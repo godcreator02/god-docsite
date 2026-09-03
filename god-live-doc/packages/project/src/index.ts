@@ -1,2 +1,8 @@
-/** @god-live-doc/project——占位：骨架已就位，实现在后面的步骤里补 */
-export const name = "project";
+/**
+ * @god-live-doc/project——消费方项目的装配。
+ * 读取器、记录簿、比较器都在这儿造；git 那条线（blob、hunk 表、行段跟随）也住这儿——核心不碰子进程。
+ */
+
+export { diffHunks, git, gitRel, hashText, headBlob, headCommit, inHead, isClean, objectExists, readBlob } from "./git.ts";
+export { createGitComparator } from "./git-comparator.ts";
+export type { GitRecord } from "./git-comparator.ts";

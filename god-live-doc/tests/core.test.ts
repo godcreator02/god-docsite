@@ -12,39 +12,11 @@ import {
   keyToTarget,
   normalizeLines,
   sliceSpan,
-  toTarget,
 } from "@god-live-doc/core";
-import type { Comparator, Fill, Format, Ledger, MemoRecord, Reader, Reference, Target } from "@god-live-doc/core";
+import type { Comparator, Ledger, MemoRecord, Reader, Reference, Target } from "@god-live-doc/core";
+import { fakeFormat } from "./fake-format.ts";
 
 const CODE = ["// greet", "export function greet(name: string): string {", "  return `hello ${name}`;", "}", ""];
-
-/** 假格式包：记号是一行 `REF file:a-b`，草稿记号交给核心认。write 只重写记号那一行 */
-function fakeFormat(name: string, suffix: string): Format {
-  const MARK = /^REF\s+(.+):(\d+)-(\d+)$/;
-  return {
-    name,
-    claims: (doc) => doc.endsWith(suffix),
-    marker: (t) => `REF ${t.file}:${t.a}-${t.b}`,
-    parse(text) {
-      const refs: Reference[] = [];
-      text.split("\n").forEach((line, at) => {
-        const m = MARK.exec(line.trim());
-        if (m !== null) {
-          refs.push({ target: toTarget({ file: m[1]!, lines: `${m[2]}-${m[3]}` }, `第 ${at + 1} 行`), at });
-          return;
-        }
-        const draft = draftOf(line, `第 ${at + 1} 行`);
-        if (draft !== null) refs.push({ target: draft, at, extra: { draft: true } });
-      });
-      return refs;
-    },
-    write(text, fills: Fill[]) {
-      const lines = text.split("\n");
-      for (const fill of fills) lines[fill.reference.at] = `REF ${targetKey(fill.reference.target)}`;
-      return lines.join("\n");
-    },
-  };
-}
 
 function memoryReader(files: Map<string, string[]>): Reader {
   return { read: (file) => files.get(file) ?? null };
