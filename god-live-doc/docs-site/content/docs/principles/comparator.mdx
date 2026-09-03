@@ -27,7 +27,7 @@ description: 四种状态是怎么判出来的；记忆按被引文件的位置�
 
 「怎么记住一段代码」这件事全收在一个接口里。核心不读文件——当前整文件的内容由它取好了递进来。
 
-{/* ref file="../packages/core/src/types.ts" lines="139-145" */}
+{/* ref file="../packages/core/src/types.ts" lines="184-190" */}
 
 **两个方法就是全部**：`snapshot` 在确认时出记录，或者说清楚为什么钉不住；`judge` 在核对时判状态，
 顺便交回这段今天在哪。三个实现：`git`、`hash`，和默认的 `auto`——它自己不记，按文件位置挑前两个。
@@ -45,14 +45,14 @@ description: 四种状态是怎么判出来的；记忆按被引文件的位置�
 | 不在任何仓里 | **hash** |
 | 仓还没有一次提交 | 拒，「这个仓还没提交过」 |
 
-{/* ref file="../packages/project/src/auto-comparator.ts" lines="22-27" */}
+{/* ref file="../packages/project/src/auto-comparator.ts" lines="24-29" */}
 
 「该进 git 的东西」不能悄悄退成一份弱记忆，所以未跟踪、脏的一律拒，只有明确被忽略的才走 hash。
 文件在哪个仓按它的**真实路径**定（pnpm 的软链按指向的地方算），细节见 [git 原理](/docs/principles/git)。
 
 核对时不看文件在哪，按**记录的 kind** 转发——记录是当时哪种记忆记的，就让哪个比较器判：
 
-{/* ref file="../packages/project/src/auto-comparator.ts" lines="37-41" */}
+{/* ref file="../packages/project/src/auto-comparator.ts" lines="41-45" */}
 
 一个项目里 git 记录和 hash 记录并存。哪一处拿到的是 hash 记忆，`confirm` 那一行会标出来
 （见 [命令行](/docs/cli/cli)）——写手得知道自己拿到的是弱记忆。
@@ -62,7 +62,7 @@ description: 四种状态是怎么判出来的；记忆按被引文件的位置�
 记忆就是那个仓 HEAD 里的 blob，哪儿都不存第二份内容。判定拿 `git diff -U0 旧内容 当前内容` 出 hunk 表，
 把旧行段映到今天：
 
-{/* ref file="../packages/project/src/git-comparator.ts" lines="84-91" */}
+{/* ref file="../packages/project/src/git-comparator.ts" lines="101-108" */}
 
 <Note>
   **绿只认段哈希**：hunk 说没碰到也再比一次。行映射跟内容对不上时（记录被手改过之类），
@@ -77,7 +77,7 @@ description: 四种状态是怎么判出来的；记忆按被引文件的位置�
 只记段哈希和旧行号，不问 git，也没有旧内容。行段靠**滑窗**跟：先看旧位置，不对就按段长在整个文件里
 逐行滑一遍找同哈希的窗口：
 
-{/* ref file="../packages/core/src/hash-comparator.ts" lines="53-68" */}
+{/* ref file="../packages/core/src/hash-comparator.ts" lines="65-86" */}
 
 - **内容没变、只是挪了**：找得到，绿、带新行号，跟 git 版一样。
 - **撞车**（同样的段出现不止一处，一两行的 `}` 之类常见）：取离旧位置最近的一处；两处一样近就不猜，当找不到。
@@ -92,17 +92,33 @@ hash 记忆一屏「位置不明」。所以能进 git 的都走 git，hash 只�
 记录的第一个字段是 `kind`，记它的那个比较器的名字。核心不看它——取记录时原样递给比较器，
 比较器看到别家的 kind 就交回「未确认」：
 
-{/* ref file="../packages/core/src/hash-comparator.ts" lines="53-56" */}
+{/* ref file="../packages/core/src/hash-comparator.ts" lines="65-75" */}
 
 所以配置里把 `comparator` 强制成 `hash`，原来的 git 记录一律退回「未确认」等人重新确认。
 不把 git 的记录翻译成 hash 的记录——翻译就是猜。auto 版按 kind 转发，两种记录各归各的比较器判。
+
+## 五类目标：先按种类分派，再按位置分派
+
+上面说的 git、hash、auto 管的是**行段和整文件**。目录树、存在性、名字各有各的比较器，住核心——它们只看
+读取器给的观察（目录树是名字表，存在性是类型，名字是文件的行），不碰盘：
+
+{/* ref file="../packages/core/src/kinds.ts" lines="115-126" */}
+
+| 类 | 记忆 | 黄 | 红 |
+| --- | --- | --- | --- |
+| 目录树 | 名字表本身（按 .gitignore 过滤过） | 名字多了少了，带 `- / +` | 目录没了 |
+| 存在性 | 类型 file / dir；absent 断言时记「不在」 | 没有 | 没了、类型变了、断言不在却出现了 |
+| 名字 | 只记「在」 | 没有 | 文件里找不到这个字面量了 |
+
+目录树的记忆是名字表本身，是「不存第二份内容」的一处例外：几十个名字不是代码，不这么存就给不出多了哪个、
+少了哪个。它也不设提交门——新建还没提交的文件正该报黄。
 
 ## 一处钉不住，整篇拒
 
 `snapshot` 交回 problem（未提交、未跟踪、行段超出文件）时，这一篇**一条记录都不写、
 文档一个字不改**：
 
-{/* ref file="../packages/core/src/service.ts" lines="101-105" */}
+{/* ref file="../packages/core/src/service.ts" lines="133-137" */}
 
 不是「能钉的先钉上」——半本记录簿比没有更难查。problems 原样交给命令行打印，退非零。
 

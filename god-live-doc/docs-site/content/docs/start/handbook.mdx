@@ -1,0 +1,162 @@
+---
+title: 五类引用：一篇手册里怎么用
+description: 拿一个命令行记事本的开发手册，把行段、整文件、目录树、存在性、名字五类引用全用上；每节三段：写手写的、读者看到的、代码改了之后
+---
+
+# 五类引用：一篇手册里怎么用
+
+文档对代码说的话只有三种：内容、形状、有无；说的对象只有两种：文件、目录。五类引用把这张矩阵填满：
+
+| | 文件 | 目录 |
+| --- | --- | --- |
+| 内容 | 行段 `ref 文件:起-止`；整文件 `ref 文件` | 不做——目录的内容就是 git 树哈希，改一行就黄，没有文档需要这种话 |
+| 形状 | 名字 `has 文件 "字面量"` | 目录树 `tree 目录` |
+| 有无 | 存在 `exists 路径`；断言不在 `absent 路径` | 同左 |
+
+这一章拿邻居 `examples/notes` 说事：一个命令行记事本，四个源文件、一份配置，一篇 mdx 开发手册。
+手册把五类全用上了。下面每一节三段：**写手写的**（手册那一段原文，钉的是 handbook.mdx 的行）、
+**读者看到的**（同样几处引用直接摆在这章里，块和芯片是活的，钉的是记事本的真文件）、
+**改了之后**（那个示例的测试真跑出来的 check 输出）。
+
+写引用只有一种写法：单独一行 `@@livedoc 动作 目标 @@`。confirm 一次换成 mdx 的正式记号 `{/* … */}`，
+之后不再变。mdx 有构建，文件里只有这一行，内容是站 build 时现拿的。
+
+## 这个项目
+
+{/* tree dir="../../examples/notes" depth="2" */}
+
+`node_modules/`、`out/`、`notes.json` 在它的 `.gitignore` 里，清单里看不到——目录树按 .gitignore 过滤。
+
+## 一、项目长什么样：目录树
+
+**写手写的**
+
+{/* ref file="../../examples/notes/docs/handbook.mdx" lines="8-13" */}
+
+**读者看到的**
+
+{/* tree dir="../../examples/notes/src" depth="1" */}
+
+四个文件各管一件事：index 解析命令行，add 和 list 是两条子命令，store 负责读写 notes.json。
+加一条子命令就是加一个文件，再在 index 里注册一下。
+
+**改了之后**：有人加了 `src/tag.ts`（给记事打标签），手册没提，文件还没提交：
+
+```text
+🟡 docs/handbook.mdx  tree src depth=1  有变动，等作者复核（+ tag.ts）
+```
+
+清单变黄、多出一行 `+ tag.ts`。「四个文件各管一件事」这段就得改成五个、补一句 tag 是干嘛的，然后 confirm 回绿。
+文件还没提交也会报——目录树的记忆是名字表本身，不靠 git；目录树只管名字，不管内容。
+
+## 二、配置：整文件
+
+**写手写的**
+
+{/* ref file="../../examples/notes/docs/handbook.mdx" lines="15-21" */}
+
+**读者看到的**
+
+{/* ref file="../../examples/notes/config.json" */}
+
+`file` 是记事存在哪儿，`dateFormat` 是列表里日期怎么显示。
+
+**改了之后**：有人加了一项 `"backup": true`，提交了：
+
+```text
+🟡 docs/handbook.mdx  config.json:all  有变动，等作者复核
+```
+
+「全部配置就这几项」不再成立，下面那句也少解释一项。要是当初钉的是 `config.json:2-3` 那两行，
+新加的第 4 行在段尾之后，算「没碰到」，页面还是绿的，读者永远不知道有 backup。
+所以说「这份文件长这样」的时候钉整个文件；说「这一段是这么写的」才钉行段。
+
+## 三、存储：名字加行段
+
+**写手写的**
+
+{/* ref file="../../examples/notes/docs/handbook.mdx" lines="23-35" */}
+
+**读者看到的**
+
+{/* has file="../../examples/notes/src/store.ts" text="export function load" */}
+
+{/* has file="../../examples/notes/src/store.ts" text="export function save" */}
+
+save 每次把整个文件重写一遍，不是追加：
+
+{/* ref file="../../examples/notes/src/store.ts" lines="16-19" */}
+
+所以 notes.json 永远是一份完整的 JSON，中途断电最多丢这一次的改动。
+
+**改了之后 A**：有人把 `save` 改名成 `write`，全仓替换，提交了：
+
+```text
+🔴 docs/handbook.mdx  has src/store.ts "export function save"  缺失，引用指向空气（文件里没有这个名字了）
+🟢 docs/handbook.mdx  has src/store.ts "export function load"  新鲜
+🟡 docs/handbook.mdx  src/store.ts:16-19  有变动，等作者复核
+```
+
+芯片变红，退 1，门禁拦下：「都走 load 和 save」这句错了。行段那处只是黄——改名对 git 来说是改了一行，
+diff 里一减一加。改名该是红不是黄，这就是名字引用存在的理由。
+
+**改了之后 B**：有人把 save 改成追加写（`appendFileSync`），名字没动：
+
+```text
+🟢 docs/handbook.mdx  has src/store.ts "export function save"  新鲜
+🟡 docs/handbook.mdx  src/store.ts:16-19  有变动，等作者复核
+```
+
+芯片还是绿的——名字在，`has` 只管这个。代码块黄带 diff：「整文件重写」和「永远是一份完整的 JSON」
+这两句都不对了。两种引用各盯各的。
+
+<Note>
+  为什么不写光秃秃的 `save`：`has` 是纯文本匹配，`save` 会命中别处的 `save(notes)`，写 `export function save`
+  才钉在导出上。只记「在」，不记出现次数——次数进注释、进字符串都会变，报出来是噪音。
+</Note>
+
+## 四、没有的东西：断言不在
+
+**写手写的**
+
+{/* ref file="../../examples/notes/docs/handbook.mdx" lines="37-43" */}
+
+**读者看到的**
+
+{/* absent path="../../examples/notes/src/remove.ts" */}
+
+**改了之后**：有人不知道这段历史，又把 `src/remove.ts` 加回来了：
+
+```text
+🔴 docs/handbook.mdx  absent src/remove.ts  缺失，引用指向空气（断言它不在，它却出现了）
+🟡 docs/handbook.mdx  tree src depth=1  有变动，等作者复核（+ remove.ts）
+```
+
+芯片红，「没有删除命令」这一节整个作废，加回来的人在门禁上就会看到「先做回收站」那句话。
+正向的 `exists` 用在「这个文件必须在」的话上——文件删了、或者变成了目录，就红。存在性没有黄：在就在，不在就不在。
+
+## 这篇手册在盯什么
+
+| 手册里的话 | 用的引用 | 什么时候提醒你 |
+| --- | --- | --- |
+| 「四个文件各管一件事」 | `tree src` | src 下多了、少了文件 |
+| 「全部配置就这几项」 | `ref config.json` | config.json 改了任何一处，包括末尾追加 |
+| 「都走 load 和 save」 | `has` 两处 | 这两个导出改名、删了 |
+| 「save 是整文件重写」 | `ref src/store.ts:16-19` | 那四行改了（挪了位置不算） |
+| 「没有删除命令」 | `absent src/remove.ts` | 这个文件又出现了 |
+
+分工一句话：**名字表、名字、有没有，交给引用盯着；散文只负责说为什么。**散文里不写「四个」「几项」这种会漂的数，
+读者看块自己数——跑出来的数字（几条测试、几个路由）更不进散文，那不是文件的话，是命令输出的话。
+
+## 写手怎么挑
+
+| 你想说的话 | 用哪类 | 为什么不用别的 |
+| --- | --- | --- |
+| 「这段代码是这么写的」 | 行段 `ref 文件:起-止` | `has` 看不见改动；整文件噪音大 |
+| 「这份文件长这样」（配置、小脚本） | 整文件 `ref 文件` | 行段会漏掉末尾追加的行 |
+| 「这个目录下有哪些东西」 | 目录树 `tree` | 行段钉不住目录；`exists` 一次只能说一个 |
+| 「这个文件在」「已经没有了」 | `exists` / `absent` | 目录树是拿邻居陪绑；行段会因为内容变而黄 |
+| 「这个函数 / 配置项 / 导出还在」 | 名字 `has` | 行段过敏，那行改个空格都黄；改名该是红不是黄 |
+
+上面「改了之后」几段的输出都是 `examples/notes/tests` 里真跑出来、断言过的；再往下看一处引用的一辈子，
+去 [一条引用的一生](/docs/start/lifecycle)；五类各自怎么判，去 [状态与比较器](/docs/principles/comparator)。

@@ -59,11 +59,11 @@ fumadocs 的 `rehypeCode` 只放行白名单里的 meta，别的一律丢掉。�
 
 颜色表在这儿——有变动和未确认同是黄，站上靠实心 / 空心区分：
 
-{/* ref file="../packages/format-fumadocs/src/blocks.ts" lines="17-21" */}
+{/* ref file="../packages/format-fumadocs/src/blocks.ts" lines="19-23" */}
 
 一处引用变成一块代码，四种状态各一种长相：
 
-{/* ref file="../packages/format-fumadocs/src/blocks.ts" lines="95-107" */}
+{/* ref file="../packages/format-fumadocs/src/blocks.ts" lines="139-151" */}
 
 - **绿 / 白**：一块当前段，`lineNumbers` 从今天的起始行起，行号跟源文件对得上；白的标题后面缀「· 未确认」。
 - **黄**：不另起一块「当前段」，而是把核心出的 `- / +` 文本换成 shiki 原生的增删行标记
@@ -78,7 +78,7 @@ fumadocs 的 `rehypeCode` 只放行白名单里的 meta，别的一律丢掉。�
 
 ## 状态点：站侧的 pre 组件
 
-{/* ref file="../packages/format-fumadocs/src/pre.tsx" lines="34-46" */}
+{/* ref file="../packages/format-fumadocs/src/pre.tsx" lines="45-57" */}
 
 有 `data-dot` 的（引用变出来的那些）套 fumadocs 的 `CodeBlock`，把一个 8px 的点塞进标题栏的
 `Actions` 槽、复制按钮左边；没有的（普通围栏）原样走默认路径，互不干扰。
@@ -91,7 +91,7 @@ fumadocs 的 `rehypeCode` 只放行白名单里的 meta，别的一律丢掉。�
 
 ## 给 AI 那份 md：一个序列化回调
 
-{/* ref file="../packages/format-fumadocs/src/markdown.ts" lines="24-42" */}
+{/* ref file="../packages/format-fumadocs/src/markdown.ts" lines="24-44" */}
 
 fumadocs 序列化每个节点前先问这个回调；看到我们打的标就按标出，没标的交回 `undefined` 让它照默认走。
 两种标：组件的 `livedocAi`（一组替换节点，交给它的状态机接着序列化，嵌套组件顺着走），

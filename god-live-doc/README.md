@@ -1,10 +1,11 @@
 # god-live-doc
 
-把文档里的代码块钉在源码上：文档说「我引的是 `src/greet.ts` 第 2 到 3 行」，工具替你盯着那几行
-有没有变。变了就报黄，等作者复核；引用指向空气了就报红。**文档里不存代码的副本**——站上那块是
-构建时现拿的，记忆只有一条指纹。
+把文档里对代码说的话钉在源码上：文档说「我引的是 `src/greet.ts` 第 2 到 3 行」「src 下有这四个文件」
+「store.ts 里还有 save」，工具替你盯着。变了就报黄，等作者复核；引用指向空气了就报红。**文档里不存代码的副本**
+——站上那块是构建时现拿的，记忆只有一条指纹。
 
-第一里程碑只做**文件型引用**（文件 + 行段）。目录型、存在性引用下一步再设计，接口给它们留了位子。
+五类引用：行段、整文件、目录树、存在性（含「断言不在」）、名字。一篇手册怎么把它们用起来，
+见 `examples/notes` 和文档站「五类引用：一篇手册里怎么用」。
 
 ## 怎么装
 
@@ -44,19 +45,24 @@ export default {
 ### 二、写引用：写一行草稿记号就行
 
 ```md
-@@livedoc ref src/greet.ts:2-3 @@
+@@livedoc ref src/greet.ts:2-3 @@                       行段
+@@livedoc ref config.json @@                            整文件（末尾追加也算变）
+@@livedoc tree src @@                                   目录树；可带 depth=2、glob=*.test.ts
+@@livedoc exists src/store.ts @@                        在；absent 是「断言不在」
+@@livedoc has src/store.ts "export function save" @@    文件里有这个字面量
 ```
 
-四种格式一个写法。`check` 认它、报「未确认」；`confirm` 把它换成这种格式的正式记号并投影内容，
+三种格式一个写法。`check` 认它、报「未确认」；`confirm` 把它换成这种格式的正式记号并投影内容，
 之后草稿不再出现。头尾的 `@@` 是哨兵，少一头就是普通文字；写在句子里、围栏里、`<script>` 里的都不算。
 
-正式记号各格式各长各的（`marker(target)` 出，`parse(marker(t))` 认得回来）：
+正式记号的载荷是核心定的一截（`ref file="…" lines="a-b"`、`tree dir="…" depth="1"`、`exists path="…"`、
+`absent path="…"`、`has file="…" text="…"`），外壳各格式各长各的（`marker(target)` 出，`parse(marker(t))` 认得回来）：
 
 | 格式 | 正式记号 | 展示区 |
 | --- | --- | --- |
-| md | `<!-- ref file="…" lines="a-b" -->` … `<!-- /ref -->` | 中间那段围栏 |
-| mdx | `{/* ref file="…" lines="a-b" */}` | 没有，build 时现拿 |
-| html | `<pre data-file="…" data-lines="a-b"></pre>` | 元素本身 |
+| md | `<!-- ref … -->` … `<!-- /ref -->`（目录树是 `<!-- tree … -->` … `<!-- /tree -->`） | 行段 / 整文件 / 目录树有围栏；存在性、名字只有记号一行 |
+| mdx | `{/* ref … */}`、`{/* tree … */}`、`{/* exists … */}`、`{/* has … */}` | 没有，build 时现拿；存在性、名字渲成一行芯片 |
+| html | `<pre data-file=… data-lines=…>`、`<pre data-tree=…>`、`<code data-exists=…>`、`<code data-has=… data-file=…>` | 元素本身 |
 
 **记号上的行号不用人维护**：代码挪了位置，下次 `confirm` 会把它改写成今天的位置，记录簿里的旧键当孤儿清掉。
 
@@ -116,7 +122,17 @@ pnpm livedoc render --target ai       # 出给 AI 读的那份 md，落 out/
 
 孤儿记录（记录簿里有、文档里没有了）和名册外组件也算红。文档本身删了、挪了的，它的记录同样算红，`confirm` 整个忘掉。
 
-### 记忆按文件位置分派
+### 五类各盯什么
+
+| 类 | 变了是什么意思 | 黄 | 红 |
+| --- | --- | --- | --- |
+| 行段 | 那几行内容变了（挪了位置不算，跟得住） | 带 diff | 整段删光、文件没了 |
+| 整文件 | 文件任何一处变了，包括末尾追加 | 整份 diff | 文件没了 |
+| 目录树 | 名字多了少了（不看内容，按 .gitignore 过滤） | `- / +` 名字 | 目录没了 |
+| 存在 / 断言不在 | 没有黄 | — | 没了、文件和目录换了个、断言不在却出现了 |
+| 名字 | 没有黄；纯文本匹配，写全（`export function save`） | — | 文件里找不到了 |
+
+### 行段和整文件的记忆按文件位置分派
 
 被引文件不限于项目自己的仓：别的仓、被忽略的 `node_modules`、仓外目录都能钉。默认的 `auto` 按文件的
 **真实路径**（pnpm 软链按指向算）挑记忆：
@@ -128,13 +144,14 @@ pnpm livedoc render --target ai       # 出给 AI 读的那份 md，落 out/
 | 被 `.gitignore` 忽略，或不在任何仓里 | **hash**：只记段哈希和旧行号。挪了靠滑窗找回来；改了就「位置不明」，没有 diff，等人重钉 |
 
 `confirm` 的 `✅` 会标出哪一处拿到的是 hash 记忆。记录带 `kind`，核对按它转发；别家比较器的记录一律当
-「未确认」重新确认，不猜。配置写 `git` / `hash` 是强制全用一种。
+「未确认」重新确认，不猜。配置写 `git` / `hash` 是强制行段和整文件全用一种；目录树（记名字表）、存在性（记类型）、
+名字（只记在）各有各的比较器，住核心。
 
 ## 包
 
 ```
-core             零依赖（只用 node:crypto）。接口正本、编排服务、归一化与哈希、行段映射与 LCS diff、hash 比较器（滑窗）
-project          装配：读 livedoc.config、造读取器 / json 记录簿 / 比较器；git 那条线和按文件位置分派的 auto 比较器也住这儿
+core             零依赖（只用 node:crypto）。接口正本、编排服务、归一化与哈希、行段映射与 LCS diff、hash 比较器（滑窗）、目录树 / 存在性 / 名字三个比较器
+project          装配：读 livedoc.config、造读取器（读文件、列目录、看类型）/ json 记录簿 / 比较器；git 那条线和按种类、按位置分派的 auto 比较器也住这儿
 cli              check / confirm / render
 format-md        注释记号 + 围栏展示区 + 尾注释
 format-fumadocs  mdx 与 fumadocs 是一个整体：remark 插件、序列化回调、meta 白名单、pre 组件 + 样式
@@ -163,6 +180,8 @@ cd ..\..\examples\plain           # 消费方示例：手写 html + 纯 md，比
 pnpm install; pnpm test
 cd ..\fumadocs-site               # 消费方示例：外部 fumadocs 站
 pnpm install; pnpm test; pnpm build
+cd ..\notes                       # 消费方示例：记事本，一篇 mdx 手册五类引用全用上
+pnpm install; pnpm test
 ```
 
 改了格式包的代码，站要**先删 `.next` 再 build** 才看得见——Turbopack 只按 mdx 内容缓存。
@@ -184,6 +203,9 @@ pnpm install; pnpm test; pnpm build
   站上那一块不摆代码只留一句提示。想要 diff 就得存一份段文本，那是「不存第二份内容」的反面，不做。
 * **文件改名不追**，改了名就是 `file-missing`，重钉。**绝对路径不认**；仓外路径在别的机器上会红，
   机器相关的路径该留在本地配置——那就是「代码根 / 命名根」，跟上面那条一起定。
+* **目录树的记忆是名字表本身**，存在记录簿里——「不存第二份内容」的一处例外：几十个名字不是代码，不这么存就给不出
+  「多了哪个、少了哪个」。目录树不设提交门。**存在性、名字没有黄**；名字是纯文本匹配、只记「在」不记次数。
+* **不做**：跑出来的数（约定不进散文）、行内记号（押后）、目录的内容哈希、符号级别的存在（要语言服务）。
 * **缺失的引用也走整篇拒**：`confirm` 时 snapshot 交回 problem，整篇不写。想确认就先把引用改对或删掉。
 * **`renderHuman` 没有实现**：fumadocs 那份人看的就是站本身，md / html 也没有第二种人看的形态。
   接口上留着这个口。

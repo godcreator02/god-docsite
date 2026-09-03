@@ -46,7 +46,7 @@ cwd 一律是那个仓的根——项目根是不是 git 子目录、被引文�
 
 `snapshot` 出记录之前逐道问：
 
-{/* ref file="../packages/project/src/git-comparator.ts" lines="43-55" */}
+{/* ref file="../packages/project/src/git-comparator.ts" lines="52-64" */}
 
 <Tabs>
   <Tab title="在不在某个仓里">
@@ -91,7 +91,7 @@ hunk 表进纯函数，旧行段映到今天。这个函数不认识 git，谁�
 
 映完之后还要再比一次段哈希——这就是判定的入口：
 
-{/* ref file="../packages/project/src/git-comparator.ts" lines="69-82" */}
+{/* ref file="../packages/project/src/git-comparator.ts" lines="78-92" */}
 
 <Note>
   **绿只认段哈希**。hunk 说「没碰到这段」也照样比一遍：行映射跟内容对不上时（记录被手改过之类），

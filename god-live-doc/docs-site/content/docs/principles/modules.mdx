@@ -25,7 +25,7 @@ format-html      元素既是记号又是展示区，文件即终态（final）�
 
 核心不读文件、不起子进程、不认识任何文档格式。它干活要的三样，全是外面递进来的：
 
-{/* ref file="../packages/core/src/service.ts" lines="38-45" */}
+{/* ref file="../packages/core/src/service.ts" lines="41-76" */}
 
 <Tabs>
   <Tab title="读取器 Reader">
@@ -40,11 +40,11 @@ format-html      元素既是记号又是展示区，文件即终态（final）�
   </Tab>
 </Tabs>
 
-{/* ref file="../packages/core/src/types.ts" lines="105-118" */}
+{/* ref file="../packages/core/src/types.ts" lines="141-161" */}
 
 第四样是格式包。核心只认这五个必选成员，别的（渲染、名册检查）有就用、没有就跳：
 
-{/* ref file="../packages/core/src/types.ts" lines="76-95" */}
+{/* ref file="../packages/core/src/types.ts" lines="112-131" */}
 
 <Note>
   `Reference.extra` 是格式包自留的私货——展示区在哪、是不是草稿记号。核心**原样带回、从不读它**。
