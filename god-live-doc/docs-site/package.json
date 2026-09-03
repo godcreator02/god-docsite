@@ -1,0 +1,34 @@
+{
+  "name": "god-live-doc-docs-site",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "god-live-doc 自己的文档站：用这套机制写自己的文档，引用的是本仓源码里的真实行段",
+  "scripts": {
+    "build": "next build",
+    "start": "next start -p 4310",
+    "livedoc": "livedoc",
+    "test": "node --test \"tests/*.test.mjs\""
+  },
+  "dependencies": {
+    "@god-live-doc/cli": "workspace:*",
+    "@god-live-doc/format-fumadocs": "workspace:*",
+    "@god-live-doc/project": "workspace:*",
+    "fumadocs-core": "16.15.1",
+    "fumadocs-mdx": "15.3.1",
+    "fumadocs-ui": "npm:@fumadocs/base-ui@16.15.1",
+    "next": "16.3.0",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4.3.3",
+    "@types/mdx": "^2.0.14",
+    "@types/node": "^26.2.0",
+    "@types/react": "^19.2.18",
+    "@types/react-dom": "^19.2.4",
+    "postcss": "^8.5.26",
+    "tailwindcss": "^4.3.3",
+    "typescript": "^6.0.3"
+  }
+}

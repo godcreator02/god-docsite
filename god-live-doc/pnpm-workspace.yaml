@@ -2,5 +2,11 @@ packages:
   - packages/*
   - docs-site
 
+# fumadocs-mdx 编译 source.config 用 esbuild，它要跑安装脚本才装得下平台二进制
+allowBuilds:
+  esbuild: true
+onlyBuiltDependencies:
+  - esbuild
+
 # format-fumadocs 把 fumadocs 声明成 peer，用的是消费方项目装的那份：这里别自动装一份进来
 autoInstallPeers: false

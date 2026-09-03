@@ -1,0 +1,95 @@
+/**
+ * 页面那头的接线：插件确实挂上了、meta 白名单确实放行了、状态确实落到了 <pre> 上、
+ * postprocess 确实带着我们的回调。
+ * 不起 Next：fumadocs-mdx/node 的 register 把它的 loader 挂进 Node，import 一篇 .mdx 走的就是站构建那条链。
+ * 只断言、不跟命令行比：算状态的是同一个 service，比出来只能相等；跨调用方的比对留给起站抓 .md 路由。
+ * 组件表按 registry.ts 的名单造占位 div：只为让渲染不缺组件，不管长相。
+ */
+import { test } from "node:test";
+import assert from "node:assert/strict";
+import { register } from "fumadocs-mdx/node";
+import { createElement } from "react";
+import { renderToStaticMarkup } from "react-dom/server";
+import { loadProject } from "@god-live-doc/project";
+import { DOT_COLOR } from "@god-live-doc/format-fumadocs";
+import { componentNames } from "../src/components/registry.ts";
+
+register();
+
+const project = await loadProject(process.cwd());
+const DOCS = project.docs();
+const key = (t) => `${t.file}:${t.a}-${t.b}`;
+const components = Object.fromEntries(
+  componentNames.map((name) => [name, (props) => createElement("div", { "data-component": name }, props.children)]),
+);
+
+/** 一篇文档：编译产物 + 页面 html + 命令行那头算出来的清单 */
+async function pageOf(doc) {
+  // ?collection= 告诉 loader 这篇属于哪个集合——集合的 postprocess（processed markdown）才会跑
+  const mod = await import(`../${doc}?collection=docs`);
+  return {
+    mod,
+    html: renderToStaticMarkup(createElement(mod.default, { components })),
+    listing: project.service.resolve(doc, project.read(doc)),
+  };
+}
+
+const pages = new Map();
+for (const doc of DOCS) pages.set(doc, await pageOf(doc));
+
+test("站里得有文档、每篇得有引用，不然下面几条什么也没验", () => {
+  assert.ok(DOCS.length >= 3, `至少三篇，实际 ${DOCS.length}`);
+  for (const [doc, page] of pages) assert.ok(page.listing.items.length > 0, `${doc} 一处引用都没有`);
+});
+
+test("每条引用在页面上都有一个 pre，带着状态点的颜色和写着来源的标题", () => {
+  // 这里没铺站的 pre 组件（tsx 进不了 Node），验的是 rehypeCode 按白名单放到 pre 上的属性；
+  // 状态点本身由 next build 出
+  const attr = (tag, name) => new RegExp(`\\b${name}="([^"]*)"`).exec(tag)?.[1];
+  for (const [doc, page] of pages) {
+    const pres = [...page.html.matchAll(/<pre\b[^>]*\bdata-dot="[^"]*"[^>]*>/g)].map(([tag]) => ({
+      dot: attr(tag, "data-dot"),
+      title: attr(tag, "title"),
+    }));
+    assert.equal(pres.length, page.listing.items.length, `${doc}：带状态点的 pre 要跟清单一样多`);
+    page.listing.items.forEach((item, i) => {
+      assert.equal(pres[i].dot, DOT_COLOR[item.status], `${doc} 第 ${i + 1} 个状态点的颜色`);
+      const where = key({ file: item.reference.target.file, a: item.lines[0], b: item.lines[1] });
+      assert.ok(pres[i].title?.includes(where), `${doc} 第 ${i + 1} 块的标题要写来源，实际是 ${pres[i].title}`);
+    });
+  }
+});
+
+test("组件由 React 表画，没有裸 JSX 漏到页面", () => {
+  for (const [doc, page] of pages) {
+    for (const name of componentNames) {
+      assert.doesNotMatch(page.html, new RegExp(`<${name}[\\s>]`), `${doc}：<${name}> 漏成了裸标签`);
+    }
+  }
+  const all = [...pages.values()].map((p) => p.html).join("");
+  assert.match(all, /data-component="Note"/);
+  assert.match(all, /data-component="Tab"/);
+});
+
+test("模块带着 _markdown，且是我们的回调出的：来源行在、组件被压平", () => {
+  for (const [doc, page] of pages) {
+    assert.equal(typeof page.mod._markdown, "string", `${doc}：postprocess.includeProcessedMarkdown 没开`);
+    for (const item of page.listing.items) {
+      const where = key({ file: item.reference.target.file, a: item.lines[0], b: item.lines[1] });
+      assert.ok(page.mod._markdown.includes(`<!-- 来源 ${where} · `), `${doc}：来源行不在，说明序列化回调没挂上`);
+    }
+    assert.doesNotMatch(page.mod._markdown, /<Tabs|<Note|<Tab[\s>]/, `${doc}：组件没被名册压平`);
+    assert.doesNotMatch(page.mod._markdown, /\[!code /, `${doc}：AI 那份不该带 shiki 的 diff 标记`);
+  }
+});
+
+test("这个站自己的文档全是绿的：写下的引用跟源码没脱节", () => {
+  for (const [doc, page] of pages) {
+    assert.deepEqual(
+      page.listing.items.map((i) => i.status),
+      page.listing.items.map(() => "fresh"),
+      `${doc} 有引用不是新鲜的——跑 pnpm livedoc check 看看`,
+    );
+    assert.equal(page.listing.orphans.length, 0, `${doc} 有孤儿记录`);
+  }
+});

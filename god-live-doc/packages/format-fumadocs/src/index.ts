@@ -46,6 +46,7 @@ export { applyListing } from "./transform.ts";
 export { codeNode, diffBlock, DOT_COLOR, LABEL, langOf, metaOf, nodeFor, NO_OLD, OLD_TITLE, UNCONFIRMED_SUFFIX } from "./blocks.ts";
 export type { Dot, LivedocMark } from "./blocks.ts";
 export { livedocMarkdownOptions } from "./markdown.ts";
+export type { MarkdownOptions } from "./markdown.ts";
 export { livedocMdxOptions, parseMetaString, remarkLivedocHost } from "./host.ts";
 export { attr, childrenOf, defaultRoster, heading, paragraph, quote, stamp, text, textOf, unknownComponents } from "./roster.ts";
 export type { Helpers, Roster, Rule } from "./roster.ts";

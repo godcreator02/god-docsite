@@ -1,0 +1,62 @@
+---
+title: 接线
+description: 一个项目怎么把 god-live-doc 挂上——配置一份、站侧接线一处、命令行三条
+---
+
+# 接线
+
+这个站本身就是消费方：你现在读的每一块代码，都是 `next build` 那一刻从源码里现拿的，页面里不存副本。
+块右上角那个小圆点是状态——绿是新鲜，实心黄是有变动，空心黄是还没确认，红是引用指向空气了。
+
+## 一、装
+
+<Tabs>
+  <Tab title="pnpm">
+    `pnpm add -D @god-live-doc/cli @god-live-doc/project @god-live-doc/format-fumadocs`
+  </Tab>
+  <Tab title="别的格式">
+    只写 md 或手写 html，就把 `format-fumadocs` 换成 `format-md` / `format-html`，别的一样。
+  </Tab>
+</Tabs>
+
+fumadocs 在格式包里只是 peer——用你项目里装的那份，包自己不带。
+
+## 二、项目根放一份 livedoc.config.mjs
+
+命令行和站读的是同一份配置：挂哪些格式包、文档在哪、用哪个比较器、组件名册是什么。
+
+{/* ref file="livedoc.config.mjs" lines="11-21" */}
+
+`comparator` 有两个值：`git`（默认，记忆是 HEAD 里那个 blob，代码挪了行能跟）和 `hash`
+（只记段哈希，不跟行段，给没有 git 的目录用）。
+
+<Note>
+  引用里的路径是**相对项目根**的。这个站的项目根就是站目录，引用的代码在工作区的 `packages/` 下，
+  所以记号里写的是 `../packages/…`。
+</Note>
+
+## 三、站侧接线一个文件
+
+`source.config.ts` 里两处：remark 链尾巴挂插件（顺带把 `data-dot` 加进 meta 白名单），
+集合的 `postprocess` 打开 processed markdown 并用格式包给的序列化回调。
+
+{/* ref file="source.config.ts" lines="12-22" */}
+
+再两行：`src/components/mdx.tsx` 里把 `pre` 换成格式包的 `LivedocPre`（它读 `data-dot` 画点），
+`global.css` 里 `@import '@god-live-doc/format-fumadocs/light.css'`。
+
+## 四、三条命令
+
+<Tabs>
+  <Tab title="check">
+    只读，报每处引用的状态。红（缺失、孤儿记录、名册外组件）退 1，黄和白退 0——黄是「等作者复核」，不是错。
+  </Tab>
+  <Tab title="confirm">
+    出记录、清孤儿、把草稿记号换成正式记号。一处钉不住整篇拒：problems 打出来，记录簿一条不写、文档一个字不改。
+  </Tab>
+  <Tab title="render --target ai">
+    让 fumadocs 自己的管线出 md，产物落 `out/`。人看那份就是站本身。
+  </Tab>
+</Tabs>
+
+改了格式包的代码，站要重 build 才看得见——Turbopack 只按 mdx 内容缓存。调试用 `next build` + `next start`，不用 dev。

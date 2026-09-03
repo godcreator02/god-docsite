@@ -1,0 +1,68 @@
+{
+  "content/docs/index.mdx": {
+    "livedoc.config.mjs:11-21": {
+      "kind": "git",
+      "blob": "abe210bc4cecb69d079f522823cd9d8e460adbd3",
+      "commit": "21373b9936016430b4639833baf675c648d55bef",
+      "lines": [
+        11,
+        21
+      ],
+      "hash": "4ad1fdb3b0cedd4008a0e638190bd0f609782ef84dffc013bf1eddf3e30791f5"
+    },
+    "source.config.ts:12-22": {
+      "kind": "git",
+      "blob": "e5d3a7f09c3cb149fbe25c9a48b585fd6d9d926b",
+      "commit": "21373b9936016430b4639833baf675c648d55bef",
+      "lines": [
+        12,
+        22
+      ],
+      "hash": "b8a1a7136e13ad671e93be1b0f46c14adeb9a88923e00acce595465730203937"
+    }
+  },
+  "content/docs/markers.mdx": {
+    "../packages/core/src/types.ts:150-156": {
+      "kind": "git",
+      "blob": "7b37fb6ff16b458f7bcc889f1626104f6bc75fee",
+      "commit": "21373b9936016430b4639833baf675c648d55bef",
+      "lines": [
+        150,
+        156
+      ],
+      "hash": "7fd773541e73d567a48fcb6edb3147520911f981f199d0a904461a0f99678666"
+    },
+    "../packages/format-md/src/index.ts:30-30": {
+      "kind": "git",
+      "blob": "8be2ba3f500bda8df06835c0a9cfebc5f29ba678",
+      "commit": "21373b9936016430b4639833baf675c648d55bef",
+      "lines": [
+        30,
+        30
+      ],
+      "hash": "4f318b10233c3b4c8ad24870c5963a12d85d53cc3de4bf751f211c3c458ed62c"
+    }
+  },
+  "content/docs/status.mdx": {
+    "../packages/core/src/types.ts:135-141": {
+      "kind": "git",
+      "blob": "7b37fb6ff16b458f7bcc889f1626104f6bc75fee",
+      "commit": "21373b9936016430b4639833baf675c648d55bef",
+      "lines": [
+        135,
+        141
+      ],
+      "hash": "2068bf8ab6779b62f6701d8e7eee222d04caaf4da8e04d69f9da93ee130ca18d"
+    },
+    "../packages/project/src/git-comparator.ts:73-80": {
+      "kind": "git",
+      "blob": "b0f18b96e994b6f36812e31d6f84a9b98ff2415a",
+      "commit": "21373b9936016430b4639833baf675c648d55bef",
+      "lines": [
+        73,
+        80
+      ],
+      "hash": "da78187b4b61b5f0fee7151fa909b748a45fdc3366bff0bb891237bddd18f534"
+    }
+  }
+}
