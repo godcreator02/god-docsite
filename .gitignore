@@ -1,0 +1,8 @@
+node_modules/
+dist/
+.next/
+.source/
+next-env.d.ts
+out/
+*.log
+.mcp.json
