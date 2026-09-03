@@ -10,8 +10,8 @@ description: 四层包与依赖方向；核心零依赖；核心从外面拿的�
 ## 六个包，四层
 
 ```text
-core             零依赖（只用 node:crypto）。接口正本、编排服务、归一化与哈希、行段映射与 LCS diff、hash 比较器
-project          装配：读 livedoc.config、造读取器 / json 记录簿 / 比较器；git 那条线也住这儿
+core             零依赖（只用 node:crypto）。接口正本、编排服务、归一化与哈希、行段映射与 LCS diff、hash 比较器（滑窗）
+project          装配：读 livedoc.config、造读取器 / json 记录簿 / 比较器；git 那条线和按文件位置分派的 auto 比较器也住这儿
 cli              check / confirm / render
 format-md        注释记号 + 围栏展示区 + 尾注释
 format-fumadocs  mdx 与 fumadocs 是一个整体：remark 插件、序列化回调、meta 白名单、pre 组件 + 样式
@@ -25,7 +25,7 @@ format-html      元素既是记号又是展示区，文件即终态（final）�
 
 核心不读文件、不起子进程、不认识任何文档格式。它干活要的三样，全是外面递进来的：
 
-{/* ref file="../packages/core/src/service.ts" lines="35-42" */}
+{/* ref file="../packages/core/src/service.ts" lines="38-45" */}
 
 <Tabs>
   <Tab title="读取器 Reader">
@@ -35,8 +35,8 @@ format-html      元素既是记号又是展示区，文件即终态（final）�
     `get / set / list / remove / save`。落盘那份是一个 json，住 `project`；测试里换成内存的。
   </Tab>
   <Tab title="比较器 Comparator">
-    「记忆怎么记、变没变怎么判」全收在这一个接口里。git 版住 `project`（它要起子进程），
-    hash 版住核心（它只要 `node:crypto`）。
+    「记忆怎么记、变没变怎么判」全收在这一个接口里。git 版和按文件位置分派的 auto 版住 `project`
+    （它们要起子进程），hash 版住核心（它只要 `node:crypto`）。
   </Tab>
 </Tabs>
 
@@ -78,7 +78,7 @@ peer 都标成 optional，是为了让只用命令行、不装 fumadocs 的项�
 两边装配的是同一份 `livedoc.config.mjs`，所以站上看到的状态和 `pnpm livedoc check` 报的状态必然一致。
 装配还带缓存，一个根只装一次：
 
-{/* ref file="../packages/project/src/load.ts" lines="59-67" */}
+{/* ref file="../packages/project/src/load.ts" lines="60-68" */}
 
 站构建时几十个 loader 并发调它，没这一条就是几十次读配置、几十本记录簿。
 

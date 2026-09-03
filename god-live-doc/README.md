@@ -30,7 +30,7 @@ export default {
   docs: "content/docs",      // 文档在哪（相对项目根）
   out: "out",                // render 的产物落哪
   ledger: ".ledger.json",    // 记录簿，默认就是这个
-  comparator: "git",         // 记忆怎么记：git（默认）或 hash
+  comparator: "auto",        // 记忆怎么记：auto（默认，按文件位置挑 git 或 hash）、git、hash
   components: {              // 组件名册：AI 那份里怎么把组件压平
     ...fumadocs.defaultRoster,
     Tabs: tabs.Tabs,
@@ -102,7 +102,7 @@ pnpm livedoc confirm                  # 出记录、清孤儿、换记号、投�
 pnpm livedoc render --target ai       # 出给 AI 读的那份 md，落 out/
 ```
 
-`confirm` 之前**先 commit**：git 比较器只对已提交、且工作区干净的内容钉。有一处钉不住就**整篇拒**
+`confirm` 之前**先 commit**：git 记忆只对已提交、且工作区干净的内容钉（引到别的仓也一样）。有一处钉不住就**整篇拒**
 ——problems 打出来，记录簿一条不写、文档一个字不改。
 
 ### 四种状态
@@ -110,25 +110,31 @@ pnpm livedoc render --target ai       # 出给 AI 读的那份 md，落 out/
 | | 什么意思 | 站上 | 退出码 |
 | --- | --- | --- | --- |
 | 🟢 新鲜 | 段哈希跟记忆里一样（挪了位置也算） | 绿点 | 0 |
-| 🟡 有变动 | 内容变了，等作者复核；这一块把 diff 渲在同一块里 | 实心黄点 | 0 |
+| 🟡 有变动 | 内容变了，等作者复核；git 记忆把 diff 渲在同一块里，hash 记忆只留一句「位置不明」 | 实心黄点 | 0 |
 | ⚪ 未确认 | 还没确认过，或者换过比较器 | 空心黄点 | 0 |
 | 🔴 缺失 | 整段删光 / 文件没了 / blob 不在对象库；显示文档写下时那段 | 红点 | 1 |
 
 孤儿记录（记录簿里有、文档里没有了）和名册外组件也算红。文档本身删了、挪了的，它的记录同样算红，`confirm` 整个忘掉。
 
-### 两个比较器
+### 记忆按文件位置分派
 
-* **git**（默认）：记忆是 HEAD 里那个 blob，仓里不存第二份内容。判定拿 `git diff -U0` 的 hunk 表把
-  旧行段映到今天，所以代码挪了行能跟得住，变了还能给出 diff 和旧内容。代价是「先提交再确认」。
-* **hash**：只记段哈希，不问 git、不跟行段。随便一个目录都能用，代价是挪了行只会报「有变动」。
+被引文件不限于项目自己的仓：别的仓、被忽略的 `node_modules`、仓外目录都能钉。默认的 `auto` 按文件的
+**真实路径**（pnpm 软链按指向算）挑记忆：
 
-记录带 `kind`，比较器只认自己那种——换了比较器，旧记录一律当「未确认」重新确认，不猜。
+| 文件在哪 | 记忆 |
+| --- | --- |
+| 任何 git 仓里、已跟踪、干净 | **git**：记忆是那个仓 HEAD 里的 blob，哪儿都不存第二份。`git diff -U0` 的 hunk 表把旧行段映到今天，挪了跟得住，变了给 diff 和旧内容 |
+| 任何 git 仓里、有改动或未跟踪 | 拒，「先 commit」，不退成 hash |
+| 被 `.gitignore` 忽略，或不在任何仓里 | **hash**：只记段哈希和旧行号。挪了靠滑窗找回来；改了就「位置不明」，没有 diff，等人重钉 |
+
+`confirm` 的 `✅` 会标出哪一处拿到的是 hash 记忆。记录带 `kind`，核对按它转发；别家比较器的记录一律当
+「未确认」重新确认，不猜。配置写 `git` / `hash` 是强制全用一种。
 
 ## 包
 
 ```
-core             零依赖（只用 node:crypto）。接口正本、编排服务、归一化与哈希、行段映射与 LCS diff、hash 比较器
-project          装配：读 livedoc.config、造读取器 / json 记录簿 / 比较器；git 那条线也住这儿
+core             零依赖（只用 node:crypto）。接口正本、编排服务、归一化与哈希、行段映射与 LCS diff、hash 比较器（滑窗）
+project          装配：读 livedoc.config、造读取器 / json 记录簿 / 比较器；git 那条线和按文件位置分派的 auto 比较器也住这儿
 cli              check / confirm / render
 format-md        注释记号 + 围栏展示区 + 尾注释
 format-fumadocs  mdx 与 fumadocs 是一个整体：remark 插件、序列化回调、meta 白名单、pre 组件 + 样式
@@ -174,8 +180,10 @@ pnpm install; pnpm test; pnpm build
 * **`format-fumadocs` 把 `fumadocs-ui` / `react` 放进了 devDependencies**，只为编译和类型检查；
   `tsdown` 的 `deps.neverBundle` 守着它们不进产物。消费方最好装**同一个版本**，否则 pnpm 会摆出两份
   副本，React 的上下文可能对不上。
-* **hash 比较器的「有变动」没有 diff 和旧内容**（记忆里没存第二份），站上那一块退成普通的当前段，
-  标题里写「· 有变动」。
+* **hash 记忆的「有变动」没有 diff、没有旧内容、也定位不了**（记忆里只有段哈希）：报「位置不明」，行号停在旧位置，
+  站上那一块不摆代码只留一句提示。想要 diff 就得存一份段文本，那是「不存第二份内容」的反面，不做。
+* **文件改名不追**，改了名就是 `file-missing`，重钉。**绝对路径不认**；仓外路径在别的机器上会红，
+  机器相关的路径该留在本地配置——那就是「代码根 / 命名根」，跟上面那条一起定。
 * **缺失的引用也走整篇拒**：`confirm` 时 snapshot 交回 problem，整篇不写。想确认就先把引用改对或删掉。
 * **`renderHuman` 没有实现**：fumadocs 那份人看的就是站本身，md / html 也没有第二种人看的形态。
   接口上留着这个口。

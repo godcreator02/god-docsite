@@ -1,57 +1,84 @@
 ---
 title: git 原理
-description: 记忆是 HEAD 的 blob；变没变、变到哪，用 git 的 hunk 表算；站展示什么就哈希什么
+description: 记忆是那个仓 HEAD 的 blob；文件在哪个仓按它自己的位置定；变没变、变到哪，用 git 的 hunk 表算
 ---
 
 # git 原理
 
-这一章回答：默认的 git 比较器凭什么说得出「这段代码变了没有、今天挪到哪儿去了」，以及它为什么非要你先提交。
+这一章回答：git 比较器凭什么说得出「这段代码变了没有、今天挪到哪儿去了」，被引文件在**哪个仓**是怎么定的，
+以及它为什么非要你先提交。
 
-## 记忆是 blob，仓里不存第二份
+## 记忆是 blob，哪儿都不存第二份
 
 确认一处引用时，记下来的是四样：`HEAD:<文件>` 的 **blob 哈希**、当时的 commit、行段、段哈希。
 代码内容一个字都不进记录簿——它本来就在 git 的对象库里，blob 被提交树引着，不会被 gc 回收。
 
-{/* ref file="../packages/project/src/git.ts" lines="47-59" */}
+{/* ref file="../packages/project/src/git.ts" lines="94-105" */}
 
 要旧内容的时候（报黄给 diff、报红显示「文档写下时那段」），拿 blob 去 `cat-file -p` 现取。
+记录里**不记仓在哪**：blob 是内容寻址的，核对时从文件位置重新找仓就行。
 
-## 只对已提交的内容钉：两道门
+## 文件在哪个仓：按文件自己的位置定
 
-`snapshot` 出记录之前先问两句：
+被引文件不限于项目自己的仓。另一个单元、上游 clone、工作区里别的仓，都能钉；所以「问哪个 git」
+不看项目根，看**被引文件在哪**：
+
+{/* ref file="../packages/project/src/git.ts" lines="59-65" */}
+
+两步：先取**真实路径**，再从所在目录往上找第一个 `.git`。
 
 <Tabs>
-  <Tab title="① 在不在 HEAD 里">
-    问的是 `HEAD:<文件>` 这个对象取不取得到。被 `.gitignore` 忽略的、没跟踪的、路径大小写跟 git
-    记的不一样的，都在这儿被拦下——先说清楚，别让后面的 `rev-parse` 炸出一句 git 原文。
+  <Tab title="① 为什么先 realpath">
+    pnpm 工作区里 `node_modules/@x/y` 是指向 `packages/y` 的软链（Windows 上是目录联接）。按写的路径判它在
+    `node_modules` 里、被忽略；按真实路径它是本仓已提交的文件。同一份代码不能有两种记忆，所以按真实位置算。
+    文件本身不存在（删了）时取最近一个存在的祖先的真实路径再拼回去，仓照样找得到。
   </Tab>
-  <Tab title="② 工作区干不干净">
-    `git status --porcelain -- <文件>` 得是空的。工作区里那份跟 HEAD 不一样，钉下去的记忆就指着一个
-    没人能取回的状态。
+  <Tab title="② 往上找最里层的 .git">
+    `.git` 可能是目录，也可能是子模块 / worktree 里的文件。找到的是**最里层**那个：子模块算它自己的仓。
+    一路找到盘根都没有，就是「不在任何仓里」，交给 hash 比较器（见 [状态与比较器](/docs/principles/comparator)）。
+  </Tab>
+</Tabs>
+
+定位出来的是「仓根 + 仓根相对的 posix 路径」。`HEAD:<路径>`、`status -- <路径>`、`check-ignore` 全用它，
+cwd 一律是那个仓的根——项目根是不是 git 子目录、被引文件在不在项目的仓里，都不再是问题。
+
+## 只对已提交的内容钉：几道门
+
+`snapshot` 出记录之前逐道问：
+
+{/* ref file="../packages/project/src/git-comparator.ts" lines="43-55" */}
+
+<Tabs>
+  <Tab title="在不在某个仓里">
+    不在任何仓里，git 记忆做不了。走默认的 auto 比较器时到不了这儿——它已经把这种文件分给 hash 了；
+    配置强制 `git` 才会撞上这条 problem。
+  </Tab>
+  <Tab title="仓有没有提交过">
+    刚 `git init` 的仓 HEAD 还没生出来，`rev-parse HEAD` 一问就炸。单独认出来说「先 commit」，
+    别转述一句 git 原文。
+  </Tab>
+  <Tab title="在不在 HEAD 里">
+    问的是 `HEAD:<路径>` 这个对象取不取得到。取不到再问一句 `check-ignore`，分成两种话说：被 `.gitignore`
+    忽略的（git 记忆不做，auto 会分给 hash），和未跟踪 / 路径大小写跟 git 记的不一样的（先 commit）。
+  </Tab>
+  <Tab title="工作区干不干净">
+    `git status --porcelain -- <路径>` 得是空的。工作区里那份跟 HEAD 不一样，钉下去的记忆就指着一个
+    没人能取回的状态。**别人的仓也一样**：那个单元正在开发中、工作区不干净，就得等它提交。
   </Tab>
 </Tabs>
 
 哪一道没过都交回 problem，那一篇[整篇拒](/docs/principles/comparator)。所以规矩是：**先 commit，再 confirm**。
 
-## 路径口径：仓根相对还是 cwd 相对
-
-`status -- <路径>` 是 cwd 相对的，cwd 就是项目根，对得上；但 `HEAD:<路径>` 是**仓根相对**的。
-项目根完全可以是 git 仓的子目录（这个站就是：仓根在单元根，项目根在 `god-live-doc/docs-site`），
-所以取 blob 之前先翻一道：
-
-{/* ref file="../packages/project/src/git.ts" lines="42-45" */}
-
-不翻就会拿 `HEAD:../packages/…` 去仓根找一个不存在的路径，把已提交的内容判成「不在 HEAD 里」。
-
 ## 变没变：hunk 表，不自己写 diff 算法
 
-{/* ref file="../packages/project/src/git.ts" lines="94-108" */}
+{/* ref file="../packages/project/src/git.ts" lines="136-155" */}
 
 两处讲究：
 
-- **绿灯是常态**，所以先只算哈希不写对象——内容一个字没改就直接回空表，对象库里不留东西。
-- 真有差异才把当前内容存成松散对象再 `diff -U0`。只有「有差异」那一种非零退出（退 1，输出在 stdout 里）
-  能吞；别的（旧 blob 不在对象库里退 128 之类）吞了就是把红判成绿，照原样抛出去。
+- **绿灯是常态**，所以先只算哈希（`hash-object --stdin`，不需要仓）——内容一个字没改就直接回空表。
+- 真有差异才把旧 blob 的内容和当前内容写成两个临时文件 `diff --no-index`。**不往任何对象库写东西**：
+  被引文件可能在别人的仓里，往那儿塞松散对象不合适。只有「有差异」那一种非零退出（退 1，输出在 stdout 里）
+  能吞；别的吞了就是把红判成绿，照原样抛出去。
 
 ## 变到哪：行段跟随
 
@@ -64,7 +91,7 @@ hunk 表进纯函数，旧行段映到今天。这个函数不认识 git，谁�
 
 映完之后还要再比一次段哈希——这就是判定的入口：
 
-{/* ref file="../packages/project/src/git-comparator.ts" lines="61-71" */}
+{/* ref file="../packages/project/src/git-comparator.ts" lines="69-82" */}
 
 <Note>
   **绿只认段哈希**。hunk 说「没碰到这段」也照样比一遍：行映射跟内容对不上时（记录被手改过之类），
@@ -77,10 +104,10 @@ hunk 表进纯函数，旧行段映到今天。这个函数不认识 git，谁�
 | --- | --- | --- |
 | `vanished` | 整段被删光，或者行段跟到文件外面去了 | 从 blob 取回的旧段 |
 | `file-missing` | 文件不在了 | 从 blob 取回的旧段 |
-| `blob-missing` | 记忆里的 blob 不在对象库——浅克隆（`--depth 1`）、历史被重写并 gc 过 | 没有旧内容，得重新确认 |
+| `blob-missing` | 记忆里的 blob 不在对象库——浅克隆（`--depth 1`）、历史被重写并 gc 过、文件所在的仓换了或没了 | 没有旧内容，得重新确认 |
 
 前两种旧内容还取得回来，第三种取不回来——所以它单独一种理由，说清楚「重新确认一次」，
-而不是含糊地说「代码没了」。
+而不是含糊地说「代码没了」。文件改名不追：改了名就是 `file-missing`，重钉。
 
 ## 归一化：站展示什么就哈希什么
 
@@ -89,9 +116,9 @@ hunk 表进纯函数，旧行段映到今天。这个函数不认识 git，谁�
 只做三件事：换行统一成 LF、去每行行尾空白、去掉末尾的空行。**缩进保留、注释保留**——JSDoc 是契约的
 一部分，改了就该黄。
 
-这一个函数被两处共用：展示前的归一化和哈希前的归一化是同一个，两个比较器也是同一个。否则会出现
+这一个函数被两处共用：展示前的归一化和哈希前的归一化是同一个，几个比较器也是同一个。否则会出现
 「页面上看着一样、状态却是黄的」这种没法解释的事。整文件送进 `git diff` 之前也统一成 LF——
 对象库里存的是 LF，工作区是不是 CRLF 不该改变判定。
 
-接着读 [状态与比较器](/docs/principles/comparator) 看四种状态怎么串起来，或者 [模块拆分](/docs/principles/modules)
-看这些东西各住哪个包。
+接着读 [状态与比较器](/docs/principles/comparator) 看四种状态怎么串起来、记忆怎么按文件位置分派，
+或者 [模块拆分](/docs/principles/modules) 看这些东西各住哪个包。

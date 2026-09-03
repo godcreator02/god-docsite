@@ -27,8 +27,9 @@ fumadocs 在格式包里只是 peer——用你项目里装的那份，包自己
 
 {/* ref file="livedoc.config.mjs" lines="11-21" */}
 
-`comparator` 有两个值：`git`（默认，记忆是 HEAD 里那个 blob，代码挪了行能跟）和 `hash`
-（只记段哈希，不跟行段，给没有 git 的目录用）。
+`comparator` 不写就是 `auto`：按被引文件的位置挑记忆——在 git 仓里（本仓、别的仓都算）已提交的走 `git`，
+被 `.gitignore` 忽略的、不在任何仓里的走 `hash`。写 `git` 或 `hash` 是强制全用一种。
+分派规则见 [状态与比较器](/docs/principles/comparator)。
 
 <Note>
   引用里的路径是**相对项目根**的。这个站的项目根就是站目录，引用的代码在工作区的 `packages/` 下，

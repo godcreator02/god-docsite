@@ -29,7 +29,8 @@ description: 装包、一份配置、写一行草稿记号、check、confirm、�
 
 {/* ref file="livedoc.config.mjs" lines="11-21" */}
 
-`comparator` 不写就是 `git`。引用里的路径**相对项目根**——这个站的项目根是站目录，源码在工作区的
+`comparator` 不写就是 `auto`：被引文件在 git 仓里就用 git 记忆，不在（被忽略的 `node_modules`、仓外目录）就用 hash 记忆。
+引用里的路径**相对项目根**——这个站的项目根是站目录，源码在工作区的
 `packages/` 下，所以记号里写的是 `../packages/…`。站侧还要接三处，见 [站接线手册](/docs/formats/wiring)。
 
 ## 三、写一行草稿记号
@@ -71,7 +72,7 @@ pnpm livedoc confirm
 `{/* ref file="…" lines="…" */}`，之后草稿不再出现。再 `check` 一次就全绿了。
 
 <Note>
-  **confirm 之前先 commit**。git 比较器只对已提交、且工作区干净的内容钉；引用到的源码没提交，
+  **confirm 之前先 commit**。git 记忆只对已提交、且工作区干净的内容钉，引用到别的仓也一样；引用到的源码没提交，
   这一篇整篇拒——记录簿一条不写、文档一个字不改。为什么这么严，见 [git 原理](/docs/principles/git)。
 </Note>
 
@@ -88,7 +89,7 @@ pnpm start
 
 ## 三条命令一览
 
-{/* ref file="../packages/cli/src/run.ts" lines="32-37" */}
+{/* ref file="../packages/cli/src/run.ts" lines="35-40" */}
 
 `render --target ai` 出给 AI 读的那份 md，落 `out/`。命令行的完整输出和退出码见
 [命令行](/docs/cli/cli)；一处引用从写下到变红的全过程见 [一条引用的一生](/docs/start/lifecycle)。

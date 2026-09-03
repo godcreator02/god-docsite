@@ -59,18 +59,19 @@ fumadocs 的 `rehypeCode` 只放行白名单里的 meta，别的一律丢掉。�
 
 颜色表在这儿——有变动和未确认同是黄，站上靠实心 / 空心区分：
 
-{/* ref file="../packages/format-fumadocs/src/blocks.ts" lines="16-20" */}
+{/* ref file="../packages/format-fumadocs/src/blocks.ts" lines="17-21" */}
 
 一处引用变成一块代码，四种状态各一种长相：
 
-{/* ref file="../packages/format-fumadocs/src/blocks.ts" lines="91-99" */}
+{/* ref file="../packages/format-fumadocs/src/blocks.ts" lines="95-107" */}
 
 - **绿 / 白**：一块当前段，`lineNumbers` 从今天的起始行起，行号跟源文件对得上；白的标题后面缀「· 未确认」。
 - **黄**：不另起一块「当前段」，而是把核心出的 `- / +` 文本换成 shiki 原生的增删行标记
   （`!code` 那对，得写在**那个语言真正的行注释**里 shiki 才认，所以包里有一张行注释表；
   没有行注释的语言退成一块 `diff`），旧行新行渲在同一块。这一块**不带 `lineNumbers`**——
   块里夹着已经不存在的旧行，行号一定对不上源文件，与其错不如不给。
-  记不下旧内容的比较器（hash 版）没有 diff，退成一块普通当前段，标题里缀「· 有变动」。
+  hash 记忆找不到这段了（`unlocated`）：旧行号上现在是什么不知道，摆出来只会误导，所以**不摆代码**，
+  只留一句「位置不明，重钉」，标题缀「· 有变动，位置不明」。别的没有 diff 的比较器退成一块普通当前段，标题里缀「· 有变动」。
 - **红**：显示从记忆里取回的旧段，标题写「文档写下时这段是」。
 
 标题一律写**今天的位置**：行段跟随之后，记号上那几行可能已经不是这段了。
