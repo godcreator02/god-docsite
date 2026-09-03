@@ -28,7 +28,7 @@ description: check / confirm / render 的输出、退出码、problems、记录�
 
 ## check：只读，报状态
 
-{/* ref file="../packages/cli/src/run.ts" lines="106-145" */}
+{/* ref file="../packages/cli/src/run.ts" lines="109-148" */}
 
 ```text
 🟢 content/docs/formats/wiring.mdx  livedoc.config.mjs:11-21  新鲜
@@ -38,8 +38,11 @@ description: check / confirm / render 的输出、退出码、problems、记录�
 🔴 docs/a.md  src/greet.ts:4-5  缺失，引用指向空气（整段已被删光）
 ```
 
-红有三个来源，都算数：**缺失**的引用、**孤儿记录**（记录簿里有、文档里已经没有了）、
-**名册外组件**（`livedoc.config.mjs` 里没给它压平规则）。
+红有四个来源，都算数：**缺失**的引用、**孤儿记录**（记录簿里有、文档里已经没有了）、
+**名册外组件**（`livedoc.config.mjs` 里没给它压平规则）、**摆放的生成物跟 mdx 源不一致**——
+挂了 `outputs` 映射的文档，`check` 在内存里重渲染跟盘上那份比；mdx 源改了没重摆、有人直接改了生成物，都抓得住：
+
+{/* ref file="../packages/cli/src/run.ts" lines="125-147" */}
 
 ```text
 🔴 docs/a.md  src/greet.ts:4-5  孤儿记录：文档里已经没有这处引用
@@ -48,7 +51,7 @@ description: check / confirm / render 的输出、退出码、problems、记录�
 
 ## confirm：出记录、清孤儿、换记号
 
-{/* ref file="../packages/cli/src/run.ts" lines="147-163" */}
+{/* ref file="../packages/cli/src/run.ts" lines="150-166" */}
 
 顺利的时候一处一行 `✅`，清掉的孤儿一行 `🧹`。文档本身删了、挪了的，它的记录逐篇那圈看不到，`check` 按文档清单一览算红，`confirm` 末尾整个忘掉，也是一行 `🧹`：
 
@@ -72,13 +75,28 @@ description: check / confirm / render 的输出、退出码、problems、记录�
 
 ## render：问格式包要产物
 
-{/* ref file="../packages/cli/src/run.ts" lines="165-174" */}
+{/* ref file="../packages/cli/src/run.ts" lines="168-177" */}
 
 格式包没有对应的渲染函数就说一声、退 0，不当错：
 
 ```text
 →  docs/a.md  渲染成 ai：out/a.md.ai.md
 ·  docs/a.html  html 的产物就是文档本身，人和 AI 都读它
+```
+
+挂了 `outputs` 映射的文档不落 out/，直接**摆**到映射给的位置（可以出项目根，`../README.md` 这种）。
+摆的那份不是管线原样——站上 .md 路由的形态（标题锚记、被保守转义的加粗星号、frontmatter 留下的开头空行）
+整理成 README 认的干净 md：
+
+{/* ref file="../packages/cli/src/run.ts" lines="76-87" */}
+
+render 里挂了映射就走这条分支，只写目标：
+
+{/* ref file="../packages/cli/src/run.ts" lines="179-190" */}
+
+```text
+→  content/docs/maintain/readme.mdx  摆放到 ../README.md
+→  content/docs/maintain/agents.mdx  摆放到 ../../AGENTS.md
 ```
 
 fumadocs 那份的 `renderAi` 是借它自己的 loader 出的 md，见 [fumadocs 格式包](/docs/formats/fumadocs)。
@@ -89,7 +107,7 @@ fumadocs 那份的 `renderAi` 是借它自己的 loader 出的 md，见 [fumadoc
 | 码 | 什么时候 |
 | --- | --- |
 | 0 | 全绿、全黄、全白都算过——**黄和白不是错**，黄是等作者复核，白是等作者确认 |
-| 1 | 有红：缺失、孤儿记录、名册外组件；`confirm` 里有 problems 也是 1 |
+| 1 | 有红：缺失、孤儿记录、名册外组件、摆放的生成物跟 mdx 源不一致；`confirm` 里有 problems 也是 1 |
 | 2 | 命令名不认识 |
 
 所以门禁里可以直接 `pnpm livedoc check`：它只在「引用指向空气」这一类真错上拦人。

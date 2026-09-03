@@ -25,7 +25,7 @@ fumadocs 在格式包里只是 peer——用你项目里装的那份，包自己
 
 命令行和站读的是同一份配置：挂哪些格式包、文档在哪、用哪个比较器、组件名册是什么。
 
-{/* ref file="livedoc.config.mjs" lines="11-21" */}
+{/* ref file="livedoc.config.mjs" lines="12-26" */}
 
 `comparator` 不写就是 `auto`：按被引文件的位置挑记忆——在 git 仓里（本仓、别的仓都算）已提交的走 `git`，
 被 `.gitignore` 忽略的、不在任何仓里的走 `hash`。写 `git` 或 `hash` 是强制全用一种。
