@@ -1,16 +1,97 @@
 ---
 title: git 原理
 description: 记忆是 HEAD 的 blob；变没变、变到哪，用 git 的 hunk 表算；站展示什么就哈希什么
-livedoc: draft
 ---
 
 # git 原理
 
-（待写。本章钉：`../packages/project/src/git.ts` 的 headBlob、diffHunks，`../packages/core/src/…` 的 mapRange、normalize、hashSpan，`../packages/project/src/git-comparator.ts` 的 snapshot 与 judge。）
+这一章回答：默认的 git 比较器凭什么说得出「这段代码变了没有、今天挪到哪儿去了」，以及它为什么非要你先提交。
 
-- 为什么记 blob 不记内容：被提交树引着不会被 gc，仓里不存第二份。
-- 只对已提交内容确认的门：在 HEAD 里、工作区干净。
-- hunk 表与行段跟随：没碰到平移、碰到取并集、删光 vanished。
-- 归一化与段哈希：LF、去行尾空白、去末尾空行；展示什么就哈希什么。
-- 红的原因：file-missing、vanished、blob-missing、stale-pin。
-- 仓根是 git 子目录时路径怎么翻。
+## 记忆是 blob，仓里不存第二份
+
+确认一处引用时，记下来的是四样：`HEAD:<文件>` 的 **blob 哈希**、当时的 commit、行段、段哈希。
+代码内容一个字都不进记录簿——它本来就在 git 的对象库里，blob 被提交树引着，不会被 gc 回收。
+
+{/* ref file="../packages/project/src/git.ts" lines="47-59" */}
+
+要旧内容的时候（报黄给 diff、报红显示「文档写下时那段」），拿 blob 去 `cat-file -p` 现取。
+
+## 只对已提交的内容钉：两道门
+
+`snapshot` 出记录之前先问两句：
+
+<Tabs>
+  <Tab title="① 在不在 HEAD 里">
+    问的是 `HEAD:<文件>` 这个对象取不取得到。被 `.gitignore` 忽略的、没跟踪的、路径大小写跟 git
+    记的不一样的，都在这儿被拦下——先说清楚，别让后面的 `rev-parse` 炸出一句 git 原文。
+  </Tab>
+  <Tab title="② 工作区干不干净">
+    `git status --porcelain -- <文件>` 得是空的。工作区里那份跟 HEAD 不一样，钉下去的记忆就指着一个
+    没人能取回的状态。
+  </Tab>
+</Tabs>
+
+哪一道没过都交回 problem，那一篇[整篇拒](/docs/principles/comparator)。所以规矩是：**先 commit，再 confirm**。
+
+## 路径口径：仓根相对还是 cwd 相对
+
+`status -- <路径>` 是 cwd 相对的，cwd 就是项目根，对得上；但 `HEAD:<路径>` 是**仓根相对**的。
+项目根完全可以是 git 仓的子目录（这个站就是：仓根在单元根，项目根在 `god-live-doc/docs-site`），
+所以取 blob 之前先翻一道：
+
+{/* ref file="../packages/project/src/git.ts" lines="42-45" */}
+
+不翻就会拿 `HEAD:../packages/…` 去仓根找一个不存在的路径，把已提交的内容判成「不在 HEAD 里」。
+
+## 变没变：hunk 表，不自己写 diff 算法
+
+{/* ref file="../packages/project/src/git.ts" lines="94-108" */}
+
+两处讲究：
+
+- **绿灯是常态**，所以先只算哈希不写对象——内容一个字没改就直接回空表，对象库里不留东西。
+- 真有差异才把当前内容存成松散对象再 `diff -U0`。只有「有差异」那一种非零退出（退 1，输出在 stdout 里）
+  能吞；别的（旧 blob 不在对象库里退 128 之类）吞了就是把红判成绿，照原样抛出去。
+
+## 变到哪：行段跟随
+
+hunk 表进纯函数，旧行段映到今天。这个函数不认识 git，谁给的 hunk 表都行：
+
+{/* ref file="../packages/core/src/diff.ts" lines="33-42" */}
+
+三条判据：**没碰到就平移**（上面插了几行，段整体下移）；**碰到就取并集**（段内没动的行映过去，
+碰到段的 hunk 的新行也算进来）；**段内每一行都落在纯删除 hunk 里就是 vanished**。
+
+映完之后还要再比一次段哈希——这就是判定的入口：
+
+{/* ref file="../packages/project/src/git-comparator.ts" lines="61-71" */}
+
+<Note>
+  **绿只认段哈希**。hunk 说「没碰到这段」也照样比一遍：行映射跟内容对不上时（记录被手改过之类），
+  宁可报黄让人复核，也不能把红判成绿。
+</Note>
+
+## 红有三种理由
+
+| 理由 | 什么情况 | 站上显示什么 |
+| --- | --- | --- |
+| `vanished` | 整段被删光，或者行段跟到文件外面去了 | 从 blob 取回的旧段 |
+| `file-missing` | 文件不在了 | 从 blob 取回的旧段 |
+| `blob-missing` | 记忆里的 blob 不在对象库——浅克隆（`--depth 1`）、历史被重写并 gc 过 | 没有旧内容，得重新确认 |
+
+前两种旧内容还取得回来，第三种取不回来——所以它单独一种理由，说清楚「重新确认一次」，
+而不是含糊地说「代码没了」。
+
+## 归一化：站展示什么就哈希什么
+
+{/* ref file="../packages/core/src/span.ts" lines="13-25" */}
+
+只做三件事：换行统一成 LF、去每行行尾空白、去掉末尾的空行。**缩进保留、注释保留**——JSDoc 是契约的
+一部分，改了就该黄。
+
+这一个函数被两处共用：展示前的归一化和哈希前的归一化是同一个，两个比较器也是同一个。否则会出现
+「页面上看着一样、状态却是黄的」这种没法解释的事。整文件送进 `git diff` 之前也统一成 LF——
+对象库里存的是 LF，工作区是不是 CRLF 不该改变判定。
+
+接着读 [状态与比较器](/docs/principles/comparator) 看四种状态怎么串起来，或者 [模块拆分](/docs/principles/modules)
+看这些东西各住哪个包。
