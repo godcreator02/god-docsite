@@ -1,9 +1,84 @@
 ---
 title: 测试与边界
 description: 契约、边界、记号、比较器、站测试各守什么；文档防漂
-livedoc: draft
 ---
 
 # 测试与边界
 
-（待写。本章钉：`../tests/boundary.test.ts` 的规则段、契约测试的夹具。）
+这一章回答：这套东西一共几摊测试，各守什么规矩，为什么边界测试要去读依赖图，以及文档本身怎么防漂。
+
+## 四摊，各自跑
+
+| 在哪儿 | 怎么跑 | 现在多少条 |
+| --- | --- | --- |
+| `god-live-doc/`（工作区） | `pnpm test`（先 build，再 `node --test tests/*.test.ts`） | 59 |
+| `god-live-doc/docs-site/`（这个站） | `pnpm test` | 5 |
+| `examples/plain`（手写 html + 纯 md，比较器 hash） | `pnpm test` | 7 |
+| `examples/fumadocs-site`（外部 fumadocs 站） | `pnpm test` | 4 |
+
+工作区那摊八个文件：骨架、边界、核心、记号、契约、命令行、fumadocs、git 比较器。
+
+## 契约测试：三个格式包摆在一起比
+
+夹具就是这么几行——三种格式各写一篇，引的是同一段代码，草稿记号一模一样：
+
+{/* ref file="../tests/contract.test.ts" lines="15-22" */}
+
+然后一串改动跑下来（确认 → 改代码 → 确认 → 上面插两行 → 删函数），断言**三篇的状态完全一致、
+跟到的行段也是同一个**。状态是核心算的，格式包只交引用——不一致就说明有谁抄了近道。
+
+它跑在临时的真 git 仓里，比较器就是产品用的那个：
+
+{/* ref file="../tests/repo.ts" lines="76-83" */}
+
+<Note>
+  用真 git 仓而不是打桩：这套机制的判定几乎全压在 git 的行为上（blob 取不取得到、`diff -U0` 的 hunk 头
+  长什么样、`status --porcelain` 什么时候为空）。打桩测的是我们对 git 的想象，不是 git。
+  工作区一律配 `core.autocrlf false`——Windows 上的换行转换会让工作区和 blob 逐字节不同。
+</Note>
+
+## 边界测试：读依赖图，不读源码措辞
+
+pnpm 的严格 `node_modules` 让「没声明就 import 不到」，所以**依赖图本身就是边界**。测试直接读各包的
+`package.json`：核心零依赖；除了 fumadocs 格式包谁都不许见宿主；命令行和装配不许依赖任何格式包。
+
+宿主那条最细，连产物都查：
+
+{/* ref file="../tests/boundary.test.ts" lines="42-57" */}
+
+再加两条读源码的 import 表——不看措辞，只看它 import 了谁：
+
+{/* ref file="../tests/boundary.test.ts" lines="66-75" */}
+
+## 记号与比较器：各守一条硬账
+
+- **记号**：`parse(marker(t))` 认回 `t`（三个格式包一起过）；草稿记号[四种不认](/docs/principles/markers)；
+  写回幂等——确认过的文档再确认一次，一个字不变。
+- **比较器**：git 版与 hash 版在同一串改动下状态一致（hash 版不跟行段，那几处单独断言）；
+  git 版的行段跟随、`vanished`、`blob-missing`、未提交拒确认，各一条。
+
+## 站测试：不起 Next，走同一条链
+
+`register()` 把 fumadocs 的 Node loader 挂进 Node，`import` 一篇 `.mdx` 走的就是站构建那条链——
+不用起服务器，也不是另写一条模拟。断言四样：每条引用在页面上都有一个带 `data-dot` 和来源标题的 `pre`、
+组件由 React 表画出来（没有裸标签漏出去）、`_markdown` 里有来源行且组件被压平、以及**这个站自己全绿**。
+
+{/* ref file="tests/page.test.mjs" lines="102-111" */}
+
+<Note>
+  站测试**不跟命令行比状态**：算状态的是同一个 service，比出来只能相等，比了也证明不了什么。
+  跨调用方的比对留给起站抓 `.md` 路由，跟 `render --target ai` 的产物逐字节对。
+</Note>
+
+## 文档防漂：这个站自己就是测试
+
+每一章都钉着本仓源码的真实行段。源码改了，那一章的状态点变色，`pnpm livedoc check` 报出来，
+站测试那条「全是绿的」直接失败——**文档跟不上代码就过不了门禁**。
+
+哪些文章允许没有引用，由 frontmatter 明说，测试按这个态度放行：
+
+{/* ref file="tests/page.test.mjs" lines="40-41" */}
+
+`livedoc: none` 是导读页（明说不钉），`livedoc: draft` 是还没写的章。两样都没写的，就必须至少钉一处。
+
+门禁怎么跑、提交怎么拆，见 [维护者手册](/docs/maintain/maintainers)。
