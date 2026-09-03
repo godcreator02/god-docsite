@@ -91,6 +91,10 @@ export function childrenOf(node: TreeNode): TreeNode[] {
 export const defaultRoster: Roster = {
   // 块级 <Note> 变引用块；写在句子里的 <Note> 变一段行内文字，别把句子拆断
   Note: (node, h) => (h.inline ? h.text(`[note] ${h.textOf(node).trim()}`) : h.quote(`[note] ${h.textOf(node).trim()}`)),
+  // fumadocs 的文件树：作者手写的压成一行一个名字，文件夹带尾斜杠、子项跟在后面。目录树引用注入的那棵不走这儿，标已经打好
+  Files: "children",
+  Folder: (node, h) => [h.paragraph(`${h.attr(node, "name") ?? ""}/`), ...h.children()],
+  File: (node, h) => h.paragraph(h.attr(node, "name") ?? ""),
 };
 
 function apply(rule: Rule, node: TreeNode, roster: Roster): TreeNode[] {
@@ -115,10 +119,12 @@ function apply(rule: Rule, node: TreeNode, roster: Roster): TreeNode[] {
  * 给树上每个组件打标。挂两种标，都是 fumadocs 序列化时认的：
  *   data.livedocAi     一组替换节点，回调里用 fumadocs 的 state 序列化（嵌套组件顺着走）
  *   data._stringify    fumadocs 自家的标；{ text: "" } 表示整个不要
- * import 语句不用管：fumadocs 自己会把 mdxjsEsm 滤掉。
+ * 已经带 livedocAi 的节点（目录树引用注入的 Files）跳过、不往里走。import 语句不用管：fumadocs 自己会把 mdxjsEsm 滤掉。
  */
 export function stamp(tree: TreeNode, roster: Roster = defaultRoster): TreeNode {
-  walk(tree, (node) => {
+  walk(tree, (node, index) => {
+    // 机制注入的节点（目录树那棵 Files）标已经打好，不在名册里找它，也不往它里面走
+    if (node.data?.livedocAi !== undefined) return index === null ? undefined : index + 1;
     if (!isComponent(node)) return;
     const rule = roster[node.name ?? ""];
     if (rule === undefined) throw new Error(`第 ${lineOf(node)} 行：名册外组件 <${node.name}>`);

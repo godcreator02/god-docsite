@@ -18,8 +18,18 @@ register();
 
 const project = await loadProject(process.cwd());
 const DOCS = project.docs();
+/** 占位组件：带上 data- 属性（目录树的状态点挂在 Files 容器上）和 name（文件夹 / 文件名），别的不管长相 */
 const components = Object.fromEntries(
-  componentNames.map((name) => [name, (props) => createElement("div", { "data-component": name }, props.children)]),
+  componentNames.map((name) => [
+    name,
+    (props) =>
+      createElement(
+        "div",
+        { "data-component": name, ...Object.fromEntries(Object.entries(props).filter(([key]) => key.startsWith("data-"))) },
+        props.name,
+        props.children,
+      ),
+  ]),
 );
 
 /** 一篇文档：编译产物 + 页面 html + 命令行那头算出来的清单 */
@@ -57,20 +67,26 @@ test("站里得有文档；每篇要么钉了源码，要么 frontmatter 明说 
   if (drafts.length > 0) console.log(`还没写的章（livedoc: draft）：${drafts.join("、")}`);
 });
 
-test("每条引用在页面上都有一个 pre，带着状态点的颜色和写着来源的标题", () => {
-  // 这里没铺站的 pre 组件（tsx 进不了 Node），验的是 rehypeCode 按白名单放到 pre 上的属性；
+test("每条引用在页面上都有一个带状态点颜色的元素：代码块和芯片是 pre、写着来源的标题；目录树是 Files 容器、根文件夹叫来源", () => {
+  // 这里没铺站的 pre 组件（tsx 进不了 Node），验的是 rehypeCode 按白名单放到 pre 上的属性和注入到 Files 上的属性；
   // 状态点本身由 next build 出
   const attr = (tag, name) => new RegExp(`\\b${name}="([^"]*)"`).exec(tag)?.[1];
   for (const [doc, page] of pages) {
-    const pres = [...page.html.matchAll(/<pre\b[^>]*\bdata-dot="[^"]*"[^>]*>/g)].map(([tag]) => ({
+    const marks = [...page.html.matchAll(/<(pre|div)\b[^>]*\bdata-dot="[^"]*"[^>]*>/g)].map(([tag, kind]) => ({
+      kind,
       dot: attr(tag, "data-dot"),
       title: attr(tag, "title"),
     }));
-    assert.equal(pres.length, page.listing.items.length, `${doc}：带状态点的 pre 要跟清单一样多`);
+    assert.equal(marks.length, page.listing.items.length, `${doc}：带状态点的元素要跟清单一样多`);
     page.listing.items.forEach((item, i) => {
-      assert.equal(pres[i].dot, DOT_COLOR[item.status], `${doc} 第 ${i + 1} 个状态点的颜色`);
+      assert.equal(marks[i].dot, DOT_COLOR[item.status], `${doc} 第 ${i + 1} 个状态点的颜色`);
       const where = whereOf(item);
-      assert.ok(pres[i].title?.includes(where), `${doc} 第 ${i + 1} 块的标题要写来源，实际是 ${pres[i].title}`);
+      if (item.reference.target.kind === "tree") {
+        assert.equal(marks[i].kind, "div", `${doc} 第 ${i + 1} 处是目录树，该是 Files 容器`);
+        assert.ok(page.html.includes(`>${where}<`), `${doc} 第 ${i + 1} 处的根文件夹要叫 ${where}`);
+      } else {
+        assert.ok(marks[i].title?.includes(where), `${doc} 第 ${i + 1} 块的标题要写来源，实际是 ${marks[i].title}`);
+      }
     });
   }
 });
@@ -80,6 +96,7 @@ test("组件由 React 表画，没有裸 JSX 漏到页面", () => {
     for (const name of componentNames) {
       assert.doesNotMatch(page.html, new RegExp(`<${name}[\\s>]`), `${doc}：<${name}> 漏成了裸标签`);
     }
+    assert.doesNotMatch(page.mod._markdown, /<Files|<Folder|<File[\s>]/, `${doc}：文件树没被压平`);
   }
   const all = [...pages.values()].map((p) => p.html).join("");
   assert.match(all, /data-component="Note"/);

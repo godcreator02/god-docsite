@@ -45,6 +45,56 @@
   box-shadow: inset 0 0 0 2px var(--livedoc-dot);
 }
 
+/*
+ * 目录树：引用注入的是 fumadocs 自己的 Files / Folder / File，容器带 data-livedoc="tree" 和 data-dot，
+ * 右上角画同一颗状态点。作者手写的 <Files> 没有这两个属性，一个像素都不会多。
+ */
+.livedoc-files[data-livedoc='tree'] {
+  position: relative;
+}
+
+.livedoc-files[data-livedoc='tree'][data-dot]::after {
+  --livedoc-dot: #a1a1aa;
+  content: '';
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--livedoc-dot);
+}
+
+.livedoc-files[data-livedoc='tree'][data-dot='green']::after {
+  --livedoc-dot: #22c55e;
+}
+
+.livedoc-files[data-livedoc='tree'][data-dot='yellow']::after,
+.livedoc-files[data-livedoc='tree'][data-dot='unpinned']::after {
+  --livedoc-dot: #eab308;
+}
+
+.livedoc-files[data-livedoc='tree'][data-dot='red']::after {
+  --livedoc-dot: #ef4444;
+}
+
+.livedoc-files[data-livedoc='tree'][data-dot='unpinned']::after {
+  background: transparent;
+  box-shadow: inset 0 0 0 2px var(--livedoc-dot);
+}
+
+/* 黄的时候旧表新表并在一棵树里：多出来的绿，少了的红字划掉 */
+.livedoc-files .livedoc-add {
+  color: #15803d;
+  background: rgba(34, 197, 94, 0.12);
+}
+
+.livedoc-files .livedoc-del {
+  color: #b91c1c;
+  text-decoration: line-through;
+  opacity: 0.75;
+}
+
 /* 芯片：存在性、名字这两种引用没有代码可摆，渲成一行带点的小标签 */
 .livedoc-chip {
   display: inline-flex;

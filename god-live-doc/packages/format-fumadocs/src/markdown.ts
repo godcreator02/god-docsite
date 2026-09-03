@@ -27,11 +27,13 @@ export function livedocMarkdownOptions(): MarkdownOptions {
       const node = rawNode as TreeNode;
       const state = rawState as State;
       const replacement = node.data?.livedocAi;
+      const mark = node.data?.livedoc as LivedocMark | undefined;
       if (Array.isArray(replacement)) {
         const box: TreeNode = { type: "root", children: replacement as TreeNode[] };
-        return node.type === "mdxJsxTextElement" ? state.containerPhrasing(box, info) : state.containerFlow(box, info);
+        const body = node.type === "mdxJsxTextElement" ? state.containerPhrasing(box, info) : state.containerFlow(box, info);
+        // 引用注入的组件（目录树那棵 Files）还带着来源，AI 那份前面加一行
+        return mark === undefined ? body : `<!-- 来源 ${mark.source} · ${mark.label} -->\n\n${body}`;
       }
-      const mark = node.data?.livedoc as LivedocMark | undefined;
       if (mark !== undefined && node.type === "code") {
         // 芯片（存在性、名字）没有内容，AI 那份里只留一行来源注释
         if (mark.chip === true) return `<!-- 来源 ${mark.source} · ${mark.label} -->`;

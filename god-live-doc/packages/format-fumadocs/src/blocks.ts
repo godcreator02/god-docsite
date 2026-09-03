@@ -1,20 +1,22 @@
 /**
- * 一处引用的状态 → 一个 mdast `code` 节点。里面是**一块**代码，写法按 fumadocs 认的那套来：
- * meta 里 `title="…"` 出标题栏、`lineNumbers=N` 让行号跟源文件对得上、`data-dot="…"` 带状态点的颜色。
+ * 一处引用的状态 → 树上的一个节点。
  *
- * 五种目标四种长相：
- *   行段 / 整文件   代码块。黄「有变动」把改过的行标上 shiki 原生的 `[!code --]` / `[!code ++]`，旧行新行渲在同一块里
- *                   （有行注释的语言才行，没有的退成 `diff` 块），所以不再另起一块「当前段」，也**不带 lineNumbers**
- *                   ——块里夹着已经不存在的旧行，行号一定对不上源文件，与其错不如不给。
- *                   红「缺失」显示的是文档写下时那段（从记忆里取回的 old）。
- *                   黄「位置不明」（hash 记忆找不到这段了）不摆代码，只留一句提示。
- *   目录树          一块 text 清单，标题写几项；黄退成 diff 块（text 没有行注释语法，正合适）；红说目录不在了。
- *   存在性 / 名字   一行芯片：meta 里多一个 `data-chip`，站的 pre 组件看到它就不画代码块，画一行带点的小标签。
+ * 五种目标三种长相：
+ *   行段 / 整文件   一个 mdast `code` 节点，写法按 fumadocs 认的那套来：meta 里 `title="…"` 出标题栏、`lineNumbers=N`
+ *                   让行号跟源文件对得上、`data-dot="…"` 带状态点的颜色。黄「有变动」把改过的行标上 shiki 原生的
+ *                   `[!code --]` / `[!code ++]`，旧行新行渲在同一块里（有行注释的语言才行，没有的退成 `diff` 块），
+ *                   所以不再另起一块「当前段」，也**不带 lineNumbers**——块里夹着已经不存在的旧行，行号一定对不上源文件。
+ *                   红「缺失」显示的是文档写下时那段（从记忆里取回的 old）。黄「位置不明」（hash 记忆找不到这段了）不摆代码。
+ *   目录树          fumadocs 自己的 `<Files>` / `<Folder>` / `<File>`：根是一个展开的文件夹，名字按路径切成嵌套；
+ *                   容器带 `data-dot` 和 `data-livedoc="tree"`，站的样式表在右上角画状态点。黄的时候旧表新表并起来，
+ *                   多的项标 `livedoc-add`、少的标 `livedoc-del`；红只剩一个禁用的根文件夹说目录不在了。
+ *                   AI 那份的标（来源行 + text 清单）在这儿直接打好，stamp 看到就跳过，不去名册里找它。
+ *   存在性 / 名字   一行芯片：`code` 节点的 meta 里多一个 `data-chip`，站的 pre 组件看到它就不画代码块，画一行带点的小标签。
  *
- * 灯长什么样、怎么渲染，全归站点侧的 pre 组件；这一层只把颜色塞进 meta。
+ * 灯长什么样、怎么渲染，全归站点侧的 pre 组件和样式表；这一层只把颜色塞进 meta / 属性。
  */
 import type { Item, Status } from "@god-live-doc/core";
-import type { TreeNode } from "./tree.ts";
+import type { JsxAttribute, TreeNode } from "./tree.ts";
 
 export const LABEL: Record<Status, string> = { fresh: "新鲜", changed: "有变动", missing: "缺失", unconfirmed: "未确认" };
 
@@ -109,7 +111,80 @@ export function diffBlock(lang: string, unified: string, title: string, dot: Dot
   return { type: "code", lang, meta: metaOf(title, dot), value: lines.join("\n"), data: { livedoc: mark } };
 }
 
-/** 一处引用 → 一块代码或一行芯片 */
+/* ---------- 目录树：fumadocs 的 Files / Folder / File ---------- */
+
+const jsxAttr = (name: string, value: string | null): JsxAttribute => ({ type: "mdxJsxAttribute", name, value });
+const jsx = (name: string, attributes: JsxAttribute[], children: TreeNode[] = []): TreeNode => ({ type: "mdxJsxFlowElement", name, attributes, children });
+
+/** 清单里的一项：相对路径（目录带尾斜杠）+ 变动标记 */
+interface Entry {
+  path: string;
+  mark: " " | "+" | "-";
+}
+
+/** 旧表新表并起来：新有旧没有的 `+`，旧有新没有的 `-`，按路径排序 */
+export function mergeNames(old: string[] | undefined, now: string[]): Entry[] {
+  const before = new Set(old ?? now);
+  const after = new Set(now);
+  const all = [...new Set([...before, ...after])].sort();
+  return all.map((path) => ({ path, mark: !before.has(path) ? "+" : !after.has(path) ? "-" : " " }));
+}
+
+interface Trie {
+  name: string;
+  dir: boolean;
+  mark: Entry["mark"];
+  children: Map<string, Trie>;
+}
+
+/** 平铺的路径表 → 嵌套的 Folder / File 节点 */
+export function filesOf(entries: Entry[]): TreeNode[] {
+  const root: Trie = { name: "", dir: true, mark: " ", children: new Map() };
+  for (const { path, mark } of entries) {
+    const dir = path.endsWith("/");
+    const parts = path.replace(/\/$/, "").split("/");
+    let cur = root;
+    parts.forEach((part, i) => {
+      const last = i === parts.length - 1;
+      let next = cur.children.get(part);
+      if (next === undefined) {
+        next = { name: part, dir: !last || dir, mark: last ? mark : " ", children: new Map() };
+        cur.children.set(part, next);
+      }
+      cur = next;
+    });
+  }
+  const render = (node: Trie): TreeNode => {
+    const attrs: JsxAttribute[] = [jsxAttr("name", node.name)];
+    if (node.mark === "+") attrs.push(jsxAttr("className", "livedoc-add"));
+    if (node.mark === "-") attrs.push(jsxAttr("className", "livedoc-del"));
+    if (!node.dir) return jsx("File", attrs);
+    // 有孩子的文件夹默认展开；到深度尽头、没孩子的禁用，点开也是空的
+    attrs.push(jsxAttr(node.children.size > 0 ? "defaultOpen" : "disabled", null));
+    return jsx("Folder", attrs, [...node.children.values()].map(render));
+  };
+  return [...root.children.values()].map(render);
+}
+
+/** 目录树 → 一棵 `<Files>`：根文件夹叫这处的来源，容器带状态点的颜色；AI 那份的标直接打好 */
+export function treeNode(item: Item): TreeNode {
+  const where = whereOf(item);
+  const dot = DOT_COLOR[item.status];
+  const label = LABEL[item.status];
+  const names = item.current ?? [];
+  const missing = item.status === "missing";
+  const entries = missing ? [] : mergeNames(item.status === "changed" ? item.old : undefined, names);
+  const rootAttrs: JsxAttribute[] = [jsxAttr("name", where), jsxAttr(missing ? "disabled" : "defaultOpen", null)];
+  const inner = missing ? [jsx("File", [jsxAttr("name", NO_DIR)])] : filesOf(entries);
+  const aiText = missing ? NO_DIR : item.status === "changed" && item.diff !== undefined ? item.diff : names.join("\n");
+  const mark: LivedocMark = { source: where, label, value: aiText };
+  return {
+    ...jsx("Files", [jsxAttr("className", "livedoc-files"), jsxAttr("data-livedoc", "tree"), jsxAttr("data-dot", dot)], [jsx("Folder", rootAttrs, inner)]),
+    data: { livedoc: mark, livedocAi: [{ type: "code", lang: "text", value: aiText }] },
+  };
+}
+
+/** 一处引用 → 一块代码、一棵文件树或一行芯片 */
 export function nodeFor(item: Item): TreeNode {
   const target = item.reference.target;
   // 标题写今天的位置：行段跟随之后，记号上那几行可能已经不是这段了
@@ -120,15 +195,7 @@ export function nodeFor(item: Item): TreeNode {
   if (target.kind === "exists" || target.kind === "has") {
     return chipNode(item.status === "fresh" ? where : `${where} · ${label}`, dot, { source: where, label, value: "" });
   }
-
-  if (target.kind === "tree") {
-    const names = item.current ?? [];
-    if (item.status === "missing") return codeNode("text", NO_DIR, `${where}${TREE_SUFFIX} · ${label}`, dot, { source: where, label, value: NO_DIR });
-    const mark: LivedocMark = { source: where, label, value: names.join("\n") };
-    if (item.status === "changed" && item.diff !== undefined && item.diff !== "") return diffBlock("text", item.diff, `${where}${TREE_SUFFIX}`, dot, mark);
-    const suffix = item.status === "unconfirmed" ? UNCONFIRMED_SUFFIX : "";
-    return codeNode("text", names.join("\n"), `${where}${TREE_SUFFIX} · ${names.length} 项${suffix}`, dot, mark);
-  }
+  if (target.kind === "tree") return treeNode(item);
 
   const lang = langOf(target.file);
   if (item.status === "missing") {

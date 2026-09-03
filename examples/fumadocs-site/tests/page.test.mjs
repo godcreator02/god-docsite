@@ -32,7 +32,7 @@ test("引用全绿：这个站写下的引用跟它自己的源码没脱节", ()
 
 test("每条引用在页面上都有一个 pre，带着状态点的颜色和写着来源的标题", () => {
   const attr = (tag, name) => new RegExp(`\\b${name}="([^"]*)"`).exec(tag)?.[1];
-  const pres = [...html.matchAll(/<pre\b[^>]*\bdata-dot="[^"]*"[^>]*>/g)].map(([tag]) => ({
+  const pres = [...html.matchAll(/<(?:pre|div)\b[^>]*\bdata-dot="[^"]*"[^>]*>/g)].map(([tag]) => ({
     dot: attr(tag, "data-dot"),
     title: attr(tag, "title"),
   }));
