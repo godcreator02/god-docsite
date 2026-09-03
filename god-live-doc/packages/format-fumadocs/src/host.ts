@@ -24,9 +24,9 @@ export function remarkLivedocHost({ root }: { root: string }): (tree: TreeNode, 
   };
 }
 
-const ALLOWED = new Set(["title", "tab", "noCopy", "lineNumbers", "data-dot"]);
+const ALLOWED = new Set(["title", "tab", "noCopy", "lineNumbers", "data-dot", "data-chip"]);
 
-/** meta 字符串 → 属性表。只放行白名单；跟 fumadocs 默认白名单同形，多认一个 data-dot（状态点的颜色） */
+/** meta 字符串 → 属性表。只放行白名单；跟 fumadocs 默认白名单同形，多认 data-dot（状态点的颜色）和 data-chip（芯片） */
 export function parseMetaString(meta: string): Record<string, unknown> {
   const out: Record<string, unknown> = {};
   for (const m of meta.matchAll(/([\w-]+)(?:=(?:"([^"]*)"|(\d+)))?/g)) {

@@ -33,6 +33,8 @@ export function livedocMarkdownOptions(): MarkdownOptions {
       }
       const mark = node.data?.livedoc as LivedocMark | undefined;
       if (mark !== undefined && node.type === "code") {
+        // 芯片（存在性、名字）没有内容，AI 那份里只留一行来源注释
+        if (mark.chip === true) return `<!-- 来源 ${mark.source} · ${mark.label} -->`;
         // AI 那份里不要 meta、也不要 diff 标记：一行来源注释加一块干净的代码
         const plain: TreeNode = { type: "code", lang: node.lang ?? "", value: mark.value };
         return `<!-- 来源 ${mark.source} · ${mark.label} -->\n\n${state.handle(plain, rawParent as TreeNode | undefined, state, info)}`;

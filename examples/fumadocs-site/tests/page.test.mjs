@@ -10,7 +10,7 @@ import { register } from "fumadocs-mdx/node";
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { loadProject } from "@god-live-doc/project";
-import { DOT_COLOR } from "@god-live-doc/format-fumadocs";
+import { DOT_COLOR, whereOf } from "@god-live-doc/format-fumadocs";
 import { componentNames } from "../src/components/registry.ts";
 
 register();
@@ -39,7 +39,7 @@ test("每条引用在页面上都有一个 pre，带着状态点的颜色和写�
   assert.equal(pres.length, listing.items.length);
   listing.items.forEach((item, i) => {
     assert.equal(pres[i].dot, DOT_COLOR[item.status]);
-    assert.ok(pres[i].title?.includes(`${item.reference.target.file}:${item.lines[0]}-${item.lines[1]}`));
+    assert.ok(pres[i].title?.includes(whereOf(item)));
   });
 });
 

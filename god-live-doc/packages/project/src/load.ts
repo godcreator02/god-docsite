@@ -6,7 +6,7 @@
 import { existsSync, readFileSync, readdirSync, statSync, writeFileSync } from "node:fs";
 import { join, relative, resolve, sep } from "node:path";
 import { pathToFileURL } from "node:url";
-import { createHashComparator, createService } from "@god-live-doc/core";
+import { createHashComparator, createKindComparator, createService } from "@god-live-doc/core";
 import type { Comparator, Format, Service } from "@god-live-doc/core";
 import { createAutoComparator } from "./auto-comparator.ts";
 import { createReader } from "./fs-reader.ts";
@@ -22,7 +22,7 @@ export interface ProjectConfig {
   out?: string;
   /** 记录簿文件，相对项目根；默认 .ledger.json */
   ledger?: string;
-  /** 比较器：auto（默认，按文件位置挑 git 或 hash）、git、hash，或者自己造一个 */
+  /** 行段 / 整文件的记忆：auto（默认，按文件位置挑 git 或 hash）、git、hash，或者自己造一个（自己造的得自己管全部五种目标） */
   comparator?: "auto" | "git" | "hash" | Comparator;
   /** 组件名册（压平规则），格式包用；没声明就用格式包的默认表 */
   components?: Record<string, unknown>;
@@ -70,8 +70,9 @@ export function loadProject(root: string): Promise<Project> {
 function comparatorOf(config: ProjectConfig, root: string): Comparator {
   const want = config.comparator ?? "auto";
   if (want === "auto") return createAutoComparator({ root });
-  if (want === "git") return createGitComparator({ root });
-  if (want === "hash") return createHashComparator();
+  // 强制 git / hash 只管行段和整文件；目录树、存在性、名字照旧走核心那三个
+  if (want === "git") return createKindComparator({ span: createGitComparator({ root }) });
+  if (want === "hash") return createKindComparator({ span: createHashComparator() });
   return want;
 }
 

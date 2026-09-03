@@ -1,14 +1,14 @@
 /**
  * 测试夹具：临时目录里起一个真 git 仓，一份代码、几篇文档，按需换比较器装配核心服务。
- * 不走 loadProject——临时目录里解析不到包名；装配的零件（读取器、json 记录簿、比较器）直接拿来用。
+ * 不走 loadProject——临时目录里解析不到包名；装配的零件（project 的读取器、比较器，内存记录簿）直接拿来用。
  */
 import { execFileSync } from "node:child_process";
 import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { createHashComparator, createService, targetKey, keyToTarget } from "@god-live-doc/core";
-import type { Comparator, Format, Ledger, MemoRecord, Reader, Service } from "@god-live-doc/core";
-import { createAutoComparator, createGitComparator } from "@god-live-doc/project";
+import type { Comparator, Format, Ledger, MemoRecord, Service } from "@god-live-doc/core";
+import { createAutoComparator, createGitComparator, createReader } from "@god-live-doc/project";
 
 export const CODE = [
   "// greet",
@@ -22,19 +22,6 @@ export const CODE = [
 
 export function run(cwd: string, args: string[]): string {
   return execFileSync("git", args, { cwd, encoding: "utf8", timeout: 30_000, stdio: ["pipe", "pipe", "pipe"] });
-}
-
-/** 临时目录里的读取器：整文件按行给，读不到 null */
-export function reader(root: string): Reader {
-  return {
-    read(file) {
-      try {
-        return readFileSync(join(root, file), "utf8").split("\n");
-      } catch {
-        return null;
-      }
-    },
-  };
 }
 
 /** 内存记录簿，够测试用；落盘那份在 @god-live-doc/project */
@@ -111,7 +98,7 @@ export function setupRepo({ formats, comparator }: RepoOptions): Repo {
   api.commit("起代码");
   api.service = createService({
     formats,
-    reader: reader(root),
+    reader: createReader(root),
     ledger: api.ledger,
     comparator: comparatorOf(root, comparator),
   });

@@ -11,14 +11,13 @@ import { register } from "fumadocs-mdx/node";
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { loadProject } from "@god-live-doc/project";
-import { DOT_COLOR } from "@god-live-doc/format-fumadocs";
+import { DOT_COLOR, whereOf } from "@god-live-doc/format-fumadocs";
 import { componentNames } from "../src/components/registry.ts";
 
 register();
 
 const project = await loadProject(process.cwd());
 const DOCS = project.docs();
-const key = (t) => `${t.file}:${t.a}-${t.b}`;
 const components = Object.fromEntries(
   componentNames.map((name) => [name, (props) => createElement("div", { "data-component": name }, props.children)]),
 );
@@ -70,7 +69,7 @@ test("每条引用在页面上都有一个 pre，带着状态点的颜色和写�
     assert.equal(pres.length, page.listing.items.length, `${doc}：带状态点的 pre 要跟清单一样多`);
     page.listing.items.forEach((item, i) => {
       assert.equal(pres[i].dot, DOT_COLOR[item.status], `${doc} 第 ${i + 1} 个状态点的颜色`);
-      const where = key({ file: item.reference.target.file, a: item.lines[0], b: item.lines[1] });
+      const where = whereOf(item);
       assert.ok(pres[i].title?.includes(where), `${doc} 第 ${i + 1} 块的标题要写来源，实际是 ${pres[i].title}`);
     });
   }
@@ -91,7 +90,7 @@ test("模块带着 _markdown，且是我们的回调出的：来源行在、组�
   for (const [doc, page] of pages) {
     assert.equal(typeof page.mod._markdown, "string", `${doc}：postprocess.includeProcessedMarkdown 没开`);
     for (const item of page.listing.items) {
-      const where = key({ file: item.reference.target.file, a: item.lines[0], b: item.lines[1] });
+      const where = whereOf(item);
       assert.ok(page.mod._markdown.includes(`<!-- 来源 ${where} · `), `${doc}：来源行不在，说明序列化回调没挂上`);
     }
     assert.doesNotMatch(page.mod._markdown, /<Tabs|<Note|<Tab[\s>]/, `${doc}：组件没被名册压平`);

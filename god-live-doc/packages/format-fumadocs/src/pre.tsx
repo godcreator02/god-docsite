@@ -1,8 +1,10 @@
 "use client";
 
 /**
- * 状态点的站点侧 pre 组件。覆盖 mdx-components 的 `pre`：有 `data-dot` 的代码块（引用变的）在标题栏
- * 右侧、复制按钮左边画一个 8px 圆点；没有的（普通围栏）原样走 fumadocs 的 CodeBlock，互不干扰。
+ * 状态点的站点侧 pre 组件。覆盖 mdx-components 的 `pre`：
+ *   有 `data-dot` 的代码块（引用变的）在标题栏右侧、复制按钮左边画一个 8px 圆点；
+ *   再带 `data-chip` 的（存在性、名字）不画代码块，画一行带点的小标签，标签上的字就是标题；
+ *   都没有的（普通围栏）原样走 fumadocs 的 CodeBlock，互不干扰。
  *
  * 必须是客户端组件：CodeBlock 是 "use client"，状态点要靠 Actions（一个函数）塞进它的标题栏，
  * 服务端组件不能把函数传给客户端组件——所以 pre 也跟着标 "use client"，函数在同一侧直接传。
@@ -14,20 +16,29 @@
 import { CodeBlock, Pre, type CodeBlockProps } from "fumadocs-ui/components/codeblock";
 import type { ReactNode } from "react";
 
-/** CodeBlock 的 props 全量（rehype 高亮塞的 title / 行号 meta 都在里面）再加我们自己的 data-dot */
-type LivedocPreProps = CodeBlockProps & { "data-dot"?: string };
+/** CodeBlock 的 props 全量（rehype 高亮塞的 title / 行号 meta 都在里面）再加我们自己的 data-dot / data-chip */
+type LivedocPreProps = CodeBlockProps & { "data-dot"?: string; "data-chip"?: string | boolean; title?: string };
 
 /** CodeBlock 的 Actions 回调参数（fumadocs 里就是这个形状） */
 type ActionsProps = { className?: string; children?: ReactNode };
 
 export function LivedocPre(props: LivedocPreProps) {
-  const { "data-dot": dot, children, ...rest } = props;
+  const { "data-dot": dot, "data-chip": chip, children, ...rest } = props;
 
   if (dot === undefined) {
     return (
       <CodeBlock {...rest}>
         <Pre>{children}</Pre>
       </CodeBlock>
+    );
+  }
+
+  if (chip !== undefined) {
+    return (
+      <div className="livedoc-chip" data-dot={dot}>
+        <span className="livedoc-dot" data-dot={dot} aria-hidden="true" />
+        <span className="livedoc-chip-text">{rest.title}</span>
+      </div>
     );
   }
 

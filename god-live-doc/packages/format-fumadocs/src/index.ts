@@ -10,6 +10,7 @@
  *   @god-live-doc/format-fumadocs/pre         状态点的 pre 组件（"use client"）
  *   @god-live-doc/format-fumadocs/light.css   状态点的样式
  */
+import { formalOf } from "@god-live-doc/core";
 import type { Fill, Reference, Target } from "@god-live-doc/core";
 import { recognize } from "./recognize.ts";
 import { parseTree } from "./render.ts";
@@ -19,8 +20,8 @@ import type { Roster } from "./roster.ts";
 export const name = "fumadocs-mdx";
 export const claims = (doc: string): boolean => doc.endsWith(".mdx");
 
-/** 记号：mdx 的花括号注释表达式 */
-export const marker = ({ file, a, b }: Target): string => `{/* ref file="${file}" lines="${a}-${b}" */}`;
+/** 记号：mdx 的花括号注释表达式，载荷是核心定的那一截 */
+export const marker = (target: Target): string => `{/* ${formalOf(target)} */}`;
 
 export function parse(text: string): Reference[] {
   return recognize(parseTree(text));
@@ -43,7 +44,24 @@ export { remarkLivedoc } from "./remark-plugin.ts";
 export type { PluginFile, RemarkOptions } from "./remark-plugin.ts";
 export { draftIn, markerOf, recognize } from "./recognize.ts";
 export { applyListing } from "./transform.ts";
-export { codeNode, diffBlock, DOT_COLOR, LABEL, langOf, metaOf, nodeFor, NO_OLD, OLD_TITLE, UNCONFIRMED_SUFFIX } from "./blocks.ts";
+export {
+  chipNode,
+  codeNode,
+  diffBlock,
+  DOT_COLOR,
+  LABEL,
+  langOf,
+  metaOf,
+  NO_DIR,
+  NO_OLD,
+  nodeFor,
+  OLD_TITLE,
+  TREE_SUFFIX,
+  UNCONFIRMED_SUFFIX,
+  UNLOCATED_NOTE,
+  UNLOCATED_SUFFIX,
+  whereOf,
+} from "./blocks.ts";
 export type { Dot, LivedocMark } from "./blocks.ts";
 export { livedocMarkdownOptions } from "./markdown.ts";
 export type { MarkdownOptions } from "./markdown.ts";

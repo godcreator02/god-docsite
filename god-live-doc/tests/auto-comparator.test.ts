@@ -141,10 +141,36 @@ test("软链接按真实路径算：node_modules 里指向已提交目录的链�
   }
 });
 
+test("目录树、存在性、名字走核心那三个：清单按 .gitignore 过滤，改名红、多文件黄", () => {
+  const r = setupRepo({ formats: FORMATS, comparator: "auto" });
+  try {
+    r.write(".gitignore", "dist/\n");
+    r.write("src/dist/out.js", "x");
+    r.write("src/util.ts", "export const a = 1;\n");
+    r.commit("起结构");
+    const text = 'REF tree src depth=1\n\nREF exists src/greet.ts\n\nREF absent src/remove.ts\n\nREF has src/greet.ts "export function greet"\n';
+    const done = r.service.confirm(DOC, text);
+    assert.deepEqual(done.problems, []);
+    assert.deepEqual(kinds(r), ["tree", "exists", "exists", "has"]);
+    const items = r.service.resolve(DOC, done.text).items;
+    assert.deepEqual(items.map((i) => i.status), ["fresh", "fresh", "fresh", "fresh"]);
+    assert.deepEqual(items[0]!.current, ["greet.ts", "util.ts"], "dist/ 被忽略，不进清单");
+
+    r.write("src/tag.ts", "export const t = 1;\n");
+    r.write("src/remove.ts", "");
+    r.write("src/greet.ts", CODE.replace("function greet", "function hello"));
+    const after = r.service.resolve(DOC, done.text).items;
+    assert.deepEqual(after.map((i) => [i.status, i.reason]), [["changed", "changed"], ["fresh", undefined], ["missing", "appeared"], ["missing", "text-missing"]]);
+    assert.match(after[0]!.diff!, /^\+ tag\.ts$/m);
+  } finally {
+    r.teardown();
+  }
+});
+
 test("核对按记录的 kind 转发：认不得的 kind 当没确认过", () => {
   const r = setupRepo({ formats: FORMATS, comparator: "auto" });
   try {
-    r.ledger.set(DOC, { file: "src/greet.ts", a: 2, b: 3 }, { kind: "别的" });
+    r.ledger.set(DOC, { kind: "span", file: "src/greet.ts", a: 2, b: 3 }, { kind: "别的" });
     assert.deepEqual(r.statuses(DOC, "REF src/greet.ts:2-3\n"), ["unconfirmed"]);
   } finally {
     r.teardown();

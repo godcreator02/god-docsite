@@ -165,6 +165,38 @@ test("被忽略的文件走 hash 记忆：confirm 标明；改了内容 check �
   }
 });
 
+test("五类引用一篇 md：目录树长出清单、名字和存在性只有记号；多了文件黄、断言不在的出现了红", async () => {
+  const p = setupProject();
+  try {
+    writeFileSync(
+      join(p.root, "docs", "d.md"),
+      "# d\n\n@@livedoc tree src @@\n\n@@livedoc ref src/greet.ts @@\n\n@@livedoc has src/greet.ts \"export function greet\" @@\n\n@@livedoc absent src/remove.ts @@\n",
+    );
+    const done = await p.cli("confirm");
+    assert.equal(done.code, 0, done.out);
+    assert.match(done.out, /✅ docs\/d\.md {2}tree src depth=1 {2}已确认/);
+    assert.match(done.out, /✅ docs\/d\.md {2}src\/greet\.ts:all {2}已确认/);
+    assert.match(done.out, /✅ docs\/d\.md {2}has src\/greet\.ts "export function greet" {2}已确认/);
+    assert.match(done.out, /✅ docs\/d\.md {2}absent src\/remove\.ts {2}已确认/);
+    const md = p.read("docs/d.md");
+    assert.match(md, /<!-- tree dir="src" depth="1" -->\n```text\ngreet\.ts\n```\n<!-- \/tree -->/);
+    assert.match(md, /<!-- ref file="src\/greet\.ts" -->\n```ts\n\/\/ greet\n/);
+    assert.match(md, /<!-- has file="src\/greet\.ts" text="export function greet" -->\n\n<!-- absent path="src\/remove\.ts" -->/);
+
+    const green = await p.cli("check");
+    assert.match(green.out, /🟢 docs\/d\.md {2}tree src depth=1 {2}新鲜（1 项）/);
+
+    writeFileSync(join(p.root, "src", "tag.ts"), "export const t = 1;\n");
+    writeFileSync(join(p.root, "src", "remove.ts"), "");
+    const after = await p.cli("check");
+    assert.equal(after.code, 1);
+    assert.match(after.out, /🟡 docs\/d\.md {2}tree src depth=1 {2}有变动，等作者复核（\+ remove\.ts，\+ tag\.ts）/);
+    assert.match(after.out, /🔴 docs\/d\.md {2}absent src\/remove\.ts {2}缺失，引用指向空气（断言它不在，它却出现了）/);
+  } finally {
+    p.teardown();
+  }
+});
+
 test("不认识的命令退 2", async () => {
   const p = setupProject();
   try {

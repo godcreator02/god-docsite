@@ -156,10 +156,32 @@ test("项目根是 git 的子目录：HEAD:<路径> 翻成仓根相对，照样�
     run(outer, ["commit", "-q", "-m", "起代码"]);
 
     const comparator = createGitComparator({ root: inner });
-    const snapshot = comparator.snapshot({ file: "src/greet.ts", a: 2, b: 3 }, CODE.split("\n"));
+    const snapshot = comparator.snapshot({ kind: "span", file: "src/greet.ts", a: 2, b: 3 }, CODE.split("\n"));
     assert.ok("record" in snapshot, `子目录里该钉得住，实际：${JSON.stringify(snapshot)}`);
   } finally {
     rmSync(outer, { recursive: true, force: true, maxRetries: 5 });
+  }
+});
+
+test("整文件：末尾追加也黄，diff 是整份对整份；行段版对同一改动是绿的", () => {
+  const r = setupRepo({ formats: FORMATS });
+  try {
+    const text = "REF src/greet.ts:all\n\nREF src/greet.ts:2-3\n";
+    const done = r.service.confirm(DOC, text);
+    assert.deepEqual(done.problems, []);
+    assert.deepEqual(r.statuses(DOC, done.text), ["fresh", "fresh"]);
+    const whole = r.ledger.dump()[DOC]!["src/greet.ts:all"] as GitRecord;
+    assert.deepEqual(whole.lines, [1, 6]);
+
+    r.write("src/greet.ts", `${CODE}export const NAME = "x";\n`);
+    r.commit("末尾追加一行");
+    const [all, span] = r.service.resolve(DOC, done.text).items;
+    assert.equal(span!.status, "fresh", "行段没被碰到");
+    assert.equal(all!.status, "changed");
+    assert.match(all!.diff!, /^\+ export const NAME/m);
+    assert.deepEqual(all!.lines, [1, 7]);
+  } finally {
+    r.teardown();
   }
 });
 

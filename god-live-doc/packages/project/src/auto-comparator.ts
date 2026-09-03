@@ -1,5 +1,6 @@
 /**
- * auto 比较器（默认）：按被引文件的位置挑记忆，一个项目里 git 记录和 hash 记录并存。
+ * auto 比较器（默认）：先按目标种类分派（目录树、存在性、名字走核心里那三个），行段和整文件再按被引文件的位置挑记忆，
+ * 一个项目里 git 记录和 hash 记录并存。
  *
  *   文件在哪                                  记忆
  *   任何 git 仓里、没被忽略                    git——已提交且干净才钉得住；未跟踪、脏、仓没提交过的，由 git 版说清楚，不退成 hash
@@ -10,12 +11,13 @@
  * 认不得的 kind 当没确认过。
  */
 
-import { createHashComparator, targetKey } from "@god-live-doc/core";
+import { createHashComparator, createKindComparator, fileOf, targetKey } from "@god-live-doc/core";
 import type { Comparator, Judgement, MemoRecord, Snapshot, Target } from "@god-live-doc/core";
 import { hasCommits, isIgnored, locate } from "./git.ts";
 import { createGitComparator } from "./git-comparator.ts";
 
-export function createAutoComparator({ root }: { root: string }): Comparator {
+/** 行段 / 整文件那一半：按文件位置挑 git 或 hash */
+export function createAutoSpanComparator({ root }: { root: string }): Comparator {
   const byGit = createGitComparator({ root });
   const byHash = createHashComparator();
 
@@ -31,7 +33,9 @@ export function createAutoComparator({ root }: { root: string }): Comparator {
 
     snapshot(target: Target, text: string[] | null): Snapshot {
       if (text === null) return { problem: `${targetKey(target)} 文件不存在` };
-      return pick(target.file).snapshot(target, text);
+      const file = fileOf(target);
+      if (file === null) return { problem: `${targetKey(target)} 不是文件` };
+      return pick(file).snapshot(target, text);
     },
 
     judge(record: MemoRecord | null, target: Target, text: string[] | null): Judgement {
@@ -40,4 +44,8 @@ export function createAutoComparator({ root }: { root: string }): Comparator {
       return byHash.judge(null, target, text);
     },
   };
+}
+
+export function createAutoComparator({ root }: { root: string }): Comparator {
+  return createKindComparator({ span: createAutoSpanComparator({ root }) });
 }

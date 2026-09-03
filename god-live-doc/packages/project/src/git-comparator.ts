@@ -1,5 +1,5 @@
 /**
- * git 比较器：记忆就是那个仓 HEAD 里的 blob，哪儿都不存第二份内容。
+ * git 比较器：记忆就是那个仓 HEAD 里的 blob，哪儿都不存第二份内容。管行段和整文件两种目标。
  *
  * 被引文件在哪个仓按它自己的位置定（见 git.ts 的 locate）：项目自己的仓、别的仓一视同仁。
  * - **确认**（snapshot）守几道门：得在某个仓里、那个仓得有过提交、文件得在 HEAD 里（未跟踪、被忽略、
@@ -9,9 +9,10 @@
  *   整段删光是 vanished，文件没了是 file-missing，blob 不在对象库（浅克隆、历史重写、仓换了）是 blob-missing；
  *   映到的那段哈希等于记录就绿，否则黄——黄带着给人看的 diff 和从 blob 取回的旧段。
  *   **绿只认段哈希**：hunk 说没碰到也再比一次，行映射跟内容对不上时宁可报黄让人复核。
+ *   整文件不映行段，只比整文件哈希，黄的 diff 是整份对整份。
  */
 
-import { fileText, hashSpan, mapRange, mappedSpan, normalizeLines, renderDiff, sliceSpan, targetKey } from "@god-live-doc/core";
+import { fileText, hashSpan, lineCount, mapRange, mappedSpan, normalizeLines, renderDiff, sliceSpan, targetKey, wantedSpan } from "@god-live-doc/core";
 import type { Comparator, Judgement, MemoRecord, Snapshot, Span, Target } from "@god-live-doc/core";
 import { diffHunks, hasCommits, headBlob, headCommit, inHead, isClean, isIgnored, locate, objectExists, readBlob } from "./git.ts";
 
@@ -32,13 +33,21 @@ export function createGitComparator({ root }: { root: string }): Comparator {
     return span ?? [];
   }
 
+  /** 整份旧文件，归一化过 */
+  function oldAll(repo: string | null, record: GitRecord): string[] {
+    if (repo === null || !objectExists(repo, record.blob)) return [];
+    return normalizeLines(readBlob(repo, record.blob).split("\n"));
+  }
+
   return {
     kind: "git",
 
     snapshot(target: Target, text: string[] | null): Snapshot {
       const where = targetKey(target);
+      if (target.kind !== "span" && target.kind !== "file") return { problem: `${where} 不是行段也不是整文件` };
       if (text === null) return { problem: `${where} 文件不存在` };
-      const span = sliceSpan(text, [target.a, target.b]);
+      const lines = wantedSpan(target, text)!;
+      const span = sliceSpan(text, lines);
       if (span === null) return { problem: `${where} 行段超出文件` };
       try {
         const at = locate(root, target.file);
@@ -57,7 +66,7 @@ export function createGitComparator({ root }: { root: string }): Comparator {
           kind: "git",
           blob: headBlob(at),
           commit: headCommit(at.repo),
-          lines: [target.a, target.b],
+          lines,
           hash: hashSpan(span),
         };
         return { record };
@@ -67,10 +76,11 @@ export function createGitComparator({ root }: { root: string }): Comparator {
     },
 
     judge(record: MemoRecord | null, target: Target, text: string[] | null): Judgement {
+      if (target.kind !== "span" && target.kind !== "file") return { status: "unconfirmed", lines: [1, 1] };
       // 别家的记录不认，当没确认过——记录格式是各比较器自己的，翻译就是猜
       if (record === null || record.kind !== "git") {
-        const lines: Span = [target.a, target.b];
-        if (text === null) return { status: "missing", lines, reason: "file-missing" };
+        if (text === null) return { status: "missing", lines: [1, 1], reason: "file-missing" };
+        const lines = wantedSpan(target, text)!;
         if (sliceSpan(text, lines) === null) return { status: "missing", lines, reason: "vanished" };
         return { status: "unconfirmed", lines };
       }
@@ -80,6 +90,13 @@ export function createGitComparator({ root }: { root: string }): Comparator {
       if (text === null) return { status: "missing", lines: pinned.lines, reason: "file-missing", old: oldSpan(repo, pinned) };
       // 记录里的 blob 不在对象库里（或者文件已经不在任何仓里）：旧内容取不回来、diff 也做不了，判红说清楚，让人重新确认
       if (repo === null || !objectExists(repo, pinned.blob)) return { status: "missing", lines: pinned.lines, reason: "blob-missing", old: [] };
+
+      if (target.kind === "file") {
+        const lines: Span = [1, Math.max(1, lineCount(text))];
+        if (hashSpan(text) === pinned.hash) return { status: "fresh", lines };
+        const old = oldAll(repo, pinned);
+        return { status: "changed", lines, reason: "changed", diff: renderDiff(old, normalizeLines(text)), old };
+      }
 
       const hunks = diffHunks(repo, pinned.blob, fileText(text));
       const lines = mappedSpan(mapRange(hunks, pinned.lines[0], pinned.lines[1]));

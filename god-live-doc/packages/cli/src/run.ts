@@ -26,6 +26,10 @@ const REASON: Record<string, string> = {
   vanished: "整段已被删光",
   "file-missing": "文件不在了",
   "blob-missing": "记忆里的 blob 不在对象库（浅克隆或历史重写过），重新确认一次",
+  "dir-missing": "目录不在了",
+  appeared: "断言它不在，它却出现了",
+  "type-changed": "文件和目录换了个",
+  "text-missing": "文件里没有这个名字了",
   unlocated: "hash 记忆找不到这段了，位置不明——重读源码、重钉",
 };
 /** 确认时拿到的是哪种记忆：hash 是弱记忆（没有旧内容、变了就找不着），写手得知道 */
@@ -66,9 +70,22 @@ export async function main(argv: string[]): Promise<number> {
 
 type Project = Awaited<ReturnType<typeof loadProject>>;
 
+/** 一行说明后面的括号：红的理由，目录树的项数或多了少了哪些 */
+function detailOf(item: Item): string {
+  if (item.reason !== undefined && REASON[item.reason] !== undefined) return `（${REASON[item.reason]}）`;
+  if (item.reference.target.kind !== "tree") return "";
+  if (item.status === "changed" && item.diff !== undefined) {
+    const marks = item.diff
+      .split("\n")
+      .filter((line) => line.startsWith("+ ") || line.startsWith("- "))
+      .map((line) => `${line[0]} ${line.slice(2)}`);
+    return `（${marks.join("，")}）`;
+  }
+  return item.current === null ? "" : `（${item.current.length} 项）`;
+}
+
 function reportItem(doc: string, item: Item): number {
-  const why = item.reason !== undefined && REASON[item.reason] !== undefined ? `（${REASON[item.reason]}）` : "";
-  console.log(`${MARK[item.status]} ${doc}  ${targetKey(item.reference.target)}  ${LABEL[item.status]}${why}`);
+  console.log(`${MARK[item.status]} ${doc}  ${targetKey(item.reference.target)}  ${LABEL[item.status]}${detailOf(item)}`);
   return item.status === "missing" ? 1 : 0;
 }
 

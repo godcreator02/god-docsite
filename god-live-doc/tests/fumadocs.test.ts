@@ -5,11 +5,11 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import * as fumadocs from "@god-live-doc/format-fumadocs";
-import { DOT_COLOR, applyListing, defaultRoster, livedocMarkdownOptions, parseMetaString, parseTree, stamp, walk } from "@god-live-doc/format-fumadocs";
+import { DOT_COLOR, applyListing, defaultRoster, livedocMarkdownOptions, parseMetaString, parseTree, stamp, walk, whereOf } from "@god-live-doc/format-fumadocs";
 import type { Roster, TreeNode } from "@god-live-doc/format-fumadocs";
 import type { Item, Listing, Target } from "@god-live-doc/core";
 
-const T: Target = { file: "src/greet.ts", a: 2, b: 3 };
+const T: Target = { kind: "span", file: "src/greet.ts", a: 2, b: 3 };
 const CURRENT = ["export function greet(name: string): string {", "  return `hello ${name}`;"];
 const OLD = ["export function greet(name: string): string {", "  return `hi ${name}`;"];
 
@@ -62,7 +62,7 @@ test("有变动：diff 渲在同一块里，用 shiki 的 [!code --] / [!code ++
 test("没有行注释的语言：diff 退成一块 diff", () => {
   const changed = itemOf({
     status: "changed",
-    reference: { target: { file: "data.json", a: 1, b: 2 }, at: 0 },
+    reference: { target: { kind: "span", file: "data.json", a: 1, b: 2 }, at: 0 },
     diff: "  {\n-   \"a\": 1\n+   \"a\": 2",
   });
   const block = blocksIn('{/* ref file="data.json" lines="1-2" */}\n', [changed])[0]!;
@@ -78,11 +78,60 @@ test("缺失：显示文档写下时那段；没有旧内容就说没有", () =>
   assert.equal(blank.value, "（没有旧内容）");
 });
 
+test("整文件：标题只写文件名，行号从 1 起", () => {
+  const whole: Target = { kind: "file", file: "config.json" };
+  const block = blocksIn(`${fumadocs.marker(whole)}\n`, [itemOf({ reference: { target: whole, at: 0 }, lines: [1, 4], current: ["{", "}"] })])[0]!;
+  assert.equal(block.meta, 'title="config.json" lineNumbers=1 data-dot="green"');
+  assert.equal(block.lang, "json");
+});
+
+test("目录树：一块 text 清单、标题写几项；黄退成 diff 块；红说目录不在了", () => {
+  const tree: Target = { kind: "tree", dir: "src", depth: 1 };
+  const names = ["add.ts", "index.ts", "store.ts"];
+  const fresh = blocksIn(`${fumadocs.marker(tree)}\n`, [itemOf({ reference: { target: tree, at: 0 }, current: names, lines: [1, 3] })])[0]!;
+  assert.equal(fresh.lang, "text");
+  assert.equal(fresh.meta, 'title="src/ · 目录树 · 3 项" data-dot="green"');
+  assert.equal(fresh.value, names.join("\n"));
+
+  const changed = blocksIn(`${fumadocs.marker(tree)}\n`, [
+    itemOf({ reference: { target: tree, at: 0 }, status: "changed", current: [...names, "tag.ts"], lines: [1, 4], diff: "  add.ts\n  index.ts\n  store.ts\n+ tag.ts", old: names }),
+  ])[0]!;
+  assert.equal(changed.lang, "diff", "text 没有行注释语法，退成 diff 块");
+  assert.match(changed.value!, /^\+ tag\.ts$/m);
+
+  const gone = blocksIn(`${fumadocs.marker(tree)}\n`, [itemOf({ reference: { target: tree, at: 0 }, status: "missing", reason: "dir-missing", current: null })])[0]!;
+  assert.equal(gone.meta, 'title="src/ · 目录树 · 缺失" data-dot="red"');
+  assert.equal(gone.value, "（目录不在了）");
+});
+
+test("存在性和名字：一行芯片，meta 带 data-chip，标题就是芯片上的字", () => {
+  const absent: Target = { kind: "exists", path: "src/remove.ts", absent: true };
+  const has: Target = { kind: "has", file: "src/store.ts", text: "export function save" };
+  const text = `${fumadocs.marker(absent)}\n\n${fumadocs.marker(has)}\n`;
+  const blocks = blocksIn(text, [
+    itemOf({ reference: { target: absent, at: 0 }, current: [], lines: [1, 1] }),
+    itemOf({ reference: { target: has, at: 2 }, status: "missing", reason: "text-missing", current: null, lines: [1, 1] }),
+  ]);
+  assert.equal(blocks[0]!.meta, 'title="src/remove.ts · 不存在" data-dot="green" data-chip');
+  assert.equal(blocks[1]!.meta, 'title="src/store.ts · 有 export function save · 缺失" data-dot="red" data-chip');
+  const state = { containerFlow: () => "", containerPhrasing: () => "", handle: () => "不该到这儿" };
+  assert.equal(livedocMarkdownOptions().stringify(blocks[0], undefined, state, {}), "<!-- 来源 src/remove.ts · 不存在 · 新鲜 -->", "AI 那份只留来源行");
+});
+
+test("whereOf：标题和来源行用同一个字符串，五种目标各一种写法", () => {
+  const at = (target: Target, lines: [number, number] = [1, 1]) => whereOf(itemOf({ reference: { target, at: 0 }, lines }));
+  assert.equal(at(T, [7, 8]), "src/greet.ts:7-8");
+  assert.equal(at({ kind: "file", file: "config.json" }), "config.json");
+  assert.equal(at({ kind: "tree", dir: "src", depth: 2, glob: "*.ts" }), "src/ *.ts");
+  assert.equal(at({ kind: "exists", path: "a.ts", absent: false }), "a.ts · 存在");
+  assert.equal(at({ kind: "has", file: "a.ts", text: "x" }), "a.ts · 有 x");
+});
+
 test("四种状态各一种颜色：新鲜绿、有变动实心黄、未确认空心黄、缺失红", () => {
   assert.deepEqual(DOT_COLOR, { fresh: "green", changed: "yellow", unconfirmed: "unpinned", missing: "red" });
 });
 
-test("meta 白名单：认 title / lineNumbers / data-dot，别的一律不放行", () => {
+test("meta 白名单：认 title / lineNumbers / data-dot / data-chip，别的一律不放行", () => {
   assert.deepEqual(parseMetaString('title="来源" lineNumbers=7 data-dot="green"'), {
     title: "来源",
     "data-line-numbers": true,
@@ -91,6 +140,7 @@ test("meta 白名单：认 title / lineNumbers / data-dot，别的一律不放�
   });
   assert.deepEqual(parseMetaString('onclick="alert(1)" data-dot="red"'), { "data-dot": "red" });
   assert.deepEqual(parseMetaString("noCopy"), { allowCopy: "false" });
+  assert.deepEqual(parseMetaString('title="x" data-dot="green" data-chip'), { title: "x", "data-dot": "green", "data-chip": true });
 });
 
 test("md 那头：来源行 + 一块干净的代码，diff 标记不漏进 AI 那份", () => {

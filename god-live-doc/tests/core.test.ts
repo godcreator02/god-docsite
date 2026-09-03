@@ -6,6 +6,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import {
   createHashComparator,
+  createKindComparator,
   createService,
   draftOf,
   targetKey,
@@ -18,8 +19,25 @@ import { fakeFormat } from "./fake-format.ts";
 
 const CODE = ["// greet", "export function greet(name: string): string {", "  return `hello ${name}`;", "}", ""];
 
+/** 内存读取器：文件表就是全部世界。目录树按路径前缀算，存在性看表里有没有 */
 function memoryReader(files: Map<string, string[]>): Reader {
-  return { read: (file) => files.get(file) ?? null };
+  return {
+    read: (file) => files.get(file) ?? null,
+    list(dir, depth) {
+      const prefix = `${dir}/`;
+      const out = new Set<string>();
+      for (const path of files.keys()) {
+        if (!path.startsWith(prefix)) continue;
+        const parts = path.slice(prefix.length).split("/");
+        for (let i = 1; i <= Math.min(depth, parts.length); i += 1) out.add(parts.slice(0, i).join("/") + (i < parts.length ? "/" : ""));
+      }
+      return out.size === 0 ? null : [...out].sort();
+    },
+    kindOf(path) {
+      if (files.has(path)) return "file";
+      return [...files.keys()].some((p) => p.startsWith(`${path}/`)) ? "dir" : null;
+    },
+  };
 }
 
 function memoryLedger(): Ledger & { dump(): Record<string, Record<string, MemoRecord>> } {
@@ -95,7 +113,7 @@ test("一篇文档两个格式包都认领：报错，不靠顺序定胜负", ()
 
 test("resolveRefs：引用别人认好了也走同一条路，状态一样", () => {
   const { service } = setup();
-  const refs: Reference[] = [{ target: { file: "src/greet.ts", a: 2, b: 3 }, at: 0 }];
+  const refs: Reference[] = [{ target: { kind: "span", file: "src/greet.ts", a: 2, b: 3 }, at: 0 }];
   assert.deepEqual(service.resolveRefs(DOC, refs).items.map((i) => i.status), ["unconfirmed"]);
 });
 
@@ -141,19 +159,101 @@ test("草稿记号：核心认它、报未确认；确认后格式包换成正�
 
 test("草稿记号的哨兵：头尾 @@ 都在才算，载荷要过 toTarget", () => {
   const where = "第 1 行";
-  assert.deepEqual(draftOf("@@livedoc ref src/greet.ts:2-3 @@", where), { file: "src/greet.ts", a: 2, b: 3 });
-  assert.deepEqual(draftOf("   @@livedoc ref src/greet.ts:2-3 @@  ", where), { file: "src/greet.ts", a: 2, b: 3 });
+  assert.deepEqual(draftOf("@@livedoc ref src/greet.ts:2-3 @@", where), { kind: "span", file: "src/greet.ts", a: 2, b: 3 });
+  assert.deepEqual(draftOf("   @@livedoc ref src/greet.ts:2-3 @@  ", where), { kind: "span", file: "src/greet.ts", a: 2, b: 3 });
   assert.equal(draftOf("@@livedoc ref src/greet.ts:2-3", where), null, "少尾哨兵");
   assert.equal(draftOf("livedoc ref src/greet.ts:2-3 @@", where), null, "少头哨兵");
   assert.equal(draftOf("这句话里有 @@livedoc ref src/greet.ts:2-3 @@ 不算", where), null);
-  assert.equal(draftOf("@@livedoc tree src @@", where), null, "动作词只有 ref");
   assert.throws(() => draftOf("@@livedoc ref src/greet.ts:3-2 @@", where), /行号不合理/);
 });
 
 test("别家的记录：kind 对不上，比较器自己当没确认过，不猜；核心不看 kind", () => {
   const { ledger, service } = setup();
-  ledger.set(DOC, { file: "src/greet.ts", a: 2, b: 3 }, { kind: "别的", hash: "x" });
+  ledger.set(DOC, { kind: "span", file: "src/greet.ts", a: 2, b: 3 }, { kind: "别的", hash: "x" });
   assert.deepEqual(service.resolve(DOC, TEXT).items.map((i) => i.status), ["unconfirmed"]);
+});
+
+test("整文件：不写行号就是整个文件；末尾追加也算变", () => {
+  const { files, service } = setup();
+  const done = service.confirm(DOC, "REF src/greet.ts:all\n");
+  assert.deepEqual(done.problems, []);
+  assert.deepEqual(service.resolve(DOC, done.text).items.map((i) => [i.status, i.lines]), [["fresh", [1, 4]]]);
+  files.set("src/greet.ts", [...CODE.slice(0, -1), "export const NAME = 1;", ""]);
+  assert.deepEqual(service.resolve(DOC, done.text).items.map((i) => i.status), ["changed"]);
+});
+
+test("目录树：名字多了少了是黄带 diff、目录没了是红；按 kind 分派，记录存名字表", () => {
+  const { files, ledger, service } = setup(createKindComparator({ span: createHashComparator() }));
+  files.set("src/util.ts", ["export const a = 1;"]);
+  files.set("src/lib/deep.ts", ["x"]);
+  const done = service.confirm(DOC, "REF tree src depth=1\n");
+  assert.deepEqual(done.problems, []);
+  assert.deepEqual(ledger.dump()[DOC]!["tree src depth=1"], { kind: "tree", names: ["greet.ts", "lib/", "util.ts"] });
+  assert.deepEqual(service.resolve(DOC, done.text).items[0]!.current, ["greet.ts", "lib/", "util.ts"]);
+
+  files.set("src/tag.ts", ["t"]);
+  files.delete("src/util.ts");
+  const changed = service.resolve(DOC, done.text).items[0]!;
+  assert.equal(changed.status, "changed");
+  assert.match(changed.diff!, /^\+ tag\.ts$/m);
+  assert.match(changed.diff!, /^- util\.ts$/m);
+  assert.deepEqual(changed.old, ["greet.ts", "lib/", "util.ts"]);
+
+  for (const key of [...files.keys()]) if (key.startsWith("src/")) files.delete(key);
+  const gone = service.resolve(DOC, done.text).items[0]!;
+  assert.deepEqual([gone.status, gone.reason], ["missing", "dir-missing"]);
+
+  const deep = service.resolve(DOC, "REF tree src depth=2\n").items[0]!;
+  assert.equal(deep.status, "missing");
+});
+
+test("存在性：在就绿、没了红、类型变了红；absent 反过来，它出现了就红；两种都没有黄", () => {
+  const { files, service } = setup(createKindComparator({ span: createHashComparator() }));
+  const text = "REF exists src/greet.ts\n\nREF absent src/remove.ts\n\nREF exists src\n";
+  assert.deepEqual(service.resolve(DOC, text).items.map((i) => i.status), ["unconfirmed", "unconfirmed", "unconfirmed"]);
+  const done = service.confirm(DOC, text);
+  assert.deepEqual(done.problems, []);
+  assert.deepEqual(service.resolve(DOC, done.text).items.map((i) => i.status), ["fresh", "fresh", "fresh"]);
+
+  files.set("src/remove.ts", [""]);
+  files.delete("src/greet.ts");
+  files.set("src/greet.ts/index.ts", ["x"]);
+  const items = service.resolve(DOC, done.text).items;
+  assert.deepEqual(items.map((i) => [i.status, i.reason]), [["missing", "type-changed"], ["missing", "appeared"], ["fresh", undefined]]);
+
+  const refuse = service.confirm(DOC, "REF absent src/remove.ts\n");
+  assert.match(refuse.problems[0]!, /断言它不在，它却在/);
+});
+
+test("名字：文件里有这个字面量就绿，没了红；没有黄", () => {
+  const { files, service } = setup(createKindComparator({ span: createHashComparator() }));
+  const text = 'REF has src/greet.ts "export function greet"\n';
+  const done = service.confirm(DOC, text);
+  assert.deepEqual(done.problems, []);
+  const fresh = service.resolve(DOC, done.text).items[0]!;
+  assert.deepEqual([fresh.status, fresh.lines], ["fresh", [2, 2]]);
+  files.set("src/greet.ts", CODE.map((l) => l.replace("greet(", "hello(")));
+  assert.deepEqual(service.resolve(DOC, done.text).items.map((i) => [i.status, i.reason]), [["missing", "text-missing"]]);
+  assert.match(service.confirm(DOC, text).problems[0]!, /文件里没有这个名字/);
+});
+
+test("草稿记号的五种写法，和记录簿键的来回", () => {
+  const where = "第 1 行";
+  const cases: Array<[string, Target]> = [
+    ["@@livedoc ref config.json @@", { kind: "file", file: "config.json" }],
+    ["@@livedoc tree src @@", { kind: "tree", dir: "src", depth: 1 }],
+    ["@@livedoc tree src/ depth=2 glob=*.test.ts @@", { kind: "tree", dir: "src", depth: 2, glob: "*.test.ts" }],
+    ["@@livedoc exists src/store.ts @@", { kind: "exists", path: "src/store.ts", absent: false }],
+    ["@@livedoc absent src/remove.ts @@", { kind: "exists", path: "src/remove.ts", absent: true }],
+    ['@@livedoc has src/store.ts "export function save" @@', { kind: "has", file: "src/store.ts", text: "export function save" }],
+    ["@@livedoc has src/a:b.ts save @@", { kind: "has", file: "src/a:b.ts", text: "save" }],
+  ];
+  for (const [line, target] of cases) {
+    assert.deepEqual(draftOf(line, where), target, line);
+    assert.deepEqual(keyToTarget(targetKey(target)), target, targetKey(target));
+  }
+  assert.equal(targetKey({ kind: "has", file: "a.ts", text: 'say("hi")' }), 'has a.ts "say(\\"hi\\")"');
+  assert.equal(draftOf("@@livedoc probe src @@", where), null, "动作词不认识");
 });
 
 test("hash 比较器滑窗跟行段：代码整体下移，绿、带新行号；确认后记号写回新行段", () => {
@@ -206,7 +306,7 @@ test("归一化：LF、去行尾空白、去末尾空行；缩进和注释留着
 });
 
 test("键和目标是一对：文件名里带冒号也认得回来", () => {
-  const t: Target = { file: "src/a:b.ts", a: 2, b: 3 };
+  const t: Target = { kind: "span", file: "src/a:b.ts", a: 2, b: 3 };
   assert.equal(targetKey(t), "src/a:b.ts:2-3");
   assert.deepEqual(keyToTarget(targetKey(t)), t);
 });

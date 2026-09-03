@@ -8,10 +8,13 @@
  * 引用的身份 = 文档 + 引用写的目标；同一篇里指向同一段的两处引用共用一条记录。
  * 记录带 kind，核心不看它：认不认这条记录是比较器的事（别家的记录交回「未确认」，不猜）——
  * 一个项目里 git 记录和 hash 记录可以并存，按记录的 kind 转发的是 project 里的 auto 比较器。
+ *
+ * 核心不碰磁盘：每种目标要看的东西（观察）由读取器给——行段 / 整文件 / 名字是文件的行，目录树是名字表，
+ * 存在性是类型；比较器只吃观察。
  */
 
 import { sliceSpan } from "./span.ts";
-import { targetKey } from "./types.ts";
+import { fileOf, targetKey } from "./types.ts";
 import type { Comparator, Fill, Format, Item, Ledger, Listing, MemoRecord, Reader, Reference, Span, Target } from "./types.ts";
 
 export interface ConfirmResult {
@@ -42,6 +45,34 @@ export interface ServiceDeps {
   comparator: Comparator;
 }
 
+/** 目标的观察：行段 / 整文件 / 名字看文件的行，目录树看名字表，存在性看类型 */
+function observe(reader: Reader, target: Target): string[] | null {
+  if (target.kind === "tree") return reader.list?.(target.dir, target.depth, target.glob) ?? null;
+  if (target.kind === "exists") {
+    const type = reader.kindOf?.(target.path) ?? null;
+    return type === null ? null : [type];
+  }
+  return reader.read(fileOf(target)!);
+}
+
+/** 观察的键：同一次核对里同一样东西只看一遍 */
+function observeKey(target: Target): string {
+  if (target.kind === "tree") return `tree ${target.dir} ${target.depth} ${target.glob ?? ""}`;
+  if (target.kind === "exists") return `exists ${target.path}`;
+  return `file ${fileOf(target)}`;
+}
+
+/**
+ * 这一处「当前是什么」：行段 / 整文件切那几行，目录树是名字表，名字没有展示内容；
+ * 存在性没有内容可言（absent 断言成立时观察本来就是空的），一律给空表，在不在由判定说
+ */
+function currentOf(target: Target, text: string[] | null, lines: Span): string[] | null {
+  if (target.kind === "span" || target.kind === "file") return sliceSpan(text, lines);
+  if (target.kind === "has") return text === null ? null : [];
+  if (target.kind === "exists") return [];
+  return text;
+}
+
 export function createService({ formats, reader, ledger, comparator }: ServiceDeps): Service {
   /** 一篇文档只能有一个格式包认领；两个都认领是配置错误，报出来而不是靠顺序静默定胜负 */
   function formatFor(doc: string): Format | null {
@@ -58,24 +89,25 @@ export function createService({ formats, reader, ledger, comparator }: ServiceDe
     return format;
   }
 
-  /** 一次核对里同一个文件只读一遍 */
-  function readerCache(): (file: string) => string[] | null {
+  function observerCache(): (target: Target) => string[] | null {
     const cache = new Map<string, string[] | null>();
-    return (file) => {
-      if (!cache.has(file)) cache.set(file, reader.read(file));
-      return cache.get(file) ?? null;
+    return (target) => {
+      const key = observeKey(target);
+      if (!cache.has(key)) cache.set(key, observe(reader, target));
+      return cache.get(key) ?? null;
     };
   }
 
   function resolveRefs(doc: string, references: Reference[]): Listing {
-    const read = readerCache();
+    const look = observerCache();
     const seen = new Set<string>();
     const items: Item[] = references.map((reference) => {
-      const text = read(reference.target.file);
-      const record = ledger.get(doc, reference.target);
-      const judged = comparator.judge(record, reference.target, text);
-      seen.add(targetKey(reference.target));
-      const current = judged.status === "missing" ? null : sliceSpan(text, judged.lines);
+      const target = reference.target;
+      const text = look(target);
+      const record = ledger.get(doc, target);
+      const judged = comparator.judge(record, target, text);
+      seen.add(targetKey(target));
+      const current = judged.status === "missing" ? null : currentOf(target, text, judged.lines);
       const item: Item = { doc, reference, current, record, status: judged.status, lines: judged.lines };
       if (judged.reason !== undefined) item.reason = judged.reason;
       if (judged.diff !== undefined) item.diff = judged.diff;
@@ -100,26 +132,26 @@ export function createService({ formats, reader, ledger, comparator }: ServiceDe
 
   /**
    * 确认：先让比较器逐条出记录，**有一处出 problem 就整篇拒**——一条都不写，记录簿和文档都不动。
-   * 记录按「今天的行段」记：判定跟到哪儿就钉到哪儿，引用的键跟着换，旧键当孤儿一并清掉。
+   * 行段按「今天的行段」记：判定跟到哪儿就钉到哪儿，引用的键跟着换，旧键当孤儿一并清掉。
    */
   function confirm(doc: string, text: string): ConfirmResult {
     const format = needFormat(doc);
     const listing = resolve(doc, text);
-    const read = readerCache();
+    const look = observerCache();
     const problems: string[] = [];
     const pending: Array<{ target: Target; record: MemoRecord; fill: Fill }> = [];
 
     for (const item of listing.items) {
-      const file = item.reference.target.file;
-      const lines: Span = item.status === "missing" ? [item.reference.target.a, item.reference.target.b] : item.lines;
-      const target: Target = { file, a: lines[0], b: lines[1] };
-      const fileLines = read(file);
-      const snapshot = comparator.snapshot(target, fileLines);
+      const was = item.reference.target;
+      const target: Target =
+        was.kind === "span" && item.status !== "missing" ? { kind: "span", file: was.file, a: item.lines[0], b: item.lines[1] } : was;
+      const seen = look(target);
+      const snapshot = comparator.snapshot(target, seen);
       if ("problem" in snapshot) {
         problems.push(`${doc} 第 ${item.reference.at + 1} 行：${snapshot.problem}`);
         continue;
       }
-      const current = sliceSpan(fileLines, lines);
+      const current = currentOf(target, seen, target.kind === "span" ? [target.a, target.b] : item.lines);
       if (current === null) {
         problems.push(`${doc} 第 ${item.reference.at + 1} 行：${targetKey(target)} 切不出内容`);
         continue;
