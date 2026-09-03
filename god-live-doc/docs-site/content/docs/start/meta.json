@@ -1,0 +1,6 @@
+{
+  "title": "入门",
+  "description": "它解决什么、怎么用、一条引用的一生",
+  "root": true,
+  "pages": ["index", "requirements", "quickstart", "lifecycle"]
+}

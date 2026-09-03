@@ -37,9 +37,25 @@ async function pageOf(doc) {
 const pages = new Map();
 for (const doc of DOCS) pages.set(doc, await pageOf(doc));
 
-test("站里得有文档、每篇得有引用，不然下面几条什么也没验", () => {
+/** 一篇文档对钉源码的态度：frontmatter 里 `livedoc: none`（导读页，明说不钉）或 `livedoc: draft`（还没写）；没写就是「必须钉」 */
+const stanceOf = (doc) => /^livedoc:\s*(none|draft)\s*$/m.exec(project.read(doc).split("---")[1] ?? "")?.[1];
+
+test("站里得有文档；每篇要么钉了源码，要么 frontmatter 明说 livedoc: none 或 draft", () => {
   assert.ok(DOCS.length >= 3, `至少三篇，实际 ${DOCS.length}`);
-  for (const [doc, page] of pages) assert.ok(page.listing.items.length > 0, `${doc} 一处引用都没有`);
+  const drafts = [];
+  for (const [doc, page] of pages) {
+    const stance = stanceOf(doc);
+    if (stance === "draft") {
+      drafts.push(doc);
+      continue;
+    }
+    if (stance === "none") {
+      assert.equal(page.listing.items.length, 0, `${doc} 说自己不钉源码，却有引用`);
+      continue;
+    }
+    assert.ok(page.listing.items.length > 0, `${doc} 一处引用都没有：钉源码，或在 frontmatter 写 livedoc: none / draft`);
+  }
+  if (drafts.length > 0) console.log(`还没写的章（livedoc: draft）：${drafts.join("、")}`);
 });
 
 test("每条引用在页面上都有一个 pre，带着状态点的颜色和写着来源的标题", () => {

@@ -1,0 +1,6 @@
+{
+  "title": "格式与站",
+  "description": "md、html、fumadocs 三个格式包，名册，站接线手册",
+  "root": true,
+  "pages": ["index", "formats", "fumadocs", "roster", "wiring"]
+}

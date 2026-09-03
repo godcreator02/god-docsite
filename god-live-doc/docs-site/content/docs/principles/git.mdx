@@ -1,0 +1,16 @@
+---
+title: git 原理
+description: 记忆是 HEAD 的 blob；变没变、变到哪，用 git 的 hunk 表算；站展示什么就哈希什么
+livedoc: draft
+---
+
+# git 原理
+
+（待写。本章钉：`../packages/project/src/git.ts` 的 headBlob、diffHunks，`../packages/core/src/…` 的 mapRange、normalize、hashSpan，`../packages/project/src/git-comparator.ts` 的 snapshot 与 judge。）
+
+- 为什么记 blob 不记内容：被提交树引着不会被 gc，仓里不存第二份。
+- 只对已提交内容确认的门：在 HEAD 里、工作区干净。
+- hunk 表与行段跟随：没碰到平移、碰到取并集、删光 vanished。
+- 归一化与段哈希：LF、去行尾空白、去末尾空行；展示什么就哈希什么。
+- 红的原因：file-missing、vanished、blob-missing、stale-pin。
+- 仓根是 git 子目录时路径怎么翻。

@@ -1,0 +1,14 @@
+---
+title: 原理
+description: 想懂它为什么这么做的人读这一部分：git 记忆、四层包、比较器、记号两态
+livedoc: none
+---
+
+# 原理
+
+四章：
+
+1. [git 原理](/docs/principles/git)：为什么记 blob 不记内容，行段怎么跟着代码走，归一化与段哈希，红的几种原因。
+2. [模块拆分](/docs/principles/modules)：四层包与依赖方向，核心零依赖，核心从外面拿的三样，两个入口。
+3. [比较器](/docs/principles/comparator)：接口两个方法，git 版与 hash 版，记录带 kind，整篇拒。
+4. [记号](/docs/principles/markers)：草稿记号与正式记号，确认时的转换，`parse(marker(t))` 契约。
