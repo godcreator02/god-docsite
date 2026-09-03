@@ -4,7 +4,7 @@
  * loadProject(root) 把这些串起来交出一个核心服务；同一个根只装配一次（站构建时几十个 loader 并发调它）。
  */
 import { existsSync, readFileSync, readdirSync, statSync, writeFileSync } from "node:fs";
-import { join, relative, resolve, sep } from "node:path";
+import { isAbsolute, join, relative, resolve, sep } from "node:path";
 import { pathToFileURL } from "node:url";
 import { createHashComparator, createKindComparator, createService } from "@god-live-doc/core";
 import type { Comparator, Format, Service } from "@god-live-doc/core";
@@ -26,6 +26,8 @@ export interface ProjectConfig {
   comparator?: "auto" | "git" | "hash" | Comparator;
   /** 组件名册（压平规则），格式包用；没声明就用格式包的默认表 */
   components?: Record<string, unknown>;
+  /** 渲染产物的摆放：文档路径（正斜杠，同记录簿的键）→ 目标路径数组（相对项目根，可以出根）。挂了映射的文档 render --target ai 只写目标，不落 out/ */
+  outputs?: Record<string, string[]>;
   /** fumadocs 格式包的私货：集合名 */
   fumadocs?: { collection?: string };
 }
@@ -88,6 +90,25 @@ async function build(root: string): Promise<Project> {
     comparator: comparatorOf(config, root),
   });
   const docsDir = join(root, config.docs ?? "docs");
+
+  // 摆放映射的地盘规则：目标相对项目根、不落进文档目录（那是源的地盘）、一个目标只许一个文档写
+  const claimed = new Map<string, string>();
+  for (const [doc, targets] of Object.entries(config.outputs ?? {})) {
+    if (!Array.isArray(targets) || targets.length === 0 || targets.some((to) => typeof to !== "string" || to === "")) {
+      throw new Error(`outputs 的 ${doc}：目标得是非空的相对路径数组`);
+    }
+    for (const to of targets) {
+      if (isAbsolute(to)) throw new Error(`outputs 的 ${doc} → ${to}：目标得相对项目根，绝对路径不认`);
+      const rel = relative(root, resolve(root, to));
+      const relDocs = relative(root, docsDir);
+      if (rel === relDocs || rel.startsWith(relDocs + sep)) {
+        throw new Error(`outputs 的 ${doc} → ${to}：目标落进了文档目录，那是源文件的地盘`);
+      }
+      const owner = claimed.get(to);
+      if (owner !== undefined) throw new Error(`outputs 的 ${owner} 和 ${doc} 都往 ${to} 摆——一个目标只许一个文档写`);
+      claimed.set(to, doc);
+    }
+  }
 
   function walk(dir: string, out: string[] = []): string[] {
     if (!existsSync(dir)) return out;

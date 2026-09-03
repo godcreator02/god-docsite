@@ -1,15 +1,15 @@
 /**
  * livedoc 的三个动作，编排在这儿。可执行那一头在 cli.ts——测试直接调 main，不用起子进程。
  * cwd 就是项目根（那里有 livedoc.config.mjs）。
- *   livedoc check                          核对：只读，红退 1
+ *   livedoc check                          核对：只读，红退 1；挂了 outputs 映射的文档顺手守生成物新鲜度
  *   livedoc confirm                        确认：出记录、清孤儿、写回文档；有钉不住的整篇拒，打印并退 1
  *                                          文档本身删了、挪了的，它的记录 check 算红、confirm 整个忘掉
- *   livedoc render --target human|ai       渲染：问格式包有没有对应的渲染函数，产物落 out/
+ *   livedoc render --target human|ai       渲染：产物落 out/；挂了 outputs 映射的 ai 产物摆到指定目标（不再落 out/）
  * 新引用不用命令：在文档里写一行核心定的草稿记号 @@livedoc ref src/greet.ts:2-3 @@，
  * check 认它、报未确认，confirm 换成该格式的正式记号。
  */
-import { mkdirSync, writeFileSync } from "node:fs";
-import { join } from "node:path";
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { dirname, join } from "node:path";
 import { targetKey } from "@god-live-doc/core";
 import type { Format, Item, Listing } from "@god-live-doc/core";
 import { loadProject } from "@god-live-doc/project";
@@ -34,6 +34,8 @@ const REASON: Record<string, string> = {
 };
 /** 确认时拿到的是哪种记忆：hash 是弱记忆（没有旧内容、变了就找不着），写手得知道 */
 const MEMORY: Record<string, string> = { hash: "（hash 记忆：不在 git 里）" };
+/** fumadocs 给站上 .md 路由的标题加的锚记（`# 标题 [#锚]`），摆放产物不要 */
+const ANCHOR = /^(#{1,6} .+) \[#[^\]]*\]$/gm;
 
 export async function main(argv: string[]): Promise<number> {
   const [command = "check", ...rest] = argv;
@@ -51,7 +53,7 @@ export async function main(argv: string[]): Promise<number> {
     const text = project.read(doc);
     const format = project.service.formatFor(doc)!;
 
-    if (command === "check") red += check(project, doc, text, format);
+    if (command === "check") red += await check(project, doc, text, format);
     else if (command === "confirm") red += confirm(project, doc, text);
     else red += await render(project, doc, text, format, target);
   }
@@ -69,6 +71,18 @@ export async function main(argv: string[]): Promise<number> {
 }
 
 type Project = Awaited<ReturnType<typeof loadProject>>;
+
+/** 摆放那份的渲染：问格式包要 ai 产物，再剥掉站上 .md 路由的锚记——README / AGENTS.md 不带那种形态 */
+async function renderPlaced(project: Project, doc: string, text: string, format: Format): Promise<string> {
+  const listing = project.service.resolve(doc, text);
+  const out = await format.renderAi!(text, listing, {
+    root: project.root,
+    doc,
+    roster: project.roster,
+    config: project.config as unknown as Record<string, unknown>,
+  });
+  return out.replace(ANCHOR, "$1");
+}
 
 /** 一行说明后面的括号：红的理由，目录树的项数或多了少了哪些 */
 function detailOf(item: Item): string {
@@ -89,7 +103,7 @@ function reportItem(doc: string, item: Item): number {
   return item.status === "missing" ? 1 : 0;
 }
 
-function check(project: Project, doc: string, text: string, format: Format): number {
+async function check(project: Project, doc: string, text: string, format: Format): Promise<number> {
   const listing: Listing = project.service.resolve(doc, text);
   let red = 0;
   for (const item of listing.items) red += reportItem(doc, item);
@@ -101,6 +115,30 @@ function check(project: Project, doc: string, text: string, format: Format): num
     for (const { name, line } of format.lintComponents(text, project.roster)) {
       console.log(`🔴 ${doc}  第 ${line} 行 <${name}>  名册外组件，livedoc.config.mjs 里没给它压平规则`);
       red += 1;
+    }
+  }
+  return red + (await checkPlaced(project, doc, text, format));
+}
+
+/** 摆放目标的守门：内存里重渲染一遍跟盘上比。目标不在、内容不一致都红——mdx 源改了没重摆、有人直接改了生成物，都算 */
+async function checkPlaced(project: Project, doc: string, text: string, format: Format): Promise<number> {
+  const targets = project.config.outputs?.[doc];
+  if (targets === undefined || typeof format.renderAi !== "function") return 0;
+  const placed = await renderPlaced(project, doc, text, format);
+  let red = 0;
+  for (const to of targets) {
+    const abs = join(project.root, to);
+    if (!existsSync(abs)) {
+      console.log(`🔴 ${doc} → ${to}  生成物还不存在——render 摆过去`);
+      red += 1;
+      continue;
+    }
+    const disk = readFileSync(abs, "utf8").replace(/\r\n/g, "\n");
+    if (disk !== placed) {
+      console.log(`🔴 ${doc} → ${to}  生成物跟 mdx 源不一致（源改了没重摆，或有人直接改了生成物）——重跑 render`);
+      red += 1;
+    } else {
+      console.log(`🟢 ${doc} → ${to}  生成物跟 mdx 源一致`);
     }
   }
   return red;
@@ -135,6 +173,18 @@ async function render(project: Project, doc: string, text: string, format: Forma
     return 0;
   }
   const listing = project.service.resolve(doc, text);
+  const placing = target === "ai" ? project.config.outputs?.[doc] : undefined;
+  if (placing !== undefined) {
+    // 挂了映射的文档只写目标：目标是纯生成物，render 直接覆盖；没挂映射的才落 out/ 当调试产物
+    const placed = await renderPlaced(project, doc, text, format);
+    for (const to of placing) {
+      const abs = join(project.root, to);
+      mkdirSync(dirname(abs), { recursive: true });
+      writeFileSync(abs, placed);
+      console.log(`→  ${doc}  摆放到 ${to}`);
+    }
+    return 0;
+  }
   const outDir = join(project.root, project.config.out ?? "out");
   mkdirSync(outDir, { recursive: true });
   const outName = `${doc.split("/").pop()}.${target === "ai" ? "ai.md" : "html"}`;
