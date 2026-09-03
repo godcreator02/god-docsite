@@ -36,6 +36,9 @@ fumadocs 在格式包里只是 peer——用你项目里装的那份，包自己
   所以记号里写的是 `../packages/…`。
 </Note>
 
+目录树引用注入的是 fumadocs 自己的 `Files` / `Folder` / `File`，`mdx.tsx` 的组件表里要有它们（从
+`fumadocs-ui/components/files` 拿），压平规则在格式包的默认名册里已经带了。
+
 ## 三、站侧接线一个文件
 
 `source.config.ts` 里两处：remark 链尾巴挂插件（顺带把 `data-dot` 加进 meta 白名单），

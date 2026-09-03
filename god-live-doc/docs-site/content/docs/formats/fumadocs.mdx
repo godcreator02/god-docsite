@@ -59,11 +59,11 @@ fumadocs 的 `rehypeCode` 只放行白名单里的 meta，别的一律丢掉。�
 
 颜色表在这儿——有变动和未确认同是黄，站上靠实心 / 空心区分：
 
-{/* ref file="../packages/format-fumadocs/src/blocks.ts" lines="19-23" */}
+{/* ref file="../packages/format-fumadocs/src/blocks.ts" lines="21-25" */}
 
 一处引用变成一块代码，四种状态各一种长相：
 
-{/* ref file="../packages/format-fumadocs/src/blocks.ts" lines="139-151" */}
+{/* ref file="../packages/format-fumadocs/src/blocks.ts" lines="206-218" */}
 
 - **绿 / 白**：一块当前段，`lineNumbers` 从今天的起始行起，行号跟源文件对得上；白的标题后面缀「· 未确认」。
 - **黄**：不另起一块「当前段」，而是把核心出的 `- / +` 文本换成 shiki 原生的增删行标记
@@ -75,6 +75,21 @@ fumadocs 的 `rehypeCode` 只放行白名单里的 meta，别的一律丢掉。�
 - **红**：显示从记忆里取回的旧段，标题写「文档写下时这段是」。
 
 标题一律写**今天的位置**：行段跟随之后，记号上那几行可能已经不是这段了。
+
+## 目录树：fumadocs 自己的文件树
+
+目录树不是代码块，换成的是 fumadocs 自己的 `<Files>` / `<Folder>` / `<File>`——这就是 mdx 比 md 多出来的那点意义：
+格式包能往树上放真组件。根是一个展开的文件夹，名字叫这处的来源，下面按路径切成嵌套；到深度尽头、没孩子的子目录禁用。
+容器带 `data-livedoc="tree"` 和 `data-dot`，样式表在右上角画同一颗状态点——作者手写的 `<Files>` 没这两个属性，一个像素不多。
+
+{/* ref file="../packages/format-fumadocs/src/blocks.ts" lines="169-185" */}
+
+黄的时候旧表新表并在一棵树里，多的项标 `livedoc-add`（绿）、少的标 `livedoc-del`（红字划掉）；红只剩一个禁用的根文件夹，
+里面一行「目录不在了」。AI 那份的标在注入时直接打好（来源行加一块 text 清单），`stamp` 看到带标的节点就跳过、不往里走，
+不去名册里找 `Files`。作者自己手写的 `<Files>` 走默认名册，压成一行一个名字，文件夹带尾斜杠。站里要把这三个组件
+注册进 mdx 组件表，见 [站接线手册](/docs/formats/wiring)。
+
+存在性和名字没有代码可摆，渲成一行芯片：还是 `code` 节点，meta 里多一个 `data-chip`，站的 pre 组件看到它就不画代码块。
 
 ## 状态点：站侧的 pre 组件
 
@@ -91,7 +106,7 @@ fumadocs 的 `rehypeCode` 只放行白名单里的 meta，别的一律丢掉。�
 
 ## 给 AI 那份 md：一个序列化回调
 
-{/* ref file="../packages/format-fumadocs/src/markdown.ts" lines="24-44" */}
+{/* ref file="../packages/format-fumadocs/src/markdown.ts" lines="24-46" */}
 
 fumadocs 序列化每个节点前先问这个回调；看到我们打的标就按标出，没标的交回 `undefined` 让它照默认走。
 两种标：组件的 `livedocAi`（一组替换节点，交给它的状态机接着序列化，嵌套组件顺着走），

@@ -61,7 +61,7 @@ export default {
 | 格式 | 正式记号 | 展示区 |
 | --- | --- | --- |
 | md | `<!-- ref … -->` … `<!-- /ref -->`（目录树是 `<!-- tree … -->` … `<!-- /tree -->`） | 行段 / 整文件 / 目录树有围栏；存在性、名字只有记号一行 |
-| mdx | `{/* ref … */}`、`{/* tree … */}`、`{/* exists … */}`、`{/* has … */}` | 没有，build 时现拿；存在性、名字渲成一行芯片 |
+| mdx | `{/* ref … */}`、`{/* tree … */}`、`{/* exists … */}`、`{/* has … */}` | 没有，build 时现拿；目录树渲成 fumadocs 的 `Files` 文件树，存在性、名字渲成一行芯片 |
 | html | `<pre data-file=… data-lines=…>`、`<pre data-tree=…>`、`<code data-exists=…>`、`<code data-has=… data-file=…>` | 元素本身 |
 
 **记号上的行号不用人维护**：代码挪了位置，下次 `confirm` 会把它改写成今天的位置，记录簿里的旧键当孤儿清掉。
@@ -84,11 +84,13 @@ export default defineConfig({
 });
 ```
 
-`src/components/mdx.tsx` 里把 `pre` 换成会画状态点的那个：
+`src/components/mdx.tsx` 里把 `pre` 换成会画状态点的那个，再注册 fumadocs 自己的文件树三件（目录树引用注入的就是它们）：
 
 ```tsx
 import { LivedocPre } from '@god-live-doc/format-fumadocs/pre';
+import { File, Files, Folder } from 'fumadocs-ui/components/files';
 // …
+Files, Folder, File,
 pre: LivedocPre as unknown as NonNullable<MDXComponents['pre']>,
 ```
 
@@ -128,7 +130,7 @@ pnpm livedoc render --target ai       # 出给 AI 读的那份 md，落 out/
 | --- | --- | --- | --- |
 | 行段 | 那几行内容变了（挪了位置不算，跟得住） | 带 diff | 整段删光、文件没了 |
 | 整文件 | 文件任何一处变了，包括末尾追加 | 整份 diff | 文件没了 |
-| 目录树 | 名字多了少了（不看内容，按 .gitignore 过滤） | `- / +` 名字 | 目录没了 |
+| 目录树 | 名字多了少了（不看内容，按 .gitignore 过滤）；站上是 fumadocs 的文件树 | 多的绿、少的划掉 | 目录没了 |
 | 存在 / 断言不在 | 没有黄 | — | 没了、文件和目录换了个、断言不在却出现了 |
 | 名字 | 没有黄；纯文本匹配，写全（`export function save`） | — | 文件里找不到了 |
 

@@ -96,7 +96,8 @@ test("组件由 React 表画，没有裸 JSX 漏到页面", () => {
     for (const name of componentNames) {
       assert.doesNotMatch(page.html, new RegExp(`<${name}[\\s>]`), `${doc}：<${name}> 漏成了裸标签`);
     }
-    assert.doesNotMatch(page.mod._markdown, /<Files|<Folder|<File[\s>]/, `${doc}：文件树没被压平`);
+    // 正文里反引号包着的 `<Files>` 是在讲它，不算；带属性的真标签才是没压平
+    assert.doesNotMatch(page.mod._markdown, /<Files className=|<Folder name=|<File name=/, `${doc}：文件树没被压平`);
   }
   const all = [...pages.values()].map((p) => p.html).join("");
   assert.match(all, /data-component="Note"/);
