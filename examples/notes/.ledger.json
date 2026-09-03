@@ -1,0 +1,43 @@
+{
+  "docs/handbook.mdx": {
+    "tree src depth=1": {
+      "kind": "tree",
+      "names": [
+        "add.ts",
+        "index.ts",
+        "list.ts",
+        "store.ts"
+      ]
+    },
+    "config.json:all": {
+      "kind": "git",
+      "blob": "c7afc6a4c5d7a20dca883052fc7d6103e1c9eeb0",
+      "commit": "4afdeb41f302a2443e60fe2e58e33ea043a893b0",
+      "lines": [
+        1,
+        4
+      ],
+      "hash": "49b60f4376559d53646dbd6476982e1328218ad8c8520e9816ea5a6c1203a9f6"
+    },
+    "has src/store.ts \"export function load\"": {
+      "kind": "has"
+    },
+    "has src/store.ts \"export function save\"": {
+      "kind": "has"
+    },
+    "src/store.ts:16-19": {
+      "kind": "git",
+      "blob": "6f097eaf040950bc303ae96c2f206dff34bac276",
+      "commit": "4afdeb41f302a2443e60fe2e58e33ea043a893b0",
+      "lines": [
+        16,
+        19
+      ],
+      "hash": "4b9a1a94b07cd62addfa7723386f717acef0dc1ae8cc2a30a7b8ca7f8193702f"
+    },
+    "absent src/remove.ts": {
+      "kind": "exists",
+      "type": "absent"
+    }
+  }
+}

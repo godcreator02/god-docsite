@@ -7,7 +7,7 @@ description: 命令行记事本怎么搭、配置有哪些、存储怎么做、�
 
 ## 项目长什么样
 
-@@livedoc tree src @@
+{/* tree dir="src" depth="1" */}
 
 四个文件各管一件事：index 解析命令行，add 和 list 是两条子命令，store 负责读写 notes.json。
 加一条子命令就是加一个文件，再在 index 里注册一下。
@@ -16,7 +16,7 @@ description: 命令行记事本怎么搭、配置有哪些、存储怎么做、�
 
 程序启动时读根目录的 config.json，全部配置就这几项：
 
-@@livedoc ref config.json @@
+{/* ref file="config.json" */}
 
 `file` 是记事存在哪儿，`dateFormat` 是列表里日期怎么显示。
 
@@ -24,13 +24,13 @@ description: 命令行记事本怎么搭、配置有哪些、存储怎么做、�
 
 所有读写都走 store.ts 的 load 和 save，别的文件不许自己碰 notes.json：
 
-@@livedoc has src/store.ts "export function load" @@
+{/* has file="src/store.ts" text="export function load" */}
 
-@@livedoc has src/store.ts "export function save" @@
+{/* has file="src/store.ts" text="export function save" */}
 
 save 每次把整个文件重写一遍，不是追加：
 
-@@livedoc ref src/store.ts:16-19 @@
+{/* ref file="src/store.ts" lines="16-19" */}
 
 所以 notes.json 永远是一份完整的 JSON，中途断电最多丢这一次的改动。
 
@@ -38,6 +38,6 @@ save 每次把整个文件重写一遍，不是追加：
 
 没有删除命令。早期有过 src/remove.ts，因为误删太容易，后来去掉了：
 
-@@livedoc absent src/remove.ts @@
+{/* absent path="src/remove.ts" */}
 
 以后要加删除，先做回收站，别直接删。
