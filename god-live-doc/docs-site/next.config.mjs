@@ -15,6 +15,11 @@ const config = {
     '@god-live-doc/project',
     '@god-live-doc/core',
   ],
+  // 没有根外的页：站首页和 /docs 都直接进「入门」那个根
+  redirects: async () => [
+    { source: '/', destination: '/docs/start', permanent: true },
+    { source: '/docs', destination: '/docs/start', permanent: true },
+  ],
 };
 
 export default withMDX(config);
