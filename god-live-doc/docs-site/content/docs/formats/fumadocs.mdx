@@ -1,9 +1,114 @@
 ---
 title: fumadocs 格式包
 description: mdx 与 fumadocs 是一个整体：三个插头、插件流程、序列化回调、状态点组件、diff 渲在同一块、借 loader 出 md
-livedoc: draft
 ---
 
 # fumadocs 格式包
 
-（待写。本章钉：`livedocMdxOptions`、`livedocMarkdownOptions`、remark 插件主体、pre 组件、diffBlock。命令行与站是同一条管线的两个调用方。）
+这一章回答：mdx 那一份为什么不是「又一个格式包」，而是一整套站接线——它往 fumadocs 上插三个插头，
+再把状态一路带到页面上的那个小圆点。
+
+**换宿主就是换这一个包**：核心、project、命令行、别的格式包，一个都不认识 fumadocs。
+
+## 三个插头
+
+<Tabs>
+  <Tab title="mdxOptions">
+    `livedocMdxOptions({ root })` 挂进 `source.config.ts`：remark 链**尾巴**上挂插件，
+    顺带把 `data-dot` 加进 rehype 的 meta 白名单。
+  </Tab>
+  <Tab title="postprocess">
+    `livedocMarkdownOptions()` 挂进集合的 `postprocess.includeProcessedMarkdown`：
+    fumadocs 序列化 md 时认我们在树上打的标。
+  </Tab>
+  <Tab title="pre 组件">
+    `@god-live-doc/format-fumadocs/pre` 覆盖 `mdx.tsx` 里的 `pre`，外加一份随包发的 css。
+  </Tab>
+</Tabs>
+
+{/* ref file="../packages/format-fumadocs/src/host.ts" lines="44-53" */}
+
+挂在链尾是有讲究的：前面是 fumadocs 自己的 `remarkInclude` 和一整套预设（标题 id、gfm……），
+后面就是它自己的 postprocess——插件看到的是一棵已经归置好的树。接线怎么写，见
+[站接线手册](/docs/formats/wiring)。
+
+## meta 白名单：只多认一个字段
+
+fumadocs 的 `rehypeCode` 只放行白名单里的 meta，别的一律丢掉。所以状态点的颜色要走一个自己的字段，
+并且把这张表整个换掉：
+
+{/* ref file="../packages/format-fumadocs/src/host.ts" lines="27-27" */}
+
+跟 fumadocs 的默认白名单同形，只多一个 `data-dot`。值一律带引号——它的 meta 解析器只认
+`key="字符串"` / `key=数字` / 裸 `key` 三种，裸单词会被解析成 `null`。
+
+## 插件流程：四步，一步一件事
+
+{/* ref file="../packages/format-fumadocs/src/remark-plugin.ts" lines="22-28" */}
+
+1. **认**：`recognize` 在 mdast 上找引用——正式记号是顶层的 `mdxFlowExpression`，草稿记号是单独成段的
+   一行普通文字。围栏里、行内的同样文字分别是 `code` 和 `mdxTextExpression`，认不出来。
+2. **算**：把认好的引用交给核心的 `resolveRefs`——树都解析完了，不必再 parse 一遍。
+3. **换**：`applyListing` 把记号节点换成一个 `code` 节点。
+4. **打标**：`stamp` 按[名册](/docs/formats/roster)给每个组件挂上「AI 那份里它长什么样」，**不动树**。
+
+同一棵树接着既出页面又出 md，所以状态走两个通道：`meta` 字符串给页面（`title` 出标题栏、
+`lineNumbers` 让行号跟源文件对得上、`data-dot` 带颜色），`data.livedoc` 给 md 的序列化回调。
+
+## 四种状态，四种长相
+
+颜色表在这儿——有变动和未确认同是黄，站上靠实心 / 空心区分：
+
+{/* ref file="../packages/format-fumadocs/src/blocks.ts" lines="16-20" */}
+
+一处引用变成一块代码，四种状态各一种长相：
+
+{/* ref file="../packages/format-fumadocs/src/blocks.ts" lines="91-99" */}
+
+- **绿 / 白**：一块当前段，`lineNumbers` 从今天的起始行起，行号跟源文件对得上；白的标题后面缀「· 未确认」。
+- **黄**：不另起一块「当前段」，而是把核心出的 `- / +` 文本换成 shiki 原生的增删行标记
+  （`!code` 那对，得写在**那个语言真正的行注释**里 shiki 才认，所以包里有一张行注释表；
+  没有行注释的语言退成一块 `diff`），旧行新行渲在同一块。这一块**不带 `lineNumbers`**——
+  块里夹着已经不存在的旧行，行号一定对不上源文件，与其错不如不给。
+  记不下旧内容的比较器（hash 版）没有 diff，退成一块普通当前段，标题里缀「· 有变动」。
+- **红**：显示从记忆里取回的旧段，标题写「文档写下时这段是」。
+
+标题一律写**今天的位置**：行段跟随之后，记号上那几行可能已经不是这段了。
+
+## 状态点：站侧的 pre 组件
+
+{/* ref file="../packages/format-fumadocs/src/pre.tsx" lines="34-46" */}
+
+有 `data-dot` 的（引用变出来的那些）套 fumadocs 的 `CodeBlock`，把一个 8px 的点塞进标题栏的
+`Actions` 槽、复制按钮左边；没有的（普通围栏）原样走默认路径，互不干扰。
+
+<Note>
+  这个组件必须是**客户端组件**：`CodeBlock` 是 `"use client"`，状态点要靠 `Actions`（一个函数）传进去，
+  而服务端组件不能把函数递给客户端组件。所以它单独一个侧出口，`"use client"` 指令还得留在产物头一行
+  ——边界测试盯着这一条。
+</Note>
+
+## 给 AI 那份 md：一个序列化回调
+
+{/* ref file="../packages/format-fumadocs/src/markdown.ts" lines="24-42" */}
+
+fumadocs 序列化每个节点前先问这个回调；看到我们打的标就按标出，没标的交回 `undefined` 让它照默认走。
+两种标：组件的 `livedocAi`（一组替换节点，交给它的状态机接着序列化，嵌套组件顺着走），
+引用的 `livedoc`（一行来源注释 + 一块干净的代码——**不要 meta、不要 diff 标记**）。
+
+出来长这样：
+
+```md
+<!-- 来源 ../packages/core/src/types.ts:11-16 · 新鲜 -->
+```
+
+## 借 loader 出 md，不自己序列化
+
+{/* ref file="../packages/format-fumadocs/src/render.ts" lines="37-44" */}
+
+`livedoc render --target ai` 不自己拼 md，而是从消费方项目根 `register()` fumadocs 的 Node loader，
+`import` 那篇 mdx（带 `?collection=`，loader 靠它知道该跑哪份 postprocess），读它导出的 `_markdown`。
+站上 `getText("processed")` 读的是同一个导出——两边逐字节相同，是**同一条管线**的结果，不是对齐出来的。
+
+命令行和站就是这条管线的两个调用方，算状态的服务只有一份。接着读 [名册](/docs/formats/roster)
+看组件那一半，或者 [站接线手册](/docs/formats/wiring) 动手接。
