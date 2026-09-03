@@ -1,0 +1,32 @@
+---
+title: greet 用法
+description: 一份正本，两个出口——人看站，AI 读 md，同一个函数
+---
+
+# greet 用法
+
+这一页由 fumadocs 渲染，引用的代码是 `next build` 那一刻现拿的，页面里不存副本。
+右上角那个绿点是状态：内容跟确认那次一样。
+
+{/* ref file="src/greet.ts" lines="2-3" */}
+
+签名约定：收一个名字，还一句问候。
+
+<Note>
+  这一段在站上是提示框，在 AI 读的 md 里是引用块。压平规则住格式包的默认表里，站只提供画框的组件。
+</Note>
+
+## 怎么装
+
+<Tabs>
+  <Tab title="pnpm">
+    `pnpm add greet`，站上这是一个标签页。
+  </Tab>
+  <Tab title="npm">
+    `npm i greet`，AI 读到的是两个三级标题。
+  </Tab>
+</Tabs>
+
+Tabs 是这个站自己定义的组件：React 那半在 `src/components/tabs/tabs.tsx`，压平规则在旁边的
+`tabs.ai.mjs`，两份一起登记进 `livedoc.config.mjs`。规则只用 helpers、不碰节点字段，
+所以它跟 god-live-doc 自己那个站里的规则文件逐字节一样——名册规则是可搬的。

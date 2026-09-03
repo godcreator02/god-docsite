@@ -1,0 +1,18 @@
+{
+  "name": "god-live-doc-example-plain",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "消费方示例二：没有构建管线的项目——一篇手写 html、一篇纯 md，两个格式包并存，比较器换成 hash（不问 git）。包全部用 link 从 ../../god-live-doc/packages 拿",
+  "scripts": {
+    "livedoc": "livedoc",
+    "test": "node --test \"tests/*.test.mjs\""
+  },
+  "dependencies": {
+    "@god-live-doc/cli": "link:../../god-live-doc/packages/cli",
+    "@god-live-doc/core": "link:../../god-live-doc/packages/core",
+    "@god-live-doc/format-html": "link:../../god-live-doc/packages/format-html",
+    "@god-live-doc/format-md": "link:../../god-live-doc/packages/format-md",
+    "@god-live-doc/project": "link:../../god-live-doc/packages/project"
+  }
+}

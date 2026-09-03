@@ -1,0 +1,25 @@
+lockfileVersion: '9.0'
+
+settings:
+  autoInstallPeers: true
+  excludeLinksFromLockfile: false
+
+importers:
+
+  .:
+    dependencies:
+      '@god-live-doc/cli':
+        specifier: link:../../god-live-doc/packages/cli
+        version: link:../../god-live-doc/packages/cli
+      '@god-live-doc/core':
+        specifier: link:../../god-live-doc/packages/core
+        version: link:../../god-live-doc/packages/core
+      '@god-live-doc/format-html':
+        specifier: link:../../god-live-doc/packages/format-html
+        version: link:../../god-live-doc/packages/format-html
+      '@god-live-doc/format-md':
+        specifier: link:../../god-live-doc/packages/format-md
+        version: link:../../god-live-doc/packages/format-md
+      '@god-live-doc/project':
+        specifier: link:../../god-live-doc/packages/project
+        version: link:../../god-live-doc/packages/project
