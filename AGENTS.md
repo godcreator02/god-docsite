@@ -7,8 +7,9 @@
   也是工作区成员），`tests/` 是工作区级测试。**怎么装、怎么接、怎么跑，看 `god-live-doc/README.md`**，
   这儿不复述。
 - `examples/`：邻居示例，外部引用这套包的消费方——`fumadocs-site`（外部 fumadocs 站）、
-  `plain`（手写 html + 纯 md，比较器换成 hash）。各自 link 依赖 `../../god-live-doc/packages/*`，
-  各自 `pnpm install`、各自跑测试。
+  `plain`（手写 html + 纯 md，比较器换成 hash）、`notes`（命令行记事本，一篇 mdx 手册把五类引用全用上；
+  文档站「五类引用」那章钉的是它的真文件，改它要连着那章一起 confirm）。各自 link 依赖
+  `../../god-live-doc/packages/*`，各自 `pnpm install`、各自跑测试。
 
 方案正本在总控台 `D:\dshfiles\26082611vry\console\docs-god-flow\drafts\god-live-doc-rewrite.md`，
 接口、记录格式、状态表、顺序都在那儿；跟方案有出入的地方记在 `god-live-doc/README.md` 的「待定」段，
@@ -34,6 +35,7 @@
   - `god-live-doc/docs-site/`：`pnpm livedoc check`、`pnpm test`、`pnpm build`、`node scripts/verify-roster.mjs`
   - `examples/plain/`：`pnpm test`
   - `examples/fumadocs-site/`：`pnpm test`、`pnpm build`
+  - `examples/notes/`：`pnpm livedoc check`、`pnpm test`
 - 动了引用到的源码，`livedoc confirm` 之前**先 commit**——git 比较器只对已提交、工作区干净的内容钉。
 - 改了格式包代码，站要先删 `.next` 再 build。调试站用 build + start，不用 dev；起的站验完必须停掉。
 - 提交按步骤拆，一个提交一件事。提交信息末尾带 `Co-Authored-By` 与 `Claude-Session` 行（会话里给的那两行）。
