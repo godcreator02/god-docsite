@@ -20,14 +20,36 @@ description: 作者只写一种草稿记号，确认时各格式包换成自己�
 
 {/* ref file="../packages/core/src/types.ts" lines="150-156" */}
 
-动作词现在只有 `ref`。`exists`、`tree` 是给下一步留的位子。
+动作词现在只有 `ref`。`exists`、`tree` 是给下一步留的位子（见 [待定与路线图](/docs/maintain/roadmap)）。
+
+### 四种不认
+
+「认得出」只是一半，「什么时候不认」才是这套写法敢往正文里塞的理由。四种情况一条测试守着，
+三个格式包一起过：
+
+{/* ref file="../tests/marker.test.ts" lines="29-40" */}
+
+| 不认的情况 | 为什么 |
+| --- | --- |
+| `@@livedoc ref a.ts:1-2`（少一头哨兵） | 哨兵不齐就是普通文字，**不报错**——文档里聊到这个写法不该炸 |
+| 写在句子里：`这句话里有 … 不算` | 草稿记号必须独立成段（html 那头是独立成行） |
+| 围栏里的同样文字 | md / mdx 走语法树：围栏里是 `code` 节点，压根不是段落 |
+| `<script>` / `<style>` 里的，或转义写成 `&lt;pre` 的 | html 逐行扫时跳过这两种块；转义过的文本天然不匹配 |
 
 ## 正式记号：格式包定，各长各的
 
-`marker(target)` 出一行，`parse(marker(t))` 必须认回 `t`——「怎么写」和「怎么认」住同一个包，
-每个格式包一条测试守着。
+`marker(target)` 出一行，`parse(marker(t))` 必须认回 `t`——「怎么写」和「怎么认」住同一个包。
+三个格式包各一行，各长各的：
 
 {/* ref file="../packages/format-md/src/index.ts" lines="30-30" */}
+
+{/* ref file="../packages/format-fumadocs/src/index.ts" lines="22-23" */}
+
+{/* ref file="../packages/format-html/src/index.ts" lines="30-31" */}
+
+这条契约有测试守着，三个格式包一起过：
+
+{/* ref file="../tests/marker.test.ts" lines="20-27" */}
 
 <Tabs>
   <Tab title="md">
@@ -51,4 +73,5 @@ description: 作者只写一种草稿记号，确认时各格式包换成自己�
 ## 记号会自己挪
 
 `confirm` 记的是**今天**这段在哪：代码往下挪了几行，下一次确认时记号上的行号会跟着改写，
-记录簿里的旧键当孤儿清掉。所以记号上的数字不需要人去维护。
+记录簿里的旧键当孤儿清掉。所以记号上的数字不需要人去维护。整个过程见
+[一条引用的一生](/docs/start/lifecycle)第五幕；各格式包怎么写回，见 [格式包](/docs/formats/formats)。
