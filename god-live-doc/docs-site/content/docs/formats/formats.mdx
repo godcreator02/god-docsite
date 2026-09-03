@@ -1,9 +1,85 @@
 ---
 title: 格式包
 description: md 的注释加围栏；html 的元素既是记号又是展示区；写一个新格式包要导出什么、要过什么测试
-livedoc: draft
 ---
 
 # 格式包
 
-（待写。本章钉：`../packages/format-md/src/index.ts` 与 `../packages/format-html/src/index.ts` 的 claims、parse、write、marker。）
+这一章回答：一种文档格式接进来要做什么，md 和 html 两个包各自怎么解的题，以及你想写第三种时照着谁抄。
+
+一个格式包就是一个模块，导出核心要的那五样。它只管**认记号、写回记号**，状态一律是核心算的——
+所以三种格式在同一串代码改动下必然给出同一串状态。
+
+## md：注释是记号，围栏是展示区
+
+{/* ref file="../packages/format-md/src/index.ts" lines="26-30" */}
+
+记号三件套：`<!-- ref … -->` 开头、一段围栏、`<!-- /ref -->` 收尾。中间那段围栏是**展示区**——
+确认时把代码投影进去，纯 md 没有构建期，不投影就什么都看不见。
+
+认记号走 remark 的语法树：记号是 `html` 节点，围栏里的同样文字是 `code` 节点，天然分得开。
+认到记号之后再逐行量一下展示区在哪：
+
+{/* ref file="../packages/format-md/src/index.ts" lines="51-61" */}
+
+三样齐全（可夹一个空行、一对围栏、尾记号）才算「有展示区」，量到的收尾行号塞进 `extra.close`——
+这就是格式包的私货，核心原样带回、从不读它。
+
+写回时按 `close` 决定是覆写还是当场长出来，并且**从下往上改**，前面几处的行号才不会串：
+
+{/* ref file="../packages/format-md/src/index.ts" lines="76-88" */}
+
+<Note>
+  **展示区不是记忆**。围栏里那段是派生缓存，手改它一个字，`parse` 认到的还是那条引用，状态也不变
+  ——记忆在记录簿里的那条指纹上。有测试守着这一条。
+</Note>
+
+## html：元素既是记号又是展示区
+
+{/* ref file="../packages/format-html/src/index.ts" lines="19-21" */}
+
+正式记号是 html 自己的东西：`<pre data-file="…" data-lines="…"></pre>`。**没有尾记号**，
+元素的闭合就是边界。`final` 标着「产物就是文档本身」——html 没有构建管线，人看它，AI 也直接读它，
+所以这个包不出 `renderAi` / `renderHuman`。
+
+认法是逐行扫，不是语法树：带 `data-file` 的开标签算引用，`<script>` / `<style>` 里的跳过，
+转义写成 `&lt;pre` 的天然不匹配。两种写坏的情况报到行号——开标签拆成多行、元素没闭合。
+
+写回时**元素里面的内容整个重写**，作者的外壳（外面的 `figure`、`figcaption`）一个字不动：
+
+{/* ref file="../packages/format-html/src/index.ts" lines="101-116" */}
+
+容器不是 `<pre>`（比如作者写了个 `<div data-file=…>`）就往里放一层 `<pre><code>`，空白才保得住。
+从后往前改，前面几处的偏移不受影响——跟 md 那头从下往上改是同一个道理。
+
+## 三个格式一张对照表
+
+<Tabs>
+  <Tab title="记号">
+    md：`<!-- ref … -->` … `<!-- /ref -->`；mdx：`{/* ref … */}`；html：`<pre data-file=… data-lines=…>`。
+    草稿记号四种格式一个写法，见 [记号](/docs/principles/markers)。
+  </Tab>
+  <Tab title="展示区">
+    md：中间那段围栏，确认时投影；mdx：**没有**，build 时现拿；html：元素本身，确认时投影。
+  </Tab>
+  <Tab title="渲染">
+    md：`renderAi` 剥掉记号，展示区里的代码留下；mdx：借 fumadocs 的 loader 出 `_markdown`；
+    html：`final`，不渲染。
+  </Tab>
+</Tabs>
+
+## 想写第三种格式：导出五样，过三条测试
+
+必选的五样是 `name` / `claims` / `parse` / `write` / `marker`，接口见 [模块拆分](/docs/principles/modules)。
+可选的四样（`lintComponents` / `renderAi` / `renderHuman` / `final`）有就用、没有就跳。
+
+{/* ref file="../tests/boundary.test.ts" lines="77-84" */}
+
+再过三条：
+
+1. **记号自认**：`parse(marker(t))` 认回 `t`。
+2. **草稿四种不认**：少一头哨兵、写在句子里、写在围栏（或 `<script>`）里的，一律不认。
+3. **契约一致**：跟别的格式包摆在同一串代码改动下，状态和跟到的行段完全一样。
+
+各条测试守什么，见 [测试与边界](/docs/cli/testing)。fumadocs 那个包情况特殊——它不止是格式包，
+还带着一整套站接线，单开一章讲：[fumadocs 格式包](/docs/formats/fumadocs)。
