@@ -148,6 +148,24 @@ test("不认识的命令退 2", async () => {
   }
 });
 
+test("文档本身删了：它的记录 check 算红；confirm 整个忘掉", async () => {
+  const p = setupProject();
+  try {
+    await p.cli("confirm");
+    rmSync(join(p.root, "docs", "b.html"));
+    const red = await p.cli("check");
+    assert.equal(red.code, 1);
+    assert.match(red.out, /🔴 docs\/b\.html {2}文档已不存在，记录簿里还留着/);
+    const swept = await p.cli("confirm");
+    assert.match(swept.out, /🧹 docs\/b\.html {2}文档已不存在，记录已清/);
+    const ledger = JSON.parse(p.read(".ledger.json")) as Record<string, unknown>;
+    assert.deepEqual(Object.keys(ledger), ["docs/a.md"]);
+    assert.equal((await p.cli("check")).code, 0);
+  } finally {
+    p.teardown();
+  }
+});
+
 test("孤儿：文档里删掉引用，check 报红；confirm 清掉", async () => {
   const p = setupProject();
   try {

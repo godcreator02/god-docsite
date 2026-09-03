@@ -33,6 +33,7 @@ function memoryLedger(): Ledger & { dump(): Record<string, Record<string, MemoRe
     remove(doc, target) {
       delete data[doc]?.[targetKey(target)];
     },
+    docs: () => Object.keys(data).filter((doc) => Object.keys(data[doc] ?? {}).length > 0),
     save() {},
     dump: () => data,
   };
@@ -65,6 +66,17 @@ test("resolve：没确认过是未确认；确认后新鲜；改了代码变有�
   assert.deepEqual(statuses(done.text), ["changed"]);
   files.delete("src/greet.ts");
   assert.deepEqual(statuses(done.text), ["missing"]);
+});
+
+test("文档删了、挪了：strays 按文档清单一览，forget 整个忘掉，别的文档不动", () => {
+  const { ledger, service } = setup();
+  service.confirm(DOC, TEXT);
+  service.confirm("e.a", TEXT);
+  assert.deepEqual(service.strays([DOC, "e.a"]), []);
+  assert.deepEqual(service.strays([DOC]), ["e.a"]);
+  assert.deepEqual(service.forget([DOC]), ["e.a"]);
+  assert.deepEqual(ledger.docs(), [DOC]);
+  assert.deepEqual(service.resolve(DOC, TEXT).items.map((i) => i.status), ["fresh"]);
 });
 
 test("一篇文档两个格式包都认领：报错，不靠顺序定胜负", () => {

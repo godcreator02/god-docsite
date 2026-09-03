@@ -112,6 +112,8 @@ export interface Ledger {
   set(doc: string, target: Target, record: MemoRecord): void;
   list(doc: string): Array<{ target: Target; record: MemoRecord }>;
   remove(doc: string, target: Target): void;
+  /** 簿里还有记录的全部文档——文档删了、挪了，它的记录没人逐篇去看，得靠这一览清掉 */
+  docs(): string[];
   save(): void;
 }
 

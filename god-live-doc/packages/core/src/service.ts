@@ -3,6 +3,7 @@
  *   resolve(doc, text)        核对：调格式包认引用，出清单，不写任何东西
  *   resolveRefs(doc, refs)    同上，但引用已经有人认好了（有语法树的宿主用，跳过 parse）
  *   confirm(doc, text)        确认：让比较器出记录、刷记录簿、清孤儿、让格式包写回
+ *   strays / forget(docs)     文档本身删了、挪了，它的记录没人逐篇去看：按文档清单一览、整个忘掉
  *
  * 引用的身份 = 文档 + 引用写的目标；同一篇里指向同一段的两处引用共用一条记录。
  * 记录带 kind：比较器只认自己那种，换了比较器旧记录当「未确认」，不猜。
@@ -25,6 +26,10 @@ export interface Service {
   resolve(doc: string, text: string): Listing;
   resolveRefs(doc: string, references: Reference[]): Listing;
   confirm(doc: string, text: string): ConfirmResult;
+  /** 记录簿里有、文档清单里没有的文档（删了、挪了）——它们的记录没人逐篇去看，这里一览 */
+  strays(docs: string[]): string[];
+  /** 把 strays 的记录整个忘掉并存盘；交回忘掉的文档 */
+  forget(docs: string[]): string[];
 }
 
 export interface ServiceDeps {
@@ -143,5 +148,17 @@ export function createService({ formats, reader, ledger, comparator }: ServiceDe
     return { listing, text: next, changed: next !== text, problems: [] };
   }
 
-  return { formatFor, resolve, resolveRefs, confirm };
+  function strays(docs: string[]): string[] {
+    const keep = new Set(docs);
+    return ledger.docs().filter((doc) => !keep.has(doc));
+  }
+
+  function forget(docs: string[]): string[] {
+    const gone = strays(docs);
+    for (const doc of gone) for (const { target } of ledger.list(doc)) ledger.remove(doc, target);
+    ledger.save();
+    return gone;
+  }
+
+  return { formatFor, resolve, resolveRefs, confirm, strays, forget };
 }

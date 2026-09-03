@@ -49,6 +49,7 @@ export function memoryLedger(): Ledger & { dump(): Record<string, Record<string,
     remove(doc, target) {
       delete data[doc]?.[targetKey(target)];
     },
+    docs: () => Object.keys(data).filter((doc) => Object.keys(data[doc] ?? {}).length > 0),
     save() {},
     dump: () => data,
   };

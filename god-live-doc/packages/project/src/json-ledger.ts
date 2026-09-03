@@ -23,6 +23,7 @@ export function createLedger(path: string): Ledger {
       delete table[targetKey(target)];
       if (Object.keys(table).length === 0) delete data[doc];
     },
+    docs: () => Object.keys(data),
     save() {
       const next = JSON.stringify(data, null, 2);
       if (next === onDisk) return;

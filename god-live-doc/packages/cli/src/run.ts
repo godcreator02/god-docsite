@@ -3,6 +3,7 @@
  * cwd 就是项目根（那里有 livedoc.config.mjs）。
  *   livedoc check                          核对：只读，红退 1
  *   livedoc confirm                        确认：出记录、清孤儿、写回文档；有钉不住的整篇拒，打印并退 1
+ *                                          文档本身删了、挪了的，它的记录 check 算红、confirm 整个忘掉
  *   livedoc render --target human|ai       渲染：问格式包有没有对应的渲染函数，产物落 out/
  * 新引用不用命令：在文档里写一行核心定的草稿记号 @@livedoc ref src/greet.ts:2-3 @@，
  * check 认它、报未确认，confirm 换成该格式的正式记号。
@@ -37,14 +38,25 @@ export async function main(argv: string[]): Promise<number> {
 
   const project = await loadProject(process.cwd());
   let red = 0;
+  const docs = project.docs();
 
-  for (const doc of project.docs()) {
+  for (const doc of docs) {
     const text = project.read(doc);
     const format = project.service.formatFor(doc)!;
 
     if (command === "check") red += check(project, doc, text, format);
     else if (command === "confirm") red += confirm(project, doc, text);
     else red += await render(project, doc, text, format, target);
+  }
+
+  // 文档本身删了、挪了：它的记录上面那圈看不到，按文档清单一览。check 算红，confirm 整个忘掉
+  if (command === "check") {
+    for (const doc of project.service.strays(docs)) {
+      console.log(`🔴 ${doc}  文档已不存在，记录簿里还留着它的记录——confirm 会清掉`);
+      red += 1;
+    }
+  } else if (command === "confirm") {
+    for (const doc of project.service.forget(docs)) console.log(`🧹 ${doc}  文档已不存在，记录已清`);
   }
   return red > 0 ? 1 : 0;
 }
