@@ -59,4 +59,29 @@ fumadocs 在格式包里只是 peer——用你项目里装的那份，包自己
   </Tab>
 </Tabs>
 
-改了格式包的代码，站要重 build 才看得见——Turbopack 只按 mdx 内容缓存。调试用 `next build` + `next start`，不用 dev。
+## 五、Next 那头两条设置
+
+{/* ref file="next.config.mjs" lines="7-18" */}
+
+- **`turbopack.root` 要抬到工作区根**。这个站的包从同一个 pnpm 工作区拿，`node_modules` 里是指向站外的
+  软链；Turbopack 只认它 root 以内的文件，root 不抬，`packages/` 就在视野外。用发布版包的项目不必管这条。
+- **三个包标成 `serverExternalPackages`**。它们只在服务端跑，还要读盘、起 git 子进程——标成外部包让 Node
+  自己解析，别让打包器把它们卷进去。
+
+## 六、三个坑
+
+<Tabs>
+  <Tab title="改了格式包要删 .next">
+    Turbopack 只按 mdx 内容缓存：文档一个字没改，它就不重跑 remark 插件，格式包里的改动看不见。
+    **先删 `.next` 再 build**。
+  </Tab>
+  <Tab title="调试用 build + start">
+    不用 `next dev`。dev 那条链的缓存和热更新会让「这一版到底跑没跑我的插件」变得说不清。
+  </Tab>
+  <Tab title="端口可能被占">
+    这个站的 `start` 脚本钉的是 4310，被别的进程占了就换一个：`pnpm exec next start -p 4312`。
+    起来的站验完记得停掉。
+  </Tab>
+</Tabs>
+
+接线的每一处分别在讲什么，见 [fumadocs 格式包](/docs/formats/fumadocs)；组件那一半见 [名册](/docs/formats/roster)。
