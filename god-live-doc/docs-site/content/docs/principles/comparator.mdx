@@ -26,7 +26,7 @@ description: 四种状态是怎么判出来的，以及把 git 换成别的记�
 
 「怎么记住一段代码」这件事全收在一个接口里。核心不读文件——当前整文件的内容由它取好了递进来。
 
-{/* ref file="../packages/core/src/types.ts" lines="135-141" */}
+{/* ref file="../packages/core/src/types.ts" lines="137-143" */}
 
 **两个方法就是全部**：`snapshot` 在确认时出记录，或者说清楚为什么钉不住；`judge` 在核对时判状态，
 顺便交回这段今天在哪。两个实现：`git`（产品用）和 `hash`。
@@ -60,7 +60,7 @@ description: 四种状态是怎么判出来的，以及把 git 换成别的记�
 
 记录的第一个字段是 `kind`，记它的那个比较器的名字。取记录时对不上，就当没有：
 
-{/* ref file="../packages/core/src/service.ts" lines="53-57" */}
+{/* ref file="../packages/core/src/service.ts" lines="58-62" */}
 
 所以配置里把 `comparator` 从 `git` 改成 `hash`，全站引用一律退回「未确认」等人重新确认。
 不把 git 的记录翻译成 hash 的记录——翻译就是猜。
@@ -70,7 +70,7 @@ description: 四种状态是怎么判出来的，以及把 git 换成别的记�
 `snapshot` 交回 problem（未提交、不在 HEAD 里、行段超出文件）时，这一篇**一条记录都不写、
 文档一个字不改**：
 
-{/* ref file="../packages/core/src/service.ts" lines="99-103" */}
+{/* ref file="../packages/core/src/service.ts" lines="104-108" */}
 
 不是「能钉的先钉上」——半本记录簿比没有更难查。problems 原样交给命令行打印，退非零。
 
