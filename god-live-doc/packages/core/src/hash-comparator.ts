@@ -1,12 +1,13 @@
 /**
- * hash 比较器：只记段哈希，别的什么都不记。
+ * hash 比较器：只记段哈希和旧行号，别的什么都不记，也不问 git。
  *
- * 它不跟行段——记号上写的是哪几行，就一直看那几行。代码往下挪了它只会说「有变动」，
- * 说不出「挪到哪儿了」，也拿不回旧内容（记忆里没存第二份）。
- * 用处两个：没有 git 的目录能用；以及在测试里当第二实现，证明比较器接口真能换。
+ * 给不在 git 里的文件用（被 .gitignore 忽略的 node_modules、不在任何仓里的目录），也在测试里当第二实现。
+ * 行段靠**滑窗**跟：段长固定，先看旧位置，不对就在当前文件里逐行滑一遍找同哈希的窗口——
+ * 内容没变、只是挪了位置，照样绿、带新行号。撞车（同样的段出现不止一处）取离旧位置最近的，
+ * 并列就不猜。找不到就是「有变动、位置不明」：没有旧内容，给不出 diff，行号停在旧位置，等人重钉。
  */
 
-import { hashSpan, sliceSpan } from "./span.ts";
+import { hashSpan, lineCount, sliceSpan } from "./span.ts";
 import type { Comparator, Judgement, MemoRecord, Snapshot, Span, Target } from "./types.ts";
 
 /** hash 版的记录 */
@@ -14,6 +15,27 @@ export interface HashRecord extends MemoRecord {
   kind: "hash";
   lines: Span;
   hash: string;
+}
+
+/**
+ * 在整文件里找哈希等于 hash、长度为 length 的窗口，交回离 near 最近的起始行；
+ * 找不到、或者两处离得一样近，都交回 null
+ */
+export function findSpan(text: string[], length: number, hash: string, near: number): number | null {
+  const last = lineCount(text) - length + 1;
+  let best: number | null = null;
+  let tie = false;
+  for (let start = 1; start <= last; start += 1) {
+    if (hashSpan(text.slice(start - 1, start - 1 + length)) !== hash) continue;
+    const distance = Math.abs(start - near);
+    if (best === null || distance < Math.abs(best - near)) {
+      best = start;
+      tie = false;
+    } else if (distance === Math.abs(best - near)) {
+      tie = true;
+    }
+  }
+  return tie ? null : best;
 }
 
 export function createHashComparator(): Comparator {
@@ -29,12 +51,20 @@ export function createHashComparator(): Comparator {
     },
 
     judge(record: MemoRecord | null, target: Target, text: string[] | null): Judgement {
-      const lines: Span = record === null ? [target.a, target.b] : (record as HashRecord).lines;
+      // 别家的记录不认，当没确认过——记录格式是各比较器自己的，翻译就是猜
+      const pinned = record !== null && record.kind === "hash" ? (record as HashRecord) : null;
+      const lines: Span = pinned === null ? [target.a, target.b] : pinned.lines;
       if (text === null) return { status: "missing", lines, reason: "file-missing" };
       const span = sliceSpan(text, lines);
+      if (pinned === null) return span === null ? { status: "missing", lines, reason: "vanished" } : { status: "unconfirmed", lines };
+      if (span !== null && hashSpan(span) === pinned.hash) return { status: "fresh", lines };
+
+      const length = lines[1] - lines[0] + 1;
+      const start = findSpan(text, length, pinned.hash, lines[0]);
+      if (start !== null) return { status: "fresh", lines: [start, start + length - 1] };
+      // 旧位置已经超出文件：当整段没了；旧位置还在：内容变了但找不到它，位置不明
       if (span === null) return { status: "missing", lines, reason: "vanished" };
-      if (record === null) return { status: "unconfirmed", lines };
-      return hashSpan(span) === (record as HashRecord).hash ? { status: "fresh", lines } : { status: "changed", lines, reason: "changed" };
+      return { status: "changed", lines, reason: "unlocated" };
     },
   };
 }

@@ -8,6 +8,7 @@ import { join, relative, resolve, sep } from "node:path";
 import { pathToFileURL } from "node:url";
 import { createHashComparator, createService } from "@god-live-doc/core";
 import type { Comparator, Format, Service } from "@god-live-doc/core";
+import { createAutoComparator } from "./auto-comparator.ts";
 import { createReader } from "./fs-reader.ts";
 import { createGitComparator } from "./git-comparator.ts";
 import { createLedger } from "./json-ledger.ts";
@@ -21,8 +22,8 @@ export interface ProjectConfig {
   out?: string;
   /** 记录簿文件，相对项目根；默认 .ledger.json */
   ledger?: string;
-  /** 比较器：git（默认）、hash，或者自己造一个 */
-  comparator?: "git" | "hash" | Comparator;
+  /** 比较器：auto（默认，按文件位置挑 git 或 hash）、git、hash，或者自己造一个 */
+  comparator?: "auto" | "git" | "hash" | Comparator;
   /** 组件名册（压平规则），格式包用；没声明就用格式包的默认表 */
   components?: Record<string, unknown>;
   /** fumadocs 格式包的私货：集合名 */
@@ -67,7 +68,8 @@ export function loadProject(root: string): Promise<Project> {
 }
 
 function comparatorOf(config: ProjectConfig, root: string): Comparator {
-  const want = config.comparator ?? "git";
+  const want = config.comparator ?? "auto";
+  if (want === "auto") return createAutoComparator({ root });
   if (want === "git") return createGitComparator({ root });
   if (want === "hash") return createHashComparator();
   return want;

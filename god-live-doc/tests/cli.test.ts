@@ -139,6 +139,32 @@ test("render：md 出 ai 那份剥掉记号；html 说产物就是文档本身",
   }
 });
 
+test("被忽略的文件走 hash 记忆：confirm 标明；改了内容 check 报黄、位置不明", async () => {
+  const p = setupProject();
+  try {
+    writeFileSync(join(p.root, ".gitignore"), "vendor/\n");
+    run(p.root, ["add", "-A"]);
+    run(p.root, ["commit", "-qm", "忽略 vendor"]);
+    mkdirSync(join(p.root, "vendor"));
+    writeFileSync(join(p.root, "vendor", "lib.ts"), CODE);
+    writeFileSync(join(p.root, "docs", "c.md"), "# c\n\n@@livedoc ref vendor/lib.ts:2-3 @@\n");
+
+    const done = await p.cli("confirm");
+    assert.equal(done.code, 0);
+    assert.match(done.out, /✅ docs\/c\.md {2}vendor\/lib\.ts:2-3 {2}已确认，草稿记号已换成正式记号（hash 记忆：不在 git 里）/);
+    assert.match(done.out, /✅ docs\/a\.md {2}src\/greet\.ts:2-3 {2}已确认，草稿记号已换成正式记号\n/, "git 记忆的不标");
+    const ledger = JSON.parse(p.read(".ledger.json")) as Record<string, Record<string, { kind: string }>>;
+    assert.equal(ledger["docs/c.md"]!["vendor/lib.ts:2-3"]!.kind, "hash");
+
+    writeFileSync(join(p.root, "vendor", "lib.ts"), CODE.replace("hello", "hey"));
+    const yellow = await p.cli("check");
+    assert.equal(yellow.code, 0);
+    assert.match(yellow.out, /🟡 docs\/c\.md {2}vendor\/lib\.ts:2-3 {2}有变动.*位置不明/);
+  } finally {
+    p.teardown();
+  }
+});
+
 test("不认识的命令退 2", async () => {
   const p = setupProject();
   try {

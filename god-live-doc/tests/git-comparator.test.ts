@@ -39,7 +39,7 @@ test("确认：记的是 blob、commit、行段、段哈希，仓里不存第二
   }
 });
 
-test("确认的门：文件未提交拒、不在 HEAD 里（未跟踪 / 被忽略）拒——一处拒整篇拒", () => {
+test("确认的门：文件未提交拒、未跟踪拒——一处拒整篇拒", () => {
   const r = setupRepo({ formats: FORMATS });
   try {
     r.write("src/greet.ts", CODE.replace("hello", "hey"));
@@ -52,7 +52,7 @@ test("确认的门：文件未提交拒、不在 HEAD 里（未跟踪 / 被忽�
     r.write("src/untracked.ts", "const a = 1;\nconst b = 2;\n");
     const mixed = r.service.confirm(DOC, `${TEXT}\nREF src/untracked.ts:1-2\n`);
     assert.equal(mixed.problems.length, 1);
-    assert.match(mixed.problems[0]!, /不在 HEAD 里/);
+    assert.match(mixed.problems[0]!, /未跟踪.*先 commit/);
     assert.equal(r.ledger.dump()[DOC], undefined, "一处钉不住，另一处也不落");
   } finally {
     r.teardown();

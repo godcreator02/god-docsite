@@ -6,6 +6,7 @@
  * （有行注释的语言才行，没有的退成 `diff` 块），所以它不再另起一块「当前段」，也**不带 lineNumbers**
  * ——块里夹着已经不存在的旧行，行号一定对不上源文件，与其错不如不给。
  * 红「缺失」那块显示的是文档写下时那段（从记忆里取回的 old）。
+ * 黄「位置不明」（hash 记忆找不到这段了）不摆代码，只留一句提示。
  *
  * 灯长什么样、怎么渲染，全归站点侧的 pre 组件；这一层只把颜色塞进 meta。
  */
@@ -22,6 +23,9 @@ export const DOT_COLOR: Record<Status, Dot> = { fresh: "green", changed: "yellow
 export const OLD_TITLE = "文档写下时这段是";
 export const NO_OLD = "（没有旧内容）";
 export const UNCONFIRMED_SUFFIX = " · 未确认";
+export const UNLOCATED_SUFFIX = " · 有变动，位置不明";
+/** hash 记忆找不到这段了：旧行号上现在是什么不知道，摆出来只会误导，只留这一句 */
+export const UNLOCATED_NOTE = "（hash 记忆找不到这段了，位置不明——重读源码、重钉）";
 
 const LANG: Record<string, string> = {
   ts: "ts", tsx: "tsx", js: "js", jsx: "jsx", mjs: "js", cjs: "js", py: "python", rs: "rust", go: "go",
@@ -91,7 +95,11 @@ export function nodeFor(item: Item): TreeNode {
   const current = (item.current ?? []).join("\n");
   const mark: LivedocMark = { source: where, label: LABEL[item.status], value: current };
   if (item.status === "changed") {
-    // 没有 diff 的比较器（hash 版记不下旧内容）退成一块普通的当前段，标题里说清楚
+    // hash 记忆找不到这段了：行号停在旧位置，那儿现在是什么不知道，不摆代码
+    if (item.reason === "unlocated") {
+      return codeNode("text", UNLOCATED_NOTE, `${where}${UNLOCATED_SUFFIX}`, dot, { ...mark, value: UNLOCATED_NOTE });
+    }
+    // 没有 diff 的比较器退成一块普通的当前段，标题里说清楚
     if (item.diff === undefined || item.diff === "") return codeNode(lang, current, `${where} · ${LABEL.changed}`, dot, mark, item.lines[0]);
     return diffBlock(lang, item.diff, where, dot, mark);
   }

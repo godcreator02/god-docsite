@@ -21,12 +21,15 @@ const LABEL: Record<string, string> = {
   missing: "缺失，引用指向空气",
   unconfirmed: "未确认，等作者确认",
 };
-/** missing 的细分理由，说清楚是哪一种「指向空气」 */
+/** 状态的细分理由：红说清楚是哪一种「指向空气」，黄说清楚是不是找不着了 */
 const REASON: Record<string, string> = {
   vanished: "整段已被删光",
   "file-missing": "文件不在了",
   "blob-missing": "记忆里的 blob 不在对象库（浅克隆或历史重写过），重新确认一次",
+  unlocated: "hash 记忆找不到这段了，位置不明——重读源码、重钉",
 };
+/** 确认时拿到的是哪种记忆：hash 是弱记忆（没有旧内容、变了就找不着），写手得知道 */
+const MEMORY: Record<string, string> = { hash: "（hash 记忆：不在 git 里）" };
 
 export async function main(argv: string[]): Promise<number> {
   const [command = "check", ...rest] = argv;
@@ -87,7 +90,7 @@ function check(project: Project, doc: string, text: string, format: Format): num
 }
 
 function confirm(project: Project, doc: string, text: string): number {
-  const { listing, text: next, changed, problems } = project.service.confirm(doc, text);
+  const { listing, text: next, changed, problems, pinned } = project.service.confirm(doc, text);
   if (problems.length > 0) {
     // 一处钉不住整篇拒：记录簿一条不写，文档一个字不改
     for (const problem of problems) console.log(`🔴 ${problem}`);
@@ -95,10 +98,11 @@ function confirm(project: Project, doc: string, text: string): number {
     return problems.length;
   }
   if (changed) project.write(doc, next);
-  for (const item of listing.items) {
+  listing.items.forEach((item, i) => {
     const how = item.reference.extra?.draft === true ? "，草稿记号已换成正式记号" : changed ? "，文档已写回" : "";
-    console.log(`✅ ${doc}  ${targetKey(item.reference.target)}  已确认${how}`);
-  }
+    const memory = MEMORY[pinned[i]?.record.kind ?? ""] ?? "";
+    console.log(`✅ ${doc}  ${targetKey(item.reference.target)}  已确认${how}${memory}`);
+  });
   for (const orphan of listing.orphans) console.log(`🧹 ${doc}  ${targetKey(orphan.target)}  孤儿记录已清`);
   return 0;
 }

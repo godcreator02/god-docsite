@@ -150,25 +150,52 @@ test("草稿记号的哨兵：头尾 @@ 都在才算，载荷要过 toTarget", (
   assert.throws(() => draftOf("@@livedoc ref src/greet.ts:3-2 @@", where), /行号不合理/);
 });
 
-test("换比较器：记录的 kind 对不上就当没确认过，不猜", () => {
-  const { files, ledger, service } = setup();
-  service.confirm(DOC, TEXT);
-  const other = createService({
-    formats: [fakeFormat("fake-a", ".a")],
-    reader: memoryReader(files),
-    ledger,
-    comparator: { ...createHashComparator(), kind: "别的" },
-  });
-  assert.deepEqual(other.resolve(DOC, TEXT).items.map((i) => i.status), ["unconfirmed"]);
+test("别家的记录：kind 对不上，比较器自己当没确认过，不猜；核心不看 kind", () => {
+  const { ledger, service } = setup();
+  ledger.set(DOC, { file: "src/greet.ts", a: 2, b: 3 }, { kind: "别的", hash: "x" });
+  assert.deepEqual(service.resolve(DOC, TEXT).items.map((i) => i.status), ["unconfirmed"]);
 });
 
-test("hash 比较器不跟行段：代码整体下移，它只会说有变动", () => {
+test("hash 比较器滑窗跟行段：代码整体下移，绿、带新行号；确认后记号写回新行段", () => {
   const { files, service } = setup();
   const done = service.confirm(DOC, TEXT);
-  files.set("src/greet.ts", ["// 新加的一行", ...CODE]);
+  files.set("src/greet.ts", ["// 新加的一行", "// 又一行", ...CODE]);
   const item = service.resolve(DOC, done.text).items[0]!;
-  assert.equal(item.status, "changed");
-  assert.deepEqual(item.lines, [2, 3], "hash 版记的是记号上那几行，不会跟到 3-4");
+  assert.equal(item.status, "fresh");
+  assert.deepEqual(item.lines, [4, 5]);
+  const again = service.confirm(DOC, done.text);
+  assert.match(again.text, /^REF src\/greet\.ts:4-5$/m);
+});
+
+test("hash 比较器找不到这段：有变动、位置不明，行号停在旧位置；旧位置超出文件才算缺失", () => {
+  const { files, service } = setup();
+  const done = service.confirm(DOC, TEXT);
+  files.set("src/greet.ts", ["// 新加的一行", ...CODE.map((l) => l.replace("hello", "hey"))]);
+  const moved = service.resolve(DOC, done.text).items[0]!;
+  assert.equal(moved.status, "changed");
+  assert.equal(moved.reason, "unlocated");
+  assert.deepEqual(moved.lines, [2, 3], "没有旧内容可比，行号停在记录里那几行");
+  assert.equal(moved.diff, undefined);
+
+  files.set("src/greet.ts", ["// greet", ""]);
+  const gone = service.resolve(DOC, done.text).items[0]!;
+  assert.equal(gone.status, "missing");
+  assert.equal(gone.reason, "vanished");
+});
+
+test("hash 比较器滑窗撞车：取离旧位置最近的一处；两处一样近就不猜", () => {
+  const { files, service } = setup();
+  const done = service.confirm(DOC, TEXT);
+  const [fn, ret] = [CODE[1]!, CODE[2]!];
+  files.set("src/greet.ts", ["a", "b", "c", fn, ret, "}", "d", fn, ret, "}", ""]);
+  const near = service.resolve(DOC, done.text).items[0]!;
+  assert.equal(near.status, "fresh");
+  assert.deepEqual(near.lines, [4, 5], "4 和 8 两处，离旧位置 2 更近的是 4");
+
+  files.set("src/greet.ts", [fn, ret, fn, ret, ""]);
+  const tie = service.resolve(DOC, done.text).items[0]!;
+  assert.equal(tie.status, "changed");
+  assert.equal(tie.reason, "unlocated", "1 和 3 离旧位置 2 一样近，不猜");
 });
 
 test("归一化：LF、去行尾空白、去末尾空行；缩进和注释留着", () => {

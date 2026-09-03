@@ -25,7 +25,7 @@ export type {
 export { fileText, hashSpan, lineCount, normalize, normalizeLines, sliceSpan } from "./span.ts";
 export { mapRange, mappedSpan, parseHunks, renderDiff } from "./diff.ts";
 export type { Hunk, Mapped } from "./diff.ts";
-export { createHashComparator } from "./hash-comparator.ts";
+export { createHashComparator, findSpan } from "./hash-comparator.ts";
 export type { HashRecord } from "./hash-comparator.ts";
 export { createService } from "./service.ts";
 export type { ConfirmResult, Service, ServiceDeps } from "./service.ts";

@@ -6,7 +6,8 @@
  *   strays / forget(docs)     文档本身删了、挪了，它的记录没人逐篇去看：按文档清单一览、整个忘掉
  *
  * 引用的身份 = 文档 + 引用写的目标；同一篇里指向同一段的两处引用共用一条记录。
- * 记录带 kind：比较器只认自己那种，换了比较器旧记录当「未确认」，不猜。
+ * 记录带 kind，核心不看它：认不认这条记录是比较器的事（别家的记录交回「未确认」，不猜）——
+ * 一个项目里 git 记录和 hash 记录可以并存，按记录的 kind 转发的是 project 里的 auto 比较器。
  */
 
 import { sliceSpan } from "./span.ts";
@@ -19,6 +20,8 @@ export interface ConfirmResult {
   changed: boolean;
   /** 非空 = 一条都没写：整篇拒绝 */
   problems: string[];
+  /** 这一趟写进记录簿的记录，跟 listing.items 一一对应、同序；整篇拒时为空。命令行靠它说清楚每处拿到的是哪种记忆 */
+  pinned: Array<{ target: Target; record: MemoRecord }>;
 }
 
 export interface Service {
@@ -55,12 +58,6 @@ export function createService({ formats, reader, ledger, comparator }: ServiceDe
     return format;
   }
 
-  /** 记录簿里的记录，只有 kind 对得上才算数——换比较器等于换记录格式，旧记录一律当没确认过 */
-  function recordFor(doc: string, target: Target): MemoRecord | null {
-    const record = ledger.get(doc, target);
-    return record !== null && record.kind === comparator.kind ? record : null;
-  }
-
   /** 一次核对里同一个文件只读一遍 */
   function readerCache(): (file: string) => string[] | null {
     const cache = new Map<string, string[] | null>();
@@ -75,7 +72,7 @@ export function createService({ formats, reader, ledger, comparator }: ServiceDe
     const seen = new Set<string>();
     const items: Item[] = references.map((reference) => {
       const text = read(reference.target.file);
-      const record = recordFor(doc, reference.target);
+      const record = ledger.get(doc, reference.target);
       const judged = comparator.judge(record, reference.target, text);
       seen.add(targetKey(reference.target));
       const current = judged.status === "missing" ? null : sliceSpan(text, judged.lines);
@@ -130,7 +127,7 @@ export function createService({ formats, reader, ledger, comparator }: ServiceDe
       pending.push({ target, record: snapshot.record, fill: { reference: { ...item.reference, target }, current } });
     }
 
-    if (problems.length > 0) return { listing, text, changed: false, problems };
+    if (problems.length > 0) return { listing, text, changed: false, problems, pinned: [] };
 
     const kept = new Set<string>();
     for (const { target, record } of pending) {
@@ -145,7 +142,7 @@ export function createService({ formats, reader, ledger, comparator }: ServiceDe
 
     const fills = pending.map((p) => p.fill);
     const next = fills.length > 0 ? format.write(text, fills) : text;
-    return { listing, text: next, changed: next !== text, problems: [] };
+    return { listing, text: next, changed: next !== text, problems: [], pinned: pending.map(({ target, record }) => ({ target, record })) };
   }
 
   function strays(docs: string[]): string[] {

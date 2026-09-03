@@ -8,7 +8,7 @@ import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { createHashComparator, createService, targetKey, keyToTarget } from "@god-live-doc/core";
 import type { Comparator, Format, Ledger, MemoRecord, Reader, Service } from "@god-live-doc/core";
-import { createGitComparator } from "@god-live-doc/project";
+import { createAutoComparator, createGitComparator } from "@god-live-doc/project";
 
 export const CODE = [
   "// greet",
@@ -69,8 +69,15 @@ export interface Repo {
 
 export interface RepoOptions {
   formats: Format[];
-  /** 不给就用 git 版；测试换比较器时传 "hash" 或自己造的 */
-  comparator?: Comparator | "hash";
+  /** 不给就用 git 版；测试换比较器时传 "hash"、"auto" 或自己造的 */
+  comparator?: Comparator | "hash" | "auto";
+}
+
+function comparatorOf(root: string, want: RepoOptions["comparator"]): Comparator {
+  if (want === undefined) return createGitComparator({ root });
+  if (want === "hash") return createHashComparator();
+  if (want === "auto") return createAutoComparator({ root });
+  return want;
 }
 
 /** 起一个临时 git 仓，代码已提交一次 */
@@ -106,7 +113,7 @@ export function setupRepo({ formats, comparator }: RepoOptions): Repo {
     formats,
     reader: reader(root),
     ledger: api.ledger,
-    comparator: comparator === undefined || comparator === "hash" ? (comparator === "hash" ? createHashComparator() : createGitComparator({ root })) : comparator,
+    comparator: comparatorOf(root, comparator),
   });
   return api;
 }

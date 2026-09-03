@@ -46,7 +46,7 @@ export interface Item {
   status: Status;
   /** 这段今天在文件里的位置——比较器跟过 diff 的结果，可能跟记号上写的不一样 */
   lines: Span;
-  /** 状态的细分理由：vanished / file-missing / blob-missing / changed */
+  /** 状态的细分理由：vanished / file-missing / blob-missing / changed / unlocated（hash 记忆找不到这段了，位置不明） */
   reason?: string;
   /** 有变动时给人看的 `- / +` 文本 */
   diff?: string;
@@ -131,8 +131,10 @@ export interface Judgement {
 
 /**
  * 比较器：记忆怎么记、变没变怎么判，全在这儿。
- * 两个实现——`git`（产品用，记 blob，按 hunk 跟行段）、`hash`（只记段哈希，不跟行段）。
+ * 三个实现——`git`（任何 git 仓里已提交的文件：记 blob，按 hunk 跟行段）、`hash`（不在 git 里的文件：
+ * 只记段哈希，按滑窗跟行段）、`auto`（默认，住 project：按文件位置挑前两个，核对时按记录的 kind 转发）。
  * 它不读文件：当前整文件的内容由核心从读取器取好了递进来（读不到是 null）。
+ * 记录认不认是它自己的事：别家 kind 的记录交回「未确认」，核心不看 kind。
  */
 export interface Comparator {
   kind: string;
