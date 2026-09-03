@@ -4,6 +4,7 @@
  * 项目根是这个站目录，引用的代码在工作区的 packages/ 下，所以记号里写 `../packages/…`——
  * 读取器按项目根拼路径，git 那头 `HEAD:<路径>` 会自己翻成仓根相对。
  * 名册：默认表展开，再加站里自己定义的组件和它们的压平规则。React 那半在 src/components/mdx.tsx。
+ * outputs：README 和单元根 AGENTS.md 是生成物，正本在 maintain 下那两篇 mdx，render 摆过去。
  */
 import * as fumadocs from "@god-live-doc/format-fumadocs";
 import * as tabs from "./src/components/tabs/tabs.ai.mjs";
@@ -13,6 +14,10 @@ export default {
   docs: "content/docs",
   out: "out",
   comparator: "git",
+  outputs: {
+    "content/docs/maintain/readme.mdx": ["../README.md"],
+    "content/docs/maintain/agents.mdx": ["../../AGENTS.md"],
+  },
   components: {
     ...fumadocs.defaultRoster,
     Tabs: tabs.Tabs,
