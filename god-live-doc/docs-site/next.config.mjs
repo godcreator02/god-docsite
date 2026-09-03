@@ -15,10 +15,10 @@ const config = {
     '@god-live-doc/project',
     '@god-live-doc/core',
   ],
-  // 没有根外的页：站首页和 /docs 都直接进「入门」那个根
+  // 站首页和 /docs 都落到人写的文档规范那页
   redirects: async () => [
-    { source: '/', destination: '/docs/start', permanent: true },
-    { source: '/docs', destination: '/docs/start', permanent: true },
+    { source: '/', destination: '/docs/human-write-spec-dont-change', permanent: true },
+    { source: '/docs', destination: '/docs/human-write-spec-dont-change', permanent: true },
   ],
 };
 
