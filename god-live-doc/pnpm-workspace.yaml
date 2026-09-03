@@ -1,0 +1,6 @@
+packages:
+  - packages/*
+  - docs-site
+
+# format-fumadocs 把 fumadocs 声明成 peer，用的是消费方项目装的那份：这里别自动装一份进来
+autoInstallPeers: false
