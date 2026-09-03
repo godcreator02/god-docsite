@@ -30,7 +30,7 @@
 - 核心零依赖（只用 `node:crypto`），格式包依赖核心（format-md / format-fumadocs 另外用 remark 那套；
   format-fumadocs 可依赖 project，fumadocs 只能是 peer）。`tests/boundary.test.ts` 守着，别绕。
 - 子进程调用一律带超时。
-- 门禁，四摊都要绿才提交：
+- 门禁，五摊都要绿才提交：
   - `god-live-doc/`：`pnpm test`、`pnpm typecheck`、`pnpm build`
   - `god-live-doc/docs-site/`：`pnpm livedoc check`、`pnpm test`、`pnpm build`、`node scripts/verify-roster.mjs`
   - `examples/plain/`：`pnpm test`
