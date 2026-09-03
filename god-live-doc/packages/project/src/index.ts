@@ -6,3 +6,7 @@
 export { diffHunks, git, gitRel, hashText, headBlob, headCommit, inHead, isClean, objectExists, readBlob } from "./git.ts";
 export { createGitComparator } from "./git-comparator.ts";
 export type { GitRecord } from "./git-comparator.ts";
+export { createReader } from "./fs-reader.ts";
+export { createLedger } from "./json-ledger.ts";
+export { configPathOf, docIdOf, loadProject } from "./load.ts";
+export type { Project, ProjectConfig } from "./load.ts";
