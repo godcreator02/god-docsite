@@ -1,0 +1,22 @@
+lockfileVersion: '9.0'
+
+settings:
+  autoInstallPeers: true
+  excludeLinksFromLockfile: false
+
+importers:
+
+  .:
+    dependencies:
+      '@god-live-doc/cli':
+        specifier: link:../../god-live-doc/packages/cli
+        version: link:../../god-live-doc/packages/cli
+      '@god-live-doc/core':
+        specifier: link:../../god-live-doc/packages/core
+        version: link:../../god-live-doc/packages/core
+      '@god-live-doc/format-fumadocs':
+        specifier: link:../../god-live-doc/packages/format-fumadocs
+        version: link:../../god-live-doc/packages/format-fumadocs
+      '@god-live-doc/project':
+        specifier: link:../../god-live-doc/packages/project
+        version: link:../../god-live-doc/packages/project
