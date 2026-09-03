@@ -2,21 +2,49 @@
   "name": "@god-live-doc/format-fumadocs",
   "version": "0.1.0",
   "type": "module",
-  "description": "fumadocs 口味的 mdx 格式包：认引用、写回、名册机制，加 fumadocs 接线（remark 插件、meta 白名单、processed markdown 的序列化回调）与状态点组件。fumadocs 只是 peer",
+  "description": "fumadocs 口味的 mdx 格式包：认引用、写回、名册机制，加 fumadocs 接线（remark 插件、meta 白名单、processed markdown 的序列化回调）与状态点组件。AI 那份 md 由 fumadocs 自己的管线产出，这个包只往树上打标。fumadocs 是 peer：用消费方项目装的那份，包自己不带",
   "exports": {
     ".": {
       "types": "./dist/index.d.mts",
       "default": "./dist/index.mjs"
-    }
+    },
+    "./pre": {
+      "types": "./dist/pre.d.mts",
+      "default": "./dist/pre.mjs"
+    },
+    "./light.css": "./styles/light.css"
   },
   "files": [
-    "dist"
+    "dist",
+    "styles"
   ],
   "scripts": {
     "build": "tsdown",
     "typecheck": "tsc -p tsconfig.json"
   },
   "dependencies": {
-    "@god-live-doc/core": "workspace:*"
+    "@god-live-doc/core": "workspace:*",
+    "@god-live-doc/project": "workspace:*",
+    "remark-frontmatter": "^5.0.0",
+    "remark-mdx": "^3.0.0",
+    "remark-parse": "^11.0.0",
+    "unified": "^11.0.0"
+  },
+  "peerDependencies": {
+    "fumadocs-core": ">=16",
+    "fumadocs-mdx": ">=15",
+    "fumadocs-ui": ">=16",
+    "react": ">=19"
+  },
+  "peerDependenciesMeta": {
+    "fumadocs-core": { "optional": true },
+    "fumadocs-mdx": { "optional": true },
+    "fumadocs-ui": { "optional": true },
+    "react": { "optional": true }
+  },
+  "devDependencies": {
+    "@types/react": "^19.2.18",
+    "fumadocs-ui": "npm:@fumadocs/base-ui@16.15.1",
+    "react": "^19.2.8"
   }
 }

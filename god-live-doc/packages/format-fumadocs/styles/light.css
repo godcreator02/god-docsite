@@ -1,0 +1,46 @@
+/*
+ * 状态点的样式。随包发，站里 `@import '@god-live-doc/format-fumadocs/light.css';` 一行就有。
+ *
+ * 点长什么样：代码块标题栏里、紧贴复制按钮左边的一个 8px 圆点，不写字、不弹悬停提示——点自解释。
+ * 圆点由侧出口的 pre 组件渲成一个 `<span class="livedoc-dot" data-dot="…">`，放在标题栏右侧的
+ * Actions 容器里；容器加了 `livedoc-actions` 类，点和复制按钮横排居中。
+ *
+ * 颜色走 `--livedoc-dot` 变量，站里想换色覆盖 `.livedoc-dot[data-dot="…"]` 的同名变量就行。
+ * 四种：新鲜绿、有变动实心黄、未确认空心黄、缺失红。
+ */
+
+.livedoc-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.livedoc-dot {
+  --livedoc-dot: #a1a1aa;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--livedoc-dot);
+  flex: none;
+  display: inline-block;
+}
+
+.livedoc-dot[data-dot='green'] {
+  --livedoc-dot: #22c55e;
+}
+
+/* 有变动和未确认同属黄，差别用实心 / 空心表示 */
+.livedoc-dot[data-dot='yellow'],
+.livedoc-dot[data-dot='unpinned'] {
+  --livedoc-dot: #eab308;
+}
+
+.livedoc-dot[data-dot='red'] {
+  --livedoc-dot: #ef4444;
+}
+
+/* 未确认：空心圈——黄，但跟「改过了」是两回事 */
+.livedoc-dot[data-dot='unpinned'] {
+  background: transparent;
+  box-shadow: inset 0 0 0 2px var(--livedoc-dot);
+}

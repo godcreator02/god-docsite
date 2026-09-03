@@ -1,5 +1,5 @@
 /**
- * 记号两态的账（md、html 两个格式包）：
+ * 记号两态的账（md、fumadocs 口味的 mdx、html 三个格式包）：
  *   parse(marker(t)) 认回 t——正式记号「怎么写」和「怎么认」住同一个包
  *   草稿记号四种情况：认得出、少一头哨兵不认、写在句子里不认、围栏 / script 里不认
  *   写回：草稿换成正式形态并投影，展示区整段重写而不是追加
@@ -8,9 +8,10 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import * as md from "@god-live-doc/format-md";
 import * as html from "@god-live-doc/format-html";
+import * as mdx from "@god-live-doc/format-fumadocs";
 import type { Fill, Format, Target } from "@god-live-doc/core";
 
-const FORMATS: Format[] = [md as unknown as Format, html as unknown as Format];
+const FORMATS: Format[] = [md as unknown as Format, mdx as unknown as Format, html as unknown as Format];
 const T: Target = { file: "src/greet.ts", a: 2, b: 3 };
 const DRAFT = "@@livedoc ref src/greet.ts:2-3 @@";
 const CODE = ["export function greet(name: string): string {", "  return `hello ${name}`;"];
@@ -33,6 +34,7 @@ test("草稿记号：四种情况——认、少哨兵不认、句子里不认�
     assert.deepEqual(format.parse(`这句话里有 ${DRAFT} 不算\n`), [], `${format.name} 把句子里的当记号了`);
   }
   assert.deepEqual(md.parse("```md\n" + DRAFT + "\n```\n"), [], "md：围栏里的不认");
+  assert.deepEqual(mdx.parse("```md\n" + DRAFT + "\n```\n"), [], "mdx：围栏里的不认");
   assert.deepEqual(html.parse(`<script>\n${DRAFT}\n</script>\n`), [], "html：script 里的不认");
   assert.deepEqual(html.parse('<p>写法是 &lt;pre data-file="src/greet.ts" data-lines="2-3"&gt;&lt;/pre&gt;</p>\n'), [], "html：转义的不认");
 });
