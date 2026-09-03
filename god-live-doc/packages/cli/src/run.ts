@@ -36,6 +36,8 @@ const REASON: Record<string, string> = {
 const MEMORY: Record<string, string> = { hash: "（hash 记忆：不在 git 里）" };
 /** fumadocs 给站上 .md 路由的标题加的锚记（`# 标题 [#锚]`），摆放产物不要 */
 const ANCHOR = /^(#{1,6} .+) \[#[^\]]*\]$/gm;
+/** 序列化器紧跟标点后保守转义的加粗星号（`&#x2A;*` 是逃逸了一半的 `**`），摆放产物还原成可读的加粗 */
+const STAR = /&#x2A;\*/g;
 
 export async function main(argv: string[]): Promise<number> {
   const [command = "check", ...rest] = argv;
@@ -72,7 +74,8 @@ export async function main(argv: string[]): Promise<number> {
 
 type Project = Awaited<ReturnType<typeof loadProject>>;
 
-/** 摆放那份的渲染：问格式包要 ai 产物，再剥掉站上 .md 路由的锚记——README / AGENTS.md 不带那种形态 */
+/** 摆放那份的渲染：问格式包要 ai 产物，再整理成摆放产物的形态——剥站上 .md 路由的锚记、
+ *  还原被保守转义的加粗星号、去掉 frontmatter 段留下的开头空行 */
 async function renderPlaced(project: Project, doc: string, text: string, format: Format): Promise<string> {
   const listing = project.service.resolve(doc, text);
   const out = await format.renderAi!(text, listing, {
@@ -81,7 +84,7 @@ async function renderPlaced(project: Project, doc: string, text: string, format:
     roster: project.roster,
     config: project.config as unknown as Record<string, unknown>,
   });
-  return out.replace(ANCHOR, "$1");
+  return out.replace(ANCHOR, "$1").replace(STAR, "**").replace(/^\n+/, "");
 }
 
 /** 一行说明后面的括号：红的理由，目录树的项数或多了少了哪些 */
