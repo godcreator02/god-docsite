@@ -1,9 +1,68 @@
 ---
 title: 维护者手册
 description: 仓布局、四摊门禁、提交规矩、发布、老仓退役条件
-livedoc: draft
 ---
 
 # 维护者手册
 
-（待写。本章钉：根 `../../AGENTS.md` 的门禁段、`../package.json` 的脚本。）
+这一章回答：要改这个仓的代码，东西都放在哪儿、提交前得跑绿哪几条、提交怎么写、发布是什么状况。
+
+## 仓布局
+
+```text
+单元根                          = git 仓
+  AGENTS.md  CLAUDE.md  unit.json
+  god-live-doc/                 pnpm 包工作区
+    packages/                   core、project、cli、format-md、format-fumadocs、format-html
+    docs-site/                  这个站：用这套机制写自己的文档，也是工作区成员
+    tests/                      工作区级测试（八个文件）
+  examples/                     邻居示例，外部引用这套包的消费方
+    fumadocs-site/              外部 fumadocs 站
+    plain/                      手写 html + 纯 md，比较器换成 hash
+```
+
+示例各自 link 依赖 `../../god-live-doc/packages/*`，各自 `pnpm install`、各自跑测试——它们扮演的就是
+「装了这几个包的别人家项目」。
+
+## 四摊门禁：都绿才提交
+
+{/* ref file="../../AGENTS.md" lines="32-36" */}
+
+工作区那一摊的三条脚本：
+
+{/* ref file="../package.json" lines="7-11" */}
+
+站这一摊四条，站自己的 `package.json` 里：
+
+{/* ref file="package.json" lines="7-12" */}
+
+外加 `node scripts/verify-roster.mjs`（[名册](/docs/formats/roster)两头对）和 `pnpm livedoc check`。
+
+<Note>
+  **动了被引用到的源码，`livedoc confirm` 之前先 commit**。git 比较器只对已提交、工作区干净的内容钉，
+  否则那一篇整篇拒。顺序是：改代码 → 跑门禁 → commit → `livedoc confirm` → 把文档和记录簿一起再 commit。
+</Note>
+
+## 写代码的规矩
+
+{/* ref file="../../AGENTS.md" lines="26-31" */}
+
+再补两条站这边的：改了格式包的代码，站要**先删 `.next` 再 build** 才看得见（Turbopack 只按 mdx 内容缓存）；
+调试站用 `next build` + `next start`，不用 dev，起的站验完必须停掉。
+
+## 提交规矩
+
+按步骤拆，一个提交一件事。文档章节和它带来的记录簿改动放在同一个提交里——记录簿就是那一章的记忆，
+分开提交等于让中间那个提交自相矛盾。提交信息中文，末尾带会话里给的 `Co-Authored-By` 与 `Claude-Session` 两行。
+
+## 发布：能发，没发
+
+六个包都没写 `private`，也没配发布流程。真要发之前得先想清楚版本策略（六个包同版本还是各走各的），
+见 [待定与路线图](/docs/maintain/roadmap)。现在消费方都是 `workspace:*` 或 `link:` 引的。
+
+## 参考，只读
+
+{/* ref file="../../AGENTS.md" lines="17-22" */}
+
+实验室是架构定案的出处（教学代码，要搬逻辑就搬，别 `import` 它）；老仓是 git 记忆那条线的出处。
+**老仓的退役条件**是：除目录型、存在性引用之外，功能面对齐。对齐了它就退役，不再是参考。
