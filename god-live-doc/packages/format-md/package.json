@@ -1,5 +1,5 @@
 {
-  "name": "@god-live-doc/format-md",
+  "name": "@godcreator02/live-doc-format-md",
   "version": "0.1.0",
   "type": "module",
   "description": "md 格式包：注释记号 + 围栏展示区 + 尾注释",
@@ -14,10 +14,11 @@
   ],
   "scripts": {
     "build": "tsdown",
-    "typecheck": "tsc -p tsconfig.json"
+    "typecheck": "tsc -p tsconfig.json",
+    "prepublishOnly": "pnpm run build"
   },
   "dependencies": {
-    "@god-live-doc/core": "workspace:*",
+    "@godcreator02/live-doc-core": "workspace:*",
     "remark-frontmatter": "^5.0.0",
     "remark-parse": "^11.0.0",
     "unified": "^11.0.0",
@@ -25,5 +26,8 @@
   },
   "devDependencies": {
     "@types/mdast": "^4.0.4"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }

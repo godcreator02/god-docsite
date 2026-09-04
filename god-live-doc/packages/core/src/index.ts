@@ -1,5 +1,5 @@
 /**
- * @god-live-doc/core——核心包的唯一出口。零依赖（只用 node:crypto）。
+ * @godcreator02/live-doc-core——核心包的唯一出口。零依赖（只用 node:crypto）。
  * types 是契约正本，span / diff 是几个比较器共用的纯函数，service 是编排。
  */
 

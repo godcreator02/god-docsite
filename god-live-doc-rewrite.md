@@ -161,3 +161,22 @@ render 摆过去，从此目标文件不再手写。
 - 目标文件没有「保护标记」：迁移路线是先把内容搬进 mdx 再挂映射，render 直接覆盖。`CLAUDE.md` 这种
   一行 `@AGENTS.md` 的桩保持手写，不进映射。
 - `renderAi` 的名字与 `--target` 语义不动：摆放出的就是平 md 这一种形态。skill（目录形态：SKILL.md 加资源）押后。
+
+## 十二、更名 @godcreator02 与首发（2026-09-04 定）
+
+六包从 `@god-live-doc/*` 更名进 `@godcreator02` scope，发进本机 Verdaccio——让其他单元的项目按精确版本装得到。
+scope 已有的 registry 规则（config 的 publish 权、~/.npmrc 的映射）原样复用，Verdaccio config 与 npmrc 都不动。
+
+| 旧 | 新 |
+| --- | --- |
+| @god-live-doc/core | @godcreator02/live-doc-core |
+| @god-live-doc/project | @godcreator02/live-doc-project |
+| @god-live-doc/cli | @godcreator02/live-doc-cli |
+| @god-live-doc/format-md | @godcreator02/live-doc-format-md |
+| @god-live-doc/format-fumadocs | @godcreator02/live-doc-format-fumadocs |
+| @god-live-doc/format-html | @godcreator02/live-doc-format-html |
+
+- **六包同版本**（当前 0.1.0），一起动一起发；内部依赖 `workspace:*`，`pnpm publish` 时自动替换成精确版本——发布纪律照总控台 `registry.md`：版本人改、同版本号永不重发、`files` 白名单加 `prepublishOnly`、发前 `pnpm pack --dry-run` 核清单。
+- **devkit release 不适用于这套包**：它的门禁是插件形态专用（scope 之外还查 exports 指 lib/、cordis.patch.yml 等），且假设一仓一包一插件。这套包手跑：工作区根 `pnpm build` → 逐包核清单 → `pnpm -r publish --no-git-checks`（docs-site 是 private 自动跳过）→ devkit `registry status` 核对 → 逐包 git tag（`@godcreator02/live-doc-core@0.1.0` 形式）。
+- **消费姿势**：纯库不走 `dsh plugin add`，消费方 devDependencies 按精确版本引入（如 `@godcreator02/live-doc-cli@0.1.0`）。
+- 第一个外部用户是 god-example（单元 26083120lks）：插件仓加 fumadocs 站（一仓一插件一站），README / CLAUDE.md 生成化，docs 迁站页钉真源码——它是后续插件接入的样板。

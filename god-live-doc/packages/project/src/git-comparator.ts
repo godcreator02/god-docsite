@@ -12,8 +12,8 @@
  *   整文件不映行段，只比整文件哈希，黄的 diff 是整份对整份。
  */
 
-import { fileText, hashSpan, lineCount, mapRange, mappedSpan, normalizeLines, renderDiff, sliceSpan, targetKey, wantedSpan } from "@god-live-doc/core";
-import type { Comparator, Judgement, MemoRecord, Snapshot, Span, Target } from "@god-live-doc/core";
+import { fileText, hashSpan, lineCount, mapRange, mappedSpan, normalizeLines, renderDiff, sliceSpan, targetKey, wantedSpan } from "@godcreator02/live-doc-core";
+import type { Comparator, Judgement, MemoRecord, Snapshot, Span, Target } from "@godcreator02/live-doc-core";
 import { diffHunks, hasCommits, headBlob, headCommit, inHead, isClean, isIgnored, locate, objectExists, readBlob } from "./git.ts";
 
 /** git 版的记录。lines 是**旧 blob 里**的位置，judge 从那儿出发往今天映 */

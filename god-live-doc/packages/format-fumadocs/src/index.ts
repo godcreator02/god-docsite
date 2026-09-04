@@ -1,5 +1,5 @@
 /**
- * @god-live-doc/format-fumadocs——fumadocs 口味的 mdx，一个格式一个包。
+ * @godcreator02/live-doc-format-fumadocs——fumadocs 口味的 mdx，一个格式一个包。
  *   ① 识别与写回：parse / write，核心会调的；名册检查 lintComponents 给 check 用
  *   ② 渲染：renderAi 让 fumadocs 的 loader 出 md；人看那份就是站本身，命令行没有 human 渲染
  *   ③ 接线：livedocMdxOptions 挂进 source.config，livedocMarkdownOptions 挂进集合的 postprocess
@@ -7,11 +7,11 @@
  * 换宿主就是换这一个包：核心、project、cli、别的格式包一个不碰 fumadocs。
  *
  * 侧出口两个，不混进主出口（一个含 React，一个是样式）：
- *   @god-live-doc/format-fumadocs/pre         状态点的 pre 组件（"use client"）
- *   @god-live-doc/format-fumadocs/light.css   状态点的样式
+ *   @godcreator02/live-doc-format-fumadocs/pre         状态点的 pre 组件（"use client"）
+ *   @godcreator02/live-doc-format-fumadocs/light.css   状态点的样式
  */
-import { formalOf } from "@god-live-doc/core";
-import type { Fill, Reference, Target } from "@god-live-doc/core";
+import { formalOf } from "@godcreator02/live-doc-core";
+import type { Fill, Reference, Target } from "@godcreator02/live-doc-core";
 import { recognize } from "./recognize.ts";
 import { parseTree } from "./render.ts";
 import { defaultRoster, unknownComponents } from "./roster.ts";

@@ -5,7 +5,7 @@
  *                  文件对上，data-dot 只带状态点的颜色；点长什么样归站的 pre 组件
  *   data.livedoc   给 md 的序列化回调：md 里不要 meta，要一行来源注释
  */
-import type { Listing } from "@god-live-doc/core";
+import type { Listing } from "@godcreator02/live-doc-core";
 import { nodeFor } from "./blocks.ts";
 import { draftIn, markerOf } from "./recognize.ts";
 import { lineOf, walk } from "./tree.ts";

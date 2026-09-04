@@ -9,7 +9,7 @@ import defaultMdxComponents from 'fumadocs-ui/mdx';
 import { File, Files, Folder } from 'fumadocs-ui/components/files';
 import type { MDXComponents } from 'mdx/types';
 import type { ReactNode } from 'react';
-import { LivedocPre } from '@god-live-doc/format-fumadocs/pre';
+import { LivedocPre } from '@godcreator02/live-doc-format-fumadocs/pre';
 import type { ComponentName } from './registry';
 import { Tabs, Tab } from './tabs/tabs';
 

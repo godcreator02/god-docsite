@@ -1,5 +1,5 @@
 /**
- * @god-live-doc/format-html——html 格式包。零依赖只吃核心。
+ * @godcreator02/live-doc-format-html——html 格式包。零依赖只吃核心。
  *
  * 正式记号是 html 自己的东西：一个带 livedoc data- 属性的元素，既是标记又是展示区，没有尾标记，元素的闭合就是边界：
  *   <pre data-file="src/greet.ts" data-lines="2-3"></pre>     行段
@@ -16,8 +16,8 @@
  * 认法：逐行扫，开标签带 livedoc data- 属性的算引用，开标签要写在一行里；<script> / <style> 里的跳过；
  * 写成 &lt;pre 的转义文本天然不匹配。
  */
-import { draftOf, toTarget } from "@god-live-doc/core";
-import type { Fill, Reference, Target } from "@god-live-doc/core";
+import { draftOf, toTarget } from "@godcreator02/live-doc-core";
+import type { Fill, Reference, Target } from "@godcreator02/live-doc-core";
 
 export const name = "html";
 export const claims = (doc: string): boolean => doc.endsWith(".html") || doc.endsWith(".htm");

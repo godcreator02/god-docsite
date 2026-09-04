@@ -1,5 +1,5 @@
 {
-  "name": "@god-live-doc/core",
+  "name": "@godcreator02/live-doc-core",
   "version": "0.1.0",
   "type": "module",
   "description": "核心：引用模型、比较器接口、编排服务。零依赖，只认注入进来的格式包、读取器、记录簿、比较器",
@@ -9,9 +9,15 @@
       "default": "./dist/index.mjs"
     }
   },
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "build": "tsdown",
-    "typecheck": "tsc -p tsconfig.json"
+    "typecheck": "tsc -p tsconfig.json",
+    "prepublishOnly": "pnpm run build"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }

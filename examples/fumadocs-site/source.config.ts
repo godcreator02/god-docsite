@@ -7,7 +7,7 @@
  * fumadocs 的 Node loader 只认 source.config 里的集合（import 时带 ?collection=docs）。
  */
 import { defineConfig, defineDocs } from 'fumadocs-mdx/config';
-import { livedocMdxOptions, livedocMarkdownOptions } from '@god-live-doc/format-fumadocs';
+import { livedocMdxOptions, livedocMarkdownOptions } from '@godcreator02/live-doc-format-fumadocs';
 
 export const docs = defineDocs({
   dir: 'content/docs',

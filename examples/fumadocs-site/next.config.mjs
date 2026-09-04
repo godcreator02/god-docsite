@@ -11,9 +11,9 @@ const config = {
   turbopack: { root: path.resolve(process.cwd(), '..', '..') },
   // 这几个包只在服务端跑、还要读盘和调 git，标成外部包让 Node 自己解析
   serverExternalPackages: [
-    '@god-live-doc/format-fumadocs',
-    '@god-live-doc/project',
-    '@god-live-doc/core',
+    '@godcreator02/live-doc-format-fumadocs',
+    '@godcreator02/live-doc-project',
+    '@godcreator02/live-doc-core',
   ],
 };
 

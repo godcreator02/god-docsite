@@ -9,7 +9,7 @@ import { execFileSync } from "node:child_process";
 import { cpSync, mkdtempSync, readFileSync, rmSync, symlinkSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { main } from "@god-live-doc/cli";
+import { main } from "@godcreator02/live-doc-cli";
 
 const HERE = process.cwd();
 const DOC = "docs/handbook.mdx";

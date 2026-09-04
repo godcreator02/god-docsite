@@ -2,8 +2,8 @@
  * 假格式包：记号是一行 `REF <记录簿键>`（`REF src/greet.ts:2-3`、`REF tree src depth=1`……），草稿记号交给核心认，
  * write 只重写记号那一行。核心和比较器的测试都用它——核心不认识任何真格式，测它就不该把真格式包拉进来。
  */
-import { draftOf, keyToTarget, targetKey } from "@god-live-doc/core";
-import type { Fill, Format, Reference } from "@god-live-doc/core";
+import { draftOf, keyToTarget, targetKey } from "@godcreator02/live-doc-core";
+import type { Fill, Format, Reference } from "@godcreator02/live-doc-core";
 
 const MARK = /^REF\s+(.+)$/;
 

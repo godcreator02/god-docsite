@@ -12,7 +12,7 @@ import { unified } from "unified";
 import remarkParse from "remark-parse";
 import remarkFrontmatter from "remark-frontmatter";
 import remarkMdx from "remark-mdx";
-import type { Listing, RenderContext } from "@god-live-doc/core";
+import type { Listing, RenderContext } from "@godcreator02/live-doc-core";
 import type { TreeNode } from "./tree.ts";
 
 export function parseTree(text: string): TreeNode {

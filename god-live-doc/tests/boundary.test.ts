@@ -57,9 +57,9 @@ test("fumadocs 格式包的产物里不许打进 fumadocs 或 react，只许 imp
 });
 
 test("html 格式包只依赖核心；命令行和装配不依赖任何格式包", () => {
-  assert.deepEqual(depsOf(pkgs["format-html"]!), ["@god-live-doc/core"]);
+  assert.deepEqual(depsOf(pkgs["format-html"]!), ["@godcreator02/live-doc-core"]);
   for (const name of ["cli", "project"]) {
-    for (const dep of depsOf(pkgs[name]!)) assert.ok(!dep.startsWith("@god-live-doc/format-"), `${name} 依赖了格式包 ${dep}`);
+    for (const dep of depsOf(pkgs[name]!)) assert.ok(!dep.startsWith("@godcreator02/live-doc-format-"), `${name} 依赖了格式包 ${dep}`);
   }
 });
 
@@ -76,7 +76,7 @@ test("core 源码只 import 自己和 node:crypto——它不读文件、不起�
 
 test("每个格式包都实现了核心要的那五样", async () => {
   for (const name of ["format-md", "format-fumadocs", "format-html"]) {
-    const mod = (await import(`@god-live-doc/${name}`)) as Record<string, unknown>;
+    const mod = (await import(`@godcreator02/live-doc-${name}`)) as Record<string, unknown>;
     for (const key of ["name", "claims", "parse", "write", "marker"]) {
       assert.ok(mod[key] !== undefined, `${name} 少了 ${key}`);
     }

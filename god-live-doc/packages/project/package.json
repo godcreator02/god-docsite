@@ -1,5 +1,5 @@
 {
-  "name": "@god-live-doc/project",
+  "name": "@godcreator02/live-doc-project",
   "version": "0.1.0",
   "type": "module",
   "description": "装配：读 livedoc.config、造读取器 / json 记录簿 / git 比较器，塞给核心的 createService；同一个根只装配一次",
@@ -14,9 +14,13 @@
   ],
   "scripts": {
     "build": "tsdown",
-    "typecheck": "tsc -p tsconfig.json"
+    "typecheck": "tsc -p tsconfig.json",
+    "prepublishOnly": "pnpm run build"
   },
   "dependencies": {
-    "@god-live-doc/core": "workspace:*"
+    "@godcreator02/live-doc-core": "workspace:*"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }

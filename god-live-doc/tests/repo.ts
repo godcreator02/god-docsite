@@ -6,9 +6,9 @@ import { execFileSync } from "node:child_process";
 import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
-import { createHashComparator, createService, targetKey, keyToTarget } from "@god-live-doc/core";
-import type { Comparator, Format, Ledger, MemoRecord, Service } from "@god-live-doc/core";
-import { createAutoComparator, createGitComparator, createReader } from "@god-live-doc/project";
+import { createHashComparator, createService, targetKey, keyToTarget } from "@godcreator02/live-doc-core";
+import type { Comparator, Format, Ledger, MemoRecord, Service } from "@godcreator02/live-doc-core";
+import { createAutoComparator, createGitComparator, createReader } from "@godcreator02/live-doc-project";
 
 export const CODE = [
   "// greet",
@@ -24,7 +24,7 @@ export function run(cwd: string, args: string[]): string {
   return execFileSync("git", args, { cwd, encoding: "utf8", timeout: 30_000, stdio: ["pipe", "pipe", "pipe"] });
 }
 
-/** 内存记录簿，够测试用；落盘那份在 @god-live-doc/project */
+/** 内存记录簿，够测试用；落盘那份在 @godcreator02/live-doc-project */
 export function memoryLedger(): Ledger & { dump(): Record<string, Record<string, MemoRecord>> } {
   const data: Record<string, Record<string, MemoRecord>> = {};
   return {

@@ -4,10 +4,10 @@
  */
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import * as fumadocs from "@god-live-doc/format-fumadocs";
-import { DOT_COLOR, applyListing, defaultRoster, livedocMarkdownOptions, parseMetaString, parseTree, stamp, walk, whereOf } from "@god-live-doc/format-fumadocs";
-import type { Roster, TreeNode } from "@god-live-doc/format-fumadocs";
-import type { Item, Listing, Target } from "@god-live-doc/core";
+import * as fumadocs from "@godcreator02/live-doc-format-fumadocs";
+import { DOT_COLOR, applyListing, defaultRoster, livedocMarkdownOptions, parseMetaString, parseTree, stamp, walk, whereOf } from "@godcreator02/live-doc-format-fumadocs";
+import type { Roster, TreeNode } from "@godcreator02/live-doc-format-fumadocs";
+import type { Item, Listing, Target } from "@godcreator02/live-doc-core";
 
 const T: Target = { kind: "span", file: "src/greet.ts", a: 2, b: 3 };
 const CURRENT = ["export function greet(name: string): string {", "  return `hello ${name}`;"];

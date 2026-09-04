@@ -6,7 +6,7 @@
  * 名册：默认表展开，再加站里自己定义的组件和它们的压平规则。React 那半在 src/components/mdx.tsx。
  * outputs：README 和单元根 AGENTS.md 是生成物，正本在 maintain 下那两篇 mdx，render 摆过去。
  */
-import * as fumadocs from "@god-live-doc/format-fumadocs";
+import * as fumadocs from "@godcreator02/live-doc-format-fumadocs";
 import * as tabs from "./src/components/tabs/tabs.ai.mjs";
 
 export default {

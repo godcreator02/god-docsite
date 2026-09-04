@@ -15,7 +15,7 @@ const NAMES = ["core", "project", "cli", "format-md", "format-fumadocs", "format
 test("六个包齐、包名带 scope、版本 0.1.0", () => {
   for (const name of NAMES) {
     const pkg = JSON.parse(readFileSync(join(PACKAGES, name, "package.json"), "utf8")) as { name: string; version: string };
-    assert.equal(pkg.name, `@god-live-doc/${name}`);
+    assert.equal(pkg.name, `@godcreator02/live-doc-${name}`);
     assert.equal(pkg.version, "0.1.0");
   }
 });

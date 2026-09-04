@@ -6,10 +6,10 @@
  */
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import * as md from "@god-live-doc/format-md";
-import * as html from "@god-live-doc/format-html";
-import * as mdx from "@god-live-doc/format-fumadocs";
-import type { Fill, Format, Target } from "@god-live-doc/core";
+import * as md from "@godcreator02/live-doc-format-md";
+import * as html from "@godcreator02/live-doc-format-html";
+import * as mdx from "@godcreator02/live-doc-format-fumadocs";
+import type { Fill, Format, Target } from "@godcreator02/live-doc-core";
 
 const FORMATS: Format[] = [md as unknown as Format, mdx as unknown as Format, html as unknown as Format];
 const T: Target = { kind: "span", file: "src/greet.ts", a: 2, b: 3 };

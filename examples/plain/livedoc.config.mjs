@@ -5,8 +5,8 @@
  * 代码往下挪了它只会说「有变动」，说不出挪到哪儿了，也拿不回旧内容。
  * 好处是没有「先 commit 再 confirm」这道门，随便一个目录都能用。
  */
-import * as md from "@god-live-doc/format-md";
-import * as html from "@god-live-doc/format-html";
+import * as md from "@godcreator02/live-doc-format-md";
+import * as html from "@godcreator02/live-doc-format-html";
 
 export default {
   formats: [md, html],

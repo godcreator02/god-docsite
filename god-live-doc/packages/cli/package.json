@@ -1,5 +1,5 @@
 {
-  "name": "@god-live-doc/cli",
+  "name": "@godcreator02/live-doc-cli",
   "version": "0.1.0",
   "type": "module",
   "description": "命令行：check / confirm / render",
@@ -17,10 +17,14 @@
   ],
   "scripts": {
     "build": "tsdown",
-    "typecheck": "tsc -p tsconfig.json"
+    "typecheck": "tsc -p tsconfig.json",
+    "prepublishOnly": "pnpm run build"
   },
   "dependencies": {
-    "@god-live-doc/core": "workspace:*",
-    "@god-live-doc/project": "workspace:*"
+    "@godcreator02/live-doc-core": "workspace:*",
+    "@godcreator02/live-doc-project": "workspace:*"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }

@@ -8,7 +8,7 @@
  */
 import { readdirSync, readFileSync, statSync } from "node:fs";
 import { join, resolve } from "node:path";
-import type { Reader } from "@god-live-doc/core";
+import type { Reader } from "@godcreator02/live-doc-core";
 import { git, locate } from "./git.ts";
 
 /** glob 只认 * 和 ?；匹配的是名字，不是路径 */

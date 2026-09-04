@@ -5,7 +5,7 @@
  *   remarkLivedocHost({ root })   异步 attacher：站构建时 loader 并发调，项目只装配一次
  * 插件挂在链尾：前面是 fumadocs 的 remarkInclude 和预设（标题 id、gfm……），后面就是它自己的 postprocess。
  */
-import { loadProject } from "@god-live-doc/project";
+import { loadProject } from "@godcreator02/live-doc-project";
 import { remarkLivedoc } from "./remark-plugin.ts";
 import type { PluginFile } from "./remark-plugin.ts";
 import type { Roster } from "./roster.ts";

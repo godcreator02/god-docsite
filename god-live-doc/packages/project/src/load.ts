@@ -6,8 +6,8 @@
 import { existsSync, readFileSync, readdirSync, statSync, writeFileSync } from "node:fs";
 import { isAbsolute, join, relative, resolve, sep } from "node:path";
 import { pathToFileURL } from "node:url";
-import { createHashComparator, createKindComparator, createService } from "@god-live-doc/core";
-import type { Comparator, Format, Service } from "@god-live-doc/core";
+import { createHashComparator, createKindComparator, createService } from "@godcreator02/live-doc-core";
+import type { Comparator, Format, Service } from "@godcreator02/live-doc-core";
 import { createAutoComparator } from "./auto-comparator.ts";
 import { createReader } from "./fs-reader.ts";
 import { createGitComparator } from "./git-comparator.ts";

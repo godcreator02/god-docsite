@@ -1,5 +1,5 @@
 /**
- * @god-live-doc/project——消费方项目的装配。
+ * @godcreator02/live-doc-project——消费方项目的装配。
  * 读取器、记录簿、比较器都在这儿造；git 那条线（定位文件在哪个仓、blob、hunk 表、行段跟随）也住这儿——核心不碰子进程。
  */
 

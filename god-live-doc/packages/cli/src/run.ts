@@ -10,9 +10,9 @@
  */
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
-import { targetKey } from "@god-live-doc/core";
-import type { Format, Item, Listing } from "@god-live-doc/core";
-import { loadProject } from "@god-live-doc/project";
+import { targetKey } from "@godcreator02/live-doc-core";
+import type { Format, Item, Listing } from "@godcreator02/live-doc-core";
+import { loadProject } from "@godcreator02/live-doc-project";
 
 const MARK: Record<string, string> = { fresh: "🟢", changed: "🟡", missing: "🔴", unconfirmed: "⚪" };
 const LABEL: Record<string, string> = {

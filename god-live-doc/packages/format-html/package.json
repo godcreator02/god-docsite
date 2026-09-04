@@ -1,5 +1,5 @@
 {
-  "name": "@god-live-doc/format-html",
+  "name": "@godcreator02/live-doc-format-html",
   "version": "0.1.0",
   "type": "module",
   "description": "html 格式包：元素既是记号又是展示区，文件即终态",
@@ -14,9 +14,13 @@
   ],
   "scripts": {
     "build": "tsdown",
-    "typecheck": "tsc -p tsconfig.json"
+    "typecheck": "tsc -p tsconfig.json",
+    "prepublishOnly": "pnpm run build"
   },
   "dependencies": {
-    "@god-live-doc/core": "workspace:*"
+    "@godcreator02/live-doc-core": "workspace:*"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }

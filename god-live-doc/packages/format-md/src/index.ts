@@ -1,5 +1,5 @@
 /**
- * @god-live-doc/format-md——md 格式包。
+ * @godcreator02/live-doc-format-md——md 格式包。
  * 识别走 remark：引用标记是一个 html 节点，代码围栏里的同样文字是 code 节点，天然分得开。
  * 记号是一条 html 注释，载荷是核心定的那一截：`<!-- ref file="…" lines="a-b" -->`、`<!-- tree dir="…" depth="1" -->`、
  * `<!-- exists path="…" -->`、`<!-- absent path="…" -->`、`<!-- has file="…" text="…" -->`。
@@ -10,8 +10,8 @@ import { unified } from "unified";
 import remarkParse from "remark-parse";
 import remarkFrontmatter from "remark-frontmatter";
 import { visit } from "unist-util-visit";
-import { draftOf, formalOf, parseFormal, wordOf } from "@god-live-doc/core";
-import type { Fill, Reference, Target } from "@god-live-doc/core";
+import { draftOf, formalOf, parseFormal, wordOf } from "@godcreator02/live-doc-core";
+import type { Fill, Reference, Target } from "@godcreator02/live-doc-core";
 import type { Root } from "mdast";
 
 const OPEN = /^<!--\s*((?:ref|tree|exists|absent|has)\b.*?)\s*-->\s*$/;

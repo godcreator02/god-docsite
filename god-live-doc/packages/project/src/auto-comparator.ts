@@ -11,8 +11,8 @@
  * 认不得的 kind 当没确认过。
  */
 
-import { createHashComparator, createKindComparator, fileOf, targetKey } from "@god-live-doc/core";
-import type { Comparator, Judgement, MemoRecord, Snapshot, Target } from "@god-live-doc/core";
+import { createHashComparator, createKindComparator, fileOf, targetKey } from "@godcreator02/live-doc-core";
+import type { Comparator, Judgement, MemoRecord, Snapshot, Target } from "@godcreator02/live-doc-core";
 import { hasCommits, isIgnored, locate } from "./git.ts";
 import { createGitComparator } from "./git-comparator.ts";
 

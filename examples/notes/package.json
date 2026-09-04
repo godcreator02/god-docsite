@@ -9,9 +9,9 @@
     "test": "node --test \"tests/*.test.mjs\""
   },
   "dependencies": {
-    "@god-live-doc/cli": "link:../../god-live-doc/packages/cli",
-    "@god-live-doc/core": "link:../../god-live-doc/packages/core",
-    "@god-live-doc/format-fumadocs": "link:../../god-live-doc/packages/format-fumadocs",
-    "@god-live-doc/project": "link:../../god-live-doc/packages/project"
+    "@godcreator02/live-doc-cli": "link:../../god-live-doc/packages/cli",
+    "@godcreator02/live-doc-core": "link:../../god-live-doc/packages/core",
+    "@godcreator02/live-doc-format-fumadocs": "link:../../god-live-doc/packages/format-fumadocs",
+    "@godcreator02/live-doc-project": "link:../../god-live-doc/packages/project"
   }
 }

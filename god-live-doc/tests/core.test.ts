@@ -13,8 +13,8 @@ import {
   keyToTarget,
   normalizeLines,
   sliceSpan,
-} from "@god-live-doc/core";
-import type { Comparator, Ledger, MemoRecord, Reader, Reference, Target } from "@god-live-doc/core";
+} from "@godcreator02/live-doc-core";
+import type { Comparator, Ledger, MemoRecord, Reader, Reference, Target } from "@godcreator02/live-doc-core";
 import { fakeFormat } from "./fake-format.ts";
 
 const CODE = ["// greet", "export function greet(name: string): string {", "  return `hello ${name}`;", "}", ""];

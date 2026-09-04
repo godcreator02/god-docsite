@@ -9,7 +9,7 @@ import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
-import { main } from "@god-live-doc/cli";
+import { main } from "@godcreator02/live-doc-cli";
 import { CODE, run } from "./repo.ts";
 
 const PACKAGES = join(dirname(fileURLToPath(import.meta.url)), "..", "packages");

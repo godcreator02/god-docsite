@@ -13,8 +13,8 @@ import { execFileSync } from "node:child_process";
 import { existsSync, mkdtempSync, realpathSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { basename, dirname, join, relative, resolve, sep } from "node:path";
-import { parseHunks } from "@god-live-doc/core";
-import type { Hunk } from "@god-live-doc/core";
+import { parseHunks } from "@godcreator02/live-doc-core";
+import type { Hunk } from "@godcreator02/live-doc-core";
 
 /** 每次调 git 都给上限：卡住的子进程比错误的答案更难查 */
 const LIMITS = { timeout: 30_000, maxBuffer: 64 * 1024 * 1024 } as const;

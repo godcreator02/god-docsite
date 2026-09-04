@@ -16,10 +16,10 @@ livedoc: none
 ## 怎么装
 
 ```bash
-pnpm add -D @god-live-doc/cli @god-live-doc/project @god-live-doc/format-fumadocs
+pnpm add -D @godcreator02/live-doc-cli @godcreator02/live-doc-project @godcreator02/live-doc-format-fumadocs
 ```
 
-写 md 或手写 html 就把 `format-fumadocs` 换成 `@god-live-doc/format-md` / `@god-live-doc/format-html`，
+写 md 或手写 html 就把 `format-fumadocs` 换成 `@godcreator02/live-doc-format-md` / `@godcreator02/live-doc-format-html`，
 一个项目里几个格式包可以并存（各认各的后缀）。fumadocs 在格式包里只是 **peer**——用你项目里装的那份。
 
 ## 怎么接
@@ -29,7 +29,7 @@ pnpm add -D @god-live-doc/cli @god-live-doc/project @god-live-doc/format-fumadoc
 命令行和站读的是同一份：
 
 ```js
-import * as fumadocs from "@god-live-doc/format-fumadocs";
+import * as fumadocs from "@godcreator02/live-doc-format-fumadocs";
 import * as tabs from "./src/components/tabs/tabs.ai.mjs";
 
 export default {
@@ -81,7 +81,7 @@ export default {
 
 ```ts
 import { defineConfig, defineDocs } from 'fumadocs-mdx/config';
-import { livedocMdxOptions, livedocMarkdownOptions } from '@god-live-doc/format-fumadocs';
+import { livedocMdxOptions, livedocMarkdownOptions } from '@godcreator02/live-doc-format-fumadocs';
 
 export const docs = defineDocs({
   dir: 'content/docs',
@@ -96,19 +96,19 @@ export default defineConfig({
 `src/components/mdx.tsx` 里把 `pre` 换成会画状态点的那个，再注册 fumadocs 自己的文件树三件（目录树引用注入的就是它们）：
 
 ```tsx
-import { LivedocPre } from '@god-live-doc/format-fumadocs/pre';
+import { LivedocPre } from '@godcreator02/live-doc-format-fumadocs/pre';
 import { File, Files, Folder } from 'fumadocs-ui/components/files';
 // …
 Files, Folder, File,
 pre: LivedocPre as unknown as NonNullable<MDXComponents['pre']>,
 ```
 
-`global.css` 里引一行样式：`@import '@god-live-doc/format-fumadocs/light.css';`
+`global.css` 里引一行样式：`@import '@godcreator02/live-doc-format-fumadocs/light.css';`
 
 `next.config.mjs` 里把这三个包标成外部包（它们只在服务端跑，还要读盘和调 git）：
 
 ```js
-serverExternalPackages: ['@god-live-doc/format-fumadocs', '@god-live-doc/project', '@god-live-doc/core'],
+serverExternalPackages: ['@godcreator02/live-doc-format-fumadocs', '@godcreator02/live-doc-project', '@godcreator02/live-doc-core'],
 ```
 
 ## 怎么跑

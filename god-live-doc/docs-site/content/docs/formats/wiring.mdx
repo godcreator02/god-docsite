@@ -12,7 +12,7 @@ description: 一个项目怎么把 god-live-doc 挂上——配置一份、站�
 
 <Tabs>
   <Tab title="pnpm">
-    `pnpm add -D @god-live-doc/cli @god-live-doc/project @god-live-doc/format-fumadocs`
+    `pnpm add -D @godcreator02/live-doc-cli @godcreator02/live-doc-project @godcreator02/live-doc-format-fumadocs`
   </Tab>
   <Tab title="别的格式">
     只写 md 或手写 html，就把 `format-fumadocs` 换成 `format-md` / `format-html`，别的一样。
@@ -47,7 +47,7 @@ fumadocs 在格式包里只是 peer——用你项目里装的那份，包自己
 {/* ref file="source.config.ts" lines="12-22" */}
 
 再两行：`src/components/mdx.tsx` 里把 `pre` 换成格式包的 `LivedocPre`（它读 `data-dot` 画点），
-`global.css` 里 `@import '@god-live-doc/format-fumadocs/light.css'`。
+`global.css` 里 `@import '@godcreator02/live-doc-format-fumadocs/light.css'`。
 
 ## 四、三条命令
 

@@ -3,8 +3,8 @@
  * save 只在内容真变了才写盘：记录簿会被构建工具登记成依赖，白改一次 mtime 就是一次全站重编。
  */
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
-import { keyToTarget, targetKey } from "@god-live-doc/core";
-import type { Ledger, MemoRecord } from "@god-live-doc/core";
+import { keyToTarget, targetKey } from "@godcreator02/live-doc-core";
+import type { Ledger, MemoRecord } from "@godcreator02/live-doc-core";
 
 type Data = Record<string, Record<string, MemoRecord>>;
 

@@ -9,10 +9,10 @@
     "test": "node --test \"tests/*.test.mjs\""
   },
   "dependencies": {
-    "@god-live-doc/cli": "link:../../god-live-doc/packages/cli",
-    "@god-live-doc/core": "link:../../god-live-doc/packages/core",
-    "@god-live-doc/format-html": "link:../../god-live-doc/packages/format-html",
-    "@god-live-doc/format-md": "link:../../god-live-doc/packages/format-md",
-    "@god-live-doc/project": "link:../../god-live-doc/packages/project"
+    "@godcreator02/live-doc-cli": "link:../../god-live-doc/packages/cli",
+    "@godcreator02/live-doc-core": "link:../../god-live-doc/packages/core",
+    "@godcreator02/live-doc-format-html": "link:../../god-live-doc/packages/format-html",
+    "@godcreator02/live-doc-format-md": "link:../../god-live-doc/packages/format-md",
+    "@godcreator02/live-doc-project": "link:../../god-live-doc/packages/project"
   }
 }

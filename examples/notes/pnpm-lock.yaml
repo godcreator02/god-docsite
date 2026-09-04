@@ -8,15 +8,15 @@ importers:
 
   .:
     dependencies:
-      '@god-live-doc/cli':
+      '@godcreator02/live-doc-cli':
         specifier: link:../../god-live-doc/packages/cli
         version: link:../../god-live-doc/packages/cli
-      '@god-live-doc/core':
+      '@godcreator02/live-doc-core':
         specifier: link:../../god-live-doc/packages/core
         version: link:../../god-live-doc/packages/core
-      '@god-live-doc/format-fumadocs':
+      '@godcreator02/live-doc-format-fumadocs':
         specifier: link:../../god-live-doc/packages/format-fumadocs
         version: link:../../god-live-doc/packages/format-fumadocs
-      '@god-live-doc/project':
+      '@godcreator02/live-doc-project':
         specifier: link:../../god-live-doc/packages/project
         version: link:../../god-live-doc/packages/project

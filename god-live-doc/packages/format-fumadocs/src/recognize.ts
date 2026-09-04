@@ -5,8 +5,8 @@
  * 围栏里的同样文字是 code 节点、行内的是 mdxTextExpression，都认不出来——这就是走语法树的理由。
  * 草稿记号是单独成段的一行普通文字，核心定的写法。
  */
-import { draftOf, parseFormal } from "@god-live-doc/core";
-import type { Reference, Target } from "@god-live-doc/core";
+import { draftOf, parseFormal } from "@godcreator02/live-doc-core";
+import type { Reference, Target } from "@godcreator02/live-doc-core";
 import { lineOf, walk } from "./tree.ts";
 import type { TreeNode } from "./tree.ts";
 

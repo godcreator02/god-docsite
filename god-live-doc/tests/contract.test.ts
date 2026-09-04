@@ -5,10 +5,10 @@
  */
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import * as md from "@god-live-doc/format-md";
-import * as mdx from "@god-live-doc/format-fumadocs";
-import * as html from "@god-live-doc/format-html";
-import type { Format } from "@god-live-doc/core";
+import * as md from "@godcreator02/live-doc-format-md";
+import * as mdx from "@godcreator02/live-doc-format-fumadocs";
+import * as html from "@godcreator02/live-doc-format-html";
+import type { Format } from "@godcreator02/live-doc-core";
 import { CODE, setupRepo } from "./repo.ts";
 import type { Repo } from "./repo.ts";
 

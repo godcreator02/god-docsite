@@ -15,7 +15,7 @@
  *
  * 灯长什么样、怎么渲染，全归站点侧的 pre 组件和样式表；这一层只把颜色塞进 meta / 属性。
  */
-import type { Item, Status } from "@god-live-doc/core";
+import type { Item, Status } from "@godcreator02/live-doc-core";
 import type { JsxAttribute, TreeNode } from "./tree.ts";
 
 export const LABEL: Record<Status, string> = { fresh: "新鲜", changed: "有变动", missing: "缺失", unconfirmed: "未确认" };

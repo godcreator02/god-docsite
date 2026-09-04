@@ -8,22 +8,22 @@ importers:
 
   .:
     devDependencies:
-      '@god-live-doc/cli':
+      '@godcreator02/live-doc-cli':
         specifier: workspace:*
         version: link:packages/cli
-      '@god-live-doc/core':
+      '@godcreator02/live-doc-core':
         specifier: workspace:*
         version: link:packages/core
-      '@god-live-doc/format-fumadocs':
+      '@godcreator02/live-doc-format-fumadocs':
         specifier: workspace:*
         version: link:packages/format-fumadocs
-      '@god-live-doc/format-html':
+      '@godcreator02/live-doc-format-html':
         specifier: workspace:*
         version: link:packages/format-html
-      '@god-live-doc/format-md':
+      '@godcreator02/live-doc-format-md':
         specifier: workspace:*
         version: link:packages/format-md
-      '@god-live-doc/project':
+      '@godcreator02/live-doc-project':
         specifier: workspace:*
         version: link:packages/project
       '@types/node':
@@ -38,13 +38,13 @@ importers:
 
   docs-site:
     dependencies:
-      '@god-live-doc/cli':
+      '@godcreator02/live-doc-cli':
         specifier: workspace:*
         version: link:../packages/cli
-      '@god-live-doc/format-fumadocs':
+      '@godcreator02/live-doc-format-fumadocs':
         specifier: workspace:*
         version: link:../packages/format-fumadocs
-      '@god-live-doc/project':
+      '@godcreator02/live-doc-project':
         specifier: workspace:*
         version: link:../packages/project
       fumadocs-core:
@@ -93,10 +93,10 @@ importers:
 
   packages/cli:
     dependencies:
-      '@god-live-doc/core':
+      '@godcreator02/live-doc-core':
         specifier: workspace:*
         version: link:../core
-      '@god-live-doc/project':
+      '@godcreator02/live-doc-project':
         specifier: workspace:*
         version: link:../project
 
@@ -104,10 +104,10 @@ importers:
 
   packages/format-fumadocs:
     dependencies:
-      '@god-live-doc/core':
+      '@godcreator02/live-doc-core':
         specifier: workspace:*
         version: link:../core
-      '@god-live-doc/project':
+      '@godcreator02/live-doc-project':
         specifier: workspace:*
         version: link:../project
       remark-frontmatter:
@@ -135,13 +135,13 @@ importers:
 
   packages/format-html:
     dependencies:
-      '@god-live-doc/core':
+      '@godcreator02/live-doc-core':
         specifier: workspace:*
         version: link:../core
 
   packages/format-md:
     dependencies:
-      '@god-live-doc/core':
+      '@godcreator02/live-doc-core':
         specifier: workspace:*
         version: link:../core
       remark-frontmatter:
@@ -163,7 +163,7 @@ importers:
 
   packages/project:
     dependencies:
-      '@god-live-doc/core':
+      '@godcreator02/live-doc-core':
         specifier: workspace:*
         version: link:../core
 
