@@ -70,7 +70,11 @@ fumadocs 在格式包里只是 peer——用你项目里装的那份，包自己
 - **`turbopack.root` 要抬到工作区根**。这个站的包从同一个 pnpm 工作区拿，`node_modules` 里是指向站外的
   软链；Turbopack 只认它 root 以内的文件，root 不抬，`packages/` 就在视野外。用发布版包的项目不必管这条。
 - **三个包标成 `serverExternalPackages`**。它们只在服务端跑，还要读盘、起 git 子进程——标成外部包让 Node
-  自己解析，别让打包器把它们卷进去。
+  自己解析，别让打包器把它们卷进去。**但发布版包（registry 装的）别把 `format-fumadocs` 外置**：
+  它的 `/pre` 是客户端组件（状态点），外置后 Next 走 Node 单独加载它、跟站打包的 React 分了家，
+  预渲染报 `Cannot read properties of null (reading 'use')`；工作区软链的装法没这个问题。只外置
+  `core` 和 `project` 就够——`format-fumadocs` 的服务端那半（remark 插件）走 fumadocs-mdx 的
+  loader，本来就是 Node 直载，不经过打包器。第一个 registry 消费方（god-example 的站）踩的就是这条。
 
 ## 六、三个坑
 

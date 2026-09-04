@@ -203,7 +203,8 @@ pnpm install; pnpm test
 
 * **记录的类型名叫 `MemoRecord`**，不叫 `Record`——后者是 TS 内置的映射型别，撞名。清单项上的字段名还是 `record`。
 * **构建产物是 `.mjs` / `.d.mts`**（tsdown 的默认），`exports` 直接指过去，没去折腾扩展名。
-* 包**没写 `private`**，但也**没配发布流程**——能发，没发。真要发之前得先想清楚版本策略。
+* 包已更名 `@godcreator02/live-doc-*` 并首发进本机 registry（六包同版本 0.1.0）；devkit 的 `release`
+  是插件形态专用，这套多包工作区发版手跑 `pnpm -r publish --no-git-checks`，纪律照总控台 `registry.md`。
 * **没有「代码根」这个配置项**：引用路径一律相对项目根。所以 `docs-site` 引工作区源码时写的是
   `../packages/…`，标题栏上也就这么显示。要更好看得先给配置加一项，那是接口变更。
 * **`format-fumadocs` 把 `fumadocs-ui` / `react` 放进了 devDependencies**，只为编译和类型检查；

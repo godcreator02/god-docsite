@@ -21,7 +21,9 @@ livedoc: none
     - **构建产物是 `.mjs` / `.d.mts`**（tsdown 的默认），`exports` 直接指过去，没去折腾扩展名。
   </Tab>
   <Tab title="发布与依赖">
-    - 六个包**没写 `private`**，但也**没配发布流程**——能发，没发。真要发之前得先想清楚版本策略。
+    - 六包 2026-09-04 更名 `@godcreator02/live-doc-*` 首发进本机 registry（同版本 0.1.0，六包一起动一起发）；
+      devkit `release` 是插件形态专用，这套多包工作区发版手跑 `pnpm -r publish --no-git-checks`，
+      版本策略即「同版本」，暂无各走各的需求。
     - **`format-fumadocs` 把 `fumadocs-ui` / `react` 放进了 devDependencies**，只为编译和类型检查；
       `tsdown` 的 `deps.neverBundle` 守着它们不进产物。消费方最好装**同一个版本**，
       否则 pnpm 会摆出两份副本，React 的上下文可能对不上。

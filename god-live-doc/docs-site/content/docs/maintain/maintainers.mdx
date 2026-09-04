@@ -56,10 +56,14 @@ description: 仓布局、五摊门禁、提交规矩、发布、老仓退役条�
 分开提交等于让中间那个提交自相矛盾。挂了 outputs 映射的文档（README、AGENTS.md）动的是 mdx 源：
 `render --target ai` 重摆之后，mdx 源、生成物、记录簿同一个提交。提交信息中文，末尾带会话里给的 `Co-Authored-By` 与 `Claude-Session` 两行。
 
-## 发布：能发，没发
+## 发布：已首发，手跑 pnpm publish
 
-六个包都没写 `private`，也没配发布流程。真要发之前得先想清楚版本策略（六个包同版本还是各走各的），
-见 [待定与路线图](/docs/maintain/roadmap)。现在消费方都是 `workspace:*` 或 `link:` 引的。
+六包 2026-09-04 更名 `@godcreator02/live-doc-*` 后首发进本机 registry（Verdaccio），同版本 0.1.0
+一起动一起发。devkit 的 `release` 是插件形态专用（门禁查 scope 之外还查 exports 指 lib/、
+cordis.patch.yml，且一仓一包一插件），这套多包工作区不适用——发版手跑：工作区根 `pnpm build` →
+逐包 `pnpm pack --dry-run` 核清单 → `pnpm -r publish --no-git-checks`（docs-site 是 private 自动跳）→
+`registry status` 核对 → 逐包 `git tag`。纪律照总控台 `registry.md`：版本人改、同版本号永不重发。
+消费方按精确版本引（如 `@godcreator02/live-doc-cli@0.1.0`），不走 `dsh plugin add`。
 
 ## 参考，只读
 
