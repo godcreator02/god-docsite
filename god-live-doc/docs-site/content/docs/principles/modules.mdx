@@ -63,7 +63,7 @@ pnpm 的严格 `node_modules` 让「没声明就 import 不到」，所以依赖
 宿主（fumadocs / next / react）只许出现在 `format-fumadocs`，而且只能是 **peer**——用消费方项目装的那份，
 包自己不带；`tsdown` 那头也守着不许打进产物：
 
-{/* ref file="../packages/format-fumadocs/package.json" lines="25-38" */}
+{/* ref file="../packages/format-fumadocs/package.json" lines="26-39" */}
 
 peer 都标成 optional，是为了让只用命令行、不装 fumadocs 的项目也能装这个包。
 
