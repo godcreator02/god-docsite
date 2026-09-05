@@ -256,6 +256,38 @@ layout / chains 四个 TS 文件是纯函数，带测试与 fixtures）；星盘
 - 测试：模型 / 布局 / 链表 / parse 的测试从老仓搬（`node --test`）；布局黄金数用老仓 fixtures 钉；React 层用
   `react-dom/server` 渲一遍断言 SVG 结构（节点数、扇环数、`a[target=_blank]`）。
 
+### 星轨盘第二版：画布层整搬 Obsidian 版，交互范式换代（2026-09-05 晚定）
+
+trail 那版是「滚轮穿梭两模式」，Obsidian 版 `D:\AI2026_godnotes\RUEPRTP9HY\plugin`（只读）是这条线最成熟的形态，
+视觉规范正本是 `D:\AI2026_godnotes\YJW9M85RLR\god-obsidian-notes\docs\trajectory\trajectory-viz-style-spec.md`（只读）。
+上一节里跟本节冲突的条目以本节为准。
+
+- **搬法：画布层整搬，React 壳只当编排者。** Obsidian 版的 `render/`（色板、节点工厂、着色、筛选判定）、
+  `star/layers/`（axis / gaps / milestones / trees / cards / hub 六层，build / place / recolor 三联组，契约在 `frame.ts`）、
+  `star/camera.ts`、`star/label-arbiter.ts`、`star/date-rail.ts`、`star/hud.ts` 的图例与帮助生成、`launcher/star-thumb.ts`
+  整搬进 `packages/trajectory`，只做机械改动（去 obsidian API、`prefix` → `id`、import 路径、注释改现状）。
+  `react.tsx` 缩成壳：容器、顶栏之外的 HUD、页签、图例、URL、主题、帧循环编排（照 `star-view.ts` 搬），
+  不再自己画任何 SVG 层。`.` 入口仍零 npm 依赖、不碰 DOM；画布层住 `./react` 入口那一侧。
+- **交互范式换成 Obsidian 版**：滚轮 = 空间缩放（指哪缩哪）+ 拖拽漫游；时间归画布左缘常驻的**日期竖轨**
+  （自绘双柄区间滑块，顶旧底新，收窄窗即进透镜、窗即焦点带，中段拖动或悬停滚轮整窗平移，ctrl + 滚轮同效，
+  窗宽输入框，空档在轨上折成暗纹窄条）；**回到原点两段式**（相机动过先归相机，再按归窗顶满；Esc 同链），
+  home 钮三态图标。「鱼眼穿梭 / 自由缩放」两模式与盘心单击切模式退役；盘心单击开根卡页（新标签页）、双击回全景。
+- **视觉照规范对齐**，唯一保留的偏离是**形状按 `type`**（上一节定的显示读法）：节点描边同色混黑约 35%（不用亮描边）；
+  被取代领域色混灰淡出；孤星虚线外环；虫洞同心双环、颜色走 `--color-fd-primary`（盘心描边同源）；标签两级显隐
+  （在立且非孤星的卡与虫洞 eff > 0.5 全景即显，孤星与被取代 eff > 1.8 进透镜才显）；节点 / 虫洞 / 树名同池拥挤仲裁
+  （真实文本宽、横向区间相交让隐、悬停先占坑）；贴盘心的内圈卡标签向盘外锚；12 点 / 6 点两条竖线各自仲裁；
+  空窗雾带高斯羽化软边、起止不画线只挂日期；最新一天加重环；盘心世界锚定、内界让位闭式解，任何卡进不了盘心；
+  连线端点与箭头通则照规范。
+- **配色映射 fumadocs 变量**，不再自带两套死色值：底色 / 盘心填色 / 标签衬底 `--color-fd-background`，主文字
+  `--color-fd-foreground`，次文字与树名 `--color-fd-muted-foreground`，边框 `--color-fd-border`，浮层与图例底
+  `--color-fd-popover`，悬停底 `--color-fd-accent`，盘心描边与虫洞 `--color-fd-primary`；周 / 月 / 最新 / 年环用
+  `color-mix` 从前景色兑 7% / 20% / 30% / 38%，扇环框边 / 底 18% / 5%。CSS 不判明暗；JS 色板（领域两套、连线金青、
+  里程碑金、mute）仍按 `html.dark` 选。
+- **启动器**：`/trajectory` 不带 `?disk=` 时是项目卡阵——每张盘一张全景定妆照缩略图（`star-thumb` 是纯静态 SVG 画家，
+  在服务端渲成静态 markup），下方短名与「n 卡 · 最近活动 <日期>」，点卡进盘（`?disk=`）；盘内顶栏加「启动器」返回。
+  盘页签退役，换盘只走启动器与虫洞。
+- 搜索维持只匹配 label 与卡身份。
+
 ### 接线
 
 - `livedoc.config` 加一项 `trajectory: "docs-god-flow/trajectory"`（相对项目根，可选；不配就整个不管）。
