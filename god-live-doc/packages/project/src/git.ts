@@ -6,6 +6,7 @@
  *
  * 被引文件在哪个仓，按**文件自己的位置**定（`locate`）：先取真实路径（pnpm 的 `node_modules/@x/y` 是指向
  * 工作区包的软链，得按真实位置算），再从所在目录往上找第一个 `.git`——最里层那个，子模块算自己的仓。
+ * 目标是**目录**时走 `locateDir`：从目录自身起找，不先跳一级（目录自己就可能是仓根）。
  * 项目自己的仓、别的仓一视同仁，所以 `HEAD:<rel>` 里的 rel 一律是**那个仓的仓根相对** posix 路径。
  */
 
@@ -56,12 +57,27 @@ export function repoOf(dir: string): string | null {
   }
 }
 
-/** 项目根 + 引用里写的路径 → 文件在哪个仓；不在任何仓里就 null */
-export function locate(root: string, file: string): Located | null {
-  const abs = realpathLoose(resolve(root, file));
-  const repo = repoOf(dirname(abs));
+function locatedAt(abs: string, searchFrom: string): Located | null {
+  const repo = repoOf(searchFrom);
   if (repo === null) return null;
   return { repo, rel: relative(repo, abs).split(sep).join("/") };
+}
+
+/** 项目根 + 引用里写的路径 → 文件在哪个仓；不在任何仓里就 null。
+ * 从**文件所在目录**起往上找：文件自己不可能是 `.git`，先跳一级才不会白问一趟。 */
+export function locate(root: string, file: string): Located | null {
+  const abs = realpathLoose(resolve(root, file));
+  return locatedAt(abs, dirname(abs));
+}
+
+/** 同上，但目标是目录：从**目录自身**起往上找。
+ * 目录不能套用 locate——目标目录恰好就是仓根时（文档里写 `tree .`、或写 `tree ..` 正好指到
+ * 工作区那层仓根），先跳一级就跳出了这个仓：仓根之上没有 `.git` 就回 null、忽略集空掉，
+ * `.gitignore` 过滤整个失效（树里冒出 node_modules/、dist/，换台机器项数还不一样）；
+ * 之上另有一个仓时更糟——拿外层仓的忽略规则去判内层仓的文件，答案是错的。 */
+export function locateDir(root: string, dir: string): Located | null {
+  const abs = realpathLoose(resolve(root, dir));
+  return locatedAt(abs, abs);
 }
 
 /** 这个仓有没有过一次提交（HEAD 存在）。刚 init 的仓 HEAD 还没生出来，什么都钉不住 */

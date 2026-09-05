@@ -9,7 +9,7 @@
 import { readdirSync, readFileSync, statSync } from "node:fs";
 import { join, resolve } from "node:path";
 import type { Reader } from "@godcreator02/live-doc-core";
-import { git, locate } from "./git.ts";
+import { git, locateDir } from "./git.ts";
 
 /** glob 只认 * 和 ?；匹配的是名字，不是路径 */
 export function globToRegExp(glob: string): RegExp {
@@ -25,9 +25,11 @@ function statOf(path: string): "file" | "dir" | null {
   }
 }
 
-/** dir 下这些相对路径里，哪些被 .gitignore 忽略了。目录不在任何仓里就一个都不忽略 */
+/** dir 下这些相对路径里，哪些被 .gitignore 忽略了。目录不在任何仓里就一个都不忽略。
+ * 定位走 locateDir（从目录自身起找仓）不走 locate：目标目录恰是仓根时先跳一级会跳出这个仓，
+ * 忽略集空掉、过滤整个失效 */
 function ignoredOf(root: string, dir: string, rels: string[]): Set<string> {
-  const at = locate(root, dir);
+  const at = locateDir(root, dir);
   if (at === null || rels.length === 0) return new Set();
   const paths = rels.map((r) => (at.rel === "" ? r : `${at.rel}/${r}`));
   let out: string;

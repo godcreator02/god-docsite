@@ -5,6 +5,8 @@
  *   未跟踪没忽略 → 拒「先 commit」；仓还没提交过 → 拒
  *   软链接（pnpm 那种 node_modules → 工作区包）按真实路径算
  *   核对按记录的 kind 转发；认不得的 kind 当没确认过
+ * 目录树那几条顺带守读取器的仓定位：目录目标从目录自身起找仓（`locateDir`），
+ * 目标恰是仓根时不能先跳一级——跳出去了 .gitignore 过滤就整个失效。
  */
 import { test } from "node:test";
 import assert from "node:assert/strict";
@@ -162,6 +164,44 @@ test("目录树、存在性、名字走核心那三个：清单按 .gitignore �
     const after = r.service.resolve(DOC, done.text).items;
     assert.deepEqual(after.map((i) => [i.status, i.reason]), [["changed", "changed"], ["fresh", undefined], ["missing", "appeared"], ["missing", "text-missing"]]);
     assert.match(after[0]!.diff!, /^\+ tag\.ts$/m);
+  } finally {
+    r.teardown();
+  }
+});
+
+test("目录目标就是仓根：.gitignore 照样过滤——仓从目录自身起找，不先跳一级", () => {
+  // 定位跳一级（locate 的口径）时，仓根之上没有 .git 就回 null、忽略集空掉，
+  // 树里冒出 node_modules/、lib/，还会随各台机器的目录布局漂
+  const r = setupRepo({ formats: FORMATS, comparator: "auto" });
+  try {
+    r.write(".gitignore", "node_modules/\nlib/\n");
+    r.write("node_modules/pkg/index.js", "x");
+    r.write("lib/out.js", "x");
+    r.commit("起结构");
+    const done = r.service.confirm(DOC, "REF tree . depth=1\n");
+    assert.deepEqual(done.problems, []);
+    const names = r.service.resolve(DOC, done.text).items[0]!.current!;
+    assert.deepEqual(names.filter((n) => n === "node_modules/" || n === "lib/"), [], "被忽略的两个目录不该进清单");
+    assert.ok(names.includes("src/"), "没被忽略的照常在");
+  } finally {
+    r.teardown();
+  }
+});
+
+test("目录目标是仓根、往下走几层：嵌套层的忽略项同样过滤，忽略的目录不往里走", () => {
+  const r = setupRepo({ formats: FORMATS, comparator: "auto" });
+  try {
+    r.write(".gitignore", "node_modules/\nsrc/dist/\n");
+    r.write("node_modules/pkg/index.js", "x");
+    r.write("src/dist/out.js", "x");
+    r.write("src/util.ts", "export const a = 1;\n");
+    r.commit("起结构");
+    const done = r.service.confirm(DOC, "REF tree . depth=3\n");
+    assert.deepEqual(done.problems, []);
+    const names = r.service.resolve(DOC, done.text).items[0]!.current!;
+    assert.deepEqual(names.filter((n) => n.startsWith("node_modules")), [], "顶层忽略的目录不进清单，也不往里走");
+    assert.deepEqual(names.filter((n) => n.startsWith("src/dist")), [], "嵌套那层的忽略目录一样过滤");
+    assert.ok(names.includes("src/greet.ts") && names.includes("src/util.ts"), "src 下没被忽略的都在");
   } finally {
     r.teardown();
   }

@@ -14,6 +14,7 @@ export {
   isClean,
   isIgnored,
   locate,
+  locateDir,
   objectExists,
   readBlob,
   realpathLoose,
