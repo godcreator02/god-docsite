@@ -53,6 +53,21 @@ html.dark {
   aspect-ratio: auto;
 }
 
+/* 整页模式：容器吃满父元素（高度由页面给），SVG 是正方形、按容器短边居中，
+   长边方向的余量留白。HUD（工具条 / 图例 / 页签 / 气泡）都是 absolute，不进这层弹性流，
+   照旧贴容器四角。 */
+.star-disk-page {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0;
+}
+.star-disk-page .star-svg {
+  flex: none;
+  width: auto;
+  height: auto;
+}
+
 .star-svg {
   display: block;
   width: 100%;

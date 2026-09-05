@@ -41,13 +41,18 @@ import type { RouteCard, SerializableModel, Trajectory } from "./index.ts";
 
 /** StarDisk 的 props：data 是 buildTrajectory 的产物（多盘），hrefBase 是卡页路由前缀
  * （节点链接 = `${hrefBase}/${encodeURIComponent(id)}`）——不收函数，服务端组件传不了函数
- * 给客户端组件。size 给了就同步按这个边长渲染（测试靠它，不量尺寸）；不给就挂载后量父元素宽、
- * 跟随 resize。initialDisk 指定初始显示哪张盘（disks 的 rootId），缺省第一张。 */
+ * 给客户端组件。size 给了就同步按这个边长渲染（测试靠它，不量尺寸）；不给就挂载后量容器、
+ * 跟随 resize。initialDisk 指定初始显示哪张盘（disks 的 rootId），不在盘清单里就退回第一张。
+ *
+ * mode 是两种形态：`embed` 方形嵌进文档流（宽随父、高等于宽、点一下才进交互态、带全屏按钮），
+ * `page` 整页（吃满父元素、SVG 取容器短边居中、滚轮直接生效、没有激活遮罩也没有全屏按钮，
+ * 当前盘写进 URL 的 `?disk=`）。顶栏不归组件画，HUD 照旧贴容器四角。 */
 export interface StarDiskProps {
   data: Trajectory;
   hrefBase: string;
   size?: number;
   initialDisk?: string;
+  mode?: "page" | "embed";
 }
 
 /* ================= 视觉词汇表：颜色只编码领域，形状编码卡的 type ================= */
@@ -278,7 +283,9 @@ const LAYOUT_SLIDERS: Array<{
   { key: "ease", label: "动画速度", min: 0.06, max: 0.4, step: 0.02, fmt: (v) => v.toFixed(2) },
 ];
 
-export function StarDisk({ data, hrefBase, size, initialDisk }: StarDiskProps): ReactNode {
+export function StarDisk({ data, hrefBase, size, initialDisk, mode = "embed" }: StarDiskProps): ReactNode {
+  /* 整页与嵌入的分支全走这一个布尔：容器几何、激活态、遮罩与全屏按钮、URL 同步 */
+  const isPage = mode === "page";
   const containerRef = useRef<HTMLDivElement | null>(null);
   const svgRef = useRef<SVGSVGElement | null>(null);
   const worldRef = useRef<SVGGElement | null>(null);
@@ -320,14 +327,21 @@ export function StarDisk({ data, hrefBase, size, initialDisk }: StarDiskProps): 
 
   const [measuredSize, setMeasuredSize] = useState<number | null>(size ?? null);
   const [dark, setDark] = useState(false);
+  /* initialDisk 过一道盘清单：它来自 URL 的 `?disk=`，也可能是卡页「回到盘」带来的父卡身份，
+   * 不是根卡就没有对应的模型，认下来整盘是空的——认不出就退回第一张盘 */
   const [currentDisk, setCurrentDisk] = useState<string | null>(
-    initialDisk ?? data.disks[0]?.rootId ?? null,
+    (initialDisk && data.disks.some((d) => d.rootId === initialDisk) ? initialDisk : null) ??
+      data.disks[0]?.rootId ??
+      null,
   );
   const [shapeFilter, setShapeFilter] = useState<ReadonlySet<string>>(new Set());
   const [domainFilter, setDomainFilter] = useState<ReadonlySet<string>>(new Set());
   const [search, setSearch] = useState("");
-  const [activated, setActivated] = useState(false);
-  const [mode, setMode] = useState<"fisheye" | "zoom">("fisheye");
+  /* 交互态：嵌入模式点一下才进（未进滚轮穿透给页面），整页模式恒真——整个视口就是盘，
+   * 没有页面要让给它滚 */
+  const [clickActivated, setClickActivated] = useState(false);
+  const activated = isPage || clickActivated;
+  const [navMode, setNavMode] = useState<"fisheye" | "zoom">("fisheye");
   const [showAllLabels, setShowAllLabels] = useState(false);
   const [popOpen, setPopOpen] = useState<"settings" | "help" | null>(null);
   const [tooltip, setTooltip] = useState<{ x: number; y: number; node: RuntimeNode } | null>(null);
@@ -344,19 +358,35 @@ export function StarDisk({ data, hrefBase, size, initialDisk }: StarDiskProps): 
     ease: 0.16,
   });
 
-  /* ---------- 尺寸：给了 size 就同步用它（SSR / 测试安全，不碰 window）；没给就量父宽 ---------- */
+  /* ---------- 尺寸：给了 size 就同步用它（SSR / 测试安全，不碰 window）；没给就量容器 ----------
+   * 嵌入是方的、只看宽；整页容器一般不方，取短边——SVG 是正方形，短边保证它整个进得来，
+   * 长边方向的余量由 star.css 居中留白。 */
   useEffect(() => {
     if (size !== undefined) return;
     const el = containerRef.current;
     if (!el || typeof ResizeObserver === "undefined") return;
     const ro = new ResizeObserver((entries) => {
-      const w = entries[0]?.contentRect.width;
-      if (w) setMeasuredSize(Math.round(w));
+      const box = entries[0]?.contentRect;
+      if (!box) return;
+      const side = isPage ? Math.min(box.width, box.height) : box.width;
+      if (side > 0) setMeasuredSize(Math.round(side));
     });
     ro.observe(el);
     return () => ro.disconnect();
-  }, [size]);
+  }, [size, isPage]);
   const effectiveSize = size ?? measuredSize;
+
+  /* ---------- 整页模式：当前盘写进 URL ----------
+   * replaceState 不刷新、不进历史栈（切盘是同页状态，不该让浏览器后退键去撤），
+   * 只为让「某一张盘」这个位置可以直接分享；初始值由页面从 searchParams 读、经 initialDisk 进来。
+   * 搜索词、筛选、鱼眼位置都不进 URL。 */
+  useEffect(() => {
+    if (!isPage || !currentDisk || typeof window === "undefined") return;
+    const url = new URL(window.location.href);
+    if (url.searchParams.get("disk") === currentDisk) return;
+    url.searchParams.set("disk", currentDisk);
+    window.history.replaceState(null, "", url);
+  }, [isPage, currentDisk]);
 
   /* ---------- 主题：挂载时读一次 html.dark，之后靠 MutationObserver 跟随 ---------- */
   useEffect(() => {
@@ -497,7 +527,7 @@ export function StarDisk({ data, hrefBase, size, initialDisk }: StarDiskProps): 
     frame.current.hover = null;
     frame.current.hv.clear();
     setTooltip(null);
-    setMode("fisheye");
+    setNavMode("fisheye");
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentDisk, effectiveSize]);
 
@@ -716,7 +746,7 @@ export function StarDisk({ data, hrefBase, size, initialDisk }: StarDiskProps): 
     if (hubStatus) {
       hubStatus.setAttribute("transform", `translate(0,${16 * ik}) scale(${ik})`);
       if (s < 0.01) {
-        hubStatus.textContent = hubStatusLine(model.day0, model.dayMax, mode, isEmpty);
+        hubStatus.textContent = hubStatusLine(model.day0, model.dayMax, navMode, isEmpty);
         hubStatus.style.fill = "";
       } else {
         /* 鱼眼态：内外圈日期从焦点带的线性域边界经引擎逆映射反解，换行显示（单行小圆装不下） */
@@ -777,7 +807,7 @@ export function StarDisk({ data, hrefBase, size, initialDisk }: StarDiskProps): 
     treeBoxes,
     allBoxes,
     milestones,
-    mode,
+    navMode,
     isEmpty,
     themeName,
     model.day0,
@@ -818,8 +848,10 @@ export function StarDisk({ data, hrefBase, size, initialDisk }: StarDiskProps): 
       e.preventDefault();
       const fr = frame.current;
       const dy = e.deltaY;
-      if (mode === "zoom") {
-        const bb = el.getBoundingClientRect();
+      if (navMode === "zoom") {
+        /* 以光标为心缩放：坐标要落在 SVG 自己的框里算——整页模式下 SVG 按短边居中，
+         * 长边方向跟容器差着一截留白，拿容器的框算会整片偏掉 */
+        const bb = (svgRef.current ?? el).getBoundingClientRect();
         const mx = e.clientX - bb.left;
         const my = e.clientY - bb.top;
         const base = effectiveSize ? fitK(effectiveSize) : 1;
@@ -859,11 +891,11 @@ export function StarDisk({ data, hrefBase, size, initialDisk }: StarDiskProps): 
     };
     el.addEventListener("wheel", onWheel, { passive: false });
     return () => el.removeEventListener("wheel", onWheel);
-  }, [activated, mode, layout, model.day0, model.dayMax, effectiveSize, fitK, applyView, place, kick, wheelSensitivity]);
+  }, [activated, navMode, layout, model.day0, model.dayMax, effectiveSize, fitK, applyView, place, kick, wheelSensitivity]);
 
   /* 自由缩放下的拖拽漫游 */
   useEffect(() => {
-    if (mode !== "zoom" || !activated) return;
+    if (navMode !== "zoom" || !activated) return;
     const svg = svgRef.current;
     if (!svg) return;
     let dragging = false;
@@ -895,14 +927,14 @@ export function StarDisk({ data, hrefBase, size, initialDisk }: StarDiskProps): 
       window.removeEventListener("pointermove", move);
       window.removeEventListener("pointerup", up);
     };
-  }, [mode, activated, applyView]);
+  }, [navMode, activated, applyView]);
 
   /* 盘心单击切模式（250ms 判定窗，双击回全景） */
   const hubTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const onHubClick = useCallback(() => {
     if (hubTimer.current) clearTimeout(hubTimer.current);
     hubTimer.current = setTimeout(() => {
-      setMode((m) => (m === "fisheye" ? "zoom" : "fisheye"));
+      setNavMode((m) => (m === "fisheye" ? "zoom" : "fisheye"));
       layoutRef.current.unfocus();
       if (effectiveSize) frame.current.vT = { k: fitK(effectiveSize), tx: effectiveSize / 2, ty: effectiveSize / 2 };
       kick();
@@ -931,21 +963,23 @@ export function StarDisk({ data, hrefBase, size, initialDisk }: StarDiskProps): 
   }, []);
 
   /* 激活后把焦点收到容器上：遮罩按钮一卸载焦点就掉回 body，onKeyDown 挂在容器上，
-   * 焦点不在这儿 Esc 一下也收不到（容器已有 tabIndex={-1}，收得住） */
+   * 焦点不在这儿 Esc 一下也收不到（容器已有 tabIndex={-1}，收得住）。
+   * 整页模式 activated 恒真，等于挂载即收焦点——整个视口就是盘，Esc 该一上来就管用 */
   useEffect(() => {
     if (activated) containerRef.current?.focus();
   }, [activated]);
 
-  /* 点击容器激活 / Esc 分层释放 / 点外部释放 */
+  /* 点外部释放交互态：整页模式没有「外部」，不挂 */
   useEffect(() => {
-    if (!activated) return;
+    if (isPage || !activated) return;
     const onPointerDown = (e: PointerEvent): void => {
-      if (containerRef.current && !containerRef.current.contains(e.target as Node)) setActivated(false);
+      if (containerRef.current && !containerRef.current.contains(e.target as Node)) setClickActivated(false);
     };
     window.addEventListener("pointerdown", onPointerDown);
     return () => window.removeEventListener("pointerdown", onPointerDown);
-  }, [activated]);
+  }, [isPage, activated]);
 
+  /* Esc 分层释放：先收浮层，再退交互态（整页模式没有这一层），最后回全景 */
   const onKeyDown = useCallback(
     (e: ReactKeyboardEvent) => {
       if (e.key !== "Escape") return;
@@ -953,13 +987,13 @@ export function StarDisk({ data, hrefBase, size, initialDisk }: StarDiskProps): 
         setPopOpen(null);
         return;
       }
-      if (activated) {
-        setActivated(false);
+      if (!isPage && activated) {
+        setClickActivated(false);
         return;
       }
       goHome();
     },
-    [popOpen, activated, goHome],
+    [popOpen, isPage, activated, goHome],
   );
 
   const toggleFullscreen = useCallback(() => {
@@ -991,24 +1025,21 @@ export function StarDisk({ data, hrefBase, size, initialDisk }: StarDiskProps): 
   const rootDiskId = model.root?.id ?? currentDisk;
   const diskLabel = (rootId: string): string => routeById.get(rootId)?.label ?? rootId;
 
-  const style: CSSProperties = {
-    position: "relative",
-    width: "100%",
-    aspectRatio: "1 / 1",
-    overflow: "hidden",
-    borderRadius: 12,
-  };
+  /* 容器几何：整页吃满父元素（高度由页面给，盘按短边居中留白由 star.css 摆），
+   * 嵌入是宽随父、高等于宽的方块 */
+  const style: CSSProperties = isPage
+    ? { position: "relative", width: "100%", height: "100%", overflow: "hidden" }
+    : { position: "relative", width: "100%", aspectRatio: "1 / 1", overflow: "hidden", borderRadius: 12 };
+  const shellClass = `star-disk${isPage ? " star-disk-page" : ""}${dark ? " star-dark" : ""}`;
 
   if (!effectiveSize) {
-    return (
-      <div ref={containerRef} className="star-disk" style={style} data-star-disk-placeholder="true" />
-    );
+    return <div ref={containerRef} className={shellClass} style={style} data-star-disk-placeholder="true" />;
   }
 
   return (
     <div
       ref={containerRef}
-      className={`star-disk${dark ? " star-dark" : ""}`}
+      className={shellClass}
       style={style}
       tabIndex={-1}
       onKeyDown={onKeyDown}
@@ -1334,9 +1365,12 @@ export function StarDisk({ data, hrefBase, size, initialDisk }: StarDiskProps): 
         >
           ？
         </button>
-        <button type="button" className="star-mbtn" title="全屏" onClick={toggleFullscreen}>
-          ⛶
-        </button>
+        {/* 全屏按钮只给嵌入模式：整页盘本来就占满视口，再全屏没有意义 */}
+        {isPage ? null : (
+          <button type="button" className="star-mbtn" title="全屏" onClick={toggleFullscreen}>
+            ⛶
+          </button>
+        )}
         <div className="star-search">
           <input
             type="text"
@@ -1397,11 +1431,15 @@ export function StarDisk({ data, hrefBase, size, initialDisk }: StarDiskProps): 
             <div>环是真实日期，内圈旧、外圈新；金色环是人工钉的里程碑。</div>
             <div>颜色分领域，形状分卡的类型；淡出的是被取代的卡。</div>
             <div className="star-hh">怎么动</div>
-            <div>先点一下盘进入交互态；未进入时滚轮照常滚页面。</div>
-            <div>进入后默认鱼眼穿梭：前滚放大进鱼眼、沿时间穿梭，滚到最新再后滚缩小回全景。</div>
+            {isPage ? (
+              <div>滚轮直接生效：整页就是盘，不必先激活。</div>
+            ) : (
+              <div>先点一下盘进入交互态；未进入时滚轮照常滚页面。</div>
+            )}
+            <div>默认鱼眼穿梭：前滚放大进鱼眼、沿时间穿梭，滚到最新再后滚缩小回全景。</div>
             <div>盘心单击切自由缩放：滚轮指哪缩哪，拖拽漫游；盘心双击或 Esc 回全景。</div>
             <div>点节点在新标签页打开卡页；点虫洞节点切到对应盘。</div>
-            <div>Esc：先收起浮层，再退出交互态。点盘外也会退出交互态。</div>
+            <div>{isPage ? "Esc：先收起浮层，再回全景。" : "Esc：先收起浮层，再退出交互态。点盘外也会退出交互态。"}</div>
             <div className="star-hh">怎么筛</div>
             <div>右下图例可点：形态、领域多选取交集；搜索匹配卡的标题与身份。</div>
             <div>虫洞不受形态与领域筛选影响，点它切盘。</div>
@@ -1459,12 +1497,13 @@ export function StarDisk({ data, hrefBase, size, initialDisk }: StarDiskProps): 
         </div>
       </div>
 
-      {/* 激活遮罩：整片可点，但提示文字贴盘面下沿一条细带——压在盘心正中会跟项目名叠一起 */}
+      {/* 激活遮罩：整片可点，但提示文字贴盘面下沿一条细带——压在盘心正中会跟项目名叠一起。
+          整页模式没有这一层：滚轮不必让给页面，遮罩只会挡在盘前面 */}
       {!activated ? (
         <button
           type="button"
           className="star-activate-overlay"
-          onClick={() => setActivated(true)}
+          onClick={() => setClickActivated(true)}
         >
           <span className="star-activate-hint">点击进入盘面</span>
         </button>

@@ -59,6 +59,28 @@ test("StarDisk：SVG 骨架数量对得上模型——节点链接数、扇环�
   assert.equal(msRings.length, expectedMs, "里程碑环数该等于根卡范围内的里程碑数");
 });
 
+test("StarDisk mode=page：SVG 照常出，激活遮罩与全屏按钮都没有", async () => {
+  const data = await buildTrajectory("tests/fixtures/trajectory");
+  const model = data.models[ROOT_ID];
+
+  const page = renderToStaticMarkup(
+    createElement(StarDisk, { data, hrefBase: "/trajectory", size: 800, mode: "page" }),
+  );
+  assert.match(page, /<svg/, "整页模式照样出画布");
+  assert.match(page, /class="star-disk star-disk-page"/, "容器带整页模式的类");
+  const links = [...page.matchAll(/<a\b[^>]*target="_blank"[^>]*>/g)];
+  assert.equal(links.length, model!.cards.length, "节点链接照旧");
+  assert.doesNotMatch(page, /star-activate-overlay/, "整页模式没有激活遮罩，滚轮直接生效");
+  assert.doesNotMatch(page, /title="全屏"/, "整页模式没有全屏按钮");
+
+  // 嵌入模式两样都在：默认值没被整页那条分支带跑
+  const embed = renderToStaticMarkup(
+    createElement(StarDisk, { data, hrefBase: "/trajectory", size: 800 }),
+  );
+  assert.match(embed, /star-activate-overlay/, "嵌入模式保留点击激活遮罩");
+  assert.match(embed, /title="全屏"/, "嵌入模式保留全屏按钮");
+});
+
 test("盘心状态行：全景态是「起 → 止 · 模式名」，切模式换字样，空盘换成一句话", async () => {
   // 盘心文字整块由 rAF 里的 place() 逐帧写（React 不碰它没渲染过的子树），
   // 静态渲染那一趟拿到的是个空 <text>——所以这一条测的是它背后那个纯函数，不测 SVG
