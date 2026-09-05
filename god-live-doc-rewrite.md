@@ -254,4 +254,7 @@ layout / chains 四个 TS 文件是纯函数，带测试与 fixtures）；星盘
 - docs-site：卡集合单开一个 fumadocs 集合与 loader，落 `/trajectory/<卡身份>`，主文档树只多一页「轨迹」放盘；
   卡目录在单元根 `docs-god-flow/trajectory/`，`turbopack.root` 抬到单元根。本仓自己的卡由人写（动手权在人），
   盘空着是正常态；演示盘用老仓那批诗名 fixtures 放在 `examples/trajectory-site`。
+- **`serverExternalPackages` 不加 trajectory**（2026-09-05 落地时定）：`./react` 是客户端组件、
+  `./server` 用包名自引用去渲它，外置后 Next 走 Node 单独加载 `server.mjs`、看不见 `"use client"`，
+  `StarDisk` 被当服务端组件渲染即炸。与 `format-fumadocs` 那条同类。
 - 后续（本轮不做）：现状文档链到的卡被 `supersedes` 时该页黄；用 git 守子卡冻结；卡钉「当时」的代码。
