@@ -1,10 +1,11 @@
 /**
- * `./server` 入口：读盘建模 + 渲 `StarDisk` 的服务端组件 `Trajectory`；fumadocs 卡集合要用的
- * frontmatter schema `cardSchema`；正文关系边 / `.md` 链接改写的 remark 插件
- * `remarkTrajectoryLinks`。三样都只在服务端跑（buildTrajectory 读文件，remark 插件挂在
- * fumadocs-mdx 的编译链上），跟 `./react`（客户端组件）放在同一趟 tsdown 构建里，
- * 好让本文件对它的引用落成产物间的相对导入、保住它头一行的 "use client"（见 tsdown.config.ts
- * 的注释）。
+ * `./server` 入口：读盘建模 + 渲 `StarDisk` 的服务端组件 `Trajectory`；启动器卡阵的静态缩略图
+ * `renderThumb` / `launcherThumbs`（star-thumb 画家喂 svg-doc 桩文档、序列化成 markup，
+ * 客户端不重画）；fumadocs 卡集合要用的 frontmatter schema `cardSchema`；正文关系边 / `.md`
+ * 链接改写的 remark 插件 `remarkTrajectoryLinks`。都只在服务端跑（buildTrajectory 读文件，
+ * remark 插件挂在 fumadocs-mdx 的编译链上），跟 `./react`（客户端组件）放在同一趟 tsdown
+ * 构建里，好让本文件对它的引用落成产物间的相对导入、保住它头一行的 "use client"
+ * （见 tsdown.config.ts 的注释）。
  */
 
 import { basename, resolve } from "node:path";
@@ -17,12 +18,65 @@ import type { Link, Paragraph, PhrasingContent, Root, Text } from "mdast";
 import type { StandardSchemaV1 } from "@standard-schema/spec";
 
 import { buildTrajectory, type Trajectory as TrajectoryData } from "./index.ts";
+import { DEFAULT_SETTINGS, type TrajectorySettings } from "./canvas/settings.ts";
+import { renderStarThumb } from "./canvas/star-thumb.ts";
+import { serializeSvg, SvgStubDocument, type SvgStubElement } from "./canvas/svg-doc.ts";
+import { buildThemes, CSS_RING_PALETTE, type ThemeName } from "./canvas/theme.ts";
+import { type LauncherThumb, type SerializableModel, toRuntimeModel } from "./serial.ts";
+import type { TrajectoryModel } from "./types.ts";
 // 走包名（自引用）而不是相对源路径：`./react` 是单独一趟 tsdown 构建（platform neutral，
 // 保着头一行 "use client"）。改成相对源路径会被这一趟构建当普通模块内联/拆共享 chunk，
 // "use client" 会被打散到一个没人标记的共享文件上——server 这边看不到边界，Next 会把
 // StarDisk 当服务端组件渲染，命中 hooks 就炸。走包名让 tsdown 把它当外部依赖，原样留在
 // 产物里；Node 的包自引用（package.json name + exports）在运行时把它解回 dist/react.mjs。
 import { StarDisk } from "@godcreator02/live-doc-trajectory/react";
+
+/* ================= 启动器缩略图：服务端渲成静态 markup ================= */
+
+export interface RenderThumbOptions {
+  /** 亮 / 暗色板：领域色、连线色、混灰是 JS 色板，按主题各出一份；环色与盘心走 CSS 变量 */
+  theme?: ThemeName;
+  /** 手感设置：只灌 hubSize / gapFree / gapWide 三项（与大图同口径），缺省 DEFAULT_SETTINGS */
+  settings?: Pick<TrajectorySettings, "hubSize" | "gapFree" | "gapWide">;
+}
+
+/** 一张盘的全景定妆照，静态 SVG markup：画家喂桩文档建树、序列化成字符串。
+ * 盘心描边 / 根节点 / 虫洞走 `var(--color-fd-primary)`（mix 对 var() 出 color-mix），
+ * 环色走 CSS 变量——静态 markup 里不带任何要探针解的颜色。 */
+export function renderThumb(
+  model: SerializableModel | TrajectoryModel,
+  options: RenderThumbOptions = {},
+): string {
+  const runtime: TrajectoryModel =
+    model.supersededIds instanceof Set ? (model as TrajectoryModel) : toRuntimeModel(model as SerializableModel);
+  const themeName = options.theme ?? "light";
+  const theme = buildThemes(runtime.domains)[themeName];
+  theme.hubStroke = "var(--color-fd-primary)";
+  const doc = new SvgStubDocument();
+  const svg = renderStarThumb(
+    runtime,
+    theme,
+    options.settings ?? DEFAULT_SETTINGS,
+    CSS_RING_PALETTE,
+    doc,
+  ) as unknown as SvgStubElement;
+  svg.setAttribute("class", `trajectory-thumb star-thumb-${themeName}`);
+  return serializeSvg(svg);
+}
+
+/** 启动器卡阵要的全部缩略图：每张盘亮 / 暗各一份（页面按 html.dark 显示其一，切主题不重画）。 */
+export function launcherThumbs(data: TrajectoryData): Record<string, LauncherThumb> {
+  const out: Record<string, LauncherThumb> = {};
+  for (const disk of data.disks) {
+    const model = data.models[disk.rootId];
+    if (!model) continue;
+    out[disk.rootId] = {
+      dark: renderThumb(model, { theme: "dark" }),
+      light: renderThumb(model, { theme: "light" }),
+    };
+  }
+  return out;
+}
 
 /* ================= 服务端组件：读盘 + 渲盘 + 报病列表 ================= */
 
@@ -32,7 +86,7 @@ export interface TrajectoryProps {
   dir: string;
   /** 卡页路由前缀，透传给 StarDisk。 */
   hrefBase: string;
-  /** 初始显示哪张盘，透传给 StarDisk。 */
+  /** 初始显示哪张盘，透传给 StarDisk；不给就是启动器卡阵。 */
   initialDisk?: string;
 }
 
@@ -40,7 +94,7 @@ export async function Trajectory({ dir, hrefBase, initialDisk }: TrajectoryProps
   const data: TrajectoryData = await buildTrajectory(resolve(process.cwd(), dir));
   return (
     <div className="star-trajectory">
-      <StarDisk data={data} hrefBase={hrefBase} initialDisk={initialDisk} />
+      <StarDisk data={data} hrefBase={hrefBase} initialDisk={initialDisk} thumbs={launcherThumbs(data)} />
       {data.sick.length > 0 ? (
         <div className="star-sick">
           <div className="star-sick-title">报病（{data.sick.length} 个文件）</div>

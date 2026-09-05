@@ -16,6 +16,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { advanceFrame, buildModel, buildTrajectory, RingsLayout, scanDir } from "@godcreator02/live-doc-trajectory";
 import type { FrameState } from "@godcreator02/live-doc-trajectory";
 import { StarDisk } from "@godcreator02/live-doc-trajectory/react";
+import { launcherThumbs, renderThumb } from "@godcreator02/live-doc-trajectory/server";
 
 const ROOT_ID = "tfix-测试项目根卡";
 
@@ -57,12 +58,46 @@ test("StarDisk 嵌入模式：默认值不被整页那条分支带跑——提�
   assert.match(embed, /aspect-ratio:1 \/ 1/, "嵌入是宽随父、高等于宽的方块");
 });
 
-test("StarDisk：initialDisk 不在盘清单里退回第一张盘", async () => {
+test("StarDisk 启动器：?disk 缺失渲项目卡阵——每张盘一张卡、每张卡带服务端渲的静态 svg", async () => {
   const data = await buildTrajectory("tests/fixtures/trajectory");
+  assert.ok(data.disks.length >= 2, "fixture 有主盘与虫洞子项目两张盘");
+  const thumbs = launcherThumbs(data);
+  assert.deepEqual(Object.keys(thumbs).sort(), data.disks.map((d) => d.rootId).sort(), "每张盘一份缩略图");
+
   const html = renderToStaticMarkup(
-    createElement(StarDisk, { data, hrefBase: "/trajectory", size: 800, mode: "page", initialDisk: "没有这张盘" }),
+    createElement(StarDisk, { data, hrefBase: "/trajectory", mode: "page", thumbs }),
   );
-  assert.match(html, new RegExp(`data-disk="${data.disks[0]!.rootId}"`));
+  assert.match(html, /class="star-launcher"/, "没有当前盘就是启动器");
+  assert.doesNotMatch(html, /class="star-canvas"/, "启动器里没有盘的画布");
+  const cards = [...html.matchAll(/<button[^>]*class="star-launcher-card"/g)];
+  assert.equal(cards.length, data.disks.length, "一张盘一张卡");
+  const svgs = [...html.matchAll(/<svg viewBox="[^"]+" class="trajectory-thumb star-thumb-(dark|light)">/g)];
+  assert.equal(svgs.length, data.disks.length * 2, "每张卡带亮暗各一份静态 svg");
+  assert.match(html, /\d+ 卡<\/span> · <span class="star-launcher-seg">最近活动 \d{4}-\d{2}-\d{2}/, "卡下方是「n 卡 · 最近活动 <日期>」");
+  /* 缩略图是静态 markup：盘心与虫洞走 --color-fd-primary，没有交互属性 */
+  const one = thumbs[ROOT_ID]!;
+  assert.match(one.dark, /stroke="var\(--color-fd-primary\)"/);
+  assert.match(one.dark, /color-mix\(in srgb, var\(--color-fd-primary\) 65\.0%, #000000\)/, "根节点描边由 mix 出 color-mix");
+  assert.doesNotMatch(one.dark, /<text|onclick|href=/);
+  assert.notEqual(one.dark, one.light, "亮暗两份色板不同");
+  /* 认不出的 initialDisk 同样回启动器；不传 thumbs 也渲卡阵（缩略图挂载后客户端现画） */
+  const unknown = renderToStaticMarkup(
+    createElement(StarDisk, { data, hrefBase: "/trajectory", mode: "page", initialDisk: "没有这张盘" }),
+  );
+  assert.match(unknown, /class="star-launcher"/);
+  assert.equal([...unknown.matchAll(/class="star-launcher-card"/g)].length, data.disks.length);
+  assert.doesNotMatch(unknown, /<svg/, "没给 thumbs 时静态渲染没有 svg");
+});
+
+test("renderThumb：吃序列化模型也吃运行期模型，静态 svg 结构相同", async () => {
+  const data = await buildTrajectory("tests/fixtures/trajectory");
+  const serialized = data.models[ROOT_ID]!;
+  const a = renderThumb(serialized, { theme: "dark" });
+  const b = renderThumb({ ...serialized, supersededIds: new Set(serialized.supersededIds) }, { theme: "dark" });
+  /* marker id 带工厂序号（每次现渲递增），抹掉再比 */
+  const norm = (s: string): string => s.replace(/mk-\d+/g, "mk-N");
+  assert.equal(norm(a), norm(b));
+  assert.match(a, /^<svg viewBox=/);
 });
 
 test("advanceFrame：focusOn 后推帧，强度趋近 1、显示半径真被鱼眼改写", async () => {

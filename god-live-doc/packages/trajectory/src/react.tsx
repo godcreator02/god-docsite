@@ -12,6 +12,10 @@
  * 交互范式：滚轮 = 空间缩放指哪缩哪 + 拖拽漫游；ctrl + 滚轮 = 时间平移；竖轨收窄窗即进透镜；
  * 回到原点两段式（相机动过先归相机、再按归窗；Esc 同链）；盘心单击开根卡页、双击回全景；
  * 点节点在新标签页开卡页；点虫洞切盘。嵌入模式保留「点击激活」这一条防页面滚动被吞。
+ *
+ * 没有当前盘（`?disk=` 缺失或认不出）时渲启动器卡阵：每张盘一张全景定妆照（服务端 launcherThumbs
+ * 渲好的静态 markup，没给就在客户端用同一个画家现画）+ 短名 + 「n 卡 · 最近活动 <日期>」，
+ * 点卡进盘；盘内工具条有「启动器」返回钮。换盘只走启动器与虫洞，多盘同开不做。
  */
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -30,16 +34,20 @@ import {
   type TrajectorySettings,
 } from "./canvas/settings.ts";
 import { type HomeState, StarStage } from "./canvas/stage.ts";
-import { buildThemes } from "./canvas/theme.ts";
+import { renderStarThumb, thumbTheme } from "./canvas/star-thumb.ts";
+import { buildThemes, CSS_RING_PALETTE } from "./canvas/theme.ts";
 import { inRange } from "./model.ts";
-import { toRuntimeModel } from "./serial.ts";
-import type { Card, Wormhole } from "./types.ts";
+import { type LauncherThumb, toRuntimeModel } from "./serial.ts";
+import type { Card, TrajectoryModel, Wormhole } from "./types.ts";
 import type { RouteCard, Trajectory } from "./index.ts";
+
+export type { LauncherThumb } from "./serial.ts";
 
 /** StarDisk 的 props：data 是 buildTrajectory 的产物（多盘），hrefBase 是卡页路由前缀
  * （节点链接 = `${hrefBase}/${encodeURIComponent(id)}`）——不收函数，服务端组件传不了函数
  * 给客户端组件。size 给了就按这个边长定容器（同步渲染、不碰 window）；不给就吃满父元素。
- * initialDisk 指定初始显示哪张盘（disks 的 rootId），不在盘清单里就退回第一张。
+ * initialDisk 指定初始显示哪张盘（disks 的 rootId）；缺失或不在盘清单里就渲启动器卡阵。
+ * thumbs 是服务端渲好的启动器缩略图（按 rootId 索引）；没给的盘在客户端现画。
  *
  * mode 是两种形态：`embed` 方形嵌进文档流（宽随父、高等于宽、点一下才进交互态），
  * `page` 整页（吃满父元素、滚轮直接生效、当前盘写进 URL 的 `?disk=`）。顶栏不归组件画。 */
@@ -49,6 +57,7 @@ export interface StarDiskProps {
   size?: number;
   initialDisk?: string;
   mode?: "page" | "embed";
+  thumbs?: Record<string, LauncherThumb>;
 }
 
 /** localStorage 里手感参数的键。 */
@@ -119,8 +128,159 @@ interface Tip {
   meta: string;
 }
 
-export function StarDisk({ data, hrefBase, size, initialDisk, mode = "embed" }: StarDiskProps): ReactNode {
-  /* 整页与嵌入的分支全走这一个布尔：容器几何、激活态、URL 同步 */
+/* ================= 路由：有当前盘渲盘，没有渲启动器 ================= */
+
+export function StarDisk({ data, hrefBase, size, initialDisk, mode = "embed", thumbs }: StarDiskProps): ReactNode {
+  const isPage = mode === "page";
+  /* initialDisk 过一道盘清单：它来自 URL 的 `?disk=`，也可能是卡页「回到盘」带来的父卡身份，
+   * 不是根卡就没有对应的模型——认不出就回启动器 */
+  const [currentDisk, setCurrentDisk] = useState<string | null>(
+    initialDisk && data.disks.some((d) => d.rootId === initialDisk) ? initialDisk : null,
+  );
+
+  /* ---------- 整页模式：当前盘写进 URL ----------
+   * replaceState 不刷新、不进历史栈（切盘是同页状态，不该让浏览器后退键去撤），
+   * 只为让「某一张盘」这个位置可以直接分享；初始值由页面从 searchParams 读、经 initialDisk 进来。
+   * 回启动器就把参数摘掉。搜索词、筛选、透镜位置都不进 URL。 */
+  useEffect(() => {
+    if (!isPage) return;
+    const url = new URL(window.location.href);
+    if ((url.searchParams.get("disk") ?? null) === currentDisk) return;
+    if (currentDisk) url.searchParams.set("disk", currentDisk);
+    else url.searchParams.delete("disk");
+    window.history.replaceState(null, "", url);
+  }, [isPage, currentDisk]);
+
+  const openDisk = useCallback(
+    (id: string) => {
+      if (data.disks.some((d) => d.rootId === id)) setCurrentDisk(id);
+    },
+    [data.disks],
+  );
+  const toLauncher = useCallback(() => setCurrentDisk(null), []);
+
+  if (!currentDisk) {
+    return <Launcher data={data} thumbs={thumbs} onOpenDisk={openDisk} />;
+  }
+  return (
+    <DiskView
+      key={currentDisk}
+      data={data}
+      hrefBase={hrefBase}
+      size={size}
+      mode={mode}
+      disk={currentDisk}
+      onOpenDisk={openDisk}
+      onLauncher={toLauncher}
+    />
+  );
+}
+
+/* ================= 启动器：项目卡阵 ================= */
+
+interface LauncherProps {
+  data: Trajectory;
+  thumbs: Record<string, LauncherThumb> | undefined;
+  onOpenDisk(id: string): void;
+}
+
+/** 一张盘在卡阵上的条目：短名、卡数、最近活动（上盘卡与虫洞里最晚的 born-at，没卡退到根卡）。 */
+interface LauncherEntry {
+  rootId: string;
+  label: string;
+  cardCount: number;
+  latest: string;
+  model: TrajectoryModel;
+}
+
+function launcherEntries(data: Trajectory): LauncherEntry[] {
+  const byId = new Map(data.cards.map((c) => [c.id, c]));
+  const entries = data.disks.map((d): LauncherEntry => {
+    const model = toRuntimeModel(data.models[d.rootId]);
+    const stamps = [...model.cards.map((c) => c.bornAt), ...model.wormholes.map((w) => w.bornAt)];
+    const latest = stamps.length ? stamps.reduce((a, b) => (a > b ? a : b)) : (model.root?.bornAt ?? "");
+    return {
+      rootId: d.rootId,
+      label: model.root?.label ?? byId.get(d.rootId)?.label ?? d.rootId,
+      cardCount: model.cards.length,
+      latest,
+      model,
+    };
+  });
+  /* 最近活动降序，并列按短名 */
+  return entries.sort((a, b) => b.latest.localeCompare(a.latest) || a.label.localeCompare(b.label));
+}
+
+function Launcher({ data, thumbs, onOpenDisk }: LauncherProps): ReactNode {
+  const entries = useMemo(() => launcherEntries(data), [data]);
+  return (
+    <div className="star-launcher">
+      {entries.length === 0 ? <div className="star-launcher-empty">还没有任何盘</div> : null}
+      <div className="star-launcher-list">
+        {entries.map((e) => (
+          <button
+            key={e.rootId}
+            type="button"
+            className="star-launcher-card"
+            title={`${e.label} · ${e.rootId}`}
+            onClick={() => onOpenDisk(e.rootId)}
+          >
+            <LauncherThumbView model={e.model} markup={thumbs?.[e.rootId]} />
+            <div className="star-launcher-text">
+              <div className="star-launcher-label">{e.label}</div>
+              <div className="star-launcher-meta">
+                <span className="star-launcher-seg">{e.cardCount} 卡</span>
+                {" · "}
+                <span className="star-launcher-seg">最近活动 {e.latest ? e.latest.slice(0, 10) : "—"}</span>
+              </div>
+            </div>
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/** 定妆照：服务端给了 markup 就原样贴（亮暗各一份，CSS 按 html.dark 显示其一）；
+ * 没给（别的消费方直接用组件）就在客户端用同一个画家现画、跟主题重画。 */
+function LauncherThumbView({ model, markup }: { model: TrajectoryModel; markup: LauncherThumb | undefined }): ReactNode {
+  const hostRef = useRef<HTMLDivElement | null>(null);
+  useEffect(() => {
+    const host = hostRef.current;
+    if (markup || !host) return;
+    const paint = (): void => {
+      host.textContent = "";
+      const dark = document.documentElement.classList.contains("dark");
+      const theme = thumbTheme(model.domains, dark ? "dark" : "light");
+      host.appendChild(renderStarThumb(model, theme, undefined, CSS_RING_PALETTE, document));
+    };
+    paint();
+    const mo = new MutationObserver(paint);
+    mo.observe(document.documentElement, { attributes: true, attributeFilter: ["class"] });
+    return () => mo.disconnect();
+  }, [model, markup]);
+  if (markup) {
+    return (
+      <div className="star-launcher-thumb" dangerouslySetInnerHTML={{ __html: markup.dark + markup.light }} />
+    );
+  }
+  return <div className="star-launcher-thumb" ref={hostRef} />;
+}
+
+/* ================= 盘 ================= */
+
+interface DiskViewProps {
+  data: Trajectory;
+  hrefBase: string;
+  size: number | undefined;
+  mode: "page" | "embed";
+  disk: string;
+  onOpenDisk(id: string): void;
+  onLauncher(): void;
+}
+
+function DiskView({ data, hrefBase, size, mode, disk: currentDisk, onOpenDisk, onLauncher }: DiskViewProps): ReactNode {
+  /* 整页与嵌入的分支全走这一个布尔：容器几何、激活态 */
   const isPage = mode === "page";
   const containerRef = useRef<HTMLDivElement | null>(null);
   const canvasRef = useRef<HTMLDivElement | null>(null);
@@ -130,13 +290,6 @@ export function StarDisk({ data, hrefBase, size, initialDisk, mode = "embed" }: 
   /** 指针在容器里的最近位置：小气泡摆放用（悬停回调不带坐标） */
   const pointerRef = useRef({ x: 0, y: 0 });
 
-  /* initialDisk 过一道盘清单：它来自 URL 的 `?disk=`，也可能是卡页「回到盘」带来的父卡身份，
-   * 不是根卡就没有对应的模型，认下来整盘是空的——认不出就退回第一张盘 */
-  const [currentDisk, setCurrentDisk] = useState<string | null>(
-    (initialDisk && data.disks.some((d) => d.rootId === initialDisk) ? initialDisk : null) ??
-      data.disks[0]?.rootId ??
-      null,
-  );
   const [dark, setDark] = useState(false);
   const [formFilter, setFormFilter] = useState<ReadonlySet<string>>(new Set());
   const [domainFilter, setDomainFilter] = useState<ReadonlySet<string>>(new Set());
@@ -155,7 +308,7 @@ export function StarDisk({ data, hrefBase, size, initialDisk, mode = "embed" }: 
 
   /* ---------- 数据联接：路由卡表（拿 type / milestones），当前盘的运行期模型 ---------- */
   const routeById = useMemo(() => new Map(data.cards.map((c) => [c.id, c])), [data.cards]);
-  const serialized = currentDisk ? data.models[currentDisk] : undefined;
+  const serialized = data.models[currentDisk];
   const model = useMemo(() => toRuntimeModel(serialized), [serialized]);
   const rootRoute: RouteCard | undefined = model.root ? routeById.get(model.root.id) : undefined;
   const milestones = useMemo(
@@ -170,8 +323,8 @@ export function StarDisk({ data, hrefBase, size, initialDisk, mode = "embed" }: 
   const hrefOf = useCallback((id: string) => `${hrefBase}/${encodeURIComponent(id)}`, [hrefBase]);
   const hrefOfRef = useRef(hrefOf);
   hrefOfRef.current = hrefOf;
-  const disksRef = useRef(data.disks);
-  disksRef.current = data.disks;
+  const onOpenDiskRef = useRef(onOpenDisk);
+  onOpenDiskRef.current = onOpenDisk;
   const settingsRef = useRef(settings);
   settingsRef.current = settings;
   const modelRef = useRef(model);
@@ -189,9 +342,7 @@ export function StarDisk({ data, hrefBase, size, initialDisk, mode = "embed" }: 
         openCard: (id) => {
           window.open(hrefOfRef.current(id), "_blank", "noopener");
         },
-        openWormhole: (id) => {
-          if (disksRef.current.some((d) => d.rootId === id)) setCurrentDisk(id);
-        },
+        openWormhole: (id) => onOpenDiskRef.current(id),
         onHover: (card: Card | null, worm: Wormhole | null) => {
           if (card) {
             setTip({
@@ -216,9 +367,9 @@ export function StarDisk({ data, hrefBase, size, initialDisk, mode = "embed" }: 
     };
   }, []);
 
-  /* 换盘 / 首开：模型灌进舞台，画布整棵重建 */
+  /* 首开（换盘换的是整个 DiskView）：模型灌进舞台，画布整棵重建 */
   useEffect(() => {
-    stageRef.current?.setData({ model, milestones, projectId: currentDisk ?? "", typeOf });
+    stageRef.current?.setData({ model, milestones, projectId: currentDisk, typeOf });
     setTip(null);
   }, [model, milestones, currentDisk, typeOf]);
 
@@ -246,18 +397,6 @@ export function StarDisk({ data, hrefBase, size, initialDisk, mode = "embed" }: 
   useEffect(() => {
     stageRef.current?.setShowAllLabels(showAllLabels);
   }, [showAllLabels]);
-
-  /* ---------- 整页模式：当前盘写进 URL ----------
-   * replaceState 不刷新、不进历史栈（切盘是同页状态，不该让浏览器后退键去撤），
-   * 只为让「某一张盘」这个位置可以直接分享；初始值由页面从 searchParams 读、经 initialDisk 进来。
-   * 搜索词、筛选、透镜位置都不进 URL。 */
-  useEffect(() => {
-    if (!isPage || !currentDisk) return;
-    const url = new URL(window.location.href);
-    if (url.searchParams.get("disk") === currentDisk) return;
-    url.searchParams.set("disk", currentDisk);
-    window.history.replaceState(null, "", url);
-  }, [isPage, currentDisk]);
 
   /* ---------- 嵌入模式：点外部释放交互态 ---------- */
   useEffect(() => {
@@ -349,7 +488,7 @@ export function StarDisk({ data, hrefBase, size, initialDisk, mode = "embed" }: 
         : { position: "relative", width: "100%", aspectRatio: "1 / 1", overflow: "hidden", borderRadius: 12 };
   const shellClass = `star-disk${isPage ? " star-disk-page" : ""}${dark ? " star-dark" : ""}${activated ? " star-active" : ""}`;
   const home = HOME_FACE[homeState];
-  const hubLabel = model.root?.label ?? currentDisk ?? "";
+  const hubLabel = model.root?.label ?? currentDisk;
 
   return (
     <div
@@ -362,7 +501,7 @@ export function StarDisk({ data, hrefBase, size, initialDisk, mode = "embed" }: 
       }}
     >
       {/* 画布区：空 div 交给画布层，svg 由舞台建；竖轨容器在它左缘 */}
-      <div ref={canvasRef} className="star-canvas" data-disk={currentDisk ?? ""} aria-label={hubLabel} />
+      <div ref={canvasRef} className="star-canvas" data-disk={currentDisk} aria-label={hubLabel} />
       <div ref={railRef} className="star-rail" />
 
       {/* 悬停小气泡 */}
@@ -379,7 +518,7 @@ export function StarDisk({ data, hrefBase, size, initialDisk, mode = "embed" }: 
         </div>
       ) : null}
 
-      {/* 右上工具条：左簇 搜索 / 图例 / 全部标签，右簇 回到原点 / 设置 / 帮助 */}
+      {/* 右上工具条：左簇 搜索 / 图例 / 全部标签，右簇 回到原点 / 启动器 / 设置 / 帮助 */}
       <div className="star-hud-top">
         <button
           type="button"
@@ -414,6 +553,9 @@ export function StarDisk({ data, hrefBase, size, initialDisk, mode = "embed" }: 
           onClick={() => stageRef.current?.goHome()}
         >
           <Icon name={home.icon} />
+        </button>
+        <button type="button" className="star-mbtn" title="启动器（换项目盘）" onClick={onLauncher}>
+          <Icon name="compass" />
         </button>
         <button
           type="button"
@@ -491,7 +633,7 @@ export function StarDisk({ data, hrefBase, size, initialDisk, mode = "embed" }: 
 
       {/* 嵌入模式未激活：一条提示带，不遮盘（点盘任何地方即激活） */}
       {!activated ? <span className="star-activate-hint">点击进入盘面</span> : null}
-      {isEmpty && !currentDisk ? <div className="star-empty">还没有任何盘</div> : null}
+      {isEmpty ? <div className="star-empty">这张盘还没有记录</div> : null}
     </div>
   );
 }

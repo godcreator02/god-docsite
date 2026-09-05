@@ -37,6 +37,13 @@ export function emptyModel(): TrajectoryModel {
   };
 }
 
+/** 一张盘的启动器缩略图：亮 / 暗各一份静态 SVG markup（`./server` 的 launcherThumbs 出，
+ * `./react` 的启动器卡阵贴），页面按 html.dark 显示其一，切主题不重画。 */
+export interface LauncherThumb {
+  dark: string;
+  light: string;
+}
+
 /** 序列化模型还原成运行期模型；没有（盘不存在）就是空盘。 */
 export function toRuntimeModel(serialized: SerializableModel | undefined): TrajectoryModel {
   if (!serialized) return emptyModel();

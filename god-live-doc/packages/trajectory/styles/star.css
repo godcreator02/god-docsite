@@ -612,6 +612,93 @@
   pointer-events: none;
 }
 
+/* ---------- 启动器：项目卡阵 ----------
+ * 一卡一个项目：上方全景定妆照（静态 svg，亮暗各一份、按 html.dark 显示其一），下方短名与
+ * 「n 卡 · 最近活动」。盘图的三个 CSS 变量（--hub-fill / --box-stroke / --box-fill）与环色变量
+ * 跟盘容器同一份（见文件头的变量块），静态盘的这部分着色走变量，主题切换不用重画。 */
+.star-launcher {
+  height: 100%;
+  overflow-y: auto;
+  padding: 16px 20px;
+  box-sizing: border-box;
+  background: var(--bg);
+  color: var(--t1);
+  user-select: none;
+}
+
+/* 卡片网格：自适应列宽，窄栏单列、宽栏多列 */
+.star-launcher-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 14px;
+}
+
+.star-launcher-card {
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  border: 1px solid var(--bd);
+  border-radius: 10px;
+  overflow: hidden;
+  background: transparent;
+  color: var(--t1);
+  font: inherit;
+  text-align: center;
+  cursor: pointer;
+}
+
+.star-launcher-card:hover {
+  background: var(--hov);
+}
+
+/* 盘图区：方形，静态盘 svg 铺满；盘纯装饰、不吃鼠标，交互全在卡片整体上 */
+.star-launcher-thumb {
+  aspect-ratio: 1;
+  padding: 12px;
+}
+
+.star-launcher-thumb svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+  pointer-events: none;
+}
+
+/* 亮暗各一份定妆照：按宿主的 html.dark 显示其一（只做显隐切换，色值仍全在各自的 JS 色板里） */
+.dark .star-launcher-thumb .star-thumb-light,
+html:not(.dark) .star-launcher-thumb .star-thumb-dark {
+  display: none;
+}
+
+.star-launcher-text {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 0 10px 10px;
+}
+
+.star-launcher-label {
+  font-size: 14px;
+}
+
+.star-launcher-meta {
+  color: var(--t4);
+  font-size: 11px;
+}
+
+/* 属性段：段内绝不断行（中文任意字间可断），换行只落段间分隔符处 */
+.star-launcher-seg {
+  white-space: nowrap;
+}
+
+.star-launcher-empty {
+  padding: 24px 8px;
+  color: var(--t2);
+  font-size: 13px;
+  text-align: center;
+}
+
 /* ---------- Trajectory 服务端组件：盘 + 报病列表 ---------- */
 .star-sick {
   margin-top: 16px;
