@@ -425,8 +425,10 @@ export function StarDisk({ data, hrefBase, size, initialDisk }: StarDiskProps): 
   const isMuted = useCallback(
     (n: RuntimeNode): boolean => {
       const shapeKey = n.type ?? "__default__";
+      /* 虫洞两道筛选都豁免：它不是一张卡，没有形态、也不属于任何领域（domain 是哨兵值），
+       * 按卡的口径一筛就整片灭掉，穿盘的入口跟着没了 */
       if (shapeFilter.size > 0 && n.kind === "card" && !shapeFilter.has(shapeKey)) return true;
-      if (domainFilter.size > 0 && n.domain !== undefined && !domainFilter.has(n.domain)) return true;
+      if (domainFilter.size > 0 && n.kind !== "wormhole" && !domainFilter.has(n.domain)) return true;
       if (searchLower && !(n.label.toLowerCase().includes(searchLower) || n.id.toLowerCase().includes(searchLower))) {
         return true;
       }
@@ -483,6 +485,11 @@ export function StarDisk({ data, hrefBase, size, initialDisk }: StarDiskProps): 
     l.strengthTarget = 0;
     l.buildMap();
     if (effectiveSize) frame.current.view = { k: fitK(effectiveSize), tx: effectiveSize / 2, ty: effectiveSize / 2 };
+    /* 上一张盘的悬停态一并撤掉：节点按卡身份 keyed，新盘没有这些身份，
+     * 气泡、hover 高亮与逐节点补间表留着就是一份永远褪不掉的残影 */
+    frame.current.hover = null;
+    frame.current.hv.clear();
+    setTooltip(null);
     setMode("fisheye");
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentDisk, effectiveSize]);
@@ -900,6 +907,29 @@ export function StarDisk({ data, hrefBase, size, initialDisk }: StarDiskProps): 
     if (hubTimer.current) clearTimeout(hubTimer.current);
     goHome();
   }, [goHome]);
+
+  /* 卸载收尾：排着的那一帧与盘心单双击的判定窗都撤掉——组件都没了，回调再回来碰
+   * ref 表就是白跑一趟（页面切走时 rAF 挂起、切回来才触发，更容易撞上） */
+  useEffect(() => {
+    const fr = frame.current;
+    const timer = hubTimer;
+    return () => {
+      if (fr.raf !== null) {
+        cancelAnimationFrame(fr.raf);
+        fr.raf = null;
+      }
+      if (timer.current !== null) {
+        clearTimeout(timer.current);
+        timer.current = null;
+      }
+    };
+  }, []);
+
+  /* 激活后把焦点收到容器上：遮罩按钮一卸载焦点就掉回 body，onKeyDown 挂在容器上，
+   * 焦点不在这儿 Esc 一下也收不到（容器已有 tabIndex={-1}，收得住） */
+  useEffect(() => {
+    if (activated) containerRef.current?.focus();
+  }, [activated]);
 
   /* 点击容器激活 / Esc 分层释放 / 点外部释放 */
   useEffect(() => {
@@ -1369,6 +1399,7 @@ export function StarDisk({ data, hrefBase, size, initialDisk }: StarDiskProps): 
             <div>Esc：先收起浮层，再退出交互态。点盘外也会退出交互态。</div>
             <div className="star-hh">怎么筛</div>
             <div>右下图例可点：形态、领域多选取交集；搜索匹配卡的标题与身份。</div>
+            <div>虫洞不受形态与领域筛选影响，点它切盘。</div>
           </div>
         ) : null}
       </div>
