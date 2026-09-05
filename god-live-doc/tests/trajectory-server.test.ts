@@ -7,13 +7,26 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { cardSchema, remarkTrajectoryLinks } from "@godcreator02/live-doc-trajectory/server";
+import type { CardFrontmatter } from "@godcreator02/live-doc-trajectory/server";
 import type { Link, Paragraph, Root, Text } from "mdast";
 
 /* ================= cardSchema ================= */
 
-test("cardSchema：合法 frontmatter 原样透出，label 就是 title", () => {
+// cardSchema.validate() 的类型签名跟协议原文一样，Result 是 { value } / { issues } 二选一的
+// 判别联合，且允许同步或 Promise（我们自己的实现永远同步返回值）——测试只想左右手都摸一下，
+// 不为了这份联合类型的精确性去逐条 narrow，转成宽松形状读。
+interface LooseResult {
+  value?: CardFrontmatter;
+  issues?: readonly { message: string }[];
+}
+const validate = async (
+  schema: ReturnType<typeof cardSchema>,
+  value: unknown,
+): Promise<LooseResult> => (await schema["~standard"].validate(value)) as LooseResult;
+
+test("cardSchema：合法 frontmatter 原样透出，label 就是 title", async () => {
   const schema = cardSchema({ path: "docs/2026-05-06-my-card.md", source: "" });
-  const result = schema["~standard"].validate({
+  const result = await validate(schema, {
     label: "标题",
     "born-at": "2026-05-06",
     type: "choice",
@@ -31,23 +44,23 @@ test("cardSchema：合法 frontmatter 原样透出，label 就是 title", () => 
   assert.equal(result.issues, undefined);
 });
 
-test("cardSchema：缺 label 时 title 退到文件名（剥掉日期前缀），不算 issues", () => {
+test("cardSchema：缺 label 时 title 退到文件名（剥掉日期前缀），不算 issues", async () => {
   const schema = cardSchema({ path: "docs/2026-05-06-my-card.md", source: "" });
-  const result = schema["~standard"].validate({ "born-at": "2026-05-06" });
+  const result = await validate(schema, { "born-at": "2026-05-06" });
   assert.equal(result.issues, undefined);
   assert.equal(result.value?.title, "my-card");
   assert.equal(result.value?.label, undefined);
 });
 
-test("cardSchema：born-at 被解析成 Date（fumadocs 自己的 YAML 走的是日级会被转 Date 这条老毛病）时转回字符串", () => {
+test("cardSchema：born-at 被解析成 Date（fumadocs 自己的 YAML 走的是日级会被转 Date 这条老毛病）时转回字符串", async () => {
   const schema = cardSchema({ path: "docs/2026-05-06-my-card.md", source: "" });
-  const result = schema["~standard"].validate({ label: "标题", "born-at": new Date("2026-05-06T00:00:00.000Z") });
+  const result = await validate(schema, { label: "标题", "born-at": new Date("2026-05-06T00:00:00.000Z") });
   assert.equal(result.value?.["born-at"], "2026-05-06");
 });
 
-test("cardSchema：缺 born-at 没有兜底，交回 issues", () => {
+test("cardSchema：缺 born-at 没有兜底，交回 issues", async () => {
   const schema = cardSchema({ path: "docs/2026-05-06-my-card.md", source: "" });
-  const result = schema["~standard"].validate({ label: "标题" });
+  const result = await validate(schema, { label: "标题" });
   assert.equal(result.value, undefined);
   assert.equal(result.issues?.length, 1);
   assert.match(result.issues![0]!.message, /born-at/);
