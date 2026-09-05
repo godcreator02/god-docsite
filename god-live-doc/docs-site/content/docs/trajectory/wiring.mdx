@@ -56,31 +56,44 @@ description: 配置一项、命令两条、fumadocs 站三处，外加 Next 那�
 {/* ref file="src/lib/trajectory-source.ts" */}
 
 卡页本身是一张普通的 fumadocs 页：标题用 `title`（`cardSchema` 已经从 `label` 派生好），
-标题下一行摆元信息，`parent` 链到父卡页，正文照常走组件表渲：
+标题下一行摆元信息，`parent` 链到父卡页，再一行「回到盘」（带上第一个 `parent` 当盘身份），
+正文照常走组件表渲。**slug 是必选的**——空 slug 归下面那条整页路由，所以静态参数里也把它滤掉：
 
-{/* ref file="src/app/trajectory/[[...slug]]/page.tsx" lines="6-39" */}
+{/* ref file="src/app/(trajectory-cards)/trajectory/[...slug]/page.tsx" lines="6-18" */}
 
-### 盘页组件
+{/* ref file="src/app/(trajectory-cards)/trajectory/[...slug]/page.tsx" lines="48-51" */}
 
-盘是个组件，走这个站的名册那一套。名单这一侧要有它：
+### 盘页路由
 
-{/* ref file="src/components/registry.ts" lines="7-8" */}
+**盘不是 mdx 里的组件，是一条独立的整页路由 `/trajectory`。**它跟卡页共用一段 URL 前缀，却要
+两套完全不同的布局——盘不要侧栏与目录，卡页要。Next 的路由组把这两套分开，组名不进 URL：
 
-React 表那一侧从 `./server` 入口拿——渲盘的是服务端组件，它自己再去渲客户端的那半：
+{/* ref file="src/app/(trajectory-disk)/trajectory/layout.tsx" */}
 
-{/* has file="src/components/mdx.tsx" text="@godcreator02/live-doc-trajectory/server" */}
+{/* ref file="src/app/(trajectory-cards)/trajectory/layout.tsx" */}
 
-压平规则那一侧：星轨盘是交互式画布，AI 那份 md 里画不出来，压成一行指路：
+盘页自己读目录建模，把模型交给 `mode="page"` 的 `StarDisk`，外加一条自己画的顶栏（左边回文档，
+右边报病数与主题切换）。**初始盘从 `searchParams.disk` 来**——组件切盘时 `replaceState` 写回
+这个参数，一个链接因此能直接指到某一张盘：
 
-{/* ref file="livedoc.config.mjs" lines="24-30" */}
+{/* ref file="src/app/(trajectory-disk)/trajectory/page.tsx" */}
 
-样式随包发，`global.css` 里引一行：
+顶栏上只有那两样。盘页签、搜索、设置、帮助、图例都归组件自己画在容器四角：当前盘是组件的状态、
+切盘要同步写 URL，页签跟状态住在一处才不必把整个盘态提到页面上。
+
+文档树里「轨迹」章的第一项是指向盘的**链接项**——`meta.json` 的 `pages` 认 `[名字](路径)` 这种写法，
+它不是一篇文档，只是侧栏上一条链接：
+
+{/* ref file="content/docs/trajectory/meta.json" */}
+
+样式随包发，`global.css` 里引一行；整页那层壳（顶栏一条、盘吃满剩下的高度）是站自己的几行 CSS，
+不进包里——顶栏是页面的事：
 
 {/* ref file="src/app/global.css" lines="6-7" */}
 
-然后在任意一篇 mdx 里摆一个 `<Trajectory dir="…" hrefBase="…" />` 就有盘了。`dir` 相对站的项目根，
-`hrefBase` 要跟 loader 的 `baseUrl` 和 `remarkTrajectoryLinks` 的 `hrefBase` 是同一个值——
-三处对不上，节点点开是 404。
+包照常导出服务端组件 `Trajectory`（读目录 + 渲一张方形嵌入的盘 + 报病列表），留给想把盘摆进
+一篇长文档中间的消费方；**这两个站的名册里不再登记它**，盘走路由了。`hrefBase` 仍要跟 loader 的
+`baseUrl` 和 `remarkTrajectoryLinks` 的 `hrefBase` 是同一个值——三处对不上，节点点开是 404。
 
 ## 四、Next 那头两条
 

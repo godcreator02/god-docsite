@@ -15,7 +15,8 @@ livedoc: none
 各用在哪种论断、反模式），配套 skill 在 `skills/livedoc-docs/SKILL.md`。
 
 另一摊是**轨迹卡**：live-doc 治现状文档撒谎，轨迹卡治历史被改写——一次方向了断记下来就该冻结，
-谁取代了谁看得见。卡不进记录簿、不用 confirm，只要即时校验，盘（星轨）画在文档站上。
+谁取代了谁看得见。卡不进记录簿、不用 confirm，只要即时校验；盘（星轨）在站上是一条独立的整页
+路由 `/trajectory`，不是塞进 mdx 的组件。
 怎么判断值得记一笔、怎么落卡，配套 skill 在 `skills/trajectory/SKILL.md`；机制那一半见文档站「轨迹」章。
 
 ## 怎么装
@@ -177,8 +178,9 @@ format-md        注释记号 + 围栏展示区 + 尾注释
 format-fumadocs  mdx 与 fumadocs 是一个整体：remark 插件、序列化回调、meta 白名单、pre 组件 + 样式
 format-html      元素既是记号又是展示区，文件即终态（final），不渲染
 trajectory       轨迹卡与星轨盘，三个入口：`.` 扫卡 / 四层校验 / 聚盘建模 / 布局与链表纯函数；
-                 `./react` 客户端组件 StarDisk（随包发 star.css）；`./server` 服务端组件 Trajectory
-                 + fumadocs 的 cardSchema + remark 关系边插件。`.` 入口的产物只 import node:
+                 `./react` 客户端组件 StarDisk，两种模式（整页 / 方形嵌入，随包发 star.css）；
+                 `./server` 服务端组件 Trajectory（方形嵌入那一档）+ fumadocs 的 cardSchema
+                 + remark 关系边插件。`.` 入口的产物只 import node:
                  （包的 dependencies 里只有 remark 那套的 unist-util-visit，给 `./server` 用），
                  react 是 peer（可选）
 ```
