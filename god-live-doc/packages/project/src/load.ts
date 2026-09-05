@@ -30,6 +30,8 @@ export interface ProjectConfig {
   outputs?: Record<string, string[]>;
   /** fumadocs 格式包的私货：集合名 */
   fumadocs?: { collection?: string };
+  /** 轨迹卡目录，相对项目根；不配就不管轨迹（check 不跑卡校验、trajectory 子命令报错退出） */
+  trajectory?: string;
 }
 
 export interface Project {
@@ -37,6 +39,8 @@ export interface Project {
   config: ProjectConfig;
   service: Service;
   roster: Record<string, unknown> | undefined;
+  /** 轨迹卡目录的绝对路径；`livedoc.config` 没配 `trajectory` 时为 null */
+  trajectoryDir: string | null;
   /** 文档目录下有格式包认领的那些文档，相对项目根、正斜杠、排过序 */
   docs(): string[];
   docIdOf(absPath: string): string;
@@ -125,6 +129,7 @@ async function build(root: string): Promise<Project> {
     config,
     service,
     roster: config.components,
+    trajectoryDir: config.trajectory !== undefined ? join(root, config.trajectory) : null,
     docs: () => walk(docsDir),
     docIdOf: (absPath) => docIdOf(root, absPath),
     read: (doc) => readFileSync(join(root, doc), "utf8"),
