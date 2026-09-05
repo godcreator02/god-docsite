@@ -1,11 +1,14 @@
 /**
- * @godcreator02/live-doc-trajectory——本轮只开 `.` 入口。零依赖（只用 node:fs / node:path）。
- * parse / validate / model / layout / chains 五个文件汇总导出；`buildTrajectory` 是本文件新写的
- * 装配入口：扫一次目录、给每张盘建模，不算布局——布局是纯函数、几毫秒，留给客户端按设置滑杆现算
- * （见方案第十三节）；layout.ts / chains.ts 照样导出，供客户端组件使用。
+ * @godcreator02/live-doc-trajectory——`.` 入口：parse / validate / model / layout / chains
+ * 纯函数汇总导出，零 npm 依赖（只用 node:fs / node:path，来自 scan.ts 一处）；`buildTrajectory`
+ * 是本文件新写的装配入口：扫一次目录、给每张盘建模，不算布局——布局是纯函数、几毫秒，留给客户端
+ * 按设置滑杆现算（见方案第十三节）；layout.ts / chains.ts 照样导出，供客户端组件使用。
+ * `./react`（客户端组件）与 `./server`（服务端组件 + cardSchema + remark 插件）是另外两个入口，
+ * 各自的源码在 react.tsx / server.tsx，见方案第十三节「星轨盘」与「接线」。
  */
 
-import { buildDisks, buildModel, scanDir } from "./model.ts";
+import { buildDisks, buildModel } from "./model.ts";
+import { scanDir } from "./scan.ts";
 import type { DiskInfo, Milestone, RawCard, Relation, SickFile, TrajectoryModel } from "./types.ts";
 
 export {
@@ -23,8 +26,11 @@ export type { ExtractedRelations, Frontmatter } from "./parse.ts";
 
 export { checkLivedocRefs } from "./validate.ts";
 
-export { buildDisks, buildModel, dayNum, formatDay, formOf, inRange, NO_DOMAIN, parseCardFile, scanDir } from "./model.ts";
-export type { ParsedFile, TrajectoryScan } from "./model.ts";
+export { buildDisks, buildModel, dayNum, formatDay, formOf, inRange, NO_DOMAIN, parseCardFile } from "./model.ts";
+export type { ParsedFile } from "./model.ts";
+
+export { scanDir } from "./scan.ts";
+export type { TrajectoryScan } from "./scan.ts";
 
 export {
   AXIS_SPAN,
