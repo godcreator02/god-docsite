@@ -119,7 +119,7 @@ export function cardSchema(ctx: { path: string; source: string }): StandardSchem
 /* ================= remarkTrajectoryLinks：关系边打标 + 链接改写 ================= */
 
 export interface RemarkTrajectoryLinksOptions {
-  /** 卡页路由前缀：`.md` 链接与 wikilink 都改写成 `${hrefBase}/<卡身份>`。 */
+  /** 卡页路由前缀：形如卡身份的 `.md` 链接与 wikilink 改写成 `${hrefBase}/<卡身份>`。 */
   hrefBase: string;
 }
 
@@ -143,9 +143,19 @@ function stemFromHref(href: string): string {
   return v.endsWith(".md") ? v.slice(0, -3) : v;
 }
 
+/** 剥完之后这个主干像不像卡身份：非空、不带路径分隔、不以 `.md` 结尾（跟 model.ts 的
+ * idShapeOk 同一条），再多一条不带 `:`——那边的值来自 frontmatter，这边来自正文链接，
+ * `https://…` 这类协议头得挡在外面。
+ * 卡正文里除了引卡还会引材料（`../assets/x/README.md` 这类带路径的 .md）：那些没有卡身份
+ * 语义，改写成卡页路由就是造死链，原样留给站自己解析。 */
+function idShapeOk(stem: string): boolean {
+  return stem !== "" && !stem.includes("/") && !stem.includes("\\") && !stem.includes(":") && !stem.endsWith(".md");
+}
+
 /** remark 插件：正文里 `supersedes::` / `pivots-from::` 起头的段落打成
- * `<div class="trajectory-edge" data-kind="...">`；所有 `.md` 结尾的链接与 wikilink
- * 改写成卡页路由。挂在 fumadocs 卡集合的 mdxOptions 上，不跑在 livedoc 自己的文档集合上。 */
+ * `<div class="trajectory-edge" data-kind="...">`；**主干像卡身份的** `.md` 链接与 wikilink
+ * 改写成卡页路由，带路径的 `.md`（引材料）原样不动。
+ * 挂在 fumadocs 卡集合的 mdxOptions 上，不跑在 livedoc 自己的文档集合上。 */
 export function remarkTrajectoryLinks(options: RemarkTrajectoryLinksOptions) {
   const { hrefBase } = options;
   return (tree: Root): void => {
@@ -162,11 +172,13 @@ export function remarkTrajectoryLinks(options: RemarkTrajectoryLinksOptions) {
     });
 
     /* .md 链接改写：判「是不是 .md 链接」要先把 # 锚剥掉再看后缀，`a.md#锚` 不然会被
-     * 误判成「不以 .md 结尾」漏改。 */
+     * 误判成「不以 .md 结尾」漏改；剥出主干后再过一道卡身份形状，不像卡身份的放行。 */
     visit(tree, "link", (node: Link) => {
       const withoutHash = node.url.split("#")[0] ?? "";
       if (!withoutHash.endsWith(".md")) return;
-      node.url = `${hrefBase}/${stemFromHref(node.url)}`;
+      const stem = stemFromHref(node.url);
+      if (!idShapeOk(stem)) return;
+      node.url = `${hrefBase}/${stem}`;
     });
 
     /* wikilink 转真链接：文本节点里找 [[...]]，切成 文本/链接/文本... 的序列 */

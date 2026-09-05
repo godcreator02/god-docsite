@@ -1,7 +1,7 @@
 /**
  * `./server` 入口两样东西的测试：`cardSchema`（合法 / 缺 label / 缺 born-at / Date 型
- * born-at 四种判定）与 `remarkTrajectoryLinks`（关系边段落打标、`.md` 链接改写、
- * wikilink 转真链接）。mdast 树直接手搭——remarkTrajectoryLinks 本身就是个吃 Root
+ * born-at 四种判定）与 `remarkTrajectoryLinks`（关系边段落打标、卡身份形状的 `.md`
+ * 链接改写、带路径的 `.md` 放行、wikilink 转真链接）。mdast 树直接手搭——remarkTrajectoryLinks 本身就是个吃 Root
  * 吐 void 的纯函数，不需要真跑一趟 unified 的 parse/stringify 管线。
  */
 import { test } from "node:test";
@@ -103,6 +103,22 @@ test("remarkTrajectoryLinks：.md 链接改写成卡页路由，解码百分号�
   assert.equal((p1!.children[0] as Link).url, "/trajectory/old-card");
   assert.equal((p2!.children[0] as Link).url, "/trajectory/2026-05-06-乙");
   assert.equal((p3!.children[0] as Link).url, "https://example.com/not-a-card");
+});
+
+test("remarkTrajectoryLinks：带路径的 .md 链接（引材料）不改写——那不是卡身份", () => {
+  const tree: Root = {
+    type: "root",
+    children: [
+      paragraph([link("../assets/re01-probe/README.md", "实验材料包")]),
+      paragraph([link("sub/夹层.md", "夹层")]),
+      paragraph([link("https://example.com/readme.md", "站外")]),
+    ],
+  };
+  remarkTrajectoryLinks({ hrefBase: "/trajectory" })(tree);
+  const [p1, p2, p3] = tree.children as Paragraph[];
+  assert.equal((p1!.children[0] as Link).url, "../assets/re01-probe/README.md");
+  assert.equal((p2!.children[0] as Link).url, "sub/夹层.md");
+  assert.equal((p3!.children[0] as Link).url, "https://example.com/readme.md");
 });
 
 test("remarkTrajectoryLinks：wikilink（带别名 / 不带别名）转成真链接，前后文字保留", () => {
