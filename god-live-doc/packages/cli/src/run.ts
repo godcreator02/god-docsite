@@ -1,18 +1,21 @@
 /**
- * livedoc 的三个动作，编排在这儿。可执行那一头在 cli.ts——测试直接调 main，不用起子进程。
+ * livedoc 的动作，编排在这儿。可执行那一头在 cli.ts——测试直接调 main，不用起子进程。
  * cwd 就是项目根（那里有 livedoc.config.mjs）。
- *   livedoc check                          核对：只读，红退 1；挂了 outputs 映射的文档顺手守生成物新鲜度
+ *   livedoc check                          核对：只读，红退 1；挂了 outputs 映射的文档顺手守生成物新鲜度；
+ *                                          配了 trajectory 目录的顺手跑卡校验，病卡也算红
  *   livedoc confirm                        确认：出记录、清孤儿、写回文档；有钉不住的整篇拒，打印并退 1
  *                                          文档本身删了、挪了的，它的记录 check 算红、confirm 整个忘掉
  *   livedoc render --target human|ai       渲染：产物落 out/；挂了 outputs 映射的 ai 产物摆到指定目标（不再落 out/）
+ *   livedoc trajectory [--json]            列轨迹卡的盘 / 树 / 主干；--json 出 buildTrajectory 的整份模型
  * 新引用不用命令：在文档里写一行核心定的草稿记号 @@livedoc ref src/greet.ts:2-3 @@，
  * check 认它、报未确认，confirm 换成该格式的正式记号。
  */
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
-import { dirname, join } from "node:path";
+import { dirname, join, relative, sep } from "node:path";
 import { targetKey } from "@godcreator02/live-doc-core";
 import type { Format, Item, Listing } from "@godcreator02/live-doc-core";
 import { loadProject } from "@godcreator02/live-doc-project";
+import { buildTrajectory, scanDir } from "@godcreator02/live-doc-trajectory";
 
 const MARK: Record<string, string> = { fresh: "🟢", changed: "🟡", missing: "🔴", unconfirmed: "⚪" };
 const LABEL: Record<string, string> = {
@@ -40,6 +43,9 @@ const ANCHOR = /^(#{1,6} .+) \[#[^\]]*\]$/gm;
 const STAR = /&#x2A;\*/g;
 
 export async function main(argv: string[]): Promise<number> {
+  // trajectory 子命令跟 check / confirm / render 不是一套：它不认 --target、不遍历文档，
+  // 提前分流，不挤进下面那条白名单检查里
+  if (argv[0] === "trajectory") return trajectoryCommand(argv.slice(1));
   const [command = "check", ...rest] = argv;
   const target = rest.includes("--target") ? rest[rest.indexOf("--target") + 1] : "human";
   if (!["check", "confirm", "render"].includes(command)) {
@@ -66,10 +72,50 @@ export async function main(argv: string[]): Promise<number> {
       console.log(`🔴 ${doc}  文档已不存在，记录簿里还留着它的记录——confirm 会清掉`);
       red += 1;
     }
+    red += await checkTrajectory(project);
   } else if (command === "confirm") {
     for (const doc of project.service.forget(docs)) console.log(`🧹 ${doc}  文档已不存在，记录已清`);
   }
   return red > 0 ? 1 : 0;
+}
+
+/** check 顺带跑的卡校验：trajectoryDir 没配就不管；目录不存在（scanDir 回空）不算红。
+ * 病按 `🔴 <path>  <field>：<reason>（<value>）` 一行打印，path 相对项目根。 */
+async function checkTrajectory(project: Project): Promise<number> {
+  if (project.trajectoryDir === null) return 0;
+  const { sick } = await scanDir(project.trajectoryDir);
+  let red = 0;
+  for (const file of sick) {
+    const rel = relative(project.root, join(project.trajectoryDir, file.path)).split(sep).join("/");
+    for (const p of file.problems) {
+      console.log(`🔴 ${rel}  ${p.field}：${p.reason}（${p.value}）`);
+      red += 1;
+    }
+  }
+  return red;
+}
+
+/** `livedoc trajectory [--json]`：没配 trajectory 目录报错退 2；`--json` 出 buildTrajectory
+ * 整份模型；不带 `--json` 按盘打印——每盘一段，列每棵树的主干，再一行汇总支线 / 孤星 / 虫洞数。 */
+async function trajectoryCommand(rest: string[]): Promise<number> {
+  const project = await loadProject(process.cwd());
+  if (project.trajectoryDir === null) {
+    console.log("这个项目没配 trajectory 目录");
+    return 2;
+  }
+  const data = await buildTrajectory(project.trajectoryDir);
+  if (rest.includes("--json")) {
+    console.log(JSON.stringify(data));
+    return 0;
+  }
+  for (const disk of data.disks) {
+    const model = data.models[disk.rootId];
+    console.log(`盘 ${model?.root?.label ?? disk.rootId}（${disk.rootId}）  ${disk.memberIds.length} 张卡`);
+    for (const tree of model?.trees ?? []) console.log(`  主干：${tree.spine.join(" → ")}`);
+    const sublineCount = model?.trees.reduce((n, t) => n + t.sublines.length, 0) ?? 0;
+    console.log(`  支线 ${sublineCount} 条，孤星 ${model?.isolated.length ?? 0} 张，虫洞 ${model?.wormholes.length ?? 0} 个`);
+  }
+  return 0;
 }
 
 type Project = Awaited<ReturnType<typeof loadProject>>;

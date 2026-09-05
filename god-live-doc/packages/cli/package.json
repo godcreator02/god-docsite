@@ -2,7 +2,7 @@
   "name": "@godcreator02/live-doc-cli",
   "version": "0.1.0",
   "type": "module",
-  "description": "命令行：check / confirm / render",
+  "description": "命令行：check / confirm / render / trajectory",
   "bin": {
     "livedoc": "./dist/cli.mjs"
   },
@@ -22,7 +22,8 @@
   },
   "dependencies": {
     "@godcreator02/live-doc-core": "workspace:*",
-    "@godcreator02/live-doc-project": "workspace:*"
+    "@godcreator02/live-doc-project": "workspace:*",
+    "@godcreator02/live-doc-trajectory": "workspace:*"
   },
   "publishConfig": {
     "access": "public"

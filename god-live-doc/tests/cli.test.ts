@@ -281,6 +281,48 @@ test("文档本身删了：它的记录 check 算红；confirm 整个忘掉", as
   }
 });
 
+/** 把 CONFIG 尾巴换成带 trajectory 的：项目根下 trajectory/ 目录挂上轨迹卡校验 */
+function withTrajectory(): string {
+  return CONFIG.replace(`docs: "docs", out: "out" };`, `docs: "docs", out: "out", trajectory: "trajectory" };`);
+}
+
+test("配了 trajectory 的项目：check 顺带跑卡校验，病卡退 1 且输出含 🔴", async () => {
+  const p = setupProject(withTrajectory());
+  try {
+    mkdirSync(join(p.root, "trajectory"));
+    writeFileSync(
+      join(p.root, "trajectory", "2026-01-01-bad.md"),
+      ["---", "born-at: 一月一号", "type: root", "label: 坏卡", "---", "", "正文。", ""].join("\n"),
+    );
+    const red = await p.cli("check");
+    assert.equal(red.code, 1);
+    assert.match(red.out, /🔴 trajectory\/2026-01-01-bad\.md {2}born-at：/);
+  } finally {
+    p.teardown();
+  }
+});
+
+test("配了 trajectory 的项目：合法根卡加子卡，trajectory --json 出的 JSON 里 disks 有一张盘", async () => {
+  const p = setupProject(withTrajectory());
+  try {
+    mkdirSync(join(p.root, "trajectory"));
+    writeFileSync(
+      join(p.root, "trajectory", "2026-01-01-root.md"),
+      ["---", "born-at: 2026-01-01T08:00", "type: root", "label: 测试项目", "---", ""].join("\n"),
+    );
+    writeFileSync(
+      join(p.root, "trajectory", "2026-01-02-child.md"),
+      ["---", "born-at: 2026-01-02T08:00", "parent: [2026-01-01-root]", "label: 子卡", "---", ""].join("\n"),
+    );
+    const result = await p.cli("trajectory", "--json");
+    assert.equal(result.code, 0, result.out);
+    const data = JSON.parse(result.out) as { disks: unknown[] };
+    assert.equal(data.disks.length, 1);
+  } finally {
+    p.teardown();
+  }
+});
+
 test("孤儿：文档里删掉引用，check 报红；confirm 清掉", async () => {
   const p = setupProject();
   try {

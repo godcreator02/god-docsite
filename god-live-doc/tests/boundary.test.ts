@@ -82,3 +82,32 @@ test("每个格式包都实现了核心要的那五样", async () => {
     }
   }
 });
+
+test("trajectory 零依赖", () => {
+  assert.deepEqual(depsOf(pkgs.trajectory!), []);
+});
+
+test("trajectory 源码只 import 自己和 node:fs / node:path / node:fs/promises", () => {
+  // 锚在行首的 import 语句取到 from 的引号——core 那条用的宽松正则会被本包正文里
+  // "pivots-from" 这个字符串字面量骗过（from 后紧跟的引号是它自己的收尾引号，
+  // 匹配一路吞到几百字符外的下一个引号），换一条不认字符串内容、只认真实 import 语句的。
+  const IMPORT_RE = /^\s*import\b[\s\S]*?\bfrom\s*["']([^"']+)["']/gm;
+  const dir = join(PACKAGES, "trajectory", "src");
+  for (const file of readdirSync(dir).filter((f) => f.endsWith(".ts"))) {
+    const src = readFileSync(join(dir, file), "utf8");
+    for (const m of src.matchAll(IMPORT_RE)) {
+      const spec = m[1]!;
+      assert.ok(
+        spec.startsWith("./") || spec === "node:fs" || spec === "node:path" || spec === "node:fs/promises",
+        `trajectory/src/${file} import 了 ${spec}`,
+      );
+    }
+  }
+});
+
+test("cli 允许依赖 trajectory，project 与三个格式包不许依赖它", () => {
+  assert.ok(depsOf(pkgs.cli!).includes("@godcreator02/live-doc-trajectory"), "cli 得依赖 trajectory 才能接 trajectory 子命令");
+  for (const name of ["project", "format-md", "format-fumadocs", "format-html"]) {
+    assert.ok(!depsOf(pkgs[name]!).includes("@godcreator02/live-doc-trajectory"), `${name} 不该依赖 trajectory`);
+  }
+});
