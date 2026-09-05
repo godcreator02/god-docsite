@@ -8,13 +8,14 @@ livedoc: none
 
 这个单元是 god-live-doc 的重写工位。单元根就是 git 仓。两个子文件夹：
 
-- `god-live-doc/`：pnpm 包工作区。`packages/` 下六个包（core、project、cli、format-md、
-  format-fumadocs、format-html），`docs-site/` 是自己的 fumadocs 文档站（用这套机制写自己的文档，
+- `god-live-doc/`：pnpm 包工作区。`packages/` 下七个包（core、project、cli、format-md、
+  format-fumadocs、format-html、trajectory），`docs-site/` 是自己的 fumadocs 文档站（用这套机制写自己的文档，
   也是工作区成员），`tests/` 是工作区级测试。**怎么装、怎么接、怎么跑，看 `god-live-doc/README.md`**，
   这儿不复述。
 - `examples/`：邻居示例，外部引用这套包的消费方——`fumadocs-site`（外部 fumadocs 站）、
   `plain`（手写 html + 纯 md，比较器换成 hash）、`notes`（命令行记事本，一篇 mdx 手册把五类引用全用上；
-  文档站「五类引用」那章钉的是它的真文件，改它要连着那章一起 confirm）。各自 link 依赖
+  文档站「五类引用」那章钉的是它的真文件，改它要连着那章一起 confirm）、`trajectory-site`
+  （外部 fumadocs 站接星轨盘，卡目录 `cards/` 放 107 张诗名 fixture）。各自 link 依赖
   `../../god-live-doc/packages/*`，各自 `pnpm install`、各自跑测试。
 
 README 和这份规矩都是**生成物**：正本分别是 `docs-site/content/docs/maintain/readme.mdx` 和 `agents.mdx`，
@@ -37,12 +38,13 @@ README 和这份规矩都是**生成物**：正本分别是 `docs-site/content/d
 - 核心零依赖（只用 `node:crypto`），格式包依赖核心（format-md / format-fumadocs 另外用 remark 那套；
   format-fumadocs 可依赖 project，fumadocs 只能是 peer）。`tests/boundary.test.ts` 守着，别绕。
 - 子进程调用一律带超时。
-- 门禁，五摊都要绿才提交：
+- 门禁，六摊都要绿才提交：
   - `god-live-doc/`：`pnpm test`、`pnpm typecheck`、`pnpm build`
   - `god-live-doc/docs-site/`：`pnpm livedoc check`、`pnpm test`、`pnpm build`、`node scripts/verify-roster.mjs`
   - `examples/plain/`：`pnpm test`
   - `examples/fumadocs-site/`：`pnpm test`、`pnpm build`
   - `examples/notes/`：`pnpm livedoc check`、`pnpm test`
+  - `examples/trajectory-site/`：`pnpm test`、`pnpm build`
 - 动了引用到的源码，`livedoc confirm` 之前**先 commit**——git 比较器只对已提交、工作区干净的内容钉。
 - 挂了 outputs 映射的文档（readme / agents 这两篇）改了 mdx 源，`pnpm livedoc render --target ai` 重摆
   生成物，跟 mdx 源一起提交；check 守着生成物跟源一致，红了就是没重摆。
