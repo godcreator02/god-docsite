@@ -26,6 +26,9 @@ importers:
       '@godcreator02/live-doc-project':
         specifier: workspace:*
         version: link:packages/project
+      '@godcreator02/live-doc-trajectory':
+        specifier: workspace:*
+        version: link:packages/trajectory
       '@types/node':
         specifier: ^26.2.0
         version: 26.4.1
@@ -99,6 +102,9 @@ importers:
       '@godcreator02/live-doc-project':
         specifier: workspace:*
         version: link:../project
+      '@godcreator02/live-doc-trajectory':
+        specifier: workspace:*
+        version: link:../trajectory
 
   packages/core: {}
 
@@ -166,6 +172,8 @@ importers:
       '@godcreator02/live-doc-core':
         specifier: workspace:*
         version: link:../core
+
+  packages/trajectory: {}
 
 packages:
 

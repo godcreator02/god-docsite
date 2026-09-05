@@ -16,6 +16,7 @@
     "@godcreator02/live-doc-format-html": "workspace:*",
     "@godcreator02/live-doc-format-md": "workspace:*",
     "@godcreator02/live-doc-project": "workspace:*",
+    "@godcreator02/live-doc-trajectory": "workspace:*",
     "@types/node": "^26.2.0",
     "tsdown": "^0.22.14",
     "typescript": "^6.0.3"
