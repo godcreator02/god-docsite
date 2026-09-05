@@ -27,6 +27,9 @@ fumadocs 在格式包里只是 peer——用你项目里装的那份，包自己
 
 {/* ref file="livedoc.config.mjs" lines="12-28" */}
 
+上面这份是本站的配置，没有 `trajectory` 那一项——它是可选的一摊（轨迹卡目录），配了 `check` 才顺带
+跑卡校验、`livedoc trajectory` 才有得列，接法见 [轨迹 · 接线](/docs/trajectory/wiring)。
+
 `comparator` 不写就是 `auto`：按被引文件的位置挑记忆——在 git 仓里（本仓、别的仓都算）已提交的走 `git`，
 被 `.gitignore` 忽略的、不在任何仓里的走 `hash`。写 `git` 或 `hash` 是强制全用一种。
 分派规则见 [状态与比较器](/docs/principles/comparator)。
