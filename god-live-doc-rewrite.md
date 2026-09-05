@@ -180,3 +180,78 @@ scope 已有的 registry 规则（config 的 publish 权、~/.npmrc 的映射）
 - **devkit release 不适用于这套包**：它的门禁是插件形态专用（scope 之外还查 exports 指 lib/、cordis.patch.yml 等），且假设一仓一包一插件。这套包手跑：工作区根 `pnpm build` → 逐包核清单 → `pnpm -r publish --no-git-checks`（docs-site 是 private 自动跳过）→ devkit `registry status` 核对 → 逐包 git tag（`@godcreator02/live-doc-core@0.1.0` 形式）。
 - **消费姿势**：纯库不走 `dsh plugin add`，消费方 devDependencies 按精确版本引入（如 `@godcreator02/live-doc-cli@0.1.0`）。
 - 第一个外部用户是 god-example（单元 26083120lks）：插件仓加 fumadocs 站（一仓一插件一站），README / CLAUDE.md 生成化，docs 迁站页钉真源码——它是后续插件接入的样板。
+
+## 十三、轨迹卡与星轨盘搬进来（2026-09-05 定）
+
+live-doc 治的是**现状文档撒谎**（话写下那刻就跟代码分家，机制盯代码变没变）；轨迹卡治的是**历史被改写**
+（了断记下来就该冻结，谁动了、谁被取代了要看得见）。两者都是「文档可信」，方向相反：一个盯代码，一个盯文档自己。
+所以轨迹**不是第四种格式包**：核心五类引用说的是「文档对文件系统说的话」，卡的关系边说的是「文档对文档说的话」，
+卡不需要记忆、不需要 confirm，只要即时校验。它的形态是 lint 加模型，不走记录簿。
+
+出处：老 god-flow monorepo `D:\dshfiles\26082411bfd\god-docs\packages\god-flow-panels\node\star\`（parse / model /
+layout / chains 四个 TS 文件是纯函数，带测试与 fixtures）；星盘视觉的参照物是
+`D:\AI2026_godnotes\RUEPRTP9HY\trail-viewer-archive\trail-rings.html`（trail 时代、自带亮暗两套色板）。
+两处都**只读**，搬逻辑不 import。老 326 张卡不搬；god-flow 家族已退役，本仓是轨迹功能的新家。
+
+### 卡的格式（照 card-format 篇，不改）
+
+- 落点：项目仓 `docs-god-flow/trajectory/`，一卡一文件、平铺不建子目录。**卡身份 = 文件名主干** `<YYYY-MM-DD>-<slug>`。
+- frontmatter：`born-at`（`YYYY-MM-DDTHH:mm`，日级 `YYYY-MM-DD` 兼容）、`type`（`root` 或形态值 `choice` / `evidence` /
+  `derivation` / `reference` / `snapshot`，缺省即默认形态）、`parent`（子卡必填，列表）、`merged-in`（仅根卡，⊆ parent）、
+  `label`（必填）、`domain`（泳道，可缺）、`status`（自由槽位，不读不校验）。
+- 正文关系边：`supersedes:: [文字](卡身份.md)`、`pivots-from:: [文字](卡身份.md)`，一行一条，wikilink 形态宽容。
+- 根卡正文 `## 里程碑` 区块：`- 日期｜标题｜说明`（全角竖线）。
+- **frontmatter 自己按行解析、一律字符串，不引 YAML 库**：日级 `born-at` 会被 YAML 库解成 Date。
+
+### 校验（三层，从老仓 model.ts 整搬）
+
+形状（born-at 格式、parent / merged-in 元素是合法身份）、存在性（缺 born-at / label、内卡缺 parent）、一致性
+（parent 含自身、merged-in ⊄ parent、内卡写 merged-in、关系行写歪）。**另加一条本仓的**：卡正文里出现 livedoc
+引用记号（草稿记号 `@@livedoc … @@` 或 md 正式记号 `<!-- ref … -->`）报病——轨迹分区冻结，不钉活代码。
+`type` 取值不校验、`domain` 不设白名单。
+
+### 模型与布局（从老仓整搬，常量公式一处不动）
+
+聚盘（`parent` 含盘即上盘；子项目根卡默认虫洞投影、`merged-in` 列出的父盘递归摊入）、关系边按盘求解、
+提树（分量收取代与转向两种边，主干比终点不比长度）、孤星、领域序按首次出现；布局：有效天数标度（空窗折叠、
+对称双半段对数）、扇环装箱（领域聚块、槽复用）、鱼眼闭式映射、跨日弧向避让链表。**布局在客户端算**：服务端只出
+模型，布局是纯函数几毫秒，放客户端才保得住设置滑杆。
+
+### 包：`packages/trajectory`，`@godcreator02/live-doc-trajectory`，三个入口
+
+| 入口 | 装什么 | 依赖 |
+| --- | --- | --- |
+| `.` | parse / validate / model / layout / chains；`scanDir(dir)` 读目录出 `{ cards, sick }`；`buildTrajectory(dir)` 出给盘的模型 | 零 npm 依赖，只用 `node:fs` / `node:path` |
+| `./react` | 客户端组件 `StarDisk`（`"use client"` 留在产物头一行，照 format-fumadocs `/pre` 的先例）+ 随包发的 `star.css` | react 为 peer |
+| `./server` | 服务端组件 `Trajectory`（读目录、建模、渲 `StarDisk`）、卡页 frontmatter 的 zod 形状 `cardSchema`（title 从 label 派生、born-at 收成字符串）、remark 插件 `remarkTrajectoryLinks`（关系边行渲成标注、`卡身份.md` 链接改写成卡页路由） | react 为 peer；remark 那套同 format-md |
+
+边界测试跟着加一条：react 只许出现在 format-fumadocs 和 trajectory，且只能是 peer；trajectory 不依赖 core、
+不依赖任何格式包、cli 与 project 不依赖 trajectory 的 react / server 入口。
+
+### 星轨盘：React 重写壳，数学不重写
+
+- **结构归 React，帧归 rAF**：SVG 树由 React 声明式建（按卡身份 keyed），补间循环与每帧 `place()` 用 useEffect 起 rAF、
+  经 ref 表直接改属性，不走 setState。离散变化才走状态：筛选、搜索、设置、帮助、主题、当前盘。
+- 视觉照 trail-rings：内旧外新的环、周月年环与日期标签、空窗小行星带、扇环框与树名、金色里程碑环、取代金黄虚线、
+  转向青色点线、枯枝渐变、图例即筛选器、右上工具条与搜索、设置滑杆收进浮层、帮助浮层。
+- **形状按 `type`**：choice 实心圆、evidence 三角、derivation 菱形、reference 方形、snapshot 空心方、缺省空心圆；
+  被取代（有取代出边）一律淡出。这是 `type` 的显示读法，不是过滤，所有卡照常上盘。颜色只编码领域。
+- **点节点在新标签页打开卡页**：节点包 SVG `<a href target="_blank" rel="noopener">`，链接由组件 prop `hrefOf(id)` 给。
+  卡片栏、分割拖柄、VSCode 打开、复制路径全删。悬停小气泡：label、出生时刻、泳道、是否被取代。
+- **搜索只匹配 label 与卡身份**，不搜正文（正文不进 payload）。
+- **滚轮点击激活**：点一下盘进入交互态（滚轮鱼眼穿梭 / 自由缩放），Esc 或点盘外释放；未激活时滚轮穿透给页面。
+- 主题跟 fumadocs：监听 `html` 的 `dark` class，两套色板从 trail-rings 搬，示例里的主题按钮不要。
+- 多盘：盘上方一排页签，虫洞节点点了切盘（同页状态）；报病列表在盘下方列出（`livedoc check` 也报）。
+- 尺寸：容器方形、宽随父元素；带全屏按钮（Fullscreen API）。客户端组件动态导入关掉 SSR，先渲占位方块。
+- 测试：模型 / 布局 / 链表 / parse 的测试从老仓搬（`node --test`）；布局黄金数用老仓 fixtures 钉；React 层用
+  `react-dom/server` 渲一遍断言 SVG 结构（节点数、扇环数、`a[target=_blank]`）。
+
+### 接线
+
+- `livedoc.config` 加一项 `trajectory: "docs-god-flow/trajectory"`（相对项目根，可选；不配就整个不管）。
+  `livedoc check` 顺带跑卡校验，病卡逐条打印、算红退 1。另加子命令 `livedoc trajectory [--json]`：列盘、树、主干，
+  `--json` 出模型。
+- docs-site：卡集合单开一个 fumadocs 集合与 loader，落 `/trajectory/<卡身份>`，主文档树只多一页「轨迹」放盘；
+  卡目录在单元根 `docs-god-flow/trajectory/`，`turbopack.root` 抬到单元根。本仓自己的卡由人写（动手权在人），
+  盘空着是正常态；演示盘用老仓那批诗名 fixtures 放在 `examples/trajectory-site`。
+- 后续（本轮不做）：现状文档链到的卡被 `supersedes` 时该页黄；用 git 守子卡冻结；卡钉「当时」的代码。
