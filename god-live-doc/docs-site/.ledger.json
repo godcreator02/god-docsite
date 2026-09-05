@@ -3,7 +3,7 @@
     "livedoc.config.mjs:12-28": {
       "kind": "git",
       "blob": "4d163c19dce3fd87f26ad21bc6d9d87ccc6d86d9",
-      "commit": "980342f000e789eb7cd16aa3215d9355b035a9c0",
+      "commit": "99d28dbc22d2b0415c61163119eb8d7c4383430a",
       "lines": [
         12,
         28
@@ -13,7 +13,7 @@
     "next.config.mjs:7-26": {
       "kind": "git",
       "blob": "dc2f22020a7245a40c7c4556255b29101effecb9",
-      "commit": "980342f000e789eb7cd16aa3215d9355b035a9c0",
+      "commit": "99d28dbc22d2b0415c61163119eb8d7c4383430a",
       "lines": [
         7,
         26
@@ -23,7 +23,7 @@
     "source.config.ts:13-18": {
       "kind": "git",
       "blob": "b028f7d32433f0c2a07c242ae0470743e20bbbe9",
-      "commit": "980342f000e789eb7cd16aa3215d9355b035a9c0",
+      "commit": "99d28dbc22d2b0415c61163119eb8d7c4383430a",
       "lines": [
         13,
         18
@@ -35,7 +35,7 @@
     "../packages/core/src/types.ts:184-190": {
       "kind": "git",
       "blob": "2af63ae9cc4fa8d021899c084b314f549c49bfbe",
-      "commit": "980342f000e789eb7cd16aa3215d9355b035a9c0",
+      "commit": "99d28dbc22d2b0415c61163119eb8d7c4383430a",
       "lines": [
         184,
         190
@@ -45,7 +45,7 @@
     "../packages/project/src/auto-comparator.ts:24-29": {
       "kind": "git",
       "blob": "a53838260a25ccc8ea5ddf9316550fe8ba677401",
-      "commit": "980342f000e789eb7cd16aa3215d9355b035a9c0",
+      "commit": "99d28dbc22d2b0415c61163119eb8d7c4383430a",
       "lines": [
         24,
         29
@@ -55,7 +55,7 @@
     "../packages/project/src/auto-comparator.ts:41-45": {
       "kind": "git",
       "blob": "a53838260a25ccc8ea5ddf9316550fe8ba677401",
-      "commit": "980342f000e789eb7cd16aa3215d9355b035a9c0",
+      "commit": "99d28dbc22d2b0415c61163119eb8d7c4383430a",
       "lines": [
         41,
         45
@@ -65,7 +65,7 @@
     "../packages/project/src/git-comparator.ts:101-108": {
       "kind": "git",
       "blob": "1c57ce62dbe3ffa4449d686a7fe0e77be95389b9",
-      "commit": "980342f000e789eb7cd16aa3215d9355b035a9c0",
+      "commit": "99d28dbc22d2b0415c61163119eb8d7c4383430a",
       "lines": [
         101,
         108
@@ -75,7 +75,7 @@
     "../packages/core/src/hash-comparator.ts:65-86": {
       "kind": "git",
       "blob": "e333db962f275bec53c05f1ab86ad850fa694cc5",
-      "commit": "980342f000e789eb7cd16aa3215d9355b035a9c0",
+      "commit": "99d28dbc22d2b0415c61163119eb8d7c4383430a",
       "lines": [
         65,
         86
@@ -85,7 +85,7 @@
     "../packages/core/src/hash-comparator.ts:65-75": {
       "kind": "git",
       "blob": "e333db962f275bec53c05f1ab86ad850fa694cc5",
-      "commit": "980342f000e789eb7cd16aa3215d9355b035a9c0",
+      "commit": "99d28dbc22d2b0415c61163119eb8d7c4383430a",
       "lines": [
         65,
         75
@@ -95,7 +95,7 @@
     "../packages/core/src/kinds.ts:115-126": {
       "kind": "git",
       "blob": "5af6f9bfe6e8e5ce4ce780919175fcc9b0b6cb89",
-      "commit": "980342f000e789eb7cd16aa3215d9355b035a9c0",
+      "commit": "99d28dbc22d2b0415c61163119eb8d7c4383430a",
       "lines": [
         115,
         126
@@ -105,7 +105,7 @@
     "../packages/core/src/service.ts:133-137": {
       "kind": "git",
       "blob": "d187cc0dc37e2e61aeab4930fdbfde622ab12d93",
-      "commit": "980342f000e789eb7cd16aa3215d9355b035a9c0",
+      "commit": "99d28dbc22d2b0415c61163119eb8d7c4383430a",
       "lines": [
         133,
         137
@@ -117,7 +117,7 @@
     "../packages/core/src/types.ts:270-282": {
       "kind": "git",
       "blob": "2af63ae9cc4fa8d021899c084b314f549c49bfbe",
-      "commit": "980342f000e789eb7cd16aa3215d9355b035a9c0",
+      "commit": "99d28dbc22d2b0415c61163119eb8d7c4383430a",
       "lines": [
         270,
         282
@@ -127,7 +127,7 @@
     "../tests/marker.test.ts:46-60": {
       "kind": "git",
       "blob": "28a5779611c6dcff45bf09b42ceb12b238aa213a",
-      "commit": "980342f000e789eb7cd16aa3215d9355b035a9c0",
+      "commit": "99d28dbc22d2b0415c61163119eb8d7c4383430a",
       "lines": [
         46,
         60
@@ -137,7 +137,7 @@
     "../packages/core/src/types.ts:220-224": {
       "kind": "git",
       "blob": "2af63ae9cc4fa8d021899c084b314f549c49bfbe",
-      "commit": "980342f000e789eb7cd16aa3215d9355b035a9c0",
+      "commit": "99d28dbc22d2b0415c61163119eb8d7c4383430a",
       "lines": [
         220,
         224
@@ -147,7 +147,7 @@
     "../packages/format-md/src/index.ts:31-32": {
       "kind": "git",
       "blob": "427d7b6b9c669444e077c3ca9c352411ee27c1b8",
-      "commit": "980342f000e789eb7cd16aa3215d9355b035a9c0",
+      "commit": "99d28dbc22d2b0415c61163119eb8d7c4383430a",
       "lines": [
         31,
         32
@@ -157,7 +157,7 @@
     "../packages/format-fumadocs/src/index.ts:23-24": {
       "kind": "git",
       "blob": "453753875134154aed2712d22fb4225310a3b771",
-      "commit": "980342f000e789eb7cd16aa3215d9355b035a9c0",
+      "commit": "99d28dbc22d2b0415c61163119eb8d7c4383430a",
       "lines": [
         23,
         24
@@ -167,7 +167,7 @@
     "../packages/format-html/src/index.ts:55-57": {
       "kind": "git",
       "blob": "ff4451aff6007184e0bcca7ab1ccf1f9a9c317f4",
-      "commit": "980342f000e789eb7cd16aa3215d9355b035a9c0",
+      "commit": "99d28dbc22d2b0415c61163119eb8d7c4383430a",
       "lines": [
         55,
         57
@@ -177,7 +177,7 @@
     "../tests/marker.test.ts:30-39": {
       "kind": "git",
       "blob": "28a5779611c6dcff45bf09b42ceb12b238aa213a",
-      "commit": "980342f000e789eb7cd16aa3215d9355b035a9c0",
+      "commit": "99d28dbc22d2b0415c61163119eb8d7c4383430a",
       "lines": [
         30,
         39
@@ -189,7 +189,7 @@
     "../packages/core/src/types.ts:12-48": {
       "kind": "git",
       "blob": "2af63ae9cc4fa8d021899c084b314f549c49bfbe",
-      "commit": "980342f000e789eb7cd16aa3215d9355b035a9c0",
+      "commit": "99d28dbc22d2b0415c61163119eb8d7c4383430a",
       "lines": [
         12,
         48
@@ -199,7 +199,7 @@
     "../packages/core/src/types.ts:50-57": {
       "kind": "git",
       "blob": "2af63ae9cc4fa8d021899c084b314f549c49bfbe",
-      "commit": "980342f000e789eb7cd16aa3215d9355b035a9c0",
+      "commit": "99d28dbc22d2b0415c61163119eb8d7c4383430a",
       "lines": [
         50,
         57
@@ -209,7 +209,7 @@
     "../packages/core/src/types.ts:59-66": {
       "kind": "git",
       "blob": "2af63ae9cc4fa8d021899c084b314f549c49bfbe",
-      "commit": "980342f000e789eb7cd16aa3215d9355b035a9c0",
+      "commit": "99d28dbc22d2b0415c61163119eb8d7c4383430a",
       "lines": [
         59,
         66
@@ -219,7 +219,7 @@
     "../packages/core/src/types.ts:1-10": {
       "kind": "git",
       "blob": "2af63ae9cc4fa8d021899c084b314f549c49bfbe",
-      "commit": "980342f000e789eb7cd16aa3215d9355b035a9c0",
+      "commit": "99d28dbc22d2b0415c61163119eb8d7c4383430a",
       "lines": [
         1,
         10
@@ -231,7 +231,7 @@
     "package.json:7-12": {
       "kind": "git",
       "blob": "ce322789b9da4e1d85144f1da287db0c211e7148",
-      "commit": "980342f000e789eb7cd16aa3215d9355b035a9c0",
+      "commit": "99d28dbc22d2b0415c61163119eb8d7c4383430a",
       "lines": [
         7,
         12
@@ -241,7 +241,7 @@
     "livedoc.config.mjs:12-28": {
       "kind": "git",
       "blob": "4d163c19dce3fd87f26ad21bc6d9d87ccc6d86d9",
-      "commit": "980342f000e789eb7cd16aa3215d9355b035a9c0",
+      "commit": "99d28dbc22d2b0415c61163119eb8d7c4383430a",
       "lines": [
         12,
         28
@@ -251,7 +251,7 @@
     "../packages/cli/src/run.ts:49-54": {
       "kind": "git",
       "blob": "1e9d7c27186b8bf2104e686c45fdd271d8350f61",
-      "commit": "980342f000e789eb7cd16aa3215d9355b035a9c0",
+      "commit": "99d28dbc22d2b0415c61163119eb8d7c4383430a",
       "lines": [
         49,
         54
@@ -263,7 +263,7 @@
     "../packages/core/src/service.ts:104-121": {
       "kind": "git",
       "blob": "d187cc0dc37e2e61aeab4930fdbfde622ab12d93",
-      "commit": "980342f000e789eb7cd16aa3215d9355b035a9c0",
+      "commit": "99d28dbc22d2b0415c61163119eb8d7c4383430a",
       "lines": [
         104,
         121
@@ -273,7 +273,7 @@
     "../packages/core/src/service.ts:122-126": {
       "kind": "git",
       "blob": "d187cc0dc37e2e61aeab4930fdbfde622ab12d93",
-      "commit": "980342f000e789eb7cd16aa3215d9355b035a9c0",
+      "commit": "99d28dbc22d2b0415c61163119eb8d7c4383430a",
       "lines": [
         122,
         126
@@ -283,7 +283,7 @@
     "../packages/core/src/service.ts:144-162": {
       "kind": "git",
       "blob": "d187cc0dc37e2e61aeab4930fdbfde622ab12d93",
-      "commit": "980342f000e789eb7cd16aa3215d9355b035a9c0",
+      "commit": "99d28dbc22d2b0415c61163119eb8d7c4383430a",
       "lines": [
         144,
         162
@@ -293,7 +293,7 @@
     "../packages/core/src/service.ts:164-173": {
       "kind": "git",
       "blob": "d187cc0dc37e2e61aeab4930fdbfde622ab12d93",
-      "commit": "980342f000e789eb7cd16aa3215d9355b035a9c0",
+      "commit": "99d28dbc22d2b0415c61163119eb8d7c4383430a",
       "lines": [
         164,
         173
@@ -305,7 +305,7 @@
     "../packages/core/src/diff.ts:33-42": {
       "kind": "git",
       "blob": "6c626cb0ed5e2d2cf878e43a1a41e21429542459",
-      "commit": "980342f000e789eb7cd16aa3215d9355b035a9c0",
+      "commit": "99d28dbc22d2b0415c61163119eb8d7c4383430a",
       "lines": [
         33,
         42
@@ -315,7 +315,7 @@
     "../packages/core/src/span.ts:13-25": {
       "kind": "git",
       "blob": "5ea56b31537ba8066ff9ea0ba80cf502c9f38c40",
-      "commit": "980342f000e789eb7cd16aa3215d9355b035a9c0",
+      "commit": "99d28dbc22d2b0415c61163119eb8d7c4383430a",
       "lines": [
         13,
         25
@@ -325,7 +325,7 @@
     "../packages/project/src/git.ts:94-105": {
       "kind": "git",
       "blob": "8b05783ec19c952911e0976becfe9d4e483a217a",
-      "commit": "980342f000e789eb7cd16aa3215d9355b035a9c0",
+      "commit": "99d28dbc22d2b0415c61163119eb8d7c4383430a",
       "lines": [
         94,
         105
@@ -335,7 +335,7 @@
     "../packages/project/src/git.ts:59-65": {
       "kind": "git",
       "blob": "8b05783ec19c952911e0976becfe9d4e483a217a",
-      "commit": "980342f000e789eb7cd16aa3215d9355b035a9c0",
+      "commit": "99d28dbc22d2b0415c61163119eb8d7c4383430a",
       "lines": [
         59,
         65
@@ -345,7 +345,7 @@
     "../packages/project/src/git.ts:136-155": {
       "kind": "git",
       "blob": "8b05783ec19c952911e0976becfe9d4e483a217a",
-      "commit": "980342f000e789eb7cd16aa3215d9355b035a9c0",
+      "commit": "99d28dbc22d2b0415c61163119eb8d7c4383430a",
       "lines": [
         136,
         155
@@ -355,7 +355,7 @@
     "../packages/project/src/git-comparator.ts:52-64": {
       "kind": "git",
       "blob": "1c57ce62dbe3ffa4449d686a7fe0e77be95389b9",
-      "commit": "980342f000e789eb7cd16aa3215d9355b035a9c0",
+      "commit": "99d28dbc22d2b0415c61163119eb8d7c4383430a",
       "lines": [
         52,
         64
@@ -365,7 +365,7 @@
     "../packages/project/src/git-comparator.ts:78-92": {
       "kind": "git",
       "blob": "1c57ce62dbe3ffa4449d686a7fe0e77be95389b9",
-      "commit": "980342f000e789eb7cd16aa3215d9355b035a9c0",
+      "commit": "99d28dbc22d2b0415c61163119eb8d7c4383430a",
       "lines": [
         78,
         92
@@ -377,7 +377,7 @@
     "../packages/core/src/service.ts:41-76": {
       "kind": "git",
       "blob": "d187cc0dc37e2e61aeab4930fdbfde622ab12d93",
-      "commit": "980342f000e789eb7cd16aa3215d9355b035a9c0",
+      "commit": "99d28dbc22d2b0415c61163119eb8d7c4383430a",
       "lines": [
         41,
         76
@@ -387,7 +387,7 @@
     "../packages/core/src/types.ts:141-161": {
       "kind": "git",
       "blob": "2af63ae9cc4fa8d021899c084b314f549c49bfbe",
-      "commit": "980342f000e789eb7cd16aa3215d9355b035a9c0",
+      "commit": "99d28dbc22d2b0415c61163119eb8d7c4383430a",
       "lines": [
         141,
         161
@@ -397,7 +397,7 @@
     "../packages/core/src/types.ts:112-131": {
       "kind": "git",
       "blob": "2af63ae9cc4fa8d021899c084b314f549c49bfbe",
-      "commit": "980342f000e789eb7cd16aa3215d9355b035a9c0",
+      "commit": "99d28dbc22d2b0415c61163119eb8d7c4383430a",
       "lines": [
         112,
         131
@@ -407,7 +407,7 @@
     "../packages/format-fumadocs/package.json:26-39": {
       "kind": "git",
       "blob": "25677476f5b60de17249ddf464cb0dc7fbaf969b",
-      "commit": "980342f000e789eb7cd16aa3215d9355b035a9c0",
+      "commit": "99d28dbc22d2b0415c61163119eb8d7c4383430a",
       "lines": [
         26,
         39
@@ -417,7 +417,7 @@
     "../tests/boundary.test.ts:42-53": {
       "kind": "git",
       "blob": "ae138a7a3f70c9c75ce3b0b9aa1b7c9ea72adf77",
-      "commit": "980342f000e789eb7cd16aa3215d9355b035a9c0",
+      "commit": "99d28dbc22d2b0415c61163119eb8d7c4383430a",
       "lines": [
         42,
         53
@@ -427,7 +427,7 @@
     "../packages/project/src/load.ts:66-74": {
       "kind": "git",
       "blob": "b1272970cc071d7cdf29205856639a154fa019cd",
-      "commit": "980342f000e789eb7cd16aa3215d9355b035a9c0",
+      "commit": "99d28dbc22d2b0415c61163119eb8d7c4383430a",
       "lines": [
         66,
         74
@@ -439,7 +439,7 @@
     "../packages/format-md/src/index.ts:28-36": {
       "kind": "git",
       "blob": "427d7b6b9c669444e077c3ca9c352411ee27c1b8",
-      "commit": "980342f000e789eb7cd16aa3215d9355b035a9c0",
+      "commit": "99d28dbc22d2b0415c61163119eb8d7c4383430a",
       "lines": [
         28,
         36
@@ -449,7 +449,7 @@
     "../packages/format-md/src/index.ts:52-64": {
       "kind": "git",
       "blob": "427d7b6b9c669444e077c3ca9c352411ee27c1b8",
-      "commit": "980342f000e789eb7cd16aa3215d9355b035a9c0",
+      "commit": "99d28dbc22d2b0415c61163119eb8d7c4383430a",
       "lines": [
         52,
         64
@@ -459,7 +459,7 @@
     "../packages/format-md/src/index.ts:78-92": {
       "kind": "git",
       "blob": "427d7b6b9c669444e077c3ca9c352411ee27c1b8",
-      "commit": "980342f000e789eb7cd16aa3215d9355b035a9c0",
+      "commit": "99d28dbc22d2b0415c61163119eb8d7c4383430a",
       "lines": [
         78,
         92
@@ -469,7 +469,7 @@
     "../packages/format-html/src/index.ts:22-24": {
       "kind": "git",
       "blob": "ff4451aff6007184e0bcca7ab1ccf1f9a9c317f4",
-      "commit": "980342f000e789eb7cd16aa3215d9355b035a9c0",
+      "commit": "99d28dbc22d2b0415c61163119eb8d7c4383430a",
       "lines": [
         22,
         24
@@ -479,7 +479,7 @@
     "../packages/format-html/src/index.ts:138-160": {
       "kind": "git",
       "blob": "ff4451aff6007184e0bcca7ab1ccf1f9a9c317f4",
-      "commit": "980342f000e789eb7cd16aa3215d9355b035a9c0",
+      "commit": "99d28dbc22d2b0415c61163119eb8d7c4383430a",
       "lines": [
         138,
         160
@@ -489,7 +489,7 @@
     "../tests/boundary.test.ts:90-97": {
       "kind": "git",
       "blob": "ae138a7a3f70c9c75ce3b0b9aa1b7c9ea72adf77",
-      "commit": "980342f000e789eb7cd16aa3215d9355b035a9c0",
+      "commit": "99d28dbc22d2b0415c61163119eb8d7c4383430a",
       "lines": [
         90,
         97
@@ -501,7 +501,7 @@
     "../packages/format-fumadocs/src/host.ts:44-53": {
       "kind": "git",
       "blob": "e6948f8a365fc3516418fcc24b6f49b0229af090",
-      "commit": "980342f000e789eb7cd16aa3215d9355b035a9c0",
+      "commit": "99d28dbc22d2b0415c61163119eb8d7c4383430a",
       "lines": [
         44,
         53
@@ -511,7 +511,7 @@
     "../packages/format-fumadocs/src/host.ts:27-27": {
       "kind": "git",
       "blob": "e6948f8a365fc3516418fcc24b6f49b0229af090",
-      "commit": "980342f000e789eb7cd16aa3215d9355b035a9c0",
+      "commit": "99d28dbc22d2b0415c61163119eb8d7c4383430a",
       "lines": [
         27,
         27
@@ -521,7 +521,7 @@
     "../packages/format-fumadocs/src/remark-plugin.ts:22-28": {
       "kind": "git",
       "blob": "d10e035dd1f472bd60439bac4d87f5deed5ba0c2",
-      "commit": "980342f000e789eb7cd16aa3215d9355b035a9c0",
+      "commit": "99d28dbc22d2b0415c61163119eb8d7c4383430a",
       "lines": [
         22,
         28
@@ -531,7 +531,7 @@
     "../packages/format-fumadocs/src/render.ts:37-44": {
       "kind": "git",
       "blob": "733caf6156f00a58dc676c610e05dde6a0678f5e",
-      "commit": "980342f000e789eb7cd16aa3215d9355b035a9c0",
+      "commit": "99d28dbc22d2b0415c61163119eb8d7c4383430a",
       "lines": [
         37,
         44
@@ -541,7 +541,7 @@
     "../packages/format-fumadocs/src/pre.tsx:45-57": {
       "kind": "git",
       "blob": "b887ae5e5ffe08d8ccd3a02328c4f0e550e103a0",
-      "commit": "980342f000e789eb7cd16aa3215d9355b035a9c0",
+      "commit": "99d28dbc22d2b0415c61163119eb8d7c4383430a",
       "lines": [
         45,
         57
@@ -551,7 +551,7 @@
     "../packages/format-fumadocs/src/blocks.ts:21-25": {
       "kind": "git",
       "blob": "042575bd743e709aa2f257e317981b7b9b013c83",
-      "commit": "980342f000e789eb7cd16aa3215d9355b035a9c0",
+      "commit": "99d28dbc22d2b0415c61163119eb8d7c4383430a",
       "lines": [
         21,
         25
@@ -561,7 +561,7 @@
     "../packages/format-fumadocs/src/blocks.ts:206-218": {
       "kind": "git",
       "blob": "042575bd743e709aa2f257e317981b7b9b013c83",
-      "commit": "980342f000e789eb7cd16aa3215d9355b035a9c0",
+      "commit": "99d28dbc22d2b0415c61163119eb8d7c4383430a",
       "lines": [
         206,
         218
@@ -571,7 +571,7 @@
     "../packages/format-fumadocs/src/blocks.ts:169-185": {
       "kind": "git",
       "blob": "042575bd743e709aa2f257e317981b7b9b013c83",
-      "commit": "980342f000e789eb7cd16aa3215d9355b035a9c0",
+      "commit": "99d28dbc22d2b0415c61163119eb8d7c4383430a",
       "lines": [
         169,
         185
@@ -581,7 +581,7 @@
     "../packages/format-fumadocs/src/markdown.ts:24-46": {
       "kind": "git",
       "blob": "4775106a23f40ebb1cf314e9473b1f27e9db700c",
-      "commit": "980342f000e789eb7cd16aa3215d9355b035a9c0",
+      "commit": "99d28dbc22d2b0415c61163119eb8d7c4383430a",
       "lines": [
         24,
         46
@@ -593,7 +593,7 @@
     "../packages/format-fumadocs/src/roster.ts:34-35": {
       "kind": "git",
       "blob": "eb07dd98c240e7e2dcb100b4f0baae129c7c36a9",
-      "commit": "980342f000e789eb7cd16aa3215d9355b035a9c0",
+      "commit": "99d28dbc22d2b0415c61163119eb8d7c4383430a",
       "lines": [
         34,
         35
@@ -603,7 +603,7 @@
     "../packages/format-fumadocs/src/roster.ts:21-32": {
       "kind": "git",
       "blob": "eb07dd98c240e7e2dcb100b4f0baae129c7c36a9",
-      "commit": "980342f000e789eb7cd16aa3215d9355b035a9c0",
+      "commit": "99d28dbc22d2b0415c61163119eb8d7c4383430a",
       "lines": [
         21,
         32
@@ -613,7 +613,7 @@
     "src/components/tabs/tabs.ai.mjs:7-13": {
       "kind": "git",
       "blob": "9f1f52903b415251d52efe240c6e3965e4f221d7",
-      "commit": "980342f000e789eb7cd16aa3215d9355b035a9c0",
+      "commit": "99d28dbc22d2b0415c61163119eb8d7c4383430a",
       "lines": [
         7,
         13
@@ -623,7 +623,7 @@
     "../packages/format-fumadocs/src/roster.ts:124-137": {
       "kind": "git",
       "blob": "eb07dd98c240e7e2dcb100b4f0baae129c7c36a9",
-      "commit": "980342f000e789eb7cd16aa3215d9355b035a9c0",
+      "commit": "99d28dbc22d2b0415c61163119eb8d7c4383430a",
       "lines": [
         124,
         137
@@ -633,7 +633,7 @@
     "src/components/registry.ts:7-8": {
       "kind": "git",
       "blob": "6024d8e5df982fdbd191524bedc1e4920996461b",
-      "commit": "980342f000e789eb7cd16aa3215d9355b035a9c0",
+      "commit": "99d28dbc22d2b0415c61163119eb8d7c4383430a",
       "lines": [
         7,
         8
@@ -645,7 +645,7 @@
     "../packages/project/src/json-ledger.ts:27-32": {
       "kind": "git",
       "blob": "605e23a702f4116ab46d59ff2837bf9721f326d2",
-      "commit": "980342f000e789eb7cd16aa3215d9355b035a9c0",
+      "commit": "99d28dbc22d2b0415c61163119eb8d7c4383430a",
       "lines": [
         27,
         32
@@ -655,7 +655,7 @@
     "../packages/project/src/git-comparator.ts:19-26": {
       "kind": "git",
       "blob": "1c57ce62dbe3ffa4449d686a7fe0e77be95389b9",
-      "commit": "980342f000e789eb7cd16aa3215d9355b035a9c0",
+      "commit": "99d28dbc22d2b0415c61163119eb8d7c4383430a",
       "lines": [
         19,
         26
@@ -665,7 +665,7 @@
     "../packages/cli/src/run.ts:20-39": {
       "kind": "git",
       "blob": "1e9d7c27186b8bf2104e686c45fdd271d8350f61",
-      "commit": "980342f000e789eb7cd16aa3215d9355b035a9c0",
+      "commit": "99d28dbc22d2b0415c61163119eb8d7c4383430a",
       "lines": [
         20,
         39
@@ -675,7 +675,7 @@
     "../packages/cli/src/run.ts:155-194": {
       "kind": "git",
       "blob": "1e9d7c27186b8bf2104e686c45fdd271d8350f61",
-      "commit": "980342f000e789eb7cd16aa3215d9355b035a9c0",
+      "commit": "99d28dbc22d2b0415c61163119eb8d7c4383430a",
       "lines": [
         155,
         194
@@ -685,7 +685,7 @@
     "../packages/cli/src/run.ts:171-193": {
       "kind": "git",
       "blob": "1e9d7c27186b8bf2104e686c45fdd271d8350f61",
-      "commit": "980342f000e789eb7cd16aa3215d9355b035a9c0",
+      "commit": "99d28dbc22d2b0415c61163119eb8d7c4383430a",
       "lines": [
         171,
         193
@@ -695,7 +695,7 @@
     "../packages/cli/src/run.ts:196-212": {
       "kind": "git",
       "blob": "1e9d7c27186b8bf2104e686c45fdd271d8350f61",
-      "commit": "980342f000e789eb7cd16aa3215d9355b035a9c0",
+      "commit": "99d28dbc22d2b0415c61163119eb8d7c4383430a",
       "lines": [
         196,
         212
@@ -705,7 +705,7 @@
     "../packages/cli/src/run.ts:214-223": {
       "kind": "git",
       "blob": "1e9d7c27186b8bf2104e686c45fdd271d8350f61",
-      "commit": "980342f000e789eb7cd16aa3215d9355b035a9c0",
+      "commit": "99d28dbc22d2b0415c61163119eb8d7c4383430a",
       "lines": [
         214,
         223
@@ -715,7 +715,7 @@
     "../packages/cli/src/run.ts:122-133": {
       "kind": "git",
       "blob": "1e9d7c27186b8bf2104e686c45fdd271d8350f61",
-      "commit": "980342f000e789eb7cd16aa3215d9355b035a9c0",
+      "commit": "99d28dbc22d2b0415c61163119eb8d7c4383430a",
       "lines": [
         122,
         133
@@ -725,7 +725,7 @@
     "../packages/cli/src/run.ts:225-236": {
       "kind": "git",
       "blob": "1e9d7c27186b8bf2104e686c45fdd271d8350f61",
-      "commit": "980342f000e789eb7cd16aa3215d9355b035a9c0",
+      "commit": "99d28dbc22d2b0415c61163119eb8d7c4383430a",
       "lines": [
         225,
         236
@@ -737,7 +737,7 @@
     "../tests/contract.test.ts:15-22": {
       "kind": "git",
       "blob": "d5e9b38349c236d77dd4d3183a86bd5c87ecf26d",
-      "commit": "980342f000e789eb7cd16aa3215d9355b035a9c0",
+      "commit": "99d28dbc22d2b0415c61163119eb8d7c4383430a",
       "lines": [
         15,
         22
@@ -747,7 +747,7 @@
     "../tests/repo.ts:71-78": {
       "kind": "git",
       "blob": "6702b8d0a9fcfd05156f33dfdd19389e92bc9ebe",
-      "commit": "980342f000e789eb7cd16aa3215d9355b035a9c0",
+      "commit": "99d28dbc22d2b0415c61163119eb8d7c4383430a",
       "lines": [
         71,
         78
@@ -757,7 +757,7 @@
     "tests/page.test.mjs:49-50": {
       "kind": "git",
       "blob": "c1e26043dfaea8fbd3eb05da0661da4d8ba7cae4",
-      "commit": "980342f000e789eb7cd16aa3215d9355b035a9c0",
+      "commit": "99d28dbc22d2b0415c61163119eb8d7c4383430a",
       "lines": [
         49,
         50
@@ -767,7 +767,7 @@
     "tests/page.test.mjs:119-128": {
       "kind": "git",
       "blob": "c1e26043dfaea8fbd3eb05da0661da4d8ba7cae4",
-      "commit": "980342f000e789eb7cd16aa3215d9355b035a9c0",
+      "commit": "99d28dbc22d2b0415c61163119eb8d7c4383430a",
       "lines": [
         119,
         128
@@ -777,7 +777,7 @@
     "../tests/boundary.test.ts:55-70": {
       "kind": "git",
       "blob": "ae138a7a3f70c9c75ce3b0b9aa1b7c9ea72adf77",
-      "commit": "980342f000e789eb7cd16aa3215d9355b035a9c0",
+      "commit": "99d28dbc22d2b0415c61163119eb8d7c4383430a",
       "lines": [
         55,
         70
@@ -787,7 +787,7 @@
     "../tests/boundary.test.ts:79-88": {
       "kind": "git",
       "blob": "ae138a7a3f70c9c75ce3b0b9aa1b7c9ea72adf77",
-      "commit": "980342f000e789eb7cd16aa3215d9355b035a9c0",
+      "commit": "99d28dbc22d2b0415c61163119eb8d7c4383430a",
       "lines": [
         79,
         88
@@ -799,7 +799,7 @@
     "../package.json:7-11": {
       "kind": "git",
       "blob": "b39259595e5af47d5d78f829b1e3259fe97bcb96",
-      "commit": "980342f000e789eb7cd16aa3215d9355b035a9c0",
+      "commit": "99d28dbc22d2b0415c61163119eb8d7c4383430a",
       "lines": [
         7,
         11
@@ -809,7 +809,7 @@
     "package.json:7-12": {
       "kind": "git",
       "blob": "ce322789b9da4e1d85144f1da287db0c211e7148",
-      "commit": "980342f000e789eb7cd16aa3215d9355b035a9c0",
+      "commit": "99d28dbc22d2b0415c61163119eb8d7c4383430a",
       "lines": [
         7,
         12
@@ -819,7 +819,7 @@
     "content/docs/maintain/agents.mdx:41-46": {
       "kind": "git",
       "blob": "c38f26bcb2c3255cc4a5a45fdb329caf048bc969",
-      "commit": "980342f000e789eb7cd16aa3215d9355b035a9c0",
+      "commit": "99d28dbc22d2b0415c61163119eb8d7c4383430a",
       "lines": [
         41,
         46
@@ -829,7 +829,7 @@
     "content/docs/maintain/agents.mdx:35-40": {
       "kind": "git",
       "blob": "c38f26bcb2c3255cc4a5a45fdb329caf048bc969",
-      "commit": "980342f000e789eb7cd16aa3215d9355b035a9c0",
+      "commit": "99d28dbc22d2b0415c61163119eb8d7c4383430a",
       "lines": [
         35,
         40
@@ -839,7 +839,7 @@
     "content/docs/maintain/agents.mdx:28-32": {
       "kind": "git",
       "blob": "c38f26bcb2c3255cc4a5a45fdb329caf048bc969",
-      "commit": "980342f000e789eb7cd16aa3215d9355b035a9c0",
+      "commit": "99d28dbc22d2b0415c61163119eb8d7c4383430a",
       "lines": [
         28,
         32
@@ -851,7 +851,7 @@
     "livedoc.config.mjs:12-28": {
       "kind": "git",
       "blob": "4d163c19dce3fd87f26ad21bc6d9d87ccc6d86d9",
-      "commit": "980342f000e789eb7cd16aa3215d9355b035a9c0",
+      "commit": "99d28dbc22d2b0415c61163119eb8d7c4383430a",
       "lines": [
         12,
         28
@@ -883,7 +883,7 @@
     "../../examples/notes/docs/handbook.mdx:8-13": {
       "kind": "git",
       "blob": "b9501b9cec6b292dc14553f44d0c086837914d2b",
-      "commit": "980342f000e789eb7cd16aa3215d9355b035a9c0",
+      "commit": "99d28dbc22d2b0415c61163119eb8d7c4383430a",
       "lines": [
         8,
         13
@@ -902,7 +902,7 @@
     "../../examples/notes/docs/handbook.mdx:15-21": {
       "kind": "git",
       "blob": "b9501b9cec6b292dc14553f44d0c086837914d2b",
-      "commit": "980342f000e789eb7cd16aa3215d9355b035a9c0",
+      "commit": "99d28dbc22d2b0415c61163119eb8d7c4383430a",
       "lines": [
         15,
         21
@@ -912,7 +912,7 @@
     "../../examples/notes/config.json:all": {
       "kind": "git",
       "blob": "c7afc6a4c5d7a20dca883052fc7d6103e1c9eeb0",
-      "commit": "980342f000e789eb7cd16aa3215d9355b035a9c0",
+      "commit": "99d28dbc22d2b0415c61163119eb8d7c4383430a",
       "lines": [
         1,
         4
@@ -922,7 +922,7 @@
     "../../examples/notes/docs/handbook.mdx:23-35": {
       "kind": "git",
       "blob": "b9501b9cec6b292dc14553f44d0c086837914d2b",
-      "commit": "980342f000e789eb7cd16aa3215d9355b035a9c0",
+      "commit": "99d28dbc22d2b0415c61163119eb8d7c4383430a",
       "lines": [
         23,
         35
@@ -938,7 +938,7 @@
     "../../examples/notes/src/store.ts:16-19": {
       "kind": "git",
       "blob": "6f097eaf040950bc303ae96c2f206dff34bac276",
-      "commit": "980342f000e789eb7cd16aa3215d9355b035a9c0",
+      "commit": "99d28dbc22d2b0415c61163119eb8d7c4383430a",
       "lines": [
         16,
         19
@@ -948,7 +948,7 @@
     "../../examples/notes/docs/handbook.mdx:37-43": {
       "kind": "git",
       "blob": "b9501b9cec6b292dc14553f44d0c086837914d2b",
-      "commit": "980342f000e789eb7cd16aa3215d9355b035a9c0",
+      "commit": "99d28dbc22d2b0415c61163119eb8d7c4383430a",
       "lines": [
         37,
         43
@@ -958,6 +958,563 @@
     "absent ../../examples/notes/src/remove.ts": {
       "kind": "exists",
       "type": "absent"
+    }
+  },
+  "content/docs/trajectory/cards.mdx": {
+    "tree ../packages/trajectory/src depth=1": {
+      "kind": "tree",
+      "names": [
+        "chains.ts",
+        "index.ts",
+        "layout.ts",
+        "model.ts",
+        "parse.ts",
+        "react.tsx",
+        "scan.ts",
+        "server.tsx",
+        "types.ts",
+        "validate.ts"
+      ]
+    },
+    "../packages/trajectory/src/scan.ts:21-33": {
+      "kind": "git",
+      "blob": "2cdbe8afad03410ed9e921826890151918b2dde8",
+      "commit": "99d28dbc22d2b0415c61163119eb8d7c4383430a",
+      "lines": [
+        21,
+        33
+      ],
+      "hash": "79693f78ebe4dea666a7afaa8755301c960206691034a55d63bf347057e6a538"
+    },
+    "../packages/trajectory/src/scan.ts:48-52": {
+      "kind": "git",
+      "blob": "2cdbe8afad03410ed9e921826890151918b2dde8",
+      "commit": "99d28dbc22d2b0415c61163119eb8d7c4383430a",
+      "lines": [
+        48,
+        52
+      ],
+      "hash": "7e74c26c27275a2bd4f255872270ae5bde75e6fc2e9afa44676aaef47d7113ac"
+    },
+    "../packages/trajectory/src/parse.ts:16-18": {
+      "kind": "git",
+      "blob": "682022a68ff779cdadca6fd03e91b86c9639cf85",
+      "commit": "99d28dbc22d2b0415c61163119eb8d7c4383430a",
+      "lines": [
+        16,
+        18
+      ],
+      "hash": "8d32892df3388d3abde56d175029c03c357e7b4b5d49236cf8676a91e42dc4fb"
+    },
+    "../packages/trajectory/src/parse.ts:1-12": {
+      "kind": "git",
+      "blob": "682022a68ff779cdadca6fd03e91b86c9639cf85",
+      "commit": "99d28dbc22d2b0415c61163119eb8d7c4383430a",
+      "lines": [
+        1,
+        12
+      ],
+      "hash": "da66cb5417e49a9af6d19e83fe7a166959ba0ab7dbca80308bf36e777b8f0cba"
+    },
+    "../packages/trajectory/src/parse.ts:73-75": {
+      "kind": "git",
+      "blob": "682022a68ff779cdadca6fd03e91b86c9639cf85",
+      "commit": "99d28dbc22d2b0415c61163119eb8d7c4383430a",
+      "lines": [
+        73,
+        75
+      ],
+      "hash": "5e0e82ccb458c4d4e276b4552012b6bbafa33625b0b511f22da1a684547cae20"
+    },
+    "../packages/trajectory/src/parse.ts:23-30": {
+      "kind": "git",
+      "blob": "682022a68ff779cdadca6fd03e91b86c9639cf85",
+      "commit": "99d28dbc22d2b0415c61163119eb8d7c4383430a",
+      "lines": [
+        23,
+        30
+      ],
+      "hash": "ec84ce87889292ade9d0c3126016403a3ee341c07b3b6c7bde68aaac9864b387"
+    },
+    "has ../packages/trajectory/src/parse.ts \"export const MILESTONE_HEADING\"": {
+      "kind": "has"
+    },
+    "../packages/trajectory/src/parse.ts:38-39": {
+      "kind": "git",
+      "blob": "682022a68ff779cdadca6fd03e91b86c9639cf85",
+      "commit": "99d28dbc22d2b0415c61163119eb8d7c4383430a",
+      "lines": [
+        38,
+        39
+      ],
+      "hash": "e70d6db72847a880de1d27c9afb23528d877cdba6a869359bf2d5f944c7230cf"
+    },
+    "../packages/trajectory/src/model.ts:98-102": {
+      "kind": "git",
+      "blob": "ceeb994ba798426a8bbf5b1227f11379a5d3784e",
+      "commit": "99d28dbc22d2b0415c61163119eb8d7c4383430a",
+      "lines": [
+        98,
+        102
+      ],
+      "hash": "1734bb77d35b26fe1d988cb8acf3ab31189e6b32f9ec4a72dc3db16639b20b8c"
+    },
+    "../packages/trajectory/src/model.ts:118-141": {
+      "kind": "git",
+      "blob": "ceeb994ba798426a8bbf5b1227f11379a5d3784e",
+      "commit": "99d28dbc22d2b0415c61163119eb8d7c4383430a",
+      "lines": [
+        118,
+        141
+      ],
+      "hash": "cab0382f3e2d579aa91cfe20c103df49a21ff9601e22bcbcd18f29c0f3ad426b"
+    },
+    "../packages/trajectory/src/validate.ts:1-9": {
+      "kind": "git",
+      "blob": "12b171453a962ba86e73d567ced62e520a941844",
+      "commit": "99d28dbc22d2b0415c61163119eb8d7c4383430a",
+      "lines": [
+        1,
+        9
+      ],
+      "hash": "d1a9ae4b793f654c0874815e834c09af3efb55b46f16b7ad920269ff74f8056c"
+    },
+    "../packages/trajectory/src/validate.ts:14-18": {
+      "kind": "git",
+      "blob": "12b171453a962ba86e73d567ced62e520a941844",
+      "commit": "99d28dbc22d2b0415c61163119eb8d7c4383430a",
+      "lines": [
+        14,
+        18
+      ],
+      "hash": "b605b729a0983b1144bb365ebfe6fc92201d561b2f7ec0eae2d08eb54fdd5b9d"
+    },
+    "../packages/trajectory/src/model.ts:143-150": {
+      "kind": "git",
+      "blob": "ceeb994ba798426a8bbf5b1227f11379a5d3784e",
+      "commit": "99d28dbc22d2b0415c61163119eb8d7c4383430a",
+      "lines": [
+        143,
+        150
+      ],
+      "hash": "bc34a33f3de1fd4f2af332bec71277f3340ec2da63cb5d648a93246ee56c55e2"
+    },
+    "../packages/trajectory/src/model.ts:216-220": {
+      "kind": "git",
+      "blob": "ceeb994ba798426a8bbf5b1227f11379a5d3784e",
+      "commit": "99d28dbc22d2b0415c61163119eb8d7c4383430a",
+      "lines": [
+        216,
+        220
+      ],
+      "hash": "9737da73dffd7b0342a5db8fd9c89aee050302b3f1cfed29e9e7fb29e18c1a9a"
+    },
+    "../packages/trajectory/src/model.ts:105-111": {
+      "kind": "git",
+      "blob": "ceeb994ba798426a8bbf5b1227f11379a5d3784e",
+      "commit": "99d28dbc22d2b0415c61163119eb8d7c4383430a",
+      "lines": [
+        105,
+        111
+      ],
+      "hash": "6e395266fc87e9e288312788b1e28da30db2c12248b2bdf7f54d9e87bd787029"
+    },
+    "../packages/trajectory/src/model.ts:44-47": {
+      "kind": "git",
+      "blob": "ceeb994ba798426a8bbf5b1227f11379a5d3784e",
+      "commit": "99d28dbc22d2b0415c61163119eb8d7c4383430a",
+      "lines": [
+        44,
+        47
+      ],
+      "hash": "e9a7f8607930122456e070713428db4853239a96521221642b9222cb21c0def2"
+    },
+    "../packages/trajectory/src/model.ts:152-169": {
+      "kind": "git",
+      "blob": "ceeb994ba798426a8bbf5b1227f11379a5d3784e",
+      "commit": "99d28dbc22d2b0415c61163119eb8d7c4383430a",
+      "lines": [
+        152,
+        169
+      ],
+      "hash": "99e54f1f6aebed41f3c3a93440cc5fa28b4a65c58ec403cccc9e5457110863f2"
+    }
+  },
+  "content/docs/trajectory/disk.mdx": {
+    "../packages/trajectory/src/model.ts:1-16": {
+      "kind": "git",
+      "blob": "ceeb994ba798426a8bbf5b1227f11379a5d3784e",
+      "commit": "99d28dbc22d2b0415c61163119eb8d7c4383430a",
+      "lines": [
+        1,
+        16
+      ],
+      "hash": "2482f6f794e3358bffae817c8c4675806b1703cda7a881e8ccfd029693098060"
+    },
+    "../packages/trajectory/src/model.ts:223-235": {
+      "kind": "git",
+      "blob": "ceeb994ba798426a8bbf5b1227f11379a5d3784e",
+      "commit": "99d28dbc22d2b0415c61163119eb8d7c4383430a",
+      "lines": [
+        223,
+        235
+      ],
+      "hash": "4b476060c58a6b1a3ba20db93dcd3288b3412d68e48827fa929c8aa5a050b147"
+    },
+    "../packages/trajectory/src/model.ts:186-221": {
+      "kind": "git",
+      "blob": "ceeb994ba798426a8bbf5b1227f11379a5d3784e",
+      "commit": "99d28dbc22d2b0415c61163119eb8d7c4383430a",
+      "lines": [
+        186,
+        221
+      ],
+      "hash": "64046ee98d677d20630e0ebcaceed9e30274c0f0524014933acb28bf9aaed453"
+    },
+    "../packages/trajectory/src/model.ts:237-248": {
+      "kind": "git",
+      "blob": "ceeb994ba798426a8bbf5b1227f11379a5d3784e",
+      "commit": "99d28dbc22d2b0415c61163119eb8d7c4383430a",
+      "lines": [
+        237,
+        248
+      ],
+      "hash": "a9f2e91eb3d5920cb5a43f54e1a95f485a41108f8e1a5ed85d4a0dc22c381b29"
+    },
+    "../packages/trajectory/src/model.ts:252-276": {
+      "kind": "git",
+      "blob": "ceeb994ba798426a8bbf5b1227f11379a5d3784e",
+      "commit": "99d28dbc22d2b0415c61163119eb8d7c4383430a",
+      "lines": [
+        252,
+        276
+      ],
+      "hash": "ca465f6232fb864683ad31b75c4cf0d8de6ff353d0935769ea41286c67e64823"
+    },
+    "../packages/trajectory/src/model.ts:278-283": {
+      "kind": "git",
+      "blob": "ceeb994ba798426a8bbf5b1227f11379a5d3784e",
+      "commit": "99d28dbc22d2b0415c61163119eb8d7c4383430a",
+      "lines": [
+        278,
+        283
+      ],
+      "hash": "6c6a754bfc56666ea363bdbe78a887a4736e41729c53eb6a5c604867a1550899"
+    },
+    "../packages/trajectory/src/model.ts:328-339": {
+      "kind": "git",
+      "blob": "ceeb994ba798426a8bbf5b1227f11379a5d3784e",
+      "commit": "99d28dbc22d2b0415c61163119eb8d7c4383430a",
+      "lines": [
+        328,
+        339
+      ],
+      "hash": "0f5251f0b09faecceecde6be786ce43e7b033d4b9d7bf112f7e087c5e5bd7e15"
+    },
+    "../packages/trajectory/src/model.ts:381-383": {
+      "kind": "git",
+      "blob": "ceeb994ba798426a8bbf5b1227f11379a5d3784e",
+      "commit": "99d28dbc22d2b0415c61163119eb8d7c4383430a",
+      "lines": [
+        381,
+        383
+      ],
+      "hash": "1bb3271f025ce87bdcb859909ee4a41ca11d9861ef51b37b34c5401ccb096c15"
+    },
+    "../packages/trajectory/src/model.ts:436-448": {
+      "kind": "git",
+      "blob": "ceeb994ba798426a8bbf5b1227f11379a5d3784e",
+      "commit": "99d28dbc22d2b0415c61163119eb8d7c4383430a",
+      "lines": [
+        436,
+        448
+      ],
+      "hash": "f11c80e2676f19ad25378b6a613c3bb64b2e4dbf2026199e683e674cb7d6ce1a"
+    },
+    "../packages/trajectory/src/layout.ts:1-11": {
+      "kind": "git",
+      "blob": "10c9dd363af5871d81767485953b9ec2a72d5c26",
+      "commit": "99d28dbc22d2b0415c61163119eb8d7c4383430a",
+      "lines": [
+        1,
+        11
+      ],
+      "hash": "0ff3870b151f54ed1687bfc52107c050dac47b686e8b4ead1c3788d8f7b2b388"
+    },
+    "../packages/trajectory/src/layout.ts:308-351": {
+      "kind": "git",
+      "blob": "10c9dd363af5871d81767485953b9ec2a72d5c26",
+      "commit": "99d28dbc22d2b0415c61163119eb8d7c4383430a",
+      "lines": [
+        308,
+        351
+      ],
+      "hash": "40a335439d09122a1b133bcb0ca9b5f7c2da6dc4b5470686e1bbe204ee2cb193"
+    },
+    "../packages/trajectory/src/layout.ts:624-671": {
+      "kind": "git",
+      "blob": "10c9dd363af5871d81767485953b9ec2a72d5c26",
+      "commit": "99d28dbc22d2b0415c61163119eb8d7c4383430a",
+      "lines": [
+        624,
+        671
+      ],
+      "hash": "7215e4d2ffeb4711744d4d39446c3ec4c3f9f67b102c9d0bf298ee5e494e17d1"
+    },
+    "../packages/trajectory/src/layout.ts:729-758": {
+      "kind": "git",
+      "blob": "10c9dd363af5871d81767485953b9ec2a72d5c26",
+      "commit": "99d28dbc22d2b0415c61163119eb8d7c4383430a",
+      "lines": [
+        729,
+        758
+      ],
+      "hash": "dba6f8ca64f27297ae7ab30aef002339c74f734fe83b1804dedc0bc3b028d9ba"
+    },
+    "../packages/trajectory/src/layout.ts:760-778": {
+      "kind": "git",
+      "blob": "10c9dd363af5871d81767485953b9ec2a72d5c26",
+      "commit": "99d28dbc22d2b0415c61163119eb8d7c4383430a",
+      "lines": [
+        760,
+        778
+      ],
+      "hash": "5ff04e5c312efafd7d916d1a292587b90bcbf5e1484ce2af05b8c5898ae7dfe0"
+    },
+    "../packages/trajectory/src/chains.ts:54-61": {
+      "kind": "git",
+      "blob": "d8b0165b44e3a5c3bcce111fb23742d0a1ec15e2",
+      "commit": "99d28dbc22d2b0415c61163119eb8d7c4383430a",
+      "lines": [
+        54,
+        61
+      ],
+      "hash": "1d5b12d046c80552624a2665fea15fd7133708b15789ccdca845fca6cd9f606c"
+    },
+    "../packages/trajectory/src/index.ts:123-140": {
+      "kind": "git",
+      "blob": "dd92376898d52163c47b633bad50a8d5b75d2743",
+      "commit": "99d28dbc22d2b0415c61163119eb8d7c4383430a",
+      "lines": [
+        123,
+        140
+      ],
+      "hash": "52a8281c123d84c551feadb14954d8b44f76e7da6df56f8165169a49221197fc"
+    },
+    "../packages/trajectory/src/server.tsx:38-42": {
+      "kind": "git",
+      "blob": "093597efabfc8649a8981e2b348df227cb35b010",
+      "commit": "99d28dbc22d2b0415c61163119eb8d7c4383430a",
+      "lines": [
+        38,
+        42
+      ],
+      "hash": "ebfaa258ead3be5117aeaa61cc25bf6526b08403b21dfcfa460c7a66bc49a66c"
+    },
+    "../packages/trajectory/src/react.tsx:53-85": {
+      "kind": "git",
+      "blob": "0c81416857f425e72c48ab9b9395870ca0ebd40f",
+      "commit": "99d28dbc22d2b0415c61163119eb8d7c4383430a",
+      "lines": [
+        53,
+        85
+      ],
+      "hash": "ac6114d3ad740a5ae9fd698591975469d7df3ba218eaf33792f0436fa86d2555"
+    },
+    "../packages/trajectory/src/react.tsx:126-166": {
+      "kind": "git",
+      "blob": "0c81416857f425e72c48ab9b9395870ca0ebd40f",
+      "commit": "99d28dbc22d2b0415c61163119eb8d7c4383430a",
+      "lines": [
+        126,
+        166
+      ],
+      "hash": "3e31d1a56c9863e5fa855bb2c9df1e5085cb9fb83336a3fbfebb611330a528b4"
+    },
+    "../packages/trajectory/src/react.tsx:1239-1245": {
+      "kind": "git",
+      "blob": "0c81416857f425e72c48ab9b9395870ca0ebd40f",
+      "commit": "99d28dbc22d2b0415c61163119eb8d7c4383430a",
+      "lines": [
+        1239,
+        1245
+      ],
+      "hash": "492df9603291eded78aad119a7bcb5d38bcd59196ad763bcfbb258a439dfcb41"
+    },
+    "../packages/trajectory/src/react.tsx:423-436": {
+      "kind": "git",
+      "blob": "0c81416857f425e72c48ab9b9395870ca0ebd40f",
+      "commit": "99d28dbc22d2b0415c61163119eb8d7c4383430a",
+      "lines": [
+        423,
+        436
+      ],
+      "hash": "5591492e526a6db72843f7ba1ead871b721e67a7ce46a12ab056f190b5519809"
+    },
+    "../packages/trajectory/src/react.tsx:800-806": {
+      "kind": "git",
+      "blob": "0c81416857f425e72c48ab9b9395870ca0ebd40f",
+      "commit": "99d28dbc22d2b0415c61163119eb8d7c4383430a",
+      "lines": [
+        800,
+        806
+      ],
+      "hash": "a02de6fe57fcbfaa3f01007c501b2da9613cdf9a2a0217c62bad99803e8630c3"
+    },
+    "../packages/trajectory/src/react.tsx:914-928": {
+      "kind": "git",
+      "blob": "0c81416857f425e72c48ab9b9395870ca0ebd40f",
+      "commit": "99d28dbc22d2b0415c61163119eb8d7c4383430a",
+      "lines": [
+        914,
+        928
+      ],
+      "hash": "e4a9370b668f2faa7f9a3f3143bb85a7348b685dfde63ee56223809cb4478a75"
+    },
+    "../packages/trajectory/src/react.tsx:3-18": {
+      "kind": "git",
+      "blob": "0c81416857f425e72c48ab9b9395870ca0ebd40f",
+      "commit": "99d28dbc22d2b0415c61163119eb8d7c4383430a",
+      "lines": [
+        3,
+        18
+      ],
+      "hash": "c93ae6688fc80d29f1420161a310a27a7580b44ba7064d6e9eb1d77ab99af852"
+    },
+    "../packages/trajectory/src/react.tsx:775-791": {
+      "kind": "git",
+      "blob": "0c81416857f425e72c48ab9b9395870ca0ebd40f",
+      "commit": "99d28dbc22d2b0415c61163119eb8d7c4383430a",
+      "lines": [
+        775,
+        791
+      ],
+      "hash": "3506f09bcf56616cab910105fa904792a21411e61eeecd6493b38c956066f6cb"
+    },
+    "../packages/trajectory/src/layout.ts:802-810": {
+      "kind": "git",
+      "blob": "10c9dd363af5871d81767485953b9ec2a72d5c26",
+      "commit": "99d28dbc22d2b0415c61163119eb8d7c4383430a",
+      "lines": [
+        802,
+        810
+      ],
+      "hash": "48bd58a0aac67178cc6afa243249d7b786541ddd26cb4ff56da39e3da30b7bc3"
+    }
+  },
+  "content/docs/trajectory/wiring.mdx": {
+    "../packages/project/src/load.ts:33-34": {
+      "kind": "git",
+      "blob": "b1272970cc071d7cdf29205856639a154fa019cd",
+      "commit": "99d28dbc22d2b0415c61163119eb8d7c4383430a",
+      "lines": [
+        33,
+        34
+      ],
+      "hash": "f823a63d3b674a7bb29a058398c4e870a4824f961d7bdf6906db2ac3f8310894"
+    },
+    "../packages/project/src/load.ts:42-43": {
+      "kind": "git",
+      "blob": "b1272970cc071d7cdf29205856639a154fa019cd",
+      "commit": "99d28dbc22d2b0415c61163119eb8d7c4383430a",
+      "lines": [
+        42,
+        43
+      ],
+      "hash": "f31609cbbe42673c0590f8f1867b7b6d13b1181abd6054aabef9375b96c01560"
+    },
+    "../packages/project/src/load.ts:130-133": {
+      "kind": "git",
+      "blob": "b1272970cc071d7cdf29205856639a154fa019cd",
+      "commit": "99d28dbc22d2b0415c61163119eb8d7c4383430a",
+      "lines": [
+        130,
+        133
+      ],
+      "hash": "14c51fdb4998c54c2da56dc2872fb9366b01af99ffebd44556e5c56996dc5e16"
+    },
+    "../packages/cli/src/run.ts:1-12": {
+      "kind": "git",
+      "blob": "1e9d7c27186b8bf2104e686c45fdd271d8350f61",
+      "commit": "99d28dbc22d2b0415c61163119eb8d7c4383430a",
+      "lines": [
+        1,
+        12
+      ],
+      "hash": "bf30f68f15fbaf44229782a45706f3aaa03823c2b00bef5fd7d16c0cb7897c09"
+    },
+    "source.config.ts:20-37": {
+      "kind": "git",
+      "blob": "b028f7d32433f0c2a07c242ae0470743e20bbbe9",
+      "commit": "99d28dbc22d2b0415c61163119eb8d7c4383430a",
+      "lines": [
+        20,
+        37
+      ],
+      "hash": "a2bc9cba41d4e04a2e48913b4681f66b4d1abb7362ddbef1b86ccb7c82e9a614"
+    },
+    "src/lib/trajectory-source.ts:all": {
+      "kind": "git",
+      "blob": "3f27319c26c06a268f322335e9c1b768af12d302",
+      "commit": "99d28dbc22d2b0415c61163119eb8d7c4383430a",
+      "lines": [
+        1,
+        8
+      ],
+      "hash": "0e897dabb5e318ce1e25d34196dd0417f01760c4ec634b4119ecfdfd132f9507"
+    },
+    "src/app/trajectory/[[...slug]]/page.tsx:6-39": {
+      "kind": "git",
+      "blob": "bdf710530948597e82625ad788723155c8cd2be3",
+      "commit": "99d28dbc22d2b0415c61163119eb8d7c4383430a",
+      "lines": [
+        6,
+        39
+      ],
+      "hash": "19defecb470d801f1e2d09fcac71e13d75b0188af0c76f8d23250942644f16ab"
+    },
+    "src/components/registry.ts:7-8": {
+      "kind": "git",
+      "blob": "6024d8e5df982fdbd191524bedc1e4920996461b",
+      "commit": "99d28dbc22d2b0415c61163119eb8d7c4383430a",
+      "lines": [
+        7,
+        8
+      ],
+      "hash": "2fb5620745337172d213c746cf5dea5be068a271e2e1e9032748f58e9553368a"
+    },
+    "has src/components/mdx.tsx \"@godcreator02/live-doc-trajectory/server\"": {
+      "kind": "has"
+    },
+    "livedoc.config.mjs:21-27": {
+      "kind": "git",
+      "blob": "4d163c19dce3fd87f26ad21bc6d9d87ccc6d86d9",
+      "commit": "99d28dbc22d2b0415c61163119eb8d7c4383430a",
+      "lines": [
+        21,
+        27
+      ],
+      "hash": "41dbf8547104c08281befc9d148c97d844ff90bc68ff1500a8c575d311b99551"
+    },
+    "src/app/global.css:6-7": {
+      "kind": "git",
+      "blob": "1b0d4eac53692d14ef8cddda6ee6a54e70b325c9",
+      "commit": "99d28dbc22d2b0415c61163119eb8d7c4383430a",
+      "lines": [
+        6,
+        7
+      ],
+      "hash": "03bf976b165255283016b3efa8edf134c0a79ea8f1963e4c89b6f9e28473ee60"
+    },
+    "next.config.mjs:9-20": {
+      "kind": "git",
+      "blob": "dc2f22020a7245a40c7c4556255b29101effecb9",
+      "commit": "99d28dbc22d2b0415c61163119eb8d7c4383430a",
+      "lines": [
+        9,
+        20
+      ],
+      "hash": "6210289ce8d734ca92ffaa5011e90b6f10bb5e0026f3d2d9f6cc845d00d07a05"
     }
   }
 }
