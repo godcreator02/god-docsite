@@ -17,6 +17,8 @@ const config = {
     '@godcreator02/live-doc-project',
     '@godcreator02/live-doc-core',
   ],
+  // 站根没有页面，直接送到文档树；盘就在 /docs 那一页上
+  redirects: async () => [{ source: '/', destination: '/docs', permanent: true }],
 };
 
 export default withMDX(config);

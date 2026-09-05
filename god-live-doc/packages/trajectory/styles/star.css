@@ -415,22 +415,37 @@ html.dark {
   background: var(--star-bd);
 }
 
-/* ---------- 激活遮罩 ---------- */
+/* ---------- 激活遮罩：整片可点，提示只占盘面下沿一条细带 ---------- */
 .star-activate-overlay {
   position: absolute;
   inset: 0;
   z-index: 6;
   border: none;
+  padding: 0;
   background: transparent;
   color: var(--star-t3);
-  font-size: 13px;
   cursor: pointer;
   display: flex;
-  align-items: center;
-  justify-content: center;
+  align-items: flex-end;
+  /* 靠左下角：右下角是图例（z-index 更高），提示带摆中间会被它压掉半截 */
+  justify-content: flex-start;
 }
 .star-activate-overlay:hover {
   background: rgba(0, 0, 0, 0.04);
+}
+.star-activate-hint {
+  margin: 0 0 12px 12px;
+  padding: 3px 12px;
+  border: 1px solid var(--star-bd);
+  border-radius: 999px;
+  background: var(--star-panel);
+  color: var(--star-t3);
+  font-size: 12px;
+  letter-spacing: 1px;
+  white-space: nowrap;
+}
+.star-activate-overlay:hover .star-activate-hint {
+  color: var(--star-t1);
 }
 
 /* ---------- Trajectory 服务端组件：盘 + 报病列表 ---------- */

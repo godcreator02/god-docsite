@@ -1423,13 +1423,14 @@ export function StarDisk({ data, hrefBase, size, initialDisk }: StarDiskProps): 
         </div>
       </div>
 
+      {/* 激活遮罩：整片可点，但提示文字贴盘面下沿一条细带——压在盘心正中会跟项目名叠一起 */}
       {!activated ? (
         <button
           type="button"
           className="star-activate-overlay"
           onClick={() => setActivated(true)}
         >
-          点击进入盘面
+          <span className="star-activate-hint">点击进入盘面</span>
         </button>
       ) : null}
     </div>
