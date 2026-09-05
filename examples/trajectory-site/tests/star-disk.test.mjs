@@ -2,7 +2,8 @@
  * StarDisk 的结构测试：`buildTrajectory("cards")` 建模、`renderToStaticMarkup` 渲成静态
  * html，断言 SVG 骨架数量——节点的 `a[target=_blank]` 数、扇环框数、里程碑环数分别等于
  * 默认盘（disks[0]，本地 107 张诗名卡的 tfix 项目盘）的卡数、树数、范围内里程碑数。
- * `size` 给死一个数字，绕开 ResizeObserver（Node 环境没有它）。
+ * 渲的是 `mode="page"`——这个站的 /trajectory 就是这么用的，所以还多断言一条：整页模式
+ * 没有激活遮罩（滚轮直接生效）。`size` 给死一个数字，绕开 ResizeObserver（Node 环境没有它）。
  */
 import { test } from "node:test";
 import assert from "node:assert/strict";
@@ -19,17 +20,20 @@ import { renderToStaticMarkup } from "../../../god-live-doc/node_modules/react-d
 import { buildTrajectory, inRange } from "@godcreator02/live-doc-trajectory";
 import { StarDisk } from "@godcreator02/live-doc-trajectory/react";
 
-test("StarDisk：SVG 骨架数量对得上默认盘的模型", async () => {
+test("StarDisk mode=page：SVG 骨架数量对得上默认盘的模型，且没有激活遮罩", async () => {
   const data = await buildTrajectory("cards");
   const rootId = data.disks[0].rootId;
   const model = data.models[rootId];
   const root = data.cards.find((c) => c.id === rootId);
 
   const html = renderToStaticMarkup(
-    createElement(StarDisk, { data, hrefBase: "/trajectory", size: 800 }),
+    createElement(StarDisk, { data, hrefBase: "/trajectory", size: 800, mode: "page" }),
   );
 
   assert.match(html, /<svg/);
+  assert.match(html, /class="star-disk star-disk-page"/, "整页模式的容器类");
+  assert.doesNotMatch(html, /star-activate-overlay/, "整页模式没有激活遮罩，滚轮直接生效");
+  assert.doesNotMatch(html, /title="全屏"/, "整页模式没有全屏按钮");
   const links = [...html.matchAll(/<a\b[^>]*target="_blank"[^>]*>/g)];
   assert.equal(links.length, model.cards.length, "节点链接数该等于上盘卡数（虫洞不算）");
 
