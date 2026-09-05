@@ -129,8 +129,9 @@ export interface Trajectory {
   models: Record<string, SerializableModel>;
 }
 
-/** 扫一次目录、给每张盘建模。dir 是绝对路径，直接传给 scanDir；目录不存在时
- * 四段皆空、不报错。 */
+/** 扫一次目录、给每张盘建模。dir 原样交给 scanDir，最终落到 node:fs 的 readdir 上——
+ * 绝对路径与相对 `process.cwd()` 的相对路径都认（命令行传的是装配好的绝对路径，
+ * `./server` 的服务端组件在自己那头先 resolve 一次）；目录不存在时四段皆空、不报错。 */
 export async function buildTrajectory(dir: string): Promise<Trajectory> {
   const { cards, sick } = await scanDir(dir);
   const disks = buildDisks(cards);

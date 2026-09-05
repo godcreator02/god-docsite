@@ -221,9 +221,9 @@ layout / chains 四个 TS 文件是纯函数，带测试与 fixtures）；星盘
 
 | 入口 | 装什么 | 依赖 |
 | --- | --- | --- |
-| `.` | parse / validate / model / layout / chains；`scanDir(dir)` 读目录出 `{ cards, sick }`；`buildTrajectory(dir)` 出给盘的模型 | 零 npm 依赖，只用 `node:fs` / `node:path` |
+| `.` | parse / validate / model / layout / chains；`scanDir(dir)` 读目录出 `{ cards, sick }`；`buildTrajectory(dir)` 出给盘的模型 | 产物只 import `node:`（包的 dependencies 里有 remark 那套，是给 `./server` 用的） |
 | `./react` | 客户端组件 `StarDisk`（`"use client"` 留在产物头一行，照 format-fumadocs `/pre` 的先例）+ 随包发的 `star.css` | react 为 peer |
-| `./server` | 服务端组件 `Trajectory`（读目录、建模、渲 `StarDisk`）、卡页 frontmatter 的 zod 形状 `cardSchema`（title 从 label 派生、born-at 收成字符串）、remark 插件 `remarkTrajectoryLinks`（关系边行渲成标注、`卡身份.md` 链接改写成卡页路由） | react 为 peer；remark 那套同 format-md |
+| `./server` | 服务端组件 `Trajectory`（读目录、建模、渲 `StarDisk`）、卡页 frontmatter 的 `cardSchema`——手写 StandardSchemaV1 对象（工厂形态，取 `ctx.path` 做 label 缺失时的文件名兜底；title 从 label 派生、born-at 收成字符串）、remark 插件 `remarkTrajectoryLinks`（关系边行渲成标注、`卡身份.md` 链接改写成卡页路由） | react 为 peer；remark 那套同 format-md |
 
 边界测试跟着加一条：react 只许出现在 format-fumadocs 和 trajectory，且只能是 peer；trajectory 不依赖 core、
 不依赖任何格式包、cli 与 project 不依赖 trajectory 的 react / server 入口。

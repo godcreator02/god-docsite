@@ -7,7 +7,7 @@
  * 的注释）。
  */
 
-import { basename } from "node:path";
+import { basename, resolve } from "node:path";
 import { visit } from "unist-util-visit";
 import type { Link, Paragraph, PhrasingContent, Root, Text } from "mdast";
 // 类型专用：不引 zod、不引任何校验库，schema 对象仍是手写的字面量——只借这份官方类型
@@ -27,7 +27,8 @@ import { StarDisk } from "@godcreator02/live-doc-trajectory/react";
 /* ================= 服务端组件：读盘 + 渲盘 + 报病列表 ================= */
 
 export interface TrajectoryProps {
-  /** 卡目录，相对 process.cwd()（即站的项目根）。 */
+  /** 卡目录：绝对路径，或相对站的项目根（`process.cwd()`）的相对路径——组件里显式
+   * resolve 一次再交给 buildTrajectory，站的 mdx 里写的都是相对写法。 */
   dir: string;
   /** 卡页路由前缀，透传给 StarDisk。 */
   hrefBase: string;
@@ -36,7 +37,7 @@ export interface TrajectoryProps {
 }
 
 export async function Trajectory({ dir, hrefBase, initialDisk }: TrajectoryProps) {
-  const data: TrajectoryData = await buildTrajectory(dir);
+  const data: TrajectoryData = await buildTrajectory(resolve(process.cwd(), dir));
   return (
     <div className="star-trajectory">
       <StarDisk data={data} hrefBase={hrefBase} initialDisk={initialDisk} />

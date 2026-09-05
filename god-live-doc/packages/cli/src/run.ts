@@ -49,7 +49,7 @@ export async function main(argv: string[]): Promise<number> {
   const [command = "check", ...rest] = argv;
   const target = rest.includes("--target") ? rest[rest.indexOf("--target") + 1] : "human";
   if (!["check", "confirm", "render"].includes(command)) {
-    console.error(`不认识的命令：${command}——有 check / confirm / render`);
+    console.error(`不认识的命令：${command}——有 check / confirm / render / trajectory`);
     return 2;
   }
 

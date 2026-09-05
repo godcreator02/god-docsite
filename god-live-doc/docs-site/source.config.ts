@@ -27,8 +27,9 @@ export const docs = defineDocs({
 export const trajectory = defineDocs({
   dir: '../../docs-god-flow/trajectory',
   docs: {
-    // cardSchema 是结构对得上 StandardSchemaV1 协议、手写的最小实现，不从 @standard-schema/spec
-    // 引类型；结构对上了不用 cast，defineDocs 能顺着推出 CardFrontmatter
+    // cardSchema 是手写的最小实现：对象字面量，不 new 任何校验库的类，只从
+    // @standard-schema/spec 借一份类型声明保结构精确（devDependency，编译期擦光）；
+    // 结构对上了不用 cast，defineDocs 能顺着推出 CardFrontmatter
     schema: cardSchema,
     mdxOptions: applyMdxPreset({
       remarkPlugins: (v) => [...v, [remarkTrajectoryLinks, { hrefBase: '/trajectory' }]],
