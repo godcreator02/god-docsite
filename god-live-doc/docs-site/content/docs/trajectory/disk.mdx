@@ -91,7 +91,7 @@ description: 聚盘、关系边、提树与主干、领域序；有效天数标�
 同一棵树同一条槽里跨日的几组卡挤到一起时，**判定看屏幕径向间距、动作只动角度**——半径 = 日期是铁律，
 挤了只能沿弧向错开，按日组序奇偶交替 ± 给偏移，间距一拉开自动归零、链还原成直线：
 
-{/* ref file="../packages/trajectory/src/chains.ts" lines="54-61" */}
+{/* ref file="../packages/trajectory/src/chains.ts" lines="56-63" */}
 
 ## 四、布局在客户端算，服务端只出模型
 
@@ -102,7 +102,7 @@ description: 聚盘、关系边、提树与主干、领域序；有效天数标�
 
 服务端组件就是「读盘 + 建模 + 把模型和启动器缩略图交给客户端组件」，外加把报病列成一张表摆在盘下方：
 
-{/* ref file="../packages/trajectory/src/server.tsx" lines="93-98" */}
+{/* ref file="../packages/trajectory/src/server.tsx" lines="92-97" */}
 
 ## 五、画布层整搬 Obsidian 版，React 壳只当编排者
 
@@ -112,7 +112,7 @@ description: 聚盘、关系边、提树与主干、领域序；有效天数标�
 六层互不 import、也不认识编排者，层与编排者之间只走一份契约：`build` 建一次 DOM，`place` 每帧只改属性，
 `recolor` 是着色专属通道：
 
-{/* ref file="../packages/trajectory/src/canvas/layers/frame.ts" lines="100-105" */}
+{/* ref file="../packages/trajectory/src/canvas/layers/frame.ts" lines="101-106" */}
 
 编排者住 `canvas/stage.ts`，照 Obsidian 版 `star-view` 搬：一轮数据进来就 `buildCtx` → 六层 `build`，
 每帧 `place`，筛选 / 主题变化 `recolor`。它不认识 React，跟壳只经一份回调对话：
@@ -128,36 +128,55 @@ description: 聚盘、关系边、提树与主干、领域序；有效天数标�
 一帧里推进的东西分三家：焦点日与鱼眼强度是布局实例自己的字段，走布局层的 `advanceFrame`；
 视图补间归相机；悬停放大归各层的 `stepTweens`。三家谁还在动就再请一帧：
 
-{/* ref file="../packages/trajectory/src/canvas/stage.ts" lines="422-441" */}
+{/* ref file="../packages/trajectory/src/canvas/stage.ts" lines="421-440" */}
 
 ## 六、盘的视觉词汇表
 
-**颜色只编码领域。**色板按 `model.domains` 的首次出现序分配，亮暗两套、色相两两拉开 45° 以上并避开
-连线色板占的两段；未分道走中性色、不占色板位；被取代的卡拿领域色跟一个灰混过再画，所以它还留着
-自己的泳道身份、只是黯下去。关系边的两种颜色也在这张表里——取代金黄、转向青色。JS 色板按
-`html.dark` 选，盘心描边跟宿主的 `--color-fd-primary` 走（探针解成 hex 再进混色）：
+**颜色只编码领域。**色板叫「矿彩」——低饱和暖偏的五色（石青 / 赭石 / 松绿 / 胭脂 / 藤紫），
+按 `model.domains` 的首次出现序分配，亮暗两套；色相避开连线占的两段（转向铜绿、里程碑与盘心泥金），
+未分道走中性灰、不占色板位；被取代的卡拿领域色跟一个灰混 40% 再画，所以它还留着自己的泳道身份、
+只是黯下去。JS 色板按 `html.dark` 选，第六个领域出现先扩色板、不循环复用：
 
-{/* ref file="../packages/trajectory/src/canvas/theme.ts" lines="31-72" */}
+{/* ref file="../packages/trajectory/src/canvas/theme.ts" lines="36-77" */}
+
+**节点是「珠光」。**在立的实心形状填一支径向渐变（中心 = 领域色向白混 22%、边缘 = 本色、焦点偏左上），
+外圈一圈**底色描边**——密集处靠这道缝把彩点分开，不靠混黑描边压边。被取代的实心无渐变、半径压到 0.7、
+缝也细一档；每棵树主干末端那张在立卡是**结论卡**，半径吃 1.3 倍放大档。渐变按颜色去重、切主题现建，
+跟空窗雾带的羽化滤镜同住一个 defs 工厂：
+
+{/* ref file="../packages/trajectory/src/canvas/node-dom.ts" lines="264-306" */}
 
 **形状编码 `type`——这是对 Obsidian 版唯一保留的偏离。**抉择实心圆、证据三角、推演菱形、参照方形、
-快照空心方，缺省空心圆；实心一组填领域色、描边同色混黑约 35%（不用亮描边），空心一组只描领域色。
-这是 `type` 的**显示读法，不是过滤**——所有卡照常上盘，盘是全量记录的镜像，关键节点靠里程碑金环
-呈现，不靠筛掉节点。同一张几何表出大图节点与图例符号：
+缺省实心圆，快照是唯一的空心方（底色缝垫在领域色边下面）。这是 `type` 的**显示读法，不是过滤**——
+所有卡照常上盘，盘是全量记录的镜像，关键节点靠里程碑泥金环呈现，不靠筛掉节点。同一张几何表出大图
+节点与图例符号：
 
-{/* ref file="../packages/trajectory/src/canvas/node-dom.ts" lines="94-144" */}
+{/* ref file="../packages/trajectory/src/canvas/node-dom.ts" lines="129-158" */}
 
-其余照 Obsidian 版规范：孤星虚线外环，虫洞同心双环、颜色与盘心描边同源（`--color-fd-primary`），
-取代金黄虚线、转向青色点线、箭头尺寸随局部放大率连续插值，里程碑金色加重环、标签走 6 点竖线。
-底色、文字、边框、浮层、悬停底、环线与扇环框全映射 fumadocs 变量，CSS 不判明暗——环用 `color-mix`
-从前景色兑 7% / 20% / 30% / 38%，扇环框边 / 底 18% / 5%：
+**连线不画箭头**——半径即时间，从内到外就是方向，箭头是白加的重量。取代边是 1px 实线、取**旧卡的
+领域色**（一条链看着就是那个领域自己长出来的），透明 0.45；转向边是 1px 铜绿点线（`2 3`），透明 0.5；
+同日两卡沿着那道环走弧。端点起止于节点边缘外一小段净空，挨得太近的两颗按比例压缩退距、宁可留根短须
+也不整条丢掉；悬停一端的边提到 0.9：
+
+{/* ref file="../packages/trajectory/src/canvas/node-dom.ts" lines="385-397" */}
+
+其余照 Obsidian 版规范：虫洞同心双环、颜色与盘心描边同源（泥金），里程碑泥金加重环、标签走 6 点竖线；
+孤星在形态上没有专属记号（虚线外环退役），只在标签分级里还认它。底色、文字、边框、浮层、悬停底、
+环线与扇环框全映射 fumadocs 变量，CSS 不判明暗——环用 `color-mix` 从前景色兑 7% / 20% / 30% / 38%，
+扇环框边 / 底 18% / 5%；节点的底色缝直接写 `var(--color-fd-background)`，亮暗跟着宿主翻，
+服务端渲的定妆照也照吃：
 
 {/* ref file="../packages/trajectory/styles/star.css" lines="9-34" */}
+
+**规格里的 px 一律是屏幕像素。**字号、线宽、虚线段、节点半径都按当前「世界单位 / 屏幕像素」的比例
+折算后才写进 SVG，几何量（半径、角度、带宽）才是世界单位。节点的缝宽写在符号局部坐标里、随符号整组
+按 `view.k` 反补偿，连线走 `vector-effect: non-scaling-stroke`——放大八倍，描边在屏幕上还是那么粗。
 
 **标签两级显隐、同池仲裁。**在立且非孤星的卡与虫洞全景即显（局部放大率 × 缩放深度 > 0.5），
 孤星与被取代进透镜才显（> 1.8）；贴盘心的内圈卡标签向盘外锚。节点、虫洞、树名同池按真实文本区间
 仲裁，横向区间相交且行距不足 14px 的后来者让隐，悬停先占坑；12 点与 6 点是两条独立的注记竖线：
 
-{/* ref file="../packages/trajectory/src/canvas/layers/cards.ts" lines="173-186" */}
+{/* ref file="../packages/trajectory/src/canvas/layers/cards.ts" lines="185-197" */}
 
 {/* ref file="../packages/trajectory/src/canvas/label-arbiter.ts" lines="45-48" */}
 
@@ -165,7 +184,7 @@ description: 聚盘、关系边、提树与主干、领域序；有效天数标�
 「压灰」不是「删掉」：没命中的节点变中性色留在原位，盘的形状不跳。虫洞不进筛选——它不是一张卡，
 是导航入口：
 
-{/* ref file="../packages/trajectory/src/canvas/node-dom.ts" lines="356-362" */}
+{/* ref file="../packages/trajectory/src/canvas/node-dom.ts" lines="365-371" */}
 
 ## 七、交互：滚轮管空间，竖轨管时间
 
@@ -173,7 +192,7 @@ description: 聚盘、关系边、提树与主干、领域序；有效天数标�
 真正的位移在补间循环里逐帧趋近。**ctrl + 滚轮**（触控板捏合同一通道）分流给时间：整窗沿时间平移，
 一格按窗宽的一成走，跟竖轨上悬停滚轮是同一段代码：
 
-{/* ref file="../packages/trajectory/src/canvas/stage.ts" lines="516-535" */}
+{/* ref file="../packages/trajectory/src/canvas/stage.ts" lines="515-534" */}
 
 **时间归画布左缘常驻的日期竖轨**：自绘双柄区间滑块，顶旧底新，收窄窗即进引力透镜——窗就是焦点带，
 窗外压缩显示不丢全貌；中段拖动整窗平移，拖回顶满退回全景；左下角小框直接键入窗宽天数。轨位与
@@ -190,9 +209,9 @@ description: 聚盘、关系边、提树与主干、领域序；有效天数标�
 **回到原点两段式**：相机动过就先只归相机（时间窗与透镜原样留着），相机已在原点再按才归窗
 （顶满 + 透镜退场）；连按两下全归。Esc 与工具条钮共用一条链，钮的图标随「下一按干什么」换脸：
 
-{/* ref file="../packages/trajectory/src/canvas/stage.ts" lines="540-554" */}
+{/* ref file="../packages/trajectory/src/canvas/stage.ts" lines="539-553" */}
 
-{/* ref file="../packages/trajectory/src/canvas/stage.ts" lines="559-572" */}
+{/* ref file="../packages/trajectory/src/canvas/stage.ts" lines="558-571" */}
 
 **盘心单击在新标签页开根卡页、双击回全景**；点节点在新标签页开卡页，点虫洞切到对应的盘。
 单击延迟一拍让双击截得住：
@@ -220,9 +239,11 @@ description: 聚盘、关系边、提树与主干、领域序；有效天数标�
 
 定妆照是 `star-thumb` 这个纯静态 SVG 画家画的：跟大图同一个布局引擎、同灌盘心与空窗设置，
 「缩略图 = 大图世界几何的等比缩放」靠共用布局层保证。**在服务端渲成静态 markup**——画家喂一个
-最小的桩文档建树、再序列化成字符串，客户端原样贴、不重画；盘心与虫洞走 `var(--color-fd-primary)`，
-环色走 CSS 变量，只有领域 / 连线 / 混灰这些 JS 色板要按亮暗各渲一份、页面按 `html.dark` 显示其一：
+最小的桩文档建树、再序列化成字符串，客户端原样贴、不重画；节点的底色缝与环色走 CSS 变量，
+盘心 / 虫洞的泥金与领域 / 连线 / 混灰这些 JS 色板要按亮暗各渲一份、页面按 `html.dark` 显示其一。
+节点在这儿退成实心（缩到卡片尺寸渐变看不出来，白留一堆 defs），被取代小一号、结论卡放大、连线无箭头
+三条跟大图一致：
 
-{/* ref file="../packages/trajectory/src/server.tsx" lines="46-79" */}
+{/* ref file="../packages/trajectory/src/server.tsx" lines="46-78" */}
 
 怎么把这套接进一个 fumadocs 站，见 [接线](/docs/trajectory/wiring)。
