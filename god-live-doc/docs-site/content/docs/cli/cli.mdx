@@ -14,7 +14,7 @@ description: check / confirm / render 的输出、退出码、problems、记录�
 
 一行一处引用：状态符号、文档、`文件:起-止`、一句话说明。
 
-{/* ref file="../packages/cli/src/run.ts" lines="17-36" */}
+{/* ref file="../packages/cli/src/run.ts" lines="20-39" */}
 
 `REASON` 里除了 `unlocated`（「有变动」的细分：hash 记忆找不到这段了，位置不明），都是「缺失」的细分——
 说清楚是哪一种指向空气，而不是含糊地报一句「代码没了」：行段的整段删光、文件没了、blob 取不回，
@@ -28,7 +28,7 @@ description: check / confirm / render 的输出、退出码、problems、记录�
 
 ## check：只读，报状态
 
-{/* ref file="../packages/cli/src/run.ts" lines="109-148" */}
+{/* ref file="../packages/cli/src/run.ts" lines="155-194" */}
 
 ```text
 🟢 content/docs/formats/wiring.mdx  livedoc.config.mjs:11-21  新鲜
@@ -42,7 +42,7 @@ description: check / confirm / render 的输出、退出码、problems、记录�
 **名册外组件**（`livedoc.config.mjs` 里没给它压平规则）、**摆放的生成物跟 mdx 源不一致**——
 挂了 `outputs` 映射的文档，`check` 在内存里重渲染跟盘上那份比；mdx 源改了没重摆、有人直接改了生成物，都抓得住：
 
-{/* ref file="../packages/cli/src/run.ts" lines="125-147" */}
+{/* ref file="../packages/cli/src/run.ts" lines="171-193" */}
 
 ```text
 🔴 docs/a.md  src/greet.ts:4-5  孤儿记录：文档里已经没有这处引用
@@ -51,7 +51,7 @@ description: check / confirm / render 的输出、退出码、problems、记录�
 
 ## confirm：出记录、清孤儿、换记号
 
-{/* ref file="../packages/cli/src/run.ts" lines="150-166" */}
+{/* ref file="../packages/cli/src/run.ts" lines="196-212" */}
 
 顺利的时候一处一行 `✅`，清掉的孤儿一行 `🧹`。文档本身删了、挪了的，它的记录逐篇那圈看不到，`check` 按文档清单一览算红，`confirm` 末尾整个忘掉，也是一行 `🧹`：
 
@@ -75,7 +75,7 @@ description: check / confirm / render 的输出、退出码、problems、记录�
 
 ## render：问格式包要产物
 
-{/* ref file="../packages/cli/src/run.ts" lines="168-177" */}
+{/* ref file="../packages/cli/src/run.ts" lines="214-223" */}
 
 格式包没有对应的渲染函数就说一声、退 0，不当错：
 
@@ -88,11 +88,11 @@ description: check / confirm / render 的输出、退出码、problems、记录�
 摆的那份不是管线原样——站上 .md 路由的形态（标题锚记、被保守转义的加粗星号、frontmatter 留下的开头空行）
 整理成 README 认的干净 md：
 
-{/* ref file="../packages/cli/src/run.ts" lines="76-87" */}
+{/* ref file="../packages/cli/src/run.ts" lines="122-133" */}
 
 render 里挂了映射就走这条分支，只写目标：
 
-{/* ref file="../packages/cli/src/run.ts" lines="179-190" */}
+{/* ref file="../packages/cli/src/run.ts" lines="225-236" */}
 
 ```text
 →  content/docs/maintain/readme.mdx  摆放到 ../README.md
