@@ -20,8 +20,9 @@ README 和这份规矩都是**生成物**：正本分别是 `docs-site/content/d
 ## 参考，不要改
 
 * 实验室 `D:\dshfiles\260901lab`（台阶七 `step7-packages` / `step7-site` / `step7-mini`）：架构定案的出处，
-  教学代码，**只读**。要搬逻辑就搬，别 import 它。
-* 老仓 `D:\dshfiles\26082711aju\god-live-doc`：git 记忆那条线的出处（`libs/core/src/core/git.ts`、
+  教学代码，**只读**。要搬逻辑就搬，别 import 它。它在**老根** `D:\dshfiles`（DSH 时代的归档区），
+  本单元住 `D:\unitfolders`，这是跨根引用。
+* 老仓 `D:\dshfiles\26082711aju\god-live-doc`（同在老根）：git 记忆那条线的出处（`libs/core/src/core/git.ts`、
   `diff.ts`、`hash.ts`、`pins.ts` 的代码钉分支），**只读**。功能面已对齐，不再是参考，代码只看这个仓。
 
 ## 规矩
@@ -44,4 +45,4 @@ README 和这份规矩都是**生成物**：正本分别是 `docs-site/content/d
   生成物，跟 mdx 源一起提交；check 守着生成物跟源一致，红了就是没重摆。
 * 改了格式包代码，站要先删 `.next` 再 build。调试站用 build + start，不用 dev；起的站验完必须停掉。
 * 提交按步骤拆，一个提交一件事。提交信息末尾带 `Co-Authored-By` 与 `Claude-Session` 行（会话里给的那两行）。
-* 不碰 `D:\dshfiles\26082412vto\homes\`；不碰主实例。
+* 不碰 `D:\dshfiles\26082412vto\homes\`（在老根 `D:\dshfiles`，DSH 时代的归档区）；不碰主实例。

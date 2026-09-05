@@ -1,11 +1,11 @@
 # god-live-doc 重写方案：带 git 的文件型引用（第一里程碑）
 
-状态：定案，2026-09-03。落点单元 `D:\dshfiles\26090315xby`（新开）。老仓 `D:\dshfiles\26082711aju\god-live-doc` 只读参考，做到对齐后退役。
+状态：定案，2026-09-03。落点单元 `D:\unitfolders\26090315xby`（2026-09-05 从老根 `D:\dshfiles` 整目录搬来）。老仓 `D:\dshfiles\26082711aju\god-live-doc` 留在老根（`D:\dshfiles`，DSH 时代的归档区），只读参考，做到对齐后退役。
 2026-09-04 起正本住单元根（这份文件）；此前它临时放在总控台 drafts/ 下，总控台清理时迁回。
 
 ## 一、决定
 
-- **全部重做**，不在老仓上改。架构照 livedoc-lab 台阶七（`D:\dshfiles\260901lab\step7-packages` / `step7-site` / `step7-mini`）的定案；从老仓只吸 git 记忆那条线（blob、hunk 映射、行段跟随、归一化）。
+- **全部重做**，不在老仓上改。架构照 livedoc-lab 台阶七（`D:\dshfiles\260901lab\step7-packages` / `step7-site` / `step7-mini`，在老根 `D:\dshfiles`，DSH 时代的归档区）的定案；从老仓只吸 git 记忆那条线（blob、hunk 映射、行段跟随、归一化）。
 - **第一里程碑只做文件型引用**（文件 + 行段）。目录型、存在性引用下一步重新设计，接口给它们留位（草稿记号的动作词、Target 的 kind），现在不实现。
 - 语言 TS，构建 tsdown，包管理 pnpm，测试 `node --test`（或 vitest 标准写法，别用沙箱绕行）。
 - 单元布局跟 260901lab 一样：单元根是 git 仓，包工作区一个子文件夹，邻居子文件夹放外部引用的示例（fumadocs 站、手写 html）。包工作区里自带一个 fumadocs 文档站，用这套机制写自己的文档。
@@ -113,7 +113,7 @@ createService({ formats, reader, ledger, comparator })
 ## 七、单元布局
 
 ```
-D:\dshfiles\26090315xby\            单元根 = git 仓
+D:\unitfolders\26090315xby\         单元根 = git 仓
   unit.json  AGENTS.md  CLAUDE.md
   god-live-doc\                     pnpm 工作区：packages/{core,project,cli,format-md,format-fumadocs,format-html}
     docs-site\                      自己的 fumadocs 文档站，用这套机制写自己的文档（消费方之一，link 依赖）
@@ -179,7 +179,7 @@ scope 已有的 registry 规则（config 的 publish 权、~/.npmrc 的映射）
 - **六包同版本**（当前 0.1.0），一起动一起发；内部依赖 `workspace:*`，`pnpm publish` 时自动替换成精确版本——发布纪律照总控台 `registry.md`：版本人改、同版本号永不重发、`files` 白名单加 `prepublishOnly`、发前 `pnpm pack --dry-run` 核清单。
 - **devkit release 不适用于这套包**：它的门禁是插件形态专用（scope 之外还查 exports 指 lib/、cordis.patch.yml 等），且假设一仓一包一插件。这套包手跑：工作区根 `pnpm build` → 逐包核清单 → `pnpm -r publish --no-git-checks`（docs-site 是 private 自动跳过）→ devkit `registry status` 核对 → 逐包 git tag（`@godcreator02/live-doc-core@0.1.0` 形式）。
 - **消费姿势**：纯库不走 `dsh plugin add`，消费方 devDependencies 按精确版本引入（如 `@godcreator02/live-doc-cli@0.1.0`）。
-- 第一个外部用户是 god-example（单元 26083120lks）：插件仓加 fumadocs 站（一仓一插件一站），README / CLAUDE.md 生成化，docs 迁站页钉真源码——它是后续插件接入的样板。
+- 第一个外部用户是 god-example（单元 26083120lks，在老根 `D:\dshfiles`，DSH 时代的归档区）：插件仓加 fumadocs 站（一仓一插件一站），README / CLAUDE.md 生成化，docs 迁站页钉真源码——它是后续插件接入的样板。
 
 ## 十三、轨迹卡与星轨盘搬进来（2026-09-05 定）
 
@@ -188,8 +188,9 @@ live-doc 治的是**现状文档撒谎**（话写下那刻就跟代码分家，�
 所以轨迹**不是第四种格式包**：核心五类引用说的是「文档对文件系统说的话」，卡的关系边说的是「文档对文档说的话」，
 卡不需要记忆、不需要 confirm，只要即时校验。它的形态是 lint 加模型，不走记录簿。
 
-出处：老 god-flow monorepo `D:\dshfiles\26082411bfd\god-docs\packages\god-flow-panels\node\star\`（parse / model /
-layout / chains 四个 TS 文件是纯函数，带测试与 fixtures）；星盘视觉的参照物是
+出处：老 god-flow monorepo `D:\dshfiles\26082411bfd\god-docs\packages\god-flow-panels\node\star\`（在老根
+`D:\dshfiles`，DSH 时代的归档区；parse / model / layout / chains 四个 TS 文件是纯函数，带测试与
+fixtures）；星盘视觉的参照物是
 `D:\AI2026_godnotes\RUEPRTP9HY\trail-viewer-archive\trail-rings.html`（trail 时代、自带亮暗两套色板）。
 两处都**只读**，搬逻辑不 import。老 326 张卡不搬；god-flow 家族已退役，本仓是轨迹功能的新家。
 

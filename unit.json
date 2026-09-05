@@ -1,5 +1,5 @@
 {
   "kind": "独立项目",
-  "purpose": "god-live-doc 重写：把 MDX / md / html 文档钉在代码上的防腐化机制。架构照 livedoc-lab 台阶七（core 零依赖、格式包实现接口、记号两态、fumadocs 是一个格式包），git 记忆那条线（blob、hunk 行段跟随、归一化）从老仓 26082711aju 吸来。第一里程碑只做带 git 的文件型引用；目录型、存在性引用下一步再设计。单元根是 git 仓：god-live-doc/ 是 pnpm 包工作区（自带 fumadocs 文档站用这套机制写自己的文档），examples/ 是邻居示例（外部 fumadocs 站、手写 html、纯 md）。方案正本：总控台 console 仓 docs-god-flow/drafts/god-live-doc-rewrite.md。老仓只读参考，对齐后退役。跟 DSH 无关",
+  "purpose": "god-live-doc 重写：把 MDX / md / html 文档钉在代码上的防腐化机制。架构照 livedoc-lab 台阶七（core 零依赖、格式包实现接口、记号两态、fumadocs 是一个格式包），git 记忆那条线（blob、hunk 行段跟随、归一化）从老仓 26082711aju（在老根 D:\\dshfiles）吸来。第一里程碑只做带 git 的文件型引用；目录型、存在性引用下一步再设计。单元根是 git 仓：god-live-doc/ 是 pnpm 包工作区（自带 fumadocs 文档站用这套机制写自己的文档），examples/ 是邻居示例（外部 fumadocs 站、手写 html、纯 md）。方案正本：单元根 god-live-doc-rewrite.md。老仓只读参考，对齐后退役。跟 DSH 无关",
   "createdAt": "2026-09-03T15:52:21+08:00"
 }

@@ -53,5 +53,6 @@ livedoc 仓的文档不是代码的复读，是**论断集**：每句话说的�
 
 ## 参考站
 
-- livedoc 自家站（最全示例）：`D:\dshfiles\26090315xby\god-live-doc\docs-site`
-- 插件仓样板（一仓一插件一站）：`D:\dshfiles\26083120lks\god-example\docs-site`
+- livedoc 自家站（最全示例）：`D:\unitfolders\26090315xby\god-live-doc\docs-site`
+- 插件仓样板（一仓一插件一站）：`D:\dshfiles\26083120lks\god-example\docs-site`——在老根 `D:\dshfiles`
+  （DSH 时代的归档区），跟上面那条不在同一个根下
