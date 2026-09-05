@@ -19,7 +19,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { CSSProperties, KeyboardEvent as ReactKeyboardEvent, ReactNode } from "react";
-import { bandFade, lodOf, NODE_RADIUS, polar, ringSkeleton, ROOT_RADIUS, RingsLayout } from "./layout.ts";
+import { bandFade, DEG, lodOf, NODE_RADIUS, polar, ringSkeleton, ROOT_RADIUS, RingsLayout, smoothstep } from "./layout.ts";
 import { buildChains, computeDodge } from "./chains.ts";
 import { dayNum, formatDay, formOf, inRange, NO_DOMAIN } from "./model.ts";
 import type { TrajectoryModel } from "./types.ts";
@@ -257,6 +257,7 @@ export function StarDisk({ data, hrefBase, size, initialDisk }: StarDiskProps): 
 
   const nodeRefs = useRef(new Map<string, SVGGElement>());
   const labelRefs = useRef(new Map<string, SVGTextElement>());
+  const edgeRefs = useRef(new Map<number, SVGPathElement | SVGLineElement>());
 
   const [measuredSize, setMeasuredSize] = useState<number | null>(size ?? null);
   const [dark, setDark] = useState(false);
@@ -496,6 +497,43 @@ export function StarDisk({ data, hrefBase, size, initialDisk }: StarDiskProps): 
       }
     }
 
+    // 边：端点跟节点同一套 displayRadius / dodge，随鱼眼实时变形——退距按端点当前的
+    // 屏幕直径算（跟节点缩放同一份 sc 口径），箭头尖不扎进节点。
+    for (const [i, e] of edgeList.entries()) {
+      const pa = layout.places.get(e.from);
+      const pb = layout.places.get(e.to);
+      const node = edgeRefs.current.get(i);
+      if (!pa || !pb || !node) continue;
+      const angA = pa.angBase + pa.spreadOff + (dodge.get(e.from) ?? 0);
+      const angB = pb.angBase + pb.spreadOff + (dodge.get(e.to) ?? 0);
+      const rA = layout.displayRadius(pa.rLin);
+      const rB = layout.displayRadius(pb.rLin);
+      const scA = 0.65 * lodOf(layout.mag(pa.rLin)) * ik;
+      const scB = 0.65 * lodOf(layout.mag(pb.rLin)) * ik;
+      const iaR = NODE_RADIUS.alive * scA + 3 * ik;
+      const ibR = NODE_RADIUS.alive * scB + 2 * ik;
+      if (e.sameDay) {
+        const da = (iaR / rA) * DEG;
+        const db = (ibR / rB) * DEG;
+        const sq = Math.min(1, Math.max(0, ((angB - angA) * 0.8) / Math.max(1e-6, da + db)));
+        const pA = polar(angA + da * sq, rA);
+        const pB = polar(angB - db * sq, rB);
+        node.setAttribute("d", `M${pA.x},${pA.y} A${rA},${rA} 0 0 1 ${pB.x},${pB.y}`);
+      } else {
+        const posA = polar(angA, rA);
+        const posB = polar(angB, rB);
+        const len = Math.hypot(posB.x - posA.x, posB.y - posA.y) || 1;
+        const ux = (posB.x - posA.x) / len;
+        const uy = (posB.y - posA.y) / len;
+        node.setAttribute("x1", String(posA.x + ux * iaR));
+        node.setAttribute("y1", String(posA.y + uy * iaR));
+        node.setAttribute("x2", String(posB.x - ux * ibR));
+        node.setAttribute("y2", String(posB.y - uy * ibR));
+      }
+      const em = Math.max(layout.mag(pa.rLin), layout.mag(pb.rLin));
+      node.setAttribute("opacity", String(0.85 * (1 - 0.5 * s * (1 - smoothstep(1.2, 2.5, em)))));
+    }
+
     // 盘心与树名是静态文字（不像节点标签走逐帧 ref 更新），但同样躺在被缩放的世界坐标系里：
     // 不反向抵消 view.k 的话，字号会跟着整盘的缩放比例一起缩水——世界大（盘深）时几乎看不见。
     if (hubTitleRef.current) hubTitleRef.current.setAttribute("transform", `translate(0,${-6 * ik}) scale(${ik})`);
@@ -508,7 +546,7 @@ export function StarDisk({ data, hrefBase, size, initialDisk }: StarDiskProps): 
       ref.setAttribute("transform", `translate(${p.x},${p.y}) scale(${ik})`);
     }
     applyView();
-  }, [layout, skeleton, runtimeNodes, chains, effectiveSize, fitK, applyView, showAllLabels, treeBoxes]);
+  }, [layout, skeleton, runtimeNodes, chains, edgeList, effectiveSize, fitK, applyView, showAllLabels, treeBoxes]);
 
   // kick 是稳定引用（[] 依赖，给 wheel / 点击等回调直接用），但每帧要跑的 tick 得看到
   // 当前渲染里最新的 place / settings / layout——tick 本身照常每次渲染重新声明，
@@ -875,12 +913,17 @@ export function StarDisk({ data, hrefBase, size, initialDisk }: StarDiskProps): 
             if (!pa || !pb) return null;
             const piv = e.kind === "pivot";
             const color = piv ? THEME_COLORS[themeName]["piv"] : THEME_COLORS[themeName]["sup"];
-            const a = polar(pa.angBase + pa.spreadOff, pa.rLin);
-            const b = polar(pb.angBase + pb.spreadOff, pb.rLin);
+            // 端点与几何（弧 / 弦）跟节点一样吃 displayRadius，随鱼眼实时变形——place() 每帧
+            // 用 ref 直接改 d / x1..y2，这里只建元素、不算初始坐标（否则全景态会跟第一帧的
+            // place() 结果短暂对不上）。
+            const refCb = (el: SVGPathElement | SVGLineElement | null) => {
+              if (el) edgeRefs.current.set(i, el);
+              else edgeRefs.current.delete(i);
+            };
             return e.sameDay ? (
               <path
                 key={`edge-${i}`}
-                d={`M${a.x},${a.y} A${pa.rLin},${pa.rLin} 0 0 1 ${b.x},${b.y}`}
+                ref={refCb}
                 fill="none"
                 stroke={color}
                 strokeWidth={1.2}
@@ -891,10 +934,7 @@ export function StarDisk({ data, hrefBase, size, initialDisk }: StarDiskProps): 
             ) : (
               <line
                 key={`edge-${i}`}
-                x1={a.x}
-                y1={a.y}
-                x2={b.x}
-                y2={b.y}
+                ref={refCb}
                 stroke={color}
                 strokeWidth={1.2}
                 strokeDasharray={piv ? "1.5 3" : "5 4"}
