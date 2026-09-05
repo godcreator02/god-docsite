@@ -239,10 +239,18 @@ layout / chains 四个 TS 文件是纯函数，带测试与 fixtures）；星盘
 - **点节点在新标签页打开卡页**：节点包 SVG `<a href target="_blank" rel="noopener">`，链接由组件 prop `hrefOf(id)` 给。
   卡片栏、分割拖柄、VSCode 打开、复制路径全删。悬停小气泡：label、出生时刻、泳道、是否被取代。
 - **搜索只匹配 label 与卡身份**，不搜正文（正文不进 payload）。
-- **滚轮点击激活**：点一下盘进入交互态（滚轮鱼眼穿梭 / 自由缩放），Esc 或点盘外释放；未激活时滚轮穿透给页面。
-- 主题跟 fumadocs：监听 `html` 的 `dark` class，两套色板从 trail-rings 搬，示例里的主题按钮不要。
-- 多盘：盘上方一排页签，虫洞节点点了切盘（同页状态）；报病列表在盘下方列出（`livedoc check` 也报）。
-- 尺寸：容器方形、宽随父元素；带全屏按钮（Fullscreen API）。客户端组件动态导入关掉 SSR，先渲占位方块。
+- **盘是一条独立的整页路由 `/trajectory`**（2026-09-05 晚定，替掉「MDX 里嵌 `<Trajectory />`」）：不走 DocsLayout，
+  没有侧栏与目录，整个视口就是盘；文档树里「轨迹」章首项是指向它的链接。`/trajectory/<卡身份>` 是卡页，
+  卡页顶上一条「回到盘」。两套布局用 Next 路由组分开，卡页从可选 catch-all 改成必选 `[...slug]`。
+  组件分两种模式：**整页**（容器铺满父元素、SVG 取短边居中、HUD 贴容器四角、滚轮直接生效、无激活遮罩、
+  无全屏按钮）与**方形嵌入**（宽随父、高等于宽、点击激活）——自家两个站只用整页，嵌入模式留给别的消费方，
+  `Trajectory` 服务端组件照常导出但站的名册里不再登记它。
+- 整页的顶栏：左边「文档」返回链接与盘页签，右边搜索、图例开关、设置、帮助、主题切换（fumadocs 的现成件）；
+  图例贴右下。当前盘进 URL（`?disk=<根卡身份>`），虫洞切盘 `replaceState`；搜索词不进 URL。
+- 嵌入模式的**滚轮点击激活**：点一下盘进入交互态（滚轮鱼眼穿梭 / 自由缩放），Esc 或点盘外释放；未激活时滚轮穿透给页面。
+- 主题跟 fumadocs：监听 `html` 的 `dark` class，两套色板从 trail-rings 搬。
+- 多盘：一排盘页签，虫洞节点点了切盘（同页状态）；报病列表在盘下方列出（`livedoc check` 也报）。
+- 客户端组件不给 `size` 时先渲占位，挂载后量尺寸；`size` 给了同步渲染、不碰 window（测试靠它）。
 - 测试：模型 / 布局 / 链表 / parse 的测试从老仓搬（`node --test`）；布局黄金数用老仓 fixtures 钉；React 层用
   `react-dom/server` 渲一遍断言 SVG 结构（节点数、扇环数、`a[target=_blank]`）。
 
@@ -251,7 +259,8 @@ layout / chains 四个 TS 文件是纯函数，带测试与 fixtures）；星盘
 - `livedoc.config` 加一项 `trajectory: "docs-god-flow/trajectory"`（相对项目根，可选；不配就整个不管）。
   `livedoc check` 顺带跑卡校验，病卡逐条打印、算红退 1。另加子命令 `livedoc trajectory [--json]`：列盘、树、主干，
   `--json` 出模型。
-- docs-site：卡集合单开一个 fumadocs 集合与 loader，落 `/trajectory/<卡身份>`，主文档树只多一页「轨迹」放盘；
+- docs-site：卡集合单开一个 fumadocs 集合与 loader，落 `/trajectory/<卡身份>`；盘是整页路由 `/trajectory`，
+  文档树的「轨迹」章首项链到它，章内三页讲机制（卡格式与校验、盘的算法与视觉、接线）；
   卡目录在单元根 `docs-god-flow/trajectory/`，`turbopack.root` 抬到单元根。本仓自己的卡由人写（动手权在人），
   盘空着是正常态；演示盘用老仓那批诗名 fixtures 放在 `examples/trajectory-site`。
 - **`serverExternalPackages` 不加 trajectory**（2026-09-05 落地时定）：`./react` 是客户端组件、
