@@ -1,4 +1,4 @@
-/* 里程碑层：人工指定的关键时刻，金色加重环 + 6 点方向恒显标签，悬停标签出说明。
+/* 里程碑层：人工指定的关键时刻，泥金加重环 + 6 点方向恒显标签，悬停标签出说明。
  * 里程碑数据本身（从根卡正文解析 + inRange 裁剪）归编排者——本层只从 BuildCtx.milestones
  * 拿建好的清单，不认识加载与裁剪逻辑。整搬自 Obsidian 版 star/layers/milestones.ts。 */
 
@@ -28,7 +28,7 @@ export class MilestonesLayer implements StarLayer {
     this.buildMilestones();
   }
 
-  /** 里程碑：人工指定的关键时刻，金色加重环 + 6 点方向恒显标签，悬停标签出说明。 */
+  /** 里程碑：人工指定的关键时刻，泥金加重环 + 6 点方向恒显标签，悬停标签出说明。 */
   private buildMilestones(): void {
     const layout = this.ctx.layout;
     this.milestoneEls = this.ctx.milestones.map((m) => {
@@ -95,8 +95,8 @@ export class MilestonesLayer implements StarLayer {
 
   private recolorMs(theme: Theme): void {
     for (const e of this.milestoneEls) {
-      e.circle.setAttribute("stroke", theme.supersede);
-      e.label.setAttribute("fill", theme.supersede);
+      e.circle.setAttribute("stroke", theme.milestone);
+      e.label.setAttribute("fill", theme.milestone);
     }
   }
 }

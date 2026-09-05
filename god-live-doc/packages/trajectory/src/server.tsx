@@ -41,8 +41,8 @@ export interface RenderThumbOptions {
 }
 
 /** 一张盘的全景定妆照，静态 SVG markup：画家喂桩文档建树、序列化成字符串。
- * 盘心描边 / 根节点 / 虫洞走 `var(--color-fd-primary)`（mix 对 var() 出 color-mix），
- * 环色走 CSS 变量——静态 markup 里不带任何要探针解的颜色。 */
+ * 盘心描边 / 根节点 / 虫洞走色板里的泥金，节点底色缝与环色走 CSS 变量——
+ * 静态 markup 里不带任何要探针解的颜色。 */
 export function renderThumb(
   model: SerializableModel | TrajectoryModel,
   options: RenderThumbOptions = {},
@@ -51,7 +51,6 @@ export function renderThumb(
     model.supersededIds instanceof Set ? (model as TrajectoryModel) : toRuntimeModel(model as SerializableModel);
   const themeName = options.theme ?? "light";
   const theme = buildThemes(runtime.domains)[themeName];
-  theme.hubStroke = "var(--color-fd-primary)";
   const doc = new SvgStubDocument();
   const svg = renderStarThumb(
     runtime,
