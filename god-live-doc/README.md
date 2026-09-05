@@ -172,8 +172,10 @@ format-md        注释记号 + 围栏展示区 + 尾注释
 format-fumadocs  mdx 与 fumadocs 是一个整体：remark 插件、序列化回调、meta 白名单、pre 组件 + 样式
 format-html      元素既是记号又是展示区，文件即终态（final），不渲染
 trajectory       轨迹卡与星轨盘，三个入口：`.` 扫卡 / 四层校验 / 聚盘建模 / 布局与链表纯函数；
-                 `./react` 客户端组件 StarDisk，两种模式（整页 / 方形嵌入，随包发 star.css）；
-                 `./server` 服务端组件 Trajectory（方形嵌入那一档）+ fumadocs 的 cardSchema
+                 `./react` 客户端组件 StarDisk（画布层整搬 Obsidian 版住 src/canvas/，React 壳只当
+                 编排者；没有当前盘渲启动器卡阵；两种模式整页 / 方形嵌入，随包发 star.css）；
+                 `./server` 服务端组件 Trajectory（方形嵌入那一档）+ 启动器缩略图的静态渲染
+                 renderThumb / launcherThumbs + fumadocs 的 cardSchema
                  + remark 关系边插件。`.` 入口的产物只 import node:
                  （包的 dependencies 里只有 remark 那套的 unist-util-visit，给 `./server` 用），
                  react 是 peer（可选）
@@ -260,9 +262,18 @@ pnpm start                        # 想看盘就起一下，4313；验完停掉
 * **「`.` 入口零依赖」改成按产物判**：`package.json` 里 react 合法地进了 peer、remark 那套进了
   dependencies（`./server` 要用），所以边界测试改成「`.` 入口的产物只许 `import` `node:` 内置模块」，
   不再看 `dependencies` 字段是不是空的。
-* **压缩区的卡标签口径跟 trail 不同**：参照物 trail 里压缩区的卡标签跟着显示，这一版的门限是
-  `eff > 0.6`（局部放大率 × 视图缩放比），压缩区默认不显、放大或推进鱼眼才现身；悬停和「显示全部标签」
-  照样能看。要改就改 `react.tsx` 里那一句门限。
+* **画布层整搬 Obsidian 版，形状按 `type` 是唯一偏离**：`src/canvas/` 下的色板、节点工厂、六个视觉层、
+  相机、标签仲裁、日期竖轨、定妆照画家都是从 Obsidian 版星轨插件机械搬来的（去宿主 API、`prefix` →
+  `id`、import 路径、注释改现状），公式与常量一处不动；改视觉先看规范正本、再看 Obsidian 版，
+  不要在这儿另起炉灶。唯一保留的偏离是节点形状按卡的 `type` 出（抉择实心圆、证据三角、推演菱形、
+  参照方形、快照空心方、缺省空心圆），Obsidian 版是一律实心圆。
+  搬运时非机械的几处：BuildCtx 多了 `typeOf`（Card 不带 type）与 `goHome`（盘心双击回全景），
+  `openCard` 收卡身份不收文件；cards 层孤星按身份集判（模型经序列化后 `isolated` 与 `cards` 不共享
+  引用）；theme 的 `mix` 对非 hex 输入出 `color-mix()`（服务端渲的定妆照拿 `var(--color-fd-primary)`
+  当盘心色）；date-rail 的折算标度抽成纯函数好测；star-thumb 去掉指纹缓存（服务端每次现渲）。
+* **启动器缩略图亮暗各渲一份**：定妆照在服务端渲成静态 markup、客户端不重画，环色与盘心走 CSS 变量，
+  但领域 / 连线 / 混灰是 JS 色板，静态 markup 里只能按主题各出一份、页面按 `html.dark` 显示其一。
+  `star.css` 里这一条显隐规则是唯一看 `.dark` 的地方，色值本身不在 CSS 里。
 * **搜索只匹配 label 与卡身份**：卡正文根本不进传给客户端的那份数据，所以搜不了正文。
   要搜正文得把全文塞进 payload，那是另一件事（盘不是全文检索器，卡页那头 fumadocs 自己有搜索）。
 

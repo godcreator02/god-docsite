@@ -9,8 +9,8 @@ description: 配置一项、命令两条、fumadocs 站三处，外加 Next 那�
 站上也不必有盘。这一页把要接的地方逐处列一遍。
 
 装的是一个包：`@godcreator02/live-doc-trajectory`。三个入口——`.` 是扫卡建模布局的纯函数
-（零 npm 依赖），`./react` 是客户端组件星轨盘，`./server` 是服务端组件加两样给 fumadocs 用的东西。
-`react` 在包里只是 peer。
+（零 npm 依赖），`./react` 是客户端组件星轨盘（画布层整搬 Obsidian 版，随包发 `star.css`），
+`./server` 是服务端组件、启动器缩略图的静态渲染，加两样给 fumadocs 用的东西。`react` 在包里只是 peer。
 
 ## 一、配置一项
 
@@ -72,14 +72,15 @@ description: 配置一项、命令两条、fumadocs 站三处，外加 Next 那�
 
 {/* ref file="src/app/(trajectory-cards)/trajectory/layout.tsx" */}
 
-盘页自己读目录建模，把模型交给 `mode="page"` 的 `StarDisk`，外加一条自己画的顶栏（左边回文档，
-右边报病数与主题切换）。**初始盘从 `searchParams.disk` 来**——组件切盘时 `replaceState` 写回
-这个参数，一个链接因此能直接指到某一张盘：
+盘页自己读目录建模，把模型和 `launcherThumbs` 渲好的启动器缩略图交给 `mode="page"` 的 `StarDisk`，
+外加一条自己画的顶栏（左边回文档、带 `?disk=` 时多一条「启动器」返回，右边报病数与主题切换）。
+**`searchParams.disk` 缺失渲启动器卡阵，有则渲那张盘**——组件切盘 / 回启动器时 `replaceState`
+写回这个参数，一个链接因此能直接指到某一张盘：
 
 {/* ref file="src/app/(trajectory-disk)/trajectory/page.tsx" */}
 
-顶栏上只有那两样。盘页签、搜索、设置、帮助、图例都归组件自己画在容器四角：当前盘是组件的状态、
-切盘要同步写 URL，页签跟状态住在一处才不必把整个盘态提到页面上。
+顶栏上只有那三样。搜索、设置、帮助、图例、日期竖轨与盘内的「启动器」钮都归组件自己画在容器四角：
+当前盘是组件的状态、切盘要同步写 URL，住在一处才不必把整个盘态提到页面上。
 
 文档树里「轨迹」章的第一项是指向盘的**链接项**——`meta.json` 的 `pages` 认 `[名字](路径)` 这种写法，
 它不是一篇文档，只是侧栏上一条链接：
@@ -91,7 +92,7 @@ description: 配置一项、命令两条、fumadocs 站三处，外加 Next 那�
 
 {/* ref file="src/app/global.css" lines="6-7" */}
 
-包照常导出服务端组件 `Trajectory`（读目录 + 渲一张方形嵌入的盘 + 报病列表），留给想把盘摆进
+包照常导出服务端组件 `Trajectory`（读目录 + 渲一张方形嵌入的盘或启动器 + 报病列表），留给想把盘摆进
 一篇长文档中间的消费方；**这两个站的名册里不再登记它**，盘走路由了。`hrefBase` 仍要跟 loader 的
 `baseUrl` 和 `remarkTrajectoryLinks` 的 `hrefBase` 是同一个值——三处对不上，节点点开是 404。
 

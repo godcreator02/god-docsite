@@ -1,12 +1,12 @@
 ---
 title: 盘怎么算、怎么画
-description: 聚盘、关系边、提树与主干、领域序；有效天数标度、扇环装箱、鱼眼；形状与颜色各编码什么，交互有哪几档
+description: 聚盘、关系边、提树与主干、领域序；有效天数标度、扇环装箱、鱼眼；形状与颜色各编码什么，滚轮、竖轨透镜、两段式回原点与启动器
 ---
 
 # 盘怎么算、怎么画
 
 一张卡目录能画出好几张盘。这一页回答：哪些卡上哪张盘、盘上的位置是怎么定的、看到的形状和颜色
-分别在说什么。
+分别在说什么、手上的滚轮和左缘那条竖轨各管什么。
 
 分工是死的：**建模是纯函数、跑在服务端；布局也是纯函数、跑在客户端**。中间那条线在下面第四节说。
 
@@ -27,7 +27,7 @@ description: 聚盘、关系边、提树与主干、领域序；有效天数标�
 
 {/* ref file="../packages/trajectory/src/model.ts" lines="186-221" */}
 
-盘清单按「最近有活动」降序——最近动过的排前面，页签上第一张就是当下在推的项目：
+盘清单按「最近有活动」降序——最近动过的排前面，启动器卡阵上第一张就是当下在推的项目：
 
 {/* ref file="../packages/trajectory/src/model.ts" lines="237-248" */}
 
@@ -77,7 +77,7 @@ description: 聚盘、关系边、提树与主干、领域序；有效天数标�
 
 {/* ref file="../packages/trajectory/src/layout.ts" lines="624-671" */}
 
-**其三，鱼眼是解析闭式，不查表。**滚轮把焦点带沿时间轴推进推出，半径映射 `r' = g(r)` 由三段斜率
+**其三，鱼眼是解析闭式，不查表。**日期竖轨把焦点带对准时间窗，半径映射 `r' = g(r)` 由三段斜率
 （旧压缩区、焦点带、新压缩区）的积分原函数直接给出，零积分误差、零量化台阶。三段的显示宽全固定，
 焦点带永远落在同一段黄金半径上；压缩区**只压不拉**，内容不足就留一圈空环当「到头了」的信号：
 
@@ -98,84 +98,131 @@ description: 聚盘、关系边、提树与主干、领域序；有效天数标�
 服务端那半只做两件事：扫一次目录，给每张盘建一次模型。**不算布局**——布局是纯函数、几毫秒的事，
 放客户端才保得住设置滑杆（改一格盘心大小、改一格空窗阈值，重算即可，不必回服务端）：
 
-{/* ref file="../packages/trajectory/src/index.ts" lines="123-141" */}
+{/* ref file="../packages/trajectory/src/index.ts" lines="119-137" */}
 
-服务端组件就是「读盘 + 建模 + 把模型交给客户端组件」，外加把报病列成一张表摆在盘下方：
+服务端组件就是「读盘 + 建模 + 把模型和启动器缩略图交给客户端组件」，外加把报病列成一张表摆在盘下方：
 
-{/* ref file="../packages/trajectory/src/server.tsx" lines="39-43" */}
+{/* ref file="../packages/trajectory/src/server.tsx" lines="93-98" */}
 
-## 五、盘的视觉词汇表
+## 五、画布层整搬 Obsidian 版，React 壳只当编排者
 
-**颜色只编码领域。**色板按 `model.domains` 的首次出现序分配，亮暗两套；未分道走中性色、不占色板位；
-被取代的卡拿领域色跟一个灰混过再画，所以它还留着自己的泳道身份、只是黯下去。关系边的两种颜色也在
-这张表里——取代金黄、转向青色：
+盘的画布层——色板、节点工厂、六个视觉层（axis / gaps / milestones / trees / cards / hub）、相机、
+标签仲裁、日期竖轨、定妆照画家——是从 Obsidian 版星轨插件**整搬**进 `packages/trajectory/src/canvas/`
+的，只做机械改动（去宿主 API、卡身份 `prefix` → `id`、import 路径、注释改现状），公式与常量一处不动。
+六层互不 import、也不认识编排者，层与编排者之间只走一份契约：`build` 建一次 DOM，`place` 每帧只改属性，
+`recolor` 是着色专属通道：
 
-{/* ref file="../packages/trajectory/src/react.tsx" lines="58-90" */}
+{/* ref file="../packages/trajectory/src/canvas/layers/frame.ts" lines="100-105" */}
 
-**形状编码 `type`。**抉择实心圆、证据三角、推演菱形、参照方形、快照空心方，缺省空心圆。这是 `type`
-的**显示读法，不是过滤**——所有卡照常上盘，盘是全量记录的镜像，关键节点靠里程碑金环呈现，不靠筛掉节点：
+编排者住 `canvas/stage.ts`，照 Obsidian 版 `star-view` 搬：一轮数据进来就 `buildCtx` → 六层 `build`，
+每帧 `place`，筛选 / 主题变化 `recolor`。它不认识 React，跟壳只经一份回调对话：
 
-{/* ref file="../packages/trajectory/src/react.tsx" lines="138-178" */}
+{/* ref file="../packages/trajectory/src/canvas/stage.ts" lines="51-68" */}
 
-线型上，取代是金黄虚线、转向是青色点线；根卡的里程碑画成金色加重环，标签走 6 点方向那条竖线。
-右下角的图例即筛选器：形态和领域多选取交集。
+`react.tsx` 因此缩成壳：容器、工具条、图例与三种浮层、悬停小气泡、当前盘与 `?disk=`、主题监听、
+本地存的手感参数。**它不画任何 SVG**——画布区是一个空 div 交给舞台，静态渲染那一趟就是空的；
+日期竖轨也是在壳渲的容器里由 `DateRail` 自建 DOM：
 
-**点节点在新标签页打开卡页。**节点外面包的是一个 SVG `<a target="_blank">`，链接由 `hrefBase`
-拼出来——盘不是卡片浏览器，读卡去卡页读，盘只负责「哪儿有什么」。**虫洞节点没有链接**：它不是一张
-要读的卡，点它是切到对应的那张盘，所以走的是另一条分支：
+{/* ref file="../packages/trajectory/src/react.tsx" lines="3-19" */}
 
-{/* ref file="../packages/trajectory/src/react.tsx" lines="1305-1311" */}
+一帧里推进的东西分三家：焦点日与鱼眼强度是布局实例自己的字段，走布局层的 `advanceFrame`；
+视图补间归相机；悬停放大归各层的 `stepTweens`。三家谁还在动就再请一帧：
 
-**搜索只匹配 label 与卡身份，不搜正文**——正文根本不进传给客户端的那份数据。筛选与搜索的效果是
-「压灰」不是「删掉」：没命中的节点变中性色留在原位，盘的形状不跳。**虫洞两道筛选都豁免**——
-它不是一张卡，没有形态、也不属于任何领域，按卡的口径一筛就把穿盘的入口一并灭了：
+{/* ref file="../packages/trajectory/src/canvas/stage.ts" lines="422-441" */}
 
-{/* ref file="../packages/trajectory/src/react.tsx" lines="460-475" */}
+## 六、盘的视觉词汇表
 
-## 六、两种模式：整页直接滚，方形嵌入先激活
+**颜色只编码领域。**色板按 `model.domains` 的首次出现序分配，亮暗两套、色相两两拉开 45° 以上并避开
+连线色板占的两段；未分道走中性色、不占色板位；被取代的卡拿领域色跟一个灰混过再画，所以它还留着
+自己的泳道身份、只是黯下去。关系边的两种颜色也在这张表里——取代金黄、转向青色。JS 色板按
+`html.dark` 选，盘心描边跟宿主的 `--color-fd-primary` 走（探针解成 hex 再进混色）：
 
-同一个组件有两种形态，`mode` 定形态、默认是嵌入。差别不在画什么，在**谁在让路**：
+{/* ref file="../packages/trajectory/src/canvas/theme.ts" lines="31-72" */}
 
-{/* ref file="../packages/trajectory/src/react.tsx" lines="42-56" */}
+**形状编码 `type`——这是对 Obsidian 版唯一保留的偏离。**抉择实心圆、证据三角、推演菱形、参照方形、
+快照空心方，缺省空心圆；实心一组填领域色、描边同色混黑约 35%（不用亮描边），空心一组只描领域色。
+这是 `type` 的**显示读法，不是过滤**——所有卡照常上盘，盘是全量记录的镜像，关键节点靠里程碑金环
+呈现，不靠筛掉节点。同一张几何表出大图节点与图例符号：
 
-**整页**（`mode="page"`）：容器吃满父元素给的高度，SVG 取容器短边居中，HUD 照旧贴容器四角。
-整个视口就是盘，没有页面等着被滚——所以交互态恒真，**没有激活遮罩**，滚轮一上来就生效；
-全屏按钮也去掉了（本来就满屏）：
+{/* ref file="../packages/trajectory/src/canvas/node-dom.ts" lines="94-144" */}
 
-{/* ref file="../packages/trajectory/src/react.tsx" lines="340-343" */}
+其余照 Obsidian 版规范：孤星虚线外环，虫洞同心双环、颜色与盘心描边同源（`--color-fd-primary`），
+取代金黄虚线、转向青色点线、箭头尺寸随局部放大率连续插值，里程碑金色加重环、标签走 6 点竖线。
+底色、文字、边框、浮层、悬停底、环线与扇环框全映射 fumadocs 变量，CSS 不判明暗——环用 `color-mix`
+从前景色兑 7% / 20% / 30% / 38%，扇环框边 / 底 18% / 5%：
 
-自家两个站用的都是这一种，接法见 [接线](/docs/trajectory/wiring)。
+{/* ref file="../packages/trajectory/styles/star.css" lines="9-34" */}
 
-**方形嵌入**（`mode="embed"`）：盘是文档流里的一块方画布，未激活时滚轮一律不拦截、照常滚页面，
-点一下盘才进交互态。这一层是给别的消费方留的——把盘塞进一篇长文档中间，不该抢走页面的滚动：
+**标签两级显隐、同池仲裁。**在立且非孤星的卡与虫洞全景即显（局部放大率 × 缩放深度 > 0.5），
+孤星与被取代进透镜才显（> 1.8）；贴盘心的内圈卡标签向盘外锚。节点、虫洞、树名同池按真实文本区间
+仲裁，横向区间相交且行距不足 14px 的后来者让隐，悬停先占坑；12 点与 6 点是两条独立的注记竖线：
 
-{/* ref file="../packages/trajectory/src/react.tsx" lines="842-847" */}
+{/* ref file="../packages/trajectory/src/canvas/layers/cards.ts" lines="173-186" */}
 
-进了交互态，滚轮有两种模式：**鱼眼穿梭**（焦点带沿时间轴走，步进走的是显示域折算表，正折算 →
-加步长 → 逆折算，段边界精确不过冲）和**自由缩放**（普通的以光标为心缩放 + 拖拽漫游）。
+{/* ref file="../packages/trajectory/src/canvas/label-arbiter.ts" lines="45-48" */}
 
-**Esc 分层释放**：先关浮层，嵌入模式再退激活态（点盘外面任何地方也退），最后才回全景归位。
-整页模式没有中间那层：
+**图例即筛选器，搜索只匹配 label 与卡身份**——正文根本不进传给客户端的那份数据。筛选与搜索的效果是
+「压灰」不是「删掉」：没命中的节点变中性色留在原位，盘的形状不跳。虫洞不进筛选——它不是一张卡，
+是导航入口：
 
-{/* ref file="../packages/trajectory/src/react.tsx" lines="982-997" */}
+{/* ref file="../packages/trajectory/src/canvas/node-dom.ts" lines="356-362" */}
 
-## 七、结构归 React，帧归 rAF
+## 七、交互：滚轮管空间，竖轨管时间
 
-这是这个组件唯一的架构纪律：SVG 树由 React 按卡身份 keyed 声明式地建；补间循环和每帧的 `place()`
-经 ref 表直接改属性，**不走 `setState`**。离散变化才走状态——筛选、搜索、设置、浮层开合、当前盘、
-激活态、主题：
+**滚轮 = 空间缩放，指哪缩哪；拖拽漫游。**目标缩放从当前目标累乘，连发滚轮不断累积、不迟滞，
+真正的位移在补间循环里逐帧趋近。**ctrl + 滚轮**（触控板捏合同一通道）分流给时间：整窗沿时间平移，
+一格按窗宽的一成走，跟竖轨上悬停滚轮是同一段代码：
 
-{/* ref file="../packages/trajectory/src/react.tsx" lines="3-18" */}
+{/* ref file="../packages/trajectory/src/canvas/stage.ts" lines="516-535" */}
 
-帧循环就这一小段：`kick` 是稳定引用给回调直接用，`tick` 每次渲染重新声明、经 ref 转一手，
-所以它永远看得见最新的 `place`，不会冻结在第一次渲染的闭包上：
+**时间归画布左缘常驻的日期竖轨**：自绘双柄区间滑块，顶旧底新，收窄窗即进引力透镜——窗就是焦点带，
+窗外压缩显示不丢全貌；中段拖动整窗平移，拖回顶满退回全景；左下角小框直接键入窗宽天数。轨位与
+像素反解都走盘面同一张折算表，空档在轨上折成暗纹窄条，拖过窄条那几步窗就跳过整段空窗：
 
-{/* ref file="../packages/trajectory/src/react.tsx" lines="817-833" */}
+{/* ref file="../packages/trajectory/src/canvas/date-rail.ts" lines="1-12" */}
 
-推进一帧本身是布局层的纯函数，只改传进来的两个对象、不碰 DOM，可以单独测。**鱼眼的两对补间量不在
-视图层**——它们是布局实例自己的字段，视图另立一份平行的会写不进引擎，表现是滚轮滚半天鱼眼一动不动、
-零报错：
+{/* ref file="../packages/trajectory/src/canvas/date-rail.ts" lines="41-56" */}
 
-{/* ref file="../packages/trajectory/src/layout.ts" lines="802-810" */}
+窗一变，舞台把焦点带对准窗——零重建，焦点日与强度的补间白送：
+
+{/* ref file="../packages/trajectory/src/canvas/stage.ts" lines="281-299" */}
+
+**回到原点两段式**：相机动过就先只归相机（时间窗与透镜原样留着），相机已在原点再按才归窗
+（顶满 + 透镜退场）；连按两下全归。Esc 与工具条钮共用一条链，钮的图标随「下一按干什么」换脸：
+
+{/* ref file="../packages/trajectory/src/canvas/stage.ts" lines="540-554" */}
+
+{/* ref file="../packages/trajectory/src/canvas/stage.ts" lines="559-572" */}
+
+**盘心单击在新标签页开根卡页、双击回全景**；点节点在新标签页开卡页，点虫洞切到对应的盘。
+单击延迟一拍让双击截得住：
+
+{/* ref file="../packages/trajectory/src/canvas/layers/hub.ts" lines="78-93" */}
+
+{/* ref file="../packages/trajectory/src/react.tsx" lines="342-344" */}
+
+**Esc 分层**：先关浮层，嵌入模式再退激活态，最后才走两段式回原点。嵌入模式（`mode="embed"`）只保留
+「点击激活」这一条——盘塞进一篇长文档中间时，没点过盘的滚轮要穿透给页面；整页模式交互态恒真：
+
+{/* ref file="../packages/trajectory/src/react.tsx" lines="411-428" */}
+
+设置滑杆照 Obsidian 版的项目表：内环 / 外环压缩、盘心大小、空窗阈值、超长空档宽、节点大小、
+结论放大、节点散开、动画速度，语义值存 `localStorage`，灌参走同一处换算。「鱼眼穿梭 / 自由缩放」
+两模式、盘心单击切模式、激活遮罩、全屏按钮、盘页签都已退役。
+
+## 八、启动器：`?disk=` 缺失时的项目卡阵
+
+同一个组件两张脸：有当前盘渲盘，没有就渲启动器——每张盘一张卡，上方全景定妆照，下方短名与
+「n 卡 · 最近活动 某日」，按最近活动降序；点卡进盘（写 `?disk=`），盘内工具条有「启动器」返回钮
+（清 `?disk=`）。换盘只走启动器与虫洞，盘页签没了，多盘同开不做：
+
+{/* ref file="../packages/trajectory/src/react.tsx" lines="133-177" */}
+
+定妆照是 `star-thumb` 这个纯静态 SVG 画家画的：跟大图同一个布局引擎、同灌盘心与空窗设置，
+「缩略图 = 大图世界几何的等比缩放」靠共用布局层保证。**在服务端渲成静态 markup**——画家喂一个
+最小的桩文档建树、再序列化成字符串，客户端原样贴、不重画；盘心与虫洞走 `var(--color-fd-primary)`，
+环色走 CSS 变量，只有领域 / 连线 / 混灰这些 JS 色板要按亮暗各渲一份、页面按 `html.dark` 显示其一：
+
+{/* ref file="../packages/trajectory/src/server.tsx" lines="46-79" */}
 
 怎么把这套接进一个 fumadocs 站，见 [接线](/docs/trajectory/wiring)。
