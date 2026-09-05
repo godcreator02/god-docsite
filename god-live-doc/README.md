@@ -8,6 +8,10 @@
 见 `examples/notes` 和文档站「五类引用：一篇手册里怎么用」；文档本身怎么写（章节骨架、五类引用
 各用在哪种论断、反模式），配套 skill 在 `skills/livedoc-docs/SKILL.md`。
 
+另一摊是**轨迹卡**：live-doc 治现状文档撒谎，轨迹卡治历史被改写——一次方向了断记下来就该冻结，
+谁取代了谁看得见。卡不进记录簿、不用 confirm，只要即时校验，盘（星轨）画在文档站上。
+怎么判断值得记一笔、怎么落卡，配套 skill 在 `skills/trajectory/SKILL.md`；机制那一半见文档站「轨迹」章。
+
 ## 怎么装
 
 ```bash
@@ -162,14 +166,21 @@ render 直接写到映射给的位置（可以出项目根，`../README.md`、`.
 ```
 core             零依赖（只用 node:crypto）。接口正本、编排服务、归一化与哈希、行段映射与 LCS diff、hash 比较器（滑窗）、目录树 / 存在性 / 名字三个比较器
 project          装配：读 livedoc.config、造读取器（读文件、列目录、看类型）/ json 记录簿 / 比较器；git 那条线和按种类、按位置分派的 auto 比较器也住这儿
-cli              check / confirm / render
+cli              check / confirm / render / trajectory
 format-md        注释记号 + 围栏展示区 + 尾注释
 format-fumadocs  mdx 与 fumadocs 是一个整体：remark 插件、序列化回调、meta 白名单、pre 组件 + 样式
 format-html      元素既是记号又是展示区，文件即终态（final），不渲染
+trajectory       轨迹卡与星轨盘，三个入口：`.` 扫卡 / 四层校验 / 聚盘建模 / 布局与链表纯函数；
+                 `./react` 客户端组件 StarDisk（随包发 star.css）；`./server` 服务端组件 Trajectory
+                 + fumadocs 的 cardSchema + remark 关系边插件。`.` 零依赖（只用 node:fs / node:path），
+                 react 是 peer（可选）
 ```
 
-依赖方向：cli → project → core；格式包 → core（format-fumadocs 还依赖 project，它在站的链上要自己装配）。
-fumadocs 只许出现在 format-fumadocs，而且只能是 peer。`tests/boundary.test.ts` 守着这几条。
+依赖方向：cli → project → core；格式包 → core（format-fumadocs 还依赖 project，它在站的链上要自己装配）；
+cli → trajectory（只 `.` 入口）。**trajectory 不依赖 core**、不依赖任何格式包——五类引用说的是「文档对
+文件系统说的话」，卡的关系边说的是「文档对文档说的话」，两套记录格式互不认识。
+fumadocs 只许出现在 format-fumadocs，而且只能是 peer；react 只许出现在 format-fumadocs 和 trajectory，
+同样只能是 peer。`tests/boundary.test.ts` 守着这几条。
 
 ## 这个仓自己怎么跑
 
@@ -193,6 +204,9 @@ cd ..\fumadocs-site               # 消费方示例：外部 fumadocs 站
 pnpm install; pnpm test; pnpm build
 cd ..\notes                       # 消费方示例：记事本，一篇 mdx 手册五类引用全用上
 pnpm install; pnpm test
+cd ..\trajectory-site             # 消费方示例：外部 fumadocs 站接星轨盘，卡目录是站自己的 cards/
+pnpm install; pnpm test; pnpm build
+pnpm start                        # 想看盘就起一下，4313；验完停掉
 ```
 
 改了格式包的代码，站要**先删 `.next` 再 build** 才看得见——Turbopack 只按 mdx 内容缓存。
@@ -223,6 +237,31 @@ pnpm install; pnpm test
   接口上留着这个口。
 * **`livedocMarkdownOptions` 的回调形参声明成 `unknown`**：fumadocs 那头要求的是完整 mdast 型别，
   这个包只认树上的几个字段，形参放宽才对得上它的签名。
+
+轨迹那一摊的（方案第十三节）：
+
+* **`serverExternalPackages` 不加 trajectory**，方案原话是加。它的 `./react` 是客户端组件、
+  `./server` 用包名自引用去渲它；外置后 Next 走 Node 单独加载 `server.mjs`，看不见 `./react` 头一行的
+  `"use client"`，`StarDisk` 被当服务端组件渲染、一命中 hooks 就炸。跟 `format-fumadocs` 那条同类。
+* **`cardSchema` 是 `(ctx) => Schema` 工厂，不是裸对象**：fumadocs-mdx 的 schema 支持传工厂、`ctx` 带
+  `path`，缺 `label` 时要靠它拿到文件名做兜底。裸对象拿不到文件名。
+* **缺 `born-at` 是硬失败，缺 `label` 不是**：`born-at` 没有任何合理兜底（半径标度全下游靠它），
+  交回 issues；`label` 按方案原话退到文件名、照样出 value。两者都走硬失败的话，「缺 label 用文件名」
+  这句就没有落地的地方。
+* **`@standard-schema/spec` 只做类型 devDependency**：schema 对象是手写的字面量，不引任何校验库；
+  借这份官方类型声明是为了保证结构精确匹配协议（判别联合的边角容易手抄漏一个 `?`）。
+  `import type` 编译期全擦除，dts 打包时形状原样内联进产物，消费方不用另装。
+* **`server.tsx` 引 `./react` 走包名自引用，不走相对源路径**：三个入口是三趟独立的 tsdown 构建，
+  包名是裸标识符、会被当外部依赖原样留在产物里；写成相对路径这一趟构建会把它内联或拆成共享 chunk，
+  `"use client"` 落到一个没人标记的文件上，两头都看不到边界。
+* **「`.` 入口零依赖」改成按产物判**：`package.json` 里 react 合法地进了 peer、remark 那套进了
+  dependencies（`./server` 要用），所以边界测试改成「`.` 入口的产物只许 `import` `node:` 内置模块」，
+  不再看 `dependencies` 字段是不是空的。
+* **压缩区的卡标签口径跟 trail 不同**：参照物 trail 里压缩区的卡标签跟着显示，这一版的门限是
+  `eff > 0.6`（局部放大率 × 视图缩放比），压缩区默认不显、放大或推进鱼眼才现身；悬停和「显示全部标签」
+  照样能看。要改就改 `react.tsx` 里那一句门限。
+* **搜索只匹配 label 与卡身份**：卡正文根本不进传给客户端的那份数据，所以搜不了正文。
+  要搜正文得把全文塞进 payload，那是另一件事（盘不是全文检索器，卡页那头 fumadocs 自己有搜索）。
 
 方案第十节那几条开放问题原样还在：`remarkInclude` 排在插件前所以被引入片段里的引用 check 看不到；
 行内组件规则只能交回行内节点、没有机制守；记录簿一个 json 在并发构建下的写入时机（靠「没变不写」躲过）。
