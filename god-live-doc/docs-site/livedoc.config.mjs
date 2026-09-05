@@ -22,5 +22,7 @@ export default {
     ...fumadocs.defaultRoster,
     Tabs: tabs.Tabs,
     Tab: tabs.Tab,
+    // 星轨盘是交互式画布，AI 那份 md 里画不出，压成一行指路
+    Trajectory: (_node, h) => h.paragraph("[星轨盘见站]"),
   },
 };

@@ -4,5 +4,5 @@
  * Files / Folder / File 是 fumadocs 自己的文件树：目录树引用注入的就是它们，作者手写也行，压平规则在格式包的默认表里。
  * registry.ts 只有可擦除的类型，Node 直接吃。
  */
-export const componentNames = ['Note', 'Tabs', 'Tab', 'Files', 'Folder', 'File'] as const;
+export const componentNames = ['Note', 'Tabs', 'Tab', 'Files', 'Folder', 'File', 'Trajectory'] as const;
 export type ComponentName = (typeof componentNames)[number];

@@ -14,6 +14,7 @@
     "@godcreator02/live-doc-cli": "workspace:*",
     "@godcreator02/live-doc-format-fumadocs": "workspace:*",
     "@godcreator02/live-doc-project": "workspace:*",
+    "@godcreator02/live-doc-trajectory": "workspace:*",
     "fumadocs-core": "16.15.1",
     "fumadocs-mdx": "15.3.1",
     "fumadocs-ui": "npm:@fumadocs/base-ui@16.15.1",
