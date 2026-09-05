@@ -1,9 +1,8 @@
 /**
- * StarDisk 的结构测试：`buildTrajectory("cards")` 建模、`renderToStaticMarkup` 渲成静态
- * html，断言 SVG 骨架数量——节点的 `a[target=_blank]` 数、扇环框数、里程碑环数分别等于
- * 默认盘（disks[0]，本地 107 张诗名卡的 tfix 项目盘）的卡数、树数、范围内里程碑数。
- * 渲的是 `mode="page"`——这个站的 /trajectory 就是这么用的，所以还多断言一条：整页模式
- * 没有激活遮罩（滚轮直接生效）。`size` 给死一个数字，绕开 ResizeObserver（Node 环境没有它）。
+ * StarDisk 的壳结构测试：`buildTrajectory("cards")` 建模、`renderToStaticMarkup` 渲成静态 html。
+ * 壳只当编排者——画布层（六层 SVG）挂载后才由画布层建，静态渲染那一趟画布区是空 div；
+ * 这里断言的是这个站真用的两种形态：`?disk=` 给了渲盘（画布容器、竖轨容器、工具条、无遮罩），
+ * 缺失渲启动器卡阵（一张盘一张卡、每张卡带服务端渲的静态定妆照 svg）。
  */
 import { test } from "node:test";
 import assert from "node:assert/strict";
@@ -17,30 +16,38 @@ import assert from "node:assert/strict";
 // 裸 node --test 直调时才现形。
 import { createElement } from "../../../god-live-doc/node_modules/react/index.js";
 import { renderToStaticMarkup } from "../../../god-live-doc/node_modules/react-dom/server.js";
-import { buildTrajectory, inRange } from "@godcreator02/live-doc-trajectory";
+import { buildTrajectory } from "@godcreator02/live-doc-trajectory";
 import { StarDisk } from "@godcreator02/live-doc-trajectory/react";
+import { launcherThumbs } from "@godcreator02/live-doc-trajectory/server";
 
-test("StarDisk mode=page：SVG 骨架数量对得上默认盘的模型，且没有激活遮罩", async () => {
+test("StarDisk mode=page 带 ?disk=：壳结构齐——画布空 div、竖轨容器、工具条，无遮罩", async () => {
   const data = await buildTrajectory("cards");
   const rootId = data.disks[0].rootId;
-  const model = data.models[rootId];
-  const root = data.cards.find((c) => c.id === rootId);
 
   const html = renderToStaticMarkup(
-    createElement(StarDisk, { data, hrefBase: "/trajectory", size: 800, mode: "page" }),
+    createElement(StarDisk, { data, hrefBase: "/trajectory", size: 800, mode: "page", initialDisk: rootId }),
   );
 
-  assert.match(html, /<svg/);
-  assert.match(html, /class="star-disk star-disk-page"/, "整页模式的容器类");
-  assert.doesNotMatch(html, /star-activate-overlay/, "整页模式没有激活遮罩，滚轮直接生效");
-  assert.doesNotMatch(html, /title="全屏"/, "整页模式没有全屏按钮");
-  const links = [...html.matchAll(/<a\b[^>]*target="_blank"[^>]*>/g)];
-  assert.equal(links.length, model.cards.length, "节点链接数该等于上盘卡数（虫洞不算）");
+  assert.match(html, /class="star-disk star-disk-page star-active"/, "整页模式的容器类，交互态恒真");
+  assert.match(html, new RegExp(`<div class="star-canvas" data-disk="${rootId}"[^>]*></div>`), "画布区是空 div，svg 挂载后由画布层建");
+  assert.doesNotMatch(html, /<svg[^>]*class="star-svg"/, "静态渲染那一趟没有画布 svg");
+  assert.match(html, /class="star-rail"/, "竖轨容器在");
+  assert.match(html, /class="star-hud-top"/, "工具条在");
+  assert.match(html, /title="启动器（换项目盘）"/, "盘内有回启动器的钮");
+  assert.doesNotMatch(html, /star-activate-overlay|star-activate-hint/, "整页模式没有激活遮罩也没有提示带");
+  assert.doesNotMatch(html, /title="全屏"|class="star-tab/, "全屏按钮与盘页签已退役");
+});
 
-  const treeBoxes = [...html.matchAll(/class="star-treebox"/g)];
-  assert.equal(treeBoxes.length, model.trees.length, "扇环框数该等于树数");
-
-  const msRings = [...html.matchAll(/class="star-ring-milestone"/g)];
-  const expectedMs = inRange(root.milestones, model.day0, model.dayMax).length;
-  assert.equal(msRings.length, expectedMs, "里程碑环数该等于根卡范围内的里程碑数");
+test("StarDisk mode=page 没有 ?disk=：启动器卡阵——一张盘一张卡，每张卡带静态定妆照", async () => {
+  const data = await buildTrajectory("cards");
+  const thumbs = launcherThumbs(data);
+  const html = renderToStaticMarkup(
+    createElement(StarDisk, { data, hrefBase: "/trajectory", mode: "page", thumbs }),
+  );
+  assert.match(html, /class="star-launcher"/);
+  const cards = [...html.matchAll(/class="star-launcher-card"/g)];
+  assert.equal(cards.length, data.disks.length, "一张盘一张卡");
+  const svgs = [...html.matchAll(/<svg viewBox="[^"]+" class="trajectory-thumb star-thumb-(dark|light)">/g)];
+  assert.equal(svgs.length, data.disks.length * 2, "每张卡带亮暗各一份静态 svg");
+  assert.match(html, /最近活动 \d{4}-\d{2}-\d{2}/, "卡下方有最近活动日期");
 });
