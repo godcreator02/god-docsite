@@ -9,7 +9,8 @@
 
 import { buildDisks, buildModel } from "./model.ts";
 import { scanDir } from "./scan.ts";
-import type { DiskInfo, Milestone, RawCard, Relation, SickFile, TrajectoryModel } from "./types.ts";
+import { type SerializableModel, toSerializable } from "./serial.ts";
+import type { DiskInfo, Milestone, RawCard, Relation, SickFile } from "./types.ts";
 
 export {
   extractMilestones,
@@ -112,13 +113,8 @@ function toRouteCard(raw: RawCard): RouteCard {
   };
 }
 
-/** TrajectoryModel 的可序列化版：supersededIds 从 Set 转数组，其余字段原样——
- * JSON.stringify（或跨进程传递）之前用这个。 */
-export type SerializableModel = Omit<TrajectoryModel, "supersededIds"> & { supersededIds: string[] };
-
-function toSerializable(model: TrajectoryModel): SerializableModel {
-  return { ...model, supersededIds: [...model.supersededIds] };
-}
+export { toRuntimeModel, toSerializable } from "./serial.ts";
+export type { SerializableModel } from "./serial.ts";
 
 /** 建模产物：`cards` 是全部卡（原始，未按盘裁剪），`disks` 是盘清单，`sick` 是报病，
  * `models` 按 rootId 索引每张盘的模型（不含布局——布局在客户端算）。 */

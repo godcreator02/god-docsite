@@ -1,466 +1,615 @@
 /*
- * StarDisk 的样式：HUD（工具条 / 图例 / 设置与帮助浮层 / 悬停气泡）与 SVG 文本类。
- * 所有选择器要么带 `.star-` 前缀、要么包在 `.star-disk` 容器下，不污染宿主站。
- * 亮暗两套变量：暗色跟 `html.dark`（fumadocs 的主题 class），亮色是默认 `:root`。
+ * StarDisk 的样式：盘面、画布文字类、日期竖轨、工具条与浮层、图例、悬停气泡、启动器卡阵。
+ * 结构照 Obsidian 版 styles.css：主题变量全收在容器根 `.star-disk`（与启动器根 `.star-launcher`）下，
+ * 不撒全局；底色 / 文字 / 边框 / 环线 / 扇环框全映射 fumadocs 的 `--color-fd-*`，CSS 不判明暗
+ * （亮暗由宿主变量自己翻），JS 色板（领域 / 连线 / 里程碑 / mute）另按 html.dark 选。
+ * 所有选择器要么带 `.star-` 前缀、要么包在 `.star-disk` / `.star-launcher` 下，不污染宿主站。
  */
 
-:root {
-  --star-bg: #070b16;
-  --star-t1: #e8eeff;
-  --star-t2: #aebadd;
-  --star-t3: #7c8bb3;
-  --star-t4: #8fa0c8;
-  --star-bd: #263050;
-  --star-panel: rgba(10, 16, 32, 0.88);
-  --star-ring: rgba(150, 175, 255, 0.08);
-  --star-ring-m: rgba(150, 175, 255, 0.22);
+.star-disk,
+.star-launcher {
+  --bg: var(--color-fd-background);
+  --t1: var(--color-fd-foreground);
+  --t2: var(--color-fd-muted-foreground);
+  --t3: var(--color-fd-muted-foreground);
+  --t4: var(--color-fd-muted-foreground);
+  --bd: var(--color-fd-border);
+  --hov: var(--color-fd-accent);
+  --panel: var(--color-fd-popover);
+  --accent: var(--color-fd-primary);
+  /* 盘心填底色融进画布，轮廓全交给 primary 描边环 */
+  --hub-fill: var(--color-fd-background);
+  --tag: var(--color-fd-muted-foreground);
+  /* 背景环与扇环框：用 color-mix 从前景色兑透明度，亮度梯度（周环 < 月环 < 最新环 < 年环）
+     不变、色相中性，什么主题都融得进去 */
+  --ring: color-mix(in srgb, var(--color-fd-foreground) 7%, transparent);
+  --ring-m: color-mix(in srgb, var(--color-fd-foreground) 20%, transparent);
+  --ring-l: color-mix(in srgb, var(--color-fd-foreground) 30%, transparent);
+  --ring-y: color-mix(in srgb, var(--color-fd-foreground) 38%, transparent);
+  /* 扇环框是泳道领地边界：要看得见才分得出领域地盘，亮度仍压月环一档 */
+  --box-stroke: color-mix(in srgb, var(--color-fd-foreground) 18%, transparent);
+  --box-fill: color-mix(in srgb, var(--color-fd-foreground) 5%, transparent);
+  /* 空窗雾带底：离盘面背景一档的雾 */
+  --gap-bg: color-mix(in srgb, var(--color-fd-foreground) 6%, transparent);
 }
 
-html.dark {
-  --star-bg: #070b16;
-  --star-t1: #e8eeff;
-  --star-t2: #aebadd;
-  --star-t3: #7c8bb3;
-  --star-t4: #8fa0c8;
-  --star-bd: #263050;
-  --star-panel: rgba(10, 16, 32, 0.88);
-  --star-ring: rgba(150, 175, 255, 0.08);
-  --star-ring-m: rgba(150, 175, 255, 0.22);
-}
-
-.star-disk:not(.star-dark) {
-  --star-bg: #f4f6fb;
-  --star-t1: #1a2238;
-  --star-t2: #3d4763;
-  --star-t3: #6b7591;
-  --star-t4: #5d6a8c;
-  --star-bd: #c5cede;
-  --star-panel: rgba(255, 255, 255, 0.92);
-  --star-ring: rgba(40, 60, 120, 0.08);
-  --star-ring-m: rgba(40, 60, 120, 0.2);
-}
-
+/* ---------- 盘容器 ---------- */
 .star-disk {
-  background: var(--star-bg);
-  color: var(--star-t2);
-  font-family: "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+  background: var(--bg);
+  color: var(--t2);
+  font-family: var(--font-sans, system-ui, "PingFang SC", "Microsoft YaHei", sans-serif);
   outline: none;
+  overflow: hidden;
+  user-select: none;
 }
 
-.star-disk:fullscreen {
-  width: 100vw;
-  height: 100vh;
-  aspect-ratio: auto;
-}
-
-/* 整页模式：容器吃满父元素（高度由页面给），SVG 是正方形、按容器短边居中，
-   长边方向的余量留白。HUD（工具条 / 图例 / 页签 / 气泡）都是 absolute，不进这层弹性流，
-   照旧贴容器四角。 */
+/* 整页模式：容器吃满父元素（高度由页面给），画布区铺满、盘径吃短边 */
 .star-disk-page {
-  display: flex;
-  align-items: center;
-  justify-content: center;
   border-radius: 0;
 }
-.star-disk-page .star-svg {
-  flex: none;
-  width: auto;
-  height: auto;
+
+/* 画布区：svg 直挂它铺满；工具条 / 浮层 / 竖轨是 absolute 兄弟、不占流 */
+.star-disk .star-canvas {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
 }
 
-.star-svg {
+.star-disk .star-canvas > svg {
   display: block;
-  width: 100%;
-  height: 100%;
 }
-.star-svg text {
+
+/* 画布文字禁选禁命中：拖拽不蓝选、鼠标只与节点符号交互 */
+.star-disk .star-canvas > svg text {
   user-select: none;
   pointer-events: none;
 }
 
-.star-node {
-  cursor: pointer;
-}
-.star-node a {
-  cursor: pointer;
-}
-
-/* ---------- 画布文字 ---------- */
-.star-label {
+/* ---------- 画布文字（SVG 文本类） ---------- */
+.star-disk .lb {
   font-size: 10.5px;
   text-anchor: middle;
   paint-order: stroke;
-  stroke: var(--star-bg);
+  stroke: var(--bg);
   stroke-width: 3px;
   stroke-linejoin: round;
 }
-.star-daylabel {
-  fill: var(--star-t4);
+
+.star-disk .dl {
+  fill: var(--t4);
   font-size: 9px;
   text-anchor: middle;
 }
-.star-treename {
-  fill: var(--star-tag, var(--star-t4));
+
+.star-disk .tag {
+  fill: var(--tag);
   font-size: 11px;
   letter-spacing: 1px;
-  text-anchor: middle;
 }
-.star-yl {
-  fill: var(--star-t3);
+
+/* 项目名：节点标签口径（与 .lb 同字号），排印根节点下方 */
+.star-disk .hub-t {
+  fill: var(--t1);
+  font-size: 10.5px;
+  letter-spacing: 1px;
+  dominant-baseline: central;
+}
+
+.star-disk .hub-s {
+  fill: var(--t4);
+  font-size: 10px;
+  letter-spacing: 1px;
+  dominant-baseline: central;
+}
+
+/* 交互入口收窄到正中根节点（单击开项目根卡、双击回全景）：手型；盘面不接指针 */
+.star-disk .hub-root {
+  cursor: pointer;
+}
+
+.star-disk .ringc {
+  stroke: var(--ring);
+}
+
+.star-disk .ringm {
+  stroke: var(--ring-m);
+}
+
+/* 年环：跨年主结构线，比月环亮一档 */
+.star-disk .ringy {
+  stroke: var(--ring-y);
+}
+
+/* 最新环：dayMax 那天的环，全景态的时间外缘；月环同族加重一档，亮度压年环之下 */
+.star-disk .ringl {
+  stroke: var(--ring-l);
+}
+
+/* 焦点带边环：鱼眼态专属，给焦点带描出窗口边界；淡色细实线，不抢节点戏 */
+.star-disk .ringb {
+  stroke: var(--ring-m);
+}
+
+.star-disk .yl {
+  fill: var(--t3);
   font-size: 10.5px;
   letter-spacing: 1.5px;
   text-anchor: middle;
 }
-.star-ms-label {
+
+/* 里程碑标签：带背景色描边衬底，压在节点或背景环上不糊 */
+.star-disk .msl {
   font-size: 10px;
   letter-spacing: 1px;
-  text-anchor: middle;
   paint-order: stroke;
-  stroke: var(--star-bg);
+  stroke: var(--bg);
   stroke-width: 3px;
   stroke-linejoin: round;
 }
 
-/* ---------- 背景环 / 空窗小行星带 / 扇环框 ---------- */
-.star-ring-week {
-  stroke: var(--star-ring);
-  fill: none;
-  stroke-width: 1;
-  vector-effect: non-scaling-stroke;
-}
-.star-ring-month {
-  stroke: var(--star-ring-m);
-  fill: none;
-  stroke-width: 1;
-  vector-effect: non-scaling-stroke;
-}
-/* 年环：跨年主结构线，比月环亮一档 */
-.star-ring-year {
-  stroke: rgba(150, 175, 255, 0.4);
-  fill: none;
-  stroke-width: 1.2;
-  vector-effect: non-scaling-stroke;
-}
-.star-disk:not(.star-dark) .star-ring-year {
-  stroke: rgba(40, 60, 120, 0.38);
-}
-.star-ring-latest {
-  stroke: var(--star-t3);
-  fill: none;
-  stroke-width: 1;
-  opacity: 0.5;
-  vector-effect: non-scaling-stroke;
-}
-.star-ring-milestone {
-  fill: none;
-  stroke-width: 1.2;
-  vector-effect: non-scaling-stroke;
-  stroke: #f5b942;
-}
-.star-gap-bg {
-  stroke: rgba(0, 0, 0, 0.5);
-  fill: none;
-}
-.star-disk:not(.star-dark) .star-gap-bg {
-  stroke: rgba(40, 55, 90, 0.1);
-}
-.star-gap-dot {
-  fill: var(--star-ring-m);
-}
-/* 空窗起止边界环：虚线航道样式，12 点挂 MM-DD 短标签（年份归年环承载） */
-.star-gap-rim {
-  fill: none;
-  stroke: var(--star-t3);
-  opacity: 0.6;
-  stroke-width: 1;
-  stroke-dasharray: 6 4;
-  vector-effect: non-scaling-stroke;
-}
-.star-treebox {
-  stroke: rgba(150, 175, 255, 0.2);
-  fill: rgba(150, 175, 255, 0.03);
-  stroke-width: 1;
-  vector-effect: non-scaling-stroke;
-}
-.star-disk:not(.star-dark) .star-treebox {
-  stroke: rgba(40, 60, 120, 0.18);
-  fill: rgba(40, 60, 120, 0.03);
-}
-.star-isobox {
-  stroke-dasharray: 3 3;
+/* 空窗暗底环带：小行星带的雾底 */
+.star-disk .gap-bg {
+  stroke: var(--gap-bg);
 }
 
-/* ---------- 盘心 ---------- */
-.star-hub {
+/* ---------- 日期竖轨：画布左缘贴边常驻的自绘双柄区间滑块（顶 = 最旧、底 = 最新）。
+ * 轨线压在 12px 竖线上、命中区往右放宽到 40px；底端让 40px 给窗宽输入 pill（左下角）；
+ * z-index 压在浮层（7）之下、画布之上 ---------- */
+.star-disk .star-rail {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 0;
+  pointer-events: none;
+}
+
+.star-disk .star-rail > * {
+  pointer-events: auto;
+}
+
+.star-disk .trajectory-date-rail {
+  position: absolute;
+  left: 0;
+  top: 12px;
+  bottom: 40px;
+  width: 40px;
+  z-index: 5;
   cursor: pointer;
-}
-.star-hub-circle {
-  fill: #0b1020;
-  stroke: #5a6a94;
-  stroke-width: 1.2;
-  vector-effect: non-scaling-stroke;
-}
-.star-disk:not(.star-dark) .star-hub-circle {
-  fill: #ffffff;
-  stroke: #b6c0d8;
-}
-.star-hub:hover .star-hub-circle {
-  stroke-width: 2.4;
-}
-.star-hub-title {
-  fill: var(--star-t1);
-  font-size: 16px;
-  letter-spacing: 2px;
-  text-anchor: middle;
-}
-.star-hub-status {
-  fill: var(--star-t4);
-  font-size: 10px;
-  letter-spacing: 1px;
-  text-anchor: middle;
+  touch-action: none;
 }
 
-/* ---------- 右上工具条 + 搜索 + 浮层 ---------- */
-.star-hud-top {
+/* 轨道细线：竖贯一条，中线在 12px */
+.star-disk .trajectory-date-rail::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 12px;
+  width: 4px;
+  transform: translateX(-50%);
+  border-radius: 2px;
+  background: var(--bd);
+}
+
+/* 空档暗纹层：安静的底纹，不吃指针 */
+.star-disk .trajectory-date-rail .rail-gaps {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 12px;
+  width: 10px;
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
+/* 一段无记录空档：低对比暗条，别抢柄与选中段的戏 */
+.star-disk .trajectory-date-rail .rail-gap {
+  position: absolute;
+  left: 0;
+  right: 0;
+  border-radius: 2px;
+  background: repeating-linear-gradient(
+    -45deg,
+    color-mix(in srgb, var(--color-fd-foreground) 16%, transparent) 0 2px,
+    transparent 2px 5px
+  );
+}
+
+/* 日期刻度层：轨上标尺，与盘面日期环同语言；不吃指针 */
+.star-disk .trajectory-date-rail .rail-scale {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+/* 刻度短刺：横穿轨线的小段细线，与盘面月环同亮度 */
+.star-disk .trajectory-date-rail .rail-lbl-hr {
+  position: absolute;
+  left: 12px;
+  height: 1px;
+  width: 12px;
+  transform: translate(-50%, -50%);
+  background: var(--ring-m);
+}
+
+/* 刻度日期文字：盘面 .dl 同款（9px / --t4），横排在轨线右侧 */
+.star-disk .trajectory-date-rail .rail-lbl {
+  position: absolute;
+  left: 22px;
+  transform: translateY(-50%);
+  font-size: 9px;
+  line-height: 1.3;
+  color: var(--t4);
+  background: var(--bg);
+  padding: 0 3px;
+  border-radius: 3px;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+/* 年起点标年份：主结构线，比普通刻度亮一档（对齐盘面年环） */
+.star-disk .trajectory-date-rail .rail-lbl-y {
+  color: var(--t3);
+}
+
+/* 轨底端最新日：字往上收齐免得探出画布底缘 */
+.star-disk .trajectory-date-rail .rail-lbl-top {
+  color: var(--t3);
+  transform: translateY(-100%);
+}
+
+/* 最新日（d1）刻度：轨底端一条短横线 */
+.star-disk .trajectory-date-rail .rail-tick {
+  position: absolute;
+  bottom: 0;
+  left: 12px;
+  height: 2px;
+  width: 18px;
+  transform: translateX(-50%);
+  border-radius: 1px;
+  background: var(--ring-l);
+  pointer-events: none;
+}
+
+/* 选中段：窗口在轨上的投影 */
+.star-disk .trajectory-date-rail .range {
+  position: absolute;
+  left: 12px;
+  width: 4px;
+  transform: translateX(-50%);
+  border-radius: 2px;
+  background: var(--accent);
+}
+
+/* 双柄：底柄 = 终点（锚点）、顶柄 = 起点 */
+.star-disk .trajectory-date-rail .thumb {
+  position: absolute;
+  left: 12px;
+  width: 12px;
+  height: 12px;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  border: 2px solid var(--accent);
+  background: var(--panel);
+  box-sizing: border-box;
+}
+
+/* 柄的命中面扩到 28×28：视觉不变，伪元素吃指针时 target 仍是柄本身 */
+.star-disk .trajectory-date-rail .thumb::before {
+  content: "";
+  position: absolute;
+  inset: -8px;
+}
+
+.star-disk .trajectory-date-rail.is-disabled {
+  opacity: 0.35;
+  pointer-events: none;
+}
+
+/* 窗宽输入 pill：轨底让位处（左下角），数字直改窗宽（键入提交 / 滚轮 ±1 天） */
+.star-disk .trajectory-date-width {
+  position: absolute;
+  left: 6px;
+  bottom: 10px;
+  z-index: 5;
+  display: flex;
+  align-items: baseline;
+  gap: 3px;
+  padding: 1px 7px;
+  border: 1px solid var(--bd);
+  border-radius: 9px;
+  background: var(--panel);
+  color: var(--t4);
+  font-size: 9px;
+}
+
+.star-disk .trajectory-date-width input {
+  width: 4ch;
+  height: auto;
+  padding: 0;
+  border: none;
+  box-shadow: none;
+  background: transparent;
+  color: var(--t3);
+  font-size: 11px;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  outline: none;
+}
+
+.star-disk .trajectory-date-width.is-disabled {
+  opacity: 0.35;
+  pointer-events: none;
+}
+
+/* ---------- 右上工具条 + 浮层 ---------- */
+.star-disk .star-hud-top {
   position: absolute;
   top: 10px;
   right: 10px;
   z-index: 8;
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 6px 10px;
-  border: 1px solid var(--star-bd);
+  gap: 4px;
+  padding: 4px 6px;
+  border: 1px solid var(--bd);
   border-radius: 9px;
-  background: var(--star-panel);
-  color: var(--star-t2);
+  background: var(--panel);
+  color: var(--t2);
 }
-.star-mbtn {
+
+.star-disk .star-hud-gap {
+  width: 6px;
+}
+
+.star-disk .star-mbtn {
+  position: relative;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   width: 26px;
   height: 26px;
   box-sizing: border-box;
-  border: 1px solid var(--star-bd);
-  color: var(--star-t3);
+  border: 1px solid transparent;
+  color: var(--t3);
   cursor: pointer;
   user-select: none;
-  background: var(--star-panel);
+  background: transparent;
   border-radius: 6px;
-  font-size: 12px;
-}
-.star-mbtn:hover {
-  color: var(--star-t1);
-}
-.star-mbtn.star-active {
-  color: var(--star-t1);
-  background: var(--star-bd);
-}
-.star-search {
-  position: relative;
-  display: flex;
-  align-items: center;
-}
-.star-search input {
-  width: 140px;
-  font-size: 12px;
-  padding: 4px 8px;
-  border: 1px solid var(--star-bd);
-  border-radius: 6px;
-  background: var(--star-panel);
-  color: var(--star-t1);
-  outline: none;
-}
-.star-hits {
-  font-size: 10.5px;
-  color: var(--star-t4);
-  margin-left: 6px;
-  white-space: nowrap;
-}
-.star-clear {
-  border: none;
-  background: none;
   padding: 0;
-  cursor: pointer;
-  color: var(--star-t4);
-  text-decoration: underline dotted;
 }
-.star-panel,
-.star-help {
+
+.star-disk .star-icon {
+  width: 15px;
+  height: 15px;
+}
+
+.star-disk .star-mbtn:hover {
+  color: var(--t1);
+  background: var(--hov);
+}
+
+.star-disk .star-mbtn.star-open,
+.star-disk .star-mbtn.star-active {
+  color: var(--accent);
+}
+
+/* 回到原点钮全归位时压暗：无事可做 */
+.star-disk .star-home.star-idle {
+  opacity: 0.4;
+}
+
+/* 图例钮的筛选激活色点：任一筛选维激活时右上角亮一粒 */
+.star-disk .star-legend-fab.star-has-filter::after {
+  content: "";
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--accent);
+}
+
+/* 浮层：锚在工具条下方、右缘对齐 */
+.star-disk .star-pop {
   position: absolute;
   top: calc(100% + 6px);
   right: 0;
   z-index: 7;
-  background: var(--star-panel);
-  border: 1px solid var(--star-bd);
+  background: var(--panel);
+  border: 1px solid var(--bd);
   border-radius: 8px;
+  color: var(--t2);
 }
-.star-panel {
+
+/* 搜索浮层：输入框 + 命中统计 */
+.star-disk .star-search-pop {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px 12px;
+}
+
+.star-disk .star-search-pop input {
+  width: 200px;
+  box-sizing: border-box;
+  font-size: 11.5px;
+  padding: 3px 8px;
+  border: 1px solid var(--bd);
+  border-radius: 6px;
+  background: var(--bg);
+  color: var(--t1);
+  outline: none;
+}
+
+.star-disk .star-search-pop input::placeholder {
+  color: var(--t4);
+}
+
+.star-disk .star-hits {
+  font-size: 10.5px;
+  color: var(--t4);
+  white-space: nowrap;
+}
+
+.star-disk .star-clear {
+  border: none;
+  background: none;
+  padding: 0;
+  cursor: pointer;
+  color: var(--t4);
+  font-size: inherit;
+  border-bottom: 1px dotted var(--t4);
+}
+
+.star-disk .star-clear:hover {
+  color: var(--t1);
+}
+
+/* 设置浮层：滑杆一列 */
+.star-disk .star-panel {
   font-size: 11px;
-  color: var(--star-t2);
-  padding: 8px 14px;
+  padding: 7px 12px;
   min-width: 200px;
 }
-.star-panel label {
+
+.star-disk .star-panel label {
   display: block;
   margin: 7px 0 1px;
 }
-.star-panel label span {
-  color: var(--star-t1);
+
+.star-disk .star-panel label span {
+  color: var(--t1);
   float: right;
 }
-.star-panel input[type="range"] {
+
+.star-disk .star-panel input[type="range"] {
   width: 168px;
   display: block;
   margin: 2px 0 0;
 }
-.star-help {
+
+/* 帮助浮层 */
+.star-disk .star-help {
   padding: 9px 13px;
   font-size: 11.5px;
-  color: var(--star-t2);
   max-width: 320px;
   line-height: 1.7;
 }
-.star-hh {
-  color: var(--star-t4);
+
+.star-disk .hh {
+  color: var(--t4);
   font-size: 10px;
   letter-spacing: 2px;
   margin: 8px 0 3px;
 }
-.star-hh:first-child {
+
+.star-disk .hh:first-child {
   margin-top: 0;
 }
 
-/* ---------- 悬停小气泡 ---------- */
-.star-tooltip {
-  position: absolute;
-  z-index: 9;
-  pointer-events: none;
-  max-width: 220px;
-  padding: 6px 10px;
-  border: 1px solid var(--star-bd);
-  border-radius: 6px;
-  background: var(--star-panel);
-  color: var(--star-t2);
-  font-size: 11px;
-}
-.star-tooltip-title {
-  color: var(--star-t1);
-  margin-bottom: 2px;
-}
-.star-tooltip-meta {
-  color: var(--star-t4);
-  font-size: 10px;
+/* ---------- 图例筛选面板 ---------- */
+.star-disk .star-hud-legend {
+  width: max-content;
+  max-width: 460px;
+  padding: 9px 16px 10px;
 }
 
-/* ---------- 右下图例即筛选器 ---------- */
-.star-hud-legend {
-  position: absolute;
-  right: 10px;
-  bottom: 10px;
-  z-index: 8;
-  max-width: 92%;
-  padding: 8px 14px 9px;
-  border: 1px solid var(--star-bd);
-  border-radius: 9px;
-  background: var(--star-panel);
-  color: var(--star-t2);
+.star-disk .star-legend {
   font-size: 11px;
   line-height: 2;
 }
-.star-legend-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 2px;
-}
-.star-lgs {
+
+.star-disk .lgs {
   display: inline-block;
   width: 15px;
   height: 15px;
   vertical-align: -3.5px;
   margin-right: 3px;
 }
-.star-lgs-w {
+
+.star-disk .lgs-w {
   width: 22px;
 }
-.star-lgi {
+
+.star-disk .lgi {
   cursor: pointer;
   user-select: none;
   padding: 2px 5px;
   border-radius: 4px;
-  margin-right: 2px;
+  margin-right: 4px;
 }
-.star-lgi:hover {
-  background: var(--star-bd);
+
+.star-disk .lgi:hover {
+  background: var(--hov);
 }
-.star-lgi.star-on {
-  background: var(--star-bd);
-  color: var(--star-t1);
+
+.star-disk .lgi.on {
+  background: var(--hov);
+  color: var(--t1);
 }
-.star-lgi.star-off {
+
+.star-disk .lgi.off {
   opacity: 0.45;
 }
-.star-lgp {
+
+.star-disk .lgp {
   padding: 2px 5px;
-  margin-right: 2px;
+  margin-right: 4px;
 }
 
-/* ---------- 多盘页签 ---------- */
-.star-tabs {
+/* ---------- 悬停小气泡 ---------- */
+.star-disk .star-tooltip {
   position: absolute;
-  top: 10px;
-  left: 10px;
-  z-index: 8;
-  display: flex;
-  gap: 4px;
-  flex-wrap: wrap;
-}
-.star-tab {
-  border: 1px solid var(--star-bd);
+  z-index: 9;
+  pointer-events: none;
+  max-width: 220px;
+  padding: 6px 10px;
+  border: 1px solid var(--bd);
   border-radius: 6px;
-  background: var(--star-panel);
-  color: var(--star-t3);
+  background: var(--panel);
+  color: var(--t2);
   font-size: 11px;
-  padding: 3px 9px;
-  cursor: pointer;
-}
-.star-tab-active {
-  color: var(--star-t1);
-  background: var(--star-bd);
 }
 
-/* ---------- 激活遮罩：整片可点，提示只占盘面下沿一条细带 ---------- */
-.star-activate-overlay {
+.star-disk .star-tooltip-title {
+  color: var(--t1);
+  margin-bottom: 2px;
+}
+
+.star-disk .star-tooltip-meta {
+  color: var(--t4);
+  font-size: 10px;
+}
+
+/* ---------- 嵌入模式未激活提示 / 空盘 ---------- */
+.star-disk .star-activate-hint {
   position: absolute;
-  inset: 0;
+  left: 12px;
+  bottom: 12px;
   z-index: 6;
-  border: none;
-  padding: 0;
-  background: transparent;
-  color: var(--star-t3);
-  cursor: pointer;
-  display: flex;
-  align-items: flex-end;
-  /* 靠左下角：右下角是图例（z-index 更高），提示带摆中间会被它压掉半截 */
-  justify-content: flex-start;
-}
-.star-activate-overlay:hover {
-  background: rgba(0, 0, 0, 0.04);
-}
-.star-activate-hint {
-  margin: 0 0 12px 12px;
   padding: 3px 12px;
-  border: 1px solid var(--star-bd);
+  border: 1px solid var(--bd);
   border-radius: 999px;
-  background: var(--star-panel);
-  color: var(--star-t3);
+  background: var(--panel);
+  color: var(--t3);
   font-size: 12px;
   letter-spacing: 1px;
   white-space: nowrap;
+  pointer-events: none;
 }
-.star-activate-overlay:hover .star-activate-hint {
-  color: var(--star-t1);
+
+.star-disk .star-empty {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--t4);
+  font-size: 13px;
+  pointer-events: none;
 }
 
 /* ---------- Trajectory 服务端组件：盘 + 报病列表 ---------- */
@@ -468,6 +617,7 @@ html.dark {
   margin-top: 16px;
   font-size: 13px;
 }
+
 .star-sick-title {
   font-weight: 600;
   margin-bottom: 6px;
@@ -481,6 +631,7 @@ html.dark {
   font-size: 13px;
   opacity: 0.85;
 }
+
 .trajectory-edge[data-kind="pivot"] {
   border-left-color: #48c9d8;
 }
