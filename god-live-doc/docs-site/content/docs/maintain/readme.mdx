@@ -178,7 +178,8 @@ format-fumadocs  mdx 与 fumadocs 是一个整体：remark 插件、序列化回
 format-html      元素既是记号又是展示区，文件即终态（final），不渲染
 trajectory       轨迹卡与星轨盘，三个入口：`.` 扫卡 / 四层校验 / 聚盘建模 / 布局与链表纯函数；
                  `./react` 客户端组件 StarDisk（随包发 star.css）；`./server` 服务端组件 Trajectory
-                 + fumadocs 的 cardSchema + remark 关系边插件。`.` 零依赖（只用 node:fs / node:path），
+                 + fumadocs 的 cardSchema + remark 关系边插件。`.` 入口的产物只 import node:
+                 （包的 dependencies 里只有 remark 那套的 unist-util-visit，给 `./server` 用），
                  react 是 peer（可选）
 ```
 

@@ -56,7 +56,7 @@ format-html      元素既是记号又是展示区，文件即终态（final）�
 pnpm 的严格 `node_modules` 让「没声明就 import 不到」，所以依赖图本身就是边界。测试直接读各包的
 `package.json` 守着：
 
-{/* ref file="../tests/boundary.test.ts" lines="42-53" */}
+{/* ref file="../tests/boundary.test.ts" lines="47-58" */}
 
 还有两条读源码的：`core/src` 下只许 import 自己和 `node:crypto`；核心不许 import 任何格式包。
 

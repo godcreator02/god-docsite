@@ -98,11 +98,11 @@ description: 聚盘、关系边、提树与主干、领域序；有效天数标�
 服务端那半只做两件事：扫一次目录，给每张盘建一次模型。**不算布局**——布局是纯函数、几毫秒的事，
 放客户端才保得住设置滑杆（改一格盘心大小、改一格空窗阈值，重算即可，不必回服务端）：
 
-{/* ref file="../packages/trajectory/src/index.ts" lines="123-140" */}
+{/* ref file="../packages/trajectory/src/index.ts" lines="123-141" */}
 
 服务端组件就是「读盘 + 建模 + 把模型交给客户端组件」，外加把报病列成一张表摆在盘下方：
 
-{/* ref file="../packages/trajectory/src/server.tsx" lines="38-42" */}
+{/* ref file="../packages/trajectory/src/server.tsx" lines="39-43" */}
 
 ## 五、盘的视觉词汇表
 
@@ -115,7 +115,7 @@ description: 聚盘、关系边、提树与主干、领域序；有效天数标�
 **形状编码 `type`。**抉择实心圆、证据三角、推演菱形、参照方形、快照空心方，缺省空心圆。这是 `type`
 的**显示读法，不是过滤**——所有卡照常上盘，盘是全量记录的镜像，关键节点靠里程碑金环呈现，不靠筛掉节点：
 
-{/* ref file="../packages/trajectory/src/react.tsx" lines="126-166" */}
+{/* ref file="../packages/trajectory/src/react.tsx" lines="133-173" */}
 
 线型上，取代是金黄虚线、转向是青色点线；根卡的里程碑画成金色加重环，标签走 6 点方向那条竖线。
 右下角的图例即筛选器：形态和领域多选取交集。
@@ -124,25 +124,26 @@ description: 聚盘、关系边、提树与主干、领域序；有效天数标�
 拼出来——盘不是卡片浏览器，读卡去卡页读，盘只负责「哪儿有什么」。**虫洞节点没有链接**：它不是一张
 要读的卡，点它是切到对应的那张盘，所以走的是另一条分支：
 
-{/* ref file="../packages/trajectory/src/react.tsx" lines="1239-1245" */}
+{/* ref file="../packages/trajectory/src/react.tsx" lines="1274-1280" */}
 
 **搜索只匹配 label 与卡身份，不搜正文**——正文根本不进传给客户端的那份数据。筛选与搜索的效果是
-「压灰」不是「删掉」：没命中的节点变中性色留在原位，盘的形状不跳：
+「压灰」不是「删掉」：没命中的节点变中性色留在原位，盘的形状不跳。**虫洞两道筛选都豁免**——
+它不是一张卡，没有形态、也不属于任何领域，按卡的口径一筛就把穿盘的入口一并灭了：
 
-{/* ref file="../packages/trajectory/src/react.tsx" lines="423-436" */}
+{/* ref file="../packages/trajectory/src/react.tsx" lines="430-445" */}
 
 ## 六、交互：先激活，再穿梭
 
 **点击激活。**盘嵌在文档流里，未激活时滚轮照常滚页面、一律不拦截；点一下盘才进交互态：
 
-{/* ref file="../packages/trajectory/src/react.tsx" lines="800-806" */}
+{/* ref file="../packages/trajectory/src/react.tsx" lines="812-818" */}
 
 激活后滚轮有两种模式：**鱼眼穿梭**（焦点带沿时间轴走，步进走的是显示域折算表，正折算 → 加步长 →
 逆折算，段边界精确不过冲）和**自由缩放**（普通的以光标为心缩放 + 拖拽漫游）。
 
 **Esc 分层释放**：先关浮层，再退出激活态，最后才回全景归位。点盘外面任何地方也退出激活态：
 
-{/* ref file="../packages/trajectory/src/react.tsx" lines="914-928" */}
+{/* ref file="../packages/trajectory/src/react.tsx" lines="949-963" */}
 
 ## 七、结构归 React，帧归 rAF
 
@@ -155,7 +156,7 @@ description: 聚盘、关系边、提树与主干、领域序；有效天数标�
 帧循环就这一小段：`kick` 是稳定引用给回调直接用，`tick` 每次渲染重新声明、经 ref 转一手，
 所以它永远看得见最新的 `place`，不会冻结在第一次渲染的闭包上：
 
-{/* ref file="../packages/trajectory/src/react.tsx" lines="775-791" */}
+{/* ref file="../packages/trajectory/src/react.tsx" lines="787-803" */}
 
 推进一帧本身是布局层的纯函数，只改传进来的两个对象、不碰 DOM，可以单独测。**鱼眼的两对补间量不在
 视图层**——它们是布局实例自己的字段，视图另立一份平行的会写不进引擎，表现是滚轮滚半天鱼眼一动不动、

@@ -13,7 +13,7 @@ description: 记忆是那个仓 HEAD 的 blob；文件在哪个仓按它自己�
 确认一处引用时，记下来的是四样：`HEAD:<文件>` 的 **blob 哈希**、当时的 commit、行段、段哈希。
 代码内容一个字都不进记录簿——它本来就在 git 的对象库里，blob 被提交树引着，不会被 gc 回收。
 
-{/* ref file="../packages/project/src/git.ts" lines="94-105" */}
+{/* ref file="../packages/project/src/git.ts" lines="110-121" */}
 
 要旧内容的时候（报黄给 diff、报红显示「文档写下时那段」），拿 blob 去 `cat-file -p` 现取。
 记录里**不记仓在哪**：blob 是内容寻址的，核对时从文件位置重新找仓就行。
@@ -23,9 +23,11 @@ description: 记忆是那个仓 HEAD 的 blob；文件在哪个仓按它自己�
 被引文件不限于项目自己的仓。另一个单元、上游 clone、工作区里别的仓，都能钉；所以「问哪个 git」
 不看项目根，看**被引文件在哪**：
 
-{/* ref file="../packages/project/src/git.ts" lines="59-65" */}
+{/* ref file="../packages/project/src/git.ts" lines="60-81" */}
 
-两步：先取**真实路径**，再从所在目录往上找第一个 `.git`。
+两步：先取**真实路径**，再往上找第一个 `.git`。从哪儿起往上找，看目标是文件还是目录——文件从它
+所在的目录起（`locate`），目录从**它自己**起（`locateDir`）：目标目录很可能自己就是仓根
+（文档里写 `tree .`），先跳一级就跳出了这个仓，`.gitignore` 过滤会整个失效。
 
 <Tabs>
   <Tab title="① 为什么先 realpath">
@@ -71,7 +73,7 @@ cwd 一律是那个仓的根——项目根是不是 git 子目录、被引文�
 
 ## 变没变：hunk 表，不自己写 diff 算法
 
-{/* ref file="../packages/project/src/git.ts" lines="136-155" */}
+{/* ref file="../packages/project/src/git.ts" lines="152-171" */}
 
 两处讲究：
 

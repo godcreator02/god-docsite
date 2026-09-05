@@ -44,7 +44,7 @@ description: 配置一项、命令两条、fumadocs 站三处，外加 Next 那�
 卡页路由）。集合级 `mdxOptions` 会把默认插件全去掉，所以要用 `applyMdxPreset` 先把默认 preset
 加回来：
 
-{/* ref file="source.config.ts" lines="20-37" */}
+{/* ref file="source.config.ts" lines="20-38" */}
 
 **livedoc 自己的 remark 插件挂在全局 `mdxOptions` 上，跑不到这个集合上**——这正是要的：
 卡正文冻结历史、不钉活代码，第四层校验守的也是这条。
@@ -72,7 +72,7 @@ React 表那一侧从 `./server` 入口拿——渲盘的是服务端组件，�
 
 压平规则那一侧：星轨盘是交互式画布，AI 那份 md 里画不出来，压成一行指路：
 
-{/* ref file="livedoc.config.mjs" lines="21-27" */}
+{/* ref file="livedoc.config.mjs" lines="24-30" */}
 
 样式随包发，`global.css` 里引一行：
 
