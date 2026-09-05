@@ -32,10 +32,15 @@ const HOST = /^(fumadocs|next$|react$|react-dom$)/;
  * `from\s*["']` 到处找：产物里字符串字面量常包含 "pivots-from" 这类含 "from" 的子串
  * （trajectory 的 EDGE_HEAD 正则源码编译进去后原样躺在那），裸正则会把它当 import 语句头，
  * 从那个引号起一路吞到几百字符外的下一个引号。tsdown/rolldown 的产物每条 import 语句独占一行，
- * 按行首锚定就躲开了这个坑。 */
+ * 按行首锚定就躲开了这个坑。
+ * 三种形态都收：`import … from "x"` / `export … from "x"`、副作用导入 `import "x"`、
+ * 动态 `import("x")`——只认 from 那一种的话，一句 `import "宿主/样式.css"` 或
+ * `await import("react")` 就能从每条边界底下溜过去。 */
 function importSpecsOf(src: string): string[] {
   const specs: string[] = [];
   for (const m of src.matchAll(/^(?:import|export)\b[^\n]*?\bfrom\s*["']([^"']+)["']/gm)) specs.push(m[1] as string);
+  for (const m of src.matchAll(/^import\s*["']([^"']+)["']/gm)) specs.push(m[1] as string);
+  for (const m of src.matchAll(/\bimport\s*\(\s*["']([^"']+)["']\s*\)/g)) specs.push(m[1] as string);
   return specs;
 }
 
@@ -104,18 +109,31 @@ test("trajectory 的 `.` 入口零 npm 依赖：产物只许 import node: 内置
   for (const spec of importSpecsOf(src)) assert.ok(spec.startsWith("node:"), `trajectory 的 . 入口产物 import 了 ${spec}`);
 });
 
-test("trajectory 的 react / server 入口：客户端指令、不打进 react、各自的边界", () => {
+test("trajectory 的 react / server 入口：客户端指令、react 只 import 不内联、各自的边界", () => {
+  // 「不打进 react」要正着断言：react 真被内联进产物时，产物里根本没有那条 import 行，
+  // 反着遍历 import 说明符的写法是恒真的（没有行就一条也遍历不到）。
+  const isReact = (spec: string): boolean => spec === "react" || spec.startsWith("react/");
   const dir = join(PACKAGES, "trajectory", "dist");
   const react = readFileSync(join(dir, "react.mjs"), "utf8");
-  assert.match(react, /^"use client";/, "react.mjs 的 use client 指令得留在头一行");
-  for (const spec of importSpecsOf(react)) {
-    assert.ok(!spec.startsWith("."), `react.mjs 把 ${spec} 打进了产物`);
-    assert.ok(!spec.startsWith("node:"), `react.mjs（客户端组件）import 了 ${spec}`);
-  }
   const server = readFileSync(join(dir, "server.mjs"), "utf8");
+  assert.match(react, /^"use client";/, "react.mjs 的 use client 指令得留在头一行");
   assert.doesNotMatch(server, /^"use client";/, "server.mjs 不该带客户端指令");
+
+  for (const [name, src] of [["react.mjs", react], ["server.mjs", server]] as const) {
+    const specs = importSpecsOf(src);
+    assert.ok(specs.some(isReact), `${name} 里没有 react 的 import 行——react 被内联进产物了`);
+    // react 本体的内部标记：真被打进来的话，光看 import 行看不出，得在正文里抓
+    assert.doesNotMatch(src, /__CLIENT_INTERNALS|react\.production/, `${name} 正文里有 react 本体的痕迹`);
+  }
+
+  // 客户端那半只许 import react：第三方也不许内联（内联的第三方跟宿主装的那份会各跑一套），
+  // node: 内置更不许（浏览器里根本没有）
+  for (const spec of importSpecsOf(react)) {
+    assert.ok(isReact(spec), `react.mjs（客户端组件）import 了 react 之外的 ${spec}`);
+  }
+  // 服务端那半可以 import node: / remark 那套 / 包名自引用的 ./react，但 react 同样只许 import
   for (const spec of importSpecsOf(server)) {
-    if (spec.startsWith("react")) assert.ok(!spec.startsWith("."), `server.mjs 把 ${spec} 打进了产物`);
+    if (spec.startsWith("react")) assert.ok(isReact(spec), `server.mjs 把 ${spec} 打进了产物`);
   }
 });
 
