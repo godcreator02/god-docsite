@@ -93,6 +93,7 @@ html.dark {
 .star-yl {
   fill: var(--star-t3);
   font-size: 10.5px;
+  letter-spacing: 1.5px;
   text-anchor: middle;
 }
 .star-ms-label {
@@ -106,17 +107,27 @@ html.dark {
 }
 
 /* ---------- 背景环 / 空窗小行星带 / 扇环框 ---------- */
-.star-ring-month {
+.star-ring-week {
   stroke: var(--star-ring);
   fill: none;
   stroke-width: 1;
   vector-effect: non-scaling-stroke;
 }
-.star-ring-year {
+.star-ring-month {
   stroke: var(--star-ring-m);
+  fill: none;
+  stroke-width: 1;
+  vector-effect: non-scaling-stroke;
+}
+/* 年环：跨年主结构线，比月环亮一档 */
+.star-ring-year {
+  stroke: rgba(150, 175, 255, 0.4);
   fill: none;
   stroke-width: 1.2;
   vector-effect: non-scaling-stroke;
+}
+.star-disk:not(.star-dark) .star-ring-year {
+  stroke: rgba(40, 60, 120, 0.38);
 }
 .star-ring-latest {
   stroke: var(--star-t3);
@@ -140,6 +151,15 @@ html.dark {
 }
 .star-gap-dot {
   fill: var(--star-ring-m);
+}
+/* 空窗起止边界环：虚线航道样式，12 点挂 MM-DD 短标签（年份归年环承载） */
+.star-gap-rim {
+  fill: none;
+  stroke: var(--star-t3);
+  opacity: 0.6;
+  stroke-width: 1;
+  stroke-dasharray: 6 4;
+  vector-effect: non-scaling-stroke;
 }
 .star-treebox {
   stroke: rgba(150, 175, 255, 0.2);

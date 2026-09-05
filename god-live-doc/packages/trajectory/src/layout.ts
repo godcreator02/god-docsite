@@ -864,44 +864,53 @@ export function gapDots(layout: RingsLayout, band: GapBand, idxStart: number): G
   return dots;
 }
 
-/** 空窗小行星带的一条：暗底雾带几何 + 碎石清单。 */
+/** 空窗小行星带的一条：暗底雾带几何 + 碎石清单 + 起止日（边界环与 12 点日期标签用）。 */
 export interface GapSkeleton {
+  /** 起止日：视图层按帧走 displayRadius(radiusDay(d)) 摆边界环、标签文字取 formatDay(d) */
+  d0: number;
+  d1: number;
   /** 暗底雾带：(ra+rb)/2 与 rb−ra，ra/rb = radiusDay(d0/d1)（全景态 displayRadius 恒等） */
   bgR: number;
   bgW: number;
   dots: GapDot[];
 }
 
-/** 全景环形骨架：月环 / 年环 / 最新环 / 空窗小行星带。 */
+/** 全景环形骨架：周环 / 月环 / 年环 / 最新环 / 空窗小行星带。
+ * 每条环都带着自己的天序数 d：视图层按帧要拿它算当地折算率（环让位空窗）与日期标签文字。 */
 export interface RingSkeleton {
+  /** 周环：7 天步进里落不到月首的那些。全景态隐、放大或进鱼眼后随缩放门渐显，显隐归视图层 */
+  weeks: Array<{ d: number; rLin: number }>;
   /** 月环：opacity = effRate(d) × monthGate(monthSpacingWorld(d)) */
-  months: Array<{ rLin: number; opacity: number }>;
+  months: Array<{ d: number; rLin: number; opacity: number }>;
   /** 年环：恒显 opacity 1 */
-  years: Array<{ rLin: number }>;
+  years: Array<{ d: number; rLin: number }>;
   /** 最新环：全景恒显 opacity 1；空盘（无卡）为 null */
   latest: { rLin: number } | null;
   gaps: GapSkeleton[];
 }
 
 /** 出全景环形骨架：纯函数，同模型同设置两次调用逐位相等（碎石走 pseudoRandom 确定性哈希）。
- * 枚举规则：d 从 day0 步进 7，isMonth = UTCDate(d) ≤ 7；年环 = day0 次年到 dayMax 年的元旦；
- * 碎石 idx 跨带连续累加。 */
+ * 枚举规则：d 从 day0 步进 7，落在 UTCDate ≤ 7 的是月环、其余是周环；年环 = day0 次年到
+ * dayMax 年的元旦；碎石 idx 跨带连续累加。 */
 export function ringSkeleton(layout: RingsLayout): RingSkeleton {
   const { day0, dayMax, cards } = layout.model;
+  const weeks: RingSkeleton["weeks"] = [];
   const months: RingSkeleton["months"] = [];
   for (let d = day0; d <= dayMax; d += 7) {
     if (new Date(d * 86400000).getUTCDate() <= 7) {
       months.push({
+        d,
         rLin: layout.radiusDay(d),
         opacity: layout.effRate(d) * monthGate(layout.monthSpacingWorld(d)),
       });
-    }
+    } else weeks.push({ d, rLin: layout.radiusDay(d) });
   }
   const years: RingSkeleton["years"] = [];
   const y0 = new Date(day0 * 86400000).getUTCFullYear() + 1;
   const y1 = new Date(dayMax * 86400000).getUTCFullYear();
   for (let y = y0; y <= y1; y++) {
-    years.push({ rLin: layout.radiusDay(Date.parse(`${y}-01-01T00:00:00Z`) / 86400000) });
+    const d = Date.parse(`${y}-01-01T00:00:00Z`) / 86400000;
+    years.push({ d, rLin: layout.radiusDay(d) });
   }
   const latest = cards.length ? { rLin: layout.radiusDay(dayMax) } : null;
 
@@ -911,7 +920,7 @@ export function ringSkeleton(layout: RingsLayout): RingSkeleton {
     const rb = layout.radiusDay(b.d1);
     const dots = gapDots(layout, b, idx);
     idx += dots.length;
-    return { bgR: (ra + rb) / 2, bgW: Math.max(0, rb - ra), dots };
+    return { d0: b.d0, d1: b.d1, bgR: (ra + rb) / 2, bgW: Math.max(0, rb - ra), dots };
   });
-  return { months, years, latest, gaps };
+  return { weeks, months, years, latest, gaps };
 }

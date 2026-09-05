@@ -23,6 +23,7 @@ import {
   advanceFrame,
   bandFade,
   DEG,
+  LOD_MIN,
   lodOf,
   NODE_RADIUS,
   polar,
@@ -30,6 +31,7 @@ import {
   ROOT_RADIUS,
   RingsLayout,
   smoothstep,
+  SPREAD_DEG,
 } from "./layout.ts";
 import type { FrameState } from "./layout.ts";
 import { buildChains, computeDodge } from "./chains.ts";
@@ -55,6 +57,8 @@ const DOMAIN_HUES: Record<"dark" | "light", string[]> = {
   light: ["#2b6fd4", "#8b47d6", "#0e9e63", "#d6478a", "#6f8f14", "#c2760c", "#0891b2", "#be185d"],
 };
 
+/** hubStroke 是盘心圆的静息描边，跟 star.css 的 `.star-hub-circle` 同值：贴时间轴端点时
+ * place() 拿它跟 warn 混色、直接写 stroke 属性盖住 CSS，退出警示区再把属性摘掉交还 CSS。 */
 const THEME_COLORS: Record<"dark" | "light", Record<string, string>> = {
   dark: {
     sup: "#f5b942",
@@ -64,6 +68,8 @@ const THEME_COLORS: Record<"dark" | "light", Record<string, string>> = {
     noDomain: "#8fa0c8",
     worm: "#e8c766",
     nodeStroke: "rgba(255,255,255,0.75)",
+    hubStroke: "#5a6a94",
+    warn: "#f5b942",
   },
   light: {
     sup: "#c07f10",
@@ -73,8 +79,27 @@ const THEME_COLORS: Record<"dark" | "light", Record<string, string>> = {
     noDomain: "#5d6a8c",
     worm: "#a9791a",
     nodeStroke: "rgba(22,30,52,0.55)",
+    hubStroke: "#b6c0d8",
+    warn: "#d97706",
   },
 };
+
+/** 盘面模式字样：盘心全景态显示，切模式即见反馈。 */
+const MODE_NAME: Record<"fisheye" | "zoom", string> = { fisheye: "鱼眼穿梭", zoom: "自由缩放" };
+
+/** 扇环框路径：内弧 → 径线 → 外弧 → 径线闭合。半径由调用方按当前显示半径给，
+ * 鱼眼变形时框跟着节点一起走。 */
+function sectorPath(th0: number, th1: number, r0: number, r1: number): string {
+  const large = th1 - th0 > 180 ? 1 : 0;
+  const p0 = polar(th0, r0);
+  const p1 = polar(th1, r0);
+  const p2 = polar(th1, r1);
+  const p3 = polar(th0, r1);
+  return (
+    `M${p0.x},${p0.y} A${r0},${r0} 0 ${large} 1 ${p1.x},${p1.y} ` +
+    `L${p2.x},${p2.y} A${r1},${r1} 0 ${large} 0 ${p3.x},${p3.y} Z`
+  );
+}
 
 /** 十六进制颜色按 t 混合，t=0 是 c1、t=1 是 c2——被取代卡与领域色混灰用。 */
 function mix(c1: string, c2: string, t: number): string {
@@ -260,6 +285,31 @@ export function StarDisk({ data, hrefBase, size, initialDisk }: StarDiskProps): 
   const nodeRefs = useRef(new Map<string, SVGGElement>());
   const labelRefs = useRef(new Map<string, SVGTextElement>());
   const edgeRefs = useRef(new Map<number, SVGPathElement | SVGLineElement>());
+  /* 环类元素统一进这两张表，键带类别前缀：周环 w、月环 m、年环 y、最新环 latest、
+   * 空窗雾带 gb、空窗起止边界环 gr、里程碑 ms。半径全由 place() 逐帧写，鱼眼一变形
+   * 环得跟着节点走——静态钉死的环会在鱼眼态跟卡整片脱节。 */
+  const ringCircleRefs = useRef(new Map<string, SVGCircleElement>());
+  const ringLabelRefs = useRef(new Map<string, SVGTextElement>());
+  const gapDotRefs = useRef(new Map<string, SVGCircleElement>());
+  /** 扇环框路径：树扇环在前、孤星带与虫洞带接在后面，索引跟 allBoxes 一致 */
+  const boxPathRefs = useRef(new Map<number, SVGPathElement>());
+
+  const ringCircleRef = (key: string) => (el: SVGCircleElement | null) => {
+    if (el) ringCircleRefs.current.set(key, el);
+    else ringCircleRefs.current.delete(key);
+  };
+  const ringLabelRef = (key: string) => (el: SVGTextElement | null) => {
+    if (el) ringLabelRefs.current.set(key, el);
+    else ringLabelRefs.current.delete(key);
+  };
+  const gapDotRef = (key: string) => (el: SVGCircleElement | null) => {
+    if (el) gapDotRefs.current.set(key, el);
+    else gapDotRefs.current.delete(key);
+  };
+  const boxPathRef = (i: number) => (el: SVGPathElement | null) => {
+    if (el) boxPathRefs.current.set(i, el);
+    else boxPathRefs.current.delete(i);
+  };
 
   const [measuredSize, setMeasuredSize] = useState<number | null>(size ?? null);
   const [dark, setDark] = useState(false);
@@ -316,6 +366,7 @@ export function StarDisk({ data, hrefBase, size, initialDisk }: StarDiskProps): 
   const serialized = currentDisk ? data.models[currentDisk] : undefined;
   const model = useMemo(() => toRuntimeModel(serialized), [serialized]);
   const runtimeNodes = useMemo(() => buildRuntimeNodes(model, routeById), [model, routeById]);
+  const isEmpty = model.cards.length === 0 && model.wormholes.length === 0;
   const rootRoute = model.root ? routeById.get(model.root.id) : undefined;
   const milestones = useMemo(
     () => (rootRoute?.milestones ? inRange(rootRoute.milestones, model.day0, model.dayMax) : []),
@@ -352,6 +403,11 @@ export function StarDisk({ data, hrefBase, size, initialDisk }: StarDiskProps): 
   const treeBoxes = useMemo(() => layout?.treeBoxes ?? [], [layout, geometryVersion]);
   const isoBoxes = useMemo(() => layout?.isoBoxes ?? [], [layout, geometryVersion]);
   const wormBox = layout?.wormBox ?? null;
+  /** 全部扇环框按 place() 的更新序摊平：树在前、孤星带与虫洞带在后 */
+  const allBoxes = useMemo(
+    () => [...treeBoxes, ...isoBoxes, ...(wormBox ? [wormBox] : [])],
+    [treeBoxes, isoBoxes, wormBox],
+  );
   const chains = useMemo(() => (layout ? buildChains(model, layout) : []), [layout, model, geometryVersion]);
   const edgeList = useMemo(
     () =>
@@ -441,11 +497,15 @@ export function StarDisk({ data, hrefBase, size, initialDisk }: StarDiskProps): 
   const place = useCallback(() => {
     if (!layout || !skeleton) return;
     const fr = frame.current;
-    /* 鱼眼强度从引擎读，不从组件读——这一步就是「补间跟引擎接上」的接缝 */
+    const f = layout.focusDay;
     const s = layout.strength;
     const ik = 1 / fr.view.k;
     const kRatio = fr.view.k / (effectiveSize ? fitK(effectiveSize) : 1);
     const dodge = computeDodge(chains, layout, fr.view.k);
+    /* 12 点竖线（周环 / 月环 / 空窗起止 / 年环）与 6 点竖线（里程碑）各一个报名处：
+     * 沿途只报名不定显隐，末尾各自贪心裁决——同线上挤在一起的标签叠成一团比少几个更难读 */
+    const labelClaims: Array<{ r: number; prio: number; label: SVGTextElement }> = [];
+    const msClaims: Array<{ r: number; label: SVGTextElement }> = [];
 
     if (bandRef.current) {
       if (s > 0.003) {
@@ -460,21 +520,122 @@ export function StarDisk({ data, hrefBase, size, initialDisk }: StarDiskProps): 
       }
     }
 
+    /* 背景环：周环随缩放展开（全景只留月环，放大 / 进鱼眼后渐显），月环渐隐保底不归零；
+     * 两者都乘当地折算率给空窗让位（荒年密环糊成灰带，信号交给小行星带） */
+    const putRing = (key: string, d: number, rLin: number, isMonth: boolean): void => {
+      const r2 = layout.displayRadius(rLin);
+      const m = layout.mag(rLin);
+      const t = Math.min(1, Math.max(0, (m - 0.3) / 0.4));
+      const tWeek = smoothstep(1.2, 2.2, m * kRatio);
+      const gapMute = layout.effRate(d);
+      const circle = ringCircleRefs.current.get(key);
+      if (circle) {
+        circle.setAttribute("r", String(r2));
+        circle.setAttribute("opacity", String((isMonth ? 0.27 + 0.73 * t : t * tWeek) * gapMute));
+      }
+      const label = ringLabelRefs.current.get(key);
+      if (!label) return;
+      label.setAttribute("transform", `translate(0,${-r2 - 5 * ik}) scale(${ik})`);
+      const reff = m * kRatio;
+      const want = gapMute > 0.5 && ((!isMonth && reff > 1.6) || (isMonth && reff > 0.25));
+      if (want) labelClaims.push({ r: r2, prio: isMonth ? 2 : 1, label });
+      else label.style.display = "none";
+    };
+    skeleton.weeks.forEach((w, i) => putRing(`w${i}`, w.d, w.rLin, false));
+    skeleton.months.forEach((mo, i) => putRing(`m${i}`, mo.d, mo.rLin, true));
+
+    /* 年环：跨年主结构线，恒显不吃 LOD 门、空窗内不让位，标签优先级最高 */
+    skeleton.years.forEach((ye, i) => {
+      const r2 = layout.displayRadius(ye.rLin);
+      ringCircleRefs.current.get(`y${i}`)?.setAttribute("r", String(r2));
+      const label = ringLabelRefs.current.get(`y${i}`);
+      if (!label) return;
+      label.setAttribute("transform", `translate(0,${-r2 - 6 * ik}) scale(${ik})`);
+      labelClaims.push({ r: r2, prio: 4, label });
+    });
+    if (skeleton.latest) {
+      ringCircleRefs.current
+        .get("latest")
+        ?.setAttribute("r", String(layout.displayRadius(skeleton.latest.rLin)));
+    }
+
+    /* 空窗小行星带：雾带与碎石随鱼眼变形，碎石尺寸吃局部放大率（上限比节点松）；
+     * 起止边界环挂 12 点短日期标签，优先级排在年环之后、月周环之前 */
+    skeleton.gaps.forEach((gb, gi) => {
+      const ra = layout.displayRadius(layout.radiusDay(gb.d0));
+      const rb = layout.displayRadius(layout.radiusDay(gb.d1));
+      const bg = ringCircleRefs.current.get(`gb${gi}`);
+      if (bg) {
+        bg.setAttribute("r", String((ra + rb) / 2));
+        bg.setAttribute("stroke-width", String(Math.max(0, rb - ra)));
+      }
+      gb.dots.forEach((gd, di) => {
+        const node = gapDotRefs.current.get(`${gi}-${di}`);
+        if (!node) return;
+        const m = layout.mag(gd.rLin);
+        const p = polar(gd.ang, layout.displayRadius(gd.rLin));
+        node.setAttribute("cx", String(p.x));
+        node.setAttribute("cy", String(p.y));
+        node.setAttribute("r", String(gd.size * Math.min(3, Math.max(LOD_MIN, Math.sqrt(m))) * ik));
+        node.setAttribute(
+          "opacity",
+          String(Math.min(1, gd.op + 0.3 * smoothstep(1.5, 3, m)) * bandFade(m, s)),
+        );
+      });
+      [gb.d0, gb.d1].forEach((d, k) => {
+        const r2 = layout.displayRadius(layout.radiusDay(d));
+        ringCircleRefs.current.get(`gr${gi}-${k}`)?.setAttribute("r", String(r2));
+        const label = ringLabelRefs.current.get(`gr${gi}-${k}`);
+        if (!label) return;
+        label.setAttribute("transform", `translate(0,${-r2 - 5 * ik}) scale(${ik})`);
+        labelClaims.push({ r: r2, prio: 3, label });
+      });
+    });
+
+    /* 里程碑环：随鱼眼变形，标签恒在 6 点方向（正上让给日期标签），仲裁按日期先后先到先得 */
+    milestones.forEach((ms, i) => {
+      const r2 = layout.displayRadius(layout.radius(ms.date));
+      ringCircleRefs.current.get(`ms${i}`)?.setAttribute("r", String(r2));
+      const label = ringLabelRefs.current.get(`ms${i}`);
+      if (!label) return;
+      const p = polar(180, r2);
+      label.setAttribute("transform", `translate(${p.x},${p.y + 12 * ik}) scale(${ik})`);
+      msClaims.push({ r: r2, label });
+    });
+
+    /* 扇环框：内外弧走显示半径，径向两端各放 16 世界单位余量包住节点 */
+    allBoxes.forEach((b, i) => {
+      const node = boxPathRefs.current.get(i);
+      if (!node) return;
+      const r0 = Math.max(layout.innerR, layout.displayRadius(b.rMin) - 16);
+      const r1 = layout.displayRadius(b.rMax) + 16;
+      node.setAttribute("d", sectorPath(b.th0, b.th1, r0, r1));
+    });
+
+    /* 节点：先摆完存下角度 / 半径 / 缩放，边随后照抄同一份，两头绝不各算各的 */
+    const geom = new Map<string, { ang: number; r: number; sc: number }>();
     for (const [id, n] of runtimeNodes) {
       const p = layout.places.get(id);
-      const g = nodeRefs.current.get(id);
-      if (!p || !g) continue;
+      if (!p) continue;
       const m = layout.mag(p.rLin);
       const lod = lodOf(m);
-      /* 悬停补间由 advanceFrame 推，这里只读当前值——摆放不该顺手改帧态 */
       if (!fr.hv.has(id)) fr.hv.set(id, 0);
       const hv = fr.hv.get(id) as number;
       const r2 = layout.displayRadius(p.rLin);
-      const sc = 0.65 * lod * ik * (1 + 0.4 * hv);
-      const ang = p.angBase + p.spreadOff + (dodge.get(id) ?? 0);
+      const sc = layout.symbolPx * lod * ik * (1 + 0.4 * hv);
+      /* 同日串珠动态展开：基础角偏是烘焙期定的固定档，这里按当前屏幕弧长现算所需角距——
+       * 进了焦点带（gate 开）才把挤在一起的同日卡撑开，带外收回基础档，串珠不满屏乱飞。
+       * 所需直径不吃 hover 放大：hover 不该抖布局。 */
+      const diamPx = 2 * NODE_RADIUS[n.superseded ? "superseded" : "alive"] * layout.symbolPx * lod;
+      const needDeg = ((diamPx + 14) / (r2 * fr.view.k)) * DEG;
+      const spreadDeg = SPREAD_DEG + Math.max(0, needDeg - SPREAD_DEG) * smoothstep(1.5, 3, m);
+      const ang = p.angBase + (p.spreadOff / SPREAD_DEG) * spreadDeg + (dodge.get(id) ?? 0);
+      geom.set(id, { ang, r: r2, sc });
+      const g = nodeRefs.current.get(id);
+      if (!g) continue;
       const pos = polar(ang, r2);
       g.setAttribute("transform", `translate(${pos.x},${pos.y}) scale(${sc})`);
-      g.style.opacity = String(bandFade(m, s) * (runtimeNodes.get(id)?.superseded ? 0.55 : 1));
+      g.style.opacity = String(bandFade(m, s) * (n.superseded ? 0.55 : 1));
       const label = labelRefs.current.get(id);
       if (label) {
         const na = ((ang % 360) + 360) % 360;
@@ -489,7 +650,7 @@ export function StarDisk({ data, hrefBase, size, initialDisk }: StarDiskProps): 
           anchor = "start";
           dy = 3.5;
         }
-        const lp = polar(ang, r2 - 6 * sc - 6 * ik);
+        const lp = polar(ang, r2 - NODE_RADIUS.alive * sc - 6 * ik);
         label.style.textAnchor = anchor;
         label.setAttribute("transform", `translate(${lp.x},${lp.y + dy * ik}) scale(${ik})`);
         const eff = m * kRatio;
@@ -498,31 +659,25 @@ export function StarDisk({ data, hrefBase, size, initialDisk }: StarDiskProps): 
       }
     }
 
-    // 边：端点跟节点同一套 displayRadius / dodge，随鱼眼实时变形——退距按端点当前的
+    // 边：端点抄节点那份 geom（角度含动态串珠展开与避让），随鱼眼实时变形——退距按端点当前的
     // 屏幕直径算（跟节点缩放同一份 sc 口径），箭头尖不扎进节点。
     for (const [i, e] of edgeList.entries()) {
-      const pa = layout.places.get(e.from);
-      const pb = layout.places.get(e.to);
+      const ga = geom.get(e.from);
+      const gbEnd = geom.get(e.to);
       const node = edgeRefs.current.get(i);
-      if (!pa || !pb || !node) continue;
-      const angA = pa.angBase + pa.spreadOff + (dodge.get(e.from) ?? 0);
-      const angB = pb.angBase + pb.spreadOff + (dodge.get(e.to) ?? 0);
-      const rA = layout.displayRadius(pa.rLin);
-      const rB = layout.displayRadius(pb.rLin);
-      const scA = 0.65 * lodOf(layout.mag(pa.rLin)) * ik;
-      const scB = 0.65 * lodOf(layout.mag(pb.rLin)) * ik;
-      const iaR = NODE_RADIUS.alive * scA + 3 * ik;
-      const ibR = NODE_RADIUS.alive * scB + 2 * ik;
+      if (!ga || !gbEnd || !node) continue;
+      const iaR = NODE_RADIUS.alive * ga.sc + 3 * ik;
+      const ibR = NODE_RADIUS.alive * gbEnd.sc + 2 * ik;
       if (e.sameDay) {
-        const da = (iaR / rA) * DEG;
-        const db = (ibR / rB) * DEG;
-        const sq = Math.min(1, Math.max(0, ((angB - angA) * 0.8) / Math.max(1e-6, da + db)));
-        const pA = polar(angA + da * sq, rA);
-        const pB = polar(angB - db * sq, rB);
-        node.setAttribute("d", `M${pA.x},${pA.y} A${rA},${rA} 0 0 1 ${pB.x},${pB.y}`);
+        const da = (iaR / ga.r) * DEG;
+        const db = (ibR / gbEnd.r) * DEG;
+        const sq = Math.min(1, Math.max(0, ((gbEnd.ang - ga.ang) * 0.8) / Math.max(1e-6, da + db)));
+        const pA = polar(ga.ang + da * sq, ga.r);
+        const pB = polar(gbEnd.ang - db * sq, gbEnd.r);
+        node.setAttribute("d", `M${pA.x},${pA.y} A${ga.r},${ga.r} 0 0 1 ${pB.x},${pB.y}`);
       } else {
-        const posA = polar(angA, rA);
-        const posB = polar(angB, rB);
+        const posA = polar(ga.ang, ga.r);
+        const posB = polar(gbEnd.ang, gbEnd.r);
         const len = Math.hypot(posB.x - posA.x, posB.y - posA.y) || 1;
         const ux = (posB.x - posA.x) / len;
         const uy = (posB.y - posA.y) / len;
@@ -531,14 +686,50 @@ export function StarDisk({ data, hrefBase, size, initialDisk }: StarDiskProps): 
         node.setAttribute("x2", String(posB.x - ux * ibR));
         node.setAttribute("y2", String(posB.y - uy * ibR));
       }
-      const em = Math.max(layout.mag(pa.rLin), layout.mag(pb.rLin));
+      const pa = layout.places.get(e.from);
+      const pb = layout.places.get(e.to);
+      const em = Math.max(layout.mag(pa?.rLin ?? 0), layout.mag(pb?.rLin ?? 0));
       node.setAttribute("opacity", String(0.85 * (1 - 0.5 * s * (1 - smoothstep(1.2, 2.5, em)))));
     }
 
     // 盘心与树名是静态文字（不像节点标签走逐帧 ref 更新），但同样躺在被缩放的世界坐标系里：
     // 不反向抵消 view.k 的话，字号会跟着整盘的缩放比例一起缩水——世界大（盘深）时几乎看不见。
     if (hubTitleRef.current) hubTitleRef.current.setAttribute("transform", `translate(0,${-6 * ik}) scale(${ik})`);
-    if (hubStatusRef.current) hubStatusRef.current.setAttribute("transform", `translate(0,${16 * ik}) scale(${ik})`);
+    /* 盘心状态文字整块由 place() 写：JSX 里那个 <text> 故意不带任何子节点——React 不碰
+     * 它没渲染过的子树，逐帧改文本才不会跟重渲染打架。贴时间轴端点时盘心圈渐变警示色，
+     * 退出警示区把 stroke 属性摘掉、颜色交还 star.css。 */
+    const hubStatus = hubStatusRef.current;
+    if (hubStatus) {
+      hubStatus.setAttribute("transform", `translate(0,${16 * ik}) scale(${ik})`);
+      if (s < 0.01) {
+        hubStatus.textContent = isEmpty
+          ? "还没有记录"
+          : `${formatDay(model.day0)} → ${formatDay(model.dayMax)} · ${MODE_NAME[mode]}`;
+        hubStatus.style.fill = "";
+      } else {
+        /* 鱼眼态：内外圈日期从焦点带的线性域边界经引擎逆映射反解，换行显示（单行小圆装不下） */
+        const clampDay = (n: number): number => Math.max(model.day0, Math.min(model.dayMax, n));
+        const dA = formatDay(Math.round(clampDay(layout.dayOfRadius(layout.bandLinear[0]))));
+        const dB = formatDay(Math.round(clampDay(layout.dayOfRadius(layout.bandLinear[1]))));
+        const early = layout.focusDayTarget <= model.day0 + 1e-9 && f <= model.day0 + 0.6;
+        const late = !early && layout.focusDayTarget >= model.dayMax - 1e-9 && f >= model.dayMax - 0.6;
+        hubStatus.innerHTML =
+          `<tspan x="0" dy="0">内圈 ${dA}${early ? " · 已到最早" : ""}</tspan>` +
+          `<tspan x="0" dy="13">外圈 ${dB}${late ? " · 已到最新" : ""}</tspan>`;
+        hubStatus.style.fill = early || late ? (THEME_COLORS[themeName]["warn"] as string) : "";
+      }
+    }
+    const hubCircle = hubCircleRef.current;
+    if (hubCircle) {
+      const distEnd = Math.min(f - model.day0, model.dayMax - f);
+      const warnT = s * (1 - smoothstep(0, 2, distEnd));
+      if (warnT > 0.01) {
+        hubCircle.setAttribute(
+          "stroke",
+          mix(THEME_COLORS[themeName]["hubStroke"] as string, THEME_COLORS[themeName]["warn"] as string, warnT),
+        );
+      } else hubCircle.removeAttribute("stroke");
+    }
     for (const [i, b] of treeBoxes.entries()) {
       const ref = treeNameRefs.current.get(i);
       if (!ref) continue;
@@ -546,8 +737,40 @@ export function StarDisk({ data, hrefBase, size, initialDisk }: StarDiskProps): 
       const p = polar(b.angMid, rT);
       ref.setAttribute("transform", `translate(${p.x},${p.y}) scale(${ik})`);
     }
+
+    /* 拥挤仲裁收尾：同一条竖线上贪心占位，屏幕间距不足 14px 的后来者让隐 */
+    const arbitrate = (claims: Array<{ r: number; label: SVGTextElement }>): void => {
+      const taken: number[] = [];
+      const minGap = 14 * ik;
+      for (const c of claims) {
+        const ok = !taken.some((y) => Math.abs(y - c.r) < minGap);
+        c.label.style.display = ok ? "" : "none";
+        if (ok) taken.push(c.r);
+      }
+    };
+    labelClaims.sort((a, b) => b.prio - a.prio);
+    arbitrate(labelClaims);
+    arbitrate(msClaims);
     applyView();
-  }, [layout, skeleton, runtimeNodes, chains, edgeList, effectiveSize, fitK, applyView, showAllLabels, treeBoxes]);
+  }, [
+    layout,
+    skeleton,
+    runtimeNodes,
+    chains,
+    edgeList,
+    effectiveSize,
+    fitK,
+    applyView,
+    showAllLabels,
+    treeBoxes,
+    allBoxes,
+    milestones,
+    mode,
+    isEmpty,
+    themeName,
+    model.day0,
+    model.dayMax,
+  ]);
 
   // kick 是稳定引用（[] 依赖，给 wheel / 点击等回调直接用），但每帧要跑的 tick 得看到
   // 当前渲染里最新的 place / settings / layout——tick 本身照常每次渲染重新声明，
@@ -747,8 +970,6 @@ export function StarDisk({ data, hrefBase, size, initialDisk }: StarDiskProps): 
     );
   }
 
-  const isEmpty = model.cards.length === 0 && model.wormholes.length === 0;
-
   return (
     <div
       ref={containerRef}
@@ -782,16 +1003,26 @@ export function StarDisk({ data, hrefBase, size, initialDisk }: StarDiskProps): 
         <g ref={worldRef}>
           <circle ref={bandRef} cx={0} cy={0} r={0} fill="none" strokeWidth={0} />
 
-          {/* 空窗小行星带 */}
+          {/* 空窗小行星带：雾带 + 碎石 + 起止边界环与 12 点日期标签（几何全由 place() 逐帧写，
+              这里给的是全景态初值，静态渲染那一趟看到的就是它） */}
           <g className="star-gap-layer">
             {skeleton?.gaps.map((gb, gi) => (
               <g key={`gap-${gi}`}>
-                <circle className="star-gap-bg" cx={0} cy={0} r={gb.bgR} fill="none" strokeWidth={gb.bgW} />
+                <circle
+                  ref={ringCircleRef(`gb${gi}`)}
+                  className="star-gap-bg"
+                  cx={0}
+                  cy={0}
+                  r={gb.bgR}
+                  fill="none"
+                  strokeWidth={gb.bgW}
+                />
                 {gb.dots.map((gd, di) => {
                   const p = polar(gd.ang, gd.rLin);
                   return (
                     <circle
                       key={`dot-${gi}-${di}`}
+                      ref={gapDotRef(`${gi}-${di}`)}
                       cx={p.x}
                       cy={p.y}
                       r={gd.size}
@@ -800,86 +1031,104 @@ export function StarDisk({ data, hrefBase, size, initialDisk }: StarDiskProps): 
                     />
                   );
                 })}
+                {[gb.d0, gb.d1].map((d, k) => (
+                  <g key={`rim-${gi}-${k}`}>
+                    <circle
+                      ref={ringCircleRef(`gr${gi}-${k}`)}
+                      className="star-gap-rim"
+                      cx={0}
+                      cy={0}
+                      r={layout ? layout.radiusDay(d) : 0}
+                    />
+                    <text ref={ringLabelRef(`gr${gi}-${k}`)} className="star-daylabel">
+                      {formatDay(d)}
+                    </text>
+                  </g>
+                ))}
               </g>
             ))}
           </g>
 
-          {/* 周月环 */}
-          {skeleton?.months.map((rg, i) => {
-            const p0 = polar(0, rg.rLin);
-            return (
-              <g key={`month-${i}`}>
-                <circle cx={0} cy={0} r={rg.rLin} className="star-ring-month" opacity={rg.opacity} />
-                <text x={p0.x} y={-rg.rLin - 5} className="star-daylabel">
-                  {formatDay(0)}
-                </text>
-              </g>
-            );
-          })}
+          {/* 周环 / 月环 / 年环 / 最新环：半径与显隐都归 place()，标签走 12 点拥挤仲裁 */}
+          {skeleton?.weeks.map((w, i) => (
+            <g key={`week-${i}`}>
+              <circle ref={ringCircleRef(`w${i}`)} cx={0} cy={0} r={w.rLin} className="star-ring-week" opacity={0} />
+              <text ref={ringLabelRef(`w${i}`)} className="star-daylabel">
+                {formatDay(w.d)}
+              </text>
+            </g>
+          ))}
+          {skeleton?.months.map((rg, i) => (
+            <g key={`month-${i}`}>
+              <circle
+                ref={ringCircleRef(`m${i}`)}
+                cx={0}
+                cy={0}
+                r={rg.rLin}
+                className="star-ring-month"
+                opacity={rg.opacity}
+              />
+              <text ref={ringLabelRef(`m${i}`)} className="star-daylabel">
+                {formatDay(rg.d)}
+              </text>
+            </g>
+          ))}
           {skeleton?.years.map((ye, i) => (
-            <circle key={`year-${i}`} cx={0} cy={0} r={ye.rLin} className="star-ring-year" />
+            <g key={`year-${i}`}>
+              <circle ref={ringCircleRef(`y${i}`)} cx={0} cy={0} r={ye.rLin} className="star-ring-year" />
+              <text ref={ringLabelRef(`y${i}`)} className="star-yl">
+                {new Date(ye.d * 86400000).getUTCFullYear()}
+              </text>
+            </g>
           ))}
           {skeleton?.latest ? (
-            <circle cx={0} cy={0} r={skeleton.latest.rLin} className="star-ring-latest" />
+            <circle ref={ringCircleRef("latest")} cx={0} cy={0} r={skeleton.latest.rLin} className="star-ring-latest" />
           ) : null}
 
-          {/* 里程碑：金色环 + 6 点标签 */}
-          {milestones.map((m, i) => {
-            const rLin = layout ? layout.radius(m.date) : 0;
-            const p = polar(180, rLin);
-            return (
-              <g key={`ms-${i}`}>
-                <circle cx={0} cy={0} r={rLin} className="star-ring-milestone" opacity={0.35} />
-                <text x={p.x} y={p.y + 12} className="star-ms-label" opacity={0.85}>
-                  {formatDay(dayNum(m.date))} {m.name}
-                </text>
-              </g>
-            );
-          })}
-
-          {/* 扇环框 + 树名 */}
-          {treeBoxes.map((b, i) => {
-            const r0 = Math.max(layout?.innerR ?? 0, b.rMin - 16);
-            const r1 = b.rMax + 16;
-            const large = b.th1 - b.th0 > 180 ? 1 : 0;
-            const p0 = polar(b.th0, r0);
-            const p1 = polar(b.th1, r0);
-            const p2 = polar(b.th1, r1);
-            const p3 = polar(b.th0, r1);
-            return (
-              <g key={`box-${i}`}>
-                <path
-                  className="star-treebox"
-                  d={`M${p0.x},${p0.y} A${r0},${r0} 0 ${large} 1 ${p1.x},${p1.y} L${p2.x},${p2.y} A${r1},${r1} 0 ${large} 0 ${p3.x},${p3.y} Z`}
-                />
-                <text
-                  ref={(el) => {
-                    if (el) treeNameRefs.current.set(i, el);
-                    else treeNameRefs.current.delete(i);
-                  }}
-                  className="star-treename"
-                >
-                  {b.name}
-                </text>
-              </g>
-            );
-          })}
-          {[...isoBoxes, ...(wormBox ? [wormBox] : [])].map((b, i) => {
-            const r0 = Math.max(layout?.innerR ?? 0, b.rMin - 16);
-            const r1 = b.rMax + 16;
-            const large = b.th1 - b.th0 > 180 ? 1 : 0;
-            const p0 = polar(b.th0, r0);
-            const p1 = polar(b.th1, r0);
-            const p2 = polar(b.th1, r1);
-            const p3 = polar(b.th0, r1);
-            return (
-              <path
-                key={`isobox-${i}`}
-                className="star-treebox star-isobox"
-                d={`M${p0.x},${p0.y} A${r0},${r0} 0 ${large} 1 ${p1.x},${p1.y} L${p2.x},${p2.y} A${r1},${r1} 0 ${large} 0 ${p3.x},${p3.y} Z`}
+          {/* 里程碑：金色环 + 6 点标签（标签走 6 点那条竖线的仲裁） */}
+          {milestones.map((m, i) => (
+            <g key={`ms-${i}`}>
+              <circle
+                ref={ringCircleRef(`ms${i}`)}
+                cx={0}
+                cy={0}
+                r={layout ? layout.radius(m.date) : 0}
+                className="star-ring-milestone"
+                opacity={0.35}
               />
-            );
-          })}
+              <text ref={ringLabelRef(`ms${i}`)} className="star-ms-label" opacity={0.85}>
+                {formatDay(dayNum(m.date))} {m.name}
+              </text>
+            </g>
+          ))}
+
+          {/* 扇环框 + 树名：框的内外弧也吃 displayRadius，鱼眼变形时不跟节点脱节 */}
+          {treeBoxes.map((b, i) => (
+            <g key={`box-${i}`}>
+              <path
+                ref={boxPathRef(i)}
+                className="star-treebox"
+                d={sectorPath(b.th0, b.th1, Math.max(layout?.innerR ?? 0, b.rMin - 16), b.rMax + 16)}
+              />
+              <text
+                ref={(el) => {
+                  if (el) treeNameRefs.current.set(i, el);
+                  else treeNameRefs.current.delete(i);
+                }}
+                className="star-treename"
+              >
+                {b.name}
+              </text>
+            </g>
+          ))}
+          {[...isoBoxes, ...(wormBox ? [wormBox] : [])].map((b, i) => (
+            <path
+              key={`isobox-${i}`}
+              ref={boxPathRef(treeBoxes.length + i)}
+              className="star-treebox star-isobox"
+              d={sectorPath(b.th0, b.th1, Math.max(layout?.innerR ?? 0, b.rMin - 16), b.rMax + 16)}
+            />
+          ))}
 
           {/* 边：取代金黄虚线，转向青色点线 */}
           <defs>
@@ -939,9 +1188,9 @@ export function StarDisk({ data, hrefBase, size, initialDisk }: StarDiskProps): 
             <text ref={hubTitleRef} className="star-hub-title">
               {isEmpty ? "还没有记录" : (model.root?.label ?? diskLabel(rootDiskId ?? ""))}
             </text>
-            <text ref={hubStatusRef} className="star-hub-status">
-              {`${formatDay(model.day0)} → ${formatDay(model.dayMax)}`}
-            </text>
+            {/* 状态行故意不给子节点：全景一行、鱼眼两行 tspan，整块由 place() 逐帧写，
+                React 不碰它没渲染过的子树，重渲染不会把当前帧的文字抹掉 */}
+            <text ref={hubStatusRef} className="star-hub-status" />
           </g>
 
           {/* 节点：卡 + 虫洞 */}
