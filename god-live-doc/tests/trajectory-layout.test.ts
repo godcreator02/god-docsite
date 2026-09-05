@@ -191,6 +191,37 @@ test("全景环形骨架：月环枚举步进 7、每月一条（UTCDate ≤ 7�
   assert.equal(sk.months.length, want.length);
 });
 
+test("全景环形骨架：周环 = 步进 7 里落不到月首的那些；周月两拨合起来正好是全部步进点", () => {
+  // 老仓那条断言的标题写着「无周环」——那一版 ringSkeleton 只出月环。这一版有周环了，
+  // 换成新口径接着守：周环得真有，且跟月环一天都不重、两拨并起来不多不少就是全部步进点。
+  const ref = new RingsLayout(m);
+  const sk = ringSkeleton(ref);
+  const steps: number[] = [];
+  const monthDays: number[] = [];
+  const weekDays: number[] = [];
+  for (let d = m.day0; d <= m.dayMax; d += 7) {
+    steps.push(d);
+    (new Date(d * 86400000).getUTCDate() <= 7 ? monthDays : weekDays).push(d);
+  }
+  assert.ok(sk.weeks.length > 0, "fixture 跨了好几个月，周环不该一条都没有");
+  assert.deepEqual(sk.weeks.map((w) => w.d), weekDays);
+  assert.deepEqual(sk.months.map((mo) => mo.d), monthDays);
+  assert.equal(sk.weeks.filter((w) => monthDays.includes(w.d)).length, 0, "周环里不该混进月环那几天");
+  const both = [...sk.weeks.map((w) => w.d), ...sk.months.map((mo) => mo.d)].sort((a, b) => a - b);
+  assert.deepEqual(both, steps, "周环 ∪ 月环 = 全部步进点，一个不多一个不少");
+});
+
+test("全景环形骨架：周 / 月 / 年每条环的 rLin 都等于自己那天的 radiusDay", () => {
+  // 环带着 d 是给视图层按帧算当地折算率与标签文字用的，d 与 rLin 对不上，
+  // 环画在一处、日期标签写着另一天，盘照样出、零报错
+  const ref = new RingsLayout(m);
+  const sk = ringSkeleton(ref);
+  assert.ok(sk.weeks.length > 0 && sk.months.length > 0 && sk.years.length > 0);
+  for (const ring of [...sk.weeks, ...sk.months, ...sk.years]) {
+    assert.equal(ring.rLin, ref.radiusDay(ring.d), `${ring.d} 这条环的 rLin 跟 radiusDay 对不上`);
+  }
+});
+
 test("全景环形骨架：年环 = day0 次年到 dayMax 年的元旦各一条；最新环 = dayMax 的环", () => {
   const ref = new RingsLayout(m);
   const sk = ringSkeleton(ref);

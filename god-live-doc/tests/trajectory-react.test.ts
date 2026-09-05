@@ -4,6 +4,9 @@
  * 范围内里程碑数。data 用工作区自带的 107 张诗名 fixture 建（tests/fixtures/trajectory），
  * `size` 给死一个数字，绕开 ResizeObserver（SSR / 测试环境没有它）。
  *
+ * 盘心状态行那条测的是它背后的纯函数 hubStatusLine：盘心文字整块由 rAF 里的 place() 逐帧写，
+ * 静态渲染那一趟拿到的是个空 `<text>`，从 SVG 上断言不到。
+ *
  * 另一条守鱼眼真接上了引擎：帧推进函数 advanceFrame 不碰 DOM，喂 fixture 建的 RingsLayout
  * 就能单测——补间只要没把 focusDay / strength 写回 layout，displayRadius 与 mag 读到的
  * 永远是线性态，盘看着一动不动、却零报错。
@@ -16,12 +19,13 @@ import {
   advanceFrame,
   buildModel,
   buildTrajectory,
+  formatDay,
   inRange,
   RingsLayout,
   scanDir,
 } from "@godcreator02/live-doc-trajectory";
 import type { FrameState } from "@godcreator02/live-doc-trajectory";
-import { StarDisk } from "@godcreator02/live-doc-trajectory/react";
+import { hubStatusLine, StarDisk } from "@godcreator02/live-doc-trajectory/react";
 
 const ROOT_ID = "tfix-测试项目根卡";
 
@@ -53,6 +57,20 @@ test("StarDisk：SVG 骨架数量对得上模型——节点链接数、扇环�
   const msRings = [...html.matchAll(/class="star-ring-milestone"/g)];
   const expectedMs = inRange(root!.milestones!, model!.day0, model!.dayMax).length;
   assert.equal(msRings.length, expectedMs, "里程碑环数该等于根卡范围内的里程碑数");
+});
+
+test("盘心状态行：全景态是「起 → 止 · 模式名」，切模式换字样，空盘换成一句话", async () => {
+  // 盘心文字整块由 rAF 里的 place() 逐帧写（React 不碰它没渲染过的子树），
+  // 静态渲染那一趟拿到的是个空 <text>——所以这一条测的是它背后那个纯函数，不测 SVG
+  const cards = (await scanDir("tests/fixtures/trajectory")).cards;
+  const m = buildModel(cards, ROOT_ID);
+  const line = hubStatusLine(m.day0, m.dayMax, "fisheye", false);
+  assert.match(line, /→/, "起止之间得有箭头");
+  assert.match(line, /鱼眼穿梭$/, "尾巴是当前模式名");
+  assert.equal(line.startsWith(formatDay(m.day0)), true);
+  assert.ok(line.includes(formatDay(m.dayMax)));
+  assert.match(hubStatusLine(m.day0, m.dayMax, "zoom", false), /自由缩放$/, "切模式即见反馈");
+  assert.equal(hubStatusLine(m.day0, m.dayMax, "fisheye", true), "还没有记录", "空盘不摆日期");
 });
 
 test("advanceFrame：focusOn 后推帧，强度趋近 1、显示半径真被鱼眼改写", async () => {

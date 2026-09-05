@@ -87,6 +87,13 @@ const THEME_COLORS: Record<"dark" | "light", Record<string, string>> = {
 /** 盘面模式字样：盘心全景态显示，切模式即见反馈。 */
 const MODE_NAME: Record<"fisheye" | "zoom", string> = { fisheye: "鱼眼穿梭", zoom: "自由缩放" };
 
+/** 盘心全景态那一行字：起止日期加当前模式名，空盘换成一句话。
+ * 鱼眼态的两行要读引擎反解出的焦点带边界，只能在 place() 里现算；全景这一行是纯的，
+ * 单独拎出来好让它有个测得到的入口——盘心文字整块由 rAF 写，静态渲染那一趟是空的。 */
+export function hubStatusLine(day0: number, dayMax: number, mode: "fisheye" | "zoom", isEmpty: boolean): string {
+  return isEmpty ? "还没有记录" : `${formatDay(day0)} → ${formatDay(dayMax)} · ${MODE_NAME[mode]}`;
+}
+
 /** 扇环框路径：内弧 → 径线 → 外弧 → 径线闭合。半径由调用方按当前显示半径给，
  * 鱼眼变形时框跟着节点一起走。 */
 function sectorPath(th0: number, th1: number, r0: number, r1: number): string {
@@ -709,9 +716,7 @@ export function StarDisk({ data, hrefBase, size, initialDisk }: StarDiskProps): 
     if (hubStatus) {
       hubStatus.setAttribute("transform", `translate(0,${16 * ik}) scale(${ik})`);
       if (s < 0.01) {
-        hubStatus.textContent = isEmpty
-          ? "还没有记录"
-          : `${formatDay(model.day0)} → ${formatDay(model.dayMax)} · ${MODE_NAME[mode]}`;
+        hubStatus.textContent = hubStatusLine(model.day0, model.dayMax, mode, isEmpty);
         hubStatus.style.fill = "";
       } else {
         /* 鱼眼态：内外圈日期从焦点带的线性域边界经引擎逆映射反解，换行显示（单行小圆装不下） */

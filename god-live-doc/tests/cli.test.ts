@@ -302,6 +302,17 @@ test("配了 trajectory 的项目：check 顺带跑卡校验，病卡退 1 且�
   }
 });
 
+test("配了 trajectory 但目录还不存在：check 退 0、一条红都不打——「这里还没有轨迹记录」是合法状态", async () => {
+  const p = setupProject(withTrajectory());
+  try {
+    const green = await p.cli("check");
+    assert.equal(green.code, 0, green.out);
+    assert.doesNotMatch(green.out, /🔴/, "没配和配了但目录没建是两件事，后者扫出来是空集合");
+  } finally {
+    p.teardown();
+  }
+});
+
 test("配了 trajectory 的项目：合法根卡加子卡，trajectory --json 出的 JSON 里 disks 有一张盘", async () => {
   const p = setupProject(withTrajectory());
   try {
