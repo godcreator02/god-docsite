@@ -19,7 +19,19 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { CSSProperties, KeyboardEvent as ReactKeyboardEvent, ReactNode } from "react";
-import { bandFade, DEG, lodOf, NODE_RADIUS, polar, ringSkeleton, ROOT_RADIUS, RingsLayout, smoothstep } from "./layout.ts";
+import {
+  advanceFrame,
+  bandFade,
+  DEG,
+  lodOf,
+  NODE_RADIUS,
+  polar,
+  ringSkeleton,
+  ROOT_RADIUS,
+  RingsLayout,
+  smoothstep,
+} from "./layout.ts";
+import type { FrameState } from "./layout.ts";
 import { buildChains, computeDodge } from "./chains.ts";
 import { dayNum, formatDay, formOf, inRange, NO_DOMAIN } from "./model.ts";
 import type { TrajectoryModel } from "./types.ts";
@@ -212,19 +224,9 @@ function toRuntimeModel(serialized: SerializableModel | undefined): TrajectoryMo
   return { ...serialized, supersededIds: new Set(serialized.supersededIds) };
 }
 
-/* ================= 帧态：补间与视图，全部塞进一个 ref，不走 setState ================= */
-
-interface FrameState {
-  f: number;
-  fT: number;
-  s: number;
-  sT: number;
-  view: { k: number; tx: number; ty: number };
-  vT: { k: number; tx: number; ty: number } | null;
-  hv: Map<string, number>;
-  hover: string | null;
-  raf: number | null;
-}
+/* ================= 帧态：视图补间与悬停补间，塞进一个 ref，不走 setState =================
+ * FrameState 与 advanceFrame 住 layout.ts——鱼眼的两对补间量（焦点日 / 强度）本来就是
+ * RingsLayout 的字段，补间跟它们同住才不会再分家。 */
 
 const LAYOUT_SLIDERS: Array<{
   key: "focusDays" | "oldShare" | "newShare" | "hubBase" | "gapFree" | "gapWide" | "symbolPx" | "ease";
@@ -390,10 +392,6 @@ export function StarDisk({ data, hrefBase, size, initialDisk }: StarDiskProps): 
 
   /* ================= rAF 补间循环：place() 每帧直接改 DOM 属性 ================= */
   const frame = useRef<FrameState>({
-    f: model.dayMax,
-    fT: model.dayMax,
-    s: 0,
-    sT: 0,
     view: { k: 1, tx: 0, ty: 0 },
     vT: null,
     hv: new Map(),
@@ -413,18 +411,21 @@ export function StarDisk({ data, hrefBase, size, initialDisk }: StarDiskProps): 
   const goHome = useCallback(() => {
     if (!effectiveSize) return;
     const fr = frame.current;
-    fr.sT = 0;
+    layoutRef.current.unfocus();
     fr.view = { k: fitK(effectiveSize), tx: effectiveSize / 2, ty: effectiveSize / 2 };
     fr.vT = null;
     kick();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [effectiveSize, fitK]);
 
+  /* 换盘 / 换尺寸：鱼眼四个字段直接复位到全景（焦点钉最新、强度归零、不走补间） */
   useEffect(() => {
-    frame.current.f = model.dayMax;
-    frame.current.fT = model.dayMax;
-    frame.current.s = 0;
-    frame.current.sT = 0;
+    const l = layoutRef.current;
+    l.focusDay = model.dayMax;
+    l.focusDayTarget = model.dayMax;
+    l.strength = 0;
+    l.strengthTarget = 0;
+    l.buildMap();
     if (effectiveSize) frame.current.view = { k: fitK(effectiveSize), tx: effectiveSize / 2, ty: effectiveSize / 2 };
     setMode("fisheye");
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -440,7 +441,8 @@ export function StarDisk({ data, hrefBase, size, initialDisk }: StarDiskProps): 
   const place = useCallback(() => {
     if (!layout || !skeleton) return;
     const fr = frame.current;
-    const { f, s } = fr;
+    /* 鱼眼强度从引擎读，不从组件读——这一步就是「补间跟引擎接上」的接缝 */
+    const s = layout.strength;
     const ik = 1 / fr.view.k;
     const kRatio = fr.view.k / (effectiveSize ? fitK(effectiveSize) : 1);
     const dodge = computeDodge(chains, layout, fr.view.k);
@@ -464,12 +466,11 @@ export function StarDisk({ data, hrefBase, size, initialDisk }: StarDiskProps): 
       if (!p || !g) continue;
       const m = layout.mag(p.rLin);
       const lod = lodOf(m);
-      const hv = fr.hv.get(id) ?? 0;
-      const t = fr.hover === id ? 1 : 0;
-      const nextHv = hv + (t - hv) * 0.25;
-      fr.hv.set(id, Math.abs(t - nextHv) < 0.01 ? t : nextHv);
+      /* 悬停补间由 advanceFrame 推，这里只读当前值——摆放不该顺手改帧态 */
+      if (!fr.hv.has(id)) fr.hv.set(id, 0);
+      const hv = fr.hv.get(id) as number;
       const r2 = layout.displayRadius(p.rLin);
-      const sc = 0.65 * lod * ik * (1 + 0.4 * nextHv);
+      const sc = 0.65 * lod * ik * (1 + 0.4 * hv);
       const ang = p.angBase + p.spreadOff + (dodge.get(id) ?? 0);
       const pos = polar(ang, r2);
       g.setAttribute("transform", `translate(${pos.x},${pos.y}) scale(${sc})`);
@@ -559,32 +560,9 @@ export function StarDisk({ data, hrefBase, size, initialDisk }: StarDiskProps): 
   function tick(): void {
     const fr = frame.current;
     fr.raf = null;
-    const ease = settings["ease"] ?? 0.16;
-    fr.f += (fr.fT - fr.f) * ease;
-    fr.s += (fr.sT - fr.s) * ease;
-    if (Math.abs(fr.fT - fr.f) < 0.02) fr.f = fr.fT;
-    if (Math.abs(fr.sT - fr.s) < 0.003) fr.s = fr.sT;
-    let hovLive = false;
-    for (const [id, hv] of fr.hv) {
-      const t = fr.hover === id ? 1 : 0;
-      if (Math.abs(t - hv) > 0.01) hovLive = true;
-    }
-    if (fr.vT) {
-      fr.view.k += (fr.vT.k - fr.view.k) * ease;
-      fr.view.tx += (fr.vT.tx - fr.view.tx) * ease;
-      fr.view.ty += (fr.vT.ty - fr.view.ty) * ease;
-      if (
-        Math.abs(fr.view.k - fr.vT.k) < 0.001 &&
-        Math.abs(fr.view.tx - fr.vT.tx) < 0.5 &&
-        Math.abs(fr.view.ty - fr.vT.ty) < 0.5
-      ) {
-        fr.view = { ...fr.vT };
-        fr.vT = null;
-      }
-    }
-    layoutRef.current.buildMap();
+    const live = advanceFrame(layoutRef.current, fr, settings["ease"] ?? 0.16);
     place();
-    if (fr.f !== fr.fT || fr.s !== fr.sT || fr.vT || hovLive) kick();
+    if (live) kick();
   }
   const tickRef = useRef(tick);
   tickRef.current = tick;
@@ -620,22 +598,28 @@ export function StarDisk({ data, hrefBase, size, initialDisk }: StarDiskProps): 
         place();
         return;
       }
-      if (fr.sT === 0) {
+      // 滚轮方向对齐自由缩放的手感：前滚 = 放大 = 进鱼眼并深入历史，后滚 = 缩小 = 走向最新
+      // 直至退回全景。三个分支只经 focusOn / unfocus 两个门，不直捅补间裸字段。
+      const l = layoutRef.current;
+      if (l.strengthTarget === 0) {
+        // 全景态：前滚从最新展开进鱼眼（snap，焦点不从上一次的位置飘过来），后滚无操作
         if (dy < 0) {
-          fr.f = model.dayMax;
-          fr.fT = model.dayMax;
-          fr.sT = 1;
+          l.focusOn(model.dayMax, true);
           kick();
         }
         return;
       }
-      if (dy > 0 && fr.fT >= model.dayMax - 1e-9 && fr.f >= model.dayMax - 0.5) {
-        fr.sT = 0;
+      if (dy > 0 && l.focusDayTarget >= model.dayMax - 1e-9 && l.focusDay >= model.dayMax - 0.5) {
+        l.unfocus();
         kick();
         return;
       }
+      // 步进走显示域折算表（正折算 → 加步长 → 逆折算，段边界精确积分不过冲）。参照物 trail
+      // 另有一张幅度减半的「穿梭域」（travEff / travOfEff）专供滚轮，本仓不设第二张标度——
+      // 位置模型只此一张表，输入设备只是驱动方式不同（见 layout.ts effSegs 的注释）。
+      // 代价是穿长空窗时一格走的日历天数比 trail 多，手感由「滚轮灵敏度」滑杆兜。
       const step = dy * (wheelSensitivity / 120);
-      fr.fT = Math.min(model.dayMax, Math.max(model.day0, layout.dayOfEff(layout.dayEff(fr.fT) + step)));
+      l.focusOn(l.dayOfEff(l.dayEff(l.focusDayTarget) + step));
       kick();
     };
     el.addEventListener("wheel", onWheel, { passive: false });
@@ -684,7 +668,7 @@ export function StarDisk({ data, hrefBase, size, initialDisk }: StarDiskProps): 
     if (hubTimer.current) clearTimeout(hubTimer.current);
     hubTimer.current = setTimeout(() => {
       setMode((m) => (m === "fisheye" ? "zoom" : "fisheye"));
-      frame.current.sT = 0;
+      layoutRef.current.unfocus();
       if (effectiveSize) frame.current.vT = { k: fitK(effectiveSize), tx: effectiveSize / 2, ty: effectiveSize / 2 };
       kick();
     }, 250);

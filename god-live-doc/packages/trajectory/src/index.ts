@@ -33,6 +33,7 @@ export { scanDir } from "./scan.ts";
 export type { TrajectoryScan } from "./scan.ts";
 
 export {
+  advanceFrame,
   AXIS_SPAN,
   BASE_RADIUS,
   BLEND_W,
@@ -56,7 +57,7 @@ export {
   pseudoRandom,
   smoothstep,
 } from "./layout.ts";
-export type { Box, CardPlace, GapBand, GapDot, GapSkeleton, IsoBox, LayoutPatch, RingSkeleton, TreeBox, WormBox } from "./layout.ts";
+export type { Box, CardPlace, FrameState, GapBand, GapDot, GapSkeleton, IsoBox, LayoutPatch, RingSkeleton, TreeBox, WormBox } from "./layout.ts";
 
 export { buildChains, computeDodge } from "./chains.ts";
 export type { Chain } from "./chains.ts";

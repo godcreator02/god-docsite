@@ -778,6 +778,62 @@ export class RingsLayout {
   }
 }
 
+/* ================= 帧推进：补间一步，纯计算 ================= */
+
+/** 视图层每帧要带的那点补间态。
+ *
+ * 鱼眼的两对补间量（焦点日 / 强度）**不在这里**——它们是 RingsLayout 自己的
+ * focusDay / focusDayTarget / strength / strengthTarget，displayRadius 与 mag 直接读它们。
+ * 视图层另立一份平行的 f / s 是没有出路的：写进组件的那份传不到引擎里，滚轮滚半天
+ * strength 恒 0、鱼眼一动不动、零报错。交互只经 focusOn() / unfocus() 两个门。 */
+export interface FrameState {
+  /** 世界变换：缩放与平移 */
+  view: { k: number; tx: number; ty: number };
+  /** 视图补间目标，null = 不在补间 */
+  vT: { k: number; tx: number; ty: number } | null;
+  /** 逐节点悬停放大补间的当前值 */
+  hv: Map<string, number>;
+  /** 当前悬停的节点身份 */
+  hover: string | null;
+  /** 已排的 requestAnimationFrame 句柄，null = 没排 */
+  raf: number | null;
+}
+
+/** 推进一帧：焦点日与鱼眼强度在 layout 自己的四个字段上趋近目标，视图与逐节点悬停在
+ * frame 上趋近，末尾重建鱼眼映射系数——下一次 displayRadius / mag 读到的就是这一帧的形状。
+ * 返回「还在动没有」，true 就该再排一帧。只改传进来的两个对象、不碰 DOM，可单独测。 */
+export function advanceFrame(layout: RingsLayout, fr: FrameState, ease: number): boolean {
+  layout.focusDay += (layout.focusDayTarget - layout.focusDay) * ease;
+  layout.strength += (layout.strengthTarget - layout.strength) * ease;
+  if (Math.abs(layout.focusDayTarget - layout.focusDay) < 0.02) layout.focusDay = layout.focusDayTarget;
+  if (Math.abs(layout.strengthTarget - layout.strength) < 0.003) layout.strength = layout.strengthTarget;
+  let live = layout.focusDay !== layout.focusDayTarget || layout.strength !== layout.strengthTarget;
+  for (const [id, hv] of fr.hv) {
+    const t = fr.hover === id ? 1 : 0;
+    const next = hv + (t - hv) * 0.25;
+    if (Math.abs(t - next) < 0.01) fr.hv.set(id, t);
+    else {
+      fr.hv.set(id, next);
+      live = true;
+    }
+  }
+  if (fr.vT) {
+    fr.view.k += (fr.vT.k - fr.view.k) * ease;
+    fr.view.tx += (fr.vT.tx - fr.view.tx) * ease;
+    fr.view.ty += (fr.vT.ty - fr.view.ty) * ease;
+    if (
+      Math.abs(fr.view.k - fr.vT.k) < 0.001 &&
+      Math.abs(fr.view.tx - fr.vT.tx) < 0.5 &&
+      Math.abs(fr.view.ty - fr.vT.ty) < 0.5
+    ) {
+      fr.view = { ...fr.vT };
+      fr.vT = null;
+    } else live = true;
+  }
+  layout.buildMap();
+  return live;
+}
+
 /* ================= 全景环形骨架（定妆照与大图共用语义） ================= */
 
 /** 一颗碎石的确定性形态——不含 DOM，骨架（定妆照）与渲染（大图）同吃这一份。 */
