@@ -250,7 +250,9 @@ export function StarDisk({ data, hrefBase, size, initialDisk }: StarDiskProps): 
   const worldRef = useRef<SVGGElement | null>(null);
   const hubRef = useRef<SVGGElement | null>(null);
   const hubCircleRef = useRef<SVGCircleElement | null>(null);
+  const hubTitleRef = useRef<SVGTextElement | null>(null);
   const hubStatusRef = useRef<SVGTextElement | null>(null);
+  const treeNameRefs = useRef(new Map<number, SVGTextElement>());
   const bandRef = useRef<SVGCircleElement | null>(null);
 
   const nodeRefs = useRef(new Map<string, SVGGElement>());
@@ -493,8 +495,20 @@ export function StarDisk({ data, hrefBase, size, initialDisk }: StarDiskProps): 
         label.style.display = show ? "" : "none";
       }
     }
+
+    // 盘心与树名是静态文字（不像节点标签走逐帧 ref 更新），但同样躺在被缩放的世界坐标系里：
+    // 不反向抵消 view.k 的话，字号会跟着整盘的缩放比例一起缩水——世界大（盘深）时几乎看不见。
+    if (hubTitleRef.current) hubTitleRef.current.setAttribute("transform", `translate(0,${-6 * ik}) scale(${ik})`);
+    if (hubStatusRef.current) hubStatusRef.current.setAttribute("transform", `translate(0,${16 * ik}) scale(${ik})`);
+    for (const [i, b] of treeBoxes.entries()) {
+      const ref = treeNameRefs.current.get(i);
+      if (!ref) continue;
+      const rT = Math.max(...b.tree.ids.map((id) => layout.displayRadius(layout.places.get(id)?.rLin ?? 0))) + 22 * ik;
+      const p = polar(b.angMid, rT);
+      ref.setAttribute("transform", `translate(${p.x},${p.y}) scale(${ik})`);
+    }
     applyView();
-  }, [layout, skeleton, runtimeNodes, chains, effectiveSize, fitK, applyView, showAllLabels]);
+  }, [layout, skeleton, runtimeNodes, chains, effectiveSize, fitK, applyView, showAllLabels, treeBoxes]);
 
   // kick 是稳定引用（[] 依赖，给 wheel / 点击等回调直接用），但每帧要跑的 tick 得看到
   // 当前渲染里最新的 place / settings / layout——tick 本身照常每次渲染重新声明，
@@ -810,14 +824,19 @@ export function StarDisk({ data, hrefBase, size, initialDisk }: StarDiskProps): 
             const p1 = polar(b.th1, r0);
             const p2 = polar(b.th1, r1);
             const p3 = polar(b.th0, r1);
-            const pn = polar(b.angMid, Math.max(...b.tree.ids.map((id) => layout?.places.get(id)?.rLin ?? 0)) + 22);
             return (
               <g key={`box-${i}`}>
                 <path
                   className="star-treebox"
                   d={`M${p0.x},${p0.y} A${r0},${r0} 0 ${large} 1 ${p1.x},${p1.y} L${p2.x},${p2.y} A${r1},${r1} 0 ${large} 0 ${p3.x},${p3.y} Z`}
                 />
-                <text x={pn.x} y={pn.y} className="star-treename">
+                <text
+                  ref={(el) => {
+                    if (el) treeNameRefs.current.set(i, el);
+                    else treeNameRefs.current.delete(i);
+                  }}
+                  className="star-treename"
+                >
                   {b.name}
                 </text>
               </g>
@@ -893,10 +912,10 @@ export function StarDisk({ data, hrefBase, size, initialDisk }: StarDiskProps): 
             onDoubleClick={onHubDoubleClick}
           >
             <circle ref={hubCircleRef} cx={0} cy={0} r={layout?.hubWorldR ?? ROOT_RADIUS} className="star-hub-circle" />
-            <text x={0} y={-6} className="star-hub-title">
+            <text ref={hubTitleRef} className="star-hub-title">
               {isEmpty ? "还没有记录" : (model.root?.label ?? diskLabel(rootDiskId ?? ""))}
             </text>
-            <text ref={hubStatusRef} x={0} y={16} className="star-hub-status">
+            <text ref={hubStatusRef} className="star-hub-status">
               {`${formatDay(model.day0)} → ${formatDay(model.dayMax)}`}
             </text>
           </g>
