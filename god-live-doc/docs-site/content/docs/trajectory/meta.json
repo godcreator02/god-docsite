@@ -2,5 +2,5 @@
   "title": "轨迹",
   "description": "轨迹卡与星轨盘：卡的格式与校验、盘怎么算怎么画、怎么接进项目",
   "root": true,
-  "pages": ["index", "cards", "disk", "wiring"]
+  "pages": ["[星轨盘](/trajectory)", "index", "cards", "disk", "wiring"]
 }
