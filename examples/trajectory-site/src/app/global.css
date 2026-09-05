@@ -1,0 +1,18 @@
+@import 'tailwindcss';
+@import 'fumadocs-ui/css/neutral.css';
+@import 'fumadocs-ui/css/preset.css';
+/* 星轨盘的 HUD / 图例 / 浮层样式随 trajectory 包发 */
+@import '@godcreator02/live-doc-trajectory/star.css';
+
+html {
+  scrollbar-gutter: stable;
+}
+
+.note {
+  border: 1px solid rgba(86, 182, 232, 0.4);
+  border-left: 3px solid rgba(86, 182, 232, 0.7);
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin: 18px 0;
+  font-size: 14px;
+}
