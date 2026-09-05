@@ -28,13 +28,26 @@ const pkgs = Object.fromEntries(
 const depsOf = (p: Pkg): string[] => Object.keys({ ...p.dependencies, ...p.peerDependencies });
 const HOST = /^(fumadocs|next$|react$|react-dom$)/;
 
+/** 编译产物里的 import 说明符——只认锚在行首的 import/export-from 语句，不用裸的
+ * `from\s*["']` 到处找：产物里字符串字面量常包含 "pivots-from" 这类含 "from" 的子串
+ * （trajectory 的 EDGE_HEAD 正则源码编译进去后原样躺在那），裸正则会把它当 import 语句头，
+ * 从那个引号起一路吞到几百字符外的下一个引号。tsdown/rolldown 的产物每条 import 语句独占一行，
+ * 按行首锚定就躲开了这个坑。 */
+function importSpecsOf(src: string): string[] {
+  const specs: string[] = [];
+  for (const m of src.matchAll(/^(?:import|export)\b[^\n]*?\bfrom\s*["']([^"']+)["']/gm)) specs.push(m[1] as string);
+  return specs;
+}
+
 test("core 零依赖", () => {
   assert.deepEqual(depsOf(pkgs.core!), []);
 });
 
-test("除了 fumadocs 格式包，谁都不依赖宿主", () => {
+test("除了 fumadocs 格式包和 trajectory，谁都不依赖宿主", () => {
+  // trajectory 的 react 是给 ./react、./server 两个入口用的 peer（跟 format-fumadocs
+  // 声明 fumadocs 为 peer 同一个道理），`.` 入口本身零依赖，见下面按产物判的那条。
   for (const [name, pkg] of Object.entries(pkgs)) {
-    if (name === "format-fumadocs") continue;
+    if (name === "format-fumadocs" || name === "trajectory") continue;
     for (const dep of depsOf(pkg)) assert.ok(!HOST.test(dep), `${name} 依赖了宿主 ${dep}`);
   }
 });
@@ -48,7 +61,7 @@ test("fumadocs 格式包：宿主只能是 peer，不许进 dependencies", () =>
 test("fumadocs 格式包的产物里不许打进 fumadocs 或 react，只许 import", () => {
   for (const file of ["dist/index.mjs", "dist/pre.mjs"]) {
     const src = readFileSync(join(PACKAGES, "format-fumadocs", file), "utf8");
-    const specs = [...src.matchAll(/from\s*["']([^"']+)["']/g)].map((m) => m[1]!);
+    const specs = importSpecsOf(src);
     const hosts = specs.filter((s) => HOST.test(s));
     for (const spec of hosts) assert.ok(!spec.startsWith("."), `${file} 把 ${spec} 打进了产物`);
     // 状态点组件是客户端组件：指令得留在产物头一行，不然 Next 不认
@@ -83,14 +96,50 @@ test("每个格式包都实现了核心要的那五样", async () => {
   }
 });
 
-test("trajectory 零依赖", () => {
-  assert.deepEqual(depsOf(pkgs.trajectory!), []);
+test("trajectory 的 `.` 入口零 npm 依赖：产物只许 import node: 内置模块", () => {
+  // 阶段 A 时包本身零依赖；阶段 B 加了 react（peer）与 unified / unist-util-visit
+  // （只给 `./server` 用），`.` 入口这条红线因此改按产物判——比按 package.json 判更准：
+  // 就算以后 `.` 入口不小心 import 到一个真依赖，这里也能抓到。
+  const src = readFileSync(join(PACKAGES, "trajectory", "dist", "index.mjs"), "utf8");
+  for (const spec of importSpecsOf(src)) assert.ok(spec.startsWith("node:"), `trajectory 的 . 入口产物 import 了 ${spec}`);
 });
 
-test("trajectory 源码只 import 自己和 node:fs / node:path / node:fs/promises", () => {
+test("trajectory 的 react / server 入口：客户端指令、不打进 react、各自的边界", () => {
+  const dir = join(PACKAGES, "trajectory", "dist");
+  const react = readFileSync(join(dir, "react.mjs"), "utf8");
+  assert.match(react, /^"use client";/, "react.mjs 的 use client 指令得留在头一行");
+  for (const spec of importSpecsOf(react)) {
+    assert.ok(!spec.startsWith("."), `react.mjs 把 ${spec} 打进了产物`);
+    assert.ok(!spec.startsWith("node:"), `react.mjs（客户端组件）import 了 ${spec}`);
+  }
+  const server = readFileSync(join(dir, "server.mjs"), "utf8");
+  assert.doesNotMatch(server, /^"use client";/, "server.mjs 不该带客户端指令");
+  for (const spec of importSpecsOf(server)) {
+    if (spec.startsWith("react")) assert.ok(!spec.startsWith("."), `server.mjs 把 ${spec} 打进了产物`);
+  }
+});
+
+test("cli、project、三个格式包不依赖 trajectory 的 react / server 入口（按产物 import 判）", () => {
+  for (const name of ["cli", "project", "format-md", "format-fumadocs", "format-html"]) {
+    const distDir = join(PACKAGES, name, "dist");
+    for (const file of readdirSync(distDir).filter((f) => f.endsWith(".mjs"))) {
+      const specs = importSpecsOf(readFileSync(join(distDir, file), "utf8"));
+      for (const spec of specs) {
+        assert.ok(
+          !spec.startsWith("@godcreator02/live-doc-trajectory/react") && !spec.startsWith("@godcreator02/live-doc-trajectory/server"),
+          `${name}/dist/${file} 引用了 trajectory 的 react / server 入口（${spec}）`,
+        );
+      }
+    }
+  }
+});
+
+test("trajectory 的 `.` 入口源码只 import 自己和 node:fs / node:path / node:fs/promises", () => {
   // 锚在行首的 import 语句取到 from 的引号——core 那条用的宽松正则会被本包正文里
   // "pivots-from" 这个字符串字面量骗过（from 后紧跟的引号是它自己的收尾引号，
   // 匹配一路吞到几百字符外的下一个引号），换一条不认字符串内容、只认真实 import 语句的。
+  // 只扫 .ts：react.tsx / server.tsx 是 `./react` `./server` 两个入口，各自的依赖边界
+  // 由上面两条按产物判的测试守着，这条不管它们。
   const IMPORT_RE = /^\s*import\b[\s\S]*?\bfrom\s*["']([^"']+)["']/gm;
   const dir = join(PACKAGES, "trajectory", "src");
   for (const file of readdirSync(dir).filter((f) => f.endsWith(".ts"))) {

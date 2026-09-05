@@ -1,0 +1,436 @@
+/*
+ * StarDisk 的样式：HUD（工具条 / 图例 / 设置与帮助浮层 / 悬停气泡）与 SVG 文本类。
+ * 所有选择器要么带 `.star-` 前缀、要么包在 `.star-disk` 容器下，不污染宿主站。
+ * 亮暗两套变量：暗色跟 `html.dark`（fumadocs 的主题 class），亮色是默认 `:root`。
+ */
+
+:root {
+  --star-bg: #070b16;
+  --star-t1: #e8eeff;
+  --star-t2: #aebadd;
+  --star-t3: #7c8bb3;
+  --star-t4: #8fa0c8;
+  --star-bd: #263050;
+  --star-panel: rgba(10, 16, 32, 0.88);
+  --star-ring: rgba(150, 175, 255, 0.08);
+  --star-ring-m: rgba(150, 175, 255, 0.22);
+}
+
+html.dark {
+  --star-bg: #070b16;
+  --star-t1: #e8eeff;
+  --star-t2: #aebadd;
+  --star-t3: #7c8bb3;
+  --star-t4: #8fa0c8;
+  --star-bd: #263050;
+  --star-panel: rgba(10, 16, 32, 0.88);
+  --star-ring: rgba(150, 175, 255, 0.08);
+  --star-ring-m: rgba(150, 175, 255, 0.22);
+}
+
+.star-disk:not(.star-dark) {
+  --star-bg: #f4f6fb;
+  --star-t1: #1a2238;
+  --star-t2: #3d4763;
+  --star-t3: #6b7591;
+  --star-t4: #5d6a8c;
+  --star-bd: #c5cede;
+  --star-panel: rgba(255, 255, 255, 0.92);
+  --star-ring: rgba(40, 60, 120, 0.08);
+  --star-ring-m: rgba(40, 60, 120, 0.2);
+}
+
+.star-disk {
+  background: var(--star-bg);
+  color: var(--star-t2);
+  font-family: "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+  outline: none;
+}
+
+.star-disk:fullscreen {
+  width: 100vw;
+  height: 100vh;
+  aspect-ratio: auto;
+}
+
+.star-svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.star-svg text {
+  user-select: none;
+  pointer-events: none;
+}
+
+.star-node {
+  cursor: pointer;
+}
+.star-node a {
+  cursor: pointer;
+}
+
+/* ---------- 画布文字 ---------- */
+.star-label {
+  font-size: 10.5px;
+  text-anchor: middle;
+  paint-order: stroke;
+  stroke: var(--star-bg);
+  stroke-width: 3px;
+  stroke-linejoin: round;
+}
+.star-daylabel {
+  fill: var(--star-t4);
+  font-size: 9px;
+  text-anchor: middle;
+}
+.star-treename {
+  fill: var(--star-tag, var(--star-t4));
+  font-size: 11px;
+  letter-spacing: 1px;
+  text-anchor: middle;
+}
+.star-yl {
+  fill: var(--star-t3);
+  font-size: 10.5px;
+  text-anchor: middle;
+}
+.star-ms-label {
+  font-size: 10px;
+  letter-spacing: 1px;
+  text-anchor: middle;
+  paint-order: stroke;
+  stroke: var(--star-bg);
+  stroke-width: 3px;
+  stroke-linejoin: round;
+}
+
+/* ---------- 背景环 / 空窗小行星带 / 扇环框 ---------- */
+.star-ring-month {
+  stroke: var(--star-ring);
+  fill: none;
+  stroke-width: 1;
+  vector-effect: non-scaling-stroke;
+}
+.star-ring-year {
+  stroke: var(--star-ring-m);
+  fill: none;
+  stroke-width: 1.2;
+  vector-effect: non-scaling-stroke;
+}
+.star-ring-latest {
+  stroke: var(--star-t3);
+  fill: none;
+  stroke-width: 1;
+  opacity: 0.5;
+  vector-effect: non-scaling-stroke;
+}
+.star-ring-milestone {
+  fill: none;
+  stroke-width: 1.2;
+  vector-effect: non-scaling-stroke;
+  stroke: #f5b942;
+}
+.star-gap-bg {
+  stroke: rgba(0, 0, 0, 0.5);
+  fill: none;
+}
+.star-disk:not(.star-dark) .star-gap-bg {
+  stroke: rgba(40, 55, 90, 0.1);
+}
+.star-gap-dot {
+  fill: var(--star-ring-m);
+}
+.star-treebox {
+  stroke: rgba(150, 175, 255, 0.2);
+  fill: rgba(150, 175, 255, 0.03);
+  stroke-width: 1;
+  vector-effect: non-scaling-stroke;
+}
+.star-disk:not(.star-dark) .star-treebox {
+  stroke: rgba(40, 60, 120, 0.18);
+  fill: rgba(40, 60, 120, 0.03);
+}
+.star-isobox {
+  stroke-dasharray: 3 3;
+}
+
+/* ---------- 盘心 ---------- */
+.star-hub {
+  cursor: pointer;
+}
+.star-hub-circle {
+  fill: #0b1020;
+  stroke: #5a6a94;
+  stroke-width: 1.2;
+  vector-effect: non-scaling-stroke;
+}
+.star-disk:not(.star-dark) .star-hub-circle {
+  fill: #ffffff;
+  stroke: #b6c0d8;
+}
+.star-hub:hover .star-hub-circle {
+  stroke-width: 2.4;
+}
+.star-hub-title {
+  fill: var(--star-t1);
+  font-size: 16px;
+  letter-spacing: 2px;
+  text-anchor: middle;
+}
+.star-hub-status {
+  fill: var(--star-t4);
+  font-size: 10px;
+  letter-spacing: 1px;
+  text-anchor: middle;
+}
+
+/* ---------- 右上工具条 + 搜索 + 浮层 ---------- */
+.star-hud-top {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 8;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  border: 1px solid var(--star-bd);
+  border-radius: 9px;
+  background: var(--star-panel);
+  color: var(--star-t2);
+}
+.star-mbtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  box-sizing: border-box;
+  border: 1px solid var(--star-bd);
+  color: var(--star-t3);
+  cursor: pointer;
+  user-select: none;
+  background: var(--star-panel);
+  border-radius: 6px;
+  font-size: 12px;
+}
+.star-mbtn:hover {
+  color: var(--star-t1);
+}
+.star-mbtn.star-active {
+  color: var(--star-t1);
+  background: var(--star-bd);
+}
+.star-search {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+.star-search input {
+  width: 140px;
+  font-size: 12px;
+  padding: 4px 8px;
+  border: 1px solid var(--star-bd);
+  border-radius: 6px;
+  background: var(--star-panel);
+  color: var(--star-t1);
+  outline: none;
+}
+.star-hits {
+  font-size: 10.5px;
+  color: var(--star-t4);
+  margin-left: 6px;
+  white-space: nowrap;
+}
+.star-clear {
+  border: none;
+  background: none;
+  padding: 0;
+  cursor: pointer;
+  color: var(--star-t4);
+  text-decoration: underline dotted;
+}
+.star-panel,
+.star-help {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  z-index: 7;
+  background: var(--star-panel);
+  border: 1px solid var(--star-bd);
+  border-radius: 8px;
+}
+.star-panel {
+  font-size: 11px;
+  color: var(--star-t2);
+  padding: 8px 14px;
+  min-width: 200px;
+}
+.star-panel label {
+  display: block;
+  margin: 7px 0 1px;
+}
+.star-panel label span {
+  color: var(--star-t1);
+  float: right;
+}
+.star-panel input[type="range"] {
+  width: 168px;
+  display: block;
+  margin: 2px 0 0;
+}
+.star-help {
+  padding: 9px 13px;
+  font-size: 11.5px;
+  color: var(--star-t2);
+  max-width: 320px;
+  line-height: 1.7;
+}
+.star-hh {
+  color: var(--star-t4);
+  font-size: 10px;
+  letter-spacing: 2px;
+  margin: 8px 0 3px;
+}
+.star-hh:first-child {
+  margin-top: 0;
+}
+
+/* ---------- 悬停小气泡 ---------- */
+.star-tooltip {
+  position: absolute;
+  z-index: 9;
+  pointer-events: none;
+  max-width: 220px;
+  padding: 6px 10px;
+  border: 1px solid var(--star-bd);
+  border-radius: 6px;
+  background: var(--star-panel);
+  color: var(--star-t2);
+  font-size: 11px;
+}
+.star-tooltip-title {
+  color: var(--star-t1);
+  margin-bottom: 2px;
+}
+.star-tooltip-meta {
+  color: var(--star-t4);
+  font-size: 10px;
+}
+
+/* ---------- 右下图例即筛选器 ---------- */
+.star-hud-legend {
+  position: absolute;
+  right: 10px;
+  bottom: 10px;
+  z-index: 8;
+  max-width: 92%;
+  padding: 8px 14px 9px;
+  border: 1px solid var(--star-bd);
+  border-radius: 9px;
+  background: var(--star-panel);
+  color: var(--star-t2);
+  font-size: 11px;
+  line-height: 2;
+}
+.star-legend-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px;
+}
+.star-lgs {
+  display: inline-block;
+  width: 15px;
+  height: 15px;
+  vertical-align: -3.5px;
+  margin-right: 3px;
+}
+.star-lgs-w {
+  width: 22px;
+}
+.star-lgi {
+  cursor: pointer;
+  user-select: none;
+  padding: 2px 5px;
+  border-radius: 4px;
+  margin-right: 2px;
+}
+.star-lgi:hover {
+  background: var(--star-bd);
+}
+.star-lgi.star-on {
+  background: var(--star-bd);
+  color: var(--star-t1);
+}
+.star-lgi.star-off {
+  opacity: 0.45;
+}
+.star-lgp {
+  padding: 2px 5px;
+  margin-right: 2px;
+}
+
+/* ---------- 多盘页签 ---------- */
+.star-tabs {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 8;
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+.star-tab {
+  border: 1px solid var(--star-bd);
+  border-radius: 6px;
+  background: var(--star-panel);
+  color: var(--star-t3);
+  font-size: 11px;
+  padding: 3px 9px;
+  cursor: pointer;
+}
+.star-tab-active {
+  color: var(--star-t1);
+  background: var(--star-bd);
+}
+
+/* ---------- 激活遮罩 ---------- */
+.star-activate-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 6;
+  border: none;
+  background: transparent;
+  color: var(--star-t3);
+  font-size: 13px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.star-activate-overlay:hover {
+  background: rgba(0, 0, 0, 0.04);
+}
+
+/* ---------- Trajectory 服务端组件：盘 + 报病列表 ---------- */
+.star-sick {
+  margin-top: 16px;
+  font-size: 13px;
+}
+.star-sick-title {
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+
+/* ---------- 关系边段落（remarkTrajectoryLinks 打标） ---------- */
+.trajectory-edge {
+  border-left: 3px solid #f5b942;
+  padding: 4px 10px;
+  margin: 8px 0;
+  font-size: 13px;
+  opacity: 0.85;
+}
+.trajectory-edge[data-kind="pivot"] {
+  border-left-color: #48c9d8;
+}

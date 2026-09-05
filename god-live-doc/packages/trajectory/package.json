@@ -2,20 +2,48 @@
   "name": "@godcreator02/live-doc-trajectory",
   "version": "0.1.0",
   "type": "module",
-  "description": "轨迹卡与星轨盘的数据层：扫卡、四层校验（含 livedoc 引用记号）、聚盘建模、布局与链表纯函数。零依赖，只用 node:fs / node:path",
+  "description": "轨迹卡与星轨盘：`.` 扫卡、四层校验（含 livedoc 引用记号）、聚盘建模、布局与链表纯函数（零 npm 依赖）；`./react` 客户端星轨盘组件；`./server` 服务端组件、frontmatter schema、remark 关系边插件",
   "exports": {
     ".": {
       "types": "./dist/index.d.mts",
       "default": "./dist/index.mjs"
-    }
+    },
+    "./react": {
+      "types": "./dist/react.d.mts",
+      "default": "./dist/react.mjs"
+    },
+    "./server": {
+      "types": "./dist/server.d.mts",
+      "default": "./dist/server.mjs"
+    },
+    "./star.css": "./styles/star.css"
   },
   "files": [
-    "dist"
+    "dist",
+    "styles"
   ],
   "scripts": {
     "build": "tsdown",
     "typecheck": "tsc -p tsconfig.json",
     "prepublishOnly": "pnpm run build"
+  },
+  "dependencies": {
+    "unified": "^11.0.0",
+    "unist-util-visit": "^5.0.0"
+  },
+  "peerDependencies": {
+    "react": ">=19"
+  },
+  "peerDependenciesMeta": {
+    "react": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@standard-schema/spec": "^1.1.0",
+    "@types/mdast": "^4.0.4",
+    "@types/react": "^19.2.18",
+    "react": "^19.2.8"
   },
   "publishConfig": {
     "access": "public"
