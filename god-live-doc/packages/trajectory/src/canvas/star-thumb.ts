@@ -6,7 +6,8 @@
  * svg-doc 的桩，服务端渲静态 markup 走后者），画家只经 el() 建树。
  *
  * 只画形状层：环形骨架（月环 / 年环 / 最新环 + 空窗小行星带，全景语义照抄大图）、
- * 盘心（圆盘 + 正中根节点）、节点（在立 / 被取代淡出、孤星虚线环）、边（取代金黄 / 转向青 + 箭头 marker）、
+ * 盘心（圆盘 + 正中根节点）、节点（在立实心 + 底色缝、被取代小一号混灰、结论卡放大）、
+ * 边（取代取旧卡领域色 / 转向铜绿，无箭头）、
  * 泳道扇环框（领域分区的形状骨架）。不画：文字标签（日期 / 树名 / 卡名）、里程碑、
  * 焦点带边环（鱼眼专属）、周环（全景态 opacity 恒 0）——盘图纯装饰，文字信息归卡片文字区。
  *
@@ -14,21 +15,29 @@
  * 盘心尺寸跟大图同源——同一个 configure 入口、同一个世界锚定 hubWorldR = innerR − HUB_RIM，
  * 布局产物（角度/半径/装箱）与盘心占比逐位一致）：
  * 一是大图节点 / 线宽走「屏幕恒定」（每帧按 view.k 反补偿），定妆照没有视口概念，
- *   节点径 / 线宽按外接框半径 outerR 等比出，缩放到卡片尺寸后形态不变；
+ *   节点径 / 线宽按外接框半径 outerR 等比出，缩放到卡片尺寸后形态不变；珠光渐变也退成实色
+ *   （缩到卡片尺寸后渐变看不出来，白留一堆 defs）；
  * 二是着色在建构时一次定死，主题切换由调用方整棵重画（服务端按亮暗各渲一份），
  *   不走 recolor 逐帧重刷（没有帧）。CSS 变量项（--hub-fill / --box-stroke / --box-fill）
  *   靠卡片容器的样式作用域跟随宿主主题，切换时这部分不用重画。 */
 
-import { BASE_RADIUS, DEG, polar, RingsLayout, ROOT_RADIUS, ringSkeleton } from "../layout.ts";
+import {
+  BASE_RADIUS,
+  DEG,
+  NODE_RADIUS,
+  polar,
+  RingsLayout,
+  ROOT_RADIUS,
+  ringSkeleton,
+} from "../layout.ts";
 import { formOf } from "../model.ts";
 import type { TrajectoryModel } from "../types.ts";
-import { el, formColor, MarkerFactory, nodeEdge } from "./node-dom.ts";
+import { DefsFactory, el, formColor, isConclusion, spineTipIds } from "./node-dom.ts";
 import { DEFAULT_SETTINGS, type TrajectorySettings } from "./settings.ts";
 import type { SvgDocument } from "./svg-doc.ts";
 import {
   buildThemes,
   DEFAULT_RING_PALETTE,
-  hubStrokeOf,
   mix,
   type RingPalette,
   type Theme,
@@ -39,12 +48,9 @@ import {
 /** 外接框相对 maxR 的外扩 padding（outerR = maxR + THUMB_PAD）。导出给测试同口径复算。 */
 export const THUMB_PAD = 24;
 
-/** 按当前亮暗解一套主题：领域色按出现序分配，盘心描边跟宿主 `--color-fd-primary` 走（同大图）。
- * 只在浏览器运行时调（hubStrokeOf 要探针解 CSS 变量）；服务端与测试直拿 buildThemes 的色板。 */
+/** 按当前亮暗解一套主题：领域色按出现序分配，盘心描边走泥金（同大图）。 */
 export function thumbTheme(domains: string[], themeName: ThemeName): Theme {
-  const theme = buildThemes(domains)[themeName];
-  theme.hubStroke = hubStrokeOf(themeName);
-  return theme;
+  return buildThemes(domains)[themeName];
 }
 
 /** 定妆照绘制现场：各 draw 层共用的一袋参数，renderStarThumb 组装一次、逐层传递。 */
@@ -54,10 +60,12 @@ interface ThumbScene {
   model: TrajectoryModel;
   theme: Theme;
   palette: RingPalette;
-  markers: MarkerFactory;
+  defs: DefsFactory;
   /** 每张卡的落点：角度 = 基准 + 同日串珠角偏（全景态基础档），半径 = 线性半径 */
   coords: Map<string, { x: number; y: number; r: number; ang: number }>;
-  /** 节点半径：随外接框等比（带上下钳制，极端盘径不变形） */
+  /** 结论卡集：每棵树主干末端那张（放大档判定用） */
+  tips: Set<string>;
+  /** 节点半径基准：随外接框等比（带上下钳制，极端盘径不变形）；形态档与放大档见 nodeRadiusOf */
   nodeR: number;
   /** 线宽基准：同随外接框等比 */
   edgeW: number;
@@ -105,8 +113,9 @@ export function renderStarThumb(
     model,
     theme,
     palette,
-    markers: new MarkerFactory(svg),
+    defs: new DefsFactory(svg),
     coords,
+    tips: spineTipIds(model.trees),
     nodeR,
     edgeW,
     outerR,
@@ -122,7 +131,7 @@ export function renderStarThumb(
 
 /** 环形骨架（最底层，对齐大图全景态）：空窗雾带铺底 → 碎石 → 月 / 年 / 最新环。 */
 function drawRingSkeleton(scene: ThumbScene): void {
-  const { svg, layout, palette, markers, nodeR } = scene;
+  const { svg, layout, palette, defs, nodeR } = scene;
   const skeleton = ringSkeleton(layout);
   for (const gap of skeleton.gaps) {
     /* 暗底雾带：比盘面背景再暗一档，高斯羽化软边（与大图同律，dev 随带宽） */
@@ -135,7 +144,7 @@ function drawRingSkeleton(scene: ThumbScene): void {
         fill: "none",
         stroke: palette.gapBg,
         "stroke-width": gap.bgW,
-        filter: `url(#${markers.blur(Math.max(3, gap.bgW * 0.3))})`,
+        filter: `url(#${defs.blur(Math.max(3, gap.bgW * 0.3))})`,
       },
       svg,
     );
@@ -227,30 +236,31 @@ function drawBoxes(scene: ThumbScene): void {
   }
 }
 
-/** 边：同日沿环走弧、跨日沿弦缩进；箭头与线段同色，取代金黄虚线 / 转向青点线。 */
+/** 边：同日沿环走弧、跨日沿弦缩进；取代边取旧卡领域色的细实线、转向边铜绿点线，都无箭头。 */
 function drawEdges(scene: ThumbScene): void {
-  const { svg, model, theme, markers, coords, nodeR, edgeW, outerR } = scene;
+  const { svg, model, theme, coords, edgeW, outerR } = scene;
   for (const e of model.edges) {
     const a = coords.get(e.from);
     const b = coords.get(e.to);
     if (!a || !b) continue;
-    const marker = markers.build();
     const isPivot = e.kind === "pivot";
-    const col = isPivot ? theme.pivot : theme.supersede;
-    marker.path.setAttribute("stroke", col);
-    marker.node.setAttribute("markerWidth", String(nodeR * 1.8));
-    marker.node.setAttribute("markerHeight", String(nodeR * 1.8));
-    /* 端点退距：起止于节点边缘外，箭头尖不扎进节点 */
-    const ia = nodeR + outerR * 0.006;
-    const ib = nodeR + outerR * 0.004;
+    const source = model.byId[e.from];
+    const col = isPivot
+      ? theme.pivot
+      : (theme.domain[source?.domain ?? ""] ?? theme.noDomain);
+    /* 端点退距：起止于节点边缘外（半径吃各自形态档与放大档，与大图同口径） */
+    const ia = nodeRadiusOf(scene, e.from) + outerR * 0.006;
+    const ib = nodeRadiusOf(scene, e.to) + outerR * 0.004;
     const attrs: Record<string, string | number> = {
       fill: "none",
       stroke: col,
       "stroke-width": edgeW,
-      "stroke-dasharray": isPivot ? `${edgeW} ${edgeW * 2}` : `${edgeW * 3} ${edgeW * 2.5}`,
-      "marker-end": `url(#${marker.node.id})`,
-      opacity: 0.85,
+      opacity: isPivot ? 0.5 : 0.45,
     };
+    if (isPivot) {
+      attrs["stroke-dasharray"] = `${edgeW * 2} ${edgeW * 3}`;
+      attrs["stroke-linecap"] = "round";
+    }
     if (a.r === b.r) {
       /* 同日边：沿环走弧，退距换算成角度；角差不足按比例收缩防反转 */
       const da = (ia / a.r) * DEG;
@@ -314,40 +324,31 @@ function drawHub(scene: ThumbScene): void {
   );
 }
 
-/** 节点（最上层）：被取代的领域色混灰淡出，孤星加虚线外环。 */
+/** 一张卡的节点半径：被取代压到 0.7、主干末端在立卡吃结论放大档——与大图同口径
+ * （大图那份乘在 symbolScale 上，这边直接乘在等比出的 nodeR 上）。 */
+function nodeRadiusOf(scene: ThumbScene, id: string): number {
+  const form = formOf(scene.model, id);
+  const tier = isConclusion(form, scene.tips.has(id)) ? scene.layout.tierMult : 1;
+  return (scene.nodeR * NODE_RADIUS[form] * tier) / BASE_RADIUS;
+}
+
+/** 节点（最上层）：实心 + 一圈底色缝（无渐变），被取代的领域色混灰淡出、小一号。 */
 function drawNodes(scene: ThumbScene): void {
-  const { svg, model, theme, coords, nodeR, edgeW } = scene;
-  const isolatedSet = new Set(model.isolated.map((c) => c.id));
+  const { svg, model, theme, coords, edgeW } = scene;
   for (const c of model.cards) {
     const p = coords.get(c.id);
     if (!p) continue;
     const form = formOf(model, c.id);
     const col = formColor(form, c, theme);
     const group = el("g", { transform: `translate(${p.x},${p.y})` }, svg);
-    if (isolatedSet.has(c.id)) {
-      el(
-        "circle",
-        {
-          cx: 0,
-          cy: 0,
-          r: nodeR * 1.8,
-          fill: "none",
-          stroke: col,
-          "stroke-width": edgeW,
-          "stroke-dasharray": `${nodeR * 0.5} ${nodeR * 0.6}`,
-          opacity: 0.8,
-        },
-        group,
-      );
-    }
     el(
       "circle",
       {
         cx: 0,
         cy: 0,
-        r: nodeR,
+        r: nodeRadiusOf(scene, c.id),
         fill: col,
-        stroke: nodeEdge(c, theme),
+        stroke: theme.bg,
         "stroke-width": edgeW * 0.8,
       },
       group,

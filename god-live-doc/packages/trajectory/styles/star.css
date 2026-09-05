@@ -65,6 +65,17 @@
   pointer-events: none;
 }
 
+/* ---------- 节点：悬停换描边 ---------- */
+/* 平时是一圈底色缝（把密集处的彩点分开），悬停换成本卡的领域色——色值由 recolor
+   写进节点组的 --dc，放大补间归 JS（符号整组按 view.k 反补偿，描边跟着走） */
+.star-disk .nd .core {
+  transition: stroke 120ms ease;
+}
+
+.star-disk .nd:hover .core {
+  stroke: var(--dc);
+}
+
 /* ---------- 画布文字（SVG 文本类） ---------- */
 .star-disk .lb {
   font-size: 10.5px;
@@ -711,8 +722,10 @@ html:not(.dark) .star-launcher-thumb .star-thumb-dark {
 }
 
 /* ---------- 关系边段落（remarkTrajectoryLinks 打标） ---------- */
+/* 两色跟盘上的连线同源：取代泥金（盘上取旧卡领域色，正文里没有领域上下文，退回泥金）、
+   转向铜绿。卡页正文亮暗共用一档，取暗色板那份——两个底上都够看 */
 .trajectory-edge {
-  border-left: 3px solid #f5b942;
+  border-left: 3px solid #cbb27a;
   padding: 4px 10px;
   margin: 8px 0;
   font-size: 13px;
@@ -720,5 +733,5 @@ html:not(.dark) .star-launcher-thumb .star-thumb-dark {
 }
 
 .trajectory-edge[data-kind="pivot"] {
-  border-left-color: #48c9d8;
+  border-left-color: #6fb8ae;
 }

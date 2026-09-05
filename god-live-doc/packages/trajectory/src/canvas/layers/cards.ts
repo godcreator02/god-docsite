@@ -26,7 +26,9 @@ import {
   buildNode,
   buildWormhole,
   isConclusion,
+  isPanoramaLabel,
   type NodeEl,
+  spineTipIds,
   type WormEl,
 } from "../node-dom.ts";
 import type { Theme } from "../theme.ts";
@@ -53,6 +55,8 @@ export class CardsLayer implements StarLayer {
     const { cards, isolated } = ctx.model;
     /* 孤星按身份认：模型经序列化过一趟后 isolated 里的对象与 cards 不共享引用 */
     const isolatedIds = new Set(isolated.map((c) => c.id));
+    /* 结论卡（尺寸放大档）：每棵树主干末端那张 */
+    const tipIds = spineTipIds(ctx.model.trees);
     const bindNode = (n: NodeEl): void => {
       /* 节点 DOM 随下一轮重建整棵销毁，监听器跟着走 */
       /* 点节点 = 开卡页（宿主决定怎么开）；Ctrl/Cmd+点透传给宿主 */
@@ -73,7 +77,15 @@ export class CardsLayer implements StarLayer {
       this.nodeEls.push(n);
     };
     for (const c of cards) {
-      bindNode(buildNode(c, formOf(ctx.model, c.id), isolatedIds.has(c.id), ctx.typeOf(c.id)));
+      bindNode(
+        buildNode(
+          c,
+          formOf(ctx.model, c.id),
+          isolatedIds.has(c.id),
+          tipIds.has(c.id),
+          ctx.typeOf(c.id),
+        ),
+      );
     }
   }
 
@@ -150,9 +162,9 @@ export class CardsLayer implements StarLayer {
       const r2 = layout.displayRadius(place.rLin);
       const mag = layout.mag(place.rLin);
       const lod = lodOf(mag);
-      /* 结论放大档：在立非孤星吃 tierMult（与标签分级同一判定）；乘在 symbolScale 上符号整组放大，
-       * 命中区 / 孤星虚线环同比跟随，标签锚点偏移（rBase × symbolScale）自动变长 */
-      const tier = isConclusion(n.form, n.isolated) ? layout.tierMult : 1;
+      /* 结论放大档：主干末端在立卡吃 tierMult；乘在 symbolScale 上符号整组放大，
+       * 命中区同比跟随，标签锚点偏移（rBase × symbolScale）自动变长 */
+      const tier = isConclusion(n.form, n.isTip) ? layout.tierMult : 1;
       /* 世界缩放因子：屏幕尺寸恒定；hover 放大 1.4 倍 */
       const symbolScale = layout.symbolPx * lod * pxToWorld * tier * (1 + 0.4 * n.hoverTween);
       /* 节点屏幕直径 */
@@ -177,10 +189,9 @@ export class CardsLayer implements StarLayer {
       const lp = polar(ang, outward ? r2 + NODE_RADIUS[n.form] * symbolScale + 6 * pxToWorld : rIn);
       const ap = this.anchorLabel(n.label, ang, lp.x, lp.y, pxToWorld, outward);
       const eff = mag * kRatio;
-      /* 标签分级：在立且非孤星 =
-       * 每棵树活着的结论，全景即显（eff>0.5）——全景读格局；孤星与被取代进鱼眼才显
+      /* 标签分级：在立且非孤星的卡全景即显（eff>0.5）——全景读格局；孤星与被取代进鱼眼才显
        * （eff>1.8）——鱼眼读细节。「全部标签」开关无视分级与仲裁全显（人就是要看重叠） */
-      const labelGate = isConclusion(n.form, n.isolated) ? 0.5 : 1.8;
+      const labelGate = isPanoramaLabel(n.form, n.isolated) ? 0.5 : 1.8;
       if (showAllLabels || hoveredCard === c || eff > labelGate) {
         if (showAllLabels) n.label.style.display = "";
         else

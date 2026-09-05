@@ -6,7 +6,7 @@
 
 import type { RingsLayout } from "../../layout.ts";
 import type { Card, Milestone, TrajectoryModel } from "../../types.ts";
-import type { MarkerFactory, WormEl } from "../node-dom.ts";
+import type { DefsFactory, WormEl } from "../node-dom.ts";
 import type { Theme } from "../theme.ts";
 
 /** 一张卡这一帧的显示坐标：节点先摆、边与树名随后取用。 */
@@ -66,7 +66,8 @@ export interface FrameCtx {
  * layout / model / theme / milestones 是建构期一次性注入的只读引用，层可持有到下一轮重建。 */
 export interface BuildCtx {
   world: SVGElement;
-  markers: MarkerFactory;
+  /** 珠光渐变与空窗羽化滤镜的 defs 工厂（每张盘一个，id 不撞） */
+  defs: DefsFactory;
   layout: RingsLayout;
   model: TrajectoryModel;
   theme: Theme;

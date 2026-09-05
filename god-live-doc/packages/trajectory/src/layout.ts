@@ -41,18 +41,18 @@ export const DEG = 57.2958;
  * displayRadius(r) ≥ innerR 恒成立，任何卡任何模式都进不了盘心；第一环（day0 在 innerR + 10）贴盘沿。 */
 export const HUB_RIM = 10;
 
-/** 节点基准半径：单档；结论放大档不吃这张表，走视图侧帧乘数 tierMult
- * （符号整组随 scale 放大，命中区与孤星虚线环同比跟随，DOM 不用重建）。
+/** 节点基准半径：在立一档、被取代压到 0.7；结论放大档不吃这张表，走视图侧帧乘数 tierMult
+ * （符号整组随 scale 放大，命中区同比跟随，DOM 不用重建）。
  * 参与间距计算的布局常量，纯数据——键用字面量联合而非渲染层的 NodeForm 类型，
  * 布局层不反向依赖渲染层（两者结构等价，消费处照样按 NodeForm 索引）。 */
 export const BASE_RADIUS = 6;
 
 export const NODE_RADIUS: Record<"alive" | "superseded", number> = {
   alive: BASE_RADIUS,
-  superseded: BASE_RADIUS,
+  superseded: BASE_RADIUS * 0.7,
 };
 
-/** 根节点半径：盘心正中的圆点 = 项目根卡。比 BASE_RADIUS(6)与结论档（6 × tierMult 1.4 = 8.4）
+/** 根节点半径：盘心正中的圆点 = 项目根卡。比 BASE_RADIUS(6)与结论档（6 × tierMult 1.3 = 7.8）
  * 都略大，盘心独一档；定妆照按 nodeR × ROOT_RADIUS / BASE_RADIUS 同基准等比。 */
 export const ROOT_RADIUS = 10;
 
@@ -206,7 +206,7 @@ export class RingsLayout {
   newShare = 0.03; // 外环（新压缩显示区）占比
   symbolPx = 0.65; // 节点屏幕尺寸系数
   spreadMult = 1; // 同日串珠散开乘数（纯角度口径，进扇环宽度——散得开树带拿得宽）
-  tierMult = 1.4; // 结论放大乘数（在立非孤星吃放大档，纯屏幕尺寸口径——帧变量，不进装箱）
+  tierMult = 1.3; // 结论放大乘数（主干末端在立卡吃放大档，纯屏幕尺寸口径——帧变量，不进装箱）
   hubR = 190; // 线性态时间零点半径：day0 的环从这里起步
   /** 有效时间轴内界 = 鱼眼恒等区边界，恒等于 hubBase（setHub 直赋值）。 */
   innerR = 180;

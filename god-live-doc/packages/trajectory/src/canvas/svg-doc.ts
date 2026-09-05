@@ -4,13 +4,23 @@
  * node-dom 的 el() 建子元素时走父节点的 ownerDocument，所以画家只要拿桩文档建根 svg，
  * 整棵树就都落在桩上；浏览器里照常走真 document，两边行为一眼看穿、不引 DOM 库。 */
 
+/** 桩样式袋：大图节点工厂写 cursor，recolor 用 setProperty 写自定义属性（--dc），
+ * 桩上只收着不解释。 */
+export interface SvgStubStyle {
+  [key: string]: unknown;
+  setProperty(name: string, value: string): void;
+}
+
 /** 桩元素：属性表 + 子节点表 + 文本。 */
 export class SvgStubElement {
   readonly tagName: string;
   readonly attrs = new Map<string, string>();
   readonly children: SvgStubElement[] = [];
-  /** 元素样式袋：大图节点工厂会写 cursor，桩上只收着不解释 */
-  readonly style: Record<string, string> = {};
+  readonly style: SvgStubStyle = {
+    setProperty: (name: string, value: string): void => {
+      this.style[name] = value;
+    },
+  };
   readonly ownerDocument: SvgStubDocument;
   private textValue = "";
 

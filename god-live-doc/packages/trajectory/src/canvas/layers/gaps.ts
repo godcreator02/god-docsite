@@ -66,7 +66,7 @@ export class GapsLayer implements StarLayer {
             cy: 0,
             fill: "none",
             class: "gap-bg",
-            filter: `url(#${this.ctx.markers.blur(Math.max(3, w * 0.3))})`,
+            filter: `url(#${this.ctx.defs.blur(Math.max(3, w * 0.3))})`,
           },
           this.layer,
         ),

@@ -19,7 +19,6 @@ import {
   DEG,
   NODE_RADIUS,
   polar,
-  smoothstep,
   type TreeBox,
 } from "../../layout.ts";
 import { formOf } from "../../model.ts";
@@ -62,7 +61,8 @@ export class TreesLayer implements StarLayer {
   }
 
   /** 边（几何每帧重算；颜色由基座 recolor 刷）：两种边都画——转向卡跟源卡同树同扇环，
-   * 连线短程不穿盘；取代虚线走金黄、转向点线走青。 */
+   * 连线短程不穿盘；取代边细实线取旧卡领域色、转向边铜绿点线，都不带箭头
+   * （半径即时间，方向天然给定）。 */
   private buildEdges(): void {
     this.edgeEls = [];
     const layout = this.ctx.layout;
@@ -76,28 +76,26 @@ export class TreesLayer implements StarLayer {
       const sameDay =
         (layout.places.get(source.id) as CardPlace).rLin ===
         (layout.places.get(target.id) as CardPlace).rLin;
-      const marker = this.ctx.markers.build();
       const isPivot = e.kind === "pivot";
-      /* 细虚线 / 点线 + 开口 V 箭头 */
-      const node = el(
-        sameDay ? "path" : "line",
-        {
-          fill: "none",
-          "stroke-width": 1.2,
-          "vector-effect": "non-scaling-stroke",
-          "stroke-dasharray": isPivot ? "1.5 3" : "5 4",
-          "marker-end": `url(#${marker.node.id})`,
-        },
-        this.ctx.world,
-      );
+      /* 取代边实线、转向边点线；线宽与虚线段都走 non-scaling-stroke，屏幕像素恒定 */
+      const attrs: Record<string, string | number> = {
+        fill: "none",
+        "stroke-width": 1,
+        "vector-effect": "non-scaling-stroke",
+      };
+      if (isPivot) {
+        attrs["stroke-dasharray"] = "2 3";
+        attrs["stroke-linecap"] = "round";
+      }
+      const node = el(sameDay ? "path" : "line", attrs, this.ctx.world);
       this.edgeEls.push({
         kind: sameDay ? "arc" : "line",
         source,
         target,
         node,
-        marker,
         isPivot,
-        baseOpacity: 1,
+        /* 转向线细一档、点线更疏，透明度给高半档才跟取代边一样看得见 */
+        baseOpacity: isPivot ? 0.5 : 0.45,
       });
     };
     for (const t of trees) {
@@ -146,44 +144,66 @@ export class TreesLayer implements StarLayer {
     this.placeEdges(f);
   }
 
-  /** 边：端点通则——起止于节点边缘外固定屏幕间隙，箭头尖不扎进节点；三种几何各按自己退距。 */
+  /** 边：端点通则——起止于节点边缘外固定屏幕间隙（不扎进节点）；两种几何各按自己退距，
+   * 挨得太近的两颗按比例压缩退距，宁可留根短须也别整条丢掉。悬停一端的边提亮。 */
   private placeEdges(f: FrameCtx): void {
-    const { framePos, pxToWorld, kRatio } = f;
+    const { framePos, pxToWorld, hoveredCard } = f;
     const layout = this.ctx.layout;
     const strength = layout.strength;
     const model = this.ctx.model;
     for (const e of this.edgeEls) {
       const a = framePos.get(e.source.id) as FramePos;
       const b = framePos.get(e.target.id) as FramePos;
-      /* 箭头端 2px：箭头尖贴节点边缘；边两端恒为普通卡，半径取基准档 */
-      const ia = NODE_RADIUS[formOf(model, e.source.id)] * a.symbolScale + 3 * pxToWorld;
-      const ib = NODE_RADIUS[formOf(model, e.target.id)] * b.symbolScale + 2 * pxToWorld;
+      /* 退距 = 节点显示半径（symbolScale 已含形态档与结论放大档）+ 2px 净空 */
+      let ia = NODE_RADIUS[formOf(model, e.source.id)] * a.symbolScale + 2 * pxToWorld;
+      let ib = NODE_RADIUS[formOf(model, e.target.id)] * b.symbolScale + 2 * pxToWorld;
+      /* 两端退距吃光整段就按比例压缩；连 1.2px 都不剩才判它画不出来 */
+      const keep = 1.2 * pxToWorld;
+      const fit = (span: number): boolean => {
+        if (span <= keep) return false;
+        if (ia + ib + keep > span) {
+          const s = (span - keep) / (ia + ib);
+          ia *= s;
+          ib *= s;
+        }
+        return true;
+      };
+      let drawn: boolean;
       if (e.kind === "arc") {
-        /* 同日边：沿环走弧，退距换算成角度；角差不足按比例收缩防反转 */
-        const da = (ia / a.r) * DEG;
-        const db = (ib / b.r) * DEG;
-        const sq = Math.min(1, Math.max(0, ((b.ang - a.ang) * 0.8) / Math.max(1e-6, da + db)));
-        const pa = polar(a.ang + da * sq, a.r);
-        const pb = polar(b.ang - db * sq, b.r);
-        e.node.setAttribute("d", `M${pa.x},${pa.y} A${a.r},${a.r} 0 0 1 ${pb.x},${pb.y}`);
+        /* 同日边：沿环走弧，退距按弧长判定后换算成角度 */
+        const dth = b.ang - a.ang;
+        const sg = dth >= 0 ? 1 : -1;
+        drawn = fit((Math.abs(dth) / DEG) * a.r);
+        if (drawn) {
+          const pa = polar(a.ang + sg * (ia / a.r) * DEG, a.r);
+          const pb = polar(b.ang - sg * (ib / b.r) * DEG, b.r);
+          e.node.setAttribute(
+            "d",
+            `M${pa.x},${pa.y} A${a.r},${a.r} 0 0 ${sg > 0 ? 1 : 0} ${pb.x},${pb.y}`,
+          );
+        }
       } else {
         /* 跨日边：沿弦缩进 */
-        const len = Math.hypot(b.x - a.x, b.y - a.y) || 1;
-        const ux = (b.x - a.x) / len;
-        const uy = (b.y - a.y) / len;
-        e.node.setAttribute("x1", String(a.x + ux * ia));
-        e.node.setAttribute("y1", String(a.y + uy * ia));
-        e.node.setAttribute("x2", String(b.x - ux * ib));
-        e.node.setAttribute("y2", String(b.y - uy * ib));
+        const len = Math.hypot(b.x - a.x, b.y - a.y);
+        drawn = fit(len);
+        if (drawn) {
+          const ux = (b.x - a.x) / len;
+          const uy = (b.y - a.y) / len;
+          e.node.setAttribute("x1", String(a.x + ux * ia));
+          e.node.setAttribute("y1", String(a.y + uy * ia));
+          e.node.setAttribute("x2", String(b.x - ux * ib));
+          e.node.setAttribute("y2", String(b.y - uy * ib));
+        }
       }
       const rLinA = (layout.places.get(e.source.id) as CardPlace).rLin;
       const rLinB = (layout.places.get(e.target.id) as CardPlace).rLin;
-      /* 箭头 5-8px 连续插值，无档位 */
-      const apx = 5 + 3 * smoothstep(0.7, 2.2, layout.mag(rLinB) * kRatio);
-      e.marker.node.setAttribute("markerWidth", String(apx * pxToWorld));
-      e.marker.node.setAttribute("markerHeight", String(apx * pxToWorld));
       const edgeMag = Math.max(layout.mag(rLinA), layout.mag(rLinB));
-      e.node.setAttribute("opacity", String(e.baseOpacity * bandFade(edgeMag, strength, 0.5)));
+      /* 悬停一端：这条边提到 0.9，跟着领域色一起跳出来 */
+      const hot =
+        hoveredCard !== null &&
+        (hoveredCard.id === e.source.id || hoveredCard.id === e.target.id);
+      const base = drawn ? (hot ? 0.9 : e.baseOpacity) : 0;
+      e.node.setAttribute("opacity", String(base * bandFade(edgeMag, strength, 0.5)));
     }
   }
 

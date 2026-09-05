@@ -24,7 +24,7 @@ export interface TrajectorySettings {
   symbolPx: number;
   /** 节点散开乘数（同日串珠角距，纯角度口径——内环同角弧长短、允许略挤） */
   spreadMult: number;
-  /** 结论放大乘数（在立非孤星 = 每棵树活着的结论吃放大档，与标签分级同一口径；
+  /** 结论放大乘数（每棵树主干末端那张在立卡吃放大档；
    * 1 = 关闭分级全员同大；纯屏幕尺寸口径，不进装箱） */
   tierMult: number;
   /** 动画速度（补间趋近系数） */
@@ -41,7 +41,7 @@ export const DEFAULT_SETTINGS: TrajectorySettings = {
   gapWide: 53,
   symbolPx: 0.65,
   spreadMult: 1,
-  tierMult: 1.4,
+  tierMult: 1.3,
   ease: 0.16,
 };
 
@@ -168,7 +168,7 @@ export const SETTING_ITEMS: readonly SettingItem[] = [
     step: 0.05,
     format: (v) => `×${v.toFixed(2)}`,
     kind: "tune",
-    /* 结论卡（在立非孤星）尺寸乘数：乘在帧缩放因子上，符号整组放大、
+    /* 结论卡（主干末端在立卡）尺寸乘数：乘在帧缩放因子上，符号整组放大、
      * dodge 直径下帧自动跟随——纯帧变量，不碰布局，不用 rebake */
     apply: (layout, v) => {
       layout.tierMult = v;

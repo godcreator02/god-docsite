@@ -30,9 +30,9 @@ import { MilestonesLayer } from "./layers/milestones.ts";
 import { TreesLayer } from "./layers/trees.ts";
 import {
   buildFilter,
+  DefsFactory,
   el,
   type FilterSel,
-  MarkerFactory,
   recolor,
   type WormEl,
 } from "./node-dom.ts";
@@ -41,7 +41,7 @@ import {
   SETTING_ITEMS,
   type TrajectorySettings,
 } from "./settings.ts";
-import { buildThemes, hubStrokeOf, type Theme, type ThemeName } from "./theme.ts";
+import { buildThemes, type Theme, type ThemeName } from "./theme.ts";
 
 /** 回到原点钮的三态：camera = 相机动过，下一按归相机回大图；window = 相机已在原点、
  * 时间窗或透镜还在场，下一按归窗顶满；idle = 全归位。 */
@@ -90,7 +90,7 @@ export class StarStage {
   /* ---------- 画布 DOM 句柄 ---------- */
   private svg: SVGElement | null = null;
   private world!: SVGElement;
-  private markers!: MarkerFactory;
+  private defs!: DefsFactory;
   private readonly axisLayer = new AxisLayer();
   private readonly cardsLayer = new CardsLayer();
   private readonly gapsLayer = new GapsLayer();
@@ -220,7 +220,7 @@ export class StarStage {
     const svg = el("svg", { class: "star-svg" }, this.host.canvasEl);
     this.svg = svg;
     this.world = el("g", {}, svg);
-    this.markers = new MarkerFactory(this.world);
+    this.defs = new DefsFactory(this.world);
     /* 数据重建整棵换掉 svg/world：相机重挂新句柄，view 状态原样留着 */
     this.camera.setElements(svg, this.world);
 
@@ -245,7 +245,7 @@ export class StarStage {
   private buildCtx(): BuildCtx {
     return {
       world: this.world,
-      markers: this.markers,
+      defs: this.defs,
       layout: this.layout as RingsLayout,
       model: this.model as TrajectoryModel,
       theme: this.theme,
@@ -363,6 +363,7 @@ export class StarStage {
       this.theme,
       this.filterSel,
       this.searchHit,
+      this.defs,
     );
     this.hubLayer.recolor(this.theme);
     this.cardsLayer.recolor(this.theme);
@@ -389,11 +390,9 @@ export class StarStage {
     return this.theme;
   }
 
-  /** 按主题名落到色板：盘心描边跟宿主 `--color-fd-primary` 走，解析成 hex 存进色板——
-   * hubStroke 要进 mix() 混警示色，不能直接留 var()。 */
+  /** 按主题名落到色板：整套色值都在色板里（盘心描边走泥金，不再探宿主变量）。 */
   private readTheme(): void {
     this.theme = this.themes[this.themeName];
-    this.theme.hubStroke = hubStrokeOf(this.themeName);
   }
 
   /* ================= 视图：画布铺满容器 ================= */

@@ -74,11 +74,13 @@ test("StarDisk 启动器：?disk 缺失渲项目卡阵——每张盘一张卡�
   const svgs = [...html.matchAll(/<svg viewBox="[^"]+" class="trajectory-thumb star-thumb-(dark|light)">/g)];
   assert.equal(svgs.length, data.disks.length * 2, "每张卡带亮暗各一份静态 svg");
   assert.match(html, /\d+ 卡<\/span> · <span class="star-launcher-seg">最近活动 \d{4}-\d{2}-\d{2}/, "卡下方是「n 卡 · 最近活动 <日期>」");
-  /* 缩略图是静态 markup：盘心与虫洞走 --color-fd-primary，没有交互属性 */
+  /* 缩略图是静态 markup：盘心与虫洞走色板里的泥金，节点底色缝走宿主变量，没有交互属性 */
   const one = thumbs[ROOT_ID]!;
-  assert.match(one.dark, /stroke="var\(--color-fd-primary\)"/);
-  assert.match(one.dark, /color-mix\(in srgb, var\(--color-fd-primary\) 65\.0%, #000000\)/, "根节点描边由 mix 出 color-mix");
-  assert.doesNotMatch(one.dark, /<text|onclick|href=/);
+  assert.match(one.dark, /stroke="#CBB27A"/, "暗色板盘心描边是泥金");
+  assert.match(one.light, /stroke="#8A7238"/, "亮色板泥金压深一档");
+  assert.match(one.dark, /stroke="var\(--color-fd-background\)"/, "节点底色缝走宿主变量");
+  assert.match(one.dark, /stroke="rgb\(132,116,79\)"/, "根节点描边由 mix 出 rgb()");
+  assert.doesNotMatch(one.dark, /<text|onclick|href=|marker/i);
   assert.notEqual(one.dark, one.light, "亮暗两份色板不同");
   /* 认不出的 initialDisk 同样回启动器；不传 thumbs 也渲卡阵（缩略图挂载后客户端现画） */
   const unknown = renderToStaticMarkup(

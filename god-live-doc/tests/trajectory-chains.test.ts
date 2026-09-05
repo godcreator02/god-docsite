@@ -46,12 +46,17 @@ test("同树同槽同日多卡分到同一组、组按日期序；跨槽（主�
 
   const spine = chainsOfAa.find((c) => c.groups.some((g) => g.ids.includes("aa01-链头")));
   assert.deepEqual(spine?.groups.map((g) => g.ids), [["aa01-链头"], ["aa02-链二", "aa03-链三"], ["aa04-链尾"]]);
+  /* 结论卡 = 主干末端那张且在立：只有 aa04-链尾 算 */
   assert.deepEqual(spine?.groups.map((g) => g.hasConclusion), [false, false, true]);
-  assert.equal(spine?.groups.every((g) => g.rBase === 6), true);
+  /* 基半径吃形态档：被取代压到 0.7（6 × 0.7 = 4.2），末端那张在立仍是 6 */
+  assert.deepEqual(
+    spine?.groups.map((g) => Number(g.rBase.toFixed(6))),
+    [4.2, 4.2, 6],
+  );
 
   const subline = chainsOfAa.find((c) => c.groups.some((g) => g.ids.includes("cc01-支线甲")));
   assert.deepEqual(subline?.groups.map((g) => g.ids), [["cc01-支线甲"], ["cc02-支线乙"]]);
-  assert.deepEqual(subline?.groups.map((g) => g.hasConclusion), [true, true]);
+  assert.deepEqual(subline?.groups.map((g) => g.hasConclusion), [false, false], "支线不占主干末端");
 });
 
 test("单日两卡树（全槽仅一个日期）不成链", () => {
