@@ -72,7 +72,7 @@ mdx 里的组件是 JSX 节点。序列化成 md 时，它要么原样漏成一�
 
 站上是标签页，AI 那份里是一串三级标题。名单的正本在这儿，两半都拿它对：
 
-{/* ref file="src/components/registry.ts" lines="7-8" */}
+{/* ref file="src/components/registry.ts" lines="9-10" */}
 
 少一半的后果不一样，但都是硬失败：**压平表没有** → 打标时报「名册外组件」；**React 表没有** →
 站渲染报 `Expected component`。所以有一个脚本两头对，门禁里跑：

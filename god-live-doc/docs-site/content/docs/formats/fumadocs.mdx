@@ -30,7 +30,7 @@ description: mdx 与 fumadocs 是一个整体：三个插头、插件流程、�
   </Tab>
 </Tabs>
 
-{/* ref file="../packages/format-fumadocs/src/host.ts" lines="44-53" */}
+{/* ref file="../packages/format-fumadocs/src/host.ts" lines="46-64" */}
 
 挂在链尾是有讲究的：前面是 fumadocs 自己的 `remarkInclude` 和一整套预设（标题 id、gfm……），
 后面就是它自己的 postprocess——插件看到的是一棵已经归置好的树。接线怎么写，见
@@ -46,7 +46,7 @@ description: mdx 与 fumadocs 是一个整体：三个插头、插件流程、�
 fumadocs 的 `rehypeCode` 只放行白名单里的 meta，别的一律丢掉。所以状态点的颜色要走一个自己的字段，
 并且把这张表整个换掉：
 
-{/* ref file="../packages/format-fumadocs/src/host.ts" lines="27-27" */}
+{/* ref file="../packages/format-fumadocs/src/host.ts" lines="29-29" */}
 
 跟 fumadocs 的默认白名单同形，只多一个 `data-dot`。值一律带引号——它的 meta 解析器只认
 `key="字符串"` / `key=数字` / 裸 `key` 三种，裸单词会被解析成 `null`。

@@ -44,7 +44,7 @@ description: 配置一项、命令两条、fumadocs 站三处，外加 Next 那�
 卡页路由）。集合级 `mdxOptions` 会把默认插件全去掉，所以要用 `applyMdxPreset` 先把默认 preset
 加回来：
 
-{/* ref file="source.config.ts" lines="20-38" */}
+{/* ref file="source.config.ts" lines="21-39" */}
 
 **livedoc 自己的 remark 插件挂在全局 `mdxOptions` 上，跑不到这个集合上**——这正是要的：
 卡正文冻结历史、不钉活代码，第四层校验守的也是这条。
@@ -90,7 +90,7 @@ description: 配置一项、命令两条、fumadocs 站三处，外加 Next 那�
 样式随包发，`global.css` 里引一行；整页那层壳（顶栏一条、盘吃满剩下的高度）是站自己的几行 CSS，
 不进包里——顶栏是页面的事：
 
-{/* ref file="src/app/global.css" lines="6-7" */}
+{/* ref file="src/app/global.css" lines="8-9" */}
 
 包照常导出服务端组件 `Trajectory`（读目录 + 渲一张方形嵌入的盘或启动器 + 报病列表），留给想把盘摆进
 一篇长文档中间的消费方；**这两个站的名册里不再登记它**，盘走路由了。`hrefBase` 仍要跟 loader 的

@@ -25,7 +25,7 @@ fumadocs 在格式包里只是 peer——用你项目里装的那份，包自己
 
 命令行和站读的是同一份配置：挂哪些格式包、文档在哪、用哪个比较器、组件名册是什么。
 
-{/* ref file="livedoc.config.mjs" lines="15-30" */}
+{/* ref file="livedoc.config.mjs" lines="15-33" */}
 
 上面这份是本站的配置。`trajectory` 是可选的一摊（轨迹卡目录）：不配就整个不管，配了 `check` 才顺带
 跑卡校验、`livedoc trajectory` 才有得列。这个站指的是单元根那个卡目录，接法见
@@ -48,7 +48,7 @@ fumadocs 在格式包里只是 peer——用你项目里装的那份，包自己
 `source.config.ts` 里两处：remark 链尾巴挂插件（顺带把 `data-dot` 加进 meta 白名单），
 集合的 `postprocess` 打开 processed markdown 并用格式包给的序列化回调。
 
-{/* ref file="source.config.ts" lines="13-18" */}
+{/* ref file="source.config.ts" lines="14-19" */}
 
 再两行：`src/components/mdx.tsx` 里把 `pre` 换成格式包的 `LivedocPre`（它读 `data-dot` 画点），
 `global.css` 里 `@import '@godcreator02/live-doc-format-fumadocs/light.css'`。
