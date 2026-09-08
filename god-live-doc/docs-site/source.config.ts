@@ -9,6 +9,7 @@
 import { applyMdxPreset, defineConfig, defineDocs } from 'fumadocs-mdx/config';
 import { livedocMdxOptions, livedocMarkdownOptions } from '@godcreator02/live-doc-format-fumadocs';
 import { cardSchema, remarkTrajectoryLinks } from '@godcreator02/live-doc-trajectory/server';
+import { terms } from './src/glossary';
 
 export const docs = defineDocs({
   dir: 'content/docs',
@@ -39,5 +40,10 @@ export const trajectory = defineDocs({
 
 export default defineConfig({
   // 类型要求完整 options（含 themes），运行时会 merge 默认值——cast 只在这一处
-  mdxOptions: livedocMdxOptions({ root: process.cwd() }) as never,
+  // glossary：正文里命中术语表的词自动包成 <Term>。术语页规范那篇是人写的规范文本，
+  // 里头的词按字面读，别在它上面标注——skipFile 把它挑出去
+  mdxOptions: livedocMdxOptions({
+    root: process.cwd(),
+    glossary: { terms, skipFile: (path) => path.endsWith('human-write-spec-dont-change.mdx') },
+  }) as never,
 });

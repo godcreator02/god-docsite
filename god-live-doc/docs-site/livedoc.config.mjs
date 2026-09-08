@@ -26,5 +26,8 @@ export default {
     ...fumadocs.defaultRoster,
     Tabs: tabs.Tabs,
     Tab: tabs.Tab,
+    // 术语标注：自动标出来的那些是构建期长的，不进源文件、命令行看不到。这条规则给作者
+    // 手写的那种——机读版里只留术语原词，装饰不带过去
+    Term: "children",
   },
 };

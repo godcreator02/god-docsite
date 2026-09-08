@@ -3,6 +3,8 @@
 @import 'fumadocs-ui/css/preset.css';
 /* 状态点的样式随格式包发，一行引进来 */
 @import '@godcreator02/live-doc-format-fumadocs/light.css';
+/* 术语标注的点线下划线与定义框，同样随格式包发 */
+@import '@godcreator02/live-doc-format-fumadocs/term.css';
 /* 星轨盘的 HUD / 图例 / 浮层样式随 trajectory 包发 */
 @import '@godcreator02/live-doc-trajectory/star.css';
 

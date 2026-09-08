@@ -24,6 +24,10 @@ description: mdx 与 fumadocs 是一个整体：三个插头、插件流程、�
   <Tab title="pre 组件">
     `@godcreator02/live-doc-format-fumadocs/pre` 覆盖 `mdx.tsx` 里的 `pre`，外加一份随包发的 css。
   </Tab>
+  <Tab title="术语标注">
+    给 `livedocMdxOptions` 一份词表就开：正文里命中的词构建期包成 `<Term>`，
+    组件与样式在侧出口 `/term` 与 `/term.css`。不给就不开。
+  </Tab>
 </Tabs>
 
 {/* ref file="../packages/format-fumadocs/src/host.ts" lines="44-53" */}
@@ -31,6 +35,11 @@ description: mdx 与 fumadocs 是一个整体：三个插头、插件流程、�
 挂在链尾是有讲究的：前面是 fumadocs 自己的 `remarkInclude` 和一整套预设（标题 id、gfm……），
 后面就是它自己的 postprocess——插件看到的是一棵已经归置好的树。接线怎么写，见
 [站接线手册](/docs/formats/wiring)。
+
+给了 `glossary` 就多挂一个术语标注插件，**排在 livedoc 那个之前**：那时树上还只有作者写的
+散文，投影的代码块与目录树都还没注入，标注碰不到它们。不给这个参数就是原来的行为，
+一个字节不变——已经在跑的站不用跟着改。术语表的正本是站里那份数据文件，`<Term>` 的定义
+是构建期写进属性的，所以组件不带词表进客户端包，也不需要一行 JS。
 
 ## meta 白名单：只多认一个字段
 

@@ -11,6 +11,7 @@ import { File, Files, Folder } from 'fumadocs-ui/components/files';
 import type { MDXComponents } from 'mdx/types';
 import type { ReactNode } from 'react';
 import { LivedocPre } from '@godcreator02/live-doc-format-fumadocs/pre';
+import { Term } from '@godcreator02/live-doc-format-fumadocs/term';
 import type { ComponentName } from './registry';
 import { Tabs, Tab } from './tabs/tabs';
 
@@ -27,6 +28,7 @@ const table: Record<ComponentName, Loose> = {
   Files: Files as Loose,
   Folder: Folder as Loose,
   File: File as Loose,
+  Term: Term as Loose,
 };
 
 export function getMDXComponents(components: MDXComponents = {}): MDXComponents {
