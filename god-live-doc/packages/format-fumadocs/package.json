@@ -12,7 +12,12 @@
       "types": "./dist/pre.d.mts",
       "default": "./dist/pre.mjs"
     },
-    "./light.css": "./styles/light.css"
+    "./term": {
+      "types": "./dist/term.d.mts",
+      "default": "./dist/term.mjs"
+    },
+    "./light.css": "./styles/light.css",
+    "./term.css": "./styles/term.css"
   },
   "files": [
     "dist",

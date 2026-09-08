@@ -6,9 +6,14 @@
  * 名册：这里只有机制（stamp）和默认表（defaultRoster），项目在 livedoc.config.mjs 里声明自己的表。
  * 换宿主就是换这一个包：核心、project、cli、别的格式包一个不碰 fumadocs。
  *
- * 侧出口两个，不混进主出口（一个含 React，一个是样式）：
+ * 术语标注是可选的一层：`livedocMdxOptions({ root, glossary })` 给了词表才开，
+ * 匹配逻辑在 glossary.ts（纯的）、挂树在 glossary-plugin.ts、画成什么样在侧出口 /term。
+ *
+ * 侧出口四个，不混进主出口（含 React 的和样式）：
  *   @godcreator02/live-doc-format-fumadocs/pre         状态点的 pre 组件（"use client"）
  *   @godcreator02/live-doc-format-fumadocs/light.css   状态点的样式
+ *   @godcreator02/live-doc-format-fumadocs/term        术语组件（服务端组件，没有 JS）
+ *   @godcreator02/live-doc-format-fumadocs/term.css    术语标注的样式
  */
 import { formalOf } from "@godcreator02/live-doc-core";
 import type { Fill, Reference, Target } from "@godcreator02/live-doc-core";
@@ -69,6 +74,10 @@ export type { Dot, LivedocMark } from "./blocks.ts";
 export { livedocMarkdownOptions } from "./markdown.ts";
 export type { MarkdownOptions } from "./markdown.ts";
 export { livedocMdxOptions, parseMetaString, remarkLivedocHost } from "./host.ts";
+export { buildTermIndex, findTerms } from "./glossary.ts";
+export type { TermEntry, TermIndex, TermSpan } from "./glossary.ts";
+export { remarkGlossary } from "./glossary-plugin.ts";
+export type { GlossaryFile, GlossaryOptions } from "./glossary-plugin.ts";
 export { attr, childrenOf, defaultRoster, heading, paragraph, quote, stamp, text, textOf, unknownComponents } from "./roster.ts";
 export type { Helpers, Roster, Rule } from "./roster.ts";
 export { lineOf, walk } from "./tree.ts";

@@ -6,6 +6,8 @@
  * 插件挂在链尾：前面是 fumadocs 的 remarkInclude 和预设（标题 id、gfm……），后面就是它自己的 postprocess。
  */
 import { loadProject } from "@godcreator02/live-doc-project";
+import { remarkGlossary } from "./glossary-plugin.ts";
+import type { GlossaryOptions } from "./glossary-plugin.ts";
 import { remarkLivedoc } from "./remark-plugin.ts";
 import type { PluginFile } from "./remark-plugin.ts";
 import type { Roster } from "./roster.ts";
@@ -41,13 +43,22 @@ export function parseMetaString(meta: string): Record<string, unknown> {
   return out;
 }
 
-/** 站的 source.config.ts 里 `mdxOptions: livedocMdxOptions({ root: process.cwd() })` 一行接上 */
-export function livedocMdxOptions({ root }: { root: string }): {
+/**
+ * 站的 source.config.ts 里 `mdxOptions: livedocMdxOptions({ root: process.cwd() })` 一行接上。
+ *
+ * 给了 `glossary` 就顺带开术语自动标注。**它挂在 livedoc 那个插件之前**：那时树上还只有
+ * 作者写的散文，引用投影的代码块与目录树都还没注入，标注碰不到它们。不给就是原来的行为，
+ * 一个字节都不变——已经在跑的站不用跟着升级。
+ */
+export function livedocMdxOptions({ root, glossary }: { root: string; glossary?: GlossaryOptions }): {
   remarkPlugins: (v: unknown[]) => unknown[];
   rehypeCodeOptions: { parseMetaString: typeof parseMetaString };
 } {
   return {
-    remarkPlugins: (v: unknown[]) => [...v, [remarkLivedocHost, { root }]],
+    remarkPlugins: (v: unknown[]) =>
+      glossary === undefined
+        ? [...v, [remarkLivedocHost, { root }]]
+        : [...v, [remarkGlossary, glossary], [remarkLivedocHost, { root }]],
     rehypeCodeOptions: { parseMetaString },
   };
 }
