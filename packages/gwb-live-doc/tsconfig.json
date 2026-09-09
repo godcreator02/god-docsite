@@ -1,0 +1,22 @@
+{
+  "compilerOptions": {
+    "target": "ES2023",
+    "lib": ["ES2023"],
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "types": ["node"],
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "verbatimModuleSyntax": true,
+    "skipLibCheck": true,
+    "noEmit": true,
+    // 只给 shadcn CLI 看：它读件根的 tsconfig 解析 components.json 里的 @/ 别名。
+    // node 半自己一个 @/ 都不用。不写 baseUrl——TS 7 移除了它
+    "paths": {
+      "@/*": ["./src/client/*"]
+    }
+  },
+  // 浏览器半另有一份 tsconfig（jsx + DOM + 无 node 全局），产物走 esbuild 不走 tsc。
+  // **只收 src 一层的 .ts**：src/client 下的东西这一半不碰，它的 lib 里没有 DOM
+  "include": ["src/*.ts", "tests/**/*.ts", "build.ts", "vitest.config.ts"]
+}

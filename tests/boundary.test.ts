@@ -3,6 +3,8 @@
  *   core 零依赖；除了 fumadocs 格式包，谁都不许见宿主（fumadocs / next / react）；
  *   fumadocs 格式包里 fumadocs 只能是 peer——它用消费方项目装的那份，产物里不许打进去。
  * 再加两条读源码的：core/ 下只 import 自己和 node:crypto；核心不 import 任何格式包。
+ * 最后一条守的是件与包之间的方向：七个 live-doc-* 包不许认识工作台件、不许认识任何
+ * `@godcreator02/gwb-*`——依赖只能是件 → cli 这一个方向。
  * pnpm 的严格 node_modules 让「没声明就 import 不到」，所以依赖图就是边界本身。
  */
 import { test } from "node:test";
@@ -20,9 +22,14 @@ interface Pkg {
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const PACKAGES = join(ROOT, "packages");
-const pkgs = Object.fromEntries(
+const all = Object.fromEntries(
   readdirSync(PACKAGES).map((name) => [name, JSON.parse(readFileSync(join(PACKAGES, name, "package.json"), "utf8")) as Pkg]),
 ) as Record<string, Pkg>;
+
+/** 工作台件的目录名。它跟七个 live-doc-* 包同住 packages/，但不在这套包的依赖网里
+ * ——下面除了最后那条守方向的，管的都是七个包，所以先把它摘出去 */
+const PLUGIN = "gwb-live-doc";
+const pkgs = Object.fromEntries(Object.entries(all).filter(([name]) => name !== PLUGIN)) as Record<string, Pkg>;
 
 /** 运行时真正会跟着走的依赖：dependencies 加 peerDependencies。devDependencies 不算——它只为编译和类型检查 */
 const depsOf = (p: Pkg): string[] => Object.keys({ ...p.dependencies, ...p.peerDependencies });
@@ -176,5 +183,17 @@ test("cli 允许依赖 trajectory，project 与三个格式包不许依赖它", 
   assert.ok(depsOf(pkgs.cli!).includes("@godcreator02/live-doc-trajectory"), "cli 得依赖 trajectory 才能接 trajectory 子命令");
   for (const name of ["project", "format-md", "format-fumadocs", "format-html"]) {
     assert.ok(!depsOf(pkgs[name]!).includes("@godcreator02/live-doc-trajectory"), `${name} 不该依赖 trajectory`);
+  }
+});
+
+test("方向只能是件 → cli：七个包的依赖面里不许出现工作台件，也不许出现任何 @godcreator02/gwb-*", () => {
+  // 件跟包同住一个工作区，方向一旦反过来（哪怕只是一条 devDependency）这套包就再也发不出去了
+  // ——装它的人不该被迫拉进一整个桌面工作台生态。三档全查：运行时、peer、开发期。
+  const pluginName = all[PLUGIN]!.name;
+  for (const [dir, pkg] of Object.entries(pkgs)) {
+    for (const dep of Object.keys({ ...pkg.dependencies, ...pkg.peerDependencies, ...pkg.devDependencies })) {
+      assert.ok(dep !== pluginName, `${dir} 依赖了工作台件 ${pluginName}——方向反了`);
+      assert.ok(!dep.startsWith("@godcreator02/gwb-"), `${dir} 依赖了 gwb 生态的 ${dep}`);
+    }
   }
 });

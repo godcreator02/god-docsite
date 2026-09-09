@@ -1,0 +1,96 @@
+---
+title: 工作台件
+description: gwb-live-doc——把容器根下所有 fumadocs 站扫出来，一格窗格加六条命令起停、看 build 新鲜度、到点自动关
+---
+
+# 工作台件
+
+`packages/gwb-live-doc` 是这个工作区里唯一不叫 `live-doc-*` 的包：它是 god 工作台（gwb）的一枚
+插件，包名 `@godcreator02/gwb-live-doc`，命令名前缀 `live-doc.`。**它跟七个包住同一个仓，
+方向却是单向的**——件依赖 cli，七个包一个字都不认识 gwb，`tests/boundary.test.ts` 最后那条守着。
+
+它解决的是一件很具体的事：坐在工作台里看某个单元时，一键把那个单元的文档站起起来看。
+认站、判 build 新不新鲜、现挑端口起 `next start`、杀整棵进程树、到点自动关，都归它。
+
+## 六条命令
+
+命令名是常量，件挂载时注册到命令总线上：
+
+{/* ref file="../packages/gwb-live-doc/src/index.ts" lines="40-45" */}
+
+`sites` 扫一遍容器根回全部站，`start` / `stop` 起停一个，`open` 用系统浏览器打开在跑的那个，
+`extend` 把到期时刻从此刻重算，`running` 列此刻不在 idle 的。**先 `sites` 再 `start`**：
+`start` 要的 `dir` 就是 `sites` 回包里的 `dir`，不自己拼——`start` 还会挡下容器根之外的目录。
+
+窗格是一格，浏览器那半与样式表的地址由 node 半从 `import.meta.url` 算成 `file://` 报给外壳。
+说明书随包发（`skills/live-doc/SKILL.md`），装了 skills 件的 home 里自动挂给 agent 读。
+
+## 认站：泛 fumadocs 站，不只认 livedoc 站
+
+判据只看 `package.json` 的两档依赖里有没有 fumadocs 家的包：
+
+{/* ref file="../packages/gwb-live-doc/src/sites.ts" lines="10-25" */}
+
+站根另有 `livedoc.config.mjs` 的，界面上多亮一个记号——**只是记号，不影响能不能起**。
+一个工具如果只肯伺候自己家的站，它在这台机器上就只能用来看一个仓。
+
+扫描是限深的，一个单元往下最多三层，点开头的目录与 `node_modules` / `dist` / `out` 不进：
+
+{/* ref file="../packages/gwb-live-doc/src/sites.ts" lines="35-43" */}
+
+三层这个数不是随手定的——容器根下是单元，单元下是仓，仓下是 `docs-site`，正好第三层。
+
+## build 三态
+
+`.next/BUILD_ID` 是 `next build` 成功留下的唯一标志（`next dev` 不写它）。有没有这个文件、
+它跟源比谁新，凑出三态：
+
+{/* ref file="../packages/gwb-live-doc/src/sites.ts" lines="147-161" */}
+
+`missing` 就先 build 再起；`stale` 不传 `rebuild` 也起得来，起的是旧产物，回执的 `note` 里
+说明白。**这一条是防「改完 mdx 起旧产物，看到旧页面还以为没生效」**——三态里最值钱的就是 stale。
+
+「源」算的是 `content` / `src` / `public` 三棵树加站根下的所有文件，`node_modules`、`.next`、
+`.source`、`out`、`dist`、`.git`、`.turbo` 不算。
+
+## 起停：状态机不碰真进程
+
+一个站一条记录，五态 `idle → building → starting → running → stopping → idle`。
+挑口、build、serve、杀树、时钟五样全从外面注入：
+
+{/* ref file="../packages/gwb-live-doc/src/manager.ts" lines="19-29" */}
+
+真机那份在 `runner.ts`，测试喂假的——所以整台状态机在 node 里跑得起单测，一个子进程都不起。
+两处值得记：**端口现挑，不用站脚本里钉的那个**（钉的口只对手跑有意义，工作台里同时起两个站
+就撞了）；**杀的是整棵进程树**，Windows 上 `pnpm` 是 `.cmd`、pid 是 `cmd.exe`，只杀它会留下一个
+占着端口的 node 孤儿。
+
+件 dispose 时把自己起的站全杀掉——工作台关了还留着 node，那才是爆内存的路：
+
+{/* ref file="../packages/gwb-live-doc/src/index.ts" lines="145-148" */}
+
+## 到点自动关
+
+起来的站默认两小时后自己关，到点前五分钟界面上给「延长」。算术是纯函数，时间由调用方传进来：
+
+{/* ref file="../packages/gwb-live-doc/src/deadline.ts" lines="44-52" */}
+
+用的是**绝对到期时刻加定期对表**，不是一个 `setTimeout`：机器睡一觉 `setTimeout` 会漂，醒来时
+它还以为没到点；对表是每半分钟拿当前时刻跟到期时刻比一次，睡多久都对。
+
+{/* ref file="../packages/gwb-live-doc/src/deadline.ts" lines="9-16" */}
+
+设置项 `auto-stop-minutes` 写 0 就是不自动关，改了只对之后起的与延长的生效。
+
+## 它自己怎么跑
+
+件用 vitest，不是工作区那七个包的 `node --test`；构建是 `tsc` 出 node 半、`esbuild` 打浏览器半、
+`tailwindcss` 编本件那张带 `livedoc` 前缀的样式表。所以它是门禁上单独的一摊：
+
+```powershell
+cd packages/gwb-live-doc
+pnpm check          # typecheck + oxlint + vitest
+pnpm build
+```
+
+发版顺序是 **cli 先、件后**：件要装的是发出去的那份 cli，工作区里的软链只在这个仓里成立。

@@ -189,6 +189,10 @@ trajectory       轨迹卡与星轨盘，三个入口：`.` 扫卡 / 四层校�
                  react 是 peer（可选）
 ```
 
+`packages/` 下还住着一个不叫 `live-doc-*` 的包：**工作台件 `gwb-live-doc`**（god 工作台的插件，
+扫容器根下所有 fumadocs 站、一格窗格加六条命令起停）。它依赖 cli，七个包不认识它、也不认识
+任何 `@godcreator02/gwb-*`——方向单向，`tests/boundary.test.ts` 守着。件那一章见文档站「工作台件」。
+
 依赖方向：cli → project → core；格式包 → core（format-fumadocs 还依赖 project，它在站的链上要自己装配）；
 cli → trajectory（只 `.` 入口）。**trajectory 不依赖 core**、不依赖任何格式包——五类引用说的是「文档对
 文件系统说的话」，卡的关系边说的是「文档对文档说的话」，两套记录格式互不认识。

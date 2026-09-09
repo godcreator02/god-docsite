@@ -1,0 +1,16 @@
+/*
+ * 本件的样式入口。件自己就是一个完整的 Tailwind 入口，围栏是**类名前缀**：类名从源头就是
+ * `livedoc:flex` 这种，全页有效，但只可能匹配到本件画出来的元素。前缀写 `livedoc` 不写
+ * `live-doc`：Tailwind v4 的 prefix 只收小写 a-z（"Prefixes must be lowercase ASCII letters
+ * (a-z) only"），带连字符当场抛。
+ *
+ * 五行各有各的必要（正本见 gwb-devkit 手册「带界面的件」）：theme.css 带 prefix 让类名解析得
+ * 出来但不输出变量；令牌包的映射面给语义色（不引颜色类整个是空的）；utilities 不带 preflight、
+ * source(none) 只认下面那条 @source；tw-animate-css 给 animate-in 一族；@source 只扫 src/client。
+ */
+
+@import 'tailwindcss/theme.css' theme(reference) prefix(livedoc);
+@import '@godcreator02/gwb-tokens/theme.reference.css' theme(reference);
+@import 'tailwindcss/utilities.css' layer(utilities) source(none);
+@import 'tw-animate-css';
+@source "./";
