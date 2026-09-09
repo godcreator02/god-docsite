@@ -29,5 +29,5 @@ export { createReader, globToRegExp } from "./fs-reader.ts";
 export { createLedger } from "./json-ledger.ts";
 export { configPathOf, docIdOf, docsDirsOf, loadProject } from "./load.ts";
 export type { Project, ProjectConfig } from "./load.ts";
-export { placementsOf } from "./placement.ts";
-export type { OutputTarget, PlacedCheck, PlacedStatus, PlacedWrite, Placement, Placing } from "./placement.ts";
+export { createPlacing, placementsOf } from "./placement.ts";
+export type { OutputTarget, PlacedCheck, PlacedStatus, PlacedWrite, Placement, Placing, PlacingHost } from "./placement.ts";
