@@ -1,0 +1,5 @@
+{
+  "title": "skill",
+  "description": "cli 包随包发的五份 SKILL.md 的正本：render 摆进 packages/cli/skills/<名>/SKILL.md",
+  "pages": ["livedoc-docs", "trajectory", "spec-grill", "parallel-by-module", "self-explaining-code"]
+}

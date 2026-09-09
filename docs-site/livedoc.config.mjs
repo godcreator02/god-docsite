@@ -14,6 +14,13 @@
 import * as fumadocs from "@godcreator02/live-doc-format-fumadocs";
 import * as tabs from "./src/components/tabs/tabs.ai.mjs";
 
+/**
+ * 一份 skill 的落点：正本是 `content/outputs/skills/<名>.mdx`，摆进 cli 包里那份 SKILL.md。
+ * 对象写法点名 name / description 两条 frontmatter 随行——宿主靠这两条决定什么时候读这份 skill，
+ * 剥光了摆出去就是一份没人会触发的散文。
+ */
+const skill = (name) => ({ to: `../packages/cli/skills/${name}/SKILL.md`, frontmatter: ["name", "description"] });
+
 export default {
   formats: [fumadocs],
   docs: ["content/docs", "content/outputs"],
@@ -23,6 +30,11 @@ export default {
   outputs: {
     "content/outputs/readme.mdx": ["../README.md"],
     "content/docs/maintain/agents.mdx": ["../AGENTS.md"],
+    "content/outputs/skills/livedoc-docs.mdx": [skill("livedoc-docs")],
+    "content/outputs/skills/trajectory.mdx": [skill("trajectory")],
+    "content/outputs/skills/spec-grill.mdx": [skill("spec-grill")],
+    "content/outputs/skills/parallel-by-module.mdx": [skill("parallel-by-module")],
+    "content/outputs/skills/self-explaining-code.mdx": [skill("self-explaining-code")],
   },
   components: {
     ...fumadocs.defaultRoster,
