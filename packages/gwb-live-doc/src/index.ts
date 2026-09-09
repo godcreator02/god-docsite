@@ -59,7 +59,7 @@ export const FEEDBACK_LIST_COMMAND = 'live-doc.feedback-list'
 
 /**
  * livedoc 那个可执行的绝对路径。`import.meta.resolve` 拿到的是包的主入口 `dist/run.mjs`
- * （`exports` 只开了 `.` 与 `./init`），可执行在它旁边：`dist/cli.mjs`。
+ * （`exports` 只开了 `.` 与 `./site`），可执行在它旁边：`dist/cli.mjs`。
  * **不读 `bin` 字段、不查 `.bin` 垫片**——node-cli 登记的是一个绝对路径的 js，
  * 垫片在 Windows 上是 `.cmd`，起不了。解析不到回 null（依赖没装全的 home），调用方 warn 一句、不炸。
  */

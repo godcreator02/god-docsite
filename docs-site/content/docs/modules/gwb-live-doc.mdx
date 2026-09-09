@@ -14,15 +14,18 @@ description: gwb-live-doc：扫容器根下的 fumadocs 站、一格窗格起停
 
 管两摊。一摊是**站的起停**：扫容器根下所有 fumadocs 站，判 build 新不新鲜，现挑一个空口起 `next start`，
 到点自动关，件卸载时把自己起的全杀掉。另一摊是**接 livedoc**：把 cli 包内那个可执行登记给运行器、跑一趟命令行；
-`stale` 把 `check --json` 的机读报告收敛成一张「待重写页」的表；`feedback` 往别的仓的文档站反馈区追加一条。
-后两块是纯逻辑，进程那半在别处。
+`init` 给一个还没有站的仓铺一个；`stale` 把 `check --json` 的机读报告收敛成一张「待重写页」的表；
+`feedback` 往别的仓的文档站反馈区追加一条。后两块是纯逻辑，进程那半在别处。
 
 命令名是常量，件挂载时注册到命令总线上：
 
-{/* ref file="../packages/gwb-live-doc/src/index.ts" lines="47-57" */}
+@@livedoc ref ../packages/gwb-live-doc/src/index.ts:47-58 @@
 
 前六条是起停那摊。**先 `sites` 再别的**：那几条要的 `dir` 就是 `sites` 回包里的 `dir`，不自己拼——`start`
-还会挡下容器根之外的目录。后四条是接 livedoc 那摊。`cli-raw` 不算一条给人用的，它是运行器登记出来的裸口。
+还会挡下容器根之外的目录。后五条是接 livedoc 那摊。`cli-raw` 不算一条给人用的，它是运行器登记出来的裸口。
+
+`init` 那条的 `dir` 是**目标仓**目录，不是站目录——它是这一串里唯一一条对着「还没有站的仓」说话的命令，
+所以它也是唯一不从 `sites` 回包里抄 `dir` 的。
 
 扫的范围是硬的：容器根下一层一个单元，每个单元往下最多三层，点开头的目录与 `node_modules` / `dist` / `out`
 不进。
@@ -99,6 +102,15 @@ description: gwb-live-doc：扫容器根下的 fumadocs 站、一格窗格起停
 **页不在就建**（对面的站可能还没改成六区，缺一页不该让跨仓反馈投不进去）。日期取本机时区，不用
 `toISOString`：那是 UTC，晚上八点之后写的条目会落到明天。
 
+**不知道一个站是怎么铺出来的。** `live-doc.init` 把「哪个仓、叫什么、用哪个口」翻译成一趟子进程就完了：
+六区骨架长什么样、端口按什么认、起手页钉哪一行，全在 cli 包的[建站模块](/docs/modules/cli)里。件这头只
+拦两件参数的事——路径得是绝对的、得是个目录（不然运行器会去抱怨 cwd，看不出是仓给错了），其余的判断连同
+错误文本原样交出去。
+
+@@livedoc ref ../packages/gwb-live-doc/src/index.ts:499-506 @@
+
+**实现不许搬进件**：livedoc 得能在没装工作台的仓里独立用，铺站搬进来就等于让建站依赖一整台桌面工作台。
+
 **不知道七个包的任何事。** 依赖方向单向：件依赖 [cli](/docs/modules/cli)，七个包一个字都不认识件、也不认识
 任何 `@godcreator02/gwb-*`。运行时、peer、开发期三档全查的那条边界测试守着：
 
@@ -123,7 +135,7 @@ description: gwb-live-doc：扫容器根下的 fumadocs 站、一格窗格起停
 `live-doc.sites` 回包里的一条站：扫出来的位置与所属单元、两个记号（livedoc、node_modules）、build 三态，
 外加状态机此刻的相位。
 
-{/* ref file="../packages/gwb-live-doc/src/index.ts" lines="102-117" */}
+@@livedoc ref ../packages/gwb-live-doc/src/index.ts:103-118 @@
 
 里头的 `buildState` 是三态，判据是 `.next/BUILD_ID`（`next build` 成功留下的唯一标志，`next dev` 不写它）
 在不在、跟源比谁新：
@@ -155,7 +167,7 @@ description: gwb-live-doc：扫容器根下的 fumadocs 站、一格窗格起停
 **命令总线上那一串 `live-doc.*`**，加运行器登记出来的裸口 `live-doc.cli-raw`。命令名是公共面，产物守卫
 那条测试一个个数着，改名就是破约。
 
-{/* ref file="../packages/gwb-live-doc/tests/artifact.test.ts" lines="77-94" */}
+@@livedoc ref ../packages/gwb-live-doc/tests/artifact.test.ts:77-95 @@
 
 **一格窗格**：浏览器那半与样式表的地址由 node 半从 `import.meta.url` 算成 `file://` 报给外壳；窗格叫什么
 归运行时，`ctx.gwbShell.describeSelf` 报。
@@ -191,7 +203,7 @@ type 的 import，产物守卫当场红。
 | `RunnerDeps`（挑口 / build / serve / 杀树 / 时钟） | 起停真进程 | `runner.ts` 的 `realRunnerDeps()` | `tests/manager.test.ts` 里一整套可操控的假运行器 |
 | `gwbShell` | 注册窗格、报自己的名字 | 外壳件 | 不测（要开窗，走实机） |
 | `gwbCommands` | 挂那一串 `live-doc.*` 命令 | 命令总线件 | 不测（命令名由产物守卫数） |
-| `gwbNodeCli` | 起 livedoc 的进程 | node-cli 件，登记包内 `dist/cli.mjs` 的绝对路径 | 不测；不在时 `live-doc.cli` / `live-doc.stale` 回 `code: 'no-node-cli'` |
+| `gwbNodeCli` | 起 livedoc 的进程 | node-cli 件，登记包内 `dist/cli.mjs` 的绝对路径 | 不测；不在时 `live-doc.cli` / `live-doc.init` / `live-doc.stale` 回 `code: 'no-node-cli'` |
 | `gwbSettings` | 读 `units-root` 与 `auto-stop-minutes` | 设置件；`units-root` 空着时经 `settings.get` 借 unit-folder 那份 | `autoStopMinutes(raw)` 直接喂原始值 |
 | `gwbUnitFolder` | 报选中单元，给 `live-doc.cli` 算缺省 cwd | unit-folder 件的 `current()` 与 `unit-folder/selection` 事件 | `pickDocsSite(sites)` 直接喂一张目录表 |
 | `gwbSkills` | 挂本件与 livedoc 那三份说明书 | skills 件 | 不测（只是把目录报过去） |
@@ -205,7 +217,7 @@ type 的 import，产物守卫当场红。
 livedoc 那个可执行的地址自己算，**不读 `bin` 字段、不查 `.bin` 垫片**——垫片在 Windows 上是 `.cmd`，
 `process.execPath` 起不了：
 
-{/* ref file="../packages/gwb-live-doc/src/index.ts" lines="65-71" */}
+@@livedoc ref ../packages/gwb-live-doc/src/index.ts:66-72 @@
 
 不给 cwd 时落在选中单元的那个站：名字正好叫 `docs-site` 的优先，整个单元只有一个站时就是它；
 
@@ -255,7 +267,7 @@ start 也收尾不悬着。真起子进程的那半在 `runner.slow.test.ts`，�
 局部注入，全在那儿挂；
 件 dispose 时杀光自己起的站也在那儿——工作台关了还留着 node，那才是爆内存的路。
 
-{/* ref file="../packages/gwb-live-doc/src/index.ts" lines="186-189" */}
+@@livedoc ref ../packages/gwb-live-doc/src/index.ts:187-190 @@
 
 **读序**：`index.ts` 往下吃四份纯逻辑——`sites.ts`（认站、限深扫描、build 三态、挑缺省站）、`manager.ts`
 （起停状态机，再往下吃 `deadline.ts` 的到期算术）、`stale.ts`（报告收敛）、`feedback.ts`（条目格式与追加）。
