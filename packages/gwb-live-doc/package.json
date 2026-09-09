@@ -33,10 +33,15 @@
   "engines": {
     "node": ">=24"
   },
-  "//deps": "契约包运行时真 import（requireKernel）→ peer；shell 与 commands 在 export const inject 里，是运行期硬依赖 → peer；shared-react 与 tokens 是浏览器半跑起来的前提（react 系经内核注的 importmap、令牌表由外壳注）→ peer。skills 与 settings 都走 ctx.inject 局部注入、只 import type 激活 declare module，不出现在导出面 → dev，另各挂一条可选 peer 当版本校验点（cordis 对服务不做版本校验，peer range 是这条链上唯一一处）。electron 一档都不写：件跑在 Electron 主进程里，import('electron') 走变量说明符、运行时就在，不让 tsc 解析它、也不为一个 openExternal 把整个 electron 装进来（照 gwb-shell 的 reload.ts）。gwb-unit-folder 0.3.0 也是 dev：只 import type（UnitSelection 与它的 declare module 'cordis'），局部注入、不占本件导出面；没装它本件照常挂、只是没有置顶",
+  "//dependencies": "live-doc-cli 是真依赖、不是 peer：本件要拿到它包内 dist/cli.mjs 的绝对路径去起进程（不进程内 import，只 import type 报告形状），装本件的 home 里必须有它。workspace:^ 发版时被 pnpm 换成 ^<那一刻的版本>——所以发版顺序是 cli 先、件后",
+  "dependencies": {
+    "@godcreator02/live-doc-cli": "workspace:^"
+  },
+  "//deps": "契约包运行时真 import（requireKernel）→ peer；shell 与 commands 在 export const inject 里，是运行期硬依赖 → peer；shared-react 与 tokens 是浏览器半跑起来的前提（react 系经内核注的 importmap、令牌表由外壳注）→ peer。skills、settings、node-cli 三个都走 ctx.inject 局部注入、只 import type（node-cli 那份还借它的 GwbNodeCliApi / CliRunOutcome 收窄，同样不出现在导出面）→ dev，另各挂一条可选 peer 当版本校验点（cordis 对服务不做版本校验，peer range 是这条链上唯一一处）。electron 一档都不写：件跑在 Electron 主进程里，import('electron') 走变量说明符、运行时就在，不让 tsc 解析它、也不为一个 openExternal 把整个 electron 装进来（照 gwb-shell 的 reload.ts）。gwb-unit-folder 0.3.0 也是 dev：只 import type（UnitSelection 与它的 declare module 'cordis'），局部注入、不占本件导出面；没装它本件照常挂、只是没有置顶",
   "//peerRange": "写 >= 不写 ^：caret 在 0.0.x 上锁死 patch，共享包一升版消费方就不匹配了",
   "peerDependencies": {
     "@godcreator02/gwb-commands": ">=0.1.0",
+    "@godcreator02/gwb-node-cli": ">=0.2.0",
     "@godcreator02/gwb-plugin-api": ">=0.1.0",
     "@godcreator02/gwb-settings": ">=0.1.0",
     "@godcreator02/gwb-shared-react": ">=0.0.2",
@@ -50,11 +55,15 @@
     },
     "@godcreator02/gwb-settings": {
       "optional": true
+    },
+    "@godcreator02/gwb-node-cli": {
+      "optional": true
     }
   },
   "//components": "radix / cva / cn / lucide 是组件的运行时依赖，但打进本束（不在 importmap 里，外置成裸名就是运行期炸），按判据算 dev。tailwindcss / @tailwindcss/cli 是构建输入；@tailwindcss/node 给 tests/prefix.test.ts 在不带前缀的输入下试编；tw-animate-css 给 animate-in 一族",
   "devDependencies": {
     "@godcreator02/gwb-commands": "0.2.0",
+    "@godcreator02/gwb-node-cli": "0.2.0",
     "@godcreator02/gwb-plugin-api": "0.1.0",
     "@godcreator02/gwb-settings": "0.1.1",
     "@godcreator02/gwb-shared-react": "0.0.2",
