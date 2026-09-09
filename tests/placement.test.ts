@@ -4,8 +4,8 @@
  * 跨 project 的接口进——临时目录里起一个真项目，`loadProject` 之后直接调 `placing` 的两个方法。
  * 不起命令行、不劫持 stdout、不 `process.chdir`：摆放的判定不该只有走一趟命令行才验得着。
  *
- * 项目配 `comparator: "hash"`，临时目录里因此不用起 git 仓：摆放一句 git 都不问，
- * 这儿起真仓只是为了让引用确认得下来（git 记忆只钉已提交的内容），换成哈希记忆就免了。
+ * 项目配 `comparator: "hash"`，临时目录里不起 git 仓：摆放一句 git 都不问，源里那条引用
+ * 靠哈希记忆就确认得下来——要一个真仓的是 git 记忆，它只钉已提交的内容。
  */
 import { test } from "node:test";
 import assert from "node:assert/strict";
