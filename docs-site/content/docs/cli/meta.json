@@ -1,6 +1,6 @@
 {
   "title": "命令与测试",
-  "description": "三条命令的输出与退出码；五组测试各守什么",
+  "description": "三条命令的输出与退出码；三摊测试各守什么",
   "root": true,
   "pages": ["index", "cli", "testing"]
 }

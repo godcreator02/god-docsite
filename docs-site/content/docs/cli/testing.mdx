@@ -7,12 +7,16 @@ description: 契约、边界、记号、比较器、站测试各守什么；文�
 
 这一章回答：这套东西一共几摊测试，各守什么规矩，为什么边界测试要去读依赖图，以及文档本身怎么防漂。
 
-## 两摊，各自跑
+## 三摊，各自跑
 
 | 在哪儿 | 怎么跑 |
 | --- | --- |
 | 工作区根 | `pnpm test`（先 build，再 `node --test tests/*.test.ts`） |
 | `docs-site/`（这个站） | `pnpm test` |
+| `packages/gwb-live-doc/`（[工作台件](/docs/plugin)） | `pnpm check`（typecheck + oxlint + vitest） |
+
+件那一摊用 vitest，是 `node --test` 唯一的例外——它照 devkit 建出来的件骨架长，不为一个件把骨架
+掰弯；工作区根的 `test` 脚本因此不去收它。
 
 工作区那摊按主题分文件，一个主题一个：
 

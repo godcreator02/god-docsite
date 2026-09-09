@@ -1,10 +1,10 @@
 # god-live-doc
 
 **仓根就是这个目录 `god-live-doc/`**，它同时是 pnpm 包工作区。上一级是单元目录，那儿只有一张
-出生证 `unit.json`，不在 git 里。仓里三样：`packages/` 下七个包（core、project、cli、format-md、
-format-fumadocs、format-html、trajectory），`docs-site/` 是自己的 fumadocs 文档站（用这套机制写
-自己的文档，也是工作区成员），`tests/` 是工作区级测试。**怎么装、怎么接、怎么跑，看 `README.md`**，
-这儿不复述。
+出生证 `unit.json`，不在 git 里。仓里三样：`packages/` 下七个 `live-doc-*` 包（core、project、cli、
+format-md、format-fumadocs、format-html、trajectory）外加一个工作台件 `gwb-live-doc`，
+`docs-site/` 是自己的 fumadocs 文档站（用这套机制写自己的文档，也是工作区成员），
+`tests/` 是工作区级测试。**怎么装、怎么接、怎么跑，看 `README.md`**，这儿不复述。
 
 消费方示例不在仓里：这套包对外的样子由 `docs-site` 自己演——它就是「装了这几个包的项目」，
 钉的是工作区里的真源码。星轨盘的诗名 fixture 住 `tests/fixtures/trajectory/`，
@@ -26,14 +26,20 @@ README 和这份规矩都是**生成物**：正本分别是 `docs-site/content/d
 ## 规矩
 
 * 中文写注释、文档、提交信息；标识符英文。注释只写现状，不写「原来怎么样」。
-* TS，tsdown 构建，pnpm，测试用 `node --test`（工作区里的测试是 `.ts`，Node 直接跑；站里的
-  是 `.mjs`）。不用 threads 池 / native loader 那类沙箱绕行，同仓不并行跑测试。
+* TS，pnpm，测试用 `node --test`（工作区里的测试是 `.ts`，Node 直接跑；站里的是 `.mjs`）。
+  **例外只有工作台件**：它用 vitest，跟 devkit 建出来的件骨架一致，不为一个件把骨架掰弯。
+  不用 threads 池 / native loader 那类沙箱绕行，同仓不并行跑测试。
+* 工具链两套并存，别互相搬：七个包是 tsdown + TS 6；工作台件是 `tsc` 出 node 半、`esbuild` 打
+  浏览器半、`tailwindcss` 编带 `livedoc` 前缀的样式表，跑在 TS 7 上。各自的 `package.json` 说了算。
 * 核心零依赖（只用 `node:crypto`），格式包依赖核心（format-md / format-fumadocs 另外用 remark 那套；
-  format-fumadocs 可依赖 project，fumadocs 只能是 peer）。`tests/boundary.test.ts` 守着，别绕。
+  format-fumadocs 可依赖 project，fumadocs 只能是 peer）。件依赖 cli，七个包不认识件、也不认识任何
+  `@godcreator02/gwb-*`——方向单向。`tests/boundary.test.ts` 守着，别绕。
 * 子进程调用一律带超时。
-* 门禁，两摊都要绿才提交：
+* 门禁，三摊都要绿才提交：
   * 仓根：`pnpm test`、`pnpm typecheck`、`pnpm build`
   * `docs-site/`：`pnpm livedoc check`、`pnpm test`、`pnpm build`、`node scripts/verify-roster.mjs`
+  * `packages/gwb-live-doc/`：`pnpm check`（typecheck + oxlint + vitest）、`pnpm build`
+* 发版顺序 **cli 先、件后**：件装的是发出去的那份 cli，工作区里的软链只在这个仓里成立。
 * 动了引用到的源码，`livedoc confirm` 之前**先 commit**——git 比较器只对已提交、工作区干净的内容钉。
 * 挂了 outputs 映射的文档（readme / agents 这两篇）改了 mdx 源，`pnpm livedoc render --target ai` 重摆
   生成物，跟 mdx 源一起提交；check 守着生成物跟源一致，红了就是没重摆。
