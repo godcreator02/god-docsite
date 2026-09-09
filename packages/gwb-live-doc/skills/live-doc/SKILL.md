@@ -1,15 +1,15 @@
 ---
 name: live-doc
-description: 用户要看某个单元 / 某个仓的文档站、问「哪些仓有文档站」「这个站 build 过没有」、要把一个 fumadocs 站起起来在浏览器里打开或停掉、要跑 livedoc 的命令行（check / confirm / render / init）、要知道一个站里哪几页的现状漂了该重写、或者要把反馈投进别的仓的文档站时用。这个件把 units-root 下所有 fumadocs 站扫出来（退役单元不列），十条命令管起停、跑 livedoc、列待重写页、投反馈。
+description: 用户要看某个单元 / 某个仓的文档站、问「哪些仓有文档站」「这个站 build 过没有」、要把一个 fumadocs 站起起来在浏览器里打开或停掉、要给一个还没有站的仓铺一个、要跑 livedoc 的命令行（check / confirm / render）、要知道一个站里哪几页的现状漂了该重写、或者要把反馈投进别的仓的文档站时用。这个件把 units-root 下所有 fumadocs 站扫出来（退役单元不列），十一条命令管起停、建站、跑 livedoc、列待重写页、投反馈。
 ---
 
 # 文档站：在工作台里管所有仓的文档站
 
 两摊事：**起停**（坐在工作台里看某个单元时，把它的文档站起起来看——认站、判 build 新不新鲜、
-现挑端口起 `next start`、杀整棵树、到点自动关），与**接 livedoc**（跑命令行、列待重写页、
-跨仓投反馈）。
+现挑端口起 `next start`、杀整棵树、到点自动关），与**接 livedoc**（铺一个新站、跑命令行、
+列待重写页、跨仓投反馈）。
 
-## 十条命令（都经 `gwb_command_run` 按名调，没有顶层的）
+## 十一条命令（都经 `gwb_command_run` 按名调，没有顶层的）
 
 **起停那五条加一条清单**
 
@@ -22,10 +22,11 @@ description: 用户要看某个单元 / 某个仓的文档站、问「哪些仓�
 | `live-doc.extend` | `{ dir }` | 到期时刻从此刻按设置重算 |
 | `live-doc.running` | 无参数 | 此刻不在 idle 的站 |
 
-**接 livedoc 那四条**
+**接 livedoc 那五条**
 
 | 命令 | 参数 | 干什么 |
 | --- | --- | --- |
+| `live-doc.init` | `{ dir, title?, port? }` | 给一个**还没有站**的仓铺一个六区站。`dir` 是目标仓目录的绝对路径 |
 | `live-doc.cli` | `{ args: string[], cwd? }` | livedoc 的命令行。`cwd` 不给就落在**选中单元的站** |
 | `live-doc.stale` | `{ dir }` | 那个站里哪几页的现状漂了（内部跑 `check --json`） |
 | `live-doc.feedback` | `{ dir, title, body, from? }` | 往那个站的反馈区追加一条 |
@@ -84,6 +85,26 @@ description: 用户要看某个单元 / 某个仓的文档站、问「哪些仓�
 装了 `gwb-unit-folder` 0.3.0 起，本件局部注入它的选中：当前选中单元的站那组顶到最上并高亮，
 选中一变跟着换。没装它清单照常显示，只是没有置顶。`sites` 回包里的 `currentUnit` 就是它。
 
+## 给一个还没有站的仓铺一个：`live-doc.init`
+
+```
+live-doc.init {"dir":"<目标仓目录的绝对路径>"}                        端口自动挑
+live-doc.init {"dir":"<仓>","title":"打个招呼","port":4321}          显示名与端口手给
+```
+
+`dir` 是**目标仓**目录，不是站目录——仓要已经存在、它下面还没有 `docs-site/`，站铺在
+`<dir>/docs-site`。`title` 不给就从仓根 `package.json` 的 name 认、再退回目录名；`port` 不给就扫
+一遍同级各仓已占的站端口（按 `next dev -p` / `next start -p` 认，不按目录名），从 4310 起挑第一个
+空位；手给的一律让给你，被占了只在输出里警告一声。
+
+**只铺文件**：不跑 `pnpm install`、不改仓里任何已有文件——`.gitignore` 缺哪几条、仓根哪几个文件会被
+第一次 `render` 覆盖（README.md / AGENTS.md），都只在输出里报出来，自己去处理。回执
+`{ dir, site, exitCode, timedOut, durationMs, stdout, stderr, note }`，**挑了哪个口、铺了哪些文件、
+接着做什么全在 `stdout.text` 里**。铺完接着做：在 `site` 那个目录 `pnpm install`、`pnpm doc:render`
+（摆出仓根 AGENTS.md / README.md）、`pnpm doc`（check）。起手页写了第一条引用怎么钉。
+
+实现在 livedoc 命令行那边（`livedoc init`），本件只是入口——**livedoc 得能在没装工作台的仓里独立用**。
+
 ## 跑 livedoc：`live-doc.cli`
 
 livedoc 是个 CLI 包、不是件，自己挂不上工作台。本件把它包内那个 `dist/cli.mjs` 登记进
@@ -103,7 +124,6 @@ live-doc.cli {"args":["check"]}                      核对，有红退出码 1
 live-doc.cli {"args":["check","--json"]}             机读报告（live-doc.stale 吃的就是它）
 live-doc.cli {"args":["confirm"]}                    确认、换记号。**先 commit**：git 记忆只对已提交、工作区干净的内容钉
 live-doc.cli {"args":["render"]}                     重摆 outputs 生成物（README / AGENTS / SKILL.md 那类）
-live-doc.cli {"args":["init","--dir","<仓的绝对路径>"]}  给一个还没有站的仓铺一个六区站（这条跟 cwd 无关）
 live-doc.cli {"args":["trajectory"]}                 列轨迹卡的盘 / 树 / 主干
 ```
 
@@ -154,7 +174,9 @@ live-doc.feedback {"dir":"<B 站目录>","title":"一句话说清是什么事","
   看日志（`logger.backlog`，本件把 build 与 next 的输出压在 debug 级）
 - 回执 `error` 带 `不是站` / `不在容器根内`：`dir` 给错了，从 `sites` 回包里抄
 - 起是起了但页面是旧的：`buildState` 是 `stale`，停了传 `rebuild: true` 再起
-- `live-doc.cli` / `live-doc.stale` 回 `code: 'no-node-cli'`：这个 home 里没装 node-cli 件
+- `live-doc.init` 回 `不是目录`：`dir` 给成了站目录或者仓还没建；退出码 1 且 stderr 里是
+  `这个仓已经有站了`：那个仓已经有 `docs-site/`，本件一个字不覆盖
+- `live-doc.cli` / `live-doc.init` / `live-doc.stale` 回 `code: 'no-node-cli'`：这个 home 里没装 node-cli 件
   （`@godcreator02/gwb-node-cli`），或者解析不到 `@godcreator02/live-doc-cli`
 
 ## 本件还代挂三份说明书
