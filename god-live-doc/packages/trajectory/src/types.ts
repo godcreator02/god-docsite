@@ -1,5 +1,5 @@
 /**
- * 轨迹卡的类型契约。卡身份 = 文件名主干（`<YYYY-MM-DD>-<slug>`），frontmatter 装语义：
+ * 轨迹卡的类型契约。卡身份 = 文件名主干（`<YYYY-MM-DD>-<slug>`，文件是 `.mdx` 或 `.md`），frontmatter 装语义：
  * `type: root` 认根卡，`parent` 决定聚盘（含盘即上盘，`domain` 只是泳道分组），
  * `merged-in`（⊆ parent，仅根卡）标注哪些父盘上子项目改平铺摊入而非虫洞投影；
  * `born-at` 是时间轴（分钟级 `YYYY-MM-DDTHH:mm`，日级 `YYYY-MM-DD` 兼容）；

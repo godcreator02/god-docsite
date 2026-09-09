@@ -18,6 +18,11 @@ export interface TrajectoryScan {
   sick: SickFile[];
 }
 
+/** 卡文件的后缀：`.mdx` 是六区站 `content/trajectory/` 里的正体（卡进 fumadocs 集合渲成页），
+ * `.md` 是站外卡目录（示例站的 `cards/`、单元根的目录）的写法——两种都认，卡身份都是去掉后缀的文件名主干。
+ * 同一主干两种后缀都在时只认 `.mdx`（`.md` 那份跳过）：身份撞车不该静默出两张卡。 */
+const CARD_EXT = /\.mdx?$/;
+
 /** 扫一个目录里的卡：目录不存在或读不动一律回空集合，不报错、不建目录
  * ——空态就是「这里还没有轨迹记录」。目录内平铺不建子目录（card-format 正本已定），
  * 只扫一层。卡上记的 `path` 相对 `dir` 本身。 */
@@ -30,7 +35,7 @@ export async function scanDir(dir: string): Promise<TrajectoryScan> {
   }
   const cards: RawCard[] = [];
   const sick: SickFile[] = [];
-  const files = names.filter((n) => n.endsWith(".md")).sort();
+  const files = pickCardFiles(names);
   await Promise.all(
     files.map(async (name) => {
       const abs = join(dir, name);
@@ -45,7 +50,7 @@ export async function scanDir(dir: string): Promise<TrajectoryScan> {
         /* 读的当口文件没了：当这张不存在 */
         return;
       }
-      const id = name.slice(0, -3);
+      const id = name.replace(CARD_EXT, "");
       const parsed = parseCardFile(id, name, mtime, text);
       if (!parsed.card) return;
       cards.push(parsed.card);
@@ -56,4 +61,16 @@ export async function scanDir(dir: string): Promise<TrajectoryScan> {
   cards.sort((a, b) => a.id.localeCompare(b.id));
   sick.sort((a, b) => a.path.localeCompare(b.path));
   return { cards, sick };
+}
+
+/** 目录名单里挑出卡文件：`.md` / `.mdx` 都要，同一主干两者都在只留 `.mdx`；排过序。 */
+export function pickCardFiles(names: readonly string[]): string[] {
+  const byStem = new Map<string, string>();
+  for (const name of [...names].sort()) {
+    if (!CARD_EXT.test(name)) continue;
+    const stem = name.replace(CARD_EXT, "");
+    const kept = byStem.get(stem);
+    if (kept === undefined || (kept.endsWith(".md") && name.endsWith(".mdx"))) byStem.set(stem, name);
+  }
+  return [...byStem.values()].sort();
 }

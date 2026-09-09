@@ -30,7 +30,7 @@ export { checkLivedocRefs } from "./validate.ts";
 export { buildDisks, buildModel, dayNum, formatDay, formOf, inRange, NO_DOMAIN, parseCardFile } from "./model.ts";
 export type { ParsedFile } from "./model.ts";
 
-export { scanDir } from "./scan.ts";
+export { pickCardFiles, scanDir } from "./scan.ts";
 export type { TrajectoryScan } from "./scan.ts";
 
 export {

@@ -82,9 +82,9 @@ function titleOf(id: string): string {
   return id.replace(ID_DATE_PREFIX, "");
 }
 
-/** 卡身份的形状：文件名主干，不带扩展名、不带路径分隔。 */
+/** 卡身份的形状：文件名主干，不带扩展名（`.md` / `.mdx` 都不带）、不带路径分隔。 */
 function idShapeOk(v: string): boolean {
-  return v !== "" && !v.includes("/") && !v.includes("\\") && !v.endsWith(".md");
+  return v !== "" && !v.includes("/") && !v.includes("\\") && !/\.mdx?$/.test(v);
 }
 
 /* ================= 扫盘：一趟读完，后续全在内存上算 ================= */
@@ -126,11 +126,11 @@ export function parseCardFile(id: string, path: string, mtime: number, text: str
   }
   /* 形状校验：parent / merged-in 元素都得是卡身份（文件名主干） */
   for (const v of parent) {
-    if (!idShapeOk(v)) bad("parent", v, "parent 元素须为卡身份（文件名主干，不带 .md 与路径）");
+    if (!idShapeOk(v)) bad("parent", v, "parent 元素须为卡身份（文件名主干，不带 .md / .mdx 与路径）");
   }
   for (const v of mergedIn) {
     if (!idShapeOk(v)) {
-      bad("merged-in", v, "merged-in 元素须为卡身份（文件名主干，不带 .md 与路径）");
+      bad("merged-in", v, "merged-in 元素须为卡身份（文件名主干，不带 .md / .mdx 与路径）");
     }
   }
   /* 一致性校验：①parent 不含自身 ②merged-in ⊆ parent（出界项逐个报） ③内卡禁写 merged-in */

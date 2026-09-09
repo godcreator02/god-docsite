@@ -124,7 +124,8 @@ export interface ExtractedRelations {
   broken: Array<{ key: string; target: string }>;
 }
 
-/** md link 的目标段还原成卡身份：百分号解码 → 剥 `./` 前缀 → 剥 `#` 锚 → 剥 `.md` 后缀。
+/** md link 的目标段还原成卡身份：百分号解码 → 剥 `./` 前缀 → 剥 `#` 锚 → 剥 `.md` / `.mdx` 后缀
+ * （卡文件两种后缀都认，见 scan.ts）。
  * 解码失败（目标里有孤零零的 `%`）按原样走，不抛——坏写法该现原形、不该炸整次扫盘。 */
 function idFromHref(href: string): string {
   let v = href.trim();
@@ -136,10 +137,10 @@ function idFromHref(href: string): string {
   v = v.replace(/^\.\//, "");
   const hash = v.indexOf("#");
   if (hash >= 0) v = v.slice(0, hash);
-  return (v.endsWith(".md") ? v.slice(0, -3) : v).trim();
+  return v.replace(/\.mdx?$/, "").trim();
 }
 
-/** 扫正文收关系边：一行一条，md link 目标剥编码与 `.md` 后即卡身份，
+/** 扫正文收关系边：一行一条，md link 目标剥编码与 `.md` / `.mdx` 后即卡身份，
  * wikilink 目标剥 # 锚与 | 别名后即卡身份。
  * 行头是关系字段却没匹配上行形的收进 broken 示众——静默吞行有过前科（CRLF 行尾全军覆没）。 */
 export function extractRelations(body: string): ExtractedRelations {

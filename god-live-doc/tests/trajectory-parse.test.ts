@@ -225,3 +225,9 @@ test("固定区块内每行一座，描述可缺、坏日期跳过、结果按�
 test("没这块即空列表", () => {
   assert.deepEqual(extractMilestones("## 在做什么\n\n没里程碑。"), []);
 });
+
+test("md link 目标带 .mdx 后缀也还原成同一身份——卡文件两种后缀都认", () => {
+  for (const line of ["supersedes:: [甲](2026-01-01-甲.mdx)", "supersedes:: [甲](./2026-01-01-甲.mdx#节)"]) {
+    assert.deepEqual(extractRelations(line).relations, [{ kind: "supersede", target: "2026-01-01-甲" }]);
+  }
+});

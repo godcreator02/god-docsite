@@ -139,3 +139,38 @@ test("remarkTrajectoryLinks：wikilink（带别名 / 不带别名）转成真链
   assert.equal((l1.children[0] as Text).value, "other-card");
   assert.equal(t2.value, "，完。");
 });
+
+test("cardSchema：六个卡字段一个都不沾的页不是卡——当普通页放行，title 取 frontmatter、缺了退文件名；description 随行", async () => {
+  const schema = cardSchema({ path: "content/trajectory/index.mdx", source: "" });
+  const plain = await validate(schema, { title: "轨迹", description: "只增不改" });
+  assert.deepEqual(plain.value, { title: "轨迹", description: "只增不改" });
+  const bare = await validate(schema, {});
+  assert.deepEqual(bare.value, { title: "index" });
+  // 沾了任何一个卡字段就是卡：缺 born-at 照样硬失败
+  const card = await validate(schema, { title: "像页的卡", label: "标题" });
+  assert.equal(card.value, undefined);
+  assert.match(card.issues![0]!.message, /born-at/);
+});
+
+test("cardSchema：卡的 description 也随行透出", async () => {
+  const schema = cardSchema({ path: "content/trajectory/2026-05-06-my-card.mdx", source: "" });
+  const result = await validate(schema, { label: "标题", "born-at": "2026-05-06", description: "一句" });
+  assert.equal(result.value?.description, "一句");
+  assert.equal(result.value?.title, "标题");
+});
+
+test("remarkTrajectoryLinks：.mdx 链接跟 .md 一样改写成卡页路由；带路径的 .mdx 同样放行", () => {
+  const tree: Root = {
+    type: "root",
+    children: [
+      paragraph([link("2026-05-06-甲.mdx", "甲")]),
+      paragraph([link("./2026-05-06-乙.mdx#锚", "乙")]),
+      paragraph([link("../docs/别处.mdx", "别处")]),
+    ],
+  };
+  remarkTrajectoryLinks({ hrefBase: "/trajectory" })(tree);
+  const [p1, p2, p3] = tree.children as Paragraph[];
+  assert.equal((p1!.children[0] as Link).url, "/trajectory/2026-05-06-甲");
+  assert.equal((p2!.children[0] as Link).url, "/trajectory/2026-05-06-乙");
+  assert.equal((p3!.children[0] as Link).url, "../docs/别处.mdx");
+});

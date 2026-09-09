@@ -188,7 +188,7 @@ test("parent 元素不是卡身份（带 .md / 带路径）报病，但形状病
       path: "dd07-坏parent.md",
       field: "parent",
       value: "docs/别的卡.md",
-      reason: "parent 元素须为卡身份（文件名主干，不带 .md 与路径）",
+      reason: "parent 元素须为卡身份（文件名主干，不带 .md / .mdx 与路径）",
     },
   ]);
   assert.deepEqual(buildModel(memCards(specs), "pj01").cards.map((c) => c.id), ["dd07-坏parent"]);

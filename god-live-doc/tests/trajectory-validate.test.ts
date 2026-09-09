@@ -54,3 +54,20 @@ test("接进 parseCardFile：正常正文不报 livedoc 病", () => {
   const specs = [card("dd02-正常的卡", { domain: "域一" }, { body: "正常叙事，没有引用记号。" })];
   assert.deepEqual(memSick(specs), []);
 });
+
+test("卡正文带 mdx 正式记号：{/* ref ... */} 等五种花括号注释都报 livedoc 病——卡是 .mdx 时 confirm 换出来的就是它", () => {
+  const cases = [
+    '{/* ref file="src/greet.ts" lines="2-3" */}',
+    '{/* tree dir="src" depth="1" */}',
+    '{/* exists path="src/store.ts" */}',
+    '{/* absent path="src/gone.ts" */}',
+    '{/* has file="src/store.ts" text="save" */}',
+  ];
+  for (const line of cases) {
+    const problems = checkLivedocRefs(`正文一段。\n\n${line}\n`);
+    assert.equal(problems.length, 1, line);
+    assert.equal(problems[0]?.field, "livedoc");
+    assert.match(problems[0]?.reason ?? "", /正式记号 \{\/\* /);
+  }
+  assert.deepEqual(checkLivedocRefs("{/* 普通的 mdx 注释，不是记号 */}\n"), []);
+});
