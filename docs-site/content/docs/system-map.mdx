@@ -11,7 +11,7 @@ description: 四类角色、三条入口、依赖方向是什么、先读哪块
 
 `packages/` 下三样：
 
-@@livedoc tree ../packages depth=1 @@
+{/* tree dir="../packages" depth="1" */}
 
 `livedoc` 是主包 `@godcreator02/livedoc`，`trajectory` 是独立的一条包线
 `@godcreator02/livedoc-trajectory`，`gwb-live-doc` 是工作台件——它不进 npm 的依赖网，只在
@@ -22,7 +22,7 @@ description: 四类角色、三条入口、依赖方向是什么、先读哪块
 主包一个包，`src/` 下五层，按**角色**分而不是按「像什么」分。四类角色的判据一句话说得清：
 **判定不认识环境，环境不认识格式，格式不认识入口，入口认识全部。**
 
-@@livedoc tree ../packages/livedoc/src depth=1 @@
+{/* tree dir="../packages/livedoc/src" depth="1" */}
 
 | 角色 | 层 | 管什么 | 先读 |
 | --- | --- | --- | --- |
@@ -63,12 +63,12 @@ description: 四类角色、三条入口、依赖方向是什么、先读哪块
 层与层之间的方向是**单向**的，而且**列的是禁止面不是允许面**——写成允许面的话，加一个新
 目录会默默地什么都不许，加错地方反而更难发现：
 
-@@livedoc ref ../tests/boundary.test.ts:86-104 @@
+{/* ref file="../tests/boundary.test.ts" lines="86-104" */}
 
 `engine` 是这张图的汇点，自己零依赖，只用 `node:crypto`。它不读文件、不起子进程、不认识任何
 文档格式——干活要的四样全是外面递进来的：
 
-@@livedoc ref ../packages/livedoc/src/engine/service.ts:42-47 @@
+{/* ref file="../packages/livedoc/src/engine/service.ts" lines="42-47" */}
 
 这就是判定层的进料口：格式、读取器、记录簿、比较器都是构造参数，所以它的依赖面可以是空的。
 
@@ -86,7 +86,7 @@ description: 四类角色、三条入口、依赖方向是什么、先读哪块
 `engine/` 里随手写一句 `import "../host/git.ts"` 编译器不会吭一声，判定层就从此起了 git
 子进程。补上那道门的是一个文件：
 
-@@livedoc ref ../tests/boundary.test.ts:1-27 @@
+{/* ref file="../tests/boundary.test.ts" lines="1-27" */}
 
 它守四类：目录方向（上面那张表）、`engine` 与 `site` 的零依赖、宿主只能是 peer 且不许被打进
 产物、方向只能是件 → 包。**它报红的时候，红的是设计，不是测试。**
@@ -100,7 +100,7 @@ description: 四类角色、三条入口、依赖方向是什么、先读哪块
 `docs-site/` 就是「装了这两个包的项目」：项目根是站目录，被钉的代码在工作区的 `packages/` 下，
 记号写 `../packages/…`。
 
-@@livedoc ref livedoc.config.mjs:5-6 @@
+{/* ref file="livedoc.config.mjs" lines="5-6" */}
 
 所以仓里不另留示例项目——这两个包对外的样子由站自己演，站上的状态点绿着，就是它们在真源码上
 跑通了。

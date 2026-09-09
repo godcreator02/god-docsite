@@ -11,11 +11,11 @@ description: gwb-live-doc：把 livedoc 开给连着工作台的 agent——跑�
 
 `packages/gwb-live-doc` 是这个工作区里唯一不发成 npm 库的包：它是 god 工作台（gwb）的一枚插件，包名 `@godcreator02/gwb-live-doc`，命令名前缀 `live-doc.`。它管的是**站里内容的正确性**——钉码、核对、确认、渲染、装配六区、列待重写页、跨仓投反馈。站的一生（扫容器根找站、铺骨架、判 build 新鲜度、起停、端口、到点自动关、那一格窗格）归站件 `@godcreator02/gwb-docs-site`；本件不知道站是谁建的、有没有在跑。
 
-@@livedoc ref ../packages/gwb-live-doc/src/index.ts:14-24 @@
+{/* ref file="../packages/gwb-live-doc/src/index.ts" lines="14-24" */}
 
 命令名是常量，件挂载时注册到命令总线上：
 
-@@livedoc ref ../packages/gwb-live-doc/src/index.ts:25-32 @@
+{/* ref file="../packages/gwb-live-doc/src/index.ts" lines="25-32" */}
 
 五条给人用：`live-doc.cli` 跑命令行、`live-doc.attach` 给一个已经铺好的 fumadocs 骨架装六区、`live-doc.stale` 列一个站里哪几页的现状漂了、`live-doc.feedback` 与 `live-doc.feedback-list` 往别的仓的文档站投反馈与读回。`live-doc.cli-raw` 不算一条给人用的，它是运行器登记出来的裸口。
 
@@ -23,35 +23,35 @@ description: gwb-live-doc：把 livedoc 开给连着工作台的 agent——跑�
 
 **两个件互不依赖**，这是这次拆分的判据本身。站件不在本件任何一档依赖里、一行都不 import；要「有哪些站」时只经命令总线问 `docs-site.list`，问不着就要求调用方给绝对路径。
 
-@@livedoc has ../packages/gwb-live-doc/src/index.ts "docs-site.list" @@
+{/* has file="../packages/gwb-live-doc/src/index.ts" text="docs-site.list" */}
 
 于是本件**有没有站件都挂得上、都干得了活**，只是方便程度不同：站件在，`live-doc.cli` 的 `cwd` 可以不给、落在选中单元的那个站；站件不在，每条命令自己带绝对路径。收敛回执与挑站那一小摊住 `site-lookup.ts`，纯函数加两句 fs 读：
 
-@@livedoc ref ../packages/gwb-live-doc/src/site-lookup.ts:4-13 @@
+{/* ref file="../packages/gwb-live-doc/src/site-lookup.ts" lines="4-13" */}
 
 **不注册窗格**：站件那一格已经叫「文档站」，两格同名分不出谁是谁。本件也因此没有浏览器半——没有 esbuild、没有那张带前缀的样式表，`build` 只剩一步 `tsc`：
 
-@@livedoc ref ../packages/gwb-live-doc/package.json:22-32 @@
+{/* ref file="../packages/gwb-live-doc/package.json" lines="22-32" */}
 
 ### 跟 livedoc：起进程，不进程内 import
 
 livedoc 是个 CLI 包、不是件，自己挂不上工作台。**CLI 形态的东西一律经 `gwbNodeCli` 登记、起子进程**，不做总线命令、不进程内调——进程内 `import` 一个 CLI，就等于把它那一整棵依赖、连同加载项目与问 git 的那些副作用，一起拉进工作台自己的进程。所以这条边上只过两样东西：一个可执行的绝对路径，和 `import type` 借来的报告形状。
 
-@@livedoc ref ../packages/gwb-live-doc/src/index.ts:75-104 @@
+{/* ref file="../packages/gwb-live-doc/src/index.ts" lines="75-104" */}
 
 那个可执行的地址自己算，**不读 `bin` 字段、不查 `.bin` 垫片**——垫片在 Windows 上是 `.cmd`，`process.execPath` 起不了：
 
-@@livedoc ref ../packages/gwb-live-doc/src/index.ts:34-46 @@
+{/* ref file="../packages/gwb-live-doc/src/index.ts" lines="34-46" */}
 
 不给 `cwd` 时落在**选中单元的站**：清单问站件要，那个单元里名字正好叫 `docs-site` 的优先，只有一个站时就是它。站件没装、没选中单元、单元里没有站、或有好几个挑不出，一律回 `code: 'no-site'` 让调用方给 `cwd`——**不替人猜**，猜错的代价是在错误的仓里跑了一次 `confirm`。
 
-@@livedoc ref ../packages/gwb-live-doc/src/index.ts:115-142 @@
+{/* ref file="../packages/gwb-live-doc/src/index.ts" lines="115-142" */}
 
 ### 装配六区：入口在这儿，实现不在
 
 `live-doc.attach` 把「哪个站、叫什么」翻译成一趟子进程就完了。**实现一行都不许搬进件**——livedoc 得能在没装工作台的仓里独立用，装配搬进来就等于让接 livedoc 依赖一整台桌面工作台。件这头只拦两件参数的事：路径得是绝对的、得是个目录（不然运行器会去抱怨 cwd，看不出是站给错了），其余的判断连同错误文本原样交出去。
 
-@@livedoc ref ../packages/gwb-live-doc/src/index.ts:212-233 @@
+{/* ref file="../packages/gwb-live-doc/src/index.ts" lines="212-233" */}
 
 建一个新站因此是两步：站件的 `docs-site.create` 铺标准 fumadocs 骨架，本件的 `live-doc.attach` 在骨架上装六区。顺序不能反，中间不要改文件——`attach` 只在刚铺好的骨架上跑。
 
@@ -59,9 +59,9 @@ livedoc 是个 CLI 包、不是件，自己挂不上工作台。**CLI 形态的�
 
 livedoc 随包发两份 skill（`livedoc-docs` 文档怎么写、`trajectory` 卡怎么记），本件在挂自己那份时把它们一起挂上：那是个 CLI 包，自己挂不上工作台。解析不到只 warn——那两份不是本件能不能干活的前提。
 
-@@livedoc ref ../packages/gwb-live-doc/src/index.ts:368-380 @@
+{/* ref file="../packages/gwb-live-doc/src/index.ts" lines="368-380" */}
 
-@@livedoc tree ../packages/livedoc/skills depth=1 @@
+{/* tree dir="../packages/livedoc/skills" depth="1" */}
 
 ## 不知道什么
 
@@ -69,31 +69,31 @@ livedoc 随包发两份 skill（`livedoc-docs` 文档怎么写、`trajectory` �
 
 **不知道有哪些站、站在哪、跑没跑。** 扫容器根、认 fumadocs 站、判 build 新鲜度、挑口起停、到点关，一件都不做。它只问站件要一份清单，而且**不部分容忍**：形状对不上宁可回一句「挑不出，给 cwd」，也不拿半份清单去猜一个仓。
 
-@@livedoc ref ../packages/gwb-live-doc/src/site-lookup.ts:34-51 @@
+{/* ref file="../packages/gwb-live-doc/src/site-lookup.ts" lines="34-51" */}
 
 挑站的规则也只有两条，挑不出就交候选、不猜：
 
-@@livedoc ref ../packages/gwb-live-doc/src/site-lookup.ts:53-66 @@
+{/* ref file="../packages/gwb-live-doc/src/site-lookup.ts" lines="53-66" */}
 
 盘上的事实件只自己判两条——站根有没有 `livedoc.config.mjs`（`live-doc.stale` 只对接了 livedoc 的站有意义）、目录里有没有 `content`（挡住把反馈落进一个随手给的目录）：
 
-@@livedoc ref ../packages/gwb-live-doc/src/site-lookup.ts:68-84 @@
+{/* ref file="../packages/gwb-live-doc/src/site-lookup.ts" lines="68-84" */}
 
 **不知道 livedoc 是怎么核对的。** 报告的形状是契约，件只认 `check --json` 打出来的那一行，五个契约字段全在才认；加字段照样认，少字段就不认：
 
-@@livedoc ref ../packages/gwb-live-doc/src/stale.ts:131-145 @@
+{/* ref file="../packages/gwb-live-doc/src/stale.ts" lines="131-145" */}
 
 少字段说明对面那份包太老，报「没拿到机读报告」比在下游读出 `undefined` 强。同理 `check` 有红时退出码是 1，那是核对结果不是命令失败——件把退出码与 stdout 原样交出去，不替它解释。捞报告那一步也不看退出码，只从后往前找第一行能 parse 成报告的：`--json` 整份打成一行，但同一条流里还可能有别的话。
 
-@@livedoc ref ../packages/gwb-live-doc/src/stale.ts:108-129 @@
+{/* ref file="../packages/gwb-live-doc/src/stale.ts" lines="108-129" */}
 
 **不知道一处钉为什么黄、一个落点为什么不新鲜。** 一处钉是绿是黄是红、行段挪了跟不跟得上，归比较器；一个落点四态里的哪一态、算不算新鲜，归摆放——判定结果随报告里每个落点的 `fresh` 一起过来。件哪一样都不重新解释，只照一条现成的口径筛：
 
-@@livedoc ref ../packages/gwb-live-doc/src/stale.ts:65-80 @@
+{/* ref file="../packages/gwb-live-doc/src/stale.ts" lines="65-80" */}
 
 筛的时候 `fresh` 原样取、四态原样带出去，件只答「这一页要不要重写」：
 
-@@livedoc ref ../packages/gwb-live-doc/src/stale.ts:82-106 @@
+{/* ref file="../packages/gwb-live-doc/src/stale.ts" lines="82-106" */}
 
 只有孤儿记录或名册外组件的页也红，但那不是「重写正文」能解决的事，单列进 `others`——混在一起会让 agent 去重写一篇其实只要 `confirm` 一下的页。`unconfirmed`（白）不算漂移：那是还没确认过，不是现状漂了。
 
@@ -101,11 +101,11 @@ livedoc 随包发两份 skill（`livedoc-docs` 文档怎么写、`trajectory` �
 
 **不知道反馈条目该长什么样。** 格式是 livedoc 站模板里那份注释定的，件只照着摆，三条纪律都写在文件头上：
 
-@@livedoc ref ../packages/gwb-live-doc/src/feedback.ts:4-20 @@
+{/* ref file="../packages/gwb-live-doc/src/feedback.ts" lines="4-20" */}
 
 **只追加**不动已有条目、不碰别的页；**不 commit**，那个仓的人自己看了再提交；**页不在就建**，对面的站可能还没改成六区，缺一页不该让跨仓反馈投不进去。日期取本机时区，不用 `toISOString`：那是 UTC，晚上八点之后写的条目会落到明天。
 
-@@livedoc ref ../packages/gwb-live-doc/src/feedback.ts:30-44 @@
+{/* ref file="../packages/gwb-live-doc/src/feedback.ts" lines="30-44" */}
 
 **不知道 livedoc 那套工具链。** 那两个 npm 包是 tsdown + TS 6、测试跑 `node --test`；这个件是 `tsc` 出一份 node 半，跑在 TS 7 上，测试用 vitest。各自的 `package.json` 说了算，**两套并存、不互相搬**。
 
@@ -115,19 +115,19 @@ livedoc 随包发两份 skill（`livedoc-docs` 文档怎么写、`trajectory` �
 
 `live-doc.stale` 的回执是一份 check 报告收敛后的样子：待重写页一张表、不用重写正文的页另一张表，红的总数原样取报告里的数、不自己加。
 
-@@livedoc ref ../packages/gwb-live-doc/src/stale.ts:49-63 @@
+{/* ref file="../packages/gwb-live-doc/src/stale.ts" lines="49-63" */}
 
 表里那些钉与落点的形状**不在这儿定义**——直接用 livedoc 主出口导出的类型（落点那个是它从环境层借过来转出的），形状是契约，抄一份必然漂：
 
-@@livedoc ref ../packages/gwb-live-doc/src/stale.ts:1-15 @@
+{/* ref file="../packages/gwb-live-doc/src/stale.ts" lines="1-15" */}
 
 一页待重写的样子：漂了的钉加不新鲜的落点，`line` 是记号在文档里的第几行，`lines` 是被引段今天在源文件里的位置，`diff` 是变了的那几行——agent 靠这三样定位改哪几段。
 
-@@livedoc ref ../packages/gwb-live-doc/src/stale.ts:17-40 @@
+{/* ref file="../packages/gwb-live-doc/src/stale.ts" lines="17-40" */}
 
 一条反馈四样（日期、标题、来源、正文），渲成页里的一节就是这个形状——标题行只能是一行，追加时页尾原有的空行先裁掉：
 
-@@livedoc ref ../packages/gwb-live-doc/src/feedback.ts:46-60 @@
+{/* ref file="../packages/gwb-live-doc/src/feedback.ts" lines="46-60" */}
 
 站件回执收敛完只剩两个字段：选中的是哪个单元，加每个站的目录与所属单元。站件回执里别的字段一概不取——取了就是给站件的形状变化多开一扇门。
 
@@ -135,25 +135,25 @@ livedoc 随包发两份 skill（`livedoc-docs` 文档怎么写、`trajectory` �
 
 对外只有**命令总线上那一串 `live-doc.*`**，加运行器登记出来的裸口 `live-doc.cli-raw`。命令名是公共面，产物守卫那条测试一个个数着，改名就是破约：
 
-@@livedoc ref ../packages/gwb-live-doc/tests/artifact.test.ts:55-60 @@
+{/* ref file="../packages/gwb-live-doc/tests/artifact.test.ts" lines="55-60" */}
 
 站的一生那几条不在这儿，另一条测试正着守住：
 
-@@livedoc ref ../packages/gwb-live-doc/tests/artifact.test.ts:62-67 @@
+{/* ref file="../packages/gwb-live-doc/tests/artifact.test.ts" lines="62-67" */}
 
 窗格与浏览器半也没有：
 
-@@livedoc ref ../packages/gwb-live-doc/tests/artifact.test.ts:115-119 @@
+{/* ref file="../packages/gwb-live-doc/tests/artifact.test.ts" lines="115-119" */}
 
 说明书随包发（`skills/live-doc/SKILL.md`），装了 skills 件的 home 里自动挂给 agent 读，`files` 里收着它——漏了包照发、照装得上，直到那个件挂载去扫目录时才报「读不动」。
 
-@@livedoc ref ../packages/gwb-live-doc/package.json:8-15 @@
+{/* ref file="../packages/gwb-live-doc/package.json" lines="8-15" */}
 
 ## 依赖的接口
 
 `gwbCommands` 进 `export const inject`，缺它不挂；其余全走 `ctx.inject` 的局部注入——那些件不在的 home 里本件照常挂，只是少一块功能。
 
-@@livedoc ref ../packages/gwb-live-doc/src/index.ts:57-64 @@
+{/* ref file="../packages/gwb-live-doc/src/index.ts" lines="57-64" */}
 
 | 接口 | 用来做什么 | 生产实现 | 测试实现 |
 | --- | --- | --- | --- |
@@ -165,17 +165,17 @@ livedoc 随包发两份 skill（`livedoc-docs` 文档怎么写、`trajectory` �
 
 livedoc 是**真依赖、不是 peer**：件要拿到它包内那个绝对路径去起进程，装本件的 home 里必须有它。工作区里写 `workspace:^`，发版时被 pnpm 换成那一刻的版本——所以发版顺序是**包先、件后**。
 
-@@livedoc ref ../packages/gwb-live-doc/package.json:36-39 @@
+{/* ref file="../packages/gwb-live-doc/package.json" lines="36-39" */}
 
 别的几档各按用法分：契约包与命令总线走 peer（前者是每个件都得对得上的那份契约，后者是运行期硬依赖），skills 与 node-cli 走局部注入、只 `import type`，落 dev 加一条可选 peer 当版本校验点。**站件一档都不写**：
 
-@@livedoc ref ../packages/gwb-live-doc/package.json:40-47 @@
+{/* ref file="../packages/gwb-live-doc/package.json" lines="40-47" */}
 
 ## 怎么单独测
 
 判据一条：**这段逻辑能不能不起进程、不开窗、只喂输入看输出**。能就写成 vitest 用例；不能（要起子进程、要 Electron、要真装进 home）那不是不测，是走实机验证那条路。两者不互相替代——`pnpm check` 全绿从来不代表装出来能跑，它吃的是源码。
 
-@@livedoc tree ../packages/gwb-live-doc/tests depth=1 @@
+{/* tree dir="../packages/gwb-live-doc/tests" depth="1" */}
 
 `stale` 喂一份手造的 `CheckReport`，证的是筛的那几条口径（`changed` / `missing` 进表、白的不进、钉全绿但落点不新鲜的页照样要重写、只有孤儿记录的页进 `others`）与从 stdout 里捞报告那一步（前后有别的话也捞得出来、少字段不认、多行取最后一份）。
 
@@ -185,11 +185,11 @@ livedoc 是**真依赖、不是 peer**：件要拿到它包内那个绝对路径
 
 产物守卫那一组要 `dist/` 造齐了才跑，缺产物整组跳过——门禁不依赖 build。它数的是四件「一改就得一起改」的账：产物只剩 node 半那四个模块、相对 import 带扩展名、裸名只有契约包、五条命令加裸口一个不少。
 
-@@livedoc ref ../packages/gwb-live-doc/tests/artifact.test.ts:30-37 @@
+{/* ref file="../packages/gwb-live-doc/tests/artifact.test.ts" lines="30-37" */}
 
 其中最要紧的一条守的是这次拆分的判据本身——**两个件互不依赖**。哪天为了省事把站件的类型 import 进来，这条会红：
 
-@@livedoc ref ../packages/gwb-live-doc/tests/artifact.test.ts:102-113 @@
+{/* ref file="../packages/gwb-live-doc/tests/artifact.test.ts" lines="102-113" */}
 
 门禁是这个包自己的一摊（vitest），跟工作区那摊 `node --test` 分开跑。
 
@@ -197,7 +197,7 @@ livedoc 是**真依赖、不是 peer**：件要拿到它包内那个绝对路径
 
 **在哪**：
 
-@@livedoc tree ../packages/gwb-live-doc/src depth=1 @@
+{/* tree dir="../packages/gwb-live-doc/src" depth="1" */}
 
 **先读** `index.ts`。整份只剩接线：五条命令、node-cli 的裸口登记、说明书那一格的局部注入，全在那儿挂。
 

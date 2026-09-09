@@ -36,7 +36,7 @@ livedoc 治的是**现状文档撒谎**——一句话写下的那一刻就跟�
 
 服务端组件就是「读盘 + 建模 + 把模型和启动器缩略图交给客户端组件」，外加把报病列成一张表摆在盘下方：
 
-{/* ref file="../packages/trajectory/src/server.tsx" lines="93-98" */}
+{/* ref file="../packages/trajectory/src/server.tsx" lines="100-105" */}
 
 ### 卡住哪、盘在哪
 
@@ -205,7 +205,7 @@ fumadocs 变量，CSS 不判明暗——环用 `color-mix` 从前景色兑 7% / 
 JS 色板要按亮暗各渲一份、页面按 `html.dark` 显示其一。节点在这儿退成实心（缩到卡片尺寸渐变看不出来，白留
 一堆 defs），被取代小一号、结论卡放大、连线无箭头三条跟大图一致：
 
-{/* ref file="../packages/trajectory/src/server.tsx" lines="47-79" */}
+{/* ref file="../packages/trajectory/src/server.tsx" lines="54-86" */}
 
 ## 不知道什么
 
@@ -422,17 +422,17 @@ props 里一个函数都不收——服务端组件传不了函数给客户端�
 `./server` 导出三样。**服务端组件** `Trajectory`：卡目录既认绝对路径也认相对站根的写法，组件里显式 resolve
 一次再交给 `buildTrajectory`：
 
-{/* ref file="../packages/trajectory/src/server.tsx" lines="83-91" */}
+{/* ref file="../packages/trajectory/src/server.tsx" lines="90-98" */}
 
 **卡集合的 frontmatter schema** `cardSchema`：手写的字面量，不 new 任何校验库的类；缺 `born-at` 硬失败，
 缺 `label` 退文件名，六个字段一个都不沾的页当普通页放行：
 
-{/* ref file="../packages/trajectory/src/server.tsx" lines="139-149" */}
+{/* ref file="../packages/trajectory/src/server.tsx" lines="146-156" */}
 
 **remark 插件** `remarkTrajectoryLinks`：把正文里的关系边段落打成带 `data-kind` 的 div，把形似卡身份的
 `.md` / `.mdx` 链接与 wikilink 改写成卡页路由，带路径的 `.md`（引材料）原样不动：
 
-{/* ref file="../packages/trajectory/src/server.tsx" lines="223-227" */}
+{/* ref file="../packages/trajectory/src/server.tsx" lines="230-234" */}
 
 另有 `renderThumb` / `launcherThumbs` 出启动器的静态定妆照（见「启动器」那段），以及一张 `./star.css`
 样式表。

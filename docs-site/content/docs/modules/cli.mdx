@@ -11,17 +11,17 @@ description: cli 层：五条命令的分流与编排，机读报告与退出码
 
 这一层是**动作的编排**，做两件事：把命令行参数翻译成几趟对装配出来的项目的调用，再把结果打成人读的一行行、或机读的一行 JSON，最后退一个码。**判定一件都不在这儿算**——它只负责印和退。五条命令各是什么，入口文件头上那段说了：
 
-@@livedoc ref ../packages/livedoc/src/cli/run.ts:1-15 @@
+{/* ref file="../packages/livedoc/src/cli/run.ts" lines="1-15" */}
 
 分两路。主干 `check` / `confirm` / `render` 是一套：cwd 就是项目根——`livedoc.config.mjs` 在哪儿就在哪儿跑——先装配，再逐篇处理文档目录下被格式认领的每一篇。`trajectory` 与 `attach` 是另一路，它们不遍历文档，命令名解出来就分流走了，连那条命令白名单和 `loadProject` 都不进；`attach` 那条的理由更硬：**它连 `livedoc.config.mjs` 都不读**，那正是它要写出来的东西。
 
-@@livedoc ref ../packages/livedoc/src/cli/run.ts:48-58 @@
+{/* ref file="../packages/livedoc/src/cli/run.ts" lines="48-58" */}
 
 ### 输出的词汇表
 
 一行一处引用：状态符号、文档、`文件:起-止`、一句话说明。
 
-@@livedoc ref ../packages/livedoc/src/cli/run.ts:27-46 @@
+{/* ref file="../packages/livedoc/src/cli/run.ts" lines="27-46" */}
 
 `REASON` 里除了 `unlocated`（「有变动」的细分：hash 记忆找不到这段了，位置不明），都是「缺失」的细分——说清楚是哪一种指向空气，而不是含糊地报一句「代码没了」：行段的整段删光、文件没了、blob 取不回，目录树的目录没了，存在性的断言不在却出现了、文件和目录换了个，名字的找不到了。`MEMORY` 是 `confirm` 用的：哪一处拿到的是 hash 记忆（文件不在 git 里），那一行标出来。目录树那行还会带上项数，黄的时候带多了少了哪些：
 
@@ -34,7 +34,7 @@ description: cli 层：五条命令的分流与编排，机读报告与退出码
 
 一趟的次序是逐篇核对 → 失踪文档 → 卡校验，先攒成一份报告再决定怎么出：人读模式边算边打，`--json` 攒完整份一行打出去。**两种模式算的是同一份报告**，红的口径不可能对不上。
 
-@@livedoc ref ../packages/livedoc/src/cli/run.ts:130-154 @@
+{/* ref file="../packages/livedoc/src/cli/run.ts" lines="130-154" */}
 
 ```text
 🟢 content/docs/modules/cli.mdx  ../packages/livedoc/src/cli/run.ts:48-58  新鲜
@@ -46,11 +46,11 @@ description: cli 层：五条命令的分流与编排，机读报告与退出码
 
 红有四个来源，都算数：**缺失**的引用、**孤儿记录**（记录簿里有、文档里已经没有了）、**名册外组件**（`livedoc.config.mjs` 里没给它压平规则）、**摆放的落点不新鲜**——挂了 `outputs` 映射的文档，落点新鲜不新鲜是问环境层的摆放要来的，一个落点回一个四态加一个 `fresh`，不新鲜的都红：
 
-@@livedoc ref ../packages/livedoc/src/cli/run.ts:228-253 @@
+{/* ref file="../packages/livedoc/src/cli/run.ts" lines="228-253" */}
 
 四态各译成一句人话，就是这一层全部的活：
 
-@@livedoc ref ../packages/livedoc/src/cli/run.ts:255-262 @@
+{/* ref file="../packages/livedoc/src/cli/run.ts" lines="255-262" */}
 
 ```text
 🔴 docs/a.md  src/greet.ts:4-5  孤儿记录：文档里已经没有这处引用
@@ -60,13 +60,13 @@ description: cli 层：五条命令的分流与编排，机读报告与退出码
 
 配了 `trajectory` 目录的项目，`check` 末尾还**顺带**跑一趟轨迹卡校验——病卡一条一行，也算红。没配就整个不管；配了但目录还不存在扫出来是空集合，不算红：
 
-@@livedoc ref ../packages/livedoc/src/cli/run.ts:156-167 @@
+{/* ref file="../packages/livedoc/src/cli/run.ts" lines="156-167" */}
 
 卡的四层校验各拦什么归 [轨迹包](/docs/modules/trajectory)——这边只负责把病打成行、计进红。
 
 ### confirm：出记录、清孤儿、换记号
 
-@@livedoc ref ../packages/livedoc/src/cli/run.ts:264-280 @@
+{/* ref file="../packages/livedoc/src/cli/run.ts" lines="264-280" */}
 
 顺利的时候一处一行 `✅`，清掉的孤儿一行 `🧹`。文档本身删了、挪了的，它的记录逐篇那圈看不到，`check` 按文档清单一览算红，`confirm` 末尾整个忘掉，也是一行 `🧹`：
 
@@ -90,13 +90,13 @@ description: cli 层：五条命令的分流与编排，机读报告与退出码
 
 命令名后面跟几个文档路径，就只动点名的那几篇。同一个仓里常有别人钉的黄等着他自己复核，整仓一趟会替他签字；改了哪几页就确认哪几页，是让「只改这几页」的改动能独立成一个提交的前提。
 
-@@livedoc ref ../packages/livedoc/src/cli/run.ts:72-108 @@
+{/* ref file="../packages/livedoc/src/cli/run.ts" lines="72-108" */}
 
 孤儿清理**分两层，限定模式里去处不同**：一页之内的孤儿（这一页正文里已经没有的引用）照清，它本来就只看这一页；整仓那层（记录簿里有、项目里已经没有这篇文档了）不能按限定后的清单算——那份清单是人点名的一小撮，拿它当「现存文档的全集」，没点名的页会被全部当成失踪抹掉。所以限定模式只清点名了的那几篇。**挪一篇文档就是点两次**：旧路径点一次（忘掉旧记录）、新路径点一次（按新身份重钉），一趟走完。
 
 点名的路径长什么样不归这儿认——反斜杠、`./` 开头、绝对路径怎么归成文档身份，是环境层那一份 `docIdOf`。这边只分三类：还在的页去确认，已经不在、记录簿里还留着的页去清记录，两边都对不上当场退 2——拼错一个路径导致少确认一页，比报错难发现得多。
 
-@@livedoc ref ../packages/livedoc/src/cli/run.ts:110-128 @@
+{/* ref file="../packages/livedoc/src/cli/run.ts" lines="110-128" */}
 
 ```text
 ·  按页限定：只动 docs/a.md、docs/old.md，别的页与它们的记录不碰
@@ -108,7 +108,7 @@ description: cli 层：五条命令的分流与编排，机读报告与退出码
 
 渲染只有一种输出，给 AI 读的那份 md——人看的那份就是文档在站上的样子。挂了 `outputs` 映射的文档不落 `out/`，直接**摆**到映射给的位置（可以出项目根，`../README.md` 这种）；渲成什么、整形到什么程度、缺字段摆不摆，整趟归环境层的摆放，这边只把回执印成行：
 
-@@livedoc ref ../packages/livedoc/src/cli/run.ts:282-296 @@
+{/* ref file="../packages/livedoc/src/cli/run.ts" lines="282-296" */}
 
 ```text
 →  content/outputs/readme.mdx  摆放到 ../README.md
@@ -118,7 +118,7 @@ description: cli 层：五条命令的分流与编排，机读报告与退出码
 
 没挂映射的落 `out/` 当调试产物；格式没有对应的渲染函数就说一声、退 0，不当错：
 
-@@livedoc ref ../packages/livedoc/src/cli/run.ts:297-319 @@
+{/* ref file="../packages/livedoc/src/cli/run.ts" lines="297-319" */}
 
 ```text
 →  docs/a.md  渲染成 out/a.md.ai.md
@@ -131,7 +131,7 @@ fumadocs 那份的 `renderAi` 是借站自己的 loader 出的 md，见 [fumadoc
 
 这条不遍历文档、不碰记录簿。没配 `trajectory` 目录直接说一声、退 2；`--json` 出整份模型（给别的工具吃），不带就按盘打印每棵树的主干，末尾一行汇总支线 / 孤星 / 虫洞数：
 
-@@livedoc ref ../packages/livedoc/src/cli/run.ts:169-190 @@
+{/* ref file="../packages/livedoc/src/cli/run.ts" lines="169-190" */}
 
 ```text
 盘 记事本（2026-01-09-notes）  17 张卡
@@ -145,25 +145,25 @@ fumadocs 那份的 `renderAi` 是借站自己的 loader 出的 md，见 [fumadoc
 
 `livedoc attach --dir <站目录>` 要的前置条件跟别的命令正相反：**站已经在、但还没接过 livedoc**。骨架谁铺不归 livedoc——装了 fumadocs 的人才该有那个能力；工作台里是站件那条 `docs-site.create`，手铺也行。
 
-@@livedoc ref ../packages/livedoc/src/cli/attach.ts:11-20 @@
+{/* ref file="../packages/livedoc/src/cli/attach.ts" lines="11-20" */}
 
 这一层跟别的四条一样薄：认参数、调 [装配层](/docs/modules/site) 面上的方法、把结果与「接着做什么」打出来。**装配的逻辑一行都不许回流到这儿**——它得能被别的程序直接调，不必绕命令行。
 
-@@livedoc ref ../packages/livedoc/src/cli/attach.ts:1-7 @@
+{/* ref file="../packages/livedoc/src/cli/attach.ts" lines="1-7" */}
 
 打出来的那几段是有次序的：装在哪、写了哪些文件、让位删了哪些、仓根已有的哪些文件下次 `render` 会被覆盖，最后才是接着跑哪几条命令。**覆盖那一条单独警告**：`outputs` 预置了 `AGENTS.md` / `README.md` 的映射，第一次 `render` 就会把仓里手写的那份摆掉，得先把内容搬进 `content/outputs/` 的 mdx 正本。
 
-@@livedoc ref ../packages/livedoc/src/cli/attach.ts:62-88 @@
+{/* ref file="../packages/livedoc/src/cli/attach.ts" lines="62-88" */}
 
 ## 不知道什么
 
 **不知道摆放怎么算。** 一篇 mdx 摆出去的正文该长什么样、跟盘上那份怎么比、四态凭什么这么定、缺了点名的 frontmatter 字段该不该写——一件都不知道。它拿到的是环境层那个摆放对象，对外只有两个方法，`render` 摆一趟、`check` 核一趟，回来一张落点清单；这一层的活是把那张清单译成人话和一个退出码。
 
-@@livedoc ref ../packages/livedoc/src/host/placement.ts:51-61 @@
+{/* ref file="../packages/livedoc/src/host/placement.ts" lines="51-61" */}
 
 **不认识任何格式的记号长什么样。** 认记号、写回记号、渲染，全走判定层定的 `Format` 接口，实现在 fumadocs 那一层；这里只知道「这一篇归哪个格式」，那也是问装配好的项目要的。
 
-@@livedoc ref ../packages/livedoc/src/engine/types.ts:119-134 @@
+{/* ref file="../packages/livedoc/src/engine/types.ts" lines="119-134" */}
 
 **不自己算状态。** 绿黄白红是 [判定层](/docs/modules/engine) 的服务判的，这边只把状态映成符号和一句中文。
 
@@ -177,7 +177,7 @@ fumadocs 那份的 `renderAi` 是借站自己的 loader 出的 md，见 [fumadoc
 
 **这一层认识以上全部四层，谁都不认识它。** 塌成一个包之后，同一个包里 `engine/` 随手写一句 `import "../host/git.ts"` 编译器不会吭一声，pnpm 那层严格 node_modules 的保护也没有了——目录方向由一份手写的禁止面表守着，它是**唯一**的边界守卫：
 
-@@livedoc ref ../tests/boundary.test.ts:86-104 @@
+{/* ref file="../tests/boundary.test.ts" lines="86-104" */}
 
 <Note>
 这张表报红的时候，红的是设计不是测试。真要改方向，改的是表本身加一段说明为什么，不是把断言删掉。
@@ -187,15 +187,15 @@ fumadocs 那份的 `renderAi` 是借站自己的 loader 出的 md，见 [fumadoc
 
 这一层自己定形状的只有一样：`check --json` 那份机读报告。它是**契约**——`gwb-live-doc` [件](/docs/modules/plugin) 的 `live-doc.stale` 靠它列「待重写页与漂移的钉」：
 
-@@livedoc ref ../packages/livedoc/src/cli/report.ts:1-4 @@
+{/* ref file="../packages/livedoc/src/cli/report.ts" lines="1-4" */}
 
 整份的形状（谁套谁、哪几个数组、哪些字段有才带）在同一个文件的头上一眼看完：
 
-@@livedoc ref ../packages/livedoc/src/cli/report.ts:6-33 @@
+{/* ref file="../packages/livedoc/src/cli/report.ts" lines="6-33" */}
 
 报告里 outputs 那一段是个例外：**形状不是这儿定的**。四态是摆放判出来的，这边直接引环境层导出的那个类型，只借个名字给报告用——把别人的四态在自己的类型里再声明一遍，就是给同一件事留了两份真相：
 
-@@livedoc ref ../packages/livedoc/src/cli/report.ts:37-42 @@
+{/* ref file="../packages/livedoc/src/cli/report.ts" lines="37-42" */}
 
 记录簿是这些命令产出的东西，形状也不归这一层定——两层键（文档 → `文件:起-止` → 记录），除了 `kind`，字段归记它的那个比较器自己定，一本记录簿里 `git` 和 `hash` 两种并存：
 
@@ -213,7 +213,7 @@ fumadocs 那份的 `renderAi` 是借站自己的 loader 出的 md，见 [fumadoc
 }
 ```
 
-@@livedoc ref ../packages/livedoc/src/host/git-comparator.ts:19-26 @@
+{/* ref file="../packages/livedoc/src/host/git-comparator.ts" lines="19-26" */}
 
 **代码内容一个字都不在里面**——`blob` 指着 git 对象库里那份，要旧内容时现取。读写它的是环境层的记录簿实现，这边只经服务用。
 
@@ -221,15 +221,15 @@ fumadocs 那份的 `renderAi` 是借站自己的 loader 出的 md，见 [fumadoc
 
 对外一个函数：`main(argv)`，吃去掉 node 与脚本名之后的参数，回退出码。
 
-@@livedoc has ../packages/livedoc/src/cli/run.ts "export async function main" @@
+{/* has file="../packages/livedoc/src/cli/run.ts" text="export async function main" */}
 
 **它自己不 `process.exit`**——退出这件事留在可执行那一头，所以测试能直接调它、当场看退出码和打印，不用起子进程。可执行的那个文件整个就这么点：
 
-@@livedoc ref ../packages/livedoc/src/cli/cli.ts @@
+{/* ref file="../packages/livedoc/src/cli/cli.ts" */}
 
 `main` 与装配层那几个名字一起从包的主出口出去，给想在别的程序里跑一趟核对、或不绕命令行装一次六区的人用：
 
-@@livedoc ref ../packages/livedoc/src/index.ts:1-17 @@
+{/* ref file="../packages/livedoc/src/index.ts" lines="1-17" */}
 
 退出码三档，是契约——门禁靠它拦人：
 
@@ -245,7 +245,7 @@ fumadocs 那份的 `renderAi` 是借站自己的 loader 出的 md，见 [fumadoc
 
 进这一层的东西一共就这几个名字，import 表一眼看全：
 
-@@livedoc ref ../packages/livedoc/src/cli/run.ts:16-23 @@
+{/* ref file="../packages/livedoc/src/cli/run.ts" lines="16-23" */}
 
 | 接口 | 用来做什么 | 生产实现 | 测试实现 |
 | --- | --- | --- | --- |
@@ -262,31 +262,31 @@ fumadocs 那份的 `renderAi` 是借站自己的 loader 出的 md，见 [fumadoc
 
 这一层没有假实现可喂——它是编排，喂假的就什么都没验着。**假的是「项目」本身**：台子在临时目录里起一个真 git 仓，写几篇文档、一份 `livedoc.config.mjs`，然后直接调 `main`：
 
-@@livedoc ref ../tests/cli-project.ts:1-11 @@
+{/* ref file="../tests/cli-project.ts" lines="1-11" */}
 
 三处约束是台子的形状定死的：配置按**绝对 `file:` 地址**引那份假格式（临时目录里解析不到包名）；**不起子进程**，退出码和打印当场看得见；台子要 `process.chdir` 到临时目录，那是进程全局的，所以**同一个文件里的用例只能串着跑**——主干这摊按主题拆成三个 `.test.ts`，`node --test` 每个文件一个进程，文件之间才并发得起来。
 
 三个文件各守一摊。三个动作的主线、五类引用各自的报法、忽略文件退回 hash 记忆、记录簿的两种清扫、按页限定的三条（只动点名的、失踪清扫只对点名的做、路径对不上退 2）：
 
-@@livedoc ref ../tests/cli.test.ts:1-5 @@
+{/* ref file="../tests/cli.test.ts" lines="1-5" */}
 
 outputs 那一摊只验这一层——render 打成哪几行、check 把不新鲜的落点计进红、缺 frontmatter 字段时退什么码，外加装配时的地盘规则与配置形状。摆放本身怎么渲、四态怎么判，账在环境层那边：
 
-@@livedoc ref ../tests/cli-outputs.test.ts:1-5 @@
+{/* ref file="../tests/cli-outputs.test.ts" lines="1-5" */}
 
 扫哪些文档、报告长什么样——`docs` 给数组时几个目录一起扫、配了 `trajectory` 顺带跑卡校验、`--json` 那份机读报告的四态与各个数组：
 
-@@livedoc ref ../tests/cli-report.test.ts:1-4 @@
+{/* ref file="../tests/cli-report.test.ts" lines="1-4" */}
 
 `attach` 自己一本账，跟上面三个文件不共台子，而且只验命令那一层：参数认没认对、话说清楚了没有、退了几，走 `main(["attach", …])` 从命令行这头进。装出来的六区长什么样是装配层自己的账。它顺带守一条**跨两份真相**的事：装配往目标站补的那张依赖表跟工作区各包的版本对得上——那张表是手写的，发版抬版本号时忘了抬它，装出来的站会装到一个旧版。
 
-@@livedoc ref ../tests/attach.test.ts:1-11 @@
+{/* ref file="../tests/attach.test.ts" lines="1-11" */}
 
 ## 代码地图
 
 **在哪**：
 
-@@livedoc tree ../packages/livedoc/src/cli depth=1 @@
+{/* tree dir="../packages/livedoc/src/cli" depth="1" */}
 
 **先读** `run.ts` 的 `main`：五条命令的分流、白名单、装配都在那二十行里，读完就知道剩下的往哪儿分。
 
