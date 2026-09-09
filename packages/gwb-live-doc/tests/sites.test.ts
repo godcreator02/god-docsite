@@ -9,6 +9,9 @@ import {
   hasNodeModules,
   isFumadocsSite,
   isInside,
+  isRetiredUnit,
+  pickDocsSite,
+  readUnitPurpose,
   rootFromSetting,
   scanUnitsRoot,
   shouldSkipDir,
@@ -135,7 +138,7 @@ describe('findSitesInUnit：一个单元里限深三层找站', () => {
 
 describe('scanUnitsRoot：根下一层一个单元，逐个扫', () => {
   it('根不存在：rootExists false、空表，不抛', () => {
-    expect(scanUnitsRoot(path.join(tmp, 'nope'))).toEqual({ rootExists: false, sites: [] })
+    expect(scanUnitsRoot(path.join(tmp, 'nope'))).toEqual({ rootExists: false, sites: [], retired: [] })
   })
 
   it('两个单元各自的站都在，按单元名再按目录排', () => {
@@ -155,6 +158,60 @@ describe('scanUnitsRoot：根下一层一个单元，逐个扫', () => {
   it('根下点开头的目录不当单元', () => {
     put('.hidden/docs-site/package.json', pkg({ 'fumadocs-core': '1' }))
     expect(scanUnitsRoot(tmp).sites).toEqual([])
+  })
+
+  it('出生证写了 retired: true 的单元整个不扫，名字进 retired', () => {
+    put('live/unit.json', JSON.stringify({ kind: 'repo', purpose: '还在用' }))
+    put('live/docs-site/package.json', pkg({ 'fumadocs-core': '1' }))
+    put('dead/unit.json', JSON.stringify({ kind: 'repo', purpose: '退役了', retired: true }))
+    put('dead/docs-site/package.json', pkg({ 'fumadocs-core': '1' }))
+    const got = scanUnitsRoot(tmp)
+    expect(got.retired).toEqual(['dead'])
+    expect(got.sites.map((s) => s.unit)).toEqual(['live'])
+  })
+})
+
+describe('出生证：purpose 与 retired', () => {
+  it('retired 只认布尔的真——字符串 "true"、1 都不算，宁可多列一个站', () => {
+    put('a/unit.json', JSON.stringify({ retired: true }))
+    put('b/unit.json', JSON.stringify({ retired: 'true' }))
+    put('c/unit.json', JSON.stringify({ retired: 1 }))
+    put('d/unit.json', JSON.stringify({}))
+    expect(isRetiredUnit(path.join(tmp, 'a'))).toBe(true)
+    for (const unit of ['b', 'c', 'd']) expect(isRetiredUnit(path.join(tmp, unit)), unit).toBe(false)
+  })
+
+  it('没有出生证、出生证是坏 JSON：不退役、没有 purpose，不抛', () => {
+    put('bad/unit.json', '{ nope')
+    expect(isRetiredUnit(path.join(tmp, 'bad'))).toBe(false)
+    expect(isRetiredUnit(path.join(tmp, 'nope'))).toBe(false)
+    expect(readUnitPurpose(path.join(tmp, 'bad'))).toBeUndefined()
+  })
+
+  it('purpose 读得出来，空白当没有', () => {
+    put('a/unit.json', JSON.stringify({ purpose: '干这个的' }))
+    put('b/unit.json', JSON.stringify({ purpose: '   ' }))
+    expect(readUnitPurpose(path.join(tmp, 'a'))).toBe('干这个的')
+    expect(readUnitPurpose(path.join(tmp, 'b'))).toBeUndefined()
+  })
+})
+
+describe('pickDocsSite：live-doc.cli 不给 cwd 时落在哪', () => {
+  const site = (dir: string) => ({ dir, unit: 'u', unitPath: path.join(tmp, 'u') })
+
+  it('名字正好叫 docs-site 的那个优先', () => {
+    const picked = pickDocsSite([site(path.join(tmp, 'u', 'repo', 'website')), site(path.join(tmp, 'u', 'repo', 'docs-site'))])
+    expect(picked).toBe(path.join(tmp, 'u', 'repo', 'docs-site'))
+  })
+
+  it('没有叫 docs-site 的，但整个单元只有一个站，就是它', () => {
+    expect(pickDocsSite([site(path.join(tmp, 'u', 'repo', 'website'))])).toBe(path.join(tmp, 'u', 'repo', 'website'))
+  })
+
+  it('挑不出就回 undefined，不替人猜：没有站、两个 docs-site、两个不同名的站', () => {
+    expect(pickDocsSite([])).toBeUndefined()
+    expect(pickDocsSite([site(path.join(tmp, 'u', 'a', 'docs-site')), site(path.join(tmp, 'u', 'b', 'docs-site'))])).toBeUndefined()
+    expect(pickDocsSite([site(path.join(tmp, 'u', 'a', 'site1')), site(path.join(tmp, 'u', 'b', 'site2'))])).toBeUndefined()
   })
 })
 
