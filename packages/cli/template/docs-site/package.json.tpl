@@ -23,10 +23,10 @@
     "react-dom": "^19.2.8"
   },
   "devDependencies": {
-    "@godcreator02/live-doc-cli": "0.2.0",
-    "@godcreator02/live-doc-format-fumadocs": "0.1.0",
-    "@godcreator02/live-doc-project": "0.1.0",
-    "@godcreator02/live-doc-trajectory": "0.1.0",
+    "@godcreator02/live-doc-cli": "0.4.1",
+    "@godcreator02/live-doc-format-fumadocs": "0.2.0",
+    "@godcreator02/live-doc-project": "0.2.0",
+    "@godcreator02/live-doc-trajectory": "0.2.0",
     "@tailwindcss/postcss": "^4.3.3",
     "@types/mdx": "^2.0.14",
     "@types/node": "^26.2.0",
