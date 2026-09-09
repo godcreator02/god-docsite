@@ -158,11 +158,6 @@ export function objectExists(repo: string, id: string): boolean {
   }
 }
 
-/** HEAD 的树里有没有这个路径（大小写也得跟 git 记的一样）。要 blob 本身就直接用 headBlob，别问两趟 */
-export function inHead(at: Located): boolean {
-  return headBlob(at) !== null;
-}
-
 /**
  * 一段文本的 blob 哈希，只算不写。
  *
