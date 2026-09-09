@@ -67,14 +67,16 @@ function comparatorOf(root: string, want: RepoOptions["comparator"]): Comparator
   return want;
 }
 
+/**
+ * 身份与换行策略用 `-c` 现传，不落 `git config`——每条 config 都是一个子进程，
+ * 而夹具在整套测试里要起二十来次。工作区一律 LF：Windows 上自动换行转换会让工作区和 blob 逐字节不同。
+ */
+const SETTINGS = ["-c", "user.email=test@example.com", "-c", "user.name=test", "-c", "core.autocrlf=false"];
+
 /** 起一个临时 git 仓，代码已提交一次 */
 export function setupRepo({ formats, comparator }: RepoOptions): Repo {
   const root = mkdtempSync(join(tmpdir(), "god-live-doc-"));
   run(root, ["init", "-q", "-b", "main"]);
-  run(root, ["config", "user.email", "test@example.com"]);
-  run(root, ["config", "user.name", "test"]);
-  // 工作区一律 LF：Windows 上自动换行转换会让工作区和 blob 逐字节不同
-  run(root, ["config", "core.autocrlf", "false"]);
 
   const api: Repo = {
     root,
@@ -87,8 +89,8 @@ export function setupRepo({ formats, comparator }: RepoOptions): Repo {
     read: (rel) => readFileSync(join(root, rel), "utf8"),
     drop: (rel) => rmSync(join(root, rel), { force: true }),
     commit(message) {
-      run(root, ["add", "-A"]);
-      run(root, ["commit", "-q", "-m", message]);
+      run(root, [...SETTINGS, "add", "-A"]);
+      run(root, [...SETTINGS, "commit", "-q", "-m", message]);
     },
     statuses: (doc, text) => api.service.resolve(doc, text).items.map((i) => i.status),
     teardown: () => rmSync(root, { recursive: true, force: true, maxRetries: 5 }),
