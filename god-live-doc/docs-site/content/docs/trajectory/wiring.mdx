@@ -93,7 +93,7 @@ description: 配置一项、命令两条、fumadocs 站三处，外加 Next 那�
 {/* ref file="src/app/global.css" lines="8-9" */}
 
 包照常导出服务端组件 `Trajectory`（读目录 + 渲一张方形嵌入的盘或启动器 + 报病列表），留给想把盘摆进
-一篇长文档中间的消费方；**这两个站的名册里不再登记它**，盘走路由了。`hrefBase` 仍要跟 loader 的
+一篇长文档中间的消费方；**这个站的名册里不再登记它**，盘走路由了。`hrefBase` 仍要跟 loader 的
 `baseUrl` 和 `remarkTrajectoryLinks` 的 `hrefBase` 是同一个值——三处对不上，节点点开是 404。
 
 ## 四、Next 那头两条
@@ -102,8 +102,8 @@ description: 配置一项、命令两条、fumadocs 站三处，外加 Next 那�
 
 **`turbopack.root` 抬到单元根**。这个站的卡目录在工作区外、单元根里（`docs-god-flow/trajectory/`），
 包又是从同一个 pnpm 工作区拿的软链——Turbopack 只认它 root 以内的文件，root 不抬，两样都在视野外。
-卡目录跟站在同一个目录树里的项目（比如邻居示例 `examples/trajectory-site`，卡就在站自己的 `cards/`）
-不必管这条。
+卡目录跟站在同一个目录树里的项目（`livedoc init` 铺出来的站就是这样，卡在站自己的
+`content/trajectory/`）不必管这条。
 
 **`serverExternalPackages` 里不要加 trajectory。**这是这一版跟方案不一样的一处：方案原话是把它
 一起外置，实际不能。它的 `./react` 是客户端组件，`./server` 内部用**包名自引用**去渲它；一外置，

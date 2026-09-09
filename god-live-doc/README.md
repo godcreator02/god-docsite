@@ -5,7 +5,8 @@
 ——站上那块是构建时现拿的，记忆只有一条指纹。
 
 五类引用：行段、整文件、目录树、存在性（含「断言不在」）、名字。一篇手册怎么把它们用起来，
-见 `examples/notes` 和文档站「五类引用：一篇手册里怎么用」；文档本身怎么写（读者是谁、六层骨架、
+见文档站「五类引用：一篇手册里怎么用」——那一章自己就是那篇手册，钉的是本仓核心包的真文件；
+文档本身怎么写（读者是谁、六层骨架、
 五类引用各用在哪种论断、术语表与动画、反模式），配套 skill 在 `packages/cli/skills/livedoc-docs/SKILL.md`
 ——**两份 skill 随 `@godcreator02/live-doc-cli` 一起发**，装了这个包的仓把它的 `skills/` 挂给 agent 读就行。
 
@@ -209,17 +210,10 @@ pnpm livedoc render --target ai       # 重摆 README / AGENTS 生成物（mdx �
 pnpm test           # 站那头的接线（不起 Next）
 pnpm build          # next build
 node scripts/verify-roster.mjs
-
-cd ..\..\examples\plain           # 消费方示例：手写 html + 纯 md，比较器 hash
-pnpm install; pnpm test
-cd ..\fumadocs-site               # 消费方示例：外部 fumadocs 站
-pnpm install; pnpm test; pnpm build
-cd ..\notes                       # 消费方示例：记事本，一篇 mdx 手册五类引用全用上
-pnpm install; pnpm test
-cd ..\trajectory-site             # 消费方示例：外部 fumadocs 站接星轨盘，卡目录是站自己的 cards/
-pnpm install; pnpm test; pnpm build
-pnpm start                        # 想看盘就起一下，4313；验完停掉
 ```
+
+站本身就是这套包唯一的消费方——它装的是工作区里的这七个包，钉的是工作区里的真源码，
+所以「装了这几个包的项目长什么样」不另留一份示例。
 
 改了格式包的代码，站要**先删 `.next` 再 build** 才看得见——Turbopack 只按 mdx 内容缓存。
 调试站用 `next build` + `next start`，不用 dev。

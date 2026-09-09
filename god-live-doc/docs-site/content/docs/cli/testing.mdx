@@ -7,17 +7,16 @@ description: 契约、边界、记号、比较器、站测试各守什么；文�
 
 这一章回答：这套东西一共几摊测试，各守什么规矩，为什么边界测试要去读依赖图，以及文档本身怎么防漂。
 
-## 五摊，各自跑
+## 两摊，各自跑
 
-| 在哪儿 | 怎么跑 | 现在多少条 |
-| --- | --- | --- |
-| `god-live-doc/`（工作区） | `pnpm test`（先 build，再 `node --test tests/*.test.ts`） | 86 |
-| `god-live-doc/docs-site/`（这个站） | `pnpm test` | 5 |
-| `examples/plain`（手写 html + 纯 md，比较器 hash） | `pnpm test` | 7 |
-| `examples/fumadocs-site`（外部 fumadocs 站） | `pnpm test` | 4 |
-| `examples/notes`（记事本，五类引用的手册） | `pnpm test` | 6 |
+| 在哪儿 | 怎么跑 |
+| --- | --- |
+| 工作区根 | `pnpm test`（先 build，再 `node --test tests/*.test.ts`） |
+| `docs-site/`（这个站） | `pnpm test` |
 
-工作区那摊九个文件：骨架、边界、核心、记号、契约、命令行、fumadocs、git 比较器、auto 比较器。
+工作区那摊按主题分文件，一个主题一个：
+
+{/* tree dir="../tests" depth="1" glob="*.test.ts" */}
 
 ## 契约测试：三个格式包摆在一起比
 
@@ -56,7 +55,7 @@ pnpm 的严格 `node_modules` 让「没声明就 import 不到」，所以**依�
 - **记号**：`parse(marker(t))` 认回 `t`（三个格式包、五类目标一起过）；草稿记号[四种不认](/docs/principles/markers)；
   写回幂等——确认过的文档再确认一次，一个字不变；目录树长展示区、存在性和名字不长。
 - **五类目标**：目录树名字多了少了黄带 diff、目录没了红；存在性没了红、类型变了红、断言不在却出现了红；
-  名字找不到红；整文件末尾追加也黄；记事本示例那六条把五类在一篇手册里的表现各演一遍。
+  名字找不到红；整文件末尾追加也黄。
 - **比较器**：git 版与 hash 版在同一串改动下状态一致；git 版的行段跟随、`vanished`、`blob-missing`、
   未提交拒确认，各一条；hash 版的滑窗（挪了跟上、改了位置不明、撞车取最近、并列不猜）各一条；
   auto 版按位置分派——忽略走 hash、仓外走 hash、另一个仓走 git（脏了拒、挪了跟、改了给 diff）、

@@ -1,7 +1,0 @@
-node_modules/
-.next/
-.source/
-next-env.d.ts
-out/
-# tests/livedoc.test.mjs 当场写、跑完就删的那张病卡；崩在半路留下也不进 git
-cards/zzsick-*.md

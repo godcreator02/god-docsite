@@ -1,6 +1,6 @@
 /**
  * fumadocs 格式包不接 Next 的那半：识别、树上换节点、meta 白名单、名册压平。
- * 接 fumadocs 管线的那半（loader、_markdown、页面上的状态点）由 docs-site 和 examples 的站测试守。
+ * 接 fumadocs 管线的那半（loader、_markdown、页面上的状态点）由 docs-site 的站测试守。
  */
 import { test } from "node:test";
 import assert from "node:assert/strict";

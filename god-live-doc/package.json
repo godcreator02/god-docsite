@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "god-live-doc 的包工作区：核心、项目装配、命令行、三个格式包。文档站在 docs-site，消费方示例在邻居 examples",
+  "description": "god-live-doc 的包工作区：核心、项目装配、命令行、三个格式包、轨迹。文档站在 docs-site，它同时是这套包唯一的消费方",
   "scripts": {
     "build": "pnpm -r --filter \"./packages/**\" run build",
     "typecheck": "pnpm -r --filter \"./packages/**\" run typecheck && tsc -p tsconfig.tests.json",
