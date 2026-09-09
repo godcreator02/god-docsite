@@ -1,0 +1,6 @@
+{
+  "//worktree": "这个仓没有远端，worktree 的基必须取本地 HEAD——默认的 fresh 会去找 origin/<默认分支>，切不出来。工作树落在 .claude/worktrees/，已在 .gitignore 里",
+  "worktree": {
+    "baseRef": "head"
+  }
+}
