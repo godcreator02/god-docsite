@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "{{title}} 的文档站：论断钉在这个仓的真实源码上，README 与机读版由 render 摆出",
+  "description": "{{title}} 的六区文档站：现状钉在这个仓的真实源码上，README / AGENTS 由 render 摆出",
   "scripts": {
     "dev": "next dev -p {{port}}",
     "build": "next build",
@@ -11,6 +11,7 @@
     "livedoc": "livedoc",
     "doc": "livedoc check",
     "doc:confirm": "livedoc confirm",
+    "doc:render": "livedoc render --target ai",
     "verify:roster": "node scripts/verify-roster.mjs"
   },
   "dependencies": {
@@ -25,6 +26,7 @@
     "@godcreator02/live-doc-cli": "0.2.0",
     "@godcreator02/live-doc-format-fumadocs": "0.1.0",
     "@godcreator02/live-doc-project": "0.1.0",
+    "@godcreator02/live-doc-trajectory": "0.1.0",
     "@tailwindcss/postcss": "^4.3.3",
     "@types/mdx": "^2.0.14",
     "@types/node": "^26.2.0",

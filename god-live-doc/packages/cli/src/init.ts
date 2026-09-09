@@ -1,9 +1,15 @@
 /**
- * `livedoc init`：往一个**已经存在的仓**里铺一个 fumadocs 文档站，站接好 livedoc。
+ * `livedoc init`：往一个**已经存在的仓**里铺一个六区 fumadocs 文档站，站接好 livedoc。
+ *
+ * 六区：`content/{docs,trajectory,spec,future,outputs,feedback}`——现状、轨迹、交接、未来、
+ * 生成正本、反馈，六个集合、六条路由、侧栏一棵树六个根节，每区一两页骨架，页头一句「本页回答」。
+ * `livedoc.config.mjs` 预置 docs + outputs 两区进 check、trajectory 指卡目录、agents / readme 两条
+ * 摆放映射——所以铺完的站要先 `pnpm doc:render` 摆出仓根 AGENTS.md / README.md，check 才绿。
  *
  * 前置条件跟建仓脚本正好相反——建新仓要求目标目录还不存在，加站要求仓已经在、
  * 而 `<仓>/docs-site` 还不在。只铺文件：**不跑 `pnpm install`**（替人装依赖，出错时现场
- * 在哪都不好找），**不改仓里任何已有文件**（`.gitignore` 缺哪几条只打印出来）。
+ * 在哪都不好找），**不改仓里任何已有文件**（`.gitignore` 缺哪几条只打印出来；仓根已有
+ * README.md / AGENTS.md 的只警告——第一次 render 会覆盖它们，内容得先搬进 outputs 区的正本）。
  *
  * 整套先在内存渲染完再碰盘：占位符认不出是最可能的失败，而目录一旦开始写就没有干净的回滚点。
  *
@@ -33,6 +39,9 @@ const PORT_TO = 4399;
 
 /** 站的产物要忽略掉的那几条 */
 export const GITIGNORE_LINES = ["docs-site/.next/", "docs-site/.source/", "docs-site/out/"];
+
+/** 模板的 outputs 映射会往仓根摆的生成物：仓里已经有的，第一次 render 就会被覆盖 */
+export const PLACED_FILES = ["README.md", "AGENTS.md"];
 
 /** 一个待落盘的文件：相对站目录的路径（正斜杠）加正文 */
 export interface TemplateFile {
@@ -225,6 +234,11 @@ export function missingGitignore(repoDir: string): string[] {
   return GITIGNORE_LINES.filter((line) => !text.includes(line));
 }
 
+/** 仓根已经有哪几个会被 outputs 摆放覆盖的文件——同样只报出来，让人先把内容搬进正本 */
+export function existingPlaced(repoDir: string): string[] {
+  return PLACED_FILES.filter((name) => existsSync(join(repoDir, name)));
+}
+
 export interface InitOptions {
   repoDir: string;
   title?: string;
@@ -241,11 +255,13 @@ export interface InitResult {
   used: Map<number, string>;
   written: string[];
   missing: string[];
+  /** 仓根已有、第一次 render 会被覆盖的生成物（README.md / AGENTS.md） */
+  overwrites: string[];
 }
 
 /**
- * 铺一个站。校验 → 认名字 → 挑端口 → 内存里渲染整套 → 落盘 → 报还缺哪几条 gitignore。
- * 校验和渲染都在碰盘之前，落盘那一步只剩写文件。
+ * 铺一个站。校验 → 认名字 → 挑端口 → 内存里渲染整套 → 落盘 → 报还缺哪几条 gitignore、
+ * 仓根哪几个文件会被 render 覆盖。校验和渲染都在碰盘之前，落盘那一步只剩写文件。
  */
 export function initSite(options: InitOptions): InitResult {
   const repoDir = resolve(options.repoDir);
@@ -275,7 +291,14 @@ export function initSite(options: InitOptions): InitResult {
   };
 
   const rendered = renderSite(readTemplate(options.template ?? SITE_TEMPLATE), values);
-  return { target, port, used, written: writeSite(target, rendered), missing: missingGitignore(repoDir) };
+  return {
+    target,
+    port,
+    used,
+    written: writeSite(target, rendered),
+    missing: missingGitignore(repoDir),
+    overwrites: existingPlaced(repoDir),
+  };
 }
 
 /* ── 命令行那一层 ─────────────────────────────────────────────────────────── */
@@ -347,15 +370,23 @@ export function initCommand(argv: string[]): number {
 仓根 .gitignore 里还缺这几条（**没替你改**，自己加）：
 ${result.missing.map((line) => `  ${line}`).join("\n")}`);
   }
+  if (result.overwrites.length > 0) {
+    console.log(`
+⚠ 仓根已有 ${result.overwrites.join("、")}：站里 outputs 预置了映射，第一次 pnpm doc:render 会**覆盖**它们。
+  先把内容搬进 docs-site/content/outputs/ 下对应的 mdx（那是正本），再 render。`);
+  }
 
   console.log(`
 接着做：
   cd ${result.target}
   pnpm install
+  pnpm doc:render     # 摆出仓根 AGENTS.md / README.md（正本在 content/outputs/）
   pnpm doc            # livedoc check
   pnpm dev            # http://localhost:${result.port}
 
-起手页写了第一条引用怎么钉。钉完先落一个提交，再 pnpm doc:confirm——git 比较器只对已提交、
-工作区干净的内容钉。文档写什么、怎么排，见随包发的 skill「livedoc-docs」。`);
+六区：docs 现状、trajectory 轨迹（卡 .mdx）、spec 交接（做完删页）、future 未来、outputs 生成正本、
+feedback 反馈；只有 docs 与 outputs 进 check。起手页写了第一条引用怎么钉：钉完先落一个提交，再
+pnpm doc:confirm——git 比较器只对已提交、工作区干净的内容钉。文档写什么、怎么排，见随包发的
+skill「livedoc-docs」。`);
   return 0;
 }

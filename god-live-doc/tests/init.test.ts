@@ -136,6 +136,41 @@ test("init 端到端：铺一个站，端口按邻居挑，起手页钉住 expor
     assert.match(said.join("\n"), /docs-site\/livedoc\.config\.mjs/, "铺了哪些文件逐条打出来");
     assert.match(said.join("\n"), /docs-site\/\.next\//, "gitignore 缺的几条只打印，不替人改");
     assert.equal(existsSync(join(repo, ".gitignore")), false, "不改仓里任何已有文件，更不新建");
+    assert.doesNotMatch(said.join("\n"), /会\*\*覆盖\*\*/, "仓根没有 README / AGENTS，不警告");
+    assert.equal(existsSync(join(repo, "README.md")), false, "init 不摆生成物，那是 render 的事");
+
+    // 六区：六个目录各有骨架页与 meta.json，六个集合、六条路由、六条 loader、侧栏六个根节
+    const zones = ["docs", "trajectory", "spec", "future", "outputs", "feedback"];
+    for (const zone of zones) {
+      assert.ok(existsSync(join(site, "content", zone, "meta.json")), `content/${zone}/meta.json`);
+      assert.ok(existsSync(join(site, "src", "app", zone, "[[...slug]]", "page.tsx")), `src/app/${zone}/[[...slug]]/page.tsx`);
+    }
+    const pages = [
+      "docs/index.mdx", "docs/system-map.mdx", "docs/glossary.mdx", "trajectory/index.mdx", "spec/index.mdx",
+      "future/overview.mdx", "outputs/agents.mdx", "outputs/readme.mdx", "feedback/hatch.mdx", "feedback/inbound.mdx",
+    ];
+    for (const page of pages) {
+      const text = readFileSync(join(site, "content", page), "utf8");
+      assert.match(text, /\*\*本页回答\*\*：/, `${page} 头一句要是「本页回答」`);
+    }
+    const sourceConfig = readFileSync(join(site, "source.config.ts"), "utf8");
+    for (const zone of zones) assert.match(sourceConfig, new RegExp(`export const ${zone} = defineDocs\\(\\{\\s*dir: 'content/${zone}'`), `集合 ${zone}`);
+    assert.equal((sourceConfig.match(/includeProcessedMarkdown/g) ?? []).length, 2, "只有 docs 与 outputs 开 processed markdown");
+    assert.match(sourceConfig, /schema: cardSchema/, "卡集合用 cardSchema");
+    const loaders = readFileSync(join(site, "src", "lib", "source.ts"), "utf8");
+    for (const base of ["/docs", "/trajectory", "/spec", "/future", "/outputs", "/feedback"]) assert.match(loaders, new RegExp(`baseUrl: '${base}'`));
+    const layout = readFileSync(join(site, "src", "app", "layout.tsx"), "utf8");
+    assert.equal((layout.match(/zone\('/g) ?? []).length, 6, "侧栏一棵树六个根节");
+    assert.match(layout, /root: true/);
+    assert.equal(existsSync(join(site, "src", "app", "docs", "layout.tsx")), false, "DocsLayout 抬到根 layout，docs 下不再单独一层");
+    const config = readFileSync(join(site, "livedoc.config.mjs"), "utf8");
+    assert.match(config, /docs: \['content\/docs', 'content\/outputs'\]/, "check 扫 docs + outputs 两区");
+    assert.match(config, /trajectory: 'content\/trajectory'/);
+    assert.match(config, /'content\/outputs\/agents\.mdx': \['\.\.\/AGENTS\.md'\]/);
+    assert.match(config, /'content\/outputs\/readme\.mdx': \['\.\.\/README\.md'\]/);
+    assert.match(readFileSync(join(site, "content", "feedback", "inbound.mdx"), "utf8"), /\{\/\*[\s\S]*## <yyyy-MM-dd> <标题>[\s\S]*\*\/\}/, "inbound 页头注释写明追加格式");
+    assert.match(readFileSync(join(site, "content", "spec", "index.mdx"), "utf8"), /有页 = 有活在路上，做完删/);
+    assert.match(said.join("\n"), /pnpm doc:render/, "接着做里先 render 再 check");
 
     // 已经有站了就拒，一个字不覆盖
     const err = console.error;
@@ -159,6 +194,25 @@ test("init：仓不在就拒；--dir 没给打用法退 1；--port 不合法退 
     assert.equal(await main(["init", "--dir", tmpdir(), "--port", "口"]), 1);
   } finally {
     console.error = err;
+  }
+});
+
+test("init：仓根已有 README.md / AGENTS.md 只警告不动它——第一次 render 会覆盖，内容得先搬进正本", async () => {
+  const root = neighborhood({});
+  const repo = join(root, "仓");
+  const said: string[] = [];
+  const log = console.log;
+  console.log = (...args: unknown[]) => void said.push(args.join(" "));
+  try {
+    mkdirSync(repo, { recursive: true });
+    writeFileSync(join(repo, "README.md"), "# 老 README\n");
+    assert.equal(await main(["init", "--dir", repo]), 0, said.join("\n"));
+    assert.match(said.join("\n"), /⚠ 仓根已有 README\.md：.*会\*\*覆盖\*\*/);
+    assert.doesNotMatch(said.join("\n"), /AGENTS\.md：/, "没有的不点名");
+    assert.equal(readFileSync(join(repo, "README.md"), "utf8"), "# 老 README\n", "init 一个字不动它");
+  } finally {
+    console.log = log;
+    rmSync(root, { recursive: true, force: true, maxRetries: 5 });
   }
 });
 
