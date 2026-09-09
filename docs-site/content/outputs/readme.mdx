@@ -82,8 +82,9 @@ pnpm livedoc check
 先读现状区的**系统地图**，再读要改的那块的模块页。
 
 文档本身怎么写、六区怎么分、每页写到哪为止，正本是随 `@godcreator02/live-doc-cli` 发的 skill，
-住 `packages/cli/skills/`：写文档读 `livedoc-docs`、落卡读 `trajectory`、盘需求读 `spec-grill`。
-装了这个包的仓把它的 `skills/` 挂给 agent 读就行。
+住 `packages/cli/skills/`：写文档读 `livedoc-docs`、落卡读 `trajectory`。装了这个包的仓把它的
+`skills/` 挂给 agent 读就行。通用开发方法论（盘需求、并行派活、自解释代码）不在这儿——它们
+不描述本仓的代码，随开发件 `@godcreator02/gwb-dev-loop` 走。
 
 **这份 README 是生成物**，正本是 `docs-site/content/outputs/readme.mdx`；仓根 `AGENTS.md` 同理。
 改 mdx 源，`pnpm livedoc render` 重摆，两份一起提交。
