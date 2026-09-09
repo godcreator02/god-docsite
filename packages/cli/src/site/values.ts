@@ -1,7 +1,7 @@
 /**
  * 占位符的值从哪儿来：站叫什么名字、起手页那块「第一条引用」写什么。
  *
- * 模块内部件，不在建站接口的面上——调用方给一个仓目录，名字与钉块都是这儿现认的。
+ * 模块内部件，不在装配接口的面上——调用方给一个站目录，名字与钉块都是这儿从它的仓现认的。
  */
 import { basename } from "node:path";
 import type { SiteValues } from "./template.ts";
@@ -18,20 +18,10 @@ export function namesFor(
   const given = (title ?? "").trim();
   const fromManifest = typeof manifest?.title === "string" ? manifest.title.trim() : "";
   return {
-    name: slug(pkgName),
     title: given !== "" ? given : fromManifest !== "" ? fromManifest : pkgName,
     pkg,
     pkgName,
   };
-}
-
-/** 站自己的包名要合法：小写、只留字母数字和连字符 */
-function slug(text: string): string {
-  const out = text
-    .toLowerCase()
-    .replace(/[^a-z0-9-]+/g, "-")
-    .replace(/^-+|-+$/g, "");
-  return out === "" ? "docs" : out;
 }
 
 /**
@@ -56,7 +46,7 @@ export function pinBlockFrom(entrySource: string | null): string {
     }
   }
   // 样例记号写进围栏里：围栏内容是 code 节点，check 认不出草稿记号——**这一步不能省**，
-  // 一条指着 `某个文件.ts` 的活记号会让刚铺好的站开局就报一条钉不住的引用。
+  // 一条指着 `某个文件.ts` 的活记号会让刚接好线的站开局就报一条钉不住的引用。
   return `**这一页还没钉第一条引用。** 钉一条：在正文里单起一行写草稿记号（不是写在围栏里，
 下面这块是样例），路径相对这个站目录——代码在仓根就写 \`../\`：
 

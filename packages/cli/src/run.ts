@@ -9,7 +9,7 @@
  *                                          带路径就是**按页限定**：只动点名的那几篇，别的页与别人的记录一个字不改
  *   livedoc render                         渲染：产物落 out/；挂了 outputs 映射的摆到指定落点（不再落 out/）
  *   livedoc trajectory [--json]            列轨迹卡的盘 / 树 / 主干；--json 出 buildTrajectory 的整份模型
- *   livedoc init --dir <仓> [--title][--port]  往一个已有仓里铺一个接好 livedoc 的六区 fumadocs 站
+ *   livedoc attach --dir <站> [--title]    在一个已经铺好的 fumadocs 骨架上装 livedoc 的六区
  * 新引用不用命令：在文档里写一行核心定的草稿记号 @@livedoc ref src/greet.ts:2-3 @@，
  * check 认它、报未确认，confirm 换成该格式的正式记号。
  */
@@ -19,7 +19,7 @@ import { targetKey } from "@godcreator02/live-doc-core";
 import type { Format, Item, Listing } from "@godcreator02/live-doc-core";
 import { loadProject } from "@godcreator02/live-doc-project";
 import { buildTrajectory, scanDir } from "@godcreator02/live-doc-trajectory";
-import { initCommand } from "./init.ts";
+import { attachCommand } from "./attach.ts";
 import type { CardProblemReport, CheckReport, DocReport, OutputReport, RefReport } from "./report.ts";
 
 export type { CardProblemReport, CheckReport, ComponentReport, DocReport, OutputReport, RefReport } from "./report.ts";
@@ -47,13 +47,13 @@ const MEMORY: Record<string, string> = { hash: "（hash 记忆：不在 git 里�
 
 export async function main(argv: string[]): Promise<number> {
   const [command = "check", ...rest] = argv;
-  // trajectory 与 init 跟 check / confirm / render 不是一套：它们不遍历文档，
-  // init 连 livedoc.config.mjs 都不要（它是给还没有站的仓铺一个站），所以在装配之前就分流，
+  // trajectory 与 attach 跟 check / confirm / render 不是一套：它们不遍历文档，
+  // attach 连 livedoc.config.mjs 都不要（那正是它要写出来的东西），所以在装配之前就分流，
   // 也不进下面那条白名单
   if (command === "trajectory") return trajectoryCommand(rest);
-  if (command === "init") return initCommand(rest);
+  if (command === "attach") return attachCommand(rest);
   if (!["check", "confirm", "render"].includes(command)) {
-    console.error(`不认识的命令：${command}——有 check / confirm / render / trajectory / init`);
+    console.error(`不认识的命令：${command}——有 check / confirm / render / trajectory / attach`);
     return 2;
   }
 

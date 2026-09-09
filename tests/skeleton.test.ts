@@ -24,12 +24,21 @@ test("六个包齐、包名带 scope、版本是合法 semver", () => {
 
 // skill 跟着 cli 包走：别的包（消费方的开发套件）装了 cli 就能把 skills/ 挂给 agent 读，
 // 不用另外约定一个目录。漏进 files 的话包发出去是空的，装的人只看到 dist。
-test("cli 随包发两份 skill 与站模板：files 收着它们，目录真在", () => {
+test("cli 随包发两份 skill 与装配模板：files 收着它们，目录真在", () => {
   const dir = join(PACKAGES, "cli");
   const pkg = JSON.parse(readFileSync(join(dir, "package.json"), "utf8")) as { files: string[] };
   for (const entry of ["dist", "skills", "template"]) assert.ok(pkg.files.includes(entry), `cli 的 files 少了 ${entry}`);
-  for (const rel of ["skills/livedoc-docs/SKILL.md", "skills/trajectory/SKILL.md", "template/docs-site"]) {
+  for (const rel of ["skills/livedoc-docs/SKILL.md", "skills/trajectory/SKILL.md", "template/attach"]) {
     assert.ok(existsSync(join(dir, rel)), `cli 少了 ${rel}`);
+  }
+});
+
+// 骨架那半归站件：模板里留着一份 package.json / tsconfig / postcss，装配就会把站件刚铺好的
+// 那几份盖掉——两个包各出一份同名配置，谁赢看谁后跑
+test("装配模板里没有骨架那半：package.json、tsconfig、postcss、pnpm-workspace、.npmrc 一份都不在", () => {
+  const template = join(PACKAGES, "cli", "template", "attach");
+  for (const rel of ["package.json.tpl", "tsconfig.json.tpl", "postcss.config.mjs.tpl", "pnpm-workspace.yaml.tpl", ".npmrc.tpl"]) {
+    assert.equal(existsSync(join(template, rel)), false, `装配模板里还留着骨架那半的 ${rel}`);
   }
 });
 
