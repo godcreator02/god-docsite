@@ -1,6 +1,6 @@
 {
   "name": "@godcreator02/live-doc-project",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "type": "module",
   "description": "装配：读 livedoc.config、造读取器 / json 记录簿 / git 比较器，塞给核心的 createService；同一个根只装配一次",
   "exports": {

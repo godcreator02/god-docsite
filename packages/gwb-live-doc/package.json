@@ -1,7 +1,7 @@
 {
   "name": "@godcreator02/gwb-live-doc",
-  "version": "0.1.0",
-  "description": "文档站件：扫 units-root 下所有 fumadocs 站（package.json 依赖里有 fumadocs-core / fumadocs-mdx / fumadocs-ui 任一，每个单元限深三层），一格列站、build 新鲜度三态、现挑空口起停、系统浏览器打开、件 dispose 时杀光自己起的站、到点自动关；站根有 livedoc.config.mjs 的多亮一个 livedoc 记号。局部注入 gwb-unit-folder 的选中：有就把当前单元的站置顶高亮，没装照常工作。识别与起停逻辑自 vscode-docs-site 搬来",
+  "version": "0.2.0",
+  "description": "文档站件：扫 units-root 下所有 fumadocs 站（package.json 依赖里有 fumadocs-core / fumadocs-mdx / fumadocs-ui 任一，每个单元限深三层，出生证写了 retired: true 的单元整个跳过），一格列站、build 新鲜度三态、现挑空口起停、系统浏览器打开、件 dispose 时杀光自己起的站、到点自动关；站根有 livedoc.config.mjs 的多亮一个 livedoc 记号。0.2：接上 livedoc 命令行（live-doc.cli，cwd 缺省为选中单元的站）、待重写页清单（live-doc.stale）、跨仓反馈（live-doc.feedback / feedback-list），并代挂 live-doc-cli 随包那三份 skill。局部注入 gwb-unit-folder 的选中：有就把当前单元的站置顶高亮，没装照常工作",
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

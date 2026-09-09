@@ -1,6 +1,6 @@
 {
   "name": "@godcreator02/live-doc-core",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "type": "module",
   "description": "核心：引用模型、比较器接口、编排服务。零依赖，只认注入进来的格式包、读取器、记录簿、比较器",
   "exports": {
