@@ -51,8 +51,8 @@ describe.skipIf(!built)('产物', () => {
   const all = built ? fs.readdirSync(distDir).filter((f) => f.endsWith('.js')) : []
   const nodeHalf = all.filter((f) => f !== CLIENT)
 
-  it('两半都在：node 半的 index.js 与四个模块，浏览器半的 client.js，样式表', () => {
-    expect(nodeHalf.sort()).toEqual(['deadline.js', 'index.js', 'manager.js', 'runner.js', 'sites.js'])
+  it('两半都在：node 半的 index.js 与六个模块，浏览器半的 client.js，样式表', () => {
+    expect(nodeHalf.sort()).toEqual(['deadline.js', 'feedback.js', 'index.js', 'manager.js', 'runner.js', 'sites.js', 'stale.js'])
     expect(all).toContain(CLIENT)
     expect(fs.existsSync(path.join(distDir, 'style.css'))).toBe(true)
   })
@@ -74,9 +74,21 @@ describe.skipIf(!built)('产物', () => {
     expect(read('index.js')).not.toMatch(/from\s+['"]electron['"]/)
   })
 
-  it('node 半：六条命令一个不少——命令名是总线上的公共面，改名就是破约', () => {
+  it('node 半：十条命令加那个裸口一个不少——命令名是总线上的公共面，改名就是破约', () => {
     const host = read('index.js')
-    for (const command of ['live-doc.sites', 'live-doc.start', 'live-doc.stop', 'live-doc.open', 'live-doc.extend', 'live-doc.running']) {
+    for (const command of [
+      'live-doc.sites',
+      'live-doc.start',
+      'live-doc.stop',
+      'live-doc.open',
+      'live-doc.extend',
+      'live-doc.running',
+      'live-doc.cli',
+      'live-doc.cli-raw',
+      'live-doc.stale',
+      'live-doc.feedback',
+      'live-doc.feedback-list',
+    ]) {
       expect(host).toContain(`'${command}'`)
     }
   })
@@ -113,8 +125,16 @@ describe('几处一改就得一起改的账', () => {
     expect(fs.readFileSync(path.join(root, 'skills', 'live-doc', 'SKILL.md'), 'utf8')).toMatch(/^---\s*\nname: live-doc\n/)
   })
 
-  it('skills 与 settings 是可选 peer，注册那两段走 ctx.inject 的子 fiber、不进 export const inject', () => {
-    for (const pkg of ['@godcreator02/gwb-skills', '@godcreator02/gwb-settings']) {
+  it('live-doc-cli 是真依赖：件要起它的进程，装本件的 home 里必须有它', () => {
+    expect(manifest.dependencies?.['@godcreator02/live-doc-cli']).toBeDefined()
+    // 只 import type：报告形状是契约，跑它一律起进程（CLI 形态不进程内 import）
+    expect(index).toMatch(/import \{ collapse, parseCheckJson \} from '\.\/stale\.js'/)
+    expect(index).not.toMatch(/^import [^t].*from '@godcreator02\/live-doc-cli'/m)
+  })
+
+  it('skills、settings、node-cli 是可选 peer，注册那三段走 ctx.inject 的子 fiber、不进 export const inject', () => {
+    expect(index).toMatch(/ctx\.inject\(\['gwbNodeCli'\]/)
+    for (const pkg of ['@godcreator02/gwb-skills', '@godcreator02/gwb-settings', '@godcreator02/gwb-node-cli']) {
       expect(manifest.peerDependencies?.[pkg]).toBeDefined()
       expect(manifest.peerDependenciesMeta?.[pkg]?.optional).toBe(true)
     }
