@@ -11,6 +11,7 @@
  */
 
 import { execFileSync } from "node:child_process";
+import { createHash } from "node:crypto";
 import { existsSync, mkdtempSync, realpathSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { basename, dirname, join, relative, resolve, sep } from "node:path";
@@ -121,12 +122,29 @@ export function readBlob(repo: string, blob: string): string {
 }
 
 /**
+ * 认得出的对象名：40 位十六进制。这种名字是内容寻址的，同一个名字永远指同一份内容，
+ * 所以「在」这个答案可以记住；`HEAD:<路径>` 那种随分支动的名字不记。
+ */
+const OBJECT_ID = /^[0-9a-f]{40}$/;
+
+/** 记住问过的「在」。只记 true：不在的对象下一次提交就可能出现，记住等于把黄判成红 */
+const objectSeen = new Set<string>();
+
+/**
  * 这个对象还在不在对象库里。浅克隆（`--depth 1`）、历史被重写后 gc 过的仓，记录里的 blob 会失踪——
  * 那时候一切从 blob 取内容的活都得先问一句，别让 git 的非零退出炸穿上层。
+ *
+ * 同一趟 check 里几十处引用问同一个 blob 是常态（一篇文档十几处引用钉的往往是同一个文件），
+ * 而一个进程里起一次 git 要几十毫秒。答案「在」记进 `objectSeen`：被提交树引用的对象不会被 gc，
+ * 存在过就一直在，记住不会给出比现问更旧的答案。
  */
 export function objectExists(repo: string, id: string): boolean {
+  const memoizable = OBJECT_ID.test(id);
+  const key = `${repo}\0${id}`;
+  if (memoizable && objectSeen.has(key)) return true;
   try {
     git(repo, ["cat-file", "-e", id]);
+    if (memoizable) objectSeen.add(key);
     return true;
   } catch {
     return false;
@@ -138,9 +156,15 @@ export function inHead(at: Located): boolean {
   return objectExists(at.repo, `HEAD:${at.rel}`);
 }
 
-/** 一段文本的 blob 哈希，只算不写。不需要仓，在临时目录里跑 */
+/**
+ * 一段文本的 blob 哈希，只算不写。
+ *
+ * git 的 blob 对象名就是 `sha1("blob " + 字节数 + "\0" + 内容)`，自己算跟 `git hash-object --stdin`
+ * 逐字节相同（`tests/hash-text.test.ts` 拿真 git 对拍）。这条路每处行段引用都要走一趟，
+ * 起子进程的话一次 check 光这一项就是几十次进程创建。
+ */
 export function hashText(text: string): string {
-  return git(tmpdir(), ["hash-object", "--stdin"], text).trim();
+  return createHash("sha1").update(`blob ${Buffer.byteLength(text)}\0${text}`).digest("hex");
 }
 
 /**
