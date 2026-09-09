@@ -19,8 +19,8 @@ description: 元素既是记号又是展示区，闭合就是边界；final 标�
 {/* ref file="../packages/core/src/types.ts" lines="129-130" */}
 
 **文件即终态**：html 没有构建管线，也没有下游产物。人打开的是这个文件，AI 读的也是这个文件，
-不存在「站上一份、AI 一份」的分叉。所以这个包不出 `renderAi`、不出 `renderHuman`，
-`livedoc render` 对一篇 html 文档无事可做——文档写成什么样，两边读到的就是什么样。
+不存在「站上一份、AI 一份」的分叉。所以这个包不出 `renderAi`，`livedoc render` 对一篇 html
+文档无事可做——文档写成什么样，两边读到的就是什么样。
 
 正式记号是 html 自己的东西：一个带 livedoc `data-` 属性的元素，**既是记号又是展示区**，
 **没有尾记号**，元素的闭合就是边界。有内容可摆的种类用 `<pre>`，存在性和名字用 `<code>`、
@@ -32,8 +32,8 @@ description: 元素既是记号又是展示区，闭合就是边界；final 标�
 
 ## 不知道什么
 
-**不知道渲染这回事**。这是它跟 md、mdx 两个包分岔的地方：那两个包各自还欠着一份「给 AI 的样子」，
-这个包连这个问题都没有：
+**不知道渲染这回事**。md 与 mdx 各自要出一份「给 AI 的样子」，这个包连这个问题都没有，
+理由就写在文件头：
 
 {/* ref file="../packages/format-html/src/index.ts" lines="14-15" */}
 
@@ -92,7 +92,7 @@ description: 元素既是记号又是展示区，闭合就是边界；final 标�
 | --- | --- | --- | --- |
 | 核心的 `Format`：`Target` / `Reference` / `Fill` 三个类型，加 `draftOf` / `toTarget` 两个函数 | 目标类型和草稿记号的写法从核心来，本包只出自己那套元素外壳；`Fill` 是核心递进来的投影内容 | `@godcreator02/live-doc-core` | 不替换。核心零依赖、不碰磁盘、不起进程，测试直接用真的 |
 
-只有这一条。契约本身长这样：
+只有这一条。契约本身长这样——必选的五样，加带问号的那几样（这个包在里面只多标一个 `final`）：
 
 {/* ref file="../packages/core/src/types.ts" lines="116-131" */}
 
@@ -146,7 +146,3 @@ description: 元素既是记号又是展示区，闭合就是边界；final 标�
 `parse` / `write`。
 
 **可跳过**：`dist/`，tsdown 的产物。
-
-同一件事在别的宿主里怎么解，见 [md 格式包](/docs/modules/format-md) 与
-[fumadocs 格式包](/docs/modules/format-fumadocs)；五类引用各该说什么话，见
-[五类引用手册](/docs/start/handbook)。

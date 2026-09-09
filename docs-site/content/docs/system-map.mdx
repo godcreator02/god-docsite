@@ -15,8 +15,8 @@ description: 拆成哪几块、各住哪、依赖方向是什么、先读哪块
 | 模块 | 在哪 | 管什么 | 先读 |
 | --- | --- | --- | --- |
 | core | `packages/core/` | 引用模型、比较器接口、编排服务；零依赖 | [核心包](/docs/modules/core) |
-| project | `packages/project/` | 读配置，造读取器 / 记录簿 / 比较器，装配给核心 | [装配包](/docs/modules/project) |
-| cli | `packages/cli/` | check / confirm / render / trajectory / init 五条命令 | [命令行](/docs/modules/cli) |
+| project | `packages/project/` | 读配置，造读取器 / 记录簿 / 比较器装配给核心；摆放也住这儿 | [装配包](/docs/modules/project) |
+| cli | `packages/cli/` | check / confirm / render / trajectory / init 五条命令：分流、编排、打印、退码 | [命令行](/docs/modules/cli) |
 | format-md | `packages/format-md/` | md：注释记号 + 围栏展示区 + 尾注释 | [md 格式包](/docs/modules/format-md) |
 | format-html | `packages/format-html/` | html：元素既是记号又是展示区，文件即终态 | [html 格式包](/docs/modules/format-html) |
 | format-fumadocs | `packages/format-fumadocs/` | mdx 记号加 fumadocs 接线：remark 插件、meta 白名单、状态点组件 | [fumadocs 格式包](/docs/modules/format-fumadocs) |
@@ -26,6 +26,23 @@ description: 拆成哪几块、各住哪、依赖方向是什么、先读哪块
 这张表说的是「有哪八块」，多一个包少一个包由目录树的钉打黄：
 
 {/* tree dir="../packages" depth="1" */}
+
+## 读序
+
+跟依赖方向反着来：**先 core**——接口正本、编排服务、四种状态都在那儿，别的块只认这一份；
+**再 project**——装配的全貌、记忆按被引文件的位置怎么分派、一篇正本怎么摆到落点；**然后 cli**——
+把动作编排成五条命令。三个格式包挑项目在用的那一个读；`trajectory` 与工作台件是两条独立支线，
+各从自己那一页进，读命令这条线的人整个跳过。
+
+两处边界值得在进包之前先知道，免得照目录名猜错：
+
+**摆放住 project**，一整摊在 `packages/project/src/placement.ts` 里——一篇 mdx 正本渲成生成物、
+戴上点名的 frontmatter 字段、写到每个落点、回头核对盘上那份还新不新鲜，全在那一份。它落在
+project 而不是 core，是因为要写盘、要问格式包要渲染，核心两样都不做；也不落在 cli，是因为
+判定住进命令行就只剩下起子进程从 stdout 捞的取法。
+
+**命令行只剩打印**：它拿到摆放的两个方法与核心的服务，把回来的清单译成一行行人话和一个退出码，
+判定一件都不在那儿算。
 
 ## 依赖方向
 

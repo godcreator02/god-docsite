@@ -1,19 +1,23 @@
 ---
 title: 装配包
-description: 读配置装出一个核心服务；记忆按被引文件的位置分派；git 那条线住这儿
+description: 读配置装出一个核心服务；记忆按被引文件的位置分派；git 与摆放两条线住这儿
 ---
 
 # 装配包
 
-**本页回答**：`@godcreator02/live-doc-project` 把哪些零件装进核心服务、一处引用拿到哪种记忆是谁决定的、换一个读取器或记录簿要动哪儿。
+**本页回答**：`@godcreator02/live-doc-project` 把哪些零件装进核心服务、一处引用拿到哪种记忆是谁决定的、一篇 mdx 正本怎么摆到落点上、换一个读取器或记录簿要动哪儿。
 
 ## 管什么
 
-一个项目 = 一个根目录 + 一份 `livedoc.config` + 一本记录簿。这个包把三者串起来，交出一个核心服务：
+一个项目 = 一个根目录 + 一份 `livedoc.config` + 一本记录簿。这个包把三者串起来，交出一个装好的项目——核心服务是它的主体，摆放挂在旁边：
 
 {/* ref file="../packages/project/src/load.ts" lines="1-5" */}
 
 零件是四样：**读取器**（读工作区文件、列目录名字表、看路径是文件还是目录）、**json 记录簿**、**比较器**、加上配置里声明的格式包名单。比较器这一样是这个包的主戏——`auto` 按被引文件的位置挑记忆，git 那条线（定位文件在哪个仓、取 blob、出 hunk 表、跟着行段走）也住这儿，因为它要起子进程，而核心不起。
+
+**摆放是另一摊。** 配置的 `outputs` 里，一篇 mdx 正本挂着几个落点（仓根的 README、AGENTS.md、包内的 SKILL.md）；摆放把它渲成一份干净 md、戴上点名的 frontmatter 字段、写到每个落点上，也负责回头核对盘上那份还跟不跟源一致。它落在这个包的理由跟 git 那条线一样：要写盘、要问格式包要渲染，核心两样都不做。
+
+{/* ref file="../packages/project/src/placement.ts" lines="1-10" */}
 
 ## 不知道什么
 
@@ -27,11 +31,25 @@ description: 读配置装出一个核心服务；记忆按被引文件的位置�
 
 {/* ref file="../packages/project/package.json" lines="20-22" */}
 
+**摆放不知道装配的别的部分。** 它认得的项目面只有六样——根、配置、核心服务、组件名册、这篇挂了哪些落点、这篇的原文。这张脸是摆放自己声明的，装好的项目结构上正好满足它，装配时把自己递进去；多的一样摆放也拿不到。
+
+{/* ref file="../packages/project/src/placement.ts" lines="61-69" */}
+
+**摆放认得 fumadocs 留下的两处痕迹，仅此而已。** 站上 `.md` 路由给标题加的锚记、序列化器紧跟标点时保守转义的加粗星号，摆放都认得——认它们只为把产物还原成可读文本，产物是给 agent 直接读的，不该带着站的痕迹。除这两处之外，这个包不认识 fumadocs 的任何东西：不认识它的集合、loader、组件表，也不依赖它。这是一处真实的轻微耦合，写在这儿比藏起来强。
+
 ## 数据结构
 
 **配置的形状**就是这个包对消费方的全部契约面——声明挂哪些格式包、哪几个目录进 check、记录簿落哪、用哪种记忆、生成物摆哪、组件名册、轨迹卡目录：
 
-{/* ref file="../packages/project/src/load.ts" lines="23-46" */}
+{/* ref file="../packages/project/src/load.ts" lines="18-41" */}
+
+**落点两种写法，归一之后是同一张表。** 一个落点要么是一个相对项目根的路径，要么是 `{ to, frontmatter }`——后者点名 mdx 源头部的哪几个字段随行到生成物（SKILL.md 要的那两个就是这么来的）；字符串写法的意思是「整段 frontmatter 剥掉」。
+
+{/* ref file="../packages/project/src/placement.ts" lines="16-27" */}
+
+**一个落点核对完是四态加一个判定。** 四态说的是发生了什么：生成物跟源一致、生成物还不在、跟源不一致、源头部缺点名的字段（缺哪几个一并交回）。判定是另一个布尔字段，读报告的人照它决定要不要重摆——四态怎么归到「新不新鲜」由这儿说了算，命令行和件不必各解释一遍。
+
+{/* ref file="../packages/project/src/placement.ts" lines="29-47" */}
 
 **git 记忆记什么**：blob、commit、旧 blob 里的行段、段哈希。不记仓在哪——blob 是内容寻址的，核对时从文件位置重新找仓，所以同一条记录换台机器、换个 clone 路径照样认得。
 
@@ -45,11 +63,11 @@ description: 读配置装出一个核心服务；记忆按被引文件的位置�
 
 **`loadProject(root)`** 是唯一入口，交回装好的项目。同一个根只装配一次：站构建时几十个 loader 并发调它，没这一条就是几十次读配置、几十本记录簿。
 
-{/* ref file="../packages/project/src/load.ts" lines="87-95" */}
+{/* ref file="../packages/project/src/load.ts" lines="83-91" */}
 
 配置里的 `comparator` 有四种写法。强制成 `git` 或 `hash` 时只换掉行段和整文件那一半，目录树、存在性、名字照旧走核心那三个：
 
-{/* ref file="../packages/project/src/load.ts" lines="127-134" */}
+{/* ref file="../packages/project/src/load.ts" lines="103-110" */}
 
 **`createReader(root)`** 是核心看到的全部世界。目录名字表在 git 仓里按 `.gitignore` 过滤（`dist/`、`node_modules/` 不进清单，也不往里走），`.git` 自己去掉；不在仓里就原样列。
 
@@ -73,11 +91,29 @@ description: 读配置装出一个核心服务；记忆按被引文件的位置�
 
 **绿只认段哈希**：hunk 说没碰到也再比一次，行映射跟内容对不上时宁可报黄让人复核，也不把红判成绿。整段没了是 `vanished`，文件没了是 `file-missing`，blob 不在对象库（浅克隆、历史重写、换了个仓）是 `blob-missing`。这条线为什么这么设计、`hash-object` 为什么自己算，见 [git 记忆原理](/docs/principles/git)。
 
+**`placing`** 是摆放的全部对外面貌，挂在装好的项目上，两个方法。`render(doc)` 摆一趟：渲一份正文，给每个落点戴上它点名的 frontmatter 字段，写过去，回一张落点清单。`check(doc)` 只读盘，回每个落点的四态。两个方法用的是同一份正文，所以摆完再核对必然新鲜——守着的和摆出去的不可能是两份东西。
+
+{/* ref file="../packages/project/src/placement.ts" lines="49-59" */}
+
+调用方得知道两件事。**空清单不是失败**：这篇没挂落点、没有格式包认领它、或者认领它的格式包不出 ai 产物，三者任一都回空清单，意思是「这篇没有摆放这回事」，不是「摆了零个」。**缺字段的落点不写**：点名了源里没有的字段，那个落点回 `no-frontmatter` 加缺哪几个，盘上一个字不动——摆一份缺 `name` 的 SKILL.md 比不摆更糟。
+
+frontmatter 是**逐行原样搬**的，不解析 YAML：一条字段从它的顶层键行起、到下一条顶层键行止，块式列表和多行标量的缩进续行都跟着走。作者在源里写下的那几行，就是生成物头部那几行，一眼对得上。
+
+{/* ref file="../packages/project/src/placement.ts" lines="134-142" */}
+
+正文本身由格式包渲，摆放只在上面还原两处序列化痕迹：站上 .md 路由给标题加的锚记，和紧跟标点时被保守转义的加粗星号。生成物是给 agent 直接读的，不该带着站的痕迹。
+
+{/* ref file="../packages/project/src/placement.ts" lines="71-78" */}
+
+落点的地盘在装配那一刻就查死：目标得相对项目根、不许落进任何一个文档目录（那是源的地盘）、一个目标只许一个文档写。犯一条 `loadProject` 当场抛，check 与 render 都还没轮到。
+
+{/* ref file="../packages/project/src/placement.ts" lines="103-121" */}
+
 ## 依赖的接口
 
 | 接口 | 用来做什么 | 生产实现 | 测试实现 |
 | --- | --- | --- | --- |
-| `Format`（核心定） | 认领文档、认出引用、写回 | 消费方在 `livedoc.config` 里挂的格式包 | `tests/fake-format.ts` 的假格式包 |
+| `Format`（核心定） | 认领文档、认出引用、写回；摆放还问它要 ai 产物 | 消费方在 `livedoc.config` 里挂的格式包 | `tests/fake-format.ts` 的假格式包；摆放那摊用真的 md 格式包 |
 | `Reader` / `Ledger`（核心定） | 观察从哪来、记录存哪 | 本包的 fs 读取器与 json 记录簿 | `tests/repo.ts` 的内存记录簿；读取器用真的 |
 | `Comparator`（核心定） | 记忆怎么记、变没变怎么判 | 本包的 auto 与 git 版 | 测试里按用例换 `auto` / `hash` / git |
 | 核心的纯函数 | 归一化、段哈希、切片、hunk 解析、行段映射 | `@godcreator02/live-doc-core`，同一份 | 同一份 |
@@ -90,7 +126,7 @@ description: 读配置装出一个核心服务；记忆按被引文件的位置�
 
 配置必须由 Node 原生加载，两个打包器标记让站的打包器绕开这一句；被它改写成自己的加载器，消费方那份活配置就装不进来了：
 
-{/* ref file="../packages/project/src/load.ts" lines="136-140" */}
+{/* ref file="../packages/project/src/load.ts" lines="112-116" */}
 
 ## 怎么单独测
 
@@ -98,13 +134,19 @@ description: 读配置装出一个核心服务；记忆按被引文件的位置�
 
 {/* ref file="../tests/auto-comparator.test.ts" lines="1-10" */}
 
-夹具本身不走 `loadProject`——临时目录里解析不到包名，零件直接拿来装；装配那一整趟（地盘规则、真扫目录）在 `tests/cli.test.ts`。
+夹具本身不走 `loadProject`——临时目录里解析不到包名，零件直接拿来装；装配走一整趟（真扫目录）在 `tests/cli.test.ts`，地盘规则拒掉哪几种配置在 `tests/cli-outputs.test.ts`。
 
 {/* ref file="../tests/repo.ts" lines="1-4" */}
 
-配置归一化那两个是纯函数，直接喂输入看输出，不起仓：
+配置归一化与文档身份那几个是纯函数，直接喂输入看输出，不起仓：
 
-{/* ref file="../tests/project-config.test.ts" lines="1-4" */}
+{/* ref file="../tests/project-config.test.ts" lines="1-5" */}
+
+摆放那一摊的账在 `tests/placement.test.ts`：临时目录里起一个**真 git 项目**，`loadProject` 装好之后直接调两个方法——不起命令行、不劫持 stdout、不 `process.chdir`。摆放的判定不该只有走一趟命令行才验得着。
+
+{/* ref file="../tests/placement.test.ts" lines="1-6" */}
+
+证明的是这几件：一个落点从「还不在」到摆过去、再核对成「一致」的整条来回；生成物被手改了、被删了各判成哪一态，重摆之后回一致；点名的字段原样随行、没点名的剥掉、字符串写法整段剥掉；点名了源里没有的字段那个落点不写、两个方法都说得出缺哪几个；没挂映射的文档两个方法都回空清单、一个字不写。命令行怎么把这些印成人话、退什么码，归 `tests/cli-outputs.test.ts`。
 
 还有两处从外面守着：`tests/contract.test.ts` 拿产品用的 git 版比较器，验三个格式包在同一串改动下状态一致；`tests/boundary.test.ts` 读依赖图，验这个包不认识任何格式包、不认识轨迹包与工作台件。
 
@@ -114,10 +156,12 @@ description: 读配置装出一个核心服务；记忆按被引文件的位置�
 
 {/* tree dir="../packages/project/src" depth="1" */}
 
-**先读** `load.ts`（装配的全貌，配置的形状也在这儿），再读 `auto-comparator.ts`（分派规则，四十行看完）。包的出口是一个文件，导出表即对外面貌：
+**先读** `load.ts`（装配的全貌，配置的形状也在这儿），再读 `auto-comparator.ts`（分派规则，四十行看完）。摆放那一摊自成一份 `placement.ts`，从文件头的注释读起。包的出口是一个文件，导出表即对外面貌：
 
 {/* ref file="../packages/project/src/index.ts" */}
 
-**读序**：`git.ts` 是子进程原语（定位仓、blob、hunk、忽略判定），不吃本包任何人；`git-comparator.ts` 吃 `git.ts` 加核心的纯函数；`auto-comparator.ts` 吃前两者加核心的 hash 版；`fs-reader.ts` 只吃 `git.ts`；`json-ledger.ts` 只吃核心的键函数；`load.ts` 吃全部，交给核心的 `createService`。
+**读序**：`git.ts` 是子进程原语（定位仓、blob、hunk、忽略判定），不吃本包任何人；`git-comparator.ts` 吃 `git.ts` 加核心的纯函数；`auto-comparator.ts` 吃前两者加核心的 hash 版；`fs-reader.ts` 只吃 `git.ts`；`json-ledger.ts` 只吃核心的键函数；`placement.ts` 只吃核心的类型加 `load.ts` 里配置的那个类型，本包别的实现一个不吃；`load.ts` 吃全部，交给核心的 `createService`。
+
+`placement.ts` 与 `load.ts` 之间因此是一圈**只有类型的**循环引用：`load.ts` 吃摆放的实现，摆放回头只借它一个 `ProjectConfig` 类型（`import type`，编译期擦掉）。运行时没有这条边，读的时候也不必先读 `load.ts`——从摆放那份文件头读起就行。
 
 **可跳过**：`dist/` 是构建产物。

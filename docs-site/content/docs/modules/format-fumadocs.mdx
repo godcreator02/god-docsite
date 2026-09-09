@@ -9,17 +9,23 @@ description: mdx 与 fumadocs 是一个整体：remark 插件、meta 白名单�
 
 ## 管什么
 
-两件事捏在一个包里：**mdx 这一种格式**（认记号、写回记号），和 **fumadocs 这一套宿主接线**（remark 插件、meta 白名单、序列化回调、状态点组件、术语标注、借 loader 出 md）。捏在一起不是图省事——mdx 没有展示区，记号旁边不存投影，页面上那块代码是构建期从源码现拿的，所以「认记号」和「站怎么构建」本来就是同一件事。
+三摊，读的时候要分得开。
 
-**换宿主就是换这一个包**：核心、project、命令行、别的格式包，一个都不认识 fumadocs。
+**格式包那一摊**：认领 `.mdx`、认记号、写回记号，加一个名册检查和一份 `renderAi`。核心看到的只有这一摊，这副面孔跟 md、html 两个包一模一样。
 
-名册也归它：组件在 AI 那份 md 里压成什么，机制在这个包里，表的内容在项目那边。
+**站接线那一摊**：remark 插件挂进 fumadocs 的链尾、整张换掉 rehype 的 meta 白名单、给集合的 postprocess 一个序列化回调、侧出口交出状态点的 pre 组件和随包发的样式。核心、命令行都不知道这一摊存在。
+
+**两张表的机制**：名册（一个组件在 AI 那份 md 里压成什么）与术语表（站上自动标注）。机制在这个包里，表的内容在项目那边——组件和词条是项目的，规则当然也该是项目的。
+
+捏在一个包里不是图省事：mdx 没有展示区，记号旁边不存投影，页面上那块代码是构建期从源码现拿的，所以「认记号」和「站怎么构建」本来就是同一件事。**换宿主就是换这一个包**：核心、project、命令行、别的格式包，一个都不认识 fumadocs。代价是反方向的一条依赖——它是唯一吃 `live-doc-project` 的格式包，因为站的 remark 链上没有命令行帮它装配，插件得在构建期自己装一次。
 
 ## 不知道什么
 
 **不认识 Next**。包里没有一处 `next`，也不知道站的路由长什么样：状态点那半只是个读 `data-dot` 的组件，挂在哪个页面、走哪条渲染链是站的事；`renderAi` 只认得项目根和 fumadocs 的 loader，不知道这篇文档在站上是哪个地址。
 
-**不带 fumadocs、不带 react**：两者只能是 peer，用消费方项目装的那份。同一段还说明另一件事——它是**唯一依赖 `live-doc-project` 的格式包**：站的 remark 链上没有命令行帮它装配，插件得在构建期自己装一次。
+**不知道摆放**。`renderAi` 交出的是一份 md 正文，摆到哪个落点、要不要带 frontmatter，归 [装配包](/docs/modules/project)——这个包只管把这一篇编译出来。
+
+**不带 fumadocs、不带 react**：两者只能是 peer，用消费方项目装的那份。真依赖只有核心、project 和 remark 那几件：
 
 {/* ref file="../packages/format-fumadocs/package.json" lines="31-44" */}
 
@@ -83,11 +89,11 @@ md 与 html 两个格式包只依赖核心（`tests/boundary.test.ts` 里那条�
 
 ## 提供的接口
 
-对核心那一面，它是个普通格式包：五样必选出口加一个名册检查。
+对核心那一面，它是个普通格式包：五样必选出口，加一个名册检查、一份 `renderAi`。
 
 {/* ref file="../packages/format-fumadocs/src/index.ts" lines="25-45" */}
 
-`lintComponents` 让命令行 `check` 提前报出名册外的组件，不用等构建才发现。
+`lintComponents` 让命令行 `check` 提前报出名册外的组件，不用等构建才发现；`renderAi` 借的是站自己的管线，摆在这一节末尾说。
 
 对站那一面是三个插头加一层可选的术语标注：`livedocMdxOptions({ root })` 挂进 `source.config.ts`（remark 链**尾巴**上挂插件，顺带换掉 rehype 的 meta 白名单）、`livedocMarkdownOptions()` 挂进集合的 `postprocess.includeProcessedMarkdown`、侧出口 `/pre` 覆盖 `mdx.tsx` 里的 `pre` 并配一份随包发的 css；给 `livedocMdxOptions` 一份词表就多开术语标注，不给就不开。
 
@@ -193,12 +199,18 @@ fumadocs 序列化每个节点前先问它，看到我们打的标就按标出�
 
 ## 代码地图
 
-在哪：
+**在哪**：
 
 {/* tree dir="../packages/format-fumadocs/src" depth="1" */}
 
-**先读** `index.ts`（出口总表，四个侧出口写在头注释里）和 `host.ts`（站接线的三样）。
+**先读** `index.ts`：出口总表，格式包那五样出口就摆在文件头，四个侧出口写在头注释里。三摊各是一条线，读一条时另外两条整条跳过。
 
-**读序**顺着数据流：`recognize.ts` 认引用 → `transform.ts` 换节点（换成什么长相在 `blocks.ts`）→ `roster.ts` 打标 → `markdown.ts` 序列化、`render.ts` 出 md。`remark-plugin.ts` 把前四步串成一趟，`host.ts` 在最外层装配、只装一次。`glossary.ts`（纯匹配）与 `glossary-plugin.ts`（在树上换节点）是独立一层，跟引用那条线不交叉，只共用 `tree.ts`。`tree.ts` 是共用的小帮手（`walk` / `lineOf` 与节点类型），别处遇到再翻。
+**读序**：
+
+- **引用这条线**（格式包那一摊，加它在站上显示成什么）：`recognize.ts` 认引用 → `transform.ts` 换节点（换成什么长相在 `blocks.ts`）→ `roster.ts` 打标 → `markdown.ts` 序列化、`render.ts` 出 md；`remark-plugin.ts` 把前四步串成一趟。
+- **站接线这条线**：`host.ts` 一个文件，把上面那趟挂进 fumadocs 的 remark 链、换掉 meta 白名单，在最外层装配、只装一次；页面上画成什么样在侧出口 `pre.tsx`。
+- **术语这条线**：`glossary.ts` 纯匹配、`glossary-plugin.ts` 在树上换节点、`term.tsx` 是站上那个组件。跟引用那条线不交叉，只共用 `tree.ts`。
+
+`tree.ts` 是三条线共用的小帮手（`walk` / `lineOf` 与节点类型），别处遇到再翻。
 
 **可跳过**：`tsdown.config.ts` 与 `tsconfig.json`（构建脚手架）、`styles/` 下两份 css（随包发的样式，改状态点或术语的长相才看）、`dist/`（产物）。

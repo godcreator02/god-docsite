@@ -92,8 +92,8 @@ pnpm start
 
 ## 命令一览
 
-{/* ref file="../packages/cli/src/run.ts" lines="55-60" */}
+{/* ref file="../packages/cli/src/run.ts" lines="4-12" */}
 
-日常就 check / confirm / render 这三条；`trajectory` 是轨迹卡那一摊的子命令，提前分流、不走这条白名单，见 [轨迹包](/docs/modules/trajectory)。
-`render --target ai` 出给 AI 读的那份 md，落 `out/`。命令行的完整输出和退出码见
+日常就 check / confirm / render 这三条；`trajectory` 与 `init` 是另一路，在参数解析的最前面就分流走了，见 [轨迹包](/docs/modules/trajectory)。
+`render` 只有一种产物：挂了 `outputs` 映射的直接摆到落点，没挂的出一份给 AI 读的 md 落 `out/`。命令行的完整输出和退出码见
 [命令行](/docs/modules/cli)；一处引用从写下到变红的全过程见 [一条引用的一生](/docs/start/lifecycle)。

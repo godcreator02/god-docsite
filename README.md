@@ -51,7 +51,7 @@ pnpm livedoc init --dir <仓的绝对路径>
 pnpm livedoc check                     # 只读，报状态。红退 1，黄和白退 0
 pnpm livedoc confirm                   # 出记录、清孤儿、换记号、投影内容
 pnpm livedoc confirm content/docs/a.mdx   # 只确认点名的那几篇
-pnpm livedoc render --target ai        # 出给 AI 读的那份 md；挂了 outputs 映射的摆到指定位置
+pnpm livedoc render                    # 挂了 outputs 映射的摆到落点；没挂的出一份给 AI 读的 md 落 out/
 ```
 
 **跑通了的样子**：`check` 打出一行一处引用，每行带一个状态符号（🟢 新鲜 / 🟡 有变动 / ⚪ 未确认 /
@@ -75,12 +75,12 @@ pnpm livedoc check
 `content/future/` 未来、`content/outputs/` 生成正本（进 check）、`content/feedback/` 反馈。
 先读现状区的**系统地图**，再读要改的那块的模块页。
 
-文档本身怎么写、六区怎么分、每页写到哪为止，正本是随 `@godcreator02/live-doc-cli` 发的三份 skill
-（`packages/cli/skills/`）：`livedoc-docs` 写文档、`trajectory` 落卡、`spec-grill` 盘需求。
+文档本身怎么写、六区怎么分、每页写到哪为止，正本是随 `@godcreator02/live-doc-cli` 发的 skill，
+住 `packages/cli/skills/`：写文档读 `livedoc-docs`、落卡读 `trajectory`、盘需求读 `spec-grill`。
 装了这个包的仓把它的 `skills/` 挂给 agent 读就行。
 
 **这份 README 是生成物**，正本是 `docs-site/content/outputs/readme.mdx`；仓根 `AGENTS.md` 同理。
-改 mdx 源，`pnpm livedoc render --target ai` 重摆，两份一起提交。
+改 mdx 源，`pnpm livedoc render` 重摆，两份一起提交。
 
 ## 这个仓自己怎么跑
 

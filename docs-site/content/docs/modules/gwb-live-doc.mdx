@@ -53,26 +53,39 @@ description: gwb-live-doc：扫容器根下的 fumadocs 站、一格窗格起停
 
 ## 不知道什么
 
+件手里只有三件事：**哪些目录是 fumadocs 站、怎么把一个站起起来又关掉、怎么把别人算出来的结论摆给人看**。
+剩下的全在别处。
+
 **不知道站里写的是什么。** 认站只看 `package.json` 的两档依赖里有没有 fumadocs 家的包——**泛 fumadocs 站，
 不只认 livedoc 站**：
 
 {/* ref file="../packages/gwb-live-doc/src/sites.ts" lines="10-25" */}
 
 站根另有 `livedoc.config.mjs` 的界面上多亮一个记号，**只是记号，不影响能不能起**。一个工具如果只肯伺候
-自己家的站，它在这台机器上就只能用来看一个仓。新鲜度同理只看文件时间，一个 mdx 都不解析。
+自己家的站，它在这台机器上就只能用来看一个仓。
+
+**不知道站是怎么编译出来的。** 要 build 就在站目录里原样跑那个站自己的脚本，next 与 fumadocs 那条编译链
+一个字都不认识；新鲜度同理只看文件时间，一个 mdx 都不解析。
+
+{/* ref file="../packages/gwb-live-doc/src/runner.ts" lines="70-72" */}
 
 **不知道 livedoc 是怎么核对的。** 报告的形状是契约，件只认 `check --json` 打出来的那一行，五个契约字段
 全在才认；加字段照样认，少字段就不认：
 
-{/* ref file="../packages/gwb-live-doc/src/stale.ts" lines="130-144" */}
+{/* ref file="../packages/gwb-live-doc/src/stale.ts" lines="131-145" */}
 
 少字段说明对面那份 cli 太老，报「没拿到机读报告」比在下游读出 `undefined` 强。同理 `check` 有红时退出码
 是 1，那是核对结果不是命令失败——件把退出码与 stdout 原样交出去，不替它解释。
 
-**「待重写页」的口径也不是件定的**，是 cli 的 `report.ts` 头注释定的：items 里有 changed / missing 的、
-或 outputs 里有非 fresh 的文档。
+**不知道一处钉为什么黄、一个落点为什么不新鲜。** 一处钉是绿是黄是红、行段挪了跟不跟得上，归比较器；
+一个落点四态里的哪一态、算不算新鲜，归 project 的摆放模块——判定结果随报告里每个落点的 `fresh` 一起过来。
+件哪一样都不重新解释，只照一条现成的口径筛：
 
-{/* ref file="../packages/gwb-live-doc/src/stale.ts" lines="82-95" */}
+{/* ref file="../packages/gwb-live-doc/src/stale.ts" lines="7-9" */}
+
+筛的时候 `fresh` 原样取、四态原样带出去，件只答「这一页要不要重写」：
+
+{/* ref file="../packages/gwb-live-doc/src/stale.ts" lines="83-96" */}
 
 只有孤儿记录或名册外组件的页也红，但那不是「重写正文」能解决的事，单列进 `others`——混在一起会让 agent
 去重写一篇其实只要 `confirm` 一下的页。`unconfirmed`（白）不算漂移：那是还没确认过，不是现状漂了。
@@ -127,9 +140,9 @@ description: gwb-live-doc：扫容器根下的 fumadocs 站、一格窗格起停
 {/* ref file="../packages/gwb-live-doc/src/manager.ts" lines="31-51" */}
 
 `live-doc.stale` 的回执是一份 check 报告收敛后的形状：待重写页一张表、不用重写正文的页另一张表，
-红的总数原样取报告里的数、不自己加。
+红的总数原样取报告里的数、不自己加。表里那些 item 与落点的形状**不在这儿定义**——直接用 cli 导出的类型。
 
-{/* ref file="../packages/gwb-live-doc/src/stale.ts" lines="48-62" */}
+{/* ref file="../packages/gwb-live-doc/src/stale.ts" lines="49-63" */}
 
 一条反馈四样，日期、标题、来源、正文：
 
@@ -139,8 +152,10 @@ description: gwb-live-doc：扫容器根下的 fumadocs 站、一格窗格起停
 
 对外三个面。
 
-**命令总线上那十条 `live-doc.*`**，加运行器登记出来的裸口 `live-doc.cli-raw`。命令名是公共面，产物守卫
+**命令总线上那一串 `live-doc.*`**，加运行器登记出来的裸口 `live-doc.cli-raw`。命令名是公共面，产物守卫
 那条测试一个个数着，改名就是破约。
+
+{/* ref file="../packages/gwb-live-doc/tests/artifact.test.ts" lines="77-94" */}
 
 **一格窗格**：浏览器那半与样式表的地址由 node 半从 `import.meta.url` 算成 `file://` 报给外壳；窗格叫什么
 归运行时，`ctx.gwbShell.describeSelf` 报。
@@ -153,9 +168,20 @@ description: gwb-live-doc：扫容器根下的 fumadocs 站、一格窗格起停
 只认本件这一个记号。
 
 说明书随包发（`skills/live-doc/SKILL.md`），装了 skills 件的 home 里自动挂给 agent 读；**livedoc 随 cli 包
-发的那三份（`livedoc-docs` / `trajectory` / `spec-grill`）也由本件代挂**——那是个 CLI 包，自己挂不上工作台。
+发的那几份（cli 包 `skills/` 下的每一份）也由本件代挂**——那是个 CLI 包，自己挂不上工作台。
 
 ## 依赖的接口
+
+**对 livedoc 命令行那条边是起子进程，不是 import 一个值。** 件跑在工作台的主进程里，进程内 `import` 一个
+CLI 就等于把 livedoc 那一整棵依赖、连同它加载项目与问 git 的那些副作用，一起拉进工作台自己的进程；所以
+这条边上只过两样东西：一个可执行的绝对路径（起进程时交给运行器），和 `import type` 借来的报告形状。
+
+{/* ref file="../packages/gwb-live-doc/src/stale.ts" lines="13-14" */}
+
+形状只借类型、不抄一份——抄的那份必然漂。这条也不靠自觉：cli 是真依赖，而 `index.ts` 里一旦出现一句非
+type 的 import，产物守卫当场红。
+
+{/* ref file="../packages/gwb-live-doc/tests/artifact.test.ts" lines="128-133" */}
 
 `gwbShell` 与 `gwbCommands` 进 `export const inject`，缺哪个都不挂；其余全走 `ctx.inject` 的局部注入
 ——那些件不在的 home 里本件照常挂，只是少一块功能。
@@ -164,12 +190,12 @@ description: gwb-live-doc：扫容器根下的 fumadocs 站、一格窗格起停
 | --- | --- | --- | --- |
 | `RunnerDeps`（挑口 / build / serve / 杀树 / 时钟） | 起停真进程 | `runner.ts` 的 `realRunnerDeps()` | `tests/manager.test.ts` 里一整套可操控的假运行器 |
 | `gwbShell` | 注册窗格、报自己的名字 | 外壳件 | 不测（要开窗，走实机） |
-| `gwbCommands` | 挂那十条命令 | 命令总线件 | 不测（命令名由产物守卫数） |
+| `gwbCommands` | 挂那一串 `live-doc.*` 命令 | 命令总线件 | 不测（命令名由产物守卫数） |
 | `gwbNodeCli` | 起 livedoc 的进程 | node-cli 件，登记包内 `dist/cli.mjs` 的绝对路径 | 不测；不在时 `live-doc.cli` / `live-doc.stale` 回 `code: 'no-node-cli'` |
 | `gwbSettings` | 读 `units-root` 与 `auto-stop-minutes` | 设置件；`units-root` 空着时经 `settings.get` 借 unit-folder 那份 | `autoStopMinutes(raw)` 直接喂原始值 |
 | `gwbUnitFolder` | 报选中单元，给 `live-doc.cli` 算缺省 cwd | unit-folder 件的 `current()` 与 `unit-folder/selection` 事件 | `pickDocsSite(sites)` 直接喂一张目录表 |
 | `gwbSkills` | 挂本件与 livedoc 那三份说明书 | skills 件 | 不测（只是把目录报过去） |
-| `@godcreator02/live-doc-cli` | 报告形状（只 import type）与那个可执行 | 包内 `dist/cli.mjs`，起进程调 | `tests/stale.test.ts` 手造 `CheckReport` |
+| `@godcreator02/live-doc-cli` | 报告形状（只 import type；落点那段是 cli 从 project 借来转出的）与那个可执行 | 包内 `dist/cli.mjs`，起进程调 | `tests/stale.test.ts` 手造 `CheckReport` |
 | `shell.openExternal` | 系统浏览器打开在跑的站 | Electron 主进程，说明符走变量的 `import()` | 不测 |
 
 运行器那五样注进来，整台状态机就跟真进程脱钩了：
@@ -206,7 +232,8 @@ start 也收尾不悬着。真起子进程的那半在 `runner.slow.test.ts`，�
 `pnpm test:all` 才跑。
 
 认站、限深扫描、build 三态、退役单元判据喂的是 `os.tmpdir()` 下现造的一棵目录树，一条用例一棵、跑完删；
-`stale` 喂一份手造的 `CheckReport`，证漂移口径与从 stdout 里捞报告那一步；`feedback` 喂一页 mdx 文本，
+`stale` 喂一份手造的 `CheckReport`，证的是筛的那两条口径（钉全绿但落点不新鲜的页照样要重写、只有孤儿
+记录的页不进那张表）与从 stdout 里捞报告那一步；`feedback` 喂一页 mdx 文本，
 证一来一回不丢字段、围栏里的 `## ` 不算条目。产物守卫那一组要 `dist/` 三样齐了才跑，缺产物整组跳过
 ——门禁不依赖 build。
 

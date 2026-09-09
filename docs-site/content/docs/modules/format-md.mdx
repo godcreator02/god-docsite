@@ -70,8 +70,8 @@ description: 注释是记号、围栏是展示区、尾注释收边界；记号�
 
 {/* ref file="../packages/format-md/src/index.ts" lines="78-92" */}
 
-可选那一档只实现了 `renderAi`：剥掉记号行和尾记号，展示区里的内容留下——剥完它本来就是一份干净的 md，
-不需要另起一条渲染管线：
+可选那几样里它只出 `renderAi`：剥掉记号行和尾记号，展示区里的内容留下——剥完本来就是一份干净的 md，
+不用另起一条管线。出的是正文，摆到哪儿不归它管：
 
 {/* ref file="../packages/format-md/src/index.ts" lines="94-100" */}
 
@@ -85,7 +85,7 @@ description: 注释是记号、围栏是展示区、尾注释收边界；记号�
 | --- | --- | --- | --- |
 | 核心的 `Format`：`Target` / `Reference` / `Fill` 三个类型，加 `formalOf` / `parseFormal` / `draftOf` / `wordOf` 四个函数 | 目标类型和记号载荷都从核心来，本包只出外壳；`Fill` 是核心递进来的投影内容 | `@godcreator02/live-doc-core` | 不替换。核心零依赖、不碰磁盘、不起进程，测试直接用真的 |
 
-只有这一条。契约本身长这样：
+只有这一条。契约本身长这样——必选的五样，加带问号的那几样：
 
 {/* ref file="../packages/core/src/types.ts" lines="116-131" */}
 
@@ -132,7 +132,3 @@ description: 注释是记号、围栏是展示区、尾注释收边界；记号�
 `write` 放最后读，它只是 `parse` 的逆。
 
 **可跳过**：`dist/`，tsdown 的产物。
-
-同一件事在别的宿主里怎么解，见 [html 格式包](/docs/modules/format-html) 与
-[fumadocs 格式包](/docs/modules/format-fumadocs)；五类引用各该说什么话，见
-[五类引用手册](/docs/start/handbook)。

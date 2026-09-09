@@ -18,7 +18,7 @@ format-md、format-fumadocs、format-html、trajectory）外加一个工作台�
 
 README 和这份规矩都是**生成物**：正本分别是 `docs-site/content/outputs/readme.mdx` 和
 `docs-site/content/docs/maintain/agents.mdx`，改 mdx 源（不是改生成物），
-`pnpm livedoc render --target ai` 重摆，mdx 源和生成物一起提交。
+`pnpm livedoc render` 重摆，mdx 源和生成物一起提交。
 
 **动手前先读文档站**：`docs-site/content/docs/system-map.mdx` 是总代码地图，八个包各一页模块页在
 `content/docs/modules/`，接口与边界逐条钉在真源码上。站分六区——现状 `docs/`、轨迹 `trajectory/`、
@@ -52,7 +52,7 @@ README 和这份规矩都是**生成物**：正本分别是 `docs-site/content/o
   - `packages/gwb-live-doc/`：`pnpm check`（typecheck + oxlint + vitest）、`pnpm build`
 - 发版顺序 **cli 先、件后**：件装的是发出去的那份 cli，工作区里的软链只在这个仓里成立。
 - 动了引用到的源码，`livedoc confirm` 之前**先 commit**——git 比较器只对已提交、工作区干净的内容钉。
-- 挂了 outputs 映射的文档（readme / agents 这两篇）改了 mdx 源，`pnpm livedoc render --target ai` 重摆
+- 挂了 outputs 映射的文档（readme / agents 这两篇）改了 mdx 源，`pnpm livedoc render` 重摆
   生成物，跟 mdx 源一起提交；check 守着生成物跟源一致，红了就是没重摆。
 - 改了格式包代码，站要先删 `.next` 再 build。调试站用 build + start，不用 dev；起的站验完必须停掉。
 - 提交按步骤拆，一个提交一件事。提交信息末尾带 `Co-Authored-By` 与 `Claude-Session` 行（会话里给的那两行）。
