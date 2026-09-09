@@ -179,7 +179,7 @@ fumadocs 那份的 `renderAi` 是借它自己的 loader 出的 md，见 [fumadoc
 `live-doc.init` 只是起个子进程调它。模块面上只有两个方法：`planSite` 算一套不碰盘、
 `createSite` 算完直接铺。
 
-@@livedoc ref ../packages/cli/src/site/index.ts:78-114 @@
+{/* ref file="../packages/cli/src/site/index.ts" lines="78-114" */}
 
 **算与写分开**是刻意的：占位符认不出是最可能的失败，而目录一旦开始写就没有干净的回滚点。
 所以校验、认名字、挑端口、整套渲染都排在碰盘之前，落盘那一步只剩写文件。`planSite` 把这个
@@ -190,13 +190,13 @@ fumadocs 那份的 `renderAi` 是借它自己的 loader 出的 md，见 [fumadoc
 那个 `next dev -p <口>` / `next start -p <口>`。手给的 `--port` 一律让给你，被占了只警告一声：
 占它的那个站早就不跑了这种事，只有人知道。
 
-@@livedoc ref ../packages/cli/src/site/ports.ts:54-65 @@
+{/* ref file="../packages/cli/src/site/ports.ts" lines="54-65" */}
 
 起手页的第一条引用是**现找的**：仓根 `src/index.ts` 里有 `export const name` 就钉那一行，
 找不到就不钉、改成写一段「第一条引用怎么钉」。硬塞一条钉不住的引用，等于让刚铺好的站开局
 就报一条红的；样例记号写在围栏里，围栏内容是 `code` 节点，`check` 认不出它。
 
-@@livedoc ref ../packages/cli/src/site/values.ts:37-49 @@
+{/* ref file="../packages/cli/src/site/values.ts" lines="37-49" */}
 
 ### 随包发的资料：两类，都不是逻辑
 
@@ -219,7 +219,7 @@ skill 谁触发谁读，有哪几份由目录树的钉兜着：
 缺了点名的 frontmatter 字段该不该写——一件都不知道。它拿到的是装配包摆放那个对象，对外只有两个
 方法，`render` 摆一趟、`check` 核一趟，回来一张落点清单；这个包的活是把那张清单译成人话和一个退出码。
 
-{/* ref file="../packages/project/src/placement.ts" lines="49-59" */}
+{/* ref file="../packages/project/src/placement.ts" lines="51-61" */}
 
 **不认识任何格式的记号长什么样。** 认记号、写回记号、渲染，全走 core 定的 `Format` 接口，
 实现住三个格式包；这个包只知道「这一篇归哪个格式」，那也是问 project 要的。
@@ -351,11 +351,11 @@ outputs 那一摊只验命令行这一层——render 打成哪几行、check �
 端口怎么挑、名字怎么认、起手页钉什么、占位符错了抛不抛，全在 `planSite` 回的那份计划里看得见，
 一个内部函数都不用点名；落盘那半在临时目录里造一小片「邻居」和一个假仓跑真的：
 
-@@livedoc ref ../tests/site.test.ts:1-7 @@
+{/* ref file="../tests/site.test.ts" lines="1-7" */}
 
 命令那层只问参数认没认对、话说清楚了没有、退了几，走 `main(["init", …])` 从命令行这头进：
 
-@@livedoc ref ../tests/init.test.ts:1-7 @@
+{/* ref file="../tests/init.test.ts" lines="1-7" */}
 
 跑法与工作区里别的几摊测试见 [测试与边界](/docs/cli/testing)。
 

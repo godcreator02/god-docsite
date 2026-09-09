@@ -19,7 +19,7 @@ description: gwb-live-doc：扫容器根下的 fumadocs 站、一格窗格起停
 
 命令名是常量，件挂载时注册到命令总线上：
 
-@@livedoc ref ../packages/gwb-live-doc/src/index.ts:47-58 @@
+{/* ref file="../packages/gwb-live-doc/src/index.ts" lines="47-58" */}
 
 前六条是起停那摊。**先 `sites` 再别的**：那几条要的 `dir` 就是 `sites` 回包里的 `dir`，不自己拼——`start`
 还会挡下容器根之外的目录。后五条是接 livedoc 那摊。`cli-raw` 不算一条给人用的，它是运行器登记出来的裸口。
@@ -107,7 +107,7 @@ description: gwb-live-doc：扫容器根下的 fumadocs 站、一格窗格起停
 拦两件参数的事——路径得是绝对的、得是个目录（不然运行器会去抱怨 cwd，看不出是仓给错了），其余的判断连同
 错误文本原样交出去。
 
-@@livedoc ref ../packages/gwb-live-doc/src/index.ts:499-506 @@
+{/* ref file="../packages/gwb-live-doc/src/index.ts" lines="499-506" */}
 
 **实现不许搬进件**：livedoc 得能在没装工作台的仓里独立用，铺站搬进来就等于让建站依赖一整台桌面工作台。
 
@@ -135,7 +135,7 @@ description: gwb-live-doc：扫容器根下的 fumadocs 站、一格窗格起停
 `live-doc.sites` 回包里的一条站：扫出来的位置与所属单元、两个记号（livedoc、node_modules）、build 三态，
 外加状态机此刻的相位。
 
-@@livedoc ref ../packages/gwb-live-doc/src/index.ts:103-118 @@
+{/* ref file="../packages/gwb-live-doc/src/index.ts" lines="103-118" */}
 
 里头的 `buildState` 是三态，判据是 `.next/BUILD_ID`（`next build` 成功留下的唯一标志，`next dev` 不写它）
 在不在、跟源比谁新：
@@ -167,7 +167,7 @@ description: gwb-live-doc：扫容器根下的 fumadocs 站、一格窗格起停
 **命令总线上那一串 `live-doc.*`**，加运行器登记出来的裸口 `live-doc.cli-raw`。命令名是公共面，产物守卫
 那条测试一个个数着，改名就是破约。
 
-@@livedoc ref ../packages/gwb-live-doc/tests/artifact.test.ts:77-95 @@
+{/* ref file="../packages/gwb-live-doc/tests/artifact.test.ts" lines="77-95" */}
 
 **一格窗格**：浏览器那半与样式表的地址由 node 半从 `import.meta.url` 算成 `file://` 报给外壳；窗格叫什么
 归运行时，`ctx.gwbShell.describeSelf` 报。
@@ -193,7 +193,7 @@ CLI 就等于把 livedoc 那一整棵依赖、连同它加载项目与问 git �
 形状只借类型、不抄一份——抄的那份必然漂。这条也不靠自觉：cli 是真依赖，而 `index.ts` 里一旦出现一句非
 type 的 import，产物守卫当场红。
 
-{/* ref file="../packages/gwb-live-doc/tests/artifact.test.ts" lines="128-133" */}
+{/* ref file="../packages/gwb-live-doc/tests/artifact.test.ts" lines="129-134" */}
 
 `gwbShell` 与 `gwbCommands` 进 `export const inject`，缺哪个都不挂；其余全走 `ctx.inject` 的局部注入
 ——那些件不在的 home 里本件照常挂，只是少一块功能。
@@ -217,7 +217,7 @@ type 的 import，产物守卫当场红。
 livedoc 那个可执行的地址自己算，**不读 `bin` 字段、不查 `.bin` 垫片**——垫片在 Windows 上是 `.cmd`，
 `process.execPath` 起不了：
 
-@@livedoc ref ../packages/gwb-live-doc/src/index.ts:66-72 @@
+{/* ref file="../packages/gwb-live-doc/src/index.ts" lines="66-72" */}
 
 不给 cwd 时落在选中单元的那个站：名字正好叫 `docs-site` 的优先，整个单元只有一个站时就是它；
 
@@ -267,7 +267,7 @@ start 也收尾不悬着。真起子进程的那半在 `runner.slow.test.ts`，�
 局部注入，全在那儿挂；
 件 dispose 时杀光自己起的站也在那儿——工作台关了还留着 node，那才是爆内存的路。
 
-@@livedoc ref ../packages/gwb-live-doc/src/index.ts:187-190 @@
+{/* ref file="../packages/gwb-live-doc/src/index.ts" lines="187-190" */}
 
 **读序**：`index.ts` 往下吃四份纯逻辑——`sites.ts`（认站、限深扫描、build 三态、挑缺省站）、`manager.ts`
 （起停状态机，再往下吃 `deadline.ts` 的到期算术）、`stale.ts`（报告收敛）、`feedback.ts`（条目格式与追加）。
