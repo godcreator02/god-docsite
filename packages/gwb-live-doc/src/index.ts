@@ -461,7 +461,7 @@ export function apply(ctx: GwbContext): void {
       {
         name: CLI_COMMAND,
         description:
-          `livedoc 的命令行：{ args: string[], cwd?: string }。args 原样递给 livedoc——check（核对，有红退 1）、check --json（机读报告，${STALE_COMMAND} 吃的就是它）、confirm（确认、换记号；先 commit）、render --target ai（重摆 outputs 生成物）、init --dir <仓>（给一个还没有站的仓铺一个）、trajectory。` +
+          `livedoc 的命令行：{ args: string[], cwd?: string }。args 原样递给 livedoc——check（核对，有红退 1）、check --json（机读报告，${STALE_COMMAND} 吃的就是它）、confirm（确认、换记号；先 commit）、render（重摆 outputs 生成物）、init --dir <仓>（给一个还没有站的仓铺一个）、trajectory。` +
           `cwd 是站目录的绝对路径（那儿有 livedoc.config.mjs），**不给就落在选中单元的站**；选中的单元没有站、或有好几个，就回一句让你给 cwd。` +
           `回 { ok, cwd, exitCode, timedOut, durationMs, stdout, stderr }——check 有红时退出码 1，那是核对结果不是命令失败`,
         plugin: name,
@@ -501,7 +501,7 @@ export function apply(ctx: GwbContext): void {
         name: STALE_COMMAND,
         description:
           '一个站里哪几页的现状漂了：{ dir: string }——dir 是站目录的绝对路径（`live-doc.sites` 回包里 livedoc: true 的那些）。' +
-          '内部跑 livedoc check --json，收敛成 { dir, ok, red, docs, pages: [{ doc, red, pins: [{ target, kind, status: changed|missing, line, lines, reason?, diff? }], outputs: [{ to, status: missing|stale|no-frontmatter, missing? }] }], others: [{ doc, orphans, components }], strays, trajectory }。' +
+          '内部跑 livedoc check --json，收敛成 { dir, ok, red, docs, pages: [{ doc, red, pins: [{ target, kind, status: changed|missing, line, lines, reason?, diff? }], outputs: [{ to, status: missing|stale|no-frontmatter, fresh: false, missing? }] }], others: [{ doc, orphans, components }], strays, trajectory }。' +
           'pages 就是待重写页（钉漂了或生成物不新鲜）；others 是只有孤儿记录 / 名册外组件的页——那两种不用重写正文，confirm 或补名册就平',
         plugin: name,
       },

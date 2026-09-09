@@ -44,17 +44,26 @@ describe('collapse：待重写页 = 钉漂了的，或生成物不新鲜的', ()
     expect(got.pages[0]?.pins[1]?.reason).toBe('file-missing')
   })
 
-  it('钉全绿但生成物不新鲜的页照样是待重写页', () => {
+  it('钉全绿但生成物不新鲜的页照样是待重写页——新不新鲜照报告里的 fresh，不自己解释四态', () => {
     const got = collapse(
       report({
         red: 1,
         ok: false,
-        docs: [doc({ red: 1, items: [item()], outputs: [{ to: '../README.md', status: 'stale' }, { to: '../x.md', status: 'fresh' }] })],
+        docs: [
+          doc({
+            red: 1,
+            items: [item()],
+            outputs: [
+              { to: '../README.md', status: 'stale', fresh: false },
+              { to: '../x.md', status: 'fresh', fresh: true },
+            ],
+          }),
+        ],
       }),
     )
     expect(got.pages).toHaveLength(1)
-    // fresh 的落点不列——列了就得让人一条条筛
-    expect(got.pages[0]?.outputs).toEqual([{ to: '../README.md', status: 'stale' }])
+    // 新鲜的落点不列——列了就得让人一条条筛
+    expect(got.pages[0]?.outputs).toEqual([{ to: '../README.md', status: 'stale', fresh: false }])
   })
 
   it('只有孤儿记录 / 名册外组件的页进 others，不进 pages——那两种不用重写正文', () => {

@@ -102,7 +102,7 @@ livedoc 是个 CLI 包、不是件，自己挂不上工作台。本件把它包�
 live-doc.cli {"args":["check"]}                      核对，有红退出码 1
 live-doc.cli {"args":["check","--json"]}             机读报告（live-doc.stale 吃的就是它）
 live-doc.cli {"args":["confirm"]}                    确认、换记号。**先 commit**：git 记忆只对已提交、工作区干净的内容钉
-live-doc.cli {"args":["render","--target","ai"]}     重摆 outputs 生成物（README / AGENTS / SKILL.md 那类）
+live-doc.cli {"args":["render"]}                     重摆 outputs 生成物（README / AGENTS / SKILL.md 那类）
 live-doc.cli {"args":["init","--dir","<仓的绝对路径>"]}  给一个还没有站的仓铺一个六区站（这条跟 cwd 无关）
 live-doc.cli {"args":["trajectory"]}                 列轨迹卡的盘 / 树 / 主干
 ```
@@ -118,7 +118,7 @@ live-doc.cli {"args":["trajectory"]}                 列轨迹卡的盘 / 树 / 
 { dir, ok, red, docs,
   pages:  [{ doc, red,
              pins:    [{ target, kind, status: changed|missing, line, lines, reason?, diff? }],
-             outputs: [{ to, status: missing|stale|no-frontmatter, missing? }] }],
+             outputs: [{ to, status: missing|stale|no-frontmatter, fresh: false, missing? }] }],
   others: [{ doc, orphans, components }],
   strays: [...], trajectory: [...] }
 ```

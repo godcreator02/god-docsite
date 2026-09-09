@@ -20,10 +20,10 @@
  *         ],
  *         "orphans": ["../src/gone.ts:1-2"],           // 记录簿里有、文档里没了的引用
  *         "components": [{ "name": "Callout", "line": 7 }], // 名册外组件
- *         "outputs": [             // 挂了 outputs 映射的才有
- *           { "to": "../README.md", "status": "fresh" },        // fresh / missing（生成物还不在）/ stale（跟源不一致）
- *           { "to": "../x/SKILL.md", "status": "no-frontmatter", "missing": ["description"] } // 源头部缺点名的字段
- *         ]
+ *         "outputs": [             // 挂了 outputs 映射的才有；形状归 project 的摆放模块定
+ *           { "to": "../README.md", "status": "fresh", "fresh": true },   // 四态：fresh / missing（生成物还不在）/
+ *           { "to": "../x/SKILL.md", "status": "no-frontmatter", "fresh": false, "missing": ["description"] }
+ *         ]                       // stale（跟源不一致）/ no-frontmatter（源头部缺点名的字段）；fresh 是判定结果
  *       }
  *     ],
  *     "strays": ["docs/old.md"],   // 记录簿里还留着、文档本身已经不在的
@@ -32,9 +32,14 @@
  *     ]
  *   }
  *
- * 「待重写页」= items 里有 changed / missing 的、或 outputs 里有非 fresh 的文档；「漂移的钉」= 那些 item。
+ * 「待重写页」= items 里有 changed / missing 的、或 outputs 里 `fresh` 为假的文档；「漂移的钉」= 那些 item。
  */
 import type { Status, Target } from "@godcreator02/live-doc-core";
+import type { PlacedCheck } from "@godcreator02/live-doc-project";
+
+/** 一个摆放落点的新鲜度。**形状由 project 的摆放模块定**，这儿只借个名字给报告用——
+ *  四态怎么算出来的不归命令行解释，读报告的人照 `fresh` 决定要不要重摆 */
+export type OutputReport = PlacedCheck;
 
 /** 一处引用核对完的样子 */
 export interface RefReport {
@@ -57,17 +62,9 @@ export interface ComponentReport {
   line: number;
 }
 
-/** 一个摆放目标的新鲜度：fresh 一致；missing 生成物还不在；stale 跟源不一致；no-frontmatter 源头部缺点名的字段 */
-export interface OutputReport {
-  to: string;
-  status: "fresh" | "missing" | "stale" | "no-frontmatter";
-  /** no-frontmatter 时缺哪几个字段 */
-  missing?: string[];
-}
-
 export interface DocReport {
   doc: string;
-  /** 这篇贡献的红：缺失 + 孤儿 + 名册外组件 + 非 fresh 的摆放目标 */
+  /** 这篇贡献的红：缺失 + 孤儿 + 名册外组件 + 不新鲜的摆放落点 */
   red: number;
   items: RefReport[];
   orphans: string[];

@@ -7,20 +7,19 @@
  *   livedoc confirm [文档路径…]            确认：出记录、清孤儿、写回文档；有钉不住的整篇拒，打印并退 1
  *                                          文档本身删了、挪了的，它的记录 check 算红、confirm 整个忘掉
  *                                          带路径就是**按页限定**：只动点名的那几篇，别的页与别人的记录一个字不改
- *   livedoc render --target human|ai       渲染：产物落 out/；挂了 outputs 映射的 ai 产物摆到指定目标（不再落 out/）
+ *   livedoc render                         渲染：产物落 out/；挂了 outputs 映射的摆到指定落点（不再落 out/）
  *   livedoc trajectory [--json]            列轨迹卡的盘 / 树 / 主干；--json 出 buildTrajectory 的整份模型
  *   livedoc init --dir <仓> [--title][--port]  往一个已有仓里铺一个接好 livedoc 的六区 fumadocs 站
  * 新引用不用命令：在文档里写一行核心定的草稿记号 @@livedoc ref src/greet.ts:2-3 @@，
  * check 认它、报未确认，confirm 换成该格式的正式记号。
  */
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
-import { dirname, isAbsolute, join, relative, sep } from "node:path";
+import { mkdirSync, writeFileSync } from "node:fs";
+import { join, relative, sep } from "node:path";
 import { targetKey } from "@godcreator02/live-doc-core";
 import type { Format, Item, Listing } from "@godcreator02/live-doc-core";
 import { loadProject } from "@godcreator02/live-doc-project";
 import { buildTrajectory, scanDir } from "@godcreator02/live-doc-trajectory";
 import { initCommand } from "./init.ts";
-import { pickFrontmatter, tidyPlaced, withFrontmatter } from "./placed.ts";
 import type { CardProblemReport, CheckReport, DocReport, OutputReport, RefReport } from "./report.ts";
 
 export type { CardProblemReport, CheckReport, ComponentReport, DocReport, OutputReport, RefReport } from "./report.ts";
@@ -47,13 +46,12 @@ const REASON: Record<string, string> = {
 const MEMORY: Record<string, string> = { hash: "（hash 记忆：不在 git 里）" };
 
 export async function main(argv: string[]): Promise<number> {
-  // trajectory 与 init 跟 check / confirm / render 不是一套：它们不认 --target、不遍历文档，
+  // trajectory 与 init 跟 check / confirm / render 不是一套：它们不遍历文档，
   // init 连 livedoc.config.mjs 都不要（它是给还没有站的仓铺一个站），所以提前分流，
   // 不挤进下面那条白名单检查、也不去 loadProject
   if (argv[0] === "trajectory") return trajectoryCommand(argv.slice(1));
   if (argv[0] === "init") return initCommand(argv.slice(1));
   const [command = "check", ...rest] = argv;
-  const target = rest.includes("--target") ? rest[rest.indexOf("--target") + 1] : "human";
   if (!["check", "confirm", "render"].includes(command)) {
     console.error(`不认识的命令：${command}——有 check / confirm / render / trajectory / init`);
     return 2;
@@ -66,7 +64,7 @@ export async function main(argv: string[]): Promise<number> {
 
   let red = 0;
   for (const doc of docs) {
-    red += await render(project, doc, project.read(doc), project.service.formatFor(doc)!, target);
+    red += await render(project, doc, project.read(doc), project.service.formatFor(doc)!);
   }
   return red > 0 ? 1 : 0;
 }
@@ -109,12 +107,6 @@ async function confirmCommand(project: Project, docs: string[], rest: string[]):
   return red > 0 ? 1 : 0;
 }
 
-/** 命令行给的路径归一成文档身份（相对项目根、正斜杠）：绝对路径、反斜杠、`./` 开头都收 */
-function docIdArg(root: string, raw: string): string {
-  const path = isAbsolute(raw) ? relative(root, raw) : raw;
-  return path.split(sep).join("/").replace(/\\/g, "/").replace(/^\.\//, "");
-}
-
 /**
  * 按页限定的点名解析：还在的页要确认（live），已经不在、但记录簿里还留着记录的页只清记录（gone）。
  * 两边都对不上就是拼错了——当场报错，不静默跳过：少确认一页比报错难发现得多。
@@ -126,7 +118,7 @@ function pickDocs(project: Project, docs: string[], named: string[]): { live: st
   const gone: string[] = [];
   const problem: string[] = [];
   for (const raw of named) {
-    const doc = docIdArg(project.root, raw);
+    const doc = project.docIdOf(raw);
     if (alive.has(doc)) live.push(doc);
     else if (strays.has(doc)) gone.push(doc);
     else problem.push(raw);
@@ -199,20 +191,6 @@ async function trajectoryCommand(rest: string[]): Promise<number> {
 
 type Project = Awaited<ReturnType<typeof loadProject>>;
 
-/** 摆放那份的正文：问格式包要 ai 产物，再整理成摆放产物的形态（剥站上 .md 路由的锚记、
- *  还原被保守转义的加粗星号、去掉 frontmatter 段留下的开头空行）。要带 frontmatter 的目标
- *  由调用方按 outputs 点名的字段再戴上——同一篇的几个目标共用这一份正文 */
-async function renderPlaced(project: Project, doc: string, text: string, format: Format): Promise<string> {
-  const listing = project.service.resolve(doc, text);
-  const out = await format.renderAi!(text, listing, {
-    root: project.root,
-    doc,
-    roster: project.roster,
-    config: project.config as unknown as Record<string, unknown>,
-  });
-  return tidyPlaced(out);
-}
-
 /** 一行说明后面的括号：红的理由，目录树的项数或多了少了哪些 */
 function detailOf(item: Item): string {
   if (item.reason !== undefined && REASON[item.reason] !== undefined) return `（${REASON[item.reason]}）`;
@@ -264,47 +242,23 @@ async function check(project: Project, doc: string, text: string, format: Format
   for (const { name, line } of components) {
     lines.push(`🔴 ${doc}  第 ${line} 行 <${name}>  名册外组件，livedoc.config.mjs 里没给它压平规则`);
   }
-  const placed = await checkPlaced(project, doc, text, format);
-  lines.push(...placed.lines);
+  const outputs = await project.placing.check(doc);
+  for (const output of outputs) lines.push(placedLine(doc, output));
   const red =
     items.filter((item) => item.status === "missing").length +
     orphans.length +
     components.length +
-    placed.outputs.filter((output) => output.status !== "fresh").length;
-  return { report: { doc, red, items, orphans, components, outputs: placed.outputs }, lines };
+    outputs.filter((output) => !output.fresh).length;
+  return { report: { doc, red, items, orphans, components, outputs }, lines };
 }
 
-/** 摆放目标的守门：内存里重渲染一遍跟盘上比。目标不在、内容不一致、源头部缺点名的 frontmatter 字段都红
- *  ——mdx 源改了没重摆、有人直接改了生成物，都算 */
-async function checkPlaced(project: Project, doc: string, text: string, format: Format): Promise<{ outputs: OutputReport[]; lines: string[] }> {
-  const targets = project.placements(doc);
-  if (targets.length === 0 || typeof format.renderAi !== "function") return { outputs: [], lines: [] };
-  const body = await renderPlaced(project, doc, text, format);
-  const outputs: OutputReport[] = [];
-  const lines: string[] = [];
-  for (const { to, frontmatter } of targets) {
-    const picked = pickFrontmatter(text, frontmatter);
-    if (picked.missing.length > 0) {
-      outputs.push({ to, status: "no-frontmatter", missing: picked.missing });
-      lines.push(`🔴 ${doc} → ${to}  mdx 源的 frontmatter 里没有 ${picked.missing.join("、")}——补上再 render`);
-      continue;
-    }
-    const abs = join(project.root, to);
-    if (!existsSync(abs)) {
-      outputs.push({ to, status: "missing" });
-      lines.push(`🔴 ${doc} → ${to}  生成物还不存在——render 摆过去`);
-      continue;
-    }
-    const disk = readFileSync(abs, "utf8").replace(/\r\n/g, "\n");
-    if (disk !== withFrontmatter(body, picked.lines)) {
-      outputs.push({ to, status: "stale" });
-      lines.push(`🔴 ${doc} → ${to}  生成物跟 mdx 源不一致（源改了没重摆，或有人直接改了生成物）——重跑 render`);
-    } else {
-      outputs.push({ to, status: "fresh" });
-      lines.push(`🟢 ${doc} → ${to}  生成物跟 mdx 源一致`);
-    }
-  }
-  return { outputs, lines };
+/** 一个落点核对完打成的那一行：四态各一句人话，不新鲜的都红 */
+function placedLine(doc: string, output: OutputReport): string {
+  const head = `${output.fresh ? "🟢" : "🔴"} ${doc} → ${output.to}`;
+  if (output.status === "no-frontmatter") return `${head}  mdx 源的 frontmatter 里没有 ${(output.missing ?? []).join("、")}——补上再 render`;
+  if (output.status === "missing") return `${head}  生成物还不存在——render 摆过去`;
+  if (output.status === "stale") return `${head}  生成物跟 mdx 源不一致（源改了没重摆，或有人直接改了生成物）——重跑 render`;
+  return `${head}  生成物跟 mdx 源一致`;
 }
 
 function confirm(project: Project, doc: string, text: string): number {
@@ -325,48 +279,41 @@ function confirm(project: Project, doc: string, text: string): number {
   return 0;
 }
 
-async function render(project: Project, doc: string, text: string, format: Format, target: string | undefined): Promise<number> {
-  const fn = target === "ai" ? format.renderAi : format.renderHuman;
-  if (typeof fn !== "function") {
-    console.log(
-      format.final === true
-        ? `·  ${doc}  ${format.name} 的产物就是文档本身，人和 AI 都读它`
-        : `·  ${doc}  ${format.name} 没有 ${target} 渲染`,
-    );
-    return 0;
-  }
-  const listing = project.service.resolve(doc, text);
-  const placing = target === "ai" ? project.placements(doc) : [];
-  if (placing.length > 0) {
-    // 挂了映射的文档只写目标：目标是纯生成物，render 直接覆盖；没挂映射的才落 out/ 当调试产物。
-    // 点名了 frontmatter 字段的目标，源头部缺字段就不摆——摆一份缺 name 的 SKILL.md 比不摆更糟
-    const body = await renderPlaced(project, doc, text, format);
+async function render(project: Project, doc: string, text: string, format: Format): Promise<number> {
+  // 挂了映射的文档只写落点：落点是纯生成物，render 直接覆盖；摆放的整趟归 project，这边只印结果
+  const placed = await project.placing.render(doc);
+  if (placed.length > 0) {
     let red = 0;
-    for (const { to, frontmatter } of placing) {
-      const picked = pickFrontmatter(text, frontmatter);
-      if (picked.missing.length > 0) {
-        console.log(`🔴 ${doc} → ${to}  mdx 源的 frontmatter 里没有 ${picked.missing.join("、")}——补上再 render`);
+    for (const { to, status, missing } of placed) {
+      if (status === "no-frontmatter") {
+        console.log(`🔴 ${doc} → ${to}  mdx 源的 frontmatter 里没有 ${(missing ?? []).join("、")}——补上再 render`);
         red += 1;
-        continue;
+      } else {
+        console.log(`→  ${doc}  摆放到 ${to}`);
       }
-      const abs = join(project.root, to);
-      mkdirSync(dirname(abs), { recursive: true });
-      writeFileSync(abs, withFrontmatter(body, picked.lines));
-      console.log(`→  ${doc}  摆放到 ${to}`);
     }
     return red;
   }
+  if (typeof format.renderAi !== "function") {
+    console.log(
+      format.final === true
+        ? `·  ${doc}  ${format.name} 的产物就是文档本身，人和 AI 都读它`
+        : `·  ${doc}  ${format.name} 没有渲染`,
+    );
+    return 0;
+  }
+  // 没挂映射的落 out/ 当调试产物。渲染函数吃文本和清单，外加项目上下文：
+  // 有自己管线的格式（fumadocs）用 root + doc 自己去编译
   const outDir = join(project.root, project.config.out ?? "out");
   mkdirSync(outDir, { recursive: true });
-  const outName = `${doc.split("/").pop()}.${target === "ai" ? "ai.md" : "html"}`;
-  // 渲染函数吃文本和清单，外加项目上下文：有自己管线的格式（fumadocs）用 root + doc 自己去编译
-  const out = await fn(text, listing, {
+  const outName = `${doc.split("/").pop()}.ai.md`;
+  const out = await format.renderAi(text, project.service.resolve(doc, text), {
     root: project.root,
     doc,
     roster: project.roster,
     config: project.config as unknown as Record<string, unknown>,
   });
   writeFileSync(join(outDir, outName), out);
-  console.log(`→  ${doc}  渲染成 ${target}：${project.config.out ?? "out"}/${outName}`);
+  console.log(`→  ${doc}  渲染成 ${project.config.out ?? "out"}/${outName}`);
   return 0;
 }

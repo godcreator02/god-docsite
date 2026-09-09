@@ -12,13 +12,8 @@ import { createAutoComparator } from "./auto-comparator.ts";
 import { createReader } from "./fs-reader.ts";
 import { createGitComparator } from "./git-comparator.ts";
 import { createLedger } from "./json-ledger.ts";
-
-/** outputs 里的一个目标，对象写法：`to` 相对项目根；`frontmatter` 点名哪些字段随行到生成物头部 */
-export interface OutputTarget {
-  to: string;
-  /** mdx 源 frontmatter 里要原样带到生成物头部的字段名（如 SKILL.md 要的 name / description）；不给就整段剥掉 */
-  frontmatter?: string[];
-}
+import { assertTurf, createPlacing, placementsOf } from "./placement.ts";
+import type { OutputTarget, Placement, Placing, PlacingHost } from "./placement.ts";
 
 export interface ProjectConfig {
   /** 这个项目挂了哪些格式包 */
@@ -45,12 +40,6 @@ export interface ProjectConfig {
   trajectory?: string;
 }
 
-/** 摆放目标归一化之后的样子：字符串写法等于 `frontmatter: []` */
-export interface Placement {
-  to: string;
-  frontmatter: string[];
-}
-
 export interface Project {
   root: string;
   config: ProjectConfig;
@@ -60,20 +49,27 @@ export interface Project {
   docsDirs: string[];
   /** 轨迹卡目录的绝对路径；`livedoc.config` 没配 `trajectory` 时为 null */
   trajectoryDir: string | null;
+  /** 摆放：render 摆一趟、check 只核对。渲成什么、跟盘上怎么比、四态怎么定，都在它背后 */
+  placing: Placing;
   /** 文档目录下有格式包认领的那些文档，相对项目根、正斜杠、排过序 */
   docs(): string[];
   /** 这篇文档挂的摆放目标（归一化过）；没挂映射给空数组 */
   placements(doc: string): Placement[];
-  docIdOf(absPath: string): string;
+  /** 路径 → 文档身份；绝对路径按项目根算，相对路径原样收 */
+  docIdOf(path: string): string;
   read(doc: string): string;
   write(doc: string, text: string): void;
 }
 
 const cache = new Map<string, Promise<Project>>();
 
-/** 文档身份：相对项目根、正斜杠。记录簿的键、命令行的报告、站的 loader 都用它 */
-export function docIdOf(root: string, absPath: string): string {
-  return relative(root, absPath).split(sep).join("/");
+/**
+ * 文档身份：相对项目根、正斜杠。记录簿的键、命令行的报告、站的 loader 都用它。
+ * 绝对路径按项目根算；相对路径原样收，`./` 前缀与反斜杠一并归一——命令行点名的路径三种写法都可能。
+ */
+export function docIdOf(root: string, path: string): string {
+  const rel = isAbsolute(path) ? relative(root, path) : path;
+  return rel.split(sep).join("/").replace(/\\/g, "/").replace(/^\.\//, "");
 }
 
 const CONFIG_NAMES = ["livedoc.config.mjs", "livedoc.config.js", "livedoc.config.ts"];
@@ -104,26 +100,6 @@ export function docsDirsOf(config: Pick<ProjectConfig, "docs">): string[] {
   return dirs.map((dir) => dir.replace(/\\/g, "/").replace(/\/+$/, ""));
 }
 
-/** `outputs` 的两种目标写法归成一张表：字符串等于 `{ to, frontmatter: [] }`。形状不对当场拒——摆错地方比不摆更糟 */
-export function placementsOf(config: Pick<ProjectConfig, "outputs">): Record<string, Placement[]> {
-  const table: Record<string, Placement[]> = {};
-  for (const [doc, targets] of Object.entries(config.outputs ?? {})) {
-    if (!Array.isArray(targets) || targets.length === 0) throw new Error(`outputs 的 ${doc}：目标得是非空数组`);
-    table[doc] = targets.map((raw) => {
-      const target: OutputTarget = typeof raw === "string" ? { to: raw } : raw;
-      if (typeof target !== "object" || target === null || typeof target.to !== "string" || target.to === "") {
-        throw new Error(`outputs 的 ${doc}：每个目标得是非空的相对路径，或 { to, frontmatter? }`);
-      }
-      const frontmatter = target.frontmatter ?? [];
-      if (!Array.isArray(frontmatter) || frontmatter.some((field) => typeof field !== "string" || field.trim() === "")) {
-        throw new Error(`outputs 的 ${doc} → ${target.to}：frontmatter 得是字段名数组`);
-      }
-      return { to: target.to, frontmatter };
-    });
-  }
-  return table;
-}
-
 function comparatorOf(config: ProjectConfig, root: string): Comparator {
   const want = config.comparator ?? "auto";
   if (want === "auto") return createAutoComparator({ root });
@@ -146,24 +122,7 @@ async function build(root: string): Promise<Project> {
   });
   const docsDirs = docsDirsOf(config);
   const placements = placementsOf(config);
-
-  // 摆放映射的地盘规则：目标相对项目根、不落进任何一个文档目录（那是源的地盘）、一个目标只许一个文档写
-  const claimed = new Map<string, string>();
-  for (const [doc, targets] of Object.entries(placements)) {
-    for (const { to } of targets) {
-      if (isAbsolute(to)) throw new Error(`outputs 的 ${doc} → ${to}：目标得相对项目根，绝对路径不认`);
-      const rel = relative(root, resolve(root, to));
-      for (const dir of docsDirs) {
-        const relDocs = relative(root, join(root, dir));
-        if (rel === relDocs || rel.startsWith(relDocs + sep)) {
-          throw new Error(`outputs 的 ${doc} → ${to}：目标落进了文档目录，那是源文件的地盘`);
-        }
-      }
-      const owner = claimed.get(to);
-      if (owner !== undefined) throw new Error(`outputs 的 ${owner} 和 ${doc} 都往 ${to} 摆——一个目标只许一个文档写`);
-      claimed.set(to, doc);
-    }
-  }
+  assertTurf(root, docsDirs, placements);
 
   function walk(dir: string, out: string[]): string[] {
     if (!existsSync(dir)) return out;
@@ -182,17 +141,23 @@ async function build(root: string): Promise<Project> {
     return [...new Set(out)].sort();
   }
 
-  return {
+  // 摆放模块认得的只有这几样，先攒齐再交给它——它拿不到装配的别的部分
+  const host: PlacingHost = {
     root,
     config,
     service,
     roster: config.components,
+    placements: (doc) => placements[doc] ?? [],
+    read: (doc) => readFileSync(join(root, doc), "utf8"),
+  };
+
+  return {
+    ...host,
     docsDirs,
     trajectoryDir: config.trajectory !== undefined ? join(root, config.trajectory) : null,
+    placing: createPlacing(host),
     docs: allDocs,
-    placements: (doc) => placements[doc] ?? [],
-    docIdOf: (absPath) => docIdOf(root, absPath),
-    read: (doc) => readFileSync(join(root, doc), "utf8"),
+    docIdOf: (path) => docIdOf(root, path),
     write: (doc, text) => writeFileSync(join(root, doc), text),
   };
 }

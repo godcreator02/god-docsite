@@ -74,9 +74,9 @@ test("render：md 出 ai 那份剥掉记号；html 说产物就是文档本身",
   const p = setupProject();
   try {
     await p.cli("confirm");
-    const rendered = await p.cli("render", "--target", "ai");
+    const rendered = await p.cli("render");
     assert.equal(rendered.code, 0);
-    assert.match(rendered.out, /→ {2}docs\/a\.md {2}渲染成 ai：out\/a\.md\.ai\.md/);
+    assert.match(rendered.out, /→ {2}docs\/a\.md {2}渲染成 out\/a\.md\.ai\.md/);
     assert.match(rendered.out, /· {2}docs\/b\.html {2}html 的产物就是文档本身/);
     const ai = p.read("out/a.md.ai.md");
     assert.doesNotMatch(ai, /<!-- ref |<!-- \/ref -->/);

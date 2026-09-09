@@ -124,8 +124,8 @@ export interface Format {
   marker(target: Target): string;
   /** 名册外组件，给命令行 check 用 */
   lintComponents?(text: string, roster?: unknown): Array<{ name: string; line: number }>;
+  /** 渲染：出一份给 AI 读的 md。渲染只有这一种目标——人看的那份就是文档在站上的样子 */
   renderAi?(text: string, listing: Listing, ctx: RenderContext): string | Promise<string>;
-  renderHuman?(text: string, listing: Listing, ctx: RenderContext): string | Promise<string>;
   /** 文档本身就是终态产物（html）：人看它、AI 也读它，没有渲染这回事 */
   final?: boolean;
 }

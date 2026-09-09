@@ -18,7 +18,7 @@ interface JsonReport {
     items: Array<{ target: string; kind: string; status: string; line: number; lines: [number, number]; draft: boolean; reason?: string; diff?: string }>;
     orphans: string[];
     components: Array<{ name: string; line: number }>;
-    outputs: Array<{ to: string; status: string }>;
+    outputs: Array<{ to: string; status: string; fresh: boolean }>;
   }>;
   strays: string[];
   trajectory: Array<{ path: string; field: string; value: string; reason: string }>;
@@ -115,17 +115,17 @@ test("check --json：整份报告一行 JSON，退出码跟人读模式一样；
     assert.equal(first.red, 1);
     const a = first.docs.find((d) => d.doc === "docs/a.md")!;
     assert.deepEqual(a.items, [{ target: "src/greet.ts:2-3", kind: "span", status: "unconfirmed", line: 3, lines: [2, 3], draft: true }]);
-    assert.deepEqual(a.outputs, [{ to: "README.md", status: "missing" }]);
+    assert.deepEqual(a.outputs, [{ to: "README.md", status: "missing", fresh: false }]);
     assert.deepEqual(first.strays, []);
     assert.deepEqual(first.trajectory, []);
 
     await p.cli("confirm");
-    await p.cli("render", "--target", "ai");
+    await p.cli("render");
     const green = JSON.parse((await p.cli("check", "--json")).out) as JsonReport;
     assert.equal(green.ok, true);
     assert.equal(green.red, 0);
     assert.equal(green.docs.find((d) => d.doc === "docs/a.md")!.items[0]!.status, "fresh");
-    assert.deepEqual(green.docs.find((d) => d.doc === "docs/a.md")!.outputs, [{ to: "README.md", status: "fresh" }]);
+    assert.deepEqual(green.docs.find((d) => d.doc === "docs/a.md")!.outputs, [{ to: "README.md", status: "fresh", fresh: true }]);
 
     // 代码改了：黄，带 diff，退 0。md 格式的投影住在文档里、confirm 才刷新，所以生成物此刻还跟源一致
     writeFileSync(join(p.root, "src", "greet.ts"), CODE.replace("hello", "hey"));
@@ -147,7 +147,7 @@ test("check --json：整份报告一行 JSON，退出码跟人读模式一样；
     assert.equal(red.code, 1);
     const last = JSON.parse(red.out) as JsonReport;
     assert.deepEqual(last.docs.find((d) => d.doc === "docs/a.md")!.orphans, ["src/greet.ts:2-3"]);
-    assert.deepEqual(last.docs.find((d) => d.doc === "docs/a.md")!.outputs, [{ to: "README.md", status: "stale" }]);
+    assert.deepEqual(last.docs.find((d) => d.doc === "docs/a.md")!.outputs, [{ to: "README.md", status: "stale", fresh: false }]);
     assert.deepEqual(last.strays, ["docs/b.html"]);
     assert.equal(last.trajectory.length, 1);
     assert.equal(last.trajectory[0]!.path, "trajectory/2026-01-01-bad.mdx");

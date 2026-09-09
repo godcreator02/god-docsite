@@ -4,13 +4,14 @@ import type { CardProblemReport, CheckReport, ComponentReport, DocReport, Output
  * `livedoc check --json` 的输出 → 「待重写页」清单。纯函数，不起进程、不碰盘
  * ——进程那半在 index.ts 里经 `gwbNodeCli` 跑，这儿只认一份 JSON。
  *
- * 口径不是这儿定的，是 cli 的 `report.ts` 头注释定的：**待重写页 = items 里有
- * changed / missing 的、或 outputs 里有非 fresh 的文档；漂移的钉 = 那些 item**。
+ * 口径不是这儿定的：**待重写页 = items 里有 changed / missing 的、或有落点不新鲜的文档；
+ * 漂移的钉 = 那些 item**。落点新不新鲜也不由这儿解释——报告里每个落点自带 `fresh`，
+ * 那是 project 的摆放模块判的，这儿只筛。
  * 只有孤儿记录或名册外组件的页也红，但那不是「重写正文」能解决的事，单列进 `others`
  * ——混在一起会让 agent 去重写一篇其实只要删条记录的页。
  *
- * 类型直接吃 cli 导出的那几个：形状是契约，抄一份必然漂。**只 import type**
- * ——CLI 形态的东西一律起进程调，不进程内 import（devkit 手册红线）。
+ * 类型直接吃 cli 导出的那几个（摆放那个是它从 project 借过来的）：形状是契约，抄一份必然漂。
+ * **只 import type**——CLI 形态的东西一律起进程调，不进程内 import（devkit 手册红线）。
  */
 
 /** 一处漂了的钉。字段是 cli 的 `RefReport` 的子集，agent 靠它定位改哪几行 */
@@ -34,7 +35,7 @@ export interface StalePage {
   red: number
   /** 漂了的钉：changed（内容变了）与 missing（引用指向空气） */
   pins: StalePin[]
-  /** 非 fresh 的摆放目标：源改了没重摆、生成物被人直接改了、或源头部缺 frontmatter 字段 */
+  /** 不新鲜的摆放落点：源改了没重摆、生成物被人直接改了、或源头部缺 frontmatter 字段 */
   outputs: OutputReport[]
 }
 
@@ -84,7 +85,7 @@ export function collapse(report: CheckReport): StaleSummary {
   const others: OtherProblemPage[] = []
   for (const doc of report.docs) {
     const pins = pinsOf(doc)
-    const outputs = doc.outputs.filter((o) => o.status !== 'fresh')
+    const outputs = doc.outputs.filter((o) => !o.fresh)
     if (pins.length > 0 || outputs.length > 0) {
       pages.push({ doc: doc.doc, red: doc.red, pins, outputs })
       continue
