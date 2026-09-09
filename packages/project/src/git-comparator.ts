@@ -14,7 +14,7 @@
 
 import { fileText, hashSpan, lineCount, mapRange, mappedSpan, normalizeLines, renderDiff, sliceSpan, targetKey, wantedSpan } from "@godcreator02/live-doc-core";
 import type { Comparator, Judgement, MemoRecord, Snapshot, Span, Target } from "@godcreator02/live-doc-core";
-import { diffHunks, hasCommits, headBlob, headCommit, inHead, isClean, isIgnored, locate, objectExists, readBlob } from "./git.ts";
+import { diffHunks, headBlob, headCommit, isClean, isIgnored, locate, objectExists, readBlob } from "./git.ts";
 
 /** git 版的记录。lines 是**旧 blob 里**的位置，judge 从那儿出发往今天映 */
 export interface GitRecord extends MemoRecord {
@@ -52,9 +52,11 @@ export function createGitComparator({ root }: { root: string }): Comparator {
       try {
         const at = locate(root, target.file);
         if (at === null) return { problem: `${where} 不在任何 git 仓里——git 记忆只对仓里的文件做` };
-        if (!hasCommits(at.repo)) return { problem: `${where} 所在的仓还没有一次提交——先 commit` };
-        // 「已提交」这道门问的是「在不在 HEAD 里」：先在这儿说清楚是哪一种，别让后面的 headBlob 炸出一句 git 原文
-        if (!inHead(at)) {
+        // 三道门各问一句 git，一句都不重复：仓有没有提交、文件在不在 HEAD 里（顺带拿到 blob）、工作区干不干净
+        const commit = headCommit(at.repo);
+        if (commit === null) return { problem: `${where} 所在的仓还没有一次提交——先 commit` };
+        const blob = headBlob(at);
+        if (blob === null) {
           return {
             problem: isIgnored(at)
               ? `${where} 被 .gitignore 忽略——git 记忆只对已提交的内容做`
@@ -62,13 +64,7 @@ export function createGitComparator({ root }: { root: string }): Comparator {
           };
         }
         if (!isClean(at)) return { problem: `${where} 未提交——钉住只对已提交的内容做，先 commit` };
-        const record: GitRecord = {
-          kind: "git",
-          blob: headBlob(at),
-          commit: headCommit(at.repo),
-          lines,
-          hash: hashSpan(span),
-        };
+        const record: GitRecord = { kind: "git", blob, commit, lines, hash: hashSpan(span) };
         return { record };
       } catch (err) {
         return { problem: `${where} 问不了 git：${(err as Error).message.trim().split("\n")[0]}` };

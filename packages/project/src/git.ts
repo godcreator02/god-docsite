@@ -83,12 +83,7 @@ export function locateDir(root: string, dir: string): Located | null {
 
 /** 这个仓有没有过一次提交（HEAD 存在）。刚 init 的仓 HEAD 还没生出来，什么都钉不住 */
 export function hasCommits(repo: string): boolean {
-  try {
-    git(repo, ["rev-parse", "--verify", "-q", "HEAD"]);
-    return true;
-  } catch {
-    return false;
-  }
+  return headCommit(repo) !== null;
 }
 
 /** 工作区里这个文件相对 HEAD 有没有改动（含未跟踪） */
@@ -108,13 +103,25 @@ export function isIgnored({ repo, rel }: Located): boolean {
   }
 }
 
-/** HEAD 里这个文件的 blob 哈希 */
-export function headBlob({ repo, rel }: Located): string {
-  return git(repo, ["rev-parse", `HEAD:${rel}`]).trim();
+/**
+ * HEAD 里这个文件的 blob 哈希；不在 HEAD 里（未跟踪、被忽略、路径大小写跟 git 记的不一样）给 null。
+ * 「在不在 HEAD 里」跟「blob 是什么」是同一句 git 能回答的，问一次就够。
+ */
+export function headBlob({ repo, rel }: Located): string | null {
+  try {
+    return git(repo, ["rev-parse", `HEAD:${rel}`]).trim();
+  } catch {
+    return null;
+  }
 }
 
-export function headCommit(repo: string): string {
-  return git(repo, ["rev-parse", "HEAD"]).trim();
+/** 仓的 HEAD commit；一次提交都还没有给 null。「有没有过提交」问的就是这一句，别再单起一趟 */
+export function headCommit(repo: string): string | null {
+  try {
+    return git(repo, ["rev-parse", "--verify", "-q", "HEAD"]).trim();
+  } catch {
+    return null;
+  }
 }
 
 export function readBlob(repo: string, blob: string): string {
@@ -151,9 +158,9 @@ export function objectExists(repo: string, id: string): boolean {
   }
 }
 
-/** HEAD 的树里有没有这个路径（大小写也得跟 git 记的一样） */
+/** HEAD 的树里有没有这个路径（大小写也得跟 git 记的一样）。要 blob 本身就直接用 headBlob，别问两趟 */
 export function inHead(at: Located): boolean {
-  return objectExists(at.repo, `HEAD:${at.rel}`);
+  return headBlob(at) !== null;
 }
 
 /**

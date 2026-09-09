@@ -1,0 +1,76 @@
+/**
+ * 命令行测试的公共台子：临时真 git 项目、跑命令、收打印。
+ *
+ * 项目的 livedoc.config.mjs 按绝对 file: 地址引格式包的构建产物——临时目录里解析不到包名。
+ * 直接调 main，不起子进程：退出码和打印都当场看得见。
+ *
+ * 台子要 `process.chdir` 到临时目录，那是进程全局的，所以同一个文件里的用例只能串着跑。
+ * 命令行这摊按主题分成几个 `.test.ts`，`node --test` 每个文件一个进程，文件之间才并发得起来。
+ */
+import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { dirname, join } from "node:path";
+import { fileURLToPath, pathToFileURL } from "node:url";
+import { main } from "@godcreator02/live-doc-cli";
+import { CODE, run } from "./repo.ts";
+
+const PACKAGES = join(dirname(fileURLToPath(import.meta.url)), "..", "packages");
+const distUrl = (name: string) => pathToFileURL(join(PACKAGES, name, "dist", "index.mjs")).href;
+
+export const CONFIG = `import * as md from ${JSON.stringify(distUrl("format-md"))};
+import * as html from ${JSON.stringify(distUrl("format-html"))};
+
+export default { formats: [md, html], docs: "docs", out: "out" };
+`;
+
+export const DOC_MD = "# md\n\n@@livedoc ref src/greet.ts:2-3 @@\n\n尾巴\n";
+export const DOC_HTML = '<h1>html</h1>\n<figure>\n  @@livedoc ref src/greet.ts:2-3 @@\n</figure>\n';
+
+/** 身份与换行策略 `-c` 现传，不落 git config——每条 config 都是一个子进程，而这个台子整套测试要搭二十来次 */
+const SETTINGS = ["-c", "user.email=test@example.com", "-c", "user.name=test", "-c", "core.autocrlf=false"];
+
+/** 起一个能被 loadProject 装配的临时项目，跑几条命令，收集打印 */
+export function setupProject(config: string = CONFIG) {
+  const root = mkdtempSync(join(tmpdir(), "god-live-doc-cli-"));
+  run(root, ["init", "-q", "-b", "main"]);
+  mkdirSync(join(root, "src"));
+  mkdirSync(join(root, "docs"));
+  writeFileSync(join(root, "src", "greet.ts"), CODE);
+  writeFileSync(join(root, "docs", "a.md"), DOC_MD);
+  writeFileSync(join(root, "docs", "b.html"), DOC_HTML);
+  writeFileSync(join(root, "livedoc.config.mjs"), config);
+  run(root, [...SETTINGS, "add", "-A"]);
+  run(root, [...SETTINGS, "commit", "-q", "-m", "起项目"]);
+
+  const before = process.cwd();
+  process.chdir(root);
+  const said: string[] = [];
+  const log = console.log;
+  console.log = (...args: unknown[]) => void said.push(args.join(" "));
+
+  return {
+    root,
+    said,
+    read: (rel: string) => readFileSync(join(root, rel), "utf8"),
+    async cli(...args: string[]) {
+      said.length = 0;
+      const code = await main(args);
+      return { code, out: said.join("\n") };
+    },
+    teardown() {
+      console.log = log;
+      process.chdir(before);
+      rmSync(root, { recursive: true, force: true, maxRetries: 5 });
+    },
+  };
+}
+
+/** 把 CONFIG 尾巴换成带 outputs 的：docs/a.md 摆到项目根的 README.md */
+export function withOutputs(extra: string): string {
+  return CONFIG.replace(`docs: "docs", out: "out" };`, `docs: "docs", out: "out", outputs: ${extra} };`);
+}
+
+/** 把 CONFIG 尾巴换成带 trajectory 的：项目根下 trajectory/ 目录挂上轨迹卡校验 */
+export function withTrajectory(): string {
+  return CONFIG.replace(`docs: "docs", out: "out" };`, `docs: "docs", out: "out", trajectory: "trajectory" };`);
+}
