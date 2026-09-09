@@ -52,13 +52,14 @@ export const EXTEND_COMMAND = 'live-doc.extend'
 export const RUNNING_COMMAND = 'live-doc.running'
 export const CLI_COMMAND = 'live-doc.cli'
 export const RAW_CLI_COMMAND = 'live-doc.cli-raw'
+export const INIT_COMMAND = 'live-doc.init'
 export const STALE_COMMAND = 'live-doc.stale'
 export const FEEDBACK_COMMAND = 'live-doc.feedback'
 export const FEEDBACK_LIST_COMMAND = 'live-doc.feedback-list'
 
 /**
  * livedoc 那个可执行的绝对路径。`import.meta.resolve` 拿到的是包的主入口 `dist/run.mjs`
- * （`exports` 只开了 `.` 与 `./init`），可执行在它旁边：`dist/cli.mjs`。
+ * （`exports` 只开了 `.` 与 `./site`），可执行在它旁边：`dist/cli.mjs`。
  * **不读 `bin` 字段、不查 `.bin` 垫片**——node-cli 登记的是一个绝对路径的 js，
  * 垫片在 Windows 上是 `.cmd`，起不了。解析不到回 null（依赖没装全的 home），调用方 warn 一句、不炸。
  */
@@ -461,7 +462,7 @@ export function apply(ctx: GwbContext): void {
       {
         name: CLI_COMMAND,
         description:
-          `livedoc 的命令行：{ args: string[], cwd?: string }。args 原样递给 livedoc——check（核对，有红退 1）、check --json（机读报告，${STALE_COMMAND} 吃的就是它）、confirm（确认、换记号；先 commit）、render（重摆 outputs 生成物）、init --dir <仓>（给一个还没有站的仓铺一个）、trajectory。` +
+          `livedoc 的命令行：{ args: string[], cwd?: string }。args 原样递给 livedoc——check（核对，有红退 1）、check --json（机读报告，${STALE_COMMAND} 吃的就是它）、confirm（确认、换记号；先 commit）、render（重摆 outputs 生成物）、trajectory。铺一个新站有专门的 ${INIT_COMMAND}，别从这儿递 init。` +
           `cwd 是站目录的绝对路径（那儿有 livedoc.config.mjs），**不给就落在选中单元的站**；选中的单元没有站、或有好几个，就回一句让你给 cwd。` +
           `回 { ok, cwd, exitCode, timedOut, durationMs, stdout, stderr }——check 有红时退出码 1，那是核对结果不是命令失败`,
         plugin: name,
@@ -490,6 +491,73 @@ export function apply(ctx: GwbContext): void {
           stdout: outcome.stdout,
           stderr: outcome.stderr,
           ...(outcome.ok ? {} : { error: `livedoc ${argv.join(' ')} 退出码 ${String(outcome.exitCode)}${outcome.timedOut ? '（超时）' : ''}` }),
+        }
+      },
+    ),
+  )
+
+  /**
+   * 建站的入口。**实现一行都不在这儿**：铺站是 livedoc 命令行里那个模块的活，件只把
+   * 「哪个仓、叫什么、用哪个口」翻译成一趟子进程——livedoc 得能在没装工作台的仓里独立用，
+   * 反过来把铺站搬进件，就等于让建站依赖一整台桌面工作台。
+   *
+   * 目标仓要**绝对路径**：件跑在工作台主进程里，相对谁都不知道；存不存在归 livedoc 判，
+   * 只有「不是目录」这一条先拦下——那会变成运行器抱怨 cwd，看不出是仓给错了。
+   */
+  function repoOf(args: unknown): { ok: true; dir: string } | { ok: false; error: string } {
+    const raw = isRecord(args) ? args['dir'] : undefined
+    if (typeof raw !== 'string' || raw.trim() === '') return { ok: false, error: `${INIT_COMMAND} 要 { dir: string }——目标仓目录的绝对路径` }
+    if (!path.isAbsolute(raw.trim())) return { ok: false, error: `dir 要是绝对路径（这儿不知道该相对于谁），给的是：${raw}` }
+    const dir = path.resolve(raw.trim())
+    let isDir = false
+    try {
+      isDir = fs.statSync(dir).isDirectory()
+    } catch {
+      isDir = false
+    }
+    if (!isDir) return { ok: false, error: `不是目录：${dir}——建站是往一个**已经存在**的仓里加站，先把仓建出来` }
+    return { ok: true, dir }
+  }
+
+  ctx.effect(() =>
+    cli.register(
+      {
+        name: INIT_COMMAND,
+        description:
+          '给一个还没有站的仓铺一个六区文档站（起子进程跑 livedoc init）：{ dir: string, title?: string, port?: number }。' +
+          'dir 是**目标仓**目录的绝对路径（不是站目录）——仓要已经存在、它下面还没有 docs-site/，站铺在 <dir>/docs-site。' +
+          'title 是站的显示名，不给就从仓根 package.json 认、再退回目录名；port 不给就扫一遍同级各仓已占的站端口、从 4310 起挑第一个空位。' +
+          '**只铺文件**：不跑 pnpm install、不改仓里任何已有文件（.gitignore 缺哪几条、仓根哪几个文件会被第一次 render 覆盖，都只在 stdout 里报出来）。' +
+          '回 { dir, site, exitCode, timedOut, durationMs, stdout, stderr, note }——挑了哪个口、铺了哪些文件、接着做什么全在 stdout.text 里',
+        plugin: name,
+      },
+      async (args) => {
+        const repo = repoOf(args)
+        if (!repo.ok) return repo
+        const title = textOf(args, 'title')
+        const port = isRecord(args) ? args['port'] : undefined
+        if (port !== undefined && typeof port !== 'number') return { ok: false, error: `port 要是数字（1024–65535），给的是：${String(port)}` }
+        const argv = ['init', '--dir', repo.dir]
+        if (title !== undefined) argv.push('--title', title)
+        if (port !== undefined) argv.push('--port', String(port))
+        // cwd 落在目标仓自己：init 不读 livedoc.config.mjs，落哪儿都不影响结果，落在仓里最好查
+        const outcome = await runLivedoc(argv, repo.dir)
+        if (outcome === undefined) return { ok: false, code: 'no-node-cli', error: MISSING_NODE_CLI }
+        if (!('exitCode' in outcome)) return outcome
+        const site = path.join(repo.dir, 'docs-site')
+        log.info(`${INIT_COMMAND}：${repo.dir} 退出码 ${String(outcome.exitCode)}`)
+        return {
+          ok: outcome.ok,
+          dir: repo.dir,
+          site,
+          exitCode: outcome.exitCode,
+          timedOut: outcome.timedOut,
+          durationMs: outcome.durationMs,
+          stdout: outcome.stdout,
+          stderr: outcome.stderr,
+          ...(outcome.ok
+            ? { note: `只铺了文件。接着在 ${site} 跑 pnpm install、pnpm doc:render、pnpm doc；起手页写了第一条引用怎么钉` }
+            : { error: `livedoc init 退出码 ${String(outcome.exitCode)}${outcome.timedOut ? '（超时）' : ''}——看 stderr.text` }),
         }
       },
     ),
@@ -617,7 +685,7 @@ export function apply(ctx: GwbContext): void {
     }
   })
 
-  log.info(`文档站件就绪：一格窗格、十条命令（live-doc.*），livedoc 命令行经 node-cli 登记成 ${RAW_CLI_COMMAND}`)
+  log.info(`文档站件就绪：一格窗格、十一条命令（live-doc.*），livedoc 命令行经 node-cli 登记成 ${RAW_CLI_COMMAND}`)
 }
 
 /**

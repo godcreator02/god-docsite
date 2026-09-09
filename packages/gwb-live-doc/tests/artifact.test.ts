@@ -74,7 +74,7 @@ describe.skipIf(!built)('产物', () => {
     expect(read('index.js')).not.toMatch(/from\s+['"]electron['"]/)
   })
 
-  it('node 半：十条命令加那个裸口一个不少——命令名是总线上的公共面，改名就是破约', () => {
+  it('node 半：十一条命令加那个裸口一个不少——命令名是总线上的公共面，改名就是破约', () => {
     const host = read('index.js')
     for (const command of [
       'live-doc.sites',
@@ -85,6 +85,7 @@ describe.skipIf(!built)('产物', () => {
       'live-doc.running',
       'live-doc.cli',
       'live-doc.cli-raw',
+      'live-doc.init',
       'live-doc.stale',
       'live-doc.feedback',
       'live-doc.feedback-list',
