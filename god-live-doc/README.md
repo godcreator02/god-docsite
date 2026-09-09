@@ -5,13 +5,14 @@
 ——站上那块是构建时现拿的，记忆只有一条指纹。
 
 五类引用：行段、整文件、目录树、存在性（含「断言不在」）、名字。一篇手册怎么把它们用起来，
-见 `examples/notes` 和文档站「五类引用：一篇手册里怎么用」；文档本身怎么写（章节骨架、五类引用
-各用在哪种论断、反模式），配套 skill 在 `skills/livedoc-docs/SKILL.md`。
+见 `examples/notes` 和文档站「五类引用：一篇手册里怎么用」；文档本身怎么写（读者是谁、六层骨架、
+五类引用各用在哪种论断、术语表与动画、反模式），配套 skill 在 `packages/cli/skills/livedoc-docs/SKILL.md`
+——**两份 skill 随 `@godcreator02/live-doc-cli` 一起发**，装了这个包的仓把它的 `skills/` 挂给 agent 读就行。
 
 另一摊是**轨迹卡**：live-doc 治现状文档撒谎，轨迹卡治历史被改写——一次方向了断记下来就该冻结，
 谁取代了谁看得见。卡不进记录簿、不用 confirm，只要即时校验；盘（星轨）在站上是一条独立的整页
 路由 `/trajectory`，不是塞进 mdx 的组件。
-怎么判断值得记一笔、怎么落卡，配套 skill 在 `skills/trajectory/SKILL.md`；机制那一半见文档站「轨迹」章。
+怎么判断值得记一笔、怎么落卡，配套 skill 在 `packages/cli/skills/trajectory/SKILL.md`；机制那一半见文档站「轨迹」章。
 
 ## 怎么装
 
@@ -117,7 +118,13 @@ serverExternalPackages: ['@godcreator02/live-doc-format-fumadocs', '@godcreator0
 pnpm livedoc check                    # 只读，报状态。红退 1，黄和白退 0
 pnpm livedoc confirm                  # 出记录、清孤儿、换记号、投影内容
 pnpm livedoc render --target ai       # 出给 AI 读的那份 md，落 out/；挂了 outputs 映射的摆到指定位置
+pnpm livedoc init --dir <已有的仓>     # 给一个还没有站的仓铺一个接好 livedoc 的 fumadocs 站
 ```
+
+`init` 跟上面三条不是一套：它不读 `livedoc.config.mjs`（那正是它要铺出来的东西），只往一个
+**已经存在**、且还没有 `docs-site/` 的仓里铺文件——不跑 `pnpm install`、不改仓里任何已有文件。
+端口扫一遍同级各仓已占的，从 4310 起找空位；起手页的第一条引用找得到 `src/index.ts` 里的
+`export const name` 就钉那一行（行号现找），找不到就改成写一段「第一条引用怎么钉」。
 
 `confirm` 之前**先 commit**：git 记忆只对已提交、且工作区干净的内容钉（引到别的仓也一样）。有一处钉不住就**整篇拒**
 ——problems 打出来，记录簿一条不写、文档一个字不改。
@@ -167,7 +174,7 @@ render 直接写到映射给的位置（可以出项目根，`../README.md`、`.
 ```
 core             零依赖（只用 node:crypto）。接口正本、编排服务、归一化与哈希、行段映射与 LCS diff、hash 比较器（滑窗）、目录树 / 存在性 / 名字三个比较器
 project          装配：读 livedoc.config、造读取器（读文件、列目录、看类型）/ json 记录簿 / 比较器；git 那条线和按种类、按位置分派的 auto 比较器也住这儿
-cli              check / confirm / render / trajectory
+cli              check / confirm / render / trajectory / init；随包发两份 skill（`skills/`）与站模板（`template/`）
 format-md        注释记号 + 围栏展示区 + 尾注释
 format-fumadocs  mdx 与 fumadocs 是一个整体：remark 插件、序列化回调、meta 白名单、pre 组件 + 样式
 format-html      元素既是记号又是展示区，文件即终态（final），不渲染
@@ -223,7 +230,8 @@ pnpm start                        # 想看盘就起一下，4313；验完停掉
 
 * **记录的类型名叫 `MemoRecord`**，不叫 `Record`——后者是 TS 内置的映射型别，撞名。清单项上的字段名还是 `record`。
 * **构建产物是 `.mjs` / `.d.mts`**（tsdown 的默认），`exports` 直接指过去，没去折腾扩展名。
-* 包已更名 `@godcreator02/live-doc-*` 并首发进本机 registry（六包同版本 0.1.0）；devkit 的 `release`
+* 包已更名 `@godcreator02/live-doc-*` 并首发进本机 registry（首发六包同版本 0.1.0；之后各包各走各的，
+  cli 已到 0.2.0——加了 `init`，两份 skill 与站模板随它发）；devkit 的 `release`
   是插件形态专用，这套多包工作区发版手跑 `pnpm -r publish --no-git-checks`，纪律照总控台 `registry.md`。
 * **没有「代码根」这个配置项**：引用路径一律相对项目根。所以 `docs-site` 引工作区源码时写的是
   `../packages/…`，标题栏上也就这么显示。要更好看得先给配置加一项，那是接口变更。
