@@ -4,8 +4,9 @@
  *   livedoc check [--json]                 核对：只读，红退 1；挂了 outputs 映射的文档顺手守生成物新鲜度；
  *                                          配了 trajectory 目录的顺手跑卡校验，病卡也算红。--json 出整份
  *                                          机读报告（形状见 report.ts），退出码不变
- *   livedoc confirm                        确认：出记录、清孤儿、写回文档；有钉不住的整篇拒，打印并退 1
+ *   livedoc confirm [文档路径…]            确认：出记录、清孤儿、写回文档；有钉不住的整篇拒，打印并退 1
  *                                          文档本身删了、挪了的，它的记录 check 算红、confirm 整个忘掉
+ *                                          带路径就是**按页限定**：只动点名的那几篇，别的页与别人的记录一个字不改
  *   livedoc render --target human|ai       渲染：产物落 out/；挂了 outputs 映射的 ai 产物摆到指定目标（不再落 out/）
  *   livedoc trajectory [--json]            列轨迹卡的盘 / 树 / 主干；--json 出 buildTrajectory 的整份模型
  *   livedoc init --dir <仓> [--title][--port]  往一个已有仓里铺一个接好 livedoc 的六区 fumadocs 站
@@ -13,7 +14,7 @@
  * check 认它、报未确认，confirm 换成该格式的正式记号。
  */
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
-import { dirname, join, relative, sep } from "node:path";
+import { dirname, isAbsolute, join, relative, sep } from "node:path";
 import { targetKey } from "@godcreator02/live-doc-core";
 import type { Format, Item, Listing } from "@godcreator02/live-doc-core";
 import { loadProject } from "@godcreator02/live-doc-project";
@@ -61,19 +62,77 @@ export async function main(argv: string[]): Promise<number> {
   const project = await loadProject(process.cwd());
   const docs = project.docs();
   if (command === "check") return checkCommand(project, docs, rest.includes("--json"));
+  if (command === "confirm") return confirmCommand(project, docs, rest);
 
   let red = 0;
   for (const doc of docs) {
-    const text = project.read(doc);
-    const format = project.service.formatFor(doc)!;
-    if (command === "confirm") red += confirm(project, doc, text);
-    else red += await render(project, doc, text, format, target);
-  }
-  // 文档本身删了、挪了：它的记录上面那圈看不到，按文档清单一览。check 算红，confirm 整个忘掉
-  if (command === "confirm") {
-    for (const doc of project.service.forget(docs)) console.log(`🧹 ${doc}  文档已不存在，记录已清`);
+    red += await render(project, doc, project.read(doc), project.service.formatFor(doc)!, target);
   }
   return red > 0 ? 1 : 0;
+}
+
+/**
+ * confirm 的整趟。不带路径是整仓一趟；带路径是**按页限定**——只动点名的那几篇。
+ *
+ * 限定是为了让「只改了这几页」的改动能只确认这几页：同一个仓里别人钉的黄还等着他复核，
+ * 顺手 confirm 掉就是替别人签字。
+ *
+ * 孤儿清理分两层，限定模式各自的去处不同：
+ *   **一页之内**的孤儿（记录簿里有、这一页正文里已经没有这处引用）由 service.confirm 顺手清。
+ *   它本来就只看这一页，限定不限定都成立，照做。
+ *   **整仓那层**（记录簿里有、整个项目里已经没有这篇文档）不能按限定后的清单算：那份清单是人
+ *   点名的一小撮，拿它当「现存文档的全集」去算，没点名的页会被全部当成「文档已不存在」抹掉。
+ *   所以限定模式只清点名了的那几篇——点名一篇已经删掉或挪走的页，意思就是「把它的记录忘掉」，
+ *   这也正是挪页时要的：旧路径点一次，新路径点一次，一趟走完。
+ */
+async function confirmCommand(project: Project, docs: string[], rest: string[]): Promise<number> {
+  const named = rest.filter((arg) => !arg.startsWith("--"));
+  let red = 0;
+  if (named.length === 0) {
+    for (const doc of docs) red += confirm(project, doc, project.read(doc));
+    // 文档本身删了、挪了：它的记录上面那圈看不到，按文档清单一览。check 算红，confirm 整个忘掉
+    for (const doc of project.service.forget(docs)) console.log(`🧹 ${doc}  文档已不存在，记录已清`);
+    return red > 0 ? 1 : 0;
+  }
+
+  const picked = pickDocs(project, docs, named);
+  if ("problem" in picked) {
+    console.error(`不是这个项目里的文档，记录簿里也没有：${picked.problem.join("、")}`);
+    return 2;
+  }
+  console.log(`·  按页限定：只动 ${[...picked.live, ...picked.gone].join("、")}，别的页与它们的记录不碰`);
+  for (const doc of picked.live) red += confirm(project, doc, project.read(doc));
+  // 只忘点名的那几篇：留下的 = 现存文档 + 没被点名的失踪文档
+  const drop = new Set(picked.gone);
+  const keep = [...docs, ...project.service.strays(docs).filter((doc) => !drop.has(doc))];
+  for (const doc of project.service.forget(keep)) console.log(`🧹 ${doc}  文档已不存在，记录已清`);
+  return red > 0 ? 1 : 0;
+}
+
+/** 命令行给的路径归一成文档身份（相对项目根、正斜杠）：绝对路径、反斜杠、`./` 开头都收 */
+function docIdArg(root: string, raw: string): string {
+  const path = isAbsolute(raw) ? relative(root, raw) : raw;
+  return path.split(sep).join("/").replace(/\\/g, "/").replace(/^\.\//, "");
+}
+
+/**
+ * 按页限定的点名解析：还在的页要确认（live），已经不在、但记录簿里还留着记录的页只清记录（gone）。
+ * 两边都对不上就是拼错了——当场报错，不静默跳过：少确认一页比报错难发现得多。
+ */
+function pickDocs(project: Project, docs: string[], named: string[]): { live: string[]; gone: string[] } | { problem: string[] } {
+  const alive = new Set(docs);
+  const strays = new Set(project.service.strays(docs));
+  const live: string[] = [];
+  const gone: string[] = [];
+  const problem: string[] = [];
+  for (const raw of named) {
+    const doc = docIdArg(project.root, raw);
+    if (alive.has(doc)) live.push(doc);
+    else if (strays.has(doc)) gone.push(doc);
+    else problem.push(raw);
+  }
+  if (problem.length > 0) return { problem };
+  return { live: [...new Set(live)], gone: [...new Set(gone)] };
 }
 
 /**

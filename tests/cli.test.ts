@@ -171,6 +171,64 @@ test("文档本身删了：它的记录 check 算红；confirm 整个忘掉", as
   }
 });
 
+test("confirm 按页限定：只动点名的那篇，别人的页与记录一个字不改", async () => {
+  const p = setupProject();
+  try {
+    const only = await p.cli("confirm", "docs/a.md");
+    assert.equal(only.code, 0, only.out);
+    assert.match(only.out, /· {2}按页限定：只动 docs\/a\.md/);
+    assert.match(only.out, /✅ docs\/a\.md/);
+    assert.doesNotMatch(only.out, /docs\/b\.html {2}src/, "没点名的页不该被确认");
+
+    const ledger = JSON.parse(p.read(".ledger.json")) as Record<string, unknown>;
+    assert.deepEqual(Object.keys(ledger), ["docs/a.md"]);
+    assert.match(p.read("docs/b.html"), /@@livedoc ref src\/greet\.ts:2-3 @@/, "没点名的页记号还是草稿");
+
+    // 反斜杠、`./` 开头、绝对路径都收
+    const again = await p.cli("confirm", `.\\docs\\b.html`);
+    assert.equal(again.code, 0, again.out);
+    assert.match(again.out, /✅ docs\/b\.html/);
+    assert.equal((await p.cli("check")).code, 0);
+  } finally {
+    p.teardown();
+  }
+});
+
+test("confirm 按页限定：整仓的失踪清扫只对点名的那篇做", async () => {
+  const p = setupProject();
+  try {
+    await p.cli("confirm");
+    rmSync(join(p.root, "docs", "a.md"));
+    rmSync(join(p.root, "docs", "b.html"));
+
+    // 只点名 a：b 的记录留着（它的红还等着人处理），a 的忘掉
+    const one = await p.cli("confirm", "docs/a.md");
+    assert.equal(one.code, 0, one.out);
+    assert.match(one.out, /🧹 docs\/a\.md {2}文档已不存在，记录已清/);
+    assert.doesNotMatch(one.out, /🧹 docs\/b\.html/);
+    assert.deepEqual(Object.keys(JSON.parse(p.read(".ledger.json")) as Record<string, unknown>), ["docs/b.html"]);
+
+    const all = await p.cli("confirm");
+    assert.match(all.out, /🧹 docs\/b\.html {2}文档已不存在，记录已清/);
+    assert.deepEqual(Object.keys(JSON.parse(p.read(".ledger.json")) as Record<string, unknown>), []);
+  } finally {
+    p.teardown();
+  }
+});
+
+test("confirm 点名的路径既不是文档也不在记录簿：退 2，什么都不动", async () => {
+  const p = setupProject();
+  try {
+    const before = p.read("docs/a.md");
+    const bad = await p.cli("confirm", "docs/没这篇.md");
+    assert.equal(bad.code, 2);
+    assert.equal(p.read("docs/a.md"), before);
+    assert.equal(existsSync(join(p.root, ".ledger.json")), false);
+  } finally {
+    p.teardown();
+  }
+});
+
 test("孤儿：文档里删掉引用，check 报红；confirm 清掉", async () => {
   const p = setupProject();
   try {
