@@ -11,7 +11,7 @@
     "livedoc": "livedoc",
     "doc": "livedoc check",
     "doc:confirm": "livedoc confirm",
-    "doc:render": "livedoc render --target ai",
+    "doc:render": "livedoc render",
     "verify:roster": "node scripts/verify-roster.mjs"
   },
   "dependencies": {

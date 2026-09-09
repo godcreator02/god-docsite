@@ -31,7 +31,7 @@ export interface ProjectConfig {
   /**
    * 渲染产物的摆放：文档路径（正斜杠，同记录簿的键）→ 目标数组。每个目标是相对项目根的路径（可以出根），
    * 或者 `{ to, frontmatter }`——要生成物保留 frontmatter 里的几个字段时用对象写法。
-   * 挂了映射的文档 render --target ai 只写目标，不落 out/
+   * 挂了映射的文档 render 只写目标，不落 out/
    */
   outputs?: Record<string, Array<string | OutputTarget>>;
   /** fumadocs 格式包的私货：集合名。一个字符串是全部文档同一个集合；按文档目录分就给一张表（文档目录 → 集合名） */
