@@ -2,7 +2,7 @@
   "name": "@godcreator02/live-doc-cli",
   "version": "0.4.1",
   "type": "module",
-  "description": "命令行：check（带 --json 机读报告）/ confirm / render / trajectory / init（铺六区站）；随包发三份 skill（livedoc-docs / trajectory / spec-grill）与站模板",
+  "description": "命令行：check（带 --json 机读报告）/ confirm / render / trajectory / init（铺六区站）；随包发五份 skill（livedoc-docs / trajectory / spec-grill / parallel-by-module / self-explaining-code）与站模板",
   "bin": {
     "livedoc": "./dist/cli.mjs"
   },
