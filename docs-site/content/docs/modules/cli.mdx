@@ -1,36 +1,29 @@
 ---
 title: 命令行
-description: live-doc-cli：五条命令的编排与打印，机读报告与退出码的契约，随包发的 skill 与站模板
+description: cli 层：五条命令的分流与编排，机读报告与退出码的契约，以及「只打印不判断」这条边
 ---
 
 # 命令行
 
-**本页回答**：`@godcreator02/live-doc-cli` 编排哪几条命令、哪些事**不**归它、`--json` 报告与退出码的契约长什么样、怎么把它单独架起来测。
+**本页回答**：`@godcreator02/livedoc` 的 `src/cli/` 编排哪五条命令、哪些事**不**归它、`--json` 报告与退出码的契约长什么样、怎么把它单独架起来测。
 
 ## 管什么
 
-这个包是**动作的编排层**，做的是两件事：把命令行参数翻译成几趟对 project 装配出来的服务的调用，再把结果打成人读的一行行、或机读的一行 JSON，最后退一个码。判断一律不在这儿——它只负责印和退。五条命令各是什么，入口文件头上那段说了：
+这一层是**动作的编排**，做两件事：把命令行参数翻译成几趟对装配出来的项目的调用，再把结果打成人读的一行行、或机读的一行 JSON，最后退一个码。**判定一件都不在这儿算**——它只负责印和退。五条命令各是什么，入口文件头上那段说了：
 
-{/* ref file="../packages/cli/src/run.ts" lines="1-15" */}
+@@livedoc ref ../packages/livedoc/src/cli/run.ts:1-15 @@
 
-分两路。主干 `check` / `confirm` / `render` 是一套：cwd 就是项目根——`livedoc.config.mjs` 在哪儿，
-就在哪儿跑——先装配，再逐篇处理文档目录下被格式包认领的每一篇。`trajectory` 与 `init` 是另一路，
-它们不遍历文档，命令名解出来就分流走了，连那条命令白名单和 `loadProject` 都不进：
+分两路。主干 `check` / `confirm` / `render` 是一套：cwd 就是项目根——`livedoc.config.mjs` 在哪儿就在哪儿跑——先装配，再逐篇处理文档目录下被格式认领的每一篇。`trajectory` 与 `attach` 是另一路，它们不遍历文档，命令名解出来就分流走了，连那条命令白名单和 `loadProject` 都不进；`attach` 那条的理由更硬：**它连 `livedoc.config.mjs` 都不读**，那正是它要写出来的东西。
 
-{/* ref file="../packages/cli/src/run.ts" lines="48-70" */}
-
-另外随包发几份 skill 与一整套六区站模板，见本段末尾。
+@@livedoc ref ../packages/livedoc/src/cli/run.ts:48-58 @@
 
 ### 输出的词汇表
 
 一行一处引用：状态符号、文档、`文件:起-止`、一句话说明。
 
-{/* ref file="../packages/cli/src/run.ts" lines="27-46" */}
+@@livedoc ref ../packages/livedoc/src/cli/run.ts:27-46 @@
 
-`REASON` 里除了 `unlocated`（「有变动」的细分：hash 记忆找不到这段了，位置不明），都是「缺失」的细分——
-说清楚是哪一种指向空气，而不是含糊地报一句「代码没了」：行段的整段删光、文件没了、blob 取不回，
-目录树的目录没了，存在性的断言不在却出现了、文件和目录换了个，名字的找不到了。`MEMORY` 是 `confirm` 用的：
-哪一处拿到的是 hash 记忆（文件不在 git 里），那一行标出来。目录树那行还会带上项数，黄的时候带多了少了哪些：
+`REASON` 里除了 `unlocated`（「有变动」的细分：hash 记忆找不到这段了，位置不明），都是「缺失」的细分——说清楚是哪一种指向空气，而不是含糊地报一句「代码没了」：行段的整段删光、文件没了、blob 取不回，目录树的目录没了，存在性的断言不在却出现了、文件和目录换了个，名字的找不到了。`MEMORY` 是 `confirm` 用的：哪一处拿到的是 hash 记忆（文件不在 git 里），那一行标出来。目录树那行还会带上项数，黄的时候带多了少了哪些：
 
 ```text
 🟢 docs/handbook.mdx  tree src depth=1  新鲜（4 项）
@@ -39,49 +32,41 @@ description: live-doc-cli：五条命令的编排与打印，机读报告与退�
 
 ### check：只读，报状态
 
-一趟的次序是逐篇核对 → 失踪文档 → 卡校验，先攒成一份报告再决定怎么出：人读模式边算边打，`--json`
-攒完整份一行打出去。两种模式算的是同一份报告，红的口径不可能对不上。
+一趟的次序是逐篇核对 → 失踪文档 → 卡校验，先攒成一份报告再决定怎么出：人读模式边算边打，`--json` 攒完整份一行打出去。**两种模式算的是同一份报告**，红的口径不可能对不上。
 
-{/* ref file="../packages/cli/src/run.ts" lines="135-154" */}
+@@livedoc ref ../packages/livedoc/src/cli/run.ts:130-154 @@
 
 ```text
-🟢 content/docs/formats/wiring.mdx  livedoc.config.mjs:11-21  新鲜
-⚪ content/docs/start/requirements.mdx  ../packages/core/src/types.ts:11-16  未确认，等作者确认
+🟢 content/docs/modules/cli.mdx  ../packages/livedoc/src/cli/run.ts:48-58  新鲜
+⚪ content/docs/start/requirements.mdx  ../packages/livedoc/src/engine/types.ts:11-16  未确认，等作者确认
 🟡 docs/a.md  src/greet.ts:2-3  有变动，等作者复核
 🟡 docs/a.md  vendor/lib.ts:2-3  有变动，等作者复核（hash 记忆找不到这段了，位置不明——重读源码、重钉）
 🔴 docs/a.md  src/greet.ts:4-5  缺失，引用指向空气（整段已被删光）
 ```
 
-红有四个来源，都算数：**缺失**的引用、**孤儿记录**（记录簿里有、文档里已经没有了）、
-**名册外组件**（`livedoc.config.mjs` 里没给它压平规则）、**摆放的落点不新鲜**——挂了 `outputs`
-映射的文档，落点新鲜不新鲜是问装配包的摆放要来的，一个落点回一个四态加一个 `fresh`，不新鲜的都红：
+红有四个来源，都算数：**缺失**的引用、**孤儿记录**（记录簿里有、文档里已经没有了）、**名册外组件**（`livedoc.config.mjs` 里没给它压平规则）、**摆放的落点不新鲜**——挂了 `outputs` 映射的文档，落点新鲜不新鲜是问环境层的摆放要来的，一个落点回一个四态加一个 `fresh`，不新鲜的都红：
 
-{/* ref file="../packages/cli/src/run.ts" lines="228-253" */}
+@@livedoc ref ../packages/livedoc/src/cli/run.ts:228-253 @@
 
 四态各译成一句人话，就是这一层全部的活：
 
-{/* ref file="../packages/cli/src/run.ts" lines="255-262" */}
+@@livedoc ref ../packages/livedoc/src/cli/run.ts:255-262 @@
 
 ```text
 🔴 docs/a.md  src/greet.ts:4-5  孤儿记录：文档里已经没有这处引用
 🔴 docs/b.mdx  第 7 行 <Callout>  名册外组件，livedoc.config.mjs 里没给它压平规则
-🔴 content/docs/maintain/readme.mdx → ../README.md  生成物跟 mdx 源不一致（源改了没重摆，或有人直接改了生成物）——重跑 render
+🔴 content/outputs/readme.mdx → ../README.md  生成物跟 mdx 源不一致（源改了没重摆，或有人直接改了生成物）——重跑 render
 ```
 
-配了 `trajectory` 目录的项目，`check` 末尾还**顺带**跑一趟轨迹卡校验——病卡一条一行，也算红。
-没配就整个不管；配了但目录还不存在扫出来是空集合，不算红：
+配了 `trajectory` 目录的项目，`check` 末尾还**顺带**跑一趟轨迹卡校验——病卡一条一行，也算红。没配就整个不管；配了但目录还不存在扫出来是空集合，不算红：
 
-{/* ref file="../packages/cli/src/run.ts" lines="156-167" */}
-
-```text
-🔴 content/trajectory/2026-09-05-foo.mdx  born-at：born-at 格式须 YYYY-MM-DD 或 YYYY-MM-DDTHH:mm（2026-9-5）
-```
+@@livedoc ref ../packages/livedoc/src/cli/run.ts:156-167 @@
 
 卡的四层校验各拦什么归 [轨迹包](/docs/modules/trajectory)——这边只负责把病打成行、计进红。
 
 ### confirm：出记录、清孤儿、换记号
 
-{/* ref file="../packages/cli/src/run.ts" lines="264-280" */}
+@@livedoc ref ../packages/livedoc/src/cli/run.ts:264-280 @@
 
 顺利的时候一处一行 `✅`，清掉的孤儿一行 `🧹`。文档本身删了、挪了的，它的记录逐篇那圈看不到，`check` 按文档清单一览算红，`confirm` 末尾整个忘掉，也是一行 `🧹`：
 
@@ -92,8 +77,7 @@ description: live-doc-cli：五条命令的编排与打印，机读报告与退�
 🧹 docs/old.md  文档已不存在，记录已清
 ```
 
-后面那句会说清楚这一趟到底动没动文档：草稿记号换掉了、文档写回了、还是什么都没改。
-末尾的括号说清楚拿到的是哪种记忆——弱记忆得让写手知道，分派规则归装配包。
+后面那句会说清楚这一趟到底动没动文档：草稿记号换掉了、文档写回了、还是什么都没改。末尾的括号说清楚拿到的是哪种记忆——弱记忆得让写手知道，分派规则归 [环境层](/docs/modules/host)。
 
 有一处钉不住就整篇拒，problems 逐条打出来，末尾补一句「这篇整篇没确认」：
 
@@ -104,22 +88,15 @@ description: live-doc-cli：五条命令的编排与打印，机读报告与退�
 
 #### 按页限定：`confirm <文档路径…>`
 
-命令名后面跟几个文档路径，就只动点名的那几篇。同一个仓里常有别人钉的黄等着他自己复核，
-整仓一趟会替他签字；改了哪几页就确认哪几页，是让「只改这几页」的改动能独立成一个提交的前提。
+命令名后面跟几个文档路径，就只动点名的那几篇。同一个仓里常有别人钉的黄等着他自己复核，整仓一趟会替他签字；改了哪几页就确认哪几页，是让「只改这几页」的改动能独立成一个提交的前提。
 
-{/* ref file="../packages/cli/src/run.ts" lines="86-108" */}
+@@livedoc ref ../packages/livedoc/src/cli/run.ts:72-108 @@
 
-孤儿清理**分两层，限定模式里去处不同**：一页之内的孤儿（这一页正文里已经没有的引用）照清，
-它本来就只看这一页；整仓那层（记录簿里有、项目里已经没有这篇文档了）不能按限定后的清单算——
-那份清单是人点名的一小撮，拿它当「现存文档的全集」，没点名的页会被全部当成失踪抹掉。所以
-限定模式只清点名了的那几篇。**挪一篇文档就是点两次**：旧路径点一次（忘掉旧记录）、新路径点一次
-（按新身份重钉），一趟走完。
+孤儿清理**分两层，限定模式里去处不同**：一页之内的孤儿（这一页正文里已经没有的引用）照清，它本来就只看这一页；整仓那层（记录簿里有、项目里已经没有这篇文档了）不能按限定后的清单算——那份清单是人点名的一小撮，拿它当「现存文档的全集」，没点名的页会被全部当成失踪抹掉。所以限定模式只清点名了的那几篇。**挪一篇文档就是点两次**：旧路径点一次（忘掉旧记录）、新路径点一次（按新身份重钉），一趟走完。
 
-点名的路径长什么样不归这儿认——反斜杠、`./` 开头、绝对路径怎么归成文档身份，是装配包那一份
-`docIdOf`。这边只分三类：还在的页去确认，已经不在、记录簿里还留着的页去清记录，两边都对不上
-当场退 2——拼错一个路径导致少确认一页，比报错难发现得多。
+点名的路径长什么样不归这儿认——反斜杠、`./` 开头、绝对路径怎么归成文档身份，是环境层那一份 `docIdOf`。这边只分三类：还在的页去确认，已经不在、记录簿里还留着的页去清记录，两边都对不上当场退 2——拼错一个路径导致少确认一页，比报错难发现得多。
 
-{/* ref file="../packages/cli/src/run.ts" lines="110-128" */}
+@@livedoc ref ../packages/livedoc/src/cli/run.ts:110-128 @@
 
 ```text
 ·  按页限定：只动 docs/a.md、docs/old.md，别的页与它们的记录不碰
@@ -127,37 +104,34 @@ description: live-doc-cli：五条命令的编排与打印，机读报告与退�
 🧹 docs/old.md  文档已不存在，记录已清
 ```
 
-### render：摆到落点，或问格式包要产物
+### render：摆到落点，或问格式要产物
 
-渲染只有一种输出，给 AI 读的那份 md——人看的那份就是文档在站上的样子。挂了 `outputs` 映射的文档
-不落 `out/`，直接**摆**到映射给的位置（可以出项目根，`../README.md` 这种）；渲成什么、整形到什么
-程度、缺字段摆不摆，整趟归装配包的摆放，这边只把回执印成行：
+渲染只有一种输出，给 AI 读的那份 md——人看的那份就是文档在站上的样子。挂了 `outputs` 映射的文档不落 `out/`，直接**摆**到映射给的位置（可以出项目根，`../README.md` 这种）；渲成什么、整形到什么程度、缺字段摆不摆，整趟归环境层的摆放，这边只把回执印成行：
 
-{/* ref file="../packages/cli/src/run.ts" lines="282-296" */}
+@@livedoc ref ../packages/livedoc/src/cli/run.ts:282-296 @@
 
 ```text
-→  content/docs/maintain/readme.mdx  摆放到 ../README.md
-→  content/docs/maintain/agents.mdx  摆放到 ../../AGENTS.md
+→  content/outputs/readme.mdx  摆放到 ../README.md
+→  content/outputs/agents.mdx  摆放到 ../../AGENTS.md
 🔴 content/outputs/skills/live-doc.mdx → ../packages/gwb-live-doc/skills/live-doc/SKILL.md  mdx 源的 frontmatter 里没有 description——补上再 render
 ```
 
-没挂映射的落 `out/` 当调试产物；格式包没有对应的渲染函数就说一声、退 0，不当错：
+没挂映射的落 `out/` 当调试产物；格式没有对应的渲染函数就说一声、退 0，不当错：
 
-{/* ref file="../packages/cli/src/run.ts" lines="297-319" */}
+@@livedoc ref ../packages/livedoc/src/cli/run.ts:297-319 @@
 
 ```text
 →  docs/a.md  渲染成 out/a.md.ai.md
 ·  docs/a.html  html 的产物就是文档本身，人和 AI 都读它
 ```
 
-fumadocs 那份的 `renderAi` 是借它自己的 loader 出的 md，见 [fumadocs 格式包](/docs/modules/format-fumadocs)。
+fumadocs 那份的 `renderAi` 是借站自己的 loader 出的 md，见 [fumadocs 层](/docs/modules/fumadocs)。
 
 ### trajectory：列盘、树、主干
 
-这条不遍历文档、不碰记录簿，所以在装配之前就分流走了。没配 `trajectory` 目录直接说一声、
-退 2；`--json` 出整份模型（给别的工具吃），不带就按盘打印每棵树的主干，末尾一行汇总支线 / 孤星 / 虫洞数：
+这条不遍历文档、不碰记录簿。没配 `trajectory` 目录直接说一声、退 2；`--json` 出整份模型（给别的工具吃），不带就按盘打印每棵树的主干，末尾一行汇总支线 / 孤星 / 虫洞数：
 
-{/* ref file="../packages/cli/src/run.ts" lines="169-190" */}
+@@livedoc ref ../packages/livedoc/src/cli/run.ts:169-190 @@
 
 ```text
 盘 记事本（2026-01-09-notes）  17 张卡
@@ -167,95 +141,63 @@ fumadocs 那份的 `renderAi` 是借它自己的 loader 出的 md，见 [fumadoc
 
 盘是怎么聚出来的、主干凭什么这么挑，归 [轨迹包](/docs/modules/trajectory)。
 
-### init：给一个还没有站的仓铺一个站
+### attach：给一个已经铺好的骨架装六区
 
-这条同样在装配之前就分流走了，而且理由更硬：**它连 `livedoc.config.mjs` 都不读**——那正是它
-要铺出来的东西。前置条件是「仓已经在、`<仓>/docs-site` 还不在」，跟别的命令「项目已经装配好」
-正相反，所以它绝不能走 `loadProject` 那条路。
+`livedoc attach --dir <站目录>` 要的前置条件跟别的命令正相反：**站已经在、但还没接过 livedoc**。骨架谁铺不归 livedoc——装了 fumadocs 的人才该有那个能力；工作台里是站件那条 `docs-site.create`，手铺也行。
 
-**建站在这个包里是一个独立模块 `src/site/`**，跟核心三包零耦合：`init.ts` 只剩命令那一层
-（认参数、把结果打成话），铺站的逻辑一行都不在它那儿。这条边是硬的——livedoc 得能在没装
-工作台的仓里独立用，所以实现留在命令行这边，[工作台件](/docs/modules/gwb-live-doc) 那条
-`live-doc.init` 只是起个子进程调它。模块面上只有两个方法：`planSite` 算一套不碰盘、
-`createSite` 算完直接铺。
+@@livedoc ref ../packages/livedoc/src/cli/attach.ts:11-20 @@
 
-{/* ref file="../packages/cli/src/site/index.ts" lines="78-114" */}
+这一层跟别的四条一样薄：认参数、调 [装配层](/docs/modules/site) 面上的方法、把结果与「接着做什么」打出来。**装配的逻辑一行都不许回流到这儿**——它得能被别的程序直接调，不必绕命令行。
 
-**算与写分开**是刻意的：占位符认不出是最可能的失败，而目录一旦开始写就没有干净的回滚点。
-所以校验、认名字、挑端口、整套渲染都排在碰盘之前，落盘那一步只剩写文件。`planSite` 把这个
-中间态直接交出去，于是「先看看会铺出什么、会占哪个口」不必先弄脏一个目录再回滚——它是接口
-的一部分，不是实现细节。
+@@livedoc ref ../packages/livedoc/src/cli/attach.ts:1-7 @@
 
-端口**按脚本内容认，不按目录名认**——站不一定叫 `docs-site`，认的是同级各仓 package.json 里
-那个 `next dev -p <口>` / `next start -p <口>`。手给的 `--port` 一律让给你，被占了只警告一声：
-占它的那个站早就不跑了这种事，只有人知道。
+打出来的那几段是有次序的：装在哪、写了哪些文件、让位删了哪些、仓根已有的哪些文件下次 `render` 会被覆盖，最后才是接着跑哪几条命令。**覆盖那一条单独警告**：`outputs` 预置了 `AGENTS.md` / `README.md` 的映射，第一次 `render` 就会把仓里手写的那份摆掉，得先把内容搬进 `content/outputs/` 的 mdx 正本。
 
-{/* ref file="../packages/cli/src/site/ports.ts" lines="54-65" */}
-
-起手页的第一条引用是**现找的**：仓根 `src/index.ts` 里有 `export const name` 就钉那一行，
-找不到就不钉、改成写一段「第一条引用怎么钉」。硬塞一条钉不住的引用，等于让刚铺好的站开局
-就报一条红的；样例记号写在围栏里，围栏内容是 `code` 节点，`check` 认不出它。
-
-{/* ref file="../packages/cli/src/site/values.ts" lines="37-49" */}
-
-### 随包发的资料：两类，都不是逻辑
-
-`files` 里除了产物，还有 `skills` 与 `template` 两份资料——装了这个包的项目就同时拿到了写文档的
-规矩与铺站的模板：
-
-{/* ref file="../packages/cli/package.json" lines="19-23" */}
-
-skill 谁触发谁读，有哪几份由目录树的钉兜着：
-
-{/* tree dir="../packages/cli/skills" depth="1" */}
-
-模板是一整套六区站（`content/` 六个集合、六条路由、预置的 `livedoc.config.mjs` 与 outputs 映射），
-`init` 把它整套渲染出来。模板路径按 `import.meta.url` 往上一层算，源码态在 `src/` 旁、产物态在
-`dist/` 旁，两态都落在包根下一层，所以同一行代码两态都指得对。
+@@livedoc ref ../packages/livedoc/src/cli/attach.ts:62-88 @@
 
 ## 不知道什么
 
-**不知道摆放怎么算。** 一篇 mdx 摆出去的正文该长什么样、跟盘上那份怎么比、四态凭什么这么定、
-缺了点名的 frontmatter 字段该不该写——一件都不知道。它拿到的是装配包摆放那个对象，对外只有两个
-方法，`render` 摆一趟、`check` 核一趟，回来一张落点清单；这个包的活是把那张清单译成人话和一个退出码。
+**不知道摆放怎么算。** 一篇 mdx 摆出去的正文该长什么样、跟盘上那份怎么比、四态凭什么这么定、缺了点名的 frontmatter 字段该不该写——一件都不知道。它拿到的是环境层那个摆放对象，对外只有两个方法，`render` 摆一趟、`check` 核一趟，回来一张落点清单；这一层的活是把那张清单译成人话和一个退出码。
 
-{/* ref file="../packages/project/src/placement.ts" lines="51-61" */}
+@@livedoc ref ../packages/livedoc/src/host/placement.ts:51-61 @@
 
-**不认识任何格式的记号长什么样。** 认记号、写回记号、渲染，全走 core 定的 `Format` 接口，
-实现住三个格式包；这个包只知道「这一篇归哪个格式」，那也是问 project 要的。
+**不认识任何格式的记号长什么样。** 认记号、写回记号、渲染，全走判定层定的 `Format` 接口，实现在 fumadocs 那一层；这里只知道「这一篇归哪个格式」，那也是问装配好的项目要的。
 
-**不自己算状态。** 绿黄白红是 core 的服务判的，这边只把状态映成符号和一句中文。
+@@livedoc ref ../packages/livedoc/src/engine/types.ts:119-134 @@
 
-**不知道记忆怎么记、怎么比。** 被引文件怎么读、算哪种记忆、变了之后段落跟到哪儿去了，是 project
-的读取器与比较器的事——它连「这个文件在不在 git 里」都不问，只在打印时把记录的 `kind` 是 `hash`
-的那几处标出来，好让写手知道自己手上是弱记忆。
+**不自己算状态。** 绿黄白红是 [判定层](/docs/modules/engine) 的服务判的，这边只把状态映成符号和一句中文。
 
-**不认识轨迹卡的语义。** 卡的字段、盘怎么聚、主干怎么挑一概不知，只把目录交给 trajectory 包，
-把交回来的病和模型打出来。
+**不知道记忆怎么记、怎么比。** 被引文件怎么读、算哪种记忆、变了之后段落跟到哪儿去了，是环境层的读取器与比较器的事——它连「这个文件在不在 git 里」都不问，只在打印时把记录的 `kind` 是 `hash` 的那几处标出来，好让写手知道自己手上是弱记忆。
 
-**不知道站怎么编译。** mdx 变成 md 是 fumadocs 格式包借站自己的 loader 干的；这个包没见过 next、
-没见过 mdx 编译器，依赖表里只有自家三个包，也没有任何 `gwb-*`：件依赖它，它不依赖件。
+**不认识轨迹卡的语义。** 卡的字段、盘怎么聚、主干怎么挑一概不知，只把目录交给轨迹包，把交回来的病和模型打出来。
 
-{/* ref file="../packages/cli/package.json" lines="29-33" */}
+**不知道六区长什么样。** `attach` 那条只认两个参数：站目录与显示名。模板怎么渲、名字从哪儿认、`package.json` 怎么合、端口从骨架里怎么读出来，全在装配层。
+
+**不知道站怎么编译。** mdx 变成 md 是 fumadocs 那一层借站自己的 loader 干的；这一层没见过 next、没见过 mdx 编译器。
+
+**这一层认识以上全部四层，谁都不认识它。** 塌成一个包之后，同一个包里 `engine/` 随手写一句 `import "../host/git.ts"` 编译器不会吭一声，pnpm 那层严格 node_modules 的保护也没有了——目录方向由一份手写的禁止面表守着，它是**唯一**的边界守卫：
+
+@@livedoc ref ../tests/boundary.test.ts:86-104 @@
+
+<Note>
+这张表报红的时候，红的是设计不是测试。真要改方向，改的是表本身加一段说明为什么，不是把断言删掉。
+</Note>
 
 ## 数据结构
 
-这个包自己定形状的只有一样：`check --json` 那份机读报告。它是**契约**——`gwb-live-doc` 件的
-`live-doc.stale` 靠它列「待重写页与漂移的钉」：
+这一层自己定形状的只有一样：`check --json` 那份机读报告。它是**契约**——`gwb-live-doc` [件](/docs/modules/plugin) 的 `live-doc.stale` 靠它列「待重写页与漂移的钉」：
 
-{/* ref file="../packages/cli/src/report.ts" lines="1-4" */}
+@@livedoc ref ../packages/livedoc/src/cli/report.ts:1-4 @@
 
 整份的形状（谁套谁、哪几个数组、哪些字段有才带）在同一个文件的头上一眼看完：
 
-{/* ref file="../packages/cli/src/report.ts" lines="6-33" */}
+@@livedoc ref ../packages/livedoc/src/cli/report.ts:6-33 @@
 
-报告里 outputs 那一段是个例外：**形状不是这儿定的**。四态是摆放判出来的，这边直接引装配包导出的
-那个类型，只借个名字给报告用——把别人的四态在自己的类型里再声明一遍，就是给同一件事留了两份真相：
+报告里 outputs 那一段是个例外：**形状不是这儿定的**。四态是摆放判出来的，这边直接引环境层导出的那个类型，只借个名字给报告用——把别人的四态在自己的类型里再声明一遍，就是给同一件事留了两份真相：
 
-{/* ref file="../packages/cli/src/report.ts" lines="37-42" */}
+@@livedoc ref ../packages/livedoc/src/cli/report.ts:37-42 @@
 
-记录簿是这些命令产出的东西，形状也不归这个包定——两层键（文档 → `文件:起-止` → 记录），
-除了 `kind`，字段归记它的那个比较器自己定，一本记录簿里 `git` 和 `hash` 两种并存：
+记录簿是这些命令产出的东西，形状也不归这一层定——两层键（文档 → `文件:起-止` → 记录），除了 `kind`，字段归记它的那个比较器自己定，一本记录簿里 `git` 和 `hash` 两种并存：
 
 ```json
 {
@@ -271,111 +213,83 @@ skill 谁触发谁读，有哪几份由目录树的钉兜着：
 }
 ```
 
-{/* ref file="../packages/project/src/git-comparator.ts" lines="19-26" */}
+@@livedoc ref ../packages/livedoc/src/host/git-comparator.ts:19-26 @@
 
-**代码内容一个字都不在里面**——`blob` 指着 git 对象库里那份，要旧内容时现取。读写它的是
-[装配包](/docs/modules/project) 的记录簿实现，命令这边只经服务用：
-
-{/* ref file="../packages/project/src/json-ledger.ts" lines="27-32" */}
+**代码内容一个字都不在里面**——`blob` 指着 git 对象库里那份，要旧内容时现取。读写它的是环境层的记录簿实现，这边只经服务用。
 
 ## 提供的接口
 
 对外一个函数：`main(argv)`，吃去掉 node 与脚本名之后的参数，回退出码。
 
-{/* has file="../packages/cli/src/run.ts" text="export async function main" */}
+@@livedoc has ../packages/livedoc/src/cli/run.ts "export async function main" @@
 
-**它自己不 `process.exit`**——退出这件事留在可执行那一头，所以测试能直接调它、当场看退出码和打印，
-不用起子进程。可执行的那个文件整个就这么点：
+**它自己不 `process.exit`**——退出这件事留在可执行那一头，所以测试能直接调它、当场看退出码和打印，不用起子进程。可执行的那个文件整个就这么点：
 
-{/* ref file="../packages/cli/src/cli.ts" */}
+@@livedoc ref ../packages/livedoc/src/cli/cli.ts @@
 
-`./site` 是第二个入口：建站模块的两个方法 `planSite` / `createSite` 从这儿出去，给想在别的
-程序里铺站的人用，不必绕命令行。模板放在哪、占位符叫什么、端口怎么挑一概不在面上：
+`main` 与装配层那几个名字一起从包的主出口出去，给想在别的程序里跑一趟核对、或不绕命令行装一次六区的人用：
 
-{/* ref file="../packages/cli/package.json" lines="9-18" */}
+@@livedoc ref ../packages/livedoc/src/index.ts:1-17 @@
 
 退出码三档，是契约——门禁靠它拦人：
 
 | 码 | 什么时候 |
 | --- | --- |
 | 0 | 全绿、全黄、全白都算过——**黄和白不是错**，黄是等作者复核，白是等作者确认 |
-| 1 | 有红：缺失、孤儿记录、名册外组件、摆放的落点不新鲜、**病卡**；`confirm` 里有 problems、`render` 遇到缺 frontmatter 字段的落点也是 1 |
-| 2 | 命令名不认识；`confirm` 点名的路径两边都对不上；`trajectory` 子命令没配卡目录。`init` 的失败（仓不在、站已经在、`--port` 不合法）算 1 |
+| 1 | 有红：缺失、孤儿记录、名册外组件、摆放的落点不新鲜、**病卡**；`confirm` 里有 problems、`render` 遇到缺 frontmatter 字段的落点、`attach` 的各种失败（没给 `--dir`、站不在、站里已有内容）也是 1 |
+| 2 | 命令名不认识；`confirm` 点名的路径两边都对不上；`trajectory` 没配卡目录 |
 
 所以门禁里可以直接 `pnpm livedoc check`：它只在「引用指向空气」这一类真错上拦人。
 
 ## 依赖的接口
 
-进这个包的东西一共就这几个名字，import 表一眼看全：
+进这一层的东西一共就这几个名字，import 表一眼看全：
 
-{/* ref file="../packages/cli/src/run.ts" lines="16-23" */}
+@@livedoc ref ../packages/livedoc/src/cli/run.ts:16-23 @@
 
 | 接口 | 用来做什么 | 生产实现 | 测试实现 |
 | --- | --- | --- | --- |
-| `loadProject(cwd)` | 装配：读配置、认格式、给出文档清单与读写 | `live-doc-project` | 同一个真实现，跑在临时真 git 项目上 |
-| `project.service`（core 的服务，经 project 递来） | `resolve` 出清单、`confirm` 出记录、`strays` / `forget` 清记录簿 | `live-doc-core` | 同上 |
-| `project.placing`（`render` / `check`） | 摆一趟、核一趟落点，回落点清单与四态 | `live-doc-project` | 同上 |
-| `project.docIdOf(path)` | 按页限定时把人给的路径认成文档身份 | `live-doc-project` | 同上 |
-| `targetKey(target)` | 把目标压成人读那一截、也是记录簿的键 | `live-doc-core` | 同上 |
-| `Format`（认记号、写回、`renderAi`、`lintComponents`） | 每一篇归哪个格式由 project 认，渲染与记号形态问它要 | 三个格式包 | 临时项目的配置按**绝对 `file:` 地址**引 format-md 与 format-html 的构建产物 |
-| `buildTrajectory(dir)` / `scanDir(dir)` | 出盘 / 树 / 主干模型；扫病卡 | `live-doc-trajectory` | 同一个真实现，喂临时目录里现写的卡 |
+| `loadProject(cwd)` | 装配：读配置、认格式、给出文档清单与读写 | 环境层 `host/load.ts` | 同一个真实现，跑在临时真 git 项目上 |
+| `project.service`（判定层的服务，经装配递来） | `resolve` 出清单、`confirm` 出记录、`strays` / `forget` 清记录簿 | 判定层 `engine/service.ts` | 同上 |
+| `project.placing`（`render` / `check`） | 摆一趟、核一趟落点，回落点清单与四态 | 环境层 `host/placement.ts` | 同上 |
+| `project.docIdOf(path)` | 按页限定时把人给的路径认成文档身份 | 环境层 | 同上 |
+| `targetKey(target)` | 把目标压成人读那一截、也是记录簿的键 | 判定层 `engine/marker.ts` | 同上 |
+| `Format`（认记号、写回、`renderAi`、`lintComponents`） | 每一篇归哪个格式由装配认，渲染与记号形态问它要 | fumadocs 那一层 | 临时项目的配置按**绝对 `file:` 地址**引一份假格式 |
+| `buildTrajectory(dir)` / `scanDir(dir)` | 出盘 / 树 / 主干模型；扫病卡 | `@godcreator02/livedoc-trajectory` | 同一个真实现，喂临时目录里现写的卡 |
+| `attachSite(options)` | 在一个已有骨架上装六区 | 装配层 `site/index.ts` | 同一个真实现，喂临时目录里现造的骨架 |
 
 ## 怎么单独测
 
-这个包没有假实现可喂——它是编排层，喂假的就什么都没验着。**假的是「项目」本身**：台子在临时目录里
-起一个真 git 仓，写几篇文档、一份 `livedoc.config.mjs`，然后直接调 `main`：
+这一层没有假实现可喂——它是编排，喂假的就什么都没验着。**假的是「项目」本身**：台子在临时目录里起一个真 git 仓，写几篇文档、一份 `livedoc.config.mjs`，然后直接调 `main`：
 
-{/* ref file="../tests/cli-project.ts" lines="1-9" */}
+@@livedoc ref ../tests/cli-project.ts:1-11 @@
 
-三处约束是台子的形状定死的：配置按**绝对 `file:` 地址**引格式包的构建产物（临时目录里解析不到包名，
-所以跑测试前得先 build）；**不起子进程**，退出码和打印当场看得见；台子要 `process.chdir` 到临时目录，
-那是进程全局的，所以**同一个文件里的用例只能串着跑**——命令行这摊按主题拆成三个 `.test.ts`，
-`node --test` 每个文件一个进程，文件之间才并发得起来。
+三处约束是台子的形状定死的：配置按**绝对 `file:` 地址**引那份假格式（临时目录里解析不到包名）；**不起子进程**，退出码和打印当场看得见；台子要 `process.chdir` 到临时目录，那是进程全局的，所以**同一个文件里的用例只能串着跑**——主干这摊按主题拆成三个 `.test.ts`，`node --test` 每个文件一个进程，文件之间才并发得起来。
 
-三个文件各守一摊。三个动作的主线、五类引用各自的报法、忽略文件退回 hash 记忆、记录簿的两种清扫、
-按页限定的三条（只动点名的、失踪清扫只对点名的做、路径对不上退 2）：
+三个文件各守一摊。三个动作的主线、五类引用各自的报法、忽略文件退回 hash 记忆、记录簿的两种清扫、按页限定的三条（只动点名的、失踪清扫只对点名的做、路径对不上退 2）：
 
-{/* ref file="../tests/cli.test.ts" lines="1-5" */}
+@@livedoc ref ../tests/cli.test.ts:1-5 @@
 
-outputs 那一摊只验命令行这一层——render 打成哪几行、check 把不新鲜的落点计进红、缺 frontmatter
-字段时退什么码，外加装配时的地盘规则与配置形状。摆放本身怎么渲、四态怎么判，账在装配包那边：
+outputs 那一摊只验这一层——render 打成哪几行、check 把不新鲜的落点计进红、缺 frontmatter 字段时退什么码，外加装配时的地盘规则与配置形状。摆放本身怎么渲、四态怎么判，账在环境层那边：
 
-{/* ref file="../tests/cli-outputs.test.ts" lines="1-5" */}
+@@livedoc ref ../tests/cli-outputs.test.ts:1-5 @@
 
-扫哪些文档、报告长什么样——`docs` 给数组时几个目录一起扫、配了 `trajectory` 顺带跑卡校验、
-`--json` 那份机读报告的四态与各个数组：
+扫哪些文档、报告长什么样——`docs` 给数组时几个目录一起扫、配了 `trajectory` 顺带跑卡校验、`--json` 那份机读报告的四态与各个数组：
 
-{/* ref file="../tests/cli-report.test.ts" lines="1-4" */}
+@@livedoc ref ../tests/cli-report.test.ts:1-4 @@
 
-建站那一摊自己一本账，跟上面三个文件不共台子，而且**分两层**。模块那层全部跨面上那两个方法测——
-端口怎么挑、名字怎么认、起手页钉什么、占位符错了抛不抛，全在 `planSite` 回的那份计划里看得见，
-一个内部函数都不用点名；落盘那半在临时目录里造一小片「邻居」和一个假仓跑真的：
+`attach` 自己一本账，跟上面三个文件不共台子，而且只验命令那一层：参数认没认对、话说清楚了没有、退了几，走 `main(["attach", …])` 从命令行这头进。装出来的六区长什么样是装配层自己的账。它顺带守一条**跨两份真相**的事：装配往目标站补的那张依赖表跟工作区各包的版本对得上——那张表是手写的，发版抬版本号时忘了抬它，装出来的站会装到一个旧版。
 
-{/* ref file="../tests/site.test.ts" lines="1-7" */}
-
-命令那层只问参数认没认对、话说清楚了没有、退了几，走 `main(["init", …])` 从命令行这头进：
-
-{/* ref file="../tests/init.test.ts" lines="1-7" */}
-
-跑法与工作区里别的几摊测试见 [测试与边界](/docs/cli/testing)。
+@@livedoc ref ../tests/attach.test.ts:1-11 @@
 
 ## 代码地图
 
 **在哪**：
 
-{/* tree dir="../packages/cli/src" depth="1" */}
+@@livedoc tree ../packages/livedoc/src/cli depth=1 @@
 
 **先读** `run.ts` 的 `main`：五条命令的分流、白名单、装配都在那二十行里，读完就知道剩下的往哪儿分。
 
-**读序**：`cli.ts`（薄壳）→ `run.ts`（全部编排，check / confirm / render 三趟各一个函数，
-外加打印用的那几张词表）→ `report.ts`（机读形状的契约，只有类型和注释，没有逻辑）。三个文件读完，
-命令这条线就完整了。
+**读序**：`cli.ts`（薄壳）→ `run.ts`（主干三条命令各一个函数，外加轨迹那条与打印用的那几张词表）→ `report.ts`（机读形状的契约，只有类型和注释，没有逻辑）→ `attach.ts`（另一路那条的命令层，认参数与打印，不碰前三份的任何东西）。四个文件读完，命令这条线就完整了。
 
-**`src/site/` 是独立的一块**：整套铺站，跟核心三包零耦合——不读配置、不装配、不认识记号，
-上面那三条也从不调它，只有 `main` 里那一句分流经 `init.ts` 碰得到它。读命令那条线的时候整个
-跳过；要动的是站模板与铺站流程时才进去，那时先读它的 `index.ts`（两个方法与那份计划的形状），
-再按需下到 `template.ts`（读模板、渲染）、`ports.ts`（扫口挑口）、`values.ts`（名字与起手页钉块）、
-`repo.ts`（目标仓的事实与落盘）四份内部件——它们互不认识，只被 `index.ts` 串起来。
-
-**可跳过**：`dist/` 是产物；`template/` 是站模板正本（改模板改的是那儿的 `.tpl`，不是这个包的逻辑）；
-`skills/` 是随包发的文档正本，同理。
+**可跳过**：`dist/` 是产物。装配的正本、站模板、随包发的两份 skill 都在包根下别的目录，不属于这一层。

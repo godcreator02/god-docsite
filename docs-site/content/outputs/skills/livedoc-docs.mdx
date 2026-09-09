@@ -167,10 +167,18 @@ README、AGENTS.md、包内 SKILL.md 都是生成物，正本住 `content/output
 
 # 起站与交接
 
-往已有仓铺站：`pnpm livedoc init --dir <仓的绝对路径> [--title <名>] [--port <口>]`，铺六区
-骨架页、六条路由、预置 outputs 与 `trajectory: 'content/trajectory'`；只铺文件不跑 install、
-不改仓里已有文件。模板假设站住仓根 `docs-site/`、被钉代码在仓根（引用写 `../src/…`），
-换形状就改 `livedoc.config.mjs` 里的相对路径。细节见 livedoc 站命令行章的 init 节。
+起一个新站是**两步，顺序不能反、中间别改文件**：先铺一个标准 fumadocs 骨架（装了 fumadocs
+的人才该有那个能力，工作台里是站件的 `docs-site.create`），再
+`pnpm livedoc attach --dir <站目录的绝对路径> [--title <名>]` 把六区装上——六个集合、六条路由、
+侧栏六个根节、`livedoc.config.mjs`、mdx 接线、名册脚本、五个区的骨架页，`package.json` 里补上
+依赖与 doc 脚本。只写文件不跑 install，端口用骨架挑好的那个。
+
+**装配只在刚铺好的骨架上跑**：站里已经有 `livedoc.config.mjs`、或 `content/` 下已经有骨架之外的
+内容，它报一句「这个站已有内容，请人工接线」退非零，一个字不改写——给跑了半年的站加 livedoc
+走人工那条路，比自作聪明地 AST 改写安全。
+
+模板假设站住仓根 `docs-site/`、被钉代码在仓根（引用写 `../src/…`），换形状就改
+`livedoc.config.mjs` 里的相对路径。细节见 livedoc 站的「装配六区」那一页。
 
 交接面四样：**愿景页 + system-map + 模块页 + glossary**，读序就这一条线；轨迹按需查。
 交接面上的钉码在、check 绿，交接面就没有说谎。

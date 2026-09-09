@@ -1,0 +1,188 @@
+---
+title: 判定层 engine
+description: 接口正本、记号语法、编排服务、四种状态；只认注进来的零件，不碰磁盘、不认识任何文档格式
+---
+
+# 判定层 engine
+
+**本页回答**：`@godcreator02/livedoc` 的 `src/engine/` 管哪几件事、它凭什么敢说自己不认识磁盘和文档格式、外面要换一种格式或一种记忆时照着哪个接口写。
+
+## 管什么
+
+四摊。**接口正本**——五种目标、引用、记录、清单、状态，加格式、读取器、记录簿、比较器四个接口，全在 `types.ts` 里定死，别的层只认这一份。**记号语法**——草稿记号怎么写、正式记号的载荷长什么样、记录簿的键怎么编解码，都在 `marker.ts` 里，各格式只管自己的外壳。**编排服务**——核对出清单、确认写记录簿、文档删了挪了之后一览与遗忘。**判定的默认实现**——hash 比较器，加目录树、存在性、名字三种目标各自的比较器，以及它们共用的归一化、哈希、hunk 解析与行段映射。
+
+编排的四件事、引用的身份、以及「这一层不碰磁盘」这条约束，在服务这一层是这么写的：
+
+@@livedoc ref ../packages/livedoc/src/engine/service.ts:1-14 @@
+
+## 不知道什么
+
+**不碰磁盘。** 每种目标要看的东西（观察）由读取器递进来：行段、整文件、名字看文件的行，目录树看名字表，存在性看类型。`Reader` 这个接口就是为这条立的——判定层从不自己去读一个路径，也就无所谓工作区、提交、软链。
+
+@@livedoc ref ../packages/livedoc/src/engine/types.ts:144-154 @@
+
+**不起子进程，也不知道 git 存在。** `src/engine/` 里的 import 只许指向自己和 `node:crypto`，一条测试正着守着：
+
+@@livedoc ref ../tests/boundary.test.ts:136-142 @@
+
+这条断言与下一节那张目录方向表是**这一层边界的全部守卫**：同一个包里，`engine/` 里随手写一句 `import "../host/git.ts"` 编译器不会吭一声，而判定层就此起了子进程——除了这份测试报红，没有任何别的信号。
+
+@@livedoc ref ../tests/boundary.test.ts:86-104 @@
+
+**不认识任何文档格式。** 一篇文档是谁认领的、记号长什么样、写回时怎么改那一行，都归格式实现。判定层只拿到「一串引用」和「一段文本」。
+
+**不知道摆放。** 渲染在格式接口上是可选的一项，出的是一份正文：
+
+@@livedoc ref ../packages/livedoc/src/engine/types.ts:130-131 @@
+
+这份正文摆到哪个落点、要不要带 frontmatter，判定层一个字不知道——编排服务从头到尾也不调它，渲染由别人发起。服务那一面上摆出来的方法里，没有一个通向渲染：
+
+@@livedoc ref ../packages/livedoc/src/engine/service.ts:31-40 @@
+
+**不看记录的 kind。** 取记录时原样递给比较器，认不认是比较器自己的事——判定层不翻译、不猜。
+
+**不知道项目根、配置文件、命令行、站。** 装配是[环境层 host](/docs/modules/host) 的活；判定层只吃已经造好的四样零件。这条约束还有一个具体形状：格式自留的私货判定层原样带回、从不读它。
+
+@@livedoc ref ../packages/livedoc/src/engine/types.ts:53-60 @@
+
+## 数据结构
+
+**目标五种**（行段、整文件、目录树、存在性、名字）。这几样的形状就是全部对外契约：
+
+@@livedoc ref ../packages/livedoc/src/engine/types.ts:15-51 @@
+
+**清单项**是一处引用核对完的全部信息：当前内容、记录、状态、这段今天在哪，外加缺失与变动的细分理由。
+
+@@livedoc ref ../packages/livedoc/src/engine/types.ts:74-94 @@
+
+**引用的身份 = 文档 + 引用写的目标。** 同一篇里指向同一段的两处引用共用一条记录；记录簿的键就是目标的文本形态，跟目标之间来回可逆（`keyToTarget` 是它的另一半）：
+
+@@livedoc ref ../packages/livedoc/src/engine/marker.ts:130-148 @@
+
+**记录带 kind，字段归那个比较器自己定。** 比较器看到别家的 kind 就交回「未确认」，不把一种记忆的记录翻译成另一种：
+
+@@livedoc ref ../packages/livedoc/src/engine/hash-comparator.ts:66-67 @@
+
+所以配置里把记忆强制成某一种，原来别家记的记录一律退回未确认，等人重新确认。
+
+**四种状态**，颜色跟着状态走：
+
+<Tabs>
+  <Tab title="🟢 新鲜">
+    观察跟记忆里那份一样。行段挪了位置但内容没变也是绿的——跟到哪儿由比较器说，`Item.lines` 交回的是今天的位置。
+  </Tab>
+  <Tab title="🟡 有变动">
+    内容变了，等作者复核，不退非零。给不给得出 `- / +` 的 diff、给不给得出旧内容，看比较器手上有没有旧的那一份。
+  </Tab>
+  <Tab title="⚪ 未确认">
+    还没确认过：新写的引用，或者记录是别家比较器记的。跟「改过了」是两回事。
+  </Tab>
+  <Tab title="🔴 缺失">
+    引用指向空气：整段没了、文件没了、目录没了、断言不在却出现了、名字找不到了。细分理由写在 `Item.reason` 里。
+  </Tab>
+</Tabs>
+
+**归一化只做三件事**：换行统一成 LF、去每行行尾空白、去掉末尾空行。缩进和注释保留——JSDoc 是契约的一部分，改了就该黄。规矩一条，展示前做的归一化就是哈希前做的：
+
+@@livedoc ref ../packages/livedoc/src/engine/span.ts:1-7 @@
+
+## 提供的接口
+
+**编排服务**是唯一算状态的地方。命令行逐篇喂文本，站构建喂已经认好的引用，走的是同一条路（见上一节的 `Service`）。
+
+**确认是全篇原子的**：有一处钉不住就整篇拒——记录簿一条不写、文档一个字不改，problems 原样交给上层打印。
+
+@@livedoc ref ../packages/livedoc/src/engine/service.ts:134-137 @@
+
+不是「能钉的先钉上」：半本记录簿比没有更难查。确认还顺手做两件事——行段按今天的位置记（判定跟到哪儿就钉到哪儿），旧键与文档里已经没有的引用一并当孤儿清掉。
+
+**记号语法自成一份 `marker.ts`**，跟接口正本分开的理由是两份的变化原因不同：`types.ts` 因「引用能指向什么」而变，`marker.ts` 因「记号怎么写」而变。它管的三样东西共同点是都在做「文本 ↔ 目标」的翻译，跟目标本身是什么无关。
+
+@@livedoc ref ../packages/livedoc/src/engine/marker.ts:1-12 @@
+
+**草稿记号是判定层定的**，所有格式一个写法。整行匹配，头尾的 `@@` 是哨兵，少一头就是普通文字、不报错：
+
+@@livedoc ref ../packages/livedoc/src/engine/marker.ts:88-100 @@
+
+动作词只有五个，语义校验统一走 `toTarget` 一个口子——各格式因此报错一致，行号不合理、depth 不是正整数都报到行：
+
+@@livedoc ref ../packages/livedoc/src/engine/marker.ts:58-70 @@
+
+**正式记号分两截。** 载荷是判定层出的，所有格式共用，认回来也走判定层：
+
+@@livedoc ref ../packages/livedoc/src/engine/marker.ts:38-42 @@
+
+外壳归格式：`marker(target)` 出一行，`parse(marker(t))` 必须认回 `t`——「怎么写」和「怎么认」住同一处。生产那份外壳是 mdx 的花括号注释，见 [fumadocs 格式](/docs/modules/fumadocs)。五类引用各该说哪种话，见[五类引用手册](/docs/start/handbook)。
+
+**判定层自带的比较器**管两摊。行段和整文件那摊是 hash 版：只记段哈希和旧行号，不问 git，也没有旧内容。行段靠滑窗跟——先看旧位置，不对就按段长在整个文件里逐行滑一遍找同哈希的窗口；撞车取离旧位置最近的一处，两处一样近就不猜；找不到就是「有变动、位置不明」，给不出 diff，行号停在旧位置。
+
+@@livedoc ref ../packages/livedoc/src/engine/hash-comparator.ts:74-86 @@
+
+另一摊是按目标种类分派：行段和整文件交给外面给的那个（[环境层 host](/docs/modules/host) 的 auto、git，或本层的 hash），目录树、存在性、名字各走本层自己的一个。
+
+@@livedoc ref ../packages/livedoc/src/engine/kinds.ts:111-126 @@
+
+这三种的记忆各不相同：目录树记名字表本身（几十个名字不是代码，不这么存就说不出多了哪个少了哪个，是「不存第二份内容」的唯一例外），存在性记类型，名字只记「在」。后两种没有黄，要么绿要么红；目录树也不设提交门——新建还没提交的文件正该报黄。
+
+@@livedoc ref ../packages/livedoc/src/engine/kinds.ts:1-8 @@
+
+## 依赖的接口
+
+四样全是外面递进来的，判定层自己一个都不造：
+
+| 接口 | 用来做什么 | 生产实现 | 测试实现 |
+| --- | --- | --- | --- |
+| `Format` | 认领文档、认出引用、确认时写回 | `src/fumadocs/` | `tests/fake-format.ts` |
+| `Reader` | 给观察：文件的行、名字表、路径的类型 | `src/host/` 的 fs 读取器 | `tests/core.test.ts` 里的内存读取器 |
+| `Ledger` | 记录存哪、怎么取、怎么清 | `src/host/` 的 json 记录簿 | `tests/core.test.ts` 里的内存记录簿 |
+| `Comparator` | 记忆怎么记、变没变怎么判 | `src/host/` 的 auto（git / hash 分派） | 本层自带的 hash 与种类比较器 |
+
+`Format` 这条接缝分离的是**「怎么认记号」与「怎么判新鲜」两种变化原因**，而且它下面真有两个适配器：生产是 fumadocs 口味的 mdx，测试是 `tests/fake-format.ts`。判定层这一面只把认领、认记号、写回记号那几样当必选；剩下的（名册检查、渲染、终态标）有就用、没有就跳，接口上一眼看得出哪几样带问号：
+
+@@livedoc ref ../packages/livedoc/src/engine/types.ts:115-134 @@
+
+读取器和记录簿都窄到能一眼看完——这是「换一样零件不用动判定层」的前提：
+
+@@livedoc ref ../packages/livedoc/src/engine/types.ts:144-164 @@
+
+比较器两个方法就是全部：确认时出记录、或者说清楚为什么钉不住；核对时判状态，顺便交回这段今天在哪。
+
+@@livedoc ref ../packages/livedoc/src/engine/types.ts:178-193 @@
+
+## 怎么单独测
+
+判定层的账在 `tests/core.test.ts`，喂三样假的：**假格式**（记号是一行 `REF <记录簿键>`，草稿记号仍交给判定层认）、**内存读取器**（一张文件表就是全部世界）、**内存记录簿**。这一层不读盘、不认识任何真格式，这么测正好把这两条也守住。
+
+@@livedoc ref ../tests/core.test.ts:1-4 @@
+
+假格式整份就是这一份，它是 `Format` 底下第二个真适配器：
+
+@@livedoc ref ../tests/fake-format.ts @@
+
+证明的是这几件：四种状态的完整来回（未确认 → 新鲜 → 有变动 → 缺失）；一篇文档两个格式都认领时报错而不是靠顺序静默定胜负；同一段被引两处只写一条记录；文档里删掉引用报孤儿、再确认一次清掉；文档整个删了或挪了走 strays / forget；一处钉不住整篇拒；草稿记号的哨兵与五种写法；别家 kind 的记录当没确认过；目录树、存在性、名字三种各自的黄红语义；hash 滑窗的挪位、撞车取近、并列不猜、找不到时位置不明；归一化与行段切片。
+
+记号那条契约由 `tests/marker.test.ts` 拿两个适配器一起过——`parse(marker(t))` 必须认回 `t`。「认得出」只是一半，「什么时候不认」才是这套写法敢往正文里塞的理由：哨兵不齐的、写在句子中间的、动作词不认识的，一律不认。
+
+@@livedoc ref ../tests/marker.test.ts:47-57 @@
+
+还有一条从外面守着：两个适配器在同一串改动下状态必须一致——状态是判定层算的，格式只交引用，不一致就是有人抄了近道。
+
+@@livedoc ref ../tests/contract.test.ts:1-8 @@
+
+边界那道门单独一份，`tests/boundary.test.ts` 的文件头写清了它守什么、为什么不许注释掉某一条：
+
+@@livedoc ref ../tests/boundary.test.ts:1-26 @@
+
+## 代码地图
+
+**在哪**：
+
+@@livedoc tree ../packages/livedoc/src/engine depth=1 @@
+
+**先读** `types.ts`（接口正本，全套用词也在文件头的注释里），再读 `service.ts`（编排，四件事都在这儿）。记号怎么写单看 `marker.ts` 一份就够。这一层的出口就是一个文件，导出表即对外面貌：
+
+@@livedoc ref ../packages/livedoc/src/engine/index.ts @@
+
+**读序**：`types.ts` 不吃任何人；`marker.ts` 只借它 `Target` 一族的类型；`span.ts`（归一化、哈希、切片）和 `diff.ts`（hunk 解析、行段映射）是纯函数；`hash-comparator.ts` 与 `kinds.ts` 吃前几者；`service.ts` 吃接口不吃实现；`index.ts` 只摆出口。
+
+**可跳过**：`dist/` 是构建产物。

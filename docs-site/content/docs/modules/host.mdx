@@ -1,0 +1,182 @@
+---
+title: 环境层 host
+description: 读配置装出一个判定服务；记忆按被引文件的位置分派；git 与摆放两条线住这儿
+---
+
+# 环境层 host
+
+**本页回答**：`@godcreator02/livedoc` 的 `src/host/` 把哪些零件装进判定服务、一处引用拿到哪种记忆是谁决定的、一篇 mdx 正本怎么摆到落点上、换一个读取器或记录簿要动哪儿。
+
+## 管什么
+
+碰环境的活全在这一层：读盘、起 git 子进程、写记录簿、把生成物摆到落点。
+
+@@livedoc ref ../packages/livedoc/src/host/index.ts:1-9 @@
+
+一个项目 = 一个根目录 + 一份 `livedoc.config` + 一本记录簿。装配把三者串起来，交出一个装好的项目——判定服务是它的主体，摆放挂在旁边：
+
+@@livedoc ref ../packages/livedoc/src/host/load.ts:1-5 @@
+
+零件是四样：**读取器**（读工作区文件、列目录名字表、看路径是文件还是目录）、**json 记录簿**、**比较器**、加上配置里声明的格式名单。比较器这一样是这一层的主戏——`auto` 按被引文件的位置挑记忆，git 那条线（定位文件在哪个仓、取 blob、出 hunk 表、跟着行段走）也住这儿，因为它要起子进程，而判定层不起。
+
+**摆放是另一摊。** 配置的 `outputs` 里，一篇 mdx 正本挂着几个落点（仓根的 README、AGENTS.md、包内的 SKILL.md）；摆放把它渲成一份干净 md、戴上点名的 frontmatter 字段、写到每个落点上，也负责回头核对盘上那份还跟不跟源一致。它落在这一层的理由跟 git 那条线一样：要写盘、要问格式要渲染，判定层两样都不做。
+
+@@livedoc ref ../packages/livedoc/src/host/placement.ts:1-13 @@
+
+## 不知道什么
+
+**不知道文档是什么格式。** 格式是消费方在配置里挂的，这一层只把名单原样交给判定服务，自己一个格式实现都不 import——`fumadocs` 这个名字只许出现在 `src/fumadocs/` 那一层：
+
+@@livedoc ref ../tests/boundary.test.ts:152-160 @@
+
+方向本身写在一张表上：`host/` 可以用 `engine/` 的类型与纯函数，不许知道 `fumadocs/`、`site/`、`cli/`。同一个包里编译器不管这件事，这张表加上它那条断言，是这条方向**唯一**的守卫。
+
+@@livedoc ref ../tests/boundary.test.ts:86-104 @@
+
+**不知道状态怎么算。** 判定的编排在 [判定层 engine](/docs/modules/engine)：这一层只交两样东西——观察（读取器给的）和记忆实现（比较器）。绿黄白红是判定层算出来的，命令行和站看到的状态因此必然一致。
+
+**摆放不知道装配的别的部分，也不知道落点是不是文件。** 它认得的外面只有 `PlacingHost` 那一圈：前半是项目面（根、配置、判定服务、组件名册、这篇挂了哪些落点、这篇的原文），后半是生成物的存放（读一个落点、写一个落点）。多的一样摆放也拿不到，`placement.ts` 因此一句 `node:fs` 都不 import。
+
+@@livedoc ref ../packages/livedoc/src/host/placement.ts:63-80 @@
+
+存放那半是**接缝**，两个适配器。生产那份在装配里：落点相对项目根，读写与建父目录都在这几行。
+
+@@livedoc ref ../packages/livedoc/src/host/load.ts:144-162 @@
+
+**摆放认得 fumadocs 留下的两处痕迹，仅此而已。** 站上 `.md` 路由给标题加的锚记、序列化器紧跟标点时保守转义的加粗星号，摆放都认得——认它们只为把产物还原成可读文本，产物是给 agent 直接读的，不该带着站的痕迹。除这两处之外，这一层不认识 fumadocs 的任何东西：不认识它的集合、loader、组件表，也不 import 它。这是一处真实的轻微耦合，写在这儿比藏起来强。
+
+@@livedoc ref ../packages/livedoc/src/host/placement.ts:82-89 @@
+
+## 数据结构
+
+**配置的形状**就是这一层对消费方的全部契约面——声明挂哪些格式、哪几个目录进 check、记录簿落哪、用哪种记忆、生成物摆哪、组件名册、轨迹卡目录：
+
+@@livedoc ref ../packages/livedoc/src/host/load.ts:18-41 @@
+
+**落点两种写法，归一之后是同一张表。** 一个落点要么是一个相对项目根的路径，要么是 `{ to, frontmatter }`——后者点名 mdx 源头部的哪几个字段随行到生成物（SKILL.md 要的那两个就是这么来的）；字符串写法的意思是「整段 frontmatter 剥掉」。
+
+@@livedoc ref ../packages/livedoc/src/host/placement.ts:18-29 @@
+
+**一个落点核对完是四态加一个判定。** 四态说的是发生了什么：生成物跟源一致、生成物还不在、跟源不一致、源头部缺点名的字段（缺哪几个一并交回）。判定是另一个布尔字段，读报告的人照它决定要不要重摆——四态怎么归到「新不新鲜」由这儿说了算，命令行和工作台件不必各解释一遍。
+
+@@livedoc ref ../packages/livedoc/src/host/placement.ts:31-49 @@
+
+**git 记忆记什么**：blob、commit、旧 blob 里的行段、段哈希。不记仓在哪——blob 是内容寻址的，核对时从文件位置重新找仓，所以同一条记录换台机器、换个 clone 路径照样认得。
+
+@@livedoc ref ../packages/livedoc/src/host/git-comparator.ts:19-26 @@
+
+**记录簿落盘就是一个 json**，两层键：文档 → 目标 → 记录。整个实现一眼看得完，`save` 只在内容真变了才写盘——记录簿会被构建工具登记成依赖，白改一次 mtime 就是一次全站重编。
+
+@@livedoc ref ../packages/livedoc/src/host/json-ledger.ts @@
+
+## 提供的接口
+
+**`loadProject(root)`** 是唯一入口，交回装好的项目。同一个根只装配一次：站构建时几十个 loader 并发调它，没这一条就是几十次读配置、几十本记录簿。
+
+@@livedoc ref ../packages/livedoc/src/host/load.ts:83-91 @@
+
+配置里的 `comparator` 有四种写法。强制成 `git` 或 `hash` 时只换掉行段和整文件那一半，目录树、存在性、名字照旧走判定层那三个：
+
+@@livedoc ref ../packages/livedoc/src/host/load.ts:103-110 @@
+
+**`createReader(root)`** 是判定层看到的全部世界。目录名字表在 git 仓里按 `.gitignore` 过滤（`dist/`、`node_modules/` 不进清单，也不往里走），`.git` 自己去掉；不在仓里就原样列。
+
+@@livedoc ref ../packages/livedoc/src/host/fs-reader.ts:1-8 @@
+
+**`createAutoComparator`** 是默认的那个。被引文件不限于项目自己的仓：另一个单元的仓、上游 clone、被忽略的 `node_modules`、不在任何仓里的目录，都能钉。规则一条——在任何 git 仓里、已跟踪、工作区干净的走 git，本仓外仓一视同仁；仓里但被 `.gitignore` 忽略的走 hash；不在任何仓里的走 hash。未跟踪且没被忽略的、已跟踪但脏的，一律拒并让人先 commit，**不退成 hash**；仓一次提交都没有的也拒。
+
+@@livedoc ref ../packages/livedoc/src/host/auto-comparator.ts:20-29 @@
+
+「该进 git 的东西」不能悄悄退成一份弱记忆，所以只有明确被忽略的才走 hash。文件在哪个仓按它的真实路径定，pnpm 的软链按指向的地方算。
+
+核对时不看文件在哪，按**记录的 kind** 转发——记录是当时哪种记忆记的，就让哪个比较器判，认不得的 kind 当没确认过：
+
+@@livedoc ref ../packages/livedoc/src/host/auto-comparator.ts:41-45 @@
+
+一个项目里 git 记录和 hash 记录并存。哪一处拿到的是 hash 记忆，`confirm` 那一行会标出来（见[命令行](/docs/modules/cli)）——写手得知道自己拿到的是弱记忆。
+
+**`createGitComparator`** 管行段和整文件。确认那头守几道门：得在某个仓里、那个仓得有过提交、文件得在 HEAD 里（未跟踪、被忽略、大小写不符都拒）、工作区得干净。核对那头拿 `git diff -U0` 出 hunk 表，把旧行段映到今天：
+
+@@livedoc ref ../packages/livedoc/src/host/git-comparator.ts:97-104 @@
+
+**绿只认段哈希**：hunk 说没碰到也再比一次，行映射跟内容对不上时宁可报黄让人复核，也不把红判成绿。整段没了是 `vanished`，文件没了是 `file-missing`，blob 不在对象库（浅克隆、历史重写、换了个仓）是 `blob-missing`。这条线为什么这么设计、`hash-object` 为什么自己算，见 [git 记忆原理](/docs/principles/git)。
+
+**`placing`** 是摆放的全部对外面貌，挂在装好的项目上，两个方法。`render(doc)` 摆一趟：渲一份正文，给每个落点戴上它点名的 frontmatter 字段，写过去，回一张落点清单。`check(doc)` 只读不写，回每个落点的四态。两个方法用的是同一份正文，所以摆完再核对必然新鲜——守着的和摆出去的不可能是两份东西。
+
+@@livedoc ref ../packages/livedoc/src/host/placement.ts:51-61 @@
+
+调用方得知道两件事。**空清单不是失败**：这篇没挂落点、没有格式认领它、或者认领它的格式不出 ai 产物，三者任一都回空清单，意思是「这篇没有摆放这回事」，不是「摆了零个」。**缺字段的落点不写**：点名了源里没有的字段，那个落点回 `no-frontmatter` 加缺哪几个，盘上一个字不动——摆一份缺 `name` 的 SKILL.md 比不摆更糟。
+
+frontmatter 是**逐行原样搬**的，不解析 YAML：一条字段从它的顶层键行起、到下一条顶层键行止，块式列表和多行标量的缩进续行都跟着走。作者在源里写下的那几行，就是生成物头部那几行，一眼对得上。
+
+@@livedoc ref ../packages/livedoc/src/host/placement.ts:145-153 @@
+
+正文本身由格式渲，摆放只在上面整形：剥掉整段 frontmatter 与站上的标题锚记、还原逃逸了一半的加粗、去掉开头空行。
+
+落点的地盘在装配那一刻就查死：目标得相对项目根、不许落进任何一个文档目录（那是源的地盘）、一个目标只许一个文档写。犯一条 `loadProject` 当场抛，check 与 render 都还没轮到。
+
+@@livedoc ref ../packages/livedoc/src/host/placement.ts:114-132 @@
+
+## 依赖的接口
+
+| 接口 | 用来做什么 | 生产实现 | 测试实现 |
+| --- | --- | --- | --- |
+| `Format`（判定层定） | 认领文档、认出引用、写回；摆放还问它要 ai 产物 | `src/fumadocs/`，由消费方在 `livedoc.config` 里挂上 | `tests/fake-format.ts` |
+| `Reader` / `Ledger`（判定层定） | 观察从哪来、记录存哪 | 本层的 fs 读取器与 json 记录簿 | `tests/repo.ts` 的内存记录簿；读取器用真的 |
+| `Comparator`（判定层定） | 记忆怎么记、变没变怎么判 | 本层的 auto 与 git 版 | 测试里按用例换 `auto` / `hash` / git |
+| `PlacingHost` 的存放那半（本层定） | 读一个落点上现在摆着什么、把生成物摆到一个落点上 | `load.ts` 里那份：落点是项目根下的文件，父目录自己建 | `tests/placing-host.test.ts` 的内存宿主：落点是一张 `to → 内容` 的表 |
+| 判定层的纯函数 | 归一化、段哈希、切片、hunk 解析、行段映射 | `src/engine/`，同一份 | 同一份 |
+| `git` 命令行 | blob、hunk、`check-ignore`、`status` | 子进程，每次调用都带上限 | 临时目录里起的真 git 仓 |
+| `livedoc.config.mjs` | 项目的声明面 | 消费方项目里的活模块，由 Node 原生加载 | 夹具不走 `loadProject`，零件直接装 |
+
+子进程一律带超时——卡住的子进程比错误的答案更难查：
+
+@@livedoc ref ../packages/livedoc/src/host/git.ts:21-22 @@
+
+配置必须由 Node 原生加载，两个打包器标记让站的打包器绕开这一句；被它改写成自己的加载器，消费方那份活配置就装不进来了：
+
+@@livedoc ref ../packages/livedoc/src/host/load.ts:112-116 @@
+
+## 怎么单独测
+
+分派规则的账在 `tests/auto-comparator.test.ts`：夹具在临时目录里起**真的 git 仓**，喂**假格式**，记录簿换成内存的。记忆分派是跟 git 的真行为对账，假不了。
+
+@@livedoc ref ../tests/auto-comparator.test.ts:1-10 @@
+
+夹具本身不走 `loadProject`——临时目录里解析不到包名，零件直接拿来装；装配走一整趟（真扫目录）在 `tests/cli.test.ts`，地盘规则拒掉哪几种配置在 `tests/cli-outputs.test.ts`。
+
+@@livedoc ref ../tests/repo.ts:1-4 @@
+
+配置归一化与文档身份那几件全部跨 `loadProject` 看——归一化的结果挂在装好的项目上（`docsDirs`、`placements(doc)`、`docIdOf(path)`），形状不对的配置装配当场拒，所以不必把那几个纯函数导出来单验。项目只有一份配置、`formats` 是空表，不扫目录也不起仓：
+
+@@livedoc ref ../tests/project-load.test.ts:1-8 @@
+
+摆放那一摊有两份账，喂的是同两个适配器。**内存那份**在 `tests/placing-host.test.ts`：落点是一张 Map，一个字节不落盘、一次 git 不起，于是「摆了什么、摆到哪个键上、那份被动过之后判成哪一态」直接看得见。
+
+@@livedoc ref ../tests/placing-host.test.ts:36-52 @@
+
+**真盘那份**在 `tests/placement.test.ts`：临时目录里起一个真项目，`loadProject` 装好之后直接调两个方法——不起命令行、不劫持 stdout、不 `process.chdir`。摆放的判定不该只有走一趟命令行才验得着。项目配 `comparator: "hash"`，因此不必起 git 仓：摆放一句 git 都不问，要真仓的是 git 记忆。
+
+@@livedoc ref ../tests/placement.test.ts:1-9 @@
+
+两份一起证明的是这几件：一个落点从「还不在」到摆过去、再核对成「一致」的整条来回；生成物被手改了、被删了各判成哪一态，重摆之后回一致；点名的字段原样随行、没点名的剥掉、字符串写法整段剥掉；点名了源里没有的字段那个落点不写、两个方法都说得出缺哪几个；没挂映射的文档两个方法都回空清单、一个字不写。命令行怎么把这些印成人话、退什么码，归 `tests/cli-outputs.test.ts`。
+
+还有两处从外面守着：`tests/contract.test.ts` 拿产品用的 git 版比较器，验两个格式适配器在同一串改动下状态一致；`tests/boundary.test.ts` 守目录方向与依赖面，文件头写清了它守什么、为什么不许注释掉某一条。
+
+@@livedoc ref ../tests/boundary.test.ts:1-26 @@
+
+## 代码地图
+
+**在哪**：
+
+@@livedoc tree ../packages/livedoc/src/host depth=1 @@
+
+**先读** `load.ts`（装配的全貌，配置的形状也在这儿），再读 `auto-comparator.ts`（分派规则，四十行看完）。摆放那一摊自成一份 `placement.ts`，从文件头的注释读起。这一层的出口是一个文件，导出表即对外面貌——层外生产用的只有 `loadProject`，其余是装配的零件（换比较器、换读取器时拿）与类型；git 那把原语一个都不出这个口，它们是 git 比较器的内部实现：
+
+@@livedoc ref ../packages/livedoc/src/host/index.ts @@
+
+**读序**：`git.ts` 是子进程原语（定位仓、blob、hunk、忽略判定），不吃本层任何人；`git-comparator.ts` 吃 `git.ts` 加判定层的纯函数；`auto-comparator.ts` 吃前两者加判定层的 hash 版；`fs-reader.ts` 只吃 `git.ts`；`json-ledger.ts` 只吃判定层的键函数；`placement.ts` 只吃判定层的类型加 `load.ts` 里配置的那个类型，本层别的实现一个不吃，`node:fs` 也不吃（生成物怎么落地由宿主给）；`load.ts` 吃全部，交给判定层的 `createService`。
+
+`placement.ts` 与 `load.ts` 之间因此是一圈**只有类型的**循环引用：`load.ts` 吃摆放的实现，摆放回头只借它一个 `ProjectConfig` 类型（`import type`，编译期擦掉）。运行时没有这条边，读的时候也不必先读 `load.ts`——从摆放那份文件头读起就行。
+
+**可跳过**：`dist/` 是构建产物。

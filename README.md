@@ -10,32 +10,36 @@
 
 五类引用把「文件系统这根轴」填满：行段、整文件、目录树、存在性（含「断言不在」）、名字。
 
-另一摊是**轨迹卡**：live-doc 治现状文档撒谎，轨迹卡治历史被改写——一次方向了断记下来就该冻结，
+另一摊是**轨迹卡**：livedoc 治现状文档撒谎，轨迹卡治历史被改写——一次方向了断记下来就该冻结，
 谁取代了谁看得见。卡不进记录簿、不用 confirm，只要即时校验；星轨盘在站上是一条独立的整页路由，
 不是塞进 mdx 的组件。
 
 ## 怎么装
 
 ```bash
-pnpm add -D @godcreator02/live-doc-cli @godcreator02/live-doc-project @godcreator02/live-doc-format-fumadocs
+pnpm add -D @godcreator02/livedoc @godcreator02/livedoc-trajectory
 ```
 
-写 md 或手写 html 就把 `format-fumadocs` 换成 `@godcreator02/live-doc-format-md` /
-`@godcreator02/live-doc-format-html`，一个项目里几个格式包可以并存（各认各的后缀）。
-fumadocs 在格式包里只是 **peer**——用你项目里装的那份。
+`fumadocs` 与 `react` 在包里只是 **peer**，用你项目里装的那份；只跑命令行、不装 fumadocs 的仓
+一个都不必装。站的接线从 `@godcreator02/livedoc/fumadocs` 进。
 
-还没有文档站的仓，一条命令铺一个接好的六区站：
+**站的构建配置里 `serverExternalPackages` 必须留空**：这个包里同时住着服务端那半与两个客户端
+组件（状态点、术语），而那个字段按包名匹配、没有子路径粒度——外置的边界会把 `"use client"`
+指令吃掉。
+
+已经有一个 fumadocs 骨架的站，一条命令把六区装上：
 
 ```bash
-pnpm livedoc init --dir <仓的绝对路径>
+pnpm livedoc attach --dir <站目录的绝对路径>
 ```
 
-它不读 `livedoc.config.mjs`（那正是它要铺出来的东西），只往一个已经存在、且还没有 `docs-site/` 的仓里
-铺文件——不跑 `pnpm install`、不改仓里任何已有文件。
+它不读 `livedoc.config.mjs`（那正是它要写出来的东西），**只在刚铺好的骨架上跑**：站里已经有
+`livedoc.config.mjs`、或 `content/` 下已经有骨架之外的内容，就报一句「这个站已有内容，请人工
+接线」退非零，一个字不改写。骨架怎么铺不归 livedoc——装了 fumadocs 的人才该有那个能力。
 
 ## 怎么用
 
-项目根放一份 `livedoc.config.mjs`（挂哪些格式包、哪几区进 check、生成物摆哪），文档里写一行草稿记号：
+项目根放一份 `livedoc.config.mjs`（挂哪些格式、哪几区进 check、生成物摆哪），文档里写一行草稿记号：
 
 ```md
 @@livedoc ref src/greet.ts:2-3 @@                       行段
@@ -62,8 +66,8 @@ pnpm livedoc render                    # 挂了 outputs 映射的摆到落点；
 
 ## 文档在哪
 
-`docs-site/` 是这套包的**六区文档站**，也是它唯一的消费方——装的是工作区里的这几个包，钉的是工作区里的
-真源码，所以仓里不另留示例。
+`docs-site/` 是这两个包的**六区文档站**，也是它们唯一的消费方——装的是工作区里的这两个包，钉的是
+工作区里的真源码，所以仓里不另留示例。
 
 ```bash
 cd docs-site
@@ -75,8 +79,8 @@ pnpm livedoc check
 `content/future/` 未来、`content/outputs/` 生成正本（进 check）、`content/feedback/` 反馈。
 先读现状区的**系统地图**，再读要改的那块的模块页。
 
-文档本身怎么写、六区怎么分、每页写到哪为止，正本是随 `@godcreator02/live-doc-cli` 发的 skill，
-住 `packages/cli/skills/`：写文档读 `livedoc-docs`、落卡读 `trajectory`。装了这个包的仓把它的
+文档本身怎么写、六区怎么分、每页写到哪为止，正本是随 `@godcreator02/livedoc` 发的 skill，
+住 `packages/livedoc/skills/`：写文档读 `livedoc-docs`、落卡读 `trajectory`。装了这个包的仓把它的
 `skills/` 挂给 agent 读就行。通用开发方法论（盘需求、并行派活、自解释代码）不在这儿——它们
 不描述本仓的代码，随开发件 `@godcreator02/gwb-dev-loop` 走。
 

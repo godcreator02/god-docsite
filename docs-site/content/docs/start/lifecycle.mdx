@@ -7,7 +7,7 @@ description: 写下 → 未确认 → 确认投影 → 代码改了变黄 → �
 
 **本页回答**：一处引用从写下那一刻起会经过哪些状态，每一步命令行说什么、页面上长什么样。
 
-下面每一段的输出，都是在一个临时 git 仓里真跑出来的：一份 `src/greet.ts`，一篇 `docs/a.md`，
+下面每一段的输出，都是在一个临时 git 仓里真跑出来的：一份 `src/greet.ts`，一篇 `docs/a.mdx`，
 比较器是产品用的 git 版。
 
 ## 第一幕：写下——未确认
@@ -19,7 +19,7 @@ description: 写下 → 未确认 → 确认投影 → 代码改了变黄 → �
 ```
 
 ```text
-⚪ docs/a.md  src/greet.ts:2-3  未确认，等作者确认
+⚪ docs/a.mdx  src/greet.ts:2-3  未确认，等作者确认
 ```
 
 空心黄。这时候记录簿里还没有它，站上那一块照样显示代码（内容是现拿的），只是标题栏后面缀着「· 未确认」。
@@ -27,21 +27,16 @@ description: 写下 → 未确认 → 确认投影 → 代码改了变黄 → �
 ## 第二幕：确认——草稿换成正式记号，内容投影
 
 ```text
-✅ docs/a.md  src/greet.ts:2-3  已确认，草稿记号已换成正式记号
+✅ docs/a.mdx  src/greet.ts:2-3  已确认，草稿记号已换成正式记号
 ```
 
-md 那头文档变成这样——记号、展示区、尾记号三件套：
+文档里那一行草稿记号换成 mdx 的正式记号，此后不再变：
 
-````md
-<!-- ref file="src/greet.ts" lines="2-3" -->
-```ts
-export function greet(name: string): string {
-  return `hello ${name}`;
+```mdx
+{/* ref file="src/greet.ts" lines="2-3" */}
 ```
-<!-- /ref -->
-````
 
-mdx 没有展示区，只留一行 `{/* ref … */}`，内容 build 时现拿。记录簿里多出一条：`kind`、blob、commit、
+**mdx 没有展示区**，文件里只留这一行，内容 build 时现拿。记录簿里多出一条：`kind`、blob、commit、
 行段、段哈希——**没有代码内容**。再 `check` 一次就是绿的。
 
 ## 第三幕：代码改了——黄
@@ -49,7 +44,7 @@ mdx 没有展示区，只留一行 `{/* ref … */}`，内容 build 时现拿。
 改一个字，还没提交：
 
 ```text
-🟡 docs/a.md  src/greet.ts:2-3  有变动，等作者复核
+🟡 docs/a.mdx  src/greet.ts:2-3  有变动，等作者复核
 ```
 
 黄不是错，命令行退 0。站上这一块把旧行新行渲在同一块里（`- / +` 用 shiki 的 diff 标记），
@@ -58,8 +53,8 @@ mdx 没有展示区，只留一行 `{/* ref … */}`，内容 build 时现拿。
 这时候要是急着确认，会被挡下来：
 
 ```text
-🔴 docs/a.md 第 3 行：src/greet.ts:2-3 未提交——钉住只对已提交的内容做，先 commit
-·  docs/a.md  这篇整篇没确认——上面几处先处理掉
+🔴 docs/a.mdx 第 3 行：src/greet.ts:2-3 未提交——钉住只对已提交的内容做，先 commit
+·  docs/a.mdx  这篇整篇没确认——上面几处先处理掉
 ```
 
 <Note>
@@ -72,7 +67,7 @@ mdx 没有展示区，只留一行 `{/* ref … */}`，内容 build 时现拿。
 `git commit` 之后再 `confirm`，这段新内容成为新的记忆：
 
 ```text
-✅ docs/a.md  src/greet.ts:2-3  已确认，文档已写回
+✅ docs/a.mdx  src/greet.ts:2-3  已确认，文档已写回
 ```
 
 ## 第五幕：代码挪了位置——还是绿
@@ -80,14 +75,14 @@ mdx 没有展示区，只留一行 `{/* ref … */}`，内容 build 时现拿。
 在文件上面插两行，函数整体下移，内容一个字没改：
 
 ```text
-🟢 docs/a.md  src/greet.ts:2-3  新鲜
+🟢 docs/a.mdx  src/greet.ts:2-3  新鲜
 ```
 
 绿。git 记忆拿 hunk 表把旧行段映到今天，段哈希对得上就是新鲜（hash 记忆靠滑窗找，结果一样）。这一趟 `confirm` 会把记号上的
 行号改写成今天的位置：
 
-```md
-<!-- ref file="src/greet.ts" lines="4-5" -->
+```mdx
+{/* ref file="src/greet.ts" lines="4-5" */}
 ```
 
 记录簿里的旧键 `src/greet.ts:2-3` 当孤儿清掉。**记号上的数字不用人维护。**
@@ -97,8 +92,8 @@ mdx 没有展示区，只留一行 `{/* ref … */}`，内容 build 时现拿。
 把函数删掉，或者把文件删掉：
 
 ```text
-🔴 docs/a.md  src/greet.ts:4-5  缺失，引用指向空气（整段已被删光）
-🔴 docs/a.md  src/greet.ts:4-5  缺失，引用指向空气（文件不在了）
+🔴 docs/a.mdx  src/greet.ts:4-5  缺失，引用指向空气（整段已被删光）
+🔴 docs/a.mdx  src/greet.ts:4-5  缺失，引用指向空气（文件不在了）
 ```
 
 红退 1。站上这一块显示的是**文档写下时那段**——从记忆里的 blob 取回来的，好让人知道原本引的是什么。
@@ -109,32 +104,32 @@ mdx 没有展示区，只留一行 `{/* ref … */}`，内容 build 时现拿。
 把文档里那处引用整个删了，记录簿里那条就没人认领了：
 
 ```text
-🔴 docs/a.md  src/greet.ts:4-5  孤儿记录：文档里已经没有这处引用
+🔴 docs/a.mdx  src/greet.ts:4-5  孤儿记录：文档里已经没有这处引用
 ```
 
 再 `confirm` 一次自动清掉：
 
 ```text
-🧹 docs/a.md  src/greet.ts:4-5  孤儿记录已清
+🧹 docs/a.mdx  src/greet.ts:4-5  孤儿记录已清
 ```
 
 ## 这七幕在代码里是哪两段
 
 核对（`check` 和站构建走的是同一条）：逐处问比较器要判定，切出今天这段内容，凑成清单项。
 
-{/* ref file="../packages/core/src/service.ts" lines="104-121" */}
+{/* ref file="../packages/livedoc/src/engine/service.ts" lines="105-122" */}
 
 孤儿就是「记录簿里有、这一趟没被认领」的那些：
 
-{/* ref file="../packages/core/src/service.ts" lines="122-126" */}
+{/* ref file="../packages/livedoc/src/engine/service.ts" lines="123-127" */}
 
 确认：先逐条问比较器要记录，有一处交回 problem 就整篇拒。
 
-{/* ref file="../packages/core/src/service.ts" lines="144-162" */}
+{/* ref file="../packages/livedoc/src/engine/service.ts" lines="145-163" */}
 
-都过了才落笔——刷记录簿、清孤儿、存盘，最后让格式包写回文档。
+都过了才落笔——刷记录簿、清孤儿、存盘，最后让格式写回文档。
 
-{/* ref file="../packages/core/src/service.ts" lines="164-173" */}
+{/* ref file="../packages/livedoc/src/engine/service.ts" lines="165-174" */}
 
-四种状态是怎么判出来的，见 [核心](/docs/modules/core)；记忆按文件位置怎么分派，见 [装配](/docs/modules/project)；
+四种状态是怎么判出来的，见 [判定层](/docs/modules/engine)；记忆按文件位置怎么分派，见 [环境层](/docs/modules/host)；
 git 那头的门和 hunk 表，见 [git 原理](/docs/principles/git)。

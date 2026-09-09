@@ -13,7 +13,7 @@ description: 契约、边界、记号、比较器、站测试各守什么；文�
 | --- | --- |
 | 工作区根 | `pnpm test`（先 build，再 `node --test tests/*.test.ts`） |
 | `docs-site/`（这个站） | `pnpm test` |
-| `packages/gwb-live-doc/`（[工作台件](/docs/plugin)） | `pnpm check`（typecheck + oxlint + vitest） |
+| `packages/gwb-live-doc/`（[工作台件](/docs/modules/plugin)） | `pnpm check`（typecheck + oxlint + vitest） |
 
 件那一摊用 vitest，是 `node --test` 唯一的例外——它照 devkit 建出来的件骨架长，不为一个件把骨架
 掰弯；工作区根的 `test` 脚本因此不去收它。
@@ -22,18 +22,19 @@ description: 契约、边界、记号、比较器、站测试各守什么；文�
 
 {/* tree dir="../tests" depth="1" glob="*.test.ts" */}
 
-## 契约测试：三个格式包摆在一起比
+## 契约测试：两个适配器摆在一起比
 
-夹具就是这么几行——三种格式各写一篇，引的是同一段代码，草稿记号一模一样：
+`Format` 这条接缝真有两个适配器——生产是 fumadocs 口味的 mdx，测试是那份假格式。夹具就是这么
+几行，两种格式各写一篇，引的是同一段代码，草稿记号一模一样：
 
-{/* ref file="../tests/contract.test.ts" lines="15-22" */}
+{/* ref file="../tests/contract.test.ts" lines="17-24" */}
 
-然后一串改动跑下来（确认 → 改代码 → 确认 → 上面插两行 → 删函数），断言**三篇的状态完全一致、
-跟到的行段也是同一个**。状态是核心算的，格式包只交引用——不一致就说明有谁抄了近道。
+然后一串改动跑下来（确认 → 改代码 → 确认 → 上面插两行 → 删函数），断言**两篇的状态完全一致、
+跟到的行段也是同一个**。状态是判定层算的，格式只交引用——不一致就说明有谁抄了近道。
 
 它跑在临时的真 git 仓里，比较器就是产品用的那个：
 
-{/* ref file="../tests/repo.ts" lines="71-78" */}
+{/* ref file="../tests/repo.ts" lines="70-79" */}
 
 <Note>
   用真 git 仓而不是打桩：这套机制的判定几乎全压在 git 的行为上（blob 取不取得到、`diff -U0` 的 hunk 头
@@ -41,23 +42,32 @@ description: 契约、边界、记号、比较器、站测试各守什么；文�
   工作区一律配 `core.autocrlf false`——Windows 上的换行转换会让工作区和 blob 逐字节不同。
 </Note>
 
-## 边界测试：读依赖图，不读源码措辞
+## 边界测试：读目录方向，不读源码措辞
 
-pnpm 的严格 `node_modules` 让「没声明就 import 不到」，所以**依赖图本身就是边界**。测试直接读各包的
-`package.json`：核心零依赖；除了 fumadocs 格式包谁都不许见宿主；命令行和装配不许依赖任何格式包。
+主包一个包五层，「谁能依赖谁」**不再由 pnpm 的严格 `node_modules` 兜着**——同一个包里，
+`engine/` 里随手写一句 `import "../host/git.ts"` 编译器不会吭一声。所以这份测试是塌包之后
+**唯一**的边界守卫，它守的第一样就是目录方向，列的是禁止面不是允许面：
+
+{/* ref file="../tests/boundary.test.ts" lines="98-104" */}
+
+判定层与装配层的零依赖各一条，都不看措辞、只看它 import 了谁：
+
+{/* ref file="../tests/boundary.test.ts" lines="136-150" */}
 
 宿主那条最细，连产物都查：
 
-{/* ref file="../tests/boundary.test.ts" lines="67-82" */}
+{/* ref file="../tests/boundary.test.ts" lines="164-179" */}
 
-再加两条读源码的 import 表——不看措辞，只看它 import 了谁：
-
-{/* ref file="../tests/boundary.test.ts" lines="91-100" */}
+<Note>
+  **它报红的时候，红的是设计，不是测试。** 真要改方向，改的是那张表加一段说明为什么——
+  不是把断言删掉，更不是为了让门禁绿注释掉某一条。
+</Note>
 
 ## 记号与比较器：各守一条硬账
 
-- **记号**：`parse(marker(t))` 认回 `t`（三个格式包、五类目标一起过）；草稿记号[四种不认](/docs/principles/markers)；
-  写回幂等——确认过的文档再确认一次，一个字不变；目录树长展示区、存在性和名字不长。
+- **记号**：`parse(marker(t))` 认回 `t`（两个适配器、五类目标一起过）；草稿记号哨兵不齐的、
+  写在句子里的、写在围栏里的、动作词不认识的，一律不认；写回幂等——确认过的文档再确认一次，
+  一个字不变。
 - **五类目标**：目录树名字多了少了黄带 diff、目录没了红；存在性没了红、类型变了红、断言不在却出现了红；
   名字找不到红；整文件末尾追加也黄。
 - **比较器**：git 版与 hash 版在同一串改动下状态一致；git 版的行段跟随、`vanished`、`blob-missing`、
@@ -75,7 +85,7 @@ pnpm 的严格 `node_modules` 让「没声明就 import 不到」，所以**依�
 
 <Note>
   站测试**不跟命令行比状态**：算状态的是同一个 service，比出来只能相等，比了也证明不了什么。
-  跨调用方的比对留给起站抓 `.md` 路由，跟 `render --target ai` 的产物逐字节对。
+  跨调用方的比对留给起站抓 `.md` 路由，跟 `render` 落在 `out/` 的那份产物逐字节对。
 </Note>
 
 ## 文档防漂：这个站自己就是测试

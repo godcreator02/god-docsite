@@ -5,19 +5,19 @@ description: 卡与盘两摊——记录格式与四层校验、聚盘建模、�
 
 # 轨迹包
 
-**本页回答**：`@godcreator02/live-doc-trajectory` 管卡与盘的哪两摊、它对 live-doc 那套记录簿一无所知到什么程度、
+**本页回答**：`@godcreator02/livedoc-trajectory` 管卡与盘的哪两摊、它对 livedoc 那套记录簿一无所知到什么程度、
 盘上的位置与颜色各编码什么、怎么不起站单独测。
 
 ## 管什么
 
-### 两摊事，方向跟 live-doc 相反
+### 两摊事，方向跟 livedoc 相反
 
 一摊是**卡**：一种只增不改的记录格式，连同读它、校它的那一层。另一摊是**盘**：把一目录卡算成一张星轨盘的
 建模、布局与画布层。
 
-live-doc 治的是**现状文档撒谎**——一句话写下的那一刻就跟代码分了家，机制盯着代码变没变。轨迹卡治的是
+livedoc 治的是**现状文档撒谎**——一句话写下的那一刻就跟代码分了家，机制盯着代码变没变。轨迹卡治的是
 另一头，**历史被改写**：一次方向了断记下来就该冻结，谁取代了谁、谁是从哪条路转过来的，得看得见。两件事
-方向相反，一个盯代码，一个盯文档自己，所以轨迹**不是第四种格式包**：五类引用说的是「文档对文件系统说的话」，
+方向相反，一个盯代码，一个盯文档自己，所以轨迹**不是又一种文档格式**：五类引用说的是「文档对文件系统说的话」，
 卡的关系边说的是「文档对文档说的话」，**卡不进记录簿、不需要 confirm，只要即时校验**。两者只在一处相遇
 ——一篇现状文档链到一张卡，此外互不打扰。
 
@@ -209,27 +209,27 @@ JS 色板要按亮暗各渲一份、页面按 `html.dark` 显示其一。节点�
 
 ## 不知道什么
 
-**不认识 core，也不认识任何格式包。**卡的记录格式与五类引用是两套互不认识的东西，所以本包不 import 核心的
-任何东西——连第四层校验用的两条记号正则都是照核心的形状独立复刻的一份。`.` 入口那一侧的源码只许 import
+**不认识判定层，也不认识任何格式实现。**卡的记录格式与五类引用是两套互不认识的东西，所以本包不 import 判定层的
+任何东西——连第四层校验用的两条记号正则都是照 `engine/marker.ts` 的形状独立复刻的一份。`.` 入口那一侧的源码只许 import
 自己和三个 `node:` 内置：
 
-{/* ref file="../tests/boundary.test.ts" lines="162-180" */}
+{/* ref file="../tests/boundary.test.ts" lines="226-241" */}
 
 同一条红线在产物上再判一次，比按 `package.json` 判更准——就算哪天 `.` 入口不小心 import 到一个真依赖，
 这条也能抓到：
 
-{/* ref file="../tests/boundary.test.ts" lines="111-117" */}
+{/* ref file="../tests/boundary.test.ts" lines="191-196" */}
 
 **react 只能是 peer，且两个入口的边界各不相同。**`./react` 的产物必须留着头一行 `"use client"`、只许
 import react（第三方与 `node:` 内置都不许内联，内联的第三方会跟宿主装的那份各跑一套）；`./server` 不许带
 客户端指令，可以走 `node:` 与 remark 那套，但 react 同样只许 import、不许打进产物：
 
-{/* ref file="../tests/boundary.test.ts" lines="119-145" */}
+{/* ref file="../tests/boundary.test.ts" lines="198-224" */}
 
-**不知道自己被谁用。**方向单向：cli 可以依赖本包（接 `livedoc trajectory` 子命令），装配包与三个格式包
+**不知道自己被谁用。**方向单向：livedoc 的命令行那一层可以依赖本包（接 `livedoc trajectory` 子命令），engine / host / fumadocs / site 四层
 一律不许；`./react` 与 `./server` 两个入口更是谁都不许从 cli 那条链上引进来：
 
-{/* ref file="../tests/boundary.test.ts" lines="182-187" */}
+{/* ref file="../tests/boundary.test.ts" lines="243-249" */}
 
 **不认识站的路由，也不认识站的框架。**卡页的地址由调用方以 `hrefBase` 传进来，组件自己只做字符串拼接；
 props 里一个函数都不收——服务端组件传不了函数给客户端组件。当前是哪张盘由 `initialDisk` 与 URL 的 `?disk=`
@@ -317,7 +317,7 @@ props 里一个函数都不收——服务端组件传不了函数给客户端�
 
 {/* ref file="../packages/trajectory/src/validate.ts" lines="16-20" */}
 
-这两条正则是照核心的形状独立复刻的一份，不 `import` core。第四层接在解析末尾，跟关系边写歪那一类一起进报病：
+这两条正则是照 `engine/marker.ts` 的形状独立复刻的一份，不 `import` 判定层。第四层接在解析末尾，跟关系边写歪那一类一起进报病：
 
 {/* ref file="../packages/trajectory/src/model.ts" lines="143-150" */}
 

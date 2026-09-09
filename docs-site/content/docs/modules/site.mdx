@@ -1,0 +1,184 @@
+---
+title: 装配六区
+description: 往一个已经铺好的 fumadocs 骨架上接 livedoc：唯一那道门、算与写分开、package.json 只加不减、谁都不认识
+---
+
+# 装配六区
+
+**本页回答**：`src/site/` 往目标站上装的到底是哪些东西、骨架那半为什么不归它、它凭什么敢整套覆盖，以及这一层为什么谁都不认识。
+
+## 管什么
+
+**在一个已经铺好的 fumadocs 骨架上加 livedoc 的六区。** 装上去的是：六个集合、六条路由、侧栏六个根节、`livedoc.config.mjs`、mdx 接线、投影块与术语组件、名册脚本、构建配置里那条不许外置的账、五个区的骨架页，外加往站的 `package.json` 里补依赖与几条 doc 脚本。
+
+@@livedoc ref ../packages/livedoc/src/site/index.ts:1-29 @@
+
+**骨架那半不在这一层**。「铺一个标准 fumadocs 骨架」是「谁装了 fumadocs 谁就该有」的能力，归工作台的站件（`@godcreator02/gwb-docs-site` 的 `docs-site.create`）。所以装配的模板里 `package.json` / `tsconfig` / `postcss` / `pnpm-workspace` / `.npmrc` 五份配置一份都没有——留一份进去，装配就会把站件一分钟前铺的那份盖掉，两家各出一份同名配置，谁赢看谁后跑。这条有测试守着：
+
+@@livedoc ref ../tests/skeleton.test.ts:49-56 @@
+
+端口同理不挑：骨架的 `next dev -p` 里写着几就是几，装配只把它认出来、写进正文、报给人看。
+
+装一次要的输入只有一个站目录，剩下两样都可以不给：
+
+@@livedoc ref ../packages/livedoc/src/site/index.ts:42-50 @@
+
+## 不知道什么
+
+**谁都不认识。** 这一层只 import `node:fs` / `node:path` / `node:url`，判定、环境、格式实现、命令行四层一个不认识，第三方包一个不 import。它得能被别的程序直接调、不拖进整套判定，所以这条是硬的：
+
+@@livedoc ref ../tests/boundary.test.ts:144-150 @@
+
+方向那张表里，它是唯一一个禁止面写满四层的：
+
+@@livedoc ref ../tests/boundary.test.ts:98-104 @@
+
+<Note>
+  塌成一个包之后，「谁能依赖谁」不再由 pnpm 的严格 node_modules 兜着——同一个包里随手写一句相对 import，编译器不会吭一声。那份边界测试是唯一的门。
+</Note>
+
+**连 `livedoc.config.mjs` 都不读**——那正是它要写出来的东西。别的活（check / confirm / render）都是「对一个已经接好的站做事」，装配是「把线接上」，前置条件正相反，所以它绝不能走装配项目那条路。
+
+**不知道调它的人在写什么。** 它不认识任何生态：不知道骨架是谁铺的、装完的站属于哪个仓做什么用。
+
+**不改仓根一个字。** 模板的 `outputs` 映射会往仓根摆 `README.md` / `AGENTS.md`，但那是 `render` 的事；装配只把「仓根已经有这两份、第一次 render 会覆盖」报出来。
+
+**不装依赖、不跑构建。** 只写文件，`pnpm install` 由人接着跑。
+
+## 数据结构
+
+面上的形状只有一样：**算完但还没碰盘的一套装配**。
+
+@@livedoc ref ../packages/livedoc/src/site/index.ts:52-74 @@
+
+`files` 里每一项是「相对站目录的路径 + 正文」，`.tpl` 后缀在算这一步就已经脱掉；合并完的 `package.json` 也在 `files` 里（落盘只走一条路），另外单独拎出来一份给调用方看。`superseded` 是骨架里要让位、装配会删掉的；`overwrites` 只是报，一个字不动。
+
+目标站那一头看出来的事实是另一份形状，只在模块内部流转：
+
+@@livedoc ref ../packages/livedoc/src/site/skeleton.ts:36-50 @@
+
+模板那一头是一张占位符表，认不出的占位符当场抛：
+
+@@livedoc ref ../packages/livedoc/src/site/template.ts:41-53 @@
+
+模板本身是包里带的一整套 `.tpl`，六区的形状就摆在目录里：
+
+@@livedoc tree ../packages/livedoc/template/attach depth=2 @@
+
+`.tpl` 后缀是故意的：带着它躺在包里，才不会被别的工具当成真配置去解析。模板的位置从本模块所在目录往上找第一个装着 `template/attach` 的目录——源码态与产物态深度不同，所以往上找、不写死层数：
+
+@@livedoc ref ../packages/livedoc/src/site/template.ts:15-33 @@
+
+**模板假设的仓形状**：站住仓根下一层（约定叫 `docs-site/`），被钉的代码在仓根，所以引用写 `../src/…`。换一种形状，`livedoc.config.mjs` 里的相对路径就得跟着改——那是模板的前提，不是可配置项。
+
+## 提供的接口
+
+**面上只有两个方法。** `planAttach` 算一套，一个字都不写盘：
+
+@@livedoc ref ../packages/livedoc/src/site/index.ts:76-101 @@
+
+`attachSite` 算完直接落，落盘那一步只剩写文件加删让位的那几个：
+
+@@livedoc ref ../packages/livedoc/src/site/index.ts:103-114 @@
+
+**算与写分开是刻意的**：占位符认不出是最可能的失败，而目录一旦开始写就没有干净的回滚点。所以验骨架、认名字、整套渲染、合 package.json 全排在碰盘之前。`planAttach` 把这个中间态直接交出去，于是「先看看会铺出什么、会占哪个口」不必先弄脏一个目录再回滚——**它是接口的一部分，不是实现细节**。
+
+调用方不必知道模板放在哪、占位符叫什么、`package.json` 怎么合。那份合并**只加不减**：
+
+@@livedoc ref ../packages/livedoc/src/site/manifest.ts:11-30 @@
+
+骨架写的 name / version / dev / build / start 一个字不动（端口就钉在那几条脚本里），补的是这个站接了 livedoc 之后才有的东西：五条 doc 脚本进 `scripts`，两条 livedoc 依赖进 `devDependencies`（站构建 import 接线、门禁跑 check，都是开发期的事），外加一句描述。补进去的依赖表按名字排——散在原表中间的话，diff 就看不出加了什么。
+
+那张依赖表是**第二份真相**，手写的：
+
+@@livedoc ref ../packages/livedoc/src/site/deps.ts @@
+
+工作区里那份写的是 `workspace:*`，摆进别人的站里装不动；发布版那份又要等 pnpm 在发版那一刻改写。所以它只能手写，靠一条测试守着它跟工作区各包的版本对得上（见下节）。
+
+命令行那一头是薄壳一层，认参数、调这两个方法、把结果与「接着做什么」打出来：
+
+@@livedoc ref ../packages/livedoc/src/cli/attach.ts:11-20 @@
+
+装配的逻辑一行都不许回流到命令层——这一层得能被别的程序直接调，不必绕命令行。命令层只管退出码：模块抛的那句话原样打成一行 `✖` 退 1，`--dir` 没给打用法退 1，`--help` 退 0。
+
+@@livedoc ref ../packages/livedoc/src/cli/attach.ts:38-60 @@
+
+## 依赖的接口
+
+这一层没有注进来的接口——它认的是**盘上的事实**，全是 `node:fs` 现读的。
+
+| 接口 | 用来做什么 | 生产实现 | 测试实现 |
+| --- | --- | --- | --- |
+| 目标站的 `package.json` | 认它是不是 fumadocs 骨架、认端口、合并的底本 | 站件铺出来的那份 | 临时目录里现写的一份最小骨架清单 |
+| 站的 `content/` 目录 | 判「有没有人写过内容」 | 骨架那三样 | 临时目录里多塞几页，验它拒 |
+| 仓根的 `package.json` | 认站的显示名 | 仓自己的那份 | 临时目录里可有可无，验退回目录名 |
+| 仓根的 `src/index.ts` | 起手页第一条引用钉哪一行 | 仓自己的入口 | 临时目录里现写，有 / 没有 `export const name` 各一遍 |
+| 模板目录 | 整套 `.tpl` | 包里带的 `template/attach` | `template` 选项换成一份临时小模板 |
+
+**整个装配唯一的那道门**是目标站这一头的检查，五种当场抛：
+
+@@livedoc ref ../packages/livedoc/src/site/skeleton.ts:95-129 @@
+
+站不在、不是目录、不是 fumadocs 骨架（`package.json` 的依赖里没有 `fumadocs-core` / `-mdx` / `-ui` 任一）、已经有 `livedoc.config.mjs`、`content/` 下有骨架之外的内容——这五条挡在前头，**放行之后整套覆盖就是安全的，因为中间没人改过文件**。给一个跑了半年的站加 livedoc 报一句「这个站已有内容，请人工接线」，比自作聪明地 AST 改写安全得多。
+
+判据本身是几张常量表，改约定就改这几行：
+
+@@livedoc ref ../packages/livedoc/src/site/skeleton.ts:11-27 @@
+
+端口**按脚本内容认，不按目录名认**——站不一定叫 `docs-site`，认的是 `next dev -p <口>` / `next start -p <口>`；认不出退 next 自己的默认口：
+
+@@livedoc ref ../packages/livedoc/src/site/skeleton.ts:66-74 @@
+
+名字能从仓根 `package.json` 认出来就别让人再敲一遍，`--title` 给了就用给的，都没有退仓的目录名：
+
+@@livedoc ref ../packages/livedoc/src/site/values.ts:9-25 @@
+
+起手页的第一条引用是**现找的**：仓根 `src/index.ts` 里有 `export const name` 就钉那一行，行号数出来、不写死；找不到就不钉，改成写一段「第一条引用怎么钉」，样例记号塞进围栏里（围栏内容是 `code` 节点，check 认不出它）：
+
+@@livedoc ref ../packages/livedoc/src/site/values.ts:27-59 @@
+
+硬塞一条钉不住的引用，等于让刚接好线的站开局就报一条红的。
+
+整套模板在内存里渲染完，认不出的占位符当场抛——留一个 `{{typo}}` 在生成的站里，没人知道它本来该是什么：
+
+@@livedoc ref ../packages/livedoc/src/site/template.ts:69-83 @@
+
+装出来的 `livedoc.config.mjs` 预置了六区里进 check 的那两区、卡目录与两条 outputs 映射：
+
+@@livedoc ref ../packages/livedoc/template/attach/livedoc.config.mjs.tpl:15-29 @@
+
+站接线那一份预置的是六个集合加全局 mdxOptions，只有 docs 与 outputs 开 processed markdown：
+
+@@livedoc ref ../packages/livedoc/template/attach/source.config.ts.tpl:60-63 @@
+
+## 怎么单独测
+
+假的是**一个刚被站件铺好的骨架**：临时目录里造 `<仓>/docs-site`，写一份最小的骨架 `package.json`（带 `fumadocs-core` 与 `next dev -p`）、`content/docs/` 那两样、一份骨架自己的 `src/app/docs/layout.tsx`，仓根按用例可选地放几个文件。
+
+@@livedoc ref ../tests/site.test.ts:1-7 @@
+
+**全部跨面上那两个方法测，一个内部函数都不用点名。** `planAttach` 那半证明的是：算完盘上什么都没有、`.tpl` 后缀在计划里就脱掉了、骨架那半一份都不在模板里；端口从骨架的脚本里认、认不出退默认；`package.json` 只加不减（骨架的 name / 依赖 / build 脚本原样，doc 脚本与依赖表补上）；名字三条退路；起手页钉块两种形态、行号是数出来的；模板换成一份自带的小模板验占位符抛。五条拒的理由各说各的那一条单独一测：
+
+@@livedoc ref ../tests/site.test.ts:167-193 @@
+
+`attachSite` 那半在临时目录里跑真的：六区各有骨架页、集合、路由、侧栏根节，骨架那份 `DocsLayout` 让了位（留着就是两层套着渲，侧栏出现两遍），仓根的 `README.md` 一个字不动、只报进 `overwrites`，装过一次再装当场拒。
+
+依赖表那条**跨两份真相的账**在命令层那本账里，跟端到端一起跑——发版抬版本号忘了抬它，这条红：
+
+@@livedoc ref ../tests/attach.test.ts:135-143 @@
+
+命令层自己只问参数认没认对、话说清楚了没有、退了几，走 `main(["attach", …])` 从命令行这头进。各条测试分别守什么，见[测试与边界](/docs/cli/testing)。
+
+## 代码地图
+
+**在哪**：
+
+@@livedoc tree ../packages/livedoc/src/site depth=1 @@
+
+**先读** `index.ts`：两个方法与那份计划的形状全在它头上，头注释把这一层的约定说完了。
+
+**读序**：`index.ts`（面）→ `skeleton.ts`（唯一那道门、目标站的事实）→ `template.ts`（读模板、渲染）→ `manifest.ts`（合 `package.json`）→ `values.ts`（认名字、起手页钉块）→ `deps.ts`（一张手写的依赖表）。后五份**互不认识**，只被 `index.ts` 串起来，各读各的。
+
+命令层那一份 `cli/attach.ts` 不算这一层，读完面再看它——它只有认参数与打印。
+
+**可跳过**：`template/attach/` 是模板正本（改模板改的是那儿的 `.tpl`，不是这一层的逻辑）、`dist/`（产物）。
