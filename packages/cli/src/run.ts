@@ -46,12 +46,12 @@ const REASON: Record<string, string> = {
 const MEMORY: Record<string, string> = { hash: "（hash 记忆：不在 git 里）" };
 
 export async function main(argv: string[]): Promise<number> {
-  // trajectory 与 init 跟 check / confirm / render 不是一套：它们不遍历文档，
-  // init 连 livedoc.config.mjs 都不要（它是给还没有站的仓铺一个站），所以提前分流，
-  // 不挤进下面那条白名单检查、也不去 loadProject
-  if (argv[0] === "trajectory") return trajectoryCommand(argv.slice(1));
-  if (argv[0] === "init") return initCommand(argv.slice(1));
   const [command = "check", ...rest] = argv;
+  // trajectory 与 init 跟 check / confirm / render 不是一套：它们不遍历文档，
+  // init 连 livedoc.config.mjs 都不要（它是给还没有站的仓铺一个站），所以在装配之前就分流，
+  // 也不进下面那条白名单
+  if (command === "trajectory") return trajectoryCommand(rest);
+  if (command === "init") return initCommand(rest);
   if (!["check", "confirm", "render"].includes(command)) {
     console.error(`不认识的命令：${command}——有 check / confirm / render / trajectory / init`);
     return 2;

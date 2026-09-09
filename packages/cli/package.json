@@ -11,9 +11,9 @@
       "types": "./dist/run.d.mts",
       "default": "./dist/run.mjs"
     },
-    "./init": {
-      "types": "./dist/init.d.mts",
-      "default": "./dist/init.mjs"
+    "./site": {
+      "types": "./dist/site.d.mts",
+      "default": "./dist/site.mjs"
     }
   },
   "files": [
