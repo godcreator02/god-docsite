@@ -5,7 +5,7 @@ description: 写下 → 未确认 → 确认投影 → 代码改了变黄 → �
 
 # 一条引用的一生
 
-这一章回答：一处引用从写下那一刻起，都会经过哪些状态，每一步命令行说什么、页面上长什么样。
+**本页回答**：一处引用从写下那一刻起会经过哪些状态，每一步命令行说什么、页面上长什么样。
 
 下面每一段的输出，都是在一个临时 git 仓里真跑出来的：一份 `src/greet.ts`，一篇 `docs/a.md`，
 比较器是产品用的 git 版。
@@ -136,5 +136,5 @@ mdx 没有展示区，只留一行 `{/* ref … */}`，内容 build 时现拿。
 
 {/* ref file="../packages/core/src/service.ts" lines="164-173" */}
 
-四种状态是怎么判出来的，见 [状态与比较器](/docs/principles/comparator)；git 那头的门和 hunk 表，
-见 [git 原理](/docs/principles/git)。
+四种状态是怎么判出来的，见 [核心](/docs/modules/core)；记忆按文件位置怎么分派，见 [装配](/docs/modules/project)；
+git 那头的门和 hunk 表，见 [git 原理](/docs/principles/git)。

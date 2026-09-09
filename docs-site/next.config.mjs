@@ -18,11 +18,8 @@ const config = {
     '@godcreator02/live-doc-project',
     '@godcreator02/live-doc-core',
   ],
-  // 站首页和 /docs 都落到人写的文档规范那页
-  redirects: async () => [
-    { source: '/', destination: '/docs/human-write-spec-dont-change', permanent: true },
-    { source: '/docs', destination: '/docs/human-write-spec-dont-change', permanent: true },
-  ],
+  // 站根落到现状区首页；六区各有各的基座，/docs 自己有 index.mdx，不再转走
+  redirects: async () => [{ source: '/', destination: '/docs', permanent: true }],
 };
 
 export default withMDX(config);

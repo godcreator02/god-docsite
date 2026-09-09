@@ -11,7 +11,7 @@ import { register } from "fumadocs-mdx/node";
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { loadProject } from "@godcreator02/live-doc-project";
-import { DOT_COLOR, whereOf } from "@godcreator02/live-doc-format-fumadocs";
+import { DOT_COLOR, collectionOf, whereOf } from "@godcreator02/live-doc-format-fumadocs";
 import { componentNames } from "../src/components/registry.ts";
 
 register();
@@ -34,8 +34,9 @@ const components = Object.fromEntries(
 
 /** 一篇文档：编译产物 + 页面 html + 命令行那头算出来的清单 */
 async function pageOf(doc) {
-  // ?collection= 告诉 loader 这篇属于哪个集合——集合的 postprocess（processed markdown）才会跑
-  const mod = await import(`../${doc}?collection=docs`);
+  // ?collection= 告诉 loader 这篇属于哪个集合——集合的 postprocess（processed markdown）才会跑。
+  // 进 check 的是现状与生成正本两区，集合名按文档所在目录定，跟命令行走同一个 collectionOf
+  const mod = await import(`../${doc}?collection=${collectionOf(project.config, doc)}`);
   return {
     mod,
     html: renderToStaticMarkup(createElement(mod.default, { components })),

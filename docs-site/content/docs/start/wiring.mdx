@@ -1,0 +1,224 @@
+---
+title: 站接线手册
+description: 把 livedoc 接进一个 fumadocs 站要动的七处：配置、集合、loader 与侧栏树、路由、名册、样式、Next
+---
+
+# 站接线手册
+
+**本页回答**：当前代码现状下，把 livedoc 接进一个 fumadocs 站要动哪七处、每处写什么。
+
+这个站自己就是消费方：页面上每一块代码都是 `next build` 那一刻从工作区源码里现拿的，页面里不存副本，
+块右上角那个小圆点是状态（图例见 [入门](/docs/start)）。所以下面每一处钉的都是这个站自己的文件，
+读到的就是正在跑的那一份。
+
+`livedoc init --dir <仓>` 把这一整套铺出来，模板在 `packages/cli/template/docs-site/`。**手接与 init 铺
+是同一套形状**，差异只有星轨整页那一处——见第四节末尾。
+
+## 一、装包，与项目根那份 livedoc.config.mjs
+
+`pnpm add -D @godcreator02/live-doc-cli @godcreator02/live-doc-project @godcreator02/live-doc-format-fumadocs`；
+要轨迹那一摊再加 `@godcreator02/live-doc-trajectory`。只写纯 md 或手写 html，就把格式包换成
+`live-doc-format-md` / `live-doc-format-html`，别的一样。fumadocs 在格式包里只是 peer——用项目里装的那份，
+包自己不带。
+
+命令行和站读的是同一份 `livedoc.config.mjs`，它住项目根（对这个站来说项目根就是站目录）：
+
+{/* ref file="livedoc.config.mjs" lines="17-35" */}
+
+这段说明接线要交代的全部事实：挂哪些格式包、哪几区进 `check`（六区里只有现状与生成正本对代码说话）、
+用哪个比较器、生成物摆到哪、卡目录在哪、组件名册是什么。`comparator` 不写就是 `auto`：按被引文件的位置
+挑记忆——在 git 仓里（本仓、别的仓都算）已提交的走 `git`，被忽略的、不在任何仓里的走 `hash`；写死
+`git` 或 `hash` 是强制全用一种，分派规则见 [核心包](/docs/modules/core)。
+
+<Note>
+  引用里的路径**相对项目根**。这个站的项目根是站目录，被引的代码在工作区的 `packages/` 下，
+  所以记号里写的是 `../packages/…`。
+</Note>
+
+装好之后命令面就是这几条，各自打印什么、退什么码见 [命令行](/docs/modules/cli)：
+
+{/* ref file="../packages/cli/src/run.ts" lines="1-15" */}
+
+### 轨迹是可选的一项
+
+`trajectory` 的值是卡目录、相对项目根；不配就整个不管：
+
+{/* ref file="../packages/project/src/load.ts" lines="44-45" */}
+
+装配时它变成一个绝对路径挂在 project 上，没配就是 `null`——「没配」和「配了但目录还不存在」是两件事，
+前者整个不管，后者扫出来是空集合：
+
+{/* ref file="../packages/project/src/load.ts" lines="61-62" */}
+
+{/* ref file="../packages/project/src/load.ts" lines="188-193" */}
+
+配了它，`livedoc check` 就**顺带**跑卡校验（病卡逐条打印、算红退 1），另外多一条独立的
+`livedoc trajectory [--json]` 列盘、树、主干；不配，卡校验不跑、这条子命令直接报错退出。
+
+## 二、source.config.ts：六个集合与全局 mdxOptions
+
+站侧的集合全在这一个文件，六区各一个 `defineDocs`（自带 docs + meta 双集合，`meta.json` 的侧栏排序天然
+支持）。集合名就是目录的最后一截，格式包靠这条约定给命令行 `?collection=`——所以集合要定义在
+`source.config.ts` 而不是 loader 那边：fumadocs 的 Node loader 只认这里的集合。
+
+现状区开 processed markdown，序列化回调由格式包给：
+
+{/* ref file="source.config.ts" lines="23-28" */}
+
+这段说明现状区除了目录只多一件事：`postprocess.includeProcessedMarkdown`，`render --target ai` 靠它拿到
+fumadocs 自己的管线出的 md。
+
+其余四区里，生成正本跟现状区同一形状（它也进 check），交接、未来、反馈是裸集合：
+
+{/* ref file="source.config.ts" lines="49-66" */}
+
+全局 `mdxOptions` 挂格式包给的那份：remark 链尾巴挂 livedoc 插件、meta 白名单放行 `data-dot`，术语标注
+也在这儿。术语表正本是 `src/glossary.ts`，`skipFile` 把人写的那篇规范挑出去——它里头的词按字面读，
+不该被标注：
+
+{/* ref file="source.config.ts" lines="68-76" */}
+
+### 卡集合
+
+卡不是文档：它们不进 `content/docs`，走自己的集合。两个要点——`schema` 用包里给的 `cardSchema`（把
+`label` 派生成 `title`，`born-at` 被 gray-matter 解成 `Date` 时转回字符串），`mdxOptions` 上挂
+`remarkTrajectoryLinks`（关系边行渲成标注，`卡身份.md` 链接与 wikilink 改写成卡页路由）。集合级
+`mdxOptions` 会把默认插件全去掉，所以用 `applyMdxPreset` 先把默认 preset 加回来：
+
+{/* ref file="source.config.ts" lines="36-47" */}
+
+**livedoc 自己的 remark 插件挂在全局 `mdxOptions` 上，跑不到这个集合**——这正是要的：卡正文冻结历史、
+不钉活代码，卡校验守的也是这条。
+
+## 三、src/lib/：六条 loader 与一棵侧栏树
+
+每区一条 loader，`baseUrl` 就是这一区的 URL 基座：
+
+{/* ref file="src/lib/source.ts" */}
+
+侧栏是**一棵**树不是六棵：每区一个 `root: true` 的根节当分区，URL 仍是六个基座。base-ui 版的 `Root`
+只有单槽 fallback，多树切换不稳，根节分区是正路；区内的顺序由各区自己的 `meta.json` 定。
+
+{/* ref file="src/lib/tree.ts" */}
+
+轨迹区 `meta.json` 的第一条不是文档，是一条指向星轨整页的**链接项**——`pages` 认 `[名字](路径)`
+这种写法：
+
+{/* ref file="content/trajectory/meta.json" */}
+
+## 四、src/app/：六条路由，外加星轨整页
+
+{/* tree dir="src/app" depth="4" */}
+
+带侧栏的六区在 `(zones)` 路由组里，共用上面那棵合成树：
+
+{/* ref file="src/app/(zones)/layout.tsx" */}
+
+区内每条路由各走各的 loader，页面本身是标准的 fumadocs 三件套，组件表来自 `getMDXComponents()`：
+
+{/* ref file="src/app/(zones)/docs/[[...slug]]/page.tsx" */}
+
+交接、未来、生成正本、反馈四条跟它一个样，只换 loader；轨迹那条不一样。
+
+### 卡页与星轨整页
+
+轨迹这一区的 slug 是**必选**的：空 slug 归星轨整页那条路由，所以静态参数里也要把它滤掉。卡页在标题下
+多两行——元信息（`born-at`、`type`、`domain`、`parent` 链到父卡页）与「回到盘」（带上第一个 `parent`
+当盘身份）：
+
+{/* ref file="src/app/(zones)/trajectory/[...slug]/page.tsx" lines="6-19" */}
+
+{/* ref file="src/app/(zones)/trajectory/[...slug]/page.tsx" lines="49-52" */}
+
+**盘不是 mdx 里的组件，是一条独立的整页路由 `/trajectory`。**它跟卡页共用一段 URL 前缀，却要两套完全
+不同的布局——盘不要侧栏与目录，卡页要。Next 的路由组把两套分开，组名不进 URL；盘这一组只套最简壳：
+
+{/* ref file="src/app/(trajectory-disk)/trajectory/layout.tsx" */}
+
+盘页自己读卡目录建模，把模型和 `launcherThumbs` 渲好的启动器缩略图交给 `mode="page"` 的 `StarDisk`，
+外加一条自己画的顶栏。**`searchParams.disk` 缺失渲启动器卡阵，有则渲那张盘**——组件切盘 / 回启动器时
+`replaceState` 写回这个参数，一个链接因此能直接指到某一张盘：
+
+{/* ref file="src/app/(trajectory-disk)/trajectory/page.tsx" */}
+
+顶栏上只有三样：回文档、报病数、主题切换。搜索、设置、帮助、图例、日期竖轨与盘内的「启动器」钮都归
+组件自己贴在容器四角——当前盘是组件的状态、切盘要同步写 URL，住在一处才不必把整个盘态提到页面上。
+
+包照常导出服务端组件 `Trajectory`（读目录、渲一张方形嵌入的盘或启动器、报病列表），留给想把盘摆进一篇
+长文档中间的消费方；这个站的名册里不登记它，盘走路由。`hrefBase` 要跟 loader 的 `baseUrl` 和
+`remarkTrajectoryLinks` 的 `hrefBase` 是同一个值——三处对不上，节点点开是 404。
+
+**这是这个站跟 `livedoc init` 模板唯一的形状差异**：模板把 `/trajectory` 留给卡集合的导读页，六条路由
+都在 `src/app/<区>/[[...slug]]/`，树在根 layout 里合成；这个站把 `/trajectory` 让给了星轨整页，所以卡路由
+的 slug 必选、路由分成两组、树搬进 `src/lib/tree.ts`，轨迹区也就没有导读页——区的入口是盘。
+
+## 五、名册两头登记
+
+名册两头：`livedoc.config.mjs` 里那半给命令行（机读版怎么把组件压成文字，见上面第一节那份配置），
+`src/components/mdx.tsx` 那半给站。站这一侧的名单正本是 `registry.ts`，它的类型逼着 React 表一个不多
+一个不少：
+
+{/* ref file="src/components/registry.ts" lines="9-10" */}
+
+React 表底下铺 fumadocs 的默认表（标题栏、复制按钮都是它的），再把 `pre` 换成格式包那个会画状态点的
+`LivedocPre`：
+
+{/* ref file="src/components/mdx.tsx" lines="24-41" */}
+
+目录树引用注入的是 fumadocs 自己的 `Files` / `Folder` / `File`，两张表里都要有它们，压平规则在格式包的
+默认名册里已经带了。`Term` 是构建期标注长出来的，源文件里一般没有，但编译出来的 JSX 会引它，两张表也
+都得给。两头齐不齐由 `scripts/verify-roster.mjs` 对，对不上门禁就红。
+
+## 六、src/app/global.css：三行 @import
+
+状态点、术语标注、星轨盘的样式都随包发，站里各引一行：
+
+{/* ref file="src/app/global.css" lines="4-9" */}
+
+整页那层壳（顶栏一条、盘吃满剩下的高度）是站自己的几行 CSS，不进包里——顶栏是页面的事，盘上的 HUD
+才归包：
+
+{/* ref file="src/app/global.css" lines="15-47" */}
+
+## 七、next.config.mjs：外置边界与 turbopack.root
+
+{/* ref file="next.config.mjs" lines="7-23" */}
+
+**`turbopack.root` 抬到工作区根。**这个站的包从同一个 pnpm 工作区拿，`node_modules` 里是指向站外的
+软链；Turbopack 只认它 root 以内的文件，root 不抬，`packages/` 就在视野外。用发布版包的项目不必管这条；
+卡目录也不必管——它在站自己的 `content/trajectory/` 里，本来就在 root 之内。
+
+**`serverExternalPackages` 里是三个包。**它们只在服务端跑，还要读盘、起 git 子进程，标成外部包让 Node
+自己解析。这条边界上有两处不能越：
+
+**发布版包（registry 装的）别把 `format-fumadocs` 外置。**它的 `/pre` 是客户端组件（状态点），外置后
+Next 走 Node 单独加载它、跟站打包的 React 分了家，预渲染报 `Cannot read properties of null (reading 'use')`。
+工作区软链的装法没这个问题，所以这个站外置了它；发布版只外置 `core` 和 `project` 就够——
+`format-fumadocs` 的服务端那半（remark 插件）走 fumadocs-mdx 的 loader，本来就是 Node 直载，不经过
+打包器。
+
+**`trajectory` 一律不外置。**它的 `./react` 是客户端组件，`./server` 内部用**包名自引用**去渲它；一外置，
+Next 就走 Node 单独加载 `server.mjs`、发现不了 `./react` 产物头一行那句 `"use client"`，`StarDisk` 被当
+服务端组件渲染，一命中 hooks 就炸。包内部为这件事也付了代价——`server.tsx` 引 `./react` 走的是包名而不是
+相对源路径，为的是让 tsdown 把它当外部依赖、原样留在产物里；写成相对路径会被这一趟构建内联或拆成共享
+chunk，`"use client"` 落到一个没人标记的文件上，两头都看不到边界。
+
+两条是同一类：**外置的边界会把客户端指令吃掉**。剩下一项是站根重定向到 `/docs`：六区各有各的基座，
+现状区自己有 `index.mdx`。
+
+跑站三件事：改了格式包的代码**先删 `.next` 再 build**——Turbopack 只按 mdx 内容缓存，文档一个字没改它
+就不重跑 remark 插件，格式包里的改动看不见；调试用 `build` + `start`，不用 `next dev`，dev 那条链的缓存
+和热更新会让「这一版到底跑没跑我的插件」说不清；`start` 脚本钉的端口被别的进程占了就
+`pnpm exec next start -p <别的口>`，起来的站验完停掉。
+
+## 附：六区各是什么
+
+- **现状** `content/docs/`：设计现状，只写现状、散文、尽量多钉；进 `check`。
+- **轨迹** `content/trajectory/`：卡只增不改，正文冻结历史、不钉活代码；入口是星轨盘 [/trajectory](/trajectory)。
+- **交接** `content/spec/`：在途的 spec 与实施方案，做完拆解归梁、删页。
+- **未来** `content/future/`：愿景、不做什么、路线图。
+- **生成正本** `content/outputs/`：README 这类生成物的 mdx 正本，`render --target ai` 摆到落点；进 `check`。
+- **反馈** `content/feedback/`：本仓的重复操作候选，加别的仓投来的意见。
+
+六区的目录、路由、loader、侧栏根节一一对应；进 `check` 的只有现状与生成正本两区，另外四区的草稿记号与
+卡天然不进门禁。

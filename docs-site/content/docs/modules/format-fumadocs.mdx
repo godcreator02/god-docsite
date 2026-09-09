@@ -1,0 +1,204 @@
+---
+title: fumadocs 格式包
+description: mdx 与 fumadocs 是一个整体：remark 插件、meta 白名单、序列化回调、状态点组件、名册压平、借 loader 出 md
+---
+
+# fumadocs 格式包
+
+**本页回答**：`@godcreator02/live-doc-format-fumadocs` 管到哪为止、它往 fumadocs 上插哪几处、组件怎么压平成给 AI 读的 md，以及换宿主时换掉的到底是什么。
+
+## 管什么
+
+两件事捏在一个包里：**mdx 这一种格式**（认记号、写回记号），和 **fumadocs 这一套宿主接线**（remark 插件、meta 白名单、序列化回调、状态点组件、术语标注、借 loader 出 md）。捏在一起不是图省事——mdx 没有展示区，记号旁边不存投影，页面上那块代码是构建期从源码现拿的，所以「认记号」和「站怎么构建」本来就是同一件事。
+
+**换宿主就是换这一个包**：核心、project、命令行、别的格式包，一个都不认识 fumadocs。
+
+名册也归它：组件在 AI 那份 md 里压成什么，机制在这个包里，表的内容在项目那边。
+
+## 不知道什么
+
+**不认识 Next**。包里没有一处 `next`，也不知道站的路由长什么样：状态点那半只是个读 `data-dot` 的组件，挂在哪个页面、走哪条渲染链是站的事；`renderAi` 只认得项目根和 fumadocs 的 loader，不知道这篇文档在站上是哪个地址。
+
+**不带 fumadocs、不带 react**：两者只能是 peer，用消费方项目装的那份。同一段还说明另一件事——它是**唯一依赖 `live-doc-project` 的格式包**：站的 remark 链上没有命令行帮它装配，插件得在构建期自己装一次。
+
+{/* ref file="../packages/format-fumadocs/package.json" lines="31-44" */}
+
+md 与 html 两个格式包只依赖核心（`tests/boundary.test.ts` 里那条「html 格式包只依赖核心」）。宿主这条边界不靠自觉：
+
+{/* ref file="../tests/boundary.test.ts" lines="58-82" */}
+
+三条一起守着——宿主不许进 `dependencies`、产物里不许打进 fumadocs 或 react（只许 `import`）、`/pre` 的 `"use client"` 指令得留在产物头一行。
+
+**不知道自己的输出最后长什么样**。节点上只塞颜色、标题和标，画成什么样归站侧的 pre 组件和随包发的样式表。**也不存副本**：mdx 没有展示区，页面上的代码每次构建现拿。
+
+**术语表的正本不在这儿**：包里只有匹配和在树上换节点，词条数据是站的。
+
+## 数据结构
+
+一处引用在树上变成一个节点，五种目标三种长相。行段和整文件是一个 mdast `code` 节点，状态写在 meta 里：
+
+{/* ref file="../packages/format-fumadocs/src/blocks.ts" lines="206-218" */}
+
+四种状态各一种长相：绿 / 白是一块当前段，`lineNumbers` 从今天的起始行起、行号跟源文件对得上，白的标题后面缀「· 未确认」；黄不另起「当前段」，把核心出的 `- / +` 换成 shiki 原生的增删行标记（得写在那个语言真正的行注释里 shiki 才认，包里因此有一张行注释表，没有行注释的语言退成一块 `diff`），旧行新行渲在同一块，所以这一块**不带 `lineNumbers`**——块里夹着已经不存在的旧行，行号一定对不上源文件，与其错不如不给；红摆的是从记忆里取回的旧段，标题写「文档写下时这段是」。hash 记忆找不到这段了（`unlocated`）就**不摆代码**，只留一句「位置不明，重钉」。标题一律写**今天的位置**：行段跟随之后，记号上那几行可能已经不是这段了。
+
+颜色只有四种，有变动和未确认同是黄，实心 / 空心的区别在样式表：
+
+{/* ref file="../packages/format-fumadocs/src/blocks.ts" lines="21-25" */}
+
+目录树不变成代码块，变成 fumadocs 自己的 `<Files>` / `<Folder>` / `<File>`——这就是 mdx 比 md 多出来的那点意义，格式包能往树上放真组件：
+
+{/* ref file="../packages/format-fumadocs/src/blocks.ts" lines="169-185" */}
+
+根是一个展开的文件夹，名字是这处的来源，下面按路径切成嵌套，到深度尽头没孩子的子目录禁用。容器带 `data-livedoc="tree"` 和 `data-dot`，样式表在右上角画同一颗点——作者手写的 `<Files>` 没这两个属性，一个像素不多。黄的时候旧表新表并在一棵树里，多的项标 `livedoc-add`、少的标 `livedoc-del`；红只剩一个禁用的根文件夹，里面一行「目录不在了」。
+
+存在性和名字没有代码可摆，还是 `code` 节点，meta 里多一个 `data-chip`，站的 pre 组件见到它画一行芯片，不画代码块。
+
+节点上另挂两条标，都只给 AI 那份 md 用，不影响页面：`data.livedoc` 是一处引用的来源、状态标签和一份干净内容；`data.livedocAi` 是一个组件的替换节点。同一棵树接着还要出页面，所以**打标不动树**。
+
+名册是一张「组件名 → 规则」的表。要它是因为 mdx 里的组件是 JSX 节点：序列化成 md 时，要么原样漏成一个裸标签（AI 读到一个 `Tabs` 标签一头雾水），要么被整个丢掉（内容也没了）。两条都不行，所以得有一张表说清**每个组件在 md 里变成什么**。机制在包里，内容在项目自己的 `livedoc.config.mjs` 里——组件是项目的，规则当然也该是项目的。
+
+规则三种写法：
+
+{/* ref file="../packages/format-fumadocs/src/roster.ts" lines="34-35" */}
+
+`"children"` 只留子内容、去掉外壳；`"drop"` 整个不进 AI 那份；函数收一个节点，交回一个或一组普通 markdown 节点。嵌套的组件不用规则操心——子节点还在树上，各自有各自的标。
+
+函数规则只能通过 helpers 读节点（`attr` / `textOf`）、造节点（`text` / `heading` / `paragraph` / `quote` / `children`），节点本身对规则是黑盒：
+
+{/* ref file="../packages/format-fumadocs/src/roster.ts" lines="21-32" */}
+
+<Note>
+  守住这一条，同一张表换个宿主照样能用：宿主各自提供一套 helpers，造的是自己的节点。规则里一旦直接摸 mdast 的字段，这张表就跟 mdast 绑死了。
+</Note>
+
+`inline` 告诉规则「这处是不是写在句子里」——行内的位置只能交回行内节点。这一条没有机制守，靠规则作者自觉，记在[待定](/future/roadmap)里。
+
+包自带一张默认表，按语义定，不知道组件在哪个站上长什么样：
+
+{/* has file="../packages/format-fumadocs/src/roster.ts" text="export const defaultRoster" */}
+
+这张表的正文这一页**只用名字钉、不摆投影**：表里的注释拿尖括号包着组件名，投影进机读版会撞上站测试
+那条「组件没被名册压平」的断言。这是这套机制自己写自己才会撞上的一处，绕法是钉名字，正文照说不误
+（见[路线图](/future/roadmap)）。表里：块级的 `Note` 变一个引用块（前面缀 `[note]`），写在句子里的变一段行内文字——别把句子拆断；再加 fumadocs 文件树那三件，作者手写的 `<Files>` 压成一行一个名字、文件夹带尾斜杠。项目一般把它展开，再加上自己的组件。
+
+## 提供的接口
+
+对核心那一面，它是个普通格式包：五样必选出口加一个名册检查。
+
+{/* ref file="../packages/format-fumadocs/src/index.ts" lines="25-45" */}
+
+`lintComponents` 让命令行 `check` 提前报出名册外的组件，不用等构建才发现。
+
+对站那一面是三个插头加一层可选的术语标注：`livedocMdxOptions({ root })` 挂进 `source.config.ts`（remark 链**尾巴**上挂插件，顺带换掉 rehype 的 meta 白名单）、`livedocMarkdownOptions()` 挂进集合的 `postprocess.includeProcessedMarkdown`、侧出口 `/pre` 覆盖 `mdx.tsx` 里的 `pre` 并配一份随包发的 css；给 `livedocMdxOptions` 一份词表就多开术语标注，不给就不开。
+
+{/* ref file="../packages/format-fumadocs/src/host.ts" lines="46-64" */}
+
+挂在链尾是有讲究的：前面是 fumadocs 自己的 `remarkInclude` 和一整套预设（标题 id、gfm……），后面就是它自己的 postprocess——插件看到的是一棵已经归置好的树。术语标注排在 livedoc 那个**之前**：那时树上还只有作者写的散文，投影的代码块与目录树都还没注入，标注碰不到它们。`<Term>` 的定义是构建期写进属性的，组件不带词表进客户端包，也不需要一行 JS。这四处怎么接进一个站，见[站接线手册](/docs/start/wiring)。
+
+meta 白名单要整张换掉——fumadocs 的 `rehypeCode` 只放行白名单里的字段，别的一律丢掉，状态点的颜色因此得自己带进去：
+
+{/* ref file="../packages/format-fumadocs/src/host.ts" lines="29-29" */}
+
+跟 fumadocs 的默认白名单同形，只多 `data-dot` 和 `data-chip`。值一律带引号——它的 meta 解析器只认 `key="字符串"` / `key=数字` / 裸 `key` 三种，裸单词会被解析成 `null`。
+
+remark 插件四步，一步一件事：
+
+{/* ref file="../packages/format-fumadocs/src/remark-plugin.ts" lines="22-28" */}
+
+**认**：`recognize` 在 mdast 上找引用，正式记号是顶层的 `mdxFlowExpression`，草稿记号是单独成段的一行普通文字；围栏里、行内的同样文字分别是 `code` 和 `mdxTextExpression`，认不出来。**算**：交给核心的 `resolveRefs`，树都解析完了，不必再 parse 一遍。**换**：`applyListing` 把记号节点换成代码块或文件树。**打标**：`stamp` 按名册给每个组件挂上「AI 那份里它长什么样」。同一棵树接着既出页面又出 md，所以状态走两个通道：`meta` 字符串给页面，`data` 上的标给序列化回调。
+
+打标的机制这一头：
+
+{/* ref file="../packages/format-fumadocs/src/roster.ts" lines="124-137" */}
+
+只挂不换：`data.livedocAi` 是一组替换节点，空的就挂 fumadocs 自家的 `data._stringify = { text: "" }` 表示整个不要；机制注入的节点（目录树那棵 `Files`）标已经打好，跳过、不往里走。表外的组件硬失败，报到行。
+
+站侧的 pre 组件：
+
+{/* ref file="../packages/format-fumadocs/src/pre.tsx" lines="45-57" */}
+
+有 `data-dot` 的（引用变出来的那些）套 fumadocs 的 `CodeBlock`，把一个 8px 的点塞进标题栏的 `Actions` 槽、复制按钮左边；再带 `data-chip` 的画一行小标签；都没有的（普通围栏）原样走默认路径，互不干扰。
+
+<Note>
+  这个组件必须是**客户端组件**：`CodeBlock` 是 `"use client"`，状态点要靠 `Actions`（一个函数）传进去，而服务端组件不能把函数递给客户端组件。所以它单独一个侧出口，`"use client"` 指令还得留在产物头一行——边界测试盯着这一条。
+</Note>
+
+给 AI 那份 md 的是一个序列化回调：
+
+{/* ref file="../packages/format-fumadocs/src/markdown.ts" lines="24-46" */}
+
+fumadocs 序列化每个节点前先问它，看到我们打的标就按标出，没标的交回 `undefined` 让它照默认走。组件的标交给它的状态机接着序列化（嵌套组件顺着走）；引用的标出一行来源注释加一块干净的代码——不要 meta、不要 diff 标记；芯片没有内容，只留来源那一行。
+
+`renderAi` 不自己拼 md：
+
+{/* ref file="../packages/format-fumadocs/src/render.ts" lines="63-70" */}
+
+从消费方项目根 `register()` fumadocs 的 Node loader，`import` 那篇 mdx（带 `?collection=`，loader 靠它知道该跑哪份 postprocess），读它导出的 `_markdown`。站上 `getText("processed")` 读的是同一个导出——两边逐字节相同，是**同一条管线**的结果，不是对齐出来的。命令行和站就是这条管线的两个调用方，算状态的服务只有一份。
+
+`?collection=` 里那个名字按文档所在的目录定：
+
+{/* ref file="../packages/format-fumadocs/src/render.ts" lines="38-49" */}
+
+六区站一区一个集合，所以默认取文档目录的最后一截，跟 `defineDocs` 变量名按目录起的习惯对上；目录套目录时取最长的那个；要一刀切或改名，项目在 `livedoc.config.mjs` 的 `fumadocs.collection` 里写字符串或一张表。
+
+## 依赖的接口
+
+| 接口 | 用来做什么 | 生产实现 | 测试实现 |
+| --- | --- | --- | --- |
+| `service.resolveRefs(doc, refs)` | 把认到的引用算成清单（状态、今天的行段、旧内容） | `loadProject` 装出来的核心服务 | 不喂：手造 `Listing` 直接交给 `applyListing` |
+| `docOf(file)` | 由 vfile 的路径算出文档身份 | project 的 `docIdOf` | 固定一个文档名 |
+| 名册表 | 每个组件在 AI 那份里压成什么 | 站的 `livedoc.config.mjs` | 测试里现写一张表 |
+| 词表 | 术语自动标注 | 站里那份术语数据文件 | 测试里几条 `TermEntry` |
+| fumadocs（peer） | loader 出 `_markdown`、`CodeBlock` 画代码块 | 消费方项目装的那份 | 不喂：假 state 顶掉序列化，页面那半归站测试 |
+
+前三样是插件的入参，形状就这一处：
+
+{/* ref file="../packages/format-fumadocs/src/remark-plugin.ts" lines="16-20" */}
+
+装配发生在 host 那一层，站构建时 loader 并发调，项目只装配一次：
+
+{/* ref file="../packages/format-fumadocs/src/host.ts" lines="16-27" */}
+
+术语那一层的入参单独一份。`skipFile` 是实际必须给的一条：术语页自己不能标，否则自我循环。
+
+{/* ref file="../packages/format-fumadocs/src/glossary-plugin.ts" lines="26-35" */}
+
+名册的内容那一半住站里，而且一个组件要**两头登记**：`livedoc.config.mjs` 的 `components` 表里给它一条压平规则（这个文件不 import React——命令行也要读它），`src/components/mdx.tsx` 的表里给它一个真组件，页面才画得出来。这个站的 `Tabs` / `Tab` 规则是纯函数，节点进节点出：
+
+{/* ref file="src/components/tabs/tabs.ai.mjs" lines="7-13" */}
+
+站上是标签页，AI 那份里是一串三级标题。名单的正本在这儿，两半都拿它对：
+
+{/* ref file="src/components/registry.ts" lines="9-10" */}
+
+少一半的后果不一样，但都是硬失败：**压平表没有** → 打标时报「名册外组件」；**React 表没有** → 站渲染报 `Expected component`。
+
+## 怎么单独测
+
+不接 Next 的那半在工作区测试里跑，不起站、不起构建：
+
+{/* ref file="../tests/fumadocs.test.ts" lines="1-4" */}
+
+假实现三样：手造的 `Item` / `Listing` 直接交给 `applyListing`（核心那一层整个不参与），现写的一张名册交给 `stamp`，一个只有 `containerFlow` / `containerPhrasing` / `handle` 三个方法的假 state 交给序列化回调。证明的是——meta 三样（标题写今天的位置、行号起点、状态点颜色）都对；四种状态四种长相，包括没有行注释的语言退成 `diff` 块、目录树的黄红两种；名册压平出的形状对、表外组件报到行；围栏里和写在句子里的假记号一个都认不出来；`collectionOf` 的集合名规则。
+
+术语那一层单独一份，只测纯匹配和在树上换节点，不碰 React：
+
+{/* ref file="../tests/glossary.test.ts" lines="1-5" */}
+
+接 fumadocs 管线的那半——loader 出 `_markdown`、页面上的状态点、样式——喂不了假实现，归 `docs-site` 自己的站测试。名册两头齐由站门禁里的一个脚本对：
+
+{/* exists path="scripts/verify-roster.mjs" */}
+
+各条测试分别守什么，见[测试与边界](/docs/cli/testing)。
+
+## 代码地图
+
+在哪：
+
+{/* tree dir="../packages/format-fumadocs/src" depth="1" */}
+
+**先读** `index.ts`（出口总表，四个侧出口写在头注释里）和 `host.ts`（站接线的三样）。
+
+**读序**顺着数据流：`recognize.ts` 认引用 → `transform.ts` 换节点（换成什么长相在 `blocks.ts`）→ `roster.ts` 打标 → `markdown.ts` 序列化、`render.ts` 出 md。`remark-plugin.ts` 把前四步串成一趟，`host.ts` 在最外层装配、只装一次。`glossary.ts`（纯匹配）与 `glossary-plugin.ts`（在树上换节点）是独立一层，跟引用那条线不交叉，只共用 `tree.ts`。`tree.ts` 是共用的小帮手（`walk` / `lineOf` 与节点类型），别处遇到再翻。
+
+**可跳过**：`tsdown.config.ts` 与 `tsconfig.json`（构建脚手架）、`styles/` 下两份 css（随包发的样式，改状态点或术语的长相才看）、`dist/`（产物）。

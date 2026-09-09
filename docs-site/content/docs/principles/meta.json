@@ -1,6 +1,4 @@
 {
   "title": "原理",
-  "description": "git 记忆、模块拆分、比较器、记号两态",
-  "root": true,
-  "pages": ["index", "git", "modules", "comparator", "markers"]
+  "pages": ["git"]
 }

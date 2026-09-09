@@ -16,10 +16,15 @@ format-md、format-fumadocs、format-html、trajectory）外加一个工作台�
 钉的是工作区里的真源码。星轨盘的诗名 fixture 住 `tests/fixtures/trajectory/`，
 轨迹卡住 `docs-site/content/trajectory/`。
 
-README 和这份规矩都是**生成物**：正本分别是 `docs-site/content/docs/maintain/readme.mdx` 和 `agents.mdx`，
-改 mdx 源（不是改生成物），`pnpm livedoc render --target ai` 重摆，mdx 源和生成物一起提交。
-方案正本是仓根的 `god-live-doc-rewrite.md`，接口、记录格式、状态表、顺序都在那儿；
-跟方案有出入的地方记在 `README.md` 的「待定」段，方案要变先改正本再改代码。
+README 和这份规矩都是**生成物**：正本分别是 `docs-site/content/outputs/readme.mdx` 和
+`docs-site/content/docs/maintain/agents.mdx`，改 mdx 源（不是改生成物），
+`pnpm livedoc render --target ai` 重摆，mdx 源和生成物一起提交。
+
+**动手前先读文档站**：`docs-site/content/docs/system-map.mdx` 是总代码地图，八个包各一页模块页在
+`content/docs/modules/`，接口与边界逐条钉在真源码上。站分六区——现状 `docs/`、轨迹 `trajectory/`、
+在途 `spec/`、未来 `future/`、生成正本 `outputs/`、反馈 `feedback/`；`livedoc check` 只扫现状与
+生成正本两区，别的四区不进门禁。文档怎么写、六区怎么分、每页写到哪为止，正本是随
+`@godcreator02/live-doc-cli` 发的 skill `packages/cli/skills/livedoc-docs/SKILL.md`，动文档前读它。
 
 ## 参考，不要改
 

@@ -1,6 +1,4 @@
 {
   "title": "维护",
-  "description": "改这个仓的人看：仓布局、门禁、提交规矩、待定与路线图",
-  "root": true,
-  "pages": ["index", "maintainers", "roadmap", "readme", "agents"]
+  "pages": ["maintainers", "agents"]
 }

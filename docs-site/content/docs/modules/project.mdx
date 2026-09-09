@@ -1,0 +1,123 @@
+---
+title: 装配包
+description: 读配置装出一个核心服务；记忆按被引文件的位置分派；git 那条线住这儿
+---
+
+# 装配包
+
+**本页回答**：`@godcreator02/live-doc-project` 把哪些零件装进核心服务、一处引用拿到哪种记忆是谁决定的、换一个读取器或记录簿要动哪儿。
+
+## 管什么
+
+一个项目 = 一个根目录 + 一份 `livedoc.config` + 一本记录簿。这个包把三者串起来，交出一个核心服务：
+
+{/* ref file="../packages/project/src/load.ts" lines="1-5" */}
+
+零件是四样：**读取器**（读工作区文件、列目录名字表、看路径是文件还是目录）、**json 记录簿**、**比较器**、加上配置里声明的格式包名单。比较器这一样是这个包的主戏——`auto` 按被引文件的位置挑记忆，git 那条线（定位文件在哪个仓、取 blob、出 hunk 表、跟着行段走）也住这儿，因为它要起子进程，而核心不起。
+
+## 不知道什么
+
+**不知道文档是什么格式。** 格式包是消费方在配置里挂的，这个包只把名单原样交给核心，自己一个格式包都不依赖：
+
+{/* ref file="../tests/boundary.test.ts" lines="84-89" */}
+
+**不知道状态怎么算。** 判定的编排在核心：这个包只交两样东西——观察（读取器给的）和记忆实现（比较器）。绿黄白红是核心算出来的，命令行和站看到的状态因此必然一致。
+
+**不知道命令行、站、轨迹卡、工作台件长什么样。** 依赖只有一条边，方向单向：
+
+{/* ref file="../packages/project/package.json" lines="20-22" */}
+
+## 数据结构
+
+**配置的形状**就是这个包对消费方的全部契约面——声明挂哪些格式包、哪几个目录进 check、记录簿落哪、用哪种记忆、生成物摆哪、组件名册、轨迹卡目录：
+
+{/* ref file="../packages/project/src/load.ts" lines="23-46" */}
+
+**git 记忆记什么**：blob、commit、旧 blob 里的行段、段哈希。不记仓在哪——blob 是内容寻址的，核对时从文件位置重新找仓，所以同一条记录换台机器、换个 clone 路径照样认得。
+
+{/* ref file="../packages/project/src/git-comparator.ts" lines="19-26" */}
+
+**记录簿落盘就是一个 json**，两层键：文档 → 目标 → 记录。整个实现一眼看得完，`save` 只在内容真变了才写盘——记录簿会被构建工具登记成依赖，白改一次 mtime 就是一次全站重编。
+
+{/* ref file="../packages/project/src/json-ledger.ts" */}
+
+## 提供的接口
+
+**`loadProject(root)`** 是唯一入口，交回装好的项目。同一个根只装配一次：站构建时几十个 loader 并发调它，没这一条就是几十次读配置、几十本记录簿。
+
+{/* ref file="../packages/project/src/load.ts" lines="87-95" */}
+
+配置里的 `comparator` 有四种写法。强制成 `git` 或 `hash` 时只换掉行段和整文件那一半，目录树、存在性、名字照旧走核心那三个：
+
+{/* ref file="../packages/project/src/load.ts" lines="127-134" */}
+
+**`createReader(root)`** 是核心看到的全部世界。目录名字表在 git 仓里按 `.gitignore` 过滤（`dist/`、`node_modules/` 不进清单，也不往里走），`.git` 自己去掉；不在仓里就原样列。
+
+{/* ref file="../packages/project/src/fs-reader.ts" lines="1-8" */}
+
+**`createAutoComparator`** 是默认的那个。被引文件不限于项目自己的仓：另一个单元的仓、上游 clone、被忽略的 `node_modules`、不在任何仓里的目录，都能钉。规则一条——在任何 git 仓里、已跟踪、工作区干净的走 git，本仓外仓一视同仁；仓里但被 `.gitignore` 忽略的走 hash；不在任何仓里的走 hash。未跟踪且没被忽略的、已跟踪但脏的，一律拒并让人先 commit，**不退成 hash**；仓一次提交都没有的也拒。
+
+{/* ref file="../packages/project/src/auto-comparator.ts" lines="24-29" */}
+
+「该进 git 的东西」不能悄悄退成一份弱记忆，所以只有明确被忽略的才走 hash。文件在哪个仓按它的真实路径定，pnpm 的软链按指向的地方算。
+
+核对时不看文件在哪，按**记录的 kind** 转发——记录是当时哪种记忆记的，就让哪个比较器判，认不得的 kind 当没确认过：
+
+{/* ref file="../packages/project/src/auto-comparator.ts" lines="41-45" */}
+
+一个项目里 git 记录和 hash 记录并存。哪一处拿到的是 hash 记忆，`confirm` 那一行会标出来（见 [命令行](/docs/modules/cli)）——写手得知道自己拿到的是弱记忆。
+
+**`createGitComparator`** 管行段和整文件。确认那头守几道门：得在某个仓里、那个仓得有过提交、文件得在 HEAD 里（未跟踪、被忽略、大小写不符都拒）、工作区得干净。核对那头拿 `git diff -U0` 出 hunk 表，把旧行段映到今天：
+
+{/* ref file="../packages/project/src/git-comparator.ts" lines="97-104" */}
+
+**绿只认段哈希**：hunk 说没碰到也再比一次，行映射跟内容对不上时宁可报黄让人复核，也不把红判成绿。整段没了是 `vanished`，文件没了是 `file-missing`，blob 不在对象库（浅克隆、历史重写、换了个仓）是 `blob-missing`。这条线为什么这么设计、`hash-object` 为什么自己算，见 [git 记忆原理](/docs/principles/git)。
+
+## 依赖的接口
+
+| 接口 | 用来做什么 | 生产实现 | 测试实现 |
+| --- | --- | --- | --- |
+| `Format`（核心定） | 认领文档、认出引用、写回 | 消费方在 `livedoc.config` 里挂的格式包 | `tests/fake-format.ts` 的假格式包 |
+| `Reader` / `Ledger`（核心定） | 观察从哪来、记录存哪 | 本包的 fs 读取器与 json 记录簿 | `tests/repo.ts` 的内存记录簿；读取器用真的 |
+| `Comparator`（核心定） | 记忆怎么记、变没变怎么判 | 本包的 auto 与 git 版 | 测试里按用例换 `auto` / `hash` / git |
+| 核心的纯函数 | 归一化、段哈希、切片、hunk 解析、行段映射 | `@godcreator02/live-doc-core`，同一份 | 同一份 |
+| `git` 命令行 | blob、hunk、`check-ignore`、`status` | 子进程，每次调用都带上限 | 临时目录里起的真 git 仓 |
+| `livedoc.config.mjs` | 项目的声明面 | 消费方项目里的活模块，由 Node 原生加载 | 夹具不走 `loadProject`，零件直接装 |
+
+子进程一律带超时——卡住的子进程比错误的答案更难查：
+
+{/* ref file="../packages/project/src/git.ts" lines="21-22" */}
+
+配置必须由 Node 原生加载，两个打包器标记让站的打包器绕开这一句；被它改写成自己的加载器，消费方那份活配置就装不进来了：
+
+{/* ref file="../packages/project/src/load.ts" lines="136-140" */}
+
+## 怎么单独测
+
+分派规则的账在 `tests/auto-comparator.test.ts`：夹具在临时目录里起**真的 git 仓**，喂**假格式包**，记录簿换成内存的。记忆分派是跟 git 的真行为对账，假不了。
+
+{/* ref file="../tests/auto-comparator.test.ts" lines="1-10" */}
+
+夹具本身不走 `loadProject`——临时目录里解析不到包名，零件直接拿来装；装配那一整趟（地盘规则、真扫目录）在 `tests/cli.test.ts`。
+
+{/* ref file="../tests/repo.ts" lines="1-4" */}
+
+配置归一化那两个是纯函数，直接喂输入看输出，不起仓：
+
+{/* ref file="../tests/project-config.test.ts" lines="1-4" */}
+
+还有两处从外面守着：`tests/contract.test.ts` 拿产品用的 git 版比较器，验三个格式包在同一串改动下状态一致；`tests/boundary.test.ts` 读依赖图，验这个包不认识任何格式包、不认识轨迹包与工作台件。
+
+## 代码地图
+
+**在哪**：
+
+{/* tree dir="../packages/project/src" depth="1" */}
+
+**先读** `load.ts`（装配的全貌，配置的形状也在这儿），再读 `auto-comparator.ts`（分派规则，四十行看完）。包的出口是一个文件，导出表即对外面貌：
+
+{/* ref file="../packages/project/src/index.ts" */}
+
+**读序**：`git.ts` 是子进程原语（定位仓、blob、hunk、忽略判定），不吃本包任何人；`git-comparator.ts` 吃 `git.ts` 加核心的纯函数；`auto-comparator.ts` 吃前两者加核心的 hash 版；`fs-reader.ts` 只吃 `git.ts`；`json-ledger.ts` 只吃核心的键函数；`load.ts` 吃全部，交给核心的 `createService`。
+
+**可跳过**：`dist/` 是构建产物。

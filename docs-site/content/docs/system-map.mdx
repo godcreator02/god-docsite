@@ -1,0 +1,87 @@
+---
+title: 系统地图
+description: 拆成哪几块、各住哪、依赖方向是什么、先读哪块
+---
+
+# 系统地图
+
+**本页回答**：这个仓拆成哪几块、各住哪、块与块之间谁依赖谁、新来的人先读哪块。
+
+## 模块
+
+八块同住 `packages/`：七个 `@godcreator02/live-doc-*` 包，外加一个工作台件。一行一块，
+「先读」指向那一块自己的页。
+
+| 模块 | 在哪 | 管什么 | 先读 |
+| --- | --- | --- | --- |
+| core | `packages/core/` | 引用模型、比较器接口、编排服务；零依赖 | [核心包](/docs/modules/core) |
+| project | `packages/project/` | 读配置，造读取器 / 记录簿 / 比较器，装配给核心 | [装配包](/docs/modules/project) |
+| cli | `packages/cli/` | check / confirm / render / trajectory / init 五条命令 | [命令行](/docs/modules/cli) |
+| format-md | `packages/format-md/` | md：注释记号 + 围栏展示区 + 尾注释 | [md 格式包](/docs/modules/format-md) |
+| format-html | `packages/format-html/` | html：元素既是记号又是展示区，文件即终态 | [html 格式包](/docs/modules/format-html) |
+| format-fumadocs | `packages/format-fumadocs/` | mdx 记号加 fumadocs 接线：remark 插件、meta 白名单、状态点组件 | [fumadocs 格式包](/docs/modules/format-fumadocs) |
+| trajectory | `packages/trajectory/` | 轨迹卡与星轨盘：扫卡、校验、聚盘、布局 | [轨迹包](/docs/modules/trajectory) |
+| gwb-live-doc | `packages/gwb-live-doc/` | 工作台件：扫站列站、起停、接命令行 | [工作台件](/docs/modules/gwb-live-doc) |
+
+这张表说的是「有哪八块」，多一个包少一个包由目录树的钉打黄：
+
+{/* tree dir="../packages" depth="1" */}
+
+## 依赖方向
+
+单向：`cli → project → core`、`格式包 → core`、`cli → trajectory`、`件 → cli`。反过来的边一条都不许。
+
+`core` 是这张图的汇点，自己零依赖，只用 `node:crypto`。它不读文件、不起子进程、不认识任何文档
+格式——干活要的四样全是外面递进来的：
+
+{/* ref file="../packages/core/src/service.ts" lines="41-76" */}
+
+这段是核心的进料口：格式包、读取器、记录簿、比较器都是构造参数，所以核心的依赖面可以是空的。
+
+`project` 只依赖核心，负责把这四样凑齐；`cli` 吃 `project` 与 `core`。三个格式包各自只依赖核心，
+`format-fumadocs` 多一条：它在站的 remark 链上要自己装配一次项目，所以也依赖 `project`。宿主
+（fumadocs、react）在它那儿只能是 **peer**，用消费方项目装的那份，包自己不带；peer 都标成
+optional，好让只用命令行、不装 fumadocs 的项目也能装它：
+
+{/* ref file="../packages/format-fumadocs/package.json" lines="31-44" */}
+
+`trajectory` 站在这套依赖网外面：它不依赖核心，也不依赖任何格式包，`.` 入口连 npm 依赖都没有——
+这条红线按产物判，产物里只许出现 `node:` 内置模块：
+
+{/* ref file="../tests/boundary.test.ts" lines="111-117" */}
+
+它的 `./react` 与 `./server` 两个入口另有 react 与 remark 那套，只给站用，细节在轨迹包那一页。
+`cli` 依赖它是为了接 `livedoc trajectory` 子命令，而且只用 `.` 入口；`project` 与三个格式包一概不许
+碰它。工作台件 `gwb-live-doc` 是链的末端，依赖发出去的那份 `cli`；七个包反过来既不认识它，也不
+认识任何 `@godcreator02/gwb-*`——装这套包的人不该被迫拉进一整个桌面工作台生态。这两条方向各由
+一条边界测试守着：
+
+{/* ref file="../tests/boundary.test.ts" lines="182-199" */}
+
+守边界靠的不是自觉，是依赖图本身：pnpm 的严格 `node_modules` 让「没声明就 import 不到」。
+`tests/boundary.test.ts` 直接读各包的 `package.json` 断言这张图：
+
+{/* ref file="../tests/boundary.test.ts" lines="54-65" */}
+
+同一份测试里还有两条读源码的：`core/src` 下只许 import 自己和 `node:crypto`；核心不许 import 任何
+格式包。
+
+方向单向换来的是换件只动一处：换一种文档格式，新写一个格式包，核心一行不动；换记忆的记法，
+实现 `Comparator` 两个方法再在配置里换个名字；换记录簿的存法，实现 `Ledger` 五个方法；换站的
+宿主，只动 `format-fumadocs`。
+
+## 站也是消费方
+
+`docs-site/` 就是「装了这几个包的项目」：项目根是站目录，被钉的代码在工作区的 `packages/` 下，
+记号写 `../packages/…`。
+
+{/* ref file="livedoc.config.mjs" lines="5-6" */}
+
+所以仓里不另留示例项目——这套包对外的样子由站自己演，站上的状态点绿着，就是这几个包在真源码上
+跑通了。
+
+## 每块一页
+
+上表里每一块在这一区有自己的一页，七个固定块顺序固定：管什么 / 不知道什么 / 数据结构 / 提供的
+接口 / 依赖的接口 / 怎么单独测 / 代码地图。写到「错了难改」为止——边界、依赖方向、接口契约、
+状态机、取舍讲透；字段清单、内部算法、内部命名是实现的自由度，不写。
