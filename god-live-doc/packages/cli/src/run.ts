@@ -7,6 +7,7 @@
  *                                          文档本身删了、挪了的，它的记录 check 算红、confirm 整个忘掉
  *   livedoc render --target human|ai       渲染：产物落 out/；挂了 outputs 映射的 ai 产物摆到指定目标（不再落 out/）
  *   livedoc trajectory [--json]            列轨迹卡的盘 / 树 / 主干；--json 出 buildTrajectory 的整份模型
+ *   livedoc init --dir <仓> [--title][--port]  往一个已有仓里铺一个接好 livedoc 的 fumadocs 站
  * 新引用不用命令：在文档里写一行核心定的草稿记号 @@livedoc ref src/greet.ts:2-3 @@，
  * check 认它、报未确认，confirm 换成该格式的正式记号。
  */
@@ -16,6 +17,7 @@ import { targetKey } from "@godcreator02/live-doc-core";
 import type { Format, Item, Listing } from "@godcreator02/live-doc-core";
 import { loadProject } from "@godcreator02/live-doc-project";
 import { buildTrajectory, scanDir } from "@godcreator02/live-doc-trajectory";
+import { initCommand } from "./init.ts";
 
 const MARK: Record<string, string> = { fresh: "🟢", changed: "🟡", missing: "🔴", unconfirmed: "⚪" };
 const LABEL: Record<string, string> = {
@@ -43,13 +45,15 @@ const ANCHOR = /^(#{1,6} .+) \[#[^\]]*\]$/gm;
 const STAR = /&#x2A;\*/g;
 
 export async function main(argv: string[]): Promise<number> {
-  // trajectory 子命令跟 check / confirm / render 不是一套：它不认 --target、不遍历文档，
-  // 提前分流，不挤进下面那条白名单检查里
+  // trajectory 与 init 跟 check / confirm / render 不是一套：它们不认 --target、不遍历文档，
+  // init 连 livedoc.config.mjs 都不要（它是给还没有站的仓铺一个站），所以提前分流，
+  // 不挤进下面那条白名单检查、也不去 loadProject
   if (argv[0] === "trajectory") return trajectoryCommand(argv.slice(1));
+  if (argv[0] === "init") return initCommand(argv.slice(1));
   const [command = "check", ...rest] = argv;
   const target = rest.includes("--target") ? rest[rest.indexOf("--target") + 1] : "human";
   if (!["check", "confirm", "render"].includes(command)) {
-    console.error(`不认识的命令：${command}——有 check / confirm / render / trajectory`);
+    console.error(`不认识的命令：${command}——有 check / confirm / render / trajectory / init`);
     return 2;
   }
 

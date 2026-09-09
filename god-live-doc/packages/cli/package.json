@@ -1,8 +1,8 @@
 {
   "name": "@godcreator02/live-doc-cli",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "type": "module",
-  "description": "命令行：check / confirm / render / trajectory",
+  "description": "命令行：check / confirm / render / trajectory / init；随包发两份 skill 与站模板",
   "bin": {
     "livedoc": "./dist/cli.mjs"
   },
@@ -10,10 +10,16 @@
     ".": {
       "types": "./dist/run.d.mts",
       "default": "./dist/run.mjs"
+    },
+    "./init": {
+      "types": "./dist/init.d.mts",
+      "default": "./dist/init.mjs"
     }
   },
   "files": [
-    "dist"
+    "dist",
+    "skills",
+    "template"
   ],
   "scripts": {
     "build": "tsdown",
