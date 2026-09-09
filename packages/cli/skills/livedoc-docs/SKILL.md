@@ -99,7 +99,7 @@ docs-site/content/
 * **提交边界慢**：`livedoc check` 与代码门禁并列，**红了这个提交不许推**。漂移处置二选一：
   `livedoc confirm` 认新行，或改论断。
 * git 比较器只钉已提交内容：动了被引用的源码，**confirm 之前先 commit**。
-* 挂 outputs 的页改了源，`livedoc render --target ai` 重摆，生成物与源**同一个提交**。
+* 挂 outputs 的页改了源，`livedoc render` 重摆，生成物与源**同一个提交**。
 
 # 开发循环
 
@@ -160,7 +160,7 @@ TDD：先写红的测试再写代码。模块经接口连接，测试喂 mock �
 # outputs
 
 README、AGENTS.md、包内 SKILL.md 都是生成物，正本住 `content/outputs/`，`livedoc.config.mjs`
-的 `outputs` 映射到落点，`livedoc render --target ai` 重摆。SKILL.md 的 `name` / `description`
+的 `outputs` 映射到落点，`livedoc render` 重摆。SKILL.md 的 `name` / `description`
 从 mdx frontmatter 随行带过去；AGENTS / README 不带 frontmatter。改正本不改生成物。
 
 # 起站与交接
