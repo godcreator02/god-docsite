@@ -2,14 +2,16 @@
  * 摆放：mdx 正本 → 落点上的生成物。
  *
  * 一篇文档在 `livedoc.config` 的 `outputs` 里挂了几个落点，摆放就把它渲成一份干净 md、
- * 戴上点名的 frontmatter 字段、写到每个落点上；核对是同一份正文跟盘上那份逐字节比。
- * 配置归一、地盘规则、渲染、整形、frontmatter 挑行、四态判定、落盘，全在这一份里。
+ * 戴上点名的 frontmatter 字段、写到每个落点上；核对是同一份正文跟落点上那份逐字节比。
+ * 配置归一、地盘规则、渲染、整形、frontmatter 挑行、四态判定，全在这一份里。
+ *
+ * 生成物怎么落地不在这一份里：读一个落点、写一个落点由 `PlacingHost` 给（真盘一份、内存一份），
+ * 所以这个文件一句 `node:fs` 都不 import。
  *
  * 对外只有两个方法：`render` 摆一趟、回落点清单，`check` 只核对、回每个落点的四态。
  * 摆出去的和守着的是**同一段正文**——两条路走的是同一个 `bodyOf`，所以摆完必然是新鲜的。
  */
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
-import { dirname, isAbsolute, join, relative, resolve, sep } from "node:path";
+import { isAbsolute, join, relative, resolve, sep } from "node:path";
 import type { Format, Service } from "@godcreator02/live-doc-core";
 import type { ProjectConfig } from "./load.ts";
 
@@ -58,14 +60,23 @@ export interface Placing {
   check(doc: string): Promise<PlacedCheck[]>;
 }
 
-/** 摆放认得的那点项目面。整个 `Project` 结构上就满足它，装配时把自己递进来 */
+/**
+ * 摆放认得的外面那一圈。前半是项目面（根、配置、核心服务、组件名册、这篇挂了哪些落点、这篇的原文），
+ * 装配时把装好的项目递进来；后半是**生成物的存放**——摆放不知道落点是文件还是别的什么，
+ * 生产给的是真盘那份，测试给的是内存那份。
+ */
 export interface PlacingHost {
   root: string;
   config: ProjectConfig;
   service: Service;
   roster: Record<string, unknown> | undefined;
   placements(doc: string): Placement[];
+  /** mdx 正本的原文 */
   read(doc: string): string;
+  /** 一个落点上现在摆着什么；还没摆过给 null。`to` 是配置里写的那个落点，怎么落地由实现说了算 */
+  readPlaced(to: string): string | null;
+  /** 把生成物摆到一个落点上；落点的容器（真盘那份就是父目录）不在得自己备好 */
+  writePlaced(to: string, text: string): void;
 }
 
 /** fumadocs 给站上 .md 路由的标题加的锚记（`# 标题 [#锚]`），摆放产物不要 */
@@ -209,9 +220,7 @@ export function createPlacing(host: PlacingHost): Placing {
           out.push({ to, status: "no-frontmatter", missing: picked.missing });
           continue;
         }
-        const abs = join(host.root, to);
-        mkdirSync(dirname(abs), { recursive: true });
-        writeFileSync(abs, withFrontmatter(body, picked.lines));
+        host.writePlaced(to, withFrontmatter(body, picked.lines));
         out.push({ to, status: "placed" });
       }
       return out;
@@ -228,13 +237,13 @@ export function createPlacing(host: PlacingHost): Placing {
           out.push({ to, status: "no-frontmatter", fresh: false, missing: picked.missing });
           continue;
         }
-        const abs = join(host.root, to);
-        if (!existsSync(abs)) {
+        const placed = host.readPlaced(to);
+        if (placed === null) {
           out.push({ to, status: "missing", fresh: false });
           continue;
         }
-        const disk = readFileSync(abs, "utf8").replace(/\r\n/g, "\n");
-        const same = disk === withFrontmatter(body, picked.lines);
+        // 换行归一在这儿不在宿主里：这是「算不算同一份」的口径，不是存放的事
+        const same = placed.replace(/\r\n/g, "\n") === withFrontmatter(body, picked.lines);
         out.push({ to, status: same ? "fresh" : "stale", fresh: same });
       }
       return out;

@@ -3,8 +3,8 @@
  * 一个项目 = 一个根目录 + 一份 livedoc.config（声明格式包、文档目录、用哪个比较器）+ 一本记录簿。
  * loadProject(root) 把这些串起来交出一个核心服务；同一个根只装配一次（站构建时几十个 loader 并发调它）。
  */
-import { existsSync, readFileSync, readdirSync, statSync, writeFileSync } from "node:fs";
-import { isAbsolute, join, relative, resolve, sep } from "node:path";
+import { existsSync, mkdirSync, readFileSync, readdirSync, statSync, writeFileSync } from "node:fs";
+import { dirname, isAbsolute, join, relative, resolve, sep } from "node:path";
 import { pathToFileURL } from "node:url";
 import { createHashComparator, createKindComparator, createService } from "@godcreator02/live-doc-core";
 import type { Comparator, Format, Service } from "@godcreator02/live-doc-core";
@@ -141,23 +141,38 @@ async function build(root: string): Promise<Project> {
     return [...new Set(out)].sort();
   }
 
-  // 摆放模块认得的只有这几样，先攒齐再交给它——它拿不到装配的别的部分
-  const host: PlacingHost = {
+  // 摆放模块认得的只有这几样，先攒齐再交给它——它拿不到装配的别的部分。
+  // 后三样是真盘那份适配器：落点相对项目根，读写与建父目录都在这儿，摆放本身不碰 node:fs
+  const placingHost: PlacingHost = {
     root,
     config,
     service,
     roster: config.components,
     placements: (doc) => placements[doc] ?? [],
     read: (doc) => readFileSync(join(root, doc), "utf8"),
+    readPlaced(to) {
+      const abs = join(root, to);
+      return existsSync(abs) ? readFileSync(abs, "utf8") : null;
+    },
+    writePlaced(to, text) {
+      const abs = join(root, to);
+      mkdirSync(dirname(abs), { recursive: true });
+      writeFileSync(abs, text);
+    },
   };
 
   return {
-    ...host,
+    root,
+    config,
+    service,
+    roster: config.components,
     docsDirs,
     trajectoryDir: config.trajectory !== undefined ? join(root, config.trajectory) : null,
-    placing: createPlacing(host),
+    placing: createPlacing(placingHost),
     docs: allDocs,
+    placements: (doc) => placements[doc] ?? [],
     docIdOf: (path) => docIdOf(root, path),
+    read: (doc) => readFileSync(join(root, doc), "utf8"),
     write: (doc, text) => writeFileSync(join(root, doc), text),
   };
 }

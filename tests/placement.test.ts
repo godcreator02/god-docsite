@@ -1,8 +1,11 @@
 /**
  * 摆放模块：渲一份正文、戴上点名的 frontmatter 字段、写到每个落点，再跟盘上那份比出四态。
  *
- * 跨 project 的接口进——临时目录里起一个真 git 项目，`loadProject` 之后直接调 `placing` 的两个方法。
+ * 跨 project 的接口进——临时目录里起一个真项目，`loadProject` 之后直接调 `placing` 的两个方法。
  * 不起命令行、不劫持 stdout、不 `process.chdir`：摆放的判定不该只有走一趟命令行才验得着。
+ *
+ * 项目配 `comparator: "hash"`，临时目录里不起 git 仓：摆放一句 git 都不问，源里那条引用
+ * 靠哈希记忆就确认得下来——要一个真仓的是 git 记忆，它只钉已提交的内容。
  */
 import { test } from "node:test";
 import assert from "node:assert/strict";
@@ -11,13 +14,10 @@ import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { loadProject } from "@godcreator02/live-doc-project";
-import { CODE, run } from "./repo.ts";
+import { CODE } from "./repo.ts";
 
 const PACKAGES = join(dirname(fileURLToPath(import.meta.url)), "..", "packages");
 const distUrl = (name: string) => pathToFileURL(join(PACKAGES, name, "dist", "index.mjs")).href;
-
-/** 身份与换行策略 `-c` 现传，不落 git config */
-const SETTINGS = ["-c", "user.email=test@example.com", "-c", "user.name=test", "-c", "core.autocrlf=false"];
 
 /** 带 frontmatter 的源：点名的字段随行到生成物头部，没点名的剥掉 */
 const SOURCE = ["---", "name: block-note", "description: 块笔记怎么用", "secret: 不该随行", "---", "", "# 摆放", "", "@@livedoc ref src/greet.ts:2-3 @@", ""].join("\n");
@@ -25,7 +25,6 @@ const SOURCE = ["---", "name: block-note", "description: 块笔记怎么用", "s
 /** 起一个能被 loadProject 装配的临时项目：一份代码、两篇文档、一份配 outputs 的 livedoc.config */
 async function setup(outputs: string) {
   const root = mkdtempSync(join(tmpdir(), "god-live-doc-placing-"));
-  run(root, ["init", "-q", "-b", "main"]);
   mkdirSync(join(root, "src"));
   mkdirSync(join(root, "docs"));
   writeFileSync(join(root, "src", "greet.ts"), CODE);
@@ -33,10 +32,8 @@ async function setup(outputs: string) {
   writeFileSync(join(root, "docs", "b.md"), "# 没挂映射\n");
   writeFileSync(
     join(root, "livedoc.config.mjs"),
-    `import * as md from ${JSON.stringify(distUrl("format-md"))};\n\nexport default { formats: [md], docs: "docs", out: "out", outputs: ${outputs} };\n`,
+    `import * as md from ${JSON.stringify(distUrl("format-md"))};\n\nexport default { formats: [md], docs: "docs", out: "out", comparator: "hash", outputs: ${outputs} };\n`,
   );
-  run(root, [...SETTINGS, "add", "-A"]);
-  run(root, [...SETTINGS, "commit", "-q", "-m", "起项目"]);
 
   const project = await loadProject(root);
   // 记号先确认掉：草稿记号还没有展示区，投影不出内容——摆放要验的正是投影过的那份正文
