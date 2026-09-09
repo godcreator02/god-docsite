@@ -349,3 +349,202 @@ test("孤儿：文档里删掉引用，check 报红；confirm 清掉", async () 
     p.teardown();
   }
 });
+
+/* ── docs 数组、outputs 对象写法、check --json ─────────────────────────────── */
+
+test("docs 给数组：几个目录一起扫，报告按文档身份排序；目录套目录同一篇只算一次", async () => {
+  const p = setupProject(CONFIG.replace(`docs: "docs"`, `docs: ["docs", "more", "more/deep"]`));
+  try {
+    mkdirSync(join(p.root, "more", "deep"), { recursive: true });
+    writeFileSync(join(p.root, "more", "x.md"), "# x\n\n@@livedoc ref src/greet.ts:2-3 @@\n");
+    writeFileSync(join(p.root, "more", "deep", "y.md"), "# y\n\n@@livedoc ref src/greet.ts:2-3 @@\n");
+    const first = await p.cli("check", "--json");
+    assert.equal(first.code, 0, first.out);
+    const report = JSON.parse(first.out) as { docs: Array<{ doc: string }> };
+    assert.deepEqual(
+      report.docs.map((d) => d.doc),
+      ["docs/a.md", "docs/b.html", "more/deep/y.md", "more/x.md"],
+    );
+  } finally {
+    p.teardown();
+  }
+});
+
+test("docs 配成空数组或空串：装配时拒", async () => {
+  for (const bad of [`docs: []`, `docs: ""`, `docs: ["docs", ""]`]) {
+    const p = setupProject(CONFIG.replace(`docs: "docs"`, bad));
+    try {
+      await assert.rejects(p.cli("check"), /docs 得是一个非空目录/);
+    } finally {
+      p.teardown();
+    }
+  }
+});
+
+test("outputs 目标落进第二个文档目录也拒", async () => {
+  const p = setupProject(CONFIG.replace(`docs: "docs", out: "out" };`, `docs: ["docs", "more"], out: "out", outputs: { "docs/a.md": ["more/copy.md"] } };`));
+  try {
+    await assert.rejects(p.cli("check"), /落进了文档目录/);
+  } finally {
+    p.teardown();
+  }
+});
+
+const SKILL_DOC = [
+  "---",
+  "name: block-note",
+  "description: 块笔记怎么用",
+  "tags:",
+  "  - 笔记",
+  "  - 块",
+  "secret: 不该随行",
+  "---",
+  "",
+  "# skill",
+  "",
+  "@@livedoc ref src/greet.ts:2-3 @@",
+  "",
+].join("\n");
+
+test("outputs 对象写法：点名的 frontmatter 字段原样随行到生成物头部（块式列表跟着走），没点名的剥掉；字符串写法照旧全剥", async () => {
+  const p = setupProject(
+    withOutputs(`{ "docs/s.md": [{ to: "skills/x/SKILL.md", frontmatter: ["name", "tags"] }, "PLAIN.md"] }`),
+  );
+  try {
+    writeFileSync(join(p.root, "docs", "s.md"), SKILL_DOC);
+    run(p.root, ["add", "-A"]);
+    run(p.root, ["commit", "-qm", "加 skill 源"]);
+    assert.equal((await p.cli("confirm")).code, 0);
+    const rendered = await p.cli("render", "--target", "ai");
+    assert.equal(rendered.code, 0, rendered.out);
+    assert.match(rendered.out, /→ {2}docs\/s\.md {2}摆放到 skills\/x\/SKILL\.md/);
+    const skill = p.read("skills/x/SKILL.md");
+    assert.ok(skill.startsWith("---\nname: block-note\ntags:\n  - 笔记\n  - 块\n---\n\n# skill\n"), skill);
+    assert.doesNotMatch(skill, /description:|secret:/, "没点名的字段不随行");
+    const plain = p.read("PLAIN.md");
+    assert.ok(plain.startsWith("# skill\n"), `字符串写法整段剥掉：${plain.slice(0, 40)}`);
+    assert.match(skill, /```ts\nexport function greet/, "正文照样是投影过的 md");
+
+    const green = await p.cli("check");
+    assert.equal(green.code, 0, green.out);
+    assert.match(green.out, /🟢 docs\/s\.md → skills\/x\/SKILL\.md {2}生成物跟 mdx 源一致/);
+    assert.match(green.out, /🟢 docs\/s\.md → PLAIN\.md {2}生成物跟 mdx 源一致/);
+
+    // 手改头部一个字：跟源不一致，红
+    writeFileSync(join(p.root, "skills", "x", "SKILL.md"), skill.replace("block-note", "block-notes"));
+    const stale = await p.cli("check");
+    assert.equal(stale.code, 1);
+    assert.match(stale.out, /🔴 docs\/s\.md → skills\/x\/SKILL\.md {2}生成物跟 mdx 源不一致/);
+  } finally {
+    p.teardown();
+  }
+});
+
+test("outputs 点名了源里没有的 frontmatter 字段：render 不摆、退 1；check 红并说缺哪个", async () => {
+  const p = setupProject(withOutputs(`{ "docs/s.md": [{ to: "SKILL.md", frontmatter: ["name", "nope"] }] }`));
+  try {
+    writeFileSync(join(p.root, "docs", "s.md"), SKILL_DOC);
+    run(p.root, ["add", "-A"]);
+    run(p.root, ["commit", "-qm", "加 skill 源"]);
+    await p.cli("confirm");
+    const rendered = await p.cli("render", "--target", "ai");
+    assert.equal(rendered.code, 1);
+    assert.match(rendered.out, /🔴 docs\/s\.md → SKILL\.md {2}mdx 源的 frontmatter 里没有 nope——补上再 render/);
+    assert.equal(existsSync(join(p.root, "SKILL.md")), false, "缺字段就不摆");
+    const red = await p.cli("check", "--json");
+    assert.equal(red.code, 1);
+    const report = JSON.parse(red.out) as { docs: Array<{ doc: string; outputs: Array<{ to: string; status: string; missing?: string[] }> }> };
+    const entry = report.docs.find((d) => d.doc === "docs/s.md")!;
+    assert.deepEqual(entry.outputs, [{ to: "SKILL.md", status: "no-frontmatter", missing: ["nope"] }]);
+  } finally {
+    p.teardown();
+  }
+});
+
+test("outputs 对象写法的形状：to 空、frontmatter 不是字符串数组，装配时拒", async () => {
+  const cases: [string, RegExp][] = [
+    [withOutputs(`{ "docs/a.md": [{ to: "" }] }`), /每个目标得是非空的相对路径/],
+    [withOutputs(`{ "docs/a.md": [{ to: "X.md", frontmatter: "name" }] }`), /frontmatter 得是字段名数组/],
+    [withOutputs(`{ "docs/a.md": [] }`), /目标得是非空数组/],
+  ];
+  for (const [config, message] of cases) {
+    const p = setupProject(config);
+    try {
+      await assert.rejects(p.cli("check"), message);
+    } finally {
+      p.teardown();
+    }
+  }
+});
+
+interface JsonReport {
+  ok: boolean;
+  red: number;
+  docs: Array<{
+    doc: string;
+    red: number;
+    items: Array<{ target: string; kind: string; status: string; line: number; lines: [number, number]; draft: boolean; reason?: string; diff?: string }>;
+    orphans: string[];
+    components: Array<{ name: string; line: number }>;
+    outputs: Array<{ to: string; status: string }>;
+  }>;
+  strays: string[];
+  trajectory: Array<{ path: string; field: string; value: string; reason: string }>;
+}
+
+test("check --json：整份报告一行 JSON，退出码跟人读模式一样；四态、行号、outputs 新鲜度、孤儿、失踪文档、病卡都在", async () => {
+  const p = setupProject(
+    CONFIG.replace(`docs: "docs", out: "out" };`, `docs: "docs", out: "out", outputs: { "docs/a.md": ["README.md"] }, trajectory: "trajectory" };`),
+  );
+  try {
+    const white = await p.cli("check", "--json");
+    assert.equal(white.code, 1, "outputs 还没摆是红，退出码跟人读模式一样");
+    assert.equal(white.out.split("\n").length, 1, "一行 JSON，别的什么都不打");
+    const first = JSON.parse(white.out) as JsonReport;
+    // outputs 还没摆：红，ok 假；引用本身是未确认
+    assert.equal(first.ok, false);
+    assert.equal(first.red, 1);
+    const a = first.docs.find((d) => d.doc === "docs/a.md")!;
+    assert.deepEqual(a.items, [{ target: "src/greet.ts:2-3", kind: "span", status: "unconfirmed", line: 3, lines: [2, 3], draft: true }]);
+    assert.deepEqual(a.outputs, [{ to: "README.md", status: "missing" }]);
+    assert.deepEqual(first.strays, []);
+    assert.deepEqual(first.trajectory, []);
+
+    await p.cli("confirm");
+    await p.cli("render", "--target", "ai");
+    const green = JSON.parse((await p.cli("check", "--json")).out) as JsonReport;
+    assert.equal(green.ok, true);
+    assert.equal(green.red, 0);
+    assert.equal(green.docs.find((d) => d.doc === "docs/a.md")!.items[0]!.status, "fresh");
+    assert.deepEqual(green.docs.find((d) => d.doc === "docs/a.md")!.outputs, [{ to: "README.md", status: "fresh" }]);
+
+    // 代码改了：黄，带 diff，退 0。md 格式的投影住在文档里、confirm 才刷新，所以生成物此刻还跟源一致
+    writeFileSync(join(p.root, "src", "greet.ts"), CODE.replace("hello", "hey"));
+    run(p.root, ["commit", "-qam", "改问候语"]);
+    const yellow = await p.cli("check", "--json");
+    const changed = JSON.parse(yellow.out) as JsonReport;
+    const item = changed.docs.find((d) => d.doc === "docs/a.md")!.items[0]!;
+    assert.equal(item.status, "changed");
+    assert.match(item.diff ?? "", /hey/);
+    assert.equal(changed.docs.find((d) => d.doc === "docs/a.md")!.outputs[0]!.status, "fresh");
+    assert.equal(yellow.code, 0);
+
+    // 源改了没重摆 → 生成物 stale；引用删掉 → 孤儿；文档删掉 → 失踪；病卡 → trajectory
+    writeFileSync(join(p.root, "docs", "a.md"), "# md\n\n没有引用了\n");
+    rmSync(join(p.root, "docs", "b.html"));
+    mkdirSync(join(p.root, "trajectory"));
+    writeFileSync(join(p.root, "trajectory", "2026-01-01-bad.mdx"), ["---", "born-at: 一月一号", "type: root", "label: 坏卡", "---", ""].join("\n"));
+    const red = await p.cli("check", "--json");
+    assert.equal(red.code, 1);
+    const last = JSON.parse(red.out) as JsonReport;
+    assert.deepEqual(last.docs.find((d) => d.doc === "docs/a.md")!.orphans, ["src/greet.ts:2-3"]);
+    assert.deepEqual(last.docs.find((d) => d.doc === "docs/a.md")!.outputs, [{ to: "README.md", status: "stale" }]);
+    assert.deepEqual(last.strays, ["docs/b.html"]);
+    assert.equal(last.trajectory.length, 1);
+    assert.equal(last.trajectory[0]!.path, "trajectory/2026-01-01-bad.mdx");
+    assert.equal(last.trajectory[0]!.field, "born-at");
+    assert.equal(last.red, last.docs.reduce((n, d) => n + d.red, 0) + last.strays.length + last.trajectory.length);
+  } finally {
+    p.teardown();
+  }
+});

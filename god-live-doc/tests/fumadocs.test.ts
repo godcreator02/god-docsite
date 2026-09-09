@@ -243,3 +243,15 @@ test("围栏里、行内的假记号认不出来——走语法树的理由", ()
 test("清单里没有的标记：报到行，不静默漏掉", () => {
   assert.throws(() => applyListing(parseTree(`${fumadocs.marker(T)}\n`), listingOf([])), /第 1 行是引用标记，但清单里没有它/);
 });
+
+test("collectionOf：集合名默认是文档目录的最后一截，目录套目录取最长的；字符串一刀切；表按目录查；不在文档目录下退 docs", () => {
+  const { collectionOf } = fumadocs;
+  assert.equal(collectionOf(undefined, "docs/a.mdx"), "docs");
+  assert.equal(collectionOf({ docs: "content/docs" }, "content/docs/a.mdx"), "docs");
+  assert.equal(collectionOf({ docs: ["content/docs", "content/outputs"] }, "content/outputs/agents.mdx"), "outputs");
+  assert.equal(collectionOf({ docs: ["content", "content/outputs"] }, "content/outputs/agents.mdx"), "outputs");
+  assert.equal(collectionOf({ docs: ["content/docs"], fumadocs: { collection: "all" } }, "content/docs/a.mdx"), "all");
+  assert.equal(collectionOf({ docs: ["content/docs", "content/outputs"], fumadocs: { collection: { "content/outputs": "generated" } } }, "content/outputs/a.mdx"), "generated");
+  assert.equal(collectionOf({ docs: ["content/docs", "content/outputs"], fumadocs: { collection: { "content/outputs": "generated" } } }, "content/docs/a.mdx"), "docs");
+  assert.equal(collectionOf({ docs: "content/docs" }, "elsewhere/a.mdx"), "docs");
+});

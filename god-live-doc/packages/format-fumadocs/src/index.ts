@@ -44,7 +44,7 @@ export function lintComponents(text: string, roster: unknown = defaultRoster): A
   return unknownComponents(parseTree(text), (roster ?? defaultRoster) as Roster);
 }
 
-export { parseTree, renderAi } from "./render.ts";
+export { collectionOf, parseTree, renderAi } from "./render.ts";
 export { remarkLivedoc } from "./remark-plugin.ts";
 export type { PluginFile, RemarkOptions } from "./remark-plugin.ts";
 export { draftIn, markerOf, recognize } from "./recognize.ts";

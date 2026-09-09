@@ -26,5 +26,5 @@ export type { GitRecord } from "./git-comparator.ts";
 export { createAutoComparator, createAutoSpanComparator } from "./auto-comparator.ts";
 export { createReader, globToRegExp } from "./fs-reader.ts";
 export { createLedger } from "./json-ledger.ts";
-export { configPathOf, docIdOf, loadProject } from "./load.ts";
-export type { Project, ProjectConfig } from "./load.ts";
+export { configPathOf, docIdOf, docsDirsOf, loadProject, placementsOf } from "./load.ts";
+export type { OutputTarget, Placement, Project, ProjectConfig } from "./load.ts";
