@@ -1,6 +1,6 @@
 {
   "name": "@godcreator02/live-doc-format-fumadocs",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "type": "module",
   "description": "fumadocs 口味的 mdx 格式包：认引用、写回、名册机制，加 fumadocs 接线（remark 插件、meta 白名单、processed markdown 的序列化回调）与状态点组件。AI 那份 md 由 fumadocs 自己的管线产出，这个包只往树上打标。fumadocs 是 peer：用消费方项目装的那份，包自己不带",
   "exports": {
