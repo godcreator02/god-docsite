@@ -1,7 +1,9 @@
 /**
  * 命令行测试的公共台子：临时真 git 项目、跑命令、收打印。
  *
- * 项目的 livedoc.config.mjs 按绝对 file: 地址引格式包的构建产物——临时目录里解析不到包名。
+ * 项目的 livedoc.config.mjs 按绝对 file: 地址引 `fake-format.ts`——临时目录里解析不到包名，
+ * 而命令行这一层要验的是它自己（报什么状态、退什么码、记录簿怎么刷），不是某个真格式的
+ * 展示区长什么样。假格式的两个形态正好覆盖两条分支：`.md` 有 renderAi，`.html` 是终态产物。
  * 直接调 main，不起子进程：退出码和打印都当场看得见。
  *
  * 台子要 `process.chdir` 到临时目录，那是进程全局的，所以同一个文件里的用例只能串着跑。
@@ -11,14 +13,17 @@ import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "nod
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
-import { main } from "@godcreator02/live-doc-cli";
+import { main } from "@godcreator02/livedoc";
 import { CODE, run } from "./repo.ts";
 
-const PACKAGES = join(dirname(fileURLToPath(import.meta.url)), "..", "packages");
-const distUrl = (name: string) => pathToFileURL(join(PACKAGES, name, "dist", "index.mjs")).href;
+const HERE = dirname(fileURLToPath(import.meta.url));
+/** 假格式的绝对 file: 地址。Node 直接吃 .ts，配置文件 import 得动 */
+const FAKE = pathToFileURL(join(HERE, "fake-format.ts")).href;
 
-export const CONFIG = `import * as md from ${JSON.stringify(distUrl("format-md"))};
-import * as html from ${JSON.stringify(distUrl("format-html"))};
+export const CONFIG = `import { fakeFormat } from ${JSON.stringify(FAKE)};
+
+const md = fakeFormat("fake-md", ".md", { render: true });
+const html = fakeFormat("fake-html", ".html", { final: true });
 
 export default { formats: [md, html], docs: "docs", out: "out" };
 `;

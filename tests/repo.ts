@@ -1,14 +1,14 @@
 /**
- * 测试夹具：临时目录里起一个真 git 仓，一份代码、几篇文档，按需换比较器装配核心服务。
- * 不走 loadProject——临时目录里解析不到包名；装配的零件（project 的读取器、比较器，内存记录簿）直接拿来用。
+ * 测试夹具：临时目录里起一个真 git 仓，一份代码、几篇文档，按需换比较器装配判定服务。
+ * 不走 loadProject——临时目录里解析不到包名；装配的零件（host 那层的读取器、比较器，内存记录簿）直接拿来用。
  */
 import { execFileSync } from "node:child_process";
 import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
-import { createHashComparator, createService, targetKey, keyToTarget } from "@godcreator02/live-doc-core";
-import type { Comparator, Format, Ledger, MemoRecord, Service } from "@godcreator02/live-doc-core";
-import { createAutoComparator, createGitComparator, createReader } from "@godcreator02/live-doc-project";
+import { createHashComparator, createService, targetKey, keyToTarget } from "../packages/livedoc/src/engine/index.ts";
+import type { Comparator, Format, Ledger, MemoRecord, Service } from "../packages/livedoc/src/engine/index.ts";
+import { createAutoComparator, createGitComparator, createReader } from "../packages/livedoc/src/host/index.ts";
 
 export const CODE = [
   "// greet",
@@ -24,7 +24,7 @@ export function run(cwd: string, args: string[]): string {
   return execFileSync("git", args, { cwd, encoding: "utf8", timeout: 30_000, stdio: ["pipe", "pipe", "pipe"] });
 }
 
-/** 内存记录簿，够测试用；落盘那份在 @godcreator02/live-doc-project */
+/** 内存记录簿，够测试用；落盘那份是 host 那层的 json-ledger */
 export function memoryLedger(): Ledger & { dump(): Record<string, Record<string, MemoRecord>> } {
   const data: Record<string, Record<string, MemoRecord>> = {};
   return {

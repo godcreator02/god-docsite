@@ -11,15 +11,15 @@
  * trajectory：卡目录是站自己的 content/trajectory/（跟 source.config.ts 里卡集合的 dir 是同一处），
  * check 顺带跑卡校验。本仓自己的卡由人写。
  */
-import * as fumadocs from "@godcreator02/live-doc-format-fumadocs";
+import * as fumadocs from "@godcreator02/livedoc/fumadocs";
 import * as tabs from "./src/components/tabs/tabs.ai.mjs";
 
 /**
- * 一份 skill 的落点：正本是 `content/outputs/skills/<名>.mdx`，摆进 cli 包里那份 SKILL.md。
+ * 一份 skill 的落点：正本是 `content/outputs/skills/<名>.mdx`，摆进 livedoc 包里那份 SKILL.md。
  * 对象写法点名 name / description 两条 frontmatter 随行——宿主靠这两条决定什么时候读这份 skill，
  * 剥光了摆出去就是一份没人会触发的散文。
  */
-const skill = (name) => ({ to: `../packages/cli/skills/${name}/SKILL.md`, frontmatter: ["name", "description"] });
+const skill = (name) => ({ to: `../packages/livedoc/skills/${name}/SKILL.md`, frontmatter: ["name", "description"] });
 
 export default {
   formats: [fumadocs],

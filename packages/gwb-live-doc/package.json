@@ -33,9 +33,9 @@
   "engines": {
     "node": ">=24"
   },
-  "//dependencies": "live-doc-cli 是真依赖、不是 peer：本件要拿到它包内 dist/cli.mjs 的绝对路径去起进程（不进程内 import，只 import type 报告形状），装本件的 home 里必须有它。workspace:^ 发版时被 pnpm 换成 ^<那一刻的版本>——所以发版顺序是包先、件后",
+  "//dependencies": "livedoc 是真依赖、不是 peer：本件要拿到它包内 dist/cli.mjs 的绝对路径去起进程（不进程内 import，只 import type 报告形状），装本件的 home 里必须有它。workspace:^ 发版时被 pnpm 换成 ^<那一刻的版本>——所以发版顺序是包先、件后",
   "dependencies": {
-    "@godcreator02/live-doc-cli": "workspace:^"
+    "@godcreator02/livedoc": "workspace:^"
   },
   "//deps": "契约包只 import type（isRecord 与 GwbContext）→ 仍走 peer，它是每个件都得对得上的那份契约；commands 在 export const inject 里，是运行期硬依赖 → peer。skills、node-cli 两个走 ctx.inject 局部注入、只 import type（node-cli 那份还借它的 GwbNodeCliApi / CliRunOutcome 收窄，同样不出现在导出面）→ dev，另各挂一条可选 peer 当版本校验点（cordis 对服务不做版本校验，peer range 是这条链上唯一一处）。gwb-docs-site 一档都不写：本件跟它**只经命令总线说话**（docs-site.list），连类型都不借——两个件互不依赖是这次拆分的判据本身",
   "//peerRange": "写 >= 不写 ^：caret 在 0.0.x 上锁死 patch，共享包一升版消费方就不匹配了",

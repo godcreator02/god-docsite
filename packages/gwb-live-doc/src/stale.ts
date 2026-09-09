@@ -1,4 +1,4 @@
-import type { CardProblemReport, CheckReport, ComponentReport, DocReport, OutputReport, RefReport } from '@godcreator02/live-doc-cli'
+import type { CardProblemReport, CheckReport, ComponentReport, DocReport, OutputReport, RefReport } from '@godcreator02/livedoc'
 
 /**
  * `livedoc check --json` 的输出 → 「待重写页」清单。纯函数，不起进程、不碰盘
@@ -10,7 +10,7 @@ import type { CardProblemReport, CheckReport, ComponentReport, DocReport, Output
  * 只有孤儿记录或名册外组件的页也红，但那不是「重写正文」能解决的事，单列进 `others`
  * ——混在一起会让 agent 去重写一篇其实只要删条记录的页。
  *
- * 类型直接吃 cli 导出的那几个（摆放那个是它从 project 借过来的）：形状是契约，抄一份必然漂。
+ * 类型直接吃 livedoc 主出口导出的那几个（摆放那个是它从 host 那层借过来的）：形状是契约，抄一份必然漂。
  * **只 import type**——CLI 形态的东西一律起进程调，不进程内 import（devkit 手册红线）。
  */
 

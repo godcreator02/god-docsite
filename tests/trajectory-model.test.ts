@@ -6,7 +6,7 @@
  */
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { buildDisks, buildModel, dayNum, NO_DOMAIN, RingsLayout, scanDir } from "@godcreator02/live-doc-trajectory";
+import { buildDisks, buildModel, dayNum, NO_DOMAIN, RingsLayout, scanDir } from "@godcreator02/livedoc-trajectory";
 import { card, D, DN, flatProblems, memCards, memSick, root } from "./trajectory-helpers.ts";
 
 /** 一月内某日转天序数。 */

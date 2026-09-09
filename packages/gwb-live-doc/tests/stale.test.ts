@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import type { CheckReport } from '@godcreator02/live-doc-cli'
+import type { CheckReport } from '@godcreator02/livedoc'
 import { collapse, parseCheckJson } from '../src/stale.js'
 
 /**

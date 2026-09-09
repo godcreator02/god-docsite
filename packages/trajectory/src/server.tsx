@@ -11,6 +11,13 @@
 import { basename, resolve } from "node:path";
 import { visit } from "unist-util-visit";
 import type { Link, Paragraph, PhrasingContent, Root, Text } from "mdast";
+/**
+ * 这几个 mdast 节点类型是本入口公共签名的一部分（`remarkTrajectoryLinks` 吃一棵 `Root`）。
+ * **消费方要用的是从这儿再导出的这一份**：dts 打包会把 mdast 的形状原样内联进产物的 `.d.mts`，
+ * 那份跟消费方自己 `import type { Root } from "mdast"` 拿到的不是同一个名义类型，直接接会报
+ * 「Root 不能赋给 Root」这种读起来像绕口令的错。再导出一次，两头说的就是同一个名字。
+ */
+export type { Link, Paragraph, PhrasingContent, Root, Text } from "mdast";
 // 类型专用：不引 zod、不引任何校验库，schema 对象仍是手写的字面量——只借这份官方类型
 // 声明来确保结构精确匹配协议（Result 判别联合的边角很容易手抄漏一个 `?`），
 // devDependency、`import type` 编译期全擦除，dts 打包时会把用到的形状原样内联进
@@ -30,7 +37,7 @@ import type { TrajectoryModel } from "./types.ts";
 // "use client" 会被打散到一个没人标记的共享文件上——server 这边看不到边界，Next 会把
 // StarDisk 当服务端组件渲染，命中 hooks 就炸。走包名让 tsdown 把它当外部依赖，原样留在
 // 产物里；Node 的包自引用（package.json name + exports）在运行时把它解回 dist/react.mjs。
-import { StarDisk } from "@godcreator02/live-doc-trajectory/react";
+import { StarDisk } from "@godcreator02/livedoc-trajectory/react";
 
 /* ================= 启动器缩略图：服务端渲成静态 markup ================= */
 

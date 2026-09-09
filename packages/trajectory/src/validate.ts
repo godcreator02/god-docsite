@@ -1,7 +1,7 @@
 /**
  * 本仓独有的第四层校验：卡正文里出现 livedoc 引用记号——轨迹分区冻结历史，不钉活代码，
  * 出现引用记号一律报病。认三种形态：
- *   核心的草稿记号，整行 `@@livedoc … @@`（正则形状照 `@godcreator02/live-doc-core` 的
+ *   核心的草稿记号，整行 `@@livedoc … @@`（正则形状照 livedoc 判定层 `engine/marker.ts` 的
  *   `types.ts` 里的 DRAFT；本包零依赖，不 import core，这里独立复刻同一形状）；
  *   md 正式记号，行里出现 `<!-- ref `、`<!-- tree `、`<!-- exists `、`<!-- absent `、
  *   `<!-- has ` 任一开标签；

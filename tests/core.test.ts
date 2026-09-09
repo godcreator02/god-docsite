@@ -1,6 +1,6 @@
 /**
  * 核心自己的账：编排服务 + hash 比较器 + 草稿记号。
- * 用假格式包、内存读取器、内存记录簿——核心不读盘、不认识任何真格式，这里正好把这条也守住。
+ * 用假格式、内存读取器、内存记录簿——核心不读盘、不认识任何真格式，这里正好把这条也守住。
  */
 import { test } from "node:test";
 import assert from "node:assert/strict";
@@ -13,8 +13,8 @@ import {
   keyToTarget,
   normalizeLines,
   sliceSpan,
-} from "@godcreator02/live-doc-core";
-import type { Comparator, Ledger, MemoRecord, Reader, Reference, Target } from "@godcreator02/live-doc-core";
+} from "../packages/livedoc/src/engine/index.ts";
+import type { Comparator, Ledger, MemoRecord, Reader, Reference, Target } from "../packages/livedoc/src/engine/index.ts";
 import { fakeFormat } from "./fake-format.ts";
 
 const CODE = ["// greet", "export function greet(name: string): string {", "  return `hello ${name}`;", "}", ""];
@@ -97,7 +97,7 @@ test("文档删了、挪了：strays 按文档清单一览，forget 整个忘掉
   assert.deepEqual(service.resolve(DOC, TEXT).items.map((i) => i.status), ["fresh"]);
 });
 
-test("一篇文档两个格式包都认领：报错，不靠顺序定胜负", () => {
+test("一篇文档两个格式都认领：报错，不靠顺序定胜负", () => {
   const { service } = setup();
   const both = createService({
     formats: [fakeFormat("fake-a", ".a"), fakeFormat("fake-也是-a", "a")],
@@ -108,7 +108,7 @@ test("一篇文档两个格式包都认领：报错，不靠顺序定胜负", ()
   assert.equal(service.formatFor(DOC)?.name, "fake-a");
   assert.equal(service.formatFor("d.txt"), null);
   assert.throws(() => both.formatFor(DOC), /都认领了这篇/);
-  assert.throws(() => both.resolve("d.txt", ""), /没有格式包认领这篇文档/);
+  assert.throws(() => both.resolve("d.txt", ""), /没有格式认领这篇文档/);
 });
 
 test("resolveRefs：引用别人认好了也走同一条路，状态一样", () => {
@@ -147,7 +147,7 @@ test("一处钉不住整篇拒：记录簿一条不写，文档一个字不改",
   assert.equal(ledger.dump()[DOC], undefined);
 });
 
-test("草稿记号：核心认它、报未确认；确认后格式包换成正式记号", () => {
+test("草稿记号：核心认它、报未确认；确认后格式换成正式记号", () => {
   const { service } = setup();
   const text = "# 标题\n\n@@livedoc ref src/greet.ts:2-3 @@\n\n尾巴\n";
   const listing = service.resolve(DOC, text);

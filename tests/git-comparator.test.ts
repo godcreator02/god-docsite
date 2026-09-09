@@ -10,10 +10,10 @@ import { execFileSync } from "node:child_process";
 import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { createGitComparator } from "@godcreator02/live-doc-project";
+import { createGitComparator } from "../packages/livedoc/src/host/index.ts";
 import { fakeFormat } from "./fake-format.ts";
 import { CODE, run, setupRepo } from "./repo.ts";
-import type { GitRecord } from "@godcreator02/live-doc-project";
+import type { GitRecord } from "../packages/livedoc/src/host/index.ts";
 
 const FORMATS = [fakeFormat("fake", ".a")];
 const DOC = "docs/a.a";

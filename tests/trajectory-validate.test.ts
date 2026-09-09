@@ -5,7 +5,7 @@
  */
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { checkLivedocRefs } from "@godcreator02/live-doc-trajectory";
+import { checkLivedocRefs } from "@godcreator02/livedoc-trajectory";
 import { card, flatProblems, memSick } from "./trajectory-helpers.ts";
 
 test("卡正文带 livedoc 草稿记号：整行 @@livedoc ... @@ 报 livedoc 病", () => {

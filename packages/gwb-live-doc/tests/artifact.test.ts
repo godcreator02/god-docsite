@@ -83,7 +83,7 @@ describe('几处一改就得一起改的账', () => {
   })
 
   it('livedoc 是真依赖：件要起它的进程，装本件的 home 里必须有它', () => {
-    expect(manifest.dependencies?.['@godcreator02/live-doc-cli']).toBeDefined()
+    expect(manifest.dependencies?.['@godcreator02/livedoc']).toBeDefined()
     // 只 import type：报告形状是契约，跑它一律起进程（CLI 形态不进程内 import）
     expect(index).toMatch(/import \{ collapse, parseCheckJson \} from '\.\/stale\.js'/)
     expect(index).not.toMatch(/^import [^t].*from '@godcreator02\/live-doc/m)

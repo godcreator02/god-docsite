@@ -5,8 +5,8 @@
  */
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { buildTermIndex, findTerms, remarkGlossary } from "@godcreator02/live-doc-format-fumadocs";
-import type { TermEntry, TreeNode } from "@godcreator02/live-doc-format-fumadocs";
+import { buildTermIndex, findTerms, remarkGlossary } from "../packages/livedoc/src/fumadocs/index.ts";
+import type { TermEntry, TreeNode } from "../packages/livedoc/src/fumadocs/index.ts";
 
 const BUS: TermEntry = { term: "命令总线", def: "件把能力挂上去、界面和 agent 从同一张表调" };
 const SVC: TermEntry = { term: "总线", def: "泛指一条把多方接到一起的通道" };

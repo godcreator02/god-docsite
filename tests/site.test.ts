@@ -1,5 +1,5 @@
 /**
- * 装配模块（`@godcreator02/live-doc-cli/site`）的账，全部跨它面上那两个方法测：
+ * 装配模块（`@godcreator02/livedoc` 主出口上的那半）的账，全部跨它面上那两个方法测：
  *   `planAttach` 算一套不碰盘——骨架合不合规、名字怎么认、起手页那块钉什么、package.json
  *   怎么合、占位符错了抛不抛，全在它回的那份计划里看得见，一个内部函数都不用点名；
  *   `attachSite` 才落盘——装出来的六区长什么样、骨架里哪份让了位，在临时目录里跑真的。
@@ -10,7 +10,7 @@ import assert from "node:assert/strict";
 import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
-import { attachSite, planAttach, DEFAULT_PORT, LIVEDOC_DEPS, type AttachPlan } from "@godcreator02/live-doc-cli/site";
+import { attachSite, planAttach, DEFAULT_PORT, LIVEDOC_DEPS, type AttachPlan } from "@godcreator02/livedoc";
 
 /** 站件铺出来的那份骨架 package.json，最小的一份 */
 function skeletonManifest(port: number | null): string {

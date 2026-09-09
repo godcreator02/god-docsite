@@ -13,11 +13,11 @@ import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
-import { loadProject } from "@godcreator02/live-doc-project";
+import { loadProject } from "../packages/livedoc/src/host/index.ts";
 import { CODE } from "./repo.ts";
 
-const PACKAGES = join(dirname(fileURLToPath(import.meta.url)), "..", "packages");
-const distUrl = (name: string) => pathToFileURL(join(PACKAGES, name, "dist", "index.mjs")).href;
+/** 假格式的绝对 file: 地址。临时目录里解析不到包名，配置按绝对地址引它 */
+const FAKE = pathToFileURL(join(dirname(fileURLToPath(import.meta.url)), "fake-format.ts")).href;
 
 /** 带 frontmatter 的源：点名的字段随行到生成物头部，没点名的剥掉 */
 const SOURCE = ["---", "name: block-note", "description: 块笔记怎么用", "secret: 不该随行", "---", "", "# 摆放", "", "@@livedoc ref src/greet.ts:2-3 @@", ""].join("\n");
@@ -32,7 +32,7 @@ async function setup(outputs: string) {
   writeFileSync(join(root, "docs", "b.md"), "# 没挂映射\n");
   writeFileSync(
     join(root, "livedoc.config.mjs"),
-    `import * as md from ${JSON.stringify(distUrl("format-md"))};\n\nexport default { formats: [md], docs: "docs", out: "out", comparator: "hash", outputs: ${outputs} };\n`,
+    `import { fakeFormat } from ${JSON.stringify(FAKE)};\n\nconst md = fakeFormat("fake-md", ".md", { render: true });\n\nexport default { formats: [md], docs: "docs", out: "out", comparator: "hash", outputs: ${outputs} };\n`,
   );
 
   const project = await loadProject(root);

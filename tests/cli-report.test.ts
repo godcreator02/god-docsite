@@ -127,7 +127,8 @@ test("check --json：整份报告一行 JSON，退出码跟人读模式一样；
     assert.equal(green.docs.find((d) => d.doc === "docs/a.md")!.items[0]!.status, "fresh");
     assert.deepEqual(green.docs.find((d) => d.doc === "docs/a.md")!.outputs, [{ to: "README.md", status: "fresh", fresh: true }]);
 
-    // 代码改了：黄，带 diff，退 0。md 格式的投影住在文档里、confirm 才刷新，所以生成物此刻还跟源一致
+    // 代码改了：引用报黄、带 diff。假格式的投影是**渲染那一刻现取的**，所以生成物当场跟源不一致
+    // ——outputs 转 stale，整趟因此退 1。黄本身不是红：红的是那个没重摆的落点
     writeFileSync(join(p.root, "src", "greet.ts"), CODE.replace("hello", "hey"));
     run(p.root, ["commit", "-qam", "改问候语"]);
     const yellow = await p.cli("check", "--json");
@@ -135,8 +136,10 @@ test("check --json：整份报告一行 JSON，退出码跟人读模式一样；
     const item = changed.docs.find((d) => d.doc === "docs/a.md")!.items[0]!;
     assert.equal(item.status, "changed");
     assert.match(item.diff ?? "", /hey/);
-    assert.equal(changed.docs.find((d) => d.doc === "docs/a.md")!.outputs[0]!.status, "fresh");
-    assert.equal(yellow.code, 0);
+    assert.equal(changed.docs.find((d) => d.doc === "docs/a.md")!.outputs[0]!.status, "stale");
+    assert.equal(yellow.code, 1);
+    await p.cli("render");
+    assert.equal((await p.cli("check", "--json")).code, 0, "重摆之后只剩那处黄，退 0");
 
     // 源改了没重摆 → 生成物 stale；引用删掉 → 孤儿；文档删掉 → 失踪；病卡 → trajectory
     writeFileSync(join(p.root, "docs", "a.md"), "# md\n\n没有引用了\n");

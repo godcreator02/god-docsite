@@ -1,16 +1,33 @@
 /**
- * 边界测试：读各包的 package.json 依赖图，守几条规矩。
- *   core 零依赖；除了 fumadocs 格式包，谁都不许见宿主（fumadocs / next / react）；
- *   fumadocs 格式包里 fumadocs 只能是 peer——它用消费方项目装的那份，产物里不许打进去。
- * 再加两条读源码的：core/ 下只 import 自己和 node:crypto；核心不 import 任何格式包。
- * 最后一条守的是件与包之间的方向：七个 live-doc-* 包不许认识工作台件、不许认识任何
- * `@godcreator02/gwb-*`——依赖只能是件 → cli 这一个方向。
- * pnpm 的严格 node_modules 让「没声明就 import 不到」，所以依赖图就是边界本身。
+ * # 边界守卫：塌包之后**唯一**的那道
+ *
+ * 五个包塌成一个 `@godcreator02/livedoc` 之后，「谁能依赖谁」不再由 pnpm 的严格
+ * node_modules 兜着了——同一个包里，`engine/` 里随手写一句 `import "../host/git.ts"`
+ * 编译器不会吭一声，判定层就从此起了 git 子进程。**这个文件就是补上的那道门。**
+ *
+ * 它守四类东西，每一类各有各的失败长相：
+ *
+ * **一、目录方向**（下面 `LAYERS` 那张表）。分层的意义是「变化原因不同的东西不互相拖累」：
+ * `engine/` 只认注进来的东西，所以它能不起进程、不碰盘地被测；`host/` 不认识任何格式，
+ * 所以换格式不动它。方向一破，这两句话当场变成假话，而且**没有任何别的信号**——
+ * 测试照跑、构建照过，只有半年后有人问「为什么判定层跑得这么慢」才看得出来。
+ *
+ * **二、判定层与装配层的零依赖**：`engine/` 只许 `node:crypto`，`site/` 只许 `node:`。
+ * 前者是这套东西唯一能被别人整块抄走的部分，后者要能被别的程序直接调、不拖进整套判定。
+ *
+ * **三、宿主只能是 peer，且不许被打进产物**：fumadocs 与 react 用的是消费方项目装的那份；
+ * 打进产物就是两份 React 各跑一套，现象是预渲染时莫名其妙的 hooks 报错。
+ *
+ * **四、方向只能是件 → 包**：两个 npm 包不许出现任何 `@godcreator02/gwb-*`。
+ * 反过来一次，装 livedoc 的人就被迫拉进一整个桌面工作台生态。
+ *
+ * **别删这个文件，也别把某一条注释掉「先让门禁绿」。** 它报红的时候，红的是设计，不是测试。
+ * 真要改方向，改的是 `LAYERS` 那张表加一段说明为什么——不是把断言删掉。
  */
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { readFileSync, readdirSync } from "node:fs";
-import { dirname, join } from "node:path";
+import { existsSync, readFileSync, readdirSync } from "node:fs";
+import { dirname, join, relative, resolve, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 
 interface Pkg {
@@ -22,27 +39,27 @@ interface Pkg {
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const PACKAGES = join(ROOT, "packages");
-const all = Object.fromEntries(
-  readdirSync(PACKAGES).map((name) => [name, JSON.parse(readFileSync(join(PACKAGES, name, "package.json"), "utf8")) as Pkg]),
-) as Record<string, Pkg>;
+const SRC = join(PACKAGES, "livedoc", "src");
 
-/** 工作台件的目录名。它跟七个 live-doc-* 包同住 packages/，但不在这套包的依赖网里
- * ——下面除了最后那条守方向的，管的都是七个包，所以先把它摘出去 */
+/** 两个 npm 包的目录名。工作台件跟它们同住 packages/，但不在这套包的依赖网里 */
+const NPM_PACKAGES = ["livedoc", "trajectory"];
 const PLUGIN = "gwb-live-doc";
-const pkgs = Object.fromEntries(Object.entries(all).filter(([name]) => name !== PLUGIN)) as Record<string, Pkg>;
 
+const manifestOf = (dir: string): Pkg => JSON.parse(readFileSync(join(PACKAGES, dir, "package.json"), "utf8")) as Pkg;
 /** 运行时真正会跟着走的依赖：dependencies 加 peerDependencies。devDependencies 不算——它只为编译和类型检查 */
 const depsOf = (p: Pkg): string[] => Object.keys({ ...p.dependencies, ...p.peerDependencies });
 const HOST = /^(fumadocs|next$|react$|react-dom$)/;
 
-/** 编译产物里的 import 说明符——只认锚在行首的 import/export-from 语句，不用裸的
+/**
+ * 编译产物里的 import 说明符——只认锚在行首的 import/export-from 语句，不用裸的
  * `from\s*["']` 到处找：产物里字符串字面量常包含 "pivots-from" 这类含 "from" 的子串
  * （trajectory 的 EDGE_HEAD 正则源码编译进去后原样躺在那），裸正则会把它当 import 语句头，
  * 从那个引号起一路吞到几百字符外的下一个引号。tsdown/rolldown 的产物每条 import 语句独占一行，
  * 按行首锚定就躲开了这个坑。
  * 三种形态都收：`import … from "x"` / `export … from "x"`、副作用导入 `import "x"`、
  * 动态 `import("x")`——只认 from 那一种的话，一句 `import "宿主/样式.css"` 或
- * `await import("react")` 就能从每条边界底下溜过去。 */
+ * `await import("react")` 就能从每条边界底下溜过去。
+ */
 function importSpecsOf(src: string): string[] {
   const specs: string[] = [];
   for (const m of src.matchAll(/^(?:import|export)\b[^\n]*?\bfrom\s*["']([^"']+)["']/gm)) specs.push(m[1] as string);
@@ -51,67 +68,129 @@ function importSpecsOf(src: string): string[] {
   return specs;
 }
 
-test("core 零依赖", () => {
-  assert.deepEqual(depsOf(pkgs.core!), []);
+/** 一个目录下的源文件（.ts / .tsx），递归 */
+function sourcesIn(dir: string): string[] {
+  const out: string[] = [];
+  for (const entry of readdirSync(dir, { withFileTypes: true })) {
+    const full = join(dir, entry.name);
+    if (entry.isDirectory()) out.push(...sourcesIn(full));
+    else if (entry.name.endsWith(".ts") || entry.name.endsWith(".tsx")) out.push(full);
+  }
+  return out;
+}
+
+const rel = (from: string, file: string): string => relative(from, file).split(sep).join("/");
+
+// ── 一、目录方向 ──────────────────────────────────────────────────────────────
+
+/**
+ * `src/<层>` 不许 import 到哪几层去。**列的是禁止面，不是允许面**：写成允许面的话，
+ * 加一个新目录会默默地什么都不许，加错地方反而更难发现。
+ *
+ * 方向读法（左边不许知道右边）：
+ *   engine   判定：只认注进来的格式 / 读取器 / 记录簿 / 比较器，谁都不认识
+ *   host     碰环境：可以用 engine 的类型与纯函数，不认识格式实现、不认识命令行
+ *   fumadocs 格式实现 + 站接线：可以用 engine 与 host（`livedocMdxOptions` 要 loadProject），不认识命令行
+ *   site     装配六区：**谁都不认识**，只 import node: —— 它连 livedoc.config.mjs 都不读，
+ *            那正是它要写出来的东西
+ *   cli      入口：认识以上全部，谁都不认识它
+ */
+const LAYERS: Record<string, string[]> = {
+  engine: ["host", "fumadocs", "site", "cli"],
+  host: ["fumadocs", "site", "cli"],
+  fumadocs: ["site", "cli"],
+  site: ["engine", "host", "fumadocs", "cli"],
+  cli: [],
+};
+
+/** 一条相对说明符落在 `src/` 下的哪一层；落到 src 外面回 null */
+function layerOf(file: string, spec: string): string | null {
+  const target = resolve(dirname(file), spec);
+  const from = relative(SRC, target);
+  if (from.startsWith("..")) return null;
+  return from.split(sep)[0] ?? null;
+}
+
+test("目录方向：engine 不认识 host / fumadocs，host 不认识 fumadocs / cli，site 谁都不认识", () => {
+  const bad: string[] = [];
+  for (const [layer, forbidden] of Object.entries(LAYERS)) {
+    for (const file of sourcesIn(join(SRC, layer))) {
+      for (const spec of importSpecsOf(readFileSync(file, "utf8"))) {
+        if (!spec.startsWith(".")) continue;
+        const hit = layerOf(file, spec);
+        if (hit !== null && forbidden.includes(hit)) bad.push(`${rel(SRC, file)} → ${hit}/（${spec}）`);
+      }
+    }
+  }
+  assert.deepEqual(bad, [], "方向反了。改的是 LAYERS 那张表加一段为什么，不是把这条断言删掉");
 });
 
-test("除了 fumadocs 格式包和 trajectory，谁都不依赖宿主", () => {
-  // trajectory 的 react 是给 ./react、./server 两个入口用的 peer（跟 format-fumadocs
-  // 声明 fumadocs 为 peer 同一个道理），`.` 入口本身零依赖，见下面按产物判的那条。
-  for (const [name, pkg] of Object.entries(pkgs)) {
-    if (name === "format-fumadocs" || name === "trajectory") continue;
-    for (const dep of depsOf(pkg)) assert.ok(!HOST.test(dep), `${name} 依赖了宿主 ${dep}`);
+test("目录方向：五层一个不少、一个不多——加了新目录得先想清楚它能认识谁", () => {
+  const dirs = readdirSync(SRC, { withFileTypes: true })
+    .filter((e) => e.isDirectory())
+    .map((e) => e.name)
+    .sort();
+  assert.deepEqual(dirs, Object.keys(LAYERS).sort());
+});
+
+test("判定层零依赖：engine/ 只许 import 自己和 node:crypto——它不读文件、不起子进程、不认识任何格式", () => {
+  for (const file of sourcesIn(join(SRC, "engine"))) {
+    for (const spec of importSpecsOf(readFileSync(file, "utf8"))) {
+      assert.ok(spec.startsWith("./") || spec === "node:crypto", `engine/${rel(join(SRC, "engine"), file)} import 了 ${spec}`);
+    }
   }
 });
 
-test("fumadocs 格式包：宿主只能是 peer，不许进 dependencies", () => {
-  const pkg = pkgs["format-fumadocs"]!;
+test("装配层只碰 node：site/ 一个第三方包都不许 import——它得能被别的程序直接调，不拖进整套判定", () => {
+  for (const file of sourcesIn(join(SRC, "site"))) {
+    for (const spec of importSpecsOf(readFileSync(file, "utf8"))) {
+      assert.ok(spec.startsWith("./") || spec.startsWith("node:"), `site/${rel(join(SRC, "site"), file)} import 了 ${spec}`);
+    }
+  }
+});
+
+test("fumadocs 这个名字只出现在 fumadocs/ 那一层：别的层一个宿主 import 都没有", () => {
+  for (const layer of ["engine", "host", "site", "cli"]) {
+    for (const file of sourcesIn(join(SRC, layer))) {
+      for (const spec of importSpecsOf(readFileSync(file, "utf8"))) {
+        assert.ok(!HOST.test(spec), `${layer}/${rel(join(SRC, layer), file)} import 了宿主 ${spec}`);
+      }
+    }
+  }
+});
+
+// ── 二、宿主只能是 peer，且不许被打进产物 ────────────────────────────────────
+
+test("宿主只能是 peer，不许进 dependencies", () => {
+  const pkg = manifestOf("livedoc");
   assert.ok(Object.keys(pkg.peerDependencies ?? {}).some((d) => d.startsWith("fumadocs")), "得声明 fumadocs 为 peer");
-  for (const dep of Object.keys(pkg.dependencies ?? {})) assert.ok(!HOST.test(dep), `format-fumadocs 把 ${dep} 装成了自己的依赖`);
+  for (const dep of Object.keys(pkg.dependencies ?? {})) assert.ok(!HOST.test(dep), `livedoc 把 ${dep} 装成了自己的依赖`);
 });
 
-test("fumadocs 格式包的产物里不许打进 fumadocs 或 react，只许 import", () => {
-  for (const file of ["dist/index.mjs", "dist/pre.mjs"]) {
-    const src = readFileSync(join(PACKAGES, "format-fumadocs", file), "utf8");
-    const specs = importSpecsOf(src);
-    const hosts = specs.filter((s) => HOST.test(s));
-    for (const spec of hosts) assert.ok(!spec.startsWith("."), `${file} 把 ${spec} 打进了产物`);
-    // 状态点组件是客户端组件：指令得留在产物头一行，不然 Next 不认
-    if (file.endsWith("pre.mjs")) assert.match(src, /^"use client";/, "pre 的 use client 指令被打没了");
-  }
-});
-
-test("html 格式包只依赖核心；命令行和装配不依赖任何格式包", () => {
-  assert.deepEqual(depsOf(pkgs["format-html"]!), ["@godcreator02/live-doc-core"]);
-  for (const name of ["cli", "project"]) {
-    for (const dep of depsOf(pkgs[name]!)) assert.ok(!dep.startsWith("@godcreator02/live-doc-format-"), `${name} 依赖了格式包 ${dep}`);
-  }
-});
-
-test("core 源码只 import 自己和 node:crypto——它不读文件、不起子进程、不认识任何格式", () => {
-  const dir = join(PACKAGES, "core", "src");
-  for (const file of readdirSync(dir).filter((f) => f.endsWith(".ts"))) {
-    const src = readFileSync(join(dir, file), "utf8");
-    for (const m of src.matchAll(/(?:from|import)\s*\(?\s*["']([^"']+)["']/g)) {
-      const spec = m[1]!;
-      assert.ok(spec.startsWith("./") || spec === "node:crypto", `core/src/${file} import 了 ${spec}`);
+test("产物里不许打进 fumadocs 或 react，只许 import；pre 的客户端指令要留在头一行", () => {
+  for (const file of ["dist/fumadocs.mjs", "dist/pre.mjs", "dist/term.mjs"]) {
+    const src = readFileSync(join(PACKAGES, "livedoc", file), "utf8");
+    for (const spec of importSpecsOf(src).filter((s) => HOST.test(s))) {
+      assert.ok(!spec.startsWith("."), `${file} 把 ${spec} 打进了产物`);
     }
   }
+  // 状态点组件是客户端组件：指令得留在产物头一行，不然 Next 不认
+  assert.match(readFileSync(join(PACKAGES, "livedoc", "dist", "pre.mjs"), "utf8"), /^"use client";/, "pre 的 use client 指令被打没了");
 });
 
-test("每个格式包都实现了核心要的那五样", async () => {
-  for (const name of ["format-md", "format-fumadocs", "format-html"]) {
-    const mod = (await import(`@godcreator02/live-doc-${name}`)) as Record<string, unknown>;
-    for (const key of ["name", "claims", "parse", "write", "marker"]) {
-      assert.ok(mod[key] !== undefined, `${name} 少了 ${key}`);
-    }
+test("装配模板、样式与两份 skill 都随包发：files 收着它们，目录真在", () => {
+  const pkg = JSON.parse(readFileSync(join(PACKAGES, "livedoc", "package.json"), "utf8")) as { files: string[] };
+  for (const entry of ["dist", "styles", "skills", "template"]) assert.ok(pkg.files.includes(entry), `livedoc 的 files 少了 ${entry}`);
+  for (const path of ["skills/livedoc-docs/SKILL.md", "skills/trajectory/SKILL.md", "template/attach", "styles/light.css", "styles/term.css"]) {
+    assert.ok(existsSync(join(PACKAGES, "livedoc", path)), `livedoc 少了 ${path}`);
   }
 });
+
+// ── 三、轨迹包自己那几条 ──────────────────────────────────────────────────────
 
 test("trajectory 的 `.` 入口零 npm 依赖：产物只许 import node: 内置模块", () => {
-  // 阶段 A 时包本身零依赖；阶段 B 加了 react（peer）与 unified / unist-util-visit
-  // （只给 `./server` 用），`.` 入口这条红线因此改按产物判——比按 package.json 判更准：
-  // 就算以后 `.` 入口不小心 import 到一个真依赖，这里也能抓到。
+  // 包本身有 react（peer）与 unist-util-visit（只给 `./server` 用），`.` 入口这条红线
+  // 按产物判——比按 package.json 判更准：就算以后 `.` 入口不小心 import 到一个真依赖，这里也抓得到
   const src = readFileSync(join(PACKAGES, "trajectory", "dist", "index.mjs"), "utf8");
   for (const spec of importSpecsOf(src)) assert.ok(spec.startsWith("node:"), `trajectory 的 . 入口产物 import 了 ${spec}`);
 });
@@ -144,27 +223,9 @@ test("trajectory 的 react / server 入口：客户端指令、react 只 import 
   }
 });
 
-test("cli、project、三个格式包不依赖 trajectory 的 react / server 入口（按产物 import 判）", () => {
-  for (const name of ["cli", "project", "format-md", "format-fumadocs", "format-html"]) {
-    const distDir = join(PACKAGES, name, "dist");
-    for (const file of readdirSync(distDir).filter((f) => f.endsWith(".mjs"))) {
-      const specs = importSpecsOf(readFileSync(join(distDir, file), "utf8"));
-      for (const spec of specs) {
-        assert.ok(
-          !spec.startsWith("@godcreator02/live-doc-trajectory/react") && !spec.startsWith("@godcreator02/live-doc-trajectory/server"),
-          `${name}/dist/${file} 引用了 trajectory 的 react / server 入口（${spec}）`,
-        );
-      }
-    }
-  }
-});
-
 test("trajectory 的 `.` 入口源码只 import 自己和 node:fs / node:path / node:fs/promises", () => {
-  // 锚在行首的 import 语句取到 from 的引号——core 那条用的宽松正则会被本包正文里
-  // "pivots-from" 这个字符串字面量骗过（from 后紧跟的引号是它自己的收尾引号，
-  // 匹配一路吞到几百字符外的下一个引号），换一条不认字符串内容、只认真实 import 语句的。
   // 只扫 .ts：react.tsx / server.tsx 是 `./react` `./server` 两个入口，各自的依赖边界
-  // 由上面两条按产物判的测试守着，这条不管它们。
+  // 由上面两条按产物判的测试守着，这条不管它们
   const IMPORT_RE = /^\s*import\b[\s\S]*?\bfrom\s*["']([^"']+)["']/gm;
   const dir = join(PACKAGES, "trajectory", "src");
   for (const file of readdirSync(dir).filter((f) => f.endsWith(".ts"))) {
@@ -179,21 +240,45 @@ test("trajectory 的 `.` 入口源码只 import 自己和 node:fs / node:path / 
   }
 });
 
-test("cli 允许依赖 trajectory，project 与三个格式包不许依赖它", () => {
-  assert.ok(depsOf(pkgs.cli!).includes("@godcreator02/live-doc-trajectory"), "cli 得依赖 trajectory 才能接 trajectory 子命令");
-  for (const name of ["project", "format-md", "format-fumadocs", "format-html"]) {
-    assert.ok(!depsOf(pkgs[name]!).includes("@godcreator02/live-doc-trajectory"), `${name} 不该依赖 trajectory`);
+test("livedoc 依赖 trajectory，trajectory 不依赖 livedoc——轨迹是独立的一条包线", () => {
+  assert.ok(depsOf(manifestOf("livedoc")).includes("@godcreator02/livedoc-trajectory"), "livedoc 得依赖 trajectory 才接得上 trajectory 子命令");
+  const trajectory = manifestOf("trajectory");
+  for (const dep of Object.keys({ ...trajectory.dependencies, ...trajectory.peerDependencies, ...trajectory.devDependencies })) {
+    assert.notEqual(dep, "@godcreator02/livedoc", "trajectory 依赖了 livedoc——方向反了");
   }
 });
 
-test("方向只能是件 → cli：七个包的依赖面里不许出现工作台件，也不许出现任何 @godcreator02/gwb-*", () => {
-  // 件跟包同住一个工作区，方向一旦反过来（哪怕只是一条 devDependency）这套包就再也发不出去了
-  // ——装它的人不该被迫拉进一整个桌面工作台生态。三档全查：运行时、peer、开发期。
-  const pluginName = all[PLUGIN]!.name;
-  for (const [dir, pkg] of Object.entries(pkgs)) {
+test("轨迹只被命令行那一层用：engine / host / fumadocs / site 一个 import 都没有", () => {
+  for (const layer of ["engine", "host", "fumadocs", "site"]) {
+    for (const file of sourcesIn(join(SRC, layer))) {
+      for (const spec of importSpecsOf(readFileSync(file, "utf8"))) {
+        assert.ok(!spec.startsWith("@godcreator02/livedoc-trajectory"), `${layer}/${rel(join(SRC, layer), file)} 引用了轨迹（${spec}）`);
+      }
+    }
+  }
+});
+
+// ── 四、方向只能是件 → 包 ────────────────────────────────────────────────────
+
+test("方向只能是件 → 包：两个 npm 包的依赖面里不许出现工作台件，也不许出现任何 @godcreator02/gwb-*", () => {
+  // 件跟包同住一个工作区，方向一旦反过来（哪怕只是一条 devDependency）这两个包就再也发不出去了
+  // ——装它们的人不该被迫拉进一整个桌面工作台生态。三档全查：运行时、peer、开发期。
+  const pluginName = manifestOf(PLUGIN).name;
+  for (const dir of NPM_PACKAGES) {
+    const pkg = manifestOf(dir);
     for (const dep of Object.keys({ ...pkg.dependencies, ...pkg.peerDependencies, ...pkg.devDependencies })) {
-      assert.ok(dep !== pluginName, `${dir} 依赖了工作台件 ${pluginName}——方向反了`);
+      assert.notEqual(dep, pluginName, `${dir} 依赖了工作台件 ${pluginName}——方向反了`);
       assert.ok(!dep.startsWith("@godcreator02/gwb-"), `${dir} 依赖了 gwb 生态的 ${dep}`);
+    }
+  }
+});
+
+test("方向只能是件 → 包：两个包的源码里一行 @godcreator02/gwb-* 都没有", () => {
+  for (const dir of NPM_PACKAGES) {
+    for (const file of sourcesIn(join(PACKAGES, dir, "src"))) {
+      for (const spec of importSpecsOf(readFileSync(file, "utf8"))) {
+        assert.ok(!spec.startsWith("@godcreator02/gwb-"), `${dir}/${rel(join(PACKAGES, dir), file)} import 了 ${spec}`);
+      }
     }
   }
 });

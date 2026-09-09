@@ -1,13 +1,13 @@
 /**
- * fumadocs 格式包不接 Next 的那半：识别、树上换节点、meta 白名单、名册压平。
+ * fumadocs 格式不接 Next 的那半：识别、树上换节点、meta 白名单、名册压平。
  * 接 fumadocs 管线的那半（loader、_markdown、页面上的状态点）由 docs-site 的站测试守。
  */
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import * as fumadocs from "@godcreator02/live-doc-format-fumadocs";
-import { DOT_COLOR, applyListing, defaultRoster, livedocMarkdownOptions, parseMetaString, parseTree, stamp, walk, whereOf } from "@godcreator02/live-doc-format-fumadocs";
-import type { Roster, TreeNode } from "@godcreator02/live-doc-format-fumadocs";
-import type { Item, Listing, Target } from "@godcreator02/live-doc-core";
+import * as fumadocs from "../packages/livedoc/src/fumadocs/index.ts";
+import { DOT_COLOR, applyListing, defaultRoster, livedocMarkdownOptions, parseMetaString, parseTree, stamp, walk, whereOf } from "../packages/livedoc/src/fumadocs/index.ts";
+import type { Roster, TreeNode } from "../packages/livedoc/src/fumadocs/index.ts";
+import type { Item, Listing, Target } from "../packages/livedoc/src/engine/index.ts";
 
 const T: Target = { kind: "span", file: "src/greet.ts", a: 2, b: 3 };
 const CURRENT = ["export function greet(name: string): string {", "  return `hello ${name}`;"];

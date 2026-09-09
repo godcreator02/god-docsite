@@ -29,6 +29,6 @@ export default defineConfig([
     format: ["esm"],
     platform: "node",
     dts: true,
-    deps: { neverBundle: [/^react/, /^@godcreator02\/live-doc-trajectory/] },
+    deps: { neverBundle: [/^react/, /^@godcreator02\/livedoc-trajectory/] },
   },
 ]);

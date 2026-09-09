@@ -21,8 +21,8 @@ test("check 报未确认；confirm 换记号、投影、刷记录簿；再 check
     const done = await p.cli("confirm");
     assert.equal(done.code, 0);
     assert.match(done.out, /✅ docs\/a\.md {2}src\/greet\.ts:2-3 {2}已确认，草稿记号已换成正式记号/);
-    assert.match(p.read("docs/a.md"), /<!-- ref file="src\/greet\.ts" lines="2-3" -->\n```ts/);
-    assert.match(p.read("docs/b.html"), /<pre data-file="src\/greet\.ts" data-lines="2-3"><code/);
+    assert.match(p.read("docs/a.md"), /^REF src\/greet\.ts:2-3$/m, "草稿记号换成了正式记号");
+    assert.match(p.read("docs/b.html"), /^REF src\/greet\.ts:2-3$/m);
     const ledger = JSON.parse(p.read(".ledger.json")) as Record<string, Record<string, { kind: string }>>;
     assert.equal(ledger["docs/a.md"]!["src/greet.ts:2-3"]!.kind, "git");
 
@@ -70,16 +70,16 @@ test("confirm 遇 problems：打印、退非零、一个字不改", async () => 
   }
 });
 
-test("render：md 出 ai 那份剥掉记号；html 说产物就是文档本身", async () => {
+test("render：有 renderAi 的格式出 ai 那份剥掉记号；终态格式说产物就是文档本身", async () => {
   const p = setupProject();
   try {
     await p.cli("confirm");
     const rendered = await p.cli("render");
     assert.equal(rendered.code, 0);
     assert.match(rendered.out, /→ {2}docs\/a\.md {2}渲染成 out\/a\.md\.ai\.md/);
-    assert.match(rendered.out, /· {2}docs\/b\.html {2}html 的产物就是文档本身/);
+    assert.match(rendered.out, /· {2}docs\/b\.html {2}fake-html 的产物就是文档本身/);
     const ai = p.read("out/a.md.ai.md");
-    assert.doesNotMatch(ai, /<!-- ref |<!-- \/ref -->/);
+    assert.doesNotMatch(ai, /^REF /m, "记号那一行被投影换掉了");
     assert.match(ai, /```ts\nexport function greet/);
   } finally {
     p.teardown();
@@ -112,7 +112,7 @@ test("被忽略的文件走 hash 记忆：confirm 标明；改了内容 check �
   }
 });
 
-test("五类引用一篇 md：目录树长出清单、名字和存在性只有记号；多了文件黄、断言不在的出现了红", async () => {
+test("五类引用一篇文档：五种记号各自认得回来；多了文件黄、断言不在的出现了红", async () => {
   const p = setupProject();
   try {
     writeFileSync(
@@ -125,10 +125,11 @@ test("五类引用一篇 md：目录树长出清单、名字和存在性只有�
     assert.match(done.out, /✅ docs\/d\.md {2}src\/greet\.ts:all {2}已确认/);
     assert.match(done.out, /✅ docs\/d\.md {2}has src\/greet\.ts "export function greet" {2}已确认/);
     assert.match(done.out, /✅ docs\/d\.md {2}absent src\/remove\.ts {2}已确认/);
-    const md = p.read("docs/d.md");
-    assert.match(md, /<!-- tree dir="src" depth="1" -->\n```text\ngreet\.ts\n```\n<!-- \/tree -->/);
-    assert.match(md, /<!-- ref file="src\/greet\.ts" -->\n```ts\n\/\/ greet\n/);
-    assert.match(md, /<!-- has file="src\/greet\.ts" text="export function greet" -->\n\n<!-- absent path="src\/remove\.ts" -->/);
+    const doc = p.read("docs/d.md");
+    assert.match(doc, /^REF tree src depth=1$/m);
+    assert.match(doc, /^REF src\/greet\.ts:all$/m);
+    assert.match(doc, /^REF has src\/greet\.ts "export function greet"$/m);
+    assert.match(doc, /^REF absent src\/remove\.ts$/m);
 
     const green = await p.cli("check");
     assert.match(green.out, /🟢 docs\/d\.md {2}tree src depth=1 {2}新鲜（1 项）/);

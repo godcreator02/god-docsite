@@ -39,7 +39,7 @@ export const FEEDBACK_LIST_COMMAND = 'live-doc.feedback-list'
  */
 function livedocEntry(): string | null {
   try {
-    return fileURLToPath(new URL('./cli.mjs', import.meta.resolve('@godcreator02/live-doc-cli')))
+    return fileURLToPath(new URL('./cli.mjs', import.meta.resolve('@godcreator02/livedoc')))
   } catch {
     return null
   }
@@ -48,7 +48,7 @@ function livedocEntry(): string | null {
 /** livedoc 随包发的那两份 skill（`livedoc-docs` / `trajectory`）所在的目录 */
 function livedocSkillsDir(): URL | null {
   try {
-    return new URL('../skills/', import.meta.resolve('@godcreator02/live-doc-cli'))
+    return new URL('../skills/', import.meta.resolve('@godcreator02/livedoc'))
   } catch {
     return null
   }
@@ -86,7 +86,7 @@ export function apply(ctx: GwbContext): void {
   ctx.inject(['gwbNodeCli'], (scoped) => {
     const entry = livedocEntry()
     if (entry === null) {
-      log.warn(`@godcreator02/live-doc-cli 解析不到——${RAW_CLI_COMMAND} 没登记，别的几条也就跑不了`)
+      log.warn(`@godcreator02/livedoc 解析不到——${RAW_CLI_COMMAND} 没登记，别的几条也就跑不了`)
       return
     }
     // register 不用自己包 effect：运行器内部已经挂在调用方的 effect 上了
@@ -105,7 +105,7 @@ export function apply(ctx: GwbContext): void {
 
   /** 没装 node-cli 件时那几条命令回的话。名字点出来，人一看就知道装哪个件 */
   const MISSING_NODE_CLI =
-    '跑不了 livedoc：这个 home 里没装 node-cli 件（@godcreator02/gwb-node-cli），或者解析不到 @godcreator02/live-doc-cli'
+    '跑不了 livedoc：这个 home 里没装 node-cli 件（@godcreator02/gwb-node-cli），或者解析不到 @godcreator02/livedoc'
 
   /** 跑一趟 livedoc。运行器不在回 undefined；cwd 的存在性校验在运行器那头（错误文本就是文档） */
   async function runLivedoc(args: readonly string[], cwd: string): Promise<CliRunOutcome | undefined> {
@@ -373,7 +373,7 @@ export function apply(ctx: GwbContext): void {
     // 解析不到只 warn——那两份不是本件能不能干活的前提
     const dir = livedocSkillsDir()
     if (dir === null) {
-      log.warn('@godcreator02/live-doc-cli 解析不到——livedoc 随包那两份 skill（livedoc-docs / trajectory）没挂上')
+      log.warn('@godcreator02/livedoc 解析不到——livedoc 随包那两份 skill（livedoc-docs / trajectory）没挂上')
     } else {
       scoped.effect(() => scoped.gwbSkills.register(dir))
     }

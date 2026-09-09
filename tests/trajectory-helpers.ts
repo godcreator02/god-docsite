@@ -2,8 +2,8 @@
  * 轨迹测试共用的最小积木：时间轴、合法卡的默认 frontmatter、内存造卡。
  * 内存造卡不绕开解析器：把 frontmatter 渲染回 markdown 文本、再走真实的 parseCardFile。
  */
-import { parseCardFile } from "@godcreator02/live-doc-trajectory";
-import type { Problem, RawCard, SickFile } from "@godcreator02/live-doc-trajectory";
+import { parseCardFile } from "@godcreator02/livedoc-trajectory";
+import type { Problem, RawCard, SickFile } from "@godcreator02/livedoc-trajectory";
 
 /** 一月内的分钟级 born-at，合成 fixture 铺时间轴用。 */
 export const D = (day: number): string => `2026-01-${String(day).padStart(2, "0")}T08:00`;

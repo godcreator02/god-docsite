@@ -9,15 +9,20 @@ const config = {
   // 包从同一个 pnpm 工作区拿，node_modules 里是指向站外的软链——root 抬到工作区根
   // （也就是仓根），那些软链的真身才在 Turbopack 视野里
   turbopack: { root: path.resolve(process.cwd(), '..') },
-  // 这几个包只在服务端跑、还要读盘和调 git，标成外部包让 Node 自己解析。
-  // trajectory 不放进来：它的 ./react 是客户端组件，server.tsx 内部用包名自引用渲它，
-  // 外置会让 Next 走 Node 单独加载 server.mjs、发现不了 ./react 那份 "use client" 指令，
-  // StarDisk 被当服务端组件渲染直接炸——跟 wiring.mdx 记的 format-fumadocs 那条一模一样。
-  serverExternalPackages: [
-    '@godcreator02/live-doc-format-fumadocs',
-    '@godcreator02/live-doc-project',
-    '@godcreator02/live-doc-core',
-  ],
+  /**
+   * **空着，这一行就是那条「不许外置」的账。**
+   *
+   * 塌包之后 `@godcreator02/livedoc` 里同时住着服务端那半（读盘、调 git、remark 插件）
+   * 与两个客户端组件（`/fumadocs/pre` 状态点、`/fumadocs/term` 术语），
+   * `serverExternalPackages` 按包名匹配、没有子路径粒度，所以它整包不能外置：
+   * 外置之后 Next 走 Node 单独加载、跟站打包的 React 分了家，预渲染报
+   * `Cannot read properties of null (reading 'use')`。
+   * trajectory 同理不外置，还多一层——它的 `./server` 用包名自引用去渲 `./react`，
+   * 一外置连那句 `"use client"` 都发现不了。两条是同一类：**外置的边界会把客户端指令吃掉**。
+   *
+   * 不外置的代价只是 Turbopack 多打一遍服务端那半：那半只在构建期跑，进不了客户端束。
+   */
+  serverExternalPackages: [],
   // 站根落到现状区首页；六区各有各的基座，/docs 自己有 index.mdx，不再转走
   redirects: async () => [{ source: '/', destination: '/docs', permanent: true }],
 };

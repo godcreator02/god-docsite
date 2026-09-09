@@ -16,8 +16,8 @@
  * fumadocs 的 Node loader 只认 source.config 里的集合。
  */
 import { applyMdxPreset, defineConfig, defineDocs } from 'fumadocs-mdx/config';
-import { livedocMdxOptions, livedocMarkdownOptions } from '@godcreator02/live-doc-format-fumadocs';
-import { cardSchema, remarkTrajectoryLinks } from '@godcreator02/live-doc-trajectory/server';
+import { livedocMdxOptions, livedocMarkdownOptions } from '@godcreator02/livedoc/fumadocs';
+import { cardSchema, remarkTrajectoryLinks } from '@godcreator02/livedoc-trajectory/server';
 import { terms } from './src/glossary';
 
 export const docs = defineDocs({

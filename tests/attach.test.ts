@@ -15,10 +15,15 @@ import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { main } from "@godcreator02/live-doc-cli";
-import { LIVEDOC_DEPS } from "@godcreator02/live-doc-cli/site";
+import { LIVEDOC_DEPS, main } from "@godcreator02/livedoc";
 
 const PACKAGES = join(dirname(fileURLToPath(import.meta.url)), "..", "packages");
+
+/** 包名 → 它在 packages/ 下的目录名。轨迹那个包的目录一直叫 trajectory，包名前面多一截 scope 与产品名 */
+const DIR_OF: Record<string, string> = {
+  "@godcreator02/livedoc": "livedoc",
+  "@godcreator02/livedoc-trajectory": "trajectory",
+};
 
 /** 造一个「刚被站件铺好」的骨架，回站目录与仓目录 */
 function skeleton(repoFiles: Record<string, string> = {}): { root: string; repo: string; site: string } {
@@ -129,7 +134,8 @@ test("attach：--title 一路带到站页里；仓根已有 README.md 只警告�
 
 test("装配那张依赖表跟工作区各包的版本对得上——发版抬了版本号忘了抬它，这条红", () => {
   for (const [name, range] of Object.entries(LIVEDOC_DEPS)) {
-    const dir = name.replace("@godcreator02/live-doc-", "");
+    const dir = DIR_OF[name];
+    assert.ok(dir !== undefined, `装配表里的 ${name} 在 packages/ 下没有对应目录——新加一条依赖时把 DIR_OF 也补上`);
     const pkg = JSON.parse(readFileSync(join(PACKAGES, dir, "package.json"), "utf8")) as { name: string; version: string };
     assert.equal(pkg.name, name, `${dir} 的包名对不上装配表里的 ${name}`);
     assert.equal(range, `^${pkg.version}`, `装配表里 ${name} 写的是 ${range}，工作区里是 ${pkg.version}——发版时这张表得跟着抬`);

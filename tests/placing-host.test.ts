@@ -7,14 +7,14 @@
  */
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { createHashComparator, createService } from "@godcreator02/live-doc-core";
-import type { Format, Reader } from "@godcreator02/live-doc-core";
-import { createPlacing } from "@godcreator02/live-doc-project";
-import type { PlacingHost, ProjectConfig } from "@godcreator02/live-doc-project";
+import { createHashComparator, createService } from "../packages/livedoc/src/engine/index.ts";
+import type { Format, Reader } from "../packages/livedoc/src/engine/index.ts";
+import { createPlacing } from "../packages/livedoc/src/host/index.ts";
+import type { PlacingHost, ProjectConfig } from "../packages/livedoc/src/host/index.ts";
 import { memoryLedger } from "./repo.ts";
 
 /**
- * 假格式包：这份测试验的是摆放，不是认记号，所以 parse 一处引用都不认。
+ * 假格式：这份测试验的是摆放，不是认记号，所以 parse 一处引用都不认。
  * renderAi 出的那份故意带上三样要被整形掉的东西——整段 frontmatter、站上的标题锚记、
  * 逃逸了一半的加粗——摆放产物里它们都不该还在。
  */
