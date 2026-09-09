@@ -78,7 +78,7 @@ peer 都标成 optional，是为了让只用命令行、不装 fumadocs 的项�
 两边装配的是同一份 `livedoc.config.mjs`，所以站上看到的状态和 `pnpm livedoc check` 报的状态必然一致。
 装配还带缓存，一个根只装一次：
 
-{/* ref file="../packages/project/src/load.ts" lines="66-74" */}
+{/* ref file="../packages/project/src/load.ts" lines="87-95" */}
 
 站构建时几十个 loader 并发调它，没这一条就是几十次读配置、几十本记录簿。
 

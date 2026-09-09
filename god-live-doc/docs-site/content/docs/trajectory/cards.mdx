@@ -18,12 +18,12 @@ description: 文件名即身份、frontmatter 六个字段、正文关系边与�
 走同一批提交、同一条历史。扫描器照着这条规矩只扫一层，遇上目录不存在一律回空集合、不建目录、不报错：
 「这里还没有轨迹记录」本来就是合法状态，不该逼人先造个空目录。
 
-{/* ref file="../packages/trajectory/src/scan.ts" lines="21-33" */}
+{/* ref file="../packages/trajectory/src/scan.ts" lines="26-38" */}
 
 **卡的身份就是文件名主干**，去掉 `.md` 的那一截。`parent` 和正文关系边拿的都是这个值，所以改名等于
 改身份——落定之后别动，真要改就把指向它的地方一起改。
 
-{/* ref file="../packages/trajectory/src/scan.ts" lines="48-52" */}
+{/* ref file="../packages/trajectory/src/scan.ts" lines="53-57" */}
 
 约定的文件名形态是 `<YYYY-MM-DD>-<英文 slug>.md`：日期前置让列目录时排序即时间序，slug 全小写、
 `-` 连词、禁 `_` 禁空格。这一条**不进校验**——它是可读性约定，机器只认「文件名主干不带路径分隔、
@@ -92,9 +92,9 @@ description: 文件名即身份、frontmatter 六个字段、正文关系边与�
 **第四层：卡正文里不许出现 livedoc 引用记号。**轨迹分区冻结历史，不钉活代码——一张卡钉了源码，
 代码一改这张卡就成了会变黄的东西，那它记的就不再是「当时的了断」。草稿记号与 md 正式记号两种形态都认：
 
-{/* ref file="../packages/trajectory/src/validate.ts" lines="1-9" */}
+{/* ref file="../packages/trajectory/src/validate.ts" lines="1-11" */}
 
-{/* ref file="../packages/trajectory/src/validate.ts" lines="14-18" */}
+{/* ref file="../packages/trajectory/src/validate.ts" lines="16-20" */}
 
 本包零依赖，这两条正则是照核心的形状独立复刻的一份，不 `import` core。第四层接在解析末尾，
 跟关系边写歪那一类一起进报病：

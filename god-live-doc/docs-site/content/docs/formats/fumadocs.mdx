@@ -129,7 +129,7 @@ fumadocs 序列化每个节点前先问这个回调；看到我们打的标就�
 
 ## 借 loader 出 md，不自己序列化
 
-{/* ref file="../packages/format-fumadocs/src/render.ts" lines="37-44" */}
+{/* ref file="../packages/format-fumadocs/src/render.ts" lines="63-70" */}
 
 `livedoc render --target ai` 不自己拼 md，而是从消费方项目根 `register()` fumadocs 的 Node loader，
 `import` 那篇 mdx（带 `?collection=`，loader 靠它知道该跑哪份 postprocess），读它导出的 `_markdown`。

@@ -16,21 +16,21 @@ description: 配置一项、命令两条、fumadocs 站三处，外加 Next 那�
 
 `livedoc.config` 加一项 `trajectory`，值是卡目录、相对项目根：
 
-{/* ref file="../packages/project/src/load.ts" lines="33-34" */}
+{/* ref file="../packages/project/src/load.ts" lines="44-45" */}
 
 装配时它变成一个绝对路径挂在 project 上，没配就是 `null`——「没配」和「配了但目录还不存在」是
 两件事，前者整个不管，后者扫出来是空集合：
 
-{/* ref file="../packages/project/src/load.ts" lines="42-43" */}
+{/* ref file="../packages/project/src/load.ts" lines="61-62" */}
 
-{/* ref file="../packages/project/src/load.ts" lines="130-133" */}
+{/* ref file="../packages/project/src/load.ts" lines="188-193" */}
 
 ## 二、命令两条
 
 `livedoc check` **顺带**跑卡校验（配了目录才跑），病卡逐条打印、算红退 1；另有一条独立的
 `livedoc trajectory [--json]` 列盘、树、主干。两条都在命令行那份总表里：
 
-{/* ref file="../packages/cli/src/run.ts" lines="1-13" */}
+{/* ref file="../packages/cli/src/run.ts" lines="1-14" */}
 
 各自打印什么、退什么码，见 [命令行](/docs/cli/cli)。
 
