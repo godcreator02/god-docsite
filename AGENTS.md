@@ -1,23 +1,25 @@
-# god-live-doc（重写）
+# god-live-doc
 
-这个单元是 god-live-doc 的重写工位。单元根就是 git 仓，`god-live-doc/` 是 pnpm 包工作区：
-`packages/` 下七个包（core、project、cli、format-md、format-fumadocs、format-html、trajectory），
-`docs-site/` 是自己的 fumadocs 文档站（用这套机制写自己的文档，也是工作区成员），
-`tests/` 是工作区级测试。**怎么装、怎么接、怎么跑，看 `god-live-doc/README.md`**，这儿不复述。
+**仓根就是这个目录 `god-live-doc/`**，它同时是 pnpm 包工作区。上一级是单元目录，那儿只有一张
+出生证 `unit.json`，不在 git 里。仓里三样：`packages/` 下七个包（core、project、cli、format-md、
+format-fumadocs、format-html、trajectory），`docs-site/` 是自己的 fumadocs 文档站（用这套机制写
+自己的文档，也是工作区成员），`tests/` 是工作区级测试。**怎么装、怎么接、怎么跑，看 `README.md`**，
+这儿不复述。
 
 消费方示例不在仓里：这套包对外的样子由 `docs-site` 自己演——它就是「装了这几个包的项目」，
-钉的是工作区里的真源码。星轨盘的诗名 fixture 住 `god-live-doc/tests/fixtures/trajectory/`。
+钉的是工作区里的真源码。星轨盘的诗名 fixture 住 `tests/fixtures/trajectory/`，
+轨迹卡住 `docs-site/content/trajectory/`。
 
 README 和这份规矩都是**生成物**：正本分别是 `docs-site/content/docs/maintain/readme.mdx` 和 `agents.mdx`，
 改 mdx 源（不是改生成物），`pnpm livedoc render --target ai` 重摆，mdx 源和生成物一起提交。
-方案正本是单元根的 `god-live-doc-rewrite.md`，接口、记录格式、状态表、顺序都在那儿；
-跟方案有出入的地方记在 `god-live-doc/README.md` 的「待定」段，方案要变先改正本再改代码。
+方案正本是仓根的 `god-live-doc-rewrite.md`，接口、记录格式、状态表、顺序都在那儿；
+跟方案有出入的地方记在 `README.md` 的「待定」段，方案要变先改正本再改代码。
 
 ## 参考，不要改
 
 * 实验室 `D:\dshfiles\260901lab`（台阶七 `step7-packages` / `step7-site` / `step7-mini`）：架构定案的出处，
   教学代码，**只读**。要搬逻辑就搬，别 import 它。它在**老根** `D:\dshfiles`（DSH 时代的归档区），
-  本单元住 `D:\unitfolders`，这是跨根引用。
+  本仓住 `D:\unitfolders` 下的单元里，这是跨根引用。
 * 老仓 `D:\dshfiles\26082711aju\god-live-doc`（同在老根）：git 记忆那条线的出处（`libs/core/src/core/git.ts`、
   `diff.ts`、`hash.ts`、`pins.ts` 的代码钉分支），**只读**。功能面已对齐，不再是参考，代码只看这个仓。
 
@@ -30,8 +32,8 @@ README 和这份规矩都是**生成物**：正本分别是 `docs-site/content/d
   format-fumadocs 可依赖 project，fumadocs 只能是 peer）。`tests/boundary.test.ts` 守着，别绕。
 * 子进程调用一律带超时。
 * 门禁，两摊都要绿才提交：
-  * `god-live-doc/`：`pnpm test`、`pnpm typecheck`、`pnpm build`
-  * `god-live-doc/docs-site/`：`pnpm livedoc check`、`pnpm test`、`pnpm build`、`node scripts/verify-roster.mjs`
+  * 仓根：`pnpm test`、`pnpm typecheck`、`pnpm build`
+  * `docs-site/`：`pnpm livedoc check`、`pnpm test`、`pnpm build`、`node scripts/verify-roster.mjs`
 * 动了引用到的源码，`livedoc confirm` 之前**先 commit**——git 比较器只对已提交、工作区干净的内容钉。
 * 挂了 outputs 映射的文档（readme / agents 这两篇）改了 mdx 源，`pnpm livedoc render --target ai` 重摆
   生成物，跟 mdx 源一起提交；check 守着生成物跟源一致，红了就是没重摆。
