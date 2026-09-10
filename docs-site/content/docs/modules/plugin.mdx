@@ -1,6 +1,6 @@
 ---
 title: 工作台件
-description: gwb-live-doc：一条铺六区的命令加三份说明书，对 @godcreator02/livedoc 那个包零依赖
+description: gwb-live-doc：一条铺六区的命令加六份说明书，对 @godcreator02/livedoc 那个包零依赖
 ---
 
 # 工作台件
@@ -9,7 +9,7 @@ description: gwb-live-doc：一条铺六区的命令加三份说明书，对 @go
 
 ## 管什么
 
-`packages/gwb-live-doc` 是这个工作区里唯一不发成 npm 库的包：它是 god 工作台（gwb）的一枚插件，包名 `@godcreator02/gwb-live-doc`。它管的只有两样——**一条把六区铺到 fumadocs 骨架上的命令，加三份随件发的说明书**。怎么分的写在文件头上：
+`packages/gwb-live-doc` 是这个工作区里唯一不发成 npm 库的包：它是 god 工作台（gwb）的一枚插件，包名 `@godcreator02/gwb-live-doc`。它管的只有两样——**一条把六区铺到 fumadocs 骨架上的命令，加六份随件发的说明书**。怎么分的写在文件头上：
 
 {/* ref file="../packages/gwb-live-doc/src/index.ts" lines="9-21" */}
 
@@ -43,15 +43,15 @@ description: gwb-live-doc：一条铺六区的命令加三份说明书，对 @go
 
 那一摊铺哪些文件、模板长什么样、骨架不合规怎么拦，全在 [装配六区](/docs/modules/site)；件这头只做参数翻译与回执收敛。
 
-### 三份说明书
+### 六份说明书
 
-`live-doc`（件自己那份）、`livedoc-docs`（文档站怎么写）、`trajectory`（卡怎么记）都住包内 `skills/`，挂载时整个目录报给 skills 件：
+两族，都住包内 `skills/`，挂载时整个目录报给 skills 件。讲**这套机制**的三份：`live-doc`（件自己那份）、`livedoc-docs`（文档站怎么写）、`trajectory`（卡怎么记）。讲**通用开发纪律**的三份：`spec-grill`（接到需求先盘问）、`parallel-by-module`（按模块并行派活）、`self-explaining-code`（让代码自己说清自己）。
 
 {/* ref file="../packages/gwb-live-doc/src/index.ts" lines="119-124" */}
 
 {/* tree dir="../packages/gwb-live-doc/skills" depth="1" */}
 
-后两份描述的是**包**的行为，正本因此仍住这个站（同仓才改得动），由 `livedoc.config.mjs` 的 outputs 把生成物摆进件的 `skills/`：
+除 `live-doc` 之外五份的正本都住这个站（同仓才改得动），由 `livedoc.config.mjs` 的 outputs 把生成物摆进件的 `skills/`。纪律那三份不描述任何代码，但它们要跟钉码写法、六区、五梁一横对得上号——同仓才守得住这份一致，这也是 2026-09-10 把它们并回来的判据，见 [三份纪律并回本仓](/trajectory/2026-09-10-dev-discipline-comes-home)：
 
 {/* ref file="livedoc.config.mjs" lines="17-26" */}
 
@@ -164,4 +164,4 @@ description: gwb-live-doc：一条铺六区的命令加三份说明书，对 @go
 
 **读序**：`index.ts` 往下只认识 `attach.ts` 一个名字，那是装配面上的两个方法（算一套、算完落盘）。`attach.ts` 再往下的 `skeleton` / `template` / `values` / `manifest` / `deps` 是它的内部，读序与各自管什么在 [装配六区](/docs/modules/site)。
 
-**可跳过**：`dist/`（`tsc` 的产物）；`template/attach/` 是原样发出去的模板，不是逻辑；`skills/` 那三份是给 agent 读的说明书，讲的是怎么用这个生态，不讲件自己怎么切的。
+**可跳过**：`dist/`（`tsc` 的产物）；`template/attach/` 是原样发出去的模板，不是逻辑；`skills/` 那六份是给 agent 读的说明书，讲的是怎么用这个生态、怎么干活，不讲件自己怎么切的。

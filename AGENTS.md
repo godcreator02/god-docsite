@@ -42,7 +42,7 @@ README 和这份规矩都是**生成物**：正本分别是 `docs-site/content/o
   不许依赖包，两个方向各由 `tests/boundary.test.ts` 与件的 `tests/artifact.test.ts&#x60; 守着。
   **`tests/boundary.test.ts` 是塌包之后唯一的边界守卫**，别绕、别删、别为了让门禁绿注释掉某一条。
 * **要在仓里发生的（核对、确认、渲染）归包，只在 agent 手上发生一次的归件**：铺六区
-  （`live-doc.attach`）与三份说明书住 `packages/gwb-live-doc/`。站的一生（扫站、起停、端口、
+  （`live-doc.attach`）与六份说明书住 `packages/gwb-live-doc/`。站的一生（扫站、起停、端口、
   窗格）与铺 fumadocs 骨架归站件 `@godcreator02/gwb-docs-site`，两个件互不依赖、只经命令总线说话。
 * 子进程调用一律带超时。
 * 门禁，三摊都要绿才提交：
@@ -52,7 +52,7 @@ README 和这份规矩都是**生成物**：正本分别是 `docs-site/content/o
 * 发版 **两边各发各的、没有先后**：件对包零依赖。两个包抬版本号时跟着改
   `packages/gwb-live-doc/src/deps.ts` 那张表——件的 `tests/attach.test.ts` 守着它。
 * 动了引用到的源码，`livedoc confirm` 之前**先 commit**——git 比较器只对已提交、工作区干净的内容钉。
-* 挂了 outputs 映射的文档（readme / agents / 两份 skill）改了 mdx 源，`pnpm livedoc render` 重摆
+* 挂了 outputs 映射的文档（readme / agents / 五份 skill）改了 mdx 源，`pnpm livedoc render` 重摆
   生成物，跟 mdx 源一起提交；check 守着生成物跟源一致，红了就是没重摆。
 * 改了 `src/fumadocs/` 的代码，站要先删 `.next` 再 build。调试站用 build + start，不用 dev；
   起的站验完必须停掉。

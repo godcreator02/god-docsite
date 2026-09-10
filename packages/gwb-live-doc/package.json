@@ -1,7 +1,7 @@
 {
   "name": "@godcreator02/gwb-live-doc",
-  "version": "0.5.0",
-  "description": "livedoc 件：给一个已经建好的 fumadocs 骨架装上 livedoc 的六区（live-doc.attach，模板随件发、件自己铺），再挂三份说明书（live-doc / livedoc-docs / trajectory）。**对 @godcreator02/livedoc 那个包零依赖**——核对、确认、渲染要在仓里发生，agent 自己 cd 过去跑 pnpm doc，件不转发、不起子进程。站的一生（扫站、起停、端口、到点关、窗格）归站件 @godcreator02/gwb-docs-site，两个件互不依赖、各带各的模板",
+  "version": "0.6.0",
+  "description": "livedoc 件：给一个已经建好的 fumadocs 骨架装上 livedoc 的六区（live-doc.attach，模板随件发、件自己铺），再挂六份说明书——讲这套机制的三份（live-doc 装六区 / livedoc-docs 写文档 / trajectory 记卡）加讲通用开发纪律的三份（spec-grill 先盘问 / parallel-by-module 并行派活 / self-explaining-code 代码自解释）。**对 @godcreator02/livedoc 那个包零依赖**——核对、确认、渲染要在仓里发生，agent 自己 cd 过去跑 pnpm doc，件不转发、不起子进程。站的一生（扫站、起停、端口、到点关、窗格）归站件 @godcreator02/gwb-docs-site，两个件互不依赖、各带各的模板",
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

@@ -19,8 +19,9 @@ import * as tabs from "./src/components/tabs/tabs.ai.mjs";
  * 对象写法点名 name / description 两条 frontmatter 随行——宿主靠这两条决定什么时候读这份 skill，
  * 剥光了摆出去就是一份没人会触发的散文。
  *
- * 正本住这个站、生成物住件：这两份讲的是**包**的行为（文档怎么写、卡怎么记），同仓才改得动，
- * 所以正本在这儿；但**包没有独立的到达路径**——它躺在 node_modules 里没人指引、没人会读，
+ * 正本住这个站、生成物住件：讲**包**行为的那几份（文档怎么写、卡怎么记）同仓才改得动，
+ * 讲**通用开发纪律**的那三份不描述任何代码、但要跟钉码与六区的写法对得上号，也同仓才守得住，
+ * 所以正本都在这儿；但**包没有独立的到达路径**——它躺在 node_modules 里没人指引、没人会读，
  * 能被 agent 读到全靠件 `register` 了自己包里那个 `skills/` 目录。
  */
 const skill = (name) => ({ to: `../packages/gwb-live-doc/skills/${name}/SKILL.md`, frontmatter: ["name", "description"] });
@@ -36,6 +37,9 @@ export default {
     "content/docs/maintain/agents.mdx": ["../AGENTS.md"],
     "content/outputs/skills/livedoc-docs.mdx": [skill("livedoc-docs")],
     "content/outputs/skills/trajectory.mdx": [skill("trajectory")],
+    "content/outputs/skills/spec-grill.mdx": [skill("spec-grill")],
+    "content/outputs/skills/parallel-by-module.mdx": [skill("parallel-by-module")],
+    "content/outputs/skills/self-explaining-code.mdx": [skill("self-explaining-code")],
   },
   components: {
     ...fumadocs.defaultRoster,

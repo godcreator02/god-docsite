@@ -7,7 +7,7 @@ import type {} from '@godcreator02/gwb-skills'
 import { attachSite, type AttachResult } from './attach.js'
 
 /**
- * livedoc 件：**一条铺六区的命令，加两份说明书**。
+ * livedoc 件：**一条铺六区的命令，加六份说明书**。
  *
  * 判据是「这件事在哪儿发生」——要在**仓**里发生的（核对、确认、渲染，门禁与站构建要跑的那些）
  * 归 `@godcreator02/livedoc` 那个包，agent 自己 `cd` 到仓里跑 `pnpm doc`；只在 **agent** 手上
@@ -117,11 +117,11 @@ export function apply(ctx: GwbContext): void {
   )
 
   // 说明书那一格，局部注入：没装 skills 件的 home 里本件照常挂。产物在 dist/ 下，包根的 skills/ 是 '../skills/'
-  // 三份都随本件发（`live-doc` / `livedoc-docs` / `trajectory`）：**说明书随件走**——那个包躺在
-  // node_modules 里没有独立的到达路径，没人指引、没人会读，能被读到全靠件 register 了这个目录
+  // 六份都随本件发：三份讲这套机制（`live-doc` / `livedoc-docs` / `trajectory`），三份讲通用开发纪律
+  // （`spec-grill` / `parallel-by-module` / `self-explaining-code`）——包没有独立的到达路径，全靠件 register 这个目录
   ctx.inject(['gwbSkills'], (scoped) => {
     scoped.effect(() => scoped.gwbSkills.register(new URL('../skills/', import.meta.url)))
   })
 
-  log.info(`livedoc 件就绪：一条命令（${ATTACH_COMMAND}）加三份说明书，对 @godcreator02/livedoc 零依赖`)
+  log.info(`livedoc 件就绪：一条命令（${ATTACH_COMMAND}）加六份说明书，对 @godcreator02/livedoc 零依赖`)
 }

@@ -77,9 +77,9 @@ describe('几处一改就得一起改的账', () => {
   }
   const index = fs.readFileSync(path.join(root, 'src', 'index.ts'), 'utf8')
 
-  it('三份说明书进了 files——漏了包照发、照装得上，直到挂载去扫目录时才报读不动', () => {
+  it('六份说明书进了 files——漏了包照发、照装得上，直到挂载去扫目录时才报读不动', () => {
     expect(manifest.files).toContain('skills')
-    for (const skill of ['live-doc', 'livedoc-docs', 'trajectory']) {
+    for (const skill of ['live-doc', 'livedoc-docs', 'trajectory', 'spec-grill', 'parallel-by-module', 'self-explaining-code']) {
       expect(fs.existsSync(path.join(root, 'skills', skill, 'SKILL.md')), `skills/${skill}/SKILL.md`).toBe(true)
     }
     expect(fs.readFileSync(path.join(root, 'skills', 'live-doc', 'SKILL.md'), 'utf8')).toMatch(/^---\s*\nname: live-doc\n/)

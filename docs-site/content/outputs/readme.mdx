@@ -85,8 +85,8 @@ pnpm livedoc check
 文档本身怎么写、六区怎么分、每页写到哪为止，正本是**随工作台件发的 skill**，住
 `packages/gwb-live-doc/skills/`：写文档读 `livedoc-docs`、落卡读 `trajectory`、装六区读 `live-doc`。
 说明书跟着件走而不是跟着包走，是因为包没有独立的到达路径——躺在 `node_modules` 里的一份
-SKILL.md 没人指引、没人会读。通用开发方法论（盘需求、并行派活、自解释代码）不在这儿——它们
-不描述本仓的代码，随开发件 `@godcreator02/gwb-dev-loop` 走。
+SKILL.md 没人指引、没人会读。通用开发纪律的三份也在这儿：接到需求先盘问读 `spec-grill`、
+活大到要派 subagent 读 `parallel-by-module`、扫一遍代码让它自解释读 `self-explaining-code`。
 
 **这份 README 是生成物**，正本是 `docs-site/content/outputs/readme.mdx`；仓根 `AGENTS.md` 同理。
 改 mdx 源，`pnpm livedoc render` 重摆，两份一起提交。
