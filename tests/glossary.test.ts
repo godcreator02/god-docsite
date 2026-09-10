@@ -5,8 +5,8 @@
  */
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { buildTermIndex, findTerms, remarkGlossary } from "../packages/livedoc/src/fumadocs/index.ts";
-import type { TermEntry, TreeNode } from "../packages/livedoc/src/fumadocs/index.ts";
+import { buildTermIndex, findTerms, remarkGlossary } from "../packages/docfirst-workflow/src/fumadocs/index.ts";
+import type { TermEntry, TreeNode } from "../packages/docfirst-workflow/src/fumadocs/index.ts";
 
 const BUS: TermEntry = { term: "命令总线", def: "件把能力挂上去、界面和 agent 从同一张表调" };
 const SVC: TermEntry = { term: "总线", def: "泛指一条把多方接到一起的通道" };
@@ -75,7 +75,7 @@ test("代码、标题、链接、注入的投影，一处都不标", () => {
       { type: "heading", depth: 2, children: [prose("窗格这一节")] },
       { type: "paragraph", children: [{ type: "inlineCode", value: "窗格" }] },
       { type: "link", children: [prose("窗格")] },
-      { type: "paragraph", data: { livedocAi: [] }, children: [prose("窗格")] },
+      { type: "paragraph", data: { docfirstAi: [] }, children: [prose("窗格")] },
     ],
   };
   remarkGlossary({ terms: [PANE] })(tree, { path: "a.mdx" });

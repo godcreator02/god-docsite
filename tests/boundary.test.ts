@@ -1,7 +1,7 @@
 /**
  * # 边界守卫：塌包之后**唯一**的那道
  *
- * 五个包塌成一个 `@godcreator02/livedoc` 之后，「谁能依赖谁」不再由 pnpm 的严格
+ * 五个包塌成一个 `@godcreator02/docfirst-workflow` 之后，「谁能依赖谁」不再由 pnpm 的严格
  * node_modules 兜着了——同一个包里，`engine/` 里随手写一句 `import "../host/git.ts"`
  * 编译器不会吭一声，判定层就从此起了 git 子进程。**这个文件就是补上的那道门。**
  *
@@ -18,7 +18,7 @@
  * 打进产物就是两份 React 各跑一套，现象是预渲染时莫名其妙的 hooks 报错。
  *
  * **四、方向只能是件 → 包**：两个 npm 包不许出现任何 `@godcreator02/gwb-*`。
- * 反过来一次，装 livedoc 的人就被迫拉进一整个桌面工作台生态。
+ * 反过来一次，装 docfirst 的人就被迫拉进一整个桌面工作台生态。
  *
  * **别删这个文件，也别把某一条注释掉「先让门禁绿」。** 它报红的时候，红的是设计，不是测试。
  * 真要改方向，改的是 `LAYERS` 那张表加一段说明为什么——不是把断言删掉。
@@ -38,11 +38,11 @@ interface Pkg {
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const PACKAGES = join(ROOT, "packages");
-const SRC = join(PACKAGES, "livedoc", "src");
+const SRC = join(PACKAGES, "docfirst-workflow", "src");
 
 /** 两个 npm 包的目录名。工作台件跟它们同住 packages/，但不在这套包的依赖网里 */
-const NPM_PACKAGES = ["livedoc", "trajectory"];
-const PLUGIN = "gwb-live-doc";
+const NPM_PACKAGES = ["docfirst-workflow", "docfirst-trajectory"];
+const PLUGIN = "gwb-docfirst-workflow";
 
 const manifestOf = (dir: string): Pkg => JSON.parse(readFileSync(join(PACKAGES, dir, "package.json"), "utf8")) as Pkg;
 /** 运行时真正会跟着走的依赖：dependencies 加 peerDependencies。devDependencies 不算——它只为编译和类型检查 */
@@ -89,7 +89,7 @@ const rel = (from: string, file: string): string => relative(from, file).split(s
  * 方向读法（左边不许知道右边）：
  *   engine   判定：只认注进来的格式 / 读取器 / 记录簿 / 比较器，谁都不认识
  *   host     碰环境：可以用 engine 的类型与纯函数，不认识格式实现、不认识命令行
- *   fumadocs 格式实现 + 站接线：可以用 engine 与 host（`livedocMdxOptions` 要 loadProject），不认识命令行
+ *   fumadocs 格式实现 + 站接线：可以用 engine 与 host（`docfirstMdxOptions` 要 loadProject），不认识命令行
  *   cli      入口：认识以上全部，谁都不认识它
  *
  * 从前还有第五层 `site/`（给已有骨架装六区）。它搬进工作台件了：那件事只在 agent 手上发生
@@ -153,20 +153,20 @@ test("fumadocs 这个名字只出现在 fumadocs/ 那一层：别的层一个宿
 // ── 二、宿主只能是 peer，且不许被打进产物 ────────────────────────────────────
 
 test("宿主只能是 peer，不许进 dependencies", () => {
-  const pkg = manifestOf("livedoc");
+  const pkg = manifestOf("docfirst-workflow");
   assert.ok(Object.keys(pkg.peerDependencies ?? {}).some((d) => d.startsWith("fumadocs")), "得声明 fumadocs 为 peer");
-  for (const dep of Object.keys(pkg.dependencies ?? {})) assert.ok(!HOST.test(dep), `livedoc 把 ${dep} 装成了自己的依赖`);
+  for (const dep of Object.keys(pkg.dependencies ?? {})) assert.ok(!HOST.test(dep), `docfirst 把 ${dep} 装成了自己的依赖`);
 });
 
 test("产物里不许打进 fumadocs 或 react，只许 import；pre 的客户端指令要留在头一行", () => {
   for (const file of ["dist/fumadocs.mjs", "dist/pre.mjs", "dist/term.mjs"]) {
-    const src = readFileSync(join(PACKAGES, "livedoc", file), "utf8");
+    const src = readFileSync(join(PACKAGES, "docfirst-workflow", file), "utf8");
     for (const spec of importSpecsOf(src).filter((s) => HOST.test(s))) {
       assert.ok(!spec.startsWith("."), `${file} 把 ${spec} 打进了产物`);
     }
   }
   // 状态点组件是客户端组件：指令得留在产物头一行，不然 Next 不认
-  assert.match(readFileSync(join(PACKAGES, "livedoc", "dist", "pre.mjs"), "utf8"), /^"use client";/, "pre 的 use client 指令被打没了");
+  assert.match(readFileSync(join(PACKAGES, "docfirst-workflow", "dist", "pre.mjs"), "utf8"), /^"use client";/, "pre 的 use client 指令被打没了");
 });
 
 /**
@@ -175,13 +175,13 @@ test("产物里不许打进 fumadocs 或 react，只许 import；pre 的客户�
  * `register` 了自己包里那个目录。判据见轨迹卡「包给仓件给人」。
  */
 test("包只发 dist 与样式：skills 与 template 跟着件走了，包里连目录都不该再有", () => {
-  const pkg = JSON.parse(readFileSync(join(PACKAGES, "livedoc", "package.json"), "utf8")) as { files: string[] };
+  const pkg = JSON.parse(readFileSync(join(PACKAGES, "docfirst-workflow", "package.json"), "utf8")) as { files: string[] };
   assert.deepEqual(pkg.files, ["dist", "styles"]);
   for (const path of ["styles/light.css", "styles/term.css"]) {
-    assert.ok(existsSync(join(PACKAGES, "livedoc", path)), `livedoc 少了 ${path}`);
+    assert.ok(existsSync(join(PACKAGES, "docfirst-workflow", path)), `docfirst 少了 ${path}`);
   }
   for (const path of ["skills", "template"]) {
-    assert.equal(existsSync(join(PACKAGES, "livedoc", path)), false, `livedoc 里还留着 ${path}/——它归件 gwb-live-doc`);
+    assert.equal(existsSync(join(PACKAGES, "docfirst-workflow", path)), false, `docfirst 里还留着 ${path}/——它归件 gwb-docfirst-workflow`);
   }
 });
 
@@ -190,7 +190,7 @@ test("包只发 dist 与样式：skills 与 template 跟着件走了，包里连
 test("trajectory 的 `.` 入口零 npm 依赖：产物只许 import node: 内置模块", () => {
   // 包本身有 react（peer）与 unist-util-visit（只给 `./server` 用），`.` 入口这条红线
   // 按产物判——比按 package.json 判更准：就算以后 `.` 入口不小心 import 到一个真依赖，这里也抓得到
-  const src = readFileSync(join(PACKAGES, "trajectory", "dist", "index.mjs"), "utf8");
+  const src = readFileSync(join(PACKAGES, "docfirst-trajectory", "dist", "index.mjs"), "utf8");
   for (const spec of importSpecsOf(src)) assert.ok(spec.startsWith("node:"), `trajectory 的 . 入口产物 import 了 ${spec}`);
 });
 
@@ -198,7 +198,7 @@ test("trajectory 的 react / server 入口：客户端指令、react 只 import 
   // 「不打进 react」要正着断言：react 真被内联进产物时，产物里根本没有那条 import 行，
   // 反着遍历 import 说明符的写法是恒真的（没有行就一条也遍历不到）。
   const isReact = (spec: string): boolean => spec === "react" || spec.startsWith("react/");
-  const dir = join(PACKAGES, "trajectory", "dist");
+  const dir = join(PACKAGES, "docfirst-trajectory", "dist");
   const react = readFileSync(join(dir, "react.mjs"), "utf8");
   const server = readFileSync(join(dir, "server.mjs"), "utf8");
   assert.match(react, /^"use client";/, "react.mjs 的 use client 指令得留在头一行");
@@ -226,7 +226,7 @@ test("trajectory 的 `.` 入口源码只 import 自己和 node:fs / node:path / 
   // 只扫 .ts：react.tsx / server.tsx 是 `./react` `./server` 两个入口，各自的依赖边界
   // 由上面两条按产物判的测试守着，这条不管它们
   const IMPORT_RE = /^\s*import\b[\s\S]*?\bfrom\s*["']([^"']+)["']/gm;
-  const dir = join(PACKAGES, "trajectory", "src");
+  const dir = join(PACKAGES, "docfirst-trajectory", "src");
   for (const file of readdirSync(dir).filter((f) => f.endsWith(".ts"))) {
     const src = readFileSync(join(dir, file), "utf8");
     for (const m of src.matchAll(IMPORT_RE)) {
@@ -239,11 +239,11 @@ test("trajectory 的 `.` 入口源码只 import 自己和 node:fs / node:path / 
   }
 });
 
-test("livedoc 依赖 trajectory，trajectory 不依赖 livedoc——轨迹是独立的一条包线", () => {
-  assert.ok(depsOf(manifestOf("livedoc")).includes("@godcreator02/livedoc-trajectory"), "livedoc 得依赖 trajectory 才接得上 trajectory 子命令");
-  const trajectory = manifestOf("trajectory");
+test("docfirst 依赖 trajectory，trajectory 不依赖 docfirst——轨迹是独立的一条包线", () => {
+  assert.ok(depsOf(manifestOf("docfirst-workflow")).includes("@godcreator02/docfirst-trajectory"), "docfirst 得依赖 trajectory 才接得上 trajectory 子命令");
+  const trajectory = manifestOf("docfirst-trajectory");
   for (const dep of Object.keys({ ...trajectory.dependencies, ...trajectory.peerDependencies, ...trajectory.devDependencies })) {
-    assert.notEqual(dep, "@godcreator02/livedoc", "trajectory 依赖了 livedoc——方向反了");
+    assert.notEqual(dep, "@godcreator02/docfirst-workflow", "trajectory 依赖了 docfirst——方向反了");
   }
 });
 
@@ -251,7 +251,7 @@ test("轨迹只被命令行那一层用：engine / host / fumadocs 一个 import
   for (const layer of ["engine", "host", "fumadocs"]) {
     for (const file of sourcesIn(join(SRC, layer))) {
       for (const spec of importSpecsOf(readFileSync(file, "utf8"))) {
-        assert.ok(!spec.startsWith("@godcreator02/livedoc-trajectory"), `${layer}/${rel(join(SRC, layer), file)} 引用了轨迹（${spec}）`);
+        assert.ok(!spec.startsWith("@godcreator02/docfirst-trajectory"), `${layer}/${rel(join(SRC, layer), file)} 引用了轨迹（${spec}）`);
       }
     }
   }

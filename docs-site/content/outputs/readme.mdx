@@ -1,7 +1,7 @@
 ---
 title: README
 description: 仓根 README.md 的正本——是什么、怎么装、怎么用、文档在哪；render 摆过去
-livedoc: none
+docfirst: none
 ---
 
 # god-live-doc
@@ -16,54 +16,54 @@ livedoc: none
 
 五类引用把「文件系统这根轴」填满：行段、整文件、目录树、存在性（含「断言不在」）、名字。
 
-另一摊是**轨迹卡**：livedoc 治现状文档撒谎，轨迹卡治历史被改写——一次方向了断记下来就该冻结，
+另一摊是**轨迹卡**：docfirst 治现状文档撒谎，轨迹卡治历史被改写——一次方向了断记下来就该冻结，
 谁取代了谁看得见。卡不进记录簿、不用 confirm，只要即时校验；星轨盘在站上是一条独立的整页路由，
 不是塞进 mdx 的组件。
 
 ## 怎么装
 
 ```bash
-pnpm add -D @godcreator02/livedoc @godcreator02/livedoc-trajectory
+pnpm add -D @godcreator02/docfirst-workflow @godcreator02/docfirst-trajectory
 ```
 
 `fumadocs` 与 `react` 在包里只是 **peer**，用你项目里装的那份；只跑命令行、不装 fumadocs 的仓
-一个都不必装。站的接线从 `@godcreator02/livedoc/fumadocs` 进。
+一个都不必装。站的接线从 `@godcreator02/docfirst-workflow/fumadocs` 进。
 
 **站的构建配置里 `serverExternalPackages` 必须留空**：这个包里同时住着服务端那半与两个客户端
 组件（状态点、术语），而那个字段按包名匹配、没有子路径粒度——外置的边界会把 `"use client"`
 指令吃掉。
 
 **装一个新站是两步，命令行不管这两步**：先铺一个标准 fumadocs 骨架（装了 fumadocs 的人才该有
-那个能力，工作台里是站件的 `docs-site.create`），再由工作台件 `@godcreator02/gwb-live-doc` 的
-`live-doc.attach` 把六区装上。它**只在刚铺好的骨架上跑**：站里已经有 `livedoc.config.mjs`、或
+那个能力，工作台里是站件的 `docs-site.create`），再由工作台件 `@godcreator02/gwb-docfirst-workflow` 的
+`docfirst.attach` 把六区装上。它**只在刚铺好的骨架上跑**：站里已经有 `docfirst.config.mjs`、或
 `content/` 下已经有骨架之外的内容，就报一句「这个站已有内容，请人工接线」退非零，一个字不改写。
 
 这两步都只在 agent 手上发生一次，所以不在这个包里——包留的是要在**仓**里反复发生的那几条。
 
 ## 怎么用
 
-项目根放一份 `livedoc.config.mjs`（挂哪些格式、哪几区进 check、生成物摆哪），文档里写一行草稿记号：
+项目根放一份 `docfirst.config.mjs`（挂哪些格式、哪几区进 check、生成物摆哪），文档里写一行草稿记号：
 
 ```md
-@@livedoc ref src/greet.ts:2-3 @@                       行段
-@@livedoc ref config.json @@                            整文件（末尾追加也算变）
-@@livedoc tree src @@                                   目录树；可带 depth=2、glob=*.test.ts
-@@livedoc exists src/store.ts @@                        在；absent 是「断言不在」
-@@livedoc has src/store.ts "export function save" @@    文件里有这个字面量
+@@docfirst ref src/greet.ts:2-3 @@                       行段
+@@docfirst ref config.json @@                            整文件（末尾追加也算变）
+@@docfirst tree src @@                                   目录树；可带 depth=2、glob=*.test.ts
+@@docfirst exists src/store.ts @@                        在；absent 是「断言不在」
+@@docfirst has src/store.ts "export function save" @@    文件里有这个字面量
 ```
 
 然后：
 
 ```bash
-pnpm livedoc check                     # 只读，报状态。红退 1，黄和白退 0
-pnpm livedoc confirm                   # 出记录、清孤儿、换记号、投影内容
-pnpm livedoc confirm content/docs/a.mdx   # 只确认点名的那几篇
-pnpm livedoc render                    # 挂了 outputs 映射的摆到落点；没挂的出一份给 AI 读的 md 落 out/
+pnpm docfirst check                     # 只读，报状态。红退 1，黄和白退 0
+pnpm docfirst confirm                   # 出记录、清孤儿、换记号、投影内容
+pnpm docfirst confirm content/docs/a.mdx   # 只确认点名的那几篇
+pnpm docfirst render                    # 挂了 outputs 映射的摆到落点；没挂的出一份给 AI 读的 md 落 out/
 ```
 
 **跑通了的样子**：`check` 打出一行一处引用，每行带一个状态符号（🟢 新鲜 / 🟡 有变动 / ⚪ 未确认 /
 🔴 缺失）；`confirm` 把草稿记号换成正式记号并写进记录簿，站上每个代码块的标题栏里多一个对应颜色的点。
-门禁里挂 `pnpm livedoc check` 就行，它只在「引用指向空气」这一类真错上拦人。
+门禁里挂 `pnpm docfirst check` 就行，它只在「引用指向空气」这一类真错上拦人。
 
 `confirm` 之前**先 commit**：git 记忆只对已提交、且工作区干净的内容钉。有一处钉不住就整篇拒。
 
@@ -75,7 +75,7 @@ pnpm livedoc render                    # 挂了 outputs 映射的摆到落点；
 ```bash
 cd docs-site
 pnpm build && pnpm start        # 看 http://localhost:4310
-pnpm livedoc check
+pnpm docfirst check
 ```
 
 六区各是什么：`content/docs/` 现状（进 check）、`content/trajectory/` 轨迹卡、`content/spec/` 在途的活、
@@ -83,13 +83,13 @@ pnpm livedoc check
 先读现状区的**系统地图**，再读要改的那块的模块页。
 
 文档本身怎么写、六区怎么分、每页写到哪为止，正本是**随工作台件发的 skill**，住
-`packages/gwb-live-doc/skills/`：写文档读 `livedoc-docs`、落卡读 `trajectory`、装六区读 `live-doc`。
+`packages/gwb-docfirst-workflow/skills/`：写文档读 `docfirst-docs`、落卡读 `trajectory`、装六区读 `docfirst`。
 说明书跟着件走而不是跟着包走，是因为包没有独立的到达路径——躺在 `node_modules` 里的一份
 SKILL.md 没人指引、没人会读。通用开发纪律的三份也在这儿：接到需求先盘问读 `spec-grill`、
 活大到要派 subagent 读 `parallel-by-module`、扫一遍代码让它自解释读 `self-explaining-code`。
 
 **这份 README 是生成物**，正本是 `docs-site/content/outputs/readme.mdx`；仓根 `AGENTS.md` 同理。
-改 mdx 源，`pnpm livedoc render` 重摆，两份一起提交。
+改 mdx 源，`pnpm docfirst render` 重摆，两份一起提交。
 
 ## 这个仓自己怎么跑
 
@@ -100,12 +100,12 @@ pnpm typecheck
 pnpm test           # 先 build 再 node --test tests/*.test.ts
 
 cd docs-site
-pnpm livedoc check
+pnpm docfirst check
 pnpm test           # 站那头的接线（不起 Next）
 pnpm build          # next build
 node scripts/verify-roster.mjs
 
-cd ../packages/gwb-live-doc
+cd ../packages/gwb-docfirst-workflow
 pnpm check && pnpm build      # 工作台件自成一摊，用 vitest
 ```
 

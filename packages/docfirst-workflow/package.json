@@ -1,0 +1,77 @@
+{
+  "name": "@godcreator02/docfirst-workflow",
+  "version": "0.2.0",
+  "type": "module",
+  "description": "docfirst：文档里的论断钉在真源码上，代码变了就报出来。一个包四个模块——engine 判定、host 碰环境（git / 盘 / 记录簿 / 摆放）、fumadocs 格式实现与站接线、cli 命令行（check / confirm / render / trajectory）。**这个包的消费方是仓**：装它的人是为了在仓里跑门禁与站构建。给一个新骨架铺六区、那两份说明书都随工作台件 @godcreator02/gwb-docfirst-workflow 走，不在这儿",
+  "bin": {
+    "docfirst": "./dist/cli.mjs"
+  },
+  "//exports": "三个口：`.` 是命令行的 main 加装配的面（测试与程序调用走它），`./fumadocs` 是站接线（source.config.ts import 它），bin 是可执行。/fumadocs/pre 与 /fumadocs/term 是含 React 的侧出口，不能混进 ./fumadocs——pre 那份带 use client 指令",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.mts",
+      "default": "./dist/index.mjs"
+    },
+    "./fumadocs": {
+      "types": "./dist/fumadocs.d.mts",
+      "default": "./dist/fumadocs.mjs"
+    },
+    "./fumadocs/pre": {
+      "types": "./dist/pre.d.mts",
+      "default": "./dist/pre.mjs"
+    },
+    "./fumadocs/term": {
+      "types": "./dist/term.d.mts",
+      "default": "./dist/term.mjs"
+    },
+    "./fumadocs/light.css": "./styles/light.css",
+    "./fumadocs/term.css": "./styles/term.css"
+  },
+  "//files": "只剩产物与那两张样式表。skills 与 template 跟着件走了——**包没有独立的到达路径**：它躺在 node_modules 里没人指引、没人会读，说明书能被 agent 读到全靠件 register 了那个目录",
+  "files": [
+    "dist",
+    "styles"
+  ],
+  "scripts": {
+    "build": "tsdown",
+    "typecheck": "tsc -p tsconfig.json",
+    "prepublishOnly": "pnpm run build"
+  },
+  "//dependencies": "轨迹是独立包线：它有意不依赖判定层、自己复刻了一部分记号语法，概念上完全独立。remark 那套只给 fumadocs 那一层用",
+  "dependencies": {
+    "@godcreator02/docfirst-trajectory": "workspace:*",
+    "remark-frontmatter": "^5.0.0",
+    "remark-mdx": "^3.0.0",
+    "remark-parse": "^11.0.0",
+    "unified": "^11.0.0"
+  },
+  "//peerDependencies": "fumadocs 与 react 用消费方项目装的那份，包自己不带——全可选，只跑命令行的仓一个都不必装",
+  "peerDependencies": {
+    "fumadocs-core": ">=16",
+    "fumadocs-mdx": ">=15",
+    "fumadocs-ui": ">=16",
+    "react": ">=19"
+  },
+  "peerDependenciesMeta": {
+    "fumadocs-core": {
+      "optional": true
+    },
+    "fumadocs-mdx": {
+      "optional": true
+    },
+    "fumadocs-ui": {
+      "optional": true
+    },
+    "react": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@types/react": "^19.2.18",
+    "fumadocs-ui": "npm:@fumadocs/base-ui@16.15.1",
+    "react": "^19.2.8"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

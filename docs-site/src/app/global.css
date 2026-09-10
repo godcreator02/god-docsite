@@ -2,11 +2,11 @@
 @import 'fumadocs-ui/css/neutral.css';
 @import 'fumadocs-ui/css/preset.css';
 /* 状态点的样式随格式包发，一行引进来 */
-@import '@godcreator02/livedoc/fumadocs/light.css';
+@import '@godcreator02/docfirst-workflow/fumadocs/light.css';
 /* 术语标注的点线下划线与定义框，同样随格式包发 */
-@import '@godcreator02/livedoc/fumadocs/term.css';
+@import '@godcreator02/docfirst-workflow/fumadocs/term.css';
 /* 星轨盘的 HUD / 图例 / 浮层样式随 trajectory 包发 */
-@import '@godcreator02/livedoc-trajectory/star.css';
+@import '@godcreator02/docfirst-trajectory/star.css';
 
 html {
   scrollbar-gutter: stable;

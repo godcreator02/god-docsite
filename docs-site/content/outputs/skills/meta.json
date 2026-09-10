@@ -1,5 +1,5 @@
 {
   "title": "skill",
   "description": "包随包发的两份 SKILL.md 的正本：render 摆进包内 skills/<名>/SKILL.md",
-  "pages": ["livedoc-docs", "trajectory"]
+  "pages": ["docfirst-docs", "trajectory"]
 }

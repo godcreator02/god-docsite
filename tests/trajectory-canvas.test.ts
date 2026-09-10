@@ -13,11 +13,11 @@ import { fileURLToPath } from "node:url";
 import { test } from "node:test";
 import assert from "node:assert/strict";
 /* 布局 / 模型也直读源码：画布层吃的是源码里的 RingsLayout 型，跟 dist 里那份是两个声明 */
-import { BASE_RADIUS, HUB_RIM, RingsLayout } from "../packages/trajectory/src/layout.ts";
-import { buildModel, NO_DOMAIN } from "../packages/trajectory/src/model.ts";
-import { scanDir } from "../packages/trajectory/src/scan.ts";
-import type { Card, RawCard, TrajectoryModel } from "../packages/trajectory/src/types.ts";
-import { buildThemes, DEFAULT_RING_PALETTE, mix } from "../packages/trajectory/src/canvas/theme.ts";
+import { BASE_RADIUS, HUB_RIM, RingsLayout } from "../packages/docfirst-trajectory/src/layout.ts";
+import { buildModel, NO_DOMAIN } from "../packages/docfirst-trajectory/src/model.ts";
+import { scanDir } from "../packages/docfirst-trajectory/src/scan.ts";
+import type { Card, RawCard, TrajectoryModel } from "../packages/docfirst-trajectory/src/types.ts";
+import { buildThemes, DEFAULT_RING_PALETTE, mix } from "../packages/docfirst-trajectory/src/canvas/theme.ts";
 import {
   buildFilter,
   buildNode,
@@ -26,12 +26,12 @@ import {
   type NodeEl,
   recolor,
   spineTipIds,
-} from "../packages/trajectory/src/canvas/node-dom.ts";
-import { LabelArbiter } from "../packages/trajectory/src/canvas/label-arbiter.ts";
-import { consumeWheelNotches, dayAtT, railTOf } from "../packages/trajectory/src/canvas/date-rail.ts";
-import { renderStarThumb, THUMB_PAD } from "../packages/trajectory/src/canvas/star-thumb.ts";
-import { DEFAULT_SETTINGS } from "../packages/trajectory/src/canvas/settings.ts";
-import { serializeSvg, SvgStubDocument, type SvgStubElement } from "../packages/trajectory/src/canvas/svg-doc.ts";
+} from "../packages/docfirst-trajectory/src/canvas/node-dom.ts";
+import { LabelArbiter } from "../packages/docfirst-trajectory/src/canvas/label-arbiter.ts";
+import { consumeWheelNotches, dayAtT, railTOf } from "../packages/docfirst-trajectory/src/canvas/date-rail.ts";
+import { renderStarThumb, THUMB_PAD } from "../packages/docfirst-trajectory/src/canvas/star-thumb.ts";
+import { DEFAULT_SETTINGS } from "../packages/docfirst-trajectory/src/canvas/settings.ts";
+import { serializeSvg, SvgStubDocument, type SvgStubElement } from "../packages/docfirst-trajectory/src/canvas/svg-doc.ts";
 
 const FIXTURES = fileURLToPath(new URL("./fixtures/trajectory", import.meta.url));
 const ROOT_ID = "tfix-测试项目根卡";

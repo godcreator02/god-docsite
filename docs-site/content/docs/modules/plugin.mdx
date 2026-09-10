@@ -1,23 +1,23 @@
 ---
 title: 工作台件
-description: gwb-live-doc：一条铺六区的命令加六份说明书，对 @godcreator02/livedoc 那个包零依赖
+description: gwb-docfirst-workflow：一条铺六区的命令加六份说明书，对 @godcreator02/docfirst-workflow 那个包零依赖
 ---
 
 # 工作台件
 
-**本页回答**：`@godcreator02/gwb-live-doc` 手上还剩什么、为什么它一个字都不许依赖 `@godcreator02/livedoc`、这条边界靠什么守住。
+**本页回答**：`@godcreator02/gwb-docfirst-workflow` 手上还剩什么、为什么它一个字都不许依赖 `@godcreator02/docfirst-workflow`、这条边界靠什么守住。
 
 ## 管什么
 
-`packages/gwb-live-doc` 是这个工作区里唯一不发成 npm 库的包：它是 god 工作台（gwb）的一枚插件，包名 `@godcreator02/gwb-live-doc`。它管的只有两样——**一条把六区铺到 fumadocs 骨架上的命令，加六份随件发的说明书**。怎么分的写在文件头上：
+`packages/gwb-docfirst-workflow` 是这个工作区里唯一不发成 npm 库的包：它是 god 工作台（gwb）的一枚插件，包名 `@godcreator02/gwb-docfirst-workflow`。它管的只有两样——**一条把六区铺到 fumadocs 骨架上的命令，加六份随件发的说明书**。怎么分的写在文件头上：
 
-{/* ref file="../packages/gwb-live-doc/src/index.ts" lines="9-21" */}
+{/* ref file="../packages/gwb-docfirst-workflow/src/index.ts" lines="9-21" */}
 
-一句话的判据：**包的消费方是仓，件的消费方是 agent。** 要在**仓**里发生的事（核对、确认、渲染，门禁与站构建要跑的那些）归 `@godcreator02/livedoc` 那个包，agent 自己 `cd` 到那个仓里跑 `pnpm doc`；只在 **agent** 手上发生一次的事（读一份说明书、给一个新骨架铺一次六区）归件。这条判据怎么推出来的、否掉了哪几条候选，在 [包给仓、件给人](/trajectory/2026-09-10-package-serves-repo-plugin-serves-agent)。
+一句话的判据：**包的消费方是仓，件的消费方是 agent。** 要在**仓**里发生的事（核对、确认、渲染，门禁与站构建要跑的那些）归 `@godcreator02/docfirst-workflow` 那个包，agent 自己 `cd` 到那个仓里跑 `pnpm doc`；只在 **agent** 手上发生一次的事（读一份说明书、给一个新骨架铺一次六区）归件。这条判据怎么推出来的、否掉了哪几条候选，在 [包给仓、件给人](/trajectory/2026-09-10-package-serves-repo-plugin-serves-agent)。
 
 件的身份面就三个常量：插件名、那条命令的名字、一条硬 inject。
 
-{/* ref file="../packages/gwb-live-doc/src/index.ts" lines="22-27" */}
+{/* ref file="../packages/gwb-docfirst-workflow/src/index.ts" lines="22-27" */}
 
 `gwbCommands` 进 `export const inject` 而不是局部注入：没有命令总线，这个件没有任何出口，挂上去也是白挂——cordis 的 inject 是等待机制，缺它整个件不 apply。
 
@@ -25,35 +25,35 @@ description: gwb-live-doc：一条铺六区的命令加六份说明书，对 @go
 
 件对那个包**三档依赖一档都不写、`src/` 里一行都不 import**：不起子进程、不登记 node CLI、不查 home 里那个包的路径。于是装了件就能挂上说明书、能铺六区，不必再装什么包，也不再有「装了件没装包」那种半截状态。manifest 上那一档是空的，注释就是这条边界的正文：
 
-{/* ref file="../packages/gwb-live-doc/package.json" lines="37-49" */}
+{/* ref file="../packages/gwb-docfirst-workflow/package.json" lines="37-49" */}
 
 守卫在产物测试里，三档依赖面与 `src/` 下每份源码的裸名 import 一起查：
 
-{/* ref file="../packages/gwb-live-doc/tests/artifact.test.ts" lines="93-122" */}
+{/* ref file="../packages/gwb-docfirst-workflow/tests/artifact.test.ts" lines="93-122" */}
 
 配套的第二条守「不起子进程、不登记 node CLI」——转发一条命令行，就是把「要在仓里发生」的事又挪回件里：
 
-{/* ref file="../packages/gwb-live-doc/tests/artifact.test.ts" lines="124-131" */}
+{/* ref file="../packages/gwb-docfirst-workflow/tests/artifact.test.ts" lines="124-131" */}
 
 **代价是 agent 要核对得自己 `cd` 到仓里跑**，比调一条命令多一步；接受这个代价，换的是这条边界。件从前要绕道去 home 里现查那个包的路径，是因为模块解析给的是一条解开软链、当场定死的真实路径，包升级之后件照读旧文件、读得通、零报错——那条绕路随着职责理顺一起消失了，来龙去脉在那张卡上。
 
 装六区因此是**进程内直接调**，`index.ts` 往外只认识一个名字：
 
-{/* has file="../packages/gwb-live-doc/src/index.ts" text="./attach.js" */}
+{/* has file="../packages/gwb-docfirst-workflow/src/index.ts" text="./attach.js" */}
 
 那一摊铺哪些文件、模板长什么样、骨架不合规怎么拦，全在 [装配六区](/docs/modules/site)；件这头只做参数翻译与回执收敛。
 
 ### 六份说明书
 
-两族，都住包内 `skills/`，挂载时整个目录报给 skills 件。讲**这套机制**的三份：`live-doc`（件自己那份）、`livedoc-docs`（文档站怎么写）、`trajectory`（卡怎么记）。讲**通用开发纪律**的三份：`spec-grill`（接到需求先盘问）、`parallel-by-module`（按模块并行派活）、`self-explaining-code`（让代码自己说清自己）。
+两族，都住包内 `skills/`，挂载时整个目录报给 skills 件。讲**这套机制**的三份：`docfirst`（件自己那份）、`docfirst-docs`（文档站怎么写）、`trajectory`（卡怎么记）。讲**通用开发纪律**的三份：`spec-grill`（接到需求先盘问）、`parallel-by-module`（按模块并行派活）、`self-explaining-code`（让代码自己说清自己）。
 
-{/* ref file="../packages/gwb-live-doc/src/index.ts" lines="119-124" */}
+{/* ref file="../packages/gwb-docfirst-workflow/src/index.ts" lines="119-124" */}
 
-{/* tree dir="../packages/gwb-live-doc/skills" depth="1" */}
+{/* tree dir="../packages/gwb-docfirst-workflow/skills" depth="1" */}
 
-除 `live-doc` 之外五份的正本都住这个站（同仓才改得动），由 `livedoc.config.mjs` 的 outputs 把生成物摆进件的 `skills/`。纪律那三份不描述任何代码，但它们要跟钉码写法、六区、五梁一横对得上号——同仓才守得住这份一致，这也是 2026-09-10 把它们并回来的判据，见 [三份纪律并回本仓](/trajectory/2026-09-10-dev-discipline-comes-home)：
+除 `docfirst` 之外五份的正本都住这个站（同仓才改得动），由 `docfirst.config.mjs` 的 outputs 把生成物摆进件的 `skills/`。纪律那三份不描述任何代码，但它们要跟钉码写法、六区、五梁一横对得上号——同仓才守得住这份一致，这也是 2026-09-10 把它们并回来的判据，见 [三份纪律并回本仓](/trajectory/2026-09-10-dev-discipline-comes-home)：
 
-{/* ref file="livedoc.config.mjs" lines="17-27" */}
+{/* ref file="docfirst.config.mjs" lines="17-27" */}
 
 理由就一句：**包没有独立的到达路径**——它躺在 `node_modules` 里没人指引、没人会读，说明书能被 agent 读到全靠件 `register` 了自己包里这个目录。这一格走 `ctx.inject` 的局部注入，没装 skills 件的 home 里本件照常挂上，只是少一块。
 
@@ -61,65 +61,65 @@ description: gwb-live-doc：一条铺六区的命令加六份说明书，对 @go
 
 **两个件互不依赖**：一档依赖不写、一行不 import，正着有测试守着。
 
-{/* ref file="../packages/gwb-live-doc/tests/artifact.test.ts" lines="140-148" */}
+{/* ref file="../packages/gwb-docfirst-workflow/tests/artifact.test.ts" lines="140-148" */}
 
-两边只剩一个使用顺序：站件的 `docs-site.create` 铺标准 fumadocs 骨架，本件的 `live-doc.attach` 在骨架上装六区。顺序不能反，中间不要改文件。各带各的模板，谁也不问谁要清单。
+两边只剩一个使用顺序：站件的 `docs-site.create` 铺标准 fumadocs 骨架，本件的 `docfirst.attach` 在骨架上装六区。顺序不能反，中间不要改文件。各带各的模板，谁也不问谁要清单。
 
 **不注册窗格**：站件那一格已经叫「文档站」，两格同名分不出谁是谁。本件也因此没有浏览器半——没有 esbuild、没有那张带前缀的样式表，`build` 只剩一步 `tsc`：
 
-{/* ref file="../packages/gwb-live-doc/package.json" lines="24-33" */}
+{/* ref file="../packages/gwb-docfirst-workflow/package.json" lines="24-33" */}
 
 ## 不知道什么
 
 **不知道有哪些站、站在哪、跑没跑。** 扫容器根、认 fumadocs 站、判 build 新鲜度、挑口起停、到点关，一件都不做；也不问任何人要一份站清单——`dir` 由调用方给一条绝对路径。件这头只拦一件事：那得是个已经存在的目录。
 
-{/* ref file="../packages/gwb-live-doc/src/index.ts" lines="36-54" */}
+{/* ref file="../packages/gwb-docfirst-workflow/src/index.ts" lines="36-54" */}
 
 「不是目录」这句话点得出「`dir` 给成仓目录了」这个最常犯的错。存不存在、是不是刚铺好的骨架，归装配那头判——它的错误文本就是文档。
 
 **不知道装配为什么不肯装。** 骨架不合规、占位符认不出，装配当场抛；件把错误文本原样交出去，不翻译、不分类。
 
-{/* ref file="../packages/gwb-live-doc/src/index.ts" lines="88-97" */}
+{/* ref file="../packages/gwb-docfirst-workflow/src/index.ts" lines="88-97" */}
 
-**不知道 livedoc 是怎么核对的。** 判定引擎、比较器、记录簿、报告形状，一样都不认识——连 `check --json` 打出来的那份机读报告都不读。哪一页漂了、一处钉为什么黄，问的是仓里那条命令行，不是这个件。
+**不知道 docfirst 是怎么核对的。** 判定引擎、比较器、记录簿、报告形状，一样都不认识——连 `check --json` 打出来的那份机读报告都不读。哪一页漂了、一处钉为什么黄，问的是仓里那条命令行，不是这个件。
 
 **不知道装完之后有没有人真去跑那几步。** 装配**只写文件**：不 install、不 render、不 check。件能做的只是把接着该在那个仓里跑的几条摆进回执，跑不跑是人和 agent 的事。
 
-{/* ref file="../packages/gwb-live-doc/src/index.ts" lines="62-71" */}
+{/* ref file="../packages/gwb-docfirst-workflow/src/index.ts" lines="62-71" */}
 
 **不知道六区长什么样、装配会写哪些文件。** 那全在 [装配六区](/docs/modules/site)，件只递两个参数、把结果收敛成一张表。
 
-**不知道 livedoc 那套工具链。** 那两个 npm 包是 tsdown + TS 6、测试跑 `node --test`；这个件是 `tsc` 出一份 node 半，跑在 TS 7 上，测试用 vitest。各自的 `package.json` 说了算，**两套并存、不互相搬**。
+**不知道 docfirst 那套工具链。** 那两个 npm 包是 tsdown + TS 6、测试跑 `node --test`；这个件是 `tsc` 出一份 node 半，跑在 TS 7 上，测试用 vitest。各自的 `package.json` 说了算，**两套并存、不互相搬**。
 
 ## 数据结构
 
 只钉形状。
 
-`live-doc.attach` 的回执是装配那份计划加一张落盘清单：装在哪、站所在的仓、骨架挑的那个口、铺了哪些文件、哪几个让了位、仓根哪些生成物第一次 render 会被盖掉。
+`docfirst.attach` 的回执是装配那份计划加一张落盘清单：装在哪、站所在的仓、骨架挑的那个口、铺了哪些文件、哪几个让了位、仓根哪些生成物第一次 render 会被盖掉。
 
-{/* ref file="../packages/gwb-live-doc/src/index.ts" lines="98-114" */}
+{/* ref file="../packages/gwb-docfirst-workflow/src/index.ts" lines="98-114" */}
 
 `overwrites` 非空时多一条 `warn`，说的是同一件事的处置：先把仓根那份的内容搬进 `content/outputs/` 下对应的 mdx（那才是正本），再 render。字段的类型**不在这儿定义**——直接用 `attach.ts` 导出的 `AttachResult`，形状是契约，抄一份必然漂。
 
 ## 提供的接口
 
-对外只有**命令总线上一条 `live-doc.attach`**。命令描述是公共面的一部分——agent 只看得见它，参数形状、只在刚铺好的骨架上跑、只写文件这三件事都写在里面：
+对外只有**命令总线上一条 `docfirst.attach`**。命令描述是公共面的一部分——agent 只看得见它，参数形状、只在刚铺好的骨架上跑、只写文件这三件事都写在里面：
 
-{/* ref file="../packages/gwb-live-doc/src/index.ts" lines="78-85" */}
+{/* ref file="../packages/gwb-docfirst-workflow/src/index.ts" lines="78-85" */}
 
 命令名与「哪些名字不许再出现」由产物守卫数着，改名就是破约：
 
-{/* ref file="../packages/gwb-live-doc/tests/artifact.test.ts" lines="55-67" */}
+{/* ref file="../packages/gwb-docfirst-workflow/tests/artifact.test.ts" lines="55-67" */}
 
 模块面上四个导出：`name`、`ATTACH_COMMAND`、`inject`、`apply`。装配那摊的类型不从这儿转出，要 `AttachResult` 就直接 import `attach.js`。
 
 说明书与模板不是代码，靠 `files` 发出去：
 
-{/* ref file="../packages/gwb-live-doc/package.json" lines="16-22" */}
+{/* ref file="../packages/gwb-docfirst-workflow/package.json" lines="16-22" */}
 
 漏一条包照发、照装得上，直到挂载去扫 skills 目录、或者跑 attach 那一刻才报「读不动」——所以两条都有测试盯着：
 
-{/* ref file="../packages/gwb-live-doc/tests/artifact.test.ts" lines="80-91" */}
+{/* ref file="../packages/gwb-docfirst-workflow/tests/artifact.test.ts" lines="80-91" */}
 
 ## 依赖的接口
 
@@ -127,20 +127,20 @@ description: gwb-live-doc：一条铺六区的命令加六份说明书，对 @go
 
 | 接口 | 用来做什么 | 生产实现 | 测试实现 |
 | --- | --- | --- | --- |
-| `gwbCommands` | 挂 `live-doc.attach` 那一条 | 命令总线件 `@godcreator02/gwb-commands` | 不测（命令名由产物守卫数着） |
+| `gwbCommands` | 挂 `docfirst.attach` 那一条 | 命令总线件 `@godcreator02/gwb-commands` | 不测（命令名由产物守卫数着） |
 | `gwbSkills` | 把包内 `skills/` 那三份报过去 | skills 件 `@godcreator02/gwb-skills` | 不测（只是把一个目录 URL 报过去） |
 
 契约包（`isRecord` 与 `GwbContext`）与命令总线走 peer——前者是每个件都得对得上的那份契约，后者是运行期硬依赖；skills 落 dev 再挂一条可选 peer 当版本校验点，cordis 对服务不做版本校验，peer range 是这条链上唯一一处。这一档由测试钉着，注入方式与依赖档一起查：
 
-{/* ref file="../packages/gwb-live-doc/tests/artifact.test.ts" lines="133-138" */}
+{/* ref file="../packages/gwb-docfirst-workflow/tests/artifact.test.ts" lines="133-138" */}
 
-`@godcreator02/livedoc` 与站件 `@godcreator02/gwb-docs-site` 一档都不写，见「零依赖这条边界」与「跟站件」两节。
+`@godcreator02/docfirst-workflow` 与站件 `@godcreator02/gwb-docs-site` 一档都不写，见「零依赖这条边界」与「跟站件」两节。
 
 ## 怎么单独测
 
 判据一条：**这段逻辑能不能不起进程、不开窗、只喂输入看输出**。能就写成 vitest 用例；不能（要真装进 home、要 Electron）那不是不测，是走实机验证那条路。两者不互相替代——`pnpm check` 全绿从来不代表装出来能跑，它吃的是源码。
 
-{/* tree dir="../packages/gwb-live-doc/tests" depth="1" */}
+{/* tree dir="../packages/gwb-docfirst-workflow/tests" depth="1" */}
 
 `plugin` 只证件的身份：插件名跟包名派生自同一个短名。件真挂进 cordis 要有 home、有别的件，那条走实机。
 
@@ -148,7 +148,7 @@ description: gwb-live-doc：一条铺六区的命令加六份说明书，对 @go
 
 `artifact` 是产物守卫加那几笔「一改就得一起改」的账——零依赖、不起子进程、命令面、`files`、依赖档、不注册窗格。产物那一组要 `dist/` 造齐了才跑，缺产物整组跳过，门禁不依赖 build。
 
-{/* ref file="../packages/gwb-live-doc/tests/artifact.test.ts" lines="30-37" */}
+{/* ref file="../packages/gwb-docfirst-workflow/tests/artifact.test.ts" lines="30-37" */}
 
 产物是平的一层这条不是洁癖：模板不进 `dist/`，`src/template.ts` 与 `dist/template.js` 都在包根下一层，`../template/attach/` 那条路两态才是同一个相对位置。
 
@@ -158,7 +158,7 @@ description: gwb-live-doc：一条铺六区的命令加六份说明书，对 @go
 
 **在哪**：
 
-{/* tree dir="../packages/gwb-live-doc/src" depth="1" */}
+{/* tree dir="../packages/gwb-docfirst-workflow/src" depth="1" */}
 
 **先读** `index.ts`：整份只剩接线——一条命令的注册与参数翻译、说明书那一格的局部注入。
 

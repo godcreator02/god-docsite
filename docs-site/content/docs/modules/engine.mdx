@@ -5,7 +5,7 @@ description: 接口正本、记号语法、编排服务、四种状态；只认�
 
 # 判定层 engine
 
-**本页回答**：`@godcreator02/livedoc` 的 `src/engine/` 管哪几件事、它凭什么敢说自己不认识磁盘和文档格式、外面要换一种格式或一种记忆时照着哪个接口写。
+**本页回答**：`@godcreator02/docfirst-workflow` 的 `src/engine/` 管哪几件事、它凭什么敢说自己不认识磁盘和文档格式、外面要换一种格式或一种记忆时照着哪个接口写。
 
 ## 管什么
 
@@ -13,13 +13,13 @@ description: 接口正本、记号语法、编排服务、四种状态；只认�
 
 编排的四件事、引用的身份、以及「这一层不碰磁盘」这条约束，在服务这一层是这么写的：
 
-{/* ref file="../packages/livedoc/src/engine/service.ts" lines="1-14" */}
+{/* ref file="../packages/docfirst-workflow/src/engine/service.ts" lines="1-14" */}
 
 ## 不知道什么
 
 **不碰磁盘。** 每种目标要看的东西（观察）由读取器递进来：行段、整文件、名字看文件的行，目录树看名字表，存在性看类型。`Reader` 这个接口就是为这条立的——判定层从不自己去读一个路径，也就无所谓工作区、提交、软链。
 
-{/* ref file="../packages/livedoc/src/engine/types.ts" lines="144-154" */}
+{/* ref file="../packages/docfirst-workflow/src/engine/types.ts" lines="144-154" */}
 
 **不起子进程，也不知道 git 存在。** `src/engine/` 里的 import 只许指向自己和 `node:crypto`，一条测试正着守着：
 
@@ -33,35 +33,35 @@ description: 接口正本、记号语法、编排服务、四种状态；只认�
 
 **不知道摆放。** 渲染在格式接口上是可选的一项，出的是一份正文：
 
-{/* ref file="../packages/livedoc/src/engine/types.ts" lines="130-131" */}
+{/* ref file="../packages/docfirst-workflow/src/engine/types.ts" lines="130-131" */}
 
 这份正文摆到哪个落点、要不要带 frontmatter，判定层一个字不知道——编排服务从头到尾也不调它，渲染由别人发起。服务那一面上摆出来的方法里，没有一个通向渲染：
 
-{/* ref file="../packages/livedoc/src/engine/service.ts" lines="31-40" */}
+{/* ref file="../packages/docfirst-workflow/src/engine/service.ts" lines="31-40" */}
 
 **不看记录的 kind。** 取记录时原样递给比较器，认不认是比较器自己的事——判定层不翻译、不猜。
 
 **不知道项目根、配置文件、命令行、站。** 装配是[环境层 host](/docs/modules/host) 的活；判定层只吃已经造好的四样零件。这条约束还有一个具体形状：格式自留的私货判定层原样带回、从不读它。
 
-{/* ref file="../packages/livedoc/src/engine/types.ts" lines="53-60" */}
+{/* ref file="../packages/docfirst-workflow/src/engine/types.ts" lines="53-60" */}
 
 ## 数据结构
 
 **目标五种**（行段、整文件、目录树、存在性、名字）。这几样的形状就是全部对外契约：
 
-{/* ref file="../packages/livedoc/src/engine/types.ts" lines="15-51" */}
+{/* ref file="../packages/docfirst-workflow/src/engine/types.ts" lines="15-51" */}
 
 **清单项**是一处引用核对完的全部信息：当前内容、记录、状态、这段今天在哪，外加缺失与变动的细分理由。
 
-{/* ref file="../packages/livedoc/src/engine/types.ts" lines="74-94" */}
+{/* ref file="../packages/docfirst-workflow/src/engine/types.ts" lines="74-94" */}
 
 **引用的身份 = 文档 + 引用写的目标。** 同一篇里指向同一段的两处引用共用一条记录；记录簿的键就是目标的文本形态，跟目标之间来回可逆（`keyToTarget` 是它的另一半）：
 
-{/* ref file="../packages/livedoc/src/engine/marker.ts" lines="130-148" */}
+{/* ref file="../packages/docfirst-workflow/src/engine/marker.ts" lines="130-148" */}
 
 **记录带 kind，字段归那个比较器自己定。** 比较器看到别家的 kind 就交回「未确认」，不把一种记忆的记录翻译成另一种：
 
-{/* ref file="../packages/livedoc/src/engine/hash-comparator.ts" lines="66-67" */}
+{/* ref file="../packages/docfirst-workflow/src/engine/hash-comparator.ts" lines="66-67" */}
 
 所以配置里把记忆强制成某一种，原来别家记的记录一律退回未确认，等人重新确认。
 
@@ -84,7 +84,7 @@ description: 接口正本、记号语法、编排服务、四种状态；只认�
 
 **归一化只做三件事**：换行统一成 LF、去每行行尾空白、去掉末尾空行。缩进和注释保留——JSDoc 是契约的一部分，改了就该黄。规矩一条，展示前做的归一化就是哈希前做的：
 
-{/* ref file="../packages/livedoc/src/engine/span.ts" lines="1-7" */}
+{/* ref file="../packages/docfirst-workflow/src/engine/span.ts" lines="1-7" */}
 
 ## 提供的接口
 
@@ -92,39 +92,39 @@ description: 接口正本、记号语法、编排服务、四种状态；只认�
 
 **确认是全篇原子的**：有一处钉不住就整篇拒——记录簿一条不写、文档一个字不改，problems 原样交给上层打印。
 
-{/* ref file="../packages/livedoc/src/engine/service.ts" lines="134-137" */}
+{/* ref file="../packages/docfirst-workflow/src/engine/service.ts" lines="134-137" */}
 
 不是「能钉的先钉上」：半本记录簿比没有更难查。确认还顺手做两件事——行段按今天的位置记（判定跟到哪儿就钉到哪儿），旧键与文档里已经没有的引用一并当孤儿清掉。
 
 **记号语法自成一份 `marker.ts`**，跟接口正本分开的理由是两份的变化原因不同：`types.ts` 因「引用能指向什么」而变，`marker.ts` 因「记号怎么写」而变。它管的三样东西共同点是都在做「文本 ↔ 目标」的翻译，跟目标本身是什么无关。
 
-{/* ref file="../packages/livedoc/src/engine/marker.ts" lines="1-12" */}
+{/* ref file="../packages/docfirst-workflow/src/engine/marker.ts" lines="1-12" */}
 
 **草稿记号是判定层定的**，所有格式一个写法。整行匹配，头尾的 `@@` 是哨兵，少一头就是普通文字、不报错：
 
-{/* ref file="../packages/livedoc/src/engine/marker.ts" lines="88-100" */}
+{/* ref file="../packages/docfirst-workflow/src/engine/marker.ts" lines="88-100" */}
 
 动作词只有五个，语义校验统一走 `toTarget` 一个口子——各格式因此报错一致，行号不合理、depth 不是正整数都报到行：
 
-{/* ref file="../packages/livedoc/src/engine/marker.ts" lines="58-70" */}
+{/* ref file="../packages/docfirst-workflow/src/engine/marker.ts" lines="58-70" */}
 
 **正式记号分两截。** 载荷是判定层出的，所有格式共用，认回来也走判定层：
 
-{/* ref file="../packages/livedoc/src/engine/marker.ts" lines="38-42" */}
+{/* ref file="../packages/docfirst-workflow/src/engine/marker.ts" lines="38-42" */}
 
 外壳归格式：`marker(target)` 出一行，`parse(marker(t))` 必须认回 `t`——「怎么写」和「怎么认」住同一处。生产那份外壳是 mdx 的花括号注释，见 [fumadocs 格式](/docs/modules/fumadocs)。五类引用各该说哪种话，见[五类引用手册](/docs/start/handbook)。
 
 **判定层自带的比较器**管两摊。行段和整文件那摊是 hash 版：只记段哈希和旧行号，不问 git，也没有旧内容。行段靠滑窗跟——先看旧位置，不对就按段长在整个文件里逐行滑一遍找同哈希的窗口；撞车取离旧位置最近的一处，两处一样近就不猜；找不到就是「有变动、位置不明」，给不出 diff，行号停在旧位置。
 
-{/* ref file="../packages/livedoc/src/engine/hash-comparator.ts" lines="74-86" */}
+{/* ref file="../packages/docfirst-workflow/src/engine/hash-comparator.ts" lines="74-86" */}
 
 另一摊是按目标种类分派：行段和整文件交给外面给的那个（[环境层 host](/docs/modules/host) 的 auto、git，或本层的 hash），目录树、存在性、名字各走本层自己的一个。
 
-{/* ref file="../packages/livedoc/src/engine/kinds.ts" lines="111-126" */}
+{/* ref file="../packages/docfirst-workflow/src/engine/kinds.ts" lines="111-126" */}
 
 这三种的记忆各不相同：目录树记名字表本身（几十个名字不是代码，不这么存就说不出多了哪个少了哪个，是「不存第二份内容」的唯一例外），存在性记类型，名字只记「在」。后两种没有黄，要么绿要么红；目录树也不设提交门——新建还没提交的文件正该报黄。
 
-{/* ref file="../packages/livedoc/src/engine/kinds.ts" lines="1-8" */}
+{/* ref file="../packages/docfirst-workflow/src/engine/kinds.ts" lines="1-8" */}
 
 ## 依赖的接口
 
@@ -139,15 +139,15 @@ description: 接口正本、记号语法、编排服务、四种状态；只认�
 
 `Format` 这条接缝分离的是**「怎么认记号」与「怎么判新鲜」两种变化原因**，而且它下面真有两个适配器：生产是 fumadocs 口味的 mdx，测试是 `tests/fake-format.ts`。判定层这一面只把认领、认记号、写回记号那几样当必选；剩下的（名册检查、渲染、终态标）有就用、没有就跳，接口上一眼看得出哪几样带问号：
 
-{/* ref file="../packages/livedoc/src/engine/types.ts" lines="115-134" */}
+{/* ref file="../packages/docfirst-workflow/src/engine/types.ts" lines="115-134" */}
 
 读取器和记录簿都窄到能一眼看完——这是「换一样零件不用动判定层」的前提：
 
-{/* ref file="../packages/livedoc/src/engine/types.ts" lines="144-164" */}
+{/* ref file="../packages/docfirst-workflow/src/engine/types.ts" lines="144-164" */}
 
 比较器两个方法就是全部：确认时出记录、或者说清楚为什么钉不住；核对时判状态，顺便交回这段今天在哪。
 
-{/* ref file="../packages/livedoc/src/engine/types.ts" lines="178-193" */}
+{/* ref file="../packages/docfirst-workflow/src/engine/types.ts" lines="178-193" */}
 
 ## 怎么单独测
 
@@ -177,11 +177,11 @@ description: 接口正本、记号语法、编排服务、四种状态；只认�
 
 **在哪**：
 
-{/* tree dir="../packages/livedoc/src/engine" depth="1" */}
+{/* tree dir="../packages/docfirst-workflow/src/engine" depth="1" */}
 
 **先读** `types.ts`（接口正本，全套用词也在文件头的注释里），再读 `service.ts`（编排，四件事都在这儿）。记号怎么写单看 `marker.ts` 一份就够。这一层的出口就是一个文件，导出表即对外面貌：
 
-{/* ref file="../packages/livedoc/src/engine/index.ts" */}
+{/* ref file="../packages/docfirst-workflow/src/engine/index.ts" */}
 
 **读序**：`types.ts` 不吃任何人；`marker.ts` 只借它 `Target` 一族的类型；`span.ts`（归一化、哈希、切片）和 `diff.ts`（hunk 解析、行段映射）是纯函数；`hash-comparator.ts` 与 `kinds.ts` 吃前几者；`service.ts` 吃接口不吃实现；`index.ts` 只摆出口。
 

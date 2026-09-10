@@ -3,7 +3,7 @@
  * `outputs` 的两种写法 → `project.placements(doc)`，三种路径写法 → `project.docIdOf(path)`，
  * 形状不对的配置 → `loadProject` 当场拒。
  *
- * 这几条不经格式也不经磁盘扫描，所以项目只有一份 `livedoc.config.mjs`、`formats` 是空表。
+ * 这几条不经格式也不经磁盘扫描，所以项目只有一份 `docfirst.config.mjs`、`formats` 是空表。
  * 装配那一整趟（地盘规则、真扫目录）在 cli.test.ts，摆放那一摊在 placement.test.ts。
  */
 import { test } from "node:test";
@@ -11,16 +11,16 @@ import assert from "node:assert/strict";
 import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { loadProject } from "../packages/livedoc/src/host/index.ts";
-import type { Project } from "../packages/livedoc/src/host/index.ts";
+import { loadProject } from "../packages/docfirst-workflow/src/host/index.ts";
+import type { Project } from "../packages/docfirst-workflow/src/host/index.ts";
 
 const roots: string[] = [];
 
-/** 起一个只有配置的临时项目：`body` 是 livedoc.config 里除 formats 之外的那几项 */
+/** 起一个只有配置的临时项目：`body` 是 docfirst.config 里除 formats 之外的那几项 */
 function project(body: string): Promise<Project> {
   const root = mkdtempSync(join(tmpdir(), "god-live-doc-load-"));
   roots.push(root);
-  writeFileSync(join(root, "livedoc.config.mjs"), `export default { formats: [], ${body} };\n`);
+  writeFileSync(join(root, "docfirst.config.mjs"), `export default { formats: [], ${body} };\n`);
   return loadProject(root);
 }
 

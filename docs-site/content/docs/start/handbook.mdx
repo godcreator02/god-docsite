@@ -15,16 +15,16 @@ description: 拿判定层当对象，把行段、整文件、目录树、存在�
 | 形状 | 名字 `has 文件 "字面量"` | 目录树 `tree 目录` |
 | 有无 | 存在 `exists 路径`；断言不在 `absent 路径` | 同左 |
 
-这一章拿本仓的判定层 `packages/livedoc/src/engine` 说事：只用 `node:crypto` 的那一层，一把源文件。
+这一章拿本仓的判定层 `packages/docfirst-workflow/src/engine` 说事：只用 `node:crypto` 的那一层，一把源文件。
 **这一章自己就是那篇手册**——下面每一处引用都是活的，钉的是那一层的真文件。每一节两段：
-**读者看到的**（引用摆在这儿，块和芯片是活的）、**改了之后**（那处代码要是动了，`livedoc check` 会打出什么）。
+**读者看到的**（引用摆在这儿，块和芯片是活的）、**改了之后**（那处代码要是动了，`docfirst check` 会打出什么）。
 
-写引用只有一种写法：单独一行 `@@livedoc 动作 目标 @@`。confirm 一次换成 mdx 的正式记号 `{/* … */}`，
+写引用只有一种写法：单独一行 `@@docfirst 动作 目标 @@`。confirm 一次换成 mdx 的正式记号 `{/* … */}`，
 之后不再变。mdx 有构建，文件里只有这一行，内容是站 build 时现拿的。
 
 ## 这个包
 
-{/* tree dir="../packages/livedoc/src" depth="1" */}
+{/* tree dir="../packages/docfirst-workflow/src" depth="1" */}
 
 `dist/` 在 `.gitignore` 里，清单里看不到——目录树按 .gitignore 过滤。
 
@@ -32,7 +32,7 @@ description: 拿判定层当对象，把行段、整文件、目录树、存在�
 
 **读者看到的**
 
-{/* tree dir="../packages/livedoc/src/engine" depth="1" */}
+{/* tree dir="../packages/docfirst-workflow/src/engine" depth="1" */}
 
 一个文件一件事：`types` 是接口正本，`marker` 是记号语法，`span` 管归一化与哈希，`diff` 管行段映射与 LCS diff，
 `hash-comparator` 是 hash 那条记忆，`kinds` 是目录树 / 存在性 / 名字三个比较器，`service` 是编排，
@@ -41,7 +41,7 @@ description: 拿判定层当对象，把行段、整文件、目录树、存在�
 **改了之后**：有人加了 `engine/trace.ts`（给编排加一条调用轨迹），这一段没提，文件还没提交：
 
 ```text
-🟡 content/docs/start/handbook.mdx  tree ../packages/livedoc/src/engine depth=1  有变动，等作者复核（+ trace.ts）
+🟡 content/docs/start/handbook.mdx  tree ../packages/docfirst-workflow/src/engine depth=1  有变动，等作者复核（+ trace.ts）
 ```
 
 清单变黄、多出一行 `+ trace.ts`。「一个文件一件事」那段就得补一句 trace 是干嘛的，然后 confirm 回绿。
@@ -51,7 +51,7 @@ description: 拿判定层当对象，把行段、整文件、目录树、存在�
 
 **读者看到的**
 
-{/* ref file="../packages/livedoc/tsdown.config.ts" */}
+{/* ref file="../packages/docfirst-workflow/tsdown.config.ts" */}
 
 整份就这么多：五个入口、只出 esm、平台是 node、出 dts、每次清干净，外加一条「宿主只 import
 不内联」。这个包的构建面小到能一眼看完，这句话本身就是论断——它一旦变长，就说明包里开始有
@@ -60,7 +60,7 @@ description: 拿判定层当对象，把行段、整文件、目录树、存在�
 **改了之后**：有人在末尾追加一条 `external`，提交了：
 
 ```text
-🟡 content/docs/start/handbook.mdx  ../packages/livedoc/tsdown.config.ts:all  有变动，等作者复核
+🟡 content/docs/start/handbook.mdx  ../packages/docfirst-workflow/tsdown.config.ts:all  有变动，等作者复核
 ```
 
 要是当初钉的是 `entry` 那一段，末尾新加的那条在段外，算「没碰到」，页面还是绿的，读者永远不知道
@@ -75,23 +75,23 @@ description: 拿判定层当对象，把行段、整文件、目录树、存在�
 
 **读者看到的**
 
-{/* has file="../packages/livedoc/src/engine/span.ts" text="export function normalizeLines" */}
+{/* has file="../packages/docfirst-workflow/src/engine/span.ts" text="export function normalizeLines" */}
 
-{/* has file="../packages/livedoc/src/engine/span.ts" text="export function hashSpan" */}
+{/* has file="../packages/docfirst-workflow/src/engine/span.ts" text="export function hashSpan" */}
 
 「站展示什么就哈希什么」这条规矩落在这一对上：展示前做的归一化，就是哈希前做的那一份。
 哈希本身先归一化再摘要，不是直接摘原文：
 
-{/* ref file="../packages/livedoc/src/engine/span.ts" lines="23-25" */}
+{/* ref file="../packages/docfirst-workflow/src/engine/span.ts" lines="23-25" */}
 
 所以行尾多几个空格、换行从 CRLF 变成 LF，段哈希都不动——站上看不见的差别，记忆里也不该算差别。
 
 **改了之后 A**：有人把 `hashSpan` 改名成 `digestSpan`，全仓替换，提交了：
 
 ```text
-🔴 content/docs/start/handbook.mdx  has ../packages/livedoc/src/engine/span.ts "export function hashSpan"  缺失，引用指向空气（文件里没有这个名字了）
-🟢 content/docs/start/handbook.mdx  has ../packages/livedoc/src/engine/span.ts "export function normalizeLines"  新鲜
-🟡 content/docs/start/handbook.mdx  ../packages/livedoc/src/engine/span.ts:23-25  有变动，等作者复核
+🔴 content/docs/start/handbook.mdx  has ../packages/docfirst-workflow/src/engine/span.ts "export function hashSpan"  缺失，引用指向空气（文件里没有这个名字了）
+🟢 content/docs/start/handbook.mdx  has ../packages/docfirst-workflow/src/engine/span.ts "export function normalizeLines"  新鲜
+🟡 content/docs/start/handbook.mdx  ../packages/docfirst-workflow/src/engine/span.ts:23-25  有变动，等作者复核
 ```
 
 芯片变红，退 1，门禁拦下：上面那句「哈希本身先归一化再摘要」点名的函数不在了。行段那处只是黄——
@@ -100,8 +100,8 @@ description: 拿判定层当对象，把行段、整文件、目录树、存在�
 **改了之后 B**：有人把摘要算法从 sha256 换成 sha1，名字没动：
 
 ```text
-🟢 content/docs/start/handbook.mdx  has ../packages/livedoc/src/engine/span.ts "export function hashSpan"  新鲜
-🟡 content/docs/start/handbook.mdx  ../packages/livedoc/src/engine/span.ts:23-25  有变动，等作者复核
+🟢 content/docs/start/handbook.mdx  has ../packages/docfirst-workflow/src/engine/span.ts "export function hashSpan"  新鲜
+🟡 content/docs/start/handbook.mdx  ../packages/docfirst-workflow/src/engine/span.ts:23-25  有变动，等作者复核
 ```
 
 芯片还是绿的——名字在，`has` 只管这个。代码块黄带 diff：记录簿里所有旧指纹一夜之间全对不上，
@@ -117,16 +117,16 @@ description: 拿判定层当对象，把行段、整文件、目录树、存在�
 
 **读者看到的**
 
-{/* absent path="../packages/livedoc/src/engine/git.ts" */}
+{/* absent path="../packages/docfirst-workflow/src/engine/git.ts" */}
 
-git 那条记忆住在环境层（`packages/livedoc/src/host/git.ts`），判定层里没有它。判定层只用
+git 那条记忆住在环境层（`packages/docfirst-workflow/src/host/git.ts`），判定层里没有它。判定层只用
 `node:crypto`、不起子进程、不认识任何一个具体的记忆实现——比较器是注入进来的，不是它自己去找的。
 
 **改了之后**：有人图省事把 git 那半搬进判定层：
 
 ```text
-🔴 content/docs/start/handbook.mdx  absent ../packages/livedoc/src/engine/git.ts  缺失，引用指向空气（断言它不在，它却出现了）
-🟡 content/docs/start/handbook.mdx  tree ../packages/livedoc/src/engine depth=1  有变动，等作者复核（+ git.ts）
+🔴 content/docs/start/handbook.mdx  absent ../packages/docfirst-workflow/src/engine/git.ts  缺失，引用指向空气（断言它不在，它却出现了）
+🟡 content/docs/start/handbook.mdx  tree ../packages/docfirst-workflow/src/engine depth=1  有变动，等作者复核（+ git.ts）
 ```
 
 芯片红，「判定层零依赖」这条边界当场作废，搬的人在门禁上就会看到上面那句「比较器是注入进来的」。
@@ -136,11 +136,11 @@ git 那条记忆住在环境层（`packages/livedoc/src/host/git.ts`），判定
 
 | 这一章里的话 | 用的引用 | 什么时候提醒你 |
 | --- | --- | --- |
-| 「一个文件一件事」 | `tree ../packages/livedoc/src/engine` | 这一层下多了、少了文件 |
-| 「构建面小到能一眼看完」 | `ref ../packages/livedoc/tsdown.config.ts` | 这份配置改了任何一处，包括末尾追加 |
+| 「一个文件一件事」 | `tree ../packages/docfirst-workflow/src/engine` | 这一层下多了、少了文件 |
+| 「构建面小到能一眼看完」 | `ref ../packages/docfirst-workflow/tsdown.config.ts` | 这份配置改了任何一处，包括末尾追加 |
 | 「归一化与哈希是一对」 | `has` 两处 | 这两个导出改名、删了 |
-| 「先归一化再摘要」 | `ref ../packages/livedoc/src/engine/span.ts:23-25` | 那三行改了（挪了位置不算） |
-| 「git 那半不在判定层里」 | `absent ../packages/livedoc/src/engine/git.ts` | 这个文件出现了 |
+| 「先归一化再摘要」 | `ref ../packages/docfirst-workflow/src/engine/span.ts:23-25` | 那三行改了（挪了位置不算） |
+| 「git 那半不在判定层里」 | `absent ../packages/docfirst-workflow/src/engine/git.ts` | 这个文件出现了 |
 
 分工一句话：**名字表、名字、有没有，交给引用盯着；散文只负责说为什么。**散文里不写「四个」「几项」这种会漂的数，
 读者看块自己数——跑出来的数字（几条测试、几个路由）更不进散文，那不是文件的话，是命令输出的话。
@@ -155,6 +155,6 @@ git 那条记忆住在环境层（`packages/livedoc/src/host/git.ts`），判定
 | 「这个文件在」「已经没有了」 | `exists` / `absent` | 目录树是拿邻居陪绑；行段会因为内容变而黄 |
 | 「这个函数 / 配置项 / 导出还在」 | 名字 `has` | 行段过敏，那行改个空格都黄；改名该是红不是黄 |
 
-上面「改了之后」几段是 `livedoc check` 在人读模式下打出来的原文格式，一行一处引用；
+上面「改了之后」几段是 `docfirst check` 在人读模式下打出来的原文格式，一行一处引用；
 再往下看一处引用的一辈子，去 [一条引用的一生](/docs/start/lifecycle)；五类各自怎么判、
 记忆按文件位置怎么分派，去 [判定层](/docs/modules/engine) 与 [环境层](/docs/modules/host)。

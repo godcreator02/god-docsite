@@ -13,8 +13,8 @@ import {
   keyToTarget,
   normalizeLines,
   sliceSpan,
-} from "../packages/livedoc/src/engine/index.ts";
-import type { Comparator, Ledger, MemoRecord, Reader, Reference, Target } from "../packages/livedoc/src/engine/index.ts";
+} from "../packages/docfirst-workflow/src/engine/index.ts";
+import type { Comparator, Ledger, MemoRecord, Reader, Reference, Target } from "../packages/docfirst-workflow/src/engine/index.ts";
 import { fakeFormat } from "./fake-format.ts";
 
 const CODE = ["// greet", "export function greet(name: string): string {", "  return `hello ${name}`;", "}", ""];
@@ -149,22 +149,22 @@ test("一处钉不住整篇拒：记录簿一条不写，文档一个字不改",
 
 test("草稿记号：核心认它、报未确认；确认后格式换成正式记号", () => {
   const { service } = setup();
-  const text = "# 标题\n\n@@livedoc ref src/greet.ts:2-3 @@\n\n尾巴\n";
+  const text = "# 标题\n\n@@docfirst ref src/greet.ts:2-3 @@\n\n尾巴\n";
   const listing = service.resolve(DOC, text);
   assert.deepEqual(listing.items.map((i) => [i.status, i.reference.extra?.draft]), [["unconfirmed", true]]);
   const done = service.confirm(DOC, text);
   assert.match(done.text, /^REF src\/greet\.ts:2-3$/m);
-  assert.doesNotMatch(done.text, /@@livedoc/);
+  assert.doesNotMatch(done.text, /@@docfirst/);
 });
 
 test("草稿记号的哨兵：头尾 @@ 都在才算，载荷要过 toTarget", () => {
   const where = "第 1 行";
-  assert.deepEqual(draftOf("@@livedoc ref src/greet.ts:2-3 @@", where), { kind: "span", file: "src/greet.ts", a: 2, b: 3 });
-  assert.deepEqual(draftOf("   @@livedoc ref src/greet.ts:2-3 @@  ", where), { kind: "span", file: "src/greet.ts", a: 2, b: 3 });
-  assert.equal(draftOf("@@livedoc ref src/greet.ts:2-3", where), null, "少尾哨兵");
-  assert.equal(draftOf("livedoc ref src/greet.ts:2-3 @@", where), null, "少头哨兵");
-  assert.equal(draftOf("这句话里有 @@livedoc ref src/greet.ts:2-3 @@ 不算", where), null);
-  assert.throws(() => draftOf("@@livedoc ref src/greet.ts:3-2 @@", where), /行号不合理/);
+  assert.deepEqual(draftOf("@@docfirst ref src/greet.ts:2-3 @@", where), { kind: "span", file: "src/greet.ts", a: 2, b: 3 });
+  assert.deepEqual(draftOf("   @@docfirst ref src/greet.ts:2-3 @@  ", where), { kind: "span", file: "src/greet.ts", a: 2, b: 3 });
+  assert.equal(draftOf("@@docfirst ref src/greet.ts:2-3", where), null, "少尾哨兵");
+  assert.equal(draftOf("docfirst ref src/greet.ts:2-3 @@", where), null, "少头哨兵");
+  assert.equal(draftOf("这句话里有 @@docfirst ref src/greet.ts:2-3 @@ 不算", where), null);
+  assert.throws(() => draftOf("@@docfirst ref src/greet.ts:3-2 @@", where), /行号不合理/);
 });
 
 test("别家的记录：kind 对不上，比较器自己当没确认过，不猜；核心不看 kind", () => {
@@ -240,20 +240,20 @@ test("名字：文件里有这个字面量就绿，没了红；没有黄", () =>
 test("草稿记号的五种写法，和记录簿键的来回", () => {
   const where = "第 1 行";
   const cases: Array<[string, Target]> = [
-    ["@@livedoc ref config.json @@", { kind: "file", file: "config.json" }],
-    ["@@livedoc tree src @@", { kind: "tree", dir: "src", depth: 1 }],
-    ["@@livedoc tree src/ depth=2 glob=*.test.ts @@", { kind: "tree", dir: "src", depth: 2, glob: "*.test.ts" }],
-    ["@@livedoc exists src/store.ts @@", { kind: "exists", path: "src/store.ts", absent: false }],
-    ["@@livedoc absent src/remove.ts @@", { kind: "exists", path: "src/remove.ts", absent: true }],
-    ['@@livedoc has src/store.ts "export function save" @@', { kind: "has", file: "src/store.ts", text: "export function save" }],
-    ["@@livedoc has src/a:b.ts save @@", { kind: "has", file: "src/a:b.ts", text: "save" }],
+    ["@@docfirst ref config.json @@", { kind: "file", file: "config.json" }],
+    ["@@docfirst tree src @@", { kind: "tree", dir: "src", depth: 1 }],
+    ["@@docfirst tree src/ depth=2 glob=*.test.ts @@", { kind: "tree", dir: "src", depth: 2, glob: "*.test.ts" }],
+    ["@@docfirst exists src/store.ts @@", { kind: "exists", path: "src/store.ts", absent: false }],
+    ["@@docfirst absent src/remove.ts @@", { kind: "exists", path: "src/remove.ts", absent: true }],
+    ['@@docfirst has src/store.ts "export function save" @@', { kind: "has", file: "src/store.ts", text: "export function save" }],
+    ["@@docfirst has src/a:b.ts save @@", { kind: "has", file: "src/a:b.ts", text: "save" }],
   ];
   for (const [line, target] of cases) {
     assert.deepEqual(draftOf(line, where), target, line);
     assert.deepEqual(keyToTarget(targetKey(target)), target, targetKey(target));
   }
   assert.equal(targetKey({ kind: "has", file: "a.ts", text: 'say("hi")' }), 'has a.ts "say(\\"hi\\")"');
-  assert.equal(draftOf("@@livedoc probe src @@", where), null, "动作词不认识");
+  assert.equal(draftOf("@@docfirst probe src @@", where), null, "动作词不认识");
 });
 
 test("hash 比较器滑窗跟行段：代码整体下移，绿、带新行号；确认后记号写回新行段", () => {

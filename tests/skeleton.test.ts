@@ -10,10 +10,10 @@ import { fileURLToPath } from "node:url";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const PACKAGES = join(HERE, "..", "packages");
-/** 目录名 → 包名。轨迹的目录一直叫 trajectory，包名前面多一截产品名 */
+/** 目录名 → 包名。目录名跟包名去掉 scope 那一截同名 */
 const NAMES: Record<string, string> = {
-  livedoc: "@godcreator02/livedoc",
-  trajectory: "@godcreator02/livedoc-trajectory",
+  "docfirst-workflow": "@godcreator02/docfirst-workflow",
+  "docfirst-trajectory": "@godcreator02/docfirst-trajectory",
 };
 
 // 塌包之后两个包重新从 0.1.0 起。这条守的是形状，不是那个具体的数——把版本号写死在测试里，

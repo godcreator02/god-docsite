@@ -7,22 +7,22 @@
  */
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import * as mdxModule from "../packages/livedoc/src/fumadocs/index.ts";
-import type { Fill, Format, Target } from "../packages/livedoc/src/engine/index.ts";
+import * as mdxModule from "../packages/docfirst-workflow/src/fumadocs/index.ts";
+import type { Fill, Format, Target } from "../packages/docfirst-workflow/src/engine/index.ts";
 import { fakeFormat } from "./fake-format.ts";
 
 const mdx = mdxModule as unknown as Format;
 const FORMATS: Format[] = [mdx, fakeFormat("fake", ".txt")];
 const T: Target = { kind: "span", file: "src/greet.ts", a: 2, b: 3 };
 const ALL: Array<[string, Target]> = [
-  ["@@livedoc ref src/greet.ts:2-3 @@", T],
-  ["@@livedoc ref config.json @@", { kind: "file", file: "config.json" }],
-  ["@@livedoc tree src @@", { kind: "tree", dir: "src", depth: 1 }],
-  ["@@livedoc tree src depth=2 glob=*.ts @@", { kind: "tree", dir: "src", depth: 2, glob: "*.ts" }],
-  ["@@livedoc exists src/store.ts @@", { kind: "exists", path: "src/store.ts", absent: false }],
-  ["@@livedoc absent src/remove.ts @@", { kind: "exists", path: "src/remove.ts", absent: true }],
-  ['@@livedoc has src/store.ts "export function save" @@', { kind: "has", file: "src/store.ts", text: "export function save" }],
-  ["@@livedoc has src/store.ts save @@", { kind: "has", file: "src/store.ts", text: "save" }],
+  ["@@docfirst ref src/greet.ts:2-3 @@", T],
+  ["@@docfirst ref config.json @@", { kind: "file", file: "config.json" }],
+  ["@@docfirst tree src @@", { kind: "tree", dir: "src", depth: 1 }],
+  ["@@docfirst tree src depth=2 glob=*.ts @@", { kind: "tree", dir: "src", depth: 2, glob: "*.ts" }],
+  ["@@docfirst exists src/store.ts @@", { kind: "exists", path: "src/store.ts", absent: false }],
+  ["@@docfirst absent src/remove.ts @@", { kind: "exists", path: "src/remove.ts", absent: true }],
+  ['@@docfirst has src/store.ts "export function save" @@', { kind: "has", file: "src/store.ts", text: "export function save" }],
+  ["@@docfirst has src/store.ts save @@", { kind: "has", file: "src/store.ts", text: "save" }],
 ];
 const DRAFT = ALL[0]![0];
 const CODE = ["export function greet(name: string): string {", "  return `hello ${name}`;"];
@@ -50,9 +50,9 @@ test("草稿记号：五种目标的写法都认；少哨兵不认、句子里�
       const refs = format.parse(`# 标题\n\n${draft}\n\n尾巴\n`);
       assert.deepEqual(refs.map((r) => [r.target, r.at, r.extra?.draft]), [[target, 2, true]], `${format.name} 不认草稿记号：${draft}`);
     }
-    assert.deepEqual(format.parse("@@livedoc ref src/greet.ts:2-3\n"), [], `${format.name} 把少一头哨兵的当记号了`);
+    assert.deepEqual(format.parse("@@docfirst ref src/greet.ts:2-3\n"), [], `${format.name} 把少一头哨兵的当记号了`);
     assert.deepEqual(format.parse(`这句话里有 ${DRAFT} 不算\n`), [], `${format.name} 把句子里的当记号了`);
-    assert.deepEqual(format.parse("@@livedoc probe src @@\n"), [], `${format.name} 把不认识的动作词当记号了`);
+    assert.deepEqual(format.parse("@@docfirst probe src @@\n"), [], `${format.name} 把不认识的动作词当记号了`);
   }
 });
 
@@ -63,13 +63,13 @@ test("mdx：围栏里的草稿记号不认——围栏内容是 code 节点，�
 test("mdx：草稿换成正式记号（花括号注释），再写一次一个字不变", () => {
   const draft = `---\ntitle: x\n---\n\n# mdx\n\n${DRAFT}\n\n尾巴\n`;
   const once = mdx.write(draft, fillsOf(mdx, draft));
-  assert.doesNotMatch(once, /@@livedoc/);
+  assert.doesNotMatch(once, /@@docfirst/);
   assert.match(once, /\{\/\* ref file="src\/greet\.ts" lines="2-3" \*\/\}/);
   assert.equal(mdx.write(once, fillsOf(mdx, once)), once, "再写一次文档不该再变");
 });
 
 test("mdx：目录树、存在性、名字三种正式记号也认得回来", () => {
-  const draft = "# mdx\n\n@@livedoc tree src @@\n\n@@livedoc absent src/remove.ts @@\n\n@@livedoc has src/store.ts save @@\n";
+  const draft = "# mdx\n\n@@docfirst tree src @@\n\n@@docfirst absent src/remove.ts @@\n\n@@docfirst has src/store.ts save @@\n";
   const fills = mdx.parse(draft).map((reference) => ({ reference, current: reference.target.kind === "tree" ? ["add.ts", "store.ts"] : [] }));
   const once = mdx.write(draft, fills);
   assert.match(once, /\{\/\* tree dir="src" depth="1" \*\/\}/);
@@ -82,6 +82,6 @@ test("记号写坏了报到行：少 file、行号不合理、depth 不是正整
   assert.throws(() => mdx.parse('{/* ref lines="2-3" */}\n'), /第 1 行：引用要有 file/);
   assert.throws(() => mdx.parse('{/* ref file="a.ts" lines="3-2" */}\n'), /第 1 行：行号不合理/);
   assert.throws(() => mdx.parse('{/* tree dir="src" depth="0" */}\n'), /第 1 行：depth 要是正整数/);
-  assert.throws(() => mdx.parse("@@livedoc tree src deep=2 @@\n"), /第 1 行：tree 的选项只有/);
+  assert.throws(() => mdx.parse("@@docfirst tree src deep=2 @@\n"), /第 1 行：tree 的选项只有/);
   assert.deepEqual(mdx.parse('{/* ref file="a.ts" */}\n')[0]!.target, { kind: "file", file: "a.ts" });
 });

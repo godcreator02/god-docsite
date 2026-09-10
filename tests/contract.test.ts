@@ -8,15 +8,15 @@
  */
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import * as mdx from "../packages/livedoc/src/fumadocs/index.ts";
-import type { Format } from "../packages/livedoc/src/engine/index.ts";
+import * as mdx from "../packages/docfirst-workflow/src/fumadocs/index.ts";
+import type { Format } from "../packages/docfirst-workflow/src/engine/index.ts";
 import { fakeFormat } from "./fake-format.ts";
 import { CODE, setupRepo } from "./repo.ts";
 import type { Repo } from "./repo.ts";
 
 const fake = fakeFormat("fake", ".txt");
 const FORMATS = [mdx as unknown as Format, fake];
-const DRAFT = "@@livedoc ref src/greet.ts:2-3 @@";
+const DRAFT = "@@docfirst ref src/greet.ts:2-3 @@";
 const DOCS = ["docs/a.mdx", "docs/a.txt"];
 const START: Record<string, string> = {
   "docs/a.mdx": `---\ntitle: mdx\n---\n\n# mdx\n\n${DRAFT}\n\n尾巴\n`,
@@ -50,7 +50,7 @@ test("两个格式在同一串改动下状态一致，行段也跟到同一个�
 
     assert.deepEqual(confirmAll(r), []);
     assert.deepEqual(statuses(r), same("fresh"));
-    for (const doc of DOCS) assert.ok(!r.read(doc).includes("@@livedoc"), `${doc} 确认后草稿记号还在`);
+    for (const doc of DOCS) assert.ok(!r.read(doc).includes("@@docfirst"), `${doc} 确认后草稿记号还在`);
 
     r.write("src/greet.ts", CODE.replace("hello", "hey"));
     r.commit("改问候语");

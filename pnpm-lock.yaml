@@ -8,12 +8,12 @@ importers:
 
   .:
     devDependencies:
-      '@godcreator02/livedoc':
+      '@godcreator02/docfirst-trajectory':
         specifier: workspace:*
-        version: link:packages/livedoc
-      '@godcreator02/livedoc-trajectory':
+        version: link:packages/docfirst-trajectory
+      '@godcreator02/docfirst-workflow':
         specifier: workspace:*
-        version: link:packages/trajectory
+        version: link:packages/docfirst-workflow
       '@types/mdast':
         specifier: ^4.0.4
         version: 4.0.4
@@ -41,12 +41,12 @@ importers:
 
   docs-site:
     dependencies:
-      '@godcreator02/livedoc':
+      '@godcreator02/docfirst-trajectory':
         specifier: workspace:*
-        version: link:../packages/livedoc
-      '@godcreator02/livedoc-trajectory':
+        version: link:../packages/docfirst-trajectory
+      '@godcreator02/docfirst-workflow':
         specifier: workspace:*
-        version: link:../packages/trajectory
+        version: link:../packages/docfirst-workflow
       fumadocs-core:
         specifier: 16.15.1
         version: 16.15.1(@mdx-js/mdx@3.1.1)(@types/estree-jsx@1.0.5)(@types/hast@3.0.5)(@types/mdast@4.0.4)(@types/react@19.2.18)(lucide-react@1.39.0(react@19.2.8))(next@16.3.0(@types/node@26.4.1)(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(zod@4.5.4)
@@ -91,7 +91,54 @@ importers:
         specifier: ^6.0.3
         version: 6.0.3
 
-  packages/gwb-live-doc:
+  packages/docfirst-trajectory:
+    dependencies:
+      unist-util-visit:
+        specifier: ^5.0.0
+        version: 5.1.0
+    devDependencies:
+      '@standard-schema/spec':
+        specifier: ^1.1.0
+        version: 1.1.0
+      '@types/mdast':
+        specifier: ^4.0.4
+        version: 4.0.4
+      '@types/react':
+        specifier: ^19.2.18
+        version: 19.2.18
+      react:
+        specifier: ^19.2.8
+        version: 19.2.8
+
+  packages/docfirst-workflow:
+    dependencies:
+      '@godcreator02/docfirst-trajectory':
+        specifier: workspace:*
+        version: link:../docfirst-trajectory
+      remark-frontmatter:
+        specifier: ^5.0.0
+        version: 5.0.0
+      remark-mdx:
+        specifier: ^3.0.0
+        version: 3.1.1
+      remark-parse:
+        specifier: ^11.0.0
+        version: 11.0.0
+      unified:
+        specifier: ^11.0.0
+        version: 11.0.5
+    devDependencies:
+      '@types/react':
+        specifier: ^19.2.18
+        version: 19.2.18
+      fumadocs-ui:
+        specifier: npm:@fumadocs/base-ui@16.15.1
+        version: '@fumadocs/base-ui@16.15.1(@types/mdx@2.0.14)(@types/react@19.2.18)(fumadocs-core@16.15.1(@mdx-js/mdx@3.1.1)(@types/estree-jsx@1.0.5)(@types/hast@3.0.5)(@types/mdast@4.0.4)(@types/react@19.2.18)(lucide-react@1.39.0(react@19.2.8))(next@16.3.0(@types/node@26.4.1)(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(zod@4.5.4))(next@16.3.0(@types/node@26.4.1)(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(tailwindcss@4.3.3)'
+      react:
+        specifier: ^19.2.8
+        version: 19.2.8
+
+  packages/gwb-docfirst-workflow:
     devDependencies:
       '@godcreator02/gwb-commands':
         specifier: 0.2.0
@@ -120,53 +167,6 @@ importers:
       vitest:
         specifier: ^4.1.10
         version: 4.1.11(@types/node@24.13.3)(esbuild@0.28.2)(jiti@2.7.0)(yaml@2.9.0)
-
-  packages/livedoc:
-    dependencies:
-      '@godcreator02/livedoc-trajectory':
-        specifier: workspace:*
-        version: link:../trajectory
-      remark-frontmatter:
-        specifier: ^5.0.0
-        version: 5.0.0
-      remark-mdx:
-        specifier: ^3.0.0
-        version: 3.1.1
-      remark-parse:
-        specifier: ^11.0.0
-        version: 11.0.0
-      unified:
-        specifier: ^11.0.0
-        version: 11.0.5
-    devDependencies:
-      '@types/react':
-        specifier: ^19.2.18
-        version: 19.2.18
-      fumadocs-ui:
-        specifier: npm:@fumadocs/base-ui@16.15.1
-        version: '@fumadocs/base-ui@16.15.1(@types/mdx@2.0.14)(@types/react@19.2.18)(fumadocs-core@16.15.1(@mdx-js/mdx@3.1.1)(@types/estree-jsx@1.0.5)(@types/hast@3.0.5)(@types/mdast@4.0.4)(@types/react@19.2.18)(lucide-react@1.39.0(react@19.2.8))(next@16.3.0(@types/node@26.4.1)(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(zod@4.5.4))(next@16.3.0(@types/node@26.4.1)(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(tailwindcss@4.3.3)'
-      react:
-        specifier: ^19.2.8
-        version: 19.2.8
-
-  packages/trajectory:
-    dependencies:
-      unist-util-visit:
-        specifier: ^5.0.0
-        version: 5.1.0
-    devDependencies:
-      '@standard-schema/spec':
-        specifier: ^1.1.0
-        version: 1.1.0
-      '@types/mdast':
-        specifier: ^4.0.4
-        version: 4.0.4
-      '@types/react':
-        specifier: ^19.2.18
-        version: 19.2.18
-      react:
-        specifier: ^19.2.8
-        version: 19.2.8
 
 packages:
 

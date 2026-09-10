@@ -22,7 +22,7 @@ const SKILL_DOC = [
   "",
   "# skill",
   "",
-  "@@livedoc ref src/greet.ts:2-3 @@",
+  "@@docfirst ref src/greet.ts:2-3 @@",
   "",
 ].join("\n");
 

@@ -1,12 +1,12 @@
 /**
- * 模型层的规则测试：树提取的择优规则、四层校验（形状 / 存在性 / 一致性 / livedoc 引用记号，
- * livedoc 一条在 trajectory-validate.test.ts 单开）、parent 归盘即上盘（含未分道哨兵）、
+ * 模型层的规则测试：树提取的择优规则、四层校验（形状 / 存在性 / 一致性 / docfirst 引用记号，
+ * docfirst 一条在 trajectory-validate.test.ts 单开）、parent 归盘即上盘（含未分道哨兵）、
  * merged-in 平铺投影（含递归摊入与环保护）、根卡认定（type: root）、正文 inline 边求解、
  * 里程碑从根卡正文解析、盘清单、扫盘空态。
  */
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { buildDisks, buildModel, dayNum, NO_DOMAIN, RingsLayout, scanDir } from "@godcreator02/livedoc-trajectory";
+import { buildDisks, buildModel, dayNum, NO_DOMAIN, RingsLayout, scanDir } from "@godcreator02/docfirst-trajectory";
 import { card, D, DN, flatProblems, memCards, memSick, root } from "./trajectory-helpers.ts";
 
 /** 一月内某日转天序数。 */

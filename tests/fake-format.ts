@@ -10,8 +10,8 @@
  * 两个开关对上真格式的两种形态：`render` 是有 AI 渲染的那种（md 一类），
  * `final` 是「文档本身就是终态产物」的那种（html 一类）。
  */
-import { draftOf, fileOf, keyToTarget, targetKey } from "../packages/livedoc/src/engine/index.ts";
-import type { Fill, Format, Listing, Reference } from "../packages/livedoc/src/engine/index.ts";
+import { draftOf, fileOf, keyToTarget, targetKey } from "../packages/docfirst-workflow/src/engine/index.ts";
+import type { Fill, Format, Listing, Reference } from "../packages/docfirst-workflow/src/engine/index.ts";
 
 const MARK = /^REF\s+(.+)$/;
 

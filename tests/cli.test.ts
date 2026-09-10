@@ -94,7 +94,7 @@ test("被忽略的文件走 hash 记忆：confirm 标明；改了内容 check �
     run(p.root, ["commit", "-qm", "忽略 vendor"]);
     mkdirSync(join(p.root, "vendor"));
     writeFileSync(join(p.root, "vendor", "lib.ts"), CODE);
-    writeFileSync(join(p.root, "docs", "c.md"), "# c\n\n@@livedoc ref vendor/lib.ts:2-3 @@\n");
+    writeFileSync(join(p.root, "docs", "c.md"), "# c\n\n@@docfirst ref vendor/lib.ts:2-3 @@\n");
 
     const done = await p.cli("confirm");
     assert.equal(done.code, 0);
@@ -117,7 +117,7 @@ test("五类引用一篇文档：五种记号各自认得回来；多了文件�
   try {
     writeFileSync(
       join(p.root, "docs", "d.md"),
-      "# d\n\n@@livedoc tree src @@\n\n@@livedoc ref src/greet.ts @@\n\n@@livedoc has src/greet.ts \"export function greet\" @@\n\n@@livedoc absent src/remove.ts @@\n",
+      "# d\n\n@@docfirst tree src @@\n\n@@docfirst ref src/greet.ts @@\n\n@@docfirst has src/greet.ts \"export function greet\" @@\n\n@@docfirst absent src/remove.ts @@\n",
     );
     const done = await p.cli("confirm");
     assert.equal(done.code, 0, done.out);
@@ -183,7 +183,7 @@ test("confirm 按页限定：只动点名的那篇，别人的页与记录一个
 
     const ledger = JSON.parse(p.read(".ledger.json")) as Record<string, unknown>;
     assert.deepEqual(Object.keys(ledger), ["docs/a.md"]);
-    assert.match(p.read("docs/b.html"), /@@livedoc ref src\/greet\.ts:2-3 @@/, "没点名的页记号还是草稿");
+    assert.match(p.read("docs/b.html"), /@@docfirst ref src\/greet\.ts:2-3 @@/, "没点名的页记号还是草稿");
 
     // 反斜杠、`./` 开头、绝对路径都收
     const again = await p.cli("confirm", `.\\docs\\b.html`);

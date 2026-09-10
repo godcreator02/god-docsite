@@ -1,8 +1,8 @@
 # god-live-doc
 
 **仓根就是这个目录 `god-live-doc/`**，它同时是 pnpm 包工作区。上一级是单元目录，那儿只有一张
-出生证 `unit.json`，不在 git 里。仓里三样：`packages/` 下两个 npm 包（`livedoc` 主包、
-`trajectory` 轨迹包）外加一个工作台件 `gwb-live-doc`，`docs-site/` 是自己的 fumadocs 文档站
+出生证 `unit.json`，不在 git 里。仓里三样：`packages/` 下两个 npm 包（`docfirst` 主包、
+`trajectory` 轨迹包）外加一个工作台件 `gwb-docfirst-workflow`，`docs-site/` 是自己的 fumadocs 文档站
 （用这套机制写自己的文档，也是工作区成员），`tests/` 是工作区级测试。
 **怎么装、怎么接、怎么跑，看 `README.md`**，这儿不复述。
 
@@ -12,13 +12,13 @@
 
 README 和这份规矩都是**生成物**：正本分别是 `docs-site/content/outputs/readme.mdx` 和
 `docs-site/content/docs/maintain/agents.mdx`，改 mdx 源（不是改生成物），
-`pnpm livedoc render` 重摆，mdx 源和生成物一起提交。
+`pnpm docfirst render` 重摆，mdx 源和生成物一起提交。
 
 **动手前先读文档站**：`docs-site/content/docs/system-map.mdx` 是总代码地图，七个模块各一页在
 `content/docs/modules/`，接口与边界逐条钉在真源码上。站分六区——现状 `docs/`、轨迹 `trajectory/`、
-在途 `spec/`、未来 `future/`、生成正本 `outputs/`、反馈 `feedback/`；`livedoc check` 只扫现状与
+在途 `spec/`、未来 `future/`、生成正本 `outputs/`、反馈 `feedback/`；`docfirst check` 只扫现状与
 生成正本两区，别的四区不进门禁。文档怎么写、六区怎么分、每页写到哪为止，正本是随工作台件
-`@godcreator02/gwb-live-doc` 发的 skill `packages/gwb-live-doc/skills/livedoc-docs/SKILL.md`，动文档前读它。
+`@godcreator02/gwb-docfirst-workflow` 发的 skill `packages/gwb-docfirst-workflow/skills/docfirst-docs/SKILL.md`，动文档前读它。
 
 ## 参考，不要改
 
@@ -42,17 +42,17 @@ README 和这份规矩都是**生成物**：正本分别是 `docs-site/content/o
   不许依赖包，两个方向各由 `tests/boundary.test.ts` 与件的 `tests/artifact.test.ts&#x60; 守着。
   **`tests/boundary.test.ts` 是塌包之后唯一的边界守卫**，别绕、别删、别为了让门禁绿注释掉某一条。
 * **要在仓里发生的（核对、确认、渲染）归包，只在 agent 手上发生一次的归件**：铺六区
-  （`live-doc.attach`）与六份说明书住 `packages/gwb-live-doc/`。站的一生（扫站、起停、端口、
+  （`docfirst.attach`）与六份说明书住 `packages/gwb-docfirst-workflow/`。站的一生（扫站、起停、端口、
   窗格）与铺 fumadocs 骨架归站件 `@godcreator02/gwb-docs-site`，两个件互不依赖、只经命令总线说话。
 * 子进程调用一律带超时。
 * 门禁，三摊都要绿才提交：
   * 仓根：`pnpm test`、`pnpm typecheck`、`pnpm build`
-  * `docs-site/`：`pnpm livedoc check`、`pnpm test`、`pnpm build`、`node scripts/verify-roster.mjs`
-  * `packages/gwb-live-doc/`：`pnpm check`（typecheck + oxlint + vitest）、`pnpm build`
+  * `docs-site/`：`pnpm docfirst check`、`pnpm test`、`pnpm build`、`node scripts/verify-roster.mjs`
+  * `packages/gwb-docfirst-workflow/`：`pnpm check`（typecheck + oxlint + vitest）、`pnpm build`
 * 发版 **两边各发各的、没有先后**：件对包零依赖。两个包抬版本号时跟着改
-  `packages/gwb-live-doc/src/deps.ts` 那张表——件的 `tests/attach.test.ts` 守着它。
-* 动了引用到的源码，`livedoc confirm` 之前**先 commit**——git 比较器只对已提交、工作区干净的内容钉。
-* 挂了 outputs 映射的文档（readme / agents / 五份 skill）改了 mdx 源，`pnpm livedoc render` 重摆
+  `packages/gwb-docfirst-workflow/src/deps.ts` 那张表——件的 `tests/attach.test.ts` 守着它。
+* 动了引用到的源码，`docfirst confirm` 之前**先 commit**——git 比较器只对已提交、工作区干净的内容钉。
+* 挂了 outputs 映射的文档（readme / agents / 五份 skill）改了 mdx 源，`pnpm docfirst render` 重摆
   生成物，跟 mdx 源一起提交；check 守着生成物跟源一致，红了就是没重摆。
 * 改了 `src/fumadocs/` 的代码，站要先删 `.next` 再 build。调试站用 build + start，不用 dev；
   起的站验完必须停掉。

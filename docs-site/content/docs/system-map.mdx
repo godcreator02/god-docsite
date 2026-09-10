@@ -13,8 +13,8 @@ description: 四类角色、三条入口、依赖方向是什么、先读哪块
 
 {/* tree dir="../packages" depth="1" */}
 
-`livedoc` 是主包 `@godcreator02/livedoc`，`trajectory` 是独立的一条包线
-`@godcreator02/livedoc-trajectory`，`gwb-live-doc` 是工作台件——它不进 npm 的依赖网，只在
+`docfirst` 是主包 `@godcreator02/docfirst-workflow`，`trajectory` 是独立的一条包线
+`@godcreator02/docfirst-trajectory`，`gwb-docfirst-workflow` 是工作台件——它不进 npm 的依赖网，只在
 桌面工作台里把命令行开给 agent。
 
 ## 四类角色
@@ -22,7 +22,7 @@ description: 四类角色、三条入口、依赖方向是什么、先读哪块
 主包一个包，`src/` 下四层，按**角色**分而不是按「像什么」分。四类角色的判据一句话说得清：
 **判定不认识环境，环境不认识格式，格式不认识入口，入口认识全部。**
 
-{/* tree dir="../packages/livedoc/src" depth="1" */}
+{/* tree dir="../packages/docfirst-workflow/src" depth="1" */}
 
 | 角色 | 层 | 管什么 | 先读 |
 | --- | --- | --- | --- |
@@ -41,16 +41,16 @@ description: 四类角色、三条入口、依赖方向是什么、先读哪块
 
 <Tabs>
   <Tab title="命令行">
-    `livedoc check / confirm / render / trajectory`。`cli` 逐篇喂文本给编排服务，
+    `docfirst check / confirm / render / trajectory`。`cli` 逐篇喂文本给编排服务，
     把回来的清单译成一行行人话和一个退出码。git hook 与 CI 跑的就是它——**提交那一刻工作台
     不在场**，所以判定与核对必须是一个 npm 包，不能依赖任何 GUI 应用开着。
   </Tab>
   <Tab title="站构建">
-    站的 `source.config.ts` import `@godcreator02/livedoc/fumadocs`，remark 插件在构建期
+    站的 `source.config.ts` import `@godcreator02/docfirst-workflow/fumadocs`，remark 插件在构建期
     装配一次项目、认引用、算清单、把状态点打到树上。人看的那份文档就是站本身。
   </Tab>
   <Tab title="工作台件">
-    `@godcreator02/gwb-live-doc` 经命令总线开出 `live-doc.attach`（在进程内给一个已有骨架
+    `@godcreator02/gwb-docfirst-workflow` 经命令总线开出 `docfirst.attach`（在进程内给一个已有骨架
     铺六区），另把六份说明书挂给 agent 读。**它对包零依赖**：不 import、不起子进程——要核对
     就 `cd` 到那个仓里跑包的命令行。
   </Tab>
@@ -69,18 +69,18 @@ description: 四类角色、三条入口、依赖方向是什么、先读哪块
 `engine` 是这张图的汇点，自己零依赖，只用 `node:crypto`。它不读文件、不起子进程、不认识任何
 文档格式——干活要的四样全是外面递进来的：
 
-{/* ref file="../packages/livedoc/src/engine/service.ts" lines="42-47" */}
+{/* ref file="../packages/docfirst-workflow/src/engine/service.ts" lines="42-47" */}
 
 这就是判定层的进料口：格式、读取器、记录簿、比较器都是构造参数，所以它的依赖面可以是空的。
 
 `trajectory` 站在这张图外面：它不依赖判定层，`.` 入口连 npm 依赖都没有——这条红线按产物判，
 产物里只许出现 `node:` 内置模块。它的 `./react` 与 `./server` 两个入口另有 react 与 remark
-那套，只给站用。`cli` 依赖它是为了接 `livedoc trajectory` 子命令，而且只用 `.` 入口；别的四层
+那套，只给站用。`cli` 依赖它是为了接 `docfirst trajectory` 子命令，而且只用 `.` 入口；别的四层
 一概不许碰它。
 
 **包与件互不认识**：两个 npm 包的三档依赖面里不许出现工作台件，也不许出现任何
 `@godcreator02/gwb-*`——装这两个包的人不该被迫拉进一整个桌面工作台生态；反过来那半，件的
-三档依赖面里也不许出现 `@godcreator02/livedoc`，守在件自己的 `tests/artifact.test.ts` 上。
+三档依赖面里也不许出现 `@godcreator02/docfirst-workflow`，守在件自己的 `tests/artifact.test.ts` 上。
 
 ## 边界靠什么守
 
@@ -102,7 +102,7 @@ description: 四类角色、三条入口、依赖方向是什么、先读哪块
 `docs-site/` 就是「装了这两个包的项目」：项目根是站目录，被钉的代码在工作区的 `packages/` 下，
 记号写 `../packages/…`。
 
-{/* ref file="livedoc.config.mjs" lines="5-6" */}
+{/* ref file="docfirst.config.mjs" lines="5-6" */}
 
 所以仓里不另留示例项目——这两个包对外的样子由站自己演，站上的状态点绿着，就是它们在真源码上
 跑通了。

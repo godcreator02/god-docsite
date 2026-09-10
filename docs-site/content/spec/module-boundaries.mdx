@@ -21,11 +21,11 @@ description: git 那条线现在只有一个直接起子进程的实现，测试
 
 **不改任何一处行为。** 生产那条路上真 git 的行为一个字不变，测试要改就说明改的不只是边界。
 
-**不为这一刀立新的配置项**，也不改 `livedoc.config` 的形状——消费方项目一个字不用动。
+**不为这一刀立新的配置项**，也不改 `docfirst.config` 的形状——消费方项目一个字不用动。
 
 ## 方案
 
-`packages/livedoc/src/host/git.ts` 是一把直接起子进程的函数：定位文件在哪个仓、读 blob、
+`packages/docfirst-workflow/src/host/git.ts` 是一把直接起子进程的函数：定位文件在哪个仓、读 blob、
 问 hunk 表、判工作区干不干净。测试要验它就得在临时目录里起真 git 仓，夹具本身近百行，
 门禁跑一趟因此起一大把 git 子进程。
 

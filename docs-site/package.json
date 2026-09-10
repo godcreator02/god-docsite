@@ -7,12 +7,12 @@
   "scripts": {
     "build": "next build",
     "start": "next start -p 4310",
-    "livedoc": "livedoc",
+    "docfirst": "docfirst",
     "test": "node --test \"tests/*.test.mjs\""
   },
   "dependencies": {
-    "@godcreator02/livedoc": "workspace:*",
-    "@godcreator02/livedoc-trajectory": "workspace:*",
+    "@godcreator02/docfirst-workflow": "workspace:*",
+    "@godcreator02/docfirst-trajectory": "workspace:*",
     "fumadocs-core": "16.15.1",
     "fumadocs-mdx": "15.3.1",
     "fumadocs-ui": "npm:@fumadocs/base-ui@16.15.1",

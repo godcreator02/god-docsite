@@ -2,7 +2,7 @@
  * 这个站的术语表——**正本就是这份数据**：页面上标出来的词、鼠标移上去看到的那句定义，
  * 全从这儿来。改词改这里，站构建时自动重标。
  *
- * 收词的判据（正本是随 cli 发的 skill「livedoc-docs」，这儿只记结论）：
+ * 收词的判据（正本是随 cli 发的 skill「docfirst-docs」，这儿只记结论）：
  *   收 这个项目自己造的词、通用词在这里有特定含义的、外来框架里读者最容易卡住的词
  *   不收 通用编程词，不收单字词——单字词会命中一切，建索引那一步会当场拒
  *
@@ -10,7 +10,7 @@
  * （它不是 mdx，引用管不到它），写进来就会悄悄腐化。具体的名字留给 `href` 指的那一页，
  * 在那儿钉。`href` 一律指本站真实存在的页。
  */
-import type { TermEntry } from "@godcreator02/livedoc/fumadocs";
+import type { TermEntry } from "@godcreator02/docfirst-workflow/fumadocs";
 
 export const terms: TermEntry[] = [
   {

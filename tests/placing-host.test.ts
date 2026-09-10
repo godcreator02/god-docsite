@@ -7,10 +7,10 @@
  */
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { createHashComparator, createService } from "../packages/livedoc/src/engine/index.ts";
-import type { Format, Reader } from "../packages/livedoc/src/engine/index.ts";
-import { createPlacing } from "../packages/livedoc/src/host/index.ts";
-import type { PlacingHost, ProjectConfig } from "../packages/livedoc/src/host/index.ts";
+import { createHashComparator, createService } from "../packages/docfirst-workflow/src/engine/index.ts";
+import type { Format, Reader } from "../packages/docfirst-workflow/src/engine/index.ts";
+import { createPlacing } from "../packages/docfirst-workflow/src/host/index.ts";
+import type { PlacingHost, ProjectConfig } from "../packages/docfirst-workflow/src/host/index.ts";
 import { memoryLedger } from "./repo.ts";
 
 /**

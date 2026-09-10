@@ -13,16 +13,16 @@ import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
-import { loadProject } from "../packages/livedoc/src/host/index.ts";
+import { loadProject } from "../packages/docfirst-workflow/src/host/index.ts";
 import { CODE } from "./repo.ts";
 
 /** 假格式的绝对 file: 地址。临时目录里解析不到包名，配置按绝对地址引它 */
 const FAKE = pathToFileURL(join(dirname(fileURLToPath(import.meta.url)), "fake-format.ts")).href;
 
 /** 带 frontmatter 的源：点名的字段随行到生成物头部，没点名的剥掉 */
-const SOURCE = ["---", "name: block-note", "description: 块笔记怎么用", "secret: 不该随行", "---", "", "# 摆放", "", "@@livedoc ref src/greet.ts:2-3 @@", ""].join("\n");
+const SOURCE = ["---", "name: block-note", "description: 块笔记怎么用", "secret: 不该随行", "---", "", "# 摆放", "", "@@docfirst ref src/greet.ts:2-3 @@", ""].join("\n");
 
-/** 起一个能被 loadProject 装配的临时项目：一份代码、两篇文档、一份配 outputs 的 livedoc.config */
+/** 起一个能被 loadProject 装配的临时项目：一份代码、两篇文档、一份配 outputs 的 docfirst.config */
 async function setup(outputs: string) {
   const root = mkdtempSync(join(tmpdir(), "god-live-doc-placing-"));
   mkdirSync(join(root, "src"));
@@ -31,7 +31,7 @@ async function setup(outputs: string) {
   writeFileSync(join(root, "docs", "a.md"), SOURCE);
   writeFileSync(join(root, "docs", "b.md"), "# 没挂映射\n");
   writeFileSync(
-    join(root, "livedoc.config.mjs"),
+    join(root, "docfirst.config.mjs"),
     `import { fakeFormat } from ${JSON.stringify(FAKE)};\n\nconst md = fakeFormat("fake-md", ".md", { render: true });\n\nexport default { formats: [md], docs: "docs", out: "out", comparator: "hash", outputs: ${outputs} };\n`,
   );
 
@@ -61,7 +61,7 @@ test("摆放一趟：render 写到落点、回落点清单；check 从 missing �
     assert.deepEqual(await project.placing.render("docs/a.md"), [{ to: "README.md", status: "placed" }]);
     const readme = p.read("README.md");
     assert.match(readme, /```ts\nexport function greet/, "正文是投影过的 md");
-    assert.doesNotMatch(readme, /<!-- ref |@@livedoc/, "摆放那份剥掉记号");
+    assert.doesNotMatch(readme, /<!-- ref |@@docfirst/, "摆放那份剥掉记号");
     assert.equal(existsSync(join(p.root, "out")), false, "摆放不落 out/");
 
     assert.deepEqual(await project.placing.check("docs/a.md"), [{ to: "README.md", status: "fresh", fresh: true }]);

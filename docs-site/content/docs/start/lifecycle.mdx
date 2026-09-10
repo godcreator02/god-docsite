@@ -15,7 +15,7 @@ description: 写下 → 未确认 → 确认投影 → 代码改了变黄 → �
 文档里单独起一行：
 
 ```md
-@@livedoc ref src/greet.ts:2-3 @@
+@@docfirst ref src/greet.ts:2-3 @@
 ```
 
 ```text
@@ -117,19 +117,19 @@ description: 写下 → 未确认 → 确认投影 → 代码改了变黄 → �
 
 核对（`check` 和站构建走的是同一条）：逐处问比较器要判定，切出今天这段内容，凑成清单项。
 
-{/* ref file="../packages/livedoc/src/engine/service.ts" lines="105-122" */}
+{/* ref file="../packages/docfirst-workflow/src/engine/service.ts" lines="105-122" */}
 
 孤儿就是「记录簿里有、这一趟没被认领」的那些：
 
-{/* ref file="../packages/livedoc/src/engine/service.ts" lines="123-127" */}
+{/* ref file="../packages/docfirst-workflow/src/engine/service.ts" lines="123-127" */}
 
 确认：先逐条问比较器要记录，有一处交回 problem 就整篇拒。
 
-{/* ref file="../packages/livedoc/src/engine/service.ts" lines="145-163" */}
+{/* ref file="../packages/docfirst-workflow/src/engine/service.ts" lines="145-163" */}
 
 都过了才落笔——刷记录簿、清孤儿、存盘，最后让格式写回文档。
 
-{/* ref file="../packages/livedoc/src/engine/service.ts" lines="165-174" */}
+{/* ref file="../packages/docfirst-workflow/src/engine/service.ts" lines="165-174" */}
 
 四种状态是怎么判出来的，见 [判定层](/docs/modules/engine)；记忆按文件位置怎么分派，见 [环境层](/docs/modules/host)；
 git 那头的门和 hunk 表，见 [git 原理](/docs/principles/git)。

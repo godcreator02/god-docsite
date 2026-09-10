@@ -10,8 +10,8 @@ import assert from "node:assert/strict";
 import { register } from "fumadocs-mdx/node";
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
-import { loadProject } from "@godcreator02/livedoc";
-import { DOT_COLOR, collectionOf, whereOf } from "@godcreator02/livedoc/fumadocs";
+import { loadProject } from "@godcreator02/docfirst-workflow";
+import { DOT_COLOR, collectionOf, whereOf } from "@godcreator02/docfirst-workflow/fumadocs";
 import { componentNames } from "../src/components/registry.ts";
 
 register();
@@ -47,10 +47,10 @@ async function pageOf(doc) {
 const pages = new Map();
 for (const doc of DOCS) pages.set(doc, await pageOf(doc));
 
-/** 一篇文档对钉源码的态度：frontmatter 里 `livedoc: none`（导读页，明说不钉）或 `livedoc: draft`（还没写）；没写就是「必须钉」 */
-const stanceOf = (doc) => /^livedoc:\s*(none|draft)\s*$/m.exec(project.read(doc).split("---")[1] ?? "")?.[1];
+/** 一篇文档对钉源码的态度：frontmatter 里 `docfirst: none`（导读页，明说不钉）或 `docfirst: draft`（还没写）；没写就是「必须钉」 */
+const stanceOf = (doc) => /^docfirst:\s*(none|draft)\s*$/m.exec(project.read(doc).split("---")[1] ?? "")?.[1];
 
-test("站里得有文档；每篇要么钉了源码，要么 frontmatter 明说 livedoc: none 或 draft", () => {
+test("站里得有文档；每篇要么钉了源码，要么 frontmatter 明说 docfirst: none 或 draft", () => {
   assert.ok(DOCS.length >= 3, `至少三篇，实际 ${DOCS.length}`);
   const drafts = [];
   for (const [doc, page] of pages) {
@@ -63,9 +63,9 @@ test("站里得有文档；每篇要么钉了源码，要么 frontmatter 明说 
       assert.equal(page.listing.items.length, 0, `${doc} 说自己不钉源码，却有引用`);
       continue;
     }
-    assert.ok(page.listing.items.length > 0, `${doc} 一处引用都没有：钉源码，或在 frontmatter 写 livedoc: none / draft`);
+    assert.ok(page.listing.items.length > 0, `${doc} 一处引用都没有：钉源码，或在 frontmatter 写 docfirst: none / draft`);
   }
-  if (drafts.length > 0) console.log(`还没写的章（livedoc: draft）：${drafts.join("、")}`);
+  if (drafts.length > 0) console.log(`还没写的章（docfirst: draft）：${drafts.join("、")}`);
 });
 
 test("每条引用在页面上都有一个带状态点颜色的元素：代码块和芯片是 pre、写着来源的标题；目录树是 Files 容器、根文件夹叫来源", () => {
@@ -122,7 +122,7 @@ test("这个站自己的文档全是绿的：写下的引用跟源码没脱节",
     assert.deepEqual(
       page.listing.items.map((i) => i.status),
       page.listing.items.map(() => "fresh"),
-      `${doc} 有引用不是新鲜的——跑 pnpm livedoc check 看看`,
+      `${doc} 有引用不是新鲜的——跑 pnpm docfirst check 看看`,
     );
     assert.equal(page.listing.orphans.length, 0, `${doc} 有孤儿记录`);
   }

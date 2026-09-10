@@ -16,22 +16,22 @@
  * fumadocs 的 Node loader 只认 source.config 里的集合。
  */
 import { applyMdxPreset, defineConfig, defineDocs } from 'fumadocs-mdx/config';
-import { livedocMdxOptions, livedocMarkdownOptions } from '@godcreator02/livedoc/fumadocs';
-import { cardSchema, remarkTrajectoryLinks } from '@godcreator02/livedoc-trajectory/server';
+import { docfirstMdxOptions, docfirstMarkdownOptions } from '@godcreator02/docfirst-workflow/fumadocs';
+import { cardSchema, remarkTrajectoryLinks } from '@godcreator02/docfirst-trajectory/server';
 import { terms } from './src/glossary';
 
 export const docs = defineDocs({
   dir: 'content/docs',
   docs: {
-    postprocess: { includeProcessedMarkdown: livedocMarkdownOptions() },
+    postprocess: { includeProcessedMarkdown: docfirstMarkdownOptions() },
   },
 });
 
 // 轨迹卡集合：目录是站自己的 content/trajectory/，跟文档集合平级、各走各的 schema，
 // 落 /trajectory/<卡身份>。盘上星星寥寥是正常态——本仓自己的卡由人写，这里不生成。
 // 集合级 mdxOptions 会把默认插件全去掉（fumadocs-mdx 的文档原话），所以用 applyMdxPreset
-// 把默认 preset（标题 id、gfm……）加回来，再挂 remarkTrajectoryLinks——livedoc 自己的
-// remarkLivedocHost（挂在下面 defineConfig 的全局 mdxOptions 里）不会跑到这个集合上，
+// 把默认 preset（标题 id、gfm……）加回来，再挂 remarkTrajectoryLinks——docfirst 自己的
+// remarkDocfirstHost（挂在下面 defineConfig 的全局 mdxOptions 里）不会跑到这个集合上，
 // 卡正文冻结历史、不钉活代码。
 export const trajectory = defineDocs({
   dir: 'content/trajectory',
@@ -57,7 +57,7 @@ export const future = defineDocs({
 export const outputs = defineDocs({
   dir: 'content/outputs',
   docs: {
-    postprocess: { includeProcessedMarkdown: livedocMarkdownOptions() },
+    postprocess: { includeProcessedMarkdown: docfirstMarkdownOptions() },
   },
 });
 
@@ -69,7 +69,7 @@ export default defineConfig({
   // 类型要求完整 options（含 themes），运行时会 merge 默认值——cast 只在这一处
   // glossary：正文里命中术语表的词自动包成 <Term>。术语页规范那篇是人写的规范文本，
   // 里头的词按字面读，别在它上面标注——skipFile 把它挑出去
-  mdxOptions: livedocMdxOptions({
+  mdxOptions: docfirstMdxOptions({
     root: process.cwd(),
     glossary: { terms, skipFile: (path) => path.endsWith('human-write-spec-dont-change.mdx') },
   }) as never,

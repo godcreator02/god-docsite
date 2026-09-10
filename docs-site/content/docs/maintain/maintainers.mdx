@@ -14,9 +14,9 @@ description: 仓布局、三摊门禁、提交规矩、发布、老仓退役条�
   god-live-doc/                 = git 仓，同时是 pnpm 包工作区
     AGENTS.md  CLAUDE.md  README.md
     packages/
-      livedoc/                  主包：src 下四层 engine / host / fumadocs / cli
+      docfirst/                  主包：src 下四层 engine / host / fumadocs / cli
       trajectory/               轨迹包：卡与星轨盘，独立的一条包线
-      gwb-live-doc/             工作台件：跟两个包同住，两边互不认识；铺六区与三份说明书在这儿
+      gwb-docfirst-workflow/             工作台件：跟两个包同住，两边互不认识；铺六区与三份说明书在这儿
     docs-site/                  这个站：用这套机制写自己的文档，也是工作区成员
       content/docs/             文档
       content/trajectory/       轨迹卡
@@ -38,16 +38,16 @@ description: 仓布局、三摊门禁、提交规矩、发布、老仓退役条�
 
 {/* ref file="package.json" lines="7-12" */}
 
-外加 `node scripts/verify-roster.mjs`（[名册](/docs/modules/fumadocs)两头对）和 `pnpm livedoc check`。
+外加 `node scripts/verify-roster.mjs`（[名册](/docs/modules/fumadocs)两头对）和 `pnpm docfirst check`。
 
 工作台件自成一摊：它用 vitest，跟两个包的 `node --test` 不是一套，所以工作区根的 `test` 脚本
 不去收它（根的 `build` 与 `typecheck` 按 `./packages/**` 过滤，件是被带上的）。
 
-{/* ref file="../packages/gwb-live-doc/package.json" lines="25-32" */}
+{/* ref file="../packages/gwb-docfirst-workflow/package.json" lines="25-32" */}
 
 <Note>
-  **动了被引用到的源码，`livedoc confirm` 之前先 commit**。git 比较器只对已提交、工作区干净的内容钉，
-  否则那一篇整篇拒。顺序是：改代码 → 跑门禁 → commit → `livedoc confirm` → 把文档和记录簿一起再 commit。
+  **动了被引用到的源码，`docfirst confirm` 之前先 commit**。git 比较器只对已提交、工作区干净的内容钉，
+  否则那一篇整篇拒。顺序是：改代码 → 跑门禁 → commit → `docfirst confirm` → 把文档和记录簿一起再 commit。
 </Note>
 
 ## 写代码的规矩
@@ -61,7 +61,7 @@ description: 仓布局、三摊门禁、提交规矩、发布、老仓退役条�
 
 按步骤拆，一个提交一件事。文档章节和它带来的记录簿改动放在同一个提交里——记录簿就是那一章的记忆，
 分开提交等于让中间那个提交自相矛盾。挂了 outputs 映射的文档（README、AGENTS.md、两份 skill）动的是 mdx 源：
-`livedoc render` 重摆之后，mdx 源、生成物、记录簿同一个提交。提交信息中文，末尾带会话里给的 `Co-Authored-By` 与 `Claude-Session` 两行。
+`docfirst render` 重摆之后，mdx 源、生成物、记录簿同一个提交。提交信息中文，末尾带会话里给的 `Co-Authored-By` 与 `Claude-Session` 两行。
 
 ## 发布：手跑 pnpm publish
 
@@ -71,7 +71,7 @@ exports 指 lib/、cordis.patch.yml，且一仓一包一插件），这套多包
 （docs-site 是 private 自动跳）→ `registry status` 核对 → 逐包 `git tag`。纪律照总控台
 `registry.md`：版本人改、同版本号永不重发。消费方按精确版本引，不走 `dsh plugin add`。
 
-抬版本号时**跟着改 `packages/gwb-live-doc/src/deps.ts` 那张表**——铺六区往目标站补的就是它，
+抬版本号时**跟着改 `packages/gwb-docfirst-workflow/src/deps.ts` 那张表**——铺六区往目标站补的就是它，
 件的 `tests/attach.test.ts` 里有一条守着它跟工作区各包的版本对得上，忘了抬当场红。
 
 **两边各发各的，没有先后。**件对包零依赖：它不打包那个包、三档依赖面里也没有它，所以先发哪个

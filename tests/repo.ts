@@ -6,9 +6,9 @@ import { execFileSync } from "node:child_process";
 import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
-import { createHashComparator, createService, targetKey, keyToTarget } from "../packages/livedoc/src/engine/index.ts";
-import type { Comparator, Format, Ledger, MemoRecord, Service } from "../packages/livedoc/src/engine/index.ts";
-import { createAutoComparator, createGitComparator, createReader } from "../packages/livedoc/src/host/index.ts";
+import { createHashComparator, createService, targetKey, keyToTarget } from "../packages/docfirst-workflow/src/engine/index.ts";
+import type { Comparator, Format, Ledger, MemoRecord, Service } from "../packages/docfirst-workflow/src/engine/index.ts";
+import { createAutoComparator, createGitComparator, createReader } from "../packages/docfirst-workflow/src/host/index.ts";
 
 export const CODE = [
   "// greet",

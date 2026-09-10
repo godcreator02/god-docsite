@@ -76,8 +76,8 @@ test("docs 给数组：几个目录一起扫，报告按文档身份排序；目
   const p = setupProject(CONFIG.replace(`docs: "docs"`, `docs: ["docs", "more", "more/deep"]`));
   try {
     mkdirSync(join(p.root, "more", "deep"), { recursive: true });
-    writeFileSync(join(p.root, "more", "x.md"), "# x\n\n@@livedoc ref src/greet.ts:2-3 @@\n");
-    writeFileSync(join(p.root, "more", "deep", "y.md"), "# y\n\n@@livedoc ref src/greet.ts:2-3 @@\n");
+    writeFileSync(join(p.root, "more", "x.md"), "# x\n\n@@docfirst ref src/greet.ts:2-3 @@\n");
+    writeFileSync(join(p.root, "more", "deep", "y.md"), "# y\n\n@@docfirst ref src/greet.ts:2-3 @@\n");
     const first = await p.cli("check", "--json");
     assert.equal(first.code, 0, first.out);
     const report = JSON.parse(first.out) as { docs: Array<{ doc: string }> };

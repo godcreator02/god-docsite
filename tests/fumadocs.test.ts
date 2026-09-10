@@ -4,10 +4,10 @@
  */
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import * as fumadocs from "../packages/livedoc/src/fumadocs/index.ts";
-import { DOT_COLOR, applyListing, defaultRoster, livedocMarkdownOptions, parseMetaString, parseTree, stamp, walk, whereOf } from "../packages/livedoc/src/fumadocs/index.ts";
-import type { Roster, TreeNode } from "../packages/livedoc/src/fumadocs/index.ts";
-import type { Item, Listing, Target } from "../packages/livedoc/src/engine/index.ts";
+import * as fumadocs from "../packages/docfirst-workflow/src/fumadocs/index.ts";
+import { DOT_COLOR, applyListing, defaultRoster, docfirstMarkdownOptions, parseMetaString, parseTree, stamp, walk, whereOf } from "../packages/docfirst-workflow/src/fumadocs/index.ts";
+import type { Roster, TreeNode } from "../packages/docfirst-workflow/src/fumadocs/index.ts";
+import type { Item, Listing, Target } from "../packages/docfirst-workflow/src/engine/index.ts";
 
 const T: Target = { kind: "span", file: "src/greet.ts", a: 2, b: 3 };
 const CURRENT = ["export function greet(name: string): string {", "  return `hello ${name}`;"];
@@ -33,7 +33,7 @@ function blocksIn(text: string, items: Item[]): TreeNode[] {
 }
 
 test("正式记号与草稿记号都换成代码块：meta 写来源、行号、状态点颜色", () => {
-  const text = `${fumadocs.marker(T)}\n\n@@livedoc ref src/greet.ts:2-3 @@\n`;
+  const text = `${fumadocs.marker(T)}\n\n@@docfirst ref src/greet.ts:2-3 @@\n`;
   const items = [itemOf({}), itemOf({ status: "unconfirmed", reference: { target: T, at: 2, extra: { draft: true } } })];
   const blocks = blocksIn(text, items);
   assert.equal(blocks.length, 2);
@@ -96,7 +96,7 @@ test("目录树：换成 fumadocs 的 Files，根是展开的文件夹、名字�
     .children![0]!;
   assert.equal(files.type, "mdxJsxFlowElement");
   assert.equal(files.name, "Files");
-  assert.deepEqual(attrsOf(files), { className: "livedoc-files", "data-livedoc": "tree", "data-dot": "green" });
+  assert.deepEqual(attrsOf(files), { className: "docfirst-files", "data-docfirst": "tree", "data-dot": "green" });
 
   const root = files.children![0]!;
   assert.equal(root.name, "Folder");
@@ -107,10 +107,10 @@ test("目录树：换成 fumadocs 的 Files，根是展开的文件夹、名字�
   assert.deepEqual(attrsOf(root.children![2]!), { name: "util", disabled: true }, "到深度尽头没孩子的文件夹禁用");
 
   // AI 那份的标直接打好：来源 + text 清单；stamp 看到就跳过，不去名册里找 Files
-  assert.deepEqual(files.data!.livedoc, { source: "src/", label: "新鲜", value: names.join("\n") });
+  assert.deepEqual(files.data!.docfirst, { source: "src/", label: "新鲜", value: names.join("\n") });
   assert.doesNotThrow(() => stamp({ type: "root", children: [files] }, {}));
   const state = { containerFlow: (box: TreeNode) => "```text\n" + box.children![0]!.value + "\n```", containerPhrasing: () => "", handle: () => "" };
-  assert.equal(livedocMarkdownOptions().stringify(files, undefined, state, {}), "<!-- 来源 src/ · 新鲜 -->\n\n```text\n" + names.join("\n") + "\n```");
+  assert.equal(docfirstMarkdownOptions().stringify(files, undefined, state, {}), "<!-- 来源 src/ · 新鲜 -->\n\n```text\n" + names.join("\n") + "\n```");
 });
 
 test("目录树的黄和红：旧表新表并在一棵树里，多的标 add、少的标 del；目录没了只剩一个禁用的根", () => {
@@ -122,8 +122,8 @@ test("目录树的黄和红：旧表新表并在一棵树里，多的标 add、�
   ).children![0]!;
   assert.equal(attrsOf(changed)["data-dot"], "yellow");
   const rows = changed.children![0]!.children!.map((n) => [attrsOf(n).name, attrsOf(n).className]);
-  assert.deepEqual(rows, [["add.ts", undefined], ["index.ts", "livedoc-del"], ["store.ts", undefined], ["tag.ts", "livedoc-add"]]);
-  assert.equal((changed.data!.livedoc as { value: string }).value, "  add.ts\n- index.ts\n  store.ts\n+ tag.ts", "AI 那份给 - / + 的清单");
+  assert.deepEqual(rows, [["add.ts", undefined], ["index.ts", "docfirst-del"], ["store.ts", undefined], ["tag.ts", "docfirst-add"]]);
+  assert.equal((changed.data!.docfirst as { value: string }).value, "  add.ts\n- index.ts\n  store.ts\n+ tag.ts", "AI 那份给 - / + 的清单");
 
   const gone = applyListing(
     parseTree(`${fumadocs.marker(tree)}\n`),
@@ -138,9 +138,9 @@ test("作者手写的 Files 走默认名册：压成一行一个名字，文件�
   const doc = '<Files>\n  <Folder name="src" defaultOpen>\n    <File name="add.ts" />\n  </Folder>\n  <File name="package.json" />\n</Files>\n';
   const tree = stamp(parseTree(doc));
   const files = tree.children![0]!;
-  assert.deepEqual(files.data!.livedocAi, files.children, "Files 只留子内容");
+  assert.deepEqual(files.data!.docfirstAi, files.children, "Files 只留子内容");
   const folder = files.children!.find((n) => n.name === "Folder")!;
-  const ai = folder.data!.livedocAi as TreeNode[];
+  const ai = folder.data!.docfirstAi as TreeNode[];
   assert.equal(ai[0]!.children![0]!.value, "src/");
 });
 
@@ -155,7 +155,7 @@ test("存在性和名字：一行芯片，meta 带 data-chip，标题就是芯�
   assert.equal(blocks[0]!.meta, 'title="src/remove.ts · 不存在" data-dot="green" data-chip');
   assert.equal(blocks[1]!.meta, 'title="src/store.ts · 有 export function save · 缺失" data-dot="red" data-chip');
   const state = { containerFlow: () => "", containerPhrasing: () => "", handle: () => "不该到这儿" };
-  assert.equal(livedocMarkdownOptions().stringify(blocks[0], undefined, state, {}), "<!-- 来源 src/remove.ts · 不存在 · 新鲜 -->", "AI 那份只留来源行");
+  assert.equal(docfirstMarkdownOptions().stringify(blocks[0], undefined, state, {}), "<!-- 来源 src/remove.ts · 不存在 · 新鲜 -->", "AI 那份只留来源行");
 });
 
 test("whereOf：标题和来源行用同一个字符串，五种目标各一种写法", () => {
@@ -191,7 +191,7 @@ test("md 那头：来源行 + 一块干净的代码，diff 标记不漏进 AI �
     containerPhrasing: () => "",
     handle: (node: TreeNode) => "```ts\n" + node.value + "\n```",
   };
-  const out = livedocMarkdownOptions().stringify(block, undefined, state, {})!;
+  const out = docfirstMarkdownOptions().stringify(block, undefined, state, {})!;
   assert.match(out, /^<!-- 来源 src\/greet\.ts:2-3 · 有变动 -->\n\n```ts\n/);
   assert.doesNotMatch(out, /\[!code/, "AI 那份不要 shiki 的 diff 标记");
   assert.ok(out.includes(CURRENT.join("\n")), "AI 那份放的是当前段");
@@ -228,7 +228,7 @@ test("名册：默认表压平 Note；项目的规则只用 helpers；表外组�
   // Note、Tabs、Tab、Hidden 四个组件各一个标；Hidden 写在一行里，是段落底下的行内组件
   assert.equal(marks.length, 4);
   assert.deepEqual(Object.keys(defaultRoster).sort(), ["File", "Files", "Folder", "Note"], "默认表：Note 加 fumadocs 的文件树三件");
-  assert.equal((marks[0]!.livedocAi as TreeNode[])[0]!.type, "blockquote", "块级 Note 变引用块");
+  assert.equal((marks[0]!.docfirstAi as TreeNode[])[0]!.type, "blockquote", "块级 Note 变引用块");
   assert.deepEqual(marks[3]!._stringify, { text: "" }, "drop 的组件整个不要");
   assert.throws(() => stamp(parseTree("# x\n\n<Tabs>\n  x\n</Tabs>\n")), /第 3 行：名册外组件 <Tabs>/);
   assert.deepEqual(fumadocs.lintComponents("# x\n\n<Tabs>\n  x\n</Tabs>\n"), [{ name: "Tabs", line: 3 }]);
@@ -237,7 +237,7 @@ test("名册：默认表压平 Note；项目的规则只用 helpers；表外组�
 test("围栏里、行内的假记号认不出来——走语法树的理由", () => {
   assert.deepEqual(fumadocs.parse("```md\n" + fumadocs.marker(T) + "\n```\n"), []);
   assert.deepEqual(fumadocs.parse(`行内的 ${fumadocs.marker(T)} 不算\n`), []);
-  assert.deepEqual(fumadocs.parse("```md\n@@livedoc ref src/greet.ts:2-3 @@\n```\n"), []);
+  assert.deepEqual(fumadocs.parse("```md\n@@docfirst ref src/greet.ts:2-3 @@\n```\n"), []);
 });
 
 test("清单里没有的标记：报到行，不静默漏掉", () => {

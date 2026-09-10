@@ -6,9 +6,9 @@
  */
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { cardSchema, remarkTrajectoryLinks } from "@godcreator02/livedoc-trajectory/server";
-import type { CardFrontmatter } from "@godcreator02/livedoc-trajectory/server";
-import type { Link, Paragraph, Root, Text } from "@godcreator02/livedoc-trajectory/server";
+import { cardSchema, remarkTrajectoryLinks } from "@godcreator02/docfirst-trajectory/server";
+import type { CardFrontmatter } from "@godcreator02/docfirst-trajectory/server";
+import type { Link, Paragraph, Root, Text } from "@godcreator02/docfirst-trajectory/server";
 
 /* ================= cardSchema ================= */
 
