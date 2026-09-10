@@ -6,9 +6,11 @@
  * 六个集合、六条路由、侧栏六个根节、`livedoc.config.mjs`、mdx 接线、投影块与术语组件、
  * 名册脚本、构建配置里那条不许外置的账、五个区的骨架页，外加往 `package.json` 里补依赖与脚本。
  *
- * 这个模块**自成一路**，跟这个包里别的东西（check / confirm / render 那三条）没有任何往来：
- * 那三条是「对一个已经接好的站做事」，装配是「把线接上」，它连 `livedoc.config.mjs` 都不读——
- * 那正是它要写出来的东西。只 import `node:fs` / `node:path` / `node:url`，判定与环境两层一个不认识。
+ * **它住在件里，不住在 `@godcreator02/livedoc` 那个包里。** 判据是「这件事在哪儿发生」：
+ * check / confirm / render 要在**仓**里发生（门禁、站构建），所以归包；装配只在 **agent** 手上
+ * 发生一次——铺六个集合、六条路由、配置、组件、骨架页，从头到尾不碰判定引擎、不碰比较器、
+ * 不碰记录簿，它连 `livedoc.config.mjs` 都不读（那正是它要写出来的东西）。**铺模板不是判定。**
+ * 只 import `node:fs` / `node:path` / `node:url`，那个包一个字都不认识。
  *
  * **面上只有两个方法**：`planAttach` 算一套（不碰盘）、`attachSite` 算完直接落。调用方不必知道
  * 模板放在哪、占位符叫什么、package.json 怎么合——那些是模块内部的 `template` / `skeleton` /
@@ -29,15 +31,15 @@
  */
 import { mkdirSync, rmSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
-import { withLivedoc } from "./manifest.ts";
-import { inspectSite, readEntry, readRepoManifest, type SiteFacts } from "./skeleton.ts";
-import { readTemplate, renderSite, ATTACH_TEMPLATE, type SiteValues, type TemplateFile } from "./template.ts";
-import { namesFor, pinBlockFrom } from "./values.ts";
+import { withLivedoc } from "./manifest.js";
+import { inspectSite, readEntry, readRepoManifest, type SiteFacts } from "./skeleton.js";
+import { readTemplate, renderSite, ATTACH_TEMPLATE, type SiteValues, type TemplateFile } from "./template.js";
+import { namesFor, pinBlockFrom } from "./values.js";
 
-export type { TemplateFile } from "./template.ts";
-export { DOC_SCRIPTS } from "./manifest.ts";
-export { LIVEDOC_DEPS } from "./deps.ts";
-export { DEFAULT_PORT, SUPERSEDED } from "./skeleton.ts";
+export type { TemplateFile } from "./template.js";
+export { DOC_SCRIPTS } from "./manifest.js";
+export { LIVEDOC_DEPS } from "./deps.js";
+export { DEFAULT_PORT, SUPERSEDED } from "./skeleton.js";
 
 /** 装一次要的全部输入。除了 `siteDir` 都可以不给 */
 export interface AttachOptions {

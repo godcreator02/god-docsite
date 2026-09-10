@@ -1,8 +1,8 @@
 {
   "name": "@godcreator02/livedoc",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "type": "module",
-  "description": "livedoc：文档里的论断钉在真源码上，代码变了就报出来。一个包五个模块——engine 判定、host 碰环境（git / 盘 / 记录簿 / 摆放）、fumadocs 格式实现与站接线、site 给已有 fumadocs 骨架装六区、cli 命令行（check / confirm / render / trajectory / attach）。随包发两份 skill 与装配模板",
+  "description": "livedoc：文档里的论断钉在真源码上，代码变了就报出来。一个包四个模块——engine 判定、host 碰环境（git / 盘 / 记录簿 / 摆放）、fumadocs 格式实现与站接线、cli 命令行（check / confirm / render / trajectory）。**这个包的消费方是仓**：装它的人是为了在仓里跑门禁与站构建。给一个新骨架铺六区、那两份说明书都随工作台件 @godcreator02/gwb-live-doc 走，不在这儿",
   "bin": {
     "livedoc": "./dist/cli.mjs"
   },
@@ -27,11 +27,10 @@
     "./fumadocs/light.css": "./styles/light.css",
     "./fumadocs/term.css": "./styles/term.css"
   },
+  "//files": "只剩产物与那两张样式表。skills 与 template 跟着件走了——**包没有独立的到达路径**：它躺在 node_modules 里没人指引、没人会读，说明书能被 agent 读到全靠件 register 了那个目录",
   "files": [
     "dist",
-    "styles",
-    "skills",
-    "template"
+    "styles"
   ],
   "scripts": {
     "build": "tsdown",

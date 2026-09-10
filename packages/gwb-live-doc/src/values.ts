@@ -4,7 +4,7 @@
  * 模块内部件，不在装配接口的面上——调用方给一个站目录，名字与钉块都是这儿从它的仓现认的。
  */
 import { basename } from "node:path";
-import type { SiteValues } from "./template.ts";
+import type { SiteValues } from "./template.js";
 
 /** 名字：能从仓根 package.json 认出来就别让人再敲一遍。`--title` 给了就用给的 */
 export function namesFor(

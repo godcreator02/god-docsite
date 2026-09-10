@@ -6,7 +6,7 @@
  * 这不是「改写别人的代码」：整个装配只在刚铺好的骨架上跑，那份 package.json 是机器一分钟前
  * 生成的，重排字段没有信息损失。
  */
-import { LIVEDOC_DEPS } from "./deps.ts";
+import { LIVEDOC_DEPS } from "./deps.js";
 
 /** 接了 livedoc 之后多出来的几条脚本 */
 export const DOC_SCRIPTS: Record<string, string> = {

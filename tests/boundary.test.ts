@@ -12,8 +12,7 @@
  * 所以换格式不动它。方向一破，这两句话当场变成假话，而且**没有任何别的信号**——
  * 测试照跑、构建照过，只有半年后有人问「为什么判定层跑得这么慢」才看得出来。
  *
- * **二、判定层与装配层的零依赖**：`engine/` 只许 `node:crypto`，`site/` 只许 `node:`。
- * 前者是这套东西唯一能被别人整块抄走的部分，后者要能被别的程序直接调、不拖进整套判定。
+ * **二、判定层的零依赖**：`engine/` 只许 `node:crypto`——这套东西唯一能被别人整块抄走的部分。
  *
  * **三、宿主只能是 peer，且不许被打进产物**：fumadocs 与 react 用的是消费方项目装的那份；
  * 打进产物就是两份 React 各跑一套，现象是预渲染时莫名其妙的 hooks 报错。
@@ -91,15 +90,15 @@ const rel = (from: string, file: string): string => relative(from, file).split(s
  *   engine   判定：只认注进来的格式 / 读取器 / 记录簿 / 比较器，谁都不认识
  *   host     碰环境：可以用 engine 的类型与纯函数，不认识格式实现、不认识命令行
  *   fumadocs 格式实现 + 站接线：可以用 engine 与 host（`livedocMdxOptions` 要 loadProject），不认识命令行
- *   site     装配六区：**谁都不认识**，只 import node: —— 它连 livedoc.config.mjs 都不读，
- *            那正是它要写出来的东西
  *   cli      入口：认识以上全部，谁都不认识它
+ *
+ * 从前还有第五层 `site/`（给已有骨架装六区）。它搬进工作台件了：那件事只在 agent 手上发生
+ * 一次、铺的是模板不是判定，而这个包的消费方是**仓**。判据见轨迹卡「包给仓件给人」。
  */
 const LAYERS: Record<string, string[]> = {
-  engine: ["host", "fumadocs", "site", "cli"],
-  host: ["fumadocs", "site", "cli"],
-  fumadocs: ["site", "cli"],
-  site: ["engine", "host", "fumadocs", "cli"],
+  engine: ["host", "fumadocs", "cli"],
+  host: ["fumadocs", "cli"],
+  fumadocs: ["cli"],
   cli: [],
 };
 
@@ -111,7 +110,7 @@ function layerOf(file: string, spec: string): string | null {
   return from.split(sep)[0] ?? null;
 }
 
-test("目录方向：engine 不认识 host / fumadocs，host 不认识 fumadocs / cli，site 谁都不认识", () => {
+test("目录方向：engine 不认识 host / fumadocs，host 不认识 fumadocs / cli", () => {
   const bad: string[] = [];
   for (const [layer, forbidden] of Object.entries(LAYERS)) {
     for (const file of sourcesIn(join(SRC, layer))) {
@@ -125,7 +124,7 @@ test("目录方向：engine 不认识 host / fumadocs，host 不认识 fumadocs 
   assert.deepEqual(bad, [], "方向反了。改的是 LAYERS 那张表加一段为什么，不是把这条断言删掉");
 });
 
-test("目录方向：五层一个不少、一个不多——加了新目录得先想清楚它能认识谁", () => {
+test("目录方向：四层一个不少、一个不多——加了新目录得先想清楚它能认识谁", () => {
   const dirs = readdirSync(SRC, { withFileTypes: true })
     .filter((e) => e.isDirectory())
     .map((e) => e.name)
@@ -141,16 +140,8 @@ test("判定层零依赖：engine/ 只许 import 自己和 node:crypto——它�
   }
 });
 
-test("装配层只碰 node：site/ 一个第三方包都不许 import——它得能被别的程序直接调，不拖进整套判定", () => {
-  for (const file of sourcesIn(join(SRC, "site"))) {
-    for (const spec of importSpecsOf(readFileSync(file, "utf8"))) {
-      assert.ok(spec.startsWith("./") || spec.startsWith("node:"), `site/${rel(join(SRC, "site"), file)} import 了 ${spec}`);
-    }
-  }
-});
-
 test("fumadocs 这个名字只出现在 fumadocs/ 那一层：别的层一个宿主 import 都没有", () => {
-  for (const layer of ["engine", "host", "site", "cli"]) {
+  for (const layer of ["engine", "host", "cli"]) {
     for (const file of sourcesIn(join(SRC, layer))) {
       for (const spec of importSpecsOf(readFileSync(file, "utf8"))) {
         assert.ok(!HOST.test(spec), `${layer}/${rel(join(SRC, layer), file)} import 了宿主 ${spec}`);
@@ -178,11 +169,19 @@ test("产物里不许打进 fumadocs 或 react，只许 import；pre 的客户�
   assert.match(readFileSync(join(PACKAGES, "livedoc", "dist", "pre.mjs"), "utf8"), /^"use client";/, "pre 的 use client 指令被打没了");
 });
 
-test("装配模板、样式与两份 skill 都随包发：files 收着它们，目录真在", () => {
+/**
+ * **包只发要在仓里用的东西。** 说明书与装配模板跟着件走了：包没有独立的到达路径——它躺在
+ * node_modules 里没人指引、没人会读，一份 SKILL.md 摆在那儿等于没有。能被 agent 读到全靠件
+ * `register` 了自己包里那个目录。判据见轨迹卡「包给仓件给人」。
+ */
+test("包只发 dist 与样式：skills 与 template 跟着件走了，包里连目录都不该再有", () => {
   const pkg = JSON.parse(readFileSync(join(PACKAGES, "livedoc", "package.json"), "utf8")) as { files: string[] };
-  for (const entry of ["dist", "styles", "skills", "template"]) assert.ok(pkg.files.includes(entry), `livedoc 的 files 少了 ${entry}`);
-  for (const path of ["skills/livedoc-docs/SKILL.md", "skills/trajectory/SKILL.md", "template/attach", "styles/light.css", "styles/term.css"]) {
+  assert.deepEqual(pkg.files, ["dist", "styles"]);
+  for (const path of ["styles/light.css", "styles/term.css"]) {
     assert.ok(existsSync(join(PACKAGES, "livedoc", path)), `livedoc 少了 ${path}`);
+  }
+  for (const path of ["skills", "template"]) {
+    assert.equal(existsSync(join(PACKAGES, "livedoc", path)), false, `livedoc 里还留着 ${path}/——它归件 gwb-live-doc`);
   }
 });
 
@@ -248,8 +247,8 @@ test("livedoc 依赖 trajectory，trajectory 不依赖 livedoc——轨迹是独
   }
 });
 
-test("轨迹只被命令行那一层用：engine / host / fumadocs / site 一个 import 都没有", () => {
-  for (const layer of ["engine", "host", "fumadocs", "site"]) {
+test("轨迹只被命令行那一层用：engine / host / fumadocs 一个 import 都没有", () => {
+  for (const layer of ["engine", "host", "fumadocs"]) {
     for (const file of sourcesIn(join(SRC, layer))) {
       for (const spec of importSpecsOf(readFileSync(file, "utf8"))) {
         assert.ok(!spec.startsWith("@godcreator02/livedoc-trajectory"), `${layer}/${rel(join(SRC, layer), file)} 引用了轨迹（${spec}）`);
@@ -258,11 +257,13 @@ test("轨迹只被命令行那一层用：engine / host / fumadocs / site 一个
   }
 });
 
-// ── 四、方向只能是件 → 包 ────────────────────────────────────────────────────
+// ── 四、包不认识件 ──────────────────────────────────────────────────────────
 
-test("方向只能是件 → 包：两个 npm 包的依赖面里不许出现工作台件，也不许出现任何 @godcreator02/gwb-*", () => {
-  // 件跟包同住一个工作区，方向一旦反过来（哪怕只是一条 devDependency）这两个包就再也发不出去了
+test("两个 npm 包的依赖面里不许出现工作台件，也不许出现任何 @godcreator02/gwb-*", () => {
+  // 件跟包同住一个工作区，包一旦认识件（哪怕只是一条 devDependency）这两个包就再也发不出去了
   // ——装它们的人不该被迫拉进一整个桌面工作台生态。三档全查：运行时、peer、开发期。
+  // 反过来那半（件不许依赖包）在件自己的 tests/artifact.test.ts 里守着：两个方向都断，
+  // 现在这两边**互不认识**。
   const pluginName = manifestOf(PLUGIN).name;
   for (const dir of NPM_PACKAGES) {
     const pkg = manifestOf(dir);
@@ -273,7 +274,7 @@ test("方向只能是件 → 包：两个 npm 包的依赖面里不许出现工�
   }
 });
 
-test("方向只能是件 → 包：两个包的源码里一行 @godcreator02/gwb-* 都没有", () => {
+test("两个包的源码里一行 @godcreator02/gwb-* 都没有", () => {
   for (const dir of NPM_PACKAGES) {
     for (const file of sourcesIn(join(PACKAGES, dir, "src"))) {
       for (const spec of importSpecsOf(readFileSync(file, "utf8"))) {

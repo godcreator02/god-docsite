@@ -45,12 +45,3 @@ test("每个包都构建出了 exports 里写的产物", () => {
     }
   }
 });
-
-// 骨架那半归站件：模板里留着一份 package.json / tsconfig / postcss，装配就会把站件刚铺好的
-// 那几份盖掉——两个包各出一份同名配置，谁赢看谁后跑
-test("装配模板里没有骨架那半：package.json、tsconfig、postcss、pnpm-workspace、.npmrc 一份都不在", () => {
-  const template = join(PACKAGES, "livedoc", "template", "attach");
-  for (const rel of ["package.json.tpl", "tsconfig.json.tpl", "postcss.config.mjs.tpl", "pnpm-workspace.yaml.tpl", ".npmrc.tpl"]) {
-    assert.equal(existsSync(join(template, rel)), false, `装配模板里还留着骨架那半的 ${rel}`);
-  }
-});

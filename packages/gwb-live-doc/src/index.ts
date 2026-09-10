@@ -1,92 +1,27 @@
 import fs from 'node:fs'
 import path from 'node:path'
-import { isRecord, requireKernel, type GwbContext } from '@godcreator02/gwb-plugin-api'
+import { isRecord, type GwbContext } from '@godcreator02/gwb-plugin-api'
 // 只为激活那几个件的 `declare module 'cordis'`——它们给 ctx 加上各自那个名字
 import type {} from '@godcreator02/gwb-commands'
 import type {} from '@godcreator02/gwb-skills'
-// 只 import type：运行器的面与一次调用的回执形状（gwbNodeCli 这个名字也由它的 declare module 加上）
-import type { CliRunOutcome, GwbNodeCliApi } from '@godcreator02/gwb-node-cli'
-import { inboundPath, parseEntries, readInbound, today, writeFeedback } from './feedback.js'
-import { DOCS_SITE_LIST, hasLivedocConfig, isSiteDir, parseSiteListing, pickSiteInUnit } from './site-lookup.js'
-import { collapse, parseCheckJson } from './stale.js'
+import { attachSite, type AttachResult } from './attach.js'
 
 /**
- * node 半：只剩接线。待重写页的收敛在 stale.ts，反馈页的读写在 feedback.ts，问站件要清单
- * 在 site-lookup.ts——那三份全能不起进程单测；这儿把它们挂到命令总线上。
+ * livedoc 件：**一条铺六区的命令，加两份说明书**。
  *
- * 目的一句话：把 livedoc 命令行开给连着工作台的 agent，再加两条它自己干不了的事
- * （跨仓投反馈、把 check 的机读报告收敛成待重写页清单）。
+ * 判据是「这件事在哪儿发生」——要在**仓**里发生的（核对、确认、渲染，门禁与站构建要跑的那些）
+ * 归 `@godcreator02/livedoc` 那个包，agent 自己 `cd` 到仓里跑 `pnpm doc`；只在 **agent** 手上
+ * 发生一次的（读说明书、给一个新骨架铺一次六区）归件。于是**件对那个包零依赖**：不起子进程、
+ * 不登记 node CLI、不查 home 里的路径，装了件不必再装什么包，说明书就挂得上。
+ * 那条边界由 `tests/artifact.test.ts` 守着。
  *
  * **本件不管站的一生**——扫站、起停、端口、到点关、那一格窗格全在站件
- * （`@godcreator02/gwb-docs-site`）。本件管的是站里**内容的正确性**：钉码、核对、确认、
- * 渲染、装配六区。它不知道站是谁建的、有没有在跑，也不注册窗格（站件那格已经叫「文档站」了）。
+ * （`@godcreator02/gwb-docs-site`）。两个件互不依赖，各带各的模板：站件铺标准 fumadocs 骨架，
+ * 本件在骨架上装六区。
  */
 export const name = 'gwb-live-doc'
 
-export const CLI_COMMAND = 'live-doc.cli'
-export const RAW_CLI_COMMAND = 'live-doc.cli-raw'
 export const ATTACH_COMMAND = 'live-doc.attach'
-export const STALE_COMMAND = 'live-doc.stale'
-export const FEEDBACK_COMMAND = 'live-doc.feedback'
-export const FEEDBACK_LIST_COMMAND = 'live-doc.feedback-list'
-
-/** livedoc 那个包在 home 里的名字。两处取址（可执行、说明书目录）同吃这一个常量 */
-const LIVEDOC_PKG = '@godcreator02/livedoc'
-
-/**
- * livedoc 那个包在这个 home 里的目录：`<home>/node_modules/@godcreator02/livedoc`。
- *
- * **每次要用现算一遍，一处都不许缓存。** 从前这儿走 `import.meta.resolve`，它回的是
- * **解开软链、当场定死的真实路径**（pnpm 下带版本号，形如
- * `.pnpm/@godcreator02+livedoc@0.1.0/…`）。包升级只改软链指向，而 pnpm **从不清理旧目录**
- * ——旧文件原样躺在盘上，件继续读它**读得通、零报错**，说明书改了发了版升了也照样读到旧的，
- * 只能重启工作台。home 底下这条路是一条 junction，`pnpm add 包@新版本` 会改它的指向：
- * 长跑进程不重启、不重挂、不重新 import，重读就是新的。
- *
- * 支点是「那个包得在 home 的 `package.json` 里」——所以本件对它是 **peer 而不是
- * dependency**：dependency 只会被塞进件私有的 `node_modules`，home 根下这条路根本不存在。
- */
-function livedocDir(ctx: GwbContext): string {
-  return path.join(requireKernel(ctx).dataDir, 'node_modules', ...LIVEDOC_PKG.split('/'))
-}
-
-/**
- * livedoc 那个可执行。包的 `exports` 只开了 `.` 与 `./fumadocs`，可执行在主入口旁边。
- * **不读 `bin` 字段、不查 `.bin` 垫片**——node-cli 登记的是一个绝对路径的 js，
- * 垫片在 Windows 上是 `.cmd`，起不了。
- */
-function livedocEntry(ctx: GwbContext): string {
-  return path.join(livedocDir(ctx), 'dist', 'cli.mjs')
-}
-
-/** livedoc 随包发的那两份 skill（`livedoc-docs` / `trajectory`）所在的目录 */
-function livedocSkillsDir(ctx: GwbContext): string {
-  return path.join(livedocDir(ctx), 'skills')
-}
-
-/** 盘上在不在。**每次现查**——包是人另外装的，装了、升了都该当场算数，不必重挂本件 */
-function onDisk(target: string): boolean {
-  try {
-    fs.statSync(target)
-    return true
-  } catch {
-    return false
-  }
-}
-
-/**
- * 缺那个包时说的话。**点名怎么装**：本件对它是 peer，装本件不会顺带把它装进 home，
- * 而「装了件没装包」这种半截状态没有任何东西拦得住，只能在这儿说清楚。
- */
-function missingLivedoc(target: string): string {
-  return `缺 ${LIVEDOC_PKG}：这个 home 里找不到 ${target}——跑 plugins.install {pkg:'${LIVEDOC_PKG}'} 装上它。本件对它是 peer 依赖，装本件不会顺带装它`
-}
-
-/**
- * 跑一趟 livedoc 给多久。顶到运行器的上限（110 秒）：`check` 要 load 整个项目、
- * 对每处引用问一次 git，站大了六十秒不够；再长运行器也不收。
- */
-const CLI_TIMEOUT_MS = 110_000
 
 /** 缺哪个都不挂——inject 是 cordis 的等待机制，不是建议 */
 export const inject = ['gwbCommands']
@@ -98,162 +33,10 @@ export function apply(ctx: GwbContext): void {
   // inject 保证了它在，这句只是把类型收窄
   if (cli === undefined) return
 
-  // ── livedoc 命令行 ──────────────────────────────────────────────────────────
-
   /**
-   * livedoc 是个 CLI 包、不是件，自己挂不上工作台。**CLI 形态的东西一律经 `gwbNodeCli`
-   * 登记，不做总线命令、不进程内调**（devkit 手册的红线）——局部注入 = 可选依赖：
-   * node-cli 件不在的 home 里本件照常挂，只是那几条跟 livedoc 打交道的命令回「没登记」。
-   *
-   * 登记出来的 `live-doc.cli-raw` 是**裸口**：cwd 不给就落在 livedoc 包自己旁边，那儿没有
-   * `livedoc.config.mjs`。缺省要落到「选中单元的站」得在调用那一刻算，而运行器的缺省 cwd
-   * 是登记时定死的一个字符串——所以缺省那一层是本件自己的命令 `live-doc.cli`，它算好 cwd
-   * 再经 `run` 递给运行器。两条同名不可能：运行器登记什么名字就往总线上挂同一个名字。
-   */
-  let nodeCli: GwbNodeCliApi | undefined
-  ctx.inject(['gwbNodeCli'], (scoped) => {
-    // 登记的是 home 底下那条 junction，**不是解析出来的真实路径**：运行器每次起进程都拿它
-    // 去 spawn，路径由操作系统当场解开，升过版就是新那份。包这会儿在不在都照登记——
-    // 缺了在调用那一刻现查、回一句说清怎么装的话（见 runLivedoc），比这儿静默少一条命令强
-    scoped.gwbNodeCli.register({
-      name: RAW_CLI_COMMAND,
-      description: `livedoc 命令行的裸口，cwd 必须自己给（不给落在 livedoc 包自己旁边，那儿没有 livedoc.config.mjs）。一般用 ${CLI_COMMAND}——它把 cwd 缺省成选中单元的站`,
-      entry: livedocEntry(ctx),
-      timeoutMs: CLI_TIMEOUT_MS,
-    })
-    nodeCli = scoped.gwbNodeCli
-    // 服务撤了就把这一格还回去：留着一个已经死掉的引用，失败会发生在很远的地方
-    scoped.effect(() => () => {
-      nodeCli = undefined
-    })
-  })
-
-  /** 没装 node-cli 件时那几条命令回的话。名字点出来，人一看就知道装哪个件 */
-  const MISSING_NODE_CLI = '跑不了 livedoc：这个 home 里没装 node-cli 件（@godcreator02/gwb-node-cli）'
-
-  /** 没跑成、也没到起进程那一步。跟运行器的 `CliRunRefused` 同形，多带一个机读的 `code` */
-  interface NotRun {
-    ok: false
-    code: string
-    error: string
-  }
-
-  /**
-   * 跑一趟 livedoc。运行器不在回 undefined（调用方报 `no-node-cli`）；
-   * **包在不在每次现查**——挂载那一刻查过不算数，人可能挂完才装、或者刚升过版。
-   * cwd 的存在性校验在运行器那头（错误文本就是文档）。
-   */
-  async function runLivedoc(args: readonly string[], cwd: string): Promise<CliRunOutcome | NotRun | undefined> {
-    if (nodeCli === undefined) return undefined
-    const entry = livedocEntry(ctx)
-    if (!onDisk(entry)) return { ok: false, code: 'no-livedoc', error: missingLivedoc(entry) }
-    return nodeCli.run(RAW_CLI_COMMAND, args, { cwd })
-  }
-
-  /**
-   * 不给 cwd 时落在哪：**选中单元的站**。清单问站件要（`docs-site.list`）——本件不扫盘。
-   * 站件没装、或者挑不出，都报清楚，不替人猜：猜错的代价是在错误的仓里跑了一次 confirm。
-   */
-  const selectedSite = async (): Promise<{ ok: true; dir: string } | { ok: false; error: string }> => {
-    if (!cli.list().some((c) => c.name === DOCS_SITE_LIST)) {
-      return {
-        ok: false,
-        error: `这个 home 里没装站件（@godcreator02/gwb-docs-site），本件问不出「有哪些站」——给 cwd 指明站目录的绝对路径`,
-      }
-    }
-    const reply = await cli.run(DOCS_SITE_LIST, {})
-    if (!reply.ok) return { ok: false, error: `${DOCS_SITE_LIST} 没给出清单：${String(reply.error ?? '未知原因')}——给 cwd 指明站目录` }
-    const listing = parseSiteListing(reply.data)
-    if (listing === undefined) return { ok: false, error: `${DOCS_SITE_LIST} 的回执形状认不出来——给 cwd 指明站目录` }
-    if (listing.currentUnit === null) {
-      return { ok: false, error: '没有选中的单元（站件那边还没接上 unit-folder，或者还没在单元树里点过）——给 cwd 指明站目录' }
-    }
-    const picked = pickSiteInUnit(listing.sites, listing.currentUnit)
-    if (picked.dir !== undefined) return { ok: true, dir: picked.dir }
-    if (picked.candidates.length === 0) {
-      return { ok: false, error: `选中的单元 ${listing.currentUnit} 里没有 fumadocs 站——给 cwd 指明站目录` }
-    }
-    return {
-      ok: false,
-      error: `选中的单元 ${listing.currentUnit} 里有 ${String(picked.candidates.length)} 个站，挑不出缺省的：${picked.candidates.join('、')}——给 cwd 指明要哪一个`,
-    }
-  }
-
-  /** 总线递来的参数是 unknown：收 `{ dir }`——站目录的绝对路径 */
-  function dirOf(args: unknown): string {
-    const dir = isRecord(args) ? args['dir'] : undefined
-    if (typeof dir !== 'string' || dir.trim() === '') throw new Error('参数要是 { dir: string }——站目录的绝对路径')
-    return path.resolve(dir.trim())
-  }
-
-  /** 总线递来的参数里那个 cwd：不给回 undefined，给了必须是绝对路径（存不存在归运行器判） */
-  function cwdOf(args: unknown): { ok: true; cwd?: string } | { ok: false; error: string } {
-    const raw = isRecord(args) ? args['cwd'] : undefined
-    if (raw === undefined) return { ok: true }
-    if (typeof raw !== 'string' || raw.trim() === '') return { ok: false, error: 'cwd 要是站目录的绝对路径（字符串）；不给就落在选中单元的站' }
-    if (!path.isAbsolute(raw.trim())) return { ok: false, error: `cwd 要是绝对路径（这儿不知道该相对于谁），给的是：${raw}` }
-    return { ok: true, cwd: path.resolve(raw.trim()) }
-  }
-
-  /** 总线递来的参数里那串 args：给数组就是它，别的当空 */
-  function argsOf(args: unknown): string[] {
-    const raw = isRecord(args) ? args['args'] : undefined
-    return Array.isArray(raw) ? raw.map((a) => String(a)) : []
-  }
-
-  /** 收 `{ dir }` 之外的字符串参数，空白算没给 */
-  function textOf(args: unknown, key: string): string | undefined {
-    const raw = isRecord(args) ? args[key] : undefined
-    return typeof raw === 'string' && raw.trim() !== '' ? raw.trim() : undefined
-  }
-
-  // **每条 register 都包 ctx.effect**：回的是注销函数，不包的话条目停了名字还留在表上
-  ctx.effect(() =>
-    cli.register(
-      {
-        name: CLI_COMMAND,
-        description:
-          `livedoc 的命令行：{ args: string[], cwd?: string }。args 原样递给 livedoc——check（核对，有红退 1）、check --json（机读报告，${STALE_COMMAND} 吃的就是它）、confirm（确认、换记号；先 commit）、render（重摆 outputs 生成物）、trajectory。给一个已有的 fumadocs 骨架装六区有专门的 ${ATTACH_COMMAND}，别从这儿递 attach。` +
-          `cwd 是站目录的绝对路径（那儿有 livedoc.config.mjs），**不给就落在选中单元的站**（清单问站件要）；站件没装、选中的单元没有站、或有好几个，就回一句让你给 cwd。` +
-          `回 { ok, cwd, exitCode, timedOut, durationMs, stdout, stderr }——check 有红时退出码 1，那是核对结果不是命令失败`,
-        plugin: name,
-      },
-      async (args) => {
-        const argv = argsOf(args)
-        if (argv.length === 0) return { ok: false, error: `${CLI_COMMAND} 要 { args: string[] }——比如 { "args": ["check"] }` }
-        const given = cwdOf(args)
-        if (!given.ok) return given
-        let cwd = given.cwd
-        if (cwd === undefined) {
-          const picked = await selectedSite()
-          if (!picked.ok) return { ok: false, code: 'no-site', error: picked.error }
-          cwd = picked.dir
-        }
-        const outcome = await runLivedoc(argv, cwd)
-        if (outcome === undefined) return { ok: false, code: 'no-node-cli', error: MISSING_NODE_CLI }
-        // 被拒（cwd 不合规）：运行器回的就是一句说清要什么的话，原样交出去
-        if (!('exitCode' in outcome)) return outcome
-        return {
-          ok: outcome.ok,
-          cwd,
-          exitCode: outcome.exitCode,
-          timedOut: outcome.timedOut,
-          durationMs: outcome.durationMs,
-          stdout: outcome.stdout,
-          stderr: outcome.stderr,
-          ...(outcome.ok ? {} : { error: `livedoc ${argv.join(' ')} 退出码 ${String(outcome.exitCode)}${outcome.timedOut ? '（超时）' : ''}` }),
-        }
-      },
-    ),
-  )
-
-  /**
-   * 装配六区的入口。**实现一行都不在这儿**：装配是 livedoc 命令行里那个模块的活，件只把
-   * 「哪个站」翻译成一趟子进程——livedoc 得能在没装工作台的仓里独立用，反过来把装配搬进件，
-   * 就等于让接 livedoc 依赖一整台桌面工作台。
-   *
-   * 目标站要**绝对路径**：件跑在工作台主进程里，相对谁都不知道；存不存在归 livedoc 判，
-   * 只有「不是目录」这一条先拦下——那会变成运行器抱怨 cwd，看不出是站给错了。
+   * 目标站要**绝对路径**：件跑在工作台主进程里，相对谁都不知道。存不存在、是不是刚铺好的
+   * 骨架归装配那头判（它的错误文本就是文档），只有「不是目录」这一条先拦下——那句话点得出
+   * 「dir 给成仓目录了」这个最常犯的错。
    */
   function siteOf(args: unknown): { ok: true; dir: string } | { ok: false; error: string } {
     const raw = isRecord(args) ? args['dir'] : undefined
@@ -270,133 +53,63 @@ export function apply(ctx: GwbContext): void {
     return { ok: true, dir }
   }
 
+  /** 收 `{ dir }` 之外的字符串参数，空白算没给 */
+  function textOf(args: unknown, key: string): string | undefined {
+    const raw = isRecord(args) ? args[key] : undefined
+    return typeof raw === 'string' && raw.trim() !== '' ? raw.trim() : undefined
+  }
+
+  /** 装完接着做什么。装配**只写文件**，装、渲、核对三步都得人或 agent 自己在那个仓里跑 */
+  function nextSteps(result: AttachResult): string[] {
+    return [
+      `cd ${result.target}`,
+      'pnpm install',
+      'pnpm doc:render     # 摆出仓根 AGENTS.md / README.md（正本在 content/outputs/）',
+      'pnpm doc            # livedoc check',
+      `pnpm dev            # http://localhost:${String(result.port)}`,
+    ]
+  }
+
+  // **每条 register 都包 ctx.effect**：回的是注销函数，不包的话条目停了名字还留在表上
   ctx.effect(() =>
     cli.register(
       {
         name: ATTACH_COMMAND,
         description:
-          '给一个**已经建好的 fumadocs 骨架**装上 livedoc 的六区（起子进程跑 livedoc attach）：{ dir: string, title?: string }。' +
+          '给一个**已经建好的 fumadocs 骨架**装上 livedoc 的六区：{ dir: string, title?: string }。' +
           'dir 是**站目录**的绝对路径（约定是 <仓>/docs-site，骨架由站件 docs-site.create 铺）。' +
           '装六个集合、六条路由、侧栏六个根节、livedoc.config.mjs、mdx 接线、投影块与术语组件、名册脚本、五个区的骨架页，' +
           'package.json 里补上 livedoc 的依赖与 doc 脚本。' +
-          '**只在刚铺好的骨架上跑**：站里已经有 livedoc.config.mjs、或 content/ 下已经有骨架之外的内容，就报一句「这个站已有内容，请人工接线」退非零，不改写任何东西。' +
-          '回 { dir, exitCode, timedOut, durationMs, stdout, stderr, note }——装了哪些文件、接着做什么全在 stdout.text 里',
+          '**只在刚铺好的骨架上跑**：站里已经有 livedoc.config.mjs、或 content/ 下已经有骨架之外的内容，就回一句「这个站已有内容，请人工接线」，不改写任何东西。' +
+          '**只写文件**：不跑 pnpm install、不 render、不 check。' +
+          '回 { dir, repoDir, port, written, superseded, overwrites, next }——written 是铺了哪些文件，next 是接着要在那个仓里跑的几条',
         plugin: name,
       },
-      async (args) => {
+      (args) => {
         const site = siteOf(args)
         if (!site.ok) return site
-        const title = textOf(args, 'title')
-        const argv = ['attach', '--dir', site.dir]
-        if (title !== undefined) argv.push('--title', title)
-        // cwd 落在目标站自己：attach 不读 livedoc.config.mjs（那正是它要写出来的），落哪儿都不影响结果，落在站里最好查
-        const outcome = await runLivedoc(argv, site.dir)
-        if (outcome === undefined) return { ok: false, code: 'no-node-cli', error: MISSING_NODE_CLI }
-        if (!('exitCode' in outcome)) return outcome
-        log.info(`${ATTACH_COMMAND}：${site.dir} 退出码 ${String(outcome.exitCode)}`)
-        return {
-          ok: outcome.ok,
-          dir: site.dir,
-          exitCode: outcome.exitCode,
-          timedOut: outcome.timedOut,
-          durationMs: outcome.durationMs,
-          stdout: outcome.stdout,
-          stderr: outcome.stderr,
-          ...(outcome.ok
-            ? { note: `只写了文件。接着在 ${site.dir} 跑 pnpm install、pnpm doc:render、pnpm doc；起手页写了第一条引用怎么钉` }
-            : { error: `livedoc attach 退出码 ${String(outcome.exitCode)}${outcome.timedOut ? '（超时）' : ''}——看 stderr.text` }),
+        let result: AttachResult
+        try {
+          result = attachSite({ siteDir: site.dir, title: textOf(args, 'title') })
+        } catch (error) {
+          return { ok: false, error: error instanceof Error ? error.message : String(error) }
         }
-      },
-    ),
-  )
-
-  ctx.effect(() =>
-    cli.register(
-      {
-        name: STALE_COMMAND,
-        description:
-          '一个站里哪几页的现状漂了：{ dir: string }——dir 是站目录的绝对路径（站件 docs-site.list 回包里的 dir 就是）。' +
-          '内部跑 livedoc check --json，收敛成 { dir, ok, red, docs, pages: [{ doc, red, pins: [{ target, kind, status: changed|missing, line, lines, reason?, diff? }], outputs: [{ to, status: missing|stale|no-frontmatter, fresh: false, missing? }] }], others: [{ doc, orphans, components }], strays, trajectory }。' +
-          'pages 就是待重写页（钉漂了或生成物不新鲜）；others 是只有孤儿记录 / 名册外组件的页——那两种不用重写正文，confirm 或补名册就平',
-        plugin: name,
-      },
-      async (args) => {
-        const target = dirOf(args)
-        if (!hasLivedocConfig(target)) {
-          return { ok: false, code: 'not-livedoc', error: `${target} 下没有 livedoc.config.mjs——这条要的是接了 livedoc 的站目录` }
-        }
-        const outcome = await runLivedoc(['check', '--json'], target)
-        if (outcome === undefined) return { ok: false, code: 'no-node-cli', error: MISSING_NODE_CLI }
-        if (!('exitCode' in outcome)) return outcome
-        const report = parseCheckJson(outcome.stdout.text)
-        if (report === undefined) {
-          // 红的时候 check 退 1、报告照样在 stdout 上，所以退出码不是判据——没捞到那一行才是
-          const tail = (outcome.stderr.text || outcome.stdout.text).trim().slice(-500)
-          return {
-            ok: false,
-            error: `livedoc check --json 没给出机读报告（退出码 ${String(outcome.exitCode)}${outcome.timedOut ? '，超时' : ''}）：${tail}`,
-          }
-        }
-        return { ok: true, data: { dir: target, ...collapse(report) } }
-      },
-    ),
-  )
-
-  // ── 反馈：跨会话把话投进别的仓 ───────────────────────────────────────────────
-
-  ctx.effect(() =>
-    cli.register(
-      {
-        name: FEEDBACK_COMMAND,
-        description:
-          '往目标站的反馈区投一条：{ dir: string, title: string, body: string, from?: string }。追加到 <dir>/content/feedback/inbound.mdx 末尾（页不在就先建），带今天的日期与来源；' +
-          'from 不给就是「未署名」，写成「哪个仓 / 哪个会话」最有用。**只追加这一页、不 commit、不动别的页**——那个仓的人自己看了再提交。回 { dir, file, created, date, total }',
-        plugin: name,
-      },
-      (args) => {
-        const target = dirOf(args)
-        const title = textOf(args, 'title')
-        const body = textOf(args, 'body')
-        if (title === undefined || body === undefined) {
-          return { ok: false, error: `${FEEDBACK_COMMAND} 要 { dir, title, body, from? }——title 与 body 都不能是空的` }
-        }
-        if (!isSiteDir(target)) return { ok: false, error: `不是站：${target} 下没有 content 目录` }
-        const date = today()
-        const written = writeFeedback(target, { date, title, body, from: textOf(args, 'from') ?? '未署名' })
-        log.info(`${FEEDBACK_COMMAND}：${target} 收到一条「${title}」${written.created ? '（顺手建了反馈页）' : ''}`)
+        log.info(`${ATTACH_COMMAND}：${site.dir} 铺了 ${String(result.written.length)} 个文件`)
         return {
           ok: true,
           data: {
-            dir: target,
-            file: written.file,
-            created: written.created,
-            date,
-            total: written.total,
-            note: '只写了这一页，没有 commit',
-          },
-        }
-      },
-    ),
-  )
-
-  ctx.effect(() =>
-    cli.register(
-      {
-        name: FEEDBACK_LIST_COMMAND,
-        description:
-          '读回一个站反馈区里的条目：{ dir: string }。回 { dir, file, exists, entries: [{ date, title, from, body }] }——页还不在时 exists 是 false、entries 空表，不是错',
-        plugin: name,
-      },
-      (args) => {
-        const target = dirOf(args)
-        const text = readInbound(target)
-        return {
-          ok: true,
-          data: {
-            dir: target,
-            file: inboundPath(target),
-            exists: text !== undefined,
-            entries: text === undefined ? [] : parseEntries(text),
+            dir: result.target,
+            repoDir: result.repoDir,
+            port: result.port,
+            written: result.written,
+            superseded: result.superseded,
+            overwrites: result.overwrites,
+            next: nextSteps(result),
+            ...(result.overwrites.length > 0
+              ? {
+                  warn: `仓根已有 ${result.overwrites.join('、')}：站里 outputs 预置了映射，第一次 pnpm doc:render 会覆盖它们——先把内容搬进 content/outputs/ 下对应的 mdx（那是正本），再 render`,
+                }
+              : {}),
           },
         }
       },
@@ -404,26 +117,11 @@ export function apply(ctx: GwbContext): void {
   )
 
   // 说明书那一格，局部注入：没装 skills 件的 home 里本件照常挂。产物在 dist/ 下，包根的 skills/ 是 '../skills/'
+  // 三份都随本件发（`live-doc` / `livedoc-docs` / `trajectory`）：**说明书随件走**——那个包躺在
+  // node_modules 里没有独立的到达路径，没人指引、没人会读，能被读到全靠件 register 了这个目录
   ctx.inject(['gwbSkills'], (scoped) => {
     scoped.effect(() => scoped.gwbSkills.register(new URL('../skills/', import.meta.url)))
-    // **livedoc 随包的两份也从这儿挂**（`livedoc-docs` / `trajectory`）：文档怎么写、卡怎么记
-    // 归 livedoc，但连着工作台的 agent 得读得到它们，而 livedoc 是个 cli 包、不是件、自己挂不上。
-    // 缺包只 warn——那两份不是本件能不能干活的前提。
-    // 报过去的是 home 底下那条 junction，**不是解析出来的真实路径**：skills 件登记时只扫一遍
-    // 文件名、正文每次现读盘，路径穿着 junction 走，那个包升过版之后重读就是新正文
-    const dir = livedocSkillsDir(ctx)
-    if (!onDisk(dir)) {
-      // **这一格跟那几条命令不一样**：说明书是挂载时把目录报过去的，事后装了包也不会自己长出来
-      log.warn(`${missingLivedoc(dir)}——livedoc 随包那两份 skill（livedoc-docs / trajectory）没挂上。这一格跟那几条命令不同：装完得把本件停用再启用一次（plugins.disable / enable）才挂得上`)
-    } else {
-      scoped.effect(() => scoped.gwbSkills.register(dir))
-    }
   })
 
-  // 挂是挂上了，但缺了那个包五条命令有三条跑不了：**挂载时就说清楚**，不等人调一次才发现
-  const entry = livedocEntry(ctx)
-  if (!onDisk(entry)) {
-    log.warn(`${missingLivedoc(entry)}。在那之前 ${CLI_COMMAND} / ${ATTACH_COMMAND} / ${STALE_COMMAND} 跑不了（回 code: 'no-livedoc'）；这三条装完就好，不必重挂本件——路径是每次现查的`)
-  }
-  log.info(`livedoc 件就绪：五条命令（live-doc.*），livedoc 命令行经 node-cli 登记成 ${RAW_CLI_COMMAND}`)
+  log.info(`livedoc 件就绪：一条命令（${ATTACH_COMMAND}）加三份说明书，对 @godcreator02/livedoc 零依赖`)
 }

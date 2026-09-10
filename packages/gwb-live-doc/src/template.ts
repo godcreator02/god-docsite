@@ -5,32 +5,23 @@
  * 这套模板里**没有骨架那半**（package.json、tsconfig、postcss、pnpm-workspace、.npmrc）：
  * 那几份归站件，装配只覆盖跟六区有关的那些文件。
  */
-import { existsSync, readFileSync, readdirSync } from "node:fs";
-import { dirname, join } from "node:path";
+import { readFileSync, readdirSync } from "node:fs";
+import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 /** 模板文件的后缀，落盘时脱掉——带着它躺在包里，才不会被别的工具当成真配置去解析 */
 const SUFFIX = ".tpl";
 
 /**
- * 装配模板的位置：从本模块所在目录往上找第一个装着 `template/attach` 的目录。
+ * 件里那份模板的绝对路径。源码态 `src/template.ts`、产物态 `dist/template.js` 都在**包根下
+ * 一层**，所以两态是同一个相对位置——`tsconfig.build.json` 的 `include` 是 `src/*.ts`（一层，
+ * 不带 `**`），产物于是是平的。哪天把实现摆进子目录，这条路就跑到 `dist/` 里去了。
  *
- * 源码态是 `packages/cli/src/site/template.ts`（往上两层到包根）、产物态是 `packages/cli/dist/*.mjs`
- * （一层）——两态深度不同，所以往上找，不写死层数。都没找着就把最后一个候选交出去，
- * 让 readTemplate 带着完整路径报 ENOENT：import 期抛会让整个包加载不了。
+ * 模板从不进 `dist/`：它原地躺在包根，靠 `package.json` 的 `files` 发出去
+ * （`tests/artifact.test.ts` 守着那一条）。站件 `@godcreator02/gwb-docs-site` 带它那份骨架模板
+ * 用的是同一套摆法——**两个件各带各的模板，是有意的对称**。
  */
-function locateTemplate(): string {
-  let dir = fileURLToPath(new URL(".", import.meta.url));
-  let candidate = join(dir, "template", "attach");
-  for (let up = 0; up < 4 && !existsSync(candidate); up += 1) {
-    dir = dirname(dir);
-    candidate = join(dir, "template", "attach");
-  }
-  return candidate;
-}
-
-/** 包里带的那份模板的绝对路径 */
-export const ATTACH_TEMPLATE = locateTemplate();
+export const ATTACH_TEMPLATE = fileURLToPath(new URL("../template/attach/", import.meta.url));
 
 /** 一个待落盘的文件：相对站目录的路径（正斜杠）加正文 */
 export interface TemplateFile {
