@@ -2862,33 +2862,13 @@
     }
   },
   "content/docs/modules/plugin.mdx": {
-    "../packages/gwb-live-doc/src/index.ts:14-24": {
-      "kind": "git",
-      "blob": "cfcb48be5275819fcb0c6ca87abab7a179988d8f",
-      "commit": "9af715dd45629ca08c3b288e7920ecce52cc53de",
-      "lines": [
-        14,
-        24
-      ],
-      "hash": "35d2b378a9c172f1ea617b4a9907925c6ecfe2a05ff5919a04da82b4bec04a6b"
-    },
-    "../packages/gwb-live-doc/src/index.ts:25-32": {
-      "kind": "git",
-      "blob": "cfcb48be5275819fcb0c6ca87abab7a179988d8f",
-      "commit": "9af715dd45629ca08c3b288e7920ecce52cc53de",
-      "lines": [
-        25,
-        32
-      ],
-      "hash": "dfb0ab31915cf6e982264c656b0eb0ca87505e107b4d90c5f3fc66413bc38f43"
-    },
     "has ../packages/gwb-live-doc/src/index.ts \"docs-site.list\"": {
       "kind": "has"
     },
     "../packages/gwb-live-doc/src/site-lookup.ts:4-13": {
       "kind": "git",
       "blob": "d9237c77837538f07b3974d2fd7c57fa5c072a00",
-      "commit": "9af715dd45629ca08c3b288e7920ecce52cc53de",
+      "commit": "2fbec49a9bdfd13dd581fe987d46d1d21358bc7a",
       "lines": [
         4,
         13
@@ -2897,63 +2877,13 @@
     },
     "../packages/gwb-live-doc/package.json:22-32": {
       "kind": "git",
-      "blob": "2317b9ebd6cf7cc403c90ee67309029b43142c40",
-      "commit": "9af715dd45629ca08c3b288e7920ecce52cc53de",
+      "blob": "0a5f12de401fd2efefee3762ecdc2a9b10e5e89e",
+      "commit": "2fbec49a9bdfd13dd581fe987d46d1d21358bc7a",
       "lines": [
         22,
         32
       ],
       "hash": "8c44beb08e165476ed69a65e39a76c5bafcbe5ce0111683ffae2e89efe0190dd"
-    },
-    "../packages/gwb-live-doc/src/index.ts:75-104": {
-      "kind": "git",
-      "blob": "cfcb48be5275819fcb0c6ca87abab7a179988d8f",
-      "commit": "9af715dd45629ca08c3b288e7920ecce52cc53de",
-      "lines": [
-        75,
-        104
-      ],
-      "hash": "40a2631f088fa517cbb4913d71b47f98a06b4206980b27bdae8549c189970777"
-    },
-    "../packages/gwb-live-doc/src/index.ts:34-46": {
-      "kind": "git",
-      "blob": "cfcb48be5275819fcb0c6ca87abab7a179988d8f",
-      "commit": "9af715dd45629ca08c3b288e7920ecce52cc53de",
-      "lines": [
-        34,
-        46
-      ],
-      "hash": "725ab1af441f76f3b8cd1bb2b28528ed17850b0e5c53c4e61006256a387a69c1"
-    },
-    "../packages/gwb-live-doc/src/index.ts:115-142": {
-      "kind": "git",
-      "blob": "cfcb48be5275819fcb0c6ca87abab7a179988d8f",
-      "commit": "9af715dd45629ca08c3b288e7920ecce52cc53de",
-      "lines": [
-        115,
-        142
-      ],
-      "hash": "8f7c4c89743fa59858b847768f78f5eacf834bd0e55d05bfe1ee8a0a399f0a34"
-    },
-    "../packages/gwb-live-doc/src/index.ts:212-233": {
-      "kind": "git",
-      "blob": "cfcb48be5275819fcb0c6ca87abab7a179988d8f",
-      "commit": "9af715dd45629ca08c3b288e7920ecce52cc53de",
-      "lines": [
-        212,
-        233
-      ],
-      "hash": "47e2935d8a0671670d4d491680ca6f5c4ee668b0b2af78a41f4ee1d57357f723"
-    },
-    "../packages/gwb-live-doc/src/index.ts:368-380": {
-      "kind": "git",
-      "blob": "cfcb48be5275819fcb0c6ca87abab7a179988d8f",
-      "commit": "9af715dd45629ca08c3b288e7920ecce52cc53de",
-      "lines": [
-        368,
-        380
-      ],
-      "hash": "9d27b9840c352d447c5b3f1a79d281989190a70a59681bce57c4da977fd8c03c"
     },
     "tree ../packages/livedoc/skills depth=1": {
       "kind": "tree",
@@ -2965,7 +2895,7 @@
     "../packages/gwb-live-doc/src/site-lookup.ts:34-51": {
       "kind": "git",
       "blob": "d9237c77837538f07b3974d2fd7c57fa5c072a00",
-      "commit": "9af715dd45629ca08c3b288e7920ecce52cc53de",
+      "commit": "2fbec49a9bdfd13dd581fe987d46d1d21358bc7a",
       "lines": [
         34,
         51
@@ -2975,7 +2905,7 @@
     "../packages/gwb-live-doc/src/site-lookup.ts:53-66": {
       "kind": "git",
       "blob": "d9237c77837538f07b3974d2fd7c57fa5c072a00",
-      "commit": "9af715dd45629ca08c3b288e7920ecce52cc53de",
+      "commit": "2fbec49a9bdfd13dd581fe987d46d1d21358bc7a",
       "lines": [
         53,
         66
@@ -2985,7 +2915,7 @@
     "../packages/gwb-live-doc/src/site-lookup.ts:68-84": {
       "kind": "git",
       "blob": "d9237c77837538f07b3974d2fd7c57fa5c072a00",
-      "commit": "9af715dd45629ca08c3b288e7920ecce52cc53de",
+      "commit": "2fbec49a9bdfd13dd581fe987d46d1d21358bc7a",
       "lines": [
         68,
         84
@@ -2995,7 +2925,7 @@
     "../packages/gwb-live-doc/src/stale.ts:131-145": {
       "kind": "git",
       "blob": "92da2aa2f5fa91027917309c13b80b0be411c353",
-      "commit": "9af715dd45629ca08c3b288e7920ecce52cc53de",
+      "commit": "2fbec49a9bdfd13dd581fe987d46d1d21358bc7a",
       "lines": [
         131,
         145
@@ -3005,7 +2935,7 @@
     "../packages/gwb-live-doc/src/stale.ts:108-129": {
       "kind": "git",
       "blob": "92da2aa2f5fa91027917309c13b80b0be411c353",
-      "commit": "9af715dd45629ca08c3b288e7920ecce52cc53de",
+      "commit": "2fbec49a9bdfd13dd581fe987d46d1d21358bc7a",
       "lines": [
         108,
         129
@@ -3015,7 +2945,7 @@
     "../packages/gwb-live-doc/src/stale.ts:65-80": {
       "kind": "git",
       "blob": "92da2aa2f5fa91027917309c13b80b0be411c353",
-      "commit": "9af715dd45629ca08c3b288e7920ecce52cc53de",
+      "commit": "2fbec49a9bdfd13dd581fe987d46d1d21358bc7a",
       "lines": [
         65,
         80
@@ -3025,7 +2955,7 @@
     "../packages/gwb-live-doc/src/stale.ts:82-106": {
       "kind": "git",
       "blob": "92da2aa2f5fa91027917309c13b80b0be411c353",
-      "commit": "9af715dd45629ca08c3b288e7920ecce52cc53de",
+      "commit": "2fbec49a9bdfd13dd581fe987d46d1d21358bc7a",
       "lines": [
         82,
         106
@@ -3035,7 +2965,7 @@
     "../packages/gwb-live-doc/src/feedback.ts:4-20": {
       "kind": "git",
       "blob": "850e63fc41e13a9cd7211144016044ba07c5ee5f",
-      "commit": "9af715dd45629ca08c3b288e7920ecce52cc53de",
+      "commit": "2fbec49a9bdfd13dd581fe987d46d1d21358bc7a",
       "lines": [
         4,
         20
@@ -3045,7 +2975,7 @@
     "../packages/gwb-live-doc/src/feedback.ts:30-44": {
       "kind": "git",
       "blob": "850e63fc41e13a9cd7211144016044ba07c5ee5f",
-      "commit": "9af715dd45629ca08c3b288e7920ecce52cc53de",
+      "commit": "2fbec49a9bdfd13dd581fe987d46d1d21358bc7a",
       "lines": [
         30,
         44
@@ -3055,7 +2985,7 @@
     "../packages/gwb-live-doc/src/stale.ts:49-63": {
       "kind": "git",
       "blob": "92da2aa2f5fa91027917309c13b80b0be411c353",
-      "commit": "9af715dd45629ca08c3b288e7920ecce52cc53de",
+      "commit": "2fbec49a9bdfd13dd581fe987d46d1d21358bc7a",
       "lines": [
         49,
         63
@@ -3065,7 +2995,7 @@
     "../packages/gwb-live-doc/src/stale.ts:1-15": {
       "kind": "git",
       "blob": "92da2aa2f5fa91027917309c13b80b0be411c353",
-      "commit": "9af715dd45629ca08c3b288e7920ecce52cc53de",
+      "commit": "2fbec49a9bdfd13dd581fe987d46d1d21358bc7a",
       "lines": [
         1,
         15
@@ -3075,7 +3005,7 @@
     "../packages/gwb-live-doc/src/stale.ts:17-40": {
       "kind": "git",
       "blob": "92da2aa2f5fa91027917309c13b80b0be411c353",
-      "commit": "9af715dd45629ca08c3b288e7920ecce52cc53de",
+      "commit": "2fbec49a9bdfd13dd581fe987d46d1d21358bc7a",
       "lines": [
         17,
         40
@@ -3085,7 +3015,7 @@
     "../packages/gwb-live-doc/src/feedback.ts:46-60": {
       "kind": "git",
       "blob": "850e63fc41e13a9cd7211144016044ba07c5ee5f",
-      "commit": "9af715dd45629ca08c3b288e7920ecce52cc53de",
+      "commit": "2fbec49a9bdfd13dd581fe987d46d1d21358bc7a",
       "lines": [
         46,
         60
@@ -3094,8 +3024,8 @@
     },
     "../packages/gwb-live-doc/tests/artifact.test.ts:55-60": {
       "kind": "git",
-      "blob": "7e971bafd4a7179fca592da32e9b95d0015f4ebb",
-      "commit": "9af715dd45629ca08c3b288e7920ecce52cc53de",
+      "blob": "68578fa13347618668c72e48d152b50eb5f1e201",
+      "commit": "2fbec49a9bdfd13dd581fe987d46d1d21358bc7a",
       "lines": [
         55,
         60
@@ -3104,63 +3034,23 @@
     },
     "../packages/gwb-live-doc/tests/artifact.test.ts:62-67": {
       "kind": "git",
-      "blob": "7e971bafd4a7179fca592da32e9b95d0015f4ebb",
-      "commit": "9af715dd45629ca08c3b288e7920ecce52cc53de",
+      "blob": "68578fa13347618668c72e48d152b50eb5f1e201",
+      "commit": "2fbec49a9bdfd13dd581fe987d46d1d21358bc7a",
       "lines": [
         62,
         67
       ],
       "hash": "6156be2a01b8d426b1e0b59ea8c6053ed82515f36460e3058fbab921e8fbb6e6"
     },
-    "../packages/gwb-live-doc/tests/artifact.test.ts:115-119": {
-      "kind": "git",
-      "blob": "7e971bafd4a7179fca592da32e9b95d0015f4ebb",
-      "commit": "9af715dd45629ca08c3b288e7920ecce52cc53de",
-      "lines": [
-        115,
-        119
-      ],
-      "hash": "3eb118bcca17cbbcc99cd997c8cde894acae72f0ce20fcdaa8dbae5b9b3fb7b3"
-    },
     "../packages/gwb-live-doc/package.json:8-15": {
       "kind": "git",
-      "blob": "2317b9ebd6cf7cc403c90ee67309029b43142c40",
-      "commit": "9af715dd45629ca08c3b288e7920ecce52cc53de",
+      "blob": "0a5f12de401fd2efefee3762ecdc2a9b10e5e89e",
+      "commit": "2fbec49a9bdfd13dd581fe987d46d1d21358bc7a",
       "lines": [
         8,
         15
       ],
       "hash": "d1fba6165b1ee2d0b0be3100a046a73f5b510d4ac773e49f246a11d21f0b0ede"
-    },
-    "../packages/gwb-live-doc/src/index.ts:57-64": {
-      "kind": "git",
-      "blob": "cfcb48be5275819fcb0c6ca87abab7a179988d8f",
-      "commit": "9af715dd45629ca08c3b288e7920ecce52cc53de",
-      "lines": [
-        57,
-        64
-      ],
-      "hash": "33ac1b7c4b161ada36e784ce6e8d5e32d9cac13475eaa204cf0d7449800fb6d8"
-    },
-    "../packages/gwb-live-doc/package.json:36-39": {
-      "kind": "git",
-      "blob": "2317b9ebd6cf7cc403c90ee67309029b43142c40",
-      "commit": "9af715dd45629ca08c3b288e7920ecce52cc53de",
-      "lines": [
-        36,
-        39
-      ],
-      "hash": "47a73658ba65ddcac3e0fdf3806d07b9be2e9b0e420a1f5fd7ccc019e4bd3719"
-    },
-    "../packages/gwb-live-doc/package.json:40-47": {
-      "kind": "git",
-      "blob": "2317b9ebd6cf7cc403c90ee67309029b43142c40",
-      "commit": "9af715dd45629ca08c3b288e7920ecce52cc53de",
-      "lines": [
-        40,
-        47
-      ],
-      "hash": "fb8d3569877e4322202ddcf13c355961b7be1c73f4c7d624cc36ef8b2e217945"
     },
     "tree ../packages/gwb-live-doc/tests depth=1": {
       "kind": "tree",
@@ -3174,23 +3064,13 @@
     },
     "../packages/gwb-live-doc/tests/artifact.test.ts:30-37": {
       "kind": "git",
-      "blob": "7e971bafd4a7179fca592da32e9b95d0015f4ebb",
-      "commit": "9af715dd45629ca08c3b288e7920ecce52cc53de",
+      "blob": "68578fa13347618668c72e48d152b50eb5f1e201",
+      "commit": "2fbec49a9bdfd13dd581fe987d46d1d21358bc7a",
       "lines": [
         30,
         37
       ],
       "hash": "656a0fa285aff1ce8c0870eb12d38a49afef2acc2f68f406db39f3e9b43bb65f"
-    },
-    "../packages/gwb-live-doc/tests/artifact.test.ts:102-113": {
-      "kind": "git",
-      "blob": "7e971bafd4a7179fca592da32e9b95d0015f4ebb",
-      "commit": "9af715dd45629ca08c3b288e7920ecce52cc53de",
-      "lines": [
-        102,
-        113
-      ],
-      "hash": "42024a2f9e18ea995a43a43d3561941bc8a9ad7cb1a331613ba075e96ca93ca5"
     },
     "tree ../packages/gwb-live-doc/src depth=1": {
       "kind": "tree",
@@ -3200,6 +3080,126 @@
         "site-lookup.ts",
         "stale.ts"
       ]
+    },
+    "../packages/gwb-live-doc/src/index.ts:13-23": {
+      "kind": "git",
+      "blob": "c3e2d4f5253cbeb27a614c608ac4e2f892458b1a",
+      "commit": "2fbec49a9bdfd13dd581fe987d46d1d21358bc7a",
+      "lines": [
+        13,
+        23
+      ],
+      "hash": "35d2b378a9c172f1ea617b4a9907925c6ecfe2a05ff5919a04da82b4bec04a6b"
+    },
+    "../packages/gwb-live-doc/src/index.ts:24-31": {
+      "kind": "git",
+      "blob": "c3e2d4f5253cbeb27a614c608ac4e2f892458b1a",
+      "commit": "2fbec49a9bdfd13dd581fe987d46d1d21358bc7a",
+      "lines": [
+        24,
+        31
+      ],
+      "hash": "dfb0ab31915cf6e982264c656b0eb0ca87505e107b4d90c5f3fc66413bc38f43"
+    },
+    "../packages/gwb-live-doc/src/index.ts:103-129": {
+      "kind": "git",
+      "blob": "c3e2d4f5253cbeb27a614c608ac4e2f892458b1a",
+      "commit": "2fbec49a9bdfd13dd581fe987d46d1d21358bc7a",
+      "lines": [
+        103,
+        129
+      ],
+      "hash": "32a5c044edc4f222750fc1438e914c8c0199d7ec23d6b174cb5fb456d49b08e4"
+    },
+    "../packages/gwb-live-doc/src/index.ts:33-65": {
+      "kind": "git",
+      "blob": "c3e2d4f5253cbeb27a614c608ac4e2f892458b1a",
+      "commit": "2fbec49a9bdfd13dd581fe987d46d1d21358bc7a",
+      "lines": [
+        33,
+        65
+      ],
+      "hash": "1a732689745b685cad0a1e4d1866784a898a3ca3cb71af9a5c79a0fcca4543d0"
+    },
+    "../packages/gwb-live-doc/src/index.ts:77-83": {
+      "kind": "git",
+      "blob": "c3e2d4f5253cbeb27a614c608ac4e2f892458b1a",
+      "commit": "2fbec49a9bdfd13dd581fe987d46d1d21358bc7a",
+      "lines": [
+        77,
+        83
+      ],
+      "hash": "7042a3696b4fdd13aa518da88eacc92f2a346da861b0fe3cd03595139440cbf1"
+    },
+    "../packages/gwb-live-doc/src/index.ts:153-180": {
+      "kind": "git",
+      "blob": "c3e2d4f5253cbeb27a614c608ac4e2f892458b1a",
+      "commit": "2fbec49a9bdfd13dd581fe987d46d1d21358bc7a",
+      "lines": [
+        153,
+        180
+      ],
+      "hash": "8f7c4c89743fa59858b847768f78f5eacf834bd0e55d05bfe1ee8a0a399f0a34"
+    },
+    "../packages/gwb-live-doc/src/index.ts:250-271": {
+      "kind": "git",
+      "blob": "c3e2d4f5253cbeb27a614c608ac4e2f892458b1a",
+      "commit": "2fbec49a9bdfd13dd581fe987d46d1d21358bc7a",
+      "lines": [
+        250,
+        271
+      ],
+      "hash": "47e2935d8a0671670d4d491680ca6f5c4ee668b0b2af78a41f4ee1d57357f723"
+    },
+    "../packages/gwb-live-doc/src/index.ts:406-421": {
+      "kind": "git",
+      "blob": "c3e2d4f5253cbeb27a614c608ac4e2f892458b1a",
+      "commit": "2fbec49a9bdfd13dd581fe987d46d1d21358bc7a",
+      "lines": [
+        406,
+        421
+      ],
+      "hash": "9c57e5668b6352fac7048d4b20ded7ebbe2aa5b6e14f10122022f279e647549d"
+    },
+    "../packages/gwb-live-doc/tests/artifact.test.ts:138-142": {
+      "kind": "git",
+      "blob": "68578fa13347618668c72e48d152b50eb5f1e201",
+      "commit": "2fbec49a9bdfd13dd581fe987d46d1d21358bc7a",
+      "lines": [
+        138,
+        142
+      ],
+      "hash": "3eb118bcca17cbbcc99cd997c8cde894acae72f0ce20fcdaa8dbae5b9b3fb7b3"
+    },
+    "../packages/gwb-live-doc/src/index.ts:85-92": {
+      "kind": "git",
+      "blob": "c3e2d4f5253cbeb27a614c608ac4e2f892458b1a",
+      "commit": "2fbec49a9bdfd13dd581fe987d46d1d21358bc7a",
+      "lines": [
+        85,
+        92
+      ],
+      "hash": "33ac1b7c4b161ada36e784ce6e8d5e32d9cac13475eaa204cf0d7449800fb6d8"
+    },
+    "../packages/gwb-live-doc/package.json:36-46": {
+      "kind": "git",
+      "blob": "0a5f12de401fd2efefee3762ecdc2a9b10e5e89e",
+      "commit": "2fbec49a9bdfd13dd581fe987d46d1d21358bc7a",
+      "lines": [
+        36,
+        46
+      ],
+      "hash": "6b5d8d7b4fe9b70ff5110b8ffa14a786a3d9f401a7ef9330134411c4381ae8be"
+    },
+    "../packages/gwb-live-doc/tests/artifact.test.ts:124-136": {
+      "kind": "git",
+      "blob": "68578fa13347618668c72e48d152b50eb5f1e201",
+      "commit": "2fbec49a9bdfd13dd581fe987d46d1d21358bc7a",
+      "lines": [
+        124,
+        136
+      ],
+      "hash": "1e186c5ac0dba0a598d27ae88d74912cf89e1004189120729522dfe325498951"
     }
   },
   "content/docs/modules/site.mdx": {
