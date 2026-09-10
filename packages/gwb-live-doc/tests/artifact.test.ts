@@ -82,11 +82,34 @@ describe('几处一改就得一起改的账', () => {
     expect(fs.readFileSync(path.join(root, 'skills', 'live-doc', 'SKILL.md'), 'utf8')).toMatch(/^---\s*\nname: live-doc\n/)
   })
 
-  it('livedoc 是真依赖：件要起它的进程，装本件的 home 里必须有它', () => {
-    expect(manifest.dependencies?.['@godcreator02/livedoc']).toBeDefined()
+  /**
+   * 降 peer 是为了让那个包**装成 home 的直接依赖**：只有那样
+   * `<home>/node_modules/@godcreator02/livedoc` 才是一条 junction、`pnpm add 包@新版本`
+   * 会改它的指向。写回 dependencies 就等于把包塞回件私有的 node_modules，那条路径不存在，
+   * 件只能退回 `import.meta.resolve`——于是升级之后照读旧文件、零报错。
+   */
+  it('livedoc 是硬 peer：不在 dependencies 里，也不标 optional（缺了这个件干不了活）', () => {
+    expect(manifest.dependencies?.['@godcreator02/livedoc']).toBeUndefined()
+    expect(manifest.peerDependencies?.['@godcreator02/livedoc']).toBeDefined()
+    expect(manifest.peerDependenciesMeta?.['@godcreator02/livedoc']).toBeUndefined()
     // 只 import type：报告形状是契约，跑它一律起进程（CLI 形态不进程内 import）
     expect(index).toMatch(/import \{ collapse, parseCheckJson \} from '\.\/stale\.js'/)
     expect(index).not.toMatch(/^import [^t].*from '@godcreator02\/live-doc/m)
+  })
+
+  /**
+   * 取址方式就是这个病本身：`import.meta.resolve` 回的是解开软链、当场定死的真实路径
+   * （pnpm 下带版本号），而 pnpm 从不清理旧目录——升级之后读旧文件一路成功、零报错。
+   * 两处取址（可执行、说明书目录）都得**每次现算**，一处缓存就是把病搬个家。
+   */
+  it('livedoc 的路径现查 home 的 node_modules，一个 import.meta.resolve 都没有', () => {
+    // 只禁那个调用，不禁注释里提它的名字——那段注释正是这条规矩的出处
+    expect(index).not.toMatch(/import\.meta\.resolve\(/)
+    expect(index).toMatch(/requireKernel\(ctx\)\.dataDir/)
+    // 两处取址各自是个函数、各自吃 ctx：没有模块级常量把结果攥住
+    expect(index).toMatch(/function livedocEntry\(ctx: GwbContext\): string/)
+    expect(index).toMatch(/function livedocSkillsDir\(ctx: GwbContext\): string/)
+    expect(index).not.toMatch(/^const livedoc\w* =/m)
   })
 
   it('skills、node-cli 是可选 peer，注册那两段走 ctx.inject 的子 fiber、不进 export const inject', () => {

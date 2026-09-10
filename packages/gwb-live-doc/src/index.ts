@@ -1,7 +1,6 @@
 import fs from 'node:fs'
 import path from 'node:path'
-import { fileURLToPath } from 'node:url'
-import { isRecord, type GwbContext } from '@godcreator02/gwb-plugin-api'
+import { isRecord, requireKernel, type GwbContext } from '@godcreator02/gwb-plugin-api'
 // 只为激活那几个件的 `declare module 'cordis'`——它们给 ctx 加上各自那个名字
 import type {} from '@godcreator02/gwb-commands'
 import type {} from '@godcreator02/gwb-skills'
@@ -31,27 +30,56 @@ export const STALE_COMMAND = 'live-doc.stale'
 export const FEEDBACK_COMMAND = 'live-doc.feedback'
 export const FEEDBACK_LIST_COMMAND = 'live-doc.feedback-list'
 
+/** livedoc 那个包在 home 里的名字。两处取址（可执行、说明书目录）同吃这一个常量 */
+const LIVEDOC_PKG = '@godcreator02/livedoc'
+
 /**
- * livedoc 那个可执行的绝对路径。`import.meta.resolve` 拿到的是包的主入口 `dist/run.mjs`
- * （`exports` 只开了 `.` 与 `./fumadocs`），可执行在它旁边：`dist/cli.mjs`。
- * **不读 `bin` 字段、不查 `.bin` 垫片**——node-cli 登记的是一个绝对路径的 js，
- * 垫片在 Windows 上是 `.cmd`，起不了。解析不到回 null（依赖没装全的 home），调用方 warn 一句、不炸。
+ * livedoc 那个包在这个 home 里的目录：`<home>/node_modules/@godcreator02/livedoc`。
+ *
+ * **每次要用现算一遍，一处都不许缓存。** 从前这儿走 `import.meta.resolve`，它回的是
+ * **解开软链、当场定死的真实路径**（pnpm 下带版本号，形如
+ * `.pnpm/@godcreator02+livedoc@0.1.0/…`）。包升级只改软链指向，而 pnpm **从不清理旧目录**
+ * ——旧文件原样躺在盘上，件继续读它**读得通、零报错**，说明书改了发了版升了也照样读到旧的，
+ * 只能重启工作台。home 底下这条路是一条 junction，`pnpm add 包@新版本` 会改它的指向：
+ * 长跑进程不重启、不重挂、不重新 import，重读就是新的。
+ *
+ * 支点是「那个包得在 home 的 `package.json` 里」——所以本件对它是 **peer 而不是
+ * dependency**：dependency 只会被塞进件私有的 `node_modules`，home 根下这条路根本不存在。
  */
-function livedocEntry(): string | null {
-  try {
-    return fileURLToPath(new URL('./cli.mjs', import.meta.resolve('@godcreator02/livedoc')))
-  } catch {
-    return null
-  }
+function livedocDir(ctx: GwbContext): string {
+  return path.join(requireKernel(ctx).dataDir, 'node_modules', ...LIVEDOC_PKG.split('/'))
+}
+
+/**
+ * livedoc 那个可执行。包的 `exports` 只开了 `.` 与 `./fumadocs`，可执行在主入口旁边。
+ * **不读 `bin` 字段、不查 `.bin` 垫片**——node-cli 登记的是一个绝对路径的 js，
+ * 垫片在 Windows 上是 `.cmd`，起不了。
+ */
+function livedocEntry(ctx: GwbContext): string {
+  return path.join(livedocDir(ctx), 'dist', 'cli.mjs')
 }
 
 /** livedoc 随包发的那两份 skill（`livedoc-docs` / `trajectory`）所在的目录 */
-function livedocSkillsDir(): URL | null {
+function livedocSkillsDir(ctx: GwbContext): string {
+  return path.join(livedocDir(ctx), 'skills')
+}
+
+/** 盘上在不在。**每次现查**——包是人另外装的，装了、升了都该当场算数，不必重挂本件 */
+function onDisk(target: string): boolean {
   try {
-    return new URL('../skills/', import.meta.resolve('@godcreator02/livedoc'))
+    fs.statSync(target)
+    return true
   } catch {
-    return null
+    return false
   }
+}
+
+/**
+ * 缺那个包时说的话。**点名怎么装**：本件对它是 peer，装本件不会顺带把它装进 home，
+ * 而「装了件没装包」这种半截状态没有任何东西拦得住，只能在这儿说清楚。
+ */
+function missingLivedoc(target: string): string {
+  return `缺 ${LIVEDOC_PKG}：这个 home 里找不到 ${target}——跑 plugins.install {pkg:'${LIVEDOC_PKG}'} 装上它。本件对它是 peer 依赖，装本件不会顺带装它`
 }
 
 /**
@@ -84,16 +112,13 @@ export function apply(ctx: GwbContext): void {
    */
   let nodeCli: GwbNodeCliApi | undefined
   ctx.inject(['gwbNodeCli'], (scoped) => {
-    const entry = livedocEntry()
-    if (entry === null) {
-      log.warn(`@godcreator02/livedoc 解析不到——${RAW_CLI_COMMAND} 没登记，别的几条也就跑不了`)
-      return
-    }
-    // register 不用自己包 effect：运行器内部已经挂在调用方的 effect 上了
+    // 登记的是 home 底下那条 junction，**不是解析出来的真实路径**：运行器每次起进程都拿它
+    // 去 spawn，路径由操作系统当场解开，升过版就是新那份。包这会儿在不在都照登记——
+    // 缺了在调用那一刻现查、回一句说清怎么装的话（见 runLivedoc），比这儿静默少一条命令强
     scoped.gwbNodeCli.register({
       name: RAW_CLI_COMMAND,
       description: `livedoc 命令行的裸口，cwd 必须自己给（不给落在 livedoc 包自己旁边，那儿没有 livedoc.config.mjs）。一般用 ${CLI_COMMAND}——它把 cwd 缺省成选中单元的站`,
-      entry,
+      entry: livedocEntry(ctx),
       timeoutMs: CLI_TIMEOUT_MS,
     })
     nodeCli = scoped.gwbNodeCli
@@ -104,12 +129,25 @@ export function apply(ctx: GwbContext): void {
   })
 
   /** 没装 node-cli 件时那几条命令回的话。名字点出来，人一看就知道装哪个件 */
-  const MISSING_NODE_CLI =
-    '跑不了 livedoc：这个 home 里没装 node-cli 件（@godcreator02/gwb-node-cli），或者解析不到 @godcreator02/livedoc'
+  const MISSING_NODE_CLI = '跑不了 livedoc：这个 home 里没装 node-cli 件（@godcreator02/gwb-node-cli）'
 
-  /** 跑一趟 livedoc。运行器不在回 undefined；cwd 的存在性校验在运行器那头（错误文本就是文档） */
-  async function runLivedoc(args: readonly string[], cwd: string): Promise<CliRunOutcome | undefined> {
-    return nodeCli === undefined ? undefined : nodeCli.run(RAW_CLI_COMMAND, args, { cwd })
+  /** 没跑成、也没到起进程那一步。跟运行器的 `CliRunRefused` 同形，多带一个机读的 `code` */
+  interface NotRun {
+    ok: false
+    code: string
+    error: string
+  }
+
+  /**
+   * 跑一趟 livedoc。运行器不在回 undefined（调用方报 `no-node-cli`）；
+   * **包在不在每次现查**——挂载那一刻查过不算数，人可能挂完才装、或者刚升过版。
+   * cwd 的存在性校验在运行器那头（错误文本就是文档）。
+   */
+  async function runLivedoc(args: readonly string[], cwd: string): Promise<CliRunOutcome | NotRun | undefined> {
+    if (nodeCli === undefined) return undefined
+    const entry = livedocEntry(ctx)
+    if (!onDisk(entry)) return { ok: false, code: 'no-livedoc', error: missingLivedoc(entry) }
+    return nodeCli.run(RAW_CLI_COMMAND, args, { cwd })
   }
 
   /**
@@ -370,14 +408,22 @@ export function apply(ctx: GwbContext): void {
     scoped.effect(() => scoped.gwbSkills.register(new URL('../skills/', import.meta.url)))
     // **livedoc 随包的两份也从这儿挂**（`livedoc-docs` / `trajectory`）：文档怎么写、卡怎么记
     // 归 livedoc，但连着工作台的 agent 得读得到它们，而 livedoc 是个 cli 包、不是件、自己挂不上。
-    // 解析不到只 warn——那两份不是本件能不能干活的前提
-    const dir = livedocSkillsDir()
-    if (dir === null) {
-      log.warn('@godcreator02/livedoc 解析不到——livedoc 随包那两份 skill（livedoc-docs / trajectory）没挂上')
+    // 缺包只 warn——那两份不是本件能不能干活的前提。
+    // 报过去的是 home 底下那条 junction，**不是解析出来的真实路径**：skills 件登记时只扫一遍
+    // 文件名、正文每次现读盘，路径穿着 junction 走，那个包升过版之后重读就是新正文
+    const dir = livedocSkillsDir(ctx)
+    if (!onDisk(dir)) {
+      // **这一格跟那几条命令不一样**：说明书是挂载时把目录报过去的，事后装了包也不会自己长出来
+      log.warn(`${missingLivedoc(dir)}——livedoc 随包那两份 skill（livedoc-docs / trajectory）没挂上。这一格跟那几条命令不同：装完得把本件停用再启用一次（plugins.disable / enable）才挂得上`)
     } else {
       scoped.effect(() => scoped.gwbSkills.register(dir))
     }
   })
 
+  // 挂是挂上了，但缺了那个包五条命令有三条跑不了：**挂载时就说清楚**，不等人调一次才发现
+  const entry = livedocEntry(ctx)
+  if (!onDisk(entry)) {
+    log.warn(`${missingLivedoc(entry)}。在那之前 ${CLI_COMMAND} / ${ATTACH_COMMAND} / ${STALE_COMMAND} 跑不了（回 code: 'no-livedoc'）；这三条装完就好，不必重挂本件——路径是每次现查的`)
+  }
   log.info(`livedoc 件就绪：五条命令（live-doc.*），livedoc 命令行经 node-cli 登记成 ${RAW_CLI_COMMAND}`)
 }
