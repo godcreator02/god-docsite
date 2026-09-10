@@ -1,6 +1,6 @@
 {
   "name": "@godcreator02/livedoc",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "type": "module",
   "description": "livedoc：文档里的论断钉在真源码上，代码变了就报出来。一个包五个模块——engine 判定、host 碰环境（git / 盘 / 记录簿 / 摆放）、fumadocs 格式实现与站接线、site 给已有 fumadocs 骨架装六区、cli 命令行（check / confirm / render / trajectory / attach）。随包发两份 skill 与装配模板",
   "bin": {
