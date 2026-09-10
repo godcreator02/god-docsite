@@ -53,7 +53,7 @@ description: gwb-live-doc：一条铺六区的命令加六份说明书，对 @go
 
 除 `live-doc` 之外五份的正本都住这个站（同仓才改得动），由 `livedoc.config.mjs` 的 outputs 把生成物摆进件的 `skills/`。纪律那三份不描述任何代码，但它们要跟钉码写法、六区、五梁一横对得上号——同仓才守得住这份一致，这也是 2026-09-10 把它们并回来的判据，见 [三份纪律并回本仓](/trajectory/2026-09-10-dev-discipline-comes-home)：
 
-{/* ref file="livedoc.config.mjs" lines="17-26" */}
+{/* ref file="livedoc.config.mjs" lines="17-27" */}
 
 理由就一句：**包没有独立的到达路径**——它躺在 `node_modules` 里没人指引、没人会读，说明书能被 agent 读到全靠件 `register` 了自己包里这个目录。这一格走 `ctx.inject` 的局部注入，没装 skills 件的 home 里本件照常挂上，只是少一块。
 
