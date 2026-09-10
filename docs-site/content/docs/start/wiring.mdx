@@ -22,7 +22,7 @@ description: 把 livedoc 接进一个 fumadocs 站要动的七处：配置、集
 
 命令行和站读的是同一份 `livedoc.config.mjs`，它住项目根（对这个站来说项目根就是站目录）：
 
-{/* ref file="livedoc.config.mjs" lines="24-44" */}
+{/* ref file="livedoc.config.mjs" lines="28-48" */}
 
 这段说明接线要交代的全部事实：挂哪个格式、哪几区进 `check`（六区里只有现状与生成正本对代码说话）、
 用哪个比较器、生成物摆到哪、卡目录在哪、组件名册是什么。`comparator` 不写就是 `auto`：按被引文件的位置
@@ -36,7 +36,7 @@ description: 把 livedoc 接进一个 fumadocs 站要动的七处：配置、集
 
 装好之后命令面就是这几条，各自打印什么、退什么码见 [命令行](/docs/modules/cli)：
 
-{/* ref file="../packages/livedoc/src/cli/run.ts" lines="1-15" */}
+{/* ref file="../packages/livedoc/src/cli/run.ts" lines="1-17" */}
 
 ### 轨迹是可选的一项
 

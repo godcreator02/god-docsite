@@ -27,7 +27,7 @@ description: 装包、一份配置、写一行草稿记号、check、confirm、�
 
 命令行和站读的是同一份 `livedoc.config.mjs`：挂哪个格式、文档在哪、用哪个比较器、产物摆到哪、组件名册是什么。
 
-{/* ref file="livedoc.config.mjs" lines="24-44" */}
+{/* ref file="livedoc.config.mjs" lines="28-48" */}
 
 `comparator` 不写就是 `auto`：被引文件在 git 仓里就用 git 记忆，不在（被忽略的 `node_modules`、仓外目录）就用 hash 记忆。
 `outputs` 是产物摆放：挂了映射的文档 render 直接写到指定位置（README、AGENTS.md 这类生成物），
@@ -92,7 +92,7 @@ pnpm start
 
 ## 命令一览
 
-{/* ref file="../packages/livedoc/src/cli/run.ts" lines="4-12" */}
+{/* ref file="../packages/livedoc/src/cli/run.ts" lines="4-14" */}
 
 命令行到此为止，一共四条；日常就 check / confirm / render 这三条，`trajectory` 是另一路，在装配之前就分流走了，见 [轨迹](/docs/modules/trajectory)。给一个新骨架铺六区不在命令行上，归工作台件，见 [装配六区](/docs/modules/site)。
 `render` 只有一种产物：挂了 `outputs` 映射的直接摆到落点，没挂的出一份给 AI 读的 md 落 `out/`。命令行的完整输出和退出码见

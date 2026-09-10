@@ -64,7 +64,7 @@ description: 四类角色、三条入口、依赖方向是什么、先读哪块
 层与层之间的方向是**单向**的，而且**列的是禁止面不是允许面**——写成允许面的话，加一个新
 目录会默默地什么都不许，加错地方反而更难发现：
 
-{/* ref file="../tests/boundary.test.ts" lines="86-104" */}
+{/* ref file="../tests/boundary.test.ts" lines="85-103" */}
 
 `engine` 是这张图的汇点，自己零依赖，只用 `node:crypto`。它不读文件、不起子进程、不认识任何
 文档格式——干活要的四样全是外面递进来的：
@@ -88,7 +88,7 @@ description: 四类角色、三条入口、依赖方向是什么、先读哪块
 `engine/` 里随手写一句 `import "../host/git.ts"` 编译器不会吭一声，判定层就从此起了 git
 子进程。补上那道门的是一个文件：
 
-{/* ref file="../tests/boundary.test.ts" lines="1-27" */}
+{/* ref file="../tests/boundary.test.ts" lines="1-26" */}
 
 它守四类：目录方向（上面那张表）、`engine` 的零依赖、宿主只能是 peer 且不许被打进产物、
 包不认识件。**它报红的时候，红的是设计，不是测试。**

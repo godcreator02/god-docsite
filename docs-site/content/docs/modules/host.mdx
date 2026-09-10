@@ -27,11 +27,11 @@ description: 读配置装出一个判定服务；记忆按被引文件的位置�
 
 **不知道文档是什么格式。** 格式是消费方在配置里挂的，这一层只把名单原样交给判定服务，自己一个格式实现都不 import——`fumadocs` 这个名字只许出现在 `src/fumadocs/` 那一层：
 
-{/* ref file="../tests/boundary.test.ts" lines="152-160" */}
+{/* ref file="../tests/boundary.test.ts" lines="143-151" */}
 
 方向本身写在一张表上：`host/` 可以用 `engine/` 的类型与纯函数，不许知道 `fumadocs/`、`cli/`。同一个包里编译器不管这件事，这张表加上它那条断言，是这条方向**唯一**的守卫。
 
-{/* ref file="../tests/boundary.test.ts" lines="86-104" */}
+{/* ref file="../tests/boundary.test.ts" lines="85-103" */}
 
 **不知道状态怎么算。** 判定的编排在 [判定层 engine](/docs/modules/engine)：这一层只交两样东西——观察（读取器给的）和记忆实现（比较器）。绿黄白红是判定层算出来的，命令行和站看到的状态因此必然一致。
 
@@ -163,7 +163,7 @@ frontmatter 是**逐行原样搬**的，不解析 YAML：一条字段从它的�
 
 还有两处从外面守着：`tests/contract.test.ts` 拿产品用的 git 版比较器，验两个格式适配器在同一串改动下状态一致；`tests/boundary.test.ts` 守目录方向与依赖面，文件头写清了它守什么、为什么不许注释掉某一条。
 
-{/* ref file="../tests/boundary.test.ts" lines="1-26" */}
+{/* ref file="../tests/boundary.test.ts" lines="1-25" */}
 
 ## 代码地图
 

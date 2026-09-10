@@ -21,7 +21,7 @@ description: 格式实现与站接线捏在一层：remark 插件、meta 白名�
 
 捏在一层不是图省事：mdx 没有展示区，记号旁边不存投影，页面上那块代码是构建期从源码现拿的，所以「认记号」和「站怎么构建」本来就是同一件事。**`fumadocs` 这个名字只出现在这一层**——engine / host / cli 一个不碰它，这条不靠自觉：
 
-{/* ref file="../tests/boundary.test.ts" lines="152-160" */}
+{/* ref file="../tests/boundary.test.ts" lines="143-151" */}
 
 `Format` 这条接缝留着**不是**为了「将来换个宿主」。它分离的是两种变化原因：怎么认记号（记号写成花括号注释还是 HTML 注释、走语法树还是走正则）与怎么判新鲜（记忆怎么记、段落怎么跟随、四态怎么定）。而且这条接缝上真有两个适配器——生产是这一层，测试是 `tests/fake-format.ts`，判定层与命令行的测试全喂它。
 
@@ -37,11 +37,11 @@ description: 格式实现与站接线捏在一层：remark 插件、meta 白名�
 
 **不带 fumadocs、不带 react**：两者只能是 peer，用消费方项目装的那份，而且全可选——只跑命令行的仓一个都不必装。
 
-{/* ref file="../packages/livedoc/package.json" lines="49-55" */}
+{/* ref file="../packages/livedoc/package.json" lines="48-54" */}
 
 peer 这条边界也不靠自觉，产物里同样盯着：
 
-{/* ref file="../tests/boundary.test.ts" lines="170-179" */}
+{/* ref file="../tests/boundary.test.ts" lines="161-170" */}
 
 三条一起守着——宿主不许进 `dependencies`、产物里不许打进 fumadocs 或 react（只许 `import`）、`/fumadocs/pre` 的 `"use client"` 指令得留在产物头一行。
 

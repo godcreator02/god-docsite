@@ -23,11 +23,11 @@ description: 接口正本、记号语法、编排服务、四种状态；只认�
 
 **不起子进程，也不知道 git 存在。** `src/engine/` 里的 import 只许指向自己和 `node:crypto`，一条测试正着守着：
 
-{/* ref file="../tests/boundary.test.ts" lines="136-142" */}
+{/* ref file="../tests/boundary.test.ts" lines="135-141" */}
 
 这条断言与下一节那张目录方向表是**这一层边界的全部守卫**：同一个包里，`engine/` 里随手写一句 `import "../host/git.ts"` 编译器不会吭一声，而判定层就此起了子进程——除了这份测试报红，没有任何别的信号。
 
-{/* ref file="../tests/boundary.test.ts" lines="86-104" */}
+{/* ref file="../tests/boundary.test.ts" lines="85-103" */}
 
 **不认识任何文档格式。** 一篇文档是谁认领的、记号长什么样、写回时怎么改那一行，都归格式实现。判定层只拿到「一串引用」和「一段文本」。
 
@@ -171,7 +171,7 @@ description: 接口正本、记号语法、编排服务、四种状态；只认�
 
 边界那道门单独一份，`tests/boundary.test.ts` 的文件头写清了它守什么、为什么不许注释掉某一条：
 
-{/* ref file="../tests/boundary.test.ts" lines="1-26" */}
+{/* ref file="../tests/boundary.test.ts" lines="1-25" */}
 
 ## 代码地图
 
