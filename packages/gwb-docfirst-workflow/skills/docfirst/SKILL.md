@@ -3,10 +3,10 @@ name: docfirst
 description: 要给一个刚建好的 fumadocs 骨架装上 docfirst 的六区时用；要核对一个站里的现状漂没漂、要确认引用、要重摆生成物时也读它——那几件事不经这个件，是自己 cd 到那个仓里跑 pnpm doc，这份说清了跑哪几条；跨仓反馈投哪儿、什么格式也在这儿。
 ---
 
-# docfirst 件：装六区，加三份说明书
+# docfirst 件：装六区，加五份说明书
 
 本件只有**一条命令**：`docfirst.attach`——给一个已经铺好的 fumadocs 骨架装上 docfirst 的六区。
-除此之外它只做一件事：把三份说明书挂给你读。
+除此之外它只做一件事：把另外五份说明书挂给你读。
 
 **它对 `@godcreator02/docfirst-workflow` 那个包零依赖**，装了本件不必再装什么包。判据是「这件事在哪儿
 发生」：核对 / 确认 / 渲染要在**仓**里发生（那是门禁与站构建跑的东西），你自己 `cd` 过去跑；
@@ -103,17 +103,19 @@ D:\unitfolders\26090520ntn\console\docs-god-flow\feedback\inbound.md
 各仓自己的重复操作候选不投这儿：那是那个站里的 `content/feedback/hatch.mdx`，仓内直接编辑。
 六区的反馈区因此只有孵化那一页。
 
-## 本件还挂着两份说明书
+## 本件还挂着五份说明书
 
 - **`docfirst-docs`**：文档站怎么写——六区怎么分、五类引用记号、每页写到哪为止。写或改任何仓的
   文档站之前先读它。
 - **`trajectory`**：什么时候记一张轨迹卡、怎么落、卡的字段是什么。
+- **`spec-grill`**：接到一句话需求，动代码之前怎么盘问到人点头。
+- **`parallel-by-module`**：活大到要派 subagent 时怎么按模块切、什么必须串行。
+- **`self-explaining-code`**：扫一遍代码，让注释、命名、函数边界自己说清自己。
 
-它们讲的是 `@godcreator02/docfirst-workflow` 那个包的行为，正本住那个包的仓（`docs-site/content/outputs/skills/`），
+前两份讲的是 `@godcreator02/docfirst-workflow` 那个包的行为，后三份讲通用开发纪律、不描述任何代码——但它们要跟钉码写法与六区对得上号，所以正本同样住那个包的仓（`docs-site/content/outputs/skills/`），
 生成物随本件发——**包没有独立的到达路径**：它躺在 `node_modules` 里没人指引、没人会读，
 一份说明书能被你读到全靠件把自己包里那个目录 register 了上去。
 
-通用开发方法论（盘需求、并行派活、自解释代码）不在这儿，随开发件 `gwb-dev-loop` 走。
 
 ## 不顺的时候
 
