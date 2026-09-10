@@ -13,7 +13,7 @@ onlyBuiltDependencies:
 autoInstallPeers: false
 
 # 这份文件**整份盖掉**用户级 pnpm 配置（不合并），所以全局那条 @godcreator02/* 的放行得在这儿再写一遍——
-# 少了它 pnpm 装 packages/gwb-live-doc 的 gwb 依赖时会被 minimumReleaseAge（默认一天）全拦下
+# 少了它 pnpm 装 packages/gwb-docfirst-workflow 的 gwb 依赖时会被 minimumReleaseAge（默认一天）全拦下
 minimumReleaseAgeExclude:
   - '@godcreator02/*'
   - lucide-react@1.43.0

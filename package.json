@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "livedoc 的包工作区：一个 livedoc 包（判定 / 环境 / 格式 / 装配 / 命令行五个模块）加一个轨迹包，外加一枚工作台件。文档站在 docs-site，它同时是这两个包唯一的消费方",
+  "description": "docfirst 的包工作区：一个 docfirst 包（判定 / 环境 / 格式 / 装配 / 命令行五个模块）加一个轨迹包，外加一枚工作台件。文档站在 docs-site，它同时是这两个包唯一的消费方",
   "scripts": {
     "build": "pnpm -r --filter \"./packages/**\" run build",
     "typecheck": "pnpm -r --filter \"./packages/**\" run typecheck && tsc -p tsconfig.tests.json",
@@ -12,8 +12,8 @@
     "test:only": "node --test \"tests/*.test.ts\""
   },
   "devDependencies": {
-    "@godcreator02/livedoc": "workspace:*",
-    "@godcreator02/livedoc-trajectory": "workspace:*",
+    "@godcreator02/docfirst-workflow": "workspace:*",
+    "@godcreator02/docfirst-trajectory": "workspace:*",
     "@types/mdast": "^4.0.4",
     "@types/node": "^26.2.0",
     "@types/react": "^19.2.18",
