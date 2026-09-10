@@ -25,6 +25,24 @@ description: 要跑 livedoc 的命令行（check / confirm / render / trajectory
 另有一条 `live-doc.cli-raw`：运行器登记出来的裸口，`cwd` 必须自己给。它存在只是因为运行器
 登记什么名字就往总线上挂同一个名字，缺省那一层没地方塞。**别用它。**
 
+## 这个件要另外装一个包
+
+`@godcreator02/livedoc` 是本件的 **peer**，装本件**不会**顺带把它装进 home——它是那个真干活
+的 npm 包（命令行与那两份 skill 都在它里面）。没装的时候件照样挂上，但上表前三条一调就回
+`code: 'no-livedoc'`：
+
+```
+plugins.install {"pkg":"@godcreator02/livedoc"}
+```
+
+装完那三条命令立刻能用，**不必重挂本件**——件每次现查 `<home>/node_modules/@godcreator02/livedoc`，
+不缓存路径。只有随那个包发的两份 skill（`livedoc-docs` / `trajectory`）例外：目录是挂载那一刻
+报给 skills 件的，装完得把本件停用再启用一次才挂得上。
+
+peer 而不是普通依赖是有原因的：普通依赖只会被 pnpm 塞进件私有的 `node_modules`，件就只能
+拿模块解析出来的**真实路径**（带版本号），而 pnpm 升级不清旧目录——升过版之后件照读旧文件，
+读得通、零报错。装成 home 的直接依赖，那条路才是一条随 `pnpm add 包@新版本` 改指向的软链。
+
 ## 建一个新站是两步，不是一步
 
 ```
@@ -113,8 +131,9 @@ live-doc.feedback {"dir":"<B 站目录>","title":"一句话说清是什么事","
 - `live-doc.attach` 回 `不是目录`：`dir` 给成了仓目录而不是站目录，或者骨架还没铺；
   退出码 1 且 stderr 里是 `这个站已有内容`：那站已经接过线或已经有内容了，人工接线
 - `live-doc.stale` 回 `code: 'not-livedoc'`：那个站还没接 livedoc，先 `live-doc.attach`
-- 任一条回 `code: 'no-node-cli'`：这个 home 里没装 node-cli 件（`@godcreator02/gwb-node-cli`），
-  或者解析不到 livedoc 那个包
+- 任一条回 `code: 'no-livedoc'`：这个 home 里没装 `@godcreator02/livedoc`——见上面「这个件要
+  另外装一个包」，回执里连路径带装法都写着
+- 任一条回 `code: 'no-node-cli'`：这个 home 里没装 node-cli 件（`@godcreator02/gwb-node-cli`）
 
 ## 本件还代挂两份说明书
 

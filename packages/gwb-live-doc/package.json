@@ -1,6 +1,6 @@
 {
   "name": "@godcreator02/gwb-live-doc",
-  "version": "0.4.1",
+  "version": "0.4.2",
   "description": "livedoc 件：管站里**内容的正确性**。把 livedoc 命令行经 node-cli 开给 agent（live-doc.cli，cwd 缺省为选中单元的站）、给一个已建好的 fumadocs 骨架装六区（live-doc.attach）、把 check 的机读报告收敛成待重写页清单（live-doc.stale）、跨仓投反馈（live-doc.feedback / feedback-list），并代挂 livedoc 随包那两份 skill。站的一生（扫站、起停、端口、到点关、窗格）归站件 @godcreator02/gwb-docs-site，本件不认识它，只在要「有哪些站」时问总线上的 docs-site.list——没装照常干活，只是 cwd 得自己给",
   "type": "module",
   "main": "dist/index.js",
@@ -66,4 +66,5 @@
     "vitest": "^4.1.10"
   }
 }
+
 
