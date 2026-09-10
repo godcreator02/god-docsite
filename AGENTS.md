@@ -1,8 +1,8 @@
 # god-live-doc
 
 **仓根就是这个目录 `god-live-doc/`**，它同时是 pnpm 包工作区。上一级是单元目录，那儿只有一张
-出生证 `unit.json`，不在 git 里。仓里三样：`packages/` 下两个 npm 包（`docfirst` 主包、
-`trajectory` 轨迹包）外加一个工作台件 `gwb-docfirst-workflow`，`docs-site/` 是自己的 fumadocs 文档站
+出生证 `unit.json`，不在 git 里。仓里三样：`packages/` 下两个 npm 包（`docfirst-workflow` 主包、
+`docfirst-trajectory` 轨迹包）外加一个工作台件 `gwb-docfirst-workflow`，`docs-site/` 是自己的 fumadocs 文档站
 （用这套机制写自己的文档，也是工作区成员），`tests/` 是工作区级测试。
 **怎么装、怎么接、怎么跑，看 `README.md`**，这儿不复述。
 
