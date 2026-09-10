@@ -185,7 +185,7 @@ supersedes:: [2025-11-30-bdd-as-main-axis](2025-11-30-bdd-as-main-axis.md)
 
 ## 六、校验归机制，建卡侧不设第二套
 
-盘（`@godcreator02/live-doc-trajectory`）是这份 schema 的运行时消费方，读的字段子集是：`type: root`（聚盘认主，盘心圆盘即根卡）、`parent`（子卡按它聚盘，子项目根卡在父盘上默认投影为虫洞节点、`merged-in` 列出的父盘改为递归展开摊入）、`born-at`（盘上时间轴）、`label`（节点显示名，读不到时回退身份去掉日期前缀那一截）、`domain`（泳道分组与领域色）、正文关系边 `supersedes::` / `pivots-from::`（连线与被取代态）、根卡「## 里程碑」区块（里程碑环）。
+盘（`@godcreator02/docfirst-trajectory`）是这份 schema 的运行时消费方，读的字段子集是：`type: root`（聚盘认主，盘心圆盘即根卡）、`parent`（子卡按它聚盘，子项目根卡在父盘上默认投影为虫洞节点、`merged-in` 列出的父盘改为递归展开摊入）、`born-at`（盘上时间轴）、`label`（节点显示名，读不到时回退身份去掉日期前缀那一截）、`domain`（泳道分组与领域色）、正文关系边 `supersedes::` / `pivots-from::`（连线与被取代态）、根卡「## 里程碑」区块（里程碑环）。
 
 **四层校验跑在 `docfirst check` 里**（实现在包的 `validate.ts` 与 `model.ts`）：形状（字段值是不是合法形态）、存在性（缺 `born-at` 或 `label`、非根卡缺 `parent`）、一致性（`parent` 含自身、`merged-in` 不是 `parent` 的子集、非根卡写了 `merged-in`、关系行写歪），外加本仓独有的第四层——卡正文里出现 docfirst 引用记号。这些写坏的形态由它报出来，病卡算红退 1。
 
