@@ -92,10 +92,6 @@ importers:
         version: 6.0.3
 
   packages/gwb-live-doc:
-    dependencies:
-      '@godcreator02/livedoc':
-        specifier: workspace:^
-        version: link:../livedoc
     devDependencies:
       '@godcreator02/gwb-commands':
         specifier: 0.2.0
@@ -109,6 +105,9 @@ importers:
       '@godcreator02/gwb-skills':
         specifier: 0.2.0
         version: 0.2.0(@godcreator02/gwb-commands@0.2.0(@godcreator02/gwb-plugin-api@0.1.0(cordis@4.0.0-rc.9)))(@godcreator02/gwb-plugin-api@0.1.0(cordis@4.0.0-rc.9))(cordis@4.0.0-rc.9)
+      '@godcreator02/livedoc':
+        specifier: workspace:^
+        version: link:../livedoc
       '@types/node':
         specifier: ^24.0.0
         version: 24.13.3
