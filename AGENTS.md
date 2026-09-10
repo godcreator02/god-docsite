@@ -17,8 +17,8 @@ README 和这份规矩都是**生成物**：正本分别是 `docs-site/content/o
 **动手前先读文档站**：`docs-site/content/docs/system-map.mdx` 是总代码地图，七个模块各一页在
 `content/docs/modules/`，接口与边界逐条钉在真源码上。站分六区——现状 `docs/`、轨迹 `trajectory/`、
 在途 `spec/`、未来 `future/`、生成正本 `outputs/`、反馈 `feedback/`；`livedoc check` 只扫现状与
-生成正本两区，别的四区不进门禁。文档怎么写、六区怎么分、每页写到哪为止，正本是随
-`@godcreator02/livedoc` 发的 skill `packages/livedoc/skills/livedoc-docs/SKILL.md`，动文档前读它。
+生成正本两区，别的四区不进门禁。文档怎么写、六区怎么分、每页写到哪为止，正本是随工作台件
+`@godcreator02/gwb-live-doc` 发的 skill `packages/gwb-live-doc/skills/livedoc-docs/SKILL.md`，动文档前读它。
 
 ## 参考，不要改
 
@@ -36,19 +36,21 @@ README 和这份规矩都是**生成物**：正本分别是 `docs-site/content/o
   不用 threads 池 / native loader 那类沙箱绕行，同仓不并行跑测试。
 * 工具链两套并存，别互相搬：两个 npm 包是 tsdown + TS 6；工作台件是 `tsc`，跑在 TS 7 上。
   各自的 `package.json` 说了算。
-* **主包 `src/` 下五层，方向单向**：`engine`（判定，只用 `node:crypto`）→ `host`（碰环境）→
-  `fumadocs`（格式实现与站接线）→ `cli`（入口）；`site`（装配六区）谁都不认识，只 import `node:`。
-  轨迹是独立包线，只被 `cli` 用。件依赖包，两个包不认识件、也不认识任何 `@godcreator02/gwb-*&#x60;。
+* **主包 `src/` 下四层，方向单向**：`engine`（判定，只用 `node:crypto`）→ `host`（碰环境）→
+  `fumadocs`（格式实现与站接线）→ `cli`（入口，四条子命令 check / confirm / render / trajectory）。
+  轨迹是独立包线，只被 `cli` 用。**包与件互不认识**：包不许出现任何 `@godcreator02/gwb-*`，件也
+  不许依赖包，两个方向各由 `tests/boundary.test.ts` 与件的 `tests/artifact.test.ts&#x60; 守着。
   **`tests/boundary.test.ts` 是塌包之后唯一的边界守卫**，别绕、别删、别为了让门禁绿注释掉某一条。
-* 站的一生（扫站、起停、端口、窗格）与铺 fumadocs 骨架归站件 `@godcreator02/gwb-docs-site`，
-  本仓的件只管站里内容的正确性，两个件互不依赖、只经命令总线说话。
+* **要在仓里发生的（核对、确认、渲染）归包，只在 agent 手上发生一次的归件**：铺六区
+  （`live-doc.attach`）与三份说明书住 `packages/gwb-live-doc/`。站的一生（扫站、起停、端口、
+  窗格）与铺 fumadocs 骨架归站件 `@godcreator02/gwb-docs-site`，两个件互不依赖、只经命令总线说话。
 * 子进程调用一律带超时。
 * 门禁，三摊都要绿才提交：
   * 仓根：`pnpm test`、`pnpm typecheck`、`pnpm build`
   * `docs-site/`：`pnpm livedoc check`、`pnpm test`、`pnpm build`、`node scripts/verify-roster.mjs`
   * `packages/gwb-live-doc/`：`pnpm check`（typecheck + oxlint + vitest）、`pnpm build`
-* 发版顺序 **包先、件后**：件装的是发出去的那份包，工作区里的软链只在这个仓里成立。
-  抬版本号时跟着改 `packages/livedoc/src/site/deps.ts` 那张表——`tests/attach.test.ts` 守着它。
+* 发版 **两边各发各的、没有先后**：件对包零依赖。两个包抬版本号时跟着改
+  `packages/gwb-live-doc/src/deps.ts` 那张表——件的 `tests/attach.test.ts` 守着它。
 * 动了引用到的源码，`livedoc confirm` 之前**先 commit**——git 比较器只对已提交、工作区干净的内容钉。
 * 挂了 outputs 映射的文档（readme / agents / 两份 skill）改了 mdx 源，`pnpm livedoc render` 重摆
   生成物，跟 mdx 源一起提交；check 守着生成物跟源一致，红了就是没重摆。

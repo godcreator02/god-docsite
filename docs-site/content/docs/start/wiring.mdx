@@ -11,8 +11,8 @@ description: 把 livedoc 接进一个 fumadocs 站要动的七处：配置、集
 块右上角那个小圆点是状态（图例见 [入门](/docs/start)）。所以下面每一处钉的都是这个站自己的文件，
 读到的就是正在跑的那一份。
 
-铺骨架归站件，接六区是 `livedoc attach --dir <站目录>`，模板在
-`packages/livedoc/template/attach/`。**手接与 attach 装是同一套形状**，差异只有星轨整页那一处
+铺骨架归站件，接六区是工作台件那条 `live-doc.attach`（[装配六区](/docs/modules/site)），模板在
+`packages/gwb-live-doc/template/attach/`。**手接与件装出来的是同一套形状**，差异只有星轨整页那一处
 ——见第四节末尾。
 
 ## 一、装包，与项目根那份 livedoc.config.mjs
@@ -147,7 +147,7 @@ fumadocs 自己的管线出的 md。
 长文档中间的消费方；这个站的名册里不登记它，盘走路由。`hrefBase` 要跟 loader 的 `baseUrl` 和
 `remarkTrajectoryLinks` 的 `hrefBase` 是同一个值——三处对不上，节点点开是 404。
 
-**这是这个站跟 `livedoc attach` 模板唯一的形状差异**：模板把 `/trajectory` 留给卡集合的导读页，六条路由
+**这是这个站跟六区模板唯一的形状差异**：模板把 `/trajectory` 留给卡集合的导读页，六条路由
 都在 `src/app/<区>/[[...slug]]/`，树在根 layout 里合成；这个站把 `/trajectory` 让给了星轨整页，所以卡路由
 的 slug 必选、路由分成两组、树搬进 `src/lib/tree.ts`，轨迹区也就没有导读页——区的入口是盘。
 
@@ -216,7 +216,7 @@ React 表底下铺 fumadocs 的默认表（标题栏、复制按钮都是它的�
 - **交接** `content/spec/`：在途的 spec 与实施方案，做完拆解归梁、删页。
 - **未来** `content/future/`：愿景、不做什么、路线图。
 - **生成正本** `content/outputs/`：README 这类生成物的 mdx 正本，`render` 摆到落点；进 `check`。
-- **反馈** `content/feedback/`：本仓的重复操作候选，加别的仓投来的意见。
+- **反馈** `content/feedback/`：本仓的重复操作候选（`hatch`）。跨仓反馈不投各仓的站，集中投总控台的一个固定落点。
 
 六区的目录、路由、loader、侧栏根节一一对应；进 `check` 的只有现状与生成正本两区，另外四区的草稿记号与
 卡天然不进门禁。

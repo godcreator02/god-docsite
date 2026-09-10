@@ -9,7 +9,7 @@
  *   spec        交接：在途 spec 与实施方案，做完拆解归梁删页
  *   future      未来：愿景 + not-doing + roadmap，常改
  *   outputs     生成正本：readme 等，render 摆到仓根；进 check
- *   feedback    反馈：hatch（本仓候选）+ inbound（别的仓投来的）
+ *   feedback    反馈：只有 hatch（本仓反复做的操作候选）——跨仓反馈集中投总控台，不落各仓的站
  * 只有 docs 与 outputs 开 processed markdown——命令行按名字找集合只对进 check 的两区有意义
  * （集合名 = 文档目录的最后一截，格式包的 collectionOf 靠这条约定给 `?collection=`）。
  * 集合定义在这里而不是 src/lib/source.ts 里，是为了让命令行也能按名字找到它：

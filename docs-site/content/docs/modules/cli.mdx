@@ -1,19 +1,19 @@
 ---
 title: 命令行
-description: cli 层：五条命令的分流与编排，机读报告与退出码的契约，以及「只打印不判断」这条边
+description: cli 层：四条子命令的分流与编排，机读报告与退出码的契约，以及「只打印不判断」这条边
 ---
 
 # 命令行
 
-**本页回答**：`@godcreator02/livedoc` 的 `src/cli/` 编排哪五条命令、哪些事**不**归它、`--json` 报告与退出码的契约长什么样、怎么把它单独架起来测。
+**本页回答**：`@godcreator02/livedoc` 的 `src/cli/` 编排哪四条子命令、哪些事**不**归它、`--json` 报告与退出码的契约长什么样、怎么把它单独架起来测。
 
 ## 管什么
 
-这一层是**动作的编排**，做两件事：把命令行参数翻译成几趟对装配出来的项目的调用，再把结果打成人读的一行行、或机读的一行 JSON，最后退一个码。**判定一件都不在这儿算**——它只负责印和退。五条命令各是什么，入口文件头上那段说了：
+这一层是**动作的编排**，做两件事：把命令行参数翻译成几趟对装配出来的项目的调用，再把结果打成人读的一行行、或机读的一行 JSON，最后退一个码。**判定一件都不在这儿算**——它只负责印和退。四条子命令各是什么、为什么到此为止，入口文件头上那段说了：
 
 {/* ref file="../packages/livedoc/src/cli/run.ts" lines="1-15" */}
 
-分两路。主干 `check` / `confirm` / `render` 是一套：cwd 就是项目根——`livedoc.config.mjs` 在哪儿就在哪儿跑——先装配，再逐篇处理文档目录下被格式认领的每一篇。`trajectory` 与 `attach` 是另一路，它们不遍历文档，命令名解出来就分流走了，连那条命令白名单和 `loadProject` 都不进；`attach` 那条的理由更硬：**它连 `livedoc.config.mjs` 都不读**，那正是它要写出来的东西。
+分两路。主干 `check` / `confirm` / `render` 是一套：cwd 就是项目根——`livedoc.config.mjs` 在哪儿就在哪儿跑——先装配，再逐篇处理文档目录下被格式认领的每一篇。`trajectory` 是另一路：它不遍历文档，命令名解出来就分流走了，连那条命令白名单和 `loadProject` 都不进。
 
 {/* ref file="../packages/livedoc/src/cli/run.ts" lines="48-58" */}
 
@@ -141,20 +141,6 @@ fumadocs 那份的 `renderAi` 是借站自己的 loader 出的 md，见 [fumadoc
 
 盘是怎么聚出来的、主干凭什么这么挑，归 [轨迹包](/docs/modules/trajectory)。
 
-### attach：给一个已经铺好的骨架装六区
-
-`livedoc attach --dir <站目录>` 要的前置条件跟别的命令正相反：**站已经在、但还没接过 livedoc**。骨架谁铺不归 livedoc——装了 fumadocs 的人才该有那个能力；工作台里是站件那条 `docs-site.create`，手铺也行。
-
-{/* ref file="../packages/livedoc/src/cli/attach.ts" lines="11-20" */}
-
-这一层跟别的四条一样薄：认参数、调 [装配层](/docs/modules/site) 面上的方法、把结果与「接着做什么」打出来。**装配的逻辑一行都不许回流到这儿**——它得能被别的程序直接调，不必绕命令行。
-
-{/* ref file="../packages/livedoc/src/cli/attach.ts" lines="1-7" */}
-
-打出来的那几段是有次序的：装在哪、写了哪些文件、让位删了哪些、仓根已有的哪些文件下次 `render` 会被覆盖，最后才是接着跑哪几条命令。**覆盖那一条单独警告**：`outputs` 预置了 `AGENTS.md` / `README.md` 的映射，第一次 `render` 就会把仓里手写的那份摆掉，得先把内容搬进 `content/outputs/` 的 mdx 正本。
-
-{/* ref file="../packages/livedoc/src/cli/attach.ts" lines="62-88" */}
-
 ## 不知道什么
 
 **不知道摆放怎么算。** 一篇 mdx 摆出去的正文该长什么样、跟盘上那份怎么比、四态凭什么这么定、缺了点名的 frontmatter 字段该不该写——一件都不知道。它拿到的是环境层那个摆放对象，对外只有两个方法，`render` 摆一趟、`check` 核一趟，回来一张落点清单；这一层的活是把那张清单译成人话和一个退出码。
@@ -171,11 +157,11 @@ fumadocs 那份的 `renderAi` 是借站自己的 loader 出的 md，见 [fumadoc
 
 **不认识轨迹卡的语义。** 卡的字段、盘怎么聚、主干怎么挑一概不知，只把目录交给轨迹包，把交回来的病和模型打出来。
 
-**不知道六区长什么样。** `attach` 那条只认两个参数：站目录与显示名。模板怎么渲、名字从哪儿认、`package.json` 怎么合、端口从骨架里怎么读出来，全在装配层。
+**不知道六区长什么样。** 给一个新骨架铺六区那件事根本不在这个包里：它只在 agent 手上发生一次、铺的是模板不碰判定，所以归工作台件的 `live-doc.attach`（[装配六区](/docs/modules/site)）。这一层连模板都没见过。
 
 **不知道站怎么编译。** mdx 变成 md 是 fumadocs 那一层借站自己的 loader 干的；这一层没见过 next、没见过 mdx 编译器。
 
-**这一层认识以上全部四层，谁都不认识它。** 塌成一个包之后，同一个包里 `engine/` 随手写一句 `import "../host/git.ts"` 编译器不会吭一声，pnpm 那层严格 node_modules 的保护也没有了——目录方向由一份手写的禁止面表守着，它是**唯一**的边界守卫：
+**这一层认识别的三层，谁都不认识它。** 塌成一个包之后，同一个包里 `engine/` 随手写一句 `import "../host/git.ts"` 编译器不会吭一声，pnpm 那层严格 node_modules 的保护也没有了——目录方向由一份手写的禁止面表守着，它是**唯一**的边界守卫：
 
 {/* ref file="../tests/boundary.test.ts" lines="86-104" */}
 
@@ -185,7 +171,7 @@ fumadocs 那份的 `renderAi` 是借站自己的 loader 出的 md，见 [fumadoc
 
 ## 数据结构
 
-这一层自己定形状的只有一样：`check --json` 那份机读报告。它是**契约**——`gwb-live-doc` [件](/docs/modules/plugin) 的 `live-doc.stale` 靠它列「待重写页与漂移的钉」：
+这一层自己定形状的只有一样：`check --json` 那份机读报告。它是**契约**——读它的是别的程序（门禁、编辑器、想列「待重写页与漂移的钉」的 agent），所以加字段可以、改名删字段不可以：
 
 {/* ref file="../packages/livedoc/src/cli/report.ts" lines="1-4" */}
 
@@ -227,7 +213,7 @@ fumadocs 那份的 `renderAi` 是借站自己的 loader 出的 md，见 [fumadoc
 
 {/* ref file="../packages/livedoc/src/cli/cli.ts" */}
 
-`main` 与装配层那几个名字一起从包的主出口出去，给想在别的程序里跑一趟核对、或不绕命令行装一次六区的人用：
+`main` 跟报告类型、`loadProject` 一起从包的主出口出去，给想在别的程序里跑一趟核对、不必起子进程的人用。**主出口的读者只有写测试的**，这句话就是它这么窄的理由：
 
 {/* ref file="../packages/livedoc/src/index.ts" lines="1-17" */}
 
@@ -236,7 +222,7 @@ fumadocs 那份的 `renderAi` 是借站自己的 loader 出的 md，见 [fumadoc
 | 码 | 什么时候 |
 | --- | --- |
 | 0 | 全绿、全黄、全白都算过——**黄和白不是错**，黄是等作者复核，白是等作者确认 |
-| 1 | 有红：缺失、孤儿记录、名册外组件、摆放的落点不新鲜、**病卡**；`confirm` 里有 problems、`render` 遇到缺 frontmatter 字段的落点、`attach` 的各种失败（没给 `--dir`、站不在、站里已有内容）也是 1 |
+| 1 | 有红：缺失、孤儿记录、名册外组件、摆放的落点不新鲜、**病卡**；`confirm` 里有 problems、`render` 遇到缺 frontmatter 字段的落点也是 1 |
 | 2 | 命令名不认识；`confirm` 点名的路径两边都对不上；`trajectory` 没配卡目录 |
 
 所以门禁里可以直接 `pnpm livedoc check`：它只在「引用指向空气」这一类真错上拦人。
@@ -256,7 +242,6 @@ fumadocs 那份的 `renderAi` 是借站自己的 loader 出的 md，见 [fumadoc
 | `targetKey(target)` | 把目标压成人读那一截、也是记录簿的键 | 判定层 `engine/marker.ts` | 同上 |
 | `Format`（认记号、写回、`renderAi`、`lintComponents`） | 每一篇归哪个格式由装配认，渲染与记号形态问它要 | fumadocs 那一层 | 临时项目的配置按**绝对 `file:` 地址**引一份假格式 |
 | `buildTrajectory(dir)` / `scanDir(dir)` | 出盘 / 树 / 主干模型；扫病卡 | `@godcreator02/livedoc-trajectory` | 同一个真实现，喂临时目录里现写的卡 |
-| `attachSite(options)` | 在一个已有骨架上装六区 | 装配层 `site/index.ts` | 同一个真实现，喂临时目录里现造的骨架 |
 
 ## 怎么单独测
 
@@ -278,18 +263,14 @@ outputs 那一摊只验这一层——render 打成哪几行、check 把不新�
 
 {/* ref file="../tests/cli-report.test.ts" lines="1-4" */}
 
-`attach` 自己一本账，跟上面三个文件不共台子，而且只验命令那一层：参数认没认对、话说清楚了没有、退了几，走 `main(["attach", …])` 从命令行这头进。装出来的六区长什么样是装配层自己的账。它顺带守一条**跨两份真相**的事：装配往目标站补的那张依赖表跟工作区各包的版本对得上——那张表是手写的，发版抬版本号时忘了抬它，装出来的站会装到一个旧版。
-
-{/* ref file="../tests/attach.test.ts" lines="1-11" */}
-
 ## 代码地图
 
 **在哪**：
 
 {/* tree dir="../packages/livedoc/src/cli" depth="1" */}
 
-**先读** `run.ts` 的 `main`：五条命令的分流、白名单、装配都在那二十行里，读完就知道剩下的往哪儿分。
+**先读** `run.ts` 的 `main`：四条子命令的分流、白名单、装配都在那二十行里，读完就知道剩下的往哪儿分。
 
-**读序**：`cli.ts`（薄壳）→ `run.ts`（主干三条命令各一个函数，外加轨迹那条与打印用的那几张词表）→ `report.ts`（机读形状的契约，只有类型和注释，没有逻辑）→ `attach.ts`（另一路那条的命令层，认参数与打印，不碰前三份的任何东西）。四个文件读完，命令这条线就完整了。
+**读序**：`cli.ts`（薄壳）→ `run.ts`（主干三条命令各一个函数，外加轨迹那条与打印用的那几张词表）→ `report.ts`（机读形状的契约，只有类型和注释，没有逻辑）。三个文件读完，命令这条线就完整了。
 
-**可跳过**：`dist/` 是产物。装配的正本、站模板、随包发的两份 skill 都在包根下别的目录，不属于这一层。
+**可跳过**：`dist/` 是产物。铺六区的模板与三份说明书都在工作台件里，包里没有。

@@ -19,7 +19,7 @@ description: 四类角色、三条入口、依赖方向是什么、先读哪块
 
 ## 四类角色
 
-主包一个包，`src/` 下五层，按**角色**分而不是按「像什么」分。四类角色的判据一句话说得清：
+主包一个包，`src/` 下四层，按**角色**分而不是按「像什么」分。四类角色的判据一句话说得清：
 **判定不认识环境，环境不认识格式，格式不认识入口，入口认识全部。**
 
 {/* tree dir="../packages/livedoc/src" depth="1" */}
@@ -29,18 +29,19 @@ description: 四类角色、三条入口、依赖方向是什么、先读哪块
 | 判定 | `src/engine/` | 引用模型、记号语法、比较器接口、编排服务；只用 `node:crypto` | [判定层](/docs/modules/engine) |
 | 环境 | `src/host/` | 读盘、起 git 子进程、写记录簿、把生成物摆到落点；读配置装配出一个项目 | [环境层](/docs/modules/host) |
 | 格式 | `src/fumadocs/` | mdx 怎么认记号、怎么写回、怎么渲；加站的 remark 接线与展示组件 | [格式与站接线](/docs/modules/fumadocs) |
-| 入口 | `src/cli/`、`src/site/` | 命令行的分流打印退码；在已有骨架上装配六区 | [命令行](/docs/modules/cli)、[装配六区](/docs/modules/site) |
+| 入口 | `src/cli/` | 命令行的分流、打印、退码 | [命令行](/docs/modules/cli) |
 
-`src/site/` 归在入口那一类是因为它是**另一条自成一路的进口**：它连 `livedoc.config.mjs` 都
-不读——那正是它要写出来的东西——所以它谁都不认识，只 import `node:`。
+包里没有第五样：给一个已有骨架**装六区**那摊住工作台件（[装配六区](/docs/modules/site)）。
+包的消费方是仓，件的消费方是 agent，判据见轨迹卡
+[包给仓件给人](/trajectory/2026-09-10-package-serves-repo-plugin-serves-agent)。
 
 ## 三条入口
 
-同一套判定，三个人从三个方向进来，走的是同一条路：
+三个人从三个方向进来，前两条走的是同一套判定：
 
 <Tabs>
   <Tab title="命令行">
-    `livedoc check / confirm / render / trajectory / attach`。`cli` 逐篇喂文本给编排服务，
+    `livedoc check / confirm / render / trajectory`。`cli` 逐篇喂文本给编排服务，
     把回来的清单译成一行行人话和一个退出码。git hook 与 CI 跑的就是它——**提交那一刻工作台
     不在场**，所以判定与核对必须是一个 npm 包，不能依赖任何 GUI 应用开着。
   </Tab>
@@ -49,14 +50,14 @@ description: 四类角色、三条入口、依赖方向是什么、先读哪块
     装配一次项目、认引用、算清单、把状态点打到树上。人看的那份文档就是站本身。
   </Tab>
   <Tab title="工作台件">
-    `@godcreator02/gwb-live-doc` 把可执行登记进运行器，agent 经命令总线调
-    `live-doc.cli` / `live-doc.attach` / `live-doc.stale` / `live-doc.feedback`。
-    **它起子进程，不进程内 import**——所以件改多少次，包这边一次都不用跟。
+    `@godcreator02/gwb-live-doc` 经命令总线开出 `live-doc.attach`（在进程内给一个已有骨架
+    铺六区），另把三份说明书挂给 agent 读。**它对包零依赖**：不 import、不起子进程——要核对
+    就 `cd` 到那个仓里跑包的命令行。
   </Tab>
 </Tabs>
 
-三条入口共用同一份编排服务，是「判定只有一处」这句话的具体形状：站上看到的绿，跟命令行
-`check` 退 0 说的是同一件事。
+前两条入口共用同一份编排服务，是「判定只有一处」这句话的具体形状：站上看到的绿，跟命令行
+`check` 退 0 说的是同一件事；第三条根本不做判定，它铺的是模板。
 
 ## 依赖方向
 
@@ -77,8 +78,9 @@ description: 四类角色、三条入口、依赖方向是什么、先读哪块
 那套，只给站用。`cli` 依赖它是为了接 `livedoc trajectory` 子命令，而且只用 `.` 入口；别的四层
 一概不许碰它。
 
-**方向只能是件 → 包**：两个 npm 包的三档依赖面里不许出现工作台件，也不许出现任何
-`@godcreator02/gwb-*`——装这两个包的人不该被迫拉进一整个桌面工作台生态。
+**包与件互不认识**：两个 npm 包的三档依赖面里不许出现工作台件，也不许出现任何
+`@godcreator02/gwb-*`——装这两个包的人不该被迫拉进一整个桌面工作台生态；反过来那半，件的
+三档依赖面里也不许出现 `@godcreator02/livedoc`，守在件自己的 `tests/artifact.test.ts` 上。
 
 ## 边界靠什么守
 
@@ -88,8 +90,8 @@ description: 四类角色、三条入口、依赖方向是什么、先读哪块
 
 {/* ref file="../tests/boundary.test.ts" lines="1-27" */}
 
-它守四类：目录方向（上面那张表）、`engine` 与 `site` 的零依赖、宿主只能是 peer 且不许被打进
-产物、方向只能是件 → 包。**它报红的时候，红的是设计，不是测试。**
+它守四类：目录方向（上面那张表）、`engine` 的零依赖、宿主只能是 peer 且不许被打进产物、
+包不认识件。**它报红的时候，红的是设计，不是测试。**
 
 方向单向换来的是换件只动一处：换一种文档格式，新写一份 `Format` 实现，判定层一行不动；
 换记忆的记法，实现 `Comparator` 两个方法再在配置里换个名字；换记录簿的存法，实现 `Ledger`
@@ -116,9 +118,9 @@ description: 四类角色、三条入口、依赖方向是什么、先读哪块
 跟依赖方向反着来：**先 [判定层](/docs/modules/engine)**——接口正本、记号语法、编排服务、四种
 状态都在那儿，别的层只认这一份；**再 [环境层](/docs/modules/host)**——装配的全貌、记忆按被引
 文件的位置怎么分派、一篇正本怎么摆到落点；**然后 [命令行](/docs/modules/cli)**。
-[格式与站接线](/docs/modules/fumadocs) 是站构建那条入口，[装配六区](/docs/modules/site) 与
-[轨迹](/docs/modules/trajectory)、[工作台件](/docs/modules/plugin) 是三条独立支线，各从自己
-那一页进，只读命令这条线的人整个跳过。
+[格式与站接线](/docs/modules/fumadocs) 是站构建那条入口，[轨迹](/docs/modules/trajectory) 是
+独立的一条包线，[工作台件](/docs/modules/plugin) 与它带的 [装配六区](/docs/modules/site) 在包
+外面，各从自己那一页进，只读命令这条线的人整个跳过。
 
 两处边界值得在进代码之前先知道，免得照目录名猜错：
 

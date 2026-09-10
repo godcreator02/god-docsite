@@ -23,7 +23,7 @@ docs-site/content/
 ├── spec/        # 3 交接：在途 spec 与实施方案，随做随提交，做完拆解归梁后删页
 ├── future/      # 4 未来规划：愿景 + not-doing + roadmap + 当前阶段；现状区一字不写未来
 ├── outputs/     # 5 生成正本：agents.mdx、readme.mdx、skills/<名>.mdx → render 到仓根与包内
-└── feedback/    # 6 反馈：hatch.mdx（本仓重复操作候选）+ inbound.mdx（别的仓投来的）
+└── feedback/    # 6 反馈：只有 hatch.mdx（本仓重复操作候选）；跨仓反馈集中投总控台，不落站里
 ```
 
 六种生命周期：现状长生、轨迹只增、交接必删、未来常改、生成随源、反馈周转。**目录即状态**：
@@ -139,7 +139,8 @@ TDD：先写红的测试再写代码。模块经接口连接，测试喂 mock �
 
 # 重写规则：现状漂了
 
-`livedoc check` 红，或 `live-doc.stale` 列出待重写页与漂移的钉之后：
+在那个站目录跑 `livedoc check` 报红（要机读清单就 `livedoc check --json`，自己读 `docs[].items[]`
+里 `status` 是 `changed` / `missing` 的那些）之后：
 
 1. 逐页逐钉看漂移：被钉的代码变了什么、正文哪句因此不再成立。
 2. **只改漂移段落**——不重排全页、不顺手润色别处、固定块的段序与标题原样保留、沿用本页
@@ -165,11 +166,12 @@ README、AGENTS.md、包内 SKILL.md 都是生成物，正本住 `content/output
 
 # 起站与交接
 
-起一个新站是**两步，顺序不能反、中间别改文件**：先铺一个标准 fumadocs 骨架（装了 fumadocs
-的人才该有那个能力，工作台里是站件的 `docs-site.create`），再
-`pnpm livedoc attach --dir <站目录的绝对路径> [--title <名>]` 把六区装上——六个集合、六条路由、
-侧栏六个根节、`livedoc.config.mjs`、mdx 接线、名册脚本、五个区的骨架页，`package.json` 里补上
-依赖与 doc 脚本。只写文件不跑 install，端口用骨架挑好的那个。
+起一个新站是**两步，顺序不能反、中间别改文件**，两步都是工作台里的命令（那个 npm 包的命令行
+里没有这两条——铺一次模板只在 agent 手上发生，不在仓的门禁里发生）：先用站件的
+`docs-site.create {"dir":"<仓>/docs-site"}` 铺一个标准 fumadocs 骨架（装了 fumadocs 的人才该有
+那个能力），再用 livedoc 件的 `live-doc.attach {"dir":"<仓>/docs-site"}` 把六区装上——六个集合、
+六条路由、侧栏六个根节、`livedoc.config.mjs`、mdx 接线、名册脚本、各区的骨架页，`package.json`
+里补上依赖与 doc 脚本。只写文件不跑 install，端口用骨架挑好的那个。
 
 **装配只在刚铺好的骨架上跑**：站里已经有 `livedoc.config.mjs`、或 `content/` 下已经有骨架之外的
 内容，它报一句「这个站已有内容，请人工接线」退非零，一个字不改写——给跑了半年的站加 livedoc

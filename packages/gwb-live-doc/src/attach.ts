@@ -4,7 +4,7 @@
  * 建骨架不在这儿——那是「谁装了 fumadocs 谁就该有」的能力，归站件
  * （`@godcreator02/gwb-docs-site` 的 `docs-site.create`）。本模块接手的是骨架之后的那一层：
  * 六个集合、六条路由、侧栏六个根节、`livedoc.config.mjs`、mdx 接线、投影块与术语组件、
- * 名册脚本、构建配置里那条不许外置的账、五个区的骨架页，外加往 `package.json` 里补依赖与脚本。
+ * 名册脚本、构建配置里那条不许外置的账、各区的骨架页，外加往 `package.json` 里补依赖与脚本。
  *
  * **它住在件里，不住在 `@godcreator02/livedoc` 那个包里。** 判据是「这件事在哪儿发生」：
  * check / confirm / render 要在**仓**里发生（门禁、站构建），所以归包；装配只在 **agent** 手上

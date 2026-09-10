@@ -16,7 +16,8 @@ description: 契约、边界、记号、比较器、站测试各守什么；文�
 | `packages/gwb-live-doc/`（[工作台件](/docs/modules/plugin)） | `pnpm check`（typecheck + oxlint + vitest） |
 
 件那一摊用 vitest，是 `node --test` 唯一的例外——它照 devkit 建出来的件骨架长，不为一个件把骨架
-掰弯；工作区根的 `test` 脚本因此不去收它。
+掰弯；工作区根的 `test` 脚本因此不去收它。**铺六区那摊的账整个在件里**，件对包零依赖那条红线
+也是件自己守，都归 [工作台件](/docs/modules/plugin) 那一页；工作区这摊一个字都不管它们。
 
 工作区那摊按主题分文件，一个主题一个：
 
@@ -44,13 +45,13 @@ description: 契约、边界、记号、比较器、站测试各守什么；文�
 
 ## 边界测试：读目录方向，不读源码措辞
 
-主包一个包五层，「谁能依赖谁」**不再由 pnpm 的严格 `node_modules` 兜着**——同一个包里，
+主包一个包四层，「谁能依赖谁」**不再由 pnpm 的严格 `node_modules` 兜着**——同一个包里，
 `engine/` 里随手写一句 `import "../host/git.ts"` 编译器不会吭一声。所以这份测试是塌包之后
 **唯一**的边界守卫，它守的第一样就是目录方向，列的是禁止面不是允许面：
 
 {/* ref file="../tests/boundary.test.ts" lines="98-104" */}
 
-判定层与装配层的零依赖各一条，都不看措辞、只看它 import 了谁：
+判定层的零依赖一条，不看措辞、只看它 import 了谁：
 
 {/* ref file="../tests/boundary.test.ts" lines="136-150" */}
 

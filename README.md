@@ -27,15 +27,12 @@ pnpm add -D @godcreator02/livedoc @godcreator02/livedoc-trajectory
 组件（状态点、术语），而那个字段按包名匹配、没有子路径粒度——外置的边界会把 `"use client"`
 指令吃掉。
 
-已经有一个 fumadocs 骨架的站，一条命令把六区装上：
+**装一个新站是两步，命令行不管这两步**：先铺一个标准 fumadocs 骨架（装了 fumadocs 的人才该有
+那个能力，工作台里是站件的 `docs-site.create`），再由工作台件 `@godcreator02/gwb-live-doc` 的
+`live-doc.attach` 把六区装上。它**只在刚铺好的骨架上跑**：站里已经有 `livedoc.config.mjs`、或
+`content/` 下已经有骨架之外的内容，就报一句「这个站已有内容，请人工接线」退非零，一个字不改写。
 
-```bash
-pnpm livedoc attach --dir <站目录的绝对路径>
-```
-
-它不读 `livedoc.config.mjs`（那正是它要写出来的东西），**只在刚铺好的骨架上跑**：站里已经有
-`livedoc.config.mjs`、或 `content/` 下已经有骨架之外的内容，就报一句「这个站已有内容，请人工
-接线」退非零，一个字不改写。骨架怎么铺不归 livedoc——装了 fumadocs 的人才该有那个能力。
+这两步都只在 agent 手上发生一次，所以不在这个包里——包留的是要在**仓**里反复发生的那几条。
 
 ## 怎么用
 
@@ -79,9 +76,10 @@ pnpm livedoc check
 `content/future/` 未来、`content/outputs/` 生成正本（进 check）、`content/feedback/` 反馈。
 先读现状区的**系统地图**，再读要改的那块的模块页。
 
-文档本身怎么写、六区怎么分、每页写到哪为止，正本是随 `@godcreator02/livedoc` 发的 skill，
-住 `packages/livedoc/skills/`：写文档读 `livedoc-docs`、落卡读 `trajectory`。装了这个包的仓把它的
-`skills/` 挂给 agent 读就行。通用开发方法论（盘需求、并行派活、自解释代码）不在这儿——它们
+文档本身怎么写、六区怎么分、每页写到哪为止，正本是**随工作台件发的 skill**，住
+`packages/gwb-live-doc/skills/`：写文档读 `livedoc-docs`、落卡读 `trajectory`、装六区读 `live-doc`。
+说明书跟着件走而不是跟着包走，是因为包没有独立的到达路径——躺在 `node_modules` 里的一份
+SKILL.md 没人指引、没人会读。通用开发方法论（盘需求、并行派活、自解释代码）不在这儿——它们
 不描述本仓的代码，随开发件 `@godcreator02/gwb-dev-loop` 走。
 
 **这份 README 是生成物**，正本是 `docs-site/content/outputs/readme.mdx`；仓根 `AGENTS.md` 同理。
