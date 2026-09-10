@@ -1,0 +1,71 @@
+---
+born-at: 2026-09-10T23:10
+type: choice
+parent: [2026-09-03-god-live-doc]
+label: 改名 docfirst
+domain: 分发
+---
+
+## 背景
+
+「livedoc」这个名字说的是一件事：文档里的论断钉在真源码上，代码变了就报出来。那是这套东西
+最早的全部。今天它已经不止这些——六区是任务的状态机（`spec/` 有页就是有活在路上，做完拆解
+归梁删页），生成正本让 README 与 AGENTS 由文档摆出来，当晚又并回三份开发纪律。名字停在了
+第一天的那件事上。
+
+## 结论与边界
+
+**改名 docfirst-workflow，中文「文档优先工作流」，一次改到底。**
+
+| 面 | 现在叫 |
+| --- | --- |
+| 主包 | `@godcreator02/docfirst-workflow`（子路径 `/fumadocs`、`/fumadocs/pre`、`/fumadocs/term`） |
+| 轨迹包 | `@godcreator02/docfirst-trajectory` |
+| 工作台件 | `@godcreator02/gwb-docfirst-workflow` |
+| 命令行 | `docfirst check / confirm / render / trajectory` |
+| 配置文件 | `docfirst.config.mjs` |
+| 草稿记号 | `@@docfirst ref 路径:起-止 @@` |
+| CSS 类前缀 | `docfirst-` |
+| 件的命令 | `docfirst.attach` |
+| 说明书 | `docfirst`（件用法）、`docfirst-docs`（文档怎么写），`trajectory` 不改 |
+
+包名用全称、命令行用短名，这两个不同名是有意的：`docfirst-workflow check` 每天敲太长，而包名
+出现在 import 路径里，短了说不清它是什么。
+
+**轨迹卡一个字不改。** 卡是冻结的历史，里头写的 livedoc 就是当时的事实；改了就是伪造历史。
+根卡的文件名 `2026-09-03-god-live-doc` 同样不动——卡的身份就是文件名，改名等于改身份。
+
+## 否掉的候选
+
+**只改叫法，包名与命令行不动。** 死在长期多一层翻译上：人读到 `livedoc.config.mjs` 与新名字
+对不上号，每次都要在心里换算一次。
+
+**只改概念名，工具仍叫 livedoc（像 TDD 与 vitest 那样分层）。** 死在这里没有第二个实现上：
+方法与工具是同一件东西，分两个名字是给不存在的竞品留位置。
+
+**换一个隐喻名（keel / 龙骨、spine / 文档脊）。** 没被采纳，但它有一条今天没赔的好处：立场名
+押的是「文档优先」这个主张，重心哪天再变，名字会再一次不合身；隐喻名不会。**这条留在这儿，
+下次要再改名先看它。**
+
+**`livespec` / `canon` / `girder`。** 死在撞既有专名上：`spec` 是在途区、`正本` 是 outputs 区、
+`梁` 是五梁一横。整体名跟内部区名同字是永久的歧义源。
+
+## 代价与遗留
+
+**旧包名永久占着本机 registry。** `@godcreator02/livedoc`、`livedoc-trajectory`、`gwb-live-doc`
+留着不删也不再发新版，等所有消费站升完再说。没有转发包、没有 deprecate 提示——本机 registry
+只有自己人用。
+
+**十二个消费站要逐个升**，每站约六处：依赖名、`docfirst.config.mjs` 的文件名与 import、
+`source.config.ts` 的两个函数名、`global.css` 的样式表路径、`mdx.tsx` 的 `DocfirstPre`、
+`package.json` 的 doc 脚本。升级期间没有全红窗口：旧包还在，没升的站照常绿。
+
+**这个仓自己的站全站重钉了一次。** 引用路径里带 `packages/` 下的目录名，目录一改记录簿整批
+键失效。内容没动，钉的还是同一段代码，但这条说明了一件事：**钉码扛得住产品改名，扛不住目录
+改名**。将来搬目录要预备一次全量 confirm。
+
+**仓目录名还没改。** `god-live-doc` 这个目录名留着——改它要让别的会话的工作目录失效，而且这
+仓的 pnpm 工作区要重装。等没人在里头的时候单独做一次。
+
+`docfirst` 这个词跟现状区目录 `docs/` 有一处小撞车，判断是可接受：一个是命令，一个是目录，
+句子里不会混。
