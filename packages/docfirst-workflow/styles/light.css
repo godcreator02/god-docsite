@@ -1,5 +1,5 @@
 /*
- * 状态点的样式。随包发，站里 `@import '@godcreator02/live-doc-format-fumadocs/light.css';` 一行就有。
+ * 状态点的样式。随包发，站里 `@import '@godcreator02/docfirst-workflow/fumadocs/light.css';` 一行就有。
  *
  * 点长什么样：代码块标题栏里、紧贴复制按钮左边的一个 8px 圆点，不写字、不弹悬停提示——点自解释。
  * 圆点由侧出口的 pre 组件渲成一个 `<span class="docfirst-dot" data-dot="…">`，放在标题栏右侧的

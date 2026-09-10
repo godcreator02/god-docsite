@@ -157,7 +157,7 @@ export function cardSchema(ctx: { path: string; source: string }): StandardSchem
   return {
     "~standard": {
       version: 1,
-      vendor: "live-doc-trajectory",
+      vendor: "docfirst-trajectory",
       validate(value: unknown): StandardSchemaV1.Result<CardFrontmatter> {
         const fm = (value && typeof value === "object" ? value : {}) as Record<string, unknown>;
         const description = typeof fm["description"] === "string" ? { description: fm["description"] as string } : {};

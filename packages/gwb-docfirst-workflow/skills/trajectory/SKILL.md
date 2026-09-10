@@ -5,7 +5,7 @@ description: 在挂了 docfirst 的仓里记方向了断时用——判断一次
 
 # 轨迹卡
 
-文档站 `docs-site/content/trajectory/` 下一个 `.mdx` 就是一张轨迹卡，跟代码同仓同提交。**live-doc 治现状
+文档站 `docs-site/content/trajectory/` 下一个 `.mdx` 就是一张轨迹卡，跟代码同仓同提交。**docfirst 治现状
 文档撒谎，轨迹卡治历史被改写**——一次方向了断记下来就该冻结，谁取代了谁、谁从哪条路转过来的，要看得见。
 整个项目的卡在文档站的**星轨盘**上呈现为一条轨迹，点开一个节点就是那张卡的页面。
 
