@@ -23,7 +23,7 @@ docs-site/content/
 ├── spec/        # 3 交接：在途 spec 与实施方案，随做随提交，做完拆解归梁后删页
 ├── future/      # 4 未来规划：愿景 + not-doing + roadmap + 当前阶段；现状区一字不写未来
 ├── outputs/     # 5 生成正本：agents.mdx、readme.mdx、skills/<名>.mdx → render 到仓根与包内
-└── feedback/    # 6 反馈：只有 hatch.mdx（本仓重复操作候选）；跨仓反馈集中投总控台，不落站里
+└── feedback/    # 6 反馈：hatch（本仓重复操作候选）+ inbox（别的仓投来的，处理完删）
 ```
 
 六种生命周期：现状长生、轨迹只增、交接必删、未来常改、生成随源、反馈周转。**目录即状态**：
