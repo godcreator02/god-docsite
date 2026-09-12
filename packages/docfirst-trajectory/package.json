@@ -1,6 +1,6 @@
 {
   "name": "@godcreator02/docfirst-trajectory",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "type": "module",
   "description": "轨迹卡与星轨盘：`.` 扫卡、四层校验（含 docfirst 引用记号）、聚盘建模、布局与链表纯函数（零 npm 依赖）；`./react` 客户端星轨盘组件；`./server` 服务端组件、frontmatter schema、remark 关系边插件",
   "exports": {
