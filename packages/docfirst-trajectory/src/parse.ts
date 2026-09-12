@@ -53,11 +53,11 @@ export function stripFrontmatter(src: string): string {
 
 /** 剥成对引号：`- "tfix-..."` 这种带引号的列表项是真实写法。 */
 function unquote(raw: string): string {
-  const v = raw.trim();
-  if (v.length >= 2 && (v.startsWith('"') || v.startsWith("'")) && v.endsWith(v[0] as string)) {
-    return v.slice(1, -1);
+  const trimmed = raw.trim();
+  if (trimmed.length >= 2 && (trimmed.startsWith('"') || trimmed.startsWith("'")) && trimmed.endsWith(trimmed[0] as string)) {
+    return trimmed.slice(1, -1);
   }
-  return v;
+  return trimmed;
 }
 
 /** 流式列表 `[a, b]`：card-format 正本里 parent 就是这个写法，必须容错。
@@ -128,16 +128,16 @@ export interface ExtractedRelations {
  * （卡文件两种后缀都认，见 scan.ts）。
  * 解码失败（目标里有孤零零的 `%`）按原样走，不抛——坏写法该现原形、不该炸整次扫盘。 */
 function idFromHref(href: string): string {
-  let v = href.trim();
+  let target = href.trim();
   try {
-    v = decodeURIComponent(v);
+    target = decodeURIComponent(target);
   } catch {
     /* 不是合法百分号序列：原样用 */
   }
-  v = v.replace(/^\.\//, "");
-  const hash = v.indexOf("#");
-  if (hash >= 0) v = v.slice(0, hash);
-  return v.replace(/\.mdx?$/, "").trim();
+  target = target.replace(/^\.\//, "");
+  const hash = target.indexOf("#");
+  if (hash >= 0) target = target.slice(0, hash);
+  return target.replace(/\.mdx?$/, "").trim();
 }
 
 /** 扫正文收关系边：一行一条，md link 目标剥编码与 `.md` / `.mdx` 后即卡身份，

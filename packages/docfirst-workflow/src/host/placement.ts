@@ -188,7 +188,7 @@ function withFrontmatter(body: string, lines: string[]): string {
 
 export function createPlacing(host: PlacingHost): Placing {
   /** 这一篇有没有摆放这回事：挂了落点、有格式、格式出 ai 产物，三样齐了才算 */
-  function open(doc: string): { targets: Placement[]; text: string; format: Format } | null {
+  function placingInputs(doc: string): { targets: Placement[]; text: string; format: Format } | null {
     const targets = host.placements(doc);
     if (targets.length === 0) return null;
     const format = host.service.formatFor(doc);
@@ -210,12 +210,12 @@ export function createPlacing(host: PlacingHost): Placing {
 
   return {
     async render(doc) {
-      const it = open(doc);
-      if (it === null) return [];
-      const body = await bodyOf(doc, it.text, it.format);
+      const inputs = placingInputs(doc);
+      if (inputs === null) return [];
+      const body = await bodyOf(doc, inputs.text, inputs.format);
       const out: PlacedWrite[] = [];
-      for (const { to, frontmatter } of it.targets) {
-        const picked = pickFrontmatter(it.text, frontmatter);
+      for (const { to, frontmatter } of inputs.targets) {
+        const picked = pickFrontmatter(inputs.text, frontmatter);
         if (picked.missing.length > 0) {
           out.push({ to, status: "no-frontmatter", missing: picked.missing });
           continue;
@@ -227,12 +227,12 @@ export function createPlacing(host: PlacingHost): Placing {
     },
 
     async check(doc) {
-      const it = open(doc);
-      if (it === null) return [];
-      const body = await bodyOf(doc, it.text, it.format);
+      const inputs = placingInputs(doc);
+      if (inputs === null) return [];
+      const body = await bodyOf(doc, inputs.text, inputs.format);
       const out: PlacedCheck[] = [];
-      for (const { to, frontmatter } of it.targets) {
-        const picked = pickFrontmatter(it.text, frontmatter);
+      for (const { to, frontmatter } of inputs.targets) {
+        const picked = pickFrontmatter(inputs.text, frontmatter);
         if (picked.missing.length > 0) {
           out.push({ to, status: "no-frontmatter", fresh: false, missing: picked.missing });
           continue;

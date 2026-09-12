@@ -300,11 +300,11 @@ function extractTrees(
       pivOut[e.from]?.push(e.to);
     }
   }
-  const neighborsOf = (i: string): string[] => [
-    ...(supOut[i] ?? []),
-    ...(supIn[i] ?? []),
-    ...(pivOut[i] ?? []),
-    ...(pivIn[i] ?? []),
+  const neighborsOf = (id: string): string[] => [
+    ...(supOut[id] ?? []),
+    ...(supIn[id] ?? []),
+    ...(pivOut[id] ?? []),
+    ...(pivIn[id] ?? []),
   ];
 
   const compOf: Record<string, string> = {};
@@ -312,17 +312,17 @@ function extractTrees(
     if (compOf[c.id] || !neighborsOf(c.id).length) continue;
     const stack = [c.id];
     while (stack.length) {
-      const i = stack.pop() as string;
-      if (compOf[i]) continue;
-      compOf[i] = c.id;
-      for (const o of neighborsOf(i)) stack.push(o);
+      const at = stack.pop() as string;
+      if (compOf[at]) continue;
+      compOf[at] = c.id;
+      for (const next of neighborsOf(at)) stack.push(next);
     }
   }
   const groups: Record<string, string[]> = {};
   for (const id in compOf) {
-    const g = compOf[id] as string;
-    if (!groups[g]) groups[g] = [];
-    groups[g]?.push(id);
+    const rep = compOf[id] as string;
+    if (!groups[rep]) groups[rep] = [];
+    groups[rep]?.push(id);
   }
 
   /* 主干择优：比终点、不比长度——长不等于主干，一条反复微调的支线小步多、
@@ -340,33 +340,33 @@ function extractTrees(
 
   const trees: Tree[] = Object.values(groups).map((ids) => {
     /* 主干在取代子图上选；整棵树纯靠转向粘起来时退到转向链、同一把尺子 */
-    const useSup = ids.some((i) => (supOut[i] as string[]).length > 0);
-    const out = useSup ? supOut : pivOut;
-    const incoming = useSup ? supIn : pivIn;
-    const roots = ids.filter((i) => !(incoming[i] as string[]).length && (out[i] as string[]).length);
+    const useSupersede = ids.some((id) => (supOut[id] as string[]).length > 0);
+    const outgoing = useSupersede ? supOut : pivOut;
+    const incoming = useSupersede ? supIn : pivIn;
+    const roots = ids.filter((id) => !(incoming[id] as string[]).length && (outgoing[id] as string[]).length);
     const memo: Record<string, string[]> = {};
-    const best = (i: string): string[] => {
-      if (!memo[i]) {
-        const next = out[i] as string[];
-        memo[i] = next.length ? [i, ...(next.map((o) => best(o)).sort(better)[0] as string[])] : [i];
+    const best = (id: string): string[] => {
+      if (!memo[id]) {
+        const next = outgoing[id] as string[];
+        memo[id] = next.length ? [id, ...(next.map((to) => best(to)).sort(better)[0] as string[])] : [id];
       }
-      return memo[i] as string[];
+      return memo[id] as string[];
     };
     const spine = roots.map((r) => best(r)).sort(better)[0] as string[];
-    const off = ids.filter((i) => !spine.includes(i));
+    const offSpine = ids.filter((id) => !spine.includes(id));
     const sublines: string[][] = [];
-    for (const i of off) {
-      if (sublines.flat().includes(i)) continue;
-      const sl: string[] = [];
-      const stack = [i];
+    for (const start of offSpine) {
+      if (sublines.flat().includes(start)) continue;
+      const subline: string[] = [];
+      const stack = [start];
       while (stack.length) {
-        const x = stack.pop() as string;
-        if (sl.includes(x) || spine.includes(x)) continue;
-        sl.push(x);
-        for (const o of neighborsOf(x)) if (off.includes(o)) stack.push(o);
+        const id = stack.pop() as string;
+        if (subline.includes(id) || spine.includes(id)) continue;
+        subline.push(id);
+        for (const neighbor of neighborsOf(id)) if (offSpine.includes(neighbor)) stack.push(neighbor);
       }
       sublines.push(
-        sl.sort((a, b) => (byId[a] as Card).bornAt.localeCompare((byId[b] as Card).bornAt)),
+        subline.sort((a, b) => (byId[a] as Card).bornAt.localeCompare((byId[b] as Card).bornAt)),
       );
     }
     return {

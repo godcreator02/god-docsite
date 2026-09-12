@@ -52,18 +52,18 @@ const LINE_COMMENT: Record<string, string> = {
  *   行段 `file:a-b`（今天的位置）、整文件 `file`、目录树 `dir/`（带 glob）、存在性 `path · 存在 / 不存在`、名字 `file · 有 text`
  */
 export function whereOf(item: Item): string {
-  const t = item.reference.target;
-  switch (t.kind) {
+  const target = item.reference.target;
+  switch (target.kind) {
     case "span":
-      return `${t.file}:${item.lines[0]}-${item.lines[1]}`;
+      return `${target.file}:${item.lines[0]}-${item.lines[1]}`;
     case "file":
-      return t.file;
+      return target.file;
     case "tree":
-      return `${t.dir}/${t.glob !== undefined ? ` ${t.glob}` : ""}`;
+      return `${target.dir}/${target.glob !== undefined ? ` ${target.glob}` : ""}`;
     case "exists":
-      return `${t.path} · ${t.absent ? "不存在" : "存在"}`;
+      return `${target.path} · ${target.absent ? "不存在" : "存在"}`;
     case "has":
-      return `${t.file} · 有 ${t.text}`;
+      return `${target.file} · 有 ${target.text}`;
   }
 }
 
@@ -99,13 +99,13 @@ export function chipNode(title: string, dot: Dot, mark: DocfirstMark): TreeNode 
 export function diffBlock(lang: string, unified: string, title: string, dot: Dot, mark: DocfirstMark): TreeNode {
   const comment = LINE_COMMENT[lang];
   if (comment === undefined) return { type: "code", lang: "diff", meta: metaOf(title, dot), value: unified, data: { docfirst: mark } };
-  const mark2 = (tag: string): string =>
+  const commentTag = (tag: string): string =>
     comment === "/* */" ? `/* [!code ${tag}] */` : comment === "<!-- -->" ? `<!-- [!code ${tag}] -->` : `${comment} [!code ${tag}]`;
   const lines = unified.split("\n").map((line) => {
     const head = line.slice(0, 2);
     const body = line.slice(2);
-    if (head === "- ") return `${body} ${mark2("--")}`;
-    if (head === "+ ") return `${body} ${mark2("++")}`;
+    if (head === "- ") return `${body} ${commentTag("--")}`;
+    if (head === "+ ") return `${body} ${commentTag("++")}`;
     return body;
   });
   return { type: "code", lang, meta: metaOf(title, dot), value: lines.join("\n"), data: { docfirst: mark } };

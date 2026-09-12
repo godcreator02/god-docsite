@@ -174,7 +174,7 @@ export function cardSchema(ctx: { path: string; source: string }): StandardSchem
         const title = labelRaw || fallbackTitle;
         const parentRaw = fm["parent"];
         const parent = Array.isArray(parentRaw) ? parentRaw.map((v) => String(v)) : undefined;
-        const value_: CardFrontmatter = {
+        const card: CardFrontmatter = {
           title,
           "born-at": bornAt,
           ...description,
@@ -183,7 +183,7 @@ export function cardSchema(ctx: { path: string; source: string }): StandardSchem
           ...(typeof fm["domain"] === "string" ? { domain: fm["domain"] as string } : {}),
           ...(parent ? { parent } : {}),
         };
-        return { value: value_ };
+        return { value: card };
       },
     },
   };

@@ -26,8 +26,8 @@ export interface HasRecord extends MemoRecord {
   kind: "has";
 }
 
-const same = (a: string[], b: string[]): boolean => a.length === b.length && a.every((x, i) => x === b[i]);
-const count = (names: string[] | null): Span => [1, Math.max(1, names?.length ?? 0)];
+const sameNames = (a: string[], b: string[]): boolean => a.length === b.length && a.every((x, i) => x === b[i]);
+const spanOfNames = (names: string[] | null): Span => [1, Math.max(1, names?.length ?? 0)];
 
 export function createTreeComparator(): Comparator {
   return {
@@ -40,10 +40,10 @@ export function createTreeComparator(): Comparator {
     },
     judge(record: MemoRecord | null, target: Target, names: string[] | null): Judgement {
       const pinned = record !== null && record.kind === "tree" ? (record as TreeRecord) : null;
-      if (names === null) return { status: "missing", lines: count(pinned?.names ?? null), reason: "dir-missing", old: pinned?.names ?? [] };
-      const lines = count(names);
+      if (names === null) return { status: "missing", lines: spanOfNames(pinned?.names ?? null), reason: "dir-missing", old: pinned?.names ?? [] };
+      const lines = spanOfNames(names);
       if (pinned === null) return { status: "unconfirmed", lines };
-      if (same(pinned.names, names)) return { status: "fresh", lines };
+      if (sameNames(pinned.names, names)) return { status: "fresh", lines };
       return { status: "changed", lines, reason: "changed", diff: renderDiff(pinned.names, names), old: pinned.names };
     },
   };

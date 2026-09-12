@@ -66,38 +66,38 @@ export function computeDodge(
   viewK: number,
 ): Map<string, number> {
   const dodge = new Map<string, number>();
-  for (const ch of chains) {
-    const cap = (layout.treeBoxes[ch.boxIndex] as { slotDeg: number }).slotDeg / 2;
-    const gs = ch.groups;
+  for (const chain of chains) {
+    const cap = (layout.treeBoxes[chain.boxIndex] as { slotDeg: number }).slotDeg / 2;
+    const groups = chain.groups;
     /* 每组的显示半径与屏幕直径（帧变量：鱼眼映射与缩放深度都在动） */
-    const rs: number[] = [];
+    const radii: number[] = [];
     const diam: number[] = [];
-    for (const g of gs) {
+    for (const g of groups) {
       const place = layout.places.get(g.ids[0] as string) as CardPlace;
       const mag = layout.mag(place.rLin);
       const lod = lodOf(mag);
-      rs.push(layout.displayRadius(place.rLin));
+      radii.push(layout.displayRadius(place.rLin));
       diam.push(2 * g.rBase * (g.hasConclusion ? layout.tierMult : 1) * layout.symbolPx * lod);
     }
     /* 相邻对的角向需求（每侧担一半）：水平错开量 √(所需² − 径向²) 在对中半径处换算角度 */
     const need: number[] = [];
-    for (let i = 0; i < gs.length - 1; i++) {
-      const r0 = rs[i] as number;
-      const r1 = rs[i + 1] as number;
+    for (let i = 0; i < groups.length - 1; i++) {
+      const r0 = radii[i] as number;
+      const r1 = radii[i + 1] as number;
       const gap = (r1 - r0) * viewK;
-      const sreq = ((diam[i] as number) + (diam[i + 1] as number)) / 2 + 6;
-      if (gap >= sreq) {
+      const needPx = ((diam[i] as number) + (diam[i + 1] as number)) / 2 + 6;
+      if (gap >= needPx) {
         need.push(0);
         continue;
       }
-      const dx = Math.sqrt(sreq * sreq - gap * gap);
+      const dx = Math.sqrt(needPx * needPx - gap * gap);
       need.push((dx / 2 / (((r0 + r1) / 2) * viewK)) * DEG);
     }
-    for (let i = 0; i < gs.length; i++) {
-      const n = Math.max(i > 0 ? (need[i - 1] as number) : 0, i < need.length ? (need[i] as number) : 0);
-      if (n <= 0) continue;
-      const off = (i % 2 ? -1 : 1) * Math.min(n, cap);
-      for (const id of (gs[i] as Chain["groups"][number]).ids) dodge.set(id, off);
+    for (let i = 0; i < groups.length; i++) {
+      const push = Math.max(i > 0 ? (need[i - 1] as number) : 0, i < need.length ? (need[i] as number) : 0);
+      if (push <= 0) continue;
+      const off = (i % 2 ? -1 : 1) * Math.min(push, cap);
+      for (const id of (groups[i] as Chain["groups"][number]).ids) dodge.set(id, off);
     }
   }
   return dodge;

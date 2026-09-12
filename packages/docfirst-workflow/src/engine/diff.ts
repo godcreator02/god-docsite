@@ -110,33 +110,31 @@ function mapLine(hunks: Hunk[], line: number): number | null {
 
 /** 给人看的 unified 风格文本：` ` 不变、`-` 删、`+` 增。朴素 LCS，段几十行足够 */
 export function renderDiff(oldLines: string[], newLines: string[]): string {
-  const a = oldLines;
-  const b = newLines;
-  const n = a.length;
-  const m = b.length;
-  const lcs: number[][] = Array.from({ length: n + 1 }, () => Array.from({ length: m + 1 }, () => 0));
-  for (let i = n - 1; i >= 0; i -= 1) {
-    for (let j = m - 1; j >= 0; j -= 1) {
-      lcs[i]![j] = a[i] === b[j] ? lcs[i + 1]![j + 1]! + 1 : Math.max(lcs[i + 1]![j]!, lcs[i]![j + 1]!);
+  const oldCount = oldLines.length;
+  const newCount = newLines.length;
+  const lcs: number[][] = Array.from({ length: oldCount + 1 }, () => Array.from({ length: newCount + 1 }, () => 0));
+  for (let i = oldCount - 1; i >= 0; i -= 1) {
+    for (let j = newCount - 1; j >= 0; j -= 1) {
+      lcs[i]![j] = oldLines[i] === newLines[j] ? lcs[i + 1]![j + 1]! + 1 : Math.max(lcs[i + 1]![j]!, lcs[i]![j + 1]!);
     }
   }
   const out: string[] = [];
   let i = 0;
   let j = 0;
-  while (i < n && j < m) {
-    if (a[i] === b[j]) {
-      out.push(`  ${a[i]}`);
+  while (i < oldCount && j < newCount) {
+    if (oldLines[i] === newLines[j]) {
+      out.push(`  ${oldLines[i]}`);
       i += 1;
       j += 1;
     } else if (lcs[i + 1]![j]! >= lcs[i]![j + 1]!) {
-      out.push(`- ${a[i]}`);
+      out.push(`- ${oldLines[i]}`);
       i += 1;
     } else {
-      out.push(`+ ${b[j]}`);
+      out.push(`+ ${newLines[j]}`);
       j += 1;
     }
   }
-  while (i < n) out.push(`- ${a[i++]}`);
-  while (j < m) out.push(`+ ${b[j++]}`);
+  while (i < oldCount) out.push(`- ${oldLines[i++]}`);
+  while (j < newCount) out.push(`+ ${newLines[j++]}`);
   return out.join("\n");
 }
