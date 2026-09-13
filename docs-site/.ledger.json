@@ -283,7 +283,7 @@
     "package.json:7-12": {
       "kind": "git",
       "blob": "ef66091360a86807c377b6ea42eca310932bc552",
-      "commit": "19590b56ecdb0f5b75d560ea2a63e7bbe3dfb1a6",
+      "commit": "98e2c9290daf21f5199a1c0af75bc712d7d49bef",
       "lines": [
         7,
         12
@@ -293,7 +293,7 @@
     "../package.json:7-13": {
       "kind": "git",
       "blob": "42573a048c06edde02917c84d53273d9b9e3f40a",
-      "commit": "19590b56ecdb0f5b75d560ea2a63e7bbe3dfb1a6",
+      "commit": "98e2c9290daf21f5199a1c0af75bc712d7d49bef",
       "lines": [
         7,
         13
@@ -302,8 +302,8 @@
     },
     "content/docs/maintain/agents.mdx:29-35": {
       "kind": "git",
-      "blob": "9d2d588f554bd24af51202b6d4bf2b96fcf64f67",
-      "commit": "19590b56ecdb0f5b75d560ea2a63e7bbe3dfb1a6",
+      "blob": "6bc3d82c7448e289e77776479814cbf01bb51151",
+      "commit": "98e2c9290daf21f5199a1c0af75bc712d7d49bef",
       "lines": [
         29,
         35
@@ -312,8 +312,8 @@
     },
     "content/docs/maintain/agents.mdx:54-57": {
       "kind": "git",
-      "blob": "9d2d588f554bd24af51202b6d4bf2b96fcf64f67",
-      "commit": "19590b56ecdb0f5b75d560ea2a63e7bbe3dfb1a6",
+      "blob": "6bc3d82c7448e289e77776479814cbf01bb51151",
+      "commit": "98e2c9290daf21f5199a1c0af75bc712d7d49bef",
       "lines": [
         54,
         57
@@ -322,18 +322,18 @@
     },
     "content/docs/maintain/agents.mdx:39-53": {
       "kind": "git",
-      "blob": "9d2d588f554bd24af51202b6d4bf2b96fcf64f67",
-      "commit": "19590b56ecdb0f5b75d560ea2a63e7bbe3dfb1a6",
+      "blob": "6bc3d82c7448e289e77776479814cbf01bb51151",
+      "commit": "98e2c9290daf21f5199a1c0af75bc712d7d49bef",
       "lines": [
         39,
         53
       ],
-      "hash": "c4f7351c32c81ac2237964703c461f467669b4bf5e6bd900f33caea950d5f167"
+      "hash": "086705382b2738d60466f52e05dad322b624cb62026fab225234c8e90307cc46"
     },
     "../packages/gwb-docfirst-workflow/package.json:25-32": {
       "kind": "git",
-      "blob": "e7edd0fea94b5873943e48a0b2a972851a581316",
-      "commit": "19590b56ecdb0f5b75d560ea2a63e7bbe3dfb1a6",
+      "blob": "d0cd7cd212d02ae484cc40fa18f6ce4fd27c7652",
+      "commit": "98e2c9290daf21f5199a1c0af75bc712d7d49bef",
       "lines": [
         25,
         32
