@@ -104,7 +104,7 @@ pnpm docfirst trajectory               列轨迹卡的盘 / 树 / 主干
 - **`trajectory`**：什么时候记一张轨迹卡、怎么落、卡的字段是什么。
 - **`spec-grill`**：接到一句话需求，动代码之前怎么盘问到人点头。
 - **`parallel-by-module`**：活大到要派 subagent 时怎么按模块切、什么必须串行。
-- **`self-explaining-code`**：扫一遍代码，让注释、命名、函数边界自己说清自己。
+- **`docs-governance`**：文档与注释治理——代码自解释扫描、术语统一、历史出清、所有权重分家。
 
 前两份讲的是 `@godcreator02/docfirst-workflow` 那个包的行为，后三份讲通用开发纪律、不描述任何代码——但它们要跟钉码写法与六区对得上号，所以正本同样住那个包的仓（`docs-site/content/outputs/skills/`），
 生成物随本件发——**包没有独立的到达路径**：它躺在 `node_modules` 里没人指引、没人会读，
