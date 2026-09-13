@@ -7,14 +7,14 @@ description: 四类角色、三条入口、依赖方向是什么、先读哪块
 
 **本页回答**：这套东西拆成哪几块、各住哪、块与块之间谁依赖谁、新来的人先读哪块。
 
-## 两个包，一枚件
+## 两个包，一个插件
 
 `packages/` 下三样：
 
 {/* tree dir="../packages" depth="1" */}
 
 `docfirst` 是主包 `@godcreator02/docfirst-workflow`，`trajectory` 是独立的一条包线
-`@godcreator02/docfirst-trajectory`，`gwb-docfirst-workflow` 是工作台件——它不进 npm 的依赖网，只在
+`@godcreator02/docfirst-trajectory`，`gwb-docfirst-workflow` 是工作台插件——它不进 npm 的依赖网，只在
 桌面工作台里把命令行开给 agent。
 
 ## 四类角色
@@ -31,9 +31,9 @@ description: 四类角色、三条入口、依赖方向是什么、先读哪块
 | 格式 | `src/fumadocs/` | mdx 怎么认记号、怎么写回、怎么渲；加站的 remark 接线与展示组件 | [格式与站接线](/docs/modules/fumadocs) |
 | 入口 | `src/cli/` | 命令行的分流、打印、退码 | [命令行](/docs/modules/cli) |
 
-包里没有第五样：给一个已有骨架**装六区**那摊住工作台件（[装配六区](/docs/modules/site)）。
-包的消费方是仓，件的消费方是 agent，判据见轨迹卡
-[包给仓件给人](/trajectory/2026-09-10-package-serves-repo-plugin-serves-agent)。
+包里没有第五样：给一个已有骨架**装六区**那摊住工作台插件（[装配六区](/docs/modules/site)）。
+包的消费方是仓，插件的消费方是 agent，判据见轨迹卡
+[包给仓、插件给人](/trajectory/2026-09-10-package-serves-repo-plugin-serves-agent)。
 
 ## 三条入口
 
@@ -49,7 +49,7 @@ description: 四类角色、三条入口、依赖方向是什么、先读哪块
     站的 `source.config.ts` import `@godcreator02/docfirst-workflow/fumadocs`，remark 插件在构建期
     装配一次项目、认引用、算清单、把状态点打到树上。人看的那份文档就是站本身。
   </Tab>
-  <Tab title="工作台件">
+  <Tab title="工作台插件">
     `@godcreator02/gwb-docfirst-workflow` 经命令总线开出 `docfirst.attach`（在进程内给一个已有骨架
     铺六区），另把六份说明书挂给 agent 读。**它对包零依赖**：不 import、不起子进程——要核对
     就 `cd` 到那个仓里跑包的命令行。
@@ -78,9 +78,9 @@ description: 四类角色、三条入口、依赖方向是什么、先读哪块
 那套，只给站用。`cli` 依赖它是为了接 `docfirst trajectory` 子命令，而且只用 `.` 入口；别的四层
 一概不许碰它。
 
-**包与件互不认识**：两个 npm 包的三档依赖面里不许出现工作台件，也不许出现任何
-`@godcreator02/gwb-*`——装这两个包的人不该被迫拉进一整个桌面工作台生态；反过来那半，件的
-三档依赖面里也不许出现 `@godcreator02/docfirst-workflow`，守在件自己的 `tests/artifact.test.ts` 上。
+**包与插件互不认识**：两个 npm 包的三档依赖面里不许出现工作台插件，也不许出现任何
+`@godcreator02/gwb-*`——装这两个包的人不该被迫拉进一整个桌面工作台生态；反过来那半，插件的
+三档依赖面里也不许出现 `@godcreator02/docfirst-workflow`，守在插件自己的 `tests/artifact.test.ts` 上。
 
 ## 边界靠什么守
 
@@ -91,9 +91,9 @@ description: 四类角色、三条入口、依赖方向是什么、先读哪块
 {/* ref file="../tests/boundary.test.ts" lines="1-26" */}
 
 它守四类：目录方向（上面那张表）、`engine` 的零依赖、宿主只能是 peer 且不许被打进产物、
-包不认识件。**它报红的时候，红的是设计，不是测试。**
+包不认识插件。**它报红的时候，红的是设计，不是测试。**
 
-方向单向换来的是换件只动一处：换一种文档格式，新写一份 `Format` 实现，判定层一行不动；
+方向单向换来的是换零件只动一处：换一种文档格式，新写一份 `Format` 实现，判定层一行不动；
 换记忆的记法，实现 `Comparator` 两个方法再在配置里换个名字；换记录簿的存法，实现 `Ledger`
 五个方法；换站的宿主，只动 `src/fumadocs/`。
 
@@ -119,7 +119,7 @@ description: 四类角色、三条入口、依赖方向是什么、先读哪块
 状态都在那儿，别的层只认这一份；**再 [环境层](/docs/modules/host)**——装配的全貌、记忆按被引
 文件的位置怎么分派、一篇正本怎么摆到落点；**然后 [命令行](/docs/modules/cli)**。
 [格式与站接线](/docs/modules/fumadocs) 是站构建那条入口，[轨迹](/docs/modules/trajectory) 是
-独立的一条包线，[工作台件](/docs/modules/plugin) 与它带的 [装配六区](/docs/modules/site) 在包
+独立的一条包线，[工作台插件](/docs/modules/plugin) 与它带的 [装配六区](/docs/modules/site) 在包
 外面，各从自己那一页进，只读命令这条线的人整个跳过。
 
 两处边界值得在进代码之前先知道，免得照目录名猜错：

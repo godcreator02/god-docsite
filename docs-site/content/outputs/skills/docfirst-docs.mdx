@@ -130,7 +130,7 @@ A 阻断直接干活：`spec-grill` skill 在对话里把想法盘到能说清�
 判据」，人点头前不动代码。它盘需求边界，`gwb-decide` 盘选型，不重叠。一个提交：代码 +
 文档变化 + 卡，一起落。
 
-**这一格的三份纪律随本件一起发，各有触发条件**：`spec-grill`（A 那一步怎么盘）、
+**这一处的三份纪律随本插件一起发，各有触发条件**：`spec-grill`（A 那一步怎么盘）、
 `parallel-by-module`（活大到要派 subagent 时怎么切、什么必须串行）、`self-explaining-code`
 （扫一遍代码，让注释、命名、函数边界自己说清自己）。这一页不复述它们的正文。
 
@@ -189,9 +189,9 @@ README、AGENTS.md、包内 SKILL.md 都是生成物，正本住 `content/output
 # 起站与交接
 
 起一个新站是**两步，顺序不能反、中间别改文件**，两步都是工作台里的命令（那个 npm 包的命令行
-里没有这两条——铺一次模板只在 agent 手上发生，不在仓的门禁里发生）：先用站件的
+里没有这两条——铺一次模板只在 agent 手上发生，不在仓的门禁里发生）：先用站点插件的
 `docs-site.create {"dir":"<仓>/docs-site"}` 铺一个标准 fumadocs 骨架（装了 fumadocs 的人才该有
-那个能力），再用 docfirst 件的 `docfirst.attach {"dir":"<仓>/docs-site"}` 把六区装上——六个集合、
+那个能力），再用 docfirst 插件的 `docfirst.attach {"dir":"<仓>/docs-site"}` 把六区装上——六个集合、
 六条路由、侧栏六个根节、`docfirst.config.mjs`、mdx 接线、名册脚本、各区的骨架页，`package.json`
 里补上依赖与 doc 脚本。只写文件不跑 install，端口用骨架挑好的那个。
 

@@ -28,7 +28,7 @@ pnpm add -D @godcreator02/docfirst-workflow @godcreator02/docfirst-trajectory
 指令吃掉。
 
 **装一个新站是两步，命令行不管这两步**：先铺一个标准 fumadocs 骨架（装了 fumadocs 的人才该有
-那个能力，工作台里是站件的 `docs-site.create`），再由工作台件 `@godcreator02/gwb-docfirst-workflow` 的
+那个能力，工作台里是站点插件的 `docs-site.create`），再由工作台插件 `@godcreator02/gwb-docfirst-workflow` 的
 `docfirst.attach` 把六区装上。它**只在刚铺好的骨架上跑**：站里已经有 `docfirst.config.mjs`、或
 `content/` 下已经有骨架之外的内容，就报一句「这个站已有内容，请人工接线」退非零，一个字不改写。
 
@@ -76,9 +76,9 @@ pnpm docfirst check
 `content/future/` 未来、`content/outputs/` 生成正本（进 check）、`content/feedback/` 反馈。
 先读现状区的**系统地图**，再读要改的那块的模块页。
 
-文档本身怎么写、六区怎么分、每页写到哪为止，正本是**随工作台件发的 skill**，住
+文档本身怎么写、六区怎么分、每页写到哪为止，正本是**随工作台插件发的 skill**，住
 `packages/gwb-docfirst-workflow/skills/`：写文档读 `docfirst-docs`、落卡读 `trajectory`、装六区读 `docfirst`。
-说明书跟着件走而不是跟着包走，是因为包没有独立的到达路径——躺在 `node_modules` 里的一份
+说明书跟着插件走而不是跟着包走，是因为包没有独立的到达路径——躺在 `node_modules` 里的一份
 SKILL.md 没人指引、没人会读。通用开发纪律的三份也在这儿：接到需求先盘问读 `spec-grill`、
 活大到要派 subagent 读 `parallel-by-module`、扫一遍代码让它自解释读 `self-explaining-code`。
 
@@ -100,7 +100,7 @@ pnpm build          # next build
 node scripts/verify-roster.mjs
 
 cd ../packages/gwb-docfirst-workflow
-pnpm check && pnpm build      # 工作台件自成一摊，用 vitest
+pnpm check && pnpm build      # 工作台插件自成一摊，用 vitest
 ```
 
 改了格式包的代码，站要**先删 `.next` 再 build** 才看得见——Turbopack 只按 mdx 内容缓存。

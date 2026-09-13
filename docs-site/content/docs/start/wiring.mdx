@@ -11,8 +11,8 @@ description: 把 docfirst 接进一个 fumadocs 站要动的七处：配置、�
 块右上角那个小圆点是状态（图例见 [入门](/docs/start)）。所以下面每一处钉的都是这个站自己的文件，
 读到的就是正在跑的那一份。
 
-铺骨架归站件，接六区是工作台件那条 `docfirst.attach`（[装配六区](/docs/modules/site)），模板在
-`packages/gwb-docfirst-workflow/template/attach/`。**手接与件装出来的是同一套形状**，差异只有星轨整页那一处
+铺骨架归站点插件，接六区是工作台插件那条 `docfirst.attach`（[装配六区](/docs/modules/site)），模板在
+`packages/gwb-docfirst-workflow/template/attach/`。**手接与插件装出来的是同一套形状**，差异只有星轨整页那一处
 ——见第四节末尾。
 
 ## 一、装包，与项目根那份 docfirst.config.mjs
@@ -207,7 +207,7 @@ React 表底下铺 fumadocs 的默认表（标题栏、复制按钮都是它的�
 跑站三件事：改了 `src/fumadocs/` 的代码**先删 `.next` 再 build**——Turbopack 只按 mdx 内容缓存，
 文档一个字没改它就不重跑 remark 插件，那一层里的改动看不见；调试用 `build` + `start`，不用 `next dev`，dev 那条链的缓存
 和热更新会让「这一版到底跑没跑我的插件」说不清；`start` 脚本钉的端口被别的进程占了就
-`pnpm exec next start -p <别的口>`，起来的站验完停掉。
+`pnpm exec next start -p <别的端口>`，起来的站验完停掉。
 
 ## 附：六区各是什么
 

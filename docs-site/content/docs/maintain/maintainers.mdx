@@ -16,7 +16,7 @@ description: 仓布局、三摊门禁、提交规矩、发布、老仓退役条�
     packages/
       docfirst/                  主包：src 下四层 engine / host / fumadocs / cli
       trajectory/               轨迹包：卡与星轨盘，独立的一条包线
-      gwb-docfirst-workflow/             工作台件：跟两个包同住，两边互不认识；铺六区与三份说明书在这儿
+      gwb-docfirst-workflow/             工作台插件：跟两个包同住，两边互不认识；铺六区与六份说明书在这儿
     docs-site/                  这个站：用这套机制写自己的文档，也是工作区成员
       content/docs/             文档
       content/trajectory/       轨迹卡
@@ -40,8 +40,8 @@ description: 仓布局、三摊门禁、提交规矩、发布、老仓退役条�
 
 外加 `node scripts/verify-roster.mjs`（[名册](/docs/modules/fumadocs)两头对）和 `pnpm docfirst check`。
 
-工作台件自成一摊：它用 vitest，跟两个包的 `node --test` 不是一套，所以工作区根的 `test` 脚本
-不去收它（根的 `build` 与 `typecheck` 按 `./packages/**` 过滤，件是被带上的）。
+工作台插件自成一摊：它用 vitest，跟两个包的 `node --test` 不是一套，所以工作区根的 `test` 脚本
+不去收它（根的 `build` 与 `typecheck` 按 `./packages/**` 过滤，插件是被带上的）。
 
 {/* ref file="../packages/gwb-docfirst-workflow/package.json" lines="25-32" */}
 
@@ -72,10 +72,10 @@ exports 指 lib/、cordis.patch.yml，且一仓一包一插件），这套多包
 `registry.md`：版本人改、同版本号永不重发。消费方按精确版本引，不走 `dsh plugin add`。
 
 抬版本号时**跟着改 `packages/gwb-docfirst-workflow/src/deps.ts` 那张表**——铺六区往目标站补的就是它，
-件的 `tests/attach.test.ts` 里有一条守着它跟工作区各包的版本对得上，忘了抬当场红。
+插件的 `tests/attach.test.ts` 里有一条守着它跟工作区各包的版本对得上，忘了抬当场红。
 
-**两边各发各的，没有先后。**件对包零依赖：它不打包那个包、三档依赖面里也没有它，所以先发哪个
-都不影响另一个。件那一摊照 devkit 的插件规矩发（一仓一包一插件的那套在它身上成立），跟两个包的
+**两边各发各的，没有先后。**插件对包零依赖：它不打包那个包、三档依赖面里也没有它，所以先发哪个
+都不影响另一个。插件那一摊照 devkit 的插件规矩发（一仓一包一插件的那套在它身上成立），跟两个包的
 手跑发版互不干涉。
 
 ## 参考，只读
