@@ -1,7 +1,7 @@
 {
   "name": "@godcreator02/gwb-docfirst-workflow",
   "version": "0.6.2",
-  "description": "docfirst 件：给一个已经建好的 fumadocs 骨架装上 docfirst 的六区（docfirst.attach，模板随件发、件自己铺），再挂六份说明书——讲这套机制的三份（docfirst 装六区 / docfirst-docs 写文档 / trajectory 记卡）加讲通用开发纪律的三份（spec-grill 先盘问 / parallel-by-module 并行派活 / self-explaining-code 代码自解释）。**对 @godcreator02/docfirst-workflow 那个包零依赖**——核对、确认、渲染要在仓里发生，agent 自己 cd 过去跑 pnpm doc，件不转发、不起子进程。站的一生（扫站、起停、端口、到点关、窗格）归站件 @godcreator02/gwb-docs-site，两个件互不依赖、各带各的模板",
+  "description": "docfirst 件：给一个已经建好的 fumadocs 骨架装上 docfirst 的六区（docfirst.attach，模板随件发、件自己铺），再挂六份说明书——讲这套机制的三份（docfirst 装六区 / docfirst-docs 写文档 / trajectory 记卡）加讲通用开发纪律的三份（spec-grill 先盘问 / parallel-by-module 并行派活 / docs-governance 文档与注释治理——含代码自解释扫描）。**对 @godcreator02/docfirst-workflow 那个包零依赖**——核对、确认、渲染要在仓里发生，agent 自己 cd 过去跑 pnpm doc，件不转发、不起子进程。站的一生（扫站、起停、端口、到点关、窗格）归站件 @godcreator02/gwb-docs-site，两个件互不依赖、各带各的模板",
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

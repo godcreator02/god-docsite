@@ -118,7 +118,7 @@ export function apply(ctx: GwbContext): void {
 
   // 说明书那一格，局部注入：没装 skills 件的 home 里本件照常挂。产物在 dist/ 下，包根的 skills/ 是 '../skills/'
   // 六份都随本件发：三份讲这套机制（`docfirst` / `docfirst-docs` / `trajectory`），三份讲通用开发纪律
-  // （`spec-grill` / `parallel-by-module` / `self-explaining-code`）——包没有独立的到达路径，全靠件 register 这个目录
+  // （`spec-grill` / `parallel-by-module` / `docs-governance`）——包没有独立的到达路径，全靠件 register 这个目录
   ctx.inject(['gwbSkills'], (scoped) => {
     scoped.effect(() => scoped.gwbSkills.register(new URL('../skills/', import.meta.url)))
   })

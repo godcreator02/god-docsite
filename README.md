@@ -80,7 +80,7 @@ pnpm docfirst check
 `packages/gwb-docfirst-workflow/skills/`：写文档读 `docfirst-docs`、落卡读 `trajectory`、装六区读 `docfirst`。
 说明书跟着插件走而不是跟着包走，是因为包没有独立的到达路径——躺在 `node_modules` 里的一份
 SKILL.md 没人指引、没人会读。通用开发纪律的三份也在这儿：接到需求先盘问读 `spec-grill`、
-活大到要派 subagent 读 `parallel-by-module`、扫一遍代码让它自解释读 `self-explaining-code`。
+活大到要派 subagent 读 `parallel-by-module`、治理文档与注释读 `docs-governance`。
 
 **这份 README 是生成物**，正本是 `docs-site/content/outputs/readme.mdx`；仓根 `AGENTS.md` 同理。
 改 mdx 源，`pnpm docfirst render` 重摆，两份一起提交。

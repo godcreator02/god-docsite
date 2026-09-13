@@ -39,7 +39,7 @@ export default {
     "content/outputs/skills/trajectory.mdx": [skill("trajectory")],
     "content/outputs/skills/spec-grill.mdx": [skill("spec-grill")],
     "content/outputs/skills/parallel-by-module.mdx": [skill("parallel-by-module")],
-    "content/outputs/skills/self-explaining-code.mdx": [skill("self-explaining-code")],
+    "content/outputs/skills/docs-governance.mdx": [skill("docs-governance")],
   },
   components: {
     ...fumadocs.defaultRoster,
