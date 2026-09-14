@@ -5,7 +5,7 @@ description: cli 层：四条子命令的分流与编排，机读报告与退出
 
 # 命令行
 
-**本页回答**：`@godcreator02/docfirst-workflow` 的 `src/cli/` 编排哪四条子命令、哪些事**不**归它、`--json` 报告与退出码的契约长什么样、怎么把它单独架起来测。
+**本页回答**：`@team/docfirst-workflow` 的 `src/cli/` 编排哪四条子命令、哪些事**不**归它、`--json` 报告与退出码的契约长什么样、怎么把它单独架起来测。
 
 ## 管什么
 
@@ -241,7 +241,7 @@ fumadocs 那份的 `renderAi` 是借站自己的 loader 出的 md，见 [fumadoc
 | `project.docIdOf(path)` | 按页限定时把人给的路径认成文档身份 | 环境层 | 同上 |
 | `targetKey(target)` | 把目标压成人读那一截、也是记录簿的键 | 判定层 `engine/marker.ts` | 同上 |
 | `Format`（认记号、写回、`renderAi`、`lintComponents`） | 每一篇归哪个格式由装配认，渲染与记号形态问它要 | fumadocs 那一层 | 临时项目的配置按**绝对 `file:` 地址**引一份假格式 |
-| `buildTrajectory(dir)` / `scanDir(dir)` | 出盘 / 树 / 主干模型；扫病卡 | `@godcreator02/docfirst-trajectory` | 同一个真实现，喂临时目录里现写的卡 |
+| `buildTrajectory(dir)` / `scanDir(dir)` | 出盘 / 树 / 主干模型；扫病卡 | `@team/docfirst-trajectory` | 同一个真实现，喂临时目录里现写的卡 |
 
 ## 怎么单独测
 
