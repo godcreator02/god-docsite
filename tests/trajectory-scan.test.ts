@@ -7,7 +7,7 @@ import assert from "node:assert/strict";
 import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { pickCardFiles, scanDir } from "@godcreator02/docfirst-trajectory";
+import { pickCardFiles, scanDir } from "@team/docfirst-trajectory";
 
 const CARD = (label: string): string => ["---", "born-at: 2026-01-02T08:00", `label: ${label}`, "parent: [pj01]", "---", "", "正文。", ""].join("\n");
 
