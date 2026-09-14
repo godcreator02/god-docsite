@@ -1,19 +1,19 @@
 ---
 title: 工作台插件
-description: gwb-docfirst-workflow：一条铺六区的命令加六份说明书，对 @team/docfirst-workflow 那个包零依赖
+description: gwb-docfirst-workflow：一条铺六区的命令加六份说明书，对 @godcreator/docfirst-workflow 那个包零依赖
 ---
 
 # 工作台插件
 
-**本页回答**：`@team/gwb-docfirst-workflow` 手上还剩什么、为什么它一个字都不许依赖 `@team/docfirst-workflow`、这条边界靠什么守住。
+**本页回答**：`@godcreator/gwb-docfirst-workflow` 手上还剩什么、为什么它一个字都不许依赖 `@godcreator/docfirst-workflow`、这条边界靠什么守住。
 
 ## 管什么
 
-`packages/gwb-docfirst-workflow` 是这个工作区里唯一不发成 npm 库的包：它是 god 工作台（gwb）的一个插件，包名 `@team/gwb-docfirst-workflow`。它管的只有两样——**一条把六区铺到 fumadocs 骨架上的命令，加六份随插件发的说明书**。怎么分的写在文件头上：
+`packages/gwb-docfirst-workflow` 是这个工作区里唯一不发成 npm 库的包：它是 god 工作台（gwb）的一个插件，包名 `@godcreator/gwb-docfirst-workflow`。它管的只有两样——**一条把六区铺到 fumadocs 骨架上的命令，加六份随插件发的说明书**。怎么分的写在文件头上：
 
 {/* ref file="../packages/gwb-docfirst-workflow/src/index.ts" lines="9-21" */}
 
-一句话的判据：**包的消费方是仓，插件的消费方是 agent。** 要在**仓**里发生的事（核对、确认、渲染，门禁与站构建要跑的那些）归 `@team/docfirst-workflow` 那个包，agent 自己 `cd` 到那个仓里跑 `pnpm doc`；只在 **agent** 手上发生一次的事（读一份说明书、给一个新骨架铺一次六区）归插件。这条判据怎么推出来的、否掉了哪几条候选，在 [包给仓、插件给人](/trajectory/2026-09-10-package-serves-repo-plugin-serves-agent)。
+一句话的判据：**包的消费方是仓，插件的消费方是 agent。** 要在**仓**里发生的事（核对、确认、渲染，门禁与站构建要跑的那些）归 `@godcreator/docfirst-workflow` 那个包，agent 自己 `cd` 到那个仓里跑 `pnpm doc`；只在 **agent** 手上发生一次的事（读一份说明书、给一个新骨架铺一次六区）归插件。这条判据怎么推出来的、否掉了哪几条候选，在 [包给仓、插件给人](/trajectory/2026-09-10-package-serves-repo-plugin-serves-agent)。
 
 插件的身份面就三个常量：插件名、那条命令的名字、一条硬 inject。
 
@@ -127,14 +127,14 @@ description: gwb-docfirst-workflow：一条铺六区的命令加六份说明书�
 
 | 接口 | 用来做什么 | 生产实现 | 测试实现 |
 | --- | --- | --- | --- |
-| `gwbCommands` | 挂 `docfirst.attach` 那一条 | 命令总线插件 `@team/gwb-commands` | 不测（命令名由产物守卫数着） |
-| `gwbSkills` | 把包内 `skills/` 那三份报过去 | skills 插件 `@team/gwb-skills` | 不测（只是把一个目录 URL 报过去） |
+| `gwbCommands` | 挂 `docfirst.attach` 那一条 | 命令总线插件 `@godcreator/gwb-commands` | 不测（命令名由产物守卫数着） |
+| `gwbSkills` | 把包内 `skills/` 那三份报过去 | skills 插件 `@godcreator/gwb-skills` | 不测（只是把一个目录 URL 报过去） |
 
 契约包（`isRecord` 与 `GwbContext`）与命令总线走 peer——前者是每个插件都得对得上的那份契约，后者是运行期硬依赖；skills 落 dev 再挂一条可选 peer 当版本校验点，cordis 对服务不做版本校验，peer range 是这条链上唯一一处。这一档由测试钉着，注入方式与依赖档一起查：
 
 {/* ref file="../packages/gwb-docfirst-workflow/tests/artifact.test.ts" lines="133-138" */}
 
-`@team/docfirst-workflow` 与站点插件 `@team/gwb-docs-site` 一档都不写，见「零依赖这条边界」与「跟站点插件」两节。
+`@godcreator/docfirst-workflow` 与站点插件 `@godcreator/gwb-docs-site` 一档都不写，见「零依赖这条边界」与「跟站点插件」两节。
 
 ## 怎么单独测
 
