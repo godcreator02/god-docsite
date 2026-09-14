@@ -22,8 +22,8 @@ const PACKAGES = path.resolve(HERE, '..', '..')
 
 /** 包名 → 它在 packages/ 下的目录名。目录名跟包名去掉 scope 那一截同名 */
 const DIR_OF: Record<string, string> = {
-  '@team/docfirst-workflow': 'docfirst-workflow',
-  '@team/docfirst-trajectory': 'docfirst-trajectory',
+  '@godcreator/docfirst-workflow': 'docfirst-workflow',
+  '@godcreator/docfirst-trajectory': 'docfirst-trajectory',
 }
 
 /** 渲模板用的一套值，占位符集合是封闭的五个 */
