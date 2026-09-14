@@ -11,8 +11,8 @@
     "test": "node --test \"tests/*.test.mjs\""
   },
   "dependencies": {
-    "@godcreator02/docfirst-workflow": "workspace:*",
-    "@godcreator02/docfirst-trajectory": "workspace:*",
+    "@team/docfirst-workflow": "workspace:*",
+    "@team/docfirst-trajectory": "workspace:*",
     "fumadocs-core": "16.15.1",
     "fumadocs-mdx": "15.3.1",
     "fumadocs-ui": "npm:@fumadocs/base-ui@16.15.1",
