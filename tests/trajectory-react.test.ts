@@ -13,10 +13,10 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
-import { advanceFrame, buildModel, buildTrajectory, RingsLayout, scanDir } from "@godcreator02/docfirst-trajectory";
-import type { FrameState } from "@godcreator02/docfirst-trajectory";
-import { StarDisk } from "@godcreator02/docfirst-trajectory/react";
-import { launcherThumbs, renderThumb } from "@godcreator02/docfirst-trajectory/server";
+import { advanceFrame, buildModel, buildTrajectory, RingsLayout, scanDir } from "@team/docfirst-trajectory";
+import type { FrameState } from "@team/docfirst-trajectory";
+import { StarDisk } from "@team/docfirst-trajectory/react";
+import { launcherThumbs, renderThumb } from "@team/docfirst-trajectory/server";
 
 const ROOT_ID = "tfix-测试项目根卡";
 
