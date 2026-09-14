@@ -18,7 +18,7 @@ const SUFFIX = ".tpl";
  * 不带 `**`），产物于是是平的。哪天把实现摆进子目录，这条路就跑到 `dist/` 里去了。
  *
  * 模板从不进 `dist/`：它原地躺在包根，靠 `package.json` 的 `files` 发出去
- * （`tests/artifact.test.ts` 守着那一条）。站件 `@team/gwb-docs-site` 带它那份骨架模板
+ * （`tests/artifact.test.ts` 守着那一条）。站件 `@godcreator/gwb-docs-site` 带它那份骨架模板
  * 用的是同一套摆法——**两个件各带各的模板，是有意的对称**。
  */
 export const ATTACH_TEMPLATE = fileURLToPath(new URL("../template/attach/", import.meta.url));
