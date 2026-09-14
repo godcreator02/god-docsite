@@ -8,11 +8,11 @@ description: 要给一个刚建好的 fumadocs 骨架装上 docfirst 的六区�
 本件只有**一条命令**：`docfirst.attach`——给一个已经铺好的 fumadocs 骨架装上 docfirst 的六区。
 除此之外它只做一件事：把另外五份说明书挂给你读。
 
-**它对 `@team/docfirst-workflow` 那个包零依赖**，装了本件不必再装什么包。判据是「这件事在哪儿
+**它对 `@godcreator/docfirst-workflow` 那个包零依赖**，装了本件不必再装什么包。判据是「这件事在哪儿
 发生」：核对 / 确认 / 渲染要在**仓**里发生（那是门禁与站构建跑的东西），你自己 `cd` 过去跑；
 只在你手上发生一次的（读说明书、给一个新骨架铺一次文件）才归件。**件不转发命令行。**
 
-**站的一生归站件**（`@team/gwb-docs-site`，命令 `docs-site.*`）：扫容器根找站、铺标准
+**站的一生归站件**（`@godcreator/gwb-docs-site`，命令 `docs-site.*`）：扫容器根找站、铺标准
 fumadocs 骨架、判 build 新鲜度、现挑空口起停、到点自动关、那一格窗格。两个件互不依赖、
 各带各的模板。
 
@@ -106,7 +106,7 @@ pnpm docfirst trajectory               列轨迹卡的盘 / 树 / 主干
 - **`parallel-by-module`**：活大到要派 subagent 时怎么按模块切、什么必须串行。
 - **`docs-governance`**：文档与注释治理——代码自解释扫描、术语统一、历史出清、所有权重分家。
 
-前两份讲的是 `@team/docfirst-workflow` 那个包的行为，后三份讲通用开发纪律、不描述任何代码——但它们要跟钉码写法与六区对得上号，所以正本同样住那个包的仓（`docs-site/content/outputs/skills/`），
+前两份讲的是 `@godcreator/docfirst-workflow` 那个包的行为，后三份讲通用开发纪律、不描述任何代码——但它们要跟钉码写法与六区对得上号，所以正本同样住那个包的仓（`docs-site/content/outputs/skills/`），
 生成物随本件发——**包没有独立的到达路径**：它躺在 `node_modules` 里没人指引、没人会读，
 一份说明书能被你读到全靠件把自己包里那个目录 register 了上去。
 
