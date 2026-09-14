@@ -2,7 +2,7 @@
  * 装配往目标站的 `devDependencies` 里补的那几条。
  *
  * **这两个包名出现在这儿不算依赖**：它们是写进别人 `package.json` 的字符串，件自己一行都不
- * import、发出去也不会被谁装上。件对 `@team/docfirst-workflow` 的零依赖守卫查的是本件
+ * import、发出去也不会被谁装上。件对 `@godcreator/docfirst-workflow` 的零依赖守卫查的是本件
  * `package.json` 的三档依赖面，跟这张表不冲突——装出来的站要跑 `pnpm doc`，那是**仓**里的事，
  * 仓当然该装那个包。
  *
@@ -12,6 +12,6 @@
  * 这张表跟着抬，那条测试红了就是忘了抬**。
  */
 export const DOCFIRST_DEPS: Record<string, string> = {
-  "@team/docfirst-workflow": "^0.2.0",
-  "@team/docfirst-trajectory": "^0.1.1",
+  "@godcreator/docfirst-workflow": "^0.2.0",
+  "@godcreator/docfirst-trajectory": "^0.1.1",
 };
