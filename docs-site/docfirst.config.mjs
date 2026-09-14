@@ -11,7 +11,7 @@
  * trajectory：卡目录是站自己的 content/trajectory/（跟 source.config.ts 里卡集合的 dir 是同一处），
  * check 顺带跑卡校验。本仓自己的卡由人写。
  */
-import * as fumadocs from "@team/docfirst-workflow/fumadocs";
+import * as fumadocs from "@godcreator/docfirst-workflow/fumadocs";
 import * as tabs from "./src/components/tabs/tabs.ai.mjs";
 
 /**
