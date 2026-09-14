@@ -1,6 +1,7 @@
 {
   "name": "@godcreator02/docfirst-workflow",
   "version": "0.2.0",
+  "author": {"name": "godcreator"},
   "type": "module",
   "description": "docfirst：文档里的论断钉在真源码上，代码变了就报出来。一个包四个模块——engine 判定、host 碰环境（git / 盘 / 记录簿 / 摆放）、fumadocs 格式实现与站接线、cli 命令行（check / confirm / render / trajectory）。**这个包的消费方是仓**：装它的人是为了在仓里跑门禁与站构建。给一个新骨架铺六区、那两份说明书都随工作台件 @godcreator02/gwb-docfirst-workflow 走，不在这儿",
   "bin": {
