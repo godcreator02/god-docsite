@@ -18,7 +18,7 @@ const built = fs.existsSync(path.join(distDir, 'index.js'))
 if (!built) console.warn('[gwb-docfirst-workflow] dist/ 还没造齐，产物组跳过（pnpm build 之后再跑）')
 
 /** node 半运行时真 import 的：契约包（isRecord）。那几个件都是 import type，整句擦除 */
-const ALLOWED_BARE = new Set(['@godcreator02/gwb-plugin-api'])
+const ALLOWED_BARE = new Set(['@team/gwb-plugin-api'])
 
 const RELATIVE = /^import\s+(?:[^'"]*from\s*)?['"](\.[^'"]*)['"]/gm
 const BARE = /^import\s+(?:[^'"]*from\s*)?['"]([^'".][^'"]*)['"]/gm
@@ -100,25 +100,25 @@ describe('几处一改就得一起改的账', () => {
    * 一旦哪天为了省事又把那个包写回任何一档，件就又回到「攥着 home 里一条解析出来的真实路径、
    * 包升级之后照读旧文件、零报错」那个坑里——三档全查：运行时、peer、开发期。
    */
-  it('件对 @godcreator02/docfirst-workflow 零依赖：三档一档都不许有它，源码里也一行都不 import', () => {
+  it('件对 @team/docfirst-workflow 零依赖：三档一档都不许有它，源码里也一行都不 import', () => {
     for (const [table, deps] of Object.entries({
       dependencies: manifest.dependencies,
       peerDependencies: manifest.peerDependencies,
       devDependencies: manifest.devDependencies,
     })) {
       for (const dep of Object.keys(deps ?? {})) {
-        expect(dep.startsWith('@godcreator02/docfirst-workflow'), `${table} 里出现了 ${dep}——件不许依赖包`).toBe(false)
+        expect(dep.startsWith('@team/docfirst-workflow'), `${table} 里出现了 ${dep}——件不许依赖包`).toBe(false)
       }
     }
     for (const file of fs.readdirSync(path.join(root, 'src')).filter((f) => f.endsWith('.ts'))) {
       const src = fs.readFileSync(path.join(root, 'src', file), 'utf8')
       for (const m of src.matchAll(BARE)) {
-        expect(m[1]!.startsWith('@godcreator02/docfirst-workflow'), `src/${file} import 了 ${m[1]!}`).toBe(false)
+        expect(m[1]!.startsWith('@team/docfirst-workflow'), `src/${file} import 了 ${m[1]!}`).toBe(false)
       }
     }
     // 那张写进目标站 package.json 的依赖表不算依赖：它是字符串，件一行都不 import，
     // 而装出来的站要跑 pnpm doc——那是仓里的事，仓当然该装那个包
-    expect(fs.readFileSync(path.join(root, 'src', 'deps.ts'), 'utf8')).toContain('@godcreator02/docfirst-workflow')
+    expect(fs.readFileSync(path.join(root, 'src', 'deps.ts'), 'utf8')).toContain('@team/docfirst-workflow')
   })
 
   it('不起任何子进程、不登记 node CLI——转发一条命令行就是把「在仓里发生」的事挪到件里', () => {
@@ -126,13 +126,13 @@ describe('几处一改就得一起改的账', () => {
       const src = fs.readFileSync(path.join(root, 'src', file), 'utf8')
       expect(src, `src/${file} 起了子进程`).not.toMatch(/node:child_process|gwbNodeCli/)
     }
-    expect(manifest.peerDependencies?.['@godcreator02/gwb-node-cli']).toBeUndefined()
-    expect(manifest.devDependencies?.['@godcreator02/gwb-node-cli']).toBeUndefined()
+    expect(manifest.peerDependencies?.['@team/gwb-node-cli']).toBeUndefined()
+    expect(manifest.devDependencies?.['@team/gwb-node-cli']).toBeUndefined()
   })
 
   it('skills 是可选 peer，注册那段走 ctx.inject 的子 fiber、不进 export const inject', () => {
-    expect(manifest.peerDependencies?.['@godcreator02/gwb-skills']).toBeDefined()
-    expect(manifest.peerDependenciesMeta?.['@godcreator02/gwb-skills']?.optional).toBe(true)
+    expect(manifest.peerDependencies?.['@team/gwb-skills']).toBeDefined()
+    expect(manifest.peerDependenciesMeta?.['@team/gwb-skills']?.optional).toBe(true)
     expect(index).toMatch(/ctx\.inject\(\['gwbSkills'\]/)
     expect(index).toMatch(/export const inject = \['gwbCommands'\]/)
   })
@@ -143,14 +143,14 @@ describe('几处一改就得一起改的账', () => {
    */
   it('站件不在任何一档依赖里，也不被 import', () => {
     const all = { ...manifest.dependencies, ...manifest.peerDependencies, ...manifest.devDependencies }
-    expect(Object.keys(all)).not.toContain('@godcreator02/gwb-docs-site')
+    expect(Object.keys(all)).not.toContain('@team/gwb-docs-site')
     expect(index).not.toMatch(/from '@godcreator02\/gwb-docs-site'/)
   })
 
   it('本件不注册窗格——站件那格已经叫「文档站」，两格同名分不出谁是谁', () => {
     expect(index).not.toContain('registerPane')
     expect(index).not.toContain('gwbShell')
-    expect(manifest.peerDependencies?.['@godcreator02/gwb-shell']).toBeUndefined()
+    expect(manifest.peerDependencies?.['@team/gwb-shell']).toBeUndefined()
   })
 
   it('cordis 与 electron 都不在 dependencies——前者写进去就是第二份实例，后者本件根本不用', () => {
