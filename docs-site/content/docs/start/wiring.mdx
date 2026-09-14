@@ -17,7 +17,7 @@ description: 把 docfirst 接进一个 fumadocs 站要动的七处：配置、�
 
 ## 一、装包，与项目根那份 docfirst.config.mjs
 
-`pnpm add -D @team/docfirst-workflow @team/docfirst-trajectory`。`fumadocs` 与 `react` 在包里
+`pnpm add -D @godcreator/docfirst-workflow @godcreator/docfirst-trajectory`。`fumadocs` 与 `react` 在包里
 只是 peer——用项目里装的那份，包自己不带；只跑命令行、不装 fumadocs 的仓一个都不必装。
 
 命令行和站读的是同一份 `docfirst.config.mjs`，它住项目根（对这个站来说项目根就是站目录）：
@@ -188,7 +188,7 @@ React 表底下铺 fumadocs 的默认表（标题栏、复制按钮都是它的�
 卡目录也不必管——它在站自己的 `content/trajectory/` 里，本来就在 root 之内。
 
 **`serverExternalPackages` 是空的，那一行本身就是账。**两个包都**不许**外置：
-`@team/docfirst-workflow` 里同时住着服务端那半（读盘、调 git、remark 插件）与两个客户端组件
+`@godcreator/docfirst-workflow` 里同时住着服务端那半（读盘、调 git、remark 插件）与两个客户端组件
 （`/fumadocs/pre` 状态点、`/fumadocs/term` 术语），而这个字段按包名匹配、没有子路径粒度——整包
 一外置，Next 走 Node 单独加载、跟站打包的 React 分了家，预渲染报
 `Cannot read properties of null (reading 'use')`。
