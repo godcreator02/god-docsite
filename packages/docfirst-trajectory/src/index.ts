@@ -1,5 +1,5 @@
 /**
- * @team/docfirst-trajectory——`.` 入口：parse / validate / model / layout / chains
+ * @godcreator/docfirst-trajectory——`.` 入口：parse / validate / model / layout / chains
  * 纯函数汇总导出，零 npm 依赖（只用 node:fs / node:path，来自 scan.ts 一处）；`buildTrajectory`
  * 是本文件新写的装配入口：扫一次目录、给每张盘建模，不算布局——布局是纯函数、几毫秒，留给客户端
  * 按设置滑杆现算（见方案第十三节）；layout.ts / chains.ts 照样导出，供客户端组件使用。
