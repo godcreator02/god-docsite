@@ -5,7 +5,7 @@
  */
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { checkDocfirstRefs } from "@team/docfirst-trajectory";
+import { checkDocfirstRefs } from "@godcreator/docfirst-trajectory";
 import { card, flatProblems, memSick } from "./trajectory-helpers.ts";
 
 test("卡正文带 docfirst 草稿记号：整行 @@docfirst ... @@ 报 docfirst 病", () => {
