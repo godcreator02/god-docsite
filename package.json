@@ -12,8 +12,8 @@
     "test:only": "node --test \"tests/*.test.ts\""
   },
   "devDependencies": {
-    "@team/docfirst-workflow": "workspace:*",
-    "@team/docfirst-trajectory": "workspace:*",
+    "@godcreator/docfirst-workflow": "workspace:*",
+    "@godcreator/docfirst-trajectory": "workspace:*",
     "@types/mdast": "^4.0.4",
     "@types/node": "^26.2.0",
     "@types/react": "^19.2.18",
