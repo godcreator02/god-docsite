@@ -10,8 +10,8 @@ import assert from "node:assert/strict";
 import { register } from "fumadocs-mdx/node";
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
-import { loadProject } from "@godcreator02/docfirst-workflow";
-import { DOT_COLOR, collectionOf, whereOf } from "@godcreator02/docfirst-workflow/fumadocs";
+import { loadProject } from "@team/docfirst-workflow";
+import { DOT_COLOR, collectionOf, whereOf } from "@team/docfirst-workflow/fumadocs";
 import { componentNames } from "../src/components/registry.ts";
 
 register();
