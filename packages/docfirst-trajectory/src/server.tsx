@@ -37,7 +37,7 @@ import type { TrajectoryModel } from "./types.ts";
 // "use client" 会被打散到一个没人标记的共享文件上——server 这边看不到边界，Next 会把
 // StarDisk 当服务端组件渲染，命中 hooks 就炸。走包名让 tsdown 把它当外部依赖，原样留在
 // 产物里；Node 的包自引用（package.json name + exports）在运行时把它解回 dist/react.mjs。
-import { StarDisk } from "@team/docfirst-trajectory/react";
+import { StarDisk } from "@godcreator/docfirst-trajectory/react";
 
 /* ================= 启动器缩略图：服务端渲成静态 markup ================= */
 
