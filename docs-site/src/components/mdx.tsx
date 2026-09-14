@@ -10,8 +10,8 @@ import defaultMdxComponents from 'fumadocs-ui/mdx';
 import { File, Files, Folder } from 'fumadocs-ui/components/files';
 import type { MDXComponents } from 'mdx/types';
 import type { ReactNode } from 'react';
-import { DocfirstPre } from '@godcreator02/docfirst-workflow/fumadocs/pre';
-import { Term } from '@godcreator02/docfirst-workflow/fumadocs/term';
+import { DocfirstPre } from '@team/docfirst-workflow/fumadocs/pre';
+import { Term } from '@team/docfirst-workflow/fumadocs/term';
 import type { ComponentName } from './registry';
 import { Tabs, Tab } from './tabs/tabs';
 
