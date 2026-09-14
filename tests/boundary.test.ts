@@ -1,7 +1,7 @@
 /**
  * # 边界守卫：塌包之后**唯一**的那道
  *
- * 五个包塌成一个 `@godcreator02/docfirst-workflow` 之后，「谁能依赖谁」不再由 pnpm 的严格
+ * 五个包塌成一个 `@team/docfirst-workflow` 之后，「谁能依赖谁」不再由 pnpm 的严格
  * node_modules 兜着了——同一个包里，`engine/` 里随手写一句 `import "../host/git.ts"`
  * 编译器不会吭一声，判定层就从此起了 git 子进程。**这个文件就是补上的那道门。**
  *
@@ -17,7 +17,7 @@
  * **三、宿主只能是 peer，且不许被打进产物**：fumadocs 与 react 用的是消费方项目装的那份；
  * 打进产物就是两份 React 各跑一套，现象是预渲染时莫名其妙的 hooks 报错。
  *
- * **四、方向只能是件 → 包**：两个 npm 包不许出现任何 `@godcreator02/gwb-*`。
+ * **四、方向只能是件 → 包**：两个 npm 包不许出现任何 `@team/gwb-*`。
  * 反过来一次，装 docfirst 的人就被迫拉进一整个桌面工作台生态。
  *
  * **别删这个文件，也别把某一条注释掉「先让门禁绿」。** 它报红的时候，红的是设计，不是测试。
@@ -240,10 +240,10 @@ test("trajectory 的 `.` 入口源码只 import 自己和 node:fs / node:path / 
 });
 
 test("docfirst 依赖 trajectory，trajectory 不依赖 docfirst——轨迹是独立的一条包线", () => {
-  assert.ok(depsOf(manifestOf("docfirst-workflow")).includes("@godcreator02/docfirst-trajectory"), "docfirst 得依赖 trajectory 才接得上 trajectory 子命令");
+  assert.ok(depsOf(manifestOf("docfirst-workflow")).includes("@team/docfirst-trajectory"), "docfirst 得依赖 trajectory 才接得上 trajectory 子命令");
   const trajectory = manifestOf("docfirst-trajectory");
   for (const dep of Object.keys({ ...trajectory.dependencies, ...trajectory.peerDependencies, ...trajectory.devDependencies })) {
-    assert.notEqual(dep, "@godcreator02/docfirst-workflow", "trajectory 依赖了 docfirst——方向反了");
+    assert.notEqual(dep, "@team/docfirst-workflow", "trajectory 依赖了 docfirst——方向反了");
   }
 });
 
@@ -251,7 +251,7 @@ test("轨迹只被命令行那一层用：engine / host / fumadocs 一个 import
   for (const layer of ["engine", "host", "fumadocs"]) {
     for (const file of sourcesIn(join(SRC, layer))) {
       for (const spec of importSpecsOf(readFileSync(file, "utf8"))) {
-        assert.ok(!spec.startsWith("@godcreator02/docfirst-trajectory"), `${layer}/${rel(join(SRC, layer), file)} 引用了轨迹（${spec}）`);
+        assert.ok(!spec.startsWith("@team/docfirst-trajectory"), `${layer}/${rel(join(SRC, layer), file)} 引用了轨迹（${spec}）`);
       }
     }
   }
@@ -259,7 +259,7 @@ test("轨迹只被命令行那一层用：engine / host / fumadocs 一个 import
 
 // ── 四、包不认识件 ──────────────────────────────────────────────────────────
 
-test("两个 npm 包的依赖面里不许出现工作台件，也不许出现任何 @godcreator02/gwb-*", () => {
+test("两个 npm 包的依赖面里不许出现工作台件，也不许出现任何 @team/gwb-*", () => {
   // 件跟包同住一个工作区，包一旦认识件（哪怕只是一条 devDependency）这两个包就再也发不出去了
   // ——装它们的人不该被迫拉进一整个桌面工作台生态。三档全查：运行时、peer、开发期。
   // 反过来那半（件不许依赖包）在件自己的 tests/artifact.test.ts 里守着：两个方向都断，
@@ -269,16 +269,16 @@ test("两个 npm 包的依赖面里不许出现工作台件，也不许出现任
     const pkg = manifestOf(dir);
     for (const dep of Object.keys({ ...pkg.dependencies, ...pkg.peerDependencies, ...pkg.devDependencies })) {
       assert.notEqual(dep, pluginName, `${dir} 依赖了工作台件 ${pluginName}——方向反了`);
-      assert.ok(!dep.startsWith("@godcreator02/gwb-"), `${dir} 依赖了 gwb 生态的 ${dep}`);
+      assert.ok(!dep.startsWith("@team/gwb-"), `${dir} 依赖了 gwb 生态的 ${dep}`);
     }
   }
 });
 
-test("两个包的源码里一行 @godcreator02/gwb-* 都没有", () => {
+test("两个包的源码里一行 @team/gwb-* 都没有", () => {
   for (const dir of NPM_PACKAGES) {
     for (const file of sourcesIn(join(PACKAGES, dir, "src"))) {
       for (const spec of importSpecsOf(readFileSync(file, "utf8"))) {
-        assert.ok(!spec.startsWith("@godcreator02/gwb-"), `${dir}/${rel(join(PACKAGES, dir), file)} import 了 ${spec}`);
+        assert.ok(!spec.startsWith("@team/gwb-"), `${dir}/${rel(join(PACKAGES, dir), file)} import 了 ${spec}`);
       }
     }
   }
