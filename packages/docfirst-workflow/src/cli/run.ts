@@ -10,7 +10,7 @@
  *   docfirst render                         渲染：产物落 out/；挂了 outputs 映射的摆到指定落点（不再落 out/）
  *   docfirst trajectory [--json]            列轨迹卡的盘 / 树 / 主干；--json 出 buildTrajectory 的整份模型
  * **四条到此为止**：给一个新骨架铺六区那条不在这儿——那件事只在 agent 手上发生一次、铺的是
- * 模板不是判定，归工作台件 `@team/gwb-docfirst-workflow` 的 `docfirst.attach`。这儿留的全是
+ * 模板不是判定，归工作台件 `@godcreator/gwb-docfirst-workflow` 的 `docfirst.attach`。这儿留的全是
  * 要在**仓**里发生的：各仓的 `pnpm doc` 与 CI 跑的就是这四条。
  * 新引用不用命令：在文档里写一行记号语法（engine/marker.ts）定的草稿记号 @@docfirst ref src/greet.ts:2-3 @@，
  * check 认它、报未确认，confirm 换成该格式的正式记号。
@@ -20,7 +20,7 @@ import { join, relative, sep } from "node:path";
 import { targetKey } from "../engine/index.ts";
 import type { Format, Item, Listing } from "../engine/index.ts";
 import { loadProject } from "../host/index.ts";
-import { buildTrajectory, scanDir } from "@team/docfirst-trajectory";
+import { buildTrajectory, scanDir } from "@godcreator/docfirst-trajectory";
 import type { CardProblemReport, CheckReport, DocReport, OutputReport, RefReport } from "./report.ts";
 
 export type { CardProblemReport, CheckReport, ComponentReport, DocReport, OutputReport, RefReport } from "./report.ts";
