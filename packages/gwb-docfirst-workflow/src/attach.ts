@@ -2,11 +2,11 @@
  * 装配：在一个**已经铺好的 fumadocs 骨架**上加 docfirst 的六区。
  *
  * 建骨架不在这儿——那是「谁装了 fumadocs 谁就该有」的能力，归站件
- * （`@godcreator02/gwb-docs-site` 的 `docs-site.create`）。本模块接手的是骨架之后的那一层：
+ * （`@team/gwb-docs-site` 的 `docs-site.create`）。本模块接手的是骨架之后的那一层：
  * 六个集合、六条路由、侧栏六个根节、`docfirst.config.mjs`、mdx 接线、投影块与术语组件、
  * 名册脚本、构建配置里那条不许外置的账、各区的骨架页，外加往 `package.json` 里补依赖与脚本。
  *
- * **它住在件里，不住在 `@godcreator02/docfirst-workflow` 那个包里。** 判据是「这件事在哪儿发生」：
+ * **它住在件里，不住在 `@team/docfirst-workflow` 那个包里。** 判据是「这件事在哪儿发生」：
  * check / confirm / render 要在**仓**里发生（门禁、站构建），所以归包；装配只在 **agent** 手上
  * 发生一次——铺六个集合、六条路由、配置、组件、骨架页，从头到尾不碰判定引擎、不碰比较器、
  * 不碰记录簿，它连 `docfirst.config.mjs` 都不读（那正是它要写出来的东西）。**铺模板不是判定。**
