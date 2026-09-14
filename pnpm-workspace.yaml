@@ -12,8 +12,8 @@ onlyBuiltDependencies:
 # format-fumadocs 把 fumadocs 声明成 peer，用的是消费方项目装的那份：这里别自动装一份进来
 autoInstallPeers: false
 
-# 这份文件**整份盖掉**用户级 pnpm 配置（不合并），所以全局那条 @godcreator02/* 的放行得在这儿再写一遍——
+# 这份文件**整份盖掉**用户级 pnpm 配置（不合并），所以全局那条 @team/* 的放行得在这儿再写一遍——
 # 少了它 pnpm 装 packages/gwb-docfirst-workflow 的 gwb 依赖时会被 minimumReleaseAge（默认一天）全拦下
 minimumReleaseAgeExclude:
-  - '@godcreator02/*'
+  - '@team/*'
   - lucide-react@1.43.0
