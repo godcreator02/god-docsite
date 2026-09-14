@@ -7,8 +7,8 @@
  */
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { buildChains, computeDodge, RingsLayout, buildModel } from "@godcreator02/docfirst-trajectory";
-import type { Chain, CardPlace } from "@godcreator02/docfirst-trajectory";
+import { buildChains, computeDodge, RingsLayout, buildModel } from "@team/docfirst-trajectory";
+import type { Chain, CardPlace } from "@team/docfirst-trajectory";
 import { card, D, memCards, root } from "./trajectory-helpers.ts";
 
 /** 一棵树四张卡的主干直链（aa01←aa02←aa03←aa04，supersedes 一路串），
