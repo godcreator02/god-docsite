@@ -13,7 +13,7 @@ import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "nod
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
-import { main } from "@team/docfirst-workflow";
+import { main } from "@godcreator/docfirst-workflow";
 import { CODE, run } from "./repo.ts";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
