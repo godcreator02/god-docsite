@@ -18,7 +18,7 @@ README 和这份规矩都是**生成物**：正本分别是 `docs-site/content/o
 `content/docs/modules/`，接口与边界逐条钉在真源码上。站分六区——现状 `docs/`、轨迹 `trajectory/`、
 在途 `spec/`、未来 `future/`、生成正本 `outputs/`、反馈 `feedback/`；`docfirst check` 只扫现状与
 生成正本两区，别的四区不进门禁。文档怎么写、六区怎么分、每页写到哪为止，正本是随工作台插件
-`@team/gwb-docfirst-workflow` 发的 skill `packages/gwb-docfirst-workflow/skills/docfirst-docs/SKILL.md`，动文档前读它。
+`@godcreator/gwb-docfirst-workflow` 发的 skill `packages/gwb-docfirst-workflow/skills/docfirst-docs/SKILL.md`，动文档前读它。
 
 ## 参考，不要改
 
@@ -38,12 +38,12 @@ README 和这份规矩都是**生成物**：正本分别是 `docs-site/content/o
   各自的 `package.json` 说了算。
 * **主包 `src/` 下四层，方向单向**：`engine`（判定，只用 `node:crypto`）→ `host`（碰环境）→
   `fumadocs`（格式实现与站接线）→ `cli`（入口，四条子命令 check / confirm / render / trajectory）。
-  轨迹是独立包线，只被 `cli` 用。**包与插件互不认识**：包不许出现任何 `@team/gwb-*`，插件也
+  轨迹是独立包线，只被 `cli` 用。**包与插件互不认识**：包不许出现任何 `@godcreator/gwb-*`，插件也
   不许依赖包，两个方向各由 `tests/boundary.test.ts` 与插件的 `tests/artifact.test.ts&#x60; 守着。
   **`tests/boundary.test.ts` 是塌包之后唯一的边界守卫**，别绕、别删、别为了让门禁绿注释掉某一条。
 * **要在仓里发生的（核对、确认、渲染）归包，只在 agent 手上发生一次的归插件**：铺六区
   （`docfirst.attach`）与六份说明书住 `packages/gwb-docfirst-workflow/`。站的一生（扫站、起停、端口、
-  窗格）与铺 fumadocs 骨架归站点插件 `@team/gwb-docs-site`，两个插件互不依赖、只经命令总线说话。
+  窗格）与铺 fumadocs 骨架归站点插件 `@godcreator/gwb-docs-site`，两个插件互不依赖、只经命令总线说话。
 * 子进程调用一律带超时。
 * 门禁，三摊都要绿才提交：
   * 仓根：`pnpm test`、`pnpm typecheck`、`pnpm build`
