@@ -1,22 +1,22 @@
 import fs from 'node:fs'
 import path from 'node:path'
-import { isRecord, type GwbContext } from '@team/gwb-plugin-api'
+import { isRecord, type GwbContext } from '@godcreator/gwb-plugin-api'
 // 只为激活那几个件的 `declare module 'cordis'`——它们给 ctx 加上各自那个名字
-import type {} from '@team/gwb-commands'
-import type {} from '@team/gwb-skills'
+import type {} from '@godcreator/gwb-commands'
+import type {} from '@godcreator/gwb-skills'
 import { attachSite, type AttachResult } from './attach.js'
 
 /**
  * docfirst 件：**一条铺六区的命令，加六份说明书**。
  *
  * 判据是「这件事在哪儿发生」——要在**仓**里发生的（核对、确认、渲染，门禁与站构建要跑的那些）
- * 归 `@team/docfirst-workflow` 那个包，agent 自己 `cd` 到仓里跑 `pnpm doc`；只在 **agent** 手上
+ * 归 `@godcreator/docfirst-workflow` 那个包，agent 自己 `cd` 到仓里跑 `pnpm doc`；只在 **agent** 手上
  * 发生一次的（读说明书、给一个新骨架铺一次六区）归件。于是**件对那个包零依赖**：不起子进程、
  * 不登记 node CLI、不查 home 里的路径，装了件不必再装什么包，说明书就挂得上。
  * 那条边界由 `tests/artifact.test.ts` 守着。
  *
  * **本件不管站的一生**——扫站、起停、端口、到点关、那一格窗格全在站件
- * （`@team/gwb-docs-site`）。两个件互不依赖，各带各的模板：站件铺标准 fumadocs 骨架，
+ * （`@godcreator/gwb-docs-site`）。两个件互不依赖，各带各的模板：站件铺标准 fumadocs 骨架，
  * 本件在骨架上装六区。
  */
 export const name = 'gwb-docfirst-workflow'
@@ -123,5 +123,5 @@ export function apply(ctx: GwbContext): void {
     scoped.effect(() => scoped.gwbSkills.register(new URL('../skills/', import.meta.url)))
   })
 
-  log.info(`docfirst 件就绪：一条命令（${ATTACH_COMMAND}）加六份说明书，对 @team/docfirst-workflow 零依赖`)
+  log.info(`docfirst 件就绪：一条命令（${ATTACH_COMMAND}）加六份说明书，对 @godcreator/docfirst-workflow 零依赖`)
 }
