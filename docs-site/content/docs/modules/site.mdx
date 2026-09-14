@@ -13,13 +13,13 @@ description: 往一个已经铺好的 fumadocs 骨架上接 docfirst：唯一那
 
 {/* ref file="../packages/gwb-docfirst-workflow/src/attach.ts" lines="1-7" */}
 
-**这摊代码住在工作台插件 `@godcreator02/gwb-docfirst-workflow` 里，不住在这两个 npm 包里。** 判据是「这件事要在**哪儿**发生」：核对 / 确认 / 渲染要在**仓**里发生（门禁跑、站构建跑），所以归包；装六区只在 **agent** 手上发生一次，从头到尾不碰判定引擎、不碰比较器、不碰记录簿，连 `docfirst.config.mjs` 都不读——**它是铺模板不是判定**，所以归插件。
+**这摊代码住在工作台插件 `@team/gwb-docfirst-workflow` 里，不住在这两个 npm 包里。** 判据是「这件事要在**哪儿**发生」：核对 / 确认 / 渲染要在**仓**里发生（门禁跑、站构建跑），所以归包；装六区只在 **agent** 手上发生一次，从头到尾不碰判定引擎、不碰比较器、不碰记录簿，连 `docfirst.config.mjs` 都不读——**它是铺模板不是判定**，所以归插件。
 
 {/* ref file="../packages/gwb-docfirst-workflow/src/attach.ts" lines="9-13" */}
 
 这条判据怎么推出来的，见[包给仓，插件给人](/trajectory/2026-09-10-package-serves-repo-plugin-serves-agent)。
 
-**骨架那半不在这一层**。「铺一个标准 fumadocs 骨架」是「谁装了 fumadocs 谁就该有」的能力，归工作台的站点插件（`@godcreator02/gwb-docs-site` 的 `docs-site.create`）。所以装配的模板里 `package.json` / `tsconfig` / `postcss` / `pnpm-workspace` / `.npmrc` 五份配置一份都没有——留一份进去，装配就会把站点插件一分钟前铺的那份盖掉，两家各出一份同名配置，谁赢看谁后跑。这条有测试守着：
+**骨架那半不在这一层**。「铺一个标准 fumadocs 骨架」是「谁装了 fumadocs 谁就该有」的能力，归工作台的站点插件（`@team/gwb-docs-site` 的 `docs-site.create`）。所以装配的模板里 `package.json` / `tsconfig` / `postcss` / `pnpm-workspace` / `.npmrc` 五份配置一份都没有——留一份进去，装配就会把站点插件一分钟前铺的那份盖掉，两家各出一份同名配置，谁赢看谁后跑。这条有测试守着：
 
 {/* ref file="../packages/gwb-docfirst-workflow/tests/attach.test.ts" lines="109-113" */}
 
@@ -35,7 +35,7 @@ description: 往一个已经铺好的 fumadocs 骨架上接 docfirst：唯一那
 
 {/* ref file="../packages/gwb-docfirst-workflow/src/attach.ts" lines="32-37" */}
 
-守它的是插件自己的产物守卫——`package.json` 的三档依赖面加 `src/` 下每一行 import，哪一档出现 `@godcreator02/docfirst-workflow` 都红：
+守它的是插件自己的产物守卫——`package.json` 的三档依赖面加 `src/` 下每一行 import，哪一档出现 `@team/docfirst-workflow` 都红：
 
 {/* ref file="../packages/gwb-docfirst-workflow/tests/artifact.test.ts" lines="103-118" */}
 
