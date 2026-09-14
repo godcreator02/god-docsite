@@ -12,8 +12,8 @@ const HERE = dirname(fileURLToPath(import.meta.url));
 const PACKAGES = join(HERE, "..", "packages");
 /** 目录名 → 包名。目录名跟包名去掉 scope 那一截同名 */
 const NAMES: Record<string, string> = {
-  "docfirst-workflow": "@godcreator02/docfirst-workflow",
-  "docfirst-trajectory": "@godcreator02/docfirst-trajectory",
+  "docfirst-workflow": "@team/docfirst-workflow",
+  "docfirst-trajectory": "@team/docfirst-trajectory",
 };
 
 // 塌包之后两个包重新从 0.1.0 起。这条守的是形状，不是那个具体的数——把版本号写死在测试里，
