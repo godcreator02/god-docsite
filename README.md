@@ -17,18 +17,18 @@
 ## 怎么装
 
 ```bash
-pnpm add -D @godcreator02/docfirst-workflow @godcreator02/docfirst-trajectory
+pnpm add -D @team/docfirst-workflow @team/docfirst-trajectory
 ```
 
 `fumadocs` 与 `react` 在包里只是 **peer**，用你项目里装的那份；只跑命令行、不装 fumadocs 的仓
-一个都不必装。站的接线从 `@godcreator02/docfirst-workflow/fumadocs` 进。
+一个都不必装。站的接线从 `@team/docfirst-workflow/fumadocs` 进。
 
 **站的构建配置里 `serverExternalPackages` 必须留空**：这个包里同时住着服务端那半与两个客户端
 组件（状态点、术语），而那个字段按包名匹配、没有子路径粒度——外置的边界会把 `"use client"`
 指令吃掉。
 
 **装一个新站是两步，命令行不管这两步**：先铺一个标准 fumadocs 骨架（装了 fumadocs 的人才该有
-那个能力，工作台里是站点插件的 `docs-site.create`），再由工作台插件 `@godcreator02/gwb-docfirst-workflow` 的
+那个能力，工作台里是站点插件的 `docs-site.create`），再由工作台插件 `@team/gwb-docfirst-workflow` 的
 `docfirst.attach` 把六区装上。它**只在刚铺好的骨架上跑**：站里已经有 `docfirst.config.mjs`、或
 `content/` 下已经有骨架之外的内容，就报一句「这个站已有内容，请人工接线」退非零，一个字不改写。
 
