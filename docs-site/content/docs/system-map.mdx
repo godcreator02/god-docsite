@@ -13,8 +13,8 @@ description: 四类角色、三条入口、依赖方向是什么、先读哪块
 
 {/* tree dir="../packages" depth="1" */}
 
-`docfirst` 是主包 `@team/docfirst-workflow`，`trajectory` 是独立的一条包线
-`@team/docfirst-trajectory`，`gwb-docfirst-workflow` 是工作台插件——它不进 npm 的依赖网，只在
+`docfirst` 是主包 `@godcreator/docfirst-workflow`，`trajectory` 是独立的一条包线
+`@godcreator/docfirst-trajectory`，`gwb-docfirst-workflow` 是工作台插件——它不进 npm 的依赖网，只在
 桌面工作台里把命令行开给 agent。
 
 ## 四类角色
@@ -46,11 +46,11 @@ description: 四类角色、三条入口、依赖方向是什么、先读哪块
     不在场**，所以判定与核对必须是一个 npm 包，不能依赖任何 GUI 应用开着。
   </Tab>
   <Tab title="站构建">
-    站的 `source.config.ts` import `@team/docfirst-workflow/fumadocs`，remark 插件在构建期
+    站的 `source.config.ts` import `@godcreator/docfirst-workflow/fumadocs`，remark 插件在构建期
     装配一次项目、认引用、算清单、把状态点打到树上。人看的那份文档就是站本身。
   </Tab>
   <Tab title="工作台插件">
-    `@team/gwb-docfirst-workflow` 经命令总线开出 `docfirst.attach`（在进程内给一个已有骨架
+    `@godcreator/gwb-docfirst-workflow` 经命令总线开出 `docfirst.attach`（在进程内给一个已有骨架
     铺六区），另把六份说明书挂给 agent 读。**它对包零依赖**：不 import、不起子进程——要核对
     就 `cd` 到那个仓里跑包的命令行。
   </Tab>
@@ -79,8 +79,8 @@ description: 四类角色、三条入口、依赖方向是什么、先读哪块
 一概不许碰它。
 
 **包与插件互不认识**：两个 npm 包的三档依赖面里不许出现工作台插件，也不许出现任何
-`@team/gwb-*`——装这两个包的人不该被迫拉进一整个桌面工作台生态；反过来那半，插件的
-三档依赖面里也不许出现 `@team/docfirst-workflow`，守在插件自己的 `tests/artifact.test.ts` 上。
+`@godcreator/gwb-*`——装这两个包的人不该被迫拉进一整个桌面工作台生态；反过来那半，插件的
+三档依赖面里也不许出现 `@godcreator/docfirst-workflow`，守在插件自己的 `tests/artifact.test.ts` 上。
 
 ## 边界靠什么守
 
