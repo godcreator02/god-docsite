@@ -13,5 +13,5 @@
  */
 export const DOCFIRST_DEPS: Record<string, string> = {
   "@godcreator02/docfirst-workflow": "^0.2.0",
-  "@godcreator02/docfirst-trajectory": "^0.1.0",
+  "@godcreator02/docfirst-trajectory": "^0.1.1",
 };
