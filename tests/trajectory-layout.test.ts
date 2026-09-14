@@ -18,8 +18,8 @@ import {
   ringSkeleton,
   scanDir,
   SPREAD_DEG,
-} from "@godcreator02/docfirst-trajectory";
-import type { RawCard, TrajectoryModel } from "@godcreator02/docfirst-trajectory";
+} from "@team/docfirst-trajectory";
+import type { RawCard, TrajectoryModel } from "@team/docfirst-trajectory";
 import { memCards } from "./trajectory-helpers.ts";
 
 /** 数值近似相等，模仿 jest 的 toBeCloseTo(expected, digits)。 */
