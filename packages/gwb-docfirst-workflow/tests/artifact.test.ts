@@ -144,7 +144,7 @@ describe('几处一改就得一起改的账', () => {
   it('站件不在任何一档依赖里，也不被 import', () => {
     const all = { ...manifest.dependencies, ...manifest.peerDependencies, ...manifest.devDependencies }
     expect(Object.keys(all)).not.toContain('@team/gwb-docs-site')
-    expect(index).not.toMatch(/from '@godcreator02\/gwb-docs-site'/)
+    expect(index).not.toMatch(/from '@team\/gwb-docs-site'/)
   })
 
   it('本件不注册窗格——站件那格已经叫「文档站」，两格同名分不出谁是谁', () => {
