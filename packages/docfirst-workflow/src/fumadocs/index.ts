@@ -1,5 +1,5 @@
 /**
- * 格式实现加站接线：fumadocs 口味的 mdx。**包外的出口 `@team/docfirst-workflow/fumadocs` 就是它**
+ * 格式实现加站接线：fumadocs 口味的 mdx。**包外的出口 `@godcreator/docfirst-workflow/fumadocs` 就是它**
  * ——站的 `source.config.ts` import 的正是这一份。
  *   ① 识别与写回：parse / write，判定层会调的；名册检查 lintComponents 给 check 用
  *   ② 渲染：renderAi 让 fumadocs 的 loader 出 md；人看那份就是站本身，命令行没有 human 渲染
@@ -14,10 +14,10 @@
  * 匹配逻辑在 glossary.ts（纯的）、挂树在 glossary-plugin.ts、画成什么样在侧出口 /fumadocs/term。
  *
  * 侧出口四个，不混进主出口（含 React 的和样式）：
- *   @team/docfirst-workflow/fumadocs/pre         状态点的 pre 组件（"use client"）
- *   @team/docfirst-workflow/fumadocs/light.css   状态点的样式
- *   @team/docfirst-workflow/fumadocs/term        术语组件（服务端组件，没有 JS）
- *   @team/docfirst-workflow/fumadocs/term.css    术语标注的样式
+ *   @godcreator/docfirst-workflow/fumadocs/pre         状态点的 pre 组件（"use client"）
+ *   @godcreator/docfirst-workflow/fumadocs/light.css   状态点的样式
+ *   @godcreator/docfirst-workflow/fumadocs/term        术语组件（服务端组件，没有 JS）
+ *   @godcreator/docfirst-workflow/fumadocs/term.css    术语标注的样式
  */
 import { formalOf } from "../engine/index.ts";
 import type { Fill, Reference, Target } from "../engine/index.ts";
