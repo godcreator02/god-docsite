@@ -75,15 +75,16 @@ export function apply(ctx: GwbContext): void {
     cli.register(
       {
         name: ATTACH_COMMAND,
-        description:
-          '给一个**已经建好的 fumadocs 骨架**装上 docfirst 的六区：{ dir: string, title?: string }。' +
+        description: '给一个建好的 fumadocs 骨架装上 docfirst 的六区',
+        usage:
+          '{ dir: string, title?: string }。' +
           'dir 是**站目录**的绝对路径（约定是 <仓>/docs-site，骨架由站件 docs-site.create 铺）。' +
           '装六个集合、六条路由、侧栏六个根节、docfirst.config.mjs、mdx 接线、投影块与术语组件、名册脚本、五个区的骨架页，' +
           'package.json 里补上 docfirst 的依赖与 doc 脚本。' +
           '**只在刚铺好的骨架上跑**：站里已经有 docfirst.config.mjs、或 content/ 下已经有骨架之外的内容，就回一句「这个站已有内容，请人工接线」，不改写任何东西。' +
           '**只写文件**：不跑 pnpm install、不 render、不 check。' +
           '回 { dir, repoDir, port, written, superseded, overwrites, next }——written 是铺了哪些文件，next 是接着要在那个仓里跑的几条',
-        plugin: name,
+        plugin: '@godcreator/gwb-docfirst-workflow',
       },
       (args) => {
         const site = siteOf(args)
