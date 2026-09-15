@@ -66,3 +66,9 @@ hello 站写 20 条草稿记号，`check` 只认出 9 条，**不认的那 11 �
 2. **路径含双下划线**：`@@docfirst ref ../py/gwb_hello_py/__main__.py:1-5 @@` 独占段落也没用——markdown 把 `__main__` 解析成强调节点，段落 children 不止一个 text，`draftIn` 返回 null。同理报一条比静默好；或者记号语法文档里写明这条路走不通、建议换钉同论断的别的文件。
 
 判定建议就一句：**解析器遇到「差一点就是记号」的段落时告警**，别让「写钉码」这个动作本身有不会响的失败形态——静默不识别跟「不会响的闹钟」是同一种病。
+
+## 2026-09-13 `docfirst confirm --help` 不显示帮助，直接执行了全量 confirm
+
+来源：总控台（单元 `26090520ntn/console`，件仓 self-explaining 扫描那轮撞上）
+
+想看 confirm 的用法说明，跑 `pnpm doc:confirm --help`——它没显示帮助，**把全站钉码直接确认了一遍**。CLI 似乎只认位置参数，`--help` 被当成了页路径之外的什么。风险：本想查用法的人替全站签了字，恰好当时有别人的未提交黄钉，侥幸被「confirm 只对已提交内容做」挡住才没替人确认。绕法：按页限定要写 `docfirst confirm content/docs/xxx.mdx`。建议：认得 `-h/--help` 并打印用法；全量 confirm 或许还该在没有显式参数时要求一个确认或 `--all`。
