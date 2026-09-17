@@ -25,7 +25,7 @@ description: gwb-docfirst-workflow：一条铺六区的命令加六份说明书�
 
 插件对那个包**三档依赖一档都不写、`src/` 里一行都不 import**：不起子进程、不登记 node CLI、不查 home 里那个包的路径。于是装了插件就能挂上说明书、能铺六区，不必再装什么包，也不再有「装了插件没装包」那种半截状态。manifest 上那一档是空的，注释就是这条边界的正文：
 
-{/* ref file="../packages/gwb-docfirst-workflow/package.json" lines="37-49" */}
+{/* ref file="../packages/gwb-docfirst-workflow/package.json" lines="41-53" */}
 
 守卫在产物测试里，三档依赖面与 `src/` 下每份源码的裸名 import 一起查：
 
@@ -47,7 +47,7 @@ description: gwb-docfirst-workflow：一条铺六区的命令加六份说明书�
 
 两族，都住包内 `skills/`，挂载时整个目录报给 skills 插件。讲**这套机制**的三份：`docfirst`（插件自己那份）、`docfirst-docs`（文档站怎么写）、`trajectory`（卡怎么记）。讲**通用开发纪律**的三份：`spec-grill`（接到需求先盘问）、`parallel-by-module`（按模块并行派活）、`docs-governance`（文档与注释治理——代码自解释扫描、术语统一、历史出清、所有权重分家）。
 
-{/* ref file="../packages/gwb-docfirst-workflow/src/index.ts" lines="119-124" */}
+{/* ref file="../packages/gwb-docfirst-workflow/src/index.ts" lines="120-125" */}
 
 {/* tree dir="../packages/gwb-docfirst-workflow/skills" depth="1" */}
 
@@ -67,7 +67,7 @@ description: gwb-docfirst-workflow：一条铺六区的命令加六份说明书�
 
 **不注册窗格**：站点插件那个窗格已经叫「文档站」，两个窗格同名分不出谁是谁。本插件也因此没有浏览器半——没有 esbuild、没有那张带前缀的样式表，`build` 只剩一步 `tsc`：
 
-{/* ref file="../packages/gwb-docfirst-workflow/package.json" lines="24-33" */}
+{/* ref file="../packages/gwb-docfirst-workflow/package.json" lines="28-37" */}
 
 ## 不知道什么
 
@@ -79,7 +79,7 @@ description: gwb-docfirst-workflow：一条铺六区的命令加六份说明书�
 
 **不知道装配为什么不肯装。** 骨架不合规、占位符认不出，装配当场抛；插件把错误文本原样交出去，不翻译、不分类。
 
-{/* ref file="../packages/gwb-docfirst-workflow/src/index.ts" lines="88-97" */}
+{/* ref file="../packages/gwb-docfirst-workflow/src/index.ts" lines="89-98" */}
 
 **不知道 docfirst 是怎么核对的。** 判定引擎、比较器、记录簿、报告形状，一样都不认识——连 `check --json` 打出来的那份机读报告都不读。哪一页漂了、一处钉为什么黄，问的是仓里那条命令行，不是这个插件。
 
@@ -97,15 +97,15 @@ description: gwb-docfirst-workflow：一条铺六区的命令加六份说明书�
 
 `docfirst.attach` 的回执是装配那份计划加一张落盘清单：装在哪、站所在的仓、骨架挑的那个端口、铺了哪些文件、哪几个让了位、仓根哪些生成物第一次 render 会被盖掉。
 
-{/* ref file="../packages/gwb-docfirst-workflow/src/index.ts" lines="98-114" */}
+{/* ref file="../packages/gwb-docfirst-workflow/src/index.ts" lines="99-115" */}
 
 `overwrites` 非空时多一条 `warn`，说的是同一件事的处置：先把仓根那份的内容搬进 `content/outputs/` 下对应的 mdx（那才是正本），再 render。字段的类型**不在这儿定义**——直接用 `attach.ts` 导出的 `AttachResult`，形状是契约，抄一份必然漂。
 
 ## 提供的接口
 
-对外只有**命令总线上一条 `docfirst.attach`**。命令描述是公共面的一部分——agent 只看得见它，参数形状、只在刚铺好的骨架上跑、只写文件这三件事都写在里面：
+对外只有**命令总线上一条 `docfirst.attach`**。登记时的 `description` 与 `usage` 是公共面的一部分——agent 只看得见这两段：`description` 一句话说干什么，参数形状、只在刚铺好的骨架上跑、只写文件这三件事都写在 `usage` 里：
 
-{/* ref file="../packages/gwb-docfirst-workflow/src/index.ts" lines="78-85" */}
+{/* ref file="../packages/gwb-docfirst-workflow/src/index.ts" lines="78-86" */}
 
 命令名与「哪些名字不许再出现」由产物守卫数着，改名就是破约：
 
@@ -115,7 +115,7 @@ description: gwb-docfirst-workflow：一条铺六区的命令加六份说明书�
 
 说明书与模板不是代码，靠 `files` 发出去：
 
-{/* ref file="../packages/gwb-docfirst-workflow/package.json" lines="16-22" */}
+{/* ref file="../packages/gwb-docfirst-workflow/package.json" lines="19-26" */}
 
 漏一条包照发、照装得上，直到挂载去扫 skills 目录、或者跑 attach 那一刻才报「读不动」——所以两条都有测试盯着：
 
@@ -144,7 +144,9 @@ description: gwb-docfirst-workflow：一条铺六区的命令加六份说明书�
 
 `plugin` 只验插件的身份：插件名跟包名派生自同一个短名。插件真挂进 cordis 要有 home、有别的插件，那条走实机。
 
-`attach` 是三份里最厚的，全部跨装配面上那两个方法测：算一套不碰盘、算完落盘在临时目录里跑真的，细节归 [装配六区](/docs/modules/site)。
+`catalog` 是身份卡防漏的薄壳，正本在 `@godcreator/gwb-repo-kit`：`catalog.md` 三段齐、命令去向指门，源码里 inject 的每个服务名卡上都得点名。
+
+`attach` 是四份里最厚的，全部跨装配面上那两个方法测：算一套不碰盘、算完落盘在临时目录里跑真的，细节归 [装配六区](/docs/modules/site)。
 
 `artifact` 是产物守卫加那几笔「一改就得一起改」的账——零依赖、不起子进程、命令面、`files`、依赖档、不注册窗格。产物那一组要 `dist/` 造齐了才跑，缺产物整组跳过，门禁不依赖 build。
 

@@ -26,7 +26,7 @@ docfirst 治的是**现状文档撒谎**——一句话写下的那一刻就跟�
 `.` 是扫卡、校验、建模、布局与链表的纯函数汇总；`./react` 是客户端的星轨盘组件；`./server` 是服务端组件、
 卡集合的 frontmatter schema 与正文关系边的 remark 插件；另外单独开一张样式表：
 
-{/* ref file="../packages/docfirst-trajectory/package.json" lines="6-20" */}
+{/* ref file="../packages/docfirst-trajectory/package.json" lines="7-21" */}
 
 分工是死的：**建模是纯函数、跑在服务端；布局也是纯函数、跑在客户端**。服务端那半只做两件事——扫一次目录，
 给每张盘建一次模型。**不算布局**：布局是纯函数、几毫秒的事，放客户端才保得住设置滑杆（改一格盘心大小、
@@ -456,7 +456,7 @@ props 里一个函数都不收——服务端组件传不了函数给客户端�
 
 依赖面就这么大，`.` 入口那一侧连这些都没有：
 
-{/* ref file="../packages/docfirst-trajectory/package.json" lines="30-40" */}
+{/* ref file="../packages/docfirst-trajectory/package.json" lines="31-41" */}
 
 ## 怎么单独测
 

@@ -103,7 +103,7 @@ description: 往一个已经铺好的 fumadocs 骨架上接 docfirst：唯一那
 
 骨架写的 name / version / dev / build / start 一个字不动（端口就钉在那几条脚本里），补的是这个站接了 docfirst 之后才有的东西：五条 doc 脚本进 `scripts`，两条 docfirst 依赖进 `devDependencies`（站构建 import 接线、门禁跑 check，都是开发期的事），外加一句描述。补进去的依赖表按名字排——散在原表中间的话，diff 就看不出加了什么。
 
-那张依赖表是**第二份真相**，手写的：
+那张依赖表是**第二份真相**，手写、一律精确号：
 
 {/* ref file="../packages/gwb-docfirst-workflow/src/deps.ts" */}
 
@@ -113,7 +113,7 @@ description: 往一个已经铺好的 fumadocs 骨架上接 docfirst：唯一那
 
 {/* has file="../packages/gwb-docfirst-workflow/src/index.ts" text="docfirst.attach" */}
 
-{/* ref file="../packages/gwb-docfirst-workflow/src/index.ts" lines="88-97" */}
+{/* ref file="../packages/gwb-docfirst-workflow/src/index.ts" lines="89-98" */}
 
 插件那头只留两样：**参数校验**与**回执组装**。`dir` 要给、要是绝对路径（插件跑在工作台主进程里，相对谁都不知道）、要是个目录——最后这条点得出「dir 给成仓目录了」这个最常犯的错；「是不是刚铺好的骨架」一概归装配那道门判，它抛的那句话原样进 `{ ok: false, error }`，那些错误文本本身就是文档。
 
@@ -187,7 +187,7 @@ description: 往一个已经铺好的 fumadocs 骨架上接 docfirst：唯一那
 
 `attachSite` 那半在临时目录里跑真的：六区各有骨架页、集合、路由、侧栏根节，骨架那份 `DocsLayout` 让了位（留着就是两层套着渲，侧栏出现两遍），仓根的 `README.md` 一个字不动、只报进 `overwrites`，装过一次再装当场拒。
 
-依赖表那条**跨两份真相的账**跟它们同一个文件里跑——发版抬版本号忘了抬它，这条红：
+依赖表那条**跨两份真相的账**跟它们同一个文件里跑——表里写的不是精确号、或发版抬版本号忘了抬它，这条红：
 
 {/* ref file="../packages/gwb-docfirst-workflow/tests/attach.test.ts" lines="302-309" */}
 
