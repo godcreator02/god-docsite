@@ -112,10 +112,10 @@ describe('模板本身', () => {
     }
   })
 
-  it('反馈区只有孵化一页——跨仓反馈集中投总控台，不再往各仓的站里投', () => {
+  it('反馈区两页：inbox 收别的仓投来的、hatch 装本仓的重复操作——跨仓反馈投目标仓自己站的 inbox', () => {
     const rels = readTemplate().map((f) => f.rel)
-    expect(rels).toContain('content/feedback/hatch.mdx.tpl')
-    expect(rels).not.toContain('content/feedback/inbound.mdx.tpl')
+    for (const page of ['inbox', 'hatch']) expect(rels).toContain(`content/feedback/${page}.mdx.tpl`)
+    expect(rels, '收件页统一叫 inbox，不叫 inbound').not.toContain('content/feedback/inbound.mdx.tpl')
   })
 })
 
@@ -257,7 +257,7 @@ describe('attachSite：算完直接落', () => {
         }
         const pages = [
           'docs/index.mdx', 'docs/system-map.mdx', 'docs/glossary.mdx', 'trajectory/index.mdx', 'spec/index.mdx',
-          'future/overview.mdx', 'outputs/agents.mdx', 'outputs/readme.mdx', 'feedback/hatch.mdx',
+          'future/overview.mdx', 'outputs/agents.mdx', 'outputs/readme.mdx', 'feedback/inbox.mdx', 'feedback/hatch.mdx',
         ]
         for (const page of pages) {
           expect(fs.readFileSync(path.join(site, 'content', page), 'utf8'), `${page} 头一句要是「本页回答」`).toMatch(/\*\*本页回答\*\*：/)

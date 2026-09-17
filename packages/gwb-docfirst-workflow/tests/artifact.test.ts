@@ -55,8 +55,8 @@ describe('产物', () => {
   it.skipIf(!built)('总线上只剩装六区那一条——命令名是公共面，改名就是破约', () => {
     const host = read('index.js')
     expect(host).toContain("'docfirst.attach'")
-    // 转发那三条随「件不许依赖包」一起去掉：核对要在**仓**里发生，agent 自己 cd 过去跑 pnpm doc。
-    // 反馈那两条随「跨仓反馈集中投总控台」去掉：落点固定之后，投反馈就是往一个固定路径的 md 追加一段
+    // 转发那三条不在：核对要在**仓**里发生，agent 自己 cd 过去跑 pnpm doc。
+    // 反馈那两条不在：投反馈是往目标仓站里 content/feedback/inbox.mdx 追加一节，不经命令
     for (const gone of ['live-doc.cli', 'live-doc.cli-raw', 'live-doc.stale', 'live-doc.feedback', 'live-doc.feedback-list']) {
       expect(host, `${gone} 还在总线上`).not.toContain(`'${gone}'`)
     }
