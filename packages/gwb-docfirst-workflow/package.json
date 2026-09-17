@@ -42,9 +42,9 @@
   "//deps": "契约包只 import type（isRecord 与 GwbContext）→ 仍走 peer，它是每个件都得对得上的那份契约；commands 在 export const inject 里，是运行期硬依赖 → peer。skills 走 ctx.inject 局部注入、只 import type → dev，另挂一条可选 peer 当版本校验点（cordis 对服务不做版本校验，peer range 是这条链上唯一一处）。gwb-docs-site 一档都不写：两个件互不依赖，连类型都不借",
   "//peerRange": "写 >= 不写 ^：caret 在 0.0.x 上锁死 patch，共享包一升版消费方就不匹配了",
   "peerDependencies": {
-    "@godcreator/gwb-commands": ">=0.1.0",
-    "@godcreator/gwb-plugin-api": ">=0.1.0",
-    "@godcreator/gwb-skills": ">=0.1.0"
+    "@godcreator/gwb-commands": ">=0.4.1",
+    "@godcreator/gwb-plugin-api": ">=0.1.1",
+    "@godcreator/gwb-skills": ">=0.4.0"
   },
   "peerDependenciesMeta": {
     "@godcreator/gwb-skills": {
@@ -52,7 +52,7 @@
     }
   },
   "devDependencies": {
-    "@godcreator/gwb-commands": "0.4.0",
+    "@godcreator/gwb-commands": "0.4.1",
     "@godcreator/gwb-plugin-api": "0.1.1",
     "@godcreator/gwb-skills": "0.4.0",
     "@types/node": "^24.0.0",
