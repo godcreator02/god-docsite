@@ -299,12 +299,12 @@ describe('attachSite：算完直接落', () => {
   })
 })
 
-it('装配那张依赖表跟工作区那两个包的版本对得上——它们发版抬了版本号忘了抬它，这条红', () => {
-  for (const [name, range] of Object.entries(DOCFIRST_DEPS)) {
+it('装配那张依赖表是精确号、跟工作区那两个包的版本对得上——它们发版抬了版本号忘了抬它，这条红', () => {
+  for (const [name, pin] of Object.entries(DOCFIRST_DEPS)) {
     const dir = DIR_OF[name]
     expect(dir, `装配表里的 ${name} 在 packages/ 下没有对应目录——新加一条依赖时把 DIR_OF 也补上`).toBeDefined()
     const pkg = JSON.parse(fs.readFileSync(path.join(PACKAGES, dir!, 'package.json'), 'utf8')) as { name: string; version: string }
     expect(pkg.name, `${String(dir)} 的包名对不上装配表里的 ${name}`).toBe(name)
-    expect(range, `装配表里 ${name} 写的是 ${range}，工作区里是 ${pkg.version}——发版时这张表得跟着抬`).toBe(`^${pkg.version}`)
+    expect(pin, `装配表里 ${name} 写的是 ${pin}，工作区里是 ${pkg.version}——写精确号（不带 ^ / ~ / >=），发版时这张表得跟着抬`).toBe(pkg.version)
   }
 })
