@@ -283,7 +283,7 @@
     "package.json:7-12": {
       "kind": "git",
       "blob": "e988abd365b85cf5c3dc4b3cc4fe3bcfb98a7aa3",
-      "commit": "5ccb45fd705c716d6228a1a6238560469bd4b5d0",
+      "commit": "7676d89094018110cca1cbd4966d2071cb8a2413",
       "lines": [
         7,
         12
@@ -293,7 +293,7 @@
     "../package.json:7-13": {
       "kind": "git",
       "blob": "888deafcdda0d11dbd553659dcd4eb3cd2e14385",
-      "commit": "5ccb45fd705c716d6228a1a6238560469bd4b5d0",
+      "commit": "7676d89094018110cca1cbd4966d2071cb8a2413",
       "lines": [
         7,
         13
@@ -303,7 +303,7 @@
     "content/docs/maintain/agents.mdx:29-35": {
       "kind": "git",
       "blob": "9ed0984bba215921122cd7afd41070f0a590f910",
-      "commit": "5ccb45fd705c716d6228a1a6238560469bd4b5d0",
+      "commit": "7676d89094018110cca1cbd4966d2071cb8a2413",
       "lines": [
         29,
         35
@@ -313,7 +313,7 @@
     "content/docs/maintain/agents.mdx:54-57": {
       "kind": "git",
       "blob": "9ed0984bba215921122cd7afd41070f0a590f910",
-      "commit": "5ccb45fd705c716d6228a1a6238560469bd4b5d0",
+      "commit": "7676d89094018110cca1cbd4966d2071cb8a2413",
       "lines": [
         54,
         57
@@ -323,7 +323,7 @@
     "content/docs/maintain/agents.mdx:39-53": {
       "kind": "git",
       "blob": "9ed0984bba215921122cd7afd41070f0a590f910",
-      "commit": "5ccb45fd705c716d6228a1a6238560469bd4b5d0",
+      "commit": "7676d89094018110cca1cbd4966d2071cb8a2413",
       "lines": [
         39,
         53
@@ -332,13 +332,32 @@
     },
     "../packages/gwb-docfirst-workflow/package.json:29-36": {
       "kind": "git",
-      "blob": "672b4d8ae38737e7db79cdd07c82e65a19f3e063",
-      "commit": "5ccb45fd705c716d6228a1a6238560469bd4b5d0",
+      "blob": "115133a643d03415cdb1c9c9b742d1e5faef283b",
+      "commit": "7676d89094018110cca1cbd4966d2071cb8a2413",
       "lines": [
         29,
         36
       ],
       "hash": "a4d761fc47d499c0d0a2cb400daadea84ffbdf2a5b856ff4b7702be947185971"
+    },
+    "tree ../packages depth=1": {
+      "kind": "tree",
+      "names": [
+        "docfirst-trajectory/",
+        "docfirst-workflow/",
+        "gwb-docfirst-workflow/"
+      ]
+    },
+    "tree content depth=1": {
+      "kind": "tree",
+      "names": [
+        "docs/",
+        "feedback/",
+        "future/",
+        "outputs/",
+        "spec/",
+        "trajectory/"
+      ]
     }
   },
   "content/docs/start/index.mdx": {
@@ -2840,7 +2859,7 @@
     "../packages/gwb-docfirst-workflow/src/index.ts:9-21": {
       "kind": "git",
       "blob": "3a915560ee8c6a092e9618347b4bca3c4d3382da",
-      "commit": "5ccb45fd705c716d6228a1a6238560469bd4b5d0",
+      "commit": "7676d89094018110cca1cbd4966d2071cb8a2413",
       "lines": [
         9,
         21
@@ -2850,7 +2869,7 @@
     "../packages/gwb-docfirst-workflow/src/index.ts:22-27": {
       "kind": "git",
       "blob": "3a915560ee8c6a092e9618347b4bca3c4d3382da",
-      "commit": "5ccb45fd705c716d6228a1a6238560469bd4b5d0",
+      "commit": "7676d89094018110cca1cbd4966d2071cb8a2413",
       "lines": [
         22,
         27
@@ -2859,8 +2878,8 @@
     },
     "../packages/gwb-docfirst-workflow/tests/artifact.test.ts:93-122": {
       "kind": "git",
-      "blob": "fd00dfc3a894cd84a3cdb4ce0476aade31957338",
-      "commit": "5ccb45fd705c716d6228a1a6238560469bd4b5d0",
+      "blob": "5800c4443602a344888e94fbe3a3081d782ab299",
+      "commit": "7676d89094018110cca1cbd4966d2071cb8a2413",
       "lines": [
         93,
         122
@@ -2869,8 +2888,8 @@
     },
     "../packages/gwb-docfirst-workflow/tests/artifact.test.ts:124-131": {
       "kind": "git",
-      "blob": "fd00dfc3a894cd84a3cdb4ce0476aade31957338",
-      "commit": "5ccb45fd705c716d6228a1a6238560469bd4b5d0",
+      "blob": "5800c4443602a344888e94fbe3a3081d782ab299",
+      "commit": "7676d89094018110cca1cbd4966d2071cb8a2413",
       "lines": [
         124,
         131
@@ -2894,7 +2913,7 @@
     "docfirst.config.mjs:17-27": {
       "kind": "git",
       "blob": "51b82e04fad951fb9fd809e3c1487b04437b4a0a",
-      "commit": "5ccb45fd705c716d6228a1a6238560469bd4b5d0",
+      "commit": "7676d89094018110cca1cbd4966d2071cb8a2413",
       "lines": [
         17,
         27
@@ -2903,8 +2922,8 @@
     },
     "../packages/gwb-docfirst-workflow/tests/artifact.test.ts:140-148": {
       "kind": "git",
-      "blob": "fd00dfc3a894cd84a3cdb4ce0476aade31957338",
-      "commit": "5ccb45fd705c716d6228a1a6238560469bd4b5d0",
+      "blob": "5800c4443602a344888e94fbe3a3081d782ab299",
+      "commit": "7676d89094018110cca1cbd4966d2071cb8a2413",
       "lines": [
         140,
         148
@@ -2914,7 +2933,7 @@
     "../packages/gwb-docfirst-workflow/src/index.ts:36-54": {
       "kind": "git",
       "blob": "3a915560ee8c6a092e9618347b4bca3c4d3382da",
-      "commit": "5ccb45fd705c716d6228a1a6238560469bd4b5d0",
+      "commit": "7676d89094018110cca1cbd4966d2071cb8a2413",
       "lines": [
         36,
         54
@@ -2924,7 +2943,7 @@
     "../packages/gwb-docfirst-workflow/src/index.ts:62-71": {
       "kind": "git",
       "blob": "3a915560ee8c6a092e9618347b4bca3c4d3382da",
-      "commit": "5ccb45fd705c716d6228a1a6238560469bd4b5d0",
+      "commit": "7676d89094018110cca1cbd4966d2071cb8a2413",
       "lines": [
         62,
         71
@@ -2933,18 +2952,18 @@
     },
     "../packages/gwb-docfirst-workflow/tests/artifact.test.ts:55-67": {
       "kind": "git",
-      "blob": "fd00dfc3a894cd84a3cdb4ce0476aade31957338",
-      "commit": "5ccb45fd705c716d6228a1a6238560469bd4b5d0",
+      "blob": "5800c4443602a344888e94fbe3a3081d782ab299",
+      "commit": "7676d89094018110cca1cbd4966d2071cb8a2413",
       "lines": [
         55,
         67
       ],
-      "hash": "26791c068a6aef9f4995bc9527ff837f77933dc3a9b29e92f5cd79b213442914"
+      "hash": "67426eadda991520f46abaf20f92938a571a547a7556d2296c266497e90457a9"
     },
     "../packages/gwb-docfirst-workflow/tests/artifact.test.ts:80-91": {
       "kind": "git",
-      "blob": "fd00dfc3a894cd84a3cdb4ce0476aade31957338",
-      "commit": "5ccb45fd705c716d6228a1a6238560469bd4b5d0",
+      "blob": "5800c4443602a344888e94fbe3a3081d782ab299",
+      "commit": "7676d89094018110cca1cbd4966d2071cb8a2413",
       "lines": [
         80,
         91
@@ -2953,8 +2972,8 @@
     },
     "../packages/gwb-docfirst-workflow/tests/artifact.test.ts:133-138": {
       "kind": "git",
-      "blob": "fd00dfc3a894cd84a3cdb4ce0476aade31957338",
-      "commit": "5ccb45fd705c716d6228a1a6238560469bd4b5d0",
+      "blob": "5800c4443602a344888e94fbe3a3081d782ab299",
+      "commit": "7676d89094018110cca1cbd4966d2071cb8a2413",
       "lines": [
         133,
         138
@@ -2972,8 +2991,8 @@
     },
     "../packages/gwb-docfirst-workflow/tests/artifact.test.ts:30-37": {
       "kind": "git",
-      "blob": "fd00dfc3a894cd84a3cdb4ce0476aade31957338",
-      "commit": "5ccb45fd705c716d6228a1a6238560469bd4b5d0",
+      "blob": "5800c4443602a344888e94fbe3a3081d782ab299",
+      "commit": "7676d89094018110cca1cbd4966d2071cb8a2413",
       "lines": [
         30,
         37
@@ -2994,18 +3013,18 @@
     },
     "../packages/gwb-docfirst-workflow/package.json:41-53": {
       "kind": "git",
-      "blob": "672b4d8ae38737e7db79cdd07c82e65a19f3e063",
-      "commit": "5ccb45fd705c716d6228a1a6238560469bd4b5d0",
+      "blob": "115133a643d03415cdb1c9c9b742d1e5faef283b",
+      "commit": "7676d89094018110cca1cbd4966d2071cb8a2413",
       "lines": [
         41,
         53
       ],
-      "hash": "82dcf9f4cda91e7d4cd759eff65fe60ebae71e48d1e0f2c5f5e988fdae4feffa"
+      "hash": "6dc45129a34b8e4772bf438269b81b911f697e17acdbcbb7b505478e5ada7ee2"
     },
     "../packages/gwb-docfirst-workflow/src/index.ts:120-125": {
       "kind": "git",
       "blob": "3a915560ee8c6a092e9618347b4bca3c4d3382da",
-      "commit": "5ccb45fd705c716d6228a1a6238560469bd4b5d0",
+      "commit": "7676d89094018110cca1cbd4966d2071cb8a2413",
       "lines": [
         120,
         125
@@ -3014,8 +3033,8 @@
     },
     "../packages/gwb-docfirst-workflow/package.json:28-37": {
       "kind": "git",
-      "blob": "672b4d8ae38737e7db79cdd07c82e65a19f3e063",
-      "commit": "5ccb45fd705c716d6228a1a6238560469bd4b5d0",
+      "blob": "115133a643d03415cdb1c9c9b742d1e5faef283b",
+      "commit": "7676d89094018110cca1cbd4966d2071cb8a2413",
       "lines": [
         28,
         37
@@ -3025,7 +3044,7 @@
     "../packages/gwb-docfirst-workflow/src/index.ts:89-98": {
       "kind": "git",
       "blob": "3a915560ee8c6a092e9618347b4bca3c4d3382da",
-      "commit": "5ccb45fd705c716d6228a1a6238560469bd4b5d0",
+      "commit": "7676d89094018110cca1cbd4966d2071cb8a2413",
       "lines": [
         89,
         98
@@ -3035,7 +3054,7 @@
     "../packages/gwb-docfirst-workflow/src/index.ts:99-115": {
       "kind": "git",
       "blob": "3a915560ee8c6a092e9618347b4bca3c4d3382da",
-      "commit": "5ccb45fd705c716d6228a1a6238560469bd4b5d0",
+      "commit": "7676d89094018110cca1cbd4966d2071cb8a2413",
       "lines": [
         99,
         115
@@ -3045,7 +3064,7 @@
     "../packages/gwb-docfirst-workflow/src/index.ts:78-86": {
       "kind": "git",
       "blob": "3a915560ee8c6a092e9618347b4bca3c4d3382da",
-      "commit": "5ccb45fd705c716d6228a1a6238560469bd4b5d0",
+      "commit": "7676d89094018110cca1cbd4966d2071cb8a2413",
       "lines": [
         78,
         86
@@ -3054,8 +3073,8 @@
     },
     "../packages/gwb-docfirst-workflow/package.json:19-26": {
       "kind": "git",
-      "blob": "672b4d8ae38737e7db79cdd07c82e65a19f3e063",
-      "commit": "5ccb45fd705c716d6228a1a6238560469bd4b5d0",
+      "blob": "115133a643d03415cdb1c9c9b742d1e5faef283b",
+      "commit": "7676d89094018110cca1cbd4966d2071cb8a2413",
       "lines": [
         19,
         26
@@ -3067,7 +3086,7 @@
     "../packages/gwb-docfirst-workflow/src/attach.ts:1-7": {
       "kind": "git",
       "blob": "edf879510973f394aad211eca08872bc30dc4def",
-      "commit": "5ccb45fd705c716d6228a1a6238560469bd4b5d0",
+      "commit": "7676d89094018110cca1cbd4966d2071cb8a2413",
       "lines": [
         1,
         7
@@ -3077,7 +3096,7 @@
     "../packages/gwb-docfirst-workflow/src/attach.ts:9-13": {
       "kind": "git",
       "blob": "edf879510973f394aad211eca08872bc30dc4def",
-      "commit": "5ccb45fd705c716d6228a1a6238560469bd4b5d0",
+      "commit": "7676d89094018110cca1cbd4966d2071cb8a2413",
       "lines": [
         9,
         13
@@ -3086,8 +3105,8 @@
     },
     "../packages/gwb-docfirst-workflow/tests/attach.test.ts:109-113": {
       "kind": "git",
-      "blob": "b1dd70c03acfd940c8a0d60fa72aa849ae232708",
-      "commit": "5ccb45fd705c716d6228a1a6238560469bd4b5d0",
+      "blob": "0b4174e57504437e9f8a40b300299c140070778e",
+      "commit": "7676d89094018110cca1cbd4966d2071cb8a2413",
       "lines": [
         109,
         113
@@ -3097,7 +3116,7 @@
     "../packages/gwb-docfirst-workflow/src/attach.ts:44-52": {
       "kind": "git",
       "blob": "edf879510973f394aad211eca08872bc30dc4def",
-      "commit": "5ccb45fd705c716d6228a1a6238560469bd4b5d0",
+      "commit": "7676d89094018110cca1cbd4966d2071cb8a2413",
       "lines": [
         44,
         52
@@ -3107,7 +3126,7 @@
     "../packages/gwb-docfirst-workflow/src/attach.ts:32-37": {
       "kind": "git",
       "blob": "edf879510973f394aad211eca08872bc30dc4def",
-      "commit": "5ccb45fd705c716d6228a1a6238560469bd4b5d0",
+      "commit": "7676d89094018110cca1cbd4966d2071cb8a2413",
       "lines": [
         32,
         37
@@ -3116,8 +3135,8 @@
     },
     "../packages/gwb-docfirst-workflow/tests/artifact.test.ts:103-118": {
       "kind": "git",
-      "blob": "fd00dfc3a894cd84a3cdb4ce0476aade31957338",
-      "commit": "5ccb45fd705c716d6228a1a6238560469bd4b5d0",
+      "blob": "5800c4443602a344888e94fbe3a3081d782ab299",
+      "commit": "7676d89094018110cca1cbd4966d2071cb8a2413",
       "lines": [
         103,
         118
@@ -3127,7 +3146,7 @@
     "../packages/gwb-docfirst-workflow/src/index.ts:62-71": {
       "kind": "git",
       "blob": "3a915560ee8c6a092e9618347b4bca3c4d3382da",
-      "commit": "5ccb45fd705c716d6228a1a6238560469bd4b5d0",
+      "commit": "7676d89094018110cca1cbd4966d2071cb8a2413",
       "lines": [
         62,
         71
@@ -3137,7 +3156,7 @@
     "../packages/gwb-docfirst-workflow/src/attach.ts:54-70": {
       "kind": "git",
       "blob": "edf879510973f394aad211eca08872bc30dc4def",
-      "commit": "5ccb45fd705c716d6228a1a6238560469bd4b5d0",
+      "commit": "7676d89094018110cca1cbd4966d2071cb8a2413",
       "lines": [
         54,
         70
@@ -3147,7 +3166,7 @@
     "../packages/gwb-docfirst-workflow/src/skeleton.ts:36-50": {
       "kind": "git",
       "blob": "14520fc36b916bb66e1e47426c1bf80dab120bbe",
-      "commit": "5ccb45fd705c716d6228a1a6238560469bd4b5d0",
+      "commit": "7676d89094018110cca1cbd4966d2071cb8a2413",
       "lines": [
         36,
         50
@@ -3157,7 +3176,7 @@
     "../packages/gwb-docfirst-workflow/src/template.ts:32-44": {
       "kind": "git",
       "blob": "a4ea759fd7b9e1ddfc2ef5312170a94ea0ec8800",
-      "commit": "5ccb45fd705c716d6228a1a6238560469bd4b5d0",
+      "commit": "7676d89094018110cca1cbd4966d2071cb8a2413",
       "lines": [
         32,
         44
@@ -3187,18 +3206,18 @@
     },
     "../packages/gwb-docfirst-workflow/tests/attach.test.ts:115-119": {
       "kind": "git",
-      "blob": "b1dd70c03acfd940c8a0d60fa72aa849ae232708",
-      "commit": "5ccb45fd705c716d6228a1a6238560469bd4b5d0",
+      "blob": "0b4174e57504437e9f8a40b300299c140070778e",
+      "commit": "7676d89094018110cca1cbd4966d2071cb8a2413",
       "lines": [
         115,
         119
       ],
-      "hash": "e02f83bfce7e7186dd869ff54af0ab21253aee02907d09b88edec206c707dd96"
+      "hash": "492d3f12c7bbfd6174036800b2c6e06e141cd9c898627b1cf7f7b4391944cee5"
     },
     "../packages/gwb-docfirst-workflow/src/template.ts:15-24": {
       "kind": "git",
       "blob": "a4ea759fd7b9e1ddfc2ef5312170a94ea0ec8800",
-      "commit": "5ccb45fd705c716d6228a1a6238560469bd4b5d0",
+      "commit": "7676d89094018110cca1cbd4966d2071cb8a2413",
       "lines": [
         15,
         24
@@ -3208,7 +3227,7 @@
     "../packages/gwb-docfirst-workflow/src/attach.ts:78-103": {
       "kind": "git",
       "blob": "edf879510973f394aad211eca08872bc30dc4def",
-      "commit": "5ccb45fd705c716d6228a1a6238560469bd4b5d0",
+      "commit": "7676d89094018110cca1cbd4966d2071cb8a2413",
       "lines": [
         78,
         103
@@ -3218,7 +3237,7 @@
     "../packages/gwb-docfirst-workflow/src/attach.ts:105-116": {
       "kind": "git",
       "blob": "edf879510973f394aad211eca08872bc30dc4def",
-      "commit": "5ccb45fd705c716d6228a1a6238560469bd4b5d0",
+      "commit": "7676d89094018110cca1cbd4966d2071cb8a2413",
       "lines": [
         105,
         116
@@ -3228,7 +3247,7 @@
     "../packages/gwb-docfirst-workflow/src/manifest.ts:20-30": {
       "kind": "git",
       "blob": "c6915b53755653136f389cba9729ba80521851be",
-      "commit": "5ccb45fd705c716d6228a1a6238560469bd4b5d0",
+      "commit": "7676d89094018110cca1cbd4966d2071cb8a2413",
       "lines": [
         20,
         30
@@ -3238,7 +3257,7 @@
     "../packages/gwb-docfirst-workflow/src/deps.ts:all": {
       "kind": "git",
       "blob": "4351cfc4fa2308cebfdf2235ed3bb0a6b68d1d2d",
-      "commit": "5ccb45fd705c716d6228a1a6238560469bd4b5d0",
+      "commit": "7676d89094018110cca1cbd4966d2071cb8a2413",
       "lines": [
         1,
         17
@@ -3251,7 +3270,7 @@
     "../packages/gwb-docfirst-workflow/src/index.ts:36-54": {
       "kind": "git",
       "blob": "3a915560ee8c6a092e9618347b4bca3c4d3382da",
-      "commit": "5ccb45fd705c716d6228a1a6238560469bd4b5d0",
+      "commit": "7676d89094018110cca1cbd4966d2071cb8a2413",
       "lines": [
         36,
         54
@@ -3261,7 +3280,7 @@
     "../packages/gwb-docfirst-workflow/src/skeleton.ts:95-118": {
       "kind": "git",
       "blob": "14520fc36b916bb66e1e47426c1bf80dab120bbe",
-      "commit": "5ccb45fd705c716d6228a1a6238560469bd4b5d0",
+      "commit": "7676d89094018110cca1cbd4966d2071cb8a2413",
       "lines": [
         95,
         118
@@ -3271,7 +3290,7 @@
     "../packages/gwb-docfirst-workflow/src/skeleton.ts:11-27": {
       "kind": "git",
       "blob": "14520fc36b916bb66e1e47426c1bf80dab120bbe",
-      "commit": "5ccb45fd705c716d6228a1a6238560469bd4b5d0",
+      "commit": "7676d89094018110cca1cbd4966d2071cb8a2413",
       "lines": [
         11,
         27
@@ -3281,7 +3300,7 @@
     "../packages/gwb-docfirst-workflow/src/skeleton.ts:66-74": {
       "kind": "git",
       "blob": "14520fc36b916bb66e1e47426c1bf80dab120bbe",
-      "commit": "5ccb45fd705c716d6228a1a6238560469bd4b5d0",
+      "commit": "7676d89094018110cca1cbd4966d2071cb8a2413",
       "lines": [
         66,
         74
@@ -3291,7 +3310,7 @@
     "../packages/gwb-docfirst-workflow/src/values.ts:9-25": {
       "kind": "git",
       "blob": "bc38276c6abc26f81392c06f4778867c7c182169",
-      "commit": "5ccb45fd705c716d6228a1a6238560469bd4b5d0",
+      "commit": "7676d89094018110cca1cbd4966d2071cb8a2413",
       "lines": [
         9,
         25
@@ -3301,7 +3320,7 @@
     "../packages/gwb-docfirst-workflow/src/values.ts:27-59": {
       "kind": "git",
       "blob": "bc38276c6abc26f81392c06f4778867c7c182169",
-      "commit": "5ccb45fd705c716d6228a1a6238560469bd4b5d0",
+      "commit": "7676d89094018110cca1cbd4966d2071cb8a2413",
       "lines": [
         27,
         59
@@ -3311,7 +3330,7 @@
     "../packages/gwb-docfirst-workflow/src/template.ts:60-66": {
       "kind": "git",
       "blob": "a4ea759fd7b9e1ddfc2ef5312170a94ea0ec8800",
-      "commit": "5ccb45fd705c716d6228a1a6238560469bd4b5d0",
+      "commit": "7676d89094018110cca1cbd4966d2071cb8a2413",
       "lines": [
         60,
         66
@@ -3321,7 +3340,7 @@
     "../packages/gwb-docfirst-workflow/template/attach/docfirst.config.mjs.tpl:17-25": {
       "kind": "git",
       "blob": "9600d4796c55b583abbe7f64d1b7b46befd30650",
-      "commit": "5ccb45fd705c716d6228a1a6238560469bd4b5d0",
+      "commit": "7676d89094018110cca1cbd4966d2071cb8a2413",
       "lines": [
         17,
         25
@@ -3330,8 +3349,8 @@
     },
     "../packages/gwb-docfirst-workflow/template/attach/source.config.ts.tpl:49-63": {
       "kind": "git",
-      "blob": "be8189b903aa345ad72351364640869c850a5f39",
-      "commit": "5ccb45fd705c716d6228a1a6238560469bd4b5d0",
+      "blob": "8da68494a50abaebd8a6ea496a34684287a5281a",
+      "commit": "7676d89094018110cca1cbd4966d2071cb8a2413",
       "lines": [
         49,
         63
@@ -3340,8 +3359,8 @@
     },
     "../packages/gwb-docfirst-workflow/tests/attach.test.ts:9-18": {
       "kind": "git",
-      "blob": "b1dd70c03acfd940c8a0d60fa72aa849ae232708",
-      "commit": "5ccb45fd705c716d6228a1a6238560469bd4b5d0",
+      "blob": "0b4174e57504437e9f8a40b300299c140070778e",
+      "commit": "7676d89094018110cca1cbd4966d2071cb8a2413",
       "lines": [
         9,
         18
@@ -3350,8 +3369,8 @@
     },
     "../packages/gwb-docfirst-workflow/tests/attach.test.ts:43-60": {
       "kind": "git",
-      "blob": "b1dd70c03acfd940c8a0d60fa72aa849ae232708",
-      "commit": "5ccb45fd705c716d6228a1a6238560469bd4b5d0",
+      "blob": "0b4174e57504437e9f8a40b300299c140070778e",
+      "commit": "7676d89094018110cca1cbd4966d2071cb8a2413",
       "lines": [
         43,
         60
@@ -3360,8 +3379,8 @@
     },
     "../packages/gwb-docfirst-workflow/tests/attach.test.ts:206-214": {
       "kind": "git",
-      "blob": "b1dd70c03acfd940c8a0d60fa72aa849ae232708",
-      "commit": "5ccb45fd705c716d6228a1a6238560469bd4b5d0",
+      "blob": "0b4174e57504437e9f8a40b300299c140070778e",
+      "commit": "7676d89094018110cca1cbd4966d2071cb8a2413",
       "lines": [
         206,
         214
@@ -3370,8 +3389,8 @@
     },
     "../packages/gwb-docfirst-workflow/tests/attach.test.ts:302-309": {
       "kind": "git",
-      "blob": "b1dd70c03acfd940c8a0d60fa72aa849ae232708",
-      "commit": "5ccb45fd705c716d6228a1a6238560469bd4b5d0",
+      "blob": "0b4174e57504437e9f8a40b300299c140070778e",
+      "commit": "7676d89094018110cca1cbd4966d2071cb8a2413",
       "lines": [
         302,
         309
@@ -3380,13 +3399,13 @@
     },
     "../packages/gwb-docfirst-workflow/tests/artifact.test.ts:55-67": {
       "kind": "git",
-      "blob": "fd00dfc3a894cd84a3cdb4ce0476aade31957338",
-      "commit": "5ccb45fd705c716d6228a1a6238560469bd4b5d0",
+      "blob": "5800c4443602a344888e94fbe3a3081d782ab299",
+      "commit": "7676d89094018110cca1cbd4966d2071cb8a2413",
       "lines": [
         55,
         67
       ],
-      "hash": "26791c068a6aef9f4995bc9527ff837f77933dc3a9b29e92f5cd79b213442914"
+      "hash": "67426eadda991520f46abaf20f92938a571a547a7556d2296c266497e90457a9"
     },
     "tree ../packages/gwb-docfirst-workflow/src depth=1": {
       "kind": "tree",
@@ -3403,7 +3422,7 @@
     "../packages/gwb-docfirst-workflow/src/index.ts:89-98": {
       "kind": "git",
       "blob": "3a915560ee8c6a092e9618347b4bca3c4d3382da",
-      "commit": "5ccb45fd705c716d6228a1a6238560469bd4b5d0",
+      "commit": "7676d89094018110cca1cbd4966d2071cb8a2413",
       "lines": [
         89,
         98

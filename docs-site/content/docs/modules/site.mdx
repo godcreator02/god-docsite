@@ -73,7 +73,7 @@ description: 往一个已经铺好的 fumadocs 骨架上接 docfirst：唯一那
 
 {/* tree dir="../packages/gwb-docfirst-workflow/template/attach" depth="2" */}
 
-**反馈区只有孵化一页**：跨仓反馈集中投总控台的一个固定路径 md，不再往各仓的站里投，`inbound` 那页因此不在模板里。
+**反馈区两页分工**：`inbox` 收别的仓投来的意见（一条一节、带日期与来源、处理完删），`hatch` 只装本仓自己的重复操作候选。跨仓反馈投的是目标仓自己站的 `inbox`，收件页统一叫这个名字，模板里没有 `inbound`。
 
 {/* ref file="../packages/gwb-docfirst-workflow/tests/attach.test.ts" lines="115-119" */}
 
@@ -183,7 +183,7 @@ description: 往一个已经铺好的 fumadocs 骨架上接 docfirst：唯一那
 
 {/* ref file="../packages/gwb-docfirst-workflow/tests/attach.test.ts" lines="206-214" */}
 
-模板本身另有一组不进临时目录的账：读得出来、后缀脱得掉、整套渲完不留占位符、骨架那半一份都不在、反馈区只有孵化一页。
+模板本身另有一组不进临时目录的账：读得出来、后缀脱得掉、整套渲完不留占位符、骨架那半一份都不在、反馈区是 inbox 与 hatch 两页。
 
 `attachSite` 那半在临时目录里跑真的：六区各有骨架页、集合、路由、侧栏根节，骨架那份 `DocsLayout` 让了位（留着就是两层套着渲，侧栏出现两遍），仓根的 `README.md` 一个字不动、只报进 `overwrites`，装过一次再装当场拒。
 
