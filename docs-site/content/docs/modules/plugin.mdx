@@ -25,7 +25,7 @@ description: gwb-docfirst-workflow：一条铺六区的命令加六份说明书�
 
 插件对那个包**三档依赖一档都不写、`src/` 里一行都不 import**：不起子进程、不登记 node CLI、不查 home 里那个包的路径。于是装了插件就能挂上说明书、能铺六区，不必再装什么包，也不再有「装了插件没装包」那种半截状态。manifest 上那一档是空的，注释就是这条边界的正文：
 
-{/* ref file="../packages/gwb-docfirst-workflow/package.json" lines="41-53" */}
+{/* ref file="../packages/gwb-docfirst-workflow/package.json" lines="37-47" */}
 
 守卫在产物测试里，三档依赖面与 `src/` 下每份源码的裸名 import 一起查：
 
@@ -67,7 +67,7 @@ description: gwb-docfirst-workflow：一条铺六区的命令加六份说明书�
 
 **不注册窗格**：站点插件那个窗格已经叫「文档站」，两个窗格同名分不出谁是谁。本插件也因此没有浏览器半——没有 esbuild、没有那张带前缀的样式表，`build` 只剩一步 `tsc`：
 
-{/* ref file="../packages/gwb-docfirst-workflow/package.json" lines="28-37" */}
+{/* ref file="../packages/gwb-docfirst-workflow/package.json" lines="25-33" */}
 
 ## 不知道什么
 
@@ -111,11 +111,13 @@ description: gwb-docfirst-workflow：一条铺六区的命令加六份说明书�
 
 {/* ref file="../packages/gwb-docfirst-workflow/tests/artifact.test.ts" lines="55-67" */}
 
+**命令清单不存文档**——现扫工作台那条 `index`，回执的命令行自带 `plugin` 包名归属（要用法走 `search {"plugin":"@godcreator/gwb-docfirst-workflow"}`）。随包自述同样只有一句：manifest 的 `description`，固定「服务 / skill / 命令」三格，包发到哪儿它跟到哪儿。
+
 模块面上四个导出：`name`、`ATTACH_COMMAND`、`inject`、`apply`。装配那摊的类型不从这儿转出，要 `AttachResult` 就直接 import `attach.js`。
 
 说明书与模板不是代码，靠 `files` 发出去：
 
-{/* ref file="../packages/gwb-docfirst-workflow/package.json" lines="19-26" */}
+{/* ref file="../packages/gwb-docfirst-workflow/package.json" lines="18-23" */}
 
 漏一条包照发、照装得上，直到挂载去扫 skills 目录、或者跑 attach 那一刻才报「读不动」——所以两条都有测试盯着：
 
@@ -123,12 +125,18 @@ description: gwb-docfirst-workflow：一条铺六区的命令加六份说明书�
 
 ## 依赖的接口
 
-`gwbCommands` 进 `export const inject`，缺它不挂；`gwbSkills` 走 `ctx.inject` 的局部注入，不在的 home 里本插件照常挂、只是少一份说明书。
+两个接口都是 cordis 的 inject，一硬一软。`gwbCommands` 是**硬注入**——进 `export const inject`，缺它整个插件不 apply：
+
+{/* ref file="../packages/gwb-docfirst-workflow/src/index.ts" lines="27-27" */}
+
+`gwbSkills` 是**局部注入**——`ctx.inject` 只在那个作用域里要它，没装 skills 插件的 home 里本插件照常挂、只是少一块说明书：
+
+{/* ref file="../packages/gwb-docfirst-workflow/src/index.ts" lines="123-125" */}
 
 | 接口 | 用来做什么 | 生产实现 | 测试实现 |
 | --- | --- | --- | --- |
 | `gwbCommands` | 挂 `docfirst.attach` 那一条 | 命令总线插件 `@godcreator/gwb-commands` | 不测（命令名由产物守卫数着） |
-| `gwbSkills` | 把包内 `skills/` 那三份报过去 | skills 插件 `@godcreator/gwb-skills` | 不测（只是把一个目录 URL 报过去） |
+| `gwbSkills` | 把包内 `skills/` 那六份报过去 | skills 插件 `@godcreator/gwb-skills` | 不测（只是把一个目录 URL 报过去） |
 
 契约包（`isRecord` 与 `GwbContext`）与命令总线走 peer——前者是每个插件都得对得上的那份契约，后者是运行期硬依赖；skills 落 dev 再挂一条可选 peer 当版本校验点，cordis 对服务不做版本校验，peer range 是这条链上唯一一处。这一档由测试钉着，注入方式与依赖档一起查：
 
@@ -144,7 +152,7 @@ description: gwb-docfirst-workflow：一条铺六区的命令加六份说明书�
 
 `plugin` 只验插件的身份：插件名跟包名派生自同一个短名。插件真挂进 cordis 要有 home、有别的插件，那条走实机。
 
-`catalog` 是身份卡防漏的薄壳，正本在 `@godcreator/gwb-repo-kit`：`catalog.md` 三段齐、命令去向指门，源码里 inject 的每个服务名卡上都得点名。
+`self-report` 是自述防漏的薄壳，正本在 `@godcreator/gwb-repo-kit`：`description` 三格（服务 / skill / 命令）齐不齐、说明书份数对不对得上 `skills/`，都归它守着。
 
 `attach` 是四份里最厚的，全部跨装配面上那两个方法测：算一套不碰盘、算完落盘在临时目录里跑真的，细节归 [装配六区](/docs/modules/site)。
 

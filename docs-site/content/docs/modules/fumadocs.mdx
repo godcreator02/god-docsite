@@ -37,7 +37,7 @@ description: 格式实现与站接线捏在一层：remark 插件、meta 白名�
 
 **不带 fumadocs、不带 react**：两者只能是 peer，用消费方项目装的那份，而且全可选——只跑命令行的仓一个都不必装。
 
-{/* ref file="../packages/docfirst-workflow/package.json" lines="49-55" */}
+{/* ref file="../packages/docfirst-workflow/package.json" lines="47-66" */}
 
 peer 这条边界也不靠自觉，产物里同样盯着：
 
@@ -99,7 +99,7 @@ peer 这条边界也不靠自觉，产物里同样盯着：
 
 包外一共三个口加两张样式表，出口表一眼看全：
 
-{/* ref file="../packages/docfirst-workflow/package.json" lines="10-30" */}
+{/* ref file="../packages/docfirst-workflow/package.json" lines="10-29" */}
 
 `./fumadocs` 是站的 `source.config.ts` import 的那一份，`.` 走命令行与程序调用那条，`/fumadocs/pre` 与 `/fumadocs/term` 含 React、单独出去。
 
