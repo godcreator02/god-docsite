@@ -3,7 +3,7 @@
   "version": "0.1.1",
   "author": {"name": "godcreator"},
   "type": "module",
-  "description": "轨迹卡与星轨盘：`.` 扫卡、四层校验（含 docfirst 引用记号）、聚盘建模、布局与链表纯函数（零 npm 依赖）；`./react` 客户端星轨盘组件；`./server` 服务端组件、frontmatter schema、remark 关系边插件",
+  "description": "轨迹卡工具：卡格式与校验（命令行 + 库），随 docfirst 线发。",
   "exports": {
     ".": {
       "types": "./dist/index.d.mts",
