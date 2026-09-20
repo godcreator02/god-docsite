@@ -1,6 +1,6 @@
 {
   "name": "@godcreator/gwb-docfirst-workflow",
-  "version": "0.7.5",
+  "version": "0.7.6",
   "author": {
     "name": "godcreator"
   },
@@ -36,9 +36,9 @@
   },
   "//dependencies": "整段没有，一个都没有。**@godcreator/docfirst-workflow 尤其不许出现在任何一档**：件的消费方是 agent，包的消费方是仓——装了件就该能挂上说明书、能铺六区，不必再装什么包。tests/artifact.test.ts 那条守卫守的就是这条边界",
   "peerDependencies": {
-    "@godcreator/gwb-commands": "^0.4.3",
+    "@godcreator/gwb-commands": "^0.4.5",
     "@godcreator/gwb-plugin-api": "^0.1.2",
-    "@godcreator/gwb-skills": "^0.4.1"
+    "@godcreator/gwb-skills": "^0.4.3"
   },
   "peerDependenciesMeta": {
     "@godcreator/gwb-skills": {
@@ -46,10 +46,10 @@
     }
   },
   "devDependencies": {
-    "@godcreator/gwb-commands": "0.4.3",
+    "@godcreator/gwb-commands": "0.4.5",
     "@godcreator/gwb-plugin-api": "0.1.2",
-    "@godcreator/gwb-repo-kit": "0.2.3",
-    "@godcreator/gwb-skills": "0.4.1",
+    "@godcreator/gwb-repo-kit": "0.3.0",
+    "@godcreator/gwb-skills": "0.4.3",
     "@types/node": "^24.0.0",
     "cordis": "4.0.0-rc.9",
     "oxlint": "1.76.0",
