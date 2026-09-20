@@ -145,6 +145,38 @@ test("五类引用一篇文档：五种记号各自认得回来；多了文件�
   }
 });
 
+test("求助：--help / -h / help 打用法退 0，一个字不写——confirm 后面带着也一样", async () => {
+  const p = setupProject();
+  try {
+    const before = p.read("docs/a.md");
+    for (const args of [["--help"], ["-h"], ["help"], ["confirm", "--help"], ["confirm", "-h"], ["check", "--help"], ["confirm", "docs/a.md", "--help"]]) {
+      const got = await p.cli(...args);
+      assert.equal(got.code, 0, args.join(" "));
+      assert.match(got.out, /docfirst confirm \[文档路径…\]/, args.join(" "));
+      assert.match(got.out, /按页限定/, args.join(" "));
+    }
+    assert.equal(p.read("docs/a.md"), before, "求助不该确认任何东西");
+    assert.equal(existsSync(join(p.root, ".ledger.json")), false, "求助不该落记录簿");
+  } finally {
+    p.teardown();
+  }
+});
+
+test("不认识的开关退 2、什么都不动——confirm 不再把开关当没写、跑成整仓一趟", async () => {
+  const p = setupProject();
+  try {
+    const before = p.read("docs/a.md");
+    for (const args of [["confirm", "--dry-run"], ["confirm", "--json"], ["render", "--force"], ["check", "--jsno"], ["trajectory", "-x"]]) {
+      assert.equal((await p.cli(...args)).code, 2, args.join(" "));
+    }
+    assert.equal(p.read("docs/a.md"), before);
+    assert.equal(existsSync(join(p.root, ".ledger.json")), false);
+    assert.equal((await p.cli("check", "--json")).code, 0, "认的开关照常");
+  } finally {
+    p.teardown();
+  }
+});
+
 test("不认识的命令退 2", async () => {
   const p = setupProject();
   try {

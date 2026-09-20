@@ -9,6 +9,8 @@
  *                                          带路径就是**按页限定**：只动点名的那几篇，别的页与别人的记录一个字不改
  *   docfirst render                         渲染：产物落 out/；挂了 outputs 映射的摆到指定落点（不再落 out/）
  *   docfirst trajectory [--json]            列轨迹卡的盘 / 树 / 主干；--json 出 buildTrajectory 的整份模型
+ *   docfirst --help | -h | help             打用法，退 0，什么都不动；任一命令后面带 --help / -h 也是
+ * 每条命令只收表里认的开关（`FLAGS`），别的开关一律报错退 2、不动手。
  * **四条到此为止**：给一个新骨架铺六区那条不在这儿——那件事只在 agent 手上发生一次、铺的是
  * 模板不是判定，归工作台件 `@godcreator/gwb-docfirst-workflow` 的 `docfirst.attach`。这儿留的全是
  * 要在**仓**里发生的：各仓的 `pnpm doc` 与 CI 跑的就是这四条。
@@ -46,15 +48,53 @@ const REASON: Record<string, string> = {
 /** 确认时拿到的是哪种记忆：hash 是弱记忆（没有旧内容、变了就找不着），写手得知道 */
 const MEMORY: Record<string, string> = { hash: "（hash 记忆：不在 git 里）" };
 
+/**
+ * 各命令认的开关。**不在表里的一律拒**：confirm 把 `--` 开头的参数从页名里筛掉，开关若静默吞掉，
+ * `confirm --help` 就成了不带页名的整仓一趟——替别人没复核的黄灯签字，而且一声不吭。
+ */
+const FLAGS: Record<string, readonly string[]> = {
+  check: ["--json"],
+  confirm: [],
+  render: [],
+  trajectory: ["--json"],
+};
+
+/** 求助的写法：命令位上三种都认，命令后面只认两种开关（`help` 在 confirm 后面可能是页名） */
+const HELP_COMMANDS = new Set(["--help", "-h", "help"]);
+const HELP_FLAGS = new Set(["--help", "-h"]);
+
+export const USAGE = `docfirst——文档钉代码的核对与确认。在有 docfirst.config.mjs 的项目根跑。
+
+  docfirst check [--json]        核对，只读。红退 1；--json 出整份机读报告，退出码不变
+  docfirst confirm [文档路径…]    确认并写回文档与 .ledger.json。
+                                 不带路径 = 整仓一趟：别人没复核的黄灯也会被一起确认。
+                                 带路径 = 按页限定：只动点名的那几篇（例：docfirst confirm content/docs/a.mdx）
+  docfirst render                渲染；挂了 outputs 映射的摆到落点
+  docfirst trajectory [--json]   列轨迹卡的盘 / 树 / 主干
+  docfirst --help                打这份用法，什么都不动
+
+不认识的开关一律报错退 2，不会被当作没写。`;
+
 export async function main(argv: string[]): Promise<number> {
   const [command = "check", ...rest] = argv;
-  // trajectory 跟 check / confirm / render 不是一套：它不遍历文档，所以在装配之前就分流，
-  // 也不进下面那条白名单
-  if (command === "trajectory") return trajectoryCommand(rest);
-  if (!["check", "confirm", "render"].includes(command)) {
-    console.error(`不认识的命令：${command}——有 check / confirm / render / trajectory`);
+  // 求助先于一切：带着它什么都不做，哪怕同时写了别的参数
+  if (HELP_COMMANDS.has(command) || rest.some((arg) => HELP_FLAGS.has(arg))) {
+    console.log(USAGE);
+    return 0;
+  }
+  const flags = FLAGS[command];
+  if (flags === undefined) {
+    console.error(`不认识的命令：${command}——有 check / confirm / render / trajectory，用法看 docfirst --help`);
     return 2;
   }
+  const unknown = rest.filter((arg) => arg.startsWith("-") && !flags.includes(arg));
+  if (unknown.length > 0) {
+    const allowed = flags.length === 0 ? "不收任何开关" : `只认 ${flags.join(" / ")}`;
+    console.error(`${command} 不认识开关 ${unknown.join(" ")}（${command} ${allowed}），什么都没动。用法看 docfirst --help`);
+    return 2;
+  }
+  // trajectory 跟 check / confirm / render 不是一套：它不遍历文档，所以在装配之前就分流
+  if (command === "trajectory") return trajectoryCommand(rest);
 
   const project = await loadProject(process.cwd());
   const docs = project.docs();

@@ -92,7 +92,10 @@ pnpm start
 
 ## 命令一览
 
-{/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="4-14" */}
+{/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="4-16" */}
+
+拿不准就先 `docfirst --help`：它只打用法，什么都不动；写错的开关也只会报错退 2，不会被当作没写。
+**`confirm` 不带路径是整仓一趟**，同一个仓里别人没复核的黄灯会被一起确认——只改了哪几页，就点名那几页。
 
 命令行到此为止，一共四条；日常就 check / confirm / render 这三条，`trajectory` 是另一路，在装配之前就分流走了，见 [轨迹](/docs/modules/trajectory)。给一个新骨架铺六区不在命令行上，归工作台插件，见 [装配六区](/docs/modules/site)。
 `render` 只有一种产物：挂了 `outputs` 映射的直接摆到落点，没挂的出一份给 AI 读的 md 落 `out/`。命令行的完整输出和退出码见

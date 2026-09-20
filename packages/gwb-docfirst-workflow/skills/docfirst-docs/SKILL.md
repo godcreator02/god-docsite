@@ -114,6 +114,8 @@ docs-site/content/
 * **内圈快**：`pnpm check`（类型 + lint + 测试）不带文档检查。
 * **提交边界慢**：`docfirst check` 与代码门禁并列，**红了这个提交不许推**。漂移处置二选一：
   `docfirst confirm` 认新行，或改论断。
+* **confirm 点名你改的页**：`docfirst confirm <文档路径…>` 只动那几篇；不带路径是整仓一趟，同仓别人
+  没复核的黄灯会被一起签掉。拿不准用法跑 `docfirst --help`（只打用法、什么都不动）。
 * git 比较器只钉已提交内容：动了被引用的源码，**confirm 之前先 commit**。
 * 挂 outputs 的页改了源，`docfirst render` 重摆，生成物与源**同一个提交**。
 
