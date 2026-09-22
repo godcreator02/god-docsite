@@ -256,8 +256,8 @@ describe('attachSite：算完直接落', () => {
           expect(fs.existsSync(path.join(site, 'src', 'app', zone, '[[...slug]]', 'page.tsx')), `src/app/${zone}/[[...slug]]/page.tsx`).toBe(true)
         }
         const pages = [
-          'docs/index.mdx', 'docs/system-map.mdx', 'docs/glossary.mdx', 'trajectory/index.mdx', 'spec/index.mdx',
-          'future/overview.mdx', 'outputs/agents.mdx', 'outputs/readme.mdx', 'feedback/inbox.mdx', 'feedback/hatch.mdx',
+          'docs/index.mdx', 'docs/boundary.mdx', 'docs/system-map.mdx', 'docs/glossary.mdx', 'trajectory/index.mdx', 'spec/index.mdx',
+          'future/roadmap.mdx', 'outputs/agents.mdx', 'outputs/readme.mdx', 'feedback/inbox.mdx', 'feedback/hatch.mdx',
         ]
         for (const page of pages) {
           expect(fs.readFileSync(path.join(site, 'content', page), 'utf8'), `${page} 头一句要是「本页回答」`).toMatch(/\*\*本页回答\*\*：/)
@@ -307,4 +307,30 @@ it('装配那张依赖表是精确号、跟工作区那两个包的版本对得�
     expect(pkg.name, `${String(dir)} 的包名对不上装配表里的 ${name}`).toBe(name)
     expect(pin, `装配表里 ${name} 写的是 ${pin}，工作区里是 ${pkg.version}——写精确号（不带 ^ / ~ / >=），发版时这张表得跟着抬`).toBe(pkg.version)
   }
+})
+
+/**
+ * 六区里现状与未来的分界：此刻是什么（含为什么存在、边界）归现状，还没发生的才归未来。
+ * 骨架页就按这条铺——愿景页与 not-doing 页不再有，入口页与边界页住现状区。
+ */
+describe('现状与未来的分界', () => {
+  it('为什么存在、边界在哪是现状——住现状区的入口页与边界页；未来区只有路线，不再有愿景页与 not-doing 页', () => {
+    const rels = readTemplate().map((f) => f.rel)
+    for (const page of ['content/docs/index.mdx.tpl', 'content/docs/boundary.mdx.tpl', 'content/future/roadmap.mdx.tpl']) expect(rels).toContain(page)
+    for (const page of ['content/future/overview.mdx.tpl', 'content/future/not-doing.mdx.tpl']) expect(rels, `未来区还留着 ${page}`).not.toContain(page)
+    for (const file of renderSite(readTemplate(), VALUES)) {
+      expect(file.text, `${file.rel} 还链着已经不存在的页`).not.toMatch(/\/future\/(overview|not-doing)/)
+    }
+  })
+
+  it('入口页循序渐进：是什么与为什么存在 → 主线走一遍 → 按来意怎么读 → 模块索引', () => {
+    const files = renderSite(readTemplate(), VALUES)
+    const entry = files.find((f) => f.rel === 'content/docs/index.mdx')!.text
+    const order = ['## 是什么，为什么存在', '## 主线走一遍', '## 按来意怎么读', '## 模块索引']
+    const at = order.map((heading) => entry.indexOf(heading))
+    expect(at.every((i) => i >= 0), `入口页缺节：${order.filter((_, k) => at[k]! < 0).join('、')}`).toBe(true)
+    expect([...at].sort((a, b) => a - b), '四节的顺序不能乱').toEqual(at)
+    const meta = JSON.parse(files.find((f) => f.rel === 'content/docs/meta.json')!.text) as { pages: string[] }
+    expect(meta.pages.slice(0, 2), '侧栏里入口页打头、边界页紧跟').toEqual(['index', 'boundary'])
+  })
 })

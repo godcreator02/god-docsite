@@ -1,3 +1,3 @@
 {
-  "pages": ["index", "system-map", "...", "glossary"]
+  "pages": ["index", "boundary", "system-map", "...", "glossary"]
 }

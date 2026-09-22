@@ -3,11 +3,11 @@
  * 尾巴挂插件，meta 白名单放行 title / lineNumbers / data-dot）。
  *
  * 六区各一个 defineDocs（自带 docs + meta 双集合，meta.json 的侧栏排序天然支持）：
- *   docs        现状：只有现状、散文、尽量多钉；进 check
+ *   docs        现状：此刻是什么、为什么存在、边界在哪；散文、尽量多钉；进 check
  *   trajectory  轨迹：卡只增不改；卡的 frontmatter 由 cardSchema 认（label 派生 title），
  *               正文里 `supersedes::` / `pivots-from::` 关系边由 remarkTrajectoryLinks 打标；不进 check
  *   spec        交接：在途 spec 与实施方案，做完删页
- *   future      未来：愿景 + not-doing + roadmap，常改
+ *   future      未来：只放还没发生的事（roadmap：在等什么前提、到期再选的决定），常改
  *   outputs     生成正本：agents / readme 等，render 摆到仓根；进 check
  *   feedback    反馈：inbox（别的仓投来的，处理完删）+ hatch（本仓反复做的操作候选）
  * 只有 docs 与 outputs 开 processed markdown——命令行按名字找集合只对进 check 的两区有意义
