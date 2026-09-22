@@ -20,10 +20,10 @@ docfirst: none
 
 ```
 docs-site/content/
-├── docs/        # 1 设计现状：只有现状、散文、**钉码只在这一区**；system-map、模块页、start、glossary
+├── docs/        # 1 现状：此刻是什么、为什么存在、边界在哪；散文、**钉码只在这一区**；入口页、边界页、system-map、模块页、start、glossary
 ├── trajectory/  # 2 轨迹：卡只增不改；evidence 卡指向仓根 probes/<时间戳>_<目的>/
 ├── spec/        # 3 交接：在途 spec 与实施方案，随做随提交，做完拆解归梁后删页
-├── future/      # 4 未来规划：愿景 + not-doing + roadmap + 当前阶段；现状区一字不写未来
+├── future/      # 4 未来：只放还没发生的事——roadmap（在等什么前提、到期再选的决定）；现状区一字不写未来
 ├── outputs/     # 5 生成正本：agents.mdx、readme.mdx、skills/<名>.mdx → render 到仓根与包内
 └── feedback/    # 6 反馈：hatch（本仓重复操作候选）+ inbox（别的仓投来的，处理完删）
 ```
@@ -54,11 +54,16 @@ docs-site/content/
 
 | 梁 | 回答的问题 | 住哪区 |
 | --- | --- | --- |
-| 愿景 | 为什么存在、不做什么 | future（overview、not-doing） |
+| 愿景 | 为什么存在、只做什么、不做什么 | docs（入口页 `index`、边界页 `boundary`） |
 | 用法 | 当前代码现状下怎么用 | docs/start |
 | 设计 | 怎么拆的、怎么隔离开发测试、为什么这么切 | docs（system-map + 每模块一页） |
-| 未来 | 接下来可能去哪、当前阶段 | future（roadmap） |
-| 轨迹 | 为什么变成现在这样 | trajectory（卡） |
+| 未来 | 还没发生的事：在等什么前提、到期再选的决定 | future（roadmap） |
+| 轨迹 | 怎么走到今天、每次取舍的理由 | trajectory（卡） |
+
+判据：**此刻是什么归现状，怎么走到今天归轨迹，还没发生的才归未来。** 为什么存在、刻意不做什么
+都是此刻的边界，住现状区；边界页每条「不做」只写一句此刻的边界，理由链到轨迹卡。入口页是现状区
+的根（`docs/index.mdx`），循序渐进：是什么与为什么存在 → 主线走一遍（按本仓自己的主流程）→
+按来意怎么读 → 模块索引；system-map 可以并进来。
 
 横切两页：**glossary**（术语，住 docs）与 **hatch**（重复操作候选，住 feedback；短期内碰到
 三次或人点名即升为 skill，升格后条目划掉指向新 skill，过期条目直接删）。
@@ -142,7 +147,7 @@ A 阻断直接干活：`spec-grill` skill 在对话里把想法盘到能说清�
 | 撞墙、做了选型、实验有结论 | 轨迹卡，当场落（`trajectory` skill） |
 | 命令 / 配置变了 | 用法页 + outputs 重摆 |
 | 定了新术语 | glossary |
-| 做 / 不做的边界动了 | future 的 overview / not-doing |
+| 做 / 不做的边界动了 | 边界页，理由落卡 |
 | 同一操作短期内第三次出现 | feedback/hatch 记条目 |
 
 真没有文档面可动，说明改动连「错了难改」的边都没碰。
@@ -204,7 +209,7 @@ README、AGENTS.md、包内 SKILL.md 都是生成物，正本住 `content/output
 模板假设站住仓根 `docs-site/`、被钉代码在仓根（引用写 `../src/…`），换形状就改
 `docfirst.config.mjs` 里的相对路径。细节见 docfirst 站的「装配六区」那一页。
 
-交接面四样：**愿景页 + system-map + 模块页 + glossary**，读序就这一条线；轨迹按需查。
+交接面四样：**入口页 → 边界 → 模块页 → glossary**，读序就这一条线；轨迹按需查。
 交接面上的钉码在、check 绿，交接面就没有说谎。
 
 docfirst 自己那个仓的 `docs-site/` 是最全的示例站，写不准时去那儿找同类页照着抄结构。
