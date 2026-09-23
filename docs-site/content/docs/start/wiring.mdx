@@ -52,7 +52,7 @@ description: 把 docfirst 接进一个 fumadocs 站要动的七处：配置、�
 {/* ref file="../packages/docfirst-workflow/src/host/load.ts" lines="149-174" */}
 
 配了它，`docfirst check` 就**顺带**跑轨迹卡校验（病卡逐条打印、算红退 1），另外多一条独立的
-`docfirst trajectory [--json]` 列盘、树、主干；不配，轨迹卡校验不跑、这条子命令直接报错退出。
+`docfirst trajectory [--json]` 列出各张星轨盘的树与主干；不配，轨迹卡校验不跑、这条子命令直接报错退出。
 
 ## 二、source.config.ts：六个集合与全局 mdxOptions
 
@@ -81,7 +81,7 @@ fumadocs 自己的管线出的 md。
 
 轨迹卡不是文档：它们不进 `content/docs`，用自己的集合。两个要点——`schema` 用包里给的 `cardSchema`（把
 `label` 派生成 `title`，`born-at` 被 gray-matter 解成 `Date` 时转回字符串），`mdxOptions` 里加上
-`remarkTrajectoryLinks`（关系边行渲染成标注，`卡身份.md` 链接与 wikilink 改写成轨迹卡页路由）。集合级
+`remarkTrajectoryLinks`（关系边行渲染成标注，`轨迹卡身份.md` 链接与 wikilink 改写成轨迹卡页路由）。集合级
 `mdxOptions` 会把默认插件全去掉，所以用 `applyMdxPreset` 先把默认 preset 加回来：
 
 {/* ref file="source.config.ts" lines="36-47" */}
@@ -122,8 +122,8 @@ fumadocs 自己的管线出的 md。
 ### 轨迹卡页与星轨整页
 
 轨迹这一区的 slug 是**必选**的：空 slug 归星轨整页那条路由，所以静态参数里也要把它滤掉。轨迹卡页在标题下
-多两行——元信息（`born-at`、`type`、`domain`、`parent` 链到父轨迹卡页）与「回到盘」（带上第一个 `parent`
-当盘身份）：
+多两行——元信息（`born-at`、`type`、`domain`、`parent` 链到父轨迹卡页）与界面上写着「回到盘」的链接（带上第一个 `parent`
+当星轨盘身份）：
 
 {/* ref file="src/app/(zones)/trajectory/[...slug]/page.tsx" lines="6-19" */}
 
@@ -135,15 +135,15 @@ fumadocs 自己的管线出的 md。
 {/* ref file="src/app/(trajectory-disk)/trajectory/layout.tsx" */}
 
 星轨盘页自己读轨迹卡目录建模，把模型和 `launcherThumbs` 渲染好的启动器缩略图交给 `mode="page"` 的 `StarDisk`，
-外加一条自己画的顶栏。**`searchParams.disk` 缺失时渲染启动器的缩略图网格，有则渲染那张盘**——组件切盘 / 回启动器时
-`replaceState` 写回这个参数，一个链接因此能直接指到某一张盘：
+外加一条自己画的顶栏。**`searchParams.disk` 缺失时渲染启动器的缩略图网格，有则渲染那张星轨盘**——组件切换星轨盘 / 回启动器时
+`replaceState` 写回这个参数，一个链接因此能直接指到某一张星轨盘：
 
 {/* ref file="src/app/(trajectory-disk)/trajectory/page.tsx" */}
 
-顶栏上只有三样：回文档、报病数、主题切换。搜索、设置、帮助、图例、日期竖轨与盘内的「启动器」按钮都由
-组件自己放在容器四角——当前盘是组件的状态、切盘要同步写 URL，住在一处才不必把整个盘的状态提到页面上。
+顶栏上只有三样：回文档、报病数、主题切换。搜索、设置、帮助、图例、日期竖轨与星轨盘内的「启动器」按钮都由
+组件自己放在容器四角——当前是哪张星轨盘是组件的状态、切换时要同步写 URL，住在一处才不必把整个星轨盘的状态提到页面上。
 
-包照常导出服务端组件 `Trajectory`（读目录、渲染一张方形嵌入的盘或启动器、报病列表），留给想把盘嵌进一篇
+包照常导出服务端组件 `Trajectory`（读目录、渲染一张方形嵌入的星轨盘或启动器、报病列表），留给想把星轨盘嵌进一篇
 长文档中间的消费方；这个站的名册里不登记它，星轨盘用独立路由。`hrefBase` 要跟 loader 的 `baseUrl` 和
 `remarkTrajectoryLinks` 的 `hrefBase` 是同一个值——三处对不上，节点点开是 404。
 
@@ -174,7 +174,7 @@ React 表先展开 fumadocs 的默认表（标题栏、复制按钮都是它的�
 
 {/* ref file="src/app/global.css" lines="4-9" */}
 
-整页的外层布局（一条顶栏、盘占满剩下的高度）是站自己的几行 CSS，不进包里——顶栏是页面的事，盘上的 HUD
+整页的外层布局（一条顶栏、星轨盘占满剩下的高度）是站自己的几行 CSS，不进包里——顶栏是页面的事，星轨盘上的 HUD
 才归包：
 
 {/* ref file="src/app/global.css" lines="15-47" */}
@@ -188,7 +188,7 @@ React 表先展开 fumadocs 的默认表（标题栏、复制按钮都是它的�
 轨迹卡目录也不必管——它在站自己的 `content/trajectory/` 里，本来就在 root 之内。
 
 **`serverExternalPackages` 是空的，那一行本身就记着一个决定。**两个包都**不许**外置：
-`@godcreator/docfirst-workflow` 里同时住着服务端那半（读盘、调 git、remark 插件）与两个客户端组件
+`@godcreator/docfirst-workflow` 里同时住着服务端那半（读文件、调 git、remark 插件）与两个客户端组件
 （`/fumadocs/pre` 状态点、`/fumadocs/term` 术语），而这个字段按包名匹配、没有子路径粒度——整包
 一外置，Next 用 Node 单独加载它、跟站打包的 React 不再是同一份，预渲染报
 `Cannot read properties of null (reading 'use')`。
