@@ -11,7 +11,7 @@ description: 把 docfirst 接进一个 fumadocs 站要动的七处：配置、�
 块右上角那个小圆点是状态（图例见 [入门](/docs/start)）。所以下面每一处钉的都是这个站自己的文件，
 读到的就是正在跑的那一份。
 
-铺骨架归站点插件，接六区是工作台插件那条 `docfirst.attach`（[装配六区](/docs/modules/site)），模板在
+生成骨架归站点插件，接六区是工作台插件那条 `docfirst.attach`（[装配六区](/docs/modules/site)），模板在
 `packages/gwb-docfirst-workflow/template/attach/`。**手接与插件装出来的是同一套形状**，差异只有星轨整页那一处
 ——见第四节末尾。
 
@@ -22,11 +22,11 @@ description: 把 docfirst 接进一个 fumadocs 站要动的七处：配置、�
 
 命令行和站读的是同一份 `docfirst.config.mjs`，它住项目根（对这个站来说项目根就是站目录）：
 
-{/* ref file="docfirst.config.mjs" lines="29-52" */}
+{/* ref file="docfirst.config.mjs" lines="34-58" */}
 
-这段说明接线要交代的全部事实：挂哪个格式、哪几区进 `check`（六区里只有现状与生成正本对代码说话）、
-用哪个比较器、生成物摆到哪、卡目录在哪、组件名册是什么。`comparator` 不写就是 `auto`：按被引文件的位置
-挑记忆——在 git 仓里（本仓、别的仓都算）已提交的走 `git`，被忽略的、不在任何仓里的走 `hash`；写死
+这段说明接线要交代的全部事实：用哪个格式、哪几区进 `check`（六区里只有现状与生成正本的论断跟代码对应）、
+用哪个比较器、生成物写到哪、轨迹卡目录在哪、组件名册是什么。`comparator` 不写就是 `auto`：按被引文件的位置
+挑记忆——在 git 仓里（本仓、别的仓都算）已提交的用 `git`，被忽略的、不在任何仓里的用 `hash`；写死
 `git` 或 `hash` 是强制全用一种，分派规则见 [环境层](/docs/modules/host)。
 
 <Note>
@@ -40,19 +40,19 @@ description: 把 docfirst 接进一个 fumadocs 站要动的七处：配置、�
 
 ### 轨迹是可选的一项
 
-`trajectory` 的值是卡目录、相对项目根；不配就整个不管：
+`trajectory` 的值是轨迹卡目录、相对项目根；不配就整个不管：
 
 {/* ref file="../packages/docfirst-workflow/src/host/load.ts" lines="39-40" */}
 
-装配时它变成一个绝对路径挂在项目上，没配就是 `null`——「没配」和「配了但目录还不存在」是两件事，
+装配时它换算成绝对路径、存进项目对象，没配就是 `null`——「没配」和「配了但目录还不存在」是两件事，
 前者整个不管，后者扫出来是空集合：
 
 {/* ref file="../packages/docfirst-workflow/src/host/load.ts" lines="50-51" */}
 
 {/* ref file="../packages/docfirst-workflow/src/host/load.ts" lines="149-174" */}
 
-配了它，`docfirst check` 就**顺带**跑卡校验（病卡逐条打印、算红退 1），另外多一条独立的
-`docfirst trajectory [--json]` 列盘、树、主干；不配，卡校验不跑、这条子命令直接报错退出。
+配了它，`docfirst check` 就**顺带**跑轨迹卡校验（病卡逐条打印、算红退 1），另外多一条独立的
+`docfirst trajectory [--json]` 列盘、树、主干；不配，轨迹卡校验不跑、这条子命令直接报错退出。
 
 ## 二、source.config.ts：六个集合与全局 mdxOptions
 
@@ -71,23 +71,23 @@ fumadocs 自己的管线出的 md。
 
 {/* ref file="source.config.ts" lines="49-66" */}
 
-全局 `mdxOptions` 挂格式那一层给的那份：remark 链尾巴挂 docfirst 插件、meta 白名单放行 `data-dot`，术语标注
+全局 `mdxOptions` 用格式那一层给的那份：remark 插件链末尾加上 docfirst 插件、meta 白名单放行 `data-dot`，术语标注
 也在这儿。术语表正本是 `src/glossary.ts`，`skipFile` 把人写的那篇规范挑出去——它里头的词按字面读，
 不该被标注：
 
 {/* ref file="source.config.ts" lines="68-76" */}
 
-### 卡集合
+### 轨迹卡集合
 
-卡不是文档：它们不进 `content/docs`，走自己的集合。两个要点——`schema` 用包里给的 `cardSchema`（把
-`label` 派生成 `title`，`born-at` 被 gray-matter 解成 `Date` 时转回字符串），`mdxOptions` 上挂
-`remarkTrajectoryLinks`（关系边行渲成标注，`卡身份.md` 链接与 wikilink 改写成卡页路由）。集合级
+轨迹卡不是文档：它们不进 `content/docs`，用自己的集合。两个要点——`schema` 用包里给的 `cardSchema`（把
+`label` 派生成 `title`，`born-at` 被 gray-matter 解成 `Date` 时转回字符串），`mdxOptions` 里加上
+`remarkTrajectoryLinks`（关系边行渲染成标注，`卡身份.md` 链接与 wikilink 改写成轨迹卡页路由）。集合级
 `mdxOptions` 会把默认插件全去掉，所以用 `applyMdxPreset` 先把默认 preset 加回来：
 
 {/* ref file="source.config.ts" lines="36-47" */}
 
-**docfirst 自己的 remark 插件挂在全局 `mdxOptions` 上，跑不到这个集合**——这正是要的：卡正文冻结历史、
-不钉活代码，卡校验守的也是这条。
+**docfirst 自己的 remark 插件登记在全局 `mdxOptions` 上，作用不到这个集合**——这正是要的：轨迹卡正文冻结历史、
+不钉活代码，轨迹卡校验检查的也是这条。
 
 ## 三、src/lib/：六条 loader 与一棵侧栏树
 
@@ -95,8 +95,8 @@ fumadocs 自己的管线出的 md。
 
 {/* ref file="src/lib/source.ts" */}
 
-侧栏是**一棵**树不是六棵：每区一个 `root: true` 的根节当分区，URL 仍是六个基座。base-ui 版的 `Root`
-只有单槽 fallback，多树切换不稳，根节分区是正路；区内的顺序由各区自己的 `meta.json` 定。
+侧栏是**一棵**树不是六棵：每区一个 `root: true` 的根节点当分区，URL 仍是六个基座。base-ui 版的 `Root`
+只有单槽 fallback，多树切换不稳，根节点分区是推荐做法；区内的顺序由各区自己的 `meta.json` 定。
 
 {/* ref file="src/lib/tree.ts" */}
 
@@ -113,60 +113,60 @@ fumadocs 自己的管线出的 md。
 
 {/* ref file="src/app/(zones)/layout.tsx" */}
 
-区内每条路由各走各的 loader，页面本身是标准的 fumadocs 三件套，组件表来自 `getMDXComponents()`：
+区内每条路由各用各的 loader，页面本身是标准的 fumadocs `DocsPage` / `DocsTitle` / `DocsBody` 三个组件，组件表来自 `getMDXComponents()`：
 
 {/* ref file="src/app/(zones)/docs/[[...slug]]/page.tsx" */}
 
 交接、未来、生成正本、反馈四条跟它一个样，只换 loader；轨迹那条不一样。
 
-### 卡页与星轨整页
+### 轨迹卡页与星轨整页
 
-轨迹这一区的 slug 是**必选**的：空 slug 归星轨整页那条路由，所以静态参数里也要把它滤掉。卡页在标题下
-多两行——元信息（`born-at`、`type`、`domain`、`parent` 链到父卡页）与「回到盘」（带上第一个 `parent`
+轨迹这一区的 slug 是**必选**的：空 slug 归星轨整页那条路由，所以静态参数里也要把它滤掉。轨迹卡页在标题下
+多两行——元信息（`born-at`、`type`、`domain`、`parent` 链到父轨迹卡页）与「回到盘」（带上第一个 `parent`
 当盘身份）：
 
 {/* ref file="src/app/(zones)/trajectory/[...slug]/page.tsx" lines="6-19" */}
 
 {/* ref file="src/app/(zones)/trajectory/[...slug]/page.tsx" lines="49-52" */}
 
-**盘不是 mdx 里的组件，是一条独立的整页路由 `/trajectory`。**它跟卡页共用一段 URL 前缀，却要两套完全
-不同的布局——盘不要侧栏与目录，卡页要。Next 的路由组把两套分开，组名不进 URL；盘这一组只套最简壳：
+**星轨盘不是 mdx 里的组件，是一条独立的整页路由 `/trajectory`。**它跟轨迹卡页共用一段 URL 前缀，却要两套完全
+不同的布局——星轨盘不要侧栏与目录，轨迹卡页要。Next 的路由组把两套分开，组名不进 URL；星轨盘这一组只用最简单的布局：
 
 {/* ref file="src/app/(trajectory-disk)/trajectory/layout.tsx" */}
 
-盘页自己读卡目录建模，把模型和 `launcherThumbs` 渲好的启动器缩略图交给 `mode="page"` 的 `StarDisk`，
-外加一条自己画的顶栏。**`searchParams.disk` 缺失渲启动器卡阵，有则渲那张盘**——组件切盘 / 回启动器时
+星轨盘页自己读轨迹卡目录建模，把模型和 `launcherThumbs` 渲染好的启动器缩略图交给 `mode="page"` 的 `StarDisk`，
+外加一条自己画的顶栏。**`searchParams.disk` 缺失时渲染启动器的缩略图网格，有则渲染那张盘**——组件切盘 / 回启动器时
 `replaceState` 写回这个参数，一个链接因此能直接指到某一张盘：
 
 {/* ref file="src/app/(trajectory-disk)/trajectory/page.tsx" */}
 
-顶栏上只有三样：回文档、报病数、主题切换。搜索、设置、帮助、图例、日期竖轨与盘内的「启动器」钮都归
-组件自己贴在容器四角——当前盘是组件的状态、切盘要同步写 URL，住在一处才不必把整个盘态提到页面上。
+顶栏上只有三样：回文档、报病数、主题切换。搜索、设置、帮助、图例、日期竖轨与盘内的「启动器」按钮都由
+组件自己放在容器四角——当前盘是组件的状态、切盘要同步写 URL，住在一处才不必把整个盘的状态提到页面上。
 
-包照常导出服务端组件 `Trajectory`（读目录、渲一张方形嵌入的盘或启动器、报病列表），留给想把盘摆进一篇
-长文档中间的消费方；这个站的名册里不登记它，盘走路由。`hrefBase` 要跟 loader 的 `baseUrl` 和
+包照常导出服务端组件 `Trajectory`（读目录、渲染一张方形嵌入的盘或启动器、报病列表），留给想把盘嵌进一篇
+长文档中间的消费方；这个站的名册里不登记它，星轨盘用独立路由。`hrefBase` 要跟 loader 的 `baseUrl` 和
 `remarkTrajectoryLinks` 的 `hrefBase` 是同一个值——三处对不上，节点点开是 404。
 
-**这是这个站跟六区模板唯一的形状差异**：模板把 `/trajectory` 留给卡集合的导读页，六条路由
-都在 `src/app/<区>/[[...slug]]/`，树在根 layout 里合成；这个站把 `/trajectory` 让给了星轨整页，所以卡路由
-的 slug 必选、路由分成两组、树搬进 `src/lib/tree.ts`，轨迹区也就没有导读页——区的入口是盘。
+**这是这个站跟六区模板唯一的形状差异**：模板把 `/trajectory` 留给轨迹卡集合的导读页，六条路由
+都在 `src/app/<区>/[[...slug]]/`，树在根 layout 里合成；这个站把 `/trajectory` 让给了星轨整页，所以轨迹卡路由
+的 slug 必选、路由分成两组、树搬进 `src/lib/tree.ts`，轨迹区也就没有导读页——区的入口是星轨盘。
 
-## 五、名册两头登记
+## 五、名册两处登记
 
-名册两头：`docfirst.config.mjs` 里那半给命令行（机读版怎么把组件压成文字，见上面第一节那份配置），
-`src/components/mdx.tsx` 那半给站。站这一侧的名单正本是 `registry.ts`，它的类型逼着 React 表一个不多
+名册分两处：`docfirst.config.mjs` 里那半给命令行（机读版怎么把组件转成文字，见上面第一节那份配置），
+`src/components/mdx.tsx` 那半给站。站这一侧的名单正本是 `registry.ts`，它的类型保证 React 表一个不多
 一个不少：
 
 {/* ref file="src/components/registry.ts" lines="9-10" */}
 
-React 表底下铺 fumadocs 的默认表（标题栏、复制按钮都是它的），再把 `pre` 换成包里那个会画状态点的
+React 表先展开 fumadocs 的默认表（标题栏、复制按钮都是它的），再把 `pre` 换成包里那个会画状态点的
 `DocfirstPre`：
 
 {/* ref file="src/components/mdx.tsx" lines="24-41" */}
 
-目录树引用注入的是 fumadocs 自己的 `Files` / `Folder` / `File`，两张表里都要有它们，压平规则在包的
-默认名册里已经带了。`Term` 是构建期标注长出来的，源文件里一般没有，但编译出来的 JSX 会引它，两张表也
-都得给。两头齐不齐由 `scripts/verify-roster.mjs` 对，对不上门禁就红。
+目录树引用注入的是 fumadocs 自己的 `Files` / `Folder` / `File`，两张表里都要有它们，转成机读文本的规则在包的
+默认名册里已经有了。`Term` 是构建时的术语标注生成的，源文件里一般没有，但编译出来的 JSX 会引它，两张表也
+都得给。两处是否一致由 `scripts/verify-roster.mjs` 核对，不一致门禁就红。
 
 ## 六、src/app/global.css：三行 @import
 
@@ -174,7 +174,7 @@ React 表底下铺 fumadocs 的默认表（标题栏、复制按钮都是它的�
 
 {/* ref file="src/app/global.css" lines="4-9" */}
 
-整页那层壳（顶栏一条、盘吃满剩下的高度）是站自己的几行 CSS，不进包里——顶栏是页面的事，盘上的 HUD
+整页的外层布局（一条顶栏、盘占满剩下的高度）是站自己的几行 CSS，不进包里——顶栏是页面的事，盘上的 HUD
 才归包：
 
 {/* ref file="src/app/global.css" lines="15-47" */}
@@ -183,40 +183,40 @@ React 表底下铺 fumadocs 的默认表（标题栏、复制按钮都是它的�
 
 {/* ref file="next.config.mjs" lines="7-28" */}
 
-**`turbopack.root` 抬到工作区根。**这个站的包从同一个 pnpm 工作区拿，`node_modules` 里是指向站外的
-软链；Turbopack 只认它 root 以内的文件，root 不抬，`packages/` 就在视野外。用发布版包的项目不必管这条；
-卡目录也不必管——它在站自己的 `content/trajectory/` 里，本来就在 root 之内。
+**`turbopack.root` 设到工作区根。**这个站的包从同一个 pnpm 工作区拿，`node_modules` 里是指向站外的
+软链；Turbopack 只认它 root 以内的文件，root 不设到工作区根，`packages/` 就不在它能读的范围里。用发布版包的项目不必管这条；
+轨迹卡目录也不必管——它在站自己的 `content/trajectory/` 里，本来就在 root 之内。
 
-**`serverExternalPackages` 是空的，那一行本身就是账。**两个包都**不许**外置：
+**`serverExternalPackages` 是空的，那一行本身就记着一个决定。**两个包都**不许**外置：
 `@godcreator/docfirst-workflow` 里同时住着服务端那半（读盘、调 git、remark 插件）与两个客户端组件
 （`/fumadocs/pre` 状态点、`/fumadocs/term` 术语），而这个字段按包名匹配、没有子路径粒度——整包
-一外置，Next 走 Node 单独加载、跟站打包的 React 分了家，预渲染报
+一外置，Next 用 Node 单独加载它、跟站打包的 React 不再是同一份，预渲染报
 `Cannot read properties of null (reading 'use')`。
 
 **`docfirst-trajectory` 同理，还多一层。**它的 `./react` 是客户端组件，`./server` 内部用**包名自引用**
-去渲它；一外置，Next 就走 Node 单独加载 `server.mjs`、发现不了 `./react` 产物头一行那句
-`"use client"`，`StarDisk` 被当服务端组件渲染，一命中 hooks 就炸。包内部为这件事也付了代价——
-`server.tsx` 引 `./react` 走的是包名而不是相对源路径，为的是让 tsdown 把它当外部依赖、原样留在
-产物里；写成相对路径会被这一趟构建内联或拆成共享 chunk，`"use client"` 落到一个没人标记的文件上，
+去渲染它；一外置，Next 就用 Node 单独加载 `server.mjs`、发现不了 `./react` 产物头一行那句
+`"use client"`，`StarDisk` 被当服务端组件渲染，一用到 hooks 就报错。包内部为这件事也付了代价——
+`server.tsx` 引 `./react` 用的是包名而不是相对源路径，为的是让 tsdown 把它当外部依赖、原样留在
+产物里；写成相对路径会在这次构建里被内联或拆成共享 chunk，`"use client"` 落到一个没人标记的文件上，
 两头都看不到边界。
 
-两条是同一类：**外置的边界会把客户端指令吃掉**。不外置的代价只是 Turbopack 多打一遍服务端那半，
+两条是同一类：**外置的边界会让客户端指令丢失**。不外置的代价只是 Turbopack 多打包一遍服务端那半，
 那半只在构建期跑、进不了客户端束。剩下一项是站根重定向到 `/docs`：六区各有各的基座，
 现状区自己有 `index.mdx`。
 
-跑站三件事：改了 `src/fumadocs/` 的代码**先删 `.next` 再 build**——Turbopack 只按 mdx 内容缓存，
+运行站要注意三件事：改了 `src/fumadocs/` 的代码**先删 `.next` 再 build**——Turbopack 只按 mdx 内容缓存，
 文档一个字没改它就不重跑 remark 插件，那一层里的改动看不见；调试用 `build` + `start`，不用 `next dev`，dev 那条链的缓存
-和热更新会让「这一版到底跑没跑我的插件」说不清；`start` 脚本钉的端口被别的进程占了就
-`pnpm exec next start -p <别的端口>`，起来的站验完停掉。
+和热更新会让「这一版到底跑没跑我的插件」说不清；`start` 脚本写死的端口被别的进程占了就
+`pnpm exec next start -p <别的端口>`，启动的站验证完就停掉。
 
 ## 附：六区各是什么
 
 - **现状** `content/docs/`：此刻是什么、为什么存在、边界在哪（入口页 `index`、边界页 `boundary`）、怎么拆，只写现状、散文、尽量多钉；进 `check`。
-- **轨迹** `content/trajectory/`：卡只增不改，正文冻结历史、不钉活代码；入口是星轨盘 [/trajectory](/trajectory)。
+- **轨迹** `content/trajectory/`：轨迹卡只增不改，正文冻结历史、不钉活代码；入口是星轨盘 [/trajectory](/trajectory)。
 - **交接** `content/spec/`：在途的 spec 与实施方案，做完拆解归梁、删页。
 - **未来** `content/future/`：只放还没发生的事——路线（在等什么前提、到期再选的决定）。
-- **生成正本** `content/outputs/`：README 这类生成物的 mdx 正本，`render` 摆到落点；进 `check`。
+- **生成正本** `content/outputs/`：README 这类生成物的 mdx 正本，`render` 写到映射指定的位置；进 `check`。
 - **反馈** `content/feedback/`：别的仓投来的意见（`inbox`，处理完删）与本仓的重复操作候选（`hatch`）。
 
 六区的目录、路由、loader、侧栏根节一一对应；进 `check` 的只有现状与生成正本两区，另外四区的草稿记号与
-卡天然不进门禁。
+轨迹卡天然不进门禁。

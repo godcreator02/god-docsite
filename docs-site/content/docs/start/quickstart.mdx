@@ -19,26 +19,26 @@ description: 装包、一份配置、写一行草稿记号、check、confirm、�
   </Tab>
 </Tabs>
 
-命令行挂进 `scripts` 就能 `pnpm docfirst …`。这个站自己的脚本表：
+把命令行写进 `scripts` 就能 `pnpm docfirst …`。这个站自己的脚本表：
 
 {/* ref file="package.json" lines="7-12" */}
 
 ## 二、项目根放一份配置
 
-命令行和站读的是同一份 `docfirst.config.mjs`：挂哪个格式、文档在哪、用哪个比较器、产物摆到哪、组件名册是什么。
+命令行和站读的是同一份 `docfirst.config.mjs`：用哪个格式、文档在哪、用哪个比较器、产物写到哪、组件名册是什么。
 
-{/* ref file="docfirst.config.mjs" lines="29-52" */}
+{/* ref file="docfirst.config.mjs" lines="34-58" */}
 
 `comparator` 不写就是 `auto`：被引文件在 git 仓里就用 git 记忆，不在（被忽略的 `node_modules`、仓外目录）就用 hash 记忆。
-`outputs` 是产物摆放：挂了映射的文档 render 直接写到指定位置（README、AGENTS.md 这类生成物），
-check 顺手守着生成物跟源一致。
-`trajectory` 是可选的轨迹卡目录，跟五类引用不是一套账，见 [站接线手册](/docs/start/wiring)。
+`outputs` 管产物写到哪：配了映射的文档 render 直接写到指定位置（README、AGENTS.md 这类生成物），
+check 顺带检查生成物跟源是否一致。
+`trajectory` 是可选的轨迹卡目录，跟五类引用分开校验，见 [站接线手册](/docs/start/wiring)。
 引用里的路径**相对项目根**——这个站的项目根是站目录，源码在工作区的
 `packages/` 下，所以记号里写的是 `../packages/…`。站侧还要接几处，见 [站接线手册](/docs/start/wiring)。
 
 ## 三、写一行草稿记号
 
-不用记各格式的记号长什么样，也不用跑什么命令注册。想引哪段代码，就在文档里**单独起一行**写：
+不用记各格式的记号长什么样，也不用跑什么命令注册。想引哪段代码，就在文档里**单独占一行**写：
 
 ```md
 @@docfirst ref ../packages/docfirst-workflow/src/engine/types.ts:15-21 @@
@@ -71,7 +71,7 @@ pnpm docfirst confirm
 ✅ content/docs/start/requirements.mdx  ../packages/docfirst-workflow/src/engine/types.ts:15-21  已确认，草稿记号已换成正式记号
 ```
 
-这一下做四件事：让比较器出记录、刷记录簿、清孤儿、把草稿记号换成这种格式的正式记号。mdx 里换成
+这一下做四件事：让比较器生成记录、更新记录簿、清孤儿、把草稿记号换成这种格式的正式记号。mdx 里换成
 `{/* ref file="…" lines="…" */}`，之后草稿不再出现。再 `check` 一次就全绿了。
 
 <Note>
@@ -95,8 +95,8 @@ pnpm start
 {/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="4-16" */}
 
 拿不准就先 `docfirst --help`：它只打用法，什么都不动；写错的开关也只会报错退 2，不会被当作没写。
-**`confirm` 不带路径是整仓一趟**，同一个仓里别人没复核的黄灯会被一起确认——只改了哪几页，就点名那几页。
+**`confirm` 不带路径就是确认整个仓**，同一个仓里别人没复核的黄色引用会被一起确认——只改了哪几页，就点名那几页。
 
-命令行到此为止，一共四条；日常就 check / confirm / render 这三条，`trajectory` 是另一路，在装配之前就分流走了，见 [轨迹](/docs/modules/trajectory)。给一个新骨架铺六区不在命令行上，归工作台插件，见 [装配六区](/docs/modules/site)。
-`render` 只有一种产物：挂了 `outputs` 映射的直接摆到落点，没挂的出一份给 AI 读的 md 落 `out/`。命令行的完整输出和退出码见
+命令行到此为止，一共四条；日常就 check / confirm / render 这三条，`trajectory` 单独处理，在装配之前就分派出去了，见 [轨迹](/docs/modules/trajectory)。给一个新骨架装六区不在命令行上，归工作台插件，见 [装配六区](/docs/modules/site)。
+`render` 只有一种产物：配了 `outputs` 映射的直接写到映射指定的位置，没配的生成一份给 AI 读的 md，写到 `out/`。命令行的完整输出和退出码见
 [命令行](/docs/modules/cli)；一处引用从写下到变红的全过程见 [一条引用的一生](/docs/start/lifecycle)。
