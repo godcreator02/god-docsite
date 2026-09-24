@@ -21,7 +21,7 @@
     "src",
     "template"
   ],
-  "//gwb": "整段没有：本件不注册窗格，外壳里没有它的格",
+  "//gwb": "整段没有：本插件不注册窗格，外壳里没有它的窗格",
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
     "typecheck": "tsc --noEmit -p tsconfig.json",
@@ -34,7 +34,7 @@
   "engines": {
     "node": ">=24"
   },
-  "//dependencies": "整段没有，一个都没有。**@godcreator/docfirst-workflow 尤其不许出现在任何一档**：件的消费方是 agent，包的消费方是仓——装了件就该能挂上说明书、能铺六区，不必再装什么包。tests/artifact.test.ts 那条守卫守的就是这条边界",
+  "//dependencies": "整段没有，一个都没有。**@godcreator/docfirst-workflow 尤其不许出现在任何一档**：插件的消费方是 agent，包的消费方是仓——装了插件就该能注册说明书、能装六区，不必再装什么包。tests/artifact.test.ts 里有一条测试检查这条边界",
   "//peerDependencies": "运行时从 home 里得到的东西：内核包（GwbContext 等接口类型从它的包根 import type）、命令总线（inject 必需）、说明书插件（局部注入，可选）。node 侧产物没有按值 import cordis，所以 peer 里没有 cordis",
   "peerDependencies": {
     "@godcreator/gwb-kernel-desktop": "^0.6.0",

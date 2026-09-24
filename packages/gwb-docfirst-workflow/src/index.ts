@@ -1,29 +1,29 @@
 import fs from 'node:fs'
 import path from 'node:path'
 import type { GwbContext } from '@godcreator/gwb-kernel-desktop'
-// 只为激活那几个件的 `declare module 'cordis'`——它们给 ctx 加上各自那个名字
+// 只为让这两个插件的 `declare module 'cordis'` 生效——它们给 ctx 加上各自的服务名
 import type {} from '@godcreator/gwb-commands'
 import type {} from '@godcreator/gwb-skills'
 import { attachSite, type AttachResult } from './attach.js'
 
 /**
- * docfirst 件：**一条铺六区的命令，加六份说明书**。
+ * docfirst 插件：**一条装六区的命令，加六份说明书**。
  *
  * 判据是「这件事在哪儿发生」——要在**仓**里发生的（核对、确认、渲染，门禁与站构建要跑的那些）
  * 归 `@godcreator/docfirst-workflow` 那个包，agent 自己 `cd` 到仓里跑 `pnpm doc`；只在 **agent** 手上
- * 发生一次的（读说明书、给一个新骨架铺一次六区）归件。于是**件对那个包零依赖**：不起子进程、
- * 不登记 node CLI、不查 home 里的路径，装了件不必再装什么包，说明书就挂得上。
- * 那条边界由 `tests/artifact.test.ts` 守着。
+ * 发生一次的（读说明书、给一个新骨架装一次六区）归插件。于是**插件对那个包零依赖**：不启动子进程、
+ * 不登记 node CLI、不查 home 里的路径，装了插件不必再装什么包，说明书就能注册上。
+ * 这条边界由 `tests/artifact.test.ts` 检查。
  *
- * **本件不管站的一生**——扫站、起停、端口、到点关、那一格窗格全在站件
- * （`@godcreator/gwb-docs-site`）。两个件互不依赖，各带各的模板：站件铺标准 fumadocs 骨架，
- * 本件在骨架上装六区。
+ * **本插件不管站的启动、停止与端口**——扫站、启停、端口、到时间关闭、那个窗格全在站点插件
+ * （`@godcreator/gwb-docs-site`）。两个插件互不依赖，各带各的模板：站点插件生成标准 fumadocs 骨架，
+ * 本插件在骨架上装六区。
  */
 export const name = 'gwb-docfirst-workflow'
 
 export const ATTACH_COMMAND = 'docfirst.attach'
 
-/** 缺哪个都不挂——inject 是 cordis 的等待机制，不是建议 */
+/** 缺哪个服务都不调 apply——inject 是 cordis 的等待机制，不是建议 */
 export const inject = ['gwbCommands']
 
 export function apply(ctx: GwbContext): void {
@@ -34,7 +34,7 @@ export function apply(ctx: GwbContext): void {
   if (cli === undefined) return
 
   /**
-   * 目标站要**绝对路径**：件跑在工作台主进程里，相对谁都不知道。存不存在、是不是刚铺好的
+   * 目标站要**绝对路径**：插件跑在工作台主进程里，不知道该相对于哪个目录。存不存在、是不是刚生成的
    * 骨架归装配那头判（它的错误文本就是文档），只有「不是目录」这一条先拦下——那句话点得出
    * 「dir 给成仓目录了」这个最常犯的错。
    */
@@ -59,7 +59,7 @@ export function apply(ctx: GwbContext): void {
     return typeof raw === 'string' && raw.trim() !== '' ? raw.trim() : undefined
   }
 
-  /** 装完接着做什么。装配**只写文件**，装、渲、核对三步都得人或 agent 自己在那个仓里跑 */
+  /** 装完接着做什么。装配**只写文件**，安装依赖、渲染、核对三步都得人或 agent 自己在那个仓里跑 */
   function nextSteps(result: AttachResult): string[] {
     return [
       `cd ${result.target}`,
@@ -70,7 +70,7 @@ export function apply(ctx: GwbContext): void {
     ]
   }
 
-  // **每条 register 都包 ctx.effect**：回的是注销函数，不包的话条目停了名字还留在表上
+  // register 返回注销函数，包进 ctx.effect 在本插件卸载时注销；命令总线 0.4.6 起自己也随调用方卸载注销命令
   ctx.effect(() =>
     cli.register(
       {
@@ -117,9 +117,9 @@ export function apply(ctx: GwbContext): void {
     ),
   )
 
-  // 说明书那一格，局部注入：没装 skills 件的 home 里本件照常挂。产物在 dist/ 下，包根的 skills/ 是 '../skills/'
-  // 六份都随本件发：三份讲这套机制（`docfirst` / `docfirst-docs` / `trajectory`），三份讲通用开发纪律
-  // （`spec-grill` / `parallel-by-module` / `docs-governance`）——包没有独立的到达路径，全靠件 register 这个目录
+  // 说明书用局部注入：没装 skills 插件的 home 里本插件照常加载。产物在 dist/ 下，包根的 skills/ 是 '../skills/'
+  // 六份都随本插件发：三份讲这套机制（`docfirst` / `docfirst-docs` / `trajectory`），三份讲通用开发纪律
+  // （`spec-grill` / `parallel-by-module` / `docs-governance`）——agent 读得到它们，全靠插件 register 这个目录
   ctx.inject(['gwbSkills'], (scoped) => {
     scoped.effect(() => scoped.gwbSkills.register(new URL('../skills/', import.meta.url)))
   })

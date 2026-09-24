@@ -5,10 +5,10 @@ import { fileURLToPath } from 'node:url'
 import { describe, expect, it } from 'vitest'
 
 /**
- * 产物守卫 + 几处「一改就得一起改」的账。缺产物时产物那组整组跳过——门禁不依赖 build。
+ * 产物检查，加几处「改一处就得同时改另一处」的对照。缺产物时产物那组整组跳过——门禁不依赖 build。
  *
- * 本件只有 node 半（tsc 出的）：相对 import 带扩展名，包名 import 只许 node 内置模块、electron 与 peer 里写了的包。
- * 浏览器半那组规矩连同窗格一起归站件了，这儿不再有。
+ * 本插件只有 node 侧产物（tsc 输出）：相对 import 带扩展名，包名 import 只许 node 内置模块、electron 与 peer 里写了的包。
+ * 本插件没有窗格，也就没有浏览器侧产物和那组检查（窗格在站点插件里）。
  */
 
 const here = path.dirname(fileURLToPath(import.meta.url))
@@ -18,7 +18,7 @@ const built = fs.existsSync(path.join(distDir, 'index.js'))
 
 if (!built) console.warn('[gwb-docfirst-workflow] dist/ 还没造齐，产物组跳过（pnpm build 之后再跑）')
 
-/** node 半产物里允许留下的包名 import：node 内置模块、electron、本包 peer 里写了的包（都是 home 里装着的）。只 import type 的整句擦除 */
+/** node 侧产物里允许留下的包名 import：node 内置模块、electron、本包 peer 里写了的包（都是 home 里装着的）。只 import type 的整句擦除 */
 const ownPeers = new Set(Object.keys((JSON.parse(fs.readFileSync(path.join(root, 'package.json'), 'utf8')) as { peerDependencies?: Record<string, string> }).peerDependencies ?? {}))
 /** `@scope/name/sub` → `@scope/name`；`name/sub` → `name` */
 const packageNameOf = (spec: string): string => spec.split('/').slice(0, spec.startsWith('@') ? 2 : 1).join('/')
@@ -64,7 +64,7 @@ describe('产物', () => {
     for (const gone of ['live-doc.cli', 'live-doc.cli-raw', 'live-doc.stale', 'live-doc.feedback', 'live-doc.feedback-list']) {
       expect(host, `${gone} 还在总线上`).not.toContain(`'${gone}'`)
     }
-    // 站的一生那几条归站件（docs-site.*）
+    // 扫站、启停、端口那几条归站点插件（docs-site.*）
     for (const gone of ['live-doc.sites', 'live-doc.start', 'live-doc.stop', 'live-doc.open', 'live-doc.extend', 'live-doc.running', 'live-doc.init']) {
       expect(host).not.toContain(`'${gone}'`)
     }
@@ -95,14 +95,14 @@ describe('几处一改就得一起改的账', () => {
   })
 
   /**
-   * **这条守的是这一轮的判据本身：件的消费方是 agent，包的消费方是仓，件不许依赖包。**
+   * **这条检查的是插件与包的分界：插件的消费方是 agent，包的消费方是仓，插件不许依赖包。**
    *
    * 包里留的是判定引擎、比较器、格式实现、站接线与命令行的核对 / 确认 / 渲染 / 轨迹——那几条
-   * 要在**仓**里发生（门禁、站构建），agent 要核对就自己 cd 过去跑 `pnpm doc`，件不转发。
-   * 件里留的是说明书与铺模板类的动作，那些只在 agent 手上发生。
+   * 要在**仓**里发生（门禁、站构建），agent 要核对就自己 cd 过去跑 `pnpm doc`，插件不转发。
+   * 插件里留的是说明书与按模板装六区，那些只在 agent 手上发生。
    *
-   * 一旦哪天为了省事又把那个包写回任何一档，件就又回到「攥着 home 里一条解析出来的真实路径、
-   * 包升级之后照读旧文件、零报错」那个坑里——三档全查：运行时、peer、开发期。
+   * 把那个包写回任何一档依赖，插件就又会拿着 home 里一条解析出来、当场定死的真实路径，
+   * 包升级之后照读旧文件、不报错——所以三档全查：运行时、peer、开发期。
    */
   it('件对 @godcreator/docfirst-workflow 零依赖：三档一档都不许有它，源码里也一行都不 import', () => {
     for (const [table, deps] of Object.entries({
@@ -120,7 +120,7 @@ describe('几处一改就得一起改的账', () => {
         expect(m[1]!.startsWith('@godcreator/docfirst-workflow'), `src/${file} import 了 ${m[1]!}`).toBe(false)
       }
     }
-    // 那张写进目标站 package.json 的依赖表不算依赖：它是字符串，件一行都不 import，
+    // 那张写进目标站 package.json 的依赖表不算依赖：它是字符串，插件一行都不 import，
     // 而装出来的站要跑 pnpm doc——那是仓里的事，仓当然该装那个包
     expect(fs.readFileSync(path.join(root, 'src', 'deps.ts'), 'utf8')).toContain('@godcreator/docfirst-workflow')
   })
@@ -142,8 +142,8 @@ describe('几处一改就得一起改的账', () => {
   })
 
   /**
-   * 两个件互不依赖：站件的东西本件一档都不写、一行都不 import。装六区要的只是一个绝对路径，
-   * 骨架是谁铺的、站有没有在跑，本件都不问。
+   * 两个插件互不依赖：站点插件的包本插件一档都不写、一行都不 import。装六区要的只是一个绝对路径，
+   * 骨架是谁生成的、站有没有在跑，本插件都不问。
    */
   it('站件不在任何一档依赖里，也不被 import', () => {
     const all = { ...manifest.dependencies, ...manifest.peerDependencies, ...manifest.devDependencies }
