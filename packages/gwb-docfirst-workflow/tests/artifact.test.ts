@@ -1,4 +1,5 @@
 import fs from 'node:fs'
+import { builtinModules } from 'node:module'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { describe, expect, it } from 'vitest'
@@ -6,7 +7,7 @@ import { describe, expect, it } from 'vitest'
 /**
  * 产物守卫 + 几处「一改就得一起改」的账。缺产物时产物那组整组跳过——门禁不依赖 build。
  *
- * 本件只有 node 半（tsc 出的）：相对 import 带扩展名、裸名只许钉死的那些。
+ * 本件只有 node 半（tsc 出的）：相对 import 带扩展名，包名 import 只许 node 内置模块、electron 与 peer 里写了的包。
  * 浏览器半那组规矩连同窗格一起归站件了，这儿不再有。
  */
 
@@ -17,8 +18,11 @@ const built = fs.existsSync(path.join(distDir, 'index.js'))
 
 if (!built) console.warn('[gwb-docfirst-workflow] dist/ 还没造齐，产物组跳过（pnpm build 之后再跑）')
 
-/** node 半运行时真 import 的：契约包（isRecord）。那几个件都是 import type，整句擦除 */
-const ALLOWED_BARE = new Set(['@godcreator/gwb-plugin-api'])
+/** node 半产物里允许留下的包名 import：node 内置模块、electron、本包 peer 里写了的包（都是 home 里装着的）。只 import type 的整句擦除 */
+const ownPeers = new Set(Object.keys((JSON.parse(fs.readFileSync(path.join(root, 'package.json'), 'utf8')) as { peerDependencies?: Record<string, string> }).peerDependencies ?? {}))
+/** `@scope/name/sub` → `@scope/name`；`name/sub` → `name` */
+const packageNameOf = (spec: string): string => spec.split('/').slice(0, spec.startsWith('@') ? 2 : 1).join('/')
+const isNodeBuiltin = (spec: string): boolean => spec.startsWith('node:') || builtinModules.includes(spec)
 
 const RELATIVE = /^import\s+(?:[^'"]*from\s*)?['"](\.[^'"]*)['"]/gm
 const BARE = /^import\s+(?:[^'"]*from\s*)?['"]([^'".][^'"]*)['"]/gm
@@ -44,12 +48,12 @@ describe('产物', () => {
     expect(bad).toEqual([])
   })
 
-  it.skipIf(!built)('裸名只有契约包', () => {
+  it.skipIf(!built)('包名 import 只有 node 内置模块、electron 与 peer 里写了的包', () => {
     const bare = new Set<string>()
     for (const file of nodeHalf) {
-      for (const m of read(file).matchAll(BARE)) if (!m[1]!.startsWith('node:')) bare.add(m[1]!)
+      for (const m of read(file).matchAll(BARE)) bare.add(m[1]!)
     }
-    expect([...bare].filter((s) => !ALLOWED_BARE.has(s))).toEqual([])
+    expect([...bare].filter((spec) => !isNodeBuiltin(spec) && spec !== 'electron' && !ownPeers.has(packageNameOf(spec)))).toEqual([])
   })
 
   it.skipIf(!built)('总线上只剩装六区那一条——命令名是公共面，改名就是破约', () => {

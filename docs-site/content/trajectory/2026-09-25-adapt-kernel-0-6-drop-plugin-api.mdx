@@ -1,0 +1,43 @@
+---
+born-at: 2026-09-25T01:50
+type: choice
+parent: [2026-09-03-god-live-doc]
+label: 适配内核 0.6
+domain: 分发
+---
+
+## 背景
+
+default 这个 home 升到内核 0.6.0（源上 latest）之后，本插件一直加载失败。default 的 `logger.backlog` 里，插件管理重新加载本插件的每一次都报同一句：
+
+```text
+dist/index.js:3
+import { isRecord } from '@godcreator/gwb-plugin-api';
+SyntaxError: The requested module '@godcreator/gwb-plugin-api' does not provide an export named 'isRecord'
+```
+
+插件管理接着记一行「条目 docfirst-workflow 重新加载了：no fiber（import 失败，原因在日志里）」。
+
+原因有两层。一是接口类型包 `@godcreator/gwb-plugin-api` 已经退役：`GwbContext`、`GwbKernelApi`、`GwbResult` 这些类型并进了内核包 `@godcreator/gwb-kernel-desktop` 的包根导出，只有类型、没有函数。二是本插件 0.7.6 在 node 侧按值 import 了它的 `isRecord`，而 default 根上装着的那一版 plugin-api 没有这个导出（0.1.2 才有），于是 ESM 链接阶段就失败，`apply` 一次都没跑。插件只 import 类型时编译后整句消失，出事的正是这一句按值 import。
+
+## 结论与边界
+
+**不再依赖 plugin-api**：`isRecord` 在 `src/index.ts` 里自带一份（五行，只用来判命令参数是不是普通对象），`GwbContext` 改从内核包 `import type`。构建产物里除 node 内置模块外不再有任何包名 import，插件运行时对 home 里装着哪一版接口类型包没有要求。
+
+**依赖照 devkit 的现行规矩**：peer 写内核包 `^0.6.0`、命令总线 `^0.5.0`、说明书插件 `^0.4.5`（标 `optional`）；node 侧产物没有按值 import `cordis`，peer 里不写它，dev 里的 `cordis` 跟 devkit 模板一致改成 `4.0.0-rc.10`。已退役的 `@godcreator/gwb-repo-kit` 与它唯一的使用方 `tests/self-report.test.ts` 一起删掉：它守的「description 三格」「说明书份数」在 devkit 那边已经整条废除（见 devkit 仓的轨迹卡 `2026-09-24-repo-kit-retires`）。
+
+**产物守卫改成跟模板同一个判据**：`tests/artifact.test.ts` 不再手写一张允许的包名单（原来那张只放行 plugin-api），改成读本包 peer——node 侧产物的包名 import 只许 node 内置模块、`electron` 与 peer 里写了的包。改完之后没重新构建时，这条测试正好拿旧产物里那句 plugin-api 报红，证明它拦得住这次的事故。
+
+版本升 y（0.7.6 → 0.7.7）：命令名、说明书名、回执形状都没变，属于修 bug 加改依赖。
+
+## 否掉的候选
+
+**把 `isRecord` 挪到一个新文件。** 它只在 `index.ts` 判命令参数时用，挪出去要改产物守卫里那张「产物是平的一层」的文件清单，模块页里「`index.ts` 往外只认识 `attach.js` 一个名字」这句也不再成立；五行函数不值这个代价。
+
+**照 devkit 规矩，peer 里的插件不再写 dev。** 在本仓做不到：仓根 `pnpm-workspace.yaml` 设了 `autoInstallPeers: false`（不让 pnpm 给 docfirst-workflow 包自动装一份 fumadocs），peer 不会被装进 `node_modules`。只写 peer 时实测 `pnpm typecheck` 报三条 `Cannot find module`（内核包、命令总线、说明书插件）。所以这三个包在 dev 里再写一份 `^` 范围，理由写进了清单的 `//devDependencies` 注释。
+
+## 代价与遗留
+
+dev 与 peer 重复写三个包，和 devkit「写进 peer 的插件不再另写 dev」不一致；要消掉得先解决仓级的 `autoInstallPeers` 与 fumadocs peer 之间的冲突，这次没有动仓级配置。
+
+命令总线 0.5.0 与说明书插件 0.4.5 自己的类型声明还从 plugin-api 取 `GwbResult` / `GwbContext`。本插件 dev 里不再有 plugin-api，关掉 `skipLibCheck` 跑类型检查会报这三处找不到模块，那几个类型在本插件里退化成 any；`skipLibCheck: true`（仓里的设置）下类型检查、oxlint 都通过。等这两个插件改成从内核包取类型之后，这个缺口自然消失。无探针，现象取自 default 的 `logger.backlog` 与本仓当次的 `pnpm typecheck` 输出。

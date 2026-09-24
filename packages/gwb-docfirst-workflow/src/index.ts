@@ -1,6 +1,6 @@
 import fs from 'node:fs'
 import path from 'node:path'
-import { isRecord, type GwbContext } from '@godcreator/gwb-plugin-api'
+import type { GwbContext } from '@godcreator/gwb-kernel-desktop'
 // 只为激活那几个件的 `declare module 'cordis'`——它们给 ctx 加上各自那个名字
 import type {} from '@godcreator/gwb-commands'
 import type {} from '@godcreator/gwb-skills'
@@ -125,4 +125,9 @@ export function apply(ctx: GwbContext): void {
   })
 
   log.info(`docfirst 件就绪：一条命令（${ATTACH_COMMAND}）加六份说明书，对 @godcreator/docfirst-workflow 零依赖`)
+}
+
+/** 命令参数是外部输入：只有普通对象才按键取值 */
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value)
 }

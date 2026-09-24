@@ -35,23 +35,24 @@
     "node": ">=24"
   },
   "//dependencies": "整段没有，一个都没有。**@godcreator/docfirst-workflow 尤其不许出现在任何一档**：件的消费方是 agent，包的消费方是仓——装了件就该能挂上说明书、能铺六区，不必再装什么包。tests/artifact.test.ts 那条守卫守的就是这条边界",
+  "//peerDependencies": "运行时从 home 里得到的东西：内核包（GwbContext 等接口类型从它的包根 import type）、命令总线（inject 必需）、说明书插件（局部注入，可选）。node 侧产物没有按值 import cordis，所以 peer 里没有 cordis",
   "peerDependencies": {
-    "@godcreator/gwb-commands": "^0.4.5",
-    "@godcreator/gwb-plugin-api": "^0.1.2",
-    "@godcreator/gwb-skills": "^0.4.3"
+    "@godcreator/gwb-kernel-desktop": "^0.6.0",
+    "@godcreator/gwb-commands": "^0.5.0",
+    "@godcreator/gwb-skills": "^0.4.5"
   },
   "peerDependenciesMeta": {
     "@godcreator/gwb-skills": {
       "optional": true
     }
   },
+  "//devDependencies": "peer 里那三个包在 dev 里再写一份：本仓 pnpm-workspace.yaml 关了 autoInstallPeers（不让 pnpm 给 docfirst-workflow 包自动装一份 fumadocs），peer 不会被装进 node_modules，类型只能从 dev 装的那份取",
   "devDependencies": {
-    "@godcreator/gwb-commands": "0.4.5",
-    "@godcreator/gwb-plugin-api": "0.1.2",
-    "@godcreator/gwb-repo-kit": "0.3.0",
-    "@godcreator/gwb-skills": "0.4.3",
+    "@godcreator/gwb-commands": "^0.5.0",
+    "@godcreator/gwb-kernel-desktop": "^0.6.0",
+    "@godcreator/gwb-skills": "^0.4.5",
     "@types/node": "^24.0.0",
-    "cordis": "4.0.0-rc.9",
+    "cordis": "4.0.0-rc.10",
     "oxlint": "1.76.0",
     "oxlint-tsgolint": "7.0.2001",
     "typescript": "^7.0.2",
