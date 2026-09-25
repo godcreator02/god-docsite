@@ -1,0 +1,25 @@
+---
+title: "要跟 devkit 0.21：packages 必给，要发的包写 publishConfig.registry"
+description: "来源：gwb-lifecycle-plugins 仓（devkit 所在的仓，`D:\unitfolders\igldu-gwbkernel\gwb-lifecycle-plugins`），提交 `9caafe0`，2026-09-25；总控台会话代为投递。"
+docfirst: none
+---
+
+`@godcreator/gwb-devkit` 0.21.0 已发到团队源。这是破坏性版本，删掉了两个只为旧仓留着的缺省值（gwb-lifecycle-plugins 仓轨迹卡 `2026-09-25-drop-legacy-defaults`）：
+
+1. **`devkit.dev` 与 `devkit.release` 的 `packages` 必给**：非空数组，每一项是相对仓根的包目录，如 `["plugins/<短名>"]`；`devkit.release` 的按依赖顺序排，被依赖的排前面。不给或写错直接拒。这两条命令不再把仓根当成插件包：仓根本身就是插件包的仓（仓根 `package.json` 就是插件，`pnpm-workspace.yaml` 里没有 `plugins/*`）要先改成 workspace 布局才能用——插件放在 `plugins/<短名>/`，仓根是 `"private": true` 的 `package.json`，照 gwb-lifecycle-plugins 仓或 `devkit.scaffold` 新建的仓的样子。devkit 不替仓改布局
+2. **每个要发的包在自己的 `package.json` 里写 `publishConfig.registry`**：发到团队源写 `"publishConfig": { "registry": "https://git.tianshen02.online:28377/api/packages/godcreator/npm/" }`，发到别的源就写那个源的地址。没写的包 `devkit.release` 拒发。发到哪只看这个字段：`devkit.release` 不再在命令行带 `--registry`，这个字段的优先级也高于用户级 `~/.npmrc` 里的范围行（gwb-lifecycle-plugins 仓轨迹卡 `2026-09-25-scope-and-publish-target`）
+
+同一天还发了插件管理 0.12.1，修了发出去的包里带着过时文件的问题，用它的插件不用改。另外有一项早就可以做的清理：命令总线 `@godcreator/gwb-commands` 0.4.6 起（源上现在是 0.5.0），`gwbCommands.register` 自己把注销登记在调用方的上下文上，调用方卸载时命令自动注销，登记命令不用再在外面包一层 `ctx.effect(() => ….register(…))`。包着也只注销一次、照样能用，删不删随意；登记说明书的 `gwbSkills.register` 不是命令总线的方法，外面那层 `effect` 要留着。
+
+本仓的情况：
+
+- 布局：workspace 仓，包在 `packages/` 下而不是 `plugins/` 下。`devkit.dev`、`devkit.release` 只处理调用方列出的包目录、不看目录名，本仓不用改布局；`docs-site/content/docs/maintain/maintainers.mdx` 第 74–75 行的发版写法已经带了 `packages`。只有往仓里加插件的 `devkit.scaffold.plugin` 要求 `pnpm-workspace.yaml` 里有 `plugins/*`，本仓用不到
+- 没写 `publishConfig.registry` 的包：三个都走 `devkit.release`，三个都没写——`packages/docfirst-trajectory/package.json`（`@godcreator/docfirst-trajectory`）、`packages/docfirst-workflow/package.json`（`@godcreator/docfirst-workflow`）、`packages/gwb-docfirst-workflow/package.json`（`@godcreator/gwb-docfirst-workflow`）
+- `maintainers.mdx` 第 67 行写着「scope 路由住用户级 `~/.npmrc`，仓里不配」，写上 `publishConfig.registry` 以后这句不再是现状：发到哪由各包 `package.json` 里这个字段决定
+- 外面包着 `effect` 的命令登记（可选清理）：`packages/gwb-docfirst-workflow/src/index.ts` 第 74 行。第 124 行登记的是说明书，留着
+
+要做的：
+
+1. 三个包的 `package.json` 写上团队源的 `publishConfig.registry`，下次发版前做完，不写 `devkit.release` 拒发
+2. `maintainers.mdx` 第 67 行改成现状
+3. 可选清理随下次改到那个文件时做

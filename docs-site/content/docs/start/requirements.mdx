@@ -37,20 +37,20 @@ description: 腐化的本质、三条需求、五类目标、明确不治的那�
 文档对代码说的话只有三种（内容、形状、有无），对象只有两种（文件、目录），五类目标把它填满——
 行段、整文件、目录树、存在性（含「断言不在」）、名字：
 
-{/* ref file="../packages/docfirst-workflow/src/engine/types.ts" lines="15-51" */}
+{/* ref file="../packages/docfirst-workflow/src/engine/types.ts" lines="15-51" hash="d3bff37dc577" blob="08a28a55c202" */}
 
 一篇手册里怎么挑、各盯什么，见 [五类引用：一篇手册里怎么用](/docs/start/handbook)。
 
 文档里的一处引用，除了目标还带着「它写在文档第几行」。**身份不靠行号**：同一篇里两处指向同一段的引用，
 共用一条记忆。
 
-{/* ref file="../packages/docfirst-workflow/src/engine/types.ts" lines="53-60" */}
+{/* ref file="../packages/docfirst-workflow/src/engine/types.ts" lines="53-60" hash="d6f9325f0699" blob="08a28a55c202" */}
 
 `extra` 是格式自留的私货（展示区在哪、是不是草稿记号），判定层原样带回、不看内容——这是判定层不认识任何格式的那道口子。
 
 ## 确认下来的是一条指纹，不是一份副本
 
-{/* ref file="../packages/docfirst-workflow/src/engine/types.ts" lines="62-69" */}
+{/* ref file="../packages/docfirst-workflow/src/engine/types.ts" lines="62-69" hash="c0407d48592c" blob="08a28a55c202" */}
 
 记录里没有代码内容，只有「那几行当时长什么样」的指纹，外加一个 `kind` 说明这条记录是哪个比较器记的。
 git 比较器记的是 HEAD 里那个 blob——内容本来就在 git 的对象库里，仓里不必存第二份。

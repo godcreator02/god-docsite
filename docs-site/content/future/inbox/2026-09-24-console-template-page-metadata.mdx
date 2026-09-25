@@ -1,0 +1,16 @@
+---
+title: "建站模板没写页面元数据，浏览器标签页没有标题"
+description: "来源：总控台（单元 00000-console），2026-09-24 给文档站加站点标题的 claude 会话。"
+docfirst: none
+---
+
+机器上 20 个 docfirst 文档站的根布局都没有 `metadata`，各区页面也没有 `generateMetadata`，浏览器标签页一律没有标题（`document.title` 是空串），
+几个站同时开着分不清哪个是哪个。根源在建站模板：docfirst 装六区时写的根布局 `packages/gwb-docfirst-workflow/template/attach/src/app/layout.tsx.tpl` 没有 `metadata`，六个区的页面模板没有 `generateMetadata`（本仓自己的站 `docs-site/` 也缺）。
+
+内核仓、gwb-lifecycle-plugins 仓（devkit 所在的仓）、界面插件仓的站已经各自补上，可以照着改（例：`gwb-lifecycle-plugins/docs-site/src/app/layout.tsx` 与 `src/app/docs/[[...slug]]/page.tsx`，提交 3ab1193）：
+
+- 根布局加 `export const metadata: Metadata = { title: { default: '<站名>', template: '%s | <站名>' } }`，站名与侧栏 `nav.title` 用同一个
+- 每个区的 `[[...slug]]/page.tsx` 加 `generateMetadata`：和页面本身一样 `getPage(slug)`、找不到就 `notFound()`，返回 `{ title: page.data.title, description: page.data.description }`
+- 没有 `getPage` 的整页路由（比如轨迹区的星轨盘）写一句静态的 `export const metadata = { title: '轨迹' }`
+
+期望：模板带上这几处，之后新建的站自带标题；已经建好的站由各仓自己补。

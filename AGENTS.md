@@ -21,36 +21,36 @@ README 和这份规矩都是**生成物**：正本分别是 `docs-site/content/o
 
 ## 参考，不要改
 
-* 实验室 `D:\dshfiles\260901lab`（台阶七 `step7-packages` / `step7-site` / `step7-mini`）：架构定案的出处，
+- 实验室 `D:\dshfiles\260901lab`（台阶七 `step7-packages` / `step7-site` / `step7-mini`）：架构定案的出处，
   教学代码，**只读**。要搬逻辑就搬，别 import 它。它在**老根** `D:\dshfiles`（DSH 时代的归档区），
   本仓住 `D:\unitfolders` 下的单元里，这是跨根引用。
-* 老仓 `D:\dshfiles\26082711aju\god-live-doc`（同在老根）：git 记忆那条线的出处（`libs/core/src/core/git.ts`、
+- 老仓 `D:\dshfiles\26082711aju\god-live-doc`（同在老根）：git 记忆那条线的出处（`libs/core/src/core/git.ts`、
   `diff.ts`、`hash.ts`、`pins.ts` 的代码钉分支），**只读**。功能面已对齐，不再是参考，代码只看这个仓。
 
 ## 规矩
 
-* 中文写注释、文档、提交信息；标识符英文。注释只写现状，不写「原来怎么样」。
-* TS，pnpm，测试用 `node --test`（工作区里的测试是 `.ts`，Node 直接跑；站里的是 `.mjs`）。
+- 中文写注释、文档、提交信息；标识符英文。注释只写现状，不写「原来怎么样」。
+- TS，pnpm，测试用 `node --test`（工作区里的测试是 `.ts`，Node 直接跑；站里的是 `.mjs`）。
   **例外只有工作台插件**：它用 vitest，跟 devkit 建出来的插件骨架一致，不为一个插件改骨架。
   不用 threads 池 / native loader 那类沙箱绕行，同仓不并行跑测试。
-* 工具链两套并存，别互相搬：两个 npm 包是 tsdown + TS 6；工作台插件是 `tsc`，跑在 TS 7 上。
+- 工具链两套并存，别互相搬：两个 npm 包是 tsdown + TS 6；工作台插件是 `tsc`，跑在 TS 7 上。
   各自的 `package.json` 说了算。
-* **主包 `src/` 下四层，方向单向**：`engine`（判定，只用 `node:crypto`）→ `host`（碰环境）→
+- **主包 `src/` 下四层，方向单向**：`engine`（判定，只用 `node:crypto`）→ `host`（碰环境）→
   `fumadocs`（格式实现与站接线）→ `cli`（入口，四条子命令 check / confirm / render / trajectory）。
   轨迹是独立包线，只被 `cli` 用。**包与插件互不认识**：包不许出现任何 `@godcreator/gwb-*`，插件也
-  不许依赖包，两个方向各由 `tests/boundary.test.ts` 与插件的 `tests/artifact.test.ts&#x60; 守着。
+  不许依赖包，两个方向各由 `tests/boundary.test.ts` 与插件的 `tests/artifact.test.ts` 守着。
   **`tests/boundary.test.ts` 是唯一的边界守卫**，别绕、别删、别为了让门禁绿注释掉某一条。
-* **要在仓里发生的（核对、确认、渲染）归包，只在 agent 手上发生一次的归插件**：装六区
+- **要在仓里发生的（核对、确认、渲染）归包，只在 agent 手上发生一次的归插件**：装六区
   （`docfirst.attach`）与六份说明书在 `packages/gwb-docfirst-workflow/`。站的管理（扫描站、启动与停止、
   端口、窗格）与生成 fumadocs 骨架归站点插件 `@godcreator/gwb-docs-site`，两个插件互不依赖、只经命令总线通信。
-* 子进程调用一律带超时。
-* 门禁，三处都要绿才提交：
-  * 仓根：`pnpm test`、`pnpm typecheck`、`pnpm build`
-  * `docs-site/`：`pnpm docfirst check`、`pnpm test`、`pnpm build`、`node scripts/verify-roster.mjs`
-  * `packages/gwb-docfirst-workflow/`：`pnpm check`（typecheck + oxlint + vitest）、`pnpm build`
-* 发版 **两边各发各的、没有先后**：插件对包零依赖。两个包升版本号时跟着改
+- 子进程调用一律带超时。
+- 门禁，三处都要绿才提交：
+  - 仓根：`pnpm test`、`pnpm typecheck`、`pnpm build`
+  - `docs-site/`：`pnpm docfirst check`、`pnpm test`、`pnpm build`、`node scripts/verify-roster.mjs`
+  - `packages/gwb-docfirst-workflow/`：`pnpm check`（typecheck + oxlint + vitest）、`pnpm build`
+- 发版 **两边各发各的、没有先后**：插件对包零依赖。两个包升版本号时跟着改
   `packages/gwb-docfirst-workflow/src/deps.ts` 那张表——插件的 `tests/attach.test.ts` 守着它。
-* 改了 `src/fumadocs/` 的代码，站要先删 `.next` 再 build。调试站用 build + start，不用 dev；
+- 改了 `src/fumadocs/` 的代码，站要先删 `.next` 再 build。调试站用 build + start，不用 dev；
   启动的站验完必须停掉。
-* 提交按步骤拆，一个提交一件事。提交信息末尾带 `Co-Authored-By` 与 `Claude-Session` 行（会话里给的那两行）。
-* 不碰 `D:\dshfiles\26082412vto\homes\`（在老根 `D:\dshfiles`，DSH 时代的归档区）；不碰主实例。
+- 提交按步骤拆，一个提交一件事。提交信息末尾带 `Co-Authored-By` 与 `Claude-Session` 行（会话里给的那两行）。
+- 不碰 `D:\dshfiles\26082412vto\homes\`（在老根 `D:\dshfiles`，DSH 时代的归档区）；不碰主实例。

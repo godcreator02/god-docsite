@@ -21,21 +21,21 @@ description: 契约、边界、记号、比较器、站测试各守什么；文�
 
 工作区那摊按主题分文件，一个主题一个：
 
-{/* tree dir="../tests" depth="1" glob="*.test.ts" */}
+{/* tree dir="../tests" depth="1" glob="*.test.ts" hash="b96fa95b4d7d" */}
 
 ## 契约测试：两个适配器摆在一起比
 
 `Format` 这条接缝真有两个适配器——生产是 fumadocs 口味的 mdx，测试是那份假格式。夹具就是这么
 几行，两种格式各写一篇，引的是同一段代码，草稿记号一模一样：
 
-{/* ref file="../tests/contract.test.ts" lines="17-24" */}
+{/* ref file="../tests/contract.test.ts" lines="17-24" hash="bc495b299d37" blob="3467ec7d28c3" */}
 
 然后一串改动跑下来（确认 → 改代码 → 确认 → 上面插两行 → 删函数），断言**两篇的状态完全一致、
 跟到的行段也是同一个**。状态是判定层算的，格式只交引用——不一致就说明有谁抄了近道。
 
 它跑在临时的真 git 仓里，比较器就是产品用的那个：
 
-{/* ref file="../tests/repo.ts" lines="70-79" */}
+{/* ref file="../tests/repo.ts" lines="70-79" hash="e3bbfb0271b6" blob="512a9f6a63ed" */}
 
 <Note>
   用真 git 仓而不是打桩：这套机制的判定几乎全压在 git 的行为上（blob 取不取得到、`diff -U0` 的 hunk 头
@@ -49,15 +49,15 @@ description: 契约、边界、记号、比较器、站测试各守什么；文�
 `engine/` 里随手写一句 `import "../host/git.ts"` 编译器不会吭一声。所以这份测试是塌包之后
 **唯一**的边界守卫，它守的第一样就是目录方向，列的是禁止面不是允许面：
 
-{/* ref file="../tests/boundary.test.ts" lines="98-103" */}
+{/* ref file="../tests/boundary.test.ts" lines="98-103" hash="cb37b2f53b68" blob="421b08df5caa" */}
 
 判定层的零依赖一条，不看措辞、只看它 import 了谁：
 
-{/* ref file="../tests/boundary.test.ts" lines="135-142" */}
+{/* ref file="../tests/boundary.test.ts" lines="135-142" hash="25b496781bf8" blob="421b08df5caa" */}
 
 宿主那条最细，连产物都查：
 
-{/* ref file="../tests/boundary.test.ts" lines="155-170" */}
+{/* ref file="../tests/boundary.test.ts" lines="155-170" hash="cdb5ac3891a7" blob="421b08df5caa" */}
 
 <Note>
   **它报红的时候，红的是设计，不是测试。** 真要改方向，改的是那张表加一段说明为什么——
@@ -82,7 +82,7 @@ description: 契约、边界、记号、比较器、站测试各守什么；文�
 不用起服务器，也不是另写一条模拟。断言四样：每条引用在页面上都有一个带 `data-dot` 和来源标题的 `pre`、
 组件由 React 表画出来（没有裸标签漏出去）、`_markdown` 里有来源行且组件被压平、以及**这个站自己全绿**。
 
-{/* ref file="tests/page.test.mjs" lines="120-129" */}
+{/* ref file="tests/page.test.mjs" lines="120-129" hash="20cece7ee85f" blob="6563bf8b4551" */}
 
 <Note>
   站测试**不跟命令行比状态**：算状态的是同一个 service，比出来只能相等，比了也证明不了什么。
@@ -96,7 +96,7 @@ description: 契约、边界、记号、比较器、站测试各守什么；文�
 
 哪些文章允许没有引用，由 frontmatter 明说，测试按这个态度放行：
 
-{/* ref file="tests/page.test.mjs" lines="50-51" */}
+{/* ref file="tests/page.test.mjs" lines="50-51" hash="cfcbeab7ba70" blob="6563bf8b4551" */}
 
 `docfirst: none` 是导读页（明说不钉），`docfirst: draft` 是还没写的章。两样都没写的，就必须至少钉一处。
 

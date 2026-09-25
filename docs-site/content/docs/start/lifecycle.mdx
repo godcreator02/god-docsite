@@ -117,19 +117,19 @@ description: 写下 → 未确认 → 确认投影 → 代码改了变黄 → �
 
 核对（`check` 和站构建走的是同一条）：逐处问比较器要判定，切出今天这段内容，凑成清单项。
 
-{/* ref file="../packages/docfirst-workflow/src/engine/service.ts" lines="105-122" */}
+{/* ref file="../packages/docfirst-workflow/src/engine/service.ts" lines="105-122" hash="2b012f03eb19" blob="c98a3a3d0083" */}
 
 孤儿就是「记录簿里有、这一趟没被认领」的那些：
 
-{/* ref file="../packages/docfirst-workflow/src/engine/service.ts" lines="123-127" */}
+{/* ref file="../packages/docfirst-workflow/src/engine/service.ts" lines="123-127" hash="a96ca08f137c" blob="c98a3a3d0083" */}
 
 确认：先逐条问比较器要记录，有一处交回 problem 就整篇拒。
 
-{/* ref file="../packages/docfirst-workflow/src/engine/service.ts" lines="145-163" */}
+{/* ref file="../packages/docfirst-workflow/src/engine/service.ts" lines="145-163" hash="85f5c6a8c4f0" blob="c98a3a3d0083" */}
 
 都过了才落笔——刷记录簿、清孤儿、存盘，最后让格式写回文档。
 
-{/* ref file="../packages/docfirst-workflow/src/engine/service.ts" lines="165-174" */}
+{/* ref file="../packages/docfirst-workflow/src/engine/service.ts" lines="165-174" hash="3c7be525b631" blob="c98a3a3d0083" */}
 
 四种状态是怎么判出来的，见 [判定层](/docs/modules/engine)；记忆按文件位置怎么分派，见 [环境层](/docs/modules/host)；
 git 那头的门和 hunk 表，见 [git 原理](/docs/principles/git)。

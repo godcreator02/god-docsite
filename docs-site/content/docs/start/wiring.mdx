@@ -22,7 +22,7 @@ description: 把 docfirst 接进一个 fumadocs 站要动的七处：配置、�
 
 命令行和站读的是同一份 `docfirst.config.mjs`，它住项目根（对这个站来说项目根就是站目录）：
 
-{/* ref file="docfirst.config.mjs" lines="34-58" */}
+{/* ref file="docfirst.config.mjs" lines="34-58" hash="9a474ecbe1a3" blob="97ccb7da232e" */}
 
 这段说明接线要交代的全部事实：用哪个格式、哪几区进 `check`（六区里只有现状与生成正本的论断跟代码对应）、
 用哪个比较器、生成物写到哪、轨迹卡目录在哪、组件名册是什么。`comparator` 不写就是 `auto`：按被引文件的位置
@@ -36,20 +36,20 @@ description: 把 docfirst 接进一个 fumadocs 站要动的七处：配置、�
 
 装好之后命令面就是这几条，各自打印什么、退什么码见 [命令行](/docs/modules/cli)：
 
-{/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="1-20" */}
+{/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="1-20" hash="412e080a06ce" blob="1dbbc2488e3a" */}
 
 ### 轨迹是可选的一项
 
 `trajectory` 的值是轨迹卡目录、相对项目根；不配就整个不管：
 
-{/* ref file="../packages/docfirst-workflow/src/host/load.ts" lines="39-40" */}
+{/* ref file="../packages/docfirst-workflow/src/host/load.ts" lines="39-40" hash="f823a63d3b67" blob="3e34c0a3250b" */}
 
 装配时它换算成绝对路径、存进项目对象，没配就是 `null`——「没配」和「配了但目录还不存在」是两件事，
 前者整个不管，后者扫出来是空集合：
 
-{/* ref file="../packages/docfirst-workflow/src/host/load.ts" lines="50-51" */}
+{/* ref file="../packages/docfirst-workflow/src/host/load.ts" lines="50-51" hash="0aa4c39d2aab" blob="3e34c0a3250b" */}
 
-{/* ref file="../packages/docfirst-workflow/src/host/load.ts" lines="149-174" */}
+{/* ref file="../packages/docfirst-workflow/src/host/load.ts" lines="149-174" hash="19c371d668fa" blob="3e34c0a3250b" */}
 
 配了它，`docfirst check` 就**顺带**跑轨迹卡校验（病卡逐条打印、算红退 1），另外多一条独立的
 `docfirst trajectory [--json]` 列出各张星轨盘的树与主干；不配，轨迹卡校验不跑、这条子命令直接报错退出。
@@ -62,20 +62,20 @@ description: 把 docfirst 接进一个 fumadocs 站要动的七处：配置、�
 
 现状区开 processed markdown，序列化回调由格式那一层给：
 
-{/* ref file="source.config.ts" lines="23-28" */}
+{/* ref file="source.config.ts" lines="23-28" hash="4eef64318f7d" blob="7d082201893d" */}
 
 这段说明现状区除了目录只多一件事：`postprocess.includeProcessedMarkdown`，`render` 靠它拿到
 fumadocs 自己的管线出的 md。
 
 其余四区里，生成正本跟现状区同一形状（它也进 check），交接、未来、反馈是裸集合：
 
-{/* ref file="source.config.ts" lines="49-66" */}
+{/* ref file="source.config.ts" lines="49-66" hash="712bc30e790b" blob="7d082201893d" */}
 
 全局 `mdxOptions` 用格式那一层给的那份：remark 插件链末尾加上 docfirst 插件、meta 白名单放行 `data-dot`，术语标注
 也在这儿。术语表正本是 `src/glossary.ts`，`skipFile` 把人写的那篇规范挑出去——它里头的词按字面读，
 不该被标注：
 
-{/* ref file="source.config.ts" lines="68-76" */}
+{/* ref file="source.config.ts" lines="68-76" hash="5f0e971e566c" blob="7d082201893d" */}
 
 ### 轨迹卡集合
 
@@ -84,7 +84,7 @@ fumadocs 自己的管线出的 md。
 `remarkTrajectoryLinks`（关系边行渲染成标注，`轨迹卡身份.md` 链接与 wikilink 改写成轨迹卡页路由）。集合级
 `mdxOptions` 会把默认插件全去掉，所以用 `applyMdxPreset` 先把默认 preset 加回来：
 
-{/* ref file="source.config.ts" lines="36-47" */}
+{/* ref file="source.config.ts" lines="36-47" hash="fa38632d9a71" blob="7d082201893d" */}
 
 **docfirst 自己的 remark 插件登记在全局 `mdxOptions` 上，作用不到这个集合**——这正是要的：轨迹卡正文冻结历史、
 不钉会变的代码，轨迹卡校验检查的也是这条。
@@ -93,29 +93,29 @@ fumadocs 自己的管线出的 md。
 
 每区一条 loader，`baseUrl` 就是这一区的 URL 前缀：
 
-{/* ref file="src/lib/source.ts" */}
+{/* ref file="src/lib/source.ts" hash="3c16146575e4" blob="e0c191d96b70" */}
 
 侧栏是**一棵**树不是六棵：每区一个 `root: true` 的根节点当分区，URL 仍是六个前缀。base-ui 版的 `Root`
 只有单槽 fallback，多树切换不稳，根节点分区是推荐做法；区内的顺序由各区自己的 `meta.json` 定。
 
-{/* ref file="src/lib/tree.ts" */}
+{/* ref file="src/lib/tree.ts" hash="919071125bce" blob="6d738267067e" */}
 
 轨迹区 `meta.json` 的第一条不是文档，是一条指向星轨整页的**链接项**——`pages` 认 `[名字](路径)`
 这种写法：
 
-{/* ref file="content/trajectory/meta.json" */}
+{/* ref file="content/trajectory/meta.json" hash="21a291e29692" blob="f84d5c0625e8" */}
 
 ## 四、src/app/：六条路由，外加星轨整页
 
-{/* tree dir="src/app" depth="4" */}
+{/* tree dir="src/app" depth="4" hash="dab6244c4b4c" */}
 
 带侧栏的六区在 `(zones)` 路由组里，共用上面那棵合成树：
 
-{/* ref file="src/app/(zones)/layout.tsx" */}
+{/* ref file="src/app/(zones)/layout.tsx" hash="33c7df1c8bed" blob="76245d76158c" */}
 
 区内每条路由各用各的 loader，页面本身是标准的 fumadocs `DocsPage` / `DocsTitle` / `DocsBody` 三个组件，组件表来自 `getMDXComponents()`：
 
-{/* ref file="src/app/(zones)/docs/[[...slug]]/page.tsx" */}
+{/* ref file="src/app/(zones)/docs/[[...slug]]/page.tsx" hash="591745104386" blob="d8a39871371e" */}
 
 交接、未来、生成正本、反馈四条跟它一个样，只换 loader；轨迹那条不一样。
 
@@ -125,20 +125,20 @@ fumadocs 自己的管线出的 md。
 多两行——元信息（`born-at`、`type`、`domain`、`parent` 链到父轨迹卡页）与界面上写着「回到盘」的链接（带上第一个 `parent`
 当星轨盘身份）：
 
-{/* ref file="src/app/(zones)/trajectory/[...slug]/page.tsx" lines="6-19" */}
+{/* ref file="src/app/(zones)/trajectory/[...slug]/page.tsx" lines="6-19" hash="6ff23e4bb903" blob="61131d6d7f84" */}
 
-{/* ref file="src/app/(zones)/trajectory/[...slug]/page.tsx" lines="49-52" */}
+{/* ref file="src/app/(zones)/trajectory/[...slug]/page.tsx" lines="49-52" hash="06c11836968c" blob="61131d6d7f84" */}
 
 **星轨盘不是 mdx 里的组件，是一条独立的整页路由 `/trajectory`。**它跟轨迹卡页共用一段 URL 前缀，却要两套完全
 不同的布局——星轨盘不要侧栏与目录，轨迹卡页要。Next 的路由组把两套分开，组名不进 URL；星轨盘这一组只用最简单的布局：
 
-{/* ref file="src/app/(trajectory-disk)/trajectory/layout.tsx" */}
+{/* ref file="src/app/(trajectory-disk)/trajectory/layout.tsx" hash="620a9ec79939" blob="6d970e94605b" */}
 
 星轨盘页自己读轨迹卡目录建模，把模型和 `launcherThumbs` 渲染好的启动器缩略图交给 `mode="page"` 的 `StarDisk`，
 外加一条自己画的顶栏。**`searchParams.disk` 缺失时渲染启动器的缩略图网格，有则渲染那张星轨盘**——组件切换星轨盘 / 回启动器时
 `replaceState` 写回这个参数，一个链接因此能直接指到某一张星轨盘：
 
-{/* ref file="src/app/(trajectory-disk)/trajectory/page.tsx" */}
+{/* ref file="src/app/(trajectory-disk)/trajectory/page.tsx" hash="c173b7c05951" blob="9eb5e8658512" */}
 
 顶栏上只有三样：回文档、报病数、主题切换。搜索、设置、帮助、图例、日期竖轨与星轨盘内的「启动器」按钮都由
 组件自己放在容器四角——当前是哪张星轨盘是组件的状态、切换时要同步写 URL，住在一处才不必把整个星轨盘的状态提到页面上。
@@ -157,12 +157,12 @@ fumadocs 自己的管线出的 md。
 `src/components/mdx.tsx` 那半给站。站这一侧的名单正本是 `registry.ts`，它的类型保证 React 表一个不多
 一个不少：
 
-{/* ref file="src/components/registry.ts" lines="9-10" */}
+{/* ref file="src/components/registry.ts" lines="9-10" hash="0e9c4d177636" blob="60b1d1a064c2" */}
 
 React 表先展开 fumadocs 的默认表（标题栏、复制按钮都是它的），再把 `pre` 换成包里那个会画状态点的
 `DocfirstPre`：
 
-{/* ref file="src/components/mdx.tsx" lines="24-41" */}
+{/* ref file="src/components/mdx.tsx" lines="24-41" hash="e2c057e9154e" blob="f239eb35beff" */}
 
 目录树引用注入的是 fumadocs 自己的 `Files` / `Folder` / `File`，两张表里都要有它们，转成机读文本的规则在包的
 默认名册里已经有了。`Term` 是构建时的术语标注生成的，源文件里一般没有，但编译出来的 JSX 会引它，两张表也
@@ -172,16 +172,16 @@ React 表先展开 fumadocs 的默认表（标题栏、复制按钮都是它的�
 
 状态点、术语标注、星轨盘的样式都随包发，站里各引一行：
 
-{/* ref file="src/app/global.css" lines="4-9" */}
+{/* ref file="src/app/global.css" lines="4-9" hash="3128a24bb514" blob="b3fab7eda778" */}
 
 整页的外层布局（一条顶栏、星轨盘占满剩下的高度）是站自己的几行 CSS，不进包里——顶栏是页面的事，星轨盘上的 HUD
 才归包：
 
-{/* ref file="src/app/global.css" lines="15-47" */}
+{/* ref file="src/app/global.css" lines="15-47" hash="4c78f6dba238" blob="b3fab7eda778" */}
 
 ## 七、next.config.mjs：外置边界与 turbopack.root
 
-{/* ref file="next.config.mjs" lines="7-28" */}
+{/* ref file="next.config.mjs" lines="7-28" hash="f4f5ef0d3ed0" blob="2b911bebe3fe" */}
 
 **`turbopack.root` 设到工作区根。**这个站的包从同一个 pnpm 工作区拿，`node_modules` 里是指向站外的
 软链；Turbopack 只认它 root 以内的文件，root 不设到工作区根，`packages/` 就不在它能读的范围里。用发布版包的项目不必管这条；

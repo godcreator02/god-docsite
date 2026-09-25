@@ -11,33 +11,33 @@ description: 往一个已经铺好的 fumadocs 骨架上接 docfirst：唯一那
 
 **在一个已经铺好的 fumadocs 骨架上加 docfirst 的六区。** 装上去的是：六个集合、六条路由、侧栏六个根节、`docfirst.config.mjs`、mdx 接线、投影块与术语组件、名册脚本、构建配置里那条不许外置的账、各区的骨架页，外加往站的 `package.json` 里补依赖与几条 doc 脚本。
 
-{/* ref file="../packages/gwb-docfirst-workflow/src/attach.ts" lines="1-7" */}
+{/* ref file="../packages/gwb-docfirst-workflow/src/attach.ts" lines="1-7" hash="00804a97a8bc" blob="edf879510973" */}
 
 **这摊代码住在工作台插件 `@godcreator/gwb-docfirst-workflow` 里，不住在这两个 npm 包里。** 判据是「这件事要在**哪儿**发生」：核对 / 确认 / 渲染要在**仓**里发生（门禁跑、站构建跑），所以归包；装六区只在 **agent** 手上发生一次，从头到尾不碰判定引擎、不碰比较器、不碰记录簿，连 `docfirst.config.mjs` 都不读——**它是铺模板不是判定**，所以归插件。
 
-{/* ref file="../packages/gwb-docfirst-workflow/src/attach.ts" lines="9-13" */}
+{/* ref file="../packages/gwb-docfirst-workflow/src/attach.ts" lines="9-13" hash="db1efd04aad0" blob="edf879510973" */}
 
 这条判据怎么推出来的，见[包给仓，插件给人](/trajectory/2026-09-10-package-serves-repo-plugin-serves-agent)。
 
 **骨架那半不在这一层**。「铺一个标准 fumadocs 骨架」是「谁装了 fumadocs 谁就该有」的能力，归工作台的站点插件（`@godcreator/gwb-docs-site` 的 `docs-site.create`）。所以装配的模板里 `package.json` / `tsconfig` / `postcss` / `pnpm-workspace` / `.npmrc` 五份配置一份都没有——留一份进去，装配就会把站点插件一分钟前铺的那份盖掉，两家各出一份同名配置，谁赢看谁后跑。这条有测试守着：
 
-{/* ref file="../packages/gwb-docfirst-workflow/tests/attach.test.ts" lines="109-113" */}
+{/* ref file="../packages/gwb-docfirst-workflow/tests/attach.test.ts" lines="109-113" hash="60f217bdc2e2" blob="d5f43a255d77" */}
 
 端口同理不挑：骨架的 `next dev -p` 里写着几就是几，装配只把它认出来、写进正文、报给人看。
 
 装一次要的输入只有一个站目录，剩下两样都可以不给：
 
-{/* ref file="../packages/gwb-docfirst-workflow/src/attach.ts" lines="44-52" */}
+{/* ref file="../packages/gwb-docfirst-workflow/src/attach.ts" lines="44-52" hash="fa358befdfdf" blob="edf879510973" */}
 
 ## 不知道什么
 
 **那两个包一个字都不认识。** 装配这几份源码只 import `node:fs` / `node:path` / `node:url` 三个内建模块，判定、环境、格式实现、命令行一个不认识，第三方包一个不 import。它得能被插件在进程内直接调、不拖进整套判定，所以这条是硬的：
 
-{/* ref file="../packages/gwb-docfirst-workflow/src/attach.ts" lines="32-37" */}
+{/* ref file="../packages/gwb-docfirst-workflow/src/attach.ts" lines="32-37" hash="2bda42c65294" blob="edf879510973" */}
 
 守它的是插件自己的产物守卫——`package.json` 的三档依赖面加 `src/` 下每一行 import，哪一档出现 `@godcreator/docfirst-workflow` 都红：
 
-{/* ref file="../packages/gwb-docfirst-workflow/tests/artifact.test.ts" lines="107-122" */}
+{/* ref file="../packages/gwb-docfirst-workflow/tests/artifact.test.ts" lines="107-122" hash="bdb565dcda17" blob="b805bc028869" */}
 
 <Note>
   插件与包是两个独立发布的包，可 npm 拦不住「顺手把包写回 devDependencies」这一手。写回去，插件就攥着 home 里一条解析出来、当场定死的真实路径，包升级之后照读旧文件、零报错——那条守卫是唯一的门。
@@ -51,35 +51,35 @@ description: 往一个已经铺好的 fumadocs 骨架上接 docfirst：唯一那
 
 **不装依赖、不跑构建。** 只写文件；装、渲、核对三步都得人或 agent 自己 `cd` 到那个仓里跑，回执里那几条话就是清单：
 
-{/* ref file="../packages/gwb-docfirst-workflow/src/index.ts" lines="62-71" */}
+{/* ref file="../packages/gwb-docfirst-workflow/src/index.ts" lines="62-71" hash="33a26192fabe" blob="50f87bd2ef2c" */}
 
 ## 数据结构
 
 面上的形状只有一样：**算完但还没碰盘的一套装配**。
 
-{/* ref file="../packages/gwb-docfirst-workflow/src/attach.ts" lines="54-70" */}
+{/* ref file="../packages/gwb-docfirst-workflow/src/attach.ts" lines="54-70" hash="1f57af773eb1" blob="edf879510973" */}
 
 `files` 里每一项是「相对站目录的路径 + 正文」，`.tpl` 后缀在算这一步就已经脱掉；合并完的 `package.json` 也在 `files` 里（落盘只走一条路），另外单独拎出来一份给调用方看。`superseded` 是骨架里要让位、装配会删掉的；`overwrites` 只是报，一个字不动。
 
 目标站那一头看出来的事实是另一份形状，只在模块内部流转：
 
-{/* ref file="../packages/gwb-docfirst-workflow/src/skeleton.ts" lines="36-50" */}
+{/* ref file="../packages/gwb-docfirst-workflow/src/skeleton.ts" lines="36-50" hash="bd453e1561f2" blob="14520fc36b91" */}
 
 模板那一头是一张占位符表，认不出的占位符当场抛：
 
-{/* ref file="../packages/gwb-docfirst-workflow/src/template.ts" lines="32-44" */}
+{/* ref file="../packages/gwb-docfirst-workflow/src/template.ts" lines="32-44" hash="415a1d4fa99e" blob="a4ea759fd7b9" */}
 
 模板本身是插件里带的一整套 `.tpl`，六区的形状就摆在目录里：
 
-{/* tree dir="../packages/gwb-docfirst-workflow/template/attach" depth="2" */}
+{/* tree dir="../packages/gwb-docfirst-workflow/template/attach" depth="2" hash="a4d5cf45a7c3" */}
 
 **反馈区两页分工**：`inbox` 收别的仓投来的意见（一条一节、带日期与来源、处理完删），`hatch` 只装本仓自己的重复操作候选。跨仓反馈投的是目标仓自己站的 `inbox`，收件页统一叫这个名字，模板里没有 `inbound`。
 
-{/* ref file="../packages/gwb-docfirst-workflow/tests/attach.test.ts" lines="115-119" */}
+{/* ref file="../packages/gwb-docfirst-workflow/tests/attach.test.ts" lines="115-119" hash="492d3f12c7bb" blob="d5f43a255d77" */}
 
 `.tpl` 后缀是故意的：带着它躺在包里，才不会被别的工具当成真配置去解析。模板的位置**写死一层** `../template/attach/`——源码态 `src/template.ts` 与产物态 `dist/template.js` 都在包根下一层，是同一个相对位置：
 
-{/* ref file="../packages/gwb-docfirst-workflow/src/template.ts" lines="15-24" */}
+{/* ref file="../packages/gwb-docfirst-workflow/src/template.ts" lines="15-24" hash="21998107a468" blob="a4ea759fd7b9" */}
 
 模板从不进 `dist/`，它原地躺在包根，靠 `package.json` 的 `files` 发出去。站点插件带它那份骨架模板用的是同一套摆法——**两个插件各带各的模板，是有意的对称**。
 
@@ -89,23 +89,23 @@ description: 往一个已经铺好的 fumadocs 骨架上接 docfirst：唯一那
 
 **面上只有两个方法。** `planAttach` 算一套，一个字都不写盘：
 
-{/* ref file="../packages/gwb-docfirst-workflow/src/attach.ts" lines="78-103" */}
+{/* ref file="../packages/gwb-docfirst-workflow/src/attach.ts" lines="78-103" hash="df8c677e7dec" blob="edf879510973" */}
 
 `attachSite` 算完直接落，落盘那一步只剩写文件加删让位的那几个：
 
-{/* ref file="../packages/gwb-docfirst-workflow/src/attach.ts" lines="105-116" */}
+{/* ref file="../packages/gwb-docfirst-workflow/src/attach.ts" lines="105-116" hash="81b0a39b2dcf" blob="edf879510973" */}
 
 **算与写分开是刻意的**：占位符认不出是最可能的失败，而目录一旦开始写就没有干净的回滚点。所以验骨架、认名字、整套渲染、合 package.json 全排在碰盘之前。`planAttach` 把这个中间态直接交出去，于是「先看看会铺出什么、会占哪个口」不必先弄脏一个目录再回滚——**它是接口的一部分，不是实现细节**。
 
 调用方不必知道模板放在哪、占位符叫什么、`package.json` 怎么合。那份合并**只加不减**：
 
-{/* ref file="../packages/gwb-docfirst-workflow/src/manifest.ts" lines="20-30" */}
+{/* ref file="../packages/gwb-docfirst-workflow/src/manifest.ts" lines="20-30" hash="ca95d351d74c" blob="c6915b537556" */}
 
 骨架写的 name / version / dev / build / start 一个字不动（端口就钉在那几条脚本里），补的是这个站接了 docfirst 之后才有的东西：五条 doc 脚本进 `scripts`，两条 docfirst 依赖进 `devDependencies`（站构建 import 接线、门禁跑 check，都是开发期的事），外加一句描述。补进去的依赖表按名字排——散在原表中间的话，diff 就看不出加了什么。
 
 那张依赖表是**第二份真相**，手写、一律精确号：
 
-{/* ref file="../packages/gwb-docfirst-workflow/src/deps.ts" */}
+{/* ref file="../packages/gwb-docfirst-workflow/src/deps.ts" hash="a3bcd25e501f" blob="b48b7753672d" */}
 
 工作区里那份写的是 `workspace:*`，摆进别人的站里装不动；发布版那份又要等 pnpm 在发版那一刻改写。所以它只能手写，靠一条测试守着它跟工作区各包的版本对得上（见下节）。**这两个包名出现在这儿不算依赖**：它们是写进别人 `package.json` 的字符串，插件自己一行都不 import。
 
@@ -113,11 +113,11 @@ description: 往一个已经铺好的 fumadocs 骨架上接 docfirst：唯一那
 
 {/* has file="../packages/gwb-docfirst-workflow/src/index.ts" text="docfirst.attach" */}
 
-{/* ref file="../packages/gwb-docfirst-workflow/src/index.ts" lines="89-98" */}
+{/* ref file="../packages/gwb-docfirst-workflow/src/index.ts" lines="89-98" hash="792317e612a4" blob="50f87bd2ef2c" */}
 
 插件那头只留两样：**参数校验**与**回执组装**。`dir` 要给、要是绝对路径（插件跑在工作台主进程里，相对谁都不知道）、要是个目录——最后这条点得出「dir 给成仓目录了」这个最常犯的错；「是不是刚铺好的骨架」一概归装配那道门判，它抛的那句话原样进 `{ ok: false, error }`，那些错误文本本身就是文档。
 
-{/* ref file="../packages/gwb-docfirst-workflow/src/index.ts" lines="36-54" */}
+{/* ref file="../packages/gwb-docfirst-workflow/src/index.ts" lines="36-54" hash="d5f54a4e121a" blob="50f87bd2ef2c" */}
 
 装配的逻辑一行都不许回流到命令层——这一层得能被别的程序直接调，不必经总线。
 
@@ -135,53 +135,53 @@ description: 往一个已经铺好的 fumadocs 骨架上接 docfirst：唯一那
 
 **整个装配唯一的那道门**是目标站这一头的检查，不合规当场抛：
 
-{/* ref file="../packages/gwb-docfirst-workflow/src/skeleton.ts" lines="95-118" */}
+{/* ref file="../packages/gwb-docfirst-workflow/src/skeleton.ts" lines="95-118" hash="db9452686b1d" blob="14520fc36b91" */}
 
 站不在、不是目录、不是 fumadocs 骨架（`package.json` 的依赖里没有 `fumadocs-core` / `-mdx` / `-ui` 任一）、已经有 `docfirst.config.mjs`、`content/` 下有骨架之外的内容——这几条挡在前头，**放行之后整套覆盖就是安全的，因为中间没人改过文件**。给一个跑了半年的站加 docfirst 报一句「这个站已有内容，请人工接线」，比自作聪明地 AST 改写安全得多。
 
 判据本身是几张常量表，改约定就改这几行：
 
-{/* ref file="../packages/gwb-docfirst-workflow/src/skeleton.ts" lines="11-27" */}
+{/* ref file="../packages/gwb-docfirst-workflow/src/skeleton.ts" lines="11-27" hash="0e4f7fcdfce8" blob="14520fc36b91" */}
 
 端口**按脚本内容认，不按目录名认**——站不一定叫 `docs-site`，认的是 `next dev -p <端口>` / `next start -p <端口>`；认不出退 next 自己的默认端口：
 
-{/* ref file="../packages/gwb-docfirst-workflow/src/skeleton.ts" lines="66-74" */}
+{/* ref file="../packages/gwb-docfirst-workflow/src/skeleton.ts" lines="66-74" hash="2db005415f08" blob="14520fc36b91" */}
 
 名字能从仓根 `package.json` 认出来就别让人再敲一遍，`title` 给了就用给的，都没有退仓的目录名：
 
-{/* ref file="../packages/gwb-docfirst-workflow/src/values.ts" lines="9-25" */}
+{/* ref file="../packages/gwb-docfirst-workflow/src/values.ts" lines="9-25" hash="5edee4df9b04" blob="bc38276c6abc" */}
 
 起手页的第一条引用是**现找的**：仓根 `src/index.ts` 里有 `export const name` 就钉那一行，行号数出来、不写死；找不到就不钉，改成写一段「第一条引用怎么钉」，样例记号塞进围栏里（围栏内容是 `code` 节点，check 认不出它）：
 
-{/* ref file="../packages/gwb-docfirst-workflow/src/values.ts" lines="27-59" */}
+{/* ref file="../packages/gwb-docfirst-workflow/src/values.ts" lines="27-59" hash="cc1a2f6041e9" blob="bc38276c6abc" */}
 
 硬塞一条钉不住的引用，等于让刚接好线的站开局就报一条红的。
 
 整套模板在内存里渲染完，认不出的占位符当场抛——留一个 `{{typo}}` 在生成的站里，没人知道它本来该是什么：
 
-{/* ref file="../packages/gwb-docfirst-workflow/src/template.ts" lines="60-66" */}
+{/* ref file="../packages/gwb-docfirst-workflow/src/template.ts" lines="60-66" hash="72f977543aef" blob="a4ea759fd7b9" */}
 
 装出来的 `docfirst.config.mjs` 预置了六区里进 check 的那两区、卡目录与两条 outputs 映射：
 
-{/* ref file="../packages/gwb-docfirst-workflow/template/attach/docfirst.config.mjs.tpl" lines="17-25" */}
+{/* ref file="../packages/gwb-docfirst-workflow/template/attach/docfirst.config.mjs.tpl" lines="17-25" hash="e84f12979e6a" blob="9600d4796c55" */}
 
 站接线那一份预置的是六个集合加全局 mdxOptions，只有 docs 与 outputs 开 processed markdown：
 
-{/* ref file="../packages/gwb-docfirst-workflow/template/attach/source.config.ts.tpl" lines="49-63" */}
+{/* ref file="../packages/gwb-docfirst-workflow/template/attach/source.config.ts.tpl" lines="49-63" hash="e84962be8916" blob="6e41bfb05da9" */}
 
 ## 怎么单独测
 
 账全在插件包里，用 **vitest**（插件跟 devkit 建出来的骨架一致，`pnpm check` 一趟带类型、lint 与测试），一个文件把模板、算、落三摊全兜住：
 
-{/* ref file="../packages/gwb-docfirst-workflow/tests/attach.test.ts" lines="9-18" */}
+{/* ref file="../packages/gwb-docfirst-workflow/tests/attach.test.ts" lines="9-18" hash="085e906c633c" blob="d5f43a255d77" */}
 
 假的是**一个刚被站件铺好的骨架**：临时目录里造 `<仓>/docs-site`，写一份最小的骨架 `package.json`（带 `fumadocs-core` 与 `next dev -p`）、`content/docs/` 那两样、一份骨架自己的 `src/app/docs/layout.tsx`，仓根按用例可选地放几个文件。
 
-{/* ref file="../packages/gwb-docfirst-workflow/tests/attach.test.ts" lines="43-60" */}
+{/* ref file="../packages/gwb-docfirst-workflow/tests/attach.test.ts" lines="43-60" hash="5bce5b1dbcc7" blob="d5f43a255d77" */}
 
 **全部跨面上那两个方法测，一个内部函数都不用点名。** `planAttach` 那半证明的是：算完盘上什么都没有、`.tpl` 后缀在计划里就脱掉了；端口从骨架的脚本里认、认不出退默认；`package.json` 只加不减（骨架的 name / 依赖 / build 脚本原样，doc 脚本与依赖表补上）；名字三条退路；起手页钉块两种形态、行号是数出来的；模板换成一份自带的小模板验占位符抛。拒的理由各说各的那一条单独一测：
 
-{/* ref file="../packages/gwb-docfirst-workflow/tests/attach.test.ts" lines="206-214" */}
+{/* ref file="../packages/gwb-docfirst-workflow/tests/attach.test.ts" lines="206-214" hash="9f1cabe601d0" blob="d5f43a255d77" */}
 
 模板本身另有一组不进临时目录的账：读得出来、后缀脱得掉、整套渲完不留占位符、骨架那半一份都不在、反馈区是 inbox 与 hatch 两页。
 
@@ -189,17 +189,17 @@ description: 往一个已经铺好的 fumadocs 骨架上接 docfirst：唯一那
 
 依赖表那条**跨两份真相的账**跟它们同一个文件里跑——表里写的不是精确号、或发版抬版本号忘了抬它，这条红：
 
-{/* ref file="../packages/gwb-docfirst-workflow/tests/attach.test.ts" lines="302-309" */}
+{/* ref file="../packages/gwb-docfirst-workflow/tests/attach.test.ts" lines="302-309" hash="9abaf79432ae" blob="d5f43a255d77" */}
 
 命令那一头没有自己的测试文件：它只有参数校验与回执组装，钉着它的是插件的产物守卫——**命令名是公共面**，总线上只剩装六区这一条，改名就是破约：
 
-{/* ref file="../packages/gwb-docfirst-workflow/tests/artifact.test.ts" lines="59-71" */}
+{/* ref file="../packages/gwb-docfirst-workflow/tests/artifact.test.ts" lines="59-71" hash="04641c0baec8" blob="b805bc028869" */}
 
 ## 代码地图
 
 **在哪**：
 
-{/* tree dir="../packages/gwb-docfirst-workflow/src" depth="1" */}
+{/* tree dir="../packages/gwb-docfirst-workflow/src" depth="1" hash="1665fb13e787" */}
 
 插件的 `src/` 是**平的一层**，没有子目录——`tsconfig.build.json` 的 `include` 只写 `src/*.ts`，产物于是也是平的，`../template/attach/` 那条写死一层的路才在源码态与产物态是同一个位置。树里那份 `index.ts` 不属于这一层：它是插件本身，管命令注册与说明书目录。
 

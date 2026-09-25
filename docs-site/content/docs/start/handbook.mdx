@@ -24,7 +24,7 @@ description: 拿判定层当对象，把行段、整文件、目录树、存在�
 
 ## 这个包
 
-{/* tree dir="../packages/docfirst-workflow/src" depth="1" */}
+{/* tree dir="../packages/docfirst-workflow/src" depth="1" hash="a62b25f0a302" */}
 
 `dist/` 在 `.gitignore` 里，清单里看不到——目录树按 .gitignore 过滤。
 
@@ -32,7 +32,7 @@ description: 拿判定层当对象，把行段、整文件、目录树、存在�
 
 **读者看到的**
 
-{/* tree dir="../packages/docfirst-workflow/src/engine" depth="1" */}
+{/* tree dir="../packages/docfirst-workflow/src/engine" depth="1" hash="25e5e768e1f5" */}
 
 一个文件一件事：`types` 是接口正本，`marker` 是记号语法，`span` 管归一化与哈希，`diff` 管行段映射与 LCS diff，
 `hash-comparator` 是 hash 那条记忆，`kinds` 是目录树 / 存在性 / 名字三个比较器，`service` 是编排，
@@ -51,7 +51,7 @@ description: 拿判定层当对象，把行段、整文件、目录树、存在�
 
 **读者看到的**
 
-{/* ref file="../packages/docfirst-workflow/tsdown.config.ts" */}
+{/* ref file="../packages/docfirst-workflow/tsdown.config.ts" hash="a72163521fb8" blob="e07d81e4ee6c" */}
 
 整份就这么多：五个入口、只出 esm、平台是 node、出 dts、每次清干净，外加一条「宿主只 import
 不内联」。这个包的构建面小到能一眼看完，这句话本身就是论断——它一旦变长，就说明包里开始有
@@ -82,7 +82,7 @@ description: 拿判定层当对象，把行段、整文件、目录树、存在�
 「站展示什么就哈希什么」这条规矩落在这一对上：展示前做的归一化，就是哈希前做的那一份。
 哈希本身先归一化再摘要，不是直接摘原文：
 
-{/* ref file="../packages/docfirst-workflow/src/engine/span.ts" lines="23-25" */}
+{/* ref file="../packages/docfirst-workflow/src/engine/span.ts" lines="23-25" hash="98917fb71245" blob="5ea56b31537b" */}
 
 所以行尾多几个空格、换行从 CRLF 变成 LF，段哈希都不动——站上看不见的差别，记忆里也不该算差别。
 
@@ -117,7 +117,7 @@ description: 拿判定层当对象，把行段、整文件、目录树、存在�
 
 **读者看到的**
 
-{/* absent path="../packages/docfirst-workflow/src/engine/git.ts" */}
+{/* absent path="../packages/docfirst-workflow/src/engine/git.ts" type="absent" */}
 
 git 那条记忆住在环境层（`packages/docfirst-workflow/src/host/git.ts`），判定层里没有它。判定层只用
 `node:crypto`、不起子进程、不认识任何一个具体的记忆实现——比较器是注入进来的，不是它自己去找的。

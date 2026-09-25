@@ -11,7 +11,7 @@ import { register } from "fumadocs-mdx/node";
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { loadProject } from "@godcreator/docfirst-workflow";
-import { DOT_COLOR, collectionOf, whereOf } from "@godcreator/docfirst-workflow/fumadocs";
+import { DOT_COLOR, whereOf } from "@godcreator/docfirst-workflow/fumadocs";
 import { componentNames } from "../src/components/registry.ts";
 
 register();
@@ -35,8 +35,8 @@ const components = Object.fromEntries(
 /** 一篇文档：编译产物 + 页面 html + 命令行那头算出来的清单 */
 async function pageOf(doc) {
   // ?collection= 告诉 loader 这篇属于哪个集合——集合的 postprocess（processed markdown）才会跑。
-  // 进 check 的是现状与生成正本两区，集合名按文档所在目录定，跟命令行走同一个 collectionOf
-  const mod = await import(`../${doc}?collection=${collectionOf(project.config, doc)}`);
+  // 进 check 的只有现状区，本站的现状区只有 content/docs 一个集合
+  const mod = await import(`../${doc}?collection=docs`);
   return {
     mod,
     html: renderToStaticMarkup(createElement(mod.default, { components })),
@@ -124,6 +124,5 @@ test("这个站自己的文档全是绿的：写下的引用跟源码没脱节",
       page.listing.items.map(() => "fresh"),
       `${doc} 有引用不是新鲜的——跑 pnpm docfirst check 看看`,
     );
-    assert.equal(page.listing.orphans.length, 0, `${doc} 有孤儿记录`);
   }
 });

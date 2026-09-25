@@ -13,13 +13,13 @@ description: 记忆是那个仓 HEAD 的 blob；文件在哪个仓按它自己�
 确认一处引用时，记下来的是四样：`HEAD:<文件>` 的 **blob 哈希**、当时的 commit、行段、段哈希。
 代码内容一个字都不进记录簿——它本来就在 git 的对象库里，blob 被提交树引着，不会被 gc 回收。
 
-{/* ref file="../packages/docfirst-workflow/src/host/git.ts" lines="106-123" */}
+{/* ref file="../packages/docfirst-workflow/src/host/git.ts" lines="106-123" hash="a6086802664d" blob="cdee3cab5d19" */}
 
 要旧内容的时候（报黄给 diff、报红显示「文档写下时那段」），拿 blob 去 `cat-file --batch` 现取——
 「在不在对象库里」和「内容是什么」一次问到。blob 名按内容寻址，所以取到的内容在进程里记住，
 一次 check 里同一个 blob 只起一次 git：
 
-{/* ref file="../packages/docfirst-workflow/src/host/git.ts" lines="134-164" */}
+{/* ref file="../packages/docfirst-workflow/src/host/git.ts" lines="134-164" hash="593ed85a8fd4" blob="cdee3cab5d19" */}
 
 记录里**不记仓在哪**：blob 是内容寻址的，核对时从文件位置重新找仓就行。
 
@@ -28,7 +28,7 @@ description: 记忆是那个仓 HEAD 的 blob；文件在哪个仓按它自己�
 被引文件不限于项目自己的仓。另一个单元、上游 clone、工作区里别的仓，都能钉；所以「问哪个 git」
 不看项目根，看**被引文件在哪**：
 
-{/* ref file="../packages/docfirst-workflow/src/host/git.ts" lines="60-81" */}
+{/* ref file="../packages/docfirst-workflow/src/host/git.ts" lines="60-81" hash="0ac2f4371487" blob="cdee3cab5d19" */}
 
 两步：先取**真实路径**，再往上找第一个 `.git`。从哪儿起往上找，看目标是文件还是目录——文件从它
 所在的目录起（`locate`），目录从**它自己**起（`locateDir`）：目标目录很可能自己就是仓根
@@ -53,12 +53,12 @@ cwd 一律是那个仓的根——项目根是不是 git 子目录、被引文�
 
 `snapshot` 出记录之前逐道问：
 
-{/* ref file="../packages/docfirst-workflow/src/host/git-comparator.ts" lines="86-101" */}
+{/* ref file="../packages/docfirst-workflow/src/host/git-comparator.ts" lines="86-101" hash="80eaa7679e00" blob="4cc1fe291fa0" */}
 
 一页几十处引用往往钉的是同几个文件，所以一次确认里**每个文件最多问一次 git**：一句 `rev-parse HEAD HEAD:<路径>`
 同时拿到 commit 与 blob，按这次读到的那份文件内容记住。下一次确认会重新读出新的内容，记住的答案带不过去：
 
-{/* ref file="../packages/docfirst-workflow/src/host/git-comparator.ts" lines="38-52" */}
+{/* ref file="../packages/docfirst-workflow/src/host/git-comparator.ts" lines="38-52" hash="eb451891338e" blob="4cc1fe291fa0" */}
 
 <Tabs>
   <Tab title="在不在某个仓里">
@@ -86,7 +86,7 @@ cwd 一律是那个仓的根——项目根是不是 git 子目录、被引文�
 
 ## 变没变：hunk 表，不自己写 diff 算法
 
-{/* ref file="../packages/docfirst-workflow/src/host/git.ts" lines="218-253" */}
+{/* ref file="../packages/docfirst-workflow/src/host/git.ts" lines="218-253" hash="3d562116da9f" blob="cdee3cab5d19" */}
 
 四处讲究：
 
@@ -101,7 +101,7 @@ cwd 一律是那个仓的根——项目根是不是 git 子目录、被引文�
   没人会去重新确认，于是每次 check 都要为它 diff——这样的文件只增不减。键按内容寻址，同一对内容的 hunk 表
   永远不变，不用管失效，所有项目共用一份；盘上那份认不出就报错并说是哪个文件，不当没有：
 
-{/* ref file="../packages/docfirst-workflow/src/host/git.ts" lines="180-203" */}
+{/* ref file="../packages/docfirst-workflow/src/host/git.ts" lines="180-203" hash="82212f0963b8" blob="cdee3cab5d19" */}
 
 旧 blob 的内容照旧每次现取，不因为盘上有 hunk 表就省掉：省了的话，「blob 已经不在对象库」判不判红就要看这台
 机器上有没有那份缓存，同一个仓在两台机器上会判出不同结果。
@@ -110,14 +110,14 @@ cwd 一律是那个仓的根——项目根是不是 git 子目录、被引文�
 
 hunk 表进纯函数，旧行段映到今天。这个函数不认识 git，谁给的 hunk 表都行：
 
-{/* ref file="../packages/docfirst-workflow/src/engine/diff.ts" lines="33-42" */}
+{/* ref file="../packages/docfirst-workflow/src/engine/diff.ts" lines="33-42" hash="ba67192a0d6d" blob="d10ace078e81" */}
 
 三条判据：**没碰到就平移**（上面插了几行，段整体下移）；**碰到就取并集**（段内没动的行映过去，
 碰到段的 hunk 的新行也算进来）；**段内每一行都落在纯删除 hunk 里就是 vanished**。
 
 映完之后还要再比一次段哈希——这就是判定的入口：
 
-{/* ref file="../packages/docfirst-workflow/src/host/git-comparator.ts" lines="132-146" */}
+{/* ref file="../packages/docfirst-workflow/src/host/git-comparator.ts" lines="132-146" hash="ae21c216db93" blob="4cc1fe291fa0" */}
 
 <Note>
   **绿只认段哈希**。hunk 说「没碰到这段」也照样比一遍：行映射跟内容对不上时（记录被手改过之类），
@@ -138,7 +138,7 @@ hunk 表进纯函数，旧行段映到今天。这个函数不认识 git，谁�
 
 ## 归一化：站展示什么就哈希什么
 
-{/* ref file="../packages/docfirst-workflow/src/engine/span.ts" lines="13-25" */}
+{/* ref file="../packages/docfirst-workflow/src/engine/span.ts" lines="13-25" hash="58a6efcffcd8" blob="5ea56b31537b" */}
 
 只做三件事：换行统一成 LF、去每行行尾空白、去掉末尾的空行。**缩进保留、注释保留**——JSDoc 是契约的
 一部分，改了就该黄。
