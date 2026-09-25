@@ -16,6 +16,8 @@ export { createGitHistory } from "./history.ts";
 export { createUncommittedProbe } from "./uncommitted.ts";
 export type { UncommittedProbe } from "./uncommitted.ts";
 export { loadProject } from "./load.ts";
+export { migrateLedger } from "./migrate-ledger.ts";
+export type { MigrationReport } from "./migrate-ledger.ts";
 export type { Project, ProjectConfig } from "./load.ts";
 export { createPlacing } from "./placement.ts";
 export type { OutputTarget, PlacedCheck, PlacedStatus, PlacedWrite, Placement, Placing, PlacingHost } from "./placement.ts";
