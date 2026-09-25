@@ -21,10 +21,10 @@
  */
 import { mkdirSync, writeFileSync } from "node:fs";
 import { join, relative, sep } from "node:path";
-import { targetKey } from "../engine/index.ts";
+import { isRenderRefusal, targetKey } from "../engine/index.ts";
 import type { ConfirmStep, Format, Item, Listing } from "../engine/index.ts";
 import { createUncommittedProbe, loadProject } from "../host/index.ts";
-import type { UncommittedProbe } from "../host/index.ts";
+import type { PlacedWrite, UncommittedProbe } from "../host/index.ts";
 import { buildTrajectory, scanDir } from "@godcreator/docfirst-trajectory";
 import type { CardProblemReport, CheckReport, DocReport, OutputReport, RefReport } from "./report.ts";
 
@@ -107,7 +107,7 @@ export async function main(argv: string[]): Promise<number> {
 
   let red = 0;
   for (const doc of docs) {
-    red += await render(project, doc, project.read(doc), project.service.formatFor(doc)!);
+    red += render(project, doc, project.read(doc), project.service.formatFor(doc)!);
   }
   return red > 0 ? 1 : 0;
 }
@@ -138,7 +138,7 @@ async function confirmCommand(project: Project, docs: string[], rest: string[]):
   }
   let red = 0;
   for (const doc of pages) red += confirm(project, doc, accept);
-  red += await replaceOutputs(project, docs);
+  red += replaceOutputs(project, docs);
   return red > 0 ? 1 : 0;
 }
 
@@ -189,19 +189,26 @@ function confirmLine(doc: string, { item, action, written, problem }: ConfirmSte
   }
 }
 
-/** 把挂了 outputs 映射的文档重新摆一遍，内容变了的才写；返回红（源头部缺点名字段的落点） */
-async function replaceOutputs(project: Project, docs: string[]): Promise<number> {
+/** 把挂了 outputs 映射的文档重新摆一遍，内容变了的才写、才打一行；返回没摆成的落点数（红） */
+function replaceOutputs(project: Project, docs: string[]): number {
   let red = 0;
   for (const doc of docs) {
-    for (const { to, status, missing } of await project.placing.render(doc)) {
-      if (status === "placed") console.log(`→  ${doc}  重新摆放到 ${to}`);
-      if (status === "no-frontmatter") {
-        console.log(`🔴 ${doc} → ${to}  mdx 源的 frontmatter 里没有 ${(missing ?? []).join("、")}——补上再 confirm`);
+    for (const placed of project.placing.render(doc)) {
+      if (placed.status === "placed") console.log(`→  ${doc}  重新摆放到 ${placed.to}`);
+      if (placed.status === "no-frontmatter" || placed.status === "unrenderable") {
+        console.log(unplacedLine(doc, placed, "confirm"));
         red += 1;
       }
     }
   }
   return red;
+}
+
+/** 一个落点没摆成打的那一行：源头部缺点名的字段，或源里有渲染不了的东西；again 是改好之后再跑哪条命令 */
+function unplacedLine(doc: string, { to, status, missing, reason }: PlacedWrite | OutputReport, again: string): string {
+  const head = `🔴 ${doc} → ${to}`;
+  if (status === "no-frontmatter") return `${head}  mdx 源的 frontmatter 里没有 ${(missing ?? []).join("、")}——补上再 ${again}`;
+  return `${head}  正本渲染不了：${reason}——改好再 ${again}`;
 }
 
 /**
@@ -317,7 +324,7 @@ async function check(project: Project, doc: string, text: string, format: Format
   for (const { name, line } of components) {
     lines.push(`🔴 ${doc}  第 ${line} 行 <${name}>  名册外组件，docfirst.config.mjs 里没给它压平规则`);
   }
-  const outputs = await project.placing.check(doc, listing);
+  const outputs = project.placing.check(doc, listing);
   for (const output of outputs) lines.push(placedLine(doc, output));
   const red =
     items.filter((item) => item.status === "missing" || item.blocking === true).length +
@@ -329,25 +336,25 @@ async function check(project: Project, doc: string, text: string, format: Format
 /** 一个落点核对完打成的那一行：每种状态各一句人话，不新鲜的都红 */
 function placedLine(doc: string, output: OutputReport): string {
   const head = `${output.fresh ? "🟢" : "🔴"} ${doc} → ${output.to}`;
-  if (output.status === "no-frontmatter") return `${head}  mdx 源的 frontmatter 里没有 ${(output.missing ?? []).join("、")}——补上再 render`;
+  if (output.status === "no-frontmatter" || output.status === "unrenderable") return unplacedLine(doc, output, "render");
   if (output.status === "missing") return `${head}  生成物还不存在——render 摆过去`;
   if (output.status === "stale") return `${head}  生成物跟 mdx 源不一致（源改了没重摆，或有人直接改了生成物）——重跑 render`;
   return `${head}  生成物跟 mdx 源一致`;
 }
 
-async function render(project: Project, doc: string, text: string, format: Format): Promise<number> {
+function render(project: Project, doc: string, text: string, format: Format): number {
   // 挂了映射的文档只写落点：落点是纯生成物，内容变了才写；摆放的全过程归 project，这边只印结果
-  const placed = await project.placing.render(doc);
+  const placed = project.placing.render(doc);
   if (placed.length > 0) {
     let red = 0;
-    for (const { to, status, missing } of placed) {
-      if (status === "no-frontmatter") {
-        console.log(`🔴 ${doc} → ${to}  mdx 源的 frontmatter 里没有 ${(missing ?? []).join("、")}——补上再 render`);
+    for (const one of placed) {
+      if (one.status === "no-frontmatter" || one.status === "unrenderable") {
+        console.log(unplacedLine(doc, one, "render"));
         red += 1;
-      } else if (status === "placed") {
-        console.log(`→  ${doc}  摆放到 ${to}`);
+      } else if (one.status === "placed") {
+        console.log(`→  ${doc}  摆放到 ${one.to}`);
       } else {
-        console.log(`·  ${doc} → ${to}  没变`);
+        console.log(`·  ${doc} → ${one.to}  没变`);
       }
     }
     return red;
@@ -360,17 +367,18 @@ async function render(project: Project, doc: string, text: string, format: Forma
     );
     return 0;
   }
-  // 没挂映射的落 out/ 当调试产物。渲染函数接收文本和清单，外加项目上下文：
-  // 有自己管线的格式（fumadocs）用 root + doc 自己去编译
+  // 没挂映射的落 out/ 当调试产物；正本渲染不了就报成这篇的红，接着渲别的
   const outDir = join(project.root, project.config.out ?? "out");
-  mkdirSync(outDir, { recursive: true });
   const outName = `${doc.split("/").pop()}.ai.md`;
-  const out = await format.renderAi(text, project.service.resolve(doc, text), {
-    root: project.root,
-    doc,
-    roster: project.roster,
-    config: project.config as unknown as Record<string, unknown>,
-  });
+  let out: string;
+  try {
+    out = format.renderAi(text, project.service.resolve(doc, text));
+  } catch (err) {
+    if (!isRenderRefusal(err)) throw err;
+    console.log(`🔴 ${doc}  正本渲染不了：${err.message}`);
+    return 1;
+  }
+  mkdirSync(outDir, { recursive: true });
   writeFileSync(join(outDir, outName), out);
   console.log(`→  ${doc}  渲染成 ${project.config.out ?? "out"}/${outName}`);
   return 0;

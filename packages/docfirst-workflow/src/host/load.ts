@@ -28,8 +28,6 @@ export interface ProjectConfig {
    * 挂了映射的文档 render 只写目标，不落 out/
    */
   outputs?: Record<string, Array<string | OutputTarget>>;
-  /** fumadocs 格式的私货：集合名。一个字符串是全部文档同一个集合；按文档目录分就给一张表（文档目录 → 集合名） */
-  fumadocs?: { collection?: string | Record<string, string> };
   /** 轨迹卡目录，相对项目根；不配就不管轨迹（check 不跑卡校验、trajectory 子命令报错退出） */
   trajectory?: string;
 }
@@ -43,7 +41,7 @@ export interface Project {
   docsDirs: string[];
   /** 轨迹卡目录的绝对路径；`docfirst.config` 没配 `trajectory` 时为 null */
   trajectoryDir: string | null;
-  /** 摆放：render 摆一趟、check 只核对。渲成什么、跟盘上怎么比、四态怎么定，都在它背后 */
+  /** 摆放：render 摆一趟、check 只核对。渲成什么、跟盘上怎么比、落点状态怎么定，都在它背后 */
   placing: Placing;
   /** 文档目录下有格式认领的那些文档，相对项目根、正斜杠、排过序 */
   docs(): string[];
@@ -124,10 +122,7 @@ async function build(root: string): Promise<Project> {
   // 摆放模块认得的只有这几样，先攒齐再交给它——它拿不到装配的别的部分。
   // 后三样是真盘那份适配器：落点相对项目根，读写与建父目录都在这儿，摆放本身不碰 node:fs
   const placingHost: PlacingHost = {
-    root,
-    config,
     service,
-    roster: config.components,
     placements: (doc) => placements[doc] ?? [],
     read: (doc) => readFileSync(join(root, doc), "utf8"),
     readPlaced(to) {

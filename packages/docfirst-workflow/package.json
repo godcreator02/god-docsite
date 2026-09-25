@@ -45,15 +45,11 @@
   },
   "peerDependencies": {
     "fumadocs-core": ">=16",
-    "fumadocs-mdx": ">=15",
     "fumadocs-ui": ">=16",
     "react": ">=19"
   },
   "peerDependenciesMeta": {
     "fumadocs-core": {
-      "optional": true
-    },
-    "fumadocs-mdx": {
       "optional": true
     },
     "fumadocs-ui": {

@@ -259,14 +259,84 @@ test("清单里没有的标记：报到行，不静默漏掉", () => {
   assert.throws(() => applyListing(parseTree(`${mark(T)}\n`), listingOf([])), /第 1 行是引用标记，但清单里没有它/);
 });
 
-test("collectionOf：集合名默认是文档目录的最后一截，目录套目录取最长的；字符串一刀切；表按目录查；不在文档目录下退 docs", () => {
-  const { collectionOf } = fumadocs;
-  assert.equal(collectionOf(undefined, "docs/a.mdx"), "docs");
-  assert.equal(collectionOf({ docs: "content/docs" }, "content/docs/a.mdx"), "docs");
-  assert.equal(collectionOf({ docs: ["content/docs", "content/outputs"] }, "content/outputs/agents.mdx"), "outputs");
-  assert.equal(collectionOf({ docs: ["content", "content/outputs"] }, "content/outputs/agents.mdx"), "outputs");
-  assert.equal(collectionOf({ docs: ["content/docs"], fumadocs: { collection: "all" } }, "content/docs/a.mdx"), "all");
-  assert.equal(collectionOf({ docs: ["content/docs", "content/outputs"], fumadocs: { collection: { "content/outputs": "generated" } } }, "content/outputs/a.mdx"), "generated");
-  assert.equal(collectionOf({ docs: ["content/docs", "content/outputs"], fumadocs: { collection: { "content/outputs": "generated" } } }, "content/docs/a.mdx"), "docs");
-  assert.equal(collectionOf({ docs: "content/docs" }, "elsewhere/a.mdx"), "docs");
+/* ---------- 生成正本按原文渲染 ---------- */
+
+const RECORD = { kind: "content", hash: "3fa9c2e1b07d", blob: "2689fa073ac6" } as const;
+/** 一篇正本在清单里的样子：按 parse 认出的引用逐处配上给定的状态与当前内容 */
+function renderOf(text: string, over: (ref: Reference) => Over = () => ({})): string {
+  const items = fumadocs.parse(text).map((reference) => ({ ...itemOf({ reference, ...over(reference) }), reference }));
+  return fumadocs.renderAi(text, listingOf(items));
+}
+
+test("按原文渲染：去掉 frontmatter，正式记号换成带语言与 title 的代码块，别的文字逐字节不动", () => {
+  const prose = "开头一段，带 `代码` 和 **加粗**，还有 [链接](https://example.com)。\n\n| 表 | 头 |\n| --- | --- |\n| 1 | 2 |\n";
+  const text = `---\ntitle: x\n---\n\n# 标题\n\n${prose}\n${fumadocs.marker(T, RECORD)}\n\n尾巴 \\{ 原样 \\}\n`;
+  const out = renderOf(text);
+  assert.equal(out, `\n# 标题\n\n${prose}\n\`\`\`ts title="src/greet.ts:2-3"\n${CURRENT.join("\n")}\n\`\`\`\n\n尾巴 \\{ 原样 \\}\n`);
+});
+
+test("按原文渲染：行内代码后面紧跟以行内代码开头的加粗段，原样不变（不会把反引号转成 &#x60;）", () => {
+  const line = "改完跑 `pnpm doc` **`docfirst check` 要绿**，再提交。";
+  assert.equal(renderOf(`# x\n\n${line}\n`), `# x\n\n${line}\n`);
+});
+
+test("按原文渲染：行段标题写今天的位置；整文件标题是 路径:1-行数；目录树给名字表；存在性与名字整行去掉", () => {
+  const whole: Target = { kind: "file", file: "config.json" };
+  const tree: Target = { kind: "tree", dir: "src", depth: 1 };
+  const has: Target = { kind: "has", file: "src/store.ts", text: "save" };
+  const absent: Target = { kind: "exists", path: "src/remove.ts", absent: true };
+  const text = [fumadocs.marker(T, RECORD), "", fumadocs.marker(whole, RECORD), "", "中间", "", fumadocs.marker(has, { kind: "has" }), "", fumadocs.marker(absent, { kind: "exists", type: "absent" }), "", fumadocs.marker(tree, { kind: "tree", hash: RECORD.hash }), ""].join("\n");
+  const out = renderOf(text, (ref) => {
+    if (ref.target.kind === "file") return { lines: [1, 2], current: ["{", "}"] };
+    if (ref.target.kind === "tree") return { lines: [1, 2], current: ["a.ts", "lib/"] };
+    if (ref.target.kind === "span") return { lines: [7, 8] };
+    return { current: [] };
+  });
+  assert.equal(
+    out,
+    ['```ts title="src/greet.ts:7-8"', ...CURRENT, "```", "", '```json title="config.json:1-2"', "{", "}", "```", "", "中间", "", '```text title="src/"', "a.ts", "lib/", "```", ""].join("\n"),
+  );
+});
+
+test("按原文渲染：围栏里的记号是正文，原样不动；内容里有三个反引号时围栏加长", () => {
+  const fenced = `\`\`\`mdx\n${fumadocs.marker(T, RECORD)}\n\`\`\`\n`;
+  assert.equal(renderOf(fenced), fenced);
+  const out = renderOf(`${fumadocs.marker(T, RECORD)}\n`, () => ({ current: ["const s = \"```\";"] }));
+  assert.equal(out, '````ts title="src/greet.ts:2-3"\nconst s = "```";\n````\n');
+});
+
+test("按原文渲染：写在列表项里的记号，代码块的续行带上列表缩进", () => {
+  const out = renderOf(`- 一项：\n\n  ${fumadocs.marker(T, RECORD)}\n`);
+  assert.equal(out, `- 一项：\n\n  \`\`\`ts title="src/greet.ts:2-3"\n  ${CURRENT.join("\n  ")}\n  \`\`\`\n`);
+});
+
+test("按原文渲染：草稿记号、缺失的引用、组件、mdx 表达式、import 都渲染不了，一次列全、抛 RenderRefusal", () => {
+  const text = [
+    "import x from 'y';",
+    "",
+    "@@docfirst ref src/greet.ts:2-3 @@",
+    "",
+    fumadocs.marker({ kind: "span", file: "src/gone.ts", a: 1, b: 2 }, RECORD),
+    "",
+    "<Note>提示</Note>",
+    "",
+    "{1 + 1}",
+    "",
+    "{/* 普通注释 */}",
+    "",
+  ].join("\n");
+  assert.throws(
+    () => renderOf(text, (ref) => (ref.target.kind === "span" && ref.target.file === "src/gone.ts" ? { status: "missing", reason: "file-missing", current: null } : {})),
+    (err: Error) => {
+      assert.equal(err.name, "RenderRefusal");
+      for (const piece of ["第 1 行有 import / export", "第 3 行是草稿记号", "第 5 行的引用缺失（file-missing）", "第 7 行有组件 <Note>", "第 9 行有 mdx 表达式 {1 + 1}", "第 11 行有 mdx 表达式 {/* 普通注释 */}"]) {
+        assert.ok(err.message.includes(piece), `报错里该有「${piece}」：${err.message}`);
+      }
+      return true;
+    },
+  );
+});
+
+test("按原文渲染：CRLF 的正本按 LF 出", () => {
+  assert.equal(renderOf("# x\r\n\r\n正文\r\n"), "# x\n\n正文\n");
 });

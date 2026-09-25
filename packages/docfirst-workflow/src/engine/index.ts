@@ -6,7 +6,7 @@
  * 这一层不许 import `../host/` 与 `../fumadocs/`（`tests/boundary.test.ts` 守着）。
  */
 
-export { fileOf } from "./types.ts";
+export { fileOf, isRenderRefusal, RenderRefusal } from "./types.ts";
 export type {
   ContentRecord,
   ExistsRecord,
@@ -22,7 +22,6 @@ export type {
   MemoRecord,
   Reader,
   Reference,
-  RenderContext,
   Snapshot,
   Span,
   SpanTarget,

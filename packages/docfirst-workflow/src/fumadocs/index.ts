@@ -2,11 +2,11 @@
  * 格式实现加站接线：fumadocs 口味的 mdx。**包外的出口 `@godcreator/docfirst-workflow/fumadocs` 就是它**
  * ——站的 `source.config.ts` import 的正是这一份。
  *   ① 识别与写回：parse / write，判定层会调的；名册检查 lintComponents 给 check 用
- *   ② 渲染：renderAi 让 fumadocs 的 loader 出 md；人看那份就是站本身，命令行没有 human 渲染
- *   ③ 接线：docfirstMdxOptions 挂进 source.config，docfirstMarkdownOptions 挂进集合的 postprocess
+ *   ② 渲染：renderAi 把生成正本按原文渲染成 md（记号换成代码块）；人看那份就是站本身，命令行没有 human 渲染
+ *   ③ 接线：docfirstMdxOptions 挂进 source.config，docfirstMarkdownOptions 挂进集合的 postprocess（站上各页的机读版）
  * 名册：这里只有机制（stamp）和默认表（defaultRoster），项目在 docfirst.config.mjs 里声明自己的表。
  *
- * **fumadocs 这个名字只出现在这一层**：engine / host / site / cli 一个不碰它。`Format` 这条
+ * **fumadocs 这个名字只出现在这一层**：engine / host / cli 一个不碰它。`Format` 这条
  * 接缝留着不是为了「将来换个宿主」——它分离的是「怎么认记号」与「怎么判新鲜」两种变化原因，
  * 而且真有两个适配器：生产是这一份，测试是 `tests/fake-format.ts`。
  *
@@ -48,7 +48,7 @@ export function lintComponents(text: string, roster: unknown = defaultRoster): A
   return unknownComponents(parseTree(text), (roster ?? defaultRoster) as Roster);
 }
 
-export { collectionOf, parseTree, renderAi } from "./render.ts";
+export { parseTree, renderAi } from "./render.ts";
 export { remarkDocfirst } from "./remark-plugin.ts";
 export type { PluginFile, RemarkOptions } from "./remark-plugin.ts";
 export { draftIn, markerOf, recognize } from "./recognize.ts";

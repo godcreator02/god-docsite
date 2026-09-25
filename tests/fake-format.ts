@@ -9,7 +9,7 @@
  * 两个开关对上真格式的两种形态：`render` 是有 AI 渲染的那种（md 一类），
  * `final` 是「文档本身就是终态产物」的那种（html 一类）。
  */
-import { draftOf, fileOf, formalOf, parseFormal } from "../packages/docfirst-workflow/src/engine/index.ts";
+import { draftOf, fileOf, formalOf, parseFormal, RenderRefusal } from "../packages/docfirst-workflow/src/engine/index.ts";
 import type { Format, Listing, Reference, Target } from "../packages/docfirst-workflow/src/engine/index.ts";
 
 const MARK = /^REF\s+(.+)$/;
@@ -24,9 +24,11 @@ export interface FakeOptions {
   final?: boolean;
 }
 
-/** 记号行换成围栏。语言按被引文件的后缀认，目录树那种没有文件就写 text */
+/** 记号行换成围栏。语言按被引文件的后缀认，目录树那种没有文件就写 text。跟真格式一样：草稿记号渲染不了 */
 function renderAi(text: string, listing: Listing): string {
   const lines = text.split("\n");
+  const drafts = listing.items.filter((item) => item.reference.extra?.draft === true);
+  if (drafts.length > 0) throw new RenderRefusal(drafts.map((item) => `第 ${item.reference.at + 1} 行是草稿记号，先 docfirst confirm`).join("；"));
   for (const item of listing.items) {
     const file = fileOf(item.reference.target);
     const lang = file !== null && file.endsWith(".ts") ? "ts" : "text";

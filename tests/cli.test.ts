@@ -141,6 +141,18 @@ test("render：有 renderAi 的格式出 ai 那份剥掉记号；终态格式说
   }
 });
 
+test("render：正本里还有草稿记号就渲染不了，报红退 1，别的文档照渲", async () => {
+  const p = setupProject();
+  try {
+    const rendered = await p.cli("render");
+    assert.equal(rendered.code, 1);
+    assert.match(rendered.out, /🔴 docs\/a\.md {2}正本渲染不了：第 3 行是草稿记号，先 docfirst confirm/);
+    assert.match(rendered.out, /· {2}docs\/b\.html {2}fake-html 的产物就是文档本身/);
+  } finally {
+    p.teardown();
+  }
+});
+
 test("五类引用一篇文档：五种记号各自认得回来；多了文件黄、断言不在的出现了红", async () => {
   const p = setupProject();
   try {

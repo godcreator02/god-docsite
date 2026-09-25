@@ -17,7 +17,7 @@ interface JsonReport {
     red: number;
     items: Array<{ target: string; kind: string; status: string; line: number; lines: [number, number]; draft: boolean; reason?: string; diff?: string; blocking?: true }>;
     components: Array<{ name: string; line: number }>;
-    outputs: Array<{ to: string; status: string; fresh: boolean }>;
+    outputs: Array<{ to: string; status: string; fresh: boolean; reason?: string }>;
   }>;
   trajectory: Array<{ path: string; field: string; value: string; reason: string }>;
 }
@@ -105,15 +105,15 @@ test("check --json：整份报告一行 JSON，退出码跟人读模式一样；
   );
   try {
     const white = await p.cli("check", "--json");
-    assert.equal(white.code, 1, "outputs 还没摆是红，退出码跟人读模式一样");
+    assert.equal(white.code, 1, "正本还有草稿记号、渲染不了，落点是红，退出码跟人读模式一样");
     assert.equal(white.out.split("\n").length, 1, "一行 JSON，别的什么都不打");
     const first = JSON.parse(white.out) as JsonReport;
-    // outputs 还没摆：红，ok 假；引用本身是未确认
+    // 草稿记号渲染不了：落点红，ok 假；引用本身是未确认
     assert.equal(first.ok, false);
     assert.equal(first.red, 1);
     const a = first.docs.find((d) => d.doc === "docs/a.md")!;
     assert.deepEqual(a.items, [{ target: "src/greet.ts:2-3", kind: "span", status: "unconfirmed", line: 3, lines: [2, 3], draft: true }]);
-    assert.deepEqual(a.outputs, [{ to: "README.md", status: "missing", fresh: false }]);
+    assert.deepEqual(a.outputs, [{ to: "README.md", status: "unrenderable", fresh: false, reason: "第 3 行是草稿记号，先 docfirst confirm" }]);
     assert.deepEqual(first.trajectory, []);
 
     await p.cli("confirm");

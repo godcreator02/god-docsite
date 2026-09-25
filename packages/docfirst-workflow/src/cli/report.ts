@@ -22,7 +22,8 @@
  *         "outputs": [             // 挂了 outputs 映射的才有；形状归 project 的摆放模块定
  *           { "to": "../README.md", "status": "fresh", "fresh": true },   // 状态：fresh / missing（生成物还不在）/
  *           { "to": "../x/SKILL.md", "status": "no-frontmatter", "fresh": false, "missing": ["description"] }
- *         ]                       // stale（跟源不一致）/ no-frontmatter（源头部缺点名的字段）；fresh 是判定结果
+ *         ]                       // stale（跟源不一致）/ no-frontmatter（源头部缺点名的字段）/
+ *                                 // unrenderable（源渲染不了，原因在 reason）；fresh 是判定结果
  *       }
  *     ],
  *     "trajectory": [              // 轨迹卡校验的病，每条一病

@@ -12,6 +12,7 @@
  * 摆出去的和守着的是**同一段正文**——两条路走的是同一个 `bodyOf`，所以摆完必然是新鲜的。
  */
 import { isAbsolute, relative, resolve, sep } from "node:path";
+import { isRenderRefusal } from "../engine/index.ts";
 import type { Format, Listing, Service } from "../engine/index.ts";
 import type { ProjectConfig } from "./load.ts";
 
@@ -28,8 +29,11 @@ export interface Placement {
   frontmatter: string[];
 }
 
-/** 一个落点核对完的状态：fresh 生成物跟源一致；missing 生成物还不在；stale 跟源不一致；no-frontmatter 源头部缺点名的字段 */
-export type PlacedStatus = "fresh" | "missing" | "stale" | "no-frontmatter";
+/**
+ * 一个落点核对完的状态：fresh 生成物跟源一致；missing 生成物还不在；stale 跟源不一致；
+ * no-frontmatter 源头部缺点名的字段；unrenderable 源里有渲染不了的东西（草稿记号、缺失的引用、组件、mdx 表达式）
+ */
+export type PlacedStatus = "fresh" | "missing" | "stale" | "no-frontmatter" | "unrenderable";
 
 /** 一个落点核对完的样子 */
 export interface PlacedCheck {
@@ -39,16 +43,19 @@ export interface PlacedCheck {
   fresh: boolean;
   /** no-frontmatter 时缺哪几个字段 */
   missing?: string[];
+  /** unrenderable 时格式说的原因 */
+  reason?: string;
 }
 
 /**
  * 摆一个落点的结果：placed 写了（内容有变）；unchanged 落点上已经是这一份，没写；
- * no-frontmatter 源头部缺 `missing` 里那几个字段，没写
+ * no-frontmatter 源头部缺 `missing` 里那几个字段、unrenderable 源渲染不了（原因在 `reason`），这两种都没写
  */
 export interface PlacedWrite {
   to: string;
-  status: "placed" | "unchanged" | "no-frontmatter";
+  status: "placed" | "unchanged" | "no-frontmatter" | "unrenderable";
   missing?: string[];
+  reason?: string;
 }
 
 /** 摆放这件事的全部对外接口 */
@@ -58,24 +65,21 @@ export interface Placing {
    * 缺字段的落点不写（摆一份缺 name 的 SKILL.md 比不摆更糟）。
    * 没挂落点、格式不出 ai 产物，回空清单——那是「这篇没有摆放这回事」，不是错。
    */
-  render(doc: string): Promise<PlacedWrite[]>;
+  render(doc: string): PlacedWrite[];
   /**
    * 这一篇的落点核对一次，只读不写：回每个落点的状态与缺哪些 frontmatter 字段。
    * 调用方手上已经有这一篇的清单（check 刚判过）就传进来，不再判一遍
    */
-  check(doc: string, listing?: Listing): Promise<PlacedCheck[]>;
+  check(doc: string, listing?: Listing): PlacedCheck[];
 }
 
 /**
- * 摆放依赖的外部接口。前半是项目面（根、配置、判定服务、组件名册、这篇挂了哪些落点、这篇的原文），
+ * 摆放依赖的外部接口。前半是项目面（判定服务、这篇挂了哪些落点、这篇的原文），
  * 装配时把装好的项目递进来；后半是**生成物的存放**——摆放不知道落点是文件还是别的什么，
  * 生产给的是真盘那份，测试给的是内存那份。
  */
 export interface PlacingHost {
-  root: string;
-  config: ProjectConfig;
   service: Service;
-  roster: Record<string, unknown> | undefined;
   placements(doc: string): Placement[];
   /** mdx 正本的原文 */
   read(doc: string): string;
@@ -85,13 +89,9 @@ export interface PlacingHost {
   writePlaced(to: string, text: string): void;
 }
 
-/** fumadocs 给站上 .md 路由的标题加的锚记（`# 标题 [#锚]`），摆放产物不要 */
-const ANCHOR = /^(#{1,6} .+) \[#[^\]]*\]$/gm;
-/** 序列化器紧跟标点后保守转义的加粗星号（`&#x2A;*` 是逃逸了一半的 `**`），摆放产物还原成可读的加粗 */
-const STAR = /&#x2A;\*/g;
 /** frontmatter 里一条顶层键的行头：列 0 起、`键:` */
 const TOP_KEY = /^([\w-]+):/;
-/** 产物开头整段 frontmatter：fumadocs 的 _markdown 已经没有它，别的格式的 ai 产物可能还带着——摆放产物一律不带 */
+/** 产物开头整段 frontmatter：格式的 ai 产物可能还带着——摆放产物一律不带，要带的字段由 `frontmatter` 点名加回 */
 const LEADING_FRONTMATTER = /^﻿?---\r?\n[\s\S]*?\r?\n---[ \t]*\r?\n?/;
 
 /**
@@ -137,9 +137,9 @@ export function assertTurf(root: string, sourceDirs: string[], table: Record<str
   }
 }
 
-/** 格式的 ai 产物 → 摆放产物的正文（还没戴 frontmatter）：剥站上的锚记、还原加粗、去掉开头空行 */
+/** 格式的 ai 产物 → 摆放产物的正文（还没戴 frontmatter）：剥掉开头的 frontmatter 与空行 */
 function tidy(rendered: string): string {
-  return rendered.replace(LEADING_FRONTMATTER, "").replace(ANCHOR, "$1").replace(STAR, "**").replace(/^\n+/, "");
+  return rendered.replace(LEADING_FRONTMATTER, "").replace(/^\n+/, "");
 }
 
 /** 挑出来的 frontmatter：点名的字段按源里的顺序原样成行；源里没有的字段列在 missing */
@@ -205,22 +205,26 @@ export function createPlacing(host: PlacingHost): Placing {
     return { targets, text: host.read(doc), format };
   }
 
-  /** 摆放产物的正文：问格式要 ai 产物再整形。同一篇的几个落点共用这一份，frontmatter 各戴各的 */
-  async function bodyOf(doc: string, text: string, format: Format, listing = host.service.resolve(doc, text)): Promise<string> {
-    const rendered = await format.renderAi!(text, listing, {
-      root: host.root,
-      doc,
-      roster: host.roster,
-      config: host.config as unknown as Record<string, unknown>,
-    });
-    return tidy(rendered);
+  /**
+   * 摆放产物的正文：问格式要 ai 产物再整形。同一篇的几个落点共用这一份，frontmatter 各戴各的。
+   * 格式拒绝渲染（RenderRefusal）交回原因，由调用方把这篇的每个落点报成红；别的错照原样抛
+   */
+  function bodyOf(doc: string, text: string, format: Format, listing = host.service.resolve(doc, text)): { body: string } | { refusal: string } {
+    try {
+      return { body: tidy(format.renderAi!(text, listing)) };
+    } catch (err) {
+      if (isRenderRefusal(err)) return { refusal: err.message };
+      throw err;
+    }
   }
 
   return {
-    async render(doc) {
+    render(doc) {
       const inputs = placingInputs(doc);
       if (inputs === null) return [];
-      const body = await bodyOf(doc, inputs.text, inputs.format);
+      const rendered = bodyOf(doc, inputs.text, inputs.format);
+      if ("refusal" in rendered) return inputs.targets.map(({ to }) => ({ to, status: "unrenderable", reason: rendered.refusal }));
+      const body = rendered.body;
       const out: PlacedWrite[] = [];
       for (const { to, frontmatter } of inputs.targets) {
         const picked = pickFrontmatter(inputs.text, frontmatter);
@@ -240,10 +244,12 @@ export function createPlacing(host: PlacingHost): Placing {
       return out;
     },
 
-    async check(doc, listing) {
+    check(doc, listing) {
       const inputs = placingInputs(doc);
       if (inputs === null) return [];
-      const body = await bodyOf(doc, inputs.text, inputs.format, listing);
+      const rendered = bodyOf(doc, inputs.text, inputs.format, listing);
+      if ("refusal" in rendered) return inputs.targets.map(({ to }) => ({ to, status: "unrenderable", fresh: false, reason: rendered.refusal }));
+      const body = rendered.body;
       const out: PlacedCheck[] = [];
       for (const { to, frontmatter } of inputs.targets) {
         const picked = pickFrontmatter(inputs.text, frontmatter);

@@ -1,71 +1,123 @@
 /**
  * 解析与 AI 渲染。
- *   parseTree   自己起 remark 认树：parse / write / 名册检查用，不碰 fumadocs
- *   renderAi    不自己序列化：让 fumadocs 的 loader 编译这篇 mdx，读它导出的 _markdown。
- *               站的 getText("processed") 读的是同一个导出，所以两边逐字节相同是同一条管线的结果。
- * fumadocs 从消费方项目根解析：本包只声明 peer，不带自己的一份。
+ *   parseTree   自己起 remark 认树：parse / write / 名册检查 / 按原文渲染都用它，不碰 fumadocs
+ *   renderAi    生成正本按原文渲染成 md：只动 frontmatter 与记号，别的文字逐字节照抄
+ *
+ * 站上各页的机读版不走这儿，走 fumadocs 的管线（markdown.ts 的 docfirstMarkdownOptions）。
  */
-import { createRequire } from "node:module";
-import { join } from "node:path";
-import { pathToFileURL } from "node:url";
 import { unified } from "unified";
 import remarkParse from "remark-parse";
 import remarkFrontmatter from "remark-frontmatter";
 import remarkMdx from "remark-mdx";
-import type { Listing, RenderContext } from "../engine/index.ts";
+import { fileOf, RenderRefusal } from "../engine/index.ts";
+import type { Item, Listing } from "../engine/index.ts";
+import { langOf } from "./blocks.ts";
+import { draftIn, markerOf } from "./recognize.ts";
+import { lineOf, walk } from "./tree.ts";
 import type { TreeNode } from "./tree.ts";
 
 export function parseTree(text: string): TreeNode {
   return unified().use(remarkParse).use(remarkFrontmatter).use(remarkMdx).parse(text) as unknown as TreeNode;
 }
 
-let registered = false;
+/** 原文里的一处改写：把 [start, end) 换成 text */
+interface Edit {
+  start: number;
+  end: number;
+  text: string;
+}
 
-/** renderAi 从项目配置里只看这两项：文档目录表和 fumadocs 的集合名 */
-interface CollectionConfig {
-  docs?: string | string[];
-  fumadocs?: { collection?: string | Record<string, string> };
+/** 能包住这段内容的围栏：比内容里最长的一串反引号多一个，至少三个 */
+function fenceFor(lines: string[]): string {
+  const longest = Math.max(0, ...lines.map((line) => Math.max(0, ...[...line.matchAll(/`+/g)].map((m) => m[0].length))));
+  return "`".repeat(Math.max(3, longest + 1));
+}
+
+/** 一处引用换成的代码块：info 串是语言加 `title="路径:起-止"`（目录树是 `目录/`），内容是清单里今天的那几行 */
+function blockOf(item: Item): string[] {
+  const target = item.reference.target;
+  const body = item.current ?? [];
+  const file = fileOf(target);
+  const info =
+    target.kind === "tree"
+      ? `text title="${target.dir}/${target.glob !== undefined ? ` ${target.glob}` : ""}"`
+      : `${langOf(file!) || "text"} title="${file}:${item.lines[0]}-${item.lines[1]}"`;
+  const fence = fenceFor(body);
+  return [`${fence}${info}`, ...body, fence];
+}
+
+/** 这个节点所在那一行的行首下标 */
+const lineStartOf = (text: string, offset: number): number => text.lastIndexOf("\n", offset - 1) + 1;
+
+/** 整行去掉：连同行尾换行；前后都是空行时再吃掉一个空行，别留下两个空行 */
+function dropLine(text: string, start: number, end: number): Edit {
+  const from = lineStartOf(text, start);
+  const newline = text.indexOf("\n", end);
+  let to = newline === -1 ? text.length : newline + 1;
+  if (text.startsWith("\n", to) && (from === 0 || text.slice(0, from).endsWith("\n\n"))) to += 1;
+  return { start: from, end: to, text: "" };
+}
+
+/** 换成代码块：续行带上记号那一行行首的前缀（列表缩进、引用块的 `> `），块才留在原来的容器里 */
+function replaceWithBlock(text: string, start: number, end: number, block: string[]): Edit {
+  const prefix = text.slice(lineStartOf(text, start), start);
+  return { start, end, text: block.map((line, i) => (i === 0 ? line : `${prefix}${line}`)).join("\n") };
+}
+
+const offsetsOf = (node: TreeNode): [number, number] => [node.position!.start.offset!, node.position!.end!.offset!];
+
+/** 一个节点要做的改写；渲染不了的记进 refusals。交回 true 表示这个节点已经处理完，不往里走 */
+function editFor(text: string, node: TreeNode, listing: Listing, edits: Edit[], refusals: string[]): boolean {
+  const line = lineOf(node);
+  if (node.type === "yaml") {
+    const [start, end] = offsetsOf(node);
+    edits.push({ start, end: text.startsWith("\n", end) ? end + 1 : end, text: "" });
+    return true;
+  }
+  if (draftIn(node) !== null) {
+    refusals.push(`第 ${line} 行是草稿记号，先 docfirst confirm`);
+    return true;
+  }
+  if (markerOf(node) !== null) {
+    const item = listing.items.find((it) => it.reference.at === line - 1);
+    if (item === undefined) throw new Error(`第 ${line} 行是引用记号，但清单里没有它`);
+    const [start, end] = offsetsOf(node);
+    const kind = item.reference.target.kind;
+    if (kind === "exists" || kind === "has") edits.push(dropLine(text, start, end));
+    else if (item.status === "missing") refusals.push(`第 ${line} 行的引用缺失（${item.reason ?? "指向空气"}），先修好`);
+    else edits.push(replaceWithBlock(text, start, end, blockOf(item)));
+    return true;
+  }
+  if (node.type === "mdxFlowExpression" || node.type === "mdxTextExpression") {
+    refusals.push(`第 ${line} 行有 mdx 表达式 {${(node.value ?? "").trim()}}，生成正本只写 markdown`);
+    return true;
+  }
+  if (node.type === "mdxJsxFlowElement" || node.type === "mdxJsxTextElement") {
+    refusals.push(`第 ${line} 行有组件 <${node.name ?? ""}>，生成正本只写 markdown`);
+    return true;
+  }
+  if (node.type === "mdxjsEsm") {
+    refusals.push(`第 ${line} 行有 import / export，生成正本只写 markdown`);
+    return true;
+  }
+  return false;
 }
 
 /**
- * 这篇文档该按哪个集合编译。fumadocs 的 loader 靠 `?collection=` 才知道该跑哪份 postprocess，
- * 而集合是按目录分的（六区站一区一个）。规则依次是：
- *   `fumadocs.collection` 给了字符串——全部文档同一个集合，照旧；
- *   给了表——按文档所在的文档目录查（`content/outputs` → `outputs`）；
- *   都没给——集合名就是文档目录的最后一截（`content/docs` → `docs`，`docs` → `docs`），
- *   跟 `defineDocs` 的变量名按目录起的习惯对上。文档不在任何文档目录下退 `docs`。
+ * 生成正本按原文渲染：去掉 frontmatter；每个正式记号换成一个代码块（存在性与名字没有内容，整行去掉）；
+ * 其余文字逐字节不动。换行先统一成 LF。
+ * 草稿记号、缺失的引用、JSX 组件、别的 mdx 表达式都渲染不了，一次列全、抛 RenderRefusal。
  */
-export function collectionOf(config: CollectionConfig | undefined, doc: string): string {
-  const want = config?.fumadocs?.collection;
-  if (typeof want === "string") return want;
-  const raw = config?.docs ?? "docs";
-  const dirs = (Array.isArray(raw) ? raw : [raw]).map((dir) => dir.replace(/\\/g, "/").replace(/\/+$/, ""));
-  // 目录套目录时取最长的那个：`content` 与 `content/outputs` 同时配着，outputs 下的页归后者
-  const home = dirs.filter((dir) => doc.startsWith(`${dir}/`)).sort((a, b) => b.length - a.length)[0];
-  if (home === undefined) return "docs";
-  const named = want?.[home];
-  if (typeof named === "string") return named;
-  return home.split("/").pop() ?? "docs";
-}
-
-/**
- * @param _text     不用：fumadocs 自己读文件
- * @param _listing  不用：清单在 remark 插件里现算
- * 集合名按 collectionOf 定：默认跟文档目录的最后一截同名，项目在 docfirst.config.mjs 的 fumadocs.collection 里改。
- */
-export async function renderAi(_text: string, _listing: Listing, ctx: RenderContext): Promise<string> {
-  const req = createRequire(join(ctx.root, "package.json"));
-  if (!registered) {
-    const { register } = (await import(pathToFileURL(req.resolve("fumadocs-mdx/node")).href)) as { register: () => void };
-    register();
-    registered = true;
-  }
-  const collection = collectionOf(ctx.config as CollectionConfig | undefined, ctx.doc);
-  const mod = (await import(`${pathToFileURL(join(ctx.root, ctx.doc)).href}?collection=${collection}`)) as { _markdown?: unknown };
-  if (typeof mod._markdown !== "string") {
-    throw new Error(
-      `${ctx.doc}：编译产物里没有 _markdown——source.config 里集合 ${collection} 的 postprocess.includeProcessedMarkdown 要给 docfirstMarkdownOptions()`,
-    );
-  }
-  return mod._markdown;
+export function renderAi(source: string, listing: Listing): string {
+  const text = source.replace(/\r\n/g, "\n");
+  const edits: Edit[] = [];
+  const refusals: string[] = [];
+  walk(parseTree(text), (node, index) => {
+    if (!editFor(text, node, listing, edits, refusals)) return undefined;
+    return index === null ? undefined : index + 1;
+  });
+  if (refusals.length > 0) throw new RenderRefusal(refusals.join("；"));
+  let out = text;
+  for (const edit of edits.sort((a, b) => b.start - a.start)) out = out.slice(0, edit.start) + edit.text + out.slice(edit.end);
+  return out;
 }

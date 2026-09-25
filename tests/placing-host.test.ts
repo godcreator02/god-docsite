@@ -1,13 +1,13 @@
 /**
  * 摆放的另一个宿主：生成物存在内存里，一个字节都不落盘、一次 git 都不起。
  *
- * `createPlacing` 只经 `PlacingHost` 认识外面——项目那半（根、配置、服务、名册、落点表、正本原文）
+ * `createPlacing` 只经 `PlacingHost` 认识外面——项目那半（服务、落点表、正本原文）
  * 和生成物那半（读一个落点、写一个落点）都在接口上。真盘那份适配器住 `load.ts`，这儿是第二份：
  * 落点在一张 Map 里，于是「摆了什么、摆到哪个键上、盘上那份被动过之后判成什么」全部直接看得见。
  */
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { createService } from "../packages/docfirst-workflow/src/engine/index.ts";
+import { createService, RenderRefusal } from "../packages/docfirst-workflow/src/engine/index.ts";
 import type { Format, Listing, Reader } from "../packages/docfirst-workflow/src/engine/index.ts";
 import { createPlacing } from "../packages/docfirst-workflow/src/host/index.ts";
 import type { PlacingHost, ProjectConfig } from "../packages/docfirst-workflow/src/host/index.ts";
@@ -15,8 +15,8 @@ import { NO_HISTORY } from "./repo.ts";
 
 /**
  * 假格式：这份测试验的是摆放，不是认记号，所以 parse 一处引用都不认。
- * renderAi 出的那份故意带上三样要被整形掉的东西——整段 frontmatter、站上的标题锚记、
- * 逃逸了一半的加粗——摆放产物里它们都不该还在。
+ * renderAi 出的那份故意带上整段 frontmatter 和开头的空行——摆放产物里它们都不该还在，
+ * 别的文字（包括看着像转义的 `&#x2A;`）原样留着。
  */
 const format: Format = {
   name: "fake",
@@ -24,11 +24,11 @@ const format: Format = {
   parse: () => [],
   write: (text) => text,
   marker: () => "",
-  renderAi: () => ["---", "title: 站上的头部", "---", "", "# 摆放 [#bai-fang]", "", "一段&#x2A;*加粗**的正文", ""].join("\n"),
+  renderAi: () => ["---", "title: 站上的头部", "---", "", "# 摆放", "", "一段**加粗**的正文，&#x2A; 原样", ""].join("\n"),
 };
 
-/** 整形之后该剩下的那段正文：frontmatter 剥掉、锚记剥掉、加粗还原、开头空行去掉 */
-const BODY = "# 摆放\n\n一段**加粗**的正文\n";
+/** 整形之后该剩下的那段正文：frontmatter 剥掉、开头空行去掉，别的原样 */
+const BODY = "# 摆放\n\n一段**加粗**的正文，&#x2A; 原样\n";
 
 /** 正本：点名的字段随行到生成物头部，没点名的剥掉 */
 const SOURCE = ["---", "name: block-note", "description: 块笔记怎么用", "secret: 不该随行", "---", "", "# 摆放", ""].join("\n");
@@ -37,12 +37,8 @@ const SOURCE = ["---", "name: block-note", "description: 块笔记怎么用", "s
 function memoryHost(outputs: ProjectConfig["outputs"], source = SOURCE) {
   const placed = new Map<string, string>();
   const reader: Reader = { read: () => null };
-  const config = { formats: [format], outputs } as ProjectConfig;
   const host: PlacingHost = {
-    root: "/内存里没有根",
-    config,
     service: createService({ formats: [format], reader, history: NO_HISTORY }),
-    roster: undefined,
     placements: (doc) => (outputs?.[doc] ?? []).map((raw) => (typeof raw === "string" ? { to: raw, frontmatter: [] } : { to: raw.to, frontmatter: raw.frontmatter ?? [] })),
     read: () => source,
     readPlaced: (to) => placed.get(to) ?? null,
@@ -95,15 +91,11 @@ test("内存宿主：源里缺点名的字段，这个落点一个字都不写",
 
 test("内存宿主：check 收到调用方判好的清单就原样交给格式，不再判一遍", async () => {
   const handed: Listing[] = [];
-  const counted: Format = { ...format, renderAi: (text, listing, ctx) => (handed.push(listing), format.renderAi!(text, listing, ctx)) };
+  const counted: Format = { ...format, renderAi: (text, listing) => (handed.push(listing), format.renderAi!(text, listing)) };
   const service = createService({ formats: [counted], reader: { read: () => null }, history: NO_HISTORY });
   let resolved = 0;
-  const outputs = { "docs/a.md": ["README.md"] };
   const placing = createPlacing({
-    root: "/内存里没有根",
-    config: { formats: [counted], outputs } as ProjectConfig,
     service: { ...service, resolve: (doc, text) => (resolved += 1, service.resolve(doc, text)) },
-    roster: undefined,
     placements: () => [{ to: "README.md", frontmatter: [] }],
     read: () => SOURCE,
     readPlaced: () => BODY,
@@ -117,6 +109,32 @@ test("内存宿主：check 收到调用方判好的清单就原样交给格式�
 
   await placing.check("docs/a.md");
   assert.equal(resolved, 1, "没传清单就自己判一遍");
+});
+
+test("内存宿主：格式拒绝渲染，每个落点都报 unrenderable、一个字不写；别的错照原样抛", () => {
+  const refusing: Format = { ...format, renderAi: () => { throw new RenderRefusal("第 3 行是草稿记号，先 docfirst confirm"); } };
+  const placed = new Map<string, string>();
+  const host = (renderer: Format): PlacingHost => ({
+    service: createService({ formats: [renderer], reader: { read: () => null }, history: NO_HISTORY }),
+    placements: () => [{ to: "README.md", frontmatter: [] }, { to: "SKILL.md", frontmatter: ["name"] }],
+    read: () => SOURCE,
+    readPlaced: (to) => placed.get(to) ?? null,
+    writePlaced: (to, text) => void placed.set(to, text),
+  });
+  const placing = createPlacing(host(refusing));
+  const reason = "第 3 行是草稿记号，先 docfirst confirm";
+  assert.deepEqual(placing.render("docs/a.md"), [
+    { to: "README.md", status: "unrenderable", reason },
+    { to: "SKILL.md", status: "unrenderable", reason },
+  ]);
+  assert.equal(placed.size, 0);
+  assert.deepEqual(placing.check("docs/a.md"), [
+    { to: "README.md", status: "unrenderable", fresh: false, reason },
+    { to: "SKILL.md", status: "unrenderable", fresh: false, reason },
+  ]);
+
+  const broken: Format = { ...format, renderAi: () => { throw new Error("格式自己的 bug"); } };
+  assert.throws(() => createPlacing(host(broken)).check("docs/a.md"), /格式自己的 bug/);
 });
 
 test("内存宿主：没挂落点的文档，两个方法都回空清单，宿主一次都没被写过", async () => {

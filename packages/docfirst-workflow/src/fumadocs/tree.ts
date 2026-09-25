@@ -21,7 +21,8 @@ export interface TreeNode {
   attributes?: JsxAttribute[];
   children?: TreeNode[];
   data?: Record<string, unknown>;
-  position?: { start: { line: number; column: number } };
+  /** 解析器给的位置；offset 是在原文里的字符下标，按原文渲染时靠它切 */
+  position?: { start: { line: number; column: number; offset?: number }; end?: { line: number; column: number; offset?: number } };
 }
 
 /**
