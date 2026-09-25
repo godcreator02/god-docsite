@@ -203,11 +203,11 @@ test("求助：--help / -h / help 打用法退 0，一个字不写——confirm 
   }
 });
 
-test("不认识的开关退 2、什么都不动——confirm 不再把开关当没写、跑成全部页", async () => {
+test("不认识的开关、不收路径的命令带了路径，都退 2、什么都不动——confirm 不再把开关当没写、跑成全部页", async () => {
   const p = setupProject();
   try {
     const before = p.read("docs/a.md");
-    for (const args of [["confirm", "--dry-run"], ["confirm", "--json"], ["confirm", "docs/a.md", "--acept"], ["render", "--force"], ["check", "--jsno"], ["check", "--accept"], ["trajectory", "-x"]]) {
+    for (const args of [["confirm", "--dry-run"], ["confirm", "--json"], ["confirm", "docs/a.md", "--acept"], ["render", "--force"], ["check", "--jsno"], ["check", "--accept"], ["trajectory", "-x"], ["check", "docs/a.md"], ["render", "docs/a.md"], ["migrate-ledger", ".ledger.json"]]) {
       assert.equal((await p.cli(...args)).code, 2, args.join(" "));
     }
     assert.equal(p.read("docs/a.md"), before);

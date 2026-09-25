@@ -101,6 +101,11 @@ export async function main(argv: string[]): Promise<number> {
     console.error(`${command} 不认识开关 ${unknown.join(" ")}（${command} ${allowed}），什么都没动。用法看 docfirst --help`);
     return 2;
   }
+  const positional = rest.filter((arg) => !arg.startsWith("-"));
+  if (command !== "confirm" && positional.length > 0) {
+    console.error(`${command} 不收文档路径（${positional.join(" ")}）——只有 confirm 能点名页，什么都没动。用法看 docfirst --help`);
+    return 2;
+  }
   // trajectory 跟 check / confirm / render 不是一套：它不遍历文档，所以在装配之前就分流
   if (command === "trajectory") return trajectoryCommand(rest);
   // 迁移时配置里多半还留着旧键，装配会拒，所以也在装配之前分流

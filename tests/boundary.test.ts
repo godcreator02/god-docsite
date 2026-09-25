@@ -87,7 +87,7 @@ const rel = (from: string, file: string): string => relative(from, file).split(s
  * 加一个新目录会默默地什么都不许，加错地方反而更难发现。
  *
  * 方向读法（左边不许知道右边）：
- *   engine   判定：只认注进来的格式 / 读取器 / 记录簿 / 比较器，谁都不认识
+ *   engine   判定：只认注进来的格式 / 读取器 / 旧内容来源，谁都不认识
  *   host     碰环境：可以用 engine 的类型与纯函数，不认识格式实现、不认识命令行
  *   fumadocs 格式实现 + 站接线：可以用 engine 与 host（`docfirstMdxOptions` 要 loadProject），不认识命令行
  *   cli      入口：认识以上全部，谁都不认识它

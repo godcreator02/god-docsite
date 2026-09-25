@@ -188,7 +188,7 @@ export function nodeFor(item: Item): TreeNode {
   const current = (item.current ?? []).join("\n");
   const mark: DocfirstMark = { source: where, label, value: current };
   if (item.status === "changed") {
-    // hash 记忆找不到这段了：行号停在旧位置，那儿现在是什么不知道，不摆代码
+    // 取不到旧内容、滑窗也找不到这段：行号停在旧位置，那儿现在是什么不知道，不摆代码
     if (item.reason === "unlocated") {
       return codeNode("text", UNLOCATED_NOTE, `${where}${UNLOCATED_SUFFIX}`, dot, { ...mark, value: UNLOCATED_NOTE });
     }

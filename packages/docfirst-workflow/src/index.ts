@@ -4,9 +4,9 @@
  * 这个口不是给站用的——站要的是 `@godcreator/docfirst-workflow/fumadocs`（接线与格式实现）。
  * 这个口的读者只有一种：写测试的（直接调 `main(["check"])`，不必起子进程）。
  *
- * **给一个新骨架铺六区不在这个包里**：那件事只在 agent 手上发生一次，铺的是模板、不碰判定，
- * 所以它归件（`@godcreator/gwb-docfirst-workflow` 的 `docfirst.attach`，模板也随那个件发）。
- * 这个包留下的是要在**仓**里发生的那几件——门禁与站构建跑的核对 / 确认 / 渲染 / 轨迹。
+ * **给一个新骨架铺各区不在这个包里**：那件事只在 agent 手上发生一次，铺的是模板、不碰判定，
+ * 所以它归工作台插件（`@godcreator/gwb-docfirst-workflow` 的 `docfirst.attach`，模板也随那个插件发）。
+ * 这个包留下的是要在**仓**里发生的那几件——门禁与站构建跑的核对 / 确认 / 渲染 / 轨迹 / 迁移。
  *
  * 可执行本身在 `dist/cli.mjs`（bin `docfirst`），它只把参数递给 `main`、把退出码递回去。
  */
