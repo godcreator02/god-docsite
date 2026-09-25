@@ -6,72 +6,72 @@ docfirst: none
 
 # 投来的反馈
 
-**本页回答**：别的仓在用 docfirst 的过程中投来了什么意见。一条一节，处理完删——周转区不是档案，
-定下来的判据落轨迹卡。本仓自己反复做的操作候选在 [hatch](/feedback/hatch)。
+**本页回答**：别的仓在用 docfirst 的过程中投来了什么意见。一条一节，处理完删——这里是临时存放区不是档案，
+定下来的判据写进轨迹卡。本仓自己反复做的操作候选在 [hatch](/feedback/hatch)。
 
 ## 2026-09-11 `docfirst confirm --help` 不打帮助，直接就跑了
 
-来源：总控台（做块笔记那一轮里撞上的）
+来源：总控台（做块笔记插件时遇到的）
 
 想看 `confirm` 收哪些参数，敲 `pnpm exec docfirst confirm --help`——它没有打帮助，直接执行了
-confirm。`--help` 是「我先问问」的标准手势，一条**会改文件**的命令把它当「照常跑」，等于把最谨慎
-的一问变成最直接的一动。
+confirm。`--help` 是查用法的标准写法，一条**会改文件**的命令把它当成照常执行，查用法就变成了
+直接改文件。
 
-**建议**：参数解析里先认 `--help` / `-h`，认到就打用法然后 exit 0，任何副作用不做；顺带，无参调用
-也该打用法而不是照默认跑。
+**建议**：参数解析里先认 `--help` / `-h`，认到就打印用法然后 exit 0，不产生任何副作用；另外，无参调用
+也该打印用法而不是按默认执行。
 
 ## 2026-09-11 `docfirst render` 把行内代码的收尾反引号转义成 `&#x60;`，而 check 抓不住
 
-来源：块笔记仓（把两个件的 SKILL.md 改成从 mdx 生成时撞到）
+来源：块笔记仓（把两个插件的 SKILL.md 改成从 mdx 生成时遇到）
 
-mdx 源里正常的行内代码，render 摆出来的 md 把**倒数第二个行内代码的收尾反引号**转成 HTML 实体，
-代码从此闭合不上，后面整句塌进代码里。触发条件（试出来的）：一个行内代码，后面隔着标点或空格
+mdx 源里正常的行内代码，render 生成的 md 把**倒数第二个行内代码的收尾反引号**转成 HTML 实体，
+行内代码闭合不上，后面整句都被当成代码。触发条件（试出来的）：一个行内代码，后面隔着标点或空格
 跟着一段 `**加粗**`，而那段加粗以另一个行内代码开头。
 
 **最麻烦的一点**：check 拿产物跟重新渲染的源比，转义是确定性的——源和产物带同一个实体，check 报 🟢。
 产物已经坏了，门禁还是绿的；肉眼扫生成的 SKILL.md 才发现。
 
 **建议**：修渲染那步的转义判据（大概在 mdast-util-to-markdown 层的 handlers / unsafe 表）；在那之前给
-check 加条产物自检——「源里没有实体、产物里有」基本可断定是转义事故，报黄让人看一眼。块笔记那边已把
-加粗挪前绕开。
+check 加条产物自检——「源里没有实体、产物里有」基本可断定是转义事故，报黄灯让人复核。块笔记仓已把
+加粗移到前面，避开了这个问题。
 
 ## 2026-09-10 `livedoc` 无参调用抛堆栈，不打印用法
 
-来源：端到端验证那一轮（scratchpad 里的临时站）
+来源：端到端验证那次（scratchpad 里的临时站）
 
 还没接过 livedoc 的站目录里跑 `livedoc`（无参），抛一整页 Node 堆栈，末行「没有 livedoc.config.mjs」——
 读起来是「崩了」而不是「你该给个子命令」。对照 `livedoc attach --help` 写得很好。
 
 **建议**：无参调用打印一页子命令清单，跟 `attach --help` 一个规格。（改名后现状待复核——`docfirst`
-无参眼下会打一句「不认识的命令」并退出，堆栈是没有了，但用法页仍没有。）
+无参时会打印一句「不认识的命令」并退出，堆栈是没有了，但用法页仍没有。）
 
-## 2026-09-10 `docfirst render` 撞到带图片导入的页就整条崩
+## 2026-09-10 `docfirst render` 遇到带图片导入的页，整条命令就崩溃
 
 来源：26090614yey/block-note-fumadocs，改名升级那次
 
-站里某页有五张 `![](/ux-study/*.jpg)`，render 渲到这页抛 `ERR_UNKNOWN_FILE_EXTENSION: ".jpg"`，
-整条命令退非零，排在它之后的页全没渲。崩点在 fumadocs-mdx 15.3.1 的 Node loader（`import("fumadocs-mdx/node")`
-那条路）。当时没挡事（崩的只是 gitignore 的调试产物），但换一个站，只要图片页排在 outputs 前面，
-生成物就摆不出来。
+站里某页有五张 `![](/ux-study/*.jpg)`，render 渲染到这页时抛出 `ERR_UNKNOWN_FILE_EXTENSION: ".jpg"`，
+整条命令以非零退出，排在它之后的页全没渲染。崩溃位置在 fumadocs-mdx 15.3.1 的 Node loader（`import("fumadocs-mdx/node")`
+那个入口）。当时没造成影响（崩溃的只是 gitignore 掉的调试产物），但换一个站，只要图片页排在 outputs 前面，
+生成物就生成不出来。
 
-**期望**：renderAi 遇到加载不了的资源导入时跳过那一页、记一条警告，别让一页毁掉整趟。
+**期望**：renderAi 遇到加载不了的资源导入时跳过那一页、记一条警告，别让一页拖垮整次渲染。
 
-## 2026-09-12 草稿钉码两种写法被静默忽略——写的人以为钉了，check 却不响
+## 2026-09-12 草稿钉码两种写法被静默忽略——写的人以为钉了，check 却不报
 
-来源：总控台（单元 `26090520ntn/console`，hello 仓 self-explaining 扫描给现状区长真身时撞上）
+来源：总控台（单元 `26090520ntn/console`，对 hello 仓做 self-explaining 扫描、给现状区写正文时遇到）
 
 hello 站写 20 条草稿记号，`check` 只认出 9 条，**不认的那 11 条连一条报告都没有**——不是红了等确认，是当它们不存在。两种形态：
 
-1. **连续两行记号**：mdx 把相邻行并成一个段落，`draftIn` 只认「段落恰好一个 text 子节点」，整块失配。改法是每条记号前后留空行（已照做），但更根本的是：这种段落在 check 里报一条「第 N 行像记号但没认出」，别静默吞掉。
-2. **路径含双下划线**：`@@docfirst ref ../py/gwb_hello_py/__main__.py:1-5 @@` 独占段落也没用——markdown 把 `__main__` 解析成强调节点，段落 children 不止一个 text，`draftIn` 返回 null。同理报一条比静默好；或者记号语法文档里写明这条路走不通、建议换钉同论断的别的文件。
+1. **连续两行记号**：mdx 把相邻行并成一个段落，`draftIn` 只认「段落恰好一个 text 子节点」，整段匹配失败。改法是每条记号前后留空行（已照做），但更根本的是：这种段落在 check 里报一条「第 N 行像记号但没认出」，别静默忽略。
+2. **路径含双下划线**：`@@docfirst ref ../py/gwb_hello_py/__main__.py:1-5 @@` 独占段落也没用——markdown 把 `__main__` 解析成强调节点，段落 children 不止一个 text，`draftIn` 返回 null。同理报一条比静默好；或者记号语法文档里写明这种写法不可用、建议改钉同一论断涉及的别的文件。
 
-判定建议就一句：**解析器遇到「差一点就是记号」的段落时告警**，别让「写钉码」这个动作本身有不会响的失败形态——静默不识别跟「不会响的闹钟」是同一种病。
+判定建议就一句：**解析器遇到「差一点就是记号」的段落时告警**，别让「写钉码」这个动作本身有不会响的失败形态——静默不识别跟「写了钉码却没有东西检查它」是同一个问题。
 
 ## 2026-09-13 `docfirst confirm --help` 不显示帮助，直接执行了全量 confirm
 
-来源：总控台（单元 `26090520ntn/console`，件仓 self-explaining 扫描那轮撞上）
+来源：总控台（单元 `26090520ntn/console`，对插件仓做 self-explaining 扫描时遇到）
 
-想看 confirm 的用法说明，跑 `pnpm doc:confirm --help`——它没显示帮助，**把全站钉码直接确认了一遍**。CLI 似乎只认位置参数，`--help` 被当成了页路径之外的什么。风险：本想查用法的人替全站签了字，恰好当时有别人的未提交黄钉，侥幸被「confirm 只对已提交内容做」挡住才没替人确认。绕法：按页限定要写 `docfirst confirm content/docs/xxx.mdx`。建议：认得 `-h/--help` 并打印用法；全量 confirm 或许还该在没有显式参数时要求一个确认或 `--all`。
+想看 confirm 的用法说明，跑 `pnpm doc:confirm --help`——它没显示帮助，**把全站钉码直接确认了一遍**。CLI 似乎只认位置参数，`--help` 被当成了页路径之外的什么。风险：本想查用法的人把全站都确认了，当时恰好有别人未提交的黄灯，因为「confirm 只处理已提交内容」才没替别人确认掉。临时办法：按页限定要写 `docfirst confirm content/docs/xxx.mdx`。建议：认得 `-h/--help` 并打印用法；全量 confirm 或许还该在没有显式参数时要求一个确认或 `--all`。
 
 ## 2026-09-24 迁到「内核装进 home」：peer 写内核包，其余包挪到 dev
 
@@ -84,11 +84,11 @@ hello 站写 20 条草稿记号，`check` 只认出 9 条，**不认的那 11 �
 
 - peer 只写内核包 `"@godcreator/gwb-kernel-desktop": "^0.4.1"`；node 侧按值 import 了 `cordis` 的再写 `cordis`。词汇表包、命令总线、外壳等其他
   `@godcreator` 包一律挪到 dev、写 `^` 范围，词汇表包 `^0.4.0` 起
-- 带界面的插件：dev 里的外壳抬到 `^0.13.7` 时，peer 必须同时写内核包——外壳 0.13.7 起不再声明 react，构建与发版检查改从装着的内核包清单
+- 带界面的插件：dev 里的外壳升到 `^0.13.7` 时，peer 必须同时写内核包——外壳 0.13.7 起不再声明 react，构建与发版检查改从装着的内核包清单
   读 react 的四个包名。浏览器侧构建脚本里「这四个名字由 gwb-shared-react 提供」那句注释改成由内核包提供；想不手抄名单的，照 devkit 模板从内核包清单的 `gwb.shared` 读
 - 命令总线 0.5.0 起，登记命令时 `name`、`description`、`usage` 必须是非空字符串，`plugin` 可以不写、写了必须等于完整包名，不合格整个插件加载失败——发版前核对每条命令
 - 发版前用 `devkit.dev` 在隔离 home 里验过，再 `devkit.release`
-- gwb-docfirst-workflow 在 default 里一直加载失败：按值 import 了词汇表包已经删掉的 `isRecord`（devkit 全生态机制定案的迁移清单第一行），迁移时一起修：这类无状态小函数由插件自带一份
+- gwb-docfirst-workflow 在 default 里一直加载失败：按值 import 了词汇表包已经删掉的 `isRecord`（devkit 给全部插件定下的迁移清单第一行），迁移时一起修：这类无状态小函数由插件自带一份
 
 ## 2026-09-24 建站模板没写页面元数据，浏览器标签页没有标题
 
@@ -97,7 +97,7 @@ hello 站写 20 条草稿记号，`check` 只认出 9 条，**不认的那 11 �
 机器上 20 个 docfirst 文档站的根布局都没有 `metadata`，各区页面也没有 `generateMetadata`，浏览器标签页一律没有标题（`document.title` 是空串），
 几个站同时开着分不清哪个是哪个。根源在建站模板：docfirst 装六区时写的根布局 `packages/gwb-docfirst-workflow/template/attach/src/app/layout.tsx.tpl` 没有 `metadata`，六个区的页面模板没有 `generateMetadata`（本仓自己的站 `docs-site/` 也缺）。
 
-内核仓、devkit 仓、界面插件仓的站已经各自补上，可以照着改（例：`gwb-devkit/docs-site/src/app/layout.tsx` 与 `src/app/docs/[[...slug]]/page.tsx`，提交 3ab1193）：
+内核仓、gwb-lifecycle-plugins 仓（devkit 所在的仓）、界面插件仓的站已经各自补上，可以照着改（例：`gwb-lifecycle-plugins/docs-site/src/app/layout.tsx` 与 `src/app/docs/[[...slug]]/page.tsx`，提交 3ab1193）：
 
 - 根布局加 `export const metadata: Metadata = { title: { default: '<站名>', template: '%s | <站名>' } }`，站名与侧栏 `nav.title` 用同一个
 - 每个区的 `[[...slug]]/page.tsx` 加 `generateMetadata`：和页面本身一样 `getPage(slug)`、找不到就 `notFound()`，返回 `{ title: page.data.title, description: page.data.description }`
@@ -127,11 +127,11 @@ hello 站写 20 条草稿记号，`check` 只认出 9 条，**不认的那 11 �
 - peer 里的内核包写 `^0.6.0`（不是 `^0.5.0`），在跑内核 0.6.0 的隔离 home 里验过再发
 - 浏览器端构建（`build.ts` 或 `tools/build-plugin.ts`）里从内核包清单读 `gwb.shared` 的那段删掉，`external` 直接写上面四个名字；
   产物测试里读 `gwb.shared` 的名单一样写死。没有浏览器端产物的包只改 peer
-- 等 devkit 发了认 0.6 的新版再发：devkit 现在的发版检查还读内核包的 `gwb.shared`，装上 0.6 会被拒（已投 devkit 收件页）
+- 等 devkit 发了认 0.6 的新版再发：devkit 现在的发版检查还读内核包的 `gwb.shared`，装上 0.6 会被拒（已投递到 devkit 所在仓的收件页）
 
 ## 2026-09-25 用到的插件写 peer：从 dev 挪到 peer，gwb.requires 已删
 
-来源：gwb-devkit（devkit 仓交接页「插件之间的运行时要求写 peer」，总控台会话），2026-09-25。插件管理 0.9.0、devkit 0.18.15 起生效，源上现在是插件管理 0.11.0、devkit 0.19.1。
+来源：gwb-lifecycle-plugins 仓（devkit 所在的仓，交接页「插件之间的运行时要求写 peer」，总控台会话），2026-09-25。插件管理 0.9.0、devkit 0.18.15 起生效，源上现在是插件管理 0.11.0、devkit 0.19.1。
 
 插件运行时用到的别的插件，从 devDependencies 挪到 peerDependencies，范围写 `^x.y.z`，下限写开发、验证时用的那一版；同一个仓里的插件写 `workspace:^`，发版时换成 `^<版本号>`。「用到」指：经 `ctx.inject` 用它的服务、经命令总线 `@godcreator/gwb-commands` 登记命令、用外壳 `@godcreator/gwb-shell` 注册窗格或样式令牌、import 它的类型。只用 `ctx.inject([...], fn)` 局部注入、缺了只少一部分功能的，在 `peerDependenciesMeta` 里标 `optional: true`；只按命令名调它的命令的不用写。写进 peer 的插件不再另写 dev：插件仓里 pnpm 会把 peer 装进 `node_modules`，类型从那里取。
 
@@ -149,7 +149,7 @@ hello 站写 20 条草稿记号，`check` 只认出 9 条，**不认的那 11 �
 
 ## 2026-09-25 要跟内核 0.7：gwb-docfirst-workflow 的 peer 里内核包改成 ^0.7.0
 
-来源：gwb-kernel（内核仓 `D:\unitfolders\igldu-gwbkernel\gwb-kernel`），提交 `6ab4ed8`，2026-09-25；总控台会话代投。
+来源：gwb-kernel（内核仓 `D:\unitfolders\igldu-gwbkernel\gwb-kernel`），提交 `6ab4ed8`，2026-09-25；总控台会话代为投递。
 
 内核包 `@godcreator/gwb-kernel-desktop` 马上从 0.6.2 发 0.7.0，这是破坏性版本：内核服务删掉了 `gwbKernel.launcherVersion`，home 里的 `runtime.json` 删掉了 `appDir`（内核仓轨迹卡 `2026-09-25-drop-launcher-version`）。此前 0.6.1、0.6.2 还给页面加了导航锁（内核仓 `docs-site/content/docs/seams/ipc.mdx` 的「页面保证」）：
 
@@ -161,7 +161,7 @@ hello 站写 20 条草稿记号，`check` 只认出 9 条，**不认的那 11 �
 
 - `@godcreator/gwb-docfirst-workflow`（`packages/gwb-docfirst-workflow/package.json`）：peer 第 40 行、dev 第 52 行写的都是 `^0.6.0`，不包含 0.7.0
 - `launcherVersion`、`appDir`：没有用到
-- 插件本身没有页面。`packages/docfirst-trajectory/src/react.tsx` 第 343 行有 `window.open(…, "_blank", "noopener")`（星轨盘点节点开卡页），那是文档站里的组件，不跑在工作台页面上；站被文档站插件的窗格用 iframe 显示时，这一下会交给系统浏览器打开，不用改
+- 插件本身没有页面。`packages/docfirst-trajectory/src/react.tsx` 第 343 行有 `window.open(…, "_blank", "noopener")`（在星轨盘上点节点打开卡片页），那是文档站里的组件，不跑在工作台页面上；站被文档站插件的窗格用 iframe 显示时，这次打开会交给系统浏览器，不用改
 
 要做的：
 
@@ -170,14 +170,14 @@ hello 站写 20 条草稿记号，`check` 只认出 9 条，**不认的那 11 �
 
 ## 2026-09-25 要跟 devkit 0.21：packages 必给，要发的包写 publishConfig.registry
 
-来源：gwb-devkit（devkit 仓 `D:\unitfolders\s28bv-gwbbase\gwb-devkit`），提交 `9caafe0`，2026-09-25；总控台会话代为投递。
+来源：gwb-lifecycle-plugins 仓（devkit 所在的仓，`D:\unitfolders\igldu-gwbkernel\gwb-lifecycle-plugins`），提交 `9caafe0`，2026-09-25；总控台会话代为投递。
 
-`@godcreator/gwb-devkit` 0.21.0 已发到团队源。这是破坏性版本，删掉了两个只为旧仓留着的缺省值（devkit 仓轨迹卡 `2026-09-25-drop-legacy-defaults`）：
+`@godcreator/gwb-devkit` 0.21.0 已发到团队源。这是破坏性版本，删掉了两个只为旧仓留着的缺省值（gwb-lifecycle-plugins 仓轨迹卡 `2026-09-25-drop-legacy-defaults`）：
 
-1. **`devkit.dev` 与 `devkit.release` 的 `packages` 必给**：非空数组，每一项是相对仓根的包目录，如 `["plugins/<短名>"]`；`devkit.release` 的按依赖顺序排，被依赖的排前面。不给或写错直接拒。这两条命令不再把仓根当成插件包：仓根本身就是插件包的仓（仓根 `package.json` 就是插件，`pnpm-workspace.yaml` 里没有 `plugins/*`）要先改成 workspace 布局才能用——插件放在 `plugins/<短名>/`，仓根是 `"private": true` 的 `package.json`，照 devkit 仓或 `devkit.scaffold` 新建的仓的样子。devkit 不替仓改布局
-2. **每个要发的包在自己的 `package.json` 里写 `publishConfig.registry`**：发到团队源写 `"publishConfig": { "registry": "https://git.tianshen02.online:28377/api/packages/godcreator/npm/" }`，发到别的源就写那个源的地址。没写的包 `devkit.release` 拒发。发到哪只看这个字段：`devkit.release` 不再在命令行带 `--registry`，这个字段的优先级也高于用户级 `~/.npmrc` 里的范围行（devkit 仓轨迹卡 `2026-09-25-scope-and-publish-target`）
+1. **`devkit.dev` 与 `devkit.release` 的 `packages` 必给**：非空数组，每一项是相对仓根的包目录，如 `["plugins/<短名>"]`；`devkit.release` 的按依赖顺序排，被依赖的排前面。不给或写错直接拒。这两条命令不再把仓根当成插件包：仓根本身就是插件包的仓（仓根 `package.json` 就是插件，`pnpm-workspace.yaml` 里没有 `plugins/*`）要先改成 workspace 布局才能用——插件放在 `plugins/<短名>/`，仓根是 `"private": true` 的 `package.json`，照 gwb-lifecycle-plugins 仓或 `devkit.scaffold` 新建的仓的样子。devkit 不替仓改布局
+2. **每个要发的包在自己的 `package.json` 里写 `publishConfig.registry`**：发到团队源写 `"publishConfig": { "registry": "https://git.tianshen02.online:28377/api/packages/godcreator/npm/" }`，发到别的源就写那个源的地址。没写的包 `devkit.release` 拒发。发到哪只看这个字段：`devkit.release` 不再在命令行带 `--registry`，这个字段的优先级也高于用户级 `~/.npmrc` 里的范围行（gwb-lifecycle-plugins 仓轨迹卡 `2026-09-25-scope-and-publish-target`）
 
-同一天还发了插件管理 0.12.1，修了发出去的包里带着过时文件的问题，用它的插件不用改。另外有一项早就可以做的清理：命令总线 `@godcreator/gwb-commands` 0.4.6 起（源上现在是 0.5.0），`gwbCommands.register` 自己把注销挂在调用方的上下文上，调用方卸载时命令自动注销，登记命令不用再在外面包一层 `ctx.effect(() => ….register(…))`。包着也只注销一次、照样能用，删不删随意；登记说明书的 `gwbSkills.register` 不是命令总线的方法，外面那层 `effect` 要留着。
+同一天还发了插件管理 0.12.1，修了发出去的包里带着过时文件的问题，用它的插件不用改。另外有一项早就可以做的清理：命令总线 `@godcreator/gwb-commands` 0.4.6 起（源上现在是 0.5.0），`gwbCommands.register` 自己把注销登记在调用方的上下文上，调用方卸载时命令自动注销，登记命令不用再在外面包一层 `ctx.effect(() => ….register(…))`。包着也只注销一次、照样能用，删不删随意；登记说明书的 `gwbSkills.register` 不是命令总线的方法，外面那层 `effect` 要留着。
 
 本仓的情况：
 
