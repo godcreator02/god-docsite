@@ -67,17 +67,7 @@ description: gwb-docfirst-workflow：一条给 fumadocs 骨架装上三个区的
 
 ## 依赖
 
-两个运行时依赖都是 cordis 的注入。`gwbCommands` 是**必需注入**，写在 `export const inject` 里——没有命令总线，这个插件对外什么都提供不了，缺它整个插件不加载：
-
-{/* ref file="../packages/gwb-docfirst-workflow/src/index.ts" lines="20-20" hash="397a91e60cb0" blob="ab455a957139" */}
-
-`gwbSkills` 是**局部注入**，只在注册说明书的那个作用域里要它；没装 skills 插件的 home 里本插件照常加载，只是少了说明书：
-
-{/* ref file="../packages/gwb-docfirst-workflow/src/index.ts" lines="116-118" hash="8a9dbe7a78c3" blob="ab455a957139" */}
-
-依赖字段照 devkit 的规矩写：运行时从 home 里得到的写 peer——内核包 `@godcreator/gwb-kernel-desktop`（`GwbContext` 从它的包根 `import type`）、命令总线、skills 插件（标 `optional`）。cordis 对服务不做版本校验，peer 范围是唯一的版本校验点。本仓 `pnpm-workspace.yaml` 关了 `autoInstallPeers`，所以这三个包在 dev 里再各写一份，否则装不进 `node_modules`、类型检查找不到。构建产物里没有按值 import 的包，所以 peer 里没有 `cordis`。为什么不再用接口类型包 `@godcreator/gwb-plugin-api`，见 [适配内核 0.6](/trajectory/2026-09-25-adapt-kernel-0-6-drop-plugin-api)。
-
-{/* ref file="../packages/gwb-docfirst-workflow/package.json" lines="36-56" hash="b26b412b100f" blob="f9e70cfe912d" */}
+注入了哪些服务、是必需还是局部注入、peer 怎么写，见[插件之间怎么连](/docs/wiring)。
 
 插件用 `tsc` 编译、跑在 TS 7 上、测试用 vitest；两个 npm 包是 tsdown + TS 6、测试用 `node --test`。两套工具链并存，各自的 `package.json` 说了算，不互相搬。
 
