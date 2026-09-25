@@ -37,7 +37,7 @@ description: 往一个已经铺好的 fumadocs 骨架上接 docfirst：唯一那
 
 守它的是插件自己的产物守卫——`package.json` 的三档依赖面加 `src/` 下每一行 import，哪一档出现 `@godcreator/docfirst-workflow` 都红：
 
-{/* ref file="../packages/gwb-docfirst-workflow/tests/artifact.test.ts" lines="103-118" */}
+{/* ref file="../packages/gwb-docfirst-workflow/tests/artifact.test.ts" lines="107-122" */}
 
 <Note>
   插件与包是两个独立发布的包，可 npm 拦不住「顺手把包写回 devDependencies」这一手。写回去，插件就攥着 home 里一条解析出来、当场定死的真实路径，包升级之后照读旧文件、零报错——那条守卫是唯一的门。
@@ -193,7 +193,7 @@ description: 往一个已经铺好的 fumadocs 骨架上接 docfirst：唯一那
 
 命令那一头没有自己的测试文件：它只有参数校验与回执组装，钉着它的是插件的产物守卫——**命令名是公共面**，总线上只剩装六区这一条，改名就是破约：
 
-{/* ref file="../packages/gwb-docfirst-workflow/tests/artifact.test.ts" lines="55-67" */}
+{/* ref file="../packages/gwb-docfirst-workflow/tests/artifact.test.ts" lines="59-71" */}
 
 ## 代码地图
 
