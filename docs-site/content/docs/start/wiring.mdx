@@ -10,7 +10,7 @@ description: 把 docfirst 接进一个 fumadocs 站要改的七处：配置、�
 读到的就是正在运行的那一份。
 
 建一个接好 docfirst 的站归工作台插件的 `docfirst.create`（[建站](/docs/modules/site)）：站点插件跑官方脚手架
-`create-fumadocs-app` 并写盘，docfirst 在官方输出上替换、删除、新增几份文件，模板在 `packages/gwb-docfirst-workflow/template/`。
+`create-fumadocs-app` 并写盘，docfirst 在官方输出上替换、删除、新增几份文件，模板在 `plugins/docfirst/template/`。
 **这个站与插件建出来的是同一套形状**：同一版脚手架、同样的官方路由（docs 页面、搜索、llms），差异只有星轨整页与
 站自己的组件和样式，见第四节末尾。
 
@@ -34,8 +34,8 @@ description: 把 docfirst 接进一个 fumadocs 站要改的七处：配置、�
 {/* ref file="../packages/docfirst-workflow/src/host/load.ts" lines="146-158" hash="299b55da5597" blob="485e0158da13" */}
 
 <Note>
-  引用里的路径**相对项目根**。这个站的项目根是站目录，被引的代码在工作区的 `packages/` 下，
-  所以记号里写的是 `../packages/…`。
+  引用里的路径**相对项目根**。这个站的项目根是站目录，被引的代码在工作区的 `packages/` 与 `plugins/` 下，
+  所以记号里写的是 `../packages/…` 或 `../plugins/…`。
 </Note>
 
 装好之后命令就是这几条，各自打印什么、退什么码见 [命令行](/docs/modules/cli)：
@@ -57,7 +57,7 @@ description: 把 docfirst 接进一个 fumadocs 站要改的七处：配置、�
 （自带 docs 与 meta 两个集合，`meta.json` 的侧栏排序直接可用）。macro 没有全局配置，docfirst 的插件只能按集合接，
 而集合级 `mdxOptions` 会把 fumadocs 的默认插件全去掉，所以写了它的集合都用 `applyMdxPreset` 把默认插件加回来。
 
-现状区挂上格式那一层给的 `docfirstMdxOptions`：remark 插件链末尾加上 docfirst 插件、meta 白名单放行 `data-dot`，
+现状区的集合用上格式那一层给的 `docfirstMdxOptions`：remark 插件链末尾加上 docfirst 插件、meta 白名单放行 `data-dot`，
 术语标注也在这儿；再开 processed markdown，序列化回调由格式那一层给，站上各页的机读版与 llms 路由从这里出。
 术语表正本是 `src/glossary.ts`，`skipFile` 把人写的那篇规范排除——它里头的词按字面读，不该被标注：
 
@@ -74,7 +74,7 @@ description: 把 docfirst 接进一个 fumadocs 站要改的七处：配置、�
 {/* ref file="src/lib/source.ts" lines="45-53" hash="e6fd7b3cff95" blob="8f433a032289" */}
 
 **docfirst 自己的 remark 插件只接在现状集合上，作用不到这个集合**——这正是要的：轨迹卡正文记的是当时的结论、
-不钉会变的代码，轨迹卡校验检查的也是这一条。未来区是裸集合，不写配置。
+不钉会变的代码，轨迹卡校验检查的也是这一条。未来区的集合不写任何配置。
 
 ## 三、loader 与一棵侧栏树
 
@@ -150,9 +150,9 @@ React 表先展开 fumadocs 的默认表（标题栏、复制按钮都是它的�
 
 目录树引用放进去的是 fumadocs 自己的 `Files` / `Folder` / `File`，两张表里都要有它们，转成机读文本的规则在包的
 默认名册里已经有了。`Term` 是构建时的术语标注生成的，源文件里一般没有，但编译出来的 JSX 会引用它，两张表也
-都得给。两处是否一致由 `scripts/verify-roster.mjs` 核对，不一致门禁就红。
+都得给。两处是否一致由 `scripts/verify-roster.mjs` 核对，不一致门禁就不通过。
 
-## 六、样式：不碰 global.css
+## 六、样式：不改 global.css
 
 `global.css` 是官方那份加上站点插件的字体设置，docfirst 不改它。状态点、术语标注、星轨盘的样式都随包发，
 站里分三份各引一行：docfirst 的状态点在 `src/app/docfirst.css`（跟建站模板那份相同），本站的术语标注与 Tabs 在
@@ -171,7 +171,7 @@ React 表先展开 fumadocs 的默认表（标题栏、复制按钮都是它的�
 
 {/* ref file="next.config.mjs" lines="7-28" hash="b8bf422c84c2" blob="3dce09f0872a" */}
 
-**`turbopack.root` 设到工作区根。**这个站的包从同一个 pnpm 工作区拿，`node_modules` 里是指向站外的
+**`turbopack.root` 设到工作区根。**这个站装的包来自同一个 pnpm 工作区，`node_modules` 里是指向站外的
 软链接；Turbopack 只认它 root 以内的文件，root 不设到工作区根，`packages/` 就不在它能读的范围里。用发布版包的项目不必管这条；
 轨迹卡目录也不必管——它在站自己的 `content/trajectory/` 里，本来就在 root 之内。
 
@@ -186,15 +186,15 @@ React 表先展开 fumadocs 的默认表（标题栏、复制按钮都是它的�
 `"use client"`，`StarDisk` 被当服务端组件渲染，一用到 hooks 就报错。包内部为这件事也付了代价——
 `server.tsx` 引 `./react` 用的是包名而不是相对源路径，为的是让 tsdown 把它当外部依赖、原样留在
 产物里；写成相对路径会在这次构建里被内联或拆成共享 chunk，`"use client"` 落到一个没人标记的文件上，
-两头都看不到边界。
+服务端与客户端两边都看不到这条边界。
 
 两条是同一类：**外置的边界会让客户端指令丢失**。不外置的代价只是 Turbopack 多打包一遍服务端那一半，
 那一半只在构建时运行、进不了客户端包。剩下一项是站根重定向到 `/docs`：三区各有各的 URL 前缀，
 现状区自己有 `index.mdx`。
 
 运行站要注意三件事：改了 `src/fumadocs/` 的代码**先删 `.next` 再 build**——Turbopack 只按 mdx 内容缓存，
-文档一个字没改它就不重跑 remark 插件，那一层里的改动看不见；调试用 `build` + `start`，不用 `next dev`，dev 那条链的缓存
-和热更新会让「这一版到底跑没跑我的插件」说不清；`start` 脚本写死的端口被别的进程占了就
+文档一个字没改它就不重跑 remark 插件，那一层里的改动看不见；调试用 `build` + `start`，不用 `next dev`，dev 模式的缓存
+和热更新会让「这一版到底有没有运行我的插件」说不清；`start` 脚本写死的端口被别的进程占了就
 `pnpm exec next start -p <别的端口>`，启动的站验证完就停掉。
 
 ## 附：分区

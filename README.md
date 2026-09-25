@@ -51,7 +51,7 @@ docfirst 只给出在官方输出上增、换、删哪些文件。站目录必�
 ```bash
 pnpm docfirst check                                 # 只读，报状态。红退 1；本仓未提交改动引起的黄也算红
 pnpm docfirst confirm                               # 机械写回：草稿换成正式记号，挪了位置的写回新行号，重新生成生成物
-pnpm docfirst confirm content/docs/a.mdx --accept   # 复核过后，签掉点名页里的黄灯；必须点名页
+pnpm docfirst confirm content/docs/a.mdx --accept   # 复核过后，接受点名页里的黄灯；必须点名页
 pnpm docfirst render                                # 只把 outputs 里有映射的生成正本渲染到落点
 ```
 
@@ -74,8 +74,8 @@ pnpm docfirst check
 先读现状区的**系统地图**，再读要改的那块的模块页。
 
 文档本身怎么写、分区各放什么、每页写到哪为止，正本是**随工作台插件发的 skill**，在
-`packages/gwb-docfirst-workflow/skills/`：写文档读 `docfirst-docs`、写轨迹卡读 `trajectory`、建站读 `docfirst`。
-说明书跟着插件走而不是跟着包走，是因为包没有独立的途径让 agent 读到——放在 `node_modules` 里的一份
+`plugins/docfirst/skills/`：写文档读 `docfirst-docs`、写轨迹卡读 `trajectory`、建站读 `docfirst`。
+说明书随插件发布而不随包发布，是因为包没有独立的途径让 agent 读到——放在 `node_modules` 里的一份
 SKILL.md 没有说明指向它、没人会读。通用开发纪律的三份也在这儿：接到需求先盘问读 `spec-grill`、
 任务大到要派子代理读 `parallel-by-module`、治理文档与注释读 `docs-governance`。
 
@@ -85,7 +85,7 @@ SKILL.md 没有说明指向它、没人会读。通用开发纪律的三份也�
 
 ```powershell
 pnpm install
-pnpm build          # 各包 tsdown，拓扑序
+pnpm build          # plugins/ 与 packages/ 下各自构建（插件 tsc、两个包 tsdown），拓扑序
 pnpm typecheck
 pnpm test           # 先 build 再 node --test tests/*.test.ts
 
@@ -95,7 +95,7 @@ pnpm test           # 站这一侧的接线（不启动 Next）
 pnpm build          # next build
 node scripts/verify-roster.mjs
 
-cd ../packages/gwb-docfirst-workflow
+cd ../plugins/docfirst
 pnpm check && pnpm build      # 工作台插件单独一套门禁，用 vitest
 ```
 

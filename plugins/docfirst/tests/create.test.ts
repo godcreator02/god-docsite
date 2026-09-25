@@ -18,7 +18,7 @@ import { readTemplate, renderFiles, renderText, TEMPLATE_ROOT, type SiteValues, 
  */
 
 const HERE = path.dirname(fileURLToPath(import.meta.url))
-const PACKAGES = path.resolve(HERE, '..', '..')
+const PACKAGES = path.resolve(HERE, '..', '..', '..', 'packages')
 
 /** 包名 → 它在 packages/ 下的目录名 */
 const DIR_OF: Record<string, string> = {
@@ -27,7 +27,7 @@ const DIR_OF: Record<string, string> = {
 }
 
 /**
- * 清单作用的那一套文件：官方脚手架 `create-fumadocs-app@16.2.9`（站点插件写死的版本，参数
+ * 清单作用的那一套文件：官方脚手架 `create-fumadocs-app@16.2.8`（站点插件写死的版本，参数
  * `--template +next+fuma-docs-mdx --src --search orama`）的输出，套完站点插件的本机约定之后——
  * 多了 pnpm-workspace.yaml，少了分享图路由 `src/app/og/docs/[...slug]/route.tsx` 与落地页 `src/app/(home)/` 两份。
  * 站点插件换脚手架版本或改本机约定时这张表跟着改：新增清单里的文件在这张表里就是重名，替换、删除清单里的不在就是找不到。

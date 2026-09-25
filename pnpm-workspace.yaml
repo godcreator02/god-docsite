@@ -1,4 +1,7 @@
+# devkit 的 workspace 布局：插件在 plugins/，不是插件的包在 packages/。
+# 文档站也是成员（站用 workspace:* 引主包），这是本仓有意的例外，理由见轨迹卡「插件挪到 plugins/docfirst」
 packages:
+  - plugins/*
   - packages/*
   - docs-site
 
@@ -13,7 +16,7 @@ onlyBuiltDependencies:
 autoInstallPeers: false
 
 # 这份文件**整份盖掉**用户级 pnpm 配置（不合并），所以全局那条 @godcreator/* 的放行得在这儿再写一遍——
-# 少了它 pnpm 装 packages/gwb-docfirst-workflow 的 gwb 依赖时会被 minimumReleaseAge（默认一天）全拦下
+# 少了它 pnpm 装 plugins/docfirst 的 gwb 依赖时会被 minimumReleaseAge（默认一天）全拦下
 minimumReleaseAgeExclude:
   - '@godcreator/*'
   - lucide-react@1.43.0

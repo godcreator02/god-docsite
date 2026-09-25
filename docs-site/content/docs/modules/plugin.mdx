@@ -5,27 +5,27 @@ description: gwb-docfirst-workflow：一条建站命令 docfirst.create（写盘
 
 **本页回答**：`@godcreator/gwb-docfirst-workflow` 提供什么、对外的接口长什么样、依赖谁、为什么一个字都不依赖 `@godcreator/docfirst-workflow`。
 
-包名 `@godcreator/gwb-docfirst-workflow`，源码在 `packages/gwb-docfirst-workflow/src/`，入口是 `src/index.ts`。
+包名 `@godcreator/gwb-docfirst-workflow`，包目录是 `plugins/docfirst/`（devkit 的 workspace 布局，插件放在 `plugins/<短名>/`），源码在 `src/`，入口是 `src/index.ts`。
 
 ## 功能
 
 这是 god 工作台（gwb）的一个插件，也是这个工作区里唯一不发成 npm 库的包。它提供两样东西：**一条命令 `docfirst.create`**，建一个接好 docfirst 三个区（现状 `docs`、轨迹 `trajectory`、未来 `future`）的文档站；**六份说明书**，随插件发布、注册给 skills 插件。分工写在入口文件的文件头上：
 
-{/* ref file="../packages/gwb-docfirst-workflow/src/index.ts" lines="12-18" hash="c5a0689623a3" blob="e30b67cc0142" */}
+{/* ref file="../plugins/docfirst/src/index.ts" lines="12-18" hash="c5a0689623a3" blob="e30b67cc0142" */}
 
 判据一句话：**包的使用者是仓，插件的使用者是 agent。** 要在仓里发生的事（核对、确认、渲染，门禁与站构建都要运行）归 `@godcreator/docfirst-workflow` 那个包，agent 自己 `cd` 到那个仓里跑 `pnpm doc`；只在 agent 手上发生一次的事（读一份说明书、给一个仓建一次站）归插件。这条判据怎么推出来的、否掉了哪几条候选，见 [包给仓、插件给人](/trajectory/2026-09-10-package-serves-repo-plugin-serves-agent)。
 
 建站时在官方脚手架输出上增、换、删哪些文件、参数怎么算、写盘交给谁，全在 [建站](/docs/modules/site)；插件这一侧只做参数检查、调站点插件与回执组装，入口文件往下认识的是算参数的那个纯函数：
 
-{/* has file="../packages/gwb-docfirst-workflow/src/index.ts" text="planCreate } from './create.js'" */}
+{/* has file="../plugins/docfirst/src/index.ts" text="planCreate } from './create.js'" */}
 
 六份说明书分两类。讲 docfirst 这套机制的三份：`docfirst`（插件自己怎么用）、`docfirst-docs`（文档站怎么写）、`trajectory`（轨迹卡怎么记）；讲通用开发纪律的三份：`spec-grill`（接到需求先盘问）、`parallel-by-module`（按模块派子代理）、`docs-governance`（文档与注释治理）。
 
-{/* tree dir="../packages/gwb-docfirst-workflow/skills" depth="1" hash="c698adfead86" */}
+{/* tree dir="../plugins/docfirst/skills" depth="1" hash="c698adfead86" */}
 
 六份的正本都在这个站的 `content/docs/outputs/skills/` 下（跟包在同一个仓才改得动，纪律那三份也要跟钉码写法、分区保持一致），由 `docfirst.config.mjs` 的 `outputs` 映射生成到插件的 `skills/`。纪律那三份为什么放回本仓，见 [三份纪律并回本仓](/trajectory/2026-09-10-dev-discipline-comes-home)：
 
-{/* ref file="docfirst.config.mjs" lines="17-27" hash="c8718f9535ab" blob="fce0d84ad1f9" */}
+{/* ref file="docfirst.config.mjs" lines="17-27" hash="af75681a2406" blob="3271a37f8bd2" */}
 
 生成物放插件、不放包：包装在 `node_modules` 里，没有任何说明指向它，agent 不会去读；说明书能被 agent 读到，全靠插件把自己包里的 `skills/` 目录注册给 skills 插件。
 
@@ -33,60 +33,60 @@ description: gwb-docfirst-workflow：一条建站命令 docfirst.create（写盘
 
 对外只有**命令总线上的一条 `docfirst.create`**，参数 `{ dir, title?, port? }`。插件的身份是插件名、命令名与两条必需的注入；它要按名字调的站点插件命令也在这儿：
 
-{/* ref file="../packages/gwb-docfirst-workflow/src/index.ts" lines="19-27" hash="0627758dac4b" blob="6a5b09c96de8" */}
+{/* ref file="../plugins/docfirst/src/index.ts" lines="19-27" hash="0627758dac4b" blob="6a5b09c96de8" */}
 
 登记时的 `description` 与 `usage` 是公共接口的一部分——agent 只看得见这两段。`usage` 写清参数、站目录必须还不存在而仓目录必须已经存在、显示名怎么认、站点插件跑官方脚手架并写盘而本插件给出增、换、删哪些文件、只写文件不跑安装，以及回执各字段的意思：
 
-{/* ref file="../packages/gwb-docfirst-workflow/src/index.ts" lines="58-70" hash="7e92453d6605" blob="e30b67cc0142" */}
+{/* ref file="../plugins/docfirst/src/index.ts" lines="58-70" hash="7e92453d6605" blob="e30b67cc0142" */}
 
 参数是外部输入，逐项校验、不认识的键直接报错。`dir` 必须是绝对路径——插件在工作台主进程里运行，不知道相对于哪个目录；它的上一级（仓目录）必须已经存在。站目录还不能存在，这条由站点插件检查：
 
-{/* ref file="../packages/gwb-docfirst-workflow/src/index.ts" lines="123-140" hash="2899606f491c" blob="e30b67cc0142" */}
+{/* ref file="../plugins/docfirst/src/index.ts" lines="123-140" hash="2899606f491c" blob="e30b67cc0142" */}
 
 校验过后读模板与仓根、算出参数，按名字调 `docs-site.create`。它回失败，错误文本原样带上、前面加上是哪条命令没建成；回了成功但回执形状不对，也报错：
 
-{/* ref file="../packages/gwb-docfirst-workflow/src/index.ts" lines="78-92" hash="5d8f313fe2f4" blob="e30b67cc0142" */}
+{/* ref file="../plugins/docfirst/src/index.ts" lines="78-92" hash="5d8f313fe2f4" blob="e30b67cc0142" */}
 
 成功时的回执：站目录、站所在的仓、站点插件定下的端口、写了哪些文件（`written`，就是站点插件回执里的 `files`）、仓根哪些文件第一次 render 会被覆盖（`overwrites`），以及接着要在站目录里跑的命令（`next`）。`overwrites` 非空时多一条 `warn`：先把仓根那份的内容移进 `content/docs/outputs/` 下对应的 mdx 正本，再 render。
 
-{/* ref file="../packages/gwb-docfirst-workflow/src/index.ts" lines="94-110" hash="8f7880cdfa76" blob="e30b67cc0142" */}
+{/* ref file="../plugins/docfirst/src/index.ts" lines="94-110" hash="8f7880cdfa76" blob="e30b67cc0142" */}
 
 `next` 就是建完之后要自己跑的那几条：
 
-{/* ref file="../packages/gwb-docfirst-workflow/src/index.ts" lines="171-180" hash="b3fcddc37562" blob="e30b67cc0142" */}
+{/* ref file="../plugins/docfirst/src/index.ts" lines="171-180" hash="b3fcddc37562" blob="e30b67cc0142" */}
 
 命令名是公共接口，改名就破坏兼容；产物检查确认总线上只有这一条命令、旧命令名一个都不再出现：
 
-{/* ref file="../packages/gwb-docfirst-workflow/tests/artifact.test.ts" lines="59-72" hash="947bf757f4cc" blob="456661fd1706" */}
+{/* ref file="../plugins/docfirst/tests/artifact.test.ts" lines="59-72" hash="947bf757f4cc" blob="456661fd1706" */}
 
 说明书与模板不是代码，靠 `package.json` 的 `files` 发布：
 
-{/* ref file="../packages/gwb-docfirst-workflow/package.json" lines="18-23" hash="b5196ee35d31" blob="f285e7cbd770" */}
+{/* ref file="../plugins/docfirst/package.json" lines="18-23" hash="b5196ee35d31" blob="f285e7cbd770" */}
 
 ## 依赖
 
 注入了哪些服务、是必需还是局部注入、peer 怎么写、按名字调了哪条命令，见[插件之间怎么连](/docs/wiring)。
 
-插件用 `tsc` 编译、跑在 TS 7 上、测试用 vitest；两个 npm 包是 tsdown + TS 6、测试用 `node --test`。两套工具链并存，各自的 `package.json` 说了算，不互相搬。
+插件用 `tsc` 编译、跑在 TS 7 上、测试用 vitest；两个 npm 包是 tsdown + TS 6、测试用 `node --test`。两套工具链并存，以各自的 `package.json` 为准，不互相照搬。
 
 ## 不做的事
 
 **不依赖 `@godcreator/docfirst-workflow`。** 三类依赖字段一个都不写、`src/` 里一行都不 import：不启动子进程、不登记 node CLI、不查 home 里那个包的路径。装了插件就能注册说明书、能建站，不存在「装了插件没装包」那种只装了一半的状态。代价是 agent 要核对得自己 `cd` 到仓里跑，比调一条命令多一步。守卫在产物检查里：
 
-{/* ref file="../packages/gwb-docfirst-workflow/tests/artifact.test.ts" lines="99-122" hash="daa3cc5f486d" blob="73a65ff41226" */}
+{/* ref file="../plugins/docfirst/tests/artifact.test.ts" lines="99-122" hash="daa3cc5f486d" blob="73a65ff41226" */}
 
 **不转发命令行。** 核对、确认、渲染都不经过插件——转发一条命令行，就是把要在仓里发生的事又挪回插件里：
 
-{/* ref file="../packages/gwb-docfirst-workflow/tests/artifact.test.ts" lines="124-131" hash="7f5543f262d0" blob="73a65ff41226" */}
+{/* ref file="../plugins/docfirst/tests/artifact.test.ts" lines="124-131" hash="7f5543f262d0" blob="73a65ff41226" */}
 
 **不读核对结果。** 判定、比较、报告的形状一样都不认识，连 `check --json` 的机读报告都不读。哪一页漂移了、一处钉码为什么黄，问的是仓里那条命令行。
 
 **不管站。** 扫容器根找站、判断 build 是不是最新、挑端口启动停止、到时间关闭、站的窗格，全归站点插件 `@godcreator/gwb-docs-site`；建站时跑官方脚手架、套本机约定与写盘也归它。本插件对它单向依赖：注入它的存在标记、按名字调它的 `docs-site.create`、只 `import type` 它的参数类型，站点插件不认识本插件。本插件这一侧的检查：
 
-{/* ref file="../packages/gwb-docfirst-workflow/tests/artifact.test.ts" lines="140-156" hash="398db2a8320a" blob="73a65ff41226" */}
+{/* ref file="../plugins/docfirst/tests/artifact.test.ts" lines="140-156" hash="398db2a8320a" blob="73a65ff41226" */}
 
 **不注册窗格。** 站点插件的窗格已经叫「文档站」，两个同名窗格分不清。所以本插件没有浏览器端的代码，`build` 只有一步 `tsc`：
 
-{/* ref file="../packages/gwb-docfirst-workflow/package.json" lines="24-32" hash="b1e8f7ece99c" blob="f285e7cbd770" */}
+{/* ref file="../plugins/docfirst/package.json" lines="24-32" hash="b1e8f7ece99c" blob="f285e7cbd770" */}
 
 **不装依赖、不渲染、不核对。** 建站只写文件；建完有没有人真去跑回执里那几条，是人和 agent 的事。

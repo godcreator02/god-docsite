@@ -1,9 +1,9 @@
 # god-live-doc
 
 **仓根就是这个目录 `god-live-doc/`**，它同时是 pnpm 包工作区。上一级是单元目录，那儿只有一张
-出生证 `unit.json`，不在 git 里。仓里三样：`packages/` 下两个 npm 包（`docfirst-workflow` 主包、
-`docfirst-trajectory` 轨迹包）外加一个工作台插件 `gwb-docfirst-workflow`，`docs-site/` 是自己的 fumadocs 文档站
-（用这套机制写自己的文档，也是工作区成员），`tests/` 是工作区级测试。
+出生证 `unit.json`，不在 git 里。布局照 devkit 的 workspace 仓：`plugins/docfirst/` 是工作台插件 `@godcreator/gwb-docfirst-workflow`，
+`packages/` 下两个 npm 包（`docfirst-workflow` 主包、`docfirst-trajectory` 轨迹包），`docs-site/` 是自己的 fumadocs 文档站
+（用这套机制写自己的文档；站用 `workspace:*` 引主包，也是工作区成员，这是本仓有意的例外），`tests/` 是工作区级测试。
 **怎么装、怎么接、怎么跑，看 `README.md`**，这儿不复述。
 
 使用方示例不在仓里：`docs-site` 就是「装了这两个包的项目」，钉的是工作区里的真源码。
@@ -16,7 +16,7 @@ README、CLAUDE.md、这份规矩与插件里的六份 SKILL.md 都是**生成�
 **动手前先读文档站**：`docs-site/content/docs/system-map.mdx` 是总地图，七个模块各一页在
 `content/docs/modules/`，接口与边界逐条钉在真源码上。文档怎么写、分区怎么分、钉码怎么确认，
 正本是随工作台插件发的 skill「docfirst-docs」（生成物在
-`packages/gwb-docfirst-workflow/skills/docfirst-docs/SKILL.md`），动文档前读它。
+`plugins/docfirst/skills/docfirst-docs/SKILL.md`），动文档前读它。
 **改了被钉的代码，就在同一个提交里处理它引起的黄灯**：本仓未提交改动引起的黄灯，`pnpm docfirst check` 算红。
 
 ## 参考，不要改
@@ -24,7 +24,7 @@ README、CLAUDE.md、这份规矩与插件里的六份 SKILL.md 都是**生成�
 - 实验室 `D:\dshfiles\260901lab`（台阶七 `step7-packages` / `step7-site` / `step7-mini`）：架构定案的出处，
   教学代码，**只读**。要搬逻辑就搬，别 import 它。它在**老根** `D:\dshfiles`（DSH 时代的归档区），
   本仓在 `D:\unitfolders` 下的单元里，这是跨根引用。
-- 老仓 `D:\dshfiles\26082711aju\god-live-doc`（同在老根）：用 git 取旧内容那条线的出处，**只读**。
+- 老仓 `D:\dshfiles\26082711aju\god-live-doc`（同在老根）：用 git 取旧内容这项功能的出处，**只读**。
   功能已对齐，不再参考，代码只看这个仓。
 
 ## 规矩
@@ -32,24 +32,24 @@ README、CLAUDE.md、这份规矩与插件里的六份 SKILL.md 都是**生成�
 - 中文写注释、文档、提交信息；标识符英文。注释只写现状，不写「原来怎么样」。
 - TS，pnpm，测试用 `node --test`（工作区里的测试是 `.ts`，Node 直接跑；站里的是 `.mjs`）。
   **例外只有工作台插件**：它用 vitest，跟 devkit 建出来的插件骨架一致，不为一个插件改骨架。
-  不用 threads 池 / native loader 那类沙箱绕行，同仓不并行跑测试。
-- 工具链两套并存，别互相搬：两个 npm 包是 tsdown + TS 6；工作台插件是 `tsc`，跑在 TS 7 上。
-  各自的 `package.json` 说了算。
-- **主包 `src/` 下四层，方向单向**：`engine`（判定，只用 `node:crypto`）→ `host`（碰环境）→
+  不用 threads 池 / native loader 那类绕开沙箱的做法，同仓不并行跑测试。
+- 工具链两套并存，别互相照搬：两个 npm 包是 tsdown + TS 6；工作台插件是 `tsc`，跑在 TS 7 上。
+  以各自的 `package.json` 为准。
+- **主包 `src/` 下四层，方向单向**：`engine`（判定，只用 `node:crypto`）→ `host`（访问环境）→
   `fumadocs`（格式实现与站接线）→ `cli`（入口：check / confirm / render / trajectory，外加一次性的 migrate-ledger）。
-  轨迹是独立包线，只被 `cli` 用。**包与插件互不认识**：包不许出现任何 `@godcreator/gwb-*`，插件也
+  轨迹是独立的一个包，只被 `cli` 用。**包与插件互不认识**：包不许出现任何 `@godcreator/gwb-*`，插件也
   不许依赖包，两个方向各由 `tests/boundary.test.ts` 与插件的 `tests/artifact.test.ts` 检查。
-  **`tests/boundary.test.ts` 是唯一的边界守卫**，别绕、别删、别为了让门禁绿注释掉某一条。
+  **`tests/boundary.test.ts` 是唯一的边界守卫**，别绕、别删、别为了让门禁通过注释掉某一条。
 - **要在仓里发生的（核对、确认、渲染）归包，只在 agent 手上发生一次的归插件**：建站
-  （`docfirst.create`）与六份说明书在 `packages/gwb-docfirst-workflow/`。站的管理（扫描站、启动与停止、端口、窗格）
+  （`docfirst.create`）与六份说明书在 `plugins/docfirst/`。站的管理（扫描站、启动与停止、端口、窗格）
   与建站时的构建环境、写盘归站点插件 `@godcreator/gwb-docs-site`；本插件单向依赖它，注入 `gwbDocsSite`、按名字调 `docs-site.create`。
 - 子进程调用一律带超时。
-- 门禁，三处都要绿才提交：
+- 门禁，三处都要通过才提交：
   - 仓根：`pnpm test`、`pnpm typecheck`、`pnpm build`
   - `docs-site/`：`pnpm docfirst check`、`pnpm test`、`pnpm build`、`node scripts/verify-roster.mjs`
-  - `packages/gwb-docfirst-workflow/`：`pnpm check`（typecheck + oxlint + vitest）、`pnpm build`
+  - `plugins/docfirst/`：`pnpm check`（typecheck + oxlint + vitest）、`pnpm build`
 - 发版 **两边各发各的、没有先后**：插件对包零依赖。两个包升版本号时跟着改
-  `packages/gwb-docfirst-workflow/src/deps.ts` 那张表——插件的 `tests/create.test.ts` 检查它。
+  `plugins/docfirst/src/deps.ts` 那张表——插件的 `tests/create.test.ts` 检查它。
 - 改了 `src/fumadocs/` 的代码，站要先删 `.next` 再 build。调试站用 build + start，不用 dev；
   启动的站验完必须停掉。
 - 提交按步骤拆，一个提交一件事。提交信息末尾带 `Co-Authored-By` 与 `Claude-Session` 行（会话里给的那两行）。

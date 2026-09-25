@@ -46,7 +46,7 @@
   },
   "devDependencies": {
     "@godcreator/gwb-commands": "^0.5.2",
-    "@godcreator/gwb-docs-site": "link:../../../gwb-docs-site",
+    "@godcreator/gwb-docs-site": "^0.6.0",
     "@godcreator/gwb-kernel-desktop": "^0.7.2",
     "@godcreator/gwb-skills": "^0.4.5",
     "@types/node": "^24.0.0",

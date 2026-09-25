@@ -1,7 +1,7 @@
 /**
  * 这个项目的 docfirst 配置：用哪个格式、生成物写到哪、组件名册是什么。命令行和站读的是同一份。
  *
- * 项目根是这个站目录，引用的代码在工作区的 packages/ 下，所以引用里写 `../packages/…`。
+ * 项目根是这个站目录，引用的代码在工作区的 packages/ 与 plugins/ 下，所以引用里写 `../packages/…` 或 `../plugins/…`。
  * 分区按约定：content/ 下 trajectory/ 与 future/ 两个名字固定，其余目录都是现状区、都进 check；
  * 本站的现状区只有 content/docs。
  * outputs：仓根 README.md / AGENTS.md / CLAUDE.md 和插件里的几份 SKILL.md 是生成物，正本是下面映射左边的 mdx
@@ -24,7 +24,7 @@ import * as tabs from "./src/components/tabs/tabs.ai.mjs";
  * 才检查得了，所以正本都在这儿。生成物却不能放进包：包装在 node_modules 里，没有任何说明指向它，
  * agent 不会去读；agent 能读到这些 skill，全靠插件 `register` 了自己包里的 `skills/` 目录。
  */
-const skill = (name) => ({ to: `../packages/gwb-docfirst-workflow/skills/${name}/SKILL.md`, frontmatter: ["name", "description"] });
+const skill = (name) => ({ to: `../plugins/docfirst/skills/${name}/SKILL.md`, frontmatter: ["name", "description"] });
 
 export default {
   formats: [fumadocs],

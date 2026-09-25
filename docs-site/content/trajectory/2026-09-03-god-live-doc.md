@@ -21,3 +21,4 @@ label: livedoc
 
 - 2026-09-25｜建站交给站点插件｜docfirst.create 一步建站：站点插件跑官方脚手架、套本机约定并写盘，docfirst 只给增、换、删三个文件清单，对不上报错不覆盖。
 - 2026-09-25｜集合移到 macro｜跟上 fumadocs 的新写法：集合写在 src/lib/source.ts，现状集合经 applyMdxPreset 接 docfirst；在官方脚手架输出上只改几份文件，本仓自己的站也迁到同一形式。
+- 2026-09-25｜插件挪到 plugins/docfirst｜照 devkit 的 workspace 布局，插件放 plugins/<短名>/、两个 npm 包留在 packages/；文档站仍是工作区成员，这是本仓有意的例外。

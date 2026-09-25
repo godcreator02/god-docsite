@@ -11,7 +11,7 @@ description: 几组测试各检查什么：判定层、契约、git 那一侧、
 | --- | --- |
 | 工作区根 | `pnpm test`（先 build，再 `node --test tests/*.test.ts`） |
 | `docs-site/`（这个站） | `pnpm test` |
-| `packages/gwb-docfirst-workflow/`（[工作台插件](/docs/modules/plugin)） | `pnpm check`（typecheck + oxlint + vitest） |
+| `plugins/docfirst/`（[工作台插件](/docs/modules/plugin)） | `pnpm check`（typecheck + oxlint + vitest） |
 
 插件那组用 vitest，是 `node --test` 唯一的例外：它跟 devkit 生成的插件初始文件一致，不为一个插件改那套初始配置；
 工作区根的 `test` 脚本因此不收它。建站参数的测试、插件对包零依赖那条规矩都由插件自己的测试检查，归
@@ -96,7 +96,7 @@ description: 几组测试各检查什么：判定层、契约、git 那一侧、
 ## 边界测试：读目录方向，不读源码措辞
 
 主包一个包四层，同一个包里「谁能依赖谁」编译器不管：`engine/` 里随手写一句 `import "../host/git.ts"`
-编译器不会报错。这份测试是这条方向**唯一**的守卫，它检查的第一样就是目录方向，列的是禁止面不是允许面：
+编译器不会报错。这份测试是这条方向**唯一**的守卫，它检查的第一样就是目录方向，列的是禁止的层不是允许的层：
 
 {/* ref file="../tests/boundary.test.ts" lines="98-103" hash="cb37b2f53b68" blob="421b08df5caa" */}
 
@@ -109,22 +109,22 @@ description: 几组测试各检查什么：判定层、契约、git 那一侧、
 {/* ref file="../tests/boundary.test.ts" lines="155-170" hash="cdb5ac3891a7" blob="421b08df5caa" */}
 
 <Note>
-  **它报红的时候，红的是设计，不是测试。** 真要改方向，改的是那张表加一段说明为什么——
-  不是把断言删掉，更不是为了让门禁变绿注释掉某一条。
+  **它失败的时候，出错的是设计，不是测试。** 真要改方向，改的是那张表加一段说明为什么——
+  不是把断言删掉，更不是为了让门禁通过注释掉某一条。
 </Note>
 
-## 站测试：不启动 Next，走同一条链
+## 站测试：不启动 Next，经过构建时的同一条处理流程
 
-`register()` 把 fumadocs 的 Node loader 注册进 Node，`import` 一篇 `.mdx` 走的就是站构建那条链——
+`register()` 把 fumadocs 的 Node loader 注册进 Node，`import` 一篇 `.mdx` 经过的就是站构建时的那条处理流程——
 不用启动服务器，也不是另写一条模拟。集合用 macro 写在 `src/lib/source.ts` 里，导入时的查询参数写
 `?macro_id=src/lib/source.ts#docs`（`#` 编码成 `%23`），loader 才找得到现状集合、用上它的 `mdxOptions` 与 postprocess。断言四样：每条引用在页面上都有一个带 `data-dot` 和来源标题的元素、
-组件由 React 表画出来（没有裸标签漏出去）、`_markdown` 里有来源行且组件被压平、以及**这个站自己全绿**。
+组件由 React 表画出来（没有裸标签漏出去）、`_markdown` 里有来源行且组件已转成纯文本、以及**这个站自己全绿**。
 
 {/* ref file="tests/page.test.mjs" lines="124-132" hash="10ebafcc9456" blob="5ae8125b5dda" */}
 
 <Note>
   站测试**不跟命令行比状态**：算状态的是同一个服务，比出来只能相等，比了也证明不了什么。
-  跨调用方的比对留给启动站后抓 `.md` 路由。
+  跨调用方的比对留给启动站后请求 `.md` 路由。
 </Note>
 
 ## 文档防止漂移：这个站自己就是测试

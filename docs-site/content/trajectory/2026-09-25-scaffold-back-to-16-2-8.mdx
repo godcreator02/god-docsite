@@ -1,0 +1,54 @@
+---
+born-at: 2026-09-25T23:59
+type: choice
+parent: [2026-09-03-god-live-doc]
+label: 脚手架回退到 16.2.8
+domain: 分发
+---
+
+## 背景
+
+站点插件写死的官方脚手架 `create-fumadocs-app@16.2.9` 在输出的 `package.json` 里写死 `fumadocs-mdx` 15.4.5，这一版
+2026-09-25 才发布。pnpm 默认不装发布不满一天的版本；本仓的站是工作区成员，仓根锁文件里的 fumadocs-mdx 15.4.5，
+连同同一天发布的间接依赖 framer-motion、motion、motion-dom 13.4.4，让仓根 `pnpm install` 直接失败，devkit 发版时
+在仓根构建也过不了。报错原文（本次会话运行 `pnpm install` 的输出，没有另存实验目录）：
+
+```text
+ERR_PNPM_MINIMUM_RELEASE_AGE_VIOLATION
+  4 lockfile entries failed verification:
+    framer-motion@13.4.4 was published at 2026-09-25T10:03:13.145Z
+    fumadocs-mdx@15.4.5 was published at 2026-09-25T05:04:53.000Z
+    motion-dom@13.4.4 was published at 2026-09-25T10:06:06.144Z
+    motion@13.4.4 was published at 2026-09-25T10:06:19.859Z
+```
+
+这张卡改的是集合那张卡定下的脚手架版本：
+pivots-from:: [集合移到 macro](2026-09-25-fumadocs-macro-collections.md)
+
+## 结论与边界
+
+**脚手架回退到 16.2.8，本仓站的 `fumadocs-mdx` 写 15.4.4。** 16.2.8 的输出与 16.2.9 只差 `package.json` 里
+fumadocs-mdx 的版本号和模板自己的 version（主会话比对的结果，本仓没有复核），所以插件测试里那张官方输出文件表不变，
+只改注明的来源版本；在官方输出上替换的几份模板也不变。站点插件那个仓同时改它写死的版本。
+
+**仓根锁文件在不放开发布期限的情况下重新解析。** 删掉锁文件里 fumadocs-mdx 15.4.5、framer-motion / motion /
+motion-dom 13.4.4 的条目，以及引用它们的 `@fumadocs/base-ui` 条目，再运行 `pnpm install`：pnpm 只选满一天的版本，
+解析出 fumadocs-mdx 15.4.4、framer-motion 13.4.3、motion 13.4.3、motion-dom 13.4.2。之后不设
+`pnpm_config_minimum_release_age` 时 `pnpm install --frozen-lockfile` 通过。
+
+## 否掉的候选
+
+**设 `pnpm_config_minimum_release_age=0` 放开。** 只在设了它的那个 shell 里生效，devkit 发版与别的机器照样被拦；
+写进配置文件又等于对所有依赖取消这条保护。
+
+**`pnpm clean --lockfile` 整份重新解析。** 范围内的依赖会全部换到最新的满一天版本，改动面远大于出问题的四个包；
+只删这几条，其余版本保持不变。
+
+**等一天再发版。** 发版要在今天完成。
+
+## 代价与遗留
+
+**脚手架比最新版落后一版。** fumadocs-mdx 15.4.5 满一天之后可以升回 16.2.9，那时站点插件写死的版本、本仓站的依赖
+与插件测试注明的来源版本一起改。
+
+**集合那张卡里写的 16.2.9 与 15.4.5 是当时的事实，不改**；脚手架版本以这张卡为准。

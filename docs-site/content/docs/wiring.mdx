@@ -3,9 +3,9 @@ title: 插件之间怎么连
 description: 本仓唯一的插件 gwb-docfirst-workflow 提供一条命令与六份说明书，必需注入命令总线与站点插件的存在标记、局部注入 skills 插件，按名字调站点插件的 docs-site.create
 ---
 
-**本页回答**：本仓插件提供哪些服务、命令与事件；注入了哪些服务、是必需还是局部注入、peer 怎么写；按名字调用了别家哪些命令、用了哪些约定通道。
+**本页回答**：本仓插件提供哪些服务、命令与事件；注入了哪些服务、是必需还是局部注入、peer 怎么写；按名字调用了别的插件哪些命令、用了哪些约定通道。
 
-本仓只有一个插件；两个 npm 包 `@godcreator/docfirst-workflow`、`@godcreator/docfirst-trajectory` 不是插件，不在这一页，它们也不认识任何 gwb 插件。
+本仓只有一个插件，在 `plugins/docfirst/`；`packages/` 下两个 npm 包 `@godcreator/docfirst-workflow`、`@godcreator/docfirst-trajectory` 不是插件，不在这一页，它们也不认识任何 gwb 插件。
 
 ## @godcreator/gwb-docfirst-workflow
 
@@ -18,7 +18,7 @@ description: 本仓唯一的插件 gwb-docfirst-workflow 提供一条命令与�
 
 不提供服务、事件、窗格，也没有给别的插件按值 import 的导出。
 
-{/* has file="../packages/gwb-docfirst-workflow/src/index.ts" text="export const CREATE_COMMAND = 'docfirst.create'" */}
+{/* has file="../plugins/docfirst/src/index.ts" text="export const CREATE_COMMAND = 'docfirst.create'" */}
 
 ### 注入
 
@@ -28,15 +28,15 @@ description: 本仓唯一的插件 gwb-docfirst-workflow 提供一条命令与�
 | `gwbDocsSite` | `@godcreator/gwb-docs-site` | 必需 | `^0.6.0` | 存在标记：保证站点插件装了，`docs-site.create` 调得到 | 插件不加载 |
 | `gwbSkills` | `@godcreator/gwb-skills` | 局部注入 | `^0.4.5`，`optional: true` | 注册 `skills/` 下的说明书 | 命令照常可用，只是读不到说明书 |
 
-{/* has file="../packages/gwb-docfirst-workflow/src/index.ts" text="export const inject = ['gwbCommands', 'gwbDocsSite']" */}
+{/* has file="../plugins/docfirst/src/index.ts" text="export const inject = ['gwbCommands', 'gwbDocsSite']" */}
 
-{/* has file="../packages/gwb-docfirst-workflow/src/index.ts" text="ctx.inject(['gwbSkills']" */}
+{/* has file="../plugins/docfirst/src/index.ts" text="ctx.inject(['gwbSkills']" */}
 
-{/* has file="../packages/gwb-docfirst-workflow/package.json" text="gwb-commands&quot;: &quot;^0.5.0&quot;" */}
+{/* has file="../plugins/docfirst/package.json" text="gwb-commands&quot;: &quot;^0.5.0&quot;" */}
 
-{/* has file="../packages/gwb-docfirst-workflow/package.json" text="gwb-docs-site&quot;: &quot;^0.6.0" */}
+{/* has file="../plugins/docfirst/package.json" text="gwb-docs-site&quot;: &quot;^0.6.0" */}
 
-{/* has file="../packages/gwb-docfirst-workflow/package.json" text="gwb-skills&quot;: &quot;^0.4.5&quot;" */}
+{/* has file="../plugins/docfirst/package.json" text="gwb-skills&quot;: &quot;^0.4.5&quot;" */}
 
 `gwbDocsSite` 是个空对象，只表示「站点插件装了」；站点插件的动作都是命令，服务不带方法。本插件从它的包根
 `import type` 几样：让 `ctx.gwbDocsSite` 有类型的那段 `declare module 'cordis'`，以及 `docs-site.create` 的参数类型
@@ -46,7 +46,7 @@ peer 里另有内核包 `@godcreator/gwb-kernel-desktop`（`GwbContext` 从它�
 构建产物里没有按值 import 的包，所以 peer 里没有 `cordis`。本仓 `pnpm-workspace.yaml` 关了 `autoInstallPeers`，
 所以 peer 里的四个包在 dev 里再各写一份，否则装不进 `node_modules`、类型检查找不到。
 
-{/* has file="../packages/gwb-docfirst-workflow/package.json" text="gwb-kernel-desktop&quot;: &quot;^0.7.2&quot;" */}
+{/* has file="../plugins/docfirst/package.json" text="gwb-kernel-desktop&quot;: &quot;^0.7.2&quot;" */}
 
 ### 按名字调用与约定通道
 
@@ -54,7 +54,7 @@ peer 里另有内核包 `@godcreator/gwb-kernel-desktop`（`GwbContext` 从它�
 | --- | --- | --- | --- |
 | 命令 | `@godcreator/gwb-docs-site` | `docs-site.create` | 建站：站点插件跑官方脚手架、套本机约定并写盘；本插件交出在官方输出上增、换、删哪些文件（`addFiles`、`replaceFiles`、`removeFiles`）、docfirst 依赖与 doc 脚本 |
 
-{/* has file="../packages/gwb-docfirst-workflow/src/index.ts" text="const DOCS_SITE_CREATE = 'docs-site.create'" */}
+{/* has file="../plugins/docfirst/src/index.ts" text="const DOCS_SITE_CREATE = 'docs-site.create'" */}
 
 方向是本插件到站点插件单向：站点插件不认识本插件，也不知道 docfirst 是什么，本插件交给它的只是几组普通的文件与依赖。
-不推、不收事件，不起子进程，不联网（跑脚手架要联网的是站点插件）。
+不发出、不监听事件，不启动子进程，不联网（运行脚手架要联网的是站点插件）。

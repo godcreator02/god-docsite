@@ -210,7 +210,7 @@ remark 插件 `remarkTrajectoryLinks`：把关系边段落转成带 `data-kind` 
 **不依赖 docfirst 主包，也不认识它的判定层。**第四层校验用的记号正则是照判定层的写法独立写的一份，不 import。
 `.` 入口的源码只许 import 包内文件和三个 `node:` 内置模块：
 
-{/* ref file="../tests/boundary.test.ts" lines="225-240" hash="6b7088dc2d48" blob="421b08df5caa" */}
+{/* ref file="../tests/boundary.test.ts" lines="225-240" hash="7d30ea41644b" blob="614b02c76579" */}
 
 依赖方向是单向的：docfirst 主包依赖本包，本包不依赖主包：
 
@@ -223,7 +223,7 @@ remark 插件 `remarkTrajectoryLinks`：把关系边段落转成带 `data-kind` 
 **不把 react 打进产物。**`./react` 的产物第一行必须是 `"use client"`，而且只许 import react；`./server` 不带客户端
 指令，可以 import `node:` 内置模块和 remark 相关的包，react 同样只 import、不打进产物：
 
-{/* ref file="../tests/boundary.test.ts" lines="197-223" hash="e4aae7a39f34" blob="421b08df5caa" */}
+{/* ref file="../tests/boundary.test.ts" lines="197-223" hash="dece3e23e74b" blob="614b02c76579" */}
 
 **轨迹卡不进 docfirst 的钉码核对。**卡记的是当时的结论，代码后来怎么变都不改它，所以卡里不钉代码，也不需要
 `docfirst confirm`；卡里出现引用记号就是第四层校验报的问题。

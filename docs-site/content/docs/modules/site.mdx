@@ -5,55 +5,55 @@ description: docfirst.create 建一个接好 docfirst 的站：站点插件跑�
 
 **本页回答**：`docfirst.create` 建站时本插件交出什么、写盘交给谁、依赖什么、刻意不做什么。
 
-建站是工作台插件 `@godcreator/gwb-docfirst-workflow` 的一部分，源码在 `packages/gwb-docfirst-workflow/src/`（除 `index.ts` 以外的几份），算参数的是 `src/create.ts`；模板在包根的 `template/` 下，分 `add/` 与 `replace/` 两个目录。
+建站是工作台插件 `@godcreator/gwb-docfirst-workflow` 的一部分，源码在 `plugins/docfirst/src/`（除 `index.ts` 以外的几份），算参数的是 `src/create.ts`；模板在包根的 `template/` 下，分 `add/` 与 `replace/` 两个目录。
 
 ## 功能
 
 **站从官方脚手架出发，本插件只改几份文件。** 站点插件 `@godcreator/gwb-docs-site` 先跑版本写死的官方脚手架 `create-fumadocs-app`，套上本机约定（`package.json`、`next.config.mjs`、根 layout、`global.css`、`src/lib/shared.ts` 等几份由它管，本插件不能再换、再删），再按调用方给的三个清单改文件：新增的在官方输出里不能已有，替换与删除的在官方输出里必须有。本插件的模板就按这三类放：
 
-{/* ref file="../packages/gwb-docfirst-workflow/src/template.ts" lines="1-8" hash="cebe8928f24d" blob="737894186a5a" */}
+{/* ref file="../plugins/docfirst/src/template.ts" lines="1-8" hash="cebe8928f24d" blob="737894186a5a" */}
 
 替换四份：`src/lib/source.ts`（三个区的集合与 loader）、`src/components/mdx.tsx`（React 组件表）、`src/app/docs/layout.tsx`（侧栏三个根节点）与入口页 `content/docs/index.mdx`。删除一份：官方的示例页 `content/docs/test.mdx`。其余都是新增：轨迹与未来两个区的路由和 layout、`docfirst.config.mjs`、组件名册与名册脚本、样式 `src/app/docfirst.css`、各区的起始页与三份生成正本（仓根 README、AGENTS、CLAUDE 的正本）。官方的 docs 页面、搜索、llms 路由原样留着：docs 页面从 `@/components/mdx` 取组件，替换了组件表，状态点就接上了。
 
-{/* ref file="../packages/gwb-docfirst-workflow/src/create.ts" lines="24-25" hash="6e56a6249dd4" blob="ba7789e519b3" */}
+{/* ref file="../plugins/docfirst/src/create.ts" lines="24-25" hash="6e56a6249dd4" blob="ba7789e519b3" */}
 
-集合用 fumadocs-mdx 的 macro 写在 `src/lib/source.ts` 里，没有 `source.config.ts`。三个集合里只有现状区挂 docfirst 的插件、生成机读版；集合级的 `mdxOptions` 会去掉 fumadocs 的默认插件，所以都经 `applyMdxPreset` 加回来，理由见 [集合移到 macro](/trajectory/2026-09-25-fumadocs-macro-collections)：
+集合用 fumadocs-mdx 的 macro 写在 `src/lib/source.ts` 里，没有 `source.config.ts`。三个集合里只有现状区的集合加了 docfirst 的插件、生成机读版；集合级的 `mdxOptions` 会去掉 fumadocs 的默认插件，所以都经 `applyMdxPreset` 加回来，理由见 [集合移到 macro](/trajectory/2026-09-25-fumadocs-macro-collections)：
 
-{/* ref file="../packages/gwb-docfirst-workflow/template/replace/src/lib/source.ts.tpl" lines="24-50" hash="67f63a58322b" blob="55e68a57df98" */}
+{/* ref file="../plugins/docfirst/template/replace/src/lib/source.ts.tpl" lines="24-50" hash="67f63a58322b" blob="55e68a57df98" */}
 
 起始页只规定每页都成立的第一句「本页回答」，不规定小标题，理由见 [骨架页不讲规矩](/trajectory/2026-09-25-skeleton-pages-dont-teach-rules)；正文也不再写一级标题，页面已经用 frontmatter 的 `title` 渲染了标题。两份生成正本（README、AGENTS）例外，它们的一级标题要进生成物。
 
 生成的 `docfirst.config.mjs` 写的是内容根与三条 `outputs` 映射，没有别的区要登记——`content/` 下除 `trajectory/`、`future/` 之外的目录都是现状区：
 
-{/* ref file="../packages/gwb-docfirst-workflow/template/add/docfirst.config.mjs.tpl" lines="15-22" hash="d19932f12fdb" blob="c75bb13b32fc" */}
+{/* ref file="../plugins/docfirst/template/add/docfirst.config.mjs.tpl" lines="15-22" hash="d19932f12fdb" blob="c75bb13b32fc" */}
 
 文件之外，本插件还往站的 `package.json` 里加 doc 脚本、两条 docfirst 依赖（进 `devDependencies`，站构建与门禁都是开发期的事）和一句描述，由站点插件合并。脚本名不能与官方的 `dev` / `build` / `start` 重名，重名同样报错：
 
-{/* ref file="../packages/gwb-docfirst-workflow/src/create.ts" lines="15-22" hash="38db1def4857" blob="ba7789e519b3" */}
+{/* ref file="../plugins/docfirst/src/create.ts" lines="15-22" hash="38db1def4857" blob="ba7789e519b3" */}
 
 ## 接口
 
-**对外一个纯函数 `planCreate`。** 它不碰盘：模板正文与仓根 `package.json` 由调用方读好传入，交回的就是 `docs-site.create` 的参数，类型用站点插件导出的 `CreateSiteArgs`：
+**对外一个纯函数 `planCreate`。** 它不读写磁盘：模板正文与仓根 `package.json` 由调用方读好传入，交回的就是 `docs-site.create` 的参数，类型用站点插件导出的 `CreateSiteArgs`：
 
-{/* ref file="../packages/gwb-docfirst-workflow/src/create.ts" lines="27-39" hash="c47100742c9c" blob="ba7789e519b3" */}
+{/* ref file="../plugins/docfirst/src/create.ts" lines="27-39" hash="c47100742c9c" blob="ba7789e519b3" */}
 
-{/* ref file="../packages/gwb-docfirst-workflow/src/create.ts" lines="41-59" hash="054469005c4b" blob="ba7789e519b3" */}
+{/* ref file="../plugins/docfirst/src/create.ts" lines="41-59" hash="054469005c4b" blob="ba7789e519b3" */}
 
 `addFiles` 与 `replaceFiles` 是渲染好的模板，与 `add/`、`replace/` 下的文件一一对应、去掉 `.tpl` 后缀；`title` 传认好的显示名，站点插件写进站名的与模板里的是同一个。显示名的认法：给了 `title` 用给的，否则仓根 `package.json` 的 `title`，再否则包名去掉 scope，最后是仓的目录名：
 
-{/* ref file="../packages/gwb-docfirst-workflow/src/values.ts" lines="7-20" hash="52c31f73763d" blob="245d681dda00" */}
+{/* ref file="../plugins/docfirst/src/values.ts" lines="7-20" hash="52c31f73763d" blob="245d681dda00" */}
 
 模板里认不出的占位符当场抛出——生成的站里留一个 `{{typo}}`，没人知道它本来该是什么：
 
-{/* ref file="../packages/gwb-docfirst-workflow/src/template.ts" lines="62-68" hash="fc9d29bde628" blob="737894186a5a" */}
+{/* ref file="../plugins/docfirst/src/template.ts" lines="62-68" hash="fc9d29bde628" blob="737894186a5a" */}
 
 仓根的两件事由 `src/repo-root.ts` 读：显示名要的 `package.json`（没有这个文件就用目录名，有但不是合法 JSON 就报错），以及仓根已有、第一次 render 会被覆盖的 README / AGENTS / CLAUDE（只报告，一个字不动）：
 
-{/* ref file="../packages/gwb-docfirst-workflow/src/repo-root.ts" lines="13-31" hash="9fb70eb79c6e" blob="f19f46898896" */}
+{/* ref file="../plugins/docfirst/src/repo-root.ts" lines="13-31" hash="9fb70eb79c6e" blob="f19f46898896" */}
 
 入口是插件的总线命令：校验参数、读模板与仓根、调 `planCreate`、按名字调 `docs-site.create`、组回执，见 [工作台插件](/docs/modules/plugin)。
 
-**写盘由站点插件做**，规矩写在它的契约里：目标目录必须还不存在、上一级得在；清单里的路径重复、越出站目录、新增的已存在、替换或删除的不存在、碰了本机约定管的文件，都报错且一个文件都不写；写盘失败就把整个目标目录删掉。所以本插件不做写盘前检查，也没有回滚。清单跟官方输出对不对得上，插件的测试里写死了一份官方输出的文件表来检查，站点插件换脚手架版本时那张表跟着改。
+**写盘由站点插件做**，规矩写在它的契约里：目标目录必须还不存在、上一级得在；清单里的路径重复、越出站目录、新增的已存在、替换或删除的不存在、改动了本机约定管的文件，都报错且一个文件都不写；写盘失败就把整个目标目录删掉。所以本插件不做写盘前检查，也没有回滚。清单跟官方输出对不对得上，插件的测试里写死了一份官方输出的文件表来检查，站点插件换脚手架版本时那张表跟着改。
 
 ## 依赖
 
@@ -61,7 +61,7 @@ description: docfirst.create 建一个接好 docfirst 的站：站点插件跑�
 
 写进站 `devDependencies` 的依赖版本来自一张手写的表，一律精确号。工作区里那两份写的是 `workspace:*`，写进别人的站装不上，所以只能手写；两个包发版升版本号时跟着改，插件的测试检查它跟工作区各包的版本一致。这两个包名出现在这儿不算插件的依赖：它们是写进别人 `package.json` 的字符串。
 
-{/* ref file="../packages/gwb-docfirst-workflow/src/deps.ts" hash="878dac3d8f6e" blob="174bc4534896" */}
+{/* ref file="../plugins/docfirst/src/deps.ts" hash="878dac3d8f6e" blob="174bc4534896" */}
 
 构建配置用站点插件那一份：它的 `next.config.mjs` 带 `/` 到 `/docs` 的重定向、不写 `serverExternalPackages`，正合 docfirst 的要求（两个包都不许外置，见 [fumadocs 那一层](/docs/modules/fumadocs)）。替换的几份是在官方脚手架那一版的输出上改的，站点插件升脚手架版本时它们可能要跟着改，理由见 [在官方输出上只改几份文件](/trajectory/2026-09-25-fumadocs-macro-collections)；建站为什么交给站点插件见 [建站交给站点插件](/trajectory/2026-09-25-site-plugin-builds-docfirst-supplies-structure)。
 
@@ -73,9 +73,9 @@ description: docfirst.create 建一个接好 docfirst 的站：站点插件跑�
 
 **不给已有的站接线。** 目标目录必须还不存在，所以不会改到任何人写过的文件。给一个用了很久的站加 docfirst 走人工接线。
 
-**不碰本机约定管的文件、不挑端口。** 依赖版本、脚本里的端口、根 layout、`global.css` 都归站点插件；docfirst 的样式放在自己新增的 `src/app/docfirst.css` 里；`port` 不给就由站点插件挑。
+**不改本机约定管的文件、不挑端口。** 依赖版本、脚本里的端口、根 layout、`global.css` 都归站点插件；docfirst 的样式放在自己新增的 `src/app/docfirst.css` 里；`port` 不给就由站点插件挑。
 
-**不读 docfirst 配置。** 那正是它要生成的文件；核对、确认、渲染都是「对一个已经接好的站做事」，建站是「把线接上」，前提正相反。
+**不读 docfirst 配置。** 那正是它要生成的文件；核对、确认、渲染都是「对一个已经接好 docfirst 的站做事」，建站是「让站接好 docfirst」，前提正相反。
 
 **不改仓根。** 仓根的 `README.md` / `AGENTS.md` / `CLAUDE.md` 由之后的 `render` 生成；建站只把「仓根已经有、第一次 render 会覆盖」报出来。
 

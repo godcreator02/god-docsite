@@ -1,26 +1,26 @@
 /**
- * # 边界守卫：塌包之后**唯一**的那道
+ * # 边界守卫：五个包合并之后**唯一**的边界检查
  *
- * 五个包塌成一个 `@godcreator/docfirst-workflow` 之后，「谁能依赖谁」不再由 pnpm 的严格
- * node_modules 兜着了——同一个包里，`engine/` 里随手写一句 `import "../host/git.ts"`
- * 编译器不会吭一声，判定层就从此起了 git 子进程。**这个文件就是补上的那道门。**
+ * 五个包合并成一个 `@godcreator/docfirst-workflow` 之后，「谁能依赖谁」不再能靠 pnpm 的严格
+ * node_modules 挡住——同一个包里，`engine/` 里随手写一句 `import "../host/git.ts"`
+ * 编译器不会报错，判定层从此就会启动 git 子进程。**这个文件补上的就是这项检查。**
  *
- * 它守四类东西，每一类各有各的失败长相：
+ * 它检查四类约束，每一类失败时的表现各不相同：
  *
  * **一、目录方向**（下面 `LAYERS` 那张表）。分层的意义是「变化原因不同的东西不互相拖累」：
  * `engine/` 只认注进来的东西，所以它能不起进程、不碰盘地被测；`host/` 不认识任何格式，
  * 所以换格式不动它。方向一破，这两句话当场变成假话，而且**没有任何别的信号**——
  * 测试照跑、构建照过，只有半年后有人问「为什么判定层跑得这么慢」才看得出来。
  *
- * **二、判定层的零依赖**：`engine/` 只许 `node:crypto`——这套东西唯一能被别人整块抄走的部分。
+ * **二、判定层的零依赖**：`engine/` 只许 `node:crypto`——整个包里唯一能被别人整块复制走的部分。
  *
  * **三、宿主只能是 peer，且不许被打进产物**：fumadocs 与 react 用的是消费方项目装的那份；
  * 打进产物就是两份 React 各跑一套，现象是预渲染时莫名其妙的 hooks 报错。
  *
- * **四、方向只能是件 → 包**：两个 npm 包不许出现任何 `@godcreator/gwb-*`。
- * 反过来一次，装 docfirst 的人就被迫拉进一整个桌面工作台生态。
+ * **四、包不认识工作台插件**：两个 npm 包不许出现任何 `@godcreator/gwb-*`。
+ * 包一旦依赖插件，装 docfirst 的人就得连带装上整个桌面工作台生态。
  *
- * **别删这个文件，也别把某一条注释掉「先让门禁绿」。** 它报红的时候，红的是设计，不是测试。
+ * **别删这个文件，也别把某一条注释掉「先让门禁通过」。** 它失败的时候，出错的是设计，不是测试。
  * 真要改方向，改的是 `LAYERS` 那张表加一段说明为什么——不是把断言删掉。
  */
 import { test } from "node:test";
@@ -40,9 +40,9 @@ const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const PACKAGES = join(ROOT, "packages");
 const SRC = join(PACKAGES, "docfirst-workflow", "src");
 
-/** 两个 npm 包的目录名。工作台件跟它们同住 packages/，但不在这套包的依赖网里 */
+/** 两个 npm 包在 packages/ 下的目录名。工作台插件在 plugins/docfirst/，同一个工作区，但不在这两个包的依赖网里 */
 const NPM_PACKAGES = ["docfirst-workflow", "docfirst-trajectory"];
-const PLUGIN = "gwb-docfirst-workflow";
+const PLUGIN_MANIFEST = join(ROOT, "plugins", "docfirst", "package.json");
 
 const manifestOf = (dir: string): Pkg => JSON.parse(readFileSync(join(PACKAGES, dir, "package.json"), "utf8")) as Pkg;
 /** 运行时真正会跟着走的依赖：dependencies 加 peerDependencies。devDependencies 不算——它只为编译和类型检查 */
@@ -50,14 +50,14 @@ const depsOf = (p: Pkg): string[] => Object.keys({ ...p.dependencies, ...p.peerD
 const HOST = /^(fumadocs|next$|react$|react-dom$)/;
 
 /**
- * 编译产物里的 import 说明符——只认锚在行首的 import/export-from 语句，不用裸的
- * `from\s*["']` 到处找：产物里字符串字面量常包含 "pivots-from" 这类含 "from" 的子串
- * （trajectory 的 EDGE_HEAD 正则源码编译进去后原样躺在那），裸正则会把它当 import 语句头，
- * 从那个引号起一路吞到几百字符外的下一个引号。tsdown/rolldown 的产物每条 import 语句独占一行，
- * 按行首锚定就躲开了这个坑。
+ * 编译产物里的 import 说明符——只认锚在行首的 import/export-from 语句，不用不带锚的
+ * `from\s*["']` 全文匹配：产物里字符串字面量常包含 "pivots-from" 这类含 "from" 的子串
+ * （trajectory 的 EDGE_HEAD 正则源码编译进去后原样留在产物里），不带锚的正则会把它当 import 语句头，
+ * 从那个引号起一直匹配到几百字符外的下一个引号。tsdown/rolldown 的产物每条 import 语句独占一行，
+ * 按行首锚定就避开了这个问题。
  * 三种形态都收：`import … from "x"` / `export … from "x"`、副作用导入 `import "x"`、
  * 动态 `import("x")`——只认 from 那一种的话，一句 `import "宿主/样式.css"` 或
- * `await import("react")` 就能从每条边界底下溜过去。
+ * `await import("react")` 就能绕过每条边界检查。
  */
 function importSpecsOf(src: string): string[] {
   const specs: string[] = [];
@@ -83,7 +83,7 @@ const rel = (from: string, file: string): string => relative(from, file).split(s
 // ── 一、目录方向 ──────────────────────────────────────────────────────────────
 
 /**
- * `src/<层>` 不许 import 到哪几层去。**列的是禁止面，不是允许面**：写成允许面的话，
+ * `src/<层>` 不许 import 到哪几层去。**列的是禁止的层，不是允许的层**：写成允许的层的话，
  * 加一个新目录会默默地什么都不许，加错地方反而更难发现。
  *
  * 方向读法（左边不许知道右边）：
@@ -92,8 +92,8 @@ const rel = (from: string, file: string): string => relative(from, file).split(s
  *   fumadocs 格式实现 + 站接线：可以用 engine 与 host（`docfirstMdxOptions` 要 loadProject），不认识命令行
  *   cli      入口：认识以上全部，谁都不认识它
  *
- * 从前还有第五层 `site/`（给已有骨架装六区）。它搬进工作台件了：那件事只在 agent 手上发生
- * 一次、铺的是模板不是判定，而这个包的消费方是**仓**。判据见轨迹卡「包给仓件给人」。
+ * 从前还有第五层 `site/`（给已有的站装六区）。它移进工作台插件了：那件事只在 agent 手上发生
+ * 一次、写的是模板不是判定，而这个包的使用方是**仓**。判据见轨迹卡「包给仓件给人」。
  */
 const LAYERS: Record<string, string[]> = {
   engine: ["host", "fumadocs", "cli"],
@@ -170,8 +170,8 @@ test("产物里不许打进 fumadocs 或 react，只许 import；pre 的客户�
 });
 
 /**
- * **包只发要在仓里用的东西。** 说明书与装配模板跟着件走了：包没有独立的到达路径——它躺在
- * node_modules 里没人指引、没人会读，一份 SKILL.md 摆在那儿等于没有。能被 agent 读到全靠件
+ * **包只发要在仓里用的东西。** 说明书与建站模板随工作台插件发：包里的说明书 agent 找不到——它放在
+ * node_modules 里，没有东西指向它，一份 SKILL.md 放在那儿等于没有。agent 能读到说明书，全靠插件
  * `register` 了自己包里那个目录。判据见轨迹卡「包给仓件给人」。
  */
 test("包只发 dist 与样式：skills 与 template 跟着件走了，包里连目录都不该再有", () => {
@@ -188,8 +188,8 @@ test("包只发 dist 与样式：skills 与 template 跟着件走了，包里连
 // ── 三、轨迹包自己那几条 ──────────────────────────────────────────────────────
 
 test("trajectory 的 `.` 入口零 npm 依赖：产物只许 import node: 内置模块", () => {
-  // 包本身有 react（peer）与 unist-util-visit（只给 `./server` 用），`.` 入口这条红线
-  // 按产物判——比按 package.json 判更准：就算以后 `.` 入口不小心 import 到一个真依赖，这里也抓得到
+  // 包本身有 react（peer）与 unist-util-visit（只给 `./server` 用），`.` 入口这条约束
+  // 按产物判——比按 package.json 判更准：就算以后 `.` 入口不小心 import 到一个真依赖，这里也查得到
   const src = readFileSync(join(PACKAGES, "docfirst-trajectory", "dist", "index.mjs"), "utf8");
   for (const spec of importSpecsOf(src)) assert.ok(spec.startsWith("node:"), `trajectory 的 . 入口产物 import 了 ${spec}`);
 });
@@ -207,7 +207,7 @@ test("trajectory 的 react / server 入口：客户端指令、react 只 import 
   for (const [name, src] of [["react.mjs", react], ["server.mjs", server]] as const) {
     const specs = importSpecsOf(src);
     assert.ok(specs.some(isReact), `${name} 里没有 react 的 import 行——react 被内联进产物了`);
-    // react 本体的内部标记：真被打进来的话，光看 import 行看不出，得在正文里抓
+    // react 本体的内部标记：真被打进来的话，光看 import 行看不出，得在正文里查
     assert.doesNotMatch(src, /__CLIENT_INTERNALS|react\.production/, `${name} 正文里有 react 本体的痕迹`);
   }
 
@@ -224,7 +224,7 @@ test("trajectory 的 react / server 入口：客户端指令、react 只 import 
 
 test("trajectory 的 `.` 入口源码只 import 自己和 node:fs / node:path / node:fs/promises", () => {
   // 只扫 .ts：react.tsx / server.tsx 是 `./react` `./server` 两个入口，各自的依赖边界
-  // 由上面两条按产物判的测试守着，这条不管它们
+  // 由上面两条按产物判的测试检查，这条不管它们
   const IMPORT_RE = /^\s*import\b[\s\S]*?\bfrom\s*["']([^"']+)["']/gm;
   const dir = join(PACKAGES, "docfirst-trajectory", "src");
   for (const file of readdirSync(dir).filter((f) => f.endsWith(".ts"))) {
@@ -257,14 +257,14 @@ test("轨迹只被命令行那一层用：engine / host / fumadocs 一个 import
   }
 });
 
-// ── 四、包不认识件 ──────────────────────────────────────────────────────────
+// ── 四、包不认识工作台插件 ──────────────────────────────────────────────────
 
 test("两个 npm 包的依赖面里不许出现工作台件，也不许出现任何 @godcreator/gwb-*", () => {
-  // 件跟包同住一个工作区，包一旦认识件（哪怕只是一条 devDependency）这两个包就再也发不出去了
-  // ——装它们的人不该被迫拉进一整个桌面工作台生态。三档全查：运行时、peer、开发期。
-  // 反过来那半（件不许依赖包）在件自己的 tests/artifact.test.ts 里守着：两个方向都断，
+  // 插件跟包在同一个工作区，包一旦认识插件（哪怕只是一条 devDependency）这两个包就不能再发布了
+  // ——装它们的人不该连带装上整个桌面工作台生态。三类依赖全查：运行时、peer、开发期。
+  // 反方向（插件不许依赖包）由插件自己的 tests/artifact.test.ts 检查：两个方向都禁止，
   // 现在这两边**互不认识**。
-  const pluginName = manifestOf(PLUGIN).name;
+  const pluginName = (JSON.parse(readFileSync(PLUGIN_MANIFEST, "utf8")) as Pkg).name;
   for (const dir of NPM_PACKAGES) {
     const pkg = manifestOf(dir);
     for (const dep of Object.keys({ ...pkg.dependencies, ...pkg.peerDependencies, ...pkg.devDependencies })) {

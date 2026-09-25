@@ -7,13 +7,14 @@ description: 两个包加一个插件、主包的四层、三条入口、依赖�
 
 ## 两个包，一个插件
 
-`packages/` 下三样：
+布局照 devkit 的 workspace 仓：插件在 `plugins/`，不是插件的包在 `packages/`。`plugins/docfirst/` 是工作台插件
+`@godcreator/gwb-docfirst-workflow`——它不进 npm 的依赖网，只在桌面工作台里给 agent 提供一条建站命令和几份说明书。
+`packages/` 下两个 npm 包：
 
-{/* tree dir="../packages" depth="1" hash="01f82fee3739" */}
+{/* tree dir="../packages" depth="1" hash="83f87a45cb77" */}
 
-`docfirst-workflow` 是主包 `@godcreator/docfirst-workflow`，`docfirst-trajectory` 是独立的一条包线
-`@godcreator/docfirst-trajectory`，`gwb-docfirst-workflow` 是工作台插件——它不进 npm 的依赖网，只在
-桌面工作台里给 agent 提供一条建站命令和几份说明书。
+`docfirst-workflow` 是主包 `@godcreator/docfirst-workflow`，`docfirst-trajectory` 是独立的一个包
+`@godcreator/docfirst-trajectory`。
 
 ## 四层
 
@@ -41,7 +42,7 @@ description: 两个包加一个插件、主包的四层、三条入口、依赖�
   <Tab title="命令行">
     `docfirst check / confirm / render / trajectory`，外加一次性的迁移命令 `migrate-ledger`。`cli` 逐篇把文本交给编排服务，
     把回来的清单译成一行行人读的文字和一个退出码。git hook 与 CI 跑的就是它——**提交那一刻工作台
-    不在场**，所以判定与核对必须是一个 npm 包，不能依赖任何 GUI 应用开着。
+    不一定在运行**，所以判定与核对必须是一个 npm 包，不能依赖任何 GUI 应用开着。
   </Tab>
   <Tab title="站构建">
     站的 `src/lib/source.ts` import `@godcreator/docfirst-workflow/fumadocs`，接到现状集合上，remark 插件在构建期
@@ -59,10 +60,10 @@ description: 两个包加一个插件、主包的四层、三条入口、依赖�
 
 ## 依赖方向
 
-层与层之间的方向是**单向**的，而且**列的是禁止面不是允许面**——写成允许面的话，加一个新
+层与层之间的方向是**单向**的，而且**列的是禁止的层不是允许的层**——写成允许的层的话，加一个新
 目录会默默地什么都不许，加错地方反而更难发现：
 
-{/* ref file="../tests/boundary.test.ts" lines="85-103" hash="bcb7a58199fa" blob="90355c11baed" */}
+{/* ref file="../tests/boundary.test.ts" lines="85-103" hash="4cbaefec70ff" blob="614b02c76579" */}
 
 `engine` 是这张图的终点，自己零依赖，只用 `node:crypto`。它不读文件、不启动子进程、不认识任何
 文档格式——运行要的三样全是外面传进来的：
@@ -71,35 +72,35 @@ description: 两个包加一个插件、主包的四层、三条入口、依赖�
 
 格式、读取器、旧内容来源（按 blob 取确认时的内容、算 hunk 表）都是构造参数，所以它的依赖面可以是空的。
 
-`trajectory` 在这张图外面：它不依赖判定层，`.` 入口连 npm 依赖都没有——这条红线按产物判，
+`trajectory` 在这张图外面：它不依赖判定层，`.` 入口连 npm 依赖都没有——这条约束按产物判，
 产物里只许出现 `node:` 内置模块。它的 `./react` 与 `./server` 两个入口另外用 react 与 remark，
 只给站用。`cli` 依赖它是为了接 `docfirst trajectory` 子命令，而且只用 `.` 入口；别的三层
-一概不许碰它。
+一概不许 import 它。
 
 **包与插件互不认识**：两个 npm 包的三类依赖字段里不许出现工作台插件，也不许出现任何
-`@godcreator/gwb-*`——装这两个包的人不该被迫拉进一整个桌面工作台生态；反过来那半，插件的
+`@godcreator/gwb-*`——装这两个包的人不该连带装上整个桌面工作台生态；反方向，插件的
 三类依赖字段里也不许出现 `@godcreator/docfirst-workflow`，由插件自己的 `tests/artifact.test.ts` 检查。
 
-## 边界靠什么守
+## 边界靠什么检查
 
 主包是一个包，「谁能依赖谁」**不由 pnpm 严格的 `node_modules` 挡住**：同一个包里，
 `engine/` 里随手写一句 `import "../host/git.ts"` 编译器不会报错，判定层就从此启动了 git
 子进程。挡住它的是一个测试文件：
 
-{/* ref file="../tests/boundary.test.ts" lines="1-26" hash="c29fd3eaad78" blob="421b08df5caa" */}
+{/* ref file="../tests/boundary.test.ts" lines="1-26" hash="0520a088acb0" blob="614b02c76579" */}
 
-它守四类：目录方向（上面那张表）、`engine` 的零依赖、宿主只能是 peer 且不许被打进产物、
-包不认识插件。**它报红的时候，红的是设计，不是测试。**
+它检查四类：目录方向（上面那张表）、`engine` 的零依赖、宿主只能是 peer 且不许被打进产物、
+包不认识插件。**它失败的时候，出错的是设计，不是测试。**
 
 方向单向换来的是替换一块只动一处：换一种文档格式，新写一份 `Format` 实现，判定层一行不动；
 旧内容不从 git 取，实现 `History` 的两个方法；换站的宿主，只动 `src/fumadocs/`。
 
 ## 站也是使用者
 
-`docs-site/` 就是「装了这两个包的项目」：项目根是站目录，被钉的代码在工作区的 `packages/` 下，
-记号写 `../packages/…`。
+`docs-site/` 就是「装了这两个包的项目」：项目根是站目录，被钉的代码在工作区的 `packages/` 与 `plugins/` 下，
+记号写 `../packages/…` 或 `../plugins/…`。
 
-{/* ref file="docfirst.config.mjs" lines="4-6" hash="a1fd3aed47bc" blob="fce0d84ad1f9" */}
+{/* ref file="docfirst.config.mjs" lines="4-6" hash="ec944a1565bb" blob="3271a37f8bd2" */}
 
 所以仓里不另留示例项目——这两个包对外的样子由站自己展示，站上的状态点绿着，就是它们在真源码上
 跑通了。
@@ -116,8 +117,8 @@ description: 两个包加一个插件、主包的四层、三条入口、依赖�
 状态都在那儿，别的层只认这一份；**再 [环境层](/docs/modules/host)**——装配的全貌、旧内容怎么按
 blob 取回、一篇正本怎么渲染到落点；**然后 [命令行](/docs/modules/cli)**。
 [格式与站接线](/docs/modules/fumadocs) 是站构建那条入口，[轨迹](/docs/modules/trajectory) 是
-独立的一条包线，[工作台插件](/docs/modules/plugin) 与它的 [建站](/docs/modules/site) 在包
-外面，各从自己那一页进，只读命令行这条线的人整个跳过。
+独立的一个包，[工作台插件](/docs/modules/plugin) 与它的 [建站](/docs/modules/site) 在包
+外面，各从自己那一页进，只关心命令行的人整个跳过。
 
 两处边界值得在进代码之前先知道，免得照目录名猜错：
 

@@ -194,8 +194,8 @@ description: cli 层：各条子命令怎么分派、打印什么、退什么码
 
 这一层认识别的三层，别的层谁都不认识它。四层在同一个包里，编译器不会拦跨层的 import，目录方向靠一份手写的禁止表检查，它是**唯一**的边界守卫：
 
-{/* ref file="../tests/boundary.test.ts" lines="85-103" hash="bcb7a58199fa" blob="90355c11baed" */}
+{/* ref file="../tests/boundary.test.ts" lines="85-103" hash="4cbaefec70ff" blob="614b02c76579" */}
 
 <Note>
-这张表报红的时候，红的是设计不是测试。真要改方向，改表本身并写明为什么，不是删断言。
+这张表检查失败的时候，出错的是设计不是测试。真要改方向，改表本身并写明为什么，不是删断言。
 </Note>
