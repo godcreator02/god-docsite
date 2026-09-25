@@ -1,9 +1,9 @@
 /**
  * docfirst 的动作，编排在这儿。可执行那一头在 cli.ts——测试直接调 main，不用起子进程。
- * cwd 就是项目根（那里有 docfirst.config.mjs）。
+ * cwd 就是项目根（那里有 docfirst.config.mjs）。核对与确认的对象是现状区的文档（分区见 host/load.ts）。
  *   docfirst check [--json]                 核对：只读，红退 1；被钉文件在文档所在的仓里有未提交改动的黄也算红
  *                                          （这次改动引起的，同一个提交里处理）；挂了 outputs 映射的文档顺手守生成物新鲜度；
- *                                          配了 trajectory 目录的顺手跑卡校验，病卡也算红。--json 出整份
+ *                                          顺手跑内容根下 trajectory/ 的卡校验，病卡也算红。--json 出整份
  *                                          机读报告（形状见 report.ts），退出码不变
  *   docfirst confirm [文档路径…]            机械写回：未确认的记上记录、挪了位置的写回新行号，再把挂了 outputs
  *                                          映射的文档重新摆一遍（内容变了才写）。黄灯不动、逐条列出；红的那几处
@@ -19,7 +19,7 @@
  * 新引用不用命令：在文档里写一行记号语法（engine/marker.ts）定的草稿记号 @@docfirst ref src/greet.ts:2-3 @@，
  * check 认它、报未确认，confirm 换成该格式的正式记号并写上记录。
  */
-import { mkdirSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, writeFileSync } from "node:fs";
 import { join, relative, sep } from "node:path";
 import { isRenderRefusal, targetKey } from "../engine/index.ts";
 import type { ConfirmStep, Format, Item, Listing } from "../engine/index.ts";
@@ -236,10 +236,9 @@ async function checkCommand(project: Project, docs: string[], json: boolean): Pr
   return report.ok ? 0 : 1;
 }
 
-/** check 顺带跑的卡校验：trajectoryDir 没配就不管；目录不存在（scanDir 回空）不算红。
+/** check 顺带跑的卡校验：轨迹卡目录还没建（scanDir 回空）不算红。
  * 每条病一条，path 相对项目根；人读模式打成 `🔴 <path>  <field>：<reason>（<value>）`。 */
 async function checkTrajectory(project: Project): Promise<CardProblemReport[]> {
-  if (project.trajectoryDir === null) return [];
   const { sick } = await scanDir(project.trajectoryDir);
   const out: CardProblemReport[] = [];
   for (const file of sick) {
@@ -249,12 +248,12 @@ async function checkTrajectory(project: Project): Promise<CardProblemReport[]> {
   return out;
 }
 
-/** `docfirst trajectory [--json]`：没配 trajectory 目录报错退 2；`--json` 出 buildTrajectory
+/** `docfirst trajectory [--json]`：轨迹卡目录还没建报错退 2；`--json` 出 buildTrajectory
  * 整份模型；不带 `--json` 按盘打印——每盘一段，列每棵树的主干，再一行汇总支线 / 孤星 / 虫洞数。 */
 async function trajectoryCommand(rest: string[]): Promise<number> {
   const project = await loadProject(process.cwd());
-  if (project.trajectoryDir === null) {
-    console.log("这个项目没配 trajectory 目录");
+  if (!existsSync(project.trajectoryDir)) {
+    console.error(`这个项目还没有轨迹卡目录 ${project.contentDir}/trajectory`);
     return 2;
   }
   const data = await buildTrajectory(project.trajectoryDir);

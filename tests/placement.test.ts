@@ -31,7 +31,7 @@ async function setup(outputs: string) {
   writeFileSync(join(root, "docs", "b.md"), "# 没挂映射\n");
   writeFileSync(
     join(root, "docfirst.config.mjs"),
-    `import { fakeFormat } from ${JSON.stringify(FAKE)};\n\nconst md = fakeFormat("fake-md", ".md", { render: true });\n\nexport default { formats: [md], docs: "docs", out: "out", outputs: ${outputs} };\n`,
+    `import { fakeFormat } from ${JSON.stringify(FAKE)};\n\nconst md = fakeFormat("fake-md", ".md", { render: true });\n\nexport default { formats: [md], content: "docs", out: "out", outputs: ${outputs} };\n`,
   );
 
   const project = await loadProject(root);

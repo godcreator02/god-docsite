@@ -7,7 +7,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { existsSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
-import { CONFIG, setupProject, withOutputs } from "./cli-project.ts";
+import { setupProject, withOutputs } from "./cli-project.ts";
 import { run } from "./repo.ts";
 
 const SKILL_DOC = [
@@ -60,7 +60,7 @@ test("outputs 摆放：confirm 顺手重摆、render 只写指定目标、不落
   }
 });
 
-test("outputs 配置的地盘规则：绝对路径、落进文档目录、一个目标两个文档写，装配时都拒", async () => {
+test("outputs 配置的地盘规则：绝对路径、落进内容根、一个目标两个文档写，装配时都拒", async () => {
   const cases: [string, RegExp][] = [
     [withOutputs(`{ "docs/a.md": ["C:/绝对/路径.md"] }`), /绝对路径不认/],
     [withOutputs(`{ "docs/a.md": ["docs/copy.md"] }`), /落进了 \S+，那是源文件的地盘/],
@@ -76,12 +76,14 @@ test("outputs 配置的地盘规则：绝对路径、落进文档目录、一个
   }
 });
 
-test("outputs 目标落进第二个文档目录也拒", async () => {
-  const p = setupProject(CONFIG.replace(`docs: "docs", out: "out" };`, `docs: ["docs", "more"], out: "out", outputs: { "docs/a.md": ["more/copy.md"] } };`));
-  try {
-    await assert.rejects(p.cli("check"), /落进了 \S+，那是源文件的地盘/);
-  } finally {
-    p.teardown();
+test("outputs 目标落进内容根下的任何地方都拒，轨迹与未来区也算", async () => {
+  for (const to of ["docs/future/copy.md", "docs/trajectory/copy.md", "./docs/deep/copy.md"]) {
+    const p = setupProject(withOutputs(`{ "docs/a.md": [${JSON.stringify(to)}] }`));
+    try {
+      await assert.rejects(p.cli("check"), /落进了 docs，那是源文件的地盘/, to);
+    } finally {
+      p.teardown();
+    }
   }
 });
 

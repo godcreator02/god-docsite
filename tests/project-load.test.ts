@@ -1,14 +1,14 @@
 /**
- * 装配的归一，全部跨 `loadProject` 看：`docs` 的两种写法 → `project.docsDirs`，
+ * 装配的归一，全部跨 `loadProject` 看：`content` → `project.contentDir` 与 `trajectoryDir`，
  * `outputs` 的两种写法 → `project.placements(doc)`，三种路径写法 → `project.docIdOf(path)`，
  * 形状不对的配置 → `loadProject` 当场拒。
  *
- * 这几条不经格式也不经磁盘扫描，所以项目只有一份 `docfirst.config.mjs`、`formats` 是空表。
- * 装配那一整趟（地盘规则、真扫目录）在 cli.test.ts，摆放那一摊在 placement.test.ts。
+ * 这几条不经格式，所以项目只有一份 `docfirst.config.mjs`、`formats` 是空表。
+ * 装配那一整趟（地盘规则、真扫目录）在 cli 那几份测试，摆放那一摊在 placement.test.ts。
  */
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { loadProject } from "../packages/docfirst-workflow/src/host/index.ts";
@@ -16,10 +16,11 @@ import type { Project } from "../packages/docfirst-workflow/src/host/index.ts";
 
 const roots: string[] = [];
 
-/** 起一个只有配置的临时项目：`body` 是 docfirst.config 里除 formats 之外的那几项 */
-function project(body: string): Promise<Project> {
+/** 起一个只有配置和空内容根的临时项目：`body` 是 docfirst.config 里除 formats 之外的那几项 */
+function project(body: string, contentDir = "content"): Promise<Project> {
   const root = mkdtempSync(join(tmpdir(), "god-live-doc-load-"));
   roots.push(root);
+  mkdirSync(join(root, contentDir), { recursive: true });
   writeFileSync(join(root, "docfirst.config.mjs"), `export default { formats: [], ${body} };\n`);
   return loadProject(root);
 }
@@ -28,15 +29,25 @@ test.after(() => {
   for (const root of roots) rmSync(root, { recursive: true, force: true, maxRetries: 5 });
 });
 
-test("docsDirs：没配退 docs；字符串一项；数组照抄；尾斜杠与反斜杠归一", async () => {
-  assert.deepEqual((await project("")).docsDirs, ["docs"]);
-  assert.deepEqual((await project(`docs: "content/docs/"`)).docsDirs, ["content/docs"]);
-  assert.deepEqual((await project(String.raw`docs: ["content/docs", "content\\outputs"]`)).docsDirs, ["content/docs", "content/outputs"]);
+test("内容根：没配退 content；配了照用，尾斜杠与反斜杠归一；轨迹卡目录固定在内容根下", async () => {
+  const plain = await project("");
+  assert.equal(plain.contentDir, "content");
+  assert.equal(plain.trajectoryDir, join(plain.root, "content", "trajectory"));
+  assert.equal((await project(String.raw`content: "site\\content/"`, "site/content")).contentDir, "site/content");
 });
 
-test("docs 的形状不对：空数组、空白串，装配当场拒", async () => {
-  await assert.rejects(project("docs: []"), /非空目录/);
-  await assert.rejects(project(`docs: " "`), /非空目录/);
+test("配置形状不对：formats 不是数组、content 空串、不认识的键，装配当场拒", async () => {
+  const root = mkdtempSync(join(tmpdir(), "god-live-doc-load-"));
+  roots.push(root);
+  mkdirSync(join(root, "content"));
+  writeFileSync(join(root, "docfirst.config.mjs"), `export default { formats: "fumadocs", content: " ", comparator: "git" };\n`);
+  await assert.rejects(loadProject(root), (err: Error) => {
+    assert.match(err.message, /有 3 处要改/);
+    assert.match(err.message, /formats 要是格式的数组/);
+    assert.match(err.message, /content 要是一个非空目录/);
+    assert.match(err.message, /删掉 comparator/);
+    return true;
+  });
 });
 
 test("placements：字符串等于 frontmatter 为空；对象写法原样；没挂映射的文档给空表", async () => {

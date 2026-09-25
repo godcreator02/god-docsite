@@ -25,7 +25,7 @@ export const CONFIG = `import { fakeFormat } from ${JSON.stringify(FAKE)};
 const md = fakeFormat("fake-md", ".md", { render: true });
 const html = fakeFormat("fake-html", ".html", { final: true });
 
-export default { formats: [md, html], docs: "docs", out: "out" };
+export default { formats: [md, html], content: "docs", out: "out" };
 `;
 
 export const DOC_MD = "# md\n\n@@docfirst ref src/greet.ts:2-3 @@\n\n尾巴\n";
@@ -67,12 +67,12 @@ export function setupProject(config: string = CONFIG) {
   };
 }
 
-/** 把 CONFIG 尾巴换成带 outputs 的：docs/a.md 摆到项目根的 README.md */
-export function withOutputs(extra: string): string {
-  return CONFIG.replace(`docs: "docs", out: "out" };`, `docs: "docs", out: "out", outputs: ${extra} };`);
+/** 把 CONFIG 尾巴换成带别的键的（`outputs: {…}` 这种一截） */
+export function withKeys(extra: string): string {
+  return CONFIG.replace(`content: "docs", out: "out" };`, `content: "docs", out: "out", ${extra} };`);
 }
 
-/** 把 CONFIG 尾巴换成带 trajectory 的：项目根下 trajectory/ 目录挂上轨迹卡校验 */
-export function withTrajectory(): string {
-  return CONFIG.replace(`docs: "docs", out: "out" };`, `docs: "docs", out: "out", trajectory: "trajectory" };`);
+/** 把 CONFIG 尾巴换成带 outputs 的：docs/a.md 摆到项目根的 README.md */
+export function withOutputs(extra: string): string {
+  return withKeys(`outputs: ${extra}`);
 }

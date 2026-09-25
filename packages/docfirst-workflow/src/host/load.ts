@@ -1,7 +1,11 @@
 /**
  * 消费方项目的装配。
- * 一个项目 = 一个根目录 + 一份 docfirst.config（声明格式、文档目录、生成物摆到哪）。
+ * 一个项目 = 一个根目录 + 一份 docfirst.config（声明格式、内容根、生成物摆到哪）。
  * loadProject(root) 把这些串起来交出一个判定服务；同一个根只装配一次（站构建时几十个 loader 并发调它）。
+ *
+ * 分区按约定：内容根（`content`，默认 `content`）下 `trajectory/` 是轨迹卡、`future/` 是未来区，
+ * 这两个名字固定；内容根下别的一切（目录里的、直接放在根上的）有格式认领的文档都是现状区，都进 check。
+ * 配置只认 `CONFIG_KEYS` 里那几个键，出现别的键当场报错并说清该怎么改。
  */
 import { existsSync, mkdirSync, readFileSync, readdirSync, statSync, writeFileSync } from "node:fs";
 import { dirname, isAbsolute, join, relative, resolve, sep } from "node:path";
@@ -16,8 +20,8 @@ import type { OutputTarget, Placement, Placing, PlacingHost } from "./placement.
 export interface ProjectConfig {
   /** 这个项目挂了哪些格式 */
   formats: Format[];
-  /** 文档目录，相对项目根；默认 docs。给数组就几个目录一起扫（六区站是 docs + outputs 两区进 check） */
-  docs?: string | string[];
+  /** 内容根，相对项目根；默认 content */
+  content?: string;
   /** 渲染产物落哪，相对项目根；默认 out */
   out?: string;
   /** 组件名册（压平规则），格式用；没声明就用格式的默认表 */
@@ -28,8 +32,6 @@ export interface ProjectConfig {
    * 挂了映射的文档 render 只写目标，不落 out/
    */
   outputs?: Record<string, Array<string | OutputTarget>>;
-  /** 轨迹卡目录，相对项目根；不配就不管轨迹（check 不跑卡校验、trajectory 子命令报错退出） */
-  trajectory?: string;
 }
 
 export interface Project {
@@ -37,13 +39,13 @@ export interface Project {
   config: ProjectConfig;
   service: Service;
   roster: Record<string, unknown> | undefined;
-  /** 文档目录，相对项目根、正斜杠、按配置里的顺序；`docs` 没配就是 `["docs"]` */
-  docsDirs: string[];
-  /** 轨迹卡目录的绝对路径；`docfirst.config` 没配 `trajectory` 时为 null */
-  trajectoryDir: string | null;
+  /** 内容根，相对项目根、正斜杠 */
+  contentDir: string;
+  /** 轨迹卡目录的绝对路径：内容根下的 trajectory/，不一定已经建了 */
+  trajectoryDir: string;
   /** 摆放：render 摆一趟、check 只核对。渲成什么、跟盘上怎么比、落点状态怎么定，都在它背后 */
   placing: Placing;
-  /** 文档目录下有格式认领的那些文档，相对项目根、正斜杠、排过序 */
+  /** 现状区里有格式认领的那些文档，相对项目根、正斜杠、排过序 */
   docs(): string[];
   /** 这篇文档挂的摆放目标（归一化过）；没挂映射给空数组 */
   placements(doc: string): Placement[];
@@ -82,28 +84,59 @@ export function loadProject(root: string): Promise<Project> {
   return pending;
 }
 
-/** `docs` 配置项的两种写法归成一张目录表：字符串一项、数组照抄；没配退 `docs`。空串、空数组、非字符串项都拒 */
-export function docsDirsOf(config: Pick<ProjectConfig, "docs">): string[] {
-  const raw = config.docs ?? "docs";
-  const dirs = Array.isArray(raw) ? raw : [raw];
-  if (dirs.length === 0 || dirs.some((dir) => typeof dir !== "string" || dir.trim() === "")) {
-    throw new Error("docs 得是一个非空目录，或几个非空目录的数组（相对项目根）");
+/** 内容根下固定的两个名字：轨迹卡与未来区，都不进 check */
+const FIXED_AREAS = new Set(["trajectory", "future"]);
+
+/** 配置认的键 */
+const CONFIG_KEYS = ["formats", "content", "out", "components", "outputs"];
+
+/** 删掉的旧键 → 该怎么改 */
+const RETIRED_KEYS: Record<string, string> = {
+  docs: '删掉 docs：现状区按约定是内容根下除 trajectory/、future/ 之外的全部；内容根不叫 content 就写 content: "…"',
+  trajectory: "删掉 trajectory：轨迹卡目录固定是内容根下的 trajectory/",
+  comparator: "删掉 comparator：行段与整文件只有一个比较器，不用选",
+  ledger: "删掉 ledger：记录写在各记号上；旧记录簿先在项目根跑 docfirst migrate-ledger 迁进记号",
+  fumadocs: "删掉 fumadocs：生成正本按原文渲染，不再按集合编译",
+};
+
+/** 配置里要改的地方，一条一句；没有就是空表。只看形状，不碰盘 */
+export function configProblems(config: unknown): string[] {
+  if (typeof config !== "object" || config === null) return ["docfirst.config 要 export default 一个对象"];
+  const table = config as Record<string, unknown>;
+  const problems: string[] = [];
+  for (const key of Object.keys(table)) {
+    if (CONFIG_KEYS.includes(key)) continue;
+    problems.push(RETIRED_KEYS[key] ?? `不认识的键 ${key}：配置只认 ${CONFIG_KEYS.join(" / ")}`);
   }
-  return dirs.map((dir) => dir.replace(/\\/g, "/").replace(/\/+$/, ""));
+  if (!Array.isArray(table.formats)) problems.push("formats 要是格式的数组");
+  if (table.content !== undefined && (typeof table.content !== "string" || table.content.trim() === "")) problems.push("content 要是一个非空目录（相对项目根）");
+  if (table.out !== undefined && (typeof table.out !== "string" || table.out.trim() === "")) problems.push("out 要是一个非空目录（相对项目根）");
+  return problems;
 }
 
-async function build(root: string): Promise<Project> {
+/** 按 Node 原生加载项目的配置模块，交回 default 导出（还没校验） */
+export async function importConfig(root: string): Promise<unknown> {
   // 配置是消费方项目里的活模块，必须由 Node 原生加载：站的打包器会把动态 import 改写成
   // 它自己的加载器，两个标记让它绕开这一句（turbopack / webpack 各认一个）
   const configUrl = pathToFileURL(configPathOf(root)).href;
-  const config = ((await import(/* turbopackIgnore: true */ /* webpackIgnore: true */ configUrl)) as { default: ProjectConfig }).default;
+  return ((await import(/* turbopackIgnore: true */ /* webpackIgnore: true */ configUrl)) as { default: unknown }).default;
+}
+
+async function build(root: string): Promise<Project> {
+  const loaded = await importConfig(root);
+  const problems = configProblems(loaded);
+  if (problems.length > 0) throw new Error(`${configPathOf(root)} 有 ${problems.length} 处要改：\n${problems.map((p) => `  - ${p}`).join("\n")}`);
+  const config = loaded as ProjectConfig;
+  const contentDir = (config.content ?? "content").replace(/\\/g, "/").replace(/\/+$/, "");
+  const contentAbs = join(root, contentDir);
+  if (!existsSync(contentAbs) || !statSync(contentAbs).isDirectory()) {
+    throw new Error(`内容根 ${contentDir} 不是项目根下的目录——配置的 content 写错了，或者还没建`);
+  }
   const service = createService({ formats: config.formats, reader: createReader(root), history: createGitHistory(root) });
-  const docsDirs = docsDirsOf(config);
   const placements = placementsOf(config);
-  assertTurf(root, docsDirs, placements);
+  assertTurf(root, [contentDir], placements);
 
   function walk(dir: string, out: string[]): string[] {
-    if (!existsSync(dir)) return out;
     for (const name of readdirSync(dir)) {
       const path = join(dir, name);
       if (statSync(path).isDirectory()) walk(path, out);
@@ -112,11 +145,18 @@ async function build(root: string): Promise<Project> {
     return out;
   }
 
-  /** 几个文档目录一起扫；目录套目录时同一篇只算一次 */
-  function allDocs(): string[] {
+  /** 现状区：内容根下除 trajectory/、future/ 之外的全部 */
+  function statusDocs(): string[] {
     const out: string[] = [];
-    for (const dir of docsDirs) walk(join(root, dir), out);
-    return [...new Set(out)].sort();
+    for (const name of readdirSync(contentAbs)) {
+      const path = join(contentAbs, name);
+      if (statSync(path).isDirectory()) {
+        if (!FIXED_AREAS.has(name)) walk(path, out);
+      } else if (service.formatFor(name) !== null) {
+        out.push(docIdOf(root, path));
+      }
+    }
+    return out.sort();
   }
 
   // 摆放模块认得的只有这几样，先攒齐再交给它——它拿不到装配的别的部分。
@@ -141,10 +181,10 @@ async function build(root: string): Promise<Project> {
     config,
     service,
     roster: config.components,
-    docsDirs,
-    trajectoryDir: config.trajectory !== undefined ? join(root, config.trajectory) : null,
+    contentDir,
+    trajectoryDir: join(contentAbs, "trajectory"),
     placing: createPlacing(placingHost),
-    docs: allDocs,
+    docs: statusDocs,
     placements: (doc) => placements[doc] ?? [],
     docIdOf: (path) => docIdOf(root, path),
     read: (doc) => readFileSync(join(root, doc), "utf8"),
