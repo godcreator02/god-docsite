@@ -68,7 +68,7 @@ description: 仓布局、三摊门禁、提交规矩、发布、只读参考
 `.npmrc`）。号在仓里抬、提交之后再调：它先守仓根 git 树干净（有未提交改动就一个都不发），再仓根
 `pnpm build`、照 `files` 白名单验产物、同号已在源上就拒，最后 staging 发 `latest`。同一个版本号永不重发。
 
-两个 npm 包一趟发，`packages` 按依赖序给，轨迹包在前——主包里 `workspace:*` 那条依赖发出去写成 `>=` 范围：
+两个 npm 包一趟发，`packages` 按依赖序给，轨迹包在前——主包里 `workspace:*` 那条依赖发出去写成 `^<工作区里轨迹包的版本号>`：
 
 ```text
 devkit.release {"dir":"<仓根>","packages":["packages/docfirst-trajectory","packages/docfirst-workflow"]}
