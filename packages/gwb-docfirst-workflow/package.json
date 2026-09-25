@@ -4,7 +4,7 @@
   "author": {
     "name": "godcreator"
   },
-  "description": "docfirst 件：在刚铺好的 fumadocs 骨架上装六区与接线（docfirst.attach），挂六份流程说明书（讲机制三份加通用开发纪律三份）；对 docfirst-workflow 那个包零依赖，核对、确认与渲染都在仓里跑。服务无；skill 6 份；命令 1 条。",
+  "description": "docfirst 插件：在刚生成的 fumadocs 骨架上装 docfirst 的现状、轨迹、未来三个区与接线（docfirst.attach），注册 6 份说明书（讲 docfirst 的 3 份、通用开发纪律 3 份）；对 docfirst-workflow 包零依赖，核对、确认与渲染在仓里运行。服务无；skill 6 份；命令 1 条。",
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
