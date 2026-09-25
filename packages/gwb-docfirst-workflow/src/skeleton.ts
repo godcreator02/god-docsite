@@ -20,7 +20,7 @@ const SKELETON_CONTENT = new Set(["docs", "docs/index.mdx", "docs/meta.json"]);
 export const SUPERSEDED = ["src/app/docs/layout.tsx"];
 
 /** 模板的 outputs 映射会写到仓根的生成物：仓里已经有的，第一次 render 就会被覆盖 */
-const PLACED_FILES = ["README.md", "AGENTS.md"];
+const PLACED_FILES = ["README.md", "AGENTS.md", "CLAUDE.md"];
 
 /** docfirst 配置文件名：扩展名不限，出现任何一个就说明这个站已经装过 */
 const DOCFIRST_CONFIG = /^docfirst\.config\.[^.]+$/;
@@ -145,10 +145,4 @@ export function readRepoManifest(repoDir: string): { name?: unknown; title?: unk
   } catch {
     return null;
   }
-}
-
-/** 仓根 `src/index.ts` 的正文，没有就是 null——入口页的第一条引用要不要写看它 */
-export function readEntry(repoDir: string): string | null {
-  const entry = join(repoDir, "src", "index.ts");
-  return existsSync(entry) ? readFileSync(entry, "utf8") : null;
 }

@@ -1,12 +1,10 @@
 /**
- * 六区合一棵侧栏树：每区一个 root: true 的根节（侧栏分区），URL 仍是六个基座
- * （/docs、/trajectory、/spec、/future、/outputs、/feedback，路由各走各的 loader）。
- * base-ui 版的 Root 只有单槽 fallback，多树切换不稳，根节分区是正路。
- * 区内的顺序由各区 content/<区>/meta.json 定。
+ * 所有内容集合合成一棵侧栏树：每个集合一个 root: true 的根节点（侧栏分区），URL 仍按集合分前缀，
+ * 路由各用各的 loader。base-ui 版的 Root 只有一个 fallback 槽，多棵树切换不稳定，所以用根节点分区。
  */
 import { RootProvider } from 'fumadocs-ui/provider/next'
 import { DocsLayout } from 'fumadocs-ui/layouts/docs'
-import { source, sourceFeedback, sourceFuture, sourceOutputs, sourceSpec, sourceTrajectory } from '@/lib/source'
+import { source, sourceFuture, sourceTrajectory } from '@/lib/source'
 import type { Node, Root } from 'fumadocs-core/page-tree'
 import type { ReactNode } from 'react'
 import './global.css'
@@ -27,10 +25,7 @@ export default function Layout({ children }: { children: ReactNode }) {
     children: [
       zone('现状', source.getPageTree()),
       zone('轨迹', sourceTrajectory.getPageTree()),
-      zone('交接', sourceSpec.getPageTree()),
       zone('未来', sourceFuture.getPageTree()),
-      zone('生成正本', sourceOutputs.getPageTree()),
-      zone('反馈', sourceFeedback.getPageTree()),
     ],
   }
 

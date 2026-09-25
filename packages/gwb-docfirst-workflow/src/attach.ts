@@ -10,14 +10,14 @@
  * 所有能失败的检查（骨架检查、占位符、写盘前的路径检查）都在写第一个文件之前做完；
  * 写盘途中仍然失败时，已写的文件恢复原样、新建的文件与目录删掉，再把错误抛出。
  *
- * 模板假设站在仓根下一层（约定叫 `docs-site/`），被引用的代码在仓根，引用写 `../src/…`。
+ * 模板假设站在仓根下一层（约定叫 `docs-site/`）：outputs 映射把 README / AGENTS / CLAUDE 生成到 `../`。
  */
 import { existsSync, mkdirSync, readFileSync, rmSync, statSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { withDocfirst } from "./manifest.js";
-import { inspectSite, readEntry, readRepoManifest, type SiteFacts } from "./skeleton.js";
+import { inspectSite, readRepoManifest, type SiteFacts } from "./skeleton.js";
 import { readTemplate, renderSite, ATTACH_TEMPLATE, type SiteValues, type TemplateFile } from "./template.js";
-import { namesFor, pinBlockFrom } from "./values.js";
+import { valuesFor } from "./values.js";
 
 export type { TemplateFile } from "./template.js";
 export { DOC_SCRIPTS } from "./manifest.js";
@@ -67,14 +67,8 @@ export interface AttachResult extends AttachPlan {
 export function planAttach(options: AttachOptions): AttachPlan {
   const siteDir = resolve(options.siteDir);
   const facts: SiteFacts = inspectSite(siteDir);
-  const names = namesFor(facts.repoDir, readRepoManifest(facts.repoDir), options.title);
-  const values: SiteValues = {
-    ...names,
-    port: String(facts.port),
-    pinBlock: pinBlockFrom(readEntry(facts.repoDir)),
-  };
-
-  const manifest = withDocfirst(facts.manifestText, names.title);
+  const values: SiteValues = valuesFor(siteDir, facts.repoDir, readRepoManifest(facts.repoDir), options.title);
+  const manifest = withDocfirst(facts.manifestText, values.title);
   const files = [...renderSite(readTemplate(options.template ?? ATTACH_TEMPLATE), values), { rel: "package.json", text: manifest }];
   assertWritable(siteDir, files.map((file) => file.rel));
   return {

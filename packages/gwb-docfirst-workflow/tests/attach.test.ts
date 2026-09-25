@@ -7,29 +7,40 @@ import { attachSite, planAttach, DEFAULT_PORT, DOCFIRST_DEPS, type AttachPlan } 
 import { readTemplate, renderSite, renderText, ATTACH_TEMPLATE, type SiteValues } from '../src/template.js'
 
 /**
- * 装六区那摊的账，全部跨它面上那两个方法测：
- *   `planAttach` 算一套不碰盘——骨架合不合规、名字怎么认、起手页那块钉什么、package.json
- *   怎么合、占位符错了抛不抛，全在它回的那份计划里看得见，一个内部函数都不用点名；
- *   `attachSite` 才落盘——装出来的六区长什么样、骨架里哪份让了位，在临时目录里跑真的。
+ * 装配经对外的两个函数测：`planAttach` 只计算不写盘，骨架检查、名字、package.json 合并、占位符
+ * 都在它返回的计划里看；`attachSite` 在临时目录里真的写盘，看装出来的站与写盘失败时的恢复。
  *
- * 加一条**跨两份真相的账**：装配往目标站补的那张依赖表跟工作区那两个包的版本对得上。
- * 那张表是手写的（工作区里写的是 `workspace:*`，摆进别人的站里装不动），那两个包发版抬版本号时
- * 忘了抬它，装出来的站会装到一个旧版——这条测试就是那个门。
+ * 另有一条检查两处版本号一致：装配写进目标站的依赖表是手写的（工作区里写的是 `workspace:*`，
+ * 写进别的站装不上），两个包发版升版本号时要跟着改。
  */
 
 const HERE = path.dirname(fileURLToPath(import.meta.url))
 const PACKAGES = path.resolve(HERE, '..', '..')
 
-/** 包名 → 它在 packages/ 下的目录名。目录名跟包名去掉 scope 那一截同名 */
+/** 包名 → 它在 packages/ 下的目录名 */
 const DIR_OF: Record<string, string> = {
   '@godcreator/docfirst-workflow': 'docfirst-workflow',
   '@godcreator/docfirst-trajectory': 'docfirst-trajectory',
 }
 
-/** 渲模板用的一套值，占位符集合是封闭的五个 */
-const VALUES: SiteValues = { title: '样例', pkg: '@s/样例', pkgName: '样例', port: '4317', pinBlock: '（钉块）' }
+/** 渲染模板用的一套值 */
+const VALUES: SiteValues = { title: '样例', site: 'docs-site' }
 
-/** 站件铺出来的那份骨架 package.json，最小的一份 */
+/** 模板里的三个区，各有集合、路由、侧栏根节点与 meta.json */
+const ZONES = ['docs', 'trajectory', 'future']
+
+/** 模板里的全部骨架页（相对 content/） */
+const PAGES = [
+  'docs/index.mdx',
+  'docs/glossary.mdx',
+  'docs/outputs/readme.mdx',
+  'docs/outputs/agents.mdx',
+  'docs/outputs/claude.mdx',
+  'trajectory/index.mdx',
+  'future/roadmap.mdx',
+]
+
+/** 站点插件生成的骨架 package.json，最小的一份 */
 function skeletonManifest(port: number | null): string {
   const scripts: Record<string, string> = { build: 'next build' }
   if (port !== null) {
@@ -40,10 +51,7 @@ function skeletonManifest(port: number | null): string {
   return `${JSON.stringify(manifest, null, 2)}\n`
 }
 
-/**
- * 造一个「刚被站件铺好」的骨架：`<tmp>/<仓>/docs-site`，仓根可选地放几样东西。
- * 跑完把整片删掉。
- */
+/** 造一个刚生成的骨架 `<tmp>/我的仓/docs-site`，仓根与站里可以额外放文件。跑完整个删掉 */
 function inSkeleton(
   setup: { port?: number | null; repoFiles?: Record<string, string>; siteFiles?: Record<string, string> },
   body: (site: string, repo: string) => void,
@@ -72,7 +80,7 @@ function inSkeleton(
   }
 }
 
-/** 造一份自带的小模板，用来验渲染本身——不必拿整套六区说事 */
+/** 造一份临时的小模板，用来单独测渲染与写盘 */
 function templateDir(files: Record<string, string>): string {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), 'gwb-docfirst-workflow-tpl-'))
   for (const [rel, text] of Object.entries(files)) {
@@ -82,68 +90,100 @@ function templateDir(files: Record<string, string>): string {
   return root
 }
 
-/** 计划里那一份文件的正文；不在就当场报出来（比在 undefined 上匹配好读） */
+/** 计划里某个文件的正文；不在就报出计划里有哪些文件 */
 function fileIn(plan: AttachPlan, rel: string): string {
   const found = plan.files.find((file) => file.rel === rel)
   expect(found, `计划里没有 ${rel}：${plan.files.map((f) => f.rel).join('、')}`).toBeDefined()
   return found!.text
 }
 
-describe('模板本身', () => {
-  it('件里那份模板读得出来，源码态与产物态是同一个相对位置', () => {
+/** 调用会抛出时返回错误文本，不抛出时返回空串 */
+function errorOf(call: () => unknown): string {
+  try {
+    call()
+  } catch (error) {
+    return (error as Error).message
+  }
+  return ''
+}
+
+describe('模板', () => {
+  it('包里的模板读得出来', () => {
     expect(fs.existsSync(path.join(ATTACH_TEMPLATE, 'docfirst.config.mjs.tpl'))).toBe(true)
-    expect(readTemplate().length).toBeGreaterThan(20)
+    expect(readTemplate().length).toBeGreaterThan(15)
   })
 
-  it('落盘时脱掉 .tpl 后缀——带着它躺在包里，才不会被别的工具当成真配置去解析', () => {
+  it('写盘时去掉 .tpl 后缀', () => {
     const files = readTemplate()
     expect(files.every((f) => f.rel.endsWith('.tpl'))).toBe(true)
     expect(renderSite(files, VALUES).every((f) => !f.rel.endsWith('.tpl'))).toBe(true)
   })
 
-  it('整套渲完不留占位符——模板里多一个认不出的 {{typo}} 就当场抛', () => {
+  it('整套渲染完不留占位符，认不出的占位符当场抛出', () => {
     for (const file of renderSite(readTemplate(), VALUES)) expect(file.text, file.rel).not.toMatch(/\{\{\w+\}\}/)
     expect(() => renderText('{{typo}}', VALUES, 'x')).toThrow(/认不出的占位符/)
   })
 
-  it('骨架那半一份都不在装配模板里——package.json、tsconfig、postcss 那几份归站件', () => {
+  it('骨架的那部分不在装配模板里：package.json、tsconfig、postcss 等由站点插件生成', () => {
     for (const rel of ['package.json.tpl', 'tsconfig.json.tpl', 'postcss.config.mjs.tpl', 'pnpm-workspace.yaml.tpl', '.npmrc.tpl']) {
-      expect(fs.existsSync(path.join(ATTACH_TEMPLATE, rel)), `装配模板里还留着骨架那半的 ${rel}`).toBe(false)
+      expect(fs.existsSync(path.join(ATTACH_TEMPLATE, rel)), `装配模板里有骨架的 ${rel}`).toBe(false)
     }
   })
 
-  it('反馈区两页：inbox 收别的仓投来的、hatch 装本仓的重复操作——跨仓反馈投目标仓自己站的 inbox', () => {
+  it('content/ 下只有 docs、trajectory、future 三个区，页面只有那几页', () => {
     const rels = readTemplate().map((f) => f.rel)
-    for (const page of ['inbox', 'hatch']) expect(rels).toContain(`content/feedback/${page}.mdx.tpl`)
-    expect(rels, '收件页统一叫 inbox，不叫 inbound').not.toContain('content/feedback/inbound.mdx.tpl')
+    const contentDirs = new Set(rels.filter((rel) => rel.startsWith('content/')).map((rel) => rel.split('/')[1]))
+    expect([...contentDirs].sort()).toEqual([...ZONES].sort())
+    const pages = rels.filter((rel) => rel.startsWith('content/') && rel.endsWith('.mdx.tpl')).map((rel) => rel.slice('content/'.length, -'.tpl'.length))
+    expect(pages.sort()).toEqual([...PAGES].sort())
+    const routes = rels.filter((rel) => /^src\/app\/[^/]+\/\[\[\.\.\.slug\]\]\/page\.tsx\.tpl$/.test(rel)).map((rel) => rel.split('/')[2])
+    expect(routes.sort()).toEqual([...ZONES].sort())
+  })
+
+  it('骨架页只规定第一句「本页回答」与待填位置，不规定小标题', () => {
+    for (const file of renderSite(readTemplate(), VALUES)) {
+      if (!file.rel.startsWith('content/') || !file.rel.endsWith('.mdx')) continue
+      expect(file.text, `${file.rel} 要有「本页回答」`).toMatch(/\*\*本页回答\*\*：/)
+      expect(file.text, `${file.rel} 里有小标题`).not.toMatch(/^#{2,} /m)
+    }
+  })
+
+  it('CLAUDE 正本 frontmatter 之后的第一行是 @AGENTS.md', () => {
+    const claude = renderSite(readTemplate(), VALUES).find((f) => f.rel === 'content/docs/outputs/claude.mdx')!.text
+    const body = claude.replace(/^---\n[\s\S]*?\n---\n/, '')
+    expect(body.trimStart().split('\n')[0]).toBe('@AGENTS.md')
+  })
+
+  it('AGENTS 正本指回自己在站里的路径', () => {
+    const agents = renderSite(readTemplate(), VALUES).find((f) => f.rel === 'content/docs/outputs/agents.mdx')!.text
+    expect(agents).toContain('`docs-site/content/docs/outputs/agents.mdx`')
   })
 })
 
-describe('planAttach：算一套不碰盘', () => {
-  it('一个字都不写盘，整套六区在回的那份计划里', () => {
+describe('planAttach：只计算不写盘', () => {
+  it('一个字都不写，整套文件在计划里', () => {
     inSkeleton({}, (site) => {
       const plan = planAttach({ siteDir: site })
       expect(plan.target).toBe(site)
-      expect(fs.existsSync(path.join(site, 'docfirst.config.mjs')), '算完盘上什么都没有').toBe(false)
-      expect(plan.files.length, '件里带的那套模板一个文件都没读到').toBeGreaterThan(20)
-      expect(plan.files.some((file) => file.rel.endsWith('.tpl')), '.tpl 后缀在计划里就已经脱掉了').toBe(false)
+      expect(fs.existsSync(path.join(site, 'docfirst.config.mjs')), '计算完盘上什么都没有').toBe(false)
+      expect(plan.files.length).toBeGreaterThan(15)
+      expect(plan.files.some((file) => file.rel.endsWith('.tpl'))).toBe(false)
     })
   })
 
-  it('端口从骨架的脚本里认，装配不改它；认不出退 next 的默认口', () => {
+  it('端口从骨架的脚本里认，装配不改它；认不出用 next 的默认端口', () => {
     inSkeleton({ port: 4317 }, (site) => {
       const plan = planAttach({ siteDir: site })
       expect(plan.port).toBe(4317)
-      expect(fileIn(plan, 'content/outputs/readme.mdx')).toMatch(/localhost:4317/)
       const merged = JSON.parse(plan.manifest) as { scripts: Record<string, string> }
-      expect(merged.scripts.dev, '骨架写的那几条脚本一个字不动').toBe('next dev -p 4317')
+      expect(merged.scripts.dev, '骨架的脚本不动').toBe('next dev -p 4317')
     })
     inSkeleton({ port: null }, (site) => {
       expect(planAttach({ siteDir: site }).port).toBe(DEFAULT_PORT)
     })
   })
 
-  it('package.json 只加不减——补 doc 脚本与 docfirst 依赖，骨架写的一律留着', () => {
+  it('package.json 只加不减：补 doc 脚本与 docfirst 依赖，骨架写的都保留', () => {
     inSkeleton({}, (site) => {
       const plan = planAttach({ siteDir: site })
       const merged = JSON.parse(plan.manifest) as {
@@ -153,45 +193,32 @@ describe('planAttach：算一套不碰盘', () => {
         devDependencies: Record<string, string>
         description: string
       }
-      expect(merged.name, '骨架挑的包名不动').toBe('hello-docs-site')
-      expect(merged.dependencies['fumadocs-core'], '骨架装的依赖不动').toBe('16.15.1')
+      expect(merged.name).toBe('hello-docs-site')
+      expect(merged.dependencies['fumadocs-core']).toBe('16.15.1')
       expect(merged.scripts.build).toBe('next build')
       expect(merged.scripts.doc).toBe('docfirst check')
       expect(merged.scripts['doc:render']).toBe('docfirst render')
       expect(merged.scripts['verify:roster']).toBe('node scripts/verify-roster.mjs')
       for (const [name, range] of Object.entries(DOCFIRST_DEPS)) expect(merged.devDependencies[name]).toBe(range)
-      expect(merged.description).toMatch(/我的仓 的六区文档站/)
-      // 合并完的那份也在待写清单里——落盘只走一条路
+      expect(merged.description).toMatch(/^我的仓 的文档站/)
       expect(fileIn(plan, 'package.json')).toBe(plan.manifest)
     })
   })
 
-  it('名字从仓根 package.json 认，认不出退仓的目录名，title 优先', () => {
+  it('显示名：title 优先，其次仓根 package.json 的 title，再次包名去掉 scope，最后仓的目录名', () => {
     inSkeleton({ repoFiles: { 'package.json': JSON.stringify({ name: '@scope/hello' }) } }, (site) => {
-      expect(fileIn(planAttach({ siteDir: site }), 'content/docs/index.mdx')).toMatch(/`hello` 是什么/)
+      expect(fileIn(planAttach({ siteDir: site }), 'content/docs/index.mdx')).toMatch(/^# hello$/m)
       expect(fileIn(planAttach({ siteDir: site, title: '打个招呼' }), 'content/docs/index.mdx')).toMatch(/^# 打个招呼$/m)
     })
+    inSkeleton({ repoFiles: { 'package.json': JSON.stringify({ name: '@scope/hello', title: '你好' }) } }, (site) => {
+      expect(fileIn(planAttach({ siteDir: site }), 'content/docs/index.mdx')).toMatch(/^# 你好$/m)
+    })
     inSkeleton({}, (site) => {
-      expect(fileIn(planAttach({ siteDir: site }), 'content/docs/index.mdx'), '仓根没有 package.json，退目录名').toMatch(/^# 我的仓$/m)
+      expect(fileIn(planAttach({ siteDir: site }), 'content/docs/index.mdx')).toMatch(/^# 我的仓$/m)
     })
   })
 
-  it('起手页的第一条引用现找——有 export const name 就钉那一行，没有就写「怎么钉」', () => {
-    inSkeleton({ repoFiles: { 'src/index.ts': ['// 头', '', "export const name = 'x';", ''].join('\n') } }, (site) => {
-      expect(fileIn(planAttach({ siteDir: site }), 'content/docs/index.mdx'), '行号是数出来的，不写死').toMatch(
-        /@@docfirst ref \.\.\/src\/index\.ts:3-3 @@/,
-      )
-    })
-    inSkeleton({ repoFiles: { 'src/index.ts': 'export function name() {}\n' } }, (site) => {
-      const none = fileIn(planAttach({ siteDir: site }), 'content/docs/index.mdx')
-      expect(none).toMatch(/还没钉第一条引用/)
-      // 样例记号在围栏里：围栏内容是 code 节点，check 认不出它——硬塞一条钉不住的引用
-      // 等于让刚接好线的站开局就报红
-      expect(none).toMatch(/```text\n@@docfirst ref/)
-    })
-  })
-
-  it('模板里有认不出的占位符当场抛，盘上一个字都还没写', () => {
+  it('模板里有认不出的占位符当场抛出，盘上一个字都没写', () => {
     inSkeleton({}, (site) => {
       const template = templateDir({ 'a.txt.tpl': '{{typo}}' })
       try {
@@ -203,16 +230,12 @@ describe('planAttach：算一套不碰盘', () => {
     })
   })
 
-  /**
-   * 装配唯一的那道门。四条拒的理由各说各的——「这个站已有内容」那两条是约定本身：
-   * 只在刚铺好的骨架上跑，跑了半年的站人工接线。
-   */
-  it('不在 / 不是目录 / 不是 fumadocs 骨架 / 已经接过线 / content 下有内容，五种都在算的那一半就抛', () => {
+  it('不在、不是目录、不是 fumadocs 骨架、已经装过、content 下有内容：都在计算时拒绝', () => {
     inSkeleton({}, (site, repo) => {
       expect(() => planAttach({ siteDir: path.join(repo, '没有这个站') })).toThrow(/站不在/)
       fs.writeFileSync(path.join(repo, '文件'), '')
       expect(() => planAttach({ siteDir: path.join(repo, '文件') })).toThrow(/不是目录/)
-      expect(() => planAttach({ siteDir: site }), '刚铺好的骨架放行').not.toThrow()
+      expect(() => planAttach({ siteDir: site }), '刚生成的骨架放行').not.toThrow()
     })
 
     inSkeleton({ siteFiles: { 'docfirst.config.mjs': 'export default {}' } }, (site) => {
@@ -238,63 +261,59 @@ describe('planAttach：算一套不碰盘', () => {
   })
 })
 
-describe('attachSite：算完直接落', () => {
-  it('整套落盘——六区各有集合、路由、骨架页，配置预置两区进 check', () => {
-    inSkeleton(
-      { repoFiles: { 'package.json': JSON.stringify({ name: '@s/hello' }), 'src/index.ts': "// 头\nexport const name = 'hello';\n" } },
-      (site) => {
-        const result = attachSite({ siteDir: site })
-        expect(result.written, '写了哪些文件逐条报出来').toContain('docfirst.config.mjs')
-        expect(result.written.length).toBe(result.files.length)
-        expect(fs.existsSync(path.join(site, 'docfirst.config.mjs.tpl')), '.tpl 后缀落盘时脱掉').toBe(false)
-        expect(fs.readFileSync(path.join(site, 'content', 'docs', 'index.mdx'), 'utf8')).toMatch(/@@docfirst ref \.\.\/src\/index\.ts:2-2 @@/)
+describe('attachSite：计算后写盘', () => {
+  it('三个区各有集合、路由、侧栏根节点与骨架页，配置是新形状', () => {
+    inSkeleton({ repoFiles: { 'package.json': JSON.stringify({ name: '@s/hello' }) } }, (site) => {
+      const result = attachSite({ siteDir: site })
+      expect(result.written).toContain('docfirst.config.mjs')
+      expect(result.written.length).toBe(result.files.length)
+      expect(fs.existsSync(path.join(site, 'docfirst.config.mjs.tpl'))).toBe(false)
 
-        // 六区：六个目录各有骨架页与 meta.json，六个集合、六条路由、侧栏六个根节
-        const zones = ['docs', 'trajectory', 'spec', 'future', 'outputs', 'feedback']
-        for (const zone of zones) {
-          expect(fs.existsSync(path.join(site, 'content', zone, 'meta.json')), `content/${zone}/meta.json`).toBe(true)
-          expect(fs.existsSync(path.join(site, 'src', 'app', zone, '[[...slug]]', 'page.tsx')), `src/app/${zone}/[[...slug]]/page.tsx`).toBe(true)
-        }
-        const pages = [
-          'docs/index.mdx', 'docs/boundary.mdx', 'docs/system-map.mdx', 'docs/glossary.mdx', 'trajectory/index.mdx', 'spec/index.mdx',
-          'future/roadmap.mdx', 'outputs/agents.mdx', 'outputs/readme.mdx', 'feedback/inbox.mdx', 'feedback/hatch.mdx',
-        ]
-        for (const page of pages) {
-          expect(fs.readFileSync(path.join(site, 'content', page), 'utf8'), `${page} 头一句要是「本页回答」`).toMatch(/\*\*本页回答\*\*：/)
-        }
-        const sourceConfig = fs.readFileSync(path.join(site, 'source.config.ts'), 'utf8')
-        for (const zone of zones) {
-          expect(sourceConfig, `集合 ${zone}`).toMatch(new RegExp(`export const ${zone} = defineDocs\\(\\{\\s*dir: 'content/${zone}'`))
-        }
-        expect((sourceConfig.match(/includeProcessedMarkdown/g) ?? []).length, '只有 docs 与 outputs 开 processed markdown').toBe(2)
-        expect(sourceConfig, '卡集合用 cardSchema').toMatch(/schema: cardSchema/)
-        const loaders = fs.readFileSync(path.join(site, 'src', 'lib', 'source.ts'), 'utf8')
-        for (const base of ['/docs', '/trajectory', '/spec', '/future', '/outputs', '/feedback']) expect(loaders).toMatch(new RegExp(`baseUrl: '${base}'`))
-        const layout = fs.readFileSync(path.join(site, 'src', 'app', 'layout.tsx'), 'utf8')
-        expect((layout.match(/zone\('/g) ?? []).length, '侧栏一棵树六个根节').toBe(6)
-        expect(layout).toMatch(/root: true/)
-        // 骨架那份 DocsLayout 让位：留着就是两层 DocsLayout 套着渲，侧栏出现两遍
-        expect(result.superseded).toEqual(['src/app/docs/layout.tsx'])
-        expect(fs.existsSync(path.join(site, 'src', 'app', 'docs', 'layout.tsx'))).toBe(false)
-        const config = fs.readFileSync(path.join(site, 'docfirst.config.mjs'), 'utf8')
-        expect(config, 'check 扫 docs + outputs 两区').toMatch(/docs: \['content\/docs', 'content\/outputs'\]/)
-        expect(config).toMatch(/trajectory: 'content\/trajectory'/)
-        expect(config).toMatch(/'content\/outputs\/agents\.mdx': \['\.\.\/AGENTS\.md'\]/)
-        expect(config).toMatch(/'content\/outputs\/readme\.mdx': \['\.\.\/README\.md'\]/)
-        expect(fs.readFileSync(path.join(site, 'content', 'spec', 'index.mdx'), 'utf8')).toMatch(/有页 = 有活在路上，做完删/)
+      for (const zone of ZONES) {
+        expect(fs.existsSync(path.join(site, 'content', zone, 'meta.json')), `content/${zone}/meta.json`).toBe(true)
+        expect(fs.existsSync(path.join(site, 'src', 'app', zone, '[[...slug]]', 'page.tsx')), `src/app/${zone}/[[...slug]]/page.tsx`).toBe(true)
+      }
+      for (const page of PAGES) expect(fs.existsSync(path.join(site, 'content', page)), page).toBe(true)
+      for (const gone of ['spec', 'feedback', 'outputs']) {
+        expect(fs.existsSync(path.join(site, 'content', gone)), `content/${gone}`).toBe(false)
+        expect(fs.existsSync(path.join(site, 'src', 'app', gone)), `src/app/${gone}`).toBe(false)
+      }
 
-        // 装过一次就拒第二次——这时站里已经有 docfirst.config.mjs
-        expect(() => attachSite({ siteDir: site })).toThrow(/这个站已有内容，请人工接线/)
-      },
-    )
+      const sourceConfig = fs.readFileSync(path.join(site, 'source.config.ts'), 'utf8')
+      expect([...sourceConfig.matchAll(/export const (\w+) = defineDocs\(\{\s*dir: 'content\/(\w+)'/g)].map((m) => [m[1], m[2]])).toEqual(
+        ZONES.map((zone) => [zone, zone]),
+      )
+      expect((sourceConfig.match(/includeProcessedMarkdown/g) ?? []).length, '只有现状区开 processed markdown').toBe(1)
+      expect(sourceConfig).toMatch(/schema: cardSchema/)
+
+      const loaders = fs.readFileSync(path.join(site, 'src', 'lib', 'source.ts'), 'utf8')
+      expect([...loaders.matchAll(/baseUrl: '([^']+)'/g)].map((m) => m[1])).toEqual(ZONES.map((zone) => `/${zone}`))
+
+      const layout = fs.readFileSync(path.join(site, 'src', 'app', 'layout.tsx'), 'utf8')
+      expect([...layout.matchAll(/zone\('([^']+)'/g)].map((m) => m[1])).toEqual(['现状', '轨迹', '未来'])
+      expect(layout).toMatch(/root: true/)
+
+      expect(result.superseded).toEqual(['src/app/docs/layout.tsx'])
+      expect(fs.existsSync(path.join(site, 'src', 'app', 'docs', 'layout.tsx'))).toBe(false)
+
+      const config = fs.readFileSync(path.join(site, 'docfirst.config.mjs'), 'utf8')
+      const body = config.slice(config.indexOf('export default'))
+      expect(body).toMatch(/content: 'content'/)
+      for (const gone of ['docs', 'trajectory', 'comparator', 'ledger', 'fumadocs']) expect(body, `配置里还有 ${gone} 键`).not.toMatch(new RegExp(`^\\s*${gone}:`, 'm'))
+      expect(body).toMatch(/'content\/docs\/outputs\/readme\.mdx': \['\.\.\/README\.md'\]/)
+      expect(body).toMatch(/'content\/docs\/outputs\/agents\.mdx': \['\.\.\/AGENTS\.md'\]/)
+      expect(body).toMatch(/'content\/docs\/outputs\/claude\.mdx': \['\.\.\/CLAUDE\.md'\]/)
+
+      expect(() => attachSite({ siteDir: site }), '装过一次就拒绝第二次').toThrow(/这个站已有内容，请人工接线/)
+    })
   })
 
-  it('仓根一个字不动——会被 render 覆盖的只报出来', () => {
-    inSkeleton({ repoFiles: { 'README.md': '# 老 README\n' } }, (site, repo) => {
+  it('仓根一个字不动，会被 render 覆盖的只报出来', () => {
+    inSkeleton({ repoFiles: { 'README.md': '# 老 README\n', 'CLAUDE.md': '老 CLAUDE\n' } }, (site, repo) => {
       const result = attachSite({ siteDir: site })
-      expect(result.overwrites, '仓根已有的生成物点名，没有的不点').toEqual(['README.md'])
-      expect(fs.readFileSync(path.join(repo, 'README.md'), 'utf8'), '装配一个字不动它').toBe('# 老 README\n')
-      expect(fs.existsSync(path.join(repo, 'AGENTS.md')), '装配不摆生成物，那是 render 的事').toBe(false)
+      expect(result.overwrites).toEqual(['README.md', 'CLAUDE.md'])
+      expect(fs.readFileSync(path.join(repo, 'README.md'), 'utf8')).toBe('# 老 README\n')
+      expect(fs.existsSync(path.join(repo, 'AGENTS.md')), '装配不写生成物，那是 render 的事').toBe(false)
     })
   })
 })
@@ -318,12 +337,7 @@ describe('写盘安全', () => {
 
   it('要写的路径被目录或文件挡住：一次列出全部，一个文件都不写', () => {
     inSkeleton({ siteFiles: { 'src/lib/source.ts/占位': '', 'scripts': '一个普通文件' } }, (site) => {
-      let message = ''
-      try {
-        attachSite({ siteDir: site })
-      } catch (error) {
-        message = (error as Error).message
-      }
+      const message = errorOf(() => attachSite({ siteDir: site }))
       expect(message).toMatch(/^这些路径写不下去，一个文件都没写：/)
       expect(message).toContain('src/lib/source.ts（已经是目录）')
       expect(message).toContain('scripts（是文件，scripts/verify-roster.mjs 要把它当目录）')
@@ -357,38 +371,12 @@ describe('写盘安全', () => {
   })
 })
 
-it('装配那张依赖表是精确号、跟工作区那两个包的版本对得上——它们发版抬了版本号忘了抬它，这条红', () => {
+it('装配写进站的依赖表是精确版本号，与工作区两个包的版本一致', () => {
   for (const [name, pin] of Object.entries(DOCFIRST_DEPS)) {
     const dir = DIR_OF[name]
-    expect(dir, `装配表里的 ${name} 在 packages/ 下没有对应目录——新加一条依赖时把 DIR_OF 也补上`).toBeDefined()
+    expect(dir, `装配表里的 ${name} 在 packages/ 下没有对应目录，新加依赖时把 DIR_OF 也补上`).toBeDefined()
     const pkg = JSON.parse(fs.readFileSync(path.join(PACKAGES, dir!, 'package.json'), 'utf8')) as { name: string; version: string }
-    expect(pkg.name, `${String(dir)} 的包名对不上装配表里的 ${name}`).toBe(name)
-    expect(pin, `装配表里 ${name} 写的是 ${pin}，工作区里是 ${pkg.version}——写精确号（不带 ^ / ~ / >=），发版时这张表得跟着抬`).toBe(pkg.version)
+    expect(pkg.name, `${String(dir)} 的包名与装配表里的 ${name} 不一致`).toBe(name)
+    expect(pin, `装配表里 ${name} 写的是 ${pin}，工作区里是 ${pkg.version}：写精确号（不带 ^ / ~ / >=），发版时跟着改`).toBe(pkg.version)
   }
-})
-
-/**
- * 六区里现状与未来的分界：此刻是什么（含为什么存在、边界）归现状，还没发生的才归未来。
- * 骨架页就按这条铺——愿景页与 not-doing 页不再有，入口页与边界页住现状区。
- */
-describe('现状与未来的分界', () => {
-  it('为什么存在、边界在哪是现状——住现状区的入口页与边界页；未来区只有路线，不再有愿景页与 not-doing 页', () => {
-    const rels = readTemplate().map((f) => f.rel)
-    for (const page of ['content/docs/index.mdx.tpl', 'content/docs/boundary.mdx.tpl', 'content/future/roadmap.mdx.tpl']) expect(rels).toContain(page)
-    for (const page of ['content/future/overview.mdx.tpl', 'content/future/not-doing.mdx.tpl']) expect(rels, `未来区还留着 ${page}`).not.toContain(page)
-    for (const file of renderSite(readTemplate(), VALUES)) {
-      expect(file.text, `${file.rel} 还链着已经不存在的页`).not.toMatch(/\/future\/(overview|not-doing)/)
-    }
-  })
-
-  it('入口页循序渐进：是什么与为什么存在 → 主线走一遍 → 按来意怎么读 → 模块索引', () => {
-    const files = renderSite(readTemplate(), VALUES)
-    const entry = files.find((f) => f.rel === 'content/docs/index.mdx')!.text
-    const order = ['## 是什么，为什么存在', '## 主线走一遍', '## 按来意怎么读', '## 模块索引']
-    const at = order.map((heading) => entry.indexOf(heading))
-    expect(at.every((i) => i >= 0), `入口页缺节：${order.filter((_, k) => at[k]! < 0).join('、')}`).toBe(true)
-    expect([...at].sort((a, b) => a - b), '四节的顺序不能乱').toEqual(at)
-    const meta = JSON.parse(files.find((f) => f.rel === 'content/docs/meta.json')!.text) as { pages: string[] }
-    expect(meta.pages.slice(0, 2), '侧栏里入口页打头、边界页紧跟').toEqual(['index', 'boundary'])
-  })
 })

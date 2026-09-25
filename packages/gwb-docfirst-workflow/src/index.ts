@@ -56,7 +56,7 @@ export function apply(ctx: GwbContext): void {
     return [
       `cd ${result.target}`,
       'pnpm install',
-      'pnpm doc:render     # 生成仓根 README.md / AGENTS.md（正本在 content/outputs/）',
+      'pnpm doc:render     # 生成仓根 README.md / AGENTS.md / CLAUDE.md（正本在 content/docs/outputs/）',
       'pnpm doc            # docfirst check',
       `pnpm dev            # http://localhost:${String(result.port)}`,
     ]
@@ -70,7 +70,8 @@ export function apply(ctx: GwbContext): void {
         usage:
           '{ dir: string, title?: string }。' +
           'dir 是站目录的绝对路径（约定是 <仓>/docs-site，骨架由站点插件的 docs-site.create 生成）。' +
-          '写入 docfirst 的内容集合、路由、侧栏、docfirst.config.mjs、mdx 接线、组件名册脚本与各区的骨架页，' +
+          '写入 content/ 下三个区（docs 现状、trajectory 轨迹、future 未来）的集合、路由、侧栏与骨架页，README / AGENTS / CLAUDE 的正本（content/docs/outputs/），' +
+          'docfirst.config.mjs、mdx 接线与组件名册脚本，' +
           '并往站的 package.json 里补 docfirst 的依赖与 doc 脚本。' +
           '只在刚生成的骨架上进行：站里已经有 docfirst.config.*、或 content/ 下有骨架之外的内容，就回「这个站已有内容，请人工接线」，不写任何文件。' +
           '要写的路径被已有的目录或文件挡住时一个文件都不写；写盘途中失败时站恢复原样。' +
@@ -102,7 +103,7 @@ export function apply(ctx: GwbContext): void {
             next: nextSteps(result),
             ...(result.overwrites.length > 0
               ? {
-                  warn: `仓根已有 ${result.overwrites.join('、')}：docfirst 配置里预置了 outputs 映射，第一次 pnpm doc:render 会覆盖它们——先把内容搬进 content/outputs/ 下对应的 mdx 正本，再 render`,
+                  warn: `仓根已有 ${result.overwrites.join('、')}：docfirst 配置里预置了 outputs 映射，第一次 pnpm doc:render 会覆盖它们——先把内容搬进 content/docs/outputs/ 下对应的 mdx 正本，再 render`,
                 }
               : {}),
           },

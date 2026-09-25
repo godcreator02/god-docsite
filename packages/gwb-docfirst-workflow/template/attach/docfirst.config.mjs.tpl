@@ -1,27 +1,25 @@
 /**
- * 这个站怎么挂机制：用哪个格式包、哪几区进 check、卡目录在哪、生成物摆哪、组件名册是什么。
- * 命令行和站读的是同一份。
+ * docfirst 配置：命令行和站读的是同一份。项目根是这个站目录，被引用的代码在仓根，引用写 `../src/…`。
  *
- * 项目根是这个站目录，钉的代码在仓根——引用里写 `../src/…`，读取器按项目根拼路径。
- * 比较器不写死：仓里有 git 就用 git 比，没有就退回按内容摘要比。
+ * content 是各区的上一级目录。它下面只有两个名字是固定的：`trajectory/` 是轨迹卡目录，
+ * `future/` 是未来区（路线、在途方案 `future/spec/`、别的仓投来的反馈 `future/inbox/`）。
+ * 其余目录都是现状区，全部进 check；本站预置的现状区是 `content/docs/`。
  *
- * 六区里只有 docs（现状）与 outputs（生成正本）进 check——只有这两区对代码说话。
- * trajectory 指卡目录：check 顺带跑卡校验（卡是 .mdx，六个字段一个不沾的页不算卡）。
- * outputs：仓根 AGENTS.md / README.md 是生成物，正本是 content/outputs/ 下那两篇 mdx——
- * 改 mdx 源要跑 `pnpm doc:render` 重摆，两份一起提交，check 守着生成物跟源一致。
- * 要发 SKILL.md 这类头部得保留 frontmatter 字段的生成物，目标写成对象：
- *   'content/outputs/skills/x.mdx': [{ to: '../skills/x/SKILL.md', frontmatter: ['name', 'description'] }]
+ * outputs 把正本映射到生成物：仓根 README.md / AGENTS.md / CLAUDE.md 由 `content/docs/outputs/` 下的
+ * 三份 mdx 生成。改正本后运行 `pnpm doc:render`，正本与生成物放进同一个提交，check 检查两者一致。
+ * 要保留 frontmatter 字段的生成物（比如 SKILL.md），目标写成对象：
+ *   'content/docs/outputs/skills/x.mdx': [{ to: '../skills/x/SKILL.md', frontmatter: ['name', 'description'] }]
  */
 import * as fumadocs from '@godcreator/docfirst-workflow/fumadocs'
 
 export default {
   formats: [fumadocs],
-  docs: ['content/docs', 'content/outputs'],
-  trajectory: 'content/trajectory',
+  content: 'content',
   out: 'out',
   outputs: {
-    'content/outputs/agents.mdx': ['../AGENTS.md'],
-    'content/outputs/readme.mdx': ['../README.md'],
+    'content/docs/outputs/readme.mdx': ['../README.md'],
+    'content/docs/outputs/agents.mdx': ['../AGENTS.md'],
+    'content/docs/outputs/claude.mdx': ['../CLAUDE.md'],
   },
   components: {
     ...fumadocs.defaultRoster,

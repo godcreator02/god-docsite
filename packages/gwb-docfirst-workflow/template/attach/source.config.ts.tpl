@@ -1,19 +1,12 @@
 /**
- * 站侧的全部接线都在这一个文件：六区六个集合，外加全局的 mdxOptions（格式包给——remark 链
- * 尾巴挂插件，meta 白名单放行 title / lineNumbers / data-dot）。
- *
- * 六区各一个 defineDocs（自带 docs + meta 双集合，meta.json 的侧栏排序天然支持）：
- *   docs        现状：此刻是什么、为什么存在、边界在哪；散文、尽量多钉；进 check
- *   trajectory  轨迹：卡只增不改；卡的 frontmatter 由 cardSchema 认（label 派生 title），
- *               正文里 `supersedes::` / `pivots-from::` 关系边由 remarkTrajectoryLinks 打标；不进 check
- *   spec        交接：在途 spec 与实施方案，做完删页
- *   future      未来：只放还没发生的事（roadmap：在等什么前提、到期再选的决定），常改
- *   outputs     生成正本：agents / readme 等，render 摆到仓根；进 check
- *   feedback    反馈：inbox（别的仓投来的，处理完删）+ hatch（本仓反复做的操作候选）
- * 只有 docs 与 outputs 开 processed markdown——命令行按名字找集合只对进 check 的两区有意义
- * （集合名 = 目录最后一截，docfirst 靠这条约定给 `?collection=`）。
- * 集合定义在这里而不是 src/lib/source.ts 里，是为了让命令行也能按名字找到它：
- * fumadocs 的 Node loader 只认 source.config 里的集合。
+ * 站的内容集合，一个目录一个 defineDocs（自带 docs + meta 两个集合，侧栏顺序由各目录的 meta.json 定）：
+ *   docs        现状区，进 check；生成正本在 content/docs/outputs/ 下
+ *   trajectory  轨迹卡，只增不改；frontmatter 由 cardSchema 认，正文里的关系边由 remarkTrajectoryLinks 标出
+ *   future      未来区：还没发生的事
+ * 现状区开 processed markdown：命令行按集合名（目录最后一段）取各页的机读版。
+ * 集合必须定义在这里：fumadocs 的 Node loader 只认 source.config 里的集合，命令行要按名字找到它们。
+ * 在 content/ 下新建现状区目录时，在这里加一个同名集合，在 src/lib/source.ts、src/app/layout.tsx 与
+ * src/app/<目录>/[[...slug]]/page.tsx 各加对应的一处。
  */
 import { applyMdxPreset, defineConfig, defineDocs } from 'fumadocs-mdx/config'
 import { docfirstMdxOptions, docfirstMarkdownOptions } from '@godcreator/docfirst-workflow/fumadocs'
@@ -26,8 +19,8 @@ export const docs = defineDocs({
   },
 })
 
-// 集合级 mdxOptions 会把默认插件全去掉（fumadocs-mdx 的文档原话），所以用 applyMdxPreset 把默认
-// preset（标题 id、gfm……）加回来，再挂 remarkTrajectoryLinks；全局那份 docfirst 插件不会跑到这个集合上
+// 集合级 mdxOptions 会去掉全部默认插件（fumadocs-mdx 的文档原话），所以用 applyMdxPreset 把默认
+// preset（标题 id、gfm 等）加回来，再加 remarkTrajectoryLinks；全局的 docfirst 插件不作用于这个集合
 export const trajectory = defineDocs({
   dir: 'content/trajectory',
   docs: {
@@ -38,26 +31,11 @@ export const trajectory = defineDocs({
   },
 })
 
-export const spec = defineDocs({
-  dir: 'content/spec',
-})
-
 export const future = defineDocs({
   dir: 'content/future',
 })
 
-export const outputs = defineDocs({
-  dir: 'content/outputs',
-  docs: {
-    postprocess: { includeProcessedMarkdown: docfirstMarkdownOptions() },
-  },
-})
-
-export const feedback = defineDocs({
-  dir: 'content/feedback',
-})
-
 export default defineConfig({
-  // 类型要求完整 options（含 themes），运行时会 merge 默认值——cast 只在这一处
+  // 类型要求完整 options（含 themes），运行时会合并默认值，cast 只在这一处
   mdxOptions: docfirstMdxOptions({ root: process.cwd() }) as never,
 })
