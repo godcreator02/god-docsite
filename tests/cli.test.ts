@@ -104,7 +104,7 @@ test("黄灯：confirm 原样不动并列出来；--accept 不点名页退 2；�
     assert.match(signed.out, /✅ docs\/a\.md {2}src\/greet\.ts:2-3 {2}已按今天的内容重新记下/);
     assert.notEqual(p.read("docs/a.md"), confirmed);
     assert.match((await p.cli("check")).out, /🟢 docs\/a\.md/);
-    assert.match((await p.cli("check")).out, /🟡 docs\/b\.html/, "没点名的页的黄灯还等着人");
+    assert.match((await p.cli("check")).out, /🔴 docs\/b\.html {2}src\/greet\.ts:2-3 {2}有变动，是本仓还没提交的改动引起的/, "没点名的页的黄灯还等着人");
   } finally {
     p.teardown();
   }
@@ -167,7 +167,7 @@ test("五类引用一篇文档：五种记号各自认得回来；多了文件�
     writeFileSync(join(p.root, "src", "remove.ts"), "");
     const after = await p.cli("check");
     assert.equal(after.code, 1);
-    assert.match(after.out, /🟡 docs\/d\.md {2}tree src depth=1 {2}有变动，等作者复核（3 项）/);
+    assert.match(after.out, /🔴 docs\/d\.md {2}tree src depth=1 {2}有变动，是本仓还没提交的改动引起的（3 项）/, "多出来的文件还没提交，这个黄算红");
     assert.match(after.out, /🔴 docs\/d\.md {2}absent src\/remove\.ts {2}缺失，引用指向空气（断言它不在，它却出现了）/);
   } finally {
     p.teardown();

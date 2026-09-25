@@ -4,7 +4,7 @@
  *
  *   {
  *     "ok": false,                 // red === 0
- *     "red": 3,                    // 红的总数：缺失 + 名册外组件 + 生成物不新鲜 + 病卡
+ *     "red": 3,                    // 红的总数：缺失 + 拦提交的黄 + 名册外组件 + 生成物不新鲜 + 病卡
  *     "docs": [                    // 每篇被扫到的文档一条，按文档身份排序
  *       {
  *         "doc": "content/docs/a.mdx",
@@ -15,7 +15,8 @@
  *             "lines": [2, 3],     // 行段今天在文件里的位置（跟过 hunk 或滑窗）；别的种类是 [1, 项数]
  *             "draft": false,      // 还是草稿记号（没 confirm 过）
  *             "reason": "changed", // 状态的细分理由，没有就不带（同判定层的 Item.reason）
- *             "diff": "- a\n+ b" } // 有变动且取得到旧内容时的 - / + 文本，没有就不带
+ *             "diff": "- a\n+ b",  // 有变动且取得到旧内容时的 - / + 文本，没有就不带
+ *             "blocking": true }   // 只出现在黄灯上：被钉文件在文档所在的仓里有未提交的改动，这个黄算红
  *         ],
  *         "components": [{ "name": "Callout", "line": 7 }], // 名册外组件
  *         "outputs": [             // 挂了 outputs 映射的才有；形状归 project 的摆放模块定
@@ -52,6 +53,8 @@ export interface RefReport {
   draft: boolean;
   reason?: string;
   diff?: string;
+  /** 这处黄是本仓未提交的改动引起的，算红：同一个提交里复核并 `--accept` */
+  blocking?: true;
 }
 
 export interface ComponentReport {
@@ -61,7 +64,7 @@ export interface ComponentReport {
 
 export interface DocReport {
   doc: string;
-  /** 这篇贡献的红：缺失 + 名册外组件 + 不新鲜的摆放落点 */
+  /** 这篇贡献的红：缺失 + 拦提交的黄 + 名册外组件 + 不新鲜的摆放落点 */
   red: number;
   items: RefReport[];
   components: ComponentReport[];

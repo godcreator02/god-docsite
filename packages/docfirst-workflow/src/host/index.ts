@@ -9,10 +9,12 @@
  */
 
 // 导出面就是这一层的契约面：外面用的是 loadProject 交出来的 Project；
-// createReader / createGitHistory / createPlacing 是装配的零件，测试换读取器、换旧内容来源时直接拿。
-// git 那把原语不出这个口——它们是 createGitHistory 的内部实现。
+// createReader / createGitHistory / createPlacing 是装配的零件，测试换读取器、换旧内容来源时直接拿；
+// createUncommittedProbe 是 check 每跑一次造一个的探针。git 那把原语不出这个口。
 export { createReader } from "./fs-reader.ts";
 export { createGitHistory } from "./history.ts";
+export { createUncommittedProbe } from "./uncommitted.ts";
+export type { UncommittedProbe } from "./uncommitted.ts";
 export { loadProject } from "./load.ts";
 export type { Project, ProjectConfig } from "./load.ts";
 export { createPlacing } from "./placement.ts";

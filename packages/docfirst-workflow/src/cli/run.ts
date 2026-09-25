@@ -1,7 +1,8 @@
 /**
  * docfirst 的动作，编排在这儿。可执行那一头在 cli.ts——测试直接调 main，不用起子进程。
  * cwd 就是项目根（那里有 docfirst.config.mjs）。
- *   docfirst check [--json]                 核对：只读，红退 1；挂了 outputs 映射的文档顺手守生成物新鲜度；
+ *   docfirst check [--json]                 核对：只读，红退 1；被钉文件在文档所在的仓里有未提交改动的黄也算红
+ *                                          （这次改动引起的，同一个提交里处理）；挂了 outputs 映射的文档顺手守生成物新鲜度；
  *                                          配了 trajectory 目录的顺手跑卡校验，病卡也算红。--json 出整份
  *                                          机读报告（形状见 report.ts），退出码不变
  *   docfirst confirm [文档路径…]            机械写回：未确认的记上记录、挪了位置的写回新行号，再把挂了 outputs
@@ -22,7 +23,8 @@ import { mkdirSync, writeFileSync } from "node:fs";
 import { join, relative, sep } from "node:path";
 import { targetKey } from "../engine/index.ts";
 import type { ConfirmStep, Format, Item, Listing } from "../engine/index.ts";
-import { loadProject } from "../host/index.ts";
+import { createUncommittedProbe, loadProject } from "../host/index.ts";
+import type { UncommittedProbe } from "../host/index.ts";
 import { buildTrajectory, scanDir } from "@godcreator/docfirst-trajectory";
 import type { CardProblemReport, CheckReport, DocReport, OutputReport, RefReport } from "./report.ts";
 
@@ -63,7 +65,8 @@ const HELP_FLAGS = new Set(["--help", "-h"]);
 
 export const USAGE = `docfirst——文档钉代码的核对与确认。在有 docfirst.config.mjs 的项目根跑。
 
-  docfirst check [--json]                核对，只读。红退 1；--json 出整份机读报告，退出码不变
+  docfirst check [--json]                核对，只读。红退 1；被钉文件在本仓有未提交改动的黄灯也算红，
+                                         在同一个提交里复核并 --accept。--json 出整份机读报告，退出码不变
   docfirst confirm [文档路径…]            机械写回：草稿换成正式记号并记下记录，挪了位置的写回新行号，
                                          再重新生成挂了 outputs 映射的生成物（内容变了才写）。
                                          黄灯不动、逐条列出；红的那几处不动、别的照写，有红退 1。
@@ -208,8 +211,9 @@ async function replaceOutputs(project: Project, docs: string[]): Promise<number>
  */
 async function checkCommand(project: Project, docs: string[], json: boolean): Promise<number> {
   const report: CheckReport = { ok: true, red: 0, docs: [], trajectory: [] };
+  const uncommitted = createUncommittedProbe(project.root);
   for (const doc of docs) {
-    const { report: entry, lines } = await check(project, doc, project.read(doc), project.service.formatFor(doc)!);
+    const { report: entry, lines } = await check(project, doc, project.read(doc), project.service.formatFor(doc)!, uncommitted);
     report.docs.push(entry);
     report.red += entry.red;
     if (!json) for (const line of lines) console.log(line);
@@ -270,8 +274,8 @@ function detailOf(item: Item): string {
   return `（${item.current.length} 项）`;
 }
 
-/** 一处引用的机读条目：目标文本、种类、状态、记号所在行（1 起）、今天的位置；理由与 diff 有才带 */
-function refReport(item: Item): RefReport {
+/** 一处引用的机读条目：目标文本、种类、状态、记号所在行（1 起）、今天的位置；理由、diff、拦提交有才带 */
+function refReport(item: Item, blocking: boolean): RefReport {
   return {
     target: targetKey(item.reference.target),
     kind: item.reference.target.kind,
@@ -281,7 +285,17 @@ function refReport(item: Item): RefReport {
     draft: item.reference.extra?.draft === true,
     ...(item.reason !== undefined ? { reason: item.reason } : {}),
     ...(item.diff !== undefined ? { diff: item.diff } : {}),
+    ...(blocking ? { blocking: true as const } : {}),
   };
+}
+
+/** 一处引用在人读报告里的那一行；拦提交的黄单独一种说法，打成红 */
+function itemLine(doc: string, item: Item, blocking: boolean): string {
+  const key = targetKey(item.reference.target);
+  if (blocking) {
+    return `🔴 ${doc}  ${key}  有变动，是本仓还没提交的改动引起的${detailOf(item)}——在同一个提交里复核，再 docfirst confirm ${doc} --accept`;
+  }
+  return `${MARK[item.status]} ${doc}  ${key}  ${LABEL[item.status]}${detailOf(item)}`;
 }
 
 /** 一篇文档核对完的两份产物：机读条目，加人读模式要打的行（顺序：引用、名册外组件、摆放目标） */
@@ -290,13 +304,14 @@ interface DocCheck {
   lines: string[];
 }
 
-async function check(project: Project, doc: string, text: string, format: Format): Promise<DocCheck> {
+async function check(project: Project, doc: string, text: string, format: Format, uncommitted: UncommittedProbe): Promise<DocCheck> {
   const listing: Listing = project.service.resolve(doc, text);
   const lines: string[] = [];
   const items: RefReport[] = [];
   for (const item of listing.items) {
-    items.push(refReport(item));
-    lines.push(`${MARK[item.status]} ${doc}  ${targetKey(item.reference.target)}  ${LABEL[item.status]}${detailOf(item)}`);
+    const blocking = item.status === "changed" && uncommitted(doc, item.reference.target);
+    items.push(refReport(item, blocking));
+    lines.push(itemLine(doc, item, blocking));
   }
   const components = typeof format.lintComponents === "function" ? format.lintComponents(text, project.roster) : [];
   for (const { name, line } of components) {
@@ -304,7 +319,10 @@ async function check(project: Project, doc: string, text: string, format: Format
   }
   const outputs = await project.placing.check(doc, listing);
   for (const output of outputs) lines.push(placedLine(doc, output));
-  const red = items.filter((item) => item.status === "missing").length + components.length + outputs.filter((output) => !output.fresh).length;
+  const red =
+    items.filter((item) => item.status === "missing" || item.blocking === true).length +
+    components.length +
+    outputs.filter((output) => !output.fresh).length;
   return { report: { doc, red, items, components, outputs }, lines };
 }
 
