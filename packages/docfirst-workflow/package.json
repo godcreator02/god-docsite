@@ -36,7 +36,6 @@
     "typecheck": "tsc -p tsconfig.json",
     "prepublishOnly": "pnpm run build"
   },
-  "//dependencies": "轨迹是独立包线：它有意不依赖判定层、自己复刻了一部分记号语法，概念上完全独立。remark 那套只给 fumadocs 那一层用",
   "dependencies": {
     "@godcreator/docfirst-trajectory": "workspace:*",
     "remark-frontmatter": "^5.0.0",

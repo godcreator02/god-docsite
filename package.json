@@ -7,7 +7,6 @@
   "scripts": {
     "build": "pnpm -r --filter \"./packages/**\" run build",
     "typecheck": "pnpm -r --filter \"./packages/**\" run typecheck && tsc -p tsconfig.tests.json",
-    "//test": "带 build 的安全默认。门禁里先单跑一次 build，之后各摊并发跑，那时用 test:only——只改测试就不必重建",
     "test": "pnpm run build && pnpm run test:only",
     "test:only": "node --test \"tests/*.test.ts\""
   },

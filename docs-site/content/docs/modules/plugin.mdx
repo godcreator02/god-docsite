@@ -15,7 +15,7 @@ description: gwb-docfirst-workflow：一条装六区的命令加六份说明书�
 
 一句话的判据：**包的消费方是仓，插件的消费方是 agent。** 要在**仓**里发生的事（核对、确认、渲染，门禁与站构建要跑的那些）归 `@godcreator/docfirst-workflow` 那个包，agent 自己 `cd` 到那个仓里跑 `pnpm doc`；只在 **agent** 手上发生一次的事（读一份说明书、给一个新骨架装一次六区）归插件。这条判据怎么推出来的、否掉了哪几条候选，在 [包给仓、插件给人](/trajectory/2026-09-10-package-serves-repo-plugin-serves-agent)。
 
-插件的身份面就三个常量：插件名、那条命令的名字、一条硬 inject。
+插件的身份面就三个常量：插件名、那条命令的名字、一条必需的 inject。
 
 {/* ref file="../packages/gwb-docfirst-workflow/src/index.ts" lines="22-27" */}
 
@@ -23,9 +23,7 @@ description: gwb-docfirst-workflow：一条装六区的命令加六份说明书�
 
 ### 零依赖这条边界
 
-插件对那个包**三类依赖字段一个都不写、`src/` 里一行都不 import**：不启动子进程、不登记 node CLI、不查 home 里那个包的路径。于是装了插件就能注册说明书、能装六区，不必再装什么包，也不再有「装了插件没装包」那种只装了一半的状态。manifest 上那个字段是空的，注释就是这条边界的正文：
-
-{/* ref file="../packages/gwb-docfirst-workflow/package.json" lines="37-37" */}
+插件对那个包**三类依赖字段一个都不写、`src/` 里一行都不 import**：不启动子进程、不登记 node CLI、不查 home 里那个包的路径。于是装了插件就能注册说明书、能装六区，不必再装什么包，也不再有「装了插件没装包」那种只装了一半的状态。所以清单里 `dependencies` 整段没有，peer 与 dev 里也没有 `@godcreator/docfirst-workflow`。
 
 守卫在产物测试里，三类依赖字段与 `src/` 下每份源码的裸名 import 一起检查：
 
@@ -125,7 +123,7 @@ description: gwb-docfirst-workflow：一条装六区的命令加六份说明书�
 
 ## 依赖的接口
 
-两个接口都是 cordis 的 inject，一硬一软。`gwbCommands` 是**硬注入**——进 `export const inject`，缺它整个插件不 apply：
+两个接口都是 cordis 的 inject，一个必需、一个可选。`gwbCommands` 是**硬注入**——进 `export const inject`，缺它整个插件不 apply：
 
 {/* ref file="../packages/gwb-docfirst-workflow/src/index.ts" lines="27-27" */}
 
