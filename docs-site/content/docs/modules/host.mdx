@@ -143,7 +143,7 @@ frontmatter 是**逐行原样搬**的，不解析 YAML：一条字段从它的�
 
 {/* ref file="../tests/auto-comparator.test.ts" lines="1-10" */}
 
-夹具本身不走 `loadProject`——临时目录里解析不到包名，零件直接拿来装；装配走一整趟（真扫目录）在 `tests/cli.test.ts`，地盘规则拒掉哪几种配置在 `tests/cli-outputs.test.ts`。
+夹具本身不走 `loadProject`——临时目录里解析不到包名，零件直接拿来装；完整走一遍装配（真扫目录）在 `tests/cli.test.ts`，地盘规则拒掉哪几种配置在 `tests/cli-outputs.test.ts`。
 
 {/* ref file="../tests/repo.ts" lines="1-4" */}
 
@@ -155,7 +155,7 @@ frontmatter 是**逐行原样搬**的，不解析 YAML：一条字段从它的�
 
 {/* ref file="../tests/placing-host.test.ts" lines="36-52" */}
 
-**真盘那份**在 `tests/placement.test.ts`：临时目录里起一个真项目，`loadProject` 装好之后直接调两个方法——不起命令行、不劫持 stdout、不 `process.chdir`。摆放的判定不该只有走一趟命令行才验得着。项目配 `comparator: "hash"`，因此不必起 git 仓：摆放一句 git 都不问，要真仓的是 git 记忆。
+**真盘那份**在 `tests/placement.test.ts`：临时目录里起一个真项目，`loadProject` 装好之后直接调两个方法——不起命令行、不劫持 stdout、不 `process.chdir`。摆放的判定不该只有经过命令行才验得到。项目配 `comparator: "hash"`，因此不必起 git 仓：摆放一句 git 都不问，要真仓的是 git 记忆。
 
 {/* ref file="../tests/placement.test.ts" lines="1-9" */}
 

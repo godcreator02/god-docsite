@@ -17,7 +17,7 @@ description: 记忆是那个仓 HEAD 的 blob；文件在哪个仓按它自己�
 
 要旧内容的时候（报黄给 diff、报红显示「文档写下时那段」），拿 blob 去 `cat-file --batch` 现取——
 「在不在对象库里」和「内容是什么」一次问到。blob 名按内容寻址，所以取到的内容在进程里记住，
-一趟 check 里同一个 blob 只起一次 git：
+一次 check 里同一个 blob 只起一次 git：
 
 {/* ref file="../packages/docfirst-workflow/src/host/git.ts" lines="127-157" */}
 
