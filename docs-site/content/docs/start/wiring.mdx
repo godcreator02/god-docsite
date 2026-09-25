@@ -7,7 +7,7 @@ description: 把 docfirst 接进一个 fumadocs 站要动的七处：配置、�
 
 **本页回答**：当前代码现状下，把 docfirst 接进一个 fumadocs 站要动哪七处、每处写什么。
 
-这个站自己就是消费方：页面上每一块代码都是 `next build` 那一刻从工作区源码里现拿的，页面里不存副本，
+这个站自己就是消费方：页面上每一块代码都是 `next build` 那一刻从工作区源码里取的，页面里不存副本，
 块右上角那个小圆点是状态（图例见 [入门](/docs/start)）。所以下面每一处钉的都是这个站自己的文件，
 读到的就是正在跑的那一份。
 
@@ -87,15 +87,15 @@ fumadocs 自己的管线出的 md。
 {/* ref file="source.config.ts" lines="36-47" */}
 
 **docfirst 自己的 remark 插件登记在全局 `mdxOptions` 上，作用不到这个集合**——这正是要的：轨迹卡正文冻结历史、
-不钉活代码，轨迹卡校验检查的也是这条。
+不钉会变的代码，轨迹卡校验检查的也是这条。
 
 ## 三、src/lib/：六条 loader 与一棵侧栏树
 
-每区一条 loader，`baseUrl` 就是这一区的 URL 基座：
+每区一条 loader，`baseUrl` 就是这一区的 URL 前缀：
 
 {/* ref file="src/lib/source.ts" */}
 
-侧栏是**一棵**树不是六棵：每区一个 `root: true` 的根节点当分区，URL 仍是六个基座。base-ui 版的 `Root`
+侧栏是**一棵**树不是六棵：每区一个 `root: true` 的根节点当分区，URL 仍是六个前缀。base-ui 版的 `Root`
 只有单槽 fallback，多树切换不稳，根节点分区是推荐做法；区内的顺序由各区自己的 `meta.json` 定。
 
 {/* ref file="src/lib/tree.ts" */}
@@ -201,7 +201,7 @@ React 表先展开 fumadocs 的默认表（标题栏、复制按钮都是它的�
 两头都看不到边界。
 
 两条是同一类：**外置的边界会让客户端指令丢失**。不外置的代价只是 Turbopack 多打包一遍服务端那半，
-那半只在构建期跑、进不了客户端束。剩下一项是站根重定向到 `/docs`：六区各有各的基座，
+那半只在构建期跑、进不了客户端束。剩下一项是站根重定向到 `/docs`：六区各有各的 URL 前缀，
 现状区自己有 `index.mdx`。
 
 运行站要注意三件事：改了 `src/fumadocs/` 的代码**先删 `.next` 再 build**——Turbopack 只按 mdx 内容缓存，
@@ -209,14 +209,7 @@ React 表先展开 fumadocs 的默认表（标题栏、复制按钮都是它的�
 和热更新会让「这一版到底跑没跑我的插件」说不清；`start` 脚本写死的端口被别的进程占了就
 `pnpm exec next start -p <别的端口>`，启动的站验证完就停掉。
 
-## 附：六区各是什么
+## 附：六区
 
-- **现状** `content/docs/`：此刻是什么、为什么存在、边界在哪（入口页 `index`、边界页 `boundary`）、怎么拆，只写现状、散文、尽量多钉；进 `check`。
-- **轨迹** `content/trajectory/`：轨迹卡只增不改，正文冻结历史、不钉活代码；入口是星轨盘 [/trajectory](/trajectory)。
-- **交接** `content/spec/`：在途的 spec 与实施方案，做完拆解归梁、删页。
-- **未来** `content/future/`：只放还没发生的事——路线（在等什么前提、到期再选的决定）。
-- **生成正本** `content/outputs/`：README 这类生成物的 mdx 正本，`render` 写到映射指定的位置；进 `check`。
-- **反馈** `content/feedback/`：别的仓投来的意见（`inbox`，处理完删）与本仓的重复操作候选（`hatch`）。
-
-六区的目录、路由、loader、侧栏根节一一对应；进 `check` 的只有现状与生成正本两区，另外四区的草稿记号与
-轨迹卡天然不进门禁。
+六区各放什么、哪两区进 `check`，正本是 skill「docfirst-docs」的「六区」一节；接进站里之后，六区的目录、
+路由、loader、侧栏根节点一一对应。
