@@ -63,7 +63,7 @@ description: 读配置装出一个判定服务；记忆按被引文件的位置�
 
 **git 记忆记什么**：blob、commit、旧 blob 里的行段、段哈希。不记仓在哪——blob 是内容寻址的，核对时从文件位置重新找仓，所以同一条记录换台机器、换个 clone 路径照样认得。
 
-{/* ref file="../packages/docfirst-workflow/src/host/git-comparator.ts" lines="20-27" */}
+{/* ref file="../packages/docfirst-workflow/src/host/git-comparator.ts" lines="22-29" */}
 
 **记录簿落盘就是一个 json**，两层键：文档 → 目标 → 记录。整个实现一眼看得完，`save` 只在内容真变了才写盘——记录簿会被构建工具登记成依赖，白改一次 mtime 就是一次全站重编。
 
@@ -91,13 +91,13 @@ description: 读配置装出一个判定服务；记忆按被引文件的位置�
 
 核对时不看文件在哪，按**记录的 kind** 转发——记录是当时哪种记忆记的，就让哪个比较器判，认不得的 kind 当没确认过：
 
-{/* ref file="../packages/docfirst-workflow/src/host/auto-comparator.ts" lines="41-45" */}
+{/* ref file="../packages/docfirst-workflow/src/host/auto-comparator.ts" lines="44-48" */}
 
 一个项目里 git 记录和 hash 记录并存。哪一处拿到的是 hash 记忆，`confirm` 那一行会标出来（见[命令行](/docs/modules/cli)）——写手得知道自己拿到的是弱记忆。
 
 **`createGitComparator`** 管行段和整文件。确认时要过几道检查：得在某个仓里、那个仓得有过提交、文件得在 HEAD 里（未跟踪、被忽略、大小写不符都拒）、工作区得干净；一次确认里每个文件最多问一次 git，工作区内容跟 HEAD 里的 blob 一样就算干净。核对时先比哈希：当前内容的 blob 名等于记录里那个，内容一字没变，不取旧内容、不起 git；变了才从对象库取旧内容，拿 `git diff -U0` 出 hunk 表，把旧行段映到今天：
 
-{/* ref file="../packages/docfirst-workflow/src/host/git-comparator.ts" lines="99-106" */}
+{/* ref file="../packages/docfirst-workflow/src/host/git-comparator.ts" lines="132-139" */}
 
 **绿只认段哈希**：hunk 说没碰到也再比一次，行映射跟内容对不上时宁可报黄让人复核，也不把红判成绿。整段没了是 `vanished`，文件没了是 `file-missing`，内容变了而 blob 不在对象库（浅克隆、历史重写、换了个仓）是 `blob-missing`。一个进程里同一个 blob 只从对象库取一次、同一对内容只 diff 一次——两样都按内容寻址，记住不会过时；hunk 表还落一份到系统临时目录，下一次 check 直接用。这条线为什么这么设计、blob 名为什么自己算，见 [git 记忆原理](/docs/principles/git)。
 

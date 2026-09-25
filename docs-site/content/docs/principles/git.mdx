@@ -19,7 +19,7 @@ description: 记忆是那个仓 HEAD 的 blob；文件在哪个仓按它自己�
 「在不在对象库里」和「内容是什么」一次问到。blob 名按内容寻址，所以取到的内容在进程里记住，
 一次 check 里同一个 blob 只起一次 git：
 
-{/* ref file="../packages/docfirst-workflow/src/host/git.ts" lines="127-157" */}
+{/* ref file="../packages/docfirst-workflow/src/host/git.ts" lines="134-164" */}
 
 记录里**不记仓在哪**：blob 是内容寻址的，核对时从文件位置重新找仓就行。
 
@@ -117,7 +117,7 @@ hunk 表进纯函数，旧行段映到今天。这个函数不认识 git，谁�
 
 映完之后还要再比一次段哈希——这就是判定的入口：
 
-{/* ref file="../packages/docfirst-workflow/src/host/git-comparator.ts" lines="99-113" */}
+{/* ref file="../packages/docfirst-workflow/src/host/git-comparator.ts" lines="132-146" */}
 
 <Note>
   **绿只认段哈希**。hunk 说「没碰到这段」也照样比一遍：行映射跟内容对不上时（记录被手改过之类），
