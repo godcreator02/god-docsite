@@ -12,6 +12,6 @@
  * 版本号，这张表跟着抬，那条测试红了就是忘了抬**。
  */
 export const DOCFIRST_DEPS: Record<string, string> = {
-  "@godcreator/docfirst-workflow": "0.2.3",
+  "@godcreator/docfirst-workflow": "0.2.4",
   "@godcreator/docfirst-trajectory": "0.1.1",
 };

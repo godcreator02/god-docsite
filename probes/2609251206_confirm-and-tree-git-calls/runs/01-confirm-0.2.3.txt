@@ -1,0 +1,23 @@
+docfirst-workflow 0.2.3（各站装的那版），按页 confirm，写盘拦下。2026-09-25 11:5x
+
+######## gwb-devkit docs-site：content/docs/devkit/index.mdx（31 处引用，auto 比较器）
+== 墙钟 5805ms；git 60 次 5492ms；拦下的写盘 1 次
+     24 次   2444ms  git rev-parse --verify
+     12 次   1124ms  git check-ignore -q
+     12 次    988ms  git status --porcelain
+     12 次    936ms  git rev-parse
+
+######## gwb-kernel docs-site：content/docs/desktop/boot.mdx（3 处引用）
+== 墙钟 890ms；git 5 次 588ms
+      1 次    274ms  git diff --no-index
+      1 次     82ms  git status --porcelain
+      1 次     80ms  git rev-parse --verify
+      1 次     77ms  git rev-parse
+      1 次     75ms  git cat-file --batch
+
+######## god-live-doc docs-site：content/docs/modules/host.mdx（32 处引用，git 比较器）
+== 墙钟 11766ms；git 95 次 11417ms；拦下的写盘 1 次
+     31 次   4230ms  git status --porcelain
+     31 次   3535ms  git rev-parse
+     31 次   3485ms  git rev-parse --verify
+      2 次    167ms  git check-ignore --stdin

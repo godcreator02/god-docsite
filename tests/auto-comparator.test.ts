@@ -7,6 +7,8 @@
  *   核对按记录的 kind 转发；认不得的 kind 当没确认过
  * 目录树那几条顺带守读取器的仓定位：目录目标从目录自身起找仓（`locateDir`），
  * 目标恰是仓根时不能先跳一级——跳出去了 .gitignore 过滤就整个失效。
+ * 忽略判定整棵树问一次 `status --ignored=matching`，那几条边角（目录里全是被忽略的文件、被忽略目录里
+ * 强制加进来的文件、目标本身在被忽略的目录里）守着它跟逐项问 `check-ignore` 的口径一样。
  */
 import { test } from "node:test";
 import assert from "node:assert/strict";
@@ -202,6 +204,47 @@ test("目录目标是仓根、往下走几层：嵌套层的忽略项同样过�
     assert.deepEqual(names.filter((n) => n.startsWith("node_modules")), [], "顶层忽略的目录不进清单，也不往里走");
     assert.deepEqual(names.filter((n) => n.startsWith("src/dist")), [], "嵌套那层的忽略目录一样过滤");
     assert.ok(names.includes("src/greet.ts") && names.includes("src/util.ts"), "src 下没被忽略的都在");
+  } finally {
+    r.teardown();
+  }
+});
+
+test("目录本身没被忽略、里面全是被忽略的文件：目录照列，文件不列", () => {
+  const r = setupRepo({ formats: FORMATS, comparator: "auto" });
+  try {
+    r.write(".gitignore", "*.log\n");
+    r.commit("忽略日志");
+    r.write("logs/a.log", "x");
+    const names = r.service.resolve(DOC, "REF tree . depth=2\n").items[0]!.current!;
+    assert.ok(names.includes("logs/"), "目录本身不匹配忽略规则，照列");
+    assert.ok(!names.includes("logs/a.log"), "里面的文件匹配 *.log，不列");
+  } finally {
+    r.teardown();
+  }
+});
+
+test("被忽略的目录里有强制加进来的已跟踪文件：目录与那个文件照列", () => {
+  const r = setupRepo({ formats: FORMATS, comparator: "auto" });
+  try {
+    r.write(".gitignore", "forced/\n");
+    r.commit("忽略 forced");
+    r.write("forced/keep.txt", "x");
+    run(r.root, ["add", "-f", "forced/keep.txt"]);
+    r.commit("强制加一个文件");
+    const names = r.service.resolve(DOC, "REF tree . depth=2\n").items[0]!.current!;
+    assert.ok(names.includes("forced/") && names.includes("forced/keep.txt"), "已跟踪的不算忽略");
+  } finally {
+    r.teardown();
+  }
+});
+
+test("目录目标本身落在被忽略的目录里：整棵都算被忽略，清单是空的", () => {
+  const r = setupRepo({ formats: FORMATS, comparator: "auto" });
+  try {
+    r.write(".gitignore", "dist/\n");
+    r.commit("忽略 dist");
+    r.write("dist/sub/y.js", "x");
+    assert.deepEqual(r.service.resolve(DOC, "REF tree dist/sub depth=1\n").items[0]!.current, []);
   } finally {
     r.teardown();
   }

@@ -2,16 +2,19 @@
  * git 比较器的测试，全在临时真 git 仓里跑：
  *   确认的检查——不在 HEAD 里、工作区脏，都拒；一处拒整篇拒
  *   核对的判——行段跟随、绿只认段哈希、vanished、file-missing、blob-missing、changed 带 diff 和旧段
- *   对象库问几次——内容没变不问、同一个 blob 只取一次
+ *   对象库问几次——内容没变不问、同一个 blob 只取一次；确认时同一个文件只问一次 git
+ *   hunk 表落盘——同一对内容下次用盘上那份，坏了报错
  *   跟 hash 版的一致性——同一串改动下两个比较器的状态一样
  */
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { execFileSync } from "node:child_process";
-import { mkdtempSync, rmSync } from "node:fs";
+import { randomUUID } from "node:crypto";
+import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { createRequire, syncBuiltinESMExports } from "node:module";
 import { tmpdir } from "node:os";
-import { join } from "node:path";
-import { createGitComparator } from "../packages/docfirst-workflow/src/host/index.ts";
+import { dirname, join } from "node:path";
+import { createGitComparator, hashText } from "../packages/docfirst-workflow/src/host/index.ts";
 import { fakeFormat } from "./fake-format.ts";
 import { CODE, run, setupRepo } from "./repo.ts";
 import type { GitRecord } from "../packages/docfirst-workflow/src/host/index.ts";
@@ -172,6 +175,99 @@ test("同一个 blob 只从对象库取一次：取过之后对象没了，旧�
     assert.deepEqual(again.old, first.old);
     assert.equal(again.diff, first.diff);
   } finally {
+    r.teardown();
+  }
+});
+
+/** 数这一段里起了几次 git：换掉 child_process 的 execFileSync，源码里的具名导入经 syncBuiltinESMExports 跟着换 */
+function gitCalls<T>(fn: () => T): { value: T; calls: string[][] } {
+  const cp = createRequire(import.meta.url)("node:child_process") as typeof import("node:child_process");
+  const orig = cp.execFileSync;
+  const calls: string[][] = [];
+  cp.execFileSync = ((file: string, args: string[], opts: object) => {
+    if (file === "git") calls.push(args);
+    return orig(file, args, opts);
+  }) as typeof cp.execFileSync;
+  syncBuiltinESMExports();
+  try {
+    return { value: fn(), calls };
+  } finally {
+    cp.execFileSync = orig;
+    syncBuiltinESMExports();
+  }
+}
+
+const SAME_FILE_THREE_TIMES = "REF src/greet.ts:1-1\n\nREF src/greet.ts:2-3\n\nREF src/greet.ts:6-6\n";
+
+for (const comparator of [undefined, "auto"] as const) {
+  test(`确认时同一个文件只问一次 git（${comparator ?? "git"} 比较器）：三处引用钉同一个干净文件，只起一句 rev-parse`, () => {
+    const r = setupRepo({ formats: FORMATS, ...(comparator !== undefined ? { comparator } : {}) });
+    try {
+      const { value: done, calls } = gitCalls(() => r.service.confirm(DOC, SAME_FILE_THREE_TIMES));
+      assert.deepEqual(done.problems, []);
+      assert.deepEqual(calls.map((args) => args[0]), ["rev-parse"], "工作区跟 blob 字节一样就算干净，不再问 status；在 HEAD 里就不问 check-ignore");
+    } finally {
+      r.teardown();
+    }
+  });
+}
+
+test("工作区跟 blob 字节不同、git 认为干净（autocrlf 换行转换）：照样钉得住", () => {
+  const r = setupRepo({ formats: FORMATS });
+  try {
+    run(r.root, ["config", "core.autocrlf", "true"]);
+    r.write("src/crlf.ts", "const a = 1;\r\nconst b = 2;\r\n");
+    run(r.root, ["-c", "user.email=test@example.com", "-c", "user.name=test", "add", "-A"]);
+    run(r.root, ["-c", "user.email=test@example.com", "-c", "user.name=test", "commit", "-q", "-m", "CRLF 文件"]);
+    const done = r.service.confirm(DOC, "REF src/crlf.ts:1-2\n");
+    assert.deepEqual(done.problems, [], "字节比不上就问 git status，由 git 按换行转换判干净");
+  } finally {
+    r.teardown();
+  }
+});
+
+/** 这对内容在盘上那份 hunk 表的位置：跟 git.ts 落盘的布局一致 */
+const hunkFile = (oldBlob: string, newText: string) => join(tmpdir(), "docfirst-cache", "hunks", `${oldBlob}-${hashText(newText)}.json`);
+
+test("hunk 表按内容寻址落盘：同一对内容下次直接用盘上那份，不再 diff", () => {
+  const r = setupRepo({ formats: FORMATS });
+  const moved = `// ${randomUUID()}\n// 又一行\n${CODE}`;
+  let planted = "";
+  try {
+    const done = r.service.confirm(DOC, TEXT);
+    r.write("src/greet.ts", moved);
+    r.commit("上面插两行");
+    planted = hunkFile(record(r, "src/greet.ts:2-3")!.blob, moved);
+    mkdirSync(dirname(planted), { recursive: true });
+    writeFileSync(planted, "[]");
+    const item = r.service.resolve(DOC, done.text).items[0]!;
+    assert.equal(item.status, "changed", "盘上那份谎称没有差异，段就留在 2-3 行，那儿已经是插进来的注释——用了盘上那份才会判黄");
+  } finally {
+    if (planted !== "") rmSync(planted, { force: true });
+    r.teardown();
+  }
+});
+
+test("hunk 表算完落盘；盘上那份坏了就报错说是哪个文件，不当没有", () => {
+  const r = setupRepo({ formats: FORMATS });
+  const moved = `// ${randomUUID()}\n${CODE}`;
+  let path = "";
+  try {
+    const done = r.service.confirm(DOC, TEXT);
+    r.write("src/greet.ts", moved);
+    r.commit("上面插一行");
+    path = hunkFile(record(r, "src/greet.ts:2-3")!.blob, moved);
+    assert.equal(r.service.resolve(DOC, done.text).items[0]!.status, "fresh");
+    assert.deepEqual(JSON.parse(readFileSync(path, "utf8")), [{ oldStart: 0, oldLen: 0, newStart: 1, newLen: 1 }]);
+
+    const corrupt = `// ${randomUUID()}\n${CODE}`;
+    r.write("src/greet.ts", corrupt);
+    rmSync(path, { force: true });
+    path = hunkFile(record(r, "src/greet.ts:2-3")!.blob, corrupt);
+    writeFileSync(path, "不是 json");
+    assert.throws(() => r.service.resolve(DOC, done.text), /hunk 缓存文件认不出/);
+  } finally {
+    if (path !== "") rmSync(path, { force: true });
     r.teardown();
   }
 });

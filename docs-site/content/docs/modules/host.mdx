@@ -79,15 +79,15 @@ description: 读配置装出一个判定服务；记忆按被引文件的位置�
 
 {/* ref file="../packages/docfirst-workflow/src/host/load.ts" lines="103-110" */}
 
-**`createReader(root)`** 是判定层能看到的全部内容。目录名字表在 git 仓里按 `.gitignore` 过滤（`dist/`、`node_modules/` 不进清单，也不往里走），`.git` 自己去掉；不在仓里就原样列。目录一层一层往下走，同一层的条目攒齐了一次问 `check-ignore`，一层只起一个 git 进程。
+**`createReader(root)`** 是判定层能看到的全部内容。目录名字表在 git 仓里按 `.gitignore` 过滤（`dist/`、`node_modules/` 不进清单，也不往里走），`.git` 自己去掉；不在仓里就原样列。忽略判定整棵树只问一次 `git status --ignored=matching`，口径跟逐项问 `check-ignore` 相同：被忽略的目录整个算一项，目录本身没被忽略时里面被忽略的文件逐个列出，已跟踪的不算忽略，目标目录本身落在被忽略的目录里就整棵都算被忽略。
 
 {/* ref file="../packages/docfirst-workflow/src/host/fs-reader.ts" lines="1-8" */}
 
 **`createAutoComparator`** 是默认的那个。被引文件不限于项目自己的仓：另一个单元的仓、上游 clone、被忽略的 `node_modules`、不在任何仓里的目录，都能钉。规则一条——在任何 git 仓里、已跟踪、工作区干净的走 git，本仓外仓一视同仁；仓里但被 `.gitignore` 忽略的走 hash；不在任何仓里的走 hash。未跟踪且没被忽略的、已跟踪但脏的，一律拒并让人先 commit，**不退成 hash**；仓一次提交都没有的也拒。
 
-{/* ref file="../packages/docfirst-workflow/src/host/auto-comparator.ts" lines="20-29" */}
+{/* ref file="../packages/docfirst-workflow/src/host/auto-comparator.ts" lines="20-32" */}
 
-「该进 git 的东西」不能悄悄退成一份弱记忆，所以只有明确被忽略的才走 hash。文件在哪个仓按它的真实路径定，pnpm 的软链按指向的地方算。
+「该进 git 的东西」不能悄悄退成一份弱记忆，所以只有明确被忽略的才走 hash。文件在哪个仓按它的真实路径定，pnpm 的软链按指向的地方算。文件在 HEAD 里就是已跟踪的，已跟踪的不算忽略，直接走 git、不再问 `check-ignore`；挑的时候问到的 commit 与 blob 跟 git 比较器共用一份，同一个文件不重问。
 
 核对时不看文件在哪，按**记录的 kind** 转发——记录是当时哪种记忆记的，就让哪个比较器判，认不得的 kind 当没确认过：
 
@@ -95,11 +95,11 @@ description: 读配置装出一个判定服务；记忆按被引文件的位置�
 
 一个项目里 git 记录和 hash 记录并存。哪一处拿到的是 hash 记忆，`confirm` 那一行会标出来（见[命令行](/docs/modules/cli)）——写手得知道自己拿到的是弱记忆。
 
-**`createGitComparator`** 管行段和整文件。确认时要过几道检查：得在某个仓里、那个仓得有过提交、文件得在 HEAD 里（未跟踪、被忽略、大小写不符都拒）、工作区得干净。核对时先比哈希：当前内容的 blob 名等于记录里那个，内容一字没变，不取旧内容、不起 git；变了才从对象库取旧内容，拿 `git diff -U0` 出 hunk 表，把旧行段映到今天：
+**`createGitComparator`** 管行段和整文件。确认时要过几道检查：得在某个仓里、那个仓得有过提交、文件得在 HEAD 里（未跟踪、被忽略、大小写不符都拒）、工作区得干净；一次确认里每个文件最多问一次 git，工作区内容跟 HEAD 里的 blob 一样就算干净。核对时先比哈希：当前内容的 blob 名等于记录里那个，内容一字没变，不取旧内容、不起 git；变了才从对象库取旧内容，拿 `git diff -U0` 出 hunk 表，把旧行段映到今天：
 
 {/* ref file="../packages/docfirst-workflow/src/host/git-comparator.ts" lines="99-106" */}
 
-**绿只认段哈希**：hunk 说没碰到也再比一次，行映射跟内容对不上时宁可报黄让人复核，也不把红判成绿。整段没了是 `vanished`，文件没了是 `file-missing`，内容变了而 blob 不在对象库（浅克隆、历史重写、换了个仓）是 `blob-missing`。一个进程里同一个 blob 只从对象库取一次、同一对内容只 diff 一次——两样都按内容寻址，记住不会过时。这条线为什么这么设计、blob 名为什么自己算，见 [git 记忆原理](/docs/principles/git)。
+**绿只认段哈希**：hunk 说没碰到也再比一次，行映射跟内容对不上时宁可报黄让人复核，也不把红判成绿。整段没了是 `vanished`，文件没了是 `file-missing`，内容变了而 blob 不在对象库（浅克隆、历史重写、换了个仓）是 `blob-missing`。一个进程里同一个 blob 只从对象库取一次、同一对内容只 diff 一次——两样都按内容寻址，记住不会过时；hunk 表还落一份到系统临时目录，下一次 check 直接用。这条线为什么这么设计、blob 名为什么自己算，见 [git 记忆原理](/docs/principles/git)。
 
 **`placing`** 是摆放对外的全部接口，挂在装好的项目上，两个方法。`render(doc)` 摆一次：渲一份正文，给每个落点戴上它点名的 frontmatter 字段，写过去，回一张落点清单。`check(doc, listing?)` 只读不写，回每个落点的四态；调用方手上已经有这一篇的清单就传进去，摆放不再判一遍——命令行的 check 刚判完这一篇，就是这么传的。两个方法用的是同一份正文，所以摆完再核对必然新鲜——守着的和摆出去的不可能是两份东西。
 
@@ -141,7 +141,7 @@ frontmatter 是**逐行原样搬**的，不解析 YAML：一条字段从它的�
 
 分派规则的测试在 `tests/auto-comparator.test.ts`：夹具在临时目录里起**真的 git 仓**，传入**假格式**，记录簿换成内存的。记忆分派要跟 git 的真实行为核对，不能用假仓代替。
 
-{/* ref file="../tests/auto-comparator.test.ts" lines="1-10" */}
+{/* ref file="../tests/auto-comparator.test.ts" lines="1-12" */}
 
 夹具本身不走 `loadProject`——临时目录里解析不到包名，零件直接拿来装；完整走一遍装配（真扫目录）在 `tests/cli.test.ts`，地盘规则拒掉哪几种配置在 `tests/cli-outputs.test.ts`。
 

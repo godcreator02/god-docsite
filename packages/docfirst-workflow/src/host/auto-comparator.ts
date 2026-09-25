@@ -13,17 +13,20 @@
 
 import { createHashComparator, createKindComparator, fileOf, targetKey } from "../engine/index.ts";
 import type { Comparator, Judgement, MemoRecord, Snapshot, Target } from "../engine/index.ts";
-import { hasCommits, isIgnored, locate } from "./git.ts";
-import { createGitComparator } from "./git-comparator.ts";
+import { hasCommits, isIgnored } from "./git.ts";
+import { createGitComparator, fileFacts } from "./git-comparator.ts";
 
 /** 行段 / 整文件那一半：按文件位置挑 git 或 hash */
 export function createAutoSpanComparator({ root }: { root: string }): Comparator {
   const byGit = createGitComparator({ root });
   const byHash = createHashComparator();
 
-  function pick(file: string): Comparator {
-    const at = locate(root, file);
+  /** 跟 git 比较器问的是同一份 `fileFacts`：挑完再确认，同一个文件不重问 */
+  function pick(file: string, text: string[]): Comparator {
+    const { at, head } = fileFacts(root, file, text);
     if (at === null) return byHash;
+    // 在 HEAD 里就是已跟踪的，已跟踪的不算忽略
+    if (head !== null) return byGit;
     if (!hasCommits(at.repo)) return byGit;
     return isIgnored(at) ? byHash : byGit;
   }
@@ -35,7 +38,7 @@ export function createAutoSpanComparator({ root }: { root: string }): Comparator
       if (text === null) return { problem: `${targetKey(target)} 文件不存在` };
       const file = fileOf(target);
       if (file === null) return { problem: `${targetKey(target)} 不是文件` };
-      return pick(file).snapshot(target, text);
+      return pick(file, text).snapshot(target, text);
     },
 
     judge(record: MemoRecord | null, target: Target, text: string[] | null): Judgement {

@@ -13,7 +13,7 @@ description: 记忆是那个仓 HEAD 的 blob；文件在哪个仓按它自己�
 确认一处引用时，记下来的是四样：`HEAD:<文件>` 的 **blob 哈希**、当时的 commit、行段、段哈希。
 代码内容一个字都不进记录簿——它本来就在 git 的对象库里，blob 被提交树引着，不会被 gc 回收。
 
-{/* ref file="../packages/docfirst-workflow/src/host/git.ts" lines="110-121" */}
+{/* ref file="../packages/docfirst-workflow/src/host/git.ts" lines="106-123" */}
 
 要旧内容的时候（报黄给 diff、报红显示「文档写下时那段」），拿 blob 去 `cat-file --batch` 现取——
 「在不在对象库里」和「内容是什么」一次问到。blob 名按内容寻址，所以取到的内容在进程里记住，
@@ -53,7 +53,12 @@ cwd 一律是那个仓的根——项目根是不是 git 子目录、被引文�
 
 `snapshot` 出记录之前逐道问：
 
-{/* ref file="../packages/docfirst-workflow/src/host/git-comparator.ts" lines="52-64" */}
+{/* ref file="../packages/docfirst-workflow/src/host/git-comparator.ts" lines="86-101" */}
+
+一页几十处引用往往钉的是同几个文件，所以一次确认里**每个文件最多问一次 git**：一句 `rev-parse HEAD HEAD:<路径>`
+同时拿到 commit 与 blob，按这次读到的那份文件内容记住。下一次确认会重新读出新的内容，记住的答案带不过去：
+
+{/* ref file="../packages/docfirst-workflow/src/host/git-comparator.ts" lines="38-52" */}
 
 <Tabs>
   <Tab title="在不在某个仓里">
@@ -65,12 +70,15 @@ cwd 一律是那个仓的根——项目根是不是 git 子目录、被引文�
     别转述一句 git 原文。
   </Tab>
   <Tab title="在不在 HEAD 里">
-    问的是 `HEAD:<路径>` 这个对象取不取得到。取不到再问一句 `check-ignore`，分成两种话说：被 `.gitignore`
-    忽略的（git 记忆不做，auto 会分给 hash），和未跟踪 / 路径大小写跟 git 记的不一样的（先 commit）。
+    问的是 `HEAD:<路径>` 这个对象取不取得到。那句 `rev-parse` 没问到，才逐项再问是哪一种：仓还没有提交，
+    还是文件不在 HEAD 里；后者再问一句 `check-ignore`，分成两种话说：被 `.gitignore` 忽略的（git 记忆不做，
+    auto 会分给 hash），和未跟踪 / 路径大小写跟 git 记的不一样的（先 commit）。
   </Tab>
   <Tab title="工作区干不干净">
-    `git status --porcelain -- <路径>` 得是空的。工作区里那份跟 HEAD 不一样，钉下去的记忆就指着一个
-    没人能取回的状态。**别人的仓也一样**：那个单元正在开发中、工作区不干净，就得等它提交。
+    工作区里那份跟 HEAD 不一样，钉下去的记忆就指着一个没人能取回的状态。先比字节：当前内容的 blob 名等于
+    HEAD 里那个，就一定干净，不起 git；不相等才问 `git status --porcelain -- <路径>`——换行转换（autocrlf）
+    下字节不同也可能是干净的，那只有 git 自己判得准。**别人的仓也一样**：那个单元正在开发中、工作区不干净，
+    就得等它提交。
   </Tab>
 </Tabs>
 
@@ -78,9 +86,9 @@ cwd 一律是那个仓的根——项目根是不是 git 子目录、被引文�
 
 ## 变没变：hunk 表，不自己写 diff 算法
 
-{/* ref file="../packages/docfirst-workflow/src/host/git.ts" lines="170-200" */}
+{/* ref file="../packages/docfirst-workflow/src/host/git.ts" lines="218-253" */}
 
-三处讲究：
+四处讲究：
 
 - **绿灯是常态**，所以比较器先只算哈希（跟 `hash-object --stdin` 算法相同，在进程里算，不起 git）——
   当前内容的 blob 名等于记录里那个，内容一个字没改，hunk 表就是空的，旧内容不取、对象库也不问。
@@ -89,6 +97,14 @@ cwd 一律是那个仓的根——项目根是不是 git 子目录、被引文�
   能吞；别的吞了就是把红判成绿，照原样抛出去。
 - 算出的 hunk 表按「旧 blob 名 + 新内容的 blob 名」记住。一篇文档十几处引用钉同一个改过的文件是常态，
   同一对内容只 diff 一次。
+- 这张表还落一份到盘上（系统临时目录下的 `docfirst-cache/hunks/`）。钉住的那段没变、文件别处改过的引用是绿的，
+  没人会去重新确认，于是每次 check 都要为它 diff——这样的文件只增不减。键按内容寻址，同一对内容的 hunk 表
+  永远不变，不用管失效，所有项目共用一份；盘上那份认不出就报错并说是哪个文件，不当没有：
+
+{/* ref file="../packages/docfirst-workflow/src/host/git.ts" lines="180-203" */}
+
+旧 blob 的内容照旧每次现取，不因为盘上有 hunk 表就省掉：省了的话，「blob 已经不在对象库」判不判红就要看这台
+机器上有没有那份缓存，同一个仓在两台机器上会判出不同结果。
 
 ## 变到哪：行段跟随
 

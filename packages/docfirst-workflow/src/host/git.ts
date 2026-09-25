@@ -12,7 +12,7 @@
 
 import { execFileSync } from "node:child_process";
 import { createHash } from "node:crypto";
-import { existsSync, mkdtempSync, realpathSync, rmSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, realpathSync, renameSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { basename, dirname, join, relative, resolve, sep } from "node:path";
 import { parseHunks } from "../engine/index.ts";
@@ -103,13 +103,20 @@ export function isIgnored({ repo, rel }: Located): boolean {
   }
 }
 
+/** 钉住一个文件要的两样：仓的 HEAD commit，与这个文件在 HEAD 里的 blob */
+export interface HeadFacts {
+  commit: string;
+  blob: string;
+}
+
 /**
- * HEAD 里这个文件的 blob 哈希；不在 HEAD 里（未跟踪、被忽略、路径大小写跟 git 记的不一样）给 null。
- * 「在不在 HEAD 里」跟「blob 是什么」是同一句 git 能回答的，问一次就够。
+ * HEAD commit 与这个文件在 HEAD 里的 blob，一次 `rev-parse` 问到。仓还没有提交、文件不在 HEAD 里
+ * （未跟踪、被忽略、路径大小写跟 git 记的不一样）都给 null——是哪一种，由调用方逐项再问，好说清楚。
  */
-export function headBlob({ repo, rel }: Located): string | null {
+export function headFacts({ repo, rel }: Located): HeadFacts | null {
   try {
-    return git(repo, ["rev-parse", `HEAD:${rel}`]).trim();
+    const [commit, blob] = git(repo, ["rev-parse", "HEAD", `HEAD:${rel}`]).trim().split("\n");
+    return { commit: commit!, blob: blob! };
   } catch {
     return null;
   }
@@ -171,13 +178,58 @@ export function hashText(text: string): string {
 const hunkCache = new Map<string, Hunk[]>();
 
 /**
+ * hunk 表的落盘那一层。钉住的那段没变、文件别处改过的引用是绿的，没人会去重新确认，于是每次 check
+ * 都要为它 diff 一遍——这样的文件只增不减。键跟内存那层一样按内容寻址，同一对内容的 hunk 表永远不变，
+ * 所以不用管失效，所有项目共用一份，放系统临时目录（被清掉只是下次重算）。
+ */
+const HUNK_DIR = join(tmpdir(), "docfirst-cache", "hunks");
+
+function isHunk(value: unknown): value is Hunk {
+  const h = value as Record<string, unknown>;
+  return typeof value === "object" && value !== null && ["oldStart", "oldLen", "newStart", "newLen"].every((k) => Number.isInteger(h[k]));
+}
+
+function readDiskHunks(path: string): Hunk[] | undefined {
+  if (!existsSync(path)) return undefined;
+  const unreadable = `hunk 缓存文件认不出：${path}——删掉它再跑一次`;
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(readFileSync(path, "utf8"));
+  } catch (err) {
+    throw new Error(unreadable, { cause: err });
+  }
+  if (!Array.isArray(parsed) || !parsed.every(isHunk)) throw new Error(unreadable);
+  return parsed;
+}
+
+/** 先写临时文件再改名，别的进程读不到写了一半的文件。改名撞上别的进程刚写好的同一份就算写过了 */
+function writeDiskHunks(path: string, hunks: Hunk[]): void {
+  mkdirSync(HUNK_DIR, { recursive: true });
+  const temp = `${path}.${process.pid}.tmp`;
+  writeFileSync(temp, JSON.stringify(hunks));
+  try {
+    renameSync(temp, path);
+  } catch (err) {
+    rmSync(temp, { force: true });
+    if (!existsSync(path)) throw err;
+  }
+}
+
+/**
  * 旧 blob 与当前文本之间的 hunk 表。两份写成临时文件 `diff --no-index`——被引文件可能在别人的仓里，
  * 不往任何对象库写东西。内容没变的那种不该走到这儿：调用方先比 `hashText`，一样就不必取旧内容。
  */
 export function diffHunks(oldBlob: string, oldText: string, newText: string): Hunk[] {
-  const key = `${oldBlob}\0${hashText(newText)}`;
+  const newBlob = hashText(newText);
+  const key = `${oldBlob}\0${newBlob}`;
   const known = hunkCache.get(key);
   if (known !== undefined) return known;
+  const diskPath = join(HUNK_DIR, `${oldBlob}-${newBlob}.json`);
+  const stored = readDiskHunks(diskPath);
+  if (stored !== undefined) {
+    hunkCache.set(key, stored);
+    return stored;
+  }
   const dir = mkdtempSync(join(tmpdir(), "docfirst-diff-"));
   try {
     writeFileSync(join(dir, "old"), oldText);
@@ -193,6 +245,7 @@ export function diffHunks(oldBlob: string, oldText: string, newText: string): Hu
     }
     const hunks = parseHunks(out);
     hunkCache.set(key, hunks);
+    writeDiskHunks(diskPath, hunks);
     return hunks;
   } finally {
     rmSync(dir, { recursive: true, force: true });

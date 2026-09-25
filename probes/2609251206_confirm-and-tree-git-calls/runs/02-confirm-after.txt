@@ -1,0 +1,18 @@
+改动后（工作区构建的 packages/docfirst-workflow/dist/cli.mjs），同样三页，写盘拦下。2026-09-25 12:0x
+
+######## gwb-devkit docs-site：content/docs/devkit/index.mdx
+== 墙钟 554ms；git 4 次 293ms；拦下的写盘 1 次
+      4 次    293ms  git rev-parse HEAD
+
+######## gwb-kernel docs-site：content/docs/desktop/boot.mdx
+== 墙钟 415ms；git 2 次 151ms
+      1 次     77ms  git cat-file --batch
+      1 次     74ms  git rev-parse HEAD
+
+######## god-live-doc docs-site：content/docs/modules/host.mdx
+这一页钉的正是这次改的源码，跑的时候还没提交，7 处按「未提交」整篇拒（预期行为），所以多出 status 那几次：
+== 墙钟 2313ms；git 26 次 2026ms
+     14 次    958ms  git rev-parse HEAD
+      5 次    564ms  git cat-file --batch
+      5 次    362ms  git status --porcelain
+      2 次    142ms  git --no-optional-locks status

@@ -25,24 +25,33 @@ function statOf(path: string): "file" | "dir" | null {
   }
 }
 
-/** dir 下这些相对路径里，哪些被 .gitignore 忽略了。目录不在任何仓里就一个都不忽略。
- * 定位走 locateDir（从目录自身起找仓）不走 locate：目标目录恰是仓根时先跳一级会跳出这个仓，
- * 忽略集空掉、过滤整个失效 */
-function ignoredOf(root: string, dir: string, rels: string[]): Set<string> {
+/**
+ * dir 底下被 .gitignore 忽略的路径，相对 dir 的 posix 路径、目录带尾斜杠；整棵树一次
+ * `git status --ignored=matching` 问全。口径跟拿 `check-ignore` 一条一条问相同：只列匹配忽略规则的，
+ * 被忽略的目录整个算一项、不往里列，目录本身没被忽略而里面的文件被忽略就列那些文件，已跟踪的不算忽略。
+ * `--no-optional-locks`：status 顺手刷新索引要拿锁，别跟同时在这个仓里干活的人抢。
+ * dir 本身落在一个被忽略的目录里时，git 报的是那个祖先目录，这时整棵树都算被忽略。
+ * 目录不在任何仓里就一个都不忽略。定位走 locateDir（从目录自身起找仓）不走 locate：目标目录恰是仓根时
+ * 先跳一级会跳出这个仓，忽略集空掉、过滤整个失效。
+ */
+function ignoredUnder(root: string, dir: string): (rel: string) => boolean {
   const at = locateDir(root, dir);
-  if (at === null || rels.length === 0) return new Set();
-  const paths = rels.map((r) => (at.rel === "" ? r : `${at.rel}/${r}`));
-  let out: string;
-  try {
-    out = git(at.repo, ["check-ignore", "--stdin"], `${paths.join("\n")}\n`);
-  } catch (err) {
-    // 退 1 是「一个都没被忽略」
-    const e = err as { status?: number; stdout?: string };
-    if (e.status !== 1) throw err;
-    out = e.stdout ?? "";
+  if (at === null) return () => false;
+  const scope = at.rel === "" ? [] : ["--", `:(literal)${at.rel}`];
+  const out = git(at.repo, ["--no-optional-locks", "status", "--porcelain", "-z", "--ignored=matching", "--untracked-files=all", ...scope]);
+  const prefix = at.rel === "" ? "" : `${at.rel}/`;
+  const ignored = new Set<string>();
+  const fields = out.split("\0");
+  for (let i = 0; i < fields.length; i += 1) {
+    const field = fields[i]!;
+    // 改名与复制那一条后面多跟一个原路径字段，跳过它
+    if (field[0] === "R" || field[0] === "C") i += 1;
+    if (!field.startsWith("!! ")) continue;
+    const path = field.slice(3);
+    if (prefix !== "" && path.endsWith("/") && prefix.startsWith(path)) return () => true;
+    if (path.startsWith(prefix)) ignored.add(path.slice(prefix.length));
   }
-  const hit = new Set(out.split("\n").map((s) => s.trim()).filter((s) => s !== ""));
-  return new Set(rels.filter((r, i) => hit.has(paths[i]!)));
+  return (rel) => ignored.has(rel) || ignored.has(`${rel}/`);
 }
 
 export function createReader(root: string): Reader {
@@ -60,8 +69,7 @@ export function createReader(root: string): Reader {
       if (statOf(base) !== "dir") return null;
       const match = glob === undefined ? null : globToRegExp(glob);
       const out: string[] = [];
-      // 一层一层往下走：同一层所有目录的条目攒齐了一次问 .gitignore，一层只起一个 git 进程。
-      // 下一层要走哪些目录得等这一层的答案（被忽略的 node_modules/ 不往里走），所以没法整棵树一起问
+      const isIgnored = ignoredUnder(root, dir);
       let dirsAtLevel = [""];
       for (let level = 1; dirsAtLevel.length > 0; level += 1) {
         const entries = dirsAtLevel.flatMap((rel) =>
@@ -69,10 +77,9 @@ export function createReader(root: string): Reader {
             .filter((e) => e.name !== ".git")
             .map((e) => ({ entry: e, rel: rel === "" ? e.name : `${rel}/${e.name}` })),
         );
-        const ignored = ignoredOf(root, dir, entries.map((e) => e.rel));
         const dirsBelow: string[] = [];
         for (const { entry, rel } of entries) {
-          if (ignored.has(rel)) continue;
+          if (isIgnored(rel)) continue;
           const isDir = entry.isDirectory() || statOf(join(base, rel)) === "dir";
           if (match === null || match.test(entry.name)) out.push(isDir ? `${rel}/` : rel);
           if (isDir && level < depth) dirsBelow.push(rel);
