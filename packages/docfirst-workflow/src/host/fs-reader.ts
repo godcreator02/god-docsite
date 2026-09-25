@@ -60,19 +60,25 @@ export function createReader(root: string): Reader {
       if (statOf(base) !== "dir") return null;
       const match = glob === undefined ? null : globToRegExp(glob);
       const out: string[] = [];
-      const walk = (rel: string, level: number): void => {
-        const entries = readdirSync(join(base, rel), { withFileTypes: true }).filter((e) => e.name !== ".git");
-        const rels = entries.map((e) => (rel === "" ? e.name : `${rel}/${e.name}`));
-        const ignored = ignoredOf(root, dir, rels);
-        entries.forEach((e, i) => {
-          const r = rels[i]!;
-          if (ignored.has(r)) return;
-          const isDir = e.isDirectory() || statOf(join(base, r)) === "dir";
-          if (match === null || match.test(e.name)) out.push(isDir ? `${r}/` : r);
-          if (isDir && level < depth) walk(r, level + 1);
-        });
-      };
-      walk("", 1);
+      // 一层一层往下走：同一层所有目录的条目攒齐了一次问 .gitignore，一层只起一个 git 进程。
+      // 下一层要走哪些目录得等这一层的答案（被忽略的 node_modules/ 不往里走），所以没法整棵树一起问
+      let dirsAtLevel = [""];
+      for (let level = 1; dirsAtLevel.length > 0; level += 1) {
+        const entries = dirsAtLevel.flatMap((rel) =>
+          readdirSync(join(base, rel), { withFileTypes: true })
+            .filter((e) => e.name !== ".git")
+            .map((e) => ({ entry: e, rel: rel === "" ? e.name : `${rel}/${e.name}` })),
+        );
+        const ignored = ignoredOf(root, dir, entries.map((e) => e.rel));
+        const dirsBelow: string[] = [];
+        for (const { entry, rel } of entries) {
+          if (ignored.has(rel)) continue;
+          const isDir = entry.isDirectory() || statOf(join(base, rel)) === "dir";
+          if (match === null || match.test(entry.name)) out.push(isDir ? `${rel}/` : rel);
+          if (isDir && level < depth) dirsBelow.push(rel);
+        }
+        dirsAtLevel = dirsBelow;
+      }
       return out.sort();
     },
 

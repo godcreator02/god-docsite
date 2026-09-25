@@ -15,7 +15,12 @@ description: 记忆是那个仓 HEAD 的 blob；文件在哪个仓按它自己�
 
 {/* ref file="../packages/docfirst-workflow/src/host/git.ts" lines="110-121" */}
 
-要旧内容的时候（报黄给 diff、报红显示「文档写下时那段」），拿 blob 去 `cat-file -p` 现取。
+要旧内容的时候（报黄给 diff、报红显示「文档写下时那段」），拿 blob 去 `cat-file --batch` 现取——
+「在不在对象库里」和「内容是什么」一次问到。blob 名按内容寻址，所以取到的内容在进程里记住，
+一趟 check 里同一个 blob 只起一次 git：
+
+{/* ref file="../packages/docfirst-workflow/src/host/git.ts" lines="127-157" */}
+
 记录里**不记仓在哪**：blob 是内容寻址的，核对时从文件位置重新找仓就行。
 
 ## 文件在哪个仓：按文件自己的位置定
@@ -44,7 +49,7 @@ description: 记忆是那个仓 HEAD 的 blob；文件在哪个仓按它自己�
 定位出来的是「仓根 + 仓根相对的 posix 路径」。`HEAD:<路径>`、`status -- <路径>`、`check-ignore` 全用它，
 cwd 一律是那个仓的根——项目根是不是 git 子目录、被引文件在不在项目的仓里，都不再是问题。
 
-## 只对已提交的内容钉：几道门
+## 只对已提交的内容钉：几道检查
 
 `snapshot` 出记录之前逐道问：
 
@@ -53,10 +58,10 @@ cwd 一律是那个仓的根——项目根是不是 git 子目录、被引文�
 <Tabs>
   <Tab title="在不在某个仓里">
     不在任何仓里，git 记忆做不了。走默认的 auto 比较器时到不了这儿——它已经把这种文件分给 hash 了；
-    配置强制 `git` 才会撞上这条 problem。
+    配置强制 `git` 才会遇到这条 problem。
   </Tab>
   <Tab title="仓有没有提交过">
-    刚 `git init` 的仓 HEAD 还没生出来，`rev-parse HEAD` 一问就炸。单独认出来说「先 commit」，
+    刚 `git init` 的仓还没有 HEAD，`rev-parse HEAD` 一问就报错。单独认出来说「先 commit」，
     别转述一句 git 原文。
   </Tab>
   <Tab title="在不在 HEAD 里">
@@ -73,14 +78,17 @@ cwd 一律是那个仓的根——项目根是不是 git 子目录、被引文�
 
 ## 变没变：hunk 表，不自己写 diff 算法
 
-{/* ref file="../packages/docfirst-workflow/src/host/git.ts" lines="152-171" */}
+{/* ref file="../packages/docfirst-workflow/src/host/git.ts" lines="170-200" */}
 
-两处讲究：
+三处讲究：
 
-- **绿灯是常态**，所以先只算哈希（`hash-object --stdin`，不需要仓）——内容一个字没改就直接回空表。
+- **绿灯是常态**，所以比较器先只算哈希（跟 `hash-object --stdin` 算法相同，在进程里算，不起 git）——
+  当前内容的 blob 名等于记录里那个，内容一个字没改，hunk 表就是空的，旧内容不取、对象库也不问。
 - 真有差异才把旧 blob 的内容和当前内容写成两个临时文件 `diff --no-index`。**不往任何对象库写东西**：
   被引文件可能在别人的仓里，往那儿塞松散对象不合适。只有「有差异」那一种非零退出（退 1，输出在 stdout 里）
   能吞；别的吞了就是把红判成绿，照原样抛出去。
+- 算出的 hunk 表按「旧 blob 名 + 新内容的 blob 名」记住。一篇文档十几处引用钉同一个改过的文件是常态，
+  同一对内容只 diff 一次。
 
 ## 变到哪：行段跟随
 
@@ -93,7 +101,7 @@ hunk 表进纯函数，旧行段映到今天。这个函数不认识 git，谁�
 
 映完之后还要再比一次段哈希——这就是判定的入口：
 
-{/* ref file="../packages/docfirst-workflow/src/host/git-comparator.ts" lines="78-92" */}
+{/* ref file="../packages/docfirst-workflow/src/host/git-comparator.ts" lines="99-113" */}
 
 <Note>
   **绿只认段哈希**。hunk 说「没碰到这段」也照样比一遍：行映射跟内容对不上时（记录被手改过之类），
@@ -106,10 +114,11 @@ hunk 表进纯函数，旧行段映到今天。这个函数不认识 git，谁�
 | --- | --- | --- |
 | `vanished` | 整段被删光，或者行段跟到文件外面去了 | 从 blob 取回的旧段 |
 | `file-missing` | 文件不在了 | 从 blob 取回的旧段 |
-| `blob-missing` | 记忆里的 blob 不在对象库——浅克隆（`--depth 1`）、历史被重写并 gc 过、文件所在的仓换了或没了 | 没有旧内容，得重新确认 |
+| `blob-missing` | 内容变了，而记忆里的 blob 不在对象库——浅克隆（`--depth 1`）、历史被重写并 gc 过、文件所在的仓换了或没了 | 没有旧内容，得重新确认 |
 
 前两种旧内容还取得回来，第三种取不回来——所以它单独一种理由，说清楚「重新确认一次」，
-而不是含糊地说「代码没了」。文件改名不追：改了名就是 `file-missing`，重钉。
+而不是含糊地说「代码没了」。内容一字没变时用不着旧内容，blob 在不在都判绿。文件改名不追：
+改了名就是 `file-missing`，重钉。
 
 ## 归一化：站展示什么就哈希什么
 

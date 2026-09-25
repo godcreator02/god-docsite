@@ -12,7 +12,7 @@
  *   docfirst --help | -h | help             打用法，退 0，什么都不动；任一命令后面带 --help / -h 也是
  * 每条命令只收表里认的开关（`FLAGS`），别的开关一律报错退 2、不动手。
  * **四条到此为止**：给一个新骨架铺六区那条不在这儿——那件事只在 agent 手上发生一次、铺的是
- * 模板不是判定，归工作台件 `@godcreator/gwb-docfirst-workflow` 的 `docfirst.attach`。这儿留的全是
+ * 模板不是判定，归工作台插件 `@godcreator/gwb-docfirst-workflow` 的 `docfirst.attach`。这儿留的全是
  * 要在**仓**里发生的：各仓的 `pnpm doc` 与 CI 跑的就是这四条。
  * 新引用不用命令：在文档里写一行记号语法（engine/marker.ts）定的草稿记号 @@docfirst ref src/greet.ts:2-3 @@，
  * check 认它、报未确认，confirm 换成该格式的正式记号。
@@ -50,7 +50,7 @@ const MEMORY: Record<string, string> = { hash: "（hash 记忆：不在 git 里�
 
 /**
  * 各命令认的开关。**不在表里的一律拒**：confirm 把 `--` 开头的参数从页名里筛掉，开关若静默吞掉，
- * `confirm --help` 就成了不带页名的整仓一趟——替别人没复核的黄灯签字，而且一声不吭。
+ * `confirm --help` 就成了不带页名的整仓确认——替别人没复核的黄灯签字，而且一声不吭。
  */
 const FLAGS: Record<string, readonly string[]> = {
   check: ["--json"],
@@ -67,7 +67,7 @@ export const USAGE = `docfirst——文档钉代码的核对与确认。在有 d
 
   docfirst check [--json]        核对，只读。红退 1；--json 出整份机读报告，退出码不变
   docfirst confirm [文档路径…]    确认并写回文档与 .ledger.json。
-                                 不带路径 = 整仓一趟：别人没复核的黄灯也会被一起确认。
+                                 不带路径 = 整仓确认：别人没复核的黄灯也会被一起确认。
                                  带路径 = 按页限定：只动点名的那几篇（例：docfirst confirm content/docs/a.mdx）
   docfirst render                渲染；挂了 outputs 映射的摆到落点
   docfirst trajectory [--json]   列轨迹卡的盘 / 树 / 主干
@@ -109,7 +109,7 @@ export async function main(argv: string[]): Promise<number> {
 }
 
 /**
- * confirm 的整趟。不带路径是整仓一趟；带路径是**按页限定**——只动点名的那几篇。
+ * confirm 的全过程。不带路径是整仓确认；带路径是**按页限定**——只动点名的那几篇。
  *
  * 限定是为了让「只改了这几页」的改动能只确认这几页：同一个仓里别人钉的黄还等着他复核，
  * 顺手 confirm 掉就是替别人签字。
@@ -120,7 +120,7 @@ export async function main(argv: string[]): Promise<number> {
  *   **整仓那层**（记录簿里有、整个项目里已经没有这篇文档）不能按限定后的清单算：那份清单是人
  *   点名的一小撮，拿它当「现存文档的全集」去算，没点名的页会被全部当成「文档已不存在」抹掉。
  *   所以限定模式只清点名了的那几篇——点名一篇已经删掉或挪走的页，意思就是「把它的记录忘掉」，
- *   这也正是挪页时要的：旧路径点一次，新路径点一次，一趟走完。
+ *   这也正是挪页时要的：旧路径点一次，新路径点一次，一条命令做完。
  */
 async function confirmCommand(project: Project, docs: string[], rest: string[]): Promise<number> {
   const named = rest.filter((arg) => !arg.startsWith("--"));
@@ -167,7 +167,7 @@ function pickDocs(project: Project, docs: string[], named: string[]): { live: st
 }
 
 /**
- * check 的整趟：逐篇核对 → 失踪文档 → 卡校验，先攒成一份报告再决定怎么出。
+ * check 的全过程：逐篇核对 → 失踪文档 → 卡校验，先攒成一份报告再决定怎么出。
  * 人读模式一行一处、边算边打（每篇的行在 check 里就排好了）；`--json` 攒完整份一行打出去。
  * 两种模式算的是同一份报告——红的口径不可能对不上。
  */
@@ -281,7 +281,7 @@ async function check(project: Project, doc: string, text: string, format: Format
   for (const { name, line } of components) {
     lines.push(`🔴 ${doc}  第 ${line} 行 <${name}>  名册外组件，docfirst.config.mjs 里没给它压平规则`);
   }
-  const outputs = await project.placing.check(doc);
+  const outputs = await project.placing.check(doc, listing);
   for (const output of outputs) lines.push(placedLine(doc, output));
   const red =
     items.filter((item) => item.status === "missing").length +
@@ -319,7 +319,7 @@ function confirm(project: Project, doc: string, text: string): number {
 }
 
 async function render(project: Project, doc: string, text: string, format: Format): Promise<number> {
-  // 挂了映射的文档只写落点：落点是纯生成物，render 直接覆盖；摆放的整趟归 project，这边只印结果
+  // 挂了映射的文档只写落点：落点是纯生成物，render 直接覆盖；摆放的全过程归 project，这边只印结果
   const placed = await project.placing.render(doc);
   if (placed.length > 0) {
     let red = 0;
@@ -341,7 +341,7 @@ async function render(project: Project, doc: string, text: string, format: Forma
     );
     return 0;
   }
-  // 没挂映射的落 out/ 当调试产物。渲染函数吃文本和清单，外加项目上下文：
+  // 没挂映射的落 out/ 当调试产物。渲染函数接收文本和清单，外加项目上下文：
   // 有自己管线的格式（fumadocs）用 root + doc 自己去编译
   const outDir = join(project.root, project.config.out ?? "out");
   mkdirSync(outDir, { recursive: true });

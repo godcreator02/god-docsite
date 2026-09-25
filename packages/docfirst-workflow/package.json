@@ -1,6 +1,6 @@
 {
   "name": "@godcreator/docfirst-workflow",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "author": {"name": "godcreator"},
   "type": "module",
   "description": "文档站工作流工具：六区装配、钉码校验与 render（命令行 + 库），随 docfirst 线发。",

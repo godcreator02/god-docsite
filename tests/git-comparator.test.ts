@@ -1,7 +1,8 @@
 /**
- * git 比较器的账，全在临时真 git 仓里跑：
- *   确认的门——不在 HEAD 里、工作区脏，都拒；一处拒整篇拒
+ * git 比较器的测试，全在临时真 git 仓里跑：
+ *   确认的检查——不在 HEAD 里、工作区脏，都拒；一处拒整篇拒
  *   核对的判——行段跟随、绿只认段哈希、vanished、file-missing、blob-missing、changed 带 diff 和旧段
+ *   对象库问几次——内容没变不问、同一个 blob 只取一次
  *   跟 hash 版的一致性——同一串改动下两个比较器的状态一样
  */
 import { test } from "node:test";
@@ -39,7 +40,7 @@ test("确认：记的是 blob、commit、行段、段哈希，仓里不存第二
   }
 });
 
-test("确认的门：文件未提交拒、未跟踪拒——一处拒整篇拒", () => {
+test("确认的检查：文件未提交拒、未跟踪拒——一处拒整篇拒", () => {
   const r = setupRepo({ formats: FORMATS });
   try {
     r.write("src/greet.ts", CODE.replace("hello", "hey"));
@@ -126,7 +127,7 @@ test("文件没了：红 file-missing", () => {
   }
 });
 
-test("blob 不在对象库（浅克隆 / 历史重写）：红 blob-missing，不当成绿也不炸", () => {
+test("blob 不在对象库（浅克隆 / 历史重写）：红 blob-missing，不当成绿也不抛错", () => {
   const r = setupRepo({ formats: FORMATS });
   try {
     const done = r.service.confirm(DOC, TEXT);
@@ -137,6 +138,39 @@ test("blob 不在对象库（浅克隆 / 历史重写）：红 blob-missing，�
     const item = r.service.resolve(DOC, done.text).items[0]!;
     assert.equal(item.status, "missing");
     assert.equal(item.reason, "blob-missing");
+  } finally {
+    r.teardown();
+  }
+});
+
+/** 把一个松散对象从对象库里删掉，等价于浅克隆或历史重写之后它取不到了 */
+function dropObject(root: string, blob: string): void {
+  rmSync(join(root, ".git", "objects", blob.slice(0, 2), blob.slice(2)));
+}
+
+test("内容一字没变就不问对象库：记录里的 blob 被删掉了，照样判绿", () => {
+  const r = setupRepo({ formats: FORMATS });
+  try {
+    const done = r.service.confirm(DOC, TEXT);
+    dropObject(r.root, record(r, "src/greet.ts:2-3")!.blob);
+    assert.deepEqual(r.statuses(DOC, done.text), ["fresh"], "当前内容的 blob 名就是记录里那个，旧内容用不着");
+  } finally {
+    r.teardown();
+  }
+});
+
+test("同一个 blob 只从对象库取一次：取过之后对象没了，旧段照样给得出来", () => {
+  const r = setupRepo({ formats: FORMATS });
+  try {
+    const done = r.service.confirm(DOC, TEXT);
+    r.write("src/greet.ts", CODE.replace("hello", "hey"));
+    r.commit("改问候语");
+    const first = r.service.resolve(DOC, done.text).items[0]!;
+    dropObject(r.root, record(r, "src/greet.ts:2-3")!.blob);
+    const again = r.service.resolve(DOC, done.text).items[0]!;
+    assert.equal(again.status, "changed", "blob 名按内容寻址，记住的内容不会过时，不该判成 blob-missing");
+    assert.deepEqual(again.old, first.old);
+    assert.equal(again.diff, first.diff);
   } finally {
     r.teardown();
   }

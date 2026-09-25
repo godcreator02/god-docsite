@@ -8,11 +8,11 @@
  * 生成物怎么落地不在这一份里：读一个落点、写一个落点由 `PlacingHost` 给（真盘一份、内存一份），
  * 所以这个文件一句 `node:fs` 都不 import。
  *
- * 对外只有两个方法：`render` 摆一趟、回落点清单，`check` 只核对、回每个落点的四态。
+ * 对外只有两个方法：`render` 摆一次、回落点清单，`check` 只核对、回每个落点的四态。
  * 摆出去的和守着的是**同一段正文**——两条路走的是同一个 `bodyOf`，所以摆完必然是新鲜的。
  */
 import { isAbsolute, join, relative, resolve, sep } from "node:path";
-import type { Format, Service } from "../engine/index.ts";
+import type { Format, Listing, Service } from "../engine/index.ts";
 import type { ProjectConfig } from "./load.ts";
 
 /** outputs 里的一个目标，对象写法：`to` 相对项目根；`frontmatter` 点名哪些字段随行到生成物头部 */
@@ -48,20 +48,23 @@ export interface PlacedWrite {
   missing?: string[];
 }
 
-/** 摆放这件事的全部对外面貌 */
+/** 摆放这件事的全部对外接口 */
 export interface Placing {
   /**
-   * 这一篇摆一趟：渲一份正文，戴上点名的 frontmatter 字段，写到每个落点，回落点清单。
+   * 这一篇摆一次：渲一份正文，戴上点名的 frontmatter 字段，写到每个落点，回落点清单。
    * 缺字段的落点不写（摆一份缺 name 的 SKILL.md 比不摆更糟）。
    * 没挂落点、格式不出 ai 产物，回空清单——那是「这篇没有摆放这回事」，不是错。
    */
   render(doc: string): Promise<PlacedWrite[]>;
-  /** 这一篇的落点核对一趟，只读不写：回每个落点的四态与缺哪些 frontmatter 字段 */
-  check(doc: string): Promise<PlacedCheck[]>;
+  /**
+   * 这一篇的落点核对一次，只读不写：回每个落点的四态与缺哪些 frontmatter 字段。
+   * 调用方手上已经有这一篇的清单（check 刚判过）就传进来，不再判一遍
+   */
+  check(doc: string, listing?: Listing): Promise<PlacedCheck[]>;
 }
 
 /**
- * 摆放认得的外面那一圈。前半是项目面（根、配置、判定服务、组件名册、这篇挂了哪些落点、这篇的原文），
+ * 摆放依赖的外部接口。前半是项目面（根、配置、判定服务、组件名册、这篇挂了哪些落点、这篇的原文），
  * 装配时把装好的项目递进来；后半是**生成物的存放**——摆放不知道落点是文件还是别的什么，
  * 生产给的是真盘那份，测试给的是内存那份。
  */
@@ -197,8 +200,7 @@ export function createPlacing(host: PlacingHost): Placing {
   }
 
   /** 摆放产物的正文：问格式要 ai 产物再整形。同一篇的几个落点共用这一份，frontmatter 各戴各的 */
-  async function bodyOf(doc: string, text: string, format: Format): Promise<string> {
-    const listing = host.service.resolve(doc, text);
+  async function bodyOf(doc: string, text: string, format: Format, listing = host.service.resolve(doc, text)): Promise<string> {
     const rendered = await format.renderAi!(text, listing, {
       root: host.root,
       doc,
@@ -226,10 +228,10 @@ export function createPlacing(host: PlacingHost): Placing {
       return out;
     },
 
-    async check(doc) {
+    async check(doc, listing) {
       const inputs = placingInputs(doc);
       if (inputs === null) return [];
-      const body = await bodyOf(doc, inputs.text, inputs.format);
+      const body = await bodyOf(doc, inputs.text, inputs.format, listing);
       const out: PlacedCheck[] = [];
       for (const { to, frontmatter } of inputs.targets) {
         const picked = pickFrontmatter(inputs.text, frontmatter);

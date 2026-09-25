@@ -8,7 +8,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { createHashComparator, createService } from "../packages/docfirst-workflow/src/engine/index.ts";
-import type { Format, Reader } from "../packages/docfirst-workflow/src/engine/index.ts";
+import type { Format, Listing, Reader } from "../packages/docfirst-workflow/src/engine/index.ts";
 import { createPlacing } from "../packages/docfirst-workflow/src/host/index.ts";
 import type { PlacingHost, ProjectConfig } from "../packages/docfirst-workflow/src/host/index.ts";
 import { memoryLedger } from "./repo.ts";
@@ -91,6 +91,32 @@ test("内存宿主：源里缺点名的字段，这个落点一个字都不写",
   assert.deepEqual(await placing.render("docs/a.md"), [{ to: "SKILL.md", status: "no-frontmatter", missing: ["nope"] }]);
   assert.equal(placed.size, 0, "缺字段就不摆——摆一份缺 name 的 SKILL.md 比不摆更糟");
   assert.deepEqual(await placing.check("docs/a.md"), [{ to: "SKILL.md", status: "no-frontmatter", fresh: false, missing: ["nope"] }]);
+});
+
+test("内存宿主：check 收到调用方判好的清单就原样交给格式，不再判一遍", async () => {
+  const handed: Listing[] = [];
+  const counted: Format = { ...format, renderAi: (text, listing, ctx) => (handed.push(listing), format.renderAi!(text, listing, ctx)) };
+  const service = createService({ formats: [counted], reader: { read: () => null }, ledger: memoryLedger(), comparator: createHashComparator() });
+  let resolved = 0;
+  const outputs = { "docs/a.md": ["README.md"] };
+  const placing = createPlacing({
+    root: "/内存里没有根",
+    config: { formats: [counted], outputs } as ProjectConfig,
+    service: { ...service, resolve: (doc, text) => (resolved += 1, service.resolve(doc, text)) },
+    roster: undefined,
+    placements: () => [{ to: "README.md", frontmatter: [] }],
+    read: () => SOURCE,
+    readPlaced: () => BODY,
+    writePlaced: () => {},
+  });
+  const listing: Listing = { doc: "docs/a.md", items: [], orphans: [] };
+
+  assert.deepEqual(await placing.check("docs/a.md", listing), [{ to: "README.md", status: "fresh", fresh: true }]);
+  assert.equal(resolved, 0, "清单是传进来的，摆放自己没判");
+  assert.equal(handed[0], listing, "格式拿到的就是传进来的那一份");
+
+  await placing.check("docs/a.md");
+  assert.equal(resolved, 1, "没传清单就自己判一遍");
 });
 
 test("内存宿主：没挂落点的文档，两个方法都回空清单，宿主一次都没被写过", async () => {

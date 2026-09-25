@@ -2,19 +2,20 @@
  * git 比较器：记忆就是那个仓 HEAD 里的 blob，哪儿都不存第二份内容。管行段和整文件两种目标。
  *
  * 被引文件在哪个仓按它自己的位置定（见 git.ts 的 locate）：项目自己的仓、别的仓一视同仁。
- * - **确认**（snapshot）守几道门：得在某个仓里、那个仓得有过提交、文件得在 HEAD 里（未跟踪、被忽略、
+ * - **确认**（snapshot）要过几道检查：得在某个仓里、那个仓得有过提交、文件得在 HEAD 里（未跟踪、被忽略、
  *   大小写不符都拒）、工作区得干净。记下 blob、commit、行段、段哈希——不记仓在哪，blob 是内容寻址的，
  *   核对时从文件位置重新找仓。
- * - **核对**（judge）用 `git diff -U0 旧内容 当前内容` 出 hunk 表，把旧行段映到今天：
- *   整段删光是 vanished，文件没了是 file-missing，blob 不在对象库（浅克隆、历史重写、仓换了）是 blob-missing；
+ * - **核对**（judge）先比哈希：当前内容跟记录一字不差（行段比 blob 名、整文件比整文件哈希）就判绿，
+ *   不取旧内容、不起 git。内容变了才从 blob 取旧内容，用 `git diff -U0 旧内容 当前内容` 出 hunk 表，把旧行段映到今天：
+ *   整段删光是 vanished，文件没了是 file-missing，内容变了而 blob 不在对象库（浅克隆、历史重写、仓换了）是 blob-missing；
  *   映到的那段哈希等于记录就绿，否则黄——黄带着给人看的 diff 和从 blob 取回的旧段。
  *   **绿只认段哈希**：hunk 说没碰到也再比一次，行映射跟内容对不上时宁可报黄让人复核。
  *   整文件不映行段，只比整文件哈希，黄的 diff 是整份对整份。
  */
 
 import { fileText, hashSpan, lineCount, mapRange, mappedSpan, normalizeLines, renderDiff, sliceSpan, targetKey, wantedSpan } from "../engine/index.ts";
-import type { Comparator, Judgement, MemoRecord, Snapshot, Span, Target } from "../engine/index.ts";
-import { diffHunks, headBlob, headCommit, isClean, isIgnored, locate, objectExists, readBlob } from "./git.ts";
+import type { Comparator, Hunk, Judgement, MemoRecord, Snapshot, Span, Target } from "../engine/index.ts";
+import { diffHunks, hashText, headBlob, headCommit, isClean, isIgnored, locate, readBlob } from "./git.ts";
 
 /** git 版的记录。lines 是**旧 blob 里**的位置，judge 从那儿出发往今天映 */
 export interface GitRecord extends MemoRecord {
@@ -26,17 +27,16 @@ export interface GitRecord extends MemoRecord {
 }
 
 export function createGitComparator({ root }: { root: string }): Comparator {
-  /** 记录里那段旧内容，从 blob 取回；仓找不到、blob 没了给空 */
-  function oldSpan(repo: string | null, record: GitRecord): string[] {
-    if (repo === null || !objectExists(repo, record.blob)) return [];
-    const span = sliceSpan(readBlob(repo, record.blob).split("\n"), record.lines);
-    return span ?? [];
+  /** 记录里的旧 blob 的内容；仓找不到、blob 不在对象库里给 null */
+  function pinnedText(repo: string | null, record: GitRecord): string | null {
+    return repo === null ? null : readBlob(repo, record.blob);
   }
 
-  /** 整份旧文件，归一化过 */
-  function oldAll(repo: string | null, record: GitRecord): string[] {
-    if (repo === null || !objectExists(repo, record.blob)) return [];
-    return normalizeLines(readBlob(repo, record.blob).split("\n"));
+  /** 记录里那段旧内容，从 blob 取回；仓找不到、blob 没了给空 */
+  function oldSpan(repo: string | null, record: GitRecord): string[] {
+    const old = pinnedText(repo, record);
+    if (old === null) return [];
+    return sliceSpan(old.split("\n"), record.lines) ?? [];
   }
 
   return {
@@ -52,7 +52,7 @@ export function createGitComparator({ root }: { root: string }): Comparator {
       try {
         const at = locate(root, target.file);
         if (at === null) return { problem: `${where} 不在任何 git 仓里——git 记忆只对仓里的文件做` };
-        // 三道门各问一句 git，一句都不重复：仓有没有提交、文件在不在 HEAD 里（顺带拿到 blob）、工作区干不干净
+        // 三道检查各问一句 git，一句都不重复：仓有没有提交、文件在不在 HEAD 里（顺带拿到 blob）、工作区干不干净
         const commit = headCommit(at.repo);
         if (commit === null) return { problem: `${where} 所在的仓还没有一次提交——先 commit` };
         const blob = headBlob(at);
@@ -85,16 +85,25 @@ export function createGitComparator({ root }: { root: string }): Comparator {
       const repo = locate(root, target.file)?.repo ?? null;
       if (text === null) return { status: "missing", lines: pinned.lines, reason: "file-missing", old: oldSpan(repo, pinned) };
       // 记录里的 blob 不在对象库里（或者文件已经不在任何仓里）：旧内容取不回来、diff 也做不了，判红说清楚，让人重新确认
-      if (repo === null || !objectExists(repo, pinned.blob)) return { status: "missing", lines: pinned.lines, reason: "blob-missing", old: [] };
+      const blobMissing: Judgement = { status: "missing", lines: pinned.lines, reason: "blob-missing", old: [] };
 
       if (target.kind === "file") {
         const lines: Span = [1, Math.max(1, lineCount(text))];
         if (hashSpan(text) === pinned.hash) return { status: "fresh", lines };
-        const old = oldAll(repo, pinned);
-        return { status: "changed", lines, reason: "changed", diff: renderDiff(old, normalizeLines(text)), old };
+        const old = pinnedText(repo, pinned);
+        if (old === null) return blobMissing;
+        const oldLines = normalizeLines(old.split("\n"));
+        return { status: "changed", lines, reason: "changed", diff: renderDiff(oldLines, normalizeLines(text)), old: oldLines };
       }
 
-      const hunks = diffHunks(repo, pinned.blob, fileText(text));
+      // 文件整份跟记录里的 blob 一样，行段原地不动：用不着旧内容，也就不去问对象库
+      const current = fileText(text);
+      let hunks: Hunk[] = [];
+      if (hashText(current) !== pinned.blob) {
+        const old = pinnedText(repo, pinned);
+        if (old === null) return blobMissing;
+        hunks = diffHunks(pinned.blob, old, current);
+      }
       const lines = mappedSpan(mapRange(hunks, pinned.lines[0], pinned.lines[1]));
       if (lines === null) return { status: "missing", lines: pinned.lines, reason: "vanished", old: oldSpan(repo, pinned) };
       const span = sliceSpan(text, lines);

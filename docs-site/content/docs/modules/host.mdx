@@ -17,9 +17,9 @@ description: 读配置装出一个判定服务；记忆按被引文件的位置�
 
 {/* ref file="../packages/docfirst-workflow/src/host/load.ts" lines="1-5" */}
 
-零件是四样：**读取器**（读工作区文件、列目录名字表、看路径是文件还是目录）、**json 记录簿**、**比较器**、加上配置里声明的格式名单。比较器这一样是这一层的主戏——`auto` 按被引文件的位置挑记忆，git 那条线（定位文件在哪个仓、取 blob、出 hunk 表、跟着行段走）也住这儿，因为它要起子进程，而判定层不起。
+零件是四样：**读取器**（读工作区文件、列目录名字表、看路径是文件还是目录）、**json 记录簿**、**比较器**、加上配置里声明的格式名单。比较器是这一层代码最多的部分——`auto` 按被引文件的位置挑记忆，git 那条线（定位文件在哪个仓、取 blob、出 hunk 表、跟着行段走）也住这儿，因为它要起子进程，而判定层不起。
 
-**摆放是另一摊。** 配置的 `outputs` 里，一篇 mdx 正本挂着几个落点（仓根的 README、AGENTS.md、包内的 SKILL.md）；摆放把它渲成一份干净 md、戴上点名的 frontmatter 字段、写到每个落点上，也负责回头核对盘上那份还跟不跟源一致。它落在这一层的理由跟 git 那条线一样：要写盘、要问格式要渲染，判定层两样都不做。
+**摆放是另一部分。** 配置的 `outputs` 里，一篇 mdx 正本挂着几个落点（仓根的 README、AGENTS.md、包内的 SKILL.md）；摆放把它渲成一份干净 md、戴上点名的 frontmatter 字段、写到每个落点上，也负责回头核对盘上那份还跟不跟源一致。它落在这一层的理由跟 git 那条线一样：要写盘、要问格式要渲染，判定层两样都不做。
 
 {/* ref file="../packages/docfirst-workflow/src/host/placement.ts" lines="1-13" */}
 
@@ -79,7 +79,7 @@ description: 读配置装出一个判定服务；记忆按被引文件的位置�
 
 {/* ref file="../packages/docfirst-workflow/src/host/load.ts" lines="103-110" */}
 
-**`createReader(root)`** 是判定层看到的全部世界。目录名字表在 git 仓里按 `.gitignore` 过滤（`dist/`、`node_modules/` 不进清单，也不往里走），`.git` 自己去掉；不在仓里就原样列。
+**`createReader(root)`** 是判定层能看到的全部内容。目录名字表在 git 仓里按 `.gitignore` 过滤（`dist/`、`node_modules/` 不进清单，也不往里走），`.git` 自己去掉；不在仓里就原样列。目录一层一层往下走，同一层的条目攒齐了一次问 `check-ignore`，一层只起一个 git 进程。
 
 {/* ref file="../packages/docfirst-workflow/src/host/fs-reader.ts" lines="1-8" */}
 
@@ -95,15 +95,15 @@ description: 读配置装出一个判定服务；记忆按被引文件的位置�
 
 一个项目里 git 记录和 hash 记录并存。哪一处拿到的是 hash 记忆，`confirm` 那一行会标出来（见[命令行](/docs/modules/cli)）——写手得知道自己拿到的是弱记忆。
 
-**`createGitComparator`** 管行段和整文件。确认那头守几道门：得在某个仓里、那个仓得有过提交、文件得在 HEAD 里（未跟踪、被忽略、大小写不符都拒）、工作区得干净。核对那头拿 `git diff -U0` 出 hunk 表，把旧行段映到今天：
+**`createGitComparator`** 管行段和整文件。确认时要过几道检查：得在某个仓里、那个仓得有过提交、文件得在 HEAD 里（未跟踪、被忽略、大小写不符都拒）、工作区得干净。核对时先比哈希：当前内容的 blob 名等于记录里那个，内容一字没变，不取旧内容、不起 git；变了才从对象库取旧内容，拿 `git diff -U0` 出 hunk 表，把旧行段映到今天：
 
-{/* ref file="../packages/docfirst-workflow/src/host/git-comparator.ts" lines="97-104" */}
+{/* ref file="../packages/docfirst-workflow/src/host/git-comparator.ts" lines="99-106" */}
 
-**绿只认段哈希**：hunk 说没碰到也再比一次，行映射跟内容对不上时宁可报黄让人复核，也不把红判成绿。整段没了是 `vanished`，文件没了是 `file-missing`，blob 不在对象库（浅克隆、历史重写、换了个仓）是 `blob-missing`。这条线为什么这么设计、`hash-object` 为什么自己算，见 [git 记忆原理](/docs/principles/git)。
+**绿只认段哈希**：hunk 说没碰到也再比一次，行映射跟内容对不上时宁可报黄让人复核，也不把红判成绿。整段没了是 `vanished`，文件没了是 `file-missing`，内容变了而 blob 不在对象库（浅克隆、历史重写、换了个仓）是 `blob-missing`。一个进程里同一个 blob 只从对象库取一次、同一对内容只 diff 一次——两样都按内容寻址，记住不会过时。这条线为什么这么设计、blob 名为什么自己算，见 [git 记忆原理](/docs/principles/git)。
 
-**`placing`** 是摆放的全部对外面貌，挂在装好的项目上，两个方法。`render(doc)` 摆一趟：渲一份正文，给每个落点戴上它点名的 frontmatter 字段，写过去，回一张落点清单。`check(doc)` 只读不写，回每个落点的四态。两个方法用的是同一份正文，所以摆完再核对必然新鲜——守着的和摆出去的不可能是两份东西。
+**`placing`** 是摆放对外的全部接口，挂在装好的项目上，两个方法。`render(doc)` 摆一趟：渲一份正文，给每个落点戴上它点名的 frontmatter 字段，写过去，回一张落点清单。`check(doc, listing?)` 只读不写，回每个落点的四态；调用方手上已经有这一篇的清单就传进去，摆放不再判一遍——命令行的 check 刚判完这一篇，就是这么传的。两个方法用的是同一份正文，所以摆完再核对必然新鲜——守着的和摆出去的不可能是两份东西。
 
-{/* ref file="../packages/docfirst-workflow/src/host/placement.ts" lines="51-61" */}
+{/* ref file="../packages/docfirst-workflow/src/host/placement.ts" lines="51-64" */}
 
 调用方得知道两件事。**空清单不是失败**：这篇没挂落点、没有格式认领它、或者认领它的格式不出 ai 产物，三者任一都回空清单，意思是「这篇没有摆放这回事」，不是「摆了零个」。**缺字段的落点不写**：点名了源里没有的字段，那个落点回 `no-frontmatter` 加缺哪几个，盘上一个字不动——摆一份缺 `name` 的 SKILL.md 比不摆更糟。
 
@@ -139,7 +139,7 @@ frontmatter 是**逐行原样搬**的，不解析 YAML：一条字段从它的�
 
 ## 怎么单独测
 
-分派规则的账在 `tests/auto-comparator.test.ts`：夹具在临时目录里起**真的 git 仓**，喂**假格式**，记录簿换成内存的。记忆分派是跟 git 的真行为对账，假不了。
+分派规则的测试在 `tests/auto-comparator.test.ts`：夹具在临时目录里起**真的 git 仓**，传入**假格式**，记录簿换成内存的。记忆分派要跟 git 的真实行为核对，不能用假仓代替。
 
 {/* ref file="../tests/auto-comparator.test.ts" lines="1-10" */}
 
@@ -151,7 +151,7 @@ frontmatter 是**逐行原样搬**的，不解析 YAML：一条字段从它的�
 
 {/* ref file="../tests/project-load.test.ts" lines="1-8" */}
 
-摆放那一摊有两份账，喂的是同两个适配器。**内存那份**在 `tests/placing-host.test.ts`：落点是一张 Map，一个字节不落盘、一次 git 不起，于是「摆了什么、摆到哪个键上、那份被动过之后判成哪一态」直接看得见。
+摆放部分有两份测试，传入的是同样两个适配器。**内存那份**在 `tests/placing-host.test.ts`：落点是一张 Map，一个字节不落盘、一次 git 不起，于是「摆了什么、摆到哪个键上、那份被动过之后判成哪一态」直接看得见。
 
 {/* ref file="../tests/placing-host.test.ts" lines="36-52" */}
 
@@ -171,12 +171,12 @@ frontmatter 是**逐行原样搬**的，不解析 YAML：一条字段从它的�
 
 {/* tree dir="../packages/docfirst-workflow/src/host" depth="1" */}
 
-**先读** `load.ts`（装配的全貌，配置的形状也在这儿），再读 `auto-comparator.ts`（分派规则，四十行看完）。摆放那一摊自成一份 `placement.ts`，从文件头的注释读起。这一层的出口是一个文件，导出表即对外面貌——层外生产用的只有 `loadProject`，其余是装配的零件（换比较器、换读取器时拿）与类型；git 那把原语一个都不出这个口，它们是 git 比较器的内部实现：
+**先读** `load.ts`（装配的全貌，配置的形状也在这儿），再读 `auto-comparator.ts`（分派规则，四十行看完）。摆放部分自成一份 `placement.ts`，从文件头的注释读起。这一层的出口是一个文件，导出表就是对外接口——层外生产用的只有 `loadProject`，其余是装配的零件（换比较器、换读取器时拿）与类型；git 那把原语一个都不出这个口，它们是 git 比较器的内部实现：
 
 {/* ref file="../packages/docfirst-workflow/src/host/index.ts" */}
 
-**读序**：`git.ts` 是子进程原语（定位仓、blob、hunk、忽略判定），不吃本层任何人；`git-comparator.ts` 吃 `git.ts` 加判定层的纯函数；`auto-comparator.ts` 吃前两者加判定层的 hash 版；`fs-reader.ts` 只吃 `git.ts`；`json-ledger.ts` 只吃判定层的键函数；`placement.ts` 只吃判定层的类型加 `load.ts` 里配置的那个类型，本层别的实现一个不吃，`node:fs` 也不吃（生成物怎么落地由宿主给）；`load.ts` 吃全部，交给判定层的 `createService`。
+**读序**：`git.ts` 是子进程原语（定位仓、blob、hunk、忽略判定），不依赖本层任何文件；`git-comparator.ts` 依赖 `git.ts` 加判定层的纯函数；`auto-comparator.ts` 依赖前两者加判定层的 hash 版；`fs-reader.ts` 只依赖 `git.ts`；`json-ledger.ts` 只依赖判定层的键函数；`placement.ts` 只依赖判定层的类型加 `load.ts` 里配置的那个类型，本层别的实现一个不用，`node:fs` 也不用（生成物怎么落地由宿主给）；`load.ts` 依赖全部，交给判定层的 `createService`。
 
-`placement.ts` 与 `load.ts` 之间因此是一圈**只有类型的**循环引用：`load.ts` 吃摆放的实现，摆放回头只借它一个 `ProjectConfig` 类型（`import type`，编译期擦掉）。运行时没有这条边，读的时候也不必先读 `load.ts`——从摆放那份文件头读起就行。
+`placement.ts` 与 `load.ts` 之间因此是一个**只有类型的**循环引用：`load.ts` 用摆放的实现，摆放反过来只借它一个 `ProjectConfig` 类型（`import type`，编译期擦掉）。运行时没有这条边，读的时候也不必先读 `load.ts`——从摆放那份文件头读起就行。
 
 **可跳过**：`dist/` 是构建产物。
