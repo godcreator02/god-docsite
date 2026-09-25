@@ -5,7 +5,7 @@ description: 仓布局、三处门禁、提交规矩、发布、只读参考
 
 # 维护者手册
 
-这一章回答：要改这个仓的代码，东西都放在哪儿、提交前得跑绿哪几条、提交怎么写、发布是什么状况。
+**本页回答**：要改这个仓的代码，东西都放在哪儿、提交前得跑绿哪几条、提交怎么写、怎么发布。
 
 ## 仓布局
 
@@ -15,14 +15,15 @@ description: 仓布局、三处门禁、提交规矩、发布、只读参考
 {/* tree dir="../packages" depth="1" hash="01f82fee3739" */}
 
 `docfirst-workflow` 是主包（`src/` 下 engine / host / fumadocs / cli 四层），`docfirst-trajectory` 是轨迹包
-（卡与星轨盘，独立的一条包线），`gwb-docfirst-workflow` 是工作台插件（装六区与六份说明书，跟两个包互不认识）。
+（卡与星轨盘，独立的一条包线），`gwb-docfirst-workflow` 是工作台插件（装三个区与六份说明书，跟两个包互不认识）。
 仓根的 `tests/` 是工作区级测试，`tests/fixtures/trajectory/` 是星轨盘的诗名 fixture。
 
-站用这套机制写自己的文档，内容分六区，轨迹卡住 `content/trajectory/`：
+站用这套机制写自己的文档，内容在 `content/` 下分三个区：`docs/` 是现状区（生成正本在 `docs/outputs/`），
+`trajectory/` 是轨迹卡，`future/` 是未来区（路线图、在途方案 `spec/`、别的仓投来的反馈 `inbox/`）：
 
-{/* tree dir="content" depth="1" hash="9ff6ea09d683" */}
+{/* tree dir="content" depth="1" hash="4d1620cb05d1" */}
 
-**没有单独的示例仓**：这个站自己就是消费方——它装的是工作区里的两个包，钉的是工作区里的真源码，
+**没有单独的示例仓**：这个站自己就是使用者——它装的是工作区里的两个包，钉的是工作区里的真源码，
 「装了这两个包的项目长什么样」在这儿就能直接看到。
 
 ## 三处门禁：都绿才提交
@@ -33,20 +34,20 @@ description: 仓布局、三处门禁、提交规矩、发布、只读参考
 
 {/* ref file="../package.json" lines="7-12" hash="5b7a254e66c4" blob="7490373a5b80" */}
 
-站的四条脚本在站自己的 `package.json` 里：
+站的脚本在站自己的 `package.json` 里：
 
 {/* ref file="package.json" lines="7-12" hash="9a5bba40030d" blob="e988abd365b8" */}
 
-外加 `node scripts/verify-roster.mjs`（[名册](/docs/modules/fumadocs)两头对）和 `pnpm docfirst check`。
+外加 `node scripts/verify-roster.mjs`（检查[名册](/docs/modules/fumadocs)两边一致）和 `pnpm docfirst check`。
 
 工作台插件单独一处门禁：它用 vitest，跟两个包的 `node --test` 不是一套，所以工作区根的 `test` 脚本
-不去收它（根的 `build` 与 `typecheck` 按 `./packages/**` 过滤，插件是被带上的）。
+不包括它（根的 `build` 与 `typecheck` 按 `./packages/**` 过滤，插件在其中）。
 
 {/* ref file="../packages/gwb-docfirst-workflow/package.json" lines="24-31" hash="c94db08cbe3b" blob="f285e7cbd770" */}
 
 ## 写代码的规矩
 
-{/* ref file="content/docs/maintain/agents.mdx" lines="38-52" hash="43556936590f" blob="5fdcd6aa5867" */}
+{/* ref file="content/docs/maintain/agents.mdx" lines="38-52" hash="a22bc9f4989e" blob="55578432fde8" */}
 
 再补两条站这边的：改了 `src/fumadocs/` 的代码，站要**先删 `.next` 再 build** 才看得见（Turbopack 只按 mdx 内容缓存）；
 调试站用 `next build` + `next start`，不用 dev，启动的站验完必须停掉。
@@ -54,14 +55,16 @@ description: 仓布局、三处门禁、提交规矩、发布、只读参考
 ## 提交规矩
 
 按步骤拆，一个提交一件事。提交信息中文，末尾带会话里给的 `Co-Authored-By` 与 `Claude-Session` 两行。
-confirm、render 与提交的先后照 skill「docfirst-docs」。
+改了被钉的代码，就在同一个提交里处理它引起的黄灯：`docfirst confirm` 做机械写回，逐条复核剩下的黄灯，
+论断还成立就 `docfirst confirm <页…> --accept` 点名签掉。细节照 skill「docfirst-docs」。
 
 ## 发布：devkit.release
 
-三个包都用工作台命令 `devkit.release` 发到 gitea 个人源；升哪一位、发版的每一步、发完升级 default，
-照 skill「gwb-release」。
+三个包都用工作台命令 `devkit.release` 发布；升哪一位、发版的每一步、发完升级 default，
+照 skill「gwb-release」。发到哪个源由各包 `package.json` 的 `publishConfig.registry` 决定，三个包都写的是团队源。
 
-两个 npm 包一次发，`packages` 按依赖顺序给，轨迹包在前——主包里 `workspace:*` 那条依赖发出去写成 `^<工作区里轨迹包的版本号>`：
+`packages` 只列这次升了版本号的包（源上已有的版本号会被拒），按依赖顺序给，轨迹包在前——主包里 `workspace:*`
+那条依赖发出去写成 `^<工作区里轨迹包的版本号>`：
 
 ```text
 devkit.release {"dir":"<仓根>","packages":["packages/docfirst-trajectory","packages/docfirst-workflow"]}
@@ -71,15 +74,15 @@ devkit.release {"dir":"<仓根>","packages":["packages/gwb-docfirst-workflow"]}
 第二行是插件单独发。插件发之前在隔离 home 里新建一个站验一遍（`docs-site.create` 接 `docfirst.attach`），
 隔离 home 里验证的步骤在 skill「gwb-devkit」。
 
-两个包升版本号时**跟着改 `packages/gwb-docfirst-workflow/src/deps.ts` 那张表**——装六区时往目标站补的依赖版本就取自它，
+两个包升版本号时**跟着改 `packages/gwb-docfirst-workflow/src/deps.ts` 那张表**——装配时往目标站补的依赖版本就取自它，
 插件的 `tests/attach.test.ts` 里有一条检查它是精确号、跟工作区各包的版本对得上，忘了改当场红。
 
 **两边各发各的，没有先后。**插件对包零依赖：它不打包那个包、`package.json` 的各类依赖里也没有它，所以先发哪个
-都不影响另一个；只是表里的版本号改了，插件得再发一版，之后新装六区的站才装到新包。
+都不影响另一个；只是表里的版本号改了，插件得再发一版，之后新装配的站才装到新包。
 
 ## 参考，只读
 
-{/* ref file="content/docs/maintain/agents.mdx" lines="28-34" hash="9390753d0372" blob="5fdcd6aa5867" */}
+{/* ref file="content/docs/maintain/agents.mdx" lines="28-34" hash="1f72e11d2bfa" blob="55578432fde8" */}
 
-实验室是架构定案的出处（教学代码，要搬逻辑就搬，别 `import` 它）；老仓是 git 记忆那条线的出处，
-**已退役**——功能面对齐之后不再是参考，代码只看这个仓。
+实验室是架构定案的出处（教学代码，要搬逻辑就搬，别 `import` 它）；老仓是用 git 取旧内容那条线的出处，
+**已退役**——功能对齐之后不再参考，代码只看这个仓。

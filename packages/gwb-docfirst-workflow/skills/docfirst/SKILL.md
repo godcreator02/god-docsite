@@ -22,9 +22,9 @@ docs-site.create {"dir":"<仓>/docs-site"}     站点插件：生成标准 fumad
 docfirst.attach  {"dir":"<仓>/docs-site"}     本插件：装分区、docfirst.config.mjs、mdx 接线、名册脚本
 ```
 
-**顺序不能反，中间不要改文件。**`attach` 只在刚生成的骨架上运行：它要覆盖或删除的文件里有任何一个跟骨架原样
-对不上、站里已经有 docfirst 配置、或者 `content/` 下已经有骨架之外的内容，它一个字都不写，报错并列出冲突的文件。
-给一个已经用了很久的站加 docfirst，走人工接线。
+**顺序不能反，中间不要改文件。**`attach` 只在刚生成的骨架上运行：站里已经有 docfirst 配置、或者 `content/` 下
+已经有骨架之外的内容，它一个字都不写，报错并列出冲突的文件。它**不核对**要覆盖的骨架文件（比如 `content/docs/index.mdx`）
+还是不是原样——改过的也会被覆盖，所以铺完骨架之后、装配之前别改任何文件。给一个已经用了很久的站加 docfirst，走人工接线。
 
 ### `docfirst.attach { dir, title? }`
 
@@ -78,7 +78,8 @@ pnpm docfirst trajectory                        列轨迹卡的盘 / 树 / 主�
 ## 跨仓反馈：投进目标仓站的 `future/inbox/`
 
 在 A 仓干活时发现 B 仓的东西不好用，**直接投进 B 仓自己站的未来区**：新建一个文件
-`docs-site/content/future/inbox/<yyyy-MM-dd>-<来源仓>-<一句话标题>.mdx`，不需要命令。格式：
+`docs-site/content/future/inbox/<yyyy-MM-dd>-<来源仓>-<英文短标题>.mdx`，不需要命令。文件名用英文小写和短横线
+（git 会把中文路径显示成八进制转义），中文标题写进 `title`。格式：
 
 ```
 ---
@@ -109,6 +110,6 @@ description: 来源：<哪个仓 / 哪次会话>
 
 - 回「不是目录」：`dir` 给成了仓目录而不是站目录，或者骨架还没生成——先 `docs-site.create`
 - 回「不是 fumadocs 骨架」：那个目录的 `package.json` 依赖里没有 `fumadocs-core` / `-mdx` / `-ui`
-- 回冲突文件清单：那个站已经接过线、或者有人改过骨架文件、或者 `content/` 下已经有人写过东西。
+- 回冲突文件清单：那个站已经接过线、或者 `content/` 下已经有人写过东西。
   本插件不改写任何东西，走人工接线
 - 想核对却找不到命令：**本插件没有那条命令**，自己 `cd` 到那个仓里跑（见上面那节）

@@ -1,544 +1,240 @@
 ---
 title: 轨迹包
-description: 卡与盘两摊——记录格式与四层校验、聚盘建模、布局与画布层；三个入口、零依赖边界、诗名 fixture
+description: 轨迹卡的格式与四层校验、把一个目录的卡算成星轨盘；三个入口、各入口的依赖边界，以及它刻意不做的事
 ---
 
 # 轨迹包
 
-**本页回答**：`@godcreator/docfirst-trajectory` 管卡与盘的哪两摊、它对 docfirst 那套记录簿一无所知到什么程度、
-盘上的位置与颜色各编码什么、怎么不起站单独测。
+**本页回答**：轨迹包负责哪几件事、对外给出哪些入口与接口、依赖谁，以及它刻意不做什么。
 
-## 管什么
+包 `@godcreator/docfirst-trajectory`，源码在 `packages/docfirst-trajectory/src/`，三个入口文件是 `src/index.ts`（`.`）、
+`src/react.tsx`（`./react`）与 `src/server.tsx`（`./server`）。
 
-### 两摊事，方向跟 docfirst 相反
+## 功能
 
-一摊是**卡**：一种只增不改的记录格式，连同读它、校它的那一层。另一摊是**盘**：把一目录卡算成一张星轨盘的
-建模、布局与画布层。
+这个包做两件事。一是**卡**：轨迹卡这种只增不改的记录格式，以及读卡、校验卡。二是**盘**：把一个目录里的卡
+算成星轨盘，包括分盘建模、布局和绘制。
 
-docfirst 治的是**现状文档撒谎**——一句话写下的那一刻就跟代码分了家，机制盯着代码变没变。轨迹卡治的是
-另一头，**历史被改写**：一次方向了断记下来就该冻结，谁取代了谁、谁是从哪条路转过来的，得看得见。两件事
-方向相反，一个盯代码，一个盯文档自己，所以轨迹**不是又一种文档格式**：五类引用说的是「文档对文件系统说的话」，
-卡的关系边说的是「文档对文档说的话」，**卡不进记录簿、不需要 confirm，只要即时校验**。两者只在一处相遇
-——一篇现状文档链到一张卡，此外互不打扰。
+卡跟 docfirst 的五类引用是两套互不相关的东西：引用说的是文档与代码之间的关系，卡上的关系边说的是卡与卡之间的
+关系（谁取代了谁、谁从哪张卡转向而来）。
 
-### 三个入口，两头分工
+### 卡
 
-`.` 是扫卡、校验、建模、布局与链表的纯函数汇总；`./react` 是客户端的星轨盘组件；`./server` 是服务端组件、
-卡集合的 frontmatter schema 与正文关系边的 remark 插件；另外单独开一张样式表：
-
-{/* ref file="../packages/docfirst-trajectory/package.json" lines="7-21" hash="680cd7f6a73f" blob="6dea81ada70c" */}
-
-分工是死的：**建模是纯函数、跑在服务端；布局也是纯函数、跑在客户端**。服务端那半只做两件事——扫一次目录，
-给每张盘建一次模型。**不算布局**：布局是纯函数、几毫秒的事，放客户端才保得住设置滑杆（改一格盘心大小、
-改一格空窗阈值，重算即可，不必回服务端）：
-
-{/* ref file="../packages/docfirst-trajectory/src/index.ts" lines="119-137" hash="712bdf84ad44" blob="f1b205039a02" */}
-
-服务端组件就是「读盘 + 建模 + 把模型和启动器缩略图交给客户端组件」，外加把报病列成一张表摆在盘下方：
-
-{/* ref file="../packages/docfirst-trajectory/src/server.tsx" lines="100-105" hash="87a8b13a34eb" blob="47d6aa20aaa9" */}
-
-### 卡住哪、盘在哪
-
-卡直接写进项目文档站的 `content/trajectory/`，**一卡一文件、目录内平铺不建子目录**——探索史跟代码走同一批
-提交、同一条历史。扫描器照着这条规矩只扫一层，遇上目录不存在一律回空集合、不建目录、不报错：「这里还没有
-轨迹记录」本来就是合法状态，不该逼人先造个空目录。
+卡放在项目文档站的 `content/trajectory/` 下，一卡一文件，目录里不建子目录。扫描只读这一层；目录不存在时返回
+空集合，不建目录、不报错——「还没有轨迹记录」是合法状态：
 
 {/* ref file="../packages/docfirst-trajectory/src/scan.ts" lines="26-38" hash="d97f70a77452" blob="a314807c9fcb" */}
 
-扫盘读文件是并发的，产物却是**确定性的**：`Promise.all` 的完成序不定，出门前按卡身份与文件路径钉死序——同一份目录两次扫描逐位相等，布局层那份黄金样本断言靠的就是这条。
-
-{/* ref file="../packages/docfirst-trajectory/src/scan.ts" lines="60-62" hash="3e12aed9ab4c" blob="a314807c9fcb" */}
-
-本仓自己的卡由人写、动手权在人（AI 只提醒不代写），所以本站那张盘上星星寥寥是正常态，不是接线坏了。盘满了
-是什么样，看工作区测试里那批诗名 fixture（`tests/fixtures/trajectory/`）：建模、聚盘、布局、画布几摊用例拿它
-当输入，盘的形状全由它撑出来。
-
-**盘本身不在文档树里**——它是一条独立的整页路由 [星轨盘 →](/trajectory)：不带 `?disk=` 是项目卡阵（启动器），
-点一张进盘；盘上整个视口就是盘，没有侧栏也没有目录。这条 URL 被整页占着，所以 `content/trajectory/` 下不放
-导读页，侧栏「轨迹」那一节的第一条直接是指向盘的链接——这是本站跟 `docfirst init` 铺出来的模板**唯一的形状
-差异**：
-
-{/* absent path="content/trajectory/index.mdx" type="absent" */}
-
-怎么把这套接进一个 fumadocs 站（配置一项、命令两条、站里三处，外加 Next 那头两条），见
-[站接线手册](/docs/start/wiring)。
-
-### 布局：半径、角度、鱼眼
-
-布局引擎是一个类，纯计算不碰 DOM。产物（落点表、扇环表）由实例自己持有、不挂回共享的卡对象上——多张盘要
-同开（虫洞穿越），挂在共享对象上的布局属性会被后建的盘覆盖：
-
-{/* ref file="../packages/docfirst-trajectory/src/layout.ts" lines="1-11" hash="0ff3870b151f" blob="5a6af728f02f" */}
-
-**其一，半径 = 有效天数标度，空窗折叠。**时间轴的世界深度是定死的（`AXIS_SPAN`），数据拉伸填满这段深度、
-不撑深度——盘是固定仪表盘。相邻卡之间的空档超过阈值，中段走**对称双半段对数**（前半正向衰减、后半镜像回升），
-两端各留一截 1:1 的呼吸带。这样三个月不动的项目和三天冲一版的项目画在同一张盘上都还能看：
-
-{/* ref file="../packages/docfirst-trajectory/src/layout.ts" lines="308-351" hash="40a335439d09" blob="5a6af728f02f" */}
-
-**其二，角度 = 扇环装箱。**先按领域聚块，同域的树排进相邻角度、域内按诞生序从 12 点顺时针先到先得。
-**领域是颜色通道，盘上同色不挨着就等于没分域**——所以跨域一律角向互斥，只有同域内时间不搭界的两棵树才复用
-同一段角度；换域时多留一档缝把色块分开：
-
-{/* ref file="../packages/docfirst-trajectory/src/layout.ts" lines="624-671" hash="7215e4d2ffeb" blob="5a6af728f02f" */}
-
-**其三，鱼眼是解析闭式，不查表。**日期竖轨把焦点带对准时间窗，半径映射 `r' = g(r)` 由三段斜率（旧压缩区、
-焦点带、新压缩区）的积分原函数直接给出，零积分误差、零量化台阶。三段的显示宽全固定，焦点带永远落在同一段
-黄金半径上；压缩区**只压不拉**，内容不足就留一圈空环当「到头了」的信号：
-
-{/* ref file="../packages/docfirst-trajectory/src/layout.ts" lines="729-758" hash="dba6f8ca64f2" blob="5a6af728f02f" */}
-
-对外只有两个出口：显示半径和局部放大率，两者都按当前鱼眼强度混合，强度 0 就是全景线性态。内盘恒等——盘心
-永远不会被鱼眼压到卡上去：
-
-{/* ref file="../packages/docfirst-trajectory/src/layout.ts" lines="760-778" hash="5ff04e5c312e" blob="5a6af728f02f" */}
-
-同一棵树同一条槽里跨日的几组卡挤到一起时，**判定看屏幕径向间距、动作只动角度**——半径 = 日期是铁律，挤了
-只能沿弧向错开，按日组序奇偶交替 ± 给偏移，间距一拉开自动归零、链还原成直线：
-
-{/* ref file="../packages/docfirst-trajectory/src/chains.ts" lines="56-63" hash="1d5b12d046c8" blob="00469a1dbd08" */}
-
-### 盘上的视觉词汇
-
-**颜色只编码领域。**色板叫「矿彩」——低饱和暖偏的五色（石青 / 赭石 / 松绿 / 胭脂 / 藤紫），按 `model.domains`
-的首次出现序分配，亮暗两套；色相避开连线占的两段（转向铜绿、里程碑与盘心泥金），未分道走中性灰、不占色板位；
-被取代的卡拿领域色跟一个灰混 40% 再画，所以它还留着自己的泳道身份、只是黯下去。JS 色板按 `html.dark` 选，
-第六个领域出现先扩色板、不循环复用：
-
-{/* ref file="../packages/docfirst-trajectory/src/canvas/theme.ts" lines="36-77" hash="8b042feac260" blob="a35b02ce90f2" */}
-
-**节点是「珠光」。**在立的实心形状填一支径向渐变（中心 = 领域色向白混 22%、边缘 = 本色、焦点偏左上），
-外圈一圈**底色描边**——密集处靠这道缝把彩点分开，不靠混黑描边压边。被取代的实心无渐变、半径压到 0.7、
-缝也细一档；每棵树主干末端那张在立卡是**结论卡**，半径吃 1.3 倍放大档。渐变按颜色去重、切主题现建，
-跟空窗雾带的羽化滤镜同住一个 defs 工厂：
-
-{/* ref file="../packages/docfirst-trajectory/src/canvas/node-dom.ts" lines="264-306" hash="ef5cab0d311a" blob="426797f9d1f9" */}
-
-**形状编码 `type`——这是对 Obsidian 版规范唯一保留的偏离。**抉择实心圆、证据三角、推演菱形、参照方形、
-缺省实心圆，快照是唯一的空心方（底色缝垫在领域色边下面）。这是 `type` 的**显示读法，不是过滤**——所有卡
-照常上盘，盘是全量记录的镜像，关键节点靠里程碑泥金环呈现，不靠筛掉节点。同一张几何表出大图节点与图例符号：
-
-{/* ref file="../packages/docfirst-trajectory/src/canvas/node-dom.ts" lines="129-158" hash="7621ab545f0b" blob="426797f9d1f9" */}
-
-**连线不画箭头**——半径即时间，从内到外就是方向，箭头是白加的重量。取代边是 1px 实线、取**旧卡的领域色**
-（一条链看着就是那个领域自己长出来的），透明 0.45；转向边是 1px 铜绿点线（`2 3`），透明 0.5；同日两卡沿着
-那道环走弧。端点起止于节点边缘外一小段净空，挨得太近的两颗按比例压缩退距、宁可留根短须也不整条丢掉；
-悬停一端的边提到 0.9：
-
-{/* ref file="../packages/docfirst-trajectory/src/canvas/node-dom.ts" lines="385-397" hash="3b1e5b6d14f7" blob="426797f9d1f9" */}
-
-其余照 Obsidian 版规范：虫洞同心双环、颜色与盘心描边同源（泥金），里程碑泥金加重环、标签走 6 点竖线；
-孤星在形态上没有专属记号，只在标签分级里还认它。底色、文字、边框、浮层、悬停底、环线与扇环框全映射
-fumadocs 变量，CSS 不判明暗——环用 `color-mix` 从前景色兑 7% / 20% / 30% / 38%，扇环框边 / 底 18% / 5%；
-节点的底色缝直接写 `var(--color-fd-background)`，亮暗跟着宿主翻，服务端渲的定妆照也照吃：
-
-{/* ref file="../packages/docfirst-trajectory/styles/star.css" lines="9-34" hash="fdb1b494d5c4" blob="151b6b77d411" */}
-
-**规格里的 px 一律是屏幕像素。**字号、线宽、虚线段、节点半径都按当前「世界单位 / 屏幕像素」的比例折算后
-才写进 SVG，几何量（半径、角度、带宽）才是世界单位。节点的缝宽写在符号局部坐标里、随符号整组按 `view.k`
-反补偿，连线走 `vector-effect: non-scaling-stroke`——放大八倍，描边在屏幕上还是那么粗。
-
-**标签两级显隐、同池仲裁。**在立且非孤星的卡与虫洞全景即显（局部放大率 × 缩放深度 > 0.5），孤星与被取代
-进透镜才显（> 1.8）；贴盘心的内圈卡标签向盘外锚。节点、虫洞、树名同池按真实文本区间仲裁，横向区间相交且
-行距不足 14px 的后来者让隐，悬停先占坑；12 点与 6 点是两条独立的注记竖线：
-
-{/* ref file="../packages/docfirst-trajectory/src/canvas/layers/cards.ts" lines="185-197" hash="90222b21419c" blob="e50f43ed362b" */}
-
-{/* ref file="../packages/docfirst-trajectory/src/canvas/label-arbiter.ts" lines="45-48" hash="d6e1c9e50599" blob="86cb8c3a37db" */}
-
-**图例即筛选器，搜索只匹配 label 与卡身份**——正文根本不进传给客户端的那份数据。筛选与搜索的效果是「压灰」
-不是「删掉」：没命中的节点变中性色留在原位，盘的形状不跳。虫洞不进筛选——它不是一张卡，是导航入口：
-
-{/* ref file="../packages/docfirst-trajectory/src/canvas/node-dom.ts" lines="365-371" hash="0265d24b0164" blob="426797f9d1f9" */}
-
-### 交互：滚轮管空间，竖轨管时间
-
-**滚轮 = 空间缩放，指哪缩哪；拖拽漫游。**目标缩放从当前目标累乘，连发滚轮不断累积、不迟滞，真正的位移在
-补间循环里逐帧趋近。**ctrl + 滚轮**（触控板捏合同一通道）分流给时间：整窗沿时间平移，一格按窗宽的一成走，
-跟竖轨上悬停滚轮是同一段代码：
-
-{/* ref file="../packages/docfirst-trajectory/src/canvas/stage.ts" lines="515-534" hash="cdd5d07802ed" blob="680468e0dfc8" */}
-
-**时间归画布左缘常驻的日期竖轨**：自绘双柄区间滑块，顶旧底新，收窄窗即进引力透镜——窗就是焦点带，窗外压缩
-显示不丢全貌；中段拖动整窗平移，拖回顶满退回全景；左下角小框直接键入窗宽天数。轨位与像素反解都走盘面同一张
-折算表，空档在轨上折成暗纹窄条，拖过窄条那几步窗就跳过整段空窗：
-
-{/* ref file="../packages/docfirst-trajectory/src/canvas/date-rail.ts" lines="1-12" hash="c1d01e5f4087" blob="2d169290dd74" */}
-
-{/* ref file="../packages/docfirst-trajectory/src/canvas/date-rail.ts" lines="41-56" hash="4d37d775b2be" blob="2d169290dd74" */}
-
-窗一变，舞台把焦点带对准窗——零重建，焦点日与强度的补间白送：
-
-{/* ref file="../packages/docfirst-trajectory/src/canvas/stage.ts" lines="281-299" hash="e520ea8fd942" blob="680468e0dfc8" */}
-
-**回到原点两段式**：相机动过就先只归相机（时间窗与透镜原样留着），相机已在原点再按才归窗（顶满 + 透镜退场）；
-连按两下全归。Esc 与工具条钮共用一条链，钮的图标随「下一按干什么」换脸：
-
-{/* ref file="../packages/docfirst-trajectory/src/canvas/stage.ts" lines="539-553" hash="d76d500d9fcc" blob="680468e0dfc8" */}
-
-{/* ref file="../packages/docfirst-trajectory/src/canvas/stage.ts" lines="558-571" hash="600caf9776df" blob="680468e0dfc8" */}
-
-**盘心单击在新标签页开根卡页、双击回全景**；点节点在新标签页开卡页，点虫洞切到对应的盘。单击延迟一拍让
-双击截得住：
-
-{/* ref file="../packages/docfirst-trajectory/src/canvas/layers/hub.ts" lines="78-93" hash="8c7667e819eb" blob="3df163b8d9de" */}
-
-{/* ref file="../packages/docfirst-trajectory/src/react.tsx" lines="342-344" hash="135950166274" blob="2a7a7719f23d" */}
-
-**Esc 分层**：先关浮层，嵌入模式再退激活态，最后才走两段式回原点。嵌入模式（`mode="embed"`）只保留「点击
-激活」这一条——盘塞进一篇长文档中间时，没点过盘的滚轮要穿透给页面；整页模式交互态恒真：
-
-{/* ref file="../packages/docfirst-trajectory/src/react.tsx" lines="411-428" hash="66ef24e2446d" blob="2a7a7719f23d" */}
-
-设置滑杆照 Obsidian 版的项目表：内环 / 外环压缩、盘心大小、空窗阈值、超长空档宽、节点大小、结论放大、
-节点散开、动画速度，语义值存 `localStorage`，灌参走同一处换算。盘只有一套缩放模式，没有激活遮罩、没有全屏
-按钮、也没有盘页签。
-
-### 启动器：`?disk=` 缺失时的项目卡阵
-
-同一个组件两张脸：有当前盘渲盘，没有就渲启动器——每张盘一张卡，上方全景定妆照，下方短名与「n 卡 · 最近
-活动 某日」，按最近活动降序；点卡进盘（写 `?disk=`），盘内工具条有「启动器」返回钮（清 `?disk=`）。换盘
-只走启动器与虫洞，多盘同开不做：
-
-{/* ref file="../packages/docfirst-trajectory/src/react.tsx" lines="133-177" hash="3284c6ba0849" blob="2a7a7719f23d" */}
-
-定妆照是 `star-thumb` 这个纯静态 SVG 画家画的：跟大图同一个布局引擎、同灌盘心与空窗设置，「缩略图 = 大图
-世界几何的等比缩放」靠共用布局层保证。**在服务端渲成静态 markup**——画家喂一个最小的桩文档建树、再序列化
-成字符串，客户端原样贴、不重画；节点的底色缝与环色走 CSS 变量，盘心 / 虫洞的泥金与领域 / 连线 / 混灰这些
-JS 色板要按亮暗各渲一份、页面按 `html.dark` 显示其一。节点在这儿退成实心（缩到卡片尺寸渐变看不出来，白留
-一堆 defs），被取代小一号、结论卡放大、连线无箭头三条跟大图一致：
-
-{/* ref file="../packages/docfirst-trajectory/src/server.tsx" lines="54-86" hash="ef1345ef4987" blob="47d6aa20aaa9" */}
-
-## 不知道什么
-
-**不认识判定层，也不认识任何格式实现。**卡的记录格式与五类引用是两套互不认识的东西，所以本包不 import 判定层的
-任何东西——连第四层校验用的两条记号正则都是照 `engine/marker.ts` 的形状独立复刻的一份。`.` 入口那一侧的源码只许 import
-自己和三个 `node:` 内置：
-
-{/* ref file="../tests/boundary.test.ts" lines="225-240" hash="6b7088dc2d48" blob="421b08df5caa" */}
-
-同一条红线在产物上再判一次，比按 `package.json` 判更准——就算哪天 `.` 入口不小心 import 到一个真依赖，
-这条也能抓到：
-
-{/* ref file="../tests/boundary.test.ts" lines="190-195" hash="9b9a13c87d23" blob="421b08df5caa" */}
-
-**react 只能是 peer，且两个入口的边界各不相同。**`./react` 的产物必须留着头一行 `"use client"`、只许
-import react（第三方与 `node:` 内置都不许内联，内联的第三方会跟宿主装的那份各跑一套）；`./server` 不许带
-客户端指令，可以走 `node:` 与 remark 那套，但 react 同样只许 import、不许打进产物：
-
-{/* ref file="../tests/boundary.test.ts" lines="197-223" hash="e4aae7a39f34" blob="421b08df5caa" */}
-
-**不知道自己被谁用。**方向单向：docfirst 的命令行那一层可以依赖本包（接 `docfirst trajectory` 子命令），engine / host / fumadocs / site 四层
-一律不许；`./react` 与 `./server` 两个入口更是谁都不许从 cli 那条链上引进来：
-
-{/* ref file="../tests/boundary.test.ts" lines="242-248" hash="1b49617ee02e" blob="421b08df5caa" */}
-
-**不认识站的路由，也不认识站的框架。**卡页的地址由调用方以 `hrefBase` 传进来，组件自己只做字符串拼接；
-props 里一个函数都不收——服务端组件传不了函数给客户端组件。当前是哪张盘由 `initialDisk` 与 URL 的 `?disk=`
-决定，组件不碰路由对象：
-
-{/* ref file="../packages/docfirst-trajectory/src/react.tsx" lines="46-61" hash="c673807fd0c7" blob="2a7a7719f23d" */}
-
-**不知道视口有多大、设置滑杆拨到了哪。**建模那一趟不算任何几何，布局实例在客户端按当前设置现算（见上面
-`buildTrajectory` 那段）；反过来，画布层不认识 React、也不认识卡从哪来。
-
-## 数据结构
-
-### 卡的身份就是文件名
-
-**卡的身份是文件名主干**，去掉后缀的那一截。`parent` 和正文关系边拿的都是这个值，所以改名等于改身份
-——落定之后别动，真要改就把指向它的地方一起改。
+**卡的身份是文件名去掉后缀的部分**。后缀可以是 `.mdx` 或 `.md`，同一个身份两种后缀都有时只认 `.mdx`。
+`parent` 和正文关系边引用的都是这个身份，所以改文件名就是改身份，指向它的地方要一起改：
 
 {/* ref file="../packages/docfirst-trajectory/src/scan.ts" lines="53-57" hash="4c2355323325" blob="a314807c9fcb" */}
 
-约定的文件名形态是 `<YYYY-MM-DD>-<英文 slug>.md`：日期前置让列目录时排序即时间序，slug 全小写、`-` 连词、
-禁 `_` 禁空格。这一条**不进校验**——它是可读性约定，机器只认「文件名主干不带路径分隔、不带后缀」这一条形状。
-整套记录格式的语义压在一处：
+文件名约定是 `<YYYY-MM-DD>-<英文 slug>`，日期在前，列目录时的顺序就是时间顺序。这条约定不进校验，机器只检查
+身份不带路径分隔符、不带后缀。整套格式的语义写在类型文件头上：
 
 {/* ref file="../packages/docfirst-trajectory/src/types.ts" lines="1-9" hash="607009ac234a" blob="c4c94ec63f99" */}
 
-### frontmatter：六个字段，外加一个自由槽位
-
-认卡靠六个卡体系字段（`born-at` / `type` / `parent` / `merged-in` / `label` / `domain`）——一个都不沾的
-`.md` 文件不是卡，整份跳过、连病都不报。`status` 不在其列，它是自由槽位，单凭一个 `status` 不足以认定这是
-张卡：
+**frontmatter 里有六个卡字段**（`born-at` / `type` / `parent` / `merged-in` / `label` / `domain`）。一个都没写的
+文件不算卡，整份跳过、不报问题；`status` 不在其中，只写了 `status` 的文件也不算卡：
 
 {/* ref file="../packages/docfirst-trajectory/src/parse.ts" lines="16-18" hash="8d32892df338" blob="f4b46a71d249" */}
 
-形状是这样的：`born-at` 是分钟级 `YYYY-MM-DDTHH:mm`（日级 `YYYY-MM-DD` 兼容），`parent` 与 `merged-in` 收
-卡身份的列表且 `merged-in ⊆ parent`、只有根卡能写，`type` 里唯一被读出语义的取值是 `root`，`label` 是盘上
-的显示名，`domain` 是泳道名、留空进「未分道」隐式组。
+各字段的形状：`born-at` 精确到分钟（`YYYY-MM-DDTHH:mm`），也接受只写到日（`YYYY-MM-DD`）；`parent` 与
+`merged-in` 是卡身份的列表，`merged-in` 必须是 `parent` 的子集，而且只有根卡能写；`type` 只有 `root` 一个取值
+有含义；`label` 是盘上的显示名；`domain` 是领域名，不写就归入「未分道」这一组。
 
-**frontmatter 是自己按行解析的，不引 YAML 库**——这不是嫌依赖多，是 YAML 库会把日级 `born-at` 解成 `Date`
-对象，格式校验当场全灭、存量卡整批被判病挡在盘外，而且是静默的（盘照出，只是少了卡）：
+frontmatter 由包自己逐行解析，不用 YAML 库。原因是 YAML 库会把只写到日的 `born-at` 解析成 `Date` 对象，格式校验
+随之失效，这些卡会被挡在盘外，而且没有任何提示：
 
 {/* ref file="../packages/docfirst-trajectory/src/parse.ts" lines="1-12" hash="da66cb5417e4" blob="f4b46a71d249" */}
 
-代价是要自己吃下人手写 frontmatter 的各种形态。解析器一律把值留成字符串或字符串列表，五种写法都认：
+值一律保留为字符串或字符串列表，手写 frontmatter 常见的五种写法都接受：
 
 {/* ref file="../packages/docfirst-trajectory/src/parse.ts" lines="73-75" hash="5e0e82ccb458" blob="f4b46a71d249" */}
 
-### 正文：关系边与里程碑
-
-`supersedes` / `pivots-from` **不进 frontmatter**，写在正文里、贴着叙事写——「这卡是从哪转过来的」「它取代
-了谁」本来就是写卡时顺手交代的事。**一行一条边，链接后面不许再挂尾巴**：整行只能是 `字段:: 链接`。行头对
-上了、整行不合形的不静默吞掉，收进坏行示众：
+**关系边写在正文里，不写在 frontmatter 里**：`supersedes::`（取代）与 `pivots-from::`（转向）各占一行，整行只能是
+`字段:: 链接`，链接后面不能再有别的内容。链接用标准 md 链接或 wikilink，链接文字随意，只读链接目标。行首是关系字段、
+整行却不合格式的，记为问题，不会被悄悄忽略：
 
 {/* ref file="../packages/docfirst-trajectory/src/parse.ts" lines="23-30" hash="ec84ce878892" blob="f4b46a71d249" */}
 
-标准 md link 是现行写法，wikilink 是给存量与粘贴留的退路。链接文字随便写，机器只读目标。
-
-根卡正文末尾固定一个 H2 区块记里程碑，区块名是硬编码的常量、不是配置项：
+**根卡正文末尾有一个固定的二级标题区块记里程碑**，标题是代码里的常量，不是配置项：
 
 {/* has file="../packages/docfirst-trajectory/src/parse.ts" text="export const MILESTONE_HEADING" */}
 
-每行一条，三段用**全角**竖线分隔——日期｜标题｜一句话说明，说明段可缺：
+每行一条，用**全角**竖线分成三段：日期｜标题｜一句话说明，说明可以省略。里程碑只追加、不改写：
 
 {/* ref file="../packages/docfirst-trajectory/src/parse.ts" lines="38-39" hash="e70d6db72847" blob="f4b46a71d249" */}
 
-里程碑只追加不改写。它是策展层在盘上唯一的视觉出口（全量记录是星点，人筛过的关键节点是泥金加重环），
-所以不是子卡索引那种全量镜像、不会漂移。
+### 校验
 
-### 四层校验
-
-前三层是形状 / 存在性 / 一致性，跟着解析一趟跑完；第四层是本仓独有的。入口只有一个，六个字段一个都不沾就
-当这文件不是卡：
+四层校验在解析一张卡时一起完成，入口是 `parseCardFile`；六个卡字段一个都没写的文件不是卡，不校验：
 
 {/* ref file="../packages/docfirst-trajectory/src/model.ts" lines="98-102" hash="1069103e4868" blob="4d569cadd406" */}
 
-**形状**（`born-at` 的格式、`parent` / `merged-in` 的元素是不是合法卡身份）、**存在性**（`born-at` 与 `label`
-全卡必填，`parent` 内卡必填、根卡可缺）、**一致性**（`parent` 不含自身、`merged-in` ⊆ `parent`、内卡不许写
-`merged-in`）三层挤在同一段里，逐条报、不早退：
+前三层是形状、必填与一致性：`born-at` 的格式，`parent` / `merged-in` 的元素是否是合法的卡身份；`born-at` 与 `label`
+所有卡必填，`parent` 非根卡必填；`parent` 不能包含自身，`merged-in` 必须是 `parent` 的子集，非根卡不能写
+`merged-in`。逐条报告，不在第一条问题处停下：
 
 {/* ref file="../packages/docfirst-trajectory/src/model.ts" lines="118-141" hash="21ac5b6d57a4" blob="4d569cadd406" */}
 
-**第四层：卡正文里不许出现 docfirst 引用记号。**轨迹分区冻结历史，不钉活代码——一张卡钉了源码，代码一改这张
-卡就成了会变黄的东西，那它记的就不再是「当时的了断」。草稿记号与 md 正式记号两种形态都认：
+**第四层：卡正文里不能出现 docfirst 的引用记号。**轨迹卡记的是当时的结论，不跟着代码变；草稿记号、md 与 mdx
+两种正式记号都算问题：
 
 {/* ref file="../packages/docfirst-trajectory/src/validate.ts" lines="1-11" hash="d2070dd75569" blob="4dacb5cbaa2f" */}
 
-{/* ref file="../packages/docfirst-trajectory/src/validate.ts" lines="16-20" hash="1ab11f2f7294" blob="4dacb5cbaa2f" */}
+每条问题带字段、原值和一句说明，按文件归到一起：
 
-这两条正则是照 `engine/marker.ts` 的形状独立复刻的一份，不 `import` 判定层。第四层接在解析末尾，跟关系边写歪那一类一起进报病：
+{/* ref file="../packages/docfirst-trajectory/src/types.ts" lines="90-107" hash="0f32a41f3f79" blob="c4c94ec63f99" */}
 
-{/* ref file="../packages/docfirst-trajectory/src/model.ts" lines="143-150" hash="ec291825c42a" blob="4d569cadd406" */}
-
-报病怎么处置分两档：**`born-at` 坏的卡上不了盘**（半径标度会一路 NaN），其余字段病不挡渲染、只进报病列表
-示众——写错一个 `label` 不该让整张盘少一颗星：
+问题分两种处理：**`born-at` 不合格的卡不出现在盘上**（半径按日期计算，没有日期就算不出来）；其余字段的问题不影响
+绘制，只列进问题清单：
 
 {/* ref file="../packages/docfirst-trajectory/src/model.ts" lines="216-220" hash="9737da73dffd" blob="4d569cadd406" */}
 
-病怎么打到命令行、怎么显示在盘下方，见 [站接线手册](/docs/start/wiring)。
-
-### 故意不校验的三样
-
-**`type` 的取值不校验。**读它的地方只有一处，判的只是「是不是 `root`」这一个布尔；非 `root` 的取值一律走
-子卡分支、按 `parent` 照常上盘。所以将来加一种形态不需要改一行代码，旧卡不回填也自洽：
+有三样故意不校验。**`type` 的取值**：代码只判断它是不是 `root`，别的取值都按普通卡处理，所以新增一种取值不用改代码：
 
 {/* ref file="../packages/docfirst-trajectory/src/model.ts" lines="105-111" hash="6e395266fc87" blob="4d569cadd406" */}
 
-**`domain` 不设白名单**，写什么就是什么泳道。唯一的限制是别撞哨兵名——无 `domain` 的卡归进一个隐式组，
-那个组名是拿字符串当 `domain` 用的，为的是装箱 / 筛选 / 图例一条链路不加特例：
+**`domain` 没有白名单**，只是不要用「未分道」这个名字——没写 `domain` 的卡就归在这个名字下：
 
 {/* ref file="../packages/docfirst-trajectory/src/model.ts" lines="44-47" hash="e9a7f8607930" blob="4d569cadd406" */}
 
-**`status` 是自由槽位**：读进来原样挂在卡上，三层校验一律不参与——既不报缺失、也不报取值不合法、更不算野
-字段。同一段里还能看到 `label` 的兜底：读不到就退到身份去掉日期前缀那一截，所以「缺 `label`」既是一条病、
-又有一个能让盘照常画出来的退路：
+**`status`** 原样读进来、原样交出去，不报缺失，也不检查取值。同一段里还能看到：缺 `label` 算一条问题，但盘照常
+绘制，显示名改用身份去掉日期前缀的部分：
 
 {/* ref file="../packages/docfirst-trajectory/src/model.ts" lines="152-169" hash="99e54f1f6aeb" blob="4d569cadd406" */}
 
-**建卡侧不设第二套校验**：照上面的字段说明填就完了，落卡流程里不要再抄一遍规则——两份规则必然漂移，而漂移
-出来的那份还会被当成权威。写完跑一次 `docfirst check` 让这四层兜底就够。
+### 分盘与建模
 
-### 盘模型：一目录卡能画出好几张盘
-
-一张盘的建模产物是布局引擎的唯一输入，形状是「根卡 + 卡 + 虫洞 + 边 + 树 + 孤星 + 领域序 + 天序数区间」：
-
-{/* ref file="../packages/docfirst-trajectory/src/types.ts" lines="154-178" hash="0a43d6bd80a6" blob="c4c94ec63f99" */}
-
-认根靠 `type: root`，一张根卡就是一张盘，盘心那个圆点就是根卡自己（所以根卡不在自己盘上出节点）。上盘规则
-只有一条——**`parent` 里含这张盘的身份就上这张盘**；`domain` 只是泳道分组，不是上盘门票。多值 `parent`
-等于同时上多张盘：
+一个目录里的卡可以分出好几张盘。`type: root` 的卡是根卡，一张根卡对应一张盘，盘的中心就是根卡本身。
+**`parent` 里含哪张盘的身份，这张卡就出现在哪张盘上**，写多个 `parent` 就同时出现在多张盘上；`domain` 只用来分组，
+不决定卡在哪张盘。有 `parent` 的根卡是子项目：父盘没有列在它的 `merged-in` 里时，它在父盘上显示为**虫洞**，
+点进去是子项目的盘；列在里面时，子项目盘上的卡整个并入父盘，逐层递归，遇到环就跳过：
 
 {/* ref file="../packages/docfirst-trajectory/src/model.ts" lines="1-16" hash="2482f6f794e3" blob="4d569cadd406" */}
 
-{/* ref file="../packages/docfirst-trajectory/src/model.ts" lines="223-235" hash="4b476060c58a" blob="4d569cadd406" */}
+一张盘的模型是布局的唯一输入：根卡、卡、虫洞、关系边、树、孤星、领域顺序和日期范围。关系边按盘求解，目标不在
+这张盘上的记进 `broken`——同一条边在一张盘上成立、在另一张盘上断开，是正常的：
 
-子项目根卡（有 `parent` 的根卡）在父盘上有两种投影，靠 `merged-in` 挑：**没列出来的画成虫洞**——一个通往
-子盘的入口，内容不展开；**列出来的整盘摊入**，子盘的内卡连同它自己的虫洞一起递归摊平进父盘。递归带环保护：
-一个盘整趟收卡只展开一次，重逢（含环路绕回自身）直接跳过，写歪的 `parent` 链不会把扫盘挂死：
+{/* ref file="../packages/docfirst-trajectory/src/types.ts" lines="154-178" hash="0a43d6bd80a6" blob="c4c94ec63f99" */}
 
-{/* ref file="../packages/docfirst-trajectory/src/model.ts" lines="186-221" hash="64046ee98d67" blob="4d569cadd406" */}
-
-虫洞是独立形状，不混进卡集合——不进树 / 孤星 / 领域泳道体系，布局单列、染色走专属通道：
-
-{/* ref file="../packages/docfirst-trajectory/src/types.ts" lines="43-55" hash="bfdc949e2191" blob="c4c94ec63f99" */}
-
-盘清单按「最近有活动」降序——最近动过的排前面，启动器卡阵上第一张就是当下在推的项目：
-
-{/* ref file="../packages/docfirst-trajectory/src/model.ts" lines="237-248" hash="a9f2e91eb3d5" blob="4d569cadd406" */}
-
-关系边**按盘求解**：目标在本盘卡集合里才成边，不在的收进坏关系示众。同一条 `supersedes::` 在 A 盘成边、
-在 B 盘算断链，是正常的——它说的是「这张盘上看不见对面那张卡」，不是「那张卡不存在」：
-
-{/* ref file="../packages/docfirst-trajectory/src/model.ts" lines="252-276" hash="ca465f6232fb" blob="4d569cadd406" */}
-
-提树时**取代与转向两种边一起收连通分量**——同一摊事该占盘上同一块地，转向卡跟长出它的那张同树：
-
-{/* ref file="../packages/docfirst-trajectory/src/model.ts" lines="278-283" hash="6c6a754bfc56" blob="4d569cadd406" */}
-
-一棵树的形状是「全部成员 + 一条主干 + 若干支线 + 诞生时刻」：
+取代边和转向边连在一起的卡组成一棵树。树的**主干**只沿取代链走，挑终点更晚的那条，不挑更长的；转向长出来的是
+**支线**。两种关系一条都没有的卡是**孤星**：
 
 {/* ref file="../packages/docfirst-trajectory/src/types.ts" lines="109-119" hash="7292f2326a9f" blob="c4c94ec63f99" */}
 
-树里选主干**比终点、不比长度**。长不等于主干：一条反复微调的支线小步多、能盖过只有几次大转折的正主。判据
-依次是终点更晚、更长、身份定序：
+盘清单按最近一次活动从新到旧排列，启动器里第一张就是最近在推进的项目：
 
-{/* ref file="../packages/docfirst-trajectory/src/model.ts" lines="328-339" hash="0f5251f0b09f" blob="4d569cadd406" */}
+{/* ref file="../packages/docfirst-trajectory/src/model.ts" lines="237-248" hash="a9f2e91eb3d5" blob="4d569cadd406" */}
 
-两种关系一条都没结的卡是**孤星**，不进任何树，按领域打包成带另行装箱：
+### 布局与绘制
 
-{/* ref file="../packages/docfirst-trajectory/src/model.ts" lines="381-383" hash="1bb3271f025c" blob="4d569cadd406" */}
+布局引擎 `RingsLayout`（`src/layout.ts`）是纯计算，不操作 DOM。半径表示时间，内旧外新，相邻两张卡之间的长空档
+会被折叠；角度按树分扇区，同一领域的树相邻；按日期滑轨选定的时间窗放大显示，窗外压缩但不隐藏。绘制在
+`src/canvas/`：颜色只表示领域，节点形状表示 `type`，被取代的卡颜色变淡。布局与绘制的公式和常量从老仓
+`god-flow-panels` 的 `node/star/` 原样搬来，出处写在各源文件的头注释里。
 
-**领域序按首次出现累积去重**——盘上的扇区分配和色板位次都靠这个顺序。换成按卡数排或按字母排，盘会画得不
-一样、还不报错，所以这段是「看着无关紧要、实际决定盘长相」的那一类。未分道的隐式组不进首次出现序，有就压尾：
+星轨盘组件没有指定盘时显示启动器：每张盘一张卡片，带静态缩略图、名字、卡数和最近活动日期；点卡片进入那张盘。
+换盘只经过启动器和虫洞。
 
-{/* ref file="../packages/docfirst-trajectory/src/model.ts" lines="436-448" hash="f11c80e2676f" blob="4d569cadd406" */}
+### 谁在用它
 
-## 提供的接口
+docfirst 的命令行：`docfirst check` 末尾用 `scanDir` 校验轨迹卡，`docfirst trajectory` 用 `buildTrajectory` 列出盘、
+树和主干（见[命令行](/docs/modules/cli)）。文档站用 `./server` 的组件、卡集合 schema 和 remark 插件，接线步骤见
+[站接线手册](/docs/start/wiring)。
 
-`.` 入口把四摊纯函数一次导出：解析（frontmatter、关系边、里程碑）、第四层校验、建模（扫目录、聚盘、建模型、
-天序数换算）、布局与链表（`RingsLayout`、帧推进、常量与几何辅助）：
+## 接口
+
+包有三个入口和一张样式表：
+
+{/* ref file="../packages/docfirst-trajectory/package.json" lines="7-21" hash="680cd7f6a73f" blob="6dea81ada70c" */}
+
+**`.`** 导出解析、第四层校验、建模、扫描、布局这几组纯函数与它们的类型：
 
 {/* ref file="../packages/docfirst-trajectory/src/index.ts" lines="15-64" hash="ebdc8ccba32c" blob="f1b205039a02" */}
 
-装配入口是 `buildTrajectory(dir)`，产物四段：全部卡、盘清单、报病、按 rootId 索引的每张盘模型（见上面
-「三个入口，两头分工」那段）。交给路由层的卡是裁过的一份形状，去掉了内部指纹与兜底前的标题：
+组装入口是 `buildTrajectory(dir)`：扫一次目录，给每张盘建模型，交回全部卡、盘清单、问题清单和按根卡身份索引的
+模型。**它不算布局**：布局放在客户端按当前设置计算，调设置时不用再请求服务端：
+
+{/* ref file="../packages/docfirst-trajectory/src/index.ts" lines="119-137" hash="712bdf84ad44" blob="f1b205039a02" */}
+
+交出去的卡去掉了内部用的修改时间和标题：
 
 {/* ref file="../packages/docfirst-trajectory/src/index.ts" lines="84-98" hash="da2cc73cbe72" blob="f1b205039a02" */}
 
-`./react` 只导出一个组件 `StarDisk` 与启动器缩略图的类型。它吃 `buildTrajectory` 的产物，`mode` 分整页与
-嵌入两种形态，顶栏不归它画（props 见上面「不认识站的路由」那段）。
+模型里被取代卡的集合换成了数组，整份能直接转成 JSON：
 
-`./server` 导出三样。**服务端组件** `Trajectory`：卡目录既认绝对路径也认相对站根的写法，组件里显式 resolve
-一次再交给 `buildTrajectory`：
+{/* ref file="../packages/docfirst-trajectory/src/serial.ts" lines="10-12" hash="06fde308bb1c" blob="e4e0b806fe16" */}
+
+**`./react`** 导出客户端组件 `StarDisk` 和启动器缩略图的类型。它接收 `buildTrajectory` 的结果；`mode` 分整页与嵌入
+两种，整页模式把当前盘写进地址栏的 `?disk=`，嵌入模式要先点一下盘才响应滚轮；顶栏不由它绘制：
+
+{/* ref file="../packages/docfirst-trajectory/src/react.tsx" lines="46-61" hash="c673807fd0c7" blob="2a7a7719f23d" */}
+
+**`./server`** 导出以下几样。服务端组件 `Trajectory`：读卡、建模，绘制 `StarDisk`，有问题的卡列在盘下方；卡目录
+可以写绝对路径，也可以写相对站根目录的路径：
 
 {/* ref file="../packages/docfirst-trajectory/src/server.tsx" lines="90-98" hash="ac61a4d126b6" blob="47d6aa20aaa9" */}
 
-**卡集合的 frontmatter schema** `cardSchema`：手写的字面量，不 new 任何校验库的类；缺 `born-at` 硬失败，
-缺 `label` 退文件名，六个字段一个都不沾的页当普通页放行：
+`renderThumb` / `launcherThumbs`：在服务端把每张盘的缩略图生成为静态 SVG，亮色、暗色各一份，客户端直接使用、不再重画：
+
+{/* ref file="../packages/docfirst-trajectory/src/server.tsx" lines="74-75" hash="ad6417d66a5d" blob="47d6aa20aaa9" */}
+
+卡集合的 frontmatter schema `cardSchema`：缺 `born-at` 校验失败，缺 `label` 用文件名代替，六个卡字段都没写的页当普通页通过：
 
 {/* ref file="../packages/docfirst-trajectory/src/server.tsx" lines="146-156" hash="3e07a1c8cca4" blob="47d6aa20aaa9" */}
 
-**remark 插件** `remarkTrajectoryLinks`：把正文里的关系边段落打成带 `data-kind` 的 div，把形似卡身份的
-`.md` / `.mdx` 链接与 wikilink 改写成卡页路由，带路径的 `.md`（引材料）原样不动：
+remark 插件 `remarkTrajectoryLinks`：把关系边段落转成带 `data-kind` 的 div，把指向卡身份的链接和 wikilink 改成
+卡页地址，带路径的 `.md` 链接（引用材料）不改：
 
 {/* ref file="../packages/docfirst-trajectory/src/server.tsx" lines="230-234" hash="21ed7eae1628" blob="47d6aa20aaa9" */}
 
-另有 `renderThumb` / `launcherThumbs` 出启动器的静态定妆照（见「启动器」那段），以及一张 `./star.css`
-样式表。
+另有样式表 `./star.css`。
 
-## 依赖的接口
+## 依赖
 
-几乎只有 remark 那套，且只给 `./server` 用：
-
-| 接口 | 用来做什么 | 生产实现 | 测试实现 |
-| --- | --- | --- | --- |
-| `unist-util-visit` | remark 插件遍历 mdast 树 | npm 依赖，本包唯一一条运行时依赖 | 同一份：测试手搭 mdast 树直接喂插件 |
-| `mdast` 的节点类型 | 关系边段落、链接节点的形状 | 无运行时实现（`import type`，编译期擦除） | 同上 |
-| `@standard-schema/spec` 的类型 | 让手写的 `cardSchema` 字面量精确对上协议 | 同上 | 结果转成宽松形状读，不逐条 narrow 判别联合 |
-| `react`（peer，optional） | `./react` 的组件与 `./server` 的 JSX | 宿主装的那份，不打进产物 | `react-dom/server` 渲成静态 html |
-| `node:fs` / `node:path` | 扫卡目录、resolve 卡目录 | Node 内置，只在 `scan.ts` 一处 | 临时目录里造真文件；其余用例走内存造卡不碰 fs |
-| 浏览器的 DOM / SVG | 画布层建节点、量标签宽度 | 宿主浏览器 | 手写的最小 DOM 桩与 `SvgStubDocument` 桩文档 |
-
-依赖面就这么大，`.` 入口那一侧连这些都没有：
+运行时依赖只有一条，而且只有 `./server` 用它：
 
 {/* ref file="../packages/docfirst-trajectory/package.json" lines="31-41" hash="abb21a8f347c" blob="6dea81ada70c" */}
 
-## 怎么单独测
+| 依赖 | 谁用、用来做什么 |
+| --- | --- |
+| `unist-util-visit` | `./server` 的 remark 插件遍历 mdast 树 |
+| `mdast`、`@standard-schema/spec` 的类型 | 只在编译期用（`import type`），产物里没有 |
+| `react`（可选的 peer 依赖） | `./react` 的组件与 `./server` 的 JSX；用宿主安装的那份，不打进产物 |
+| `node:fs` / `node:path` | `scan.ts` 读卡目录；`./server` 把相对路径解析成绝对路径 |
+| 浏览器的 DOM / SVG | `src/canvas/` 创建节点、测量标签宽度 |
 
-一摊 `tests/trajectory-*.test.ts` 加一份共用积木，`node --test` 直跑 `.ts`，不起站、不起浏览器。
+## 不做的事
 
-**积木是内存造卡**：把 frontmatter 渲染回 markdown 文本、再走真实的 `parseCardFile`——不绕开解析器，所以
-造出来的病卡跟真文件走同一条路：
+**不依赖 docfirst 主包，也不认识它的判定层。**第四层校验用的记号正则是照判定层的写法独立写的一份，不 import。
+`.` 入口的源码只许 import 包内文件和三个 `node:` 内置模块：
 
-{/* ref file="../tests/trajectory-helpers.ts" lines="1-6" hash="3b7a9374c7fd" blob="3e7d1730d29a" */}
+{/* ref file="../tests/boundary.test.ts" lines="225-240" hash="6b7088dc2d48" blob="421b08df5caa" */}
 
-**模型层证规则**：主干择优、四层校验、`parent` 归盘、`merged-in` 递归摊入与环保护、根卡认定、正文边求解、
-里程碑解析、盘清单、扫盘空态：
+依赖方向是单向的：docfirst 主包依赖本包，本包不依赖主包：
 
-{/* ref file="../tests/trajectory-model.test.ts" lines="1-7" hash="161b848a6999" blob="23dd42db4008" */}
+{/* ref file="../tests/boundary.test.ts" lines="242-248" hash="1b49617ee02e" blob="421b08df5caa" */}
 
-**布局层对的是数学自洽，不是数字**：折算正逆互逆、显示半径单调、局部放大率与映射本体的数值导数一致、装箱后
-跨域扇环角向互斥、每张卡都有落点。输入是那批诗名 fixture 建出来的黄金样本——布局是一整块连续几何，改错一个
-常量盘照样画出来、只是「看着不太对」，零报错，没有这份样本等于没护栏：
+主包里也只有命令行那一层能 import 本包，engine / host / fumadocs 三层都不行：
 
-{/* ref file="../tests/trajectory-layout.test.ts" lines="1-8" hash="36de09570f8a" blob="d284c27f2d17" */}
+{/* ref file="../tests/boundary.test.ts" lines="250-258" hash="16fae8b696d1" blob="90355c11baed" */}
 
-fixture 是一目录真卡，根卡带里程碑区块，子项目根卡撑虫洞那一路：
+**不把 react 打进产物。**`./react` 的产物第一行必须是 `"use client"`，而且只许 import react；`./server` 不带客户端
+指令，可以 import `node:` 内置模块和 remark 相关的包，react 同样只 import、不打进产物：
 
-{/* ref file="../tests/fixtures/trajectory/tfix-测试项目根卡.md" hash="aabcad22427b" blob="f875bfb2532f" */}
+{/* ref file="../tests/boundary.test.ts" lines="197-223" hash="e4aae7a39f34" blob="421b08df5caa" */}
 
-**画布层喂桩**：DOM 元素是手写的最小桩（只实现仲裁真读写的 `style` / `textContent`，不引 DOM 库），
-`star-thumb` 喂 `svg-doc` 桩文档画一张 fixture 盘，证节点数 = 上盘卡数、扇环框数 = 树数、边数 = 关系边数、
-不带箭头也不带任何交互属性：
+**轨迹卡不进 docfirst 的钉码核对。**卡记的是当时的结论，代码后来怎么变都不改它，所以卡里不钉代码，也不需要
+`docfirst confirm`；卡里出现引用记号就是第四层校验报的问题。
 
-{/* ref file="../tests/trajectory-canvas.test.ts" lines="1-11" hash="26e3fb7ca3ed" blob="f7fb9583459e" */}
+**不认识站的路由和框架。**卡页地址由调用方通过 `hrefBase` 传入，组件只拼字符串；props 里不收函数，因为服务端组件
+不能把函数传给客户端组件；当前是哪张盘只看 `initialDisk` 和地址栏的 `?disk=`。
 
-**React 壳只测壳**：`react-dom/server` 渲静态 html，断言画布容器、竖轨容器、三态 home 钮与两种 mode 的差别
-——画布层挂载后才建，静态那一趟画布区就该是空 div。同一份文件里另有一条守「鱼眼真接上了引擎」：帧推进函数
-不碰 DOM，喂 fixture 建的布局实例就能单测：
+**不在服务端算布局，不知道视口多大、设置调到了哪。**建模不涉及任何几何量；画布层不认识 React，也不知道卡从哪来。
 
-{/* ref file="../tests/trajectory-react.test.ts" lines="1-11" hash="d5e2e70baa68" blob="b7c9bec0050f" */}
+**不提供写卡工具。**卡按上面的字段说明手写，写完运行 `docfirst check` 校验，不在别处另写一套校验规则。
 
-**`./server` 那两样纯函数手搭输入**：`cardSchema` 四种判定，`remarkTrajectoryLinks` 直接吃手搭的 mdast 树，
-不跑 unified 管线：
-
-{/* ref file="../tests/trajectory-server.test.ts" lines="1-7" hash="d5f633bc896e" blob="50abca5758e4" */}
-
-边界那几条（零依赖、`use client`、谁不许依赖谁）跟本包的用例分开，住 `tests/boundary.test.ts`，按产物判
-（见「不知道什么」）——它们要先 `pnpm build` 才有东西可看。
-
-## 代码地图
-
-**在哪。**扁平一层加一个画布层子目录：卡这一摊归 `parse.ts`（怎么读）、`scan.ts`（读哪些）、`model.ts`
-（读成什么、顺带校验）、`validate.ts`（第四层）；盘这一摊归 `layout.ts` / `chains.ts`（纯几何）、`canvas/`
-（画）、`react.tsx` 与 `server.tsx`（两个组件入口）：
-
-{/* tree dir="../packages/docfirst-trajectory/src" depth="1" hash="0e76dbd72427" */}
-
-{/* tree dir="../packages/docfirst-trajectory/src/canvas" depth="2" hash="fd4d613ea966" */}
-
-**先读** `types.ts`：整套记录格式与盘模型的形状都在那儿，读完再读 `index.ts` 看四摊纯函数怎么汇总、
-`buildTrajectory` 怎么装配。
-
-**读序**沿依赖方向：`types.ts` → `parse.ts` → `scan.ts` → `model.ts`（校验接在解析末尾，`validate.ts` 是它
-吃的一小块）→ `layout.ts` / `chains.ts` → `canvas/` → `react.tsx` / `server.tsx`。倒过来读会看见一堆没来由
-的常量。
-
-`canvas/` 里再分三层，层与层之间只走一份契约。**六个视觉层**（axis / gaps / milestones / trees / cards / hub）
-互不 import、也不认识编排者：`build` 建一次 DOM，`place` 每帧只改属性，`recolor` 是着色专属通道：
-
-{/* ref file="../packages/docfirst-trajectory/src/canvas/layers/frame.ts" lines="101-106" hash="6244cb6796b4" blob="f4befa8caac4" */}
-
-**编排者**住 `canvas/stage.ts`：一轮数据进来就 `buildCtx` → 六层 `build`，每帧 `place`，筛选 / 主题变化
-`recolor`。它不认识 React，跟壳只经一份回调对话：
-
-{/* ref file="../packages/docfirst-trajectory/src/canvas/stage.ts" lines="51-68" hash="43e858db893f" blob="680468e0dfc8" */}
-
-一帧里推进的东西分三家：焦点日与鱼眼强度是布局实例自己的字段，走布局层的 `advanceFrame`；视图补间归相机；
-悬停放大归各层的 `stepTweens`。三家谁还在动就再请一帧：
-
-{/* ref file="../packages/docfirst-trajectory/src/canvas/stage.ts" lines="421-440" hash="9e14f31476ae" blob="680468e0dfc8" */}
-
-**壳**是 `react.tsx`：容器、工具条、图例与三种浮层、悬停小气泡、当前盘与 `?disk=`、主题监听、本地存的手感
-参数。**它不画任何 SVG**——画布区是一个空 div 交给舞台；日期竖轨也是在壳渲的容器里由 `DateRail` 自建 DOM：
-
-{/* ref file="../packages/docfirst-trajectory/src/react.tsx" lines="3-19" hash="fd2f310eb9a3" blob="2a7a7719f23d" */}
-
-**可跳过。**`dist/` 是生成物。`canvas/` 是从 Obsidian 版星轨盘整搬来的画布层，公式与常量
-以那份规范正本为准（出处写在 `types.ts` 的头注释里）——改视觉之前先看规范正本，
-别照着这边的代码反推设计意图。
+**不支持同时打开多张盘。**换盘只经过启动器和虫洞。

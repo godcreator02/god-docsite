@@ -1,181 +1,104 @@
 ---
 title: 工作台插件
-description: gwb-docfirst-workflow：一条装六区的命令加六份说明书，对 @godcreator/docfirst-workflow 那个包零依赖
+description: gwb-docfirst-workflow：一条给 fumadocs 骨架装上三个区的命令，加六份说明书；对 @godcreator/docfirst-workflow 那个包零依赖
 ---
 
 # 工作台插件
 
-**本页回答**：`@godcreator/gwb-docfirst-workflow` 手上还剩什么、为什么它一个字都不许依赖 `@godcreator/docfirst-workflow`、这条边界靠什么守住。
+**本页回答**：`@godcreator/gwb-docfirst-workflow` 提供什么、对外的接口长什么样、依赖谁、为什么一个字都不依赖 `@godcreator/docfirst-workflow`。
 
-## 管什么
+包名 `@godcreator/gwb-docfirst-workflow`，源码在 `packages/gwb-docfirst-workflow/src/`，入口是 `src/index.ts`。
 
-`packages/gwb-docfirst-workflow` 是这个工作区里唯一不发成 npm 库的包：它是 god 工作台（gwb）的一个插件，包名 `@godcreator/gwb-docfirst-workflow`。它管的只有两样——**一条把六区装到 fumadocs 骨架上的命令，加六份随插件发的说明书**。怎么分的写在文件头上：
+## 功能
 
-{/* ref file="../packages/gwb-docfirst-workflow/src/index.ts" lines="9-21" hash="5cd670873bd8" blob="50f87bd2ef2c" */}
+这是 god 工作台（gwb）的一个插件，也是这个工作区里唯一不发成 npm 库的包。它提供两样东西：**一条命令 `docfirst.attach`**，给刚生成的 fumadocs 骨架装上 docfirst 的三个区（现状 `docs`、轨迹 `trajectory`、未来 `future`）与接线；**六份说明书**，随插件发布、注册给 skills 插件。分工写在入口文件的文件头上：
 
-一句话的判据：**包的消费方是仓，插件的消费方是 agent。** 要在**仓**里发生的事（核对、确认、渲染，门禁与站构建要跑的那些）归 `@godcreator/docfirst-workflow` 那个包，agent 自己 `cd` 到那个仓里跑 `pnpm doc`；只在 **agent** 手上发生一次的事（读一份说明书、给一个新骨架装一次六区）归插件。这条判据怎么推出来的、否掉了哪几条候选，在 [包给仓、插件给人](/trajectory/2026-09-10-package-serves-repo-plugin-serves-agent)。
+{/* ref file="../packages/gwb-docfirst-workflow/src/index.ts" lines="9-15" hash="fc66f678a0da" blob="ab455a957139" */}
 
-插件的身份面就三个常量：插件名、那条命令的名字、一条必需的 inject。
+判据一句话：**包的使用者是仓，插件的使用者是 agent。** 要在仓里发生的事（核对、确认、渲染，门禁与站构建都要运行）归 `@godcreator/docfirst-workflow` 那个包，agent 自己 `cd` 到那个仓里跑 `pnpm doc`；只在 agent 手上发生一次的事（读一份说明书、给一个新骨架装一次各区）归插件。这条判据怎么推出来的、否掉了哪几条候选，见 [包给仓、插件给人](/trajectory/2026-09-10-package-serves-repo-plugin-serves-agent)。
 
-{/* ref file="../packages/gwb-docfirst-workflow/src/index.ts" lines="22-27" hash="bddbcf9bc929" blob="50f87bd2ef2c" */}
-
-`gwbCommands` 进 `export const inject` 而不是局部注入：没有命令总线，这个插件对外什么都提供不了，装上也没用——cordis 的 inject 是等待机制，缺它整个插件不 apply。
-
-### 零依赖这条边界
-
-插件对那个包**三类依赖字段一个都不写、`src/` 里一行都不 import**：不启动子进程、不登记 node CLI、不查 home 里那个包的路径。于是装了插件就能注册说明书、能装六区，不必再装什么包，也不再有「装了插件没装包」那种只装了一半的状态。所以清单里 `dependencies` 整段没有，peer 与 dev 里也没有 `@godcreator/docfirst-workflow`。
-
-守卫在产物测试里，三类依赖字段与 `src/` 下每份源码的裸名 import 一起检查：
-
-{/* ref file="../packages/gwb-docfirst-workflow/tests/artifact.test.ts" lines="97-126" hash="bc976533571f" blob="b805bc028869" */}
-
-配套的第二条检查「不启动子进程、不登记 node CLI」——转发一条命令行，就是把「要在仓里发生」的事又挪回插件里：
-
-{/* ref file="../packages/gwb-docfirst-workflow/tests/artifact.test.ts" lines="128-135" hash="e75b2e425492" blob="b805bc028869" */}
-
-**代价是 agent 要核对得自己 `cd` 到仓里跑**，比调一条命令多一步；接受这个代价，换的是这条边界。
-
-装六区因此是**进程内直接调**，`index.ts` 往外只认识一个名字：
+装配本身写哪些文件、怎么检查目标站、写盘失败怎么恢复，全在 [装配](/docs/modules/site)；插件这一侧只做参数检查与回执组装，入口文件往下只认识一个名字：
 
 {/* has file="../packages/gwb-docfirst-workflow/src/index.ts" text="./attach.js" */}
 
-装配写哪些文件、模板长什么样、骨架不合规怎么拦，全在 [装配六区](/docs/modules/site)；插件这边只做参数转换与回执汇总。
-
-### 六份说明书
-
-两类，都住包内 `skills/`，挂载时把整个目录注册给 skills 插件。讲**这套机制**的三份：`docfirst`（插件自己那份）、`docfirst-docs`（文档站怎么写）、`trajectory`（轨迹卡怎么记）。讲**通用开发纪律**的三份：`spec-grill`（接到需求先盘问）、`parallel-by-module`（按模块并行分派任务）、`docs-governance`（文档与注释治理——代码自解释扫描、术语统一、清除历史描述、所有权重新划分）。
-
-{/* ref file="../packages/gwb-docfirst-workflow/src/index.ts" lines="120-125" hash="c7f3b4c7d022" blob="50f87bd2ef2c" */}
+六份说明书分两类。讲 docfirst 这套机制的三份：`docfirst`（插件自己怎么用）、`docfirst-docs`（文档站怎么写）、`trajectory`（轨迹卡怎么记）；讲通用开发纪律的三份：`spec-grill`（接到需求先盘问）、`parallel-by-module`（按模块派子代理）、`docs-governance`（文档与注释治理）。
 
 {/* tree dir="../packages/gwb-docfirst-workflow/skills" depth="1" hash="c698adfead86" */}
 
-除 `docfirst` 之外五份的正本都住这个站（跟包在同一个仓才改得动），由 `docfirst.config.mjs` 的 outputs 把生成物写到插件的 `skills/`。纪律那三份不描述任何代码，但它们要跟钉码写法、六区、五梁一横保持一致——在同一个仓才检查得了，并回来的判据见 [三份纪律并回本仓](/trajectory/2026-09-10-dev-discipline-comes-home)：
+六份的正本都在这个站的 `content/docs/outputs/skills/` 下（跟包在同一个仓才改得动，纪律那三份也要跟钉码写法、分区保持一致），由 `docfirst.config.mjs` 的 `outputs` 映射生成到插件的 `skills/`。纪律那三份为什么放回本仓，见 [三份纪律并回本仓](/trajectory/2026-09-10-dev-discipline-comes-home)：
 
-{/* ref file="docfirst.config.mjs" lines="22-32" hash="e0203192d040" blob="97ccb7da232e" */}
+{/* ref file="docfirst.config.mjs" lines="17-27" hash="c8718f9535ab" blob="fce0d84ad1f9" */}
 
-生成物放插件、不放包，理由就一句：**包装在 `node_modules` 里，没有任何说明指向它，agent 不会去读**——说明书能被 agent 读到，全靠插件 `register` 了自己包里这个目录。这一处用 `ctx.inject` 局部注入，没装 skills 插件的 home 里本插件照常加载，只是少了说明书。
+生成物放插件、不放包：包装在 `node_modules` 里，没有任何说明指向它，agent 不会去读；说明书能被 agent 读到，全靠插件把自己包里的 `skills/` 目录注册给 skills 插件。
 
-### 跟站点插件
+## 接口
 
-**两个插件互不依赖**：一类依赖都不写、一行不 import，本插件这一侧有测试检查。
+对外只有**命令总线上的一条 `docfirst.attach`**，参数 `{ dir, title? }`。插件的身份是三个常量：插件名、命令名、一条必需的注入：
 
-{/* ref file="../packages/gwb-docfirst-workflow/tests/artifact.test.ts" lines="144-152" hash="d11c4bcde323" blob="b805bc028869" */}
+{/* ref file="../packages/gwb-docfirst-workflow/src/index.ts" lines="16-20" hash="aaeafc2ace00" blob="ab455a957139" */}
 
-两边只剩一个使用顺序：站点插件的 `docs-site.create` 生成标准 fumadocs 骨架，本插件的 `docfirst.attach` 在骨架上装六区。顺序不能反，中间不要改文件。各带各的模板，谁也不问谁要清单。
+登记时的 `description` 与 `usage` 是公共接口的一部分——agent 只看得见这两段。`usage` 写清参数、只在刚生成的骨架上进行、被挡住的路径一个都不写、写盘途中失败恢复原样、只写文件不跑安装，以及回执各字段的意思：
 
-**不注册窗格**：站点插件那个窗格已经叫「文档站」，两个窗格同名分不出谁是谁。本插件也因此没有浏览器端的代码——没有 esbuild、没有那张带前缀的样式表，`build` 只剩一步 `tsc`：
+{/* ref file="../packages/gwb-docfirst-workflow/src/index.ts" lines="69-80" hash="6f5a7771f8ae" blob="ab455a957139" */}
 
-{/* ref file="../packages/gwb-docfirst-workflow/package.json" lines="24-32" hash="b1e8f7ece99c" blob="f285e7cbd770" */}
+`dir` 必须是一个已经存在的目录的绝对路径——插件在工作台主进程里运行，不知道相对于哪个目录。「不是目录」这条错误文本点出最常犯的错：`dir` 给成了仓目录。别的检查（是不是 fumadocs 骨架、是不是刚生成的）归装配：
 
-## 不知道什么
+{/* ref file="../packages/gwb-docfirst-workflow/src/index.ts" lines="29-46" hash="f0712b8786f9" blob="ab455a957139" */}
 
-**不知道有哪些站、站在哪、跑没跑。** 扫容器根、识别 fumadocs 站、判断 build 是不是最新、挑端口启动停止、到时间关闭，一件都不做；也不问任何人要一份站清单——`dir` 由调用方给一条绝对路径。插件这头只拦一件事：那得是个已经存在的目录。
+装配拒绝时抛出的错误文本原样放进 `{ ok: false, error }`，插件不翻译、不分类——那些错误文本本身就是文档：
 
-{/* ref file="../packages/gwb-docfirst-workflow/src/index.ts" lines="36-54" hash="d5f54a4e121a" blob="50f87bd2ef2c" */}
+{/* ref file="../packages/gwb-docfirst-workflow/src/index.ts" lines="83-92" hash="fe6f9b333eda" blob="ab455a957139" */}
 
-「不是目录」这句话能指出「`dir` 给成仓目录了」这个最常犯的错。存不存在、是不是刚生成的骨架，由装配那边判断——它的错误文本就是文档。
+成功时的回执：站目录、站所在的仓、骨架用的端口、写了哪些文件（`written`）、其中覆盖了站上已有的哪些（`replaced`）、删掉了哪些骨架文件（`superseded`）、仓根哪些文件第一次 render 会被覆盖（`overwrites`），以及接着要在那个仓里跑的命令（`next`）。`overwrites` 非空时多一条 `warn`：先把仓根那份的内容移进 `content/docs/outputs/` 下对应的 mdx 正本，再 render。
 
-**不知道装配为什么不肯装。** 骨架不合规、占位符认不出，装配当场抛错；插件把错误文本原样交出去，不翻译、不分类。
+{/* ref file="../packages/gwb-docfirst-workflow/src/index.ts" lines="93-110" hash="624a1222e571" blob="ab455a957139" */}
 
-{/* ref file="../packages/gwb-docfirst-workflow/src/index.ts" lines="89-98" hash="792317e612a4" blob="50f87bd2ef2c" */}
+`next` 就是装完之后要自己跑的那几条：
 
-**不知道 docfirst 是怎么核对的。** 判定引擎、比较器、记录簿、报告形状，一样都不认识——连 `check --json` 打出来的那份机读报告都不读。哪一页漂移了、一处钉码为什么黄，问的是仓里那条命令行，不是这个插件。
+{/* ref file="../packages/gwb-docfirst-workflow/src/index.ts" lines="54-63" hash="ed0e137e9c85" blob="ab455a957139" */}
 
-**不知道装完之后有没有人真去跑那几步。** 装配**只写文件**：不 install、不 render、不 check。插件能做的只是把接下来该在那个仓里跑的几条命令写进回执，跑不跑是人和 agent 的事。
+命令名是公共接口，改名就破坏兼容；产物检查守着总线上只有这一条命令、旧命令名一个都不再出现：
 
-{/* ref file="../packages/gwb-docfirst-workflow/src/index.ts" lines="62-71" hash="33a26192fabe" blob="50f87bd2ef2c" */}
+{/* ref file="../packages/gwb-docfirst-workflow/tests/artifact.test.ts" lines="59-71" hash="3104927d151f" blob="950285b9e9d9" */}
 
-**不知道六区长什么样、装配会写哪些文件。** 那全在 [装配六区](/docs/modules/site)，插件只传两个参数、把结果汇总成一张表。
-
-**不知道 docfirst 那套工具链。** 那两个 npm 包是 tsdown + TS 6、测试跑 `node --test`；这个插件用 `tsc` 编译出 Node 端代码，跑在 TS 7 上，测试用 vitest。各自的 `package.json` 说了算，**两套并存、不互相搬**。
-
-## 数据结构
-
-只钉形状。
-
-`docfirst.attach` 的回执是装配那份计划加一张写盘清单：装在哪、站所在的仓、骨架挑的那个端口、写了哪些文件、删掉了骨架里哪几个文件、仓根哪些生成物第一次 render 会被覆盖。
-
-{/* ref file="../packages/gwb-docfirst-workflow/src/index.ts" lines="99-115" hash="2090683ee2e4" blob="50f87bd2ef2c" */}
-
-`overwrites` 非空时多一条 `warn`，说的是同一件事的处置：先把仓根那份的内容搬进 `content/outputs/` 下对应的 mdx（那才是正本），再 render。字段的类型**不在这儿定义**——直接用 `attach.ts` 导出的 `AttachResult`，形状是契约，复制一份必然漂移。
-
-## 提供的接口
-
-对外只有**命令总线上一条 `docfirst.attach`**。登记时的 `description` 与 `usage` 是公共面的一部分——agent 只看得见这两段：`description` 一句话说干什么，参数形状、只在刚生成的骨架上跑、只写文件这三件事都写在 `usage` 里：
-
-{/* ref file="../packages/gwb-docfirst-workflow/src/index.ts" lines="78-86" hash="6435969d841a" blob="50f87bd2ef2c" */}
-
-命令名与「哪些名字不许再出现」由产物守卫检查，改名就是破坏约定：
-
-{/* ref file="../packages/gwb-docfirst-workflow/tests/artifact.test.ts" lines="59-71" hash="04641c0baec8" blob="b805bc028869" */}
-
-**命令清单不存文档**——现调工作台那条 `index`，回执的命令行自带 `plugin` 包名归属（要用法就调 `search {"plugin":"@godcreator/gwb-docfirst-workflow"}`）。随包自述同样只有一句：manifest 的 `description`，固定「服务 / skill / 命令」三格，包发到哪儿它跟到哪儿。
-
-模块面上四个导出：`name`、`ATTACH_COMMAND`、`inject`、`apply`。装配那部分的类型不从这儿再导出，要 `AttachResult` 就直接 import `attach.js`。
-
-说明书与模板不是代码，靠 `files` 发出去：
+说明书与模板不是代码，靠 `package.json` 的 `files` 发布：
 
 {/* ref file="../packages/gwb-docfirst-workflow/package.json" lines="18-23" hash="b5196ee35d31" blob="f285e7cbd770" */}
 
-漏一条包照发、照装得上，直到挂载去扫 skills 目录、或者跑 attach 那一刻才报「读不动」——所以两条都有测试检查：
+## 依赖
 
-{/* ref file="../packages/gwb-docfirst-workflow/tests/artifact.test.ts" lines="84-95" hash="58565672487b" blob="b805bc028869" */}
+两个运行时依赖都是 cordis 的注入。`gwbCommands` 是**必需注入**，写在 `export const inject` 里——没有命令总线，这个插件对外什么都提供不了，缺它整个插件不加载：
 
-## 依赖的接口
+{/* ref file="../packages/gwb-docfirst-workflow/src/index.ts" lines="20-20" hash="397a91e60cb0" blob="ab455a957139" */}
 
-两个接口都是 cordis 的 inject，一个必需、一个可选。`gwbCommands` 是**硬注入**——进 `export const inject`，缺它整个插件不 apply：
+`gwbSkills` 是**局部注入**，只在注册说明书的那个作用域里要它；没装 skills 插件的 home 里本插件照常加载，只是少了说明书：
 
-{/* ref file="../packages/gwb-docfirst-workflow/src/index.ts" lines="27-27" hash="397a91e60cb0" blob="50f87bd2ef2c" */}
+{/* ref file="../packages/gwb-docfirst-workflow/src/index.ts" lines="116-118" hash="8a9dbe7a78c3" blob="ab455a957139" */}
 
-`gwbSkills` 是**局部注入**——`ctx.inject` 只在那个作用域里要它，没装 skills 插件的 home 里本插件照常加载、只是少了说明书：
+依赖字段照 devkit 的规矩写：运行时从 home 里得到的写 peer——内核包 `@godcreator/gwb-kernel-desktop`（`GwbContext` 从它的包根 `import type`）、命令总线、skills 插件（标 `optional`）。cordis 对服务不做版本校验，peer 范围是唯一的版本校验点。本仓 `pnpm-workspace.yaml` 关了 `autoInstallPeers`，所以这三个包在 dev 里再各写一份，否则装不进 `node_modules`、类型检查找不到。构建产物里没有按值 import 的包，所以 peer 里没有 `cordis`。为什么不再用接口类型包 `@godcreator/gwb-plugin-api`，见 [适配内核 0.6](/trajectory/2026-09-25-adapt-kernel-0-6-drop-plugin-api)。
 
-{/* ref file="../packages/gwb-docfirst-workflow/src/index.ts" lines="123-125" hash="8a9dbe7a78c3" blob="50f87bd2ef2c" */}
+{/* ref file="../packages/gwb-docfirst-workflow/package.json" lines="36-56" hash="b26b412b100f" blob="f9e70cfe912d" */}
 
-| 接口 | 用来做什么 | 生产实现 | 测试实现 |
-| --- | --- | --- | --- |
-| `gwbCommands` | 注册 `docfirst.attach` 那一条 | 命令总线插件 `@godcreator/gwb-commands` | 不测（命令名由产物守卫检查） |
-| `gwbSkills` | 把包内 `skills/` 那六份注册过去 | skills 插件 `@godcreator/gwb-skills` | 不测（只是把一个目录 URL 传过去） |
+插件用 `tsc` 编译、跑在 TS 7 上、测试用 vitest；两个 npm 包是 tsdown + TS 6、测试用 `node --test`。两套工具链并存，各自的 `package.json` 说了算，不互相搬。
 
-依赖字段照 devkit 的规矩写：运行时从 home 里得到的写 peer——内核包 `@godcreator/gwb-kernel-desktop`（`GwbContext` 从它的包根 `import type`）、命令总线（硬注入）、skills 插件（局部注入，标 `optional`）。cordis 对服务不做版本校验，peer 范围是这条链上唯一的版本校验点。这三个包在 dev 里再各写一份，因为本仓 `pnpm-workspace.yaml` 关了 `autoInstallPeers`，只写 peer 的话它们不会被装进 `node_modules`，类型检查找不到。判断命令参数用的 `isRecord` 是 `index.ts` 里自带的一个函数，构建产物里没有按值 import 的包，所以 peer 里没有 `cordis`。为什么不再用接口类型包 `@godcreator/gwb-plugin-api`，见 [适配内核 0.6](/trajectory/2026-09-25-adapt-kernel-0-6-drop-plugin-api)。
+## 不做的事
 
-{/* ref file="../packages/gwb-docfirst-workflow/package.json" lines="36-56" hash="b9cdc1648377" blob="f285e7cbd770" */}
+**不依赖 `@godcreator/docfirst-workflow`。** 三类依赖字段一个都不写、`src/` 里一行都不 import：不启动子进程、不登记 node CLI、不查 home 里那个包的路径。装了插件就能注册说明书、能装配，不存在「装了插件没装包」那种只装了一半的状态。代价是 agent 要核对得自己 `cd` 到仓里跑，比调一条命令多一步。守卫在产物检查里：
 
-注入方式与依赖字段由测试一起检查：
+{/* ref file="../packages/gwb-docfirst-workflow/tests/artifact.test.ts" lines="97-120" hash="daa3cc5f486d" blob="950285b9e9d9" */}
 
-{/* ref file="../packages/gwb-docfirst-workflow/tests/artifact.test.ts" lines="137-142" hash="6dd5e47e76a5" blob="b805bc028869" */}
+**不转发命令行。** 核对、确认、渲染都不经过插件——转发一条命令行，就是把要在仓里发生的事又挪回插件里：
 
-构建产物里留下的包名 import 只许 node 内置模块、`electron` 与 peer 里写了的包——按值 import 了 peer 里没写的包，装进 home 之后在加载那一刻才失败：
+{/* ref file="../packages/gwb-docfirst-workflow/tests/artifact.test.ts" lines="122-129" hash="7f5543f262d0" blob="950285b9e9d9" */}
 
-{/* ref file="../packages/gwb-docfirst-workflow/tests/artifact.test.ts" lines="51-57" hash="fb00e906668f" blob="b805bc028869" */}
+**不读核对结果。** 判定、比较、报告的形状一样都不认识，连 `check --json` 的机读报告都不读。哪一页漂移了、一处钉码为什么黄，问的是仓里那条命令行。
 
-`@godcreator/docfirst-workflow` 与站点插件 `@godcreator/gwb-docs-site` 哪一类依赖都不写，见「零依赖这条边界」与「跟站点插件」两节。
+**不管站。** 扫容器根找站、判断 build 是不是最新、挑端口启动停止、到时间关闭、站的窗格，全归站点插件 `@godcreator/gwb-docs-site`。两个插件互不依赖、各带各的模板，只剩一个使用顺序：先 `docs-site.create` 生成骨架，再 `docfirst.attach` 装各区，中间不要改文件。本插件这一侧的检查：
 
-## 怎么单独测
+{/* ref file="../packages/gwb-docfirst-workflow/tests/artifact.test.ts" lines="138-143" hash="9d4ff70c4cec" blob="950285b9e9d9" */}
 
-判据一条：**这段逻辑能不能不启动进程、不开窗口、只传入输入看输出**。能就写成 vitest 用例；不能（要真装进 home、要 Electron）那不是不测，是用实机验证。两者不互相替代——`pnpm check` 全绿从来不代表装出来能跑，它检查的是源码。
+**不注册窗格。** 站点插件的窗格已经叫「文档站」，两个同名窗格分不清。所以本插件没有浏览器端的代码，`build` 只有一步 `tsc`：
 
-{/* tree dir="../packages/gwb-docfirst-workflow/tests" depth="1" hash="289f67f43df1" */}
+{/* ref file="../packages/gwb-docfirst-workflow/package.json" lines="24-32" hash="b1e8f7ece99c" blob="f285e7cbd770" */}
 
-`plugin` 只验插件的身份：插件名跟包名派生自同一个短名。插件真正加载进 cordis 要有 home、有别的插件，那部分用实机验证。
-
-`attach` 是三份里用例最多的，全部通过装配面上那两个方法测：只计算、不写盘的那个直接测；计算完写盘的那个在临时目录里真的写一遍，细节归 [装配六区](/docs/modules/site)。
-
-`artifact` 是产物守卫加那几条「一改就得一起改」的检查——零依赖、不启动子进程、命令面、`files`、依赖字段、不注册窗格。产物那一组要 `dist/` 构建齐了才跑，缺产物整组跳过，门禁不依赖 build。
-
-{/* ref file="../packages/gwb-docfirst-workflow/tests/artifact.test.ts" lines="34-41" hash="932220d69885" blob="b805bc028869" */}
-
-产物只有一层目录这条不是多余的讲究：模板不进 `dist/`，`src/template.ts` 与 `dist/template.js` 都在包根下一层，`../template/attach/` 那条路径在源码和产物里才是同一个相对位置。
-
-门禁是这个包自己的一套（vitest），跟工作区那套 `node --test` 分开跑。
-
-## 代码地图
-
-**在哪**：
-
-{/* tree dir="../packages/gwb-docfirst-workflow/src" depth="1" hash="1665fb13e787" */}
-
-**先读** `index.ts`：整份只剩接线——一条命令的注册与参数转换、说明书那部分的局部注入。
-
-**读序**：`index.ts` 往下只认识 `attach.ts` 一个名字，那是装配面上的两个方法（只计算、计算完写盘）。`attach.ts` 再往下的 `skeleton` / `template` / `values` / `manifest` / `deps` 是它的内部，读序与各自管什么在 [装配六区](/docs/modules/site)。
-
-**可跳过**：`dist/`（`tsc` 的产物）；`template/attach/` 是原样发出去的模板，不是逻辑；`skills/` 那六份是给 agent 读的说明书，讲的是怎么用这个生态、怎么干活，不讲插件自己怎么划分的。
+**不装依赖、不渲染、不核对。** 装配只写文件；装完有没有人真去跑回执里那几条，是人和 agent 的事。

@@ -5,7 +5,8 @@ description: 装包、一份配置、写一行草稿记号、check、confirm、�
 
 # 一分钟上手
 
-**本页回答**：从零到「站上出现一块钉住源码的代码」，一共要做哪几步。全程用的是这个站自己跑出来的输出。
+**本页回答**：从零到「站上出现一块钉住源码的代码」，一共要做哪几步。下面的命令输出都是真跑出来的：
+一个项目根下有 `src/greet.ts` 和 `content/docs/a.mdx`。
 
 ## 一、装
 
@@ -15,7 +16,7 @@ description: 装包、一份配置、写一行草稿记号、check、confirm、�
   </Tab>
   <Tab title="只跑命令行">
     一样这两个包。`fumadocs` 与 `react` 在包里只是 peer，不装 fumadocs 的仓一个都不必装——
-    命令行那条路一处都不碰它们。
+    命令行那条路一处都不用它们。
   </Tab>
 </Tabs>
 
@@ -25,26 +26,27 @@ description: 装包、一份配置、写一行草稿记号、check、confirm、�
 
 ## 二、项目根放一份配置
 
-命令行和站读的是同一份 `docfirst.config.mjs`：用哪个格式、文档在哪、用哪个比较器、产物写到哪、组件名册是什么。
+命令行和站读的是同一份 `docfirst.config.mjs`。它只认四个键：`formats`（用哪个格式）、`content`（内容根，
+不写就是 `content`）、`components`（组件名册）、`outputs`（生成物写到哪），写了别的键当场报错。这个站的配置：
 
-{/* ref file="docfirst.config.mjs" lines="34-58" hash="9a474ecbe1a3" blob="97ccb7da232e" */}
+{/* ref file="docfirst.config.mjs" lines="29-50" hash="78f85e416247" blob="fce0d84ad1f9" */}
 
-`comparator` 不写就是 `auto`：被引文件在 git 仓里就用 git 记忆，不在（被忽略的 `node_modules`、仓外目录）就用 hash 记忆。
-`outputs` 管产物写到哪：配了映射的文档 render 直接写到指定位置（README、AGENTS.md 这类生成物），
-check 顺带检查生成物跟源是否一致。
-`trajectory` 是可选的轨迹卡目录，跟五类引用分开校验，见 [站接线手册](/docs/start/wiring)。
-引用里的路径**相对项目根**——这个站的项目根是站目录，源码在工作区的
-`packages/` 下，所以记号里写的是 `../packages/…`。站侧还要接几处，见 [站接线手册](/docs/start/wiring)。
+分区不用配：内容根下 `trajectory/` 是轨迹卡、`future/` 是未来区，这两个名字固定，**其余目录都是现状区**，
+里面的文档都进 `check`。`outputs` 把 mdx 正本映射到生成物（README、AGENTS.md 这类），`render` 与 `confirm`
+会重新生成它们，`check` 检查生成物跟正本是否一致。
+
+引用里的路径**相对项目根**——这个站的项目根是站目录，源码在工作区的 `packages/` 下，所以记号里写的是
+`../packages/…`。站侧还要接几处，见 [站接线手册](/docs/start/wiring)。
 
 ## 三、写一行草稿记号
 
-不用记各格式的记号长什么样，也不用跑什么命令注册。想引哪段代码，就在文档里**单独占一行**写：
+不用记各格式的记号长什么样，也不用跑命令登记。想引哪段代码，就在文档里**单独占一行**写，前后空行：
 
 ```md
-@@docfirst ref ../packages/docfirst-workflow/src/engine/types.ts:15-21 @@
+@@docfirst ref src/greet.ts:2-3 @@
 ```
 
-头尾的 `@@` 是哨兵，少一头就是普通文字。写在句子里、围栏里的不算。
+头尾的 `@@` 是标记，少一头就是普通文字。写在句子里、围栏里的不算。
 
 ## 四、核对
 
@@ -55,11 +57,10 @@ pnpm docfirst check
 新写的引用是空心黄「未确认」，已经确认过、代码没动的是绿：
 
 ```text
-🟢 content/docs/start/wiring.mdx  docfirst.config.mjs:34-58  新鲜
-⚪ content/docs/start/requirements.mdx  ../packages/docfirst-workflow/src/engine/types.ts:15-21  未确认，等作者确认
+⚪ content/docs/a.mdx  src/greet.ts:2-3  未确认，等作者确认
 ```
 
-`check` 只读，什么都不写。红（缺失、孤儿记录、名册外组件）退 1，黄和白退 0。
+`check` 只读，什么都不写。有红退 1，黄和白退 0——只有一种黄算红：被钉的代码在本仓有未提交的改动。
 
 ## 五、确认
 
@@ -68,15 +69,22 @@ pnpm docfirst confirm
 ```
 
 ```text
-✅ content/docs/start/requirements.mdx  ../packages/docfirst-workflow/src/engine/types.ts:15-21  已确认，草稿记号已换成正式记号
+✅ content/docs/a.mdx  src/greet.ts:2-3  已确认，草稿记号已换成正式记号
 ```
 
-这一下做四件事：让比较器生成记录、更新记录簿、清孤儿、把草稿记号换成这种格式的正式记号。mdx 里换成
-`{/* ref file="…" lines="…" */}`，之后草稿不再出现。再 `check` 一次就全绿了。
+草稿记号换成 mdx 的正式记号，确认时的记录就写在它的属性上：
+
+```mdx
+{/* ref file="src/greet.ts" lines="2-3" hash="901ac644922d" blob="c12611d97d6e" */}
+```
+
+`hash` 是那几行的段哈希，`blob` 是确认时整个文件的 git blob 名，各取前 12 位；没有代码内容。记号由 `confirm`
+写，不手改。再 `check` 一次就是绿的。
 
 <Note>
-  **confirm 之前先 commit**。git 记忆只对已提交、且工作区干净的内容钉，引用到别的仓也一样；引用到的源码没提交，
-  这一篇整篇拒——记录簿一条不写、文档一个字不改。为什么这么严，见 [git 原理](/docs/principles/git)。
+  **确认不要求先提交**。改了被钉的代码，就在同一个提交里处理它引起的黄：`check` 会把本仓未提交改动引起的黄算红、
+  拦下这次提交；复核过正文后 `docfirst confirm <页…> --accept` 重新记下，代码、文档、记号上的新记录一起提交。
+  整个过程见 [一条引用的一生](/docs/start/lifecycle)。
 </Note>
 
 ## 六、看站
@@ -86,17 +94,19 @@ pnpm build
 pnpm start
 ```
 
-页面上那一块代码是 `next build` 那一刻从源文件里现拿的，标题栏写着来源 `文件:起-止`，
+页面上那一块代码是 `next build` 那一刻从源文件里现取的，标题栏写着来源 `文件:起-止`，
 复制按钮左边那个小圆点就是状态。调试用 build + start，**不用 dev**；改了 `src/fumadocs/` 的代码要先删 `.next`
 再 build 才看得见。
 
 ## 命令一览
 
-{/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="4-16" hash="3cfd57365aef" blob="1dbbc2488e3a" */}
+{/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="3-19" hash="5dfc0087023e" blob="7307ed6bcc73" */}
 
-拿不准就先 `docfirst --help`：它只打用法，什么都不动；写错的开关也只会报错退 2，不会被当作没写。
-**`confirm` 不带路径就是确认整个仓**，同一个仓里别人没复核的黄色引用会被一起确认——只改了哪几页，就点名那几页。
+拿不准就先 `docfirst --help`：它只打用法，什么都不改；写错的开关只会报错退 2，不会被当作没写。
+**`confirm` 不带路径就是全部页**：它只做不需要判断的写回，黄原样留着；要把复核过的黄重新记下，必须点名页再带 `--accept`，
+同一个仓里别人还没复核的黄不会被一起重新记下。
 
-命令行到此为止，一共四条；日常就 check / confirm / render 这三条，`trajectory` 单独处理，在装配之前就分派出去了，见 [轨迹](/docs/modules/trajectory)。给一个新骨架装六区不在命令行上，归工作台插件，见 [装配六区](/docs/modules/site)。
-`render` 只有一种产物：配了 `outputs` 映射的直接写到映射指定的位置，没配的生成一份给 AI 读的 md，写到 `out/`。命令行的完整输出和退出码见
-[命令行](/docs/modules/cli)；一处引用从写下到变红的全过程见 [一条引用的一生](/docs/start/lifecycle)。
+日常用的是 check / confirm / render 三条。`render` 只生成在 `outputs` 里有映射的生成物，别的文档不渲染；
+`trajectory` 列轨迹卡的盘与主干，见 [轨迹](/docs/modules/trajectory)；`migrate-ledger` 只给从旧版升级的站用一次。
+给一个新骨架铺分区不在命令行上，归工作台插件，见 [装配](/docs/modules/site)。命令行的完整输出和退出码见
+[命令行](/docs/modules/cli)。

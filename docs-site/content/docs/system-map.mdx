@@ -1,11 +1,11 @@
 ---
 title: 系统地图
-description: 四类角色、三条入口、依赖方向是什么、先读哪块
+description: 两个包加一个插件、主包的四层、三条入口、依赖方向、先读哪块
 ---
 
 # 系统地图
 
-**本页回答**：这套东西拆成哪几块、各住哪、块与块之间谁依赖谁、新来的人先读哪块。
+**本页回答**：这套东西拆成哪几块、各在哪、块与块之间谁依赖谁、新来的人先读哪块。
 
 ## 两个包，一个插件
 
@@ -13,80 +13,80 @@ description: 四类角色、三条入口、依赖方向是什么、先读哪块
 
 {/* tree dir="../packages" depth="1" hash="01f82fee3739" */}
 
-`docfirst` 是主包 `@godcreator/docfirst-workflow`，`trajectory` 是独立的一条包线
+`docfirst-workflow` 是主包 `@godcreator/docfirst-workflow`，`docfirst-trajectory` 是独立的一条包线
 `@godcreator/docfirst-trajectory`，`gwb-docfirst-workflow` 是工作台插件——它不进 npm 的依赖网，只在
-桌面工作台里把命令行开给 agent。
+桌面工作台里给 agent 提供一条装配命令和几份说明书。
 
-## 四类角色
+## 四层
 
-主包一个包，`src/` 下四层，按**角色**分而不是按「像什么」分。四类角色的判据一句话说得清：
+主包一个包，`src/` 下四层，按**职责**分，不按「像什么」分。判据一句话：
 **判定不认识环境，环境不认识格式，格式不认识入口，入口认识全部。**
 
 {/* tree dir="../packages/docfirst-workflow/src" depth="1" hash="a62b25f0a302" */}
 
-| 角色 | 层 | 管什么 | 先读 |
+| 职责 | 层 | 管什么 | 先读 |
 | --- | --- | --- | --- |
-| 判定 | `src/engine/` | 引用模型、记号语法、比较器接口、编排服务；只用 `node:crypto` | [判定层](/docs/modules/engine) |
-| 环境 | `src/host/` | 读盘、起 git 子进程、写记录簿、把生成物摆到落点；读配置装配出一个项目 | [环境层](/docs/modules/host) |
-| 格式 | `src/fumadocs/` | mdx 怎么认记号、怎么写回、怎么渲；加站的 remark 接线与展示组件 | [格式与站接线](/docs/modules/fumadocs) |
-| 入口 | `src/cli/` | 命令行的分流、打印、退码 | [命令行](/docs/modules/cli) |
+| 判定 | `src/engine/` | 引用模型、记号语法、比较器、编排服务；只用 `node:crypto` | [判定层](/docs/modules/engine) |
+| 环境 | `src/host/` | 读盘；起 git 子进程（按 blob 取旧内容、算 hunk 表、查未提交的改动）；把生成物写到落点；读配置装配出一个项目 | [环境层](/docs/modules/host) |
+| 格式 | `src/fumadocs/` | mdx 怎么认记号、怎么写回、怎么按原文渲染；站的 remark 接线与展示组件 | [格式与站接线](/docs/modules/fumadocs) |
+| 入口 | `src/cli/` | 命令行的分流、打印、退出码 | [命令行](/docs/modules/cli) |
 
-包里没有第五样：给一个已有骨架**装六区**那摊住工作台插件（[装配六区](/docs/modules/site)）。
-包的消费方是仓，插件的消费方是 agent，判据见轨迹卡
+包里没有第五层：给一个刚生成的骨架**装三个区**的那部分在工作台插件里（[装配](/docs/modules/site)）。
+包的使用者是仓，插件的使用者是 agent，判据见轨迹卡
 [包给仓、插件给人](/trajectory/2026-09-10-package-serves-repo-plugin-serves-agent)。
 
 ## 三条入口
 
-三个人从三个方向进来，前两条走的是同一套判定：
+三种使用者从三个方向进来，前两条走的是同一套判定：
 
 <Tabs>
   <Tab title="命令行">
-    `docfirst check / confirm / render / trajectory`。`cli` 逐篇喂文本给编排服务，
+    `docfirst check / confirm / render / trajectory`，外加一次性的迁移命令 `migrate-ledger`。`cli` 逐篇把文本交给编排服务，
     把回来的清单译成一行行人话和一个退出码。git hook 与 CI 跑的就是它——**提交那一刻工作台
     不在场**，所以判定与核对必须是一个 npm 包，不能依赖任何 GUI 应用开着。
   </Tab>
   <Tab title="站构建">
     站的 `source.config.ts` import `@godcreator/docfirst-workflow/fumadocs`，remark 插件在构建期
-    装配一次项目、认引用、算清单、把状态点打到树上。人看的那份文档就是站本身。
+    装配一次项目、认引用、算清单、把状态点打到语法树上。人看的那份文档就是站本身。
   </Tab>
   <Tab title="工作台插件">
-    `@godcreator/gwb-docfirst-workflow` 经命令总线开出 `docfirst.attach`（在进程内给一个已有骨架
-    铺六区），另把六份说明书挂给 agent 读。**它对包零依赖**：不 import、不起子进程——要核对
+    `@godcreator/gwb-docfirst-workflow` 经命令总线提供 `docfirst.attach`（在进程内给一个刚生成的骨架
+    装上三个区），另把六份说明书注册给 agent 读。**它对包零依赖**：不 import、不起子进程——要核对
     就 `cd` 到那个仓里跑包的命令行。
   </Tab>
 </Tabs>
 
-前两条入口共用同一份编排服务，是「判定只有一处」这句话的具体形状：站上看到的绿，跟命令行
-`check` 退 0 说的是同一件事；第三条根本不做判定，它铺的是模板。
+前两条入口共用同一份编排服务，这就是「判定只有一处」：站上看到的绿，跟命令行
+`check` 退 0 说的是同一件事；第三条根本不做判定，它写的是模板。
 
 ## 依赖方向
 
 层与层之间的方向是**单向**的，而且**列的是禁止面不是允许面**——写成允许面的话，加一个新
 目录会默默地什么都不许，加错地方反而更难发现：
 
-{/* ref file="../tests/boundary.test.ts" lines="85-103" hash="13d1489f8de5" blob="421b08df5caa" */}
+{/* ref file="../tests/boundary.test.ts" lines="85-103" hash="bcb7a58199fa" blob="90355c11baed" */}
 
-`engine` 是这张图的汇点，自己零依赖，只用 `node:crypto`。它不读文件、不起子进程、不认识任何
-文档格式——干活要的四样全是外面递进来的：
+`engine` 是这张图的终点，自己零依赖，只用 `node:crypto`。它不读文件、不起子进程、不认识任何
+文档格式——干活要的三样全是外面传进来的：
 
-{/* ref file="../packages/docfirst-workflow/src/engine/service.ts" lines="42-47" hash="5b9292f874dc" blob="c98a3a3d0083" */}
+{/* ref file="../packages/docfirst-workflow/src/engine/service.ts" lines="56-60" hash="54376c072d21" blob="78a15b3aa6cb" */}
 
-这就是判定层的进料口：格式、读取器、记录簿、比较器都是构造参数，所以它的依赖面可以是空的。
+格式、读取器、旧内容来源（按 blob 取确认时的内容、算 hunk 表）都是构造参数，所以它的依赖面可以是空的。
 
-`trajectory` 站在这张图外面：它不依赖判定层，`.` 入口连 npm 依赖都没有——这条红线按产物判，
-产物里只许出现 `node:` 内置模块。它的 `./react` 与 `./server` 两个入口另有 react 与 remark
-那套，只给站用。`cli` 依赖它是为了接 `docfirst trajectory` 子命令，而且只用 `.` 入口；别的四层
+`trajectory` 在这张图外面：它不依赖判定层，`.` 入口连 npm 依赖都没有——这条红线按产物判，
+产物里只许出现 `node:` 内置模块。它的 `./react` 与 `./server` 两个入口另外用 react 与 remark，
+只给站用。`cli` 依赖它是为了接 `docfirst trajectory` 子命令，而且只用 `.` 入口；别的三层
 一概不许碰它。
 
-**包与插件互不认识**：两个 npm 包的三档依赖面里不许出现工作台插件，也不许出现任何
+**包与插件互不认识**：两个 npm 包的三类依赖字段里不许出现工作台插件，也不许出现任何
 `@godcreator/gwb-*`——装这两个包的人不该被迫拉进一整个桌面工作台生态；反过来那半，插件的
-三档依赖面里也不许出现 `@godcreator/docfirst-workflow`，守在插件自己的 `tests/artifact.test.ts` 上。
+三类依赖字段里也不许出现 `@godcreator/docfirst-workflow`，由插件自己的 `tests/artifact.test.ts` 检查。
 
 ## 边界靠什么守
 
-塌成一个包之后，「谁能依赖谁」**不再由 pnpm 的严格 `node_modules` 兜着**：同一个包里，
-`engine/` 里随手写一句 `import "../host/git.ts"` 编译器不会吭一声，判定层就从此起了 git
-子进程。补上那道门的是一个文件：
+主包是一个包，「谁能依赖谁」**不由 pnpm 严格的 `node_modules` 挡住**：同一个包里，
+`engine/` 里随手写一句 `import "../host/git.ts"` 编译器不会报错，判定层就从此起了 git
+子进程。挡住它的是一个测试文件：
 
 {/* ref file="../tests/boundary.test.ts" lines="1-26" hash="c29fd3eaad78" blob="421b08df5caa" */}
 
@@ -94,40 +94,40 @@ description: 四类角色、三条入口、依赖方向是什么、先读哪块
 包不认识插件。**它报红的时候，红的是设计，不是测试。**
 
 方向单向换来的是换零件只动一处：换一种文档格式，新写一份 `Format` 实现，判定层一行不动；
-换记忆的记法，实现 `Comparator` 两个方法再在配置里换个名字；换记录簿的存法，实现 `Ledger`
-五个方法；换站的宿主，只动 `src/fumadocs/`。
+旧内容不从 git 取，实现 `History` 的两个方法；换站的宿主，只动 `src/fumadocs/`。
 
-## 站也是消费方
+## 站也是使用者
 
 `docs-site/` 就是「装了这两个包的项目」：项目根是站目录，被钉的代码在工作区的 `packages/` 下，
 记号写 `../packages/…`。
 
-{/* ref file="docfirst.config.mjs" lines="5-6" hash="073fb967a772" blob="97ccb7da232e" */}
+{/* ref file="docfirst.config.mjs" lines="4-6" hash="a1fd3aed47bc" blob="fce0d84ad1f9" */}
 
-所以仓里不另留示例项目——这两个包对外的样子由站自己演，站上的状态点绿着，就是它们在真源码上
+所以仓里不另留示例项目——这两个包对外的样子由站自己展示，站上的状态点绿着，就是它们在真源码上
 跑通了。
 
 ## 每块一页
 
-上面每一块在这一区有自己的一页，七个固定块顺序固定：管什么 / 不知道什么 / 数据结构 / 提供的
-接口 / 依赖的接口 / 怎么单独测 / 代码地图。写到「错了难改」为止——边界、依赖方向、接口契约、
-状态机、取舍讲透；字段清单、内部算法、内部命名是实现的自由度，不写。
+上面每一块在这一区有自己的一页，四段顺序固定：功能 / 接口 / 依赖 / 不做的事。开头一句写包名、
+源码目录与入口文件。写到「错了难改」为止——边界、依赖方向、接口契约、状态机、取舍讲透；
+字段清单、内部算法、内部命名是实现者的自由，不写。测试集中在 [测试与边界](/docs/cli/testing)。
 
 ## 读序
 
-跟依赖方向反着来：**先 [判定层](/docs/modules/engine)**——接口正本、记号语法、编排服务、四种
-状态都在那儿，别的层只认这一份；**再 [环境层](/docs/modules/host)**——装配的全貌、记忆按被引
-文件的位置怎么分派、一篇正本怎么摆到落点；**然后 [命令行](/docs/modules/cli)**。
+跟依赖方向反着来：**先 [判定层](/docs/modules/engine)**——接口正本、记号语法、比较器、编排服务、四种
+状态都在那儿，别的层只认这一份；**再 [环境层](/docs/modules/host)**——装配的全貌、旧内容怎么按
+blob 取回、一篇正本怎么渲染到落点；**然后 [命令行](/docs/modules/cli)**。
 [格式与站接线](/docs/modules/fumadocs) 是站构建那条入口，[轨迹](/docs/modules/trajectory) 是
-独立的一条包线，[工作台插件](/docs/modules/plugin) 与它带的 [装配六区](/docs/modules/site) 在包
-外面，各从自己那一页进，只读命令这条线的人整个跳过。
+独立的一条包线，[工作台插件](/docs/modules/plugin) 与它的 [装配](/docs/modules/site) 在包
+外面，各从自己那一页进，只读命令行这条线的人整个跳过。
 
 两处边界值得在进代码之前先知道，免得照目录名猜错：
 
-**摆放住 `host/`**，一整摊在 `placement.ts` 里——一篇 mdx 正本渲成生成物、戴上点名的
-frontmatter 字段、写到每个落点、回头核对盘上那份还新不新鲜，全在那一份。它落在环境层而不是
-判定层，是因为要写盘、要问格式要渲染，判定两样都不做；也不落在命令行，是因为判定住进命令行
-就只剩下起子进程从 stdout 捞的取法。
+**摆放在 `host/`**，全部在 `placement.ts` 里——一篇 mdx 正本渲染成生成物、加回指定的
+frontmatter 字段、写到每个落点、核对盘上那份是不是最新，都在那一份。它在环境层而不是
+判定层，是因为要写盘、要调用格式的渲染，判定两样都不做；也不在命令行，是因为放进命令行
+站构建就只能起子进程从 stdout 取结果。
 
-**命令行只剩打印**：它拿到摆放的两个方法与编排服务，把回来的清单译成一行行人话和一个退出码，
-判定一件都不在那儿算。
+**命令行只负责打印**：它拿到摆放的两个方法与编排服务，把回来的清单译成一行行人话和一个退出码，
+引用的状态一件都不在那儿算。它另外只问环境层一件事：被钉的文件在本仓有没有未提交的改动，
+有的话那处黄灯算红。

@@ -1,34 +1,44 @@
 ---
 title: git 原理
-description: 记忆是那个仓 HEAD 的 blob；文件在哪个仓按它自己的位置定；变没变、变到哪，用 git 的 hunk 表算
+description: 记号上的 blob 名在进程里算；旧内容按被引文件的位置找仓、从对象库取；变到哪用 git 的 hunk 表算，取不到旧内容就滑窗
 ---
 
 # git 原理
 
-这一章回答：git 比较器凭什么说得出「这段代码变了没有、今天挪到哪儿去了」，被引文件在**哪个仓**是怎么定的，
-以及它为什么非要你先提交。
+这一章回答：行段与整文件的比较器凭什么说得出「这段代码变了没有、今天挪到哪儿去了」，它从 git 拿什么、不拿什么，
+被引文件在**哪个仓**是怎么定的，以及 check 怎么认出本仓未提交的改动。
 
-## 记忆是 blob，哪儿都不存第二份
+## 记号上的 blob 名：在进程里算
 
-确认一处引用时，记下来的是四样：`HEAD:<文件>` 的 **blob 哈希**、当时的 commit、行段、段哈希。
-代码内容一个字都不进记录簿——它本来就在 git 的对象库里，blob 被提交树引着，不会被 gc 回收。
+确认一处行段或整文件引用时，记号上写两样：段哈希和确认时整文件的 **blob 名**，都取前 12 位十六进制。
+代码内容一个字都不进记号，旧内容要用时去 git 的对象库里取。
 
-{/* ref file="../packages/docfirst-workflow/src/host/git.ts" lines="106-123" hash="a6086802664d" blob="cdee3cab5d19" */}
+blob 名不问 git：把工作区内容的换行统一成 LF，按 git 的 blob 算法在进程里算。仓的对象库存的是 LF 时，
+算出来的就是这份内容提交后的 blob 名，所以**确认不要求先提交**，也一次 git 都不起：
 
-要旧内容的时候（报黄给 diff、报红显示「文档写下时那段」），拿 blob 去 `cat-file --batch` 现取——
-「在不在对象库里」和「内容是什么」一次问到。blob 名按内容寻址，所以取到的内容在进程里记住，
-一次 check 里同一个 blob 只起一次 git：
+{/* ref file="../packages/docfirst-workflow/src/engine/span.ts" lines="41-57" hash="c2d846c84d20" blob="349017fffa50" */}
 
-{/* ref file="../packages/docfirst-workflow/src/host/git.ts" lines="134-164" hash="593ed85a8fd4" blob="cdee3cab5d19" */}
+`tests/hash-text.test.ts` 拿真 git 的 `hash-object` 逐字节核对这个算法，它一旦算错，整站的绿灯会一起变黄。
 
-记录里**不记仓在哪**：blob 是内容寻址的，核对时从文件位置重新找仓就行。
+代价是：确认之后、提交之前又改了这个文件，或者仓里的文件本来就存 CRLF，记号上的 blob 就不会进对象库。
+这时取不到旧内容，比较器退回滑窗（见下文）。为什么接受这个代价，见[记录进记号](/trajectory/2026-09-25-records-live-in-markers)。
+
+## 旧内容：按 blob 名去对象库取
+
+报黄要给 diff、报红要显示确认时那段，都要旧内容。环境层拿 blob 名去 `cat-file --batch` 取，「在不在对象库」和
+「内容是什么」一次问到。blob 名按内容寻址，所以取到的内容在进程里记住，一次 check 里同一个 blob 只起一次 git：
+
+{/* ref file="../packages/docfirst-workflow/src/host/git.ts" lines="80-110" hash="a2badff969ea" blob="afd0fbdae4c4" */}
+
+不在对象库、缩写有歧义、缩写认出的不是 blob，都只是「没有旧内容」，给 `null`，不报错。记号上**不记仓在哪**：
+核对时从文件位置重新找仓就行。
 
 ## 文件在哪个仓：按文件自己的位置定
 
-被引文件不限于项目自己的仓。另一个单元、上游 clone、工作区里别的仓，都能钉；所以「问哪个 git」
-不看项目根，看**被引文件在哪**：
+被引文件不限于项目自己的仓。另一个单元、上游 clone、工作区里别的仓，都能钉；所以「问哪个 git」不看项目根，
+看**被引文件在哪**：
 
-{/* ref file="../packages/docfirst-workflow/src/host/git.ts" lines="60-81" hash="0ac2f4371487" blob="cdee3cab5d19" */}
+{/* ref file="../packages/docfirst-workflow/src/host/git.ts" lines="56-77" hash="0ac2f4371487" blob="afd0fbdae4c4" */}
 
 两步：先取**真实路径**，再往上找第一个 `.git`。从哪儿起往上找，看目标是文件还是目录——文件从它
 所在的目录起（`locate`），目录从**它自己**起（`locateDir`）：目标目录很可能自己就是仓根
@@ -37,74 +47,36 @@ description: 记忆是那个仓 HEAD 的 blob；文件在哪个仓按它自己�
 <Tabs>
   <Tab title="① 为什么先 realpath">
     pnpm 工作区里 `node_modules/@x/y` 是指向 `packages/y` 的软链（Windows 上是目录联接）。按写的路径判它在
-    `node_modules` 里、被忽略；按真实路径它是本仓已提交的文件。同一份代码不能有两种记忆，所以按真实位置算。
+    `node_modules` 里、被忽略；按真实路径它是本仓已提交的文件。同一份代码只能按一个位置算，所以按真实位置算。
     文件本身不存在（删了）时取最近一个存在的祖先的真实路径再拼回去，仓照样找得到。
   </Tab>
   <Tab title="② 往上找最里层的 .git">
     `.git` 可能是目录，也可能是子模块 / worktree 里的文件。找到的是**最里层**那个：子模块算它自己的仓。
-    一路找到盘根都没有，就是「不在任何仓里」，交给 hash 比较器（见 [环境层](/docs/modules/host)）。
+    一直找到磁盘根目录都没有，就是「不在任何仓里」：取不到旧内容，比较器只能滑窗。
   </Tab>
 </Tabs>
 
-定位出来的是「仓根 + 仓根相对的 posix 路径」。`HEAD:<路径>`、`status -- <路径>`、`check-ignore` 全用它，
-cwd 一律是那个仓的根——项目根是不是 git 子目录、被引文件在不在项目的仓里，都不再是问题。
+定位出来的是「仓根 + 仓根相对的 posix 路径」。取 blob、问 status、列被忽略的路径，cwd 一律是那个仓的根——
+项目根是不是 git 子目录、被引文件在不在项目的仓里，都不影响结果。
 
-## 只对已提交的内容钉：几道检查
+## 变没变：先比哈希，不行再用 hunk 表
 
-`snapshot` 出记录之前逐道问：
+比较器按固定顺序判（见[判定层](/docs/modules/engine)），能用哈希下结论的不碰 git：
 
-{/* ref file="../packages/docfirst-workflow/src/host/git-comparator.ts" lines="86-101" hash="80eaa7679e00" blob="4cc1fe291fa0" */}
+- **绿灯是常态**。记号上那几行的段哈希等于记录，就是绿；当前整文件的 blob 名等于记录，内容一字没变，旧内容就是当前内容。
+  这两步都在进程里算，对象库不问。
+- 真有差异、又取得到旧内容，才把旧内容和当前内容写成两个临时文件 `diff --no-index -U0`。**不往任何对象库写东西**：
+  被引文件可能在别人的仓里。只有「有差异」那一种非零退出（退 1，输出在 stdout 里）能忽略，别的照原样抛出去。
 
-一页几十处引用往往钉的是同几个文件，所以一次确认里**每个文件最多问一次 git**：一句 `rev-parse HEAD HEAD:<路径>`
-同时拿到 commit 与 blob，按这次读到的那份文件内容记住。下一次确认会重新读出新的内容，记住的答案带不过去：
+{/* ref file="../packages/docfirst-workflow/src/host/git.ts" lines="153-187" hash="602913b7a3fd" blob="afd0fbdae4c4" */}
 
-{/* ref file="../packages/docfirst-workflow/src/host/git-comparator.ts" lines="38-52" hash="eb451891338e" blob="4cc1fe291fa0" */}
-
-<Tabs>
-  <Tab title="在不在某个仓里">
-    不在任何仓里，git 记忆做不了。走默认的 auto 比较器时到不了这儿——它已经把这种文件分给 hash 了；
-    配置强制 `git` 才会遇到这条 problem。
-  </Tab>
-  <Tab title="仓有没有提交过">
-    刚 `git init` 的仓还没有 HEAD，`rev-parse HEAD` 一问就报错。单独认出来说「先 commit」，
-    别转述一句 git 原文。
-  </Tab>
-  <Tab title="在不在 HEAD 里">
-    问的是 `HEAD:<路径>` 这个对象取不取得到。那句 `rev-parse` 没问到，才逐项再问是哪一种：仓还没有提交，
-    还是文件不在 HEAD 里；后者再问一句 `check-ignore`，分成两种话说：被 `.gitignore` 忽略的（git 记忆不做，
-    auto 会分给 hash），和未跟踪 / 路径大小写跟 git 记的不一样的（先 commit）。
-  </Tab>
-  <Tab title="工作区干不干净">
-    工作区里那份跟 HEAD 不一样，钉下去的记忆就指着一个没人能取回的状态。先比字节：当前内容的 blob 名等于
-    HEAD 里那个，就一定干净，不起 git；不相等才问 `git status --porcelain -- <路径>`——换行转换（autocrlf）
-    下字节不同也可能是干净的，那只有 git 自己判得准。**别人的仓也一样**：那个单元正在开发中、工作区不干净，
-    就得等它提交。
-  </Tab>
-</Tabs>
-
-哪一道没过都交回 problem，那一篇[整篇拒](/docs/modules/engine)。所以规矩是：**先 commit，再 confirm**。
-
-## 变没变：hunk 表，不自己写 diff 算法
-
-{/* ref file="../packages/docfirst-workflow/src/host/git.ts" lines="218-253" hash="3d562116da9f" blob="cdee3cab5d19" */}
-
-四处讲究：
-
-- **绿灯是常态**，所以比较器先只算哈希（跟 `hash-object --stdin` 算法相同，在进程里算，不起 git）——
-  当前内容的 blob 名等于记录里那个，内容一个字没改，hunk 表就是空的，旧内容不取、对象库也不问。
-- 真有差异才把旧 blob 的内容和当前内容写成两个临时文件 `diff --no-index`。**不往任何对象库写东西**：
-  被引文件可能在别人的仓里，往那儿塞松散对象不合适。只有「有差异」那一种非零退出（退 1，输出在 stdout 里）
-  能吞；别的吞了就是把红判成绿，照原样抛出去。
-- 算出的 hunk 表按「旧 blob 名 + 新内容的 blob 名」记住。一篇文档十几处引用钉同一个改过的文件是常态，
+- 算出的 hunk 表按「旧内容的 blob 名 + 新内容的 blob 名」记住。一篇文档十几处引用钉同一个改过的文件是常态，
   同一对内容只 diff 一次。
-- 这张表还落一份到盘上（系统临时目录下的 `docfirst-cache/hunks/`）。钉住的那段没变、文件别处改过的引用是绿的，
-  没人会去重新确认，于是每次 check 都要为它 diff——这样的文件只增不减。键按内容寻址，同一对内容的 hunk 表
-  永远不变，不用管失效，所有项目共用一份；盘上那份认不出就报错并说是哪个文件，不当没有：
+- 这张表还存一份到盘上（系统临时目录下的 `docfirst-cache/hunks/`）：钉住的那段没变、只是文件别处改过的引用是绿的，
+  没人会去重新确认，每次 check 都要为它算一遍。键按内容寻址，同一对内容的 hunk 表永远不变，不用管失效，所有项目共用一份；
+  盘上那份认不出就报错并说是哪个文件，不当作没有：
 
-{/* ref file="../packages/docfirst-workflow/src/host/git.ts" lines="180-203" hash="82212f0963b8" blob="cdee3cab5d19" */}
-
-旧 blob 的内容照旧每次现取，不因为盘上有 hunk 表就省掉：省了的话，「blob 已经不在对象库」判不判红就要看这台
-机器上有没有那份缓存，同一个仓在两台机器上会判出不同结果。
+{/* ref file="../packages/docfirst-workflow/src/host/git.ts" lines="115-138" hash="e927ee282741" blob="afd0fbdae4c4" */}
 
 ## 变到哪：行段跟随
 
@@ -115,37 +87,54 @@ hunk 表进纯函数，旧行段映到今天。这个函数不认识 git，谁�
 三条判据：**没碰到就平移**（上面插了几行，段整体下移）；**碰到就取并集**（段内没动的行映过去，
 碰到段的 hunk 的新行也算进来）；**段内每一行都落在纯删除 hunk 里就是 vanished**。
 
-映完之后还要再比一次段哈希——这就是判定的入口：
+映完之后再比一次段哈希，这才是判定：
 
-{/* ref file="../packages/docfirst-workflow/src/host/git-comparator.ts" lines="132-146" hash="ae21c216db93" blob="4cc1fe291fa0" */}
+{/* ref file="../packages/docfirst-workflow/src/engine/compare.ts" lines="88-97" hash="36a8311c0e6c" blob="29bf0bfed8b4" */}
 
 <Note>
-  **绿只认段哈希**。hunk 说「没碰到这段」也照样比一遍：行映射跟内容对不上时（记录被手改过之类），
-  宁可报黄让人复核，也不能把红判成绿。
+  **绿只认段哈希**。hunk 说「没碰到这段」也照样比一遍：行映射跟内容对不上时，宁可报黄让人复核，也不能把红判成绿。
 </Note>
 
-## 红有三种理由
+## 取不到旧内容：按段哈希滑窗
+
+文件不在任何仓里、确认后没提交就又改了、浅克隆、仓按 CRLF 存，都取不到旧内容。这时比较器按段长在整个文件里
+逐行滑一遍，找段哈希相同的窗口；有几处相同时取离旧位置最近的一处，两处一样近就不猜：
+
+{/* ref file="../packages/docfirst-workflow/src/engine/compare.ts" lines="37-56" hash="a53b5891c4bc" blob="29bf0bfed8b4" */}
+
+找到就是绿，带今天的行号，确认时写回；找不到是黄 `unlocated`（位置不明），没有 diff，行号停在记号上的位置；
+记号上那几行已经超出文件才是红：
+
+{/* ref file="../packages/docfirst-workflow/src/engine/compare.ts" lines="99-103" hash="be64a13f865a" blob="29bf0bfed8b4" */}
+
+## 红有两种理由
 
 | 理由 | 什么情况 | 站上显示什么 |
 | --- | --- | --- |
-| `vanished` | 整段被删光，或者行段跟到文件外面去了 | 从 blob 取回的旧段 |
-| `file-missing` | 文件不在了 | 从 blob 取回的旧段 |
-| `blob-missing` | 内容变了，而记忆里的 blob 不在对象库——浅克隆（`--depth 1`）、历史被重写并 gc 过、文件所在的仓换了或没了 | 没有旧内容，得重新确认 |
+| `vanished` | 整段被删光，或者行段跟到文件外面去了 | 取得到旧内容时显示确认时那段 |
+| `file-missing` | 文件不在了 | 取得到旧内容时显示确认时那段 |
 
-前两种旧内容还取得回来，第三种取不回来——所以它单独一种理由，说清楚「重新确认一次」，
-而不是含糊地说「代码没了」。内容一字没变时用不着旧内容，blob 在不在都判绿。文件改名不追：
-改了名就是 `file-missing`，重钉。
+取不到旧内容不是红，只是少了 diff。文件改名不追：改了名就是 `file-missing`，重新钉。
+
+## 本仓未提交的改动：check 靠 status 认
+
+check 要知道一处黄灯是不是这次改动引起的：被钉的文件（目录树是那个目录）跟文档在同一个仓里，并且在那个仓的
+`git status` 里出现（工作区或暂存区跟 HEAD 不一样，或者未跟踪），这个黄就算红。每个仓一次 check 只问一次 status：
+
+{/* ref file="../packages/docfirst-workflow/src/host/git.ts" lines="189-209" hash="519cd2928353" blob="afd0fbdae4c4" */}
+
+被钉文件在别的仓里、或者改动已经提交，黄灯只报告不拦。命令行怎么报，见[命令行](/docs/modules/cli)；为什么这样拦，见
+[同提交复核](/trajectory/2026-09-25-drift-handled-in-same-commit)。
 
 ## 归一化：站展示什么就哈希什么
 
-{/* ref file="../packages/docfirst-workflow/src/engine/span.ts" lines="13-25" hash="58a6efcffcd8" blob="5ea56b31537b" */}
+{/* ref file="../packages/docfirst-workflow/src/engine/span.ts" lines="20-25" hash="b691171da610" blob="349017fffa50" */}
 
 只做三件事：换行统一成 LF、去每行行尾空白、去掉末尾的空行。**缩进保留、注释保留**——JSDoc 是契约的
 一部分，改了就该黄。
 
-这一个函数被两处共用：展示前的归一化和哈希前的归一化是同一个，几个比较器也是同一个。否则会出现
-「页面上看着一样、状态却是黄的」这种没法解释的事。整文件送进 `git diff` 之前也统一成 LF——
-对象库里存的是 LF，工作区是不是 CRLF 不该改变判定。
+展示前和哈希前用同一个函数，否则会出现「页面上看着一样、状态却是黄的」这种没法解释的事。算 blob 名和送进 `git diff`
+的整文件也先统一成 LF：对象库里存的是 LF，工作区是不是 CRLF 不该改变判定。
 
 接着读 [判定层](/docs/modules/engine) 看四种状态怎么串起来，或者 [环境层](/docs/modules/host)
-看记忆怎么按文件位置分派、这些东西各住哪个文件。
+看旧内容来源和未提交改动的探针在哪装进去。

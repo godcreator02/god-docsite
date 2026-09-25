@@ -2,12 +2,12 @@
  * 这个站的术语表——**正本就是这份数据**：页面上标出来的词、鼠标移上去看到的那句定义，
  * 全从这儿来。改词改这里，站构建时自动重新标注。
  *
- * 收词的判据（正本是随 cli 发的 skill「docfirst-docs」，这儿只记结论）：
+ * 收词的判据（正本是随工作台插件发的 skill「docfirst-docs」，这儿只记结论）：
  *   收 这个项目自己造的词、通用词在这里有特定含义的、外来框架里读者最容易卡住的词
  *   不收 通用编程词，不收单字词——单字词会命中一切，建索引那一步会直接报错
  *
  * **定义里不写会变的东西**：函数名、路径、行号、配置项一律不进。这份数据钉不住
- * （它不是 mdx，引用管不到它），写进来就会悄悄腐化。具体的名字留给 `href` 指的那一页，
+ * （它不是 mdx，引用管不到它），写进来就会悄悄过时。具体的名字留给 `href` 指的那一页，
  * 在那儿钉。`href` 一律指本站真实存在的页。
  */
 import type { TermEntry } from "@godcreator/docfirst-workflow/fumadocs";
@@ -17,12 +17,12 @@ export const terms: TermEntry[] = [
     term: "引用",
     aliases: ["reference"],
     def: "文档里一句论断跟一段真实源码之间的绑定。代码变了，这句话旁边就变色——文档跟代码不符会当场看出来。",
-    href: "/docs/modules/core",
+    href: "/docs/modules/engine",
   },
   {
     term: "记号",
-    def: "写在 mdx 里、代表一条引用的那一行。两态：人手写的草稿态，和确认之后机器写回的正式态。",
-    href: "/docs/modules/core",
+    def: "写在 mdx 里、代表一条引用的那一行。两态：人手写的草稿态，和确认之后机器写回的正式态；确认时留下的记录就写在正式态的属性上。",
+    href: "/docs/modules/engine",
   },
   {
     term: "投影",
@@ -32,34 +32,44 @@ export const terms: TermEntry[] = [
   },
   {
     term: "状态点",
-    def: "每条引用旁边那个小圆点：绿是新鲜，实心黄是代码变了待复核，空心黄是还没确认，红是指向的代码不存在。",
-    href: "/docs/modules/core",
+    def: "每条引用旁边那个小圆点：绿是新鲜，实心黄是代码变了待复核，空心是还没确认，红是指向的东西不在了。",
+    href: "/docs/modules/engine",
   },
   {
     term: "比较器",
     aliases: ["comparator"],
-    def: "判断被钉住的那段代码有没有变过的那套办法。有 git 的仓靠提交历史比，没有的改用内容摘要比。",
-    href: "/docs/modules/project",
+    def: "判断被钉住的那段代码有没有变过的那套办法：先比这段的指纹，再取出确认时的整份文件、跟着改动找这段今天在哪；取不到旧内容就在整个文件里按指纹找。",
+    href: "/docs/modules/engine",
   },
   {
-    term: "格式包",
-    def: "把一种文档格式接进这套机制的那个包。识别记号、写回记号都归它，换一种格式就是换一个包。",
-    href: "/docs/modules/format-md",
+    term: "格式实现",
+    def: "把一种文档格式接进这套机制的那部分代码。识别记号、写回记号、按原文渲染都归它，换一种格式就是换一份实现，判定不动。",
+    href: "/docs/modules/fumadocs",
+  },
+  {
+    term: "现状区",
+    def: "文档站内容目录下写「此刻是什么」的那些目录。除了轨迹与未来两个固定名字，其余目录都是现状区，全部进核对。",
+    href: "/docs/modules/host",
+  },
+  {
+    term: "生成正本",
+    def: "README、AGENTS.md、SKILL.md 这类生成物的 mdx 源，放在现状区里。改正本再重新渲染；直接改生成物，下一次渲染就被覆盖。",
+    href: "/docs/modules/host",
   },
   {
     term: "名册",
     aliases: ["roster"],
     def: "站里用到的自定义组件，以及它们在机读版里该转成什么文本的那张表。表外的组件会直接报错。",
-    href: "/docs/modules/format-fumadocs",
+    href: "/docs/modules/fumadocs",
   },
   {
     term: "机读版",
     def: "同一篇文档给 AI 读的那个版本：代码现读、带来源行，放进上下文就能用。跟站上那份是同一份内容的两种呈现。",
-    href: "/docs/modules/cli",
+    href: "/docs/modules/fumadocs",
   },
   {
     term: "轨迹卡",
-    def: "一次方向了断的记录：此路不通、转向、被取代、确定采纳。写下来就冻结，不钉还在变的代码。",
+    def: "一次方向决定的记录：此路不通、转向、被取代、确定采纳。写下来就不再改，不钉还在变的代码。",
     href: "/docs/modules/trajectory",
   },
   {
@@ -75,6 +85,6 @@ export const terms: TermEntry[] = [
   {
     term: "fumadocs",
     def: "这个站用的文档框架，跑在 Next 上。它管导航、搜索、页面排版，这套机制只往它的处理管线里加插件。",
-    href: "/docs/modules/format-fumadocs",
+    href: "/docs/modules/fumadocs",
   },
 ];

@@ -1,182 +1,140 @@
 ---
 title: 环境层 host
-description: 读配置装出一个判定服务；记忆按被引文件的位置分派；git 与摆放两条线住这儿
+description: 读配置装出一个项目；读取器、git 版的旧内容来源、未提交改动的探针、生成正本的摆放都在这一层
 ---
 
 # 环境层 host
 
-**本页回答**：`@godcreator/docfirst-workflow` 的 `src/host/` 把哪些零件装进判定服务、一处引用拿到哪种记忆是谁决定的、一篇 mdx 正本怎么摆到落点上、换一个读取器或记录簿要动哪儿。
+**本页回答**：环境层把哪些东西装进判定服务、给命令行和站提供哪些接口、依赖外面的什么，以及它刻意不做什么。
 
-## 管什么
+它是包 `@godcreator/docfirst-workflow` 的 `packages/docfirst-workflow/src/host/` 目录，入口是 `src/host/index.ts`；
+包的主出口只转出其中的 `loadProject` 与它的类型，别的只给包里的其他层和仓里的测试用。
 
-碰环境的活全在这一层：读盘、起 git 子进程、写记录簿、把生成物摆到落点。
+## 功能
 
-{/* ref file="../packages/docfirst-workflow/src/host/index.ts" lines="1-9" hash="17921e11aa49" blob="41e5fc3c025a" */}
+碰环境的事都在这一层：读盘、起 git 子进程、把生成物写到落点。
 
-一个项目 = 一个根目录 + 一份 `docfirst.config` + 一本记录簿。装配把三者串起来，交出一个装好的项目——判定服务是它的主体，摆放挂在旁边：
+{/* ref file="../packages/docfirst-workflow/src/host/index.ts" lines="1-9" hash="fb6ca3070d0b" blob="cab2db765e61" */}
 
-{/* ref file="../packages/docfirst-workflow/src/host/load.ts" lines="1-5" hash="4d10f7880d72" blob="3e34c0a3250b" */}
+**装配项目。** 一个项目是一个根目录加一份 `docfirst.config`。装配读配置、造读取器和旧内容来源、交给判定层建服务，
+再把摆放一起装进项目；分区按约定，不在配置里登记：
 
-零件是四样：**读取器**（读工作区文件、列目录名字表、看路径是文件还是目录）、**json 记录簿**、**比较器**、加上配置里声明的格式名单。比较器是这一层代码最多的部分——`auto` 按被引文件的位置挑记忆，git 那条线（定位文件在哪个仓、取 blob、出 hunk 表、跟着行段走）也住这儿，因为它要起子进程，而判定层不起。
+{/* ref file="../packages/docfirst-workflow/src/host/load.ts" lines="1-9" hash="54a253641e58" blob="485e0158da13" */}
 
-**摆放是另一部分。** 配置的 `outputs` 里，一篇 mdx 正本挂着几个落点（仓根的 README、AGENTS.md、包内的 SKILL.md）；摆放把它渲成一份干净 md、戴上点名的 frontmatter 字段、写到每个落点上，也负责回头核对盘上那份还跟不跟源一致。它落在这一层的理由跟 git 那条线一样：要写盘、要问格式要渲染，判定层两样都不做。
+现状区就是内容根下除 `trajectory/`、`future/` 之外的全部，目录里的和直接放在内容根上的文档都算，按文档身份排序：
 
-{/* ref file="../packages/docfirst-workflow/src/host/placement.ts" lines="1-13" hash="fb7a13635e74" blob="f2fc99cf264f" */}
+{/* ref file="../packages/docfirst-workflow/src/host/load.ts" lines="146-158" hash="299b55da5597" blob="485e0158da13" */}
 
-## 不知道什么
+为什么分区按约定、不再登记，见[两个固定区](/trajectory/2026-09-25-zones-by-convention)。
 
-**不知道文档是什么格式。** 格式是消费方在配置里挂的，这一层只把名单原样交给判定服务，自己一个格式实现都不 import——`fumadocs` 这个名字只许出现在 `src/fumadocs/` 那一层：
-
-{/* ref file="../tests/boundary.test.ts" lines="143-151" hash="f86f0c003c09" blob="421b08df5caa" */}
-
-方向本身写在一张表上：`host/` 可以用 `engine/` 的类型与纯函数，不许知道 `fumadocs/`、`cli/`。同一个包里编译器不管这件事，这张表加上它那条断言，是这条方向**唯一**的守卫。
-
-{/* ref file="../tests/boundary.test.ts" lines="85-103" hash="13d1489f8de5" blob="421b08df5caa" */}
-
-**不知道状态怎么算。** 判定的编排在 [判定层 engine](/docs/modules/engine)：这一层只交两样东西——观察（读取器给的）和记忆实现（比较器）。绿黄白红是判定层算出来的，命令行和站看到的状态因此必然一致。
-
-**摆放不知道装配的别的部分，也不知道落点是不是文件。** 它认得的外面只有 `PlacingHost` 那一圈：前半是项目面（根、配置、判定服务、组件名册、这篇挂了哪些落点、这篇的原文），后半是生成物的存放（读一个落点、写一个落点）。多的一样摆放也拿不到，`placement.ts` 因此一句 `node:fs` 都不 import。
-
-{/* ref file="../packages/docfirst-workflow/src/host/placement.ts" lines="66-83" hash="c2a0beb7e8d0" blob="f2fc99cf264f" */}
-
-存放那半是**接缝**，两个适配器。生产那份在装配里：落点相对项目根，读写与建父目录都在这几行。
-
-{/* ref file="../packages/docfirst-workflow/src/host/load.ts" lines="144-162" hash="8fc81e30a828" blob="3e34c0a3250b" */}
-
-**摆放认得 fumadocs 留下的两处痕迹，仅此而已。** 站上 `.md` 路由给标题加的锚记、序列化器紧跟标点时保守转义的加粗星号，摆放都认得——认它们只为把产物还原成可读文本，产物是给 agent 直接读的，不该带着站的痕迹。除这两处之外，这一层不认识 fumadocs 的任何东西：不认识它的集合、loader、组件表，也不 import 它。这是一处真实的轻微耦合，写在这儿比藏起来强。
-
-{/* ref file="../packages/docfirst-workflow/src/host/placement.ts" lines="85-92" hash="72a15bcbe930" blob="f2fc99cf264f" */}
-
-## 数据结构
-
-**配置的形状**就是这一层对消费方的全部契约面——声明挂哪些格式、哪几个目录进 check、记录簿落哪、用哪种记忆、生成物摆哪、组件名册、轨迹卡目录：
-
-{/* ref file="../packages/docfirst-workflow/src/host/load.ts" lines="18-41" hash="656ae831ae95" blob="3e34c0a3250b" */}
-
-**落点两种写法，归一之后是同一张表。** 一个落点要么是一个相对项目根的路径，要么是 `{ to, frontmatter }`——后者点名 mdx 源头部的哪几个字段随行到生成物（SKILL.md 要的那两个就是这么来的）；字符串写法的意思是「整段 frontmatter 剥掉」。
-
-{/* ref file="../packages/docfirst-workflow/src/host/placement.ts" lines="18-29" hash="bc0575277bf3" blob="f2fc99cf264f" */}
-
-**一个落点核对完是四态加一个判定。** 四态说的是发生了什么：生成物跟源一致、生成物还不在、跟源不一致、源头部缺点名的字段（缺哪几个一并交回）。判定是另一个布尔字段，读报告的人照它决定要不要重摆——四态怎么归到「新不新鲜」由这儿说了算，命令行和工作台插件不必各解释一遍。
-
-{/* ref file="../packages/docfirst-workflow/src/host/placement.ts" lines="31-49" hash="83aeb6075d69" blob="f2fc99cf264f" */}
-
-**git 记忆记什么**：blob、commit、旧 blob 里的行段、段哈希。不记仓在哪——blob 是内容寻址的，核对时从文件位置重新找仓，所以同一条记录换台机器、换个 clone 路径照样认得。
-
-{/* ref file="../packages/docfirst-workflow/src/host/git-comparator.ts" lines="22-29" hash="fb814f8cc9f3" blob="4cc1fe291fa0" */}
-
-**记录簿落盘就是一个 json**，两层键：文档 → 目标 → 记录。整个实现一眼看得完，`save` 只在内容真变了才写盘——记录簿会被构建工具登记成依赖，白改一次 mtime 就是一次全站重编。
-
-{/* ref file="../packages/docfirst-workflow/src/host/json-ledger.ts" hash="60329393528e" blob="76cfa9c4ea10" */}
-
-## 提供的接口
-
-**`loadProject(root)`** 是唯一入口，交回装好的项目。同一个根只装配一次：站构建时几十个 loader 并发调它，没这一条就是几十次读配置、几十本记录簿。
-
-{/* ref file="../packages/docfirst-workflow/src/host/load.ts" lines="83-91" hash="f544b31667f5" blob="3e34c0a3250b" */}
-
-配置里的 `comparator` 有四种写法。强制成 `git` 或 `hash` 时只换掉行段和整文件那一半，目录树、存在性、名字照旧走判定层那三个：
-
-{/* ref file="../packages/docfirst-workflow/src/host/load.ts" lines="103-110" hash="511c1b91623d" blob="3e34c0a3250b" */}
-
-**`createReader(root)`** 是判定层能看到的全部内容。目录名字表在 git 仓里按 `.gitignore` 过滤（`dist/`、`node_modules/` 不进清单，也不往里走），`.git` 自己去掉；不在仓里就原样列。忽略判定整棵树只问一次 `git status --ignored=matching`，口径跟逐项问 `check-ignore` 相同：被忽略的目录整个算一项，目录本身没被忽略时里面被忽略的文件逐个列出，已跟踪的不算忽略，目标目录本身落在被忽略的目录里就整棵都算被忽略。
+**读取器**把工作区的文件、目录的名字表、路径的类型交给判定层。名字表在 git 仓里按 `.gitignore` 过滤，整棵树只问一次
+`git status --ignored=matching`，不在仓里就原样列：
 
 {/* ref file="../packages/docfirst-workflow/src/host/fs-reader.ts" lines="1-8" hash="ee32300b7c05" blob="f609787e1f36" */}
 
-**`createAutoComparator`** 是默认的那个。被引文件不限于项目自己的仓：另一个单元的仓、上游 clone、被忽略的 `node_modules`、不在任何仓里的目录，都能钉。规则一条——在任何 git 仓里、已跟踪、工作区干净的走 git，本仓外仓一视同仁；仓里但被 `.gitignore` 忽略的走 hash；不在任何仓里的走 hash。未跟踪且没被忽略的、已跟踪但脏的，一律拒并让人先 commit，**不退成 hash**；仓一次提交都没有的也拒。
+**旧内容来源**是判定层 `History` 的 git 版：按被引文件自己的位置找仓，从对象库按 blob 名取确认时的内容；hunk 表用
+`git diff --no-index` 算。取不到就给 `null`，比较器退回滑窗：
 
-{/* ref file="../packages/docfirst-workflow/src/host/auto-comparator.ts" lines="20-32" hash="9a1a35912d82" blob="ac569a12de60" */}
+{/* ref file="../packages/docfirst-workflow/src/host/history.ts" hash="1a854c97c475" blob="764b7aca3945" */}
 
-「该进 git 的东西」不能悄悄退成一份弱记忆，所以只有明确被忽略的才走 hash。文件在哪个仓按它的真实路径定，pnpm 的软链按指向的地方算。文件在 HEAD 里就是已跟踪的，已跟踪的不算忽略，直接走 git、不再问 `check-ignore`；挑的时候问到的 commit 与 blob 跟 git 比较器共用一份，同一个文件不重问。
+这两样背后的 git 细节（按文件位置找仓、blob 名怎么算、hunk 表的缓存）见 [git 原理](/docs/principles/git)。
 
-核对时不看文件在哪，按**记录的 kind** 转发——记录是当时哪种记忆记的，就让哪个比较器判，认不得的 kind 当没确认过：
+**未提交改动的探针**回答「这处黄灯是不是本仓这次改动引起的」，命令行的 check 用它把这种黄灯算红：
 
-{/* ref file="../packages/docfirst-workflow/src/host/auto-comparator.ts" lines="44-48" hash="7c3b50c929db" blob="ac569a12de60" */}
+{/* ref file="../packages/docfirst-workflow/src/host/uncommitted.ts" lines="1-8" hash="7012ae307b16" blob="3cda642bbfcc" */}
 
-一个项目里 git 记录和 hash 记录并存。哪一处拿到的是 hash 记忆，`confirm` 那一行会标出来（见[命令行](/docs/modules/cli)）——写手得知道自己拿到的是弱记忆。
+**摆放**把一篇 mdx 正本变成落点上的生成物：让格式渲出一份 md、带上点名的 frontmatter 字段、写到每个落点；
+核对时用同一份正文跟落点上那份比：
 
-**`createGitComparator`** 管行段和整文件。确认时要过几道检查：得在某个仓里、那个仓得有过提交、文件得在 HEAD 里（未跟踪、被忽略、大小写不符都拒）、工作区得干净；一次确认里每个文件最多问一次 git，工作区内容跟 HEAD 里的 blob 一样就算干净。核对时先比哈希：当前内容的 blob 名等于记录里那个，内容一字没变，不取旧内容、不起 git；变了才从对象库取旧内容，拿 `git diff -U0` 出 hunk 表，把旧行段映到今天：
+{/* ref file="../packages/docfirst-workflow/src/host/placement.ts" lines="1-13" hash="e867c62cab15" blob="ac453a55d54e" */}
 
-{/* ref file="../packages/docfirst-workflow/src/host/git-comparator.ts" lines="132-139" hash="689f9205ac2e" blob="4cc1fe291fa0" */}
+frontmatter 按行原样搬，不解析 YAML：一条字段从它的顶层键那行起、到下一条顶层键为止，缩进的续行跟着走：
 
-**绿只认段哈希**：hunk 说没碰到也再比一次，行映射跟内容对不上时宁可报黄让人复核，也不把红判成绿。整段没了是 `vanished`，文件没了是 `file-missing`，内容变了而 blob 不在对象库（浅克隆、历史重写、换了个仓）是 `blob-missing`。一个进程里同一个 blob 只从对象库取一次、同一对内容只 diff 一次——两样都按内容寻址，记住不会过时；hunk 表还落一份到系统临时目录，下一次 check 直接用。这条线为什么这么设计、blob 名为什么自己算，见 [git 记忆原理](/docs/principles/git)。
+{/* ref file="../packages/docfirst-workflow/src/host/placement.ts" lines="151-159" hash="56d233cf2e94" blob="ac453a55d54e" */}
 
-**`placing`** 是摆放对外的全部接口，挂在装好的项目上，两个方法。`render(doc)` 摆一次：渲一份正文，给每个落点戴上它点名的 frontmatter 字段，写过去，回一张落点清单。`check(doc, listing?)` 只读不写，回每个落点的四态；调用方手上已经有这一篇的清单就传进去，摆放不再判一遍——命令行的 check 刚判完这一篇，就是这么传的。两个方法用的是同一份正文，所以摆完再核对必然新鲜——守着的和摆出去的不可能是两份东西。
+**迁移旧记录。** `migrateLedger(root)` 把旧版的 `.ledger.json` 逐处写进对应的记号，写完删掉这个文件，并列出配置里还要手工改的键。
+它是一次性的，各站迁完后删除；背景见[记录进记号](/trajectory/2026-09-25-records-live-in-markers)。
 
-{/* ref file="../packages/docfirst-workflow/src/host/placement.ts" lines="51-64" hash="b680d4ec74da" blob="f2fc99cf264f" */}
+## 接口
 
-调用方得知道两件事。**空清单不是失败**：这篇没挂落点、没有格式认领它、或者认领它的格式不出 ai 产物，三者任一都回空清单，意思是「这篇没有摆放这回事」，不是「摆了零个」。**缺字段的落点不写**：点名了源里没有的字段，那个落点回 `no-frontmatter` 加缺哪几个，盘上一个字不动——摆一份缺 `name` 的 SKILL.md 比不摆更糟。
+出口是 `index.ts` 一个文件，导出表就是这一层对外的全部：
 
-frontmatter 是**逐行原样搬**的，不解析 YAML：一条字段从它的顶层键行起、到下一条顶层键行止，块式列表和多行标量的缩进续行都跟着走。作者在源里写下的那几行，就是生成物头部那几行，一眼对得上。
+{/* ref file="../packages/docfirst-workflow/src/host/index.ts" hash="e319b557be2e" blob="cab2db765e61" */}
 
-{/* ref file="../packages/docfirst-workflow/src/host/placement.ts" lines="148-156" hash="56d233cf2e94" blob="f2fc99cf264f" */}
+**`loadProject(root)`** 交回装好的项目。同一个根只装配一次：站构建时几十个 loader 并发调它。
 
-正文本身由格式渲，摆放只在上面整形：剥掉整段 frontmatter 与站上的标题锚记、还原逃逸了一半的加粗、去掉开头空行。
+{/* ref file="../packages/docfirst-workflow/src/host/load.ts" lines="75-83" hash="f544b31667f5" blob="485e0158da13" */}
 
-落点的地盘在装配那一刻就查死：目标得相对项目根、不许落进任何一个文档目录（那是源的地盘）、一个目标只许一个文档写。犯一条 `loadProject` 当场抛，check 与 render 都还没轮到。
+**配置的形状**是这一层对消费方的契约：用哪些格式、内容根在哪、组件名册、生成物摆到哪：
 
-{/* ref file="../packages/docfirst-workflow/src/host/placement.ts" lines="117-135" hash="1a79092b00c8" blob="f2fc99cf264f" */}
+{/* ref file="../packages/docfirst-workflow/src/host/load.ts" lines="20-33" hash="6b9c8d4ae651" blob="485e0158da13" */}
 
-## 依赖的接口
+配置只认这四个键，出现别的键装配当场报错，一次列全，每条说清该怎么改：
 
-| 接口 | 用来做什么 | 生产实现 | 测试实现 |
-| --- | --- | --- | --- |
-| `Format`（判定层定） | 认领文档、认出引用、写回；摆放还问它要 ai 产物 | `src/fumadocs/`，由消费方在 `docfirst.config` 里挂上 | `tests/fake-format.ts` |
-| `Reader` / `Ledger`（判定层定） | 观察从哪来、记录存哪 | 本层的 fs 读取器与 json 记录簿 | `tests/repo.ts` 的内存记录簿；读取器用真的 |
-| `Comparator`（判定层定） | 记忆怎么记、变没变怎么判 | 本层的 auto 与 git 版 | 测试里按用例换 `auto` / `hash` / git |
-| `PlacingHost` 的存放那半（本层定） | 读一个落点上现在摆着什么、把生成物摆到一个落点上 | `load.ts` 里那份：落点是项目根下的文件，父目录自己建 | `tests/placing-host.test.ts` 的内存宿主：落点是一张 `to → 内容` 的表 |
-| 判定层的纯函数 | 归一化、段哈希、切片、hunk 解析、行段映射 | `src/engine/`，同一份 | 同一份 |
-| `git` 命令行 | blob、hunk、`check-ignore`、`status` | 子进程，每次调用都带上限 | 临时目录里起的真 git 仓 |
-| `docfirst.config.mjs` | 项目的声明面 | 消费方项目里的活模块，由 Node 原生加载 | 夹具不走 `loadProject`，零件直接装 |
+{/* ref file="../packages/docfirst-workflow/src/host/load.ts" lines="88-89" hash="b6abba6463b8" blob="485e0158da13" */}
 
-子进程一律带超时——卡住的子进程比错误的答案更难查：
+**落点**有两种写法，归一之后是同一张表：一个相对项目根的路径，或者 `{ to, frontmatter }`，后者点名 mdx 正本头部哪几个字段
+带到生成物上；字符串写法表示整段 frontmatter 都去掉。
 
-{/* ref file="../packages/docfirst-workflow/src/host/git.ts" lines="21-22" hash="6c30493d4168" blob="cdee3cab5d19" */}
+{/* ref file="../packages/docfirst-workflow/src/host/placement.ts" lines="19-30" hash="bc0575277bf3" blob="ac453a55d54e" */}
 
-配置必须由 Node 原生加载，两个打包器标记让站的打包器绕开这一句；被它改写成自己的加载器，消费方那份活配置就装不进来了：
+落点在装配时就检查：得相对项目根、不许落进内容根、一个落点只许一篇文档写。违反任何一条，`loadProject` 当场报错：
 
-{/* ref file="../packages/docfirst-workflow/src/host/load.ts" lines="112-116" hash="fa05573d3836" blob="3e34c0a3250b" */}
+{/* ref file="../packages/docfirst-workflow/src/host/placement.ts" lines="120-138" hash="134440fb80cc" blob="ac453a55d54e" */}
 
-## 怎么单独测
+**`placing`** 是摆放对外的全部接口，是装好的项目上的一个字段。`render(doc)` 写一次、回落点清单；`check(doc, listing?)` 只读，
+回每个落点的状态，调用方手上已有这篇的清单就传进来，不再判一遍。两个方法用同一份正文，所以写完再核对必然一致：
 
-分派规则的测试在 `tests/auto-comparator.test.ts`：夹具在临时目录里起**真的 git 仓**，传入**假格式**，记录簿换成内存的。记忆分派要跟 git 的真实行为核对，不能用假仓代替。
+{/* ref file="../packages/docfirst-workflow/src/host/placement.ts" lines="61-74" hash="c816cf25273e" blob="ac453a55d54e" */}
 
-{/* ref file="../tests/auto-comparator.test.ts" lines="1-12" hash="3724968911c6" blob="ef448b0cc20d" */}
+一个落点核对完是五种状态之一，外加一个布尔判定 `fresh`，读报告的人照它决定要不要重新渲染：
 
-夹具本身不走 `loadProject`——临时目录里解析不到包名，零件直接拿来装；完整走一遍装配（真扫目录）在 `tests/cli.test.ts`，地盘规则拒掉哪几种配置在 `tests/cli-outputs.test.ts`。
+{/* ref file="../packages/docfirst-workflow/src/host/placement.ts" lines="32-48" hash="5f3b6d103d1d" blob="ac453a55d54e" */}
 
-{/* ref file="../tests/repo.ts" lines="1-4" hash="e982b29ac20f" blob="512a9f6a63ed" */}
+调用方要知道两件事。**空清单不是失败**：这篇没配落点、没有格式认领它、或者认领它的格式不出生成正本，都回空清单。
+**缺字段、渲染不了的落点不写**：缺了点名的字段回 `no-frontmatter` 和缺哪几个；正本里有渲染不了的东西（草稿记号、缺失的引用、
+组件、mdx 表达式）回 `unrenderable` 和原因，落点上的内容一个字不动。
 
-配置归一化与文档身份那几件全部跨 `loadProject` 看——归一化的结果挂在装好的项目上（`docsDirs`、`placements(doc)`、`docIdOf(path)`），形状不对的配置装配当场拒，所以不必把那几个纯函数导出来单验。项目只有一份配置、`formats` 是空表，不扫目录也不起仓：
+**`createUncommittedProbe(root)`** 造一个探针，只用于一次 check；**`migrateLedger(root)`** 是上面那个一次性迁移；
+**`createReader`**、**`createGitHistory`**、**`createPlacing`** 是装配用的零件，测试换读取器、换旧内容来源、换生成物的存放时直接拿。
 
-{/* ref file="../tests/project-load.test.ts" lines="1-8" hash="e5b5a71dd538" blob="80d736fa3a41" */}
+## 依赖
 
-摆放部分有两份测试，传入的是同样两个适配器。**内存那份**在 `tests/placing-host.test.ts`：落点是一张 Map，一个字节不落盘、一次 git 不起，于是「摆了什么、摆到哪个键上、那份被动过之后判成哪一态」直接看得见。
+**判定层 `src/engine/`**：用它的类型、纯函数（归一化、哈希、hunk 解析）和 `createService`。环境层自己不算状态，
+没有它就没有服务可装。
 
-{/* ref file="../tests/placing-host.test.ts" lines="36-52" hash="710e9f37ea8f" blob="75fa70977909" */}
+**格式**：由消费方写进配置的 `formats`，环境层只把名单原样交给判定服务，自己一个格式实现都不 import。摆放还要格式出生成正本；
+格式不出，这篇就没有摆放这回事。
 
-**真盘那份**在 `tests/placement.test.ts`：临时目录里起一个真项目，`loadProject` 装好之后直接调两个方法——不起命令行、不劫持 stdout、不 `process.chdir`。摆放的判定不该只有经过命令行才验得到。项目配 `comparator: "hash"`，因此不必起 git 仓：摆放一句 git 都不问，要真仓的是 git 记忆。
+**生成物的存放 `PlacingHost`**：摆放只经这个接口认识外面，前半是项目（判定服务、这篇配了哪些落点、正本原文），
+后半是读一个落点、写一个落点：
 
-{/* ref file="../tests/placement.test.ts" lines="1-9" hash="9bc6e76b27c9" blob="2d1caaa3f81b" */}
+{/* ref file="../packages/docfirst-workflow/src/host/placement.ts" lines="76-90" hash="e3c671c62603" blob="ac453a55d54e" */}
 
-两份一起证明的是这几件：一个落点从「还不在」到摆过去、再核对成「一致」的整条来回；生成物被手改了、被删了各判成哪一态，重摆之后回一致；点名的字段原样随行、没点名的剥掉、字符串写法整段剥掉；点名了源里没有的字段那个落点不写、两个方法都说得出缺哪几个；没挂映射的文档两个方法都回空清单、一个字不写。命令行怎么把这些印成人话、退什么码，归 `tests/cli-outputs.test.ts`。
+生产的存放在装配里：落点是项目根下的文件，父目录自己建。
 
-还有两处从外面守着：`tests/contract.test.ts` 拿产品用的 git 版比较器，验两个格式适配器在同一串改动下状态一致；`tests/boundary.test.ts` 守目录方向与依赖面，文件头写清了它守什么、为什么不许注释掉某一条。
+{/* ref file="../packages/docfirst-workflow/src/host/load.ts" lines="160-175" hash="78f0c6b3ac5b" blob="485e0158da13" */}
 
-{/* ref file="../tests/boundary.test.ts" lines="1-25" hash="dcaf1bb1a8f0" blob="421b08df5caa" */}
+**`git` 命令行**：定位文件在哪个仓、按 blob 取旧内容、算 hunk 表、列被忽略的路径、列有未提交改动的路径。每次调用都带超时与输出上限，
+卡住的子进程比错误的答案更难查。被引的文件和目录都不在任何 git 仓里时，这一层一次 git 都不起：
 
-## 代码地图
+{/* ref file="../packages/docfirst-workflow/src/host/git.ts" lines="17-18" hash="6c30493d4168" blob="afd0fbdae4c4" */}
 
-**在哪**：
+**`docfirst.config.mjs`**：消费方项目里的活模块，必须由 Node 原生加载。两个打包器标记让站的打包器跳过这一句；
+被改写成打包器自己的加载器，消费方的配置就装不进来：
 
-{/* tree dir="../packages/docfirst-workflow/src/host" depth="1" hash="ed309c99c4e0" */}
+{/* ref file="../packages/docfirst-workflow/src/host/load.ts" lines="115-121" hash="5d8ed05b1d87" blob="485e0158da13" */}
 
-**先读** `load.ts`（装配的全貌，配置的形状也在这儿），再读 `auto-comparator.ts`（分派规则，四十行看完）。摆放部分自成一份 `placement.ts`，从文件头的注释读起。这一层的出口是一个文件，导出表就是对外接口——层外生产用的只有 `loadProject`，其余是装配的零件（换比较器、换读取器时拿）与类型；git 那把原语一个都不出这个口，它们是 git 比较器的内部实现：
+## 不做的事
 
-{/* ref file="../packages/docfirst-workflow/src/host/index.ts" hash="55401e917fe9" blob="41e5fc3c025a" */}
+**不认识任何文档格式。** `fumadocs` 这个名字只许出现在 `src/fumadocs/` 那一层：
 
-**读序**：`git.ts` 是子进程原语（定位仓、blob、hunk、忽略判定），不依赖本层任何文件；`git-comparator.ts` 依赖 `git.ts` 加判定层的纯函数；`auto-comparator.ts` 依赖前两者加判定层的 hash 版；`fs-reader.ts` 只依赖 `git.ts`；`json-ledger.ts` 只依赖判定层的键函数；`placement.ts` 只依赖判定层的类型加 `load.ts` 里配置的那个类型，本层别的实现一个不用，`node:fs` 也不用（生成物怎么落地由宿主给）；`load.ts` 依赖全部，交给判定层的 `createService`。
+{/* ref file="../tests/boundary.test.ts" lines="143-151" hash="f86f0c003c09" blob="421b08df5caa" */}
 
-`placement.ts` 与 `load.ts` 之间因此是一个**只有类型的**循环引用：`load.ts` 用摆放的实现，摆放反过来只借它一个 `ProjectConfig` 类型（`import type`，编译期擦掉）。运行时没有这条边，读的时候也不必先读 `load.ts`——从摆放那份文件头读起就行。
+**不算状态。** 绿黄白红都是判定层算的，环境层只提供观察和旧内容，所以命令行和站看到的状态必然一致。
 
-**可跳过**：`dist/` 是构建产物。
+**摆放不碰 `node:fs`。** 生成物怎么落地由 `PlacingHost` 给，`placement.ts` 里没有一句文件读写。
+
+**不往任何对象库写东西。** 被引文件可能在别人的仓里；hunk 表用两个临时文件 `diff --no-index` 算。
+
+**不决定拦不拦提交。** 探针只回答是不是本仓未提交的改动，算不算红由[命令行](/docs/modules/cli)决定。

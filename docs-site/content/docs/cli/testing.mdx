@@ -1,13 +1,13 @@
 ---
 title: 测试与边界
-description: 契约、边界、记号、比较器、站测试各守什么；文档防漂
+description: 几组测试各守什么：判定层、契约、git 那一侧、摆放、边界、站测试；文档本身怎么防漂
 ---
 
 # 测试与边界
 
-这一章回答：这套东西一共几摊测试，各守什么规矩，为什么边界测试要去读依赖图，以及文档本身怎么防漂。
+这一章回答：这套东西一共几组测试，各守什么规矩，为什么边界测试要去读依赖图，以及文档本身怎么防漂。
 
-## 三摊，各自跑
+## 三组，各自跑
 
 | 在哪儿 | 怎么跑 |
 | --- | --- |
@@ -15,39 +15,90 @@ description: 契约、边界、记号、比较器、站测试各守什么；文�
 | `docs-site/`（这个站） | `pnpm test` |
 | `packages/gwb-docfirst-workflow/`（[工作台插件](/docs/modules/plugin)） | `pnpm check`（typecheck + oxlint + vitest） |
 
-插件那一摊用 vitest，是 `node --test` 唯一的例外——它照 devkit 建出来的插件骨架长，不为一个插件把骨架
-掰弯；工作区根的 `test` 脚本因此不去收它。**铺六区那摊的账整个在插件里**，插件对包零依赖那条红线
-也是插件自己守，都归 [工作台插件](/docs/modules/plugin) 那一页；工作区这摊一个字都不管它们。
+插件那组用 vitest，是 `node --test` 唯一的例外：它跟 devkit 建出来的插件骨架一致，不为一个插件改骨架；
+工作区根的 `test` 脚本因此不收它。装配各区的测试、插件对包零依赖那条规矩都由插件自己的测试守，归
+[工作台插件](/docs/modules/plugin) 那一页。
 
-工作区那摊按主题分文件，一个主题一个：
+工作区那组按主题分文件，一个主题一个：
 
-{/* tree dir="../tests" depth="1" glob="*.test.ts" hash="b96fa95b4d7d" */}
+{/* tree dir="../tests" depth="1" glob="*.test.ts" hash="162351a3d538" */}
+
+## 判定层单独测：三样假的
+
+判定层的测试在 `tests/core.test.ts`，传入三样假的：**假格式**、**内存读取器**（它能读到的只有一张文件表）、
+**内存里的旧内容来源**。判定层不读盘、不起进程、不认识任何真格式，这样测正好把这几条也守住：
+
+{/* ref file="../tests/core.test.ts" lines="1-4" hash="bf9bca964602" blob="3f7f931c2523" */}
+
+旧内容来源默认是什么都取不到的这一份：比较器只能滑窗，走到 hunk 表就说明判定顺序错了；要验 hunk 跟随的几条另传一份带旧内容的：
+
+{/* ref file="../tests/repo.ts" lines="27-33" hash="fac97ce041a5" blob="1f63ee05e8b2" */}
+
+假格式整份就是这一个文件。它是 `Format` 底下第二个真适配器（生产那个是 fumadocs 站用的 mdx），判定层、命令行、
+摆放的测试都用它：
+
+{/* ref file="../tests/fake-format.ts" hash="7bc5692991f1" blob="4a30e3e1941e" */}
+
+这组测试证明的是：四种状态的完整来回；一篇文档两个格式都认领时报错；同一段被引两处各带各的记录；一处钉不住只是那一处不动；
+草稿记号的哨兵；没写记录属性的正式记号算未确认；目录树、存在性、名字三种各自的黄红；滑窗的挪位、多处相同时取最近、
+并列不猜、找不到时位置不明；黄灯不带 accept 不动、带了重新记；取得到旧内容时按 hunk 表跟随并给 diff；归一化与行段切片。
+
+记号那条契约由 `tests/marker.test.ts` 拿两个适配器一起验：`parse(marker(t, r))` 必须认回 `t` 与 `r`。认得出只是一半，
+什么时候不认才是这套写法能放进正文的理由——哨兵不齐的、写在句子中间的、动作词不认识的，一律不认：
+
+{/* ref file="../tests/marker.test.ts" lines="75-85" hash="b1cd5b0ee6df" blob="e2299ad39a8b" */}
 
 ## 契约测试：两个适配器摆在一起比
 
-`Format` 这条接缝真有两个适配器——生产是 fumadocs 口味的 mdx，测试是那份假格式。夹具就是这么
-几行，两种格式各写一篇，引的是同一段代码，草稿记号一模一样：
+`Format` 这个接口真有两个适配器，契约测试把它们放在一起比：
+
+{/* ref file="../tests/contract.test.ts" lines="1-8" hash="06a50693aad4" blob="e4bbd3c3d947" */}
+
+夹具就是这么几行，两种格式各写一篇，引的是同一段代码，草稿记号一模一样：
 
 {/* ref file="../tests/contract.test.ts" lines="17-24" hash="bc495b299d37" blob="3467ec7d28c3" */}
 
-然后一串改动跑下来（确认 → 改代码 → 确认 → 上面插两行 → 删函数），断言**两篇的状态完全一致、
-跟到的行段也是同一个**。状态是判定层算的，格式只交引用——不一致就说明有谁抄了近道。
+然后一串改动跑下来（确认 → 改代码并提交 → 不带 accept 不动、带了重新记 → 上面插两行 → 删函数），断言**两篇的状态完全一致、
+跟到的行段也是同一个、记号上的记录也一样**。状态是判定层算的，格式只交引用——不一致就说明有谁绕过了判定层。
 
-它跑在临时的真 git 仓里，比较器就是产品用的那个：
+它跑在临时的真 git 仓里，旧内容来源默认就是产品用的 git 版：
 
-{/* ref file="../tests/repo.ts" lines="70-79" hash="e3bbfb0271b6" blob="512a9f6a63ed" */}
+{/* ref file="../tests/repo.ts" lines="48-52" hash="d9798a887f91" blob="1f63ee05e8b2" */}
+
+## git 那一侧：真 git 仓
+
+比较器接上 git 版旧内容来源之后的行为，在 `tests/git-history.test.ts` 里逐条验：
+
+{/* ref file="../tests/git-history.test.ts" lines="1-9" hash="3aaa7a0f88c3" blob="4b18faa7ce08" */}
+
+读取器的目录名字表按 `.gitignore` 过滤、软链接按真实路径算，在 `tests/reader-tree.test.ts`；check 把本仓未提交改动引起的
+黄灯算红，在 `tests/cli-uncommitted.test.ts`：
+
+{/* ref file="../tests/cli-uncommitted.test.ts" lines="1-5" hash="6f6301b32a95" blob="fdece939eac4" */}
 
 <Note>
-  用真 git 仓而不是打桩：这套机制的判定几乎全压在 git 的行为上（blob 取不取得到、`diff -U0` 的 hunk 头
-  长什么样、`status --porcelain` 什么时候为空）。打桩测的是我们对 git 的想象，不是 git。
-  工作区一律配 `core.autocrlf false`——Windows 上的换行转换会让工作区和 blob 逐字节不同。
+  用真 git 仓而不是打桩：这一侧的行为几乎全看 git（blob 取不取得到、`diff -U0` 的 hunk 头长什么样、
+  `status --porcelain` 列出哪些路径）。打桩测的是我们对 git 的想象，不是 git。
+  工作区一律配 `core.autocrlf false`：Windows 上的换行转换会让工作区和 blob 逐字节不同。
 </Note>
+
+{/* ref file="../tests/repo.ts" lines="54-58" hash="41a94bc7fbdc" blob="1f63ee05e8b2" */}
+
+## 装配与摆放
+
+装配的归一（内容根、落点的两种写法、文档身份）全部经过 `loadProject` 看，在 `tests/project-load.test.ts`；
+完整跑一遍命令行（真扫目录、分区按约定、配置里不认识的键报错）在 `tests/cli*.test.ts` 那几份。
+
+摆放有两份测试，用的是 `PlacingHost` 的两个适配器：`tests/placing-host.test.ts` 的存放是内存里一张表，一个字节不落盘，
+「写了什么、写到哪个键上、被改过之后判成哪种状态」直接看得见；`tests/placement.test.ts` 在临时目录里起一个真项目，
+`loadProject` 之后直接调两个方法，不经命令行。命令行怎么把摆放的结果打成人话、退什么码，归 `tests/cli-outputs.test.ts`。
+
+一次性迁移 `docfirst migrate-ledger`（旧版 `.ledger.json` 写进记号）在 `tests/migrate-ledger.test.ts`。
 
 ## 边界测试：读目录方向，不读源码措辞
 
-主包一个包四层，「谁能依赖谁」**不再由 pnpm 的严格 `node_modules` 兜着**——同一个包里，
-`engine/` 里随手写一句 `import "../host/git.ts"` 编译器不会吭一声。所以这份测试是塌包之后
-**唯一**的边界守卫，它守的第一样就是目录方向，列的是禁止面不是允许面：
+主包一个包四层，同一个包里「谁能依赖谁」编译器不管：`engine/` 里随手写一句 `import "../host/git.ts"`
+编译器不会报错。这份测试是这条方向**唯一**的守卫，它守的第一样就是目录方向，列的是禁止面不是允许面：
 
 {/* ref file="../tests/boundary.test.ts" lines="98-103" hash="cb37b2f53b68" blob="421b08df5caa" */}
 
@@ -61,40 +112,29 @@ description: 契约、边界、记号、比较器、站测试各守什么；文�
 
 <Note>
   **它报红的时候，红的是设计，不是测试。** 真要改方向，改的是那张表加一段说明为什么——
-  不是把断言删掉，更不是为了让门禁绿注释掉某一条。
+  不是把断言删掉，更不是为了让门禁变绿注释掉某一条。
 </Note>
-
-## 记号与比较器：各守一条硬账
-
-- **记号**：`parse(marker(t))` 认回 `t`（两个适配器、五类目标一起过）；草稿记号哨兵不齐的、
-  写在句子里的、写在围栏里的、动作词不认识的，一律不认；写回幂等——确认过的文档再确认一次，
-  一个字不变。
-- **五类目标**：目录树名字多了少了黄带 diff、目录没了红；存在性没了红、类型变了红、断言不在却出现了红；
-  名字找不到红；整文件末尾追加也黄。
-- **比较器**：git 版与 hash 版在同一串改动下状态一致；git 版的行段跟随、`vanished`、`blob-missing`、
-  未提交拒确认，各一条；hash 版的滑窗（挪了跟上、改了位置不明、撞车取最近、并列不猜）各一条；
-  auto 版按位置分派——忽略走 hash、仓外走 hash、另一个仓走 git（脏了拒、挪了跟、改了给 diff）、
-  未跟踪拒、没提交过的仓拒、软链接按真实路径算，各一条。
 
 ## 站测试：不起 Next，走同一条链
 
-`register()` 把 fumadocs 的 Node loader 挂进 Node，`import` 一篇 `.mdx` 走的就是站构建那条链——
-不用起服务器，也不是另写一条模拟。断言四样：每条引用在页面上都有一个带 `data-dot` 和来源标题的 `pre`、
+`register()` 把 fumadocs 的 Node loader 注册进 Node，`import` 一篇 `.mdx` 走的就是站构建那条链——
+不用起服务器，也不是另写一条模拟。断言四样：每条引用在页面上都有一个带 `data-dot` 和来源标题的元素、
 组件由 React 表画出来（没有裸标签漏出去）、`_markdown` 里有来源行且组件被压平、以及**这个站自己全绿**。
 
-{/* ref file="tests/page.test.mjs" lines="120-129" hash="20cece7ee85f" blob="6563bf8b4551" */}
+{/* ref file="tests/page.test.mjs" lines="120-128" hash="10ebafcc9456" blob="042335e112b4" */}
 
 <Note>
-  站测试**不跟命令行比状态**：算状态的是同一个 service，比出来只能相等，比了也证明不了什么。
-  跨调用方的比对留给起站抓 `.md` 路由，跟 `render` 落在 `out/` 的那份产物逐字节对。
+  站测试**不跟命令行比状态**：算状态的是同一个服务，比出来只能相等，比了也证明不了什么。
+  跨调用方的比对留给起站抓 `.md` 路由。
 </Note>
 
 ## 文档防漂：这个站自己就是测试
 
 每一章都钉着本仓源码的真实行段。源码改了，那一章的状态点变色，`pnpm docfirst check` 报出来，
-站测试那条「全是绿的」直接失败——**文档跟不上代码就过不了门禁**。
+站测试那条「全是绿的」直接失败——**文档跟不上代码就过不了门禁**。本仓未提交的改动引起的黄灯，check 直接算红，
+要在改代码的同一个提交里复核。
 
-哪些文章允许没有引用，由 frontmatter 明说，测试按这个态度放行：
+哪些文章允许没有引用，由 frontmatter 明说，测试按这个标记放行：
 
 {/* ref file="tests/page.test.mjs" lines="50-51" hash="cfcbeab7ba70" blob="6563bf8b4551" */}
 
