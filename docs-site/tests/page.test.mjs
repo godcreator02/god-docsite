@@ -71,7 +71,10 @@ test("站里得有文档；每篇要么钉了源码，要么 frontmatter 明说 
 test("每条引用在页面上都有一个带状态点颜色的元素：代码块和芯片是 pre、写着来源的标题；目录树是 Files 容器、根文件夹叫来源", () => {
   // 这里没铺站的 pre 组件（tsx 进不了 Node），验的是 rehypeCode 按白名单放到 pre 上的属性和注入到 Files 上的属性；
   // 状态点本身由 next build 出
-  const attr = (tag, name) => new RegExp(`\\b${name}="([^"]*)"`).exec(tag)?.[1];
+  // 静态 html 里属性值的引号与 & 是转义过的，还原之后才能跟来源原文比
+  const unescape = (value) =>
+    value?.replace(/&#x27;/g, "'").replace(/&quot;/g, '"').replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&amp;/g, "&");
+  const attr = (tag, name) => unescape(new RegExp(`\\b${name}="([^"]*)"`).exec(tag)?.[1]);
   for (const [doc, page] of pages) {
     const marks = [...page.html.matchAll(/<(pre|div)\b[^>]*\bdata-dot="[^"]*"[^>]*>/g)].map(([tag, kind]) => ({
       kind,
@@ -86,7 +89,8 @@ test("每条引用在页面上都有一个带状态点颜色的元素：代码�
         assert.equal(marks[i].kind, "div", `${doc} 第 ${i + 1} 处是目录树，该是 Files 容器`);
         assert.ok(page.html.includes(`>${where}<`), `${doc} 第 ${i + 1} 处的根文件夹要叫 ${where}`);
       } else {
-        assert.ok(marks[i].title?.includes(where), `${doc} 第 ${i + 1} 块的标题要写来源，实际是 ${marks[i].title}`);
+        // 标题写在代码块的 meta 串里，放不下双引号，站上换成了单引号
+        assert.ok(marks[i].title?.includes(where.replace(/"/g, "'")), `${doc} 第 ${i + 1} 块的标题要写来源，实际是 ${marks[i].title}`);
       }
     });
   }
