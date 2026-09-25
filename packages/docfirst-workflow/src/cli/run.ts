@@ -4,23 +4,24 @@
  *   docfirst check [--json]                 核对：只读，红退 1；挂了 outputs 映射的文档顺手守生成物新鲜度；
  *                                          配了 trajectory 目录的顺手跑卡校验，病卡也算红。--json 出整份
  *                                          机读报告（形状见 report.ts），退出码不变
- *   docfirst confirm [文档路径…]            确认：出记录、清孤儿、写回文档；有钉不住的整篇拒，打印并退 1
- *                                          文档本身删了、挪了的，它的记录 check 算红、confirm 整个忘掉
- *                                          带路径就是**按页限定**：只动点名的那几篇，别的页与别人的记录一个字不改
+ *   docfirst confirm [文档路径…]            机械写回：未确认的记上记录、挪了位置的写回新行号，再把挂了 outputs
+ *                                          映射的文档重新摆一遍（内容变了才写）。黄灯不动、逐条列出；红的那几处
+ *                                          不动、别的照写，有红退 1。带路径就是**按页限定**：只动点名的那几篇
+ *   docfirst confirm <文档路径…> --accept   另外把点名页里的黄灯按今天的内容重新记；不点名页报错退 2
  *   docfirst render                         渲染：产物落 out/；挂了 outputs 映射的摆到指定落点（不再落 out/）
  *   docfirst trajectory [--json]            列轨迹卡的盘 / 树 / 主干；--json 出 buildTrajectory 的整份模型
  *   docfirst --help | -h | help             打用法，退 0，什么都不动；任一命令后面带 --help / -h 也是
  * 每条命令只收表里认的开关（`FLAGS`），别的开关一律报错退 2、不动手。
- * **四条到此为止**：给一个新骨架铺六区那条不在这儿——那件事只在 agent 手上发生一次、铺的是
- * 模板不是判定，归工作台插件 `@godcreator/gwb-docfirst-workflow` 的 `docfirst.attach`。这儿留的全是
- * 要在**仓**里发生的：各仓的 `pnpm doc` 与 CI 跑的就是这四条。
+ * 给一个新骨架铺各区那件事不在这儿——它只在 agent 手上发生一次、铺的是模板不是判定，归工作台插件
+ * `@godcreator/gwb-docfirst-workflow` 的 `docfirst.attach`。这儿留的全是要在**仓**里发生的：
+ * 各仓的 `pnpm doc` 与 CI 跑的就是这几条。
  * 新引用不用命令：在文档里写一行记号语法（engine/marker.ts）定的草稿记号 @@docfirst ref src/greet.ts:2-3 @@，
- * check 认它、报未确认，confirm 换成该格式的正式记号。
+ * check 认它、报未确认，confirm 换成该格式的正式记号并写上记录。
  */
 import { mkdirSync, writeFileSync } from "node:fs";
 import { join, relative, sep } from "node:path";
 import { targetKey } from "../engine/index.ts";
-import type { Format, Item, Listing } from "../engine/index.ts";
+import type { ConfirmStep, Format, Item, Listing } from "../engine/index.ts";
 import { loadProject } from "../host/index.ts";
 import { buildTrajectory, scanDir } from "@godcreator/docfirst-trajectory";
 import type { CardProblemReport, CheckReport, DocReport, OutputReport, RefReport } from "./report.ts";
@@ -38,23 +39,20 @@ const LABEL: Record<string, string> = {
 const REASON: Record<string, string> = {
   vanished: "整段已被删光",
   "file-missing": "文件不在了",
-  "blob-missing": "记忆里的 blob 不在对象库（浅克隆或历史重写过），重新确认一次",
   "dir-missing": "目录不在了",
   appeared: "断言它不在，它却出现了",
   "type-changed": "文件和目录换了个",
   "text-missing": "文件里没有这个名字了",
-  unlocated: "hash 记忆找不到这段了，位置不明——重读源码、重钉",
+  unlocated: "取不到确认时的内容，这段也找不到了，位置不明——重读源码后 --accept",
 };
-/** 确认时拿到的是哪种记忆：hash 是弱记忆（没有旧内容、变了就找不着），写手得知道 */
-const MEMORY: Record<string, string> = { hash: "（hash 记忆：不在 git 里）" };
 
 /**
- * 各命令认的开关。**不在表里的一律拒**：confirm 把 `--` 开头的参数从页名里筛掉，开关若静默吞掉，
- * `confirm --help` 就成了不带页名的整仓确认——替别人没复核的黄灯签字，而且一声不吭。
+ * 各命令认的开关。**不在表里的一律拒**：confirm 把 `-` 开头的参数从页名里筛掉，开关若静默吞掉，
+ * `confirm --help` 就成了不带页名的全部页确认，而且一声不吭。
  */
 const FLAGS: Record<string, readonly string[]> = {
   check: ["--json"],
-  confirm: [],
+  confirm: ["--accept"],
   render: [],
   trajectory: ["--json"],
 };
@@ -65,13 +63,16 @@ const HELP_FLAGS = new Set(["--help", "-h"]);
 
 export const USAGE = `docfirst——文档钉代码的核对与确认。在有 docfirst.config.mjs 的项目根跑。
 
-  docfirst check [--json]        核对，只读。红退 1；--json 出整份机读报告，退出码不变
-  docfirst confirm [文档路径…]    确认并写回文档与 .ledger.json。
-                                 不带路径 = 整仓确认：别人没复核的黄灯也会被一起确认。
-                                 带路径 = 按页限定：只动点名的那几篇（例：docfirst confirm content/docs/a.mdx）
-  docfirst render                渲染；挂了 outputs 映射的摆到落点
-  docfirst trajectory [--json]   列轨迹卡的盘 / 树 / 主干
-  docfirst --help                打这份用法，什么都不动
+  docfirst check [--json]                核对，只读。红退 1；--json 出整份机读报告，退出码不变
+  docfirst confirm [文档路径…]            机械写回：草稿换成正式记号并记下记录，挪了位置的写回新行号，
+                                         再重新生成挂了 outputs 映射的生成物（内容变了才写）。
+                                         黄灯不动、逐条列出；红的那几处不动、别的照写，有红退 1。
+                                         不带路径 = 全部页；带路径 = 按页限定，只动点名的那几篇
+                                         （例：docfirst confirm content/docs/a.mdx）
+  docfirst confirm <文档路径…> --accept   另外把点名页里的黄灯按今天的内容重新记。复核过才用，必须点名页
+  docfirst render                        渲染；挂了 outputs 映射的摆到落点
+  docfirst trajectory [--json]           列轨迹卡的盘 / 树 / 主干
+  docfirst --help                        打这份用法，什么都不动
 
 不认识的开关一律报错退 2，不会被当作没写。`;
 
@@ -84,7 +85,7 @@ export async function main(argv: string[]): Promise<number> {
   }
   const flags = FLAGS[command];
   if (flags === undefined) {
-    console.error(`不认识的命令：${command}——有 check / confirm / render / trajectory，用法看 docfirst --help`);
+    console.error(`不认识的命令：${command}——有 ${Object.keys(FLAGS).join(" / ")}，用法看 docfirst --help`);
     return 2;
   }
   const unknown = rest.filter((arg) => arg.startsWith("-") && !flags.includes(arg));
@@ -109,84 +110,116 @@ export async function main(argv: string[]): Promise<number> {
 }
 
 /**
- * confirm 的全过程。不带路径是整仓确认；带路径是**按页限定**——只动点名的那几篇。
+ * confirm 的全过程：逐篇机械写回，再把挂了 outputs 映射的全部文档重新摆一遍。
  *
- * 限定是为了让「只改了这几页」的改动能只确认这几页：同一个仓里别人钉的黄还等着他复核，
- * 顺手 confirm 掉就是替别人签字。
- *
- * 孤儿清理分两层，限定模式各自的去处不同：
- *   **一页之内**的孤儿（记录簿里有、这一页正文里已经没有这处引用）由 service.confirm 顺手清。
- *   它本来就只看这一页，限定不限定都成立，照做。
- *   **整仓那层**（记录簿里有、整个项目里已经没有这篇文档）不能按限定后的清单算：那份清单是人
- *   点名的一小撮，拿它当「现存文档的全集」去算，没点名的页会被全部当成「文档已不存在」抹掉。
- *   所以限定模式只清点名了的那几篇——点名一篇已经删掉或挪走的页，意思就是「把它的记录忘掉」，
- *   这也正是挪页时要的：旧路径点一次，新路径点一次，一条命令做完。
+ * 带路径是**按页限定**——只动点名的那几篇：同一个仓里别人钉的黄还等着他复核，顺手签掉就是替别人签字。
+ * `--accept` 签的就是黄灯，所以必须点名页；不点名直接退 2，什么都不动。
+ * 摆放不按页限定：正本改没改、生成物要不要跟，按内容判，内容没变的落点一个字节都不写。
  */
 async function confirmCommand(project: Project, docs: string[], rest: string[]): Promise<number> {
-  const named = rest.filter((arg) => !arg.startsWith("--"));
-  let red = 0;
-  if (named.length === 0) {
-    for (const doc of docs) red += confirm(project, doc, project.read(doc));
-    // 文档本身删了、挪了：它的记录上面那圈看不到，按文档清单一览。check 算红，confirm 整个忘掉
-    for (const doc of project.service.forget(docs)) console.log(`🧹 ${doc}  文档已不存在，记录已清`);
-    return red > 0 ? 1 : 0;
-  }
-
-  const picked = pickDocs(project, docs, named);
-  if ("problem" in picked) {
-    console.error(`不是这个项目里的文档，记录簿里也没有：${picked.problem.join("、")}`);
+  const accept = rest.includes("--accept");
+  const named = rest.filter((arg) => !arg.startsWith("-"));
+  if (accept && named.length === 0) {
+    console.error("--accept 要点名页：docfirst confirm <文档路径…> --accept——签黄灯得说清是哪几页，什么都没动");
     return 2;
   }
-  console.log(`·  按页限定：只动 ${[...picked.live, ...picked.gone].join("、")}，别的页与它们的记录不碰`);
-  for (const doc of picked.live) red += confirm(project, doc, project.read(doc));
-  // 只忘点名的那几篇：留下的 = 现存文档 + 没被点名的失踪文档
-  const drop = new Set(picked.gone);
-  const keep = [...docs, ...project.service.strays(docs).filter((doc) => !drop.has(doc))];
-  for (const doc of project.service.forget(keep)) console.log(`🧹 ${doc}  文档已不存在，记录已清`);
+  let pages = docs;
+  if (named.length > 0) {
+    const picked = pickDocs(project, docs, named);
+    if ("unknown" in picked) {
+      console.error(`不是这个项目里的文档：${picked.unknown.join("、")}——什么都没动`);
+      return 2;
+    }
+    pages = picked.docs;
+    console.log(`·  按页限定：只动 ${pages.join("、")}，别的页不碰`);
+  }
+  let red = 0;
+  for (const doc of pages) red += confirm(project, doc, accept);
+  red += await replaceOutputs(project, docs);
   return red > 0 ? 1 : 0;
 }
 
-/**
- * 按页限定的点名解析：还在的页要确认（live），已经不在、但记录簿里还留着记录的页只清记录（gone）。
- * 两边都对不上就是拼错了——当场报错，不静默跳过：少确认一页比报错难发现得多。
- */
-function pickDocs(project: Project, docs: string[], named: string[]): { live: string[]; gone: string[] } | { problem: string[] } {
+/** 点名解析：三种路径写法都收，对不上的当场报错，不静默跳过——少确认一页比报错难发现得多 */
+function pickDocs(project: Project, docs: string[], named: string[]): { docs: string[] } | { unknown: string[] } {
   const alive = new Set(docs);
-  const strays = new Set(project.service.strays(docs));
-  const live: string[] = [];
-  const gone: string[] = [];
-  const problem: string[] = [];
+  const picked: string[] = [];
+  const unknown: string[] = [];
   for (const raw of named) {
     const doc = project.docIdOf(raw);
-    if (alive.has(doc)) live.push(doc);
-    else if (strays.has(doc)) gone.push(doc);
-    else problem.push(raw);
+    if (alive.has(doc)) picked.push(doc);
+    else unknown.push(raw);
   }
-  if (problem.length > 0) return { problem };
-  return { live: [...new Set(live)], gone: [...new Set(gone)] };
+  return unknown.length > 0 ? { unknown } : { docs: [...new Set(picked)] };
+}
+
+/** 一篇的机械写回：逐处打一行结果，返回这篇的红（缺失与钉不住的） */
+function confirm(project: Project, doc: string, accept: boolean): number {
+  const { text, changed, steps } = project.service.confirm(doc, project.read(doc), { accept });
+  if (changed) project.write(doc, text);
+  let red = 0;
+  for (const step of steps) {
+    const line = confirmLine(doc, step);
+    if (line !== null) console.log(line);
+    if (step.action === "refused") red += 1;
+  }
+  return red;
+}
+
+/** 确认时一处引用打成的那一行；原地没动的绿不打 */
+function confirmLine(doc: string, { item, action, written, problem }: ConfirmStep): string | null {
+  const key = targetKey(item.reference.target);
+  switch (action) {
+    case "recorded":
+      return `✅ ${doc}  ${key}  已确认${item.reference.extra?.draft === true ? "，草稿记号已换成正式记号" : ""}`;
+    case "moved": {
+      const target = written!.target;
+      return `✅ ${doc}  ${key}  内容没变、挪到了 ${target.kind === "span" ? `${target.a}-${target.b}` : "新位置"}，已写回新行号`;
+    }
+    case "accepted":
+      return `✅ ${doc}  ${key}  已按今天的内容重新记下`;
+    case "needs-accept":
+      return `🟡 ${doc}  ${key}  ${LABEL.changed}${detailOf(item)}——复核后 docfirst confirm ${doc} --accept`;
+    case "refused":
+      return `🔴 ${doc}  第 ${item.reference.at + 1} 行 ${key}  ${problem ?? `${LABEL.missing}${detailOf(item)}`}，这处没动`;
+    case "unchanged":
+      return null;
+  }
+}
+
+/** 把挂了 outputs 映射的文档重新摆一遍，内容变了的才写；返回红（源头部缺点名字段的落点） */
+async function replaceOutputs(project: Project, docs: string[]): Promise<number> {
+  let red = 0;
+  for (const doc of docs) {
+    for (const { to, status, missing } of await project.placing.render(doc)) {
+      if (status === "placed") console.log(`→  ${doc}  重新摆放到 ${to}`);
+      if (status === "no-frontmatter") {
+        console.log(`🔴 ${doc} → ${to}  mdx 源的 frontmatter 里没有 ${(missing ?? []).join("、")}——补上再 confirm`);
+        red += 1;
+      }
+    }
+  }
+  return red;
 }
 
 /**
- * check 的全过程：逐篇核对 → 失踪文档 → 卡校验，先攒成一份报告再决定怎么出。
+ * check 的全过程：逐篇核对 → 卡校验，先攒成一份报告再决定怎么出。
  * 人读模式一行一处、边算边打（每篇的行在 check 里就排好了）；`--json` 攒完整份一行打出去。
  * 两种模式算的是同一份报告——红的口径不可能对不上。
  */
 async function checkCommand(project: Project, docs: string[], json: boolean): Promise<number> {
-  const report: CheckReport = { ok: true, red: 0, docs: [], strays: [], trajectory: [] };
+  const report: CheckReport = { ok: true, red: 0, docs: [], trajectory: [] };
   for (const doc of docs) {
     const { report: entry, lines } = await check(project, doc, project.read(doc), project.service.formatFor(doc)!);
     report.docs.push(entry);
     report.red += entry.red;
     if (!json) for (const line of lines) console.log(line);
   }
-  report.strays = project.service.strays(docs);
   report.trajectory = await checkTrajectory(project);
-  report.red += report.strays.length + report.trajectory.length;
+  report.red += report.trajectory.length;
   report.ok = report.red === 0;
   if (json) {
     console.log(JSON.stringify(report));
   } else {
-    for (const doc of report.strays) console.log(`🔴 ${doc}  文档已不存在，记录簿里还留着它的记录——confirm 会清掉`);
     for (const p of report.trajectory) console.log(`🔴 ${p.path}  ${p.field}：${p.reason}（${p.value}）`);
   }
   return report.ok ? 0 : 1;
@@ -230,21 +263,14 @@ async function trajectoryCommand(rest: string[]): Promise<number> {
 
 type Project = Awaited<ReturnType<typeof loadProject>>;
 
-/** 一行说明后面的括号：红的理由，目录树的项数或多了少了哪些 */
+/** 一行说明后面的括号：状态的细分理由，或目录树的项数 */
 function detailOf(item: Item): string {
   if (item.reason !== undefined && REASON[item.reason] !== undefined) return `（${REASON[item.reason]}）`;
-  if (item.reference.target.kind !== "tree") return "";
-  if (item.status === "changed" && item.diff !== undefined) {
-    const marks = item.diff
-      .split("\n")
-      .filter((line) => line.startsWith("+ ") || line.startsWith("- "))
-      .map((line) => `${line[0]} ${line.slice(2)}`);
-    return `（${marks.join("，")}）`;
-  }
-  return item.current === null ? "" : `（${item.current.length} 项）`;
+  if (item.reference.target.kind !== "tree" || item.current === null) return "";
+  return `（${item.current.length} 项）`;
 }
 
-/** 一处引用的机读条目：目标键、种类、状态、记号所在行（1 起）、今天的位置；理由与 diff 有才带 */
+/** 一处引用的机读条目：目标文本、种类、状态、记号所在行（1 起）、今天的位置；理由与 diff 有才带 */
 function refReport(item: Item): RefReport {
   return {
     target: targetKey(item.reference.target),
@@ -258,7 +284,7 @@ function refReport(item: Item): RefReport {
   };
 }
 
-/** 一篇文档核对完的两份产物：机读条目，加人读模式要打的行（顺序：引用、孤儿、名册外组件、摆放目标） */
+/** 一篇文档核对完的两份产物：机读条目，加人读模式要打的行（顺序：引用、名册外组件、摆放目标） */
 interface DocCheck {
   report: DocReport;
   lines: string[];
@@ -272,26 +298,17 @@ async function check(project: Project, doc: string, text: string, format: Format
     items.push(refReport(item));
     lines.push(`${MARK[item.status]} ${doc}  ${targetKey(item.reference.target)}  ${LABEL[item.status]}${detailOf(item)}`);
   }
-  const orphans: string[] = [];
-  for (const orphan of listing.orphans) {
-    orphans.push(targetKey(orphan.target));
-    lines.push(`🔴 ${doc}  ${targetKey(orphan.target)}  孤儿记录：文档里已经没有这处引用`);
-  }
   const components = typeof format.lintComponents === "function" ? format.lintComponents(text, project.roster) : [];
   for (const { name, line } of components) {
     lines.push(`🔴 ${doc}  第 ${line} 行 <${name}>  名册外组件，docfirst.config.mjs 里没给它压平规则`);
   }
   const outputs = await project.placing.check(doc, listing);
   for (const output of outputs) lines.push(placedLine(doc, output));
-  const red =
-    items.filter((item) => item.status === "missing").length +
-    orphans.length +
-    components.length +
-    outputs.filter((output) => !output.fresh).length;
-  return { report: { doc, red, items, orphans, components, outputs }, lines };
+  const red = items.filter((item) => item.status === "missing").length + components.length + outputs.filter((output) => !output.fresh).length;
+  return { report: { doc, red, items, components, outputs }, lines };
 }
 
-/** 一个落点核对完打成的那一行：四态各一句人话，不新鲜的都红 */
+/** 一个落点核对完打成的那一行：每种状态各一句人话，不新鲜的都红 */
 function placedLine(doc: string, output: OutputReport): string {
   const head = `${output.fresh ? "🟢" : "🔴"} ${doc} → ${output.to}`;
   if (output.status === "no-frontmatter") return `${head}  mdx 源的 frontmatter 里没有 ${(output.missing ?? []).join("、")}——补上再 render`;
@@ -300,26 +317,8 @@ function placedLine(doc: string, output: OutputReport): string {
   return `${head}  生成物跟 mdx 源一致`;
 }
 
-function confirm(project: Project, doc: string, text: string): number {
-  const { listing, text: next, changed, problems, pinned } = project.service.confirm(doc, text);
-  if (problems.length > 0) {
-    // 一处钉不住整篇拒：记录簿一条不写，文档一个字不改
-    for (const problem of problems) console.log(`🔴 ${problem}`);
-    console.log(`·  ${doc}  这篇整篇没确认——上面几处先处理掉`);
-    return problems.length;
-  }
-  if (changed) project.write(doc, next);
-  listing.items.forEach((item, i) => {
-    const how = item.reference.extra?.draft === true ? "，草稿记号已换成正式记号" : changed ? "，文档已写回" : "";
-    const memory = MEMORY[pinned[i]?.record.kind ?? ""] ?? "";
-    console.log(`✅ ${doc}  ${targetKey(item.reference.target)}  已确认${how}${memory}`);
-  });
-  for (const orphan of listing.orphans) console.log(`🧹 ${doc}  ${targetKey(orphan.target)}  孤儿记录已清`);
-  return 0;
-}
-
 async function render(project: Project, doc: string, text: string, format: Format): Promise<number> {
-  // 挂了映射的文档只写落点：落点是纯生成物，render 直接覆盖；摆放的全过程归 project，这边只印结果
+  // 挂了映射的文档只写落点：落点是纯生成物，内容变了才写；摆放的全过程归 project，这边只印结果
   const placed = await project.placing.render(doc);
   if (placed.length > 0) {
     let red = 0;
@@ -327,8 +326,10 @@ async function render(project: Project, doc: string, text: string, format: Forma
       if (status === "no-frontmatter") {
         console.log(`🔴 ${doc} → ${to}  mdx 源的 frontmatter 里没有 ${(missing ?? []).join("、")}——补上再 render`);
         red += 1;
-      } else {
+      } else if (status === "placed") {
         console.log(`→  ${doc}  摆放到 ${to}`);
+      } else {
+        console.log(`·  ${doc} → ${to}  没变`);
       }
     }
     return red;

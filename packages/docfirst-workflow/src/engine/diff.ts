@@ -1,6 +1,6 @@
 /**
  * 行段映射与展示。两样都是纯函数，没有 git：
- *   mapRange / parseHunks   吃 hunk 表（谁给的不管，git 比较器给的是 `git diff -U0` 的输出），把旧行段映到新文件
+ *   mapRange / parseHunks   吃 hunk 表（谁给的不管，环境层给的是 `git diff -U0` 的输出），把旧行段映到新文件
  *   renderDiff              朴素 LCS，把两段文本并排成 `- / +`，只给人看
  */
 

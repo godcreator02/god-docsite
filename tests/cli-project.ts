@@ -2,8 +2,8 @@
  * 命令行测试的公共台子：临时真 git 项目、跑命令、收打印。
  *
  * 项目的 docfirst.config.mjs 按绝对 file: 地址引 `fake-format.ts`——临时目录里解析不到包名，
- * 而命令行这一层要验的是它自己（报什么状态、退什么码、记录簿怎么刷），不是某个真格式的
- * 展示区长什么样。假格式的两个形态正好覆盖两条分支：`.md` 有 renderAi，`.html` 是终态产物。
+ * 而命令行这一层要验的是它自己（报什么状态、退什么码、写回了什么），不是某个真格式长什么样。
+ * 假格式的两个形态正好覆盖两条分支：`.md` 有 renderAi，`.html` 是终态产物。
  * 直接调 main，不起子进程：退出码和打印都当场看得见。
  *
  * 台子要 `process.chdir` 到临时目录，那是进程全局的，所以同一个文件里的用例只能串着跑。
@@ -14,7 +14,7 @@ import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { main } from "@godcreator/docfirst-workflow";
-import { CODE, run } from "./repo.ts";
+import { CODE, run, SETTINGS } from "./repo.ts";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 /** 假格式的绝对 file: 地址。Node 直接吃 .ts，配置文件 import 得动 */
@@ -30,9 +30,6 @@ export default { formats: [md, html], docs: "docs", out: "out" };
 
 export const DOC_MD = "# md\n\n@@docfirst ref src/greet.ts:2-3 @@\n\n尾巴\n";
 export const DOC_HTML = '<h1>html</h1>\n<figure>\n  @@docfirst ref src/greet.ts:2-3 @@\n</figure>\n';
-
-/** 身份与换行策略 `-c` 现传，不落 git config——每条 config 都是一个子进程，而这个台子整套测试要搭二十来次 */
-const SETTINGS = ["-c", "user.email=test@example.com", "-c", "user.name=test", "-c", "core.autocrlf=false"];
 
 /** 起一个能被 loadProject 装配的临时项目，跑几条命令，收集打印 */
 export function setupProject(config: string = CONFIG) {

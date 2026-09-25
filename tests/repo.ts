@@ -1,14 +1,14 @@
 /**
- * 测试夹具：临时目录里起一个真 git 仓，一份代码、几篇文档，按需换比较器装配判定服务。
- * 不走 loadProject——临时目录里解析不到包名；装配的零件（host 那层的读取器、比较器，内存记录簿）直接拿来用。
+ * 测试夹具：临时目录里起一个真 git 仓，一份代码、几篇文档，装配判定服务。
+ * 不走 loadProject——临时目录里解析不到包名；装配的零件（host 那层的读取器与旧内容来源）直接拿来用。
  */
 import { execFileSync } from "node:child_process";
 import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
-import { createHashComparator, createService, targetKey, keyToTarget } from "../packages/docfirst-workflow/src/engine/index.ts";
-import type { Comparator, Format, Ledger, MemoRecord, Service } from "../packages/docfirst-workflow/src/engine/index.ts";
-import { createAutoComparator, createGitComparator, createReader } from "../packages/docfirst-workflow/src/host/index.ts";
+import { createService } from "../packages/docfirst-workflow/src/engine/index.ts";
+import type { ConfirmResult, Format, History, Service } from "../packages/docfirst-workflow/src/engine/index.ts";
+import { createGitHistory, createReader } from "../packages/docfirst-workflow/src/host/index.ts";
 
 export const CODE = [
   "// greet",
@@ -24,64 +24,47 @@ export function run(cwd: string, args: string[]): string {
   return execFileSync("git", args, { cwd, encoding: "utf8", timeout: 30_000, stdio: ["pipe", "pipe", "pipe"] });
 }
 
-/** 内存记录簿，够测试用；落盘那份是 host 那层的 json-ledger */
-export function memoryLedger(): Ledger & { dump(): Record<string, Record<string, MemoRecord>> } {
-  const data: Record<string, Record<string, MemoRecord>> = {};
-  return {
-    get: (doc, target) => data[doc]?.[targetKey(target)] ?? null,
-    set(doc, target, record) {
-      (data[doc] ??= {})[targetKey(target)] = record;
-    },
-    list: (doc) => Object.entries(data[doc] ?? {}).map(([key, record]) => ({ target: keyToTarget(key), record })),
-    remove(doc, target) {
-      delete data[doc]?.[targetKey(target)];
-    },
-    docs: () => Object.keys(data).filter((doc) => Object.keys(data[doc] ?? {}).length > 0),
-    save() {},
-    dump: () => data,
-  };
-}
+/** 什么旧内容都取不到的来源：比较器只能滑窗 */
+export const NO_HISTORY: History = {
+  oldText: () => null,
+  hunks: () => {
+    throw new Error("取不到旧内容，不该走到 hunk 表");
+  },
+};
 
 export interface Repo {
   root: string;
   service: Service;
-  ledger: ReturnType<typeof memoryLedger>;
   write(rel: string, text: string): void;
   read(rel: string): string;
   drop(rel: string): void;
   commit(message: string): void;
   statuses(doc: string, text: string): string[];
+  /** 确认一篇并把写回落盘（不带 --accept） */
+  confirm(doc: string, accept?: boolean): ConfirmResult;
   teardown(): void;
 }
 
 export interface RepoOptions {
   formats: Format[];
-  /** 不给就用 git 版；测试换比较器时传 "hash"、"auto" 或自己造的 */
-  comparator?: Comparator | "hash" | "auto";
-}
-
-function comparatorOf(root: string, want: RepoOptions["comparator"]): Comparator {
-  if (want === undefined) return createGitComparator({ root });
-  if (want === "hash") return createHashComparator();
-  if (want === "auto") return createAutoComparator({ root });
-  return want;
+  /** 不给就用 git 版 */
+  history?: History;
 }
 
 /**
  * 身份与换行策略用 `-c` 现传，不落 `git config`——每条 config 都是一个子进程，
  * 而夹具在整套测试里要起二十来次。工作区一律 LF：Windows 上自动换行转换会让工作区和 blob 逐字节不同。
  */
-const SETTINGS = ["-c", "user.email=test@example.com", "-c", "user.name=test", "-c", "core.autocrlf=false"];
+export const SETTINGS = ["-c", "user.email=test@example.com", "-c", "user.name=test", "-c", "core.autocrlf=false"];
 
 /** 起一个临时 git 仓，代码已提交一次 */
-export function setupRepo({ formats, comparator }: RepoOptions): Repo {
+export function setupRepo({ formats, history }: RepoOptions): Repo {
   const root = mkdtempSync(join(tmpdir(), "god-live-doc-"));
   run(root, ["init", "-q", "-b", "main"]);
 
   const api: Repo = {
     root,
-    ledger: memoryLedger(),
-    service: undefined as unknown as Service,
+    service: createService({ formats, reader: createReader(root), history: history ?? createGitHistory(root) }),
     write(rel, text) {
       mkdirSync(dirname(join(root, rel)), { recursive: true });
       writeFileSync(join(root, rel), text);
@@ -93,16 +76,15 @@ export function setupRepo({ formats, comparator }: RepoOptions): Repo {
       run(root, [...SETTINGS, "commit", "-q", "-m", message]);
     },
     statuses: (doc, text) => api.service.resolve(doc, text).items.map((i) => i.status),
+    confirm(doc, accept = false) {
+      const done = api.service.confirm(doc, api.read(doc), { accept });
+      if (done.changed) api.write(doc, done.text);
+      return done;
+    },
     teardown: () => rmSync(root, { recursive: true, force: true, maxRetries: 5 }),
   };
 
   api.write("src/greet.ts", CODE);
   api.commit("起代码");
-  api.service = createService({
-    formats,
-    reader: createReader(root),
-    ledger: api.ledger,
-    comparator: comparatorOf(root, comparator),
-  });
   return api;
 }

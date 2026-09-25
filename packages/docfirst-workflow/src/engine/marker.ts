@@ -1,16 +1,13 @@
 /**
  * 记号语法：**引用怎么写、怎么读**，一处正本。
  *
- * 三样东西住这儿，共同点是它们都在做「文本 ↔ 目标」的翻译，跟目标本身是什么无关：
- *   **语言表** `WORDS`——动作词只有这五个，`toTarget` 是唯一的语义校验点，各格式报错一致
- *   **正式记号的载荷**（`wordOf` / `attrsOf` / `formalOf` / `parseAttrs` / `parseFormal`）——
- *   所有格式共用的那一截，格式只负责在外面套自己的壳（mdx 是花括号注释，md 是 HTML 注释）
- *   **草稿记号**（`draftOf`）与**记录簿的键**（`targetKey` / `keyToTarget`）
- *
- * 从 `types.ts` 里分出来是因为它俩的变化原因不同：接口正本因「引用能指向什么」而变，
- * 这一份因「记号怎么写」而变。域类型只有 `Target` 一族，从 `./types.ts` 借。
+ * 这儿做的都是「文本 ↔ 目标 + 记录」的翻译，跟目标本身是什么无关：
+ *   **语言表** `WORDS` 与每个动作词认的属性 `ATTRS`——`toTarget` / `recordOf` 是唯一的语义校验点，各格式报错一致
+ *   **正式记号的载荷**（`formalOf` / `parseFormal`）——所有格式共用的那一截，格式只负责在外面套自己的壳
+ *   （mdx 是花括号注释）。载荷 = 动作词 + 目标属性 + 记录属性，记录属性只在确认过的记号上出现
+ *   **草稿记号**（`draftOf`）与报告里用的目标文本形态（`targetKey`）
  */
-import type { Target, TreeTarget } from "./types.ts";
+import type { MemoRecord, Target, TreeTarget } from "./types.ts";
 
 /** 正式记号的动作词：ref / tree / exists / absent / has。格式用它拼自己的外壳 */
 export function wordOf(target: Target): string {
@@ -19,8 +16,9 @@ export function wordOf(target: Target): string {
   return target.kind;
 }
 
-/** 正式记号的属性表（有序），格式按 key="value" 摆出来 */
-export function attrsOf(target: Target): Array<[string, string]> {
+type Attrs = Array<[string, string]>;
+
+function targetAttrsOf(target: Target): Attrs {
   switch (target.kind) {
     case "span":
       return [["file", target.file], ["lines", `${target.a}-${target.b}`]];
@@ -35,27 +33,102 @@ export function attrsOf(target: Target): Array<[string, string]> {
   }
 }
 
-/** 正式记号的载荷（所有格式共用的那一截）：`ref file="…" lines="a-b"`、`tree dir="…" depth="1"`…… 值里的引号写成 &quot; */
-export function formalOf(target: Target): string {
-  const attrs = attrsOf(target).map(([k, v]) => `${k}="${v.replace(/"/g, "&quot;")}"`);
+function recordAttrsOf(record: MemoRecord | null): Attrs {
+  if (record === null) return [];
+  switch (record.kind) {
+    case "content":
+      return [["hash", record.hash], ...(record.blob !== undefined ? [["blob", record.blob] as [string, string]] : [])];
+    case "tree":
+      return [["hash", record.hash]];
+    case "exists":
+      return [["type", record.type]];
+    case "has":
+      return [];
+  }
+}
+
+/** 正式记号的属性表（有序）：先目标、后记录，格式按 key="value" 摆出来 */
+export function attrsOf(target: Target, record: MemoRecord | null): Attrs {
+  return [...targetAttrsOf(target), ...recordAttrsOf(record)];
+}
+
+/** 正式记号的载荷：`ref file="…" lines="a-b" hash="…" blob="…"`、`tree dir="…" depth="1" hash="…"`…… 值里的引号写成 &quot; */
+export function formalOf(target: Target, record: MemoRecord | null): string {
+  const attrs = attrsOf(target, record).map(([k, v]) => `${k}="${v.replace(/"/g, "&quot;")}"`);
   return [wordOf(target), ...attrs].join(" ");
 }
+
+const ATTR = /(\w+)="([^"]*)"/g;
 
 /** 载荷 → 属性表。跟 formalOf 是一对 */
 export function parseAttrs(s: string): Record<string, string> {
   const table: Record<string, string> = {};
-  for (const m of s.matchAll(/(\w+)="([^"]*)"/g)) table[m[1]!] = m[2]!.replace(/&quot;/g, '"');
+  for (const m of s.matchAll(ATTR)) table[m[1]!] = m[2]!.replace(/&quot;/g, '"');
   return table;
 }
 
-/** 正式记号的载荷 → 目标：`ref file="…" lines="…"` 这种一整串。格式把外壳剥掉后交给它 */
-export function parseFormal(payload: string, where: string): Target | null {
+const WORDS = new Set(["ref", "tree", "exists", "absent", "has"]);
+
+/** 每个动作词认的属性：目标属性在前，记录属性在后。别的属性一律报错 */
+const ATTRS: Record<string, readonly string[]> = {
+  ref: ["file", "lines", "hash", "blob"],
+  tree: ["dir", "depth", "glob", "hash"],
+  exists: ["path", "type"],
+  absent: ["path", "type"],
+  has: ["file", "text"],
+};
+
+/** 记号上的哈希与 blob 名：12 位小写十六进制 */
+const HEX12 = /^[0-9a-f]{12}$/;
+
+/**
+ * 正式记号的载荷 → 目标与记录。格式把外壳剥掉后交给它；动作词不认识给 null。
+ * 属性写成 `key="value"` 之外的样子、出现这个动作词不认的属性，都报错到 where
+ */
+export function parseFormal(payload: string, where: string): { target: Target; record: MemoRecord | null } | null {
   const m = /^(\w+)\s*(.*)$/s.exec(payload.trim());
-  if (m === null) return null;
-  return toTarget(m[1]!, parseAttrs(m[2]!), where);
+  if (m === null || !WORDS.has(m[1]!)) return null;
+  const word = m[1]!;
+  const rest = m[2]!;
+  const leftover = rest.replace(ATTR, "").trim();
+  if (leftover !== "") throw new Error(`${where}：记号里有认不出的写法（${leftover}）——属性一律写成 key="value"`);
+  const attrs = parseAttrs(rest);
+  const unknown = Object.keys(attrs).filter((key) => !ATTRS[word]!.includes(key));
+  if (unknown.length > 0) throw new Error(`${where}：${word} 不认属性 ${unknown.join("、")}（认的有 ${ATTRS[word]!.join(" / ")}）`);
+  const target = toTarget(word, attrs, where)!;
+  return { target, record: recordOf(word, attrs, where) };
 }
 
-const WORDS = new Set(["ref", "tree", "exists", "absent", "has"]);
+function assertHex(value: string, name: string, where: string): void {
+  if (!HEX12.test(value)) throw new Error(`${where}：${name} 要是 12 位小写十六进制（${value}）`);
+}
+
+/**
+ * 动作词 + 属性表 → 记录。没写任何记录属性给 null（未确认）；`has` 的正式记号本身就是确认过。
+ * 记录属性写了一半（行段有 blob 没有 hash）、值不合法，报错到 where
+ */
+export function recordOf(word: string, attrs: Record<string, string | undefined>, where: string): MemoRecord | null {
+  if (word === "has") return { kind: "has" };
+  if (word === "ref") {
+    if (attrs.hash === undefined) {
+      if (attrs.blob !== undefined) throw new Error(`${where}：记录属性写了一半——有 blob 没有 hash`);
+      return null;
+    }
+    assertHex(attrs.hash, "hash", where);
+    if (attrs.blob === undefined) return { kind: "content", hash: attrs.hash };
+    assertHex(attrs.blob, "blob", where);
+    return { kind: "content", hash: attrs.hash, blob: attrs.blob };
+  }
+  if (word === "tree") {
+    if (attrs.hash === undefined) return null;
+    assertHex(attrs.hash, "hash", where);
+    return { kind: "tree", hash: attrs.hash };
+  }
+  if (attrs.type === undefined) return null;
+  const allowed = word === "absent" ? ["absent"] : ["file", "dir"];
+  if (!allowed.includes(attrs.type)) throw new Error(`${where}：${word} 的 type 只能是 ${allowed.join(" / ")}（${attrs.type}）`);
+  return { kind: "exists", type: attrs.type as "file" | "dir" | "absent" };
+}
 
 /** 动作词 + 属性表 → 目标。语义校验统一住这儿，各格式报错一致；动作词不认识给 null */
 export function toTarget(word: string, attrs: Record<string, string | undefined>, where: string): Target | null {
@@ -92,7 +165,7 @@ export function toTarget(word: string, attrs: Record<string, string | undefined>
  *   @@docfirst tree src @@                      目录树；可带 depth=2、glob=*.test.ts
  *   @@docfirst exists src/store.ts @@           在；absent 是「断言不在」
  *   @@docfirst has src/store.ts "export function save" @@   文件里有这个字面量（带空格就用引号包）
- * 在 md、mdx、html 里都是合法的一行普通文字；check 认它、报未确认；confirm 时格式换成自己的正式形态。
+ * 在 md、mdx、html 里都是合法的一行普通文字；check 认它、报未确认；confirm 时格式换成自己的正式记号。
  */
 const DRAFT = /^\s*@@docfirst\s+(\w+)\s+(.+?)\s+@@\s*$/;
 
@@ -128,7 +201,7 @@ export function draftOf(line: string, where: string): Target | null {
 }
 
 /**
- * 目标的文本形态，给报告和记录簿的键用：
+ * 目标的文本形态，给报告用：
  *   行段 `file:a-b`、整文件 `file:all`、目录树 `tree dir depth=1[ glob=…]`、存在性 `exists path` / `absent path`、
  *   名字 `has file "text"`（text 按 JSON 转义）
  */
@@ -145,23 +218,4 @@ export function targetKey(t: Target): string {
     case "has":
       return `has ${t.file} ${JSON.stringify(t.text)}`;
   }
-}
-
-/** 记录簿的键 → 目标。跟 targetKey 是一对；行段的文件名里有冒号也认得回来（取最后一个冒号） */
-export function keyToTarget(key: string): Target {
-  const tree = /^tree (.+?) depth=(\d+)(?: glob=(.+))?$/.exec(key);
-  if (tree !== null) {
-    const t: TreeTarget = { kind: "tree", dir: tree[1]!, depth: Number(tree[2]) };
-    if (tree[3] !== undefined) t.glob = tree[3];
-    return t;
-  }
-  const exists = /^(exists|absent) (.+)$/.exec(key);
-  if (exists !== null) return { kind: "exists", path: exists[2]!, absent: exists[1] === "absent" };
-  const has = /^has (.+?) ("(?:[^"\\]|\\.)*")$/.exec(key);
-  if (has !== null) return { kind: "has", file: has[1]!, text: JSON.parse(has[2]!) as string };
-  const all = /^(.*):all$/.exec(key);
-  if (all !== null) return { kind: "file", file: all[1]! };
-  const span = /^(.*):(\d+)-(\d+)$/.exec(key);
-  if (span === null) throw new Error(`记录簿里的键不认得：${key}`);
-  return { kind: "span", file: span[1]!, a: Number(span[2]), b: Number(span[3]) };
 }

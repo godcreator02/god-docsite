@@ -1,17 +1,15 @@
 /**
  * 消费方项目的装配。
- * 一个项目 = 一个根目录 + 一份 docfirst.config（声明格式、文档目录、用哪个比较器）+ 一本记录簿。
+ * 一个项目 = 一个根目录 + 一份 docfirst.config（声明格式、文档目录、生成物摆到哪）。
  * loadProject(root) 把这些串起来交出一个判定服务；同一个根只装配一次（站构建时几十个 loader 并发调它）。
  */
 import { existsSync, mkdirSync, readFileSync, readdirSync, statSync, writeFileSync } from "node:fs";
 import { dirname, isAbsolute, join, relative, resolve, sep } from "node:path";
 import { pathToFileURL } from "node:url";
-import { createHashComparator, createKindComparator, createService } from "../engine/index.ts";
-import type { Comparator, Format, Service } from "../engine/index.ts";
-import { createAutoComparator } from "./auto-comparator.ts";
+import { createService } from "../engine/index.ts";
+import type { Format, Service } from "../engine/index.ts";
 import { createReader } from "./fs-reader.ts";
-import { createGitComparator } from "./git-comparator.ts";
-import { createLedger } from "./json-ledger.ts";
+import { createGitHistory } from "./history.ts";
 import { assertTurf, createPlacing, placementsOf } from "./placement.ts";
 import type { OutputTarget, Placement, Placing, PlacingHost } from "./placement.ts";
 
@@ -22,14 +20,10 @@ export interface ProjectConfig {
   docs?: string | string[];
   /** 渲染产物落哪，相对项目根；默认 out */
   out?: string;
-  /** 记录簿文件，相对项目根；默认 .ledger.json */
-  ledger?: string;
-  /** 行段 / 整文件的记忆：auto（默认，按文件位置挑 git 或 hash）、git、hash，或者自己造一个（自己造的得自己管全部五种目标） */
-  comparator?: "auto" | "git" | "hash" | Comparator;
   /** 组件名册（压平规则），格式用；没声明就用格式的默认表 */
   components?: Record<string, unknown>;
   /**
-   * 渲染产物的摆放：文档路径（正斜杠，同记录簿的键）→ 目标数组。每个目标是相对项目根的路径（可以出根），
+   * 渲染产物的摆放：文档身份（相对项目根、正斜杠）→ 目标数组。每个目标是相对项目根的路径（可以出根），
    * 或者 `{ to, frontmatter }`——要生成物保留 frontmatter 里的几个字段时用对象写法。
    * 挂了映射的文档 render 只写目标，不落 out/
    */
@@ -64,7 +58,7 @@ export interface Project {
 const cache = new Map<string, Promise<Project>>();
 
 /**
- * 文档身份：相对项目根、正斜杠。记录簿的键、命令行的报告、站的 loader 都用它。
+ * 文档身份：相对项目根、正斜杠。命令行的报告、outputs 映射的键、站的 loader 都用它。
  * 绝对路径按项目根算；相对路径原样收，`./` 前缀与反斜杠一并归一——命令行点名的路径三种写法都可能。
  */
 export function docIdOf(root: string, path: string): string {
@@ -100,26 +94,12 @@ export function docsDirsOf(config: Pick<ProjectConfig, "docs">): string[] {
   return dirs.map((dir) => dir.replace(/\\/g, "/").replace(/\/+$/, ""));
 }
 
-function comparatorOf(config: ProjectConfig, root: string): Comparator {
-  const want = config.comparator ?? "auto";
-  if (want === "auto") return createAutoComparator({ root });
-  // 强制 git / hash 只管行段和整文件；目录树、存在性、名字照旧走判定层那三个
-  if (want === "git") return createKindComparator({ span: createGitComparator({ root }) });
-  if (want === "hash") return createKindComparator({ span: createHashComparator() });
-  return want;
-}
-
 async function build(root: string): Promise<Project> {
   // 配置是消费方项目里的活模块，必须由 Node 原生加载：站的打包器会把动态 import 改写成
   // 它自己的加载器，两个标记让它绕开这一句（turbopack / webpack 各认一个）
   const configUrl = pathToFileURL(configPathOf(root)).href;
   const config = ((await import(/* turbopackIgnore: true */ /* webpackIgnore: true */ configUrl)) as { default: ProjectConfig }).default;
-  const service = createService({
-    formats: config.formats,
-    reader: createReader(root),
-    ledger: createLedger(join(root, config.ledger ?? ".ledger.json")),
-    comparator: comparatorOf(config, root),
-  });
+  const service = createService({ formats: config.formats, reader: createReader(root), history: createGitHistory(root) });
   const docsDirs = docsDirsOf(config);
   const placements = placementsOf(config);
   assertTurf(root, docsDirs, placements);

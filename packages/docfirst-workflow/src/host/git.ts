@@ -1,21 +1,17 @@
 /**
- * git 是记忆，也是 diff 引擎。
- *
- * - 钉住只对**已提交**的内容做：blob 从 `HEAD:<file>` 取，它被提交树引用、永远不会被 gc
- * - 变没变、变到哪：`git diff -U0` 旧内容对当前内容，解析 hunk 头做行段映射——不自己写 diff 算法
+ * git 那几样：定位文件在哪个仓、按 blob 名取旧内容、出 hunk 表、问工作区哪些文件有未提交的改动。
  *
  * 被引文件在哪个仓，按**文件自己的位置**定（`locate`）：先取真实路径（pnpm 的 `node_modules/@x/y` 是指向
  * 工作区包的软链，得按真实位置算），再从所在目录往上找第一个 `.git`——最里层那个，子模块算自己的仓。
  * 目标是**目录**时走 `locateDir`：从目录自身起找，不先跳一级（目录自己就可能是仓根）。
- * 项目自己的仓、别的仓一视同仁，所以 `HEAD:<rel>` 里的 rel 一律是**那个仓的仓根相对** posix 路径。
+ * 项目自己的仓、别的仓一视同仁，所以 rel 一律是**那个仓的仓根相对** posix 路径。
  */
 
 import { execFileSync } from "node:child_process";
-import { createHash } from "node:crypto";
 import { existsSync, mkdirSync, mkdtempSync, readFileSync, realpathSync, renameSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { basename, dirname, join, relative, resolve, sep } from "node:path";
-import { parseHunks } from "../engine/index.ts";
+import { hashText, parseHunks } from "../engine/index.ts";
 import type { Hunk } from "../engine/index.ts";
 
 /** 每次调 git 都给上限：卡住的子进程比错误的答案更难查 */
@@ -81,71 +77,20 @@ export function locateDir(root: string, dir: string): Located | null {
   return locatedAt(abs, abs);
 }
 
-/** 这个仓有没有过一次提交（HEAD 存在）。刚 init 的仓 HEAD 还没生出来，什么都钉不住 */
-export function hasCommits(repo: string): boolean {
-  return headCommit(repo) !== null;
-}
-
-/** 工作区里这个文件相对 HEAD 有没有改动（含未跟踪） */
-export function isClean({ repo, rel }: Located): boolean {
-  return git(repo, ["status", "--porcelain", "--", rel]).trim() === "";
-}
-
-/** 这个文件是不是被 .gitignore（含全局忽略、info/exclude）忽略了。已跟踪的文件不算忽略 */
-export function isIgnored({ repo, rel }: Located): boolean {
-  try {
-    git(repo, ["check-ignore", "-q", "--", rel]);
-    return true;
-  } catch (err) {
-    // 退 1 是「没被忽略」，别的（退 128 之类）是真出错
-    if ((err as { status?: number }).status === 1) return false;
-    throw err;
-  }
-}
-
-/** 钉住一个文件要的两样：仓的 HEAD commit，与这个文件在 HEAD 里的 blob */
-export interface HeadFacts {
-  commit: string;
-  blob: string;
-}
-
 /**
- * HEAD commit 与这个文件在 HEAD 里的 blob，一次 `rev-parse` 问到。仓还没有提交、文件不在 HEAD 里
- * （未跟踪、被忽略、路径大小写跟 git 记的不一样）都给 null——是哪一种，由调用方逐项再问，好说清楚。
- */
-export function headFacts({ repo, rel }: Located): HeadFacts | null {
-  try {
-    const [commit, blob] = git(repo, ["rev-parse", "HEAD", `HEAD:${rel}`]).trim().split("\n");
-    return { commit: commit!, blob: blob! };
-  } catch {
-    return null;
-  }
-}
-
-/** 仓的 HEAD commit；一次提交都还没有给 null。「有没有过提交」问的就是这一句，别再单独起一次 git */
-export function headCommit(repo: string): string | null {
-  try {
-    return git(repo, ["rev-parse", "--verify", "-q", "HEAD"]).trim();
-  } catch {
-    return null;
-  }
-}
-
-/**
- * 读到过的 blob 内容，键是「仓 + blob 名」。blob 名按内容寻址，同一个名字永远是同一份内容，
+ * 读到过的 blob 内容，键是「仓 + blob 名前缀」。blob 名按内容寻址，一个前缀一旦认出唯一的对象，
  * 记住不会给出过时的答案。同一次 check 里几十处引用钉同一个文件是常态，而 Windows 上起一次 git
- * 要 0.1 秒上下——不记住的话，同一个 blob 一次 check 能被读几十遍。
- * 只记读到了的：不在对象库里的 blob 下一次 fetch 就可能出现，记住「不在」等于把黄判成红。
+ * 要 0.1 秒上下。只记读到了的：不在对象库里的 blob 下一次 fetch 就可能出现。
  */
 const blobCache = new Map<string, string>();
 
-/** `cat-file --batch` 回话的头一行：`<名字> <类型> <字节数>`；对象不在时是 `<名字> missing` */
+/** `cat-file --batch` 回话的头一行：`<名字> <类型> <字节数>`；对象不在时是 `<名字> missing`，缩写有歧义时是 `<名字> ambiguous` */
 const BATCH_HEADER = /^([0-9a-f]+) (\w+) (\d+)$/;
 
 /**
- * 对象库里这个 blob 的内容；不在对象库里（浅克隆 `--depth 1`、历史被重写后 gc 过）给 null。
- * 「在不在」和「是什么」用一次 `cat-file --batch` 一起问到，不分两趟起进程。
- * 回话按字节数切：内容里可能有任何字符，按行切会切错。
+ * 对象库里这个 blob 的内容，blob 可以是缩写。取不到给 null：不在对象库里（没提交过、浅克隆、历史重写后 gc 过）、
+ * 缩写有歧义、缩写认出的不是 blob——都只是「没有旧内容」，由比较器退回滑窗。
+ * 「在不在」和「是什么」用一次 `cat-file --batch` 一起问到；回话按字节数切：内容里可能有任何字符，按行切会切错。
  */
 export function readBlob(repo: string, blob: string): string | null {
   const key = `${repo}\0${blob}`;
@@ -154,33 +99,23 @@ export function readBlob(repo: string, blob: string): string | null {
   const out = execFileSync("git", ["cat-file", "--batch"], { cwd: repo, input: `${blob}\n`, ...LIMITS, stdio: ["pipe", "pipe", "pipe"] });
   const headerEnd = out.indexOf(0x0a);
   const header = out.subarray(0, headerEnd).toString("utf8");
-  if (header === `${blob} missing`) return null;
+  if (header === `${blob} missing` || header === `${blob} ambiguous`) return null;
   const parsed = BATCH_HEADER.exec(header);
-  if (parsed === null || parsed[2] !== "blob") throw new Error(`${repo}：git cat-file --batch 对 ${blob} 的回话认不出（${header}），记录里的应当是一个 blob`);
+  if (parsed === null) throw new Error(`${repo}：git cat-file --batch 对 ${blob} 的回话认不出（${header}）`);
+  if (parsed[2] !== "blob") return null;
   const start = headerEnd + 1;
   const text = out.subarray(start, start + Number(parsed[3])).toString("utf8");
   blobCache.set(key, text);
   return text;
 }
 
-/**
- * 一段文本的 blob 哈希，只算不写。
- *
- * git 的 blob 对象名就是 `sha1("blob " + 字节数 + "\0" + 内容)`，自己算跟 `git hash-object --stdin`
- * 逐字节相同（`tests/hash-text.test.ts` 拿真 git 对拍）。这条路每处行段引用都要走一遍，
- * 起子进程的话一次 check 光这一项就是几十次进程创建。
- */
-export function hashText(text: string): string {
-  return createHash("sha1").update(`blob ${Buffer.byteLength(text)}\0${text}`).digest("hex");
-}
-
 /** 算过的 hunk 表，键是「旧 blob 名 + 新内容的 blob 名」：两头都按内容寻址，同一对内容只 diff 一次 */
 const hunkCache = new Map<string, Hunk[]>();
 
 /**
- * hunk 表的落盘那一层。钉住的那段没变、文件别处改过的引用是绿的，没人会去重新确认，于是每次 check
- * 都要为它 diff 一遍——这样的文件只增不减。键跟内存那层一样按内容寻址，同一对内容的 hunk 表永远不变，
- * 所以不用管失效，所有项目共用一份，放系统临时目录（被清掉只是下次重算）。
+ * hunk 表的落盘那一层。钉住的那段挪了位置、没人会去重新确认的引用，每次 check 都要为它 diff 一遍。
+ * 键跟内存那层一样按内容寻址，同一对内容的 hunk 表永远不变，所以不用管失效，所有项目共用一份，
+ * 放系统临时目录（被清掉只是下次重算）。
  */
 const HUNK_DIR = join(tmpdir(), "docfirst-cache", "hunks");
 
@@ -216,15 +151,14 @@ function writeDiskHunks(path: string, hunks: Hunk[]): void {
 }
 
 /**
- * 旧 blob 与当前文本之间的 hunk 表。两份写成临时文件 `diff --no-index`——被引文件可能在别人的仓里，
- * 不往任何对象库写东西。内容没变的那种不该走到这儿：调用方先比 `hashText`，一样就不必取旧内容。
+ * 旧内容与当前文本之间的 hunk 表。两份写成临时文件 `diff --no-index`——被引文件可能在别人的仓里，
+ * 不往任何对象库写东西。
  */
-export function diffHunks(oldBlob: string, oldText: string, newText: string): Hunk[] {
-  const newBlob = hashText(newText);
-  const key = `${oldBlob}\0${newBlob}`;
+export function diffHunks(oldText: string, newText: string): Hunk[] {
+  const key = `${hashText(oldText)}-${hashText(newText)}`;
   const known = hunkCache.get(key);
   if (known !== undefined) return known;
-  const diskPath = join(HUNK_DIR, `${oldBlob}-${newBlob}.json`);
+  const diskPath = join(HUNK_DIR, `${key}.json`);
   const stored = readDiskHunks(diskPath);
   if (stored !== undefined) {
     hunkCache.set(key, stored);
@@ -250,4 +184,26 @@ export function diffHunks(oldBlob: string, oldText: string, newText: string): Hu
   } finally {
     rmSync(dir, { recursive: true, force: true });
   }
+}
+
+/**
+ * 这个仓里有未提交改动的路径（仓根相对 posix）：工作区或暂存区跟 HEAD 不一样的、未跟踪的。
+ * 未跟踪的目录逐个文件列出来；改名与复制两头的路径都算。
+ * `--no-optional-locks`：status 顺手刷新索引要拿锁，别跟同时在这个仓里干活的人抢。
+ */
+export function uncommittedPaths(repo: string): Set<string> {
+  const out = git(repo, ["--no-optional-locks", "status", "--porcelain", "-z", "--untracked-files=all"]);
+  const paths = new Set<string>();
+  const fields = out.split("\0");
+  for (let i = 0; i < fields.length; i += 1) {
+    const field = fields[i]!;
+    if (field.length < 4) continue;
+    paths.add(field.slice(3));
+    // 改名与复制那一条后面多跟一个原路径字段
+    if (/[RC]/.test(field.slice(0, 2))) {
+      i += 1;
+      if (fields[i] !== undefined && fields[i] !== "") paths.add(fields[i]!);
+    }
+  }
+  return paths;
 }

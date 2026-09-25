@@ -20,7 +20,7 @@
  *   @godcreator/docfirst-workflow/fumadocs/term.css    术语标注的样式
  */
 import { formalOf } from "../engine/index.ts";
-import type { Fill, Reference, Target } from "../engine/index.ts";
+import type { MemoRecord, Reference, Target } from "../engine/index.ts";
 import { recognize } from "./recognize.ts";
 import { parseTree } from "./render.ts";
 import { defaultRoster, unknownComponents } from "./roster.ts";
@@ -29,17 +29,17 @@ import type { Roster } from "./roster.ts";
 export const name = "fumadocs-mdx";
 export const claims = (doc: string): boolean => doc.endsWith(".mdx");
 
-/** 记号：mdx 的花括号注释表达式，载荷是记号语法（engine/marker.ts）定的那一截 */
-export const marker = (target: Target): string => `{/* ${formalOf(target)} */}`;
+/** 记号：mdx 的花括号注释表达式，载荷是记号语法（engine/marker.ts）定的那一截，确认过的带着记录属性 */
+export const marker = (target: Target, record: MemoRecord | null): string => `{/* ${formalOf(target, record)} */}`;
 
 export function parse(text: string): Reference[] {
   return recognize(parseTree(text));
 }
 
-/** mdx 没有展示区，写回只重写标记行（行号可能跟过 diff）。草稿记号也在这一下换成正式记号 */
-export function write(text: string, fills: Fill[]): string {
+/** 写回只重写记号那一行（行号与记录可能都换了）。草稿记号也在这一下换成正式记号；行尾的 \r 留着 */
+export function write(text: string, references: Reference[]): string {
   const lines = text.split("\n");
-  for (const { reference } of fills) lines[reference.at] = marker(reference.target);
+  for (const { target, record, at } of references) lines[at] = marker(target, record) + (lines[at]!.endsWith("\r") ? "\r" : "");
   return lines.join("\n");
 }
 
@@ -61,7 +61,6 @@ export {
   filesOf,
   LABEL,
   langOf,
-  mergeNames,
   metaOf,
   NO_DIR,
   NO_OLD,

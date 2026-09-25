@@ -6,10 +6,10 @@
  *                   让行号跟源文件对得上、`data-dot="…"` 带状态点的颜色。黄「有变动」把改过的行标上 shiki 原生的
  *                   `[!code --]` / `[!code ++]`，旧行新行渲在同一块里（有行注释的语言才行，没有的退成 `diff` 块），
  *                   所以不再另起一块「当前段」，也**不带 lineNumbers**——块里夹着已经不存在的旧行，行号一定对不上源文件。
- *                   红「缺失」显示的是文档写下时那段（从记忆里取回的 old）。黄「位置不明」（hash 记忆找不到这段了）不摆代码。
+ *                   红「缺失」显示的是确认时那段（取得到旧内容时的 old）。黄「位置不明」（取不到旧内容、滑窗也找不到这段）不摆代码。
  *   目录树          fumadocs 自己的 `<Files>` / `<Folder>` / `<File>`：根是一个展开的文件夹，名字按路径切成嵌套；
- *                   容器带 `data-dot` 和 `data-docfirst="tree"`，站的样式表在右上角画状态点。黄的时候旧表新表并起来，
- *                   多的项标 `docfirst-add`、少的标 `docfirst-del`；红只剩一个禁用的根文件夹说目录不在了。
+ *                   容器带 `data-dot` 和 `data-docfirst="tree"`，站的样式表在右上角画状态点。黄的时候摆当前的名字表
+ *                   （记录只有名字表的哈希，多了少了哪些不知道）；红只剩一个禁用的根文件夹说目录不在了。
  *                   AI 那份的标（来源行 + text 清单）在这儿直接打好，stamp 看到就跳过，不去名册里找它。
  *   存在性 / 名字   一行芯片：`code` 节点的 meta 里多一个 `data-chip`，站的 pre 组件看到它就不画代码块，画一行带点的小标签。
  *
@@ -29,8 +29,8 @@ export const NO_OLD = "（没有旧内容）";
 export const NO_DIR = "（目录不在了）";
 export const UNCONFIRMED_SUFFIX = " · 未确认";
 export const UNLOCATED_SUFFIX = " · 有变动，位置不明";
-/** hash 记忆找不到这段了：旧行号上现在是什么不知道，摆出来只会误导，只留这一句 */
-export const UNLOCATED_NOTE = "（hash 记忆找不到这段了，位置不明——重读源码、重钉）";
+/** 取不到旧内容、滑窗也找不到这段：旧行号上现在是什么不知道，摆出来只会误导，只留这一句 */
+export const UNLOCATED_NOTE = "（取不到确认时的内容，这段也找不到了，位置不明——重读源码后 docfirst confirm <页> --accept）";
 export const TREE_SUFFIX = " · 目录树";
 
 const LANG: Record<string, string> = {
@@ -116,31 +116,16 @@ export function diffBlock(lang: string, unified: string, title: string, dot: Dot
 const jsxAttr = (name: string, value: string | null): JsxAttribute => ({ type: "mdxJsxAttribute", name, value });
 const jsx = (name: string, attributes: JsxAttribute[], children: TreeNode[] = []): TreeNode => ({ type: "mdxJsxFlowElement", name, attributes, children });
 
-/** 清单里的一项：相对路径（目录带尾斜杠）+ 变动标记 */
-interface Entry {
-  path: string;
-  mark: " " | "+" | "-";
-}
-
-/** 旧表新表并起来：新有旧没有的 `+`，旧有新没有的 `-`，按路径排序 */
-export function mergeNames(old: string[] | undefined, now: string[]): Entry[] {
-  const before = new Set(old ?? now);
-  const after = new Set(now);
-  const all = [...new Set([...before, ...after])].sort();
-  return all.map((path) => ({ path, mark: !before.has(path) ? "+" : !after.has(path) ? "-" : " " }));
-}
-
 interface Trie {
   name: string;
   dir: boolean;
-  mark: Entry["mark"];
   children: Map<string, Trie>;
 }
 
-/** 平铺的路径表 → 嵌套的 Folder / File 节点 */
-export function filesOf(entries: Entry[]): TreeNode[] {
-  const root: Trie = { name: "", dir: true, mark: " ", children: new Map() };
-  for (const { path, mark } of entries) {
+/** 平铺的名字表（相对路径，目录带尾斜杠）→ 嵌套的 Folder / File 节点 */
+export function filesOf(names: string[]): TreeNode[] {
+  const root: Trie = { name: "", dir: true, children: new Map() };
+  for (const path of names) {
     const dir = path.endsWith("/");
     const parts = path.replace(/\/$/, "").split("/");
     let cur = root;
@@ -148,7 +133,7 @@ export function filesOf(entries: Entry[]): TreeNode[] {
       const last = i === parts.length - 1;
       let next = cur.children.get(part);
       if (next === undefined) {
-        next = { name: part, dir: !last || dir, mark: last ? mark : " ", children: new Map() };
+        next = { name: part, dir: !last || dir, children: new Map() };
         cur.children.set(part, next);
       }
       cur = next;
@@ -156,8 +141,6 @@ export function filesOf(entries: Entry[]): TreeNode[] {
   }
   const render = (node: Trie): TreeNode => {
     const attrs: JsxAttribute[] = [jsxAttr("name", node.name)];
-    if (node.mark === "+") attrs.push(jsxAttr("className", "docfirst-add"));
-    if (node.mark === "-") attrs.push(jsxAttr("className", "docfirst-del"));
     if (!node.dir) return jsx("File", attrs);
     // 有孩子的文件夹默认展开；到深度尽头、没孩子的禁用，点开也是空的
     attrs.push(jsxAttr(node.children.size > 0 ? "defaultOpen" : "disabled", null));
@@ -173,10 +156,9 @@ export function treeNode(item: Item): TreeNode {
   const label = LABEL[item.status];
   const names = item.current ?? [];
   const missing = item.status === "missing";
-  const entries = missing ? [] : mergeNames(item.status === "changed" ? item.old : undefined, names);
   const rootAttrs: JsxAttribute[] = [jsxAttr("name", where), jsxAttr(missing ? "disabled" : "defaultOpen", null)];
-  const inner = missing ? [jsx("File", [jsxAttr("name", NO_DIR)])] : filesOf(entries);
-  const aiText = missing ? NO_DIR : item.status === "changed" && item.diff !== undefined ? item.diff : names.join("\n");
+  const inner = missing ? [jsx("File", [jsxAttr("name", NO_DIR)])] : filesOf(names);
+  const aiText = missing ? NO_DIR : names.join("\n");
   const mark: DocfirstMark = { source: where, label, value: aiText };
   return {
     ...jsx("Files", [jsxAttr("className", "docfirst-files"), jsxAttr("data-docfirst", "tree"), jsxAttr("data-dot", dot)], [jsx("Folder", rootAttrs, inner)]),
@@ -210,7 +192,7 @@ export function nodeFor(item: Item): TreeNode {
     if (item.reason === "unlocated") {
       return codeNode("text", UNLOCATED_NOTE, `${where}${UNLOCATED_SUFFIX}`, dot, { ...mark, value: UNLOCATED_NOTE });
     }
-    // 没有 diff 的比较器退成一块普通的当前段，标题里说清楚
+    // 取不到旧内容就没有 diff：退成一块普通的当前段，标题里说清楚
     if (item.diff === undefined || item.diff === "") return codeNode(lang, current, `${where} · ${LABEL.changed}`, dot, mark, item.lines[0]);
     return diffBlock(lang, item.diff, where, dot, mark);
   }

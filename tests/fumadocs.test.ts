@@ -7,25 +7,29 @@ import assert from "node:assert/strict";
 import * as fumadocs from "../packages/docfirst-workflow/src/fumadocs/index.ts";
 import { DOT_COLOR, applyListing, defaultRoster, docfirstMarkdownOptions, parseMetaString, parseTree, stamp, walk, whereOf } from "../packages/docfirst-workflow/src/fumadocs/index.ts";
 import type { Roster, TreeNode } from "../packages/docfirst-workflow/src/fumadocs/index.ts";
-import type { Item, Listing, Target } from "../packages/docfirst-workflow/src/engine/index.ts";
+import type { Item, Listing, Reference, Target } from "../packages/docfirst-workflow/src/engine/index.ts";
 
 const T: Target = { kind: "span", file: "src/greet.ts", a: 2, b: 3 };
 const CURRENT = ["export function greet(name: string): string {", "  return `hello ${name}`;"];
 const OLD = ["export function greet(name: string): string {", "  return `hi ${name}`;"];
 
-function itemOf(over: Partial<Item>): Item {
+/** 测试里只关心目标与位置，记录一律当没有 */
+type Over = Omit<Partial<Item>, "reference"> & { reference?: Omit<Reference, "record"> };
+
+function itemOf(over: Over): Item {
+  const { reference, ...rest } = over;
   return {
     doc: "a.mdx",
-    reference: { target: T, at: 0, extra: { draft: false } },
+    reference: { record: null, ...(reference ?? { target: T, at: 0, extra: { draft: false } }) },
     current: CURRENT,
-    record: null,
     status: "fresh",
     lines: [2, 3],
-    ...over,
+    ...rest,
   } as Item;
 }
 
-const listingOf = (items: Item[]): Listing => ({ doc: "a.mdx", items, orphans: [] });
+const mark = (target: Target): string => fumadocs.marker(target, null);
+const listingOf = (items: Item[]): Listing => ({ doc: "a.mdx", items });
 /** 把一篇 mdx 过一遍换节点，交回换出来的代码块 */
 function blocksIn(text: string, items: Item[]): TreeNode[] {
   const tree = applyListing(parseTree(text), listingOf(items));
@@ -33,7 +37,7 @@ function blocksIn(text: string, items: Item[]): TreeNode[] {
 }
 
 test("正式记号与草稿记号都换成代码块：meta 写来源、行号、状态点颜色", () => {
-  const text = `${fumadocs.marker(T)}\n\n@@docfirst ref src/greet.ts:2-3 @@\n`;
+  const text = `${mark(T)}\n\n@@docfirst ref src/greet.ts:2-3 @@\n`;
   const items = [itemOf({}), itemOf({ status: "unconfirmed", reference: { target: T, at: 2, extra: { draft: true } } })];
   const blocks = blocksIn(text, items);
   assert.equal(blocks.length, 2);
@@ -43,20 +47,33 @@ test("正式记号与草稿记号都换成代码块：meta 写来源、行号、
   assert.equal(blocks[1]!.meta, 'title="src/greet.ts:2-3 · 未确认" lineNumbers=2 data-dot="unpinned"');
 });
 
+test("带记录的正式记号照样认、照样换", () => {
+  const text = `${fumadocs.marker(T, { kind: "content", hash: "3fa9c2e1b07d", blob: "2689fa073ac6" })}\n`;
+  assert.equal(blocksIn(text, [itemOf({})]).length, 1);
+});
+
 test("标题写今天的位置：行段跟随之后，记号上那几行已经不是这段了", () => {
   const moved = itemOf({ lines: [7, 8] });
-  const blocks = blocksIn(`${fumadocs.marker(T)}\n`, [moved]);
+  const blocks = blocksIn(`${mark(T)}\n`, [moved]);
   assert.equal(blocks[0]!.meta, 'title="src/greet.ts:7-8" lineNumbers=7 data-dot="green"');
 });
 
 test("有变动：diff 渲在同一块里，用 shiki 的 [!code --] / [!code ++]，不带 lineNumbers", () => {
   const changed = itemOf({ status: "changed", reason: "changed", old: OLD, diff: "  export function greet(name: string): string {\n-   return `hi ${name}`;\n+   return `hello ${name}`;" });
-  const block = blocksIn(`${fumadocs.marker(T)}\n`, [changed])[0]!;
+  const block = blocksIn(`${mark(T)}\n`, [changed])[0]!;
   assert.equal(block.lang, "ts");
   assert.equal(block.meta, 'title="src/greet.ts:2-3" data-dot="yellow"');
   assert.match(block.value!, /return `hi \$\{name\}`; \/\/ \[!code --\]/);
   assert.match(block.value!, /return `hello \$\{name\}`; \/\/ \[!code \+\+\]/);
   assert.doesNotMatch(block.meta!, /lineNumbers/, "块里夹着已经不存在的旧行，行号对不上源文件");
+});
+
+test("有变动但取不到旧内容：没有 diff，退成一块当前段，标题说有变动；位置不明的只留一句说明", () => {
+  const plain = blocksIn(`${mark(T)}\n`, [itemOf({ status: "changed", reason: "changed" })])[0]!;
+  assert.equal(plain.meta, 'title="src/greet.ts:2-3 · 有变动" lineNumbers=2 data-dot="yellow"');
+  assert.equal(plain.value, CURRENT.join("\n"));
+  const lost = blocksIn(`${mark(T)}\n`, [itemOf({ status: "changed", reason: "unlocated" })])[0]!;
+  assert.equal(lost.value, fumadocs.UNLOCATED_NOTE);
 });
 
 test("没有行注释的语言：diff 退成一块 diff", () => {
@@ -69,18 +86,18 @@ test("没有行注释的语言：diff 退成一块 diff", () => {
   assert.equal(block.lang, "diff");
 });
 
-test("缺失：显示文档写下时那段；没有旧内容就说没有", () => {
+test("缺失：显示确认时那段；没有旧内容就说没有", () => {
   const gone = itemOf({ status: "missing", reason: "vanished", current: null, old: OLD });
-  const block = blocksIn(`${fumadocs.marker(T)}\n`, [gone])[0]!;
+  const block = blocksIn(`${mark(T)}\n`, [gone])[0]!;
   assert.equal(block.meta, 'title="文档写下时这段是（src/greet.ts:2-3）" data-dot="red"');
   assert.equal(block.value, OLD.join("\n"));
-  const blank = blocksIn(`${fumadocs.marker(T)}\n`, [itemOf({ status: "missing", current: null })])[0]!;
+  const blank = blocksIn(`${mark(T)}\n`, [itemOf({ status: "missing", current: null })])[0]!;
   assert.equal(blank.value, "（没有旧内容）");
 });
 
 test("整文件：标题只写文件名，行号从 1 起", () => {
   const whole: Target = { kind: "file", file: "config.json" };
-  const block = blocksIn(`${fumadocs.marker(whole)}\n`, [itemOf({ reference: { target: whole, at: 0 }, lines: [1, 4], current: ["{", "}"] })])[0]!;
+  const block = blocksIn(`${mark(whole)}\n`, [itemOf({ reference: { target: whole, at: 0 }, lines: [1, 4], current: ["{", "}"] })])[0]!;
   assert.equal(block.meta, 'title="config.json" lineNumbers=1 data-dot="green"');
   assert.equal(block.lang, "json");
 });
@@ -92,8 +109,7 @@ const attrsOf = (node: TreeNode): Record<string, string | true> =>
 test("目录树：换成 fumadocs 的 Files，根是展开的文件夹、名字按路径嵌套，容器带状态点的颜色", () => {
   const tree: Target = { kind: "tree", dir: "src", depth: 2 };
   const names = ["add.ts", "lib/", "lib/deep.ts", "util/"];
-  const files = applyListing(parseTree(`${fumadocs.marker(tree)}\n`), listingOf([itemOf({ reference: { target: tree, at: 0 }, current: names, lines: [1, 4] })]))
-    .children![0]!;
+  const files = applyListing(parseTree(`${mark(tree)}\n`), listingOf([itemOf({ reference: { target: tree, at: 0 }, current: names, lines: [1, 4] })])).children![0]!;
   assert.equal(files.type, "mdxJsxFlowElement");
   assert.equal(files.name, "Files");
   assert.deepEqual(attrsOf(files), { className: "docfirst-files", "data-docfirst": "tree", "data-dot": "green" });
@@ -113,20 +129,19 @@ test("目录树：换成 fumadocs 的 Files，根是展开的文件夹、名字�
   assert.equal(docfirstMarkdownOptions().stringify(files, undefined, state, {}), "<!-- 来源 src/ · 新鲜 -->\n\n```text\n" + names.join("\n") + "\n```");
 });
 
-test("目录树的黄和红：旧表新表并在一棵树里，多的标 add、少的标 del；目录没了只剩一个禁用的根", () => {
+test("目录树的黄和红：黄摆当前的名字表、容器是黄点；目录没了只剩一个禁用的根", () => {
   const tree: Target = { kind: "tree", dir: "src", depth: 1 };
-  const old = ["add.ts", "index.ts", "store.ts"];
+  const now = ["add.ts", "store.ts", "tag.ts"];
   const changed = applyListing(
-    parseTree(`${fumadocs.marker(tree)}\n`),
-    listingOf([itemOf({ reference: { target: tree, at: 0 }, status: "changed", current: ["add.ts", "store.ts", "tag.ts"], lines: [1, 3], diff: "  add.ts\n- index.ts\n  store.ts\n+ tag.ts", old })]),
+    parseTree(`${mark(tree)}\n`),
+    listingOf([itemOf({ reference: { target: tree, at: 0 }, status: "changed", reason: "changed", current: now, lines: [1, 3] })]),
   ).children![0]!;
   assert.equal(attrsOf(changed)["data-dot"], "yellow");
-  const rows = changed.children![0]!.children!.map((n) => [attrsOf(n).name, attrsOf(n).className]);
-  assert.deepEqual(rows, [["add.ts", undefined], ["index.ts", "docfirst-del"], ["store.ts", undefined], ["tag.ts", "docfirst-add"]]);
-  assert.equal((changed.data!.docfirst as { value: string }).value, "  add.ts\n- index.ts\n  store.ts\n+ tag.ts", "AI 那份给 - / + 的清单");
+  assert.deepEqual(changed.children![0]!.children!.map((n) => attrsOf(n).name), now);
+  assert.equal((changed.data!.docfirst as { value: string }).value, now.join("\n"), "AI 那份给当前的名字表");
 
   const gone = applyListing(
-    parseTree(`${fumadocs.marker(tree)}\n`),
+    parseTree(`${mark(tree)}\n`),
     listingOf([itemOf({ reference: { target: tree, at: 0 }, status: "missing", reason: "dir-missing", current: null })]),
   ).children![0]!;
   assert.equal(attrsOf(gone)["data-dot"], "red");
@@ -147,7 +162,7 @@ test("作者手写的 Files 走默认名册：压成一行一个名字，文件�
 test("存在性和名字：一行芯片，meta 带 data-chip，标题就是芯片上的字", () => {
   const absent: Target = { kind: "exists", path: "src/remove.ts", absent: true };
   const has: Target = { kind: "has", file: "src/store.ts", text: "export function save" };
-  const text = `${fumadocs.marker(absent)}\n\n${fumadocs.marker(has)}\n`;
+  const text = `${mark(absent)}\n\n${mark(has)}\n`;
   const blocks = blocksIn(text, [
     itemOf({ reference: { target: absent, at: 0 }, current: [], lines: [1, 1] }),
     itemOf({ reference: { target: has, at: 2 }, status: "missing", reason: "text-missing", current: null, lines: [1, 1] }),
@@ -185,7 +200,7 @@ test("meta 白名单：认 title / lineNumbers / data-dot / data-chip，别的�
 
 test("md 那头：来源行 + 一块干净的代码，diff 标记不漏进 AI 那份", () => {
   const changed = itemOf({ status: "changed", diff: "-   a\n+   b", old: OLD });
-  const block = blocksIn(`${fumadocs.marker(T)}\n`, [changed])[0]!;
+  const block = blocksIn(`${mark(T)}\n`, [changed])[0]!;
   const state = {
     containerFlow: () => "",
     containerPhrasing: () => "",
@@ -235,13 +250,13 @@ test("名册：默认表压平 Note；项目的规则只用 helpers；表外组�
 });
 
 test("围栏里、行内的假记号认不出来——走语法树的理由", () => {
-  assert.deepEqual(fumadocs.parse("```md\n" + fumadocs.marker(T) + "\n```\n"), []);
-  assert.deepEqual(fumadocs.parse(`行内的 ${fumadocs.marker(T)} 不算\n`), []);
+  assert.deepEqual(fumadocs.parse("```md\n" + mark(T) + "\n```\n"), []);
+  assert.deepEqual(fumadocs.parse(`行内的 ${mark(T)} 不算\n`), []);
   assert.deepEqual(fumadocs.parse("```md\n@@docfirst ref src/greet.ts:2-3 @@\n```\n"), []);
 });
 
 test("清单里没有的标记：报到行，不静默漏掉", () => {
-  assert.throws(() => applyListing(parseTree(`${fumadocs.marker(T)}\n`), listingOf([])), /第 1 行是引用标记，但清单里没有它/);
+  assert.throws(() => applyListing(parseTree(`${mark(T)}\n`), listingOf([])), /第 1 行是引用标记，但清单里没有它/);
 });
 
 test("collectionOf：集合名默认是文档目录的最后一截，目录套目录取最长的；字符串一刀切；表按目录查；不在文档目录下退 docs", () => {

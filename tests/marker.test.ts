@@ -1,14 +1,15 @@
 /**
- * 记号两态的账。语法本身住 `engine/marker.ts`（草稿的哨兵行、正式记号的载荷、记录簿的键），
+ * 记号两态的账。语法本身住 `engine/marker.ts`（草稿的哨兵行、正式记号的载荷与记录属性），
  * 外壳归格式——所以两边分开测：
- *   **跨格式的**（mdx 与假格式两个适配器都过）：`parse(marker(t))` 认回 t，五种目标都过；
+ *   **跨格式的**（mdx 与假格式两个适配器都过）：`parse(marker(t, r))` 认回 t 与 r，五种目标都过；
  *   草稿记号四种情况：认得出、少一头哨兵不认、写在句子里不认、动作词不认识不认
+ *   **记录属性**：写了一半、值不合法、不认识的属性，都报错到行
  *   **mdx 自己的**：围栏里的不认、草稿换正式记号、写坏了报到行
  */
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import * as mdxModule from "../packages/docfirst-workflow/src/fumadocs/index.ts";
-import type { Fill, Format, Target } from "../packages/docfirst-workflow/src/engine/index.ts";
+import type { Format, MemoRecord, Reference, Target } from "../packages/docfirst-workflow/src/engine/index.ts";
 import { fakeFormat } from "./fake-format.ts";
 
 const mdx = mdxModule as unknown as Format;
@@ -25,30 +26,57 @@ const ALL: Array<[string, Target]> = [
   ["@@docfirst has src/store.ts save @@", { kind: "has", file: "src/store.ts", text: "save" }],
 ];
 const DRAFT = ALL[0]![0];
-const CODE = ["export function greet(name: string): string {", "  return `hello ${name}`;"];
-const fillsOf = (format: Format, text: string, current = CODE): Fill[] => format.parse(text).map((reference) => ({ reference, current }));
+const HASH = "3fa9c2e1b07d";
+const BLOB = "2689fa073ac6";
 
-test("正式记号：parse(marker(t)) 认回 t，五种目标都过，位置也对", () => {
+/** 每种目标确认过之后记号上带的记录 */
+function recordFor(target: Target): MemoRecord {
+  if (target.kind === "span" || target.kind === "file") return { kind: "content", hash: HASH, blob: BLOB };
+  if (target.kind === "tree") return { kind: "tree", hash: HASH };
+  if (target.kind === "exists") return { kind: "exists", type: target.absent ? "absent" : "file" };
+  return { kind: "has" };
+}
+
+/** 把一篇里认出的引用全按确认过的样子写回 */
+const confirmed = (format: Format, text: string): Reference[] => format.parse(text).map((r) => ({ ...r, record: recordFor(r.target) }));
+
+test("正式记号：parse(marker(t, r)) 认回 t 与 r，五种目标都过，位置也对", () => {
   for (const format of FORMATS) {
     for (const [, target] of ALL) {
-      const refs = format.parse(`${format.marker(target)}\n`);
-      assert.deepEqual(refs.map((r) => r.target), [target], `${format.name} 的记号自己认不回来：${format.marker(target)}`);
+      const record = recordFor(target);
+      const refs = format.parse(`${format.marker(target, record)}\n`);
+      assert.deepEqual(refs.map((r) => [r.target, r.record]), [[target, record]], `${format.name} 的记号自己认不回来：${format.marker(target, record)}`);
       assert.equal(refs[0]!.at, 0);
       assert.ok(refs[0]!.extra?.draft !== true, `${format.name} 把正式记号当成草稿了`);
     }
   }
 });
 
+test("没有记录属性的正式记号是未确认；has 例外，正式记号就是确认过", () => {
+  for (const format of FORMATS) {
+    for (const [, target] of ALL) {
+      const want = target.kind === "has" ? { kind: "has" } : null;
+      assert.deepEqual(format.parse(`${format.marker(target, null)}\n`)[0]!.record, want, `${format.name}：${format.marker(target, null)}`);
+    }
+  }
+});
+
+test("只有 hash 没有 blob 的行段记录认得（从 hash 记录迁过来的）", () => {
+  const record: MemoRecord = { kind: "content", hash: HASH };
+  assert.deepEqual(mdx.parse(`${mdx.marker(T, record)}\n`)[0]!.record, record);
+  assert.equal(mdx.marker(T, record), `{/* ref file="src/greet.ts" lines="2-3" hash="${HASH}" */}`);
+});
+
 test("正式记号里的引号：has 的 text 带引号也认得回来", () => {
   const quoted: Target = { kind: "has", file: "a.ts", text: 'say("hi")' };
-  for (const format of FORMATS) assert.deepEqual(format.parse(`${format.marker(quoted)}\n`)[0]!.target, quoted, format.name);
+  for (const format of FORMATS) assert.deepEqual(format.parse(`${format.marker(quoted, { kind: "has" })}\n`)[0]!.target, quoted, format.name);
 });
 
 test("草稿记号：五种目标的写法都认；少哨兵不认、句子里不认、动作词不认识不认", () => {
   for (const format of FORMATS) {
     for (const [draft, target] of ALL) {
       const refs = format.parse(`# 标题\n\n${draft}\n\n尾巴\n`);
-      assert.deepEqual(refs.map((r) => [r.target, r.at, r.extra?.draft]), [[target, 2, true]], `${format.name} 不认草稿记号：${draft}`);
+      assert.deepEqual(refs.map((r) => [r.target, r.record, r.at, r.extra?.draft]), [[target, null, 2, true]], `${format.name} 不认草稿记号：${draft}`);
     }
     assert.deepEqual(format.parse("@@docfirst ref src/greet.ts:2-3\n"), [], `${format.name} 把少一头哨兵的当记号了`);
     assert.deepEqual(format.parse(`这句话里有 ${DRAFT} 不算\n`), [], `${format.name} 把句子里的当记号了`);
@@ -56,26 +84,43 @@ test("草稿记号：五种目标的写法都认；少哨兵不认、句子里�
   }
 });
 
-test("mdx：围栏里的草稿记号不认——围栏内容是 code 节点，讲记号怎么写的段落不该变成一处引用", () => {
-  assert.deepEqual(mdx.parse("```md\n" + DRAFT + "\n```\n"), []);
+test("记录属性写了一半、值不合法、不认识的属性：报错到行", () => {
+  assert.throws(() => mdx.parse(`{/* ref file="a.ts" lines="1-2" blob="${BLOB}" */}\n`), /第 1 行：记录属性写了一半——有 blob 没有 hash/);
+  assert.throws(() => mdx.parse('{/* ref file="a.ts" lines="1-2" hash="xyz" */}\n'), /第 1 行：hash 要是 12 位小写十六进制/);
+  assert.throws(() => mdx.parse(`{/* ref file="a.ts" hash="${"a".repeat(40)}" */}\n`), /hash 要是 12 位/);
+  assert.throws(() => mdx.parse(`{/* tree dir="src" blob="${BLOB}" */}\n`), /第 1 行：tree 不认属性 blob/);
+  assert.throws(() => mdx.parse('{/* absent path="x" type="file" */}\n'), /absent 的 type 只能是 absent/);
+  assert.throws(() => mdx.parse('{/* exists path="x" type="absent" */}\n'), /exists 的 type 只能是 file \/ dir/);
+  assert.throws(() => mdx.parse('{/* ref file="a.ts" lines=1-2 */}\n'), /认不出的写法/);
 });
 
-test("mdx：草稿换成正式记号（花括号注释），再写一次一个字不变", () => {
+test("mdx：围栏里的草稿记号不认——围栏内容是 code 节点，讲记号怎么写的段落不该变成一处引用", () => {
+  assert.deepEqual(mdx.parse("```md\n" + DRAFT + "\n```\n"), []);
+  assert.deepEqual(mdx.parse(`\`\`\`mdx\n{/* ref file="a.ts" lines="1-2" hash="${HASH}" blob="${BLOB}" */}\n\`\`\`\n`), []);
+});
+
+test("mdx：草稿换成正式记号（花括号注释、带记录），再写一次一个字不变", () => {
   const draft = `---\ntitle: x\n---\n\n# mdx\n\n${DRAFT}\n\n尾巴\n`;
-  const once = mdx.write(draft, fillsOf(mdx, draft));
+  const once = mdx.write(draft, confirmed(mdx, draft));
   assert.doesNotMatch(once, /@@docfirst/);
-  assert.match(once, /\{\/\* ref file="src\/greet\.ts" lines="2-3" \*\/\}/);
-  assert.equal(mdx.write(once, fillsOf(mdx, once)), once, "再写一次文档不该再变");
+  assert.match(once, new RegExp(`\\{/\\* ref file="src/greet\\.ts" lines="2-3" hash="${HASH}" blob="${BLOB}" \\*/\\}`));
+  assert.equal(mdx.write(once, mdx.parse(once)), once, "再写一次文档不该再变");
+});
+
+test("mdx：写回保留行尾的 CRLF", () => {
+  const draft = `# mdx\r\n\r\n${DRAFT}\r\n\r\n尾巴\r\n`;
+  const once = mdx.write(draft, confirmed(mdx, draft));
+  assert.match(once, /\*\/\}\r\n/);
 });
 
 test("mdx：目录树、存在性、名字三种正式记号也认得回来", () => {
   const draft = "# mdx\n\n@@docfirst tree src @@\n\n@@docfirst absent src/remove.ts @@\n\n@@docfirst has src/store.ts save @@\n";
-  const fills = mdx.parse(draft).map((reference) => ({ reference, current: reference.target.kind === "tree" ? ["add.ts", "store.ts"] : [] }));
-  const once = mdx.write(draft, fills);
-  assert.match(once, /\{\/\* tree dir="src" depth="1" \*\/\}/);
-  assert.match(once, /\{\/\* absent path="src\/remove\.ts" \*\/\}/);
+  const refs = confirmed(mdx, draft);
+  const once = mdx.write(draft, refs);
+  assert.match(once, new RegExp(`\\{/\\* tree dir="src" depth="1" hash="${HASH}" \\*/\\}`));
+  assert.match(once, /\{\/\* absent path="src\/remove\.ts" type="absent" \*\/\}/);
   assert.match(once, /\{\/\* has file="src\/store\.ts" text="save" \*\/\}/);
-  assert.deepEqual(mdx.parse(once).map((r) => r.target), fills.map((f) => f.reference.target));
+  assert.deepEqual(mdx.parse(once).map((r) => [r.target, r.record]), refs.map((r) => [r.target, r.record]));
 });
 
 test("记号写坏了报到行：少 file、行号不合理、depth 不是正整数；只有 file 没有 lines 是整文件", () => {

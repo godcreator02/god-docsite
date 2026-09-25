@@ -7,11 +7,11 @@
  */
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { createHashComparator, createService } from "../packages/docfirst-workflow/src/engine/index.ts";
+import { createService } from "../packages/docfirst-workflow/src/engine/index.ts";
 import type { Format, Listing, Reader } from "../packages/docfirst-workflow/src/engine/index.ts";
 import { createPlacing } from "../packages/docfirst-workflow/src/host/index.ts";
 import type { PlacingHost, ProjectConfig } from "../packages/docfirst-workflow/src/host/index.ts";
-import { memoryLedger } from "./repo.ts";
+import { NO_HISTORY } from "./repo.ts";
 
 /**
  * 假格式：这份测试验的是摆放，不是认记号，所以 parse 一处引用都不认。
@@ -41,7 +41,7 @@ function memoryHost(outputs: ProjectConfig["outputs"], source = SOURCE) {
   const host: PlacingHost = {
     root: "/内存里没有根",
     config,
-    service: createService({ formats: [format], reader, ledger: memoryLedger(), comparator: createHashComparator() }),
+    service: createService({ formats: [format], reader, history: NO_HISTORY }),
     roster: undefined,
     placements: (doc) => (outputs?.[doc] ?? []).map((raw) => (typeof raw === "string" ? { to: raw, frontmatter: [] } : { to: raw.to, frontmatter: raw.frontmatter ?? [] })),
     read: () => source,
@@ -96,7 +96,7 @@ test("内存宿主：源里缺点名的字段，这个落点一个字都不写",
 test("内存宿主：check 收到调用方判好的清单就原样交给格式，不再判一遍", async () => {
   const handed: Listing[] = [];
   const counted: Format = { ...format, renderAi: (text, listing, ctx) => (handed.push(listing), format.renderAi!(text, listing, ctx)) };
-  const service = createService({ formats: [counted], reader: { read: () => null }, ledger: memoryLedger(), comparator: createHashComparator() });
+  const service = createService({ formats: [counted], reader: { read: () => null }, history: NO_HISTORY });
   let resolved = 0;
   const outputs = { "docs/a.md": ["README.md"] };
   const placing = createPlacing({
@@ -109,7 +109,7 @@ test("内存宿主：check 收到调用方判好的清单就原样交给格式�
     readPlaced: () => BODY,
     writePlaced: () => {},
   });
-  const listing: Listing = { doc: "docs/a.md", items: [], orphans: [] };
+  const listing: Listing = { doc: "docs/a.md", items: [] };
 
   assert.deepEqual(await placing.check("docs/a.md", listing), [{ to: "README.md", status: "fresh", fresh: true }]);
   assert.equal(resolved, 0, "清单是传进来的，摆放自己没判");

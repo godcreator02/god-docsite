@@ -1,17 +1,17 @@
 /**
  * 摆放：mdx 正本 → 落点上的生成物。
  *
- * 一篇文档在 `docfirst.config` 的 `outputs` 里挂了几个落点，摆放就把它渲成一份干净 md、
+ * 一篇文档在 `docfirst.config` 的 `outputs` 里挂了几个落点，摆放就让格式把它渲成一份干净 md、
  * 戴上点名的 frontmatter 字段、写到每个落点上；核对是同一份正文跟落点上那份逐字节比。
- * 配置归一、地盘规则、渲染、整形、frontmatter 挑行、四态判定，全在这一份里。
+ * 配置归一、地盘规则、渲染、整形、frontmatter 挑行、落点状态判定，全在这一份里。
  *
  * 生成物怎么落地不在这一份里：读一个落点、写一个落点由 `PlacingHost` 给（真盘一份、内存一份），
  * 所以这个文件一句 `node:fs` 都不 import。
  *
- * 对外只有两个方法：`render` 摆一次、回落点清单，`check` 只核对、回每个落点的四态。
+ * 对外只有两个方法：`render` 摆一次、回落点清单，`check` 只核对、回每个落点的状态。
  * 摆出去的和守着的是**同一段正文**——两条路走的是同一个 `bodyOf`，所以摆完必然是新鲜的。
  */
-import { isAbsolute, join, relative, resolve, sep } from "node:path";
+import { isAbsolute, relative, resolve, sep } from "node:path";
 import type { Format, Listing, Service } from "../engine/index.ts";
 import type { ProjectConfig } from "./load.ts";
 
@@ -28,36 +28,39 @@ export interface Placement {
   frontmatter: string[];
 }
 
-/** 一个落点的四态：fresh 生成物跟源一致；missing 生成物还不在；stale 跟源不一致；no-frontmatter 源头部缺点名的字段 */
+/** 一个落点核对完的状态：fresh 生成物跟源一致；missing 生成物还不在；stale 跟源不一致；no-frontmatter 源头部缺点名的字段 */
 export type PlacedStatus = "fresh" | "missing" | "stale" | "no-frontmatter";
 
 /** 一个落点核对完的样子 */
 export interface PlacedCheck {
   to: string;
   status: PlacedStatus;
-  /** 判定结果：四态里只有 fresh 算新鲜。读报告的人照它决定要不要重摆，不必再把四态解释一遍 */
+  /** 判定结果：只有 fresh 算新鲜。读报告的人照它决定要不要重摆，不必再把各个状态解释一遍 */
   fresh: boolean;
   /** no-frontmatter 时缺哪几个字段 */
   missing?: string[];
 }
 
-/** 摆一个落点的结果：placed 摆过去了；no-frontmatter 源头部缺 `missing` 里那几个字段，这个落点没摆 */
+/**
+ * 摆一个落点的结果：placed 写了（内容有变）；unchanged 落点上已经是这一份，没写；
+ * no-frontmatter 源头部缺 `missing` 里那几个字段，没写
+ */
 export interface PlacedWrite {
   to: string;
-  status: "placed" | "no-frontmatter";
+  status: "placed" | "unchanged" | "no-frontmatter";
   missing?: string[];
 }
 
 /** 摆放这件事的全部对外接口 */
 export interface Placing {
   /**
-   * 这一篇摆一次：渲一份正文，戴上点名的 frontmatter 字段，写到每个落点，回落点清单。
+   * 这一篇摆一次：渲一份正文，戴上点名的 frontmatter 字段，内容有变的落点才写，回落点清单。
    * 缺字段的落点不写（摆一份缺 name 的 SKILL.md 比不摆更糟）。
    * 没挂落点、格式不出 ai 产物，回空清单——那是「这篇没有摆放这回事」，不是错。
    */
   render(doc: string): Promise<PlacedWrite[]>;
   /**
-   * 这一篇的落点核对一次，只读不写：回每个落点的四态与缺哪些 frontmatter 字段。
+   * 这一篇的落点核对一次，只读不写：回每个落点的状态与缺哪些 frontmatter 字段。
    * 调用方手上已经有这一篇的清单（check 刚判过）就传进来，不再判一遍
    */
   check(doc: string, listing?: Listing): Promise<PlacedCheck[]>;
@@ -114,17 +117,17 @@ export function placementsOf(config: Pick<ProjectConfig, "outputs">): Record<str
   return table;
 }
 
-/** 地盘规则：目标相对项目根、不落进任何一个文档目录（那是源的地盘）、一个目标只许一个文档写 */
-export function assertTurf(root: string, docsDirs: string[], table: Record<string, Placement[]>): void {
+/** 地盘规则：目标相对项目根、不落进源文件所在的目录（sourceDirs，相对项目根）、一个目标只许一个文档写 */
+export function assertTurf(root: string, sourceDirs: string[], table: Record<string, Placement[]>): void {
   const claimed = new Map<string, string>();
   for (const [doc, targets] of Object.entries(table)) {
     for (const { to } of targets) {
       if (isAbsolute(to)) throw new Error(`outputs 的 ${doc} → ${to}：目标得相对项目根，绝对路径不认`);
       const rel = relative(root, resolve(root, to));
-      for (const dir of docsDirs) {
-        const relDocs = relative(root, join(root, dir));
-        if (rel === relDocs || rel.startsWith(relDocs + sep)) {
-          throw new Error(`outputs 的 ${doc} → ${to}：目标落进了文档目录，那是源文件的地盘`);
+      for (const dir of sourceDirs) {
+        const relSource = relative(root, resolve(root, dir));
+        if (rel === relSource || rel.startsWith(relSource + sep)) {
+          throw new Error(`outputs 的 ${doc} → ${to}：目标落进了 ${dir}，那是源文件的地盘`);
         }
       }
       const owner = claimed.get(to);
@@ -189,6 +192,9 @@ function withFrontmatter(body: string, lines: string[]): string {
   return `---\n${lines.join("\n")}\n---\n\n${body}`;
 }
 
+/** 换行归一：「算不算同一份」的口径，不是存放的事 */
+const sameText = (placed: string, body: string): boolean => placed.replace(/\r\n/g, "\n") === body;
+
 export function createPlacing(host: PlacingHost): Placing {
   /** 这一篇有没有摆放这回事：挂了落点、有格式、格式出 ai 产物，三样齐了才算 */
   function placingInputs(doc: string): { targets: Placement[]; text: string; format: Format } | null {
@@ -222,7 +228,13 @@ export function createPlacing(host: PlacingHost): Placing {
           out.push({ to, status: "no-frontmatter", missing: picked.missing });
           continue;
         }
-        host.writePlaced(to, withFrontmatter(body, picked.lines));
+        const next = withFrontmatter(body, picked.lines);
+        const placed = host.readPlaced(to);
+        if (placed !== null && sameText(placed, next)) {
+          out.push({ to, status: "unchanged" });
+          continue;
+        }
+        host.writePlaced(to, next);
         out.push({ to, status: "placed" });
       }
       return out;
@@ -244,8 +256,7 @@ export function createPlacing(host: PlacingHost): Placing {
           out.push({ to, status: "missing", fresh: false });
           continue;
         }
-        // 换行归一在这儿不在宿主里：这是「算不算同一份」的口径，不是存放的事
-        const same = placed.replace(/\r\n/g, "\n") === withFrontmatter(body, picked.lines);
+        const same = sameText(placed, withFrontmatter(body, picked.lines));
         out.push({ to, status: same ? "fresh" : "stale", fresh: same });
       }
       return out;

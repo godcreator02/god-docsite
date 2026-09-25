@@ -15,12 +15,10 @@ interface JsonReport {
   docs: Array<{
     doc: string;
     red: number;
-    items: Array<{ target: string; kind: string; status: string; line: number; lines: [number, number]; draft: boolean; reason?: string; diff?: string }>;
-    orphans: string[];
+    items: Array<{ target: string; kind: string; status: string; line: number; lines: [number, number]; draft: boolean; reason?: string; diff?: string; blocking?: true }>;
     components: Array<{ name: string; line: number }>;
     outputs: Array<{ to: string; status: string; fresh: boolean }>;
   }>;
-  strays: string[];
   trajectory: Array<{ path: string; field: string; value: string; reason: string }>;
 }
 
@@ -101,7 +99,7 @@ test("docs 配成空数组或空串：装配时拒", async () => {
   }
 });
 
-test("check --json：整份报告一行 JSON，退出码跟人读模式一样；四态、行号、outputs 新鲜度、孤儿、失踪文档、病卡都在", async () => {
+test("check --json：整份报告一行 JSON，退出码跟人读模式一样；四态、行号、outputs 新鲜度、病卡都在", async () => {
   const p = setupProject(
     CONFIG.replace(`docs: "docs", out: "out" };`, `docs: "docs", out: "out", outputs: { "docs/a.md": ["README.md"] }, trajectory: "trajectory" };`),
   );
@@ -116,11 +114,9 @@ test("check --json：整份报告一行 JSON，退出码跟人读模式一样；
     const a = first.docs.find((d) => d.doc === "docs/a.md")!;
     assert.deepEqual(a.items, [{ target: "src/greet.ts:2-3", kind: "span", status: "unconfirmed", line: 3, lines: [2, 3], draft: true }]);
     assert.deepEqual(a.outputs, [{ to: "README.md", status: "missing", fresh: false }]);
-    assert.deepEqual(first.strays, []);
     assert.deepEqual(first.trajectory, []);
 
     await p.cli("confirm");
-    await p.cli("render");
     const green = JSON.parse((await p.cli("check", "--json")).out) as JsonReport;
     assert.equal(green.ok, true);
     assert.equal(green.red, 0);
@@ -141,7 +137,7 @@ test("check --json：整份报告一行 JSON，退出码跟人读模式一样；
     await p.cli("render");
     assert.equal((await p.cli("check", "--json")).code, 0, "重摆之后只剩那处黄，退 0");
 
-    // 源改了没重摆 → 生成物 stale；引用删掉 → 孤儿；文档删掉 → 失踪；病卡 → trajectory
+    // 源改了没重摆 → 生成物 stale；病卡 → trajectory
     writeFileSync(join(p.root, "docs", "a.md"), "# md\n\n没有引用了\n");
     rmSync(join(p.root, "docs", "b.html"));
     mkdirSync(join(p.root, "trajectory"));
@@ -149,13 +145,12 @@ test("check --json：整份报告一行 JSON，退出码跟人读模式一样；
     const red = await p.cli("check", "--json");
     assert.equal(red.code, 1);
     const last = JSON.parse(red.out) as JsonReport;
-    assert.deepEqual(last.docs.find((d) => d.doc === "docs/a.md")!.orphans, ["src/greet.ts:2-3"]);
-    assert.deepEqual(last.docs.find((d) => d.doc === "docs/a.md")!.outputs, [{ to: "README.md", status: "stale", fresh: false }]);
-    assert.deepEqual(last.strays, ["docs/b.html"]);
+    assert.deepEqual(last.docs.map((d) => d.doc), ["docs/a.md"]);
+    assert.deepEqual(last.docs[0]!.outputs, [{ to: "README.md", status: "stale", fresh: false }]);
     assert.equal(last.trajectory.length, 1);
     assert.equal(last.trajectory[0]!.path, "trajectory/2026-01-01-bad.mdx");
     assert.equal(last.trajectory[0]!.field, "born-at");
-    assert.equal(last.red, last.docs.reduce((n, d) => n + d.red, 0) + last.strays.length + last.trajectory.length);
+    assert.equal(last.red, last.docs.reduce((n, d) => n + d.red, 0) + last.trajectory.length);
   } finally {
     p.teardown();
   }

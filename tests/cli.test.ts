@@ -1,16 +1,18 @@
 /**
- * 命令行三个动作，在临时真 git 项目里跑一遍：check 报状态、confirm 写回并刷记录簿、render 出产物。
- * 五类引用各自的报法、忽略文件退回 hash 记忆、记录簿的两种清扫（文档没了、引用没了）也在这儿。
+ * 命令行三个动作，在临时真 git 项目里跑一遍：check 报状态、confirm 机械写回、render 出产物。
+ * 五类引用各自的报法、黄灯要点名页带 --accept、红的那几处不挡别的，也在这儿。
  * 台子在 cli-project.ts；outputs 摆放在 cli-outputs.test.ts，装配与报告在 cli-report.test.ts。
  */
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { existsSync, mkdirSync, rmSync, writeFileSync } from "node:fs";
+import { existsSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { setupProject } from "./cli-project.ts";
 import { CODE, run } from "./repo.ts";
 
-test("check 报未确认；confirm 换记号、投影、刷记录簿；再 check 全绿", async () => {
+const CONFIRMED = /^REF ref file="src\/greet\.ts" lines="2-3" hash="[0-9a-f]{12}" blob="[0-9a-f]{12}"$/m;
+
+test("check 报未确认；confirm 把草稿换成带记录的正式记号；再 check 全绿；没有记录簿", async () => {
   const p = setupProject();
   try {
     const first = await p.cli("check");
@@ -21,21 +23,21 @@ test("check 报未确认；confirm 换记号、投影、刷记录簿；再 check
     const done = await p.cli("confirm");
     assert.equal(done.code, 0);
     assert.match(done.out, /✅ docs\/a\.md {2}src\/greet\.ts:2-3 {2}已确认，草稿记号已换成正式记号/);
-    assert.match(p.read("docs/a.md"), /^REF src\/greet\.ts:2-3$/m, "草稿记号换成了正式记号");
-    assert.match(p.read("docs/b.html"), /^REF src\/greet\.ts:2-3$/m);
-    const ledger = JSON.parse(p.read(".ledger.json")) as Record<string, Record<string, { kind: string }>>;
-    assert.equal(ledger["docs/a.md"]!["src/greet.ts:2-3"]!.kind, "git");
+    assert.match(p.read("docs/a.md"), CONFIRMED, "草稿记号换成了带记录的正式记号");
+    assert.match(p.read("docs/b.html"), CONFIRMED);
+    assert.equal(existsSync(join(p.root, ".ledger.json")), false, "记录写在记号上，没有记录簿");
 
     const again = await p.cli("check");
     assert.equal(again.code, 0);
     assert.match(again.out, /🟢 docs\/a\.md/);
     assert.match(again.out, /🟢 docs\/b\.html/);
+    assert.equal((await p.cli("confirm")).out, "", "都是原地没动的绿：再确认一行都不打、一个字不改");
   } finally {
     p.teardown();
   }
 });
 
-test("代码改了：check 报黄、退 0；文件没了：报红、退 1", async () => {
+test("已提交的代码改了：check 报黄、退 0；文件没了：报红、退 1", async () => {
   const p = setupProject();
   try {
     await p.cli("confirm");
@@ -54,17 +56,70 @@ test("代码改了：check 报黄、退 0；文件没了：报红、退 1", asyn
   }
 });
 
-test("confirm 遇 problems：打印、退非零、一个字不改", async () => {
+test("confirm 不要求先提交：改了没提交的代码照样记得下", async () => {
   const p = setupProject();
   try {
     writeFileSync(join(p.root, "src", "greet.ts"), CODE.replace("hello", "hey"));
-    const before = p.read("docs/a.md");
-    const rejected = await p.cli("confirm");
-    assert.equal(rejected.code, 1);
-    assert.match(rejected.out, /🔴 docs\/a\.md 第 3 行：src\/greet\.ts:2-3 未提交/);
-    assert.match(rejected.out, /这篇整篇没确认/);
-    assert.equal(p.read("docs/a.md"), before, "拒了就不写回");
-    assert.equal(existsSync(join(p.root, ".ledger.json")), false, "拒了就不落记录簿");
+    const done = await p.cli("confirm");
+    assert.equal(done.code, 0, done.out);
+    assert.match(p.read("docs/a.md"), CONFIRMED);
+  } finally {
+    p.teardown();
+  }
+});
+
+test("confirm 遇红：红的那处不动、别的照写，打印后退 1", async () => {
+  const p = setupProject();
+  try {
+    writeFileSync(join(p.root, "docs", "a.md"), "# md\n\n@@docfirst ref src/greet.ts:2-3 @@\n\n@@docfirst ref src/nowhere.ts:1-2 @@\n");
+    const done = await p.cli("confirm");
+    assert.equal(done.code, 1);
+    assert.match(done.out, /🔴 docs\/a\.md {2}第 5 行 src\/nowhere\.ts:1-2 {2}缺失，引用指向空气（文件不在了），这处没动/);
+    const doc = p.read("docs/a.md");
+    assert.match(doc, CONFIRMED, "钉得住的那处照写");
+    assert.match(doc, /^@@docfirst ref src\/nowhere\.ts:1-2 @@$/m, "红的那处原样留着");
+  } finally {
+    p.teardown();
+  }
+});
+
+test("黄灯：confirm 原样不动并列出来；--accept 不点名页退 2；点名页带 --accept 才重新记", async () => {
+  const p = setupProject();
+  try {
+    await p.cli("confirm");
+    const confirmed = p.read("docs/a.md");
+    writeFileSync(join(p.root, "src", "greet.ts"), CODE.replace("hello", "hey"));
+
+    const pending = await p.cli("confirm");
+    assert.equal(pending.code, 0, "黄不是红");
+    assert.match(pending.out, /🟡 docs\/a\.md {2}src\/greet\.ts:2-3 {2}有变动，等作者复核——复核后 docfirst confirm docs\/a\.md --accept/);
+    assert.equal(p.read("docs/a.md"), confirmed, "黄灯原样不动");
+
+    const bare = await p.cli("confirm", "--accept");
+    assert.equal(bare.code, 2);
+    assert.equal(p.read("docs/a.md"), confirmed);
+
+    const signed = await p.cli("confirm", "docs/a.md", "--accept");
+    assert.equal(signed.code, 0, signed.out);
+    assert.match(signed.out, /✅ docs\/a\.md {2}src\/greet\.ts:2-3 {2}已按今天的内容重新记下/);
+    assert.notEqual(p.read("docs/a.md"), confirmed);
+    assert.match((await p.cli("check")).out, /🟢 docs\/a\.md/);
+    assert.match((await p.cli("check")).out, /🟡 docs\/b\.html/, "没点名的页的黄灯还等着人");
+  } finally {
+    p.teardown();
+  }
+});
+
+test("绿灯挪了位置：confirm 机械写回新行号", async () => {
+  const p = setupProject();
+  try {
+    await p.cli("confirm");
+    writeFileSync(join(p.root, "src", "greet.ts"), `// 头一行\n// 又一行\n${CODE}`);
+    run(p.root, ["commit", "-qam", "上面插两行"]);
+    const done = await p.cli("confirm");
+    assert.equal(done.code, 0, done.out);
+    assert.match(done.out, /✅ docs\/a\.md {2}src\/greet\.ts:2-3 {2}内容没变、挪到了 4-5，已写回新行号/);
+    assert.match(p.read("docs/a.md"), /^REF ref file="src\/greet\.ts" lines="4-5" /m);
   } finally {
     p.teardown();
   }
@@ -86,32 +141,6 @@ test("render：有 renderAi 的格式出 ai 那份剥掉记号；终态格式说
   }
 });
 
-test("被忽略的文件走 hash 记忆：confirm 标明；改了内容 check 报黄、位置不明", async () => {
-  const p = setupProject();
-  try {
-    writeFileSync(join(p.root, ".gitignore"), "vendor/\n");
-    run(p.root, ["add", "-A"]);
-    run(p.root, ["commit", "-qm", "忽略 vendor"]);
-    mkdirSync(join(p.root, "vendor"));
-    writeFileSync(join(p.root, "vendor", "lib.ts"), CODE);
-    writeFileSync(join(p.root, "docs", "c.md"), "# c\n\n@@docfirst ref vendor/lib.ts:2-3 @@\n");
-
-    const done = await p.cli("confirm");
-    assert.equal(done.code, 0);
-    assert.match(done.out, /✅ docs\/c\.md {2}vendor\/lib\.ts:2-3 {2}已确认，草稿记号已换成正式记号（hash 记忆：不在 git 里）/);
-    assert.match(done.out, /✅ docs\/a\.md {2}src\/greet\.ts:2-3 {2}已确认，草稿记号已换成正式记号\n/, "git 记忆的不标");
-    const ledger = JSON.parse(p.read(".ledger.json")) as Record<string, Record<string, { kind: string }>>;
-    assert.equal(ledger["docs/c.md"]!["vendor/lib.ts:2-3"]!.kind, "hash");
-
-    writeFileSync(join(p.root, "vendor", "lib.ts"), CODE.replace("hello", "hey"));
-    const yellow = await p.cli("check");
-    assert.equal(yellow.code, 0);
-    assert.match(yellow.out, /🟡 docs\/c\.md {2}vendor\/lib\.ts:2-3 {2}有变动.*位置不明/);
-  } finally {
-    p.teardown();
-  }
-});
-
 test("五类引用一篇文档：五种记号各自认得回来；多了文件黄、断言不在的出现了红", async () => {
   const p = setupProject();
   try {
@@ -126,10 +155,10 @@ test("五类引用一篇文档：五种记号各自认得回来；多了文件�
     assert.match(done.out, /✅ docs\/d\.md {2}has src\/greet\.ts "export function greet" {2}已确认/);
     assert.match(done.out, /✅ docs\/d\.md {2}absent src\/remove\.ts {2}已确认/);
     const doc = p.read("docs/d.md");
-    assert.match(doc, /^REF tree src depth=1$/m);
-    assert.match(doc, /^REF src\/greet\.ts:all$/m);
-    assert.match(doc, /^REF has src\/greet\.ts "export function greet"$/m);
-    assert.match(doc, /^REF absent src\/remove\.ts$/m);
+    assert.match(doc, /^REF tree dir="src" depth="1" hash="[0-9a-f]{12}"$/m);
+    assert.match(doc, /^REF ref file="src\/greet\.ts" hash="[0-9a-f]{12}" blob="[0-9a-f]{12}"$/m);
+    assert.match(doc, /^REF has file="src\/greet\.ts" text="export function greet"$/m);
+    assert.match(doc, /^REF absent path="src\/remove\.ts" type="absent"$/m);
 
     const green = await p.cli("check");
     assert.match(green.out, /🟢 docs\/d\.md {2}tree src depth=1 {2}新鲜（1 项）/);
@@ -138,7 +167,7 @@ test("五类引用一篇文档：五种记号各自认得回来；多了文件�
     writeFileSync(join(p.root, "src", "remove.ts"), "");
     const after = await p.cli("check");
     assert.equal(after.code, 1);
-    assert.match(after.out, /🟡 docs\/d\.md {2}tree src depth=1 {2}有变动，等作者复核（\+ remove\.ts，\+ tag\.ts）/);
+    assert.match(after.out, /🟡 docs\/d\.md {2}tree src depth=1 {2}有变动，等作者复核（3 项）/);
     assert.match(after.out, /🔴 docs\/d\.md {2}absent src\/remove\.ts {2}缺失，引用指向空气（断言它不在，它却出现了）/);
   } finally {
     p.teardown();
@@ -149,28 +178,27 @@ test("求助：--help / -h / help 打用法退 0，一个字不写——confirm 
   const p = setupProject();
   try {
     const before = p.read("docs/a.md");
-    for (const args of [["--help"], ["-h"], ["help"], ["confirm", "--help"], ["confirm", "-h"], ["check", "--help"], ["confirm", "docs/a.md", "--help"]]) {
+    for (const args of [["--help"], ["-h"], ["help"], ["confirm", "--help"], ["confirm", "-h"], ["check", "--help"], ["confirm", "docs/a.md", "--help"], ["confirm", "docs/a.md", "--accept", "-h"]]) {
       const got = await p.cli(...args);
       assert.equal(got.code, 0, args.join(" "));
       assert.match(got.out, /docfirst confirm \[文档路径…\]/, args.join(" "));
+      assert.match(got.out, /docfirst confirm <文档路径…> --accept/, args.join(" "));
       assert.match(got.out, /按页限定/, args.join(" "));
     }
     assert.equal(p.read("docs/a.md"), before, "求助不该确认任何东西");
-    assert.equal(existsSync(join(p.root, ".ledger.json")), false, "求助不该落记录簿");
   } finally {
     p.teardown();
   }
 });
 
-test("不认识的开关退 2、什么都不动——confirm 不再把开关当没写、跑成整仓一趟", async () => {
+test("不认识的开关退 2、什么都不动——confirm 不再把开关当没写、跑成全部页", async () => {
   const p = setupProject();
   try {
     const before = p.read("docs/a.md");
-    for (const args of [["confirm", "--dry-run"], ["confirm", "--json"], ["render", "--force"], ["check", "--jsno"], ["trajectory", "-x"]]) {
+    for (const args of [["confirm", "--dry-run"], ["confirm", "--json"], ["confirm", "docs/a.md", "--acept"], ["render", "--force"], ["check", "--jsno"], ["check", "--accept"], ["trajectory", "-x"]]) {
       assert.equal((await p.cli(...args)).code, 2, args.join(" "));
     }
     assert.equal(p.read("docs/a.md"), before);
-    assert.equal(existsSync(join(p.root, ".ledger.json")), false);
     assert.equal((await p.cli("check", "--json")).code, 0, "认的开关照常");
   } finally {
     p.teardown();
@@ -186,25 +214,7 @@ test("不认识的命令退 2", async () => {
   }
 });
 
-test("文档本身删了：它的记录 check 算红；confirm 整个忘掉", async () => {
-  const p = setupProject();
-  try {
-    await p.cli("confirm");
-    rmSync(join(p.root, "docs", "b.html"));
-    const red = await p.cli("check");
-    assert.equal(red.code, 1);
-    assert.match(red.out, /🔴 docs\/b\.html {2}文档已不存在，记录簿里还留着/);
-    const swept = await p.cli("confirm");
-    assert.match(swept.out, /🧹 docs\/b\.html {2}文档已不存在，记录已清/);
-    const ledger = JSON.parse(p.read(".ledger.json")) as Record<string, unknown>;
-    assert.deepEqual(Object.keys(ledger), ["docs/a.md"]);
-    assert.equal((await p.cli("check")).code, 0);
-  } finally {
-    p.teardown();
-  }
-});
-
-test("confirm 按页限定：只动点名的那篇，别人的页与记录一个字不改", async () => {
+test("confirm 按页限定：只动点名的那篇，别人的页一个字不改", async () => {
   const p = setupProject();
   try {
     const only = await p.cli("confirm", "docs/a.md");
@@ -212,9 +222,6 @@ test("confirm 按页限定：只动点名的那篇，别人的页与记录一个
     assert.match(only.out, /· {2}按页限定：只动 docs\/a\.md/);
     assert.match(only.out, /✅ docs\/a\.md/);
     assert.doesNotMatch(only.out, /docs\/b\.html {2}src/, "没点名的页不该被确认");
-
-    const ledger = JSON.parse(p.read(".ledger.json")) as Record<string, unknown>;
-    assert.deepEqual(Object.keys(ledger), ["docs/a.md"]);
     assert.match(p.read("docs/b.html"), /@@docfirst ref src\/greet\.ts:2-3 @@/, "没点名的页记号还是草稿");
 
     // 反斜杠、`./` 开头、绝对路径都收
@@ -227,52 +234,13 @@ test("confirm 按页限定：只动点名的那篇，别人的页与记录一个
   }
 });
 
-test("confirm 按页限定：整仓的失踪清扫只对点名的那篇做", async () => {
-  const p = setupProject();
-  try {
-    await p.cli("confirm");
-    rmSync(join(p.root, "docs", "a.md"));
-    rmSync(join(p.root, "docs", "b.html"));
-
-    // 只点名 a：b 的记录留着（它的红还等着人处理），a 的忘掉
-    const one = await p.cli("confirm", "docs/a.md");
-    assert.equal(one.code, 0, one.out);
-    assert.match(one.out, /🧹 docs\/a\.md {2}文档已不存在，记录已清/);
-    assert.doesNotMatch(one.out, /🧹 docs\/b\.html/);
-    assert.deepEqual(Object.keys(JSON.parse(p.read(".ledger.json")) as Record<string, unknown>), ["docs/b.html"]);
-
-    const all = await p.cli("confirm");
-    assert.match(all.out, /🧹 docs\/b\.html {2}文档已不存在，记录已清/);
-    assert.deepEqual(Object.keys(JSON.parse(p.read(".ledger.json")) as Record<string, unknown>), []);
-  } finally {
-    p.teardown();
-  }
-});
-
-test("confirm 点名的路径既不是文档也不在记录簿：退 2，什么都不动", async () => {
+test("confirm 点名的路径不是这个项目里的文档：退 2，什么都不动", async () => {
   const p = setupProject();
   try {
     const before = p.read("docs/a.md");
-    const bad = await p.cli("confirm", "docs/没这篇.md");
+    const bad = await p.cli("confirm", "docs/a.md", "docs/没这篇.md");
     assert.equal(bad.code, 2);
     assert.equal(p.read("docs/a.md"), before);
-    assert.equal(existsSync(join(p.root, ".ledger.json")), false);
-  } finally {
-    p.teardown();
-  }
-});
-
-test("孤儿：文档里删掉引用，check 报红；confirm 清掉", async () => {
-  const p = setupProject();
-  try {
-    await p.cli("confirm");
-    writeFileSync(join(p.root, "docs", "a.md"), "# md\n\n没有引用了\n");
-    const red = await p.cli("check");
-    assert.equal(red.code, 1);
-    assert.match(red.out, /🔴 docs\/a\.md {2}src\/greet\.ts:2-3 {2}孤儿记录/);
-    const swept = await p.cli("confirm");
-    assert.match(swept.out, /🧹 docs\/a\.md {2}src\/greet\.ts:2-3 {2}孤儿记录已清/);
-    assert.equal((await p.cli("check")).code, 0);
   } finally {
     p.teardown();
   }

@@ -26,13 +26,14 @@ const SKILL_DOC = [
   "",
 ].join("\n");
 
-test("outputs 摆放：render 只写指定目标、不落 out/；check 守生成物——手改了或删了都红，重摆后复原", async () => {
+test("outputs 摆放：confirm 顺手重摆、render 只写指定目标、不落 out/；check 守生成物——手改了或删了都红，重摆后复原", async () => {
   const p = setupProject(withOutputs(`{ "docs/a.md": ["README.md"] }`));
   try {
-    await p.cli("confirm");
+    const done = await p.cli("confirm");
+    assert.match(done.out, /→ {2}docs\/a\.md {2}重新摆放到 README\.md/, "confirm 最后把挂了映射的文档重摆一遍");
     const rendered = await p.cli("render");
     assert.equal(rendered.code, 0, rendered.out);
-    assert.match(rendered.out, /→ {2}docs\/a\.md {2}摆放到 README\.md/);
+    assert.match(rendered.out, /· {2}docs\/a\.md → README\.md {2}没变/, "内容没变就不写");
     const readme = p.read("README.md");
     assert.match(readme, /```ts\nexport function greet/);
     assert.doesNotMatch(readme, /<!-- ref |<!-- \/ref -->/, "摆放那份也剥记号");
@@ -52,7 +53,7 @@ test("outputs 摆放：render 只写指定目标、不落 out/；check 守生成
     assert.equal(gone.code, 1);
     assert.match(gone.out, /🔴 docs\/a\.md → README\.md {2}生成物还不存在——render 摆过去/);
 
-    await p.cli("render");
+    assert.match((await p.cli("render")).out, /→ {2}docs\/a\.md {2}摆放到 README\.md/);
     assert.equal((await p.cli("check")).code, 0, "重摆之后恢复绿");
   } finally {
     p.teardown();
@@ -62,7 +63,7 @@ test("outputs 摆放：render 只写指定目标、不落 out/；check 守生成
 test("outputs 配置的地盘规则：绝对路径、落进文档目录、一个目标两个文档写，装配时都拒", async () => {
   const cases: [string, RegExp][] = [
     [withOutputs(`{ "docs/a.md": ["C:/绝对/路径.md"] }`), /绝对路径不认/],
-    [withOutputs(`{ "docs/a.md": ["docs/copy.md"] }`), /落进了文档目录/],
+    [withOutputs(`{ "docs/a.md": ["docs/copy.md"] }`), /落进了 \S+，那是源文件的地盘/],
     [withOutputs(`{ "docs/a.md": ["README.md"], "docs/b.html": ["README.md"] }`), /一个目标只许一个文档写/],
   ];
   for (const [config, message] of cases) {
@@ -78,7 +79,7 @@ test("outputs 配置的地盘规则：绝对路径、落进文档目录、一个
 test("outputs 目标落进第二个文档目录也拒", async () => {
   const p = setupProject(CONFIG.replace(`docs: "docs", out: "out" };`, `docs: ["docs", "more"], out: "out", outputs: { "docs/a.md": ["more/copy.md"] } };`));
   try {
-    await assert.rejects(p.cli("check"), /落进了文档目录/);
+    await assert.rejects(p.cli("check"), /落进了 \S+，那是源文件的地盘/);
   } finally {
     p.teardown();
   }
@@ -90,7 +91,9 @@ test("outputs 点名了源里没有的 frontmatter 字段：render 不摆、退 
     writeFileSync(join(p.root, "docs", "s.md"), SKILL_DOC);
     run(p.root, ["add", "-A"]);
     run(p.root, ["commit", "-qm", "加 skill 源"]);
-    await p.cli("confirm");
+    const done = await p.cli("confirm");
+    assert.equal(done.code, 1, "confirm 顺手重摆时遇到缺字段的落点也算红");
+    assert.match(done.out, /🔴 docs\/s\.md → SKILL\.md {2}mdx 源的 frontmatter 里没有 nope——补上再 confirm/);
     const rendered = await p.cli("render");
     assert.equal(rendered.code, 1);
     assert.match(rendered.out, /🔴 docs\/s\.md → SKILL\.md {2}mdx 源的 frontmatter 里没有 nope——补上再 render/);
