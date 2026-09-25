@@ -1,35 +1,18 @@
 /**
- * 装配：在一个**已经铺好的 fumadocs 骨架**上加 docfirst 的六区。
+ * 装配：在已经生成的 fumadocs 骨架上加 docfirst 的集合、路由、侧栏、配置、组件与骨架页，
+ * 并往站的 `package.json` 里补依赖与脚本。
  *
- * 建骨架不在这儿——那是「谁装了 fumadocs 谁就该有」的能力，归站件
- * （`@godcreator/gwb-docs-site` 的 `docs-site.create`）。本模块接手的是骨架之后的那一层：
- * 六个集合、六条路由、侧栏六个根节、`docfirst.config.mjs`、mdx 接线、投影块与术语组件、
- * 名册脚本、构建配置里那条不许外置的账、各区的骨架页，外加往 `package.json` 里补依赖与脚本。
+ * 骨架由站点插件（`@godcreator/gwb-docs-site` 的 `docs-site.create`）生成，本模块不生成骨架。
+ * 本模块只 import `node:fs` / `node:path` / `node:url`，不依赖 `@godcreator/docfirst-workflow`，
+ * 也不读 docfirst 配置（配置正是它要写出来的文件）。
  *
- * **它住在件里，不住在 `@godcreator/docfirst-workflow` 那个包里。** 判据是「这件事在哪儿发生」：
- * check / confirm / render 要在**仓**里发生（门禁、站构建），所以归包；装配只在 **agent** 手上
- * 发生一次——铺六个集合、六条路由、配置、组件、骨架页，从头到尾不碰判定引擎、不碰比较器、
- * 不碰记录簿，它连 `docfirst.config.mjs` 都不读（那正是它要写出来的东西）。**铺模板不是判定。**
- * 只 import `node:fs` / `node:path` / `node:url`，那个包一个字都不认识。
+ * 对外两个函数：`planAttach` 只计算不写盘，`attachSite` 计算后写盘。
+ * 所有能失败的检查（骨架检查、占位符、写盘前的路径检查）都在写第一个文件之前做完；
+ * 写盘途中仍然失败时，已写的文件恢复原样、新建的文件与目录删掉，再把错误抛出。
  *
- * **面上只有两个方法**：`planAttach` 算一套（不碰盘）、`attachSite` 算完直接落。调用方不必知道
- * 模板放在哪、占位符叫什么、package.json 怎么合——那些是模块内部的 `template` / `skeleton` /
- * `manifest` / `values`。
- *
- * **只在刚铺好的骨架上跑**：站里已经有 `docfirst.config.mjs`、或 `content/` 下已经有骨架之外的
- * 内容，`inspectSite` 当场抛「这个站已有内容，请人工接线」，一个字不改写。放行之后整套覆盖是
- * 安全的——中间没人改过文件。给一个跑了半年的站加 docfirst 走人工那条路，比 AST 改写安全。
- *
- * 整套先在内存渲染完再碰盘：占位符认不出是最可能的失败，而目录一旦开始写就没有干净的回滚点。
- * `planAttach` 就是把这个中间态直接交出去——**它是接口的一部分，不是实现细节**。
- *
- * **模板假设的仓形状**：站住仓根下一层（约定叫 `docs-site/`），被钉的代码在仓根（引用写
- * `../src/…`）。换一种形状，`docfirst.config.mjs` 里的相对路径就得跟着改——那是模板的前提。
- *
- * 这个模块只认「一个骨架 + 一份模板」，不认识任何生态：它不知道调它的人在写什么件、
- * 骨架是谁铺的。**别人依赖它，它不依赖别人。**
+ * 模板假设站在仓根下一层（约定叫 `docs-site/`），被引用的代码在仓根，引用写 `../src/…`。
  */
-import { mkdirSync, rmSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, rmSync, statSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { withDocfirst } from "./manifest.js";
 import { inspectSite, readEntry, readRepoManifest, type SiteFacts } from "./skeleton.js";
@@ -41,43 +24,45 @@ export { DOC_SCRIPTS } from "./manifest.js";
 export { DOCFIRST_DEPS } from "./deps.js";
 export { DEFAULT_PORT, SUPERSEDED } from "./skeleton.js";
 
-/** 装一次要的全部输入。除了 `siteDir` 都可以不给 */
+/** 装配的输入。除了 `siteDir` 都可以不给 */
 export interface AttachOptions {
-  /** 往哪个站上装。要已经存在、是个 fumadocs 骨架、还没接过 docfirst */
+  /** 目标站目录：已经存在、是 fumadocs 骨架、还没装过 docfirst */
   siteDir: string;
-  /** 站的显示名，不给就从仓根 package.json 认，再退回仓的目录名 */
+  /** 站的显示名，不给就从仓根 package.json 认，再用仓的目录名 */
   title?: string;
-  /** 模板从哪儿读，缺省是包里带的那份 */
+  /** 模板目录，缺省是包里带的那份 */
   template?: string;
 }
 
-/** 算完但还没碰盘的一套装配 */
+/** 计算好、还没写盘的一次装配 */
 export interface AttachPlan {
-  /** 装在哪（站目录的绝对路径） */
+  /** 站目录的绝对路径 */
   target: string;
-  /** 站所在的仓（被钉的代码在那儿） */
+  /** 站所在的仓 */
   repoDir: string;
-  /** 骨架挑的那个口，只是报出来——装配不改它 */
+  /** 骨架用的端口，装配不改它 */
   port: number;
-  /** 渲染好的整套，`rel` 相对站目录、`.tpl` 后缀已经脱掉 */
+  /** 要写的全部文件，`rel` 相对站目录、`.tpl` 后缀已去掉 */
   files: TemplateFile[];
-  /** 合并完的 `package.json` 正文（也在 `files` 里，单独拎出来给调用方看） */
+  /** 合并后的 `package.json` 正文（也在 `files` 里） */
   manifest: string;
-  /** 骨架里要让位、装配会删掉的文件（相对站目录） */
+  /** `files` 里站上已经存在、会被覆盖的文件（相对站目录） */
+  replaced: string[];
+  /** 装配会删掉的骨架文件（相对站目录） */
   superseded: string[];
-  /** 仓根已有、第一次 render 会被覆盖的生成物（README.md / AGENTS.md） */
+  /** 仓根已有、第一次 render 会覆盖的生成物 */
   overwrites: string[];
 }
 
-/** 装完的结果：那份计划，外加真落了盘的文件清单 */
+/** 装配结果：计划本身，加上实际写了哪些文件 */
 export interface AttachResult extends AttachPlan {
   /** 写了哪些文件，相对站目录 */
   written: string[];
 }
 
 /**
- * 算一套装配出来，**一个字都不写盘**：验骨架 → 认名字 → 整套渲染进内存 → 合 package.json。
- * 骨架不合规（不在、不是 fumadocs、已经接过线、content 下有内容）与占位符认不出都在这一步抛。
+ * 计算一次装配，不写盘：检查骨架 → 认名字 → 在内存里渲染整套模板 → 合并 package.json →
+ * 检查每个要写的路径都写得下去。任何一步不通过都在这里抛出。
  */
 export function planAttach(options: AttachOptions): AttachPlan {
   const siteDir = resolve(options.siteDir);
@@ -89,40 +74,97 @@ export function planAttach(options: AttachOptions): AttachPlan {
     pinBlock: pinBlockFrom(readEntry(facts.repoDir)),
   };
 
-  const files = renderSite(readTemplate(options.template ?? ATTACH_TEMPLATE), values);
   const manifest = withDocfirst(facts.manifestText, names.title);
+  const files = [...renderSite(readTemplate(options.template ?? ATTACH_TEMPLATE), values), { rel: "package.json", text: manifest }];
+  assertWritable(siteDir, files.map((file) => file.rel));
   return {
     target: siteDir,
     repoDir: facts.repoDir,
     port: facts.port,
-    files: [...files, { rel: "package.json", text: manifest }],
+    files,
     manifest,
+    replaced: files.map((file) => file.rel).filter((rel) => existsSync(join(siteDir, rel))),
     superseded: facts.superseded,
     overwrites: facts.overwrites,
   };
 }
 
-/**
- * 装一次：先 `planAttach` 算全套，再把渲好的文件落盘、把让位的那几个删掉。
- * 落盘那一步只剩写文件——会抛的都在算的那一半抛完了。
- */
+/** 计算一次装配并写盘。写盘途中失败时站恢复到写之前的样子 */
 export function attachSite(options: AttachOptions): AttachResult {
   const plan = planAttach(options);
-  const written = writeFiles(plan.target, plan.files);
-  // 让位：骨架的 src/app/docs/layout.tsx 那份 DocsLayout 已经抬到根 layout 上，
-  // 留着就是两层 DocsLayout 套着渲——侧栏出现两遍，谁也看不出是哪儿来的
-  for (const rel of plan.superseded) rmSync(join(plan.target, ...rel.split("/")), { force: true });
-  return { ...plan, written };
+  applyPlan(plan.target, plan.files, plan.superseded);
+  return { ...plan, written: plan.files.map((file) => file.rel) };
 }
 
-/** 渲染好的一套落到站目录下，回写了哪些（相对站目录） */
-function writeFiles(target: string, files: readonly TemplateFile[]): string[] {
-  const written: string[] = [];
-  for (const file of files) {
-    const full = join(target, file.rel);
-    mkdirSync(dirname(full), { recursive: true });
-    writeFileSync(full, file.text, "utf8");
-    written.push(file.rel);
+/**
+ * 每个要写的文件：自己不能是已存在的目录，站目录以下的上级路径里不能有已存在的普通文件。
+ * 有问题的路径一次全部列出。
+ */
+function assertWritable(target: string, rels: readonly string[]): void {
+  const blocked = new Set<string>();
+  for (const rel of rels) {
+    const parts = rel.split("/");
+    if (isDirectory(join(target, ...parts))) blocked.add(`${rel}（已经是目录）`);
+    for (let depth = 1; depth < parts.length; depth++) {
+      const ancestor = parts.slice(0, depth).join("/");
+      const full = join(target, ...parts.slice(0, depth));
+      if (existsSync(full) && !statSync(full).isDirectory()) blocked.add(`${ancestor}（是文件，${rel} 要把它当目录）`);
+    }
   }
-  return written;
+  if (blocked.size > 0) throw new Error(`这些路径写不下去，一个文件都没写：${[...blocked].join("、")}`);
+}
+
+function isDirectory(full: string): boolean {
+  return existsSync(full) && statSync(full).isDirectory();
+}
+
+/** 写盘前的一个文件：原来的内容，不存在是 null */
+interface Snapshot {
+  full: string;
+  before: Buffer | null;
+}
+
+/** 写文件、删文件；任何一步失败就撤销已做的改动再抛出 */
+function applyPlan(target: string, files: readonly TemplateFile[], removals: readonly string[]): void {
+  const touched: Snapshot[] = [];
+  const createdDirs: string[] = [];
+  const snapshot = (full: string): void => {
+    touched.push({ full, before: existsSync(full) ? readFileSync(full) : null });
+  };
+  try {
+    for (const file of files) {
+      const full = join(target, ...file.rel.split("/"));
+      const created = mkdirSync(dirname(full), { recursive: true });
+      if (created !== undefined) createdDirs.push(created);
+      snapshot(full);
+      writeFileSync(full, file.text, "utf8");
+    }
+    for (const rel of removals) {
+      const full = join(target, ...rel.split("/"));
+      snapshot(full);
+      rmSync(full, { force: true });
+    }
+  } catch (error) {
+    const reason = error instanceof Error ? error.message : String(error);
+    try {
+      rollback(touched, createdDirs);
+    } catch (rollbackError) {
+      const why = rollbackError instanceof Error ? rollbackError.message : String(rollbackError);
+      throw new Error(`写盘途中失败（${reason}），恢复原样时又失败（${why}）：${target} 现在是改了一半的状态，要人工检查`, { cause: error });
+    }
+    throw new Error(`写盘途中失败，站已恢复原样：${reason}`, { cause: error });
+  }
+}
+
+/** 按相反顺序恢复：原来有的写回原内容（内容没变的不写），原来没有的删掉，新建的目录删掉 */
+function rollback(touched: readonly Snapshot[], createdDirs: readonly string[]): void {
+  for (const { full, before } of [...touched].reverse()) {
+    if (before === null) {
+      rmSync(full, { force: true });
+      continue;
+    }
+    if (existsSync(full) && readFileSync(full).equals(before)) continue;
+    writeFileSync(full, before);
+  }
+  for (const dir of [...createdDirs].reverse()) rmSync(dir, { recursive: true, force: true });
 }

@@ -299,6 +299,64 @@ describe('attachSite：算完直接落', () => {
   })
 })
 
+describe('写盘安全', () => {
+  it('任何扩展名的 docfirst 配置都算已经装过', () => {
+    for (const name of ['docfirst.config.ts', 'docfirst.config.js', 'docfirst.config.json']) {
+      inSkeleton({ siteFiles: { [name]: 'export default {}' } }, (site) => {
+        expect(() => planAttach({ siteDir: site })).toThrow(new RegExp(`这个站已有内容，请人工接线：.*已经有 ${name.replace(/\./g, '\\.')}`))
+      })
+    }
+  })
+
+  it('计划里列出站上已经存在、会被覆盖的文件', () => {
+    inSkeleton({}, (site) => {
+      const plan = planAttach({ siteDir: site })
+      for (const rel of ['content/docs/index.mdx', 'content/docs/meta.json', 'package.json']) expect(plan.replaced).toContain(rel)
+      expect(plan.replaced).not.toContain('docfirst.config.mjs')
+    })
+  })
+
+  it('要写的路径被目录或文件挡住：一次列出全部，一个文件都不写', () => {
+    inSkeleton({ siteFiles: { 'src/lib/source.ts/占位': '', 'scripts': '一个普通文件' } }, (site) => {
+      let message = ''
+      try {
+        attachSite({ siteDir: site })
+      } catch (error) {
+        message = (error as Error).message
+      }
+      expect(message).toMatch(/^这些路径写不下去，一个文件都没写：/)
+      expect(message).toContain('src/lib/source.ts（已经是目录）')
+      expect(message).toContain('scripts（是文件，scripts/verify-roster.mjs 要把它当目录）')
+      expect(fs.existsSync(path.join(site, 'docfirst.config.mjs'))).toBe(false)
+      expect(fs.readFileSync(path.join(site, 'content', 'docs', 'index.mdx'), 'utf8')).toBe('---\ntitle: 骨架\n---\n')
+      expect(fs.existsSync(path.join(site, 'src', 'app', 'docs', 'layout.tsx'))).toBe(true)
+    })
+  })
+
+  it('写盘途中失败：已写的文件恢复、新建的文件与目录删掉、要删的文件还在', () => {
+    const template = templateDir({ 'a.txt.tpl': 'a', 'b/c.txt.tpl': 'c', 'z.txt.tpl': 'z' })
+    try {
+      inSkeleton({ siteFiles: { 'z.txt': '原来的 z' } }, (site) => {
+        const manifestBefore = fs.readFileSync(path.join(site, 'package.json'), 'utf8')
+        const readonly = path.join(site, 'z.txt')
+        fs.chmodSync(readonly, 0o444)
+        try {
+          expect(() => attachSite({ siteDir: site, template })).toThrow(/写盘途中失败，站已恢复原样/)
+        } finally {
+          fs.chmodSync(readonly, 0o644)
+        }
+        expect(fs.existsSync(path.join(site, 'a.txt'))).toBe(false)
+        expect(fs.existsSync(path.join(site, 'b'))).toBe(false)
+        expect(fs.readFileSync(readonly, 'utf8')).toBe('原来的 z')
+        expect(fs.readFileSync(path.join(site, 'package.json'), 'utf8')).toBe(manifestBefore)
+        expect(fs.existsSync(path.join(site, 'src', 'app', 'docs', 'layout.tsx'))).toBe(true)
+      })
+    } finally {
+      fs.rmSync(template, { recursive: true, force: true, maxRetries: 5 })
+    }
+  })
+})
+
 it('装配那张依赖表是精确号、跟工作区那两个包的版本对得上——它们发版抬了版本号忘了抬它，这条红', () => {
   for (const [name, pin] of Object.entries(DOCFIRST_DEPS)) {
     const dir = DIR_OF[name]

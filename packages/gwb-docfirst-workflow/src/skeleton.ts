@@ -1,55 +1,57 @@
 /**
- * 目标站这一头的事实：它是不是一个**刚铺好的 fumadocs 骨架**、它用哪个口、它的仓叫什么、
+ * 目标站的事实：它是不是一个刚生成、还没装过 docfirst 的 fumadocs 骨架，用哪个端口，仓在哪，
  * 仓根哪几个文件会被第一次 render 覆盖。
  *
- * 模块内部件，不在装配接口的面上。这一层的纪律有两条：**只读**（会覆盖什么只报出来），
- * 与**宁可拒绝也不改写**——`assertFresh` 是整个装配唯一的门，它放行之后下游一路覆盖。
+ * 这一层只读不写。`inspectSite` 拒绝的站，装配一个文件都不写。
  */
 import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
 import { join } from "node:path";
 
-/** fumadocs 家的三个包名。依赖里有任一就算 fumadocs 站 */
+/** fumadocs 的三个包名。依赖里有任一个就算 fumadocs 站 */
 const FUMADOCS_PACKAGES = ["fumadocs-core", "fumadocs-mdx", "fumadocs-ui"];
 
 /**
- * 刚铺好的骨架里，`content/` 下允许有的东西（相对 `content/` 的 posix 路径）。
- * 多出一个就是有人写过内容了——那时装配一律拒。
+ * 刚生成的骨架里 `content/` 下允许有的路径（相对 `content/`，正斜杠）。
+ * 多出任何一个就是有人写过内容，装配拒绝。
  */
 const SKELETON_CONTENT = new Set(["docs", "docs/index.mdx", "docs/meta.json"]);
 
-/** 骨架自己的那份文档布局。六区的侧栏抬到根 layout，这一份要让位——装配把它删掉 */
+/** 骨架自带的文档布局。装配把侧栏放到根 layout 上，这一份要删掉，否则两层 DocsLayout 叠在一起、侧栏出现两遍 */
 export const SUPERSEDED = ["src/app/docs/layout.tsx"];
 
-/** 模板的 outputs 映射会往仓根摆的生成物：仓里已经有的，第一次 render 就会被覆盖 */
+/** 模板的 outputs 映射会写到仓根的生成物：仓里已经有的，第一次 render 就会被覆盖 */
 const PLACED_FILES = ["README.md", "AGENTS.md"];
 
-/** `next dev -p <口>` / `next start -p <口>` 认不出来时退回 next 自己的默认口 */
+/** docfirst 配置文件名：扩展名不限，出现任何一个就说明这个站已经装过 */
+const DOCFIRST_CONFIG = /^docfirst\.config\.[^.]+$/;
+
+/** `next dev -p <端口>` / `next start -p <端口>` 认不出来时用 next 自己的默认端口 */
 export const DEFAULT_PORT = 3000;
 
-/** 目标站的 package.json 里本模块读得动的那几样 */
+/** 目标站 package.json 里本模块用到的字段 */
 export interface SiteManifest {
   name?: unknown;
   description?: unknown;
   scripts?: Record<string, unknown>;
 }
 
-/** 装配前把目标站看一遍，看出来的全部事实 */
+/** 装配前检查目标站得到的全部事实 */
 export interface SiteFacts {
   /** 站目录的绝对路径 */
   dir: string;
-  /** 站所在的仓（站目录的上一级）——被钉的代码在那儿，引用写 `../src/…` */
+  /** 站所在的仓（站目录的上一级），被引用的代码在那里，引用写 `../src/…` */
   repoDir: string;
-  /** 站自己的 package.json 原文，装配那一步要往里合并 */
+  /** 站自己的 package.json 原文，装配要往里合并 */
   manifestText: string;
-  /** 骨架挑的那个口，从 scripts 里认；认不出退 `DEFAULT_PORT` */
+  /** 骨架用的端口，从 scripts 里认；认不出是 `DEFAULT_PORT` */
   port: number;
   /** 仓根已有、第一次 render 会被覆盖的生成物 */
   overwrites: string[];
-  /** 骨架里要让位、装配会删掉的文件（相对站目录） */
+  /** 骨架里要删掉的文件（相对站目录） */
   superseded: string[];
 }
 
-/** 一份 package.json 是不是 fumadocs 站：dependencies 与 devDependencies 里有 fumadocs 家的包 */
+/** 一份 package.json 是不是 fumadocs 站：dependencies 或 devDependencies 里有 fumadocs 的包 */
 export function isFumadocsSite(manifestText: string): boolean {
   let parsed: unknown;
   try {
@@ -63,7 +65,7 @@ export function isFumadocsSite(manifestText: string): boolean {
   return names.some((name) => FUMADOCS_PACKAGES.includes(name));
 }
 
-/** 骨架挑的那个口：按 `next dev -p <口>` / `next start -p <口>` 认，认不出退默认 */
+/** 骨架用的端口：按 `next dev -p <端口>` / `next start -p <端口>` 认，认不出用默认端口 */
 export function portOf(manifest: SiteManifest): number {
   for (const command of Object.values(manifest.scripts ?? {})) {
     if (typeof command !== "string") continue;
@@ -73,7 +75,7 @@ export function portOf(manifest: SiteManifest): number {
   return DEFAULT_PORT;
 }
 
-/** `content/` 下有骨架之外的东西吗——有就把它们列出来（相对 `content/` 的 posix 路径，排过序） */
+/** `content/` 下骨架之外的路径（相对 `content/`，正斜杠，排过序） */
 export function extraContent(siteDir: string): string[] {
   const root = join(siteDir, "content");
   if (!existsSync(root)) return [];
@@ -92,14 +94,19 @@ export function extraContent(siteDir: string): string[] {
   return extra.sort();
 }
 
+/** 站目录下的 docfirst 配置文件名（排过序） */
+export function docfirstConfigs(siteDir: string): string[] {
+  return readdirSync(siteDir)
+    .filter((name) => DOCFIRST_CONFIG.test(name))
+    .sort();
+}
+
 /**
- * 装配唯一的那道门。**只在刚铺好的骨架上跑**——放行之后整套覆盖是安全的，因为中间没人
- * 改过文件；给一个跑了半年的站加 docfirst，报一句让人工接线，比自作聪明地 AST 改写安全。
- *
- * 四条拒的理由各说各的：目录不对、不是 fumadocs 骨架、已经接过 docfirst、`content/` 下已有内容。
+ * 检查目标站能不能装。拒绝的理由各报各的：目录不在、不是目录、不是 fumadocs 骨架、
+ * 已经有 docfirst 配置、`content/` 下有骨架之外的内容。
  */
 export function inspectSite(siteDir: string): SiteFacts {
-  if (!existsSync(siteDir)) throw new Error(`站不在：${siteDir}（装配是往一个已经铺好的 fumadocs 骨架上加六区，先把骨架铺出来）`);
+  if (!existsSync(siteDir)) throw new Error(`站不在：${siteDir}（装配要在已经生成的 fumadocs 骨架上进行，先用 docs-site.create 生成骨架）`);
   if (!statSync(siteDir).isDirectory()) throw new Error(`不是目录：${siteDir}`);
 
   const manifestPath = join(siteDir, "package.json");
@@ -109,8 +116,9 @@ export function inspectSite(siteDir: string): SiteFacts {
     throw new Error(`不是 fumadocs 骨架：${siteDir} 的依赖里没有 fumadocs-core / -mdx / -ui`);
   }
 
-  if (existsSync(join(siteDir, "docfirst.config.mjs"))) {
-    throw new Error(`这个站已有内容，请人工接线：${siteDir} 下已经有 docfirst.config.mjs`);
+  const configs = docfirstConfigs(siteDir);
+  if (configs.length > 0) {
+    throw new Error(`这个站已有内容，请人工接线：${siteDir} 下已经有 ${configs.join("、")}`);
   }
   const extra = extraContent(siteDir);
   if (extra.length > 0) {
@@ -128,7 +136,7 @@ export function inspectSite(siteDir: string): SiteFacts {
   };
 }
 
-/** 仓根 package.json 里能认出来的那两样。读不动不挡事——名字退回目录名 */
+/** 仓根 package.json 里的 name 与 title。文件不在或解析不了是 null，名字改用目录名 */
 export function readRepoManifest(repoDir: string): { name?: unknown; title?: unknown } | null {
   const manifestPath = join(repoDir, "package.json");
   if (!existsSync(manifestPath)) return null;
@@ -139,7 +147,7 @@ export function readRepoManifest(repoDir: string): { name?: unknown; title?: unk
   }
 }
 
-/** 仓根 `src/index.ts` 的正文，没有就是 null——起手页那块钉不钉得成看它 */
+/** 仓根 `src/index.ts` 的正文，没有就是 null——入口页的第一条引用要不要写看它 */
 export function readEntry(repoDir: string): string | null {
   const entry = join(repoDir, "src", "index.ts");
   return existsSync(entry) ? readFileSync(entry, "utf8") : null;
