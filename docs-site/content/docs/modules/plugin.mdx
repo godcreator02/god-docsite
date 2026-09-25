@@ -65,7 +65,7 @@ description: gwb-docfirst-workflow：一条装六区的命令加六份说明书�
 
 **不注册窗格**：站点插件那个窗格已经叫「文档站」，两个窗格同名分不出谁是谁。本插件也因此没有浏览器端的代码——没有 esbuild、没有那张带前缀的样式表，`build` 只剩一步 `tsc`：
 
-{/* ref file="../packages/gwb-docfirst-workflow/package.json" lines="25-33" */}
+{/* ref file="../packages/gwb-docfirst-workflow/package.json" lines="24-32" */}
 
 ## 不知道什么
 
@@ -138,7 +138,7 @@ description: gwb-docfirst-workflow：一条装六区的命令加六份说明书�
 
 依赖字段照 devkit 的规矩写：运行时从 home 里得到的写 peer——内核包 `@godcreator/gwb-kernel-desktop`（`GwbContext` 从它的包根 `import type`）、命令总线（硬注入）、skills 插件（局部注入，标 `optional`）。cordis 对服务不做版本校验，peer 范围是这条链上唯一的版本校验点。这三个包在 dev 里再各写一份，因为本仓 `pnpm-workspace.yaml` 关了 `autoInstallPeers`，只写 peer 的话它们不会被装进 `node_modules`，类型检查找不到。判断命令参数用的 `isRecord` 是 `index.ts` 里自带的一个函数，构建产物里没有按值 import 的包，所以 peer 里没有 `cordis`。为什么不再用接口类型包 `@godcreator/gwb-plugin-api`，见 [适配内核 0.6](/trajectory/2026-09-25-adapt-kernel-0-6-drop-plugin-api)。
 
-{/* ref file="../packages/gwb-docfirst-workflow/package.json" lines="38-60" */}
+{/* ref file="../packages/gwb-docfirst-workflow/package.json" lines="36-56" */}
 
 注入方式与依赖字段由测试一起检查：
 
