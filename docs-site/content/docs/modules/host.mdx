@@ -37,7 +37,7 @@ description: 读配置装出一个判定服务；记忆按被引文件的位置�
 
 **摆放不知道装配的别的部分，也不知道落点是不是文件。** 它认得的外面只有 `PlacingHost` 那一圈：前半是项目面（根、配置、判定服务、组件名册、这篇挂了哪些落点、这篇的原文），后半是生成物的存放（读一个落点、写一个落点）。多的一样摆放也拿不到，`placement.ts` 因此一句 `node:fs` 都不 import。
 
-{/* ref file="../packages/docfirst-workflow/src/host/placement.ts" lines="63-80" */}
+{/* ref file="../packages/docfirst-workflow/src/host/placement.ts" lines="66-83" */}
 
 存放那半是**接缝**，两个适配器。生产那份在装配里：落点相对项目根，读写与建父目录都在这几行。
 
@@ -45,7 +45,7 @@ description: 读配置装出一个判定服务；记忆按被引文件的位置�
 
 **摆放认得 fumadocs 留下的两处痕迹，仅此而已。** 站上 `.md` 路由给标题加的锚记、序列化器紧跟标点时保守转义的加粗星号，摆放都认得——认它们只为把产物还原成可读文本，产物是给 agent 直接读的，不该带着站的痕迹。除这两处之外，这一层不认识 fumadocs 的任何东西：不认识它的集合、loader、组件表，也不 import 它。这是一处真实的轻微耦合，写在这儿比藏起来强。
 
-{/* ref file="../packages/docfirst-workflow/src/host/placement.ts" lines="82-89" */}
+{/* ref file="../packages/docfirst-workflow/src/host/placement.ts" lines="85-92" */}
 
 ## 数据结构
 
@@ -63,7 +63,7 @@ description: 读配置装出一个判定服务；记忆按被引文件的位置�
 
 **git 记忆记什么**：blob、commit、旧 blob 里的行段、段哈希。不记仓在哪——blob 是内容寻址的，核对时从文件位置重新找仓，所以同一条记录换台机器、换个 clone 路径照样认得。
 
-{/* ref file="../packages/docfirst-workflow/src/host/git-comparator.ts" lines="19-26" */}
+{/* ref file="../packages/docfirst-workflow/src/host/git-comparator.ts" lines="20-27" */}
 
 **记录簿落盘就是一个 json**，两层键：文档 → 目标 → 记录。整个实现一眼看得完，`save` 只在内容真变了才写盘——记录簿会被构建工具登记成依赖，白改一次 mtime 就是一次全站重编。
 
@@ -101,7 +101,7 @@ description: 读配置装出一个判定服务；记忆按被引文件的位置�
 
 **绿只认段哈希**：hunk 说没碰到也再比一次，行映射跟内容对不上时宁可报黄让人复核，也不把红判成绿。整段没了是 `vanished`，文件没了是 `file-missing`，内容变了而 blob 不在对象库（浅克隆、历史重写、换了个仓）是 `blob-missing`。一个进程里同一个 blob 只从对象库取一次、同一对内容只 diff 一次——两样都按内容寻址，记住不会过时。这条线为什么这么设计、blob 名为什么自己算，见 [git 记忆原理](/docs/principles/git)。
 
-**`placing`** 是摆放对外的全部接口，挂在装好的项目上，两个方法。`render(doc)` 摆一趟：渲一份正文，给每个落点戴上它点名的 frontmatter 字段，写过去，回一张落点清单。`check(doc, listing?)` 只读不写，回每个落点的四态；调用方手上已经有这一篇的清单就传进去，摆放不再判一遍——命令行的 check 刚判完这一篇，就是这么传的。两个方法用的是同一份正文，所以摆完再核对必然新鲜——守着的和摆出去的不可能是两份东西。
+**`placing`** 是摆放对外的全部接口，挂在装好的项目上，两个方法。`render(doc)` 摆一次：渲一份正文，给每个落点戴上它点名的 frontmatter 字段，写过去，回一张落点清单。`check(doc, listing?)` 只读不写，回每个落点的四态；调用方手上已经有这一篇的清单就传进去，摆放不再判一遍——命令行的 check 刚判完这一篇，就是这么传的。两个方法用的是同一份正文，所以摆完再核对必然新鲜——守着的和摆出去的不可能是两份东西。
 
 {/* ref file="../packages/docfirst-workflow/src/host/placement.ts" lines="51-64" */}
 
@@ -109,13 +109,13 @@ description: 读配置装出一个判定服务；记忆按被引文件的位置�
 
 frontmatter 是**逐行原样搬**的，不解析 YAML：一条字段从它的顶层键行起、到下一条顶层键行止，块式列表和多行标量的缩进续行都跟着走。作者在源里写下的那几行，就是生成物头部那几行，一眼对得上。
 
-{/* ref file="../packages/docfirst-workflow/src/host/placement.ts" lines="145-153" */}
+{/* ref file="../packages/docfirst-workflow/src/host/placement.ts" lines="148-156" */}
 
 正文本身由格式渲，摆放只在上面整形：剥掉整段 frontmatter 与站上的标题锚记、还原逃逸了一半的加粗、去掉开头空行。
 
 落点的地盘在装配那一刻就查死：目标得相对项目根、不许落进任何一个文档目录（那是源的地盘）、一个目标只许一个文档写。犯一条 `loadProject` 当场抛，check 与 render 都还没轮到。
 
-{/* ref file="../packages/docfirst-workflow/src/host/placement.ts" lines="114-132" */}
+{/* ref file="../packages/docfirst-workflow/src/host/placement.ts" lines="117-135" */}
 
 ## 依赖的接口
 
