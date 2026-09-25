@@ -34,9 +34,9 @@ const components = Object.fromEntries(
 
 /** 一篇文档：编译产物 + 页面 html + 命令行那头算出来的清单 */
 async function pageOf(doc) {
-  // ?collection= 告诉 loader 这篇属于哪个集合——集合的 postprocess（processed markdown）才会跑。
-  // 进 check 的只有现状区，本站的现状区只有 content/docs 一个集合
-  const mod = await import(`../${doc}?collection=docs`);
+  // ?macro_id= 告诉 loader 这篇属于哪个集合（写集合的文件 + 变量名）——集合的 mdxOptions 与
+  // postprocess（processed markdown）才会用上。进 check 的只有现状区，本站的现状区只有 content/docs 一个集合
+  const mod = await import(`../${doc}?macro_id=src/lib/source.ts%23docs`);
   return {
     mod,
     html: renderToStaticMarkup(createElement(mod.default, { components })),

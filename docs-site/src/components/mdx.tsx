@@ -15,27 +15,31 @@ import { Term } from '@godcreator/docfirst-workflow/fumadocs/term';
 import type { ComponentName } from './registry';
 import { Tabs, Tab } from './tabs/tabs';
 
-type Loose = MDXComponents[string];
-
 export function Note({ children }: { children?: ReactNode }) {
   return <div className="note">{children}</div>;
 }
 
-const table: Record<ComponentName, Loose> = {
-  Note: Note as Loose,
-  Tabs: Tabs as Loose,
-  Tab: Tab as Loose,
-  Files: Files as Loose,
-  Folder: Folder as Loose,
-  File: File as Loose,
-  Term: Term as Loose,
+const table: Record<ComponentName, MDXComponents[string]> = {
+  Note,
+  Tabs,
+  Tab,
+  Files,
+  Folder,
+  File,
+  Term,
 };
 
-export function getMDXComponents(components: MDXComponents = {}): MDXComponents {
+export function getMDXComponents(components?: MDXComponents) {
   return {
     ...defaultMdxComponents,
     ...components,
     ...table,
-    pre: DocfirstPre as unknown as NonNullable<MDXComponents['pre']>,
-  };
+    pre: DocfirstPre,
+  } satisfies MDXComponents;
+}
+
+export const useMDXComponents = getMDXComponents;
+
+declare global {
+  type MDXProvidedComponents = ReturnType<typeof getMDXComponents>;
 }

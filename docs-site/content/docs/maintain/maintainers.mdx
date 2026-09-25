@@ -15,7 +15,7 @@ description: 仓布局、三处门禁、提交规矩、发布、只读参考
 {/* tree dir="../packages" depth="1" hash="01f82fee3739" */}
 
 `docfirst-workflow` 是主包（`src/` 下 engine / host / fumadocs / cli 四层），`docfirst-trajectory` 是轨迹包
-（卡与星轨盘，独立的一条包线），`gwb-docfirst-workflow` 是工作台插件（装三个区与六份说明书，跟两个包互不认识）。
+（卡与星轨盘，独立的一条包线），`gwb-docfirst-workflow` 是工作台插件（建站命令与六份说明书，跟两个包互不认识）。
 仓根的 `tests/` 是工作区级测试，`tests/fixtures/trajectory/` 是星轨盘的诗名 fixture。
 
 站用这套机制写自己的文档，内容在 `content/` 下分三个区：`docs/` 是现状区（生成正本在 `docs/outputs/`），
@@ -36,7 +36,7 @@ description: 仓布局、三处门禁、提交规矩、发布、只读参考
 
 站的脚本在站自己的 `package.json` 里：
 
-{/* ref file="package.json" lines="7-12" hash="9a5bba40030d" blob="e988abd365b8" */}
+{/* ref file="package.json" lines="7-15" hash="06917a2611c7" blob="3eccd3ca82ab" */}
 
 外加 `node scripts/verify-roster.mjs`（检查[名册](/docs/modules/fumadocs)两边一致）和 `pnpm docfirst check`。
 
@@ -47,7 +47,7 @@ description: 仓布局、三处门禁、提交规矩、发布、只读参考
 
 ## 写代码的规矩
 
-{/* ref file="content/docs/maintain/agents.mdx" lines="38-52" hash="a22bc9f4989e" blob="55578432fde8" */}
+{/* ref file="content/docs/maintain/agents.mdx" lines="38-52" hash="d6ee082f8668" blob="5640d303febe" */}
 
 再补两条站这边的：改了 `src/fumadocs/` 的代码，站要**先删 `.next` 再 build** 才看得见（Turbopack 只按 mdx 内容缓存）；
 调试站用 `next build` + `next start`，不用 dev，启动的站验完必须停掉。
@@ -71,14 +71,14 @@ devkit.release {"dir":"<仓根>","packages":["packages/docfirst-trajectory","pac
 devkit.release {"dir":"<仓根>","packages":["packages/gwb-docfirst-workflow"]}
 ```
 
-第二行是插件单独发。插件发之前在隔离 home 里新建一个站验一遍（`docs-site.create` 接 `docfirst.attach`），
+第二行是插件单独发。插件发之前在隔离 home 里用 `docfirst.create` 新建一个站验一遍（隔离 home 里也要装站点插件），
 隔离 home 里验证的步骤在 skill「gwb-devkit」。
 
-两个包升版本号时**跟着改 `packages/gwb-docfirst-workflow/src/deps.ts` 那张表**——装配时往目标站补的依赖版本就取自它，
-插件的 `tests/attach.test.ts` 里有一条检查它是精确号、跟工作区各包的版本对得上，忘了改当场红。
+两个包升版本号时**跟着改 `packages/gwb-docfirst-workflow/src/deps.ts` 那张表**——建站时写进站的依赖版本就取自它，
+插件的 `tests/create.test.ts` 里有一条检查它是精确号、跟工作区各包的版本对得上，忘了改测试当场失败。
 
 **两边各发各的，没有先后。**插件对包零依赖：它不打包那个包、`package.json` 的各类依赖里也没有它，所以先发哪个
-都不影响另一个；只是表里的版本号改了，插件得再发一版，之后新装配的站才装到新包。
+都不影响另一个；只是表里的版本号改了，插件得再发一版，之后新建的站才装到新包。
 
 ## 参考，只读
 

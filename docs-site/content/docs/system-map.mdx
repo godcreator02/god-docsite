@@ -15,7 +15,7 @@ description: 两个包加一个插件、主包的四层、三条入口、依赖�
 
 `docfirst-workflow` 是主包 `@godcreator/docfirst-workflow`，`docfirst-trajectory` 是独立的一条包线
 `@godcreator/docfirst-trajectory`，`gwb-docfirst-workflow` 是工作台插件——它不进 npm 的依赖网，只在
-桌面工作台里给 agent 提供一条装配命令和几份说明书。
+桌面工作台里给 agent 提供一条建站命令和几份说明书。
 
 ## 四层
 
@@ -27,11 +27,11 @@ description: 两个包加一个插件、主包的四层、三条入口、依赖�
 | 职责 | 层 | 管什么 | 先读 |
 | --- | --- | --- | --- |
 | 判定 | `src/engine/` | 引用模型、记号语法、比较器、编排服务；只用 `node:crypto` | [判定层](/docs/modules/engine) |
-| 环境 | `src/host/` | 读盘；起 git 子进程（按 blob 取旧内容、算 hunk 表、查未提交的改动）；把生成物写到落点；读配置装配出一个项目 | [环境层](/docs/modules/host) |
+| 环境 | `src/host/` | 读盘；启动 git 子进程（按 blob 取旧内容、算 hunk 表、查未提交的改动）；把生成物写到落点；读配置装配出一个项目 | [环境层](/docs/modules/host) |
 | 格式 | `src/fumadocs/` | mdx 怎么认记号、怎么写回、怎么按原文渲染；站的 remark 接线与展示组件 | [格式与站接线](/docs/modules/fumadocs) |
 | 入口 | `src/cli/` | 命令行的分流、打印、退出码 | [命令行](/docs/modules/cli) |
 
-包里没有第五层：给一个刚生成的骨架**装三个区**的那部分在工作台插件里（[装配](/docs/modules/site)）。
+包里没有第五层：**建一个接好三个区的站**那部分在工作台插件里（[建站](/docs/modules/site)）。
 包的使用者是仓，插件的使用者是 agent，判据见轨迹卡
 [包给仓、插件给人](/trajectory/2026-09-10-package-serves-repo-plugin-serves-agent)。
 
@@ -42,22 +42,22 @@ description: 两个包加一个插件、主包的四层、三条入口、依赖�
 <Tabs>
   <Tab title="命令行">
     `docfirst check / confirm / render / trajectory`，外加一次性的迁移命令 `migrate-ledger`。`cli` 逐篇把文本交给编排服务，
-    把回来的清单译成一行行人话和一个退出码。git hook 与 CI 跑的就是它——**提交那一刻工作台
+    把回来的清单译成一行行人读的文字和一个退出码。git hook 与 CI 跑的就是它——**提交那一刻工作台
     不在场**，所以判定与核对必须是一个 npm 包，不能依赖任何 GUI 应用开着。
   </Tab>
   <Tab title="站构建">
-    站的 `source.config.ts` import `@godcreator/docfirst-workflow/fumadocs`，remark 插件在构建期
-    装配一次项目、认引用、算清单、把状态点打到语法树上。人看的那份文档就是站本身。
+    站的 `src/lib/source.ts` import `@godcreator/docfirst-workflow/fumadocs`，接到现状集合上，remark 插件在构建期
+    装配一次项目、认引用、算清单、把状态点加到语法树上。人看的那份文档就是站本身。
   </Tab>
   <Tab title="工作台插件">
-    `@godcreator/gwb-docfirst-workflow` 经命令总线提供 `docfirst.attach`（在进程内给一个刚生成的骨架
-    装上三个区），另把六份说明书注册给 agent 读。**它对包零依赖**：不 import、不起子进程——要核对
+    `@godcreator/gwb-docfirst-workflow` 经命令总线提供 `docfirst.create`（算好在官方脚手架输出上增、换、删哪些文件，
+    交给站点插件的 `docs-site.create` 建站），另把六份说明书注册给 agent 读。**它对包零依赖**：不 import、不启动子进程——要核对
     就 `cd` 到那个仓里跑包的命令行。
   </Tab>
 </Tabs>
 
 前两条入口共用同一份编排服务，这就是「判定只有一处」：站上看到的绿，跟命令行
-`check` 退 0 说的是同一件事；第三条根本不做判定，它写的是模板。
+`check` 退 0 说的是同一件事；第三条根本不做判定，它交出的是模板。
 
 ## 依赖方向
 
@@ -66,8 +66,8 @@ description: 两个包加一个插件、主包的四层、三条入口、依赖�
 
 {/* ref file="../tests/boundary.test.ts" lines="85-103" hash="bcb7a58199fa" blob="90355c11baed" */}
 
-`engine` 是这张图的终点，自己零依赖，只用 `node:crypto`。它不读文件、不起子进程、不认识任何
-文档格式——干活要的三样全是外面传进来的：
+`engine` 是这张图的终点，自己零依赖，只用 `node:crypto`。它不读文件、不启动子进程、不认识任何
+文档格式——运行要的三样全是外面传进来的：
 
 {/* ref file="../packages/docfirst-workflow/src/engine/service.ts" lines="56-60" hash="54376c072d21" blob="78a15b3aa6cb" */}
 
@@ -85,7 +85,7 @@ description: 两个包加一个插件、主包的四层、三条入口、依赖�
 ## 边界靠什么守
 
 主包是一个包，「谁能依赖谁」**不由 pnpm 严格的 `node_modules` 挡住**：同一个包里，
-`engine/` 里随手写一句 `import "../host/git.ts"` 编译器不会报错，判定层就从此起了 git
+`engine/` 里随手写一句 `import "../host/git.ts"` 编译器不会报错，判定层就从此启动了 git
 子进程。挡住它的是一个测试文件：
 
 {/* ref file="../tests/boundary.test.ts" lines="1-26" hash="c29fd3eaad78" blob="421b08df5caa" */}
@@ -93,7 +93,7 @@ description: 两个包加一个插件、主包的四层、三条入口、依赖�
 它守四类：目录方向（上面那张表）、`engine` 的零依赖、宿主只能是 peer 且不许被打进产物、
 包不认识插件。**它报红的时候，红的是设计，不是测试。**
 
-方向单向换来的是换零件只动一处：换一种文档格式，新写一份 `Format` 实现，判定层一行不动；
+方向单向换来的是替换一块只动一处：换一种文档格式，新写一份 `Format` 实现，判定层一行不动；
 旧内容不从 git 取，实现 `History` 的两个方法；换站的宿主，只动 `src/fumadocs/`。
 
 ## 站也是使用者
@@ -118,7 +118,7 @@ description: 两个包加一个插件、主包的四层、三条入口、依赖�
 状态都在那儿，别的层只认这一份；**再 [环境层](/docs/modules/host)**——装配的全貌、旧内容怎么按
 blob 取回、一篇正本怎么渲染到落点；**然后 [命令行](/docs/modules/cli)**。
 [格式与站接线](/docs/modules/fumadocs) 是站构建那条入口，[轨迹](/docs/modules/trajectory) 是
-独立的一条包线，[工作台插件](/docs/modules/plugin) 与它的 [装配](/docs/modules/site) 在包
+独立的一条包线，[工作台插件](/docs/modules/plugin) 与它的 [建站](/docs/modules/site) 在包
 外面，各从自己那一页进，只读命令行这条线的人整个跳过。
 
 两处边界值得在进代码之前先知道，免得照目录名猜错：
@@ -126,8 +126,8 @@ blob 取回、一篇正本怎么渲染到落点；**然后 [命令行](/docs/mod
 **摆放在 `host/`**，全部在 `placement.ts` 里——一篇 mdx 正本渲染成生成物、加回指定的
 frontmatter 字段、写到每个落点、核对盘上那份是不是最新，都在那一份。它在环境层而不是
 判定层，是因为要写盘、要调用格式的渲染，判定两样都不做；也不在命令行，是因为放进命令行
-站构建就只能起子进程从 stdout 取结果。
+站构建就只能启动子进程从 stdout 取结果。
 
-**命令行只负责打印**：它拿到摆放的两个方法与编排服务，把回来的清单译成一行行人话和一个退出码，
+**命令行只负责打印**：它拿到摆放的两个方法与编排服务，把回来的清单译成一行行人读的文字和一个退出码，
 引用的状态一件都不在那儿算。它另外只问环境层一件事：被钉的文件在本仓有没有未提交的改动，
 有的话那处黄灯算红。

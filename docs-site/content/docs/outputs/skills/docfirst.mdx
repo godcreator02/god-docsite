@@ -1,46 +1,48 @@
 ---
 title: docfirst
 name: docfirst
-description: 要给一个刚建好的 fumadocs 骨架装上 docfirst 的分区时用；要核对一个站里的现状有没有漂移、要确认引用、要重新生成生成物时也读它——那几件事不经过这个插件，是自己 cd 到那个仓里跑 pnpm doc，这份说清了跑哪几条；跨仓反馈投到哪儿、什么格式也在这儿。
+description: 要给一个仓建一个接好 docfirst 分区的文档站时用；要核对一个站里的现状有没有漂移、要确认引用、要重新生成生成物时也读它——那几件事不经过这个插件，是自己 cd 到那个仓里跑 pnpm doc，这份说清了跑哪几条；跨仓反馈投到哪儿、什么格式也在这儿。
 docfirst: none
 ---
 
-# docfirst 插件：装分区，带五份说明书
+# docfirst 插件：建站，带五份说明书
 
-本插件只有**一条命令**：`docfirst.attach`——给一个已经生成好的 fumadocs 骨架装上 docfirst 的分区。
+本插件只有**一条命令**：`docfirst.create`——给一个仓建一个接好 docfirst 分区的文档站。
 除此之外它只做一件事：把另外五份说明书注册给你读。
 
 **它对 `@godcreator/docfirst-workflow` 那个包零依赖**，装了本插件不必再装什么包。判据是「这件事在哪儿发生」：
 核对 / 确认 / 渲染要在**仓**里发生（那是门禁与站构建要跑的东西），你自己 `cd` 过去跑；只在你手上发生一次的
-（读说明书、给一个新骨架写一次文件）才归插件。**插件不转发命令行。**
+（读说明书、给一个仓建一次站）才归插件。**插件不转发命令行。**
 
-**站的管理归站点插件**（`@godcreator/gwb-docs-site`，命令 `docs-site.*`）：扫容器根找站、生成标准 fumadocs
-骨架、判断 build 是不是最新、挑空闲端口启动与停止、到时间自动关闭、站的窗格。两个插件互不依赖、各带各的模板。
+**站的管理归站点插件**（`@godcreator/gwb-docs-site`，命令 `docs-site.*`）：判断 build 是不是最新、挑空闲端口启动与停止、
+到时间自动关闭、站的窗格；建站时跑官方脚手架 `create-fumadocs-app`、套本机约定（端口、页面语言、字体、站名等）与写盘也归它。本插件依赖它：
+没装站点插件的 home 里本插件不加载。站建好以后要改结构（加分区、加组件）、要跑 `dev` / `build`，读站点插件的说明书 `docs-site`。
 
-## 建一个新站是两步
+## 建一个新站：一条命令
 
 ```
-docs-site.create {"dir":"<仓>/docs-site"}     站点插件：生成标准 fumadocs 骨架（一个集合、一条路由、一页 index）
-docfirst.attach  {"dir":"<仓>/docs-site"}     本插件：装分区、docfirst.config.mjs、mdx 接线、名册脚本
+docfirst.create {"dir":"<仓>/docs-site"}
 ```
 
-**顺序不能反，中间不要改文件。**`attach` 只在刚生成的骨架上运行：站里已经有 docfirst 配置、或者 `content/` 下
-已经有骨架之外的内容，它一个字都不写，报错并列出冲突的文件。它**不核对**要覆盖的骨架文件（比如 `content/docs/index.mdx`）
-还是不是原样——改过的也会被覆盖，所以铺完骨架之后、装配之前别改任何文件。给一个已经用了很久的站加 docfirst，走人工接线。
+站约定放在仓根下的 `docs-site/`。站点插件的 `docs-site.create` 先跑官方脚手架、套本机约定，本插件算好在官方输出上
+替换、删除、新增哪些文件（分区、`docfirst.config.mjs`、mdx 接线、名册脚本、各区的起始页）与 docfirst 的依赖、脚本，
+交给它一起写盘。**站目录必须还不存在**：
+已经有站的仓不能用这条命令，给一个已经用了很久的站加 docfirst，走人工接线。
 
-### `docfirst.attach { dir, title? }`
+### `docfirst.create { dir, title?, port? }`
 
-- `dir`：**站目录**的绝对路径（约定是 `<仓>/docs-site`）。给成仓目录是最常犯的错，那时回「不是目录」或
-  「不是 fumadocs 骨架」。
-- `title`：站的显示名，不给就取仓根 `package.json` 的 `name`，再退回仓的目录名。
+- `dir`：**站目录**的绝对路径（约定是 `<仓>/docs-site`）。它必须还不存在，上一级（仓目录）必须已经存在。
+- `title`：站的显示名，不给就依次用仓根 `package.json` 的 `title`、包名去掉 scope、仓的目录名。
+- `port`：站的端口，不给由站点插件挑一个没被占用的。
 
-装的东西：三个集合（`source.config.ts` 里的 docs、trajectory、future）、三条路由与侧栏三个根节点、
-`docfirst.config.mjs`、mdx 接线（投影块与术语组件）、名册脚本、各区的骨架页（`content/docs/` 下的入口页、
+建出来的东西：官方脚手架的站（搜索、llms 路由照旧），加上三个集合（`src/lib/source.ts` 里用 fumadocs-mdx 的 macro
+写的 docs、trajectory、future，现状集合经 `applyMdxPreset(docfirstMdxOptions(...))` 接上 docfirst）、三条路由与侧栏三个根节点、
+`docfirst.config.mjs`、mdx 接线（`src/components/mdx.tsx` 里的状态点组件）、样式 `src/app/docfirst.css`、名册脚本、
+各区的起始页（`content/docs/` 下的入口页、
 术语表与 `outputs/` 下的三份生成正本，`content/trajectory/` 与 `content/future/` 各一页），`package.json` 里
-补上 docfirst 的依赖与 `doc` / `doc:confirm` / `doc:render` / `verify:roster` 几条脚本。骨架自己那份
-`src/app/docs/layout.tsx` 会被删掉（留着就是两层 DocsLayout 嵌套渲染，侧栏出现两遍）。
+有 docfirst 的依赖与 `doc` / `doc:confirm` / `doc:render` / `verify:roster` 几条脚本。
 
-**只写文件**：不跑 `pnpm install`、不 render、不 check。回执里 `next` 就是接着要在那个仓里跑的那几条：
+**只写文件**：不跑 `pnpm install`、不 render、不 check。回执里 `next` 就是接着要在站目录里跑的那几条：
 
 ```
 cd <站目录>
@@ -51,11 +53,11 @@ pnpm dev
 ```
 
 仓根已经有 `README.md` / `AGENTS.md` / `CLAUDE.md` 时回执里会多一条 `warn`：第一次 `doc:render` 会**覆盖**它们
-——先把内容移进 `content/docs/outputs/` 下对应的 mdx（那是正本），再 render。装配自己一个字不动仓根。
+——先把内容移进 `content/docs/outputs/` 下对应的 mdx（那是正本），再 render。建站本身一个字不动仓根。
 
 ## 核对 / 确认 / 渲染：自己在那个仓里跑
 
-这几条**不经过工作台**。`cd` 到那个站目录（有 `docfirst.config.mjs` 的那个），跑：
+这几条**不经过工作台**。`cd` 到那个站目录（有 `docfirst.config.mjs` 的那个，约定是 `<仓>/docs-site`），跑：
 
 ```
 pnpm doc                                       核对。有红时退出码 1——那是核对结果，不是命令失败
@@ -75,11 +77,9 @@ pnpm docfirst trajectory                        列轨迹卡的盘 / 树 / 主�
 位置、`diff` 是变了的那几行——按这三样定位，**只改漂移的段落，不重排全页**。`unconfirmed`（还没确认过）不算漂移。
 只有名册外组件的页不用重写正文：在 `docfirst.config.mjs` 里补转成机读文本的规则。
 
-哪个仓有站、站在哪，问站点插件的 `docs-site.list`。
-
 ## 跨仓反馈：投进目标仓站的 `future/inbox/`
 
-在 A 仓干活时发现 B 仓的东西不好用，**直接投进 B 仓自己站的未来区**：新建一个文件
+在 A 仓工作时发现 B 仓的东西不好用，**直接投进 B 仓自己站的未来区**：新建一个文件
 `docs-site/content/future/inbox/<yyyy-MM-dd>-<来源仓>-<英文短标题>.mdx`，不需要命令。文件名用英文小写和短横线
 （git 会把中文路径显示成八进制转义），中文标题写进 `title`。格式：
 
@@ -110,8 +110,10 @@ description: 来源：<哪个仓 / 哪次会话>
 
 ## 出错时
 
-- 回「不是目录」：`dir` 给成了仓目录而不是站目录，或者骨架还没生成——先 `docs-site.create`
-- 回「不是 fumadocs 骨架」：那个目录的 `package.json` 依赖里没有 `fumadocs-core` / `-mdx` / `-ui`
-- 回冲突文件清单：那个站已经接过线、或者 `content/` 下已经有人写过东西。
-  本插件不改写任何东西，走人工接线
+- 回「dir 要是绝对路径」：给了相对路径，插件在工作台主进程里运行，不知道该相对于哪个目录
+- 回「站目录的上一级要是已经存在的仓目录」：`dir` 多写或少写了一层，或者仓还没建
+- 回「docs-site.create 没建成：……」：后面是站点插件的原话。最常见的是站目录已经存在（这个仓已经有站，
+  走人工接线），其次是跑官方脚手架要联网没联上、端口冲突，或脚手架的输出变了、本插件的文件清单对不上
+  （新增的已经有、替换或删除的没有），照原话处理
+- 回「不认识的参数」：只收 `dir`、`title`、`port` 三个
 - 想核对却找不到命令：**本插件没有那条命令**，自己 `cd` 到那个仓里跑（见上面那节）

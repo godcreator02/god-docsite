@@ -34,8 +34,8 @@ function read(file: string): string {
 describe('产物', () => {
   const nodeHalf = built ? fs.readdirSync(distDir).filter((f) => f.endsWith('.js')) : []
 
-  it.skipIf(!built)('产物只有一层：`../template/attach/` 在源码与产物里是同一个相对位置，靠的就是这一点', () => {
-    expect(nodeHalf.sort()).toEqual(['attach.js', 'deps.js', 'index.js', 'manifest.js', 'skeleton.js', 'template.js', 'values.js'])
+  it.skipIf(!built)('产物只有一层：`../template/` 在源码与产物里是同一个相对位置，靠的就是这一点', () => {
+    expect(nodeHalf.sort()).toEqual(['create.js', 'deps.js', 'index.js', 'repo-root.js', 'template.js', 'values.js'])
     expect(fs.existsSync(path.join(distDir, 'client.js'))).toBe(false)
     expect(fs.existsSync(path.join(distDir, 'template')), '模板不进 dist，它在包根，靠 files 发布').toBe(false)
   })
@@ -56,9 +56,10 @@ describe('产物', () => {
     expect([...bare].filter((spec) => !isNodeBuiltin(spec) && spec !== 'electron' && !ownPeers.has(packageNameOf(spec)))).toEqual([])
   })
 
-  it.skipIf(!built)('命令总线上只有 docfirst.attach 一条：命令名是公共接口，改名就是破坏兼容', () => {
+  it.skipIf(!built)('命令总线上只有 docfirst.create 一条：命令名是公共接口，改名就是破坏兼容', () => {
     const host = read('index.js')
-    expect(host).toContain("'docfirst.attach'")
+    expect(host).toContain("'docfirst.create'")
+    expect(host, '建站一步完成，不再有先建骨架再装配的第二条命令').not.toContain("'docfirst.attach'")
     // 核对要在仓里发生，agent 在仓里跑 pnpm doc，插件不转发命令行。
     // 投反馈是在目标仓站里的 content/future/inbox/ 下新建一个文件，不经命令
     for (const gone of ['live-doc.cli', 'live-doc.cli-raw', 'live-doc.stale', 'live-doc.feedback', 'live-doc.feedback-list']) {
@@ -89,9 +90,10 @@ describe('必须同时改的几处', () => {
     expect(fs.readFileSync(path.join(root, 'skills', 'docfirst', 'SKILL.md'), 'utf8')).toMatch(/^---\s*\nname: docfirst\n/)
   })
 
-  it('template 在 files 里：漏了照样能发布、能安装，直到运行 attach 时才报读不到', () => {
+  it('template 在 files 里：漏了照样能发布、能安装，直到运行 docfirst.create 时才报读不到', () => {
     expect(manifest.files).toContain('template')
-    expect(fs.existsSync(path.join(root, 'template', 'attach', 'docfirst.config.mjs.tpl'))).toBe(true)
+    expect(fs.existsSync(path.join(root, 'template', 'add', 'docfirst.config.mjs.tpl'))).toBe(true)
+    expect(fs.existsSync(path.join(root, 'template', 'replace', 'src', 'lib', 'source.ts.tpl'))).toBe(true)
   })
 
   /**
@@ -132,14 +134,25 @@ describe('必须同时改的几处', () => {
     expect(manifest.peerDependencies?.['@godcreator/gwb-skills']).toBeDefined()
     expect(manifest.peerDependenciesMeta?.['@godcreator/gwb-skills']?.optional).toBe(true)
     expect(index).toMatch(/ctx\.inject\(\['gwbSkills'\]/)
-    expect(index).toMatch(/export const inject = \['gwbCommands'\]/)
+    expect(index).toMatch(/export const inject = \['gwbCommands', 'gwbDocsSite'\]/)
   })
 
-  /** 两个插件互不依赖：装配只要一个绝对路径，骨架由谁生成、站在不在运行，本插件都不问 */
-  it('站点插件不在任何一档依赖里，也不被 import', () => {
-    const all = { ...manifest.dependencies, ...manifest.peerDependencies, ...manifest.devDependencies }
-    expect(Object.keys(all)).not.toContain('@godcreator/gwb-docs-site')
-    expect(index).not.toMatch(/from '@godcreator\/gwb-docs-site'/)
+  /**
+   * 建站的写盘归站点插件：本插件注入它的存在标记 `gwbDocsSite`、经命令总线按名字调 `docs-site.create`。
+   * 方向单向，站点插件不认识本插件。它是必需的 peer（不标 optional）；本工作区关了自动装 peer，dev 里也要有一份。
+   * 源码对它只有 `import type`，产物里没有它的运行时 import。
+   */
+  it('站点插件是必需的 peer，源码只 import type', () => {
+    expect(manifest.peerDependencies?.['@godcreator/gwb-docs-site']).toBeDefined()
+    expect(manifest.peerDependenciesMeta?.['@godcreator/gwb-docs-site']?.optional).not.toBe(true)
+    expect(manifest.devDependencies?.['@godcreator/gwb-docs-site']).toBeDefined()
+    for (const file of fs.readdirSync(path.join(root, 'src')).filter((f) => f.endsWith('.ts'))) {
+      const src = fs.readFileSync(path.join(root, 'src', file), 'utf8')
+      for (const m of src.matchAll(/^import\s+(type\s+)?[^'"]*from\s*['"]@godcreator\/gwb-docs-site['"]/gm)) {
+        expect(m[1], `src/${file} 对站点插件有运行时 import`).toBeDefined()
+      }
+    }
+    expect(index).toContain("'docs-site.create'")
   })
 
   it('本插件不注册窗格：站点插件的窗格已经叫「文档站」，两个同名窗格分不清', () => {

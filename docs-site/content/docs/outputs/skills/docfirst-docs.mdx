@@ -1,7 +1,7 @@
 ---
 title: docfirst-docs
 name: docfirst-docs
-description: 给挂了 docfirst 的仓写或改文档站内容之前读；接到一句话需求要走开发循环、`docfirst check` 报红要重写漂移的页、改了被钉的代码要提交、给一个还没有站的仓起站、写 README / AGENTS / SKILL.md 的 mdx 正本、给别的仓投反馈时也读。讲的是分区怎么分、每页写到哪为止、钉码怎么确认、文档怎么嵌进写代码的循环、现状漂了怎么只改漂移的段落。
+description: 给接了 docfirst 的仓写或改文档站内容之前读；接到一句话需求要走开发循环、`docfirst check` 报红要重写漂移的页、改了被钉的代码要提交、给一个还没有站的仓建站、写 README / AGENTS / SKILL.md 的 mdx 正本、给别的仓投反馈时也读。讲的是分区怎么分、每页写到哪为止、钉码怎么确认、文档怎么嵌进写代码的循环、现状漂移了怎么只改漂移的段落。
 docfirst: none
 ---
 
@@ -10,7 +10,7 @@ docfirst: none
 文档的职责是**告诉读者东西在哪、先读什么、可以跳过什么**；把代码逐句翻译成散文就是镜像，写的时候浪费、
 写完立刻开始漂移，读完还是不知道该看哪。
 
-**第一读者是干活的 agent**，人是看站点页面的监督者。agent 直接读 mdx，不另外养一份机读副本；唯一的生成物是
+**第一读者是写代码的 agent**，人是看站点页面的监督者。agent 直接读 mdx，不另外维护一份机读副本；唯一的生成物是
 生成正本（见后文）。两条随手用的判据：
 
 - **段落自检**：删掉这句，读者会迷路吗？会就留；只是复述代码里也写着的事实，就钉码指过去，或者删掉。
@@ -109,7 +109,7 @@ spec 页头的验收清单、术语表这几类允许写成列表或表格。
 
 已经提交的代码引起的黄灯、钉在别的仓里的代码引起的黄灯，`check` 只报告不拦；碰到了按下面的重写规则处理。
 
-## 重写规则：现状漂了
+## 重写规则：现状漂移了
 
 `docfirst check` 报红或报黄（要机读清单就 `docfirst check --json`，读 `docs[].items[]` 里 `status` 是
 `changed` / `missing` 的那些）之后：
@@ -130,7 +130,7 @@ A 之前不动代码：`spec-grill` 在对话里把想法问到能说清「回�
 它问需求边界，`gwb-decide` 问选型，两者不重叠。
 
 **这一处的三份纪律随本插件一起发，各有触发条件**：`spec-grill`（A 那一步怎么问）、
-`parallel-by-module`（活大到要派子代理时怎么切、什么必须串行）、`docs-governance`
+`parallel-by-module`（任务大到要派子代理时怎么切、什么必须串行）、`docs-governance`
 （文档与注释治理——代码自解释扫描、术语统一、清理历史、分清谁负责什么）。这一页不复述它们的正文。
 
 | 代码动作 | 文档要跟着改的地方 |
@@ -152,7 +152,7 @@ git 历史就是它的存档。
 
 ## 给别的仓投反馈
 
-在 A 仓干活发现 B 仓的问题，当场写一个文件投进 B 仓：`<B 仓的站>/content/future/inbox/<日期>-<来源>-<标题>.mdx`，
+在 A 仓工作时发现 B 仓的问题，当场写一个文件投进 B 仓：`<B 仓的站>/content/future/inbox/<日期>-<来源>-<标题>.mdx`，
 文件名里的来源与标题用英文小写和短横线（git 会把中文路径显示成八进制转义），中文标题写进 frontmatter 的 `title`。
 写清现场、期望、证据路径，然后在 B 仓里 `git add` 这个文件、`git commit --only` 这个文件。一条一个文件，
 不会跟 B 仓里别人未提交的改动冲突。B 仓的会话处理完就删掉这个文件，结论写进现状页或轨迹卡。
@@ -178,17 +178,16 @@ AGENTS / README 不带 frontmatter。改正本，不改生成物。
 每仓的 AGENTS 正本只写本仓专属的（怎么跑、端口、检查命令、红线、从哪读起）加一行指回这份 skill，
 生成出的 AGENTS.md 控制在 60 行内。CLAUDE 正本第一行固定是 `@AGENTS.md`，只给 Claude 的指令写在后面。
 
-# 起站
+# 建站
 
-起一个新站是**两步，顺序不能反、中间别改文件**，两步都是工作台命令：先用站点插件的
-`docs-site.create {"dir":"<仓>/docs-site"}` 铺一个标准 fumadocs 骨架，再用本插件的
-`docfirst.attach {"dir":"<仓>/docs-site"}` 装上分区——三个集合（docs、trajectory、future）与各自的路由、
-`docfirst.config.mjs`、mdx 接线、名册脚本、各区的骨架页，`package.json` 里补上依赖与 doc 脚本。
-只写文件不跑 install，端口用骨架挑好的那个。
+建一个新站是**一条工作台命令**：`docfirst.create {"dir":"<仓>/docs-site"}`。站点插件的 `docs-site.create` 先跑官方脚手架
+`create-fumadocs-app`、套本机约定并写盘；docfirst 在官方输出上改几份文件：三个集合（docs、trajectory、future）用 fumadocs-mdx
+的 macro 写在 `src/lib/source.ts`，现状集合写 `mdxOptions: applyMdxPreset(docfirstMdxOptions({ root: process.cwd() }))` 与
+`postprocess.includeProcessedMarkdown: docfirstMarkdownOptions()`，外加各区的路由、`docfirst.config.mjs`、mdx 接线、名册脚本、
+各区的起始页，`package.json` 里带上依赖与 doc 脚本。只写文件不跑 install，端口不给就由站点插件挑。
 
-**装配只在刚铺好的骨架上运行**：站里已经有 docfirst 配置、或者 `content/` 下已经有骨架之外的内容，
-它一个字都不改，报错并列出冲突的文件。它不核对要覆盖的骨架文件还是不是原样，所以两步之间别改文件。
-给已经运行很久的站加 docfirst 走人工接线。
+**站目录必须还不存在**：已经有站的仓不能用这条命令，给已经运行很久的站加 docfirst 走人工接线。
+站建好以后要改站的结构（加分区、加组件）或跑 `dev` / `build`，读站点插件的说明书 `docs-site`。
 
 模板假设站在仓根 `docs-site/`、被钉的代码在仓根（引用写 `../src/…`），形状不同就改引用里的相对路径。
 

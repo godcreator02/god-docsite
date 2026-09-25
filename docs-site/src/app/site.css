@@ -1,0 +1,8 @@
+/* 本站自己的样式：术语标注与自定义的 Tabs。src/app/docs/layout.tsx 引入，三个区的页都用得到 */
+/* 术语标注的点线下划线与定义框，随格式包发 */
+@import '@godcreator/docfirst-workflow/fumadocs/term.css';
+
+/* 站里自定义的 Tabs：不做交互，并排小节 */
+.tabs { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; margin: 18px 0; }
+.tab { border: 1px solid rgba(145, 145, 155, 0.35); border-radius: 8px; padding: 10px 14px; }
+.tab h4 { margin: 0 0 6px; font-size: 13px; letter-spacing: 1px; opacity: 0.7; }

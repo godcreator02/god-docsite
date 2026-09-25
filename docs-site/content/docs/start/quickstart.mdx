@@ -22,7 +22,7 @@ description: 装包、一份配置、写一行草稿记号、check、confirm、�
 
 把命令行写进 `scripts` 就能 `pnpm docfirst …`。这个站自己的脚本表：
 
-{/* ref file="package.json" lines="7-12" hash="9a5bba40030d" blob="e988abd365b8" */}
+{/* ref file="package.json" lines="7-15" hash="06917a2611c7" blob="3eccd3ca82ab" */}
 
 ## 二、项目根放一份配置
 
@@ -108,5 +108,5 @@ pnpm start
 
 日常用的是 check / confirm / render 三条。`render` 只生成在 `outputs` 里有映射的生成物，别的文档不渲染；
 `trajectory` 列轨迹卡的盘与主干，见 [轨迹](/docs/modules/trajectory)；`migrate-ledger` 只给从旧版升级的站用一次。
-给一个新骨架铺分区不在命令行上，归工作台插件，见 [装配](/docs/modules/site)。命令行的完整输出和退出码见
+建站不在命令行上，归工作台插件的 `docfirst.create`，见 [建站](/docs/modules/site)。命令行的完整输出和退出码见
 [命令行](/docs/modules/cli)。

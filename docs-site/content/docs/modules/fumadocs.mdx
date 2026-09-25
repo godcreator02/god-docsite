@@ -31,7 +31,7 @@ description: mdx 格式实现与站接线在同一层：认记号与写回、生
 
 代价是一条反方向的依赖：这一层是包里唯一同时用到判定层与环境层的（`docfirstMdxOptions` 要 `loadProject`）。站的 remark 链上没有命令行帮它装配，插件得在构建时自己装配一次：
 
-{/* ref file="../packages/docfirst-workflow/src/fumadocs/index.ts" lines="1-21" hash="11e260193ed5" blob="f7fadb45570d" */}
+{/* ref file="../packages/docfirst-workflow/src/fumadocs/index.ts" lines="1-21" hash="b4724bbd010d" blob="eb535ef31986" */}
 
 ### 一处引用在页面上长什么样
 
@@ -105,23 +105,25 @@ fumadocs 序列化每个节点前先问它，看到这一层打的标记就按�
 
 {/* ref file="../packages/docfirst-workflow/package.json" lines="10-29" hash="280bf95df27d" blob="6eb7a7bc1b45" */}
 
-`./fumadocs` 是站的 `source.config.ts` 与 `docfirst.config.mjs` import 的那一份；`.` 是命令行与程序调用那条；`/fumadocs/pre` 与 `/fumadocs/term` 含 React，单独出去。
+`./fumadocs` 是站的 `src/lib/source.ts` 与 `docfirst.config.mjs` import 的那一份；`.` 是命令行与程序调用那条；`/fumadocs/pre` 与 `/fumadocs/term` 含 React，单独出去。
 
 对判定层，它是一个普通格式：`Format` 要的五样出口，加一个名册检查和一份 `renderAi`。`lintComponents` 让命令行 `check` 提前报出名册外的组件，不用等构建才发现。
 
-对站，是三个接入点加一层可选的术语标注：`docfirstMdxOptions({ root })` 接进 `source.config.ts`（remark 链**末尾**加插件，同时换掉 rehype 的 meta 白名单）；`docfirstMarkdownOptions()` 接进集合的 `postprocess.includeProcessedMarkdown`；侧出口 `/fumadocs/pre` 覆盖 `mdx.tsx` 里的 `pre`，并配一份 css。给 `docfirstMdxOptions` 一份词表就开术语标注，不给就不开。
+对站，是三个接入点加一层可选的术语标注：`docfirstMdxOptions({ root })` 经 fumadocs-mdx 的 `applyMdxPreset` 接进现状集合的 `mdxOptions`（remark 链**末尾**加插件，同时换掉 rehype 的 meta 白名单）；`docfirstMarkdownOptions()` 接进同一个集合的 `postprocess.includeProcessedMarkdown`；侧出口 `/fumadocs/pre` 覆盖 `mdx.tsx` 里的 `pre`，并配一份 css。给 `docfirstMdxOptions` 一份词表就开术语标注，不给就不开。
 
-{/* ref file="../packages/docfirst-workflow/src/fumadocs/host.ts" lines="46-64" hash="34fbdfa42adc" blob="bf8ce9648f28" */}
+集合写在站的 `src/lib/source.ts` 里（fumadocs-mdx 的 macro），没有全局配置，所以接线按集合写；集合级 `mdxOptions` 会去掉 fumadocs 的默认插件，`applyMdxPreset` 把它们加回来。返回值的类型按结构对上 `applyMdxPreset` 的参数，这一层不 import fumadocs 的类型，站里也不用强转；代码高亮选项里写上 fumadocs 的默认主题，是因为它的类型要求主题必填，运行时先铺默认再盖这一份，结果不变：
+
+{/* ref file="../packages/docfirst-workflow/src/fumadocs/host.ts" lines="47-75" hash="3270efe65d90" blob="d938ae6daf30" */}
 
 加在链尾是有原因的：前面是 fumadocs 自己的 `remarkInclude` 和一整套预设（标题 id、gfm……），后面是它自己的 postprocess，插件看到的是一棵已经整理好的树。术语标注排在 docfirst 插件**之前**：那时树上还只有作者写的正文，引用换出来的代码块与目录树都还没放进去，标注碰不到它们。`Term` 的定义在构建时写进属性，组件不把词表带进客户端包，也不需要一行 JS。
 
-这个站自己就是这么接的，全站接线一个文件：
+这个站自己就是这么接的，接在现状集合上：
 
-{/* ref file="source.config.ts" lines="47-55" hash="a4ad21d23114" blob="3712f3410a8b" */}
+{/* ref file="src/lib/source.ts" lines="24-43" hash="3e9dcbabc58b" blob="8f433a032289" */}
 
 meta 白名单要整张换掉——fumadocs 的 `rehypeCode` 只放行白名单里的字段，别的一律丢掉，状态点的颜色得自己加进去：
 
-{/* ref file="../packages/docfirst-workflow/src/fumadocs/host.ts" lines="29-29" hash="6bcfcf51a50c" blob="bf8ce9648f28" */}
+{/* ref file="../packages/docfirst-workflow/src/fumadocs/host.ts" lines="30-30" hash="6bcfcf51a50c" blob="d938ae6daf30" */}
 
 跟 fumadocs 的默认白名单同形，只多 `data-dot` 和 `data-chip`。值一律带引号——它的 meta 解析器只认 `key="字符串"` / `key=数字` / 裸 `key` 三种，裸单词会被解析成 `null`。
 
@@ -159,7 +161,7 @@ remark 插件四步，一步一件事：
 | `docOf(file)` | 由 vfile 的路径算出文档身份 | 环境层的 `docIdOf` |
 | 名册表 | 每个组件在机读版里压成什么 | 站的 `docfirst.config.mjs` |
 | 词表 | 术语自动标注 | 站里那份术语数据文件 |
-| unified、remark-parse、remark-mdx、remark-frontmatter | 认记号、写回、名册检查、`renderAi` 用的语法树 | 包自己的依赖 |
+| unified、remark-parse、remark-mdx、remark-frontmatter | 认记号、写回、名册检查、`renderAi` 用的语法树；`docfirstMdxOptions` 返回类型里的插件表类型（unified 的 `Pluggable`） | 包自己的依赖 |
 | fumadocs（peer） | processed markdown 出机读版、`CodeBlock` 画代码块 | 使用方项目装的那份 |
 
 插件的入参就这三样：
@@ -168,7 +170,7 @@ remark 插件四步，一步一件事：
 
 装配发生在 `host.ts` 那个异步 attacher 里，站构建时 loader 并发调用，项目只装配一次：
 
-{/* ref file="../packages/docfirst-workflow/src/fumadocs/host.ts" lines="16-27" hash="206294eebad1" blob="bf8ce9648f28" */}
+{/* ref file="../packages/docfirst-workflow/src/fumadocs/host.ts" lines="17-28" hash="206294eebad1" blob="d938ae6daf30" */}
 
 术语那一层的入参单独一份。`skipFile` 实际上必须给：术语页自己不能标，否则会自己引用自己。
 

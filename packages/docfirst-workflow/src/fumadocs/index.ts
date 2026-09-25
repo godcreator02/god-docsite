@@ -1,9 +1,9 @@
 /**
  * 格式实现加站接线：fumadocs 口味的 mdx。**包外的出口 `@godcreator/docfirst-workflow/fumadocs` 就是它**
- * ——站的 `source.config.ts` import 的正是这一份。
+ * ——站的 `src/lib/source.ts` 与 `docfirst.config.mjs` import 的正是这一份。
  *   ① 识别与写回：parse / write，判定层会调的；名册检查 lintComponents 给 check 用
  *   ② 渲染：renderAi 把生成正本按原文渲染成 md（记号换成代码块）；人看那份就是站本身，命令行没有 human 渲染
- *   ③ 接线：docfirstMdxOptions 挂进 source.config，docfirstMarkdownOptions 挂进集合的 postprocess（站上各页的机读版）
+ *   ③ 接线：docfirstMdxOptions 经 applyMdxPreset 挂进现状集合的 mdxOptions，docfirstMarkdownOptions 挂进集合的 postprocess（站上各页的机读版）
  * 名册：这里只有机制（stamp）和默认表（defaultRoster），项目在 docfirst.config.mjs 里声明自己的表。
  *
  * **fumadocs 这个名字只出现在这一层**：engine / host / cli 一个不碰它。`Format` 这条
@@ -77,6 +77,7 @@ export type { Dot, DocfirstMark } from "./blocks.ts";
 export { docfirstMarkdownOptions } from "./markdown.ts";
 export type { MarkdownOptions } from "./markdown.ts";
 export { docfirstMdxOptions, parseMetaString, remarkDocfirstHost } from "./host.ts";
+export type { DocfirstMdxOptions } from "./host.ts";
 export { buildTermIndex, findTerms } from "./glossary.ts";
 export type { TermEntry, TermIndex, TermSpan } from "./glossary.ts";
 export { remarkGlossary } from "./glossary-plugin.ts";

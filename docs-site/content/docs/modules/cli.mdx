@@ -59,7 +59,7 @@ description: cli 层：各条子命令怎么分派、打印什么、退什么码
 🔴 content/docs/a.mdx  src/greet.ts:4-5  缺失，引用指向空气（整段已被删光）
 ```
 
-生成物的每种状态各译成一句人话：
+生成物的每种状态各译成一句人读的话：
 
 {/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="359-366" hash="c28d8799272e" blob="7307ed6bcc73" */}
 
@@ -132,7 +132,7 @@ description: cli 层：各条子命令怎么分派、打印什么、退什么码
 
 {/* ref file="../packages/docfirst-workflow/src/cli/cli.ts" hash="435cd11017b0" blob="83f53d30c0ad" */}
 
-`main` 跟报告类型、`loadProject` 一起从包的主出口出去。主出口只给想在程序里跑一次核对、不必起子进程的调用方，站要的是 `./fumadocs` 那个出口：
+`main` 跟报告类型、`loadProject` 一起从包的主出口出去。主出口只给想在程序里跑一次核对、不必启动子进程的调用方，站要的是 `./fumadocs` 那个出口：
 
 {/* ref file="../packages/docfirst-workflow/src/index.ts" lines="1-18" hash="614a5a6dec90" blob="a3e9c18c4791" */}
 
@@ -176,7 +176,7 @@ description: cli 层：各条子命令怎么分派、打印什么、退什么码
 | `Format.lintComponents` | 名册外组件 | fumadocs 那一层 |
 | `buildTrajectory(dir)` / `scanDir(dir)` | 出盘 / 树 / 主干模型；扫病卡 | `@godcreator/docfirst-trajectory` |
 
-生成物模块对外只有两个方法，`render` 生成一次、`check` 核对一次，回来一张目标位置清单；这一层的活是把那张清单译成人话和退出码：
+生成物模块对外只有两个方法，`render` 生成一次、`check` 核对一次，回来一张目标位置清单；这一层做的是把那张清单译成人读的话和退出码：
 
 {/* ref file="../packages/docfirst-workflow/src/host/placement.ts" lines="61-74" hash="c816cf25273e" blob="ac453a55d54e" */}
 
@@ -189,12 +189,12 @@ description: cli 层：各条子命令怎么分派、打印什么、退什么码
 - **不判状态**：绿黄白红是[判定层](/docs/modules/engine)判的，这边只把状态映成符号和一句中文。
 - **不认识记号长什么样**：认记号、写回、渲染都问格式。
 - **不管生成物怎么算**：正文怎么渲、跟目标位置上那份怎么比、缺了 frontmatter 字段写不写，都归[环境层](/docs/modules/host)。
-- **不取旧内容、不起 git**：旧内容怎么取、哪些文件有未提交的改动，是环境层的事，这边只问探针要一个是或否。
+- **不取旧内容、不启动 git**：旧内容怎么取、哪些文件有未提交的改动，是环境层的事，这边只问探针要一个是或否。
 - **不认识轨迹卡的语义**：只把目录交给轨迹包，把交回来的病和模型打出来。
-- **不给新站铺分区**：那件事只在 agent 手上发生一次、铺的是模板，归工作台插件的 `docfirst.attach`（[装配](/docs/modules/site)）。
+- **不建站**：那件事只在 agent 手上发生一次、交出的是模板，归工作台插件的 `docfirst.create`（[建站](/docs/modules/site)）。
 - **不知道站怎么编译**：这一层没见过 next，也没见过 mdx 编译器。
 
-这一层认识别的三层，别的层谁都不认识它。四层在同一个包里，编译器不会拦跨层的 import，目录方向靠一份手写的禁止表守着，它是**唯一**的边界守卫：
+这一层认识别的三层，别的层谁都不认识它。四层在同一个包里，编译器不会拦跨层的 import，目录方向靠一份手写的禁止表检查，它是**唯一**的边界守卫：
 
 {/* ref file="../tests/boundary.test.ts" lines="85-103" hash="bcb7a58199fa" blob="90355c11baed" */}
 

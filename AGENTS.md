@@ -38,18 +38,18 @@ README、CLAUDE.md、这份规矩与插件里的六份 SKILL.md 都是**生成�
 - **主包 `src/` 下四层，方向单向**：`engine`（判定，只用 `node:crypto`）→ `host`（碰环境）→
   `fumadocs`（格式实现与站接线）→ `cli`（入口：check / confirm / render / trajectory，外加一次性的 migrate-ledger）。
   轨迹是独立包线，只被 `cli` 用。**包与插件互不认识**：包不许出现任何 `@godcreator/gwb-*`，插件也
-  不许依赖包，两个方向各由 `tests/boundary.test.ts` 与插件的 `tests/artifact.test.ts` 守着。
+  不许依赖包，两个方向各由 `tests/boundary.test.ts` 与插件的 `tests/artifact.test.ts` 检查。
   **`tests/boundary.test.ts` 是唯一的边界守卫**，别绕、别删、别为了让门禁绿注释掉某一条。
-- **要在仓里发生的（核对、确认、渲染）归包，只在 agent 手上发生一次的归插件**：装三个区
-  （`docfirst.attach`）与六份说明书在 `packages/gwb-docfirst-workflow/`。站的管理（扫描站、启动与停止、
-  端口、窗格）与生成 fumadocs 骨架归站点插件 `@godcreator/gwb-docs-site`，两个插件互不依赖、只经命令总线通信。
+- **要在仓里发生的（核对、确认、渲染）归包，只在 agent 手上发生一次的归插件**：建站
+  （`docfirst.create`）与六份说明书在 `packages/gwb-docfirst-workflow/`。站的管理（扫描站、启动与停止、端口、窗格）
+  与建站时的构建环境、写盘归站点插件 `@godcreator/gwb-docs-site`；本插件单向依赖它，注入 `gwbDocsSite`、按名字调 `docs-site.create`。
 - 子进程调用一律带超时。
 - 门禁，三处都要绿才提交：
   - 仓根：`pnpm test`、`pnpm typecheck`、`pnpm build`
   - `docs-site/`：`pnpm docfirst check`、`pnpm test`、`pnpm build`、`node scripts/verify-roster.mjs`
   - `packages/gwb-docfirst-workflow/`：`pnpm check`（typecheck + oxlint + vitest）、`pnpm build`
 - 发版 **两边各发各的、没有先后**：插件对包零依赖。两个包升版本号时跟着改
-  `packages/gwb-docfirst-workflow/src/deps.ts` 那张表——插件的 `tests/attach.test.ts` 守着它。
+  `packages/gwb-docfirst-workflow/src/deps.ts` 那张表——插件的 `tests/create.test.ts` 检查它。
 - 改了 `src/fumadocs/` 的代码，站要先删 `.next` 再 build。调试站用 build + start，不用 dev；
   启动的站验完必须停掉。
 - 提交按步骤拆，一个提交一件事。提交信息末尾带 `Co-Authored-By` 与 `Claude-Session` 行（会话里给的那两行）。

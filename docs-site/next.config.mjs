@@ -23,7 +23,7 @@ const config = {
    * 不外置的代价只是 Turbopack 多打包一遍服务端代码：那部分只在构建期运行，不进客户端产物。
    */
   serverExternalPackages: [],
-  // 站根跳到现状区首页；三个区各有各的 URL 前缀，/docs 自己有 index.mdx
+  // 站根跳到现状区首页：本站不要官方脚手架的落地页，三个区各有各的 URL 前缀
   redirects: async () => [{ source: '/', destination: '/docs', permanent: true }],
 };
 

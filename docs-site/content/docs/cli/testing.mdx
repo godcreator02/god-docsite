@@ -1,11 +1,11 @@
 ---
 title: 测试与边界
-description: 几组测试各守什么：判定层、契约、git 那一侧、摆放、边界、站测试；文档本身怎么防漂
+description: 几组测试各检查什么：判定层、契约、git 那一侧、摆放、边界、站测试；文档本身怎么防止漂移
 ---
 
 # 测试与边界
 
-这一章回答：这套东西一共几组测试，各守什么规矩，为什么边界测试要去读依赖图，以及文档本身怎么防漂。
+这一章回答：这套东西一共几组测试，各检查什么规矩，为什么边界测试要去读依赖图，以及文档本身怎么防止漂移。
 
 ## 三组，各自跑
 
@@ -15,8 +15,8 @@ description: 几组测试各守什么：判定层、契约、git 那一侧、摆
 | `docs-site/`（这个站） | `pnpm test` |
 | `packages/gwb-docfirst-workflow/`（[工作台插件](/docs/modules/plugin)） | `pnpm check`（typecheck + oxlint + vitest） |
 
-插件那组用 vitest，是 `node --test` 唯一的例外：它跟 devkit 建出来的插件骨架一致，不为一个插件改骨架；
-工作区根的 `test` 脚本因此不收它。装配各区的测试、插件对包零依赖那条规矩都由插件自己的测试守，归
+插件那组用 vitest，是 `node --test` 唯一的例外：它跟 devkit 生成的插件初始文件一致，不为一个插件改那套初始配置；
+工作区根的 `test` 脚本因此不收它。建站参数的测试、插件对包零依赖那条规矩都由插件自己的测试检查，归
 [工作台插件](/docs/modules/plugin) 那一页。
 
 工作区那组按主题分文件，一个主题一个：
@@ -26,7 +26,7 @@ description: 几组测试各守什么：判定层、契约、git 那一侧、摆
 ## 判定层单独测：三样假的
 
 判定层的测试在 `tests/core.test.ts`，传入三样假的：**假格式**、**内存读取器**（它能读到的只有一张文件表）、
-**内存里的旧内容来源**。判定层不读盘、不起进程、不认识任何真格式，这样测正好把这几条也守住：
+**内存里的旧内容来源**。判定层不读盘、不启动进程、不认识任何真格式，这样测正好把这几条也一并检查了：
 
 {/* ref file="../tests/core.test.ts" lines="1-4" hash="bf9bca964602" blob="3f7f931c2523" */}
 
@@ -90,15 +90,15 @@ description: 几组测试各守什么：判定层、契约、git 那一侧、摆
 完整跑一遍命令行（真扫目录、分区按约定、配置里不认识的键报错）在 `tests/cli*.test.ts` 那几份。
 
 摆放有两份测试，用的是 `PlacingHost` 的两个适配器：`tests/placing-host.test.ts` 的存放是内存里一张表，一个字节不落盘，
-「写了什么、写到哪个键上、被改过之后判成哪种状态」直接看得见；`tests/placement.test.ts` 在临时目录里起一个真项目，
-`loadProject` 之后直接调两个方法，不经命令行。命令行怎么把摆放的结果打成人话、退什么码，归 `tests/cli-outputs.test.ts`。
+「写了什么、写到哪个键上、被改过之后判成哪种状态」直接看得见；`tests/placement.test.ts` 在临时目录里建一个真项目，
+`loadProject` 之后直接调两个方法，不经命令行。命令行怎么把摆放的结果打印成人读的话、退什么码，归 `tests/cli-outputs.test.ts`。
 
 一次性迁移 `docfirst migrate-ledger`（旧版 `.ledger.json` 写进记号）在 `tests/migrate-ledger.test.ts`。
 
 ## 边界测试：读目录方向，不读源码措辞
 
 主包一个包四层，同一个包里「谁能依赖谁」编译器不管：`engine/` 里随手写一句 `import "../host/git.ts"`
-编译器不会报错。这份测试是这条方向**唯一**的守卫，它守的第一样就是目录方向，列的是禁止面不是允许面：
+编译器不会报错。这份测试是这条方向**唯一**的守卫，它检查的第一样就是目录方向，列的是禁止面不是允许面：
 
 {/* ref file="../tests/boundary.test.ts" lines="98-103" hash="cb37b2f53b68" blob="421b08df5caa" */}
 
@@ -115,20 +115,21 @@ description: 几组测试各守什么：判定层、契约、git 那一侧、摆
   不是把断言删掉，更不是为了让门禁变绿注释掉某一条。
 </Note>
 
-## 站测试：不起 Next，走同一条链
+## 站测试：不启动 Next，走同一条链
 
 `register()` 把 fumadocs 的 Node loader 注册进 Node，`import` 一篇 `.mdx` 走的就是站构建那条链——
-不用起服务器，也不是另写一条模拟。断言四样：每条引用在页面上都有一个带 `data-dot` 和来源标题的元素、
+不用启动服务器，也不是另写一条模拟。集合用 macro 写在 `src/lib/source.ts` 里，导入时的查询参数写
+`?macro_id=src/lib/source.ts#docs`（`#` 编码成 `%23`），loader 才找得到现状集合、用上它的 `mdxOptions` 与 postprocess。断言四样：每条引用在页面上都有一个带 `data-dot` 和来源标题的元素、
 组件由 React 表画出来（没有裸标签漏出去）、`_markdown` 里有来源行且组件被压平、以及**这个站自己全绿**。
 
-{/* ref file="tests/page.test.mjs" lines="120-128" hash="10ebafcc9456" blob="042335e112b4" */}
+{/* ref file="tests/page.test.mjs" lines="124-132" hash="10ebafcc9456" blob="5ae8125b5dda" */}
 
 <Note>
   站测试**不跟命令行比状态**：算状态的是同一个服务，比出来只能相等，比了也证明不了什么。
-  跨调用方的比对留给起站抓 `.md` 路由。
+  跨调用方的比对留给启动站后抓 `.md` 路由。
 </Note>
 
-## 文档防漂：这个站自己就是测试
+## 文档防止漂移：这个站自己就是测试
 
 每一章都钉着本仓源码的真实行段。源码改了，那一章的状态点变色，`pnpm docfirst check` 报出来，
 站测试那条「全是绿的」直接失败——**文档跟不上代码就过不了门禁**。本仓未提交的改动引起的黄灯，check 直接算红，

@@ -2,7 +2,7 @@ packages:
   - packages/*
   - docs-site
 
-# fumadocs-mdx 编译 source.config 用 esbuild，它要跑安装脚本才装得下平台二进制
+# fumadocs-mdx 用 esbuild 求值站里 src/lib/source.ts 的集合定义，esbuild 要跑安装脚本才装得下平台二进制
 allowBuilds:
   esbuild: true
   '@parcel/watcher': false
