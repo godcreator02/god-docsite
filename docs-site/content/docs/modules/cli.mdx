@@ -3,8 +3,6 @@ title: 命令行
 description: cli 层：各条子命令怎么分派、打印什么、退什么码，check --json 报告的形状，以及「只打印不判断」这条边界
 ---
 
-# 命令行
-
 **本页回答**：命令行这一层做什么、对外给出哪些命令与契约（开关、退出码、`check --json` 的报告）、依赖谁、哪些事不归它。
 
 包 `@godcreator/docfirst-workflow`，源码在 `packages/docfirst-workflow/src/cli/`，入口是 `run.ts` 的 `main`；可执行文件 `cli.ts` 只转发参数与退出码。

@@ -3,8 +3,6 @@ title: fumadocs 那一层
 description: mdx 格式实现与站接线在同一层：认记号与写回、生成正本按原文渲染、remark 插件、meta 白名单、机读版回调、状态点组件、名册与术语两张表的机制
 ---
 
-# fumadocs 那一层
-
 **本页回答**：`src/fumadocs/` 做哪几件事、往 fumadocs 上接哪几处、对外给哪些出口、依赖谁，以及 `Format` 这条接缝到底分离了什么。
 
 包 `@godcreator/docfirst-workflow`，源码在 `packages/docfirst-workflow/src/fumadocs/`，入口是 `index.ts`（包出口 `./fumadocs`），另有两个含 React 的侧出口与两张样式表。
