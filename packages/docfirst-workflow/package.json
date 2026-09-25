@@ -1,9 +1,9 @@
 {
   "name": "@godcreator/docfirst-workflow",
-  "version": "0.2.4",
+  "version": "0.3.0",
   "author": {"name": "godcreator"},
   "type": "module",
-  "description": "文档站工作流工具：六区装配、钉码校验与 render（命令行 + 库），随 docfirst 线发。",
+  "description": "文档站工作流工具：钉码核对与确认、生成正本渲染（命令行 + 库），随 docfirst 线发。",
   "bin": {
     "docfirst": "./dist/cli.mjs"
   },
@@ -65,7 +65,8 @@
     "react": "^19.2.8"
   },
   "publishConfig": {
-    "access": "public"
+    "access": "public",
+    "registry": "https://git.tianshen02.online:28377/api/packages/godcreator/npm/"
   },
   "repository": {
     "type": "git",
