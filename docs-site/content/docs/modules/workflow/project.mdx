@@ -1,0 +1,163 @@
+---
+title: 项目装配 project
+description: 读配置装出一个项目；读取器、git 版的旧内容来源、未提交改动的探针、生成正本的摆放、磁盘读卡都在这一块
+---
+
+**本页回答**：项目装配把哪些东西交给钉码服务、给命令行和 fumadocs 适配提供哪些接口、依赖外面的什么，以及它刻意不做什么。
+
+包 `@godcreator/docfirst-workflow` 的 `packages/docfirst-workflow/src/project/` 目录，入口是 `src/project/index.ts`；
+包的主出口转出其中的 `loadProject`、`docIdOf`、`scanCardDir` 与项目的类型，`scanCardDir` 另有只装它一个的出口 `./cards`（入口文件
+`src/project/card-dir.ts`）；别的只给包里的命令行和仓里的测试用。
+
+## 功能
+
+碰环境的事都在这一块：读盘、启动 git 子进程、把生成物写到落点、读轨迹卡目录。
+
+{/* ref file="../packages/docfirst-workflow/src/project/index.ts" lines="1-9" hash="e5c54e1c5cb8" blob="9ca6f4be302b" */}
+
+**装配项目。** 一个项目是一个根目录加一份 `docfirst.config`。装配读配置、造读取器和旧内容来源、交给钉码核心建服务，
+再把摆放一起装进项目；分区按约定，不在配置里登记：
+
+{/* ref file="../packages/docfirst-workflow/src/project/load.ts" lines="1-9" hash="54a253641e58" blob="485e0158da13" */}
+
+现状区就是内容根下除 `trajectory/`、`future/` 之外的全部，目录里的和直接放在内容根上的文档都算，按文档身份排序：
+
+{/* ref file="../packages/docfirst-workflow/src/project/load.ts" lines="147-159" hash="299b55da5597" blob="485972d4fa88" */}
+
+为什么分区按约定、不再登记，见[两个固定区](/trajectory/2026-09-25-zones-by-convention)。
+
+**读取器**把工作区的文件、目录的名字表、路径的类型交给钉码核心。名字表在 git 仓里按 `.gitignore` 过滤，整棵树只问一次
+`git status --ignored=matching`，不在仓里就原样列：
+
+{/* ref file="../packages/docfirst-workflow/src/project/fs-reader.ts" lines="1-8" hash="4a7673eef0a1" blob="2c9427f15c3d" */}
+
+**旧内容来源**是钉码核心 `History` 的 git 版：按被引文件自己的位置找仓，从对象库按 blob 名取确认时的内容；hunk 表用
+`git diff --no-index` 算。取不到就给 `null`，比较器退回滑窗：
+
+{/* ref file="../packages/docfirst-workflow/src/project/history.ts" hash="c9fdbb444a03" blob="4420ba5fce88" */}
+
+这两样背后的 git 细节（按文件位置找仓、blob 名怎么算、hunk 表的缓存）见 [git 原理](/docs/principles/git)。
+
+**未提交改动的探针**回答「这处黄灯是不是本仓这次改动引起的」，命令行的 check 用它把这种黄灯算红：
+
+{/* ref file="../packages/docfirst-workflow/src/project/uncommitted.ts" lines="1-8" hash="7012ae307b16" blob="3cda642bbfcc" */}
+
+**摆放**把一篇 mdx 正本变成落点上的生成物：让格式渲出一份 md、带上点名的 frontmatter 字段、写到每个落点；
+核对时用同一份正文跟落点上那份比：
+
+{/* ref file="../packages/docfirst-workflow/src/project/placement.ts" lines="1-13" hash="e867c62cab15" blob="ac453a55d54e" */}
+
+frontmatter 按行原样搬，不解析 YAML：一条字段从它的顶层键那行起、到下一条顶层键为止，缩进的续行跟着走：
+
+{/* ref file="../packages/docfirst-workflow/src/project/placement.ts" lines="152-160" hash="56d233cf2e94" blob="963b388356c7" */}
+
+**磁盘读卡。** 轨迹核心只收已经读好的卡片文件，读目录在这儿：`scanCardDir(dir)` 挑出卡文件、并发读正文与修改时间，
+交给轨迹核心的 `scanCards`，再对每张卡的正文查一遍「卡里不许钉码」，病按文件并进同一份清单。目录不存在就回空集合，
+不报错、不建目录：
+
+{/* ref file="../packages/docfirst-workflow/src/project/card-dir.ts" lines="13-25" hash="7d367c0d4a7f" blob="775b6e9e6c2d" */}
+
+**卡里不许钉码**是钉码这一侧的规矩，所以放在这儿、不放在轨迹核心：它要认识记号的三种形态，又要知道卡在哪个目录。
+草稿记号、md 与 mdx 两种正式记号都算问题：
+
+{/* ref file="../packages/docfirst-workflow/src/project/card-refs.ts" lines="1-11" hash="18ad404eda50" blob="23e24d936909" */}
+
+**迁移旧记录。** `migrateLedger(root)` 把旧版的 `.ledger.json` 逐处写进对应的记号，写完删掉这个文件，并列出配置里还要手工改的键。
+它是一次性的，各站迁完后删除；背景见[记录进记号](/trajectory/2026-09-25-records-live-in-markers)。
+
+## 接口
+
+出口是 `index.ts` 一个文件，导出表就是这一块对外的全部：
+
+{/* ref file="../packages/docfirst-workflow/src/project/index.ts" hash="050eef10d231" blob="9ca6f4be302b" */}
+
+**`loadProject(root)`** 交回装好的项目。同一个根只装配一次：站构建时几十个 loader 并发调它。
+
+{/* ref file="../packages/docfirst-workflow/src/project/load.ts" lines="76-84" hash="f544b31667f5" blob="485972d4fa88" */}
+
+**配置的形状**是这一块对消费方的契约：用哪些格式、内容根在哪、组件名册、生成物摆到哪：
+
+{/* ref file="../packages/docfirst-workflow/src/project/load.ts" lines="21-34" hash="62a83efb211e" blob="485972d4fa88" */}
+
+配置只认这四个键，出现别的键装配当场报错，一次列全，每条说清该怎么改：
+
+{/* ref file="../packages/docfirst-workflow/src/project/load.ts" lines="89-90" hash="b6abba6463b8" blob="485972d4fa88" */}
+
+**装好的项目**带着判定服务、名册、内容根与轨迹卡目录的位置、摆放，以及读写文档的几个方法；轨迹卡目录固定是内容根下的
+`trajectory/`，不一定已经建了：
+
+{/* ref file="../packages/docfirst-workflow/src/project/load.ts" lines="36-55" hash="9f8cf649ff98" blob="485972d4fa88" */}
+
+**落点**有两种写法，归一之后是同一张表：一个相对项目根的路径，或者 `{ to, frontmatter }`，后者点名 mdx 正本头部哪几个字段
+带到生成物上；字符串写法表示整段 frontmatter 都去掉。
+
+{/* ref file="../packages/docfirst-workflow/src/project/placement.ts" lines="20-31" hash="bc0575277bf3" blob="963b388356c7" */}
+
+落点在装配时就检查：得相对项目根、不许落进内容根、一个落点只许一篇文档写。违反任何一条，`loadProject` 当场报错：
+
+{/* ref file="../packages/docfirst-workflow/src/project/placement.ts" lines="121-139" hash="134440fb80cc" blob="963b388356c7" */}
+
+**`placing`** 是摆放对外的全部接口，是装好的项目上的一个字段。`render(doc)` 写一次、回落点清单；`check(doc, listing?)` 只读，
+回每个落点的状态，调用方手上已有这篇的清单就传进来，不再判一遍。两个方法用同一份正文，所以写完再核对必然一致：
+
+{/* ref file="../packages/docfirst-workflow/src/project/placement.ts" lines="62-75" hash="c816cf25273e" blob="963b388356c7" */}
+
+一个落点核对完是五种状态之一，外加一个布尔判定 `fresh`，读报告的人照它决定要不要重新渲染：
+
+{/* ref file="../packages/docfirst-workflow/src/project/placement.ts" lines="33-49" hash="5f3b6d103d1d" blob="963b388356c7" */}
+
+调用方要知道两件事。**空清单不是失败**：这篇没配落点、没有格式认领它、或者认领它的格式不出生成正本，都回空清单。
+**缺字段、渲染不了的落点不写**：缺了点名的字段回 `no-frontmatter` 和缺哪几个；正本里有渲染不了的东西（草稿记号、缺失的引用、
+组件、mdx 表达式）回 `unrenderable` 和原因，落点上的内容一个字不动。
+
+**`scanCardDir(dir)`** 交回轨迹核心的扫描结果（卡与病卡），命令行的 check、`docfirst trajectory` 与 fumadocs 适配的星轨盘组件（经 `./cards`）
+都从它读卡；**`createUncommittedProbe(root)`** 造一个探针，只用于一次 check；**`migrateLedger(root)`** 是上面那个一次性迁移；
+**`createReader`**、**`createGitHistory`**、**`createPlacing`** 是装配用的零件，测试换读取器、换旧内容来源、换生成物的存放时直接拿。
+
+## 依赖
+
+**钉码核心 `@godcreator/docfirst-pin`**：用它的类型、纯函数（归一化、哈希、hunk 解析）和 `createService`。项目装配自己不算状态，
+没有它就没有服务可装。
+
+**格式**：由消费方写进配置的 `formats`，装配只把名单原样交给钉码服务，自己一个格式实现都不 import，只认识 workflow
+`src/format/` 里的 `DocFormat` 接口。摆放还要格式出生成正本；格式不出，这篇就没有摆放这回事。
+
+**轨迹核心 `@godcreator/docfirst-trajectory`**：磁盘读卡用它的 `pickCardFiles`、`scanCards` 与 `stripFrontmatter`，
+卡里不许钉码用它的 `splitLines` 与问题类型。没有它就读不出卡。
+
+**生成物的存放 `PlacingHost`**：摆放只经这个接口认识外面，前半是项目（判定服务、这篇配了哪些落点、正本原文），
+后半是读一个落点、写一个落点：
+
+{/* ref file="../packages/docfirst-workflow/src/project/placement.ts" lines="77-91" hash="f92e490eb5c2" blob="963b388356c7" */}
+
+生产的存放在装配里：落点是项目根下的文件，父目录自己建。
+
+{/* ref file="../packages/docfirst-workflow/src/project/load.ts" lines="161-176" hash="78f0c6b3ac5b" blob="485972d4fa88" */}
+
+**`git` 命令行**：定位文件在哪个仓、按 blob 取旧内容、算 hunk 表、列被忽略的路径、列有未提交改动的路径。每次调用都带超时与输出上限，
+卡住的子进程比错误的答案更难查。被引的文件和目录都不在任何 git 仓里时，这一块一次 git 都不启动：
+
+{/* ref file="../packages/docfirst-workflow/src/project/git.ts" lines="17-18" hash="6c30493d4168" blob="afd0fbdae4c4" */}
+
+**`docfirst.config.mjs`**：消费方项目里要在运行时执行的模块，必须由 Node 原生加载。两个打包器标记让站的打包器跳过这一句；
+被改写成打包器自己的加载器，消费方的配置就装不进来：
+
+{/* ref file="../packages/docfirst-workflow/src/project/load.ts" lines="116-122" hash="5d8ed05b1d87" blob="485972d4fa88" */}
+
+## 不做的事
+
+**不认识任何具体格式，也不认识命令行。** workflow 里四个目录的方向由边界测试检查，`project` 不许 import `mdx/` 与 `cli/`：
+
+{/* ref file="../tests/boundary.test.ts" lines="206-221" hash="5e5d288cdf5a" blob="55f573c4c909" */}
+
+**不认识任何站的宿主。** fumadocs、react、next 一个都不 import，所以只跑命令行的仓不必装它们。
+
+**不算状态。** 绿黄白红都是钉码核心算的，这一块只提供观察和旧内容，所以命令行和站看到的状态必然一致。
+
+**摆放不碰 `node:fs`。** 生成物怎么落地由 `PlacingHost` 给，`placement.ts` 里没有一句文件读写。
+
+**不往任何对象库写东西。** 被引文件可能在别人的仓里；hunk 表用两个临时文件 `diff --no-index` 算。
+
+**不解析卡、不给卡建模。** 读完的卡片文件交给轨迹核心，卡字段怎么校验、盘怎么聚归[轨迹核心](/docs/modules/trajectory)。
+
+**不决定拦不拦提交。** 探针只回答是不是本仓未提交的改动，算不算红由[命令行](/docs/modules/workflow/cli)决定。

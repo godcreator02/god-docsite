@@ -11,8 +11,8 @@ import assert from "node:assert/strict";
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { loadProject } from "../packages/docfirst-workflow/src/host/index.ts";
-import type { Project } from "../packages/docfirst-workflow/src/host/index.ts";
+import { loadProject } from "../packages/docfirst-workflow/src/project/index.ts";
+import type { Project } from "../packages/docfirst-workflow/src/project/index.ts";
 
 const roots: string[] = [];
 

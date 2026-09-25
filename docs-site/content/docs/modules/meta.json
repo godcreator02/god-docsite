@@ -1,5 +1,5 @@
 {
   "title": "模块",
-  "description": "一模块一页：功能 / 接口 / 依赖 / 不做的事",
-  "pages": ["engine", "host", "fumadocs", "cli", "trajectory", "plugin", "site"]
+  "description": "按包组织：钉码核心、轨迹核心、workflow（项目装配 / mdx 格式 / 命令行）、fumadocs 适配、工作台插件与建站",
+  "pages": ["pin", "trajectory", "workflow", "fumadocs", "plugin", "site"]
 }

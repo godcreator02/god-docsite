@@ -142,15 +142,15 @@ description: 写下 → 未确认 → confirm 写上记录 → 挪了位置机�
 
 核对（`check` 和站构建走的是同一条）：逐处按记号上的记录判定，切出今天这段内容，组成清单项。
 
-{/* ref file="../packages/docfirst-workflow/src/engine/service.ts" lines="117-134" hash="115c70f03829" blob="78a15b3aa6cb" */}
+{/* ref file="../packages/docfirst-pin/src/service.ts" lines="118-135" hash="115c70f03829" blob="33d8acf46386" */}
 
 行段的判定顺序：先比段哈希，再比 blob 名，取得到旧内容就跟 hunk 表，取不到就在整个文件里找：
 
-{/* ref file="../packages/docfirst-workflow/src/engine/compare.ts" lines="6-14" hash="a033f65b0f3e" blob="29bf0bfed8b4" */}
+{/* ref file="../packages/docfirst-pin/src/compare.ts" lines="6-14" hash="a033f65b0f3e" blob="29bf0bfed8b4" */}
 
 确认：按每处的状态决定写不写回、写回成什么——未确认的记上记录，挪了位置的写回新行号，黄的只有带 `--accept` 才重新记，红的不动：
 
-{/* ref file="../packages/docfirst-workflow/src/engine/service.ts" lines="150-166" hash="0bfa11f59cdf" blob="78a15b3aa6cb" */}
+{/* ref file="../packages/docfirst-pin/src/service.ts" lines="151-167" hash="0bfa11f59cdf" blob="33d8acf46386" */}
 
-四种状态怎么判出来的，见 [判定层](/docs/modules/engine)；旧内容怎么从 git 取、未提交的改动怎么查，见 [环境层](/docs/modules/host)；
-命令行各条输出与退出码，见 [命令行](/docs/modules/cli)。
+四种状态怎么判出来的，见 [钉码核心](/docs/modules/pin)；旧内容怎么从 git 取、未提交的改动怎么查，见 [项目装配](/docs/modules/workflow/project)；
+命令行各条输出与退出码，见 [命令行](/docs/modules/workflow/cli)。

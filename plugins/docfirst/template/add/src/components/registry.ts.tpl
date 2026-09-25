@@ -6,8 +6,8 @@
  * **React 表没有** → 站渲染报 Expected component。
  *
  * Files / Folder / File 是 fumadocs 自己的文件树：目录树引用注入的就是它们，
- * 压平规则在格式包的默认表里。
- * registry.ts 只有可擦除的类型，Node 直接吃。
+ * 它们与 Note 的压平规则在 @godcreator/docfirst-fumadocs/roster 的 fumadocsRoster 里。
+ * registry.ts 只有可擦除的类型，Node 直接运行。
  */
 export const componentNames = ['Note', 'Files', 'Folder', 'File'] as const
 export type ComponentName = (typeof componentNames)[number]

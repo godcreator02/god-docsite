@@ -15,9 +15,9 @@ import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "nod
 import { createRequire, syncBuiltinESMExports } from "node:module";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
-import { blobOf, hashText } from "../packages/docfirst-workflow/src/engine/index.ts";
-import { createGitHistory } from "../packages/docfirst-workflow/src/host/index.ts";
-import { readBlob } from "../packages/docfirst-workflow/src/host/git.ts";
+import { blobOf, hashText } from "../packages/docfirst-pin/src/index.ts";
+import { createGitHistory } from "../packages/docfirst-workflow/src/project/index.ts";
+import { readBlob } from "../packages/docfirst-workflow/src/project/git.ts";
 import { fakeFormat, refLine } from "./fake-format.ts";
 import { CODE, NO_HISTORY, run, SETTINGS, setupRepo } from "./repo.ts";
 import type { Repo } from "./repo.ts";

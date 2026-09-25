@@ -55,7 +55,8 @@ function renderFrontmatter(fm: Record<string, string | string[]>): string {
   return lines.join("\n");
 }
 
-function renderCard(spec: CardSpec): string {
+/** 一张卡渲回文件全文：frontmatter + 空行 + 正文 */
+export function renderCard(spec: CardSpec): string {
   return `---\n${renderFrontmatter(spec.fm)}\n---\n\n${spec.body ?? ""}\n`;
 }
 
@@ -69,7 +70,7 @@ export function memCards(specs: CardSpec[]): RawCard[] {
   return cards;
 }
 
-/** 内存造卡的报病清单（按文件归拢，与 scanDir 同口径）。 */
+/** 内存造卡的报病清单（按文件归拢，与 scanCards 同口径）。 */
 export function memSick(specs: CardSpec[]): SickFile[] {
   const sick: SickFile[] = [];
   for (const spec of specs) {

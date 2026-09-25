@@ -8,8 +8,10 @@
  *
  * 开关 `render` 给它一个 AI 渲染（能当生成正本）；不开就是只核对、不渲染的格式。
  */
-import { draftOf, fileOf, formalOf, parseFormal, RenderRefusal } from "../packages/docfirst-workflow/src/engine/index.ts";
-import type { Format, Listing, Reference, Target } from "../packages/docfirst-workflow/src/engine/index.ts";
+import { draftOf, fileOf, formalOf, parseFormal } from "../packages/docfirst-pin/src/index.ts";
+import type { Listing, Reference, Target } from "../packages/docfirst-pin/src/index.ts";
+import { RenderRefusal } from "../packages/docfirst-workflow/src/format/index.ts";
+import type { DocFormat } from "../packages/docfirst-workflow/src/format/index.ts";
 
 const MARK = /^REF\s+(.+)$/;
 
@@ -34,8 +36,8 @@ function renderAi(text: string, listing: Listing): string {
   return lines.join("\n");
 }
 
-export function fakeFormat(name: string, suffix: string, options: FakeOptions = {}): Format {
-  const format: Format = {
+export function fakeFormat(name: string, suffix: string, options: FakeOptions = {}): DocFormat {
+  const format: DocFormat = {
     name,
     claims: (doc) => doc.endsWith(suffix),
     marker: (target, record) => `REF ${formalOf(target, record)}`,

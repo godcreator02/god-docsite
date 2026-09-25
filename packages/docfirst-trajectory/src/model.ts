@@ -8,9 +8,9 @@
  * md link 与 wikilink 两形态都认）；
  * 根卡不上自己的盘（盘心圆盘即根卡），诞生时刻只参与定盘界；里程碑从根卡正文「## 里程碑」解析。
  *
- * 纯函数，不碰文件系统——扫目录读文件的那半在 scan.ts（只有它 import node:fs/promises），
- * `./react` 客户端入口只吃这个文件不会把 fs 打进浏览器包。扫盘一趟读完、内存聚盘：
- * `scanDir` 出 `RawCard[]`，本文件的建模函数一概只吃它——同一份卡集合能反复喂给不同
+ * 纯函数，不碰文件系统——读卡目录在 `@godcreator/docfirst-workflow` 的 `scanCardDir`，
+ * 这个包一句 import 外部模块都没有。扫盘一趟读完、内存聚盘：
+ * `scanCards` 出 `RawCard[]`，本文件的建模函数一概只吃它——同一份卡集合能反复喂给不同
  * rootId 各自建模，不重复读盘。报病按文件归拢成 `SickFile`。
  * 逻辑出自老仓 `god-flow-panels` 的 `node/star/model.ts`（只读参考，本仓不 import 它）。
  */
@@ -39,7 +39,6 @@ import type {
   Tree,
   Wormhole,
 } from "./types.ts";
-import { checkDocfirstRefs } from "./validate.ts";
 
 /** 「未分道」隐式组的哨兵值：无 domain 的卡归进这组——着中性色（盘心色一档）、
  * 排各泳道组之后、不占领域色板。拿字符串当 domain 用是为了装箱 / 筛选 / 图例
@@ -95,7 +94,8 @@ export interface ParsedFile {
   problems: Problem[];
 }
 
-/** 把一份卡文件的全文变成 RawCard，顺带跑四层校验（形状 / 存在性 / 一致性 / docfirst 引用记号）。
+/** 把一份卡文件的全文变成 RawCard，顺带跑三层校验（形状 / 存在性 / 一致性）。
+ * 「卡正文里不许钉码」是钉码那一侧的规矩，由 `@godcreator/docfirst-workflow` 读卡目录时另加。
  * 六个卡体系字段一个都不沾的文件不是卡：card 与 problems 都回空，整文件跳过。 */
 export function parseCardFile(id: string, path: string, mtime: number, text: string): ParsedFile {
   const fm: Frontmatter | null = parseFrontmatter(text);
@@ -146,8 +146,6 @@ export function parseCardFile(id: string, path: string, mtime: number, text: str
   for (const b of broken) {
     bad("relation", b.target, `${b.key}:: 后须是 [文字](卡身份.md) 形态的一行`);
   }
-  /* docfirst 引用记号：轨迹分区冻结历史，不钉活代码 */
-  problems.push(...checkDocfirstRefs(body));
 
   return {
     card: {

@@ -6,9 +6,9 @@ import { execFileSync } from "node:child_process";
 import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
-import { createService } from "../packages/docfirst-workflow/src/engine/index.ts";
-import type { ConfirmResult, Format, History, Service } from "../packages/docfirst-workflow/src/engine/index.ts";
-import { createGitHistory, createReader } from "../packages/docfirst-workflow/src/host/index.ts";
+import { createService } from "../packages/docfirst-pin/src/index.ts";
+import type { ConfirmResult, Format, History, Service } from "../packages/docfirst-pin/src/index.ts";
+import { createGitHistory, createReader } from "../packages/docfirst-workflow/src/project/index.ts";
 
 export const CODE = [
   "// greet",

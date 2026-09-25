@@ -10,7 +10,7 @@ docfirst: none
 本插件只有**一条命令**：`docfirst.create`——给一个仓建一个接好 docfirst 分区的文档站。
 除此之外它只做一件事：把另外五份说明书注册给你读。
 
-**它对 `@godcreator/docfirst-workflow` 那个包零依赖**，装了本插件不必再装什么包。判据是「这件事在哪儿发生」：
+**它对 `@godcreator/docfirst-*` 四个 npm 包零依赖**（pin、trajectory、workflow、fumadocs），装了本插件不必再装什么包。判据是「这件事在哪儿发生」：
 核对 / 确认 / 渲染要在**仓**里发生（那是门禁与站构建要跑的东西），你自己 `cd` 过去跑；只在你手上发生一次的
 （读说明书、给一个仓建一次站）才归插件。**插件不转发命令行。**
 
@@ -36,8 +36,8 @@ docfirst.create {"dir":"<仓>/docs-site"}
 - `port`：站的端口，不给由站点插件挑一个没被占用的。
 
 建出来的东西：官方脚手架的站（搜索、llms 路由照旧），加上三个集合（`src/lib/source.ts` 里用 fumadocs-mdx 的 macro
-写的 docs、trajectory、future，现状集合经 `applyMdxPreset(docfirstMdxOptions(...))` 接上 docfirst）、三条路由与侧栏三个根节点、
-`docfirst.config.mjs`、mdx 接线（`src/components/mdx.tsx` 里的状态点组件）、样式 `src/app/docfirst.css`、名册脚本、
+写的 docs、trajectory、future，现状集合经 `applyMdxPreset(docfirstMdxOptions(...))` 接上 docfirst，这些接线从 `@godcreator/docfirst-fumadocs` 取）、三条路由与侧栏三个根节点、
+`docfirst.config.mjs`（格式是 `@godcreator/docfirst-workflow/mdx`，名册展开 `@godcreator/docfirst-fumadocs/roster` 的 `fumadocsRoster`）、mdx 接线（`src/components/mdx.tsx` 里的状态点组件）、样式 `src/app/docfirst.css`、名册脚本、
 各区的起始页（`content/docs/` 下的入口页、
 术语表与 `outputs/` 下的三份生成正本，`content/trajectory/` 与 `content/future/` 各一页），`package.json` 里
 有 docfirst 的依赖与 `doc` / `doc:confirm` / `doc:render` / `verify:roster` 几条脚本。
@@ -104,7 +104,7 @@ description: 来源：<哪个仓 / 哪次会话>
 - **`parallel-by-module`**：任务大到要派子代理时怎么按模块切分、什么必须串行。
 - **`docs-governance`**：文档与注释治理——代码自解释扫描、术语统一、清除历史描述、分清谁负责什么。
 
-这几份连同这一份，正本都在 `@godcreator/docfirst-workflow` 那个包的仓里（`docs-site` 的生成正本），生成物随本插件
+这几份连同这一份，正本都在 `@godcreator/docfirst-*` 那几个包的仓里（`docs-site` 的生成正本），生成物随本插件
 发布——**包没有独立的途径让你读到**：它装在 `node_modules` 里，没有任何说明指向它，一份说明书能被你读到全靠插件
 把自己包里那个目录注册给了 skills 插件。
 

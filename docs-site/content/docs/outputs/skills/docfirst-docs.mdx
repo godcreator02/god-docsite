@@ -95,7 +95,7 @@ spec 页头的验收清单、术语表这几类允许写成列表或表格。
 ## 同一个提交里处理
 
 **改代码的那个提交，同时处理这次改动引起的黄灯。**改代码的人最清楚改了什么、文档里哪句还成立，
-隔几天再由别人成批确认就只剩走形式。
+隔几天再由别人成批确认，就只剩签字、没人真去核对。
 
 1. 改代码，跑内圈检查（类型、lint、测试；不带文档检查）
 2. 提交前在站目录跑 `docfirst check`：钉住的文件在本仓有未提交改动、内容又变了的黄灯**算红**，拦下这次提交
@@ -115,7 +115,7 @@ spec 页头的验收清单、术语表这几类允许写成列表或表格。
 `changed` / `missing` 的那些）之后：
 
 1. 逐页逐处看漂移：被钉的代码变了什么、正文哪句因此不再成立。
-2. **只改漂移的段落**——不重排全页、不顺手润色别处、小标题原样保留、沿用本页已有的口吻与钉法。
+2. **只改漂移的段落**——不重排全页、不同时润色别处、小标题原样保留、沿用本页已有的口吻与钉法。
 3. 论断仍成立的 `--accept`；不成立的先改论断再 `--accept`；指向的东西没了（红）就改写或删掉那处引用。
 4. 人审 diff 后提交，代码与文档同一个提交。
 
@@ -136,7 +136,7 @@ A 之前不动代码：`spec-grill` 在对话里把想法问到能说清「回�
 | 代码动作 | 文档要跟着改的地方 |
 | --- | --- |
 | 动接口 / 状态机 / 依赖方向 | 讲这一块的现状页，先改或同一个提交 |
-| 撞墙、做了选型、实验有结论 | 轨迹卡，当场写（`trajectory` skill） |
+| 某条路走不通、做了选型、实验有结论 | 轨迹卡，当场写（`trajectory` skill） |
 | 命令 / 配置变了 | 用法页，重新渲染生成正本 |
 | 定了新术语 | 术语表 |
 | 做 / 不做的边界动了 | 讲边界的那页，理由写进卡 |
@@ -165,7 +165,7 @@ git 历史就是它的存档。
 正本是一份数据文件（`src/glossary.ts` 一类），每条 `term / aliases / def / href`。**定义只写概念，
 不写服务名、类型名、路径**——数据文件钉不住，写进去就会过时，具体名字留给 `href` 指的那一页。
 自动标注发生在站构建的 remark 阶段，源文件保持干净；手写 `<Term>` 要在 `docfirst.config.mjs` 的名册里有一条
-（`Term: 'children'`）。机制见 docfirst 站的 fumadocs 那一页。
+（`Term: 'children'`）。机制见 docfirst 站的「fumadocs 适配」那一页。
 
 # 生成正本
 
@@ -183,8 +183,9 @@ AGENTS / README 不带 frontmatter。改正本，不改生成物。
 建一个新站是**一条工作台命令**：`docfirst.create {"dir":"<仓>/docs-site"}`。站点插件的 `docs-site.create` 先跑官方脚手架
 `create-fumadocs-app`、套本机约定并写盘；docfirst 在官方输出上改几份文件：三个集合（docs、trajectory、future）用 fumadocs-mdx
 的 macro 写在 `src/lib/source.ts`，现状集合写 `mdxOptions: applyMdxPreset(docfirstMdxOptions({ root: process.cwd() }))` 与
-`postprocess.includeProcessedMarkdown: docfirstMarkdownOptions()`，外加各区的路由、`docfirst.config.mjs`、mdx 接线、名册脚本、
-各区的起始页，`package.json` 里带上依赖与 doc 脚本。只写文件不跑 install，端口不给就由站点插件挑。
+`postprocess.includeProcessedMarkdown: docfirstMarkdownOptions()`（两样都从 `@godcreator/docfirst-fumadocs` 取），外加各区的路由、
+`docfirst.config.mjs`（格式是 `@godcreator/docfirst-workflow/mdx`）、mdx 接线、名册脚本、各区的起始页，`package.json` 里带上
+这两个包的依赖与 doc 脚本。只写文件不跑 install，端口不给就由站点插件挑。
 
 **站目录必须还不存在**：已经有站的仓不能用这条命令，给已经运行很久的站加 docfirst 走人工接线。
 站建好以后要改站的结构（加分区、加组件）或跑 `dev` / `build`，读站点插件的说明书 `docs-site`。

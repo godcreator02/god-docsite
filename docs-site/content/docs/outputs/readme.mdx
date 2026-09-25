@@ -23,25 +23,27 @@ docfirst: none
 ## 怎么装
 
 ```bash
-pnpm add -D @godcreator/docfirst-workflow @godcreator/docfirst-trajectory
+pnpm add -D @godcreator/docfirst-workflow @godcreator/docfirst-fumadocs
 ```
 
-`fumadocs` 与 `react` 在包里只是 **peer**，用你项目里装的那份；只跑命令行、不装 fumadocs 的仓
-一个都不必装。站的接线从 `@godcreator/docfirst-workflow/fumadocs` 进。
+`@godcreator/docfirst-workflow` 是命令行、项目装配与 mdx 格式，`@godcreator/docfirst-fumadocs` 是站的 fumadocs 接线；
+钉码核心 `@godcreator/docfirst-pin` 与轨迹核心 `@godcreator/docfirst-trajectory` 随它们装上。`fumadocs` 与 `react`
+只是 fumadocs 接线的 **peer**，用你项目里装的那份；只跑命令行、不装 fumadocs 的仓只装 `@godcreator/docfirst-workflow`。
 
-**站的构建配置里 `serverExternalPackages` 必须留空**：这个包里同时有服务端那部分与两个客户端
-组件（状态点、术语），而那个字段按包名匹配、没有子路径粒度——外置之后 `"use client"` 指令会丢掉。
+**站的构建配置里 `serverExternalPackages` 必须留空**：`@godcreator/docfirst-fumadocs` 里同时有服务端代码与客户端
+组件（状态点），而那个字段按包名匹配、没有子路径粒度——外置之后 `"use client"` 指令会丢掉；星轨盘的客户端组件在
+`@godcreator/docfirst-trajectory` 里，同样不能外置。
 
 **建一个新站用工作台插件，命令行不管这一步**：工作台插件 `@godcreator/gwb-docfirst-workflow` 的
 `docfirst.create {"dir":"<仓>/docs-site"}` 一步建好接了三个区（现状 `docs`、轨迹 `trajectory`、未来 `future`）的站。
 站点插件 `@godcreator/gwb-docs-site` 的 `docs-site.create` 跑官方脚手架 `create-fumadocs-app`、套本机约定并写盘，
 docfirst 只给出在官方输出上增、换、删哪些文件。站目录必须还不存在；给一个用了很久的站加 docfirst 走人工接线。
 
-建站只在 agent 手上发生一次，所以不在这个包里——包留的是要在**仓**里反复发生的那几条。
+建站只在 agent 手上发生一次，所以不在这几个包里——包留的是要在**仓**里反复发生的那几条。
 
 ## 怎么用
 
-项目根放一份 `docfirst.config.mjs`（用哪些格式、内容根在哪、生成物写到哪）。内容根下 `trajectory/` 是轨迹卡、
+项目根放一份 `docfirst.config.mjs`（用哪些格式——通常是 `@godcreator/docfirst-workflow/mdx`、内容根在哪、组件名册、生成物写到哪）。内容根下 `trajectory/` 是轨迹卡、
 `future/` 是未来区，其余目录都是现状区、都进核对，不用登记。文档里写一行草稿记号：
 
 ```md
@@ -68,7 +70,7 @@ pnpm docfirst render                                # 只把 outputs 里有映�
 
 ## 文档在哪
 
-`docs-site/` 是这两个包的文档站，也是它们唯一的使用方——装的是工作区里的这两个包，钉的是
+`docs-site/` 是这几个包的文档站，也是它们唯一的使用方——装的是工作区里的这几个包，钉的是
 工作区里的真源码，所以仓里不另留示例。
 
 ```bash
@@ -77,7 +79,7 @@ pnpm build && pnpm start        # 看 http://127.0.0.1:4310
 pnpm docfirst check
 ```
 
-先读现状区的**系统地图**，再读要改的那块的模块页。
+先读现状区的**系统地图**（四个包与它们之间的接缝），再读要改的那块的模块页。
 
 文档本身怎么写、分区各放什么、每页写到哪为止，正本是**随工作台插件发的 skill**，在
 `plugins/docfirst/skills/`：写文档读 `docfirst-docs`、写轨迹卡读 `trajectory`、建站读 `docfirst`。
@@ -91,7 +93,7 @@ SKILL.md 没有说明指向它、没人会读。通用开发纪律的三份也�
 
 ```powershell
 pnpm install
-pnpm build          # plugins/ 与 packages/ 下各自构建（插件 tsc、两个包 tsdown），拓扑序
+pnpm build          # plugins/ 与 packages/ 下各自构建（插件 tsc、四个包 tsdown），拓扑序
 pnpm typecheck
 pnpm test           # 先 build 再 node --test tests/*.test.ts
 
@@ -105,5 +107,5 @@ cd ../plugins/docfirst
 pnpm check && pnpm build      # 工作台插件单独一套门禁，用 vitest
 ```
 
-改了 `packages/docfirst-workflow/src/fumadocs/` 的代码，站要**先删 `.next` 再 build** 才看得见——Turbopack 只按 mdx 内容缓存。
+改了站构建时 remark 插件会跑到的包代码（`packages/docfirst-fumadocs/`，连同它调用的 workflow 与 pin），站要**先删 `.next` 再 build** 才看得见——Turbopack 只按 mdx 内容缓存。
 调试站用 `next build` + `next start`，不用 dev。

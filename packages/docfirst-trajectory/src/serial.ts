@@ -1,8 +1,7 @@
 /**
  * 序列化模型的两头：服务端 buildTrajectory 出的是 SerializableModel（supersededIds 是数组，
  * 过得了 JSON），客户端组件与服务端定妆照画家吃的是 TrajectoryModel（Set）——这两个转换
- * 与「空盘兜底」住一处，`./react` 与 `./server` 两个入口共用。不经 index.ts 的桶（那儿链到
- * node:fs），这个文件本身零 import。
+ * 与「空盘兜底」住一处，`.` 与 `./disk` 两个入口共用。
  */
 
 import type { TrajectoryModel } from "./types.ts";
@@ -37,8 +36,8 @@ export function emptyModel(): TrajectoryModel {
   };
 }
 
-/** 一张盘的启动器缩略图：亮 / 暗各一份静态 SVG markup（`./server` 的 launcherThumbs 出，
- * `./react` 的启动器卡阵贴），页面按 html.dark 显示其一，切主题不重画。 */
+/** 一张盘的启动器缩略图：亮 / 暗各一份静态 SVG markup（`.` 的 launcherThumbs 出，
+ * `./disk` 的启动器卡阵贴），页面按 html.dark 显示其一，切主题不重画。 */
 export interface LauncherThumb {
   dark: string;
   light: string;

@@ -6,7 +6,8 @@
  */
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { buildDisks, buildModel, dayNum, NO_DOMAIN, RingsLayout, scanDir } from "@godcreator/docfirst-trajectory";
+import { buildDisks, buildModel, dayNum, NO_DOMAIN, RingsLayout } from "@godcreator/docfirst-trajectory";
+import { scanCardDir } from "@godcreator/docfirst-workflow";
 import { card, D, DN, flatProblems, memCards, memSick, root } from "./trajectory-helpers.ts";
 
 /** 一月内某日转天序数。 */
@@ -479,5 +480,5 @@ test("窗内无卡：空盘，day0 = dayMax = 窗口下界", () => {
 });
 
 test("扫盘：目录不存在，回空集合，不报错、不建目录", async () => {
-  assert.deepEqual(await scanDir("D:/这个目录不存在/也不该被建出来"), { cards: [], sick: [] });
+  assert.deepEqual(await scanCardDir("D:/这个目录不存在/也不该被建出来"), { cards: [], sick: [] });
 });

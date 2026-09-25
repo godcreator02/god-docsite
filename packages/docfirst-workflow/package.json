@@ -3,7 +3,7 @@
   "version": "0.3.1",
   "author": {"name": "godcreator"},
   "type": "module",
-  "description": "文档站工作流工具：钉码核对与确认、生成正本渲染（命令行 + 库），随 docfirst 线发。",
+  "description": "文档站工作流工具：命令行（核对、确认、渲染、轨迹）、项目装配与 mdx 格式，随 docfirst 线发。",
   "bin": {
     "docfirst": "./dist/cli.mjs"
   },
@@ -12,24 +12,17 @@
       "types": "./dist/index.d.mts",
       "default": "./dist/index.mjs"
     },
-    "./fumadocs": {
-      "types": "./dist/fumadocs.d.mts",
-      "default": "./dist/fumadocs.mjs"
+    "./mdx": {
+      "types": "./dist/mdx.d.mts",
+      "default": "./dist/mdx.mjs"
     },
-    "./fumadocs/pre": {
-      "types": "./dist/pre.d.mts",
-      "default": "./dist/pre.mjs"
-    },
-    "./fumadocs/term": {
-      "types": "./dist/term.d.mts",
-      "default": "./dist/term.mjs"
-    },
-    "./fumadocs/light.css": "./styles/light.css",
-    "./fumadocs/term.css": "./styles/term.css"
+    "./cards": {
+      "types": "./dist/cards.d.mts",
+      "default": "./dist/cards.mjs"
+    }
   },
   "files": [
-    "dist",
-    "styles"
+    "dist"
   ],
   "scripts": {
     "build": "tsdown",
@@ -37,32 +30,12 @@
     "prepublishOnly": "pnpm run build"
   },
   "dependencies": {
+    "@godcreator/docfirst-pin": "workspace:*",
     "@godcreator/docfirst-trajectory": "workspace:*",
     "remark-frontmatter": "^5.0.0",
     "remark-mdx": "^3.0.0",
     "remark-parse": "^11.0.0",
     "unified": "^11.0.0"
-  },
-  "peerDependencies": {
-    "fumadocs-core": ">=16",
-    "fumadocs-ui": ">=16",
-    "react": ">=19"
-  },
-  "peerDependenciesMeta": {
-    "fumadocs-core": {
-      "optional": true
-    },
-    "fumadocs-ui": {
-      "optional": true
-    },
-    "react": {
-      "optional": true
-    }
-  },
-  "devDependencies": {
-    "@types/react": "^19.3.0",
-    "fumadocs-ui": "npm:@fumadocs/base-ui@16.15.14",
-    "react": "^19.3.0"
   },
   "publishConfig": {
     "access": "public",

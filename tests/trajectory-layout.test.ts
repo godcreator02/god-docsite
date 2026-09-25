@@ -16,9 +16,9 @@ import {
   monthGate,
   RingsLayout,
   ringSkeleton,
-  scanDir,
   SPREAD_DEG,
 } from "@godcreator/docfirst-trajectory";
+import { scanCardDir } from "@godcreator/docfirst-workflow";
 import type { RawCard, TrajectoryModel } from "@godcreator/docfirst-trajectory";
 import { memCards } from "./trajectory-helpers.ts";
 
@@ -46,7 +46,7 @@ const FIXTURES = fileURLToPath(new URL("./fixtures/trajectory", import.meta.url)
 const ROOT_ID = "tfix-测试项目根卡";
 const WORM_ID = "wh01-虫洞子项目根卡";
 
-const fixtureCards: RawCard[] = (await scanDir(FIXTURES)).cards;
+const fixtureCards: RawCard[] = (await scanCardDir(FIXTURES)).cards;
 const m: TrajectoryModel = buildModel(fixtureCards, ROOT_ID);
 const L = new RingsLayout(m);
 

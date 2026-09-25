@@ -13,10 +13,10 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
-import { advanceFrame, buildModel, buildTrajectory, RingsLayout, scanDir } from "@godcreator/docfirst-trajectory";
+import { advanceFrame, buildModel, buildTrajectory, launcherThumbs, renderThumb, RingsLayout } from "@godcreator/docfirst-trajectory";
 import type { FrameState } from "@godcreator/docfirst-trajectory";
-import { StarDisk } from "@godcreator/docfirst-trajectory/react";
-import { launcherThumbs, renderThumb } from "@godcreator/docfirst-trajectory/server";
+import { StarDisk } from "@godcreator/docfirst-trajectory/disk";
+import { scanCardDir } from "@godcreator/docfirst-workflow";
 
 const ROOT_ID = "tfix-测试项目根卡";
 
@@ -26,7 +26,7 @@ function emptyFrame(): FrameState {
 }
 
 test("StarDisk 整页模式：壳结构齐——画布空 div、竖轨容器、工具条与三态 home 钮，无激活遮罩", async () => {
-  const data = await buildTrajectory("tests/fixtures/trajectory");
+  const data = buildTrajectory(await scanCardDir("tests/fixtures/trajectory"));
   assert.ok(data.models[ROOT_ID], "fixture 里得有 tfix 这张盘");
 
   const html = renderToStaticMarkup(
@@ -48,7 +48,7 @@ test("StarDisk 整页模式：壳结构齐——画布空 div、竖轨容器、�
 });
 
 test("StarDisk 嵌入模式：默认值不被整页那条分支带跑——提示带在、没有遮罩、方形容器", async () => {
-  const data = await buildTrajectory("tests/fixtures/trajectory");
+  const data = buildTrajectory(await scanCardDir("tests/fixtures/trajectory"));
   const embed = renderToStaticMarkup(
     createElement(StarDisk, { data, hrefBase: "/trajectory", initialDisk: ROOT_ID }),
   );
@@ -59,7 +59,7 @@ test("StarDisk 嵌入模式：默认值不被整页那条分支带跑——提�
 });
 
 test("StarDisk 启动器：?disk 缺失渲项目卡阵——每张盘一张卡、每张卡带服务端渲的静态 svg", async () => {
-  const data = await buildTrajectory("tests/fixtures/trajectory");
+  const data = buildTrajectory(await scanCardDir("tests/fixtures/trajectory"));
   assert.ok(data.disks.length >= 2, "fixture 有主盘与虫洞子项目两张盘");
   const thumbs = launcherThumbs(data);
   assert.deepEqual(Object.keys(thumbs).sort(), data.disks.map((d) => d.rootId).sort(), "每张盘一份缩略图");
@@ -92,7 +92,7 @@ test("StarDisk 启动器：?disk 缺失渲项目卡阵——每张盘一张卡�
 });
 
 test("renderThumb：吃序列化模型也吃运行期模型，静态 svg 结构相同", async () => {
-  const data = await buildTrajectory("tests/fixtures/trajectory");
+  const data = buildTrajectory(await scanCardDir("tests/fixtures/trajectory"));
   const serialized = data.models[ROOT_ID]!;
   const a = renderThumb(serialized, { theme: "dark" });
   const b = renderThumb({ ...serialized, supersededIds: new Set(serialized.supersededIds) }, { theme: "dark" });
@@ -103,7 +103,7 @@ test("renderThumb：吃序列化模型也吃运行期模型，静态 svg 结构�
 });
 
 test("advanceFrame：focusOn 后推帧，强度趋近 1、显示半径真被鱼眼改写", async () => {
-  const cards = (await scanDir("tests/fixtures/trajectory")).cards;
+  const cards = (await scanCardDir("tests/fixtures/trajectory")).cards;
   const m = buildModel(cards, ROOT_ID);
   const layout = new RingsLayout(m);
   const fr = emptyFrame();

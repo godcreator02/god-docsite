@@ -1,178 +1,153 @@
 ---
-title: fumadocs 那一层
-description: mdx 格式实现与站接线在同一层：认记号与写回、生成正本按原文渲染、remark 插件、meta 白名单、机读版回调、状态点组件、名册与术语两张表的机制
+title: fumadocs 适配 docfirst-fumadocs
+description: 把 docfirst 接到 fumadocs 站上：remark 插件与 meta 白名单、机读版回调、状态点与术语组件、fumadocs 组件的名册规则、轨迹卡集合的 schema 与链接改写、星轨盘服务端组件
 ---
 
-**本页回答**：`src/fumadocs/` 做哪几件事、往 fumadocs 上接哪几处、对外给哪些出口、依赖谁，以及 `Format` 这条接缝到底分离了什么。
+**本页回答**：fumadocs 适配做哪几件事、往 fumadocs 上接哪几处、对外给哪些出口、依赖谁，以及它刻意不做什么。
 
-包 `@godcreator/docfirst-workflow`，源码在 `packages/docfirst-workflow/src/fumadocs/`，入口是 `index.ts`（包出口 `./fumadocs`），另有两个含 React 的侧出口与两张样式表。
+包 `@godcreator/docfirst-fumadocs`，源码在 `packages/docfirst-fumadocs/src/`，入口是 `src/index.ts`（出口 `.`），
+另有侧出口 `./roster`、`./pre`、`./term`、`./trajectory` 与两张样式表。
 
 ## 功能
 
-三件事，读的时候要分开。
+这个包里的代码都由 fumadocs 或 Next 调用：mdx 加载器编译页面时调的插件、集合的 schema 与回调、页面渲染时的组件。
+从 `docfirst` 命令开始的调用链一条都不经过它。入口文件头把几样东西各接到哪写全了：
 
-**mdx 格式的实现**：认领 `.mdx`、认记号、写回记号，加一个名册检查和一份给生成正本用的 `renderAi`。判定层看到的只有这一件，`Format` 要的那几样出口就在文件头上：
+{/* ref file="../packages/docfirst-fumadocs/src/index.ts" lines="1-17" hash="677de7c33676" blob="8f4947e20dfb" */}
 
-{/* ref file="../packages/docfirst-workflow/src/fumadocs/index.ts" lines="29-49" hash="06828f399d5b" blob="f7fadb45570d" */}
+**现状集合的 remark 插件。** 四步，一步一件事：
 
-认记号走语法树：这一层自己起一个 remark 解析器（remark-parse、remark-mdx、remark-frontmatter），正式记号是顶层的 `mdxFlowExpression`，属性里带着确认时的记录；草稿记号是单独成段的一行普通文字。写在围栏里、句子里的同样文字分别是 `code` 和 `mdxTextExpression` 节点，认不出来。写回只重写记号所在那一行：草稿换成正式记号，行号与记录换成确认时算好的。
+{/* ref file="../packages/docfirst-fumadocs/src/remark-plugin.ts" lines="21-27" hash="1b4fd315e4b5" blob="2efb8db2a72b" */}
 
-**站接线**：remark 插件加到 fumadocs remark 链的末尾、整张换掉 rehype 的 meta 白名单、给集合的 postprocess 一个序列化回调、侧出口交出状态点的 pre 组件与术语组件，各配一份随包发的样式表。判定、环境、命令行三层都不知道这一件存在。
-
-**两张表的机制**：名册（一个组件在机读版里压成什么）与术语表（站上自动标注）。机制在这一层，表的内容在站那边——组件和词条是站的，规则也该是站的。
-
-格式与站接线放在同一层，是因为 mdx 页面上那块代码是构建时从源码现取的，「认记号」和「站怎么构建」本来就是同一件事。**`fumadocs` 这个名字只出现在这一层**，engine / host / cli 一个都不 import 它：
-
-{/* ref file="../tests/boundary.test.ts" lines="143-151" hash="f86f0c003c09" blob="421b08df5caa" */}
-
-`Format` 这条接缝留着**不是**为了「将来换个宿主」。它分离的是两种变化原因：怎么认记号（花括号注释还是 HTML 注释、走语法树还是走正则）与怎么判新鲜（记录怎么比、段落怎么跟随、状态怎么定）。这条接缝上真有两个实现：生产用这一层，测试用一份假格式。
-
-代价是一条反方向的依赖：这一层是包里唯一同时用到判定层与环境层的（`docfirstMdxOptions` 要 `loadProject`）。站的 remark 链上没有命令行帮它装配，插件得在构建时自己装配一次：
-
-{/* ref file="../packages/docfirst-workflow/src/fumadocs/index.ts" lines="1-21" hash="b4724bbd010d" blob="eb535ef31986" */}
+**认**：workflow `./mdx` 的 `recognize` 在 mdast 上找引用。**算**：交给钉码服务的 `resolveRefs`，树已经解析好了，不再解析一遍。
+**换**：`applyListing` 把记号节点换成代码块、文件树或小标签。**打标记**：`stamp` 按名册给每个组件加上「机读版里它长什么样」。
+同一棵树接着既出页面又出 md，所以状态走两条通道：`meta` 字符串给页面，`data` 上的标记给序列化回调。
 
 ### 一处引用在页面上长什么样
 
-五种目标三种样子。行段和整文件是一个 mdast `code` 节点，状态写在 meta 里。绿和白是一块当前段，`lineNumbers` 从今天的起始行起，行号跟源文件对得上，白的标题后面加「· 未确认」；黄把判定层给的 `-` / `+` 换成 shiki 原生的增删行标记（要写在那个语言真正的行注释里 shiki 才认，所以这一层带着一张行注释表，没有行注释的语言退成一块 `diff`），旧行新行在同一块里，所以**不带 `lineNumbers`**；取不到确认时的内容、没有 diff 的黄退成一块普通的当前段，标题里写「有变动」；「位置不明」**不放代码**，只留一句提示。红放的是确认时那段（取得到才有），标题写「文档写下时这段是」。标题一律写**今天的位置**：行段跟随之后，记号上那几行可能已经不是这段了。
+五种目标三种样子。行段和整文件是一个 mdast `code` 节点，状态写在 meta 里。绿和白是一块当前段，`lineNumbers` 从今天的起始行起，行号跟源文件对得上，白的标题后面加「· 未确认」；黄把钉码核心给的 `-` / `+` 换成 shiki 原生的增删行标记（要写在那个语言真正的行注释里 shiki 才认，所以这里带着一张行注释表，没有行注释的语言退成一块 `diff`），旧行新行在同一块里，所以**不带 `lineNumbers`**；取不到确认时的内容、没有 diff 的黄退成一块普通的当前段，标题里写「有变动」；「位置不明」**不放代码**，只留一句提示。红放的是确认时那段（取得到才有），标题写「文档写下时这段是」。标题一律写**今天的位置**：行段跟随之后，记号上那几行可能已经不是这段了。
 
-{/* ref file="../packages/docfirst-workflow/src/fumadocs/blocks.ts" lines="170-201" hash="8e8924529a15" blob="ba015fd523f0" */}
+{/* ref file="../packages/docfirst-fumadocs/src/blocks.ts" lines="167-198" hash="8e8924529a15" blob="8cf656b5cdc2" */}
 
 颜色只有四种，有变动和未确认同是黄，实心、空心的区别在样式表：
 
-{/* ref file="../packages/docfirst-workflow/src/fumadocs/blocks.ts" lines="23-25" hash="74bf6269f8c9" blob="42eb9e4a4823" */}
+{/* ref file="../packages/docfirst-fumadocs/src/blocks.ts" lines="26-28" hash="74bf6269f8c9" blob="8cf656b5cdc2" */}
 
 目录树不变成代码块，变成 fumadocs 自己的 `Files` / `Folder` / `File` 组件——mdx 能往树上放真组件，这是它比纯文本格式多出来的地方：
 
-{/* ref file="../packages/docfirst-workflow/src/fumadocs/blocks.ts" lines="153-167" hash="3f1c0692e282" blob="ba015fd523f0" */}
+{/* ref file="../packages/docfirst-fumadocs/src/blocks.ts" lines="150-164" hash="3f1c0692e282" blob="8cf656b5cdc2" */}
 
 根是一个展开的文件夹，名字是这处的来源，下面按路径切成嵌套，到深度尽头没孩子的子目录禁用。容器带 `data-docfirst="tree"` 和 `data-dot`，样式表在右上角画同一颗点；作者手写的文件树没有这两个属性，外观不变。记录里只有名字表的哈希，所以黄的时候放的是今天的名字表，说不出多了哪项少了哪项；红只剩一个禁用的根文件夹，里面一行「目录不在了」。
 
 存在性和名字没有代码可放，还是 `code` 节点，meta 里多一个 `data-chip`，站的 pre 组件见到它画一行小标签，不画代码块。
 
-节点上另加两个标记，都只给机读版用，不影响页面：`data.docfirst` 是一处引用的来源、状态和一份干净内容；`data.docfirstAi` 是一个组件的替换节点。同一棵树接着还要出页面，所以**打标记不改树**。
+节点上另加两个标记，都只给机读版用，不影响页面：`data.docfirst` 是一处引用的来源、状态和一份干净内容；`data.docfirstAi` 是一个组件的替换节点。
 
-### 名册
+### 机读版
 
-名册是一张「组件名 → 规则」的表。mdx 里的组件是 JSX 节点，序列化成 md 时要么原样漏成一个裸标签（AI 读到一个 `Tabs` 标签不知道是什么），要么整个丢掉（内容也没了），所以得有一张表说清**每个组件在 md 里变成什么**。
+站上各页给 AI 读的 md 走 fumadocs 自己的 processed markdown，序列化回调由这个包给：
 
-规则三种写法：
+{/* ref file="../packages/docfirst-fumadocs/src/markdown.ts" lines="24-46" hash="0455bbfbe401" blob="26542dea70a7" */}
 
-{/* ref file="../packages/docfirst-workflow/src/fumadocs/roster.ts" lines="34-35" hash="69cdb1ca8839" blob="e6b0541becb8" */}
+fumadocs 序列化每个节点前先问它，看到打过的标记就按标记出，没标记的交回 `undefined` 照默认走。组件的标记交给它的状态机接着序列化（嵌套组件照常处理）；引用的标记出一行来源注释加一块干净的代码，不要 meta、不要 diff 标记；小标签没有内容，只留来源那一行。生成正本（README、AGENTS.md 这类）不走这条路，由 workflow 的 [mdx 格式](/docs/modules/workflow/mdx)按原文渲染。
 
-`"children"` 只留子内容、去掉外层；`"drop"` 整个不进机读版；函数收一个节点，交回一个或一组普通 markdown 节点。嵌套的组件不用规则处理——子节点还在树上，各自有各自的标记。
+### 状态点组件
 
-函数规则只能通过 helpers 读节点（`attr` / `textOf`）、造节点（`text` / `heading` / `paragraph` / `quote` / `children`），节点本身对规则不透明：
-
-{/* ref file="../packages/docfirst-workflow/src/fumadocs/roster.ts" lines="21-32" hash="efedd191320a" blob="e6b0541becb8" */}
-
-<Note>
-  守住这一条，同一张表换个宿主照样能用：宿主各自提供一套 helpers，造的是自己的节点。规则里一旦直接读写 mdast 的字段，这张表就只能跟 mdast 一起用了。
-</Note>
-
-`inline` 告诉规则「这处是不是写在句子里」——行内的位置只能交回行内节点。这一条没有机制检查，靠规则作者遵守，记在[路线图](/future/roadmap)里。
-
-这一层自带一张默认表，按语义定，不知道组件在哪个站上长什么样：
-
-{/* has file="../packages/docfirst-workflow/src/fumadocs/roster.ts" text="export const defaultRoster" */}
-
-这张表在这一页**只钉名字、不放代码**：表里的注释用尖括号包着组件名，放进机读版会触发站测试「组件没被名册压平」的断言。这是这套机制写自己时才会遇到的一处，办法是钉名字，正文照说（见[路线图](/future/roadmap)）。表里：块级的 `Note` 变一个引用块（前面加 `[note]`），写在句子里的变一段行内文字，不把句子拆断；再加 fumadocs 文件树那三个组件，作者手写的文件树压成一行一个名字、文件夹带尾斜杠。站一般把它展开，再加上自己的组件。
-
-### 机读版与生成正本
-
-给 AI 读的 md 有两条路，互不相干。
-
-**站上各页的机读版**走 fumadocs 自己的 processed markdown，序列化回调由这一层给：
-
-{/* ref file="../packages/docfirst-workflow/src/fumadocs/markdown.ts" lines="24-46" hash="0455bbfbe401" blob="26542dea70a7" */}
-
-fumadocs 序列化每个节点前先问它，看到这一层打的标记就按标记出，没标记的交回 `undefined` 照默认走。组件的标记交给它的状态机接着序列化（嵌套组件照常处理）；引用的标记出一行来源注释加一块干净的代码，不要 meta、不要 diff 标记；小标签没有内容，只留来源那一行。
-
-**生成正本**（README、AGENTS.md、SKILL.md 这类）走 `renderAi`，不经过 fumadocs 编译：按原文处理，去掉 frontmatter，每个正式记号换成一个代码块，其余文字一个字节都不改。草稿记号、缺失的引用、JSX 组件、别的 mdx 表达式都渲染不了，一次列全后报错：
-
-{/* ref file="../packages/docfirst-workflow/src/fumadocs/render.ts" lines="106-123" hash="fc085e616933" blob="7223c0a190ab" */}
-
-记号换成的代码块，info 串是语言加 `title="路径:起-止"`（目录树是 `目录/`），内容是清单里今天的那几行；围栏比内容里最长的一串反引号多一个：
-
-{/* ref file="../packages/docfirst-workflow/src/fumadocs/render.ts" lines="36-47" hash="da5e04e79a4b" blob="7223c0a190ab" */}
-
-所以生成正本里可以钉码，但不能用组件；这几页在站上的机读版与生成物也不保证逐字节相同。为什么这样取舍见轨迹卡[按原文渲染](/trajectory/2026-09-25-outputs-render-from-source-text)。
-
-## 接口
-
-包外三个出口加两张样式表，出口表一眼看全：
-
-{/* ref file="../packages/docfirst-workflow/package.json" lines="10-29" hash="280bf95df27d" blob="6eb7a7bc1b45" */}
-
-`./fumadocs` 是站的 `src/lib/source.ts` 与 `docfirst.config.mjs` import 的那一份；`.` 是命令行与程序调用那条；`/fumadocs/pre` 与 `/fumadocs/term` 含 React，单独出去。
-
-对判定层，它是一个普通格式：`Format` 要的五样出口，加一个名册检查和一份 `renderAi`。`lintComponents` 让命令行 `check` 提前报出名册外的组件，不用等构建才发现。
-
-对站，是三个接入点加一层可选的术语标注：`docfirstMdxOptions({ root })` 经 fumadocs-mdx 的 `applyMdxPreset` 接进现状集合的 `mdxOptions`（remark 链**末尾**加插件，同时换掉 rehype 的 meta 白名单）；`docfirstMarkdownOptions()` 接进同一个集合的 `postprocess.includeProcessedMarkdown`；侧出口 `/fumadocs/pre` 覆盖 `mdx.tsx` 里的 `pre`，并配一份 css。给 `docfirstMdxOptions` 一份词表就开术语标注，不给就不开。
-
-集合写在站的 `src/lib/source.ts` 里（fumadocs-mdx 的 macro），没有全局配置，所以接线按集合写；集合级 `mdxOptions` 会去掉 fumadocs 的默认插件，`applyMdxPreset` 把它们加回来。返回值的类型按结构对上 `applyMdxPreset` 的参数，这一层不 import fumadocs 的类型，站里也不用强转；代码高亮选项里写上 fumadocs 的默认主题，是因为它的类型要求主题必填，运行时先铺默认再盖这一份，结果不变：
-
-{/* ref file="../packages/docfirst-workflow/src/fumadocs/host.ts" lines="47-75" hash="3270efe65d90" blob="d938ae6daf30" */}
-
-加在链尾是有原因的：前面是 fumadocs 自己的 `remarkInclude` 和一整套预设（标题 id、gfm……），后面是它自己的 postprocess，插件看到的是一棵已经整理好的树。术语标注排在 docfirst 插件**之前**：那时树上还只有作者写的正文，引用换出来的代码块与目录树都还没放进去，标注碰不到它们。`Term` 的定义在构建时写进属性，组件不把词表带进客户端包，也不需要一行 JS。
-
-这个站自己就是这么接的，接在现状集合上：
-
-{/* ref file="src/lib/source.ts" lines="24-43" hash="3e9dcbabc58b" blob="8f433a032289" */}
-
-meta 白名单要整张换掉——fumadocs 的 `rehypeCode` 只放行白名单里的字段，别的一律丢掉，状态点的颜色得自己加进去：
-
-{/* ref file="../packages/docfirst-workflow/src/fumadocs/host.ts" lines="30-30" hash="6bcfcf51a50c" blob="d938ae6daf30" */}
-
-跟 fumadocs 的默认白名单同形，只多 `data-dot` 和 `data-chip`。值一律带引号——它的 meta 解析器只认 `key="字符串"` / `key=数字` / 裸 `key` 三种，裸单词会被解析成 `null`。
-
-remark 插件四步，一步一件事：
-
-{/* ref file="../packages/docfirst-workflow/src/fumadocs/remark-plugin.ts" lines="22-28" hash="1e64e8f9fe08" blob="18c24a429715" */}
-
-**认**：`recognize` 在 mdast 上找引用。**算**：交给判定层的 `resolveRefs`，树已经解析好了，不再解析一遍。**换**：`applyListing` 把记号节点换成代码块、文件树或小标签。**打标记**：`stamp` 按名册给每个组件加上「机读版里它长什么样」。同一棵树接着既出页面又出 md，所以状态走两条通道：`meta` 字符串给页面，`data` 上的标记给序列化回调。
-
-打标记这一头：
-
-{/* ref file="../packages/docfirst-workflow/src/fumadocs/roster.ts" lines="118-137" hash="5808429ce8a8" blob="e6b0541becb8" */}
-
-只加标记不换节点：`data.docfirstAi` 是一组替换节点，空的就设上 fumadocs 自己的 `data._stringify` 表示整个不要；这一层放进去的节点（目录树那棵 `Files`）标记已经打好，跳过、不往里走。表外的组件直接报错，报到行。
-
-站侧的 pre 组件：
-
-{/* ref file="../packages/docfirst-workflow/src/fumadocs/pre.tsx" lines="45-57" hash="cc45214abd3a" blob="d991b4ac2515" */}
+{/* ref file="../packages/docfirst-fumadocs/src/pre.tsx" lines="45-57" hash="cc45214abd3a" blob="d991b4ac2515" */}
 
 有 `data-dot` 的（引用换出来的那些）交给 fumadocs 的 `CodeBlock`，把一个 8px 的点放进标题栏的 `Actions` 位置、复制按钮左边；再带 `data-chip` 的画一行小标签；都没有的（普通围栏）照默认路径走，互不干扰。
 
 <Note>
-  这个组件必须是**客户端组件**：`CodeBlock` 带 `"use client"`，状态点要经 `Actions`（一个函数）传进去，而服务端组件不能把函数传给客户端组件。所以它单独一个侧出口，`"use client"` 指令还得留在产物第一行——边界测试盯着这一条。
+  这个组件必须是**客户端组件**：`CodeBlock` 带 `"use client"`，状态点要经 `Actions`（一个函数）传进去，而服务端组件不能把函数传给客户端组件。所以它单独一个侧出口，`"use client"` 指令还得留在产物第一行——边界测试检查这一条。
 </Note>
 
-站的构建配置里 `serverExternalPackages` 因此**必须留空**。这个包里同时有服务端那一半（读盘、调 git、remark 插件）与两个客户端组件，而那个字段按包名匹配、没有子路径粒度，整包外置会让 `"use client"` 指令丢掉：
+### 术语标注
 
-{/* ref file="next.config.mjs" lines="12-25" hash="3334cd9f7abe" blob="55f12ba8844c" */}
+给 `docfirstMdxOptions` 一份词表就开术语标注，不给就不开。它排在 docfirst 插件**之前**：那时树上还只有作者写的正文，引用换出来的代码块与目录树都还没放进去，标注碰不到它们。`Term` 的定义在构建时写进属性，组件是服务端组件，不把词表带进客户端包，也不需要一行 JS。入参单独一份，`skipFile` 实际上必须给：术语页自己不能标，否则会自己引用自己。
+
+{/* ref file="../packages/docfirst-fumadocs/src/glossary-plugin.ts" lines="26-35" hash="6e3562a4b1af" blob="8bc7141770f1" */}
+
+这个包只有匹配和在树上换节点，词条数据是站的。
+
+### fumadocs 组件的名册规则
+
+fumadocs 自带的几个组件在机读版里压成什么，规则在 `./roster` 出口，站在 `docfirst.config.mjs` 里展开它、再加自己的组件：
+
+{/* has file="../packages/docfirst-fumadocs/src/roster.ts" text="export const fumadocsRoster" */}
+
+这张表在这一页**只钉名字、不放代码**：表里的注释用尖括号包着组件名，放进机读版会触发站测试「组件没被名册压平」的断言。这是这套机制写自己时才会遇到的一处，办法是钉名字，正文照说（见[路线图](/future/roadmap)）。表里：块级的 `Note` 变一个引用块（前面加 `[note]`），写在句子里的变一段行内文字，不把句子拆断；再加 fumadocs 文件树那三个组件，作者手写的文件树压成一行一个名字、文件夹带尾斜杠。
+
+`./roster` 只放数据与纯函数：命令行读 `docfirst.config.mjs` 时会加载它，而命令行跑的环境（git hook、CI）不一定装了 fumadocs。规则的类型从 workflow 的 `./mdx` 取，运行时一句 import 都没有。remark 插件在站没给名册时也用这张表。
+
+### 轨迹卡集合
+
+轨迹卡用自己的集合，这个包给集合两样东西。frontmatter schema `cardSchema`：缺 `born-at` 校验失败，缺 `label` 用文件名代替，六个卡字段都没写的页当普通页通过：
+
+{/* ref file="../packages/docfirst-fumadocs/src/card-collection.ts" lines="41-48" hash="d834c788244a" blob="2179f5ccdf19" */}
+
+remark 插件 `remarkTrajectoryLinks`：把关系边段落转成带 `data-kind` 的 div，把指向卡身份的链接和 wikilink 改成卡页地址，带路径的 `.md` 链接（引用材料）不改：
+
+{/* ref file="../packages/docfirst-fumadocs/src/card-collection.ts" lines="125-129" hash="21ed7eae1628" blob="2179f5ccdf19" */}
+
+哪几个字段算卡，从轨迹核心的 `CARD_KEYS` 取，跟命令行校验卡用的是同一条判据。
+
+### 星轨盘服务端组件
+
+`./trajectory` 出口有两样：`loadTrajectory(dir)` 读一个卡目录并建模，要自己排页面的站直接拿数据；服务端组件 `Trajectory` 读卡、建模，绘制 `StarDisk`，有问题的卡列在盘下方。卡目录可以写绝对路径，也可以写相对站根目录的路径：
+
+{/* ref file="../packages/docfirst-fumadocs/src/trajectory.tsx" lines="17-29" hash="d7d894adb801" blob="f8b43c49b05a" */}
+
+读卡目录走 workflow `./cards` 出口的 `scanCardDir`（它顺带查卡里不许钉码；不从 `.` 取，免得把命令行与配置加载带进 Next 的服务端构建），建模与缩略图走轨迹核心的纯函数，`StarDisk` 按包名从 `@godcreator/docfirst-trajectory/disk` 取——那份产物头一行是 `"use client"`，按包名 import 才会原样留在产物里，Next 认得出客户端边界。
+
+## 接口
+
+主出口、四个侧出口、两张样式表：
+
+{/* ref file="../packages/docfirst-fumadocs/package.json" lines="7-30" hash="f9522bea440a" blob="56f4689ae118" */}
+
+对站，是三个接入点加一层可选的术语标注：`docfirstMdxOptions({ root })` 经 fumadocs-mdx 的 `applyMdxPreset` 接进现状集合的 `mdxOptions`（remark 链**末尾**加插件，同时换掉 rehype 的 meta 白名单）；`docfirstMarkdownOptions()` 接进同一个集合的 `postprocess.includeProcessedMarkdown`；侧出口 `./pre` 覆盖 `mdx.tsx` 里的 `pre`，并配一份 css。轨迹卡集合另用 `cardSchema` 与 `remarkTrajectoryLinks`；`./roster` 给 `docfirst.config.mjs`；`./trajectory` 给星轨盘路由。
+
+集合写在站的 `src/lib/source.ts` 里（fumadocs-mdx 的 macro），没有全局配置，所以接线按集合写；集合级 `mdxOptions` 会去掉 fumadocs 的默认插件，`applyMdxPreset` 把它们加回来。返回值的类型按结构对上 `applyMdxPreset` 的参数，这个包不 import fumadocs 的类型，站里也不用强转；代码高亮选项里写上 fumadocs 的默认主题，是因为它的类型要求主题必填，运行时先铺默认再盖这一份，结果不变：
+
+{/* ref file="../packages/docfirst-fumadocs/src/host.ts" lines="46-74" hash="3270efe65d90" blob="ee5ba8cf517d" */}
+
+加在链尾是有原因的：前面是 fumadocs 自己的 `remarkInclude` 和一整套预设（标题 id、gfm……），后面是它自己的 postprocess，插件看到的是一棵已经整理好的树。
+
+这个站自己就是这么接的，接在现状集合上：
+
+{/* ref file="src/lib/source.ts" lines="23-42" hash="3e9dcbabc58b" blob="0e069abf8afb" */}
+
+meta 白名单要整张换掉——fumadocs 的 `rehypeCode` 只放行白名单里的字段，别的一律丢掉，状态点的颜色得自己加进去：
+
+{/* ref file="../packages/docfirst-fumadocs/src/host.ts" lines="29-29" hash="6bcfcf51a50c" blob="ee5ba8cf517d" */}
+
+跟 fumadocs 的默认白名单同形，只多 `data-dot` 和 `data-chip`。值一律带引号——它的 meta 解析器只认 `key="字符串"` / `key=数字` / 裸 `key` 三种，裸单词会被解析成 `null`。
+
+站的构建配置里 `serverExternalPackages` 因此**必须留空**。这个包里同时有服务端代码（remark 插件、读卡目录）与客户端组件，而那个字段按包名匹配、没有子路径粒度，整包外置会让 `"use client"` 指令丢掉：
+
+{/* ref file="next.config.mjs" lines="12-25" hash="1b86caa7e55b" blob="96a8ad30ead4" */}
 
 ## 依赖
 
-| 接口 | 用来做什么 | 实现在 |
+| 依赖 | 用来做什么 | 缺了会怎样 |
 | --- | --- | --- |
-| `service.resolveRefs(doc, refs)` | 把认到的引用算成清单（状态、今天的行段、旧内容） | `loadProject` 装配出的判定服务 |
-| `docOf(file)` | 由 vfile 的路径算出文档身份 | 环境层的 `docIdOf` |
-| 名册表 | 每个组件在机读版里压成什么 | 站的 `docfirst.config.mjs` |
-| 词表 | 术语自动标注 | 站里那份术语数据文件 |
-| unified、remark-parse、remark-mdx、remark-frontmatter | 认记号、写回、名册检查、`renderAi` 用的语法树；`docfirstMdxOptions` 返回类型里的插件表类型（unified 的 `Pluggable`） | 包自己的依赖 |
-| fumadocs（peer） | processed markdown 出机读版、`CodeBlock` 画代码块 | 使用方项目装的那份 |
+| workflow `@godcreator/docfirst-workflow` | `.` 的 `loadProject` 装配项目、拿到钉码服务与名册；`./cards` 的 `scanCardDir` 读卡目录；`./mdx` 的 `recognize`、`stamp`、`langOf` 与名册类型 | 站构建时认不出记号、算不出状态，星轨盘读不到卡 |
+| 钉码核心 `@godcreator/docfirst-pin` | `Reference`、`Listing` 等类型；清单项的形状 | 类型对不上 |
+| 轨迹核心 `@godcreator/docfirst-trajectory` | `buildTrajectory`、`launcherThumbs`、`CARD_KEYS`；`./disk` 的 `StarDisk` | 星轨盘与卡集合用不了 |
+| unified、unist-util-visit | 插件表类型；`remarkTrajectoryLinks` 遍历 mdast | 卡集合的链接改写用不了 |
+| fumadocs-core、fumadocs-ui、react（peer） | processed markdown 出机读版、`CodeBlock` 画代码块、组件渲染 | 用使用方项目装的那份；站没装就用不了这个包 |
 
-插件的入参就这三样：
+插件的入参就这三样：钉码服务、由 vfile 算文档身份的函数、名册：
 
-{/* ref file="../packages/docfirst-workflow/src/fumadocs/remark-plugin.ts" lines="16-20" hash="7c71147082ca" blob="18c24a429715" */}
+{/* ref file="../packages/docfirst-fumadocs/src/remark-plugin.ts" lines="15-19" hash="7c71147082ca" blob="2efb8db2a72b" */}
 
-装配发生在 `host.ts` 那个异步 attacher 里，站构建时 loader 并发调用，项目只装配一次：
+装配发生在 `host.ts` 那个异步 attacher 里，站构建时 loader 并发调用，项目只装配一次——站的 remark 链上没有命令行帮它装配：
 
-{/* ref file="../packages/docfirst-workflow/src/fumadocs/host.ts" lines="17-28" hash="206294eebad1" blob="d938ae6daf30" */}
+{/* ref file="../packages/docfirst-fumadocs/src/host.ts" lines="16-27" hash="206294eebad1" blob="ee5ba8cf517d" */}
 
-术语那一层的入参单独一份。`skipFile` 实际上必须给：术语页自己不能标，否则会自己引用自己。
+fumadocs 与 react 只能是必需的 peer，用使用方项目装的那份：
 
-{/* ref file="../packages/docfirst-workflow/src/fumadocs/glossary-plugin.ts" lines="26-35" hash="6e3562a4b1af" blob="8bc7141770f1" */}
+{/* ref file="../packages/docfirst-fumadocs/package.json" lines="47-51" hash="19d43e3ebfe1" blob="56f4689ae118" */}
 
 名册的内容在站里，而且一个组件要**两处登记**：`docfirst.config.mjs` 的 `components` 表里给它一条压平规则（这个文件不 import React，命令行也要读它），`src/components/mdx.tsx` 的表里给它一个真组件，页面才画得出来。这个站的 `Tabs` / `Tab` 规则是纯函数，节点进节点出：
 
@@ -188,16 +163,13 @@ remark 插件四步，一步一件事：
 
 ## 不做的事
 
-- **不认识 Next**：这一层里没有一处 `next`，也不知道站的路由：状态点只是个读 `data-dot` 的组件，用在哪个页面、走哪条渲染链是站的事。
-- **不管生成物写到哪**：`renderAi` 交出一份 md 正文，写到哪个目标位置、带不带 frontmatter，归[环境层](/docs/modules/host)。
-- **不带 fumadocs、不带 react**：两者只能是 peer，用使用方项目装的那份，而且全可选——只跑命令行的仓一个都不必装。
+- **不认识 Next**：这个包里没有一处 `next`，也不知道站的路由：状态点只是个读 `data-dot` 的组件，星轨盘的卡页地址由调用方传 `hrefBase`，用在哪个页面、走哪条渲染链是站的事。
+- **不认记号、不判状态**：认记号与打标记用 workflow `./mdx` 的函数，状态由钉码核心算；这个包只把清单换成页面上的节点。
+- **不管生成物**：生成正本的渲染与写到哪归 workflow。
+- **不把宿主打进产物**：fumadocs、react 与另外三个包都只按包名 import；`./pre` 的 `"use client"` 在产物第一行，别的出口不带这条指令：
 
-{/* ref file="../packages/docfirst-workflow/package.json" lines="46-61" hash="72cb274c84a8" blob="5d058b6392e1" */}
-
-peer 这条边界在产物里也有检查——宿主不许进 `dependencies`、产物里不许打进 fumadocs 或 react（只许 `import`）、`/fumadocs/pre` 的 `"use client"` 指令得留在产物第一行：
-
-{/* ref file="../tests/boundary.test.ts" lines="161-170" hash="d94618568b0f" blob="421b08df5caa" */}
+{/* ref file="../tests/boundary.test.ts" lines="280-314" hash="39d7e86b49f8" blob="55f573c4c909" */}
 
 - **不管自己的输出最后长什么样**：节点上只放颜色、标题和标记，画成什么样归站侧的 pre 组件和随包发的样式表。
 - **不存副本**：页面上的代码每次构建时现取，文件里只有记号那一行。
-- **不存术语表的正本**：这一层只有匹配和在树上换节点，词条数据是站的。
+- **不被命令行加载**（`./roster` 除外）：workflow 不许依赖这个包，边界测试的包方向表管着。

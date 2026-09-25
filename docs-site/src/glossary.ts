@@ -10,19 +10,19 @@
  * （它不是 mdx，引用管不到它），写进来就会悄悄过时。具体的名字留给 `href` 指的那一页，
  * 在那儿钉。`href` 一律指本站真实存在的页。
  */
-import type { TermEntry } from "@godcreator/docfirst-workflow/fumadocs";
+import type { TermEntry } from "@godcreator/docfirst-fumadocs";
 
 export const terms: TermEntry[] = [
   {
     term: "引用",
     aliases: ["reference"],
     def: "文档里一句论断跟一段真实源码之间的绑定。代码变了，这句话旁边就变色——文档跟代码不符会当场看出来。",
-    href: "/docs/modules/engine",
+    href: "/docs/modules/pin",
   },
   {
     term: "记号",
     def: "写在 mdx 里、代表一条引用的那一行。两态：人手写的草稿态，和确认之后机器写回的正式态；确认时留下的记录就写在正式态的属性上。",
-    href: "/docs/modules/engine",
+    href: "/docs/modules/pin",
   },
   {
     term: "投影",
@@ -33,34 +33,34 @@ export const terms: TermEntry[] = [
   {
     term: "状态点",
     def: "每条引用旁边那个小圆点：绿是新鲜，实心黄是代码变了待复核，空心是还没确认，红是指向的东西不在了。",
-    href: "/docs/modules/engine",
+    href: "/docs/modules/pin",
   },
   {
     term: "比较器",
     aliases: ["comparator"],
     def: "判断被钉住的那段代码有没有变过的那套办法：先比这段的指纹，再取出确认时的整份文件、跟着改动找这段今天在哪；取不到旧内容就在整个文件里按指纹找。",
-    href: "/docs/modules/engine",
+    href: "/docs/modules/pin",
   },
   {
     term: "格式实现",
-    def: "把一种文档格式接进这套机制的那部分代码。识别记号、写回记号、按原文渲染都归它，换一种格式就是换一份实现，判定不动。",
-    href: "/docs/modules/fumadocs",
+    def: "把一种文档格式接进这套机制的那部分代码。识别记号、写回记号、按原文渲染都归它，换一种格式就是换一份实现，钉码核心不动。",
+    href: "/docs/modules/workflow/mdx",
   },
   {
     term: "现状区",
     def: "文档站内容目录下写「此刻是什么」的那些目录。除了轨迹与未来两个固定名字，其余目录都是现状区，全部进核对。",
-    href: "/docs/modules/host",
+    href: "/docs/modules/workflow/project",
   },
   {
     term: "生成正本",
     def: "README、AGENTS.md、SKILL.md 这类生成物的 mdx 源，放在现状区里。改正本再重新渲染；直接改生成物，下一次渲染就被覆盖。",
-    href: "/docs/modules/host",
+    href: "/docs/modules/workflow/project",
   },
   {
     term: "名册",
     aliases: ["roster"],
     def: "站里用到的自定义组件，以及它们在机读版里该转成什么文本的那张表。表外的组件会直接报错。",
-    href: "/docs/modules/fumadocs",
+    href: "/docs/modules/workflow/mdx",
   },
   {
     term: "机读版",

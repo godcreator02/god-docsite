@@ -3,19 +3,15 @@
   "version": "0.1.1",
   "author": {"name": "godcreator"},
   "type": "module",
-  "description": "轨迹卡工具：卡格式与校验（命令行 + 库），随 docfirst 线发。",
+  "description": "轨迹卡核心：卡格式、建模、布局与星轨盘画布。`.` 入口是零 import 的纯函数，`./disk` 是客户端组件 StarDisk，随 docfirst 线发。",
   "exports": {
     ".": {
       "types": "./dist/index.d.mts",
       "default": "./dist/index.mjs"
     },
-    "./react": {
-      "types": "./dist/react.d.mts",
-      "default": "./dist/react.mjs"
-    },
-    "./server": {
-      "types": "./dist/server.d.mts",
-      "default": "./dist/server.mjs"
+    "./disk": {
+      "types": "./dist/disk.d.mts",
+      "default": "./dist/disk.mjs"
     },
     "./star.css": "./styles/star.css"
   },
@@ -28,9 +24,6 @@
     "typecheck": "tsc -p tsconfig.json",
     "prepublishOnly": "pnpm run build"
   },
-  "dependencies": {
-    "unist-util-visit": "^5.0.0"
-  },
   "peerDependencies": {
     "react": ">=19"
   },
@@ -40,8 +33,6 @@
     }
   },
   "devDependencies": {
-    "@standard-schema/spec": "^1.1.0",
-    "@types/mdast": "^4.0.4",
     "@types/react": "^19.3.0",
     "react": "^19.3.0"
   },

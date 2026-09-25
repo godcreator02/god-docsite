@@ -91,7 +91,8 @@ export interface BrokenRel {
  * + 存在性校验（缺 born-at / label，内卡缺 parent）
  * + 一致性校验（parent 含自身、merged-in ⊄ parent、内卡写 merged-in）
  * + 正文关系行写歪（行头对但行形不合，不静默吞行）
- * + docfirst 引用记号（卡正文里出现 docfirst 草稿或正式记号，见 validate.ts）。
+ * + docfirst 引用记号（卡正文里出现 docfirst 草稿或正式记号；这一条由 `@godcreator/docfirst-workflow`
+ *   读卡目录时查，这个包只留字段名）。
  * 病卡列名示众；born-at 坏的卡同时被挡在盘外（半径标度一路 NaN）。 */
 export interface Problem {
   field: "born-at" | "parent" | "merged-in" | "label" | "relation" | "docfirst";

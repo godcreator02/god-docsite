@@ -9,7 +9,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { mkdirSync, symlinkSync } from "node:fs";
 import { join } from "node:path";
-import type { Target } from "../packages/docfirst-workflow/src/engine/index.ts";
+import type { Target } from "../packages/docfirst-pin/src/index.ts";
 import { fakeFormat, refLine } from "./fake-format.ts";
 import { CODE, run, setupRepo } from "./repo.ts";
 

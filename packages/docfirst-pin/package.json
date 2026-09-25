@@ -1,0 +1,30 @@
+{
+  "name": "@godcreator/docfirst-pin",
+  "version": "0.1.0",
+  "author": {"name": "godcreator"},
+  "type": "module",
+  "description": "文档钉代码的核心：引用模型、记号语法、比较器、编排服务。零依赖，只用 node:crypto，随 docfirst 线发。",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.mts",
+      "default": "./dist/index.mjs"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsdown",
+    "typecheck": "tsc -p tsconfig.json",
+    "prepublishOnly": "pnpm run build"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://git.tianshen02.online:28377/api/packages/godcreator/npm/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://git.tianshen02.online:28377/godcreator/god-live-doc.git"
+  },
+  "keywords": ["gwb"]
+}

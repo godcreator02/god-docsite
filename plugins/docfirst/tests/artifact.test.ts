@@ -97,28 +97,32 @@ describe('必须同时改的几处', () => {
   })
 
   /**
-   * 插件与包的分界：插件的使用者是 agent，包的使用者是仓，插件不许依赖包。
-   * 把那个包写进任何一档依赖，插件就会用 home 里解析出来的一条固定路径，包升级后照读旧文件、不报错，
+   * 插件与包的分界：插件的使用者是 agent，包的使用者是仓，插件不许依赖任何一个 `@godcreator/docfirst-*` 包
+   * （docfirst-pin、docfirst-trajectory、docfirst-workflow、docfirst-fumadocs）。
+   * 把包写进任何一档依赖，插件就会用 home 里解析出来的一条固定路径，包升级后照读旧文件、不报错，
    * 所以三档都查：运行时、peer、开发期。
    */
-  it('插件对 @godcreator/docfirst-workflow 零依赖：三档依赖都没有它，源码里也不 import', () => {
+  it('插件对四个 @godcreator/docfirst-* 包零依赖：三档依赖都没有，源码里也不 import', () => {
+    const isDocfirstPackage = (spec: string): boolean => spec.startsWith('@godcreator/docfirst-')
     for (const [table, deps] of Object.entries({
       dependencies: manifest.dependencies,
       peerDependencies: manifest.peerDependencies,
       devDependencies: manifest.devDependencies,
     })) {
       for (const dep of Object.keys(deps ?? {})) {
-        expect(dep.startsWith('@godcreator/docfirst-workflow'), `${table} 里出现了 ${dep}：插件不许依赖包`).toBe(false)
+        expect(isDocfirstPackage(dep), `${table} 里出现了 ${dep}：插件不许依赖包`).toBe(false)
       }
     }
     for (const file of fs.readdirSync(path.join(root, 'src')).filter((f) => f.endsWith('.ts'))) {
       const src = fs.readFileSync(path.join(root, 'src', file), 'utf8')
       for (const m of src.matchAll(BARE)) {
-        expect(m[1]!.startsWith('@godcreator/docfirst-workflow'), `src/${file} import 了 ${m[1]!}`).toBe(false)
+        expect(isDocfirstPackage(m[1]!), `src/${file} import 了 ${m[1]!}`).toBe(false)
       }
     }
-    // 写进目标站 package.json 的依赖表不算依赖：它是字符串，插件不 import；装出来的站要跑 pnpm doc，站当然要装那个包
-    expect(fs.readFileSync(path.join(root, 'src', 'deps.ts'), 'utf8')).toContain('@godcreator/docfirst-workflow')
+    // 写进目标站 package.json 的依赖表不算依赖：它是字符串，插件不 import；装出来的站要跑 pnpm doc、要渲染，站当然要装这两个包
+    const depsSource = fs.readFileSync(path.join(root, 'src', 'deps.ts'), 'utf8')
+    expect(depsSource).toContain('@godcreator/docfirst-workflow')
+    expect(depsSource).toContain('@godcreator/docfirst-fumadocs')
   })
 
   it('不启动子进程、不登记 node CLI：转发命令行就是把该在仓里发生的事搬进插件', () => {

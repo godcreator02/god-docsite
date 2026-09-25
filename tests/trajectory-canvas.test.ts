@@ -15,7 +15,7 @@ import assert from "node:assert/strict";
 /* 布局 / 模型也直读源码：画布层吃的是源码里的 RingsLayout 型，跟 dist 里那份是两个声明 */
 import { BASE_RADIUS, HUB_RIM, RingsLayout } from "../packages/docfirst-trajectory/src/layout.ts";
 import { buildModel, NO_DOMAIN } from "../packages/docfirst-trajectory/src/model.ts";
-import { scanDir } from "../packages/docfirst-trajectory/src/scan.ts";
+import { scanCardDir } from "../packages/docfirst-workflow/src/project/card-dir.ts";
 import type { Card, RawCard, TrajectoryModel } from "../packages/docfirst-trajectory/src/types.ts";
 import { buildThemes, DEFAULT_RING_PALETTE, mix } from "../packages/docfirst-trajectory/src/canvas/theme.ts";
 import {
@@ -41,7 +41,7 @@ const SVG_NS = "http://www.w3.org/2000/svg";
 /* 节点工厂建的是游离 DOM，走全局 document——Node 里没有，喂个桩顶上 */
 (globalThis as unknown as { document: SvgStubDocument }).document = new SvgStubDocument();
 
-const fixtureCards: RawCard[] = (await scanDir(FIXTURES)).cards;
+const fixtureCards: RawCard[] = (await scanCardDir(FIXTURES)).cards;
 const m: TrajectoryModel = buildModel(fixtureCards, ROOT_ID);
 
 /* ================= theme ================= */

@@ -12,8 +12,8 @@ import {
   hashSpan,
   normalizeLines,
   sliceSpan,
-} from "../packages/docfirst-workflow/src/engine/index.ts";
-import type { History, Reader, Reference, Target } from "../packages/docfirst-workflow/src/engine/index.ts";
+} from "../packages/docfirst-pin/src/index.ts";
+import type { History, Reader, Reference, Target } from "../packages/docfirst-pin/src/index.ts";
 import { fakeFormat, refLine } from "./fake-format.ts";
 import { NO_HISTORY } from "./repo.ts";
 

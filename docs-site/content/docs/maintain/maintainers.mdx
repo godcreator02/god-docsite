@@ -12,14 +12,15 @@ description: 仓布局、三处门禁、提交规矩、发布、只读参考
 
 {/* has file="../pnpm-workspace.yaml" text="- plugins/*" */}
 
-`plugins/docfirst/` 是工作台插件 `@godcreator/gwb-docfirst-workflow`（建站命令与六份说明书，跟两个包互不认识）。
-`packages/` 下两个 npm 包：
+`plugins/docfirst/` 是工作台插件 `@godcreator/gwb-docfirst-workflow`（建站命令与六份说明书，跟四个包互不认识）。
+`packages/` 下四个 npm 包：
 
-{/* tree dir="../packages" depth="1" hash="83f87a45cb77" */}
+{/* tree dir="../packages" depth="1" hash="991dd33377ea" */}
 
-`docfirst-workflow` 是主包（`src/` 下 engine / host / fumadocs / cli 四层），`docfirst-trajectory` 是轨迹包
-（卡与星轨盘，独立的一个包）。站也是工作区成员，是本仓有意的例外：devkit 的建仓模板不收文档站，
-这个站却要用 `workspace:*` 装工作区里的主包、钉工作区里的真源码，理由见轨迹卡
+`docfirst-pin` 是钉码核心，`docfirst-trajectory` 是轨迹核心，`docfirst-workflow` 是命令行与项目（`src/` 下
+format / mdx / project / cli 四个目录），`docfirst-fumadocs` 是 fumadocs 适配，各包管什么见[系统地图](/docs/system-map)。
+站也是工作区成员，是本仓有意的例外：devkit 的建仓模板不收文档站，
+这个站却要用 `workspace:*` 装工作区里的包、钉工作区里的真源码，理由见轨迹卡
 [插件挪到 plugins/docfirst](/trajectory/2026-09-25-plugin-to-plugins-dir)。
 仓根的 `tests/` 是工作区级测试，`tests/fixtures/trajectory/` 是星轨盘的诗名 fixture。
 
@@ -28,12 +29,12 @@ description: 仓布局、三处门禁、提交规矩、发布、只读参考
 
 {/* tree dir="content" depth="1" hash="4d1620cb05d1" */}
 
-**没有单独的示例仓**：这个站自己就是使用者——它装的是工作区里的两个包，钉的是工作区里的真源码，
-「装了这两个包的项目长什么样」在这儿就能直接看到。
+**没有单独的示例仓**：这个站自己就是使用者——它装的是工作区里的包，钉的是工作区里的真源码，
+「装了这几个包的项目长什么样」在这儿就能直接看到。
 
 ## 三处门禁：都通过才提交
 
-{/* ref file="content/docs/maintain/agents.mdx" lines="53-56" hash="9597f743314d" blob="63db0a7bfc0f" */}
+{/* ref file="content/docs/maintain/agents.mdx" lines="56-59" hash="9597f743314d" blob="9c686e5cb12a" */}
 
 工作区的三条脚本：
 
@@ -45,16 +46,16 @@ description: 仓布局、三处门禁、提交规矩、发布、只读参考
 
 外加 `node scripts/verify-roster.mjs`（检查[名册](/docs/modules/fumadocs)两边一致）和 `pnpm docfirst check`。
 
-工作台插件单独一处门禁：它用 vitest，跟两个包的 `node --test` 不是一套，所以工作区根的 `test` 脚本
+工作台插件单独一处门禁：它用 vitest，跟四个包的 `node --test` 不是一套，所以工作区根的 `test` 脚本
 不包括它（根的 `build` 与 `typecheck` 按 `./plugins/*` 与 `./packages/*` 过滤，插件在其中）。
 
 {/* ref file="../plugins/docfirst/package.json" lines="24-31" hash="c94db08cbe3b" blob="f285e7cbd770" */}
 
 ## 写代码的规矩
 
-{/* ref file="content/docs/maintain/agents.mdx" lines="38-52" hash="df6afecc86f9" blob="63db0a7bfc0f" */}
+{/* ref file="content/docs/maintain/agents.mdx" lines="39-55" hash="059ec08df51e" blob="9c686e5cb12a" */}
 
-再补两条站这边的：改了 `src/fumadocs/` 的代码，站要**先删 `.next` 再 build** 才看得见（Turbopack 只按 mdx 内容缓存）；
+再补两条站这边的：改了站构建时 remark 插件会跑到的包代码，站要**先删 `.next` 再 build** 才看得见（Turbopack 只按 mdx 内容缓存）；
 调试站用 `next build` + `next start`，不用 dev，启动的站验完必须停掉。
 
 ## 提交规矩
@@ -65,29 +66,29 @@ description: 仓布局、三处门禁、提交规矩、发布、只读参考
 
 ## 发布：devkit.release
 
-三个包都用工作台命令 `devkit.release` 发布；升哪一位、发版的每一步、发完升级 default，
-照 skill「gwb-release」。发到哪个源由各包 `package.json` 的 `publishConfig.registry` 决定，三个包都写的是团队源。
+四个 npm 包与插件都用工作台命令 `devkit.release` 发布；升哪一位、发版的每一步、发完升级 default，
+照 skill「gwb-release」。发到哪个源由各包 `package.json` 的 `publishConfig.registry` 决定，五个包都写的是团队源。
 
-`packages` 只列这次升了版本号的包（源上已有的版本号会被拒），按依赖顺序给，轨迹包在前——主包里 `workspace:*`
-那条依赖发出去写成 `^<工作区里轨迹包的版本号>`：
+`packages` 只列这次升了版本号的包（源上已有的版本号会被拒），按依赖顺序给：两个核心在前，workflow 其次，
+fumadocs 适配最后——包里 `workspace:*` 的依赖发出去写成 `^<工作区里那个包的版本号>`：
 
 ```text
-devkit.release {"dir":"<仓根>","packages":["packages/docfirst-trajectory","packages/docfirst-workflow"]}
+devkit.release {"dir":"<仓根>","packages":["packages/docfirst-pin","packages/docfirst-trajectory","packages/docfirst-workflow","packages/docfirst-fumadocs"]}
 devkit.release {"dir":"<仓根>","packages":["plugins/docfirst"]}
 ```
 
 第二行是插件单独发。插件发之前在隔离 home 里用 `docfirst.create` 新建一个站验一遍（隔离 home 里也要装站点插件），
 隔离 home 里验证的步骤在 skill「gwb-devkit」。
 
-两个包升版本号时**跟着改 `plugins/docfirst/src/deps.ts` 那张表**——建站时写进站的依赖版本就取自它，
+`docfirst-workflow` 与 `docfirst-fumadocs` 升版本号时**跟着改 `plugins/docfirst/src/deps.ts` 那张表**——建站时写进站的依赖版本就取自它，
 插件的 `tests/create.test.ts` 里有一条检查它是精确号、跟工作区各包的版本对得上，忘了改测试当场失败。
 
-**两边各发各的，没有先后。**插件对包零依赖：它不打包那个包、`package.json` 的各类依赖里也没有它，所以先发哪个
+**两边各发各的，没有先后。**插件对四个包零依赖：它不打包这些包、`package.json` 的各类依赖里也没有它们，所以先发哪个
 都不影响另一个；只是表里的版本号改了，插件得再发一版，之后新建的站才装到新包。
 
 ## 参考，只读
 
-{/* ref file="content/docs/maintain/agents.mdx" lines="28-34" hash="443f07cb5cfd" blob="63db0a7bfc0f" */}
+{/* ref file="content/docs/maintain/agents.mdx" lines="29-35" hash="443f07cb5cfd" blob="9c686e5cb12a" */}
 
 实验室是架构定案的出处（教学代码，要搬逻辑就搬，别 `import` 它）；老仓是用 git 取旧内容这项功能的出处，
 **已退役**——功能对齐之后不再参考，代码只看这个仓。

@@ -12,7 +12,7 @@ import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
-import { loadProject } from "../packages/docfirst-workflow/src/host/index.ts";
+import { loadProject } from "../packages/docfirst-workflow/src/project/index.ts";
 import { CODE } from "./repo.ts";
 
 /** 假格式的绝对 file: 地址。临时目录里解析不到包名，配置按绝对地址引它 */

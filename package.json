@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "docfirst 的包工作区：一个 docfirst 包（判定 / 环境 / 格式 / 装配 / 命令行五个模块）加一个轨迹包，外加一个工作台插件（在 plugins/docfirst）。文档站在 docs-site，它同时是这两个包唯一的消费方",
+  "description": "docfirst 的包工作区：四个包（钉码 pin、轨迹 trajectory、命令行与项目 workflow、fumadocs 适配 fumadocs），外加一个工作台插件（在 plugins/docfirst）。文档站在 docs-site，它同时是这几个包唯一的消费方",
   "scripts": {
     "build": "pnpm -r --filter \"./plugins/*\" --filter \"./packages/*\" run build",
     "typecheck": "pnpm -r --filter \"./plugins/*\" --filter \"./packages/*\" run typecheck && tsc -p tsconfig.tests.json",
@@ -11,8 +11,10 @@
     "test:only": "node --test \"tests/*.test.ts\""
   },
   "devDependencies": {
-    "@godcreator/docfirst-workflow": "workspace:*",
+    "@godcreator/docfirst-fumadocs": "workspace:*",
+    "@godcreator/docfirst-pin": "workspace:*",
     "@godcreator/docfirst-trajectory": "workspace:*",
+    "@godcreator/docfirst-workflow": "workspace:*",
     "@types/mdast": "^4.0.4",
     "@types/node": "^26.2.0",
     "@types/react": "^19.3.0",

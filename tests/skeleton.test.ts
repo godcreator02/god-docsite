@@ -1,5 +1,5 @@
 /**
- * 骨架：两个包都在、都能装、都出得来产物，出口按 package.json 的 exports 解析得到。
+ * 骨架：四个包都在、都能装、都出得来产物，出口按 package.json 的 exports 解析得到。
  * 别的规矩（谁能依赖谁、目录方向）归 boundary.test.ts。
  */
 import { test } from "node:test";
@@ -12,13 +12,15 @@ const HERE = dirname(fileURLToPath(import.meta.url));
 const PACKAGES = join(HERE, "..", "packages");
 /** 目录名 → 包名。目录名跟包名去掉 scope 那一截同名 */
 const NAMES: Record<string, string> = {
-  "docfirst-workflow": "@godcreator/docfirst-workflow",
+  "docfirst-pin": "@godcreator/docfirst-pin",
   "docfirst-trajectory": "@godcreator/docfirst-trajectory",
+  "docfirst-workflow": "@godcreator/docfirst-workflow",
+  "docfirst-fumadocs": "@godcreator/docfirst-fumadocs",
 };
 
-// 塌包之后两个包重新从 0.1.0 起。这条守的是形状，不是那个具体的数——把版本号写死在测试里，
+// 这条守的是版本号的形状，不是那个具体的数——把版本号写死在测试里，
 // 每发一次版就得改一次测试。
-test("两个包齐、包名带 scope、版本是合法 semver", () => {
+test("四个包齐、包名带 scope、版本是合法 semver", () => {
   for (const [dir, name] of Object.entries(NAMES)) {
     const pkg = JSON.parse(readFileSync(join(PACKAGES, dir, "package.json"), "utf8")) as { name: string; version: string };
     assert.equal(pkg.name, name);

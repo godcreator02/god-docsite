@@ -1,13 +1,17 @@
 /**
- * fumadocs 格式不接 Next 的那半：识别、树上换节点、meta 白名单、名册压平。
+ * mdx 格式与 fumadocs 适配不接 Next 的那半：识别、树上换节点、meta 白名单、名册压平、按原文渲染。
+ * 认记号与渲染在 `@godcreator/docfirst-workflow/mdx`，换节点、代码块长相、名册规则在 `@godcreator/docfirst-fumadocs`。
  * 接 fumadocs 管线的那半（loader、_markdown、页面上的状态点）由 docs-site 的站测试守。
  */
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import * as fumadocs from "../packages/docfirst-workflow/src/fumadocs/index.ts";
-import { DOT_COLOR, applyListing, defaultRoster, docfirstMarkdownOptions, parseMetaString, parseTree, stamp, walk, whereOf } from "../packages/docfirst-workflow/src/fumadocs/index.ts";
-import type { Roster, TreeNode } from "../packages/docfirst-workflow/src/fumadocs/index.ts";
-import type { Item, Listing, Reference, Target } from "../packages/docfirst-workflow/src/engine/index.ts";
+import * as mdx from "../packages/docfirst-workflow/src/mdx/index.ts";
+import { parseTree, stamp, walk } from "../packages/docfirst-workflow/src/mdx/index.ts";
+import type { Roster, TreeNode } from "../packages/docfirst-workflow/src/mdx/index.ts";
+import * as fumadocs from "../packages/docfirst-fumadocs/src/index.ts";
+import { DOT_COLOR, applyListing, docfirstMarkdownOptions, parseMetaString, whereOf } from "../packages/docfirst-fumadocs/src/index.ts";
+import { fumadocsRoster } from "../packages/docfirst-fumadocs/src/roster.ts";
+import type { Item, Listing, Reference, Target } from "../packages/docfirst-pin/src/index.ts";
 
 const T: Target = { kind: "span", file: "src/greet.ts", a: 2, b: 3 };
 const CURRENT = ["export function greet(name: string): string {", "  return `hello ${name}`;"];
@@ -28,7 +32,7 @@ function itemOf(over: Over): Item {
   } as Item;
 }
 
-const mark = (target: Target): string => fumadocs.marker(target, null);
+const mark = (target: Target): string => mdx.marker(target, null);
 const listingOf = (items: Item[]): Listing => ({ doc: "a.mdx", items });
 /** 把一篇 mdx 过一遍换节点，交回换出来的代码块 */
 function blocksIn(text: string, items: Item[]): TreeNode[] {
@@ -48,7 +52,7 @@ test("正式记号与草稿记号都换成代码块：meta 写来源、行号、
 });
 
 test("带记录的正式记号照样认、照样换", () => {
-  const text = `${fumadocs.marker(T, { kind: "content", hash: "3fa9c2e1b07d", blob: "2689fa073ac6" })}\n`;
+  const text = `${mdx.marker(T, { kind: "content", hash: "3fa9c2e1b07d", blob: "2689fa073ac6" })}\n`;
   assert.equal(blocksIn(text, [itemOf({})]).length, 1);
 });
 
@@ -151,7 +155,7 @@ test("目录树的黄和红：黄摆当前的名字表、容器是黄点；目�
 
 test("作者手写的 Files 走默认名册：压成一行一个名字，文件夹带尾斜杠", () => {
   const doc = '<Files>\n  <Folder name="src" defaultOpen>\n    <File name="add.ts" />\n  </Folder>\n  <File name="package.json" />\n</Files>\n';
-  const tree = stamp(parseTree(doc));
+  const tree = stamp(parseTree(doc), fumadocsRoster);
   const files = tree.children![0]!;
   assert.deepEqual(files.data!.docfirstAi, files.children, "Files 只留子内容");
   const folder = files.children!.find((n) => n.name === "Folder")!;
@@ -214,7 +218,7 @@ test("md 那头：来源行 + 一块干净的代码，diff 标记不漏进 AI �
 
 test("名册：默认表压平 Note；项目的规则只用 helpers；表外组件报到行", () => {
   const rules: Roster = {
-    ...defaultRoster,
+    ...fumadocsRoster,
     Tabs: "children",
     Tab: (node, h) => [h.heading(3, h.attr(node, "title") ?? "标签"), ...h.children()],
     Hidden: "drop",
@@ -242,17 +246,17 @@ test("名册：默认表压平 Note；项目的规则只用 helpers；表外组�
   });
   // Note、Tabs、Tab、Hidden 四个组件各一个标；Hidden 写在一行里，是段落底下的行内组件
   assert.equal(marks.length, 4);
-  assert.deepEqual(Object.keys(defaultRoster).sort(), ["File", "Files", "Folder", "Note"], "默认表：Note 加 fumadocs 的文件树三件");
+  assert.deepEqual(Object.keys(fumadocsRoster).sort(), ["File", "Files", "Folder", "Note"], "默认表：Note 加 fumadocs 的文件树三件");
   assert.equal((marks[0]!.docfirstAi as TreeNode[])[0]!.type, "blockquote", "块级 Note 变引用块");
   assert.deepEqual(marks[3]!._stringify, { text: "" }, "drop 的组件整个不要");
-  assert.throws(() => stamp(parseTree("# x\n\n<Tabs>\n  x\n</Tabs>\n")), /第 3 行：名册外组件 <Tabs>/);
-  assert.deepEqual(fumadocs.lintComponents("# x\n\n<Tabs>\n  x\n</Tabs>\n"), [{ name: "Tabs", line: 3 }]);
+  assert.throws(() => stamp(parseTree("# x\n\n<Tabs>\n  x\n</Tabs>\n"), fumadocsRoster), /第 3 行：名册外组件 <Tabs>/);
+  assert.deepEqual(mdx.lintComponents("# x\n\n<Tabs>\n  x\n</Tabs>\n"), [{ name: "Tabs", line: 3 }]);
 });
 
 test("围栏里、行内的假记号认不出来——走语法树的理由", () => {
-  assert.deepEqual(fumadocs.parse("```md\n" + mark(T) + "\n```\n"), []);
-  assert.deepEqual(fumadocs.parse(`行内的 ${mark(T)} 不算\n`), []);
-  assert.deepEqual(fumadocs.parse("```md\n@@docfirst ref src/greet.ts:2-3 @@\n```\n"), []);
+  assert.deepEqual(mdx.parse("```md\n" + mark(T) + "\n```\n"), []);
+  assert.deepEqual(mdx.parse(`行内的 ${mark(T)} 不算\n`), []);
+  assert.deepEqual(mdx.parse("```md\n@@docfirst ref src/greet.ts:2-3 @@\n```\n"), []);
 });
 
 test("清单里没有的标记：报到行，不静默漏掉", () => {
@@ -264,13 +268,13 @@ test("清单里没有的标记：报到行，不静默漏掉", () => {
 const RECORD = { kind: "content", hash: "3fa9c2e1b07d", blob: "2689fa073ac6" } as const;
 /** 一篇正本在清单里的样子：按 parse 认出的引用逐处配上给定的状态与当前内容 */
 function renderOf(text: string, over: (ref: Reference) => Over = () => ({})): string {
-  const items = fumadocs.parse(text).map((reference) => ({ ...itemOf({ reference, ...over(reference) }), reference }));
-  return fumadocs.renderAi(text, listingOf(items));
+  const items = mdx.parse(text).map((reference) => ({ ...itemOf({ reference, ...over(reference) }), reference }));
+  return mdx.renderAi(text, listingOf(items));
 }
 
 test("按原文渲染：去掉 frontmatter，正式记号换成带语言与 title 的代码块，别的文字逐字节不动", () => {
   const prose = "开头一段，带 `代码` 和 **加粗**，还有 [链接](https://example.com)。\n\n| 表 | 头 |\n| --- | --- |\n| 1 | 2 |\n";
-  const text = `---\ntitle: x\n---\n\n# 标题\n\n${prose}\n${fumadocs.marker(T, RECORD)}\n\n尾巴 \\{ 原样 \\}\n`;
+  const text = `---\ntitle: x\n---\n\n# 标题\n\n${prose}\n${mdx.marker(T, RECORD)}\n\n尾巴 \\{ 原样 \\}\n`;
   const out = renderOf(text);
   assert.equal(out, `\n# 标题\n\n${prose}\n\`\`\`ts title="src/greet.ts:2-3"\n${CURRENT.join("\n")}\n\`\`\`\n\n尾巴 \\{ 原样 \\}\n`);
 });
@@ -285,7 +289,7 @@ test("按原文渲染：行段标题写今天的位置；整文件标题是 路�
   const tree: Target = { kind: "tree", dir: "src", depth: 1 };
   const has: Target = { kind: "has", file: "src/store.ts", text: "save" };
   const absent: Target = { kind: "exists", path: "src/remove.ts", absent: true };
-  const text = [fumadocs.marker(T, RECORD), "", fumadocs.marker(whole, RECORD), "", "中间", "", fumadocs.marker(has, { kind: "has" }), "", fumadocs.marker(absent, { kind: "exists", type: "absent" }), "", fumadocs.marker(tree, { kind: "tree", hash: RECORD.hash }), ""].join("\n");
+  const text = [mdx.marker(T, RECORD), "", mdx.marker(whole, RECORD), "", "中间", "", mdx.marker(has, { kind: "has" }), "", mdx.marker(absent, { kind: "exists", type: "absent" }), "", mdx.marker(tree, { kind: "tree", hash: RECORD.hash }), ""].join("\n");
   const out = renderOf(text, (ref) => {
     if (ref.target.kind === "file") return { lines: [1, 2], current: ["{", "}"] };
     if (ref.target.kind === "tree") return { lines: [1, 2], current: ["a.ts", "lib/"] };
@@ -299,14 +303,14 @@ test("按原文渲染：行段标题写今天的位置；整文件标题是 路�
 });
 
 test("按原文渲染：围栏里的记号是正文，原样不动；内容里有三个反引号时围栏加长", () => {
-  const fenced = `\`\`\`mdx\n${fumadocs.marker(T, RECORD)}\n\`\`\`\n`;
+  const fenced = `\`\`\`mdx\n${mdx.marker(T, RECORD)}\n\`\`\`\n`;
   assert.equal(renderOf(fenced), fenced);
-  const out = renderOf(`${fumadocs.marker(T, RECORD)}\n`, () => ({ current: ["const s = \"```\";"] }));
+  const out = renderOf(`${mdx.marker(T, RECORD)}\n`, () => ({ current: ["const s = \"```\";"] }));
   assert.equal(out, '````ts title="src/greet.ts:2-3"\nconst s = "```";\n````\n');
 });
 
 test("按原文渲染：写在列表项里的记号，代码块的续行带上列表缩进", () => {
-  const out = renderOf(`- 一项：\n\n  ${fumadocs.marker(T, RECORD)}\n`);
+  const out = renderOf(`- 一项：\n\n  ${mdx.marker(T, RECORD)}\n`);
   assert.equal(out, `- 一项：\n\n  \`\`\`ts title="src/greet.ts:2-3"\n  ${CURRENT.join("\n  ")}\n  \`\`\`\n`);
 });
 
@@ -316,7 +320,7 @@ test("按原文渲染：草稿记号、缺失的引用、组件、mdx 表达式�
     "",
     "@@docfirst ref src/greet.ts:2-3 @@",
     "",
-    fumadocs.marker({ kind: "span", file: "src/gone.ts", a: 1, b: 2 }, RECORD),
+    mdx.marker({ kind: "span", file: "src/gone.ts", a: 1, b: 2 }, RECORD),
     "",
     "<Note>提示</Note>",
     "",

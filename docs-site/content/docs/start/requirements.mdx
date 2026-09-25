@@ -36,23 +36,23 @@ description: 文档里的代码为什么会过时、三条需求、五类目标�
 文档对代码说的话只有三种（内容、形状、有无），对象只有两种（文件、目录），五类目标把它填满——
 行段、整文件、目录树、存在性（含「断言不在」）、名字：
 
-{/* ref file="../packages/docfirst-workflow/src/engine/types.ts" lines="16-52" hash="d3bff37dc577" blob="beff25dfe17b" */}
+{/* ref file="../packages/docfirst-pin/src/types.ts" lines="16-52" hash="d3bff37dc577" blob="beff25dfe17b" */}
 
-一篇手册里怎么挑、各盯什么，见 [五类引用：一篇手册里怎么用](/docs/start/handbook)。
+一篇手册里怎么挑、各检查什么，见 [五类引用：一篇手册里怎么用](/docs/start/handbook)。
 
 文档里的一处引用，除了目标，还带着记号上的记录（没确认过就是空）和「它写在文档第几行」。每处记号各带各的记录，
 同一篇里两处指向同一段的引用各确认各的，写回也互不牵连：
 
-{/* ref file="../packages/docfirst-workflow/src/engine/types.ts" lines="83-92" hash="f225bd6f2295" blob="beff25dfe17b" */}
+{/* ref file="../packages/docfirst-pin/src/types.ts" lines="83-92" hash="b333dff89fd5" blob="5973fadd9101" */}
 
-`extra` 是格式自己用的字段（是不是草稿记号），判定层原样带回、不看内容——判定层不认识任何格式，靠的就是这个字段。
+`extra` 是格式自己用的字段（是不是草稿记号），钉码核心原样带回、不看内容——钉码核心不认识任何格式，靠的就是这个字段。
 
 ## 确认下来的是一条指纹，不是一份副本
 
 记录按目标种类各一种，写在正式记号的属性上。行段与整文件记段哈希和确认时整文件的 blob 名，目录树记名字表的哈希，
 存在性记类型，名字引用的正式记号本身就表示确认过：
 
-{/* ref file="../packages/docfirst-workflow/src/engine/types.ts" lines="54-81" hash="c17852859b19" blob="beff25dfe17b" */}
+{/* ref file="../packages/docfirst-pin/src/types.ts" lines="54-81" hash="c17852859b19" blob="beff25dfe17b" */}
 
 记录里没有代码内容。blob 名是在进程里按 git 的算法算的，确认不用先提交；代码提交之后，
 核对时能按这个名字从 git 对象库里取回确认时的内容，给出 diff、跟着行段挪位置。取不到也不算错，只是少了 diff。
@@ -61,7 +61,7 @@ description: 文档里的代码为什么会过时、三条需求、五类目标�
 <Note>
   **状态只有四种**：新鲜、有变动、缺失、未确认。「有变动」不是错，它是「等作者复核」，命令行退 0——
   只有一个例外：被钉的代码在本仓有未提交的改动，这个黄是这次改动引起的，`check` 算红，要在同一个提交里复核。
-  「缺失」一律退 1。四种状态怎么判出来的，见 [判定层](/docs/modules/engine)。
+  「缺失」一律退 1。四种状态怎么判出来的，见 [钉码核心](/docs/modules/pin)。
 </Note>
 
 ## 明确不管的
@@ -71,6 +71,6 @@ description: 文档里的代码为什么会过时、三条需求、五类目标�
 - **不自动修复**。代码改了，工具报黄，等人来看；它不会替你把文档里的话改对。
 - **不猜作者意图**。行段映射跟内容对不上时报黄让人复核，不把红判成绿；取不到确认时的内容、
   在文件里也找不到那一段时就说「位置不明」，不拿旧行号上的东西冒充。
-- **不做全文正则**。记号靠语法树或逐行扫描认，写在围栏里、句子里的同样文字一律不算。见 [判定层](/docs/modules/engine)。
+- **不做全文正则**。记号靠语法树或逐行扫描认，写在围栏里、句子里的同样文字一律不算。见 [mdx 格式](/docs/modules/workflow/mdx)。
 
 词都收在 [术语表](/docs/glossary) 里，接着读 [一分钟上手](/docs/start/quickstart)。

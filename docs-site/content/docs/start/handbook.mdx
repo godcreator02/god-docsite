@@ -1,6 +1,6 @@
 ---
 title: 五类引用：一篇手册里怎么用
-description: 拿判定层当对象，把行段、整文件、目录树、存在性、名字五类引用全用上；每节两段：读者看到的、代码改了之后
+description: 拿钉码核心当对象，把行段、整文件、目录树、存在性、名字五类引用全用上；每节两段：读者看到的、代码改了之后
 ---
 
 **本页回答**：五类引用各该用在哪种论断上，挑错了会漏掉什么。
@@ -13,8 +13,8 @@ description: 拿判定层当对象，把行段、整文件、目录树、存在�
 | 形状 | 名字 `has 文件 "字面量"` | 目录树 `tree 目录` |
 | 有无 | 存在 `exists 路径`；断言不在 `absent 路径` | 同左 |
 
-这一章拿本仓的判定层 `packages/docfirst-workflow/src/engine` 说事：只用 `node:crypto` 的那一层，几个源文件。
-**这一章自己就是那篇手册**——下面每一处引用都是活的，钉的是那一层的真文件。每一节两段：
+这一章拿本仓的钉码核心 `packages/docfirst-pin` 说事：只用 `node:crypto` 的那个包，几个源文件。
+**这一章自己就是那篇手册**——下面每一处引用都是活的，钉的是那个包的真文件。每一节两段：
 **读者看到的**（引用放在这儿，代码块和小标签是活的）、**改了之后**（那处代码要是动了，`docfirst check` 会打出什么）。
 
 写引用只有一种写法：单独一行 `@@docfirst 动作 目标 @@`。confirm 把它换成 mdx 的正式记号 `{/* … */}`，
@@ -23,24 +23,24 @@ description: 拿判定层当对象，把行段、整文件、目录树、存在�
 
 ## 这个包
 
-{/* tree dir="../packages/docfirst-workflow/src" depth="1" hash="a62b25f0a302" */}
+{/* tree dir="../packages/docfirst-pin" depth="1" hash="2f769910ade8" */}
 
 `dist/` 在 `.gitignore` 里，清单里看不到——目录树按 .gitignore 过滤。
 
-## 一、这一层里有什么：目录树
+## 一、这个包里有什么：目录树
 
 **读者看到的**
 
-{/* tree dir="../packages/docfirst-workflow/src/engine" depth="1" hash="3e5a21fa3ef9" */}
+{/* tree dir="../packages/docfirst-pin/src" depth="1" hash="3e5a21fa3ef9" */}
 
 一个文件一件事：`types` 是接口正本，`marker` 是记号语法（草稿记号、正式记号的属性与记录），`span` 管归一化、
 段哈希、名字表哈希与 blob 名，`diff` 管行段映射与 diff 文本，`compare` 是五种目标怎么判、确认时记什么，
 `service` 是编排，`index` 只放导出。
 
-**改了之后**：有人加了 `engine/trace.ts`（给编排加一条调用轨迹），这一段没提，文件还没提交：
+**改了之后**：有人加了 `src/trace.ts`（给编排加一条调用轨迹），这一段没提，文件还没提交：
 
 ```text
-🔴 content/docs/start/handbook.mdx  tree ../packages/docfirst-workflow/src/engine depth=1  有变动，是本仓还没提交的改动引起的（8 项）——在同一个提交里复核，再 docfirst confirm content/docs/start/handbook.mdx --accept
+🔴 content/docs/start/handbook.mdx  tree ../packages/docfirst-pin/src depth=1  有变动，是本仓还没提交的改动引起的（8 项）——在同一个提交里复核，再 docfirst confirm content/docs/start/handbook.mdx --accept
 ```
 
 目录树的记录只是名字表的哈希，所以只知道「变了」、今天有 8 项，说不出多了哪个；站上这一处放的是今天的名字表。
@@ -51,16 +51,15 @@ description: 拿判定层当对象，把行段、整文件、目录树、存在�
 
 **读者看到的**
 
-{/* ref file="../packages/docfirst-workflow/tsdown.config.ts" hash="cf8cbda04785" blob="9006217a429e" */}
+{/* ref file="../packages/docfirst-pin/tsdown.config.ts" hash="0d48a7431ead" blob="7800852f97f6" */}
 
-整份就这么多：五个入口、只出 esm、平台是 node、出 dts、每次清干净，外加一条「宿主只 import
-不内联」。这个包的构建面小到能一眼看完，这句话本身就是论断——它一旦变长，就说明包里开始有
+整份就这么多：一个入口、只出 esm、平台是 node、出 dts、每次清干净。这个包的构建面小到能一眼看完，这句话本身就是论断——它一旦变长，就说明包里开始有
 别的形态要照顾了。
 
 **改了之后**：有人在末尾追加一条 `external`，提交了：
 
 ```text
-🟡 content/docs/start/handbook.mdx  ../packages/docfirst-workflow/tsdown.config.ts:all  有变动，等作者复核
+🟡 content/docs/start/handbook.mdx  ../packages/docfirst-pin/tsdown.config.ts:all  有变动，等作者复核
 ```
 
 要是当初钉的是 `entry` 那一段，末尾新加的那条在段外，算「没碰到」，页面还是绿的，读者永远不知道
@@ -75,23 +74,23 @@ description: 拿判定层当对象，把行段、整文件、目录树、存在�
 
 **读者看到的**
 
-{/* has file="../packages/docfirst-workflow/src/engine/span.ts" text="export function normalizeLines" */}
+{/* has file="../packages/docfirst-pin/src/span.ts" text="export function normalizeLines" */}
 
-{/* has file="../packages/docfirst-workflow/src/engine/span.ts" text="export function hashSpan" */}
+{/* has file="../packages/docfirst-pin/src/span.ts" text="export function hashSpan" */}
 
 「站展示什么就哈希什么」这条规矩落在这一对上：展示前做的归一化，就是哈希前做的那一份。
 哈希本身先归一化再摘要，不是直接摘原文：
 
-{/* ref file="../packages/docfirst-workflow/src/engine/span.ts" lines="31-34" hash="dcbe978b73f4" blob="349017fffa50" */}
+{/* ref file="../packages/docfirst-pin/src/span.ts" lines="31-34" hash="dcbe978b73f4" blob="349017fffa50" */}
 
 所以行尾多几个空格、换行从 CRLF 变成 LF，段哈希都不动——站上看不见的差别，记录里也不该算差别。
 
 **改了之后 A**：有人把 `hashSpan` 改名成 `digestSpan`，全仓替换，提交了：
 
 ```text
-🔴 content/docs/start/handbook.mdx  has ../packages/docfirst-workflow/src/engine/span.ts "export function hashSpan"  缺失，引用指向空气（文件里没有这个名字了）
-🟢 content/docs/start/handbook.mdx  has ../packages/docfirst-workflow/src/engine/span.ts "export function normalizeLines"  新鲜
-🟡 content/docs/start/handbook.mdx  ../packages/docfirst-workflow/src/engine/span.ts:31-34  有变动，等作者复核
+🔴 content/docs/start/handbook.mdx  has ../packages/docfirst-pin/src/span.ts "export function hashSpan"  缺失，引用指向空气（文件里没有这个名字了）
+🟢 content/docs/start/handbook.mdx  has ../packages/docfirst-pin/src/span.ts "export function normalizeLines"  新鲜
+🟡 content/docs/start/handbook.mdx  ../packages/docfirst-pin/src/span.ts:31-34  有变动，等作者复核
 ```
 
 小标签变红，退 1，门禁拦下：上面那句「哈希本身先归一化再摘要」点名的函数不在了。行段那处只是黄——
@@ -100,12 +99,12 @@ description: 拿判定层当对象，把行段、整文件、目录树、存在�
 **改了之后 B**：有人把摘要算法从 sha256 换成 sha1，名字没动，提交了：
 
 ```text
-🟢 content/docs/start/handbook.mdx  has ../packages/docfirst-workflow/src/engine/span.ts "export function hashSpan"  新鲜
-🟡 content/docs/start/handbook.mdx  ../packages/docfirst-workflow/src/engine/span.ts:31-34  有变动，等作者复核
+🟢 content/docs/start/handbook.mdx  has ../packages/docfirst-pin/src/span.ts "export function hashSpan"  新鲜
+🟡 content/docs/start/handbook.mdx  ../packages/docfirst-pin/src/span.ts:31-34  有变动，等作者复核
 ```
 
 小标签还是绿的——名字在，`has` 只管这个。代码块黄、带 diff：所有记号上的旧哈希一夜之间全对不上，
-这件事只有那一行 diff 说得出来。两种引用各盯各的。
+这件事只有那一行 diff 说得出来。两种引用各自检查各自的那一件事。
 
 这两个例子都是「提交了」：已经提交的改动引起的黄只报告、退 0。改动还没提交时，行段那处的黄会算红，
 要在改代码的那个提交里复核。
@@ -120,32 +119,32 @@ description: 拿判定层当对象，把行段、整文件、目录树、存在�
 
 **读者看到的**
 
-{/* absent path="../packages/docfirst-workflow/src/engine/git.ts" type="absent" */}
+{/* absent path="../packages/docfirst-pin/src/git.ts" type="absent" */}
 
-git 那一半在环境层（`packages/docfirst-workflow/src/host/git.ts`），判定层里没有它。判定层只用
-`node:crypto`、不起子进程：行段要的旧内容和 hunk 表由环境层从外面传入，不是它自己去取的。
+git 那一半在 workflow 的项目装配（`packages/docfirst-workflow/src/project/git.ts`），钉码核心里没有它。钉码核心只用
+`node:crypto`、不启动子进程：行段要的旧内容和 hunk 表由项目装配从外面传入，不是它自己去取的。
 
-**改了之后**：有人图省事把 git 那一半搬进判定层，提交了：
+**改了之后**：有人图省事把 git 那一半搬进钉码核心，提交了：
 
 ```text
-🔴 content/docs/start/handbook.mdx  absent ../packages/docfirst-workflow/src/engine/git.ts  缺失，引用指向空气（断言它不在，它却出现了）
-🟡 content/docs/start/handbook.mdx  tree ../packages/docfirst-workflow/src/engine depth=1  有变动，等作者复核（8 项）
+🔴 content/docs/start/handbook.mdx  absent ../packages/docfirst-pin/src/git.ts  缺失，引用指向空气（断言它不在，它却出现了）
+🟡 content/docs/start/handbook.mdx  tree ../packages/docfirst-pin/src depth=1  有变动，等作者复核（8 项）
 ```
 
-小标签红，「判定层零依赖」这条边界当场作废，搬的人在门禁上就会看到上面那句「由环境层从外面传入」。
+小标签红，「钉码核心零依赖」这条边界当场作废，搬的人在门禁上就会看到上面那句「由项目装配从外面传入」。
 正向的 `exists` 用在「这个文件必须在」的话上——文件删了、或者变成了目录，就红。存在性没有黄：在就在，不在就不在。
 
-## 这一章在盯什么
+## 这一章的引用各检查什么
 
 | 这一章里的话 | 用的引用 | 什么时候提醒你 |
 | --- | --- | --- |
-| 「一个文件一件事」 | `tree ../packages/docfirst-workflow/src/engine` | 这一层下多了、少了文件 |
-| 「构建面小到能一眼看完」 | `ref ../packages/docfirst-workflow/tsdown.config.ts` | 这份配置改了任何一处，包括末尾追加 |
+| 「一个文件一件事」 | `tree ../packages/docfirst-pin/src` | 这个包下多了、少了文件 |
+| 「构建面小到能一眼看完」 | `ref ../packages/docfirst-pin/tsdown.config.ts` | 这份配置改了任何一处，包括末尾追加 |
 | 「归一化与哈希是一对」 | `has` 两处 | 这两个导出改名、删了 |
-| 「先归一化再摘要」 | `ref ../packages/docfirst-workflow/src/engine/span.ts:31-34` | 那几行改了（挪了位置不算） |
-| 「git 那一半不在判定层里」 | `absent ../packages/docfirst-workflow/src/engine/git.ts` | 这个文件出现了 |
+| 「先归一化再摘要」 | `ref ../packages/docfirst-pin/src/span.ts:31-34` | 那几行改了（挪了位置不算） |
+| 「git 那一半不在钉码核心里」 | `absent ../packages/docfirst-pin/src/git.ts` | 这个文件出现了 |
 
-分工一句话：**名字表、名字、有没有，交给引用盯着；散文只负责说为什么。**散文里不写「四个」「几项」这种会变的数，
+分工一句话：**名字表、名字、有没有，交给引用检查；散文只负责说为什么。**散文里不写「四个」「几项」这种会变的数，
 读者看代码块自己数——跑出来的数字（几条测试、几个路由）更不进散文，那不是文件的话，是命令输出的话。
 
 ## 写手怎么挑
@@ -160,4 +159,4 @@ git 那一半在环境层（`packages/docfirst-workflow/src/host/git.ts`），�
 
 上面「改了之后」几段是 `docfirst check` 在人读模式下打出来的原文格式，一行一处引用；
 再往下看一处引用从写下到变红的全过程，去 [一条引用的一生](/docs/start/lifecycle)；五类各自怎么判、
-旧内容从哪取，去 [判定层](/docs/modules/engine) 与 [环境层](/docs/modules/host)。
+旧内容从哪取，去 [钉码核心](/docs/modules/pin) 与 [项目装配](/docs/modules/workflow/project)。

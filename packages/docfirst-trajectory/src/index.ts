@@ -1,14 +1,15 @@
 /**
- * @godcreator/docfirst-trajectory——`.` 入口：parse / validate / model / layout / chains
- * 纯函数汇总导出，零 npm 依赖（只用 node:fs / node:path，来自 scan.ts 一处）；`buildTrajectory`
- * 是本文件新写的装配入口：扫一次目录、给每张盘建模，不算布局——布局是纯函数、几毫秒，留给客户端
- * 按设置滑杆现算（见方案第十三节）；layout.ts / chains.ts 照样导出，供客户端组件使用。
- * `./react`（客户端组件）与 `./server`（服务端组件 + cardSchema + remark 插件）是另外两个入口，
- * 各自的源码在 react.tsx / server.tsx，见方案第十三节「星轨盘」与「接线」。
+ * @godcreator/docfirst-trajectory——`.` 入口：parse / scan / model / layout / chains / thumbs
+ * 纯函数汇总导出，**一句 import 外部模块都没有**（连 `node:` 也没有），浏览器、服务端、命令行都能直接用。
+ * `buildTrajectory` 是装配入口：给一份扫盘产物的每张盘建模，不算布局——布局是纯函数、几毫秒，
+ * 留给客户端按设置滑杆现算（见方案第十三节）；layout.ts / chains.ts 照样导出，供客户端组件使用。
+ * 卡从哪儿来不归这个包：读卡目录在 `@godcreator/docfirst-workflow` 的 `scanCardDir`，
+ * 这里的 `scanCards` 只吃已经读好的文件。
+ * `./disk`（客户端组件 StarDisk）是另一个入口，源码在 disk.tsx，见方案第十三节「星轨盘」。
  */
 
 import { buildDisks, buildModel } from "./model.ts";
-import { scanDir } from "./scan.ts";
+import type { TrajectoryScan } from "./scan.ts";
 import { type SerializableModel, toSerializable } from "./serial.ts";
 import type { DiskInfo, Milestone, RawCard, Relation, SickFile } from "./types.ts";
 
@@ -25,13 +26,14 @@ export {
 } from "./parse.ts";
 export type { ExtractedRelations, Frontmatter } from "./parse.ts";
 
-export { checkDocfirstRefs } from "./validate.ts";
-
 export { buildDisks, buildModel, dayNum, formatDay, formOf, inRange, NO_DOMAIN, parseCardFile } from "./model.ts";
 export type { ParsedFile } from "./model.ts";
 
-export { pickCardFiles, scanDir } from "./scan.ts";
-export type { TrajectoryScan } from "./scan.ts";
+export { pickCardFiles, scanCards } from "./scan.ts";
+export type { CardFile, TrajectoryScan } from "./scan.ts";
+
+export { launcherThumbs, renderThumb } from "./thumbs.ts";
+export type { RenderThumbOptions } from "./thumbs.ts";
 
 export {
   advanceFrame,
@@ -114,7 +116,7 @@ function toRouteCard(raw: RawCard): RouteCard {
 }
 
 export { toRuntimeModel, toSerializable } from "./serial.ts";
-export type { SerializableModel } from "./serial.ts";
+export type { LauncherThumb, SerializableModel } from "./serial.ts";
 
 /** 建模产物：`cards` 是全部卡（原始，未按盘裁剪），`disks` 是盘清单，`sick` 是报病，
  * `models` 按 rootId 索引每张盘的模型（不含布局——布局在客户端算）。 */
@@ -125,11 +127,9 @@ export interface Trajectory {
   models: Record<string, SerializableModel>;
 }
 
-/** 扫一次目录、给每张盘建模。dir 原样交给 scanDir，最终落到 node:fs 的 readdir 上——
- * 绝对路径与相对 `process.cwd()` 的相对路径都认（命令行传的是装配好的绝对路径，
- * `./server` 的服务端组件在自己那头先 resolve 一次）；目录不存在时四段皆空、不报错。 */
-export async function buildTrajectory(dir: string): Promise<Trajectory> {
-  const { cards, sick } = await scanDir(dir);
+/** 给一份扫盘产物的每张盘建模。扫盘产物是空的（卡目录还没建）时四段皆空、不报错。 */
+export function buildTrajectory(scan: TrajectoryScan): Trajectory {
+  const { cards, sick } = scan;
   const disks = buildDisks(cards);
   const models: Record<string, SerializableModel> = {};
   for (const disk of disks) models[disk.rootId] = toSerializable(buildModel(cards, disk.rootId));

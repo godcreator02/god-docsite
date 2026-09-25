@@ -1,17 +1,16 @@
-import { resolve } from 'node:path';
 import Link from 'next/link';
 import { ThemeSwitch } from 'fumadocs-ui/layouts/shared/slots/theme-switch';
-import { buildTrajectory } from '@godcreator/docfirst-trajectory';
-import { StarDisk } from '@godcreator/docfirst-trajectory/react';
-import { launcherThumbs } from '@godcreator/docfirst-trajectory/server';
+import { loadTrajectory } from '@godcreator/docfirst-fumadocs/trajectory';
+import { launcherThumbs } from '@godcreator/docfirst-trajectory';
+import { StarDisk } from '@godcreator/docfirst-trajectory/disk';
 
-// 星轨整页：读站里的卡目录建模，渲一条顶栏加一张吃满剩余高度的盘或启动器卡阵。
-// `?disk=` 缺失渲启动器（每张盘一张服务端渲好的静态定妆照），有则渲那张盘；组件切盘 / 回启动器
-// 时也写回这个参数。顶栏是页面的：左边回文档，盘内多一条「启动器」返回；右边报病数与主题切换。
-// 搜索 / 设置 / 帮助 / 图例 / 竖轨都是组件自己贴在容器四角的 HUD。
+// 星轨整页：读取站里的卡目录并建模，渲染一条顶栏和一张占满剩余高度的盘或启动器卡阵。
+// 没有 `?disk=` 时渲染启动器（每张盘一张服务端预先渲染的静态缩略图），有则渲染那张盘；组件切盘、回启动器
+// 时也写回这个参数。顶栏属于页面：左边回文档，盘内多一条「启动器」返回；右边是报病数与主题切换。
+// 搜索、设置、帮助、图例、竖轨都是组件自己固定在容器四角的 HUD。
 export default async function Page({ searchParams }: { searchParams: Promise<{ disk?: string }> }) {
   const { disk } = await searchParams;
-  const data = await buildTrajectory(resolve(process.cwd(), 'content/trajectory'));
+  const data = await loadTrajectory('content/trajectory');
   const thumbs = launcherThumbs(data);
   return (
     <div className="trajectory-page">

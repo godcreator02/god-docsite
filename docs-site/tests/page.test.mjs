@@ -1,9 +1,9 @@
 /**
- * 页面那头的接线：插件确实挂上了、meta 白名单确实放行了、状态确实落到了 <pre> 上、
+ * 页面那一侧的接线：remark 插件确实加上了、meta 白名单确实放行了、状态确实写到了 <pre> 上、
  * postprocess 确实带着我们的回调。
- * 不起 Next：fumadocs-mdx/node 的 register 把它的 loader 挂进 Node，import 一篇 .mdx 走的就是站构建那条链。
- * 只断言、不跟命令行比：算状态的是同一个 service，比出来只能相等；跨调用方的比对留给起站抓 .md 路由。
- * 组件表按 registry.ts 的名单造占位 div：只为让渲染不缺组件，不管长相。
+ * 不启动 Next：fumadocs-mdx/node 的 register 把它的 loader 注册进 Node，import 一篇 .mdx 走的就是站构建时的同一条处理链。
+ * 只断言、不跟命令行比：算状态的是同一个 service，比出来只能相等；跨调用方的比对要启动站后抓取 .md 路由。
+ * 组件表按 registry.ts 的名单生成占位 div：只为让渲染不缺组件，不管外观。
  */
 import { test } from "node:test";
 import assert from "node:assert/strict";
@@ -11,14 +11,14 @@ import { register } from "fumadocs-mdx/node";
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { loadProject } from "@godcreator/docfirst-workflow";
-import { DOT_COLOR, whereOf } from "@godcreator/docfirst-workflow/fumadocs";
+import { DOT_COLOR, whereOf } from "@godcreator/docfirst-fumadocs";
 import { componentNames } from "../src/components/registry.ts";
 
 register();
 
 const project = await loadProject(process.cwd());
 const DOCS = project.docs();
-/** 占位组件：带上 data- 属性（目录树的状态点挂在 Files 容器上）和 name（文件夹 / 文件名），别的不管长相 */
+/** 占位组件：带上 data- 属性（目录树的状态点属性加在 Files 容器上）和 name（文件夹 / 文件名），别的不管长相 */
 const components = Object.fromEntries(
   componentNames.map((name) => [
     name,
@@ -69,8 +69,8 @@ test("站里得有文档；每篇要么钉了源码，要么 frontmatter 明说 
 });
 
 test("每条引用在页面上都有一个带状态点颜色的元素：代码块和芯片是 pre、写着来源的标题；目录树是 Files 容器、根文件夹叫来源", () => {
-  // 这里没铺站的 pre 组件（tsx 进不了 Node），验的是 rehypeCode 按白名单放到 pre 上的属性和注入到 Files 上的属性；
-  // 状态点本身由 next build 出
+  // 这里没用站的 pre 组件（Node 不能直接加载 tsx），验的是 rehypeCode 按白名单放到 pre 上的属性和注入到 Files 上的属性；
+  // 状态点本身由 next build 生成
   // 静态 html 里属性值的引号与 & 是转义过的，还原之后才能跟来源原文比
   const unescape = (value) =>
     value?.replace(/&#x27;/g, "'").replace(/&quot;/g, '"').replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&amp;/g, "&");
@@ -117,7 +117,7 @@ test("模块带着 _markdown，且是我们的回调出的：来源行在、组�
       assert.ok(page.mod._markdown.includes(`<!-- 来源 ${where} · `), `${doc}：来源行不在，说明序列化回调没挂上`);
     }
     assert.doesNotMatch(page.mod._markdown, /<Tabs|<Note|<Tab[\s>]/, `${doc}：组件没被名册压平`);
-    assert.doesNotMatch(page.mod._markdown, /\[!code /, `${doc}：AI 那份不该带 shiki 的 diff 标记`);
+    assert.doesNotMatch(page.mod._markdown, /\[!code /, `${doc}：机读版不该带 shiki 的 diff 标记`);
   }
 });
 

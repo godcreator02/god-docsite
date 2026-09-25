@@ -19,13 +19,13 @@ description: docfirst.create 建一个接好 docfirst 的站：站点插件跑�
 
 集合用 fumadocs-mdx 的 macro 写在 `src/lib/source.ts` 里，没有 `source.config.ts`。三个集合里只有现状区的集合加了 docfirst 的插件、生成机读版；集合级的 `mdxOptions` 会去掉 fumadocs 的默认插件，所以都经 `applyMdxPreset` 加回来，理由见 [集合移到 macro](/trajectory/2026-09-25-fumadocs-macro-collections)：
 
-{/* ref file="../plugins/docfirst/template/replace/src/lib/source.ts.tpl" lines="24-50" hash="67f63a58322b" blob="55e68a57df98" */}
+{/* ref file="../plugins/docfirst/template/replace/src/lib/source.ts.tpl" lines="23-49" hash="67f63a58322b" blob="0ceaf5dc19b0" */}
 
 起始页只规定每页都成立的第一句「本页回答」，不规定小标题，理由见 [骨架页不讲规矩](/trajectory/2026-09-25-skeleton-pages-dont-teach-rules)；正文也不再写一级标题，页面已经用 frontmatter 的 `title` 渲染了标题。两份生成正本（README、AGENTS）例外，它们的一级标题要进生成物。
 
-生成的 `docfirst.config.mjs` 写的是内容根与三条 `outputs` 映射，没有别的区要登记——`content/` 下除 `trajectory/`、`future/` 之外的目录都是现状区：
+生成的 `docfirst.config.mjs` 从 workflow 的 `./mdx` 取格式、从 fumadocs 适配的 `./roster` 取名册，写的是内容根与三条 `outputs` 映射，没有别的区要登记——`content/` 下除 `trajectory/`、`future/` 之外的目录都是现状区：
 
-{/* ref file="../plugins/docfirst/template/add/docfirst.config.mjs.tpl" lines="15-22" hash="d19932f12fdb" blob="c75bb13b32fc" */}
+{/* ref file="../plugins/docfirst/template/add/docfirst.config.mjs.tpl" lines="16-30" hash="903cd6c0795c" blob="73e7955951f9" */}
 
 文件之外，本插件还往站的 `package.json` 里加 doc 脚本、两条 docfirst 依赖（进 `devDependencies`，站构建与门禁都是开发期的事）和一句描述，由站点插件合并。脚本名不能与官方的 `dev` / `build` / `start` 重名，重名同样报错：
 
@@ -57,13 +57,19 @@ description: docfirst.create 建一个接好 docfirst 的站：站点插件跑�
 
 ## 依赖
 
-`src/` 只 import `node:fs`、`node:path`、`node:url` 三个内置模块，对站点插件只有 `import type`（`CreateSiteArgs`、`SiteFile` 与它给 `Context` 加的 `gwbDocsSite`），不认识 `@godcreator/docfirst-workflow` 的判定、环境、格式、命令行。守卫在插件的产物检查里，见 [工作台插件](/docs/modules/plugin) 的「不做的事」。
+`src/` 只 import `node:fs`、`node:path`、`node:url` 三个内置模块，对站点插件只有 `import type`（`CreateSiteArgs`、`SiteFile` 与它给 `Context` 加的 `gwbDocsSite`），不认识四个 `@godcreator/docfirst-*` 包里的任何代码。守卫在插件的产物检查里，见 [工作台插件](/docs/modules/plugin) 的「不做的事」。
 
-写进站 `devDependencies` 的依赖版本来自一张手写的表，一律精确号。工作区里那两份写的是 `workspace:*`，写进别人的站装不上，所以只能手写；两个包发版升版本号时跟着改，插件的测试检查它跟工作区各包的版本一致。这两个包名出现在这儿不算插件的依赖：它们是写进别人 `package.json` 的字符串。
+写进站 `devDependencies` 的是 `@godcreator/docfirst-workflow` 与 `@godcreator/docfirst-fumadocs` 两条（钉码核心与轨迹核心随它们装上），版本来自一张手写的表，一律精确号。工作区里那两份写的是 `workspace:*`，写进别人的站装不上，所以只能手写；这两个包发版升版本号时跟着改，插件的测试检查它跟工作区各包的版本一致。这两个包名出现在这儿不算插件的依赖：它们是写进别人 `package.json` 的字符串。
 
-{/* ref file="../plugins/docfirst/src/deps.ts" hash="878dac3d8f6e" blob="174bc4534896" */}
+{/* ref file="../plugins/docfirst/src/deps.ts" hash="add69b585ae8" blob="4229f60b43d3" */}
 
-构建配置用站点插件那一份：它的 `next.config.mjs` 带 `/` 到 `/docs` 的重定向、不写 `serverExternalPackages`，正合 docfirst 的要求（两个包都不许外置，见 [fumadocs 那一层](/docs/modules/fumadocs)）。替换的几份是在官方脚手架那一版的输出上改的，站点插件升脚手架版本时它们可能要跟着改，理由见 [在官方输出上只改几份文件](/trajectory/2026-09-25-fumadocs-macro-collections)；建站为什么交给站点插件见 [建站交给站点插件](/trajectory/2026-09-25-site-plugin-builds-docfirst-supplies-structure)。
+构建配置用站点插件那一份：它的 `next.config.mjs` 带 `/` 到 `/docs` 的重定向、不写 `serverExternalPackages`，正合 docfirst 的要求（fumadocs 适配与轨迹核心都不许外置，见 [fumadocs 适配](/docs/modules/fumadocs)）。替换的几份是在官方脚手架那一版的输出上改的，站点插件升脚手架版本时它们可能要跟着改，理由见 [在官方输出上只改几份文件](/trajectory/2026-09-25-fumadocs-macro-collections)；建站为什么交给站点插件见 [建站交给站点插件](/trajectory/2026-09-25-site-plugin-builds-docfirst-supplies-structure)。
+
+**模板里写的包名与出口名只靠约定跟四个包对上**：模板渲染出的站 import `@godcreator/docfirst-workflow/mdx` 与
+`@godcreator/docfirst-fumadocs` 的几个出口，包改出口时模板要在同一个提交里跟着改。插件的测试列着模板可以引用的出口，
+检查渲染出的每个引用都在这张清单里、所在的包都在写进站的依赖表里：
+
+{/* ref file="../plugins/docfirst/tests/create.test.ts" lines="29-36" hash="97c972e0e61c" blob="f460d1de51c9" */}
 
 模板假设站在仓根下一层（约定叫 `docs-site/`）、被钉的代码在仓根，所以引用写 `../src/…`，`outputs` 映射把生成物写到 `../`。形状不同就改生成的配置里的相对路径，这是模板的前提，不是配置项。
 

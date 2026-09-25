@@ -12,8 +12,9 @@ import { readTemplate } from './template.js'
 /**
  * docfirst 插件：一条建站命令 `docfirst.create`，加 `skills/` 下的说明书。
  *
- * 核对、确认、渲染在仓里发生，归 `@godcreator/docfirst-workflow` 包，agent 在仓里跑 `pnpm doc`；
- * 本插件对那个包零依赖（`tests/artifact.test.ts` 检查）。建站时站点插件 `@godcreator/gwb-docs-site` 跑官方脚手架、
+ * 核对、确认、渲染在仓里发生，归 `@godcreator/docfirst-*` 四个 npm 包（pin、trajectory、workflow、fumadocs），
+ * agent 在仓里跑 `pnpm doc`；本插件对四个包都零依赖（`tests/artifact.test.ts` 检查），建站时只把 workflow 与 fumadocs
+ * 两个包名写进站的 devDependencies（`src/deps.ts`）。建站时站点插件 `@godcreator/gwb-docs-site` 跑官方脚手架、
  * 套本机约定并写盘，本插件经命令总线按名字调它的 `docs-site.create`，只提供在官方输出上增、换、删哪些文件。
  */
 export const name = 'gwb-docfirst-workflow'
@@ -64,7 +65,7 @@ export function apply(ctx: GwbContext): void {
           '本插件的清单：替换 src/lib/source.ts（三个区 docs 现状、trajectory 轨迹、future 未来的集合与 loader）、src/components/mdx.tsx、' +
           'src/app/docs/layout.tsx（侧栏三个根节点）与 content/docs/index.mdx，删掉示例页 content/docs/test.mdx，' +
           '新增轨迹与未来两个区的路由、docfirst.config.mjs、组件名册与名册脚本、样式、各区的起始页与 README / AGENTS / CLAUDE 的正本（content/docs/outputs/），' +
-          '外加 docfirst 的依赖与 doc 脚本。' +
+          '外加 docfirst 的依赖（@godcreator/docfirst-workflow 与 @godcreator/docfirst-fumadocs）与 doc 脚本。' +
           '只写文件：不跑 pnpm install、不 render、不 check。' +
           '回 { dir, repoDir, port, written, overwrites, next, warn? }——written 是写了哪些文件（相对站目录），' +
           'overwrites 是仓根已有、第一次 render 会覆盖的文件，next 是接着要在站目录里跑的命令',
@@ -117,7 +118,7 @@ export function apply(ctx: GwbContext): void {
     scoped.effect(() => scoped.gwbSkills.register(new URL('../skills/', import.meta.url)))
   })
 
-  log.info(`docfirst 插件就绪：命令 ${CREATE_COMMAND} 与 skills/ 下的说明书，对 @godcreator/docfirst-workflow 零依赖`)
+  log.info(`docfirst 插件就绪：命令 ${CREATE_COMMAND} 与 skills/ 下的说明书，对 @godcreator/docfirst-* 四个包零依赖`)
 }
 
 /**

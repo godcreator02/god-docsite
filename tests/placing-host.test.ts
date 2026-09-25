@@ -7,10 +7,12 @@
  */
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { createService, RenderRefusal } from "../packages/docfirst-workflow/src/engine/index.ts";
-import type { Format, Listing, Reader } from "../packages/docfirst-workflow/src/engine/index.ts";
-import { createPlacing } from "../packages/docfirst-workflow/src/host/index.ts";
-import type { PlacingHost, ProjectConfig } from "../packages/docfirst-workflow/src/host/index.ts";
+import { createService } from "../packages/docfirst-pin/src/index.ts";
+import type { Listing, Reader } from "../packages/docfirst-pin/src/index.ts";
+import { RenderRefusal } from "../packages/docfirst-workflow/src/format/index.ts";
+import type { DocFormat } from "../packages/docfirst-workflow/src/format/index.ts";
+import { createPlacing } from "../packages/docfirst-workflow/src/project/index.ts";
+import type { PlacingHost, ProjectConfig } from "../packages/docfirst-workflow/src/project/index.ts";
 import { NO_HISTORY } from "./repo.ts";
 
 /**
@@ -18,7 +20,7 @@ import { NO_HISTORY } from "./repo.ts";
  * renderAi 出的那份故意带上整段 frontmatter 和开头的空行——摆放产物里它们都不该还在，
  * 别的文字（包括看着像转义的 `&#x2A;`）原样留着。
  */
-const format: Format = {
+const format: DocFormat = {
   name: "fake",
   claims: (doc) => doc.endsWith(".md"),
   parse: () => [],
@@ -91,7 +93,7 @@ test("内存宿主：源里缺点名的字段，这个落点一个字都不写",
 
 test("内存宿主：check 收到调用方判好的清单就原样交给格式，不再判一遍", async () => {
   const handed: Listing[] = [];
-  const counted: Format = { ...format, renderAi: (text, listing) => (handed.push(listing), format.renderAi!(text, listing)) };
+  const counted: DocFormat = { ...format, renderAi: (text, listing) => (handed.push(listing), format.renderAi!(text, listing)) };
   const service = createService({ formats: [counted], reader: { read: () => null }, history: NO_HISTORY });
   let resolved = 0;
   const placing = createPlacing({
@@ -112,9 +114,9 @@ test("内存宿主：check 收到调用方判好的清单就原样交给格式�
 });
 
 test("内存宿主：格式拒绝渲染，每个落点都报 unrenderable、一个字不写；别的错照原样抛", () => {
-  const refusing: Format = { ...format, renderAi: () => { throw new RenderRefusal("第 3 行是草稿记号，先 docfirst confirm"); } };
+  const refusing: DocFormat = { ...format, renderAi: () => { throw new RenderRefusal("第 3 行是草稿记号，先 docfirst confirm"); } };
   const placed = new Map<string, string>();
-  const host = (renderer: Format): PlacingHost => ({
+  const host = (renderer: DocFormat): PlacingHost => ({
     service: createService({ formats: [renderer], reader: { read: () => null }, history: NO_HISTORY }),
     placements: () => [{ to: "README.md", frontmatter: [] }, { to: "SKILL.md", frontmatter: ["name"] }],
     read: () => SOURCE,
@@ -133,7 +135,7 @@ test("内存宿主：格式拒绝渲染，每个落点都报 unrenderable、一�
     { to: "SKILL.md", status: "unrenderable", fresh: false, reason },
   ]);
 
-  const broken: Format = { ...format, renderAi: () => { throw new Error("格式自己的 bug"); } };
+  const broken: DocFormat = { ...format, renderAi: () => { throw new Error("格式自己的 bug"); } };
   assert.throws(() => createPlacing(host(broken)).check("docs/a.md"), /格式自己的 bug/);
 });
 

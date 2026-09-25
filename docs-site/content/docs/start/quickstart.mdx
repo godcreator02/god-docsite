@@ -10,10 +10,10 @@ description: 装包、一份配置、写一行草稿记号、check、confirm、�
 
 <Tabs>
   <Tab title="fumadocs 站">
-    `pnpm add -D @godcreator/docfirst-workflow @godcreator/docfirst-trajectory`
+    `pnpm add -D @godcreator/docfirst-workflow @godcreator/docfirst-fumadocs`
   </Tab>
   <Tab title="只跑命令行">
-    一样这两个包。`fumadocs` 与 `react` 在包里只是 peer，不装 fumadocs 的仓一个都不必装——
+    只装 `@godcreator/docfirst-workflow`。`fumadocs` 与 `react` 只是 fumadocs 适配的 peer，不装 fumadocs 的仓一个都不必装——
     命令行那条路一处都不用它们。
   </Tab>
 </Tabs>
@@ -27,7 +27,7 @@ description: 装包、一份配置、写一行草稿记号、check、confirm、�
 命令行和站读的是同一份 `docfirst.config.mjs`。它只认四个键：`formats`（用哪个格式）、`content`（内容根，
 不写就是 `content`）、`components`（组件名册）、`outputs`（生成物写到哪），写了别的键当场报错。这个站的配置：
 
-{/* ref file="docfirst.config.mjs" lines="29-50" hash="78f85e416247" blob="fce0d84ad1f9" */}
+{/* ref file="docfirst.config.mjs" lines="16-53" hash="64938c4e27b7" blob="cd87ba1471ab" */}
 
 分区不用配：内容根下 `trajectory/` 是轨迹卡、`future/` 是未来区，这两个名字固定，**其余目录都是现状区**，
 里面的文档都进 `check`。`outputs` 把 mdx 正本映射到生成物（README、AGENTS.md 这类），`render` 与 `confirm`
@@ -93,18 +93,18 @@ pnpm start
 ```
 
 页面上那一块代码是 `next build` 那一刻从源文件里现取的，标题栏写着来源 `文件:起-止`，
-复制按钮左边那个小圆点就是状态。调试用 build + start，**不用 dev**；改了 `src/fumadocs/` 的代码要先删 `.next`
+复制按钮左边那个小圆点就是状态。调试用 build + start，**不用 dev**；改了 remark 插件会跑到的包代码要先删 `.next`
 再 build 才看得见。
 
 ## 命令一览
 
-{/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="3-19" hash="5dfc0087023e" blob="7307ed6bcc73" */}
+{/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="4-16" hash="b21f84ae84ea" blob="12b6936e716e" */}
 
 拿不准就先 `docfirst --help`：它只打用法，什么都不改；写错的开关只会报错退 2，不会被当作没写。
 **`confirm` 不带路径就是全部页**：它只做不需要判断的写回，黄原样留着；要把复核过的黄重新记下，必须点名页再带 `--accept`，
 同一个仓里别人还没复核的黄不会被一起重新记下。
 
 日常用的是 check / confirm / render 三条。`render` 只生成在 `outputs` 里有映射的生成物，别的文档不渲染；
-`trajectory` 列轨迹卡的盘与主干，见 [轨迹](/docs/modules/trajectory)；`migrate-ledger` 只给从旧版升级的站用一次。
+`trajectory` 列轨迹卡的盘与主干，见 [轨迹核心](/docs/modules/trajectory)；`migrate-ledger` 只给从旧版升级的站用一次。
 建站不在命令行上，归工作台插件的 `docfirst.create`，见 [建站](/docs/modules/site)。命令行的完整输出和退出码见
-[命令行](/docs/modules/cli)。
+[命令行](/docs/modules/workflow/cli)。

@@ -14,7 +14,7 @@ import { readTemplate, renderFiles, renderText, TEMPLATE_ROOT, type SiteValues, 
  * 读仓根的两个函数在临时目录里测。
  *
  * 另有一条检查两处版本号一致：写进站的依赖表是手写的（工作区里写的是 `workspace:*`，
- * 写进别的站装不上），两个包发版升版本号时要跟着改。
+ * 写进别的站装不上），表里的包发版升版本号时要跟着改。
  */
 
 const HERE = path.dirname(fileURLToPath(import.meta.url))
@@ -23,8 +23,17 @@ const PACKAGES = path.resolve(HERE, '..', '..', '..', 'packages')
 /** 包名 → 它在 packages/ 下的目录名 */
 const DIR_OF: Record<string, string> = {
   '@godcreator/docfirst-workflow': 'docfirst-workflow',
-  '@godcreator/docfirst-trajectory': 'docfirst-trajectory',
+  '@godcreator/docfirst-fumadocs': 'docfirst-fumadocs',
 }
+
+/** 模板可以 import 的 docfirst 出口：只有写进站依赖表的两个包的这几个出口 */
+const TEMPLATE_IMPORTABLE = [
+  '@godcreator/docfirst-workflow/mdx',
+  '@godcreator/docfirst-fumadocs',
+  '@godcreator/docfirst-fumadocs/roster',
+  '@godcreator/docfirst-fumadocs/pre',
+  '@godcreator/docfirst-fumadocs/light.css',
+]
 
 /**
  * 清单作用的那一套文件：官方脚手架 `create-fumadocs-app@16.2.8`（站点插件写死的版本，参数
@@ -191,11 +200,21 @@ describe('结构模板', () => {
     expect([...layout.matchAll(/zone\('([^']+)'/g)].map((m) => m[1])).toEqual(['现状', '轨迹', '未来'])
     expect(layout).toMatch(/root: true/)
     expect(layout).toMatch(/import '\.\.\/docfirst\.css';/)
-    expect(renderedText('src/app/docfirst.css')).toMatch(/@import '@godcreator\/docfirst-workflow\/fumadocs\/light\.css';/)
+    expect(renderedText('src/app/docfirst.css')).toMatch(/@import '@godcreator\/docfirst-fumadocs\/light\.css';/)
+  })
+
+  it('模板里引用的 docfirst 出口都在站依赖表的两个包里', () => {
+    const referenced = new Set<string>()
+    for (const file of renderedAll()) {
+      for (const m of file.text.matchAll(/(?:from|@import)\s+'(@godcreator\/docfirst-[^']+)'/g)) referenced.add(m[1]!)
+    }
+    expect([...referenced].filter((spec) => !TEMPLATE_IMPORTABLE.includes(spec)), '模板引用了不在清单里的出口').toEqual([])
+    for (const spec of referenced) expect(Object.keys(DOCFIRST_DEPS), `${spec} 所在的包不在站依赖表里`).toContain(spec.split('/').slice(0, 2).join('/'))
   })
 
   it('src/components/mdx.tsx：pre 换成状态点组件，官方的 useMDXComponents 与全局类型还在', () => {
     const mdx = renderedText('src/components/mdx.tsx')
+    expect(mdx).toMatch(/import \{ DocfirstPre \} from '@godcreator\/docfirst-fumadocs\/pre';/)
     expect(mdx).toMatch(/pre: DocfirstPre,/)
     expect(mdx).toMatch(/export const useMDXComponents = getMDXComponents;/)
     expect(mdx).toMatch(/type MDXProvidedComponents = /)
@@ -213,6 +232,14 @@ describe('结构模板', () => {
     expect(body).toMatch(/'content\/docs\/outputs\/readme\.mdx': \['\.\.\/README\.md'\]/)
     expect(body).toMatch(/'content\/docs\/outputs\/agents\.mdx': \['\.\.\/AGENTS\.md'\]/)
     expect(body).toMatch(/'content\/docs\/outputs\/claude\.mdx': \['\.\.\/CLAUDE\.md'\]/)
+  })
+
+  it('docfirst.config.mjs：格式是 workflow 包的 mdx，名册展开 fumadocs 包的 fumadocsRoster', () => {
+    const config = renderedText('docfirst.config.mjs')
+    expect(config).toMatch(/^import \* as mdx from '@godcreator\/docfirst-workflow\/mdx'$/m)
+    expect(config).toMatch(/^import \{ fumadocsRoster \} from '@godcreator\/docfirst-fumadocs\/roster'$/m)
+    expect(config).toMatch(/formats: \[mdx\],/)
+    expect(config).toMatch(/components: \{\s*\.\.\.fumadocsRoster,\s*\}/)
   })
 
   it('起始页只规定第一句「本页回答」与待填位置，不规定小标题', () => {
@@ -255,7 +282,7 @@ describe('planCreate：交给 docs-site.create 的参数', () => {
     expect(new Set(paths).size, '三个清单之间有重复路径').toBe(paths.length)
   })
 
-  it('依赖与脚本：docfirst 的两个包进 devDependencies，doc 脚本进 scripts，不占官方的 dev / build / start', () => {
+  it('依赖与脚本：docfirst-workflow 与 docfirst-fumadocs 进 devDependencies，doc 脚本进 scripts，不占官方的 dev / build / start', () => {
     const args = planCreate(inputWith())
     expect(args.devDependencies).toEqual(DOCFIRST_DEPS)
     expect(args.dependencies, '不往运行时依赖里加').toBeUndefined()
@@ -312,7 +339,7 @@ describe('仓根', () => {
   })
 })
 
-it('写进站的依赖表是精确版本号，与工作区两个包的版本一致', () => {
+it('写进站的依赖表是精确版本号，与工作区里对应包的版本一致', () => {
   for (const [name, pin] of Object.entries(DOCFIRST_DEPS)) {
     const dir = DIR_OF[name]
     expect(dir, `依赖表里的 ${name} 在 packages/ 下没有对应目录，新加依赖时把 DIR_OF 也补上`).toBeDefined()

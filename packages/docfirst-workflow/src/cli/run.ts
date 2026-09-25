@@ -1,6 +1,6 @@
 /**
  * docfirst 的动作，编排在这儿。可执行那一头在 cli.ts——测试直接调 main，不用起子进程。
- * cwd 就是项目根（那里有 docfirst.config.mjs）。核对与确认的对象是现状区的文档（分区见 host/load.ts）。
+ * cwd 就是项目根（那里有 docfirst.config.mjs）。核对与确认的对象是现状区的文档（分区见 project/load.ts）。
  *   docfirst check [--json]                 核对：只读，红退 1；被钉文件在文档所在的仓里有未提交改动的黄也算红
  *                                          （这次改动引起的，同一个提交里处理）；挂了 outputs 映射的文档顺手守生成物新鲜度；
  *                                          顺手跑内容根下 trajectory/ 的卡校验，病卡也算红。--json 出整份
@@ -11,22 +11,23 @@
  *   docfirst confirm <文档路径…> --accept   另外把点名页里的黄灯按今天的内容重新记；不点名页报错退 2
  *   docfirst render                         渲染：挂了 outputs 映射的生成正本摆到指定落点；别的文档不渲染
  *   docfirst trajectory [--json]            列轨迹卡的盘 / 树 / 主干；--json 出 buildTrajectory 的整份模型
- *   docfirst migrate-ledger                 一次性迁移：旧记录簿写进各记号后删掉（见 host/migrate-ledger.ts）
+ *   docfirst migrate-ledger                 一次性迁移：旧记录簿写进各记号后删掉（见 project/migrate-ledger.ts）
  *   docfirst --help | -h | help             打用法，退 0，什么都不动；任一命令后面带 --help / -h 也是
  * 每条命令只收表里认的开关（`FLAGS`），别的开关一律报错退 2、不动手。
  * 给一个新骨架铺各区那件事不在这儿——它只在 agent 手上发生一次、铺的是模板不是判定，归工作台插件
- * `@godcreator/gwb-docfirst-workflow` 的 `docfirst.attach`。这儿留的全是要在**仓**里发生的：
+ * `@godcreator/gwb-docfirst-workflow` 的 `docfirst.create`。这儿留的全是要在**仓**里发生的：
  * 各仓的 `pnpm doc` 与 CI 跑的就是这几条。
- * 新引用不用命令：在文档里写一行记号语法（engine/marker.ts）定的草稿记号 @@docfirst ref src/greet.ts:2-3 @@，
+ * 新引用不用命令：在文档里写一行记号语法（`@godcreator/docfirst-pin` 的 marker）定的草稿记号 @@docfirst ref src/greet.ts:2-3 @@，
  * check 认它、报未确认，confirm 换成该格式的正式记号并写上记录。
  */
 import { existsSync } from "node:fs";
 import { join, relative, sep } from "node:path";
-import { targetKey } from "../engine/index.ts";
-import type { ConfirmStep, Format, Item, Listing } from "../engine/index.ts";
-import { createUncommittedProbe, loadProject, migrateLedger } from "../host/index.ts";
-import type { PlacedWrite, UncommittedProbe } from "../host/index.ts";
-import { buildTrajectory, scanDir } from "@godcreator/docfirst-trajectory";
+import { targetKey } from "@godcreator/docfirst-pin";
+import type { ConfirmStep, Item, Listing } from "@godcreator/docfirst-pin";
+import { buildTrajectory } from "@godcreator/docfirst-trajectory";
+import type { DocFormat } from "../format/index.ts";
+import { createUncommittedProbe, loadProject, migrateLedger, scanCardDir } from "../project/index.ts";
+import type { PlacedWrite, UncommittedProbe } from "../project/index.ts";
 import type { CardProblemReport, CheckReport, DocReport, OutputReport, RefReport } from "./report.ts";
 
 export type { CardProblemReport, CheckReport, ComponentReport, DocReport, OutputReport, RefReport } from "./report.ts";
@@ -247,10 +248,10 @@ async function checkCommand(project: Project, docs: string[], json: boolean): Pr
   return report.ok ? 0 : 1;
 }
 
-/** check 顺带跑的卡校验：轨迹卡目录还没建（scanDir 回空）不算红。
+/** check 顺带跑的卡校验：轨迹卡目录还没建（scanCardDir 回空）不算红。
  * 每条病一条，path 相对项目根；人读模式打成 `🔴 <path>  <field>：<reason>（<value>）`。 */
 async function checkTrajectory(project: Project): Promise<CardProblemReport[]> {
-  const { sick } = await scanDir(project.trajectoryDir);
+  const { sick } = await scanCardDir(project.trajectoryDir);
   const out: CardProblemReport[] = [];
   for (const file of sick) {
     const path = relative(project.root, join(project.trajectoryDir, file.path)).split(sep).join("/");
@@ -267,7 +268,7 @@ async function trajectoryCommand(rest: string[]): Promise<number> {
     console.error(`这个项目还没有轨迹卡目录 ${project.contentDir}/trajectory`);
     return 2;
   }
-  const data = await buildTrajectory(project.trajectoryDir);
+  const data = buildTrajectory(await scanCardDir(project.trajectoryDir));
   if (rest.includes("--json")) {
     console.log(JSON.stringify(data));
     return 0;
@@ -282,7 +283,7 @@ async function trajectoryCommand(rest: string[]): Promise<number> {
   return 0;
 }
 
-/** `docfirst migrate-ledger`：一次性迁移，各站迁完之后下一个版本连同 host/migrate-ledger.ts 一起删掉 */
+/** `docfirst migrate-ledger`：一次性迁移，各站迁完之后下一个版本连同 project/migrate-ledger.ts 一起删掉 */
 async function migrateLedgerCommand(): Promise<number> {
   const report = await migrateLedger(process.cwd());
   for (const { doc, count } of report.written) console.log(`✅ ${doc}  ${count} 处记号写上了记录`);
@@ -334,7 +335,7 @@ interface DocCheck {
   lines: string[];
 }
 
-async function check(project: Project, doc: string, text: string, format: Format, uncommitted: UncommittedProbe): Promise<DocCheck> {
+async function check(project: Project, doc: string, text: string, format: DocFormat, uncommitted: UncommittedProbe): Promise<DocCheck> {
   const listing: Listing = project.service.resolve(doc, text);
   const lines: string[] = [];
   const items: RefReport[] = [];

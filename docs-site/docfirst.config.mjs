@@ -8,10 +8,13 @@
  * （AGENTS 的正本在 content/docs/maintain/agents.mdx，其余在 content/docs/outputs/）——
  * 改 mdx 源要跑 `pnpm docfirst render`（`confirm` 也会顺带做），两份一起提交，check 检查生成物跟源是否一致。
  * CLAUDE.md 第一行固定是 `@AGENTS.md`，只给 Claude 的指令写在它后面。
- * 组件名册：先展开默认名册，再加站里自己定义的组件和它们转成机读文本的规则。组件的 React 实现在
- * src/components/mdx.tsx。星轨盘不在名册里：它是一条独立的整页路由 /trajectory，不在 mdx 里用。
+ * formats 是命令行认的文档格式（mdx，来自 docfirst-workflow）。
+ * 组件名册：先展开 fumadocsRoster（fumadocs 自带的 Files / Folder / File 与 Note 的压平规则，纯数据，命令行也能加载），
+ * 再加站里自己定义的组件和它们转成机读文本的规则。组件的 React 实现在 src/components/mdx.tsx。
+ * 星轨盘不在名册里：它是一条独立的整页路由 /trajectory，不在 mdx 里用。
  */
-import * as fumadocs from "@godcreator/docfirst-workflow/fumadocs";
+import * as mdx from "@godcreator/docfirst-workflow/mdx";
+import { fumadocsRoster } from "@godcreator/docfirst-fumadocs/roster";
 import * as tabs from "./src/components/tabs/tabs.ai.mjs";
 
 /**
@@ -27,7 +30,7 @@ import * as tabs from "./src/components/tabs/tabs.ai.mjs";
 const skill = (name) => ({ to: `../plugins/docfirst/skills/${name}/SKILL.md`, frontmatter: ["name", "description"] });
 
 export default {
-  formats: [fumadocs],
+  formats: [mdx],
   outputs: {
     "content/docs/outputs/readme.mdx": ["../README.md"],
     "content/docs/maintain/agents.mdx": ["../AGENTS.md"],
@@ -40,7 +43,7 @@ export default {
     "content/docs/outputs/skills/docs-governance.mdx": [skill("docs-governance")],
   },
   components: {
-    ...fumadocs.defaultRoster,
+    ...fumadocsRoster,
     Tabs: tabs.Tabs,
     Tab: tabs.Tab,
     // 术语标注：自动标出的术语是构建时生成的，不写进源文件，命令行看不到。这条规则管作者

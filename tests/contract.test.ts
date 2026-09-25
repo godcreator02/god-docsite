@@ -8,8 +8,8 @@
  */
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import * as mdx from "../packages/docfirst-workflow/src/fumadocs/index.ts";
-import type { Format } from "../packages/docfirst-workflow/src/engine/index.ts";
+import * as mdx from "../packages/docfirst-workflow/src/mdx/index.ts";
+import type { Format } from "../packages/docfirst-pin/src/index.ts";
 import { fakeFormat } from "./fake-format.ts";
 import { CODE, setupRepo } from "./repo.ts";
 import type { Repo } from "./repo.ts";
