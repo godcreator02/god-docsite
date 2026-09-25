@@ -140,8 +140,6 @@ export interface Format {
   lintComponents?(text: string, roster?: unknown): Array<{ name: string; line: number }>;
   /** 渲染：按原文出一份给 AI 读的 md，记号换成清单里今天的内容。正本里有渲染不了的东西时抛 RenderRefusal */
   renderAi?(text: string, listing: Listing): string;
-  /** 文档本身就是终态产物（html）：人看它、AI 也读它，没有渲染这回事 */
-  final?: boolean;
 }
 
 /** renderAi 拒绝渲染（草稿记号、缺失的引用、组件、mdx 表达式）时抛它；摆放按这一类把它报成红，别的错照原样抛 */

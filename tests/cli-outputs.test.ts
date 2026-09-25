@@ -26,7 +26,7 @@ const SKILL_DOC = [
   "",
 ].join("\n");
 
-test("outputs 摆放：confirm 顺手重摆、render 只写指定目标、不落 out/；check 守生成物——手改了或删了都红，重摆后复原", async () => {
+test("outputs 摆放：confirm 顺手重摆、render 只写指定目标；check 守生成物——手改了或删了都红，重摆后复原", async () => {
   const p = setupProject(withOutputs(`{ "docs/a.md": ["README.md"] }`));
   try {
     const done = await p.cli("confirm");
@@ -37,7 +37,6 @@ test("outputs 摆放：confirm 顺手重摆、render 只写指定目标、不落
     const readme = p.read("README.md");
     assert.match(readme, /```ts\nexport function greet/);
     assert.doesNotMatch(readme, /<!-- ref |<!-- \/ref -->/, "摆放那份也剥记号");
-    assert.equal(existsSync(join(p.root, "out")), false, "挂了映射的不再落 out/");
 
     const green = await p.cli("check");
     assert.equal(green.code, 0, green.out);

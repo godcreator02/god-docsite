@@ -7,7 +7,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { existsSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
-import { setupProject } from "./cli-project.ts";
+import { setupProject, withOutputs } from "./cli-project.ts";
 import { CODE, run } from "./repo.ts";
 
 const CONFIRMED = /^REF ref file="src\/greet\.ts" lines="2-3" hash="[0-9a-f]{12}" blob="[0-9a-f]{12}"$/m;
@@ -125,29 +125,26 @@ test("绿灯挪了位置：confirm 机械写回新行号", async () => {
   }
 });
 
-test("render：有 renderAi 的格式出 ai 那份剥掉记号；终态格式说产物就是文档本身", async () => {
+test("render：只处理挂了 outputs 映射的文档，别的文档不渲染、什么都不写", async () => {
   const p = setupProject();
   try {
     await p.cli("confirm");
     const rendered = await p.cli("render");
-    assert.equal(rendered.code, 0);
-    assert.match(rendered.out, /→ {2}docs\/a\.md {2}渲染成 out\/a\.md\.ai\.md/);
-    assert.match(rendered.out, /· {2}docs\/b\.html {2}fake-html 的产物就是文档本身/);
-    const ai = p.read("out/a.md.ai.md");
-    assert.doesNotMatch(ai, /^REF /m, "记号那一行被投影换掉了");
-    assert.match(ai, /```ts\nexport function greet/);
+    assert.equal(rendered.code, 0, rendered.out);
+    assert.equal(rendered.out, "");
+    assert.equal(existsSync(join(p.root, "out")), false);
   } finally {
     p.teardown();
   }
 });
 
-test("render：正本里还有草稿记号就渲染不了，报红退 1，别的文档照渲", async () => {
-  const p = setupProject();
+test("render：正本里还有草稿记号就渲染不了，报红退 1、不写落点", async () => {
+  const p = setupProject(withOutputs(`{ "docs/a.md": ["README.md"] }`));
   try {
     const rendered = await p.cli("render");
     assert.equal(rendered.code, 1);
-    assert.match(rendered.out, /🔴 docs\/a\.md {2}正本渲染不了：第 3 行是草稿记号，先 docfirst confirm/);
-    assert.match(rendered.out, /· {2}docs\/b\.html {2}fake-html 的产物就是文档本身/);
+    assert.match(rendered.out, /🔴 docs\/a\.md → README\.md {2}.*第 3 行是草稿记号，先 docfirst confirm/);
+    assert.equal(existsSync(join(p.root, "README.md")), false);
   } finally {
     p.teardown();
   }

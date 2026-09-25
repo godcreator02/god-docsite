@@ -15,7 +15,6 @@ import * as fumadocs from '@godcreator/docfirst-workflow/fumadocs'
 export default {
   formats: [fumadocs],
   content: 'content',
-  out: 'out',
   outputs: {
     'content/docs/outputs/readme.mdx': ['../README.md'],
     'content/docs/outputs/agents.mdx': ['../AGENTS.md'],

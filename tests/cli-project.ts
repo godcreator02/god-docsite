@@ -3,7 +3,7 @@
  *
  * 项目的 docfirst.config.mjs 按绝对 file: 地址引 `fake-format.ts`——临时目录里解析不到包名，
  * 而命令行这一层要验的是它自己（报什么状态、退什么码、写回了什么），不是某个真格式长什么样。
- * 假格式的两个形态正好覆盖两条分支：`.md` 有 renderAi，`.html` 是终态产物。
+ * 两个假格式：`.md` 有 renderAi（能当生成正本），`.html` 没有，只核对不渲染。
  * 直接调 main，不起子进程：退出码和打印都当场看得见。
  *
  * 台子要 `process.chdir` 到临时目录，那是进程全局的，所以同一个文件里的用例只能串着跑。
@@ -23,9 +23,9 @@ const FAKE = pathToFileURL(join(HERE, "fake-format.ts")).href;
 export const CONFIG = `import { fakeFormat } from ${JSON.stringify(FAKE)};
 
 const md = fakeFormat("fake-md", ".md", { render: true });
-const html = fakeFormat("fake-html", ".html", { final: true });
+const html = fakeFormat("fake-html", ".html");
 
-export default { formats: [md, html], content: "docs", out: "out" };
+export default { formats: [md, html], content: "docs" };
 `;
 
 export const DOC_MD = "# md\n\n@@docfirst ref src/greet.ts:2-3 @@\n\n尾巴\n";
@@ -69,7 +69,7 @@ export function setupProject(config: string = CONFIG) {
 
 /** 把 CONFIG 尾巴换成带别的键的（`outputs: {…}` 这种一截） */
 export function withKeys(extra: string): string {
-  return CONFIG.replace(`content: "docs", out: "out" };`, `content: "docs", out: "out", ${extra} };`);
+  return CONFIG.replace(`content: "docs" };`, `content: "docs", ${extra} };`);
 }
 
 /** 把 CONFIG 尾巴换成带 outputs 的：docs/a.md 摆到项目根的 README.md */

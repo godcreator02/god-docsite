@@ -6,8 +6,7 @@
  * 两种变化原因，生产那个是 fumadocs 口味的 mdx，测试这个就是它。判定层、命令行、摆放的测试都用它：
  * 那几层不认识任何真格式，测它们就不该把真格式拉进来。
  *
- * 两个开关对上真格式的两种形态：`render` 是有 AI 渲染的那种（md 一类），
- * `final` 是「文档本身就是终态产物」的那种（html 一类）。
+ * 开关 `render` 给它一个 AI 渲染（能当生成正本）；不开就是只核对、不渲染的格式。
  */
 import { draftOf, fileOf, formalOf, parseFormal, RenderRefusal } from "../packages/docfirst-workflow/src/engine/index.ts";
 import type { Format, Listing, Reference, Target } from "../packages/docfirst-workflow/src/engine/index.ts";
@@ -20,8 +19,6 @@ export const refLine = (target: Target): string => `REF ${formalOf(target, null)
 export interface FakeOptions {
   /** 出一份给 AI 读的 md：记号那一行换成投影出来的围栏 */
   render?: boolean;
-  /** 文档本身就是终态产物，没有渲染这回事 */
-  final?: boolean;
 }
 
 /** 记号行换成围栏。语言按被引文件的后缀认，目录树那种没有文件就写 text。跟真格式一样：草稿记号渲染不了 */
@@ -64,6 +61,5 @@ export function fakeFormat(name: string, suffix: string, options: FakeOptions = 
     },
   };
   if (options.render === true) format.renderAi = (text, listing) => renderAi(text, listing);
-  if (options.final === true) format.final = true;
   return format;
 }

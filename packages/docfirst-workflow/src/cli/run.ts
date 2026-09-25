@@ -9,7 +9,7 @@
  *                                          映射的文档重新摆一遍（内容变了才写）。黄灯不动、逐条列出；红的那几处
  *                                          不动、别的照写，有红退 1。带路径就是**按页限定**：只动点名的那几篇
  *   docfirst confirm <文档路径…> --accept   另外把点名页里的黄灯按今天的内容重新记；不点名页报错退 2
- *   docfirst render                         渲染：产物落 out/；挂了 outputs 映射的摆到指定落点（不再落 out/）
+ *   docfirst render                         渲染：挂了 outputs 映射的生成正本摆到指定落点；别的文档不渲染
  *   docfirst trajectory [--json]            列轨迹卡的盘 / 树 / 主干；--json 出 buildTrajectory 的整份模型
  *   docfirst migrate-ledger                 一次性迁移：旧记录簿写进各记号后删掉（见 host/migrate-ledger.ts）
  *   docfirst --help | -h | help             打用法，退 0，什么都不动；任一命令后面带 --help / -h 也是
@@ -20,9 +20,9 @@
  * 新引用不用命令：在文档里写一行记号语法（engine/marker.ts）定的草稿记号 @@docfirst ref src/greet.ts:2-3 @@，
  * check 认它、报未确认，confirm 换成该格式的正式记号并写上记录。
  */
-import { existsSync, mkdirSync, writeFileSync } from "node:fs";
+import { existsSync } from "node:fs";
 import { join, relative, sep } from "node:path";
-import { isRenderRefusal, targetKey } from "../engine/index.ts";
+import { targetKey } from "../engine/index.ts";
 import type { ConfirmStep, Format, Item, Listing } from "../engine/index.ts";
 import { createUncommittedProbe, loadProject, migrateLedger } from "../host/index.ts";
 import type { PlacedWrite, UncommittedProbe } from "../host/index.ts";
@@ -75,7 +75,7 @@ export const USAGE = `docfirst——文档钉代码的核对与确认。在有 d
                                          不带路径 = 全部页；带路径 = 按页限定，只动点名的那几篇
                                          （例：docfirst confirm content/docs/a.mdx）
   docfirst confirm <文档路径…> --accept   另外把点名页里的黄灯按今天的内容重新记。复核过才用，必须点名页
-  docfirst render                        渲染；挂了 outputs 映射的摆到落点
+  docfirst render                        把挂了 outputs 映射的生成正本渲染到落点（内容变了才写）
   docfirst trajectory [--json]           列轨迹卡的盘 / 树 / 主干
   docfirst migrate-ledger                一次性迁移：把旧记录簿 .ledger.json 写进各记号后删掉它，
                                          再列出配置里还要手工改的键
@@ -118,7 +118,7 @@ export async function main(argv: string[]): Promise<number> {
 
   let red = 0;
   for (const doc of docs) {
-    red += render(project, doc, project.read(doc), project.service.formatFor(doc)!);
+    if (project.placements(doc).length > 0) red += render(project, doc);
   }
   return red > 0 ? 1 : 0;
 }
@@ -365,44 +365,18 @@ function placedLine(doc: string, output: OutputReport): string {
   return `${head}  生成物跟 mdx 源一致`;
 }
 
-function render(project: Project, doc: string, text: string, format: Format): number {
-  // 挂了映射的文档只写落点：落点是纯生成物，内容变了才写；摆放的全过程归 project，这边只印结果
-  const placed = project.placing.render(doc);
-  if (placed.length > 0) {
-    let red = 0;
-    for (const one of placed) {
-      if (one.status === "no-frontmatter" || one.status === "unrenderable") {
-        console.log(unplacedLine(doc, one, "render"));
-        red += 1;
-      } else if (one.status === "placed") {
-        console.log(`→  ${doc}  摆放到 ${one.to}`);
-      } else {
-        console.log(`·  ${doc} → ${one.to}  没变`);
-      }
+/** 一篇生成正本摆到它的落点：落点是纯生成物，内容变了才写；摆放的全过程归 project，这边只印结果 */
+function render(project: Project, doc: string): number {
+  let red = 0;
+  for (const one of project.placing.render(doc)) {
+    if (one.status === "no-frontmatter" || one.status === "unrenderable") {
+      console.log(unplacedLine(doc, one, "render"));
+      red += 1;
+    } else if (one.status === "placed") {
+      console.log(`→  ${doc}  摆放到 ${one.to}`);
+    } else {
+      console.log(`·  ${doc} → ${one.to}  没变`);
     }
-    return red;
   }
-  if (typeof format.renderAi !== "function") {
-    console.log(
-      format.final === true
-        ? `·  ${doc}  ${format.name} 的产物就是文档本身，人和 AI 都读它`
-        : `·  ${doc}  ${format.name} 没有渲染`,
-    );
-    return 0;
-  }
-  // 没挂映射的落 out/ 当调试产物；正本渲染不了就报成这篇的红，接着渲别的
-  const outDir = join(project.root, project.config.out ?? "out");
-  const outName = `${doc.split("/").pop()}.ai.md`;
-  let out: string;
-  try {
-    out = format.renderAi(text, project.service.resolve(doc, text));
-  } catch (err) {
-    if (!isRenderRefusal(err)) throw err;
-    console.log(`🔴 ${doc}  正本渲染不了：${err.message}`);
-    return 1;
-  }
-  mkdirSync(outDir, { recursive: true });
-  writeFileSync(join(outDir, outName), out);
-  console.log(`→  ${doc}  渲染成 ${project.config.out ?? "out"}/${outName}`);
-  return 0;
+  return red;
 }

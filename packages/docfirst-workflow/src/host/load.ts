@@ -22,14 +22,12 @@ export interface ProjectConfig {
   formats: Format[];
   /** 内容根，相对项目根；默认 content */
   content?: string;
-  /** 渲染产物落哪，相对项目根；默认 out */
-  out?: string;
   /** 组件名册（压平规则），格式用；没声明就用格式的默认表 */
   components?: Record<string, unknown>;
   /**
-   * 渲染产物的摆放：文档身份（相对项目根、正斜杠）→ 目标数组。每个目标是相对项目根的路径（可以出根），
+   * 生成正本的摆放：文档身份（相对项目根、正斜杠）→ 目标数组。每个目标是相对项目根的路径（可以出根），
    * 或者 `{ to, frontmatter }`——要生成物保留 frontmatter 里的几个字段时用对象写法。
-   * 挂了映射的文档 render 只写目标，不落 out/
+   * render 只处理挂了映射的文档
    */
   outputs?: Record<string, Array<string | OutputTarget>>;
 }
@@ -88,7 +86,7 @@ export function loadProject(root: string): Promise<Project> {
 const FIXED_AREAS = new Set(["trajectory", "future"]);
 
 /** 配置认的键 */
-const CONFIG_KEYS = ["formats", "content", "out", "components", "outputs"];
+const CONFIG_KEYS = ["formats", "content", "components", "outputs"];
 
 /** 删掉的旧键 → 该怎么改 */
 const RETIRED_KEYS: Record<string, string> = {
@@ -97,6 +95,7 @@ const RETIRED_KEYS: Record<string, string> = {
   comparator: "删掉 comparator：行段与整文件只有一个比较器，不用选",
   ledger: "删掉 ledger：记录写在各记号上；旧记录簿先在项目根跑 docfirst migrate-ledger 迁进记号",
   fumadocs: "删掉 fumadocs：生成正本按原文渲染，不再按集合编译",
+  out: "删掉 out：render 只生成 outputs 映射里的生成物，不再往 out/ 写调试产物",
 };
 
 /** 配置里要改的地方，一条一句；没有就是空表。只看形状，不碰盘 */
@@ -110,7 +109,6 @@ export function configProblems(config: unknown): string[] {
   }
   if (!Array.isArray(table.formats)) problems.push("formats 要是格式的数组");
   if (table.content !== undefined && (typeof table.content !== "string" || table.content.trim() === "")) problems.push("content 要是一个非空目录（相对项目根）");
-  if (table.out !== undefined && (typeof table.out !== "string" || table.out.trim() === "")) problems.push("out 要是一个非空目录（相对项目根）");
   return problems;
 }
 

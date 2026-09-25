@@ -31,7 +31,7 @@ async function setup(outputs: string) {
   writeFileSync(join(root, "docs", "b.md"), "# 没挂映射\n");
   writeFileSync(
     join(root, "docfirst.config.mjs"),
-    `import { fakeFormat } from ${JSON.stringify(FAKE)};\n\nconst md = fakeFormat("fake-md", ".md", { render: true });\n\nexport default { formats: [md], content: "docs", out: "out", outputs: ${outputs} };\n`,
+    `import { fakeFormat } from ${JSON.stringify(FAKE)};\n\nconst md = fakeFormat("fake-md", ".md", { render: true });\n\nexport default { formats: [md], content: "docs", outputs: ${outputs} };\n`,
   );
 
   const project = await loadProject(root);
@@ -61,7 +61,6 @@ test("摆放一趟：render 写到落点、回落点清单；check 从 missing �
     const readme = p.read("README.md");
     assert.match(readme, /```ts\nexport function greet/, "正文是投影过的 md");
     assert.doesNotMatch(readme, /<!-- ref |@@docfirst/, "摆放那份剥掉记号");
-    assert.equal(existsSync(join(p.root, "out")), false, "摆放不落 out/");
 
     assert.deepEqual(await project.placing.check("docs/a.md"), [{ to: "README.md", status: "fresh", fresh: true }]);
   } finally {
@@ -125,7 +124,6 @@ test("没挂映射的文档：两个方法都回空清单，一个字都不写",
     const project = p.project;
     assert.deepEqual(await project.placing.check("docs/b.md"), []);
     assert.deepEqual(await project.placing.render("docs/b.md"), []);
-    assert.equal(existsSync(join(p.root, "out")), false);
   } finally {
     p.teardown();
   }
