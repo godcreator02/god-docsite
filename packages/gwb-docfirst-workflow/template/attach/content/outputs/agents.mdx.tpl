@@ -34,6 +34,4 @@ cd docs-site && pnpm doc && pnpm build
 
 ## 红线
 
-- 改了代码要连着改现状页；改了 `content/outputs/` 下的 mdx 要 `pnpm doc:render` 重摆，生成物跟源一起提交
 - 这份 AGENTS.md 是生成物，正本是 `docs-site/content/outputs/agents.mdx`，改那边
-- 轨迹卡只增不改
