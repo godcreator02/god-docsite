@@ -19,7 +19,6 @@
 
 import { mapRange, mappedSpan, renderDiff } from "./diff.ts";
 import { blobOf, fileText, hashNames, hashSpan, lineCount, normalizeLines, sliceSpan } from "./span.ts";
-import { targetKey } from "./marker.ts";
 import type {
   ContentRecord,
   FileTarget,
@@ -147,24 +146,23 @@ export function judge(target: Target, record: MemoRecord | null, seen: string[] 
 
 /**
  * 确认时出记录：行段 / 整文件记段哈希与整文件的 blob 名（都在进程里算，不问 git），
- * 目录树记名字表的哈希。钉不住的说清楚为什么
+ * 目录树记名字表的哈希。钉不住的说清楚为什么（不带目标文本：调用方打印时自己带着）
  */
 export function snapshot(target: Target, seen: string[] | null): Snapshot {
-  const where = targetKey(target);
   switch (target.kind) {
     case "span":
     case "file": {
-      if (seen === null) return { problem: `${where} 文件不存在` };
+      if (seen === null) return { problem: "文件不存在" };
       const span = sliceSpan(seen, target.kind === "span" ? [target.a, target.b] : wholeSpan(seen));
-      if (span === null) return { problem: `${where} 行段超出文件` };
+      if (span === null) return { problem: "行段超出文件" };
       return { record: { kind: "content", hash: hashSpan(span), blob: blobOf(seen) } };
     }
     case "tree":
-      if (seen === null) return { problem: `${where} 目录不存在` };
+      if (seen === null) return { problem: "目录不存在" };
       return { record: { kind: "tree", hash: hashNames(seen) } };
     case "has":
-      if (seen === null) return { problem: `${where} 文件不存在` };
-      if (findText(seen, target.text) === null) return { problem: `${where} 文件里没有这个名字` };
+      if (seen === null) return { problem: "文件不存在" };
+      if (findText(seen, target.text) === null) return { problem: "文件里没有这个名字" };
       return { record: { kind: "has" } };
   }
 }

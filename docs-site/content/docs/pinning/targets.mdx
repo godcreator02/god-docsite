@@ -38,7 +38,7 @@ description: 行段、整文件、目录树、名字：记号上记什么、chec
 - **`has` 是逐行的纯文本包含**，区分大小写，不管在第几行、出现几次。写 `export function hashSpan`，不写光秃秃的 `hashSpan`：
   后者也会命中别处的调用：导出删了、调用还在，它照样是绿。
 
-{/* ref file="../packages/docfirst-pin/src/compare.ts" lines="57-61" hash="beccefc10c11" blob="223927110711" */}
+{/* ref file="../packages/docfirst-pin/src/compare.ts" lines="56-60" hash="beccefc10c11" blob="7f6556a69177" */}
 
 - **目录树按 `.gitignore` 过滤**：`dist/`、`node_modules/` 不进名字表，也不往里走。`glob` 只认 `*` 和 `?`，匹配的是名字不是路径。
 
