@@ -18,9 +18,9 @@
 pnpm add -D @godcreator/docfirst-workflow @godcreator/docfirst-fumadocs
 ```
 
-`@godcreator/docfirst-workflow` 是命令行、项目装配与 mdx 格式，`@godcreator/docfirst-fumadocs` 是站的 fumadocs 接线；
+`@godcreator/docfirst-workflow` 是命令行、项目装配与 mdx 格式，`@godcreator/docfirst-fumadocs` 是 fumadocs 适配，把 docfirst 接到 fumadocs 站上；
 钉码核心 `@godcreator/docfirst-pin` 与轨迹核心 `@godcreator/docfirst-trajectory` 随它们装上。`fumadocs` 与 `react`
-只是 fumadocs 接线的 **peer**，用你项目里装的那份；只跑命令行、不装 fumadocs 的仓只装 `@godcreator/docfirst-workflow`。
+只是 fumadocs 适配的 **peer**，用你项目里装的那份；只跑命令行、不装 fumadocs 的仓只装 `@godcreator/docfirst-workflow`。
 
 **站的构建配置里 `serverExternalPackages` 必须留空**：`@godcreator/docfirst-fumadocs` 里同时有服务端代码与客户端
 组件（状态点），而那个字段按包名匹配、没有子路径粒度——外置之后 `"use client"` 指令会丢掉；星轨盘的客户端组件在
@@ -29,13 +29,13 @@ pnpm add -D @godcreator/docfirst-workflow @godcreator/docfirst-fumadocs
 **建一个新站用工作台插件，命令行不管这一步**：工作台插件 `@godcreator/gwb-docfirst-workflow` 的
 `docfirst.create {"dir":"<仓>/docs-site"}` 一步建好接了三个区（现状 `docs`、轨迹 `trajectory`、未来 `future`）的站；
 不接 docfirst 的普通 fumadocs 站用 `docfirst.create-plain`，参数相同。两条都运行官方脚手架 `create-fumadocs-app`、
-应用本机约定、挑端口并写盘，`docfirst.create` 再在官方输出上增、换、删几份文件。站目录必须还不存在；给一个用了很久的站加 docfirst 走人工接线。
+应用本机约定、挑端口并写盘，`docfirst.create` 再在官方输出上增、换、删几份文件。站目录必须还不存在；给一个用了很久的站加 docfirst，要手动改站的配置接入。
 
 建站只在 agent 手上发生一次，所以不在这几个包里——包留的是要在**仓**里反复发生的那几条。
 
 ## 怎么用
 
-项目根放一份 `docfirst.config.mjs`（用哪些格式——通常是 `@godcreator/docfirst-workflow/mdx`、内容根在哪、组件名册、生成物写到哪）。内容根下 `trajectory/` 是轨迹卡、
+项目根放一份 `docfirst.config.mjs`（内容根在哪、组件名册、生成物写到哪；文档格式只有 mdx 一种，不用配置）。内容根下 `trajectory/` 是轨迹卡、
 `future/` 是未来区，其余目录都是现状区、都进核对，不用登记。文档里写一行草稿记号：
 
 ```md

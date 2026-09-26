@@ -190,7 +190,7 @@ AGENTS / README 不带 frontmatter。改正本，不改生成物。
 的 macro 写在 `src/lib/source.ts`，现状集合写 `mdxOptions: applyMdxPreset(docfirstMdxOptions({ root: process.cwd() }))` 与
 `postprocess.includeProcessedMarkdown: docfirstMarkdownOptions()`（两样都从 `@godcreator/docfirst-fumadocs` 取），外加各区的路由
 （轨迹区是整页星轨盘 `/trajectory` 与卡页，盘从 `@godcreator/docfirst-fumadocs/trajectory` 取）、
-`docfirst.config.mjs`（格式是 `@godcreator/docfirst-workflow/mdx`）、mdx 的接入配置、名册脚本、现状与未来两区的起始页，`package.json` 里带上
+`docfirst.config.mjs`（内容根、生成物落点与组件名册）、mdx 的接入配置、名册脚本、现状与未来两区的起始页，`package.json` 里带上
 这两个包的依赖与 doc 脚本。只写文件不跑 install，端口不给就挑一个没被别的站占用的。
 不接 docfirst 的普通 fumadocs 站用 `docfirst.create-plain`，参数相同。
 

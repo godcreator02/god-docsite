@@ -11,7 +11,6 @@ import { workflowGraph } from './inner/workflow.data.mjs';
 import { fumadocsGraph } from './inner/fumadocs.data.mjs';
 import { docsExplainGraph } from './inner/docs-explain.data.mjs';
 import { pluginGraph } from './inner/plugin.data.mjs';
-import { pinPlanGraph } from './inner/pin-plan.data.mjs';
 
 const INNER = {
   pin: pinGraph,
@@ -20,7 +19,6 @@ const INNER = {
   fumadocs: fumadocsGraph,
   'docs-explain': docsExplainGraph,
   plugin: pluginGraph,
-  'pin-plan': pinPlanGraph,
 };
 
 /** @param {import('./graph.mjs').SeamGraph} graph */

@@ -1,0 +1,52 @@
+---
+born-at: 2026-09-26T19:10
+type: choice
+parent: [2026-09-03-god-live-doc]
+label: 钉码只认记录
+domain: 模块边界
+---
+
+## 背景
+
+按接缝拆成四个包之后，钉码核心 `docfirst-pin` 里还留着两样跟文档格式有关的东西：记号写法（`marker.ts`，草稿与正式记号的属性
+怎么写、怎么解析），和格式接口 `Format`——编排服务 `createService` 拿它从文档文本里认引用、把新记录写回记号那一行。
+实际只有 mdx 一种格式，每个站的配置键 `formats` 都只写 mdx 那一项；记号写法的使用方（mdx 格式、旧记录簿迁移、命令行）全在 workflow。
+存在性目标 `exists` / `absent` 在本机所有站里只有本站讲 docfirst 的示范页用过。
+
+pivots-from:: [按接缝拆四包](2026-09-26-split-by-seams-into-four-packages.md)
+
+## 结论与边界
+
+**钉码核心只认目标与记录**：出口是 `createPinner({ reader, history })` 交回的 `check` / `confirm`，收一组「目标 + 记录」，
+交回的判定与传入顺序一一对应。文档路径、行号、是不是草稿都不进钉码核心；边界测试查它的源码与产物里没有文档文本那一侧的名字。
+
+**记号写法与 mdx 放进 workflow 的两个目录**：记号写法在 `src/marker/`，只从钉码核心 import 类型；mdx 格式在 `src/mdx/`；
+引用与清单这些带文档位置的类型在 `src/reference/`。
+
+**一篇文档的核对与确认由钉码编排 `src/pinning/` 串起来**：mdx 格式认出引用，每处剥成目标与记录交给钉码核心，结果按下标配回，
+确认时把新记录交回 mdx 格式写回。三个入口：`checkDoc`、`confirmDoc` 给命令行与生成物摆放，`checkReferences` 给站构建
+（语法树上已经认好了引用）。
+
+**删掉存在性目标**，连同它的记录、两种红灯理由、读取器的 `kindOf` 与草稿写法；「这个路径在不在」改用 `has` 或正文说明。
+
+**删掉配置键 `formats`**，连同 `DocFormat` 与按文件名挑格式，mdx 格式写死；配置里还写着 `formats` 的，配置检查报「删掉这个键」。
+
+**细分理由 `Reason` 改成固定几个字面量**，中文说法 `REASON_TEXT` 跟它放在钉码核心同一处，少写一个说法在类型上就过不去，
+不再有查不到就给空串的分支。
+
+依据：提交 bcbcb7b、cdcd79b、f442b4c、9cf5f71、584cd38、5fc6e7e、5c2183b。
+
+## 否掉的候选
+
+**记号写法单独成一个包**：它的使用方（mdx 格式、迁移、命令行）都在 workflow 里，单独成包只多一份版本号和一道发版先后。
+
+**保留格式可插拔**（`Format` 接口加配置键 `formats`）：只有 mdx 一种格式，接口、按文件名挑格式、两个格式同时认领的报错
+都是给不存在的第二种格式留的。
+
+## 代价与遗留
+
+这是破坏性版本，跟「一站一张根卡」放进同一个版本发：各站升级时删掉 `docfirst.config.mjs` 里 `formats` 那一行，
+用了 `exists` / `absent` 记号的站要改写那几处（只有本站，已经改完）。
+
+旧记录格式还留着：gwb-kernel、gwb-base-plugins、gwb-block-note、collab-site、plecs-studio 这几个站的记录还在 `.ledger.json` 里、
+正式记号上不带记录。等它们跑完 `docfirst migrate-ledger`，再删迁移命令、「正式记号可以不带记录」与「记录可以没有 blob」。
