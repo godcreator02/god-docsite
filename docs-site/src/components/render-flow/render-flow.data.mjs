@@ -168,7 +168,7 @@ export const chapters = [
     id: 'write',
     title: '写到落点：内容变了才写',
     text:
-      `落点 ${files.output} 相对项目根（放 docfirst.config.mjs 的站目录），不能落进内容根 content/，一个落点只许一篇正本写。` +
+      `落点 ${files.output} 相对项目根（放 docfirst.config.mjs 的站目录），不能落进配置里的内容根（默认 content/），一个落点只许一篇正本写。` +
       '写之前先读落点上现有的文件，换行统一后跟这次的结果比：不同才写，输出一行「摆放到」；相同就不写，输出「没变」。' +
       'confirm 写回记号之后也会渲染一遍，只输出写了的那几行。',
     duration: 7,

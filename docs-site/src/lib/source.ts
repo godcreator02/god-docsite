@@ -1,8 +1,8 @@
 /**
- * 站的内容集合与 loader。集合用 fumadocs-mdx 的 macro 写在这里，三个区各一个 defineDocs
+ * 站的内容集合与 loader。集合用 fumadocs-mdx 的 macro 写在这里，content/ 下每个顶层目录一个 defineDocs
  * （自带 docs 与 meta，侧栏顺序由各目录的 meta.json 定）：
- *   docs        现状：只有现状、散文、尽量多钉；参与 check。生成正本（README、AGENTS、SKILL.md 的 mdx）也在这一区，
- *               术语标注只在这个集合上开启
+ *   docs        现状·原理：机制、模块与接缝；参与 check。生成正本（README、SKILL.md 的 mdx）也在这一区
+ *   maintain    现状·维护：改这个仓要知道的——仓布局、门禁、测试与边界、AGENTS.md 的正本；参与 check
  *   trajectory  轨迹：卡只增不改；卡的 frontmatter 由 cardSchema 校验（label 派生 title），
  *               正文里 `supersedes::` / `pivots-from::` 关系由 remarkTrajectoryLinks 标出；不参与 check，不加 docfirst 的 remark 插件
  *   future      未来：愿景、不做的事、roadmap、还在进行的 spec、别的仓投来的反馈
@@ -41,6 +41,18 @@ const docs = defineDocs({
   },
 });
 
+/** 维护区也是现状，同样钉码、进 check；给改这个仓的人看，不进机读版与 llms */
+const maintain = defineDocs({
+  dir: 'content/maintain',
+  docs: {
+    schema: pageSchema,
+    mdxOptions: applyMdxPreset(docfirstMdxOptions({ root: process.cwd(), glossary: { terms } })),
+  },
+  meta: {
+    schema: metaSchema,
+  },
+});
+
 const trajectory = defineDocs({
   dir: 'content/trajectory',
   docs: {
@@ -58,6 +70,12 @@ const future = defineDocs({
 export const source = loader({
   baseUrl: docsRoute,
   source: docs.toFumadocsSource(),
+  plugins: [lucideIconsPlugin()],
+});
+
+export const sourceMaintain = loader({
+  baseUrl: '/maintain',
+  source: maintain.toFumadocsSource(),
   plugins: [lucideIconsPlugin()],
 });
 

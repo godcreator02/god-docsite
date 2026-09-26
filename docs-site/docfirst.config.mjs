@@ -3,9 +3,9 @@
  *
  * 项目根是这个站目录，引用的代码在工作区的 packages/ 与 plugins/ 下，所以引用里写 `../packages/…` 或 `../plugins/…`。
  * 分区按约定：content/ 下 trajectory/ 与 future/ 两个名字固定，其余目录都是现状区、都进 check；
- * 本站的现状区只有 content/docs。
+ * 本站的现状区是 content/docs（原理）与 content/maintain（维护这个仓）。
  * outputs：仓根 README.md / AGENTS.md / CLAUDE.md 和插件里的几份 SKILL.md 是生成物，正本是下面映射左边的 mdx
- * （AGENTS 的正本在 content/docs/maintain/agents.mdx，其余在 content/docs/outputs/）——
+ * （AGENTS 的正本在 content/maintain/agents.mdx，其余在 content/docs/outputs/）——
  * 改 mdx 源要跑 `pnpm docfirst render`（`confirm` 也会顺带做），两份一起提交，check 检查生成物跟源是否一致。
  * CLAUDE.md 第一行固定是 `@AGENTS.md`，只给 Claude 的指令写在它后面。
  * formats 是命令行认的文档格式（mdx，来自 docfirst-workflow）。
@@ -42,7 +42,7 @@ export default {
   formats: [mdx],
   outputs: {
     "content/docs/outputs/readme.mdx": ["../README.md"],
-    "content/docs/maintain/agents.mdx": ["../AGENTS.md"],
+    "content/maintain/agents.mdx": ["../AGENTS.md"],
     "content/docs/outputs/claude.mdx": ["../CLAUDE.md"],
     "content/docs/outputs/skills/docfirst.mdx": [skill("docfirst")],
     "content/docs/outputs/skills/docfirst-docs.mdx": [skill("docfirst-docs")],

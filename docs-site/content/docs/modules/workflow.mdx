@@ -1,0 +1,195 @@
+---
+title: workflow 命令行与项目
+description: docfirst-workflow：命令行 docfirst、项目装配（读盘、git、生成物、磁盘读卡）、mdx 格式与格式接口 DocFormat；调用链从 docfirst 命令开始的都在这个包里，不认识任何站的宿主
+---
+
+包 `@godcreator/docfirst-workflow`，源码在 `packages/docfirst-workflow/src/`。出口 `.`（`src/index.ts`）、`./mdx`（`src/mdx/index.ts`）、
+`./cards`（`src/project/card-dir.ts`），可执行文件 `docfirst`（`src/cli/cli.ts`）。
+
+<SeamMap module="workflow" />
+
+## 功能
+
+`src/` 下每个目录一件事：`format` 定格式接口，`mdx` 实现它，`project` 读写磁盘、调 git，`cli` 把它们串成命令。
+这些目录在同一个包里，编译器不拦跨目录 import，方向由边界测试的禁止表检查：
+
+{/* ref file="../tests/boundary.test.ts" lines="213-228" hash="5e5d288cdf5a" blob="e450056cc091" */}
+
+### 项目装配 project
+
+一个项目是一个根目录加一份 `docfirst.config`。`loadProject(root)` 读配置，造读取器与 git 版的旧内容来源交给钉码核心的
+`createService`，再把生成物的摆放装进项目；分区按约定，不在配置里登记：
+
+{/* ref file="../packages/docfirst-workflow/src/project/load.ts" lines="1-9" hash="54a253641e58" blob="485e0158da13" */}
+
+现状区是内容根下除 `trajectory/`、`future/` 之外的全部，目录里的和直接放在内容根上的文档都算：
+
+{/* ref file="../packages/docfirst-workflow/src/project/load.ts" lines="147-159" hash="299b55da5597" blob="485972d4fa88" */}
+
+配置模块由 Node 原生加载：站的打包器会把动态 import 改写成自己的加载器，这一句带着两个打包器的跳过标记。
+
+{/* ref file="../packages/docfirst-workflow/src/project/load.ts" lines="116-122" hash="5d8ed05b1d87" blob="485972d4fa88" */}
+
+**读取器与旧内容来源**是钉码核心 `Reader`、`History` 两个接口的实现（接缝 2）。读取器列目录时在 git 仓里按 `.gitignore` 过滤；
+旧内容来源按被引文件自己的位置找仓、按 blob 名取确认时的文件，hunk 表用两个临时文件跑 `git diff --no-index` 算，不往任何对象库写：
+
+{/* ref file="../packages/docfirst-workflow/src/project/fs-reader.ts" lines="1-8" hash="4a7673eef0a1" blob="2c9427f15c3d" */}
+
+{/* ref file="../packages/docfirst-workflow/src/project/history.ts" hash="c9fdbb444a03" blob="4420ba5fce88" */}
+
+每次启动 git 都带超时与输出上限。按文件位置找仓、blob 名怎么算见 [git 取回旧内容](/docs/pinning/git)。
+
+{/* ref file="../packages/docfirst-workflow/src/project/git.ts" lines="17-18" hash="6c30493d4168" blob="afd0fbdae4c4" */}
+
+**未提交改动的探针**回答一处黄是不是本仓未提交的改动引起的，一次 check 造一个；算不算红由命令行决定，规则见[提交门禁](/docs/pinning/gate)：
+
+{/* ref file="../packages/docfirst-workflow/src/project/uncommitted.ts" lines="1-8" hash="7012ae307b16" blob="3cda642bbfcc" */}
+
+**摆放**把 `outputs` 里有映射的 mdx 正本渲染成生成物写到落点，渲染过程见[生成物渲染](/docs/rendering)。落点在装配时就检查：
+得相对项目根、不许落进内容根、一个落点只许一篇文档写，违反任何一条 `loadProject` 当场报错：
+
+{/* ref file="../packages/docfirst-workflow/src/project/placement.ts" lines="121-139" hash="134440fb80cc" blob="963b388356c7" */}
+
+**磁盘读卡**：轨迹核心只收读好的卡片文件，读目录在 `scanCardDir`。目录不存在回空集合；读完交给轨迹核心的 `scanCards`，
+再对每张卡查一遍「卡里不许钉码」（草稿、md、mdx 三种记号形态都算），病并进同一份清单：
+
+{/* ref file="../packages/docfirst-workflow/src/project/card-dir.ts" lines="13-25" hash="7d367c0d4a7f" blob="775b6e9e6c2d" */}
+
+{/* ref file="../packages/docfirst-workflow/src/project/card-refs.ts" lines="1-11" hash="18ad404eda50" blob="23e24d936909" */}
+
+`migrateLedger(root)` 把项目根的 `.ledger.json` 逐处写进对应的记号、删掉这个文件，并列出配置里还要手工改的键；它不经过 `loadProject`。
+
+### mdx 格式
+
+项目的 `docfirst.config.mjs` 把整个 `./mdx` 模块写进 `formats`，命令行与站读同一份。钉码核心要的 `name`、`claims`、`marker`、
+`parse`、`write` 与给 check 的名册检查都在入口文件上，写回只重写记号所在那一行：
+
+{/* ref file="../packages/docfirst-workflow/src/mdx/index.ts" lines="21-41" hash="178174d6e2b2" blob="73a54f8abd37" */}
+
+认记号走 remark 语法树：正式记号是 `mdxFlowExpression` 节点，草稿记号是只含一段文字的段落。写在围栏里、句子里的同样文字分别是
+`code` 与 `mdxTextExpression` 节点，不算记号：
+
+{/* ref file="../packages/docfirst-workflow/src/mdx/recognize.ts" lines="15-28" hash="43cde5b2e9d5" blob="4354ba3e23d7" */}
+
+**名册**是一张「组件名 → 规则」的表，说明每个组件在机读版里变成什么。这里只有机制，没有默认表：组件与规则写在项目的配置里，
+fumadocs 自带组件的规则在 [fumadocs 适配](/docs/modules/fumadocs)的 `./roster`。规则三种写法，函数规则只经 helpers 读节点、造节点：
+
+{/* ref file="../packages/docfirst-workflow/src/mdx/roster.ts" lines="35-36" hash="69cdb1ca8839" blob="d192d3db2a0c" */}
+
+{/* ref file="../packages/docfirst-workflow/src/mdx/roster.ts" lines="22-33" hash="efedd191320a" blob="d192d3db2a0c" */}
+
+`stamp` 按名册给树上每个组件加标记、不换节点（同一棵树还要出页面），名册外的组件报错并给出行号；把标记序列化成 md 的回调在 fumadocs 适配：
+
+{/* ref file="../packages/docfirst-workflow/src/mdx/roster.ts" lines="109-128" hash="c5990a4e9fe5" blob="d192d3db2a0c" */}
+
+`renderAi` 把生成正本按原文渲染成 md，不经过 fumadocs，见[生成物渲染](/docs/rendering)。`Format` 接口在生产与测试里各有一个实现，
+测试那份是假格式：
+
+{/* exists path="../tests/fake-format.ts" type="file" */}
+
+### 命令行 cli
+
+`main(argv)` 把参数译成对装配好的项目的几次调用，把结果打印成人读的行或一行 JSON，交回退出码；状态一个都不在这里判。
+子命令与各自做什么写在入口文件头上：
+
+{/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="1-22" hash="eaeed42dd9ce" blob="12b6936e716e" */}
+
+每条命令只收自己开关表里的开关，别的一律退 2、什么都不动。表必须封闭：`confirm` 把 `-` 开头的参数从页名里筛掉，
+开关若被静默丢掉，`confirm --help` 就成了不带页名的全部页确认：
+
+{/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="44-58" hash="835f0ad5c8c0" blob="036135d56300" */}
+
+人读输出一行一处引用：状态符号、文档、目标（记号上的行号）、一句说明，括号里是细分理由或目录树的项数：
+
+{/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="36-42" hash="9ebfdcac2bf1" blob="036135d56300" */}
+
+```text
+🟢 content/docs/a.mdx  src/greet.ts:2-3  新鲜
+⚪ content/docs/a.mdx  src/greet.ts:2-3  未确认，等作者确认
+🟡 content/docs/a.mdx  src/greet.ts:4-5  有变动，等作者复核
+🔴 content/docs/a.mdx  src/greet.ts:4-5  有变动，是本仓还没提交的改动引起的——在同一个提交里复核，再 docfirst confirm content/docs/a.mdx --accept
+🔴 content/docs/a.mdx  src/greet.ts:4-5  缺失（整段已被删光）
+```
+
+`check` 先把逐篇核对与轨迹卡校验汇总成一份报告，人读模式边算边打，`--json` 汇总完打印一行，两种模式的红出自同一份报告：
+
+{/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="217-240" hash="aed7c545eb4b" blob="036135d56300" */}
+
+`confirm` 带路径时只动点名的页；`--accept` 必须点名页，点名的路径对不上项目里的文档当场退 2。重新生成生成物不按页限定，按内容判：
+
+{/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="118-146" hash="235a864d0ce8" blob="036135d56300" */}
+
+`render` 只处理 `outputs` 里有映射的正本，摆放全归 `project.placing`，这边只把回执打印成行。`trajectory` 不遍历文档，
+没有轨迹卡目录就退 2，`--json` 打印 `buildTrajectory` 的整份模型：
+
+{/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="254-275" hash="b13c8318090a" blob="036135d56300" */}
+
+退出码、红的来源、未提交改动的黄怎么算红，见[提交门禁](/docs/pinning/gate)。
+
+### 格式接口 format
+
+`DocFormat` 是钉码核心的 `Format` 加两样可选的方法：名册检查给 check，按原文渲染给 render。只实现钉码那四样的格式也能写进配置，
+只是不查名册、不渲染。渲染不了时抛 `RenderRefusal`，摆放按错误名认它、报成红，别的错照原样抛：
+
+{/* ref file="../packages/docfirst-workflow/src/format/index.ts" lines="12-25" hash="6cf688162137" blob="a39df8c8c5f4" */}
+
+## 接口
+
+三个出口加一个可执行文件：
+
+{/* ref file="../packages/docfirst-workflow/package.json" lines="7-23" hash="963a33bdb3d8" blob="4ed0dffcdd33" */}
+
+`.` 交出 `main`、`check --json` 报告的类型、`loadProject` / `docIdOf` / `scanCardDir` 与格式接口：
+
+{/* ref file="../packages/docfirst-workflow/src/index.ts" hash="39ac1ddf9cd3" blob="abe11e116ab4" */}
+
+`main` 自己不调 `process.exit`，可执行文件只转发参数与退出码，别的程序可以直接调 `main` 拿到退出码：
+
+{/* ref file="../packages/docfirst-workflow/src/cli/cli.ts" hash="435cd11017b0" blob="83f53d30c0ad" */}
+
+**`loadProject(root)`** 同一个根只装配一次，站构建时 loader 并发调用拿到同一个项目。配置只认四个键，项目上带着钉码服务、名册、
+内容根、轨迹卡目录与摆放：
+
+{/* ref file="../packages/docfirst-workflow/src/project/load.ts" lines="21-34" hash="62a83efb211e" blob="485972d4fa88" */}
+
+{/* ref file="../packages/docfirst-workflow/src/project/load.ts" lines="36-55" hash="9f8cf649ff98" blob="485972d4fa88" */}
+
+**`./mdx`** 除了格式本身，还交出语法树上的函数给 fumadocs 适配：站构建时 remark 插件拿到的树已经解析好，用 `recognize` 认记号、
+`stamp` 打标记，不再解析一遍；`langOf` 让按原文渲染与站上的代码块标同一种语言：
+
+{/* ref file="../packages/docfirst-workflow/src/mdx/index.ts" lines="43-49" hash="6acd0fd85525" blob="73a54f8abd37" */}
+
+**`./cards`** 只有 `scanCardDir`，给 fumadocs 适配的星轨盘组件用：走 `.` 会把命令行与配置加载带进 Next 的服务端构建：
+
+{/* ref file="../packages/docfirst-workflow/tsdown.config.ts" lines="9-11" hash="95d05dddcb40" blob="7cebd624af96" */}
+
+**`check --json` 的报告**是给别的程序读的契约，加字段可以，改名、删字段不可以；`outputs` 那一段直接用项目装配的 `PlacedCheck` 类型：
+
+{/* ref file="../packages/docfirst-workflow/src/cli/report.ts" lines="5-32" hash="530a1c3373e5" blob="494fdbb8aec1" */}
+
+## 依赖
+
+| 依赖 | 用来做什么 |
+| --- | --- |
+| 钉码核心 `@godcreator/docfirst-pin` | `createService`、记号语法（`formalOf`、`draftOf`、`parseFormal`、`targetKey`）、hash 与 hunk 解析、引用与清单的类型 |
+| 轨迹核心 `@godcreator/docfirst-trajectory` | `pickCardFiles`、`scanCards`、`stripFrontmatter` 读卡，`buildTrajectory` 给 `docfirst trajectory` 建模 |
+| unified、remark-parse、remark-mdx、remark-frontmatter | mdx 格式的语法树 |
+| `git` 命令行 | 取旧内容、算 hunk 表、查未提交改动、按 `.gitignore` 过滤；被引的文件与目录都不在 git 仓里时不启动 |
+
+## 不做的事
+
+- **不认识任何站的宿主**：fumadocs、react、next 在源码、清单、产物里都不出现，命令行跑在 git hook 与 CI 里，那些环境不一定装了站的依赖：
+
+{/* ref file="../tests/boundary.test.ts" lines="269-283" hash="d5b710f640dc" blob="e450056cc091" */}
+
+- **不依赖 fumadocs 适配**：包方向表里 workflow 一行禁止它：
+
+{/* ref file="../tests/boundary.test.ts" lines="129-135" hash="f64865a8c24f" blob="e450056cc091" */}
+
+- **不判状态**：绿黄白红由[钉码核心](/docs/modules/pin)算，这个包把磁盘、git、配置接给它，再把结果打印出来。
+- **不给卡建模**：卡字段怎么校验、盘怎么聚归[轨迹核心](/docs/modules/trajectory)。
+- **摆放不读写文件**：`placement.ts` 经 `PlacingHost` 读写落点，真盘那份实现在 `load.ts`，测试换成内存那份：
+
+{/* ref file="../packages/docfirst-workflow/src/project/placement.ts" lines="77-91" hash="f92e490eb5c2" blob="963b388356c7" */}
+
+- **不建站**：建站命令与模板归[工作台插件](/docs/modules/plugin)。

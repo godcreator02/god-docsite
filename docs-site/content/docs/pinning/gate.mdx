@@ -1,0 +1,59 @@
+---
+title: 什么算红、门禁拦什么
+description: check 把哪几类问题计入红；本仓未提交的改动引起的黄为什么按红算、怎么认出来；退出码 0、1、2 各是什么；这个仓的门禁怎么落实
+---
+
+`check` 只读不写，退出码只看红的总数：有红退 1，门禁不放行。下面还是 `src/greet.ts` 那个例子，改了被钉的两行之后，
+走一遍拦下、复核、放行，再看另外几种情况：
+
+<CommitGate />
+
+## 红从哪来
+
+- **缺失的引用**：被钉的行段、文件、目录、名字不在了，或者断言不在的东西出现了。提没提交都算。
+- **拦提交的黄**：状态是「有变动」，而且是本仓未提交的改动引起的（下一节）。
+- **名册外组件**：mdx 里用了 `docfirst.config.mjs` 的 `components` 里没有规则的组件。
+- **不新鲜的生成物**：挂了 `outputs` 映射的落点还不存在、跟正本重新渲染的结果不一致，或者正本渲染不了，见[生成物怎么渲染](/docs/rendering)。
+- **轨迹卡的病**：`content/trajectory/` 下的卡缺必填字段或格式不对。
+
+绿、未确认、不拦提交的黄只打印，不计入。加 `--json` 时整份报告打成一行，退出码的算法不变。
+
+{/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="333-347" hash="883424c426d8" blob="036135d56300" */}
+
+{/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="231-239" hash="87e007751793" blob="036135d56300" */}
+
+## 本仓未提交的改动引起的黄，按红算
+
+一处黄灯，`check` 再问三件事：它是行段、整文件或目录树吗（`exists`、`has` 没有黄，不问）；被钉的文件和这篇文档往上找到的是不是同一个 `.git`；
+那个仓的 `git status` 里有没有这个文件（目录树是这个目录下的任何一个路径）。三个都是，这个黄就是这次改动引起的，打成 🔴、计入红。
+
+{/* ref file="../packages/docfirst-workflow/src/project/git.ts" lines="189-209" hash="519cd2928353" blob="afd0fbdae4c4" */}
+
+{/* ref file="../packages/docfirst-workflow/src/project/uncommitted.ts" lines="26-36" hash="3bdc3b66b964" blob="312fa48d1440" */}
+
+「未提交」包括工作区改了、已经暂存、还没跟踪的新文件，改名两头的路径都算。每个仓一次 `check` 只跑一次 `git status`，
+带 `--no-optional-locks`，不跟同时在这个仓里干活的人抢索引锁。
+
+被钉文件在别的仓里，或者改动已经提交，这个黄只报告、退 0：改代码的提交和改文档的提交已经不可能是同一个了。
+为什么要在同一个提交里复核，见轨迹卡[同提交复核](/trajectory/2026-09-25-drift-handled-in-same-commit)。
+
+## 退出码
+
+| 退出码 | 什么时候 |
+| --- | --- |
+| 0 | 没有红；`--help` |
+| 1 | `check` 有红；`confirm` 碰到红、钉不住或生成物摆不出去；`render` 有正本渲染不了 |
+| 2 | 用法错，什么都没动：不认识的命令或开关；`confirm` 以外的命令带了文档路径；`--accept` 没点名页；点名的不是这个项目里的文档；`trajectory` 时还没有轨迹卡目录 |
+
+{/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="85-100" hash="122c339e1c4f" blob="036135d56300" */}
+
+{/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="126-138" hash="f69acb5f7470" blob="036135d56300" */}
+
+`--accept` 必须点名页：它接受的是黄灯，同一个仓里别人钉的黄还等着他自己复核。
+
+## 这个仓的门禁
+
+docfirst 不装 git hook，接进哪一步由各仓自己定。这个仓没有 git hook，也没有 CI：「`docs-site` 里 `pnpm docfirst check`
+通过才提交」是[仓的 AGENTS 正本](/maintain/agents)门禁里的一条规矩，由提交的人照做。
+
+{/* absent path="../.github" type="absent" */}

@@ -1,0 +1,95 @@
+---
+title: 维护者手册
+description: 改这个仓的代码时，东西放在哪、提交前要通过哪些检查、提交怎么写、怎么发布、哪些目录只读
+---
+
+## 仓布局
+
+仓根 `god-live-doc/` 是 git 仓，同时是 pnpm 包工作区；上一级的单元目录只有一张出生证 `unit.json`，不在 git 里。
+工作区照 devkit 的 workspace 仓布局：插件在 `plugins/`，不是插件的包在 `packages/`，再加上 `docs-site/` 这个站。
+
+{/* has file="../pnpm-workspace.yaml" text="- plugins/*" */}
+
+`plugins/docfirst/` 是[工作台插件](/docs/modules/plugin) `@godcreator/gwb-docfirst-workflow`：建站命令与说明书。
+`packages/` 下每个目录一个 npm 包：
+
+{/* tree dir="../packages" depth="1" hash="06330e2d87df" */}
+
+[钉码核心](/docs/modules/pin) `docfirst-pin`、[轨迹核心](/docs/modules/trajectory) `docfirst-trajectory`、
+[命令行与项目](/docs/modules/workflow) `docfirst-workflow`、[fumadocs 适配](/docs/modules/fumadocs) `docfirst-fumadocs`，
+加上讲解组件的外壳与零件 [`docs-explain`](/docs/modules/docs-explain)。谁能依赖谁见[测试与边界](/maintain/testing)。
+
+站也是工作区成员：它用 `workspace:*` 装工作区里的包，钉的是工作区里的真源码，所以仓里不另留示例项目。
+devkit 的建仓模板不收文档站，这是本仓有意的例外，理由见轨迹卡
+[插件挪到 plugins/docfirst](/trajectory/2026-09-25-plugin-to-plugins-dir)。
+
+站的内容在 `docs-site/content/` 下。`trajectory/`（轨迹卡）与 `future/`（未来区）两个名字固定，其余目录都是现状区：
+`docs/` 讲原理，`maintain/` 就是这一区，给改这个仓的人看。
+
+{/* tree dir="content" depth="1" hash="5b64f1579a79" */}
+
+仓根的 `tests/` 是工作区级测试，星轨盘测试用的卡片 fixture 在 `tests/fixtures/trajectory/`。
+
+## 提交前要通过的检查
+
+每处都有自己的命令，全部通过才提交：
+
+<Tabs>
+  <Tab title="仓根">
+    `pnpm test`、`pnpm typecheck`、`pnpm build`。`build` 与 `typecheck` 按 `./plugins/*` 与 `./packages/*` 过滤，插件在其中；
+    `test` 只跑 `tests/` 下的 `node --test`，不包括插件的 vitest。
+  </Tab>
+  <Tab title="docs-site/">
+    `pnpm docfirst check`、`pnpm test`、`pnpm build`、`node scripts/verify-roster.mjs`。`verify-roster.mjs` 核对组件名册两边
+    （`docfirst.config.mjs` 的 `components` 与 `src/components/registry.ts`）一致。
+  </Tab>
+  <Tab title="plugins/docfirst/">
+    `pnpm check`、`pnpm build`。`check` 依次跑 typecheck、oxlint、vitest；`test` 跳过打了 `slow` 标签的测试，`test:all` 不跳。
+  </Tab>
+</Tabs>
+
+三处的脚本，依次是仓根、站、插件：
+
+{/* ref file="../package.json" lines="7-12" hash="6e15b3e305d3" blob="e5ffbb1a9dc4" */}
+
+{/* ref file="package.json" lines="7-15" hash="06917a2611c7" blob="3eccd3ca82ab" */}
+
+{/* ref file="../plugins/docfirst/package.json" lines="24-31" hash="c94db08cbe3b" blob="f285e7cbd770" */}
+
+改了站构建时 remark 插件会调用到的包代码（`docfirst-fumadocs` 及它调用的 workflow、pin），站要先删 `.next` 再 build。
+
+## 提交规矩
+
+- 一个提交一件事。提交信息用中文，末尾带会话里给的 `Co-Authored-By` 与 `Claude-Session` 两行。
+- 同一个仓常有别的会话在改：新文件用 `git add <自己的路径…>`，提交一律 `git commit --only <自己的路径…>`。
+- **代码、文档、轨迹卡放进同一个提交**。改了被钉的代码，本仓未提交改动引起的黄灯 `docfirst check` 算红
+  （见[门禁](/docs/pinning/gate)）：`docfirst confirm` 做机械写回，剩下的黄灯逐条复核，论断还成立就
+  `docfirst confirm <页…> --accept` 点名确认。步骤照说明书 [docfirst-docs](/docs/outputs/skills/docfirst-docs)。
+- 改生成物的正本（README、AGENTS、CLAUDE、插件里的 SKILL.md）后 `pnpm docfirst render`，正本与生成物同一个提交。
+
+## 发布
+
+`packages/` 下的包与插件都用工作台命令 `devkit.release` 发布。升哪一位、发版的每一步、发完怎么升级 default，
+每次都先读说明书「gwb-release」（经 gwb MCP 入口 `run skill.read {"name":"gwb-release"}`），这里不复述。
+发到哪个源由各自 `package.json` 的 `publishConfig.registry` 决定。
+
+包与插件各发各的，没有先后：插件对 `@godcreator/docfirst-*` 包零依赖，由插件的 `tests/artifact.test.ts` 检查。
+唯一的联系是 `plugins/docfirst/src/deps.ts` 那张表：建站时写进新站的依赖版本取自它，表里写精确号。
+`docfirst-workflow` 或 `docfirst-fumadocs` 升了版本号就同时改表，忘了改这条测试当场失败：
+
+{/* ref file="../plugins/docfirst/tests/create.test.ts" lines="346-354" hash="aea19349e525" blob="e6f0ed38fd51" */}
+
+表改了之后插件要再发一版，之后新建的站才装到新包。
+
+插件发布前，在隔离 home 里用 `docfirst.create` 与 `docfirst.create-plain` 各建一个站验一遍（步骤在说明书「gwb-devkit」）。
+改了官方脚手架的版本或本机约定，先在 `plugins/docfirst/` 里跑 `pnpm test:all`：多出的那条真运行官方脚手架、
+跟存下的样本逐份比较，要联网。
+
+## 只读参考
+
+两处都在 `D:\dshfiles`（DSH 时代的归档区），只读，不 `import`：
+
+- 实验室 `D:\dshfiles\260901lab`（`step7-packages` / `step7-site` / `step7-mini`）：架构定案的出处，教学代码，要用其中的逻辑就复制过来。
+- 老仓 `D:\dshfiles\26082711aju\god-live-doc`：用 git 取旧内容这项功能的出处。功能已对齐，不再参考，代码只看这个仓。
+
+agent 在这个仓干活的全部规矩见 [AGENTS.md 的正本](/maintain/agents)。

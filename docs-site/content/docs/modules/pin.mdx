@@ -1,144 +1,90 @@
 ---
 title: 钉码核心 docfirst-pin
-description: 核对与确认、五种目标的比较器、记号语法；只认传进来的格式、读取器与旧内容来源，不碰磁盘、不启动子进程
+description: 编排服务、五种目标的比较器、记号语法；格式、读取器、旧内容来源都从构造参数传进来，自己不读盘、不启动子进程
 ---
 
-**本页回答**：钉码核心负责哪几件事、对外给出哪些接口、要外面传进来哪几样东西，以及它刻意不做什么。
-
-包 `@godcreator/docfirst-pin`，源码在 `packages/docfirst-pin/src/`，入口是 `src/index.ts`（包出口只有 `.` 一个）。
+包 `@godcreator/docfirst-pin`，源码在 `packages/docfirst-pin/src/`，出口只有 `.`（`src/index.ts`）。
 
 <SeamMap module="pin" />
 
 ## 功能
 
-**核对与确认。** 编排服务拿到一篇文档的文本，交给认领它的格式认出引用，逐处算状态，出一份清单；确认在核对的基础上
-逐处决定写不写回、写回成什么，再交格式改文档。三个动作写在服务的文件头：
+**编排服务**是唯一算状态的地方。核对只出清单、不写；确认在核对的结果上逐处决定写不写回、写回成什么，再交格式改文档。
+每处的记录写在它自己的记号上，所以一处钉不住只是那一处不动：
 
 {/* ref file="../packages/docfirst-pin/src/service.ts" lines="1-9" hash="4bc2a719ec00" blob="33d8acf46386" */}
 
-每处引用的记录写在它自己的记号上，所以确认时各处互不牵连：一处钉不住只是那一处不动，其余照写。确认对每一处
-做了什么，只有下面六种结果；其中新写的（recorded）和内容没变、只是挪了位置的（moved）是机械写回，
-有变动的只在带 `accept` 时才按今天的内容重新记：
+确认对每一处的结果只有六种。`recorded` 与 `moved` 是机械写回；黄的只在带 `accept` 时才按今天的内容重新记：
 
 {/* ref file="../packages/docfirst-pin/src/service.ts" lines="16-25" hash="2fd6e774aec5" blob="78a15b3aa6cb" */}
 
-命令行怎么把确认分成默认写回与 `--accept` 两步，见[命令行](/docs/modules/workflow/cli)；为什么这样分，见
-[同提交复核](/trajectory/2026-09-25-drift-handled-in-same-commit)。
+**比较器** `compare.ts` 是纯函数：五种目标各自怎么判新鲜、确认时记什么。行段按什么顺序判、取不到旧内容时怎么降级，
+见[判定](/docs/pinning/judge)；五种目标各钉哪种话，见[五种目标](/docs/pinning/targets)；旧内容与 hunk 表怎么从 git 来，
+见[git 那一侧](/docs/pinning/git)。
 
-**四种状态**，颜色跟着状态走：
-
-<Tabs>
-  <Tab title="🟢 新鲜">
-    被钉的内容跟记号上的记录对得上。行段挪了位置但内容没变也是绿的，`Item.lines` 交回今天的位置，确认时写回新行号。
-  </Tab>
-  <Tab title="🟡 有变动">
-    内容变了，等人复核。取得到旧内容时带 `- / +` 的 diff 和确认时那段；取不到、滑窗也找不到这段时，理由是
-    `unlocated`（位置不明），行号停在记号上写的位置。
-  </Tab>
-  <Tab title="⚪ 未确认">
-    草稿记号，或者没写记录属性的正式记号。名字引用例外：它的正式记号本身就表示确认过。
-  </Tab>
-  <Tab title="🔴 缺失">
-    引用指向的东西没了：整段没了、文件没了、目录没了、断言不在的却出现了、类型变了、名字找不到了。细分理由写在 `Item.reason`。
-  </Tab>
-</Tabs>
-
-状态和清单里的当前内容用同一个口径：比较器说有内容、这时却切不出来（行段跟到了文件外面）的，服务改判缺失，
-不拿空段当新鲜：
-
-{/* ref file="../packages/docfirst-pin/src/service.ts" lines="126-130" hash="5e93093a9506" blob="33d8acf46386" */}
-
-**比较。** 五种目标变没变怎么判、确认时记什么，都在 `compare.ts` 一个比较器里，全是纯函数。行段按固定顺序判，
-前一步能下结论就不往下走：
-
-{/* ref file="../packages/docfirst-pin/src/compare.ts" lines="1-18" hash="14c2252e596d" blob="29bf0bfed8b4" */}
-
-旧内容和 hunk 表是比较器唯一要从外面拿的两样（见「依赖」）。取不到旧内容时退回滑窗查找，是有意设计的降级：
-少的只是 diff，不算错误。git 那一侧怎么提供这两样，见 [git 原理](/docs/principles/git)。
-
-**归一化**只做三件事：换行统一成 LF、去每行行尾空白、去掉末尾空行；缩进和注释保留。展示前和算哈希前用的是同一个函数，
-记号上的哈希一律取前 12 位十六进制：
+**归一化**只做三件事：换行统一成 LF、去每行行尾空白、去掉末尾空行。展示和算 `hash` 用同一个函数，记号上的 hash 取前 12 位：
 
 {/* ref file="../packages/docfirst-pin/src/span.ts" lines="1-10" hash="4bd7647c3a83" blob="349017fffa50" */}
 
-**记号语法**集中在 `marker.ts` 一份，跟接口定义分开：`types.ts` 因「引用能指向什么」而变，`marker.ts` 因「记号怎么写」而变。
-它做的都是文本与「目标 + 记录」之间的翻译：
+**记号语法**集中在 `marker.ts`：目标加记录与记号文本之间的互相转换，草稿记号的写法也在这里，所有格式共用。
+记号的外壳（mdx 里是花括号注释）归格式：
 
 {/* ref file="../packages/docfirst-pin/src/marker.ts" lines="1-9" hash="020a78a576d2" blob="cd45c0abef46" */}
 
-草稿记号所有格式同一个写法。整行匹配，头尾的 `@@` 是哨兵，少一头就是普通文字、不报错：
-
-{/* ref file="../packages/docfirst-pin/src/marker.ts" lines="161-170" hash="177d7fa8561e" blob="cd45c0abef46" */}
-
-正式记号的载荷由这个包给出、所有格式共用：先目标属性，后记录属性，记录属性只出现在确认过的记号上：
-
-{/* ref file="../packages/docfirst-pin/src/marker.ts" lines="50-59" hash="95c0cebd820a" blob="cd45c0abef46" */}
-
-每个动作词认哪些属性是固定的。出现别的属性、记录属性只写了一半、值不合法，都报错到行，各格式因此报错一致：
+每个动作词认哪些属性是固定的；多出属性、记录属性只写了一半、值不合法都报错到行，所以各格式报错一致：
 
 {/* ref file="../packages/docfirst-pin/src/marker.ts" lines="72-79" hash="7ac5787f4488" blob="cd45c0abef46" */}
 
-外壳归格式：`marker(t, r)` 出一行，`parse` 必须认回 `t` 与 `r`。生产用的外壳是 mdx 的花括号注释，见
-[mdx 格式](/docs/modules/workflow/mdx)；五类引用各该说哪种话，见[五类引用手册](/docs/start/handbook)。
-
 ## 接口
 
-出口是 `index.ts` 一个文件，导出表就是这个包对外的全部：
+`index.ts` 的导出表就是这个包对外的全部：
 
 {/* ref file="../packages/docfirst-pin/src/index.ts" hash="d320856e17d5" blob="82b4f1d9846a" */}
 
-**编排服务**是唯一算状态的地方。命令行逐篇传文本（`resolve`），站构建传已经认好的引用（`resolveRefs`），走的是同一条路；
-创建服务时传入的三样就是它的全部依赖：
+**服务**：命令行逐篇传文本（`resolve`），站构建传已经认好的引用（`resolveRefs`），两条走同一段判定；
+创建时传入的三样就是它的全部依赖：
 
 {/* ref file="../packages/docfirst-pin/src/service.ts" lines="49-61" hash="6c78fd023d02" blob="33d8acf46386" */}
 
-**目标五种**：行段、整文件、目录树、存在性、名字。这几个类型的形状就是对外的契约：
+**目标**五种：行段、整文件、目录树、存在性、名字。这几个类型的形状是对外契约：
 
 {/* ref file="../packages/docfirst-pin/src/types.ts" lines="16-52" hash="d3bff37dc577" blob="beff25dfe17b" */}
 
-**引用**带着记号上的记录（未确认的是 `null`）和它在文档里的行号；格式自己用的附加信息（比如这处是不是草稿记号），
-这个包原样带回、从不读它：
-
-{/* ref file="../packages/docfirst-pin/src/types.ts" lines="83-92" hash="b333dff89fd5" blob="5973fadd9101" */}
-
-**清单项**是一处引用核对完的全部信息：当前内容、状态、这段今天在哪，加上缺失与变动的细分理由、diff 和确认时那段：
+**清单项**是一处引用核对完的全部信息：当前内容、状态、这段今天在哪、缺失与变动的细分理由、diff 和确认时那段。
+调用方只读它，不自己判定：
 
 {/* ref file="../packages/docfirst-pin/src/types.ts" lines="100-119" hash="64ab38dc70f5" blob="beff25dfe17b" */}
 
 ## 依赖
 
-源码只 import 自己和 `node:crypto`（算段哈希与 blob 名），`package.json` 里没有运行时依赖和 peer。其余的都在创建服务时传进来。
+源码只 import 包内文件和 `node:crypto`（算段 hash 与 blob 名），`package.json` 里没有运行时依赖和 peer。
+其余三样在创建服务时传进来，生产实现都在 [workflow](/docs/modules/workflow)。
 
-**格式 `Format`**：认领文档、认出引用和记号上的记录、确认时写回、给出正式记号，一共四样。一篇文档没有格式认领，核对和确认都报错；
-两个格式都认领也报错，不靠顺序决定用哪个。名册检查和按原文渲染不是钉码的事，不在这个接口上，由 workflow 的 `DocFormat`
-另加（见 [workflow](/docs/modules/workflow)）。生产实现是 [mdx 格式](/docs/modules/workflow/mdx)，由消费方写进配置的 `formats`：
+**格式 `Format`**：认领文档、认出引用、写回、给出正式记号。一篇文档没有格式认领、或有两个格式认领，都报错。
+名册检查与按原文渲染不在这个接口上，由 workflow 的 `DocFormat` 另加：
 
 {/* ref file="../packages/docfirst-pin/src/types.ts" lines="126-139" hash="3fe3d27a9730" blob="5973fadd9101" */}
 
-**读取器 `Reader`** 与 **旧内容来源 `History`**：每种目标要看的东西都从读取器来，行段、整文件、名字读文件的行，
-目录树要 `list`，存在性要 `kindOf`；读取器没提供后两个方法，那两种目标一律判缺失。旧内容来源按 blob 名取确认时的
-整文件内容、算两份文本之间的 hunk 表；`oldText` 给 `null` 时比较器退回滑窗，挪了位置的段照样跟得上，只是没有 diff。
-两样的生产实现都在 workflow 的[项目装配](/docs/modules/workflow/project)：
+**读取器 `Reader`** 与**旧内容来源 `History`**：行段、整文件、名字读文件的行，目录树要 `list`，存在性要 `kindOf`，
+读取器没提供后两个方法时这两种目标一律判缺失；`oldText` 给 `null` 时比较器改为滑窗查找，少的只是 diff：
 
 {/* ref file="../packages/docfirst-pin/src/types.ts" lines="141-161" hash="a881f182ffdd" blob="5973fadd9101" */}
 
 ## 不做的事
 
-**不碰磁盘，不启动子进程，不知道 git 存在。** 边界测试只许这个包 import 自己和 `node:crypto`，清单里也不许有依赖：
+**不碰磁盘，不启动子进程，不知道 git 存在。** 边界测试只许源码 import 包内文件和 `node:crypto`，清单里不许有依赖：
 
 {/* ref file="../tests/boundary.test.ts" lines="169-178" hash="a91ae39e41d4" blob="e450056cc091" */}
 
-**不认识别的包。** 它不依赖另外三个 `@godcreator/docfirst-*` 包，另外三个包里用到钉码的也只经这一个出口：
+**不认识别的包。** 它不依赖任何兄弟包：
 
-{/* ref file="../tests/boundary.test.ts" lines="126-142" hash="68408bdfa32a" blob="e450056cc091" */}
+{/* ref file="../tests/boundary.test.ts" lines="121-135" hash="6240de2040d1" blob="e450056cc091" */}
 
-**不认识任何文档格式。** 一篇文档归谁认领、记号的外壳长什么样、写回时怎么改那一行，都归格式实现；这个包只拿到一串引用和一段文本。
+**不认识任何文档格式。** 文档归谁认领、记号外壳长什么样、写回时怎么改那一行，都归格式实现。
 
-**不渲染，也不知道生成物放到哪。** 服务接口上没有渲染；生成正本由 workflow [项目装配](/docs/modules/workflow/project)里的摆放发起。
+**不渲染，不知道项目根、配置文件和生成物放哪。** 装配、渲染与摆放在 workflow。
 
-**不知道项目根、配置文件、命令行和站。** 装配归 workflow 的[项目装配](/docs/modules/workflow/project)，这个包只用已经造好的格式、读取器和旧内容来源。
+**不存旧内容。** 记号上只有 `hash` 与 `blob`；目录树只记名字表的 hash，变了只能报黄、给出当前的名字表。
+理由见[记录进记号](/trajectory/2026-09-25-records-live-in-markers)。
 
-**不存旧内容。** 记号上只有哈希和 blob 名；目录树只记名字表的哈希，变了只能报黄、给出当前的名字表，说不出多了哪个、
-少了哪个。理由见[记录进记号](/trajectory/2026-09-25-records-live-in-markers)。
-
-**不决定黄灯拦不拦提交。** 这个包只给状态；哪些黄灯算红由[命令行](/docs/modules/workflow/cli)的 check 决定。
+**不决定黄灯拦不拦提交。** 这个包只给状态，哪些黄算红由 check 决定，见[门禁](/docs/pinning/gate)。

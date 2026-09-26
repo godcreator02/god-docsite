@@ -1,223 +1,90 @@
 ---
 title: 轨迹核心 docfirst-trajectory
-description: 轨迹卡的格式与三层校验、把一批卡片文件算成星轨盘模型、星轨盘画布；两个入口、各入口的依赖边界，以及它刻意不做的事
+description: 卡的解析与校验、分盘建模、布局与缩略图、星轨盘客户端组件；收读好的卡片文件，交出模型与病卡，自己不读盘
 ---
 
-**本页回答**：轨迹核心负责哪几件事、对外给出哪些入口与接口、依赖谁，以及它刻意不做什么。
-
-包 `@godcreator/docfirst-trajectory`，源码在 `packages/docfirst-trajectory/src/`，两个入口文件是 `src/index.ts`（`.`）与
-`src/disk.tsx`（`./disk`），另有样式表 `./star.css`。
+包 `@godcreator/docfirst-trajectory`，源码在 `packages/docfirst-trajectory/src/`，出口是 `.`（`src/index.ts`）、
+`./disk`（`src/disk.tsx`）与样式表 `./star.css`。
 
 <SeamMap module="trajectory" />
 
-<TrajectoryFlow />
-
 ## 功能
 
-这个包做两件事。一是**卡**：轨迹卡这种只增不改的记录格式，以及解析卡、校验卡。二是**盘**：把一批卡
-算成星轨盘，包括分盘建模、布局和绘制。它不读盘：收的是已经读好的卡片文件，交出模型与病卡。
+两件事：**卡**（轨迹卡的格式、解析、三层校验）与**盘**（把一批卡分盘建模、布局、画成星轨盘）。卡有哪些字段、
+怎么校验、怎么分盘、半径和角度怎么排，见[轨迹](/docs/trajectory)。
 
-卡跟 docfirst 的五类引用是两套互不相关的东西：引用说的是文档与代码之间的关系，卡上的关系边说的是卡与卡之间的
-关系（谁取代了谁、谁从哪张卡转向而来）。
-
-### 卡
-
-卡放在项目文档站的 `content/trajectory/` 下，一卡一文件，目录里不建子目录。这个包收的是一批卡片文件（文件名、正文、
-修改时间），挑出卡文件、逐张解析，交出卡与病卡；卡从哪儿来由调用方定，读目录在 workflow 的
-[项目装配](/docs/modules/workflow/project)：
+它不读盘：调用方把卡片文件读好传进来（文件名、正文、修改时间），拿回卡与病卡。卡的身份是文件名去掉 `.mdx` / `.md`
+后缀的部分，同一身份两种后缀都在时只认 `.mdx`：
 
 {/* ref file="../packages/docfirst-trajectory/src/scan.ts" lines="17-47" hash="95f149892032" blob="c08f4ca5904b" */}
 
-**卡的身份是文件名去掉后缀的部分**。后缀可以是 `.mdx` 或 `.md`，同一个身份两种后缀都有时只认 `.mdx`。
-`parent` 和正文关系边引用的都是这个身份，所以改文件名就是改身份，指向它的地方要一起改：
-
-{/* ref file="../packages/docfirst-trajectory/src/scan.ts" lines="24-27" hash="86a5124a9270" blob="c08f4ca5904b" */}
-
-文件名约定是 `<YYYY-MM-DD>-<英文 slug>`，日期在前，列目录时的顺序就是时间顺序。这条约定不进校验，机器只检查
-身份不带路径分隔符、不带后缀。整套格式的语义写在类型文件头上：
-
-{/* ref file="../packages/docfirst-trajectory/src/types.ts" lines="1-9" hash="607009ac234a" blob="c4c94ec63f99" */}
-
-**frontmatter 里有六个卡字段**（`born-at` / `type` / `parent` / `merged-in` / `label` / `domain`）。一个都没写的
-文件不算卡，整份跳过、不报问题；`status` 不在其中，只写了 `status` 的文件也不算卡：
-
-{/* ref file="../packages/docfirst-trajectory/src/parse.ts" lines="16-18" hash="8d32892df338" blob="f4b46a71d249" */}
-
-各字段的形状：`born-at` 精确到分钟（`YYYY-MM-DDTHH:mm`），也接受只写到日（`YYYY-MM-DD`）；`parent` 与
-`merged-in` 是卡身份的列表，`merged-in` 必须是 `parent` 的子集，而且只有根卡能写；`type` 只有 `root` 一个取值
-有含义；`label` 是盘上的显示名；`domain` 是领域名，不写就归入「未分道」这一组。
-
-frontmatter 由包自己逐行解析，不用 YAML 库。原因是 YAML 库会把只写到日的 `born-at` 解析成 `Date` 对象，格式校验
-随之失效，这些卡会被挡在盘外，而且没有任何提示：
-
-{/* ref file="../packages/docfirst-trajectory/src/parse.ts" lines="1-12" hash="da66cb5417e4" blob="f4b46a71d249" */}
-
-值一律保留为字符串或字符串列表，手写 frontmatter 常见的五种写法都接受：
-
-{/* ref file="../packages/docfirst-trajectory/src/parse.ts" lines="73-75" hash="5e0e82ccb458" blob="f4b46a71d249" */}
-
-**关系边写在正文里，不写在 frontmatter 里**：`supersedes::`（取代）与 `pivots-from::`（转向）各占一行，整行只能是
-`字段:: 链接`，链接后面不能再有别的内容。链接用标准 md 链接或 wikilink，链接文字随意，只读链接目标。行首是关系字段、
-整行却不合格式的，记为问题，不会被悄悄忽略：
-
-{/* ref file="../packages/docfirst-trajectory/src/parse.ts" lines="23-30" hash="ec84ce878892" blob="f4b46a71d249" */}
-
-**根卡正文末尾有一个固定的二级标题区块记里程碑**，标题是代码里的常量，不是配置项：
-
-{/* has file="../packages/docfirst-trajectory/src/parse.ts" text="export const MILESTONE_HEADING" */}
-
-每行一条，用**全角**竖线分成三段：日期｜标题｜一句话说明，说明可以省略。里程碑只追加、不改写：
-
-{/* ref file="../packages/docfirst-trajectory/src/parse.ts" lines="38-39" hash="e70d6db72847" blob="f4b46a71d249" */}
-
-### 校验
-
-三层校验在解析一张卡时一起完成，入口是 `parseCardFile`；六个卡字段一个都没写的文件不是卡，不校验：
-
-{/* ref file="../packages/docfirst-trajectory/src/model.ts" lines="97-102" hash="18e9271140d8" blob="1ee72d0830da" */}
-
-三层是形状、必填与一致性：`born-at` 的格式，`parent` / `merged-in` 的元素是否是合法的卡身份；`born-at` 与 `label`
-所有卡必填，`parent` 非根卡必填；`parent` 不能包含自身，`merged-in` 必须是 `parent` 的子集，非根卡不能写
-`merged-in`。逐条报告，不在第一条问题处停下：
-
-{/* ref file="../packages/docfirst-trajectory/src/model.ts" lines="118-141" hash="21ac5b6d57a4" blob="4d569cadd406" */}
-
-**卡正文里不能出现 docfirst 的引用记号**，但这一条不在这个包里查：它要认识记号，是钉码那一侧的规矩，由 workflow
-读卡目录时另加，病并进同一份清单（见[项目装配](/docs/modules/workflow/project)）。这个包只在问题类型里留着这个字段名。
-
-每条问题带字段、原值和一句说明，按文件归到一起：
-
-{/* ref file="../packages/docfirst-trajectory/src/types.ts" lines="90-108" hash="b1e95296c4cc" blob="b20fdb03c00f" */}
-
-问题分两种处理：**`born-at` 不合格的卡不出现在盘上**（半径按日期计算，没有日期就算不出来）；其余字段的问题不影响
-绘制，只列进问题清单：
-
-{/* ref file="../packages/docfirst-trajectory/src/model.ts" lines="214-218" hash="9737da73dffd" blob="1ee72d0830da" */}
-
-有三样故意不校验。**`type` 的取值**：代码只判断它是不是 `root`，别的取值都按普通卡处理，所以新增一种取值不用改代码：
-
-{/* ref file="../packages/docfirst-trajectory/src/model.ts" lines="105-111" hash="6e395266fc87" blob="4d569cadd406" */}
-
-**`domain` 没有白名单**，只是不要用「未分道」这个名字——没写 `domain` 的卡就归在这个名字下：
-
-{/* ref file="../packages/docfirst-trajectory/src/model.ts" lines="43-46" hash="e9a7f8607930" blob="1ee72d0830da" */}
-
-**`status`** 原样读进来、原样交出去，不报缺失，也不检查取值。同一段里还能看到：缺 `label` 算一条问题，但盘照常
-绘制，显示名改用身份去掉日期前缀的部分：
-
-{/* ref file="../packages/docfirst-trajectory/src/model.ts" lines="150-167" hash="99e54f1f6aeb" blob="1ee72d0830da" */}
-
-### 分盘与建模
-
-一个目录里的卡可以分出好几张盘。`type: root` 的卡是根卡，一张根卡对应一张盘，盘的中心就是根卡本身。
-**`parent` 里含哪张盘的身份，这张卡就出现在哪张盘上**，写多个 `parent` 就同时出现在多张盘上；`domain` 只用来分组，
-不决定卡在哪张盘。有 `parent` 的根卡是子项目：父盘没有列在它的 `merged-in` 里时，它在父盘上显示为**虫洞**，
-点进去是子项目的盘；列在里面时，子项目盘上的卡整个并入父盘，逐层递归，遇到环就跳过：
-
-{/* ref file="../packages/docfirst-trajectory/src/model.ts" lines="1-16" hash="a56bb1b35a0f" blob="1ee72d0830da" */}
-
-一张盘的模型是布局的唯一输入：根卡、卡、虫洞、关系边、树、孤星、领域顺序和日期范围。关系边按盘求解，目标不在
-这张盘上的记进 `broken`——同一条边在一张盘上成立、在另一张盘上断开，是正常的：
-
-{/* ref file="../packages/docfirst-trajectory/src/types.ts" lines="155-179" hash="0a43d6bd80a6" blob="b20fdb03c00f" */}
-
-取代边和转向边连在一起的卡组成一棵树。树的**主干**只沿取代链走，挑终点更晚的那条，不挑更长的；转向长出来的是
-**支线**。两种关系一条都没有的卡是**孤星**：
-
-{/* ref file="../packages/docfirst-trajectory/src/types.ts" lines="110-120" hash="7292f2326a9f" blob="b20fdb03c00f" */}
-
-盘清单按最近一次活动从新到旧排列，启动器里第一张就是最近在推进的项目：
-
-{/* ref file="../packages/docfirst-trajectory/src/model.ts" lines="235-246" hash="a9f2e91eb3d5" blob="1ee72d0830da" */}
-
-### 布局与绘制
-
-布局引擎 `RingsLayout`（`src/layout.ts`）是纯计算，不操作 DOM。半径表示时间，内旧外新，相邻两张卡之间的长空档
-会被折叠；角度按树分扇区，同一领域的树相邻；按日期滑轨选定的时间窗放大显示，窗外压缩但不隐藏。绘制在
-`src/canvas/`：颜色只表示领域，节点形状表示 `type`，被取代的卡颜色变淡。布局与绘制的公式和常量从老仓
-`god-flow-panels` 的 `node/star/` 原样搬来，出处写在各源文件的头注释里。
-
-星轨盘组件没有指定盘时显示启动器：每张盘一张卡片，带静态缩略图、名字、卡数和最近活动日期；点卡片进入那张盘。
-换盘只经过启动器和虫洞。
-
-### 谁在用它
-
-workflow 的[项目装配](/docs/modules/workflow/project)读卡目录后交给 `scanCards`；命令行的 `docfirst check` 末尾把病卡计进红，
-`docfirst trajectory` 用 `buildTrajectory` 列出盘、树和主干（见[命令行](/docs/modules/workflow/cli)）。
-[fumadocs 适配](/docs/modules/fumadocs)用 `CARD_KEYS` 做卡集合的 schema，用 `buildTrajectory`、`launcherThumbs` 与 `./disk`
-的 `StarDisk` 做星轨盘服务端组件；站的星轨整页也直接用 `./disk`，接线步骤见[站接线手册](/docs/start/wiring)。
-
 ## 接口
 
-包有两个入口和一张样式表：
+两个入口和一张样式表：
 
 {/* ref file="../packages/docfirst-trajectory/package.json" lines="7-17" hash="c306e90e051b" blob="f560168d1bfb" */}
 
-**`.`** 导出解析、挑卡与扫描、建模、缩略图、布局这几组纯函数与它们的类型：
+**`.`** 导出解析、挑卡与扫描、建模、缩略图、布局这几组纯函数与类型：
 
 {/* ref file="../packages/docfirst-trajectory/src/index.ts" lines="16-84" hash="d82a0442783e" blob="d6f99d5a6da4" */}
 
-组装入口是 `buildTrajectory(scan)`：收 `scanCards` 的结果，给每张盘建模型，交回全部卡、盘清单、问题清单和按根卡身份索引的
-模型。**它不算布局**：布局放在客户端按当前设置计算，调设置时不用再请求服务端：
+哪些 frontmatter 字段算卡由 `CARD_KEYS` 决定。命令行校验卡与 fumadocs 适配的卡集合 schema 用的是这同一张表，
+六个字段一个都没写的文件不算卡：
+
+{/* has file="../packages/docfirst-trajectory/src/parse.ts" text="export const CARD_KEYS" */}
+
+**`buildTrajectory(scan)`** 是组装入口：收 `scanCards` 的结果，给每张盘建模，交回全部卡、盘清单、病卡和按根卡身份索引的模型。
+它不算布局，布局在客户端按当前设置现算：
 
 {/* ref file="../packages/docfirst-trajectory/src/index.ts" lines="121-137" hash="096fb6ab2d4f" blob="d6f99d5a6da4" */}
 
-交出去的卡去掉了内部用的修改时间和标题：
+交出去的卡去掉了包内部用的修改时间和标题：
 
 {/* ref file="../packages/docfirst-trajectory/src/index.ts" lines="86-100" hash="59e04da0bae3" blob="fcf5ac788f4a" */}
 
-模型里被取代卡的集合换成了数组，整份能直接转成 JSON：
+模型里被取代卡的集合换成了数组，整份能直接转成 JSON 交给客户端组件：
 
 {/* ref file="../packages/docfirst-trajectory/src/serial.ts" lines="9-11" hash="06fde308bb1c" blob="c519fffe9144" */}
 
-`renderThumb` / `launcherThumbs`：把每张盘的缩略图生成为静态 SVG，亮色、暗色各一份，客户端直接使用、不再重画。它们不碰 DOM、
-不碰文件，服务端组件拿 `buildTrajectory` 的结果调用：
+**`renderThumb` / `launcherThumbs`** 把每张盘的缩略图生成为静态 SVG，亮、暗各一份；不碰 DOM、不碰文件，服务端组件调用：
 
 {/* ref file="../packages/docfirst-trajectory/src/thumbs.ts" lines="44-45" hash="967351171ea9" blob="37d21bb3508a" */}
 
-**`./disk`** 导出客户端组件 `StarDisk` 和启动器缩略图的类型。它接收 `buildTrajectory` 的结果；`mode` 分整页与嵌入
-两种，整页模式把当前盘写进地址栏的 `?disk=`，嵌入模式要先点一下盘才响应滚轮；顶栏不由它绘制：
+**`./disk`** 导出客户端组件 `StarDisk`。`data` 是 `buildTrajectory` 的结果；卡页地址由 `hrefBase` 拼出，props 里不收函数
+（服务端组件不能把函数传给客户端组件）；`mode` 为 `page` 时当前盘写进地址栏的 `?disk=`，为 `embed` 时先点一下才响应滚轮；
+没有当前盘就显示启动器：
 
 {/* ref file="../packages/docfirst-trajectory/src/disk.tsx" lines="46-61" hash="c673807fd0c7" blob="2a7a7719f23d" */}
 
-另有样式表 `./star.css`。
-
 ## 依赖
 
-没有运行时依赖；react 是可选的 peer，只有 `./disk` 用它：
+没有运行时依赖；react 是可选的 peer，只有 `./disk` 用它，只用 `.` 的调用方（命令行）不必装：
 
 {/* ref file="../packages/docfirst-trajectory/package.json" lines="27-34" hash="ef4ae805b5b5" blob="f560168d1bfb" */}
 
-| 依赖 | 谁用、用来做什么 | 缺了会怎样 |
-| --- | --- | --- |
-| `react`（可选的 peer） | `./disk` 的组件；用宿主安装的那份，不打进产物 | 只用 `.` 的调用方（命令行）不必装 |
-| 浏览器的 DOM / SVG | `src/canvas/` 创建节点、测量标签宽度 | 只在 `./disk` 用；缩略图走服务端的桩文档，不要 DOM |
+`./disk` 的画布层在浏览器里建 DOM 节点、测标签宽度；缩略图走服务端，不要 DOM。
 
 ## 不做的事
 
-**不读盘，也不认识另外三个包。** `.` 入口的产物一条 import 都没有，连 `node:` 也没有；`.ts` 源码只 import 包内文件。
-所以浏览器、服务端、命令行都能直接用它：
+**不读盘，不认识别的包。** `.` 入口的产物一条 import 都没有，连 `node:` 也没有；`.ts` 源码只有相对 import。
+所以浏览器、服务端、命令行都能直接用：
 
 {/* ref file="../tests/boundary.test.ts" lines="180-193" hash="c35ca7bc8225" blob="e450056cc091" */}
 
-依赖方向是单向的：workflow 与 fumadocs 适配依赖本包，本包不依赖钉码核心、workflow、fumadocs 适配：
+它不依赖钉码核心、workflow、fumadocs 适配，反过来 workflow 与 fumadocs 适配依赖它：
 
-{/* ref file="../tests/boundary.test.ts" lines="126-142" hash="68408bdfa32a" blob="e450056cc091" */}
+{/* ref file="../tests/boundary.test.ts" lines="121-135" hash="6240de2040d1" blob="e450056cc091" */}
 
-**不把 react 打进产物。**`./disk` 的产物第一行必须是 `"use client"`，而且只许 import react：
+**不把 react 打进产物。** `./disk` 的产物第一行是 `"use client"`，只许 import react：
 
-{/* ref file="../tests/boundary.test.ts" lines="202-214" hash="513958008f23" blob="e450056cc091" */}
+{/* ref file="../tests/boundary.test.ts" lines="195-207" hash="321c5491dda8" blob="e450056cc091" */}
 
-**不管卡里有没有钉码。**轨迹卡记的是当时的结论，代码后来怎么变都不改它，所以卡里不钉代码，也不需要
-`docfirst confirm`；卡里出现引用记号由 workflow 读卡时报成问题，这个包不认识记号。
+**不认识钉码记号。** 卡里不许钉码这条由 workflow 读卡目录时另查，病并进同一份清单；这个包只在问题类型里留着这个字段名：
+
+{/* ref file="../packages/docfirst-trajectory/src/types.ts" lines="94-98" hash="55cdacf410b9" blob="b20fdb03c00f" */}
 
 **不管 fumadocs 集合与服务端组件。** 卡集合的 schema、正文链接改写、读卡目录的服务端组件都在 [fumadocs 适配](/docs/modules/fumadocs)。
 
-**不认识站的路由和框架。**卡页地址由调用方通过 `hrefBase` 传入，组件只拼字符串；props 里不收函数，因为服务端组件
-不能把函数传给客户端组件；当前是哪张盘只看 `initialDisk` 和地址栏的 `?disk=`。
+**不认识站的路由。** 当前是哪张盘只看 `initialDisk` 与地址栏的 `?disk=`；顶栏不归组件画。
 
-**不在服务端算布局，不知道视口多大、设置调到了哪。**建模不涉及任何几何量；画布层不认识 React，也不知道卡从哪来。
-
-**不提供写卡工具。**卡按上面的字段说明手写，写完运行 `docfirst check` 校验，不在别处另写一套校验规则。
-
-**不支持同时打开多张盘。**换盘只经过启动器和虫洞。
+**不提供写卡工具，不支持同时打开多张盘。** 卡手写，写完用 `docfirst check` 校验；换盘只经过启动器和虫洞。
