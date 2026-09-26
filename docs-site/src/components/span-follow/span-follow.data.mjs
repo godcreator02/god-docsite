@@ -46,6 +46,7 @@ export const markers = {
 };
 
 /** 记号上三个值各是怎么算的（span.ts 的 hashSpan、blobOf、normalizeLines） */
+/* ref file="../packages/docfirst-pin/src/span.ts" lines="21-57" hash="f969251f74d4" blob="23033c685517" */
 export const recordFields = [
   { name: 'lines', value: `${recorded.lines[0]}-${recorded.lines[1]}`, how: '被钉的行号，1 起、含两端' },
   { name: 'hash', value: recorded.hash, how: '这几行换行统一成 LF、去掉行尾空白后，sha256 取前 12 位' },
@@ -53,6 +54,8 @@ export const recordFields = [
 ];
 
 /** judgeSpan 判行段的顺序，前一步能下结论就不往下走（compare.ts） */
+/* ref file="../packages/docfirst-pin/src/compare.ts" lines="6-14" hash="a033f65b0f3e" blob="a2a505a8ece0" */
+/* ref file="../packages/docfirst-pin/src/compare.ts" lines="72-98" hash="cf90a3576cdf" blob="a2a505a8ece0" */
 export const judgeOrder = [
   { id: 'here', label: '记号上的行号处 hash 相同' },
   { id: 'blob', label: '今天整个文件的 blob 相同' },
@@ -61,6 +64,7 @@ export const judgeOrder = [
 ];
 
 /** 按 blob 从对象库取旧文件：命令写成等价的 shell，check 里是把 blob 写进 git cat-file --batch 的标准输入 */
+/* ref file="../packages/docfirst-workflow/src/project/git.ts" lines="87-110" hash="58240822df6b" blob="0a80b545c484" */
 export const catFile = {
   command: `echo ${recorded.blob} | git cat-file --batch`,
   found: `${recorded.blobFull} blob ${recorded.bytes}`,
@@ -68,6 +72,7 @@ export const catFile = {
 };
 
 /** 两份内容写成临时文件 old、new 之后跑的 diff，以及它的完整输出 */
+/* ref file="../packages/docfirst-workflow/src/project/git.ts" lines="153-187" hash="602913b7a3fd" blob="0a80b545c484" */
 export const diffCommand = 'git diff --no-index -U0 --no-color -- old new';
 export const diffOutput = [
   'diff --git a/old b/new',
@@ -79,11 +84,14 @@ export const diffOutput = [
   '+// 返回一句问候',
 ];
 /** parseHunks 从上面那行 @@ 解析出的 hunk 表 */
+/* ref file="../packages/docfirst-pin/src/diff.ts" lines="19-31" hash="76da0e06819b" blob="288622632c90" */
 export const hunks = [{ oldStart: 1, oldLen: 0, newStart: 2, newLen: 2 }];
 /** mapRange(hunks, 2, 3) 的返回值 */
+/* ref file="../packages/docfirst-pin/src/diff.ts" lines="33-85" hash="99df21e531b1" blob="288622632c90" */
 export const mapped = '{ touched: false, start: 4, end: 5 }';
 
 /** 取不到旧文件时，findSpan 在今天的文件里逐个窗口算出的 hash（窗口高度等于记号上的行数） */
+/* ref file="../packages/docfirst-pin/src/compare.ts" lines="35-54" hash="a53b5891c4bc" blob="a2a505a8ece0" */
 export const windows = [
   { start: 1, hash: '9e26e5478323' },
   { start: 2, hash: '8f3849e2f53a' },
@@ -96,6 +104,8 @@ export const windows = [
 const confirmCommand = { kind: 'cmd', text: 'pnpm docfirst confirm', at: 0.04 };
 /** @type {TimedLine} */
 const checkCommand = { kind: 'cmd', text: 'pnpm docfirst check', at: 0.04 };
+/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="37-43" hash="9ebfdcac2bf1" blob="68565dfd474a" */
+/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="171-189" hash="89872d5416cd" blob="68565dfd474a" */
 const recordedLine = `✅ ${files.doc}  ${REF}:2-3  已确认，写上了记录`;
 const freshLine = `🟢 ${files.doc}  ${REF}:2-3  新鲜`;
 const movedLine = `✅ ${files.doc}  ${REF}:2-3  内容没变、挪到了 4-5，已写回新行号`;

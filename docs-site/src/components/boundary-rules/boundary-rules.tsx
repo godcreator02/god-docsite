@@ -37,6 +37,7 @@ const NODE_BOX: Record<string, Box> = {
   pinning: { x: 470, y: 334, w: 100, h: 36 },
   marker: { x: 306, y: 392, w: 90, h: 36 },
   reference: { x: 420, y: 392, w: 90, h: 36 },
+  code: { x: 534, y: 392, w: 90, h: 36 },
   pin: { x: 230, y: 500, w: 200, h: 52 },
   trajectory: { x: 560, y: 500, w: 200, h: 52 },
   crypto: { x: 230, y: 610, w: 150, h: 44 },
@@ -69,6 +70,9 @@ const EDGE_ROUTE: Record<string, Point[]> = {
   'pinning>mdx': [[470, 348], [406, 348]],
   'mdx>marker': [[346, 370], [346, 392]],
   'mdx>reference': [[390, 370], [390, 381], [465, 381], [465, 392]],
+  'pinning>code': [[555, 370], [555, 392]],
+  'code>reference': [[534, 404], [510, 404]],
+  'code>marker': [[579, 428], [579, 440], [351, 440], [351, 428]],
   // 包与包的方向
   'pin~trajectory': [[430, 526], [560, 526]],
   'pin>workflow': [[380, 500], [380, 450]],
@@ -86,6 +90,9 @@ const EDGE_ROUTE: Record<string, Point[]> = {
   // workflow 目录方向
   'marker~reference': [[396, 410], [420, 410]],
   'marker>mdx:back': [[370, 392], [370, 370]],
+  'reference>code:back': [[510, 418], [534, 418]],
+  'mdx~code': [[400, 370], [400, 386], [600, 386], [600, 392]],
+  'code>pinning:back': [[590, 392], [590, 370]],
   'mdx>pinning:back': [[406, 360], [470, 360]],
   'mdx>project': [[356, 334], [356, 300], [470, 300]],
   'pinning>project:back': [[540, 334], [540, 312]],

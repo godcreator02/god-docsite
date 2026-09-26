@@ -13,6 +13,7 @@ const OTHER_REF = '../../greet-lib/src/greet.ts';
 const MARKER_BEFORE = `{/* ref file="${REF}" lines="4-5" hash="3eb99c2e88e2" blob="58b32ed1c69e" */}`;
 const MARKER_AFTER = `{/* ref file="${REF}" lines="4-5" hash="9a083fec7547" blob="eeec5ca2bd8f" */}`;
 
+/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="296-303" hash="85058fb75fad" blob="68565dfd474a" */
 const BLOCKING_LINE = `🔴 ${DOC}  ${REF}:4-5  有变动，是本仓还没提交的改动引起的——在同一个提交里复核，再 docfirst confirm ${DOC} --accept`;
 
 export const files = { doc: DOC, ref: REF, cwd: '~/repo/docs-site' };
@@ -29,8 +30,10 @@ export const gateLabel = {
 };
 
 /** check 计入红的几类，退出码只看它们的总数 */
+/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="311-332" hash="efcb24752ad5" blob="68565dfd474a" */
+/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="218-236" hash="f70391e16cf2" blob="68565dfd474a" */
 export const redSources = [
-  { name: '缺失的引用', rule: '被钉的行段、文件、目录、名字不在了，或断言不在的东西出现了；提没提交都算' },
+  { name: '缺失的引用', rule: '被钉的行段、文件、目录、名字不在了；提没提交都算' },
   { name: '拦提交的黄', rule: '状态是「有变动」，且被钉文件在文档所在的仓里有未提交的改动' },
   { name: '名册外组件', rule: 'mdx 里用了 docfirst.config.mjs 的 components 里没有的组件' },
   { name: '不新鲜的生成物', rule: '挂了 outputs 映射的落点：文件还不存在、跟正本重新渲染的结果不一致、正本头部缺点名的字段、正本渲染不了' },
@@ -60,6 +63,12 @@ export const notRed = ['🟢 新鲜', '⚪ 未确认', '🟡 有变动但不是�
  *   sources: boolean, command: string, output: OutLine[], exit: 0 | 1, gate: Gate }} Step
  * @type {Step[]}
  */
+/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="37-43" hash="9ebfdcac2bf1" blob="68565dfd474a" */
+/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="171-189" hash="89872d5416cd" blob="68565dfd474a" */
+/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="335-341" hash="dcd5a37f8b61" blob="68565dfd474a" */
+/* ref file="../packages/docfirst-workflow/src/project/uncommitted.ts" lines="1-4" hash="4968cfab632f" blob="2ad45230cb96" */
+/* ref file="../packages/docfirst-workflow/src/project/uncommitted.ts" lines="26-36" hash="85c1c005ef67" blob="2ad45230cb96" */
+/* has file="../packages/docfirst-trajectory/src/model.ts" text="born-at 格式须 YYYY-MM-DD 或 YYYY-MM-DDTHH:mm" */
 export const steps = [
   {
     title: '改了被钉的两行，还没提交',

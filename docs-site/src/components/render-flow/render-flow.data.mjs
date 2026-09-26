@@ -53,6 +53,8 @@ export const sourceParts = {
 };
 
 /** 写到 ../skills/greet/SKILL.md 的生成物全文 */
+/* ref file="../packages/docfirst-workflow/src/mdx/render.ts" lines="38-55" hash="e1060d7157f7" blob="471cfd781c18" */
+/* ref file="../packages/docfirst-workflow/src/project/placement.ts" lines="139-195" hash="5dcf3df126a9" blob="3ad1d1a31735" */
 export const outputLines = [
   '---',
   'name: greet',
@@ -88,6 +90,9 @@ export const refusalLines = [
 ];
 /** 上面几行里渲染不了的那几行的行号 */
 export const refusalBadLines = [17, 19, 21];
+/* ref file="../packages/docfirst-workflow/src/mdx/render.ts" lines="77-114" hash="82dd4904507d" blob="471cfd781c18" */
+/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="206-211" hash="d77611f10efb" blob="68565dfd474a" */
+/* ref file="../packages/docfirst-pin/src/types.ts" lines="92-98" hash="b9f62b148d2e" blob="714c2718e246" */
 export const refusalMessage =
   `🔴 ${files.source} → ${files.output}  正本渲染不了：` +
   '第 17 行的引用缺失（文件不在了），先修好；第 19 行有组件 <Callout>，生成正本只写 markdown；' +
@@ -98,6 +103,9 @@ export const refusalMessage =
  * @typedef {{ text: string, kind: 'cmd' | 'out' | 'ok' | 'err', at: number }} TimedLine
  * @type {Record<'render' | 'check' | 'refuse', TimedLine[]>}
  */
+/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="343-357" hash="0d0da5c61ab5" blob="68565dfd474a" */
+/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="334-341" hash="c28d8799272e" blob="68565dfd474a" */
+/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="37-43" hash="9ebfdcac2bf1" blob="68565dfd474a" */
 export const terminals = {
   render: [
     { kind: 'cmd', text: 'pnpm docfirst render', at: 0.04 },
@@ -129,6 +137,9 @@ export const terminals = {
  * @typedef {{ id: SceneId, title: string, text: string, duration: number }} RenderChapter
  * @type {RenderChapter[]}
  */
+/* ref file="../packages/docfirst-workflow/src/mdx/render.ts" lines="116-133" hash="96fae5b03942" blob="471cfd781c18" */
+/* ref file="../packages/docfirst-workflow/src/project/placement.ts" lines="119-137" hash="134440fb80cc" blob="3ad1d1a31735" */
+/* ref file="../packages/docfirst-workflow/src/project/placement.ts" lines="197-268" hash="8c252d7102ba" blob="3ad1d1a31735" */
 export const chapters = [
   {
     id: 'source',
@@ -159,7 +170,7 @@ export const chapters = [
     id: 'fields',
     title: '点名的字段加回头部',
     text:
-      '这个落点点名了 name 和 description：这两个字段按正本里的顺序逐行照搬（不解析 YAML，多行的值连同缩进的续行一起搬），' +
+      '这个落点点名了 name 和 description：这两个字段按 outputs 里点名的顺序逐行照搬（不解析 YAML，多行的值连同缩进的续行一起搬），' +
       '外面补上两行 ---，空一行再接正文。title 没点名，不带。outputs 里只写一个路径字符串的落点（比如仓根 README.md）什么都不带；' +
       '点名的字段正本里没有，这个落点不写，报「frontmatter 里没有 …」。',
     duration: 7,

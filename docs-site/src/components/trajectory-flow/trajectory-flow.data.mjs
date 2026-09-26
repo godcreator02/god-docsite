@@ -31,6 +31,7 @@ export const stages = [
 ];
 
 /** 卡字段，顺序照 parse.ts 的 CARD_KEYS */
+/* ref file="../packages/docfirst-trajectory/src/parse.ts" lines="18-18" hash="74454731c96f" blob="4e25ee1e4c92" */
 export const cardKeys = ['type', 'born-at', 'parent', 'label', 'domain'];
 
 /**
@@ -134,6 +135,8 @@ export function cardOf(code) {
  * scanCardDir 里依次发生的调用。role 标出函数在哪个包：blue 是 docfirst-workflow，violet 是 docfirst-trajectory。
  * @type {Array<{ call: string, role: 'blue' | 'violet', what: string }>}
  */
+/* ref file="../packages/docfirst-workflow/src/project/card-dir.ts" lines="13-25" hash="7d367c0d4a7f" blob="0c202dd219be" */
+/* ref file="../packages/docfirst-trajectory/src/scan.ts" lines="82-92" hash="aa54cc2e797c" blob="7ace664ccf8b" */
 export const readCalls = [
   { call: 'readdir(dir)', role: 'blue', what: '列出目录这一层；目录不存在或读不了，整个函数返回 { cards: [], sick: [] }' },
   { call: 'pickCardFiles(names)', role: 'violet', what: '只留 .md 与 .mdx；同一个身份两种后缀都有时只留 .mdx' },
@@ -143,6 +146,7 @@ export const readCalls = [
 ];
 
 /** card-refs.ts 认的两种形态 */
+/* ref file="../packages/docfirst-workflow/src/project/card-refs.ts" lines="17-38" hash="09ecf841cc47" blob="7d8a942dfc3c" */
 export const refForms = ['{/* ref …、{/* tree …、{/* has … 这类正式记号', '以 @@docfirst 开头的一行（已经删掉的草稿写法）'];
 
 /**
@@ -168,6 +172,7 @@ export const checks = [
 export const failedChecks = { D: ['shape', 'docfirst'] };
 
 /** scanCardDir 交回的 sick：病按文件归拢，path 相对卡目录 */
+/* has file="../packages/docfirst-trajectory/src/model.ts" text="born-at 格式须 YYYY-MM-DD 或 YYYY-MM-DDTHH:mm" */
 export const sick = [
   {
     path: '2026-06-12-pin-in-card.mdx',
@@ -228,6 +233,7 @@ export const layout = {
 };
 
 /** 站的整页路由 page.tsx 里接线的几行（原文，start 是行号） */
+/* ref file="src/app/(trajectory-disk)/trajectory/page.tsx" hash="7785977f2762" blob="da67a1b04df3" */
 export const pageLines = [
   { start: 4, lines: ["import { loadTrajectory, StarDisk } from '@godcreator/docfirst-fumadocs/trajectory';"] },
   { start: 8, lines: ["  const data = await loadTrajectory(join(process.cwd(), 'content', 'trajectory'));"] },
@@ -241,6 +247,7 @@ export const clicks = [
 ];
 
 /** docfirst-fumadocs 的 src/trajectory.ts 里 loadTrajectory 的定义（原文，start 是行号） */
+/* ref file="../packages/docfirst-fumadocs/src/trajectory.ts" lines="22-27" hash="4d9ae8574c6a" blob="877bcbfc11a5" */
 export const fumadocsLines = {
   start: 22,
   lines: [
@@ -257,6 +264,8 @@ export const fumadocsLines = {
  * 两段命令行输出，原样
  * @type {Record<'check' | 'trajectory', Array<{ kind: 'cmd' | 'out' | 'ok' | 'err', text: string }>>}
  */
+/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="218-236" hash="f70391e16cf2" blob="68565dfd474a" */
+/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="250-270" hash="931ad6970d4e" blob="68565dfd474a" */
 export const terminals = {
   check: [
     { kind: 'cmd', text: 'pnpm docfirst check' },
