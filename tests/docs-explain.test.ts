@@ -112,6 +112,24 @@ test("CasePicker 第一帧：每种情况一个胶囊，默认选第一个；受
   assert.throws(() => render({ value: "nope" }), /没有 id 为「nope」的情况/);
 });
 
+test("CasePicker 一个都不选：给了 renderNone，value 是 null 时画 renderNone、没有按下的胶囊、没有说明；不给 renderNone 就报错", () => {
+  const render = (props: { value?: string | null; initial?: string | null; renderNone?: () => unknown }): string =>
+    renderToStaticMarkup(
+      createElement(CasePicker, {
+        cases: CASES,
+        ...props,
+        children: (item) => createElement("div", { className: "scene" }, item.id),
+      } as Parameters<typeof CasePicker>[0]),
+    );
+  const none = render({ value: null, renderNone: () => createElement("div", { className: "overview" }, "全景") });
+  assert.match(none, /<div class="overview">全景<\/div>/);
+  assert.doesNotMatch(none, /aria-pressed="true"/);
+  assert.doesNotMatch(none, /class="scene"/);
+  assert.doesNotMatch(none, /dx-caption/);
+  assert.equal(render({ initial: null, renderNone: () => null }).includes('aria-pressed="true"'), false);
+  assert.throws(() => render({ value: null }), /要给 renderNone/);
+});
+
 test("外壳拿到空数组直接报错", () => {
   assert.throws(() => renderToStaticMarkup(createElement(Stepper, { steps: [], children: () => null })), /steps 不能是空数组/);
   assert.throws(() => renderToStaticMarkup(createElement(Timeline, { chapters: [], children: () => null })), /chapters 不能是空数组/);

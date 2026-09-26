@@ -17,6 +17,7 @@ import * as mdx from "@godcreator/docfirst-workflow/mdx";
 import { fumadocsRoster } from "@godcreator/docfirst-fumadocs/roster";
 import * as tabs from "./src/components/tabs/tabs.ai.mjs";
 import * as pin from "./src/components/pin/pin.ai.mjs";
+import * as pinGlance from "./src/components/pin-glance/glance.ai.mjs";
 import * as seamMap from "./src/components/seam-map/seam-map.ai.mjs";
 import * as renderFlow from "./src/components/render-flow/render-flow.ai.mjs";
 
@@ -54,6 +55,7 @@ export default {
     // 手写的术语标注——机读版里只保留术语原词，不保留样式
     Term: "children",
     // 自包含的讲解组件：规则读组件自己的讲解数据，把每一步、每一条写成段落
+    PinGlance: pinGlance.PinGlance,
     PinStory: pin.PinStory,
     PinJudge: pin.PinJudge,
     SeamMap: seamMap.SeamMap,

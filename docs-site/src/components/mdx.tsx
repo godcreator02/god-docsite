@@ -16,6 +16,7 @@ import type { ComponentName } from './registry';
 import { Tabs, Tab } from './tabs/tabs';
 import { PinJudge } from './pin/judge';
 import { PinStory } from './pin/story';
+import { PinGlance } from './pin-glance/glance';
 import { RenderFlow } from './render-flow/render-flow';
 import { SeamMap } from './seam-map/seam-map';
 
@@ -31,6 +32,7 @@ const table: Record<ComponentName, MDXComponents[string]> = {
   Folder,
   File,
   Term,
+  PinGlance,
   PinStory,
   PinJudge,
   SeamMap,

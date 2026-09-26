@@ -69,10 +69,17 @@
 .seam-map .sm-badge:focus-visible .sm-badge-ring { stroke: var(--dx-accent); stroke-width: 2; }
 
 /* 入口：灰色胶囊与箭头，不编号 */
-.seam-map .sm-entry rect { fill: transparent; stroke: var(--dx-line); }
-.seam-map .sm-entry text { fill: var(--dx-dim); font-size: 11.5px; }
-.seam-map .sm-entry line { stroke: var(--dx-dim); stroke-width: 1.2; }
-.seam-map .sm-entry polygon { fill: var(--dx-dim); }
+/* 只选直接子元素：图标内部也有 rect、line，不能被这几条改掉描边 */
+.seam-map .sm-entry > rect { fill: transparent; stroke: var(--dx-line); }
+.seam-map .sm-entry > text { fill: var(--dx-dim); font-size: 11.5px; }
+.seam-map .sm-entry > line { stroke: var(--dx-dim); stroke-width: 1.2; }
+.seam-map .sm-entry > polygon { fill: var(--dx-dim); }
+/* 图标：模块框标题前的用模块自己的角色色，入口块里的用次要文字色 */
+.seam-map .sm-module .sm-icon { color: var(--dx-c); }
+.seam-map .sm-module[data-outside='true'] .sm-icon { color: var(--dx-dim); }
+.seam-map .sm-entry .sm-icon { color: var(--dx-dim); }
+.seam-map .sm-icon { fill: none; pointer-events: none; }
+.seam-map .sm-inline-icon { display: inline-block; vertical-align: -2px; margin-right: 4px; flex: none; }
 
 /* 图例 */
 .seam-map .sm-legend { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 12px; color: var(--dx-dim); }
