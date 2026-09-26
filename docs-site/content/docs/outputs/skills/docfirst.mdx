@@ -5,10 +5,10 @@ description: 要给一个仓建一个接好 docfirst 分区的文档站（`docfi
 docfirst: none
 ---
 
-# docfirst 插件：两条建站命令，带六份说明书
+# docfirst 插件：两条建站命令，另带一组说明书
 
 本插件有**两条命令**：`docfirst.create` 给一个仓建一个接好 docfirst 分区的文档站，`docfirst.create-plain`
-建一个不接 docfirst 的普通 fumadocs 站。除此之外它只做一件事：把另外六份说明书注册给你读。
+建一个不接 docfirst 的普通 fumadocs 站。除此之外它只做一件事：把本插件带的其余说明书注册给你读。
 
 **它对 `@godcreator/docfirst-*` 四个 npm 包零依赖**（pin、trajectory、workflow、fumadocs），装了本插件不必再装什么包。判据是「这件事在哪儿发生」：
 核对 / 确认 / 渲染要在**仓**里发生（那是门禁与站构建要跑的东西），你自己 `cd` 过去跑；只在你手上发生一次的
@@ -99,7 +99,7 @@ description: 来源：<哪个仓 / 哪次会话>
 然后在 B 仓里 `git add` 这个文件、`git commit --only` 这个文件。一条一个文件，所以不会跟 B 仓里别人未提交的
 改动冲突，也不用等。处理完由收件的仓删掉这个文件，结论写进现状页或轨迹卡——inbox 只放待处理的条目，不是档案。
 
-## 本插件还带着六份说明书
+## 本插件还带着这些说明书
 
 - **`docfirst-docs`**：文档站怎么写——分区怎么分、五类引用记号、每页写到哪为止、钉码怎么确认。
   写或改任何仓的文档站之前先读它。

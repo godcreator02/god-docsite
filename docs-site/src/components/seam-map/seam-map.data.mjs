@@ -78,9 +78,9 @@ export const modules = [
     pkg: '@godcreator/gwb-docfirst-workflow',
     role: 'cyan',
     outside: false,
-    blurb: '不进 npm 的依赖网，只在桌面工作台里给 agent 提供两条建站命令和七份说明书。对四个包零依赖：不 import、不运行它们的命令行。',
+    blurb: '不进 npm 的依赖网，只在桌面工作台里给 agent 提供两条建站命令和说明书。对四个包零依赖：不 import、不运行它们的命令行。',
     caps: [
-      { id: 'skills', name: '七份说明书', ident: 'skills/' },
+      { id: 'skills', name: '说明书', ident: 'skills/' },
       { id: 'create', name: '建站命令与模板', ident: 'docfirst.create' },
     ],
   },

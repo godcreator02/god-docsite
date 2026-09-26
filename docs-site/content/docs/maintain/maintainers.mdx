@@ -12,7 +12,7 @@ description: 仓布局、三处门禁、提交规矩、发布、只读参考
 
 {/* has file="../pnpm-workspace.yaml" text="- plugins/*" */}
 
-`plugins/docfirst/` 是工作台插件 `@godcreator/gwb-docfirst-workflow`（两条建站命令与七份说明书，跟四个包互不认识）。
+`plugins/docfirst/` 是工作台插件 `@godcreator/gwb-docfirst-workflow`（两条建站命令与说明书，跟四个包互不认识）。
 `packages/` 下四个 docfirst 的 npm 包，外加讲解组件的模板包：
 
 {/* tree dir="../packages" depth="1" hash="06330e2d87df" */}
@@ -54,7 +54,7 @@ format / mdx / project / cli 四个目录），`docfirst-fumadocs` 是 fumadocs 
 
 ## 写代码的规矩
 
-{/* ref file="content/docs/maintain/agents.mdx" lines="40-57" hash="b9e991bab6f7" blob="4ef0a13d5c3d" */}
+{/* ref file="content/docs/maintain/agents.mdx" lines="40-57" hash="5d2a2da65489" blob="2f2bb988c953" */}
 
 再补两条站这边的：改了站构建时 remark 插件会跑到的包代码，站要**先删 `.next` 再 build** 才看得见（Turbopack 只按 mdx 内容缓存）；
 调试站用 `next build` + `next start`，不用 dev，启动的站验完必须停掉。

@@ -46,7 +46,7 @@ README、CLAUDE.md、这份规矩与插件里的七份 SKILL.md 都是**生成�
   **`tests/boundary.test.ts` 是唯一的边界守卫**（包的方向、两个核心零依赖、workflow 目录方向、宿主只能是 peer、
   包不认识插件、docs-explain 只给站用），别绕、别删、别为了让门禁通过注释掉某一条。
 - **要在仓里发生的（核对、确认、渲染）归包，只在 agent 手上发生一次的归插件**：建站
-  （`docfirst.create` 与 `docfirst.create-plain`）与七份说明书在 `plugins/docfirst/`。建站的每一步（运行官方脚手架、本机约定、
+  （`docfirst.create` 与 `docfirst.create-plain`）与说明书在 `plugins/docfirst/`。建站的每一步（运行官方脚手架、本机约定、
   挑端口、写盘）都在插件的 `src/` 里，插件必需注入的只有命令总线 `gwbCommands`，不依赖别的插件建站。
 - 子进程调用一律带超时。
 - 门禁，三处都要通过才提交：

@@ -1,6 +1,6 @@
 ---
 title: 工作台插件
-description: gwb-docfirst-workflow：两条建站命令 docfirst.create 与 docfirst.create-plain，加七份说明书；对 @godcreator/docfirst-* 四个包零依赖
+description: gwb-docfirst-workflow：两条建站命令 docfirst.create 与 docfirst.create-plain，加随插件发布的说明书；对 @godcreator/docfirst-* 四个包零依赖
 ---
 
 **本页回答**：`@godcreator/gwb-docfirst-workflow` 提供什么、对外的接口长什么样、依赖谁、为什么一个字都不依赖 `@godcreator/docfirst-*` 那四个包。
@@ -9,7 +9,7 @@ description: gwb-docfirst-workflow：两条建站命令 docfirst.create 与 docf
 
 ## 功能
 
-这是 god 工作台（gwb）的一个插件，也是这个工作区里唯一不发成 npm 库的包。它提供两样东西：**两条建站命令**，`docfirst.create` 建一个接好 docfirst 三个区（现状 `docs`、轨迹 `trajectory`、未来 `future`）的文档站，`docfirst.create-plain` 建一个不接 docfirst 的普通 fumadocs 站；**七份说明书**，随插件发布、注册给 skills 插件。分工写在入口文件的文件头上：
+这是 god 工作台（gwb）的一个插件，也是这个工作区里唯一不发成 npm 库的包。它提供两样东西：**两条建站命令**，`docfirst.create` 建一个接好 docfirst 三个区（现状 `docs`、轨迹 `trajectory`、未来 `future`）的文档站，`docfirst.create-plain` 建一个不接 docfirst 的普通 fumadocs 站；**说明书**，随插件发布、注册给 skills 插件。分工写在入口文件的文件头上：
 
 {/* ref file="../plugins/docfirst/src/index.ts" lines="12-20" hash="8f696f6f8968" blob="a9aa2f4c2ca3" */}
 
@@ -21,11 +21,11 @@ description: gwb-docfirst-workflow：两条建站命令 docfirst.create 与 docf
 
 {/* has file="../plugins/docfirst/src/index.ts" text="createSite, type SiteOptions" */}
 
-七份说明书分三类。讲 docfirst 这套机制的三份：`docfirst`（插件自己怎么用）、`docfirst-docs`（文档站怎么写）、`trajectory`（轨迹卡怎么记）；讲文档站本身的一份：`docs-site`（每页怎么写成讲清原理的网页、两条建站命令、fumadocs 站的组件与构建）；讲通用开发纪律的三份：`spec-grill`（接到需求先盘问）、`parallel-by-module`（按模块派子代理）、`docs-governance`（文档与注释治理）。
+说明书分三类。讲 docfirst 这套机制的：`docfirst`（插件自己怎么用）、`docfirst-docs`（文档站怎么写）、`trajectory`（轨迹卡怎么记）；讲文档站本身的：`docs-site`（每页怎么写成讲清原理的网页、两条建站命令、fumadocs 站的组件与构建）；讲通用开发纪律的：`spec-grill`（接到需求先盘问）、`parallel-by-module`（按模块派子代理）、`docs-governance`（文档与注释治理）。
 
 {/* tree dir="../plugins/docfirst/skills" depth="1" hash="fb82986da185" */}
 
-七份的正本都在这个站的 `content/docs/outputs/skills/` 下（跟包在同一个仓才改得动，纪律那三份也要跟钉码写法、分区保持一致），由 `docfirst.config.mjs` 的 `outputs` 映射生成到插件的 `skills/`。纪律那三份为什么放回本仓，见 [三份纪律并回本仓](/trajectory/2026-09-10-dev-discipline-comes-home)：
+正本都在这个站的 `content/docs/outputs/skills/` 下（跟包在同一个仓才改得动，讲纪律的几份也要跟钉码写法、分区保持一致），由 `docfirst.config.mjs` 的 `outputs` 映射生成到插件的 `skills/`。讲纪律的几份为什么放回本仓，见 [三份纪律并回本仓](/trajectory/2026-09-10-dev-discipline-comes-home)：
 
 {/* ref file="docfirst.config.mjs" lines="20-30" hash="ec44c3a085e4" blob="d6fce2c7e95b" */}
 
