@@ -25,9 +25,9 @@ description: workflow 的 cli 目录：各条子命令怎么分派、打印什�
 
 ### 人读输出的词表
 
-一行一处引用：状态符号、文档、目标、一句话说明。说明后面的括号是细分理由——红说清楚是哪一种「指向空气」（整段删光、文件不在、目录不在、断言不在却出现了、文件和目录换了、名字没了），黄里只有「位置不明」一种细分：取不到确认时的内容，滑窗也找不到这段。目录树没有细分理由时，括号里是当前的项数：
+一行一处引用：状态符号、文档、目标、一句话说明。说明后面的括号是细分理由——红说清楚引用的是什么东西不在了（整段删光、文件不在、目录不在、断言不在却出现了、文件和目录换了、名字没了），黄里只有「位置不明」一种细分：取不到确认时的内容，在整个文件里也找不到 hash 相同的那段。目录树没有细分理由时，括号里是当前的项数：
 
-{/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="35-51" hash="5ba78c29bc99" blob="12b6936e716e" */}
+{/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="35-51" hash="74adc80e503f" blob="147bc8474cdb" */}
 
 行里的目标写的是**记号上的**行号；行段跟到新位置之后，今天在哪看 `--json` 报告里的 `lines`，或者站上那一块的标题。
 
@@ -54,7 +54,7 @@ description: workflow 的 cli 目录：各条子命令怎么分派、打印什�
 ⚪ content/docs/a.mdx  src/greet.ts:2-3  未确认，等作者确认
 🟡 content/docs/a.mdx  src/greet.ts:4-5  有变动，等作者复核
 🔴 content/docs/a.mdx  src/greet.ts:4-5  有变动，是本仓还没提交的改动引起的——在同一个提交里复核，再 docfirst confirm content/docs/a.mdx --accept
-🔴 content/docs/a.mdx  src/greet.ts:4-5  缺失，引用指向空气（整段已被删光）
+🔴 content/docs/a.mdx  src/greet.ts:4-5  缺失（整段已被删光）
 ```
 
 生成物的每种状态各译成一句人读的话：
@@ -85,7 +85,7 @@ description: workflow 的 cli 目录：各条子命令怎么分派、打印什�
 ✅ content/docs/a.mdx  src/greet.ts:2-3  已确认，草稿记号已换成正式记号
 ✅ content/docs/a.mdx  src/greet.ts:2-3  内容没变、挪到了 4-5，已写回新行号
 🟡 content/docs/a.mdx  src/greet.ts:4-5  有变动，等作者复核——复核后 docfirst confirm content/docs/a.mdx --accept
-🔴 content/docs/a.mdx  第 3 行 src/greet.ts:4-5  缺失，引用指向空气（整段已被删光），这处没动
+🔴 content/docs/a.mdx  第 3 行 src/greet.ts:4-5  缺失（整段已被删光），这处没动
 ```
 
 带了 `--accept` 的：
@@ -142,7 +142,7 @@ description: workflow 的 cli 目录：各条子命令怎么分派、打印什�
 | 1 | 有红：缺失、本仓未提交改动引起的黄、名册外组件、生成物不新鲜、病卡；`confirm` 遇到红、`render` 与 `confirm` 遇到生成不了的生成物 |
 | 2 | 命令名不认识；开关不在那条命令的表里；`confirm` 之外的命令带了文档路径；`--accept` 没点名页；点名的路径不是项目里的文档；没有轨迹卡目录时跑 `trajectory` |
 
-所以门禁里直接跑 `pnpm docfirst check`：它拦的是「引用指向空气」和「这次改了被钉的代码却没复核」这两类。
+所以门禁里直接跑 `pnpm docfirst check`：它拦的是「引用的东西不在了」和「这次改了被钉的代码却没复核」。
 
 `check --json` 的报告也是**契约**：读它的是别的程序（门禁、编辑器、想列出「待重写页与漂移的引用」的 agent），加字段可以，改名、删字段不可以：
 

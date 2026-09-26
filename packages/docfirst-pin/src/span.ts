@@ -57,7 +57,7 @@ export function blobOf(lines: string[]): string {
 }
 
 /**
- * 取出 [a, b] 这几行（1 起、闭区间）并归一化；行段超出文件就给 null——引用指向空气。
+ * 取出 [a, b] 这几行（1 起、闭区间）并归一化；行段超出文件就给 null。
  * 整文件按行读进来的最后一个元素常常是文件末换行留下的空串，它不算一行内容。
  */
 export function sliceSpan(lines: string[] | null, [a, b]: Span): string[] | null {

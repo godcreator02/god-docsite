@@ -102,7 +102,7 @@ export const steps = [
     marker: `{/* ref file="${REF}" lines="4-5" hash="9a083fec7547" blob="eeec5ca2bd8f" */}`,
     status: 'missing',
     command: 'pnpm docfirst check',
-    cli: `🔴 ${DOC}  ${REF}:4-5  缺失，引用指向空气（整段已被删光）`,
+    cli: `🔴 ${DOC}  ${REF}:4-5  缺失（整段已被删光）`,
     removed: ['export function greet(name: string) {', '  return `hi, ${name}`;', '}'],
     text: '函数删掉了，被钉的两行在今天的文件里找不到了，状态是「缺失」（红），check 退 1。页面上这一块改成显示文档写下时的那两行，好让人知道原来引的是什么。要么改写这处引用，要么连同那句话一起删掉。',
   },

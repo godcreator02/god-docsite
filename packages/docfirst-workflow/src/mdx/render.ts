@@ -85,7 +85,7 @@ function editFor(text: string, node: TreeNode, listing: Listing, edits: Edit[], 
     const [start, end] = offsetsOf(node);
     const kind = item.reference.target.kind;
     if (kind === "exists" || kind === "has") edits.push(dropLine(text, start, end));
-    else if (item.status === "missing") refusals.push(`第 ${line} 行的引用缺失（${item.reason ?? "指向空气"}），先修好`);
+    else if (item.status === "missing") refusals.push(`第 ${line} 行的引用缺失（${item.reason ?? "引用的东西不在了"}），先修好`);
     else edits.push(replaceWithBlock(text, start, end, blockOf(item)));
     return true;
   }

@@ -125,15 +125,15 @@ description: 写下 → 未确认 → confirm 写上记录 → 挪了位置机�
 把函数删掉，或者把文件删掉：
 
 ```text
-🔴 content/docs/a.mdx  src/greet.ts:4-5  缺失，引用指向空气（整段已被删光）
-🔴 content/docs/a.mdx  src/greet.ts:4-5  缺失，引用指向空气（文件不在了）
+🔴 content/docs/a.mdx  src/greet.ts:4-5  缺失（整段已被删光）
+🔴 content/docs/a.mdx  src/greet.ts:4-5  缺失（文件不在了）
 ```
 
 红退 1。取得到确认时的内容，站上这一块显示的就是**文档写下时那段**，好让人知道原本引的是什么。`confirm`
 碰到红的那一处不动，同一篇里别的记号照写：
 
 ```text
-🔴 content/docs/a.mdx  第 3 行 src/greet.ts:4-5  缺失，引用指向空气（整段已被删光），这处没动
+🔴 content/docs/a.mdx  第 3 行 src/greet.ts:4-5  缺失（整段已被删光），这处没动
 ```
 
 改写这处引用，或者连同说它的那句话一起删掉。记录就在记号上，记号删了，记录也就没了，不用另外清理。

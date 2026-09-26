@@ -74,7 +74,7 @@ test("confirm 遇红：红的那处不动、别的照写，打印后退 1", asyn
     writeFileSync(join(p.root, "docs", "a.md"), "# md\n\n@@docfirst ref src/greet.ts:2-3 @@\n\n@@docfirst ref src/nowhere.ts:1-2 @@\n");
     const done = await p.cli("confirm");
     assert.equal(done.code, 1);
-    assert.match(done.out, /🔴 docs\/a\.md {2}第 5 行 src\/nowhere\.ts:1-2 {2}缺失，引用指向空气（文件不在了），这处没动/);
+    assert.match(done.out, /🔴 docs\/a\.md {2}第 5 行 src\/nowhere\.ts:1-2 {2}缺失（文件不在了），这处没动/);
     const doc = p.read("docs/a.md");
     assert.match(doc, CONFIRMED, "钉得住的那处照写");
     assert.match(doc, /^@@docfirst ref src\/nowhere\.ts:1-2 @@$/m, "红的那处原样留着");
@@ -177,7 +177,7 @@ test("五类引用一篇文档：五种记号各自认得回来；多了文件�
     const after = await p.cli("check");
     assert.equal(after.code, 1);
     assert.match(after.out, /🔴 docs\/d\.md {2}tree src depth=1 {2}有变动，是本仓还没提交的改动引起的（3 项）/, "多出来的文件还没提交，这个黄算红");
-    assert.match(after.out, /🔴 docs\/d\.md {2}absent src\/remove\.ts {2}缺失，引用指向空气（断言它不在，它却出现了）/);
+    assert.match(after.out, /🔴 docs\/d\.md {2}absent src\/remove\.ts {2}缺失（断言它不在，它却出现了）/);
   } finally {
     p.teardown();
   }

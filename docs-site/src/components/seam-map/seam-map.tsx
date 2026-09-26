@@ -2,12 +2,12 @@
 /**
  * 系统地图的接缝图：虚线框是模块（docfirst 的每个包与工作台插件，每个包一种角色色），框里的方块是能力，
  * 跨模块的线带编号，就是接缝；实线是代码调用，虚线是读写磁盘上的文件；框外是使用方的站、使用方的仓、fumadocs 本体与外面进来的入口。
- * 鼠标停在编号上（或键盘聚焦到它），高亮这条接缝和两端的能力，旁边浮出它的说明；停在模块框上，高亮跟它有关的接缝、浮出模块说明。
- * 鼠标一挪开浮层就消失，点击不固定。
+ * 两件事互相独立：鼠标停在编号或模块框上（或键盘聚焦到它）浮出说明，挪开就收起；
+ * 点击（或回车、空格）固定高亮关系——点编号高亮这条接缝和两端的能力，点模块框高亮跟它有关的接缝，再点一次取消。
  * 内容全在 seam-map.data.mjs，这里只有布局与交互；机读版由 seam-map.ai.mjs 读同一份数据生成。
  */
 import { useState } from 'react';
-import type { ComponentType, CSSProperties, ReactNode, SVGProps } from 'react';
+import type { ComponentType, CSSProperties, KeyboardEvent, ReactNode, SVGProps } from 'react';
 import { Pill } from '@godcreator/docs-explain';
 import { Bot, FolderGit2, Globe, Hammer, Layers, Orbit, Pin, Plug, Puzzle, SquareTerminal, Workflow } from 'lucide-react';
 import { capById, entries, moduleOfCap, modules, seams, seamsOfModule } from './seam-map.data.mjs';
@@ -131,18 +131,30 @@ interface Target {
   kind: 'seam' | 'module';
   id: string;
 }
-type Point = (target: Target | null) => void;
+/** point 管浮层（停着就显示），pin 管高亮（点一下固定、再点取消） */
+interface Pointing {
+  point: (target: Target | null) => void;
+  pin: (target: Target) => void;
+}
 
-/** 鼠标停着或键盘聚焦时显示浮层，离开就收起 */
-function pointable(label: string, target: Target, point: Point) {
+const sameTarget = (p: Target | null, q: Target): boolean => p !== null && p.kind === q.kind && p.id === q.id;
+
+function pointable(label: string, target: Target, pinned: boolean, { point, pin }: Pointing) {
   return {
-    role: 'img',
+    role: 'button',
     tabIndex: 0,
     'aria-label': label,
+    'aria-pressed': pinned,
     onMouseEnter: () => point(target),
     onMouseLeave: () => point(null),
     onFocus: () => point(target),
     onBlur: () => point(null),
+    onClick: () => pin(target),
+    onKeyDown: (event: KeyboardEvent) => {
+      if (event.key !== 'Enter' && event.key !== ' ') return;
+      event.preventDefault();
+      pin(target);
+    },
   };
 }
 
@@ -164,7 +176,7 @@ function CapBlock({ id, lit }: { id: string; lit: boolean | undefined }) {
   );
 }
 
-function ModuleGroup({ module, focused, litCaps, point }: { module: Module; focused: boolean; litCaps: Set<string> | null; point: Point }) {
+function ModuleGroup({ module, focused, litCaps, pointing }: { module: Module; focused: boolean; litCaps: Set<string> | null; pointing: Pointing }) {
   const frame = layoutOf(GROUP_BOX, module.id, '模块');
   const FrameIcon = layoutOf(MODULE_ICON, module.id, '模块图标');
   return (
@@ -173,7 +185,7 @@ function ModuleGroup({ module, focused, litCaps, point }: { module: Module; focu
       data-role={module.role ?? 'slate'}
       data-outside={module.outside}
       data-focus={focused}
-      {...pointable(`模块 ${module.name}`, { kind: 'module', id: module.id }, point)}
+      {...pointable(`模块 ${module.name}`, { kind: 'module', id: module.id }, focused, pointing)}
     >
       {frame === null ? null : (
         <>
@@ -195,13 +207,13 @@ function ModuleGroup({ module, focused, litCaps, point }: { module: Module; focu
 }
 
 /** on 为 undefined 表示什么都没指着：不高亮也不淡化 */
-function SeamLine({ seam, on, point }: { seam: Seam; on: boolean | undefined; point: Point }) {
+function SeamLine({ seam, on, pinned, pointing }: { seam: Seam; on: boolean | undefined; pinned: boolean; pointing: Pointing }) {
   const { d, badge } = layoutOf(SEAM_PATH, seam.id, '接缝');
   const [bx, by] = badge;
   return (
     <g className="sm-seam" data-on={on} data-via={seam.via}>
       <path d={d} />
-      <g className="sm-badge" {...pointable(`接缝 ${seam.label}`, { kind: 'seam', id: seam.id }, point)}>
+      <g className="sm-badge" {...pointable(`接缝 ${seam.label}`, { kind: 'seam', id: seam.id }, pinned, pointing)}>
         <circle className="sm-badge-hit" cx={bx} cy={by} r={13} />
         <circle className="sm-badge-ring" cx={bx} cy={by} r={9.5} />
         <text x={bx} y={by} textAnchor="middle" dominantBaseline="central">
@@ -270,7 +282,7 @@ function Legend() {
         '接缝编号',
       )}
       {item(<rect x="2" y="2" width="22" height="10" rx="5" className="sm-lg-entry" />, '从外面进来的入口')}
-      <span className="sm-legend-hint">鼠标停在编号或模块框上看说明</span>
+      <span className="sm-legend-hint">鼠标停在编号或模块框上看说明，点击固定高亮它连着谁</span>
     </div>
   );
 }
@@ -355,14 +367,20 @@ function Tip({ target }: { target: Target }) {
 }
 
 export function SeamMap() {
+  /** 浮层显示的是鼠标停着的那个；高亮的是点击固定的那个，两者互不影响 */
   const [shown, setShown] = useState<Target | null>(null);
+  const [pinned, setPinned] = useState<Target | null>(null);
+  const pointing: Pointing = {
+    point: setShown,
+    pin: (target) => setPinned((current) => (sameTarget(current, target) ? null : target)),
+  };
 
-  const focused = shown?.kind === 'module' ? modules.find((m) => m.id === shown.id)! : null;
-  const seam = shown?.kind === 'seam' ? seams.find((s) => s.id === shown.id)! : null;
+  const focused = pinned?.kind === 'module' ? modules.find((m) => m.id === pinned.id)! : null;
+  const seam = pinned?.kind === 'seam' ? seams.find((s) => s.id === pinned.id)! : null;
   const active = focused !== null ? seamsOfModule(focused.id) : seam !== null ? [seam] : [];
-  const nothingShown = shown === null;
+  const nothingPinned = pinned === null;
   const activeIds = new Set(active.map((s) => s.id));
-  const litCaps = nothingShown ? null : new Set(active.flatMap((s) => [...s.a, ...s.b]));
+  const litCaps = nothingPinned ? null : new Set(active.flatMap((s) => [...s.a, ...s.b]));
   if (focused !== null && litCaps !== null) for (const c of focused.caps) litCaps.add(c.id);
   // 高亮的接缝画在最后，压在别的线上面
   const drawOrder = [...seams].sort((p, q) => Number(activeIds.has(p.id)) - Number(activeIds.has(q.id)));
@@ -377,10 +395,10 @@ export function SeamMap() {
               <Entry key={e.id} id={e.id} name={e.name} />
             ))}
             {modules.map((m) => (
-              <ModuleGroup key={m.id} module={m} focused={focused?.id === m.id} litCaps={litCaps} point={setShown} />
+              <ModuleGroup key={m.id} module={m} focused={focused?.id === m.id} litCaps={litCaps} pointing={pointing} />
             ))}
             {drawOrder.map((s) => (
-              <SeamLine key={s.id} seam={s} on={nothingShown ? undefined : activeIds.has(s.id)} point={setShown} />
+              <SeamLine key={s.id} seam={s} on={nothingPinned ? undefined : activeIds.has(s.id)} pinned={seam?.id === s.id} pointing={pointing} />
             ))}
           </svg>
           {shown === null ? null : <Tip target={shown} />}

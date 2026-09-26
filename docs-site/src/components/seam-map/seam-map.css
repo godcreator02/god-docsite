@@ -15,7 +15,7 @@
   .seam-map .sm-scroll { overflow: visible; }
 }
 .seam-map .sm-svg { display: block; width: 100%; min-width: 820px; height: auto; font-size: 12px; user-select: none; }
-.seam-map .sm-svg [tabindex] { cursor: help; outline: none; }
+.seam-map .sm-svg [role='button'] { cursor: pointer; outline: none; }
 
 /* 模块：虚线框，框外的东西是实线细框 */
 .seam-map .sm-frame {

@@ -88,7 +88,7 @@ description: 拿钉码核心当对象，把行段、整文件、目录树、存�
 **改了之后 A**：有人把 `hashSpan` 改名成 `digestSpan`，全仓替换，提交了：
 
 ```text
-🔴 content/docs/start/handbook.mdx  has ../packages/docfirst-pin/src/span.ts "export function hashSpan"  缺失，引用指向空气（文件里没有这个名字了）
+🔴 content/docs/start/handbook.mdx  has ../packages/docfirst-pin/src/span.ts "export function hashSpan"  缺失（文件里没有这个名字了）
 🟢 content/docs/start/handbook.mdx  has ../packages/docfirst-pin/src/span.ts "export function normalizeLines"  新鲜
 🟡 content/docs/start/handbook.mdx  ../packages/docfirst-pin/src/span.ts:31-34  有变动，等作者复核
 ```
@@ -103,7 +103,7 @@ description: 拿钉码核心当对象，把行段、整文件、目录树、存�
 🟡 content/docs/start/handbook.mdx  ../packages/docfirst-pin/src/span.ts:31-34  有变动，等作者复核
 ```
 
-小标签还是绿的——名字在，`has` 只管这个。代码块黄、带 diff：所有记号上的旧哈希一夜之间全对不上，
+小标签还是绿的——名字在，`has` 只管这个。代码块黄、带 diff：所有记号上的旧 hash 全对不上，
 这件事只有那一行 diff 说得出来。两种引用各自检查各自的那一件事。
 
 这两个例子都是「提交了」：已经提交的改动引起的黄只报告、退 0。改动还没提交时，行段那处的黄会算红，
@@ -127,7 +127,7 @@ git 那一半在 workflow 的项目装配（`packages/docfirst-workflow/src/proj
 **改了之后**：有人图省事把 git 那一半搬进钉码核心，提交了：
 
 ```text
-🔴 content/docs/start/handbook.mdx  absent ../packages/docfirst-pin/src/git.ts  缺失，引用指向空气（断言它不在，它却出现了）
+🔴 content/docs/start/handbook.mdx  absent ../packages/docfirst-pin/src/git.ts  缺失（断言它不在，它却出现了）
 🟡 content/docs/start/handbook.mdx  tree ../packages/docfirst-pin/src depth=1  有变动，等作者复核（8 项）
 ```
 

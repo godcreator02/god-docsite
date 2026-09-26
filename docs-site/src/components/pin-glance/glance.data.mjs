@@ -53,7 +53,7 @@ export const cases = [
     code: ['// 打招呼'],
     span: null,
     status: 'missing',
-    cli: '🔴 content/docs/a.mdx  src/greet.ts:2-3  缺失，引用指向空气（整段已被删光）',
+    cli: '🔴 content/docs/a.mdx  src/greet.ts:2-3  缺失（整段已被删光）',
   },
 ];
 

@@ -36,10 +36,10 @@ const MARK: Record<string, string> = { fresh: "🟢", changed: "🟡", missing: 
 const LABEL: Record<string, string> = {
   fresh: "新鲜",
   changed: "有变动，等作者复核",
-  missing: "缺失，引用指向空气",
+  missing: "缺失",
   unconfirmed: "未确认，等作者确认",
 };
-/** 状态的细分理由：红说清楚是哪一种「指向空气」，黄说清楚是不是找不着了 */
+/** 状态的细分理由：红说清楚引用的是什么东西不在了，黄说清楚是不是找不着了 */
 const REASON: Record<string, string> = {
   vanished: "整段已被删光",
   "file-missing": "文件不在了",
