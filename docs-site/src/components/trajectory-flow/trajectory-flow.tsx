@@ -154,7 +154,7 @@ function ReadScene(): JSX.Element {
         <Pane title={d.file} role="amber" icon="file" extra={<Pill tone="bad">第 {markerLine} 行是钉码记号</Pill>}>
           <CodeLines lines={d.lines} highlight={[markerLine, markerLine]} tone="bad" />
         </Pane>
-        <Pane title="checkDocfirstRefs 认的三种记号（card-refs.ts）" role="blue">
+        <Pane title="checkDocfirstRefs 认的两种记号（card-refs.ts）" role="blue">
           <ul className="tf-bullets">
             {refForms.map((form) => (
               <li key={form}>{form}</li>

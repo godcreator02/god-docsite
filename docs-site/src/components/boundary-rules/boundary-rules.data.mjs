@@ -21,8 +21,10 @@ export const nodes = [
   { id: 'explain', name: '讲解组件模板', short: 'docs-explain', ident: 'docs-explain', role: 'slate', parent: null },
   { id: 'fumadocs', name: 'fumadocs 适配', short: 'fumadocs', ident: 'docfirst-fumadocs', role: 'amber', parent: null },
   { id: 'workflow', name: '命令行与项目', short: 'workflow', ident: 'docfirst-workflow', role: 'emerald', parent: null },
-  { id: 'format', name: 'format/', short: 'format/', ident: '格式接口', role: 'emerald', parent: 'workflow' },
+  { id: 'marker', name: 'marker/', short: 'marker/', ident: '记号写法', role: 'emerald', parent: 'workflow' },
+  { id: 'reference', name: 'reference/', short: 'reference/', ident: '引用与清单', role: 'emerald', parent: 'workflow' },
   { id: 'mdx', name: 'mdx/', short: 'mdx/', ident: 'mdx 格式', role: 'emerald', parent: 'workflow' },
+  { id: 'pinning', name: 'pinning/', short: 'pinning/', ident: '钉码编排', role: 'emerald', parent: 'workflow' },
   { id: 'project', name: 'project/', short: 'project/', ident: '项目装配', role: 'emerald', parent: 'workflow' },
   { id: 'cli', name: 'cli/', short: 'cli/', ident: '命令行', role: 'emerald', parent: 'workflow' },
   { id: 'pin', name: '钉码核心', short: 'pin', ident: 'docfirst-pin', role: 'blue', parent: null },
@@ -34,7 +36,7 @@ export const nodes = [
 
 /**
  * 允许的依赖，也就是图上平时画出来的箭头。key 写成「起点>终点」；kind 写这条依赖落在哪里。
- * 包之间的边都是 package.json 里真写着的依赖；workflow 目录之间的边照禁止表 WORKFLOW_DIRS 允许的方向画。
+ * 包之间的边都是 package.json 里真写着的依赖；workflow 目录之间只画相邻两层之间真实的 import（cli → project → pinning → mdx → marker、reference），\n * 上层还直接 import 更下层的目录（cli 与 project 用 marker、mdx、reference，pinning 用 reference），禁止表都允许，图上不画。
  * @typedef {{ key: string, kind: string }} AllowedEdge
  * @type {AllowedEdge[]}
  */
@@ -52,12 +54,13 @@ export const allowedEdges = [
   { key: 'trajectory>host', kind: '可选 peer：react，只给 ./disk 用' },
   { key: 'explain>host', kind: '必需 peer：react' },
   { key: 'pin>crypto', kind: '源码 import' },
-  { key: 'format>pin', kind: '源码 import' },
-  { key: 'cli>format', kind: '目录间 import' },
+  { key: 'marker>pin', kind: '源码 import，只 import 类型' },
+  { key: 'reference>pin', kind: '源码 import，只 import 类型' },
   { key: 'cli>project', kind: '目录间 import' },
-  { key: 'cli>mdx', kind: '禁止表允许，目前没有 import' },
-  { key: 'mdx>format', kind: '目录间 import' },
-  { key: 'project>format', kind: '目录间 import' },
+  { key: 'project>pinning', kind: '目录间 import' },
+  { key: 'pinning>mdx', kind: '目录间 import' },
+  { key: 'mdx>marker', kind: '目录间 import' },
+  { key: 'mdx>reference', kind: '目录间 import，只 import 类型' },
 ];
 
 /**
@@ -79,7 +82,7 @@ export const rules = [
     forbidden: [
       {
         edges: ['pin>workflow', 'pin>fumadocs', 'pin~trajectory'],
-        what: '钉码核心谁都不认识：判新鲜要的格式、读取器、旧内容来源都由构造参数传进来。',
+        what: '钉码核心谁都不认识：判新鲜要的读取器、旧内容来源都由构造参数传进来。',
       },
       {
         edges: ['trajectory>workflow', 'trajectory>fumadocs'],
@@ -105,7 +108,7 @@ export const rules = [
     forbidden: [
       {
         edges: ['pin>others'],
-        what: '钉码核心的 dependencies 与 peerDependencies 必须是空的，源码只许 import 自己的文件和 node:crypto。',
+        what: '钉码核心的 dependencies 与 peerDependencies 必须是空的，源码只许 import 自己的文件和 node:crypto；源码与产物里也不许出现 mdx、记号写法、引用、清单这些文档文本那一侧的名字。',
       },
       {
         edges: ['trajectory>others'],
@@ -114,6 +117,7 @@ export const rules = [
     ],
     tests: [
       { name: 'pin 零依赖：清单里没有 dependencies / peerDependencies，源码只 import 自己和 node:crypto', checks: '读 pin 的 package.json 与 src/ 的 import' },
+      { name: '钉码核心不接触文档文本：源码与产物里没有 mdx、记号写法、格式接口、引用与清单', checks: '读 pin 的 src/ 与产物 index.mjs、index.d.mts 的全文' },
       { name: 'trajectory 的 `.` 入口零 import：产物一条 import 都没有，连 node: 也没有', checks: '读产物 dist/index.mjs 与 package.json 的 dependencies' },
       { name: 'trajectory 的 `.ts` 源码只有相对 import——`.tsx` 是 `./disk` 入口，由下一条按产物查', checks: '读 src/ 下每个 .ts 的 import' },
       { name: 'trajectory 的 `./disk`：客户端指令在头一行，只 import react、不内联 react', checks: '读产物 dist/disk.mjs 的头一行、import 行与正文' },
@@ -122,24 +126,28 @@ export const rules = [
   {
     id: 'workflow-dirs',
     label: 'workflow 目录方向',
-    text: '这几个目录在同一个包里，编译器不拦跨目录的 import：project/ 里写一句 import "../mdx/render.ts" 不会报错，项目装配从此就只能用 mdx 一种格式。禁止表 WORKFLOW_DIRS 列的是禁止的目录：写成允许的目录的话，加一个新目录会默默地什么都不许，加错地方反而更难发现；src/ 下多出一个表里没有的目录，另一条测试当场失败。',
-    allowed: ['cli>format', 'cli>project', 'cli>mdx', 'mdx>format', 'project>format', 'format>pin'],
+    text: '这几个目录在同一个包里，编译器不拦跨目录的 import：mdx/ 里写一句 import "../project/load.ts" 不会报错，mdx 格式从此就跟读盘、git 绑在一起。禁止表 WORKFLOW_DIRS 列的是禁止的目录：写成允许的目录的话，加一个新目录会默默地什么都不许，加错地方反而更难发现；src/ 下多出一个表里没有的目录，另一条测试当场失败。图上只画相邻两层之间的 import：cli 与 project 还直接用 marker、mdx、reference，pinning 也直接用 reference，禁止表都允许。',
+    allowed: ['cli>project', 'project>pinning', 'pinning>mdx', 'mdx>marker', 'mdx>reference', 'marker>pin', 'reference>pin'],
     forbidden: [
       {
-        edges: ['format>mdx', 'format>project', 'format>cli'],
-        what: 'format 是格式接口（钉码的 Format 加上名册检查、按原文渲染这些可选本事，外加渲染拒绝的错误类），谁都不认识；除了同目录的文件只许 import @godcreator/docfirst-pin。',
+        edges: ['marker~reference', 'marker>mdx:back'],
+        what: 'marker 是记号写法，reference 是引用与清单的类型，两个都谁都不认识：marker 只从 @godcreator/docfirst-pin import 类型，reference 只认识 @godcreator/docfirst-pin。',
       },
-      { edges: ['mdx~project'], what: 'mdx 是格式实现，不认识项目怎么装配；project 的格式由配置递进来，不认识 mdx 这个具体格式。' },
-      { edges: ['mdx>cli', 'project>cli'], what: 'cli 是入口，认识另外几个目录，谁都不认识它。' },
+      { edges: ['mdx>pinning:back', 'mdx>project'], what: 'mdx 格式认引用、写回、渲染，不认识钉码编排的先后顺序，也不认识项目怎么装配、不碰磁盘与 git。' },
+      { edges: ['pinning>project:back'], what: '钉码编排不认识 project，也不认识记号属性怎么写：记号写法在 mdx 格式后面。' },
+      { edges: ['project>cli:back', 'pinning>cli'], what: 'cli 是入口，认识另外几个目录，谁都不认识它。' },
+      { edges: ['pin>workflow'], what: '钉码核心不认识 workflow：源码的相对 import 都落在自己的 src/ 里，说明符里没有 docfirst-workflow。' },
       {
         edges: ['workflow>host'],
         what: 'workflow 整个不认识站的宿主：源码、清单、产物 index.mjs / cli.mjs / mdx.mjs 连同它们引的 chunk 里都不许出现 fumadocs、next、react、react-dom。',
       },
     ],
     tests: [
-      { name: 'workflow 目录方向：format 谁都不认识，mdx 与 project 互不认识，都不认识 cli', checks: '读 src/<目录>/ 下每个文件的相对 import，看它落进哪个目录' },
-      { name: 'workflow 目录方向：format 只认识 @godcreator/docfirst-pin', checks: '读 src/format/ 下每个文件的 import' },
-      { name: 'workflow 目录方向：四个目录一个不少、一个不多——加了新目录得先想清楚它能认识谁', checks: 'src/ 下的目录必须正好是禁止表里列出的那些' },
+      { name: 'workflow 目录方向：marker 与 reference 谁都不认识，mdx 不认识钉码编排与 project，都不认识 cli', checks: '读 src/<目录>/ 下每个文件的相对 import，看它落进哪个目录' },
+      { name: 'workflow 目录方向：reference 只认识 @godcreator/docfirst-pin', checks: '读 src/reference/ 下每个文件的 import' },
+      { name: 'workflow 目录方向：marker 只从 @godcreator/docfirst-pin import 类型，别的只许是目录里的相对路径', checks: '读 src/marker/ 下每条 import 语句的整行' },
+      { name: '钉码核心不认识 workflow：源码的相对 import 都落在自己的 src/ 里，说明符里没有 docfirst-workflow', checks: '读 pin 的 src/ 下每个文件的 import' },
+      { name: 'workflow 目录方向：目录一个不少、一个不多——加了新目录得先想清楚它能认识谁', checks: 'src/ 下的目录必须正好是禁止表里列出的那些' },
       { name: 'workflow 不认识任何站的宿主：源码一个 fumadocs / react / next import 都没有，清单里也没有', checks: '读源码、package.json 与产物' },
     ],
   },

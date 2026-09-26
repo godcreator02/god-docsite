@@ -158,7 +158,7 @@ export const steps = [
     text:
       `引用写的是 ${OTHER_REF}，它属于另一个 git 仓 ~/greet-lib，那里有未提交的改动。探针先比仓：被钉文件跟文档不在同一个仓，` +
       '改代码的提交和改文档的提交不可能是同一个，直接回答「否」，不去看那个仓的 git status。这个黄只报告，退出码 0。' +
-      'exists、has 两种引用也不问 git。',
+      'has 引用没有黄，也不问 git。',
     repos: [
       { path: '~/repo', note: '文档在这个仓', lines: [], hit: null },
       { path: '~/greet-lib', note: '被钉的 greet.ts 在这个仓', lines: [' M src/greet.ts'], hit: null },

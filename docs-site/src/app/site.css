@@ -7,7 +7,7 @@
 @import '../components/pin/pin.css';
 /* 系统地图的接缝图 SeamMap */
 @import '../components/seam-map/seam-map.css';
-/* 五类引用 RefKinds、行段跟随 SpanFollow、提交门禁 CommitGate、轨迹卡流程 TrajectoryFlow、边界规则 BoundaryRules */
+/* 引用种类 RefKinds、行段跟随 SpanFollow、提交门禁 CommitGate、轨迹卡流程 TrajectoryFlow、边界规则 BoundaryRules */
 @import '../components/ref-kinds/ref-kinds.css';
 @import '../components/span-follow/span-follow.css';
 @import '../components/commit-gate/commit-gate.css';

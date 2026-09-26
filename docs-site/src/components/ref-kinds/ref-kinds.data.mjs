@@ -1,8 +1,8 @@
 /**
  * 「引用能指向哪几类东西」的全部讲解数据：画面（ref-kinds.tsx）与机读版规则（ref-kinds.ai.mjs）都只读这一份。
  * 例子跟钉码页是同一个仓：content/docs/a.mdx 引用 src/greet.ts，src/ 下有 greet.test.ts、greet.ts、index.ts。
- * 记号语法照 docfirst-pin 的 marker.ts；比什么照 compare.ts；命令行那一行照 docfirst-workflow 的 cli/run.ts
- * 与 format/index.ts 的 REASON_TEXT；站上长什么样照 docfirst-fumadocs 的 blocks.ts 与 pre.tsx。
+ * 记号写法照 docfirst-workflow 的 marker/index.ts；比什么照 docfirst-pin 的 compare.ts；命令行那一行照 docfirst-workflow 的 cli/run.ts
+ * 与 docfirst-pin types.ts 里的 REASON_TEXT；站上长什么样照 docfirst-fumadocs 的 blocks.ts 与 pre.tsx。
  * hash 与 blob 是用 docfirst-pin 的 span.ts 对这版 greet.ts 与这张名字表真算出来的。
  *
  * @typedef {'fresh' | 'changed' | 'missing' | 'unconfirmed'} Status
@@ -21,7 +21,7 @@
  *   compare: CompareRow[], rule: string, observe: Observe, outcomes: Outcome[] }} RefKind
  */
 
-export const files = { doc: 'content/docs/a.mdx', ref: 'src/greet.ts', dir: 'src', absent: 'src/legacy.ts' };
+export const files = { doc: 'content/docs/a.mdx', ref: 'src/greet.ts', dir: 'src' };
 
 const GREET = ['// 打招呼', 'export function greet(name: string) {', '  return `hello, ${name}`;', '}'];
 const NAMES = ['greet.test.ts', 'greet.ts', 'index.ts'];
@@ -217,64 +217,6 @@ export const kinds = [
         when: 'src/ 整个目录不在了',
         cli: '🔴 content/docs/a.mdx  tree src depth=1  缺失（目录不在了）',
         site: { type: 'tree', root: 'src/', names: ['（目录不在了）'], gone: true },
-      },
-    ],
-  },
-  {
-    id: 'exists',
-    label: '存在性',
-    text: 'exists 说这个路径在，absent 断言它不在。记号记确认时的类型（file、dir，或 absent），check 拿今天看到的类型比，不看内容。没有黄：对不上就是红。',
-    formal: ['{/* exists path="src/greet.ts" type="file" */}', '{/* absent path="src/legacy.ts" type="absent" */}'],
-    draft: ['@@docfirst exists src/greet.ts @@', '@@docfirst absent src/legacy.ts @@'],
-    draftNote: 'absent 是断言不在',
-    compare: [
-      { attr: 'type', recorded: 'file', today: 'src/greet.ts 今天是 file、dir，还是不在' },
-      { attr: 'type', recorded: 'absent', today: 'src/legacy.ts 今天是不是还不在' },
-    ],
-    rule: '只看类型，不算 hash、不看内容。',
-    observe: { title: '今天在磁盘上看到的类型', lines: ['src/greet.ts   file', 'src/legacy.ts  （不在）'], highlight: null },
-    outcomes: [
-      {
-        id: 'draft',
-        status: 'unconfirmed',
-        when: '还是草稿记号，没有记录可比（路径在）',
-        cli: '⚪ content/docs/a.mdx  exists src/greet.ts  未确认，等作者确认',
-        site: { type: 'chip', text: 'src/greet.ts · 存在 · 未确认' },
-      },
-      {
-        id: 'same',
-        status: 'fresh',
-        when: 'src/greet.ts 今天还是文件',
-        cli: '🟢 content/docs/a.mdx  exists src/greet.ts  新鲜',
-        site: { type: 'chip', text: 'src/greet.ts · 存在' },
-      },
-      {
-        id: 'file-missing',
-        status: 'missing',
-        when: 'src/greet.ts 不在了',
-        cli: '🔴 content/docs/a.mdx  exists src/greet.ts  缺失（文件不在了）',
-        site: { type: 'chip', text: 'src/greet.ts · 存在 · 缺失' },
-      },
-      {
-        id: 'type-changed',
-        status: 'missing',
-        when: '同一个路径从文件变成了目录',
-        cli: '🔴 content/docs/a.mdx  exists src/greet.ts  缺失（文件和目录换了个）',
-        site: { type: 'chip', text: 'src/greet.ts · 存在 · 缺失' },
-      },
-      {
-        id: 'absent-same',
-        status: 'fresh',
-        when: 'src/legacy.ts 仍然不在',
-        cli: '🟢 content/docs/a.mdx  absent src/legacy.ts  新鲜',
-        site: { type: 'chip', text: 'src/legacy.ts · 不存在' },
-      },
-      {
-        id: 'appeared',
-        status: 'missing',
-        when: '有人又建了 src/legacy.ts',
-        cli: '🔴 content/docs/a.mdx  absent src/legacy.ts  缺失（断言它不在，它却出现了）',
-        site: { type: 'chip', text: 'src/legacy.ts · 不存在 · 缺失' },
       },
     ],
   },

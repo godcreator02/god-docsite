@@ -9,7 +9,7 @@ import { files, kinds, outcomeName, siteSummary } from './ref-kinds.data.mjs';
 export function RefKinds(_node, { paragraph }) {
   const texts = casesText(kinds);
   return [
-    paragraph(`例子：${files.doc} 里的引用都指向 ${files.ref} 或它所在的 ${files.dir}/ 目录；断言不在的路径是 ${files.absent}。`),
+    paragraph(`例子：${files.doc} 里的引用都指向 ${files.ref} 或它所在的 ${files.dir}/ 目录。`),
     ...kinds.flatMap((kind, i) => [
       paragraph(texts[i]),
       paragraph(`正式记号：${kind.formal.join('　')}　草稿记号：${kind.draft.join('　')}（${kind.draftNote}）`),

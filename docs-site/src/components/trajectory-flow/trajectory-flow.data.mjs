@@ -1,7 +1,7 @@
 /**
  * 「一批轨迹卡文件怎么变成星轨盘」的全部讲解数据：画面（trajectory-flow.tsx）与机读版规则（trajectory-flow.ai.mjs）都只读这一份。
  * 例子里的校验结果、模型、树、布局落点与两段命令行输出，是把下面五个卡文件放进一个临时项目
- * （docfirst.config.mjs 只写 `formats: []`，没有现状区文档），实际运行 `docfirst check`、`docfirst trajectory`、
+ * （docfirst.config.mjs 是一个空对象，没有现状区文档），实际运行 `docfirst check`、`docfirst trajectory`、
  * `buildTrajectory` 与 `new RingsLayout(model)` 得到的；包的输出格式变了要重新运行一遍再抄。
  */
 
@@ -142,8 +142,8 @@ export const readCalls = [
   { call: 'checkDocfirstRefs(body)', role: 'blue', what: '对每张卡去掉 frontmatter 的正文逐行查引用记号，病追加进 sick' },
 ];
 
-/** card-refs.ts 认的三种记号形态 */
-export const refForms = ['@@docfirst ref … @@（整行草稿记号）', '<!-- ref …、<!-- tree … 这类 md 正式记号', '{/* ref …、{/* tree … 这类 mdx 正式记号'];
+/** card-refs.ts 认的两种记号形态 */
+export const refForms = ['@@docfirst ref … @@（整行草稿记号）', '{/* ref …、{/* tree …、{/* has … 这类正式记号'];
 
 /**
  * 解析时的几道校验。钉码记号那一道在 docfirst-workflow 的 card-refs.ts 里，其余在 docfirst-trajectory 里：
