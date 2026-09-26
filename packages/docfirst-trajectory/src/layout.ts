@@ -293,9 +293,11 @@ export class RingsLayout {
     );
   }
 
-  /** 建折算表：相邻卡空档超过阈值的中段走对称双半段对数，两端各留呼吸带。 */
+  /** 建折算表：相邻两个有记录的日子空档超过阈值的中段走对称双半段对数，两端各留呼吸带。
+   * 表从 day0（含根卡诞生日）起建：根卡早于第一张卡时，day0 落在表外会折出负的有效天数，环掉进盘心。 */
   private buildEff(): void {
-    const days = [...new Set(this.model.cards.map((c) => dayNum(c.bornAt)))].sort((a, b) => a - b);
+    const cardDays = this.model.cards.map((c) => dayNum(c.bornAt));
+    const days = [...new Set([this.model.day0, ...cardDays])].sort((a, b) => a - b);
     const amp = this.logAmp();
     const segs: EffSeg[] = [];
     let e = 0;
@@ -330,7 +332,7 @@ export class RingsLayout {
       lin(cur - h, h);
     }
     /* 尾段开放 1:1（空态恒等） */
-    segs.push({ d0: days.length ? (days[days.length - 1] as number) : this.model.day0, e0: e, k: 1 });
+    segs.push({ d0: days[days.length - 1] as number, e0: e, k: 1 });
     this.effSegs = segs;
     /* 环带世界深度定死后，每天步长反出：effTotal = 0（单日盘 / 空盘）时 radPerEff 钉 0，
      * radiusDay 的外锚定形式自然把所有环坍缩到 R_LATEST，不用特例判空。 */

@@ -158,6 +158,27 @@ test("外锚定环带：最内 / 最外环世界半径与数据无关", () => {
   assert.equal(a.maxR, b.maxR);
 });
 
+test("外锚定环带：根卡早于第一张卡时，day0 的环仍落在 hubR，任何一天的环都不进盘心", () => {
+  const day = (d: number): string => `2026-01-${String(d).padStart(2, "0")}T08:00`;
+  for (const [rootDay, cardDays] of [
+    [1, [7, 10]],
+    [1, [28, 30]],
+  ] as const) {
+    const model = buildModel(
+      memCards([
+        { name: "root", fm: { type: "root", label: "合成项目", "born-at": day(rootDay) } },
+        ...cardDays.map((d, i) => ({ name: `cd${i}-卡`, fm: { "born-at": day(d), label: "卡", parent: ["root"] } })),
+      ]),
+    );
+    const layout = new RingsLayout(model);
+    assert.equal(model.day0, Date.parse(`${day(rootDay).slice(0, 10)}T00:00:00Z`) / 86400000);
+    closeTo(layout.radiusDay(model.day0), layout.hubR, 9);
+    for (let d = model.day0; d <= model.dayMax; d++) {
+      assert.ok(layout.radiusDay(d) >= layout.hubR - 1e-9, `第 ${d - model.day0} 天的环半径 ${layout.radiusDay(d)} 小于 hubR`);
+    }
+  }
+});
+
 test("外锚定环带：单日盘（effTotal = 0）所有卡半径坍缩到 hubR + AXIS_SPAN，dayOfRadius 不返回 NaN", () => {
   const oneDay = buildSynthetic("oned", [5, 5, 5]);
   const L2 = new RingsLayout(oneDay);
