@@ -22,7 +22,7 @@ description: 把 docfirst 接进一个 fumadocs 站要改的七处：配置、�
 
 命令行和站读的是同一份 `docfirst.config.mjs`，它在项目根（对这个站来说项目根就是站目录）：
 
-{/* ref file="docfirst.config.mjs" lines="16-54" hash="40ac1cff7452" blob="d6fce2c7e95b" */}
+{/* ref file="docfirst.config.mjs" lines="16-62" hash="d0e5217b2e7d" blob="4405110efb5b" */}
 
 配置只认四个键：`formats` 用哪个格式（这里是 workflow 的 `./mdx`）；`content` 是内容根（各区的上一级目录），不写就是 `content`；
 `components` 是组件名册（先展开 fumadocs 适配的 `fumadocsRoster`，再加站自己的组件）；`outputs` 把 mdx 正本映射到生成物。写了别的键，装配当场报错并说清该怎么改：
@@ -86,9 +86,10 @@ llms 路由在用的，别改名：
 
 侧栏是**一棵**树不是三棵：每区一个 `root: true` 的根节点当分区，URL 仍是三个前缀。base-ui 版的 `Root`
 只有单个 fallback 位置，多棵树切换不稳，根节点分区是推荐做法；区内的顺序由各区自己的 `meta.json` 定。
-树在 docs 的 layout 里合成，docfirst 的样式也在这里引入：
+树在 docs 的 layout 里合成，docfirst 的样式也在这里引入。三个根节点各带一个唯一的 `$id`：侧栏顶上切换分区的下拉按
+`$id` 找每个根节点对应的选项，都不带的话三个区会对上同一个选项，下拉里的名字和链接就乱了：
 
-{/* ref file="src/app/docs/layout.tsx" lines="7-29" hash="3914244c424f" blob="d5cf5d75b02d" */}
+{/* ref file="src/app/docs/layout.tsx" lines="7-37" hash="511dde061255" blob="43da089cf1c4" */}
 
 轨迹区 `meta.json` 的第一条不是文档，是一条指向星轨整页的**链接项**——`pages` 认 `[名字](路径)`
 这种写法：
@@ -142,12 +143,12 @@ fumadocs 适配的 `./trajectory` 另有服务端组件 `Trajectory`（读目录
 `src/components/mdx.tsx` 那一半给站。站这一侧的名单正本是 `registry.ts`，它的类型保证 React 表一个不多
 一个不少：
 
-{/* ref file="src/components/registry.ts" lines="9-10" hash="0e9c4d177636" blob="60b1d1a064c2" */}
+{/* ref file="src/components/registry.ts" lines="12-13" hash="874b43b7a109" blob="7e12024b5e7a" */}
 
 React 表先展开 fumadocs 的默认表（标题栏、复制按钮都是它的），再把 `pre` 换成 fumadocs 适配里那个会画状态点的
 `DocfirstPre`；官方的 `useMDXComponents` 与全局类型照旧留着：
 
-{/* ref file="src/components/mdx.tsx" lines="22-45" hash="0907c71af177" blob="79fcc0bfcfd5" */}
+{/* ref file="src/components/mdx.tsx" lines="26-53" hash="c8abd85ecc51" blob="20b84571f18f" */}
 
 目录树引用放进去的是 fumadocs 自己的 `Files` / `Folder` / `File`，两张表里都要有它们，转成机读文本的规则在 fumadocs 适配的
 `fumadocsRoster` 里已经有了。`Term` 是构建时的术语标注生成的，源文件里一般没有，但编译出来的 JSX 会引用它，两张表也

@@ -197,7 +197,12 @@ describe('结构模板', () => {
 
   it('src/app/docs/layout.tsx：侧栏三个根节点，引入 docfirst 的样式', () => {
     const layout = renderedText('src/app/docs/layout.tsx')
-    expect([...layout.matchAll(/zone\('([^']+)'/g)].map((m) => m[1])).toEqual(['现状', '轨迹', '未来'])
+    expect([...layout.matchAll(/zone\('([^']+)', '([^']+)'/g)].map((m) => [m[1], m[2]])).toEqual([
+      ['docs', '现状'],
+      ['trajectory', '轨迹'],
+      ['future', '未来'],
+    ])
+    expect(layout, '每个根节点带唯一的 $id，区切换下拉才对得上').toMatch(/\$id: `zone:\$\{id\}`/)
     expect(layout).toMatch(/root: true/)
     expect(layout).toMatch(/import '\.\.\/docfirst\.css';/)
     expect(renderedText('src/app/docfirst.css')).toMatch(/@import '@godcreator\/docfirst-fumadocs\/light\.css';/)

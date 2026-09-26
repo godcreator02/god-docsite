@@ -1,0 +1,43 @@
+{
+  "name": "@godcreator/docs-explain",
+  "version": "0.1.0",
+  "author": {"name": "godcreator"},
+  "type": "module",
+  "description": "文档站讲解组件的外壳与零件：分步、动画、选情况三种外壳，卡片、终端、胶囊、代码行等零件，共用一套样式。`.` 是客户端组件，`./text` 是生成机读版用的纯函数。",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.mts",
+      "default": "./dist/index.mjs"
+    },
+    "./text": {
+      "types": "./dist/text.d.mts",
+      "default": "./dist/text.mjs"
+    },
+    "./styles.css": "./styles/explain.css"
+  },
+  "files": [
+    "dist",
+    "styles"
+  ],
+  "scripts": {
+    "build": "tsdown",
+    "typecheck": "tsc -p tsconfig.json",
+    "prepublishOnly": "pnpm run build"
+  },
+  "peerDependencies": {
+    "react": ">=19"
+  },
+  "devDependencies": {
+    "@types/react": "^19.3.0",
+    "react": "^19.3.0"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://git.tianshen02.online:28377/api/packages/godcreator/npm/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://git.tianshen02.online:28377/godcreator/god-live-doc.git"
+  },
+  "keywords": ["gwb"]
+}

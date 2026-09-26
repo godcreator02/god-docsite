@@ -1,5 +1,5 @@
 /**
- * 骨架：四个包都在、都能装、都出得来产物，出口按 package.json 的 exports 解析得到。
+ * 骨架：五个包都在、都能装、都出得来产物，出口按 package.json 的 exports 解析得到。
  * 别的规矩（谁能依赖谁、目录方向）归 boundary.test.ts。
  */
 import { test } from "node:test";
@@ -16,11 +16,12 @@ const NAMES: Record<string, string> = {
   "docfirst-trajectory": "@godcreator/docfirst-trajectory",
   "docfirst-workflow": "@godcreator/docfirst-workflow",
   "docfirst-fumadocs": "@godcreator/docfirst-fumadocs",
+  "docs-explain": "@godcreator/docs-explain",
 };
 
-// 这条守的是版本号的形状，不是那个具体的数——把版本号写死在测试里，
+// 这条检查的是版本号的形状，不是那个具体的数——把版本号写死在测试里，
 // 每发一次版就得改一次测试。
-test("四个包齐、包名带 scope、版本是合法 semver", () => {
+test("五个包齐、包名带 scope、版本是合法 semver", () => {
   for (const [dir, name] of Object.entries(NAMES)) {
     const pkg = JSON.parse(readFileSync(join(PACKAGES, dir, "package.json"), "utf8")) as { name: string; version: string };
     assert.equal(pkg.name, name);

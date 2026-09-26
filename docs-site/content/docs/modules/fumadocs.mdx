@@ -155,7 +155,7 @@ fumadocs 与 react 只能是必需的 peer，用使用方项目装的那份：
 
 名单的正本在这儿，两处都拿它对：
 
-{/* ref file="src/components/registry.ts" lines="9-10" hash="0e9c4d177636" blob="60b1d1a064c2" */}
+{/* ref file="src/components/registry.ts" lines="12-13" hash="874b43b7a109" blob="7e12024b5e7a" */}
 
 少登记一处的后果不一样，但都直接报错：**压平表没有** → 打标记时报「名册外组件」；**React 表没有** → 站渲染报 `Expected component`。两处是否一致由站门禁里的一个脚本核对：
 
@@ -168,7 +168,7 @@ fumadocs 与 react 只能是必需的 peer，用使用方项目装的那份：
 - **不管生成物**：生成正本的渲染与写到哪归 workflow。
 - **不把宿主打进产物**：fumadocs、react 与另外三个包都只按包名 import；`./pre` 的 `"use client"` 在产物第一行，别的出口不带这条指令：
 
-{/* ref file="../tests/boundary.test.ts" lines="280-314" hash="39d7e86b49f8" blob="55f573c4c909" */}
+{/* ref file="../tests/boundary.test.ts" lines="294-328" hash="230c83fc7fa0" blob="e450056cc091" */}
 
 - **不管自己的输出最后长什么样**：节点上只放颜色、标题和标记，画成什么样归站侧的 pre 组件和随包发的样式表。
 - **不存副本**：页面上的代码每次构建时现取，文件里只有记号那一行。

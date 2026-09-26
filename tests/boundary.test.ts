@@ -1,13 +1,14 @@
 /**
- * # 边界守卫：四个包之间、workflow 包里面**唯一**的边界检查
+ * # 边界守卫：五个包之间、workflow 包里面**唯一**的边界检查
  *
- * 四个包按接缝切开：钉码 `docfirst-pin`、轨迹 `docfirst-trajectory`、命令行与项目 `docfirst-workflow`、
- * fumadocs 适配 `docfirst-fumadocs`。包与包之间的方向有 pnpm 严格的 node_modules 挡一半——没写进依赖的包
- * import 不到——但「该不该写进依赖」没人挡；workflow 包里四个目录之间更是谁都能 import 谁，`project/` 里
- * 随手写一句 `import "../mdx/render.ts"`，编译器不会报错，项目装配从此就绑死了 mdx 一种格式。
+ * docfirst 的四个包按接缝切开：钉码 `docfirst-pin`、轨迹 `docfirst-trajectory`、命令行与项目 `docfirst-workflow`、
+ * fumadocs 适配 `docfirst-fumadocs`；第五个包 `docs-explain` 是文档站讲解组件的外壳与零件，只给站用，
+ * 跟那四个包互不认识。包与包之间的方向，pnpm 严格的 node_modules 能拦住一半——没写进依赖的包
+ * import 不到——但「该不该写进依赖」没人检查；workflow 包里四个目录之间更是谁都能 import 谁，`project/` 里
+ * 写一句 `import "../mdx/render.ts"`，编译器不会报错，项目装配从此就只能用 mdx 一种格式。
  * **这个文件补上的就是这两项检查。**
  *
- * 它检查五类约束，每一类失败时的表现各不相同：
+ * 它检查六类约束，每一类失败时的表现各不相同：
  *
  * **一、包与包之间的方向**：pin 谁都不认识；trajectory 不认识 pin / workflow / fumadocs；workflow 不认识
  * fumadocs。方向一破，下游的改动就会拖着上游一起发版，而且没有任何别的信号。
@@ -17,11 +18,14 @@
  *
  * **三、workflow 里四个目录的方向**（下面 `WORKFLOW_DIRS` 那张表），以及 workflow 整个不认识任何站的宿主。
  *
- * **四、宿主只能是 peer，且不许被打进产物**：fumadocs 与 react 用的是消费方项目装的那份；打进产物就是
+ * **四、宿主只能是 peer，且不许打包进产物**：fumadocs 与 react 用的是消费方项目装的那份；打包进产物就是
  * 两份 React 各跑一套，现象是预渲染时莫名其妙的 hooks 报错。客户端组件的 "use client" 要留在产物头一行。
  *
- * **五、包不认识工作台插件**：四个 npm 包不许出现任何 `@godcreator/gwb-*`。
+ * **五、包不认识工作台插件**：五个 npm 包不许出现任何 `@godcreator/gwb-*`。
  * 包一旦依赖插件，装 docfirst 的人就得连带装上整个桌面工作台生态。
+ *
+ * **六、docs-explain 只给站用**：没有 dependencies，react 是必需 peer；`.` 是客户端组件，`./text` 零 import
+ * （docfirst.config.mjs 在 Node 里加载它）。别的包都不依赖它。
  *
  * **别删这个文件，也别把某一条注释掉「先让门禁通过」。** 它失败的时候，出错的是设计，不是测试。
  * 真要改方向，改的是那几张表加一段说明为什么——不是把断言删掉。
@@ -44,12 +48,13 @@ interface Pkg {
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const PACKAGES = join(ROOT, "packages");
 
-/** 四个 npm 包在 packages/ 下的目录名 → 包名。工作台插件在 plugins/docfirst/，同一个工作区，但不在这几个包的依赖网里 */
+/** 五个 npm 包在 packages/ 下的目录名 → 包名。工作台插件在 plugins/docfirst/，同一个工作区，但不在这几个包的依赖关系里 */
 const NPM_PACKAGES: Record<string, string> = {
   "docfirst-pin": "@godcreator/docfirst-pin",
   "docfirst-trajectory": "@godcreator/docfirst-trajectory",
   "docfirst-workflow": "@godcreator/docfirst-workflow",
   "docfirst-fumadocs": "@godcreator/docfirst-fumadocs",
+  "docs-explain": "@godcreator/docs-explain",
 };
 const PLUGIN_MANIFEST = join(ROOT, "plugins", "docfirst", "package.json");
 
@@ -118,13 +123,15 @@ function distClosureSpecs(dir: string, file: string): string[] {
  *   pin         钉码：判新鲜只要格式、读取器、旧内容来源三样注进来的东西，谁都不认识
  *   trajectory  轨迹：卡怎么解析、盘怎么建模画，跟钉码无关；读卡目录的那一半在 workflow
  *   workflow    命令行与项目：认识钉码与轨迹，不认识任何站的宿主，所以也不认识 fumadocs 适配
- *   fumadocs    站那一侧：认识以上全部，谁都不认识它
+ *   fumadocs    站那一侧：认识以上三个，除了站谁都不认识它
+ *   docs-explain 讲解组件：普通 fumadocs 站也要用，所以不认识 docfirst 的任何包；它只给站用，四个包也都不认识它
  */
 const PACKAGE_FORBIDDEN: Record<string, string[]> = {
-  "docfirst-pin": ["docfirst-trajectory", "docfirst-workflow", "docfirst-fumadocs"],
-  "docfirst-trajectory": ["docfirst-pin", "docfirst-workflow", "docfirst-fumadocs"],
-  "docfirst-workflow": ["docfirst-fumadocs"],
-  "docfirst-fumadocs": [],
+  "docfirst-pin": ["docfirst-trajectory", "docfirst-workflow", "docfirst-fumadocs", "docs-explain"],
+  "docfirst-trajectory": ["docfirst-pin", "docfirst-workflow", "docfirst-fumadocs", "docs-explain"],
+  "docfirst-workflow": ["docfirst-fumadocs", "docs-explain"],
+  "docfirst-fumadocs": ["docs-explain"],
+  "docs-explain": ["docfirst-pin", "docfirst-trajectory", "docfirst-workflow", "docfirst-fumadocs"],
 };
 
 test("包的方向：清单三类依赖字段里不许出现禁止的兄弟包", () => {
@@ -149,7 +156,7 @@ test("包的方向：源码里也不许 import 禁止的兄弟包", () => {
   assert.deepEqual(bad, []);
 });
 
-test("四个包一个不多一个不少——加了新包得先想清楚它能认识谁", () => {
+test("五个包一个不多一个不少——加了新包得先想清楚它能认识谁", () => {
   const dirs = readdirSync(PACKAGES, { withFileTypes: true })
     .filter((e) => e.isDirectory())
     .map((e) => e.name)
@@ -186,7 +193,7 @@ test("trajectory 的 `.ts` 源码只有相对 import——`.tsx` 是 `./disk` �
 });
 
 test("trajectory 的 `./disk`：客户端指令在头一行，只 import react、不内联 react", () => {
-  // 「不打进 react」要正着断言：react 真被内联进产物时，产物里根本没有那条 import 行，
+  // 「不把 react 打包进产物」要正着断言：react 真被内联进产物时，产物里根本没有那条 import 行，
   // 反着遍历 import 说明符的写法是恒真的（没有行就一条也遍历不到）。
   const disk = distOf("docfirst-trajectory", "disk.mjs");
   assert.match(disk, /^"use client";/, "disk.mjs 的 use client 指令得留在头一行");
@@ -195,7 +202,7 @@ test("trajectory 的 `./disk`：客户端指令在头一行，只 import react�
   // 客户端那半只许 import react：第三方也不许内联（内联的第三方跟宿主装的那份会各跑一套），
   // node: 内置更不许（浏览器里根本没有）
   for (const spec of specs) assert.ok(isReact(spec), `disk.mjs（客户端组件）import 了 react 之外的 ${spec}`);
-  // react 本体的内部标记：真被打进来的话，光看 import 行看不出，得在正文里查
+  // react 本体的内部标记：真被打包进来的话，光看 import 行看不出，得在正文里查
   assert.doesNotMatch(disk, /__CLIENT_INTERNALS|react\.production/, "disk.mjs 正文里有 react 本体的痕迹");
 });
 
@@ -275,7 +282,7 @@ test("workflow 不认识任何站的宿主：源码一个 fumadocs / react / nex
   }
 });
 
-// ── 四、fumadocs 包：宿主只能是 peer，且不许被打进产物 ──────────────────────
+// ── 四、fumadocs 包：宿主只能是 peer，且不许被打包进产物 ──────────────────────
 
 test("fumadocs 包的宿主只能是必需的 peer，不许进 dependencies", () => {
   const pkg = manifestOf("docfirst-fumadocs");
@@ -286,14 +293,14 @@ test("fumadocs 包的宿主只能是必需的 peer，不许进 dependencies", ()
   for (const dep of Object.keys(pkg.dependencies ?? {})) assert.ok(!HOST.test(dep), `fumadocs 包把 ${dep} 装成了自己的依赖`);
 });
 
-test("fumadocs 包的产物：宿主与兄弟包只许按包名 import，不许打进产物；pre 的客户端指令在头一行", () => {
+test("fumadocs 包的产物：宿主与兄弟包只许按包名 import，不许打包进产物；pre 的客户端指令在头一行", () => {
   const FILES = ["index.mjs", "roster.mjs", "pre.mjs", "term.mjs", "trajectory.mjs"];
   for (const file of FILES) {
     const src = distOf("docfirst-fumadocs", file);
-    // rolldown 给打进来的每个模块标一行 `//#region <来源路径>`：只许是本包 src/ 下的，
-    // 宿主或兄弟包被打进来时这里会出现 node_modules / ../docfirst-… 的路径
+    // rolldown 给打包进来的每个模块标一行 `//#region <来源路径>`：只许是本包 src/ 下的，
+    // 宿主或兄弟包被打包进来时这里会出现 node_modules / ../docfirst-… 的路径
     for (const m of src.matchAll(/^\/\/#region (.+)$/gm)) {
-      assert.ok(m[1]!.startsWith("src/"), `${file} 把 ${m[1]} 打进了产物`);
+      assert.ok(m[1]!.startsWith("src/"), `${file} 把 ${m[1]} 打包进了产物`);
     }
     assert.doesNotMatch(src, /__CLIENT_INTERNALS|react\.production/, `${file} 正文里有 react 本体的痕迹`);
   }
@@ -333,6 +340,7 @@ test("包只发 dist 与样式：skills 与 template 跟着插件走了，包里
     "docfirst-trajectory": ["dist", "styles"],
     "docfirst-workflow": ["dist"],
     "docfirst-fumadocs": ["dist", "styles"],
+    "docs-explain": ["dist", "styles"],
   };
   for (const [dir, files] of Object.entries(FILES)) {
     assert.deepEqual(manifestOf(dir).files, files, `${dir} 的 files`);
@@ -343,11 +351,12 @@ test("包只发 dist 与样式：skills 与 template 跟着插件走了，包里
   for (const path of ["styles/light.css", "styles/term.css"]) {
     assert.ok(existsSync(join(PACKAGES, "docfirst-fumadocs", path)), `fumadocs 包少了 ${path}`);
   }
+  assert.ok(existsSync(join(PACKAGES, "docs-explain", "styles", "explain.css")), "docs-explain 包少了 styles/explain.css");
 });
 
 // ── 五、包不认识工作台插件 ──────────────────────────────────────────────────
 
-test("四个 npm 包的依赖面里不许出现工作台插件，也不许出现任何 @godcreator/gwb-*", () => {
+test("五个 npm 包的依赖字段里不许出现工作台插件，也不许出现任何 @godcreator/gwb-*", () => {
   // 插件跟包在同一个工作区，包一旦认识插件（哪怕只是一条 devDependency）这几个包就不能再发布了
   // ——装它们的人不该连带装上整个桌面工作台生态。三类依赖全查：运行时、peer、开发期。
   // 反方向（插件不许依赖包）由插件自己的 tests/artifact.test.ts 检查：两个方向都禁止，
@@ -361,7 +370,7 @@ test("四个 npm 包的依赖面里不许出现工作台插件，也不许出现
   }
 });
 
-test("四个包的源码里一行 @godcreator/gwb-* 都没有", () => {
+test("五个包的源码里一行 @godcreator/gwb-* 都没有", () => {
   for (const dir of Object.keys(NPM_PACKAGES)) {
     for (const file of sourcesIn(srcOf(dir))) {
       for (const spec of importSpecsOf(readFileSync(file, "utf8"))) {
@@ -369,4 +378,37 @@ test("四个包的源码里一行 @godcreator/gwb-* 都没有", () => {
       }
     }
   }
+});
+
+// ── 六、docs-explain 只给站用 ─────────────────────────────────────────────────
+
+test("docs-explain 清单：没有 dependencies，react 只作必需 peer，依赖字段里没有任何 @godcreator/ 包", () => {
+  const pkg = manifestOf("docs-explain");
+  assert.deepEqual(Object.keys(pkg.dependencies ?? {}), [], "docs-explain 的 dependencies 得是空的");
+  assert.deepEqual(Object.keys(pkg.peerDependencies ?? {}), ["react"], "docs-explain 的 peer 只有 react");
+  assert.notEqual(pkg.peerDependenciesMeta?.react?.optional, true, "react 是 docs-explain 的必需 peer，不该标可选");
+  // 普通 fumadocs 站也装它：docfirst-* 与 gwb-* 一个都不许出现，开发期依赖也算
+  for (const dep of allDepsOf(pkg)) assert.ok(!dep.startsWith("@godcreator/"), `docs-explain 的清单里有 ${dep}`);
+  // 反方向：别的包由 PACKAGE_FORBIDDEN 查，工作台插件在这里查
+  const plugin = JSON.parse(readFileSync(PLUGIN_MANIFEST, "utf8")) as Pkg;
+  assert.ok(!allDepsOf(plugin).includes(NPM_PACKAGES["docs-explain"]!), "工作台插件依赖了 docs-explain");
+});
+
+test("docs-explain 的 `.`：客户端指令在头一行，只 import react，没有把 react 或别的模块打包进来", () => {
+  const index = distOf("docs-explain", "index.mjs");
+  assert.match(index, /^"use client";/, "index.mjs 的 use client 指令得留在头一行");
+  const specs = importSpecsOf(index);
+  assert.ok(specs.some(isReact), "index.mjs 里没有 react 的 import 行——react 被内联进产物了");
+  for (const spec of specs) assert.ok(isReact(spec), `index.mjs（客户端组件）import 了 react 之外的 ${spec}`);
+  for (const m of index.matchAll(/^\/\/#region (.+)$/gm)) {
+    assert.ok(m[1]!.startsWith("src/"), `index.mjs 把 ${m[1]} 打包进了产物`);
+  }
+  assert.doesNotMatch(index, /__CLIENT_INTERNALS|react\.production/, "index.mjs 正文里有 react 本体的痕迹");
+});
+
+test("docs-explain 的 `./text`：docfirst.config.mjs 在 Node 里加载它，产物零 import、不带客户端指令", () => {
+  const text = distOf("docs-explain", "text.mjs");
+  assert.deepEqual(importSpecsOf(text), []);
+  assert.doesNotMatch(text, /^"use client";/);
+  assert.deepEqual(importSpecsOf(readFileSync(join(srcOf("docs-explain"), "text.ts"), "utf8")), [], "text.ts 源码也不许 import");
 });

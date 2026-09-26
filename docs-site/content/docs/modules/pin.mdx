@@ -124,11 +124,11 @@ description: 核对与确认、五种目标的比较器、记号语法；只认�
 
 **不碰磁盘，不启动子进程，不知道 git 存在。** 边界测试只许这个包 import 自己和 `node:crypto`，清单里也不许有依赖：
 
-{/* ref file="../tests/boundary.test.ts" lines="162-171" hash="a91ae39e41d4" blob="55f573c4c909" */}
+{/* ref file="../tests/boundary.test.ts" lines="169-178" hash="a91ae39e41d4" blob="e450056cc091" */}
 
 **不认识别的包。** 它不依赖另外三个 `@godcreator/docfirst-*` 包，另外三个包里用到钉码的也只经这一个出口：
 
-{/* ref file="../tests/boundary.test.ts" lines="123-128" hash="074213900a0b" blob="55f573c4c909" */}
+{/* ref file="../tests/boundary.test.ts" lines="126-142" hash="68408bdfa32a" blob="e450056cc091" */}
 
 **不认识任何文档格式。** 一篇文档归谁认领、记号的外壳长什么样、写回时怎么改那一行，都归格式实现；这个包只拿到一串引用和一段文本。
 

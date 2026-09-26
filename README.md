@@ -88,7 +88,7 @@ SKILL.md 没有说明指向它、没人会读。通用开发纪律的三份也�
 
 ```powershell
 pnpm install
-pnpm build          # plugins/ 与 packages/ 下各自构建（插件 tsc、四个包 tsdown），拓扑序
+pnpm build          # plugins/ 与 packages/ 下各自构建（插件 tsc、五个包 tsdown），拓扑序
 pnpm typecheck
 pnpm test           # 先 build 再 node --test tests/*.test.ts
 

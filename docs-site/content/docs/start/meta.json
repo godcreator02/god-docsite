@@ -1,5 +1,5 @@
 {
   "title": "入门",
   "description": "它解决什么、怎么用、五类引用、一条引用的一生、怎么接进自己的站",
-  "pages": ["index", "requirements", "quickstart", "handbook", "lifecycle", "wiring"]
+  "pages": ["index", "requirements", "quickstart", "handbook", "pinning", "rendering", "lifecycle", "wiring"]
 }

@@ -20,6 +20,9 @@ importers:
       '@godcreator/docfirst-workflow':
         specifier: workspace:*
         version: link:packages/docfirst-workflow
+      '@godcreator/docs-explain':
+        specifier: workspace:*
+        version: link:packages/docs-explain
       '@types/mdast':
         specifier: ^4.0.4
         version: 4.0.4
@@ -56,6 +59,9 @@ importers:
       '@godcreator/docfirst-workflow':
         specifier: workspace:*
         version: link:../packages/docfirst-workflow
+      '@godcreator/docs-explain':
+        specifier: workspace:*
+        version: link:../packages/docs-explain
       cn:
         specifier: ^0.3.0
         version: 0.3.3
@@ -174,6 +180,15 @@ importers:
       unified:
         specifier: ^11.0.0
         version: 11.0.5
+
+  packages/docs-explain:
+    devDependencies:
+      '@types/react':
+        specifier: ^19.3.0
+        version: 19.3.0
+      react:
+        specifier: ^19.3.0
+        version: 19.3.0
 
   plugins/docfirst:
     devDependencies:

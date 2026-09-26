@@ -19,7 +19,7 @@ description: 几组测试各检查什么：钉码核心、契约、git 那一侧
 
 工作区那组按主题分文件，一个主题一个：
 
-{/* tree dir="../tests" depth="1" glob="*.test.ts" hash="162351a3d538" */}
+{/* tree dir="../tests" depth="1" glob="*.test.ts" hash="cbe1ce027b8d" */}
 
 ## 钉码核心单独测：三样假的
 
@@ -95,25 +95,28 @@ description: 几组测试各检查什么：钉码核心、契约、git 那一侧
 
 ## 边界测试：读目录方向，不读源码措辞
 
-`tests/boundary.test.ts` 是四个包之间、workflow 包里面**唯一**的边界检查。包与包之间有 pnpm 严格的 `node_modules` 挡一半，
-但「该不该写进依赖」没人挡；workflow 里四个目录之间编译器更不管：`project/` 里随手写一句 `import "../mdx/render.ts"`
-编译器不会报错。它检查五类，每一类都列禁止的不列允许的。第一类是包与包之间的方向：
+`tests/boundary.test.ts` 是五个包之间、workflow 包里面**唯一**的边界检查。pnpm 严格的 `node_modules` 只保证
+没写进依赖的包 import 不到，但「该不该写进依赖」它不管；workflow 里四个目录之间编译器更不管：`project/` 里随手写一句
+`import "../mdx/render.ts"` 编译器不会报错。它检查六类，每一类都列禁止的不列允许的。第一类是包与包之间的方向：
 
-{/* ref file="../tests/boundary.test.ts" lines="123-128" hash="074213900a0b" blob="55f573c4c909" */}
+{/* ref file="../tests/boundary.test.ts" lines="126-142" hash="68408bdfa32a" blob="e450056cc091" */}
 
 第二类是两个核心的零依赖，不看措辞、只看 import 了谁：钉码核心只许 `node:crypto`，轨迹核心的 `.` 入口产物一条 import 都不许有：
 
-{/* ref file="../tests/boundary.test.ts" lines="162-177" hash="2b8c1cefd190" blob="55f573c4c909" */}
+{/* ref file="../tests/boundary.test.ts" lines="169-184" hash="2b8c1cefd190" blob="e450056cc091" */}
 
 第三类是 workflow 里四个目录的方向，以及 workflow 整个不认识站的宿主：
 
-{/* ref file="../tests/boundary.test.ts" lines="216-221" hash="12c90daad83d" blob="55f573c4c909" */}
+{/* ref file="../tests/boundary.test.ts" lines="223-228" hash="12c90daad83d" blob="e450056cc091" */}
 
 第四类是 fumadocs 适配的宿主只能是 peer、不许被打进产物，最细，连产物都查：
 
-{/* ref file="../tests/boundary.test.ts" lines="280-287" hash="188f962f2d06" blob="55f573c4c909" */}
+{/* ref file="../tests/boundary.test.ts" lines="287-294" hash="188f962f2d06" blob="e450056cc091" */}
 
-第五类是四个包不认识工作台插件：三类依赖字段与源码里都不许出现任何 `@godcreator/gwb-*`。
+第五类是五个包不认识工作台插件：三类依赖字段与源码里都不许出现任何 `@godcreator/gwb-*`。
+
+第六类是讲解组件的模板包 `docs-explain` 只给站用：没有 dependencies，react 只作必需 peer；`.` 出口的产物头一行是
+`"use client"`、只 import react；`./text` 出口零 import，因为 `docfirst.config.mjs` 在 Node 里加载它。
 
 <Note>
   **它失败的时候，出错的是设计，不是测试。** 真要改方向，改的是那张表加一段说明为什么——

@@ -1,0 +1,249 @@
+/*
+ * 讲解组件的外壳与零件：现代开发者工具风。
+ * 1px 细边框、12px 圆角；边框、标题栏、标签都用同一个颜色调淡（color-mix 5%–40% 透明），不铺实心色块；
+ * 每个角色固定一种颜色；很轻的阴影与小动画；不用辉光、渐变、毛玻璃。
+ * 颜色全部是根元素 .dx 上的变量，浅色一套、.dark .dx 下一套（fumadocs 在 html 上加 .dark 切深色）。
+ * 零件只写 data-tone / data-role 属性，下面按属性给出 --dx-c，边框、底色、文字都从它调淡。
+ */
+.dx {
+  --dx-blue: #2563eb;
+  --dx-violet: #7c3aed;
+  --dx-emerald: #059669;
+  --dx-amber: #d97706;
+  --dx-rose: #e11d48;
+  --dx-cyan: #0891b2;
+  --dx-slate: #64748b;
+  --dx-good: var(--dx-emerald);
+  --dx-warn: var(--dx-amber);
+  --dx-bad: var(--dx-rose);
+  --dx-pending: var(--dx-amber);
+  --dx-info: var(--dx-blue);
+  --dx-accent: var(--dx-blue);
+  --dx-term-bg: #0f172a;
+  --dx-term-fg: #e2e8f0;
+  --dx-term-dim: #94a3b8;
+  --dx-surface: var(--color-fd-card, #ffffff);
+  --dx-line: var(--color-fd-border, #e2e8f0);
+  --dx-fg: var(--color-fd-foreground, #0f172a);
+  --dx-dim: var(--color-fd-muted-foreground, #64748b);
+  --dx-mono: 'Sarasa Mono SC', ui-monospace, 'Cascadia Mono', Consolas, monospace;
+  --dx-c: var(--dx-accent);
+  margin: 20px 0 28px;
+  display: grid;
+  gap: 12px;
+  min-width: 0;
+  max-width: 100%;
+  container-type: inline-size;
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--dx-fg);
+  border-radius: 12px;
+}
+.dark .dx {
+  --dx-blue: #60a5fa;
+  --dx-violet: #c084fc;
+  --dx-emerald: #34d399;
+  --dx-amber: #fbbf24;
+  --dx-rose: #fb7185;
+  --dx-cyan: #22d3ee;
+  --dx-slate: #94a3b8;
+  --dx-term-bg: #020617;
+  --dx-surface: var(--color-fd-card, #0b1120);
+  --dx-line: var(--color-fd-border, #1e293b);
+  --dx-fg: var(--color-fd-foreground, #e2e8f0);
+  --dx-dim: var(--color-fd-muted-foreground, #94a3b8);
+}
+.dx *, .dx *::before, .dx *::after { box-sizing: border-box; }
+.dx:focus-visible { outline: 2px solid var(--dx-accent); outline-offset: 4px; }
+.dx button { font: inherit; cursor: pointer; }
+.dx button:focus-visible { outline: 2px solid var(--dx-accent); outline-offset: 2px; }
+
+/* 语气与角色：同一个属性在点、胶囊、高亮行、卡片上是同一种颜色 */
+.dx [data-tone='good'] { --dx-c: var(--dx-good); }
+.dx [data-tone='warn'] { --dx-c: var(--dx-warn); }
+.dx [data-tone='bad'] { --dx-c: var(--dx-bad); }
+.dx [data-tone='pending'] { --dx-c: var(--dx-pending); }
+.dx [data-tone='info'] { --dx-c: var(--dx-info); }
+.dx [data-role='blue'] { --dx-c: var(--dx-blue); }
+.dx [data-role='violet'] { --dx-c: var(--dx-violet); }
+.dx [data-role='emerald'] { --dx-c: var(--dx-emerald); }
+.dx [data-role='amber'] { --dx-c: var(--dx-amber); }
+.dx [data-role='rose'] { --dx-c: var(--dx-rose); }
+.dx [data-role='cyan'] { --dx-c: var(--dx-cyan); }
+.dx [data-role='slate'] { --dx-c: var(--dx-slate); }
+
+/* ── 控制条：一行，按钮位置固定；中间那一格（步号或横条）占满剩下的宽度 ── */
+.dx-bar { display: flex; align-items: center; gap: 6px; min-width: 0; }
+.dx-btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 4px; flex: none;
+  height: 28px; padding: 0 10px; border-radius: 8px; font-size: 13px; font-weight: 500;
+  border: 1px solid var(--dx-line); background: transparent; color: var(--dx-fg);
+  transition: background-color .2s, border-color .2s, color .2s;
+}
+.dx-btn:hover:not(:disabled) {
+  border-color: color-mix(in srgb, var(--dx-accent) 40%, transparent); color: var(--dx-accent);
+}
+.dx-btn:disabled { opacity: .35; cursor: default; }
+.dx-btn-play {
+  width: 28px; padding: 0;
+  border-color: color-mix(in srgb, var(--dx-accent) 40%, transparent);
+  background: color-mix(in srgb, var(--dx-accent) 12%, transparent); color: var(--dx-accent);
+}
+.dx-count {
+  flex: none; min-width: 3.2em; text-align: right; margin-left: auto;
+  font-family: var(--dx-mono); font-size: 12px; color: var(--dx-dim); white-space: nowrap;
+}
+
+/* 分步：步号小圆钮紧挨着上一步、下一步，不撑满整行；太多时在自己那一格里折行，不挤动两边的按钮 */
+.dx-steps { flex: 0 1 auto; min-width: 0; display: flex; flex-wrap: wrap; gap: 4px; }
+.dx-step {
+  min-width: 24px; height: 24px; padding: 0 6px; border-radius: 999px;
+  font-family: var(--dx-mono); font-size: 12px; line-height: 1;
+  border: 1px solid var(--dx-line); background: transparent; color: var(--dx-dim);
+  transition: background-color .2s, border-color .2s, color .2s;
+}
+.dx-step:hover:not([aria-current='step']) { color: var(--dx-fg); }
+.dx-step[aria-current='step'] {
+  border-color: color-mix(in srgb, var(--dx-accent) 40%, transparent);
+  background: color-mix(in srgb, var(--dx-accent) 12%, transparent); color: var(--dx-accent); font-weight: 600;
+}
+
+/* 动画：横条。真正接收拖动与键盘的是透明的原生 range，下面画轨道、已播部分、章节刻度与圆钮；
+   原生滑块的圆钮宽 12px，可拖范围两端各缩进 6px，画出来的轨道也缩进 6px，两者才对得齐 */
+.dx-scrub { position: relative; flex: 1 1 120px; min-width: 80px; height: 28px; }
+.dx-scrub-rail { position: absolute; top: 0; bottom: 0; left: 6px; right: 6px; pointer-events: none; }
+.dx-scrub-track {
+  position: absolute; left: 0; right: 0; top: 50%; height: 4px; margin-top: -2px; border-radius: 999px; overflow: hidden;
+  background: color-mix(in srgb, var(--dx-dim) 22%, transparent);
+}
+.dx-scrub-fill { position: absolute; left: 0; top: 0; bottom: 0; background: var(--dx-accent); }
+.dx-scrub-tick {
+  position: absolute; top: 50%; width: 2px; height: 10px; margin: -5px 0 0 -1px; border-radius: 1px;
+  background: color-mix(in srgb, var(--dx-fg) 40%, transparent);
+}
+.dx-scrub-thumb {
+  position: absolute; top: 50%; width: 12px; height: 12px; margin: -6px 0 0 -6px; border-radius: 50%;
+  background: var(--dx-surface); border: 2px solid var(--dx-accent); box-shadow: 0 1px 2px rgba(15, 23, 42, .18);
+}
+.dx-scrub input {
+  position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; opacity: 0; cursor: pointer;
+  -webkit-appearance: none; appearance: none; background: transparent;
+}
+.dx-scrub input::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 12px; height: 28px; }
+.dx-scrub input::-moz-range-thumb { width: 12px; height: 28px; border: 0; }
+.dx-scrub:has(input:focus-visible) .dx-scrub-thumb { outline: 2px solid var(--dx-accent); outline-offset: 2px; }
+
+/* 窄屏：上一步 / 下一步只留箭头，控制条仍是一行 */
+@container (max-width: 480px) {
+  .dx-btn-text { display: none; }
+  .dx-btn-prev, .dx-btn-next { width: 28px; padding: 0; }
+}
+
+/* ── 画面与说明 ── */
+.dx-stage { display: grid; gap: 12px; min-width: 0; }
+.dx-caption { margin: 0; max-width: 70ch; }
+.dx-caption-title { font-weight: 600; margin-right: .6em; }
+
+/* 选情况：一排胶囊 */
+.dx-case-row { display: flex; flex-wrap: wrap; gap: 6px; }
+.dx-case {
+  border: 1px solid var(--dx-line); background: transparent; color: var(--dx-dim);
+  border-radius: 999px; padding: 1px 11px; font-size: 12.5px;
+  transition: background-color .2s, border-color .2s, color .2s;
+}
+.dx-case:hover:not([aria-pressed='true']) { color: var(--dx-fg); }
+.dx-case[aria-pressed='true'] {
+  border-color: color-mix(in srgb, var(--dx-accent) 40%, transparent);
+  background: color-mix(in srgb, var(--dx-accent) 12%, transparent); color: var(--dx-accent); font-weight: 600;
+}
+
+/* ── 卡片 ── */
+.dx-pane {
+  min-width: 0; border-radius: 12px; overflow: hidden; background: var(--dx-surface);
+  border: 1px solid color-mix(in srgb, var(--dx-c) 35%, transparent);
+  box-shadow: 0 1px 2px rgba(15, 23, 42, .06);
+  display: grid; grid-template-rows: auto 1fr;
+}
+.dx-pane-bar {
+  display: flex; align-items: center; gap: 6px; min-width: 0; padding: 5px 10px; font-size: 12px; font-weight: 500;
+  background: color-mix(in srgb, var(--dx-c) 10%, transparent); color: var(--dx-c);
+  border-bottom: 1px solid color-mix(in srgb, var(--dx-c) 18%, transparent);
+}
+.dx-icon { flex: none; }
+.dx-pane-title { min-width: 0; overflow-wrap: anywhere; }
+.dx-pane-extra { margin-left: auto; flex: none; }
+.dx-pane-body { padding: 10px 12px; min-width: 0; display: grid; gap: 8px; align-content: start; }
+/* 代码行与对照直接放在卡片里时贴满卡片，不再套自己的边框 */
+.dx-pane-body > .dx-code, .dx-pane-body > .dx-diff { border: 0; border-radius: 0; margin-inline: -12px; }
+.dx-pane-body > .dx-code:first-child, .dx-pane-body > .dx-diff:first-child { margin-top: -10px; }
+.dx-pane-body > .dx-code:last-child, .dx-pane-body > .dx-diff:last-child { margin-bottom: -10px; }
+
+/* ── 终端 ── */
+.dx-term {
+  min-width: 0; border-radius: 12px; overflow: hidden; background: var(--dx-term-bg); color: var(--dx-term-fg);
+  box-shadow: 0 4px 12px rgba(15, 23, 42, .18);
+}
+.dx-term-bar { display: flex; align-items: center; gap: 5px; padding: 5px 10px; background: rgba(148, 163, 184, .12); }
+.dx-term-light { width: 9px; height: 9px; border-radius: 50%; display: block; flex: none; }
+.dx-term-light[data-light='red'] { background: #f87171; }
+.dx-term-light[data-light='amber'] { background: #fbbf24; }
+.dx-term-light[data-light='green'] { background: #34d399; }
+.dx-term-title { margin-left: 6px; font-family: var(--dx-mono); font-size: 11px; color: var(--dx-term-dim); overflow-wrap: anywhere; }
+.dx-term-body { padding: 6px 12px 8px; font-family: var(--dx-mono); font-size: 12px; }
+.dx-term-line { white-space: pre-wrap; overflow-wrap: anywhere; }
+.dx-term-line[data-kind='cmd'] { color: #f8fafc; }
+.dx-term-line[data-kind='ok'] { color: #34d399; }
+.dx-term-line[data-kind='err'] { color: #fb7185; }
+.dx-term-prompt { color: #34d399; user-select: none; }
+
+/* ── 胶囊与状态点 ── */
+.dx-pill {
+  justify-self: start; display: inline-flex; align-items: center; gap: 7px; border-radius: 999px; padding: 1px 11px;
+  background: color-mix(in srgb, var(--dx-c) 14%, transparent); color: var(--dx-c);
+  border: 1px solid color-mix(in srgb, var(--dx-c) 40%, transparent);
+  font-weight: 600; font-size: 12.5px; animation: dx-pop .35s ease-out both;
+}
+.dx-pill:has(> .dx-dot) { padding-left: 8px; }
+.dx-dot {
+  display: inline-block; width: 9px; height: 9px; border-radius: 50%; flex: none;
+  background: var(--dx-c); transition: background-color .3s, border-color .3s;
+}
+.dx-dot[data-hollow] { background: transparent; border: 2px solid var(--dx-c); }
+
+/* ── 代码行：自己横向滚动；行宽取最长那一行，高亮底色铺满整行 ── */
+.dx-code {
+  min-width: 0; overflow-x: auto; padding: 6px 0; font-family: var(--dx-mono); font-size: 12px;
+  border: 1px solid var(--dx-line); border-radius: 10px; background: var(--dx-surface);
+}
+.dx-code-lines { display: grid; min-width: 100%; width: max-content; }
+.dx-ln {
+  display: flex; white-space: pre; line-height: 20px; padding-right: 12px;
+  border-left: 2px solid transparent; transition: background-color .3s, border-color .3s;
+}
+.dx-ln-no { flex: none; width: 4ch; padding-right: 10px; text-align: right; color: var(--dx-dim); opacity: .7; user-select: none; }
+.dx-ln[data-highlight] { background: color-mix(in srgb, var(--dx-c) 12%, transparent); border-left-color: var(--dx-c); }
+.dx-ln[data-added] { background: color-mix(in srgb, var(--dx-good) 10%, transparent); animation: dx-flash 1.4s ease-out both; }
+.dx-ln[data-added] .dx-ln-no::before { content: '+'; color: var(--dx-good); margin-right: 2px; }
+.dx-ln[data-changed] .dx-ln-text { text-decoration: underline wavy var(--dx-warn); text-underline-offset: 3px; }
+
+/* ── 新旧行对照 ── */
+.dx-diff {
+  min-width: 0; overflow-x: auto; font-family: var(--dx-mono); font-size: 12px; border-radius: 10px;
+  border: 1px solid color-mix(in srgb, var(--dx-warn) 40%, transparent);
+}
+.dx-diff-lines { display: grid; min-width: 100%; width: max-content; }
+.dx-diff-line { padding: 1px 10px; white-space: pre; line-height: 20px; }
+.dx-diff-line[data-side='old'] { background: color-mix(in srgb, var(--dx-bad) 10%, transparent); }
+.dx-diff-line[data-side='now'] { background: color-mix(in srgb, var(--dx-good) 10%, transparent); }
+.dx-diff-line[data-side='old']::before { content: '- '; color: var(--dx-bad); }
+.dx-diff-line[data-side='now']::before { content: '+ '; color: var(--dx-good); }
+
+@keyframes dx-pop { from { transform: scale(.92); opacity: .4; } to { transform: none; opacity: 1; } }
+@keyframes dx-flash {
+  from { background: color-mix(in srgb, var(--dx-good) 40%, transparent); }
+  to { background: color-mix(in srgb, var(--dx-good) 10%, transparent); }
+}
+/* 减少动态：去掉过渡与闪动，播放照样可用（分步照常跳，动画照常推进） */
+@media (prefers-reduced-motion: reduce) {
+  .dx, .dx * { transition: none !important; animation: none !important; }
+}

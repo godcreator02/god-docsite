@@ -13,12 +13,13 @@ description: 仓布局、三处门禁、提交规矩、发布、只读参考
 {/* has file="../pnpm-workspace.yaml" text="- plugins/*" */}
 
 `plugins/docfirst/` 是工作台插件 `@godcreator/gwb-docfirst-workflow`（两条建站命令与七份说明书，跟四个包互不认识）。
-`packages/` 下四个 npm 包：
+`packages/` 下四个 docfirst 的 npm 包，外加讲解组件的模板包：
 
-{/* tree dir="../packages" depth="1" hash="991dd33377ea" */}
+{/* tree dir="../packages" depth="1" hash="06330e2d87df" */}
 
 `docfirst-pin` 是钉码核心，`docfirst-trajectory` 是轨迹核心，`docfirst-workflow` 是命令行与项目（`src/` 下
 format / mdx / project / cli 四个目录），`docfirst-fumadocs` 是 fumadocs 适配，各包管什么见[系统地图](/docs/system-map)。
+`docs-explain` 是文档站讲解组件的外壳与零件（分步、动画、选情况三种模板），普通 fumadocs 站也用它，跟四个 docfirst 包互不认识。
 站也是工作区成员，是本仓有意的例外：devkit 的建仓模板不收文档站，
 这个站却要用 `workspace:*` 装工作区里的包、钉工作区里的真源码，理由见轨迹卡
 [插件挪到 plugins/docfirst](/trajectory/2026-09-25-plugin-to-plugins-dir)。
@@ -34,7 +35,7 @@ format / mdx / project / cli 四个目录），`docfirst-fumadocs` 是 fumadocs 
 
 ## 三处门禁：都通过才提交
 
-{/* ref file="content/docs/maintain/agents.mdx" lines="56-59" hash="9597f743314d" blob="9c686e5cb12a" */}
+{/* ref file="content/docs/maintain/agents.mdx" lines="58-61" hash="9597f743314d" blob="4ef0a13d5c3d" */}
 
 工作区的三条脚本：
 
@@ -53,7 +54,7 @@ format / mdx / project / cli 四个目录），`docfirst-fumadocs` 是 fumadocs 
 
 ## 写代码的规矩
 
-{/* ref file="content/docs/maintain/agents.mdx" lines="39-55" hash="81e1b5cb19b9" blob="705f69b295e5" */}
+{/* ref file="content/docs/maintain/agents.mdx" lines="40-57" hash="b9e991bab6f7" blob="4ef0a13d5c3d" */}
 
 再补两条站这边的：改了站构建时 remark 插件会跑到的包代码，站要**先删 `.next` 再 build** 才看得见（Turbopack 只按 mdx 内容缓存）；
 调试站用 `next build` + `next start`，不用 dev，启动的站验完必须停掉。
@@ -89,7 +90,7 @@ devkit.release {"dir":"<仓根>","packages":["plugins/docfirst"]}
 
 ## 参考，只读
 
-{/* ref file="content/docs/maintain/agents.mdx" lines="29-35" hash="443f07cb5cfd" blob="9c686e5cb12a" */}
+{/* ref file="content/docs/maintain/agents.mdx" lines="30-36" hash="443f07cb5cfd" blob="4ef0a13d5c3d" */}
 
 实验室是架构定案的出处（教学代码，要搬逻辑就搬，别 `import` 它）；老仓是用 git 取旧内容这项功能的出处，
 **已退役**——功能对齐之后不再参考，代码只看这个仓。

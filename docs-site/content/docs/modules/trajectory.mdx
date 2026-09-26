@@ -194,15 +194,15 @@ workflow 的[项目装配](/docs/modules/workflow/project)读卡目录后交给 
 **不读盘，也不认识另外三个包。** `.` 入口的产物一条 import 都没有，连 `node:` 也没有；`.ts` 源码只 import 包内文件。
 所以浏览器、服务端、命令行都能直接用它：
 
-{/* ref file="../tests/boundary.test.ts" lines="173-186" hash="c35ca7bc8225" blob="55f573c4c909" */}
+{/* ref file="../tests/boundary.test.ts" lines="180-193" hash="c35ca7bc8225" blob="e450056cc091" */}
 
 依赖方向是单向的：workflow 与 fumadocs 适配依赖本包，本包不依赖钉码核心、workflow、fumadocs 适配：
 
-{/* ref file="../tests/boundary.test.ts" lines="123-128" hash="074213900a0b" blob="55f573c4c909" */}
+{/* ref file="../tests/boundary.test.ts" lines="126-142" hash="68408bdfa32a" blob="e450056cc091" */}
 
 **不把 react 打进产物。**`./disk` 的产物第一行必须是 `"use client"`，而且只许 import react：
 
-{/* ref file="../tests/boundary.test.ts" lines="188-200" hash="3df4b4f3de5f" blob="55f573c4c909" */}
+{/* ref file="../tests/boundary.test.ts" lines="202-214" hash="513958008f23" blob="e450056cc091" */}
 
 **不管卡里有没有钉码。**轨迹卡记的是当时的结论，代码后来怎么变都不改它，所以卡里不钉代码，也不需要
 `docfirst confirm`；卡里出现引用记号由 workflow 读卡时报成问题，这个包不认识记号。

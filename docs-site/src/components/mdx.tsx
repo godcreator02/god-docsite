@@ -14,6 +14,10 @@ import { DocfirstPre } from '@godcreator/docfirst-fumadocs/pre';
 import { Term } from '@godcreator/docfirst-fumadocs/term';
 import type { ComponentName } from './registry';
 import { Tabs, Tab } from './tabs/tabs';
+import { PinJudge } from './pin/judge';
+import { PinStory } from './pin/story';
+import { RenderFlow } from './render-flow/render-flow';
+import { SeamMap } from './seam-map/seam-map';
 
 export function Note({ children }: { children?: ReactNode }) {
   return <div className="note">{children}</div>;
@@ -27,6 +31,10 @@ const table: Record<ComponentName, MDXComponents[string]> = {
   Folder,
   File,
   Term,
+  PinStory,
+  PinJudge,
+  SeamMap,
+  RenderFlow,
 };
 
 export function getMDXComponents(components?: MDXComponents) {

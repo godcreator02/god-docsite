@@ -1,0 +1,29 @@
+---
+title: 生成物怎么从 mdx 正本渲染出来
+description: 仓根 README.md、AGENTS.md 与插件里的 SKILL.md 由 docfirst render 从现状区的 mdx 正本渲染：去掉 frontmatter、记号换成代码块、点名的字段加回头部、写到 outputs 映射的落点，check 再渲染一次跟磁盘上的比
+---
+
+仓根的 README.md、AGENTS.md 和插件里的几份 SKILL.md 都不是手写的：`docfirst render` 按 `docfirst.config.mjs` 的 `outputs`，
+把现状区里对应的 mdx 正本渲染到这些位置。下面用一篇小 SKILL 正本从头到尾演示一遍，看它变成生成物时哪几行动了、其余几行为什么一个字节都没变。
+
+<RenderFlow />
+
+所以要改生成物就改正本，再 `render`（`confirm` 也会顺带渲染），正本与生成物放进同一个提交；正本里可以钉码，但不能写组件和 mdx 表达式。
+
+## 对应的代码
+
+`renderAi` 对语法树上每个节点做的事：frontmatter 切掉、记号换成代码块、`exists` 与 `has` 整行去掉，其余几种记进拒绝的原因：
+
+{/* ref file="../packages/docfirst-workflow/src/mdx/render.ts" lines="70-105" hash="7ea70391a00f" blob="3c202787cdfc" */}
+
+代码块的 info 串是语言加 `title="路径:起-止"`，内容是清单里今天的那几行：
+
+{/* ref file="../packages/docfirst-workflow/src/mdx/render.ts" lines="37-48" hash="da5e04e79a4b" blob="3c202787cdfc" */}
+
+摆放时点名的字段逐行加回头部，跟落点上现有的一样就不写：
+
+{/* ref file="../packages/docfirst-workflow/src/project/placement.ts" lines="223-246" hash="8cdbe0f9bddc" blob="963b388356c7" */}
+
+`check` 调用同一个 `bodyOf`，只读不写，跟落点上那份比：
+
+{/* ref file="../packages/docfirst-workflow/src/project/placement.ts" lines="248-270" hash="bb846aedab2a" blob="963b388356c7" */}
