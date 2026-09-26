@@ -9,8 +9,8 @@ import { filesFirstRenderOverwrites, readRepoManifest } from '../src/repo-root.j
 import { readTemplate, renderFiles, renderText, TEMPLATE_ROOT, type SiteValues, type TemplateFile } from '../src/template.js'
 
 /**
- * 建站参数经纯函数 `planCreate` 测：交给 `docs-site.create` 的参数形状、依赖与脚本、模板渲染、显示名。
- * 模板本身另测一组：三个清单跟官方脚手架的输出对得上、不碰本机约定管的文件、三个区齐全。
+ * 建站选项经纯函数 `planCreate` 测：交给 `createSite` 的选项形状、依赖与脚本、模板渲染、显示名。
+ * 模板本身另测一组：三个清单跟官方脚手架的输出对得上、不碰本机约定改过的文件、三个区齐全。
  * 读仓根的两个函数在临时目录里测。
  *
  * 另有一条检查两处版本号一致：写进站的依赖表是手写的（工作区里写的是 `workspace:*`，
@@ -36,10 +36,10 @@ const TEMPLATE_IMPORTABLE = [
 ]
 
 /**
- * 清单作用的那一套文件：官方脚手架 `create-fumadocs-app@16.2.8`（站点插件写死的版本，参数
- * `--template +next+fuma-docs-mdx --src --search orama`）的输出，套完站点插件的本机约定之后——
+ * 清单作用的那一套文件：官方脚手架 `create-fumadocs-app@16.2.8`（`src/scaffold.ts` 写死的版本，参数
+ * `--template +next+fuma-docs-mdx --src --search orama`）的输出，应用本机约定之后——
  * 多了 pnpm-workspace.yaml，少了分享图路由 `src/app/og/docs/[...slug]/route.tsx` 与落地页 `src/app/(home)/` 两份。
- * 站点插件换脚手架版本或改本机约定时这张表跟着改：新增清单里的文件在这张表里就是重名，替换、删除清单里的不在就是找不到。
+ * `src/scaffold.ts` 换脚手架版本或改本机约定时这张表跟着改：新增清单里的文件在这张表里就是重名，替换、删除清单里的不在就是找不到。
  */
 const SCAFFOLD_OUTPUT = [
   '.gitignore',
@@ -67,8 +67,8 @@ const SCAFFOLD_OUTPUT = [
   'tsconfig.json',
 ]
 
-/** 站点插件本机约定管的文件：调用方不能替换、不能删除 */
-const MANAGED_BY_SITE_PLUGIN = [
+/** 本机约定改过的文件（`src/scaffold.ts` 的 `MANAGED_FILES`）：清单不能替换、不能删除 */
+const MANAGED_BY_CONVENTIONS = [
   'package.json',
   'pnpm-workspace.yaml',
   'next.config.mjs',
@@ -150,15 +150,15 @@ describe('结构模板', () => {
     expect(() => renderText('{{typo}}', VALUES, 'x')).toThrow(/认不出的占位符 \{\{typo\}\}（x）/)
   })
 
-  it('新增的文件官方输出里都没有：重名 docs-site.create 就报错', () => {
+  it('新增的文件官方输出里都没有：重名 createSite 就报错', () => {
     for (const file of renderFiles(readTemplate().add, VALUES)) expect(SCAFFOLD_OUTPUT, `新增清单里的 ${file.rel} 官方输出里已经有`).not.toContain(file.rel)
   })
 
-  it('替换与删除的文件官方输出里都有，且都不是本机约定管的', () => {
+  it('替换与删除的文件官方输出里都有，且都不是本机约定改过的', () => {
     const touched = [...renderFiles(readTemplate().replace, VALUES).map((f) => f.rel), ...SCAFFOLD_FILES_REMOVED]
     for (const rel of touched) {
       expect(SCAFFOLD_OUTPUT, `${rel} 官方输出里没有，没法替换或删除`).toContain(rel)
-      expect(MANAGED_BY_SITE_PLUGIN, `${rel} 由站点插件的本机约定管理`).not.toContain(rel)
+      expect(MANAGED_BY_CONVENTIONS, `${rel} 本机约定已经改过`).not.toContain(rel)
     }
   })
 
@@ -220,7 +220,7 @@ describe('结构模板', () => {
     expect(mdx).toMatch(/type MDXProvidedComponents = /)
   })
 
-  it('模板里不引用站点插件本机约定删掉的 gitConfig', () => {
+  it('模板里不引用本机约定删掉的 gitConfig', () => {
     for (const file of renderedAll()) expect(file.text, file.rel).not.toContain('gitConfig')
   })
 
@@ -268,8 +268,8 @@ describe('结构模板', () => {
   })
 })
 
-describe('planCreate：交给 docs-site.create 的参数', () => {
-  it('三个清单：新增、替换来自模板，删除是官方的示例页；不替调用方预演', () => {
+describe('planCreate：交给 createSite 的选项', () => {
+  it('三个清单：新增、替换来自模板，删除是官方的示例页', () => {
     const template = readTemplate()
     const args = planCreate(inputWith({ template }))
     const values: SiteValues = { title: '我的仓', site: 'docs-site' }
@@ -277,7 +277,6 @@ describe('planCreate：交给 docs-site.create 的参数', () => {
     expect(args.addFiles).toEqual(renderFiles(template.add, values).map((f) => ({ path: f.rel, text: f.text })))
     expect(args.replaceFiles).toEqual(renderFiles(template.replace, values).map((f) => ({ path: f.rel, text: f.text })))
     expect(args.removeFiles).toEqual(['content/docs/test.mdx'])
-    expect(args.dryRun, '不替调用方预演').toBeUndefined()
     const paths = [...args.addFiles!.map((f) => f.path), ...args.replaceFiles!.map((f) => f.path), ...args.removeFiles!]
     expect(new Set(paths).size, '三个清单之间有重复路径').toBe(paths.length)
   })
@@ -292,7 +291,7 @@ describe('planCreate：交给 docs-site.create 的参数', () => {
     expect(args.scripts!['verify:roster']).toBe('node scripts/verify-roster.mjs')
   })
 
-  it('端口给了就传，不给就不带这个键，由站点插件挑', () => {
+  it('端口给了就传，不给就不带这个键，由 createSite 选', () => {
     expect(planCreate(inputWith({ port: 4317 })).port).toBe(4317)
     expect('port' in planCreate(inputWith())).toBe(false)
   })
@@ -305,7 +304,7 @@ describe('planCreate：交给 docs-site.create 的参数', () => {
     expect(titleOf({ repoManifest: null })).toBe('我的仓')
   })
 
-  it('传给站点插件的显示名与模板里的是同一个，description 也用它', () => {
+  it('传给 createSite 的显示名与模板里的是同一个，description 也用它', () => {
     const args = planCreate(inputWith({ repoManifest: { name: '@scope/hello', title: '你好' } }))
     expect(args.title).toBe('你好')
     const index = args.replaceFiles!.find((file) => file.path === 'content/docs/index.mdx')

@@ -11,6 +11,7 @@
     "skipLibCheck": true,
     "noEmit": true
   },
-  // 本件只有 node 半：窗格与浏览器半跟着站件走了，没有第二份 tsconfig、没有 esbuild 那一步
-  "include": ["src/*.ts", "tests/**/*.ts", "vitest.config.ts"]
+  // 本插件只有 node 侧代码，没有窗格与浏览器侧代码，所以只有这一份 tsconfig、不用 esbuild 打包。
+  // tests/fixtures/ 下是官方脚手架的输出样本，不参与类型检查
+  "include": ["src/*.ts", "tests/*.ts", "vitest.config.ts"]
 }

@@ -12,7 +12,7 @@ description: 仓布局、三处门禁、提交规矩、发布、只读参考
 
 {/* has file="../pnpm-workspace.yaml" text="- plugins/*" */}
 
-`plugins/docfirst/` 是工作台插件 `@godcreator/gwb-docfirst-workflow`（建站命令与六份说明书，跟四个包互不认识）。
+`plugins/docfirst/` 是工作台插件 `@godcreator/gwb-docfirst-workflow`（两条建站命令与七份说明书，跟四个包互不认识）。
 `packages/` 下四个 npm 包：
 
 {/* tree dir="../packages" depth="1" hash="991dd33377ea" */}
@@ -53,7 +53,7 @@ format / mdx / project / cli 四个目录），`docfirst-fumadocs` 是 fumadocs 
 
 ## 写代码的规矩
 
-{/* ref file="content/docs/maintain/agents.mdx" lines="39-55" hash="059ec08df51e" blob="9c686e5cb12a" */}
+{/* ref file="content/docs/maintain/agents.mdx" lines="39-55" hash="81e1b5cb19b9" blob="705f69b295e5" */}
 
 再补两条站这边的：改了站构建时 remark 插件会跑到的包代码，站要**先删 `.next` 再 build** 才看得见（Turbopack 只按 mdx 内容缓存）；
 调试站用 `next build` + `next start`，不用 dev，启动的站验完必须停掉。
@@ -77,8 +77,9 @@ devkit.release {"dir":"<仓根>","packages":["packages/docfirst-pin","packages/d
 devkit.release {"dir":"<仓根>","packages":["plugins/docfirst"]}
 ```
 
-第二行是插件单独发。插件发之前在隔离 home 里用 `docfirst.create` 新建一个站验一遍（隔离 home 里也要装站点插件），
-隔离 home 里验证的步骤在 skill「gwb-devkit」。
+第二行是插件单独发。插件发之前在隔离 home 里用 `docfirst.create` 与 `docfirst.create-plain` 各新建一个站验一遍，
+隔离 home 里验证的步骤在 skill「gwb-devkit」。改了官方脚手架的版本或本机约定，先在 `plugins/docfirst/` 里跑 `pnpm test:all`：
+它比 `pnpm test` 多一条慢测试，真的运行官方脚手架、跟样本比较（要联网）。
 
 `docfirst-workflow` 与 `docfirst-fumadocs` 升版本号时**跟着改 `plugins/docfirst/src/deps.ts` 那张表**——建站时写进站的依赖版本就取自它，
 插件的 `tests/create.test.ts` 里有一条检查它是精确号、跟工作区各包的版本对得上，忘了改测试当场失败。

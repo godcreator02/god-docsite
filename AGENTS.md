@@ -10,11 +10,11 @@
 使用方示例不在仓里：`docs-site` 就是「装了这几个包的项目」，钉的是工作区里的真源码。
 星轨盘的诗名 fixture 在 `tests/fixtures/trajectory/`，轨迹卡在 `docs-site/content/trajectory/`。
 
-README、CLAUDE.md、这份规矩与插件里的六份 SKILL.md 都是**生成物**：正本是 `docs-site/content/docs/outputs/` 下的 mdx
+README、CLAUDE.md、这份规矩与插件里的七份 SKILL.md 都是**生成物**：正本是 `docs-site/content/docs/outputs/` 下的 mdx
 （这份的正本是 `docs-site/content/docs/maintain/agents.mdx`），对应关系看 `docs-site/docfirst.config.mjs`
 的 `outputs`。改 mdx 正本，`pnpm docfirst render` 重新生成，正本和生成物放进同一个提交。
 
-**动手前先读文档站**：`docs-site/content/docs/system-map.mdx` 是总地图（四个包与十三条接缝），
+**动手前先读文档站**：`docs-site/content/docs/system-map.mdx` 是总地图（四个包与十二条接缝），
 模块页按包组织在 `content/docs/modules/`，接口与边界逐条钉在真源码上。文档怎么写、分区怎么分、钉码怎么确认，
 正本是随工作台插件发的 skill「docfirst-docs」（生成物在
 `plugins/docfirst/skills/docfirst-docs/SKILL.md`），动文档前读它。
@@ -44,8 +44,8 @@ README、CLAUDE.md、这份规矩与插件里的六份 SKILL.md 都是**生成�
   **`tests/boundary.test.ts` 是唯一的边界守卫**（包的方向、两个核心零依赖、workflow 目录方向、宿主只能是 peer、
   包不认识插件），别绕、别删、别为了让门禁通过注释掉某一条。
 - **要在仓里发生的（核对、确认、渲染）归包，只在 agent 手上发生一次的归插件**：建站
-  （`docfirst.create`）与六份说明书在 `plugins/docfirst/`。站的管理（扫描站、启动与停止、端口、窗格）
-  与建站时的构建环境、写盘归站点插件 `@godcreator/gwb-docs-site`；本插件单向依赖它，注入 `gwbDocsSite`、按名字调 `docs-site.create`。
+  （`docfirst.create` 与 `docfirst.create-plain`）与七份说明书在 `plugins/docfirst/`。建站的每一步（运行官方脚手架、本机约定、
+  挑端口、写盘）都在插件的 `src/` 里，插件必需注入的只有命令总线 `gwbCommands`，不依赖别的插件建站。
 - 子进程调用一律带超时。
 - 门禁，三处都要通过才提交：
   - 仓根：`pnpm test`、`pnpm typecheck`、`pnpm build`

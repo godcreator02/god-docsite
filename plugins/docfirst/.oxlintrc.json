@@ -14,6 +14,7 @@
     "**/node_modules/**",
     ".claude/**",
     "docs-site/**",
+    "tests/fixtures/**",
     "**/*.js",
     "**/*.mjs",
     "**/*.config.ts",

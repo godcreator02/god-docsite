@@ -1,6 +1,6 @@
 ---
 title: 系统地图
-description: 四个包加一个插件、包与包之间的依赖方向、十三条接缝、三条入口、先读哪块
+description: 四个包加一个插件、包与包之间的依赖方向、十二条接缝、三条入口、先读哪块
 ---
 
 **本页回答**：这套东西拆成哪几块、各在哪、块与块之间谁依赖谁、经哪几条接缝连起来、新来的人先读哪块。
@@ -8,7 +8,7 @@ description: 四个包加一个插件、包与包之间的依赖方向、十三�
 ## 四个包，一个插件
 
 布局照 devkit 的 workspace 仓：插件在 `plugins/`，不是插件的包在 `packages/`。`plugins/docfirst/` 是工作台插件
-`@godcreator/gwb-docfirst-workflow`——它不进 npm 的依赖网，只在桌面工作台里给 agent 提供一条建站命令和几份说明书。
+`@godcreator/gwb-docfirst-workflow`——它不进 npm 的依赖网，只在桌面工作台里给 agent 提供两条建站命令和几份说明书。
 `packages/` 下四个 npm 包：
 
 {/* tree dir="../packages" depth="1" hash="991dd33377ea" */}
@@ -72,13 +72,12 @@ workflow 包里再分四个目录，各一件事：
 | 9 | 项目根（约定） | 项目装配 ↔ docfirst.config.mjs 与 content/ | 配置键；trajectory/、future/ 两个名字固定 |
 | 10 | 仓里的文件（约定） | 读盘与 git ↔ 被钉的源码与 git 历史 | 按文件读取；git 取 blob、算差异、查未提交改动 |
 | 11 | 生成物（约定） | 生成物写入 ↔ 仓根生成物 | outputs 映射的落点 |
-| 12 | 建站 | docfirst 插件 ↔ 站点插件 | docs-site.create 的三个清单、gwbDocsSite |
-| 13 | 模板（约定） | docfirst 插件 ↔ 站的接线代码 | 模板里写的包名与出口名要跟四个包对得上 |
+| 12 | 模板（约定） | docfirst 插件 ↔ 站的接线代码 | 模板里写的包名与出口名要跟四个包对得上 |
 
 各接缝两边分别在哪一页：1、2、3 的接口定义在[钉码核心](/docs/modules/pin)，实现一侧在 [mdx 格式](/docs/modules/workflow/mdx)
 与[项目装配](/docs/modules/workflow/project)；4 在[项目装配](/docs/modules/workflow/project)与[轨迹核心](/docs/modules/trajectory)；
-5 至 8 在 [fumadocs 适配](/docs/modules/fumadocs)；9 至 11 在[项目装配](/docs/modules/workflow/project)；12 见
-[插件之间怎么连](/docs/wiring)；13 由插件的 `tests/create.test.ts` 检查模板引用的出口都在写进站依赖表的两个包里，见[建站](/docs/modules/site)。
+5 至 8 在 [fumadocs 适配](/docs/modules/fumadocs)；9 至 11 在[项目装配](/docs/modules/workflow/project)；
+12 由插件的 `tests/create.test.ts` 检查模板引用的出口都在写进站依赖表的两个包里，见[建站](/docs/modules/site)。
 
 ## 三条入口
 
@@ -95,14 +94,14 @@ workflow 包里再分四个目录，各一件事：
     装配一次项目、认引用、算清单、把状态点加到语法树上。人看的那份文档就是站本身。
   </Tab>
   <Tab title="工作台插件">
-    `@godcreator/gwb-docfirst-workflow` 经命令总线提供 `docfirst.create`（算好在官方脚手架输出上增、换、删哪些文件，
-    交给站点插件的 `docs-site.create` 建站），另把六份说明书注册给 agent 读。**它对四个包零依赖**：不 import、不启动子进程——要核对
+    `@godcreator/gwb-docfirst-workflow` 经命令总线提供 `docfirst.create` 与 `docfirst.create-plain`（运行官方脚手架、应用本机约定并写盘，
+    `docfirst.create` 再在官方输出上增、换、删几份文件），另把七份说明书注册给 agent 读。**它对四个包零依赖**：不 import、不运行它们的命令行——要核对
     就 `cd` 到那个仓里跑包的命令行。
   </Tab>
 </Tabs>
 
 前两条入口共用同一份编排服务，这就是「判定只有一处」：站上看到的绿，跟命令行
-`check` 退 0 说的是同一件事；第三条根本不做判定，它交出的是模板。
+`check` 退 0 说的是同一件事；第三条根本不做判定，它只建站。
 
 ## 边界靠什么检查
 

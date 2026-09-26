@@ -22,9 +22,9 @@ import * as tabs from "./src/components/tabs/tabs.ai.mjs";
  * 对象写法指定 name / description 两个 frontmatter 字段保留到生成物里——宿主靠这两个字段决定什么时候读
  * 这份 skill，去掉 frontmatter 生成出去，就是一份永远不会被触发的普通文档。
  *
- * 正本存放在这个站、生成物存放在插件里：讲**包**行为的那几份（文档怎么写、轨迹卡怎么记、插件怎么用）跟包
- * 在同一个仓才改得动；讲**通用开发纪律**的那三份不描述任何代码，但要跟钉码与分区的写法保持一致，也要在同一个仓
- * 才检查得了，所以正本都在这儿。生成物却不能放进包：包装在 node_modules 里，没有任何说明指向它，
+ * 正本存放在这个站、生成物存放在插件里：讲**包与插件**行为的那几份（docfirst 站怎么写、轨迹卡怎么记、插件怎么用、
+ * 两种建站命令建出来的站怎么写成讲清原理的网页）跟代码在同一个仓才改得动；讲**通用开发纪律**的那三份不描述任何代码，
+ * 但要跟钉码与分区的写法保持一致，也要在同一个仓才检查得了，所以正本都在这儿。生成物却不能放进包：包装在 node_modules 里，没有任何说明指向它，
  * agent 不会去读；agent 能读到这些 skill，全靠插件 `register` 了自己包里的 `skills/` 目录。
  */
 const skill = (name) => ({ to: `../plugins/docfirst/skills/${name}/SKILL.md`, frontmatter: ["name", "description"] });
@@ -37,6 +37,7 @@ export default {
     "content/docs/outputs/claude.mdx": ["../CLAUDE.md"],
     "content/docs/outputs/skills/docfirst.mdx": [skill("docfirst")],
     "content/docs/outputs/skills/docfirst-docs.mdx": [skill("docfirst-docs")],
+    "content/docs/outputs/skills/docs-site.mdx": [skill("docs-site")],
     "content/docs/outputs/skills/trajectory.mdx": [skill("trajectory")],
     "content/docs/outputs/skills/spec-grill.mdx": [skill("spec-grill")],
     "content/docs/outputs/skills/parallel-by-module.mdx": [skill("parallel-by-module")],

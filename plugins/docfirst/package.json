@@ -4,7 +4,7 @@
   "author": {
     "name": "godcreator"
   },
-  "description": "docfirst 插件：一条命令建一个接好 docfirst 的文档站（docfirst.create）——站点插件的 docs-site.create 跑官方脚手架并写盘，本插件给出在官方输出上增、换、删哪些文件（现状、轨迹、未来三个区）；注册 6 份说明书（讲 docfirst 的 3 份、通用开发纪律 3 份）；对 @godcreator/docfirst-* 四个 npm 包（pin、trajectory、workflow、fumadocs）零依赖，核对、确认与渲染在仓里运行。服务无；skill 6 份；命令 1 条。",
+  "description": "docfirst 插件：两条建站命令——docfirst.create 建接好 docfirst 的文档站（现状、轨迹、未来三个区），docfirst.create-plain 建不接 docfirst 的普通 fumadocs 站；都运行官方脚手架 create-fumadocs-app、应用本机约定（放行 esbuild、端口与只监听本机、Sarasa Mono SC 字体、站名）并写盘；注册 7 份说明书（讲 docfirst 的 3 份、讲文档站怎么写成讲清原理的网页的 docs-site 1 份、通用开发纪律 3 份）；对 @godcreator/docfirst-* 四个 npm 包（pin、trajectory、workflow、fumadocs）零依赖，核对、确认与渲染在仓里运行。服务无；skill 7 份；命令 2 条。",
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -36,7 +36,6 @@
   "peerDependencies": {
     "@godcreator/gwb-kernel-desktop": "^0.7.2",
     "@godcreator/gwb-commands": "^0.5.0",
-    "@godcreator/gwb-docs-site": "^0.6.0",
     "@godcreator/gwb-skills": "^0.4.5"
   },
   "peerDependenciesMeta": {
@@ -46,7 +45,6 @@
   },
   "devDependencies": {
     "@godcreator/gwb-commands": "^0.5.2",
-    "@godcreator/gwb-docs-site": "^0.6.0",
     "@godcreator/gwb-kernel-desktop": "^0.7.2",
     "@godcreator/gwb-skills": "^0.4.5",
     "@types/node": "^24.0.0",

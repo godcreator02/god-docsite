@@ -1,10 +1,10 @@
 /**
  * 站的结构模板：读出包里的全部 `.tpl` 文件，在内存里渲染。
  *
- * 站点插件先跑官方脚手架 create-fumadocs-app，再套本机约定，最后按调用方的清单改文件。模板分两个目录，
- * 对应清单里的两种改法：`template/add/` 是官方输出里没有、要新增的；`template/replace/` 是官方输出里有、
- * 要整份替换的。要删的文件在 `create.ts` 的 `SCAFFOLD_FILES_REMOVED` 里。
- * 本机约定管的那几份（package.json、global.css 等）不能出现在替换清单里，`tests/create.test.ts` 检查。
+ * `createSite`（`scaffold.ts`）先运行官方脚手架 create-fumadocs-app，再应用本机约定，最后按传入的清单改文件。
+ * 模板分两个目录，对应清单里的两种改法：`template/add/` 是官方输出里没有、要新增的；`template/replace/` 是
+ * 官方输出里有、要整份替换的。要删的文件在 `create.ts` 的 `SCAFFOLD_FILES_REMOVED` 里。
+ * 本机约定改过的那几份（package.json、global.css 等）不能出现在替换清单里，`tests/create.test.ts` 检查。
  */
 import { readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";

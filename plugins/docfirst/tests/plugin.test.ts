@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { name } from '../src/index.js'
+import { CREATE_COMMAND, CREATE_PLAIN_COMMAND, inject, name } from '../src/index.js'
 
 /**
  * 第一条测试：插件的身份对不对。
@@ -11,5 +11,11 @@ import { name } from '../src/index.js'
 describe('gwb-docfirst-workflow', () => {
   it('插件名跟包名派生自同一个短名', () => {
     expect(name).toBe('gwb-docfirst-workflow')
+  })
+
+  it('两条建站命令的名字是命令总线上的公开接口；必需的服务只有命令总线', () => {
+    expect(CREATE_COMMAND).toBe('docfirst.create')
+    expect(CREATE_PLAIN_COMMAND).toBe('docfirst.create-plain')
+    expect(inject).toEqual(['gwbCommands'])
   })
 })

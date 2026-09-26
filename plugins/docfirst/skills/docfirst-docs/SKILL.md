@@ -178,15 +178,16 @@ AGENTS / README 不带 frontmatter。改正本，不改生成物。
 
 # 建站
 
-建一个新站是**一条工作台命令**：`docfirst.create {"dir":"<仓>/docs-site"}`。站点插件的 `docs-site.create` 先跑官方脚手架
-`create-fumadocs-app`、套本机约定并写盘；docfirst 在官方输出上改几份文件：三个集合（docs、trajectory、future）用 fumadocs-mdx
+建一个新站是**一条工作台命令**：`docfirst.create {"dir":"<仓>/docs-site"}`。它先跑官方脚手架
+`create-fumadocs-app`、套本机约定，再在官方输出上改几份文件，一起写盘：三个集合（docs、trajectory、future）用 fumadocs-mdx
 的 macro 写在 `src/lib/source.ts`，现状集合写 `mdxOptions: applyMdxPreset(docfirstMdxOptions({ root: process.cwd() }))` 与
 `postprocess.includeProcessedMarkdown: docfirstMarkdownOptions()`（两样都从 `@godcreator/docfirst-fumadocs` 取），外加各区的路由、
 `docfirst.config.mjs`（格式是 `@godcreator/docfirst-workflow/mdx`）、mdx 接线、名册脚本、各区的起始页，`package.json` 里带上
-这两个包的依赖与 doc 脚本。只写文件不跑 install，端口不给就由站点插件挑。
+这两个包的依赖与 doc 脚本。只写文件不跑 install，端口不给就挑一个没被别的站占用的。
+不接 docfirst 的普通 fumadocs 站用 `docfirst.create-plain`，参数相同。
 
 **站目录必须还不存在**：已经有站的仓不能用这条命令，给已经运行很久的站加 docfirst 走人工接线。
-站建好以后要改站的结构（加分区、加组件）或跑 `dev` / `build`，读站点插件的说明书 `docs-site`。
+站建好以后要改站的结构（加分区、加组件）或跑 `dev` / `build`，读同一个插件的说明书 `docs-site`。
 
 模板假设站在仓根 `docs-site/`、被钉的代码在仓根（引用写 `../src/…`），形状不同就改引用里的相对路径。
 
