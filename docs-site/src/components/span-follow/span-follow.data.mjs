@@ -40,7 +40,7 @@ export const today = {
 const markerOf = ({ lines, hash, blob }) => `{/* ref file="${REF}" lines="${lines[0]}-${lines[1]}" hash="${hash}" blob="${blob}" */}`;
 
 export const markers = {
-  draft: `@@docfirst ref ${REF}:${recorded.lines[0]}-${recorded.lines[1]} @@`,
+  unconfirmed: `{/* ref file="${REF}" lines="${recorded.lines[0]}-${recorded.lines[1]}" */}`,
   confirmed: markerOf(recorded),
   moved: markerOf({ lines: today.lines, hash: today.hash, blob: today.blob }),
 };
@@ -96,7 +96,7 @@ export const windows = [
 const confirmCommand = { kind: 'cmd', text: 'pnpm docfirst confirm', at: 0.04 };
 /** @type {TimedLine} */
 const checkCommand = { kind: 'cmd', text: 'pnpm docfirst check', at: 0.04 };
-const recordedLine = `✅ ${files.doc}  ${REF}:2-3  已确认，草稿记号已换成正式记号`;
+const recordedLine = `✅ ${files.doc}  ${REF}:2-3  已确认，写上了记录`;
 const freshLine = `🟢 ${files.doc}  ${REF}:2-3  新鲜`;
 const movedLine = `✅ ${files.doc}  ${REF}:2-3  内容没变、挪到了 4-5，已写回新行号`;
 
@@ -110,9 +110,9 @@ const movedLine = `✅ ${files.doc}  ${REF}:2-3  内容没变、挪到了 4-5，
 export const chapters = [
   {
     id: 'confirm',
-    title: '确认时：记号上写下 lines、hash、blob',
+    title: '确认时：记号上添上 hash、blob',
     text:
-      'confirm 把草稿记号换成正式记号，写上三个值：lines 是被钉的行号 2-3；hash 是这两行换行统一成 LF、去掉行尾空白后 sha256 的前 12 位；' +
+      '作者写下只有 file 与 lines 的记号，confirm 在同一行记号上写上记录，这时记号上有三个值：lines 是被钉的行号 2-3；hash 是这两行换行统一成 LF、去掉行尾空白后 sha256 的前 12 位；' +
       `blob 是整个 greet.ts 按 git 的算法算出的对象名前 12 位，也就是 sha1("blob ${recorded.bytes}\\0" + 文件内容)。两个值都在进程里算，不问 git。`,
     duration: 6,
     terminal: [confirmCommand, { kind: 'ok', text: recordedLine, at: 0.7 }],

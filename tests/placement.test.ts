@@ -15,7 +15,7 @@ import { loadProject } from "../packages/docfirst-workflow/src/project/index.ts"
 import { CODE } from "./repo.ts";
 
 /** 带 frontmatter 的源：点名的字段随行到生成物头部，没点名的剥掉 */
-const SOURCE = ["---", "name: block-note", "description: 块笔记怎么用", "secret: 不该随行", "---", "", "# 摆放", "", "@@docfirst ref src/greet.ts:2-3 @@", ""].join("\n");
+const SOURCE = ["---", "name: block-note", "description: 块笔记怎么用", "secret: 不该随行", "---", "", "# 摆放", "", '{/* ref file="src/greet.ts" lines="2-3" */}', ""].join("\n");
 
 /** 起一个能被 loadProject 装配的临时项目：一份代码、两篇文档、一份配 outputs 的 docfirst.config */
 async function setup(outputs: string) {
@@ -28,7 +28,7 @@ async function setup(outputs: string) {
   writeFileSync(join(root, "docfirst.config.mjs"), `export default { content: "docs", outputs: ${outputs} };\n`);
 
   const project = await loadProject(root);
-  // 记号先确认掉：草稿记号还没有展示区，投影不出内容——摆放要验的正是投影过的那份正文
+  // 记号先确认掉：摆放要验的是确认过的那份正文
   for (const doc of project.docs()) {
     const done = project.pinning.confirmDoc(doc, project.read(doc), { accept: false });
     assert.ok(done.steps.every((step) => step.action !== "refused"), `${doc} 没确认下来`);
@@ -53,7 +53,7 @@ test("摆放一趟：render 写到落点、回落点清单；check 从 missing �
     assert.deepEqual(await project.placing.render("docs/a.mdx"), [{ to: "README.md", status: "placed" }]);
     const readme = p.read("README.md");
     assert.match(readme, /```ts title="src\/greet\.ts:2-3"\nexport function greet/, "正文是投影过的 md");
-    assert.doesNotMatch(readme, /\{\/\* ref |@@docfirst/, "摆放那份剥掉记号");
+    assert.doesNotMatch(readme, /\{\/\* ref /, "摆放那份剥掉记号");
 
     assert.deepEqual(await project.placing.check("docs/a.mdx"), [{ to: "README.md", status: "fresh", fresh: true }]);
   } finally {

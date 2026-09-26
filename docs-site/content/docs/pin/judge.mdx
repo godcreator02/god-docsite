@@ -1,6 +1,6 @@
 ---
 title: 钉码怎么判断红黄绿
-description: 一处引用的四种状态；一条引用从写下草稿记号到被删掉，每一步记号、命令行和状态怎么变；核对一处行段引用时依次做哪几道检查
+description: 一处引用的四种状态；一条引用从写下记号到被删掉，每一步记号、命令行和状态怎么变；核对一处行段引用时依次做哪几道检查
 ---
 
 文档里钉一处码，是在一句话下面单独写一行记号，指向源码里的几行。`confirm` 在记号上写下两个值：`hash` 是被钉那几行（去掉行尾空白）的
@@ -18,7 +18,7 @@ sha256 前 12 位，`blob` 是整个文件当时的 git blob 名前 12 位。之
 记录只写在记号自己身上，没有另外的记录文件。同一篇里两处记号指向同一段，也各带各的记录、各自写回；
 一处是红，只是那一处不动，别的照写。删掉记号，它的记录也就没了。
 
-{/* ref file="../packages/docfirst-workflow/src/reference/index.ts" lines="11-25" hash="5ff57c4de593" blob="f79c766b853b" */}
+{/* ref file="../packages/docfirst-workflow/src/reference/index.ts" lines="11-25" hash="c14662ebadbb" blob="ff70f29c64ee" */}
 
 ## 一条引用从写下到删掉
 

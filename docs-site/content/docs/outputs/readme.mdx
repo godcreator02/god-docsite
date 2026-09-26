@@ -42,26 +42,26 @@ pnpm add -D @godcreator/docfirst-workflow @godcreator/docfirst-fumadocs
 ## 怎么用
 
 项目根放一份 `docfirst.config.mjs`（内容根在哪、组件名册、生成物写到哪；文档格式只有 mdx 一种，不用配置）。内容根下 `trajectory/` 是轨迹卡、
-`future/` 是未来区，其余目录都是现状区、都进核对，不用登记。文档里写一行草稿记号：
+`future/` 是未来区，其余目录都是现状区、都进核对，不用登记。文档里单独写一行不带记录的正式记号，路径相对项目根：
 
-```md
-@@docfirst ref src/greet.ts:2-3 @@                       行段
-@@docfirst ref config.json @@                            整文件（末尾追加也算变）
-@@docfirst tree src @@                                   目录树；可带 depth=2、glob=*.test.ts
-@@docfirst has src/store.ts "export function save" @@    文件里有这个字面量
+```mdx
+{/* ref file="src/greet.ts" lines="2-3" */}                   行段
+{/* ref file="config.json" */}                                整文件（末尾追加也算变）
+{/* tree dir="src" */}                                        目录树；可带 depth="2"、glob="*.test.ts"
+{/* has file="src/store.ts" text="export function save" */}   文件里有这个字面量
 ```
 
 然后：
 
 ```bash
 pnpm docfirst check                                 # 只读，报状态。红退 1；本仓未提交改动引起的黄也算红
-pnpm docfirst confirm                               # 机械写回：草稿换成正式记号，挪了位置的写回新行号，重新生成生成物
+pnpm docfirst confirm                               # 机械写回：给未确认的记号写上记录，挪了位置的写回新行号，重新生成生成物
 pnpm docfirst confirm content/docs/a.mdx --accept   # 复核过后，接受点名页里的黄灯；必须点名页
 pnpm docfirst render                                # 只把 outputs 里有映射的生成正本渲染到落点
 ```
 
 **正常工作的样子**：`check` 打出一行一处引用，每行带一个状态符号（🟢 新鲜 / 🟡 有变动 / ⚪ 未确认 /
-🔴 缺失）；`confirm` 把草稿记号换成正式记号、把记录写进记号的属性，站上每个代码块的标题栏里多一个对应颜色的点。
+🔴 缺失）；`confirm` 把记录写进记号的属性，站上每个代码块的标题栏里多一个对应颜色的点。
 门禁里加上 `pnpm docfirst check` 就行。**改了被钉的代码，就在同一个提交里处理它引起的黄灯**：
 先 `confirm`，再逐条复核剩下的黄灯、点名页 `--accept`。确认不要求先提交。
 

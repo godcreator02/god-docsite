@@ -16,8 +16,10 @@ import { CODE, run, SETTINGS } from "./repo.ts";
 export const CONFIG = `export default { content: "docs" };
 `;
 
-export const DOC_A = "# md\n\n@@docfirst ref src/greet.ts:2-3 @@\n\n尾巴\n";
-export const DOC_B = "# b\n\n另一篇\n\n@@docfirst ref src/greet.ts:2-3 @@\n";
+/** 还没确认的那一行：不带记录的正式记号 */
+export const UNCONFIRMED = '{/* ref file="src/greet.ts" lines="2-3" */}';
+export const DOC_A = `# md\n\n${UNCONFIRMED}\n\n尾巴\n`;
+export const DOC_B = `# b\n\n另一篇\n\n${UNCONFIRMED}\n`;
 
 /** 起一个能被 loadProject 装配的临时项目，跑几条命令，收集打印 */
 export function setupProject(config: string = CONFIG) {

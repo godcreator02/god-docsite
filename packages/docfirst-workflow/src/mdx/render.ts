@@ -12,11 +12,11 @@ import remarkMdx from "remark-mdx";
 import { fileOf, REASON_TEXT } from "@godcreator/docfirst-pin";
 import type { Item, Listing } from "../reference/index.ts";
 import { langOf } from "./lang.ts";
-import { draftIn, markerOf } from "./recognize.ts";
+import { markerOf } from "./recognize.ts";
 import { lineOf, walk } from "./tree.ts";
 import type { TreeNode } from "./tree.ts";
 
-/** 按原文渲染拒绝渲染（草稿记号、缺失的引用、组件、mdx 表达式）时抛它；摆放按这一类把它报成红，别的错照原样抛 */
+/** 按原文渲染拒绝渲染（缺失的引用、组件、mdx 表达式）时抛它；摆放按这一类把它报成红，别的错照原样抛 */
 export class RenderRefusal extends Error {
   override name = "RenderRefusal";
 }
@@ -88,10 +88,6 @@ function editFor(text: string, node: TreeNode, listing: Listing, edits: Edit[], 
     edits.push({ start, end: text.startsWith("\n", end) ? end + 1 : end, text: "" });
     return true;
   }
-  if (draftIn(node) !== null) {
-    refusals.push(`第 ${line} 行是草稿记号，先 docfirst confirm`);
-    return true;
-  }
   if (markerOf(node) !== null) {
     const item = listing.items.find((it) => it.reference.at === line - 1);
     if (item === undefined) throw new Error(`第 ${line} 行是引用记号，但清单里没有它`);
@@ -118,9 +114,9 @@ function editFor(text: string, node: TreeNode, listing: Listing, edits: Edit[], 
 }
 
 /**
- * 生成正本按原文渲染：去掉 frontmatter；每个正式记号换成一个代码块（名字没有内容，整行去掉）；
+ * 生成正本按原文渲染：去掉 frontmatter；每个记号换成一个代码块（名字没有内容，整行去掉）；
  * 其余文字逐字节不动。换行先统一成 LF。
- * 草稿记号、缺失的引用、JSX 组件、别的 mdx 表达式都渲染不了，一次列全、抛 RenderRefusal。
+ * 缺失的引用、JSX 组件、别的 mdx 表达式都渲染不了，一次列全、抛 RenderRefusal。
  */
 export function renderAi(source: string, listing: Listing): string {
   const text = source.replace(/\r\n/g, "\n");

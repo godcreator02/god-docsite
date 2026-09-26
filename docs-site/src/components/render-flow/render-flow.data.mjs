@@ -1,7 +1,7 @@
 /**
  * 「生成物怎么从 mdx 正本渲染出来」的全部讲解数据：画面（render-flow.tsx）与机读版规则（render-flow.ai.mjs）都只读这一份。
  * 示例正本、生成物、命令行输出都是在一个临时项目里用 docfirst-workflow 0.3.1 的命令行实际运行得到的：
- * 配置只有下面这一条 outputs，正本先写草稿记号再 confirm，记号上的 hash / blob 是 confirm 写回的。
+ * 配置只有下面这一条 outputs，正本先写不带记录的记号再 confirm，记号上的 hash / blob 是 confirm 写回的。
  */
 
 export const files = {
@@ -78,7 +78,7 @@ export const handEditedLast = '返回的问候不带句号，也不带空格。'
 /** 渲染不了的那一段：在正本末尾加上这几行（第 14–21 行） */
 export const refusalLines = [
   '',
-  '@@docfirst ref ../src/greet.ts:1-1 @@',
+  '名字是空串时也照样拼。',
   '',
   '{/* ref file="../src/bye.ts" lines="1-3" hash="5d0f95c9bd80" blob="c134a7ab15a9" */}',
   '',
@@ -87,10 +87,10 @@ export const refusalLines = [
   '一共 {1 + 1} 种写法。',
 ];
 /** 上面几行里渲染不了的那几行的行号 */
-export const refusalBadLines = [15, 17, 19, 21];
+export const refusalBadLines = [17, 19, 21];
 export const refusalMessage =
-  `🔴 ${files.source} → ${files.output}  正本渲染不了：第 15 行是草稿记号，先 docfirst confirm；` +
-  '第 17 行的引用缺失（file-missing），先修好；第 19 行有组件 <Callout>，生成正本只写 markdown；' +
+  `🔴 ${files.source} → ${files.output}  正本渲染不了：` +
+  '第 17 行的引用缺失（文件不在了），先修好；第 19 行有组件 <Callout>，生成正本只写 markdown；' +
   '第 21 行有 mdx 表达式 {1 + 1}，生成正本只写 markdown——改好再 render';
 
 /**
@@ -185,7 +185,7 @@ export const chapters = [
     id: 'refuse',
     title: '渲染不了：一次列全，一个文件都不写',
     text:
-      '正本里出现这四样就渲染不了：草稿记号（还没 confirm）、指向的东西不在了的引用、JSX 组件、mdx 表达式（import / export 也算）。' +
+      '正本里出现这三样就渲染不了：指向的东西不在了的引用、JSX 组件、mdx 表达式（import / export 也算）。' +
       'renderAi 走完整棵语法树，把每一处连同行号一次列全再拒绝；这一篇的落点都不写，磁盘上的旧生成物原样留着，render 和 check 都报红。' +
       '代码块里写的同样文字不算：记号是在语法树上认的。',
     duration: 9,

@@ -38,7 +38,7 @@ export function SpanFollow(_node, { paragraph }) {
     paragraph(numbered(oldCode)),
     paragraph(`今天的 ${files.ref}（第 1 行后面插进两行注释）：`),
     paragraph(numbered(newCode)),
-    paragraph(`确认前的草稿记号：${markers.draft}　确认后的正式记号：${markers.confirmed}`),
+    paragraph(`作者写下的记号：${markers.unconfirmed}　确认后的记号：${markers.confirmed}`),
     paragraph(`记号上三个值怎么来：${recordFields.map((f) => `${f.name}="${f.value}"——${f.how}`).join('；')}。`),
     paragraph(`check 判行段的顺序，前一步能下结论就不往下走：${judgeOrder.map((s, i) => `${i + 1}. ${s.label}`).join('；')}。`),
     // at 为 0 的是上一段留在终端里的行，机读版只写这一段新出现的

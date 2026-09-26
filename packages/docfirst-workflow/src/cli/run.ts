@@ -16,8 +16,8 @@
  * 给一个新骨架铺各区那件事不在这儿——它只在 agent 手上发生一次、铺的是模板不是判定，归工作台插件
  * `@godcreator/gwb-docfirst-workflow` 的 `docfirst.create`。这儿留的全是要在**仓**里发生的：
  * 各仓的 `pnpm doc` 与 CI 跑的就是这几条。
- * 新引用不用命令：在文档里写一行记号语法（`../marker/`）定的草稿记号 @@docfirst ref src/greet.ts:2-3 @@，
- * check 认它、报未确认，confirm 换成 mdx 的正式记号并写上记录。
+ * 新引用不用命令：在文档里写一行不带记录的正式记号 {/* ref file="src/greet.ts" lines="2-3" *\/}
+ * （写法由 `../marker/` 定），check 认它、报未确认，confirm 在这一行写上记录。
  */
 import { existsSync } from "node:fs";
 import { join, relative, sep } from "node:path";
@@ -60,7 +60,7 @@ export const USAGE = `docfirst——文档钉代码的核对与确认。在有 d
 
   docfirst check [--json]                核对，只读。红退 1；被钉文件在本仓有未提交改动的黄灯也算红，
                                          在同一个提交里复核并 --accept。--json 出整份机读报告，退出码不变
-  docfirst confirm [文档路径…]            机械写回：草稿换成正式记号并记下记录，挪了位置的写回新行号，
+  docfirst confirm [文档路径…]            机械写回：未确认的记号写上记录，挪了位置的写回新行号，
                                          再重新生成挂了 outputs 映射的生成物（内容变了才写）。
                                          黄灯不动、逐条列出；红的那几处不动、别的照写，有红退 1。
                                          不带路径 = 全部页；带路径 = 按页限定，只动点名的那几篇
@@ -171,7 +171,7 @@ function confirmLine(doc: string, { item, action, written, problem }: ConfirmSte
   const key = targetKey(item.reference.target);
   switch (action) {
     case "recorded":
-      return `✅ ${doc}  ${key}  已确认，草稿记号已换成正式记号`;
+      return `✅ ${doc}  ${key}  已确认，写上了记录`;
     case "moved": {
       const target = written!.target;
       return `✅ ${doc}  ${key}  内容没变、挪到了 ${target.kind === "span" ? `${target.a}-${target.b}` : "新位置"}，已写回新行号`;

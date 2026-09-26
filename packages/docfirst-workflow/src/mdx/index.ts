@@ -11,20 +11,20 @@
 import type { MemoRecord, Target } from "@godcreator/docfirst-pin";
 import type { Reference, WrittenReference } from "../reference/index.ts";
 import { formalOf } from "../marker/index.ts";
-import { recognize } from "./recognize.ts";
+import { braceComment, recognize } from "./recognize.ts";
 import { parseTree } from "./render.ts";
 import { unknownComponents } from "./roster.ts";
 import type { Roster } from "./roster.ts";
 
-/** 正式记号：mdx 的花括号注释表达式，载荷是记号写法（`../marker/`）定的那一截，带着记录属性 */
-export const marker = (target: Target, record: MemoRecord): string => `{/* ${formalOf(target, record)} */}`;
+/** 记号：mdx 的花括号注释表达式，载荷是记号写法（`../marker/`）定的那一截；还没确认的 record 是 null，不带记录属性 */
+export const marker = (target: Target, record: MemoRecord | null): string => braceComment(formalOf(target, record));
 
-/** 正式记号和草稿记号都认；正式记号上的记录属性一并读出 */
+/** 认出全部记号，记号上的记录属性一并读出（还没确认的是 null） */
 export function parse(text: string): Reference[] {
   return recognize(parseTree(text));
 }
 
-/** 写回只重写记号那一行（行号与记录可能都换了）。草稿记号也在这一下换成正式记号；行尾的 \r 留着 */
+/** 写回只重写记号那一行（行号与记录可能都换了），写上记录；行尾的 \r 留着 */
 export function write(text: string, references: WrittenReference[]): string {
   const lines = text.split("\n");
   for (const { target, record, at } of references) lines[at] = marker(target, record) + (lines[at]!.endsWith("\r") ? "\r" : "");
@@ -37,7 +37,7 @@ export function lintComponents(text: string, roster: Roster = {}): Array<{ name:
 }
 
 export { isRenderRefusal, parseTree, RenderRefusal, renderAi } from "./render.ts";
-export { draftIn, markerOf, recognize } from "./recognize.ts";
+export { markerOf, recognize } from "./recognize.ts";
 export { attr, childrenOf, heading, paragraph, quote, stamp, text, textOf, unknownComponents } from "./roster.ts";
 export type { Helpers, Roster, Rule } from "./roster.ts";
 export { lineOf, walk } from "./tree.ts";

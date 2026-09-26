@@ -25,7 +25,7 @@ function recordFor(target: Target): MemoRecord {
   return { kind: "has" };
 }
 
-/** 测试里只关心目标与位置；不给记录就是确认过的正式记号，草稿记号传 record: null */
+/** 测试里只关心目标与位置；不给记录就是确认过的记号，未确认的传 record: null */
 type Over = Omit<Partial<Item>, "reference"> & { reference?: Omit<Reference, "record"> & { record?: MemoRecord | null } };
 
 function itemOf(over: Over): Item {
@@ -49,8 +49,8 @@ function blocksIn(text: string, items: Item[]): TreeNode[] {
   return (tree.children ?? []).filter((n) => n.type === "code");
 }
 
-test("正式记号与草稿记号都换成代码块：meta 写来源、行号、状态点颜色", () => {
-  const text = `${mark(T)}\n\n@@docfirst ref src/greet.ts:2-3 @@\n`;
+test("确认过的与未确认的记号都换成代码块：meta 写来源、行号、状态点颜色", () => {
+  const text = `${mark(T)}\n\n${mdx.marker(T, null)}\n`;
   const items = [itemOf({}), itemOf({ status: "unconfirmed", reference: { target: T, at: 2, record: null } })];
   const blocks = blocksIn(text, items);
   assert.equal(blocks.length, 2);
@@ -264,7 +264,13 @@ test("名册：默认表压平 Note；项目的规则只用 helpers；表外组�
 test("围栏里、行内的假记号认不出来——走语法树的理由", () => {
   assert.deepEqual(mdx.parse("```md\n" + mark(T) + "\n```\n"), []);
   assert.deepEqual(mdx.parse(`行内的 ${mark(T)} 不算\n`), []);
-  assert.deepEqual(mdx.parse("```md\n@@docfirst ref src/greet.ts:2-3 @@\n```\n"), []);
+  assert.deepEqual(mdx.parse("```md\n" + mdx.marker(T, null) + "\n```\n"), []);
+});
+
+test("普通注释不是标记，原样留着；长成记号却认不出动作词的报错到行", () => {
+  const tree = applyListing(parseTree("{/* 普通注释 */}\n"), listingOf([]));
+  assert.equal(tree.children![0]!.type, "mdxFlowExpression");
+  assert.throws(() => applyListing(parseTree('{/* probe dir="src" */}\n'), listingOf([])), /第 1 行：记号的动作词只有 ref \/ tree \/ has/);
 });
 
 test("清单里没有的标记：报到行，不静默漏掉", () => {
@@ -321,11 +327,16 @@ test("按原文渲染：写在列表项里的记号，代码块的续行带上�
   assert.equal(out, `- 一项：\n\n  \`\`\`ts title="src/greet.ts:2-3"\n  ${CURRENT.join("\n  ")}\n  \`\`\`\n`);
 });
 
-test("按原文渲染：草稿记号、缺失的引用、组件、mdx 表达式、import 都渲染不了，一次列全、抛 RenderRefusal", () => {
+test("按原文渲染：未确认的记号照样换成代码块，内容是今天的那几行", () => {
+  const out = renderOf(`${mdx.marker(T, null)}\n`, () => ({ status: "unconfirmed" }));
+  assert.equal(out, `\`\`\`ts title="src/greet.ts:2-3"\n${CURRENT.join("\n")}\n\`\`\`\n`);
+});
+
+test("按原文渲染：缺失的引用、组件、mdx 表达式、import 都渲染不了，一次列全、抛 RenderRefusal", () => {
   const text = [
     "import x from 'y';",
     "",
-    "@@docfirst ref src/greet.ts:2-3 @@",
+    "正文",
     "",
     mdx.marker({ kind: "span", file: "src/gone.ts", a: 1, b: 2 }, RECORD),
     "",
@@ -340,7 +351,7 @@ test("按原文渲染：草稿记号、缺失的引用、组件、mdx 表达式�
     () => renderOf(text, (ref) => (ref.target.kind === "span" && ref.target.file === "src/gone.ts" ? { status: "missing", reason: "file-missing", current: null } : {})),
     (err: Error) => {
       assert.equal(err.name, "RenderRefusal");
-      for (const piece of ["第 1 行有 import / export", "第 3 行是草稿记号", "第 5 行的引用缺失（文件不在了）", "第 7 行有组件 <Note>", "第 9 行有 mdx 表达式 {1 + 1}", "第 11 行有 mdx 表达式 {/* 普通注释 */}"]) {
+      for (const piece of ["第 1 行有 import / export","第 5 行的引用缺失（文件不在了）", "第 7 行有组件 <Note>", "第 9 行有 mdx 表达式 {1 + 1}", "第 11 行有 mdx 表达式 {/* 普通注释 */}"]) {
         assert.ok(err.message.includes(piece), `报错里该有「${piece}」：${err.message}`);
       }
       return true;

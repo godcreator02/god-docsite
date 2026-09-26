@@ -22,7 +22,7 @@ function setup() {
 
 test("checkDoc：mdx 认出的每处按原来的顺序配回文档、行号、记录", () => {
   const { pinning } = setup();
-  const text = `# 标题\n\n${refLine(SPAN)}\n\n@@docfirst ref src/nowhere.ts:1-2 @@\n\n{/* has file="src/greet.ts" text="greet" */}\n`;
+  const text = `# 标题\n\n${refLine(SPAN)}\n\n${refLine({ kind: "span", file: "src/nowhere.ts", a: 1, b: 2 })}\n\n{/* has file="src/greet.ts" text="greet" */}\n`;
   const listing = pinning.checkDoc(DOC, text);
   assert.equal(listing.doc, DOC);
   assert.deepEqual(
@@ -43,9 +43,14 @@ test("checkReferences：引用别人认好了也走同一条路，结果跟 chec
   assert.deepEqual(pinning.checkReferences(DOC, [{ target: SPAN, record: null, at: 0 }]), byText);
 });
 
-test("confirmDoc：草稿换成带记录的正式记号，步骤与清单一一对应，写回的引用留在原来那一行", () => {
+test("checkDoc：记号写坏了的报错补上是哪篇文档", () => {
   const { pinning } = setup();
-  const text = "# 标题\n\n@@docfirst ref src/greet.ts:2-3 @@\n\n尾巴\n";
+  assert.throws(() => pinning.checkDoc(DOC, "# 标题\n\n@@docfirst ref src/greet.ts:2-3 @@\n"), /^Error: d\.mdx 第 3 行：@@docfirst 草稿写法已经删了/);
+});
+
+test("confirmDoc：未确认的记号写上记录，步骤与清单一一对应，写回的引用留在原来那一行", () => {
+  const { pinning } = setup();
+  const text = `# 标题\n\n${refLine(SPAN)}\n\n尾巴\n`;
   const done = pinning.confirmDoc(DOC, text, plain);
   assert.equal(done.changed, true);
   assert.deepEqual(done.steps.map((s) => s.item), done.listing.items);

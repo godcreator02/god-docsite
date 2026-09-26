@@ -1,6 +1,6 @@
 'use client';
 /**
- * 「引用能指向哪几类东西」：选一类目标，看它在 mdx 里的正式记号与草稿记号、check 拿什么跟什么比、
+ * 「引用能指向哪几类东西」：选一类目标，看它在 mdx 里新写时与确认后的记号、check 拿什么跟什么比、
  * 各种结果在命令行打出的那一行，以及站上这处引用显示成什么。点一种结果，下方终端与站上显示跟着换。
  * 数据与讲解文字都在 ref-kinds.data.mjs；类别按钮与说明由 CasePicker 显示。机读版由 ref-kinds.ai.mjs 读同一份数据生成。
  */
@@ -140,8 +140,8 @@ function Picture({ kind }: { kind: Kind }) {
           {kind.formal.map((line) => (
             <Marker key={line} text={line} />
           ))}
-          <span className="rk-label">草稿记号（作者手写，{kind.draftNote}）</span>
-          {kind.draft.map((line) => (
+          <span className="rk-label">新写的记号（作者手写，{kind.writtenNote}）</span>
+          {kind.written.map((line) => (
             <code key={line} className="rk-marker">
               {line}
             </code>

@@ -100,8 +100,8 @@ test("内存宿主：check 收到调用方判好的清单就直接渲染，不�
 
 test("内存宿主：正本渲染不了，每个落点都报 unrenderable、一个字不写；别的错照原样抛", () => {
   const targets = { "docs/a.mdx": ["README.md", { to: "SKILL.md", frontmatter: ["name"] }] };
-  const { placed, placing } = memoryHost(targets, `${SOURCE}\n@@docfirst ref src/greet.ts:2-3 @@\n`);
-  const reason = "第 11 行是草稿记号，先 docfirst confirm";
+  const { placed, placing } = memoryHost(targets, `${SOURCE}\n<Note>提示</Note>\n`);
+  const reason = "第 11 行有组件 <Note>，生成正本只写 markdown";
   assert.deepEqual(placing.render("docs/a.mdx"), [
     { to: "README.md", status: "unrenderable", reason },
     { to: "SKILL.md", status: "unrenderable", reason },

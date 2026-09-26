@@ -83,9 +83,9 @@ description: content/trajectory/ 下的轨迹卡怎么被读出、校验、建�
 
 {/* ref file="../packages/docfirst-workflow/src/project/load.ts" lines="89-90" hash="e60f111d117a" blob="0186be908b77" */}
 
-二是读卡目录时逐行查每张卡的正文，草稿记号、正式记号两种写法出现任何一种，都记成一条问题：
+二是读卡目录时逐行查每张卡的正文，正式记号、以 `@@docfirst` 开头的一行（已经删掉的草稿写法）出现任何一种，都记成一条问题：
 
-{/* ref file="../packages/docfirst-workflow/src/project/card-refs.ts" lines="13-17" hash="ae6b4b304940" blob="8050bc5f07e7" */}
+{/* ref file="../packages/docfirst-workflow/src/project/card-refs.ts" lines="17-38" hash="09ecf841cc47" blob="7d8a942dfc3c" */}
 
 这一条要认识钉码的记号，所以查在 `docfirst-workflow` 读卡目录的 `scanCardDir` 里，查出的问题并进轨迹包校验出的同一份清单；
 `docfirst-trajectory` 不认识记号：

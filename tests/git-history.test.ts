@@ -132,7 +132,7 @@ test("确认之后没提交又改了：记录里的 blob 不在对象库，退�
   const r = setupRepo();
   try {
     r.write("src/greet.ts", `// 没提交的一行\n${CODE}`);
-    r.write(DOC, TEXT.replace(":2-3 @@", ":3-4 @@"));
+    r.write(DOC, TEXT.replace('lines="2-3"', 'lines="3-4"'));
     r.confirm(DOC);
     r.write("src/greet.ts", `// 又一行\n// 没提交的一行\n${CODE}`);
     assert.deepEqual([first(r).status, first(r).lines], ["fresh", [4, 5]]);

@@ -32,14 +32,14 @@ const REF = 'src/greet.ts';
  */
 export const steps = [
   {
-    title: '写下草稿记号',
+    title: '写下记号',
     code: V0,
     span: [2, 3],
-    marker: `@@docfirst ref ${REF}:2-3 @@`,
+    marker: `{/* ref file="${REF}" lines="2-3" */}`,
     status: 'unconfirmed',
     command: 'pnpm docfirst check',
     cli: `⚪ ${DOC}  ${REF}:2-3  未确认，等作者确认`,
-    text: '在文档里单独起一行，写草稿记号指向 greet.ts 的第 2–3 行。check 认得它、也读得到这两行，但记号上还没有确认时的记录，所以是空心的「未确认」。',
+    text: '在文档里单独起一行，写一个只有文件与行号的记号，指向 greet.ts 的第 2–3 行。check 认得它、也读得到这两行，但记号上还没有确认时的记录，所以是空心的「未确认」。',
   },
   {
     title: '确认：记下 hash 与 blob',
@@ -48,8 +48,8 @@ export const steps = [
     marker: `{/* ref file="${REF}" lines="2-3" hash="3eb99c2e88e2" blob="c134a7ab15a9" */}`,
     status: 'fresh',
     command: 'pnpm docfirst confirm',
-    cli: `✅ ${DOC}  ${REF}:2-3  已确认，草稿记号已换成正式记号`,
-    text: 'confirm 把草稿换成正式记号，并写上两个数：hash 是这两行内容的 sha256 前 12 位，blob 是此刻整个 greet.ts 的 git 对象名前 12 位。记号里没有代码，页面上那块代码是构建时现读的。',
+    cli: `✅ ${DOC}  ${REF}:2-3  已确认，写上了记录`,
+    text: 'confirm 在同一行记号上写上两个数：hash 是这两行内容的 sha256 前 12 位，blob 是此刻整个 greet.ts 的 git 对象名前 12 位。记号里没有代码，页面上那块代码是构建时现读的。',
   },
   {
     title: '上面插了两行：还是绿',

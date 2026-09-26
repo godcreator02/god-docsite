@@ -3,13 +3,13 @@
  *
  * 这儿做的都是「文本 ↔ 目标 + 记录」的翻译，跟目标本身是什么无关：
  *   **语言表** `WORDS` 与每个动作词认的属性 `ATTRS`——`toTarget` / `recordOf` 是唯一的语义校验点
- *   **正式记号的载荷**（`formalOf` / `parseFormal`）——mdx 格式只在外面套花括号注释。
- *   载荷 = 动作词 + 目标属性 + 记录属性；正式记号一定带着记录，未确认的引用只写成草稿记号
- *   **草稿记号**（`draftOf`）与报告里用的目标文本形态（`targetKey`）
+ *   **记号的载荷**（`formalOf` / `parseFormal`）——格式只在外面套自己的注释外壳。
+ *   载荷 = 动作词 + 目标属性 + 记录属性；没有记录属性就是还没确认，confirm 时写上
+ *   报告里用的目标文本形态（`targetKey`），以及已经删掉的草稿写法 `@@docfirst … @@` 的报错
  */
 import type { MemoRecord, Target, TreeTarget } from "@godcreator/docfirst-pin";
 
-/** 正式记号的动作词：ref / tree / has */
+/** 记号的动作词：ref / tree / has */
 export function wordOf(target: Target): string {
   if (target.kind === "span" || target.kind === "file") return "ref";
   return target.kind;
@@ -30,7 +30,8 @@ function targetAttrsOf(target: Target): Attrs {
   }
 }
 
-function recordAttrsOf(record: MemoRecord): Attrs {
+function recordAttrsOf(record: MemoRecord | null): Attrs {
+  if (record === null) return [];
   switch (record.kind) {
     case "content":
       return [["hash", record.hash], ["blob", record.blob]];
@@ -41,13 +42,13 @@ function recordAttrsOf(record: MemoRecord): Attrs {
   }
 }
 
-/** 正式记号的属性表（有序）：先目标、后记录，格式按 key="value" 摆出来 */
-export function attrsOf(target: Target, record: MemoRecord): Attrs {
+/** 记号的属性表（有序）：先目标、后记录；还没确认的没有记录属性。格式按 key="value" 摆出来 */
+export function attrsOf(target: Target, record: MemoRecord | null): Attrs {
   return [...targetAttrsOf(target), ...recordAttrsOf(record)];
 }
 
-/** 正式记号的载荷：`ref file="…" lines="a-b" hash="…" blob="…"`、`tree dir="…" depth="1" hash="…"`…… 值里的引号写成 &quot; */
-export function formalOf(target: Target, record: MemoRecord): string {
+/** 记号的载荷：`ref file="…" lines="a-b" hash="…" blob="…"`、`tree dir="…" depth="1" hash="…"`…… 值里的引号写成 &quot; */
+export function formalOf(target: Target, record: MemoRecord | null): string {
   const attrs = attrsOf(target, record).map(([k, v]) => `${k}="${v.replace(/"/g, "&quot;")}"`);
   return [wordOf(target), ...attrs].join(" ");
 }
@@ -70,17 +71,40 @@ const ATTRS: Record<string, readonly string[]> = {
   has: ["file", "text"],
 };
 
+/** 「一个词 + 至少一个 key="value" 属性」：长成记号的样子，词不认识就报错，不当成普通注释 */
+const MARKER_SHAPE = /^\w+(?:\s+\w+="[^"]*")+$/s;
+
 /** 记号上的哈希与 blob 名：12 位小写十六进制 */
 const HEX12 = /^[0-9a-f]{12}$/;
 
+/** 未确认的记号写法举例：报错时给人照抄 */
+const EXAMPLE_PAYLOAD = formalOf({ kind: "span", file: "src/a.ts", a: 2, b: 3 }, null);
+
+/** 以 `@@docfirst` 开头的一行：草稿写法已经删了，格式碰到就报错，不让它悄悄变成普通文字 */
+export const isRemovedDraftLine = (line: string): boolean => /^\s*@@docfirst\b/.test(line);
+
+/** 草稿写法的报错：shell 是格式的外壳，把举例的载荷包成这个格式里的完整记号 */
+export function removedDraftError(where: string, shell: (payload: string) => string): Error {
+  return new Error(
+    `${where}：@@docfirst 草稿写法已经删了——改写成不带记录的正式记号，如 ${shell(EXAMPLE_PAYLOAD)}（动作词 ref / tree / has），confirm 时写上记录`,
+  );
+}
+
 /**
- * 正式记号的载荷 → 目标与记录。格式把外壳剥掉后交给它；动作词不认识给 null。
+ * 记号的载荷 → 目标与记录（还没确认的记录是 null）。格式把外壳剥掉后交给它。
+ * 不是记号（普通注释）给 null；长成「一个词 + key="value" 属性」但词不认识、以 @@docfirst 开头、
  * 属性写成 `key="value"` 之外的样子、出现这个动作词不认的属性，都报错到 where
  */
-export function parseFormal(payload: string, where: string): { target: Target; record: MemoRecord } | null {
-  const m = /^(\w+)\s*(.*)$/s.exec(payload.trim());
-  if (m === null || !WORDS.has(m[1]!)) return null;
+export function parseFormal(payload: string, where: string): { target: Target; record: MemoRecord | null } | null {
+  const trimmed = payload.trim();
+  if (isRemovedDraftLine(trimmed)) throw removedDraftError(where, (inner) => inner);
+  const m = /^(\w+)\s*(.*)$/s.exec(trimmed);
+  if (m === null) return null;
   const word = m[1]!;
+  if (!WORDS.has(word)) {
+    if (MARKER_SHAPE.test(trimmed)) throw new Error(`${where}：记号的动作词只有 ref / tree / has，不认识 ${word}——普通注释别写成 key="value" 属性`);
+    return null;
+  }
   const rest = m[2]!;
   const leftover = rest.replace(ATTR, "").trim();
   if (leftover !== "") throw new Error(`${where}：记号里有认不出的写法（${leftover}）——属性一律写成 key="value"`);
@@ -95,29 +119,27 @@ function assertHex(value: string, name: string, where: string): void {
   if (!HEX12.test(value)) throw new Error(`${where}：${name} 要是 12 位小写十六进制（${value}）`);
 }
 
-/** 正式记号少了记录属性时的报错：未确认的引用只有草稿一种写法 */
-function missingRecord(where: string, word: string, names: string): Error {
-  return new Error(`${where}：${word} 正式记号要带确认记录 ${names}——新引用写草稿记号 @@docfirst … @@，confirm 时换成正式记号`);
-}
-
 /**
- * 动作词 + 属性表 → 记录。正式记号一定是确认过的：`ref` 要有 hash 与 blob，`tree` 要有 hash，`has` 的记号本身就是记录。
- * 缺记录属性、值不合法，报错到 where
+ * 动作词 + 属性表 → 记录。`ref` 没有 hash 与 blob、`tree` 没有 hash 就是还没确认（null）；
+ * `ref` 只写了其中一个、值不合法，报错到 where。`has` 的记号本身就是记录
  */
-export function recordOf(word: string, attrs: Record<string, string | undefined>, where: string): MemoRecord {
+export function recordOf(word: string, attrs: Record<string, string | undefined>, where: string): MemoRecord | null {
   if (word === "has") return { kind: "has" };
   if (word === "ref") {
-    if (attrs.hash === undefined || attrs.blob === undefined) throw missingRecord(where, word, "hash、blob");
+    if (attrs.hash === undefined && attrs.blob === undefined) return null;
+    if (attrs.hash === undefined || attrs.blob === undefined) {
+      throw new Error(`${where}：ref 的记录只写了一半（hash、blob 要一起有）——记录由 confirm 写，删掉剩下那个再 confirm`);
+    }
     assertHex(attrs.hash, "hash", where);
     assertHex(attrs.blob, "blob", where);
     return { kind: "content", hash: attrs.hash, blob: attrs.blob };
   }
-  if (attrs.hash === undefined) throw missingRecord(where, word, "hash");
+  if (attrs.hash === undefined) return null;
   assertHex(attrs.hash, "hash", where);
   return { kind: "tree", hash: attrs.hash };
 }
 
-/** 动作词 + 属性表 → 目标。语义校验统一在这儿，草稿与正式记号报错一致；动作词不认识给 null */
+/** 动作词 + 属性表 → 目标。语义校验统一在这儿；动作词不认识给 null */
 export function toTarget(word: string, attrs: Record<string, string | undefined>, where: string): Target | null {
   if (!WORDS.has(word)) return null;
   if (word === "ref") {
@@ -139,46 +161,6 @@ export function toTarget(word: string, attrs: Record<string, string | undefined>
   if (attrs.file === undefined || attrs.file === "") throw new Error(`${where}：has 要有 file="…"`);
   if (attrs.text === undefined || attrs.text === "") throw new Error(`${where}：has 要有 text="…"`);
   return { kind: "has", file: attrs.file, text: attrs.text };
-}
-
-/**
- * 草稿记号——独立一行，头尾 @@ 是边界，少一头就是普通文字，不报错：
- *   @@docfirst ref src/greet.ts:2-3 @@          行段
- *   @@docfirst ref config.json @@               整文件
- *   @@docfirst tree src @@                      目录树；可带 depth=2、glob=*.test.ts
- *   @@docfirst has src/store.ts "export function save" @@   文件里有这个字面量（带空格就用引号包）
- * 在 mdx 里是一行普通文字；check 认它、报未确认；confirm 时换成正式记号。
- */
-const DRAFT = /^\s*@@docfirst\s+(\w+)\s+(.+?)\s+@@\s*$/;
-
-/** 这一行是不是草稿记号；是就交目标（经 toTarget 校验），不是给 null */
-export function draftOf(line: string, where: string): Target | null {
-  const m = DRAFT.exec(line);
-  if (m === null) return null;
-  const word = m[1]!;
-  const payload = m[2]!;
-  if (word === "ref") {
-    const span = /^(.+):(\d+)-(\d+)$/.exec(payload);
-    return span === null ? toTarget("ref", { file: payload }, where) : toTarget("ref", { file: span[1]!, lines: `${span[2]}-${span[3]}` }, where);
-  }
-  if (word === "tree") {
-    const [dir, ...opts] = payload.split(/\s+/);
-    const attrs: Record<string, string> = { dir: dir! };
-    for (const opt of opts) {
-      const kv = /^(depth|glob)=(.+)$/.exec(opt);
-      if (kv === null) throw new Error(`${where}：tree 的选项只有 depth= 和 glob=（${opt}）`);
-      attrs[kv[1]!] = kv[2]!;
-    }
-    return toTarget("tree", attrs, where);
-  }
-  if (word === "has") {
-    const m2 = /^(\S+)\s+(.+)$/.exec(payload);
-    if (m2 === null) throw new Error(`${where}：has 要写成 has 文件 名字`);
-    const raw = m2[2]!;
-    const text = /^"(.*)"$/.exec(raw)?.[1] ?? raw;
-    return toTarget("has", { file: m2[1]!, text }, where);
-  }
-  return null;
 }
 
 /**

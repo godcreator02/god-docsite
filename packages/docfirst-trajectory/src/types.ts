@@ -65,7 +65,7 @@ export interface BrokenRel {
  * + 一致性校验（跨文件，在 scanCards 里查：卡目录里根卡多于一张、根卡写了 parent、
  *   非根卡的 parent 不是那张根卡的身份）
  * + 正文关系行写歪（行头对但行形不合，不静默吞行）
- * + docfirst 引用记号（卡正文里出现 docfirst 草稿或正式记号；这一条由 `@godcreator/docfirst-workflow`
+ * + docfirst 引用记号（卡正文里出现 docfirst 正式记号或以 @@docfirst 开头的一行；这一条由 `@godcreator/docfirst-workflow`
  *   读卡目录时查，这个包只留字段名）。
  * 病卡列名示众；born-at 坏的卡同时被挡在盘外（半径标度一路 NaN）。 */
 export interface Problem {

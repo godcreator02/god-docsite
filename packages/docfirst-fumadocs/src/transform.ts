@@ -6,14 +6,14 @@
  *   data.docfirst   给 md 的序列化回调：md 里不要 meta，要一行来源注释
  */
 import type { Listing } from "@godcreator/docfirst-workflow";
-import { draftIn, lineOf, markerOf, walk } from "@godcreator/docfirst-workflow/mdx";
+import { lineOf, markerOf, walk } from "@godcreator/docfirst-workflow/mdx";
 import type { TreeNode } from "@godcreator/docfirst-workflow/mdx";
 import { nodeFor } from "./blocks.ts";
 
 export function applyListing(tree: TreeNode, listing: Listing): TreeNode {
-  // 正式记号是 mdxFlowExpression，草稿记号是单独成段的一行文字；站上两种都换成带状态点的代码块
+  // 记号是 mdxFlowExpression，确认过没确认过都换成带状态点的代码块
   walk(tree, (node, index, parent) => {
-    if (markerOf(node) === null && draftIn(node) === null) return;
+    if (markerOf(node) === null) return;
     if (parent === undefined || parent === null || index === null) return;
     const at = lineOf(node) - 1;
     const item = listing.items.find((it) => it.reference.at === at);

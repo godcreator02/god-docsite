@@ -67,7 +67,7 @@ test("被钉文件改了没提交：这个黄算红、退 1，提示同一个提
 test("目录树里多了未跟踪的文件：这个黄算红", async () => {
   const p = setupProject();
   try {
-    writeFileSync(join(p.root, "docs", "t.mdx"), "# t\n\n@@docfirst tree src @@\n");
+    writeFileSync(join(p.root, "docs", "t.mdx"), '# t\n\n{/* tree dir="src" */}\n');
     await p.cli("confirm");
     run(p.root, [...SETTINGS, "add", "-A"]);
     run(p.root, [...SETTINGS, "commit", "-qm", "确认"]);
@@ -90,7 +90,7 @@ test("被钉文件在别的仓里：改了没提交也只报黄，不拦这个�
     run(other, [...SETTINGS, "add", "-A"]);
     run(other, [...SETTINGS, "commit", "-qm", "起代码"]);
     const rel = relative(p.root, join(other, "src", "lib.ts")).split(sep).join("/");
-    writeFileSync(join(p.root, "docs", "x.mdx"), `# x\n\n@@docfirst ref ${rel}:2-3 @@\n`);
+    writeFileSync(join(p.root, "docs", "x.mdx"), `# x\n\n{/* ref file="${rel}" lines="2-3" */}\n`);
     await p.cli("confirm");
     writeFileSync(join(other, "src", "lib.ts"), CODE.replace("hello", "hey"));
     const out = await p.cli("check", "--json");
@@ -106,7 +106,7 @@ test("一次 check 里每个仓只问一次 git status", async () => {
   const p = setupProject();
   try {
     writeFileSync(join(p.root, "src", "more.ts"), CODE);
-    writeFileSync(join(p.root, "docs", "c.mdx"), "# c\n\n@@docfirst ref src/more.ts:2-3 @@\n");
+    writeFileSync(join(p.root, "docs", "c.mdx"), '# c\n\n{/* ref file="src/more.ts" lines="2-3" */}\n');
     await p.cli("confirm");
     run(p.root, [...SETTINGS, "add", "-A"]);
     run(p.root, [...SETTINGS, "commit", "-qm", "确认"]);

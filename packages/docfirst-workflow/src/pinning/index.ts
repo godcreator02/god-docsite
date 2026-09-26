@@ -53,6 +53,15 @@ function confirmStepOf(item: Item, { action, written, problem }: Step): ConfirmS
   return step;
 }
 
+/** 认引用；记号写坏了的报错只说到第几行，这里补上是哪篇文档再抛 */
+function referencesIn(doc: string, text: string): Reference[] {
+  try {
+    return parse(text);
+  } catch (err) {
+    throw new Error(`${doc} ${(err as Error).message}`, { cause: err });
+  }
+}
+
 export function createPinning(pinner: Pinner): Pinning {
   function listingOf(doc: string, references: Reference[]): { listing: Listing; verdicts: Verdict[] } {
     const verdicts = pinner.check(references.map(pinOf));
@@ -60,10 +69,10 @@ export function createPinning(pinner: Pinner): Pinning {
   }
 
   return {
-    checkDoc: (doc, text) => listingOf(doc, parse(text)).listing,
+    checkDoc: (doc, text) => listingOf(doc, referencesIn(doc, text)).listing,
     checkReferences: (doc, references) => listingOf(doc, references).listing,
     confirmDoc(doc, text, options) {
-      const { listing, verdicts } = listingOf(doc, parse(text));
+      const { listing, verdicts } = listingOf(doc, referencesIn(doc, text));
       const steps = pinner.confirm(verdicts, options).map((step, i) => confirmStepOf(listing.items[i]!, step));
       const written = steps.flatMap((step) => (step.written !== undefined ? [step.written] : []));
       const next = written.length > 0 ? write(text, written) : text;

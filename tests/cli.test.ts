@@ -7,12 +7,12 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { existsSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
-import { setupProject, withOutputs } from "./cli-project.ts";
+import { setupProject, UNCONFIRMED, withOutputs } from "./cli-project.ts";
 import { CODE, run } from "./repo.ts";
 
 const CONFIRMED = /^\{\/\* ref file="src\/greet\.ts" lines="2-3" hash="[0-9a-f]{12}" blob="[0-9a-f]{12}" \*\/\}$/m;
 
-test("check 报未确认；confirm 把草稿换成带记录的正式记号；再 check 全绿", async () => {
+test("check 报未确认；confirm 给不带记录的记号写上记录；再 check 全绿", async () => {
   const p = setupProject();
   try {
     const first = await p.cli("check");
@@ -22,8 +22,8 @@ test("check 报未确认；confirm 把草稿换成带记录的正式记号；再
 
     const done = await p.cli("confirm");
     assert.equal(done.code, 0);
-    assert.match(done.out, /✅ docs\/a\.mdx {2}src\/greet\.ts:2-3 {2}已确认，草稿记号已换成正式记号/);
-    assert.match(p.read("docs/a.mdx"), CONFIRMED, "草稿记号换成了带记录的正式记号");
+    assert.match(done.out, /✅ docs\/a\.mdx {2}src\/greet\.ts:2-3 {2}已确认，写上了记录/);
+    assert.match(p.read("docs/a.mdx"), CONFIRMED, "记号上写上了记录");
     assert.match(p.read("docs/b.mdx"), CONFIRMED);
 
     const again = await p.cli("check");
@@ -70,13 +70,14 @@ test("confirm 不要求先提交：改了没提交的代码照样记得下", asy
 test("confirm 遇红：红的那处不动、别的照写，打印后退 1", async () => {
   const p = setupProject();
   try {
-    writeFileSync(join(p.root, "docs", "a.mdx"), "# md\n\n@@docfirst ref src/greet.ts:2-3 @@\n\n@@docfirst ref src/nowhere.ts:1-2 @@\n");
+    const gone = '{/* ref file="src/nowhere.ts" lines="1-2" */}';
+    writeFileSync(join(p.root, "docs", "a.mdx"), `# md\n\n${UNCONFIRMED}\n\n${gone}\n`);
     const done = await p.cli("confirm");
     assert.equal(done.code, 1);
     assert.match(done.out, /🔴 docs\/a\.mdx {2}第 5 行 src\/nowhere\.ts:1-2 {2}缺失（文件不在了），这处没动/);
     const doc = p.read("docs/a.mdx");
     assert.match(doc, CONFIRMED, "钉得住的那处照写");
-    assert.match(doc, /^@@docfirst ref src\/nowhere\.ts:1-2 @@$/m, "红的那处原样留着");
+    assert.ok(doc.split("\n").includes(gone), "红的那处原样留着");
   } finally {
     p.teardown();
   }
@@ -137,13 +138,24 @@ test("render：只处理挂了 outputs 映射的文档，别的文档不渲染�
   }
 });
 
-test("render：正本里还有草稿记号就渲染不了，报红退 1、不写落点", async () => {
+test("render：正本里有渲染不了的东西，报红退 1、不写落点", async () => {
   const p = setupProject(withOutputs(`{ "docs/a.mdx": ["README.md"] }`));
   try {
+    writeFileSync(join(p.root, "docs", "a.mdx"), `# md\n\n<Note>提示</Note>\n`);
     const rendered = await p.cli("render");
     assert.equal(rendered.code, 1);
-    assert.match(rendered.out, /🔴 docs\/a\.mdx → README\.md {2}.*第 3 行是草稿记号，先 docfirst confirm/);
+    assert.match(rendered.out, /🔴 docs\/a\.mdx → README\.md {2}.*第 3 行有组件 <Note>/);
     assert.equal(existsSync(join(p.root, "README.md")), false);
+  } finally {
+    p.teardown();
+  }
+});
+
+test("以 @@docfirst 开头的一行：check 报错，说清是哪篇第几行、正式记号怎么写", async () => {
+  const p = setupProject();
+  try {
+    writeFileSync(join(p.root, "docs", "a.mdx"), "# md\n\n@@docfirst ref src/greet.ts:2-3 @@\n");
+    await assert.rejects(p.cli("check"), /docs\/a\.mdx 第 3 行：@@docfirst 草稿写法已经删了——改写成不带记录的正式记号/);
   } finally {
     p.teardown();
   }
@@ -154,13 +166,13 @@ test("四类引用一篇文档：四种记号各自认得回来；多了文件�
   try {
     writeFileSync(
       join(p.root, "docs", "d.mdx"),
-      "# d\n\n@@docfirst tree src @@\n\n@@docfirst ref src/greet.ts @@\n\n@@docfirst has src/greet.ts \"export function greet\" @@\n",
+      '# d\n\n{/* tree dir="src" */}\n\n{/* ref file="src/greet.ts" */}\n\n{/* has file="src/greet.ts" text="export function greet" */}\n',
     );
     const done = await p.cli("confirm");
     assert.equal(done.code, 0, done.out);
     assert.match(done.out, /✅ docs\/d\.mdx {2}tree src depth=1 {2}已确认/);
     assert.match(done.out, /✅ docs\/d\.mdx {2}src\/greet\.ts:all {2}已确认/);
-    assert.match(done.out, /✅ docs\/d\.mdx {2}has src\/greet\.ts "export function greet" {2}已确认/);
+    assert.doesNotMatch(done.out, /has src\/greet\.ts/, "has 的记号本身就是记录，写下就是确认过的，confirm 没什么可写");
     const doc = p.read("docs/d.mdx");
     assert.match(doc, /^\{\/\* tree dir="src" depth="1" hash="[0-9a-f]{12}" \*\/\}$/m);
     assert.match(doc, /^\{\/\* ref file="src\/greet\.ts" hash="[0-9a-f]{12}" blob="[0-9a-f]{12}" \*\/\}$/m);
@@ -228,7 +240,7 @@ test("confirm 按页限定：只动点名的那篇，别人的页一个字不改
     assert.match(only.out, /· {2}按页限定：只动 docs\/a\.mdx/);
     assert.match(only.out, /✅ docs\/a\.mdx/);
     assert.doesNotMatch(only.out, /docs\/b\.mdx {2}src/, "没点名的页不该被确认");
-    assert.match(p.read("docs/b.mdx"), /@@docfirst ref src\/greet\.ts:2-3 @@/, "没点名的页记号还是草稿");
+    assert.ok(p.read("docs/b.mdx").split("\n").includes(UNCONFIRMED), "没点名的页记号还没有记录");
 
     // 反斜杠、`./` 开头、绝对路径都收
     const again = await p.cli("confirm", `.\\docs\\b.mdx`);

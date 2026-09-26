@@ -7,7 +7,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { existsSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
-import { setupProject, withOutputs } from "./cli-project.ts";
+import { setupProject, UNCONFIRMED, withOutputs } from "./cli-project.ts";
 import { run } from "./repo.ts";
 
 const SKILL_DOC = [
@@ -22,7 +22,7 @@ const SKILL_DOC = [
   "",
   "# skill",
   "",
-  "@@docfirst ref src/greet.ts:2-3 @@",
+  UNCONFIRMED,
   "",
 ].join("\n");
 
@@ -36,7 +36,7 @@ test("outputs 摆放：confirm 顺手重摆、render 只写指定目标；check 
     assert.match(rendered.out, /· {2}docs\/a\.mdx → README\.md {2}没变/, "内容没变就不写");
     const readme = p.read("README.md");
     assert.match(readme, /```ts title="src\/greet\.ts:2-3"\nexport function greet/);
-    assert.doesNotMatch(readme, /\{\/\* ref |@@docfirst/, "摆放那份也剥记号");
+    assert.doesNotMatch(readme, /\{\/\* ref /, "摆放那份也剥记号");
 
     const green = await p.cli("check");
     assert.equal(green.code, 0, green.out);

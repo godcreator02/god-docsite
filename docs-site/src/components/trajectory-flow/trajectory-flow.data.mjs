@@ -142,8 +142,8 @@ export const readCalls = [
   { call: 'checkDocfirstRefs(body)', role: 'blue', what: '对每张卡去掉 frontmatter 的正文逐行查引用记号，病追加进 sick' },
 ];
 
-/** card-refs.ts 认的两种记号形态 */
-export const refForms = ['@@docfirst ref … @@（整行草稿记号）', '{/* ref …、{/* tree …、{/* has … 这类正式记号'];
+/** card-refs.ts 认的两种形态 */
+export const refForms = ['{/* ref …、{/* tree …、{/* has … 这类正式记号', '以 @@docfirst 开头的一行（已经删掉的草稿写法）'];
 
 /**
  * 解析时的几道校验。钉码记号那一道在 docfirst-workflow 的 card-refs.ts 里，其余在 docfirst-trajectory 里：
@@ -161,7 +161,7 @@ export const checks = [
     rule: '根卡多于一张，每张各报一条；根卡不写 parent；其余的卡 parent 只写那张根卡的身份，目录里没有根卡时写了 parent 就报',
   },
   { id: 'relation', name: '关系行', role: 'violet', rule: '行首是 supersedes:: 或 pivots-from:: 的行，整行必须是「字段:: 一条链接」' },
-  { id: 'docfirst', name: '钉码记号', role: 'blue', rule: '正文里不许出现 docfirst 的草稿或正式记号' },
+  { id: 'docfirst', name: '钉码记号', role: 'blue', rule: '正文里不许出现 docfirst 的正式记号，也不许有以 @@docfirst 开头的一行' },
 ];
 
 /** @type {Partial<Record<CardCode, CheckId[]>>} 没过的校验；没列出的卡全部通过 */

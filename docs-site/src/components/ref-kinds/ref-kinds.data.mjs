@@ -17,7 +17,7 @@
  *   blocking：黄灯且被钉的东西在本仓有未提交改动，check 按红算（站上仍按 status 显示）
  * @typedef {{ attr: string, recorded: string, today: string }} CompareRow
  * @typedef {{ title: string, lines: string[], highlight: [number, number] | null }} Observe
- * @typedef {{ id: string, label: string, text: string, formal: string[], draft: string[], draftNote: string,
+ * @typedef {{ id: string, label: string, text: string, formal: string[], written: string[], writtenNote: string,
  *   compare: CompareRow[], rule: string, observe: Observe, outcomes: Outcome[] }} RefKind
  */
 
@@ -37,8 +37,8 @@ export const kinds = [
     label: '行段',
     text: '钉住文件里的几行。记号上记两样：这几行的 hash，和确认时整个文件的 blob 名。check 先比这几行的 hash；对不上，再按 blob 从 git 取回确认时的文件，把行号对到今天的位置再比一次——上面插了行还是绿，confirm 写回新行号。',
     formal: ['{/* ref file="src/greet.ts" lines="2-3" hash="3eb99c2e88e2" blob="c134a7ab15a9" */}'],
-    draft: ['@@docfirst ref src/greet.ts:2-3 @@'],
-    draftNote: '文件:起-止',
+    written: ['{/* ref file="src/greet.ts" lines="2-3" */}'],
+    writtenNote: '只写 file 与 lines',
     compare: [
       { attr: 'hash', recorded: '3eb99c2e88e2', today: '今天第 2–3 行 sha256 的前 12 位' },
       { attr: 'blob', recorded: 'c134a7ab15a9', today: '不直接比：hash 对不上时按它从 git 取回确认时的文件，把第 2–3 行对到今天的位置再比 hash' },
@@ -47,9 +47,9 @@ export const kinds = [
     observe: { title: 'src/greet.ts（今天）· 高亮的两行拿去算 hash', lines: GREET, highlight: [2, 3] },
     outcomes: [
       {
-        id: 'draft',
+        id: 'unconfirmed',
         status: 'unconfirmed',
-        when: '还是草稿记号，没有记录可比',
+        when: '记号上还没有记录属性，没有记录可比',
         cli: '⚪ content/docs/a.mdx  src/greet.ts:2-3  未确认，等作者确认',
         site: { type: 'code', title: 'src/greet.ts:2-3 · 未确认', start: 2, lines: GREET.slice(1, 3) },
       },
@@ -116,8 +116,8 @@ export const kinds = [
     label: '整文件',
     text: '钉住整个文件。记号跟行段一样记 hash 与 blob，只是 hash 算的是整个文件：任何一处改动都黄，末尾追加一行也算（这时钉第 2–3 行的行段引用还是绿）。文件没有位置可挪，blob 只用来取回确认时的文件，让站上给出旧行与新行。',
     formal: ['{/* ref file="src/greet.ts" hash="32cfd95b425c" blob="c134a7ab15a9" */}'],
-    draft: ['@@docfirst ref src/greet.ts @@'],
-    draftNote: '只写文件名，不带行号',
+    written: ['{/* ref file="src/greet.ts" */}'],
+    writtenNote: '只写 file，不带 lines',
     compare: [
       { attr: 'hash', recorded: '32cfd95b425c', today: '今天整个文件 sha256 的前 12 位' },
       { attr: 'blob', recorded: 'c134a7ab15a9', today: '不参与判定：hash 对不上时按它取回确认时的文件，给站上的旧行新行对照' },
@@ -126,9 +126,9 @@ export const kinds = [
     observe: { title: 'src/greet.ts（今天）· 整个文件拿去算 hash', lines: GREET, highlight: [1, 4] },
     outcomes: [
       {
-        id: 'draft',
+        id: 'unconfirmed',
         status: 'unconfirmed',
-        when: '还是草稿记号，没有记录可比',
+        when: '记号上还没有记录属性，没有记录可比',
         cli: '⚪ content/docs/a.mdx  src/greet.ts:all  未确认，等作者确认',
         site: { type: 'code', title: 'src/greet.ts · 未确认', start: 1, lines: GREET },
       },
@@ -176,16 +176,16 @@ export const kinds = [
     label: '目录树',
     text: '钉住一个目录下有哪些名字：depth 默认 1 只列直接子项，glob 只留名字匹配的。记号只记名字表的 hash，不存旧名字表：多了、少了、改名都只知道「变了」，站上摆今天的名字表。文件内容不参与。',
     formal: ['{/* tree dir="src" depth="1" hash="8f9bf9539c42" */}'],
-    draft: ['@@docfirst tree src @@'],
-    draftNote: '可带 depth=2、glob=*.test.ts',
+    written: ['{/* tree dir="src" */}'],
+    writtenNote: '可带 depth="2"、glob="*.test.ts"',
     compare: [{ attr: 'hash', recorded: '8f9bf9539c42', today: '今天的名字表按行拼起来 sha256 的前 12 位' }],
     rule: '名字是相对 src 的路径，目录带尾斜杠、排好序；被 .gitignore 忽略的不进表。',
     observe: { title: 'src/ 的名字表（今天）· 按行拼起来算 hash', lines: NAMES, highlight: [1, 3] },
     outcomes: [
       {
-        id: 'draft',
+        id: 'unconfirmed',
         status: 'unconfirmed',
-        when: '还是草稿记号，没有记录可比',
+        when: '记号上还没有记录属性，没有记录可比',
         cli: '⚪ content/docs/a.mdx  tree src depth=1  未确认，等作者确认（3 项）',
         site: { type: 'tree', root: 'src/', names: NAMES, gone: false },
       },
@@ -223,21 +223,14 @@ export const kinds = [
   {
     id: 'has',
     label: '名字',
-    text: '说某个文件里有某个名字。check 只看文件里有没有一行包含这串字，是纯文本匹配，不算 hash、不管在第几行。正式记号没有记录属性，写成正式记号就算确认过。没有黄：找得到是绿，找不到是红。',
+    text: '说某个文件里有某个名字。check 只看文件里有没有一行包含这串字，是纯文本匹配，不算 hash、不管在第几行。记号没有记录属性，写下就算确认过，没有「未确认」。没有黄：找得到是绿，找不到是红。',
     formal: ['{/* has file="src/greet.ts" text="export function greet" */}'],
-    draft: ['@@docfirst has src/greet.ts "export function greet" @@'],
-    draftNote: '名字带空格就用引号包',
+    written: ['{/* has file="src/greet.ts" text="export function greet" */}'],
+    writtenNote: '跟上面一样：has 的记号本身就是记录，写下就算确认过',
     compare: [{ attr: 'text', recorded: 'export function greet', today: '今天的 src/greet.ts 里有没有一行包含这串字（区分大小写）' }],
     rule: '没有记录属性可比，函数体改了、挪了位置都不影响。',
     observe: { title: 'src/greet.ts（今天）· 第 2 行包含这串字', lines: GREET, highlight: [2, 2] },
     outcomes: [
-      {
-        id: 'draft',
-        status: 'unconfirmed',
-        when: '还是草稿记号（名字找得到）',
-        cli: '⚪ content/docs/a.mdx  has src/greet.ts "export function greet"  未确认，等作者确认',
-        site: { type: 'chip', text: 'src/greet.ts · 有 export function greet · 未确认' },
-      },
       {
         id: 'same',
         status: 'fresh',
@@ -291,7 +284,7 @@ export function siteSummary(site) {
   }
 }
 
-const KIND_KEYS = ['id', 'label', 'text', 'formal', 'draft', 'draftNote', 'compare', 'rule', 'observe', 'outcomes'];
+const KIND_KEYS = ['id', 'label', 'text', 'formal', 'written', 'writtenNote', 'compare', 'rule', 'observe', 'outcomes'];
 const OUTCOME_KEYS = ['id', 'status', 'when', 'cli', 'site'];
 
 for (const kind of kinds) {

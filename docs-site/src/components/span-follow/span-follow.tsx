@@ -17,7 +17,6 @@ import {
   insertedLines,
   judgeOrder,
   mapped,
-  markers,
   newCode,
   oldCode,
   recordFields,
@@ -216,8 +215,8 @@ function FormalMarker({ values, changing = [] }: { values: Partial<Record<'lines
 const confirmedValues = { lines: `${spanStart}-${spanEnd}`, hash: recorded.hash, blob: recorded.blob };
 const movedValues = { lines: `${today.lines[0]}-${today.lines[1]}`, hash: today.hash, blob: today.blob };
 
-/** 确认那一段里三个属性依次写上的时刻 */
-const FIELD_AT = { lines: 0.3, hash: 0.45, blob: 0.6 } as const;
+/** 确认那一段里两个记录属性依次写上的时刻；lines 是作者写下的，一开始就在 */
+const FIELD_AT = { hash: 0.3, blob: 0.45 } as const;
 /** 写回那一段里 lines、blob 换成新值的时刻 */
 const WRITE_AT = { lines: 0.3, hash: 0.45, blob: 0.6 } as const;
 
@@ -225,9 +224,8 @@ function markerState(frame: Frame): MarkerState {
   const p = frame.progress;
   switch (frame.chapter.id) {
     case 'confirm': {
-      if (p < 0.22) return { text: markers.draft, tone: 'pending' };
-      const written = (['lines', 'hash', 'blob'] as const).filter((name) => p >= FIELD_AT[name]);
-      const values: Partial<Record<'lines' | 'hash' | 'blob', string>> = {};
+      const written = (['hash', 'blob'] as const).filter((name) => p >= FIELD_AT[name]);
+      const values: Partial<Record<'lines' | 'hash' | 'blob', string>> = { lines: confirmedValues.lines };
       for (const name of written) values[name] = confirmedValues[name];
       return { text: <FormalMarker values={values} changing={[...written]} />, tone: p < 0.7 ? 'pending' : 'good' };
     }

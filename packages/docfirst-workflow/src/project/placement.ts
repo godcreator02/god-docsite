@@ -32,7 +32,7 @@ export interface Placement {
 
 /**
  * 一个落点核对完的状态：fresh 生成物跟源一致；missing 生成物还不在；stale 跟源不一致；
- * no-frontmatter 源头部缺点名的字段；unrenderable 源里有渲染不了的东西（草稿记号、缺失的引用、组件、mdx 表达式）
+ * no-frontmatter 源头部缺点名的字段；unrenderable 源里有渲染不了的东西（缺失的引用、组件、mdx 表达式）
  */
 export type PlacedStatus = "fresh" | "missing" | "stale" | "no-frontmatter" | "unrenderable";
 

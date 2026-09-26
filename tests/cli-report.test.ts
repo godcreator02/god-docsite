@@ -75,10 +75,10 @@ test("合法根卡加子卡：trajectory --json 出那一张盘的模型，不�
 test("分区按约定：内容根下除 trajectory/、future/ 之外都是现状区，目录里的、根上的都扫，按文档身份排序", async () => {
   const p = setupProject();
   try {
-    const draft = "# x\n\n@@docfirst ref src/greet.ts:2-3 @@\n";
+    const unconfirmed = '# x\n\n{/* ref file="src/greet.ts" lines="2-3" */}\n';
     for (const rel of ["more/x.mdx", "more/deep/y.mdx", "future/roadmap.mdx", "future/spec/plan.mdx", "trajectory/2026-01-01-x.md"]) {
       mkdirSync(join(p.root, "docs", rel, ".."), { recursive: true });
-      writeFileSync(join(p.root, "docs", rel), draft);
+      writeFileSync(join(p.root, "docs", rel), unconfirmed);
     }
     const first = await p.cli("check", "--json");
     const report = JSON.parse(first.out) as { docs: Array<{ doc: string }> };
@@ -127,15 +127,15 @@ test("check --json：整份报告一行 JSON，退出码跟人读模式一样；
   const p = setupProject(withOutputs(`{ "docs/a.mdx": ["README.md"] }`));
   try {
     const white = await p.cli("check", "--json");
-    assert.equal(white.code, 1, "正本还有草稿记号、渲染不了，落点是红，退出码跟人读模式一样");
+    assert.equal(white.code, 1, "生成物还没摆过，落点是红，退出码跟人读模式一样");
     assert.equal(white.out.split("\n").length, 1, "一行 JSON，别的什么都不打");
     const first = JSON.parse(white.out) as JsonReport;
-    // 草稿记号渲染不了：落点红，ok 假；引用本身是未确认
+    // 生成物还不在：落点红，ok 假；引用本身是未确认，不算红
     assert.equal(first.ok, false);
     assert.equal(first.red, 1);
     const a = first.docs.find((d) => d.doc === "docs/a.mdx")!;
     assert.deepEqual(a.items, [{ target: "src/greet.ts:2-3", kind: "span", status: "unconfirmed", line: 3, lines: [2, 3], draft: true }]);
-    assert.deepEqual(a.outputs, [{ to: "README.md", status: "unrenderable", fresh: false, reason: "第 3 行是草稿记号，先 docfirst confirm" }]);
+    assert.deepEqual(a.outputs, [{ to: "README.md", status: "missing", fresh: false }]);
     assert.deepEqual(first.trajectory, []);
 
     await p.cli("confirm");

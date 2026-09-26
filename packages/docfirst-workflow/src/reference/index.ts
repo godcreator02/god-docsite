@@ -11,7 +11,7 @@ import type { MemoRecord, Reason, Span, Status, Target } from "@godcreator/docfi
 /** 文档里的一处引用 */
 export interface Reference {
   target: Target;
-  /** 正式记号上带的记录；草稿记号是 null（未确认）——正式记号一定带着记录 */
+  /** 记号上带的记录；还没确认的记号不带记录属性，是 null */
   record: MemoRecord | null;
   /** 在文档里第几行（0 起）——写回和渲染靠它定位 */
   at: number;
