@@ -10,7 +10,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import * as mdx from "../packages/docfirst-workflow/src/mdx/index.ts";
 import type { MemoRecord, Target } from "../packages/docfirst-pin/src/index.ts";
-import type { Reference } from "../packages/docfirst-workflow/src/format/index.ts";
+import type { Reference } from "../packages/docfirst-workflow/src/reference/index.ts";
 import { draftOf } from "../packages/docfirst-workflow/src/marker/index.ts";
 
 const T: Target = { kind: "span", file: "src/greet.ts", a: 2, b: 3 };

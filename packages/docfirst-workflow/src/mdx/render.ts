@@ -10,12 +10,19 @@ import remarkParse from "remark-parse";
 import remarkFrontmatter from "remark-frontmatter";
 import remarkMdx from "remark-mdx";
 import { fileOf, REASON_TEXT } from "@godcreator/docfirst-pin";
-import { RenderRefusal } from "../format/index.ts";
-import type { Item, Listing } from "../format/index.ts";
+import type { Item, Listing } from "../reference/index.ts";
 import { langOf } from "./lang.ts";
 import { draftIn, markerOf } from "./recognize.ts";
 import { lineOf, walk } from "./tree.ts";
 import type { TreeNode } from "./tree.ts";
+
+/** 按原文渲染拒绝渲染（草稿记号、缺失的引用、组件、mdx 表达式）时抛它；摆放按这一类把它报成红，别的错照原样抛 */
+export class RenderRefusal extends Error {
+  override name = "RenderRefusal";
+}
+
+/** 认名字不认 instanceof：渲染与摆放可能各从一份产物加载，拿到的不是同一个类 */
+export const isRenderRefusal = (err: unknown): err is RenderRefusal => err instanceof Error && err.name === "RenderRefusal";
 
 export function parseTree(text: string): TreeNode {
   return unified().use(remarkParse).use(remarkFrontmatter).use(remarkMdx).parse(text) as unknown as TreeNode;

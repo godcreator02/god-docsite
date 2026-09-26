@@ -24,7 +24,7 @@ import { existsSync } from "node:fs";
 import { join, relative, sep } from "node:path";
 import { REASON_TEXT } from "@godcreator/docfirst-pin";
 import { buildTrajectory } from "@godcreator/docfirst-trajectory";
-import type { Item, Listing } from "../format/index.ts";
+import type { Item, Listing } from "../reference/index.ts";
 import { targetKey } from "../marker/index.ts";
 import { lintComponents } from "../mdx/index.ts";
 import type { ConfirmStep } from "../pinning/index.ts";

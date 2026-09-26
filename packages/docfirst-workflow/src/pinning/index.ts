@@ -3,10 +3,10 @@
  * 结果按原来的顺序配回文档路径、行号、是不是草稿；确认时把核心算出的新记录交回 mdx 格式写回。
  * 命令行、生成物摆放与站构建共用这一份。
  *
- * 这个目录认识 `../format/`、`../mdx/` 与 `@godcreator/docfirst-pin`，不认识记号属性怎么写，也不认识 project 与 cli（`tests/boundary.test.ts` 守着）。
+ * 这个目录认识 `../reference/`、`../mdx/` 与 `@godcreator/docfirst-pin`，不认识记号属性怎么写，也不认识 project 与 cli（`tests/boundary.test.ts` 守着）。
  */
 import type { ConfirmAction, ConfirmOptions, Pin, Pinner, Step, Verdict } from "@godcreator/docfirst-pin";
-import type { Item, Listing, Reference } from "../format/index.ts";
+import type { Item, Listing, Reference } from "../reference/index.ts";
 import { parse, write } from "../mdx/index.ts";
 
 /** 确认时对一处引用做了什么；动作的含义见钉码核心的 `ConfirmAction` */

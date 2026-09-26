@@ -12,7 +12,7 @@ import * as fumadocs from "../packages/docfirst-fumadocs/src/index.ts";
 import { DOT_COLOR, applyListing, docfirstMarkdownOptions, parseMetaString, whereOf } from "../packages/docfirst-fumadocs/src/index.ts";
 import { fumadocsRoster } from "../packages/docfirst-fumadocs/src/roster.ts";
 import type { Target } from "../packages/docfirst-pin/src/index.ts";
-import type { Item, Listing, Reference } from "../packages/docfirst-workflow/src/format/index.ts";
+import type { Item, Listing, Reference } from "../packages/docfirst-workflow/src/reference/index.ts";
 
 const T: Target = { kind: "span", file: "src/greet.ts", a: 2, b: 3 };
 const CURRENT = ["export function greet(name: string): string {", "  return `hello ${name}`;"];

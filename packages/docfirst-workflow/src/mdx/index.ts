@@ -9,7 +9,7 @@
  * 这个目录不认识钉码编排、project 与 cli，也不认识任何站的宿主（`tests/boundary.test.ts` 守着）。
  */
 import type { MemoRecord, Target } from "@godcreator/docfirst-pin";
-import type { Reference } from "../format/index.ts";
+import type { Reference } from "../reference/index.ts";
 import { formalOf } from "../marker/index.ts";
 import { recognize } from "./recognize.ts";
 import { parseTree } from "./render.ts";
@@ -36,7 +36,7 @@ export function lintComponents(text: string, roster: Roster = {}): Array<{ name:
   return unknownComponents(parseTree(text), roster);
 }
 
-export { parseTree, renderAi } from "./render.ts";
+export { isRenderRefusal, parseTree, RenderRefusal, renderAi } from "./render.ts";
 export { draftIn, markerOf, recognize } from "./recognize.ts";
 export { attr, childrenOf, heading, paragraph, quote, stamp, text, textOf, unknownComponents } from "./roster.ts";
 export type { Helpers, Roster, Rule } from "./roster.ts";

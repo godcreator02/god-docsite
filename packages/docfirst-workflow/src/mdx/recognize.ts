@@ -6,7 +6,7 @@
  * 草稿记号是单独成段的一行普通文字，记号语法定的写法。
  */
 import type { Target } from "@godcreator/docfirst-pin";
-import type { Reference } from "../format/index.ts";
+import type { Reference } from "../reference/index.ts";
 import { draftOf, parseFormal } from "../marker/index.ts";
 import { lineOf, walk } from "./tree.ts";
 import type { TreeNode } from "./tree.ts";

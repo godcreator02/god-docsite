@@ -17,5 +17,5 @@ export type { CardProblemReport, CheckReport, ComponentReport, DocReport, Output
 // project 别的零件不出这个口——它们是模块内部，仓里的测试直接 import 源码
 export { docIdOf, loadProject, scanCardDir } from "./project/index.ts";
 export type { Project, ProjectConfig } from "./project/index.ts";
-export type { Item, Listing, Reference } from "./format/index.ts";
+export type { Item, Listing, Reference } from "./reference/index.ts";
 export type { ConfirmResult, ConfirmStep, Pinning } from "./pinning/index.ts";

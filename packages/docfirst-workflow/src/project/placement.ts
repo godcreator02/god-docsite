@@ -12,9 +12,8 @@
  * 摆出去的和守着的是**同一段正文**——两条路走的是同一个 `bodyOf`，所以摆完必然是新鲜的。
  */
 import { isAbsolute, relative, resolve, sep } from "node:path";
-import { isRenderRefusal } from "../format/index.ts";
-import type { Listing } from "../format/index.ts";
-import { renderAi } from "../mdx/index.ts";
+import type { Listing } from "../reference/index.ts";
+import { isRenderRefusal, renderAi } from "../mdx/index.ts";
 import type { Pinning } from "../pinning/index.ts";
 import type { ProjectConfig } from "./load.ts";
 

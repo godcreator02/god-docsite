@@ -18,7 +18,7 @@ description: 包与目录之间的依赖方向靠什么检查，各组测试检�
 ## 依赖方向：只有一个文件在检查
 
 pnpm 严格的 `node_modules` 只保证没写进依赖的包 import 不到；「该不该写进依赖」没人管，workflow 包里
-`marker/`、`format/`、`mdx/`、`pinning/`、`project/`、`cli/` 之间编译器也不拦——`mdx/` 里写一句 `import "../project/load.ts"` 不会报错，
+`marker/`、`reference/`、`mdx/`、`pinning/`、`project/`、`cli/` 之间编译器也不拦——`mdx/` 里写一句 `import "../project/load.ts"` 不会报错，
 mdx 格式从此就跟读盘、git 绑在一起。补上这两项的是 `tests/boundary.test.ts`，它是包之间、workflow 目录之间**唯一**的边界检查。
 选一类规则，看它允许哪些方向、禁止哪些方向、由哪条测试失败报出来：
 
@@ -31,7 +31,7 @@ mdx 格式从此就跟读盘、git 绑在一起。补上这两项的是 `tests/b
 
 workflow 目录之间是同样的写法：
 
-{/* ref file="../tests/boundary.test.ts" lines="240-247" hash="a94525006118" blob="25cfed99c034" */}
+{/* ref file="../tests/boundary.test.ts" lines="240-247" hash="145f05cf1c36" blob="20992db5df4e" */}
 
 两个核心的零依赖只看 import 了谁，轨迹核心直接查产物；钉码核心另外查源码与产物里有没有文档文本那一侧的名字：
 

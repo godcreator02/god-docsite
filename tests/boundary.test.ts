@@ -231,15 +231,15 @@ const WORKFLOW_SRC = srcOf("docfirst-workflow");
  *
  * 方向读法（左边不许知道右边）：
  *   marker   记号写法：草稿写法、正式记号里的属性、报告里的目标文本；只用钉码核心的类型，谁都不认识
- *   format   引用与清单的类型、渲染拒绝的错误类，谁都不认识
+ *   reference 引用在文档里的位置与核对结果的类型，谁都不认识
  *   mdx      mdx 格式：认引用、写回、名册检查、按原文渲染，用记号写法；不认识钉码编排、项目怎么装配、命令行怎么打印
  *   pinning  钉码编排：mdx 认引用、钉码核心判定、mdx 写回的先后顺序；不认识记号属性怎么写
  *   project  碰环境：读盘、git、摆放、读卡目录；不认识命令行
  *   cli      入口：认识以上全部，谁都不认识它
  */
 const WORKFLOW_DIRS: Record<string, string[]> = {
-  marker: ["format", "mdx", "pinning", "project", "cli"],
-  format: ["marker", "mdx", "pinning", "project", "cli"],
+  marker: ["reference", "mdx", "pinning", "project", "cli"],
+  reference: ["marker", "mdx", "pinning", "project", "cli"],
   mdx: ["pinning", "project", "cli"],
   pinning: ["marker", "project", "cli"],
   project: ["cli"],
@@ -255,7 +255,7 @@ function dirOf(file: string, spec: string): string | null {
   return parts.length > 1 ? parts[0]! : null;
 }
 
-test("workflow 目录方向：marker 与 format 谁都不认识，mdx 不认识钉码编排与 project，都不认识 cli", () => {
+test("workflow 目录方向：marker 与 reference 谁都不认识，mdx 不认识钉码编排与 project，都不认识 cli", () => {
   const bad: string[] = [];
   for (const [dir, forbidden] of Object.entries(WORKFLOW_DIRS)) {
     for (const file of sourcesIn(join(WORKFLOW_SRC, dir))) {
@@ -269,10 +269,10 @@ test("workflow 目录方向：marker 与 format 谁都不认识，mdx 不认识�
   assert.deepEqual(bad, [], "方向反了。改的是 WORKFLOW_DIRS 那张表加一段为什么，不是把这条断言删掉");
 });
 
-test("workflow 目录方向：format 只认识 @godcreator/docfirst-pin", () => {
-  for (const file of sourcesIn(join(WORKFLOW_SRC, "format"))) {
+test("workflow 目录方向：reference 只认识 @godcreator/docfirst-pin", () => {
+  for (const file of sourcesIn(join(WORKFLOW_SRC, "reference"))) {
     for (const spec of importSpecsOf(readFileSync(file, "utf8"))) {
-      assert.ok(spec.startsWith("./") || spec === "@godcreator/docfirst-pin", `format/${rel(join(WORKFLOW_SRC, "format"), file)} import 了 ${spec}`);
+      assert.ok(spec.startsWith("./") || spec === "@godcreator/docfirst-pin", `reference/${rel(join(WORKFLOW_SRC, "reference"), file)} import 了 ${spec}`);
     }
   }
 });

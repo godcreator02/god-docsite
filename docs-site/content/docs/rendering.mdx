@@ -15,7 +15,7 @@ description: 仓根的 README.md、AGENTS.md、CLAUDE.md 与插件里的 SKILL.m
 frontmatter；写成 `{ to, frontmatter }`，点名的字段逐行搬进生成物头部，SKILL.md 就是靠这样保住 `name` 与 `description`。
 装配项目时检查每个落点：不能是绝对路径、不能落进内容根（配置的 `content`，默认 `content/`）、同一个落点只许一篇正本写，违反任何一条直接报错：
 
-{/* ref file="../packages/docfirst-workflow/src/project/placement.ts" lines="122-140" hash="134440fb80cc" blob="ff9aae9560f4" */}
+{/* ref file="../packages/docfirst-workflow/src/project/placement.ts" lines="121-139" hash="134440fb80cc" blob="6dc0e3cf3ba7" */}
 
 render 只遍历现状区的文档，映射的键写成 `trajectory/` 或 `future/` 下的页，永远不会被渲染：
 
@@ -26,22 +26,22 @@ render 只遍历现状区的文档，映射的键写成 `trajectory/` 或 `futur
 渲染由 mdx 格式的 `renderAi` 完成：用 remark 把正本解析成语法树，只改 frontmatter 和记号两种节点，其余原文逐字节照抄。
 每个节点的处理：
 
-{/* ref file="../packages/docfirst-workflow/src/mdx/render.ts" lines="76-111" hash="731e77ed5520" blob="8296809554c9" */}
+{/* ref file="../packages/docfirst-workflow/src/mdx/render.ts" lines="83-118" hash="731e77ed5520" blob="9fe43e0b5dbe" */}
 
 记号换成的代码块，内容是渲染时从被钉文件读出的那几行，info 串是语言加 `title="路径:起-止"`，hash 与 blob 不进生成物：
 
-{/* ref file="../packages/docfirst-workflow/src/mdx/render.ts" lines="37-48" hash="da5e04e79a4b" blob="3c202787cdfc" */}
+{/* ref file="../packages/docfirst-workflow/src/mdx/render.ts" lines="44-55" hash="da5e04e79a4b" blob="9fe43e0b5dbe" */}
 
 同一篇正本只渲染一次正文，每个落点各自加上点名的 frontmatter 字段。点名的字段正本里没有，这个落点不写；
 跟落点上现有的文件相同，也不写：
 
-{/* ref file="../packages/docfirst-workflow/src/project/placement.ts" lines="222-245" hash="84dfba0ad0d3" blob="90cc5ebe3c3d" */}
+{/* ref file="../packages/docfirst-workflow/src/project/placement.ts" lines="221-244" hash="84dfba0ad0d3" blob="6dc0e3cf3ba7" */}
 
 ## check 怎么守生成物新鲜
 
 `check` 用 render 同一个 `bodyOf` 在内存里再渲染一次，跟落点上的文件比，只读不写：
 
-{/* ref file="../packages/docfirst-workflow/src/project/placement.ts" lines="247-269" hash="c7cdaed835f2" blob="90cc5ebe3c3d" */}
+{/* ref file="../packages/docfirst-workflow/src/project/placement.ts" lines="246-268" hash="c7cdaed835f2" blob="6dc0e3cf3ba7" */}
 
 只有 `fresh` 算新鲜，其余状态（落点上还没有文件、内容不一致、缺点名的字段、渲染不了）每个落点记一次红：
 
@@ -55,4 +55,4 @@ check 变红。
 四样东西渲染不了：还没确认的草稿记号、指向的东西已经不在的引用、JSX 组件、mdx 表达式（`import` / `export` 也算）。
 `renderAi` 先走完整棵树，把每一处连同行号列全再拒绝；这一篇的落点一个都不写，render 与 check 都报红：
 
-{/* ref file="../packages/docfirst-workflow/src/mdx/render.ts" lines="113-130" hash="6513bc5e9f62" blob="8296809554c9" */}
+{/* ref file="../packages/docfirst-workflow/src/mdx/render.ts" lines="120-137" hash="6513bc5e9f62" blob="9fe43e0b5dbe" */}

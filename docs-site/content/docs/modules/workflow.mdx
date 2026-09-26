@@ -13,7 +13,7 @@ full: true
 
 目录之间的依赖方向见上图。这些目录在同一个包里，编译器不拦跨目录 import，方向由边界测试的禁止表检查：
 
-{/* ref file="../tests/boundary.test.ts" lines="228-247" hash="f90f97fdf5ed" blob="25cfed99c034" */}
+{/* ref file="../tests/boundary.test.ts" lines="228-247" hash="05e4ab95b165" blob="20992db5df4e" */}
 
 ### 项目装配 project
 
@@ -46,7 +46,7 @@ full: true
 **摆放**的渲染过程见[生成物渲染](/docs/rendering)。落点在装配时就检查：
 得相对项目根、不许落进内容根、一个落点只许一篇文档写，违反任何一条 `loadProject` 当场报错：
 
-{/* ref file="../packages/docfirst-workflow/src/project/placement.ts" lines="122-140" hash="134440fb80cc" blob="ff9aae9560f4" */}
+{/* ref file="../packages/docfirst-workflow/src/project/placement.ts" lines="121-139" hash="134440fb80cc" blob="6dc0e3cf3ba7" */}
 
 **读卡目录**：目录不存在回空集合；「卡里不许钉码」认草稿与正式记号两种形态：
 
@@ -117,12 +117,16 @@ fumadocs 自带组件的规则在 [fumadocs 适配](/docs/modules/fumadocs)的 `
 
 退出码、红的来源、未提交改动的黄怎么算红，见[提交门禁](/docs/pinning/gate)。
 
-### 引用与清单 format
+### 引用与清单 reference
 
-引用与清单的类型定义在这里：钉码核心只认目标与记录，文档路径、行号、是不是草稿由钉码编排配回去。渲染拒绝按错误名认、不用 `instanceof`：渲染与摆放可能各从一份产物加载，
+引用在文档里的位置与核对结果的类型定义在 `src/reference/`：钉码核心只认目标与记录，文档路径、行号、是不是草稿由钉码编排配回去：
+
+{/* ref file="../packages/docfirst-workflow/src/reference/index.ts" lines="11-20" hash="c4ce2d858fd7" blob="086e0b8062c9" */}
+
+按原文渲染拒绝渲染时抛的错误类在 mdx 格式里。摆放按错误名认、不用 `instanceof`：渲染与摆放可能各从一份产物加载，
 拿到的不是同一个类：
 
-{/* ref file="../packages/docfirst-workflow/src/format/index.ts" lines="44-50" hash="6d024e48e50e" blob="c9bc7d02bf03" */}
+{/* ref file="../packages/docfirst-workflow/src/mdx/render.ts" lines="19-25" hash="6d024e48e50e" blob="9fe43e0b5dbe" */}
 
 ## 接口
 
@@ -132,7 +136,7 @@ fumadocs 自带组件的规则在 [fumadocs 适配](/docs/modules/fumadocs)的 `
 
 `.` 交出 `main`、`check --json` 报告的类型、`loadProject` / `docIdOf` / `scanCardDir`、引用与清单和钉码编排的类型：
 
-{/* ref file="../packages/docfirst-workflow/src/index.ts" hash="e0555026fc1c" blob="77cfb7daaffd" */}
+{/* ref file="../packages/docfirst-workflow/src/index.ts" hash="b69f37dfca04" blob="974951466224" */}
 
 `main` 自己不调 `process.exit`，可执行文件只转发参数与退出码，别的程序可以直接调 `main` 拿到退出码：
 
@@ -148,7 +152,7 @@ fumadocs 自带组件的规则在 [fumadocs 适配](/docs/modules/fumadocs)的 `
 **`./mdx`** 除了格式本身，还交出语法树上的函数给 fumadocs 适配：站构建时 remark 插件拿到的树已经解析好，用 `recognize` 认记号、
 `stamp` 打标记，不再解析一遍；`langOf` 让按原文渲染与站上的代码块标同一种语言：
 
-{/* ref file="../packages/docfirst-workflow/src/mdx/index.ts" lines="39-45" hash="6acd0fd85525" blob="52d83213a3ed" */}
+{/* ref file="../packages/docfirst-workflow/src/mdx/index.ts" lines="39-45" hash="d2525bfe4976" blob="760b234df302" */}
 
 **`./cards`** 只有 `scanCardDir`，给 fumadocs 适配的 `loadTrajectory` 用：走 `.` 会把命令行与配置加载带进 Next 的服务端构建：
 
@@ -181,6 +185,6 @@ fumadocs 自带组件的规则在 [fumadocs 适配](/docs/modules/fumadocs)的 `
 - **不给卡建模**：卡字段怎么校验、盘怎么建归[轨迹核心](/docs/modules/trajectory)。
 - **摆放不读写文件**：`placement.ts` 经 `PlacingHost` 读写落点，读写磁盘的那份实现在 `load.ts`，测试换成内存那份：
 
-{/* ref file="../packages/docfirst-workflow/src/project/placement.ts" lines="78-92" hash="90be89518ac3" blob="90cc5ebe3c3d" */}
+{/* ref file="../packages/docfirst-workflow/src/project/placement.ts" lines="77-91" hash="90be89518ac3" blob="6dc0e3cf3ba7" */}
 
 - **不建站**：建站命令与模板归[工作台插件](/docs/modules/plugin)。

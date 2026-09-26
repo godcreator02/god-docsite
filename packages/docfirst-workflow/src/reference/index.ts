@@ -1,5 +1,5 @@
 /**
- * 文档这一层的共用类型：一处引用在文档里的位置、一篇核对完的清单，以及按原文渲染拒绝时抛的错误。
+ * 引用在文档里的位置与核对结果的类型：一处引用在文档里的位置、一篇核对完的清单。
  *
  * 钉码核心只收目标与记录，文档路径、第几行、是不是草稿都定义在这儿，由钉码编排（`../pinning/`）配回去；
  * mdx 格式认出的引用、按原文渲染要读的清单也是这几个类型。
@@ -40,11 +40,3 @@ export interface Listing {
   doc: string;
   items: Item[];
 }
-
-/** 按原文渲染拒绝渲染（草稿记号、缺失的引用、组件、mdx 表达式）时抛它；摆放按这一类把它报成红，别的错照原样抛 */
-export class RenderRefusal extends Error {
-  override name = "RenderRefusal";
-}
-
-/** 认名字不认 instanceof：渲染与摆放可能各从一份产物加载，拿到的不是同一个类 */
-export const isRenderRefusal = (err: unknown): err is RenderRefusal => err instanceof Error && err.name === "RenderRefusal";

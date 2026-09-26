@@ -8,7 +8,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { createPinner } from "../packages/docfirst-pin/src/index.ts";
-import type { Listing } from "../packages/docfirst-workflow/src/format/index.ts";
+import type { Listing } from "../packages/docfirst-workflow/src/reference/index.ts";
 import { createPinning } from "../packages/docfirst-workflow/src/pinning/index.ts";
 import type { Pinning } from "../packages/docfirst-workflow/src/pinning/index.ts";
 import { createPlacing } from "../packages/docfirst-workflow/src/project/index.ts";
