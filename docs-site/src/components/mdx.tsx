@@ -19,6 +19,11 @@ import { PinStory } from './pin/story';
 import { PinGlance } from './pin-glance/glance';
 import { RenderFlow } from './render-flow/render-flow';
 import { SeamMap } from './seam-map/seam-map';
+import { RefKinds } from './ref-kinds/ref-kinds';
+import { SpanFollow } from './span-follow/span-follow';
+import { CommitGate } from './commit-gate/commit-gate';
+import { TrajectoryFlow } from './trajectory-flow/trajectory-flow';
+import { BoundaryRules } from './boundary-rules/boundary-rules';
 
 export function Note({ children }: { children?: ReactNode }) {
   return <div className="note">{children}</div>;
@@ -37,6 +42,11 @@ const table: Record<ComponentName, MDXComponents[string]> = {
   PinJudge,
   SeamMap,
   RenderFlow,
+  RefKinds,
+  SpanFollow,
+  CommitGate,
+  TrajectoryFlow,
+  BoundaryRules,
 };
 
 export function getMDXComponents(components?: MDXComponents) {

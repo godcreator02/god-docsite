@@ -4,12 +4,22 @@
  * 每条接缝的标题与说明就是画面浮层里显示的 label、text 两个字段。
  * 这个文件不 import React，docfirst.config.mjs 引它，命令行也能运行。
  */
-import { capById, entries, modules, seams } from './seam-map.data.mjs';
+import { capById, entries, modules, seams, seamsOfModule } from './seam-map.data.mjs';
 
 const capNames = (ids) => ids.map((id) => capById.get(id).name).join('、');
 const entryTarget = (to) => capById.get(to)?.name ?? modules.find((m) => m.id === to).name;
 
-export function SeamMap(_node, { paragraph }) {
+/** 带 module 属性（模块页）时只写这个模块和跟它有关的接缝 */
+export function SeamMap(node, { paragraph, attr }) {
+  const moduleId = attr(node, 'module');
+  if (moduleId !== undefined) {
+    const m = modules.find((x) => x.id === moduleId);
+    if (m === undefined) throw new Error(`SeamMap 的 module 属性「${moduleId}」不是接缝图里的模块，可选：${modules.map((x) => x.id).join('、')}`);
+    return [
+      paragraph(`「${m.name}」（${m.pkg}）在接缝图里的位置：${m.blurb}能力：${m.caps.map((c) => `${c.name}（${c.ident}）`).join('、')}。`),
+      ...seamsOfModule(m.id).map(seamParagraph(paragraph)),
+    ];
+  }
   return [
     paragraph(
       `接缝图：虚线框是模块（docfirst 的 npm 包与工作台插件），框里的方块是能力，跨模块的线带编号就是接缝；实线是代码调用，虚线是读写磁盘上的文件；系统之外的东西画在框外。从外面进来的入口：${entries.map((e) => `${e.name} → ${entryTarget(e.to)}`).join('；')}。`,
@@ -17,10 +27,13 @@ export function SeamMap(_node, { paragraph }) {
     ...modules.map((m) =>
       paragraph(`${m.outside ? '框外' : '模块'}「${m.name}」（${m.pkg}）：${m.blurb}能力：${m.caps.map((c) => `${c.name}（${c.ident}）`).join('、')}。`),
     ),
-    ...seams.map((s) =>
-      paragraph(
-        `接缝 ${s.label}：${s.text}两端：${capNames(s.a)} ↔ ${capNames(s.b)}。接口：${s.iface}。${s.convention ? '约定，没有代码接口' : '有代码接口'}，${s.via === 'disk' ? '读写磁盘上的文件' : '代码调用'}。`,
-      ),
-    ),
+    ...seams.map(seamParagraph(paragraph)),
   ];
+}
+
+function seamParagraph(paragraph) {
+  return (s) =>
+    paragraph(
+      `接缝 ${s.label}：${s.text}两端：${capNames(s.a)} ↔ ${capNames(s.b)}。接口：${s.iface}。${s.convention ? '约定，没有代码接口' : '有代码接口'}，${s.via === 'disk' ? '读写磁盘上的文件' : '代码调用'}。`,
+    );
 }

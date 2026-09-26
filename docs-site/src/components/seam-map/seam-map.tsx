@@ -4,6 +4,7 @@
  * 跨模块的线带编号，就是接缝；实线是代码调用，虚线是读写磁盘上的文件；框外是使用方的站、使用方的仓、fumadocs 本体与外面进来的入口。
  * 两件事互相独立：鼠标停在编号或模块框上（或键盘聚焦到它）浮出说明，挪开就收起；
  * 点击（或回车、空格）固定高亮关系——点编号高亮这条接缝和两端的能力，点模块框高亮跟它有关的接缝，再点一次取消。
+ * 带 module 属性时一打开就固定高亮那个模块，模块页用它。
  * 内容全在 seam-map.data.mjs，这里只有布局与交互；机读版由 seam-map.ai.mjs 读同一份数据生成。
  */
 import { useState } from 'react';
@@ -366,10 +367,19 @@ function Tip({ target }: { target: Target }) {
   );
 }
 
-export function SeamMap() {
+/** 模块页上写 `<SeamMap module="pin" />`：一打开就固定高亮这个模块和它的接缝 */
+function initialPin(moduleId: string | undefined): Target | null {
+  if (moduleId === undefined) return null;
+  if (!modules.some((m) => m.id === moduleId)) {
+    throw new Error(`SeamMap 的 module 属性「${moduleId}」不是接缝图里的模块，可选：${modules.map((m) => m.id).join('、')}`);
+  }
+  return { kind: 'module', id: moduleId };
+}
+
+export function SeamMap({ module: moduleId }: { module?: string }) {
   /** 浮层显示的是鼠标停着的那个；高亮的是点击固定的那个，两者互不影响 */
   const [shown, setShown] = useState<Target | null>(null);
-  const [pinned, setPinned] = useState<Target | null>(null);
+  const [pinned, setPinned] = useState<Target | null>(() => initialPin(moduleId));
   const pointing: Pointing = {
     point: setShown,
     pin: (target) => setPinned((current) => (sameTarget(current, target) ? null : target)),

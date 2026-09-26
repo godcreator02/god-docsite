@@ -8,6 +8,8 @@ description: 把 docfirst 接到 fumadocs 站上：remark 插件与 meta 白名�
 包 `@godcreator/docfirst-fumadocs`，源码在 `packages/docfirst-fumadocs/src/`，入口是 `src/index.ts`（出口 `.`），
 另有侧出口 `./roster`、`./pre`、`./term`、`./trajectory` 与两张样式表。
 
+<SeamMap module="fumadocs" />
+
 ## 功能
 
 这个包里的代码都由 fumadocs 或 Next 调用：mdx 加载器编译页面时调的插件、集合的 schema 与回调、页面渲染时的组件。
@@ -155,7 +157,7 @@ fumadocs 与 react 只能是必需的 peer，用使用方项目装的那份：
 
 名单的正本在这儿，两处都拿它对：
 
-{/* ref file="src/components/registry.ts" lines="12-13" hash="9aecd6b84e07" blob="608dca5082b4" */}
+{/* ref file="src/components/registry.ts" lines="12-13" hash="520584aa7f9f" blob="d774808a81ac" */}
 
 少登记一处的后果不一样，但都直接报错：**压平表没有** → 打标记时报「名册外组件」；**React 表没有** → 站渲染报 `Expected component`。两处是否一致由站门禁里的一个脚本核对：
 

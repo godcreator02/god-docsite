@@ -93,6 +93,8 @@ description: 几组测试各检查什么：钉码核心、契约、git 那一侧
 
 一次性迁移 `docfirst migrate-ledger`（旧版 `.ledger.json` 写进记号）在 `tests/migrate-ledger.test.ts`。
 
+<BoundaryRules />
+
 ## 边界测试：读目录方向，不读源码措辞
 
 `tests/boundary.test.ts` 是五个包之间、workflow 包里面**唯一**的边界检查。pnpm 严格的 `node_modules` 只保证

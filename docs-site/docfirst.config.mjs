@@ -20,6 +20,11 @@ import * as pin from "./src/components/pin/pin.ai.mjs";
 import * as pinGlance from "./src/components/pin-glance/glance.ai.mjs";
 import * as seamMap from "./src/components/seam-map/seam-map.ai.mjs";
 import * as renderFlow from "./src/components/render-flow/render-flow.ai.mjs";
+import * as refKinds from "./src/components/ref-kinds/ref-kinds.ai.mjs";
+import * as spanFollow from "./src/components/span-follow/span-follow.ai.mjs";
+import * as commitGate from "./src/components/commit-gate/commit-gate.ai.mjs";
+import * as trajectoryFlow from "./src/components/trajectory-flow/trajectory-flow.ai.mjs";
+import * as boundaryRules from "./src/components/boundary-rules/boundary-rules.ai.mjs";
 
 /**
  * 一份 skill 的生成位置：正本是 `content/docs/outputs/skills/<名>.mdx`，生成到**插件**里那份 SKILL.md。
@@ -60,5 +65,10 @@ export default {
     PinJudge: pin.PinJudge,
     SeamMap: seamMap.SeamMap,
     RenderFlow: renderFlow.RenderFlow,
+    RefKinds: refKinds.RefKinds,
+    SpanFollow: spanFollow.SpanFollow,
+    CommitGate: commitGate.CommitGate,
+    TrajectoryFlow: trajectoryFlow.TrajectoryFlow,
+    BoundaryRules: boundaryRules.BoundaryRules,
   },
 };

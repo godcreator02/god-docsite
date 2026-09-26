@@ -8,6 +8,8 @@ description: docfirst-workflow：命令行 docfirst、项目装配（读盘、gi
 包 `@godcreator/docfirst-workflow`，源码在 `packages/docfirst-workflow/src/`，入口是 `src/index.ts`（出口 `.`）、
 `src/mdx/index.ts`（出口 `./mdx`）与 `src/project/card-dir.ts`（出口 `./cards`），可执行文件 `docfirst` 由 `src/cli/cli.ts` 构建。
 
+<SeamMap module="workflow" />
+
 ## 功能
 
 调用链从 `docfirst` 命令开始的都在这个包里：门禁、CI 与 git hook 跑的核对、确认、渲染、轨迹，以及这些命令要的项目装配与
