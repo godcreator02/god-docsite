@@ -17,7 +17,9 @@ import { componentNames } from "../src/components/registry.ts";
 register();
 
 const project = await loadProject(process.cwd());
-const DOCS = project.docs();
+/** 现状区里的 mdx 页面；讲解组件的源码也在现状区，但不是页面，由最后一条测试单独看 */
+const DOCS = project.docs().filter((doc) => doc.endsWith(".mdx"));
+const COMPONENT_FILES = project.docs().filter((doc) => !doc.endsWith(".mdx"));
 /** 占位组件：带上 data- 属性（目录树的状态点属性加在 Files 容器上）和 name（文件夹 / 文件名），别的不管长相 */
 const components = Object.fromEntries(
   componentNames.map((name) => [
@@ -128,5 +130,13 @@ test("这个站自己的文档全是绿的：写下的引用跟源码没脱节",
       page.listing.items.map(() => "fresh"),
       `${doc} 有引用不是新鲜的——跑 pnpm docfirst check 看看`,
     );
+  }
+});
+
+test("讲解组件的源码也进现状区，里面挂的引用全是绿的", () => {
+  assert.ok(COMPONENT_FILES.every((file) => file.startsWith("src/components/")), `现状区里有 src/components/ 之外的代码文件：${COMPONENT_FILES.join("、")}`);
+  for (const file of COMPONENT_FILES) {
+    const { items } = project.pinning.checkDoc(file, project.read(file));
+    assert.deepEqual(items.map((i) => i.status), items.map(() => "fresh"), `${file} 有引用不是新鲜的——跑 pnpm docfirst check 看看`);
   }
 });

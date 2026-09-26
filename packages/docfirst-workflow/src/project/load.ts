@@ -5,6 +5,7 @@
  *
  * 分区按约定：内容根（`content`，默认 `content`）下 `trajectory/` 是轨迹卡、`future/` 是未来区，
  * 这两个名字固定；内容根下别的一切（目录里的、直接放在根上的）.mdx 文档都是现状区，都进 check。
+ * 项目根下 `src/components/` 里有格式认领的代码文件（讲解组件的源码）也是现状区。
  * 配置只认 `CONFIG_KEYS` 里那几个键，出现别的键当场报错并说清该怎么改。
  */
 import { existsSync, mkdirSync, readFileSync, readdirSync, statSync, writeFileSync } from "node:fs";
@@ -12,7 +13,7 @@ import { dirname, isAbsolute, join, relative, resolve, sep } from "node:path";
 import { pathToFileURL } from "node:url";
 import { createPinner } from "@godcreator/docfirst-pin";
 import type { Roster } from "../mdx/index.ts";
-import { createPinning } from "../pinning/index.ts";
+import { createPinning, isClaimed } from "../pinning/index.ts";
 import type { Pinning } from "../pinning/index.ts";
 import { createReader } from "./fs-reader.ts";
 import { createGitHistory } from "./history.ts";
@@ -44,7 +45,7 @@ export interface Project {
   trajectoryDir: string;
   /** 摆放：render 摆一趟、check 只核对。渲成什么、跟盘上怎么比、落点状态怎么定，都在它背后 */
   placing: Placing;
-  /** 现状区里的 .mdx 文档，相对项目根、正斜杠、排过序 */
+  /** 现状区里的文件：内容根下的 .mdx 文档，加上 src/components/ 下有格式认领的代码文件；相对项目根、正斜杠、排过序 */
   docs(): string[];
   /** 这篇文档挂的摆放目标（归一化过）；没挂映射给空数组 */
   placements(doc: string): Placement[];
@@ -88,6 +89,17 @@ const isDoc = (name: string): boolean => name.endsWith(".mdx");
 
 /** 内容根下固定的两个名字：轨迹卡与未来区，都不进 check */
 const FIXED_AREAS = new Set(["trajectory", "future"]);
+
+/** 讲解组件的源码目录，相对项目根 */
+const COMPONENTS_DIR = "src/components";
+
+/** 目录下的全部文件（递归），绝对路径 */
+function filesUnder(dir: string): string[] {
+  return readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
+    const path = join(dir, entry.name);
+    return entry.isDirectory() ? filesUnder(path) : [path];
+  });
+}
 
 /** 配置认的键 */
 const CONFIG_KEYS = ["content", "components", "outputs"];
@@ -135,7 +147,7 @@ async function build(root: string): Promise<Project> {
     return out;
   }
 
-  /** 现状区：内容根下除 trajectory/、future/ 之外的全部 */
+  /** 现状区：内容根下除 trajectory/、future/ 之外的全部，加上 src/components/ 下有格式认领的代码文件 */
   function statusDocs(): string[] {
     const out: string[] = [];
     for (const name of readdirSync(contentAbs)) {
@@ -146,7 +158,13 @@ async function build(root: string): Promise<Project> {
         out.push(docIdOf(root, path));
       }
     }
-    return out.sort();
+    return [...out, ...componentFiles()].sort();
+  }
+
+  function componentFiles(): string[] {
+    const dir = join(root, COMPONENTS_DIR);
+    if (!existsSync(dir)) return [];
+    return filesUnder(dir).map((path) => docIdOf(root, path)).filter(isClaimed);
   }
 
   // 摆放模块认得的只有这几样，先攒齐再交给它——它拿不到装配的别的部分。

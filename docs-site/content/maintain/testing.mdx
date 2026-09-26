@@ -13,7 +13,7 @@ description: 包与目录之间的依赖方向靠什么检查，各组测试检�
 
 仓根那组按主题一个文件：
 
-{/* tree dir="../tests" depth="1" glob="*.test.ts" hash="6bcca5406a8c" */}
+{/* tree dir="../tests" depth="1" glob="*.test.ts" hash="15c579d6e45d" */}
 
 ## 依赖方向：只有一个文件在检查
 
@@ -31,7 +31,7 @@ mdx 格式从此就跟读盘、git 绑在一起。补上这两项的是 `tests/b
 
 workflow 目录之间是同样的写法：
 
-{/* ref file="../tests/boundary.test.ts" lines="240-247" hash="145f05cf1c36" blob="20992db5df4e" */}
+{/* ref file="../tests/boundary.test.ts" lines="241-249" hash="fe2a32967054" blob="620efd5d3544" */}
 
 两个核心的零依赖只看 import 了谁，轨迹核心直接查产物；钉码核心另外查源码与产物里有没有文档文本那一侧的名字：
 
@@ -106,12 +106,12 @@ fumadocs 适配不接 Next 的那一半在 `tests/fumadocs.test.ts`，讲解组�
 它断言每条引用在页面上都有带状态点和来源标题的元素、组件没有漏成裸标签、机读版里有来源行且组件已压平成文字，
 以及这个站自己全绿：
 
-{/* ref file="tests/page.test.mjs" lines="124-132" hash="10ebafcc9456" blob="5ae8125b5dda" */}
+{/* ref file="tests/page.test.mjs" lines="126-134" hash="10ebafcc9456" blob="53b48109f86c" */}
 
 所以每一页钉着的源码一改，`docfirst check` 报出来、站测试直接失败，文档跟不上代码就过不了门禁。
 允许不钉码的页由 frontmatter 明说：`docfirst: none` 是明说不钉的页，`docfirst: draft` 是还没写完的页，两样都没写就必须至少钉一处：
 
-{/* ref file="tests/page.test.mjs" lines="50-51" hash="cfcbeab7ba70" blob="6563bf8b4551" */}
+{/* ref file="tests/page.test.mjs" lines="52-53" hash="cfcbeab7ba70" blob="53b48109f86c" */}
 
 <Note>
   站测试不跟命令行比状态：算状态的是同一个钉码编排，比出来只能相等。跨调用方的比对要启动站后请求 `.md` 路由。

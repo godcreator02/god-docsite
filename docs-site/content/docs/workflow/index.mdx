@@ -13,21 +13,22 @@ full: true
 
 目录之间的依赖方向见上图。这些目录在同一个包里，编译器不拦跨目录 import，方向由边界测试的禁止表检查：
 
-{/* ref file="../tests/boundary.test.ts" lines="228-247" hash="cc23d5202c7d" blob="38bd9586bd31" */}
+{/* ref file="../tests/boundary.test.ts" lines="228-249" hash="5903b549095a" blob="620efd5d3544" */}
 
 ### 项目装配 project
 
 一个项目是一个根目录加一份 `docfirst.config`，分区按约定，不在配置里登记：
 
-{/* ref file="../packages/docfirst-workflow/src/project/load.ts" lines="1-9" hash="9213daf3edbb" blob="0186be908b77" */}
+{/* ref file="../packages/docfirst-workflow/src/project/load.ts" lines="1-10" hash="56d45cc1765f" blob="9af74e0233aa" */}
 
-现状区是内容根下除 `trajectory/`、`future/` 之外的全部 `.mdx` 文档，目录里的和直接放在内容根上的都算：
+现状区是内容根下除 `trajectory/`、`future/` 之外的全部 `.mdx` 文档（目录里的和直接放在内容根上的都算），
+加上项目根下 `src/components/` 里有格式认领的代码文件：
 
-{/* ref file="../packages/docfirst-workflow/src/project/load.ts" lines="138-150" hash="91fa7cb3762b" blob="0c65c5b4fafe" */}
+{/* ref file="../packages/docfirst-workflow/src/project/load.ts" lines="150-168" hash="50c8056ca830" blob="9af74e0233aa" */}
 
 配置模块由 Node 原生加载：站的打包器会把动态 import 改写成自己的加载器，这一句带着两个打包器的跳过标记。
 
-{/* ref file="../packages/docfirst-workflow/src/project/load.ts" lines="107-113" hash="5d8ed05b1d87" blob="0c65c5b4fafe" */}
+{/* ref file="../packages/docfirst-workflow/src/project/load.ts" lines="119-125" hash="5d8ed05b1d87" blob="9af74e0233aa" */}
 
 **读取器与旧内容来源**：旧内容来源按被引文件自己的位置找仓，hunk 表用两个临时文件跑 `git diff --no-index` 算，不往任何对象库写：
 
@@ -56,20 +57,24 @@ full: true
 
 ### 钉码编排 pinning
 
-一篇文档的核对与确认只在这里串起来：mdx 格式认出引用，每处剥成目标与记录交给钉码核心，结果按原来的顺序配回文档路径与
-行号；确认时把钉码核心算出的新记录交回 mdx 格式写回。命令行、生成物摆放与站构建共用这一份，入口有三个：
+一个文件的核对与确认只在这里串起来：按文件挑格式，格式认出引用，每处剥成目标与记录交给钉码核心，结果按原来的顺序配回文件路径与
+行号；确认时把钉码核心算出的新记录交回同一个格式写回。命令行、生成物摆放与站构建共用这一份，入口有三个：
 
-{/* ref file="../packages/docfirst-workflow/src/pinning/index.ts" lines="30-37" hash="ad4340c0a68f" blob="daa159f365a8" */}
+{/* ref file="../packages/docfirst-workflow/src/pinning/index.ts" lines="32-39" hash="f1fbdd9d8360" blob="846e36be1e3f" */}
+
+格式有两种：mdx 页面与讲解组件的源码（`src/code/`）。一个文件只能有一个格式认领，没有或不止一个都报错：
+
+{/* ref file="../packages/docfirst-workflow/src/pinning/index.ts" lines="41-52" hash="7a51c81ee6c4" blob="846e36be1e3f" */}
 
 钉码核心交回的结果与传入的引用一一对应、同序，配回靠下标；写回只交有新记录的那几处：
 
-{/* ref file="../packages/docfirst-workflow/src/pinning/index.ts" lines="65-82" hash="35812cb6a996" blob="00256fa57d19" */}
+{/* ref file="../packages/docfirst-workflow/src/pinning/index.ts" lines="80-98" hash="9182092f5801" blob="846e36be1e3f" */}
 
 ### mdx 格式
 
-钉码编排要的 `parse`、`write` 与给 check 的名册检查都在入口文件上，写回只重写记号所在那一行；`marker` 把记号写法给的一截文字包成花括号注释：
+钉码编排要的 `mdxFormat`（`parse`、`write`）与给 check 的名册检查都在入口文件上，写回只重写记号所在那一行；`marker` 把记号写法给的一截文字包成花括号注释：
 
-{/* ref file="../packages/docfirst-workflow/src/mdx/index.ts" lines="19-37" hash="8e0b69e183e3" blob="20bb18c9efdd" */}
+{/* ref file="../packages/docfirst-workflow/src/mdx/index.ts" lines="20-41" hash="00a0ec519d2a" blob="26de56e31ba1" */}
 
 认记号走 remark 语法树：记号是 `mdxFlowExpression` 节点，段落里以 `@@docfirst` 开头的一行报错。写在围栏里、句子里的同样文字分别是
 `code` 与 `mdxTextExpression` 节点，不算记号：
@@ -121,16 +126,16 @@ mdx 格式认出的、按原文渲染要读的、命令行打印的都是这几�
 
 子命令与各自做什么写在入口文件头上：
 
-{/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="1-21" hash="0a6add2fc39d" blob="0f3253b19ef0" */}
+{/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="1-22" hash="2adcd321d58a" blob="68565dfd474a" */}
 
 每条命令只收自己开关表里的开关，别的一律退 2、什么都不动。表必须封闭：`confirm` 把 `-` 开头的参数从页名里筛掉，
 开关若被静默丢掉，`confirm --help` 就成了不带页名的全部页确认：
 
-{/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="44-57" hash="ec22d1956cc8" blob="75cc83db6ebd" */}
+{/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="45-58" hash="ec22d1956cc8" blob="68565dfd474a" */}
 
 人读输出一行一处引用：状态符号、文档、目标（记号上的行号）、一句说明，括号里是细分理由或目录树的项数：
 
-{/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="36-42" hash="9ebfdcac2bf1" blob="75cc83db6ebd" */}
+{/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="37-43" hash="9ebfdcac2bf1" blob="68565dfd474a" */}
 
 ```text
 🟢 content/docs/a.mdx  src/greet.ts:2-3  新鲜
@@ -142,15 +147,15 @@ mdx 格式认出的、按原文渲染要读的、命令行打印的都是这几�
 
 `check` 先把逐篇核对与轨迹卡校验汇总成一份报告，人读模式边算边打，`--json` 汇总完打印一行，两种模式的红出自同一份报告：
 
-{/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="212-235" hash="5f938c9ee287" blob="75cc83db6ebd" */}
+{/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="213-236" hash="5f938c9ee287" blob="68565dfd474a" */}
 
 `confirm` 带路径时只动点名的页；`--accept` 必须点名页，点名的路径对不上项目里的文档当场退 2。重新生成生成物不按页限定，按内容判：
 
-{/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="113-141" hash="235a864d0ce8" blob="75cc83db6ebd" */}
+{/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="114-142" hash="235a864d0ce8" blob="68565dfd474a" */}
 
 `trajectory` 不遍历文档，打印卡目录那一张盘的树与主干，没有轨迹卡目录就退 2：
 
-{/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="249-269" hash="931ad6970d4e" blob="75cc83db6ebd" */}
+{/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="250-270" hash="931ad6970d4e" blob="68565dfd474a" */}
 
 退出码、红的来源、未提交改动的黄怎么算红，见[提交门禁](/docs/pin/gate)。
 
@@ -160,9 +165,9 @@ mdx 格式认出的、按原文渲染要读的、命令行打印的都是这几�
 
 {/* ref file="../packages/docfirst-workflow/package.json" lines="7-23" hash="963a33bdb3d8" blob="4ed0dffcdd33" */}
 
-`.` 交出 `main`、`check --json` 报告的类型、`loadProject` / `docIdOf` / `scanCardDir`、引用与清单和钉码编排的类型：
+`.` 交出 `main`、`check --json` 报告的类型、`loadProject` / `docIdOf` / `scanCardDir`、引用与清单、格式接口和钉码编排的类型：
 
-{/* ref file="../packages/docfirst-workflow/src/index.ts" hash="109781d97fcd" blob="73698b968f17" */}
+{/* ref file="../packages/docfirst-workflow/src/index.ts" hash="3bb48c26fc7c" blob="c97f14628983" */}
 
 `main` 自己不调 `process.exit`，可执行文件只转发参数与退出码，别的程序可以直接调 `main` 拿到退出码：
 
@@ -171,14 +176,14 @@ mdx 格式认出的、按原文渲染要读的、命令行打印的都是这几�
 **`loadProject(root)`** 同一个根只装配一次，站构建时 loader 并发调用拿到同一个项目。配置只认三个键，项目上带着钉码编排、名册、
 内容根、轨迹卡目录与摆放：
 
-{/* ref file="../packages/docfirst-workflow/src/project/load.ts" lines="22-33" hash="7749dba9e8a3" blob="0186be908b77" */}
+{/* ref file="../packages/docfirst-workflow/src/project/load.ts" lines="23-34" hash="7749dba9e8a3" blob="9af74e0233aa" */}
 
-{/* ref file="../packages/docfirst-workflow/src/project/load.ts" lines="35-55" hash="af44a39d0b58" blob="0186be908b77" */}
+{/* ref file="../packages/docfirst-workflow/src/project/load.ts" lines="36-56" hash="d98f55069bd0" blob="9af74e0233aa" */}
 
 **`./mdx`** 除了格式本身，还交出语法树上的函数给 fumadocs 适配：站构建时 remark 插件拿到的树已经解析好，用 `recognize` 认记号、
 `stamp` 打标记，不再解析一遍；`langOf` 让按原文渲染与站上的代码块标同一种语言：
 
-{/* ref file="../packages/docfirst-workflow/src/mdx/index.ts" lines="39-45" hash="d0c08feabc36" blob="20bb18c9efdd" */}
+{/* ref file="../packages/docfirst-workflow/src/mdx/index.ts" lines="43-49" hash="d0c08feabc36" blob="26de56e31ba1" */}
 
 **`./cards`** 只有 `scanCardDir`，给 fumadocs 适配的 `loadTrajectory` 用：走 `.` 会把命令行与配置加载带进 Next 的服务端构建：
 
@@ -201,7 +206,7 @@ mdx 格式认出的、按原文渲染要读的、命令行打印的都是这几�
 
 - **不认识任何站的宿主**：fumadocs、react、next 在源码、清单、产物里都不出现，命令行跑在 git hook 与 CI 里，那些环境不一定装了站的依赖：
 
-{/* ref file="../tests/boundary.test.ts" lines="320-334" hash="d5b710f640dc" blob="e77be7ebc154" */}
+{/* ref file="../tests/boundary.test.ts" lines="333-347" hash="d5b710f640dc" blob="620efd5d3544" */}
 
 - **不依赖 fumadocs 适配**：包方向表里 workflow 一行禁止它：
 

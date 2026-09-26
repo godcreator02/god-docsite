@@ -232,15 +232,17 @@ const WORKFLOW_SRC = srcOf("docfirst-workflow");
  * 方向读法（左边不许知道右边）：
  *   marker   记号写法：记号里的属性、报告里的目标文本、已删掉的草稿写法的报错；只用钉码核心的类型，谁都不认识
  *   reference 引用在文档里的位置与核对结果的类型，谁都不认识
- *   mdx      mdx 格式：认引用、写回、名册检查、按原文渲染，用记号写法；不认识钉码编排、项目怎么装配、命令行怎么打印
- *   pinning  钉码编排：mdx 认引用、钉码核心判定、mdx 写回的先后顺序；不认识记号属性怎么写
+ *   mdx      mdx 格式：认引用、写回、名册检查、按原文渲染，用记号写法；不认识组件格式、钉码编排、项目怎么装配、命令行怎么打印
+ *   code     组件格式：讲解组件源码里的记号，按行认、按行写，用记号写法；只认识 marker 与 reference
+ *   pinning  钉码编排：按文件挑格式，格式认引用、钉码核心判定、格式写回的先后顺序；不认识记号属性怎么写
  *   project  碰环境：读盘、git、摆放、读卡目录；不认识命令行
  *   cli      入口：认识以上全部，谁都不认识它
  */
 const WORKFLOW_DIRS: Record<string, string[]> = {
-  marker: ["reference", "mdx", "pinning", "project", "cli"],
-  reference: ["marker", "mdx", "pinning", "project", "cli"],
-  mdx: ["pinning", "project", "cli"],
+  marker: ["reference", "mdx", "code", "pinning", "project", "cli"],
+  reference: ["marker", "mdx", "code", "pinning", "project", "cli"],
+  mdx: ["code", "pinning", "project", "cli"],
+  code: ["mdx", "pinning", "project", "cli"],
   pinning: ["marker", "project", "cli"],
   project: ["cli"],
   cli: [],
@@ -273,6 +275,17 @@ test("workflow 目录方向：reference 只认识 @godcreator/docfirst-pin", () 
   for (const file of sourcesIn(join(WORKFLOW_SRC, "reference"))) {
     for (const spec of importSpecsOf(readFileSync(file, "utf8"))) {
       assert.ok(spec.startsWith("./") || spec === "@godcreator/docfirst-pin", `reference/${rel(join(WORKFLOW_SRC, "reference"), file)} import 了 ${spec}`);
+    }
+  }
+});
+
+test("workflow 目录方向：code 只认识 marker、reference 与 @godcreator/docfirst-pin", () => {
+  const dir = join(WORKFLOW_SRC, "code");
+  for (const file of sourcesIn(dir)) {
+    for (const spec of importSpecsOf(readFileSync(file, "utf8"))) {
+      if (spec === "@godcreator/docfirst-pin") continue;
+      const landed = spec.startsWith(".") ? (dirOf(file, spec) ?? "") : "";
+      assert.ok(["code", "marker", "reference"].includes(landed), `code/${rel(dir, file)} import 了 ${spec}`);
     }
   }
 });

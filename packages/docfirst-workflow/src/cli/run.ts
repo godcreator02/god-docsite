@@ -1,6 +1,7 @@
 /**
  * docfirst 的动作，编排在这儿。可执行那一头在 cli.ts——测试直接调 main，不用起子进程。
- * cwd 就是项目根（那里有 docfirst.config.mjs）。核对与确认的对象是现状区的文档（分区见 project/load.ts）。
+ * cwd 就是项目根（那里有 docfirst.config.mjs）。核对与确认的对象是现状区的文件（分区见 project/load.ts）：
+ * mdx 页面与 src/components/ 下讲解组件的源码逐个处理；名册检查与生成物摆放只对 mdx 页面。
  *   docfirst check [--json]                 核对：只读，红退 1；被钉文件在文档所在的仓里有未提交改动的黄也算红
  *                                          （这次改动引起的，同一个提交里处理）；挂了 outputs 映射的文档顺手守生成物新鲜度；
  *                                          顺手跑内容根下 trajectory/ 的卡校验，病卡也算红。--json 出整份
@@ -17,7 +18,7 @@
  * `@godcreator/gwb-docfirst-workflow` 的 `docfirst.create`。这儿留的全是要在**仓**里发生的：
  * 各仓的 `pnpm doc` 与 CI 跑的就是这几条。
  * 新引用不用命令：在文档里写一行不带记录的正式记号 {/* ref file="src/greet.ts" lines="2-3" *\/}
- * （写法由 `../marker/` 定），check 认它、报未确认，confirm 在这一行写上记录。
+ * （组件源码里去掉花括号；写法由 `../marker/` 定），check 认它、报未确认，confirm 在这一行写上记录。
  */
 import { existsSync } from "node:fs";
 import { join, relative, sep } from "node:path";
@@ -25,7 +26,7 @@ import { REASON_TEXT } from "@godcreator/docfirst-pin";
 import { buildTrajectory } from "@godcreator/docfirst-trajectory";
 import type { Item, Listing } from "../reference/index.ts";
 import { targetKey } from "../marker/index.ts";
-import { lintComponents } from "../mdx/index.ts";
+import { lintComponents, mdxFormat } from "../mdx/index.ts";
 import type { ConfirmStep } from "../pinning/index.ts";
 import { createUncommittedProbe, loadProject, scanCardDir } from "../project/index.ts";
 import type { PlacedWrite, UncommittedProbe } from "../project/index.ts";
@@ -316,11 +317,12 @@ async function check(project: Project, doc: string, text: string, uncommitted: U
     items.push(refReport(item, blocking));
     lines.push(itemLine(doc, item, blocking));
   }
-  const components = lintComponents(text, project.roster);
+  const isPage = mdxFormat.claims(doc);
+  const components = isPage ? lintComponents(text, project.roster) : [];
   for (const { name, line } of components) {
     lines.push(`🔴 ${doc}  第 ${line} 行 <${name}>  名册外组件，docfirst.config.mjs 里没给它压平规则`);
   }
-  const outputs = project.placing.check(doc, listing);
+  const outputs = isPage ? project.placing.check(doc, listing) : [];
   for (const output of outputs) lines.push(placedLine(doc, output));
   const red =
     items.filter((item) => item.status === "missing" || item.blocking === true).length +
