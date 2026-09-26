@@ -33,7 +33,7 @@
  *
  * 「待重写页」= items 里有 changed / missing 的、或 outputs 里 `fresh` 为假的文档；「漂移的钉」= 那些 item。
  */
-import type { Status, Target } from "@godcreator/docfirst-pin";
+import type { Reason, Status, Target } from "@godcreator/docfirst-pin";
 import type { PlacedCheck } from "../project/index.ts";
 
 /** 一个摆放落点的新鲜度。**形状由 project 的摆放模块定**，这儿只借个名字给报告用——
@@ -52,7 +52,7 @@ export interface RefReport {
   lines: [number, number];
   /** 还是草稿记号 */
   draft: boolean;
-  reason?: string;
+  reason?: Reason;
   diff?: string;
   /** 这处黄是本仓未提交的改动引起的，算红：同一个提交里复核并 `--accept` */
   blocking?: true;

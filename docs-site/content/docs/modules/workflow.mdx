@@ -92,11 +92,11 @@ fumadocs 自带组件的规则在 [fumadocs 适配](/docs/modules/fumadocs)的 `
 每条命令只收自己开关表里的开关，别的一律退 2、什么都不动。表必须封闭：`confirm` 把 `-` 开头的参数从页名里筛掉，
 开关若被静默丢掉，`confirm --help` 就成了不带页名的全部页确认：
 
-{/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="44-58" hash="835f0ad5c8c0" blob="036135d56300" */}
+{/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="43-57" hash="835f0ad5c8c0" blob="df382c5c530d" */}
 
 人读输出一行一处引用：状态符号、文档、目标（记号上的行号）、一句说明，括号里是细分理由或目录树的项数：
 
-{/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="36-42" hash="9ebfdcac2bf1" blob="036135d56300" */}
+{/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="35-41" hash="9ebfdcac2bf1" blob="df382c5c530d" */}
 
 ```text
 🟢 content/docs/a.mdx  src/greet.ts:2-3  新鲜
@@ -108,15 +108,15 @@ fumadocs 自带组件的规则在 [fumadocs 适配](/docs/modules/fumadocs)的 `
 
 `check` 先把逐篇核对与轨迹卡校验汇总成一份报告，人读模式边算边打，`--json` 汇总完打印一行，两种模式的红出自同一份报告：
 
-{/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="217-240" hash="aed7c545eb4b" blob="036135d56300" */}
+{/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="216-239" hash="aed7c545eb4b" blob="df382c5c530d" */}
 
 `confirm` 带路径时只动点名的页；`--accept` 必须点名页，点名的路径对不上项目里的文档当场退 2。重新生成生成物不按页限定，按内容判：
 
-{/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="118-146" hash="235a864d0ce8" blob="036135d56300" */}
+{/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="117-145" hash="235a864d0ce8" blob="df382c5c530d" */}
 
 `trajectory` 不遍历文档，打印卡目录那一张盘的树与主干，没有轨迹卡目录就退 2：
 
-{/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="254-274" hash="931ad6970d4e" blob="7bdfe9b388cc" */}
+{/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="253-273" hash="931ad6970d4e" blob="df382c5c530d" */}
 
 退出码、红的来源、未提交改动的黄怎么算红，见[提交门禁](/docs/pinning/gate)。
 

@@ -6,7 +6,7 @@
  * 这个包不依赖任何别的包，自己也只 import 自己（`tests/boundary.test.ts` 守着）。
  */
 
-export { fileOf } from "./types.ts";
+export { fileOf, REASON_TEXT } from "./types.ts";
 export type {
   ContentRecord,
   FileTarget,
@@ -19,6 +19,7 @@ export type {
   Listing,
   MemoRecord,
   Reader,
+  Reason,
   Reference,
   Snapshot,
   Span,

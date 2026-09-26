@@ -22,10 +22,9 @@
  */
 import { existsSync } from "node:fs";
 import { join, relative, sep } from "node:path";
-import { targetKey } from "@godcreator/docfirst-pin";
+import { REASON_TEXT, targetKey } from "@godcreator/docfirst-pin";
 import type { ConfirmStep, Item, Listing } from "@godcreator/docfirst-pin";
 import { buildTrajectory } from "@godcreator/docfirst-trajectory";
-import { REASON_TEXT } from "../format/index.ts";
 import type { DocFormat } from "../format/index.ts";
 import { createUncommittedProbe, loadProject, migrateLedger, scanCardDir } from "../project/index.ts";
 import type { PlacedWrite, UncommittedProbe } from "../project/index.ts";
@@ -288,9 +287,9 @@ async function migrateLedgerCommand(): Promise<number> {
 
 type Project = Awaited<ReturnType<typeof loadProject>>;
 
-/** 一行说明后面的括号：状态的细分理由，或目录树的项数 */
+/** 一行说明后面的括号：状态的细分理由（`changed` 就是状态本身，不另说），或目录树的项数 */
 function detailOf(item: Item): string {
-  if (item.reason !== undefined && REASON_TEXT[item.reason] !== undefined) return `（${REASON_TEXT[item.reason]}）`;
+  if (item.reason !== undefined && item.reason !== "changed") return `（${REASON_TEXT[item.reason]}）`;
   if (item.reference.target.kind !== "tree" || item.current === null) return "";
   return `（${item.current.length} 项）`;
 }

@@ -40,7 +40,7 @@ full: true
 
 `index.ts` 的导出表就是这个包对外的全部：
 
-{/* ref file="../packages/docfirst-pin/src/index.ts" hash="59b38e2ed683" blob="13a6c4edb96f" */}
+{/* ref file="../packages/docfirst-pin/src/index.ts" hash="171622b7833b" blob="09c0ea1d7839" */}
 
 **服务**：命令行逐篇传文本（`resolve`），站构建传已经认好的引用（`resolveRefs`），两条走同一段判定；
 创建时传入的三样就是它的全部依赖：
@@ -54,7 +54,7 @@ full: true
 **清单项**是一处引用核对完的全部信息：当前内容、状态、这段今天在哪、缺失与变动的细分理由、diff 和确认时那段。
 调用方只读它，不自己判定：
 
-{/* ref file="../packages/docfirst-pin/src/types.ts" lines="87-106" hash="a6e5c3171a17" blob="e1f0e6cc4150" */}
+{/* ref file="../packages/docfirst-pin/src/types.ts" lines="106-120" hash="6f16637cbc94" blob="2be5c089780b" */}
 
 ## 依赖
 
@@ -64,12 +64,12 @@ full: true
 **格式 `Format`**：认领文档、认出引用、写回、给出正式记号。一篇文档没有格式认领、或有两个格式认领，都报错。
 名册检查与按原文渲染不在这个接口上，由 workflow 的 `DocFormat` 另加：
 
-{/* ref file="../packages/docfirst-pin/src/types.ts" lines="113-126" hash="3fe3d27a9730" blob="e1f0e6cc4150" */}
+{/* ref file="../packages/docfirst-pin/src/types.ts" lines="127-140" hash="3fe3d27a9730" blob="2be5c089780b" */}
 
 **读取器 `Reader`** 与**旧内容来源 `History`**：行段、整文件、名字读文件的行，目录树要 `list`，
 读取器没提供它时目录树一律判缺失；`oldText` 给 `null` 时比较器改为滑窗查找，少的只是 diff：
 
-{/* ref file="../packages/docfirst-pin/src/types.ts" lines="128-146" hash="3fe14471437b" blob="e1f0e6cc4150" */}
+{/* ref file="../packages/docfirst-pin/src/types.ts" lines="142-160" hash="3fe14471437b" blob="2be5c089780b" */}
 
 ## 不做的事
 

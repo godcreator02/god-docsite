@@ -81,6 +81,25 @@ export interface Reference {
 /** 新鲜 / 有变动 / 缺失 / 未确认 */
 export type Status = "fresh" | "changed" | "missing" | "unconfirmed";
 
+/**
+ * 状态的细分理由：
+ *   缺失  vanished（整段删光）/ file-missing / dir-missing / text-missing
+ *   变动  changed / unlocated（取不到旧内容，滑窗也找不到这段，位置不明）
+ */
+export type Reason = "vanished" | "file-missing" | "dir-missing" | "text-missing" | "changed" | "unlocated";
+
+/**
+ * 细分理由的中文说法，命令行打印与渲染拒绝的提示共用：红说清楚引用的是什么东西不在了，黄说清楚是不是找不着了。
+ * `changed` 就是状态「有变动」本身，没有另外的说法
+ */
+export const REASON_TEXT: Record<Exclude<Reason, "changed">, string> = {
+  vanished: "整段已被删光",
+  "file-missing": "文件不在了",
+  "dir-missing": "目录不在了",
+  "text-missing": "文件里没有这个名字了",
+  unlocated: "取不到确认时的内容，这段也找不到了，位置不明——重读源码后 --accept",
+};
+
 /** 行段：1 起、闭区间 */
 export type Span = [number, number];
 
@@ -93,12 +112,7 @@ export interface Item {
   status: Status;
   /** 行段今天在文件里的位置——跟过 hunk 或滑窗的结果，可能跟记号上写的不一样。别的种类是 [1, 项数] */
   lines: Span;
-  /**
-   * 状态的细分理由：
-   *   缺失  vanished / file-missing / dir-missing / text-missing
-   *   变动  changed / unlocated（取不到旧内容，滑窗也找不到这段，位置不明）
-   */
-  reason?: string;
+  reason?: Reason;
   /** 有变动且取得到旧内容时给人看的 `- / +` 文本 */
   diff?: string;
   /** 确认时那段是什么；取得到旧内容时才有 */
@@ -152,7 +166,7 @@ export type Snapshot = { record: MemoRecord } | { problem: string };
 export interface Judgement {
   status: Status;
   lines: Span;
-  reason?: string;
+  reason?: Reason;
   diff?: string;
   old?: string[];
 }

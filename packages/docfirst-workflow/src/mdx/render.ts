@@ -9,9 +9,9 @@ import { unified } from "unified";
 import remarkParse from "remark-parse";
 import remarkFrontmatter from "remark-frontmatter";
 import remarkMdx from "remark-mdx";
-import { fileOf } from "@godcreator/docfirst-pin";
+import { fileOf, REASON_TEXT } from "@godcreator/docfirst-pin";
 import type { Item, Listing } from "@godcreator/docfirst-pin";
-import { REASON_TEXT, RenderRefusal } from "../format/index.ts";
+import { RenderRefusal } from "../format/index.ts";
 import { langOf } from "./lang.ts";
 import { draftIn, markerOf } from "./recognize.ts";
 import { lineOf, walk } from "./tree.ts";
@@ -67,11 +67,10 @@ function replaceWithBlock(text: string, start: number, end: number, block: strin
 
 const offsetsOf = (node: TreeNode): [number, number] => [node.position!.start.offset!, node.position!.end!.offset!];
 
-/** 缺失的引用一定带着钉码核心给的细分理由；表里没有它的中文说法就是表漏了，直接报错 */
+/** 缺失的引用一定带着钉码核心给的缺失理由；没带、或带着没有中文说法的 changed，都直接报错 */
 function missingReasonOf(item: Item): string {
-  const text = item.reason === undefined ? undefined : REASON_TEXT[item.reason];
-  if (text === undefined) throw new Error(`缺失的引用带的细分理由「${item.reason}」没有中文说法：在 format/index.ts 的 REASON_TEXT 里补上`);
-  return text;
+  if (item.reason === undefined || item.reason === "changed") throw new Error(`缺失的引用没带缺失理由（${item.reason}）`);
+  return REASON_TEXT[item.reason];
 }
 
 /** 一个节点要做的改写；渲染不了的记进 refusals。交回 true 表示这个节点已经处理完，不往里走 */
