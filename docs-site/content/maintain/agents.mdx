@@ -61,7 +61,7 @@ README、CLAUDE.md、这份规矩与插件里的 SKILL.md 都是**生成物**：
   - `plugins/docfirst/`：`pnpm check`（typecheck + oxlint + vitest）、`pnpm build`
 - 发版 **两边各发各的、没有先后**：插件对 `packages/` 下的包零依赖。`docfirst-workflow` 与 `docfirst-fumadocs` 升版本号时跟着改
   `plugins/docfirst/src/deps.ts` 那张表——插件的 `tests/create.test.ts` 检查它。
-- 改了站构建时 remark 插件会跑到的包代码（`docfirst-fumadocs` 及它调用的 workflow、pin），站要先删 `.next` 再 build。调试站用 build + start，不用 dev；
-  启动的站验完必须停掉。
+- 改了站构建时 remark 插件会跑到的包代码（`docfirst-fumadocs` 及它调用的 workflow、pin），要先删 `.next` 再重新运行。调试站用 `pnpm dev`，
+  看完必须停掉；`pnpm build` 只在收尾或发版前跑一次，构建通过就结束，不跑 `start`。
 - 提交按步骤拆，一个提交一件事。提交信息末尾带 `Co-Authored-By` 与 `Claude-Session` 行（会话里给的那两行）。
 - 不碰 `D:\dshfiles\26082412vto\homes\`（在老根 `D:\dshfiles`，DSH 时代的归档区）；不碰主实例。

@@ -1,10 +1,8 @@
 # god-live-doc
 
-**本页回答**：这套包是什么、怎么装、怎么确认它在正常工作、文档在哪。
-
 ## 是什么
 
-把文档里对代码说的话钉在源码上：文档说「我引的是 `src/greet.ts` 第 2 到 3 行」「src 下有这四个文件」
+把文档里对代码说的话钉在源码上：文档说「我引的是 `src/greet.ts` 第 2 到 3 行」「src 下有这几个文件」
 「store.ts 里还有 save」，工具替你检查这些话还成不成立。变了就报黄等作者复核，引用指向的东西不在了就报红。**文档里不存代码的
 副本**——页面上那块是构建时现从源码读的，确认时的记录就写在记号自己身上：被钉那几行内容的 hash，加上确认时那份文件的 blob 名。
 
@@ -69,11 +67,11 @@ pnpm docfirst render                                # 只把 outputs 里有映�
 
 ```bash
 cd docs-site
-pnpm build && pnpm start        # 看 http://127.0.0.1:4310
+pnpm dev                        # 看 http://127.0.0.1:4310，改了文件刷新就能看到
 pnpm docfirst check
 ```
 
-先读现状区的**系统地图**（四个包与它们之间的接缝），再读要改的那块的模块页。
+先读首页的接缝图（包与包之间怎么接），再读要改的那块的模块页；改这个仓要知道的在维护区 `content/maintain/`。
 
 文档本身怎么写、分区各放什么、每页写到哪为止，正本是**随工作台插件发的 skill**，在
 `plugins/docfirst/skills/`：写文档读 `docfirst-docs`、写轨迹卡读 `trajectory`、建站读 `docfirst`、
@@ -82,13 +80,13 @@ pnpm docfirst check
 SKILL.md 没有说明指向它、没人会读。通用开发纪律的三份也在这儿：接到需求先盘问读 `spec-grill`、
 任务大到要派子代理读 `parallel-by-module`、治理文档与注释读 `docs-governance`。
 
-**这份 README 与仓根 `AGENTS.md`、`CLAUDE.md` 是生成物**，改 `docs-site/content/docs/` 下的 mdx 正本再 `pnpm docfirst render`。
+**这份 README 与仓根 `AGENTS.md`、`CLAUDE.md` 是生成物**，改 mdx 正本再 `pnpm docfirst render`；哪份正本生成到哪看 `docs-site/docfirst.config.mjs` 的 `outputs`。
 
 ## 这个仓自己怎么跑
 
 ```powershell
 pnpm install
-pnpm build          # plugins/ 与 packages/ 下各自构建（插件 tsc、五个包 tsdown），拓扑序
+pnpm build          # plugins/ 与 packages/ 下各自构建（插件 tsc、各包 tsdown），拓扑序
 pnpm typecheck
 pnpm test           # 先 build 再 node --test tests/*.test.ts
 
@@ -102,5 +100,5 @@ cd ../plugins/docfirst
 pnpm check && pnpm build      # 工作台插件单独一套门禁，用 vitest
 ```
 
-改了站构建时 remark 插件会跑到的包代码（`packages/docfirst-fumadocs/`，连同它调用的 workflow 与 pin），站要**先删 `.next` 再 build** 才看得见——Turbopack 只按 mdx 内容缓存。
-调试站用 `next build` + `next start`，不用 dev。
+调试站用 `pnpm dev`，看完停掉。`pnpm build` 只在收尾或发版前跑一次，构建通过就结束，不跑 `start`。
+改了站构建时 remark 插件会跑到的包代码（`packages/docfirst-fumadocs/`，连同它调用的 workflow 与 pin），要先删 `.next` 再重新运行。
