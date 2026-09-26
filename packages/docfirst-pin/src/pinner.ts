@@ -11,7 +11,7 @@
 import { judge, snapshot } from "./compare.ts";
 import { sliceSpan } from "./span.ts";
 import { fileOf } from "./types.ts";
-import type { History, Pin, Reader, Span, Target, Verdict } from "./types.ts";
+import type { History, Pin, Reader, RecordedPin, Span, Target, Verdict } from "./types.ts";
 
 /**
  * 确认时对一处做什么：
@@ -28,7 +28,7 @@ export interface Step {
   verdict: Verdict;
   action: ConfirmAction;
   /** recorded / moved / accepted：新的目标与记录 */
-  written?: Pin;
+  written?: RecordedPin;
   /** refused 且不是因为红（钉不住）时的原因；红的原因看 verdict.reason */
   problem?: string;
 }
@@ -96,7 +96,7 @@ export function createPinner({ reader, history }: PinnerDeps): Pinner {
   }
 
   /** 按今天的样子重新记一处：行段钉到判定跟到的位置 */
-  function rerecord(verdict: Verdict, look: (target: Target) => string[] | null): { written: Pin } | { problem: string } {
+  function rerecord(verdict: Verdict, look: (target: Target) => string[] | null): { written: RecordedPin } | { problem: string } {
     const was = verdict.pin.target;
     const target: Target = was.kind === "span" ? { kind: "span", file: was.file, a: verdict.lines[0], b: verdict.lines[1] } : was;
     const taken = snapshot(target, look(target));

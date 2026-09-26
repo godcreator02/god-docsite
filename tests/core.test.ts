@@ -226,15 +226,6 @@ test("取得到旧内容：按 hunk 表把旧行段映到今天，内容变了�
   assert.match(verdict.diff!, /^\+ {3}return `hey/m);
 });
 
-test("从旧记录簿迁来的只有 hash 的记录：照样核对，挪了位置靠滑窗", () => {
-  const { files, pinner } = setup();
-  const record: MemoRecord = { kind: "content", hash: hashSpan(CODE.slice(1, 3)) };
-  const pin: Pin = { target: SPAN, record };
-  assert.deepEqual(pinner.check([pin]).map((v) => v.status), ["fresh"]);
-  files.set("src/greet.ts", ["// 头一行", ...CODE]);
-  assert.deepEqual(pinner.check([pin]).map((v) => [v.status, v.lines]), [["fresh", [3, 4]]]);
-});
-
 test("归一化：LF、去行尾空白、去末尾空行；缩进和注释留着", () => {
   assert.deepEqual(normalizeLines(["  a  \r", "\tb", "", "  "]), ["  a", "\tb"]);
   assert.deepEqual(sliceSpan(["x", "y", "z", ""], [2, 3]), ["y", "z"]);

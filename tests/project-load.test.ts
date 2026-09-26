@@ -36,16 +36,16 @@ test("内容根：没配退 content；配了照用，尾斜杠与反斜杠归一
   assert.equal((await project(String.raw`content: "site\\content/"`, "site/content")).contentDir, "site/content");
 });
 
-test("配置形状不对：还写着 formats、content 空串、删掉的旧键，装配当场拒", async () => {
+test("配置形状不对：不认识的键、content 空串，装配当场拒", async () => {
   const root = mkdtempSync(join(tmpdir(), "god-live-doc-load-"));
   roots.push(root);
   mkdirSync(join(root, "content"));
   writeFileSync(join(root, "docfirst.config.mjs"), `export default { formats: "fumadocs", content: " ", comparator: "git" };\n`);
   await assert.rejects(loadProject(root), (err: Error) => {
     assert.match(err.message, /有 3 处要改/);
-    assert.match(err.message, /删掉 formats：只有 mdx 一种格式，不用配置/);
+    assert.match(err.message, /不认识的键 formats：配置只认 content \/ components \/ outputs/);
     assert.match(err.message, /content 要是一个非空目录/);
-    assert.match(err.message, /删掉 comparator/);
+    assert.match(err.message, /不认识的键 comparator/);
     return true;
   });
 });

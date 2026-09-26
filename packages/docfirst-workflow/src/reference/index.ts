@@ -1,7 +1,7 @@
 /**
  * 引用在文档里的位置与核对结果的类型：一处引用在文档里的位置、一篇核对完的清单。
  *
- * 钉码核心只收目标与记录，文档路径、第几行、是不是草稿都定义在这儿，由钉码编排（`../pinning/`）配回去；
+ * 钉码核心只收目标与记录，文档路径、第几行都定义在这儿，由钉码编排（`../pinning/`）配回去；
  * mdx 格式认出的引用、按原文渲染要读的清单也是这几个类型。
  *
  * 这个目录只认识 `@godcreator/docfirst-pin`，不认识 workflow 里别的目录（`tests/boundary.test.ts` 守着）。
@@ -11,12 +11,17 @@ import type { MemoRecord, Reason, Span, Status, Target } from "@godcreator/docfi
 /** 文档里的一处引用 */
 export interface Reference {
   target: Target;
-  /** 记号上带的记录；草稿记号、没写记录属性的正式记号是 null（未确认） */
+  /** 正式记号上带的记录；草稿记号是 null（未确认）——正式记号一定带着记录 */
   record: MemoRecord | null;
   /** 在文档里第几行（0 起）——写回和渲染靠它定位 */
   at: number;
-  /** 还是草稿记号（没 confirm 过） */
-  draft: boolean;
+}
+
+/** 确认后要写回的一处：一定带着记录，写成正式记号 */
+export interface WrittenReference {
+  target: Target;
+  record: MemoRecord;
+  at: number;
 }
 
 /** 清单项：一处引用核对完的全部信息，钉码核心的判定配回这处引用 */

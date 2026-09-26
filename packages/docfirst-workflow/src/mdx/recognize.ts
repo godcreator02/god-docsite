@@ -36,10 +36,10 @@ export function recognize(tree: TreeNode): Reference[] {
     const payload = markerOf(node);
     if (payload !== null) {
       const formal = parseFormal(payload, `第 ${line} 行`);
-      if (formal !== null) refs.push({ ...formal, at: line - 1, draft: false });
+      if (formal !== null) refs.push({ ...formal, at: line - 1 });
     }
     const draft = draftIn(node);
-    if (draft !== null) refs.push({ target: draft, record: null, at: line - 1, draft: true });
+    if (draft !== null) refs.push({ target: draft, record: null, at: line - 1 });
   });
   return refs;
 }

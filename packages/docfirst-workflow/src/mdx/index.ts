@@ -9,15 +9,15 @@
  * 这个目录不认识钉码编排、project 与 cli，也不认识任何站的宿主（`tests/boundary.test.ts` 守着）。
  */
 import type { MemoRecord, Target } from "@godcreator/docfirst-pin";
-import type { Reference } from "../reference/index.ts";
+import type { Reference, WrittenReference } from "../reference/index.ts";
 import { formalOf } from "../marker/index.ts";
 import { recognize } from "./recognize.ts";
 import { parseTree } from "./render.ts";
 import { unknownComponents } from "./roster.ts";
 import type { Roster } from "./roster.ts";
 
-/** 记号：mdx 的花括号注释表达式，载荷是记号语法（`../marker/`）定的那一截，确认过的带着记录属性 */
-export const marker = (target: Target, record: MemoRecord | null): string => `{/* ${formalOf(target, record)} */}`;
+/** 正式记号：mdx 的花括号注释表达式，载荷是记号写法（`../marker/`）定的那一截，带着记录属性 */
+export const marker = (target: Target, record: MemoRecord): string => `{/* ${formalOf(target, record)} */}`;
 
 /** 正式记号和草稿记号都认；正式记号上的记录属性一并读出 */
 export function parse(text: string): Reference[] {
@@ -25,7 +25,7 @@ export function parse(text: string): Reference[] {
 }
 
 /** 写回只重写记号那一行（行号与记录可能都换了）。草稿记号也在这一下换成正式记号；行尾的 \r 留着 */
-export function write(text: string, references: Reference[]): string {
+export function write(text: string, references: WrittenReference[]): string {
   const lines = text.split("\n");
   for (const { target, record, at } of references) lines[at] = marker(target, record) + (lines[at]!.endsWith("\r") ? "\r" : "");
   return lines.join("\n");

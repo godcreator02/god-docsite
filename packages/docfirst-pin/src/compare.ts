@@ -62,12 +62,8 @@ export function findText(text: string[], needle: string): number | null {
 /** 整文件的行段：[1, 行数]，空文件也算一行 */
 const wholeSpan = (text: string[]): Span => [1, Math.max(1, lineCount(text))];
 
-/**
- * 确认时整文件长什么样：blob 名跟当前内容一样就是当前内容，否则问 History；
- * 记录没有 blob（从 hash 记录迁过来的）给 null
- */
+/** 确认时整文件长什么样：blob 名跟当前内容一样就是当前内容，否则问 History；History 也取不到给 null */
 function oldTextOf(file: string, record: ContentRecord, text: string[] | null, history: History): { old: string; same: boolean } | null {
-  if (record.blob === undefined) return null;
   if (text !== null && blobOf(text) === record.blob) return { old: fileText(text), same: true };
   const old = history.oldText(file, record.blob);
   return old === null ? null : { old, same: false };

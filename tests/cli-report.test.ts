@@ -91,19 +91,13 @@ test("分区按约定：内容根下除 trajectory/、future/ 之外都是现状
   }
 });
 
-test("配置里不认识的键报错：删掉的旧键说清该怎么改，别的键列出认得的有哪些；一次列全", async () => {
-  const p = setupProject(withKeys(`docs: ["docs"], trajectory: "t", comparator: "git", ledger: ".ledger.json", fumadocs: {}, out: "out", formats: [], docz: 1`));
+test("配置里不认识的键报错：列出认得的有哪些；一次列全", async () => {
+  const p = setupProject(withKeys(`formats: [], docz: 1`));
   try {
     await assert.rejects(p.cli("check"), (err: Error) => {
       for (const piece of [
-        "有 8 处要改",
-        "删掉 docs：现状区按约定是内容根下除 trajectory/、future/ 之外的全部",
-        "删掉 trajectory：轨迹卡目录固定是内容根下的 trajectory/",
-        "删掉 comparator",
-        "删掉 ledger：记录写在各记号上；旧记录簿先在项目根跑 docfirst migrate-ledger",
-        "删掉 fumadocs",
-        "删掉 out：render 只生成 outputs 映射里的生成物",
-        "删掉 formats：只有 mdx 一种格式，不用配置",
+        "有 2 处要改",
+        "不认识的键 formats：配置只认 content / components / outputs",
         "不认识的键 docz：配置只认 content / components / outputs",
       ]) {
         assert.ok(err.message.includes(piece), `报错里该有「${piece}」：${err.message}`);

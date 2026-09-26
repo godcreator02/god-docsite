@@ -31,7 +31,7 @@ full: true
 
 `index.ts` 的导出表就是这个包对外的全部：
 
-{/* ref file="../packages/docfirst-pin/src/index.ts" hash="cc115c5a0278" blob="7af52c214661" */}
+{/* ref file="../packages/docfirst-pin/src/index.ts" hash="da18258d7e26" blob="148dfe88a1c8" */}
 
 **`createPinner`**：创建时传入的读取器与旧内容来源就是它的全部依赖，交回 `check` 与 `confirm` 两个动作；
 命令行、生成物摆放与站构建都经 workflow 的钉码编排调它：
@@ -45,12 +45,12 @@ full: true
 **判定**是一处钉核对完的全部信息：当前内容、状态、这段今天在哪、缺失与变动的细分理由、diff 和确认时那段。
 调用方只读它，不自己判定：
 
-{/* ref file="../packages/docfirst-pin/src/types.ts" lines="100-113" hash="bc009573ca3e" blob="f7ca47b13c53" */}
+{/* ref file="../packages/docfirst-pin/src/types.ts" lines="103-116" hash="bc009573ca3e" blob="714c2718e246" */}
 
 **细分理由**只有固定几个取值，中文说法跟它放在同一处。命令行打印黄灯与红灯、按原文渲染拒绝缺失的引用，都从这张表取，
 `changed` 之外每个取值都有说法：
 
-{/* ref file="../packages/docfirst-pin/src/types.ts" lines="78-95" hash="1bb562dc67f3" blob="f7ca47b13c53" */}
+{/* ref file="../packages/docfirst-pin/src/types.ts" lines="81-98" hash="1bb562dc67f3" blob="714c2718e246" */}
 
 ## 依赖
 
@@ -60,7 +60,7 @@ full: true
 **读取器 `Reader`** 与**旧内容来源 `History`**：行段、整文件、名字读文件的行，目录树要 `list`，
 读取器没提供它时目录树一律判缺失；`oldText` 给 `null` 时比较器改为滑窗查找，少的只是 diff：
 
-{/* ref file="../packages/docfirst-pin/src/types.ts" lines="115-133" hash="4a2e73523351" blob="f7ca47b13c53" */}
+{/* ref file="../packages/docfirst-pin/src/types.ts" lines="118-136" hash="4a2e73523351" blob="714c2718e246" */}
 
 ## 不做的事
 

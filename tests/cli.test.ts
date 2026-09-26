@@ -12,7 +12,7 @@ import { CODE, run } from "./repo.ts";
 
 const CONFIRMED = /^\{\/\* ref file="src\/greet\.ts" lines="2-3" hash="[0-9a-f]{12}" blob="[0-9a-f]{12}" \*\/\}$/m;
 
-test("check 报未确认；confirm 把草稿换成带记录的正式记号；再 check 全绿；没有记录簿", async () => {
+test("check 报未确认；confirm 把草稿换成带记录的正式记号；再 check 全绿", async () => {
   const p = setupProject();
   try {
     const first = await p.cli("check");
@@ -25,7 +25,6 @@ test("check 报未确认；confirm 把草稿换成带记录的正式记号；再
     assert.match(done.out, /✅ docs\/a\.mdx {2}src\/greet\.ts:2-3 {2}已确认，草稿记号已换成正式记号/);
     assert.match(p.read("docs/a.mdx"), CONFIRMED, "草稿记号换成了带记录的正式记号");
     assert.match(p.read("docs/b.mdx"), CONFIRMED);
-    assert.equal(existsSync(join(p.root, ".ledger.json")), false, "记录写在记号上，没有记录簿");
 
     const again = await p.cli("check");
     assert.equal(again.code, 0);
@@ -202,7 +201,7 @@ test("不认识的开关、不收路径的命令带了路径，都退 2、什么
   const p = setupProject();
   try {
     const before = p.read("docs/a.mdx");
-    for (const args of [["confirm", "--dry-run"], ["confirm", "--json"], ["confirm", "docs/a.mdx", "--acept"], ["render", "--force"], ["check", "--jsno"], ["check", "--accept"], ["trajectory", "-x"], ["check", "docs/a.mdx"], ["render", "docs/a.mdx"], ["migrate-ledger", ".ledger.json"]]) {
+    for (const args of [["confirm", "--dry-run"], ["confirm", "--json"], ["confirm", "docs/a.mdx", "--acept"], ["render", "--force"], ["check", "--jsno"], ["check", "--accept"], ["trajectory", "-x"], ["check", "docs/a.mdx"], ["render", "docs/a.mdx"]]) {
       assert.equal((await p.cli(...args)).code, 2, args.join(" "));
     }
     assert.equal(p.read("docs/a.mdx"), before);

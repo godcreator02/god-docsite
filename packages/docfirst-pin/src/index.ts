@@ -16,6 +16,7 @@ export type {
   Judgement,
   MemoRecord,
   Pin,
+  RecordedPin,
   Reader,
   Reason,
   Snapshot,

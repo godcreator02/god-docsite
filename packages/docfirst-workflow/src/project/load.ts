@@ -92,25 +92,13 @@ const FIXED_AREAS = new Set(["trajectory", "future"]);
 /** 配置认的键 */
 const CONFIG_KEYS = ["content", "components", "outputs"];
 
-/** 删掉的旧键 → 该怎么改 */
-const RETIRED_KEYS: Record<string, string> = {
-  docs: '删掉 docs：现状区按约定是内容根下除 trajectory/、future/ 之外的全部；内容根不叫 content 就写 content: "…"',
-  trajectory: "删掉 trajectory：轨迹卡目录固定是内容根下的 trajectory/",
-  comparator: "删掉 comparator：行段与整文件只有一个比较器，不用选",
-  ledger: "删掉 ledger：记录写在各记号上；旧记录簿先在项目根跑 docfirst migrate-ledger 迁进记号",
-  fumadocs: "删掉 fumadocs：生成正本按原文渲染，不再按集合编译",
-  out: "删掉 out：render 只生成 outputs 映射里的生成物，不再往 out/ 写调试产物",
-  formats: "删掉 formats：只有 mdx 一种格式，不用配置（只为它 import 的 @godcreator/docfirst-workflow/mdx 也一起删）",
-};
-
 /** 配置里要改的地方，一条一句；没有就是空表。只看形状，不碰盘 */
 export function configProblems(config: unknown): string[] {
   if (typeof config !== "object" || config === null) return ["docfirst.config 要 export default 一个对象"];
   const table = config as Record<string, unknown>;
   const problems: string[] = [];
   for (const key of Object.keys(table)) {
-    if (CONFIG_KEYS.includes(key)) continue;
-    problems.push(RETIRED_KEYS[key] ?? `不认识的键 ${key}：配置只认 ${CONFIG_KEYS.join(" / ")}`);
+    if (!CONFIG_KEYS.includes(key)) problems.push(`不认识的键 ${key}：配置只认 ${CONFIG_KEYS.join(" / ")}`);
   }
   if (table.content !== undefined && (typeof table.content !== "string" || table.content.trim() === "")) problems.push("content 要是一个非空目录（相对项目根）");
   return problems;

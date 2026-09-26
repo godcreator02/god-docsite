@@ -8,7 +8,6 @@ import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { createPinner } from "../packages/docfirst-pin/src/index.ts";
 import type { History, Target } from "../packages/docfirst-pin/src/index.ts";
-import { marker } from "../packages/docfirst-workflow/src/mdx/index.ts";
 import { createPinning } from "../packages/docfirst-workflow/src/pinning/index.ts";
 import type { ConfirmResult, Pinning } from "../packages/docfirst-workflow/src/pinning/index.ts";
 import { createGitHistory, createReader } from "../packages/docfirst-workflow/src/project/index.ts";
@@ -48,8 +47,19 @@ export interface Repo {
   teardown(): void;
 }
 
-/** 一处还没确认的正式记号那一行：mdx 的花括号注释，不带记录属性 */
-export const refLine = (target: Target): string => marker(target, null);
+/** 一处还没确认的引用那一行：草稿记号。放进文档时前后要空行，草稿记号得单独成段才认 */
+export function refLine(target: Target): string {
+  switch (target.kind) {
+    case "span":
+      return `@@docfirst ref ${target.file}:${target.a}-${target.b} @@`;
+    case "file":
+      return `@@docfirst ref ${target.file} @@`;
+    case "tree":
+      return `@@docfirst tree ${target.dir}${target.depth === 1 ? "" : ` depth=${target.depth}`}${target.glob === undefined ? "" : ` glob=${target.glob}`} @@`;
+    case "has":
+      return `@@docfirst has ${target.file} "${target.text}" @@`;
+  }
+}
 
 export interface RepoOptions {
   /** 不给就用 git 版 */

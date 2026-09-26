@@ -47,9 +47,9 @@ description: 分几个阶段、现在在哪一个、哪些问题知道但没解�
 
 ## 待办
 
-- **别的站迁到新结构**：在各站目录跑 `docfirst migrate-ledger` 把旧记录簿迁进记号，把 spec / feedback / outputs
+- **别的站迁到新结构**：新版本不再认旧记录格式（`.ledger.json`、不带记录的正式记号），也没有迁移命令。
+  还用记录簿的站先用 `@godcreator/docfirst-workflow` 0.3.x 的 `docfirst migrate-ledger` 迁完再升；把 spec / feedback / outputs
   三个旧区挪进 `future/` 与现状区，改配置与路由（配置里的 `formats` 那一行删掉）；经各仓站的 `future/inbox/` 通知。
-  各站迁完后的下一个版本删掉 `migrate-ledger`，连同「正式记号可以不带记录」与「记录可以没有 blob」这两种旧记录的写法。
 
 ### 投来的反馈
 

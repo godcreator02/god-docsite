@@ -1,12 +1,12 @@
 /**
  * 钉码编排：一篇文档的核对与确认只在这里串起来——mdx 格式认出引用，每处剥成目标与记录交给钉码核心，
- * 结果按原来的顺序配回文档路径、行号、是不是草稿；确认时把核心算出的新记录交回 mdx 格式写回。
+ * 结果按原来的顺序配回文档路径与行号；确认时把核心算出的新记录交回 mdx 格式写回。
  * 命令行、生成物摆放与站构建共用这一份。
  *
  * 这个目录认识 `../reference/`、`../mdx/` 与 `@godcreator/docfirst-pin`，不认识记号属性怎么写，也不认识 project 与 cli（`tests/boundary.test.ts` 守着）。
  */
 import type { ConfirmAction, ConfirmOptions, Pin, Pinner, Step, Verdict } from "@godcreator/docfirst-pin";
-import type { Item, Listing, Reference } from "../reference/index.ts";
+import type { Item, Listing, Reference, WrittenReference } from "../reference/index.ts";
 import { parse, write } from "../mdx/index.ts";
 
 /** 确认时对一处引用做了什么；动作的含义见钉码核心的 `ConfirmAction` */
@@ -14,7 +14,7 @@ export interface ConfirmStep {
   item: Item;
   action: ConfirmAction;
   /** recorded / moved / accepted：写回之后的引用，还在原来那一行，已经是正式记号 */
-  written?: Reference;
+  written?: WrittenReference;
   /** refused 且不是因为红（钉不住）时的原因；红的原因看 item.reason */
   problem?: string;
 }
@@ -48,7 +48,7 @@ function itemOf(doc: string, reference: Reference, verdict: Verdict): Item {
 
 function confirmStepOf(item: Item, { action, written, problem }: Step): ConfirmStep {
   const step: ConfirmStep = { item, action };
-  if (written !== undefined) step.written = { target: written.target, record: written.record, at: item.reference.at, draft: false };
+  if (written !== undefined) step.written = { target: written.target, record: written.record, at: item.reference.at };
   if (problem !== undefined) step.problem = problem;
   return step;
 }

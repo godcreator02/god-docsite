@@ -23,11 +23,11 @@ full: true
 
 现状区是内容根下除 `trajectory/`、`future/` 之外的全部 `.mdx` 文档，目录里的和直接放在内容根上的都算：
 
-{/* ref file="../packages/docfirst-workflow/src/project/load.ts" lines="150-162" hash="91fa7cb3762b" blob="0186be908b77" */}
+{/* ref file="../packages/docfirst-workflow/src/project/load.ts" lines="138-150" hash="91fa7cb3762b" blob="0c65c5b4fafe" */}
 
 配置模块由 Node 原生加载：站的打包器会把动态 import 改写成自己的加载器，这一句带着两个打包器的跳过标记。
 
-{/* ref file="../packages/docfirst-workflow/src/project/load.ts" lines="119-125" hash="5d8ed05b1d87" blob="0186be908b77" */}
+{/* ref file="../packages/docfirst-workflow/src/project/load.ts" lines="107-113" hash="5d8ed05b1d87" blob="0c65c5b4fafe" */}
 
 **读取器与旧内容来源**：旧内容来源按被引文件自己的位置找仓，hunk 表用两个临时文件跑 `git diff --no-index` 算，不往任何对象库写：
 
@@ -54,12 +54,10 @@ full: true
 
 {/* ref file="../packages/docfirst-workflow/src/project/card-refs.ts" lines="1-8" hash="173e86fbecca" blob="8050bc5f07e7" */}
 
-`migrateLedger(root)` 把项目根的 `.ledger.json` 逐处写进对应的记号、删掉这个文件，并列出配置里还要手工改的键。
-
 ### 钉码编排 pinning
 
-一篇文档的核对与确认只在这里串起来：mdx 格式认出引用，每处剥成目标与记录交给钉码核心，结果按原来的顺序配回文档路径、
-行号与是不是草稿；确认时把钉码核心算出的新记录交回 mdx 格式写回。命令行、生成物摆放与站构建共用这一份，入口有三个：
+一篇文档的核对与确认只在这里串起来：mdx 格式认出引用，每处剥成目标与记录交给钉码核心，结果按原来的顺序配回文档路径与
+行号；确认时把钉码核心算出的新记录交回 mdx 格式写回。命令行、生成物摆放与站构建共用这一份，入口有三个：
 
 {/* ref file="../packages/docfirst-workflow/src/pinning/index.ts" lines="30-37" hash="ad4340c0a68f" blob="daa159f365a8" */}
 
@@ -71,7 +69,7 @@ full: true
 
 钉码编排要的 `parse`、`write` 与给 check 的名册检查都在入口文件上，写回只重写记号所在那一行；`marker` 把记号写法给的一截文字包成花括号注释：
 
-{/* ref file="../packages/docfirst-workflow/src/mdx/index.ts" lines="19-37" hash="3a82c9d07565" blob="52d83213a3ed" */}
+{/* ref file="../packages/docfirst-workflow/src/mdx/index.ts" lines="19-37" hash="ed0232ccd320" blob="78a17aca2a24" */}
 
 认记号走 remark 语法树：正式记号是 `mdxFlowExpression` 节点，草稿记号是只含一段文字的段落。写在围栏里、句子里的同样文字分别是
 `code` 与 `mdxTextExpression` 节点，不算记号：
@@ -98,35 +96,41 @@ fumadocs 自带组件的规则在 [fumadocs 适配](/docs/modules/fumadocs)的 `
 ### 记号写法 marker
 
 一处引用写成文字是什么样、文字怎么解析回目标与记录，都在 `src/marker/`：正式记号里的属性（先目标、后记录）、草稿记号、
-命令行报告与旧记录簿迁移用的目标文本 `targetKey`。它只从钉码核心 import 目标与记录的类型，不认识 mdx，也不判状态：
+命令行报告用的目标文本 `targetKey`。它只从钉码核心 import 目标与记录的类型，不认识 mdx，也不判状态：
 
-{/* ref file="../packages/docfirst-workflow/src/marker/index.ts" lines="45-54" hash="95c0cebd820a" blob="76fef2a0be1c" */}
+{/* ref file="../packages/docfirst-workflow/src/marker/index.ts" lines="44-53" hash="0de2148a78a2" blob="b24178592311" */}
 
-每个动作词认哪些属性是固定的；多出属性、记录属性只写了一半、值不合法都报错到行：
+**正式记号一定带着记录**：`ref` 要有 hash 与 blob，`tree` 要有 hash，`has` 的记号本身就是记录。未确认的引用只有草稿记号一种写法，
+正式记号缺记录直接报错到行：
 
-{/* ref file="../packages/docfirst-workflow/src/marker/index.ts" lines="67-72" hash="ac51ca2c095b" blob="76fef2a0be1c" */}
+{/* ref file="../packages/docfirst-workflow/src/marker/index.ts" lines="98-118" hash="7959bba562d7" blob="b24178592311" */}
+
+每个动作词认哪些属性是固定的；多出属性、值不合法都报错到行：
+
+{/* ref file="../packages/docfirst-workflow/src/marker/index.ts" lines="66-71" hash="ac51ca2c095b" blob="b24178592311" */}
 
 ### 引用与清单 reference
 
-引用在文档里的位置与核对结果的类型定义在 `src/reference/`：钉码核心只认目标与记录，文档路径、行号、是不是草稿由钉码编排配回去。
+引用在文档里的位置与核对结果的类型定义在 `src/reference/`：钉码核心只认目标与记录，文档路径与行号由钉码编排配回去；记录为 null
+的就是草稿记号，确认后要写回的一处一定带着记录。
 mdx 格式认出的、按原文渲染要读的、命令行打印的都是这几个类型：
 
-{/* ref file="../packages/docfirst-workflow/src/reference/index.ts" lines="11-20" hash="c4ce2d858fd7" blob="086e0b8062c9" */}
+{/* ref file="../packages/docfirst-workflow/src/reference/index.ts" lines="11-25" hash="5ff57c4de593" blob="f79c766b853b" */}
 
 ### 命令行 cli
 
 子命令与各自做什么写在入口文件头上：
 
-{/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="1-22" hash="cc416437b074" blob="3ce3a8b0948a" */}
+{/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="1-21" hash="be5d2d90c369" blob="75cc83db6ebd" */}
 
 每条命令只收自己开关表里的开关，别的一律退 2、什么都不动。表必须封闭：`confirm` 把 `-` 开头的参数从页名里筛掉，
 开关若被静默丢掉，`confirm --help` 就成了不带页名的全部页确认：
 
-{/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="45-59" hash="835f0ad5c8c0" blob="3ce3a8b0948a" */}
+{/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="44-57" hash="ec22d1956cc8" blob="75cc83db6ebd" */}
 
 人读输出一行一处引用：状态符号、文档、目标（记号上的行号）、一句说明，括号里是细分理由或目录树的项数：
 
-{/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="37-43" hash="9ebfdcac2bf1" blob="3ce3a8b0948a" */}
+{/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="36-42" hash="9ebfdcac2bf1" blob="75cc83db6ebd" */}
 
 ```text
 🟢 content/docs/a.mdx  src/greet.ts:2-3  新鲜
@@ -138,15 +142,15 @@ mdx 格式认出的、按原文渲染要读的、命令行打印的都是这几�
 
 `check` 先把逐篇核对与轨迹卡校验汇总成一份报告，人读模式边算边打，`--json` 汇总完打印一行，两种模式的红出自同一份报告：
 
-{/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="218-241" hash="5f938c9ee287" blob="3ce3a8b0948a" */}
+{/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="212-235" hash="5f938c9ee287" blob="75cc83db6ebd" */}
 
 `confirm` 带路径时只动点名的页；`--accept` 必须点名页，点名的路径对不上项目里的文档当场退 2。重新生成生成物不按页限定，按内容判：
 
-{/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="119-147" hash="235a864d0ce8" blob="3ce3a8b0948a" */}
+{/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="113-141" hash="235a864d0ce8" blob="75cc83db6ebd" */}
 
 `trajectory` 不遍历文档，打印卡目录那一张盘的树与主干，没有轨迹卡目录就退 2：
 
-{/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="255-275" hash="931ad6970d4e" blob="3ce3a8b0948a" */}
+{/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="249-269" hash="931ad6970d4e" blob="75cc83db6ebd" */}
 
 退出码、红的来源、未提交改动的黄怎么算红，见[提交门禁](/docs/pinning/gate)。
 
@@ -158,11 +162,11 @@ mdx 格式认出的、按原文渲染要读的、命令行打印的都是这几�
 
 `.` 交出 `main`、`check --json` 报告的类型、`loadProject` / `docIdOf` / `scanCardDir`、引用与清单和钉码编排的类型：
 
-{/* ref file="../packages/docfirst-workflow/src/index.ts" hash="b69f37dfca04" blob="974951466224" */}
+{/* ref file="../packages/docfirst-workflow/src/index.ts" hash="109781d97fcd" blob="73698b968f17" */}
 
 `main` 自己不调 `process.exit`，可执行文件只转发参数与退出码，别的程序可以直接调 `main` 拿到退出码：
 
-{/* ref file="../packages/docfirst-workflow/src/cli/cli.ts" hash="435cd11017b0" blob="83f53d30c0ad" */}
+{/* ref file="../packages/docfirst-workflow/src/cli/cli.ts" hash="db36f021285e" blob="e451ab0dc72b" */}
 
 **`loadProject(root)`** 同一个根只装配一次，站构建时 loader 并发调用拿到同一个项目。配置只认三个键，项目上带着钉码编排、名册、
 内容根、轨迹卡目录与摆放：

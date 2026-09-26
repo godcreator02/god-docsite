@@ -43,14 +43,11 @@ export interface HasTarget {
 
 export type Target = SpanTarget | FileTarget | TreeTarget | HasTarget;
 
-/**
- * 行段与整文件的记录：段哈希，加确认时整文件的 blob 名（两样都是 12 位十六进制前缀）。
- * blob 缺省只出现在从旧记录簿的 hash 记录迁过来的记录上：没有它就取不到旧内容，只能滑窗找
- */
+/** 行段与整文件的记录：段哈希，加确认时整文件的 blob 名（两样都是 12 位十六进制前缀） */
 export interface ContentRecord {
   kind: "content";
   hash: string;
-  blob?: string;
+  blob: string;
 }
 
 /** 目录树的记录：名字表的哈希。旧名字表不存，变了只知道变了 */
@@ -70,6 +67,12 @@ export type MemoRecord = ContentRecord | TreeRecord | HasRecord;
 export interface Pin {
   target: Target;
   record: MemoRecord | null;
+}
+
+/** 确认过的一处钉：一定带着记录 */
+export interface RecordedPin {
+  target: Target;
+  record: MemoRecord;
 }
 
 /** 新鲜 / 有变动 / 缺失 / 未确认 */

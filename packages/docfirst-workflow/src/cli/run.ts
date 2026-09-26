@@ -11,7 +11,6 @@
  *   docfirst confirm <文档路径…> --accept   另外把点名页里的黄灯按今天的内容重新记；不点名页报错退 2
  *   docfirst render                         渲染：挂了 outputs 映射的生成正本摆到指定落点；别的文档不渲染
  *   docfirst trajectory [--json]            列轨迹卡那张盘的树与主干；--json 出 buildTrajectory 的整份模型
- *   docfirst migrate-ledger                 一次性迁移：旧记录簿写进各记号后删掉（见 project/migrate-ledger.ts）
  *   docfirst --help | -h | help             打用法，退 0，什么都不动；任一命令后面带 --help / -h 也是
  * 每条命令只收表里认的开关（`FLAGS`），别的开关一律报错退 2、不动手。
  * 给一个新骨架铺各区那件事不在这儿——它只在 agent 手上发生一次、铺的是模板不是判定，归工作台插件
@@ -28,7 +27,7 @@ import type { Item, Listing } from "../reference/index.ts";
 import { targetKey } from "../marker/index.ts";
 import { lintComponents } from "../mdx/index.ts";
 import type { ConfirmStep } from "../pinning/index.ts";
-import { createUncommittedProbe, loadProject, migrateLedger, scanCardDir } from "../project/index.ts";
+import { createUncommittedProbe, loadProject, scanCardDir } from "../project/index.ts";
 import type { PlacedWrite, UncommittedProbe } from "../project/index.ts";
 import type { CardProblemReport, CheckReport, DocReport, OutputReport, RefReport } from "./report.ts";
 
@@ -51,7 +50,6 @@ const FLAGS: Record<string, readonly string[]> = {
   confirm: ["--accept"],
   render: [],
   trajectory: ["--json"],
-  "migrate-ledger": [],
 };
 
 /** 求助的写法：命令位上三种都认，命令后面只认两种开关（`help` 在 confirm 后面可能是页名） */
@@ -70,8 +68,6 @@ export const USAGE = `docfirst——文档钉代码的核对与确认。在有 d
   docfirst confirm <文档路径…> --accept   另外把点名页里的黄灯按今天的内容重新记。复核过才用，必须点名页
   docfirst render                        把挂了 outputs 映射的生成正本渲染到落点（内容变了才写）
   docfirst trajectory [--json]           列轨迹卡那张盘的树与主干
-  docfirst migrate-ledger                一次性迁移：把旧记录簿 .ledger.json 写进各记号后删掉它，
-                                         再列出配置里还要手工改的键
   docfirst --help                        打这份用法，什么都不动
 
 不认识的开关一律报错退 2，不会被当作没写。`;
@@ -101,8 +97,6 @@ export async function main(argv: string[]): Promise<number> {
   }
   // trajectory 跟 check / confirm / render 不是一套：它不遍历文档，所以在装配之前就分流
   if (command === "trajectory") return trajectoryCommand(rest);
-  // 迁移时配置里多半还留着旧键，装配会拒，所以也在装配之前分流
-  if (command === "migrate-ledger") return migrateLedgerCommand();
 
   const project = await loadProject(process.cwd());
   const docs = project.docs();
@@ -177,7 +171,7 @@ function confirmLine(doc: string, { item, action, written, problem }: ConfirmSte
   const key = targetKey(item.reference.target);
   switch (action) {
     case "recorded":
-      return `✅ ${doc}  ${key}  已确认${item.reference.draft ? "，草稿记号已换成正式记号" : ""}`;
+      return `✅ ${doc}  ${key}  已确认，草稿记号已换成正式记号`;
     case "moved": {
       const target = written!.target;
       return `✅ ${doc}  ${key}  内容没变、挪到了 ${target.kind === "span" ? `${target.a}-${target.b}` : "新位置"}，已写回新行号`;
@@ -274,19 +268,6 @@ async function trajectoryCommand(rest: string[]): Promise<number> {
   return 0;
 }
 
-/** `docfirst migrate-ledger`：一次性迁移，各站迁完之后下一个版本连同 project/migrate-ledger.ts 一起删掉 */
-async function migrateLedgerCommand(): Promise<number> {
-  const report = await migrateLedger(process.cwd());
-  for (const { doc, count } of report.written) console.log(`✅ ${doc}  ${count} 处记号写上了记录`);
-  if (report.dropped > 0) console.log(`·  丢掉 ${report.dropped} 条记录：文档已经不在，或文档里没有对应的记号`);
-  console.log(`🧹 已删掉 ${report.ledger}`);
-  if (report.configAdvice.length > 0) {
-    console.log("docfirst.config 里还要手工改：");
-    for (const advice of report.configAdvice) console.log(`  - ${advice}`);
-  }
-  return 0;
-}
-
 type Project = Awaited<ReturnType<typeof loadProject>>;
 
 /** 一行说明后面的括号：状态的细分理由（`changed` 就是状态本身，不另说），或目录树的项数 */
@@ -304,7 +285,7 @@ function refReport(item: Item, blocking: boolean): RefReport {
     status: item.status,
     line: item.reference.at + 1,
     lines: item.lines,
-    draft: item.reference.draft,
+    draft: item.reference.record === null,
     ...(item.reason !== undefined ? { reason: item.reason } : {}),
     ...(item.diff !== undefined ? { diff: item.diff } : {}),
     ...(blocking ? { blocking: true as const } : {}),

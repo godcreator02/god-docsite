@@ -11,21 +11,29 @@ import type { Roster, TreeNode } from "../packages/docfirst-workflow/src/mdx/ind
 import * as fumadocs from "../packages/docfirst-fumadocs/src/index.ts";
 import { DOT_COLOR, applyListing, docfirstMarkdownOptions, parseMetaString, whereOf } from "../packages/docfirst-fumadocs/src/index.ts";
 import { fumadocsRoster } from "../packages/docfirst-fumadocs/src/roster.ts";
-import type { Target } from "../packages/docfirst-pin/src/index.ts";
+import type { MemoRecord, Target } from "../packages/docfirst-pin/src/index.ts";
 import type { Item, Listing, Reference } from "../packages/docfirst-workflow/src/reference/index.ts";
 
 const T: Target = { kind: "span", file: "src/greet.ts", a: 2, b: 3 };
 const CURRENT = ["export function greet(name: string): string {", "  return `hello ${name}`;"];
 const OLD = ["export function greet(name: string): string {", "  return `hi ${name}`;"];
 
-/** 测试里只关心目标与位置，记录一律当没有；不说是草稿就是正式记号 */
-type Over = Omit<Partial<Item>, "reference"> & { reference?: Omit<Reference, "record" | "draft"> & { draft?: boolean } };
+/** 每种目标确认过之后记号上带的记录 */
+function recordFor(target: Target): MemoRecord {
+  if (target.kind === "span" || target.kind === "file") return { kind: "content", hash: "3fa9c2e1b07d", blob: "2689fa073ac6" };
+  if (target.kind === "tree") return { kind: "tree", hash: "3fa9c2e1b07d" };
+  return { kind: "has" };
+}
+
+/** 测试里只关心目标与位置；不给记录就是确认过的正式记号，草稿记号传 record: null */
+type Over = Omit<Partial<Item>, "reference"> & { reference?: Omit<Reference, "record"> & { record?: MemoRecord | null } };
 
 function itemOf(over: Over): Item {
   const { reference, ...rest } = over;
+  const at = reference ?? { target: T, at: 0 };
   return {
     doc: "a.mdx",
-    reference: { record: null, draft: false, ...(reference ?? { target: T, at: 0 }) },
+    reference: { record: recordFor(at.target), ...at },
     current: CURRENT,
     status: "fresh",
     lines: [2, 3],
@@ -33,7 +41,7 @@ function itemOf(over: Over): Item {
   } as Item;
 }
 
-const mark = (target: Target): string => mdx.marker(target, null);
+const mark = (target: Target): string => mdx.marker(target, recordFor(target));
 const listingOf = (items: Item[]): Listing => ({ doc: "a.mdx", items });
 /** 把一篇 mdx 过一遍换节点，交回换出来的代码块 */
 function blocksIn(text: string, items: Item[]): TreeNode[] {
@@ -43,7 +51,7 @@ function blocksIn(text: string, items: Item[]): TreeNode[] {
 
 test("正式记号与草稿记号都换成代码块：meta 写来源、行号、状态点颜色", () => {
   const text = `${mark(T)}\n\n@@docfirst ref src/greet.ts:2-3 @@\n`;
-  const items = [itemOf({}), itemOf({ status: "unconfirmed", reference: { target: T, at: 2, draft: true } })];
+  const items = [itemOf({}), itemOf({ status: "unconfirmed", reference: { target: T, at: 2, record: null } })];
   const blocks = blocksIn(text, items);
   assert.equal(blocks.length, 2);
   assert.equal(blocks[0]!.lang, "ts");

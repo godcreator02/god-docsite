@@ -20,17 +20,17 @@ function setup() {
   return { files, pinning };
 }
 
-test("checkDoc：mdx 认出的每处按原来的顺序配回文档、行号、是不是草稿", () => {
+test("checkDoc：mdx 认出的每处按原来的顺序配回文档、行号、记录", () => {
   const { pinning } = setup();
-  const text = `# 标题\n\n${refLine(SPAN)}\n\n@@docfirst ref src/nowhere.ts:1-2 @@\n\n${refLine({ kind: "has", file: "src/greet.ts", text: "greet" })}\n`;
+  const text = `# 标题\n\n${refLine(SPAN)}\n\n@@docfirst ref src/nowhere.ts:1-2 @@\n\n{/* has file="src/greet.ts" text="greet" */}\n`;
   const listing = pinning.checkDoc(DOC, text);
   assert.equal(listing.doc, DOC);
   assert.deepEqual(
-    listing.items.map((i) => [i.doc, i.reference.at, i.reference.draft, i.status]),
+    listing.items.map((i) => [i.doc, i.reference.at, i.reference.record, i.status]),
     [
-      [DOC, 2, false, "unconfirmed"],
-      [DOC, 4, true, "missing"],
-      [DOC, 6, false, "fresh"],
+      [DOC, 2, null, "unconfirmed"],
+      [DOC, 4, null, "missing"],
+      [DOC, 6, { kind: "has" }, "fresh"],
     ],
   );
   assert.equal(listing.items[1]!.reason, "file-missing");
@@ -40,7 +40,7 @@ test("checkDoc：mdx 认出的每处按原来的顺序配回文档、行号、�
 test("checkReferences：引用别人认好了也走同一条路，结果跟 checkDoc 一样", () => {
   const { pinning } = setup();
   const byText = pinning.checkDoc(DOC, `${refLine(SPAN)}\n`);
-  assert.deepEqual(pinning.checkReferences(DOC, [{ target: SPAN, record: null, at: 0, draft: false }]), byText);
+  assert.deepEqual(pinning.checkReferences(DOC, [{ target: SPAN, record: null, at: 0 }]), byText);
 });
 
 test("confirmDoc：草稿换成带记录的正式记号，步骤与清单一一对应，写回的引用留在原来那一行", () => {
@@ -49,9 +49,9 @@ test("confirmDoc：草稿换成带记录的正式记号，步骤与清单一一�
   const done = pinning.confirmDoc(DOC, text, plain);
   assert.equal(done.changed, true);
   assert.deepEqual(done.steps.map((s) => s.item), done.listing.items);
-  assert.deepEqual(done.steps.map((s) => [s.action, s.item.reference.draft, s.written?.at, s.written?.draft]), [["recorded", true, 2, false]]);
+  assert.deepEqual(done.steps.map((s) => [s.action, s.item.reference.record, s.written?.at]), [["recorded", null, 2]]);
   assert.equal(done.text, `# 标题\n\n{/* ref file="src/greet.ts" lines="2-3" hash="${hashSpan(CODE.slice(1, 3))}" blob="${blobOf(CODE)}" */}\n\n尾巴\n`);
-  assert.deepEqual(pinning.checkDoc(DOC, done.text).items.map((i) => [i.status, i.reference.draft]), [["fresh", false]]);
+  assert.deepEqual(pinning.checkDoc(DOC, done.text).items.map((i) => [i.status, i.reference.record === null]), [["fresh", false]]);
 });
 
 test("confirmDoc：一处钉不住只是那一处不动，别的照写；什么都不用写时原文不变", () => {

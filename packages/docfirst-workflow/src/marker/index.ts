@@ -4,7 +4,7 @@
  * 这儿做的都是「文本 ↔ 目标 + 记录」的翻译，跟目标本身是什么无关：
  *   **语言表** `WORDS` 与每个动作词认的属性 `ATTRS`——`toTarget` / `recordOf` 是唯一的语义校验点
  *   **正式记号的载荷**（`formalOf` / `parseFormal`）——mdx 格式只在外面套花括号注释。
- *   载荷 = 动作词 + 目标属性 + 记录属性，记录属性只在确认过的记号上出现
+ *   载荷 = 动作词 + 目标属性 + 记录属性；正式记号一定带着记录，未确认的引用只写成草稿记号
  *   **草稿记号**（`draftOf`）与报告里用的目标文本形态（`targetKey`）
  */
 import type { MemoRecord, Target, TreeTarget } from "@godcreator/docfirst-pin";
@@ -30,11 +30,10 @@ function targetAttrsOf(target: Target): Attrs {
   }
 }
 
-function recordAttrsOf(record: MemoRecord | null): Attrs {
-  if (record === null) return [];
+function recordAttrsOf(record: MemoRecord): Attrs {
   switch (record.kind) {
     case "content":
-      return [["hash", record.hash], ...(record.blob !== undefined ? [["blob", record.blob] as [string, string]] : [])];
+      return [["hash", record.hash], ["blob", record.blob]];
     case "tree":
       return [["hash", record.hash]];
     case "has":
@@ -43,12 +42,12 @@ function recordAttrsOf(record: MemoRecord | null): Attrs {
 }
 
 /** 正式记号的属性表（有序）：先目标、后记录，格式按 key="value" 摆出来 */
-export function attrsOf(target: Target, record: MemoRecord | null): Attrs {
+export function attrsOf(target: Target, record: MemoRecord): Attrs {
   return [...targetAttrsOf(target), ...recordAttrsOf(record)];
 }
 
 /** 正式记号的载荷：`ref file="…" lines="a-b" hash="…" blob="…"`、`tree dir="…" depth="1" hash="…"`…… 值里的引号写成 &quot; */
-export function formalOf(target: Target, record: MemoRecord | null): string {
+export function formalOf(target: Target, record: MemoRecord): string {
   const attrs = attrsOf(target, record).map(([k, v]) => `${k}="${v.replace(/"/g, "&quot;")}"`);
   return [wordOf(target), ...attrs].join(" ");
 }
@@ -78,7 +77,7 @@ const HEX12 = /^[0-9a-f]{12}$/;
  * 正式记号的载荷 → 目标与记录。格式把外壳剥掉后交给它；动作词不认识给 null。
  * 属性写成 `key="value"` 之外的样子、出现这个动作词不认的属性，都报错到 where
  */
-export function parseFormal(payload: string, where: string): { target: Target; record: MemoRecord | null } | null {
+export function parseFormal(payload: string, where: string): { target: Target; record: MemoRecord } | null {
   const m = /^(\w+)\s*(.*)$/s.exec(payload.trim());
   if (m === null || !WORDS.has(m[1]!)) return null;
   const word = m[1]!;
@@ -96,23 +95,24 @@ function assertHex(value: string, name: string, where: string): void {
   if (!HEX12.test(value)) throw new Error(`${where}：${name} 要是 12 位小写十六进制（${value}）`);
 }
 
+/** 正式记号少了记录属性时的报错：未确认的引用只有草稿一种写法 */
+function missingRecord(where: string, word: string, names: string): Error {
+  return new Error(`${where}：${word} 正式记号要带确认记录 ${names}——新引用写草稿记号 @@docfirst … @@，confirm 时换成正式记号`);
+}
+
 /**
- * 动作词 + 属性表 → 记录。没写任何记录属性给 null（未确认）；`has` 的正式记号本身就是确认过。
- * 记录属性写了一半（行段有 blob 没有 hash）、值不合法，报错到 where
+ * 动作词 + 属性表 → 记录。正式记号一定是确认过的：`ref` 要有 hash 与 blob，`tree` 要有 hash，`has` 的记号本身就是记录。
+ * 缺记录属性、值不合法，报错到 where
  */
-export function recordOf(word: string, attrs: Record<string, string | undefined>, where: string): MemoRecord | null {
+export function recordOf(word: string, attrs: Record<string, string | undefined>, where: string): MemoRecord {
   if (word === "has") return { kind: "has" };
   if (word === "ref") {
-    if (attrs.hash === undefined) {
-      if (attrs.blob !== undefined) throw new Error(`${where}：记录属性写了一半——有 blob 没有 hash`);
-      return null;
-    }
+    if (attrs.hash === undefined || attrs.blob === undefined) throw missingRecord(where, word, "hash、blob");
     assertHex(attrs.hash, "hash", where);
-    if (attrs.blob === undefined) return { kind: "content", hash: attrs.hash };
     assertHex(attrs.blob, "blob", where);
     return { kind: "content", hash: attrs.hash, blob: attrs.blob };
   }
-  if (attrs.hash === undefined) return null;
+  if (attrs.hash === undefined) throw missingRecord(where, word, "hash");
   assertHex(attrs.hash, "hash", where);
   return { kind: "tree", hash: attrs.hash };
 }
