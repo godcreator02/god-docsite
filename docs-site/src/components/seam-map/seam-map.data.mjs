@@ -1,7 +1,7 @@
 /**
  * 系统地图接缝图的全部内容：画面（seam-map.tsx）与机读版规则（seam-map.ai.mjs）都只读这一份。
  * 接缝的正本就在这里，system-map.mdx 里只有 <SeamMap /> 标签。
- * 模块按包分：四个 npm 包加工作台插件各一个虚线框，框里的方块是能力；使用方的站、使用方的仓、fumadocs 本体在框外。
+ * 模块按包分：docfirst 的每个 npm 包与工作台插件各一个虚线框，框里的方块是能力；使用方的站、使用方的仓、fumadocs 本体在框外。
  * 每条接缝写明两端的能力、接口、是不是约定（没有代码接口，只靠文件名、目录名、配置键对上）、经代码调用还是经磁盘上的文件。
  * 坐标不在这里，在 seam-map.tsx 的布局表里：这份只描述系统是什么样。
  */
@@ -78,7 +78,7 @@ export const modules = [
     pkg: '@godcreator/gwb-docfirst-workflow',
     role: 'cyan',
     outside: false,
-    blurb: '不进 npm 的依赖网，只在桌面工作台里给 agent 提供两条建站命令和说明书。对四个包零依赖：不 import、不运行它们的命令行。',
+    blurb: '不进 npm 的依赖网，只在桌面工作台里给 agent 提供两条建站命令和说明书。对 docfirst 的 npm 包零依赖：不 import、不运行它们的命令行。',
     caps: [
       { id: 'skills', name: '说明书', ident: 'skills/' },
       { id: 'create', name: '建站命令与模板', ident: 'docfirst.create' },
@@ -108,7 +108,7 @@ export const modules = [
     pkg: '磁盘上的文件',
     role: null,
     outside: true,
-    blurb: '站所在的仓：项目根的配置与内容、被钉的源码与 git 历史、仓根的生成物。四个包只经约定读写它们。',
+    blurb: '站所在的仓：项目根的配置与内容、被钉的源码与 git 历史、仓根的生成物。docfirst 的包只经约定读写它们。',
     caps: [
       { id: 'root', name: '站的项目根', ident: 'docfirst.config.mjs · content/' },
       { id: 'source', name: '被钉的源码与 git 历史', ident: '源码 · .git' },
@@ -118,7 +118,7 @@ export const modules = [
 ];
 
 /**
- * 从系统外面进来的三条入口，画成灰色箭头，不编号、不算接缝。to 是进来的那个能力或模块。
+ * 从系统外面进来的入口，画成灰色箭头，不编号、不算接缝。to 是进来的那个能力或模块。
  * @type {{ id: string, name: string, to: string }[]}
  */
 export const entries = [
@@ -128,8 +128,8 @@ export const entries = [
 ];
 
 /**
- * 十二条接缝。a、b 是两端的能力 id；via 为 code 是代码调用（实线），disk 是读写磁盘上的文件（虚线）。
- * label 与 text 给 CasePicker：label 是「编号 名称」，text 写连接谁、交换什么、由谁负责。
+ * 接缝。a、b 是两端的能力 id；via 为 code 是代码调用（实线），disk 是读写磁盘上的文件（虚线）。
+ * label 与 text 显示在浮层里：label 是「编号 名称」，text 写连接谁、交换什么、由谁负责。
  * @typedef {{ id: string, n: number, name: string, label: string, a: string[], b: string[], iface: string, convention: boolean, via: 'code' | 'disk', text: string }} Seam
  * @type {Seam[]}
  */
@@ -152,7 +152,7 @@ export const seams = [
     iface: 'Reader：read / list / kindOf；History：oldText / hunks',
     convention: false,
     via: 'code',
-    text: '读盘与 git 和钉码核心的比较器之间。比较器要看的当前文件、目录的名字表、路径是文件还是目录，从 Reader 取；确认时的旧文件（按 blob 名）与两份文本之间的 hunk 表，从 History 取。workflow 用 createReader 与 createGitHistory 实现这两个接口，装配项目时传给 createService。取不到旧内容时 oldText 给 null，比较器改为在整个文件里按指纹找。',
+    text: '读盘与 git 和钉码核心的比较器之间。比较器要看的当前文件、目录的名字表、路径是文件还是目录，从 Reader 取；确认时的旧文件（按 blob 名）与两份文本之间的 hunk 表，从 History 取。workflow 用 createReader 与 createGitHistory 实现这两个接口，装配项目时传给 createService。取不到旧内容时 oldText 给 null，比较器改为在整个文件里找段 hash 跟记号上的 hash 相同的那几行。',
   },
   {
     n: 3,

@@ -10,8 +10,12 @@
   background: var(--dx-surface);
   padding: 6px;
 }
+/* 图放得下时不再横向滚动，浮层才能伸出图的下边而不被裁掉 */
+@container (min-width: 840px) {
+  .seam-map .sm-scroll { overflow: visible; }
+}
 .seam-map .sm-svg { display: block; width: 100%; min-width: 820px; height: auto; font-size: 12px; user-select: none; }
-.seam-map .sm-svg [role='button'] { cursor: pointer; outline: none; }
+.seam-map .sm-svg [tabindex] { cursor: help; outline: none; }
 
 /* 模块：虚线框，框外的东西是实线细框 */
 .seam-map .sm-frame {
@@ -92,8 +96,20 @@
 .seam-map .sm-lg-badge-n { fill: var(--dx-fg); font-size: 8px; font-family: var(--dx-mono); }
 .seam-map .sm-lg-entry { fill: none; stroke: var(--dx-dim); }
 
-/* 图下面：接缝两端与接口，或者模块的说明与相关接缝 */
-.seam-map .sm-detail { display: grid; gap: 8px; min-width: 0; }
+.seam-map .sm-legend-hint { margin-left: auto; }
+
+/* 浮层：定位基准是 .sm-canvas（跟 svg 一样大），位置由 seam-map.tsx 按画布坐标换算成百分比 */
+.seam-map .sm-canvas { position: relative; }
+.seam-map .sm-tip {
+  position: absolute; z-index: 2; width: min(400px, 92%);
+  display: grid; gap: 8px; padding: 10px 12px;
+  border: 1px solid var(--dx-line); border-radius: 10px;
+  background: var(--dx-surface); box-shadow: 0 6px 20px rgb(0 0 0 / .12);
+  font-size: 13px; line-height: 1.55;
+  pointer-events: none;
+}
+.seam-map .sm-tip-head { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 8px; }
+.seam-map .sm-tip-text { margin: 0; }
 .seam-map .sm-ends { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
 .seam-map .sm-arrow { color: var(--dx-dim); }
 .seam-map .sm-iface {
@@ -102,12 +118,6 @@
   border: 1px solid color-mix(in srgb, var(--dx-rose) 30%, transparent);
   background: color-mix(in srgb, var(--dx-rose) 5%, transparent);
 }
-.seam-map .sm-module-text { margin: 0; max-width: 70ch; }
-.seam-map .sm-module-name { color: var(--dx-c); margin-right: .5em; }
-.seam-map .sm-module-pkg { font-family: var(--dx-mono); font-size: 12px; color: var(--dx-dim); margin-right: .6em; }
-.seam-map .sm-related { font-size: 12.5px; color: var(--dx-dim); }
-.seam-map .sm-seam-chip {
-  border: 1px solid color-mix(in srgb, var(--dx-c) 40%, transparent); border-radius: 999px; padding: 1px 10px;
-  background: color-mix(in srgb, var(--dx-c) 10%, transparent); color: var(--dx-c); font-size: 12.5px;
-}
-.seam-map .sm-seam-chip:hover { background: color-mix(in srgb, var(--dx-c) 18%, transparent); }
+.seam-map .sm-module-name { color: var(--dx-c); }
+.seam-map .sm-module-pkg { font-family: var(--dx-mono); font-size: 12px; color: var(--dx-dim); }
+.seam-map .sm-related { margin: 0; font-size: 12.5px; color: var(--dx-dim); }

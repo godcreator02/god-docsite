@@ -195,7 +195,7 @@ description: workflow 的 cli 目录：各条子命令怎么分派、打印什�
 
 `cli/` 认识 workflow 里另外三个目录（`format`、`mdx`、`project`），另外三个谁都不认识它。四个目录在同一个包里，编译器不会拦跨目录的 import，目录方向靠一份手写的禁止表检查，它是**唯一**的边界守卫：
 
-{/* ref file="../tests/boundary.test.ts" lines="206-221" hash="5e5d288cdf5a" blob="55f573c4c909" */}
+{/* ref file="../tests/boundary.test.ts" lines="213-228" hash="5e5d288cdf5a" blob="e450056cc091" */}
 
 <Note>
 这张表检查失败的时候，出错的是设计不是测试。真要改方向，改表本身并写明为什么，不是删断言。

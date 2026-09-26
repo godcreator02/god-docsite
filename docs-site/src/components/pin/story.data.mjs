@@ -1,7 +1,7 @@
 /**
  * 「一条引用的一生」的全部讲解数据：画面（story.tsx）与机读版规则（pin.ai.mjs）都只读这一份。
- * 例子里的指纹与 blob 名是按 docfirst-pin 的算法对这几版 greet.ts 真算出来的：
- * 段指纹 = 归一化后 sha256 前 12 位，blob 名 = git blob 对象名前 12 位。
+ * 例子里的 hash 与 blob 是按 docfirst-pin 的算法对这几版 greet.ts 真算出来的：
+ * hash = 被钉的几行去掉行尾空白后 sha256 的前 12 位，blob = 整个文件的 git blob 对象名前 12 位。
  */
 
 const V0 = ['// 打招呼', 'export function greet(name: string) {', '  return `hello, ${name}`;', '}'];
@@ -42,14 +42,14 @@ export const steps = [
     text: '在文档里单独起一行，写草稿记号指向 greet.ts 的第 2–3 行。check 认得它、也读得到这两行，但记号上还没有确认时的记录，所以是空心的「未确认」。',
   },
   {
-    title: '确认：记下指纹',
+    title: '确认：记下 hash 与 blob',
     code: V0,
     span: [2, 3],
     marker: `{/* ref file="${REF}" lines="2-3" hash="3eb99c2e88e2" blob="c134a7ab15a9" */}`,
     status: 'fresh',
     command: 'pnpm docfirst confirm',
     cli: `✅ ${DOC}  ${REF}:2-3  已确认，草稿记号已换成正式记号`,
-    text: 'confirm 把草稿换成正式记号，并写上两个数：hash 是这两行的指纹，blob 是此刻整个 greet.ts 的 git 对象名。记号里没有代码，页面上那块代码是构建时现读的。',
+    text: 'confirm 把草稿换成正式记号，并写上两个数：hash 是这两行内容的 sha256 前 12 位，blob 是此刻整个 greet.ts 的 git 对象名前 12 位。记号里没有代码，页面上那块代码是构建时现读的。',
   },
   {
     title: '上面插了两行：还是绿',
@@ -60,7 +60,7 @@ export const steps = [
     status: 'fresh',
     command: 'pnpm docfirst check',
     cli: `🟢 ${DOC}  ${REF}:2-3  新鲜`,
-    text: '函数上面加了两行注释，被钉的两行整体下移到 4–5 行，内容没变。check 按 blob 从 git 取回确认时的文件，照着这次的改动把旧的 2–3 行对到今天的 4–5 行，指纹一致，所以还是绿。',
+    text: '函数上面加了两行注释，被钉的两行整体下移到 4–5 行，内容没变。check 按 blob 从 git 取回确认时的文件，照着这次的改动把旧的 2–3 行对到今天的 4–5 行，这两行算出的 hash 跟记号上的相同，所以还是绿。',
   },
   {
     title: 'confirm 写回新行号',
@@ -70,7 +70,7 @@ export const steps = [
     status: 'fresh',
     command: 'pnpm docfirst confirm',
     cli: `✅ ${DOC}  ${REF}:2-3  内容没变、挪到了 4-5，已写回新行号`,
-    text: '再跑一次 confirm，行号改成 4-5、blob 换成今天的文件，指纹不变。这一步不需要人判断，记号上的数字不用人维护。',
+    text: '再跑一次 confirm，行号改成 4-5、blob 换成今天的文件，hash 不变。这一步不需要人判断，记号上的数字不用人维护。',
   },
   {
     title: '改了被钉的代码：变黄，而且拦下提交',
@@ -83,7 +83,7 @@ export const steps = [
     command: 'pnpm docfirst check',
     cli: `🔴 ${DOC}  ${REF}:4-5  有变动，是本仓还没提交的改动引起的——在同一个提交里复核，再 docfirst confirm ${DOC} --accept`,
     diff: { old: '  return `hello, ${name}`;', now: '  return `hi, ${name}`;' },
-    text: '把 hello 改成 hi。这两行的指纹对不上了，状态是「有变动」（黄），页面上把旧行和新行放在一起。改动还没提交，说明就是这次改的，check 把它按红处理、退 1，让改代码的人在同一个提交里把文档对上。',
+    text: '把 hello 改成 hi。这两行算出的 hash 跟记号上的不同了，状态是「有变动」（黄），页面上把旧行和新行放在一起。改动还没提交，说明就是这次改的，check 把它按红处理、退 1，让改代码的人在同一个提交里把文档对上。',
   },
   {
     title: '复核后 --accept：回绿',
@@ -93,7 +93,7 @@ export const steps = [
     status: 'fresh',
     command: `pnpm docfirst confirm ${DOC} --accept`,
     cli: `✅ ${DOC}  ${REF}:4-5  已按今天的内容重新记下`,
-    text: '读一遍文档里讲这段代码的那句话。还成立，就点名这一页 --accept，按今天的内容重新记下指纹；不成立就先改那句话。代码、文档和新指纹放进同一个提交。',
+    text: '读一遍文档里讲这段代码的那句话。还成立，就点名这一页 --accept，按今天的内容重新写 hash 与 blob；不成立就先改那句话。代码、文档和新记号放进同一个提交。',
   },
   {
     title: '删掉这段：红',
@@ -113,7 +113,7 @@ export const legend = [
   { status: 'fresh', name: '新鲜', meaning: '被钉的内容跟确认时一样，位置变了也算' },
   { status: 'changed', name: '有变动', meaning: '内容变了，等人读一遍文档再确认' },
   { status: 'missing', name: '缺失', meaning: '被钉的东西不在了' },
-  { status: 'unconfirmed', name: '未确认', meaning: '还没记下确认时的指纹' },
+  { status: 'unconfirmed', name: '未确认', meaning: '记号上还没有确认时写的 hash' },
 ];
 
 export const files = { doc: DOC, ref: REF };

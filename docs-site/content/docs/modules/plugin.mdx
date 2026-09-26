@@ -27,7 +27,7 @@ description: gwb-docfirst-workflow：两条建站命令 docfirst.create 与 docf
 
 正本都在这个站的 `content/docs/outputs/skills/` 下（跟包在同一个仓才改得动，讲纪律的几份也要跟钉码写法、分区保持一致），由 `docfirst.config.mjs` 的 `outputs` 映射生成到插件的 `skills/`。讲纪律的几份为什么放回本仓，见 [三份纪律并回本仓](/trajectory/2026-09-10-dev-discipline-comes-home)：
 
-{/* ref file="docfirst.config.mjs" lines="20-30" hash="ec44c3a085e4" blob="d6fce2c7e95b" */}
+{/* ref file="docfirst.config.mjs" lines="24-34" hash="ec44c3a085e4" blob="c65fc885b99d" */}
 
 生成物放插件、不放包：包装在 `node_modules` 里，没有任何说明指向它，agent 不会去读；说明书能被 agent 读到，全靠插件把自己包里的 `skills/` 目录注册给 skills 插件。
 

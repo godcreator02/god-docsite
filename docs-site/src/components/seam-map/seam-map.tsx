@@ -1,13 +1,14 @@
 'use client';
 /**
- * 系统地图的接缝图：虚线框是模块（四个包加工作台插件，每个包一种角色色），框里的方块是能力，
- * 跨模块的线带编号，就是接缝；实线是代码调用，虚线是读写磁盘上的文件；框外是使用方的站、使用方的仓、fumadocs 本体与三条入口。
- * 点编号（图上的圆点或上面的胶囊）高亮这条接缝和两端的能力；点一个模块，高亮跟它有关的接缝。
+ * 系统地图的接缝图：虚线框是模块（docfirst 的每个包与工作台插件，每个包一种角色色），框里的方块是能力，
+ * 跨模块的线带编号，就是接缝；实线是代码调用，虚线是读写磁盘上的文件；框外是使用方的站、使用方的仓、fumadocs 本体与外面进来的入口。
+ * 鼠标停在编号上（或键盘聚焦到它），高亮这条接缝和两端的能力，旁边浮出它的说明；停在模块框上，高亮跟它有关的接缝、浮出模块说明。
+ * 鼠标一挪开浮层就消失，点击不固定。
  * 内容全在 seam-map.data.mjs，这里只有布局与交互；机读版由 seam-map.ai.mjs 读同一份数据生成。
  */
 import { useState } from 'react';
-import type { ComponentType, KeyboardEvent, ReactNode, SVGProps } from 'react';
-import { CasePicker, Pill } from '@godcreator/docs-explain';
+import type { ComponentType, CSSProperties, ReactNode, SVGProps } from 'react';
+import { Pill } from '@godcreator/docs-explain';
 import { Bot, FolderGit2, Globe, Hammer, Layers, Orbit, Pin, Plug, Puzzle, SquareTerminal, Workflow } from 'lucide-react';
 import { capById, entries, moduleOfCap, modules, seams, seamsOfModule } from './seam-map.data.mjs';
 
@@ -19,6 +20,10 @@ interface Box {
   w: number;
   h: number;
 }
+
+/** 画布的坐标范围，浮层位置按它换算成百分比 */
+const VIEW_W = 1100;
+const VIEW_H = 750;
 
 const CAP_H = 48;
 const cap = (x: number, y: number, w: number): Box => ({ x, y, w, h: CAP_H });
@@ -70,8 +75,8 @@ const GROUP_BOX: Record<string, Box | null> = {
 };
 
 /**
- * 每条接缝的走线与编号圆点。线停在框边上（6、7、8）表示接这个包里的几处能力，是哪几处点编号看高亮。
- * 5 的另两端（建模、缩略图）与 8 落在项目根的那一端没有单独画线，点编号时照样高亮。
+ * 每条接缝的走线与编号圆点。线停在框边上（6、7、8）表示接这个包里的几处能力，是哪几处看高亮。
+ * 5 的另两端（建模、缩略图）与 8 落在项目根的那一端没有单独画线，指到编号时照样高亮。
  */
 const SEAM_PATH: Record<string, { d: string; badge: [number, number] }> = {
   '1': { d: 'M320,420 V522', badge: [320, 462] },
@@ -88,7 +93,7 @@ const SEAM_PATH: Record<string, { d: string; badge: [number, number] }> = {
   '12': { d: 'M686,106 H734', badge: [710, 106] },
 };
 
-/** 三条入口：外面的方块与指向入口的箭头（起点、终点） */
+/** 外面进来的入口：外面的方块与指向入口的箭头（起点、终点） */
 const ENTRY_LAYOUT: Record<string, { box: Box; arrow: [number, number, number, number] }> = {
   agent: { box: { x: 440, y: 6, w: 200, h: 26 }, arrow: [540, 32, 540, 50] },
   next: { box: { x: 20, y: 222, w: 130, h: 48 }, arrow: [150, 246, 194, 246] },
@@ -97,7 +102,7 @@ const ENTRY_LAYOUT: Record<string, { box: Box; arrow: [number, number, number, n
 
 type Icon = ComponentType<SVGProps<SVGSVGElement> & { size?: number }>;
 
-/** 三条入口与各模块的图标：只是外观，跟内容无关，所以放在画面这边而不是数据文件里 */
+/** 入口与各模块的图标：只是外观，跟内容无关，所以放在画面这边而不是数据文件里 */
 const ENTRY_ICON: Record<string, Icon> = { agent: Bot, next: Hammer, human: SquareTerminal };
 const MODULE_ICON: Record<string, Icon> = {
   plugin: Puzzle,
@@ -110,33 +115,38 @@ const MODULE_ICON: Record<string, Icon> = {
   repo: FolderGit2,
 };
 
-/** 图下面说明区里跟在模块名前的小图标 */
-function ModuleIcon({ moduleId }: { moduleId: string }) {
-  const Glyph = layoutOf(MODULE_ICON, moduleId, '模块图标');
-  return <Glyph className="sm-inline-icon" width={13} height={13} strokeWidth={2} aria-hidden="true" />;
-}
-
 function layoutOf<T>(table: Record<string, T>, id: string, what: string): T {
   if (!(id in table)) throw new Error(`接缝图的布局表里没有${what}「${id}」：seam-map.data.mjs 加了东西，seam-map.tsx 的布局表要跟着加`);
   return table[id]!;
 }
 
-/** 键盘上回车、空格与点击是同一个动作 */
-function pressable(label: string, action: () => void) {
+/** 浮层里跟在模块名前的小图标 */
+function ModuleIcon({ moduleId }: { moduleId: string }) {
+  const Glyph = layoutOf(MODULE_ICON, moduleId, '模块图标');
+  return <Glyph className="sm-inline-icon" width={13} height={13} strokeWidth={2} aria-hidden="true" />;
+}
+
+/** 浮层指着的东西：一条接缝或一个模块 */
+interface Target {
+  kind: 'seam' | 'module';
+  id: string;
+}
+type Point = (target: Target | null) => void;
+
+/** 鼠标停着或键盘聚焦时显示浮层，离开就收起 */
+function pointable(label: string, target: Target, point: Point) {
   return {
-    role: 'button',
+    role: 'img',
     tabIndex: 0,
     'aria-label': label,
-    onClick: action,
-    onKeyDown: (event: KeyboardEvent) => {
-      if (event.key !== 'Enter' && event.key !== ' ') return;
-      event.preventDefault();
-      action();
-    },
+    onMouseEnter: () => point(target),
+    onMouseLeave: () => point(null),
+    onFocus: () => point(target),
+    onBlur: () => point(null),
   };
 }
 
-/** lit 为 undefined 表示什么都没选：不高亮也不淡化 */
+/** lit 为 undefined 表示什么都没指着：不高亮也不淡化 */
 function CapBlock({ id, lit }: { id: string; lit: boolean | undefined }) {
   const box = layoutOf(CAP_BOX, id, '能力');
   const capability = capById.get(id)!;
@@ -154,7 +164,7 @@ function CapBlock({ id, lit }: { id: string; lit: boolean | undefined }) {
   );
 }
 
-function ModuleGroup({ module, focused, litCaps, onPick }: { module: Module; focused: boolean; litCaps: Set<string> | null; onPick: () => void }) {
+function ModuleGroup({ module, focused, litCaps, point }: { module: Module; focused: boolean; litCaps: Set<string> | null; point: Point }) {
   const frame = layoutOf(GROUP_BOX, module.id, '模块');
   const FrameIcon = layoutOf(MODULE_ICON, module.id, '模块图标');
   return (
@@ -163,8 +173,7 @@ function ModuleGroup({ module, focused, litCaps, onPick }: { module: Module; foc
       data-role={module.role ?? 'slate'}
       data-outside={module.outside}
       data-focus={focused}
-      aria-pressed={focused}
-      {...pressable(`模块 ${module.name}`, onPick)}
+      {...pointable(`模块 ${module.name}`, { kind: 'module', id: module.id }, point)}
     >
       {frame === null ? null : (
         <>
@@ -185,14 +194,14 @@ function ModuleGroup({ module, focused, litCaps, onPick }: { module: Module; foc
   );
 }
 
-/** on 为 undefined 表示什么都没选：不高亮也不淡化 */
-function SeamLine({ seam, on, onPick }: { seam: Seam; on: boolean | undefined; onPick: () => void }) {
+/** on 为 undefined 表示什么都没指着：不高亮也不淡化 */
+function SeamLine({ seam, on, point }: { seam: Seam; on: boolean | undefined; point: Point }) {
   const { d, badge } = layoutOf(SEAM_PATH, seam.id, '接缝');
   const [bx, by] = badge;
   return (
     <g className="sm-seam" data-on={on} data-via={seam.via}>
       <path d={d} />
-      <g className="sm-badge" aria-pressed={on === true} {...pressable(`接缝 ${seam.label}`, onPick)}>
+      <g className="sm-badge" {...pointable(`接缝 ${seam.label}`, { kind: 'seam', id: seam.id }, point)}>
         <circle className="sm-badge-hit" cx={bx} cy={by} r={13} />
         <circle className="sm-badge-ring" cx={bx} cy={by} r={9.5} />
         <text x={bx} y={by} textAnchor="middle" dominantBaseline="central">
@@ -235,7 +244,7 @@ function Entry({ id, name }: { id: string; name: string }) {
   );
 }
 
-/** 图例：每种元素的意思 */
+/** 图例：每种元素的意思，末尾一句怎么看说明 */
 function Legend() {
   const item = (mark: ReactNode, text: string) => (
     <span className="sm-legend-item">
@@ -261,11 +270,12 @@ function Legend() {
         '接缝编号',
       )}
       {item(<rect x="2" y="2" width="22" height="10" rx="5" className="sm-lg-entry" />, '从外面进来的入口')}
+      <span className="sm-legend-hint">鼠标停在编号或模块框上看说明</span>
     </div>
   );
 }
 
-function SeamDetail({ seam }: { seam: Seam }) {
+function SeamTip({ seam }: { seam: Seam }) {
   const end = (ids: string[]) =>
     ids.map((id) => {
       const owner = moduleOfCap.get(id)!;
@@ -277,109 +287,105 @@ function SeamDetail({ seam }: { seam: Seam }) {
       );
     });
   return (
-    <div className="sm-detail">
+    <>
+      <div className="sm-tip-head">
+        <b>{seam.label}</b>
+        <Pill tone={seam.convention ? 'warn' : 'info'}>{seam.convention ? '约定，没有代码接口' : '代码接口'}</Pill>
+      </div>
       <div className="sm-ends">
         {end(seam.a)}
         <span className="sm-arrow" aria-hidden="true">
           ↔
         </span>
         {end(seam.b)}
-        <Pill tone={seam.convention ? 'warn' : 'info'}>{seam.convention ? '约定，没有代码接口' : '代码接口'}</Pill>
       </div>
+      <p className="sm-tip-text">{seam.text}</p>
       <code className="sm-iface">{seam.iface}</code>
-    </div>
+    </>
   );
 }
 
-function ModuleDetail({ module, onSeam }: { module: Module; onSeam: (id: string) => void }) {
-  const related = seamsOfModule(module.id);
+function ModuleTip({ module }: { module: Module }) {
   return (
-    <div className="sm-detail" data-role={module.role ?? 'slate'}>
-      <p className="sm-module-text">
+    <>
+      <div className="sm-tip-head" data-role={module.role ?? 'slate'}>
         <b className="sm-module-name">
           <ModuleIcon moduleId={module.id} />
           {module.name}
         </b>
         <code className="sm-module-pkg">{module.pkg}</code>
-        {module.blurb}
-      </p>
-      <div className="sm-ends">
-        <span className="sm-related">相关接缝 {related.length} 条：</span>
-        {related.map((s) => (
-          <button key={s.id} type="button" className="sm-seam-chip" onClick={() => onSeam(s.id)}>
-            {s.label}
-          </button>
-        ))}
       </div>
+      <p className="sm-tip-text">{module.blurb}</p>
+      <p className="sm-related">相关接缝：{seamsOfModule(module.id).map((s) => s.label).join(' · ')}</p>
+    </>
+  );
+}
+
+/** 浮层挂在哪儿：横向位置，以及上下两条边（浮层放在下边之下或上边之上） */
+function anchorOf(target: Target): { x: number; top: number; bottom: number } {
+  if (target.kind === 'seam') {
+    const [bx, by] = layoutOf(SEAM_PATH, target.id, '接缝').badge;
+    return { x: bx, top: by - 12, bottom: by + 12 };
+  }
+  const module = modules.find((m) => m.id === target.id)!;
+  const box = layoutOf(GROUP_BOX, module.id, '模块') ?? layoutOf(CAP_BOX, module.caps[0]!.id, '能力');
+  return { x: box.x + box.w / 2, top: box.y, bottom: box.y + box.h };
+}
+
+/**
+ * 浮层：上半张图的东西，浮层放在它下面；下半张的放在上面。横向按锚点在图里的比例平移，
+ * 锚点在最左时浮层左边对齐、在最右时右边对齐，所以不会伸出图外。
+ */
+function Tip({ target }: { target: Target }) {
+  const { x, top, bottom } = anchorOf(target);
+  const below = (top + bottom) / 2 < VIEW_H / 2;
+  const across = (x / VIEW_W) * 100;
+  const style: CSSProperties = {
+    left: `${across}%`,
+    top: `${((below ? bottom : top) / VIEW_H) * 100}%`,
+    transform: `translate(${-across}%, ${below ? '8px' : 'calc(-100% - 8px)'})`,
+  };
+  const content =
+    target.kind === 'seam' ? <SeamTip seam={seams.find((s) => s.id === target.id)!} /> : <ModuleTip module={modules.find((m) => m.id === target.id)!} />;
+  return (
+    <div className="sm-tip" style={style} role="tooltip">
+      {content}
     </div>
   );
 }
 
-/** 什么都没选时图下面的一句话 */
-function OverviewHint() {
-  return <p className="sm-module-text">点一个编号，看这条接缝连着哪两处能力、交换什么；点一个模块框，看跟它有关的全部接缝。再点一次取消。</p>;
-}
+export function SeamMap() {
+  const [shown, setShown] = useState<Target | null>(null);
 
-function Stage({
-  seam,
-  focusModule,
-  onSeam,
-  onModule,
-}: {
-  seam: Seam | null;
-  focusModule: string | null;
-  onSeam: (id: string) => void;
-  onModule: (id: string) => void;
-}) {
-  const focused = focusModule === null ? null : modules.find((m) => m.id === focusModule)!;
+  const focused = shown?.kind === 'module' ? modules.find((m) => m.id === shown.id)! : null;
+  const seam = shown?.kind === 'seam' ? seams.find((s) => s.id === shown.id)! : null;
   const active = focused !== null ? seamsOfModule(focused.id) : seam !== null ? [seam] : [];
-  const nothingPicked = active.length === 0 && focused === null;
+  const nothingShown = shown === null;
   const activeIds = new Set(active.map((s) => s.id));
-  const litCaps = nothingPicked ? null : new Set(active.flatMap((s) => [...s.a, ...s.b]));
+  const litCaps = nothingShown ? null : new Set(active.flatMap((s) => [...s.a, ...s.b]));
   if (focused !== null && litCaps !== null) for (const c of focused.caps) litCaps.add(c.id);
   // 高亮的接缝画在最后，压在别的线上面
   const drawOrder = [...seams].sort((p, q) => Number(activeIds.has(p.id)) - Number(activeIds.has(q.id)));
 
   return (
-    <>
+    <div className="dx seam-map not-prose">
       <Legend />
       <div className="sm-scroll">
-        <svg className="sm-svg" viewBox="0 0 1100 750" role="group" aria-label="docfirst 的模块、能力与十二条接缝">
-          {entries.map((e) => (
-            <Entry key={e.id} id={e.id} name={e.name} />
-          ))}
-          {modules.map((m) => (
-            <ModuleGroup key={m.id} module={m} focused={focused?.id === m.id} litCaps={litCaps} onPick={() => onModule(m.id)} />
-          ))}
-          {drawOrder.map((s) => (
-            <SeamLine key={s.id} seam={s} on={nothingPicked ? undefined : activeIds.has(s.id)} onPick={() => onSeam(s.id)} />
-          ))}
-        </svg>
+        <div className="sm-canvas">
+          <svg className="sm-svg" viewBox={`0 0 ${VIEW_W} ${VIEW_H}`} role="group" aria-label="docfirst 的模块、能力与接缝">
+            {entries.map((e) => (
+              <Entry key={e.id} id={e.id} name={e.name} />
+            ))}
+            {modules.map((m) => (
+              <ModuleGroup key={m.id} module={m} focused={focused?.id === m.id} litCaps={litCaps} point={setShown} />
+            ))}
+            {drawOrder.map((s) => (
+              <SeamLine key={s.id} seam={s} on={nothingShown ? undefined : activeIds.has(s.id)} point={setShown} />
+            ))}
+          </svg>
+          {shown === null ? null : <Tip target={shown} />}
+        </div>
       </div>
-      {focused !== null ? <ModuleDetail module={focused} onSeam={onSeam} /> : seam !== null ? <SeamDetail seam={seam} /> : <OverviewHint />}
-    </>
-  );
-}
-
-export function SeamMap() {
-  const [seamId, setSeamId] = useState<string | null>(null);
-  const [focusModule, setFocusModule] = useState<string | null>(null);
-  /** 点已选中的那条接缝就取消选中，回到全景 */
-  const pickSeam = (id: string | null) => {
-    setSeamId((current) => (id === current ? null : id));
-    setFocusModule(null);
-  };
-  const toggleModule = (id: string) => {
-    setFocusModule((current) => (current === id ? null : id));
-    setSeamId(null);
-  };
-  const stage = (seam: Seam | null) => <Stage seam={seam} focusModule={focusModule} onSeam={pickSeam} onModule={toggleModule} />;
-
-  return (
-    <div className="seam-map not-prose">
-      <CasePicker cases={seams} value={seamId} onChange={pickSeam} renderNone={() => stage(null)} label="十二条接缝">
-        {(seam) => stage(seam)}
-      </CasePicker>
     </div>
   );
 }

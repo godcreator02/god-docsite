@@ -98,7 +98,7 @@ description: mdx 格式实现：认记号与写回、名册检查与名册机制
 - **不认识项目装配与命令行**：`mdx/` 不许 import `project/` 与 `cli/`，由边界测试的目录方向表检查（见[项目装配](/docs/modules/workflow/project)的「不做的事」）。
 - **不认识 fumadocs、react、next**：workflow 整个包连同产物都不许出现站的宿主，命令行读配置加载这个模块时不会带进任何站的代码：
 
-{/* ref file="../tests/boundary.test.ts" lines="262-276" hash="d5b710f640dc" blob="55f573c4c909" */}
+{/* ref file="../tests/boundary.test.ts" lines="269-283" hash="d5b710f640dc" blob="e450056cc091" */}
 
 - **不带默认名册**：组件和规则是站的，fumadocs 自带组件的规则归 [fumadocs 适配](/docs/modules/fumadocs)。
 - **不管生成物写到哪**：`renderAi` 交出一份 md 正文，写到哪个落点、带不带 frontmatter，归[项目装配](/docs/modules/workflow/project)的摆放。

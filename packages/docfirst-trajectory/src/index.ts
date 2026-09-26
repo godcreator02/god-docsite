@@ -83,7 +83,7 @@ export type {
   Wormhole,
 } from "./types.ts";
 
-/** 一张卡对外的样子：RawCard 去掉 title（label 已兜底）与 mtime（内部指纹用）。 */
+/** 一张卡对外的样子：RawCard 去掉 title（label 已兜底）与 mtime（只在包内部用）。 */
 export interface RouteCard {
   id: string;
   type: string | null;
