@@ -27,15 +27,6 @@ full: true
 
 {/* ref file="../packages/docfirst-pin/src/span.ts" lines="1-10" hash="4bd7647c3a83" blob="349017fffa50" */}
 
-**记号语法**不在这个包里，在 workflow 的 `src/marker/`：目标加记录与记号文本之间的互相转换，草稿记号的写法也在那里，所有格式共用。
-记号的外壳（mdx 里是花括号注释）归格式：
-
-{/* ref file="../packages/docfirst-workflow/src/marker/index.ts" lines="1-9" hash="020a78a576d2" blob="76fef2a0be1c" */}
-
-每个动作词认哪些属性是固定的；多出属性、记录属性只写了一半、值不合法都报错到行，所以各格式报错一致：
-
-{/* ref file="../packages/docfirst-workflow/src/marker/index.ts" lines="67-72" hash="ac51ca2c095b" blob="76fef2a0be1c" */}
-
 ## 接口
 
 `index.ts` 的导出表就是这个包对外的全部：
@@ -55,6 +46,11 @@ full: true
 调用方只读它，不自己判定：
 
 {/* ref file="../packages/docfirst-pin/src/types.ts" lines="100-113" hash="bc009573ca3e" blob="f7ca47b13c53" */}
+
+**细分理由**只有固定几个取值，中文说法跟它放在同一处。命令行打印黄灯与红灯、按原文渲染拒绝缺失的引用，都从这张表取，
+`changed` 之外每个取值都有说法：
+
+{/* ref file="../packages/docfirst-pin/src/types.ts" lines="78-95" hash="1bb562dc67f3" blob="f7ca47b13c53" */}
 
 ## 依赖
 
@@ -76,7 +72,10 @@ full: true
 
 {/* ref file="../tests/boundary.test.ts" lines="121-135" hash="3045c8cb7ab9" blob="e77be7ebc154" */}
 
-**不接触文档文本。** 文档归谁认领、记号在第几行、长什么样、写回时怎么改那一行，都归 workflow 的钉码编排与格式实现。
+**不接触文档文本。** 记号写成什么样、在文档第几行、写回时怎么改那一行，都归 workflow 的记号写法、mdx 格式与钉码编排。
+边界测试查源码与产物里有没有文档文本那一侧的名字：
+
+{/* ref file="../tests/boundary.test.ts" lines="180-193" hash="bed945d7fee3" blob="20992db5df4e" */}
 
 **不渲染，不知道项目根、配置文件和生成物放哪。** 装配、渲染与摆放在 workflow。
 

@@ -1,9 +1,10 @@
 /**
  * 命令行与项目 docfirst-workflow 的内部接缝图：模块页 <SeamMap module="workflow" /> 画的就是它。
- * 虚线框是包里的目录：format、mdx、cli 各一个框，project 按做的事分成项目装配、读文件与 git、生成物与读卡几个框，
- * 这几个框的包名一栏都写 project/，框里的文件写在 blurb 里；灰色实线框是包外的调用方、依赖与使用方的仓。
- * 目录之间的方向从线上看：format 只往钉码核心连，mdx 与 project 之间没有线，cli 往下连 project、format 与两个核心。
- * 坐标在 workflow.layout.ts。
+ * 虚线框是包里的目录：cli、pinning、mdx、marker、reference 各一个框，project 按做的事分成项目装配、读文件与 git、
+ * 生成物与读卡三个框，这三个框的包名一栏都写 project/、颜色相同，框里的文件写在 blurb 里；
+ * 灰色实线框是包外的调用方、依赖与使用方的仓。
+ * 目录之间的方向从线上看：marker 与 reference 只往钉码核心连，mdx 往 marker 连、不连 pinning 与 project，
+ * pinning 往 mdx 与钉码核心连，cli 往下连其余各处。坐标在 workflow.layout.ts。
  */
 import { defineSeamGraph } from '../graph.mjs';
 
@@ -11,7 +12,7 @@ export const workflowGraph = defineSeamGraph({
   id: 'workflow',
   title: '命令行与项目内部的目录与接缝',
   intro:
-    '命令行与项目内部接缝图：虚线框是包里的目录，project 目录按做的事分成项目装配、读文件与 git、生成物与读卡几个框；框里的方块是它对外给的函数或类型，灰色实线框是包外的调用方、依赖与使用方的仓。format 只连钉码核心，mdx 与 project 之间没有线，cli 连 project、format 与两个核心。',
+    '命令行与项目内部接缝图：虚线框是包里的目录，project 目录按做的事分成项目装配、读文件与 git、生成物与读卡三个框；框里的方块是它对外给的函数或类型，灰色实线框是包外的调用方、依赖与使用方的仓。记号写法与引用类型只连钉码核心，mdx 格式连记号写法、不连钉码编排与 project，钉码编排连 mdx 格式与钉码核心，命令行连其余各处。',
   frameLabel: '目录',
   modules: [
     {
@@ -21,7 +22,7 @@ export const workflowGraph = defineSeamGraph({
       role: 'emerald',
       outside: false,
       blurb:
-        'run.ts 的 main 把参数译成对装配好的项目的几次调用，打印成人读的行或一行 JSON，交回退出码；每条命令只收自己开关表里的开关。cli.ts 是可执行文件 docfirst，只转发参数与退出码。report.ts 定 check --json 的报告形状。它认识 project 与 format，这个包里谁都不认识它。',
+        'run.ts 的 main 把参数译成对装配好的项目的几次调用，打印成人读的行或一行 JSON，交回退出码；每条命令只收自己开关表里的开关。cli.ts 是可执行文件 docfirst，只转发参数与退出码。report.ts 定 check --json 的报告形状。它认识 project、pinning、mdx、marker、reference 与两个核心，这个包里谁都不认识它。',
       caps: [
         { id: 'main', name: '命令编排', ident: 'main' },
         { id: 'report', name: '机读报告', ident: 'CheckReport' },
@@ -35,11 +36,20 @@ export const workflowGraph = defineSeamGraph({
       role: null,
       outside: true,
       blurb:
-        '站构建时 remark 插件装配项目、在语法树上认记号打标记，./trajectory 的 loadTrajectory 读轨迹卡。用的是这个包的三个出口：主入口的 loadProject、./mdx 的语法树函数、./cards 的 scanCardDir。',
+        '站构建时 remark 插件装配项目、经钉码编排核对、在语法树上认记号打标记，./trajectory 的 loadTrajectory 读轨迹卡。用的是这个包的三个出口：主入口的 loadProject、./mdx 的语法树函数、./cards 的 scanCardDir。',
       caps: [
         { id: 'fd-disk', name: '星轨盘读卡', ident: 'loadTrajectory' },
         { id: 'fd-remark', name: 'remark 插件', ident: 'loadProject · recognize · stamp' },
       ],
+    },
+    {
+      id: 'config-file',
+      name: '项目配置',
+      pkg: 'docfirst.config.mjs',
+      role: null,
+      outside: true,
+      blurb: '使用方项目根上的配置模块，是使用方自己写的代码：声明内容根、组件名册与生成物落点。命令行与站构建读的是同一份。',
+      caps: [{ id: 'cfgfile', name: '项目配置', ident: 'docfirst.config.mjs' }],
     },
     {
       id: 'assembly',
@@ -48,33 +58,75 @@ export const workflowGraph = defineSeamGraph({
       role: 'blue',
       outside: false,
       blurb:
-        'load.ts：loadProject 读配置、造读取器与旧内容来源交给编排服务、把摆放装进项目，同一个根只装配一次；现状区按约定是内容根下 trajectory/、future/ 之外的全部；docIdOf 把路径换成文档身份。migrate-ledger.ts：一次性把旧记录簿写进各记号，不经过装配。',
+        'load.ts：loadProject 读配置，用读取器与旧内容来源建出钉码核心、交给 createPinning 建出钉码编排，再把摆放装进项目，同一个根只装配一次；现状区按约定是内容根下 trajectory/、future/ 之外的全部 .mdx；docIdOf 把路径换成文档身份。migrate-ledger.ts：一次性把旧记录簿写进各记号，不经过装配。',
       caps: [
-        { id: 'config', name: '读配置', ident: 'importConfig · configProblems' },
+        { id: 'config', name: '读配置', ident: 'configProblems' },
         { id: 'migrate', name: '旧记录簿迁移', ident: 'migrateLedger' },
         { id: 'load', name: '装配', ident: 'loadProject · docIdOf' },
+      ],
+    },
+    {
+      id: 'pinning',
+      name: '钉码编排',
+      pkg: 'pinning/',
+      role: 'rose',
+      outside: false,
+      blurb:
+        'index.ts 一个文件：一篇文档的核对与确认只在这里串起来。mdx 格式认出引用，每处剥成目标与记录交给钉码核心，结果按原来的顺序配回文档路径、行号与是不是草稿；确认时把新记录交回 mdx 格式写回。命令行、生成物摆放与站构建共用这一份。不认识记号属性怎么写，也不认识 project 与 cli。',
+      caps: [
+        { id: 'pn-check', name: '核对', ident: 'checkDoc · checkReferences' },
+        { id: 'pn-confirm', name: '确认写回', ident: 'confirmDoc' },
+      ],
+    },
+    {
+      id: 'marker',
+      name: '记号写法',
+      pkg: 'marker/',
+      role: 'amber',
+      outside: false,
+      blurb:
+        'index.ts 一个文件：一处引用写成文字是什么样、文字怎么解析回目标与记录。正式记号里的属性（先目标、后记录）、草稿记号、报告里的目标文本都在这里。只从钉码核心 import 类型，不认识 mdx，也不判状态。',
+      caps: [
+        { id: 'mk-draft', name: '草稿', ident: 'draftOf' },
+        { id: 'mk-formal', name: '正式记号', ident: 'formalOf · parseFormal' },
+        { id: 'mk-key', name: '目标文本', ident: 'targetKey' },
       ],
     },
     {
       id: 'io',
       name: '读文件与 git',
       pkg: 'project/',
-      role: 'cyan',
+      role: 'blue',
       outside: false,
       blurb:
         'fs-reader.ts 的读取器读工作区文件、列目录；history.ts 的旧内容来源按 blob 名从被引文件所在的仓取确认时的内容；git.ts 是启动 git 子进程的几个函数，每次都带超时；uncommitted.ts 的探针回答一处黄是不是本仓还没提交的改动引起的，一次 check 造一个。',
       caps: [
-        { id: 'probe', name: '未提交改动探针', ident: 'createUncommittedProbe' },
         { id: 'reader', name: '读取器', ident: 'createReader' },
         { id: 'history', name: '旧内容来源', ident: 'createGitHistory' },
-        { id: 'git', name: 'git 原语', ident: 'git · readBlob · diffHunks' },
+        { id: 'git', name: 'git 原语', ident: 'readBlob · diffHunks' },
+        { id: 'probe', name: '未提交改动探针', ident: 'createUncommittedProbe' },
+      ],
+    },
+    {
+      id: 'mdx',
+      name: 'mdx 格式',
+      pkg: 'mdx/',
+      role: 'violet',
+      outside: false,
+      blurb:
+        '项目里唯一的文档格式。认引用走 remark 语法树（unified、remark-mdx），正式记号与草稿记号都认；写回只重写记号那一行；名册检查给 check；按原文渲染给摆放，渲染不了就抛 RenderRefusal；语法树上的函数给 fumadocs 适配。认识 marker、reference 与钉码核心，不认识钉码编排、project 与 cli。',
+      caps: [
+        { id: 'md-tree', name: '语法树函数', ident: 'recognize · stamp · walk' },
+        { id: 'md-rw', name: '认引用与写回', ident: 'parse · write' },
+        { id: 'md-lint', name: '名册检查', ident: 'lintComponents' },
+        { id: 'md-render', name: '按原文渲染', ident: 'renderAi · RenderRefusal' },
       ],
     },
     {
       id: 'output',
       name: '生成物与读卡',
       pkg: 'project/',
-      role: 'rose',
+      role: 'blue',
       outside: false,
       blurb:
         'placement.ts 的摆放把 outputs 里有映射的正本渲染成生成物写到落点，check 时只核对落点上那份是不是最新；读写落点由装配给的 PlacingHost 做，这个文件不 import node:fs。card-dir.ts 读轨迹卡目录交给轨迹核心，card-refs.ts 再查卡里不许钉码。',
@@ -85,33 +137,14 @@ export const workflowGraph = defineSeamGraph({
       ],
     },
     {
-      id: 'mdx',
-      name: 'mdx 格式',
-      pkg: 'mdx/',
-      role: 'violet',
+      id: 'reference',
+      name: '引用与清单',
+      pkg: 'reference/',
+      role: 'cyan',
       outside: false,
       blurb:
-        '项目配置把整个 ./mdx 模块写进 formats。认记号走 remark 语法树（unified、remark-mdx），写回只重写记号那一行；名册检查给 check，按原文渲染给 render；语法树上的函数给 fumadocs 适配。只认识 format 与钉码核心。',
-      caps: [
-        { id: 'md-tree', name: '语法树函数', ident: 'recognize · stamp · walk' },
-        { id: 'md-format', name: '认记号与写回', ident: 'claims · parse · write' },
-        { id: 'md-lint', name: '名册检查', ident: 'lintComponents' },
-        { id: 'md-render', name: '按原文渲染', ident: 'renderAi' },
-      ],
-    },
-    {
-      id: 'format',
-      name: '格式接口',
-      pkg: 'format/',
-      role: 'amber',
-      outside: false,
-      blurb:
-        'index.ts 一个文件：钉码核心的 Format 加两个可选方法（名册检查 lintComponents、按原文渲染 renderAi），另有渲染拒绝的错误类和细分理由的中文说法。只 import 钉码核心。',
-      caps: [
-        { id: 'refusal', name: '渲染拒绝', ident: 'RenderRefusal · isRenderRefusal' },
-        { id: 'reason', name: '理由说法', ident: 'REASON_TEXT' },
-        { id: 'doc-format', name: '格式接口', ident: 'DocFormat' },
-      ],
+        'index.ts 一个文件，只有类型：一处引用在文档里的位置（目标、记录、第几行、是不是草稿）、一处核对完的清单项、一篇文档的清单。只认识钉码核心。',
+      caps: [{ id: 'ref-types', name: '引用与清单', ident: 'Reference · Listing' }],
     },
     {
       id: 'pin',
@@ -120,11 +153,23 @@ export const workflowGraph = defineSeamGraph({
       role: null,
       outside: true,
       blurb:
-        '状态全在这里判：编排服务、记号语法、hunk 解析与 hash。它要的格式、读取器、旧内容来源由 workflow 实现，装配时交给 createService。只用 node:crypto，不读文件、不启动子进程。',
+        '状态全在这里判。它只收目标与记录：读取器与旧内容来源由 workflow 实现，装配时传给 createPinner；目标、记录、判定的类型与细分理由的中文说法 REASON_TEXT 也从它取。只用 node:crypto，不读文件、不启动子进程。',
       caps: [
-        { id: 'service', name: '编排服务', ident: 'createService' },
+        { id: 'pinner', name: '核对与确认', ident: 'createPinner' },
         { id: 'algo', name: 'hunk 与 hash', ident: 'parseHunks · hashText' },
-        { id: 'marker', name: '记号语法', ident: 'formalOf · parseFormal' },
+        { id: 'pin-types', name: '类型与说法', ident: 'REASON_TEXT' },
+      ],
+    },
+    {
+      id: 'repo',
+      name: '磁盘与 git',
+      pkg: '使用方的仓',
+      role: null,
+      outside: true,
+      blurb: '使用方仓里的文件与 git 历史。workflow 用 node:fs 读写文件，用 git 子进程查忽略规则、按 blob 名取旧内容、算 hunk 表、查未提交改动。',
+      caps: [
+        { id: 'repo-git', name: 'git 子进程', ident: 'execFileSync' },
+        { id: 'repo-fs', name: '读写文件', ident: 'node:fs' },
       ],
     },
     {
@@ -140,27 +185,6 @@ export const workflowGraph = defineSeamGraph({
         { id: 'traj-build', name: '建模', ident: 'buildTrajectory' },
       ],
     },
-    {
-      id: 'config-file',
-      name: '项目配置',
-      pkg: 'docfirst.config.mjs',
-      role: null,
-      outside: true,
-      blurb: '使用方项目根上的配置模块，是使用方自己写的代码：声明格式、内容根、组件名册与生成物落点。命令行与站构建读的是同一份。',
-      caps: [{ id: 'cfgfile', name: '项目配置', ident: 'docfirst.config.mjs' }],
-    },
-    {
-      id: 'repo',
-      name: '磁盘与 git',
-      pkg: '使用方的仓',
-      role: null,
-      outside: true,
-      blurb: '使用方仓里的文件与 git 历史。workflow 用 node:fs 读写文件，用 git 子进程查忽略规则、按 blob 名取旧内容、算 hunk 表、查未提交改动。',
-      caps: [
-        { id: 'repo-git', name: 'git 子进程', ident: 'execFileSync' },
-        { id: 'repo-fs', name: '读写文件', ident: 'node:fs' },
-      ],
-    },
   ],
   entries: [{ id: 'human', name: '人 · git hook · CI', to: 'bin' }],
   seams: [
@@ -169,7 +193,7 @@ export const workflowGraph = defineSeamGraph({
       name: '项目',
       a: ['main'],
       b: ['load', 'migrate'],
-      iface: 'loadProject(process.cwd()) → Project：docs() / read / write / placements；migrateLedger(cwd) → MigrationReport',
+      iface: 'loadProject(process.cwd()) → Project：docs() / read / write / pinning / placing；migrateLedger(cwd) → MigrationReport',
       convention: false,
       via: 'code',
       text: 'check、confirm、render 先调 loadProject 拿到装配好的项目，按 docs() 列出的现状区文档逐篇处理，confirm 写好的全文经 project.write 写回；trajectory 也从项目上拿轨迹卡目录。migrate-ledger 在装配之前分流，直接调 migrateLedger：迁移时配置里多半还留着删掉的键，装配会拒。',
@@ -177,12 +201,12 @@ export const workflowGraph = defineSeamGraph({
     {
       n: 2,
       name: '核对与确认',
-      a: ['main', 'migrate'],
-      b: ['service', 'marker', 'algo'],
-      iface: 'resolve(doc, text) → Listing · confirm(doc, text, { accept }) → ConfirmResult · formatFor(doc) · targetKey(target) · hashNames(names)',
+      a: ['main'],
+      b: ['pn-check', 'pn-confirm'],
+      iface: 'project.pinning.checkDoc(doc, text) → Listing；confirmDoc(doc, text, { accept }) → ConfirmResult',
       convention: false,
       via: 'code',
-      text: '命令行经 project.service 核对与确认：check 对每篇调 resolve 拿清单，confirm 调 confirm 拿回写好的全文与每处的结果，打印时用记号语法的 targetKey 写出目标。状态全由钉码核心判，命令行只打印、算退出码。migrateLedger 也直接用 targetKey 对上旧记录簿的键，用 hashNames 与 RECORD_HASH_LENGTH 换算旧记录。',
+      text: 'check 对每篇调 checkDoc 拿清单，confirm 调 confirmDoc 拿回写好的全文与每处的 ConfirmStep（记上、写回新行号、accept 后重新记、不动、等复核、拒绝）。状态全由钉码核心判，命令行只打印、算退出码。',
     },
     {
       n: 3,
@@ -196,13 +220,13 @@ export const workflowGraph = defineSeamGraph({
     },
     {
       n: 4,
-      name: '命令行用的格式',
+      name: '名册检查与理由说法',
       a: ['main'],
-      b: ['doc-format', 'reason'],
-      iface: 'DocFormat.lintComponents?(text, roster)；REASON_TEXT[item.reason]',
+      b: ['md-lint', 'pin-types'],
+      iface: 'lintComponents(text, roster)；REASON_TEXT[item.reason]',
       convention: false,
       via: 'code',
-      text: 'check 从 service.formatFor 拿到这篇的格式，格式有 lintComponents 就查名册外组件，每个算一处红；打印黄灯与红灯的细分理由用 REASON_TEXT 的中文说法。命令行只认 DocFormat 接口，不认识 mdx 格式。',
+      text: 'check 对每篇用 mdx 格式的 lintComponents 查名册外组件，每个算一处红，不用等站构建才发现；打印黄灯与红灯的细分理由用钉码核心 REASON_TEXT 的中文说法。',
     },
     {
       n: 5,
@@ -218,11 +242,11 @@ export const workflowGraph = defineSeamGraph({
       n: 6,
       name: '站构建时装配',
       a: ['fd-remark'],
-      b: ['load'],
-      iface: 'loadProject(root) → Project：service · docIdOf · roster',
+      b: ['load', 'pn-check'],
+      iface: 'loadProject(root) → Project：pinning · docIdOf · roster；pinning.checkReferences(doc, references) → Listing',
       convention: false,
       via: 'code',
-      text: 'fumadocs 适配的 remark 插件在站构建时调 loadProject：同一个根只装配一次，并发调用拿到同一个项目。插件用项目上的编排服务核对，用 docIdOf 把页面路径换成文档身份，把项目的组件名册交给 stamp。',
+      text: 'fumadocs 适配的 remark 插件在站构建时调 loadProject：同一个根只装配一次，并发调用拿到同一个项目。插件把语法树上认好的引用交给项目上钉码编排的 checkReferences，用 docIdOf 把页面路径换成文档身份，把项目的组件名册交给 stamp。',
     },
     {
       n: 7,
@@ -246,13 +270,13 @@ export const workflowGraph = defineSeamGraph({
     },
     {
       n: 9,
-      name: '编排服务',
+      name: '建钉码编排',
       a: ['load'],
-      b: ['service'],
-      iface: 'createService({ formats, reader, history }) → Service<DocFormat>',
+      b: ['pn-check', 'pinner'],
+      iface: 'createPinning(createPinner({ reader: createReader(root), history: createGitHistory(root) })) → Pinning',
       convention: false,
       via: 'code',
-      text: 'loadProject 读完配置，把配置里的格式表、读取器、git 版旧内容来源三样交给 createService，交回的服务放在 Project.service 上；列现状区文档时也用 service.formatFor 判断一个文件有没有格式认领。',
+      text: 'loadProject 读完配置，用读取器与 git 版旧内容来源建出钉码核心，再交给 createPinning，交回的钉码编排放在 Project.pinning 上。项目里只有 mdx 一种格式，配置里没有格式这一项。',
     },
     {
       n: 10,
@@ -262,47 +286,47 @@ export const workflowGraph = defineSeamGraph({
       iface: 'createReader(root) · createGitHistory(root) · createPlacing(host: PlacingHost)',
       convention: false,
       via: 'code',
-      text: '装配时按项目根造读取器与旧内容来源；再把编排服务、每篇的落点表和在磁盘上读正本、读落点、写落点的函数攒成 PlacingHost，交给 createPlacing。摆放拿不到装配的别的部分。',
+      text: '装配时按项目根造读取器与旧内容来源；再把钉码编排、每篇的落点表和在磁盘上读正本、读落点、写落点的函数攒成 PlacingHost，交给 createPlacing。摆放拿不到装配的别的部分。',
     },
     {
       n: 11,
       name: '读取器与旧内容',
       a: ['reader', 'history'],
-      b: ['service'],
-      iface: 'Reader：read / list / kindOf；History：oldText(file, blob) / hunks(oldText, newText)',
+      b: ['pinner'],
+      iface: 'Reader：read(file) / list(dir, depth, glob)；History：oldText(file, blob) / hunks(oldText, newText)',
       convention: false,
       via: 'code',
-      text: '读取器实现钉码核心的 Reader：read 按行读文件，list 列目录的名字表（在 git 仓里按 .gitignore 过滤），kindOf 判断是文件还是目录。旧内容来源实现 History：oldText 找到被引文件所在的仓、按 blob 名取确认时的内容，取不到给 null；hunks 算两份内容之间的 hunk 表。',
+      text: '读取器实现钉码核心的 Reader：read 按行读文件，list 列目录的名字表（在 git 仓里按 .gitignore 过滤）。旧内容来源实现 History：oldText 找到被引文件所在的仓、按 blob 名取确认时的内容，取不到给 null；hunks 算两份内容之间的 hunk 表。',
     },
     {
       n: 12,
       name: '复用算法',
-      a: ['git'],
+      a: ['git', 'migrate'],
       b: ['algo'],
-      iface: 'parseHunks(diffText) · hashText(text)',
+      iface: 'parseHunks(diffText) · hashText(text)；hashNames(names) · RECORD_HASH_LENGTH',
       convention: false,
       via: 'code',
-      text: 'git.ts 跑完 git diff 用钉码核心的 parseHunks 解析输出，hunk 表的缓存键是两份内容用 hashText 算出的 blob 名。解析与 hash 只有钉码核心一份，两边对 hunk 和 blob 名的理解不会分叉。',
+      text: 'git.ts 跑完 git diff 用钉码核心的 parseHunks 解析输出，hunk 表的缓存键是两份内容用 hashText 算出的 blob 名。解析与 hash 只有钉码核心一份，两边对 hunk 和 blob 名的理解不会分叉。migrateLedger 用 hashNames 与 RECORD_HASH_LENGTH 把旧记录换算成记号上的记录。',
     },
     {
       n: 13,
       name: '读配置',
       a: ['config'],
       b: ['cfgfile'],
-      iface: 'configPathOf(root) → import(url).default；CONFIG_KEYS：formats / content / components / outputs',
+      iface: 'configPathOf(root) → import(url).default；CONFIG_KEYS：content / components / outputs',
       convention: true,
       via: 'disk',
       text: 'importConfig 在项目根找 docfirst.config.mjs（也认 .js、.ts），由 Node 原生加载、取 default 导出。configProblems 只认 CONFIG_KEYS 里的键，出现别的键当场报错并说明该怎么改。配置的形状是约定，由项目装配定，使用方照着写。',
     },
     {
       n: 14,
-      name: '格式从配置传入',
-      a: ['cfgfile'],
-      b: ['md-format'],
-      iface: 'import * as mdx from "@godcreator/docfirst-workflow/mdx"；formats: [mdx]',
+      name: '认引用与写回',
+      a: ['pn-check', 'pn-confirm', 'migrate'],
+      b: ['md-rw'],
+      iface: 'parse(text) → Reference[]；write(text, references) → text',
       convention: false,
       via: 'code',
-      text: '项目配置把整个 ./mdx 模块写进 formats，项目装配从配置里拿到它，自己不 import mdx 目录，所以 project 与 mdx 互不认识。命令行与站构建读同一份配置，用的是同一个格式。',
+      text: '钉码编排把整篇文本交给 mdx 格式认出全部引用；确认时把带着新记录的引用交回去，mdx 格式只重写那几行，草稿记号也在这时换成正式记号。migrateLedger 用同一对函数认出记号、写进迁来的记录。项目里只有 mdx 一种格式，钉码编排直接 import 它。',
     },
     {
       n: 15,
@@ -316,33 +340,33 @@ export const workflowGraph = defineSeamGraph({
     },
     {
       n: 16,
-      name: '钉码的 Format',
-      a: ['md-format', 'doc-format'],
-      b: ['service', 'marker'],
-      iface: 'Format：name / claims / parse / write / marker；draftOf · parseFormal · formalOf',
+      name: '钉码',
+      a: ['pn-check', 'pn-confirm'],
+      b: ['pinner'],
+      iface: 'check(pins: Pin[]) → Verdict[]；confirm(verdicts, { accept }) → Step[]；Pin = { target, record }',
       convention: false,
       via: 'code',
-      text: 'Format 接口的正本在钉码核心：编排服务用 claims 找认领的格式，用 parse 认出引用，确认时用 write 改记号那一行。DocFormat 在它上面加两个可选方法，format 目录因此只认识钉码核心。mdx 格式实现这几个方法：认记号用记号语法的 draftOf、parseFormal，写回用 formalOf 生成属性再包成 mdx 注释。',
+      text: '钉码编排把每处引用剥成目标与记录交给钉码核心，交回的判定与传入顺序一一对应，按下标配回文档路径、行号与是不是草稿；确认时交回的 Step 带着要写回的新目标与记录。钉码核心看不到文档文本。',
     },
     {
       n: 17,
-      name: 'DocFormat 的实现',
-      a: ['md-format', 'md-lint', 'md-render'],
-      b: ['doc-format', 'refusal', 'reason'],
-      iface: 'DocFormat：lintComponents?(text, roster) / renderAi?(text, listing)；throw new RenderRefusal(…)；REASON_TEXT',
+      name: '记号写法',
+      a: ['md-rw', 'md-tree'],
+      b: ['mk-formal', 'mk-draft'],
+      iface: 'draftOf(line, where) → Target | null；parseFormal(payload, where) → { target, record } | null；formalOf(target, record) → payload',
       convention: false,
       via: 'code',
-      text: 'mdx 格式按 DocFormat 的形状交出 lintComponents 与 renderAi。renderAi 遇到草稿记号、缺失的引用、组件、mdx 表达式时一次列全，抛 RenderRefusal；缺失引用的理由用 REASON_TEXT 的说法，表里没有就直接报错。',
+      text: 'mdx 格式认出一行草稿文字，或剥掉正式记号外面的花括号注释，把里面那一截交给记号写法解析；写回时拿记号写法生成的那一截，再包上花括号注释。属性叫什么、记录怎么写，只在记号写法里定义。',
     },
     {
       n: 18,
-      name: '项目用的格式',
-      a: ['load', 'placing'],
-      b: ['doc-format', 'refusal'],
-      iface: 'ProjectConfig.formats: DocFormat[]；format.renderAi(text, listing)；isRenderRefusal(err)',
+      name: '摆放用的渲染',
+      a: ['placing'],
+      b: ['md-render', 'pn-check'],
+      iface: 'pinning.checkDoc(doc, text) → Listing；renderAi(text, listing)；isRenderRefusal(err)',
       convention: false,
       via: 'code',
-      text: '配置里的格式按 DocFormat 收下，项目装配不知道具体是哪个格式。摆放向这篇的格式要 renderAi 的产物，格式没有这个方法就是这篇不摆放；抛出的错用 isRenderRefusal 按错误名认，是拒绝渲染就把这篇的每个落点报成红，别的错照原样抛。',
+      text: '摆放先经钉码编排拿这篇的清单（check 已经判过就直接用传进来的那份），交给 mdx 格式的 renderAi 按原文渲染；抛出的错用 isRenderRefusal 按错误名认，是拒绝渲染就把这篇的每个落点报成红，别的错照原样抛。',
     },
     {
       n: 19,
@@ -353,6 +377,36 @@ export const workflowGraph = defineSeamGraph({
       convention: false,
       via: 'code',
       text: 'scanCardDir 读目录，用 pickCardFiles 挑出卡文件，把每张的文件名、全文、修改时间交给 scanCards，拿回卡与病卡；再对每张卡去掉 frontmatter 的正文按 splitLines 逐行查卡里不许钉码，病并进同一份清单。轨迹核心不读文件。',
+    },
+    {
+      n: 20,
+      name: '目标文本',
+      a: ['main', 'migrate'],
+      b: ['mk-key'],
+      iface: 'targetKey(target) → "src/a.ts:2-3" · "src/a.ts:all" · "tree src depth=1" · \'has src/a.ts "…"\'',
+      convention: false,
+      via: 'code',
+      text: '命令行打印每处引用、check --json 报告里的 target 都用 targetKey 写出目标；migrateLedger 用它对上旧记录簿的键。',
+    },
+    {
+      n: 21,
+      name: '引用与清单的类型',
+      a: ['md-render', 'pn-check', 'placing', 'main'],
+      b: ['ref-types'],
+      iface: 'import type { Reference, Item, Listing } from "../reference/index.ts"',
+      convention: false,
+      via: 'code',
+      text: '一处引用在文档里的位置、一处核对完的清单项、一篇的清单都定义在 reference/：mdx 格式认出的是 Reference，钉码编排交回的、按原文渲染与摆放读的、命令行打印的都是 Listing。fumadocs 适配从主入口取同一组类型。',
+    },
+    {
+      n: 22,
+      name: '钉码核心的类型与说法',
+      a: ['ref-types', 'mk-formal', 'md-render'],
+      b: ['pin-types'],
+      iface: 'import type { Target, MemoRecord, Status, Reason } from "@godcreator/docfirst-pin"；REASON_TEXT',
+      convention: false,
+      via: 'code',
+      text: '记号写法解析出来的、引用类型里存的，都是钉码核心定义的目标与记录，两个目录都只 import 类型；钉码核心反过来一行都不引用 workflow。按原文渲染拒绝缺失的引用时，理由取 REASON_TEXT 的中文说法。',
     },
   ],
 });

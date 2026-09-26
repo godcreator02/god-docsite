@@ -73,9 +73,10 @@ export const fumadocsGraph = defineSeamGraph({
       role: null,
       outside: true,
       blurb:
-        '主入口的 loadProject 交回编排服务、名册与文档身份；./mdx 提供认记号、打标与遍历语法树的函数，命令行认记号用的是同一份；./cards 的 scanCardDir 读卡目录。workflow 不认识这个包。',
+        '主入口的 loadProject 交回钉码编排、名册与文档身份，钉码编排的 checkReferences 核对已经在语法树上认好的引用，清单、清单项与引用的类型也从主入口取；./mdx 提供认记号、打标与遍历语法树的函数，命令行认记号用的是同一份；./cards 的 scanCardDir 读卡目录。workflow 不认识这个包。',
       caps: [
         { id: 'wf-load', name: '项目装配', ident: 'loadProject' },
+        { id: 'wf-pinning', name: '钉码编排', ident: 'checkReferences' },
         { id: 'wf-mdx', name: '认记号与打标', ident: 'recognize · stamp' },
         { id: 'wf-scan', name: '读卡目录', ident: 'scanCardDir' },
       ],
@@ -113,7 +114,7 @@ export const fumadocsGraph = defineSeamGraph({
       role: 'blue',
       outside: false,
       blurb:
-        'remarkDocfirst 对每篇做四步：recognize 认出引用，resolveRefs 算出清单，applyListing 换节点，stamp 按名册打标。调用方给三样：编排服务、由文件路径算文档身份的 docOf、名册（不给就用 fumadocsRoster）。',
+        'remarkDocfirst 对每篇做四步：recognize 认出引用，钉码编排的 checkReferences 算出清单，applyListing 换节点，stamp 按名册打标。调用方给三样：钉码编排、由文件路径算文档身份的 docOf、名册（不给就用 fumadocsRoster）。',
       caps: [{ id: 'remark', name: '认引用到打标', ident: 'remarkDocfirst' }],
     },
     {
@@ -152,7 +153,7 @@ export const fumadocsGraph = defineSeamGraph({
       role: 'amber',
       outside: false,
       blurb:
-        '一处引用换成树上的一个节点：行段与整文件是代码块（黄的有变动由 diffBlock 把旧行新行排在同一块），目录树是名为 Files 的 JSX 节点，存在性与名字是一行小标签。状态写两处：meta 字符串给页面，节点的 data 给机读版。',
+        '一处引用换成树上的一个节点：行段与整文件是代码块（黄的有变动由 diffBlock 把旧行新行排在同一块），目录树是名为 Files 的 JSX 节点，名字是一行小标签。状态写两处：meta 字符串给页面，节点的 data 给机读版。',
       caps: [
         { id: 'bl-tree', name: '目录树', ident: 'treeNode · filesOf' },
         { id: 'bl-code', name: '代码块与小标签', ident: 'codeNode · chipNode' },
@@ -166,8 +167,8 @@ export const fumadocsGraph = defineSeamGraph({
       role: null,
       outside: true,
       blurb:
-        'remark 插件调用的编排服务是钉码核心的（经 loadProject 拿到），交回的 Listing 与每一项的 Item、Status 类型也从它 import。状态全由钉码核心判，这个包只读。',
-      caps: [{ id: 'pin', name: '钉码核心', ident: 'resolveRefs · Listing' }],
+        '状态全由钉码核心判，这个包只读。blocks.ts 从钉码核心只 import 状态的类型 Status，按它选状态点的颜色与节点形状。',
+      caps: [{ id: 'pin', name: '钉码核心', ident: 'Status' }],
     },
     {
       id: 'pre',
@@ -249,20 +250,20 @@ export const fumadocsGraph = defineSeamGraph({
       name: '装配项目',
       a: ['host-attach'],
       b: ['wf-load'],
-      iface: 'loadProject(root) → Project：service · roster · docIdOf',
+      iface: 'loadProject(root) → Project：pinning · roster · docIdOf',
       convention: false,
       via: 'code',
-      text: 'remarkDocfirstHost 每篇都 await loadProject(root)，workflow 按项目根缓存，同一个根只装配一次。第一篇时用 project.service、project.docIdOf 与 project.roster 建出 remarkDocfirst，之后复用。站的 remark 链上没有命令行替它装配。',
+      text: 'remarkDocfirstHost 每篇都 await loadProject(root)，workflow 按项目根缓存，同一个根只装配一次。第一篇时用 project.pinning、project.docIdOf 与 project.roster 建出 remarkDocfirst，之后复用。站的 remark 链上没有命令行替它装配。',
     },
     {
       n: 4,
       name: '建插件',
       a: ['host-attach'],
       b: ['remark'],
-      iface: 'remarkDocfirst({ service, docOf, roster }) → (tree, file) => void',
+      iface: 'remarkDocfirst({ pinning, docOf, roster }) → (tree, file) => void',
       convention: false,
       via: 'code',
-      text: 'service 只要求有 resolveRefs；docOf 把文件路径换成文档身份；项目没声明名册时不传 roster，插件用 fumadocsRoster。',
+      text: 'pinning 只要求有 checkReferences；docOf 把文件路径换成文档身份；项目没声明名册时不传 roster，插件用 fumadocsRoster。',
     },
     {
       n: 5,
@@ -278,11 +279,11 @@ export const fumadocsGraph = defineSeamGraph({
       n: 6,
       name: '算清单',
       a: ['remark', 'tf-apply', 'bl-nodefor'],
-      b: ['pin'],
-      iface: 'service.resolveRefs(doc, references) → Listing；Item · Status',
+      b: ['wf-pinning'],
+      iface: 'pinning.checkReferences(doc, references) → Listing；Item · Reference',
       convention: false,
       via: 'code',
-      text: '第二步：认好的引用交给编排服务的 resolveRefs，跳过解析直接核对，交回 Listing。applyListing 按每一项的 reference.at 对行，nodeFor 读 status、lines、current、old、diff、reason 决定造什么节点。状态全由钉码核心判，这个包只读。',
+      text: '第二步：认好的引用交给钉码编排的 checkReferences，跳过认引用直接核对，交回 Listing。applyListing 按每一项的 reference.at 对行，nodeFor 读 status、lines、current、old、diff、reason 决定造什么节点。清单、清单项与引用的类型从 workflow 主入口 import。',
     },
     {
       n: 7,
@@ -443,6 +444,16 @@ export const fumadocsGraph = defineSeamGraph({
       convention: false,
       via: 'code',
       text: 'loadTrajectory 用 buildTrajectory 建模。StarDisk 按包名从 ./disk 转出，那份产物第一行的 "use client" 才留在原处，Next 认得出客户端边界；trajectory.css 用 @import 引入 ./star.css。cardSchema 用 CARD_KEYS 判断一页算不算卡，跟轨迹核心自己的判据相同。',
+    },
+    {
+      n: 23,
+      name: '状态的类型',
+      a: ['bl-nodefor'],
+      b: ['pin'],
+      iface: 'import type { Status } from "@godcreator/docfirst-pin"',
+      convention: false,
+      via: 'code',
+      text: 'nodeFor 按清单项的 status 选节点形状与状态点的颜色，这个类型从钉码核心取。这个包不调钉码核心的任何函数：核对经 workflow 的钉码编排，状态全由钉码核心判。',
     },
   ],
 });

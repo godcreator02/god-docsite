@@ -63,7 +63,7 @@ full: true
 
 下面是一个 fumadocs 站接入这个包要改的几处，每处都是这个包与站之间的一条接缝，钉的是本站自己的文件。
 
-**配置 `docfirst.config.mjs`**：在项目根（本站就是站目录），命令行与站读同一份。不用写格式（只有 mdx 一种），
+**配置 `docfirst.config.mjs`**：在项目根（本站就是站目录），命令行与站读同一份。
 `components` 先展开 `fumadocsRoster` 再加站自己的组件：
 
 {/* ref file="docfirst.config.mjs" lines="15-15" hash="a4306c677c56" blob="3c54d3ed0c2c" */}
@@ -147,7 +147,7 @@ React 表先展开 fumadocs 的默认表，再把 `pre` 换成 `DocfirstPre`：
 ## 不做的事
 
 - **不认识 Next**：包里没有一处 `next`，卡页地址由调用方传 `hrefBase`。
-- **不认记号、不判状态**：认记号与打标记用 workflow `./mdx`，状态由[钉码核心](/docs/modules/pin)算，这个包只把清单换成树上的节点。
+- **不认记号、不判状态**：认记号与打标记用 workflow `./mdx`，核对经项目上的钉码编排，状态由[钉码核心](/docs/modules/pin)算，这个包只把清单换成树上的节点。
 - **不管生成物**：生成正本的渲染与写到哪归 [workflow](/docs/modules/workflow)。
 - **不把宿主与兄弟包打进产物**：只按包名 import；`./pre` 的 `"use client"` 在产物第一行，别的出口不带：
 
