@@ -153,4 +153,5 @@ docfirst.create-plain {"dir":"D:\\unitfolders\\<单元>\\<仓>\\docs-site"}
 - 升级 fumadocs：先在临时目录 `pnpm dlx create-fumadocs-app@<版本>` 生成一份对照、读迁移说明，改 `package.json` 版本
   （`fumadocs-core` 与 `fumadocs-ui` 同号），`pnpm install`、`pnpm build`
 
-人看站用 VS Code 扩展「文档站」（`D:\unitfolders\035mp-vscode-docs-site\vscode-docs-site`）；agent 用 `pnpm dev` 加客户端预览，看完停掉。
+人看站用 VS Code 扩展「文档站」（`D:\unitfolders\035mp-vscode-docs-site\vscode-docs-site`）；agent 用 `pnpm dev` 加客户端预览：用户说要看就一直开着，
+服务带超时（默认 2 小时）自动停；只是自己验证的，验完停掉。

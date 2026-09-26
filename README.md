@@ -100,5 +100,6 @@ cd ../plugins/docfirst
 pnpm check && pnpm build      # 工作台插件单独一套门禁，用 vitest
 ```
 
-调试站用 `pnpm dev`，看完停掉。`pnpm build` 只在收尾或发版前跑一次，构建通过就结束，不跑 `start`。
+调试站用 `pnpm dev`：用户说要看就一直开着，服务带超时（默认 2 小时）自动停；只是自己验证的，验完停掉。
+`pnpm build` 只在收尾或发版前跑一次，构建通过就结束，不跑 `start`。
 改了站构建时 remark 插件会跑到的包代码（`packages/docfirst-fumadocs/`，连同它调用的 workflow 与 pin），要先删 `.next` 再重新运行。
