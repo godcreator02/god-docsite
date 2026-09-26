@@ -97,7 +97,7 @@ describe('必须同时改的几处', () => {
 
   it('说明书都在 files 里：漏了照样能发布、能安装，直到注册时扫描目录才报读不到', () => {
     expect(manifest.files).toContain('skills')
-    for (const skill of ['docfirst', 'docfirst-docs', 'docs-site', 'trajectory', 'spec-grill', 'parallel-by-module', 'docs-governance']) {
+    for (const skill of ['docfirst', 'docfirst-docs', 'docs-site', 'trajectory', 'docs-governance']) {
       expect(fs.existsSync(path.join(root, 'skills', skill, 'SKILL.md')), `skills/${skill}/SKILL.md`).toBe(true)
     }
     expect(fs.readFileSync(path.join(root, 'skills', 'docfirst', 'SKILL.md'), 'utf8')).toMatch(/^---\s*\nname: docfirst\n/)

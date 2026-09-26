@@ -32,7 +32,7 @@ import * as boundaryRules from "./src/components/boundary-rules/boundary-rules.a
  * 这份 skill，去掉 frontmatter 生成出去，就是一份永远不会被触发的普通文档。
  *
  * 正本存放在这个站、生成物存放在插件里：讲**包与插件**行为的那几份（docfirst 站怎么写、轨迹卡怎么记、插件怎么用、
- * 两种建站命令建出来的站怎么写成讲清原理的网页）跟代码在同一个仓才改得动；讲**通用开发纪律**的那三份不描述任何代码，
+ * 两种建站命令建出来的站怎么写成讲清原理的网页）跟代码在同一个仓才改得动；讲文档与注释治理的 docs-governance 不描述任何代码，
  * 但要跟钉码与分区的写法保持一致，也要在同一个仓才检查得了，所以正本都在这儿。生成物却不能放进包：包装在 node_modules 里，没有任何说明指向它，
  * agent 不会去读；agent 能读到这些 skill，全靠插件 `register` 了自己包里的 `skills/` 目录。
  */
@@ -48,8 +48,6 @@ export default {
     "content/docs/outputs/skills/docfirst-docs.mdx": [skill("docfirst-docs")],
     "content/docs/outputs/skills/docs-site.mdx": [skill("docs-site")],
     "content/docs/outputs/skills/trajectory.mdx": [skill("trajectory")],
-    "content/docs/outputs/skills/spec-grill.mdx": [skill("spec-grill")],
-    "content/docs/outputs/skills/parallel-by-module.mdx": [skill("parallel-by-module")],
     "content/docs/outputs/skills/docs-governance.mdx": [skill("docs-governance")],
   },
   components: {

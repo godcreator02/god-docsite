@@ -83,8 +83,7 @@ pnpm docfirst check
 `plugins/docfirst/skills/`：写文档读 `docfirst-docs`、写轨迹卡读 `trajectory`、建站读 `docfirst`、
 设计站的页面与组件、构建站读 `docs-site`。
 说明书随插件发布而不随包发布，是因为包没有独立的途径让 agent 读到——放在 `node_modules` 里的一份
-SKILL.md 没有说明指向它、没人会读。通用开发纪律的三份也在这儿：接到需求先盘问读 `spec-grill`、
-任务大到要派子代理读 `parallel-by-module`、治理文档与注释读 `docs-governance`。
+SKILL.md 没有说明指向它、没人会读。治理文档与注释读同在这儿的 `docs-governance`。
 
 **这份 README 与仓根 `AGENTS.md`、`CLAUDE.md` 是生成物**，改 mdx 正本再 `pnpm docfirst render`；哪份正本生成到哪看 `docs-site/docfirst.config.mjs` 的 `outputs`。
 
