@@ -13,7 +13,7 @@ full: true
 
 目录之间的依赖方向见上图。这些目录在同一个包里，编译器不拦跨目录 import，方向由边界测试的禁止表检查：
 
-{/* ref file="../tests/boundary.test.ts" lines="213-228" hash="5e5d288cdf5a" blob="e450056cc091" */}
+{/* ref file="../tests/boundary.test.ts" lines="213-230" hash="c7886bee98a2" blob="b10eeb50e0bf" */}
 
 ### 项目装配 project
 
@@ -52,7 +52,7 @@ full: true
 
 {/* ref file="../packages/docfirst-workflow/src/project/card-dir.ts" lines="13-25" hash="7d367c0d4a7f" blob="775b6e9e6c2d" */}
 
-{/* ref file="../packages/docfirst-workflow/src/project/card-refs.ts" lines="1-11" hash="881d548ae1df" blob="8b263d8b9616" */}
+{/* ref file="../packages/docfirst-workflow/src/project/card-refs.ts" lines="1-11" hash="3dc410c9366a" blob="3dbcce634d03" */}
 
 `migrateLedger(root)` 把项目根的 `.ledger.json` 逐处写进对应的记号、删掉这个文件，并列出配置里还要手工改的键。
 
@@ -60,7 +60,7 @@ full: true
 
 钉码核心要的 `name`、`claims`、`marker`、`parse`、`write` 与给 check 的名册检查都在入口文件上，写回只重写记号所在那一行：
 
-{/* ref file="../packages/docfirst-workflow/src/mdx/index.ts" lines="21-41" hash="178174d6e2b2" blob="73a54f8abd37" */}
+{/* ref file="../packages/docfirst-workflow/src/mdx/index.ts" lines="21-41" hash="4f7b21bd8e3c" blob="18ccdb23a282" */}
 
 认记号走 remark 语法树：正式记号是 `mdxFlowExpression` 节点，草稿记号是只含一段文字的段落。写在围栏里、句子里的同样文字分别是
 `code` 与 `mdxTextExpression` 节点，不算记号：
@@ -87,16 +87,16 @@ fumadocs 自带组件的规则在 [fumadocs 适配](/docs/modules/fumadocs)的 `
 
 子命令与各自做什么写在入口文件头上：
 
-{/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="1-22" hash="3a25d9894769" blob="7bdfe9b388cc" */}
+{/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="1-22" hash="202f57dfd594" blob="5f11f57dfab2" */}
 
 每条命令只收自己开关表里的开关，别的一律退 2、什么都不动。表必须封闭：`confirm` 把 `-` 开头的参数从页名里筛掉，
 开关若被静默丢掉，`confirm --help` 就成了不带页名的全部页确认：
 
-{/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="43-57" hash="835f0ad5c8c0" blob="df382c5c530d" */}
+{/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="44-58" hash="835f0ad5c8c0" blob="5f11f57dfab2" */}
 
 人读输出一行一处引用：状态符号、文档、目标（记号上的行号）、一句说明，括号里是细分理由或目录树的项数：
 
-{/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="35-41" hash="9ebfdcac2bf1" blob="df382c5c530d" */}
+{/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="36-42" hash="9ebfdcac2bf1" blob="5f11f57dfab2" */}
 
 ```text
 🟢 content/docs/a.mdx  src/greet.ts:2-3  新鲜
@@ -108,15 +108,15 @@ fumadocs 自带组件的规则在 [fumadocs 适配](/docs/modules/fumadocs)的 `
 
 `check` 先把逐篇核对与轨迹卡校验汇总成一份报告，人读模式边算边打，`--json` 汇总完打印一行，两种模式的红出自同一份报告：
 
-{/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="216-239" hash="aed7c545eb4b" blob="df382c5c530d" */}
+{/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="217-240" hash="aed7c545eb4b" blob="5f11f57dfab2" */}
 
 `confirm` 带路径时只动点名的页；`--accept` 必须点名页，点名的路径对不上项目里的文档当场退 2。重新生成生成物不按页限定，按内容判：
 
-{/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="117-145" hash="235a864d0ce8" blob="df382c5c530d" */}
+{/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="118-146" hash="235a864d0ce8" blob="5f11f57dfab2" */}
 
 `trajectory` 不遍历文档，打印卡目录那一张盘的树与主干，没有轨迹卡目录就退 2：
 
-{/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="253-273" hash="931ad6970d4e" blob="df382c5c530d" */}
+{/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="254-274" hash="931ad6970d4e" blob="5f11f57dfab2" */}
 
 退出码、红的来源、未提交改动的黄怎么算红，见[提交门禁](/docs/pinning/gate)。
 
@@ -174,7 +174,7 @@ fumadocs 自带组件的规则在 [fumadocs 适配](/docs/modules/fumadocs)的 `
 
 - **不认识任何站的宿主**：fumadocs、react、next 在源码、清单、产物里都不出现，命令行跑在 git hook 与 CI 里，那些环境不一定装了站的依赖：
 
-{/* ref file="../tests/boundary.test.ts" lines="269-283" hash="d5b710f640dc" blob="e450056cc091" */}
+{/* ref file="../tests/boundary.test.ts" lines="303-317" hash="d5b710f640dc" blob="b10eeb50e0bf" */}
 
 - **不依赖 fumadocs 适配**：包方向表里 workflow 一行禁止它：
 

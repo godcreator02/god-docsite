@@ -7,12 +7,12 @@ import assert from "node:assert/strict";
 import {
   blobOf,
   createService,
-  draftOf,
   hashNames,
   hashSpan,
   normalizeLines,
   sliceSpan,
 } from "../packages/docfirst-pin/src/index.ts";
+import { draftOf } from "../packages/docfirst-workflow/src/marker/index.ts";
 import type { History, Reader, Reference, Target } from "../packages/docfirst-pin/src/index.ts";
 import { fakeFormat, refLine } from "./fake-format.ts";
 import { NO_HISTORY } from "./repo.ts";

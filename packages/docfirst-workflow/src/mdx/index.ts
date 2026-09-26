@@ -11,8 +11,8 @@
  * 接缝分离的是「怎么认记号」与「怎么判新鲜」两种变化原因，而且真有两个适配器：生产是这一份，
  * 测试是 `tests/fake-format.ts`。
  */
-import { formalOf } from "@godcreator/docfirst-pin";
 import type { MemoRecord, Reference, Target } from "@godcreator/docfirst-pin";
+import { formalOf } from "../marker/index.ts";
 import { recognize } from "./recognize.ts";
 import { parseTree } from "./render.ts";
 import { unknownComponents } from "./roster.ts";
@@ -21,7 +21,7 @@ import type { Roster } from "./roster.ts";
 export const name = "mdx";
 export const claims = (doc: string): boolean => doc.endsWith(".mdx");
 
-/** 记号：mdx 的花括号注释表达式，载荷是记号语法（`@godcreator/docfirst-pin` 的 marker）定的那一截，确认过的带着记录属性 */
+/** 记号：mdx 的花括号注释表达式，载荷是记号语法（`../marker/`）定的那一截，确认过的带着记录属性 */
 export const marker = (target: Target, record: MemoRecord | null): string => `{/* ${formalOf(target, record)} */}`;
 
 export function parse(text: string): Reference[] {

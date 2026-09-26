@@ -15,8 +15,9 @@
  */
 import { existsSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
-import { hashNames, RECORD_HASH_LENGTH, targetKey } from "@godcreator/docfirst-pin";
+import { hashNames, RECORD_HASH_LENGTH } from "@godcreator/docfirst-pin";
 import type { Format, MemoRecord, Reference, Target } from "@godcreator/docfirst-pin";
+import { targetKey } from "../marker/index.ts";
 import { configProblems, importConfig } from "./load.ts";
 
 export interface MigrationReport {

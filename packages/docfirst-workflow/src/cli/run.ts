@@ -17,15 +17,16 @@
  * 给一个新骨架铺各区那件事不在这儿——它只在 agent 手上发生一次、铺的是模板不是判定，归工作台插件
  * `@godcreator/gwb-docfirst-workflow` 的 `docfirst.create`。这儿留的全是要在**仓**里发生的：
  * 各仓的 `pnpm doc` 与 CI 跑的就是这几条。
- * 新引用不用命令：在文档里写一行记号语法（`@godcreator/docfirst-pin` 的 marker）定的草稿记号 @@docfirst ref src/greet.ts:2-3 @@，
+ * 新引用不用命令：在文档里写一行记号语法（`../marker/`）定的草稿记号 @@docfirst ref src/greet.ts:2-3 @@，
  * check 认它、报未确认，confirm 换成该格式的正式记号并写上记录。
  */
 import { existsSync } from "node:fs";
 import { join, relative, sep } from "node:path";
-import { REASON_TEXT, targetKey } from "@godcreator/docfirst-pin";
+import { REASON_TEXT } from "@godcreator/docfirst-pin";
 import type { ConfirmStep, Item, Listing } from "@godcreator/docfirst-pin";
 import { buildTrajectory } from "@godcreator/docfirst-trajectory";
 import type { DocFormat } from "../format/index.ts";
+import { targetKey } from "../marker/index.ts";
 import { createUncommittedProbe, loadProject, migrateLedger, scanCardDir } from "../project/index.ts";
 import type { PlacedWrite, UncommittedProbe } from "../project/index.ts";
 import type { CardProblemReport, CheckReport, DocReport, OutputReport, RefReport } from "./report.ts";

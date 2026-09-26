@@ -7,7 +7,7 @@
  *   （mdx 是花括号注释）。载荷 = 动作词 + 目标属性 + 记录属性，记录属性只在确认过的记号上出现
  *   **草稿记号**（`draftOf`）与报告里用的目标文本形态（`targetKey`）
  */
-import type { MemoRecord, Target, TreeTarget } from "./types.ts";
+import type { MemoRecord, Target, TreeTarget } from "@godcreator/docfirst-pin";
 
 /** 正式记号的动作词：ref / tree / has。格式用它拼自己的外壳 */
 export function wordOf(target: Target): string {

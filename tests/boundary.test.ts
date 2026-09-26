@@ -4,7 +4,7 @@
  * docfirst 的四个包按接缝切开：钉码 `docfirst-pin`、轨迹 `docfirst-trajectory`、命令行与项目 `docfirst-workflow`、
  * fumadocs 适配 `docfirst-fumadocs`；第五个包 `docs-explain` 是文档站讲解组件的外壳与零件，只给站用，
  * 跟那四个包互不认识。包与包之间的方向，pnpm 严格的 node_modules 能拦住一半——没写进依赖的包
- * import 不到——但「该不该写进依赖」没人检查；workflow 包里四个目录之间更是谁都能 import 谁，`project/` 里
+ * import 不到——但「该不该写进依赖」没人检查；workflow 包里各目录之间更是谁都能 import 谁，`project/` 里
  * 写一句 `import "../mdx/render.ts"`，编译器不会报错，项目装配从此就只能用 mdx 一种格式。
  * **这个文件补上的就是这两项检查。**
  *
@@ -16,7 +16,7 @@
  * **二、pin 与 trajectory 的零依赖**：pin 只许 `node:crypto`，trajectory 的 `.` 入口连 `node:` 都不许——
  * 它们是整块能被别人拿走的部分，浏览器里也跑得动。
  *
- * **三、workflow 里四个目录的方向**（下面 `WORKFLOW_DIRS` 那张表），以及 workflow 整个不认识任何站的宿主。
+ * **三、workflow 里各目录的方向**（下面 `WORKFLOW_DIRS` 那张表），以及 workflow 整个不认识任何站的宿主。
  *
  * **四、宿主只能是 peer，且不许打包进产物**：fumadocs 与 react 用的是消费方项目装的那份；打包进产物就是
  * 两份 React 各跑一套，现象是预渲染时莫名其妙的 hooks 报错。客户端组件的 "use client" 要留在产物头一行。
@@ -206,7 +206,7 @@ test("trajectory 的 `./disk`：客户端指令在头一行，只 import react�
   assert.doesNotMatch(disk, /__CLIENT_INTERNALS|react\.production/, "disk.mjs 正文里有 react 本体的痕迹");
 });
 
-// ── 三、workflow 里四个目录的方向 ────────────────────────────────────────────
+// ── 三、workflow 里各目录的方向 ────────────────────────────────────────────
 
 const WORKFLOW_SRC = srcOf("docfirst-workflow");
 
@@ -215,13 +215,15 @@ const WORKFLOW_SRC = srcOf("docfirst-workflow");
  * 加一个新目录会默默地什么都不许，加错地方反而更难发现。
  *
  * 方向读法（左边不许知道右边）：
+ *   marker   记号写法：草稿写法、正式记号里的属性、报告里的目标文本；只用钉码核心的类型，谁都不认识
  *   format   格式接口：钉码的 Format 加两样可选本事（名册检查、按原文渲染）与渲染拒绝的错误类，谁都不认识
- *   mdx      mdx 格式实现：实现 format 的接口，不认识项目怎么装配、命令行怎么打印
+ *   mdx      mdx 格式实现：实现 format 的接口、用记号写法，不认识项目怎么装配、命令行怎么打印
  *   project  碰环境：读盘、git、摆放、读卡目录；格式由配置递进来，所以不认识 mdx 这个具体格式，也不认识命令行
  *   cli      入口：认识以上全部，谁都不认识它
  */
 const WORKFLOW_DIRS: Record<string, string[]> = {
-  format: ["mdx", "project", "cli"],
+  marker: ["format", "mdx", "project", "cli"],
+  format: ["marker", "mdx", "project", "cli"],
   mdx: ["project", "cli"],
   project: ["mdx", "cli"],
   cli: [],
@@ -236,7 +238,7 @@ function dirOf(file: string, spec: string): string | null {
   return parts.length > 1 ? parts[0]! : null;
 }
 
-test("workflow 目录方向：format 谁都不认识，mdx 与 project 互不认识，都不认识 cli", () => {
+test("workflow 目录方向：marker 与 format 谁都不认识，mdx 与 project 互不认识，都不认识 cli", () => {
   const bad: string[] = [];
   for (const [dir, forbidden] of Object.entries(WORKFLOW_DIRS)) {
     for (const file of sourcesIn(join(WORKFLOW_SRC, dir))) {
@@ -258,7 +260,39 @@ test("workflow 目录方向：format 只认识 @godcreator/docfirst-pin", () => 
   }
 });
 
-test("workflow 目录方向：四个目录一个不少、一个不多——加了新目录得先想清楚它能认识谁", () => {
+/** 源码里每条 import / export-from 语句的整行与说明符；判「是不是 import type」要看整行 */
+function importStatementsOf(src: string): Array<{ line: string; spec: string }> {
+  return [...src.matchAll(/^(?:import|export)\b[^\n]*?\bfrom\s*["']([^"']+)["']/gm)].map((m) => ({ line: m[0], spec: m[1]! }));
+}
+
+test("workflow 目录方向：marker 只从 @godcreator/docfirst-pin import 类型，别的只许是目录里的相对路径", () => {
+  const dir = join(WORKFLOW_SRC, "marker");
+  for (const file of sourcesIn(dir)) {
+    const src = readFileSync(file, "utf8");
+    const statements = importStatementsOf(src);
+    assert.equal(statements.length, importSpecsOf(src).length, `marker/${rel(dir, file)} 有认不出整行的 import（副作用导入、动态导入或跨行花括号）`);
+    for (const { line, spec } of statements) {
+      if (spec === "@godcreator/docfirst-pin") {
+        assert.match(line, /^(?:import|export)\s+type\b/, `marker/${rel(dir, file)} 从钉码核心 import 了值：${line}`);
+        continue;
+      }
+      const inside = spec.startsWith("./") && !relative(dir, resolve(dirname(file), spec)).startsWith("..");
+      assert.ok(inside, `marker/${rel(dir, file)} import 了 ${spec}`);
+    }
+  }
+});
+
+test("钉码核心不认识 workflow：源码的相对 import 都落在自己的 src/ 里，说明符里没有 docfirst-workflow", () => {
+  const dir = srcOf("docfirst-pin");
+  for (const file of sourcesIn(dir)) {
+    for (const spec of importSpecsOf(readFileSync(file, "utf8"))) {
+      assert.ok(!spec.includes("docfirst-workflow"), `pin/${rel(dir, file)} import 了 ${spec}`);
+      if (spec.startsWith(".")) assert.ok(!relative(dir, resolve(dirname(file), spec)).startsWith(".."), `pin/${rel(dir, file)} 的 ${spec} 落到了 src/ 外面`);
+    }
+  }
+});
+
+test("workflow 目录方向：目录一个不少、一个不多——加了新目录得先想清楚它能认识谁", () => {
   const dirs = readdirSync(WORKFLOW_SRC, { withFileTypes: true })
     .filter((e) => e.isDirectory())
     .map((e) => e.name)

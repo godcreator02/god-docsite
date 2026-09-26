@@ -8,8 +8,9 @@
  *
  * 开关 `render` 给它一个 AI 渲染（能当生成正本）；不开就是只核对、不渲染的格式。
  */
-import { draftOf, fileOf, formalOf, parseFormal } from "../packages/docfirst-pin/src/index.ts";
+import { fileOf } from "../packages/docfirst-pin/src/index.ts";
 import type { Listing, Reference, Target } from "../packages/docfirst-pin/src/index.ts";
+import { draftOf, formalOf, parseFormal } from "../packages/docfirst-workflow/src/marker/index.ts";
 import { RenderRefusal } from "../packages/docfirst-workflow/src/format/index.ts";
 import type { DocFormat } from "../packages/docfirst-workflow/src/format/index.ts";
 

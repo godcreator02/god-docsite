@@ -1,6 +1,6 @@
 ---
 title: 钉码核心 docfirst-pin
-description: 编排服务、五种目标的比较器、记号语法；格式、读取器、旧内容来源都从构造参数传进来，自己不读盘、不启动子进程
+description: 编排服务、四种目标的比较器；格式、读取器、旧内容来源都从构造参数传进来，自己不读盘、不启动子进程
 full: true
 ---
 
@@ -19,28 +19,28 @@ full: true
 
 {/* ref file="../packages/docfirst-pin/src/service.ts" lines="16-25" hash="2fd6e774aec5" blob="78a15b3aa6cb" */}
 
-**比较器** `compare.ts` 是纯函数：五种目标各自怎么判新鲜、确认时记什么。行段按什么顺序判、取不到旧内容时怎么降级，
-见[判定](/docs/pinning/judge)；五种目标各钉哪种话，见[五种目标](/docs/pinning/targets)；旧内容与 hunk 表怎么从 git 来，
+**比较器** `compare.ts` 是纯函数：四种目标各自怎么判新鲜、确认时记什么。行段按什么顺序判、取不到旧内容时怎么降级，
+见[判定](/docs/pinning/judge)；四种目标各钉哪种话，见[四类引用](/docs/pinning/targets)；旧内容与 hunk 表怎么从 git 来，
 见[git 那一侧](/docs/pinning/git)。
 
 **归一化**只做三件事：换行统一成 LF、去每行行尾空白、去掉末尾空行。展示和算 `hash` 用同一个函数，记号上的 hash 取前 12 位：
 
 {/* ref file="../packages/docfirst-pin/src/span.ts" lines="1-10" hash="4bd7647c3a83" blob="349017fffa50" */}
 
-**记号语法**集中在 `marker.ts`：目标加记录与记号文本之间的互相转换，草稿记号的写法也在这里，所有格式共用。
+**记号语法**不在这个包里，在 workflow 的 `src/marker/`：目标加记录与记号文本之间的互相转换，草稿记号的写法也在那里，所有格式共用。
 记号的外壳（mdx 里是花括号注释）归格式：
 
-{/* ref file="../packages/docfirst-pin/src/marker.ts" lines="1-9" hash="020a78a576d2" blob="cd45c0abef46" */}
+{/* ref file="../packages/docfirst-workflow/src/marker/index.ts" lines="1-9" hash="020a78a576d2" blob="76fef2a0be1c" */}
 
 每个动作词认哪些属性是固定的；多出属性、记录属性只写了一半、值不合法都报错到行，所以各格式报错一致：
 
-{/* ref file="../packages/docfirst-pin/src/marker.ts" lines="67-72" hash="ac51ca2c095b" blob="bada7cf054d3" */}
+{/* ref file="../packages/docfirst-workflow/src/marker/index.ts" lines="67-72" hash="ac51ca2c095b" blob="76fef2a0be1c" */}
 
 ## 接口
 
 `index.ts` 的导出表就是这个包对外的全部：
 
-{/* ref file="../packages/docfirst-pin/src/index.ts" hash="171622b7833b" blob="09c0ea1d7839" */}
+{/* ref file="../packages/docfirst-pin/src/index.ts" hash="c5335b222e59" blob="d0246defc221" */}
 
 **服务**：命令行逐篇传文本（`resolve`），站构建传已经认好的引用（`resolveRefs`），两条走同一段判定；
 创建时传入的三样就是它的全部依赖：
@@ -64,7 +64,7 @@ full: true
 **格式 `Format`**：认领文档、认出引用、写回、给出正式记号。一篇文档没有格式认领、或有两个格式认领，都报错。
 名册检查与按原文渲染不在这个接口上，由 workflow 的 `DocFormat` 另加：
 
-{/* ref file="../packages/docfirst-pin/src/types.ts" lines="127-140" hash="3fe3d27a9730" blob="2be5c089780b" */}
+{/* ref file="../packages/docfirst-pin/src/types.ts" lines="127-140" hash="c749fbd3e6c7" blob="dafa0b722cf9" */}
 
 **读取器 `Reader`** 与**旧内容来源 `History`**：行段、整文件、名字读文件的行，目录树要 `list`，
 读取器没提供它时目录树一律判缺失；`oldText` 给 `null` 时比较器改为滑窗查找，少的只是 diff：

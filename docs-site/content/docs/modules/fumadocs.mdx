@@ -151,8 +151,8 @@ React 表先展开 fumadocs 的默认表，再把 `pre` 换成 `DocfirstPre`：
 - **不管生成物**：生成正本的渲染与写到哪归 [workflow](/docs/modules/workflow)。
 - **不把宿主与兄弟包打进产物**：只按包名 import；`./pre` 的 `"use client"` 在产物第一行，别的出口不带：
 
-{/* ref file="../tests/boundary.test.ts" lines="296-321" hash="27348ae73122" blob="3b26a75d942f" */}
+{/* ref file="../tests/boundary.test.ts" lines="330-355" hash="27348ae73122" blob="b10eeb50e0bf" */}
 
 - **不被命令行加载**（`./roster` 除外）：workflow 不许依赖这个包；`./roster` 的产物不许 import 宿主：
 
-{/* ref file="../tests/boundary.test.ts" lines="323-330" hash="d6c1f158b36d" blob="e450056cc091" */}
+{/* ref file="../tests/boundary.test.ts" lines="357-364" hash="d6c1f158b36d" blob="b10eeb50e0bf" */}
