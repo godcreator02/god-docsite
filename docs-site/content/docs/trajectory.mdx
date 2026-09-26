@@ -59,15 +59,15 @@ description: content/trajectory/ 下的轨迹卡怎么被读出、校验、建�
 
 整页 `/trajectory` 在服务端读卡目录、建模，交给客户端组件 `StarDisk`；两样都从 `@godcreator/docfirst-fumadocs/trajectory` 取：
 
-{/* ref file="src/app/(trajectory-disk)/trajectory/page.tsx" lines="3-3" hash="75e52e0103c2" blob="f2309432cb6e" */}
+{/* ref file="src/app/(trajectory-disk)/trajectory/page.tsx" lines="4-4" hash="75e52e0103c2" blob="da67a1b04df3" */}
 
-{/* ref file="src/app/(trajectory-disk)/trajectory/page.tsx" lines="6-7" hash="579744a6ea90" blob="f2309432cb6e" */}
+{/* ref file="src/app/(trajectory-disk)/trajectory/page.tsx" lines="7-8" hash="79d6f7b6375a" blob="da67a1b04df3" */}
 
-{/* ref file="src/app/(trajectory-disk)/trajectory/page.tsx" lines="22-22" hash="2b1da735d05f" blob="f2309432cb6e" */}
+{/* ref file="src/app/(trajectory-disk)/trajectory/page.tsx" lines="23-23" hash="2b1da735d05f" blob="da67a1b04df3" */}
 
-`loadTrajectory` 就是读卡目录加建模两步：
+`loadTrajectory` 只收绝对路径，然后读卡目录、建模。卡目录由页面用写死的目录名拼成绝对路径再传，Turbopack 才看得出只读这一个目录，不会把整个项目打进服务端产物：
 
-{/* ref file="../packages/docfirst-fumadocs/src/trajectory.ts" lines="19-22" hash="95163c3bc745" blob="be574a389f2e" */}
+{/* ref file="../packages/docfirst-fumadocs/src/trajectory.ts" lines="19-27" hash="fd1c13685fd0" blob="877bcbfc11a5" */}
 
 盘上每张卡链到 `/trajectory/<卡身份>`。那是站里的 fumadocs 卡集合渲染的卡页：`cardSchema` 校验 frontmatter，
 `remarkTrajectoryLinks` 把正文里指向卡的链接改写成卡页地址：

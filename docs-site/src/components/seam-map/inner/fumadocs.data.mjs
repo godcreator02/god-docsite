@@ -215,7 +215,7 @@ export const fumadocsGraph = defineSeamGraph({
       role: 'emerald',
       outside: false,
       blurb:
-        'loadTrajectory(dir) 按站的项目根解析目录、读卡并建模；同一个出口按包名转出轨迹核心的 StarDisk，trajectory.css 引入轨迹核心的 star.css。站画星轨盘只 import 这个包。只 import workflow 的 ./cards，不 import 主入口。',
+        'loadTrajectory(dir) 收卡目录的绝对路径（不是绝对路径直接报错）、读卡并建模；同一个出口按包名转出轨迹核心的 StarDisk，trajectory.css 引入轨迹核心的 star.css。站画星轨盘只 import 这个包。只 import workflow 的 ./cards，不 import 主入口。',
       caps: [
         { id: 'star-load', name: '读卡建模与组件', ident: 'loadTrajectory · StarDisk' },
         { id: 'star-css', name: '盘的样式', ident: 'trajectory.css' },
@@ -422,7 +422,7 @@ export const fumadocsGraph = defineSeamGraph({
       iface: "import { loadTrajectory, StarDisk } from '@godcreator/docfirst-fumadocs/trajectory'；@import '@godcreator/docfirst-fumadocs/trajectory.css'",
       convention: false,
       via: 'code',
-      text: '本站的星轨整页调用 loadTrajectory 拿模型，把它交给 StarDisk，顶栏由页面自己画；路由组的 disk.css 引入 trajectory.css。站不直接依赖轨迹核心。dir 可以写相对站的项目根（process.cwd()）的路径。',
+      text: '本站的星轨整页调用 loadTrajectory 拿模型，把它交给 StarDisk，顶栏由页面自己画；路由组的 disk.css 引入 trajectory.css。站不直接依赖轨迹核心。卡目录由页面用 join(process.cwd(), "content", "trajectory") 拼成绝对路径再传：目录名写死，Turbopack 才看得出只读这一个目录，不把整个项目打进服务端产物。',
     },
     {
       n: 21,

@@ -229,9 +229,9 @@ export const layout = {
 
 /** 站的整页路由 page.tsx 里接线的几行（原文，start 是行号） */
 export const pageLines = [
-  { start: 3, lines: ["import { loadTrajectory, StarDisk } from '@godcreator/docfirst-fumadocs/trajectory';"] },
-  { start: 7, lines: ["  const data = await loadTrajectory('content/trajectory');"] },
-  { start: 22, lines: ['        <StarDisk data={data} hrefBase="/trajectory" />'] },
+  { start: 4, lines: ["import { loadTrajectory, StarDisk } from '@godcreator/docfirst-fumadocs/trajectory';"] },
+  { start: 8, lines: ["  const data = await loadTrajectory(join(process.cwd(), 'content', 'trajectory'));"] },
+  { start: 23, lines: ['        <StarDisk data={data} hrefBase="/trajectory" />'] },
 ];
 
 /** 在站上点什么、去哪 */
@@ -242,10 +242,13 @@ export const clicks = [
 
 /** docfirst-fumadocs 的 src/trajectory.ts 里 loadTrajectory 的定义（原文，start 是行号） */
 export const fumadocsLines = {
-  start: 20,
+  start: 22,
   lines: [
     'export async function loadTrajectory(dir: string): Promise<Trajectory> {',
-    '  return buildTrajectory(await scanCardDir(resolve(process.cwd(), dir)));',
+    '  if (!isAbsolute(dir)) {',
+    '    throw new Error(`loadTrajectory 只收绝对路径，收到「${dir}」：在站里用 join(process.cwd(), "content", "trajectory") 拼好再传`);',
+    '  }',
+    '  return buildTrajectory(await scanCardDir(dir));',
     '}',
   ],
 };

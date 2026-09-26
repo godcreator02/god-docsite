@@ -9,14 +9,19 @@
  * 打进这份产物的话指令就丢了，StarDisk 会被当服务端组件渲染，命中 hooks 就报错。
  */
 
-import { resolve } from "node:path";
+import { isAbsolute } from "node:path";
 import { buildTrajectory } from "@godcreator/docfirst-trajectory";
 import type { Trajectory } from "@godcreator/docfirst-trajectory";
 import { scanCardDir } from "@godcreator/docfirst-workflow/cards";
 
 export { StarDisk } from "@godcreator/docfirst-trajectory/disk";
 
-/** 读一个卡目录并建模：绝对路径，或相对站的项目根（`process.cwd()`）的相对路径；目录不在给空盘 */
+/** 读一个卡目录并建模，目录不在给空盘。只收绝对路径：站用 `join(process.cwd(), "content", "trajectory")`
+ * 这种写死目录名的写法拼好再传，Turbopack 才看得出只读这一个目录；在这里拿变量拼 `process.cwd()`，
+ * 它会把整个项目打进服务端产物。 */
 export async function loadTrajectory(dir: string): Promise<Trajectory> {
-  return buildTrajectory(await scanCardDir(resolve(process.cwd(), dir)));
+  if (!isAbsolute(dir)) {
+    throw new Error(`loadTrajectory 只收绝对路径，收到「${dir}」：在站里用 join(process.cwd(), "content", "trajectory") 拼好再传`);
+  }
+  return buildTrajectory(await scanCardDir(dir));
 }

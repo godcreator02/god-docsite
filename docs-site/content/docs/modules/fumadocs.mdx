@@ -50,10 +50,10 @@ full: true
 
 {/* ref file="../packages/docfirst-fumadocs/src/card-collection.ts" lines="41-48" hash="e19430412226" blob="f18a4a264f4d" */}
 
-**星轨盘**：`./trajectory` 的 `loadTrajectory(dir)` 读卡并建模，同一个出口转出轨迹核心的客户端组件 `StarDisk`，
+**星轨盘**：`./trajectory` 的 `loadTrajectory(dir)` 读卡并建模（`dir` 只收绝对路径），同一个出口转出轨迹核心的客户端组件 `StarDisk`，
 样式 `./trajectory.css` 引入轨迹核心的 `star.css`。站画星轨盘只 import 这个包，不直接依赖轨迹核心：
 
-{/* ref file="../packages/docfirst-fumadocs/src/trajectory.ts" lines="17-22" hash="399574eca97f" blob="be574a389f2e" */}
+{/* ref file="../packages/docfirst-fumadocs/src/trajectory.ts" lines="17-27" hash="b85e57402249" blob="877bcbfc11a5" */}
 
 ## 接口
 
@@ -104,7 +104,7 @@ fumadocs 的 `rehypeCode` 只放行 meta 白名单里的字段，这里换成同
 
 星轨整页调用 `loadTrajectory`，把模型交给 `StarDisk`，路由组的 layout 引入 `disk.css`，它再引入 `./trajectory.css`。`StarDisk` 的 `hrefBase`、轨迹卡 loader 的 `baseUrl`、`remarkTrajectoryLinks` 的 `hrefBase` 必须是同一个值，否则卡页链接是 404：
 
-{/* ref file="src/app/(trajectory-disk)/trajectory/page.tsx" hash="c8a44524fb09" blob="f2309432cb6e" */}
+{/* ref file="src/app/(trajectory-disk)/trajectory/page.tsx" hash="7785977f2762" blob="da67a1b04df3" */}
 
 **名册**：一个组件要登记两处，`docfirst.config.mjs` 的 `components` 给机读版规则，`src/components/mdx.tsx` 给 React 组件；
 React 表先展开 fumadocs 的默认表，再把 `pre` 换成 `DocfirstPre`：

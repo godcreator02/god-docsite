@@ -197,7 +197,7 @@ describe('结构模板', () => {
 
     const disk = renderedText('src/app/(trajectory-disk)/trajectory/page.tsx')
     expect(disk).toMatch(/^import \{ loadTrajectory, StarDisk \} from '@godcreator\/docfirst-fumadocs\/trajectory';$/m)
-    expect(disk).toMatch(/loadTrajectory\('content\/trajectory'\)/)
+    expect(disk, '卡目录用写死的目录名拼成绝对路径，Turbopack 才不把整个项目打进服务端产物').toMatch(/loadTrajectory\(join\(process\.cwd\(\), 'content', 'trajectory'\)\)/)
     expect(disk, 'StarDisk 的 hrefBase 与轨迹卡 loader 的 baseUrl 是同一个前缀').toMatch(/<StarDisk data=\{data\} hrefBase="\/trajectory" \/>/)
 
     const cards = renderedText('src/app/(trajectory-cards)/trajectory/[...slug]/page.tsx')
