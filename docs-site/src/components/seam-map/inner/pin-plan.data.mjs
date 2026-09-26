@@ -1,0 +1,190 @@
+/**
+ * 在途方案「钉码与格式解耦」里拆完之后的接缝图：<SeamMap module="pin-plan" /> 画的就是它。
+ * 框是拆完之后的模块（包或 workflow 里的目录），方块是它对外给的函数；灰色实线框是调用方与实现方。
+ * 坐标在 pin-plan.layout.ts。方案落地后这张图删掉，现状改画在钉码核心与 workflow 的模块页上。
+ */
+import { defineSeamGraph } from '../graph.mjs';
+
+export const pinPlanGraph = defineSeamGraph({
+  id: 'pin-plan',
+  title: '钉码与格式解耦之后的模块与接缝',
+  intro:
+    '钉码与格式解耦之后的接缝图：虚线框是拆完之后的模块，框里的方块是它对外给的函数，灰色实线框是调用方与实现方。钉码核心只认目标和记录，记号写法和 mdx 格式都在它外面。',
+  frameLabel: '模块',
+  modules: [
+    {
+      id: 'callers',
+      name: '调用方',
+      pkg: 'workflow 命令行 · fumadocs 适配',
+      role: null,
+      outside: true,
+      blurb: '命令行的 check、confirm、render 传整篇文档；站构建时 remark 插件已经在语法树上认出了引用，只要核对。',
+      caps: [
+        { id: 'cli', name: '命令行', ident: 'check · confirm · render' },
+        { id: 'remark', name: '站构建', ident: 'remarkDocfirst' },
+      ],
+    },
+    {
+      id: 'pinning',
+      name: '钉码编排',
+      pkg: 'docfirst-workflow · src/pinning/',
+      role: 'blue',
+      outside: false,
+      blurb:
+        '一篇文档的核对与确认只在这里串起来：交给 mdx 格式认出引用，把每处的目标和记录交给钉码核心，确认时把核心算出的新记录交回 mdx 格式写回。命令行和站构建共用这一份。',
+      caps: [
+        { id: 'check-doc', name: '核对一篇', ident: 'checkDoc' },
+        { id: 'confirm-doc', name: '确认一篇', ident: 'confirmDoc' },
+        { id: 'check-refs', name: '核对认好的引用', ident: 'checkReferences' },
+      ],
+    },
+    {
+      id: 'mdx',
+      name: 'mdx 格式',
+      pkg: 'docfirst-workflow · src/mdx/',
+      role: 'violet',
+      outside: false,
+      blurb:
+        '在 mdx 语法树上认出记号：花括号注释里的正式记号，单独成段的草稿记号，记下每处在第几行、是不是草稿；写回时把那一行整行换成新的正式记号。只管外面那层 {/* */} 和行号，里面的文字交给记号写法；不知道状态怎么判。按原文渲染生成物也在这里。',
+      caps: [
+        { id: 'recognize', name: '认引用', ident: 'recognize' },
+        { id: 'write', name: '写回', ident: 'write' },
+      ],
+    },
+    {
+      id: 'marker',
+      name: '记号写法',
+      pkg: 'docfirst-workflow · src/marker/',
+      role: 'amber',
+      outside: false,
+      blurb:
+        '一处引用写成文字是什么样、文字怎么解析回目标与记录：草稿写法、正式记号里的属性、报告里的目标文本（targetKey）。只用钉码核心的类型，不认识 mdx，不判断状态。',
+      caps: [
+        { id: 'draft', name: '草稿', ident: 'draftOf' },
+        { id: 'formal', name: '正式记号', ident: 'formalOf · parseFormal' },
+      ],
+    },
+    {
+      id: 'core',
+      name: '钉码核心',
+      pkg: '@godcreator/docfirst-pin',
+      role: 'emerald',
+      outside: false,
+      blurb:
+        '只认目标和记录：收进一组「目标 + 记录」，交回每处的状态、今天的位置、给人看的旧行新行；确认时交回每处该写的新记录，或者钉不住的原因。不接触文档文本，不认识任何记号写法和文档格式。',
+      caps: [
+        { id: 'judge', name: '判定', ident: 'judge' },
+        { id: 'snapshot', name: '记录', ident: 'snapshot' },
+        { id: 'check', name: '核对', ident: 'check' },
+        { id: 'confirm', name: '确认', ident: 'confirm' },
+        { id: 'hash', name: 'hash 与行号映射', ident: 'hashSpan · mapRange' },
+      ],
+    },
+    {
+      id: 'impl',
+      name: '实现方',
+      pkg: 'docfirst-workflow · src/project/',
+      role: null,
+      outside: true,
+      blurb: '装配项目时造出读取器和 git 历史，交给钉码核心；钉码编排也在这时建好，放在 Project 上。',
+      caps: [
+        { id: 'load', name: '项目装配', ident: 'loadProject' },
+        { id: 'reader', name: '读取器', ident: 'createReader' },
+        { id: 'history', name: 'git 历史', ident: 'createGitHistory' },
+      ],
+    },
+  ],
+  entries: [],
+  seams: [
+    {
+      n: 1,
+      name: '核对与确认一篇',
+      a: ['cli', 'remark'],
+      b: ['check-doc', 'confirm-doc', 'check-refs'],
+      iface: 'checkDoc(doc, text) → Listing；confirmDoc(doc, text, { accept }) → ConfirmResult；checkReferences(doc, references) → Listing',
+      convention: false,
+      via: 'code',
+      text: '命令行传整篇文本：check 调 checkDoc，confirm 调 confirmDoc，render 先 checkDoc 再按清单渲染。站构建已经在语法树上认好了引用，调 checkReferences 跳过认引用。三者交回的清单形状相同。',
+    },
+    {
+      n: 2,
+      name: '认引用与写回',
+      a: ['check-doc', 'confirm-doc'],
+      b: ['recognize', 'write'],
+      iface: 'recognize(tree) → Reference[]（目标、记录、第几行、是不是草稿）；write(text, references) → text',
+      convention: false,
+      via: 'code',
+      text: '编排把文档交给 mdx 格式认出全部引用；确认时把带着新记录的引用交回去，mdx 格式只重写那几行。项目里只有 mdx 一种格式，编排直接用它，不再按文件名挑格式。',
+    },
+    {
+      n: 3,
+      name: '记号写法',
+      a: ['recognize', 'write'],
+      b: ['draft', 'formal'],
+      iface: 'draftOf(line) → Target；parseFormal(payload) → { target, record }；formalOf(target, record) → payload',
+      convention: false,
+      via: 'code',
+      text: 'mdx 格式认出一行草稿文字，或剥掉正式记号外面的 {/* */}，把里面的文字交给记号写法解析；写回时拿记号写法生成的文字，再包上 {/* */}。属性叫什么、记录怎么写，只在记号写法里定义。',
+    },
+    {
+      n: 4,
+      name: '钉码',
+      a: ['check-doc', 'confirm-doc', 'check-refs'],
+      b: ['check', 'confirm'],
+      iface: 'check(pins) → Verdict[]；confirm(verdicts, { accept }) → Step[]；Pin = { target, record }',
+      convention: false,
+      via: 'code',
+      text: '编排把每处引用剥成「目标 + 记录」交给钉码核心，结果按原来的顺序配回行号和是不是草稿。钉码核心看不到文档路径、行号、记号的样子。',
+    },
+    {
+      n: 5,
+      name: '判定与记录',
+      a: ['check', 'confirm'],
+      b: ['judge', 'snapshot'],
+      iface: 'judge(target, record, observation, history) → Judgement；snapshot(target, observation) → Snapshot',
+      convention: false,
+      via: 'code',
+      text: '核对把每处交给 judge 判出状态与今天的行段；确认时要重新记的，交给 snapshot 按今天的观察算出新记录，钉不住的交回原因。',
+    },
+    {
+      n: 6,
+      name: '读取',
+      a: ['check', 'confirm'],
+      b: ['reader'],
+      iface: 'Reader：read(file) / list(dir, depth, glob)',
+      convention: false,
+      via: 'code',
+      text: '行段、整文件、名字读文件的行，目录树要名字表；同一次核对里同一样东西只读一遍。',
+    },
+    {
+      n: 7,
+      name: '旧内容',
+      a: ['judge'],
+      b: ['history'],
+      iface: 'History：oldText(file, blob) / hunks(oldText, newText)',
+      convention: false,
+      via: 'code',
+      text: '行段的 hash 对不上时，judge 按记录里的 blob 名向 git 历史要确认时的整个文件和两份文件之间的 hunk 表；取不到就在整个文件里按 hash 找。',
+    },
+    {
+      n: 8,
+      name: '装配',
+      a: ['load'],
+      b: ['check-refs', 'check', 'confirm'],
+      iface: 'createPinner({ reader, history }) → Pinner；createPinning(pinner) → Pinning',
+      convention: false,
+      via: 'code',
+      text: '项目装配读完配置，先用读取器和 git 历史建出钉码核心，再把它交给钉码编排；配置里不再有 formats 这个键。',
+    },
+    {
+      n: 9,
+      name: '目标与记录的类型',
+      a: ['draft', 'formal'],
+      b: ['check', 'confirm'],
+      iface: 'import type { Target, MemoRecord } from "@godcreator/docfirst-pin"',
+      convention: false,
+      via: 'code',
+      text: '记号写法解析出来的就是钉码核心定义的目标与记录，只 import 类型；钉码核心反过来一行都不引用记号写法。',
+    },
+  ],
+});

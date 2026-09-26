@@ -1,0 +1,75 @@
+---
+title: 钉码与格式解耦
+description: 钉码核心只认目标和记录；记号写法与 mdx 格式挪到 workflow，文档的核对与确认由 workflow 里的钉码编排串起来。附带删掉存在性目标与配置键 formats
+full: true
+---
+
+现在钉码核心 `docfirst-pin` 里有两样跟格式有关的东西：记号写法（`marker.ts`，草稿与正式记号里的属性怎么写、怎么解析），
+和格式接口（`Format`，编排服务拿它从文档文本里认引用、把新记录写回文本）。拆完之后钉码核心只认目标和记录：
+收进一组「目标 + 记录」，交回每处的状态；确认时交回每处的新记录。它不接触文档文本，不认识任何记号写法和文档格式。
+
+<SeamMap module="pin-plan" />
+
+## 每一层只认识什么
+
+| 模块 | 在哪 | 认识 | 不认识 |
+| --- | --- | --- | --- |
+| 钉码核心 | `@godcreator/docfirst-pin` | 目标、记录、读取器与 git 历史两个接口、hash 与行号映射 | 文档路径、行号、记号的样子、mdx |
+| 记号写法 | workflow `src/marker/` | 草稿写法、正式记号里的属性；目标与记录的类型从钉码核心 import | mdx、状态怎么判 |
+| mdx 格式 | workflow `src/mdx/` | mdx 语法树、`{/* */}` 这层外壳、按行写回、按原文渲染生成物 | 状态怎么判 |
+| 钉码编排 | workflow `src/pinning/` | 一篇文档先认引用、再交钉码核心、最后写回的先后顺序 | 记号属性怎么写、状态怎么判 |
+
+边界测试照这张表守：钉码核心不许 import workflow 的任何目录；记号写法只许从钉码核心 import 类型；mdx 格式不许 import 钉码编排。
+
+## 钉码核心的新接口
+
+```ts
+/** 一处引用去掉它在文档里的位置之后剩下的：钉的是什么，确认时记了什么 */
+interface Pin { target: Target; record: MemoRecord | null }
+
+/** 一处核对完的结果：状态、今天的位置、细分理由、给人看的旧行新行 */
+interface Verdict { pin: Pin; status: Status; lines: Span; reason?: Reason; current: string[] | null; diff?: string; old?: string[] }
+
+/** 确认时对一处做什么；written 是要写回的新目标与记录 */
+interface Step { verdict: Verdict; action: ConfirmAction; written?: Pin; problem?: string }
+
+interface Pinner {
+  check(pins: Pin[]): Verdict[];
+  confirm(verdicts: Verdict[], options: { accept: boolean }): Step[];
+}
+
+function createPinner(deps: { reader: Reader; history: History }): Pinner;
+```
+
+交回的结果与传进去的顺序一一对应。文档路径、记号在第几行、是不是草稿，由钉码编排按顺序配回去，钉码核心看不到。
+
+## 一起收掉的
+
+- **存在性目标**（`exists` / `absent`）：本机所有站里只有本站讲 docfirst 的示范页用过。连同它的记录、两种红灯理由、
+  读取器的 `kindOf` 与草稿写法一起删，那几处改成 `has` 或正文说明
+- **配置键 `formats` 与格式认领**：只有 mdx 一种格式，钉码编排直接用它；按文件名挑格式、两个格式同时认领报错、
+  `DocFormat` 那两个可选方法都不再需要，名册检查与按原文渲染成为 mdx 格式固定有的函数。配置检查对 `formats` 报「删掉这个键」
+- **细分理由改成固定取值**：`Reason` 是几个字面量的联合，中文说法跟它放在钉码核心同一处，查不到直接报错
+- **读卡目录时查 md 格式记号**（`<!-- ref`）：md 格式已经不存在，只查草稿与 mdx 正式记号
+
+## 这次不动的
+
+旧记录格式留到下一步：gwb-kernel、gwb-base-plugins、gwb-block-note、collab-site、plecs-studio 这几个站的记录还存在
+`.ledger.json` 里、正式记号上不带记录。给这几个仓各投一条反馈，请它们跑一次 `docfirst migrate-ledger`；都迁完之后再删迁移命令、
+「正式记号可以不带记录」与「记录可以没有 blob」。
+
+## 顺序
+
+每一步单独提交，测试全过再走下一步：
+
+1. 删存在性目标（行为改动，测试跟着删）
+2. 细分理由改成固定取值，中文说法移进钉码核心
+3. 记号写法从钉码核心搬到 workflow `src/marker/`（只搬位置，测试只改 import 路径）
+4. 钉码核心改成 `check` / `confirm` 两个只收目标与记录的动作；钉码编排进 workflow，命令行、生成物摆放与站构建都改调它
+5. 写死 mdx，删配置键 `formats`，本站与建站模板的配置跟着删
+6. 钉码核心、workflow、fumadocs 适配三个模块页与接缝图、钉码几页、说明书跟改；写一张轨迹卡；这张方案页删掉
+
+## 对下游的影响
+
+跟「一站一张根卡」放进同一个破坏性版本。各站升级时多做一件事：`docfirst.config.mjs` 里删掉 `formats` 那一行，
+配置检查会直接指出来。用了 `exists` / `absent` 记号的站（目前只有本站）要改写那几处。
