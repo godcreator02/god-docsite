@@ -21,8 +21,8 @@ README、CLAUDE.md、这份规矩与插件里的 SKILL.md 都是**生成物**：
 （这份的正本是 `docs-site/content/maintain/agents.mdx`，其余在 `docs-site/content/docs/outputs/`），对应关系看
 `docs-site/docfirst.config.mjs` 的 `outputs`。改 mdx 正本，`pnpm docfirst render` 重新生成，正本和生成物放进同一个提交。
 
-**动手前先读文档站**：首页 `docs-site/content/docs/index.mdx` 的接缝图是总地图，模块页按包组织在
-`content/docs/modules/`，改这个仓要知道的（布局、门禁、测试与边界）在 `content/maintain/`；接口与边界逐条钉在真源码上。文档怎么写、分区怎么分、钉码怎么确认，
+**动手前先读文档站**：首页 `docs-site/content/docs/index.mdx` 的接缝图是总地图，每个包一个目录
+（如 `content/docs/pin/`）：目录首页是这个包的接缝与接口，讲原理的页跟在它下面；改这个仓要知道的（布局、门禁、测试与边界）在 `content/maintain/`；接口与边界逐条钉在真源码上。文档怎么写、分区怎么分、钉码怎么确认，
 正本是随工作台插件发的 skill「docfirst-docs」（生成物在
 `plugins/docfirst/skills/docfirst-docs/SKILL.md`），动文档前读它。
 **改了被钉的代码，就在同一个提交里处理它引起的黄灯**：本仓未提交改动引起的黄灯，`pnpm docfirst check` 算红。

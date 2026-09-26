@@ -1,5 +1,0 @@
-{
-  "title": "模块",
-  "description": "按包组织：钉码核心、轨迹核心、命令行与项目、fumadocs 适配、讲解组件、工作台插件",
-  "pages": ["pin", "trajectory", "workflow", "fumadocs", "docs-explain", "plugin"]
-}

@@ -20,8 +20,8 @@ full: true
 {/* ref file="../packages/docfirst-pin/src/pinner.ts" lines="16-25" hash="b775aac011bd" blob="89c8a0c744fd" */}
 
 **比较器** `compare.ts` 是纯函数：四种目标各自怎么判新鲜、确认时记什么。行段按什么顺序判、取不到旧内容时怎么降级，
-见[判定](/docs/pinning/judge)；四种目标各钉哪种话，见[四类引用](/docs/pinning/targets)；旧内容与 hunk 表怎么从 git 来，
-见[git 那一侧](/docs/pinning/git)。
+见[判定](/docs/pin/judge)；四种目标各钉哪种话，见[四类引用](/docs/pin/targets)；旧内容与 hunk 表怎么从 git 来，
+见[git 那一侧](/docs/pin/git)。
 
 **归一化**只做三件事：换行统一成 LF、去每行行尾空白、去掉末尾空行。展示和算 `hash` 用同一个函数，记号上的 hash 取前 12 位：
 
@@ -55,7 +55,7 @@ full: true
 ## 依赖
 
 源码只 import 包内文件和 `node:crypto`（算段 hash 与 blob 名），`package.json` 里没有运行时依赖和 peer。
-其余两样在创建时传进来，生产实现都在 [workflow](/docs/modules/workflow)。
+其余两样在创建时传进来，生产实现都在 [workflow](/docs/workflow)。
 
 **读取器 `Reader`** 与**旧内容来源 `History`**：行段、整文件、名字读文件的行，目录树要 `list`，
 读取器没提供它时目录树一律判缺失；`oldText` 给 `null` 时比较器改为滑窗查找，少的只是 diff：
@@ -82,4 +82,4 @@ full: true
 **不存旧内容。** 记号上只有 `hash` 与 `blob`；目录树只记名字表的 hash，变了只能报黄、给出当前的名字表。
 理由见[记录进记号](/trajectory/2026-09-25-records-live-in-markers)。
 
-**不决定黄灯拦不拦提交。** 这个包只给状态，哪些黄算红由 check 决定，见[门禁](/docs/pinning/gate)。
+**不决定黄灯拦不拦提交。** 这个包只给状态，哪些黄算红由 check 决定，见[门禁](/docs/pin/gate)。

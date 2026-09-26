@@ -70,7 +70,7 @@ workflow 目录之间是同样的写法：
 
 - `tests/git-history.test.ts`：比较器接上 git 版旧内容来源之后的跟随、退回滑窗、取对象的次数
 - `tests/reader-tree.test.ts`：目录树按 `.gitignore` 过滤、软链接按真实路径读
-- `tests/cli-uncommitted.test.ts`：本仓未提交改动引起的黄灯算红（见[门禁](/docs/pinning/gate)）
+- `tests/cli-uncommitted.test.ts`：本仓未提交改动引起的黄灯算红（见[门禁](/docs/pin/gate)）
 - `tests/hash-text.test.ts`：自己算的 blob 名跟 `git hash-object` 逐字节相同
 
 `tests/repo.ts` 建的临时仓一律 `core.autocrlf=false`，否则 Windows 上的换行转换会让工作区和 blob 逐字节不同：
@@ -92,7 +92,7 @@ fumadocs 适配不接 Next 的那一半在 `tests/fumadocs.test.ts`，讲解组�
 
 除了一条慢测试，插件的测试只传入输入看输出，不启动进程、不打开窗口：建站参数与模板（`create.test.ts`）、本机约定怎么改官方脚手架的输出
 （`scaffold.test.ts`，对照的是存在 `tests/fixtures` 下的样本）、端口挑选（`ports.test.ts`）、产物与依赖（`artifact.test.ts`）。
-真运行官方脚手架的 `scaffold.slow.test.ts` 要联网，只在 `pnpm test:all` 里跑。插件怎么工作见[工作台插件](/docs/modules/plugin)。
+真运行官方脚手架的 `scaffold.slow.test.ts` 要联网，只在 `pnpm test:all` 里跑。插件怎么工作见[工作台插件](/docs/plugin)。
 
 ## 站也是使用者，也是一组测试
 

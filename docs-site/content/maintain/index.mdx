@@ -10,14 +10,14 @@ description: 改这个仓的代码时，东西放在哪、提交前要通过哪�
 
 {/* has file="../pnpm-workspace.yaml" text="- plugins/*" */}
 
-`plugins/docfirst/` 是[工作台插件](/docs/modules/plugin) `@godcreator/gwb-docfirst-workflow`：建站命令与说明书。
+`plugins/docfirst/` 是[工作台插件](/docs/plugin) `@godcreator/gwb-docfirst-workflow`：建站命令与说明书。
 `packages/` 下每个目录一个 npm 包：
 
 {/* tree dir="../packages" depth="1" hash="06330e2d87df" */}
 
-[钉码核心](/docs/modules/pin) `docfirst-pin`、[轨迹核心](/docs/modules/trajectory) `docfirst-trajectory`、
-[命令行与项目](/docs/modules/workflow) `docfirst-workflow`、[fumadocs 适配](/docs/modules/fumadocs) `docfirst-fumadocs`，
-加上讲解组件的外壳与零件 [`docs-explain`](/docs/modules/docs-explain)。谁能依赖谁见[测试与边界](/maintain/testing)。
+[钉码核心](/docs/pin) `docfirst-pin`、[轨迹核心](/docs/trajectory) `docfirst-trajectory`、
+[命令行与项目](/docs/workflow) `docfirst-workflow`、[fumadocs 适配](/docs/fumadocs) `docfirst-fumadocs`，
+加上讲解组件的外壳与零件 [`docs-explain`](/docs/docs-explain)。谁能依赖谁见[测试与边界](/maintain/testing)。
 
 站也是工作区成员：它用 `workspace:*` 装工作区里的包，钉的是工作区里的真源码，所以仓里不另留示例项目。
 devkit 的建仓模板不收文档站，这是本仓有意的例外，理由见轨迹卡
@@ -65,7 +65,7 @@ devkit 的建仓模板不收文档站，这是本仓有意的例外，理由见�
 - 一个提交一件事。提交信息用中文，末尾带会话里给的 `Co-Authored-By` 与 `Claude-Session` 两行。
 - 同一个仓常有别的会话在改：新文件用 `git add <自己的路径…>`，提交一律 `git commit --only <自己的路径…>`。
 - **代码、文档、轨迹卡放进同一个提交**。改了被钉的代码，本仓未提交改动引起的黄灯 `docfirst check` 算红
-  （见[门禁](/docs/pinning/gate)）：`docfirst confirm` 做机械写回，剩下的黄灯逐条复核，论断还成立就
+  （见[门禁](/docs/pin/gate)）：`docfirst confirm` 做机械写回，剩下的黄灯逐条复核，论断还成立就
   `docfirst confirm <页…> --accept` 点名确认。步骤照说明书 [docfirst-docs](/docs/outputs/skills/docfirst-docs)。
 - 改生成物的正本（README、AGENTS、CLAUDE、插件里的 SKILL.md）后 `pnpm docfirst render`，正本与生成物同一个提交。
 

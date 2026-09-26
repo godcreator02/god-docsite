@@ -12,7 +12,7 @@ full: true
 ## 功能
 
 两件事：**卡**（轨迹卡的格式、解析、校验）与**盘**（把一个卡目录的卡建成一个模型、布局、画成星轨盘）。
-一个卡目录只有一张根卡、只画一张盘。卡有哪些字段、怎么校验、半径和角度怎么排，见[轨迹](/docs/trajectory)。
+一个卡目录只有一张根卡、只画一张盘。卡有哪些字段、怎么校验、半径和角度怎么排，见[轨迹](/docs/trajectory/flow)。
 
 卡的身份是文件名去掉 `.mdx` / `.md` 后缀的部分，同一身份两种后缀都在时只认 `.mdx`：
 
@@ -80,7 +80,7 @@ props 里不收函数（服务端组件不能把函数传给客户端组件）�
 
 {/* ref file="../packages/docfirst-trajectory/src/types.ts" lines="68-72" hash="c0fa2b5a900c" blob="ea79dc7c4f44" */}
 
-**不管 fumadocs 集合与读卡目录。** 卡集合的 schema、正文链接改写、`loadTrajectory` 都在 [fumadocs 适配](/docs/modules/fumadocs)，
+**不管 fumadocs 集合与读卡目录。** 卡集合的 schema、正文链接改写、`loadTrajectory` 都在 [fumadocs 适配](/docs/fumadocs)，
 站经它拿到 `StarDisk` 与样式。
 
 **不认识站的路由。** 不读也不写地址栏；顶栏不归组件画。

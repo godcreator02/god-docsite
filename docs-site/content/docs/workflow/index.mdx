@@ -35,15 +35,15 @@ full: true
 
 {/* ref file="../packages/docfirst-workflow/src/project/history.ts" hash="c9fdbb444a03" blob="4420ba5fce88" */}
 
-每次启动 git 都带超时与输出上限。按文件位置找仓、blob 名怎么算见 [git 取回旧内容](/docs/pinning/git)。
+每次启动 git 都带超时与输出上限。按文件位置找仓、blob 名怎么算见 [git 取回旧内容](/docs/pin/git)。
 
 {/* ref file="../packages/docfirst-workflow/src/project/git.ts" lines="17-18" hash="6c30493d4168" blob="afd0fbdae4c4" */}
 
-**未提交改动的探针**只回答一处黄是不是本仓未提交的改动引起的，算不算红由命令行决定，规则见[提交门禁](/docs/pinning/gate)：
+**未提交改动的探针**只回答一处黄是不是本仓未提交的改动引起的，算不算红由命令行决定，规则见[提交门禁](/docs/pin/gate)：
 
 {/* ref file="../packages/docfirst-workflow/src/project/uncommitted.ts" lines="1-8" hash="7012ae307b16" blob="3cda642bbfcc" */}
 
-**摆放**的渲染过程见[生成物渲染](/docs/rendering)。落点在装配时就检查：
+**摆放**的渲染过程见[生成物渲染](/docs/workflow/rendering)。落点在装配时就检查：
 得相对项目根、不许落进内容根、一个落点只许一篇文档写，违反任何一条 `loadProject` 当场报错：
 
 {/* ref file="../packages/docfirst-workflow/src/project/placement.ts" lines="119-137" hash="134440fb80cc" blob="b57813645c6a" */}
@@ -77,7 +77,7 @@ full: true
 {/* ref file="../packages/docfirst-workflow/src/mdx/recognize.ts" lines="16-29" hash="43cde5b2e9d5" blob="0b6b4748c743" */}
 
 **名册**是一张「组件名 → 规则」的表，说明每个组件在机读版里变成什么。这里只有机制，没有默认表：组件与规则写在项目的配置里，
-fumadocs 自带组件的规则在 [fumadocs 适配](/docs/modules/fumadocs)的 `./roster`。规则三种写法，函数规则只经 helpers 读节点、造节点：
+fumadocs 自带组件的规则在 [fumadocs 适配](/docs/fumadocs)的 `./roster`。规则三种写法，函数规则只经 helpers 读节点、造节点：
 
 {/* ref file="../packages/docfirst-workflow/src/mdx/roster.ts" lines="35-36" hash="69cdb1ca8839" blob="d192d3db2a0c" */}
 
@@ -87,7 +87,7 @@ fumadocs 自带组件的规则在 [fumadocs 适配](/docs/modules/fumadocs)的 `
 
 {/* ref file="../packages/docfirst-workflow/src/mdx/roster.ts" lines="109-128" hash="c5990a4e9fe5" blob="d192d3db2a0c" */}
 
-`renderAi` 把生成正本按原文渲染成 md，不经过 fumadocs，见[生成物渲染](/docs/rendering)。
+`renderAi` 把生成正本按原文渲染成 md，不经过 fumadocs，见[生成物渲染](/docs/workflow/rendering)。
 按原文渲染拒绝渲染时抛的错误类也在这里。摆放按错误名认、不用 `instanceof`：渲染与摆放可能各从一份产物加载，
 拿到的不是同一个类：
 
@@ -152,7 +152,7 @@ mdx 格式认出的、按原文渲染要读的、命令行打印的都是这几�
 
 {/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="249-269" hash="931ad6970d4e" blob="75cc83db6ebd" */}
 
-退出码、红的来源、未提交改动的黄怎么算红，见[提交门禁](/docs/pinning/gate)。
+退出码、红的来源、未提交改动的黄怎么算红，见[提交门禁](/docs/pin/gate)。
 
 ## 接口
 
@@ -207,10 +207,10 @@ mdx 格式认出的、按原文渲染要读的、命令行打印的都是这几�
 
 {/* ref file="../tests/boundary.test.ts" lines="129-135" hash="f64865a8c24f" blob="e450056cc091" */}
 
-- **不判状态**：绿黄白红由[钉码核心](/docs/modules/pin)算，这个包把磁盘、git、配置接给它，再把结果打印出来。
-- **不给卡建模**：卡字段怎么校验、盘怎么建归[轨迹核心](/docs/modules/trajectory)。
+- **不判状态**：绿黄白红由[钉码核心](/docs/pin)算，这个包把磁盘、git、配置接给它，再把结果打印出来。
+- **不给卡建模**：卡字段怎么校验、盘怎么建归[轨迹核心](/docs/trajectory)。
 - **摆放不读写文件**：`placement.ts` 经 `PlacingHost` 读写落点，读写磁盘的那份实现在 `load.ts`，测试换成内存那份：
 
 {/* ref file="../packages/docfirst-workflow/src/project/placement.ts" lines="77-91" hash="90be89518ac3" blob="6dc0e3cf3ba7" */}
 
-- **不建站**：建站命令与模板归[工作台插件](/docs/modules/plugin)。
+- **不建站**：建站命令与模板归[工作台插件](/docs/plugin)。
