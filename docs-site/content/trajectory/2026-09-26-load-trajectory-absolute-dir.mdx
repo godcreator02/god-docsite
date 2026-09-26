@@ -24,5 +24,4 @@ domain: 模块边界
 
 ## 代价与遗留
 
-用过相对路径的站（gwb-kernel 的盘页写的是 `loadTrajectory('content/trajectory')`）升级后会直接报错，
-要改成上面的写法；和删多盘是同一个破坏性版本。
+给 `loadTrajectory` 传相对路径的站升级后会直接报错，要改成上面的写法；和删多盘是同一个破坏性版本。
