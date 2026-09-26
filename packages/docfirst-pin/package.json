@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "author": {"name": "godcreator"},
   "type": "module",
-  "description": "文档钉代码的核心：引用模型、记号语法、比较器、编排服务。零依赖，只用 node:crypto，随 docfirst 线发。",
+  "description": "文档钉代码的核心：只认目标与记录，核对出状态、确认出新记录；不认识文档文本、记号写法与文档格式。零依赖，只用 node:crypto，随 docfirst 线发。",
   "exports": {
     ".": {
       "types": "./dist/index.d.mts",

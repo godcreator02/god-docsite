@@ -2,7 +2,7 @@
  * 页面那一侧的接线：remark 插件确实加上了、meta 白名单确实放行了、状态确实写到了 <pre> 上、
  * postprocess 确实带着我们的回调。
  * 不启动 Next：fumadocs-mdx/node 的 register 把它的 loader 注册进 Node，import 一篇 .mdx 走的就是站构建时的同一条处理链。
- * 只断言、不跟命令行比：算状态的是同一个 service，比出来只能相等；跨调用方的比对要启动站后抓取 .md 路由。
+ * 只断言、不跟命令行比：算状态的是同一个钉码编排（project.pinning），比出来只能相等；跨调用方的比对要启动站后抓取 .md 路由。
  * 组件表按 registry.ts 的名单生成占位 div：只为让渲染不缺组件，不管外观。
  */
 import { test } from "node:test";

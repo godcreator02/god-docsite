@@ -28,7 +28,6 @@ const DIR_OF: Record<string, string> = {
 
 /** 模板可以 import 的 docfirst 出口：只有写进站依赖表的两个包的这几个出口 */
 const TEMPLATE_IMPORTABLE = [
-  '@godcreator/docfirst-workflow/mdx',
   '@godcreator/docfirst-fumadocs',
   '@godcreator/docfirst-fumadocs/roster',
   '@godcreator/docfirst-fumadocs/pre',

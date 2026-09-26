@@ -1,15 +1,15 @@
 /**
- * 记号语法：**引用怎么写、怎么读**，一处正本。
+ * 记号写法：**引用怎么写、怎么读**，一处正本。
  *
  * 这儿做的都是「文本 ↔ 目标 + 记录」的翻译，跟目标本身是什么无关：
- *   **语言表** `WORDS` 与每个动作词认的属性 `ATTRS`——`toTarget` / `recordOf` 是唯一的语义校验点，各格式报错一致
- *   **正式记号的载荷**（`formalOf` / `parseFormal`）——所有格式共用的那一截，格式只负责在外面套自己的壳
- *   （mdx 是花括号注释）。载荷 = 动作词 + 目标属性 + 记录属性，记录属性只在确认过的记号上出现
+ *   **语言表** `WORDS` 与每个动作词认的属性 `ATTRS`——`toTarget` / `recordOf` 是唯一的语义校验点
+ *   **正式记号的载荷**（`formalOf` / `parseFormal`）——mdx 格式只在外面套花括号注释。
+ *   载荷 = 动作词 + 目标属性 + 记录属性，记录属性只在确认过的记号上出现
  *   **草稿记号**（`draftOf`）与报告里用的目标文本形态（`targetKey`）
  */
 import type { MemoRecord, Target, TreeTarget } from "@godcreator/docfirst-pin";
 
-/** 正式记号的动作词：ref / tree / has。格式用它拼自己的外壳 */
+/** 正式记号的动作词：ref / tree / has */
 export function wordOf(target: Target): string {
   if (target.kind === "span" || target.kind === "file") return "ref";
   return target.kind;
@@ -117,7 +117,7 @@ export function recordOf(word: string, attrs: Record<string, string | undefined>
   return { kind: "tree", hash: attrs.hash };
 }
 
-/** 动作词 + 属性表 → 目标。语义校验统一住这儿，各格式报错一致；动作词不认识给 null */
+/** 动作词 + 属性表 → 目标。语义校验统一在这儿，草稿与正式记号报错一致；动作词不认识给 null */
 export function toTarget(word: string, attrs: Record<string, string | undefined>, where: string): Target | null {
   if (!WORDS.has(word)) return null;
   if (word === "ref") {
@@ -142,12 +142,12 @@ export function toTarget(word: string, attrs: Record<string, string | undefined>
 }
 
 /**
- * 草稿记号——所有格式通用的写法，独立一行，头尾 @@ 是哨兵，少一头就是普通文字，不报错：
+ * 草稿记号——独立一行，头尾 @@ 是边界，少一头就是普通文字，不报错：
  *   @@docfirst ref src/greet.ts:2-3 @@          行段
  *   @@docfirst ref config.json @@               整文件
  *   @@docfirst tree src @@                      目录树；可带 depth=2、glob=*.test.ts
  *   @@docfirst has src/store.ts "export function save" @@   文件里有这个字面量（带空格就用引号包）
- * 在 md、mdx、html 里都是合法的一行普通文字；check 认它、报未确认；confirm 时格式换成自己的正式记号。
+ * 在 mdx 里是一行普通文字；check 认它、报未确认；confirm 时换成正式记号。
  */
 const DRAFT = /^\s*@@docfirst\s+(\w+)\s+(.+?)\s+@@\s*$/;
 

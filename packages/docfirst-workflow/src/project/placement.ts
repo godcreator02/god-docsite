@@ -92,8 +92,6 @@ export interface PlacingHost {
 
 /** frontmatter 里一条顶层键的行头：列 0 起、`键:` */
 const TOP_KEY = /^([\w-]+):/;
-/** 产物开头整段 frontmatter：摆放产物一律不带，要带的字段由 `frontmatter` 点名加回 */
-const LEADING_FRONTMATTER = /^﻿?---\r?\n[\s\S]*?\r?\n---[ \t]*\r?\n?/;
 
 /**
  * `outputs` 的两种目标写法归成一张表：字符串等于 `{ to, frontmatter: [] }`。
@@ -138,9 +136,9 @@ export function assertTurf(root: string, sourceDirs: string[], table: Record<str
   }
 }
 
-/** 按原文渲染的产物 → 摆放产物的正文（还没戴 frontmatter）：剥掉开头的 frontmatter 与空行 */
+/** 按原文渲染的产物 → 摆放产物的正文（还没戴 frontmatter）：renderAi 已经去掉了 frontmatter，这里只去掉它后面留下的空行 */
 function tidy(rendered: string): string {
-  return rendered.replace(LEADING_FRONTMATTER, "").replace(/^\n+/, "");
+  return rendered.replace(/^\n+/, "");
 }
 
 /** 挑出来的 frontmatter：点名的字段按源里的顺序原样成行；源里没有的字段列在 missing */
