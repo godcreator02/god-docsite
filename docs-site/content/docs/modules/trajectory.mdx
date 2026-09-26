@@ -66,15 +66,15 @@ props 里不收函数（服务端组件不能把函数传给客户端组件）�
 **不读文件，不认识别的包。** `.` 入口的产物一条 import 都没有，连 `node:` 也没有；`.ts` 源码只有相对 import。
 所以浏览器、服务端、命令行都能直接用：
 
-{/* ref file="../tests/boundary.test.ts" lines="180-193" hash="c35ca7bc8225" blob="e450056cc091" */}
+{/* ref file="../tests/boundary.test.ts" lines="195-208" hash="c35ca7bc8225" blob="e77be7ebc154" */}
 
 它不依赖钉码核心、workflow、fumadocs 适配，反过来 workflow 与 fumadocs 适配依赖它：
 
-{/* ref file="../tests/boundary.test.ts" lines="121-135" hash="6240de2040d1" blob="e450056cc091" */}
+{/* ref file="../tests/boundary.test.ts" lines="121-135" hash="3045c8cb7ab9" blob="e77be7ebc154" */}
 
 **不把 react 打进产物。** `./disk` 的产物第一行是 `"use client"`，只许 import react：
 
-{/* ref file="../tests/boundary.test.ts" lines="195-207" hash="321c5491dda8" blob="e450056cc091" */}
+{/* ref file="../tests/boundary.test.ts" lines="210-222" hash="321c5491dda8" blob="e77be7ebc154" */}
 
 **不认识钉码记号。** 卡里不许钉码这条由 workflow 读卡目录时另查，病并进同一份清单；这个包只在问题类型里留着这个字段名：
 

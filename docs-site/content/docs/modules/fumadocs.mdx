@@ -18,7 +18,7 @@ full: true
 
 **remark 插件**对每篇依次认引用、算清单、换节点、打标，每一步交给谁见上图：
 
-{/* ref file="../packages/docfirst-fumadocs/src/remark-plugin.ts" lines="21-27" hash="1b4fd315e4b5" blob="2efb8db2a72b" */}
+{/* ref file="../packages/docfirst-fumadocs/src/remark-plugin.ts" lines="21-27" hash="5232a651e6c6" blob="bea22dbd14b5" */}
 
 四种引用在页面上是三种节点：行段与整文件是带状态点的代码块，目录树是 fumadocs 的 `Files`，名字是一行小标签：
 
@@ -132,15 +132,15 @@ React 表先展开 fumadocs 的默认表，再把 `pre` 换成 `DocfirstPre`：
 
 | 依赖 | 用来做什么 |
 | --- | --- |
-| workflow `@godcreator/docfirst-workflow` | `.` 的 `loadProject` 拿钉码服务与名册；`./mdx` 的 `recognize`、`stamp`、`walk`、`langOf` 与名册类型；`./cards` 的 `scanCardDir` |
-| 钉码核心 `@godcreator/docfirst-pin` | `Reference`、`Item`、`Listing` 等类型 |
+| workflow `@godcreator/docfirst-workflow` | `.` 的 `loadProject` 拿钉码编排与名册，`Reference`、`Item`、`Listing` 等类型；`./mdx` 的 `recognize`、`stamp`、`walk`、`langOf` 与名册类型；`./cards` 的 `scanCardDir` |
+| 钉码核心 `@godcreator/docfirst-pin` | `Status` 类型 |
 | 轨迹核心 `@godcreator/docfirst-trajectory` | `buildTrajectory`、`CARD_KEYS`；`./disk` 的 `StarDisk` 与 `./star.css` 转给站 |
 | unified、unist-util-visit | 插件类型；`remarkTrajectoryLinks` 遍历语法树 |
 | fumadocs-core、fumadocs-ui、react | processed markdown、`CodeBlock`、组件渲染；必需的 peer，用站装的那份 |
 
 插件在 `remarkDocfirstHost` 这个异步 attacher 里调用 `loadProject`，站的 remark 链上没有命令行替它装配：
 
-{/* ref file="../packages/docfirst-fumadocs/src/host.ts" lines="16-27" hash="206294eebad1" blob="ee5ba8cf517d" */}
+{/* ref file="../packages/docfirst-fumadocs/src/host.ts" lines="16-27" hash="c0a67270e343" blob="b288d233dfd0" */}
 
 {/* ref file="../packages/docfirst-fumadocs/package.json" lines="48-52" hash="19d43e3ebfe1" blob="5f3e6b3a568a" */}
 
@@ -151,8 +151,8 @@ React 表先展开 fumadocs 的默认表，再把 `pre` 换成 `DocfirstPre`：
 - **不管生成物**：生成正本的渲染与写到哪归 [workflow](/docs/modules/workflow)。
 - **不把宿主与兄弟包打进产物**：只按包名 import；`./pre` 的 `"use client"` 在产物第一行，别的出口不带：
 
-{/* ref file="../tests/boundary.test.ts" lines="330-355" hash="27348ae73122" blob="b10eeb50e0bf" */}
+{/* ref file="../tests/boundary.test.ts" lines="347-372" hash="27348ae73122" blob="e77be7ebc154" */}
 
 - **不被命令行加载**（`./roster` 除外）：workflow 不许依赖这个包；`./roster` 的产物不许 import 宿主：
 
-{/* ref file="../tests/boundary.test.ts" lines="357-364" hash="d6c1f158b36d" blob="b10eeb50e0bf" */}
+{/* ref file="../tests/boundary.test.ts" lines="374-381" hash="d6c1f158b36d" blob="e77be7ebc154" */}

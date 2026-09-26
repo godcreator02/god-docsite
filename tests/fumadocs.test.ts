@@ -11,20 +11,21 @@ import type { Roster, TreeNode } from "../packages/docfirst-workflow/src/mdx/ind
 import * as fumadocs from "../packages/docfirst-fumadocs/src/index.ts";
 import { DOT_COLOR, applyListing, docfirstMarkdownOptions, parseMetaString, whereOf } from "../packages/docfirst-fumadocs/src/index.ts";
 import { fumadocsRoster } from "../packages/docfirst-fumadocs/src/roster.ts";
-import type { Item, Listing, Reference, Target } from "../packages/docfirst-pin/src/index.ts";
+import type { Target } from "../packages/docfirst-pin/src/index.ts";
+import type { Item, Listing, Reference } from "../packages/docfirst-workflow/src/format/index.ts";
 
 const T: Target = { kind: "span", file: "src/greet.ts", a: 2, b: 3 };
 const CURRENT = ["export function greet(name: string): string {", "  return `hello ${name}`;"];
 const OLD = ["export function greet(name: string): string {", "  return `hi ${name}`;"];
 
-/** 测试里只关心目标与位置，记录一律当没有 */
-type Over = Omit<Partial<Item>, "reference"> & { reference?: Omit<Reference, "record"> };
+/** 测试里只关心目标与位置，记录一律当没有；不说是草稿就是正式记号 */
+type Over = Omit<Partial<Item>, "reference"> & { reference?: Omit<Reference, "record" | "draft"> & { draft?: boolean } };
 
 function itemOf(over: Over): Item {
   const { reference, ...rest } = over;
   return {
     doc: "a.mdx",
-    reference: { record: null, ...(reference ?? { target: T, at: 0, extra: { draft: false } }) },
+    reference: { record: null, draft: false, ...(reference ?? { target: T, at: 0 }) },
     current: CURRENT,
     status: "fresh",
     lines: [2, 3],
@@ -42,7 +43,7 @@ function blocksIn(text: string, items: Item[]): TreeNode[] {
 
 test("正式记号与草稿记号都换成代码块：meta 写来源、行号、状态点颜色", () => {
   const text = `${mark(T)}\n\n@@docfirst ref src/greet.ts:2-3 @@\n`;
-  const items = [itemOf({}), itemOf({ status: "unconfirmed", reference: { target: T, at: 2, extra: { draft: true } } })];
+  const items = [itemOf({}), itemOf({ status: "unconfirmed", reference: { target: T, at: 2, draft: true } })];
   const blocks = blocksIn(text, items);
   assert.equal(blocks.length, 2);
   assert.equal(blocks[0]!.lang, "ts");

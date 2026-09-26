@@ -16,7 +16,8 @@
 import { existsSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { hashNames, RECORD_HASH_LENGTH } from "@godcreator/docfirst-pin";
-import type { Format, MemoRecord, Reference, Target } from "@godcreator/docfirst-pin";
+import type { MemoRecord, Target } from "@godcreator/docfirst-pin";
+import type { DocFormat, Reference } from "../format/index.ts";
 import { targetKey } from "../marker/index.ts";
 import { configProblems, importConfig } from "./load.ts";
 
@@ -83,20 +84,20 @@ function migrated(target: Target, record: Record<string, unknown>, where: string
   throw new Error(`${where}：记录的 kind ${kind} 对不上这种记号（${target.kind}）`);
 }
 
-function formatOf(formats: Format[], doc: string): Format {
+function formatOf(formats: DocFormat[], doc: string): DocFormat {
   const hits = formats.filter((format) => format.claims(doc));
   if (hits.length !== 1) throw new Error(`${doc}：${hits.length === 0 ? "没有格式认领这篇文档" : `${hits.map((f) => f.name).join("、")} 都认领了这篇`}`);
   return hits[0]!;
 }
 
 /** 一篇文档：把记录写进对应的记号，交回写了几处、用掉了哪些目标键 */
-function migrateDoc(root: string, doc: string, format: Format, table: Record<string, Record<string, unknown>>): { count: number; used: Set<string> } {
+function migrateDoc(root: string, doc: string, format: DocFormat, table: Record<string, Record<string, unknown>>): { count: number; used: Set<string> } {
   const path = join(root, doc);
   const text = readFileSync(path, "utf8");
   const used = new Set<string>();
   const updates: Reference[] = [];
   for (const reference of format.parse(text)) {
-    if (reference.extra?.draft === true) continue;
+    if (reference.draft) continue;
     const key = targetKey(reference.target);
     const record = table[key];
     if (record === undefined) continue;
@@ -111,7 +112,7 @@ function migrateDoc(root: string, doc: string, format: Format, table: Record<str
 export async function migrateLedger(root: string): Promise<MigrationReport> {
   const config = (await importConfig(root)) as { formats?: unknown; ledger?: unknown };
   if (!Array.isArray(config.formats)) throw new Error("docfirst.config 的 formats 要是格式的数组");
-  const formats = config.formats as Format[];
+  const formats = config.formats as DocFormat[];
   const ledger = typeof config.ledger === "string" ? config.ledger : ".ledger.json";
   const ledgerPath = join(root, ledger);
   if (!existsSync(ledgerPath)) throw new Error(`项目根下没有记录簿 ${ledger}——没有要迁的`);

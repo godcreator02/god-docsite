@@ -14,7 +14,7 @@
  *             "line": 12,          // 记号在文档里的第几行（1 起）
  *             "lines": [2, 3],     // 行段今天在文件里的位置（跟过 hunk 或滑窗）；别的种类是 [1, 项数]
  *             "draft": false,      // 还是草稿记号（没 confirm 过）
- *             "reason": "changed", // 状态的细分理由，没有就不带（同 `@godcreator/docfirst-pin` 的 Item.reason）
+ *             "reason": "changed", // 状态的细分理由，没有就不带（同钉码核心 `@godcreator/docfirst-pin` 的 Reason）
  *             "diff": "- a\n+ b",  // 有变动且取得到旧内容时的 - / + 文本，没有就不带
  *             "blocking": true }   // 只出现在黄灯上：被钉文件在文档所在的仓里有未提交的改动，这个黄算红
  *         ],

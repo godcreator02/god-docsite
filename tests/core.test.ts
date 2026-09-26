@@ -1,20 +1,11 @@
 /**
- * 判定层自己的账：编排服务、比较器、确认的机械写回、草稿记号。
- * 用假格式、内存读取器、内存里的旧内容来源——判定层不读盘、不起进程、不认识任何真格式，这里正好把这条也守住。
+ * 钉码核心自己的账：check / confirm 两个动作、比较器、确认时记什么。
+ * 直接给目标与记录，用内存读取器、内存里的旧内容来源——钉码核心不读盘、不起进程、不接触文档文本，这里正好把这条也守住。
  */
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import {
-  blobOf,
-  createService,
-  hashNames,
-  hashSpan,
-  normalizeLines,
-  sliceSpan,
-} from "../packages/docfirst-pin/src/index.ts";
-import { draftOf } from "../packages/docfirst-workflow/src/marker/index.ts";
-import type { History, Reader, Reference, Target } from "../packages/docfirst-pin/src/index.ts";
-import { fakeFormat, refLine } from "./fake-format.ts";
+import { blobOf, createPinner, hashNames, hashSpan, normalizeLines, sliceSpan } from "../packages/docfirst-pin/src/index.ts";
+import type { History, MemoRecord, Pin, Pinner, Reader, Target, Verdict } from "../packages/docfirst-pin/src/index.ts";
 import { NO_HISTORY } from "./repo.ts";
 
 const CODE = ["// greet", "export function greet(name: string): string {", "  return `hello ${name}`;", "}", ""];
@@ -38,203 +29,180 @@ function memoryReader(files: Map<string, string[]>): Reader {
 
 function setup(history: History = NO_HISTORY) {
   const files = new Map<string, string[]>([["src/greet.ts", [...CODE]]]);
-  const service = createService({ formats: [fakeFormat("fake-a", ".a"), fakeFormat("fake-b", ".b")], reader: memoryReader(files), history });
-  const statuses = (text: string) => service.resolve(DOC, text).items.map((i) => i.status);
-  return { files, service, statuses };
+  const pinner = createPinner({ reader: memoryReader(files), history });
+  const statuses = (pins: Pin[]) => pinner.check(pins).map((v) => v.status);
+  return { files, pinner, statuses };
 }
 
-const DOC = "d.a";
 const SPAN: Target = { kind: "span", file: "src/greet.ts", a: 2, b: 3 };
-const REF = refLine(SPAN);
-const TEXT = `# 标题\n\n${REF}\n\n尾巴\n`;
+const UNCONFIRMED: Pin = { target: SPAN, record: null };
 const accept = { accept: true };
 const plain = { accept: false };
 
-test("resolve：没确认过是未确认；确认后新鲜；改了代码变有变动；文件没了是缺失", () => {
-  const { files, service, statuses } = setup();
-  assert.deepEqual(statuses(TEXT), ["unconfirmed"]);
-  const done = service.confirm(DOC, TEXT, plain);
-  assert.deepEqual(done.steps.map((s) => s.action), ["recorded"]);
-  assert.deepEqual(statuses(done.text), ["fresh"]);
+/** 确认一处，交回写下的那一处（钉不住就报错） */
+function confirmOne(pinner: Pinner, pin: Pin, options = plain): Pin {
+  const [step] = pinner.confirm(pinner.check([pin]), options);
+  assert.ok(step!.written !== undefined, `这一处没记下来：${step!.action} ${step!.problem ?? ""}`);
+  return step!.written!;
+}
+
+test("check：没确认过是未确认；确认后新鲜；改了代码变有变动；文件没了是缺失", () => {
+  const { files, pinner, statuses } = setup();
+  assert.deepEqual(statuses([UNCONFIRMED]), ["unconfirmed"]);
+  const steps = pinner.confirm(pinner.check([UNCONFIRMED]), plain);
+  assert.deepEqual(steps.map((s) => s.action), ["recorded"]);
+  const done = steps[0]!.written!;
+  assert.deepEqual(statuses([done]), ["fresh"]);
   files.set("src/greet.ts", CODE.map((l) => l.replace("hello", "hey")));
-  assert.deepEqual(statuses(done.text), ["changed"]);
+  assert.deepEqual(statuses([done]), ["changed"]);
   files.delete("src/greet.ts");
-  assert.deepEqual(statuses(done.text), ["missing"]);
+  assert.deepEqual(statuses([done]), ["missing"]);
 });
 
-test("确认把记录写在记号上：段哈希与整文件的 blob 名，都是 12 位前缀、都在进程里算", () => {
-  const { service } = setup();
-  const done = service.confirm(DOC, TEXT, plain);
+test("确认记下段哈希与整文件的 blob 名，都是 12 位前缀、都在进程里算", () => {
+  const { pinner } = setup();
+  const done = confirmOne(pinner, UNCONFIRMED);
   const hash = hashSpan(CODE.slice(1, 3));
   const blob = blobOf(CODE);
   assert.match(hash, /^[0-9a-f]{12}$/);
   assert.match(blob, /^[0-9a-f]{12}$/);
-  assert.match(done.text, new RegExp(`^REF ref file="src/greet\\.ts" lines="2-3" hash="${hash}" blob="${blob}"$`, "m"));
-  assert.deepEqual(service.resolve(DOC, done.text).items[0]!.reference.record, { kind: "content", hash, blob });
+  assert.deepEqual(done, { target: SPAN, record: { kind: "content", hash, blob } });
 });
 
-test("一篇文档两个格式都认领：报错，不靠顺序定胜负", () => {
-  const { service } = setup();
-  const both = createService({ formats: [fakeFormat("fake-a", ".a"), fakeFormat("fake-也是-a", "a")], reader: memoryReader(new Map()), history: NO_HISTORY });
-  assert.equal(service.formatFor(DOC)?.name, "fake-a");
-  assert.equal(service.formatFor("d.txt"), null);
-  assert.throws(() => both.formatFor(DOC), /都认领了这篇/);
-  assert.throws(() => both.resolve("d.txt", ""), /没有格式认领这篇文档/);
+test("结果与传入的顺序一一对应：判定带着原来那处钉，确认的每一步带着它的判定", () => {
+  const { pinner } = setup();
+  const pins: Pin[] = [
+    { target: { kind: "span", file: "src/nowhere.ts", a: 1, b: 2 }, record: null },
+    UNCONFIRMED,
+    { target: { kind: "has", file: "src/greet.ts", text: "greet" }, record: null },
+  ];
+  const verdicts = pinner.check(pins);
+  assert.deepEqual(verdicts.map((v) => v.pin), pins);
+  assert.deepEqual(verdicts.map((v) => v.status), ["missing", "unconfirmed", "unconfirmed"]);
+  const steps = pinner.confirm(verdicts, plain);
+  assert.deepEqual(steps.map((s) => s.verdict), verdicts);
+  assert.deepEqual(steps.map((s) => s.action), ["refused", "recorded", "recorded"]);
 });
 
-test("resolveRefs：引用别人认好了也走同一条路，状态一样", () => {
-  const { service } = setup();
-  const refs: Reference[] = [{ target: SPAN, record: null, at: 0 }];
-  assert.deepEqual(service.resolveRefs(DOC, refs).items.map((i) => i.status), ["unconfirmed"]);
+test("同一段钉两处：各记各的，都新鲜", () => {
+  const { pinner, statuses } = setup();
+  const steps = pinner.confirm(pinner.check([UNCONFIRMED, UNCONFIRMED]), plain);
+  const written = steps.map((s) => s.written!);
+  assert.equal(written.length, 2);
+  assert.deepEqual(statuses(written), ["fresh", "fresh"]);
 });
 
-test("同一篇里两处引用指向同一段：各带各的记录，都新鲜", () => {
-  const { service, statuses } = setup();
-  const done = service.confirm(DOC, `${REF}\n\n${REF}\n`, plain);
-  assert.deepEqual(statuses(done.text), ["fresh", "fresh"]);
-  assert.equal(done.text.match(/hash="/g)?.length, 2);
-});
-
-test("一处钉不住只是那一处不动：红的原样留着，别的照写", () => {
-  const { service } = setup();
-  const bad = refLine({ kind: "span", file: "src/nowhere.ts", a: 1, b: 2 });
-  const text = `${REF}\n\n${bad}\n`;
-  const done = service.confirm(DOC, text, plain);
-  assert.deepEqual(done.steps.map((s) => s.action), ["recorded", "refused"]);
-  assert.equal(done.steps[1]!.item.reason, "file-missing");
-  const lines = done.text.split("\n");
-  assert.match(lines[0]!, /hash="[0-9a-f]{12}"/, "钉得住的那处写上了记录");
-  assert.equal(lines[2], bad, "红的那处一个字没动");
-});
-
-test("草稿记号：判定层认它、报未确认；确认后格式换成正式记号", () => {
-  const { service } = setup();
-  const text = "# 标题\n\n@@docfirst ref src/greet.ts:2-3 @@\n\n尾巴\n";
-  const listing = service.resolve(DOC, text);
-  assert.deepEqual(listing.items.map((i) => [i.status, i.reference.extra?.draft]), [["unconfirmed", true]]);
-  const done = service.confirm(DOC, text, plain);
-  assert.match(done.text, /^REF ref file="src\/greet\.ts" lines="2-3" hash="[0-9a-f]{12}" blob="[0-9a-f]{12}"$/m);
-  assert.doesNotMatch(done.text, /@@docfirst/);
-});
-
-test("没写记录属性的正式记号（人手写的）跟草稿一样算未确认，确认时补上记录", () => {
-  const { service, statuses } = setup();
-  assert.deepEqual(statuses(TEXT), ["unconfirmed"]);
-  assert.deepEqual(service.confirm(DOC, TEXT, plain).steps.map((s) => s.action), ["recorded"]);
-});
-
-test("草稿记号的哨兵：头尾 @@ 都在才算，载荷要过 toTarget", () => {
-  const where = "第 1 行";
-  assert.deepEqual(draftOf("@@docfirst ref src/greet.ts:2-3 @@", where), { kind: "span", file: "src/greet.ts", a: 2, b: 3 });
-  assert.deepEqual(draftOf("   @@docfirst ref src/greet.ts:2-3 @@  ", where), { kind: "span", file: "src/greet.ts", a: 2, b: 3 });
-  assert.equal(draftOf("@@docfirst ref src/greet.ts:2-3", where), null, "少尾哨兵");
-  assert.equal(draftOf("docfirst ref src/greet.ts:2-3 @@", where), null, "少头哨兵");
-  assert.equal(draftOf("这句话里有 @@docfirst ref src/greet.ts:2-3 @@ 不算", where), null);
-  assert.throws(() => draftOf("@@docfirst ref src/greet.ts:3-2 @@", where), /行号不合理/);
-  assert.equal(draftOf("@@docfirst probe src @@", where), null, "动作词不认识");
+test("一处钉不住只是那一处不记：红的原样不动，别的照记", () => {
+  const { pinner } = setup();
+  const bad: Pin = { target: { kind: "span", file: "src/nowhere.ts", a: 1, b: 2 }, record: null };
+  const steps = pinner.confirm(pinner.check([UNCONFIRMED, bad]), plain);
+  assert.deepEqual(steps.map((s) => s.action), ["recorded", "refused"]);
+  assert.equal(steps[1]!.verdict.reason, "file-missing");
+  assert.equal(steps[1]!.written, undefined, "红的那处不记");
 });
 
 test("整文件：不写行号就是整个文件；末尾追加也算变；取不到旧内容就没有 diff", () => {
-  const { files, service, statuses } = setup();
-  const done = service.confirm(DOC, `${refLine({ kind: "file", file: "src/greet.ts" })}\n`, plain);
-  assert.deepEqual(service.resolve(DOC, done.text).items.map((i) => [i.status, i.lines]), [["fresh", [1, 4]]]);
+  const { files, pinner, statuses } = setup();
+  const done = confirmOne(pinner, { target: { kind: "file", file: "src/greet.ts" }, record: null });
+  assert.deepEqual(pinner.check([done]).map((v) => [v.status, v.lines]), [["fresh", [1, 4]]]);
   files.set("src/greet.ts", [...CODE.slice(0, -1), "export const NAME = 1;", ""]);
-  const item = service.resolve(DOC, done.text).items[0]!;
-  assert.deepEqual([item.status, item.reason, item.diff], ["changed", "changed", undefined]);
-  assert.deepEqual(statuses(done.text), ["changed"]);
+  const verdict = pinner.check([done])[0]!;
+  assert.deepEqual([verdict.status, verdict.reason, verdict.diff], ["changed", "changed", undefined]);
+  assert.deepEqual(statuses([done]), ["changed"]);
 });
 
 test("目录树：记录是名字表的哈希；名字变了是黄、给当前表不给增删；目录没了是红", () => {
-  const { files, service } = setup();
+  const { files, pinner } = setup();
   files.set("src/util.ts", ["export const a = 1;"]);
   files.set("src/lib/deep.ts", ["x"]);
-  const done = service.confirm(DOC, `${refLine({ kind: "tree", dir: "src", depth: 1 })}\n`, plain);
-  assert.match(done.text, new RegExp(`^REF tree dir="src" depth="1" hash="${hashNames(["greet.ts", "lib/", "util.ts"])}"$`, "m"));
-  assert.deepEqual(service.resolve(DOC, done.text).items[0]!.current, ["greet.ts", "lib/", "util.ts"]);
+  const done = confirmOne(pinner, { target: { kind: "tree", dir: "src", depth: 1 }, record: null });
+  assert.deepEqual(done.record, { kind: "tree", hash: hashNames(["greet.ts", "lib/", "util.ts"]) });
+  assert.deepEqual(pinner.check([done])[0]!.current, ["greet.ts", "lib/", "util.ts"]);
 
   files.set("src/tag.ts", ["t"]);
   files.delete("src/util.ts");
-  const changed = service.resolve(DOC, done.text).items[0]!;
+  const changed = pinner.check([done])[0]!;
   assert.deepEqual([changed.status, changed.reason, changed.diff, changed.old], ["changed", "changed", undefined, undefined]);
   assert.deepEqual(changed.current, ["greet.ts", "lib/", "tag.ts"]);
 
   for (const key of [...files.keys()]) if (key.startsWith("src/")) files.delete(key);
-  const gone = service.resolve(DOC, done.text).items[0]!;
+  const gone = pinner.check([done])[0]!;
   assert.deepEqual([gone.status, gone.reason], ["missing", "dir-missing"]);
 });
 
-test("名字：正式记号本身就是确认过；文件里有这个字面量就绿，没了红；草稿要 confirm", () => {
-  const { files, service, statuses } = setup();
+test("名字：有记录就是确认过；文件里有这个字面量就绿，没了红；没记录的要 confirm", () => {
+  const { files, pinner, statuses } = setup();
   const has: Target = { kind: "has", file: "src/greet.ts", text: "export function greet" };
-  const fresh = service.resolve(DOC, `${refLine(has)}\n`).items[0]!;
+  const confirmed: Pin = { target: has, record: { kind: "has" } };
+  const fresh = pinner.check([confirmed])[0]!;
   assert.deepEqual([fresh.status, fresh.lines], ["fresh", [2, 2]]);
-  const draft = '@@docfirst has src/greet.ts "export function greet" @@\n';
-  assert.deepEqual(statuses(draft), ["unconfirmed"]);
-  assert.match(service.confirm(DOC, draft, plain).text, /^REF has file="src\/greet\.ts" text="export function greet"$/m);
+  const unconfirmed: Pin = { target: has, record: null };
+  assert.deepEqual(statuses([unconfirmed]), ["unconfirmed"]);
+  assert.deepEqual(confirmOne(pinner, unconfirmed), confirmed);
   files.set("src/greet.ts", CODE.map((l) => l.replace("greet(", "hello(")));
-  assert.deepEqual(service.resolve(DOC, `${refLine(has)}\n`).items.map((i) => [i.status, i.reason]), [["missing", "text-missing"]]);
-  assert.equal(service.confirm(DOC, draft, plain).steps[0]!.action, "refused");
+  assert.deepEqual(pinner.check([confirmed]).map((v) => [v.status, v.reason]), [["missing", "text-missing"]]);
+  assert.equal(pinner.confirm(pinner.check([unconfirmed]), plain)[0]!.action, "refused");
 });
 
-test("取不到旧内容时滑窗跟行段：代码整体下移，绿、带新行号；confirm 机械写回新行号与新 blob", () => {
-  const { files, service } = setup();
-  const done = service.confirm(DOC, TEXT, plain);
+test("取不到旧内容时滑窗跟行段：代码整体下移，绿、带新行号；confirm 记下新行号与新 blob", () => {
+  const { files, pinner } = setup();
+  const done = confirmOne(pinner, UNCONFIRMED);
   files.set("src/greet.ts", ["// 新加的一行", "// 又一行", ...CODE]);
-  const item = service.resolve(DOC, done.text).items[0]!;
-  assert.equal(item.status, "fresh");
-  assert.deepEqual(item.lines, [4, 5]);
-  const again = service.confirm(DOC, done.text, plain);
-  assert.deepEqual(again.steps.map((s) => s.action), ["moved"]);
-  assert.match(again.text, new RegExp(`^REF ref file="src/greet\\.ts" lines="4-5" hash="${hashSpan(CODE.slice(1, 3))}" blob="${blobOf(files.get("src/greet.ts")!)}"$`, "m"));
-  assert.deepEqual(service.confirm(DOC, again.text, plain).steps.map((s) => s.action), ["unchanged"], "写回之后原地不动，再确认一个字不改");
+  const verdict = pinner.check([done])[0]!;
+  assert.equal(verdict.status, "fresh");
+  assert.deepEqual(verdict.lines, [4, 5]);
+  const steps = pinner.confirm([verdict], plain);
+  assert.deepEqual(steps.map((s) => s.action), ["moved"]);
+  const moved = steps[0]!.written!;
+  assert.deepEqual(moved, { target: { kind: "span", file: "src/greet.ts", a: 4, b: 5 }, record: { kind: "content", hash: hashSpan(CODE.slice(1, 3)), blob: blobOf(files.get("src/greet.ts")!) } });
+  assert.deepEqual(pinner.confirm(pinner.check([moved]), plain).map((s) => s.action), ["unchanged"], "记下之后原地不动，再确认什么都不记");
 });
 
 test("滑窗找不到这段：有变动、位置不明，行号停在旧位置；旧位置超出文件才算缺失", () => {
-  const { files, service } = setup();
-  const done = service.confirm(DOC, TEXT, plain);
+  const { files, pinner } = setup();
+  const done = confirmOne(pinner, UNCONFIRMED);
   files.set("src/greet.ts", ["// 新加的一行", ...CODE.map((l) => l.replace("hello", "hey"))]);
-  const moved = service.resolve(DOC, done.text).items[0]!;
+  const moved = pinner.check([done])[0]!;
   assert.deepEqual([moved.status, moved.reason, moved.lines, moved.diff], ["changed", "unlocated", [2, 3], undefined]);
 
   files.set("src/greet.ts", ["// greet", ""]);
-  const gone = service.resolve(DOC, done.text).items[0]!;
+  const gone = pinner.check([done])[0]!;
   assert.deepEqual([gone.status, gone.reason], ["missing", "vanished"]);
 });
 
 test("滑窗撞车：取离旧位置最近的一处；两处一样近就不猜", () => {
-  const { files, service } = setup();
-  const done = service.confirm(DOC, TEXT, plain);
+  const { files, pinner } = setup();
+  const done = confirmOne(pinner, UNCONFIRMED);
   const [fn, ret] = [CODE[1]!, CODE[2]!];
   files.set("src/greet.ts", ["a", "b", "c", fn, ret, "}", "d", fn, ret, "}", ""]);
-  const near = service.resolve(DOC, done.text).items[0]!;
+  const near = pinner.check([done])[0]!;
   assert.deepEqual([near.status, near.lines], ["fresh", [4, 5]], "4 和 8 两处，离旧位置 2 更近的是 4");
 
   files.set("src/greet.ts", [fn, ret, fn, ret, ""]);
-  const tie = service.resolve(DOC, done.text).items[0]!;
+  const tie = pinner.check([done])[0]!;
   assert.deepEqual([tie.status, tie.reason], ["changed", "unlocated"], "1 和 3 离旧位置 2 一样近，不猜");
 });
 
-test("黄灯：不带 accept 原样不动、列为待复核；带 accept 按今天的内容重新记，之后新鲜", () => {
-  const { files, service, statuses } = setup();
-  const done = service.confirm(DOC, TEXT, plain);
+test("黄灯：不带 accept 不记、列为待复核；带 accept 按今天的内容重新记，之后新鲜", () => {
+  const { files, pinner, statuses } = setup();
+  const done = confirmOne(pinner, UNCONFIRMED);
   files.set("src/greet.ts", CODE.map((l) => l.replace("hello", "hey")));
-  const pending = service.confirm(DOC, done.text, plain);
-  assert.deepEqual(pending.steps.map((s) => s.action), ["needs-accept"]);
-  assert.equal(pending.changed, false);
-  const signed = service.confirm(DOC, done.text, accept);
-  assert.deepEqual(signed.steps.map((s) => s.action), ["accepted"]);
-  assert.deepEqual(statuses(signed.text), ["fresh"]);
+  const pending = pinner.confirm(pinner.check([done]), plain);
+  assert.deepEqual(pending.map((s) => [s.action, s.written]), [["needs-accept", undefined]]);
+  const signed = pinner.confirm(pinner.check([done]), accept);
+  assert.deepEqual(signed.map((s) => s.action), ["accepted"]);
+  assert.deepEqual(statuses([signed[0]!.written!]), ["fresh"]);
 });
 
 test("内容一字没变就不问旧内容来源；变了才问，一处问一次", () => {
   const asked: string[] = [];
   const counting: History = { oldText: (file, blob) => (asked.push(`${file}@${blob}`), null), hunks: NO_HISTORY.hunks };
-  const { files, service, statuses } = setup(counting);
-  const done = service.confirm(DOC, TEXT, plain);
-  assert.deepEqual(statuses(done.text), ["fresh"]);
+  const { files, pinner, statuses } = setup(counting);
+  const done = confirmOne(pinner, UNCONFIRMED);
+  assert.deepEqual(statuses([done]), ["fresh"]);
   assert.deepEqual(asked, [], "段哈希对得上就不取旧内容");
   files.set("src/greet.ts", CODE.map((l) => l.replace("hello", "hey")));
-  statuses(done.text);
+  statuses([done]);
   assert.deepEqual(asked, [`src/greet.ts@${blobOf(CODE)}`]);
 });
 
@@ -248,22 +216,23 @@ test("取得到旧内容：按 hunk 表把旧行段映到今天，内容变了�
       { oldStart: 3, oldLen: 1, newStart: 5, newLen: 1 },
     ],
   };
-  const { files, service } = setup(history);
-  const done = service.confirm(DOC, TEXT, plain);
+  const { files, pinner } = setup(history);
+  const done = confirmOne(pinner, UNCONFIRMED);
   files.set("src/greet.ts", ["// a", "// b", ...CODE.map((l) => l.replace("hello", "hey"))]);
-  const item = service.resolve(DOC, done.text).items[0]!;
-  assert.deepEqual([item.status, item.reason, item.lines], ["changed", "changed", [4, 5]]);
-  assert.deepEqual(item.old, CODE.slice(1, 3));
-  assert.match(item.diff!, /^- {3}return `hello/m);
-  assert.match(item.diff!, /^\+ {3}return `hey/m);
+  const verdict: Verdict = pinner.check([done])[0]!;
+  assert.deepEqual([verdict.status, verdict.reason, verdict.lines], ["changed", "changed", [4, 5]]);
+  assert.deepEqual(verdict.old, CODE.slice(1, 3));
+  assert.match(verdict.diff!, /^- {3}return `hello/m);
+  assert.match(verdict.diff!, /^\+ {3}return `hey/m);
 });
 
 test("从旧记录簿迁来的只有 hash 的记录：照样核对，挪了位置靠滑窗", () => {
-  const { files, service } = setup();
-  const text = `REF ref file="src/greet.ts" lines="2-3" hash="${hashSpan(CODE.slice(1, 3))}"\n`;
-  assert.deepEqual(service.resolve(DOC, text).items.map((i) => i.status), ["fresh"]);
+  const { files, pinner } = setup();
+  const record: MemoRecord = { kind: "content", hash: hashSpan(CODE.slice(1, 3)) };
+  const pin: Pin = { target: SPAN, record };
+  assert.deepEqual(pinner.check([pin]).map((v) => v.status), ["fresh"]);
   files.set("src/greet.ts", ["// 头一行", ...CODE]);
-  assert.deepEqual(service.resolve(DOC, text).items.map((i) => [i.status, i.lines]), [["fresh", [3, 4]]]);
+  assert.deepEqual(pinner.check([pin]).map((v) => [v.status, v.lines]), [["fresh", [3, 4]]]);
 });
 
 test("归一化：LF、去行尾空白、去末尾空行；缩进和注释留着", () => {

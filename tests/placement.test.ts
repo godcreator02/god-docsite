@@ -37,7 +37,7 @@ async function setup(outputs: string) {
   const project = await loadProject(root);
   // 记号先确认掉：草稿记号还没有展示区，投影不出内容——摆放要验的正是投影过的那份正文
   for (const doc of project.docs()) {
-    const done = project.service.confirm(doc, project.read(doc), { accept: false });
+    const done = project.pinning.confirmDoc(doc, project.read(doc), { accept: false });
     assert.ok(done.steps.every((step) => step.action !== "refused"), `${doc} 没确认下来`);
     if (done.changed) project.write(doc, done.text);
   }

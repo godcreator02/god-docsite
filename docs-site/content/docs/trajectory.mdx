@@ -81,7 +81,7 @@ description: content/trajectory/ 下的轨迹卡怎么被读出、校验、建�
 
 一是 `check`、`confirm`、`render` 遍历的文档不含 `trajectory/` 与 `future/`，卡上的记号不会被核对，也不会被确认：
 
-{/* ref file="../packages/docfirst-workflow/src/project/load.ts" lines="86-87" hash="e60f111d117a" blob="485972d4fa88" */}
+{/* ref file="../packages/docfirst-workflow/src/project/load.ts" lines="91-92" hash="e60f111d117a" blob="0d859eff2438" */}
 
 二是读卡目录时逐行查每张卡的正文，草稿记号、md 正式记号、mdx 正式记号三种写法出现任何一种，都记成一条问题：
 

@@ -23,10 +23,10 @@
 import { existsSync } from "node:fs";
 import { join, relative, sep } from "node:path";
 import { REASON_TEXT } from "@godcreator/docfirst-pin";
-import type { ConfirmStep, Item, Listing } from "@godcreator/docfirst-pin";
 import { buildTrajectory } from "@godcreator/docfirst-trajectory";
-import type { DocFormat } from "../format/index.ts";
+import type { DocFormat, Item, Listing } from "../format/index.ts";
 import { targetKey } from "../marker/index.ts";
+import type { ConfirmStep } from "../pinning/index.ts";
 import { createUncommittedProbe, loadProject, migrateLedger, scanCardDir } from "../project/index.ts";
 import type { PlacedWrite, UncommittedProbe } from "../project/index.ts";
 import type { CardProblemReport, CheckReport, DocReport, OutputReport, RefReport } from "./report.ts";
@@ -160,7 +160,7 @@ function pickDocs(project: Project, docs: string[], named: string[]): { docs: st
 
 /** 一篇的机械写回：逐处打一行结果，返回这篇的红（缺失与钉不住的） */
 function confirm(project: Project, doc: string, accept: boolean): number {
-  const { text, changed, steps } = project.service.confirm(doc, project.read(doc), { accept });
+  const { text, changed, steps } = project.pinning.confirmDoc(doc, project.read(doc), { accept });
   if (changed) project.write(doc, text);
   let red = 0;
   for (const step of steps) {
@@ -176,7 +176,7 @@ function confirmLine(doc: string, { item, action, written, problem }: ConfirmSte
   const key = targetKey(item.reference.target);
   switch (action) {
     case "recorded":
-      return `✅ ${doc}  ${key}  已确认${item.reference.extra?.draft === true ? "，草稿记号已换成正式记号" : ""}`;
+      return `✅ ${doc}  ${key}  已确认${item.reference.draft ? "，草稿记号已换成正式记号" : ""}`;
     case "moved": {
       const target = written!.target;
       return `✅ ${doc}  ${key}  内容没变、挪到了 ${target.kind === "span" ? `${target.a}-${target.b}` : "新位置"}，已写回新行号`;
@@ -223,7 +223,7 @@ async function checkCommand(project: Project, docs: string[], json: boolean): Pr
   const report: CheckReport = { ok: true, red: 0, docs: [], trajectory: [] };
   const uncommitted = createUncommittedProbe(project.root);
   for (const doc of docs) {
-    const { report: entry, lines } = await check(project, doc, project.read(doc), project.service.formatFor(doc)!, uncommitted);
+    const { report: entry, lines } = await check(project, doc, project.read(doc), project.formatFor(doc)!, uncommitted);
     report.docs.push(entry);
     report.red += entry.red;
     if (!json) for (const line of lines) console.log(line);
@@ -303,7 +303,7 @@ function refReport(item: Item, blocking: boolean): RefReport {
     status: item.status,
     line: item.reference.at + 1,
     lines: item.lines,
-    draft: item.reference.extra?.draft === true,
+    draft: item.reference.draft,
     ...(item.reason !== undefined ? { reason: item.reason } : {}),
     ...(item.diff !== undefined ? { diff: item.diff } : {}),
     ...(blocking ? { blocking: true as const } : {}),
@@ -326,7 +326,7 @@ interface DocCheck {
 }
 
 async function check(project: Project, doc: string, text: string, format: DocFormat, uncommitted: UncommittedProbe): Promise<DocCheck> {
-  const listing: Listing = project.service.resolve(doc, text);
+  const listing: Listing = project.pinning.checkDoc(doc, text);
   const lines: string[] = [];
   const items: RefReport[] = [];
   for (const item of listing.items) {

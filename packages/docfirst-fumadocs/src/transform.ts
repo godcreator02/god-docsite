@@ -5,7 +5,7 @@
  *                  文件对上，data-dot 只带状态点的颜色；点长什么样归站的 pre 组件
  *   data.docfirst   给 md 的序列化回调：md 里不要 meta，要一行来源注释
  */
-import type { Listing } from "@godcreator/docfirst-pin";
+import type { Listing } from "@godcreator/docfirst-workflow";
 import { draftIn, lineOf, markerOf, walk } from "@godcreator/docfirst-workflow/mdx";
 import type { TreeNode } from "@godcreator/docfirst-workflow/mdx";
 import { nodeFor } from "./blocks.ts";

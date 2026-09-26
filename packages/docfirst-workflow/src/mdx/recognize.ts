@@ -5,7 +5,8 @@
  * 围栏里的同样文字是 code 节点、行内的是 mdxTextExpression，都认不出来——这就是走语法树的理由。
  * 草稿记号是单独成段的一行普通文字，记号语法定的写法。
  */
-import type { Reference, Target } from "@godcreator/docfirst-pin";
+import type { Target } from "@godcreator/docfirst-pin";
+import type { Reference } from "../format/index.ts";
 import { draftOf, parseFormal } from "../marker/index.ts";
 import { lineOf, walk } from "./tree.ts";
 import type { TreeNode } from "./tree.ts";
@@ -35,10 +36,10 @@ export function recognize(tree: TreeNode): Reference[] {
     const payload = markerOf(node);
     if (payload !== null) {
       const formal = parseFormal(payload, `第 ${line} 行`);
-      if (formal !== null) refs.push({ ...formal, at: line - 1, extra: { draft: false } });
+      if (formal !== null) refs.push({ ...formal, at: line - 1, draft: false });
     }
     const draft = draftIn(node);
-    if (draft !== null) refs.push({ target: draft, record: null, at: line - 1, extra: { draft: true } });
+    if (draft !== null) refs.push({ target: draft, record: null, at: line - 1, draft: true });
   });
   return refs;
 }

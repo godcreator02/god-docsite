@@ -1,16 +1,17 @@
 /**
  * 摆放的另一个宿主：生成物存在内存里，一个字节都不落盘、一次 git 都不起。
  *
- * `createPlacing` 只经 `PlacingHost` 认识外面——项目那半（服务、落点表、正本原文）
+ * `createPlacing` 只经 `PlacingHost` 认识外面——项目那半（钉码编排、格式、落点表、正本原文）
  * 和生成物那半（读一个落点、写一个落点）都在接口上。真盘那份适配器住 `load.ts`，这儿是第二份：
  * 落点在一张 Map 里，于是「摆了什么、摆到哪个键上、盘上那份被动过之后判成什么」全部直接看得见。
  */
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { createService } from "../packages/docfirst-pin/src/index.ts";
-import type { Listing, Reader } from "../packages/docfirst-pin/src/index.ts";
-import { RenderRefusal } from "../packages/docfirst-workflow/src/format/index.ts";
-import type { DocFormat } from "../packages/docfirst-workflow/src/format/index.ts";
+import { createPinner } from "../packages/docfirst-pin/src/index.ts";
+import { formatPicker, RenderRefusal } from "../packages/docfirst-workflow/src/format/index.ts";
+import type { DocFormat, Listing } from "../packages/docfirst-workflow/src/format/index.ts";
+import { createPinning } from "../packages/docfirst-workflow/src/pinning/index.ts";
+import type { Pinning } from "../packages/docfirst-workflow/src/pinning/index.ts";
 import { createPlacing } from "../packages/docfirst-workflow/src/project/index.ts";
 import type { PlacingHost, ProjectConfig } from "../packages/docfirst-workflow/src/project/index.ts";
 import { NO_HISTORY } from "./repo.ts";
@@ -35,12 +36,15 @@ const BODY = "# 摆放\n\n一段**加粗**的正文，&#x2A; 原样\n";
 /** 正本：点名的字段随行到生成物头部，没点名的剥掉 */
 const SOURCE = ["---", "name: block-note", "description: 块笔记怎么用", "secret: 不该随行", "---", "", "# 摆放", ""].join("\n");
 
+/** 只认这一个格式、什么都读不到的钉码编排：这份测试不验判定 */
+const pinningOf = (only: DocFormat): Pinning => createPinning(createPinner({ reader: { read: () => null }, history: NO_HISTORY }), formatPicker([only]));
+
 /** 内存宿主：落点是一张 `to → 内容` 的表，没有目录、没有路径解析、没有磁盘 */
 function memoryHost(outputs: ProjectConfig["outputs"], source = SOURCE) {
   const placed = new Map<string, string>();
-  const reader: Reader = { read: () => null };
   const host: PlacingHost = {
-    service: createService({ formats: [format], reader, history: NO_HISTORY }),
+    pinning: pinningOf(format),
+    formatFor: formatPicker([format]),
     placements: (doc) => (outputs?.[doc] ?? []).map((raw) => (typeof raw === "string" ? { to: raw, frontmatter: [] } : { to: raw.to, frontmatter: raw.frontmatter ?? [] })),
     read: () => source,
     readPlaced: (to) => placed.get(to) ?? null,
@@ -94,10 +98,11 @@ test("内存宿主：源里缺点名的字段，这个落点一个字都不写",
 test("内存宿主：check 收到调用方判好的清单就原样交给格式，不再判一遍", async () => {
   const handed: Listing[] = [];
   const counted: DocFormat = { ...format, renderAi: (text, listing) => (handed.push(listing), format.renderAi!(text, listing)) };
-  const service = createService({ formats: [counted], reader: { read: () => null }, history: NO_HISTORY });
+  const pinning = pinningOf(counted);
   let resolved = 0;
   const placing = createPlacing({
-    service: { ...service, resolve: (doc, text) => (resolved += 1, service.resolve(doc, text)) },
+    pinning: { ...pinning, checkDoc: (doc, text) => (resolved += 1, pinning.checkDoc(doc, text)) },
+    formatFor: formatPicker([counted]),
     placements: () => [{ to: "README.md", frontmatter: [] }],
     read: () => SOURCE,
     readPlaced: () => BODY,
@@ -117,7 +122,8 @@ test("内存宿主：格式拒绝渲染，每个落点都报 unrenderable、一�
   const refusing: DocFormat = { ...format, renderAi: () => { throw new RenderRefusal("第 3 行是草稿记号，先 docfirst confirm"); } };
   const placed = new Map<string, string>();
   const host = (renderer: DocFormat): PlacingHost => ({
-    service: createService({ formats: [renderer], reader: { read: () => null }, history: NO_HISTORY }),
+    pinning: pinningOf(renderer),
+    formatFor: formatPicker([renderer]),
     placements: () => [{ to: "README.md", frontmatter: [] }, { to: "SKILL.md", frontmatter: ["name"] }],
     read: () => SOURCE,
     readPlaced: (to) => placed.get(to) ?? null,

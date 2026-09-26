@@ -1,13 +1,17 @@
 /**
- * 测试夹具：临时目录里起一个真 git 仓，一份代码、几篇文档，装配判定服务。
+ * 测试夹具：临时目录里起一个真 git 仓，一份代码、几篇文档，装配钉码编排。
  * 不走 loadProject——临时目录里解析不到包名；装配的零件（host 那层的读取器与旧内容来源）直接拿来用。
  */
 import { execFileSync } from "node:child_process";
 import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
-import { createService } from "../packages/docfirst-pin/src/index.ts";
-import type { ConfirmResult, Format, History, Service } from "../packages/docfirst-pin/src/index.ts";
+import { createPinner } from "../packages/docfirst-pin/src/index.ts";
+import type { History } from "../packages/docfirst-pin/src/index.ts";
+import { formatPicker } from "../packages/docfirst-workflow/src/format/index.ts";
+import type { DocFormat } from "../packages/docfirst-workflow/src/format/index.ts";
+import { createPinning } from "../packages/docfirst-workflow/src/pinning/index.ts";
+import type { ConfirmResult, Pinning } from "../packages/docfirst-workflow/src/pinning/index.ts";
 import { createGitHistory, createReader } from "../packages/docfirst-workflow/src/project/index.ts";
 
 export const CODE = [
@@ -34,7 +38,7 @@ export const NO_HISTORY: History = {
 
 export interface Repo {
   root: string;
-  service: Service;
+  pinning: Pinning;
   write(rel: string, text: string): void;
   read(rel: string): string;
   drop(rel: string): void;
@@ -46,7 +50,7 @@ export interface Repo {
 }
 
 export interface RepoOptions {
-  formats: Format[];
+  formats: DocFormat[];
   /** 不给就用 git 版 */
   history?: History;
 }
@@ -64,7 +68,7 @@ export function setupRepo({ formats, history }: RepoOptions): Repo {
 
   const api: Repo = {
     root,
-    service: createService({ formats, reader: createReader(root), history: history ?? createGitHistory(root) }),
+    pinning: createPinning(createPinner({ reader: createReader(root), history: history ?? createGitHistory(root) }), formatPicker(formats)),
     write(rel, text) {
       mkdirSync(dirname(join(root, rel)), { recursive: true });
       writeFileSync(join(root, rel), text);
@@ -75,9 +79,9 @@ export function setupRepo({ formats, history }: RepoOptions): Repo {
       run(root, [...SETTINGS, "add", "-A"]);
       run(root, [...SETTINGS, "commit", "-q", "-m", message]);
     },
-    statuses: (doc, text) => api.service.resolve(doc, text).items.map((i) => i.status),
+    statuses: (doc, text) => api.pinning.checkDoc(doc, text).items.map((i) => i.status),
     confirm(doc, accept = false) {
-      const done = api.service.confirm(doc, api.read(doc), { accept });
+      const done = api.pinning.confirmDoc(doc, api.read(doc), { accept });
       if (done.changed) api.write(doc, done.text);
       return done;
     },

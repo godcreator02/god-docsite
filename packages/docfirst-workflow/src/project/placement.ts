@@ -12,9 +12,9 @@
  * 摆出去的和守着的是**同一段正文**——两条路走的是同一个 `bodyOf`，所以摆完必然是新鲜的。
  */
 import { isAbsolute, relative, resolve, sep } from "node:path";
-import type { Listing, Service } from "@godcreator/docfirst-pin";
 import { isRenderRefusal } from "../format/index.ts";
-import type { DocFormat } from "../format/index.ts";
+import type { DocFormat, Listing } from "../format/index.ts";
+import type { Pinning } from "../pinning/index.ts";
 import type { ProjectConfig } from "./load.ts";
 
 /** outputs 里的一个目标，对象写法：`to` 相对项目根；`frontmatter` 点名哪些字段随行到生成物头部 */
@@ -75,12 +75,13 @@ export interface Placing {
 }
 
 /**
- * 摆放依赖的外部接口。前半是项目面（判定服务、这篇挂了哪些落点、这篇的原文），
+ * 摆放依赖的外部接口。前半是项目面（钉码编排、这篇归哪个格式、这篇挂了哪些落点、这篇的原文），
  * 装配时把装好的项目递进来；后半是**生成物的存放**——摆放不知道落点是文件还是别的什么，
  * 生产给的是真盘那份，测试给的是内存那份。
  */
 export interface PlacingHost {
-  service: Service<DocFormat>;
+  pinning: Pinning;
+  formatFor(doc: string): DocFormat | null;
   placements(doc: string): Placement[];
   /** mdx 正本的原文 */
   read(doc: string): string;
@@ -201,7 +202,7 @@ export function createPlacing(host: PlacingHost): Placing {
   function placingInputs(doc: string): { targets: Placement[]; text: string; format: DocFormat } | null {
     const targets = host.placements(doc);
     if (targets.length === 0) return null;
-    const format = host.service.formatFor(doc);
+    const format = host.formatFor(doc);
     if (format === null || typeof format.renderAi !== "function") return null;
     return { targets, text: host.read(doc), format };
   }
@@ -210,7 +211,7 @@ export function createPlacing(host: PlacingHost): Placing {
    * 摆放产物的正文：问格式要 ai 产物再整形。同一篇的几个落点共用这一份，frontmatter 各戴各的。
    * 格式拒绝渲染（RenderRefusal）交回原因，由调用方把这篇的每个落点报成红；别的错照原样抛
    */
-  function bodyOf(doc: string, text: string, format: DocFormat, listing = host.service.resolve(doc, text)): { body: string } | { refusal: string } {
+  function bodyOf(doc: string, text: string, format: DocFormat, listing = host.pinning.checkDoc(doc, text)): { body: string } | { refusal: string } {
     try {
       return { body: tidy(format.renderAi!(text, listing)) };
     } catch (err) {

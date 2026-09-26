@@ -120,7 +120,7 @@ function distClosureSpecs(dir: string, file: string): string[] {
 
 /**
  * 每个包不许依赖哪几个兄弟包。**列的是禁止的，不是允许的**——理由跟下面目录那张表一样。
- *   pin         钉码：判新鲜只要格式、读取器、旧内容来源三样注进来的东西，谁都不认识
+ *   pin         钉码：判新鲜只要读取器、旧内容来源两样传进来的东西，谁都不认识
  *   trajectory  轨迹：卡怎么解析、盘怎么建模画，跟钉码无关；读卡目录的那一半在 workflow
  *   workflow    命令行与项目：认识钉码与轨迹，不认识任何站的宿主，所以也不认识 fumadocs 适配
  *   fumadocs    站那一侧：认识以上三个，除了站谁都不认识它
@@ -177,6 +177,21 @@ test("pin 零依赖：清单里没有 dependencies / peerDependencies，源码�
   }
 });
 
+/** 文档文本那一侧的名字：mdx、记号写法、格式接口、带文档位置的引用与清单。钉码核心只认目标与记录，一个都不该有 */
+const DOC_SIDE_WORDS = /\bmdx\b|[Mm]arker|[Dd]raft|formalOf|parseFormal|targetKey|@@docfirst|\bFormat\b|\bReference\b|\bListing\b/;
+
+test("钉码核心不接触文档文本：源码与产物里没有 mdx、记号写法、格式接口、引用与清单", () => {
+  const dir = srcOf("docfirst-pin");
+  for (const file of sourcesIn(dir)) {
+    const hit = DOC_SIDE_WORDS.exec(readFileSync(file, "utf8"));
+    assert.equal(hit, null, `pin/src/${rel(dir, file)} 里出现了「${hit?.[0]}」`);
+  }
+  for (const file of ["index.mjs", "index.d.mts"]) {
+    const hit = DOC_SIDE_WORDS.exec(distOf("docfirst-pin", file));
+    assert.equal(hit, null, `pin 的产物 ${file} 里出现了「${hit?.[0]}」`);
+  }
+});
+
 test("trajectory 的 `.` 入口零 import：产物一条 import 都没有，连 node: 也没有", () => {
   // 按产物判比按 package.json 判更准：就算以后 `.` 入口不小心 import 到一个真依赖，这里也查得到
   assert.deepEqual(importSpecsOf(distOf("docfirst-trajectory", "index.mjs")), []);
@@ -216,15 +231,17 @@ const WORKFLOW_SRC = srcOf("docfirst-workflow");
  *
  * 方向读法（左边不许知道右边）：
  *   marker   记号写法：草稿写法、正式记号里的属性、报告里的目标文本；只用钉码核心的类型，谁都不认识
- *   format   格式接口：钉码的 Format 加两样可选本事（名册检查、按原文渲染）与渲染拒绝的错误类，谁都不认识
- *   mdx      mdx 格式实现：实现 format 的接口、用记号写法，不认识项目怎么装配、命令行怎么打印
+ *   format   引用与清单的类型、格式接口（认引用、写回，加两样可选本事）与渲染拒绝的错误类，谁都不认识
+ *   mdx      mdx 格式实现：实现 format 的接口、用记号写法，不认识钉码编排、项目怎么装配、命令行怎么打印
+ *   pinning  钉码编排：格式认引用、钉码核心判定、格式写回的先后顺序；不认识记号属性怎么写、具体是哪个格式
  *   project  碰环境：读盘、git、摆放、读卡目录；格式由配置递进来，所以不认识 mdx 这个具体格式，也不认识命令行
  *   cli      入口：认识以上全部，谁都不认识它
  */
 const WORKFLOW_DIRS: Record<string, string[]> = {
-  marker: ["format", "mdx", "project", "cli"],
-  format: ["marker", "mdx", "project", "cli"],
-  mdx: ["project", "cli"],
+  marker: ["format", "mdx", "pinning", "project", "cli"],
+  format: ["marker", "mdx", "pinning", "project", "cli"],
+  mdx: ["pinning", "project", "cli"],
+  pinning: ["marker", "mdx", "project", "cli"],
   project: ["mdx", "cli"],
   cli: [],
 };

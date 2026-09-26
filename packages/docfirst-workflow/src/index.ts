@@ -4,6 +4,7 @@
  * 读者三种：写测试的（直接调 `main(["check"])`，不必起子进程）；站那一侧的适配包
  * `@godcreator/docfirst-fumadocs`（构建期要 loadProject 装配项目、要 scanCardDir 读轨迹卡）；
  * 自己写格式的（实现 `DocFormat`，渲染不了时抛 `RenderRefusal`）。mdx 格式本身在 `./mdx` 出口。
+ * 引用、清单与钉码编排的类型也从这里出：钉码核心只认目标与记录，带文档位置的类型都在 workflow。
  *
  * **给一个新骨架铺各区不在这个包里**：那件事只在 agent 手上发生一次，铺的是模板、不碰判定，
  * 所以它归工作台插件（`@godcreator/gwb-docfirst-workflow` 的 `docfirst.create`，模板也随那个插件发）。
@@ -18,4 +19,5 @@ export type { CardProblemReport, CheckReport, ComponentReport, DocReport, Output
 export { docIdOf, loadProject, scanCardDir } from "./project/index.ts";
 export type { Project, ProjectConfig } from "./project/index.ts";
 export { isRenderRefusal, RenderRefusal } from "./format/index.ts";
-export type { DocFormat } from "./format/index.ts";
+export type { DocFormat, Item, Listing, Reference } from "./format/index.ts";
+export type { ConfirmResult, ConfirmStep, Pinning } from "./pinning/index.ts";

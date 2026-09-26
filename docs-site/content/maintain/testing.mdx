@@ -13,12 +13,12 @@ description: 包与目录之间的依赖方向靠什么检查，各组测试检�
 
 仓根那组按主题一个文件：
 
-{/* tree dir="../tests" depth="1" glob="*.test.ts" hash="cbe1ce027b8d" */}
+{/* tree dir="../tests" depth="1" glob="*.test.ts" hash="35b698d9eace" */}
 
 ## 依赖方向：只有一个文件在检查
 
 pnpm 严格的 `node_modules` 只保证没写进依赖的包 import 不到；「该不该写进依赖」没人管，workflow 包里
-`format/`、`mdx/`、`project/`、`cli/` 之间编译器也不拦——`project/` 里写一句 `import "../mdx/render.ts"` 不会报错，
+`marker/`、`format/`、`mdx/`、`pinning/`、`project/`、`cli/` 之间编译器也不拦——`project/` 里写一句 `import "../mdx/render.ts"` 不会报错，
 项目装配从此只能用 mdx 一种格式。补上这两项的是 `tests/boundary.test.ts`，它是包之间、workflow 目录之间**唯一**的边界检查。
 选一类规则，看它允许哪些方向、禁止哪些方向、由哪条测试失败报出来：
 
@@ -27,15 +27,15 @@ pnpm 严格的 `node_modules` 只保证没写进依赖的包 import 不到；「
 禁止表**列的是禁止的，不是允许的**：写成允许的话，新加一个包默认什么都不能依赖，放错位置反而更难发现。
 `packages/` 下多出一个表里没有的目录，另一条测试当场失败，要求先想清楚它能认识谁：
 
-{/* ref file="../tests/boundary.test.ts" lines="121-135" hash="6240de2040d1" blob="e450056cc091" */}
+{/* ref file="../tests/boundary.test.ts" lines="121-135" hash="3045c8cb7ab9" blob="e77be7ebc154" */}
 
 workflow 目录之间是同样的写法：
 
-{/* ref file="../tests/boundary.test.ts" lines="224-230" hash="788974639953" blob="b10eeb50e0bf" */}
+{/* ref file="../tests/boundary.test.ts" lines="240-247" hash="ef437777d990" blob="e77be7ebc154" */}
 
-两个核心的零依赖不看措辞、只看 import 了谁，轨迹核心直接查产物：
+两个核心的零依赖只看 import 了谁，轨迹核心直接查产物；钉码核心另外查源码与产物里有没有文档文本那一侧的名字：
 
-{/* ref file="../tests/boundary.test.ts" lines="169-184" hash="2b8c1cefd190" blob="e450056cc091" */}
+{/* ref file="../tests/boundary.test.ts" lines="169-199" hash="29865f2198b6" blob="e77be7ebc154" */}
 
 包与插件互不认识，两个方向分在两处：包里不许出现任何 `@godcreator/gwb-*` 由 `boundary.test.ts` 查；
 插件不许依赖 `@godcreator/docfirst-*` 由插件自己的测试查：
@@ -47,29 +47,29 @@ workflow 目录之间是同样的写法：
   不是删断言，更不是为了让门禁通过注释掉某一条。
 </Note>
 
-## 钉码核心：传入三样假的
+## 钉码核心：传入两样假的
 
-`tests/core.test.ts` 给钉码核心传入假格式、内存读取器（能读到的只有一张文件表）和内存里的旧内容来源。
-钉码核心不读盘、不启动进程、不认识任何真格式，这样测正好把这几条一并检查了：
+`tests/core.test.ts` 直接给钉码核心目标与记录，传入内存读取器（能读到的只有一张文件表）和内存里的旧内容来源。
+钉码核心不读盘、不启动进程、不接触文档文本，这样测正好把这几条一并检查了；认引用、配回行号、写回的先后顺序在 `tests/pinning.test.ts` 用假格式测：
 
-{/* ref file="../tests/core.test.ts" lines="1-4" hash="bf9bca964602" blob="3f7f931c2523" */}
+{/* ref file="../tests/core.test.ts" lines="1-4" hash="e463e5acdc35" blob="cb01529c0ac2" */}
 
 旧内容来源默认什么都取不到，比较器只能滑窗；走到 hunk 表就说明判定顺序错了：
 
-{/* ref file="../tests/repo.ts" lines="27-33" hash="fac97ce041a5" blob="1f63ee05e8b2" */}
+{/* ref file="../tests/repo.ts" lines="31-37" hash="fac97ce041a5" blob="902d3f8f6bf2" */}
 
 记号的写法由 `tests/marker.test.ts` 拿 mdx 与假格式两个适配器一起验：`parse(marker(t, r))` 必须认回 `t` 与 `r`。
 认得出只是一半，什么时候不认才是记号能放进正文的理由：
 
-{/* ref file="../tests/marker.test.ts" lines="72-82" hash="e63f943bacbf" blob="2ff3b5fb320e" */}
+{/* ref file="../tests/marker.test.ts" lines="74-84" hash="50b86ecea36a" blob="6ff8e184b4eb" */}
 
 ## 契约测试：两个格式在同一串改动下状态一致
 
-`Format` 真有两个适配器：生产用的 mdx 与 `tests/fake-format.ts`。`tests/contract.test.ts` 让两种格式各写一篇、
+`DocFormat` 真有两个适配器：生产用的 mdx 与 `tests/fake-format.ts`。`tests/contract.test.ts` 让两种格式各写一篇、
 引同一段代码，跑一串改动（确认、改代码并提交、带与不带 `--accept`、上面插两行、删函数），断言两篇的状态、
 跟到的行段、记号上的记录完全一样。状态由钉码核心算，格式只交引用，不一致就说明有谁绕过了钉码核心：
 
-{/* ref file="../tests/contract.test.ts" lines="17-24" hash="bc495b299d37" blob="3467ec7d28c3" */}
+{/* ref file="../tests/contract.test.ts" lines="17-24" hash="857db9f5b5bb" blob="01c6c4701eaa" */}
 
 ## git 那一侧：真 git 仓，不打桩
 
@@ -83,7 +83,7 @@ workflow 目录之间是同样的写法：
 
 `tests/repo.ts` 建的临时仓一律 `core.autocrlf=false`，否则 Windows 上的换行转换会让工作区和 blob 逐字节不同：
 
-{/* ref file="../tests/repo.ts" lines="54-58" hash="41a94bc7fbdc" blob="1f63ee05e8b2" */}
+{/* ref file="../tests/repo.ts" lines="58-62" hash="41a94bc7fbdc" blob="902d3f8f6bf2" */}
 
 ## 装配、摆放、命令行
 
@@ -122,5 +122,5 @@ fumadocs 适配不接 Next 的那一半在 `tests/fumadocs.test.ts`，讲解组�
 {/* ref file="tests/page.test.mjs" lines="50-51" hash="cfcbeab7ba70" blob="6563bf8b4551" */}
 
 <Note>
-  站测试不跟命令行比状态：算状态的是同一个编排服务，比出来只能相等。跨调用方的比对要启动站后请求 `.md` 路由。
+  站测试不跟命令行比状态：算状态的是同一个钉码编排，比出来只能相等。跨调用方的比对要启动站后请求 `.md` 路由。
 </Note>

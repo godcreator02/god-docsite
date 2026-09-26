@@ -36,7 +36,7 @@ function confirmed(history?: Parameters<typeof setupRepo>[0]["history"]): Repo {
   return r;
 }
 
-const first = (r: Repo) => r.service.resolve(DOC, r.read(DOC)).items[0]!;
+const first = (r: Repo) => r.pinning.checkDoc(DOC, r.read(DOC)).items[0]!;
 
 /** 数这一段里起了几次 git：换掉 child_process 的 execFileSync，源码里的具名导入经 syncBuiltinESMExports 跟着换 */
 function gitCalls<T>(fn: () => T): { value: T; calls: string[][] } {
@@ -262,7 +262,7 @@ test("整文件：末尾追加也黄，diff 是整份对整份；行段版对同
     r.confirm(DOC);
     assert.deepEqual(r.statuses(DOC, r.read(DOC)), ["fresh", "fresh"]);
     r.write("src/greet.ts", `${CODE}export const NAME = "x";\n`);
-    const [all, span] = r.service.resolve(DOC, r.read(DOC)).items;
+    const [all, span] = r.pinning.checkDoc(DOC, r.read(DOC)).items;
     assert.equal(span!.status, "fresh", "行段没被碰到");
     assert.equal(all!.status, "changed");
     assert.match(all!.diff!, /^\+ export const NAME/m);

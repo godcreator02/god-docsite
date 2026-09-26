@@ -15,7 +15,7 @@ description: 仓根的 README.md、AGENTS.md、CLAUDE.md 与插件里的 SKILL.m
 frontmatter；写成 `{ to, frontmatter }`，点名的字段逐行搬进生成物头部，SKILL.md 就是靠这样保住 `name` 与 `description`。
 装配项目时检查每个落点：不能是绝对路径、不能落进内容根（配置的 `content`，默认 `content/`）、同一个落点只许一篇正本写，违反任何一条直接报错：
 
-{/* ref file="../packages/docfirst-workflow/src/project/placement.ts" lines="121-139" hash="134440fb80cc" blob="963b388356c7" */}
+{/* ref file="../packages/docfirst-workflow/src/project/placement.ts" lines="122-140" hash="134440fb80cc" blob="ff9aae9560f4" */}
 
 render 只遍历现状区的文档，映射的键写成 `trajectory/` 或 `future/` 下的页，永远不会被渲染：
 
@@ -35,13 +35,13 @@ render 只遍历现状区的文档，映射的键写成 `trajectory/` 或 `futur
 同一篇正本只渲染一次正文，每个落点各自加上点名的 frontmatter 字段。点名的字段正本里没有，这个落点不写；
 跟落点上现有的文件相同，也不写：
 
-{/* ref file="../packages/docfirst-workflow/src/project/placement.ts" lines="223-246" hash="8cdbe0f9bddc" blob="963b388356c7" */}
+{/* ref file="../packages/docfirst-workflow/src/project/placement.ts" lines="224-247" hash="8cdbe0f9bddc" blob="ff9aae9560f4" */}
 
 ## check 怎么守生成物新鲜
 
 `check` 用 render 同一个 `bodyOf` 在内存里再渲染一次，跟落点上的文件比，只读不写：
 
-{/* ref file="../packages/docfirst-workflow/src/project/placement.ts" lines="248-270" hash="bb846aedab2a" blob="963b388356c7" */}
+{/* ref file="../packages/docfirst-workflow/src/project/placement.ts" lines="249-271" hash="bb846aedab2a" blob="ff9aae9560f4" */}
 
 只有 `fresh` 算新鲜，其余状态（落点上还没有文件、内容不一致、缺点名的字段、渲染不了）每个落点记一次红：
 

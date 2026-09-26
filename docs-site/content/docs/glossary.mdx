@@ -5,13 +5,13 @@ description: 这个仓里反复出现的词各指什么、正本在哪、怎么�
 
 ## 五个基本词
 
-这五个是接口正本上的名字，代码里就是这么写的：
+这五个是钉码核心接口正本上的名字，代码里就是这么写的：
 
-{/* ref file="../packages/docfirst-pin/src/types.ts" lines="1-13" hash="f63de64dd889" blob="dafa0b722cf9" */}
+{/* ref file="../packages/docfirst-pin/src/types.ts" lines="1-12" hash="d8d2bce5db34" blob="f7ca47b13c53" */}
 
-引用（reference）是「文档里的一处指」，目标（target）是「文档指着的那样东西」，记录（record）是
-「确认那一刻写在正式记号上的 hash 与 blob 名这类属性」，清单（listing）是「一篇文档核对完的结果」，状态（status）是
-「一处引用核对出来的结论」。五个词在代码、命令行输出、这个站上是同一套。
+目标（target）是「文档指着的那样东西」，记录（record）是「确认那一刻算出、写在正式记号上的 hash 与 blob 名这类属性」，
+钉（pin）是目标加记录，判定（verdict）是「一处钉核对完的结果」，状态（status）是判定里的结论。带上文档位置之后是 workflow 的两个词：
+引用（reference）是「文档里的一处指」，清单（listing）是「一篇文档核对完的结果」。这些词在代码、命令行输出、这个站上是同一套。
 
 ## 站上自动标出来的那些词
 

@@ -1,7 +1,7 @@
 /**
  * 消费方项目的装配。
  * 一个项目 = 一个根目录 + 一份 docfirst.config（声明格式、内容根、生成物摆到哪）。
- * loadProject(root) 把这些串起来交出一个判定服务；同一个根只装配一次（站构建时几十个 loader 并发调它）。
+ * loadProject(root) 把这些串起来交出钉码编排；同一个根只装配一次（站构建时几十个 loader 并发调它）。
  *
  * 分区按约定：内容根（`content`，默认 `content`）下 `trajectory/` 是轨迹卡、`future/` 是未来区，
  * 这两个名字固定；内容根下别的一切（目录里的、直接放在根上的）有格式认领的文档都是现状区，都进 check。
@@ -10,9 +10,11 @@
 import { existsSync, mkdirSync, readFileSync, readdirSync, statSync, writeFileSync } from "node:fs";
 import { dirname, isAbsolute, join, relative, resolve, sep } from "node:path";
 import { pathToFileURL } from "node:url";
-import { createService } from "@godcreator/docfirst-pin";
-import type { Service } from "@godcreator/docfirst-pin";
+import { createPinner } from "@godcreator/docfirst-pin";
+import { formatPicker } from "../format/index.ts";
 import type { DocFormat } from "../format/index.ts";
+import { createPinning } from "../pinning/index.ts";
+import type { Pinning } from "../pinning/index.ts";
 import { createReader } from "./fs-reader.ts";
 import { createGitHistory } from "./history.ts";
 import { assertTurf, createPlacing, placementsOf } from "./placement.ts";
@@ -36,7 +38,10 @@ export interface ProjectConfig {
 export interface Project {
   root: string;
   config: ProjectConfig;
-  service: Service<DocFormat>;
+  /** 钉码编排：核对与确认一篇文档都经它 */
+  pinning: Pinning;
+  /** 这篇文档归哪个格式；没有格式认领给 null */
+  formatFor(doc: string): DocFormat | null;
   roster: Record<string, unknown> | undefined;
   /** 内容根，相对项目根、正斜杠 */
   contentDir: string;
@@ -131,7 +136,8 @@ async function build(root: string): Promise<Project> {
   if (!existsSync(contentAbs) || !statSync(contentAbs).isDirectory()) {
     throw new Error(`内容根 ${contentDir} 不是项目根下的目录——配置的 content 写错了，或者还没建`);
   }
-  const service = createService({ formats: config.formats, reader: createReader(root), history: createGitHistory(root) });
+  const formatFor = formatPicker(config.formats);
+  const pinning = createPinning(createPinner({ reader: createReader(root), history: createGitHistory(root) }), formatFor);
   const placements = placementsOf(config);
   assertTurf(root, [contentDir], placements);
 
@@ -139,7 +145,7 @@ async function build(root: string): Promise<Project> {
     for (const name of readdirSync(dir)) {
       const path = join(dir, name);
       if (statSync(path).isDirectory()) walk(path, out);
-      else if (service.formatFor(name) !== null) out.push(docIdOf(root, path));
+      else if (formatFor(name) !== null) out.push(docIdOf(root, path));
     }
     return out;
   }
@@ -151,7 +157,7 @@ async function build(root: string): Promise<Project> {
       const path = join(contentAbs, name);
       if (statSync(path).isDirectory()) {
         if (!FIXED_AREAS.has(name)) walk(path, out);
-      } else if (service.formatFor(name) !== null) {
+      } else if (formatFor(name) !== null) {
         out.push(docIdOf(root, path));
       }
     }
@@ -161,7 +167,8 @@ async function build(root: string): Promise<Project> {
   // 摆放模块认得的只有这几样，先攒齐再交给它——它拿不到装配的别的部分。
   // 后三样是真盘那份适配器：落点相对项目根，读写与建父目录都在这儿，摆放本身不碰 node:fs
   const placingHost: PlacingHost = {
-    service,
+    pinning,
+    formatFor,
     placements: (doc) => placements[doc] ?? [],
     read: (doc) => readFileSync(join(root, doc), "utf8"),
     readPlaced(to) {
@@ -178,7 +185,8 @@ async function build(root: string): Promise<Project> {
   return {
     root,
     config,
-    service,
+    pinning,
+    formatFor,
     roster: config.components,
     contentDir,
     trajectoryDir: join(contentAbs, "trajectory"),

@@ -40,7 +40,7 @@ async function pageOf(doc) {
   return {
     mod,
     html: renderToStaticMarkup(createElement(mod.default, { components })),
-    listing: project.service.resolve(doc, project.read(doc)),
+    listing: project.pinning.checkDoc(doc, project.read(doc)),
   };
 }
 

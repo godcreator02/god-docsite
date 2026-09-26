@@ -16,7 +16,7 @@ import { CODE, run, setupRepo } from "./repo.ts";
 const FORMATS = [fakeFormat("fake", ".a")];
 const DOC = "docs/a.a";
 const tree = (dir: string, depth: number): string => `${refLine({ kind: "tree", dir, depth })}\n`;
-const namesOf = (r: ReturnType<typeof setupRepo>, dir: string, depth: number): string[] => r.service.resolve(DOC, tree(dir, depth)).items[0]!.current!;
+const namesOf = (r: ReturnType<typeof setupRepo>, dir: string, depth: number): string[] => r.pinning.checkDoc(DOC, tree(dir, depth)).items[0]!.current!;
 
 test("目录树、名字：清单按 .gitignore 过滤，改名红、多文件黄", () => {
   const r = setupRepo({ formats: FORMATS });
@@ -31,13 +31,13 @@ test("目录树、名字：清单按 .gitignore 过滤，改名红、多文件�
     ];
     r.write(DOC, refs.map(refLine).join("\n\n"));
     r.confirm(DOC);
-    const items = r.service.resolve(DOC, r.read(DOC)).items;
+    const items = r.pinning.checkDoc(DOC, r.read(DOC)).items;
     assert.deepEqual(items.map((i) => i.status), ["fresh", "fresh"]);
     assert.deepEqual(items[0]!.current, ["greet.ts", "util.ts"], "dist/ 被忽略，不进清单");
 
     r.write("src/tag.ts", "export const t = 1;\n");
     r.write("src/greet.ts", CODE.replace("function greet", "function hello"));
-    const after = r.service.resolve(DOC, r.read(DOC)).items;
+    const after = r.pinning.checkDoc(DOC, r.read(DOC)).items;
     assert.deepEqual(after.map((i) => [i.status, i.reason]), [["changed", "changed"], ["missing", "text-missing"]]);
     assert.deepEqual(after[0]!.current, ["greet.ts", "tag.ts", "util.ts"]);
   } finally {
@@ -133,7 +133,7 @@ test("软链接按真实路径读：node_modules 里指向工作区目录的链�
     r.confirm(DOC);
     assert.deepEqual(r.statuses(DOC, r.read(DOC)), ["fresh"]);
     r.write("lib/greet.ts", `// 头一行\n${CODE.replace("hello", "hey")}`);
-    const item = r.service.resolve(DOC, r.read(DOC)).items[0]!;
+    const item = r.pinning.checkDoc(DOC, r.read(DOC)).items[0]!;
     assert.deepEqual([item.status, item.reason, item.lines], ["changed", "changed", [3, 4]], "按真实路径找到仓，旧内容取得到、跟得上 hunk");
   } finally {
     r.teardown();

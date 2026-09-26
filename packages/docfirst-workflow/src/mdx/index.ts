@@ -1,17 +1,18 @@
 /**
  * mdx 格式：`@godcreator/docfirst-workflow/mdx` 出口就是它。项目的 `docfirst.config.mjs` 把整个模块
  * 挂进 `formats`，命令行与站读的是同一份。
- *   ① 识别与写回：parse / write / marker，钉码会调的；名册检查 lintComponents 给 check 用
+ *   ① 识别与写回：parse / write / marker，钉码编排会调的；名册检查 lintComponents 给 check 用
  *   ② 渲染：renderAi 把生成正本按原文渲染成 md（记号换成代码块）；人看那份就是站本身，命令行没有 human 渲染
  *   ③ 语法树零件：parseTree / recognize / stamp / walk 等，给 `@godcreator/docfirst-fumadocs` 接站用
  * 名册：这里只有机制（stamp / unknownComponents）和写规则用的帮手，没有默认表——哪些组件、怎么压平
  * 由项目在 docfirst.config.mjs 里声明；fumadocs 自带那几个组件的规则在 `@godcreator/docfirst-fumadocs/roster`。
  *
- * 这个目录不认识 project 与 cli，也不认识任何站的宿主（`tests/boundary.test.ts` 守着）。`Format` 这条
+ * 这个目录不认识 project 与 cli，也不认识任何站的宿主（`tests/boundary.test.ts` 守着）。`DocFormat` 这条
  * 接缝分离的是「怎么认记号」与「怎么判新鲜」两种变化原因，而且真有两个适配器：生产是这一份，
  * 测试是 `tests/fake-format.ts`。
  */
-import type { MemoRecord, Reference, Target } from "@godcreator/docfirst-pin";
+import type { MemoRecord, Target } from "@godcreator/docfirst-pin";
+import type { Reference } from "../format/index.ts";
 import { formalOf } from "../marker/index.ts";
 import { recognize } from "./recognize.ts";
 import { parseTree } from "./render.ts";

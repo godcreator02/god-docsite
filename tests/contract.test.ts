@@ -2,20 +2,20 @@
  * 契约测试：**两个适配器**在同一串改动下状态一致——生产那个是 fumadocs 口味的 mdx，
  * 测试那个是 `fake-format.ts`（记号一行 `REF <载荷>`）。
  *
- * 这就是 `Format` 这条接缝存在的理由：它分离的是「怎么认记号」与「怎么判新鲜」两种变化原因。
- * 状态是判定层算的，格式只交引用与记号上的记录——两边不一致就是有人抄了近道。
+ * 这就是 `DocFormat` 这条接缝存在的理由：它分离的是「怎么认记号」与「怎么判新鲜」两种变化原因。
+ * 状态是钉码核心算的，格式只交引用与记号上的记录——两边不一致就是有人抄了近道。
  * 跑在临时真 git 仓里，旧内容来源是产品用的 git 那份。
  */
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import * as mdx from "../packages/docfirst-workflow/src/mdx/index.ts";
-import type { Format } from "../packages/docfirst-pin/src/index.ts";
+import type { DocFormat } from "../packages/docfirst-workflow/src/format/index.ts";
 import { fakeFormat } from "./fake-format.ts";
 import { CODE, setupRepo } from "./repo.ts";
 import type { Repo } from "./repo.ts";
 
 const fake = fakeFormat("fake", ".txt");
-const FORMATS = [mdx as unknown as Format, fake];
+const FORMATS = [mdx as unknown as DocFormat, fake];
 const DRAFT = "@@docfirst ref src/greet.ts:2-3 @@";
 const DOCS = ["docs/a.mdx", "docs/a.txt"];
 const START: Record<string, string> = {
@@ -30,7 +30,7 @@ function start(): Repo {
 }
 
 const statuses = (r: Repo): string[][] => DOCS.map((doc) => r.statuses(doc, r.read(doc)));
-const spans = (r: Repo): Array<[number, number]> => DOCS.map((doc) => r.service.resolve(doc, r.read(doc)).items[0]!.lines);
+const spans = (r: Repo): Array<[number, number]> => DOCS.map((doc) => r.pinning.checkDoc(doc, r.read(doc)).items[0]!.lines);
 const same = (s: string): string[][] => DOCS.map(() => [s]);
 /** 两篇都确认一遍，交回每篇每处做了什么 */
 const confirmAll = (r: Repo, accept = false): string[][] => DOCS.map((doc) => r.confirm(doc, accept).steps.map((s) => s.action));

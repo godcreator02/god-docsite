@@ -72,14 +72,14 @@ full: true
 **不认识 docfirst 的任何包，也不被它们认识。** 普通 fumadocs 站也装它，所以清单里不许出现任何 `@godcreator/` 包，
 工作台插件也不依赖它：
 
-{/* ref file="../tests/boundary.test.ts" lines="419-429" hash="b53e494465c5" blob="b10eeb50e0bf" */}
+{/* ref file="../tests/boundary.test.ts" lines="436-446" hash="b53e494465c5" blob="e77be7ebc154" */}
 
 **不把 react 打进产物。** `.` 的产物第一行是 `"use client"`，只许 import react：
 
-{/* ref file="../tests/boundary.test.ts" lines="431-441" hash="c24aef42a31c" blob="b10eeb50e0bf" */}
+{/* ref file="../tests/boundary.test.ts" lines="448-458" hash="c24aef42a31c" blob="e77be7ebc154" */}
 
 **`./text` 不 import 任何东西。** `docfirst.config.mjs` 在 Node 里加载它，所以它不带客户端指令、源码和产物都零 import：
 
-{/* ref file="../tests/boundary.test.ts" lines="443-448" hash="1cb40f589530" blob="b10eeb50e0bf" */}
+{/* ref file="../tests/boundary.test.ts" lines="460-465" hash="1cb40f589530" blob="e77be7ebc154" */}
 
 **不画题目的画面。** 画面里画什么、每一步的讲解数据、机读规则都写在各站自己的组件里；这个包只给外壳与零件。

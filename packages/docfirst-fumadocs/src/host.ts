@@ -18,7 +18,7 @@ export function remarkDocfirstHost({ root }: { root: string }): (tree: TreeNode,
   return async (tree, file) => {
     const project = await loadProject(root);
     inner ??= remarkDocfirst({
-      service: project.service,
+      pinning: project.pinning,
       docOf: (f) => project.docIdOf(f.path ?? ""),
       ...(project.roster !== undefined ? { roster: project.roster as Roster } : {}),
     });

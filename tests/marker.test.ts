@@ -9,11 +9,13 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import * as mdxModule from "../packages/docfirst-workflow/src/mdx/index.ts";
-import type { Format, MemoRecord, Reference, Target } from "../packages/docfirst-pin/src/index.ts";
+import type { MemoRecord, Target } from "../packages/docfirst-pin/src/index.ts";
+import type { DocFormat, Reference } from "../packages/docfirst-workflow/src/format/index.ts";
+import { draftOf } from "../packages/docfirst-workflow/src/marker/index.ts";
 import { fakeFormat } from "./fake-format.ts";
 
-const mdx = mdxModule as unknown as Format;
-const FORMATS: Format[] = [mdx, fakeFormat("fake", ".txt")];
+const mdx = mdxModule as unknown as DocFormat;
+const FORMATS: DocFormat[] = [mdx, fakeFormat("fake", ".txt")];
 const T: Target = { kind: "span", file: "src/greet.ts", a: 2, b: 3 };
 const ALL: Array<[string, Target]> = [
   ["@@docfirst ref src/greet.ts:2-3 @@", T],
@@ -35,7 +37,7 @@ function recordFor(target: Target): MemoRecord {
 }
 
 /** 把一篇里认出的引用全按确认过的样子写回 */
-const confirmed = (format: Format, text: string): Reference[] => format.parse(text).map((r) => ({ ...r, record: recordFor(r.target) }));
+const confirmed = (format: DocFormat, text: string): Reference[] => format.parse(text).map((r) => ({ ...r, record: recordFor(r.target) }));
 
 test("正式记号：parse(marker(t, r)) 认回 t 与 r，四种目标都过，位置也对", () => {
   for (const format of FORMATS) {
@@ -44,7 +46,7 @@ test("正式记号：parse(marker(t, r)) 认回 t 与 r，四种目标都过，�
       const refs = format.parse(`${format.marker(target, record)}\n`);
       assert.deepEqual(refs.map((r) => [r.target, r.record]), [[target, record]], `${format.name} 的记号自己认不回来：${format.marker(target, record)}`);
       assert.equal(refs[0]!.at, 0);
-      assert.ok(refs[0]!.extra?.draft !== true, `${format.name} 把正式记号当成草稿了`);
+      assert.ok(!refs[0]!.draft, `${format.name} 把正式记号当成草稿了`);
     }
   }
 });
@@ -73,7 +75,7 @@ test("草稿记号：四种目标的写法都认；少哨兵不认、句子里�
   for (const format of FORMATS) {
     for (const [draft, target] of ALL) {
       const refs = format.parse(`# 标题\n\n${draft}\n\n尾巴\n`);
-      assert.deepEqual(refs.map((r) => [r.target, r.record, r.at, r.extra?.draft]), [[target, null, 2, true]], `${format.name} 不认草稿记号：${draft}`);
+      assert.deepEqual(refs.map((r) => [r.target, r.record, r.at, r.draft]), [[target, null, 2, true]], `${format.name} 不认草稿记号：${draft}`);
     }
     assert.deepEqual(format.parse("@@docfirst ref src/greet.ts:2-3\n"), [], `${format.name} 把少一头哨兵的当记号了`);
     assert.deepEqual(format.parse(`这句话里有 ${DRAFT} 不算\n`), [], `${format.name} 把句子里的当记号了`);
@@ -123,4 +125,15 @@ test("记号写坏了报到行：少 file、行号不合理、depth 不是正整
   assert.throws(() => mdx.parse('{/* tree dir="src" depth="0" */}\n'), /第 1 行：depth 要是正整数/);
   assert.throws(() => mdx.parse("@@docfirst tree src deep=2 @@\n"), /第 1 行：tree 的选项只有/);
   assert.deepEqual(mdx.parse('{/* ref file="a.ts" */}\n')[0]!.target, { kind: "file", file: "a.ts" });
+});
+
+test("草稿记号的哨兵：头尾 @@ 都在才算，载荷要过 toTarget", () => {
+  const where = "第 1 行";
+  assert.deepEqual(draftOf("@@docfirst ref src/greet.ts:2-3 @@", where), { kind: "span", file: "src/greet.ts", a: 2, b: 3 });
+  assert.deepEqual(draftOf("   @@docfirst ref src/greet.ts:2-3 @@  ", where), { kind: "span", file: "src/greet.ts", a: 2, b: 3 });
+  assert.equal(draftOf("@@docfirst ref src/greet.ts:2-3", where), null, "少尾哨兵");
+  assert.equal(draftOf("docfirst ref src/greet.ts:2-3 @@", where), null, "少头哨兵");
+  assert.equal(draftOf("这句话里有 @@docfirst ref src/greet.ts:2-3 @@ 不算", where), null);
+  assert.throws(() => draftOf("@@docfirst ref src/greet.ts:3-2 @@", where), /行号不合理/);
+  assert.equal(draftOf("@@docfirst probe src @@", where), null, "动作词不认识");
 });

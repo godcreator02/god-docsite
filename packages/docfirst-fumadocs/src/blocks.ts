@@ -15,7 +15,8 @@
  *
  * 灯长什么样、怎么渲染，全归站点侧的 pre 组件和样式表；这一层只把颜色塞进 meta / 属性。
  */
-import type { Item, Status } from "@godcreator/docfirst-pin";
+import type { Status } from "@godcreator/docfirst-pin";
+import type { Item } from "@godcreator/docfirst-workflow";
 import { langOf } from "@godcreator/docfirst-workflow/mdx";
 import type { JsxAttribute, TreeNode } from "@godcreator/docfirst-workflow/mdx";
 

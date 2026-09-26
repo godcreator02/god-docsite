@@ -7,7 +7,9 @@ import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
 import { existsSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
-import { createService, hashNames, hashSpan, hashText, normalizeLines } from "../packages/docfirst-pin/src/index.ts";
+import { createPinner, hashNames, hashSpan, hashText, normalizeLines } from "../packages/docfirst-pin/src/index.ts";
+import { formatPicker } from "../packages/docfirst-workflow/src/format/index.ts";
+import { createPinning } from "../packages/docfirst-workflow/src/pinning/index.ts";
 import { createGitHistory, createReader } from "../packages/docfirst-workflow/src/project/index.ts";
 import { CONFIG, setupProject } from "./cli-project.ts";
 import { fakeFormat } from "./fake-format.ts";
@@ -75,9 +77,9 @@ test("migrate-ledger：记录逐处写进记号，孤儿丢掉，记录簿删掉
       "",
     ]);
 
-    const service = createService({ formats: [fakeFormat("fake-md", ".md")], reader: createReader(p.root), history: createGitHistory(p.root) });
+    const pinning = createPinning(createPinner({ reader: createReader(p.root), history: createGitHistory(p.root) }), formatPicker([fakeFormat("fake-md", ".md")]));
     assert.deepEqual(
-      service.resolve("docs/m.md", p.read("docs/m.md")).items.map((i) => i.status),
+      pinning.checkDoc("docs/m.md", p.read("docs/m.md")).items.map((i) => i.status),
       ["fresh", "fresh", "fresh", "fresh", "fresh", "unconfirmed", "unconfirmed"],
       "迁过来的记录跟今天的内容对得上；没记录的与草稿照旧未确认",
     );
