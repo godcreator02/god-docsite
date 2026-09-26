@@ -141,7 +141,7 @@ function tidy(rendered: string): string {
   return rendered.replace(/^\n+/, "");
 }
 
-/** 挑出来的 frontmatter：点名的字段按源里的顺序原样成行；源里没有的字段列在 missing */
+/** 挑出来的 frontmatter：点名的字段按 outputs 里点名的顺序原样成行；源里没有的字段列在 missing */
 interface PickedFrontmatter {
   lines: string[];
   missing: string[];

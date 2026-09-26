@@ -26,7 +26,7 @@ render 只遍历现状区的文档，映射的键写成 `trajectory/` 或 `futur
 渲染由 mdx 格式的 `renderAi` 完成：用 remark 把正本解析成语法树，只改 frontmatter 和记号两种节点，其余原文逐字节照抄。
 每个节点的处理：
 
-{/* ref file="../packages/docfirst-workflow/src/mdx/render.ts" lines="83-114" hash="98d7b99c96cb" blob="471cfd781c18" */}
+{/* ref file="../packages/docfirst-workflow/src/mdx/render.ts" lines="83-115" hash="868d186e5745" blob="54090ab69698" */}
 
 记号换成的代码块，内容是渲染时从被钉文件读出的那几行，info 串是语言加 `title="路径:起-止"`，hash 与 blob 不进生成物：
 
@@ -45,14 +45,15 @@ render 只遍历现状区的文档，映射的键写成 `trajectory/` 或 `futur
 
 只有 `fresh` 算新鲜，其余状态（落点上还没有文件、内容不一致、缺点名的字段、渲染不了）每个落点记一次红：
 
-{/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="325-330" hash="a1553519e7ac" blob="68565dfd474a" */}
+{/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="324-329" hash="a1553519e7ac" blob="ec24566d459a" */}
 
 代码块的内容取自被钉文件今天的内容，所以有人直接改了生成物、改了正本没渲染、改了被钉的代码没渲染，这三种都会让
 check 变红。
 
 ## 渲染拒绝什么
 
-三样东西渲染不了：指向的东西已经不在的引用、JSX 组件、mdx 表达式（`import` / `export` 也算）。还没确认的记号照样换成代码块。
+四样东西渲染不了：还没确认的引用、指向的东西已经不在的引用、JSX 组件、mdx 表达式（`import` / `export` 也算）。
+生成物里只放确认过的代码，所以正本里新写的引用要先 `confirm`，再渲染。
 `renderAi` 先走完整棵树，把每一处连同行号列全再拒绝；这一篇的落点一个都不写，render 与 check 都报红：
 
-{/* ref file="../packages/docfirst-workflow/src/mdx/render.ts" lines="116-133" hash="96fae5b03942" blob="471cfd781c18" */}
+{/* ref file="../packages/docfirst-workflow/src/mdx/render.ts" lines="117-134" hash="8076880b3f76" blob="54090ab69698" */}

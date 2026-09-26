@@ -92,6 +92,14 @@ test("记录属性值不合法、不认识的属性：报错到行", () => {
   assert.throws(() => mdx.parse('{/* ref file="a.ts" lines=1-2 */}\n'), /认不出的写法/);
 });
 
+test("一篇里写坏了好几处：一次列全，不只报第一处", () => {
+  const text = `# 标题\n\n@@docfirst ref src/a.ts:1-2 @@\n\n{/* ref file="a.ts" lines="3-2" */}\n\n{/* probe dir="src" */}\n`;
+  assert.throws(
+    () => mdx.parse(text),
+    (err: Error) => ["第 3 行：@@docfirst 草稿写法已经删了", "第 5 行：行号不合理", "第 7 行：记号的动作词只有"].every((piece) => err.message.includes(piece)),
+  );
+});
+
 test("mdx：围栏里的记号不认——围栏内容是 code 节点，讲记号怎么写的段落不该变成一处引用", () => {
   assert.deepEqual(mdx.parse("```mdx\n" + UNCONFIRMED + "\n```\n"), []);
   assert.deepEqual(mdx.parse(`\`\`\`mdx\n{/* ref file="a.ts" lines="1-2" hash="${HASH}" blob="${BLOB}" */}\n\`\`\`\n`), []);

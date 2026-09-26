@@ -54,7 +54,7 @@ export const sourceParts = {
 
 /** 写到 ../skills/greet/SKILL.md 的生成物全文 */
 /* ref file="../packages/docfirst-workflow/src/mdx/render.ts" lines="38-55" hash="e1060d7157f7" blob="471cfd781c18" */
-/* ref file="../packages/docfirst-workflow/src/project/placement.ts" lines="139-195" hash="5dcf3df126a9" blob="3ad1d1a31735" */
+/* ref file="../packages/docfirst-workflow/src/project/placement.ts" lines="139-195" hash="11618e867068" blob="d55b5cb67bc7" */
 export const outputLines = [
   '---',
   'name: greet',
@@ -90,7 +90,7 @@ export const refusalLines = [
 ];
 /** 上面几行里渲染不了的那几行的行号 */
 export const refusalBadLines = [17, 19, 21];
-/* ref file="../packages/docfirst-workflow/src/mdx/render.ts" lines="77-114" hash="82dd4904507d" blob="471cfd781c18" */
+/* ref file="../packages/docfirst-workflow/src/mdx/render.ts" lines="77-115" hash="6c1f19cccf45" blob="54090ab69698" */
 /* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="206-211" hash="d77611f10efb" blob="68565dfd474a" */
 /* ref file="../packages/docfirst-pin/src/types.ts" lines="92-98" hash="b9f62b148d2e" blob="714c2718e246" */
 export const refusalMessage =
@@ -103,8 +103,8 @@ export const refusalMessage =
  * @typedef {{ text: string, kind: 'cmd' | 'out' | 'ok' | 'err', at: number }} TimedLine
  * @type {Record<'render' | 'check' | 'refuse', TimedLine[]>}
  */
-/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="343-357" hash="0d0da5c61ab5" blob="68565dfd474a" */
-/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="334-341" hash="c28d8799272e" blob="68565dfd474a" */
+/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="342-356" hash="0d0da5c61ab5" blob="ec24566d459a" */
+/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="333-340" hash="c28d8799272e" blob="ec24566d459a" */
 /* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="37-43" hash="9ebfdcac2bf1" blob="68565dfd474a" */
 export const terminals = {
   render: [
@@ -137,7 +137,7 @@ export const terminals = {
  * @typedef {{ id: SceneId, title: string, text: string, duration: number }} RenderChapter
  * @type {RenderChapter[]}
  */
-/* ref file="../packages/docfirst-workflow/src/mdx/render.ts" lines="116-133" hash="96fae5b03942" blob="471cfd781c18" */
+/* ref file="../packages/docfirst-workflow/src/mdx/render.ts" lines="117-134" hash="8076880b3f76" blob="54090ab69698" */
 /* ref file="../packages/docfirst-workflow/src/project/placement.ts" lines="119-137" hash="134440fb80cc" blob="3ad1d1a31735" */
 /* ref file="../packages/docfirst-workflow/src/project/placement.ts" lines="197-268" hash="8c252d7102ba" blob="3ad1d1a31735" */
 export const chapters = [
@@ -196,7 +196,7 @@ export const chapters = [
     id: 'refuse',
     title: '渲染不了：一次列全，一个文件都不写',
     text:
-      '正本里出现这三样就渲染不了：指向的东西不在了的引用、JSX 组件、mdx 表达式（import / export 也算）。' +
+      '正本里出现这四样就渲染不了：还没确认的引用、指向的东西不在了的引用、JSX 组件、mdx 表达式（import / export 也算）。' +
       'renderAi 走完整棵语法树，把每一处连同行号一次列全再拒绝；这一篇的落点都不写，磁盘上的旧生成物原样留着，render 和 check 都报红。' +
       '代码块里写的同样文字不算：记号是在语法树上认的。',
     duration: 9,

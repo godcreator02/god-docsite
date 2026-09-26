@@ -286,7 +286,6 @@ function refReport(item: Item, blocking: boolean): RefReport {
     status: item.status,
     line: item.reference.at + 1,
     lines: item.lines,
-    draft: item.reference.record === null,
     ...(item.reason !== undefined ? { reason: item.reason } : {}),
     ...(item.diff !== undefined ? { diff: item.diff } : {}),
     ...(blocking ? { blocking: true as const } : {}),

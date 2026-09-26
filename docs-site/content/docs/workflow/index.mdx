@@ -76,10 +76,10 @@ full: true
 
 {/* ref file="../packages/docfirst-workflow/src/mdx/index.ts" lines="20-41" hash="00a0ec519d2a" blob="26de56e31ba1" */}
 
-认记号走 remark 语法树：记号是 `mdxFlowExpression` 节点，段落里以 `@@docfirst` 开头的一行报错。写在围栏里、句子里的同样文字分别是
-`code` 与 `mdxTextExpression` 节点，不算记号：
+认记号走 remark 语法树：记号是 `mdxFlowExpression` 节点，段落里以 `@@docfirst` 开头的一行报错；一篇里写坏的记号走完整棵树一次列全再报错。
+写在围栏里、句子里的同样文字分别是 `code` 与 `mdxTextExpression` 节点，不算记号：
 
-{/* ref file="../packages/docfirst-workflow/src/mdx/recognize.ts" lines="16-53" hash="b6bb0e3334f0" blob="9a526c750cc0" */}
+{/* ref file="../packages/docfirst-workflow/src/mdx/recognize.ts" lines="16-56" hash="9396d0206273" blob="28e155966a3c" */}
 
 **名册**是一张「组件名 → 规则」的表，说明每个组件在机读版里变成什么。这里只有机制，没有默认表：组件与规则写在项目的配置里，
 fumadocs 自带组件的规则在 [fumadocs 适配](/docs/fumadocs)的 `./roster`。规则三种写法，函数规则只经 helpers 读节点、造节点：
@@ -108,7 +108,7 @@ fumadocs 自带组件的规则在 [fumadocs 适配](/docs/fumadocs)的 `./roster
 **没有记录属性就是未确认**：`ref` 没有 hash 与 blob、`tree` 没有 hash，记录是 null，`confirm` 时写上；`has` 的记号本身就是记录。
 记录只写了一半、值不合法直接报错到行：
 
-{/* ref file="../packages/docfirst-workflow/src/marker/index.ts" lines="122-140" hash="0eb5643ad8ae" blob="7a3452874ed0" */}
+{/* ref file="../packages/docfirst-workflow/src/marker/index.ts" lines="143-161" hash="0eb5643ad8ae" blob="1d392bc3267a" */}
 
 每个动作词认哪些属性是固定的；多出属性、值不合法都报错到行：
 
@@ -189,9 +189,9 @@ mdx 格式认出的、按原文渲染要读的、命令行打印的都是这几�
 
 {/* ref file="../packages/docfirst-workflow/tsdown.config.ts" lines="9-11" hash="95d05dddcb40" blob="7cebd624af96" */}
 
-**`check --json` 的报告**是给别的程序读的契约，加字段可以，改名、删字段不可以；`outputs` 那一段直接用项目装配的 `PlacedCheck` 类型：
+**`check --json` 的报告**是给别的程序读的契约：加字段可以，改名、删字段是破坏性改动，只随破坏性版本发；`outputs` 那一段直接用项目装配的 `PlacedCheck` 类型：
 
-{/* ref file="../packages/docfirst-workflow/src/cli/report.ts" lines="5-32" hash="da9d3a75bd4d" blob="690ca7e4508e" */}
+{/* ref file="../packages/docfirst-workflow/src/cli/report.ts" lines="5-31" hash="0cd9965c2795" blob="ace55f42e73b" */}
 
 ## 依赖
 

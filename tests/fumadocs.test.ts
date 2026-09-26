@@ -327,9 +327,11 @@ test("按原文渲染：写在列表项里的记号，代码块的续行带上�
   assert.equal(out, `- 一项：\n\n  \`\`\`ts title="src/greet.ts:2-3"\n  ${CURRENT.join("\n  ")}\n  \`\`\`\n`);
 });
 
-test("按原文渲染：未确认的记号照样换成代码块，内容是今天的那几行", () => {
-  const out = renderOf(`${mdx.marker(T, null)}\n`, () => ({ status: "unconfirmed" }));
-  assert.equal(out, `\`\`\`ts title="src/greet.ts:2-3"\n${CURRENT.join("\n")}\n\`\`\`\n`);
+test("按原文渲染：未确认的记号渲染不了——生成物里只放确认过的代码", () => {
+  assert.throws(
+    () => renderOf(`# 标题\n\n${mdx.marker(T, null)}\n`, () => ({ status: "unconfirmed" })),
+    (err: Error) => err.name === "RenderRefusal" && err.message.includes("第 3 行的引用还没确认，先 docfirst confirm"),
+  );
 });
 
 test("按原文渲染：缺失的引用、组件、mdx 表达式、import 都渲染不了，一次列全、抛 RenderRefusal", () => {

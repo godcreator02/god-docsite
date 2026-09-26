@@ -8,7 +8,7 @@
  */
 import type { MemoRecord, Target } from "@godcreator/docfirst-pin";
 import type { Format, Reference, WrittenReference } from "../reference/index.ts";
-import { formalOf, parseFormal } from "../marker/index.ts";
+import { formalOf, markerErrors, parseFormal } from "../marker/index.ts";
 
 /** 组件格式认领的目录（相对项目根，也就是站目录）与扩展名 */
 const COMPONENTS_DIR = "src/components/";
@@ -27,14 +27,17 @@ export function claims(file: string): boolean {
   return file.startsWith(COMPONENTS_DIR) && EXTENSIONS.some((ext) => file.endsWith(ext));
 }
 
+/** 认出全部记号；写坏的记号一次列全再报错 */
 export function parse(text: string): Reference[] {
   const refs: Reference[] = [];
+  const errors = markerErrors();
   text.split("\n").forEach((raw, index) => {
     const comment = COMMENT_LINE.exec(raw.replace(/\r$/, ""));
     if (comment === null) return;
-    const parsed = parseFormal(comment[2]!, `第 ${index + 1} 行`);
+    const parsed = errors.attempt(() => parseFormal(comment[2]!, `第 ${index + 1} 行`));
     if (parsed !== null) refs.push({ ...parsed, at: index });
   });
+  errors.throwIfAny();
   return refs;
 }
 

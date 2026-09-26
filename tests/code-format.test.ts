@@ -63,6 +63,11 @@ test("写错了报错到行：认不出动作词、以 @@docfirst 开头、记�
   assert.throws(() => code.parse('x\n/* probe dir="src" */\n'), /第 2 行：记号的动作词只有 ref \/ tree \/ has，不认识 probe/);
   assert.throws(() => code.parse("/* @@docfirst ref a.ts:1-2 @@ */\n"), /第 1 行：@@docfirst 草稿写法已经删了/);
   assert.throws(() => code.parse('/* ref file="a.ts" hash="3fa9c2e1b07d" */\n'), /第 1 行：ref 的记录只写了一半/);
+  assert.throws(
+    () => code.parse('/* probe dir="src" */\nx\n/* ref file="a.ts" hash="3fa9c2e1b07d" */\n'),
+    (err: Error) => err.message.includes("第 1 行：记号的动作词只有") && err.message.includes("第 3 行：ref 的记录只写了一半"),
+    "写坏了好几处一次列全",
+  );
 });
 
 test("写回：整行替换，保留缩进与行尾 \\r，别的行一个字节不动；再写一次不变", () => {

@@ -91,6 +91,27 @@ export function removedDraftError(where: string, shell: (payload: string) => str
 }
 
 /**
+ * 一个文件里写坏的记号一次列全：格式逐处解析时经 attempt 调用，出错的那处记下、交回 null 接着往下认，
+ * 认完调 throwIfAny 把全部报错合成一条抛出——只报第一处的话，改一处跑一次才看得到下一处
+ */
+export function markerErrors(): { attempt<T>(parse: () => T): T | null; throwIfAny(): void } {
+  const messages: string[] = [];
+  return {
+    attempt(parse) {
+      try {
+        return parse();
+      } catch (err) {
+        messages.push((err as Error).message);
+        return null;
+      }
+    },
+    throwIfAny() {
+      if (messages.length > 0) throw new Error(messages.join("\n"));
+    },
+  };
+}
+
+/**
  * 记号的载荷 → 目标与记录（还没确认的记录是 null）。格式把外壳剥掉后交给它。
  * 不是记号（普通注释）给 null；长成「一个词 + key="value" 属性」但词不认识、以 @@docfirst 开头、
  * 属性写成 `key="value"` 之外的样子、出现这个动作词不认的属性，都报错到 where

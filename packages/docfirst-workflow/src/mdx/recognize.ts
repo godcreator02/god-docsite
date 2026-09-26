@@ -6,7 +6,7 @@
  * 段落里以 `@@docfirst` 开头的一行是已经删掉的草稿写法，报错。
  */
 import type { Reference } from "../reference/index.ts";
-import { isRemovedDraftLine, parseFormal, removedDraftError } from "../marker/index.ts";
+import { isRemovedDraftLine, markerErrors, parseFormal, removedDraftError } from "../marker/index.ts";
 import { lineOf, walk } from "./tree.ts";
 import type { TreeNode } from "./tree.ts";
 
@@ -39,15 +39,18 @@ function assertNoRemovedDraft(node: TreeNode, index: number | null, parent: Tree
   });
 }
 
+/** 认出全部记号；写坏的记号与草稿写法一次列全再报错 */
 export function recognize(tree: TreeNode): Reference[] {
   const refs: Reference[] = [];
+  const errors = markerErrors();
   walk(tree, (node, index, parent) => {
-    assertNoRemovedDraft(node, index, parent);
+    errors.attempt(() => assertNoRemovedDraft(node, index, parent));
     const payload = commentOf(node);
     if (payload === null) return;
     const line = lineOf(node);
-    const parsed = parseFormal(payload, `第 ${line} 行`);
+    const parsed = errors.attempt(() => parseFormal(payload, `第 ${line} 行`));
     if (parsed !== null) refs.push({ ...parsed, at: line - 1 });
   });
+  errors.throwIfAny();
   return refs;
 }
