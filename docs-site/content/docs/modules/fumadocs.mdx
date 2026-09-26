@@ -20,14 +20,14 @@ full: true
 
 {/* ref file="../packages/docfirst-fumadocs/src/remark-plugin.ts" lines="21-27" hash="1b4fd315e4b5" blob="2efb8db2a72b" */}
 
-五种引用在页面上是三种节点：行段与整文件是带状态点的代码块，目录树是 fumadocs 的 `Files`，存在性与名字是一行小标签：
+四种引用在页面上是三种节点：行段与整文件是带状态点的代码块，目录树是 fumadocs 的 `Files`，名字是一行小标签：
 
-{/* ref file="../packages/docfirst-fumadocs/src/blocks.ts" lines="4-6" hash="794e2891d151" blob="8cf656b5cdc2" */}
+{/* ref file="../packages/docfirst-fumadocs/src/blocks.ts" lines="4-6" hash="1636c1193ea1" blob="31ca86b30219" */}
 
 黄「有变动」时旧行和新行显示在同一个代码块里，块里夹着已经不存在的旧行，所以不带行号；红「缺失」显示确认时那段；
 取不到旧内容、全文也找不到的黄不显示代码。目录树与小标签：
 
-{/* ref file="../packages/docfirst-fumadocs/src/blocks.ts" lines="10-16" hash="400ed50913d1" blob="8cf656b5cdc2" */}
+{/* ref file="../packages/docfirst-fumadocs/src/blocks.ts" lines="10-16" hash="a1bad073a51a" blob="31ca86b30219" */}
 
 **机读版**的序列化回调：
 
@@ -115,7 +115,7 @@ React 表先展开 fumadocs 的默认表，再把 `pre` 换成 `DocfirstPre`：
 
 {/* ref file="src/components/registry.ts" lines="12-13" hash="520584aa7f9f" blob="d774808a81ac" */}
 
-{/* exists path="scripts/verify-roster.mjs" type="file" */}
+{/* has file="scripts/verify-roster.mjs" text="config.components" */}
 
 **样式**：`global.css` 不改。状态点与术语标注的样式随这个包发，站各引一行，两份 css 都由 docs 的 layout 引入：
 

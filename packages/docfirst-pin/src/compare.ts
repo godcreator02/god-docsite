@@ -1,6 +1,6 @@
 /**
- * 比较器：五种目标变没变怎么判、确认时记什么，全在这儿。纯函数，只看交进来的观察
- * （行段 / 整文件 / 名字是文件的行，目录树是名字表，存在性是 ["file"] / ["dir"]；取不到是 null），
+ * 比较器：四种目标变没变怎么判、确认时记什么，全在这儿。纯函数，只看交进来的观察
+ * （行段 / 整文件 / 名字是文件的行，目录树是名字表；取不到是 null），
  * 行段与整文件要的旧内容和 hunk 表从 `History` 取——那是环境层注进来的唯一不纯的两样。
  *
  * 行段的判定按这个顺序，前一步能下结论就不往下走：
@@ -14,7 +14,7 @@
  * 或者仓按 CRLF 存，这个 blob 就不会进对象库——少的只是 diff，不是错。
  *
  * 整文件只比整文件的段哈希；目录树只比名字表的哈希（旧表不存，变了是黄、给当前表）；
- * 存在性比类型，名字只看字面量还在不在，这两种没有黄。
+ * 名字只看字面量还在不在，没有黄。
  */
 
 import { mapRange, mappedSpan, renderDiff } from "./diff.ts";
@@ -22,7 +22,6 @@ import { blobOf, fileText, hashNames, hashSpan, lineCount, normalizeLines, slice
 import { targetKey } from "./marker.ts";
 import type {
   ContentRecord,
-  ExistsRecord,
   FileTarget,
   History,
   Judgement,
@@ -125,19 +124,6 @@ function judgeTree(record: TreeRecord | null, names: string[] | null): Judgement
   return { status: "changed", lines, reason: "changed" };
 }
 
-function judgeExists(absent: boolean, record: ExistsRecord | null, seen: string[] | null): Judgement {
-  const lines: Span = [1, 1];
-  const type = seen?.[0] ?? null;
-  if (absent) {
-    if (type !== null) return { status: "missing", lines, reason: "appeared" };
-    return { status: record === null ? "unconfirmed" : "fresh", lines };
-  }
-  if (type === null) return { status: "missing", lines, reason: "file-missing" };
-  if (record === null) return { status: "unconfirmed", lines };
-  if (record.type !== type) return { status: "missing", lines, reason: "type-changed", old: [record.type] };
-  return { status: "fresh", lines };
-}
-
 function judgeHas(needle: string, record: MemoRecord | null, text: string[] | null): Judgement {
   if (text === null) return { status: "missing", lines: [1, 1], reason: "file-missing" };
   const at = findText(text, needle);
@@ -154,8 +140,6 @@ export function judge(target: Target, record: MemoRecord | null, seen: string[] 
       return judgeFile(target, record as ContentRecord | null, seen, history);
     case "tree":
       return judgeTree(record as TreeRecord | null, seen);
-    case "exists":
-      return judgeExists(target.absent, record as ExistsRecord | null, seen);
     case "has":
       return judgeHas(target.text, record, seen);
   }
@@ -163,7 +147,7 @@ export function judge(target: Target, record: MemoRecord | null, seen: string[] 
 
 /**
  * 确认时出记录：行段 / 整文件记段哈希与整文件的 blob 名（都在进程里算，不问 git），
- * 目录树记名字表的哈希，存在性记类型。钉不住的说清楚为什么
+ * 目录树记名字表的哈希。钉不住的说清楚为什么
  */
 export function snapshot(target: Target, seen: string[] | null): Snapshot {
   const where = targetKey(target);
@@ -178,15 +162,6 @@ export function snapshot(target: Target, seen: string[] | null): Snapshot {
     case "tree":
       if (seen === null) return { problem: `${where} 目录不存在` };
       return { record: { kind: "tree", hash: hashNames(seen) } };
-    case "exists": {
-      const type = seen?.[0] ?? null;
-      if (target.absent) {
-        if (type !== null) return { problem: `${where} 断言它不在，它却在（${type}）` };
-        return { record: { kind: "exists", type: "absent" } };
-      }
-      if (type !== "file" && type !== "dir") return { problem: `${where} 不存在` };
-      return { record: { kind: "exists", type } };
-    }
     case "has":
       if (seen === null) return { problem: `${where} 文件不存在` };
       if (findText(seen, target.text) === null) return { problem: `${where} 文件里没有这个名字` };

@@ -163,26 +163,25 @@ test("作者手写的 Files 走默认名册：压成一行一个名字，文件�
   assert.equal(ai[0]!.children![0]!.value, "src/");
 });
 
-test("存在性和名字：一行芯片，meta 带 data-chip，标题就是芯片上的字", () => {
-  const absent: Target = { kind: "exists", path: "src/remove.ts", absent: true };
+test("名字：一行芯片，meta 带 data-chip，标题就是芯片上的字", () => {
+  const kept: Target = { kind: "has", file: "src/greet.ts", text: "greet" };
   const has: Target = { kind: "has", file: "src/store.ts", text: "export function save" };
-  const text = `${mark(absent)}\n\n${mark(has)}\n`;
+  const text = `${mark(kept)}\n\n${mark(has)}\n`;
   const blocks = blocksIn(text, [
-    itemOf({ reference: { target: absent, at: 0 }, current: [], lines: [1, 1] }),
+    itemOf({ reference: { target: kept, at: 0 }, current: [], lines: [2, 2] }),
     itemOf({ reference: { target: has, at: 2 }, status: "missing", reason: "text-missing", current: null, lines: [1, 1] }),
   ]);
-  assert.equal(blocks[0]!.meta, 'title="src/remove.ts · 不存在" data-dot="green" data-chip');
+  assert.equal(blocks[0]!.meta, 'title="src/greet.ts · 有 greet" data-dot="green" data-chip');
   assert.equal(blocks[1]!.meta, 'title="src/store.ts · 有 export function save · 缺失" data-dot="red" data-chip');
   const state = { containerFlow: () => "", containerPhrasing: () => "", handle: () => "不该到这儿" };
-  assert.equal(docfirstMarkdownOptions().stringify(blocks[0], undefined, state, {}), "<!-- 来源 src/remove.ts · 不存在 · 新鲜 -->", "AI 那份只留来源行");
+  assert.equal(docfirstMarkdownOptions().stringify(blocks[0], undefined, state, {}), "<!-- 来源 src/greet.ts · 有 greet · 新鲜 -->", "AI 那份只留来源行");
 });
 
-test("whereOf：标题和来源行用同一个字符串，五种目标各一种写法", () => {
+test("whereOf：标题和来源行用同一个字符串，四种目标各一种写法", () => {
   const at = (target: Target, lines: [number, number] = [1, 1]) => whereOf(itemOf({ reference: { target, at: 0 }, lines }));
   assert.equal(at(T, [7, 8]), "src/greet.ts:7-8");
   assert.equal(at({ kind: "file", file: "config.json" }), "config.json");
   assert.equal(at({ kind: "tree", dir: "src", depth: 2, glob: "*.ts" }), "src/ *.ts");
-  assert.equal(at({ kind: "exists", path: "a.ts", absent: false }), "a.ts · 存在");
   assert.equal(at({ kind: "has", file: "a.ts", text: "x" }), "a.ts · 有 x");
 });
 
@@ -284,12 +283,11 @@ test("按原文渲染：行内代码后面紧跟以行内代码开头的加粗�
   assert.equal(renderOf(`# x\n\n${line}\n`), `# x\n\n${line}\n`);
 });
 
-test("按原文渲染：行段标题写今天的位置；整文件标题是 路径:1-行数；目录树给名字表；存在性与名字整行去掉", () => {
+test("按原文渲染：行段标题写今天的位置；整文件标题是 路径:1-行数；目录树给名字表；名字整行去掉", () => {
   const whole: Target = { kind: "file", file: "config.json" };
   const tree: Target = { kind: "tree", dir: "src", depth: 1 };
   const has: Target = { kind: "has", file: "src/store.ts", text: "save" };
-  const absent: Target = { kind: "exists", path: "src/remove.ts", absent: true };
-  const text = [mdx.marker(T, RECORD), "", mdx.marker(whole, RECORD), "", "中间", "", mdx.marker(has, { kind: "has" }), "", mdx.marker(absent, { kind: "exists", type: "absent" }), "", mdx.marker(tree, { kind: "tree", hash: RECORD.hash }), ""].join("\n");
+  const text = [mdx.marker(T, RECORD), "", mdx.marker(whole, RECORD), "", "中间", "", mdx.marker(has, { kind: "has" }), "", mdx.marker(tree, { kind: "tree", hash: RECORD.hash }), ""].join("\n");
   const out = renderOf(text, (ref) => {
     if (ref.target.kind === "file") return { lines: [1, 2], current: ["{", "}"] };
     if (ref.target.kind === "tree") return { lines: [1, 2], current: ["a.ts", "lib/"] };

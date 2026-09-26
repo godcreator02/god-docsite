@@ -9,10 +9,9 @@
  */
 import type { MemoRecord, Target, TreeTarget } from "./types.ts";
 
-/** 正式记号的动作词：ref / tree / exists / absent / has。格式用它拼自己的外壳 */
+/** 正式记号的动作词：ref / tree / has。格式用它拼自己的外壳 */
 export function wordOf(target: Target): string {
   if (target.kind === "span" || target.kind === "file") return "ref";
-  if (target.kind === "exists") return target.absent ? "absent" : "exists";
   return target.kind;
 }
 
@@ -26,8 +25,6 @@ function targetAttrsOf(target: Target): Attrs {
       return [["file", target.file]];
     case "tree":
       return [["dir", target.dir], ["depth", String(target.depth)], ...(target.glob !== undefined ? [["glob", target.glob] as [string, string]] : [])];
-    case "exists":
-      return [["path", target.path]];
     case "has":
       return [["file", target.file], ["text", target.text]];
   }
@@ -40,8 +37,6 @@ function recordAttrsOf(record: MemoRecord | null): Attrs {
       return [["hash", record.hash], ...(record.blob !== undefined ? [["blob", record.blob] as [string, string]] : [])];
     case "tree":
       return [["hash", record.hash]];
-    case "exists":
-      return [["type", record.type]];
     case "has":
       return [];
   }
@@ -67,14 +62,12 @@ export function parseAttrs(s: string): Record<string, string> {
   return table;
 }
 
-const WORDS = new Set(["ref", "tree", "exists", "absent", "has"]);
+const WORDS = new Set(["ref", "tree", "has"]);
 
 /** 每个动作词认的属性：目标属性在前，记录属性在后。别的属性一律报错 */
 const ATTRS: Record<string, readonly string[]> = {
   ref: ["file", "lines", "hash", "blob"],
   tree: ["dir", "depth", "glob", "hash"],
-  exists: ["path", "type"],
-  absent: ["path", "type"],
   has: ["file", "text"],
 };
 
@@ -119,15 +112,9 @@ export function recordOf(word: string, attrs: Record<string, string | undefined>
     assertHex(attrs.blob, "blob", where);
     return { kind: "content", hash: attrs.hash, blob: attrs.blob };
   }
-  if (word === "tree") {
-    if (attrs.hash === undefined) return null;
-    assertHex(attrs.hash, "hash", where);
-    return { kind: "tree", hash: attrs.hash };
-  }
-  if (attrs.type === undefined) return null;
-  const allowed = word === "absent" ? ["absent"] : ["file", "dir"];
-  if (!allowed.includes(attrs.type)) throw new Error(`${where}：${word} 的 type 只能是 ${allowed.join(" / ")}（${attrs.type}）`);
-  return { kind: "exists", type: attrs.type as "file" | "dir" | "absent" };
+  if (attrs.hash === undefined) return null;
+  assertHex(attrs.hash, "hash", where);
+  return { kind: "tree", hash: attrs.hash };
 }
 
 /** 动作词 + 属性表 → 目标。语义校验统一住这儿，各格式报错一致；动作词不认识给 null */
@@ -149,10 +136,6 @@ export function toTarget(word: string, attrs: Record<string, string | undefined>
     if (attrs.glob !== undefined && attrs.glob !== "") target.glob = attrs.glob;
     return target;
   }
-  if (word === "exists" || word === "absent") {
-    if (attrs.path === undefined || attrs.path === "") throw new Error(`${where}：${word} 要有 path="…"`);
-    return { kind: "exists", path: attrs.path, absent: word === "absent" };
-  }
   if (attrs.file === undefined || attrs.file === "") throw new Error(`${where}：has 要有 file="…"`);
   if (attrs.text === undefined || attrs.text === "") throw new Error(`${where}：has 要有 text="…"`);
   return { kind: "has", file: attrs.file, text: attrs.text };
@@ -163,7 +146,6 @@ export function toTarget(word: string, attrs: Record<string, string | undefined>
  *   @@docfirst ref src/greet.ts:2-3 @@          行段
  *   @@docfirst ref config.json @@               整文件
  *   @@docfirst tree src @@                      目录树；可带 depth=2、glob=*.test.ts
- *   @@docfirst exists src/store.ts @@           在；absent 是「断言不在」
  *   @@docfirst has src/store.ts "export function save" @@   文件里有这个字面量（带空格就用引号包）
  * 在 md、mdx、html 里都是合法的一行普通文字；check 认它、报未确认；confirm 时格式换成自己的正式记号。
  */
@@ -189,7 +171,6 @@ export function draftOf(line: string, where: string): Target | null {
     }
     return toTarget("tree", attrs, where);
   }
-  if (word === "exists" || word === "absent") return toTarget(word, { path: payload }, where);
   if (word === "has") {
     const m2 = /^(\S+)\s+(.+)$/.exec(payload);
     if (m2 === null) throw new Error(`${where}：has 要写成 has 文件 名字`);
@@ -202,8 +183,7 @@ export function draftOf(line: string, where: string): Target | null {
 
 /**
  * 目标的文本形态，给报告用：
- *   行段 `file:a-b`、整文件 `file:all`、目录树 `tree dir depth=1[ glob=…]`、存在性 `exists path` / `absent path`、
- *   名字 `has file "text"`（text 按 JSON 转义）
+ *   行段 `file:a-b`、整文件 `file:all`、目录树 `tree dir depth=1[ glob=…]`、名字 `has file "text"`（text 按 JSON 转义）
  */
 export function targetKey(t: Target): string {
   switch (t.kind) {
@@ -213,8 +193,6 @@ export function targetKey(t: Target): string {
       return `${t.file}:all`;
     case "tree":
       return `tree ${t.dir} depth=${t.depth}${t.glob !== undefined ? ` glob=${t.glob}` : ""}`;
-    case "exists":
-      return `${t.absent ? "absent" : "exists"} ${t.path}`;
     case "has":
       return `has ${t.file} ${JSON.stringify(t.text)}`;
   }

@@ -12,7 +12,7 @@ docfirst: none
 「store.ts 里还有 save」，工具替你检查这些话还成不成立。变了就报黄等作者复核，引用指向的东西不在了就报红。**文档里不存代码的
 副本**——页面上那块是构建时现从源码读的，确认时的记录就写在记号自己身上：被钉那几行内容的 hash，加上确认时那份文件的 blob 名。
 
-五类引用覆盖文件系统上能说的几类事：行段、整文件、目录树、存在性（含「断言不在」）、名字。
+四类引用覆盖文件系统上能说的几类事：行段、整文件、目录树、名字。
 
 另一部分是**轨迹卡**：docfirst 防止现状文档与代码不符，轨迹卡防止历史被改写——一次方向上的决定
 记下来就不再改，谁取代了谁看得见。卡不钉码、不用 confirm，`check` 时一并校验；星轨盘在站上是一条独立的整页路由，
@@ -48,7 +48,6 @@ pnpm add -D @godcreator/docfirst-workflow @godcreator/docfirst-fumadocs
 @@docfirst ref src/greet.ts:2-3 @@                       行段
 @@docfirst ref config.json @@                            整文件（末尾追加也算变）
 @@docfirst tree src @@                                   目录树；可带 depth=2、glob=*.test.ts
-@@docfirst exists src/store.ts @@                        在；absent 是「断言不在」
 @@docfirst has src/store.ts "export function save" @@    文件里有这个字面量
 ```
 

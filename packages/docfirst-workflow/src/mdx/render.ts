@@ -91,7 +91,7 @@ function editFor(text: string, node: TreeNode, listing: Listing, edits: Edit[], 
     if (item === undefined) throw new Error(`第 ${line} 行是引用记号，但清单里没有它`);
     const [start, end] = offsetsOf(node);
     const kind = item.reference.target.kind;
-    if (kind === "exists" || kind === "has") edits.push(dropLine(text, start, end));
+    if (kind === "has") edits.push(dropLine(text, start, end));
     else if (item.status === "missing") refusals.push(`第 ${line} 行的引用缺失（${missingReasonOf(item)}），先修好`);
     else edits.push(replaceWithBlock(text, start, end, blockOf(item)));
     return true;
@@ -112,7 +112,7 @@ function editFor(text: string, node: TreeNode, listing: Listing, edits: Edit[], 
 }
 
 /**
- * 生成正本按原文渲染：去掉 frontmatter；每个正式记号换成一个代码块（存在性与名字没有内容，整行去掉）；
+ * 生成正本按原文渲染：去掉 frontmatter；每个正式记号换成一个代码块（名字没有内容，整行去掉）；
  * 其余文字逐字节不动。换行先统一成 LF。
  * 草稿记号、缺失的引用、JSX 组件、别的 mdx 表达式都渲染不了，一次列全、抛 RenderRefusal。
  */

@@ -1,6 +1,6 @@
 /**
  * 命令行三个动作，在临时真 git 项目里跑一遍：check 报状态、confirm 机械写回、render 出产物。
- * 五类引用各自的报法、黄灯要点名页带 --accept、红的那几处不挡别的，也在这儿。
+ * 四类引用各自的报法、黄灯要点名页带 --accept、红的那几处不挡别的，也在这儿。
  * 台子在 cli-project.ts；outputs 摆放在 cli-outputs.test.ts，装配与报告在 cli-report.test.ts。
  */
 import { test } from "node:test";
@@ -150,34 +150,32 @@ test("render：正本里还有草稿记号就渲染不了，报红退 1、不写
   }
 });
 
-test("五类引用一篇文档：五种记号各自认得回来；多了文件黄、断言不在的出现了红", async () => {
+test("四类引用一篇文档：四种记号各自认得回来；多了文件黄、名字没了红", async () => {
   const p = setupProject();
   try {
     writeFileSync(
       join(p.root, "docs", "d.md"),
-      "# d\n\n@@docfirst tree src @@\n\n@@docfirst ref src/greet.ts @@\n\n@@docfirst has src/greet.ts \"export function greet\" @@\n\n@@docfirst absent src/remove.ts @@\n",
+      "# d\n\n@@docfirst tree src @@\n\n@@docfirst ref src/greet.ts @@\n\n@@docfirst has src/greet.ts \"export function greet\" @@\n",
     );
     const done = await p.cli("confirm");
     assert.equal(done.code, 0, done.out);
     assert.match(done.out, /✅ docs\/d\.md {2}tree src depth=1 {2}已确认/);
     assert.match(done.out, /✅ docs\/d\.md {2}src\/greet\.ts:all {2}已确认/);
     assert.match(done.out, /✅ docs\/d\.md {2}has src\/greet\.ts "export function greet" {2}已确认/);
-    assert.match(done.out, /✅ docs\/d\.md {2}absent src\/remove\.ts {2}已确认/);
     const doc = p.read("docs/d.md");
     assert.match(doc, /^REF tree dir="src" depth="1" hash="[0-9a-f]{12}"$/m);
     assert.match(doc, /^REF ref file="src\/greet\.ts" hash="[0-9a-f]{12}" blob="[0-9a-f]{12}"$/m);
     assert.match(doc, /^REF has file="src\/greet\.ts" text="export function greet"$/m);
-    assert.match(doc, /^REF absent path="src\/remove\.ts" type="absent"$/m);
 
     const green = await p.cli("check");
     assert.match(green.out, /🟢 docs\/d\.md {2}tree src depth=1 {2}新鲜（1 项）/);
 
     writeFileSync(join(p.root, "src", "tag.ts"), "export const t = 1;\n");
-    writeFileSync(join(p.root, "src", "remove.ts"), "");
+    writeFileSync(join(p.root, "src", "greet.ts"), CODE.replace("function greet", "function hello"));
     const after = await p.cli("check");
     assert.equal(after.code, 1);
-    assert.match(after.out, /🔴 docs\/d\.md {2}tree src depth=1 {2}有变动，是本仓还没提交的改动引起的（3 项）/, "多出来的文件还没提交，这个黄算红");
-    assert.match(after.out, /🔴 docs\/d\.md {2}absent src\/remove\.ts {2}缺失（断言它不在，它却出现了）/);
+    assert.match(after.out, /🔴 docs\/d\.md {2}tree src depth=1 {2}有变动，是本仓还没提交的改动引起的（2 项）/, "多出来的文件还没提交，这个黄算红");
+    assert.match(after.out, /🔴 docs\/d\.md {2}has src\/greet\.ts "export function greet" {2}缺失（文件里没有这个名字了）/);
   } finally {
     p.teardown();
   }

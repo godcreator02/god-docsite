@@ -32,8 +32,6 @@ export const REASON_TEXT: Record<string, string> = {
   vanished: "整段已被删光",
   "file-missing": "文件不在了",
   "dir-missing": "目录不在了",
-  appeared: "断言它不在，它却出现了",
-  "type-changed": "文件和目录换了个",
   "text-missing": "文件里没有这个名字了",
   unlocated: "取不到确认时的内容，这段也找不到了，位置不明——重读源码后 --accept",
 };

@@ -9,8 +9,6 @@
 export { fileOf } from "./types.ts";
 export type {
   ContentRecord,
-  ExistsRecord,
-  ExistsTarget,
   FileTarget,
   Format,
   HasRecord,

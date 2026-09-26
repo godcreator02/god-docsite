@@ -24,12 +24,12 @@ description: check 把哪几类问题计入红；本仓未提交的改动引起�
 
 ## 本仓未提交的改动引起的黄，按红算
 
-一处黄灯，`check` 再问三件事：它是行段、整文件或目录树吗（`exists`、`has` 没有黄，不问）；被钉的文件和这篇文档往上找到的是不是同一个 `.git`；
+一处黄灯，`check` 再问三件事：它是行段、整文件或目录树吗（`has` 没有黄，不问）；被钉的文件和这篇文档往上找到的是不是同一个 `.git`；
 那个仓的 `git status` 里有没有这个文件（目录树是这个目录下的任何一个路径）。三个都是，这个黄就是这次改动引起的，打成 🔴、计入红。
 
 {/* ref file="../packages/docfirst-workflow/src/project/git.ts" lines="189-209" hash="519cd2928353" blob="afd0fbdae4c4" */}
 
-{/* ref file="../packages/docfirst-workflow/src/project/uncommitted.ts" lines="26-36" hash="3bdc3b66b964" blob="312fa48d1440" */}
+{/* ref file="../packages/docfirst-workflow/src/project/uncommitted.ts" lines="26-36" hash="85c1c005ef67" blob="2ad45230cb96" */}
 
 「未提交」包括工作区改了、已经暂存、还没跟踪的新文件，改名两头的路径都算。每个仓一次 `check` 只跑一次 `git status`，
 带 `--no-optional-locks`，不跟同时在这个仓里干活的人抢索引锁。
@@ -53,7 +53,5 @@ description: check 把哪几类问题计入红；本仓未提交的改动引起�
 
 ## 这个仓的门禁
 
-docfirst 不装 git hook，接进哪一步由各仓自己定。这个仓没有 git hook，也没有 CI：「`docs-site` 里 `pnpm docfirst check`
+docfirst 不装 git hook，接进哪一步由各仓自己定。这个仓没有 git hook，也没有 CI（仓根下没有 `.github` 目录）：「`docs-site` 里 `pnpm docfirst check`
 通过才提交」是[仓的 AGENTS 正本](/maintain/agents)门禁里的一条规矩，由提交的人照做。
-
-{/* absent path="../.github" type="absent" */}

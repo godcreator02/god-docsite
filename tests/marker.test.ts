@@ -1,7 +1,7 @@
 /**
  * 记号两态的账。语法本身住 `engine/marker.ts`（草稿的哨兵行、正式记号的载荷与记录属性），
  * 外壳归格式——所以两边分开测：
- *   **跨格式的**（mdx 与假格式两个适配器都过）：`parse(marker(t, r))` 认回 t 与 r，五种目标都过；
+ *   **跨格式的**（mdx 与假格式两个适配器都过）：`parse(marker(t, r))` 认回 t 与 r，四种目标都过；
  *   草稿记号四种情况：认得出、少一头哨兵不认、写在句子里不认、动作词不认识不认
  *   **记录属性**：写了一半、值不合法、不认识的属性，都报错到行
  *   **mdx 自己的**：围栏里的不认、草稿换正式记号、写坏了报到行
@@ -20,8 +20,6 @@ const ALL: Array<[string, Target]> = [
   ["@@docfirst ref config.json @@", { kind: "file", file: "config.json" }],
   ["@@docfirst tree src @@", { kind: "tree", dir: "src", depth: 1 }],
   ["@@docfirst tree src depth=2 glob=*.ts @@", { kind: "tree", dir: "src", depth: 2, glob: "*.ts" }],
-  ["@@docfirst exists src/store.ts @@", { kind: "exists", path: "src/store.ts", absent: false }],
-  ["@@docfirst absent src/remove.ts @@", { kind: "exists", path: "src/remove.ts", absent: true }],
   ['@@docfirst has src/store.ts "export function save" @@', { kind: "has", file: "src/store.ts", text: "export function save" }],
   ["@@docfirst has src/store.ts save @@", { kind: "has", file: "src/store.ts", text: "save" }],
 ];
@@ -33,14 +31,13 @@ const BLOB = "2689fa073ac6";
 function recordFor(target: Target): MemoRecord {
   if (target.kind === "span" || target.kind === "file") return { kind: "content", hash: HASH, blob: BLOB };
   if (target.kind === "tree") return { kind: "tree", hash: HASH };
-  if (target.kind === "exists") return { kind: "exists", type: target.absent ? "absent" : "file" };
   return { kind: "has" };
 }
 
 /** 把一篇里认出的引用全按确认过的样子写回 */
 const confirmed = (format: Format, text: string): Reference[] => format.parse(text).map((r) => ({ ...r, record: recordFor(r.target) }));
 
-test("正式记号：parse(marker(t, r)) 认回 t 与 r，五种目标都过，位置也对", () => {
+test("正式记号：parse(marker(t, r)) 认回 t 与 r，四种目标都过，位置也对", () => {
   for (const format of FORMATS) {
     for (const [, target] of ALL) {
       const record = recordFor(target);
@@ -72,7 +69,7 @@ test("正式记号里的引号：has 的 text 带引号也认得回来", () => {
   for (const format of FORMATS) assert.deepEqual(format.parse(`${format.marker(quoted, { kind: "has" })}\n`)[0]!.target, quoted, format.name);
 });
 
-test("草稿记号：五种目标的写法都认；少哨兵不认、句子里不认、动作词不认识不认", () => {
+test("草稿记号：四种目标的写法都认；少哨兵不认、句子里不认、动作词不认识不认", () => {
   for (const format of FORMATS) {
     for (const [draft, target] of ALL) {
       const refs = format.parse(`# 标题\n\n${draft}\n\n尾巴\n`);
@@ -89,8 +86,6 @@ test("记录属性写了一半、值不合法、不认识的属性：报错到�
   assert.throws(() => mdx.parse('{/* ref file="a.ts" lines="1-2" hash="xyz" */}\n'), /第 1 行：hash 要是 12 位小写十六进制/);
   assert.throws(() => mdx.parse(`{/* ref file="a.ts" hash="${"a".repeat(40)}" */}\n`), /hash 要是 12 位/);
   assert.throws(() => mdx.parse(`{/* tree dir="src" blob="${BLOB}" */}\n`), /第 1 行：tree 不认属性 blob/);
-  assert.throws(() => mdx.parse('{/* absent path="x" type="file" */}\n'), /absent 的 type 只能是 absent/);
-  assert.throws(() => mdx.parse('{/* exists path="x" type="absent" */}\n'), /exists 的 type 只能是 file \/ dir/);
   assert.throws(() => mdx.parse('{/* ref file="a.ts" lines=1-2 */}\n'), /认不出的写法/);
 });
 
@@ -113,12 +108,11 @@ test("mdx：写回保留行尾的 CRLF", () => {
   assert.match(once, /\*\/\}\r\n/);
 });
 
-test("mdx：目录树、存在性、名字三种正式记号也认得回来", () => {
-  const draft = "# mdx\n\n@@docfirst tree src @@\n\n@@docfirst absent src/remove.ts @@\n\n@@docfirst has src/store.ts save @@\n";
+test("mdx：目录树、名字两种正式记号也认得回来", () => {
+  const draft = "# mdx\n\n@@docfirst tree src @@\n\n@@docfirst has src/store.ts save @@\n";
   const refs = confirmed(mdx, draft);
   const once = mdx.write(draft, refs);
   assert.match(once, new RegExp(`\\{/\\* tree dir="src" depth="1" hash="${HASH}" \\*/\\}`));
-  assert.match(once, /\{\/\* absent path="src\/remove\.ts" type="absent" \*\/\}/);
   assert.match(once, /\{\/\* has file="src\/store\.ts" text="save" \*\/\}/);
   assert.deepEqual(mdx.parse(once).map((r) => [r.target, r.record]), refs.map((r) => [r.target, r.record]));
 });

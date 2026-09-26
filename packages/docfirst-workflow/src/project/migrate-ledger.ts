@@ -6,8 +6,8 @@
  *   git     { blob(40 位), commit, lines, hash(64 位) }   → hash、blob 各取前 12 位，行段按 lines 写
  *   hash    { lines, hash(64 位) }                        → 只写 hash，行段按 lines 写
  *   tree    { names }                                     → 名字表的哈希
- *   exists  { type }                                      → type
  *   has     {}                                            → 名字的正式记号本身就是确认过，不用写
+ *   exists  { type }                                      → 迁不了，报错：存在性目标已经删掉
  * 记录簿里有、文档里没有对应记号的（孤儿、文档已经不在）丢掉；记号在、记录不在的保持未确认；
  * 草稿记号和已经带着记录的记号不动。
  *
@@ -42,6 +42,9 @@ function readLedger(path: string): LedgerData {
     if (!isTable(table)) throw new Error(`${path}：${doc} 底下要是 { 目标键: 记录 } 的对象`);
     for (const [key, record] of Object.entries(table)) {
       if (!isTable(record) || typeof record.kind !== "string") throw new Error(`${path}：${doc} 的 ${key} 不是一条带 kind 的记录`);
+      if (record.kind === "exists") {
+        throw new Error(`${path}：${doc} 的 ${key} 是存在性记录，存在性目标（exists / absent）已经删掉——把文档里那处改成 has 记号或正文说明，再从记录簿里删掉这条`);
+      }
     }
   }
   return data as LedgerData;
@@ -75,11 +78,6 @@ function migrated(target: Target, record: Record<string, unknown>, where: string
     const names = record.names;
     if (!Array.isArray(names) || !names.every((name) => typeof name === "string")) throw new Error(`${where}：记录的 names 要是名字的数组`);
     return { target, record: { kind: "tree", hash: hashNames(names as string[]) } };
-  }
-  if (kind === "exists" && target.kind === "exists") {
-    const allowed = target.absent ? ["absent"] : ["file", "dir"];
-    if (typeof record.type !== "string" || !allowed.includes(record.type)) throw new Error(`${where}：记录的 type 要是 ${allowed.join(" / ")}`);
-    return { target, record: { kind: "exists", type: record.type as "file" | "dir" | "absent" } };
   }
   throw new Error(`${where}：记录的 kind ${kind} 对不上这种记号（${target.kind}）`);
 }

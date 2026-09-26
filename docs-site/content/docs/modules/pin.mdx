@@ -34,27 +34,27 @@ full: true
 
 每个动作词认哪些属性是固定的；多出属性、记录属性只写了一半、值不合法都报错到行，所以各格式报错一致：
 
-{/* ref file="../packages/docfirst-pin/src/marker.ts" lines="72-79" hash="7ac5787f4488" blob="cd45c0abef46" */}
+{/* ref file="../packages/docfirst-pin/src/marker.ts" lines="67-72" hash="ac51ca2c095b" blob="bada7cf054d3" */}
 
 ## 接口
 
 `index.ts` 的导出表就是这个包对外的全部：
 
-{/* ref file="../packages/docfirst-pin/src/index.ts" hash="d320856e17d5" blob="82b4f1d9846a" */}
+{/* ref file="../packages/docfirst-pin/src/index.ts" hash="59b38e2ed683" blob="13a6c4edb96f" */}
 
 **服务**：命令行逐篇传文本（`resolve`），站构建传已经认好的引用（`resolveRefs`），两条走同一段判定；
 创建时传入的三样就是它的全部依赖：
 
 {/* ref file="../packages/docfirst-pin/src/service.ts" lines="49-61" hash="6c78fd023d02" blob="33d8acf46386" */}
 
-**目标**五种：行段、整文件、目录树、存在性、名字。这几个类型的形状是对外契约：
+**目标**四种：行段、整文件、目录树、名字。这几个类型的形状是对外契约：
 
-{/* ref file="../packages/docfirst-pin/src/types.ts" lines="16-52" hash="d3bff37dc577" blob="beff25dfe17b" */}
+{/* ref file="../packages/docfirst-pin/src/types.ts" lines="16-45" hash="9826fc85fed7" blob="e1f0e6cc4150" */}
 
 **清单项**是一处引用核对完的全部信息：当前内容、状态、这段今天在哪、缺失与变动的细分理由、diff 和确认时那段。
 调用方只读它，不自己判定：
 
-{/* ref file="../packages/docfirst-pin/src/types.ts" lines="100-119" hash="64ab38dc70f5" blob="beff25dfe17b" */}
+{/* ref file="../packages/docfirst-pin/src/types.ts" lines="87-106" hash="a6e5c3171a17" blob="e1f0e6cc4150" */}
 
 ## 依赖
 
@@ -64,12 +64,12 @@ full: true
 **格式 `Format`**：认领文档、认出引用、写回、给出正式记号。一篇文档没有格式认领、或有两个格式认领，都报错。
 名册检查与按原文渲染不在这个接口上，由 workflow 的 `DocFormat` 另加：
 
-{/* ref file="../packages/docfirst-pin/src/types.ts" lines="126-139" hash="3fe3d27a9730" blob="5973fadd9101" */}
+{/* ref file="../packages/docfirst-pin/src/types.ts" lines="113-126" hash="3fe3d27a9730" blob="e1f0e6cc4150" */}
 
-**读取器 `Reader`** 与**旧内容来源 `History`**：行段、整文件、名字读文件的行，目录树要 `list`，存在性要 `kindOf`，
-读取器没提供后两个方法时这两种目标一律判缺失；`oldText` 给 `null` 时比较器改为滑窗查找，少的只是 diff：
+**读取器 `Reader`** 与**旧内容来源 `History`**：行段、整文件、名字读文件的行，目录树要 `list`，
+读取器没提供它时目录树一律判缺失；`oldText` 给 `null` 时比较器改为滑窗查找，少的只是 diff：
 
-{/* ref file="../packages/docfirst-pin/src/types.ts" lines="141-161" hash="a881f182ffdd" blob="5973fadd9101" */}
+{/* ref file="../packages/docfirst-pin/src/types.ts" lines="128-146" hash="3fe14471437b" blob="e1f0e6cc4150" */}
 
 ## 不做的事
 

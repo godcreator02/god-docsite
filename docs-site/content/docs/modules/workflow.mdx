@@ -31,7 +31,7 @@ full: true
 
 **读取器与旧内容来源**：旧内容来源按被引文件自己的位置找仓，hunk 表用两个临时文件跑 `git diff --no-index` 算，不往任何对象库写：
 
-{/* ref file="../packages/docfirst-workflow/src/project/fs-reader.ts" lines="1-8" hash="4a7673eef0a1" blob="2c9427f15c3d" */}
+{/* ref file="../packages/docfirst-workflow/src/project/fs-reader.ts" lines="1-7" hash="47320c54fcd0" blob="34d9e87c179c" */}
 
 {/* ref file="../packages/docfirst-workflow/src/project/history.ts" hash="c9fdbb444a03" blob="4420ba5fce88" */}
 
@@ -81,7 +81,7 @@ fumadocs 自带组件的规则在 [fumadocs 适配](/docs/modules/fumadocs)的 `
 `renderAi` 把生成正本按原文渲染成 md，不经过 fumadocs，见[生成物渲染](/docs/rendering)。`Format` 接口在生产与测试里各有一个实现，
 测试那份是假格式：
 
-{/* exists path="../tests/fake-format.ts" type="file" */}
+{/* has file="../tests/fake-format.ts" text="export function fakeFormat" */}
 
 ### 命令行 cli
 

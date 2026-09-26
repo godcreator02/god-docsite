@@ -5,8 +5,8 @@
  * 不一样，这一份因「引用能指向什么」而变，那一份因「记号怎么写」而变。
  *
  * 用词：
- *   引用 Reference    文档里的一处声明：我说的是某文件某几行 / 整个文件 / 某目录的形状 / 某路径在不在 / 某文件里有没有某名字
- *   目标 Target       引用指向什么，五种（见下）
+ *   引用 Reference    文档里的一处声明：我说的是某文件某几行 / 整个文件 / 某目录的形状 / 某文件里有没有某名字
+ *   目标 Target       引用指向什么，四种（见下）
  *   记录 MemoRecord   确认时写在正式记号上的属性（hash、blob 名这类），按目标种类各一种
  *   清单 Listing      一篇文档核对完的结果，渲染器和命令行只读它
  *   状态 Status       核对的结果，四种
@@ -35,13 +35,6 @@ export interface TreeTarget {
   glob?: string;
 }
 
-/** 存在性：这个路径在（absent 为真时：断言它不在） */
-export interface ExistsTarget {
-  kind: "exists";
-  path: string;
-  absent: boolean;
-}
-
 /** 名字：文件里有没有一行含这个字面量 */
 export interface HasTarget {
   kind: "has";
@@ -49,7 +42,7 @@ export interface HasTarget {
   text: string;
 }
 
-export type Target = SpanTarget | FileTarget | TreeTarget | ExistsTarget | HasTarget;
+export type Target = SpanTarget | FileTarget | TreeTarget | HasTarget;
 
 /**
  * 行段与整文件的记录：段哈希，加确认时整文件的 blob 名（两样都是 12 位十六进制前缀）。
@@ -67,18 +60,12 @@ export interface TreeRecord {
   hash: string;
 }
 
-/** 存在性的记录：确认时是文件、目录，还是（absent 断言时）不在 */
-export interface ExistsRecord {
-  kind: "exists";
-  type: "file" | "dir" | "absent";
-}
-
 /** 名字的记录：正式记号本身就是确认过 */
 export interface HasRecord {
   kind: "has";
 }
 
-export type MemoRecord = ContentRecord | TreeRecord | ExistsRecord | HasRecord;
+export type MemoRecord = ContentRecord | TreeRecord | HasRecord;
 
 /** 文档里的一处引用 */
 export interface Reference {
@@ -101,14 +88,14 @@ export type Span = [number, number];
 export interface Item {
   doc: string;
   reference: Reference;
-  /** 当前内容：行段 / 整文件是那几行（归一化过），目录树是名字表，存在性、名字是空表；读不到是 null */
+  /** 当前内容：行段 / 整文件是那几行（归一化过），目录树是名字表，名字是空表；读不到是 null */
   current: string[] | null;
   status: Status;
   /** 行段今天在文件里的位置——跟过 hunk 或滑窗的结果，可能跟记号上写的不一样。别的种类是 [1, 项数] */
   lines: Span;
   /**
    * 状态的细分理由：
-   *   缺失  vanished / file-missing / dir-missing / appeared（断言不在，它却在）/ type-changed / text-missing
+   *   缺失  vanished / file-missing / dir-missing / text-missing
    *   变动  changed / unlocated（取不到旧内容，滑窗也找不到这段，位置不明）
    */
   reason?: string;
@@ -142,12 +129,10 @@ export interface Format {
  * 读取器：钉码不碰磁盘，看到的一切都从这儿来。
  *   read     整文件按行读，读不到给 null
  *   list     目录下的名字表：相对 dir 的 posix 路径，目录带尾斜杠，排过序；只到 depth 层；glob 只留名字匹配的；目录不在给 null
- *   kindOf   路径是文件还是目录；不在给 null
  */
 export interface Reader {
   read(file: string): string[] | null;
   list?(dir: string, depth: number, glob?: string): string[] | null;
-  kindOf?(path: string): "file" | "dir" | null;
 }
 
 /**
@@ -172,7 +157,7 @@ export interface Judgement {
   old?: string[];
 }
 
-/** 引用指向的文件（行段、整文件、名字）；目录树和存在性不是文件，给 null */
+/** 引用指向的文件（行段、整文件、名字）；目录树不是文件，给 null */
 export function fileOf(target: Target): string | null {
   return target.kind === "span" || target.kind === "file" || target.kind === "has" ? target.file : null;
 }

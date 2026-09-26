@@ -19,7 +19,7 @@ import { NO_HISTORY } from "./repo.ts";
 
 const CODE = ["// greet", "export function greet(name: string): string {", "  return `hello ${name}`;", "}", ""];
 
-/** 内存读取器：文件表就是全部世界。目录树按路径前缀算，存在性看表里有没有 */
+/** 内存读取器：文件表就是全部世界。目录树按路径前缀算 */
 function memoryReader(files: Map<string, string[]>): Reader {
   return {
     read: (file) => files.get(file) ?? null,
@@ -32,10 +32,6 @@ function memoryReader(files: Map<string, string[]>): Reader {
         for (let i = 1; i <= Math.min(depth, parts.length); i += 1) out.add(parts.slice(0, i).join("/") + (i < parts.length ? "/" : ""));
       }
       return out.size === 0 ? null : [...out].sort();
-    },
-    kindOf(path) {
-      if (files.has(path)) return "file";
-      return [...files.keys()].some((p) => p.startsWith(`${path}/`)) ? "dir" : null;
     },
   };
 }
@@ -165,30 +161,6 @@ test("目录树：记录是名字表的哈希；名字变了是黄、给当前�
   for (const key of [...files.keys()]) if (key.startsWith("src/")) files.delete(key);
   const gone = service.resolve(DOC, done.text).items[0]!;
   assert.deepEqual([gone.status, gone.reason], ["missing", "dir-missing"]);
-});
-
-test("存在性：记录是类型；在就绿、没了红、类型变了红；absent 反过来，它出现了就红；两种都没有黄", () => {
-  const { files, service, statuses } = setup();
-  const text = [
-    refLine({ kind: "exists", path: "src/greet.ts", absent: false }),
-    refLine({ kind: "exists", path: "src/remove.ts", absent: true }),
-    refLine({ kind: "exists", path: "src", absent: false }),
-  ].join("\n\n");
-  assert.deepEqual(statuses(text), ["unconfirmed", "unconfirmed", "unconfirmed"]);
-  const done = service.confirm(DOC, text, plain);
-  assert.match(done.text, /^REF exists path="src\/greet\.ts" type="file"$/m);
-  assert.match(done.text, /^REF absent path="src\/remove\.ts" type="absent"$/m);
-  assert.match(done.text, /^REF exists path="src" type="dir"$/m);
-  assert.deepEqual(statuses(done.text), ["fresh", "fresh", "fresh"]);
-
-  files.set("src/remove.ts", [""]);
-  files.delete("src/greet.ts");
-  files.set("src/greet.ts/index.ts", ["x"]);
-  const items = service.resolve(DOC, done.text).items;
-  assert.deepEqual(items.map((i) => [i.status, i.reason]), [["missing", "type-changed"], ["missing", "appeared"], ["fresh", undefined]]);
-
-  const refuse = service.confirm(DOC, refLine({ kind: "exists", path: "src/remove.ts", absent: true }), plain);
-  assert.match(refuse.steps[0]!.item.reason!, /appeared/);
 });
 
 test("名字：正式记号本身就是确认过；文件里有这个字面量就绿，没了红；草稿要 confirm", () => {

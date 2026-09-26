@@ -3,7 +3,6 @@
  *   read     读工作区文件，整文件按行给
  *   list     目录的名字表：相对 dir 的 posix 路径，目录带尾斜杠，排过序。在 git 仓里按 .gitignore 过滤（dist/、
  *            node_modules/ 不进清单，也不往里走），.git 自己去掉；不在仓里原样列。glob 只认 * 和 ?，匹配名字不匹配路径
- *   kindOf   路径是文件还是目录（软链接按指向的算）
  * 换成读某个提交、读内存，再写一个这样的文件即可。
  */
 import { readdirSync, readFileSync, statSync } from "node:fs";
@@ -88,7 +87,5 @@ export function createReader(root: string): Reader {
       }
       return out.sort();
     },
-
-    kindOf: (path) => statOf(resolve(root, path)),
   };
 }

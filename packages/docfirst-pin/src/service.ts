@@ -60,31 +60,22 @@ export interface ServiceDeps<F extends Format = Format> {
   history: History;
 }
 
-/** 目标的观察：行段 / 整文件 / 名字看文件的行，目录树看名字表，存在性看类型 */
+/** 目标的观察：行段 / 整文件 / 名字看文件的行，目录树看名字表 */
 function observe(reader: Reader, target: Target): string[] | null {
   if (target.kind === "tree") return reader.list?.(target.dir, target.depth, target.glob) ?? null;
-  if (target.kind === "exists") {
-    const type = reader.kindOf?.(target.path) ?? null;
-    return type === null ? null : [type];
-  }
   return reader.read(fileOf(target)!);
 }
 
 /** 观察的键：同一次核对里同一样东西只看一遍 */
 function observeKey(target: Target): string {
   if (target.kind === "tree") return `tree ${target.dir} ${target.depth} ${target.glob ?? ""}`;
-  if (target.kind === "exists") return `exists ${target.path}`;
   return `file ${fileOf(target)}`;
 }
 
-/**
- * 这一处「当前是什么」：行段 / 整文件切那几行，目录树是名字表，名字没有展示内容；
- * 存在性没有内容可言（absent 断言成立时观察本来就是空的），一律给空表，在不在由判定说
- */
+/** 这一处「当前是什么」：行段 / 整文件切那几行，目录树是名字表，名字没有展示内容 */
 function currentOf(target: Target, text: string[] | null, lines: Span): string[] | null {
   if (target.kind === "span" || target.kind === "file") return sliceSpan(text, lines);
   if (target.kind === "has") return text === null ? null : [];
-  if (target.kind === "exists") return [];
   return text;
 }
 

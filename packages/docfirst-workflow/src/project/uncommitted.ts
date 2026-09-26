@@ -24,7 +24,7 @@ export function createUncommittedProbe(root: string): UncommittedProbe {
   };
 
   return (doc, target) => {
-    if (target.kind === "exists" || target.kind === "has") return false;
+    if (target.kind === "has") return false;
     const home = locate(root, doc);
     const at: Located | null = target.kind === "tree" ? locateDir(root, target.dir) : locate(root, target.file);
     if (home === null || at === null || at.repo !== home.repo) return false;

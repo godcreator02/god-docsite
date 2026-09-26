@@ -26,8 +26,6 @@ const DOC = [
   'REF ref file="src/greet.ts" lines="6-6"',
   'REF ref file="src/greet.ts"',
   'REF tree dir="src" depth="1"',
-  'REF exists path="src/greet.ts"',
-  'REF absent path="src/gone.ts"',
   'REF has file="src/greet.ts" text="greet"',
   'REF ref file="src/greet.ts" lines="1-1"',
   "@@docfirst ref src/greet.ts:4-4 @@",
@@ -40,8 +38,6 @@ const LEDGER = {
     "src/greet.ts:6-6": { kind: "hash", lines: [6, 6], hash: oldHash(LINES.slice(5, 6)) },
     "src/greet.ts:all": { kind: "git", blob: BLOB, commit: "c".repeat(40), lines: [1, 6], hash: oldHash(LINES) },
     "tree src depth=1": { kind: "tree", names: ["greet.ts"] },
-    "exists src/greet.ts": { kind: "exists", type: "file" },
-    "absent src/gone.ts": { kind: "exists", type: "absent" },
     'has src/greet.ts "greet"': { kind: "has" },
     "src/greet.ts:9-9": { kind: "hash", lines: [9, 9], hash: "0".repeat(64) },
     "src/greet.ts:4-4": { kind: "hash", lines: [4, 4], hash: oldHash(LINES.slice(3, 4)) },
@@ -57,7 +53,7 @@ test("migrate-ledger：记录逐处写进记号，孤儿丢掉，记录簿删掉
 
     const done = await p.cli("migrate-ledger");
     assert.equal(done.code, 0, done.out);
-    assert.match(done.out, /✅ docs\/m\.md {2}6 处记号写上了记录/);
+    assert.match(done.out, /✅ docs\/m\.md {2}4 处记号写上了记录/);
     assert.match(done.out, /丢掉 3 条记录/, "文档已经不在的一条、没有记号对应的一条、草稿记号那一条");
     assert.match(done.out, /🧹 已删掉 \.ledger\.json/);
     assert.match(done.out, /删掉 docs：/);
@@ -73,8 +69,6 @@ test("migrate-ledger：记录逐处写进记号，孤儿丢掉，记录簿删掉
       `REF ref file="src/greet.ts" lines="6-6" hash="${hashSpan(LINES.slice(5, 6))}"`,
       `REF ref file="src/greet.ts" hash="${hashSpan(LINES)}" blob="${blob}"`,
       `REF tree dir="src" depth="1" hash="${hashNames(["greet.ts"])}"`,
-      'REF exists path="src/greet.ts" type="file"',
-      'REF absent path="src/gone.ts" type="absent"',
       'REF has file="src/greet.ts" text="greet"',
       'REF ref file="src/greet.ts" lines="1-1"',
       "@@docfirst ref src/greet.ts:4-4 @@",
@@ -84,7 +78,7 @@ test("migrate-ledger：记录逐处写进记号，孤儿丢掉，记录簿删掉
     const service = createService({ formats: [fakeFormat("fake-md", ".md")], reader: createReader(p.root), history: createGitHistory(p.root) });
     assert.deepEqual(
       service.resolve("docs/m.md", p.read("docs/m.md")).items.map((i) => i.status),
-      ["fresh", "fresh", "fresh", "fresh", "fresh", "fresh", "fresh", "unconfirmed", "unconfirmed"],
+      ["fresh", "fresh", "fresh", "fresh", "fresh", "unconfirmed", "unconfirmed"],
       "迁过来的记录跟今天的内容对得上；没记录的与草稿照旧未确认",
     );
   } finally {
@@ -92,7 +86,7 @@ test("migrate-ledger：记录逐处写进记号，孤儿丢掉，记录簿删掉
   }
 });
 
-test("migrate-ledger：记录的 kind 跟记号对不上、没有记录簿，都报错说清楚", async () => {
+test("migrate-ledger：记录的 kind 跟记号对不上、没有记录簿、存在性记录，都报错说清楚", async () => {
   const p = setupProject(OLD_CONFIG);
   try {
     await assert.rejects(p.cli("migrate-ledger"), /没有记录簿 \.ledger\.json——没有要迁的/);
@@ -100,6 +94,9 @@ test("migrate-ledger：记录的 kind 跟记号对不上、没有记录簿，都
     writeFileSync(join(p.root, ".ledger.json"), JSON.stringify({ "docs/m.md": { "src/greet.ts:2-3": { kind: "tree", names: [] } } }));
     await assert.rejects(p.cli("migrate-ledger"), /docs\/m\.md 第 1 行 src\/greet\.ts:2-3：记录的 kind tree 对不上这种记号（span）/);
     assert.equal(existsSync(join(p.root, ".ledger.json")), true, "出错就不删记录簿");
+    writeFileSync(join(p.root, ".ledger.json"), JSON.stringify({ "docs/m.md": { "exists src/greet.ts": { kind: "exists", type: "file" } } }));
+    await assert.rejects(p.cli("migrate-ledger"), /docs\/m\.md 的 exists src\/greet\.ts 是存在性记录，存在性目标（exists \/ absent）已经删掉/);
+    assert.equal(existsSync(join(p.root, ".ledger.json")), true, "存在性记录迁不了，记录簿留着");
   } finally {
     p.teardown();
   }

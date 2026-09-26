@@ -18,7 +18,7 @@ const DOC = "docs/a.a";
 const tree = (dir: string, depth: number): string => `${refLine({ kind: "tree", dir, depth })}\n`;
 const namesOf = (r: ReturnType<typeof setupRepo>, dir: string, depth: number): string[] => r.service.resolve(DOC, tree(dir, depth)).items[0]!.current!;
 
-test("目录树、存在性、名字：清单按 .gitignore 过滤，改名红、多文件黄", () => {
+test("目录树、名字：清单按 .gitignore 过滤，改名红、多文件黄", () => {
   const r = setupRepo({ formats: FORMATS });
   try {
     r.write(".gitignore", "dist/\n");
@@ -27,22 +27,19 @@ test("目录树、存在性、名字：清单按 .gitignore 过滤，改名红�
     r.commit("起结构");
     const refs: Target[] = [
       { kind: "tree", dir: "src", depth: 1 },
-      { kind: "exists", path: "src/greet.ts", absent: false },
-      { kind: "exists", path: "src/remove.ts", absent: true },
       { kind: "has", file: "src/greet.ts", text: "export function greet" },
     ];
     r.write(DOC, refs.map(refLine).join("\n\n"));
     r.confirm(DOC);
     const items = r.service.resolve(DOC, r.read(DOC)).items;
-    assert.deepEqual(items.map((i) => i.status), ["fresh", "fresh", "fresh", "fresh"]);
+    assert.deepEqual(items.map((i) => i.status), ["fresh", "fresh"]);
     assert.deepEqual(items[0]!.current, ["greet.ts", "util.ts"], "dist/ 被忽略，不进清单");
 
     r.write("src/tag.ts", "export const t = 1;\n");
-    r.write("src/remove.ts", "");
     r.write("src/greet.ts", CODE.replace("function greet", "function hello"));
     const after = r.service.resolve(DOC, r.read(DOC)).items;
-    assert.deepEqual(after.map((i) => [i.status, i.reason]), [["changed", "changed"], ["fresh", undefined], ["missing", "appeared"], ["missing", "text-missing"]]);
-    assert.deepEqual(after[0]!.current, ["greet.ts", "remove.ts", "tag.ts", "util.ts"]);
+    assert.deepEqual(after.map((i) => [i.status, i.reason]), [["changed", "changed"], ["missing", "text-missing"]]);
+    assert.deepEqual(after[0]!.current, ["greet.ts", "tag.ts", "util.ts"]);
   } finally {
     r.teardown();
   }

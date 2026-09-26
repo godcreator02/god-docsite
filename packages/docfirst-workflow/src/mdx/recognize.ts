@@ -1,7 +1,7 @@
 /**
  * 识别器：在 mdast 上认引用标记。只有一份，parse 和 remark 插件都用它。
  * 正式记号是 mdxFlowExpression 节点，值形如 `/* ref file="…" lines="…" hash="…" blob="…" *\/`（载荷是记号语法
- * （`@godcreator/docfirst-pin` 的 marker）定的那一截，动作词 ref / tree / exists / absent / has，确认过的带着记录属性）。
+ * （`@godcreator/docfirst-pin` 的 marker）定的那一截，动作词 ref / tree / has，确认过的带着记录属性）。
  * 围栏里的同样文字是 code 节点、行内的是 mdxTextExpression，都认不出来——这就是走语法树的理由。
  * 草稿记号是单独成段的一行普通文字，记号语法定的写法。
  */
@@ -10,7 +10,7 @@ import type { Reference, Target } from "@godcreator/docfirst-pin";
 import { lineOf, walk } from "./tree.ts";
 import type { TreeNode } from "./tree.ts";
 
-const MARKER = /^\/\*\s*((?:ref|tree|exists|absent|has)\b.*?)\s*\*\/$/s;
+const MARKER = /^\/\*\s*((?:ref|tree|has)\b.*?)\s*\*\/$/s;
 
 /** 这个节点是不是正式记号；是就交载荷（`ref file="…" lines="…"` 那一截），不是给 null */
 export function markerOf(node: TreeNode): string | null {

@@ -26,7 +26,7 @@ render 只遍历现状区的文档，映射的键写成 `trajectory/` 或 `futur
 渲染由格式的 `renderAi` 完成：用 remark 把正本解析成语法树，只改 frontmatter 和记号两种节点，其余原文逐字节照抄。
 每个节点的处理：
 
-{/* ref file="../packages/docfirst-workflow/src/mdx/render.ts" lines="77-112" hash="f7aa1412397b" blob="2073491942ea" */}
+{/* ref file="../packages/docfirst-workflow/src/mdx/render.ts" lines="77-112" hash="731e77ed5520" blob="e59ba45f2d1e" */}
 
 记号换成的代码块，内容是渲染时从被钉文件读出的那几行，info 串是语言加 `title="路径:起-止"`，hash 与 blob 不进生成物：
 
@@ -55,4 +55,4 @@ check 变红。
 四样东西渲染不了：还没确认的草稿记号、指向的东西已经不在的引用、JSX 组件、mdx 表达式（`import` / `export` 也算）。
 `renderAi` 先走完整棵树，把每一处连同行号列全再拒绝；这一篇的落点一个都不写，render 与 check 都报红：
 
-{/* ref file="../packages/docfirst-workflow/src/mdx/render.ts" lines="114-131" hash="fc085e616933" blob="2073491942ea" */}
+{/* ref file="../packages/docfirst-workflow/src/mdx/render.ts" lines="114-131" hash="6513bc5e9f62" blob="e59ba45f2d1e" */}
