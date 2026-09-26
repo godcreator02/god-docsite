@@ -25,6 +25,7 @@ import { join, relative, sep } from "node:path";
 import { targetKey } from "@godcreator/docfirst-pin";
 import type { ConfirmStep, Item, Listing } from "@godcreator/docfirst-pin";
 import { buildTrajectory } from "@godcreator/docfirst-trajectory";
+import { REASON_TEXT } from "../format/index.ts";
 import type { DocFormat } from "../format/index.ts";
 import { createUncommittedProbe, loadProject, migrateLedger, scanCardDir } from "../project/index.ts";
 import type { PlacedWrite, UncommittedProbe } from "../project/index.ts";
@@ -38,16 +39,6 @@ const LABEL: Record<string, string> = {
   changed: "有变动，等作者复核",
   missing: "缺失",
   unconfirmed: "未确认，等作者确认",
-};
-/** 状态的细分理由：红说清楚引用的是什么东西不在了，黄说清楚是不是找不着了 */
-const REASON: Record<string, string> = {
-  vanished: "整段已被删光",
-  "file-missing": "文件不在了",
-  "dir-missing": "目录不在了",
-  appeared: "断言它不在，它却出现了",
-  "type-changed": "文件和目录换了个",
-  "text-missing": "文件里没有这个名字了",
-  unlocated: "取不到确认时的内容，这段也找不到了，位置不明——重读源码后 --accept",
 };
 
 /**
@@ -300,7 +291,7 @@ type Project = Awaited<ReturnType<typeof loadProject>>;
 
 /** 一行说明后面的括号：状态的细分理由，或目录树的项数 */
 function detailOf(item: Item): string {
-  if (item.reason !== undefined && REASON[item.reason] !== undefined) return `（${REASON[item.reason]}）`;
+  if (item.reason !== undefined && REASON_TEXT[item.reason] !== undefined) return `（${REASON_TEXT[item.reason]}）`;
   if (item.reference.target.kind !== "tree" || item.current === null) return "";
   return `（${item.current.length} 项）`;
 }

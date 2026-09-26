@@ -17,17 +17,21 @@ description: workflow 的 cli 目录：各条子命令怎么分派、打印什�
 
 每条命令先做同样的检查：带了求助（命令位上的 `--help` / `-h` / `help`，或任一命令后面的 `--help` / `-h`）就打用法退 0，别的一概不做；命令名不认识退 2；开关不在这条命令的表里退 2；除了 `confirm`，别的命令带了文档路径也退 2。之后 `trajectory` 与 `migrate-ledger` 在装配之前就分出去，`check` / `confirm` / `render` 先装配项目再逐篇处理：
 
-{/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="87-118" hash="846eb29b4c69" blob="12b6936e716e" */}
+{/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="78-109" hash="846eb29b4c69" blob="036135d56300" */}
 
 开关表**必须是封闭的**，理由在 `confirm` 身上：它把 `-` 开头的参数从页名里筛掉，开关要是被静默丢掉，`confirm --help` 就成了不带页名的全部页确认，而且不报任何错。求助的写法在命令位与命令后面宽窄不同，是同一个原因——`help` 跟在 `confirm` 后面可能是一篇文档的路径：
 
-{/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="53-67" hash="835f0ad5c8c0" blob="12b6936e716e" */}
+{/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="44-58" hash="835f0ad5c8c0" blob="036135d56300" */}
 
 ### 人读输出的词表
 
-一行一处引用：状态符号、文档、目标、一句话说明。说明后面的括号是细分理由——红说清楚引用的是什么东西不在了（整段删光、文件不在、目录不在、断言不在却出现了、文件和目录换了、名字没了），黄里只有「位置不明」一种细分：取不到确认时的内容，在整个文件里也找不到 hash 相同的那段。目录树没有细分理由时，括号里是当前的项数：
+一行一处引用：状态符号、文档、目标、一句话说明。说明后面的括号是细分理由——红说清楚引用的是什么东西不在了（整段删光、文件不在、目录不在、断言不在却出现了、文件和目录换了、名字没了），黄里只有「位置不明」一种细分：取不到确认时的内容，在整个文件里也找不到 hash 相同的那段。目录树没有细分理由时，括号里是当前的项数。状态符号与说明在命令行这边：
 
-{/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="35-51" hash="74adc80e503f" blob="147bc8474cdb" */}
+{/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="36-42" hash="9ebfdcac2bf1" blob="036135d56300" */}
+
+细分理由的中文说法在格式接口 `format/` 里，渲染生成正本碰到缺失的引用、拒绝时的提示也用这张表：
+
+{/* ref file="../packages/docfirst-workflow/src/format/index.ts" lines="27-39" hash="50d41a738220" blob="52a843e5c351" */}
 
 行里的目标写的是**记号上的**行号；行段跟到新位置之后，今天在哪看 `--json` 报告里的 `lines`，或者站上那一块的标题。
 
@@ -35,11 +39,11 @@ description: workflow 的 cli 目录：各条子命令怎么分派、打印什�
 
 逐篇核对，再跑轨迹卡校验，先汇总成一份报告再决定怎么输出：人读模式边算边打，`--json` 汇总完整份打印成一行。**两种模式算的是同一份报告**，红的口径不会对不上：
 
-{/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="226-249" hash="aed7c545eb4b" blob="12b6936e716e" */}
+{/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="217-240" hash="aed7c545eb4b" blob="036135d56300" */}
 
 一篇文档的红有四个来源：缺失的引用；**本仓未提交改动引起的黄**；名册外组件（`docfirst.config.mjs` 里没给它压平规则）；在 `outputs` 里有映射的文档，生成物跟正本不一致。核对生成物时把这一篇刚判好的清单一起交过去，不再判一遍：
 
-{/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="338-358" hash="e472e6ad5379" blob="12b6936e716e" */}
+{/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="329-349" hash="e472e6ad5379" blob="036135d56300" */}
 
 黄算不算红，问的是[项目装配](/docs/modules/workflow/project)的一个探针：被钉的文件和文档在同一个 git 仓里、并且在那个仓里有未提交的改动，这个黄就是这次改动引起的，要在同一个提交里复核。已经提交的代码、别的仓里的代码引起的黄只报告：
 
@@ -47,7 +51,7 @@ description: workflow 的 cli 目录：各条子命令怎么分派、打印什�
 
 这种黄按红打印，提示写明下一步：
 
-{/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="323-330" hash="85058fb75fad" blob="12b6936e716e" */}
+{/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="314-321" hash="85058fb75fad" blob="036135d56300" */}
 
 ```text
 🟢 content/docs/a.mdx  src/greet.ts:2-3  新鲜
@@ -59,11 +63,11 @@ description: workflow 的 cli 目录：各条子命令怎么分派、打印什�
 
 生成物的每种状态各译成一句人读的话：
 
-{/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="360-367" hash="c28d8799272e" blob="12b6936e716e" */}
+{/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="351-358" hash="c28d8799272e" blob="036135d56300" */}
 
 末尾顺带跑内容根下 `trajectory/` 的轨迹卡校验，病卡一条一行，也算红；目录还没建时扫出来是空集合，不算红。读卡目录与「卡里不许钉码」归[项目装配](/docs/modules/workflow/project)的 `scanCardDir`，卡字段的校验归[轨迹核心](/docs/modules/trajectory)，这边只负责把病打印成行、计进红：
 
-{/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="251-261" hash="f3ba233e6f42" blob="12b6936e716e" */}
+{/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="242-252" hash="f3ba233e6f42" blob="036135d56300" */}
 
 ### confirm：机械写回，复核过的黄才重新记
 
@@ -71,15 +75,15 @@ description: workflow 的 cli 目录：各条子命令怎么分派、打印什�
 
 **带 `--accept`** 才把黄按今天的内容重新记下，而且必须点名页——同一个仓里别人没复核的黄不能替他重新记下。点名的页之外一个都不碰；生成物不按页限定，按内容判，没变的一个字节都不写：
 
-{/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="127-155" hash="235a864d0ce8" blob="12b6936e716e" */}
+{/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="118-146" hash="235a864d0ce8" blob="036135d56300" */}
 
 点名的路径三种写法都收（反斜杠、`./` 开头、绝对路径），归成文档身份的是项目装配那一份 `docIdOf`；对不上的当场退 2，不静默跳过——少确认一页比报错难发现得多：
 
-{/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="157-168" hash="7a5facf9721b" blob="12b6936e716e" */}
+{/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="148-159" hash="7a5facf9721b" blob="036135d56300" */}
 
 每处引用做了什么，打印一行；原地没动的绿不打印：
 
-{/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="170-202" hash="bfbc18e5bd67" blob="12b6936e716e" */}
+{/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="161-193" hash="bfbc18e5bd67" blob="036135d56300" */}
 
 ```text
 ✅ content/docs/a.mdx  src/greet.ts:2-3  已确认，草稿记号已换成正式记号
@@ -99,7 +103,7 @@ description: workflow 的 cli 目录：各条子命令怎么分派、打印什�
 
 只处理在 `outputs` 里有映射的正本，别的文档不渲染。渲成什么、frontmatter 带哪几个字段、跟目标位置上现有的那份比，全归项目装配的 `Placing`，这边只把回执打印成行：
 
-{/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="369-381" hash="4e82fffef190" blob="12b6936e716e" */}
+{/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="360-372" hash="4e82fffef190" blob="036135d56300" */}
 
 ```text
 →  content/docs/outputs/readme.mdx  摆放到 ../README.md
@@ -112,13 +116,13 @@ description: workflow 的 cli 目录：各条子命令怎么分派、打印什�
 
 不遍历文档。内容根下还没有 `trajectory/` 目录就报错退 2；`--json` 出整份模型给别的工具读，不带就按盘打印每棵树的主干，末尾一行汇总支线、孤星、虫洞数。盘怎么聚、主干怎么挑，归[轨迹核心](/docs/modules/trajectory)：
 
-{/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="263-284" hash="b13c8318090a" blob="12b6936e716e" */}
+{/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="254-275" hash="b13c8318090a" blob="036135d56300" */}
 
 ### migrate-ledger：一次性迁移
 
 给从旧版升级的站用一次：旧版把确认记录存在项目根的一个单独文件里，这条命令把记录写进各记号、删掉那个文件，再列出配置里还要手工改的键。各站迁完后的下一个版本连同命令一起删掉，来由见轨迹卡[记录进记号](/trajectory/2026-09-25-records-live-in-markers)：
 
-{/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="286-297" hash="5b5388fa20c7" blob="12b6936e716e" */}
+{/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="277-288" hash="5b5388fa20c7" blob="036135d56300" */}
 
 ## 接口
 
@@ -160,7 +164,7 @@ description: workflow 的 cli 目录：各条子命令怎么分派、打印什�
 
 进命令行的名字，import 表一眼看全：
 
-{/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="23-31" hash="dc9747a72f9b" blob="12b6936e716e" */}
+{/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="23-32" hash="99361178d7a4" blob="036135d56300" */}
 
 | 接口 | 用来做什么 | 实现在 |
 | --- | --- | --- |

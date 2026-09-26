@@ -333,7 +333,7 @@ test("按原文渲染：草稿记号、缺失的引用、组件、mdx 表达式�
     () => renderOf(text, (ref) => (ref.target.kind === "span" && ref.target.file === "src/gone.ts" ? { status: "missing", reason: "file-missing", current: null } : {})),
     (err: Error) => {
       assert.equal(err.name, "RenderRefusal");
-      for (const piece of ["第 1 行有 import / export", "第 3 行是草稿记号", "第 5 行的引用缺失（file-missing）", "第 7 行有组件 <Note>", "第 9 行有 mdx 表达式 {1 + 1}", "第 11 行有 mdx 表达式 {/* 普通注释 */}"]) {
+      for (const piece of ["第 1 行有 import / export", "第 3 行是草稿记号", "第 5 行的引用缺失（文件不在了）", "第 7 行有组件 <Note>", "第 9 行有 mdx 表达式 {1 + 1}", "第 11 行有 mdx 表达式 {/* 普通注释 */}"]) {
         assert.ok(err.message.includes(piece), `报错里该有「${piece}」：${err.message}`);
       }
       return true;

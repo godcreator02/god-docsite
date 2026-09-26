@@ -23,3 +23,17 @@ export class RenderRefusal extends Error {
 
 /** 认名字不认 instanceof：格式与宿主可能各从一份产物加载，拿到的不是同一个类 */
 export const isRenderRefusal = (err: unknown): err is RenderRefusal => err instanceof Error && err.name === "RenderRefusal";
+
+/**
+ * 钉码核心交回的状态细分理由（`Item.reason`）的中文说法，命令行打印与渲染拒绝的提示共用：
+ * 红说清楚引用的是什么东西不在了，黄说清楚是不是找不着了。`changed` 不用解释，不在表里。
+ */
+export const REASON_TEXT: Record<string, string> = {
+  vanished: "整段已被删光",
+  "file-missing": "文件不在了",
+  "dir-missing": "目录不在了",
+  appeared: "断言它不在，它却出现了",
+  "type-changed": "文件和目录换了个",
+  "text-missing": "文件里没有这个名字了",
+  unlocated: "取不到确认时的内容，这段也找不到了，位置不明——重读源码后 --accept",
+};

@@ -11,7 +11,7 @@ import remarkFrontmatter from "remark-frontmatter";
 import remarkMdx from "remark-mdx";
 import { fileOf } from "@godcreator/docfirst-pin";
 import type { Item, Listing } from "@godcreator/docfirst-pin";
-import { RenderRefusal } from "../format/index.ts";
+import { REASON_TEXT, RenderRefusal } from "../format/index.ts";
 import { langOf } from "./lang.ts";
 import { draftIn, markerOf } from "./recognize.ts";
 import { lineOf, walk } from "./tree.ts";
@@ -67,6 +67,13 @@ function replaceWithBlock(text: string, start: number, end: number, block: strin
 
 const offsetsOf = (node: TreeNode): [number, number] => [node.position!.start.offset!, node.position!.end!.offset!];
 
+/** 缺失的引用一定带着钉码核心给的细分理由；表里没有它的中文说法就是表漏了，直接报错 */
+function missingReasonOf(item: Item): string {
+  const text = item.reason === undefined ? undefined : REASON_TEXT[item.reason];
+  if (text === undefined) throw new Error(`缺失的引用带的细分理由「${item.reason}」没有中文说法：在 format/index.ts 的 REASON_TEXT 里补上`);
+  return text;
+}
+
 /** 一个节点要做的改写；渲染不了的记进 refusals。交回 true 表示这个节点已经处理完，不往里走 */
 function editFor(text: string, node: TreeNode, listing: Listing, edits: Edit[], refusals: string[]): boolean {
   const line = lineOf(node);
@@ -85,7 +92,7 @@ function editFor(text: string, node: TreeNode, listing: Listing, edits: Edit[], 
     const [start, end] = offsetsOf(node);
     const kind = item.reference.target.kind;
     if (kind === "exists" || kind === "has") edits.push(dropLine(text, start, end));
-    else if (item.status === "missing") refusals.push(`第 ${line} 行的引用缺失（${item.reason ?? "引用的东西不在了"}），先修好`);
+    else if (item.status === "missing") refusals.push(`第 ${line} 行的引用缺失（${missingReasonOf(item)}），先修好`);
     else edits.push(replaceWithBlock(text, start, end, blockOf(item)));
     return true;
   }
