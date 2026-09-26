@@ -1,17 +1,14 @@
 /**
- * 由卡目录建模：认根靠 `type: root`；项目 id 铁律 = 文件名主干，不再靠字段自指互证；
- * 聚盘与上盘按 `parent`（归盘即上盘，`domain` 只是泳道分组、不是上盘门票）；
- * 子项目根卡（有 parent 的根卡）默认在所属项目盘上投影为虫洞；`merged-in` 列出的父盘上
- * 不画虫洞，改为子项目整盘内容（递归）摊入——带环保护；
+ * 由卡目录建模：一个卡目录一张盘。认根靠 `type: root`，卡目录里恰好一张根卡时它是盘心；
+ * born-at 合格的非根卡全部上盘（`parent` 由 scanCards 校验，不决定上不上盘；`domain` 只是泳道分组）；
  * 时间轴吃 `born-at`（分钟级 `YYYY-MM-DDTHH:mm`，日级 `YYYY-MM-DD` 兼容）；
  * 关系边是正文 inline field（`supersedes::` / `pivots-from::`，链接目标即卡身份，
  * md link 与 wikilink 两形态都认）；
- * 根卡不上自己的盘（盘心圆盘即根卡），诞生时刻只参与定盘界；里程碑从根卡正文「## 里程碑」解析。
+ * 根卡不上盘（盘心圆盘即根卡），诞生时刻只参与定盘界；里程碑从根卡正文「## 里程碑」解析。
  *
  * 纯函数，不碰文件系统——读卡目录在 `@godcreator/docfirst-workflow` 的 `scanCardDir`，
- * 这个包一句 import 外部模块都没有。扫盘一趟读完、内存聚盘：
- * `scanCards` 出 `RawCard[]`，本文件的建模函数一概只吃它——同一份卡集合能反复喂给不同
- * rootId 各自建模，不重复读盘。报病按文件归拢成 `SickFile`。
+ * 这个包一句 import 外部模块都没有。`scanCards` 出 `RawCard[]`，本文件的建模函数只吃它。
+ * 报病按文件归拢成 `SickFile`。
  * 逻辑出自老仓 `god-flow-panels` 的 `node/star/model.ts`（只读参考，本仓不 import 它）。
  */
 
@@ -25,20 +22,7 @@ import {
   scalarOf,
   stripFrontmatter,
 } from "./parse.ts";
-import type {
-  Card,
-  DiskInfo,
-  DayRange,
-  Edge,
-  BrokenRel,
-  Problem,
-  ProjectRoot,
-  RawCard,
-  SickFile,
-  TrajectoryModel,
-  Tree,
-  Wormhole,
-} from "./types.ts";
+import type { Card, Edge, BrokenRel, Problem, ProjectRoot, RawCard, TrajectoryModel, Tree } from "./types.ts";
 
 /** 「未分道」隐式组的哨兵值：无 domain 的卡归进这组——着中性色（盘心色一档）、
  * 排各泳道组之后、不占领域色板。拿字符串当 domain 用是为了装箱 / 筛选 / 图例
@@ -81,22 +65,18 @@ function titleOf(id: string): string {
   return id.replace(ID_DATE_PREFIX, "");
 }
 
-/** 卡身份的形状：文件名主干，不带扩展名（`.md` / `.mdx` 都不带）、不带路径分隔。 */
-function idShapeOk(v: string): boolean {
-  return v !== "" && !v.includes("/") && !v.includes("\\") && !/\.mdx?$/.test(v);
-}
-
 /* ================= 扫盘：一趟读完，后续全在内存上算 ================= */
 
-/** 一个文件解析出的卡与它自己的病。不是卡（六个字段一个都不沾）时 card 为 null。 */
+/** 一个文件解析出的卡与它自己的病。不是卡（卡体系字段一个都不沾）时 card 为 null。 */
 export interface ParsedFile {
   card: RawCard | null;
   problems: Problem[];
 }
 
-/** 把一份卡文件的全文变成 RawCard，顺带跑三层校验（形状 / 存在性 / 一致性）。
+/** 把一份卡文件的全文变成 RawCard，顺带跑单文件的校验（born-at 形状、必填字段、关系行形）。
+ * 一致性校验（根卡几张、parent 指不指向根卡）跨文件，在 scanCards 里。
  * 「卡正文里不许钉码」是钉码那一侧的规矩，由 `@godcreator/docfirst-workflow` 读卡目录时另加。
- * 六个卡体系字段一个都不沾的文件不是卡：card 与 problems 都回空，整文件跳过。 */
+ * 卡体系字段（CARD_KEYS）一个都不沾的文件不是卡：card 与 problems 都回空，整文件跳过。 */
 export function parseCardFile(id: string, path: string, mtime: number, text: string): ParsedFile {
   const fm: Frontmatter | null = parseFrontmatter(text);
   if (!fm || !CARD_KEYS.some((k) => fm[k] !== undefined)) return { card: null, problems: [] };
@@ -105,7 +85,6 @@ export function parseCardFile(id: string, path: string, mtime: number, text: str
   const bornAt = scalarOf(fm, "born-at") ?? "";
   const type = scalarOf(fm, "type");
   const parent = listOf(fm, "parent");
-  const mergedIn = listOf(fm, "merged-in");
   const domain = scalarOf(fm, "domain");
   const rawLabel = scalarOf(fm, "label");
   const isRoot = type === "root";
@@ -115,30 +94,15 @@ export function parseCardFile(id: string, path: string, mtime: number, text: str
     problems.push({ field, value, reason });
   };
 
-  /* 存在性校验：born-at / label 全卡必填；parent 内卡必填，根卡可缺 */
+  /* 存在性校验：born-at / label 全卡必填；parent 非根卡必填（根卡不写 parent 由 scanCards 查） */
   if (!bornAt) bad("born-at", "", "缺 born-at（全卡必填）");
   else if (!bornAtOk(bornAt)) {
     bad("born-at", bornAt, "born-at 格式须 YYYY-MM-DD 或 YYYY-MM-DDTHH:mm");
   }
-  if (!isRoot && !parent.length) bad("parent", "", "缺 parent（内卡必填；根卡可缺）");
+  if (!isRoot && !parent.length) bad("parent", "", "缺 parent（非根卡必填，写根卡的身份）");
   if (rawLabel === null || rawLabel.trim() === "") {
     bad("label", rawLabel ?? "", "缺 label（全卡必填）");
   }
-  /* 形状校验：parent / merged-in 元素都得是卡身份（文件名主干） */
-  for (const v of parent) {
-    if (!idShapeOk(v)) bad("parent", v, "parent 元素须为卡身份（文件名主干，不带 .md / .mdx 与路径）");
-  }
-  for (const v of mergedIn) {
-    if (!idShapeOk(v)) {
-      bad("merged-in", v, "merged-in 元素须为卡身份（文件名主干，不带 .md / .mdx 与路径）");
-    }
-  }
-  /* 一致性校验：①parent 不含自身 ②merged-in ⊆ parent（出界项逐个报） ③内卡禁写 merged-in */
-  if (parent.includes(id)) bad("parent", id, "parent 不得包含自身");
-  for (const v of mergedIn) {
-    if (!parent.includes(v)) bad("merged-in", v, "merged-in 元素须 ⊆ parent");
-  }
-  if (!isRoot && mergedIn.length) bad("merged-in", mergedIn.join(","), "merged-in 仅根卡可写");
 
   const body = stripFrontmatter(text);
   const { relations, broken } = extractRelations(body);
@@ -155,7 +119,6 @@ export function parseCardFile(id: string, path: string, mtime: number, text: str
       mtime,
       type,
       parent,
-      mergedIn,
       domain,
       label: rawLabel?.trim() || title,
       status: scalarOf(fm, "status"),
@@ -167,7 +130,7 @@ export function parseCardFile(id: string, path: string, mtime: number, text: str
   };
 }
 
-/* ================= 聚盘 ================= */
+/* ================= 上盘 ================= */
 
 function toCard(raw: RawCard): Card {
   return {
@@ -180,74 +143,18 @@ function toCard(raw: RawCard): Card {
   };
 }
 
-/** 单张盘的收卡实作，供 collectCards 递归摊入复用：diskId 是当前正被展开的盘——
- * 顶层调用即 rootId 本身，平铺投影递归时改传子项目身份，out / wormholes 两个输出数组
- * 全程共享（子项目盘的内卡与它自己的虫洞都摊平进同一份清单）。
- * visited 是环保护：一个项目盘整次收卡只展开一次，重逢（含环路绕回自身）直接跳过。 */
-function gatherDisk(
-  all: readonly RawCard[],
-  diskId: string,
-  visited: Set<string>,
-  out: Card[],
-  wormholes: Wormhole[],
-): void {
-  for (const c of all) {
-    if (c.type === "root") {
-      /* 自己的盘盘心即根卡，不出节点；born-at 病的根卡不上盘（与内卡同口径） */
-      if (c.id === diskId) continue;
-      if (!c.parent.includes(diskId) || !bornAtOk(c.bornAt)) continue;
-      if (c.mergedIn.includes(diskId)) {
-        /* 平铺投影：已展开过的盘（环路）直接跳过，不重复摊入、不再递归 */
-        if (visited.has(c.id)) continue;
-        visited.add(c.id);
-        /* 子项目根卡自己画普通节点：domain / label 待遇与内卡一致 */
-        out.push(toCard(c));
-        /* 子项目盘的整套内容（内卡 + 它自己的虫洞 / 平铺子项目）递归摊入本盘 */
-        gatherDisk(all, c.id, visited, out, wormholes);
-      } else {
-        /* 虫洞：通往子项目盘的入口，不展开内容 */
-        wormholes.push({ id: c.id, title: c.title, label: c.label, bornAt: c.bornAt, path: c.path });
-      }
-      continue;
-    }
-    if (!c.parent.includes(diskId)) continue;
-    /* born-at 坏的上不了盘（半径标度一路 NaN）——病已进 sick，这里只挡不收；
-     * 其余字段病不挡渲染，示众归报病列表 */
-    if (!bornAtOk(c.bornAt)) continue;
-    out.push(toCard(c));
-  }
-}
-
-/** 收一张盘的上盘卡与虫洞：parent 含该盘即上盘——定案规则。 */
-function collectCards(
-  all: readonly RawCard[],
-  diskId: string,
-): { cards: Card[]; wormholes: Wormhole[] } {
-  const out: Card[] = [];
-  const wormholes: Wormhole[] = [];
-  gatherDisk(all, diskId, new Set([diskId]), out, wormholes);
-  /* 字典序即时间序（同刻日级排在分钟级前），并列按身份收尾 */
-  out.sort((a, b) => a.bornAt.localeCompare(b.bornAt) || a.id.localeCompare(b.id));
-  wormholes.sort((a, b) => a.bornAt.localeCompare(b.bornAt) || a.id.localeCompare(b.id));
-  return { cards: out, wormholes };
-}
-
-/** 盘清单：每张根卡一张盘，带它的成员卡身份列表。
- * 序按「最近有活动」降序——最近动过的盘排前。 */
-export function buildDisks(all: readonly RawCard[]): DiskInfo[] {
-  const roots = all.filter((c) => c.type === "root");
-  const disks = roots.map((r) => {
-    const { cards } = collectCards(all, r.id);
-    const latest = cards.reduce((acc, c) => (c.bornAt > acc ? c.bornAt : acc), r.bornAt);
-    return { rootId: r.id, memberIds: cards.map((c) => c.id), latest };
-  });
-  disks.sort((a, b) => b.latest.localeCompare(a.latest) || a.rootId.localeCompare(b.rootId));
-  return disks.map(({ rootId, memberIds }) => ({ rootId, memberIds }));
+/** 上盘卡：非根卡里 born-at 合格的全部（born-at 坏的半径标度一路 NaN，病已进 sick，这里只挡不收；
+ * 其余字段病不挡渲染）。字典序即时间序（同刻日级排在分钟级前），并列按身份收尾。 */
+function collectCards(all: readonly RawCard[]): Card[] {
+  return all
+    .filter((c) => c.type !== "root" && bornAtOk(c.bornAt))
+    .map(toCard)
+    .sort((a, b) => a.bornAt.localeCompare(b.bornAt) || a.id.localeCompare(b.id));
 }
 
 /* ================= 关系边与树 ================= */
 
-/** 按盘求解正文关系边：目标在本盘卡集合里的成边，不在的收进坏关系示众。 */
+/** 求解正文关系边：目标在盘上卡集合里的成边，不在的收进坏关系示众。 */
 function collectEdges(
   all: readonly RawCard[],
   cards: readonly Card[],
@@ -383,18 +290,12 @@ function extractTrees(
 
 /* ================= 建盘 ================= */
 
-/** 建一张盘的全模型：收卡、按盘求解关系边、按首次出现定领域序、提树。
- * day0 含根卡诞生时刻——盘从项目诞生那天起算。
- * range（日期窗，天序数闭区间）非空时走裁剪：先全量收卡收边再裁——越界端点是
- * 「不在窗内」不是「指向不存在」，不能混进 broken 冤枉好卡；
- * 边只留两端都在窗内，树 / 领域序按窗内子集重提，supersededIds 保留全量判定；
- * 盘界钉下不钉上：下界钉在窗口起点（不早于项目诞生），上界取窗内最晚活动。 */
-export function buildModel(
-  all: readonly RawCard[],
-  rootId: string,
-  range?: DayRange,
-): TrajectoryModel {
-  const rootRaw = all.find((c) => c.id === rootId && c.type === "root") ?? null;
+/** 建盘的全模型：认根、收卡、求解关系边、按首次出现定领域序、提树。
+ * 根卡恰好一张才认主，不是恰好一张时 root 为 null（问题由 scanCards 报进 sick）。
+ * day0 含根卡诞生时刻——盘从项目诞生那天起算。 */
+export function buildModel(all: readonly RawCard[]): TrajectoryModel {
+  const roots = all.filter((c) => c.type === "root");
+  const rootRaw = roots.length === 1 ? (roots[0] as RawCard) : null;
   const root: ProjectRoot | null = rootRaw
     ? {
         id: rootRaw.id,
@@ -404,32 +305,12 @@ export function buildModel(
         path: rootRaw.path,
       }
     : null;
-  const collected = collectCards(all, rootId);
-  const byIdAll: Record<string, Card> = {};
-  const dupes: string[] = [];
-  for (const c of collected.cards) {
-    if (byIdAll[c.id]) dupes.push(c.id);
-    else byIdAll[c.id] = c;
-  }
-
-  const allEdges = collectEdges(all, collected.cards, byIdAll);
-  const supersededIds = new Set(
-    allEdges.edges.filter((e) => e.kind === "supersede").map((e) => e.from),
-  );
-
-  /* 裁剪：范围外的卡与虫洞不上盘；无窗时原样透传，零开销 */
-  const inWindow = (bornAt: string): boolean => {
-    if (!range) return true;
-    const d = dayNum(bornAt);
-    return d >= range.d0 && d <= range.d1;
-  };
-  const cards = range ? collected.cards.filter((c) => inWindow(c.bornAt)) : collected.cards;
-  const wormholes = range
-    ? collected.wormholes.filter((w) => inWindow(w.bornAt))
-    : collected.wormholes;
+  const cards = collectCards(all);
   const byId: Record<string, Card> = {};
   for (const c of cards) byId[c.id] = c;
-  const edges = range ? allEdges.edges.filter((e) => byId[e.from] && byId[e.to]) : allEdges.edges;
+
+  const { edges, broken } = collectEdges(all, cards, byId);
+  const supersededIds = new Set(edges.filter((e) => e.kind === "supersede").map((e) => e.from));
 
   /* 领域序 = 按卡的 born-at 序首次出现累积去重。盘上扇区分配靠这个顺序，
    * 换成按卡数或按字母，盘画得不一样、还不报错。
@@ -447,32 +328,18 @@ export function buildModel(
 
   const { trees, isolated, compOf } = extractTrees(cards, edges, byId);
   const days = cards.map((c) => dayNum(c.bornAt));
-  /* 虫洞有自己的时间位置：born-at 参与定盘界（落时间轴原位） */
-  for (const w of wormholes) days.push(dayNum(w.bornAt));
   /* 根卡诞生时刻参与定盘界：盘从项目诞生那天起算 */
-  const rootDay = root && bornAtOk(root.bornAt) ? dayNum(root.bornAt) : null;
+  if (root && bornAtOk(root.bornAt)) days.push(dayNum(root.bornAt));
+  /* 一张卡都没有、也没有可用的根卡诞生时刻：盘界落在今天 */
   const today = dayNum(new Date().toISOString());
-
-  let day0: number;
-  let dayMax: number;
-  if (range) {
-    /* 钉下不钉上；窗内一张卡都没有 → 空盘（day0 = dayMax = 窗口下界） */
-    const lo = Math.max(range.d0, rootDay ?? range.d0);
-    day0 = days.length ? Math.min(lo, Math.min(...days)) : lo;
-    dayMax = days.length ? Math.max(...days) : day0;
-  } else {
-    if (rootDay !== null) days.push(rootDay);
-    day0 = days.length ? Math.min(...days) : today;
-    dayMax = days.length ? Math.max(...days) : today;
-  }
+  const day0 = days.length ? Math.min(...days) : today;
+  const dayMax = days.length ? Math.max(...days) : today;
 
   return {
     root,
     cards,
-    wormholes,
     edges,
-    broken: allEdges.broken,
-    dupes,
+    broken,
     supersededIds,
     domains,
     byId,

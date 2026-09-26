@@ -33,6 +33,8 @@ const TEMPLATE_IMPORTABLE = [
   '@godcreator/docfirst-fumadocs/roster',
   '@godcreator/docfirst-fumadocs/pre',
   '@godcreator/docfirst-fumadocs/light.css',
+  '@godcreator/docfirst-fumadocs/trajectory',
+  '@godcreator/docfirst-fumadocs/trajectory.css',
 ]
 
 /**
@@ -85,14 +87,13 @@ const VALUES: SiteValues = { title: '样例', site: 'docs-site' }
 /** 模板里的三个区，各有集合、loader、侧栏根节点与 meta.json */
 const ZONES = ['docs', 'trajectory', 'future']
 
-/** 模板里的全部起始页（相对 content/） */
+/** 模板里的全部起始页（相对 content/）；轨迹区没有页，入口是整页星轨盘 */
 const PAGES = [
   'docs/index.mdx',
   'docs/glossary.mdx',
   'docs/outputs/readme.mdx',
   'docs/outputs/agents.mdx',
   'docs/outputs/claude.mdx',
-  'trajectory/index.mdx',
   'future/roadmap.mdx',
 ]
 
@@ -171,16 +172,39 @@ describe('结构模板', () => {
     for (const gone of ['source.config.ts', 'next.config.mjs', 'tsconfig.json', 'postcss.config.mjs']) expect(rels).not.toContain(gone)
   })
 
-  it('content/ 下只有 docs、trajectory、future 三个区，页面只有那几页；轨迹与未来各有路由与 layout', () => {
+  it('content/ 下只有 docs、trajectory、future 三个区，页面只有那几页；未来区有路由与 layout', () => {
     const rels = renderedAll().map((f) => f.rel)
     const contentDirs = new Set(rels.filter((rel) => rel.startsWith('content/')).map((rel) => rel.split('/')[1]))
     expect([...contentDirs].sort()).toEqual([...ZONES].sort())
     const pages = rels.filter((rel) => rel.startsWith('content/') && rel.endsWith('.mdx')).map((rel) => rel.slice('content/'.length))
     expect(pages.sort()).toEqual([...PAGES].sort())
-    for (const zone of ['trajectory', 'future']) {
-      expect(rels).toContain(`src/app/${zone}/[[...slug]]/page.tsx`)
-      expect(renderedText(`src/app/${zone}/layout.tsx`).trim()).toBe("export { default } from '../docs/layout';")
-    }
+    expect(rels).toContain('src/app/future/[[...slug]]/page.tsx')
+    expect(renderedText('src/app/future/layout.tsx').trim()).toBe("export { default } from '../docs/layout';")
+  })
+
+  it('轨迹区两个路由组：整页星轨盘不套侧栏，卡页复用 docs 的 layout；侧栏第一条链到盘', () => {
+    const rels = renderedAll().map((f) => f.rel)
+    expect(rels.filter((rel) => rel.includes('trajectory/') && rel.startsWith('src/app/')).sort()).toEqual([
+      'src/app/(trajectory-cards)/trajectory/[...slug]/page.tsx',
+      'src/app/(trajectory-cards)/trajectory/layout.tsx',
+      'src/app/(trajectory-disk)/trajectory/disk.css',
+      'src/app/(trajectory-disk)/trajectory/layout.tsx',
+      'src/app/(trajectory-disk)/trajectory/page.tsx',
+    ])
+    expect(renderedText('src/app/(trajectory-cards)/trajectory/layout.tsx').trim()).toBe("export { default } from '../../docs/layout';")
+    expect(renderedText('src/app/(trajectory-disk)/trajectory/layout.tsx')).toMatch(/^import '\.\/disk\.css';$/m)
+    expect(renderedText('src/app/(trajectory-disk)/trajectory/disk.css')).toMatch(/^@import '@godcreator\/docfirst-fumadocs\/trajectory\.css';$/m)
+
+    const disk = renderedText('src/app/(trajectory-disk)/trajectory/page.tsx')
+    expect(disk).toMatch(/^import \{ loadTrajectory, StarDisk \} from '@godcreator\/docfirst-fumadocs\/trajectory';$/m)
+    expect(disk).toMatch(/loadTrajectory\('content\/trajectory'\)/)
+    expect(disk, 'StarDisk 的 hrefBase 与轨迹卡 loader 的 baseUrl 是同一个前缀').toMatch(/<StarDisk data=\{data\} hrefBase="\/trajectory" \/>/)
+
+    const cards = renderedText('src/app/(trajectory-cards)/trajectory/[...slug]/page.tsx')
+    expect(cards, '空 slug 归整页盘，卡页不出').toMatch(/generateParams\(\)\.filter\(\(p\) => p\.slug\.length > 0\)/)
+    expect(cards).toMatch(/<a href="\/trajectory">← 回到盘<\/a>/)
+
+    expect(JSON.parse(renderedText('content/trajectory/meta.json'))).toEqual({ pages: ['[星轨盘](/trajectory)', '...'] })
   })
 
   it('src/lib/source.ts：三个区各一个 macro 集合，现状集合经 applyMdxPreset 接 docfirst，官方的导出名还在', () => {

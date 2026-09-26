@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "author": {"name": "godcreator"},
   "type": "module",
-  "description": "把 docfirst 接到 fumadocs 站上：remark 接线、状态点与术语组件、轨迹卡集合与星轨盘服务端组件，随 docfirst 线发。",
+  "description": "把 docfirst 接到 fumadocs 站上：remark 接线、状态点与术语组件、轨迹卡集合与星轨盘（读卡建模，转出 StarDisk 与样式），随 docfirst 线发。",
   "exports": {
     ".": {
       "types": "./dist/index.d.mts",
@@ -26,7 +26,8 @@
       "default": "./dist/trajectory.mjs"
     },
     "./light.css": "./styles/light.css",
-    "./term.css": "./styles/term.css"
+    "./term.css": "./styles/term.css",
+    "./trajectory.css": "./styles/trajectory.css"
   },
   "files": [
     "dist",

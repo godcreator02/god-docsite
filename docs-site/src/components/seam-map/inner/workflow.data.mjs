@@ -1,6 +1,6 @@
 /**
  * 命令行与项目 docfirst-workflow 的内部接缝图：模块页 <SeamMap module="workflow" /> 画的就是它。
- * 虚线框是包里的目录：format、mdx、cli 各一个框，project 按做的事分成项目装配、读盘与 git、生成物与读卡几个框，
+ * 虚线框是包里的目录：format、mdx、cli 各一个框，project 按做的事分成项目装配、读文件与 git、生成物与读卡几个框，
  * 这几个框的包名一栏都写 project/，框里的文件写在 blurb 里；灰色实线框是包外的调用方、依赖与使用方的仓。
  * 目录之间的方向从线上看：format 只往钉码核心连，mdx 与 project 之间没有线，cli 往下连 project、format 与两个核心。
  * 坐标在 workflow.layout.ts。
@@ -11,7 +11,7 @@ export const workflowGraph = defineSeamGraph({
   id: 'workflow',
   title: '命令行与项目内部的目录与接缝',
   intro:
-    '命令行与项目内部接缝图：虚线框是包里的目录，project 目录按做的事分成项目装配、读盘与 git、生成物与读卡几个框；框里的方块是它对外给的函数或类型，灰色实线框是包外的调用方、依赖与使用方的仓。format 只连钉码核心，mdx 与 project 之间没有线，cli 连 project、format 与两个核心。',
+    '命令行与项目内部接缝图：虚线框是包里的目录，project 目录按做的事分成项目装配、读文件与 git、生成物与读卡几个框；框里的方块是它对外给的函数或类型，灰色实线框是包外的调用方、依赖与使用方的仓。format 只连钉码核心，mdx 与 project 之间没有线，cli 连 project、format 与两个核心。',
   frameLabel: '目录',
   modules: [
     {
@@ -35,9 +35,9 @@ export const workflowGraph = defineSeamGraph({
       role: null,
       outside: true,
       blurb:
-        '站构建时 remark 插件装配项目、在语法树上认记号打标记，星轨盘服务端组件读轨迹卡。用的是这个包的三个出口：主入口的 loadProject、./mdx 的语法树函数、./cards 的 scanCardDir。',
+        '站构建时 remark 插件装配项目、在语法树上认记号打标记，./trajectory 的 loadTrajectory 读轨迹卡。用的是这个包的三个出口：主入口的 loadProject、./mdx 的语法树函数、./cards 的 scanCardDir。',
       caps: [
-        { id: 'fd-disk', name: '星轨盘服务端组件', ident: 'scanCardDir' },
+        { id: 'fd-disk', name: '星轨盘读卡', ident: 'loadTrajectory' },
         { id: 'fd-remark', name: 'remark 插件', ident: 'loadProject · recognize · stamp' },
       ],
     },
@@ -57,7 +57,7 @@ export const workflowGraph = defineSeamGraph({
     },
     {
       id: 'io',
-      name: '读盘与 git',
+      name: '读文件与 git',
       pkg: 'project/',
       role: 'cyan',
       outside: false,
@@ -120,7 +120,7 @@ export const workflowGraph = defineSeamGraph({
       role: null,
       outside: true,
       blurb:
-        '状态全在这里判：编排服务、记号语法、hunk 解析与 hash。它要的格式、读取器、旧内容来源由 workflow 实现，装配时交给 createService。只用 node:crypto，不读盘、不启动子进程。',
+        '状态全在这里判：编排服务、记号语法、hunk 解析与 hash。它要的格式、读取器、旧内容来源由 workflow 实现，装配时交给 createService。只用 node:crypto，不读文件、不启动子进程。',
       caps: [
         { id: 'service', name: '编排服务', ident: 'createService' },
         { id: 'algo', name: 'hunk 与 hash', ident: 'parseHunks · hashText' },
@@ -212,7 +212,7 @@ export const workflowGraph = defineSeamGraph({
       iface: 'buildTrajectory(scan: TrajectoryScan) → Trajectory',
       convention: false,
       via: 'code',
-      text: 'docfirst trajectory 读完轨迹卡目录，把扫描结果交给 buildTrajectory，按盘打印每棵树的主干，再汇总支线、孤星、虫洞；--json 打印整份模型。卡片字段与建模规则都在轨迹核心。',
+      text: 'docfirst trajectory 读完轨迹卡目录，把扫描结果交给 buildTrajectory，打印这张盘每棵树的主干，再汇总支线与孤星；--json 打印整份结果。卡片字段与建模规则都在轨迹核心。',
     },
     {
       n: 6,
@@ -242,7 +242,7 @@ export const workflowGraph = defineSeamGraph({
       iface: '@godcreator/docfirst-workflow/cards：scanCardDir(dir) → TrajectoryScan',
       convention: false,
       via: 'code',
-      text: '星轨盘服务端组件从 ./cards 出口取 scanCardDir 读轨迹卡目录，再交给轨迹核心建模。./cards 的入口是 card-dir.ts，不经主入口，免得把命令行与配置加载带进 Next 的服务端构建。',
+      text: 'fumadocs 适配的 loadTrajectory 从 ./cards 出口取 scanCardDir 读轨迹卡目录，再交给轨迹核心建模。./cards 的入口是 card-dir.ts，不经主入口，免得把命令行与配置加载带进 Next 的服务端构建。',
     },
     {
       n: 9,
@@ -262,7 +262,7 @@ export const workflowGraph = defineSeamGraph({
       iface: 'createReader(root) · createGitHistory(root) · createPlacing(host: PlacingHost)',
       convention: false,
       via: 'code',
-      text: '装配时按项目根造读取器与旧内容来源；再把编排服务、每篇的落点表和真盘上读正本、读落点、写落点的函数攒成 PlacingHost，交给 createPlacing。摆放拿不到装配的别的部分。',
+      text: '装配时按项目根造读取器与旧内容来源；再把编排服务、每篇的落点表和在磁盘上读正本、读落点、写落点的函数攒成 PlacingHost，交给 createPlacing。摆放拿不到装配的别的部分。',
     },
     {
       n: 11,
@@ -352,7 +352,7 @@ export const workflowGraph = defineSeamGraph({
       iface: 'pickCardFiles(names) · scanCards(files: CardFile[]) → TrajectoryScan · stripFrontmatter(src) · splitLines(text)',
       convention: false,
       via: 'code',
-      text: 'scanCardDir 读目录，用 pickCardFiles 挑出卡文件，把每张的文件名、全文、修改时间交给 scanCards，拿回卡与病卡；再对每张卡去掉 frontmatter 的正文按 splitLines 逐行查卡里不许钉码，病并进同一份清单。轨迹核心不读盘。',
+      text: 'scanCardDir 读目录，用 pickCardFiles 挑出卡文件，把每张的文件名、全文、修改时间交给 scanCards，拿回卡与病卡；再对每张卡去掉 frontmatter 的正文按 splitLines 逐行查卡里不许钉码，病并进同一份清单。轨迹核心不读文件。',
     },
   ],
 });

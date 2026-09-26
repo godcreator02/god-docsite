@@ -53,15 +53,20 @@ test("轨迹卡目录还没建：check 退 0、一条红都不打——「这里
   }
 });
 
-test("合法根卡加子卡：trajectory --json 出的 JSON 里 disks 有一张盘", async () => {
+test("合法根卡加子卡：trajectory --json 出那一张盘的模型，不带 --json 打印根卡与卡数", async () => {
   const p = setupProject();
   try {
     card(p.root, "2026-01-01-root.md", ["---", "born-at: 2026-01-01T08:00", "type: root", "label: 测试项目", "---", ""]);
     card(p.root, "2026-01-02-child.md", ["---", "born-at: 2026-01-02T08:00", "parent: [2026-01-01-root]", "label: 子卡", "---", ""]);
     const result = await p.cli("trajectory", "--json");
     assert.equal(result.code, 0, result.out);
-    const data = JSON.parse(result.out) as { disks: unknown[] };
-    assert.equal(data.disks.length, 1);
+    const data = JSON.parse(result.out) as { sick: unknown[]; model: { root: { id: string } | null; cards: Array<{ id: string }> } };
+    assert.equal(data.model.root?.id, "2026-01-01-root");
+    assert.deepEqual(data.model.cards.map((c) => c.id), ["2026-01-02-child"]);
+    assert.deepEqual(data.sick, []);
+    const text = await p.cli("trajectory");
+    assert.equal(text.code, 0, text.out);
+    assert.match(text.out, /^盘 测试项目（2026-01-01-root） {2}1 张卡$/m);
   } finally {
     p.teardown();
   }

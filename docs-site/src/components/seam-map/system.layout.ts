@@ -18,7 +18,7 @@ export const systemLayout: SeamLayout = {
     pre: cap(488, 222, 137),
     roster: cap(635, 222, 137),
     cardset: cap(782, 222, 137),
-    'disk-server': cap(929, 222, 137),
+    'disk-load': cap(929, 222, 137),
 
     cli: cap(194, 372, 106),
     mdx: cap(310, 372, 106),
@@ -32,7 +32,7 @@ export const systemLayout: SeamLayout = {
     compare: cap(550, 522, 96),
 
     model: cap(714, 522, 120),
-    thumbs: cap(844, 522, 100),
+    layout: cap(844, 522, 100),
     disk: cap(954, 522, 112),
 
     root: cap(400, 676, 240),
@@ -50,7 +50,7 @@ export const systemLayout: SeamLayout = {
     repo: { x: 180, y: 646, w: 900, h: 90 },
   },
   // 线停在框边上（6、7、8）表示接这个包里的几处能力，是哪几处看高亮。
-  // 5 的另两端（建模、缩略图）与 8 落在项目根的那一端没有单独画线，固定高亮时照样亮
+  // 5 的另两端（卡集合、建模）与 8 落在项目根的那一端没有单独画线，固定高亮时照样亮
   seamPaths: {
     '1': { d: 'M320,420 V522', badge: [320, 462] },
     '2': { d: 'M600,420 V522', badge: [600, 462] },

@@ -1,13 +1,12 @@
 /*
- * StarDisk 的样式：盘面、画布文字类、日期竖轨、工具条与浮层、图例、悬停气泡、启动器卡阵。
- * 结构照 Obsidian 版 styles.css：主题变量全收在容器根 `.star-disk`（与启动器根 `.star-launcher`）下，
+ * StarDisk 的样式：盘面、画布文字类、日期竖轨、工具条与浮层、图例、悬停气泡。
+ * 结构照 Obsidian 版 styles.css：主题变量全收在容器根 `.star-disk` 下，
  * 不撒全局；底色 / 文字 / 边框 / 环线 / 扇环框全映射 fumadocs 的 `--color-fd-*`，CSS 不判明暗
  * （亮暗由宿主变量自己翻），JS 色板（领域 / 连线 / 里程碑 / mute）另按 html.dark 选。
- * 所有选择器要么带 `.star-` 前缀、要么包在 `.star-disk` / `.star-launcher` 下，不污染宿主站。
+ * 所有选择器要么带 `.star-` 前缀、要么包在 `.star-disk` 下，不污染宿主站。
  */
 
-.star-disk,
-.star-launcher {
+.star-disk {
   --bg: var(--color-fd-background);
   --t1: var(--color-fd-foreground);
   --t2: var(--color-fd-muted-foreground);
@@ -41,11 +40,6 @@
   outline: none;
   overflow: hidden;
   user-select: none;
-}
-
-/* 整页模式：容器吃满父元素（高度由页面给），画布区铺满、盘径吃短边 */
-.star-disk-page {
-  border-radius: 0;
 }
 
 /* 画布区：svg 直挂它铺满；工具条 / 浮层 / 竖轨是 absolute 兄弟、不占流 */
@@ -595,23 +589,7 @@
   font-size: 10px;
 }
 
-/* ---------- 嵌入模式未激活提示 / 空盘 ---------- */
-.star-disk .star-activate-hint {
-  position: absolute;
-  left: 12px;
-  bottom: 12px;
-  z-index: 6;
-  padding: 3px 12px;
-  border: 1px solid var(--bd);
-  border-radius: 999px;
-  background: var(--panel);
-  color: var(--t3);
-  font-size: 12px;
-  letter-spacing: 1px;
-  white-space: nowrap;
-  pointer-events: none;
-}
-
+/* ---------- 空盘 ---------- */
 .star-disk .star-empty {
   position: absolute;
   inset: 0;
@@ -621,104 +599,6 @@
   color: var(--t4);
   font-size: 13px;
   pointer-events: none;
-}
-
-/* ---------- 启动器：项目卡阵 ----------
- * 一卡一个项目：上方全景定妆照（静态 svg，亮暗各一份、按 html.dark 显示其一），下方短名与
- * 「n 卡 · 最近活动」。盘图的三个 CSS 变量（--hub-fill / --box-stroke / --box-fill）与环色变量
- * 跟盘容器同一份（见文件头的变量块），静态盘的这部分着色走变量，主题切换不用重画。 */
-.star-launcher {
-  height: 100%;
-  overflow-y: auto;
-  padding: 16px 20px;
-  box-sizing: border-box;
-  background: var(--bg);
-  color: var(--t1);
-  user-select: none;
-}
-
-/* 卡片网格：自适应列宽，窄栏单列、宽栏多列 */
-.star-launcher-list {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 14px;
-}
-
-.star-launcher-card {
-  display: flex;
-  flex-direction: column;
-  padding: 0;
-  border: 1px solid var(--bd);
-  border-radius: 10px;
-  overflow: hidden;
-  background: transparent;
-  color: var(--t1);
-  font: inherit;
-  text-align: center;
-  cursor: pointer;
-}
-
-.star-launcher-card:hover {
-  background: var(--hov);
-}
-
-/* 盘图区：方形，静态盘 svg 铺满；盘纯装饰、不吃鼠标，交互全在卡片整体上 */
-.star-launcher-thumb {
-  aspect-ratio: 1;
-  padding: 12px;
-}
-
-.star-launcher-thumb svg {
-  width: 100%;
-  height: 100%;
-  display: block;
-  pointer-events: none;
-}
-
-/* 亮暗各一份定妆照：按宿主的 html.dark 显示其一（只做显隐切换，色值仍全在各自的 JS 色板里） */
-.dark .star-launcher-thumb .star-thumb-light,
-html:not(.dark) .star-launcher-thumb .star-thumb-dark {
-  display: none;
-}
-
-.star-launcher-text {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 2px;
-  padding: 0 10px 10px;
-}
-
-.star-launcher-label {
-  font-size: 14px;
-}
-
-.star-launcher-meta {
-  color: var(--t4);
-  font-size: 11px;
-}
-
-/* 属性段：段内绝不断行（中文任意字间可断），换行只落段间分隔符处 */
-.star-launcher-seg {
-  white-space: nowrap;
-}
-
-.star-launcher-empty {
-  padding: 24px 8px;
-  color: var(--t2);
-  font-size: 13px;
-  text-align: center;
-}
-
-/* ---------- Trajectory 服务端组件：盘 + 报病列表 ---------- */
-.star-sick {
-  margin-top: 16px;
-  font-size: 13px;
-}
-
-.star-sick-title {
-  font-weight: 600;
-  margin-bottom: 6px;
 }
 
 /* ---------- 关系边段落（remarkTrajectoryLinks 打标） ---------- */

@@ -6,7 +6,7 @@
  * 得到「Tue May 06 2026 08:00:00 GMT+0800」——born-at 的格式校验当场全灭，日级存量卡全部
  * 被判字段病并挡在盘外，而且是静默的（盘照出，只是少了卡少了环）。
  *
- * 只认既定键：born-at / type / parent / merged-in / label / domain / status。其余键读进来
+ * 只认既定键：born-at / type / parent / label / domain / status。其余键读进来
  * 也没人取，消费侧（model.ts）只按这张表读。
  * 逻辑出自老仓 `god-flow-panels` 的 `node/star/parse.ts`（只读参考，本仓不 import 它）。
  */
@@ -15,7 +15,7 @@ import type { EdgeKind, Milestone, Relation } from "./types.ts";
 
 /** 卡体系字段：frontmatter 里一个都不沾的文件不是卡，校验直接跳过。
  * status 不在其列——它是自由槽位，单凭一个 status 不足以认定这是张卡。 */
-export const CARD_KEYS = ["type", "born-at", "parent", "merged-in", "label", "domain"] as const;
+export const CARD_KEYS = ["type", "born-at", "parent", "label", "domain"] as const;
 
 /** 根卡正文末尾装里程碑的固定 H2 区块名。 */
 export const MILESTONE_HEADING = "里程碑";
@@ -117,8 +117,8 @@ export function listOf(fm: Frontmatter, key: string): string[] {
 }
 
 /** 正文关系边提取的产物：成形的边与写歪的行分开装。
- * broken 只装「行头对但行形不合」这一类（文件级病，跟哪张盘无关）；
- * 「指向的卡不在本盘」是按盘算的，归 model.ts 的 BrokenRel。 */
+ * broken 只装「行头对但行形不合」这一类（文件级病，跟盘上有哪些卡无关）；
+ * 「指向的卡不在盘上」要对盘上的卡集合求解，归 model.ts 的 BrokenRel。 */
 export interface ExtractedRelations {
   relations: Relation[];
   broken: Array<{ key: string; target: string }>;

@@ -1,7 +1,7 @@
 'use client';
 /**
  * 「一批轨迹卡文件怎么变成星轨盘」：上面一条固定的流水线，第几步就点亮第几段；下面是例子里的五个卡文件在这一段变成了什么
- * （字段表 → 读目录 → 校验结果 → 盘与树 → 布局落点 → 站上的页面）。
+ * （字段表 → 读目录 → 校验结果 → 模型与树 → 布局落点 → 站上的页面）。
  * 讲解文字与例子都在 trajectory-flow.data.mjs，这里只负责画；机读版由 trajectory-flow.ai.mjs 读同一份数据生成。
  */
 import { useState } from 'react';
@@ -17,18 +17,17 @@ import {
   failedChecks,
   files,
   fumadocsLines,
-  launcher,
   layout,
   model,
   pageLines,
   parsedExtras,
   readCalls,
   refForms,
+  result,
   sick,
   stages,
   steps,
   terminals,
-  withoutMergedIn,
 } from './trajectory-flow.data.mjs';
 
 type Step = (typeof steps)[number];
@@ -77,7 +76,7 @@ const fieldOf = (card: Card, key: string): string | undefined => card.fields.fin
 /* ── 第 1 步：字段表，点一行看原文 ── */
 
 function FilesScene(): JSX.Element {
-  const [picked, setPicked] = useState<CardCode>('S');
+  const [picked, setPicked] = useState<CardCode>('R');
   const card = cardOf(picked);
   return (
     <div className="tf-stack">
@@ -175,7 +174,7 @@ function ReadScene(): JSX.Element {
 function ParseScene(): JSX.Element {
   return (
     <>
-      <Pane title="parseCardFile（model.ts）与 checkDocfirstRefs 的结果" role="violet">
+      <Pane title="scanCards 与 checkDocfirstRefs 的结果" role="violet">
         <div className="tf-table-wrap">
           <table className="tf-table tf-matrix">
             <thead>
@@ -220,7 +219,7 @@ function ParseScene(): JSX.Element {
         </dl>
       </Pane>
       <Pill tone="bad" dot>
-        D 的 born-at 不合格：不上任何一张盘；其余的病只列出，不挡绘制
+        D 的 born-at 不合格：不上盘；其余的病只列出，不挡绘制
       </Pill>
       <div className="tf-grid">
         <Pane title="解析时从正文取出的" role="violet">
@@ -232,7 +231,7 @@ function ParseScene(): JSX.Element {
   );
 }
 
-/* ── 第 4 步：R 的盘上的树、盘清单、去掉 merged-in 的对照 ── */
+/* ── 第 4 步：盘上的树与 buildTrajectory 交回的三样 ── */
 
 function placeOf(id: string): Place {
   const place = layout.places.find((p) => p.id === id);
@@ -254,7 +253,7 @@ function TreeSvg(): JSX.Element {
   };
   const ids = [...spineIds, ...sublineIds];
   return (
-    <svg className="tf-svg" viewBox="0 0 400 150" role="img" aria-label="R 的盘上的树：主干 A → B，支线 S">
+    <svg className="tf-svg" viewBox="0 0 400 150" role="img" aria-label="盘上的树：主干 A → B，支线 S">
       <text className="tf-svg-note" x={4} y={20}>
         主干 spine
       </text>
@@ -286,24 +285,22 @@ function TreeSvg(): JSX.Element {
   );
 }
 
-function ChipList({ ids }: { ids: readonly string[] }): JSX.Element {
+function ChipList({ ids, bad = [] }: { ids: readonly string[]; bad?: readonly string[] }): JSX.Element {
   if (ids.length === 0) return <span className="tf-dim">没有</span>;
   return (
     <span className="tf-chips">
       {ids.map((id) => (
-        <Chip key={id} code={codeOf(id)} />
+        <Chip key={id} code={codeOf(id)} bad={bad.includes(id)} />
       ))}
     </span>
   );
 }
 
 function ModelScene(): JSX.Element {
-  const rootDisk = model.disks[0];
-  if (rootDisk === undefined) throw new Error('例子的盘清单是空的');
   return (
     <>
       <div className="tf-grid">
-        <Pane title={`${rootDisk.label} 的盘：一棵树`} role="violet" extra={<Pill role="violet">extractTrees</Pill>}>
+        <Pane title={`${model.root.label} 的盘：一棵树`} role="violet" extra={<Pill role="violet">extractTrees</Pill>}>
           <TreeSvg />
           <dl className="tf-kv">
             <dt>被取代 supersededIds</dt>
@@ -314,49 +311,34 @@ function ModelScene(): JSX.Element {
             <dd>
               <ChipList ids={model.isolated} />
             </dd>
-            <dt>虫洞 wormholes</dt>
-            <dd>
-              <ChipList ids={model.wormholes} />
-            </dd>
             <dt>领域顺序 domains</dt>
             <dd>{model.domains.join(' → ')}</dd>
           </dl>
+        </Pane>
+        <Pane title="buildTrajectory 交回的" role="violet" extra={<Pill role="violet">index.ts</Pill>}>
+          <dl className="tf-kv">
+            <dt>cards 全部卡</dt>
+            <dd>
+              <ChipList ids={result.cards} bad={result.sickFiles} />
+            </dd>
+            <dt>sick 病卡</dt>
+            <dd>
+              <ChipList ids={result.sickFiles} bad={result.sickFiles} />
+            </dd>
+            <dt>model.root 盘心</dt>
+            <dd>
+              <ChipList ids={[model.root.id]} />
+            </dd>
+            <dt>model.cards 盘上的卡</dt>
+            <dd>
+              <ChipList ids={model.cards} />
+            </dd>
+          </dl>
           <div className="tf-off">
             <Chip code="D" bad />
-            <span>born-at 不合格，不在任何一张盘上</span>
+            <span>born-at 不合格：在 cards 与 sick 里，不在盘上</span>
           </div>
         </Pane>
-        <div className="tf-stack">
-          <Pane title="盘清单 disks" role="violet" extra={<Pill role="violet">buildDisks</Pill>}>
-            {model.disks.map((disk) => (
-              <div key={disk.rootId} className="tf-disk-row">
-                <span className="tf-disk-head">
-                  <Chip code={codeOf(disk.rootId)} />
-                  <b>{disk.label}</b>
-                </span>
-                <span className="tf-disk-members">
-                  盘上的卡 <ChipList ids={disk.memberIds} />
-                </span>
-              </div>
-            ))}
-            <p className="tf-note">S 是根卡，parent 与 merged-in 都含 R：在 R 的盘上当普通卡，所以 S 同时是一张盘的盘心和另一张盘上的一张卡。</p>
-          </Pane>
-          <Pane title="对照：S 不写 merged-in" role="slate">
-            <dl className="tf-kv">
-              <dt>R 的盘上的卡</dt>
-              <dd>
-                <ChipList ids={withoutMergedIn.cards} />
-              </dd>
-              <dt>虫洞</dt>
-              <dd>
-                <ChipList ids={withoutMergedIn.wormholes} />
-              </dd>
-              <dt>主干</dt>
-              <dd>{withoutMergedIn.spine.map(codeOf).join(' → ')}</dd>
-            </dl>
-            <p className="tf-note">{withoutMergedIn.text}</p>
-          </Pane>
-        </div>
       </div>
       <Terminal title={files.cwd} lines={terminals.trajectory} />
     </>
@@ -379,8 +361,8 @@ function wedgePath(th0: number, th1: number, r0: number, r1: number): string {
   return `M${a.x} ${a.y}L${b.x} ${b.y}A${r1} ${r1} 0 0 1 ${c.x} ${c.y}L${d.x} ${d.y}A${r0} ${r0} 0 0 0 ${a.x} ${a.y}Z`;
 }
 
-/** 按 RingsLayout 算出的真实落点画盘（世界坐标）；withCards 为假时只画盘心，labels 为假时不写字 */
-function DiskSvg({ withCards, labels }: { withCards: boolean; labels: boolean }): JSX.Element {
+/** 按 RingsLayout 算出的真实落点画盘（世界坐标）；labels 为假时不写字 */
+function DiskSvg({ labels }: { labels: boolean }): JSX.Element {
   const edge = layout.maxR + 60;
   const at = (id: string): { x: number; y: number } => {
     const place = placeOf(id);
@@ -390,47 +372,41 @@ function DiskSvg({ withCards, labels }: { withCards: boolean; labels: boolean })
   return (
     <svg className="tf-svg tf-disk" viewBox={`${-edge} ${-edge} ${2 * edge} ${2 * edge}`} role="img" aria-label="R 的盘：按 RingsLayout 的落点画出">
       <circle className="tf-ring" data-outer r={layout.maxR} />
-      {withCards
-        ? layout.places.map((place) => (
-            <g key={`ring:${place.id}`}>
-              <circle className="tf-ring" r={place.rLin} />
-              {labels ? (
-                <text className="tf-svg-note tf-svg-big" x={0} y={-place.rLin - 18} textAnchor="middle">
-                  {place.day}
-                </text>
-              ) : null}
-            </g>
-          ))
-        : null}
-      {withCards ? <path className="tf-wedge" d={wedgePath(th0, th1, rMin - 15, rMax + 40)} /> : null}
+      {layout.places.map((place) => (
+        <g key={`ring:${place.id}`}>
+          <circle className="tf-ring" r={place.rLin} />
+          {labels ? (
+            <text className="tf-svg-note tf-svg-big" x={0} y={-place.rLin - 18} textAnchor="middle">
+              {place.day}
+            </text>
+          ) : null}
+        </g>
+      ))}
+      <path className="tf-wedge" d={wedgePath(th0, th1, rMin - 15, rMax + 40)} />
       <circle className="tf-hub" r={layout.hubWorldR} />
       {labels ? (
         <text className="tf-hub-text" x={0} y={28} textAnchor="middle">
           R
         </text>
       ) : null}
-      {withCards
-        ? model.edges.map((e) => {
-            const from = at(e.from);
-            const to = at(e.to);
-            return <line key={`${e.from}>${e.to}`} className="tf-edge" data-kind={e.kind} x1={from.x} y1={from.y} x2={to.x} y2={to.y} />;
-          })
-        : null}
-      {withCards
-        ? layout.places.map((place) => {
-            const p = at(place.id);
-            return (
-              <g key={place.id} className="tf-node" data-superseded={model.supersededIds.includes(place.id) ? true : undefined}>
-                <circle cx={p.x} cy={p.y} r={36} />
-                {labels ? (
-                  <text className="tf-svg-big" x={p.x} y={p.y - 80} textAnchor="middle">
-                    {codeOf(place.id)}
-                  </text>
-                ) : null}
-              </g>
-            );
-          })
-        : null}
+      {model.edges.map((e) => {
+        const from = at(e.from);
+        const to = at(e.to);
+        return <line key={`${e.from}>${e.to}`} className="tf-edge" data-kind={e.kind} x1={from.x} y1={from.y} x2={to.x} y2={to.y} />;
+      })}
+      {layout.places.map((place) => {
+        const p = at(place.id);
+        return (
+          <g key={place.id} className="tf-node" data-superseded={model.supersededIds.includes(place.id) ? true : undefined}>
+            <circle cx={p.x} cy={p.y} r={36} />
+            {labels ? (
+              <text className="tf-svg-big" x={p.x} y={p.y - 80} textAnchor="middle">
+                {codeOf(place.id)}
+              </text>
+            ) : null}
+          </g>
+        );
+      })}
     </svg>
   );
 }
@@ -440,56 +416,39 @@ function LayoutScene(): JSX.Element {
   return (
     <div className="tf-grid">
       <Pane title="new RingsLayout(model)：R 的盘" role="violet" extra={<Pill role="violet">layout.ts</Pill>}>
-        <DiskSvg withCards labels />
+        <DiskSvg labels />
         <p className="tf-note">
           虚线环是三张卡所在的日期，越往外越新；浅色扇区是这棵树分到的角度 {th0.toFixed(0)}°–{th1.toFixed(1)}°，别的树会分到别的角度。A 被取代，画得淡。
         </p>
       </Pane>
-      <div className="tf-stack">
-        <Pane title="落点 places 与槽号 pos" role="violet">
-          <div className="tf-table-wrap">
-            <table className="tf-table">
-              <thead>
-                <tr>
-                  <th>卡</th>
-                  <th>日期</th>
-                  <th>rLin（半径）</th>
-                  <th>angBase（角度）</th>
-                  <th>pos</th>
+      <Pane title="落点 places 与槽号 pos" role="violet">
+        <div className="tf-table-wrap">
+          <table className="tf-table">
+            <thead>
+              <tr>
+                <th>卡</th>
+                <th>日期</th>
+                <th>rLin（半径）</th>
+                <th>angBase（角度）</th>
+                <th>pos</th>
+              </tr>
+            </thead>
+            <tbody>
+              {layout.places.map((place) => (
+                <tr key={place.id}>
+                  <td>
+                    <Chip code={codeOf(place.id)} />
+                  </td>
+                  <td>{place.day}</td>
+                  <td>{place.rLin}</td>
+                  <td>{place.angBase.toFixed(1)}°</td>
+                  <td>{place.pos === 0 ? '0 主干' : `${place.pos} 支线`}</td>
                 </tr>
-              </thead>
-              <tbody>
-                {layout.places.map((place) => (
-                  <tr key={place.id}>
-                    <td>
-                      <Chip code={codeOf(place.id)} />
-                    </td>
-                    <td>{place.day}</td>
-                    <td>{place.rLin}</td>
-                    <td>{place.angBase.toFixed(1)}°</td>
-                    <td>{place.pos === 0 ? '0 主干' : `${place.pos} 支线`}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </Pane>
-        <Pane title="launcherThumbs(data)：服务端画缩略图" role="violet" extra={<Pill role="violet">thumbs.ts</Pill>}>
-          {launcher.map((entry) => (
-            <div key={entry.rootId} className="tf-disk-row">
-              <span className="tf-disk-head">
-                <Chip code={codeOf(entry.rootId)} />
-                <b>{entry.label}</b>
-              </span>
-              <span className="tf-chips">
-                <Pill role="slate">light SVG</Pill>
-                <Pill role="slate">dark SVG</Pill>
-              </span>
-            </div>
-          ))}
-          <p className="tf-note">同一个 RingsLayout 算落点，画进不需要浏览器 DOM 的 SVG 文档再转成字符串；页面按 html.dark 显示其中一份，切主题不重画。</p>
-        </Pane>
-      </div>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </Pane>
     </div>
   );
 }
@@ -499,22 +458,12 @@ function LayoutScene(): JSX.Element {
 function PageScene(): JSX.Element {
   return (
     <div className="tf-grid">
-      <Pane title="/trajectory" role="cyan" icon="server" extra="启动器（示意）">
+      <Pane title="/trajectory" role="cyan" icon="server" extra="整页（示意）">
         <div className="tf-topbar">
           <span>← 文档</span>
           <Pill tone="bad">报病 {sick.length}</Pill>
         </div>
-        <div className="tf-launch">
-          {launcher.map((entry) => (
-            <div key={entry.rootId} className="tf-launch-card">
-              <DiskSvg withCards={entry.cardCount > 0} labels={false} />
-              <div className="tf-launch-label">{entry.label}</div>
-              <div className="tf-launch-meta">
-                {entry.cardCount} 卡 · 最近活动 {entry.latest}
-              </div>
-            </div>
-          ))}
-        </div>
+        <DiskSvg labels={false} />
         <ul className="tf-clicks">
           {clicks.map((click) => (
             <li key={click.what}>
@@ -526,10 +475,11 @@ function PageScene(): JSX.Element {
       </Pane>
       <div className="tf-stack">
         <Pane title={files.page} role="cyan" icon="file">
-          <CodeLines lines={pageLines.load.lines} start={pageLines.load.start} />
-          <CodeLines lines={pageLines.render.lines} start={pageLines.render.start} />
+          {pageLines.map((block) => (
+            <CodeLines key={block.start} lines={block.lines} start={block.start} />
+          ))}
         </Pane>
-        <Pane title="docfirst-fumadocs/trajectory（trajectory.tsx）" role="emerald" icon="file">
+        <Pane title="docfirst-fumadocs/trajectory（trajectory.ts）" role="emerald" icon="file">
           <CodeLines lines={fumadocsLines.lines} start={fumadocsLines.start} tone="good" highlight={[fumadocsLines.start + 1, fumadocsLines.start + 1]} />
         </Pane>
       </div>

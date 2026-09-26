@@ -6,16 +6,12 @@
  * 缩放律：滚轮 = 焦点环带沿时间穿梭的径向鱼眼 r' = g(r)，解析闭式、零积分误差。
  *
  * 布局产物（places / treeBoxes）由实例自己持有，不挂在共享的 card / tree 对象上：
- * 多张盘要同开（虫洞穿越），共享对象上的布局属性会被后建的盘覆盖。
+ * 同一个模型会建多份布局（数据重建、测试里对比两份），写在共享对象上后建的会盖掉先建的。
  * 逻辑出自老仓 `god-flow-panels` 的 `node/star/layout.ts`（只读参考，本仓不 import 它）。
  */
 
 import { dayNum, NO_DOMAIN } from "./model.ts";
-import type { Card, TrajectoryModel, Tree, Wormhole } from "./types.ts";
-
-/** 虫洞带的装箱分组哨兵：虫洞不占领域（染色走根卡家族 accent 专属通道），
- * 装箱只需自成一块地、排最末。拿不可能撞名的字符串当 domain 用，装箱链路不加特例。 */
-export const WORM_DOMAIN = "__wormhole__";
+import type { Card, TrajectoryModel, Tree } from "./types.ts";
 
 /* ---------- 定型常量 ---------- */
 /** 斜率 smoothstep 过渡半宽（px）。面板要在端上重建同一张鱼眼映射表，随 geometry 透出。 */
@@ -27,7 +23,7 @@ const DOM_GAP_DEG = 9; // 换领域时额外留的缝：色块之间要看得出
 const SLOT_ARC = 56; // 组内槽宽（世界单位弧长：一条链一槽）
 const PAD_ARC = 18; // 扇环两侧内边距（弧长）
 const ISO_ARC = 48; // 孤星带内的槽宽（弧长）
-/** 同槽贪心装箱要留的净空（天）：树内支线分道、孤星带、虫洞带三处按日期分槽都用它——
+/** 同槽贪心装箱要留的净空（天）：树内支线分道、孤星带两处按日期分槽都用它——
  * 留够这道净空，免得前后两条挨得太近看着像一条。 */
 const LANE_GAP_DAYS = 2;
 /** 时间轴环带世界深度定死（外锚定）：不管数据深浅、节点多少，day0 到 dayMax 恒拉伸填满
@@ -53,7 +49,7 @@ export const NODE_RADIUS: Record<"alive" | "superseded", number> = {
 };
 
 /** 根节点半径：盘心正中的圆点 = 项目根卡。比 BASE_RADIUS(6)与结论档（6 × tierMult 1.3 = 7.8）
- * 都略大，盘心独一档；定妆照按 nodeR × ROOT_RADIUS / BASE_RADIUS 同基准等比。 */
+ * 都略大，盘心独一档。 */
 export const ROOT_RADIUS = 10;
 
 /** 压缩区符号缩小下限。 */
@@ -127,11 +123,6 @@ export interface IsoBox extends Box {
   iso: Card[];
 }
 
-/** 虫洞带：全盘虫洞打包成一条参与装箱（机制类孤星带，但不占领域、不算孤星） */
-export interface WormBox extends Box {
-  holes: Wormhole[];
-}
-
 /** 极坐标转直角：0 度指 12 点、顺时针增。 */
 export function polar(a: number, r: number): { x: number; y: number } {
   return { x: r * Math.sin((a * Math.PI) / 180), y: -r * Math.cos((a * Math.PI) / 180) };
@@ -143,7 +134,7 @@ export function smoothstep(a: number, b: number, x: number): number {
 }
 
 /** 弧长换角度：取内外半径的几何平均——按最内半径换算等于拿主干独占内圈的那一段
- * 给整条带定宽，一棵横跨全年的树能吃掉小半个盘。树扇环 / 孤星带 / 虫洞带三处共用。 */
+ * 给整条带定宽，一棵横跨全年的树能吃掉小半个盘。树扇环与孤星带共用。 */
 function arcToDeg(arc: number, rMin: number, rMax: number): number {
   return (arc / Math.sqrt(rMin * rMax)) * DEG;
 }
@@ -156,13 +147,12 @@ const GATE_HI = 24;
 
 /** 月环密度门：spacingWorld（世界单位，乘 m·kRatio 等视图倍率由调用方定）过 smoothstep
  * 出展示强度——密盘月环糊成同心圆纹时渐隐，乘视图倍率后放大 / 进鱼眼能让月环重新现身
- * （与周环缩放门同思路）。大图（乘 m·kRatio）与 ringSkeleton（全景态 m=kRatio=1）
- * 共用同一函数，别抄两份 smoothstep 参数。 */
+ * （与周环缩放门同思路）。 */
 export function monthGate(spacingWorld: number): number {
   return smoothstep(GATE_LO, GATE_HI, spacingWorld);
 }
 
-/** 确定性伪随机（按粒序哈希）：重建折算表时点云形态不跳。星轨大图与定妆照共用。 */
+/** 确定性伪随机（按粒序哈希）：重建折算表时点云形态不跳。 */
 export const pseudoRandom = (i: number, salt: number): number => {
   const x = Math.sin(i * 12.9898 + salt * 78.233) * 43758.5453;
   return x - Math.floor(x);
@@ -234,8 +224,6 @@ export class RingsLayout {
   places = new Map<string, CardPlace>();
   treeBoxes: TreeBox[] = [];
   isoBoxes: IsoBox[] = [];
-  /** 虫洞带：无虫洞为 null */
-  wormBox: WormBox | null = null;
 
   /* ---------- 鱼眼状态 ---------- */
   /** 焦点日：补间中 / 目标 */
@@ -450,8 +438,7 @@ export class RingsLayout {
 
   /* ================= 布局烘焙 ================= */
 
-  /** 按日期贪心分槽：同槽内前后两项相隔 < LANE_GAP_DAYS 天就换槽。孤星带 / 虫洞带
-   * 都是「一串卡按日期分槽」的同一件事，只是取的对象不同（卡 / 虫洞），抽成一个泛型入口；
+  /** 按日期贪心分槽：同槽内前后两项相隔 < LANE_GAP_DAYS 天就换槽（孤星带用）；
    * 顺带把该组的半径跨度（rMin/rMax）一起算出，laneBox 的角度换算靠它。
    * 树内支线分道走的是区间（每条支线占一个 [d0,d1]），不是单点，形状不同，不复用这个。 */
   private packDateSlots<T>(
@@ -484,7 +471,7 @@ export class RingsLayout {
   }
 
   /** 一条带的 Box 形状组装：pad / slot 角宽由几何平均半径换算（arcToDeg），
-   * width 按槽数摊开。孤星带与虫洞带装箱形状完全一致，只是归属的 domain 不同。 */
+   * width 按槽数摊开。 */
   private laneBox(
     domain: string,
     packed: { laneCount: number; dMin: number; dMax: number; rMin: number; rMax: number },
@@ -606,38 +593,16 @@ export class RingsLayout {
       return { iso: list, ...this.laneBox(dom, packed, ISO_ARC) };
     });
 
-    /* 虫洞带：全盘虫洞打包一条，机制与孤星带同款（日期分槽），但不染领域色、不进泳道体系——
-     * 装箱只为给它一块不撞的地，排各泳道与未分道之后。 */
-    const wormSlot = new Map<string, number>();
-    this.wormBox = null;
-    if (this.model.wormholes.length) {
-      const list = this.model.wormholes;
-      const packed = this.packDateSlots(
-        list,
-        (w) => dayNum(w.bornAt),
-        (w) => w.id,
-      );
-      for (const [id, k] of packed.slot) wormSlot.set(id, k);
-      this.wormBox = { holes: list, ...this.laneBox(WORM_DOMAIN, packed, ISO_ARC) };
-    }
-
     /* 装箱：先按领域聚块，同域的树排进相邻角度、域内按诞生序从 12 点顺时针先到先得。
      * 领域是颜色通道，盘上同色不挨着就等于没分域——所以跨域一律角向互斥、
      * 只有同域内时间不搭界的两棵树才复用同一段角度；换域时多留一档缝把色块分开。 */
     const all: Box[] = [...this.treeBoxes, ...this.isoBoxes];
-    if (this.wormBox) all.push(this.wormBox);
     const doms = [...new Set(all.map((b) => b.domain))];
     /* 未分道隐式组排各泳道之后：哨兵从出现序里摘出来压尾 */
     const noDomainIdx = doms.indexOf(NO_DOMAIN);
     if (noDomainIdx >= 0) {
       doms.splice(noDomainIdx, 1);
       doms.push(NO_DOMAIN);
-    }
-    /* 虫洞带再压最末：不占领域，最后给块地即可 */
-    const wormIdx = doms.indexOf(WORM_DOMAIN);
-    if (wormIdx >= 0) {
-      doms.splice(wormIdx, 1);
-      doms.push(WORM_DOMAIN);
     }
     /* 域内保持诞生序，孤星带排在本域末尾 */
     const order = doms.flatMap((d) => all.filter((b) => b.domain === d));
@@ -686,17 +651,6 @@ export class RingsLayout {
           angBase: b.th0 + b.padDeg + ((isoSlot.get(c.id) ?? 0) + 0.5) * b.slotDeg,
           spreadOff: 0,
           rLin: this.radius(c.bornAt),
-        });
-      }
-    }
-    /* 虫洞落点：带内槽居中，半径由 born-at 定（时间轴原位） */
-    if (this.wormBox) {
-      const b = this.wormBox;
-      for (const w of b.holes) {
-        this.places.set(w.id, {
-          angBase: b.th0 + b.padDeg + ((wormSlot.get(w.id) ?? 0) + 0.5) * b.slotDeg,
-          spreadOff: 0,
-          rLin: this.radius(w.bornAt),
         });
       }
     }
@@ -834,9 +788,9 @@ export function advanceFrame(layout: RingsLayout, fr: FrameState, ease: number):
   return live;
 }
 
-/* ================= 全景环形骨架（定妆照与大图共用语义） ================= */
+/* ================= 空窗碎石 ================= */
 
-/** 一颗碎石的确定性形态——不含 DOM，骨架（定妆照）与渲染（大图）同吃这一份。 */
+/** 一颗碎石的确定性形态——不含 DOM，gaps 层照它建节点。 */
 export interface GapDot {
   rLin: number;
   ang: number;
@@ -846,9 +800,8 @@ export interface GapDot {
 
 /** 枚举一条空窗带里的碎石。
  *
- * idxStart 是**跨带连续累加**的粒序，它直接进 pseudoRandom 的哈希——两处调用传的
- * 序号不一致，画出来的碎石就落在不同位置。定妆照与大图必须逐位相等，所以这段公式
- * 只能有一处：抖动幅度、尺寸曲线、透明度区间任何一个改了，两边同时变。 */
+ * idxStart 是**跨带连续累加**的粒序，它直接进 pseudoRandom 的哈希——序号一变，
+ * 碎石就落到别处，重烘焙时点云会跳。 */
 export function gapDots(layout: RingsLayout, band: GapBand, idxStart: number): GapDot[] {
   const dots: GapDot[] = [];
   for (let i = 0; i < Math.floor(band.days); i++) {
@@ -862,65 +815,4 @@ export function gapDots(layout: RingsLayout, band: GapBand, idxStart: number): G
     });
   }
   return dots;
-}
-
-/** 空窗小行星带的一条：暗底雾带几何 + 碎石清单 + 起止日（边界环与 12 点日期标签用）。 */
-export interface GapSkeleton {
-  /** 起止日：视图层按帧走 displayRadius(radiusDay(d)) 摆边界环、标签文字取 formatDay(d) */
-  d0: number;
-  d1: number;
-  /** 暗底雾带：(ra+rb)/2 与 rb−ra，ra/rb = radiusDay(d0/d1)（全景态 displayRadius 恒等） */
-  bgR: number;
-  bgW: number;
-  dots: GapDot[];
-}
-
-/** 全景环形骨架：周环 / 月环 / 年环 / 最新环 / 空窗小行星带。
- * 每条环都带着自己的天序数 d：视图层按帧要拿它算当地折算率（环让位空窗）与日期标签文字。 */
-export interface RingSkeleton {
-  /** 周环：7 天步进里落不到月首的那些。全景态隐、放大或进鱼眼后随缩放门渐显，显隐归视图层 */
-  weeks: Array<{ d: number; rLin: number }>;
-  /** 月环：opacity = effRate(d) × monthGate(monthSpacingWorld(d)) */
-  months: Array<{ d: number; rLin: number; opacity: number }>;
-  /** 年环：恒显 opacity 1 */
-  years: Array<{ d: number; rLin: number }>;
-  /** 最新环：全景恒显 opacity 1；空盘（无卡）为 null */
-  latest: { rLin: number } | null;
-  gaps: GapSkeleton[];
-}
-
-/** 出全景环形骨架：纯函数，同模型同设置两次调用逐位相等（碎石走 pseudoRandom 确定性哈希）。
- * 枚举规则：d 从 day0 步进 7，落在 UTCDate ≤ 7 的是月环、其余是周环；年环 = day0 次年到
- * dayMax 年的元旦；碎石 idx 跨带连续累加。 */
-export function ringSkeleton(layout: RingsLayout): RingSkeleton {
-  const { day0, dayMax, cards } = layout.model;
-  const weeks: RingSkeleton["weeks"] = [];
-  const months: RingSkeleton["months"] = [];
-  for (let d = day0; d <= dayMax; d += 7) {
-    if (new Date(d * 86400000).getUTCDate() <= 7) {
-      months.push({
-        d,
-        rLin: layout.radiusDay(d),
-        opacity: layout.effRate(d) * monthGate(layout.monthSpacingWorld(d)),
-      });
-    } else weeks.push({ d, rLin: layout.radiusDay(d) });
-  }
-  const years: RingSkeleton["years"] = [];
-  const y0 = new Date(day0 * 86400000).getUTCFullYear() + 1;
-  const y1 = new Date(dayMax * 86400000).getUTCFullYear();
-  for (let y = y0; y <= y1; y++) {
-    const d = Date.parse(`${y}-01-01T00:00:00Z`) / 86400000;
-    years.push({ d, rLin: layout.radiusDay(d) });
-  }
-  const latest = cards.length ? { rLin: layout.radiusDay(dayMax) } : null;
-
-  let idx = 0;
-  const gaps = layout.gapBands().map((b) => {
-    const ra = layout.radiusDay(b.d0);
-    const rb = layout.radiusDay(b.d1);
-    const dots = gapDots(layout, b, idx);
-    idx += dots.length;
-    return { d0: b.d0, d1: b.d1, bgR: (ra + rb) / 2, bgW: Math.max(0, rb - ra), dots };
-  });
-  return { weeks, months, years, latest, gaps };
 }

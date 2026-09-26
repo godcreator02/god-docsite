@@ -5,19 +5,17 @@
  *          吃放大档、连线不带箭头。
  *   label-arbiter：12 点 / 6 点竖线 14px 贪心占位；节点标签按真实文本区间判定、悬停先占坑。
  *   date-rail：滚轮格数结算（余额累进、反向清账）；railTOf / dayAtT 正逆互逆、空窗折成折痕。
- *   star-thumb：喂 svg-doc 桩文档画 fixture 盘，节点数 = 上盘卡数、扇环框数 = 树数、
- *          边数 = 关系边数、不画里程碑与文字、没有箭头也没有任何交互属性；布局与大图同口径。
  * DOM 相关的元素用手写的最小桩（只实现仲裁真读写的 style / textContent），不引 DOM 库。
  */
 import { fileURLToPath } from "node:url";
 import { test } from "node:test";
 import assert from "node:assert/strict";
 /* 布局 / 模型也直读源码：画布层吃的是源码里的 RingsLayout 型，跟 dist 里那份是两个声明 */
-import { BASE_RADIUS, HUB_RIM, RingsLayout } from "../packages/docfirst-trajectory/src/layout.ts";
+import { BASE_RADIUS, RingsLayout } from "../packages/docfirst-trajectory/src/layout.ts";
 import { buildModel, NO_DOMAIN } from "../packages/docfirst-trajectory/src/model.ts";
 import { scanCardDir } from "../packages/docfirst-workflow/src/project/card-dir.ts";
 import type { Card, RawCard, TrajectoryModel } from "../packages/docfirst-trajectory/src/types.ts";
-import { buildThemes, DEFAULT_RING_PALETTE, mix } from "../packages/docfirst-trajectory/src/canvas/theme.ts";
+import { buildThemes, mix } from "../packages/docfirst-trajectory/src/canvas/theme.ts";
 import {
   buildFilter,
   buildNode,
@@ -29,20 +27,16 @@ import {
 } from "../packages/docfirst-trajectory/src/canvas/node-dom.ts";
 import { LabelArbiter } from "../packages/docfirst-trajectory/src/canvas/label-arbiter.ts";
 import { consumeWheelNotches, dayAtT, railTOf } from "../packages/docfirst-trajectory/src/canvas/date-rail.ts";
-import { renderStarThumb, THUMB_PAD } from "../packages/docfirst-trajectory/src/canvas/star-thumb.ts";
-import { DEFAULT_SETTINGS } from "../packages/docfirst-trajectory/src/canvas/settings.ts";
-import { serializeSvg, SvgStubDocument, type SvgStubElement } from "../packages/docfirst-trajectory/src/canvas/svg-doc.ts";
+import { SvgStubDocument, type SvgStubElement } from "./svg-stub.ts";
 
 const FIXTURES = fileURLToPath(new URL("./fixtures/trajectory", import.meta.url));
-const ROOT_ID = "tfix-测试项目根卡";
-const WORM_ID = "wh01-虫洞子项目根卡";
 const SVG_NS = "http://www.w3.org/2000/svg";
 
 /* 节点工厂建的是游离 DOM，走全局 document——Node 里没有，喂个桩顶上 */
 (globalThis as unknown as { document: SvgStubDocument }).document = new SvgStubDocument();
 
 const fixtureCards: RawCard[] = (await scanCardDir(FIXTURES)).cards;
-const m: TrajectoryModel = buildModel(fixtureCards, ROOT_ID);
+const m: TrajectoryModel = buildModel(fixtureCards);
 
 /* ================= theme ================= */
 
@@ -255,126 +249,4 @@ test("railTOf / dayAtT：顶 = d0 归 0、底 = d1 归 1，正逆互逆，空窗
   const oneDay = { d0: m.dayMax, d1: m.dayMax };
   assert.equal(railTOf(L, oneDay, m.dayMax), 0);
   assert.equal(dayAtT(L, oneDay, 0.7), m.dayMax);
-});
-
-/* ================= star-thumb ================= */
-
-/** 用桩文档画一张定妆照，交回根元素与序列化 markup。 */
-function paint(model: TrajectoryModel, settings = DEFAULT_SETTINGS): { svg: SvgStubElement; html: string } {
-  const doc = new SvgStubDocument();
-  const theme = buildThemes(model.domains).dark;
-  const svg = renderStarThumb(model, theme, settings, DEFAULT_RING_PALETTE, doc) as unknown as SvgStubElement;
-  return { svg, html: serializeSvg(svg) };
-}
-
-/** 定妆照里的边：path / line 里带 opacity 的那些（扇环框不带，环是 circle）。 */
-function thumbEdges(svg: SvgStubElement): SvgStubElement[] {
-  return [...svg.query("path"), ...svg.query("line")].filter((e) => e.getAttribute("opacity"));
-}
-
-test("star-thumb：节点数 = 上盘卡数、扇环框数 = 树数、边数 = 关系边数，不画文字与里程碑，没有交互属性", () => {
-  const { svg, html } = paint(m);
-  assert.ok(m.cards.length > 0 && m.edges.length > 0 && m.trees.length > 0);
-  /* 节点 g：每卡一个 + 每虫洞一个（虫洞 g 排最末） */
-  const gs = svg.query("g");
-  assert.equal(gs.length, m.cards.length + m.wormholes.length);
-  /* 扇环框：fill 走 --box-fill 变量的 path，一树一个 */
-  const boxes = svg.query("path").filter((p) => p.getAttribute("fill") === "var(--box-fill)");
-  assert.equal(boxes.length, m.trees.length);
-  /* 边：一边一条，都不带箭头 */
-  const edges = thumbEdges(svg);
-  assert.equal(edges.length, m.edges.length);
-  assert.doesNotMatch(html, /marker/i, "箭头 marker 整个退役");
-  /* 取代边取旧卡领域色的实线、转向边铜绿点线 */
-  const T0 = buildThemes(m.domains).dark;
-  const pivots = edges.filter((e) => e.getAttribute("stroke") === T0.pivot);
-  assert.equal(pivots.length, m.edges.filter((e) => e.kind === "pivot").length);
-  for (const e of pivots) assert.ok(e.getAttribute("stroke-dasharray"));
-  const supersede = edges.filter((e) => e.getAttribute("stroke") !== T0.pivot);
-  assert.ok(supersede.length > 0);
-  for (const e of supersede) assert.equal(e.getAttribute("stroke-dasharray"), null, "取代边是实线");
-  const firstSup = m.edges.find((e) => e.kind === "supersede") as { from: string };
-  const oldCard = m.byId[firstSup.from] as Card;
-  assert.ok(
-    supersede.some((e) => e.getAttribute("stroke") === (T0.domain[oldCard.domain] ?? T0.noDomain)),
-    "取代边着旧卡的领域色",
-  );
-  /* 只画形状：一个字都不画，也不画里程碑（泥金细环）、不带任何交互属性 */
-  assert.equal(svg.query("text").length, 0);
-  assert.doesNotMatch(html, /<text/);
-  assert.doesNotMatch(html, /\bon[a-z]+=|href=|cursor|tabindex/i);
-  assert.match(html, /^<svg viewBox="-[\d.]+ -[\d.]+ [\d.]+ [\d.]+" class="trajectory-thumb">/);
-  /* 虫洞双环：同一 g 里恰好两个根卡家族色的空心环 */
-  const wormGs = gs.filter(
-    (g) =>
-      g.children.filter(
-        (c) => c.tagName === "circle" && c.getAttribute("fill") === "none" && c.getAttribute("stroke") === T0.hubStroke,
-      ).length === 2,
-  );
-  assert.equal(wormGs.length, m.wormholes.length);
-});
-
-test("star-thumb：节点实心 + 底色缝，被取代小一号、结论卡（主干末端在立）大一号", () => {
-  const { svg } = paint(m);
-  const ref = new RingsLayout(m);
-  const base = Math.min(18, Math.max(4, (ref.maxR + THUMB_PAD) * 0.02));
-  const tips = spineTipIds(m.trees);
-  const gs = svg.query("g");
-  const radiusOf = (i: number): number => Number(gs[i]?.children[0]?.getAttribute("r"));
-  let bigs = 0;
-  m.cards.forEach((c, i) => {
-    const superseded = m.supersededIds.has(c.id);
-    const tier = !superseded && tips.has(c.id) ? 1.3 : 1;
-    if (tier > 1) bigs++;
-    const want = (base * (superseded ? BASE_RADIUS * 0.7 : BASE_RADIUS) * tier) / BASE_RADIUS;
-    assert.ok(Math.abs(radiusOf(i) - want) < 1e-9, `${c.id} 的节点半径该是 ${want}`);
-    /* 实心 + 一圈底色缝，没有渐变 */
-    assert.equal(gs[i]?.children[0]?.getAttribute("stroke"), "var(--color-fd-background)");
-    assert.doesNotMatch(gs[i]?.children[0]?.getAttribute("fill") ?? "", /url\(/);
-  });
-  assert.ok(bigs > 0, "fixture 里得有在立的结论卡");
-});
-
-test("star-thumb：布局与大图同口径——节点角度 = 同模型同设置的 places，盘心 r = innerR − HUB_RIM", () => {
-  const settings = { ...DEFAULT_SETTINGS, hubSize: 130, gapFree: 31 };
-  const { svg } = paint(m, settings);
-  const ref = new RingsLayout(m);
-  ref.configure({ gapFree: settings.gapFree, gapWide: settings.gapWide, hubBase: settings.hubSize });
-  const gs = svg.query("g");
-  const angDiff = (a: number, b: number): number => Math.abs(((((a - b) % 360) + 540) % 360) - 180);
-  m.cards.forEach((c, i) => {
-    const tr = gs[i]!.getAttribute("transform") ?? "";
-    const mm = /translate\((-?[\d.e+-]+),(-?[\d.e+-]+)\)/.exec(tr);
-    assert.ok(mm, `第 ${i} 个节点得有 translate`);
-    const ang = (Math.atan2(Number(mm![1]), -Number(mm![2])) * 180) / Math.PI;
-    const pl = ref.places.get(c.id);
-    assert.ok(pl);
-    assert.ok(angDiff(ang, pl!.angBase + pl!.spreadOff) < 1e-9);
-  });
-  const T = buildThemes(m.domains).dark;
-  const hub = svg.query("circle").filter((x) => x.getAttribute("fill") === T.hubFill);
-  assert.equal(hub.length, 1);
-  assert.ok(Math.abs(Number(hub[0]!.getAttribute("r")) - (ref.innerR - HUB_RIM)) < 1e-9);
-  /* 根节点：家族色实心，半径 = nodeR × ROOT_RADIUS / BASE_RADIUS */
-  const B = ref.maxR + THUMB_PAD;
-  const nodeR = Math.min(18, Math.max(4, B * 0.02));
-  const root = svg.query("circle").filter(
-    (x) => x.getAttribute("fill") === T.hubStroke && Math.abs(Number(x.getAttribute("r")) - (nodeR * 10) / 6) < 1e-9,
-  );
-  assert.equal(root.length, 1);
-});
-
-test("star-thumb：空盘（虫洞子项目）也画得出——盘心在、没有节点与边", () => {
-  const mw = buildModel(fixtureCards, WORM_ID);
-  assert.equal(mw.cards.length, 0);
-  const { svg, html } = paint(mw);
-  assert.equal(svg.query("g").length, 0);
-  assert.match(html, /<circle/, "盘心与环在");
-  assert.doesNotMatch(html, /marker-end/);
-});
-
-test("star-thumb：手感设置灌进布局——同模型不同 gapFree，节点落点必变", () => {
-  const a = paint(m, { ...DEFAULT_SETTINGS, gapFree: 14 }).svg.query("g").map((g) => g.getAttribute("transform")).join("|");
-  const b = paint(m, { ...DEFAULT_SETTINGS, gapFree: 31 }).svg.query("g").map((g) => g.getAttribute("transform")).join("|");
-  assert.notEqual(a, b);
 });

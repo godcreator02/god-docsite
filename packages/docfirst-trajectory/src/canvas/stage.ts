@@ -7,17 +7,17 @@
  * 层间互不 import、互不认识本舞台，契约见 layers/frame.ts）+ 本舞台（画布 DOM 组装 / 层编排调度 /
  * 补间循环 / 视图与交互语义 / 数据刷新）。
  *
- * React 壳只做状态与 HUD：容器、工具条、图例、浮层、搜索、URL、主题监听，经 StageHost 回调
+ * React 壳只做状态与 HUD：容器、工具条、图例、浮层、搜索、主题监听，经 StageHost 回调
  * 与本舞台对话；舞台不认识 React。
  *
  * 关键结构约定：
  * 一是布局产物住 layout 实例的 places / treeBoxes、每帧显示坐标住本舞台的 framePos 表，
- * 不往共享的 model 卡对象上写——多张盘同开会互踩。
+ * 不往共享的 model 卡对象上写（理由见 layout.ts 头注）。
  * 二是画布 svg 直挂 canvasEl（铺满），竖轨挂 railEl；尺寸公式一律吃画布区宽高。 */
 
 import { buildChains, type Chain, computeDodge } from "../chains.ts";
 import { advanceFrame, type FrameState, type LayoutPatch, RingsLayout } from "../layout.ts";
-import type { Card, Milestone, TrajectoryModel, Wormhole } from "../types.ts";
+import type { Card, Milestone, TrajectoryModel } from "../types.ts";
 import { Camera } from "./camera.ts";
 import { DateRail } from "./date-rail.ts";
 import { LabelArbiter } from "./label-arbiter.ts";
@@ -28,14 +28,7 @@ import { GapsLayer } from "./layers/gaps.ts";
 import { HubLayer } from "./layers/hub.ts";
 import { MilestonesLayer } from "./layers/milestones.ts";
 import { TreesLayer } from "./layers/trees.ts";
-import {
-  buildFilter,
-  DefsFactory,
-  el,
-  type FilterSel,
-  recolor,
-  type WormEl,
-} from "./node-dom.ts";
+import { buildFilter, DefsFactory, el, type FilterSel, recolor } from "./node-dom.ts";
 import {
   applyStoredSettings,
   SETTING_ITEMS,
@@ -55,23 +48,18 @@ export interface StageHost {
   railEl: HTMLElement;
   /** 开卡页；inNewTab 对应 Ctrl/Cmd+点 */
   openCard(id: string, inNewTab: boolean): void;
-  /** 点虫洞穿越到子项目的盘 */
-  openWormhole(id: string): void;
-  /** 悬停态变了（小气泡用）：卡 / 虫洞二选一，都空 = 离开 */
-  onHover(card: Card | null, worm: Wormhole | null): void;
+  /** 悬停卡变了（小气泡用）：null = 离开 */
+  onHover(card: Card | null): void;
   /** 回到原点钮该换脸了 */
   onHomeState(state: HomeState): void;
   /** 筛选命中统计变了：hit / 上盘卡数 */
   onHits(hit: number, total: number): void;
-  /** 交互门：嵌入模式没点过盘时滚轮要穿透给页面 */
-  isActive(): boolean;
 }
 
-/** 一轮数据：模型 + 里程碑 + 盘 id + type 查表。 */
+/** 一轮数据：模型 + 里程碑 + type 查表。 */
 export interface StageData {
   model: TrajectoryModel;
   milestones: Milestone[];
-  projectId: string;
   typeOf(id: string): string | null;
 }
 
@@ -79,7 +67,6 @@ export class StarStage {
   private model: TrajectoryModel | null = null;
   private layout: RingsLayout | null = null;
   private milestones: Milestone[] = [];
-  private projectId = "";
   private typeOf: (id: string) => string | null = () => null;
 
   /* ---------- 主题：跟随 html.dark ---------- */
@@ -116,7 +103,6 @@ export class StarStage {
 
   /* ---------- 交互态 ---------- */
   private hoveredCard: Card | null = null;
-  private hoveredWorm: WormEl | null = null;
   private showAllLabels = false;
   /** 三维筛选态：图例点选（形态 / 领域）+ 搜索串 */
   private filterSel: FilterSel = buildFilter();
@@ -165,12 +151,11 @@ export class StarStage {
 
   /* ================= 数据 ================= */
 
-  /** 一轮数据（切盘 / 首开）：建模产物灌进来，建构类全跑一遍。
-   * 日期窗是盘特定的，换盘复位「全部」（两柄回撑满）。 */
+  /** 一轮数据（首开 / 数据变了）：建模产物灌进来，建构类全跑一遍。
+   * 日期窗跟着数据走，换一份数据复位「全部」（两柄回撑满）。 */
   setData(data: StageData): void {
     this.model = data.model;
     this.milestones = data.milestones;
-    this.projectId = data.projectId;
     this.typeOf = data.typeOf;
     this.dateRail.reset();
     this.buildAll();
@@ -196,7 +181,6 @@ export class StarStage {
     this.framePos.clear();
     /* 悬停卡与视图补间都指着旧一轮的对象，一并清掉（根节点悬停态同清见 hubLayer.build） */
     this.setHoveredCard(null);
-    this.setHoveredWorm(null);
     this.camera.viewTarget = null;
     this.camera.zoomTarget = null;
     this.camera.isViewDirty = false;
@@ -250,15 +234,11 @@ export class StarStage {
       model: this.model as TrajectoryModel,
       theme: this.theme,
       milestones: this.milestones,
-      projectId: this.projectId,
       typeOf: (id) => this.typeOf(id),
       openCard: (id, inNewTab) => this.host.openCard(id, inNewTab),
-      openWormhole: (id) => this.host.openWormhole(id),
       goHome: () => this.goHome(),
       getHoveredCard: () => this.hoveredCard,
       setHoveredCard: (c) => this.setHoveredCard(c),
-      getHoveredWorm: () => this.hoveredWorm,
-      setHoveredWorm: (w) => this.setHoveredWorm(w),
       hasMoved: () => this.hasMoved,
       kick: () => this.kick(),
     };
@@ -266,12 +246,7 @@ export class StarStage {
 
   private setHoveredCard(c: Card | null): void {
     this.hoveredCard = c;
-    this.host.onHover(c, this.hoveredWorm?.worm ?? null);
-  }
-
-  private setHoveredWorm(w: WormEl | null): void {
-    this.hoveredWorm = w;
-    this.host.onHover(this.hoveredCard, w?.worm ?? null);
+    this.host.onHover(c);
   }
 
   /* ================= 日期窗：时间窗聚焦 ================= */
@@ -366,7 +341,6 @@ export class StarStage {
       this.defs,
     );
     this.hubLayer.recolor(this.theme);
-    this.cardsLayer.recolor(this.theme);
     this.treesLayer.recolor(this.theme);
     this.milestonesLayer.recolor(this.theme);
     this.host.onHits(hit, this.cardsLayer.getNodeEls().length);
@@ -425,7 +399,7 @@ export class StarStage {
     const ease = layout.ease;
     /* 焦点日与强度在 layout 自己的四个字段上趋近目标（advanceFrame 末尾重建鱼眼映射） */
     const lensAnimating = advanceFrame(layout, this.frameState, ease);
-    /* 节点 / 虫洞 / 根节点 hover 放大补间：两层各自步进、都要跑（不能短路） */
+    /* 节点 / 根节点 hover 放大补间：两层各自步进、都要跑（不能短路） */
     const cardsAnimating = this.cardsLayer.stepTweens();
     const hubAnimating = this.hubLayer.stepTweens();
     const hoverAnimating = cardsAnimating || hubAnimating;
@@ -446,7 +420,6 @@ export class StarStage {
     svg.addEventListener("wheel", (e) => this.onWheel(e), { passive: false });
     // 拖拽漫游：起手挂画布，移动与松手挂 document（拖出画布也不断）
     svg.addEventListener("mousedown", (e) => {
-      if (!this.host.isActive()) return;
       /* 先清：盘心单击靠它排除拖拽尾梢 */
       this.hasMoved = false;
       this.isDragging = true;
@@ -511,9 +484,9 @@ export class StarStage {
   /** 滚轮：指哪缩哪（相机层，符号层屏幕恒定），锚点保持的补间——目标 k 从当前目标累乘，
    * 连发滚轮不断累积目标而不是每次从当前值起跳，手感跟手不迟滞。
    * ctrl+滚轮（触控板捏合同一通道）分流给透镜：空间缩放与时间缩放一柄滚轮两个修饰态。
-   * 嵌入模式没点过盘：不拦截，滚轮穿透给页面。真正的缩放位移在 tick() 里逐帧趋近。 */
+   * 真正的缩放位移在 tick() 里逐帧趋近。 */
   private onWheel(e: WheelEvent): void {
-    if (!this.host.isActive() || !this.svg) return;
+    if (!this.svg) return;
     e.preventDefault();
     if (e.ctrlKey) {
       this.dateRail.wheelPan(e);
@@ -577,7 +550,7 @@ export class StarStage {
     const labelClaims: LabelClaim[] = [];
     /* 6 点标签拥挤仲裁报名处（里程碑各自投递，与 12 点分属两条竖线） */
     const milestoneClaims: LabelClaim[] = [];
-    /* 节点 / 虫洞标签仲裁报名处（全景密度兜底，与注记仲裁分池） */
+    /* 节点标签仲裁报名处（全景密度兜底，与注记仲裁分池） */
     const nodeLabelClaims: NodeLabelClaim[] = [];
     this.dodge = computeDodge(this.chains, layout, this.camera.view.k);
     /* 每帧上下文：层间数据只走它，层不许回头引用舞台（见 layers/frame.ts 头注）。 */
@@ -587,7 +560,6 @@ export class StarStage {
       framePos: this.framePos,
       dodge: this.dodge,
       hoveredCard: this.hoveredCard,
-      hoveredWorm: this.hoveredWorm,
       showAllLabels: this.showAllLabels,
       theme: this.theme,
       labelClaims,

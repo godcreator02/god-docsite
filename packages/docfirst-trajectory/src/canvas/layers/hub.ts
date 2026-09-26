@@ -18,6 +18,9 @@ import type { BuildCtx, FrameCtx, StarLayer } from "./frame.ts";
 /** 单击开卡的判定窗（毫秒）：窗内再来一击算双击，改走回全景。 */
 const CLICK_DELAY = 250;
 
+/** 盘心标题在模型没认出根卡（卡目录里根卡不是恰好一张）时显示的字。 */
+const NO_ROOT_TITLE = "未认出根卡";
+
 export class HubLayer implements StarLayer {
   private hubG!: SVGElement;
   private hubC!: SVGElement;
@@ -72,7 +75,7 @@ export class HubLayer implements StarLayer {
       },
       this.hubG,
     );
-    el("title", {}, this.hubRoot).textContent = `${ctx.model.root?.label ?? ctx.projectId} · 根卡`;
+    el("title", {}, this.hubRoot).textContent = `${ctx.model.root?.label ?? NO_ROOT_TITLE} · 根卡`;
     /* 监听器随 DOM 重建销毁（与节点同款生命周期）；hasMoved 守卫排除从盘上起手的拖拽尾梢；
      * 单击延迟一拍：判定窗内来第二击就是双击，走回全景、不开卡 */
     this.hubRoot.addEventListener("click", (ev) => {
@@ -104,7 +107,7 @@ export class HubLayer implements StarLayer {
       0,
       /* 项目名读根卡 label（项目短名），排印在根节点下方；盘心不背状态行
        * （卡 schema 无 status 字段） */
-      ctx.model.root?.label ?? ctx.projectId,
+      ctx.model.root?.label ?? NO_ROOT_TITLE,
       "hub-t",
       { "text-anchor": "middle" },
       this.hubG,
@@ -172,7 +175,7 @@ export class HubLayer implements StarLayer {
   recolor(theme: Theme): void {
     this.hubC.setAttribute("fill", theme.hubFill);
     this.hubC.setAttribute("stroke", theme.hubStroke);
-    /* 根节点：根卡家族色实心（与虫洞同源），描边混黑收边（同 nodeEdge 哲学） */
+    /* 根节点：根卡家族色实心，描边混黑收边（同 nodeEdge 哲学） */
     this.hubRoot.setAttribute("fill", theme.hubStroke);
     this.hubRoot.setAttribute("stroke", mix(theme.hubStroke, "#000000", 0.35));
   }

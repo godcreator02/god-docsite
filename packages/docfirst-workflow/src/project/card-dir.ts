@@ -40,7 +40,7 @@ async function readCardFiles(dir: string, names: readonly string[]): Promise<Car
   return read.filter((file): file is CardFile => file !== null);
 }
 
-/** 每张卡的正文查一遍钉码记号，病追加在轨迹包三层校验的病后面，按 path 归拢、排序 */
+/** 每张卡的正文查一遍钉码记号，病追加在轨迹包卡校验的病后面，按 path 归拢、排序 */
 function withCardRefs(scan: TrajectoryScan, files: readonly CardFile[]): SickFile[] {
   const textOf = new Map(files.map((file) => [file.name, file.text]));
   const byPath = new Map(scan.sick.map((file) => [file.path, [...file.problems]]));

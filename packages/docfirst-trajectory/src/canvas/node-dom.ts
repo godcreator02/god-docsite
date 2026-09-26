@@ -1,5 +1,5 @@
 /* 星图 DOM 构件——SVG 工具 / 节点视觉词汇表 / defs 工厂（珠光渐变与羽化滤镜）/
- * 节点与虫洞工厂 / 着色 / 筛选判定。星轨大图与定妆照共用，不持视图状态。
+ * 节点工厂 / 着色 / 筛选判定。不持视图状态。
  *
  * 形态词汇表（节点珠光那版）：
  * - 颜色只编码领域——被取代的卡用领域色混灰淡出，不许整成中性灰；
@@ -10,19 +10,19 @@
  * - 连线取旧卡领域色 = 取代、铜绿点线 = 转向，都不带箭头（半径即时间，方向天然给定）。
  * 被取代从 supersedes 链读（取代出边），不落字段。
  *
- * defs 序号 / 筛选态一律实例持有，不走模块级单例——多盘同开不撞。
+ * defs 序号 / 筛选态一律实例持有，不走模块级单例。
  * 整搬自 Obsidian 版 render/node-dom.ts。 */
 
-import { BASE_RADIUS, NODE_RADIUS } from "../layout.ts";
-import type { Card, Tree, Wormhole } from "../types.ts";
+import { NODE_RADIUS } from "../layout.ts";
+import type { Card, Tree } from "../types.ts";
 import { mix, type Theme } from "./theme.ts";
 
 /* ---------- DOM 工具：parent 显式传、缺省建游离节点（由调用方挂载） ---------- */
 
 const NS = "http://www.w3.org/2000/svg";
 
-/** 元素归属的文档：给了父节点就用父节点的（服务端渲定妆照时是 svg-doc 的桩文档），
- * 游离建构走全局 document（浏览器里的大图）。 */
+/** 元素归属的文档：给了父节点就用父节点的（测试里是桩文档），
+ * 游离建构走全局 document。 */
 function docOf(parent?: Element): Document {
   return (parent?.ownerDocument as Document | undefined) ?? document;
 }
@@ -174,10 +174,10 @@ export function shapeMarkup(
 
 /* ---------- defs 工厂：珠光渐变 + 空窗雾带羽化滤镜 ---------- */
 
-/** 工厂实例序号：进 defs id 当前缀，多张盘同开不撞 id。 */
+/** 工厂实例序号：进 defs id 当前缀，同一页面里的几个工厂不撞 id。 */
 let factorySeq = 0;
 
-/** 每张盘一个工厂：自持 defs 与序号，发出的 id 形如 mk-<实例序>-<用途>-<序号>。 */
+/** 每轮建画布一个工厂：自持 defs 与序号，发出的 id 形如 mk-<实例序>-<用途>-<序号>。 */
 export class DefsFactory {
   private readonly defs: SVGElement;
   private readonly prefix: string;
@@ -305,43 +305,6 @@ export function buildNode(
   };
 }
 
-/* ---------- 虫洞节点工厂 ---------- */
-
-/** 一个虫洞节点的全部句柄。 */
-export interface WormEl {
-  worm: Wormhole;
-  group: SVGElement;
-  label: SVGElement;
-  outer: SVGElement;
-  inner: SVGElement;
-  /** hover 放大补间量（与 NodeEl 同律） */
-  hoverTween: number;
-}
-
-/** 虫洞建构：同心双环、中空透盘底色——子项目根卡在本盘的投影，点击穿越到子项目的盘。
- * 这是第三种节点形态，编码卡种而非状态（不占在立/被取代两态）；
- * 染色走泥金（与盘心描边同源，根卡家族签名），不占领域色板、不进筛选。 */
-export function buildWormhole(worm: Wormhole): WormEl {
-  const group = el("g", {});
-  /* 命中区：符号外圈点得着（与节点同律） */
-  el("circle", { cx: 0, cy: 0, r: BASE_RADIUS + 7, fill: "transparent" }, group);
-  const outer = el(
-    "circle",
-    { cx: 0, cy: 0, r: BASE_RADIUS, fill: "none", "stroke-width": 1.6 },
-    group,
-  );
-  const inner = el(
-    "circle",
-    { cx: 0, cy: 0, r: BASE_RADIUS * 0.45, fill: "none", "stroke-width": 1.2 },
-    group,
-  );
-  el("title", {}, group).textContent =
-    `${worm.label} · ${worm.bornAt.slice(0, 10)} · 虫洞 —— 点击穿越到子项目盘`;
-  group.style.cursor = "pointer";
-  const label = text(0, 0, worm.label, "lb");
-  return { worm, group, label, outer, inner, hoverTween: 0 };
-}
-
 /* ---------- 筛选：图例即筛选器（形态 / 领域两维多选、取交集，选中集空 = 本维不筛）
  * 搜索是第三维：非空字符串对 label 与卡身份做包含匹配，跟前两维一起取交集；
  * 非命中卡整体退成 mute 灰 = 暂时退出颜色通道（规范「筛选例外」）；交互不禁用、灰卡照常点 ---------- */
@@ -353,7 +316,7 @@ export interface FilterSel {
   search: string;
 }
 
-/** 一张盘一份筛选态（多盘同开各筛各的）。 */
+/** 空筛选态：三维都不筛。 */
 export function buildFilter(): FilterSel {
   return { form: new Set(), domain: new Set(), search: "" };
 }

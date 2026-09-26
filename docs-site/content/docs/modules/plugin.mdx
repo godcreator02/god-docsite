@@ -65,7 +65,7 @@ full: true
 
 登记时的 `description` 与 `usage` 是 agent 唯一看得见的说明，回执各字段的意思写在 `usage` 里：
 
-{/* ref file="../plugins/docfirst/src/index.ts" lines="112-125" hash="2d348814a621" blob="a9aa2f4c2ca3" */}
+{/* ref file="../plugins/docfirst/src/index.ts" lines="112-126" hash="85d49ff42ee2" blob="8a6fffc45d6f" */}
 
 命令名是公共接口，改名就破坏兼容；产物检查确认总线上只有这两条：
 
@@ -88,7 +88,7 @@ full: true
 **写进新站的依赖是一张手写的精确版本表**，只有 workflow 与 fumadocs 适配两个包。这两个包名是写进别人 `package.json` 的字符串，
 不算插件的依赖；两个包发版时这张表跟着改，模板能引用哪些出口由接缝 12 那条测试检查：
 
-{/* ref file="../plugins/docfirst/src/deps.ts" hash="add69b585ae8" blob="4229f60b43d3" */}
+{/* ref file="../plugins/docfirst/src/deps.ts" hash="eced1c0bc557" blob="f00216b5fb75" */}
 
 ## 不做的事
 

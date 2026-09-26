@@ -3,28 +3,18 @@
 /**
  * 客户端组件 StarDisk——星轨盘的 React 壳，只当编排者。
  *
- * 壳管状态与 HUD：容器、工具条、图例、设置 / 帮助 / 搜索浮层、报病数、当前盘与 URL、主题监听、
- * 悬停小气泡、嵌入模式的点击激活。画布是一个空 div，交给整搬的画布层（canvas/stage.ts 照
- * Obsidian 版 star-view 的编排：buildCtx → 六层 build，每帧 place，筛选 / 主题变化 recolor，
- * 帧循环 tick）——React 不画任何 SVG，`renderToStaticMarkup` 那一趟画布区就是空的。
- * 日期竖轨由 DateRail 在壳渲的 `.star-rail` 容器里自建 DOM。
+ * 壳管状态与 HUD：容器、工具条、图例、设置 / 帮助 / 搜索浮层、主题监听、悬停小气泡。
+ * 画布是一个空 div，交给整搬的画布层（canvas/stage.ts 照 Obsidian 版 star-view 的编排：
+ * buildCtx → 六层 build，每帧 place，筛选 / 主题变化 recolor，帧循环 tick）——React 不画任何 SVG，
+ * `renderToStaticMarkup` 那一趟画布区就是空的。日期竖轨由 DateRail 在壳渲的 `.star-rail` 容器里自建 DOM。
  *
  * 交互范式：滚轮 = 空间缩放指哪缩哪 + 拖拽漫游；ctrl + 滚轮 = 时间平移；竖轨收窄窗即进透镜；
  * 回到原点两段式（相机动过先归相机、再按归窗；Esc 同链）；盘心单击开根卡页、双击回全景；
- * 点节点在新标签页开卡页；点虫洞切盘。嵌入模式保留「点击激活」这一条防页面滚动被吞。
- *
- * 没有当前盘（`?disk=` 缺失或认不出）时渲启动器卡阵：每张盘一张全景定妆照（服务端 launcherThumbs
- * 渲好的静态 markup，没给就在客户端用同一个画家现画）+ 短名 + 「n 卡 · 最近活动 <日期>」，
- * 点卡进盘；盘内工具条有「启动器」返回钮。换盘只走启动器与虫洞，多盘同开不做。
+ * 点节点在新标签页开卡页。
  */
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import type {
-  CSSProperties,
-  MouseEvent as ReactMouseEvent,
-  PointerEvent as ReactPointerEvent,
-  ReactNode,
-} from "react";
+import type { MouseEvent as ReactMouseEvent, PointerEvent as ReactPointerEvent, ReactNode } from "react";
 import { HELP_HTML, legendHtml } from "./canvas/hud.ts";
 import type { FilterSel } from "./canvas/node-dom.ts";
 import {
@@ -34,30 +24,18 @@ import {
   type TrajectorySettings,
 } from "./canvas/settings.ts";
 import { type HomeState, StarStage } from "./canvas/stage.ts";
-import { renderStarThumb, thumbTheme } from "./canvas/star-thumb.ts";
-import { buildThemes, CSS_RING_PALETTE } from "./canvas/theme.ts";
+import { buildThemes } from "./canvas/theme.ts";
 import { inRange } from "./model.ts";
-import { type LauncherThumb, toRuntimeModel } from "./serial.ts";
-import type { Card, TrajectoryModel, Wormhole } from "./types.ts";
+import { toRuntimeModel } from "./serial.ts";
+import type { Card } from "./types.ts";
 import type { RouteCard, Trajectory } from "./index.ts";
 
-export type { LauncherThumb } from "./serial.ts";
-
-/** StarDisk 的 props：data 是 buildTrajectory 的产物（多盘），hrefBase 是卡页路由前缀
+/** StarDisk 的 props：data 是 buildTrajectory 的产物，hrefBase 是卡页路由前缀
  * （节点链接 = `${hrefBase}/${encodeURIComponent(id)}`）——不收函数，服务端组件传不了函数
- * 给客户端组件。size 给了就按这个边长定容器（同步渲染、不碰 window）；不给就吃满父元素。
- * initialDisk 指定初始显示哪张盘（disks 的 rootId）；缺失或不在盘清单里就渲启动器卡阵。
- * thumbs 是服务端渲好的启动器缩略图（按 rootId 索引）；没给的盘在客户端现画。
- *
- * mode 是两种形态：`embed` 方形嵌进文档流（宽随父、高等于宽、点一下才进交互态），
- * `page` 整页（吃满父元素、滚轮直接生效、当前盘写进 URL 的 `?disk=`）。顶栏不归组件画。 */
+ * 给客户端组件。容器吃满父元素（高度由页面给），滚轮直接作用于盘。顶栏不归组件画。 */
 export interface StarDiskProps {
   data: Trajectory;
   hrefBase: string;
-  size?: number;
-  initialDisk?: string;
-  mode?: "page" | "embed";
-  thumbs?: Record<string, LauncherThumb>;
 }
 
 /** localStorage 里手感参数的键。 */
@@ -90,7 +68,6 @@ const ICON_PATHS: Record<string, string> = {
   home: "M3 11l9-8l9 8v10a1 1 0 0 1-1 1h-5v-7h-6v7H4a1 1 0 0 1-1-1z",
   shrink: "M4 14h6v6 M20 10h-6V4 M14 10l7-7 M3 21l7-7",
   history: "M3 12a9 9 0 1 0 3-6.7 M3 4v5h5 M12 7v5l3 3",
-  compass: "M12 2a10 10 0 1 0 0 20a10 10 0 0 0 0-20z M16 8l-2.5 6L8 16l2.5-6z",
   settings: "M4 6h10 M18 6h2 M4 12h4 M12 12h8 M4 18h12 M20 18h0 M14 4v4 M8 10v4 M16 16v4",
   help: "M12 2a10 10 0 1 0 0 20a10 10 0 0 0 0-20z M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.7.3-1 .9-1 1.7 M12 17h.01",
 };
@@ -121,167 +98,14 @@ const HOME_FACE: Record<HomeState, { icon: string; title: string }> = {
 
 type PopKey = "legend" | "search" | "settings" | "help";
 
-/** 悬停小气泡的内容：卡或虫洞。 */
+/** 悬停小气泡的内容。 */
 interface Tip {
   label: string;
   bornAt: string;
   meta: string;
 }
 
-/* ================= 路由：有当前盘渲盘，没有渲启动器 ================= */
-
-export function StarDisk({ data, hrefBase, size, initialDisk, mode = "embed", thumbs }: StarDiskProps): ReactNode {
-  const isPage = mode === "page";
-  /* initialDisk 过一道盘清单：它来自 URL 的 `?disk=`，也可能是卡页「回到盘」带来的父卡身份，
-   * 不是根卡就没有对应的模型——认不出就回启动器 */
-  const [currentDisk, setCurrentDisk] = useState<string | null>(
-    initialDisk && data.disks.some((d) => d.rootId === initialDisk) ? initialDisk : null,
-  );
-
-  /* ---------- 整页模式：当前盘写进 URL ----------
-   * replaceState 不刷新、不进历史栈（切盘是同页状态，不该让浏览器后退键去撤），
-   * 只为让「某一张盘」这个位置可以直接分享；初始值由页面从 searchParams 读、经 initialDisk 进来。
-   * 回启动器就把参数摘掉。搜索词、筛选、透镜位置都不进 URL。 */
-  useEffect(() => {
-    if (!isPage) return;
-    const url = new URL(window.location.href);
-    if ((url.searchParams.get("disk") ?? null) === currentDisk) return;
-    if (currentDisk) url.searchParams.set("disk", currentDisk);
-    else url.searchParams.delete("disk");
-    window.history.replaceState(null, "", url);
-  }, [isPage, currentDisk]);
-
-  const openDisk = useCallback(
-    (id: string) => {
-      if (data.disks.some((d) => d.rootId === id)) setCurrentDisk(id);
-    },
-    [data.disks],
-  );
-  const toLauncher = useCallback(() => setCurrentDisk(null), []);
-
-  if (!currentDisk) {
-    return <Launcher data={data} thumbs={thumbs} onOpenDisk={openDisk} />;
-  }
-  return (
-    <DiskView
-      key={currentDisk}
-      data={data}
-      hrefBase={hrefBase}
-      size={size}
-      mode={mode}
-      disk={currentDisk}
-      onOpenDisk={openDisk}
-      onLauncher={toLauncher}
-    />
-  );
-}
-
-/* ================= 启动器：项目卡阵 ================= */
-
-interface LauncherProps {
-  data: Trajectory;
-  thumbs: Record<string, LauncherThumb> | undefined;
-  onOpenDisk(id: string): void;
-}
-
-/** 一张盘在卡阵上的条目：短名、卡数、最近活动（上盘卡与虫洞里最晚的 born-at，没卡退到根卡）。 */
-interface LauncherEntry {
-  rootId: string;
-  label: string;
-  cardCount: number;
-  latest: string;
-  model: TrajectoryModel;
-}
-
-function launcherEntries(data: Trajectory): LauncherEntry[] {
-  const byId = new Map(data.cards.map((c) => [c.id, c]));
-  const entries = data.disks.map((d): LauncherEntry => {
-    const model = toRuntimeModel(data.models[d.rootId]);
-    const stamps = [...model.cards.map((c) => c.bornAt), ...model.wormholes.map((w) => w.bornAt)];
-    const latest = stamps.length ? stamps.reduce((a, b) => (a > b ? a : b)) : (model.root?.bornAt ?? "");
-    return {
-      rootId: d.rootId,
-      label: model.root?.label ?? byId.get(d.rootId)?.label ?? d.rootId,
-      cardCount: model.cards.length,
-      latest,
-      model,
-    };
-  });
-  /* 最近活动降序，并列按短名 */
-  return entries.sort((a, b) => b.latest.localeCompare(a.latest) || a.label.localeCompare(b.label));
-}
-
-function Launcher({ data, thumbs, onOpenDisk }: LauncherProps): ReactNode {
-  const entries = useMemo(() => launcherEntries(data), [data]);
-  return (
-    <div className="star-launcher">
-      {entries.length === 0 ? <div className="star-launcher-empty">还没有任何盘</div> : null}
-      <div className="star-launcher-list">
-        {entries.map((e) => (
-          <button
-            key={e.rootId}
-            type="button"
-            className="star-launcher-card"
-            title={`${e.label} · ${e.rootId}`}
-            onClick={() => onOpenDisk(e.rootId)}
-          >
-            <LauncherThumbView model={e.model} markup={thumbs?.[e.rootId]} />
-            <div className="star-launcher-text">
-              <div className="star-launcher-label">{e.label}</div>
-              <div className="star-launcher-meta">
-                <span className="star-launcher-seg">{e.cardCount} 卡</span>
-                {" · "}
-                <span className="star-launcher-seg">最近活动 {e.latest ? e.latest.slice(0, 10) : "—"}</span>
-              </div>
-            </div>
-          </button>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-/** 定妆照：服务端给了 markup 就原样贴（亮暗各一份，CSS 按 html.dark 显示其一）；
- * 没给（别的消费方直接用组件）就在客户端用同一个画家现画、跟主题重画。 */
-function LauncherThumbView({ model, markup }: { model: TrajectoryModel; markup: LauncherThumb | undefined }): ReactNode {
-  const hostRef = useRef<HTMLDivElement | null>(null);
-  useEffect(() => {
-    const host = hostRef.current;
-    if (markup || !host) return;
-    const paint = (): void => {
-      host.textContent = "";
-      const dark = document.documentElement.classList.contains("dark");
-      const theme = thumbTheme(model.domains, dark ? "dark" : "light");
-      host.appendChild(renderStarThumb(model, theme, undefined, CSS_RING_PALETTE, document));
-    };
-    paint();
-    const mo = new MutationObserver(paint);
-    mo.observe(document.documentElement, { attributes: true, attributeFilter: ["class"] });
-    return () => mo.disconnect();
-  }, [model, markup]);
-  if (markup) {
-    return (
-      <div className="star-launcher-thumb" dangerouslySetInnerHTML={{ __html: markup.dark + markup.light }} />
-    );
-  }
-  return <div className="star-launcher-thumb" ref={hostRef} />;
-}
-
-/* ================= 盘 ================= */
-
-interface DiskViewProps {
-  data: Trajectory;
-  hrefBase: string;
-  size: number | undefined;
-  mode: "page" | "embed";
-  disk: string;
-  onOpenDisk(id: string): void;
-  onLauncher(): void;
-}
-
-function DiskView({ data, hrefBase, size, mode, disk: currentDisk, onOpenDisk, onLauncher }: DiskViewProps): ReactNode {
-  /* 整页与嵌入的分支全走这一个布尔：容器几何、激活态 */
-  const isPage = mode === "page";
+export function StarDisk({ data, hrefBase }: StarDiskProps): ReactNode {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const canvasRef = useRef<HTMLDivElement | null>(null);
   const railRef = useRef<HTMLDivElement | null>(null);
@@ -300,16 +124,10 @@ function DiskView({ data, hrefBase, size, mode, disk: currentDisk, onOpenDisk, o
   const [hits, setHits] = useState<{ hit: number; total: number }>({ hit: 0, total: 0 });
   const [tip, setTip] = useState<Tip | null>(null);
   const [settings, setSettings] = useState<TrajectorySettings>(loadSettings);
-  /* 交互态：嵌入模式点一下才进（未进滚轮穿透给页面），整页模式恒真——整个视口就是盘 */
-  const [clickActivated, setClickActivated] = useState(false);
-  const activated = isPage || clickActivated;
-  const activeRef = useRef(activated);
-  activeRef.current = activated;
 
-  /* ---------- 数据联接：路由卡表（拿 type / milestones），当前盘的运行期模型 ---------- */
+  /* ---------- 数据联接：路由卡表（拿 type / milestones），运行期模型 ---------- */
   const routeById = useMemo(() => new Map(data.cards.map((c) => [c.id, c])), [data.cards]);
-  const serialized = data.models[currentDisk];
-  const model = useMemo(() => toRuntimeModel(serialized), [serialized]);
+  const model = useMemo(() => toRuntimeModel(data.model), [data.model]);
   const rootRoute: RouteCard | undefined = model.root ? routeById.get(model.root.id) : undefined;
   const milestones = useMemo(
     () => (rootRoute?.milestones ? inRange(rootRoute.milestones, model.day0, model.dayMax) : []),
@@ -317,14 +135,12 @@ function DiskView({ data, hrefBase, size, mode, disk: currentDisk, onOpenDisk, o
   );
   const typeOf = useCallback((id: string): string | null => routeById.get(id)?.type ?? null, [routeById]);
   const themeName = dark ? "dark" : "light";
-  const isEmpty = model.cards.length === 0 && model.wormholes.length === 0;
+  const isEmpty = model.cards.length === 0;
 
   /* ---------- 舞台：挂载建一次，随组件存活；数据 / 主题 / 筛选各自经 effect 灌 ---------- */
   const hrefOf = useCallback((id: string) => `${hrefBase}/${encodeURIComponent(id)}`, [hrefBase]);
   const hrefOfRef = useRef(hrefOf);
   hrefOfRef.current = hrefOf;
-  const onOpenDiskRef = useRef(onOpenDisk);
-  onOpenDiskRef.current = onOpenDisk;
   const settingsRef = useRef(settings);
   settingsRef.current = settings;
   const modelRef = useRef(model);
@@ -342,21 +158,17 @@ function DiskView({ data, hrefBase, size, mode, disk: currentDisk, onOpenDisk, o
         openCard: (id) => {
           window.open(hrefOfRef.current(id), "_blank", "noopener");
         },
-        openWormhole: (id) => onOpenDiskRef.current(id),
-        onHover: (card: Card | null, worm: Wormhole | null) => {
+        onHover: (card: Card | null) => {
           if (card) {
             setTip({
               label: card.label,
               bornAt: card.bornAt.slice(0, 10),
               meta: `${card.domain} · ${modelRef.current.supersededIds.has(card.id) ? "被取代" : "在立"}`,
             });
-          } else if (worm) {
-            setTip({ label: worm.label, bornAt: worm.bornAt.slice(0, 10), meta: "虫洞 · 点击穿越到子项目盘" });
           } else setTip(null);
         },
         onHomeState: setHomeState,
         onHits: (hit, total) => setHits({ hit, total }),
-        isActive: () => activeRef.current,
       },
       settingsRef.current,
     );
@@ -367,11 +179,11 @@ function DiskView({ data, hrefBase, size, mode, disk: currentDisk, onOpenDisk, o
     };
   }, []);
 
-  /* 首开（换盘换的是整个 DiskView）：模型灌进舞台，画布整棵重建 */
+  /* 首开与数据变了：模型灌进舞台，画布整棵重建 */
   useEffect(() => {
-    stageRef.current?.setData({ model, milestones, projectId: currentDisk, typeOf });
+    stageRef.current?.setData({ model, milestones, typeOf });
     setTip(null);
-  }, [model, milestones, currentDisk, typeOf]);
+  }, [model, milestones, typeOf]);
 
   /* ---------- 主题：挂载时读一次 html.dark，之后靠 MutationObserver 跟随 ---------- */
   useEffect(() => {
@@ -398,34 +210,19 @@ function DiskView({ data, hrefBase, size, mode, disk: currentDisk, onOpenDisk, o
     stageRef.current?.setShowAllLabels(showAllLabels);
   }, [showAllLabels]);
 
-  /* ---------- 嵌入模式：点外部释放交互态 ---------- */
+  /* ---------- Esc 分层：先收浮层，再走两段式回原点 ---------- */
   useEffect(() => {
-    if (isPage || !activated) return;
-    const onPointerDown = (e: PointerEvent): void => {
-      if (containerRef.current && !containerRef.current.contains(e.target as Node)) setClickActivated(false);
-    };
-    window.addEventListener("pointerdown", onPointerDown);
-    return () => window.removeEventListener("pointerdown", onPointerDown);
-  }, [isPage, activated]);
-
-  /* ---------- Esc 分层：先收浮层，嵌入模式再退交互态，最后走两段式回原点 ---------- */
-  useEffect(() => {
-    if (!activated) return;
     const onKey = (e: KeyboardEvent): void => {
       if (e.key !== "Escape" || e.defaultPrevented) return;
       if (popOpen) {
         setPopOpen(null);
         return;
       }
-      if (!isPage) {
-        setClickActivated(false);
-        return;
-      }
       stageRef.current?.goHome();
     };
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
-  }, [activated, popOpen, isPage]);
+  }, [popOpen]);
 
   /* ---------- 设置滑杆：语义值进状态与 localStorage，舞台按项目表落到布局 ---------- */
   const applySetting = useCallback((key: keyof TrajectorySettings, value: number) => {
@@ -478,30 +275,17 @@ function DiskView({ data, hrefBase, size, mode, disk: currentDisk, onOpenDisk, o
     }
   };
 
-  /* 容器几何：整页吃满父元素（高度由页面给），嵌入是宽随父、高等于宽的方块；
-   * size 给了就钉死边长（不量尺寸、不碰 window） */
-  const style: CSSProperties =
-    size !== undefined
-      ? { position: "relative", width: size, height: size, overflow: "hidden" }
-      : isPage
-        ? { position: "relative", width: "100%", height: "100%", overflow: "hidden" }
-        : { position: "relative", width: "100%", aspectRatio: "1 / 1", overflow: "hidden", borderRadius: 12 };
-  const shellClass = `star-disk${isPage ? " star-disk-page" : ""}${dark ? " star-dark" : ""}${activated ? " star-active" : ""}`;
   const home = HOME_FACE[homeState];
-  const hubLabel = model.root?.label ?? currentDisk;
 
   return (
     <div
       ref={containerRef}
-      className={shellClass}
-      style={style}
+      className={`star-disk${dark ? " star-dark" : ""}`}
+      style={{ position: "relative", width: "100%", height: "100%", overflow: "hidden" }}
       onPointerMove={onPointerMove}
-      onPointerDown={() => {
-        if (!isPage) setClickActivated(true);
-      }}
     >
       {/* 画布区：空 div 交给画布层，svg 由舞台建；竖轨容器在它左缘 */}
-      <div ref={canvasRef} className="star-canvas" data-disk={currentDisk} aria-label={hubLabel} />
+      <div ref={canvasRef} className="star-canvas" aria-label={model.root?.label ?? "星轨盘"} />
       <div ref={railRef} className="star-rail" />
 
       {/* 悬停小气泡 */}
@@ -518,7 +302,7 @@ function DiskView({ data, hrefBase, size, mode, disk: currentDisk, onOpenDisk, o
         </div>
       ) : null}
 
-      {/* 右上工具条：左簇 搜索 / 图例 / 全部标签，右簇 回到原点 / 启动器 / 设置 / 帮助 */}
+      {/* 右上工具条：左簇 搜索 / 图例 / 全部标签，右簇 回到原点 / 设置 / 帮助 */}
       <div className="star-hud-top">
         <button
           type="button"
@@ -553,9 +337,6 @@ function DiskView({ data, hrefBase, size, mode, disk: currentDisk, onOpenDisk, o
           onClick={() => stageRef.current?.goHome()}
         >
           <Icon name={home.icon} />
-        </button>
-        <button type="button" className="star-mbtn" title="启动器（换项目盘）" onClick={onLauncher}>
-          <Icon name="compass" />
         </button>
         <button
           type="button"
@@ -631,8 +412,7 @@ function DiskView({ data, hrefBase, size, mode, disk: currentDisk, onOpenDisk, o
         ) : null}
       </div>
 
-      {/* 嵌入模式未激活：一条提示带，不遮盘（点盘任何地方即激活） */}
-      {!activated ? <span className="star-activate-hint">点击进入盘面</span> : null}
+      {/* 没有上盘卡：盘心与环照画，正中叠一句提示 */}
       {isEmpty ? <div className="star-empty">这张盘还没有记录</div> : null}
     </div>
   );

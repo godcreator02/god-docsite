@@ -1,11 +1,11 @@
 ---
 title: fumadocs 适配 docfirst-fumadocs
-description: docfirst-fumadocs：mdx 加载器编译页面时调的 remark 插件与 meta 白名单、机读版回调、状态点与术语组件、fumadocs 组件的名册规则、轨迹卡集合、星轨盘服务端组件，以及一个 fumadocs 站接入它要改的几处
+description: docfirst-fumadocs：mdx 加载器编译页面时调的 remark 插件与 meta 白名单、机读版回调、状态点与术语组件、fumadocs 组件的名册规则、轨迹卡集合、星轨盘的读卡建模与组件和样式，以及一个 fumadocs 站接入它要改的几处
 full: true
 ---
 
 包 `@godcreator/docfirst-fumadocs`，源码在 `packages/docfirst-fumadocs/src/`。出口 `.`（`src/index.ts`），侧出口 `./roster`、`./pre`、`./term`、
-`./trajectory`，样式表 `./light.css`、`./term.css`。
+`./trajectory`，样式表 `./light.css`、`./term.css`、`./trajectory.css`。
 
 <SeamMap module="fumadocs" />
 
@@ -14,7 +14,7 @@ full: true
 这个包里的代码都由 fumadocs 或 Next 调用：mdx 加载器编译页面时调的插件、集合的 schema 与回调、页面渲染时的组件。
 入口文件头写明了每样接到站的哪里：
 
-{/* ref file="../packages/docfirst-fumadocs/src/index.ts" lines="1-17" hash="677de7c33676" blob="8f4947e20dfb" */}
+{/* ref file="../packages/docfirst-fumadocs/src/index.ts" lines="1-17" hash="4b76096825ed" blob="927e68e40e97" */}
 
 **remark 插件**对每篇依次认引用、算清单、换节点、打标，每一步交给谁见上图：
 
@@ -48,17 +48,18 @@ full: true
 **轨迹卡集合**：`cardSchema` 缺 `born-at` 校验失败、缺 `label` 用文件名；
 `remarkTrajectoryLinks` 把关系边段落转成带 `data-kind` 的 div，把指向卡身份的链接与 wikilink 改成卡页地址：
 
-{/* ref file="../packages/docfirst-fumadocs/src/card-collection.ts" lines="41-48" hash="d834c788244a" blob="2179f5ccdf19" */}
+{/* ref file="../packages/docfirst-fumadocs/src/card-collection.ts" lines="41-48" hash="e19430412226" blob="f18a4a264f4d" */}
 
-**星轨盘**：`./trajectory` 的 `loadTrajectory(dir)` 读卡并建模，服务端组件 `Trajectory` 再绘制 `StarDisk`、列出病卡：
+**星轨盘**：`./trajectory` 的 `loadTrajectory(dir)` 读卡并建模，同一个出口转出轨迹核心的客户端组件 `StarDisk`，
+样式 `./trajectory.css` 引入轨迹核心的 `star.css`。站画星轨盘只 import 这个包，不直接依赖轨迹核心：
 
-{/* ref file="../packages/docfirst-fumadocs/src/trajectory.tsx" lines="17-29" hash="d7d894adb801" blob="f8b43c49b05a" */}
+{/* ref file="../packages/docfirst-fumadocs/src/trajectory.ts" lines="17-22" hash="399574eca97f" blob="be574a389f2e" */}
 
 ## 接口
 
-主出口、四个侧出口、两张样式表：
+主出口、侧出口与样式表：
 
-{/* ref file="../packages/docfirst-fumadocs/package.json" lines="7-30" hash="f9522bea440a" blob="56f4689ae118" */}
+{/* ref file="../packages/docfirst-fumadocs/package.json" lines="7-31" hash="a61a378d85ca" blob="5f3e6b3a568a" */}
 
 下面是一个 fumadocs 站接入这个包要改的几处，每处都是这个包与站之间的一条接缝，钉的是本站自己的文件。
 
@@ -81,7 +82,7 @@ fumadocs 的 `rehypeCode` 只放行 meta 白名单里的字段，这里换成同
 
 {/* ref file="../packages/docfirst-fumadocs/src/host.ts" lines="29-29" hash="6bcfcf51a50c" blob="ee5ba8cf517d" */}
 
-`maintain` 集合也是现状区，同样接 `docfirstMdxOptions`、进 check，不开 processed markdown；轨迹卡集合用 `cardSchema` 与
+`maintain` 集合也是现状区，同样接 `docfirstMdxOptions`、由 check 检查，不开 processed markdown；轨迹卡集合用 `cardSchema` 与
 `remarkTrajectoryLinks`，不接 docfirst 的插件；未来区的集合不写配置：
 
 {/* ref file="src/lib/source.ts" lines="44-68" hash="90331461ea0c" blob="5128ac69a760" */}
@@ -101,9 +102,9 @@ fumadocs 的 `rehypeCode` 只放行 meta 白名单里的字段，这里换成同
 
 {/* tree dir="src/app" depth="4" hash="9d4fedfa30d0" */}
 
-星轨整页调用 `loadTrajectory`，把模型交给 `StarDisk`。`StarDisk` 的 `hrefBase`、轨迹卡 loader 的 `baseUrl`、`remarkTrajectoryLinks` 的 `hrefBase` 必须是同一个值，否则卡页链接是 404：
+星轨整页调用 `loadTrajectory`，把模型交给 `StarDisk`，路由组的 layout 引入 `disk.css`，它再引入 `./trajectory.css`。`StarDisk` 的 `hrefBase`、轨迹卡 loader 的 `baseUrl`、`remarkTrajectoryLinks` 的 `hrefBase` 必须是同一个值，否则卡页链接是 404：
 
-{/* ref file="src/app/(trajectory-disk)/trajectory/page.tsx" hash="d8da1416eac1" blob="397f89778067" */}
+{/* ref file="src/app/(trajectory-disk)/trajectory/page.tsx" hash="c8a44524fb09" blob="f2309432cb6e" */}
 
 **名册**：一个组件要登记两处，`docfirst.config.mjs` 的 `components` 给机读版规则，`src/components/mdx.tsx` 给 React 组件；
 React 表先展开 fumadocs 的默认表，再把 `pre` 换成 `DocfirstPre`：
@@ -133,7 +134,7 @@ React 表先展开 fumadocs 的默认表，再把 `pre` 换成 `DocfirstPre`：
 | --- | --- |
 | workflow `@godcreator/docfirst-workflow` | `.` 的 `loadProject` 拿钉码服务与名册；`./mdx` 的 `recognize`、`stamp`、`walk`、`langOf` 与名册类型；`./cards` 的 `scanCardDir` |
 | 钉码核心 `@godcreator/docfirst-pin` | `Reference`、`Item`、`Listing` 等类型 |
-| 轨迹核心 `@godcreator/docfirst-trajectory` | `buildTrajectory`、`launcherThumbs`、`CARD_KEYS`；`./disk` 的 `StarDisk` |
+| 轨迹核心 `@godcreator/docfirst-trajectory` | `buildTrajectory`、`CARD_KEYS`；`./disk` 的 `StarDisk` 与 `./star.css` 转给站 |
 | unified、unist-util-visit | 插件类型；`remarkTrajectoryLinks` 遍历语法树 |
 | fumadocs-core、fumadocs-ui、react | processed markdown、`CodeBlock`、组件渲染；必需的 peer，用站装的那份 |
 
@@ -141,7 +142,7 @@ React 表先展开 fumadocs 的默认表，再把 `pre` 换成 `DocfirstPre`：
 
 {/* ref file="../packages/docfirst-fumadocs/src/host.ts" lines="16-27" hash="206294eebad1" blob="ee5ba8cf517d" */}
 
-{/* ref file="../packages/docfirst-fumadocs/package.json" lines="47-51" hash="19d43e3ebfe1" blob="56f4689ae118" */}
+{/* ref file="../packages/docfirst-fumadocs/package.json" lines="48-52" hash="19d43e3ebfe1" blob="5f3e6b3a568a" */}
 
 ## 不做的事
 
@@ -150,7 +151,7 @@ React 表先展开 fumadocs 的默认表，再把 `pre` 换成 `DocfirstPre`：
 - **不管生成物**：生成正本的渲染与写到哪归 [workflow](/docs/modules/workflow)。
 - **不把宿主与兄弟包打进产物**：只按包名 import；`./pre` 的 `"use client"` 在产物第一行，别的出口不带：
 
-{/* ref file="../tests/boundary.test.ts" lines="296-321" hash="42167dd07c3d" blob="e450056cc091" */}
+{/* ref file="../tests/boundary.test.ts" lines="296-321" hash="27348ae73122" blob="3b26a75d942f" */}
 
 - **不被命令行加载**（`./roster` 除外）：workflow 不许依赖这个包；`./roster` 的产物不许 import 宿主：
 

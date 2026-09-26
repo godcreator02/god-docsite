@@ -1,6 +1,6 @@
 /**
  * 命令行与项目内部接缝图（workflow.data.mjs）的坐标与图标。调用方在最上：fumadocs 适配在左，命令行在右，入口从上面进可执行文件；
- * 第二行项目装配与钉码核心左右相邻，读盘与 git 在它们下面；再往下是项目配置、磁盘与 git、格式接口，mdx 格式，最下是生成物与读卡、轨迹核心。
+ * 第二行项目装配与钉码核心左右相邻，读文件与 git 在它们下面；再往下是项目配置、磁盘与 git、格式接口，mdx 格式，最下是生成物与读卡、轨迹核心。
  * 命令行去格式接口、生成物、轨迹核心的线走画布右边，fumadocs 适配去 mdx 格式与读卡目录的线走画布左边。
  */
 import { Blocks, FileCode, FileOutput, FolderGit2, HardDrive, Orbit, Pin, Plug, Shapes, SquareTerminal, Terminal } from 'lucide-react';

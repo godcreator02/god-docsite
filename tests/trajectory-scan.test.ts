@@ -36,7 +36,7 @@ test("scanCardDir：.mdx 卡进盘，身份不带后缀；.md 卡照旧；同主
         ["pj01", "pj01.mdx", "项目"],
       ],
     );
-    assert.deepEqual(sick, [], "导读页六个字段一个不沾，不是卡、不报病");
+    assert.deepEqual(sick, [], "导读页卡体系字段一个不沾，不是卡、不报病");
   } finally {
     rmSync(dir, { recursive: true, force: true, maxRetries: 5 });
   }
@@ -48,10 +48,12 @@ test("scanCards：纯函数吃已经读好的文件，挑卡、解析、按身�
     { name: "2026-01-04-丙.mdx", text: CARD("丙 mdx"), mtime: 0 },
     { name: "2026-01-02-甲.mdx", text: CARD("甲"), mtime: 5 },
     { name: "notes.txt", text: CARD("不是卡"), mtime: 0 },
+    { name: "pj01.md", text: ["---", "type: root", "born-at: 2026-01-01", "label: 项目", "---", ""].join("\n"), mtime: 1 },
   ]);
   assert.deepEqual(cards.map((c) => [c.id, c.path, c.label, c.mtime]), [
     ["2026-01-02-甲", "2026-01-02-甲.mdx", "甲", 5],
     ["2026-01-04-丙", "2026-01-04-丙.mdx", "丙 mdx", 0],
+    ["pj01", "pj01.md", "项目", 1],
   ]);
   assert.deepEqual(sick, []);
 });

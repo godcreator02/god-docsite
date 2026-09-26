@@ -309,14 +309,14 @@ test("fumadocs 包的产物：宿主与兄弟包只许按包名 import，不许�
   for (const file of FILES.filter((f) => f !== "pre.mjs")) {
     assert.doesNotMatch(distOf("docfirst-fumadocs", file), /^"use client";/, `${file} 不该带客户端指令`);
   }
-  // 含 React 的三份得真 import react（正着断言：react 被内联时产物里根本没有这条 import 行）
-  for (const file of ["pre.mjs", "term.mjs", "trajectory.mjs"]) {
+  // 含 React 的两份得真 import react（正着断言：react 被内联时产物里根本没有这条 import 行）
+  for (const file of ["pre.mjs", "term.mjs"]) {
     assert.ok(importSpecsOf(distOf("docfirst-fumadocs", file)).some(isReact), `${file} 里没有 react 的 import 行——react 被内联进产物了`);
   }
-  // 星轨盘按包名 import `./disk`，那份产物头一行的 "use client" 才管得住 StarDisk
+  // 星轨盘按包名转出 `./disk`，那份产物头一行的 "use client" 才管得住 StarDisk
   assert.ok(
     importSpecsOf(distOf("docfirst-fumadocs", "trajectory.mjs")).includes("@godcreator/docfirst-trajectory/disk"),
-    "trajectory.mjs 得按包名 import @godcreator/docfirst-trajectory/disk",
+    "trajectory.mjs 得按包名引用 @godcreator/docfirst-trajectory/disk",
   );
 });
 
@@ -348,7 +348,7 @@ test("包只发 dist 与样式：skills 与 template 跟着插件走了，包里
       assert.equal(existsSync(join(PACKAGES, dir, path)), false, `${dir} 里还留着 ${path}/——它归插件 gwb-docfirst-workflow`);
     }
   }
-  for (const path of ["styles/light.css", "styles/term.css"]) {
+  for (const path of ["styles/light.css", "styles/term.css", "styles/trajectory.css"]) {
     assert.ok(existsSync(join(PACKAGES, "docfirst-fumadocs", path)), `fumadocs 包少了 ${path}`);
   }
   assert.ok(existsSync(join(PACKAGES, "docs-explain", "styles", "explain.css")), "docs-explain 包少了 styles/explain.css");

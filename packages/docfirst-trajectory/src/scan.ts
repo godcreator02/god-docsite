@@ -6,7 +6,7 @@
  */
 
 import { parseCardFile } from "./model.ts";
-import type { RawCard, SickFile } from "./types.ts";
+import type { Problem, RawCard, SickFile } from "./types.ts";
 
 /** 扫盘产物：全部卡 + 按文件归拢的报病。 */
 export interface TrajectoryScan {
@@ -27,23 +27,56 @@ export interface CardFile {
 const CARD_EXT = /\.mdx?$/;
 
 /** 一批卡文件扫成卡与报病。目录内平铺不建子目录（card-format 正本已定），名字不带路径。
- * 不是卡文件的名字、同主干被 `.mdx` 盖掉的 `.md` 都跳过；产物按身份、按路径排序，
+ * 不是卡文件的名字、同主干被 `.mdx` 盖掉的 `.md` 都跳过；每张卡先报单文件的病，
+ * 再跑跨文件的校验（crossFileProblems）追加在后面。产物按身份、按路径排序，
  * 同一批文件两次扫描产物逐位相等。 */
 export function scanCards(files: readonly CardFile[]): TrajectoryScan {
   const byName = new Map(files.map((file) => [file.name, file]));
   const cards: RawCard[] = [];
-  const sick: SickFile[] = [];
+  const problemsByPath = new Map<string, Problem[]>();
   for (const name of pickCardFiles([...byName.keys()])) {
     const file = byName.get(name)!;
     const id = name.replace(CARD_EXT, "");
     const parsed = parseCardFile(id, name, file.mtime, file.text);
     if (!parsed.card) continue;
     cards.push(parsed.card);
-    if (parsed.problems.length) sick.push({ path: parsed.card.path, problems: parsed.problems });
+    problemsByPath.set(parsed.card.path, [...parsed.problems]);
   }
   cards.sort((a, b) => a.id.localeCompare(b.id));
-  sick.sort((a, b) => a.path.localeCompare(b.path));
+  for (const { path, problem } of crossFileProblems(cards)) problemsByPath.get(path)!.push(problem);
+  const sick: SickFile[] = [...problemsByPath]
+    .filter(([, problems]) => problems.length > 0)
+    .map(([path, problems]) => ({ path, problems }))
+    .sort((a, b) => a.path.localeCompare(b.path));
   return { cards, sick };
+}
+
+/** 跨文件的一致性校验：卡目录里只有一张根卡，根卡不写 parent，非根卡的 parent 每个值都是那张根卡的身份。
+ * 根卡多于一张时不查非根卡的 parent：没有唯一的根卡可比，先把根卡减到一张。 */
+function crossFileProblems(cards: readonly RawCard[]): Array<{ path: string; problem: Problem }> {
+  const out: Array<{ path: string; problem: Problem }> = [];
+  const roots = cards.filter((c) => c.type === "root");
+  if (roots.length > 1) {
+    const reason = `卡目录里有 ${roots.length} 张根卡（${roots.map((r) => r.id).join("、")}），只能有一张`;
+    for (const r of roots) out.push({ path: r.path, problem: { field: "type", value: "root", reason } });
+  }
+  for (const r of roots) {
+    if (r.parent.length) {
+      out.push({ path: r.path, problem: { field: "parent", value: r.parent.join(","), reason: "根卡不写 parent" } });
+    }
+  }
+  if (roots.length > 1) return out;
+  const rootId = roots.length === 1 ? (roots[0] as RawCard).id : null;
+  for (const c of cards) {
+    if (c.type === "root") continue;
+    for (const v of c.parent) {
+      if (v === rootId) continue;
+      const reason =
+        rootId === null ? "parent 须指向根卡，但卡目录里没有根卡" : `parent 须是根卡的身份 ${rootId}`;
+      out.push({ path: c.path, problem: { field: "parent", value: v, reason } });
+    }
+  }
+  return out;
 }
 
 /** 目录名单里挑出卡文件：`.md` / `.mdx` 都要，同一主干两者都在只留 `.mdx`；排过序。 */

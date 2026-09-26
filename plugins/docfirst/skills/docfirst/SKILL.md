@@ -1,6 +1,6 @@
 ---
 name: docfirst
-description: 要给一个仓建一个接好 docfirst 分区的文档站（`docfirst.create`）或不接 docfirst 的普通 fumadocs 站（`docfirst.create-plain`）时用；要核对一个站里的现状有没有漂移、要确认引用、要重新生成生成物时也读它——那几件事不经过这个插件，是自己 cd 到那个仓里跑 pnpm doc，这份说清了跑哪几条；跨仓反馈投到哪儿、什么格式也在这儿。
+description: 要给一个仓建一个接好 docfirst 分区的文档站（`docfirst.create`）或不接 docfirst 的普通 fumadocs 站（`docfirst.create-plain`）时用；要核对一个站里的现状页跟代码对不对得上、要确认引用、要重新生成生成物时也读它——那几件事不经过这个插件，是自己 cd 到那个仓里跑 pnpm doc，这份说清了跑哪几条；跨仓反馈放到哪儿、什么格式也在这儿。
 ---
 
 # docfirst 插件：两条建站命令，另带一组说明书
@@ -13,7 +13,7 @@ description: 要给一个仓建一个接好 docfirst 分区的文档站（`docfi
 （读说明书、给一个仓建一次站）才归插件。**插件不转发命令行。**
 
 **建站在本插件里一步做完**：运行官方脚手架 `create-fumadocs-app`（版本写死，要联网）、应用本机约定（端口并只监听 127.0.0.1、
-页面语言、字体、站名等）、挑端口、写盘。**本插件不管站的运行**：没有启动、停止站的命令，也没有窗格。
+页面语言、字体、站名等）、挑端口、写文件。**本插件不管站的运行**：没有启动、停止站的命令，也没有窗格。
 站建好以后要改结构（加分区、加组件）、要跑 `dev` / `build`，读本插件的说明书 `docs-site`。
 
 ## 建一个新站
@@ -23,8 +23,8 @@ docfirst.create {"dir":"<仓>/docs-site"}
 ```
 
 站约定放在仓根下的 `docs-site/`。本插件先运行官方脚手架、应用本机约定，再在官方输出上替换、删除、新增几份文件
-（分区、`docfirst.config.mjs`、mdx 接线、名册脚本、各区的起始页），加上 docfirst 的依赖与脚本，一起写盘。**站目录必须还不存在**：
-已经有站的仓不能用这条命令，给一个已经用了很久的站加 docfirst，走人工接线。
+（分区、`docfirst.config.mjs`、mdx 的接入配置、名册脚本、起始页），加上 docfirst 的依赖与脚本，一起写进目录。**站目录必须还不存在**：
+已经有站的仓不能用这条命令，给一个已经用了很久的站加 docfirst，手动接入。
 
 不要 docfirst 的普通站用 `docfirst.create-plain`，参数相同，写法见说明书 `docs-site`。
 
@@ -38,10 +38,11 @@ docfirst.create {"dir":"<仓>/docs-site"}
 多给别的键直接报错。回执是 `{ dir, repoDir, port, written, overwrites, portScanIncomplete, next, warn? }`。
 
 建出来的东西：官方脚手架的站（搜索、llms 路由照旧），加上三个集合（`src/lib/source.ts` 里用 fumadocs-mdx 的 macro
-写的 docs、trajectory、future，现状集合经 `applyMdxPreset(docfirstMdxOptions(...))` 接上 docfirst，这些接线从 `@godcreator/docfirst-fumadocs` 取）、三条路由与侧栏三个根节点、
-`docfirst.config.mjs`（格式是 `@godcreator/docfirst-workflow/mdx`，名册展开 `@godcreator/docfirst-fumadocs/roster` 的 `fumadocsRoster`）、mdx 接线（`src/components/mdx.tsx` 里的状态点组件）、样式 `src/app/docfirst.css`、名册脚本、
-各区的起始页（`content/docs/` 下的入口页、
-术语表与 `outputs/` 下的三份生成正本，`content/trajectory/` 与 `content/future/` 各一页），`package.json` 里
+写的 docs、trajectory、future，现状集合经 `applyMdxPreset(docfirstMdxOptions(...))` 接上 docfirst，这些接入配置从 `@godcreator/docfirst-fumadocs` 取）、各区的路由与侧栏三个根节点、
+整页星轨盘 `/trajectory`（`loadTrajectory` 与 `StarDisk` 从 `@godcreator/docfirst-fumadocs/trajectory` 取，样式是它的 `trajectory.css`）与卡页 `/trajectory/<卡身份>`、
+`docfirst.config.mjs`（格式是 `@godcreator/docfirst-workflow/mdx`，名册展开 `@godcreator/docfirst-fumadocs/roster` 的 `fumadocsRoster`）、mdx 的接入配置（`src/components/mdx.tsx` 里的状态点组件）、样式 `src/app/docfirst.css`、名册脚本、
+起始页（`content/docs/` 下的入口页、术语表与 `outputs/` 下的生成正本，`content/future/` 一页；`content/trajectory/`
+只有 `meta.json`，侧栏第一条链到星轨盘，根卡与其余的卡照说明书 `trajectory` 写），`package.json` 里
 有 docfirst 的依赖与 `doc` / `doc:confirm` / `doc:render` / `verify:roster` 几条脚本。
 
 **只写文件**：不跑 `pnpm install`、不 render、不 check。回执里 `next` 就是接着要在站目录里跑的那几条：
@@ -63,25 +64,25 @@ pnpm dev
 
 ```
 pnpm doc                                       核对。有红时退出码 1——那是核对结果，不是命令失败
-pnpm docfirst check --json                      机读报告：哪几页的钉码漂移了、哪个生成物过期了，一行 JSON
+pnpm docfirst check --json                      机读报告：哪几页的钉码跟代码对不上了、哪个生成物过期了，一行 JSON
 pnpm doc:confirm                               机械写回：草稿换成正式记号、挪了位置的写回新行号、重新渲染生成正本
 pnpm doc:confirm content/docs/a.mdx --accept   复核过后，接受点名页里的黄灯
 pnpm doc:render                                只重新生成生成物（README / AGENTS / SKILL.md 那类）
-pnpm docfirst trajectory                        列轨迹卡的盘 / 树 / 主干
+pnpm docfirst trajectory                        列轨迹卡那张盘的树与主干
 ```
 
 **改了被钉的代码，就在同一个提交里处理它引起的黄灯**：钉住的文件在本仓有未提交改动、内容又变了的黄灯，
 `pnpm doc` 算红。先 `doc:confirm` 做完机械写回，再逐条看剩下的黄灯，论断还成立就 `--accept`，不成立先改论断。
 `--accept` 必须点名页，别人没复核的黄灯不替他接受。确认不要求先提交。
 
-**要看哪几页漂移了就跑带 `--json` 的那条**，自己读那份报告：`docs[].items[]` 里 `status` 是 `changed`（内容变了）
+**要看哪几页跟代码对不上了就跑带 `--json` 的那条**，自己读那份报告：`docs[].items[]` 里 `status` 是 `changed`（内容变了）
 或 `missing`（引用的目标不存在）的就是待重写；`line` 是记号在文档里的第几行、`lines` 是被引段今天在源文件里的
-位置、`diff` 是变了的那几行——按这三样定位，**只改漂移的段落，不重排全页**。`unconfirmed`（还没确认过）不算漂移。
+位置、`diff` 是变了的那几行——按这三样定位，**只改对不上的段落，不重排全页**。`unconfirmed`（还没确认过）不算对不上。
 只有名册外组件的页不用重写正文：在 `docfirst.config.mjs` 里补转成机读文本的规则。
 
-## 跨仓反馈：投进目标仓站的 `future/inbox/`
+## 跨仓反馈：放进目标仓站的 `future/inbox/`
 
-在 A 仓工作时发现 B 仓的东西不好用，**直接投进 B 仓自己站的未来区**：新建一个文件
+在 A 仓工作时发现 B 仓的东西不好用，**直接放进 B 仓自己站的未来区**：新建一个文件
 `docs-site/content/future/inbox/<yyyy-MM-dd>-<来源仓>-<英文短标题>.mdx`，不需要命令。文件名用英文小写和短横线
 （git 会把中文路径显示成八进制转义），中文标题写进 `title`。格式：
 
@@ -101,7 +102,7 @@ description: 来源：<哪个仓 / 哪次会话>
 
 - **`docfirst-docs`**：文档站怎么写——分区怎么分、五类引用记号、每页写到哪为止、钉码怎么确认。
   写或改任何仓的文档站之前先读它。
-- **`docs-site`**：每一页怎么做成讲清原理的网页、站的组件怎么接、怎么验收，两条建站命令、加分区、pnpm 与 next 的坑。
+- **`docs-site`**：每一页怎么做成讲清原理的网页、站的组件怎么接、怎么验收，两条建站命令、加分区、pnpm 与 next 的常见错误。
 - **`trajectory`**：什么时候记一张轨迹卡、怎么写、卡的字段是什么。
 - **`docs-governance`**：文档与注释治理——代码自解释扫描、术语统一、清除历史描述、分清谁负责什么。
 
@@ -114,7 +115,7 @@ description: 来源：<哪个仓 / 哪次会话>
 - 回「dir 要是绝对路径」：给了相对路径，插件在工作台主进程里运行，不知道该相对于哪个目录
 - 回「站目录的上一级要是已经存在的仓目录」：`dir` 多写或少写了一层，或者仓还没建
 - 回「docfirst.create 没建成：……」：后面是建站那一步的原话。最常见的是站目录已经存在（这个仓已经有站，
-  走人工接线），其次是运行官方脚手架要联网没联上或超时，或脚手架的输出变了、本机约定或文件清单对不上
+  手动接入），其次是运行官方脚手架要联网没联上或超时，或脚手架的输出变了、本机约定或文件清单对不上
   （要替换的原文找不到、新增的已经有、替换或删除的没有，报错里会指向插件的 `src/scaffold.ts`），照原话处理
 - 回「不认识的参数」：只收 `dir`、`title`、`port` 三个
 - 想核对却找不到命令：**本插件没有那条命令**，自己 `cd` 到那个仓里跑（见上面那节）

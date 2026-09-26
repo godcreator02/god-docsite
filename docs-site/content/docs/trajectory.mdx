@@ -1,64 +1,73 @@
 ---
 title: 轨迹卡怎么变成星轨盘
-description: content/trajectory/ 下的轨迹卡怎么被读出、校验、分成一张张星轨盘、在每棵树里挑出主干，再画到站的 /trajectory 上；以及卡里为什么不许钉码
+description: content/trajectory/ 下的轨迹卡怎么被读出、校验、建成一张星轨盘、在每棵树里挑出主干，再画到站的 /trajectory 上；以及卡里为什么不许钉码
 ---
 
 轨迹卡是 `content/trajectory/` 下一卡一文件的 mdx，一张卡记一次取舍的结论，只增不改。星轨盘是这些卡的图：
-一个项目一张盘，项目的根卡画在盘心，其余的卡按日期排在同心环上，半径表示时间、内旧外新。
-从卡文件到站上的盘分六段，读盘在 `docfirst-workflow`，解析、建模、布局在 `docfirst-trajectory`，最后由站渲染：
+一个站只有一张根卡、一张盘，根卡画在盘心，其余的卡按日期排在同心环上，半径表示时间、内旧外新。
+从卡文件到站上的盘分几段，读卡目录在 `docfirst-workflow`，解析、建模、布局在 `docfirst-trajectory`，最后由站渲染：
 
 <TrajectoryFlow />
 
 ## 卡的格式与校验
 
-卡的身份是文件名去掉 `.mdx` / `.md`，`parent`、`merged-in` 与正文里的关系都用身份指向别的卡。frontmatter 里下面六个
+卡的身份是文件名去掉 `.mdx` / `.md`，`parent` 与正文里的关系都用身份指向别的卡。frontmatter 里下面这些
 字段至少写了一个才算卡，一个都没写的文件整份跳过、不报问题：
 
-{/* ref file="../packages/docfirst-trajectory/src/parse.ts" lines="16-18" hash="8d32892df338" blob="f4b46a71d249" */}
+{/* ref file="../packages/docfirst-trajectory/src/parse.ts" lines="16-18" hash="dfeb7aaec458" blob="4e25ee1e4c92" */}
 
 卡与卡之间的两种关系写在正文里，一行一条：`supersedes::`（取代）或 `pivots-from::`（转向）后面跟一条指向卡身份的链接。
 行首是这两个词、整行却不合格式的，记成问题：
 
 {/* ref file="../packages/docfirst-trajectory/src/parse.ts" lines="23-30" hash="ec84ce878892" blob="f4b46a71d249" */}
 
-解析一张卡时把问题逐条记下，不在第一条停：必填、形状、一致性，再加写歪的关系行：
+解析一张卡时把问题逐条记下，不在第一条停：必填字段、`born-at` 的格式，再加写歪的关系行：
 
-{/* ref file="../packages/docfirst-trajectory/src/model.ts" lines="118-148" hash="7a2d51130b63" blob="1ee72d0830da" */}
+{/* ref file="../packages/docfirst-trajectory/src/model.ts" lines="97-112" hash="282815b67ec8" blob="3449f87e60a6" */}
 
-`born-at` 不合格的卡不上任何一张盘，半径按日期算，没有日期算不出来；其余问题不挡绘制。`docfirst check` 把每条问题
+`born-at` 不合格的卡不上盘，半径按日期算，没有日期算不出来；其余问题不挡绘制。`docfirst check` 把每条问题
 记一次红：
 
 {/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="231-232" hash="6a87fa27d832" blob="036135d56300" */}
 
-## 分盘、建树、挑主干
+## 一张根卡、建树、挑主干
 
-`type: root` 的卡是根卡，每张根卡一张盘。**`parent` 里含哪张盘的身份，卡就在哪张盘上**，写几个就上几张盘；
-`domain` 只用来分组配色，不决定卡在哪张盘。有 `parent` 的根卡是子项目：父盘列在它的 `merged-in` 里，它和它盘上的卡
-整个并进父盘（逐层递归，遇到环跳过）；没列，它在父盘上画成**虫洞**，点进去换到子项目的盘：
+`type: root` 的卡是根卡。**一个卡目录只有一张根卡，整个目录只画一张盘。**`scanCards` 逐张解析完，再对整个目录查根卡，
+问题记在对应的卡上，跟单卡的问题进同一份清单：
 
-{/* ref file="../packages/docfirst-trajectory/src/model.ts" lines="187-219" hash="125bf7072e32" blob="1ee72d0830da" */}
+- 根卡多于一张，每张根卡各记一条（字段 `type`）；这时先不查其余卡的 `parent`，没有唯一的根卡可比
+- 根卡不写 `parent`
+- 其余的卡 `parent` 必填，只能写那张根卡的身份；目录里没有根卡时，写了 `parent` 的卡都记一条
 
-关系按盘求解，目标不在这张盘上的记进这张盘的 `broken`。用取代与转向连在一起的卡组成一棵树。树的**主干**在取代关系上挑：
+{/* ref file="../packages/docfirst-trajectory/src/scan.ts" lines="54-80" hash="722a56b13470" blob="7ace664ccf8b" */}
+
+根卡画在盘心，其余 `born-at` 合格的卡都在盘上；`parent` 与 `domain` 不决定卡在不在盘上，`domain` 只用来分组配色：
+
+{/* ref file="../packages/docfirst-trajectory/src/model.ts" lines="146-153" hash="9c68e53f0ee6" blob="3449f87e60a6" */}
+
+关系在盘上求解，目标不在盘上的记进 `broken`。用取代与转向连在一起的卡组成一棵树。树的**主干**在取代关系上挑：
 几条取代链先比终点的 `born-at` 谁更晚，再比长短，最后按身份排；整棵树一条取代都没有，才在转向链上用同一个比法挑。
 不在主干上的卡按连通分成**支线**；两种关系都没有的卡是**孤星**：
 
-{/* ref file="../packages/docfirst-trajectory/src/model.ts" lines="326-353" hash="3efa5ab62617" blob="1ee72d0830da" */}
+{/* ref file="../packages/docfirst-trajectory/src/model.ts" lines="233-260" hash="3efa5ab62617" blob="3449f87e60a6" */}
 
-`buildTrajectory` 给每张盘建好模型就交出去，不算布局。盘的布局（`RingsLayout`）由浏览器里的画布按当前设置算，调设置不用再请求服务端：
+`buildTrajectory` 建好这张盘的模型就交出去，不算布局。盘的布局（`RingsLayout`）由浏览器里的画布按当前设置算，调设置不用再请求服务端：
 
-{/* ref file="../packages/docfirst-trajectory/src/index.ts" lines="130-137" hash="1ccb31a3c424" blob="fcf5ac788f4a" */}
+{/* ref file="../packages/docfirst-trajectory/src/index.ts" lines="111-123" hash="700374590e8b" blob="6e3c47627e1c" */}
 
 ## 站上怎么渲染
 
-整页 `/trajectory` 在服务端读卡目录、建模、给每张盘生成缩略图，交给客户端组件 `StarDisk`：
+整页 `/trajectory` 在服务端读卡目录、建模，交给客户端组件 `StarDisk`；两样都从 `@godcreator/docfirst-fumadocs/trajectory` 取：
 
-{/* ref file="src/app/(trajectory-disk)/trajectory/page.tsx" lines="12-14" hash="131245eece5d" blob="397f89778067" */}
+{/* ref file="src/app/(trajectory-disk)/trajectory/page.tsx" lines="3-3" hash="75e52e0103c2" blob="f2309432cb6e" */}
 
-{/* ref file="src/app/(trajectory-disk)/trajectory/page.tsx" lines="32-32" hash="b4659414b2a1" blob="397f89778067" */}
+{/* ref file="src/app/(trajectory-disk)/trajectory/page.tsx" lines="6-7" hash="579744a6ea90" blob="f2309432cb6e" */}
+
+{/* ref file="src/app/(trajectory-disk)/trajectory/page.tsx" lines="22-22" hash="2b1da735d05f" blob="f2309432cb6e" */}
 
 `loadTrajectory` 就是读卡目录加建模两步：
 
-{/* ref file="../packages/docfirst-fumadocs/src/trajectory.tsx" lines="18-21" hash="c6da7b3de260" blob="f8b43c49b05a" */}
+{/* ref file="../packages/docfirst-fumadocs/src/trajectory.ts" lines="19-22" hash="95163c3bc745" blob="be574a389f2e" */}
 
 盘上每张卡链到 `/trajectory/<卡身份>`。那是站里的 fumadocs 卡集合渲染的卡页：`cardSchema` 校验 frontmatter，
 `remarkTrajectoryLinks` 把正文里指向卡的链接改写成卡页地址：

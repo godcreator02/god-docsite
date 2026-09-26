@@ -53,9 +53,6 @@ importers:
       '@godcreator/docfirst-fumadocs':
         specifier: workspace:*
         version: link:../packages/docfirst-fumadocs
-      '@godcreator/docfirst-trajectory':
-        specifier: workspace:*
-        version: link:../packages/docfirst-trajectory
       '@godcreator/docfirst-workflow':
         specifier: workspace:*
         version: link:../packages/docfirst-workflow

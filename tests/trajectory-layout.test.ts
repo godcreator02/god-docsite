@@ -1,5 +1,5 @@
 /**
- * 布局引擎的数学不变量——黄金样本（107 张卡的 fixture，覆盖长空窗 / 爆发簇 / 虫洞子项目）。
+ * 布局引擎的数学不变量——黄金样本（诗名 fixture，覆盖长空窗 / 爆发簇）。
  * 布局是一整块连续几何：改错一个常量或一处正负号，盘照样画出来、只是「看着不太对」，
  * 零报错——没有这份样本等于没护栏。
  *
@@ -13,13 +13,12 @@ import {
   AXIS_SPAN,
   buildModel,
   HUB_RIM,
-  monthGate,
   RingsLayout,
-  ringSkeleton,
+  gapDots,
   SPREAD_DEG,
 } from "@godcreator/docfirst-trajectory";
 import { scanCardDir } from "@godcreator/docfirst-workflow";
-import type { RawCard, TrajectoryModel } from "@godcreator/docfirst-trajectory";
+import type { GapDot, RawCard, TrajectoryModel } from "@godcreator/docfirst-trajectory";
 import { memCards } from "./trajectory-helpers.ts";
 
 /** 数值近似相等，模仿 jest 的 toBeCloseTo(expected, digits)。 */
@@ -39,15 +38,14 @@ function buildSynthetic(id: string, days: number[]): TrajectoryModel {
       fm: { "born-at": day(d), label: "卡", parent: [id] },
     })),
   ];
-  return buildModel(memCards(specs), id);
+  return buildModel(memCards(specs));
 }
 
 const FIXTURES = fileURLToPath(new URL("./fixtures/trajectory", import.meta.url));
 const ROOT_ID = "tfix-测试项目根卡";
-const WORM_ID = "wh01-虫洞子项目根卡";
 
 const fixtureCards: RawCard[] = (await scanCardDir(FIXTURES)).cards;
-const m: TrajectoryModel = buildModel(fixtureCards, ROOT_ID);
+const m: TrajectoryModel = buildModel(fixtureCards);
 const L = new RingsLayout(m);
 
 /** 采样日：全程步进 + 空窗段边界两侧与中点（对数段的接缝是最容易错的地方）。 */
@@ -60,8 +58,8 @@ function sampleDays(): number[] {
   return days.filter((d) => d >= m.day0 && d <= m.dayMax);
 }
 
-test("fixture 装载：107 张卡全扫到，tfix 盘认主、收得到卡与虫洞", () => {
-  assert.equal(fixtureCards.length, 107);
+test("fixture 装载：106 张卡全扫到，tfix 认主、收得到卡", () => {
+  assert.equal(fixtureCards.length, 106);
   assert.equal(m.root?.id, ROOT_ID);
   assert.ok(m.cards.length > 100);
   assert.ok(m.edges.length > 0);
@@ -171,7 +169,7 @@ test("外锚定环带：单日盘（effTotal = 0）所有卡半径坍缩到 hubR
 });
 
 test("外锚定环带：空盘（无卡）day0 = dayMax，radPerEff 钉 0，maxR 与有卡盘同一默认 hubR 下相等", () => {
-  const mw = buildModel(fixtureCards, WORM_ID);
+  const mw = buildModel(fixtureCards.filter((c) => c.type === "root"));
   assert.equal(mw.cards.length, 0);
   const L2 = new RingsLayout(mw);
   assert.equal(L2.radPerEff, 0);
@@ -179,87 +177,24 @@ test("外锚定环带：空盘（无卡）day0 = dayMax，radPerEff 钉 0，maxR
   assert.equal(L2.maxR, L.maxR);
 });
 
-test("全景环形骨架：月环枚举步进 7、每月一条（UTCDate ≤ 7），opacity = effRate(d) × 密度门", () => {
-  const ref = new RingsLayout(m);
-  const sk = ringSkeleton(ref);
-  const want: number[] = [];
-  for (let d = m.day0; d <= m.dayMax; d += 7) {
-    if (new Date(d * 86400000).getUTCDate() <= 7) want.push(d);
-  }
-  assert.deepEqual(sk.months.map((mo) => mo.rLin), want.map((d) => ref.radiusDay(d)));
-  assert.deepEqual(sk.months.map((mo) => mo.opacity), want.map((d) => ref.effRate(d) * monthGate(ref.monthSpacingWorld(d))));
-  assert.equal(sk.months.length, want.length);
-});
-
-test("全景环形骨架：周环 = 步进 7 里落不到月首的那些；周月两拨合起来正好是全部步进点", () => {
-  // 老仓那条断言的标题写着「无周环」——那一版 ringSkeleton 只出月环。这一版有周环了，
-  // 换成新口径接着守：周环得真有，且跟月环一天都不重、两拨并起来不多不少就是全部步进点。
-  const ref = new RingsLayout(m);
-  const sk = ringSkeleton(ref);
-  const steps: number[] = [];
-  const monthDays: number[] = [];
-  const weekDays: number[] = [];
-  for (let d = m.day0; d <= m.dayMax; d += 7) {
-    steps.push(d);
-    (new Date(d * 86400000).getUTCDate() <= 7 ? monthDays : weekDays).push(d);
-  }
-  assert.ok(sk.weeks.length > 0, "fixture 跨了好几个月，周环不该一条都没有");
-  assert.deepEqual(sk.weeks.map((w) => w.d), weekDays);
-  assert.deepEqual(sk.months.map((mo) => mo.d), monthDays);
-  assert.equal(sk.weeks.filter((w) => monthDays.includes(w.d)).length, 0, "周环里不该混进月环那几天");
-  const both = [...sk.weeks.map((w) => w.d), ...sk.months.map((mo) => mo.d)].sort((a, b) => a - b);
-  assert.deepEqual(both, steps, "周环 ∪ 月环 = 全部步进点，一个不多一个不少");
-});
-
-test("全景环形骨架：周 / 月 / 年每条环的 rLin 都等于自己那天的 radiusDay", () => {
-  // 环带着 d 是给视图层按帧算当地折算率与标签文字用的，d 与 rLin 对不上，
-  // 环画在一处、日期标签写着另一天，盘照样出、零报错
-  const ref = new RingsLayout(m);
-  const sk = ringSkeleton(ref);
-  assert.ok(sk.weeks.length > 0 && sk.months.length > 0 && sk.years.length > 0);
-  for (const ring of [...sk.weeks, ...sk.months, ...sk.years]) {
-    assert.equal(ring.rLin, ref.radiusDay(ring.d), `${ring.d} 这条环的 rLin 跟 radiusDay 对不上`);
-  }
-});
-
-test("全景环形骨架：年环 = day0 次年到 dayMax 年的元旦各一条；最新环 = dayMax 的环", () => {
-  const ref = new RingsLayout(m);
-  const sk = ringSkeleton(ref);
-  const y0 = new Date(m.day0 * 86400000).getUTCFullYear() + 1;
-  const y1 = new Date(m.dayMax * 86400000).getUTCFullYear();
-  const want: number[] = [];
-  for (let y = y0; y <= y1; y++) want.push(Date.parse(`${y}-01-01T00:00:00Z`) / 86400000);
-  assert.deepEqual(sk.years.map((y) => y.rLin), want.map((d) => ref.radiusDay(d)));
-  assert.equal(sk.latest?.rLin, ref.radiusDay(m.dayMax));
-});
-
-test("全景环形骨架：空窗带几何与碎石总数，两次调用逐位相等", () => {
-  const ref = new RingsLayout(m);
-  const a = ringSkeleton(ref);
-  const b = ringSkeleton(new RingsLayout(m));
-  const bands = ref.gapBands();
+test("空窗碎石：每条带 floor(天数) 颗、粒序跨带累加，同模型两份布局逐位相等", () => {
+  const dotsOf = (layout: RingsLayout): GapDot[][] => {
+    let idx = 0;
+    return layout.gapBands().map((band) => {
+      const dots = gapDots(layout, band, idx);
+      idx += dots.length;
+      return dots;
+    });
+  };
+  const a = dotsOf(new RingsLayout(m));
+  const bands = L.gapBands();
   assert.ok(bands.length > 0);
-  assert.equal(a.gaps.length, bands.length);
-  let total = 0;
-  bands.forEach((band, i) => {
-    const ra = ref.radiusDay(band.d0);
-    const rb = ref.radiusDay(band.d1);
-    assert.equal(a.gaps[i]?.bgR, (ra + rb) / 2);
-    assert.equal(a.gaps[i]?.bgW, rb - ra);
-    total += Math.floor(band.days);
-  });
-  assert.equal(a.gaps.reduce((n, g) => n + g.dots.length, 0), total);
-  assert.deepEqual(b, a);
-});
-
-test("全景环形骨架：空模型最新环 null", () => {
-  const mw = buildModel(fixtureCards, WORM_ID);
-  assert.equal(mw.cards.length, 0);
-  assert.equal(ringSkeleton(new RingsLayout(mw)).latest, null);
+  bands.forEach((band, i) => assert.equal(a[i]?.length, Math.floor(band.days)));
+  assert.deepEqual(dotsOf(new RingsLayout(m)), a);
 });
 
 test("装箱：跨域扇环角向互斥（领域是颜色通道，同色不挨着才成立）", () => {
-  const boxes = [...L.treeBoxes, ...L.isoBoxes, ...(L.wormBox ? [L.wormBox] : [])];
+  const boxes = [...L.treeBoxes, ...L.isoBoxes];
   const norm = (x: number): number => ((x % 360) + 360) % 360;
   for (let i = 0; i < boxes.length; i++) {
     for (let j = i + 1; j < boxes.length; j++) {
@@ -274,10 +209,9 @@ test("装箱：跨域扇环角向互斥（领域是颜色通道，同色不挨�
   }
 });
 
-test("装箱：每张卡与每个虫洞都有落点", () => {
-  assert.equal(L.places.size, m.cards.length + m.wormholes.length);
+test("装箱：每张卡都有落点", () => {
+  assert.equal(L.places.size, m.cards.length);
   for (const c of m.cards) assert.equal(L.places.has(c.id), true);
-  for (const w of m.wormholes) assert.equal(L.places.has(w.id), true);
 });
 
 test("装箱：节点散开乘数——串珠角偏等比放大、扇环宽度增量 = (串珠峰值−1)×角距差", () => {
@@ -301,12 +235,6 @@ test("装箱：节点散开乘数——串珠角偏等比放大、扇环宽度�
     const beadMax = Math.max(...byKey.values());
     closeTo((L2.treeBoxes[i]?.width ?? 0) - box.width, (beadMax - 1) * SPREAD_DEG, 10);
   });
-});
-
-test("装箱：虫洞带——fixture 子项目根卡投影一条带，排最末、半径按 born-at", () => {
-  assert.deepEqual(m.wormholes.map((w) => w.id), [WORM_ID]);
-  assert.deepEqual(L.wormBox?.holes.map((w) => w.id), [WORM_ID]);
-  assert.equal(L.places.get(WORM_ID)?.rLin, L.radius("2026-06-20T00:00"));
 });
 
 test("结论放大档不进装箱：tierMult 纯屏幕尺寸口径，改它布局产物纹丝不动", () => {

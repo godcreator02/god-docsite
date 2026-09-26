@@ -1,7 +1,7 @@
 /* 主题色板与配色工具——SVG 动态着色的唯一色源：两套亮暗底板（矿彩）+ 领域色分配、
- * 颜色插值 / 归一工具、star.css 环色的探针解析。
+ * 颜色插值工具。
  * 背景线与文字色走 CSS 变量、不经这里；节点底色缝也走变量（`bg`），亮暗由宿主自己翻。
- * 领域色一律实例持有（buildThemes 出新副本），不走模块级单例——多盘同开互不干扰。
+ * 领域色一律实例持有（buildThemes 出新副本），不走模块级单例。
  * 整搬自 Obsidian 版 render/theme.ts，宿主变量换成 fumadocs 的 `--color-fd-*`。 */
 
 import { NO_DOMAIN } from "../model.ts";
@@ -22,7 +22,7 @@ export interface Theme {
   /** 节点底色缝（外圈描边）：密集处靠这圈缝把彩点分开 */
   bg: string;
   hubFill: string;
-  /** 盘心描边与虫洞：泥金 */
+  /** 盘心描边与根节点：泥金 */
   hubStroke: string;
   warn: string;
   mute: string;
@@ -97,13 +97,11 @@ export function buildThemes(domains: string[]): Record<ThemeName, Theme> {
   return out;
 }
 
-const NS = "http://www.w3.org/2000/svg";
-
 const HEX_RE = /^#[0-9a-f]{6}$/i;
 
 /** 两个颜色之间按 t 混合。两边都是 #rrggbb 时线性插值出 rgb()；任一边不是 hex
- * （比如 `var(--color-fd-primary)`——服务端渲的定妆照拿不到探针解析值，直接给 CSS 变量）
- * 就交给浏览器：出一条 color-mix() 表达式，混合比同一口径。 */
+ * （比如 `var(--color-fd-primary)` 这类 CSS 变量）就交给浏览器：出一条 color-mix() 表达式，
+ * 混合比同一口径。 */
 export function mix(c1: string, c2: string, t: number): string {
   if (!HEX_RE.test(c1) || !HEX_RE.test(c2)) {
     return `color-mix(in srgb, ${c1} ${((1 - t) * 100).toFixed(1)}%, ${c2})`;
@@ -116,60 +114,4 @@ export function mix(c1: string, c2: string, t: number): string {
   const a = p(c1);
   const b = p(c2);
   return `rgb(${a.map((v, i) => Math.round(v + ((b[i] as number) - v) * t)).join(",")})`;
-}
-
-/* ---------- 环形骨架配色：探针解 star.css 的环色（定妆照 JS 着色用） ---------- */
-
-/** 环形骨架的一套色：月环（碎石同源，--ring-m）/ 年环 / 最新环 / 空窗雾带暗底。 */
-export interface RingPalette {
-  month: string;
-  year: string;
-  latest: string;
-  gapBg: string;
-}
-
-/** 环色兜底（测试与探针失败用）：暗主题计算值的合理近似——month / latest / year 是
- * 前景色按 20% / 30% / 38% color-mix 的 rgba 形态，gapBg 是前景色 6%。 */
-export const DEFAULT_RING_PALETTE: RingPalette = {
-  month: "rgba(220, 221, 222, 0.2)",
-  year: "rgba(220, 221, 222, 0.38)",
-  latest: "rgba(220, 221, 222, 0.3)",
-  gapBg: "rgba(220, 221, 222, 0.06)",
-};
-
-/** 环色的 CSS 变量形态：服务端渲的定妆照用它——环色直接写成 var()，不经 mix()，
- * 亮暗由宿主变量在浏览器里现解，静态 markup 不必按主题出两份环色。 */
-export const CSS_RING_PALETTE: RingPalette = {
-  month: "var(--ring-m)",
-  year: "var(--ring-y)",
-  latest: "var(--ring-l)",
-  gapBg: "var(--gap-bg)",
-};
-
-/** 环形骨架配色：探针法让浏览器自己解 star.css 的环色——与 hubStrokeOf 同哲学，
- * 但保留 rgba 原串不做 cssToHex：环色是半透明 color-mix（前景色百分比），
- * 丢 alpha 就糊成实色。只在浏览器运行时调；探针容器带 star-disk 作用域，
- * 未匹配 / none 的项留 DEFAULT_RING_PALETTE 兜底。 */
-export function ringPaletteOf(): RingPalette {
-  const host = document.createElement("div");
-  host.className = "star-disk";
-  const svg = document.createElementNS(NS, "svg");
-  host.appendChild(svg);
-  document.body.appendChild(host);
-  /* 未匹配到规则时 getComputedStyle 的 stroke 是初始值 none，视同失败 */
-  const strokeOf = (cls: string): string | null => {
-    const c = document.createElementNS(NS, "circle");
-    c.setAttribute("class", cls);
-    svg.appendChild(c);
-    const s = getComputedStyle(c).stroke;
-    return s && s !== "none" ? s : null;
-  };
-  const out: RingPalette = {
-    month: strokeOf("ringm") ?? DEFAULT_RING_PALETTE.month,
-    year: strokeOf("ringy") ?? DEFAULT_RING_PALETTE.year,
-    latest: strokeOf("ringl") ?? DEFAULT_RING_PALETTE.latest,
-    gapBg: strokeOf("gap-bg") ?? DEFAULT_RING_PALETTE.gapBg,
-  };
-  host.remove();
-  return out;
 }

@@ -1,7 +1,8 @@
 /**
  * fumadocs 适配内部接缝图（fumadocs.data.mjs）的坐标与图标。站在最上；左列是术语标注的三个文件，
  * 中间两列是 fumadocs 本体，以及 mdx 选项、remark 插件、换节点、节点形状、机读版回调与状态点组件，
- * 右列是 workflow 与钉码核心；最下一行是卡集合、轨迹核心与星轨盘。站连到卡集合与星轨盘的两条线沿画布左右两边。
+ * 右列是 workflow 与钉码核心；最下一行是卡集合、轨迹核心与星轨盘。站连到卡集合与星轨盘的两条线沿画布左右两边，
+ * 星轨盘到读卡目录的线绕过钉码核心。
  */
 import {
   CircleDot,
@@ -68,10 +69,9 @@ export const fumadocsLayout: SeamLayout = {
     'cc-schema': cap(189, 952, 115),
     'tj-keys': cap(352, 952, 80),
     'tj-build': cap(442, 952, 105),
-    'tj-thumbs': cap(557, 952, 100),
-    'tj-disk': cap(667, 952, 110),
-    'star-comp': cap(854, 952, 85),
-    'star-load': cap(949, 952, 106),
+    'tj-disk': cap(557, 952, 140),
+    'star-load': cap(739, 952, 175),
+    'star-css': cap(924, 952, 110),
   },
   groups: {
     site: { x: 20, y: 20, w: 1060, h: 94 },
@@ -89,8 +89,8 @@ export const fumadocsLayout: SeamLayout = {
     pin: null,
     pre: { x: 452, y: 770, w: 208, h: 94 },
     'card-collection': { x: 20, y: 920, w: 298, h: 94 },
-    trajectory: { x: 338, y: 920, w: 453, h: 94 },
-    star: { x: 840, y: 920, w: 229, h: 94 },
+    trajectory: { x: 338, y: 920, w: 373, h: 94 },
+    star: { x: 725, y: 920, w: 323, h: 94 },
   },
   // 一端有几个方块时线只画到其中一个，其余的（机读版回调、状态点样式、组件表这类）固定高亮时照样亮。
   // 1 与 17 交叉一次：集合在站的最左、要连到右下方的现状集合选项，样式表那条竖线挡在中间
@@ -114,9 +114,9 @@ export const fumadocsLayout: SeamLayout = {
     '17': { d: 'M186,100 V202', badge: [186, 128] },
     '18': { d: 'M720,100 V202', badge: [720, 142] },
     '19': { d: 'M34,76 H10 V976 H34', badge: [10, 880] },
-    '20': { d: 'M1065,76 H1090 V976 H1055', badge: [1090, 860] },
-    '21': { d: 'M917,526 H1030 V952', badge: [1030, 800] },
-    '22': { d: 'M304,976 H352 M777,976 H854', badge: [328, 976] },
+    '20': { d: 'M1065,76 H1090 V976 H1034', badge: [1090, 860] },
+    '21': { d: 'M917,526 H1000 V900 H850 V952', badge: [1000, 800] },
+    '22': { d: 'M304,976 H352 M697,976 H739', badge: [328, 976] },
   },
   entries: {},
   moduleIcons: {

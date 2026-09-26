@@ -1,5 +1,5 @@
 /*
- * TrajectoryFlow 这一页自己的画面：流水线、字段表与校验表、调用列表、树与盘的 SVG、启动器示意。
+ * TrajectoryFlow 这一页自己的画面：流水线、字段表与校验表、调用列表、树与盘的 SVG、整页示意。
  * 外壳、控制条、卡片、终端、胶囊、代码行的样式与颜色变量（--dx-*）由 @godcreator/docs-explain 提供，
  * 这里全部画在它的 .dx 根元素里，颜色只取 --dx-* 变量与 data-role / data-tone 给出的 --dx-c。
  * SVG 用世界坐标画，线宽用 non-scaling-stroke 固定成屏幕上的 1px 左右。
@@ -94,7 +94,7 @@
 .tf-filelist code { font-family: var(--dx-mono); font-size: 12px; overflow-wrap: anywhere; }
 .tf-bullets { margin: 0; padding-left: 1.2em; font-size: 12.5px; display: grid; gap: 2px; }
 
-/* ── 第 4 步：键值表、盘清单、盘外的病卡 ── */
+/* ── 第 4 步：键值表、盘外的病卡 ── */
 .tf-kv { display: grid; grid-template-columns: max-content 1fr; gap: 4px 12px; margin: 0; font-size: 12.5px; align-items: center; }
 .tf-kv dt { color: var(--dx-dim); font-family: var(--dx-mono); font-size: 11.5px; }
 .tf-kv dd { margin: 0; }
@@ -102,13 +102,6 @@
   display: flex; align-items: center; gap: 8px; font-size: 12.5px; padding: 5px 9px; border-radius: 8px;
   border: 1px dashed color-mix(in srgb, var(--dx-bad) 45%, transparent); color: var(--dx-bad);
 }
-.tf-disk-row {
-  display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 6px 12px;
-  padding-bottom: 7px; border-bottom: 1px solid var(--dx-line);
-}
-.tf-disk-row:last-of-type { border-bottom: 0; padding-bottom: 0; }
-.tf-disk-head { display: inline-flex; align-items: center; gap: 6px; }
-.tf-disk-members { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: var(--dx-dim); }
 
 /* ── SVG：树与盘 ── */
 .tf-svg { display: block; width: 100%; height: auto; overflow: visible; }
@@ -144,13 +137,6 @@
   display: flex; align-items: center; justify-content: space-between; gap: 8px; font-size: 12.5px;
   padding-bottom: 8px; border-bottom: 1px solid var(--dx-line);
 }
-.tf-launch { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
-.tf-launch-card {
-  display: grid; gap: 4px; padding: 8px; border-radius: 10px; border: 1px solid var(--dx-line); background: var(--dx-surface);
-}
-.tf-launch-card .tf-disk { max-width: 120px; }
-.tf-launch-label { font-weight: 600; font-size: 13px; }
-.tf-launch-meta { font-size: 11.5px; color: var(--dx-dim); font-family: var(--dx-mono); }
 .tf-clicks { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; font-size: 12.5px; }
 .tf-clicks li { display: flex; flex-wrap: wrap; gap: 2px 8px; }
 .tf-clicks b { font-weight: 600; }

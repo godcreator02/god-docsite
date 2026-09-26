@@ -10,7 +10,7 @@
  *                                          不动、别的照写，有红退 1。带路径就是**按页限定**：只动点名的那几篇
  *   docfirst confirm <文档路径…> --accept   另外把点名页里的黄灯按今天的内容重新记；不点名页报错退 2
  *   docfirst render                         渲染：挂了 outputs 映射的生成正本摆到指定落点；别的文档不渲染
- *   docfirst trajectory [--json]            列轨迹卡的盘 / 树 / 主干；--json 出 buildTrajectory 的整份模型
+ *   docfirst trajectory [--json]            列轨迹卡那张盘的树与主干；--json 出 buildTrajectory 的整份模型
  *   docfirst migrate-ledger                 一次性迁移：旧记录簿写进各记号后删掉（见 project/migrate-ledger.ts）
  *   docfirst --help | -h | help             打用法，退 0，什么都不动；任一命令后面带 --help / -h 也是
  * 每条命令只收表里认的开关（`FLAGS`），别的开关一律报错退 2、不动手。
@@ -68,7 +68,7 @@ export const USAGE = `docfirst——文档钉代码的核对与确认。在有 d
                                          （例：docfirst confirm content/docs/a.mdx）
   docfirst confirm <文档路径…> --accept   另外把点名页里的黄灯按今天的内容重新记。复核过才用，必须点名页
   docfirst render                        把挂了 outputs 映射的生成正本渲染到落点（内容变了才写）
-  docfirst trajectory [--json]           列轨迹卡的盘 / 树 / 主干
+  docfirst trajectory [--json]           列轨迹卡那张盘的树与主干
   docfirst migrate-ledger                一次性迁移：把旧记录簿 .ledger.json 写进各记号后删掉它，
                                          再列出配置里还要手工改的键
   docfirst --help                        打这份用法，什么都不动
@@ -252,7 +252,7 @@ async function checkTrajectory(project: Project): Promise<CardProblemReport[]> {
 }
 
 /** `docfirst trajectory [--json]`：轨迹卡目录还没建报错退 2；`--json` 出 buildTrajectory
- * 整份模型；不带 `--json` 按盘打印——每盘一段，列每棵树的主干，再一行汇总支线 / 孤星 / 虫洞数。 */
+ * 整份模型；不带 `--json` 打印那一张盘——根卡与上盘卡数，每棵树的主干，再一行汇总支线 / 孤星数。 */
 async function trajectoryCommand(rest: string[]): Promise<number> {
   const project = await loadProject(process.cwd());
   if (!existsSync(project.trajectoryDir)) {
@@ -264,13 +264,12 @@ async function trajectoryCommand(rest: string[]): Promise<number> {
     console.log(JSON.stringify(data));
     return 0;
   }
-  for (const disk of data.disks) {
-    const model = data.models[disk.rootId];
-    console.log(`盘 ${model?.root?.label ?? disk.rootId}（${disk.rootId}）  ${disk.memberIds.length} 张卡`);
-    for (const tree of model?.trees ?? []) console.log(`  主干：${tree.spine.join(" → ")}`);
-    const sublineCount = model?.trees.reduce((n, t) => n + t.sublines.length, 0) ?? 0;
-    console.log(`  支线 ${sublineCount} 条，孤星 ${model?.isolated.length ?? 0} 张，虫洞 ${model?.wormholes.length ?? 0} 个`);
-  }
+  const { model } = data;
+  const rootText = model.root ? `${model.root.label}（${model.root.id}）` : "没认出根卡（卡目录里根卡不是恰好一张，见 docfirst check）";
+  console.log(`盘 ${rootText}  ${model.cards.length} 张卡`);
+  for (const tree of model.trees) console.log(`  主干：${tree.spine.join(" → ")}`);
+  const sublineCount = model.trees.reduce((n, t) => n + t.sublines.length, 0);
+  console.log(`  支线 ${sublineCount} 条，孤星 ${model.isolated.length} 张`);
   return 0;
 }
 

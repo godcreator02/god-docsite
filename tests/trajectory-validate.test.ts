@@ -12,14 +12,14 @@ import { join } from "node:path";
 import type { SickFile } from "@godcreator/docfirst-trajectory";
 import { checkDocfirstRefs } from "../packages/docfirst-workflow/src/project/card-refs.ts";
 import { scanCardDir } from "../packages/docfirst-workflow/src/project/card-dir.ts";
-import { card, flatProblems, memSick, renderCard } from "./trajectory-helpers.ts";
+import { card, D, flatProblems, memSick, renderCard, root } from "./trajectory-helpers.ts";
 import type { CardSpec } from "./trajectory-helpers.ts";
 
-/** 把卡写进一个临时目录跑 scanCardDir，交回报病；目录跑完就删 */
+/** 把卡连同根卡 pj01 写进一个临时目录跑 scanCardDir，交回报病；目录跑完就删 */
 async function dirSick(specs: CardSpec[]): Promise<SickFile[]> {
   const dir = mkdtempSync(join(tmpdir(), "god-live-doc-card-refs-"));
   try {
-    for (const spec of specs) writeFileSync(join(dir, `${spec.name}.md`), renderCard(spec));
+    for (const spec of [root("pj01", D(1)), ...specs]) writeFileSync(join(dir, `${spec.name}.md`), renderCard(spec));
     return (await scanCardDir(dir)).sick;
   } finally {
     rmSync(dir, { recursive: true, force: true, maxRetries: 5 });

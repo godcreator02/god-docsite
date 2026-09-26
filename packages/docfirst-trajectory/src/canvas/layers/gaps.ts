@@ -1,6 +1,6 @@
 /* 空窗小行星带层：压缩掉的空窗期折叠成一条雾带，碎石堆填充暗示「时间被跳过」，
  * 起止边界只挂 12 点日期短标签（不画边界线，带沿由雾带自身收边）。
- * 整搬自 Obsidian 版 star/layers/gaps.ts；碎石形态走 layout.ts 的 gapDots（与定妆照同一份公式）。 */
+ * 整搬自 Obsidian 版 star/layers/gaps.ts；碎石形态走 layout.ts 的 gapDots。 */
 
 import type { GapBand } from "../../layout.ts";
 import { bandFade, gapDots, LOD_MIN, polar, smoothstep } from "../../layout.ts";
@@ -71,7 +71,7 @@ export class GapsLayer implements StarLayer {
           this.layer,
         ),
       });
-      /* 碎石粒序跨带连续累加（gapDots 的哈希吃它），与定妆照逐位相等 */
+      /* 碎石粒序跨带连续累加（gapDots 的哈希吃它） */
       const dots = gapDots(layout, b, idx);
       idx += dots.length;
       for (const d of dots) {

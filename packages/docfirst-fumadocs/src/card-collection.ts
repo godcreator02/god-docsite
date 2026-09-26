@@ -41,7 +41,7 @@ export interface CardFrontmatter {
 /** born-at 缺失没有任何合理兜底（半径标度全下游要靠它），报 issues 硬失败；
  * label 缺失时按方案原话「缺 label 用文件名」退到文件名兜底、照样出 value——
  * 两者不能都走硬失败分支，不然「缺 label 用文件名」这句话就没有落地的地方。
- * 六个卡体系字段一个都不沾的文件不是卡（跟 parseCardFile 同一条判据）：当普通页放行，
+ * 卡体系字段（CARD_KEYS）一个都不沾的文件不是卡（跟 parseCardFile 同一条判据）：当普通页放行，
  * title 取 frontmatter 的 title、缺了退文件名——卡集合里的导读页靠这条进站。
  * fumadocs-mdx 的 schema 支持传一个 `(ctx) => Schema` 工厂（ctx 带 path），
  * 用工厂形态是为了在缺 label 时能拿到文件名。对象字面量手写、不 new 任何校验库的类。 */
@@ -113,9 +113,8 @@ function stemFromHref(href: string): string {
   return v.replace(CARD_EXT, "");
 }
 
-/** 剥完之后这个主干像不像卡身份：非空、不带路径分隔、不以 `.md` / `.mdx` 结尾（跟轨迹包 model.ts 的
- * idShapeOk 同一条），再多一条不带 `:`——那边的值来自 frontmatter，这边来自正文链接，
- * `https://…` 这类协议头得挡在外面。
+/** 剥完之后这个主干像不像卡身份：非空、不带路径分隔、不以 `.md` / `.mdx` 结尾、不带 `:`
+ * ——值来自正文链接，`https://…` 这类协议头得挡在外面。
  * 卡正文里除了引卡还会引材料（`../assets/x/README.md` 这类带路径的 .md）：那些没有卡身份
  * 语义，改写成卡页路由就是造死链，原样留给站自己解析。 */
 function idShapeOk(stem: string): boolean {

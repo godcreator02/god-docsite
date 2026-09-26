@@ -1,17 +1,14 @@
 /**
  * 模型层的规则测试：树提取的择优规则、四层校验（形状 / 存在性 / 一致性 / docfirst 引用记号，
- * docfirst 一条在 trajectory-validate.test.ts 单开）、parent 归盘即上盘（含未分道哨兵）、
- * merged-in 平铺投影（含递归摊入与环保护）、根卡认定（type: root）、正文 inline 边求解、
- * 里程碑从根卡正文解析、盘清单、扫盘空态。
+ * docfirst 一条在 trajectory-validate.test.ts 单开；跨文件的三条走 scanCards）、
+ * 非根卡全部上盘（含未分道哨兵）、根卡认定（卡目录里恰好一张 type: root）、正文 inline 边求解、
+ * 里程碑从根卡正文解析、扫盘空态。
  */
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { buildDisks, buildModel, dayNum, NO_DOMAIN, RingsLayout } from "@godcreator/docfirst-trajectory";
+import { buildModel, dayNum, NO_DOMAIN, RingsLayout } from "@godcreator/docfirst-trajectory";
 import { scanCardDir } from "@godcreator/docfirst-workflow";
-import { card, D, DN, flatProblems, memCards, memSick, root } from "./trajectory-helpers.ts";
-
-/** 一月内某日转天序数。 */
-const dn = (day: number): number => dayNum(DN(day));
+import { card, D, flatProblems, memCards, memSick, root, scanSick } from "./trajectory-helpers.ts";
 
 test("主干择优比终点：终点更晚的短链赢，长链成支线", () => {
   const m = buildModel(
@@ -21,7 +18,6 @@ test("主干择优比终点：终点更晚的短链赢，长链成支线", () =>
       card("aa03-长链二", { "born-at": D(3) }, { body: "supersedes:: [[aa02-长链一]]" }),
       card("aa05-短链终点更晚", { "born-at": D(4) }, { body: "supersedes:: [[aa01-起点]]" }),
     ]),
-    "pj01",
   );
   assert.equal(m.trees.length, 1);
   assert.deepEqual(m.trees[0]?.spine, ["aa01-起点", "aa05-短链终点更晚"]);
@@ -36,7 +32,6 @@ test("纯转向树退化：一条取代边都没有时主干沿转向链走", ()
       card("bb02-长出一", { "born-at": D(2) }, { body: "pivots-from:: [[bb01-源头]]" }),
       card("bb03-长出二", { "born-at": D(3) }, { body: "pivots-from:: [[bb02-长出一]]" }),
     ]),
-    "pj01",
   );
   assert.equal(m.trees.length, 1);
   assert.deepEqual(m.trees[0]?.spine, ["bb01-源头", "bb02-长出一", "bb03-长出二"]);
@@ -51,7 +46,6 @@ test("支线时间不搭界共槽，搭界另开槽", () => {
       card("cc02-支线乙隔得远", { "born-at": D(28) }, { body: "pivots-from:: [[aa02-主干尾]]" }),
       card("cc03-支线丙跟甲搭界", { "born-at": D(6) }, { body: "pivots-from:: [[aa01-主干头]]" }),
     ]),
-    "pj01",
   );
   const box = new RingsLayout(m).treeBoxes[0];
   /* 甲乙时间隔开（净空 2 天以上）复用同一条槽；丙贴着甲，只能另开 */
@@ -67,7 +61,6 @@ test("被取代从链上读：有取代出边的卡进 supersededIds", () => {
       card("aa02-新", { "born-at": D(2) }, { body: "supersedes:: [[aa01-旧]]" }),
       card("aa03-孤", { "born-at": D(3), domain: "域一" }),
     ]),
-    "pj01",
   );
   assert.deepEqual([...m.supersededIds], ["aa01-旧"]);
   assert.deepEqual(m.isolated.map((c) => c.id), ["aa03-孤"]);
@@ -92,7 +85,6 @@ test("正文 inline 边：目标在本盘卡集合里的成边，一行一条、
         },
       ),
     ]),
-    "pj01",
   );
   assert.deepEqual(m.edges, [
     { from: "aa01-甲", to: "dd01-丁", kind: "supersede" },
@@ -108,7 +100,6 @@ test("指向本盘卡集合外的关系收进 broken 示众", () => {
       card("aa01-在的", { domain: "域一" }),
       card("dd01-指空", { "born-at": D(2), domain: "域一" }, { body: "supersedes:: [[zz99-不存在的卡]]" }),
     ]),
-    "pj01",
   );
   assert.deepEqual(m.edges, []);
   assert.deepEqual(m.broken, [{ id: "dd01-指空", key: "supersedes", target: "zz99-不存在的卡" }]);
@@ -123,7 +114,7 @@ test("行头是关系字段但行形不合的进 sick（文件级病）——不
       { body: ["supersedes:: [[aa01-在的]] 多了句尾巴", "pivots-from:: 忘了包 wikilink"].join("\n") },
     ),
   ];
-  const m = buildModel(memCards(specs), "pj01");
+  const m = buildModel(memCards(specs));
   assert.deepEqual(m.edges, []);
   assert.deepEqual(m.broken, []);
   assert.deepEqual(flatProblems(memSick(specs)), [
@@ -145,14 +136,14 @@ test("行头是关系字段但行形不合的进 sick（文件级病）——不
 test("内卡写 type 不报病——取值一概不校验，照常上盘", () => {
   const specs = [card("dd01-写type的内卡", { domain: "域一", type: "choice" })];
   assert.deepEqual(memSick(specs), []);
-  assert.deepEqual(buildModel(memCards(specs), "pj01").cards.map((c) => c.id), ["dd01-写type的内卡"]);
+  assert.deepEqual(buildModel(memCards(specs)).cards.map((c) => c.id), ["dd01-写type的内卡"]);
 });
 
-test("缺 born-at / parent / label 都报病（内卡 parent 必填）", () => {
+test("缺 born-at / parent / label 都报病（非根卡 parent 必填）", () => {
   const specs = [card("dd02-三缺", { domain: "域一", "born-at": "", parent: [], label: "" })];
   assert.deepEqual(flatProblems(memSick(specs)), [
     { path: "dd02-三缺.md", field: "born-at", value: "", reason: "缺 born-at（全卡必填）" },
-    { path: "dd02-三缺.md", field: "parent", value: "", reason: "缺 parent（内卡必填；根卡可缺）" },
+    { path: "dd02-三缺.md", field: "parent", value: "", reason: "缺 parent（非根卡必填，写根卡的身份）" },
     { path: "dd02-三缺.md", field: "label", value: "", reason: "缺 label（全卡必填）" },
   ]);
 });
@@ -164,7 +155,7 @@ test("born-at 两种长度合法，坏格式报病且不上盘", () => {
     card("dd05-坏格式", { domain: "域一", "born-at": "2026-1-7" }),
     card("dd06-毫秒老格式", { domain: "域一", "born-at": "2026-01-08T00:00:00.000" }),
   ];
-  const m = buildModel(memCards(specs), "pj01");
+  const m = buildModel(memCards(specs));
   assert.deepEqual(m.cards.map((c) => c.id), ["dd03-日级存量", "dd04-分钟级"]);
   assert.deepEqual(flatProblems(memSick(specs)), [
     {
@@ -182,37 +173,74 @@ test("born-at 两种长度合法，坏格式报病且不上盘", () => {
   ]);
 });
 
-test("parent 元素不是卡身份（带 .md / 带路径）报病，但形状病不挡上盘", () => {
-  const specs = [card("dd07-坏parent", { domain: "域一", parent: ["pj01", "docs/别的卡.md"] })];
-  assert.deepEqual(flatProblems(memSick(specs)), [
-    {
-      path: "dd07-坏parent.md",
-      field: "parent",
-      value: "docs/别的卡.md",
-      reason: "parent 元素须为卡身份（文件名主干，不带 .md / .mdx 与路径）",
-    },
+
+/* ---------- 跨文件的三条校验：走 scanCards ---------- */
+
+test("根卡多于一张：每张根卡各报一条 type 病，说明里列出全部根卡；非根卡的 parent 不再逐个比", () => {
+  const specs = [
+    root("pjaa", D(1)),
+    root("pjbb", D(2)),
+    card("aa01-挂甲的卡", { "born-at": D(3), parent: ["pjaa"] }),
+    card("bb01-挂别处的卡", { "born-at": D(4), parent: ["zz99"] }),
+  ];
+  const reason = "卡目录里有 2 张根卡（pjaa、pjbb），只能有一张";
+  assert.deepEqual(flatProblems(scanSick(specs)), [
+    { path: "pjaa.md", field: "type", value: "root", reason },
+    { path: "pjbb.md", field: "type", value: "root", reason },
   ]);
-  assert.deepEqual(buildModel(memCards(specs), "pj01").cards.map((c) => c.id), ["dd07-坏parent"]);
+  const m = buildModel(memCards(specs));
+  assert.equal(m.root, null, "根卡不是恰好一张：盘心无主");
+  assert.deepEqual(m.cards.map((c) => c.id), ["aa01-挂甲的卡", "bb01-挂别处的卡"], "非根卡照样全部上盘");
 });
 
-test("parent 含自身报病（一致性校验①）", () => {
-  const specs = [card("dd09-自指", { domain: "域一", parent: ["pj01", "dd09-自指"] })];
-  assert.deepEqual(flatProblems(memSick(specs)), [
-    { path: "dd09-自指.md", field: "parent", value: "dd09-自指", reason: "parent 不得包含自身" },
+test("根卡写了 parent：报一条 parent 病，值是它写的 parent", () => {
+  const specs = [root("pjaa", D(1), { fm: { parent: ["zz99", "yy88"] } }), card("aa01-卡", { parent: ["pjaa"] })];
+  assert.deepEqual(flatProblems(scanSick(specs)), [
+    { path: "pjaa.md", field: "parent", value: "zz99,yy88", reason: "根卡不写 parent" },
+  ]);
+  assert.equal(buildModel(memCards(specs)).root?.id, "pjaa", "根卡照样认主");
+});
+
+test("非根卡的 parent 每个值都得是那张根卡的身份，不是就逐个报，说明里写出根卡身份", () => {
+  const specs = [
+    root("pjaa", D(1)),
+    card("aa01-对的卡", { parent: ["pjaa"] }),
+    card("aa02-多写一项", { parent: ["pjaa", "sub1"] }),
+    card("aa03-全写错", { parent: ["sub1", "sub2"] }),
+  ];
+  assert.deepEqual(flatProblems(scanSick(specs)), [
+    { path: "aa02-多写一项.md", field: "parent", value: "sub1", reason: "parent 须是根卡的身份 pjaa" },
+    { path: "aa03-全写错.md", field: "parent", value: "sub1", reason: "parent 须是根卡的身份 pjaa" },
+    { path: "aa03-全写错.md", field: "parent", value: "sub2", reason: "parent 须是根卡的身份 pjaa" },
   ]);
 });
 
-test("merged-in 出界（⊄ parent）逐项报病（一致性校验②）", () => {
-  const specs = [root("sub1", D(1), { fm: { parent: ["pjaa"], "merged-in": ["pjaa", "pjbb"] } })];
-  assert.deepEqual(flatProblems(memSick(specs)), [
-    { path: "sub1.md", field: "merged-in", value: "pjbb", reason: "merged-in 元素须 ⊆ parent" },
+test("卡目录里没有根卡：非根卡的每个 parent 值都报「卡目录里没有根卡」", () => {
+  const specs = [card("aa01-卡", { parent: ["pj01"] })];
+  assert.deepEqual(flatProblems(scanSick(specs)), [
+    { path: "aa01-卡.md", field: "parent", value: "pj01", reason: "parent 须指向根卡，但卡目录里没有根卡" },
   ]);
+  assert.equal(buildModel(memCards(specs)).root, null);
 });
 
-test("无 type 的内卡写 merged-in 报病（一致性校验③）", () => {
-  const specs = [card("dd10-内卡写merged", { domain: "域一", "merged-in": ["pj01"] })];
-  assert.deepEqual(flatProblems(memSick(specs)), [
-    { path: "dd10-内卡写merged.md", field: "merged-in", value: "pj01", reason: "merged-in 仅根卡可写" },
+test("parent 写成带路径 / 带后缀的样子或写成自己：同一个值只报一条「须是根卡的身份」，病卡照样上盘", () => {
+  const specs = [
+    root("pjaa", D(1)),
+    card("aa01-带路径", { parent: ["docs/pjaa.md"] }),
+    card("aa02-自指", { parent: ["aa02-自指"] }),
+  ];
+  assert.deepEqual(flatProblems(scanSick(specs)), [
+    { path: "aa01-带路径.md", field: "parent", value: "docs/pjaa.md", reason: "parent 须是根卡的身份 pjaa" },
+    { path: "aa02-自指.md", field: "parent", value: "aa02-自指", reason: "parent 须是根卡的身份 pjaa" },
+  ]);
+  assert.deepEqual(buildModel(memCards(specs)).cards.map((c) => c.id), ["aa01-带路径", "aa02-自指"]);
+});
+
+test("跨文件的病追加在同一文件单文件的病后面", () => {
+  const specs = [root("pjaa", D(1)), card("aa01-缺短名", { label: "", parent: ["zz99"] })];
+  assert.deepEqual(flatProblems(scanSick(specs)), [
+    { path: "aa01-缺短名.md", field: "label", value: "", reason: "缺 label（全卡必填）" },
+    { path: "aa01-缺短名.md", field: "parent", value: "zz99", reason: "parent 须是根卡的身份 pjaa" },
   ]);
 });
 
@@ -221,7 +249,7 @@ test("缺 label 报病但回退标题上盘；身份带日期段时标题是去�
     card("dd08-没短名", { domain: "域一", label: "" }),
     card("2026-01-09-no-label", { domain: "域一", label: "", "born-at": D(9) }),
   ];
-  const m = buildModel(memCards(specs), "pj01");
+  const m = buildModel(memCards(specs));
   assert.deepEqual(m.cards.map((c) => c.label), ["dd08-没短名", "no-label"]);
   assert.deepEqual(flatProblems(memSick(specs)).map((p) => p.reason), [
     "缺 label（全卡必填）",
@@ -229,7 +257,7 @@ test("缺 label 报病但回退标题上盘；身份带日期段时标题是去�
   ]);
 });
 
-test("六个卡体系字段一个都不沾的文件不是卡：不上盘、不报病", () => {
+test("卡体系字段一个都不沾的文件不是卡：不上盘、不报病", () => {
   const specs = [{ name: "ee01-不是卡", fm: { note: "随手写的" } }];
   assert.deepEqual(memCards(specs), []);
   assert.deepEqual(memSick(specs), []);
@@ -237,154 +265,30 @@ test("六个卡体系字段一个都不沾的文件不是卡：不上盘、不�
 
 const VAULT = [
   root("pjaa", D(1)),
-  card("aa01-甲项目的卡", { domain: "域一", "born-at": D(5), label: "甲", parent: ["pjaa"] }),
-  card("aa02-甲项目未分道的卡", { "born-at": D(6), label: "野", parent: ["pjaa"] }),
-  root("pjbb", D(2)),
-  card("bb01-乙项目的卡", { domain: "域一", "born-at": D(6), label: "乙", parent: ["pjbb"] }),
-  card("cc01-没挂项目的卡", { domain: "域一", "born-at": D(7), label: "散", parent: [] }),
+  card("aa01-有领域的卡", { domain: "域一", "born-at": D(5), label: "甲", parent: ["pjaa"] }),
+  card("aa02-未分道的卡", { "born-at": D(6), label: "野", parent: ["pjaa"] }),
+  card("cc01-parent写错的卡", { domain: "域一", "born-at": D(4), label: "散", parent: ["zz99"] }),
 ];
 
-test("归盘即上盘：无 domain 的卡也上盘、进未分道哨兵组，根卡认成 model.root，day0 含诞生时刻", () => {
-  const m = buildModel(memCards(VAULT), "pjaa");
+test("认主与上盘：唯一那张根卡是 model.root、不上盘；非根卡全部上盘不看 parent，无 domain 进未分道；day0 含诞生时刻", () => {
+  const m = buildModel(memCards(VAULT));
   assert.equal(m.root?.id, "pjaa");
   assert.equal(m.root?.label, "测试项目");
-  assert.deepEqual(m.cards.map((c) => c.id), ["aa01-甲项目的卡", "aa02-甲项目未分道的卡"]);
+  assert.deepEqual(m.cards.map((c) => c.id), ["cc01-parent写错的卡", "aa01-有领域的卡", "aa02-未分道的卡"]);
   /* 未分道哨兵：无 domain 卡归隐式组，压 domains 尾 */
-  assert.equal(m.cards[1]?.domain, NO_DOMAIN);
+  assert.equal(m.byId["aa02-未分道的卡"]?.domain, NO_DOMAIN);
   assert.deepEqual(m.domains, ["域一", NO_DOMAIN]);
   /* 根卡诞生早于首张卡：盘从项目诞生那天起算 */
   assert.equal(m.day0, dayNum(D(1)));
   assert.equal(m.dayMax, dayNum(D(6)));
 });
 
-test("同一目录里不同项目各自建模，互不串卡", () => {
-  const mb = buildModel(memCards(VAULT), "pjbb");
-  assert.deepEqual(mb.cards.map((c) => c.id), ["bb01-乙项目的卡"]);
-  assert.deepEqual(mb.domains, ["域一"]);
-});
-
-test("卡 parent 多项：父项目盘也收它", () => {
-  const m = buildModel(
-    memCards([
-      root("pjaa", D(1)),
-      card("aa01-本项目的卡", { domain: "域一", "born-at": D(3), parent: ["pjaa"] }),
-      card("aa02-子项目的卡", { domain: "域一", "born-at": D(4), parent: ["pjaa", "sub1"] }),
-    ]),
-    "pjaa",
-  );
-  assert.deepEqual(m.cards.map((c) => c.id), ["aa01-本项目的卡", "aa02-子项目的卡"]);
-});
-
-test("子项目根卡投影为所属项目盘上的虫洞：自己的盘认主、无虫洞；父盘虫洞按 born-at 定盘界", () => {
-  const cards = memCards([
-    root("pjaa", D(1)),
-    card("aa01-父项目的卡", { domain: "域一", "born-at": D(4), parent: ["pjaa"] }),
-    root("sub1", D(6), { fm: { parent: ["pjaa"], label: "子项目" } }),
-  ]);
-  const parent = buildModel(cards, "pjaa");
-  assert.deepEqual(parent.cards.map((c) => c.id), ["aa01-父项目的卡"]);
-  assert.deepEqual(parent.wormholes.map((w) => w.id), ["sub1"]);
-  assert.equal(parent.wormholes[0]?.label, "子项目");
-  assert.equal(parent.dayMax, dayNum(D(6)));
-  const sub = buildModel(cards, "sub1");
-  assert.equal(sub.root?.id, "sub1");
-  assert.deepEqual(sub.wormholes, []);
-});
-
-test("多父分发：parent 每一项各投一个虫洞", () => {
-  const cards = memCards([
-    root("pjaa", D(1)),
-    root("pjbb", D(1)),
-    root("sub1", D(3), { fm: { parent: ["pjaa", "pjbb"] } }),
-  ]);
-  assert.deepEqual(buildModel(cards, "pjaa").wormholes.map((w) => w.id), ["sub1"]);
-  assert.deepEqual(buildModel(cards, "pjbb").wormholes.map((w) => w.id), ["sub1"]);
-});
-
-test("一致性校验：根卡 parent 含自身也报病，认主与虫洞投影不受影响", () => {
-  const specs = [root("pjaa", D(1)), root("sub1", D(3), { fm: { parent: ["pjaa", "sub1"] } })];
-  const cards = memCards(specs);
-  assert.equal(buildModel(cards, "sub1").root?.id, "sub1");
-  assert.deepEqual(buildModel(cards, "pjaa").wormholes.map((w) => w.id), ["sub1"]);
-  const bad = flatProblems(memSick(specs)).filter((p) => p.path === "sub1.md");
-  assert.equal(bad.length, 1);
-  assert.equal(bad[0]?.field, "parent");
-});
-
-test("merged-in 列出的父盘：子项目根卡画普通节点，内卡摊入，父盘不画虫洞", () => {
-  const cards = memCards([
-    root("pjaa", D(1)),
-    card("aa01-父项目的卡", { domain: "域一", "born-at": D(2), parent: ["pjaa"] }),
-    root("sub1", D(3), { fm: { parent: ["pjaa"], "merged-in": ["pjaa"], label: "子项目" } }),
-    card("bb01-子项目的卡", { domain: "域二", "born-at": D(4), label: "子卡", parent: ["sub1"] }),
-  ]);
-  const m = buildModel(cards, "pjaa");
-  assert.deepEqual(m.wormholes, []);
-  assert.deepEqual(m.cards.map((c) => c.id).sort(), ["aa01-父项目的卡", "bb01-子项目的卡", "sub1"]);
-  const subNode = m.cards.find((c) => c.id === "sub1");
-  assert.equal(subNode?.label, "子项目");
-  assert.equal(subNode?.bornAt, D(3));
-  assert.deepEqual(buildModel(cards, "sub1").cards.map((c) => c.id), ["bb01-子项目的卡"]);
-});
-
-test("递归摊入：孙项目通过被平铺的子项目继续摊平，两级都进父盘", () => {
-  const m = buildModel(
-    memCards([
-      root("pjaa", D(1)),
-      root("sub1", D(2), { fm: { parent: ["pjaa"], "merged-in": ["pjaa"], label: "子项目" } }),
-      root("sub2", D(3), { fm: { parent: ["sub1"], "merged-in": ["sub1"], label: "孙项目" } }),
-      card("cc01-孙项目的卡", { domain: "域三", "born-at": D(4), label: "孙卡", parent: ["sub2"] }),
-    ]),
-    "pjaa",
-  );
-  assert.deepEqual(m.wormholes, []);
-  assert.deepEqual(m.cards.map((c) => c.id).sort(), ["cc01-孙项目的卡", "sub1", "sub2"]);
-});
-
-test("递归摊入连它自己的虫洞也带上父盘：子项目没平铺的孙项目仍在父盘现出虫洞", () => {
-  const m = buildModel(
-    memCards([
-      root("pjaa", D(1)),
-      root("sub1", D(2), { fm: { parent: ["pjaa"], "merged-in": ["pjaa"], label: "子项目" } }),
-      root("sub2", D(3), { fm: { parent: ["sub1"], label: "孙项目仍虫洞" } }),
-    ]),
-    "pjaa",
-  );
-  assert.deepEqual(m.cards.map((c) => c.id), ["sub1"]);
-  assert.deepEqual(m.wormholes.map((w) => w.id), ["sub2"]);
-});
-
-test("环保护：A、B 互相 merged-in 不死循环，重逢的盘直接停止展开", () => {
-  const m = buildModel(
-    memCards([
-      root("aaaa", D(1), { fm: { parent: ["bbbb"], "merged-in": ["bbbb"] } }),
-      root("bbbb", D(1), { fm: { parent: ["aaaa"], "merged-in": ["aaaa"] } }),
-    ]),
-    "aaaa",
-  );
-  assert.deepEqual(m.cards.map((c) => c.id), ["bbbb"]);
-  assert.deepEqual(m.wormholes, []);
-});
-
-test("buildDisks：每张根卡一张盘，带成员卡身份；虫洞不算成员；序按最近有活动降序", () => {
-  const disks = buildDisks(
-    memCards([
-      root("pjaa", D(1)),
-      card("aa01-甲", { domain: "域一", "born-at": D(9), parent: ["pjaa"] }),
-      root("pjbb", D(2)),
-      card("bb01-乙", { domain: "域二", "born-at": D(3), parent: ["pjbb"] }),
-      root("sub1", D(6), { fm: { parent: ["pjaa"] } }),
-    ]),
-  );
-  assert.deepEqual(disks, [
-    { rootId: "pjaa", memberIds: ["aa01-甲"] },
-    { rootId: "sub1", memberIds: [] },
-    { rootId: "pjbb", memberIds: ["bb01-乙"] },
-  ]);
-});
-
-test("buildDisks：一张根卡都没有，盘清单为空", () => {
-  assert.deepEqual(buildDisks(memCards([card("aa01-孤零零", { domain: "域一" })])), []);
+test("只有根卡：空盘，盘界落在根卡诞生那天", () => {
+  const m = buildModel(memCards([root("pjaa", D(3))]));
+  assert.equal(m.root?.id, "pjaa");
+  assert.deepEqual(m.cards, []);
+  assert.equal(m.day0, dayNum(D(3)));
+  assert.equal(m.dayMax, dayNum(D(3)));
 });
 
 test("根卡带里程碑，内卡恒 null", () => {
@@ -409,74 +313,6 @@ test("根卡带里程碑，内卡恒 null", () => {
 test("根卡没这块即空列表", () => {
   const cards = memCards([root("pj01", D(1), { body: "## 在做什么\n\n没里程碑。" })]);
   assert.deepEqual(cards[0]?.milestones, []);
-});
-
-test("日期范围裁剪：范围外的卡不上盘，越界边丢弃但不进 broken 示众", () => {
-  const m = buildModel(
-    memCards([
-      card("aa01-窗外旧卡", { domain: "域一" }),
-      card("aa02-窗内新卡", { "born-at": D(10), domain: "域一" }, { body: "supersedes:: [[aa01-窗外旧卡]]" }),
-    ]),
-    "pj01",
-    { d0: dn(5), d1: dn(31) },
-  );
-  assert.deepEqual(m.cards.map((c) => c.id), ["aa02-窗内新卡"]);
-  assert.equal(m.edges.length, 0);
-  assert.equal(m.broken.length, 0);
-  assert.equal(m.supersededIds.has("aa01-窗外旧卡"), true);
-  assert.deepEqual(m.domains, ["域一"]);
-});
-
-test("窗内断裂：取代链头在窗外，窗内余段自成一树", () => {
-  const m = buildModel(
-    memCards([
-      card("aa01-链头", { domain: "域一" }),
-      card("aa02-链中", { "born-at": D(10), domain: "域一" }, { body: "supersedes:: [[aa01-链头]]" }),
-      card("aa03-链尾", { "born-at": D(12), domain: "域一" }, { body: "supersedes:: [[aa02-链中]]" }),
-    ]),
-    "pj01",
-    { d0: dn(5), d1: dn(31) },
-  );
-  assert.equal(m.trees.length, 1);
-  assert.deepEqual(m.trees[0]?.spine, ["aa02-链中", "aa03-链尾"]);
-});
-
-test("虫洞落点在窗外也不上盘", () => {
-  const m = buildModel(
-    memCards([root("pj01", D(1)), card("aa01-窗内卡", { "born-at": D(10) }), root("wh01", D(2), { fm: { parent: ["pj01"] } })]),
-    "pj01",
-    { d0: dn(5), d1: dn(31) },
-  );
-  assert.equal(m.wormholes.length, 0);
-  assert.deepEqual(m.cards.map((c) => c.id), ["aa01-窗内卡"]);
-});
-
-test("盘界钉下不钉上：下界钉窗口起点（不早于项目诞生），上界取窗内最晚活动", () => {
-  const m = buildModel(
-    memCards([root("pj01", D(1)), card("aa01-近卡一", { "born-at": D(20) }), card("aa02-近卡二", { "born-at": D(25) })]),
-    "pj01",
-    { d0: dn(10), d1: dn(31) },
-  );
-  assert.equal(m.day0, dn(10));
-  assert.equal(m.dayMax, dn(25));
-});
-
-test("窗口起点早于项目诞生：下界由根卡诞生时刻托底", () => {
-  const m = buildModel(memCards([root("pj01", D(5)), card("aa01-首卡", { "born-at": D(8) })]), "pj01", {
-    d0: dn(1),
-    d1: dn(31),
-  });
-  assert.equal(m.day0, dn(5));
-});
-
-test("窗内无卡：空盘，day0 = dayMax = 窗口下界", () => {
-  const m = buildModel(memCards([root("pj01", D(1)), card("aa01-旧卡", { "born-at": D(3) })]), "pj01", {
-    d0: dn(10),
-    d1: dn(20),
-  });
-  assert.equal(m.cards.length, 0);
-  assert.equal(m.day0, dn(10));
-  assert.equal(m.dayMax, dn(10));
 });
 
 test("扫盘：目录不存在，回空集合，不报错、不建目录", async () => {

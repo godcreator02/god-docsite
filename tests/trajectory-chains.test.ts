@@ -31,7 +31,6 @@ const buildFixtureModel = () =>
       card("dd01-别树头", { "born-at": D(25), domain: "域三" }),
       card("dd02-别树尾", { "born-at": D(30), domain: "域三" }, { body: "supersedes:: [[dd01-别树头]]" }),
     ]),
-    "pj01",
   );
 
 test("同树同槽同日多卡分到同一组、组按日期序；跨槽（主干/支线）各开一条链不串组", () => {

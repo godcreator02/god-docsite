@@ -9,7 +9,7 @@
  * build() 只建 boxEls/edgeEls（满足 StarLayer 接口，层叠序排在 hub 之前）；buildNames 住
  * 公开方法 buildNamesLayer()，由编排者在 hub 层 build 之后原位调用，保证 DOM 插入序（层叠序）。
  *
- * 帧内调用序同款被夹断：placeEdges 排在 cards 层节点 / 虫洞摆放之后、gaps/axis/milestones
+ * 帧内调用序同款被夹断：placeEdges 排在 cards 层节点摆放之后、gaps/axis/milestones
  * 三层 place 之前；placeBoxes/placeNames 排在三层之后、hub 之前。place(f) 只摆 edgeEls；
  * placeBoxes/placeNames 住公开方法 placeRest(f)，由编排者在三层 place 之后原位调用。 */
 
@@ -138,7 +138,7 @@ export class TreesLayer implements StarLayer {
     });
   }
 
-  /** 只摆边（帧内调用序排在 cards 层节点 / 虫洞摆放之后、gaps/axis/milestones 三层 place
+  /** 只摆边（帧内调用序排在 cards 层节点摆放之后、gaps/axis/milestones 三层 place
    * 之前）——满足 StarLayer 接口；扇环框 / 树名见 placeRest()。 */
   place(f: FrameCtx): void {
     this.placeEdges(f);
@@ -243,7 +243,7 @@ export class TreesLayer implements StarLayer {
         22 * pxToWorld;
       const p = polar(nameEl.box.angMid, rT);
       nameEl.node.setAttribute("transform", `translate(${p.x},${p.y}) scale(${pxToWorld})`);
-      /* 树名与节点标签同池仲裁、排在节点与虫洞之后（报名晚）——撞车时树名让隐 */
+      /* 树名与节点标签同池仲裁、排在节点之后（报名晚）——撞车时树名让隐 */
       nodeLabelClaims.push({
         x: p.x / pxToWorld,
         y: p.y / pxToWorld,

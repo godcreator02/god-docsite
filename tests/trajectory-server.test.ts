@@ -140,7 +140,7 @@ test("remarkTrajectoryLinks：wikilink（带别名 / 不带别名）转成真链
   assert.equal(t2.value, "，完。");
 });
 
-test("cardSchema：六个卡字段一个都不沾的页不是卡——当普通页放行，title 取 frontmatter、缺了退文件名；description 随行", async () => {
+test("cardSchema：卡字段一个都不沾的页不是卡——当普通页放行，title 取 frontmatter、缺了退文件名；description 随行", async () => {
   const schema = cardSchema({ path: "content/trajectory/index.mdx", source: "" });
   const plain = await validate(schema, { title: "轨迹", description: "只增不改" });
   assert.deepEqual(plain.value, { title: "轨迹", description: "只增不改" });

@@ -18,10 +18,9 @@ export const HELP_HTML =
   "<div>画布上滚轮指哪缩哪，拖拽平移；ctrl+滚轮（触控板捏合同效）是时间平移——透镜宽度不变、整窗沿时间滑动，一格按窗宽的一成走、下滚向新（与竖轨悬停滚轮同一段逻辑，滚哪儿结果都一样），空档按折痕宽度匀速划过；全景态没有窗、不动作。</div>" +
   "<div>画布左缘竖轨是日期窗，常驻不收：顶旧底新，双柄收窄就进引力透镜——窗即焦点带，窗外压缩显示不丢全貌；中段拖动或悬停滚轮整窗平移（一格按窗宽的一成走），拖回顶满退回全景；左下角小框直接键入窗宽天数，框上滚轮一格一天微调；轨上的暗纹是没记录的空档——空档在轨上折成窄条（与盘面标度同比），拖过窄条那几步窗就跳过整段空窗。</div>" +
   "<div>透镜里焦点带内外边环各挂当天日期，贴到时间端点会提示。</div>" +
-  "<div>「回到原点」两段式：相机动过先归相机，再按一次窗回顶满；Esc 同一条链。点盘心正中的根节点在新标签页开根卡页，双击盘心回全景；点节点在新标签页开卡页；点虫洞穿越到子项目的盘。</div>" +
+  "<div>「回到原点」两段式：相机动过先归相机，再按一次窗回顶满；Esc 同一条链。点盘心正中的根节点在新标签页开根卡页，双击盘心回全景；点节点在新标签页开卡页。</div>" +
   '<div class="hh">怎么筛</div>' +
-  "<div>工具条：漏斗钮开图例（形态、领域可点多选取交集），放大镜钮开搜索（匹配 label 与卡身份）。</div>" +
-  "<div>换盘：点「启动器」钮回项目卡阵。</div>";
+  "<div>工具条：漏斗钮开图例（形态、领域可点多选取交集），放大镜钮开搜索（匹配 label 与卡身份）。</div>";
 
 /* ---------- 图例：卡片化三组（形态 / 关系 / 领域） ---------- */
 
@@ -33,7 +32,7 @@ const escapeHtml = (s: string): string => s.replace(/[&<>"']/g, (ch) => `&#${ch.
 const LEGEND_PEARL = "star-lg-pearl";
 
 /** 图例 HTML：符号与画布节点同模的内联 SVG；形态（按 type 的形状表）与领域项是筛选器
- * （on = 选中，off = 本维有筛选但未选中），在立 / 被取代 / 虫洞与关系组纯展示。
+ * （on = 选中，off = 本维有筛选但未选中），在立 / 被取代与关系组纯展示。
  * 形状符号吃跟大图同款的珠光渐变与底色缝，样本色取第一个领域色。 */
 export function legendHtml(theme: Theme, domains: string[], sel: FilterSel): string {
   const sym = (inner: string, wide = false): string =>
@@ -63,15 +62,12 @@ export function legendHtml(theme: Theme, domains: string[], sel: FilterSel): str
       `<line x1="1" y1="0" x2="23" y2="0" stroke="${col}" stroke-width="1.2"${dash ? ` stroke-dasharray="${dash}" stroke-linecap="round"` : ""}/>`,
       true,
     );
-  const gold = theme.hubStroke;
   return (
     forms +
     `<br>` +
     /* 在立 / 被取代：颜色通道的两态（纯展示，筛选维度是形状与领域） */
     `<span class="lgp">${sym(`<circle r="4" fill="${pearl}" stroke="${theme.bg}" stroke-width="1.2"/>`)}在立</span>` +
-    `<span class="lgp">${sym(`<circle r="2.8" fill="${mix(sample, theme.deadMix, 0.4)}" stroke="${theme.bg}" stroke-width="0.8"/>`)}被取代</span>` +
-    /* 虫洞：子项目根卡的投影节点（纯展示，不进筛选——它是导航入口不是卡） */
-    `<span class="lgp">${sym(`<circle r="5" fill="none" stroke="${gold}" stroke-width="1.4"/><circle r="2.2" fill="none" stroke="${gold}" stroke-width="1"/>`)}虫洞</span><br>` +
+    `<span class="lgp">${sym(`<circle r="2.8" fill="${mix(sample, theme.deadMix, 0.4)}" stroke="${theme.bg}" stroke-width="0.8"/>`)}被取代</span><br>` +
     `<span class="lgp">${edgeSymbol(sample)}取代·迭代</span>` +
     `<span class="lgp">${edgeSymbol(theme.pivot, "2 3")}转向·长出</span>` +
     `<span class="lgp">${sym(`<circle r="6.2" fill="none" stroke="${theme.milestone}" stroke-width="1.3"/>`)}里程碑</span><br>` +

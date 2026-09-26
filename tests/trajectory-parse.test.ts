@@ -56,7 +56,7 @@ test("单值当列表容错成一项；列表取标量取首项", () => {
 test("缺席的键：标量回 null、列表回空", () => {
   const fm = parseFrontmatter("---\nlabel: 甲\n---\n") as Record<string, string | string[]>;
   assert.equal(scalarOf(fm, "domain"), null);
-  assert.deepEqual(listOf(fm, "merged-in"), []);
+  assert.deepEqual(listOf(fm, "parent"), []);
 });
 
 test("CRLF 与 BOM 都吃得下", () => {

@@ -1,12 +1,12 @@
 /* 层契约：星轨视图六层（axis / gaps / milestones / trees / cards / hub）共用的类型与接口正本。
  * 层与层互不 import，层文件也不得 import 编排者——层不认识 StarStage，建构期的宿主动作
- * （开卡 / 穿越虫洞 / 回到原点 / 悬停态回写 / 请帧）全走 BuildCtx 回调，
+ * （开卡 / 回到原点 / 悬停态回写 / 请帧）全走 BuildCtx 回调，
  * 每帧的显示态全走 place(f: FrameCtx) 单一入参，禁止层回头引用编排者取数据。
  * 整搬自 Obsidian 版 star/layers/frame.ts。 */
 
 import type { RingsLayout } from "../../layout.ts";
 import type { Card, Milestone, TrajectoryModel } from "../../types.ts";
-import type { DefsFactory, WormEl } from "../node-dom.ts";
+import type { DefsFactory } from "../node-dom.ts";
 import type { Theme } from "../theme.ts";
 
 /** 一张卡这一帧的显示坐标：节点先摆、边与树名随后取用。 */
@@ -25,7 +25,7 @@ export interface LabelClaim {
   label: SVGElement;
 }
 
-/** 节点 / 虫洞标签拥挤仲裁的一次报名（全景密度兜底，与 12 点 / 6 点注记仲裁分池）。 */
+/** 节点标签拥挤仲裁的一次报名（全景密度兜底，与 12 点 / 6 点注记仲裁分池）。 */
 export interface NodeLabelClaim {
   /** 锚点屏幕坐标（区间重建与行距判定用，画布平移无关） */
   x: number;
@@ -49,7 +49,6 @@ export interface FrameCtx {
   /** 编排者从 chains 算出后灌入：跨日弧向避让角偏，cards 层消费。 */
   dodge: Map<string, number>;
   hoveredCard: Card | null;
-  hoveredWorm: WormEl | null;
   /** 全部标签开关：无视 LOD 与仲裁全显（重叠也显）。 */
   showAllLabels: boolean;
   /** recolor 走静态着色，place 内仍有随帧态变化的取色（如焦点带边环 / 盘心的贴端点警示色）。 */
@@ -58,7 +57,7 @@ export interface FrameCtx {
   labelClaims: LabelClaim[];
   /** 6 点标签拥挤仲裁池（里程碑投递），与 12 点分属两条竖线、各自裁决。 */
   milestoneClaims: LabelClaim[];
-  /** 节点 / 虫洞 / 树名标签仲裁池，与 12 点 / 6 点注记仲裁分池。 */
+  /** 节点 / 树名标签仲裁池，与 12 点 / 6 点注记仲裁分池。 */
   nodeLabelClaims: NodeLabelClaim[];
 }
 
@@ -66,30 +65,24 @@ export interface FrameCtx {
  * layout / model / theme / milestones 是建构期一次性注入的只读引用，层可持有到下一轮重建。 */
 export interface BuildCtx {
   world: SVGElement;
-  /** 珠光渐变与空窗羽化滤镜的 defs 工厂（每张盘一个，id 不撞） */
+  /** 珠光渐变与空窗羽化滤镜的 defs 工厂（每轮建画布一个，id 不撞） */
   defs: DefsFactory;
   layout: RingsLayout;
   model: TrajectoryModel;
   theme: Theme;
   milestones: Milestone[];
-  /** 当前盘 id：hub 层的盘心标题在 model.root 为空（项目还没根卡）时退回它。 */
-  projectId: string;
   /** 卡的 type（形状按它出）：模型里的 Card 不带 type，由编排者从路由卡表查。 */
   typeOf(id: string): string | null;
   /** 开卡页；inNewTab 对应 Ctrl/Cmd+点（宿主决定怎么开）。 */
   openCard(id: string, inNewTab: boolean): void;
-  /** 点虫洞穿越到子项目的盘。 */
-  openWormhole(id: string): void;
   /** 盘心双击：回全景（两段式回到原点的整链）。 */
   goHome(): void;
   /** 读当前悬停卡：节点 mouseleave 只在「还是自己」时才清态，不能只给 setter
    * （setHoveredCard(null) 分不清是谁触发的离开）。 */
   getHoveredCard(): Card | null;
   setHoveredCard(c: Card | null): void;
-  getHoveredWorm(): WormEl | null;
-  setHoveredWorm(w: WormEl | null): void;
   /** 是否已越过拖拽判定阈值：hub 的单击开卡要排除「从盘上起手的拖拽」尾梢
-   * （节点 / 虫洞的点击目前不需要这层守卫，不强加给它们）。 */
+   * （节点的点击目前不需要这层守卫，不强加给它）。 */
   hasMoved(): boolean;
   /** 请一帧：补间循环续帧的唯一入口。 */
   kick(): void;

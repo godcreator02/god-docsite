@@ -7,7 +7,7 @@
  *   mdx 正式记号，行里出现 `{/* ref `、`{/* tree ` 等同样五个词的花括号注释（卡是 `.mdx` 时
  *   confirm 换出来的就是这一种）。
  * 这是钉码那一侧的规矩，所以在这儿、不在轨迹包：`scanCardDir` 读完卡目录后对每张卡跑一遍，
- * 病并进轨迹包三层校验报的 SickFile。
+ * 病并进轨迹包卡校验报的 SickFile。
  */
 
 import { splitLines } from "@godcreator/docfirst-trajectory";

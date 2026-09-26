@@ -1,6 +1,6 @@
 ---
 title: 轨迹核心 docfirst-trajectory
-description: 卡的解析与校验、分盘建模、布局与缩略图、星轨盘客户端组件；收读好的卡片文件，交出模型与病卡，自己不读盘
+description: 卡的解析与校验、给唯一那张根卡建模、布局、星轨盘客户端组件；收读好的卡片文件，交出模型与病卡，自己不读文件
 full: true
 ---
 
@@ -11,50 +11,47 @@ full: true
 
 ## 功能
 
-两件事：**卡**（轨迹卡的格式、解析、校验）与**盘**（把一批卡分盘建模、布局、画成星轨盘）。卡有哪些字段、
-怎么校验、怎么分盘、半径和角度怎么排，见[轨迹](/docs/trajectory)。
+两件事：**卡**（轨迹卡的格式、解析、校验）与**盘**（把一个卡目录的卡建成一个模型、布局、画成星轨盘）。
+一个卡目录只有一张根卡、只画一张盘。卡有哪些字段、怎么校验、半径和角度怎么排，见[轨迹](/docs/trajectory)。
 
 卡的身份是文件名去掉 `.mdx` / `.md` 后缀的部分，同一身份两种后缀都在时只认 `.mdx`：
 
-{/* ref file="../packages/docfirst-trajectory/src/scan.ts" lines="17-47" hash="95f149892032" blob="c08f4ca5904b" */}
+{/* ref file="../packages/docfirst-trajectory/src/scan.ts" lines="24-27" hash="86a5124a9270" blob="7ace664ccf8b" */}
+
+{/* ref file="../packages/docfirst-trajectory/src/scan.ts" lines="82-92" hash="aa54cc2e797c" blob="7ace664ccf8b" */}
 
 ## 接口
 
-两个入口和一张样式表：
+入口与样式表：
 
 {/* ref file="../packages/docfirst-trajectory/package.json" lines="7-17" hash="c306e90e051b" blob="f560168d1bfb" */}
 
-**`.`** 导出解析、挑卡与扫描、建模、缩略图、布局这几组纯函数与类型：
+**`.`** 导出解析、挑卡与扫描、建模、布局这几组纯函数与类型：
 
-{/* ref file="../packages/docfirst-trajectory/src/index.ts" lines="16-84" hash="d82a0442783e" blob="d6f99d5a6da4" */}
+{/* ref file="../packages/docfirst-trajectory/src/index.ts" lines="16-76" hash="9fc1adb60125" blob="6e3c47627e1c" */}
 
 哪些 frontmatter 字段算卡由 `CARD_KEYS` 决定。命令行校验卡与 fumadocs 适配的卡集合 schema 用的是这同一张表，
-六个字段一个都没写的文件不算卡：
+表里的字段一个都没写的文件不算卡：
 
 {/* has file="../packages/docfirst-trajectory/src/parse.ts" text="export const CARD_KEYS" */}
 
-**`buildTrajectory(scan)`** 是组装入口：收 `scanCards` 的结果，给每张盘建模，交回全部卡、盘清单、病卡和按根卡身份索引的模型。
-它不算布局，布局在客户端按当前设置现算：
+**`buildTrajectory(scan)`** 是组装入口：收 `scanCards` 的结果，给那张根卡的盘建模，交回全部卡、病卡和一个模型。
+它不算布局，布局在客户端按当前设置计算：
 
-{/* ref file="../packages/docfirst-trajectory/src/index.ts" lines="121-137" hash="096fb6ab2d4f" blob="d6f99d5a6da4" */}
+{/* ref file="../packages/docfirst-trajectory/src/index.ts" lines="111-123" hash="700374590e8b" blob="6e3c47627e1c" */}
 
 交出去的卡去掉了包内部用的修改时间和标题：
 
-{/* ref file="../packages/docfirst-trajectory/src/index.ts" lines="86-100" hash="59e04da0bae3" blob="fcf5ac788f4a" */}
+{/* ref file="../packages/docfirst-trajectory/src/index.ts" lines="78-91" hash="765b4bfba590" blob="6e3c47627e1c" */}
 
 模型里被取代卡的集合换成了数组，整份能直接转成 JSON 交给客户端组件：
 
 {/* ref file="../packages/docfirst-trajectory/src/serial.ts" lines="9-11" hash="06fde308bb1c" blob="c519fffe9144" */}
 
-**`renderThumb` / `launcherThumbs`** 把每张盘的缩略图生成为静态 SVG，亮、暗各一份；不碰 DOM、不碰文件，服务端组件调用：
+**`./disk`** 导出客户端组件 `StarDisk`，props 只有 `data` 与 `hrefBase`：`data` 是 `buildTrajectory` 的结果；卡页地址由 `hrefBase` 拼出，
+props 里不收函数（服务端组件不能把函数传给客户端组件）。组件占满父容器，只有整页一种形态：
 
-{/* ref file="../packages/docfirst-trajectory/src/thumbs.ts" lines="44-45" hash="967351171ea9" blob="37d21bb3508a" */}
-
-**`./disk`** 导出客户端组件 `StarDisk`。`data` 是 `buildTrajectory` 的结果；卡页地址由 `hrefBase` 拼出，props 里不收函数
-（服务端组件不能把函数传给客户端组件）；`mode` 为 `page` 时当前盘写进地址栏的 `?disk=`，为 `embed` 时先点一下才响应滚轮；
-没有当前盘就显示启动器：
-
-{/* ref file="../packages/docfirst-trajectory/src/disk.tsx" lines="46-61" hash="c673807fd0c7" blob="2a7a7719f23d" */}
+{/* ref file="../packages/docfirst-trajectory/src/disk.tsx" lines="33-39" hash="f65c0598c49a" blob="ab210f01863f" */}
 
 ## 依赖
 
@@ -62,11 +59,11 @@ full: true
 
 {/* ref file="../packages/docfirst-trajectory/package.json" lines="27-34" hash="ef4ae805b5b5" blob="f560168d1bfb" */}
 
-`./disk` 的画布层在浏览器里建 DOM 节点、测标签宽度；缩略图走服务端，不要 DOM。
+`./disk` 的画布层在浏览器里建 DOM 节点、测标签宽度。
 
 ## 不做的事
 
-**不读盘，不认识别的包。** `.` 入口的产物一条 import 都没有，连 `node:` 也没有；`.ts` 源码只有相对 import。
+**不读文件，不认识别的包。** `.` 入口的产物一条 import 都没有，连 `node:` 也没有；`.ts` 源码只有相对 import。
 所以浏览器、服务端、命令行都能直接用：
 
 {/* ref file="../tests/boundary.test.ts" lines="180-193" hash="c35ca7bc8225" blob="e450056cc091" */}
@@ -81,10 +78,12 @@ full: true
 
 **不认识钉码记号。** 卡里不许钉码这条由 workflow 读卡目录时另查，病并进同一份清单；这个包只在问题类型里留着这个字段名：
 
-{/* ref file="../packages/docfirst-trajectory/src/types.ts" lines="94-98" hash="55cdacf410b9" blob="b20fdb03c00f" */}
+{/* ref file="../packages/docfirst-trajectory/src/types.ts" lines="68-72" hash="c0fa2b5a900c" blob="ea79dc7c4f44" */}
 
-**不管 fumadocs 集合与服务端组件。** 卡集合的 schema、正文链接改写、读卡目录的服务端组件都在 [fumadocs 适配](/docs/modules/fumadocs)。
+**不管 fumadocs 集合与读卡目录。** 卡集合的 schema、正文链接改写、`loadTrajectory` 都在 [fumadocs 适配](/docs/modules/fumadocs)，
+站经它拿到 `StarDisk` 与样式。
 
-**不认识站的路由。** 当前是哪张盘只看 `initialDisk` 与地址栏的 `?disk=`；顶栏不归组件画。
+**不认识站的路由。** 不读也不写地址栏；顶栏不归组件画。
 
-**不提供写卡工具，不支持同时打开多张盘。** 卡手写，写完用 `docfirst check` 校验；换盘只经过启动器和虫洞。
+**不提供写卡工具，不在一个卡目录里放几个项目。** 卡手写，写完用 `docfirst check` 校验；一个卡目录只有一张根卡，理由见
+[一站一张根卡](/trajectory/2026-09-26-one-root-one-disk)。
