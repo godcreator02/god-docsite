@@ -4,8 +4,8 @@
  * docfirst 的四个包按接缝切开：钉码 `docfirst-pin`、轨迹 `docfirst-trajectory`、命令行与项目 `docfirst-workflow`、
  * fumadocs 适配 `docfirst-fumadocs`；第五个包 `docs-explain` 是文档站讲解组件的外壳与零件，只给站用，
  * 跟那四个包互不认识。包与包之间的方向，pnpm 严格的 node_modules 能拦住一半——没写进依赖的包
- * import 不到——但「该不该写进依赖」没人检查；workflow 包里各目录之间更是谁都能 import 谁，`project/` 里
- * 写一句 `import "../mdx/render.ts"`，编译器不会报错，项目装配从此就只能用 mdx 一种格式。
+ * import 不到——但「该不该写进依赖」没人检查；workflow 包里各目录之间更是谁都能 import 谁，`mdx/` 里
+ * 写一句 `import "../project/load.ts"`，编译器不会报错，mdx 格式从此就跟读盘、git 绑在一起。
  * **这个文件补上的就是这两项检查。**
  *
  * 它检查六类约束，每一类失败时的表现各不相同：
@@ -231,18 +231,18 @@ const WORKFLOW_SRC = srcOf("docfirst-workflow");
  *
  * 方向读法（左边不许知道右边）：
  *   marker   记号写法：草稿写法、正式记号里的属性、报告里的目标文本；只用钉码核心的类型，谁都不认识
- *   format   引用与清单的类型、格式接口（认引用、写回，加两样可选本事）与渲染拒绝的错误类，谁都不认识
- *   mdx      mdx 格式实现：实现 format 的接口、用记号写法，不认识钉码编排、项目怎么装配、命令行怎么打印
- *   pinning  钉码编排：格式认引用、钉码核心判定、格式写回的先后顺序；不认识记号属性怎么写、具体是哪个格式
- *   project  碰环境：读盘、git、摆放、读卡目录；格式由配置递进来，所以不认识 mdx 这个具体格式，也不认识命令行
+ *   format   引用与清单的类型、渲染拒绝的错误类，谁都不认识
+ *   mdx      mdx 格式：认引用、写回、名册检查、按原文渲染，用记号写法；不认识钉码编排、项目怎么装配、命令行怎么打印
+ *   pinning  钉码编排：mdx 认引用、钉码核心判定、mdx 写回的先后顺序；不认识记号属性怎么写
+ *   project  碰环境：读盘、git、摆放、读卡目录；不认识命令行
  *   cli      入口：认识以上全部，谁都不认识它
  */
 const WORKFLOW_DIRS: Record<string, string[]> = {
   marker: ["format", "mdx", "pinning", "project", "cli"],
   format: ["marker", "mdx", "pinning", "project", "cli"],
   mdx: ["pinning", "project", "cli"],
-  pinning: ["marker", "mdx", "project", "cli"],
-  project: ["mdx", "cli"],
+  pinning: ["marker", "project", "cli"],
+  project: ["cli"],
   cli: [],
 };
 
@@ -255,7 +255,7 @@ function dirOf(file: string, spec: string): string | null {
   return parts.length > 1 ? parts[0]! : null;
 }
 
-test("workflow 目录方向：marker 与 format 谁都不认识，mdx 与 project 互不认识，都不认识 cli", () => {
+test("workflow 目录方向：marker 与 format 谁都不认识，mdx 不认识钉码编排与 project，都不认识 cli", () => {
   const bad: string[] = [];
   for (const [dir, forbidden] of Object.entries(WORKFLOW_DIRS)) {
     for (const file of sourcesIn(join(WORKFLOW_SRC, dir))) {

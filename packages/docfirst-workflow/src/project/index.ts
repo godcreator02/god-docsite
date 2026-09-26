@@ -4,8 +4,8 @@
  * 哪些文件有未提交的改动）也在这儿——钉码（`@godcreator/docfirst-pin`）不碰子进程。
  * 摆放（mdx 正本 → 落点上的生成物：渲、整形、跟盘上比、状态判定、落盘）也是这里的一个模块。
  *
- * 这个目录可以 import `../format/`、`../marker/`、`../pinning/`、`@godcreator/docfirst-pin` 与 `@godcreator/docfirst-trajectory`，
- * **不许 import `../mdx/` 与 `../cli/`**（`tests/boundary.test.ts` 守着）：格式由项目配置递进来，这里不认识任何具体格式。
+ * 这个目录可以 import workflow 里除 `../cli/` 之外的目录、`@godcreator/docfirst-pin` 与 `@godcreator/docfirst-trajectory`，
+ * **不许 import `../cli/`**（`tests/boundary.test.ts` 守着）。
  */
 
 // 导出面就是这个目录的契约面：外面用的是 loadProject 交出来的 Project；

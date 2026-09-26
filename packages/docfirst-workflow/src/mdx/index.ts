@@ -1,15 +1,12 @@
 /**
- * mdx 格式：`@godcreator/docfirst-workflow/mdx` 出口就是它。项目的 `docfirst.config.mjs` 把整个模块
- * 挂进 `formats`，命令行与站读的是同一份。
+ * mdx 格式：`@godcreator/docfirst-workflow/mdx` 出口就是它。项目里只有这一种文档格式，钉码编排、命令行与站用的是同一份。
  *   ① 识别与写回：parse / write / marker，钉码编排会调的；名册检查 lintComponents 给 check 用
  *   ② 渲染：renderAi 把生成正本按原文渲染成 md（记号换成代码块）；人看那份就是站本身，命令行没有 human 渲染
  *   ③ 语法树零件：parseTree / recognize / stamp / walk 等，给 `@godcreator/docfirst-fumadocs` 接站用
  * 名册：这里只有机制（stamp / unknownComponents）和写规则用的帮手，没有默认表——哪些组件、怎么压平
  * 由项目在 docfirst.config.mjs 里声明；fumadocs 自带那几个组件的规则在 `@godcreator/docfirst-fumadocs/roster`。
  *
- * 这个目录不认识 project 与 cli，也不认识任何站的宿主（`tests/boundary.test.ts` 守着）。`DocFormat` 这条
- * 接缝分离的是「怎么认记号」与「怎么判新鲜」两种变化原因，而且真有两个适配器：生产是这一份，
- * 测试是 `tests/fake-format.ts`。
+ * 这个目录不认识钉码编排、project 与 cli，也不认识任何站的宿主（`tests/boundary.test.ts` 守着）。
  */
 import type { MemoRecord, Target } from "@godcreator/docfirst-pin";
 import type { Reference } from "../format/index.ts";
@@ -19,12 +16,10 @@ import { parseTree } from "./render.ts";
 import { unknownComponents } from "./roster.ts";
 import type { Roster } from "./roster.ts";
 
-export const name = "mdx";
-export const claims = (doc: string): boolean => doc.endsWith(".mdx");
-
 /** 记号：mdx 的花括号注释表达式，载荷是记号语法（`../marker/`）定的那一截，确认过的带着记录属性 */
 export const marker = (target: Target, record: MemoRecord | null): string => `{/* ${formalOf(target, record)} */}`;
 
+/** 正式记号和草稿记号都认；正式记号上的记录属性一并读出 */
 export function parse(text: string): Reference[] {
   return recognize(parseTree(text));
 }
@@ -37,8 +32,8 @@ export function write(text: string, references: Reference[]): string {
 }
 
 /** 名册检查：文档里出现、表里没有的组件。命令行 check 调它，不用等构建才发现；项目没声明名册就按空表查 */
-export function lintComponents(text: string, roster: unknown = {}): Array<{ name: string; line: number }> {
-  return unknownComponents(parseTree(text), roster as Roster);
+export function lintComponents(text: string, roster: Roster = {}): Array<{ name: string; line: number }> {
+  return unknownComponents(parseTree(text), roster);
 }
 
 export { parseTree, renderAi } from "./render.ts";

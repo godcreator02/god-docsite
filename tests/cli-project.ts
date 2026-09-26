@@ -1,9 +1,7 @@
 /**
  * 命令行测试的公共台子：临时真 git 项目、跑命令、收打印。
  *
- * 项目的 docfirst.config.mjs 按绝对 file: 地址引 `fake-format.ts`——临时目录里解析不到包名，
- * 而命令行这一层要验的是它自己（报什么状态、退什么码、写回了什么），不是某个真格式长什么样。
- * 两个假格式：`.md` 有 renderAi（能当生成正本），`.html` 没有，只核对不渲染。
+ * 项目里两篇 mdx 文档，各钉同一段代码；配置只写内容根，要 outputs 的用例自己加。
  * 直接调 main，不起子进程：退出码和打印都当场看得见。
  *
  * 台子要 `process.chdir` 到临时目录，那是进程全局的，所以同一个文件里的用例只能串着跑。
@@ -11,25 +9,15 @@
  */
 import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
-import { dirname, join } from "node:path";
-import { fileURLToPath, pathToFileURL } from "node:url";
+import { join } from "node:path";
 import { main } from "@godcreator/docfirst-workflow";
 import { CODE, run, SETTINGS } from "./repo.ts";
 
-const HERE = dirname(fileURLToPath(import.meta.url));
-/** 假格式的绝对 file: 地址。Node 直接吃 .ts，配置文件 import 得动 */
-const FAKE = pathToFileURL(join(HERE, "fake-format.ts")).href;
-
-export const CONFIG = `import { fakeFormat } from ${JSON.stringify(FAKE)};
-
-const md = fakeFormat("fake-md", ".md", { render: true });
-const html = fakeFormat("fake-html", ".html");
-
-export default { formats: [md, html], content: "docs" };
+export const CONFIG = `export default { content: "docs" };
 `;
 
-export const DOC_MD = "# md\n\n@@docfirst ref src/greet.ts:2-3 @@\n\n尾巴\n";
-export const DOC_HTML = '<h1>html</h1>\n<figure>\n  @@docfirst ref src/greet.ts:2-3 @@\n</figure>\n';
+export const DOC_A = "# md\n\n@@docfirst ref src/greet.ts:2-3 @@\n\n尾巴\n";
+export const DOC_B = "# b\n\n另一篇\n\n@@docfirst ref src/greet.ts:2-3 @@\n";
 
 /** 起一个能被 loadProject 装配的临时项目，跑几条命令，收集打印 */
 export function setupProject(config: string = CONFIG) {
@@ -38,8 +26,8 @@ export function setupProject(config: string = CONFIG) {
   mkdirSync(join(root, "src"));
   mkdirSync(join(root, "docs"));
   writeFileSync(join(root, "src", "greet.ts"), CODE);
-  writeFileSync(join(root, "docs", "a.md"), DOC_MD);
-  writeFileSync(join(root, "docs", "b.html"), DOC_HTML);
+  writeFileSync(join(root, "docs", "a.mdx"), DOC_A);
+  writeFileSync(join(root, "docs", "b.mdx"), DOC_B);
   writeFileSync(join(root, "docfirst.config.mjs"), config);
   run(root, [...SETTINGS, "add", "-A"]);
   run(root, [...SETTINGS, "commit", "-q", "-m", "起项目"]);
@@ -72,7 +60,7 @@ export function withKeys(extra: string): string {
   return CONFIG.replace(`content: "docs" };`, `content: "docs", ${extra} };`);
 }
 
-/** 把 CONFIG 尾巴换成带 outputs 的：docs/a.md 摆到项目根的 README.md */
+/** 把 CONFIG 尾巴换成带 outputs 的：docs/a.mdx 摆到项目根的 README.md */
 export function withOutputs(extra: string): string {
   return withKeys(`outputs: ${extra}`);
 }

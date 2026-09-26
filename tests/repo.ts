@@ -7,9 +7,8 @@ import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "nod
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { createPinner } from "../packages/docfirst-pin/src/index.ts";
-import type { History } from "../packages/docfirst-pin/src/index.ts";
-import { formatPicker } from "../packages/docfirst-workflow/src/format/index.ts";
-import type { DocFormat } from "../packages/docfirst-workflow/src/format/index.ts";
+import type { History, Target } from "../packages/docfirst-pin/src/index.ts";
+import { marker } from "../packages/docfirst-workflow/src/mdx/index.ts";
 import { createPinning } from "../packages/docfirst-workflow/src/pinning/index.ts";
 import type { ConfirmResult, Pinning } from "../packages/docfirst-workflow/src/pinning/index.ts";
 import { createGitHistory, createReader } from "../packages/docfirst-workflow/src/project/index.ts";
@@ -49,8 +48,10 @@ export interface Repo {
   teardown(): void;
 }
 
+/** 一处还没确认的正式记号那一行：mdx 的花括号注释，不带记录属性 */
+export const refLine = (target: Target): string => marker(target, null);
+
 export interface RepoOptions {
-  formats: DocFormat[];
   /** 不给就用 git 版 */
   history?: History;
 }
@@ -62,13 +63,13 @@ export interface RepoOptions {
 export const SETTINGS = ["-c", "user.email=test@example.com", "-c", "user.name=test", "-c", "core.autocrlf=false"];
 
 /** 起一个临时 git 仓，代码已提交一次 */
-export function setupRepo({ formats, history }: RepoOptions): Repo {
+export function setupRepo({ history }: RepoOptions = {}): Repo {
   const root = mkdtempSync(join(tmpdir(), "god-live-doc-"));
   run(root, ["init", "-q", "-b", "main"]);
 
   const api: Repo = {
     root,
-    pinning: createPinning(createPinner({ reader: createReader(root), history: history ?? createGitHistory(root) }), formatPicker(formats)),
+    pinning: createPinning(createPinner({ reader: createReader(root), history: history ?? createGitHistory(root) })),
     write(rel, text) {
       mkdirSync(dirname(join(root, rel)), { recursive: true });
       writeFileSync(join(root, rel), text);

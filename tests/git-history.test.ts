@@ -16,20 +16,19 @@ import { createRequire, syncBuiltinESMExports } from "node:module";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { blobOf, hashText } from "../packages/docfirst-pin/src/index.ts";
+import type { History } from "../packages/docfirst-pin/src/index.ts";
 import { createGitHistory } from "../packages/docfirst-workflow/src/project/index.ts";
 import { readBlob } from "../packages/docfirst-workflow/src/project/git.ts";
-import { fakeFormat, refLine } from "./fake-format.ts";
-import { CODE, NO_HISTORY, run, SETTINGS, setupRepo } from "./repo.ts";
+import { CODE, NO_HISTORY, refLine, run, SETTINGS, setupRepo } from "./repo.ts";
 import type { Repo } from "./repo.ts";
 
-const FORMATS = [fakeFormat("fake", ".a")];
-const DOC = "docs/a.a";
+const DOC = "docs/a.mdx";
 const REF = refLine({ kind: "span", file: "src/greet.ts", a: 2, b: 3 });
 const TEXT = `# 标题\n\n${REF}\n\n尾巴\n`;
 
 /** 起仓、写好文档、确认一次 */
-function confirmed(history?: Parameters<typeof setupRepo>[0]["history"]): Repo {
-  const r = setupRepo({ formats: FORMATS, ...(history !== undefined ? { history } : {}) });
+function confirmed(history?: History): Repo {
+  const r = setupRepo({ ...(history !== undefined ? { history } : {}) });
   r.write(DOC, TEXT);
   const done = r.confirm(DOC);
   assert.deepEqual(done.steps.map((s) => s.action), ["recorded"]);
@@ -57,7 +56,7 @@ function gitCalls<T>(fn: () => T): { value: T; calls: string[][] } {
 }
 
 test("确认不要求先提交：改了没提交、未跟踪的文件都记得下，一次 git 都不起", () => {
-  const r = setupRepo({ formats: FORMATS });
+  const r = setupRepo();
   try {
     r.write("src/greet.ts", CODE.replace("hello", "hey"));
     r.write("src/untracked.ts", "const a = 1;\nconst b = 2;\n");
@@ -92,7 +91,7 @@ test("行段跟随：上面插几行，段按 hunk 跟到新位置；confirm 写
 
     const again = r.confirm(DOC);
     assert.deepEqual(again.steps.map((s) => s.action), ["moved"]);
-    assert.match(r.read(DOC), /^REF ref file="src\/greet\.ts" lines="4-5" /m, "记号写回成新行段");
+    assert.match(r.read(DOC), /^\{\/\* ref file="src\/greet\.ts" lines="4-5" /m, "记号写回成新行段");
   } finally {
     r.teardown();
   }
@@ -130,7 +129,7 @@ test("整段删光：红 vanished，旧段还能从 blob 取回来；文件没�
 });
 
 test("确认之后没提交又改了：记录里的 blob 不在对象库，退回滑窗——挪了位置照样绿，改了是位置不明的黄", () => {
-  const r = setupRepo({ formats: FORMATS });
+  const r = setupRepo();
   try {
     r.write("src/greet.ts", `// 没提交的一行\n${CODE}`);
     r.write(DOC, TEXT.replace('lines="2-3"', 'lines="3-4"'));
@@ -179,7 +178,7 @@ test("同一个 blob 只从对象库取一次：取过之后对象没了，旧�
 });
 
 test("取旧内容：缩写不在对象库、缩写有歧义都给 null，不抛错", () => {
-  const r = setupRepo({ formats: FORMATS });
+  const r = setupRepo();
   try {
     assert.equal(readBlob(r.root, "0123456789ab"), null, "不在对象库");
     // 一次写进两千个对象（内容固定，名字也就固定），挑两个前 4 位相同的，用这 4 位去问
@@ -256,7 +255,7 @@ test("项目根是 git 的子目录：按文件自己的位置找仓，照样取
 });
 
 test("整文件：末尾追加也黄，diff 是整份对整份；行段版对同一改动是绿的", () => {
-  const r = setupRepo({ formats: FORMATS });
+  const r = setupRepo();
   try {
     r.write(DOC, `${refLine({ kind: "file", file: "src/greet.ts" })}\n\n${REF}\n`);
     r.confirm(DOC);
@@ -273,7 +272,7 @@ test("整文件：末尾追加也黄，diff 是整份对整份；行段版对同
 });
 
 test("仓按 autocrlf 存 LF、工作区是 CRLF：blob 名照样对得上，旧内容取得到", () => {
-  const r = setupRepo({ formats: FORMATS });
+  const r = setupRepo();
   try {
     const crlf = CODE.replace(/\n/g, "\r\n");
     r.write("src/crlf.ts", crlf);
@@ -304,7 +303,7 @@ test("git 那份与取不到旧内容的：同一串改动下状态一致", () =
     (r) => r.drop("src/greet.ts"),
   ];
   const trace = (history: typeof NO_HISTORY | undefined) => {
-    const r = setupRepo({ formats: FORMATS, ...(history !== undefined ? { history } : {}) });
+    const r = setupRepo({ ...(history !== undefined ? { history } : {}) });
     try {
       r.write(DOC, TEXT);
       const out = [r.statuses(DOC, TEXT)];

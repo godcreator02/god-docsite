@@ -1,12 +1,13 @@
 /**
- * 钉码编排：一篇文档的核对与确认只在这里串起来——格式认出引用，每处剥成目标与记录交给钉码核心，
- * 结果按原来的顺序配回文档路径、行号、是不是草稿；确认时把核心算出的新记录交回格式写回。
+ * 钉码编排：一篇文档的核对与确认只在这里串起来——mdx 格式认出引用，每处剥成目标与记录交给钉码核心，
+ * 结果按原来的顺序配回文档路径、行号、是不是草稿；确认时把核心算出的新记录交回 mdx 格式写回。
  * 命令行、生成物摆放与站构建共用这一份。
  *
- * 这个目录认识 `../format/` 与 `@godcreator/docfirst-pin`，不认识 project 与 cli（`tests/boundary.test.ts` 守着）。
+ * 这个目录认识 `../format/`、`../mdx/` 与 `@godcreator/docfirst-pin`，不认识记号属性怎么写，也不认识 project 与 cli（`tests/boundary.test.ts` 守着）。
  */
 import type { ConfirmAction, ConfirmOptions, Pin, Pinner, Step, Verdict } from "@godcreator/docfirst-pin";
-import type { DocFormat, Item, Listing, Reference } from "../format/index.ts";
+import type { Item, Listing, Reference } from "../format/index.ts";
+import { parse, write } from "../mdx/index.ts";
 
 /** 确认时对一处引用做了什么；动作的含义见钉码核心的 `ConfirmAction` */
 export interface ConfirmStep {
@@ -52,27 +53,20 @@ function confirmStepOf(item: Item, { action, written, problem }: Step): ConfirmS
   return step;
 }
 
-export function createPinning(pinner: Pinner, formatFor: (doc: string) => DocFormat | null): Pinning {
-  function needFormat(doc: string): DocFormat {
-    const format = formatFor(doc);
-    if (format === null) throw new Error(`${doc}：没有格式认领这篇文档`);
-    return format;
-  }
-
+export function createPinning(pinner: Pinner): Pinning {
   function listingOf(doc: string, references: Reference[]): { listing: Listing; verdicts: Verdict[] } {
     const verdicts = pinner.check(references.map(pinOf));
     return { listing: { doc, items: references.map((reference, i) => itemOf(doc, reference, verdicts[i]!)) }, verdicts };
   }
 
   return {
-    checkDoc: (doc, text) => listingOf(doc, needFormat(doc).parse(text)).listing,
+    checkDoc: (doc, text) => listingOf(doc, parse(text)).listing,
     checkReferences: (doc, references) => listingOf(doc, references).listing,
     confirmDoc(doc, text, options) {
-      const format = needFormat(doc);
-      const { listing, verdicts } = listingOf(doc, format.parse(text));
+      const { listing, verdicts } = listingOf(doc, parse(text));
       const steps = pinner.confirm(verdicts, options).map((step, i) => confirmStepOf(listing.items[i]!, step));
       const written = steps.flatMap((step) => (step.written !== undefined ? [step.written] : []));
-      const next = written.length > 0 ? format.write(text, written) : text;
+      const next = written.length > 0 ? write(text, written) : text;
       return { listing, text: next, changed: next !== text, steps };
     },
   };

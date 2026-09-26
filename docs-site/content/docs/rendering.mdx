@@ -19,11 +19,11 @@ frontmatter；写成 `{ to, frontmatter }`，点名的字段逐行搬进生成�
 
 render 只遍历现状区的文档，映射的键写成 `trajectory/` 或 `future/` 下的页，永远不会被渲染：
 
-{/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="111-115" hash="f4afd688f402" blob="5f11f57dfab2" */}
+{/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="112-116" hash="f4afd688f402" blob="3ce3a8b0948a" */}
 
 ## render 做什么
 
-渲染由格式的 `renderAi` 完成：用 remark 把正本解析成语法树，只改 frontmatter 和记号两种节点，其余原文逐字节照抄。
+渲染由 mdx 格式的 `renderAi` 完成：用 remark 把正本解析成语法树，只改 frontmatter 和记号两种节点，其余原文逐字节照抄。
 每个节点的处理：
 
 {/* ref file="../packages/docfirst-workflow/src/mdx/render.ts" lines="76-111" hash="731e77ed5520" blob="8296809554c9" */}
@@ -35,17 +35,17 @@ render 只遍历现状区的文档，映射的键写成 `trajectory/` 或 `futur
 同一篇正本只渲染一次正文，每个落点各自加上点名的 frontmatter 字段。点名的字段正本里没有，这个落点不写；
 跟落点上现有的文件相同，也不写：
 
-{/* ref file="../packages/docfirst-workflow/src/project/placement.ts" lines="224-247" hash="8cdbe0f9bddc" blob="ff9aae9560f4" */}
+{/* ref file="../packages/docfirst-workflow/src/project/placement.ts" lines="222-245" hash="84dfba0ad0d3" blob="90cc5ebe3c3d" */}
 
 ## check 怎么守生成物新鲜
 
 `check` 用 render 同一个 `bodyOf` 在内存里再渲染一次，跟落点上的文件比，只读不写：
 
-{/* ref file="../packages/docfirst-workflow/src/project/placement.ts" lines="249-271" hash="bb846aedab2a" blob="ff9aae9560f4" */}
+{/* ref file="../packages/docfirst-workflow/src/project/placement.ts" lines="247-269" hash="c7cdaed835f2" blob="90cc5ebe3c3d" */}
 
 只有 `fresh` 算新鲜，其余状态（落点上还没有文件、内容不一致、缺点名的字段、渲染不了）每个落点记一次红：
 
-{/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="341-346" hash="2a07d6e6c07e" blob="5f11f57dfab2" */}
+{/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="342-347" hash="2a07d6e6c07e" blob="3ce3a8b0948a" */}
 
 代码块的内容取自被钉文件今天的内容，所以有人直接改了生成物、改了正本没渲染、改了被钉的代码没渲染，这三种都会让
 check 变红。

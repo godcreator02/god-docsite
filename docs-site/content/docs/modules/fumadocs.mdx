@@ -63,10 +63,10 @@ full: true
 
 下面是一个 fumadocs 站接入这个包要改的几处，每处都是这个包与站之间的一条接缝，钉的是本站自己的文件。
 
-**配置 `docfirst.config.mjs`**：在项目根（本站就是站目录），命令行与站读同一份。`formats` 写 workflow 的 `./mdx`，
+**配置 `docfirst.config.mjs`**：在项目根（本站就是站目录），命令行与站读同一份。不用写格式（只有 mdx 一种），
 `components` 先展开 `fumadocsRoster` 再加站自己的组件：
 
-{/* ref file="docfirst.config.mjs" lines="16-17" hash="57bd5812b93a" blob="ef8b98ac9425" */}
+{/* ref file="docfirst.config.mjs" lines="15-15" hash="a4306c677c56" blob="3c54d3ed0c2c" */}
 
 **集合 `src/lib/source.ts`**：集合用 fumadocs-mdx 的 macro 写，没有全局配置，所以按集合接。集合级 `mdxOptions` 会去掉 fumadocs 的默认
 插件，`applyMdxPreset` 把它们加回来。`docs` 集合接 `docfirstMdxOptions` 与 `docfirstMarkdownOptions`，站上各页的机读版与 llms 路由从这里出：

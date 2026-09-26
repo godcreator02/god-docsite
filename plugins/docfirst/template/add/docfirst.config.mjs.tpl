@@ -10,14 +10,12 @@
  * 要保留 frontmatter 字段的生成物（比如 SKILL.md），目标写成对象：
  *   'content/docs/outputs/skills/x.mdx': [{ to: '../skills/x/SKILL.md', frontmatter: ['name', 'description'] }]
  *
- * formats 是命令行认的文档格式（这里是 mdx）；components 是组件名册，fumadocsRoster 给 fumadocs 自带文件树
- * Files / Folder / File 与 Note 的压平规则，站里自己加的组件在它后面追加。
+ * components 是组件名册，fumadocsRoster 给 fumadocs 自带文件树 Files / Folder / File 与 Note 的压平规则，
+ * 站里自己加的组件在它后面追加。
  */
-import * as mdx from '@godcreator/docfirst-workflow/mdx'
 import { fumadocsRoster } from '@godcreator/docfirst-fumadocs/roster'
 
 export default {
-  formats: [mdx],
   content: 'content',
   outputs: {
     'content/docs/outputs/readme.mdx': ['../README.md'],

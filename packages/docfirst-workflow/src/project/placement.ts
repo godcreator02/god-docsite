@@ -1,7 +1,7 @@
 /**
  * 摆放：mdx 正本 → 落点上的生成物。
  *
- * 一篇文档在 `docfirst.config` 的 `outputs` 里挂了几个落点，摆放就让格式把它渲成一份干净 md、
+ * 一篇文档在 `docfirst.config` 的 `outputs` 里挂了几个落点，摆放就用 mdx 格式把它按原文渲成一份干净 md、
  * 戴上点名的 frontmatter 字段、写到每个落点上；核对是同一份正文跟落点上那份逐字节比。
  * 配置归一、地盘规则、渲染、整形、frontmatter 挑行、落点状态判定，全在这一份里。
  *
@@ -13,7 +13,8 @@
  */
 import { isAbsolute, relative, resolve, sep } from "node:path";
 import { isRenderRefusal } from "../format/index.ts";
-import type { DocFormat, Listing } from "../format/index.ts";
+import type { Listing } from "../format/index.ts";
+import { renderAi } from "../mdx/index.ts";
 import type { Pinning } from "../pinning/index.ts";
 import type { ProjectConfig } from "./load.ts";
 
@@ -64,7 +65,7 @@ export interface Placing {
   /**
    * 这一篇摆一次：渲一份正文，戴上点名的 frontmatter 字段，内容有变的落点才写，回落点清单。
    * 缺字段的落点不写（摆一份缺 name 的 SKILL.md 比不摆更糟）。
-   * 没挂落点、格式不出 ai 产物，回空清单——那是「这篇没有摆放这回事」，不是错。
+   * 没挂落点回空清单——那是「这篇没有摆放这回事」，不是错。
    */
   render(doc: string): PlacedWrite[];
   /**
@@ -75,13 +76,12 @@ export interface Placing {
 }
 
 /**
- * 摆放依赖的外部接口。前半是项目面（钉码编排、这篇归哪个格式、这篇挂了哪些落点、这篇的原文），
+ * 摆放依赖的外部接口。前半是项目面（钉码编排、这篇挂了哪些落点、这篇的原文），
  * 装配时把装好的项目递进来；后半是**生成物的存放**——摆放不知道落点是文件还是别的什么，
  * 生产给的是真盘那份，测试给的是内存那份。
  */
 export interface PlacingHost {
   pinning: Pinning;
-  formatFor(doc: string): DocFormat | null;
   placements(doc: string): Placement[];
   /** mdx 正本的原文 */
   read(doc: string): string;
@@ -93,7 +93,7 @@ export interface PlacingHost {
 
 /** frontmatter 里一条顶层键的行头：列 0 起、`键:` */
 const TOP_KEY = /^([\w-]+):/;
-/** 产物开头整段 frontmatter：格式的 ai 产物可能还带着——摆放产物一律不带，要带的字段由 `frontmatter` 点名加回 */
+/** 产物开头整段 frontmatter：摆放产物一律不带，要带的字段由 `frontmatter` 点名加回 */
 const LEADING_FRONTMATTER = /^﻿?---\r?\n[\s\S]*?\r?\n---[ \t]*\r?\n?/;
 
 /**
@@ -139,7 +139,7 @@ export function assertTurf(root: string, sourceDirs: string[], table: Record<str
   }
 }
 
-/** 格式的 ai 产物 → 摆放产物的正文（还没戴 frontmatter）：剥掉开头的 frontmatter 与空行 */
+/** 按原文渲染的产物 → 摆放产物的正文（还没戴 frontmatter）：剥掉开头的 frontmatter 与空行 */
 function tidy(rendered: string): string {
   return rendered.replace(LEADING_FRONTMATTER, "").replace(/^\n+/, "");
 }
@@ -198,22 +198,20 @@ function withFrontmatter(body: string, lines: string[]): string {
 const sameText = (placed: string, body: string): boolean => placed.replace(/\r\n/g, "\n") === body;
 
 export function createPlacing(host: PlacingHost): Placing {
-  /** 这一篇有没有摆放这回事：挂了落点、有格式、格式出 ai 产物，三样齐了才算 */
-  function placingInputs(doc: string): { targets: Placement[]; text: string; format: DocFormat } | null {
+  /** 这一篇有没有摆放这回事：挂了落点才算 */
+  function placingInputs(doc: string): { targets: Placement[]; text: string } | null {
     const targets = host.placements(doc);
     if (targets.length === 0) return null;
-    const format = host.formatFor(doc);
-    if (format === null || typeof format.renderAi !== "function") return null;
-    return { targets, text: host.read(doc), format };
+    return { targets, text: host.read(doc) };
   }
 
   /**
-   * 摆放产物的正文：问格式要 ai 产物再整形。同一篇的几个落点共用这一份，frontmatter 各戴各的。
-   * 格式拒绝渲染（RenderRefusal）交回原因，由调用方把这篇的每个落点报成红；别的错照原样抛
+   * 摆放产物的正文：按原文渲染再整形。同一篇的几个落点共用这一份，frontmatter 各戴各的。
+   * 拒绝渲染（RenderRefusal）交回原因，由调用方把这篇的每个落点报成红；别的错照原样抛
    */
-  function bodyOf(doc: string, text: string, format: DocFormat, listing = host.pinning.checkDoc(doc, text)): { body: string } | { refusal: string } {
+  function bodyOf(doc: string, text: string, listing = host.pinning.checkDoc(doc, text)): { body: string } | { refusal: string } {
     try {
-      return { body: tidy(format.renderAi!(text, listing)) };
+      return { body: tidy(renderAi(text, listing)) };
     } catch (err) {
       if (isRenderRefusal(err)) return { refusal: err.message };
       throw err;
@@ -224,7 +222,7 @@ export function createPlacing(host: PlacingHost): Placing {
     render(doc) {
       const inputs = placingInputs(doc);
       if (inputs === null) return [];
-      const rendered = bodyOf(doc, inputs.text, inputs.format);
+      const rendered = bodyOf(doc, inputs.text);
       if ("refusal" in rendered) return inputs.targets.map(({ to }) => ({ to, status: "unrenderable", reason: rendered.refusal }));
       const body = rendered.body;
       const out: PlacedWrite[] = [];
@@ -249,7 +247,7 @@ export function createPlacing(host: PlacingHost): Placing {
     check(doc, listing) {
       const inputs = placingInputs(doc);
       if (inputs === null) return [];
-      const rendered = bodyOf(doc, inputs.text, inputs.format, listing);
+      const rendered = bodyOf(doc, inputs.text, listing);
       if ("refusal" in rendered) return inputs.targets.map(({ to }) => ({ to, status: "unrenderable", fresh: false, reason: rendered.refusal }));
       const body = rendered.body;
       const out: PlacedCheck[] = [];

@@ -10,13 +10,9 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
-import { dirname, join } from "node:path";
-import { fileURLToPath, pathToFileURL } from "node:url";
+import { join } from "node:path";
 import { loadProject } from "../packages/docfirst-workflow/src/project/index.ts";
 import { CODE } from "./repo.ts";
-
-/** 假格式的绝对 file: 地址。临时目录里解析不到包名，配置按绝对地址引它 */
-const FAKE = pathToFileURL(join(dirname(fileURLToPath(import.meta.url)), "fake-format.ts")).href;
 
 /** 带 frontmatter 的源：点名的字段随行到生成物头部，没点名的剥掉 */
 const SOURCE = ["---", "name: block-note", "description: 块笔记怎么用", "secret: 不该随行", "---", "", "# 摆放", "", "@@docfirst ref src/greet.ts:2-3 @@", ""].join("\n");
@@ -27,12 +23,9 @@ async function setup(outputs: string) {
   mkdirSync(join(root, "src"));
   mkdirSync(join(root, "docs"));
   writeFileSync(join(root, "src", "greet.ts"), CODE);
-  writeFileSync(join(root, "docs", "a.md"), SOURCE);
-  writeFileSync(join(root, "docs", "b.md"), "# 没挂映射\n");
-  writeFileSync(
-    join(root, "docfirst.config.mjs"),
-    `import { fakeFormat } from ${JSON.stringify(FAKE)};\n\nconst md = fakeFormat("fake-md", ".md", { render: true });\n\nexport default { formats: [md], content: "docs", outputs: ${outputs} };\n`,
-  );
+  writeFileSync(join(root, "docs", "a.mdx"), SOURCE);
+  writeFileSync(join(root, "docs", "b.mdx"), "# 没挂映射\n");
+  writeFileSync(join(root, "docfirst.config.mjs"), `export default { content: "docs", outputs: ${outputs} };\n`);
 
   const project = await loadProject(root);
   // 记号先确认掉：草稿记号还没有展示区，投影不出内容——摆放要验的正是投影过的那份正文
@@ -51,48 +44,48 @@ async function setup(outputs: string) {
 }
 
 test("摆放一趟：render 写到落点、回落点清单；check 从 missing 转成 fresh", async () => {
-  const p = await setup(`{ "docs/a.md": ["README.md"] }`);
+  const p = await setup(`{ "docs/a.mdx": ["README.md"] }`);
   try {
     const project = p.project;
 
-    assert.deepEqual(await project.placing.check("docs/a.md"), [{ to: "README.md", status: "missing", fresh: false }], "还没摆过：生成物不在");
+    assert.deepEqual(await project.placing.check("docs/a.mdx"), [{ to: "README.md", status: "missing", fresh: false }], "还没摆过：生成物不在");
 
-    assert.deepEqual(await project.placing.render("docs/a.md"), [{ to: "README.md", status: "placed" }]);
+    assert.deepEqual(await project.placing.render("docs/a.mdx"), [{ to: "README.md", status: "placed" }]);
     const readme = p.read("README.md");
-    assert.match(readme, /```ts\nexport function greet/, "正文是投影过的 md");
-    assert.doesNotMatch(readme, /<!-- ref |@@docfirst/, "摆放那份剥掉记号");
+    assert.match(readme, /```ts title="src\/greet\.ts:2-3"\nexport function greet/, "正文是投影过的 md");
+    assert.doesNotMatch(readme, /\{\/\* ref |@@docfirst/, "摆放那份剥掉记号");
 
-    assert.deepEqual(await project.placing.check("docs/a.md"), [{ to: "README.md", status: "fresh", fresh: true }]);
+    assert.deepEqual(await project.placing.check("docs/a.mdx"), [{ to: "README.md", status: "fresh", fresh: true }]);
   } finally {
     p.teardown();
   }
 });
 
 test("摆放的核对：生成物被手改了是 stale，被删了是 missing，重摆之后回 fresh", async () => {
-  const p = await setup(`{ "docs/a.md": ["README.md"] }`);
+  const p = await setup(`{ "docs/a.mdx": ["README.md"] }`);
   try {
     const project = p.project;
-    await project.placing.render("docs/a.md");
+    await project.placing.render("docs/a.mdx");
 
     writeFileSync(join(p.root, "README.md"), p.read("README.md") + "\n手改一笔\n");
-    assert.deepEqual(await project.placing.check("docs/a.md"), [{ to: "README.md", status: "stale", fresh: false }]);
+    assert.deepEqual(await project.placing.check("docs/a.mdx"), [{ to: "README.md", status: "stale", fresh: false }]);
 
     rmSync(join(p.root, "README.md"));
-    assert.deepEqual(await project.placing.check("docs/a.md"), [{ to: "README.md", status: "missing", fresh: false }]);
+    assert.deepEqual(await project.placing.check("docs/a.mdx"), [{ to: "README.md", status: "missing", fresh: false }]);
 
-    await project.placing.render("docs/a.md");
-    assert.deepEqual(await project.placing.check("docs/a.md"), [{ to: "README.md", status: "fresh", fresh: true }]);
-    assert.deepEqual(await project.placing.render("docs/a.md"), [{ to: "README.md", status: "unchanged" }], "内容没变就不写");
+    await project.placing.render("docs/a.mdx");
+    assert.deepEqual(await project.placing.check("docs/a.mdx"), [{ to: "README.md", status: "fresh", fresh: true }]);
+    assert.deepEqual(await project.placing.render("docs/a.mdx"), [{ to: "README.md", status: "unchanged" }], "内容没变就不写");
   } finally {
     p.teardown();
   }
 });
 
 test("点名的 frontmatter 字段原样随行到生成物头部，没点名的剥掉；字符串写法整段剥掉", async () => {
-  const p = await setup(`{ "docs/a.md": [{ to: "skills/x/SKILL.md", frontmatter: ["name", "description"] }, "PLAIN.md"] }`);
+  const p = await setup(`{ "docs/a.mdx": [{ to: "skills/x/SKILL.md", frontmatter: ["name", "description"] }, "PLAIN.md"] }`);
   try {
     const project = p.project;
-    assert.deepEqual(await project.placing.render("docs/a.md"), [
+    assert.deepEqual(await project.placing.render("docs/a.mdx"), [
       { to: "skills/x/SKILL.md", status: "placed" },
       { to: "PLAIN.md", status: "placed" },
     ]);
@@ -107,23 +100,23 @@ test("点名的 frontmatter 字段原样随行到生成物头部，没点名的�
 });
 
 test("点名了源里没有的 frontmatter 字段：这个落点不摆，两个方法都说缺哪几个", async () => {
-  const p = await setup(`{ "docs/a.md": [{ to: "SKILL.md", frontmatter: ["name", "nope"] }] }`);
+  const p = await setup(`{ "docs/a.mdx": [{ to: "SKILL.md", frontmatter: ["name", "nope"] }] }`);
   try {
     const project = p.project;
-    assert.deepEqual(await project.placing.render("docs/a.md"), [{ to: "SKILL.md", status: "no-frontmatter", missing: ["nope"] }]);
+    assert.deepEqual(await project.placing.render("docs/a.mdx"), [{ to: "SKILL.md", status: "no-frontmatter", missing: ["nope"] }]);
     assert.equal(existsSync(join(p.root, "SKILL.md")), false, "缺字段就不摆——摆一份缺 name 的 SKILL.md 比不摆更糟");
-    assert.deepEqual(await project.placing.check("docs/a.md"), [{ to: "SKILL.md", status: "no-frontmatter", fresh: false, missing: ["nope"] }]);
+    assert.deepEqual(await project.placing.check("docs/a.mdx"), [{ to: "SKILL.md", status: "no-frontmatter", fresh: false, missing: ["nope"] }]);
   } finally {
     p.teardown();
   }
 });
 
 test("没挂映射的文档：两个方法都回空清单，一个字都不写", async () => {
-  const p = await setup(`{ "docs/a.md": ["README.md"] }`);
+  const p = await setup(`{ "docs/a.mdx": ["README.md"] }`);
   try {
     const project = p.project;
-    assert.deepEqual(await project.placing.check("docs/b.md"), []);
-    assert.deepEqual(await project.placing.render("docs/b.md"), []);
+    assert.deepEqual(await project.placing.check("docs/b.mdx"), []);
+    assert.deepEqual(await project.placing.render("docs/b.mdx"), []);
   } finally {
     p.teardown();
   }

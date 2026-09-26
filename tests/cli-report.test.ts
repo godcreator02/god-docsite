@@ -76,7 +76,7 @@ test("分区按约定：内容根下除 trajectory/、future/ 之外都是现状
   const p = setupProject();
   try {
     const draft = "# x\n\n@@docfirst ref src/greet.ts:2-3 @@\n";
-    for (const rel of ["more/x.md", "more/deep/y.md", "future/roadmap.md", "future/spec/plan.md", "trajectory/2026-01-01-x.md"]) {
+    for (const rel of ["more/x.mdx", "more/deep/y.mdx", "future/roadmap.mdx", "future/spec/plan.mdx", "trajectory/2026-01-01-x.md"]) {
       mkdirSync(join(p.root, "docs", rel, ".."), { recursive: true });
       writeFileSync(join(p.root, "docs", rel), draft);
     }
@@ -84,7 +84,7 @@ test("分区按约定：内容根下除 trajectory/、future/ 之外都是现状
     const report = JSON.parse(first.out) as { docs: Array<{ doc: string }> };
     assert.deepEqual(
       report.docs.map((d) => d.doc),
-      ["docs/a.md", "docs/b.html", "docs/more/deep/y.md", "docs/more/x.md"],
+      ["docs/a.mdx", "docs/b.mdx", "docs/more/deep/y.mdx", "docs/more/x.mdx"],
     );
   } finally {
     p.teardown();
@@ -92,18 +92,19 @@ test("分区按约定：内容根下除 trajectory/、future/ 之外都是现状
 });
 
 test("配置里不认识的键报错：删掉的旧键说清该怎么改，别的键列出认得的有哪些；一次列全", async () => {
-  const p = setupProject(withKeys(`docs: ["docs"], trajectory: "t", comparator: "git", ledger: ".ledger.json", fumadocs: {}, out: "out", docz: 1`));
+  const p = setupProject(withKeys(`docs: ["docs"], trajectory: "t", comparator: "git", ledger: ".ledger.json", fumadocs: {}, out: "out", formats: [], docz: 1`));
   try {
     await assert.rejects(p.cli("check"), (err: Error) => {
       for (const piece of [
-        "有 7 处要改",
+        "有 8 处要改",
         "删掉 docs：现状区按约定是内容根下除 trajectory/、future/ 之外的全部",
         "删掉 trajectory：轨迹卡目录固定是内容根下的 trajectory/",
         "删掉 comparator",
         "删掉 ledger：记录写在各记号上；旧记录簿先在项目根跑 docfirst migrate-ledger",
         "删掉 fumadocs",
         "删掉 out：render 只生成 outputs 映射里的生成物",
-        "不认识的键 docz：配置只认 formats / content / components / outputs",
+        "删掉 formats：只有 mdx 一种格式，不用配置",
+        "不认识的键 docz：配置只认 content / components / outputs",
       ]) {
         assert.ok(err.message.includes(piece), `报错里该有「${piece}」：${err.message}`);
       }
@@ -129,7 +130,7 @@ test("content 写错、内容根不在：装配时拒", async () => {
 });
 
 test("check --json：整份报告一行 JSON，退出码跟人读模式一样；四态、行号、outputs 新鲜度、病卡都在", async () => {
-  const p = setupProject(withOutputs(`{ "docs/a.md": ["README.md"] }`));
+  const p = setupProject(withOutputs(`{ "docs/a.mdx": ["README.md"] }`));
   try {
     const white = await p.cli("check", "--json");
     assert.equal(white.code, 1, "正本还有草稿记号、渲染不了，落点是红，退出码跟人读模式一样");
@@ -138,7 +139,7 @@ test("check --json：整份报告一行 JSON，退出码跟人读模式一样；
     // 草稿记号渲染不了：落点红，ok 假；引用本身是未确认
     assert.equal(first.ok, false);
     assert.equal(first.red, 1);
-    const a = first.docs.find((d) => d.doc === "docs/a.md")!;
+    const a = first.docs.find((d) => d.doc === "docs/a.mdx")!;
     assert.deepEqual(a.items, [{ target: "src/greet.ts:2-3", kind: "span", status: "unconfirmed", line: 3, lines: [2, 3], draft: true }]);
     assert.deepEqual(a.outputs, [{ to: "README.md", status: "unrenderable", fresh: false, reason: "第 3 行是草稿记号，先 docfirst confirm" }]);
     assert.deepEqual(first.trajectory, []);
@@ -147,31 +148,31 @@ test("check --json：整份报告一行 JSON，退出码跟人读模式一样；
     const green = JSON.parse((await p.cli("check", "--json")).out) as JsonReport;
     assert.equal(green.ok, true);
     assert.equal(green.red, 0);
-    assert.equal(green.docs.find((d) => d.doc === "docs/a.md")!.items[0]!.status, "fresh");
-    assert.deepEqual(green.docs.find((d) => d.doc === "docs/a.md")!.outputs, [{ to: "README.md", status: "fresh", fresh: true }]);
+    assert.equal(green.docs.find((d) => d.doc === "docs/a.mdx")!.items[0]!.status, "fresh");
+    assert.deepEqual(green.docs.find((d) => d.doc === "docs/a.mdx")!.outputs, [{ to: "README.md", status: "fresh", fresh: true }]);
 
-    // 代码改了：引用报黄、带 diff。假格式的投影是**渲染那一刻现取的**，所以生成物当场跟源不一致
+    // 代码改了：引用报黄、带 diff。按原文渲染的投影是**渲染那一刻现取的**，所以生成物当场跟源不一致
     // ——outputs 转 stale，整趟因此退 1。黄本身不是红：红的是那个没重摆的落点
     writeFileSync(join(p.root, "src", "greet.ts"), CODE.replace("hello", "hey"));
     run(p.root, ["commit", "-qam", "改问候语"]);
     const yellow = await p.cli("check", "--json");
     const changed = JSON.parse(yellow.out) as JsonReport;
-    const item = changed.docs.find((d) => d.doc === "docs/a.md")!.items[0]!;
+    const item = changed.docs.find((d) => d.doc === "docs/a.mdx")!.items[0]!;
     assert.equal(item.status, "changed");
     assert.match(item.diff ?? "", /hey/);
-    assert.equal(changed.docs.find((d) => d.doc === "docs/a.md")!.outputs[0]!.status, "stale");
+    assert.equal(changed.docs.find((d) => d.doc === "docs/a.mdx")!.outputs[0]!.status, "stale");
     assert.equal(yellow.code, 1);
     await p.cli("render");
     assert.equal((await p.cli("check", "--json")).code, 0, "重摆之后只剩那处黄，退 0");
 
     // 源改了没重摆 → 生成物 stale；病卡 → trajectory
-    writeFileSync(join(p.root, "docs", "a.md"), "# md\n\n没有引用了\n");
-    rmSync(join(p.root, "docs", "b.html"));
+    writeFileSync(join(p.root, "docs", "a.mdx"), "# md\n\n没有引用了\n");
+    rmSync(join(p.root, "docs", "b.mdx"));
     card(p.root, "2026-01-01-bad.mdx", ["---", "born-at: 一月一号", "type: root", "label: 坏卡", "---", ""]);
     const red = await p.cli("check", "--json");
     assert.equal(red.code, 1);
     const last = JSON.parse(red.out) as JsonReport;
-    assert.deepEqual(last.docs.map((d) => d.doc), ["docs/a.md"]);
+    assert.deepEqual(last.docs.map((d) => d.doc), ["docs/a.mdx"]);
     assert.deepEqual(last.docs[0]!.outputs, [{ to: "README.md", status: "stale", fresh: false }]);
     assert.equal(last.trajectory.length, 1);
     assert.equal(last.trajectory[0]!.path, "docs/trajectory/2026-01-01-bad.mdx");

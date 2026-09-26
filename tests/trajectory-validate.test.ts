@@ -33,22 +33,6 @@ test("卡正文带 docfirst 草稿记号：整行 @@docfirst ... @@ 报 docfirst
   assert.match(problems[0]?.reason ?? "", /草稿记号/);
 });
 
-test("卡正文带 md 正式记号：<!-- ref ... --> 等五种开标签都报 docfirst 病", () => {
-  const cases = [
-    '<!-- ref file="src/greet.ts" lines="2-3" -->',
-    '<!-- tree dir="src" depth="1" -->',
-    '<!-- exists path="src/store.ts" -->',
-    '<!-- absent path="src/gone.ts" -->',
-    '<!-- has file="src/store.ts" text="save" -->',
-  ];
-  for (const line of cases) {
-    const problems = checkDocfirstRefs(`正文一段。\n\n${line}\n`);
-    assert.equal(problems.length, 1, line);
-    assert.equal(problems[0]?.field, "docfirst");
-    assert.match(problems[0]?.reason ?? "", /正式记号/);
-  }
-});
-
 test("普通正文不报 docfirst 病", () => {
   assert.deepEqual(checkDocfirstRefs("正常写的一段叙事，没有任何引用记号。\n\n第二段。\n"), []);
 });
@@ -73,12 +57,10 @@ test("接进 scanCardDir：正常正文不报 docfirst 病", async () => {
   assert.deepEqual(await dirSick(specs), []);
 });
 
-test("卡正文带 mdx 正式记号：{/* ref ... */} 等五种花括号注释都报 docfirst 病——卡是 .mdx 时 confirm 换出来的就是它", () => {
+test("卡正文带正式记号：{/* ref ... */} 等三种花括号注释都报 docfirst 病——confirm 换出来的就是它", () => {
   const cases = [
     '{/* ref file="src/greet.ts" lines="2-3" */}',
     '{/* tree dir="src" depth="1" */}',
-    '{/* exists path="src/store.ts" */}',
-    '{/* absent path="src/gone.ts" */}',
     '{/* has file="src/store.ts" text="save" */}',
   ];
   for (const line of cases) {
@@ -88,6 +70,7 @@ test("卡正文带 mdx 正式记号：{/* ref ... */} 等五种花括号注释�
     assert.match(problems[0]?.reason ?? "", /正式记号 \{\/\* /);
   }
   assert.deepEqual(checkDocfirstRefs("{/* 普通的 mdx 注释，不是记号 */}\n"), []);
+  assert.deepEqual(checkDocfirstRefs('<!-- ref file="src/greet.ts" lines="2-3" -->\n'), [], "md 那种开标签不再是记号");
 });
 
 test("轨迹包的 parseCardFile 不查钉码记号：同一张卡，内存解析不报 docfirst 病", () => {

@@ -1,5 +1,5 @@
 /**
- * 这个项目的 docfirst 配置：用哪个格式、生成物写到哪、组件名册是什么。命令行和站读的是同一份。
+ * 这个项目的 docfirst 配置：生成物写到哪、组件名册是什么。命令行和站读的是同一份。
  *
  * 项目根是这个站目录，引用的代码在工作区的 packages/ 与 plugins/ 下，所以引用里写 `../packages/…` 或 `../plugins/…`。
  * 分区按约定：content/ 下 trajectory/ 与 future/ 两个名字固定，其余目录都是现状区、都进 check；
@@ -8,12 +8,10 @@
  * （AGENTS 的正本在 content/maintain/agents.mdx，其余在 content/docs/outputs/）——
  * 改 mdx 源要跑 `pnpm docfirst render`（`confirm` 也会顺带做），两份一起提交，check 检查生成物跟源是否一致。
  * CLAUDE.md 第一行固定是 `@AGENTS.md`，只给 Claude 的指令写在它后面。
- * formats 是命令行认的文档格式（mdx，来自 docfirst-workflow）。
  * 组件名册：先展开 fumadocsRoster（fumadocs 自带的 Files / Folder / File 与 Note 的压平规则，纯数据，命令行也能加载），
  * 再加站里自己定义的组件和它们转成机读文本的规则。组件的 React 实现在 src/components/mdx.tsx。
  * 星轨盘不在名册里：它是一条独立的整页路由 /trajectory，不在 mdx 里用。
  */
-import * as mdx from "@godcreator/docfirst-workflow/mdx";
 import { fumadocsRoster } from "@godcreator/docfirst-fumadocs/roster";
 import * as tabs from "./src/components/tabs/tabs.ai.mjs";
 import * as pin from "./src/components/pin/pin.ai.mjs";
@@ -39,7 +37,6 @@ import * as boundaryRules from "./src/components/boundary-rules/boundary-rules.a
 const skill = (name) => ({ to: `../plugins/docfirst/skills/${name}/SKILL.md`, frontmatter: ["name", "description"] });
 
 export default {
-  formats: [mdx],
   outputs: {
     "content/docs/outputs/readme.mdx": ["../README.md"],
     "content/maintain/agents.mdx": ["../AGENTS.md"],

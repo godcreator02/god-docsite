@@ -28,7 +28,7 @@ description: content/trajectory/ 下的轨迹卡怎么被读出、校验、建�
 `born-at` 不合格的卡不上盘，半径按日期算，没有日期算不出来；其余问题不挡绘制。`docfirst check` 把每条问题
 记一次红：
 
-{/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="231-232" hash="6a87fa27d832" blob="5f11f57dfab2" */}
+{/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="232-233" hash="6a87fa27d832" blob="3ce3a8b0948a" */}
 
 ## 一张根卡、建树、挑主干
 
@@ -81,11 +81,11 @@ description: content/trajectory/ 下的轨迹卡怎么被读出、校验、建�
 
 一是 `check`、`confirm`、`render` 遍历的文档不含 `trajectory/` 与 `future/`，卡上的记号不会被核对，也不会被确认：
 
-{/* ref file="../packages/docfirst-workflow/src/project/load.ts" lines="91-92" hash="e60f111d117a" blob="0d859eff2438" */}
+{/* ref file="../packages/docfirst-workflow/src/project/load.ts" lines="89-90" hash="e60f111d117a" blob="0186be908b77" */}
 
-二是读卡目录时逐行查每张卡的正文，草稿记号、md 正式记号、mdx 正式记号三种写法出现任何一种，都记成一条问题：
+二是读卡目录时逐行查每张卡的正文，草稿记号、正式记号两种写法出现任何一种，都记成一条问题：
 
-{/* ref file="../packages/docfirst-workflow/src/project/card-refs.ts" lines="16-23" hash="6946a48e2d58" blob="23e24d936909" */}
+{/* ref file="../packages/docfirst-workflow/src/project/card-refs.ts" lines="13-17" hash="ae6b4b304940" blob="8050bc5f07e7" */}
 
 这一条要认识钉码的记号，所以查在 `docfirst-workflow` 读卡目录的 `scanCardDir` 里，查出的问题并进轨迹包校验出的同一份清单；
 `docfirst-trajectory` 不认识记号：

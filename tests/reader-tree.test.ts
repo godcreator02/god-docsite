@@ -10,16 +10,14 @@ import assert from "node:assert/strict";
 import { mkdirSync, symlinkSync } from "node:fs";
 import { join } from "node:path";
 import type { Target } from "../packages/docfirst-pin/src/index.ts";
-import { fakeFormat, refLine } from "./fake-format.ts";
-import { CODE, run, setupRepo } from "./repo.ts";
+import { CODE, refLine, run, setupRepo } from "./repo.ts";
 
-const FORMATS = [fakeFormat("fake", ".a")];
-const DOC = "docs/a.a";
+const DOC = "docs/a.mdx";
 const tree = (dir: string, depth: number): string => `${refLine({ kind: "tree", dir, depth })}\n`;
 const namesOf = (r: ReturnType<typeof setupRepo>, dir: string, depth: number): string[] => r.pinning.checkDoc(DOC, tree(dir, depth)).items[0]!.current!;
 
 test("目录树、名字：清单按 .gitignore 过滤，改名红、多文件黄", () => {
-  const r = setupRepo({ formats: FORMATS });
+  const r = setupRepo();
   try {
     r.write(".gitignore", "dist/\n");
     r.write("src/dist/out.js", "x");
@@ -48,7 +46,7 @@ test("目录树、名字：清单按 .gitignore 过滤，改名红、多文件�
 test("目录目标就是仓根：.gitignore 照样过滤——仓从目录自身起找，不先跳一级", () => {
   // 定位跳一级（locate 的口径）时，仓根之上没有 .git 就回 null、忽略集空掉，
   // 树里冒出 node_modules/、lib/，还会随各台机器的目录布局漂
-  const r = setupRepo({ formats: FORMATS });
+  const r = setupRepo();
   try {
     r.write(".gitignore", "node_modules/\nlib/\n");
     r.write("node_modules/pkg/index.js", "x");
@@ -63,7 +61,7 @@ test("目录目标就是仓根：.gitignore 照样过滤——仓从目录自身
 });
 
 test("目录目标是仓根、往下走几层：嵌套层的忽略项同样过滤，忽略的目录不往里走", () => {
-  const r = setupRepo({ formats: FORMATS });
+  const r = setupRepo();
   try {
     r.write(".gitignore", "node_modules/\nsrc/dist/\n");
     r.write("node_modules/pkg/index.js", "x");
@@ -80,7 +78,7 @@ test("目录目标是仓根、往下走几层：嵌套层的忽略项同样过�
 });
 
 test("目录本身没被忽略、里面全是被忽略的文件：目录照列，文件不列", () => {
-  const r = setupRepo({ formats: FORMATS });
+  const r = setupRepo();
   try {
     r.write(".gitignore", "*.log\n");
     r.commit("忽略日志");
@@ -94,7 +92,7 @@ test("目录本身没被忽略、里面全是被忽略的文件：目录照列�
 });
 
 test("被忽略的目录里有强制加进来的已跟踪文件：目录与那个文件照列", () => {
-  const r = setupRepo({ formats: FORMATS });
+  const r = setupRepo();
   try {
     r.write(".gitignore", "forced/\n");
     r.commit("忽略 forced");
@@ -109,7 +107,7 @@ test("被忽略的目录里有强制加进来的已跟踪文件：目录与那�
 });
 
 test("目录目标本身落在被忽略的目录里：整棵都算被忽略，清单是空的", () => {
-  const r = setupRepo({ formats: FORMATS });
+  const r = setupRepo();
   try {
     r.write(".gitignore", "dist/\n");
     r.commit("忽略 dist");
@@ -121,7 +119,7 @@ test("目录目标本身落在被忽略的目录里：整棵都算被忽略，�
 });
 
 test("软链接按真实路径读：node_modules 里指向工作区目录的链接，读得到内容、钉得住", () => {
-  const r = setupRepo({ formats: FORMATS });
+  const r = setupRepo();
   try {
     r.write(".gitignore", "node_modules/\n");
     r.write("lib/greet.ts", CODE);

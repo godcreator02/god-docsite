@@ -11,14 +11,15 @@
  * 记录簿里有、文档里没有对应记号的（孤儿、文档已经不在）丢掉；记号在、记录不在的保持未确认；
  * 草稿记号和已经带着记录的记号不动。
  *
- * 不走 loadProject：迁移时配置里多半还留着旧键，装配会拒；这里只要配置里的 formats。
+ * 不走 loadProject：迁移时配置里多半还留着旧键，装配会拒；这里只读配置里的 ledger。
  */
 import { existsSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { hashNames, RECORD_HASH_LENGTH } from "@godcreator/docfirst-pin";
 import type { MemoRecord, Target } from "@godcreator/docfirst-pin";
-import type { DocFormat, Reference } from "../format/index.ts";
+import type { Reference } from "../format/index.ts";
 import { targetKey } from "../marker/index.ts";
+import { parse, write } from "../mdx/index.ts";
 import { configProblems, importConfig } from "./load.ts";
 
 export interface MigrationReport {
@@ -84,19 +85,13 @@ function migrated(target: Target, record: Record<string, unknown>, where: string
   throw new Error(`${where}：记录的 kind ${kind} 对不上这种记号（${target.kind}）`);
 }
 
-function formatOf(formats: DocFormat[], doc: string): DocFormat {
-  const hits = formats.filter((format) => format.claims(doc));
-  if (hits.length !== 1) throw new Error(`${doc}：${hits.length === 0 ? "没有格式认领这篇文档" : `${hits.map((f) => f.name).join("、")} 都认领了这篇`}`);
-  return hits[0]!;
-}
-
 /** 一篇文档：把记录写进对应的记号，交回写了几处、用掉了哪些目标键 */
-function migrateDoc(root: string, doc: string, format: DocFormat, table: Record<string, Record<string, unknown>>): { count: number; used: Set<string> } {
+function migrateDoc(root: string, doc: string, table: Record<string, Record<string, unknown>>): { count: number; used: Set<string> } {
   const path = join(root, doc);
   const text = readFileSync(path, "utf8");
   const used = new Set<string>();
   const updates: Reference[] = [];
-  for (const reference of format.parse(text)) {
+  for (const reference of parse(text)) {
     if (reference.draft) continue;
     const key = targetKey(reference.target);
     const record = table[key];
@@ -105,18 +100,18 @@ function migrateDoc(root: string, doc: string, format: DocFormat, table: Record<
     if (reference.record !== null) continue;
     updates.push({ ...reference, ...migrated(reference.target, record, `${doc} 第 ${reference.at + 1} 行 ${key}`) });
   }
-  if (updates.length > 0) writeFileSync(path, format.write(text, updates));
+  if (updates.length > 0) writeFileSync(path, write(text, updates));
   return { count: updates.length, used };
 }
 
 export async function migrateLedger(root: string): Promise<MigrationReport> {
-  const config = (await importConfig(root)) as { formats?: unknown; ledger?: unknown };
-  if (!Array.isArray(config.formats)) throw new Error("docfirst.config 的 formats 要是格式的数组");
-  const formats = config.formats as DocFormat[];
+  const config = (await importConfig(root)) as { ledger?: unknown };
   const ledger = typeof config.ledger === "string" ? config.ledger : ".ledger.json";
   const ledgerPath = join(root, ledger);
   if (!existsSync(ledgerPath)) throw new Error(`项目根下没有记录簿 ${ledger}——没有要迁的`);
   const data = readLedger(ledgerPath);
+  const notMdx = Object.keys(data).filter((doc) => !doc.endsWith(".mdx") && existsSync(join(root, doc)));
+  if (notMdx.length > 0) throw new Error(`记录簿里有不是 .mdx 的文档：${notMdx.join("、")}——docfirst 只认 mdx，先把它们改成 .mdx 再迁`);
 
   const written: MigrationReport["written"] = [];
   let dropped = 0;
@@ -126,7 +121,7 @@ export async function migrateLedger(root: string): Promise<MigrationReport> {
       dropped += keys.length;
       continue;
     }
-    const { count, used } = migrateDoc(root, doc, formatOf(formats, doc), table);
+    const { count, used } = migrateDoc(root, doc, table);
     dropped += keys.filter((key) => !used.has(key)).length;
     if (count > 0) written.push({ doc, count });
   }

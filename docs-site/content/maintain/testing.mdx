@@ -13,13 +13,13 @@ description: 包与目录之间的依赖方向靠什么检查，各组测试检�
 
 仓根那组按主题一个文件：
 
-{/* tree dir="../tests" depth="1" glob="*.test.ts" hash="35b698d9eace" */}
+{/* tree dir="../tests" depth="1" glob="*.test.ts" hash="2c5c72900191" */}
 
 ## 依赖方向：只有一个文件在检查
 
 pnpm 严格的 `node_modules` 只保证没写进依赖的包 import 不到；「该不该写进依赖」没人管，workflow 包里
-`marker/`、`format/`、`mdx/`、`pinning/`、`project/`、`cli/` 之间编译器也不拦——`project/` 里写一句 `import "../mdx/render.ts"` 不会报错，
-项目装配从此只能用 mdx 一种格式。补上这两项的是 `tests/boundary.test.ts`，它是包之间、workflow 目录之间**唯一**的边界检查。
+`marker/`、`format/`、`mdx/`、`pinning/`、`project/`、`cli/` 之间编译器也不拦——`mdx/` 里写一句 `import "../project/load.ts"` 不会报错，
+mdx 格式从此就跟读盘、git 绑在一起。补上这两项的是 `tests/boundary.test.ts`，它是包之间、workflow 目录之间**唯一**的边界检查。
 选一类规则，看它允许哪些方向、禁止哪些方向、由哪条测试失败报出来：
 
 <BoundaryRules />
@@ -31,7 +31,7 @@ pnpm 严格的 `node_modules` 只保证没写进依赖的包 import 不到；「
 
 workflow 目录之间是同样的写法：
 
-{/* ref file="../tests/boundary.test.ts" lines="240-247" hash="ef437777d990" blob="e77be7ebc154" */}
+{/* ref file="../tests/boundary.test.ts" lines="240-247" hash="a94525006118" blob="25cfed99c034" */}
 
 两个核心的零依赖只看 import 了谁，轨迹核心直接查产物；钉码核心另外查源码与产物里有没有文档文本那一侧的名字：
 
@@ -50,26 +50,18 @@ workflow 目录之间是同样的写法：
 ## 钉码核心：传入两样假的
 
 `tests/core.test.ts` 直接给钉码核心目标与记录，传入内存读取器（能读到的只有一张文件表）和内存里的旧内容来源。
-钉码核心不读盘、不启动进程、不接触文档文本，这样测正好把这几条一并检查了；认引用、配回行号、写回的先后顺序在 `tests/pinning.test.ts` 用假格式测：
+钉码核心不读盘、不启动进程、不接触文档文本，这样测正好把这几条一并检查了；认引用、配回行号、写回的先后顺序在 `tests/pinning.test.ts` 测：
 
 {/* ref file="../tests/core.test.ts" lines="1-4" hash="e463e5acdc35" blob="cb01529c0ac2" */}
 
 旧内容来源默认什么都取不到，比较器只能滑窗；走到 hunk 表就说明判定顺序错了：
 
-{/* ref file="../tests/repo.ts" lines="31-37" hash="fac97ce041a5" blob="902d3f8f6bf2" */}
+{/* ref file="../tests/repo.ts" lines="30-36" hash="fac97ce041a5" blob="160b8f7bec15" */}
 
-记号的写法由 `tests/marker.test.ts` 拿 mdx 与假格式两个适配器一起验：`parse(marker(t, r))` 必须认回 `t` 与 `r`。
+记号的写法由 `tests/marker.test.ts` 验：`parse(marker(t, r))` 必须认回 `t` 与 `r`。
 认得出只是一半，什么时候不认才是记号能放进正文的理由：
 
-{/* ref file="../tests/marker.test.ts" lines="74-84" hash="50b86ecea36a" blob="6ff8e184b4eb" */}
-
-## 契约测试：两个格式在同一串改动下状态一致
-
-`DocFormat` 真有两个适配器：生产用的 mdx 与 `tests/fake-format.ts`。`tests/contract.test.ts` 让两种格式各写一篇、
-引同一段代码，跑一串改动（确认、改代码并提交、带与不带 `--accept`、上面插两行、删函数），断言两篇的状态、
-跟到的行段、记号上的记录完全一样。状态由钉码核心算，格式只交引用，不一致就说明有谁绕过了钉码核心：
-
-{/* ref file="../tests/contract.test.ts" lines="17-24" hash="857db9f5b5bb" blob="01c6c4701eaa" */}
+{/* ref file="../tests/marker.test.ts" lines="67-75" hash="792771904fbc" blob="b4cda3311db8" */}
 
 ## git 那一侧：真 git 仓，不打桩
 
@@ -83,7 +75,7 @@ workflow 目录之间是同样的写法：
 
 `tests/repo.ts` 建的临时仓一律 `core.autocrlf=false`，否则 Windows 上的换行转换会让工作区和 blob 逐字节不同：
 
-{/* ref file="../tests/repo.ts" lines="58-62" hash="41a94bc7fbdc" blob="902d3f8f6bf2" */}
+{/* ref file="../tests/repo.ts" lines="59-63" hash="41a94bc7fbdc" blob="160b8f7bec15" */}
 
 ## 装配、摆放、命令行
 

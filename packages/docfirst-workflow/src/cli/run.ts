@@ -18,14 +18,15 @@
  * `@godcreator/gwb-docfirst-workflow` 的 `docfirst.create`。这儿留的全是要在**仓**里发生的：
  * 各仓的 `pnpm doc` 与 CI 跑的就是这几条。
  * 新引用不用命令：在文档里写一行记号语法（`../marker/`）定的草稿记号 @@docfirst ref src/greet.ts:2-3 @@，
- * check 认它、报未确认，confirm 换成该格式的正式记号并写上记录。
+ * check 认它、报未确认，confirm 换成 mdx 的正式记号并写上记录。
  */
 import { existsSync } from "node:fs";
 import { join, relative, sep } from "node:path";
 import { REASON_TEXT } from "@godcreator/docfirst-pin";
 import { buildTrajectory } from "@godcreator/docfirst-trajectory";
-import type { DocFormat, Item, Listing } from "../format/index.ts";
+import type { Item, Listing } from "../format/index.ts";
 import { targetKey } from "../marker/index.ts";
+import { lintComponents } from "../mdx/index.ts";
 import type { ConfirmStep } from "../pinning/index.ts";
 import { createUncommittedProbe, loadProject, migrateLedger, scanCardDir } from "../project/index.ts";
 import type { PlacedWrite, UncommittedProbe } from "../project/index.ts";
@@ -223,7 +224,7 @@ async function checkCommand(project: Project, docs: string[], json: boolean): Pr
   const report: CheckReport = { ok: true, red: 0, docs: [], trajectory: [] };
   const uncommitted = createUncommittedProbe(project.root);
   for (const doc of docs) {
-    const { report: entry, lines } = await check(project, doc, project.read(doc), project.formatFor(doc)!, uncommitted);
+    const { report: entry, lines } = await check(project, doc, project.read(doc), uncommitted);
     report.docs.push(entry);
     report.red += entry.red;
     if (!json) for (const line of lines) console.log(line);
@@ -325,7 +326,7 @@ interface DocCheck {
   lines: string[];
 }
 
-async function check(project: Project, doc: string, text: string, format: DocFormat, uncommitted: UncommittedProbe): Promise<DocCheck> {
+async function check(project: Project, doc: string, text: string, uncommitted: UncommittedProbe): Promise<DocCheck> {
   const listing: Listing = project.pinning.checkDoc(doc, text);
   const lines: string[] = [];
   const items: RefReport[] = [];
@@ -334,7 +335,7 @@ async function check(project: Project, doc: string, text: string, format: DocFor
     items.push(refReport(item, blocking));
     lines.push(itemLine(doc, item, blocking));
   }
-  const components = typeof format.lintComponents === "function" ? format.lintComponents(text, project.roster) : [];
+  const components = lintComponents(text, project.roster);
   for (const { name, line } of components) {
     lines.push(`🔴 ${doc}  第 ${line} 行 <${name}>  名册外组件，docfirst.config.mjs 里没给它压平规则`);
   }

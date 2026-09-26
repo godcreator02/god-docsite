@@ -257,17 +257,16 @@ describe('结构模板', () => {
     const config = renderedText('docfirst.config.mjs')
     const body = config.slice(config.indexOf('export default'))
     expect(body).toMatch(/content: 'content'/)
-    for (const gone of ['docs', 'trajectory', 'comparator', 'ledger', 'fumadocs']) expect(body, `配置里还有 ${gone} 键`).not.toMatch(new RegExp(`^\\s*${gone}:`, 'm'))
+    for (const gone of ['docs', 'trajectory', 'comparator', 'ledger', 'fumadocs', 'formats']) expect(body, `配置里还有 ${gone} 键`).not.toMatch(new RegExp(`^\\s*${gone}:`, 'm'))
     expect(body).toMatch(/'content\/docs\/outputs\/readme\.mdx': \['\.\.\/README\.md'\]/)
     expect(body).toMatch(/'content\/docs\/outputs\/agents\.mdx': \['\.\.\/AGENTS\.md'\]/)
     expect(body).toMatch(/'content\/docs\/outputs\/claude\.mdx': \['\.\.\/CLAUDE\.md'\]/)
   })
 
-  it('docfirst.config.mjs：格式是 workflow 包的 mdx，名册展开 fumadocs 包的 fumadocsRoster', () => {
+  it('docfirst.config.mjs：不配格式（只有 mdx 一种），名册展开 fumadocs 包的 fumadocsRoster', () => {
     const config = renderedText('docfirst.config.mjs')
-    expect(config).toMatch(/^import \* as mdx from '@godcreator\/docfirst-workflow\/mdx'$/m)
+    expect(config).not.toMatch(/docfirst-workflow\/mdx/)
     expect(config).toMatch(/^import \{ fumadocsRoster \} from '@godcreator\/docfirst-fumadocs\/roster'$/m)
-    expect(config).toMatch(/formats: \[mdx\],/)
     expect(config).toMatch(/components: \{\s*\.\.\.fumadocsRoster,\s*\}/)
   })
 
