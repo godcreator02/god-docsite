@@ -1,47 +1,47 @@
 ---
 title: 讲解组件 docs-explain
 description: 讲解组件的三种模板 Stepper、Timeline、CasePicker 与一组零件，加生成机读文字的 ./text；不认识任何 docfirst 包，普通 fumadocs 站也用
+full: true
 ---
 
 包 `@godcreator/docs-explain`，源码在 `packages/docs-explain/src/`，出口是 `.`（客户端组件，`src/index.ts`）、`./text`
-（`src/text.ts`）与样式表 `./styles.css`（`styles/explain.css`）。它跟四个 docfirst 包互不认识，没有接缝图模块。
+（`src/text.ts`）与样式表 `./styles.css`（`styles/explain.css`）。它跟 docfirst 的包互不认识，所以首页的全局接缝图里没有它；下面是它内部的接缝图。
+
+<SeamMap module="docs-explain" />
 
 ## 功能
 
-**三种模板只管控制条与说明行，画面由调用方传一个函数画。** 控制条在画面上方排成固定的一行，说明行（当前这一步的
-`title` 与 `text`）在画面下方；方向键上一步 / 下一步，空格播放 / 暂停。数组为空时三种模板都直接报错。
+**三种模板**：控制条在画面上方排成固定的一行，说明行（当前这一步的 `title` 与 `text`）在画面下方。
 
-`Stepper` 讲有先后的过程：每一步是一个固定状态，`children(step, index)` 画当前这一步；播放是每隔 `interval` 毫秒下一步，到最后一步停：
+`Stepper` 讲有先后的过程：每一步是一个固定状态；播放是每隔 `interval` 毫秒下一步，到最后一步停：
 
 {/* ref file="../packages/docs-explain/src/stepper.tsx" lines="14-22" hash="392da250a524" blob="dafaf7713972" */}
 
 `Timeline` 讲连续变化：时间是秒数，每章给 `duration`；播放按 `requestAnimationFrame` 推进，横条能拖到任意一刻。
-画面是「这一刻 → 画面」的函数，模板把当前秒数、第几章、本章进度传进来，所以往回拖也画得出来：
+画面是「这一刻 → 画面」的函数，所以往回拖也画得出来：
 
 {/* ref file="../packages/docs-explain/src/timeline.tsx" lines="17-32" hash="7df491c52f49" blob="40324b1df520" */}
 
-`CasePicker` 讲同一套规则下的几种情况：一排按钮选一种，`children(item)` 画这种情况；给了 `value` 就是受控的：
+`CasePicker` 讲同一套规则下的几种情况：一排按钮选一种；给了 `value` 就是受控的：
 
 {/* ref file="../packages/docs-explain/src/case-picker.tsx" lines="15-26" hash="e5092067dac8" blob="f6d9bff872e4" */}
 
 **零件**：`Pane`（标题栏同色调淡的卡片）、`Terminal`（深色终端窗口）、`Pill`、`Dot`、`CodeLines`（行号、高亮行段、新增行、
-改动行）、`Diff`（新旧行对照）。零件不写颜色值，只写 `data-tone`（状态语气）或 `data-role`（角色色）属性：
+改动行）、`Diff`（新旧行对照）。颜色参数收的名字：
 
 {/* ref file="../packages/docs-explain/src/colors.ts" hash="732169a56104" blob="714797ae3f69" */}
 
-**`./text`** 把步骤、章节、情况的数据转成一行行文字，docfirst 站的组件名册规则用它生成机读版，跟画面读同一份数据：
+**`./text`** 生成机读版的文字：
 
 {/* ref file="../packages/docs-explain/src/text.ts" lines="6-19" hash="135f06641462" blob="e40e4aa915ef" */}
 
-**样式与深浅色**：颜色全是根元素 `.dx` 上的 CSS 变量，`.dark .dx` 下另给一套；背景、边框、正文颜色取 fumadocs 的
-`--color-fd-*`，没有时用自带的值。系统设了「减少动画」时关掉全部过渡与动画：
+**样式表**开头写着配色规则；系统设了「减少动画」时关掉全部过渡与动画：
 
 {/* ref file="../packages/docs-explain/styles/explain.css" lines="1-7" hash="2048a02d3d93" blob="d6052765b283" */}
 
 {/* has file="../packages/docs-explain/styles/explain.css" text="@media (prefers-reduced-motion: reduce)" */}
 
-**谁在用它**：本仓的 `docs-site/` 在 `package.json` 里依赖它，全局样式引入 `styles.css`，站里的讲解组件用模板与零件画、
-`.ai.mjs` 规则用 `./text`：
+**谁在用它**：本仓的 `docs-site/` 在 `package.json` 里依赖它，全局样式引入 `styles.css`：
 
 {/* ref file="src/app/site.css" lines="4-5" hash="5f41b15c5463" blob="ffd9405ced03" */}
 

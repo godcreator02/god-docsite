@@ -1,19 +1,13 @@
 /**
- * 接缝图的全部内容：画面（seam-map.tsx）与机读版规则（seam-map.ai.mjs）都只读这一份。
- * 接缝的正本就在这里，首页与各模块页里只有 <SeamMap /> 标签。
+ * 全局接缝图的全部内容：首页的 <SeamMap /> 画的就是它，接缝的正本就在这里。
  * 模块按包分：docfirst 的每个 npm 包与工作台插件各一个虚线框，框里的方块是能力；使用方的站、使用方的仓、fumadocs 本体在框外。
  * 每条接缝写明两端的能力、接口、是不是约定（没有代码接口，只靠文件名、目录名、配置键对上）、经代码调用还是经磁盘上的文件。
- * 坐标不在这里，在 seam-map.tsx 的布局表里：这份只描述系统是什么样。
+ * 坐标不在这里，在 system.layout.ts：这份只描述系统是什么样。各包内部的接缝图在 inner/ 下。
  */
+import { defineSeamGraph } from './graph.mjs';
 
-/**
- * @typedef {'blue' | 'violet' | 'emerald' | 'amber' | 'rose' | 'cyan' | 'slate'} Role
- * @typedef {{ id: string, name: string, ident: string }} Capability
- * @typedef {{ id: string, name: string, pkg: string, role: Role | null, outside: boolean, blurb: string, caps: Capability[] }} Module
- */
-
-/** @type {Module[]} */
-export const modules = [
+/** @type {import('./graph.mjs').Module[]} */
+const modules = [
   {
     id: 'fumadocs',
     name: 'fumadocs 适配',
@@ -119,9 +113,9 @@ export const modules = [
 
 /**
  * 从系统外面进来的入口，画成灰色箭头，不编号、不算接缝。to 是进来的那个能力或模块。
- * @type {{ id: string, name: string, to: string }[]}
+ * @type {import('./graph.mjs').Entry[]}
  */
-export const entries = [
+const entries = [
   { id: 'agent', name: 'agent · 工作台命令总线', to: 'plugin' },
   { id: 'next', name: 'Next 构建', to: 'remark' },
   { id: 'human', name: '人 · git hook · CI', to: 'cli' },
@@ -129,11 +123,10 @@ export const entries = [
 
 /**
  * 接缝。a、b 是两端的能力 id；via 为 code 是代码调用（实线），disk 是读写磁盘上的文件（虚线）。
- * label 与 text 显示在浮层里：label 是「编号 名称」，text 写连接谁、交换什么、由谁负责。
- * @typedef {{ id: string, n: number, name: string, label: string, a: string[], b: string[], iface: string, convention: boolean, via: 'code' | 'disk', text: string }} Seam
- * @type {Seam[]}
+ * name 与 text 显示在浮层里，text 写连接谁、交换什么、由谁负责。
+ * @type {import('./graph.mjs').SeamInput[]}
  */
-export const seams = [
+const seams = [
   {
     n: 1,
     name: '记号格式',
@@ -254,19 +247,15 @@ export const seams = [
     via: 'disk',
     text: '工作台插件与它建出来的站之间。docfirst.create 把模板写成新站的 source.ts、mdx.tsx、docfirst.config.mjs 等文件，并把 workflow 与 fumadocs 两个包按精确版本写进站的依赖。插件不依赖这几个包，模板里的包名和出口名只能靠约定对上：插件的 tests/create.test.ts 检查模板引用的出口都在这两个包的清单里、依赖表的版本等于工作区里各包的版本。',
   },
-].map((seam) => ({ ...seam, id: String(seam.n), label: `${seam.n} ${seam.name}` }));
+];
 
-/** 能力 id → 它所在的模块 @type {Map<string, Module>} */
-export const moduleOfCap = new Map(modules.flatMap((m) => m.caps.map((c) => /** @type {[string, Module]} */ ([c.id, m]))));
-
-/** 能力 id → 能力 @type {Map<string, Capability>} */
-export const capById = new Map(modules.flatMap((m) => m.caps.map((c) => /** @type {[string, Capability]} */ ([c.id, c]))));
-
-/**
- * 跟一个模块有关的接缝：任一端落在这个模块的能力上
- * @param {string} moduleId
- * @returns {Seam[]}
- */
-export function seamsOfModule(moduleId) {
-  return seams.filter((s) => [...s.a, ...s.b].some((cap) => moduleOfCap.get(cap)?.id === moduleId));
-}
+export const systemGraph = defineSeamGraph({
+  id: 'system',
+  title: 'docfirst 的模块、能力与接缝',
+  intro:
+    '接缝图：虚线框是模块（docfirst 的 npm 包与工作台插件），框里的方块是能力，跨模块的线带编号就是接缝；实线是代码调用，虚线是读写磁盘上的文件；系统之外的东西画在框外。',
+  frameLabel: '模块（包）',
+  modules,
+  entries,
+  seams,
+});

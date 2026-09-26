@@ -1,6 +1,7 @@
 ---
 title: fumadocs 适配 docfirst-fumadocs
 description: docfirst-fumadocs：mdx 加载器编译页面时调的 remark 插件与 meta 白名单、机读版回调、状态点与术语组件、fumadocs 组件的名册规则、轨迹卡集合、星轨盘服务端组件，以及一个 fumadocs 站接入它要改的几处
+full: true
 ---
 
 包 `@godcreator/docfirst-fumadocs`，源码在 `packages/docfirst-fumadocs/src/`。出口 `.`（`src/index.ts`），侧出口 `./roster`、`./pre`、`./term`、
@@ -15,9 +16,7 @@ description: docfirst-fumadocs：mdx 加载器编译页面时调的 remark 插�
 
 {/* ref file="../packages/docfirst-fumadocs/src/index.ts" lines="1-17" hash="677de7c33676" blob="8f4947e20dfb" */}
 
-**remark 插件**四步：workflow `./mdx` 的 `recognize` 在树上认引用，钉码服务的 `resolveRefs` 算清单，`applyListing` 把记号节点换成
-代码块、文件树或小标签，`stamp` 按名册打标记。同一棵树既出页面又出机读版，所以状态走两条通道：`meta` 字符串给页面，
-节点 `data` 上的标记给机读版的序列化回调。
+**remark 插件**对每篇依次认引用、算清单、换节点、打标，每一步交给谁见上图：
 
 {/* ref file="../packages/docfirst-fumadocs/src/remark-plugin.ts" lines="21-27" hash="1b4fd315e4b5" blob="2efb8db2a72b" */}
 
@@ -25,38 +24,33 @@ description: docfirst-fumadocs：mdx 加载器编译页面时调的 remark 插�
 
 {/* ref file="../packages/docfirst-fumadocs/src/blocks.ts" lines="4-6" hash="794e2891d151" blob="8cf656b5cdc2" */}
 
-黄「有变动」时旧行和新行渲在同一块里，块里夹着已经不存在的旧行，所以不带行号；红「缺失」显示确认时那段；
-取不到旧内容、全文也找不到的黄不摆代码。目录树与小标签：
+黄「有变动」时旧行和新行显示在同一个代码块里，块里夹着已经不存在的旧行，所以不带行号；红「缺失」显示确认时那段；
+取不到旧内容、全文也找不到的黄不显示代码。目录树与小标签：
 
 {/* ref file="../packages/docfirst-fumadocs/src/blocks.ts" lines="10-16" hash="400ed50913d1" blob="8cf656b5cdc2" */}
 
-**机读版**走 fumadocs 的 processed markdown，序列化回调由这个包给：看到标记就按标记出，引用出一行来源注释加一块不带 meta 与 diff
-标记的代码，没标记的交回 `undefined` 照默认走：
+**机读版**的序列化回调：
 
 {/* ref file="../packages/docfirst-fumadocs/src/markdown.ts" lines="24-46" hash="0455bbfbe401" blob="26542dea70a7" */}
 
-**状态点组件** `DocfirstPre` 覆盖站的 `pre`：有 `data-dot` 的交给 fumadocs 的 `CodeBlock`，点经 `Actions` 放进标题栏；再带 `data-chip`
-的画小标签；普通围栏照默认走。`Actions` 是函数，服务端组件不能把函数传给客户端组件，所以 `./pre` 是客户端组件：
+**状态点组件** `DocfirstPre` 替换站的 `pre`。点经 `Actions` 这个函数放进 `CodeBlock` 的标题栏，服务端组件不能把函数传给客户端组件，所以 `./pre` 是客户端组件：
 
 {/* ref file="../packages/docfirst-fumadocs/src/pre.tsx" lines="45-57" hash="cc45214abd3a" blob="d991b4ac2515" */}
 
-**术语标注**：给 `docfirstMdxOptions` 一份词表才开，插件排在 docfirst 插件之前，引用换出来的代码块还没放进树里，标注碰不到。
-`Term` 是服务端组件，定义在构建时写进属性。词条数据是站的：
+**术语标注**：给 `docfirstMdxOptions` 一份词表才开，词条数据是站的：
 
 {/* ref file="../packages/docfirst-fumadocs/src/glossary-plugin.ts" lines="26-35" hash="6e3562a4b1af" blob="8bc7141770f1" */}
 
-**名册规则** `fumadocsRoster` 管 fumadocs 自带的 `Note`、`Files`、`Folder`、`File`。命令行读 `docfirst.config.mjs` 时会加载 `./roster`，
-所以它只有数据与纯函数，规则的类型从 workflow 的 `./mdx` 取：
+**名册规则** `fumadocsRoster` 管 fumadocs 自带的 `Note`、`Files`、`Folder`、`File`：
 
 {/* has file="../packages/docfirst-fumadocs/src/roster.ts" text="export const fumadocsRoster" */}
 
-**轨迹卡集合**：`cardSchema` 缺 `born-at` 校验失败、缺 `label` 用文件名，哪几个字段算卡从轨迹核心的 `CARD_KEYS` 取；
+**轨迹卡集合**：`cardSchema` 缺 `born-at` 校验失败、缺 `label` 用文件名；
 `remarkTrajectoryLinks` 把关系边段落转成带 `data-kind` 的 div，把指向卡身份的链接与 wikilink 改成卡页地址：
 
 {/* ref file="../packages/docfirst-fumadocs/src/card-collection.ts" lines="41-48" hash="d834c788244a" blob="2179f5ccdf19" */}
 
-**星轨盘**：`./trajectory` 的 `loadTrajectory(dir)` 经 workflow `./cards` 读卡目录、调轨迹核心建模；服务端组件 `Trajectory` 再绘制
-`StarDisk`、列出病卡。`StarDisk` 按包名从 `@godcreator/docfirst-trajectory/disk` 取，那份产物第一行的 `"use client"` 才留得住：
+**星轨盘**：`./trajectory` 的 `loadTrajectory(dir)` 读卡并建模，服务端组件 `Trajectory` 再绘制 `StarDisk`、列出病卡：
 
 {/* ref file="../packages/docfirst-fumadocs/src/trajectory.tsx" lines="17-29" hash="d7d894adb801" blob="f8b43c49b05a" */}
 

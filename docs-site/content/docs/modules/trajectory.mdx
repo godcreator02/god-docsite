@@ -1,6 +1,7 @@
 ---
 title: 轨迹核心 docfirst-trajectory
 description: 卡的解析与校验、分盘建模、布局与缩略图、星轨盘客户端组件；收读好的卡片文件，交出模型与病卡，自己不读盘
+full: true
 ---
 
 包 `@godcreator/docfirst-trajectory`，源码在 `packages/docfirst-trajectory/src/`，出口是 `.`（`src/index.ts`）、
@@ -10,11 +11,10 @@ description: 卡的解析与校验、分盘建模、布局与缩略图、星轨�
 
 ## 功能
 
-两件事：**卡**（轨迹卡的格式、解析、三层校验）与**盘**（把一批卡分盘建模、布局、画成星轨盘）。卡有哪些字段、
+两件事：**卡**（轨迹卡的格式、解析、校验）与**盘**（把一批卡分盘建模、布局、画成星轨盘）。卡有哪些字段、
 怎么校验、怎么分盘、半径和角度怎么排，见[轨迹](/docs/trajectory)。
 
-它不读盘：调用方把卡片文件读好传进来（文件名、正文、修改时间），拿回卡与病卡。卡的身份是文件名去掉 `.mdx` / `.md`
-后缀的部分，同一身份两种后缀都在时只认 `.mdx`：
+卡的身份是文件名去掉 `.mdx` / `.md` 后缀的部分，同一身份两种后缀都在时只认 `.mdx`：
 
 {/* ref file="../packages/docfirst-trajectory/src/scan.ts" lines="17-47" hash="95f149892032" blob="c08f4ca5904b" */}
 

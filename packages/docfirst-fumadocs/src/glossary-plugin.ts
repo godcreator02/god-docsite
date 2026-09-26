@@ -1,5 +1,5 @@
 /**
- * 术语自动标注的 remark 半：把正文里命中的词包成 `<Term def href>词</Term>`。
+ * 术语自动标注的 remark 插件：把正文里命中的词包成 `<Term def href>词</Term>`。
  *
  * 匹配规矩在 `glossary.ts`（纯逻辑），这里只管「在树上哪些地方能标、换节点怎么换」。
  *
@@ -9,9 +9,9 @@
  * **挂在 docfirst 自己那个插件之前**（`docfirstMdxOptions` 里就是这个顺序）：那时树上还只有
  * 作者写的散文，引用投影的代码块、目录树都还没注入，标注碰不到它们。
  *
- * 源文件里没有 `<Term>`——它是构建期长出来的。所以命令行的 check 与 `render`
- * 看到的是干净原文，机读版天然不带装饰，名册里不配规则也不会硬失败。作者手写的
- * `<Term>` 是另一回事：那会进源文件，名册里就必须有一条规则。
+ * 源文件里没有 `<Term>`，它是站构建时加进树的，所以命令行的 check 与 `render` 看到的是原文。
+ * 但站构建时同一棵树接着会经过 docfirst 插件的 `stamp`，名册外的组件在那里直接报错：
+ * 开了术语标注的站，名册里必须有 `Term` 的规则（本站写成 `Term: "children"`）。
  */
 import { buildTermIndex, findTerms } from "./glossary.ts";
 import type { TermEntry, TermIndex } from "./glossary.ts";

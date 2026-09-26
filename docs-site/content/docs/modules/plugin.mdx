@@ -1,6 +1,7 @@
 ---
 title: 工作台插件 gwb-docfirst-workflow
 description: 两条建站命令 docfirst.create 与 docfirst.create-plain（官方脚手架、本机约定、端口、写盘），加随插件发布的说明书；对 @godcreator/docfirst-* 包零依赖
+full: true
 ---
 
 包 `@godcreator/gwb-docfirst-workflow`，在 `plugins/docfirst/`，源码在 `src/`，入口 `src/index.ts`；说明书在 `skills/`，
@@ -15,38 +16,35 @@ description: 两条建站命令 docfirst.create 与 docfirst.create-plain（官�
 
 {/* ref file="../plugins/docfirst/src/index.ts" lines="12-20" hash="8f696f6f8968" blob="a9aa2f4c2ca3" */}
 
-**建站从官方脚手架出发。** 两条命令都调用 `createSite`：运行版本写死的 `create-fumadocs-app` 生成到临时目录，应用本机约定，
-合并 `package.json` 的补充，按新增、替换、删除三个清单改文件，最后整套写进目标目录。`docfirst.create-plain` 只要官方输出加本机约定：
+**建站从官方脚手架出发。** 两条命令共用 `createSite`，`docfirst.create-plain` 只要官方输出加本机约定：
 
 {/* ref file="../plugins/docfirst/src/scaffold.ts" lines="10-29" hash="cacbffd8ca1d" blob="b62b36fbee8d" */}
 
 {/* ref file="../plugins/docfirst/src/scaffold.ts" lines="31-37" hash="ae296fd32488" blob="b62b36fbee8d" */}
 
-本机约定每一处都是精确文本替换，要替换的原文在官方输出里必须恰好出现一次，否则报错——那说明脚手架的输出变了：
+本机约定是精确文本替换，原文对不上就报错：
 
 {/* ref file="../plugins/docfirst/src/scaffold.ts" lines="163-168" hash="4fa12ba781fd" blob="b62b36fbee8d" */}
 
-三个清单一次查完再动手：新增的在官方输出里不能已有，替换与删除的必须有，路径不能越出站目录；有问题一次列全，一个文件都不写：
+三个清单一次查完再动手：
 
 {/* ref file="../plugins/docfirst/src/scaffold.ts" lines="268-271" hash="68c670cbca41" blob="b62b36fbee8d" */}
 
-写盘途中失败就删掉整个目标目录——它是这次新建的：
+写盘途中失败就删掉整个目标目录：
 
 {/* ref file="../plugins/docfirst/src/scaffold.ts" lines="347-364" hash="460179de2867" blob="b62b36fbee8d" */}
 
-**`docfirst.create` 在官方输出上多改几份文件**：`template/add/` 下的新增、`template/replace/` 下的整份替换，
-另删掉示例页 `content/docs/test.mdx`；`package.json` 里再加两条 docfirst 依赖和 doc 脚本：
+**`docfirst.create` 在官方输出上多改几份文件**，模板分新增与替换两个目录，另加 doc 脚本：
 
 {/* ref file="../plugins/docfirst/src/template.ts" lines="1-8" hash="24fa9ba9f089" blob="80056932433a" */}
 
 {/* ref file="../plugins/docfirst/src/create.ts" lines="15-22" hash="38db1def4857" blob="ba7789e519b3" */}
 
-**端口从 4310 起挑第一个空闲的。** 空闲看的是别的站 `package.json` 脚本里写死的 `next dev -p` / `next start -p`，不看此刻
-有没有进程在监听；调用方给了端口就用给的，被占用也只在回执里说明：
+**端口从 4310 起挑第一个空闲的**，调用方给了端口就用给的：
 
 {/* ref file="../plugins/docfirst/src/ports.ts" lines="90-101" hash="b91169faf764" blob="163d5c8b6267" */}
 
-查重范围：站在容器根（单元文件夹插件的设置 `unit-folder.units-root`）里就扫整个容器根，否则只扫站目录的祖父目录：
+查重范围看站在不在容器根里：
 
 {/* ref file="../plugins/docfirst/src/scaffold.ts" lines="304-308" hash="250edd16bd50" blob="b62b36fbee8d" */}
 

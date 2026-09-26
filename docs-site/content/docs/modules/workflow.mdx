@@ -1,6 +1,7 @@
 ---
 title: workflow 命令行与项目
 description: docfirst-workflow：命令行 docfirst、项目装配（读盘、git、生成物、磁盘读卡）、mdx 格式与格式接口 DocFormat；调用链从 docfirst 命令开始的都在这个包里，不认识任何站的宿主
+full: true
 ---
 
 包 `@godcreator/docfirst-workflow`，源码在 `packages/docfirst-workflow/src/`。出口 `.`（`src/index.ts`）、`./mdx`（`src/mdx/index.ts`）、
@@ -10,15 +11,13 @@ description: docfirst-workflow：命令行 docfirst、项目装配（读盘、gi
 
 ## 功能
 
-`src/` 下每个目录一件事：`format` 定格式接口，`mdx` 实现它，`project` 读写磁盘、调 git，`cli` 把它们串成命令。
-这些目录在同一个包里，编译器不拦跨目录 import，方向由边界测试的禁止表检查：
+目录之间的依赖方向见上图。这些目录在同一个包里，编译器不拦跨目录 import，方向由边界测试的禁止表检查：
 
 {/* ref file="../tests/boundary.test.ts" lines="213-228" hash="5e5d288cdf5a" blob="e450056cc091" */}
 
 ### 项目装配 project
 
-一个项目是一个根目录加一份 `docfirst.config`。`loadProject(root)` 读配置，造读取器与 git 版的旧内容来源交给钉码核心的
-`createService`，再把生成物的摆放装进项目；分区按约定，不在配置里登记：
+一个项目是一个根目录加一份 `docfirst.config`，分区按约定，不在配置里登记：
 
 {/* ref file="../packages/docfirst-workflow/src/project/load.ts" lines="1-9" hash="54a253641e58" blob="485e0158da13" */}
 
@@ -30,8 +29,7 @@ description: docfirst-workflow：命令行 docfirst、项目装配（读盘、gi
 
 {/* ref file="../packages/docfirst-workflow/src/project/load.ts" lines="116-122" hash="5d8ed05b1d87" blob="485972d4fa88" */}
 
-**读取器与旧内容来源**是钉码核心 `Reader`、`History` 两个接口的实现（接缝 2）。读取器列目录时在 git 仓里按 `.gitignore` 过滤；
-旧内容来源按被引文件自己的位置找仓、按 blob 名取确认时的文件，hunk 表用两个临时文件跑 `git diff --no-index` 算，不往任何对象库写：
+**读取器与旧内容来源**：旧内容来源按被引文件自己的位置找仓，hunk 表用两个临时文件跑 `git diff --no-index` 算，不往任何对象库写：
 
 {/* ref file="../packages/docfirst-workflow/src/project/fs-reader.ts" lines="1-8" hash="4a7673eef0a1" blob="2c9427f15c3d" */}
 
@@ -41,28 +39,26 @@ description: docfirst-workflow：命令行 docfirst、项目装配（读盘、gi
 
 {/* ref file="../packages/docfirst-workflow/src/project/git.ts" lines="17-18" hash="6c30493d4168" blob="afd0fbdae4c4" */}
 
-**未提交改动的探针**回答一处黄是不是本仓未提交的改动引起的，一次 check 造一个；算不算红由命令行决定，规则见[提交门禁](/docs/pinning/gate)：
+**未提交改动的探针**只回答一处黄是不是本仓未提交的改动引起的，算不算红由命令行决定，规则见[提交门禁](/docs/pinning/gate)：
 
 {/* ref file="../packages/docfirst-workflow/src/project/uncommitted.ts" lines="1-8" hash="7012ae307b16" blob="3cda642bbfcc" */}
 
-**摆放**把 `outputs` 里有映射的 mdx 正本渲染成生成物写到落点，渲染过程见[生成物渲染](/docs/rendering)。落点在装配时就检查：
+**摆放**的渲染过程见[生成物渲染](/docs/rendering)。落点在装配时就检查：
 得相对项目根、不许落进内容根、一个落点只许一篇文档写，违反任何一条 `loadProject` 当场报错：
 
 {/* ref file="../packages/docfirst-workflow/src/project/placement.ts" lines="121-139" hash="134440fb80cc" blob="963b388356c7" */}
 
-**磁盘读卡**：轨迹核心只收读好的卡片文件，读目录在 `scanCardDir`。目录不存在回空集合；读完交给轨迹核心的 `scanCards`，
-再对每张卡查一遍「卡里不许钉码」（草稿、md、mdx 三种记号形态都算），病并进同一份清单：
+**磁盘读卡**：目录不存在回空集合；「卡里不许钉码」认草稿、md、mdx 的记号形态：
 
 {/* ref file="../packages/docfirst-workflow/src/project/card-dir.ts" lines="13-25" hash="7d367c0d4a7f" blob="775b6e9e6c2d" */}
 
 {/* ref file="../packages/docfirst-workflow/src/project/card-refs.ts" lines="1-11" hash="18ad404eda50" blob="23e24d936909" */}
 
-`migrateLedger(root)` 把项目根的 `.ledger.json` 逐处写进对应的记号、删掉这个文件，并列出配置里还要手工改的键；它不经过 `loadProject`。
+`migrateLedger(root)` 把项目根的 `.ledger.json` 逐处写进对应的记号、删掉这个文件，并列出配置里还要手工改的键。
 
 ### mdx 格式
 
-项目的 `docfirst.config.mjs` 把整个 `./mdx` 模块写进 `formats`，命令行与站读同一份。钉码核心要的 `name`、`claims`、`marker`、
-`parse`、`write` 与给 check 的名册检查都在入口文件上，写回只重写记号所在那一行：
+钉码核心要的 `name`、`claims`、`marker`、`parse`、`write` 与给 check 的名册检查都在入口文件上，写回只重写记号所在那一行：
 
 {/* ref file="../packages/docfirst-workflow/src/mdx/index.ts" lines="21-41" hash="178174d6e2b2" blob="73a54f8abd37" */}
 
@@ -89,7 +85,6 @@ fumadocs 自带组件的规则在 [fumadocs 适配](/docs/modules/fumadocs)的 `
 
 ### 命令行 cli
 
-`main(argv)` 把参数译成对装配好的项目的几次调用，把结果打印成人读的行或一行 JSON，交回退出码；状态一个都不在这里判。
 子命令与各自做什么写在入口文件头上：
 
 {/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="1-22" hash="eaeed42dd9ce" blob="12b6936e716e" */}
@@ -119,8 +114,7 @@ fumadocs 自带组件的规则在 [fumadocs 适配](/docs/modules/fumadocs)的 `
 
 {/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="118-146" hash="235a864d0ce8" blob="036135d56300" */}
 
-`render` 只处理 `outputs` 里有映射的正本，摆放全归 `project.placing`，这边只把回执打印成行。`trajectory` 不遍历文档，
-没有轨迹卡目录就退 2，`--json` 打印 `buildTrajectory` 的整份模型：
+`trajectory` 不遍历文档，没有轨迹卡目录就退 2：
 
 {/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="254-275" hash="b13c8318090a" blob="036135d56300" */}
 
@@ -128,8 +122,8 @@ fumadocs 自带组件的规则在 [fumadocs 适配](/docs/modules/fumadocs)的 `
 
 ### 格式接口 format
 
-`DocFormat` 是钉码核心的 `Format` 加两样可选的方法：名册检查给 check，按原文渲染给 render。只实现钉码那四样的格式也能写进配置，
-只是不查名册、不渲染。渲染不了时抛 `RenderRefusal`，摆放按错误名认它、报成红，别的错照原样抛：
+只实现钉码核心 `Format` 的格式也能写进配置，只是不查名册、不渲染。渲染拒绝按错误名认、不用 `instanceof`：格式与宿主可能各从一份产物加载，
+拿到的不是同一个类：
 
 {/* ref file="../packages/docfirst-workflow/src/format/index.ts" lines="12-25" hash="6cf688162137" blob="a39df8c8c5f4" */}
 
