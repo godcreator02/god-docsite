@@ -236,6 +236,12 @@ export class DefsFactory {
     return id;
   }
 
+  /** 给沿弧文字走的路径（不画出来，只给 textPath 引用）：几何每帧由调用方改 d。 */
+  textArc(): { id: string; path: SVGElement } {
+    const id = `${this.prefix}-ta-${this.seq++}`;
+    return { id, path: el("path", { id, fill: "none", stroke: "none" }, this.defs) };
+  }
+
   /** 一条边专属的线性渐变（世界坐标）：起点每帧对准旧卡、终点对准新卡，颜色由着色时改两个 stop。 */
   edgeGradient(): EdgeGradient {
     const id = `${this.prefix}-eg-${this.seq++}`;

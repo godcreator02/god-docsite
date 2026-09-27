@@ -237,13 +237,10 @@
   text-anchor: middle;
 }
 
-/* 里程碑标签：带背景色描边衬底，压在节点或背景环上不糊 */
+/* 里程碑名字：沿环写、嵌在环的断口里，带背景色描边衬底；字号与描边宽由 milestones 层按缩放每帧设 */
 .star-disk .msl {
-  font-size: 10px;
-  letter-spacing: 1px;
   paint-order: stroke;
   stroke: var(--bg);
-  stroke-width: 3px;
   stroke-linejoin: round;
 }
 
