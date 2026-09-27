@@ -9,7 +9,7 @@ full: true
 ## 验收
 
 - [ ] 包里只有 `src/node/` import `node:fs`、`node:fs/promises`、`node:child_process`、`node:os`；`process` 只在 `node/` 与 `cli/` 里出现；边界测试守住
-- [ ] 装配拆成配置、现状区、组装三块；命令行拆成参数、各命令、文案三块
+- [ ] 装配拆出配置 `config.ts`；命令行拆成参数、各命令、文案三块
 - [ ] 下面「重复的概念归到哪」逐条做完
 - [ ] 第 1 到 4 步只挪代码、不改行为：`tests/` 里的断言一个字不改，只有被挪走的文件的 import 路径跟着改；每步全绿
 - [ ] 第 5 步用 git worktree 取改动前的提交，新旧两边对本站运行 `docfirst check --json`、`docfirst trajectory --json`、`docfirst render`，输出一致
@@ -57,7 +57,7 @@ full: true
 | 现在 | 拆成 |
 | --- | --- |
 | `project/git.ts`、`fs-reader.ts`、`history.ts`、`uncommitted.ts` | 挪进 `node/`，`project/index.ts` 照旧再导出 `createReader`、`createGitHistory`、`createUncommittedProbe` |
-| `project/load.ts` | `node/` 里的 `files.ts`（列目录、读写文本、目录在不在）与 `config-file.ts`（找配置文件、由 Node 原生加载）；`project/config.ts`：配置的键、校验、归一；`project/zones.ts`：给一张文件清单，定出现状区的文档；`load.ts`：只剩组装 |
+| `project/load.ts` | `node/` 里的 `files.ts`（列目录、读写文本、目录在不在）与 `config-file.ts`（找配置文件、由 Node 原生加载）；`project/config.ts`：配置的类型、认哪些键、校验、加载、内容根归一；`load.ts`：组装，加上定现状区文档的二十来行（单独成文件要改它列目录的方式，不值得） |
 | `cards/card-dir.ts` 的读盘 | `node/files.ts` 的 `readDirFiles(dir, accept)`：列一层、按 `accept` 挑名字、并发读全文，目录不在交回 `null`；`card-dir.ts` 只剩组合 |
 | `cli/run.ts` | `args.ts`：命令与开关表、求助、点名页解析；`commands.ts`：check / confirm / render / trajectory 各一个函数；`text.ts`：状态符号、状态文案、每种结果打成哪一行 |
 
@@ -127,7 +127,7 @@ frontmatter 按行扫描在 `project/placement.ts:158` 与 `cards/parse.ts:71` �
 每一步一个提交：
 
 1. 建 `node/`，把 git、读取器、旧内容来源、未提交探针、列目录读文件、加载配置、文件读写挪进去（只挪代码，测试断言不改）
-2. 装配拆成 `config.ts`、`zones.ts`、`load.ts`（只挪代码）
+2. 装配拆出 `config.ts`（只挪代码）
 3. 命令行拆成 `args.ts`、`commands.ts`、`text.ts`（只挪代码）
 4. 重复的概念归一（只挪代码）
 5. worktree 对比：新旧两边对本站运行三条命令，输出一致；顺带实测 hunk 磁盘缓存；证据写进轨迹卡

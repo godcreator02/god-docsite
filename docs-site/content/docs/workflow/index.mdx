@@ -20,12 +20,12 @@ full: true
 
 一个项目是一个根目录加一份 `docfirst.config`，分区按约定，不在配置里登记：
 
-{/* ref file="../packages/docfirst-workflow/src/project/load.ts" lines="1-10" hash="22bec36cbb4d" blob="d40d73769d17" */}
+{/* ref file="../packages/docfirst-workflow/src/project/load.ts" lines="1-9" hash="ed8cc6431170" blob="06fa3d94f4bf" */}
 
 现状区是内容根下除 `trajectory/`、`future/` 之外的全部 `.mdx` 文档（目录里的和直接放在内容根上的都算），
 加上项目根下 `src/components/` 里组件格式认领的代码文件（`.ts`、`.tsx`、`.mjs`，放在那里的 `.mdx` 不算页面）：
 
-{/* ref file="../packages/docfirst-workflow/src/project/load.ts" lines="128-146" hash="dd74d26ff03f" blob="0ea671f02d07" */}
+{/* ref file="../packages/docfirst-workflow/src/project/load.ts" lines="85-103" hash="dd74d26ff03f" blob="06fa3d94f4bf" */}
 
 配置模块由 Node 原生加载：站的打包器会把动态 import 改写成自己的加载器，这一句带着两个打包器的跳过标记。
 
@@ -213,9 +213,9 @@ fumadocs 自带组件的规则在 [fumadocs 适配](/docs/fumadocs)的 `./roster
 **`loadProject(root)`** 同一个根只装配一次，站构建时 loader 并发调用拿到同一个项目。配置只认三个键，项目上带着钉码编排、名册、
 内容根、轨迹卡目录与摆放：
 
-{/* ref file="../packages/docfirst-workflow/src/project/load.ts" lines="21-32" hash="5fda9d235fec" blob="0ea671f02d07" */}
+{/* ref file="../packages/docfirst-workflow/src/project/config.ts" lines="9-20" hash="5fda9d235fec" blob="4917ab14c441" */}
 
-{/* ref file="../packages/docfirst-workflow/src/project/load.ts" lines="34-54" hash="1db4678694fd" blob="0ea671f02d07" */}
+{/* ref file="../packages/docfirst-workflow/src/project/load.ts" lines="22-42" hash="1db4678694fd" blob="06fa3d94f4bf" */}
 
 **`./mdx`** 除了格式本身，还交出语法树上的函数给 fumadocs 适配：站构建时 remark 插件拿到的树已经解析好，用 `recognize` 认记号、
 `stamp` 打标记，不再解析一遍；`langOf` 让按原文渲染与站上的代码块标同一种语言：

@@ -15,7 +15,7 @@ import { isAbsolute, relative, resolve, sep } from "node:path";
 import type { Listing } from "../reference/index.ts";
 import { isRenderRefusal, renderAi } from "../mdx/index.ts";
 import type { Pinning } from "../pinning/index.ts";
-import type { ProjectConfig } from "./load.ts";
+import type { ProjectConfig } from "./config.ts";
 
 /** outputs 里的一个目标，对象写法：`to` 相对项目根；`frontmatter` 点名哪些字段随行到生成物头部 */
 export interface OutputTarget {

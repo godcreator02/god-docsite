@@ -5,8 +5,7 @@
  *
  * 分区按约定：内容根（`content`，默认 `content`）下 `trajectory/` 是轨迹卡、`future/` 是未来区，
  * 这两个名字固定；内容根下别的一切（目录里的、直接放在根上的）.mdx 文档都是现状区，都进 check。
- * 项目根下 `src/components/` 里有格式认领的代码文件（讲解组件的源码）也是现状区。
- * 配置只认 `CONFIG_KEYS` 里那几个键，出现别的键当场报错并说清该怎么改。
+ * 项目根下 `src/components/` 里有格式认领的代码文件（讲解组件的源码）也是现状区。配置怎么读、怎么校验在 config.ts。
  */
 import { isAbsolute, join, relative, resolve, sep } from "node:path";
 import { createPinner } from "@godcreator/code-pin";
@@ -14,22 +13,11 @@ import type { Roster } from "../mdx/index.ts";
 import { codeFormat } from "../code/index.ts";
 import { createPinning } from "../pinning/index.ts";
 import type { Pinning } from "../pinning/index.ts";
-import { createGitHistory, createReader, filesUnder, filesUnderFollowingLinks, importDefault, isDirectory, namesIn, pathExists, readText, readTextIfExists, writeText, writeTextMakingParents } from "../node/index.ts";
+import { createGitHistory, createReader, filesUnder, filesUnderFollowingLinks, isDirectory, namesIn, pathExists, readText, readTextIfExists, writeText, writeTextMakingParents } from "../node/index.ts";
+import { contentDirOf, loadConfig } from "./config.ts";
+import type { ProjectConfig } from "./config.ts";
 import { assertTurf, createPlacing, placementsOf } from "./placement.ts";
-import type { OutputTarget, Placement, Placing, PlacingHost } from "./placement.ts";
-
-export interface ProjectConfig {
-  /** 内容根，相对项目根；默认 content */
-  content?: string;
-  /** 组件名册（压平规则），mdx 格式用；没声明就是空表，出现任何组件都算名册外 */
-  components?: Roster;
-  /**
-   * 生成正本的摆放：文档身份（相对项目根、正斜杠）→ 目标数组。每个目标是相对项目根的路径（可以出根），
-   * 或者 `{ to, frontmatter }`——要生成物保留 frontmatter 里的几个字段时用对象写法。
-   * render 只处理有映射的文档
-   */
-  outputs?: Record<string, Array<string | OutputTarget>>;
-}
+import type { Placement, Placing, PlacingHost } from "./placement.ts";
 
 export interface Project {
   root: string;
@@ -64,14 +52,6 @@ export function docIdOf(root: string, path: string): string {
   return rel.split(sep).join("/").replace(/\\/g, "/").replace(/^\.\//, "");
 }
 
-const CONFIG_NAMES = ["docfirst.config.mjs", "docfirst.config.js", "docfirst.config.ts"];
-
-export function configPathOf(root: string): string {
-  const hit = CONFIG_NAMES.map((name) => join(root, name)).find(pathExists);
-  if (hit === undefined) throw new Error(`${root} 下没有 docfirst.config.mjs——项目根就是放配置的那个目录`);
-  return hit;
-}
-
 export function loadProject(root: string): Promise<Project> {
   const abs = resolve(root);
   let pending = cache.get(abs);
@@ -91,32 +71,9 @@ const FIXED_AREAS = new Set(["trajectory", "future"]);
 /** 讲解组件的源码目录，相对项目根 */
 const COMPONENTS_DIR = "src/components";
 
-/** 配置认的键 */
-const CONFIG_KEYS = ["content", "components", "outputs"];
-
-/** 配置里要改的地方，一条一句；没有就是空表。只检查结构，不读写文件 */
-export function configProblems(config: unknown): string[] {
-  if (typeof config !== "object" || config === null) return ["docfirst.config 要 export default 一个对象"];
-  const table = config as Record<string, unknown>;
-  const problems: string[] = [];
-  for (const key of Object.keys(table)) {
-    if (!CONFIG_KEYS.includes(key)) problems.push(`不认识的键 ${key}：配置只认 ${CONFIG_KEYS.join(" / ")}`);
-  }
-  if (table.content !== undefined && (typeof table.content !== "string" || table.content.trim() === "")) problems.push("content 要是一个非空目录（相对项目根）");
-  return problems;
-}
-
-/** 按 Node 原生加载项目的配置模块，交回 default 导出（还没校验） */
-export async function importConfig(root: string): Promise<unknown> {
-  return importDefault(configPathOf(root));
-}
-
 async function build(root: string): Promise<Project> {
-  const loaded = await importConfig(root);
-  const problems = configProblems(loaded);
-  if (problems.length > 0) throw new Error(`${configPathOf(root)} 有 ${problems.length} 处要改：\n${problems.map((p) => `  - ${p}`).join("\n")}`);
-  const config = loaded as ProjectConfig;
-  const contentDir = (config.content ?? "content").replace(/\\/g, "/").replace(/\/+$/, "");
+  const config = await loadConfig(root);
+  const contentDir = contentDirOf(config);
   const contentAbs = join(root, contentDir);
   if (!isDirectory(contentAbs)) {
     throw new Error(`内容根 ${contentDir} 不是项目根下的目录——配置的 content 写错了，或者还没建`);

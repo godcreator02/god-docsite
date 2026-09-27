@@ -13,6 +13,7 @@
 export { createGitHistory, createReader, createUncommittedProbe } from "../node/index.ts";
 export type { UncommittedProbe } from "../node/index.ts";
 export { docIdOf, loadProject } from "./load.ts";
-export type { Project, ProjectConfig } from "./load.ts";
+export type { Project } from "./load.ts";
+export type { ProjectConfig } from "./config.ts";
 export { createPlacing } from "./placement.ts";
 export type { OutputTarget, PlacedCheck, PlacedStatus, PlacedWrite, Placement, Placing, PlacingHost } from "./placement.ts";
