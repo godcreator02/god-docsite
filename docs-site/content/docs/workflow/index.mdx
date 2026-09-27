@@ -27,6 +27,19 @@ full: true
 
 {/* ref file="../packages/docfirst-workflow/src/project/load.ts" lines="83-101" hash="dd74d26ff03f" blob="205ed5645903" */}
 
+配置认哪些键、怎么校验、内容根怎么归一在 `config.ts`，`load.ts` 只做组装。project 自己不 import `node:fs`，读写文件、加载配置、
+读取器与旧内容来源都从 `node/` 取。
+
+**摆放**的渲染过程见[生成物渲染](/docs/workflow/rendering)。落点在装配时就检查：
+得相对项目根、不许落进内容根、一个落点只许一篇文档写，违反任何一条 `loadProject` 当场报错：
+
+{/* ref file="../packages/docfirst-workflow/src/project/placement.ts" lines="119-137" hash="134440fb80cc" blob="b57813645c6a" */}
+
+### Node 实现 node
+
+包里只有 `src/node/` 碰 `node:fs`、git 子进程与系统临时目录，不认识 docfirst 的任何格式；装配、卡格式与命令行直接 import 它。
+Node 实现只有这一份，所以不做可替换的接口，测试照旧建临时 git 仓。
+
 配置模块由 Node 原生加载：站的打包器会把动态 import 改写成自己的加载器，这一句带着两个打包器的跳过标记。
 
 {/* ref file="../packages/docfirst-workflow/src/node/module.ts" lines="3-9" hash="355d983d1663" blob="77f18e11a892" */}
@@ -44,11 +57,6 @@ full: true
 **未提交改动的探针**只回答一处黄是不是本仓未提交的改动引起的，算不算红由命令行决定，规则见[提交门禁](/docs/pin/gate)：
 
 {/* ref file="../packages/docfirst-workflow/src/node/uncommitted.ts" lines="1-8" hash="9f3479ad438b" blob="8b523d262113" */}
-
-**摆放**的渲染过程见[生成物渲染](/docs/workflow/rendering)。落点在装配时就检查：
-得相对项目根、不许落进内容根、一个落点只许一篇文档写，违反任何一条 `loadProject` 当场报错：
-
-{/* ref file="../packages/docfirst-workflow/src/project/placement.ts" lines="119-137" hash="134440fb80cc" blob="b57813645c6a" */}
 
 ### 卡格式 cards
 
@@ -160,6 +168,7 @@ fumadocs 自带组件的规则在 [fumadocs 适配](/docs/fumadocs)的 `./roster
 
 ### 命令行 cli
 
+`run.ts` 的 `main` 认命令与开关（开关表、求助与用法在 `args.ts`），装配项目，交给 `commands.ts` 里各命令的函数；每种结果打成哪一行在 `text.ts`。
 子命令与各自做什么写在入口文件头上：
 
 {/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="1-22" hash="1d41b72013a9" blob="bd1e29a8b8d5" */}
@@ -250,6 +259,11 @@ fumadocs 自带组件的规则在 [fumadocs 适配](/docs/fumadocs)的 `./roster
 - **命令行那一侧不认识 fumadocs 适配**：别的目录不许引用 `src/fumadocs/`，`src/fumadocs/` 也只按包名用 `.`、`./mdx`、`./cards`：
 
 {/* ref file="../tests/boundary.test.ts" lines="417-431" hash="6cf7852c8dc4" blob="b3c39878725f" */}
+
+- **`node/` 以外不碰磁盘与子进程**：别的目录不 import `node:fs`、`node:child_process`、`node:os`；`process` 只有 `node/` 与命令行用。
+  记号、格式、钉码编排、卡的解析因此都能直接拿文本测：
+
+{/* ref file="../tests/boundary.test.ts" lines="454-465" hash="7430135f6d42" blob="f364ea40ffcc" */}
 
 - **不判状态**：绿黄白红由[钉码核心](/docs/pin)算，这个包把磁盘、git、配置交给它，再把结果打印出来。
 - **不给盘建模、不画盘**：关系怎么连成树、主干怎么选、盘怎么画归[星轨盘](/docs/trajectory)；这个包只把卡文件换成它要的中性输入。

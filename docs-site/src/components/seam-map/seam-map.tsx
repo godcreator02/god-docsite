@@ -15,8 +15,6 @@ import { trajectoryGraph } from './inner/trajectory.data.mjs';
 import { trajectoryLayout } from './inner/trajectory.layout';
 import { workflowGraph } from './inner/workflow.data.mjs';
 import { workflowLayout } from './inner/workflow.layout';
-import { workflowPlanGraph } from './inner/workflow-plan.data.mjs';
-import { workflowPlanLayout } from './inner/workflow-plan.layout';
 import { fumadocsGraph } from './inner/fumadocs.data.mjs';
 import { fumadocsLayout } from './inner/fumadocs.layout';
 import { explainerPlayerGraph } from './inner/explainer-player.data.mjs';
@@ -28,7 +26,6 @@ const INNER: Record<string, { graph: SeamGraph; layout: SeamLayout }> = {
   pin: { graph: pinGraph, layout: pinLayout },
   trajectory: { graph: trajectoryGraph, layout: trajectoryLayout },
   workflow: { graph: workflowGraph, layout: workflowLayout },
-  'workflow-plan': { graph: workflowPlanGraph, layout: workflowPlanLayout },
   fumadocs: { graph: fumadocsGraph, layout: fumadocsLayout },
   'explainer-player': { graph: explainerPlayerGraph, layout: explainerPlayerLayout },
   plugin: { graph: pluginGraph, layout: pluginLayout },

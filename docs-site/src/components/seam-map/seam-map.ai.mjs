@@ -8,7 +8,6 @@ import { systemGraph } from './seam-map.data.mjs';
 import { pinGraph } from './inner/pin.data.mjs';
 import { trajectoryGraph } from './inner/trajectory.data.mjs';
 import { workflowGraph } from './inner/workflow.data.mjs';
-import { workflowPlanGraph } from './inner/workflow-plan.data.mjs';
 import { fumadocsGraph } from './inner/fumadocs.data.mjs';
 import { explainerPlayerGraph } from './inner/explainer-player.data.mjs';
 import { pluginGraph } from './inner/plugin.data.mjs';
@@ -17,7 +16,6 @@ const INNER = {
   pin: pinGraph,
   trajectory: trajectoryGraph,
   workflow: workflowGraph,
-  'workflow-plan': workflowPlanGraph,
   fumadocs: fumadocsGraph,
   'explainer-player': explainerPlayerGraph,
   plugin: pluginGraph,

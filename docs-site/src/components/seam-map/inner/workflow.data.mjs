@@ -5,7 +5,7 @@
  * mdx 与 code 是同一个格式接口的两份实现，颜色相同；cards 与 cli 同色：包里的目录只有 cli import cards。
  * 灰色实线框是包外的调用方、依赖与使用方的仓。
  * 目录之间的方向从线上看：marker 与 reference 只往钉码核心连，mdx 与 code 往 marker 连、不连 pinning 与 project，
- * pinning 往两个格式与钉码核心连，cards 只连 marker 与星轨盘，cli 往下连其余各处。坐标在 workflow.layout.ts。
+ * pinning 往两个格式与钉码核心连，cards 只连 marker、node 与星轨盘，cli 往下连其余各处。坐标在 workflow.layout.ts。
  */
 import { defineSeamGraph } from '../graph.mjs';
 
@@ -13,7 +13,7 @@ export const workflowGraph = defineSeamGraph({
   id: 'workflow',
   title: '命令行与项目内部的目录与接缝',
   intro:
-    '命令行与项目内部接缝图：虚线框是包里的目录，project 目录按做的事分成项目装配、生成物两个框，读文件与 git 那个框是 node/ 目录；框里的方块是它对外给的函数或类型，灰色实线框是命令行那一侧以外的调用方（包括同一个包里站那一侧的 src/fumadocs/，它只按包名调用）、依赖与使用方的仓。mdx 格式与组件格式实现同一个格式接口，都连记号写法、不连钉码编排与 project；记号写法与引用类型只连钉码核心，钉码编排按文件选格式、连两个格式与钉码核心；卡格式读卡目录、校验卡、换成星轨盘的中性输入，只连记号写法与星轨盘；命令行连其余各处。',
+    '命令行与项目内部接缝图：虚线框是包里的目录，project 目录按做的事分成项目装配、生成物两个框，读文件与 git 那个框是 node/ 目录；框里的方块是它对外给的函数或类型，灰色实线框是命令行那一侧以外的调用方（包括同一个包里站那一侧的 src/fumadocs/，它只按包名调用）、依赖与使用方的仓。mdx 格式与组件格式实现同一个格式接口，都连记号写法、不连钉码编排与 project；记号写法与引用类型只连钉码核心，钉码编排按文件选格式、连两个格式与钉码核心；卡格式读卡目录、校验卡、换成星轨盘的中性输入，只连记号写法、读文件与 git、星轨盘；命令行连其余各处。',
   frameLabel: '目录',
   modules: [
     {
@@ -37,7 +37,7 @@ export const workflowGraph = defineSeamGraph({
       role: null,
       outside: true,
       blurb:
-        '站构建时 remark 插件装配项目、经钉码编排核对、在语法树上认记号打标记；./fumadocs/trajectory 的 loadTrajectory 读轨迹卡目录；卡集合的 cardSchema 按卡字段认卡，remarkTrajectoryLinks 从链接认出卡身份。按包名用的是这个包的主入口 loadProject、./mdx 的语法树函数，以及 ./cards 的 scanCardDir、CARD_KEYS 与 cardIdFromHref。',
+        '站构建时 remark 插件装配项目、经钉码编排核对、在语法树上认记号打标记；./fumadocs/trajectory 的 loadTrajectory 读轨迹卡目录；卡集合的 cardSchema 按卡字段认卡，remarkTrajectoryLinks 从链接认出卡身份。按包名用的是这个包的主入口 loadProject、./mdx 的语法树函数，以及 ./cards 的 scanCardDir、CARD_KEYS、cardIdFromHref 与卡文件后缀、关系行头、身份的日期前缀这几个常量。',
       caps: [
         { id: 'fd-disk', name: '星轨盘读卡', ident: 'loadTrajectory' },
         { id: 'fd-cardset', name: '卡集合', ident: 'cardSchema' },
@@ -60,9 +60,9 @@ export const workflowGraph = defineSeamGraph({
       role: 'blue',
       outside: false,
       blurb:
-        'load.ts：loadProject 读配置，用读取器与旧内容来源建出钉码核心、交给 createPinning 建出钉码编排，再把摆放装进项目，同一个根只装配一次。现状区按约定是内容根下 trajectory/、future/ 之外的全部 .mdx，加上项目根下 src/components/ 里有格式认领的代码文件（讲解组件的源码）；docIdOf 把路径换成文档身份。',
+        'config.ts 管配置：认哪些键、怎么校验、内容根怎么归一，loadConfig 加载并校验，有要改的地方一次列全报错。load.ts 只做组装：loadProject 取配置，用 node/ 的读取器与旧内容来源建出钉码核心、交给 createPinning 建出钉码编排，再把摆放装进项目，同一个根只装配一次。现状区按约定是内容根下 trajectory/、future/ 之外的全部 .mdx，加上项目根下 src/components/ 里有组件格式认领的代码文件（讲解组件的源码），组件目录取组件格式的 COMPONENTS_DIR；项目上的 docIdOf 把路径换成文档身份。自己不 import node:fs，读写文件都调 node/。',
       caps: [
-        { id: 'config', name: '读配置', ident: 'configProblems' },
+        { id: 'config', name: '读配置', ident: 'loadConfig · configProblems' },
         { id: 'load', name: '装配', ident: 'loadProject · docIdOf' },
       ],
     },
@@ -149,7 +149,7 @@ export const workflowGraph = defineSeamGraph({
       role: 'emerald',
       outside: false,
       blurb:
-        'docfirst 的轨迹卡怎么写、怎么校验、怎么换成星轨盘的中性输入。card-dir.ts 的 scanCardDir 读卡目录一层，目录不在就交回空集合；scan.ts 的 scanCards 用 pickCardFiles 选出卡文件，card.ts 的 parseCardFile 解析 frontmatter、关系行与里程碑并做单文件校验，scanCards 再做跨文件校验（只有一张根卡、parent 只写根卡身份），用 card-refs.ts 查卡里不许钉码，最后交回 CardScan：中性输入加病卡。parse.ts 放卡字段表 CARD_KEYS 与从链接取卡身份的 cardIdFromHref。只 import marker 与星轨盘；包里的目录只有 cli import 它，project 不认识它；主入口也再导出 scanCardDir 与 CardScan 等类型。',
+        'docfirst 的轨迹卡怎么写、怎么校验、怎么换成星轨盘的中性输入。card-dir.ts 的 scanCardDir 经 node/ 的 readDirFiles 读卡目录一层，目录不在就交回空集合；scan.ts 的 scanCards 用 pickCardFiles 选出卡文件，card.ts 的 parseCardFile 解析 frontmatter、关系行与里程碑并做单文件校验，scanCards 再做跨文件校验（只有一张根卡、parent 只写根卡身份），用 card-refs.ts 查卡里不许钉码，最后交回 CardScan：中性输入加病卡。parse.ts 放卡字段表 CARD_KEYS、从链接取卡身份的 cardIdFromHref，以及卡文件后缀 CARD_EXT、关系行头 EDGE_HEAD、身份的日期前缀 ID_DATE_PREFIX，fumadocs 适配也从这里取。只 import marker、node 与星轨盘；包里的目录只有 cli import 它，project 不认识它；只从 ./cards 出口出，主入口不再导出。',
       caps: [
         { id: 'card-dir', name: '读卡目录', ident: 'scanCardDir' },
         { id: 'card-keys', name: '卡字段与卡身份', ident: 'CARD_KEYS · cardIdFromHref' },
@@ -335,10 +335,10 @@ export const workflowGraph = defineSeamGraph({
       name: '读配置',
       a: ['config'],
       b: ['cfgfile'],
-      iface: 'configPathOf(root) → import(url).default；CONFIG_KEYS：content / components / outputs',
+      iface: 'loadConfig(root) → ProjectConfig：configPathOf(root) → importDefault(path)；CONFIG_KEYS：content / components / outputs',
       convention: true,
       via: 'disk',
-      text: 'importConfig 在项目根找 docfirst.config.mjs（只认这一个名字），由 Node 原生加载、取 default 导出。configProblems 只认 CONFIG_KEYS 里的键，出现别的键当场报错并列出认的键。配置的形状是约定，由项目装配定，使用方照着写。',
+      text: 'loadConfig 在项目根找 docfirst.config.mjs（只认这一个名字），经 node/ 的 importDefault 由 Node 原生加载、取 default 导出，再交给 configProblems 校验：只认 CONFIG_KEYS 里的键，出现别的键当场报错并列出认的键。加载与校验分开，校验可以直接拿一个对象测。配置的形状是约定，由项目装配定，使用方照着写。',
     },
     {
       n: 14,
@@ -358,7 +358,7 @@ export const workflowGraph = defineSeamGraph({
       iface: 'node:fs 与 node:fs/promises 读写文件、列目录；execFileSync("git", args, { timeout, maxBuffer })',
       convention: false,
       via: 'disk',
-      text: '包里只有 node/ 碰磁盘与 git：读取器用 node:fs 读文件与目录，装配与卡格式读写文件、列目录都调 node/ 的 files.ts；git.ts 启动 git 子进程：查忽略规则、按 blob 名取旧内容、算 hunk 表、查未提交改动，每次都带超时和输出上限。',
+      text: '包里只有 node/ 碰磁盘与 git：读取器用 node:fs 读文件与目录，装配、卡格式与命令行读写文件、列目录都直接 import node/ 的 files.ts（Node 实现只有这一份，不做可替换的接口）；git.ts 启动 git 子进程：查忽略规则、按 blob 名取旧内容、算 hunk 表、查未提交改动，每次都带超时和输出上限，解析 git status 输出只有 statusEntries 一份。边界测试检查 node/ 以外的目录不 import node:fs、node:child_process、node:os。',
     },
     {
       n: 16,
