@@ -102,7 +102,9 @@ export interface Box {
   dMax: number;
   rMin: number;
   rMax: number;
+  /** 需要的角宽（按弧长换算）；一圈装得下时实际占的 th1 − th0 是它放大后的值 */
   width: number;
+  /** 两侧内边距与槽宽（度）：装箱后是实际值，铺满整圈时跟着放大 */
   padDeg: number;
   slotDeg: number;
   th0: number;
@@ -139,6 +141,73 @@ export function smoothstep(a: number, b: number, x: number): number {
  * 给整条带定宽，一棵横跨全年的树能吃掉小半个盘。树扇环与孤星带共用。 */
 function arcToDeg(arc: number, rMin: number, rMax: number): number {
   return (arc / Math.sqrt(rMin * rMax)) * DEG;
+}
+
+/** 相邻两块扇环之间的缝：同域 GAP_DEG，换域再多 DOM_GAP_DEG。 */
+function gapBetween(prev: Box, next: Box): number {
+  return GAP_DEG + (prev.domain === next.domain ? 0 : DOM_GAP_DEG);
+}
+
+/** 按顺序一块挨一块排完一圈要多少度：各块需要的角宽 + 块间的缝 + 最后一块接回第一块的那道缝。 */
+function angleDemand(order: Box[]): number {
+  if (order.length === 0) return 0;
+  let total = 0;
+  order.forEach((b, i) => {
+    total += b.width;
+    if (i > 0) total += gapBetween(order[i - 1] as Box, b);
+  });
+  return total + gapBetween(order[order.length - 1] as Box, order[0] as Box);
+}
+
+/** 一圈装得下：按顺序排开后整体放大 k 倍铺满整圈，槽宽与内边距同比放大，卡在扇环里跟着散开。
+ * 首尾相接的那道缝跨在 12 点方向（日期标签挂在那里）；width 仍记需要的角宽。 */
+function spreadFullCircle(order: Box[], k: number): void {
+  const first = order[0];
+  const last = order[order.length - 1];
+  if (!first || !last) return;
+  let cursor = (gapBetween(last, first) * k) / 2;
+  order.forEach((b, i) => {
+    if (i > 0) cursor += gapBetween(order[i - 1] as Box, b) * k;
+    b.th0 = cursor;
+    b.th1 = cursor + b.width * k;
+    b.angMid = (b.th0 + b.th1) / 2;
+    b.slotDeg *= k;
+    b.padDeg *= k;
+    cursor = b.th1;
+  });
+}
+
+/** 一圈装不下：从 9 点方向顺时针先到先得，同域内时间不搭界的两块可以复用同一段角度；
+ * 全占满时原位重叠。 */
+function packWithReuse(order: Box[]): void {
+  const placed: Box[] = [];
+  let cursor = -90;
+  let lastDom: string | null = null;
+  for (const b of order) {
+    if (lastDom !== null && b.domain !== lastDom) cursor += DOM_GAP_DEG;
+    lastDom = b.domain;
+    const occupied: Array<[number, number]> = [];
+    for (const p of placed) {
+      /* 同域时间不搭界：同角可复用 */
+      if (p.domain === b.domain && (p.dMin > b.dMax || b.dMin > p.dMax)) continue;
+      const a0 = (((p.th0 - GAP_DEG) % 360) + 360) % 360;
+      const span = p.th1 - p.th0 + 2 * GAP_DEG;
+      occupied.push([a0, a0 + span], [a0 - 360, a0 + span - 360], [a0 + 360, a0 + span + 360]);
+    }
+    occupied.sort((x, y) => x[0] - y[0]);
+    let th = ((cursor % 360) + 360) % 360;
+    /* 逐冲突段右移，直到找到放得下的空当 */
+    for (let g = 0; g <= occupied.length; g++) {
+      const hit = occupied.find(([a, bb]) => th < bb && a < th + b.width);
+      if (!hit) break;
+      th = hit[1];
+    }
+    b.th0 = th;
+    b.th1 = th + b.width;
+    b.angMid = th + b.width / 2;
+    cursor = b.th1 + GAP_DEG;
+    placed.push(b);
+  }
 }
 
 /* 月环密度门：世界单位间距阈值。环带世界深度定死后，密盘的月环间距
@@ -642,9 +711,9 @@ export class RingsLayout {
       return { iso: list, ...this.laneBox(dom, packed, ISO_ARC) };
     });
 
-    /* 装箱：先按领域聚块，同域的树排进相邻角度、域内按诞生序从 12 点顺时针先到先得。
-     * 领域是颜色通道，盘上同色不挨着就等于没分域——所以跨域一律角向互斥、
-     * 只有同域内时间不搭界的两棵树才复用同一段角度；换域时多留一档缝把色块分开。 */
+    /* 装箱：先按领域聚块，同域的树排进相邻角度，域内按诞生序顺时针排；换域时多留一档缝把色块分开。
+     * 领域是颜色通道，盘上同色不挨着就等于没分域——所以跨域一律角向互斥。
+     * 一圈装得下就整体放大铺满整圈；装不下才让同域内时间不搭界的两棵树复用同一段角度。 */
     const all: Box[] = [...this.treeBoxes, ...this.isoBoxes];
     const doms = [...new Set(all.map((b) => b.domain))];
     /* 未分道隐式组排各泳道之后：哨兵从出现序里摘出来压尾 */
@@ -655,34 +724,9 @@ export class RingsLayout {
     }
     /* 域内保持诞生序，孤星带排在本域末尾 */
     const order = doms.flatMap((d) => all.filter((b) => b.domain === d));
-    const placed: Box[] = [];
-    let cursor = -90;
-    let lastDom: string | null = null;
-    for (const b of order) {
-      if (lastDom !== null && b.domain !== lastDom) cursor += DOM_GAP_DEG;
-      lastDom = b.domain;
-      const occupied: Array<[number, number]> = [];
-      for (const p of placed) {
-        /* 同域时间不搭界：同角可复用 */
-        if (p.domain === b.domain && (p.dMin > b.dMax || b.dMin > p.dMax)) continue;
-        const a0 = (((p.th0 - GAP_DEG) % 360) + 360) % 360;
-        const span = p.th1 - p.th0 + 2 * GAP_DEG;
-        occupied.push([a0, a0 + span], [a0 - 360, a0 + span - 360], [a0 + 360, a0 + span + 360]);
-      }
-      occupied.sort((x, y) => x[0] - y[0]);
-      let th = ((cursor % 360) + 360) % 360;
-      /* 逐冲突段右移；全占满时兜底原位重叠（真实规模到不了） */
-      for (let g = 0; g <= occupied.length; g++) {
-        const hit = occupied.find(([a, bb]) => th < bb && a < th + b.width);
-        if (!hit) break;
-        th = hit[1];
-      }
-      b.th0 = th;
-      b.th1 = th + b.width;
-      b.angMid = th + b.width / 2;
-      cursor = b.th1 + GAP_DEG;
-      placed.push(b);
-    }
+    const demand = angleDemand(order);
+    if (demand <= 360) spreadFullCircle(order, 360 / demand);
+    else packWithReuse(order);
 
     /* 树内定角与孤星带内定角：槽在各自的角段里居中排布，半径一律由日期定 */
     for (const b of this.treeBoxes) {

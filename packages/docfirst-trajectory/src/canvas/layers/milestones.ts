@@ -1,15 +1,15 @@
-/* 里程碑层：人工指定的关键时刻，泥金加重环 + 6 点方向恒显标签，悬停标签出说明。
+/* 里程碑层：人工指定的关键时刻，金黄细环 + 12 点方向的标签（跟日期标签同一条竖线、同池避让），
+ * 悬停标签出说明。
  * 里程碑数据本身（从根卡正文解析 + inRange 裁剪）归编排者——本层只从 BuildCtx.milestones
  * 拿建好的清单，不认识加载与裁剪逻辑。整搬自 Obsidian 版 star/layers/milestones.ts。 */
 
-import { polar } from "../../layout.ts";
 import { dayNum, formatDay } from "../../model.ts";
 import type { Milestone } from "../../types.ts";
 import { el, text } from "../node-dom.ts";
 import type { Theme } from "../theme.ts";
 import type { BuildCtx, FrameCtx, StarLayer } from "./frame.ts";
 
-/** 里程碑环 + 6 点标签。 */
+/** 里程碑环 + 12 点标签。 */
 interface MsEl {
   m: Milestone;
   rLin: number;
@@ -28,7 +28,7 @@ export class MilestonesLayer implements StarLayer {
     this.buildMilestones();
   }
 
-  /** 里程碑：人工指定的关键时刻，泥金加重环 + 6 点方向恒显标签，悬停标签出说明。 */
+  /** 里程碑：人工指定的关键时刻，金黄细环 + 12 点方向的标签，悬停标签出说明。 */
   private buildMilestones(): void {
     const layout = this.ctx.layout;
     this.milestoneEls = this.ctx.milestones.map((m) => {
@@ -73,19 +73,17 @@ export class MilestonesLayer implements StarLayer {
     this.placeMilestones(f);
   }
 
-  /** 里程碑环：随鱼眼变形，标签恒显在 6 点方向（正上让给日期标签）。 */
+  /** 里程碑环：随鱼眼变形；标签挂在 12 点方向——扇环铺满整圈后只有那里留着缝。
+   * 跟日期标签同池避让，优先级在透镜边界日期（5）之下、年份（4）之上；同一天的日期标签让给它
+   * （里程碑标签自带日期）。 */
   private placeMilestones(f: FrameCtx): void {
     const layout = this.ctx.layout;
-    const { pxToWorld, milestoneClaims } = f;
+    const { pxToWorld, labelClaims } = f;
     for (const e of this.milestoneEls) {
       const r2 = layout.displayRadius(e.rLin);
       e.circle.setAttribute("r", String(r2));
-      const p = polar(180, r2);
-      e.label.setAttribute(
-        "transform",
-        `translate(${p.x},${p.y + 12 * pxToWorld}) scale(${pxToWorld})`,
-      );
-      milestoneClaims.push({ r: r2, prio: 0, label: e.label });
+      e.label.setAttribute("transform", `translate(0,${-r2 - 5 * pxToWorld}) scale(${pxToWorld})`);
+      labelClaims.push({ r: r2, prio: 4.5, label: e.label });
     }
   }
 

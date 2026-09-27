@@ -18,14 +18,14 @@ export interface FramePos {
   ang: number;
 }
 
-/** 12 点 / 6 点标签拥挤仲裁的一次报名。 */
+/** 12 点竖线上注记标签拥挤仲裁的一次报名。 */
 export interface LabelClaim {
   r: number;
   prio: number;
   label: SVGElement;
 }
 
-/** 节点标签拥挤仲裁的一次报名（全景密度兜底，与 12 点 / 6 点注记仲裁分池）。 */
+/** 节点标签拥挤仲裁的一次报名（全景密度兜底，与 12 点注记仲裁分池）。 */
 export interface NodeLabelClaim {
   /** 锚点屏幕坐标（区间重建与行距判定用，画布平移无关） */
   x: number;
@@ -55,11 +55,9 @@ export interface FrameCtx {
   showAllLabels: boolean;
   /** recolor 走静态着色，place 内仍有随帧态变化的取色（如焦点带边环 / 盘心的贴端点警示色）。 */
   theme: Theme;
-  /** 12 点标签拥挤仲裁池（空窗起止 / 周月环 / 年环各自投递）。 */
+  /** 12 点标签拥挤仲裁池（空窗起止 / 周月环 / 年环 / 里程碑各自投递）。 */
   labelClaims: LabelClaim[];
-  /** 6 点标签拥挤仲裁池（里程碑投递），与 12 点分属两条竖线、各自裁决。 */
-  milestoneClaims: LabelClaim[];
-  /** 节点 / 树名标签仲裁池，与 12 点 / 6 点注记仲裁分池。 */
+  /** 节点 / 树名标签仲裁池，与 12 点注记仲裁分池。 */
   nodeLabelClaims: NodeLabelClaim[];
 }
 

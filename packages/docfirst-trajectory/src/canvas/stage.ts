@@ -553,10 +553,8 @@ export class StarStage {
     const pxToWorld = 1 / this.camera.view.k;
     /* 缩放深度：LOD 显隐 = 局部放大率 × 缩放深度 */
     const kRatio = this.camera.view.k / this.camera.fitK();
-    /* 12 点标签拥挤仲裁报名处（空窗起止 / 周月环 / 年环各块沿途投递） */
+    /* 12 点标签拥挤仲裁报名处（空窗起止 / 周月环 / 年环 / 里程碑各块沿途投递） */
     const labelClaims: LabelClaim[] = [];
-    /* 6 点标签拥挤仲裁报名处（里程碑各自投递，与 12 点分属两条竖线） */
-    const milestoneClaims: LabelClaim[] = [];
     /* 节点标签仲裁报名处（全景密度兜底，与注记仲裁分池） */
     const nodeLabelClaims: NodeLabelClaim[] = [];
     this.dodge = computeDodge(this.chains, layout, this.camera.view.k);
@@ -571,7 +569,6 @@ export class StarStage {
       showAllLabels: this.showAllLabels,
       theme: this.theme,
       labelClaims,
-      milestoneClaims,
       nodeLabelClaims,
     };
     this.cardsLayer.place(f);
@@ -581,10 +578,9 @@ export class StarStage {
     this.milestonesLayer.place(f);
     this.treesLayer.placeRest(f);
     this.hubLayer.place(f);
-    /* 12 点按优先级排队，低位让隐；6 点里程碑同等重要，按日期先后（内到外）先到先得 */
+    /* 12 点按优先级排队，低位让隐 */
     labelClaims.sort((a, b) => b.prio - a.prio);
     this.labelArbiter.arbitrate(labelClaims, pxToWorld);
-    this.labelArbiter.arbitrate(milestoneClaims, pxToWorld);
     this.labelArbiter.arbitrateNodeLabels(nodeLabelClaims);
   }
 

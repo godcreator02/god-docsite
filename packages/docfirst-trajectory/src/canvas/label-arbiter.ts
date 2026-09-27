@@ -1,7 +1,6 @@
-/* 标签仲裁器：星轨盘上三池拥挤裁决——12 点注记（空窗起止 / 周月环 / 年环）、
- * 6 点里程碑、节点 / 树名密度兜底，三池互不干扰、各自一条判定线。
- * labelWidth 的文本宽缓存生命周期与视图同长，故仲裁器建一份实例、随视图存活。
- * 整搬自 Obsidian 版 star/label-arbiter.ts。 */
+/* 标签仲裁器：星轨盘上两池拥挤裁决——12 点注记（空窗起止 / 周月环 / 年环 / 里程碑）、
+ * 节点 / 树名密度兜底，两池互不干扰、各自一套判定。
+ * labelWidth 的文本宽缓存生命周期与视图同长，故仲裁器建一份实例、随视图存活。 */
 
 import type { LabelClaim, NodeLabelClaim } from "./layers/frame.ts";
 
@@ -30,8 +29,8 @@ export class LabelArbiter {
     return w;
   }
 
-  /** 拥挤仲裁：12 点（空窗起止 / 周月环 / 年环）与 6 点（里程碑）各住一条竖线、各自裁决——
-   * 同线内贪心占位，屏幕间距不足 14px 的后来者让隐。 */
+  /** 拥挤仲裁：12 点竖线上的注记（空窗起止 / 周月环 / 年环 / 里程碑）按调用方排好的优先级
+   * 贪心占位，屏幕间距不足 14px 的后来者让隐。 */
   arbitrate(claims: LabelClaim[], pxToWorld: number): void {
     const taken: number[] = [];
     const minGap = 14 * pxToWorld;

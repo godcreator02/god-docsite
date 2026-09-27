@@ -230,6 +230,39 @@ test("装箱：跨域扇环角向互斥（领域是颜色通道，同色不挨�
   }
 });
 
+test("装箱：一圈装得下就铺满整圈——扇环按顺序互不重叠、各自放大同一倍，首尾相接的缝跨在 12 点", () => {
+  const day = (d: number): string => `2026-01-${String(d).padStart(2, "0")}T08:00`;
+  const specs = [
+    { name: "fc00-根", fm: { type: "root", label: "小盘", "born-at": day(1) } },
+    { name: "fc01-甲一", fm: { "born-at": day(2), label: "甲一", domain: "甲", parent: ["fc00-根"] } },
+    {
+      name: "fc02-甲二",
+      fm: { "born-at": day(4), label: "甲二", domain: "甲", parent: ["fc00-根"] },
+      body: "supersedes:: [甲一](fc01-甲一.md)",
+    },
+    { name: "fc03-乙一", fm: { "born-at": day(3), label: "乙一", domain: "乙", parent: ["fc00-根"] } },
+    { name: "fc04-丙一", fm: { "born-at": day(5), label: "丙一", domain: "丙", parent: ["fc00-根"] } },
+  ];
+  const small = new RingsLayout(buildModel(memCards(specs)));
+  const boxes = [...small.treeBoxes, ...small.isoBoxes].sort((a, b) => a.th0 - b.th0);
+  assert.equal(boxes.length, 3, "甲一棵树，乙、丙各一条孤星带");
+  const first = boxes[0]!;
+  const last = boxes[boxes.length - 1]!;
+  assert.ok(first.th0 > 0 && last.th1 < 360, "全在 0～360° 之内");
+  closeTo(first.th0, 360 - last.th1, 6);
+  const k = (first.th1 - first.th0) / first.width;
+  assert.ok(k > 1, "小盘放大铺开");
+  for (let i = 0; i < boxes.length; i++) {
+    const b = boxes[i]!;
+    closeTo((b.th1 - b.th0) / b.width, k, 6);
+    if (i > 0) assert.ok(b.th0 > boxes[i - 1]!.th1, "按顺序互不重叠");
+  }
+  for (const c of buildModel(memCards(specs)).cards) {
+    const p = small.places.get(c.id)!;
+    assert.ok(p.angBase > 0 && p.angBase < 360, `${c.id} 落在圈内`);
+  }
+});
+
 test("装箱：每张卡都有落点", () => {
   assert.equal(L.places.size, m.cards.length);
   for (const c of m.cards) assert.equal(L.places.has(c.id), true);
