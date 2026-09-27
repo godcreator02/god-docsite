@@ -12,15 +12,16 @@
 
 /**
  * 图上的节点。role 与系统地图接缝图（seam-map.data.mjs）里同一个包的角色色一致；
- * role 为 null 的是仓外或包外的东西（站、宿主、别的模块），画成灰色细框。parent 不为 null 的是 workflow 包里的目录。
+ * role 为 null 的是仓外或包外的东西（站、宿主、别的模块），画成灰色细框。parent 不为 null 的是 workflow 命令行那一侧的目录，
+ * 画在 workflow 的虚线框里；fumadocs 适配也是 workflow 包里的目录（src/fumadocs/），它是站那一侧，单独画在框外、站的正下方。
  * @type {BoundaryNode[]}
  */
-/* tree dir="../packages/docfirst-workflow/src" depth="1" hash="27bc7720b289" */
+/* tree dir="../packages/docfirst-workflow/src" depth="1" hash="68dbebf39177" */
 export const nodes = [
   { id: 'plugin', name: '工作台插件', short: '插件', ident: 'plugins/docfirst', role: 'cyan', parent: null },
   { id: 'site', name: '文档站', short: 'docs-site', ident: 'docs-site', role: null, parent: null },
   { id: 'explain', name: '讲解播放器', short: 'explainer-player', ident: 'explainer-player', role: 'slate', parent: null },
-  { id: 'fumadocs', name: 'fumadocs 适配', short: 'fumadocs', ident: 'docfirst-fumadocs', role: 'amber', parent: null },
+  { id: 'fumadocs', name: 'fumadocs 适配', short: 'fumadocs/', ident: 'docfirst-workflow/fumadocs', role: 'amber', parent: null },
   { id: 'workflow', name: '命令行与项目', short: 'workflow', ident: 'docfirst-workflow', role: 'emerald', parent: null },
   { id: 'marker', name: 'marker/', short: 'marker/', ident: '记号写法', role: 'emerald', parent: 'workflow' },
   { id: 'reference', name: 'reference/', short: 'reference/', ident: '引用与清单', role: 'emerald', parent: 'workflow' },
@@ -39,20 +40,20 @@ export const nodes = [
 
 /**
  * 允许的依赖，也就是图上平时画出来的箭头。key 写成「起点>终点」；kind 写这条依赖落在哪里。
- * 包之间的边都是 package.json 里真写着的依赖；workflow 目录之间只画相邻两层之间真实的 import（cli → project → pinning → mdx、code → marker、reference，cli → cards → marker），
+ * 包之间的边都是 package.json 里实际写着的依赖；workflow 目录之间只画相邻两层之间实际的 import（cli → project → pinning → mdx、code → marker、reference，cli → cards → marker），
  * 上层还直接 import 更下层的目录（cli 与 project 用 marker、mdx、reference，pinning 用 reference），禁止表都允许，图上不画。
  * @typedef {{ key: string, kind: string }} AllowedEdge
  * @type {AllowedEdge[]}
  */
 export const allowedEdges = [
-  { key: 'site>fumadocs', kind: '站的 dependencies' },
-  { key: 'site>workflow', kind: '站的 dependencies' },
+  { key: 'site>fumadocs', kind: '站的 dependencies，import ./fumadocs 开头的出口' },
+  { key: 'site>workflow', kind: '站的 dependencies，运行命令行 docfirst、docfirst.config.mjs import ./mdx' },
   { key: 'site>trajectory', kind: '站的 dependencies' },
   { key: 'site>explain', kind: '站的 dependencies' },
-  { key: 'fumadocs>pin', kind: 'dependencies' },
-  { key: 'fumadocs>trajectory', kind: 'dependencies' },
-  { key: 'fumadocs>workflow', kind: 'dependencies' },
-  { key: 'fumadocs>host', kind: '必需 peer：fumadocs-core、fumadocs-ui、react' },
+  { key: 'fumadocs>pin', kind: 'dependencies，只 import 类型' },
+  { key: 'fumadocs>trajectory', kind: 'dependencies，按包名再导出 ./disk 与样式' },
+  { key: 'fumadocs>workflow', kind: '按包名 import 本包的 .、./mdx、./cards' },
+  { key: 'fumadocs>host', kind: '可选 peer：fumadocs-core、fumadocs-ui、react，只有 fumadocs/ 用' },
   { key: 'workflow>pin', kind: 'dependencies' },
   { key: 'workflow>trajectory', kind: 'dependencies' },
   { key: 'trajectory>host', kind: '可选 peer：react，只给 ./disk 用' },
@@ -82,23 +83,22 @@ export const allowedEdges = [
  * @typedef {{ id: string, label: string, text: string, allowed: string[], forbidden: Forbidden[], tests: GuardTest[] }} BoundaryRule
  * @type {BoundaryRule[]}
  */
-/* ref file="../tests/boundary.test.ts" hash="cfe94fbe2e2e" blob="269b4f418ee0" */
+/* ref file="../tests/boundary.test.ts" hash="fba28a42c8f6" blob="29557311bd0a" */
 export const rules = [
   {
     id: 'packages',
     label: '包与包的方向',
     text: '方向一破，下游的改动就会拖着上游一起发版，而且没有任何别的信号。pnpm 严格的 node_modules 只拦得住没写进依赖的 import，「该不该写进依赖」没人检查，这一类补的就是它。禁止表 PACKAGE_FORBIDDEN 按包列出它不许依赖的兄弟包，列的是禁止的、不是允许的；packages/ 下多出一个表里没有的目录，另一条测试当场失败，逼着先想清楚新包能认识谁。',
-    allowed: ['workflow>pin', 'workflow>trajectory', 'fumadocs>pin', 'fumadocs>trajectory', 'fumadocs>workflow'],
+    allowed: ['workflow>pin', 'workflow>trajectory', 'fumadocs>pin', 'fumadocs>trajectory'],
     forbidden: [
       {
         edges: ['pin>workflow', 'pin>fumadocs', 'pin~trajectory'],
-        what: '钉码谁都不认识：判代码变没变要的读取器、旧内容来源都由构造参数传进来。',
+        what: '钉码谁都不认识，也不认识 docfirst-workflow 的任何部分：判代码变没变要的读取器、旧内容来源都由构造参数传进来。',
       },
       {
         edges: ['trajectory>workflow', 'trajectory>fumadocs'],
         what: '星轨盘不认识钉码、workflow、fumadocs 适配：它只收盘心加一组卡的中性输入，docfirst 卡格式与读卡目录在 workflow。',
       },
-      { edges: ['workflow>fumadocs'], what: 'workflow 不认识任何站的宿主，所以也不认识 fumadocs 适配。' },
       {
         edges: ['explain~pin', 'explain~trajectory', 'explain~workflow', 'explain~fumadocs'],
         what: '讲解播放器跟本仓别的包互不认识：普通 fumadocs 站也用它，docfirst 的包都不用它，只有站用。',
@@ -107,7 +107,7 @@ export const rules = [
     tests: [
       { name: '包的方向：清单三类依赖字段里不许出现禁止的兄弟包', checks: '读各包 package.json 的 dependencies、peerDependencies、devDependencies' },
       { name: '包的方向：源码里也不许 import 禁止的兄弟包', checks: '读各包 src/ 下每个 .ts、.tsx 的 import' },
-      { name: '五个包一个不多一个不少——加了新包得先想清楚它能认识谁', checks: 'packages/ 下的目录必须正好是禁止表里列出的那些' },
+      { name: 'packages/ 下的包一个不多一个不少——加了新包得先想清楚它能认识谁', checks: 'packages/ 下的目录必须正好是禁止表里列出的那些' },
     ],
   },
   {
@@ -145,8 +145,8 @@ export const rules = [
   {
     id: 'workflow-dirs',
     label: 'workflow 目录方向',
-    text: '这几个目录在同一个包里，编译器不拦跨目录的 import：mdx/ 里写一句 import "../project/load.ts" 不会报错，mdx 格式从此就跟读盘、git 绑在一起。禁止表 WORKFLOW_DIRS 列的是禁止的目录：写成允许的目录的话，加一个新目录会默默地什么都不许，加错地方反而更难发现；src/ 下多出一个表里没有的目录，另一条测试当场失败。图上只画相邻两层之间的 import：cli 与 project 还直接用 marker、mdx、reference，pinning 也直接用 reference，禁止表都允许。cards 是 docfirst 卡格式，卡里不许钉码要认记号，所以只认识 marker，只有 cli 用它。',
-    allowed: ['cli>project', 'project>pinning', 'pinning>mdx', 'pinning>code', 'mdx>marker', 'mdx>reference', 'code>marker', 'code>reference', 'marker>pin', 'reference>pin', 'cli>cards', 'cards>marker'],
+    text: '这几个目录在同一个包里，编译器不拦跨目录的 import：mdx/ 里写一句 import "../project/load.ts" 不会报错，mdx 格式从此就跟读盘、git 绑在一起。禁止表 WORKFLOW_DIRS 列的是禁止的目录：写成允许的目录的话，加一个新目录会默默地什么都不许，加错地方反而更难发现；src/ 下多出一个表里没有的目录，另一条测试当场失败。图上只画相邻两层之间的 import：cli 与 project 还直接用 marker、mdx、reference，pinning 也直接用 reference，禁止表都允许。cards 是 docfirst 卡格式，卡里不许钉码要认记号，所以只认识 marker，只有 cli 用它。fumadocs/ 是站那一侧：不用相对路径进任何目录，只按包名用本包的 .、./mdx、./cards，命令行那一侧的目录都不认识它，站构建时加载的产物才不会带上命令行代码。',
+    allowed: ['cli>project', 'project>pinning', 'pinning>mdx', 'pinning>code', 'mdx>marker', 'mdx>reference', 'code>marker', 'code>reference', 'marker>pin', 'reference>pin', 'cli>cards', 'cards>marker', 'fumadocs>workflow'],
     forbidden: [
       {
         edges: ['marker~reference', 'marker>mdx:back', 'reference>code:back'],
@@ -155,14 +155,15 @@ export const rules = [
       { edges: ['mdx>pinning:back', 'mdx>project'], what: 'mdx 格式认引用、写回、渲染，不认识钉码编排的先后顺序，也不认识项目怎么装配、不碰磁盘与 git。' },
       {
         edges: ['mdx~code', 'code>pinning:back'],
-        what: '组件格式只认识 marker 与 reference：跟 mdx 格式互不认识，也不认识钉码编排、project 与 cli。两种格式由钉码编排按文件挑。',
+        what: '组件格式只认识 marker 与 reference：跟 mdx 格式互不认识，也不认识钉码编排、project 与 cli。两种格式由钉码编排按文件选。',
       },
       { edges: ['pinning>project:back'], what: '钉码编排不认识 project，也不认识记号属性怎么写：记号写法在两种格式后面。' },
       { edges: ['cards>pinning', 'cards>cli:back'], what: '卡格式只认识 marker：不认识钉码编排、项目装配，也不认识 cli。' },
       { edges: ['project>cli:back', 'pinning>cli'], what: 'cli 是入口，认识另外几个目录，谁都不认识它。' },
+      { edges: ['workflow>fumadocs'], what: '命令行那一侧的目录都不许引用 fumadocs/，也不许按包名引用本包；fumadocs/ 不许用相对路径出自己的目录，按包名只许用 .、./mdx、./cards。' },
       {
         edges: ['workflow>host'],
-        what: 'workflow 整个不认识站的宿主：源码、清单、产物 index.mjs / cli.mjs / mdx.mjs 连同它们引的 chunk 里都不许出现 fumadocs、next、react、react-dom。',
+        what: '除了 fumadocs/，workflow 不认识站的宿主：源码与产物 index.mjs / cli.mjs / mdx.mjs / cards.mjs 连同它们引的 chunk 里都不许出现 fumadocs、next、react、react-dom。',
       },
     ],
     tests: [
@@ -171,24 +172,25 @@ export const rules = [
       { name: 'workflow 目录方向：code 只认识 marker、reference 与 @godcreator/code-pin', checks: '读 src/code/ 下每个文件的 import，看相对 import 落进哪个目录' },
       { name: 'workflow 目录方向：marker 只从 @godcreator/code-pin import 类型，别的只许是目录里的相对路径', checks: '读 src/marker/ 下每条 import 语句的整行' },
       { name: 'workflow 目录方向：目录一个不少、一个不多——加了新目录得先想清楚它能认识谁', checks: 'src/ 下的目录必须正好是禁止表里列出的那些' },
-      { name: 'workflow 不认识任何站的宿主：源码一个 fumadocs / react / next import 都没有，清单里也没有', checks: '读源码、package.json 与产物' },
+      { name: 'workflow 的 fumadocs 目录：相对 import 不出 src/fumadocs/，本包只按包名用 `.`、`./mdx`、`./cards`；别的目录不按包名引用本包', checks: '读 src/ 下每个文件的 import，看相对 import 落在哪、按包名引用了本包的哪个出口' },
+      { name: 'workflow 除了 src/fumadocs/ 不认识任何站的宿主：源码与命令行那一侧的产物一个 fumadocs / react / next import 都没有', checks: '读 src/fumadocs/ 以外的源码与产物 index.mjs、cli.mjs、mdx.mjs、cards.mjs' },
     ],
   },
   {
     id: 'host-peer',
-    label: '宿主只能是 peer',
-    text: 'fumadocs 与 react 用的是消费方项目装的那份。宿主被打包进产物，就是两份 React 各跑一套，现象是预渲染时莫名其妙的 hooks 报错。客户端组件 pre 的 "use client" 要留在产物头一行，不然 Next 不认；星轨盘按包名 import @godcreator/trajectory-disk/disk，那份产物头一行的 "use client" 才管得住 StarDisk。./roster 由命令行读 docfirst.config.mjs 时加载，命令行那一侧没有宿主。',
+    label: '宿主只能是可选 peer',
+    text: 'fumadocs 与 react 用的是消费方项目装的那份，只有 fumadocs/ 用，只运行命令行的项目不装它们，所以标可选。宿主被打包进产物，就是两份 React 各运行一套，现象是预渲染时莫名其妙的 hooks 报错。客户端组件 pre 的 "use client" 要留在产物头一行，不然 Next 不认；星轨盘按包名 import @godcreator/trajectory-disk/disk，那份产物头一行的 "use client" 才管得住 StarDisk。./fumadocs/roster 由命令行读 docfirst.config.mjs 时加载，命令行那一侧没有宿主。',
     allowed: ['fumadocs>host', 'fumadocs>pin', 'fumadocs>trajectory', 'fumadocs>workflow'],
     forbidden: [
       {
         edges: ['fumadocs>host:bundled'],
-        what: 'fumadocs-core、fumadocs-ui、react 必须声明成必需 peer（不标 optional），不许进 dependencies；产物里宿主与兄弟包只许按包名 import，不许打包进来；./roster 的产物连同它引的 chunk 不许 import 宿主。',
+        what: 'fumadocs-core、fumadocs-ui、react 必须声明成 peer 并标 optional，不许进 dependencies；fumadocs-*.mjs 产物里宿主、兄弟包与本包别的出口只许按包名 import，不许打包进来；./fumadocs/roster 的产物连同它引的 chunk 不许 import 宿主。',
       },
     ],
     tests: [
-      { name: 'fumadocs 包的宿主只能是必需的 peer，不许进 dependencies', checks: '读 package.json 的 peerDependencies、peerDependenciesMeta、dependencies' },
-      { name: 'fumadocs 包的产物：宿主与兄弟包只许按包名 import，不许打包进产物；pre 的客户端指令在头一行', checks: '读各份产物的 //#region 来源、头一行与 import 行' },
-      { name: 'fumadocs 包的 `./roster`：命令行读 docfirst.config.mjs 时会加载它，产物不许 import 宿主', checks: '读产物 roster.mjs 与源码 roster.ts 的 import' },
+      { name: 'workflow 的宿主只能是可选的 peer，不许进 dependencies', checks: '读 package.json 的 peerDependencies、peerDependenciesMeta、dependencies' },
+      { name: 'fumadocs 子入口的产物：宿主、兄弟包与本包的别的出口只许按包名 import，不许打包进产物；pre 的客户端指令在头一行', checks: '读 fumadocs-*.mjs 各份产物的 //#region 来源、头一行与 import 行' },
+      { name: 'fumadocs 子入口的 `./fumadocs/roster`：命令行读 docfirst.config.mjs 时会加载它，产物不许 import 宿主', checks: '读产物 fumadocs-roster.mjs 与源码 fumadocs/roster.ts 的 import' },
     ],
   },
   {
@@ -203,8 +205,8 @@ export const rules = [
       },
     ],
     tests: [
-      { name: '五个 npm 包的依赖字段里不许出现工作台插件，也不许出现任何 @godcreator/gwb-*', checks: '读各包 package.json 的三类依赖字段' },
-      { name: '五个包的源码里一行 @godcreator/gwb-* 都没有', checks: '读各包 src/ 下每个文件的 import' },
+      { name: 'npm 包的依赖字段里不许出现工作台插件，也不许出现任何 @godcreator/gwb-*', checks: '读各包 package.json 的三类依赖字段' },
+      { name: 'npm 包的源码里一行 @godcreator/gwb-* 都没有', checks: '读各包 src/ 下每个文件的 import' },
       { name: '包只发 dist 与样式：skills 与 template 跟着插件走了，包里连目录都不该再有', checks: '读各包 package.json 的 files，并查包目录里有没有 skills/、template/' },
     ],
   },

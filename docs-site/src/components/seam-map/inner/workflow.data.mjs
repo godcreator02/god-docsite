@@ -13,7 +13,7 @@ export const workflowGraph = defineSeamGraph({
   id: 'workflow',
   title: '命令行与项目内部的目录与接缝',
   intro:
-    '命令行与项目内部接缝图：虚线框是包里的目录，project 目录按做的事分成项目装配、读文件与 git、生成物各一个框；框里的方块是它对外给的函数或类型，灰色实线框是包外的调用方、依赖与使用方的仓。mdx 格式与组件格式实现同一个格式接口，都连记号写法、不连钉码编排与 project；记号写法与引用类型只连钉码核心，钉码编排按文件挑格式、连两个格式与钉码核心；卡格式读卡目录、校验卡、换成星轨盘的中性输入，只连记号写法与星轨盘；命令行连其余各处。',
+    '命令行与项目内部接缝图：虚线框是包里的目录，project 目录按做的事分成项目装配、读文件与 git、生成物各一个框；框里的方块是它对外给的函数或类型，灰色实线框是命令行那一侧以外的调用方（包括同一个包里站那一侧的 src/fumadocs/，它只按包名调用）、依赖与使用方的仓。mdx 格式与组件格式实现同一个格式接口，都连记号写法、不连钉码编排与 project；记号写法与引用类型只连钉码核心，钉码编排按文件选格式、连两个格式与钉码核心；卡格式读卡目录、校验卡、换成星轨盘的中性输入，只连记号写法与星轨盘；命令行连其余各处。',
   frameLabel: '目录',
   modules: [
     {
@@ -33,11 +33,11 @@ export const workflowGraph = defineSeamGraph({
     {
       id: 'fumadocs',
       name: 'fumadocs 适配',
-      pkg: '@godcreator/docfirst-fumadocs',
+      pkg: '@godcreator/docfirst-workflow/fumadocs',
       role: null,
       outside: true,
       blurb:
-        '站构建时 remark 插件装配项目、经钉码编排核对、在语法树上认记号打标记；./trajectory 的 loadTrajectory 读轨迹卡目录；卡集合的 cardSchema 按卡字段认卡，remarkTrajectoryLinks 从链接认出卡身份。用的是这个包的主入口 loadProject、./mdx 的语法树函数，以及 ./cards 的 scanCardDir、CARD_KEYS 与 cardIdFromHref。',
+        '站构建时 remark 插件装配项目、经钉码编排核对、在语法树上认记号打标记；./fumadocs/trajectory 的 loadTrajectory 读轨迹卡目录；卡集合的 cardSchema 按卡字段认卡，remarkTrajectoryLinks 从链接认出卡身份。按包名用的是这个包的主入口 loadProject、./mdx 的语法树函数，以及 ./cards 的 scanCardDir、CARD_KEYS 与 cardIdFromHref。',
       caps: [
         { id: 'fd-disk', name: '星轨盘读卡', ident: 'loadTrajectory' },
         { id: 'fd-cardset', name: '卡集合', ident: 'cardSchema' },
@@ -73,7 +73,7 @@ export const workflowGraph = defineSeamGraph({
       role: 'rose',
       outside: false,
       blurb:
-        'index.ts 一个文件：一个文件的核对与确认只在这里串起来。formatOf 按文件路径挑格式（mdx 页面或组件源码，没有或不止一个格式认领都报错），格式认出引用，每处拆成目标与记录交给钉码核心，结果按原来的顺序配回文件路径与行号；确认时把新记录交回同一个格式写回。命令行、生成物摆放与站构建共用这一份。不认识记号属性怎么写，也不认识 project 与 cli。',
+        'index.ts 一个文件：一个文件的核对与确认只在这里串起来。formatOf 按文件路径选格式（mdx 页面或组件源码，没有或不止一个格式认领都报错），格式认出引用，每处拆成目标与记录交给钉码核心，结果按原来的顺序配回文件路径与行号；确认时把新记录交回同一个格式写回。命令行、生成物摆放与站构建共用这一份。不认识记号属性怎么写，也不认识 project 与 cli。',
       caps: [
         { id: 'pn-check', name: '核对', ident: 'checkDoc · checkReferences' },
         { id: 'pn-confirm', name: '确认写回', ident: 'confirmDoc' },
@@ -149,7 +149,7 @@ export const workflowGraph = defineSeamGraph({
       role: 'emerald',
       outside: false,
       blurb:
-        'docfirst 的轨迹卡怎么写、怎么校验、怎么换成星轨盘的中性输入。card-dir.ts 的 scanCardDir 读卡目录一层，目录不在就交回空集合；scan.ts 的 scanCards 用 pickCardFiles 挑出卡文件，card.ts 的 parseCardFile 解析 frontmatter、关系行与里程碑并做单文件校验，scanCards 再做跨文件校验（只有一张根卡、parent 只写根卡身份），用 card-refs.ts 查卡里不许钉码，最后交回 CardScan：中性输入加病卡。parse.ts 放卡字段表 CARD_KEYS 与从链接取卡身份的 cardIdFromHref。只 import marker 与星轨盘；包里的目录只有 cli import 它，project 不认识它；主入口也再导出 scanCardDir 与 CardScan 等类型。',
+        'docfirst 的轨迹卡怎么写、怎么校验、怎么换成星轨盘的中性输入。card-dir.ts 的 scanCardDir 读卡目录一层，目录不在就交回空集合；scan.ts 的 scanCards 用 pickCardFiles 选出卡文件，card.ts 的 parseCardFile 解析 frontmatter、关系行与里程碑并做单文件校验，scanCards 再做跨文件校验（只有一张根卡、parent 只写根卡身份），用 card-refs.ts 查卡里不许钉码，最后交回 CardScan：中性输入加病卡。parse.ts 放卡字段表 CARD_KEYS 与从链接取卡身份的 cardIdFromHref。只 import marker 与星轨盘；包里的目录只有 cli import 它，project 不认识它；主入口也再导出 scanCardDir 与 CardScan 等类型。',
       caps: [
         { id: 'card-dir', name: '读卡目录', ident: 'scanCardDir' },
         { id: 'card-keys', name: '卡字段与卡身份', ident: 'CARD_KEYS · cardIdFromHref' },
@@ -228,7 +228,7 @@ export const workflowGraph = defineSeamGraph({
       iface: 'project.pinning.checkDoc(doc, text) → Listing；confirmDoc(doc, text, { accept }) → ConfirmResult',
       convention: false,
       via: 'code',
-      text: 'check 对每个文件调 checkDoc 拿清单，confirm 调 confirmDoc 拿回写好的全文与每处的 ConfirmStep（记上、写回新行号、accept 后重新记、不动、等复核、拒绝）。页面与组件源码走同一个入口，挑格式是钉码编排的事。状态全由钉码核心判，命令行只打印、算退出码。',
+      text: 'check 对每个文件调 checkDoc 拿清单，confirm 调 confirmDoc 拿回写好的全文与每处的 ConfirmStep（记上、写回新行号、accept 后重新记、不动、等复核、拒绝）。页面与组件源码走同一个入口，选格式是钉码编排的事。状态全由钉码核心判，命令行只打印、算退出码。',
     },
     {
       n: 3,
@@ -348,7 +348,7 @@ export const workflowGraph = defineSeamGraph({
       iface: 'formatOf(file) → Format；Format：claims(file) / parse(text) → Reference[] / write(text, written) → text',
       convention: false,
       via: 'code',
-      text: '钉码编排按文件路径挑格式：.mdx 归 mdx 格式，站的 src/components/ 下的 .ts、.tsx、.mjs 归组件格式，一个文件只能有一个格式认领。整个文件的文本交给那个格式认出全部引用；确认时把带着新记录的引用交回同一个格式，它只重写那几行，未确认的记号在这时写上记录。两个格式写死在钉码编排的表里。',
+      text: '钉码编排按文件路径选格式：.mdx 归 mdx 格式，站的 src/components/ 下的 .ts、.tsx、.mjs 归组件格式，一个文件只能有一个格式认领。整个文件的文本交给那个格式认出全部引用；确认时把带着新记录的引用交回同一个格式，它只重写那几行，未确认的记号在这时写上记录。两个格式写死在钉码编排的表里。',
     },
     {
       n: 15,

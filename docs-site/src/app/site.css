@@ -1,6 +1,6 @@
 /* 本站自己的样式：术语标注与自定义的 Tabs。src/app/docs/layout.tsx 引入，三个区的页都用得到 */
-/* 术语标注的点线下划线与定义框，随 @godcreator/docfirst-fumadocs 发布 */
-@import '@godcreator/docfirst-fumadocs/term.css';
+/* 术语标注的点线下划线与定义框，随 @godcreator/docfirst-workflow/fumadocs 发布 */
+@import '@godcreator/docfirst-workflow/fumadocs/term.css';
 /* 讲解组件的外壳与零件（分步、动画、选情况的控制条，面板、终端、胶囊、代码行） */
 @import '@godcreator/explainer-player/styles.css';
 /* 讲钉码的两个讲解组件 PinStory、PinJudge 自己的画面 */

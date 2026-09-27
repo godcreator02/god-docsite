@@ -1,5 +1,5 @@
 /**
- * `@godcreator/docfirst-fumadocs/roster`：fumadocs 自带组件转成机读文本的规则。项目的
+ * `@godcreator/docfirst-workflow/fumadocs/roster`：fumadocs 自带组件转成机读文本的规则。项目的
  * docfirst.config.mjs 展开它、再加站里自己的组件：`components: { ...fumadocsRoster, Tabs: … }`。
  *
  * **纯数据加纯函数，不许 import fumadocs / react**：命令行读 docfirst.config.mjs 时会加载这个模块，

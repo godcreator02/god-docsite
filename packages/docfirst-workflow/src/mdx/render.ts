@@ -3,7 +3,7 @@
  *   parseTree   自己调用 remark 解析出语法树：parse / write / 名册检查 / 按原文渲染都用它，不碰 fumadocs
  *   renderAi    生成正本按原文渲染成 md：只动 frontmatter 与记号，别的文字逐字节照抄
  *
- * 站上各页的机读版不走这儿，走 fumadocs 的管线（`@godcreator/docfirst-fumadocs` 的 docfirstMarkdownOptions）。
+ * 站上各页的机读版不走这儿，走 fumadocs 的管线（`@godcreator/docfirst-workflow/fumadocs` 的 docfirstMarkdownOptions）。
  */
 import { unified } from "unified";
 import remarkParse from "remark-parse";

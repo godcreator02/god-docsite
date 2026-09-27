@@ -11,7 +11,7 @@ import { register } from "fumadocs-mdx/node";
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { loadProject } from "@godcreator/docfirst-workflow";
-import { DOT_COLOR, whereOf } from "@godcreator/docfirst-fumadocs";
+import { DOT_COLOR, whereOf } from "@godcreator/docfirst-workflow/fumadocs";
 import { componentNames } from "../src/components/registry.ts";
 
 register();

@@ -2,7 +2,7 @@
  * 「引用能指向哪几类东西」的全部讲解数据：画面（ref-kinds.tsx）与机读版规则（ref-kinds.ai.mjs）都只读这一份。
  * 例子跟钉码页是同一个仓：content/docs/a.mdx 引用 src/greet.ts，src/ 下有 greet.test.ts、greet.ts、index.ts。
  * 记号写法照 docfirst-workflow 的 marker/index.ts；比什么照 code-pin 的 compare.ts；命令行那一行照 docfirst-workflow 的 cli/run.ts
- * 与 code-pin types.ts 里的 REASON_TEXT；站上长什么样照 docfirst-fumadocs 的 blocks.ts 与 pre.tsx。
+ * 与 code-pin types.ts 里的 REASON_TEXT；站上长什么样照 docfirst-workflow 的 src/fumadocs/blocks.ts 与 pre.tsx。
  * hash 与 blob 是用 code-pin 的 span.ts 对这版 greet.ts 与这张名字表真算出来的。
  *
  * @typedef {'fresh' | 'changed' | 'missing' | 'unconfirmed'} Status
@@ -38,9 +38,9 @@ const NORMALIZE = '算之前先归一化：换行统一成 LF、去掉每行行�
 /* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="275-280" hash="a11866d4fa45" blob="418434ff646c" */
 /* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="296-303" hash="23ad1504ef64" blob="ff2e6b7ae7d3" */
 /* ref file="../packages/code-pin/src/types.ts" lines="80-85" hash="70feff6a62c9" blob="32a0167e8d8f" */
-/* ref file="../packages/docfirst-fumadocs/src/blocks.ts" lines="24-37" hash="c3224ec6e495" blob="19f00626cf69" */
-/* ref file="../packages/docfirst-fumadocs/src/blocks.ts" lines="47-61" hash="8a889ba101b1" blob="19f00626cf69" */
-/* ref file="../packages/docfirst-fumadocs/src/blocks.ts" lines="156-185" hash="48c366c0543b" blob="19f00626cf69" */
+/* ref file="../packages/docfirst-workflow/src/fumadocs/blocks.ts" lines="24-37" hash="c3224ec6e495" blob="19f00626cf69" */
+/* ref file="../packages/docfirst-workflow/src/fumadocs/blocks.ts" lines="47-61" hash="8a889ba101b1" blob="19f00626cf69" */
+/* ref file="../packages/docfirst-workflow/src/fumadocs/blocks.ts" lines="156-185" hash="48c366c0543b" blob="19f00626cf69" */
 export const kinds = [
   {
     id: 'span',

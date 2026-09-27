@@ -15,25 +15,25 @@
 ## 怎么装
 
 ```bash
-pnpm add -D @godcreator/docfirst-workflow @godcreator/docfirst-fumadocs
+pnpm add -D @godcreator/docfirst-workflow
 ```
 
-`@godcreator/docfirst-workflow` 是命令行、项目装配与 mdx 格式，`@godcreator/docfirst-fumadocs` 是 fumadocs 适配，把 docfirst 接到 fumadocs 站上；
+`@godcreator/docfirst-workflow` 是命令行、项目装配与 mdx 格式，子入口 `./fumadocs` 是 fumadocs 适配，把 docfirst 接到 fumadocs 站上；
 通用包钉码核心 `@godcreator/code-pin`（把文字钉在代码上）与星轨盘 `@godcreator/trajectory-disk`（把轨迹卡画成
-项目方向演变的圆盘）随它们装上。通用包不认识 docfirst，也能单独拿走用；讲解播放器 `@godcreator/explainer-player` 也是通用包，
+项目方向演变的圆盘）随它装上。通用包不认识 docfirst，也能单独拿走用；讲解播放器 `@godcreator/explainer-player` 也是通用包，
 把一段讲解拆成配说明的帧来播放，站的讲解组件用它，docfirst 自己的包不依赖它。`fumadocs` 与 `react`
-只是 fumadocs 适配的 **peer**，用你项目里装的那份；只跑命令行、不装 fumadocs 的仓只装 `@godcreator/docfirst-workflow`。
+是可选的 **peer**，只有 `./fumadocs` 用，用你项目里装的那份；只运行命令行的仓不用装它们。
 
-**站的构建配置里 `serverExternalPackages` 必须留空**：`@godcreator/docfirst-fumadocs` 里同时有服务端代码与客户端
+**站的构建配置里 `serverExternalPackages` 必须留空**：`@godcreator/docfirst-workflow` 的 `./fumadocs` 下同时有服务端代码与客户端
 组件（状态点），而那个字段按包名匹配、没有子路径粒度——外置之后 `"use client"` 指令会丢掉；星轨盘的客户端组件在
 `@godcreator/trajectory-disk` 里，同样不能外置。
 
 **建一个新站用工作台插件，命令行不管这一步**：工作台插件 `@godcreator/gwb-docfirst-workflow` 的
 `docfirst.create {"dir":"<仓>/docs-site"}` 一步建好接了三个区（现状 `docs`、轨迹 `trajectory`、未来 `future`）的站；
 不接 docfirst 的普通 fumadocs 站用 `docfirst.create-plain`，参数相同。两条都运行官方脚手架 `create-fumadocs-app`、
-应用本机约定、挑端口并写入文件，`docfirst.create` 再在官方输出上增、换、删几份文件。站目录必须还不存在；给一个用了很久的站加 docfirst，要手动改站的配置接入。
+应用本机约定、选端口并写入文件，`docfirst.create` 再在官方输出上增、换、删几份文件。站目录必须还不存在；给一个用了很久的站加 docfirst，要手动改站的配置接入。
 
-建站只在 agent 手上发生一次，所以不在这几个包里——包留的是要在**仓**里反复发生的那几条。
+建站只在 agent 手上发生一次，所以不在包里——包留的是要在**仓**里反复发生的那几条。
 
 ## 怎么用
 
@@ -66,11 +66,11 @@ pnpm docfirst render                                # 只把 outputs 里有映�
 ## 文档在哪
 
 `docs-site/` 是这几个包的文档站，也是它们唯一的使用方——装的是工作区里的这几个包，钉的是
-工作区里的真源码，所以仓里不另留示例。
+工作区里的实际源码，所以仓里不另留示例。
 
 ```bash
 cd docs-site
-pnpm dev                        # 看 http://127.0.0.1:4310，改了文件刷新就能看到
+pnpm build && pnpm start        # 看 http://127.0.0.1:4310，改了文件要重新 build
 pnpm docfirst check
 ```
 
@@ -84,7 +84,7 @@ SKILL.md 没有说明指向它、没人会读。治理文档与注释读同在�
 
 **这份 README 与仓根 `AGENTS.md`、`CLAUDE.md` 是生成物**，改 mdx 正本再 `pnpm docfirst render`；哪份正本生成到哪看 `docs-site/docfirst.config.mjs` 的 `outputs`。
 
-## 这个仓自己怎么跑
+## 这个仓自己怎么运行
 
 ```powershell
 pnpm install
@@ -102,6 +102,6 @@ cd ../plugins/docfirst
 pnpm check && pnpm build      # 工作台插件单独一套门禁，用 vitest
 ```
 
-调试站用 `pnpm dev`：用户说要看就一直开着，服务带超时（默认 2 小时）自动停；只是自己验证的，验完停掉。
-`pnpm build` 只在收尾或发版前跑一次，构建通过就结束，不跑 `start`。
-改了站构建时 remark 插件会跑到的包代码（`packages/docfirst-fumadocs/`，连同它调用的 workflow 与 code-pin），要先删 `.next` 再重新运行。
+站不用 `pnpm dev`：看页面也是先 `pnpm build` 再 `pnpm start`，改了内容重新 build。`build` 集中在收尾或发版前运行一次，
+用户没说要看就构建通过即结束；说要看就一直开着 `start`，服务带超时（默认 12 小时）自动停。
+改了站构建时 remark 插件会调用到的包代码（`packages/docfirst-workflow/src/fumadocs/`，连同它调用的 workflow 别的出口与 code-pin），要先删 `.next` 再重新构建。

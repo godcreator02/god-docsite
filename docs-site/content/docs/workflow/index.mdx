@@ -1,11 +1,12 @@
 ---
 title: workflow 命令行与项目
-description: docfirst-workflow：命令行 docfirst、项目装配（读文件、git、生成物）、钉码编排、记号写法、两种格式（mdx 页面与讲解组件的源码）、docfirst 卡格式；调用链从 docfirst 命令开始的都在这个包里，不认识任何站的宿主
+description: docfirst-workflow：命令行 docfirst、项目装配（读文件、git、生成物）、钉码编排、记号写法、两种格式（mdx 页面与讲解组件的源码）、docfirst 卡格式；调用链从 docfirst 命令开始的都在这个包里，这一侧不认识任何站的宿主；接到 fumadocs 站上的子入口 ./fumadocs 也在这个包里，讲在 fumadocs 适配页
 full: true
 ---
 
 包 `@godcreator/docfirst-workflow`，源码在 `packages/docfirst-workflow/src/`。出口 `.`（`src/index.ts`）、`./mdx`（`src/mdx/index.ts`）、
 `./cards`（`src/cards/index.ts`），可执行文件 `docfirst`（`src/cli/cli.ts`）。
+接到 fumadocs 站上的部分在 `src/fumadocs/`，经 `./fumadocs` 开头的出口发出去，讲在 [fumadocs 适配](/docs/fumadocs)。
 
 <SeamMap module="workflow" />
 
@@ -13,7 +14,7 @@ full: true
 
 目录之间的依赖方向见上图。这些目录在同一个包里，编译器不拦跨目录 import，方向由边界测试的禁止表检查：
 
-{/* ref file="../tests/boundary.test.ts" lines="312-335" hash="6aa3df9ae68c" blob="269b4f418ee0" */}
+{/* ref file="../tests/boundary.test.ts" lines="312-337" hash="8bc8334eed36" blob="29557311bd0a" */}
 
 ### 项目装配 project
 
@@ -30,7 +31,7 @@ full: true
 
 {/* ref file="../packages/docfirst-workflow/src/project/load.ts" lines="120-126" hash="5d8ed05b1d87" blob="9fa77c18d282" */}
 
-**读取器与旧内容来源**：旧内容来源按被引文件自己的位置找仓，hunk 表用两个临时文件跑 `git diff --no-index` 算，不往任何对象库写：
+**读取器与旧内容来源**：旧内容来源按被引文件自己的位置找仓，hunk 表用两个临时文件运行 `git diff --no-index` 算，不往任何对象库写：
 
 {/* ref file="../packages/docfirst-workflow/src/project/fs-reader.ts" lines="1-7" hash="d7f39c660a9c" blob="5b1604322176" */}
 
@@ -54,9 +55,9 @@ full: true
 docfirst 的轨迹卡怎么写、怎么校验、怎么换成星轨盘要的中性输入，都在 `src/cards/`；星轨盘是通用包，不认识卡文件的写法，
 见[星轨盘](/docs/trajectory)。卡的字段、关系行与校验逐条讲在[轨迹卡怎么变成星轨盘](/docs/trajectory/flow)。只有这一种卡格式，没有格式接口：
 
-{/* ref file="../packages/docfirst-workflow/src/cards/index.ts" lines="1-8" hash="2d12ba3f99d1" blob="a6d4f2866584" */}
+{/* ref file="../packages/docfirst-workflow/src/cards/index.ts" lines="1-8" hash="c0c58b5778e1" blob="922f6abe0946" */}
 
-`scanCards` 收读好的卡文件，交回中性输入加病卡清单：先报单卡的病，再跑跨文件的校验，再查「卡里不许钉码」，有病但画得出来的卡照样上盘。
+`scanCards` 收读好的卡文件，交回中性输入加病卡清单：先报单卡的病，再做跨文件的校验，再查「卡里不许钉码」，有病但画得出来的卡照样上盘。
 `scanCardDir` 读一个卡目录再交给它，目录不存在回空集合：
 
 {/* ref file="../packages/docfirst-workflow/src/cards/scan.ts" lines="19-44" hash="af462fe9dae6" blob="84851160ced5" */}
@@ -67,7 +68,7 @@ docfirst 的轨迹卡怎么写、怎么校验、怎么换成星轨盘要的中�
 
 ### 钉码编排 pinning
 
-一个文件的核对与确认只在这里串起来：按文件挑格式，格式认出引用，每处剥成目标与记录交给钉码核心，结果按原来的顺序配回文件路径与
+一个文件的核对与确认只在这里串起来：按文件选格式，格式认出引用，每处剥成目标与记录交给钉码核心，结果按原来的顺序配回文件路径与
 行号；确认时把钉码核心算出的新记录交回同一个格式写回。命令行、生成物摆放与站构建共用这一份，入口有三个：
 
 {/* ref file="../packages/docfirst-workflow/src/pinning/index.ts" lines="32-39" hash="f1fbdd9d8360" blob="846e36be1e3f" */}
@@ -197,13 +198,13 @@ fumadocs 自带组件的规则在 [fumadocs 适配](/docs/fumadocs)的 `./roster
 
 ## 接口
 
-三个出口加一个可执行文件：
+命令行那一侧的三个出口加一个可执行文件（`./fumadocs` 开头的出口见 [fumadocs 适配](/docs/fumadocs)）：
 
-{/* ref file="../packages/docfirst-workflow/package.json" lines="7-23" hash="963a33bdb3d8" blob="4ed0dffcdd33" */}
+{/* ref file="../packages/docfirst-workflow/package.json" lines="7-22" hash="1e4e1c65ed7c" blob="ddc68d23c92b" */}
 
 `.` 交出 `main`、`check --json` 报告的类型、`loadProject` / `docIdOf` / `scanCardDir` 与病卡的类型、引用与清单、格式接口和钉码编排的类型：
 
-{/* ref file="../packages/docfirst-workflow/src/index.ts" hash="44245e2ef4a9" blob="676e8e581c06" */}
+{/* ref file="../packages/docfirst-workflow/src/index.ts" hash="52a7edaa4684" blob="ae0c52fe37ec" */}
 
 `main` 自己不调 `process.exit`，可执行文件只转发参数与退出码，别的程序可以直接调 `main` 拿到退出码：
 
@@ -224,7 +225,7 @@ fumadocs 自带组件的规则在 [fumadocs 适配](/docs/fumadocs)的 `./roster
 **`./cards`** 是整个卡格式：读卡目录、解析、字段表、卡身份。fumadocs 适配的 `loadTrajectory` 与卡集合用它；
 走 `.` 会把命令行与配置加载带进 Next 的服务端构建：
 
-{/* ref file="../packages/docfirst-workflow/tsdown.config.ts" lines="9-11" hash="3a89750f81e1" blob="2acbf79d152f" */}
+{/* ref file="../packages/docfirst-workflow/tsdown.config.ts" lines="8-11" hash="0160c388d13b" blob="15c1ca54010e" */}
 
 **`check --json` 的报告**是给别的程序读的契约：加字段可以，改名、删字段是破坏性改动，只随破坏性版本发；`outputs` 那一段直接用项目装配的 `PlacedCheck` 类型：
 
@@ -237,20 +238,22 @@ fumadocs 自带组件的规则在 [fumadocs 适配](/docs/fumadocs)的 `./roster
 | 钉码核心 `@godcreator/code-pin`（通用包） | `createPinner`、目标与记录的类型、细分理由的中文说法 `REASON_TEXT`、hash 与 hunk 解析 |
 | 星轨盘 `@godcreator/trajectory-disk`（通用包） | 中性输入的类型、校验时刻的 `validBornAt`，`buildModel` 给 `docfirst trajectory` 建模 |
 | unified、remark-parse、remark-mdx、remark-frontmatter | mdx 格式的语法树 |
+| fumadocs-core、fumadocs-ui、react、unist-util-visit | 只有 `src/fumadocs/` 用；前三个是可选 peer，只用命令行的项目不装 |
 | `git` 命令行 | 取旧内容、算 hunk 表、查未提交改动、按 `.gitignore` 过滤；被引的文件与目录都不在 git 仓里时不启动 |
 
 ## 不做的事
 
-- **不认识任何站的宿主**：fumadocs、react、next 在源码、清单、产物里都不出现，命令行跑在 git hook 与 CI 里，那些环境不一定装了站的依赖：
+- **命令行那一侧不认识任何站的宿主**：除了 `src/fumadocs/`，fumadocs、react、next 在源码与产物里都不出现，清单里它们只是可选 peer。
+  命令行运行在 git hook 与 CI 里，那些环境不一定装了站的依赖：
 
-{/* ref file="../tests/boundary.test.ts" lines="409-423" hash="d5b710f640dc" blob="269b4f418ee0" */}
+{/* ref file="../tests/boundary.test.ts" lines="431-443" hash="8ddaab08f765" blob="e4a12e9753de" */}
 
-- **不依赖 fumadocs 适配**：包方向表里 workflow 一行禁止它：
+- **命令行那一侧不认识 fumadocs 适配**：别的目录不许引用 `src/fumadocs/`，`src/fumadocs/` 也只按包名用 `.`、`./mdx`、`./cards`：
 
-{/* ref file="../tests/boundary.test.ts" lines="131-137" hash="d1725af384df" blob="269b4f418ee0" */}
+{/* ref file="../tests/boundary.test.ts" lines="415-429" hash="6cf7852c8dc4" blob="e4a12e9753de" */}
 
 - **不判状态**：绿黄白红由[钉码核心](/docs/pin)算，这个包把磁盘、git、配置交给它，再把结果打印出来。
-- **不给盘建模、不画盘**：关系怎么连成树、主干怎么挑、盘怎么画归[星轨盘](/docs/trajectory)；这个包只把卡文件换成它要的中性输入。
+- **不给盘建模、不画盘**：关系怎么连成树、主干怎么选、盘怎么画归[星轨盘](/docs/trajectory)；这个包只把卡文件换成它要的中性输入。
 - **摆放不读写文件**：`placement.ts` 经 `PlacingHost` 读写落点，读写磁盘的那份实现在 `load.ts`，测试换成内存那份：
 
 {/* ref file="../packages/docfirst-workflow/src/project/placement.ts" lines="77-91" hash="90be89518ac3" blob="6dc0e3cf3ba7" */}

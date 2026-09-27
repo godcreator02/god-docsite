@@ -13,7 +13,6 @@
     "test": "node --test \"tests/*.test.mjs\""
   },
   "dependencies": {
-    "@godcreator/docfirst-fumadocs": "workspace:*",
     "@godcreator/explainer-player": "workspace:*",
     "@godcreator/docfirst-workflow": "workspace:*",
     "cn": "^0.3.0",

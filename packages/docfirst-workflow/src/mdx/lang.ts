@@ -1,6 +1,6 @@
 /**
  * 被引文件的后缀 → 代码块的语言名。按原文渲染（render.ts）与站上的代码块节点
- * （`@godcreator/docfirst-fumadocs` 的 blocks）用同一张表，两边的代码块才标同一种语言。
+ * （`@godcreator/docfirst-workflow/fumadocs` 的 blocks）用同一张表，两边的代码块才标同一种语言。
  */
 
 const LANG: Record<string, string> = {

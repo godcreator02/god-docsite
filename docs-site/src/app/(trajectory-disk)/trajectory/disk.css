@@ -1,4 +1,4 @@
-@import '@godcreator/docfirst-fumadocs/trajectory.css';
+@import '@godcreator/docfirst-workflow/fumadocs/trajectory.css';
 
 /* 顶栏一条，盘占满剩下的高度；整页挂 star-surface，顶栏跟盘同一块底色、不画分隔线 */
 .trajectory-page {

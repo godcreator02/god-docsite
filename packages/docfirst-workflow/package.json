@@ -3,7 +3,7 @@
   "version": "0.4.0",
   "author": {"name": "godcreator"},
   "type": "module",
-  "description": "文档站工作流工具：命令行（核对、确认、渲染、轨迹）、项目装配与 mdx 格式，随 docfirst 线发。",
+  "description": "docfirst 文档工作流：命令行（核对、确认、渲染、轨迹）、项目装配、mdx 格式与卡格式，外加接到 fumadocs 站上的子入口 ./fumadocs（remark 接入、状态点与术语组件、轨迹卡集合与星轨盘、样式），随 docfirst 线发。",
   "bin": {
     "docfirst": "./dist/cli.mjs"
   },
@@ -19,10 +19,34 @@
     "./cards": {
       "types": "./dist/cards.d.mts",
       "default": "./dist/cards.mjs"
-    }
+    },
+    "./fumadocs": {
+      "types": "./dist/fumadocs.d.mts",
+      "default": "./dist/fumadocs.mjs"
+    },
+    "./fumadocs/roster": {
+      "types": "./dist/fumadocs-roster.d.mts",
+      "default": "./dist/fumadocs-roster.mjs"
+    },
+    "./fumadocs/pre": {
+      "types": "./dist/fumadocs-pre.d.mts",
+      "default": "./dist/fumadocs-pre.mjs"
+    },
+    "./fumadocs/term": {
+      "types": "./dist/fumadocs-term.d.mts",
+      "default": "./dist/fumadocs-term.mjs"
+    },
+    "./fumadocs/trajectory": {
+      "types": "./dist/fumadocs-trajectory.d.mts",
+      "default": "./dist/fumadocs-trajectory.mjs"
+    },
+    "./fumadocs/light.css": "./styles/light.css",
+    "./fumadocs/term.css": "./styles/term.css",
+    "./fumadocs/trajectory.css": "./styles/trajectory.css"
   },
   "files": [
-    "dist"
+    "dist",
+    "styles"
   ],
   "scripts": {
     "build": "tsdown",
@@ -35,7 +59,26 @@
     "remark-frontmatter": "^5.0.0",
     "remark-mdx": "^3.0.0",
     "remark-parse": "^11.0.0",
-    "unified": "^11.0.0"
+    "unified": "^11.0.0",
+    "unist-util-visit": "^5.0.0"
+  },
+  "peerDependencies": {
+    "fumadocs-core": ">=16",
+    "fumadocs-ui": ">=16",
+    "react": ">=19"
+  },
+  "peerDependenciesMeta": {
+    "fumadocs-core": {"optional": true},
+    "fumadocs-ui": {"optional": true},
+    "react": {"optional": true}
+  },
+  "devDependencies": {
+    "@standard-schema/spec": "^1.1.0",
+    "@types/mdast": "^4.0.4",
+    "@types/react": "^19.3.0",
+    "fumadocs-core": "16.15.14",
+    "fumadocs-ui": "npm:@fumadocs/base-ui@16.15.14",
+    "react": "^19.3.0"
   },
   "publishConfig": {
     "access": "public",

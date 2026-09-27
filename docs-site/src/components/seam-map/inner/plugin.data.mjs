@@ -155,7 +155,7 @@ export const pluginGraph = defineSeamGraph({
       role: 'blue',
       outside: false,
       blurb:
-        '建站命令共用的建站函数。planSite 检查目标、定站名、挑端口，运行官方脚手架并读进内存，应用本机约定、合并 package.json、按清单改文件，任何一步不通过都在写入文件前抛出；createSite 再整套写进目标目录。插件里只有这个文件启动子进程。',
+        '建站命令共用的建站函数。planSite 检查目标、定站名、选端口，运行官方脚手架并读进内存，应用本机约定、合并 package.json、按清单改文件，任何一步不通过都在写入文件前抛出；createSite 再整套写进目标目录。插件里只有这个文件启动子进程。',
       caps: [
         { id: 'changes', name: '三张清单', ident: 'applyChanges' },
         { id: 'conventions', name: '本机约定', ident: 'applyConventions' },
@@ -169,8 +169,8 @@ export const pluginGraph = defineSeamGraph({
       pkg: 'ports.ts',
       role: 'blue',
       outside: false,
-      blurb: '只读文件系统。认出别的站占了哪些端口，给了端口就用给的，没给从 4310 起挑第一个空闲的；4310–4399 留给文档站。',
-      caps: [{ id: 'pick-port', name: '查重与挑端口', ident: 'scanUsedPorts · pickPort' }],
+      blurb: '只读文件系统。认出别的站占了哪些端口，给了端口就用给的，没给从 4310 起选第一个空闲的；4310–4399 留给文档站。',
+      caps: [{ id: 'pick-port', name: '查重与选端口', ident: 'scanUsedPorts · pickPort' }],
     },
     {
       id: 'packages',
@@ -182,7 +182,7 @@ export const pluginGraph = defineSeamGraph({
         '新站要装的 docfirst 包：workflow 给站提供命令行 docfirst 与 mdx 格式，fumadocs 适配给站提供集合选项、组件名册、状态点组件与样式。插件不依赖它们，只把包名和版本写进新站。',
       caps: [
         { id: 'pkg-workflow', name: '命令行与项目', ident: 'docfirst-workflow' },
-        { id: 'pkg-fumadocs', name: 'fumadocs 适配', ident: 'docfirst-fumadocs' },
+        { id: 'pkg-fumadocs', name: 'fumadocs 适配', ident: 'docfirst-workflow/fumadocs' },
       ],
     },
     {
@@ -313,7 +313,7 @@ export const pluginGraph = defineSeamGraph({
       name: '包名约定',
       a: ['tpl', 'deps-table'],
       b: ['pkg-workflow', 'pkg-fumadocs'],
-      iface: '模板只 import docfirst-workflow/mdx、docfirst-fumadocs 与它的 /roster、/pre、/light.css',
+      iface: '模板只 import docfirst-workflow/mdx、docfirst-workflow/fumadocs 与 /fumadocs/roster、/fumadocs/pre、/fumadocs/light.css',
       convention: true,
       via: 'disk',
       text: '插件对本仓的 npm 包零依赖：dependencies、devDependencies、peerDependencies 都不写，源码不 import，tests/artifact.test.ts 检查。所以模板里 import 的出口、依赖表里的包名只能靠约定对上：tests/create.test.ts 检查模板引用的出口都在允许的清单里、所在的包都在依赖表里。',
@@ -366,7 +366,7 @@ export const pluginGraph = defineSeamGraph({
       iface: 'scanUsedPorts(root) → { used, incomplete }；pickPort(used, prefer?)',
       convention: false,
       via: 'code',
-      text: 'planSite 在查重范围里调 scanUsedPorts，得到别的站占用的端口与没读取成功的位置；pickPort 给了端口就用给的，没给从 4310 起挑第一个空闲的，全被占了就报错。给的端口已被占用只写进 portTakenBy，不替人改。',
+      text: 'planSite 在查重范围里调 scanUsedPorts，得到别的站占用的端口与没读取成功的位置；pickPort 给了端口就用给的，没给从 4310 起选第一个空闲的，全被占了就报错。给的端口已被占用只写进 portTakenBy，不替人改。',
     },
     {
       n: 16,

@@ -1,5 +1,5 @@
 /**
- * `@godcreator/docfirst-fumadocs/trajectory`：`loadTrajectory(dir)` 读卡目录，返回星轨盘的中性输入加病卡清单；
+ * `@godcreator/docfirst-workflow/fumadocs/trajectory`：`loadTrajectory(dir)` 读卡目录，返回星轨盘的中性输入加病卡清单；
  * 另外再导出客户端组件 `StarDisk`——站的星轨盘页把前者原样传给后者（组件自己建模），只依赖这个包。星轨盘的样式在 `./trajectory.css`。
  *
  * 读卡目录用 `@godcreator/docfirst-workflow/cards` 的 `scanCardDir`（docfirst 卡格式与校验都在那儿）。

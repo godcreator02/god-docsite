@@ -63,7 +63,7 @@ export function TrajectoryFlow(_node, { paragraph }) {
     paragraph(`/trajectory 整页：顶栏一条，下面是盘。${clicks.map((c) => `${c.what}：${c.then}`).join('；')}。`),
     paragraph(`${files.page} 里读卡目录、交给 StarDisk 的几行：`),
     ...pageLines.map((block) => paragraph(numbered(block.lines, block.start))),
-    paragraph('docfirst-fumadocs 的 src/trajectory.ts 里 loadTrajectory 的定义：'),
+    paragraph('docfirst-workflow 的 src/fumadocs/trajectory.ts 里 loadTrajectory 的定义：'),
     paragraph(numbered(fumadocsLines.lines, fumadocsLines.start)),
   ];
 }

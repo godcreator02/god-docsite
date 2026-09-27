@@ -10,13 +10,13 @@ docfirst: none
 本插件有**两条命令**：`docfirst.create` 给一个仓建一个接好 docfirst 分区的文档站，`docfirst.create-plain`
 建一个不接 docfirst 的普通 fumadocs 站。除此之外它只做一件事：把本插件带的其余说明书注册给你读。
 
-**它对本仓发布的 npm 包零依赖**（通用包 `code-pin`、`trajectory-disk`、`explainer-player`，docfirst 自己的 `docfirst-workflow`、`docfirst-fumadocs`），装了本插件不必再装什么包。判据是「这件事在哪儿发生」：
+**它对本仓发布的 npm 包零依赖**（通用包 `code-pin`、`trajectory-disk`、`explainer-player`，docfirst 自己的 `docfirst-workflow`），装了本插件不必再装什么包。判据是「这件事在哪儿发生」：
 核对 / 确认 / 渲染要在**仓**里发生（那是门禁与站构建要运行的东西），你自己 `cd` 过去运行；只在你手上发生一次的
 （读说明书、给一个仓建一次站）才归插件。**插件不转发命令行。**
 
 **建站在本插件里一步做完**：运行官方脚手架 `create-fumadocs-app`（版本写死，要联网）、应用本机约定（端口并只监听 127.0.0.1、
-页面语言、字体、站名等）、挑端口、写文件。**本插件不管站的运行**：没有启动、停止站的命令，也没有窗格。
-站建好以后要改结构（加分区、加组件）、要运行 `dev` / `build`，读本插件的说明书 `docs-site`。
+页面语言、字体、站名等）、选端口、写文件。**本插件不管站的运行**：没有启动、停止站的命令，也没有窗格。
+站建好以后要改结构（加分区、加组件）、要构建和看页面，读本插件的说明书 `docs-site`。
 
 ## 建一个新站
 
@@ -34,15 +34,15 @@ docfirst.create {"dir":"<仓>/docs-site"}
 
 - `dir`：**站目录**的绝对路径（约定是 `<仓>/docs-site`）。它必须还不存在，上一级（仓目录）必须已经存在。
 - `title`：站的显示名，不给就依次用仓根 `package.json` 的 `title`、包名去掉 scope、仓的目录名。
-- `port`：站的端口。不给就在容器根（单元文件夹插件的设置 `unit-folder.units-root`）里找没被别的站脚本占用的，从 4310 起挑；
+- `port`：站的端口。不给就在容器根（单元文件夹插件的设置 `unit-folder.units-root`）里找没被别的站脚本占用的，从 4310 起选；
   检查端口占用时没读取成功的目录或 `package.json` 列在回执的 `portScanIncomplete` 里。
 
 多给别的键直接报错。回执是 `{ dir, repoDir, port, written, overwrites, portScanIncomplete, next, warn? }`。
 
 建出来的东西：官方脚手架的站（搜索、llms 路由照旧），加上三个集合（`src/lib/source.ts` 里用 fumadocs-mdx 的 macro
-写的 docs、trajectory、future，现状集合经 `applyMdxPreset(docfirstMdxOptions(...))` 接上 docfirst，这些接入配置从 `@godcreator/docfirst-fumadocs` 取）、各区的路由与侧栏三个根节点、
-整页星轨盘 `/trajectory`（`loadTrajectory` 与 `StarDisk` 从 `@godcreator/docfirst-fumadocs/trajectory` 取，样式是它的 `trajectory.css`）与卡页 `/trajectory/<卡身份>`、
-`docfirst.config.mjs`（名册展开 `@godcreator/docfirst-fumadocs/roster` 的 `fumadocsRoster`）、mdx 的接入配置（`src/components/mdx.tsx` 里的状态点组件）、样式 `src/app/docfirst.css`、名册脚本、
+写的 docs、trajectory、future，现状集合经 `applyMdxPreset(docfirstMdxOptions(...))` 接上 docfirst，这些接入配置从 `@godcreator/docfirst-workflow/fumadocs` 取）、各区的路由与侧栏三个根节点、
+整页星轨盘 `/trajectory`（`loadTrajectory` 与 `StarDisk` 从 `@godcreator/docfirst-workflow/fumadocs/trajectory` 取，样式是 `@godcreator/docfirst-workflow/fumadocs/trajectory.css`）与卡页 `/trajectory/<卡身份>`、
+`docfirst.config.mjs`（名册展开 `@godcreator/docfirst-workflow/fumadocs/roster` 的 `fumadocsRoster`）、mdx 的接入配置（`src/components/mdx.tsx` 里的状态点组件）、样式 `src/app/docfirst.css`、名册脚本、
 起始页（`content/docs/` 下的入口页、术语表与 `outputs/` 下的生成正本，`content/future/` 一页；`content/trajectory/`
 只有 `meta.json`，侧栏第一条链到星轨盘，根卡与其余的卡照说明书 `trajectory` 写），`package.json` 里
 有 docfirst 的依赖与 `doc` / `doc:confirm` / `doc:render` / `verify:roster` 几条脚本。
@@ -105,7 +105,7 @@ description: 来源：<哪个仓 / 哪次会话>
 
 - **`docfirst-docs`**：文档站怎么写——分区怎么分、引用记号各钉哪种话、每页写到哪为止、钉码怎么确认。
   写或改任何仓的文档站之前先读它。
-- **`docs-site`**：每一页怎么做成讲清原理的网页、站的组件怎么接、怎么验收，两条建站命令、加分区、pnpm 与 next 的常见错误。
+- **`docs-site`**：每一页怎么做成讲清原理的网页、站的组件怎么登记、怎么验收，两条建站命令、加分区、pnpm 与 next 的常见错误。
 - **`trajectory`**：什么时候记一张轨迹卡、怎么写、卡的字段是什么。
 - **`docs-governance`**：文档与注释治理——代码自解释扫描、术语统一、清除历史描述、分清谁负责什么。
 

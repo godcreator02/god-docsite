@@ -23,17 +23,16 @@ const PACKAGES = path.resolve(HERE, '..', '..', '..', 'packages')
 /** 包名 → 它在 packages/ 下的目录名 */
 const DIR_OF: Record<string, string> = {
   '@godcreator/docfirst-workflow': 'docfirst-workflow',
-  '@godcreator/docfirst-fumadocs': 'docfirst-fumadocs',
 }
 
-/** 模板可以 import 的 docfirst 出口：只有写进站依赖表的两个包的这几个出口 */
+/** 模板可以 import 的 docfirst 出口：只有写进站依赖表的那个包的这几个出口 */
 const TEMPLATE_IMPORTABLE = [
-  '@godcreator/docfirst-fumadocs',
-  '@godcreator/docfirst-fumadocs/roster',
-  '@godcreator/docfirst-fumadocs/pre',
-  '@godcreator/docfirst-fumadocs/light.css',
-  '@godcreator/docfirst-fumadocs/trajectory',
-  '@godcreator/docfirst-fumadocs/trajectory.css',
+  '@godcreator/docfirst-workflow/fumadocs',
+  '@godcreator/docfirst-workflow/fumadocs/roster',
+  '@godcreator/docfirst-workflow/fumadocs/pre',
+  '@godcreator/docfirst-workflow/fumadocs/light.css',
+  '@godcreator/docfirst-workflow/fumadocs/trajectory',
+  '@godcreator/docfirst-workflow/fumadocs/trajectory.css',
 ]
 
 /**
@@ -193,10 +192,10 @@ describe('结构模板', () => {
     ])
     expect(renderedText('src/app/(trajectory-cards)/trajectory/layout.tsx').trim()).toBe("export { default } from '../../docs/layout';")
     expect(renderedText('src/app/(trajectory-disk)/trajectory/layout.tsx')).toMatch(/^import '\.\/disk\.css';$/m)
-    expect(renderedText('src/app/(trajectory-disk)/trajectory/disk.css')).toMatch(/^@import '@godcreator\/docfirst-fumadocs\/trajectory\.css';$/m)
+    expect(renderedText('src/app/(trajectory-disk)/trajectory/disk.css')).toMatch(/^@import '@godcreator\/docfirst-workflow\/fumadocs\/trajectory\.css';$/m)
 
     const disk = renderedText('src/app/(trajectory-disk)/trajectory/page.tsx')
-    expect(disk).toMatch(/^import \{ loadTrajectory, StarDisk \} from '@godcreator\/docfirst-fumadocs\/trajectory';$/m)
+    expect(disk).toMatch(/^import \{ loadTrajectory, StarDisk \} from '@godcreator\/docfirst-workflow\/fumadocs\/trajectory';$/m)
     expect(disk, '卡目录用写死的目录名拼成绝对路径，Turbopack 才不把整个项目打进服务端产物').toMatch(/loadTrajectory\(join\(process\.cwd\(\), 'content', 'trajectory'\)\)/)
     expect(disk, 'StarDisk 的 hrefBase 与轨迹卡 loader 的 baseUrl 是同一个前缀，正文随 bodies 传进去').toMatch(/<StarDisk data=\{data\} hrefBase="\/trajectory" bodies=\{bodies\} \/>/)
     expect(disk, '每张卡的正文在盘页上用轨迹卡集合渲染好，键是卡身份（跟卡页地址同一个）').toMatch(/sourceTrajectory\.getPages\(\)/)
@@ -232,7 +231,7 @@ describe('结构模板', () => {
     expect(layout, '每个根节点带唯一的 $id，区切换下拉才对得上').toMatch(/\$id: `zone:\$\{id\}`/)
     expect(layout).toMatch(/root: true/)
     expect(layout).toMatch(/import '\.\.\/docfirst\.css';/)
-    expect(renderedText('src/app/docfirst.css')).toMatch(/@import '@godcreator\/docfirst-fumadocs\/light\.css';/)
+    expect(renderedText('src/app/docfirst.css')).toMatch(/@import '@godcreator\/docfirst-workflow\/fumadocs\/light\.css';/)
   })
 
   it('模板里引用的 docfirst 出口都在站依赖表的两个包里', () => {
@@ -246,7 +245,7 @@ describe('结构模板', () => {
 
   it('src/components/mdx.tsx：pre 换成状态点组件，官方的 useMDXComponents 与全局类型还在', () => {
     const mdx = renderedText('src/components/mdx.tsx')
-    expect(mdx).toMatch(/import \{ DocfirstPre \} from '@godcreator\/docfirst-fumadocs\/pre';/)
+    expect(mdx).toMatch(/import \{ DocfirstPre \} from '@godcreator\/docfirst-workflow\/fumadocs\/pre';/)
     expect(mdx).toMatch(/pre: DocfirstPre,/)
     expect(mdx).toMatch(/export const useMDXComponents = getMDXComponents;/)
     expect(mdx).toMatch(/type MDXProvidedComponents = /)
@@ -266,10 +265,10 @@ describe('结构模板', () => {
     expect(body).toMatch(/'content\/docs\/outputs\/claude\.mdx': \['\.\.\/CLAUDE\.md'\]/)
   })
 
-  it('docfirst.config.mjs：不配格式（格式按约定认领文件），名册展开 fumadocs 包的 fumadocsRoster', () => {
+  it('docfirst.config.mjs：不配格式（格式按约定认领文件），名册展开 fumadocs 子入口的 fumadocsRoster', () => {
     const config = renderedText('docfirst.config.mjs')
     expect(config).not.toMatch(/docfirst-workflow\/mdx/)
-    expect(config).toMatch(/^import \{ fumadocsRoster \} from '@godcreator\/docfirst-fumadocs\/roster'$/m)
+    expect(config).toMatch(/^import \{ fumadocsRoster \} from '@godcreator\/docfirst-workflow\/fumadocs\/roster'$/m)
     expect(config).toMatch(/components: \{\s*\.\.\.fumadocsRoster,\s*\}/)
   })
 
@@ -312,7 +311,7 @@ describe('planCreate：交给 createSite 的选项', () => {
     expect(new Set(paths).size, '三个清单之间有重复路径').toBe(paths.length)
   })
 
-  it('依赖与脚本：docfirst-workflow 与 docfirst-fumadocs 进 devDependencies，doc 脚本进 scripts，不占官方的 dev / build / start', () => {
+  it('依赖与脚本：docfirst-workflow 进 devDependencies，doc 脚本进 scripts，不占官方的 dev / build / start', () => {
     const args = planCreate(inputWith())
     expect(args.devDependencies).toEqual(DOCFIRST_DEPS)
     expect(args.dependencies, '不往运行时依赖里加').toBeUndefined()

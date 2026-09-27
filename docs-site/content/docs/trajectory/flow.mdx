@@ -1,6 +1,6 @@
 ---
 title: 轨迹卡怎么变成星轨盘
-description: content/trajectory/ 下的轨迹卡怎么被读出、校验、换成星轨盘的中性输入、建成一张盘、在每棵树里挑出主干，再画到站的 /trajectory 上；以及卡里为什么不许钉码
+description: content/trajectory/ 下的轨迹卡怎么被读出、校验、换成星轨盘的中性输入、建成一张盘、在每棵树里选出主干，再画到站的 /trajectory 上；以及卡里为什么不许钉码
 ---
 
 轨迹卡是 `content/trajectory/` 下一卡一文件的 mdx，一张卡记一次取舍的结论，只增不改。星轨盘是这些卡的图：
@@ -50,10 +50,10 @@ description: content/trajectory/ 下的轨迹卡怎么被读出、校验、换�
 
 {/* ref file="../packages/docfirst-workflow/src/cards/scan.ts" lines="46-73" hash="ea1b3b8a9e0a" blob="84851160ced5" */}
 
-## 建树、挑主干
+## 建树、选主干
 
-关系在建模时求解，目标不在盘上的记进 `broken`。用取代与转向连在一起的卡组成一棵树。树的**主干**在取代关系上挑：
-几条取代链先比终点的时刻谁更晚，再比长短，最后按身份排；整棵树一条取代都没有，才在转向链上用同一个比法挑。
+关系在建模时求解，目标不在盘上的记进 `broken`。用取代与转向连在一起的卡组成一棵树。树的**主干**在取代关系上选：
+几条取代链先比终点的时刻谁更晚，再比长短，最后按身份排；整棵树一条取代都没有，才在转向链上用同一个比法选。
 不在主干上的卡按连通分成**支线**；两种关系都没有的卡是**孤星**：
 
 {/* ref file="../packages/trajectory-disk/src/model/build.ts" lines="177-204" hash="3efa5ab62617" blob="fafdd715830c" */}
@@ -64,9 +64,9 @@ description: content/trajectory/ 下的轨迹卡怎么被读出、校验、换�
 
 ## 站上怎么渲染
 
-整页 `/trajectory` 在服务端读卡目录，把结果交给客户端组件 `StarDisk`；两样都从 `@godcreator/docfirst-fumadocs/trajectory` 取：
+整页 `/trajectory` 在服务端读卡目录，把结果交给客户端组件 `StarDisk`；两样都从 `@godcreator/docfirst-workflow/fumadocs/trajectory` 取：
 
-{/* ref file="src/app/(trajectory-disk)/trajectory/page.tsx" lines="5-5" hash="75e52e0103c2" blob="da67a1b04df3" */}
+{/* ref file="src/app/(trajectory-disk)/trajectory/page.tsx" lines="8-8" hash="e3b0c44298fc" blob="656dac5215ca" */}
 
 {/* ref file="src/app/(trajectory-disk)/trajectory/page.tsx" lines="11-12" hash="79d6f7b6375a" blob="da67a1b04df3" */}
 
@@ -80,7 +80,7 @@ description: content/trajectory/ 下的轨迹卡怎么被读出、校验、换�
 `loadTrajectory` 只收绝对路径，然后读卡目录，交回中性输入与病卡清单。卡目录由页面用写死的目录名拼成绝对路径再传，
 Turbopack 才看得出只读这一个目录，不会把整个项目打包进服务端产物：
 
-{/* ref file="../packages/docfirst-fumadocs/src/trajectory.ts" lines="18-26" hash="274aec720515" blob="127ca2597015" */}
+{/* ref file="../packages/docfirst-workflow/src/fumadocs/trajectory.ts" lines="18-26" hash="274aec720515" blob="127ca2597015" */}
 
 每张卡另有自己的卡页 `/trajectory/<卡身份>`，由站里的 fumadocs 卡集合渲染：`cardSchema` 从 frontmatter 派生标题，
 `remarkTrajectoryLinks` 把正文里指向卡的链接改写成卡页地址（侧栏靠这个前缀认出卡链接）：

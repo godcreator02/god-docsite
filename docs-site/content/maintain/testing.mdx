@@ -3,11 +3,11 @@ title: 测试与边界
 description: 包与目录之间的依赖方向靠什么检查，各组测试检查什么，这个站为什么也是一组测试
 ---
 
-## 三处测试，各自跑
+## 三处测试，各自运行
 
-| 在哪儿 | 怎么跑 | 用什么 |
+| 在哪儿 | 怎么运行 | 用什么 |
 | --- | --- | --- |
-| 仓根 `tests/` | `pnpm test`（先 build，再跑） | `node --test`，测试是 `.ts`，Node 直接跑 |
+| 仓根 `tests/` | `pnpm test`（先 build，再运行） | `node --test`，测试是 `.ts`，Node 直接运行 |
 | `docs-site/tests/` | `pnpm test` | `node --test`，测试是 `.mjs` |
 | `plugins/docfirst/tests/` | `pnpm check` | vitest，跟 devkit 生成的插件初始文件一致 |
 
@@ -18,7 +18,7 @@ description: 包与目录之间的依赖方向靠什么检查，各组测试检�
 ## 依赖方向：只有一个文件在检查
 
 pnpm 严格的 `node_modules` 只保证没写进依赖的包 import 不到；「该不该写进依赖」没人管，workflow 包里
-`marker/`、`reference/`、`mdx/`、`code/`、`pinning/`、`project/`、`cards/`、`cli/` 之间编译器也不拦——`mdx/` 里写一句 `import "../project/load.ts"` 不会报错，
+`marker/`、`reference/`、`mdx/`、`code/`、`pinning/`、`project/`、`cards/`、`cli/`、`fumadocs/` 之间编译器也不拦——`mdx/` 里写一句 `import "../project/load.ts"` 不会报错，
 mdx 格式从此就跟读盘、git 绑在一起。补上这两项的是 `tests/boundary.test.ts`，它是包之间、workflow 目录之间**唯一**的边界检查。
 选一类规则，看它允许哪些方向、禁止哪些方向、由哪条测试失败报出来：
 
@@ -27,24 +27,24 @@ mdx 格式从此就跟读盘、git 绑在一起。补上这两项的是 `tests/b
 禁止表**列的是禁止的，不是允许的**：写成允许的话，新加一个包默认什么都不能依赖，放错位置反而更难发现。
 `packages/` 下多出一个表里没有的目录，另一条测试当场失败，要求先想清楚它能认识谁：
 
-{/* ref file="../tests/boundary.test.ts" lines="123-137" hash="befd1479b002" blob="269b4f418ee0" */}
+{/* ref file="../tests/boundary.test.ts" lines="125-137" hash="10099a6dad41" blob="29557311bd0a" */}
 
 workflow 目录之间是同样的写法：
 
-{/* ref file="../tests/boundary.test.ts" lines="326-335" hash="4e942c086aa2" blob="269b4f418ee0" */}
+{/* ref file="../tests/boundary.test.ts" lines="327-337" hash="2c75b499fb4b" blob="29557311bd0a" */}
 
 ## 通用包：不认识 docfirst，能单独拿走用
 
 本仓的包分两类。**通用包**不认识 docfirst：`code-pin` 把文字钉在代码上，`trajectory-disk` 把一组卡画成项目方向演变的圆盘，
 `explainer-player` 把讲解拆成配说明的帧来播放；docfirst 只是它们的一个使用者。docfirst 自己的规矩在
-`docfirst-workflow` 与 `docfirst-fumadocs` 里。通用包列在一张表里，下面三条对表里每个包都一样：
+`docfirst-workflow` 里。通用包列在一张表里，下面三条对表里每个包都一样：
 清单里没有任何 `@godcreator/` 包；源码与产物不 import 它们，源码的相对 import 不出自己的 `src/`；
 包目录里（源码、产物、样式、构建配置、清单）一个 docfirst 字样都没有。
 
 最后一条连注释也查。通用包里一旦写了「docfirst 站会这样用」，下一个改它的人就会照着 docfirst 的需要改它，
-它就不再通用。讲 docfirst 怎么用这几个包，写在 docfirst 的两个包或这个站里。加一个通用包只要把它加进表里：
+它就不再通用。讲 docfirst 怎么用这几个包，写在 `docfirst-workflow` 或这个站里。加一个通用包只要把它加进表里：
 
-{/* ref file="../tests/boundary.test.ts" lines="169-229" hash="9c142f441342" blob="269b4f418ee0" */}
+{/* ref file="../tests/boundary.test.ts" lines="169-229" hash="734aabafa30c" blob="29557311bd0a" */}
 
 各通用包另有自己的几条。钉码只许 import `node:crypto`，源码与产物里没有文档文本那一侧的名字：
 
@@ -81,10 +81,10 @@ workflow 目录之间是同样的写法：
 
 {/* ref file="../tests/marker.test.ts" lines="111-114" hash="3386f2608c3a" blob="3c0f91ece368" */}
 
-## git 那一侧：真 git 仓，不打桩
+## git 那一侧：用实际的 git 仓，不打桩
 
 这一侧的行为几乎全看 git：blob 取不取得到、`diff -U0` 的 hunk 头长什么样、`status --porcelain` 列出哪些路径。
-打桩测的是对 git 的假设，所以这几组都调真 git：
+打桩测的是对 git 的假设，所以这几组都调用实际的 git：
 
 - `tests/git-history.test.ts`：比较器接上 git 版旧内容来源之后的跟随、退回滑窗、取对象的次数
 - `tests/reader-tree.test.ts`：目录树按 `.gitignore` 过滤、软链接按真实路径读
@@ -99,7 +99,7 @@ workflow 目录之间是同样的写法：
 
 装配的归一（内容根、`outputs` 的两种写法、文档身份）经 `loadProject` 看，在 `tests/project-load.test.ts`。
 摆放用 `PlacingHost` 的两个适配器测：`tests/placing-host.test.ts` 的落点是内存里一张表，一个字节不落盘；
-`tests/placement.test.ts` 在临时目录建真项目，`loadProject` 之后直接调摆放的方法，不经命令行。
+`tests/placement.test.ts` 在临时目录建实际的项目，`loadProject` 之后直接调摆放的方法，不经命令行。
 命令行把结果打印成什么、退什么码，在 `tests/cli*.test.ts` 那几份。
 
 星轨盘与卡格式的测试是 `tests/trajectory-*.test.ts`：卡格式的解析、扫描、校验在 parse、scan、validate、model 几份，fumadocs 卡集合在 server，
@@ -111,8 +111,8 @@ fumadocs 适配不接 Next 的那一半在 `tests/fumadocs.test.ts`，讲解播�
 ## 插件那组
 
 除了一条慢测试，插件的测试只传入输入看输出，不启动进程、不打开窗口：建站参数与模板（`create.test.ts`）、本机约定怎么改官方脚手架的输出
-（`scaffold.test.ts`，对照的是存在 `tests/fixtures` 下的样本）、端口挑选（`ports.test.ts`）、产物与依赖（`artifact.test.ts`）。
-真运行官方脚手架的 `scaffold.slow.test.ts` 要联网，只在 `pnpm test:all` 里跑。插件怎么工作见[工作台插件](/docs/plugin)。
+（`scaffold.test.ts`，对照的是存在 `tests/fixtures` 下的样本）、端口选择（`ports.test.ts`）、产物与依赖（`artifact.test.ts`）。
+实际运行官方脚手架的 `scaffold.slow.test.ts` 要联网，只在 `pnpm test:all` 里运行。插件怎么工作见[工作台插件](/docs/plugin)。
 
 ## 站也是使用者，也是一组测试
 

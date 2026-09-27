@@ -1,10 +1,10 @@
 /**
  * 组件名册的机制。名册的内容不在这里：项目在 docfirst.config.mjs 里声明自己的表，
  * 这里只提供「按一张表打标」的能力与写规则用的几个帮手。fumadocs 自带组件的规则
- * 在 `@godcreator/docfirst-fumadocs/roster`，项目展开它再加自己的。
+ * 在 `@godcreator/docfirst-workflow/fumadocs/roster`，项目展开它再加自己的。
  *
  * 打标不动树：同一棵树还要出页面。每个组件节点挂上「AI 那份里它长什么样」，
- * 真正序列化是 fumadocs 的事（见 `@godcreator/docfirst-fumadocs` 的 markdown.ts 回调）。
+ * 真正序列化是 fumadocs 的事（见 `@godcreator/docfirst-workflow/fumadocs` 的 markdown.ts 回调）。
  *
  * 规则三种写法：
  *   函数        (node, helpers) => 一个或一组普通 markdown 节点。纯函数：节点进节点出，不读文件

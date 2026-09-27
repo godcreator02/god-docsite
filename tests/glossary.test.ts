@@ -5,8 +5,8 @@
  */
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { buildTermIndex, findTerms, remarkGlossary } from "../packages/docfirst-fumadocs/src/index.ts";
-import type { TermEntry } from "../packages/docfirst-fumadocs/src/index.ts";
+import { buildTermIndex, findTerms, remarkGlossary } from "../packages/docfirst-workflow/src/fumadocs/index.ts";
+import type { TermEntry } from "../packages/docfirst-workflow/src/fumadocs/index.ts";
 import type { TreeNode } from "../packages/docfirst-workflow/src/mdx/index.ts";
 
 const BUS: TermEntry = { term: "命令总线", def: "件把能力挂上去、界面和 agent 从同一张表调" };

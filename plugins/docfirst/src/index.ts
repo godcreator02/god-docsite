@@ -122,7 +122,7 @@ export function apply(ctx: GwbContext): void {
           'src/app/docs/layout.tsx（侧栏三个根节点）与 content/docs/index.mdx，删掉示例页 content/docs/test.mdx，' +
           '新增轨迹与未来两个区的路由（轨迹区是整页星轨盘 /trajectory 加卡页 /trajectory/<卡身份>）、docfirst.config.mjs、组件名册与名册脚本、样式、' +
           '现状与未来两区的起始页、轨迹区的侧栏（第一条链到星轨盘，卡由人或 agent 以后写）与 README / AGENTS / CLAUDE 的正本（content/docs/outputs/），' +
-          '外加 docfirst 的依赖（@godcreator/docfirst-workflow 与 @godcreator/docfirst-fumadocs）与 doc 脚本。不 render、不 check。' +
+          '外加 docfirst 的依赖（@godcreator/docfirst-workflow）与 doc 脚本。不 render、不 check。' +
           '回 { dir, repoDir, port, written, overwrites, portScanIncomplete, next, warn? }——written 是写了哪些文件（相对站目录），' +
           'overwrites 是仓根已有、第一次 render 会覆盖的文件，next 是接着要在站目录里运行的命令，warn 汇总要人注意的事（覆盖、端口查重）',
         plugin: PLUGIN,

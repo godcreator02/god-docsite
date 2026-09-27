@@ -69,7 +69,7 @@ docs-site/content/
   「怎么做」，为什么写在站里。站上的页可以写得长，它是按需读的。
 - **引用轨迹卡是说「有先例」，不是说「不许动」**。环境变了就写一张新卡推翻旧结论。
 - **现状页少做站内链接**；对决策的说明写进轨迹卡再链过去。
-- 手画目录树、手抄配置样例、给跑出来的数字写散文，都会很快过时；别钉生成物。
+- 手画目录树、手抄配置样例、给运行出来的数字写散文，都会很快过时；别钉生成物。
 
 ## 引用各钉哪种话
 
@@ -108,10 +108,10 @@ export const steps = [ /* 照抄 a.ts 第 10–23 行的讲解数据 */ ];
 ## 同一个提交里处理
 
 **改代码的那个提交，同时处理这次改动让它变黄的引用。**改代码的人最清楚改了什么、文档里哪句还成立，
-隔几天再由别人成批确认，就成了只点确认、没人真去对照代码。
+隔几天再由别人成批确认，就成了只点确认、没人实际去对照代码。
 
-1. 改代码，先跑不带文档的检查（类型、lint、测试）
-2. 提交前在站目录跑 `docfirst check`：钉住的文件在本仓有未提交改动、内容又变了的黄色引用**按红处理**，拦下这次提交
+1. 改代码，先运行不带文档的检查（类型、lint、测试）
+2. 提交前在站目录运行 `docfirst check`：钉住的文件在本仓有未提交改动、内容又变了的黄色引用**按红处理**，拦下这次提交
 3. `docfirst confirm`：机械写回，不需要判断——未确认的记号写上记录；内容没变、只是挪了位置的，写回新行号；
    重新渲染生成正本。黄色的引用原样留着，逐条列出来
 4. 逐条看剩下的黄色引用：被钉的代码变了什么、正文哪句因此不再成立。论断还成立，
@@ -154,7 +154,7 @@ A 问需求边界，`gwb-decide` 问选型，两者不重叠。
 | 定了新术语 | 术语表 |
 | 做 / 不做的边界动了 | 讲边界的那页，理由写进卡 |
 
-真没有文档要改，说明这次改动没碰到任何「错了难改」的东西。
+确实没有文档要改，说明这次改动没碰到任何「错了难改」的东西。
 
 ## spec：在途方案
 
@@ -194,22 +194,22 @@ README、AGENTS.md、CLAUDE.md、包内 SKILL.md 都是生成物。正本是现�
 所以正本里可以钉码，但不能用 JSX 组件。SKILL.md 的 `name` / `description` 从 frontmatter 带过去；
 AGENTS / README 不带 frontmatter。改正本，不改生成物。
 
-每仓的 AGENTS 正本只写本仓专属的（怎么跑、端口、检查命令、禁止事项、从哪读起）加一行指回这份 skill，
+每仓的 AGENTS 正本只写本仓专属的（怎么运行、端口、检查命令、禁止事项、从哪读起）加一行指回这份 skill，
 生成出的 AGENTS.md 控制在 60 行内。CLAUDE 正本第一行固定是 `@AGENTS.md`，只给 Claude 的指令写在后面。
 
 # 建站
 
-建一个新站是**一条工作台命令**：`docfirst.create {"dir":"<仓>/docs-site"}`。它先跑官方脚手架
+建一个新站是**一条工作台命令**：`docfirst.create {"dir":"<仓>/docs-site"}`。它先运行官方脚手架
 `create-fumadocs-app`、加上本机约定，再在官方输出上改几份文件，一次写进目录：三个集合（docs、trajectory、future）用 fumadocs-mdx
 的 macro 写在 `src/lib/source.ts`，现状集合写 `mdxOptions: applyMdxPreset(docfirstMdxOptions({ root: process.cwd() }))` 与
-`postprocess.includeProcessedMarkdown: docfirstMarkdownOptions()`（两样都从 `@godcreator/docfirst-fumadocs` 取），外加各区的路由
-（轨迹区是整页星轨盘 `/trajectory` 与卡页，盘从 `@godcreator/docfirst-fumadocs/trajectory` 取）、
+`postprocess.includeProcessedMarkdown: docfirstMarkdownOptions()`（两样都从 `@godcreator/docfirst-workflow/fumadocs` 取），外加各区的路由
+（轨迹区是整页星轨盘 `/trajectory` 与卡页，盘从 `@godcreator/docfirst-workflow/fumadocs/trajectory` 取）、
 `docfirst.config.mjs`（内容根、生成物落点与组件名册）、mdx 的接入配置、名册脚本、现状与未来两区的起始页，`package.json` 里带上
-这两个包的依赖与 doc 脚本。只写文件不跑 install，端口不给就挑一个没被别的站占用的。
+这个包的依赖与 doc 脚本。只写文件不运行 install，端口不给就选一个没被别的站占用的。
 不接 docfirst 的普通 fumadocs 站用 `docfirst.create-plain`，参数相同。
 
 **站目录必须还不存在**：已经有站的仓不能用这条命令，给已经在用的站加 docfirst 要手动改站的配置接入。
-站建好以后要改站的结构（加分区、加组件）或跑 `dev` / `build`，读同一个插件的说明书 `docs-site`。
+站建好以后要改站的结构（加分区、加组件）或构建和看页面，读同一个插件的说明书 `docs-site`。
 
 模板假设站在仓根 `docs-site/`、被钉的代码在仓根（引用写 `../src/…`），形状不同就改引用里的相对路径。
 

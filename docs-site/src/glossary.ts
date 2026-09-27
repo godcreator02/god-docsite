@@ -10,7 +10,7 @@
  * （它既不是 mdx 页面，也不在讲解组件的目录下，引用管不到它），写进来就会悄悄过时。具体的名字留给 `href` 指的那一页，
  * 在那儿钉。`href` 一律指本站真实存在的页。
  */
-import type { TermEntry } from "@godcreator/docfirst-fumadocs";
+import type { TermEntry } from "@godcreator/docfirst-workflow/fumadocs";
 
 export const terms: TermEntry[] = [
   {

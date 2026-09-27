@@ -13,7 +13,7 @@
  * components 是组件名册，fumadocsRoster 给 fumadocs 自带文件树 Files / Folder / File 与 Note 的压平规则，
  * 站里自己加的组件在它后面追加。
  */
-import { fumadocsRoster } from '@godcreator/docfirst-fumadocs/roster'
+import { fumadocsRoster } from '@godcreator/docfirst-workflow/fumadocs/roster'
 
 export default {
   content: 'content',

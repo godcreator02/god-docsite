@@ -1,0 +1,51 @@
+---
+born-at: 2026-09-27T17:40
+type: choice
+parent: [2026-09-03-god-live-doc]
+label: fumadocs 适配并进 workflow
+domain: 模块边界
+---
+
+## 背景
+
+按接缝拆包时，docfirst 自己分成两个包：命令行与项目 `docfirst-workflow`、fumadocs 适配 `docfirst-fumadocs`。
+分开的理由是命令行不绑定 fumadocs。可是建站命令总把两个包一起写进站的依赖，没有只装其中一个的站；
+fumadocs 适配本身依赖 workflow；文档站也已经定了只用 fumadocs、不换框架。分开只是给一个不会来的第二个框架留位置，
+代价是多一个版本号要维护、建站依赖表多一行，下游站迁移时多装一个包。
+
+pivots-from:: [按接缝拆四包](2026-09-26-split-by-seams-into-four-packages.mdx)
+
+## 结论与边界
+
+**`docfirst-fumadocs` 并进 `docfirst-workflow`**：源码搬到 `src/fumadocs/`，样式搬到包根的 `styles/`，
+经子入口 `./fumadocs`、`./fumadocs/roster`、`./fumadocs/pre`、`./fumadocs/term`、`./fumadocs/trajectory` 与三份
+`./fumadocs/*.css` 发出去。包名沿用 `docfirst-workflow`：它讲的是 docfirst 这套文档工作流的实现，合进来的 fumadocs 那部分
+约九百行，其余两千七百行是分区、钉码记号、卡格式、生成物渲染与命令行，是规矩本身，不是胶水；下游站依赖的也正是这个名字。
+工作台插件仍然独立，不并进来：它装在 home 里、运行在工作台里，包装在每个站的 `node_modules` 里，并进来会让每个站
+缺工作台的 peer、让 home 多装 remark 与 react。
+
+**分界从包之间挪到包里的目录之间**，照旧由 `tests/boundary.test.ts` 守：`fumadocs` 进 workflow 的目录方向表，
+别的目录都不许引用它；`src/fumadocs/` 不用相对路径出自己的目录，按包名只许用本包的 `.`、`./mdx`、`./cards`，
+所以构建出的 `fumadocs-*.mjs` 仍按包名加载那几个出口，站构建时不会带上命令行代码，产物里 `//#region` 只许是 `src/fumadocs/`；
+宿主 fumadocs-core、fumadocs-ui、react 改成可选 peer，只运行命令行的项目不装；命令行那一侧的源码与产物仍一个宿主都不许出现。
+
+## 否掉的候选
+
+**并进工作台插件**：理由见上，插件与包运行在不同的地方、装在不同的地方，发版节奏也不同。
+
+**合并后叫 `docfirst`**：只剩项目名，说不出这个包做什么。
+
+**合并后叫 `docfirst-site`**：说的是装在哪，不是做什么；下游站还要换包名。
+
+**`src/fumadocs/` 改用相对路径引用 workflow 的目录**：产物会把用到的命令行那一侧代码打进 fumadocs 的产物或共享 chunk，
+站构建时加载的就不再只是 `./mdx`、`./cards` 这几个出口。
+
+## 依据
+
+合并后仓根 `pnpm build`、`pnpm typecheck` 通过，`pnpm test:only` 312 条全过（新的目录边界测试在内）；
+插件 `pnpm check` 85 条通过；站 `docfirst check` 全绿。
+
+## 代价与遗留
+
+源上已经发过的 `docfirst-fumadocs` 0.1.0 只有本仓的站用过（按 `workspace:*`），下游站都还没迁到它；
+给下游的迁移说明要改成只装 `docfirst-workflow`。只用命令行的项目装 `docfirst-workflow` 时会看到三个可选 peer 的说明。

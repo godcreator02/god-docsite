@@ -1,14 +1,14 @@
 /**
- * `@godcreator/docfirst-fumadocs` 里轨迹卡集合那两样东西的测试：`cardSchema`（合法 / 缺 label / 缺 born-at / Date 型
+ * `@godcreator/docfirst-workflow/fumadocs` 里轨迹卡集合那两样东西的测试：`cardSchema`（合法 / 缺 label / 缺 born-at / Date 型
  * born-at 四种情形，只派生字段、不校验）与 `remarkTrajectoryLinks`（关系边段落打标、卡身份形状的 `.md`
  * 链接改写、带路径的 `.md` 放行、wikilink 原样不动）。mdast 树直接手搭——remarkTrajectoryLinks 本身就是个吃 Root
  * 吐 void 的纯函数，不需要真跑一趟 unified 的 parse/stringify 管线。
  */
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { cardSchema, remarkTrajectoryLinks } from "@godcreator/docfirst-fumadocs";
-import type { CardFrontmatter } from "@godcreator/docfirst-fumadocs";
-import type { Link, Paragraph, Root, Text } from "@godcreator/docfirst-fumadocs";
+import { cardSchema, remarkTrajectoryLinks } from "@godcreator/docfirst-workflow/fumadocs";
+import type { CardFrontmatter } from "@godcreator/docfirst-workflow/fumadocs";
+import type { Link, Paragraph, Root, Text } from "@godcreator/docfirst-workflow/fumadocs";
 
 /* ================= cardSchema ================= */
 

@@ -137,10 +137,9 @@ describe('必须同时改的几处', () => {
         expect(isRepoPackage(m[1]!), `src/${file} import 了 ${m[1]!}`).toBe(false)
       }
     }
-    // 写进目标站 package.json 的依赖表不算依赖：它是字符串，插件不 import；装出来的站要跑 pnpm doc、要渲染，站当然要装这两个包
+    // 写进目标站 package.json 的依赖表不算依赖：它是字符串，插件不 import；装出来的站要运行 pnpm doc、要渲染，站当然要装这个包
     const depsSource = fs.readFileSync(path.join(root, 'src', 'deps.ts'), 'utf8')
     expect(depsSource).toContain('@godcreator/docfirst-workflow')
-    expect(depsSource).toContain('@godcreator/docfirst-fumadocs')
   })
 
   /**

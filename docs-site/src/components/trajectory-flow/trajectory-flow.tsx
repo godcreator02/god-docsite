@@ -475,7 +475,7 @@ function PageScene(): JSX.Element {
             <CodeLines key={block.start} lines={block.lines} start={block.start} />
           ))}
         </Pane>
-        <Pane title="docfirst-fumadocs/trajectory（trajectory.ts）" role="emerald" icon="file">
+        <Pane title="docfirst-workflow/fumadocs/trajectory（fumadocs/trajectory.ts）" role="emerald" icon="file">
           <CodeLines lines={fumadocsLines.lines} start={fumadocsLines.start} tone="good" highlight={[fumadocsLines.start + 1, fumadocsLines.start + fumadocsLines.lines.length - 2]} />
         </Pane>
       </div>

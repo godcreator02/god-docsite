@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "docfirst 的包工作区：三个通用包（钉码 code-pin、星轨盘 trajectory-disk、讲解播放器 explainer-player）与 docfirst 自己的两个包（命令行与项目 docfirst-workflow、fumadocs 适配 docfirst-fumadocs），外加一个工作台插件（在 plugins/docfirst）。文档站在 docs-site，它同时是这几个包唯一的使用方",
+  "description": "docfirst 的包工作区：三个通用包（钉码 code-pin、星轨盘 trajectory-disk、讲解播放器 explainer-player）与 docfirst 自己的包 docfirst-workflow（命令行、项目装配与格式，fumadocs 适配在它的子入口 ./fumadocs），外加一个工作台插件（在 plugins/docfirst）。文档站在 docs-site，它同时是这几个包唯一的使用方",
   "scripts": {
     "build": "pnpm -r --filter \"./plugins/*\" --filter \"./packages/*\" run build",
     "typecheck": "pnpm -r --filter \"./plugins/*\" --filter \"./packages/*\" run typecheck && tsc -p tsconfig.tests.json",
@@ -11,7 +11,6 @@
     "test:only": "node --test \"tests/*.test.ts\""
   },
   "devDependencies": {
-    "@godcreator/docfirst-fumadocs": "workspace:*",
     "@godcreator/code-pin": "workspace:*",
     "@godcreator/trajectory-disk": "workspace:*",
     "@godcreator/docfirst-workflow": "workspace:*",

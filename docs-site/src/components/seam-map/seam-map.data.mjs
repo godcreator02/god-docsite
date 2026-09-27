@@ -12,17 +12,17 @@ const modules = [
   {
     id: 'fumadocs',
     name: 'fumadocs 适配',
-    pkg: '@godcreator/docfirst-fumadocs',
+    pkg: '@godcreator/docfirst-workflow/fumadocs',
     role: 'amber',
     outside: false,
     blurb: '调用链从 fumadocs 或 Next 开始的部分：mdx 加载器编译页面时调的 remark 插件、机读版、页面渲染时的组件、名册规则、卡集合、星轨盘的读卡与组件。认识命令行与项目、钉码核心、星轨盘，谁都不认识它。',
     caps: [
       { id: 'remark', name: 'remark 插件', ident: 'docfirstMdxOptions' },
       { id: 'markdown', name: '机读版', ident: 'markdown.ts' },
-      { id: 'pre', name: '状态点与术语组件', ident: './pre · ./term' },
-      { id: 'roster', name: '组件名册规则', ident: './roster' },
+      { id: 'pre', name: '状态点与术语组件', ident: './fumadocs/pre · ./fumadocs/term' },
+      { id: 'roster', name: '组件名册规则', ident: './fumadocs/roster' },
       { id: 'cardset', name: '卡集合', ident: 'cardSchema' },
-      { id: 'disk-load', name: '星轨盘读卡', ident: './trajectory' },
+      { id: 'disk-load', name: '星轨盘读卡', ident: './fumadocs/trajectory' },
     ],
   },
   {
@@ -178,7 +178,7 @@ const seams = [
     iface: './disk 的 StarDisk（data 收中性输入）、./star.css',
     convention: false,
     via: 'code',
-    text: 'fumadocs 适配与星轨盘之间。./trajectory 按包名从 ./disk 再导出客户端组件 StarDisk，Next 才认得出客户端边界；./trajectory.css 引入 star.css。StarDisk 的 data 就是 loadTrajectory 交回的中性输入，组件在浏览器里自己调 buildModel。站画星轨盘只经过 fumadocs 适配，不直接依赖星轨盘包；fumadocs 适配也不从星轨盘包的主入口取任何东西。组件的形状由星轨盘负责。',
+    text: 'fumadocs 适配与星轨盘之间。./fumadocs/trajectory 按包名从 ./disk 再导出客户端组件 StarDisk，Next 才认得出客户端边界；./fumadocs/trajectory.css 引入 star.css。StarDisk 的 data 就是 loadTrajectory 交回的中性输入，组件在浏览器里自己调 buildModel。站画星轨盘只经过 fumadocs 适配，不直接依赖星轨盘包；fumadocs 适配也不从星轨盘包的主入口取任何东西。组件的形状由星轨盘负责。',
   },
   {
     n: 6,
@@ -188,7 +188,7 @@ const seams = [
     iface: '主入口的 loadProject（pinning、roster、docIdOf）与 Listing 等类型；./mdx 的 recognize、stamp 等语法树函数；./cards 的 scanCardDir、CARD_KEYS、cardIdFromHref',
     convention: false,
     via: 'code',
-    text: 'workflow 与 fumadocs 适配之间。站构建时 remark 插件调用 loadProject 装配一次项目，拿到钉码编排与组件名册，用 ./mdx 的 recognize 在语法树上认记号、交给钉码编排的 checkReferences 核对、用 stamp 按名册打标记，认记号用的是和命令行同一份代码。./trajectory 的 loadTrajectory 就是 ./cards 的 scanCardDir，交回中性输入加病卡、不建模；卡集合的 cardSchema 用 CARD_KEYS 判断一页算不算卡，remarkTrajectoryLinks 用 cardIdFromHref 从链接认出卡身份。卡格式只从 ./cards 取、不从主入口取，免得把命令行与配置加载带进 Next 的服务端构建。出口由 workflow 负责。',
+    text: 'workflow 与 fumadocs 适配之间。站构建时 remark 插件调用 loadProject 装配一次项目，拿到钉码编排与组件名册，用 ./mdx 的 recognize 在语法树上认记号、交给钉码编排的 checkReferences 核对、用 stamp 按名册打标记，认记号用的是和命令行同一份代码。./fumadocs/trajectory 的 loadTrajectory 就是 ./cards 的 scanCardDir，交回中性输入加病卡、不建模；卡集合的 cardSchema 用 CARD_KEYS 判断一页算不算卡，remarkTrajectoryLinks 用 cardIdFromHref 从链接认出卡身份。卡格式只从 ./cards 取、不从主入口取，免得把命令行与配置加载带进 Next 的服务端构建。两边在同一个包 docfirst-workflow 里，fumadocs 适配只按包名用这几个出口，不用相对路径进命令行那一侧的目录。出口由 workflow 负责。',
   },
   {
     n: 7,
@@ -205,10 +205,10 @@ const seams = [
     name: '站接入',
     a: ['remark', 'markdown', 'pre', 'roster', 'cardset', 'disk-load'],
     b: ['wiring', 'root'],
-    iface: 'docfirstMdxOptions、docfirstMarkdownOptions、cardSchema、remarkTrajectoryLinks；./pre、./term、./trajectory、样式表；./roster',
+    iface: 'docfirstMdxOptions、docfirstMarkdownOptions、cardSchema、remarkTrajectoryLinks；./fumadocs/pre、./fumadocs/term、./fumadocs/trajectory、样式表；./fumadocs/roster',
     convention: false,
     via: 'code',
-    text: 'fumadocs 适配与使用方站的接入代码之间。站的 src/lib/source.ts 把前四个出口接到现状集合与轨迹卡集合上，mdx.tsx 把 pre 换成会画状态点的 DocfirstPre、登记 Term，星轨整页调用 loadTrajectory、渲染 StarDisk，样式表 light.css、term.css、trajectory.css 由站引入；docfirst.config.mjs 展开 ./roster 的 fumadocsRoster。出口名由 fumadocs 适配负责，改名要同时改站的接入代码和接缝 12 的模板。',
+    text: 'fumadocs 适配与使用方站的接入代码之间。站的 src/lib/source.ts 把前四个出口接到现状集合与轨迹卡集合上，mdx.tsx 把 pre 换成会画状态点的 DocfirstPre、登记 Term，星轨整页调用 loadTrajectory、渲染 StarDisk，样式表 light.css、term.css、trajectory.css 由站引入；docfirst.config.mjs 展开 ./fumadocs/roster 的 fumadocsRoster。出口名由 fumadocs 适配负责，改名要同时改站的接入代码和接缝 12 的模板。',
   },
   {
     n: 9,
@@ -245,10 +245,10 @@ const seams = [
     name: '模板',
     a: ['create'],
     b: ['wiring', 'root'],
-    iface: '模板 import 的出口都在 docfirst-fumadocs 与它的 /roster、/pre、/light.css、/trajectory 里；站依赖表 src/deps.ts',
+    iface: '模板 import 的出口都在 docfirst-workflow 的 /fumadocs 与 /fumadocs/roster、/fumadocs/pre、/fumadocs/light.css、/fumadocs/trajectory 里；站依赖表 src/deps.ts',
     convention: true,
     via: 'disk',
-    text: '工作台插件与它建出来的站之间。docfirst.create 把模板写成新站的 source.ts、mdx.tsx、docfirst.config.mjs 等文件，并把 workflow 与 fumadocs 两个包按精确版本写进站的依赖。插件不依赖这几个包，模板里的包名和出口名只能靠约定对上：插件的 tests/create.test.ts 检查模板引用的出口都在这两个包的清单里、依赖表的版本等于工作区里各包的版本。',
+    text: '工作台插件与它建出来的站之间。docfirst.create 把模板写成新站的 source.ts、mdx.tsx、docfirst.config.mjs 等文件，并把 docfirst-workflow 按精确版本写进站的依赖。插件不依赖这个包，模板里的包名和出口名只能靠约定对上：插件的 tests/create.test.ts 检查模板引用的出口都在这个包的清单里、依赖表的版本等于工作区里各包的版本。',
   },
 ];
 

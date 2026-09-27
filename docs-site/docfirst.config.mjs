@@ -12,7 +12,7 @@
  * 再加站里自己定义的组件和它们转成机读文本的规则。组件的 React 实现在 src/components/mdx.tsx。
  * 星轨盘不在名册里：它是一条独立的整页路由 /trajectory，不在 mdx 里用。
  */
-import { fumadocsRoster } from "@godcreator/docfirst-fumadocs/roster";
+import { fumadocsRoster } from "@godcreator/docfirst-workflow/fumadocs/roster";
 import * as tabs from "./src/components/tabs/tabs.ai.mjs";
 import * as pin from "./src/components/pin/pin.ai.mjs";
 import * as pinGlance from "./src/components/pin-glance/glance.ai.mjs";

@@ -2,7 +2,7 @@
  * 包的主出口 `@godcreator/docfirst-workflow`：**命令行的 main**，加上项目装配与读卡目录。
  *
  * 读者两种：写测试的（直接调 `main(["check"])`，不必起子进程）；站那一侧的适配包
- * `@godcreator/docfirst-fumadocs`（构建期要 loadProject 装配项目）。mdx 格式本身在 `./mdx` 出口，docfirst 卡格式在 `./cards` 出口。
+ * `@godcreator/docfirst-workflow/fumadocs`（构建期要 loadProject 装配项目）。mdx 格式本身在 `./mdx` 出口，docfirst 卡格式在 `./cards` 出口。
  * 引用、清单、格式接口与钉码编排的类型也从这里出：钉码核心只认目标与记录，带文档位置的类型都在 workflow。
  *
  * **给一个新骨架铺各区不在这个包里**：那件事只在 agent 手上发生一次，铺的是模板、不碰判定，

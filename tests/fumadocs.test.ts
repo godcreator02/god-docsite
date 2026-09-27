@@ -1,6 +1,6 @@
 /**
  * mdx 格式与 fumadocs 适配里不经过 Next 的那部分：识别、在语法树上替换节点、meta 白名单、名册压平、按原文渲染。
- * 认记号与渲染在 `@godcreator/docfirst-workflow/mdx`，替换节点、代码块的样子、名册规则在 `@godcreator/docfirst-fumadocs`。
+ * 认记号与渲染在 `@godcreator/docfirst-workflow/mdx`，替换节点、代码块的样子、名册规则在 `@godcreator/docfirst-workflow/fumadocs`。
  * 接入 fumadocs 管线的那部分（loader、_markdown、页面上的状态点）由 docs-site 自己的测试检查。
  */
 import { test } from "node:test";
@@ -8,9 +8,9 @@ import assert from "node:assert/strict";
 import * as mdx from "../packages/docfirst-workflow/src/mdx/index.ts";
 import { parseTree, stamp, walk } from "../packages/docfirst-workflow/src/mdx/index.ts";
 import type { Roster, TreeNode } from "../packages/docfirst-workflow/src/mdx/index.ts";
-import * as fumadocs from "../packages/docfirst-fumadocs/src/index.ts";
-import { DOT_COLOR, applyListing, docfirstMarkdownOptions, parseMetaString, whereOf } from "../packages/docfirst-fumadocs/src/index.ts";
-import { fumadocsRoster } from "../packages/docfirst-fumadocs/src/roster.ts";
+import * as fumadocs from "../packages/docfirst-workflow/src/fumadocs/index.ts";
+import { DOT_COLOR, applyListing, docfirstMarkdownOptions, parseMetaString, whereOf } from "../packages/docfirst-workflow/src/fumadocs/index.ts";
+import { fumadocsRoster } from "../packages/docfirst-workflow/src/fumadocs/roster.ts";
 import type { MemoRecord, Target } from "../packages/code-pin/src/index.ts";
 import type { Item, Listing, Reference } from "../packages/docfirst-workflow/src/reference/index.ts";
 

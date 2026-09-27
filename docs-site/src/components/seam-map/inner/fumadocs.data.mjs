@@ -1,5 +1,5 @@
 /**
- * fumadocs 适配 docfirst-fumadocs 的内部接缝图：模块页 <SeamMap module="fumadocs" /> 画的就是它。
+ * fumadocs 适配（docfirst-workflow 的 src/fumadocs/）的内部接缝图：模块页 <SeamMap module="fumadocs" /> 画的就是它。
  * 框是包里的文件，方块是文件对外给的东西；灰色实线框是包外的站、fumadocs 本体、workflow、钉码核心与星轨盘包。
  * 组件与它随包发的样式表合成一个框（pre.tsx 与 light.css、term.tsx 与 term.css）；index.ts 只再导出别的文件的出口，不单画成框。
  * 坐标在 fumadocs.layout.ts。
@@ -20,7 +20,7 @@ export const fumadocsGraph = defineSeamGraph({
       role: null,
       outside: true,
       blurb:
-        '装了这个包的站：src/lib/source.ts 接集合，src/components/mdx.tsx 换组件，样式表各引一行 css，docfirst.config.mjs 展开名册规则，星轨整页调用 loadTrajectory、渲染 StarDisk，它的 disk.css 引入 trajectory.css。本仓的 docs-site/ 就是这样一个站。',
+        '装了 docfirst-workflow、接入 ./fumadocs 的站：src/lib/source.ts 接集合，src/components/mdx.tsx 换组件，样式表各引一行 css，docfirst.config.mjs 展开名册规则，星轨整页调用 loadTrajectory、渲染 StarDisk，它的 disk.css 引入 trajectory.css。本仓的 docs-site/ 就是这样一个站。',
       caps: [
         { id: 'site-source', name: '集合', ident: 'src/lib/source.ts' },
         { id: 'site-css', name: '样式表', ident: 'docfirst.css · site.css' },
@@ -73,7 +73,7 @@ export const fumadocsGraph = defineSeamGraph({
       role: null,
       outside: true,
       blurb:
-        '主入口的 loadProject 交回钉码编排、名册与文档身份，钉码编排的 checkReferences 核对已经在语法树上认好的引用，清单、清单项与引用的类型也从主入口取；./mdx 提供认记号、打标与遍历语法树的函数，命令行认记号用的是同一份；./cards 是 docfirst 卡格式：scanCardDir 读卡目录、校验卡、交回中性输入加病卡，CARD_KEYS 与 cardIdFromHref 给卡集合认卡。workflow 不认识这个包。',
+        '主入口的 loadProject 交回钉码编排、名册与文档身份，钉码编排的 checkReferences 核对已经在语法树上认好的引用，清单、清单项与引用的类型也从主入口取；./mdx 提供认记号、打标与遍历语法树的函数，命令行认记号用的是同一份；./cards 是 docfirst 卡格式：scanCardDir 读卡目录、校验卡、交回中性输入加病卡，CARD_KEYS 与 cardIdFromHref 给卡集合认卡。都按包名引用，workflow 别的目录不认识这个目录。',
       caps: [
         { id: 'wf-load', name: '项目装配', ident: 'loadProject' },
         { id: 'wf-pinning', name: '钉码编排', ident: 'checkReferences' },
@@ -99,7 +99,7 @@ export const fumadocsGraph = defineSeamGraph({
       role: null,
       outside: true,
       blurb:
-        'fumadocs-mdx 编译 mdx、按集合的 postprocess 生成机读版，fumadocs-ui 提供代码块与目录树组件。这个包按它的参数形状接上去，运行时只有 ./pre import 它（CodeBlock、Pre）。',
+        'fumadocs-mdx 编译 mdx、按集合的 postprocess 生成机读版，fumadocs-ui 提供代码块与目录树组件。这个目录按它的参数形状接入，运行时只有 ./fumadocs/pre import 它（CodeBlock、Pre）。',
       caps: [
         { id: 'fd-preset', name: 'mdx 预设', ident: 'applyMdxPreset' },
         { id: 'fd-rehype', name: '代码高亮', ident: 'rehypeCode' },
@@ -168,7 +168,7 @@ export const fumadocsGraph = defineSeamGraph({
       role: null,
       outside: true,
       blurb:
-        '通用包，不认识 docfirst，把文字钉在代码上。状态全由钉码核心判，这个包只读。blocks.ts 从钉码核心只 import 状态的类型 Status，按它选状态点的颜色与节点形状。',
+        '通用包，不认识 docfirst，把文字钉在代码上。状态全由钉码核心判，这个目录只读结果。blocks.ts 从钉码核心只 import 状态的类型 Status，按它选状态点的颜色与节点形状。',
       caps: [{ id: 'pin', name: '钉码核心', ident: 'Status' }],
     },
     {
@@ -204,7 +204,7 @@ export const fumadocsGraph = defineSeamGraph({
       role: null,
       outside: true,
       blurb:
-        '通用包星轨盘，不认识 docfirst。星轨盘组件 StarDisk 在 ./disk，那份产物第一行是 "use client"，样式表是 ./star.css。StarDisk 的 data 收中性输入，组件在浏览器里自己调 buildModel 建模。这个包只从星轨盘包取这两样，不从主入口取任何东西。',
+        '通用包星轨盘，不认识 docfirst。星轨盘组件 StarDisk 在 ./disk，那份产物第一行是 "use client"，样式表是 ./star.css。StarDisk 的 data 收中性输入，组件在浏览器里自己调 buildModel 建模。这个目录只从星轨盘包取这两样，不从主入口取任何东西。',
       caps: [{ id: 'tj-disk', name: '星轨盘组件与样式', ident: './disk · ./star.css' }],
     },
     {
@@ -214,7 +214,7 @@ export const fumadocsGraph = defineSeamGraph({
       role: 'emerald',
       outside: false,
       blurb:
-        'loadTrajectory(dir) 收卡目录的绝对路径（不是绝对路径直接报错），就是 workflow 卡格式的 scanCardDir：交回中性输入加病卡，不建模；同一个出口按包名再导出星轨盘包的 StarDisk，trajectory.css 引入星轨盘包的 star.css。站画星轨盘只 import 这个包。只 import workflow 的 ./cards，不 import 主入口。',
+        'loadTrajectory(dir) 收卡目录的绝对路径（不是绝对路径直接报错），就是 workflow 卡格式的 scanCardDir：交回中性输入加病卡，不建模；同一个出口按包名再导出星轨盘包的 StarDisk，trajectory.css 引入星轨盘包的 star.css。站画星轨盘只 import 这个出口。只按包名 import workflow 的 ./cards，不 import 主入口。',
       caps: [
         { id: 'star-load', name: '读卡与组件', ident: 'loadTrajectory · StarDisk' },
         { id: 'star-css', name: '盘的样式', ident: 'trajectory.css' },
@@ -388,7 +388,7 @@ export const fumadocsGraph = defineSeamGraph({
       name: '组件与样式',
       a: ['site-mdx', 'site-css'],
       b: ['pre-pre', 'pre-light', 'term-comp', 'term-css'],
-      iface: "pre: DocfirstPre · Term；@import '@godcreator/docfirst-fumadocs/light.css' · '…/term.css'",
+      iface: "pre: DocfirstPre · Term；@import '@godcreator/docfirst-workflow/fumadocs/light.css' · '…/term.css'",
       convention: false,
       via: 'code',
       text: '站的 mdx.tsx 先展开 fumadocs 的默认组件表，再把 pre 换成 DocfirstPre、登记 Term；两份样式表由站各引一行，本站 docfirst.css 引 light.css、site.css 引 term.css。',
@@ -401,7 +401,7 @@ export const fumadocsGraph = defineSeamGraph({
       iface: 'components: { ...fumadocsRoster, … }',
       convention: false,
       via: 'code',
-      text: 'docfirst.config.mjs 展开 fumadocsRoster 再加站自己的组件，命令行的 check 与站构建时的 stamp 读同一张表；项目没声明名册时 remarkDocfirst 直接用 fumadocsRoster。命令行在没有站依赖的环境里（git hook、CI）也要加载这份配置，所以 ./roster 不 import fumadocs 与 react。',
+      text: 'docfirst.config.mjs 展开 fumadocsRoster 再加站自己的组件，命令行的 check 与站构建时的 stamp 读同一张表；项目没声明名册时 remarkDocfirst 直接用 fumadocsRoster。命令行在没有站依赖的环境里（git hook、CI）也要加载这份配置，所以 ./fumadocs/roster 不 import fumadocs 与 react。',
     },
     {
       n: 19,
@@ -418,7 +418,7 @@ export const fumadocsGraph = defineSeamGraph({
       name: '星轨整页',
       a: ['site-page'],
       b: ['star-load', 'star-css'],
-      iface: "import { loadTrajectory, StarDisk } from '@godcreator/docfirst-fumadocs/trajectory'；@import '@godcreator/docfirst-fumadocs/trajectory.css'",
+      iface: "import { loadTrajectory, StarDisk } from '@godcreator/docfirst-workflow/fumadocs/trajectory'；@import '@godcreator/docfirst-workflow/fumadocs/trajectory.css'",
       convention: false,
       via: 'code',
       text: '本站的星轨整页调用 loadTrajectory 拿到中性输入加病卡，原样交给 StarDisk 的 data，顶栏由页面自己画；路由组的 disk.css 引入 trajectory.css。站不直接依赖星轨盘包。卡目录由页面用 join(process.cwd(), "content", "trajectory") 拼成绝对路径再传：目录名写死，Turbopack 才看得出只读这一个目录，不把整个项目打进服务端产物。',
@@ -431,7 +431,7 @@ export const fumadocsGraph = defineSeamGraph({
       iface: 'loadTrajectory(dir) = scanCardDir(dir) → CardScan：{ center, cards, sick }',
       convention: false,
       via: 'code',
-      text: '读文件、解析与校验卡都在 workflow 的卡格式：scanCardDir 读卡目录，挑卡、解析、校验、查卡里不许钉码，交回中性输入加病卡，目录不在就交回空集合。loadTrajectory 只检查路径是不是绝对路径，不建模。只从 ./cards 取、不取主入口：主入口带着命令行与配置加载，进了 Next 的服务端构建会让 Turbopack 报按路径读文件的警告。',
+      text: '读文件、解析与校验卡都在 workflow 的卡格式：scanCardDir 读卡目录，选卡、解析、校验、查卡里不许钉码，交回中性输入加病卡，目录不在就交回空集合。loadTrajectory 只检查路径是不是绝对路径，不建模。只从 ./cards 取、不取主入口：主入口带着命令行与配置加载，进了 Next 的服务端构建会让 Turbopack 报按路径读文件的警告。',
     },
     {
       n: 22,
@@ -451,7 +451,7 @@ export const fumadocsGraph = defineSeamGraph({
       iface: 'import type { Status } from "@godcreator/code-pin"',
       convention: false,
       via: 'code',
-      text: 'nodeFor 按清单项的 status 选节点形状与状态点的颜色，这个类型从钉码核心取。这个包不调钉码核心的任何函数：核对经 workflow 的钉码编排，状态全由钉码核心判。',
+      text: 'nodeFor 按清单项的 status 选节点形状与状态点的颜色，这个类型从钉码核心取。这个目录不调钉码核心的任何函数：核对经 workflow 的钉码编排，状态全由钉码核心判。',
     },
     {
       n: 24,

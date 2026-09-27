@@ -2,7 +2,7 @@ import { join } from 'node:path';
 import Link from 'next/link';
 import { ThemeSwitch } from 'fumadocs-ui/layouts/shared/slots/theme-switch';
 import { DocsBody } from 'fumadocs-ui/layouts/docs/page';
-import { loadTrajectory, StarDisk } from '@godcreator/docfirst-fumadocs/trajectory';
+import { loadTrajectory, StarDisk } from '@godcreator/docfirst-workflow/fumadocs/trajectory';
 import { sourceTrajectory } from '@/lib/source';
 import { getMDXComponents } from '@/components/mdx';
 

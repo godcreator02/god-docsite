@@ -28,13 +28,13 @@ export const trajectoryGraph = defineSeamGraph({
     {
       id: 'fumadocs',
       name: 'fumadocs 适配',
-      pkg: '@godcreator/docfirst-fumadocs',
+      pkg: '@godcreator/docfirst-workflow/fumadocs',
       role: null,
       outside: true,
       blurb:
-        './trajectory 按包名再导出 StarDisk，./trajectory.css 引入 star.css。站读卡目录走 loadTrajectory（即卡格式的 scanCardDir），把结果原样交给 StarDisk；站画星轨盘只经过这个包。',
+        './fumadocs/trajectory 按包名再导出 StarDisk，./fumadocs/trajectory.css 引入 star.css。站读卡目录走 loadTrajectory（即卡格式的 scanCardDir），把结果原样交给 StarDisk；站画星轨盘只经过这个出口。',
       caps: [
-        { id: 'css', name: '盘的样式', ident: './trajectory.css' },
+        { id: 'css', name: '盘的样式', ident: './fumadocs/trajectory.css' },
         { id: 'reexport', name: '再导出组件', ident: 'StarDisk' },
       ],
     },
@@ -140,7 +140,7 @@ export const trajectoryGraph = defineSeamGraph({
       iface: '@import "@godcreator/trajectory-disk/star.css"',
       convention: false,
       via: 'code',
-      text: 'StarDisk 不自己引入样式；fumadocs 适配的 ./trajectory.css 引入 ./star.css，站引入前者。选择器都带 .star- 前缀或写在 .star-disk 容器下，不影响站的其他页面。底色、文字、边框取 fumadocs 的颜色变量，画在盘上的领域色与连线色由 JS 色板按亮暗选。',
+      text: 'StarDisk 不自己引入样式；fumadocs 适配的 ./fumadocs/trajectory.css 引入 ./star.css，站引入前者。选择器都带 .star- 前缀或写在 .star-disk 容器下，不影响站的其他页面。底色、文字、边框取 fumadocs 的颜色变量，画在盘上的领域色与连线色由 JS 色板按亮暗选。',
     },
     {
       n: 5,
