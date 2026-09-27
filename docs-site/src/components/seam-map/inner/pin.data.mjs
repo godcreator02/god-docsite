@@ -47,11 +47,11 @@ export const pinGraph = defineSeamGraph({
       role: 'violet',
       outside: false,
       blurb:
-        '四种目标变没变怎么判、确认时记什么都在这里。纯函数，只看交进来的观察；行段与整文件要的旧内容和 hunk 表从 History 取，那是唯一不纯的两样。',
+        '三种目标变没变怎么判、确认时记什么都在这里。纯函数，只看交进来的观察；行段与整文件要的旧内容和 hunk 表从 History 取，那是唯一不纯的两样。',
       caps: [
         { id: 'judge', name: '判定', ident: 'judge' },
         { id: 'snapshot', name: '记录', ident: 'snapshot' },
-        { id: 'find', name: '全文找', ident: 'findSpan · findText' },
+        { id: 'find', name: '全文找', ident: 'findSpan' },
       ],
     },
     {
@@ -137,7 +137,7 @@ export const pinGraph = defineSeamGraph({
       iface: 'Reader：read(file) / list?(dir, depth, glob)',
       convention: false,
       via: 'code',
-      text: '每种目标要看的东西都向读取器要：行段、整文件、名字读文件的行，目录树要名字表；读取器没提供 list 时目录树一律判缺失。同一次核对里同一样东西只读一遍，结果缓存在这一次调用里。',
+      text: '每种目标要看的东西都向读取器要：行段、整文件读文件的行，目录树要名字表；读取器没提供 list 时目录树一律判缺失。同一次核对里同一样东西只读一遍，结果缓存在这一次调用里。',
     },
     {
       n: 4,

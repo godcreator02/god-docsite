@@ -153,10 +153,10 @@ export const fumadocsGraph = defineSeamGraph({
       role: 'amber',
       outside: false,
       blurb:
-        '一处引用换成树上的一个节点：行段与整文件是代码块（黄的有变动由 diffBlock 把旧行新行排在同一块），目录树是名为 Files 的 JSX 节点，名字是一行小标签。状态写两处：meta 字符串给页面，节点的 data 给机读版。',
+        '一处引用换成树上的一个节点：行段与整文件是代码块（黄的有变动由 diffBlock 把旧行新行排在同一块），目录树是名为 Files 的 JSX 节点。状态写两处：meta 字符串给页面，节点的 data 给机读版。',
       caps: [
         { id: 'bl-tree', name: '目录树', ident: 'treeNode · filesOf' },
-        { id: 'bl-code', name: '代码块与小标签', ident: 'codeNode · chipNode' },
+        { id: 'bl-code', name: '代码块', ident: 'codeNode · diffBlock' },
         { id: 'bl-nodefor', name: '选形状', ident: 'nodeFor' },
       ],
     },
@@ -177,7 +177,7 @@ export const fumadocsGraph = defineSeamGraph({
       role: 'amber',
       outside: false,
       blurb:
-        'DocfirstPre 替换站的 pre：有 data-dot 的交给 CodeBlock、点经 Actions 放进标题栏，再带 data-chip 的画一行小标签，都没有的照 CodeBlock 渲染。文件第一行是 "use client"：Actions 是函数，服务端组件不能把函数传给客户端组件。点的颜色与空心实心、目录树右上角的点由 light.css 画。',
+        'DocfirstPre 替换站的 pre：有 data-dot 的交给 CodeBlock、点经 Actions 放进标题栏，没有的照 CodeBlock 渲染。文件第一行是 "use client"：Actions 是函数，服务端组件不能把函数传给客户端组件。点的颜色与空心实心、目录树右上角的点由 light.css 画。',
       caps: [
         { id: 'pre-pre', name: '状态点代码块', ident: 'DocfirstPre' },
         { id: 'pre-light', name: '状态点样式', ident: 'light.css' },
@@ -243,7 +243,7 @@ export const fumadocsGraph = defineSeamGraph({
       iface: 'DocfirstMdxOptions：remarkPlugins(v) → [...v, …]；rehypeCodeOptions { themes, parseMetaString }',
       convention: false,
       via: 'code',
-      text: '返回值按结构对上 applyMdxPreset 的参数，类型里不 import fumadocs。remarkPlugins 接在 fumadocs 的默认插件之后；rehypeCode 只放行白名单里的 meta，parseMetaString 与 fumadocs 默认的白名单同形，多放行 data-dot 与 data-chip。themes 写的是 fumadocs 的默认值。',
+      text: '返回值按结构对上 applyMdxPreset 的参数，类型里不 import fumadocs。remarkPlugins 接在 fumadocs 的默认插件之后；rehypeCode 只放行白名单里的 meta，parseMetaString 与 fumadocs 默认的白名单同形，多放行 data-dot。themes 写的是 fumadocs 的默认值。',
     },
     {
       n: 3,
@@ -303,7 +303,7 @@ export const fumadocsGraph = defineSeamGraph({
       iface: 'nodeFor(item: Item) → TreeNode',
       convention: false,
       via: 'code',
-      text: 'applyListing 找到记号节点后取它所在的行，在清单里找 reference.at 相同的那一项交给 nodeFor，用交回的代码块、目录树或小标签替换记号节点。',
+      text: 'applyListing 找到记号节点后取它所在的行，在清单里找 reference.at 相同的那一项交给 nodeFor，用交回的代码块或目录树替换记号节点。',
     },
     {
       n: 9,
@@ -320,17 +320,17 @@ export const fumadocsGraph = defineSeamGraph({
       name: 'meta 字符串',
       a: ['bl-code', 'bl-tree'],
       b: ['pre-pre', 'pre-light'],
-      iface: 'meta：title="…" lineNumbers=N data-dot="…" data-chip；Files 上 data-docfirst="tree" data-dot="…"',
+      iface: 'meta：title="…" lineNumbers=N data-dot="…"；Files 上 data-docfirst="tree" data-dot="…"',
       convention: true,
       via: 'code',
-      text: '给页面的状态写进代码块的 meta 字符串：title 显示在标题栏，lineNumbers 让行号对上源文件，data-dot 带状态点的颜色，小标签再加 data-chip。rehypeCode 按 parseMetaString 放行后它们成了 pre 的属性，DocfirstPre 读 data-dot 与 data-chip。目录树不经过 pre，容器上的 data-docfirst 与 data-dot 由 light.css 画点。两边只靠属性名对上。',
+      text: '给页面的状态写进代码块的 meta 字符串：title 显示在标题栏，lineNumbers 让行号对上源文件，data-dot 带状态点的颜色。rehypeCode 按 parseMetaString 放行后它们成了 pre 的属性，DocfirstPre 读 data-dot。目录树不经过 pre，容器上的 data-docfirst 与 data-dot 由 light.css 画点。两边只靠属性名对上。',
     },
     {
       n: 11,
       name: '节点 data',
       a: ['bl-code', 'bl-tree'],
       b: ['md-stringify'],
-      iface: 'node.data.docfirst: DocfirstMark { source, label, value, chip }；node.data.docfirstAi',
+      iface: 'node.data.docfirst: DocfirstMark { source, label, value }；node.data.docfirstAi',
       convention: false,
       via: 'code',
       text: '给机读版的内容放在节点的 data 上：每处引用带 docfirst 标记（来源、状态、机读版里放的内容），目录树另带 docfirstAi 替换节点。stringify 回调只看这两样，不读 meta。',

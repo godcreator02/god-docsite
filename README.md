@@ -2,11 +2,11 @@
 
 ## 是什么
 
-把文档里对代码说的话钉在源码上：文档说「我引的是 `src/greet.ts` 第 2 到 3 行」「src 下有这几个文件」
-「store.ts 里还有 save」，工具替你检查这些话还成不成立。变了就报黄等作者复核，引用指向的东西不在了就报红。**文档里不存代码的
+把文档里对代码说的话钉在源码上：文档说「我引的是 `src/greet.ts` 第 2 到 3 行」「`config.json` 就这些」
+「src 下有这几个文件」，工具替你检查这些话还成不成立。变了就报黄等作者复核，引用指向的东西不在了就报红。**文档里不存代码的
 副本**——页面上那块是构建时现从源码读的，确认时的记录就写在记号自己身上：被钉那几行内容的 hash，加上确认时那份文件的 blob 名。
 
-四类引用覆盖文件系统上能说的几类事：行段、整文件、目录树、名字。
+引用分行段、整文件、目录树：说一段代码、一个短文件的全部、一个目录下有哪些东西。
 
 另一部分是**轨迹卡**：docfirst 防止现状文档与代码不符，轨迹卡防止历史被改写——一次方向上的决定
 记下来就不再改，谁取代了谁看得见。卡不钉码、不用 confirm，`check` 时一并校验；星轨盘在站上是一条独立的整页路由，
@@ -40,10 +40,9 @@ pnpm add -D @godcreator/docfirst-workflow @godcreator/docfirst-fumadocs
 文档里单独写一行不带记录的正式记号，路径相对项目根：
 
 ```mdx
-{/* ref file="src/greet.ts" lines="2-3" */}                   行段
-{/* ref file="config.json" */}                                整文件（末尾追加也算变）
-{/* tree dir="src" */}                                        目录树；可带 depth="2"、glob="*.test.ts"
-{/* has file="src/store.ts" text="export function save" */}   文件里有这个字面量
+{/* ref file="src/greet.ts" lines="2-3" */}   行段：这段代码、一条测试、配置里的一个值
+{/* ref file="config.json" */}                整文件：只用在短文件上（末尾追加也算变）
+{/* tree dir="src" */}                        目录树；可带 depth="2"、glob="*.test.ts"
 ```
 
 讲解组件里照抄源码的数据也能钉：在那段数据正上方单独一行写 `/* ref file="src/greet.ts" lines="2-3" */`，跟上面一样，只是不带花括号。

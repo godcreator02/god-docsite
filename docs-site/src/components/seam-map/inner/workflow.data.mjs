@@ -84,7 +84,7 @@ export const workflowGraph = defineSeamGraph({
       role: 'amber',
       outside: false,
       blurb:
-        'index.ts 一个文件：一处引用写成文字是什么样、文字怎么解析回目标与记录，两个格式共用。记号里的属性先目标、后记录，没有记录属性就是未确认；长成记号却认不出动作词、以 @@docfirst 开头的都报错，markerErrors 让格式把一个文件里写坏的记号一次列全；报告里的目标文本也在这里。只从钉码核心 import 类型，不认识哪个格式，也不判状态。',
+        'index.ts 一个文件：一处引用写成文字是什么样、文字怎么解析回目标与记录，两个格式共用。记号里的属性先目标、后记录，没有记录属性就是未确认；长成记号却认不出动作词、以 @@docfirst 开头的都报错，已经删掉的 has 记号报错时给出改成行段的写法，markerErrors 让格式把一个文件里写坏的记号一次列全；报告里的目标文本也在这里。只从钉码核心 import 类型，不认识哪个格式，也不判状态。',
       caps: [
         { id: 'mk-key', name: '目标文本', ident: 'targetKey' },
         { id: 'mk-formal', name: '记号', ident: 'formalOf · parseFormal' },
@@ -361,10 +361,10 @@ export const workflowGraph = defineSeamGraph({
       name: '记号写法',
       a: ['md-rw', 'md-tree', 'cd-rw'],
       b: ['mk-formal'],
-      iface: 'parseFormal(payload, where) → { target, record } | null；formalOf(target, record) → payload；markerErrors()；mdx 外壳 {/* … */}，组件外壳 /* … */',
+      iface: 'parseFormal(payload, where, shell) → { target, record } | null；formalOf(target, record) → payload；markerErrors()；mdx 外壳 {/* … */}，组件外壳 /* … */',
       convention: false,
       via: 'code',
-      text: '两个格式各剥掉自己的外壳（mdx 是花括号注释，组件源码是单独一行的块注释），把里面那一截交给同一个 parseFormal；写回时拿 formalOf 生成的那一截，再包上自己的外壳。同一条引用在两种文件里只有外壳不同，属性叫什么、记录怎么写只在记号写法里定义。两个格式都经 markerErrors 把一个文件里写坏的记号一次列全再报错；mdx 段落里以 @@docfirst 开头的一行也用记号写法给的报错。',
+      text: '两个格式各剥掉自己的外壳（mdx 是花括号注释，组件源码是单独一行的块注释），把里面那一截连同自己的外壳函数交给同一个 parseFormal（外壳只用来在报错里给出这个格式里的完整写法）；写回时拿 formalOf 生成的那一截，再包上自己的外壳。同一条引用在两种文件里只有外壳不同，属性叫什么、记录怎么写只在记号写法里定义。两个格式都经 markerErrors 把一个文件里写坏的记号一次列全再报错；mdx 段落里以 @@docfirst 开头的一行也用记号写法给的报错。',
     },
     {
       n: 18,
@@ -391,7 +391,7 @@ export const workflowGraph = defineSeamGraph({
       name: '目标文本',
       a: ['main'],
       b: ['mk-key'],
-      iface: 'targetKey(target) → "src/a.ts:2-3" · "src/a.ts:all" · "tree src depth=1" · \'has src/a.ts "…"\'',
+      iface: 'targetKey(target) → "src/a.ts:2-3" · "src/a.ts:all" · "tree src depth=1"',
       convention: false,
       via: 'code',
       text: '命令行打印每处引用、check --json 报告里的 target 都用 targetKey 写出目标。',

@@ -147,7 +147,8 @@ export const readCalls = [
 
 /** card-refs.ts 认的两种形态 */
 /* ref file="../packages/docfirst-workflow/src/project/card-refs.ts" lines="17-38" hash="09ecf841cc47" blob="7d8a942dfc3c" */
-export const refForms = ['{/* ref …、{/* tree …、{/* has … 这类正式记号', '以 @@docfirst 开头的一行'];
+/* ref file="../packages/docfirst-workflow/src/project/card-refs.ts" lines="13-14" hash="2f69572e2297" blob="e7c7dda81ecd" */
+export const refForms = ['{/* ref … 与 {/* tree … 这类正式记号', '以 @@docfirst 开头的一行'];
 
 /**
  * 解析时的几道校验。钉码记号那一道在 docfirst-workflow 的 card-refs.ts 里，其余在 docfirst-trajectory 里：
