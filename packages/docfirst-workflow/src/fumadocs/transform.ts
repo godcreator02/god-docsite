@@ -14,12 +14,11 @@ export function applyListing(tree: TreeNode, listing: Listing): TreeNode {
   // 记号是 mdxFlowExpression，确认过没确认过都换成带状态点的代码块
   walk(tree, (node, index, parent) => {
     if (markerOf(node) === null) return;
-    if (parent === undefined || parent === null || index === null) return;
     const at = lineOf(node) - 1;
     const item = listing.items.find((it) => it.reference.at === at);
     if (item === undefined) throw new Error(`第 ${at + 1} 行是引用标记，但清单里没有它`);
-    parent.children!.splice(index, 1, nodeFor(item));
-    return index + 1;
+    parent!.children!.splice(index!, 1, nodeFor(item));
+    return index! + 1;
   });
   return tree;
 }

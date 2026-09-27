@@ -40,7 +40,7 @@ export function lintComponents(text: string, roster: Roster = {}): Array<{ name:
   return unknownComponents(parseTree(text), roster);
 }
 
-export { isRenderRefusal, parseTree, RenderRefusal, renderAi } from "./render.ts";
+export { parseTree, RenderRefusal, renderAi } from "./render.ts";
 export { markerOf, recognize } from "./recognize.ts";
 export { attr, childrenOf, heading, paragraph, quote, stamp, text, textOf, unknownComponents } from "./roster.ts";
 export type { Helpers, Roster, Rule } from "./roster.ts";

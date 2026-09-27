@@ -7,10 +7,10 @@
  */
 import type { Pluggable } from "unified";
 import { loadProject } from "@godcreator/docfirst-workflow";
-import type { Roster, TreeNode } from "@godcreator/docfirst-workflow/mdx";
+import type { TreeNode } from "@godcreator/docfirst-workflow/mdx";
 import { remarkGlossary } from "./glossary-plugin.ts";
 import type { GlossaryOptions } from "./glossary-plugin.ts";
-import { remarkDocfirst } from "./remark-plugin.ts";
+import { pathOf, remarkDocfirst } from "./remark-plugin.ts";
 import type { PluginFile } from "./remark-plugin.ts";
 
 export function remarkDocfirstHost({ root }: { root: string }): (tree: TreeNode, file: PluginFile) => Promise<void> {
@@ -19,8 +19,8 @@ export function remarkDocfirstHost({ root }: { root: string }): (tree: TreeNode,
     const project = await loadProject(root);
     inner ??= remarkDocfirst({
       pinning: project.pinning,
-      docOf: (f) => project.docIdOf(f.path ?? ""),
-      ...(project.roster !== undefined ? { roster: project.roster as Roster } : {}),
+      docOf: (f) => project.docIdOf(pathOf(f)),
+      roster: project.roster,
     });
     inner(tree, file);
   };

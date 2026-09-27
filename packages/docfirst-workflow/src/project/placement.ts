@@ -13,7 +13,7 @@
  */
 import { isAbsolute, relative, resolve, sep } from "node:path";
 import type { Listing } from "../reference/index.ts";
-import { isRenderRefusal, renderAi } from "../mdx/index.ts";
+import { RenderRefusal, renderAi } from "../mdx/index.ts";
 import type { Pinning } from "../pinning/index.ts";
 import type { ProjectConfig } from "./config.ts";
 
@@ -210,7 +210,7 @@ export function createPlacing(host: PlacingHost): Placing {
     try {
       return { body: tidy(renderAi(text, listing)) };
     } catch (err) {
-      if (isRenderRefusal(err)) return { refusal: err.message };
+      if (err instanceof RenderRefusal) return { refusal: err.message };
       throw err;
     }
   }

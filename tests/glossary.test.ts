@@ -95,6 +95,11 @@ test("skipFile 命中的文件整篇不标——术语页自己走这条", () =>
   assert.equal(tree.children?.[0]?.children?.[0]?.type, "text");
 });
 
+test("要按文件跳过却拿不到页面路径：直接报错，不拿空串当路径", () => {
+  const tree: TreeNode = { type: "root", children: [{ type: "paragraph", children: [{ type: "text", value: "窗格" }] }] };
+  assert.throws(() => remarkGlossary({ terms: [PANE], skipFile: () => false })(tree, {}), /拿到的文件没有路径/);
+});
+
 test("已经是 Term 的地方不往里再嵌一层", () => {
   const tree: TreeNode = {
     type: "root",

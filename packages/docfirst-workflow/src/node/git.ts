@@ -8,7 +8,7 @@
  */
 
 import { execFileSync } from "node:child_process";
-import { existsSync, mkdirSync, mkdtempSync, readFileSync, realpathSync, renameSync, rmSync, writeFileSync } from "node:fs";
+import { existsSync, mkdtempSync, realpathSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { basename, dirname, join, relative, resolve, sep } from "node:path";
 import { hashText, parseHunks } from "@godcreator/code-pin";
@@ -34,7 +34,7 @@ export interface Located {
 }
 
 /** 真实路径；文件本身不存在（删了、还没建）就取最近一个存在的祖先的真实路径再拼回去 */
-export function realpathLoose(path: string): string {
+function realpathLoose(path: string): string {
   try {
     return realpathSync.native(path);
   } catch {
@@ -44,7 +44,7 @@ export function realpathLoose(path: string): string {
 }
 
 /** 从这个目录往上找第一个带 `.git` 的目录（.git 可能是目录，也可能是子模块 / worktree 里的文件）；没有就 null */
-export function repoOf(dir: string): string | null {
+function repoOf(dir: string): string | null {
   let cur = dir;
   for (;;) {
     if (existsSync(join(cur, ".git"))) return cur;
@@ -113,44 +113,6 @@ export function readBlob(repo: string, blob: string): string | null {
 const hunkCache = new Map<string, Hunk[]>();
 
 /**
- * hunk 表写入文件的那一层缓存。钉住的那段挪了位置、没人会去重新确认的引用，每次 check 都要为它 diff 一遍。
- * 键跟内存那层一样按内容寻址，同一对内容的 hunk 表永远不变，所以不用管失效，所有项目共用一份，
- * 放系统临时目录（被清掉只是下次重算）。
- */
-const HUNK_DIR = join(tmpdir(), "docfirst-cache", "hunks");
-
-function isHunk(value: unknown): value is Hunk {
-  const h = value as Record<string, unknown>;
-  return typeof value === "object" && value !== null && ["oldStart", "oldLen", "newStart", "newLen"].every((k) => Number.isInteger(h[k]));
-}
-
-function readDiskHunks(path: string): Hunk[] | undefined {
-  if (!existsSync(path)) return undefined;
-  const unreadable = `hunk 缓存文件认不出：${path}——删掉它再跑一次`;
-  let parsed: unknown;
-  try {
-    parsed = JSON.parse(readFileSync(path, "utf8"));
-  } catch (err) {
-    throw new Error(unreadable, { cause: err });
-  }
-  if (!Array.isArray(parsed) || !parsed.every(isHunk)) throw new Error(unreadable);
-  return parsed;
-}
-
-/** 先写临时文件再改名，别的进程读不到写了一半的文件。改名失败而别的进程已经写好了同一份，就算写过了 */
-function writeDiskHunks(path: string, hunks: Hunk[]): void {
-  mkdirSync(HUNK_DIR, { recursive: true });
-  const temp = `${path}.${process.pid}.tmp`;
-  writeFileSync(temp, JSON.stringify(hunks));
-  try {
-    renameSync(temp, path);
-  } catch (err) {
-    rmSync(temp, { force: true });
-    if (!existsSync(path)) throw err;
-  }
-}
-
-/**
  * 旧内容与当前文本之间的 hunk 表。两份写成临时文件 `diff --no-index`——被引文件可能在别人的仓里，
  * 不往任何对象库写东西。
  */
@@ -158,12 +120,6 @@ export function diffHunks(oldText: string, newText: string): Hunk[] {
   const key = `${hashText(oldText)}-${hashText(newText)}`;
   const known = hunkCache.get(key);
   if (known !== undefined) return known;
-  const diskPath = join(HUNK_DIR, `${key}.json`);
-  const stored = readDiskHunks(diskPath);
-  if (stored !== undefined) {
-    hunkCache.set(key, stored);
-    return stored;
-  }
   const dir = mkdtempSync(join(tmpdir(), "docfirst-diff-"));
   try {
     writeFileSync(join(dir, "old"), oldText);
@@ -179,7 +135,6 @@ export function diffHunks(oldText: string, newText: string): Hunk[] {
     }
     const hunks = parseHunks(out);
     hunkCache.set(key, hunks);
-    writeDiskHunks(diskPath, hunks);
     return hunks;
   } finally {
     rmSync(dir, { recursive: true, force: true });

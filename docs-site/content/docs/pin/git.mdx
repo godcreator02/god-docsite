@@ -49,13 +49,13 @@ description: 记号上的 blob 在进程里算；check 按被钉文件自己的�
 旧文件和今天的文件写成两个临时文件跑 `git diff --no-index -U0`，不往任何对象库写东西，因为被钉文件可能在别人的仓里。
 git diff 有差异时退出码是 1，只有这一种非零退出码被当作正常，别的照原样抛出去。
 
-{/* ref file="../packages/docfirst-workflow/src/node/git.ts" lines="153-187" hash="8debd8fc4e0d" blob="834127e543cf" */}
+{/* ref file="../packages/docfirst-workflow/src/node/git.ts" lines="115-142" hash="5dd7cf891b75" blob="3f76fa2cf505" */}
 
-hunk 表按「旧内容的 blob + 新内容的 blob」缓存两层：进程里一层，系统临时目录下的 `docfirst-cache/hunks/` 一层。
-键按内容算，同一对内容的 hunk 表永远不变，不用管失效，所有项目共用；盘上的文件认不出就报错并说是哪个文件。
-写到磁盘上是为了那些只挪了位置、没人重新确认的引用：它们一直是绿的，每次 `check` 都要为它们对一次位置。
+hunk 表按「旧内容的 blob + 新内容的 blob」缓存在进程里：键按内容算，同一对内容的 hunk 表永远不变，不用管失效，
+同一次 `check` 里钉在同一个文件上的几十处引用只 diff 一次。不写到磁盘上：只挪了位置、没人重新确认的引用每次 `check` 要再对一次位置，
+实测只多 0.15 秒左右（轨迹卡「挪代码前后输出一致」）。
 
-{/* ref file="../packages/docfirst-workflow/src/node/git.ts" lines="115-120" hash="7d8540f0a3c7" blob="834127e543cf" */}
+{/* ref file="../packages/docfirst-workflow/src/node/git.ts" lines="112-113" hash="f2e403602a76" blob="3f76fa2cf505" */}
 
 把旧行段对到今天的是钉码核心里的纯函数，它只收 hunk 表，不认识 git：
 

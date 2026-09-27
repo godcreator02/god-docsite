@@ -11,16 +11,20 @@ import type { Reader } from "@godcreator/code-pin";
 import { git, locateDir, statusEntries } from "./git.ts";
 
 /** glob 只认 * 和 ?；匹配的是名字，不是路径 */
-export function globToRegExp(glob: string): RegExp {
+function globToRegExp(glob: string): RegExp {
   const escaped = glob.replace(/[.+^${}()|[\]\\]/g, "\\$&").replace(/\*/g, ".*").replace(/\?/g, ".");
   return new RegExp(`^${escaped}$`);
 }
 
+/** 路径不存在（或路径中间有一段是文件）时的错误码：这几种当成「没有」，别的读取失败照原样抛 */
+const NOT_THERE = new Set(["ENOENT", "ENOTDIR"]);
+
 function statOf(path: string): "file" | "dir" | null {
   try {
     return statSync(path).isDirectory() ? "dir" : "file";
-  } catch {
-    return null;
+  } catch (err) {
+    if (NOT_THERE.has((err as NodeJS.ErrnoException).code ?? "")) return null;
+    throw err;
   }
 }
 
@@ -53,8 +57,11 @@ export function createReader(root: string): Reader {
     read(file) {
       try {
         return readFileSync(join(root, file), "utf8").split("\n");
-      } catch {
-        return null;
+      } catch (err) {
+        // 钉的是一个目录也当成文件不在：这处引用报缺失
+        const code = (err as NodeJS.ErrnoException).code ?? "";
+        if (NOT_THERE.has(code) || code === "EISDIR") return null;
+        throw err;
       }
     },
 

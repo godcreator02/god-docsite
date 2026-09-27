@@ -88,9 +88,8 @@ frontmatter 按行扫描在 `project/placement.ts:158` 与 `cards/parse.ts:71` �
 | `fumadocs/blocks.ts:37` | 导出的 `TREE_SUFFIX` | 删掉：没有调用方 |
 | `fumadocs/remark-plugin.ts:21` | 名册的默认值 `fumadocsRoster`，跟命令行的默认值 `{}` 口径不一 | 删掉默认值：项目上的名册没写就是 `{}`，站与命令行用同一份 |
 | `marker/index.ts:171` | `toTarget` 把 `parseFormal` 已经判过的动作词再判一次 | 删掉第二次 |
-| `mdx/render.ts:24` | `isRenderRefusal` 按错误名认，理由是「两份产物各有一个类」 | 改用 `instanceof`：查过产物，这个类只在一个 chunk 里 |
-| `project/placement.ts:74` | `Placing.check` 的清单参数可选 | 改成必填：唯一的调用方总会传 |
-| `pinning/index.ts:47`；`mdx/render.ts:69,84`、`fumadocs/transform.ts:17,20` | 「不止一个格式认领」、「清单里没有它」这类按构造不会触发的检查 | 删掉 |
+| `mdx/render.ts:24` | `isRenderRefusal` 按错误名认，理由是「两份产物各有一个类」 | 删掉，摆放直接 `instanceof RenderRefusal`：查过产物，这个类只在一个 chunk 里 |
+| `pinning/index.ts:47`、`fumadocs/transform.ts:17` | 「不止一个格式认领」（两种格式按扩展名与目录互斥）、「记号节点没有父节点」这类按构造不会触发的检查 | 删掉 |
 | `project/fs-reader.ts:20,59` | 读文件、判断文件类型时把所有错误都当成「文件不在」 | 只有「不存在」当成没有，别的错照原样抛 |
 | `fumadocs/host.ts:22`、`glossary-plugin.ts:98` | 拿不到页面路径时用空串继续跑 | 报错 |
 | 只在本文件里用的导出（`marker/` 的 `wordOf` 等、`git.ts` 的 `realpathLoose` 等） | 导出了没人用 | 去掉 `export`；测试直接 import 的留着 |
@@ -100,6 +99,8 @@ frontmatter 按行扫描在 `project/placement.ts:158` 与 `cards/parse.ts:71` �
 「check 在进程内记住 git 的回答」），留着。
 
 **留着的**：同一个根只装配一次的项目缓存（站构建时几十个 loader 并发调用）；`PlacingHost`（测试里有内存实现）；
+`Placing.check` 的清单参数可选（命令行总会传，测试里几十处不传、让它自己算）；`renderAi` 与 `applyListing` 里「清单里没有它」的报错
+（两个都是导出的函数，调用方传进来的清单可能对不上正本，有测试钉着这个报错）；
 文档路径认绝对路径、`./` 前缀与反斜杠，命令行认 `--help`、`-h`、`help`（都是命令行上用户输入的等价写法）；
 已经删掉的写法（`has` 记号、以 `@@docfirst` 开头的一行）报错时给出改法——下游还有九十多个页面写着 `has`，迁完再删，记进路线图。
 
@@ -110,7 +111,8 @@ frontmatter 按行扫描在 `project/placement.ts:158` 与 `cards/parse.ts:71` �
 | `.` | 去掉 `scanCardDir` 与卡的类型（从 `./cards` 取） |
 | `./fumadocs` | 不再再导出 `langOf` 与 `TREE_SUFFIX`；类型 `GlossaryFile` 并进 `PluginFile` |
 | `./cards` | 加导出卡文件后缀 `CARD_EXT`、关系行头 `EDGE_HEAD`、身份的日期前缀 `ID_DATE_PREFIX` |
-| `./mdx`、bin `docfirst` | 不变 |
+| `./mdx` | 不再导出 `isRenderRefusal` |
+| bin `docfirst` | 不变 |
 
 站与插件模板都不用 `.` 的 `scanCardDir` 与 `./fumadocs` 的 `langOf`，只有本仓的三份星轨盘测试从 `.` 取 `scanCardDir`，改成从 `./cards` 取。
 升 x 是因为删了出口的名字；下游站都还没迁到 0.4，这一版它们直接迁到 0.5。

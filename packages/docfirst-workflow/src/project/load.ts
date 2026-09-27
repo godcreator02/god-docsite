@@ -24,7 +24,8 @@ export interface Project {
   config: ProjectConfig;
   /** 钉码编排：核对与确认一篇文档都经它 */
   pinning: Pinning;
-  roster: Roster | undefined;
+  /** 组件名册；配置里没写就是空表 */
+  roster: Roster;
   /** 内容根，相对项目根、正斜杠 */
   contentDir: string;
   /** 轨迹卡目录的绝对路径：内容根下的 trajectory/，不一定已经建了 */
@@ -113,7 +114,7 @@ async function build(root: string): Promise<Project> {
     root,
     config,
     pinning,
-    roster: config.components,
+    roster: config.components ?? {},
     contentDir,
     trajectoryDir: join(contentAbs, "trajectory"),
     placing: createPlacing(placingHost),

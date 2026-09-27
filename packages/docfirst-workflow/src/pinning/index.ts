@@ -40,12 +40,11 @@ export interface Pinning {
 
 const FORMATS: readonly Format[] = [mdxFormat, codeFormat];
 
-/** 这个文件归哪个格式：一个文件只能有一个格式认领，没有或不止一个都报错 */
+/** 这个文件归哪个格式；没有格式认领就报错。两种格式按扩展名与目录互斥，不会同时认领 */
 export function formatOf(file: string): Format {
-  const claimed = FORMATS.filter((format) => format.claims(file));
-  if (claimed.length === 0) throw new Error(`${file}：没有格式认领这个文件——${FORMATS.map((f) => f.name).join("、")}都不认它`);
-  if (claimed.length > 1) throw new Error(`${file}：${claimed.map((f) => f.name).join("、")}都认领了这个文件，一个文件只能归一个格式`);
-  return claimed[0]!;
+  const format = FORMATS.find((f) => f.claims(file));
+  if (format === undefined) throw new Error(`${file}：没有格式认领这个文件——${FORMATS.map((f) => f.name).join("、")}都不认它`);
+  return format;
 }
 
 const pinOf = ({ target, record }: Reference): Pin => ({ target, record });

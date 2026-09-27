@@ -25,7 +25,7 @@ full: true
 现状区是内容根下除 `trajectory/`、`future/` 之外的全部 `.mdx` 文档（目录里的和直接放在内容根上的都算），
 加上项目根下 `src/components/` 里组件格式认领的代码文件（`.ts`、`.tsx`、`.mjs`，放在那里的 `.mdx` 不算页面）：
 
-{/* ref file="../packages/docfirst-workflow/src/project/load.ts" lines="82-100" hash="dd74d26ff03f" blob="c04dc82efda2" */}
+{/* ref file="../packages/docfirst-workflow/src/project/load.ts" lines="83-101" hash="dd74d26ff03f" blob="205ed5645903" */}
 
 配置模块由 Node 原生加载：站的打包器会把动态 import 改写成自己的加载器，这一句带着两个打包器的跳过标记。
 
@@ -73,13 +73,13 @@ docfirst 的轨迹卡怎么写、怎么校验、怎么换成星轨盘要的中�
 
 {/* ref file="../packages/docfirst-workflow/src/pinning/index.ts" lines="32-39" hash="f1fbdd9d8360" blob="846e36be1e3f" */}
 
-格式有两种：mdx 页面与讲解组件的源码（`src/code/`）。一个文件只能有一个格式认领，没有或不止一个都报错：
+格式有两种：mdx 页面与讲解组件的源码（`src/code/`），按扩展名与目录互斥，不会同时认领一个文件；没有格式认领就报错：
 
-{/* ref file="../packages/docfirst-workflow/src/pinning/index.ts" lines="41-49" hash="9e97a3f281cb" blob="ed48db2f6f1a" */}
+{/* ref file="../packages/docfirst-workflow/src/pinning/index.ts" lines="41-48" hash="b181465488b3" blob="9e7a295b7fdf" */}
 
 钉码核心交回的结果与传入的引用一一对应、同序，配回靠下标；写回只交有新记录的那几处：
 
-{/* ref file="../packages/docfirst-workflow/src/pinning/index.ts" lines="77-95" hash="9182092f5801" blob="ed48db2f6f1a" */}
+{/* ref file="../packages/docfirst-workflow/src/pinning/index.ts" lines="76-94" hash="9182092f5801" blob="9e7a295b7fdf" */}
 
 ### mdx 格式
 
@@ -104,10 +104,9 @@ fumadocs 自带组件的规则在 [fumadocs 适配](/docs/fumadocs)的 `./roster
 {/* ref file="../packages/docfirst-workflow/src/mdx/roster.ts" lines="109-128" hash="c5990a4e9fe5" blob="d192d3db2a0c" */}
 
 `renderAi` 把生成正本按原文渲染成 md，不经过 fumadocs，见[生成物渲染](/docs/workflow/rendering)。
-按原文渲染拒绝渲染时抛的错误类也在这里。摆放按错误名认、不用 `instanceof`：渲染与摆放可能各从一份产物加载，
-拿到的不是同一个类：
+按原文渲染拒绝渲染时抛的错误类也在这里，摆放用 `instanceof` 认出它，把这篇的每个落点报成红，别的错照原样抛：
 
-{/* ref file="../packages/docfirst-workflow/src/mdx/render.ts" lines="19-25" hash="1b1efc688db9" blob="471cfd781c18" */}
+{/* ref file="../packages/docfirst-workflow/src/mdx/render.ts" lines="19-22" hash="81f85d47f420" blob="905d5a4a5a96" */}
 
 ### 组件格式 code
 
@@ -126,12 +125,12 @@ fumadocs 自带组件的规则在 [fumadocs 适配](/docs/fumadocs)的 `./roster
 一处引用写成文字是什么样、文字怎么解析回目标与记录，都在 `src/marker/`，两个格式共用：记号里的属性（先目标、后记录）、
 命令行报告用的目标文本 `targetKey`、已经删掉的两种写法（以 `@@docfirst` 开头的一行与 `has` 记号）的报错。它只从钉码核心 import 目标与记录的类型，不认识哪个格式，也不判状态：
 
-{/* ref file="../packages/docfirst-workflow/src/marker/index.ts" lines="40-49" hash="3c5323faf69b" blob="7b1527430cf9" */}
+{/* ref file="../packages/docfirst-workflow/src/marker/index.ts" lines="40-49" hash="f1bfa4b58a36" blob="fe3bfa339e50" */}
 
 **没有记录属性就是未确认**：`ref` 没有 hash 与 blob、`tree` 没有 hash，记录是 null，`confirm` 时写上。
 记录只写了一半、值不合法直接报错到行：
 
-{/* ref file="../packages/docfirst-workflow/src/marker/index.ts" lines="151-168" hash="ab11512ad2d9" blob="7b1527430cf9" */}
+{/* ref file="../packages/docfirst-workflow/src/marker/index.ts" lines="151-168" hash="e07e6de9ca3b" blob="fe3bfa339e50" */}
 
 每个动作词认哪些属性是固定的；多出属性、值不合法都报错到行。外壳里是「一个词 + `key="value"` 属性」的样子、这个词却不是
 `ref` / `tree`，也报错，不当成普通注释：
@@ -215,12 +214,12 @@ fumadocs 自带组件的规则在 [fumadocs 适配](/docs/fumadocs)的 `./roster
 
 {/* ref file="../packages/docfirst-workflow/src/project/config.ts" lines="9-20" hash="5fda9d235fec" blob="4917ab14c441" */}
 
-{/* ref file="../packages/docfirst-workflow/src/project/load.ts" lines="22-42" hash="1db4678694fd" blob="06fa3d94f4bf" */}
+{/* ref file="../packages/docfirst-workflow/src/project/load.ts" lines="22-43" hash="ccbed082425c" blob="205ed5645903" */}
 
 **`./mdx`** 除了格式本身，还交出语法树上的函数给 fumadocs 适配：站构建时 remark 插件拿到的树已经解析好，用 `recognize` 认记号、
 `stamp` 打标记，不再解析一遍；`langOf` 让按原文渲染与站上的代码块标同一种语言：
 
-{/* ref file="../packages/docfirst-workflow/src/mdx/index.ts" lines="43-49" hash="d0c08feabc36" blob="26de56e31ba1" */}
+{/* ref file="../packages/docfirst-workflow/src/mdx/index.ts" lines="43-49" hash="fc17028f62dc" blob="231d2e8eb8e6" */}
 
 **`./cards`** 是整个卡格式：读卡目录、解析、字段表、卡身份。fumadocs 适配的 `loadTrajectory` 与卡集合用它；
 走 `.` 会把命令行与配置加载带进 Next 的服务端构建：

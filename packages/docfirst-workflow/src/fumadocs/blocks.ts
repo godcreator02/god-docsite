@@ -34,7 +34,6 @@ export const UNCONFIRMED_SUFFIX = " · 未确认";
 export const UNLOCATED_SUFFIX = " · 有变动，位置不明";
 /** 取不到旧内容、滑窗也找不到这段：旧行号上现在是什么不知道，摆出来只会误导，只留这一句 */
 export const UNLOCATED_NOTE = "（取不到确认时的内容，这段也找不到了，位置不明——重读源码后 docfirst confirm <页> --accept）";
-export const TREE_SUFFIX = " · 目录树";
 
 /** 各语言的行注释——diff 标记得写在真正的注释里 shiki 才认；没有行注释的语言退成 `diff` 块 */
 const LINE_COMMENT: Record<string, string> = {

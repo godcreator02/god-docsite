@@ -21,9 +21,6 @@ export class RenderRefusal extends Error {
   override name = "RenderRefusal";
 }
 
-/** 认名字不认 instanceof：渲染与摆放可能各从一份产物加载，拿到的不是同一个类 */
-export const isRenderRefusal = (err: unknown): err is RenderRefusal => err instanceof Error && err.name === "RenderRefusal";
-
 export function parseTree(text: string): TreeNode {
   return unified().use(remarkParse).use(remarkFrontmatter).use(remarkMdx).parse(text) as unknown as TreeNode;
 }

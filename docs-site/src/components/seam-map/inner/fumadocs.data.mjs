@@ -115,7 +115,7 @@ export const fumadocsGraph = defineSeamGraph({
       role: 'blue',
       outside: false,
       blurb:
-        'remarkDocfirst 对每篇做四步：recognize 认出引用，钉码编排的 checkReferences 算出清单，applyListing 换节点，stamp 按名册打标。调用方给三样：钉码编排、由文件路径算文档身份的 docOf、名册（不给就用 fumadocsRoster）。',
+        'remarkDocfirst 对每篇做四步：recognize 认出引用，钉码编排的 checkReferences 算出清单，applyListing 换节点，stamp 按名册打标。调用方给三样：钉码编排、由文件路径算文档身份的 docOf、名册（项目上的那份，配置里没写就是空表）。',
       caps: [{ id: 'remark', name: '认引用到打标', ident: 'remarkDocfirst' }],
     },
     {

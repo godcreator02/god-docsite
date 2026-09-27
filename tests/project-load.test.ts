@@ -50,6 +50,14 @@ test("配置形状不对：不认识的键、content 空串，装配当场拒", 
   });
 });
 
+test("配置文件只认 docfirst.config.mjs：写成 .js 当作没有配置，报错说要哪个文件", async () => {
+  const root = mkdtempSync(join(tmpdir(), "god-live-doc-load-"));
+  roots.push(root);
+  mkdirSync(join(root, "content"));
+  writeFileSync(join(root, "docfirst.config.js"), "export default {};\n");
+  await assert.rejects(loadProject(root), /下没有 docfirst\.config\.mjs/);
+});
+
 test("placements：字符串等于 frontmatter 为空；对象写法原样；没挂映射的文档给空表", async () => {
   const p = await project(`outputs: { "a.mdx": ["../README.md", { to: "../x/SKILL.md", frontmatter: ["name", "description"] }, { to: "Y.md" }] }`);
 

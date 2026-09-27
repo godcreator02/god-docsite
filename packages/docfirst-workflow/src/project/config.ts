@@ -19,12 +19,13 @@ export interface ProjectConfig {
   outputs?: Record<string, Array<string | OutputTarget>>;
 }
 
-const CONFIG_NAMES = ["docfirst.config.mjs", "docfirst.config.js", "docfirst.config.ts"];
+/** 配置文件只有这一个名字 */
+const CONFIG_NAME = "docfirst.config.mjs";
 
 export function configPathOf(root: string): string {
-  const hit = CONFIG_NAMES.map((name) => join(root, name)).find(pathExists);
-  if (hit === undefined) throw new Error(`${root} 下没有 docfirst.config.mjs——项目根就是放配置的那个目录`);
-  return hit;
+  const path = join(root, CONFIG_NAME);
+  if (!pathExists(path)) throw new Error(`${root} 下没有 ${CONFIG_NAME}——项目根就是放配置的那个目录`);
+  return path;
 }
 
 /** 配置认的键 */

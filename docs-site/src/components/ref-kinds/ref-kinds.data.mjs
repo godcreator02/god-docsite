@@ -30,7 +30,7 @@ const BLOCKING_TAIL = '——在同一个提交里复核，再 docfirst confirm 
 const NORMALIZE = '算之前先归一化：换行统一成 LF、去掉每行行尾空白、去掉末尾空行；缩进和注释照算。';
 
 /** @type {RefKind[]} */
-/* ref file="../packages/docfirst-workflow/src/marker/index.ts" lines="19-49" hash="a65b6baa8846" blob="7b1527430cf9" */
+/* ref file="../packages/docfirst-workflow/src/marker/index.ts" lines="19-49" hash="5066dbe663a7" blob="fe3bfa339e50" */
 /* ref file="../packages/code-pin/src/span.ts" lines="21-39" hash="8d9f8b1618fa" blob="23033c685517" */
 /* ref file="../packages/code-pin/src/compare.ts" lines="65-113" hash="74b12acad0bd" blob="f5272b0530fa" */
 /* ref file="../packages/docfirst-workflow/src/node/fs-reader.ts" lines="1-7" hash="d7f39c660a9c" blob="5b1604322176" */
@@ -38,9 +38,9 @@ const NORMALIZE = '算之前先归一化：换行统一成 LF、去掉每行行�
 /* ref file="../packages/docfirst-workflow/src/cli/text.ts" lines="47-52" hash="a11866d4fa45" blob="cc1432339eb9" */
 /* ref file="../packages/docfirst-workflow/src/cli/text.ts" lines="54-61" hash="9d2eb01cf9a5" blob="cc1432339eb9" */
 /* ref file="../packages/code-pin/src/types.ts" lines="80-85" hash="70feff6a62c9" blob="32a0167e8d8f" */
-/* ref file="../packages/docfirst-workflow/src/fumadocs/blocks.ts" lines="24-37" hash="c3224ec6e495" blob="19f00626cf69" */
-/* ref file="../packages/docfirst-workflow/src/fumadocs/blocks.ts" lines="47-61" hash="8a889ba101b1" blob="19f00626cf69" */
-/* ref file="../packages/docfirst-workflow/src/fumadocs/blocks.ts" lines="156-185" hash="48c366c0543b" blob="19f00626cf69" */
+/* ref file="../packages/docfirst-workflow/src/fumadocs/blocks.ts" lines="24-36" hash="4dc66b969a75" blob="e41881a801be" */
+/* ref file="../packages/docfirst-workflow/src/fumadocs/blocks.ts" lines="46-60" hash="8a889ba101b1" blob="e41881a801be" */
+/* ref file="../packages/docfirst-workflow/src/fumadocs/blocks.ts" lines="155-184" hash="48c366c0543b" blob="e41881a801be" */
 export const kinds = [
   {
     id: 'span',

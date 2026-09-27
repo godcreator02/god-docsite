@@ -4,17 +4,15 @@
  *   核对：行段按 hunk 跟随、绿只认段哈希、vanished、file-missing、changed 带 diff 和旧段
  *   取不到旧内容（确认后没提交就又改了、blob 名缩写有歧义）——退回滑窗，不报错
  *   对象库问几次——内容没变不问、同一个 blob 只取一次
- *   hunk 表存到磁盘——同一对内容下次直接用磁盘上那份，那份坏了报错
  *   跟取不到任何旧内容的比较一致——同一串改动下状态一样
  */
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { randomUUID } from "node:crypto";
 import { execFileSync } from "node:child_process";
-import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { createRequire, syncBuiltinESMExports } from "node:module";
 import { tmpdir } from "node:os";
-import { dirname, join } from "node:path";
+import { join } from "node:path";
 import { blobOf, hashText } from "../packages/code-pin/src/index.ts";
 import type { History } from "../packages/code-pin/src/index.ts";
 import { createGitHistory } from "../packages/docfirst-workflow/src/project/index.ts";
@@ -195,46 +193,6 @@ test("取旧内容：缩写不在对象库、缩写有歧义都给 null，不抛
     assert.equal(readBlob(r.root, prefix), null, "缩写有歧义");
     assert.equal(readBlob(r.root, names[0]!.slice(0, 12)), "x0\n", "缩写唯一就取得到");
   } finally {
-    r.teardown();
-  }
-});
-
-/** 这对内容的 hunk 表在磁盘上的位置：跟 git.ts 写入时用的路径布局一致 */
-const hunkFile = (oldText: string, newText: string) => join(tmpdir(), "docfirst-cache", "hunks", `${hashText(oldText)}-${hashText(newText)}.json`);
-
-test("hunk 表按内容寻址落盘：同一对内容下次直接用盘上那份，不再 diff", () => {
-  const r = confirmed();
-  const moved = `// ${randomUUID()}\n// 又一行\n${CODE}`;
-  const planted = hunkFile(CODE, moved);
-  try {
-    r.write("src/greet.ts", moved);
-    mkdirSync(dirname(planted), { recursive: true });
-    writeFileSync(planted, "[]");
-    const item = first(r);
-    assert.equal(item.status, "changed", "盘上那份谎称没有差异，段就留在 2-3 行，那儿已经是插进来的注释——用了盘上那份才会判黄");
-  } finally {
-    rmSync(planted, { force: true });
-    r.teardown();
-  }
-});
-
-test("hunk 表算完落盘；盘上那份坏了就报错说是哪个文件，不当没有", () => {
-  const r = confirmed();
-  const moved = `// ${randomUUID()}\n${CODE}`;
-  let path = hunkFile(CODE, moved);
-  try {
-    r.write("src/greet.ts", moved);
-    assert.equal(first(r).status, "fresh");
-    assert.deepEqual(JSON.parse(readFileSync(path, "utf8")), [{ oldStart: 0, oldLen: 0, newStart: 1, newLen: 1 }]);
-
-    const corrupt = `// ${randomUUID()}\n${CODE}`;
-    r.write("src/greet.ts", corrupt);
-    rmSync(path, { force: true });
-    path = hunkFile(CODE, corrupt);
-    writeFileSync(path, "不是 json");
-    assert.throws(() => first(r), /hunk 缓存文件认不出/);
-  } finally {
-    rmSync(path, { force: true });
     r.teardown();
   }
 });

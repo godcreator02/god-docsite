@@ -15,21 +15,20 @@
  */
 import { buildTermIndex, findTerms } from "./glossary.ts";
 import type { TermEntry, TermIndex } from "./glossary.ts";
+import { pathOf } from "./remark-plugin.ts";
 import type { PluginFile } from "./remark-plugin.ts";
 import { walk } from "@godcreator/docfirst-workflow/mdx";
 import type { TreeNode } from "@godcreator/docfirst-workflow/mdx";
 
-/** 插件拿到的那份文件信息。跟 remark-plugin.ts 的同形，只用得上路径 */
 export interface GlossaryOptions {
   /** 术语表。正本是站里那份数据文件，这儿只收结果 */
   terms: readonly TermEntry[];
-  /** 组件名，默认 `Term`。站的 React 表与压平表里都得有这个名字 */
-  componentName?: string;
   /** 哪些文件不标。术语页自己一定要跳过，否则自我循环 */
   skipFile?: (path: string) => boolean;
-  /** 每篇只标第一次，默认开。关掉就是每处都标——正文会变成一片虚线，别关 */
-  oncePerPage?: boolean;
 }
+
+/** 标出来的组件名。站的 React 表与压平表里都得有这个名字 */
+const TERM = "Term";
 
 /**
  * 这些地方不标，一条都不能少：
@@ -69,7 +68,7 @@ function termNode(name: string, text: string, entry: TermEntry): TreeNode {
 /**
  * 一个文字节点 → 一串「原文片段 + 术语组件」。没命中就交回 null，让调用方原样留着。
  */
-function splitText(value: string, index: TermIndex, name: string, taken?: Set<string>): TreeNode[] | null {
+function splitText(value: string, index: TermIndex, name: string, taken: Set<string>): TreeNode[] | null {
   const spans = findTerms(value, index, taken);
   if (spans.length === 0) return null;
   const out: TreeNode[] = [];
@@ -88,24 +87,22 @@ function splitText(value: string, index: TermIndex, name: string, taken?: Set<st
  */
 export function remarkGlossary(options: GlossaryOptions): (tree: TreeNode, file: PluginFile) => void {
   const index = buildTermIndex(options.terms);
-  const name = options.componentName ?? "Term";
-  const once = options.oncePerPage !== false;
 
   return (tree, file) => {
-    if (options.skipFile?.(file.path ?? "") === true) return;
-    const taken = once ? new Set<string>() : undefined;
+    if (options.skipFile?.(pathOf(file)) === true) return;
+    const taken = new Set<string>();
 
     walk(tree, (node, i, parent) => {
       // 机制注入的节点（目录树那棵 Files）整块跳过，不往里走
       if (node.data?.docfirstAi !== undefined) return i === null ? undefined : i + 1;
       if (SKIP_TYPES.has(node.type)) return i === null ? undefined : i + 1;
       // 已经是术语组件了，不往里嵌第二层
-      if ((node.type === "mdxJsxTextElement" || node.type === "mdxJsxFlowElement") && node.name === name) {
+      if ((node.type === "mdxJsxTextElement" || node.type === "mdxJsxFlowElement") && node.name === TERM) {
         return i === null ? undefined : i + 1;
       }
       if (node.type !== "text" || parent === null || i === null) return;
 
-      const pieces = splitText(node.value ?? "", index, name, taken);
+      const pieces = splitText(node.value ?? "", index, TERM, taken);
       if (pieces === null) return;
       parent.children?.splice(i, 1, ...pieces);
       // 换进去的片段自己不用再走一遍：术语组件不嵌套，文字片段也不会再命中

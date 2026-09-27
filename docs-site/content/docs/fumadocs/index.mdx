@@ -18,7 +18,7 @@ full: true
 
 **remark 插件**对每篇依次认引用、算清单、换节点、打标，每一步交给谁见上图：
 
-{/* ref file="../packages/docfirst-workflow/src/fumadocs/remark-plugin.ts" lines="21-27" hash="5232a651e6c6" blob="bea22dbd14b5" */}
+{/* ref file="../packages/docfirst-workflow/src/fumadocs/remark-plugin.ts" lines="26-32" hash="ac17d35141a4" blob="0723b1e3439d" */}
 
 引用在页面上是两种节点：行段与整文件是带状态点的代码块，目录树是 fumadocs 的 `Files`：
 
@@ -39,7 +39,7 @@ full: true
 
 **术语标注**：给 `docfirstMdxOptions` 一份词表才开，词条数据是站的：
 
-{/* ref file="../packages/docfirst-workflow/src/fumadocs/glossary-plugin.ts" lines="23-32" hash="6e3562a4b1af" blob="c92e2d4d27a5" */}
+{/* ref file="../packages/docfirst-workflow/src/fumadocs/glossary-plugin.ts" lines="23-31" hash="b751ed45620e" blob="2ed0ad0475d1" */}
 
 **名册规则** `fumadocsRoster` 管 fumadocs 自带的 `Note`、`Files`、`Folder`、`File`：
 
@@ -144,7 +144,7 @@ React 表先展开 fumadocs 的默认表，再把 `pre` 换成 `DocfirstPre`：
 
 插件在 `remarkDocfirstHost` 这个异步 attacher 里调用 `loadProject`，站的 remark 链上没有命令行替它装配：
 
-{/* ref file="../packages/docfirst-workflow/src/fumadocs/host.ts" lines="16-27" hash="c0a67270e343" blob="b288d233dfd0" */}
+{/* ref file="../packages/docfirst-workflow/src/fumadocs/host.ts" lines="16-27" hash="cfcaa16a5f7c" blob="ddc4d292552e" */}
 
 {/* ref file="../packages/docfirst-workflow/package.json" lines="65-74" hash="f7e5ebc6ff68" blob="ddc68d23c92b" */}
 

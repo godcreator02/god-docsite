@@ -209,7 +209,7 @@ export const workflowPlanGraph = defineSeamGraph({
       iface: 'createPlacing({ pinning, placements, read, readPlaced, writePlaced })：读写落点用 node/files.ts',
       convention: false,
       via: 'code',
-      text: '摆放的接口不变，只是清单参数改成必填；装配组 PlacingHost 时读写落点改用 node/ 的函数，不再自己调 node:fs。',
+      text: '摆放的接口不变；装配组 PlacingHost 时读写落点改用 node/ 的函数，不再自己调 node:fs。',
     },
     {
       n: 7,

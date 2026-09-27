@@ -72,7 +72,7 @@ export const catFile = {
 };
 
 /** 两份内容写成临时文件 old、new 之后跑的 diff，以及它的完整输出 */
-/* ref file="../packages/docfirst-workflow/src/node/git.ts" lines="153-187" hash="8debd8fc4e0d" blob="834127e543cf" */
+/* ref file="../packages/docfirst-workflow/src/node/git.ts" lines="115-142" hash="5dd7cf891b75" blob="3f76fa2cf505" */
 export const diffCommand = 'git diff --no-index -U0 --no-color -- old new';
 export const diffOutput = [
   'diff --git a/old b/new',

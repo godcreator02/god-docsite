@@ -10,7 +10,7 @@
 import type { MemoRecord, Target, TreeTarget } from "@godcreator/code-pin";
 
 /** 记号的动作词：ref / tree */
-export function wordOf(target: Target): string {
+function wordOf(target: Target): string {
   return target.kind === "tree" ? "tree" : "ref";
 }
 
@@ -38,7 +38,7 @@ function recordAttrsOf(record: MemoRecord | null): Attrs {
 }
 
 /** 记号的属性表（有序）：先目标、后记录；还没确认的没有记录属性。格式按 key="value" 摆出来 */
-export function attrsOf(target: Target, record: MemoRecord | null): Attrs {
+function attrsOf(target: Target, record: MemoRecord | null): Attrs {
   return [...targetAttrsOf(target), ...recordAttrsOf(record)];
 }
 
@@ -51,7 +51,7 @@ export function formalOf(target: Target, record: MemoRecord | null): string {
 const ATTR = /(\w+)="([^"]*)"/g;
 
 /** 载荷 → 属性表。跟 formalOf 是一对 */
-export function parseAttrs(s: string): Record<string, string> {
+function parseAttrs(s: string): Record<string, string> {
   const table: Record<string, string> = {};
   for (const m of s.matchAll(ATTR)) table[m[1]!] = m[2]!.replace(/&quot;/g, '"');
   return table;
@@ -140,7 +140,7 @@ export function parseFormal(payload: string, where: string, shell: MarkerShell):
   const attrs = parseAttrs(rest);
   const unknown = Object.keys(attrs).filter((key) => !ATTRS[word]!.includes(key));
   if (unknown.length > 0) throw new Error(`${where}：${word} 不认属性 ${unknown.join("、")}（认的有 ${ATTRS[word]!.join(" / ")}）`);
-  const target = toTarget(word, attrs, where)!;
+  const target = toTarget(word, attrs, where);
   return { target, record: recordOf(word, attrs, where) };
 }
 
@@ -152,7 +152,7 @@ function assertHex(value: string, name: string, where: string): void {
  * 动作词 + 属性表 → 记录。`ref` 没有 hash 与 blob、`tree` 没有 hash 就是还没确认（null）；
  * `ref` 只写了其中一个、值不合法，报错到 where
  */
-export function recordOf(word: string, attrs: Record<string, string | undefined>, where: string): MemoRecord | null {
+function recordOf(word: string, attrs: Record<string, string | undefined>, where: string): MemoRecord | null {
   if (word === "ref") {
     if (attrs.hash === undefined && attrs.blob === undefined) return null;
     if (attrs.hash === undefined || attrs.blob === undefined) {
@@ -167,9 +167,8 @@ export function recordOf(word: string, attrs: Record<string, string | undefined>
   return { kind: "tree", hash: attrs.hash };
 }
 
-/** 动作词 + 属性表 → 目标。语义校验统一在这儿；动作词不认识给 null */
-export function toTarget(word: string, attrs: Record<string, string | undefined>, where: string): Target | null {
-  if (!WORDS.has(word)) return null;
+/** 动作词 + 属性表 → 目标。语义校验统一在这儿；动作词由 parseFormal 判过 */
+function toTarget(word: string, attrs: Record<string, string | undefined>, where: string): Target {
   if (word === "ref") {
     if (attrs.file === undefined || attrs.file === "") throw new Error(`${where}：引用要有 file="…"`);
     if (attrs.lines === undefined) return { kind: "file", file: attrs.file };

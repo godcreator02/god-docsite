@@ -73,7 +73,7 @@ export const workflowGraph = defineSeamGraph({
       role: 'rose',
       outside: false,
       blurb:
-        'index.ts 一个文件：一个文件的核对与确认只在这里串起来。formatOf 按文件路径选格式（mdx 页面或组件源码，没有或不止一个格式认领都报错），格式认出引用，每处拆成目标与记录交给钉码核心，结果按原来的顺序配回文件路径与行号；确认时把新记录交回同一个格式写回。命令行、生成物摆放与站构建共用这一份。不认识记号属性怎么写，也不认识 project 与 cli。',
+        'index.ts 一个文件：一个文件的核对与确认只在这里串起来。formatOf 按文件路径选格式（mdx 页面或组件源码，两种按扩展名与目录互斥，没有格式认领就报错），格式认出引用，每处拆成目标与记录交给钉码核心，结果按原来的顺序配回文件路径与行号；确认时把新记录交回同一个格式写回。命令行、生成物摆放与站构建共用这一份。不认识记号属性怎么写，也不认识 project 与 cli。',
       caps: [
         { id: 'pn-check', name: '核对', ident: 'checkDoc · checkReferences' },
         { id: 'pn-confirm', name: '确认写回', ident: 'confirmDoc' },
@@ -338,7 +338,7 @@ export const workflowGraph = defineSeamGraph({
       iface: 'configPathOf(root) → import(url).default；CONFIG_KEYS：content / components / outputs',
       convention: true,
       via: 'disk',
-      text: 'importConfig 在项目根找 docfirst.config.mjs（也认 .js、.ts），由 Node 原生加载、取 default 导出。configProblems 只认 CONFIG_KEYS 里的键，出现别的键当场报错并列出认的键。配置的形状是约定，由项目装配定，使用方照着写。',
+      text: 'importConfig 在项目根找 docfirst.config.mjs（只认这一个名字），由 Node 原生加载、取 default 导出。configProblems 只认 CONFIG_KEYS 里的键，出现别的键当场报错并列出认的键。配置的形状是约定，由项目装配定，使用方照着写。',
     },
     {
       n: 14,
@@ -385,10 +385,10 @@ export const workflowGraph = defineSeamGraph({
       name: '摆放用的渲染',
       a: ['placing'],
       b: ['md-render', 'pn-check'],
-      iface: 'pinning.checkDoc(doc, text) → Listing；renderAi(text, listing)；isRenderRefusal(err)',
+      iface: 'pinning.checkDoc(doc, text) → Listing；renderAi(text, listing)；err instanceof RenderRefusal',
       convention: false,
       via: 'code',
-      text: '摆放先经钉码编排拿这篇的清单（check 已经判过就直接用传进来的那份），交给 mdx 格式的 renderAi 按原文渲染；抛出的错用 isRenderRefusal 按错误名认，是拒绝渲染就把这篇的每个落点报成红，别的错照原样抛。',
+      text: '摆放先经钉码编排拿这篇的清单（check 已经判过就直接用传进来的那份），交给 mdx 格式的 renderAi 按原文渲染；抛出的错是 RenderRefusal 就把这篇的每个落点报成红，别的错照原样抛。',
     },
     {
       n: 19,

@@ -31,7 +31,6 @@ export {
   NO_OLD,
   nodeFor,
   OLD_TITLE,
-  TREE_SUFFIX,
   treeNode,
   UNCONFIRMED_SUFFIX,
   UNLOCATED_NOTE,
