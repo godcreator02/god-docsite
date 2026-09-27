@@ -1,25 +1,29 @@
 ---
 title: 星轨盘收中性输入
-description: 轨迹核心只收盘心加一组卡的中性数据，docfirst 的卡格式与校验挪到 workflow；建模挪到客户端；删掉没人用的、重复的机制与容错
+description: 轨迹核心只收盘心加一组卡的中性数据，docfirst 的卡格式与校验挪到 workflow；建模挪到客户端；删掉没人用的、重复的代码与容错，盘面上看得到的操作一个都不变
 full: true
 ---
 
-**本页回答**：轨迹核心怎么跟 docfirst 的卡格式分开、分开后每块只认识什么、顺带删掉哪些机制、按什么顺序做。
+**本页回答**：轨迹核心怎么跟 docfirst 的卡格式分开、分开后每块只认识什么、顺带删掉哪些代码、怎么证明盘面没变、按什么顺序做。
 
 ## 验收
 
-- [ ] 轨迹核心的源码与产物里不出现 frontmatter、关系行、里程碑标题、`.md` / `.mdx` 这些 docfirst 卡格式的写法
+- [ ] 轨迹核心的源码与产物里不出现 frontmatter、关系行、`.md` / `.mdx` 这些 docfirst 卡格式的写法
 - [ ] `buildModel` 只收中性输入；`serial.ts`、`RouteCard`、`Trajectory`、`toRuntimeModel` 不存在
-- [ ] docfirst 卡格式在 workflow 的 `src/cards/`，边界测试守住它不被轨迹核心 import
+- [ ] docfirst 卡格式在 workflow 的 `src/cards/`；轨迹核心的建模在 `src/model/`，边界测试守住方向
 - [ ] fumadocs 卡集合与链接改写用 workflow 的解析器，gray-matter 那一份校验删掉
-- [ ] 容错改成报错，断掉的关系与指向根卡的关系算病卡，fixture 改用标准链接
-- [ ] 下面「一起收掉的」逐条做完；「实测再定的」有截图对比和结论
-- [ ] 各站的盘页模板一个字不改就能用上新版本
+- [ ] 容错改成报错，新增的几条校验记成病卡，fixture 改用标准链接
+- [ ] 下面「一起收掉的」逐条做完
+- [ ] 盘面上现在看得到的每个操作都不变：用 git 取改动前的提交，新旧两边跑同一套布局导出与页面操作脚本，结果一致
+- [ ] 各站的盘页与建站模板一个字不改（`StarDisk` 照旧收 `data`、`hrefBase`、`bodies`）
 - [ ] 模块页、接缝图、flow 页改成现状，写轨迹卡，本页删掉
 
 钉码核心只收「目标 + 记录」，记号是 mdx 还是组件源码归 workflow 的两个格式。轨迹核心照同样的办法切：
 它只收一份中性数据——盘心，加一组卡；卡文件怎么写、哪些字段必填、一个目录只能有一张根卡，这些 docfirst 的规矩
 都在 workflow 的卡格式里。卡格式只有一种，所以不做格式接口，写死。
+
+**盘面渲染不改**：画布、布局、组件里只删没人用的和重复的代码，现在看得到的画面与操作——缩放、拖动、时间平移、
+日期窗与透镜、筛选与搜索、全部标签、悬停、侧栏看卡、设置滑杆、亮暗主题、回到原点——一个都不变。
 
 <SeamMap module="trajectory-plan" />
 
@@ -28,19 +32,20 @@ full: true
 | 模块 | 在哪 | 认识 | 不认识 |
 | --- | --- | --- | --- |
 | 建模 | 轨迹核心 `src/model/`，出口 `.` | 中性输入、关系边、树、主干、孤星、领域顺序、时间范围 | 卡文件的写法、像素 |
-| 布局 | 轨迹核心 `src/layout/` | 半径、角度、空档折叠、同日错开、补间 | DOM |
-| 画布 | 轨迹核心 `src/canvas/` | SVG、相机、视觉层、标签避让、色板、节点种类 | React |
-| 星轨盘组件 | 轨迹核心 `src/disk/`，出口 `./disk` | React 状态、工具条、侧栏 | 卡文件的写法 |
+| 布局 | 轨迹核心 `layout.ts`、`chains.ts` | 半径、角度、空档折叠、同日错开、补间 | DOM |
+| 画布 | 轨迹核心 `src/canvas/` | SVG、相机、视觉层、标签避让、色板、节点种类、设置项 | React |
+| 星轨盘组件 | 轨迹核心 `disk.tsx`，出口 `./disk` | React 状态、工具条、侧栏、设置面板 | 卡文件的写法 |
 | docfirst 卡格式 | workflow `src/cards/`，出口 `./cards` | frontmatter、关系行、里程碑区块、卡身份、全部校验、卡里不许钉码 | 盘怎么画 |
 
-轨迹核心里四个目录只许往上游 import（组件 → 画布 → 布局 → 建模），由边界测试的目录禁止表检查，跟 workflow 的目录同一种写法。
+布局、画布、组件的文件原地不动，只新建 `src/model/`。边界测试守两条：建模不 import 包里别的文件；
+轨迹核心任何文件都不认识 docfirst 卡格式。
 
 ## 中性输入
 
 ```ts
 interface DiskInput {
   /** 盘心：docfirst 里是那张根卡；根卡不是恰好一张时为 null，盘照画、盘心无主 */
-  center: { label: string; at: string; milestones: { date: string; name: string; desc: string }[] } | null;
+  center: { id: string; label: string; at: string; milestones: { date: string; name: string; desc: string }[] } | null;
   cards: DiskCard[];
 }
 
@@ -59,26 +64,28 @@ interface DiskCard {
 function buildModel(input: DiskInput): TrajectoryModel;
 ```
 
-`buildModel` 收到不合格的输入（身份重复、时间写坏、关系种类不认识）直接抛错：卡格式已经把坏卡挡在外面，
+`buildModel` 收到不合格的输入（身份重复、时间写坏、关系种类不认识）直接抛错：卡格式只把画得出来的卡交过来，
 走到这里说明卡格式有 bug。关系指向卡集合之外的目标，照旧放进模型的 `broken`，盘上不画那条边。
+种类与里程碑都在模型里，画布直接读，不再另传查表函数。
 
 **建模挪到客户端**。`StarDisk` 的 `data` 就是中性输入，组件自己建模、交给画布；服务端和客户端之间传的就是这份输入，
-不另有传输形状。`loadTrajectory` 交回 `{ center, cards, sick }`，站的盘页把它原样交给 `StarDisk`、拿 `sick` 显示报病数，
-所以盘页模板不用改。
+不另有传输形状。`loadTrajectory` 交回 `{ center, cards, sick }`，站的盘页把它原样交给 `StarDisk`、拿 `sick` 显示报病数。
 
 节点种类是星轨盘自己的一套词，恰好跟 docfirst 的卡体裁同名。只有一个下游，不做种类配置表。
 
 ## docfirst 卡格式
 
 从轨迹核心搬过来的：按行解析 frontmatter、关系行、里程碑区块、`CARD_KEYS`、挑卡文件、单卡与整个目录的校验、
-病卡的类型 `Problem` / `SickFile`。`scanCardDir(dir)` 交回中性输入与病卡清单；校验不过、画不出来的卡（`born-at` 写坏）
-记成病卡、不进中性输入。
+病卡的类型 `Problem` / `SickFile`。`scanCardDir(dir)` 交回中性输入与病卡清单。
 
-新增的校验，全部记成病卡：
+**有病的卡照样上盘**，跟现在一样：缺 `label` 用文件名去掉日期前缀的部分，`parent` 写错照画。
+只有 `born-at` 缺失或写坏、算不出半径的卡不进中性输入。
+
+新增的校验，全部记成病卡（盘面不变，只是盘页顶栏的报病数会多）：
 
 - 关系指向的身份不是盘上的卡
 - 关系指向根卡（根卡代表整个项目，从项目转向、取代项目都说不通）
-- 同一身份 `.md` 与 `.mdx` 两个文件都在
+- 同一身份 `.md` 与 `.mdx` 两个文件都在（照旧只认 `.mdx`）
 - 里程碑行格式不对、日期写坏
 
 fumadocs 的 `cardSchema` 收到的 `ctx.source` 是卡的原文，改用卡格式的解析器判断是不是卡、取标题；
@@ -93,16 +100,20 @@ fumadocs 的 `cardSchema` 收到的 `ctx.source` 是卡的原文，改用卡格�
 - `serial.ts` 与它的两条接缝：只为 `supersededIds` 是 `Set` 才存在
 - `mtime`：workflow 每张卡 `stat` 一次，没有代码读它
 - `status`：一路传到组件，没有代码读它；卡格式照旧不校验这个字段
+- `.` 出口里只有画布与测试在用的布局常量与函数：画布从源码相对 import，测试改从源码路径 import
 
-删掉的死代码与重复：
+渲染这一侧删掉的，都不改变画面：
 
-- `advanceFrame` 与 `FrameState`：视图补间在 `Camera`、悬停补间在各层，这里只剩焦点日与鱼眼强度的补间，收成 `RingsLayout` 的一个方法
+- `advanceFrame` 与 `FrameState` 里没人用的视图与悬停字段：视图补间在 `Camera`、悬停补间在各层，只留焦点日与鱼眼强度的补间
 - `LAYOUT_PATCH_KEYS` 与 `layoutPatchOf`：没有调用方
-- `hubBase`、`innerR`、`hubR` 三个字段关系固定，只存一个
+- `hubBase`、`innerR`、`hubR` 三个字段关系固定，只存 `hubBase`，另两个按原来的换算算出
 - `NODE_RADIUS` 按形态分两项、值相同，换成一个常量
 - `smoothWindow` 与 `smoothstep` 同一个公式
 - `chains.ts` 自己算的主干末端集合，跟画布里的 `spineTipIds` 重复
-- 设置面板：`settings.ts`、面板、`localStorage` 里的手感参数，连同两套默认值、两套名字、`tune` / `patch` 两种滑杆
+- 设置的两套默认值合成一套：`RingsLayout` 的字段初值是唯一来源，面板显示的值从它换算
+
+设置面板、`tune` / `patch` 两种滑杆（`patch` 会重新适配视图，只有改布局的项才走它）、`localStorage` 里存的键名都不动。
+防重叠的几层、扇区一圈装不下时复用角度的那条路径都不动。
 
 改成报错的容错：
 
@@ -112,28 +123,31 @@ fumadocs 的 `cardSchema` 收到的 `ctx.source` 是卡的原文，改用卡格�
 
 日级 `born-at` 是合法写法，不动。
 
-## 实测再定的
+## 怎么证明盘面没变
 
-防重叠有四层：同日按角度排开、忙的日子加宽环带斜排、每帧算的跨日错开、鱼眼。本机同组同日最挤的是 plecs-studio 38 张、
-gwb-lifecycle-plugins 19 张、gwb-kernel 11 张（`probes/2609271010_disk-input-survey/`），在这几个站上逐层关掉截图对比，
-多余的删。
+用 git 取改动前的提交（`git worktree`），新旧两边各跑一遍：
 
-扇区一圈装不下时复用角度的那条路径留着：plecs-studio、gwb-kernel、gwb-block-note、collab-site 四个站会走到。
+- **布局导出**：本机十八个站的卡目录，逐个导出每张卡的半径与角度、扇区、空档、树与主干、里程碑，逐位比对。
+  plecs-studio（复用角度那条路径、同日最挤 38 张）这类站都在里面
+- **页面操作**：本站 `/trajectory` 上按固定顺序做一遍上面列的操作，每步之后导出 SVG 与浮层的 DOM 比对
+
+两边的输出只放临时目录，不进仓。
 
 ## 顺序
 
 每一步单独提交，测试全过再走下一步：
 
 1. 本页与轨迹卡
-2. 删死代码与重复（不改行为，测试一个字不改）
+2. 渲染这一侧删掉的代码（不改行为）
 3. 卡格式搬进 workflow `src/cards/`（只搬位置，测试只改 import 路径）
-4. 轨迹核心改收中性输入，建模挪到客户端，四个目录与边界测试
+4. 轨迹核心改收中性输入，建模挪到客户端，`src/model/`、收窄 `.` 出口、边界测试
 5. 容错改成报错，新增的校验，fixture 改写
-6. 防重叠实测、删设置面板
+6. 新旧两边对比布局导出与页面操作
 7. 模块页、接缝图、flow 页、说明书改成现状；写轨迹卡；本页删掉；发版
 
 ## 对下游的影响
 
 `docfirst-trajectory`、`docfirst-workflow`、`docfirst-fumadocs` 三个包都是破坏性改动，发版照 gwb-release 升 x 并给下游投反馈。
-各站的盘页不用改。会多红的卡有两张：gwb-ui-plugins 的 `2026-09-12-shell-refactor-round` 的 `parent` 没写成列表，
-gwb-paper-fetch 的 `2026-09-17-paper-fetch` 的 `pivots-from` 指向了根卡；发版前在那两个仓里改掉。
+各站的盘页不用改。gwb-ui-plugins 的 `2026-09-12-shell-refactor-round` 与 gwb-paper-fetch 的 `2026-09-17-paper-fetch`
+现在就因为 `parent` 不是根卡而报病，新校验会各多报一条（前者 `parent` 没写成列表，后者 `pivots-from` 指向根卡）；
+发版前跟人确认后在那两个仓里改。

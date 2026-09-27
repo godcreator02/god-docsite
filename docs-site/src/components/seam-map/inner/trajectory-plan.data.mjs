@@ -35,7 +35,7 @@ export const trajectoryPlanGraph = defineSeamGraph({
       role: 'amber',
       outside: false,
       blurb:
-        '读卡目录、按行解析 frontmatter、关系行与里程碑区块，校验全部在这里：必填字段、born-at 的格式、只有一张根卡、parent 只写根卡、关系只指向盘上的卡、卡里不许钉码。校验不过的卡记成病卡、不交给轨迹核心；交出去的是轨迹核心要的中性数据。只有这一种卡格式，没有格式接口。',
+        '读卡目录、按行解析 frontmatter、关系行与里程碑区块，校验全部在这里：必填字段、born-at 的格式、只有一张根卡、parent 只写根卡、关系只指向盘上的卡、卡里不许钉码。问题记成病卡，有病但画得出来的卡照样交给轨迹核心，只有 born-at 写坏的不交；交出去的是轨迹核心要的中性数据。只有这一种卡格式，没有格式接口。',
       caps: [
         { id: 'parse', name: '解析一张卡', ident: 'parseCardText' },
         { id: 'keys', name: '字段表与卡身份', ident: 'CARD_KEYS · cardIdFromHref' },
@@ -80,7 +80,7 @@ export const trajectoryPlanGraph = defineSeamGraph({
     {
       id: 'layout',
       name: '布局',
-      pkg: 'docfirst-trajectory · src/layout/',
+      pkg: 'docfirst-trajectory · layout.ts · chains.ts',
       role: 'emerald',
       outside: false,
       blurb: '纯计算、不碰 DOM：每张卡的半径与角度、长空档折叠、同日错开、焦点日与鱼眼强度的补间。',
@@ -123,7 +123,7 @@ export const trajectoryPlanGraph = defineSeamGraph({
       name: '中性输入',
       a: ['scan-dir'],
       b: ['input'],
-      iface: 'DiskInput { center: { label, at, milestones } | null, cards: { id, at, label, group, kind, relations }[] }',
+      iface: 'DiskInput { center: { id, label, at, milestones } | null, cards: { id, at, label, group, kind, relations }[] }',
       convention: false,
       via: 'code',
       text: '卡格式把校验通过的卡换成轨迹核心的中性输入：根卡变成盘心，其余卡只留盘要用的字段。frontmatter、关系行、文件名这些 docfirst 的写法都停在卡格式这一侧。',
