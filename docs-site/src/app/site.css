@@ -5,12 +5,13 @@
 @import '@godcreator/explainer-player/styles.css';
 /* 讲钉码的两个讲解组件 PinStory、PinJudge 自己的画面 */
 @import '../components/pin/pin.css';
-/* 引用种类 RefKinds、行段跟随 SpanFollow、提交门禁 CommitGate、轨迹卡流程 TrajectoryFlow、边界规则 BoundaryRules */
+/* 引用种类 RefKinds、行段跟随 SpanFollow、提交门禁 CommitGate、轨迹卡流程 TrajectoryFlow、边界规则 BoundaryRules、机读版 MdBuild 与 MdServe */
 @import '../components/ref-kinds/ref-kinds.css';
 @import '../components/span-follow/span-follow.css';
 @import '../components/commit-gate/commit-gate.css';
 @import '../components/trajectory-flow/trajectory-flow.css';
 @import '../components/boundary-rules/boundary-rules.css';
+@import '../components/md-output/md-output.css';
 
 /* 站里自定义的 Tabs：不做交互，并排小节 */
 .tabs { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; margin: 18px 0; }

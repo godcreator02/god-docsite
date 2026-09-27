@@ -24,6 +24,7 @@ import { SpanFollow } from './span-follow/span-follow';
 import { CommitGate } from './commit-gate/commit-gate';
 import { TrajectoryFlow } from './trajectory-flow/trajectory-flow';
 import { BoundaryRules } from './boundary-rules/boundary-rules';
+import { MdBuild, MdServe } from './md-output/md-output';
 
 export function Note({ children }: { children?: ReactNode }) {
   return <div className="note">{children}</div>;
@@ -47,6 +48,8 @@ const table: Record<ComponentName, MDXComponents[string]> = {
   CommitGate,
   TrajectoryFlow,
   BoundaryRules,
+  MdBuild,
+  MdServe,
 };
 
 export function getMDXComponents(components?: MDXComponents) {

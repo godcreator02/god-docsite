@@ -23,6 +23,7 @@ import * as spanFollow from "./src/components/span-follow/span-follow.ai.mjs";
 import * as commitGate from "./src/components/commit-gate/commit-gate.ai.mjs";
 import * as trajectoryFlow from "./src/components/trajectory-flow/trajectory-flow.ai.mjs";
 import * as boundaryRules from "./src/components/boundary-rules/boundary-rules.ai.mjs";
+import * as mdOutput from "./src/components/md-output/md-output.ai.mjs";
 
 /**
  * 一份 skill 的生成位置：正本是 `content/docs/outputs/skills/<名>.mdx`，生成到**插件**里那份 SKILL.md。
@@ -65,5 +66,7 @@ export default {
     CommitGate: commitGate.CommitGate,
     TrajectoryFlow: trajectoryFlow.TrajectoryFlow,
     BoundaryRules: boundaryRules.BoundaryRules,
+    MdBuild: mdOutput.MdBuild,
+    MdServe: mdOutput.MdServe,
   },
 };

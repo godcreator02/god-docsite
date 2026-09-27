@@ -1,0 +1,59 @@
+---
+title: 机读版：agent 怎么拿到一页的 md
+description: 现状区每一页都有一份 md：next build 时从同一棵语法树序列化出来、预渲染成静态文件；请求时 src/proxy.ts 按网址后缀或 Accept 请求头把页面网址改写到这份 md；外加 /llms.txt 目录与 /llms-full.txt 全站
+full: true
+---
+
+同一页有两种样子：人看的 HTML，和给 agent 读的 md（机读版）。md 里没有样式和交互，引用块写成一行来源注释加一块代码，
+讲解组件按组件名册写成文字。两份出自同一次编译，所以不会一个新一个旧。
+
+## 构建时就生成好
+
+md 不是请求来了才生成的。`next build` 编译每一页时，同一棵语法树先交给 docfirst 的 remark 插件改，再序列化成 md、编进这一页的产物；
+最后 md 路由把每一页预渲染成一个静态文件。下面用钉码页那个例子走一遍：`content/docs/a.mdx` 钉 `src/greet.ts` 第 2–3 行，外加一个 Note 组件。
+
+<MdBuild />
+
+只有现状区 `content/docs` 的集合打开了这一项，回调由 docfirst 给：
+
+{/* ref file="src/lib/source.ts" lines="35-37" hash="b41af54c6c86" blob="5ee282b98601" */}
+
+md 路由在构建时列出每一页、预渲染，请求来了不再编译：
+
+{/* ref file="src/app/llms.mdx/docs/[[...slug]]/route.ts" hash="558535c14d37" blob="048c0b757236" */}
+
+每一页的 md 前面加一行「# 标题 (网址)」，目录与全站两份也由同一个对象给：
+
+{/* ref file="src/lib/source.ts" lines="92-96" hash="8836756f3ab1" blob="5ee282b98601" */}
+
+## 请求时按网址或请求头改写
+
+页面网址只有一个，要 md 有两种说法：网址后面加 `.md`，或者请求头 `Accept` 要 md。`src/proxy.ts` 在每个请求到达路由之前看一眼，
+命中就把路径改写到这一页的 md 路由；不命中就原样放行，走页面路由出 HTML。选一种请求看它经过哪几处：
+
+<MdServe />
+
+{/* ref file="src/proxy.ts" hash="73ac5d9cd1d7" blob="dff0e8b5a267" */}
+
+判断 `Accept` 的是 fumadocs 的 `isMarkdownPreferred`：`text/markdown`、`text/x-markdown`、`text/plain` 算 md，
+`text/html`、`text/*`、`*/*` 算 HTML，两边各取最高的权重比，md 不低于 HTML 就给 md。浏览器的请求头里只有后一类，所以拿到的是页面。
+
+## 哪些网址有 md
+
+| 网址 | 返回 |
+| --- | --- |
+| `/docs/<页>.md`，或 `/docs/<页>` 带 `Accept: text/markdown` | 这一页的 md |
+| `/llms.mdx/docs/<页>/content.md` | 同上，页面上 Copy Markdown 与 Open 两个按钮用的就是它 |
+| `/llms.txt` | 现状区的目录：按侧栏分组，每页一行标题、网址与 description |
+| `/llms-full.txt` | 现状区所有页的 md 拼在一起 |
+| 维护区、未来区、轨迹区的页 | 没有 md：加 `.md` 是 404，带 `Accept` 头照样是 HTML |
+
+维护区是给改这个仓的人看的，有意不进机读版；它的集合没开 `includeProcessedMarkdown`，proxy 也只改写 `/docs` 开头的路径。
+
+## 要知道的几件事
+
+- **组件没有名册规则，站构建不过**：打标那一步在名册里找不到组件就报错，这一页编译失败。新写一个讲解组件，要在
+  `docfirst.config.mjs` 的 `components` 里给它一条规则，写明它在 md 里变成什么，见 [fumadocs 适配](/docs/fumadocs) 的名册一节
+- **改了正文要重新 build，md 才跟着变**：md 是构建时写死的静态文件，`next start` 不会重新生成
+- **响应的 `Vary` 里没有 `Accept`**：proxy 改写时写了 `Vary: Accept`，在 `next start` 下实测，最终响应的 `Vary` 里没有它。
+  同一个网址按请求头给出两种内容，前面要是放了按网址缓存的代理，可能把一种内容当成另一种返回；本机直接访问不受影响

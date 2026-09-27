@@ -29,7 +29,7 @@ full: true
 
 {/* ref file="../packages/docfirst-workflow/src/fumadocs/blocks.ts" lines="10-13" hash="d4b2f00a52c6" blob="22c804b6e0e2" */}
 
-**机读版**的序列化回调：
+**机读版**的序列化回调。这份 md 在构建时怎么生成、agent 请求时怎么拿到，讲在[机读版](/docs/fumadocs/markdown)：
 
 {/* ref file="../packages/docfirst-workflow/src/fumadocs/markdown.ts" lines="24-45" hash="a74a112c335a" blob="0f8adb086fd4" */}
 
@@ -113,11 +113,11 @@ fumadocs 的 `rehypeCode` 只保留 meta 白名单里的字段，这里换成同
 **名册**：一个组件要登记两处，`docfirst.config.mjs` 的 `components` 给机读版规则，`src/components/mdx.tsx` 给 React 组件；
 React 表先展开 fumadocs 的默认表，再把 `pre` 换成 `DocfirstPre`：
 
-{/* ref file="src/components/mdx.tsx" lines="52-59" hash="a6628dd2668d" blob="a0870f5c00c9" */}
+{/* ref file="src/components/mdx.tsx" lines="55-62" hash="a6628dd2668d" blob="034ad126dffe" */}
 
 两处的名单正本是 `registry.ts`，`mdx.tsx` 的类型保证 React 表一个不多一个不少，`scripts/verify-roster.mjs` 核对它与 `components` 一致：
 
-{/* ref file="src/components/registry.ts" lines="12-13" hash="520584aa7f9f" blob="d774808a81ac" */}
+{/* ref file="src/components/registry.ts" lines="12-13" hash="a778f3ff1f39" blob="61a1782910f2" */}
 
 {/* ref file="scripts/verify-roster.mjs" lines="12-15" hash="33ef553880dc" blob="55aaeb786def" */}
 
@@ -125,7 +125,7 @@ React 表先展开 fumadocs 的默认表，再把 `pre` 换成 `DocfirstPre`：
 
 {/* ref file="src/app/docfirst.css" lines="1-2" hash="a784f69dceae" blob="075892599848" */}
 
-{/* ref file="src/app/site.css" lines="1-13" hash="75d2482410c8" blob="fd9cec25c8c3" */}
+{/* ref file="src/app/site.css" lines="1-14" hash="2fc46e0e618d" blob="7e359798e526" */}
 
 **`next.config.mjs`**：`turbopack.root` 设到工作区根，`node_modules` 里指向 `packages/` 的软链接才在 Turbopack 的范围里（用发布版包的站不必设）；
 `serverExternalPackages` 必须为空，workflow 包与星轨盘包都同时有服务端代码与客户端组件，整包外置会让 `"use client"` 失效：
