@@ -15,8 +15,8 @@ docfirst: none
 小标题怎么起，每一页按它的题目设计。一大段一大段的文字没人愿意看。
 
 - **先想清楚再动手**：读者看完这一页要明白哪一两件事，读者现在已经知道什么、会在哪一步看不懂
-- **直接讲原理**：是什么东西、按什么规则、在什么时候、变成什么。用真名、真实的数据结构、真实的命令与输出。
-  类比少用，只在真东西讲不清时才用，用了就说清它哪一点对得上、哪一点对不上，别拿类比代替解释
+- **直接讲原理**：是什么东西、按什么规则、在什么时候、变成什么。用实际的名字、实际的数据结构、真实的命令与输出。
+  类比少用，只在实际的东西讲不清时才用，用了就说清它哪一点对得上、哪一点对不上，别拿类比代替解释
 - **一个具体例子贯穿全页**：同一个仓、同一组数据从头用到尾，读者不用每一节重新理解一遍场景。
   描述一个系统时，这个例子就是它的接缝图（下一节）
 - **能看、能动、能自己操作的东西承担主要解释**，文字负责引出和收尾。读者自己点一步、拨一个参数、换一种情况，
@@ -32,7 +32,7 @@ docfirst: none
 ## 描述一个系统：先画接缝图
 
 讲一个代码仓、一组插件、一套架构时，**先放一张接缝图把整个系统分成模块，再按接缝逐条讲功能**。
-别一开始就挑一段看起来关键的代码逐行讲：读者还不知道它在系统里处于什么位置，讲得再细也用不上。讲一个概念
+别一开始就选一段看起来关键的代码逐行讲：读者还不知道它在系统里处于什么位置，讲得再细也用不上。讲一个概念
 （比如 git 的原理）没有可切分的模块，不用这张图。
 
 图上几种元素的意思是固定的，配色、布局、字体按系统自己设计：
@@ -125,10 +125,10 @@ docfirst 自己的文档站是现成的实现：`docs-site/src/components/seam-m
 
 ## 验收
 
-- `pnpm dev` 加客户端的预览：每个按钮点一下、每种情况走一遍，深浅主题各看一次，把窗口拉窄看一次
+- 先 `pnpm build` 再 `pnpm start`，加客户端的预览：每个按钮点一下、每种情况走一遍，深浅主题各看一次，把窗口拉窄看一次
 - 预览面板被隐藏时，页面的逐帧回调不运行，动画停在中途；这时连续截几张图让它往前走，再看最终画面。
   面板隐藏时页面宽度是 0，先用预览工具给页面设一个尺寸。预览把窗口缩放过时按坐标点会点偏，改用元素引用
-- 收尾运行一次 `pnpm build`：`dev` 只编译打开过的页，整站构建失败它看不出来
+- 不用 `pnpm dev`：它重新编译时内存一路上涨，出现过涨到约 16 GB 退出。改了内容重新 `pnpm build` 再重启 `start`；改完一批再 build，不改一页 build 一次
 - docfirst 站再运行 `pnpm doc` 与 `node scripts/verify-roster.mjs`，看一眼机读版（`/llms.mdx/docs/<页>/content.md`）里组件变成的文字读得懂
 - 组件里的文字不进站内搜索：读者会搜的词要出现在页面标题、描述或正文里
 
@@ -141,12 +141,12 @@ docfirst.create-plain {"dir":"D:\\unitfolders\\<单元>\\<仓>\\docs-site"}
 ```
 
 `docfirst.create-plain` 建普通 fumadocs 站；要 docfirst 的现状、轨迹、未来三个区就用 `docfirst.create`。
-`dir` 必须还不存在、上一级得存在；只写文件，接着 `pnpm install`、`pnpm dev`。站来自官方脚手架 `create-fumadocs-app`
+`dir` 必须还不存在、上一级得存在；只写文件，接着 `pnpm install`、`pnpm build`、`pnpm start`。站来自官方脚手架 `create-fumadocs-app`
 （版本写死在 docfirst 插件里，要联网），加上本机约定：允许 esbuild 运行构建脚本、`dev` / `start` 写端口并只监听 127.0.0.1、
 字体 Sarasa Mono SC、页面语言 zh-CN、站名、去掉 GitHub 链接、删掉分享图与落地页、`/` 跳到 `/docs`、
 `.gitignore` 排除 `next dev` 在站根生成的 `AGENTS.md` 与 `CLAUDE.md`。
 站里自带搜索（中文不用另配）、`/llms.txt`、每页的 markdown 版本。参数只有 `dir`、`title`（站名）、`port`；
-`port` 不给就挑一个没被别的站占用的，查占用的范围是单元文件夹插件的 `units-root` 设置指的目录。细节看命令的 `usage`。
+`port` 不给就选一个没被别的站占用的，查占用的范围是单元文件夹插件的 `units-root` 设置指的目录。细节看命令的 `usage`。
 
 **加一个分区**（`content/notes/` → `/notes`）改四处：`src/lib/source.ts` 里用 `fumadocs-mdx/macro` 的 `defineDocs` 加集合、
 再加一条 `loader`；`src/app/notes/[[...slug]]/page.tsx` 照 docs 的写；侧栏在 `src/app/docs/layout.tsx` 里把各 loader 的
@@ -168,5 +168,5 @@ docfirst.create-plain {"dir":"D:\\unitfolders\\<单元>\\<仓>\\docs-site"}
 - 升级 fumadocs：先在临时目录 `pnpm dlx create-fumadocs-app@<版本>` 生成一份对照、读迁移说明，改 `package.json` 版本
   （`fumadocs-core` 与 `fumadocs-ui` 同号），`pnpm install`、`pnpm build`
 
-服务由 agent 自己启动：`pnpm dev` 加客户端自带的预览，自己检查页面用客户端的浏览器工具；给人看就在 VS Code 的内置浏览器里打开
-（怎么打开读说明书 `vscode`）。用户说要看就一直开着，服务带超时（默认 2 小时）自动停；只是自己验证的，验完停掉。
+服务由 agent 自己启动：先 `pnpm build` 再 `pnpm start`，加客户端自带的预览，自己检查页面用客户端的浏览器工具；给人看就在 VS Code 的内置浏览器里打开
+（怎么打开读说明书 `vscode`）。用户说要看就一直开着，服务带超时（默认 12 小时）自动停；只是自己验证的，验完停掉。

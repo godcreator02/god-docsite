@@ -65,7 +65,7 @@ full: true
 
 登记时的 `description` 与 `usage` 是 agent 唯一看得见的说明，回执各字段的意思写在 `usage` 里：
 
-{/* ref file="../plugins/docfirst/src/index.ts" lines="113-127" hash="a979ddaf8994" blob="9b3758b20969" */}
+{/* ref file="../plugins/docfirst/src/index.ts" lines="114-128" hash="a979ddaf8994" blob="97eae2d486d7" */}
 
 命令名是公共接口，改名就破坏兼容；产物检查确认总线上只有这两条：
 
@@ -81,9 +81,9 @@ full: true
 
 {/* ref file="../plugins/docfirst/src/index.ts" lines="26-26" hash="397a91e60cb0" blob="8a6fffc45d6f" */}
 
-{/* ref file="../plugins/docfirst/src/index.ts" lines="205-208" hash="eb0b315868cd" blob="9b3758b20969" */}
+{/* ref file="../plugins/docfirst/src/index.ts" lines="206-209" hash="eb0b315868cd" blob="97eae2d486d7" */}
 
-{/* ref file="../plugins/docfirst/src/index.ts" lines="72-78" hash="568963670f9e" blob="8a6fffc45d6f" */}
+{/* ref file="../plugins/docfirst/src/index.ts" lines="73-79" hash="568963670f9e" blob="97eae2d486d7" */}
 
 **写进新站的依赖是一张手写的精确版本表**，只有 `docfirst-workflow` 一个包。包名是写进别人 `package.json` 的字符串，
 不算插件的依赖；这个包发版时这张表跟着改，模板能引用哪些出口由接缝 12 那条测试检查：

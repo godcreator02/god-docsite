@@ -54,7 +54,8 @@ function nextSteps(siteDir: string, port: number): string[] {
     'pnpm install',
     'pnpm doc:render     # 生成仓根 README.md / AGENTS.md / CLAUDE.md（正本在 content/docs/outputs/）',
     'pnpm doc            # docfirst check',
-    `pnpm dev            # http://127.0.0.1:${String(port)}`,
+    'pnpm build',
+    `pnpm start          # http://127.0.0.1:${String(port)}`,
   ]
 }
 
@@ -195,7 +196,7 @@ export function apply(ctx: GwbContext): void {
             portScanIncomplete: site.portScan.incomplete,
             note: [
               ...portScanNotes(site, lookup),
-              `只写了文件。接着在 ${site.target} 运行 pnpm install，再 pnpm build（或 pnpm dev 看 http://127.0.0.1:${String(site.port)}）`,
+              `只写了文件。接着在 ${site.target} 运行 pnpm install，再 pnpm build，看页面用 pnpm start（http://127.0.0.1:${String(site.port)}）`,
             ].join('。'),
           }),
         ),

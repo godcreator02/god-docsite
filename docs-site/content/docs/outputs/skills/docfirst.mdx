@@ -54,7 +54,8 @@ cd <站目录>
 pnpm install
 pnpm doc:render     # 生成仓根 README.md / AGENTS.md / CLAUDE.md（正本在 content/docs/outputs/）
 pnpm doc            # docfirst check
-pnpm dev
+pnpm build
+pnpm start
 ```
 
 仓根已经有 `README.md` / `AGENTS.md` / `CLAUDE.md` 时回执里会多一条 `warn`：第一次 `doc:render` 会**覆盖**它们
