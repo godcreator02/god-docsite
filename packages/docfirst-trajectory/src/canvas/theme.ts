@@ -2,7 +2,7 @@
  * 画在盘上的颜色照 trail 星盘；底色、背景线与文字色走 CSS 变量（跟宿主站的 fumadocs 颜色），不经这里。
  * 领域色一律实例持有（buildThemes 出新副本），不走模块级单例。 */
 
-import { NO_DOMAIN } from "../model.ts";
+import { NO_DOMAIN } from "../model/build.ts";
 
 /* ---------- 主题调色板：SVG 动态着色走这里，背景线与文字色走 CSS 变量 ---------- */
 

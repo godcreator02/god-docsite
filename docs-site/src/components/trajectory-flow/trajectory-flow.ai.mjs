@@ -13,12 +13,12 @@ import {
   failedChecks,
   files,
   fumadocsLines,
+  input,
   layout,
   model,
   pageLines,
   parsedExtras,
   readCalls,
-  result,
   stages,
   steps,
   terminals,
@@ -48,8 +48,8 @@ export function TrajectoryFlow(_node, { paragraph }) {
     paragraph(`解析时从正文取出的：\n${parsedExtras.join('\n')}`),
     paragraph(terminalText(terminals.check)),
     paragraph(
-      `buildTrajectory 交回：cards（全部卡）${codes(result.cards)}；sick（病卡）${codes(result.sickFiles)}；` +
-        `model 的盘心 ${codeOf(model.root.id)}，盘上的卡 ${codes(model.cards)}。` +
+      `scanCardDir 交回的中性输入：盘心 ${codeOf(input.center)}，cards ${codes(input.cards)}；sick（病卡）${codes(input.sickFiles)}。` +
+        `buildModel 建出的盘：盘心 ${codeOf(model.center.id)}，盘上的卡 ${codes(model.cards)}。` +
         `盘上：关系边 ${model.edges.map((e) => `${codeOf(e.from)} → ${codeOf(e.to)}（${e.kind === 'supersede' ? '取代' : '转向'}）`).join('、')}；` +
         `主干 ${model.tree.spine.map(codeOf).join(' → ')}；支线 ${model.tree.sublines.map((line) => line.map(codeOf).join(' → ')).join('，')}；` +
         `被取代 ${codes(model.supersededIds)}；孤星 ${codes(model.isolated)}；领域顺序 ${model.domains.join(' → ')}。D 不在盘上。`,

@@ -3,7 +3,7 @@
   "version": "0.1.1",
   "author": {"name": "godcreator"},
   "type": "module",
-  "description": "轨迹卡核心：卡格式、建模、布局与星轨盘画布。`.` 入口是零 import 的纯函数，`./disk` 是客户端组件 StarDisk，随 docfirst 线发。",
+  "description": "星轨盘：收盘心加一组卡的中性输入，建模、布局与画布。`.` 入口是零 import 的建模与类型，`./disk` 是客户端组件 StarDisk，随 docfirst 线发。",
   "exports": {
     ".": {
       "types": "./dist/index.d.mts",

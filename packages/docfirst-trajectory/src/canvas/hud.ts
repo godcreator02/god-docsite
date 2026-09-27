@@ -3,7 +3,6 @@
  *
  * 这里只出字符串，不持任何视图状态——盘的 HUD 怎么摆、点了做什么归壳。 */
 
-import { MILESTONE_HEADING } from "../parse.ts";
 import { type FilterSel, SHAPE_NAMES, SHAPE_ORDER, shapeMarkup, supersededColor } from "./node-dom.ts";
 import type { Theme } from "./theme.ts";
 
@@ -12,7 +11,7 @@ import type { Theme } from "./theme.ts";
 export const HELP_HTML =
   '<div class="hh">怎么看</div>' +
   "<div>环是真实日期，内圈旧、外圈新；最外圈加重环是记录的最新一天。</div>" +
-  `<div>金黄的环是人工钉的里程碑（记在根卡正文「${MILESTONE_HEADING}」区块），名字沿环写在 12 点方向。</div>` +
+  "<div>金黄的环是人工钉的里程碑（记在根卡正文「里程碑」区块），名字沿环写在 12 点方向。</div>" +
   "<div>颜色分领域，形状分卡的 type，所有卡一样大；盘心正中的根节点就是项目根卡。在立的卡外套一圈同色细环；再往外一圈实线的是每棵树主干末端那张在立卡（这条线目前的结论），虚线的是孤星（跟别的卡没有关系）；混灰、没有环的是被取代的卡。</div>" +
   "<div>金黄的线是取代，青色的线是转向；线从旧卡到新卡由淡变亮，亮的那头是新卡。每棵树占一片扇形，颜色跟它的领域一样。</div>" +
   '<div class="hh">怎么动</div>' +
@@ -26,7 +25,7 @@ export const HELP_HTML =
 
 /* ---------- 图例：卡片化三组（形态 / 关系 / 领域） ---------- */
 
-/** HTML 转义：领域名来自卡的 frontmatter、是不可信输入，拼进 innerHTML 前必须过这里。
+/** HTML 转义：领域名来自下游送进来的卡、是不可信输入，拼进 innerHTML 前必须过这里。
  * 属性位（双引号内）与文本位共用：五个危险字符全数值实体化。 */
 const escapeHtml = (s: string): string => s.replace(/[&<>"']/g, (ch) => `&#${ch.charCodeAt(0)};`);
 

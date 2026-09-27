@@ -4,7 +4,7 @@
 
 import type { GapBand } from "../../layout.ts";
 import { bandFade, gapDots, LOD_MIN, polar, smoothstep } from "../../layout.ts";
-import { formatDay } from "../../model.ts";
+import { formatDay } from "../../model/build.ts";
 import { el } from "../node-dom.ts";
 import { RingLabel } from "../ring-label.ts";
 import type { BuildCtx, FrameCtx, StarLayer } from "./frame.ts";

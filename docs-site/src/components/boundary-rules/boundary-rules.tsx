@@ -38,6 +38,7 @@ const NODE_BOX: Record<string, Box> = {
   marker: { x: 306, y: 392, w: 90, h: 36 },
   reference: { x: 420, y: 392, w: 90, h: 36 },
   code: { x: 534, y: 392, w: 90, h: 36 },
+  cards: { x: 604, y: 334, w: 80, h: 36 },
   pin: { x: 230, y: 500, w: 200, h: 52 },
   trajectory: { x: 560, y: 500, w: 200, h: 52 },
   crypto: { x: 230, y: 610, w: 150, h: 44 },
@@ -73,6 +74,8 @@ const EDGE_ROUTE: Record<string, Point[]> = {
   'pinning>code': [[555, 370], [555, 392]],
   'code>reference': [[534, 404], [510, 404]],
   'code>marker': [[579, 428], [579, 440], [351, 440], [351, 428]],
+  'cli>cards': [[664, 312], [664, 334]],
+  'cards>marker': [[670, 370], [670, 446], [341, 446], [341, 428]],
   // 包与包的方向
   'pin~trajectory': [[430, 526], [560, 526]],
   'pin>workflow': [[380, 500], [380, 450]],
@@ -97,7 +100,9 @@ const EDGE_ROUTE: Record<string, Point[]> = {
   'mdx>project': [[356, 334], [356, 300], [470, 300]],
   'pinning>project:back': [[540, 334], [540, 312]],
   'project>cli:back': [[570, 302], [604, 302]],
-  'pinning>cli': [[570, 352], [644, 352], [644, 312]],
+  'pinning>cli': [[570, 346], [590, 346], [590, 322], [624, 322], [624, 312]],
+  'cards>pinning': [[604, 362], [570, 362]],
+  'cards>cli:back': [[644, 334], [644, 312]],
   'workflow>host': [[700, 300], [850, 300]],
   // 宿主只能是 peer
   'fumadocs>host:bundled': [[800, 180], [880, 180], [880, 250]],

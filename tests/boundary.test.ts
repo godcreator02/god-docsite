@@ -121,7 +121,7 @@ function distClosureSpecs(dir: string, file: string): string[] {
 /**
  * 每个包不许依赖哪几个兄弟包。**列的是禁止的，不是允许的**——理由跟下面目录那张表一样。
  *   pin         钉码：判新鲜只要读取器、旧内容来源两样传进来的东西，谁都不认识
- *   trajectory  轨迹：卡怎么解析、盘怎么建模画，跟钉码无关；读卡目录的那一半在 workflow
+ *   trajectory  星轨盘：只收盘心加一组卡的中性输入，怎么建模、怎么画；跟钉码无关，docfirst 卡格式与读卡目录在 workflow
  *   workflow    命令行与项目：认识钉码与轨迹，不认识任何站的宿主，所以也不认识 fumadocs 适配
  *   fumadocs    站那一侧：认识以上三个，除了站谁都不认识它
  *   docs-explain 讲解组件：普通 fumadocs 站也要用，所以不认识 docfirst 的任何包；它只给站用，四个包也都不认识它
@@ -207,6 +207,31 @@ test("trajectory 的 `.ts` 源码只有相对 import——`.tsx` 是 `./disk` �
   }
 });
 
+test("trajectory 的建模 `src/model/` 只 import 自己目录里的文件——布局、画布、组件都在它下游", () => {
+  const dir = join(srcOf("docfirst-trajectory"), "model");
+  for (const file of sourcesIn(dir)) {
+    for (const spec of importSpecsOf(readFileSync(file, "utf8"))) {
+      const inside = spec.startsWith("./") && !relative(dir, resolve(dirname(file), spec)).startsWith("..");
+      assert.ok(inside, `trajectory/src/model/${rel(dir, file)} import 了 ${spec}`);
+    }
+  }
+});
+
+/** docfirst 卡文件的写法：关系行、frontmatter 字段名、里程碑标题常量。星轨盘只收中性输入，一个都不该认识 */
+const CARD_FORMAT_WORDS = /supersedes::|pivots-from::|born-at|frontmatter|CARD_KEYS|MILESTONE_HEADING/;
+
+test("trajectory 不认识 docfirst 卡格式：`.` 的产物与建模源码里没有关系行、frontmatter 字段名这些卡文件的写法", () => {
+  for (const file of ["index.mjs", "index.d.mts"]) {
+    const hit = CARD_FORMAT_WORDS.exec(distOf("docfirst-trajectory", file));
+    assert.equal(hit, null, `trajectory 的产物 ${file} 里出现了「${hit?.[0]}」`);
+  }
+  const dir = join(srcOf("docfirst-trajectory"), "model");
+  for (const file of sourcesIn(dir)) {
+    const hit = CARD_FORMAT_WORDS.exec(readFileSync(file, "utf8"));
+    assert.equal(hit, null, `trajectory/src/model/${rel(dir, file)} 里出现了「${hit?.[0]}」`);
+  }
+});
+
 test("trajectory 的 `./disk`：客户端指令在头一行，只 import react、不内联 react", () => {
   // 「不把 react 打包进产物」要正着断言：react 真被内联进产物时，产物里根本没有那条 import 行，
   // 反着遍历 import 说明符的写法是恒真的（没有行就一条也遍历不到）。
@@ -235,16 +260,18 @@ const WORKFLOW_SRC = srcOf("docfirst-workflow");
  *   mdx      mdx 格式：认引用、写回、名册检查、按原文渲染，用记号写法；不认识组件格式、钉码编排、项目怎么装配、命令行怎么打印
  *   code     组件格式：讲解组件源码里的记号，按行认、按行写，用记号写法；只认识 marker 与 reference
  *   pinning  钉码编排：按文件挑格式，格式认引用、钉码核心判定、格式写回的先后顺序；不认识记号属性怎么写
- *   project  碰环境：读盘、git、摆放、读卡目录；不认识命令行
+ *   project  碰环境：读盘、git、摆放；不认识命令行与卡格式
+ *   cards    docfirst 卡格式：读卡目录、解析、校验、换成星轨盘的中性输入；卡里不许钉码要认记号，所以只认识 marker
  *   cli      入口：认识以上全部，谁都不认识它
  */
 const WORKFLOW_DIRS: Record<string, string[]> = {
-  marker: ["reference", "mdx", "code", "pinning", "project", "cli"],
-  reference: ["marker", "mdx", "code", "pinning", "project", "cli"],
-  mdx: ["code", "pinning", "project", "cli"],
-  code: ["mdx", "pinning", "project", "cli"],
-  pinning: ["marker", "project", "cli"],
-  project: ["cli"],
+  marker: ["reference", "mdx", "code", "pinning", "project", "cards", "cli"],
+  reference: ["marker", "mdx", "code", "pinning", "project", "cards", "cli"],
+  mdx: ["code", "pinning", "project", "cards", "cli"],
+  code: ["mdx", "pinning", "project", "cards", "cli"],
+  pinning: ["marker", "project", "cards", "cli"],
+  project: ["cards", "cli"],
+  cards: ["reference", "mdx", "code", "pinning", "project", "cli"],
   cli: [],
 };
 

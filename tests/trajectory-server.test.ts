@@ -1,6 +1,6 @@
 /**
  * `@godcreator/docfirst-fumadocs` 里轨迹卡集合那两样东西的测试：`cardSchema`（合法 / 缺 label / 缺 born-at / Date 型
- * born-at 四种判定）与 `remarkTrajectoryLinks`（关系边段落打标、卡身份形状的 `.md`
+ * born-at 四种情形，只派生字段、不校验）与 `remarkTrajectoryLinks`（关系边段落打标、卡身份形状的 `.md`
  * 链接改写、带路径的 `.md` 放行、wikilink 转真链接）。mdast 树直接手搭——remarkTrajectoryLinks 本身就是个吃 Root
  * 吐 void 的纯函数，不需要真跑一趟 unified 的 parse/stringify 管线。
  */
@@ -58,12 +58,11 @@ test("cardSchema：born-at 被解析成 Date（fumadocs 自己的 YAML 走的是
   assert.equal(result.value?.["born-at"], "2026-05-06");
 });
 
-test("cardSchema：缺 born-at 没有兜底，交回 issues", async () => {
+test("cardSchema：缺 born-at 不校验，照样出页——卡写得对不对由 docfirst check 报", async () => {
   const schema = cardSchema({ path: "docs/2026-05-06-my-card.md", source: "" });
   const result = await validate(schema, { label: "标题" });
-  assert.equal(result.value, undefined);
-  assert.equal(result.issues?.length, 1);
-  assert.match(result.issues![0]!.message, /born-at/);
+  assert.equal(result.issues, undefined);
+  assert.deepEqual(result.value, { title: "标题", label: "标题" });
 });
 
 /* ================= remarkTrajectoryLinks ================= */
@@ -146,10 +145,9 @@ test("cardSchema：卡字段一个都不沾的页不是卡——当普通页放�
   assert.deepEqual(plain.value, { title: "轨迹", description: "只增不改" });
   const bare = await validate(schema, {});
   assert.deepEqual(bare.value, { title: "index" });
-  // 沾了任何一个卡字段就是卡：缺 born-at 照样硬失败
+  // 沾了任何一个卡字段就是卡：标题取 label，不取 frontmatter 的 title
   const card = await validate(schema, { title: "像页的卡", label: "标题" });
-  assert.equal(card.value, undefined);
-  assert.match(card.issues![0]!.message, /born-at/);
+  assert.equal(card.value?.title, "标题");
 });
 
 test("cardSchema：卡的 description 也随行透出", async () => {

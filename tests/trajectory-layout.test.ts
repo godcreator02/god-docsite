@@ -9,17 +9,14 @@
 import { fileURLToPath } from "node:url";
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import {
-  AXIS_SPAN,
-  buildModel,
-  HUB_RIM,
-  RingsLayout,
-  gapDots,
-  SPREAD_DEG,
-} from "@godcreator/docfirst-trajectory";
+import { buildModel } from "@godcreator/docfirst-trajectory";
+import type { TrajectoryModel } from "@godcreator/docfirst-trajectory";
 import { scanCardDir } from "@godcreator/docfirst-workflow";
-import type { GapDot, RawCard, TrajectoryModel } from "@godcreator/docfirst-trajectory";
+/* 布局不从 `.` 出口导出，直读源码 */
+import { AXIS_SPAN, gapDots, HUB_RIM, RingsLayout, SPREAD_DEG } from "../packages/docfirst-trajectory/src/layout.ts";
+import type { GapDot } from "../packages/docfirst-trajectory/src/layout.ts";
 import { memCards } from "./trajectory-helpers.ts";
+import type { CardSpec } from "./trajectory-helpers.ts";
 
 /** 数值近似相等，模仿 jest 的 toBeCloseTo(expected, digits)。 */
 function closeTo(actual: number, expected: number, digits = 2): void {
@@ -44,8 +41,8 @@ function buildSynthetic(id: string, days: number[]): TrajectoryModel {
 const FIXTURES = fileURLToPath(new URL("./fixtures/trajectory", import.meta.url));
 const ROOT_ID = "tfix-测试项目根卡";
 
-const fixtureCards: RawCard[] = (await scanCardDir(FIXTURES)).cards;
-const m: TrajectoryModel = buildModel(fixtureCards);
+const fixture = await scanCardDir(FIXTURES);
+const m: TrajectoryModel = buildModel(fixture);
 const L = new RingsLayout(m);
 
 /** 采样日：全程步进 + 空窗段边界两侧与中点（对数段的接缝是最容易错的地方）。 */
@@ -58,9 +55,9 @@ function sampleDays(): number[] {
   return days.filter((d) => d >= m.day0 && d <= m.dayMax);
 }
 
-test("fixture 装载：106 张卡全扫到，tfix 认主、收得到卡", () => {
-  assert.equal(fixtureCards.length, 106);
-  assert.equal(m.root?.id, ROOT_ID);
+test("fixture 装载：根卡之外 105 张卡全上盘，tfix 认主、收得到卡", () => {
+  assert.equal(fixture.cards.length, 105);
+  assert.equal(m.center?.id, ROOT_ID);
   assert.ok(m.cards.length > 100);
   assert.ok(m.edges.length > 0);
   assert.ok(m.trees.length > 0);
@@ -190,7 +187,7 @@ test("外锚定环带：单日盘（effTotal = 0）所有卡半径坍缩到 hubR
 });
 
 test("外锚定环带：空盘（无卡）day0 = dayMax，radPerEff 钉 0，maxR 与有卡盘同一默认 hubR 下相等", () => {
-  const mw = buildModel(fixtureCards.filter((c) => c.type === "root"));
+  const mw = buildModel({ center: fixture.center, cards: [] });
   assert.equal(mw.cards.length, 0);
   const L2 = new RingsLayout(mw);
   assert.equal(L2.radPerEff, 0);
@@ -232,7 +229,7 @@ test("装箱：跨域扇环角向互斥（领域是颜色通道，同色不挨�
 
 test("装箱：一圈装得下就铺满整圈——扇环按顺序互不重叠、各自放大同一倍，首尾相接的缝跨在 12 点", () => {
   const day = (d: number): string => `2026-01-${String(d).padStart(2, "0")}T08:00`;
-  const specs = [
+  const specs: CardSpec[] = [
     { name: "fc00-根", fm: { type: "root", label: "小盘", "born-at": day(1) } },
     { name: "fc01-甲一", fm: { "born-at": day(2), label: "甲一", domain: "甲", parent: ["fc00-根"] } },
     {

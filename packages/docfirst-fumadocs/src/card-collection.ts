@@ -1,7 +1,8 @@
 /**
  * fumadocs 卡集合的两样接线：frontmatter schema `cardSchema`，与正文关系边 / `.md` 链接改写的
  * remark 插件 `remarkTrajectoryLinks`。站的 `src/lib/source.ts` 在轨迹卡集合上挂它们，
- * 都只在构建期的服务端跑。卡格式本身（哪几个字段算卡）从 `@godcreator/docfirst-trajectory` 取。
+ * 都只在构建期的服务端跑。卡格式本身（哪几个字段算卡、链接怎么认出卡身份）从 workflow 的卡格式取；
+ * 卡写得对不对由 `docfirst check` 校验，这里不再校验。
  */
 
 import { basename } from "node:path";
@@ -19,15 +20,14 @@ export type { Link, Paragraph, PhrasingContent, Root, Text } from "mdast";
 // devDependency、`import type` 编译期全擦除，dts 打包时会把用到的形状原样内联进
 // 产物的 .d.mts（跟 mdast 的类型是同一个道理），消费方不需要另装这个包。
 import type { StandardSchemaV1 } from "@standard-schema/spec";
-import { CARD_KEYS } from "@godcreator/docfirst-trajectory";
+import { CARD_KEYS, cardIdFromHref } from "@godcreator/docfirst-workflow/cards";
 
 /* ================= cardSchema：fumadocs 卡集合的 frontmatter schema ================= */
 
 /** 卡页渲染需要的字段：label 派生成 title（缺 label 时退到文件名，见下），其余原样透出，
- * born-at 若被 fumadocs 自己的 YAML 解析成 Date（日级写法的老毛病，本仓自家的
+ * born-at 若被 fumadocs 自己的 YAML 解析成 Date（日级写法的老毛病，卡格式自己的
  * `parseFrontmatter` 绕开了它，但 fumadocs 走的是它自己的 gray-matter，躲不掉）就转回字符串。
- * 同一集合里不是卡的页（六区站 `trajectory/index.mdx` 这种导读页）只有 title / description，
- * born-at 不带——所以它在这儿是可选的；卡本身缺 born-at 仍是硬失败。 */
+ * 同一集合里不是卡的页（`trajectory/index.mdx` 这种导读页）只有 title / description。 */
 export interface CardFrontmatter {
   title: string;
   description?: string;
@@ -38,9 +38,7 @@ export interface CardFrontmatter {
   "born-at"?: string;
 }
 
-/** born-at 缺失没有任何合理兜底（半径标度全下游要靠它），报 issues 硬失败；
- * label 缺失时按方案原话「缺 label 用文件名」退到文件名兜底、照样出 value——
- * 两者不能都走硬失败分支，不然「缺 label 用文件名」这句话就没有落地的地方。
+/** 只派生页面要的字段，不校验：卡写得对不对由 `docfirst check` 报。label 缺失时退到文件名，跟星轨盘上的短名一致。
  * 卡体系字段（CARD_KEYS）一个都不沾的文件不是卡（跟 parseCardFile 同一条判据）：当普通页放行，
  * title 取 frontmatter 的 title、缺了退文件名——卡集合里的导读页靠这条进站。
  * fumadocs-mdx 的 schema 支持传一个 `(ctx) => Schema` 工厂（ctx 带 path），
@@ -61,17 +59,19 @@ export function cardSchema(ctx: { path: string; source: string }): StandardSchem
           return { value: { title: plainTitle || fallbackTitle, ...description } };
         }
         const bornAtRaw = fm["born-at"];
-        if (bornAtRaw === undefined || bornAtRaw === null || bornAtRaw === "") {
-          return { issues: [{ message: "缺 born-at（全卡必填，没有可用的兜底）", path: ["born-at"] }] };
-        }
-        const bornAt = bornAtRaw instanceof Date ? (bornAtRaw.toISOString().slice(0, 10) as string) : String(bornAtRaw);
+        const bornAt =
+          bornAtRaw === undefined || bornAtRaw === null || bornAtRaw === ""
+            ? undefined
+            : bornAtRaw instanceof Date
+              ? bornAtRaw.toISOString().slice(0, 10)
+              : String(bornAtRaw);
         const labelRaw = typeof fm["label"] === "string" ? (fm["label"] as string).trim() : "";
         const title = labelRaw || fallbackTitle;
         const parentRaw = fm["parent"];
         const parent = Array.isArray(parentRaw) ? parentRaw.map((v) => String(v)) : undefined;
         const card: CardFrontmatter = {
           title,
-          "born-at": bornAt,
+          ...(bornAt !== undefined ? { "born-at": bornAt } : {}),
           ...description,
           ...(labelRaw ? { label: labelRaw } : {}),
           ...(typeof fm["type"] === "string" ? { type: fm["type"] as string } : {}),
@@ -94,24 +94,8 @@ export interface RemarkTrajectoryLinksOptions {
 const EDGE_HEAD = /^(supersedes|pivots-from)::/;
 /** wikilink：`[[身份]]`、`[[身份#锚]]`、`[[身份|别名]]`，锚与别名都可省。 */
 const WIKILINK_RE = /\[\[([^\]|#]+)(?:#[^\]|]*)?(?:\|([^\]]+))?\]\]/g;
-/** 卡文件的后缀，跟 `@godcreator/docfirst-trajectory` 的 scan.ts 同一条：`.mdx` 与 `.md` 都是卡。 */
+/** 卡文件的后缀，跟卡格式同一条：`.mdx` 与 `.md` 都是卡。 */
 const CARD_EXT = /\.mdx?$/;
-
-/** md link 目标还原成卡身份：解码 → 剥 `./` 前缀 → 剥 `#` 锚 → 剥 `.md` / `.mdx` 后缀。
- * 跟轨迹包 parse.ts 的 idFromHref 同一形状——两处独立实现，因为 remark 插件不吃卡解析器的私有函数，
- * 而这条转换本身只有几行，不值得为了共享单开一个内部模块。 */
-function stemFromHref(href: string): string {
-  let v = href.trim();
-  try {
-    v = decodeURIComponent(v);
-  } catch {
-    /* 不是合法百分号序列：原样用 */
-  }
-  v = v.replace(/^\.\//, "");
-  const hash = v.indexOf("#");
-  if (hash >= 0) v = v.slice(0, hash);
-  return v.replace(CARD_EXT, "");
-}
 
 /** 剥完之后这个主干像不像卡身份：非空、不带路径分隔、不以 `.md` / `.mdx` 结尾、不带 `:`
  * ——值来自正文链接，`https://…` 这类协议头得挡在外面。
@@ -145,7 +129,7 @@ export function remarkTrajectoryLinks(options: RemarkTrajectoryLinksOptions) {
     visit(tree, "link", (node: Link) => {
       const withoutHash = node.url.split("#")[0] ?? "";
       if (!CARD_EXT.test(withoutHash)) return;
-      const stem = stemFromHref(node.url);
+      const stem = cardIdFromHref(node.url);
       if (!idShapeOk(stem)) return;
       node.url = `${hrefBase}/${stem}`;
     });

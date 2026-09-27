@@ -17,13 +17,13 @@ import {
   failedChecks,
   files,
   fumadocsLines,
+  input,
   layout,
   model,
   pageLines,
   parsedExtras,
   readCalls,
   refForms,
-  result,
   sick,
   stages,
   steps,
@@ -174,7 +174,7 @@ function ReadScene(): JSX.Element {
 function ParseScene(): JSX.Element {
   return (
     <>
-      <Pane title="scanCards 与 checkDocfirstRefs 的结果" role="violet">
+      <Pane title="scanCards 与 checkDocfirstRefs 的结果" role="blue">
         <div className="tf-table-wrap">
           <table className="tf-table tf-matrix">
             <thead>
@@ -222,7 +222,7 @@ function ParseScene(): JSX.Element {
         D 的 born-at 不合格：不上盘；其余的病只列出，不挡绘制
       </Pill>
       <div className="tf-grid">
-        <Pane title="解析时从正文取出的" role="violet">
+        <Pane title="解析时从正文取出的" role="blue">
           <CodeLines lines={parsedExtras} />
         </Pane>
         <Terminal title={files.cwd} lines={terminals.check} />
@@ -231,7 +231,7 @@ function ParseScene(): JSX.Element {
   );
 }
 
-/* ── 第 4 步：盘上的树与 buildTrajectory 交回的三样 ── */
+/* ── 第 4 步：scanCardDir 交回的中性输入，buildModel 建出的树 ── */
 
 function placeOf(id: string): Place {
   const place = layout.places.find((p) => p.id === id);
@@ -300,7 +300,7 @@ function ModelScene(): JSX.Element {
   return (
     <>
       <div className="tf-grid">
-        <Pane title={`${model.root.label} 的盘：一棵树`} role="violet" extra={<Pill role="violet">extractTrees</Pill>}>
+        <Pane title={`${model.center.label} 的盘：一棵树`} role="violet" extra={<Pill role="violet">buildModel</Pill>}>
           <TreeSvg />
           <dl className="tf-kv">
             <dt>被取代 supersededIds</dt>
@@ -315,28 +315,24 @@ function ModelScene(): JSX.Element {
             <dd>{model.domains.join(' → ')}</dd>
           </dl>
         </Pane>
-        <Pane title="buildTrajectory 交回的" role="violet" extra={<Pill role="violet">index.ts</Pill>}>
+        <Pane title="scanCardDir 交回的中性输入与病卡" role="blue" extra={<Pill role="blue">cards/scan.ts</Pill>}>
           <dl className="tf-kv">
-            <dt>cards 全部卡</dt>
+            <dt>center 盘心</dt>
             <dd>
-              <ChipList ids={result.cards} bad={result.sickFiles} />
+              <ChipList ids={[input.center]} />
+            </dd>
+            <dt>cards 盘上的卡</dt>
+            <dd>
+              <ChipList ids={input.cards} />
             </dd>
             <dt>sick 病卡</dt>
             <dd>
-              <ChipList ids={result.sickFiles} bad={result.sickFiles} />
-            </dd>
-            <dt>model.root 盘心</dt>
-            <dd>
-              <ChipList ids={[model.root.id]} />
-            </dd>
-            <dt>model.cards 盘上的卡</dt>
-            <dd>
-              <ChipList ids={model.cards} />
+              <ChipList ids={input.sickFiles} bad={input.sickFiles} />
             </dd>
           </dl>
           <div className="tf-off">
             <Chip code="D" bad />
-            <span>born-at 不合格：在 cards 与 sick 里，不在盘上</span>
+            <span>born-at 不合格：只在 sick 里，不进中性输入、不在盘上</span>
           </div>
         </Pane>
       </div>

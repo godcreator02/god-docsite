@@ -104,8 +104,8 @@ export const windows = [
 const confirmCommand = { kind: 'cmd', text: 'pnpm docfirst confirm', at: 0.04 };
 /** @type {TimedLine} */
 const checkCommand = { kind: 'cmd', text: 'pnpm docfirst check', at: 0.04 };
-/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="37-43" hash="9ebfdcac2bf1" blob="68565dfd474a" */
-/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="171-189" hash="89872d5416cd" blob="68565dfd474a" */
+/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="38-44" hash="9ebfdcac2bf1" blob="418434ff646c" */
+/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="172-190" hash="89872d5416cd" blob="418434ff646c" */
 const recordedLine = `✅ ${files.doc}  ${REF}:2-3  已确认，写上了记录`;
 const freshLine = `🟢 ${files.doc}  ${REF}:2-3  新鲜`;
 const movedLine = `✅ ${files.doc}  ${REF}:2-3  内容没变、挪到了 4-5，已写回新行号`;

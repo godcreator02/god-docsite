@@ -1,8 +1,8 @@
 /**
  * fumadocs 适配内部接缝图（fumadocs.data.mjs）的坐标与图标。站在最上；左列是术语标注的三个文件，
- * 中间两列是 fumadocs 本体，以及 mdx 选项、remark 插件、换节点、节点形状、机读版回调与状态点组件，
- * 右列是 workflow 与钉码核心；最下一行是卡集合、轨迹核心与星轨盘。站连到卡集合与星轨盘的两条线沿画布左右两边，
- * 星轨盘到读卡目录的线绕过钉码核心。
+ * 中间两列是 fumadocs 本体，以及 mdx 选项、remark 插件、换节点、节点形状、机读版回调、状态点组件与钉码核心，
+ * 右列是 workflow；最下一行是卡集合、轨迹核心与星轨盘。站连到卡集合与星轨盘的线沿画布左右两边，
+ * 读卡目录去星轨盘的线沿 workflow 框右侧往下，卡字段与卡身份去卡集合的线从状态点组件下面往左走。
  */
 import {
   CircleDot,
@@ -60,16 +60,15 @@ export const fumadocsLayout: SeamLayout = {
     'bl-tree': cap(466, 652, 118),
     'bl-code': cap(594, 652, 125),
     'bl-nodefor': cap(729, 652, 56),
-    pin: cap(808, 652, 140),
+    'wf-keys': cap(822, 652, 180),
 
     'fd-codeblock': cap(254, 802, 105),
     'pre-pre': cap(466, 802, 90),
     'pre-light': cap(566, 802, 80),
+    pin: cap(690, 802, 100),
 
     'cc-links': cap(34, 952, 145),
     'cc-schema': cap(189, 952, 115),
-    'tj-keys': cap(352, 952, 80),
-    'tj-build': cap(442, 952, 105),
     'tj-disk': cap(557, 952, 140),
     'star-load': cap(739, 952, 175),
     'star-css': cap(924, 952, 110),
@@ -79,7 +78,7 @@ export const fumadocsLayout: SeamLayout = {
     term: { x: 20, y: 170, w: 198, h: 94 },
     host: { x: 240, y: 170, w: 403, h: 94 },
     roster: { x: 650, y: 170, w: 146, h: 94 },
-    workflow: { x: 808, y: 170, w: 250, h: 394 },
+    workflow: { x: 808, y: 170, w: 250, h: 544 },
     'glossary-plugin': { x: 20, y: 320, w: 205, h: 94 },
     'fumadocs-core': { x: 240, y: 320, w: 198, h: 544 },
     'remark-plugin': { x: 500, y: 320, w: 180, h: 94 },
@@ -90,7 +89,7 @@ export const fumadocsLayout: SeamLayout = {
     pin: null,
     pre: { x: 452, y: 770, w: 208, h: 94 },
     'card-collection': { x: 20, y: 920, w: 298, h: 94 },
-    trajectory: { x: 338, y: 920, w: 373, h: 94 },
+    trajectory: { x: 400, y: 920, w: 311, h: 94 },
     star: { x: 725, y: 920, w: 323, h: 94 },
   },
   // 一端有几个方块时线只画到其中一个，其余的（机读版回调、状态点样式、组件表这类）固定高亮时照样亮。
@@ -117,9 +116,10 @@ export const fumadocsLayout: SeamLayout = {
     '18': { d: 'M720,100 V202', badge: [720, 142] },
     '19': { d: 'M34,76 H10 V976 H34', badge: [10, 880] },
     '20': { d: 'M1065,76 H1090 V976 H1034', badge: [1090, 860] },
-    '21': { d: 'M917,526 H1000 V900 H850 V952', badge: [1000, 800] },
-    '22': { d: 'M304,976 H352 M697,976 H739', badge: [328, 976] },
-    '23': { d: 'M785,676 H808', badge: [797, 676] },
+    '21': { d: 'M917,526 H1030 V900 H880 V952', badge: [1030, 800] },
+    '22': { d: 'M697,976 H739', badge: [718, 976] },
+    '23': { d: 'M757,700 V802', badge: [757, 751] },
+    '24': { d: 'M840,700 V890 H250 V952', badge: [600, 890] },
   },
   entries: {},
   moduleIcons: {

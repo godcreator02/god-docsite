@@ -1,13 +1,14 @@
 ---
 title: 轨迹卡怎么变成星轨盘
-description: content/trajectory/ 下的轨迹卡怎么被读出、校验、建成一张星轨盘、在每棵树里挑出主干，再画到站的 /trajectory 上；以及卡里为什么不许钉码
+description: content/trajectory/ 下的轨迹卡怎么被读出、校验、换成星轨盘的中性输入、建成一张盘、在每棵树里挑出主干，再画到站的 /trajectory 上；以及卡里为什么不许钉码
 ---
 
 轨迹卡是 `content/trajectory/` 下一卡一文件的 mdx，一张卡记一次取舍的结论，只增不改。星轨盘是这些卡的图：
 一个站只有一张根卡、一张盘，根卡画在盘心，其余的卡按日期排在同心环上，半径表示时间、内旧外新。
 同一棵树（或同一领域的孤星）在同一天有好几张卡时，那一天的环带按张数加宽，这几张按角度从当天的环往内排成一斜排，不叠在同一个环上。
 角度按领域分扇区，一圈装得下就整体放大铺满整圈，只在 12 点方向留一道缝放日期与里程碑的名字；装不下才让同一领域里时间不重叠的树共用一段角度。
-从卡文件到站上的盘分几段，读卡目录在 `docfirst-workflow`，解析、建模、布局在 `docfirst-trajectory`，最后由站渲染：
+从卡文件到站上的盘分几段：读卡目录、解析、校验、换成中性输入在 `docfirst-workflow` 的卡格式；建模、布局、画盘在 `docfirst-trajectory`，
+组件在浏览器里建模；站只负责读卡目录、把结果交给组件：
 
 <TrajectoryFlow />
 
@@ -16,23 +17,22 @@ description: content/trajectory/ 下的轨迹卡怎么被读出、校验、建�
 卡的身份是文件名去掉 `.mdx` / `.md`，`parent` 与正文里的关系都用身份指向别的卡。frontmatter 里下面这些
 字段至少写了一个才算卡，一个都没写的文件整份跳过、不报问题：
 
-{/* ref file="../packages/docfirst-trajectory/src/parse.ts" lines="16-18" hash="dfeb7aaec458" blob="4e25ee1e4c92" */}
+{/* ref file="../packages/docfirst-workflow/src/cards/parse.ts" lines="15-17" hash="dfeb7aaec458" blob="f9e17188994b" */}
 
 卡与卡之间的两种关系写在正文里，一行一条：`supersedes::`（取代）或 `pivots-from::`（转向）后面跟一条指向卡身份的链接。
 行首是这两个词、整行却不合格式的，记成问题：
 
-{/* ref file="../packages/docfirst-trajectory/src/parse.ts" lines="23-30" hash="ec84ce878892" blob="f4b46a71d249" */}
+{/* ref file="../packages/docfirst-workflow/src/cards/parse.ts" lines="22-29" hash="ec84ce878892" blob="f9e17188994b" */}
 
 解析一张卡时把问题逐条记下，不在第一条停：必填字段、`born-at` 的格式，再加写歪的关系行：
 
-{/* ref file="../packages/docfirst-trajectory/src/model.ts" lines="97-112" hash="282815b67ec8" blob="3449f87e60a6" */}
+{/* ref file="../packages/docfirst-workflow/src/cards/card.ts" lines="51-66" hash="e207a8069f1e" blob="feb4174fcae5" */}
 
-`born-at` 不合格的卡不上盘，半径按日期算，没有日期算不出来；其余问题不挡绘制。`docfirst check` 把每条问题
-记一次红：
+`docfirst check` 把每条问题记一次红：
 
-{/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="227-228" hash="6a87fa27d832" blob="68565dfd474a" */}
+{/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="228-229" hash="6a87fa27d832" blob="418434ff646c" */}
 
-## 一张根卡、建树、挑主干
+## 一张根卡、换成中性输入
 
 `type: root` 的卡是根卡。**一个卡目录只有一张根卡，整个目录只画一张盘。**`scanCards` 逐张解析完，再对整个目录查根卡，
 问题记在对应的卡上，跟单卡的问题进同一份清单：
@@ -41,25 +41,28 @@ description: content/trajectory/ 下的轨迹卡怎么被读出、校验、建�
 - 根卡不写 `parent`
 - 其余的卡 `parent` 必填，只能写那张根卡的身份；目录里没有根卡时，写了 `parent` 的卡都记一条
 
-{/* ref file="../packages/docfirst-trajectory/src/scan.ts" lines="54-80" hash="722a56b13470" blob="7ace664ccf8b" */}
+{/* ref file="../packages/docfirst-workflow/src/cards/scan.ts" lines="74-100" hash="92b5b5d04ab7" blob="e88f50e0472c" */}
 
-根卡画在盘心，其余 `born-at` 合格的卡都在盘上；`parent` 与 `domain` 不决定卡在不在盘上，`domain` 只用来分组配色：
+然后换成星轨盘的中性输入：根卡恰好一张时它是盘心；其余 `born-at` 合格的卡都上盘，别的问题不挡上盘，`parent` 与 `domain`
+不决定卡在不在盘上。`born-at` 不合格的卡算不出半径，不进输入：
 
-{/* ref file="../packages/docfirst-trajectory/src/model.ts" lines="146-153" hash="9c68e53f0ee6" blob="3449f87e60a6" */}
+{/* ref file="../packages/docfirst-workflow/src/cards/scan.ts" lines="45-72" hash="4fea4043393f" blob="e88f50e0472c" */}
 
-关系在盘上求解，目标不在盘上的记进 `broken`。用取代与转向连在一起的卡组成一棵树。树的**主干**在取代关系上挑：
-几条取代链先比终点的 `born-at` 谁更晚，再比长短，最后按身份排；整棵树一条取代都没有，才在转向链上用同一个比法挑。
+## 建树、挑主干
+
+关系在建模时求解，目标不在盘上的记进 `broken`。用取代与转向连在一起的卡组成一棵树。树的**主干**在取代关系上挑：
+几条取代链先比终点的时刻谁更晚，再比长短，最后按身份排；整棵树一条取代都没有，才在转向链上用同一个比法挑。
 不在主干上的卡按连通分成**支线**；两种关系都没有的卡是**孤星**：
 
-{/* ref file="../packages/docfirst-trajectory/src/model.ts" lines="233-260" hash="3efa5ab62617" blob="3449f87e60a6" */}
+{/* ref file="../packages/docfirst-trajectory/src/model/build.ts" lines="177-204" hash="3efa5ab62617" blob="fafdd715830c" */}
 
-`buildTrajectory` 建好这张盘的模型就交出去，不算布局。盘的布局（`RingsLayout`）由浏览器里的画布按当前设置算，调设置不用再请求服务端：
+建模在浏览器里做：组件 `StarDisk` 收到中性输入，自己建模；盘的布局（`RingsLayout`）也由画布按当前设置算，调设置不用再请求服务端：
 
-{/* ref file="../packages/docfirst-trajectory/src/index.ts" lines="111-123" hash="700374590e8b" blob="6e3c47627e1c" */}
+{/* ref file="../packages/docfirst-trajectory/src/disk.tsx" lines="158-159" hash="f3f44d34895f" blob="3ecaca179c38" */}
 
 ## 站上怎么渲染
 
-整页 `/trajectory` 在服务端读卡目录、建模，交给客户端组件 `StarDisk`；两样都从 `@godcreator/docfirst-fumadocs/trajectory` 取：
+整页 `/trajectory` 在服务端读卡目录，把结果交给客户端组件 `StarDisk`；两样都从 `@godcreator/docfirst-fumadocs/trajectory` 取：
 
 {/* ref file="src/app/(trajectory-disk)/trajectory/page.tsx" lines="5-5" hash="75e52e0103c2" blob="da67a1b04df3" */}
 
@@ -72,11 +75,12 @@ description: content/trajectory/ 下的轨迹卡怎么被读出、校验、建�
 
 {/* ref file="src/app/(trajectory-disk)/trajectory/page.tsx" lines="38-38" hash="68a8bf23899d" blob="8b9b202f561e" */}
 
-`loadTrajectory` 只收绝对路径，然后读卡目录、建模。卡目录由页面用写死的目录名拼成绝对路径再传，Turbopack 才看得出只读这一个目录，不会把整个项目打进服务端产物：
+`loadTrajectory` 只收绝对路径，然后读卡目录，交回中性输入与病卡清单。卡目录由页面用写死的目录名拼成绝对路径再传，
+Turbopack 才看得出只读这一个目录，不会把整个项目打进服务端产物：
 
-{/* ref file="../packages/docfirst-fumadocs/src/trajectory.ts" lines="19-27" hash="fd1c13685fd0" blob="877bcbfc11a5" */}
+{/* ref file="../packages/docfirst-fumadocs/src/trajectory.ts" lines="18-26" hash="568db72b8fbc" blob="56741c0227aa" */}
 
-每张卡另有自己的卡页 `/trajectory/<卡身份>`，由站里的 fumadocs 卡集合渲染：`cardSchema` 校验 frontmatter，
+每张卡另有自己的卡页 `/trajectory/<卡身份>`，由站里的 fumadocs 卡集合渲染：`cardSchema` 从 frontmatter 派生标题，
 `remarkTrajectoryLinks` 把正文里指向卡的链接改写成卡页地址（侧栏靠这个前缀认出卡链接）：
 
 {/* ref file="src/lib/source.ts" lines="59-62" hash="3f19f19dd147" blob="5128ac69a760" */}
@@ -90,11 +94,10 @@ description: content/trajectory/ 下的轨迹卡怎么被读出、校验、建�
 
 {/* ref file="../packages/docfirst-workflow/src/project/load.ts" lines="91-92" hash="e60f111d117a" blob="9fa77c18d282" */}
 
-二是读卡目录时逐行查每张卡的正文，正式记号、以 `@@docfirst` 开头的一行（已经删掉的草稿写法）出现任何一种，都记成一条问题：
+二是卡格式扫卡时逐行查每张卡的正文，正式记号、以 `@@docfirst` 开头的一行（已经删掉的草稿写法）出现任何一种，都记成一条问题：
 
-{/* ref file="../packages/docfirst-workflow/src/project/card-refs.ts" lines="17-38" hash="09ecf841cc47" blob="7d8a942dfc3c" */}
+{/* ref file="../packages/docfirst-workflow/src/cards/card-refs.ts" lines="15-37" hash="b15c02e922ef" blob="57bbf681b44f" */}
 
-这一条要认识钉码的记号，所以查在 `docfirst-workflow` 读卡目录的 `scanCardDir` 里，查出的问题并进轨迹包校验出的同一份清单；
-`docfirst-trajectory` 不认识记号：
+这一条要认识钉码的记号，所以在 workflow 的卡格式里查，病并进同一份清单；星轨盘本身连卡文件的写法都不认识：
 
-{/* ref file="../packages/docfirst-workflow/src/project/card-dir.ts" lines="13-25" hash="7d367c0d4a7f" blob="775b6e9e6c2d" */}
+{/* ref file="../packages/docfirst-workflow/src/cards/scan.ts" lines="33-37" hash="1460749cec5c" blob="e88f50e0472c" */}

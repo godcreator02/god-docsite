@@ -14,7 +14,7 @@
  * defs 序号 / 筛选态一律实例持有，不走模块级单例。 */
 
 import { BASE_RADIUS } from "../layout.ts";
-import type { Card } from "../types.ts";
+import type { Card } from "../model/types.ts";
 import { mix, type Theme } from "./theme.ts";
 
 /* ---------- DOM 工具：parent 显式传、缺省建游离节点（由调用方挂载） ---------- */

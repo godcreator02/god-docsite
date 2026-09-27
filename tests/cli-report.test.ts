@@ -53,17 +53,18 @@ test("轨迹卡目录还没建：check 退 0、一条红都不打——「这里
   }
 });
 
-test("合法根卡加子卡：trajectory --json 出那一张盘的模型，不带 --json 打印根卡与卡数", async () => {
+test("合法根卡加子卡：trajectory --json 出那一张盘的输入（盘心、卡、病卡）与树，不带 --json 打印根卡与卡数", async () => {
   const p = setupProject();
   try {
     card(p.root, "2026-01-01-root.md", ["---", "born-at: 2026-01-01T08:00", "type: root", "label: 测试项目", "---", ""]);
     card(p.root, "2026-01-02-child.md", ["---", "born-at: 2026-01-02T08:00", "parent: [2026-01-01-root]", "label: 子卡", "---", ""]);
     const result = await p.cli("trajectory", "--json");
     assert.equal(result.code, 0, result.out);
-    const data = JSON.parse(result.out) as { sick: unknown[]; model: { root: { id: string } | null; cards: Array<{ id: string }> } };
-    assert.equal(data.model.root?.id, "2026-01-01-root");
-    assert.deepEqual(data.model.cards.map((c) => c.id), ["2026-01-02-child"]);
+    const data = JSON.parse(result.out) as { center: { id: string } | null; cards: Array<{ id: string }>; sick: unknown[]; trees: unknown[] };
+    assert.equal(data.center?.id, "2026-01-01-root");
+    assert.deepEqual(data.cards.map((c) => c.id), ["2026-01-02-child"]);
     assert.deepEqual(data.sick, []);
+    assert.deepEqual(data.trees, [], "一张卡没有关系：没有树");
     const text = await p.cli("trajectory");
     assert.equal(text.code, 0, text.out);
     assert.match(text.out, /^盘 测试项目（2026-01-01-root） {2}1 张卡$/m);

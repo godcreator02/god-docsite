@@ -12,7 +12,7 @@
  *   ./roster      fumadocs 自带组件的名册规则，docfirst.config.mjs 展开它（纯数据，不 import 宿主）
  *   ./pre         状态点的 pre 组件（"use client"）
  *   ./term        术语组件（服务端组件，没有 JS）
- *   ./trajectory  星轨盘：loadTrajectory 读卡建模，转出客户端组件 StarDisk
+ *   ./trajectory  星轨盘：loadTrajectory 读卡目录，转出客户端组件 StarDisk
  *   ./light.css   状态点的样式；./term.css 术语标注的样式；./trajectory.css 星轨盘的样式
  */
 export { remarkDocfirst } from "./remark-plugin.ts";

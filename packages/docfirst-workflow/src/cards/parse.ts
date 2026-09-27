@@ -6,12 +6,11 @@
  * 得到「Tue May 06 2026 08:00:00 GMT+0800」——born-at 的格式校验当场全灭，日级存量卡全部
  * 被判字段病并挡在盘外，而且是静默的（盘照出，只是少了卡少了环）。
  *
- * 只认既定键：born-at / type / parent / label / domain / status。其余键读进来
- * 也没人取，消费侧（model.ts）只按这张表读。
+ * 值读进来谁用谁取，card.ts 只按 CARD_KEYS 与自己要的几个键读。
  * 逻辑出自老仓 `god-flow-panels` 的 `node/star/parse.ts`（只读参考，本仓不 import 它）。
  */
 
-import type { EdgeKind, Milestone, Relation } from "./types.ts";
+import type { EdgeKind, Milestone, Relation } from "@godcreator/docfirst-trajectory";
 
 /** 卡体系字段：frontmatter 里一个都不沾的文件不是卡，校验直接跳过。
  * status 不在其列——它是自由槽位，单凭一个 status 不足以认定这是张卡。 */
@@ -118,16 +117,16 @@ export function listOf(fm: Frontmatter, key: string): string[] {
 
 /** 正文关系边提取的产物：成形的边与写歪的行分开装。
  * broken 只装「行头对但行形不合」这一类（文件级病，跟盘上有哪些卡无关）；
- * 「指向的卡不在盘上」要对盘上的卡集合求解，归 model.ts 的 BrokenRel。 */
+ * 「指向的卡不在盘上」要对盘上的卡集合求解，归星轨盘建模时的 broken。 */
 export interface ExtractedRelations {
   relations: Relation[];
   broken: Array<{ key: string; target: string }>;
 }
 
 /** md link 的目标段还原成卡身份：百分号解码 → 剥 `./` 前缀 → 剥 `#` 锚 → 剥 `.md` / `.mdx` 后缀
- * （卡文件两种后缀都认，见 scan.ts）。
+ * （卡文件两种后缀都认，见 scan.ts 的 CARD_EXT）。关系行与站上的卡链接改写用的是这同一个。
  * 解码失败（目标里有孤零零的 `%`）按原样走，不抛——坏写法该现原形、不该炸整次扫盘。 */
-function idFromHref(href: string): string {
+export function cardIdFromHref(href: string): string {
   let target = href.trim();
   try {
     target = decodeURIComponent(target);
@@ -163,7 +162,7 @@ export function extractRelations(body: string): ExtractedRelations {
     const target =
       wiki !== undefined
         ? (wiki.split(/[|#]/)[0]?.trim() ?? "")
-        : idFromHref((match[3] ?? match[4]) as string);
+        : cardIdFromHref((match[3] ?? match[4]) as string);
     /* 目标段空掉（`[文字]()` 之类）：算写歪，示众不成边 */
     if (target === "") {
       broken.push({ key: match[1] as string, target: line.slice(line.indexOf("::") + 2).trim() });

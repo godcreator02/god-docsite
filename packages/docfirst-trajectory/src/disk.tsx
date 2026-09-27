@@ -25,17 +25,15 @@ import {
 } from "./canvas/settings.ts";
 import { type HomeState, StarStage } from "./canvas/stage.ts";
 import { buildThemes } from "./canvas/theme.ts";
-import { inRange } from "./model.ts";
-import { toRuntimeModel } from "./serial.ts";
-import type { Card } from "./types.ts";
-import type { RouteCard, Trajectory } from "./index.ts";
+import { buildModel } from "./model/build.ts";
+import type { Card, DiskInput } from "./model/types.ts";
 
-/** StarDisk 的 props：data 是 buildTrajectory 的产物，hrefBase 是卡页路由前缀
+/** StarDisk 的 props：data 是下游送进来的一张盘（盘心加一组卡，组件自己建模），hrefBase 是卡页路由前缀
  * （卡页地址 = `${hrefBase}/${encodeURIComponent(id)}`），bodies 是每张卡（含根卡）渲染好的正文、
  * 键是卡身份——不收函数，服务端组件传不了函数给客户端组件。
  * 容器吃满父元素（高度由页面给），滚轮直接作用于盘。顶栏不归组件画。 */
 export interface StarDiskProps {
-  data: Trajectory;
+  data: DiskInput;
   hrefBase: string;
   bodies: Record<string, ReactNode>;
 }
@@ -157,15 +155,8 @@ export function StarDisk({ data, hrefBase, bodies }: StarDiskProps): ReactNode {
   const [openId, setOpenId] = useState<string | null>(null);
   const [sideWidth, setSideWidth] = useState(loadSideWidth);
 
-  /* ---------- 数据联接：路由卡表（拿 type / milestones），运行期模型 ---------- */
-  const routeById = useMemo(() => new Map(data.cards.map((c) => [c.id, c])), [data.cards]);
-  const model = useMemo(() => toRuntimeModel(data.model), [data.model]);
-  const rootRoute: RouteCard | undefined = model.root ? routeById.get(model.root.id) : undefined;
-  const milestones = useMemo(
-    () => (rootRoute?.milestones ? inRange(rootRoute.milestones, model.day0, model.dayMax) : []),
-    [rootRoute, model.day0, model.dayMax],
-  );
-  const typeOf = useCallback((id: string): string | null => routeById.get(id)?.type ?? null, [routeById]);
+  /* ---------- 建模：输入变了才重建 ---------- */
+  const model = useMemo(() => buildModel(data), [data]);
   const themeName = dark ? "dark" : "light";
   const isEmpty = model.cards.length === 0;
 
@@ -228,9 +219,9 @@ export function StarDisk({ data, hrefBase, bodies }: StarDiskProps): ReactNode {
 
   /* 首开与数据变了：模型灌进舞台，画布整棵重建 */
   useEffect(() => {
-    stageRef.current?.setData({ model, milestones, typeOf });
+    stageRef.current?.setData(model);
     setTip(null);
-  }, [model, milestones, typeOf]);
+  }, [model]);
 
   /* 首开：地址栏带着 ?card= 就直接在侧栏打开那张（链接发给别人、刷新都停在同一张卡） */
   useEffect(() => {
@@ -382,7 +373,7 @@ export function StarDisk({ data, hrefBase, bodies }: StarDiskProps): ReactNode {
     >
       <div ref={containerRef} className="star-main" onPointerMove={onPointerMove}>
       {/* 画布区：空 div 交给画布层，svg 由舞台建 */}
-      <div ref={canvasRef} className="star-canvas" aria-label={model.root?.label ?? "星轨盘"} />
+      <div ref={canvasRef} className="star-canvas" aria-label={model.center?.label ?? "星轨盘"} />
 
       {/* 悬停小气泡 */}
       {tip ? (
@@ -552,23 +543,22 @@ export function StarDisk({ data, hrefBase, bodies }: StarDiskProps): ReactNode {
    * 就在侧栏里如实说明；在盘上却没传正文是盘页的错，直接抛出。 */
   function sideCardOf(id: string): { title: string; meta: string; body: ReactNode } {
     const card = model.byId[id];
-    const root = model.root?.id === id ? model.root : null;
-    if (!card && !root) {
+    const center = model.center?.id === id ? model.center : null;
+    const shown = card ?? center;
+    if (!shown) {
       return { title: id, meta: "", body: <p className="star-side-missing">这张盘上没有身份为「{id}」的卡。</p> };
     }
     if (!(id in bodies)) {
       throw new Error(`卡「${id}」没有正文：盘页传给 StarDisk 的 bodies 里缺这一张`);
     }
-    const type = routeById.get(id)?.type;
-    const status = root
+    const status = center
       ? "根卡"
       : model.supersededIds.has(id)
         ? "被取代"
         : model.isolated.some((c) => c.id === id)
           ? "在立 · 孤星"
           : "在立";
-    const src = (card ?? root) as { label: string; bornAt: string };
-    const meta = [src.bornAt.slice(0, 10), type, card?.domain, status].filter(Boolean).join(" · ");
-    return { title: src.label, meta, body: bodies[id] };
+    const meta = [(shown.bornAt ?? "").slice(0, 10), shown.kind, card?.domain, status].filter(Boolean).join(" · ");
+    return { title: shown.label, meta, body: bodies[id] };
   }
 }

@@ -1,39 +1,19 @@
 /**
- * 由卡目录建模：一个卡目录一张盘。认根靠 `type: root`，卡目录里恰好一张根卡时它是盘心；
- * born-at 合格的非根卡全部上盘（`parent` 由 scanCards 校验，不决定上不上盘；`domain` 只是泳道分组）；
- * 时间轴吃 `born-at`（分钟级 `YYYY-MM-DDTHH:mm`，日级 `YYYY-MM-DD` 兼容）；
- * 关系边是正文 inline field（`supersedes::` / `pivots-from::`，链接目标即卡身份，
- * md link 与 wikilink 两形态都认）；
- * 根卡不上盘（盘心圆盘即根卡），诞生时刻只参与定盘界；里程碑从根卡正文「## 里程碑」解析。
- *
- * 纯函数，不碰文件系统——读卡目录在 `@godcreator/docfirst-workflow` 的 `scanCardDir`，
- * 这个包一句 import 外部模块都没有。`scanCards` 出 `RawCard[]`，本文件的建模函数只吃它。
- * 报病按文件归拢成 `SickFile`。
+ * 建模：下游送进来的一张盘（盘心加一组卡）→ 布局要的模型。求关系边、提树、挑主干、定领域序与时间范围。
+ * 输入不合格直接抛错：下游只把画得出来的卡送进来，走到这里说明下游有 bug。
+ * 纯函数，一句 import 外部模块都没有。
  * 逻辑出自老仓 `god-flow-panels` 的 `node/star/model.ts`（只读参考，本仓不 import 它）。
  */
 
-import {
-  CARD_KEYS,
-  extractMilestones,
-  extractRelations,
-  type Frontmatter,
-  listOf,
-  parseFrontmatter,
-  scalarOf,
-  stripFrontmatter,
-} from "./parse.ts";
-import type { Card, Edge, BrokenRel, Problem, ProjectRoot, RawCard, TrajectoryModel, Tree } from "./types.ts";
+import type { BrokenRel, Card, DiskCard, DiskInput, Edge, Milestone, TrajectoryModel, Tree } from "./types.ts";
 
 /** 「未分道」隐式组的哨兵值：无 domain 的卡归进这组——着中性色（盘心色一档）、
  * 排各泳道组之后、不占领域色板。拿字符串当 domain 用是为了装箱 / 筛选 / 图例
  * 一条链路不加特例；规范层面不会起这个领域名。 */
 export const NO_DOMAIN = "未分道";
 
-/** born-at 合法形状：分钟级 YYYY-MM-DDTHH:mm，存量日级 YYYY-MM-DD 兼容。 */
+/** 时刻的合法形状：分钟级 YYYY-MM-DDTHH:mm 或日级 YYYY-MM-DD。 */
 const BORN_AT_RE = /^\d{4}-\d{2}-\d{2}(?:T\d{2}:\d{2})?$/;
-
-/** 卡身份的前置日期段：`<YYYY-MM-DD>-<slug>`，剥掉它剩下的就是 title。 */
-const ID_DATE_PREFIX = /^\d{4}-\d{2}-\d{2}-/;
 
 /** 日期字符串转天序数——取日期部分强制 UTC 解析，序数是精确整数、零时区依赖。
  * 日级与分钟级两种长度都只吃前 10 位，天然兼容。 */
@@ -46,8 +26,12 @@ export function formatDay(n: number): string {
   return new Date(n * 86400000).toISOString().slice(5, 10);
 }
 
-/** 卡的盘上形态：有取代出边（supersedes 链上被人取代）即「被取代」，否则「在立」。
- * 根卡不在其列——它不上盘，盘心圆盘就是它。 */
+/** 时刻写得合不合格：形状对、日期真能解析。下游校验卡的时刻用同一个判据。 */
+export function validBornAt(v: string): boolean {
+  return BORN_AT_RE.test(v) && !Number.isNaN(dayNum(v));
+}
+
+/** 卡的盘上形态：有取代出边（被别的卡取代）即「被取代」，否则「在立」。 */
 export function formOf(
   model: Pick<TrajectoryModel, "supersededIds">,
   id: string,
@@ -65,118 +49,68 @@ export function spineTipIds(trees: Tree[]): Set<string> {
   return out;
 }
 
-/** born-at 形状 + 可解析双查（分钟级与日级两种长度合法）。 */
-function bornAtOk(v: string): boolean {
-  return BORN_AT_RE.test(v) && !Number.isNaN(dayNum(v));
-}
+/* ================= 输入校验 ================= */
 
-/** 身份去掉前置日期段就是 title（label 读不到时的兜底）；没有日期段的身份原样当 title。 */
-function titleOf(id: string): string {
-  return id.replace(ID_DATE_PREFIX, "");
-}
-
-/* ================= 扫盘：一趟读完，后续全在内存上算 ================= */
-
-/** 一个文件解析出的卡与它自己的病。不是卡（卡体系字段一个都不沾）时 card 为 null。 */
-export interface ParsedFile {
-  card: RawCard | null;
-  problems: Problem[];
-}
-
-/** 把一份卡文件的全文变成 RawCard，顺带跑单文件的校验（born-at 形状、必填字段、关系行形）。
- * 一致性校验（根卡几张、parent 指不指向根卡）跨文件，在 scanCards 里。
- * 「卡正文里不许钉码」是钉码那一侧的规矩，由 `@godcreator/docfirst-workflow` 读卡目录时另加。
- * 卡体系字段（CARD_KEYS）一个都不沾的文件不是卡：card 与 problems 都回空，整文件跳过。 */
-export function parseCardFile(id: string, path: string, mtime: number, text: string): ParsedFile {
-  const fm: Frontmatter | null = parseFrontmatter(text);
-  if (!fm || !CARD_KEYS.some((k) => fm[k] !== undefined)) return { card: null, problems: [] };
-
-  const title = titleOf(id);
-  const bornAt = scalarOf(fm, "born-at") ?? "";
-  const type = scalarOf(fm, "type");
-  const parent = listOf(fm, "parent");
-  const domain = scalarOf(fm, "domain");
-  const rawLabel = scalarOf(fm, "label");
-  const isRoot = type === "root";
-
-  const problems: Problem[] = [];
-  const bad = (field: Problem["field"], value: string, reason: string): void => {
-    problems.push({ field, value, reason });
+/** 输入里不合格的地方一次列全再抛：身份重复、时刻写坏、关系种类不认识。 */
+function assertInput(input: DiskInput): void {
+  const errors: string[] = [];
+  const seen = new Set<string>();
+  const claim = (id: string): void => {
+    if (seen.has(id)) errors.push(`身份「${id}」重复`);
+    seen.add(id);
   };
-
-  /* 存在性校验：born-at / label 全卡必填；parent 非根卡必填（根卡不写 parent 由 scanCards 查） */
-  if (!bornAt) bad("born-at", "", "缺 born-at（全卡必填）");
-  else if (!bornAtOk(bornAt)) {
-    bad("born-at", bornAt, "born-at 格式须 YYYY-MM-DD 或 YYYY-MM-DDTHH:mm");
+  if (input.center) {
+    claim(input.center.id);
+    if (input.center.bornAt !== null && !validBornAt(input.center.bornAt)) {
+      errors.push(`盘心「${input.center.id}」的 bornAt「${input.center.bornAt}」不是 YYYY-MM-DD 或 YYYY-MM-DDTHH:mm`);
+    }
   }
-  if (!isRoot && !parent.length) bad("parent", "", "缺 parent（非根卡必填，写根卡的身份）");
-  if (rawLabel === null || rawLabel.trim() === "") {
-    bad("label", rawLabel ?? "", "缺 label（全卡必填）");
+  for (const card of input.cards) {
+    claim(card.id);
+    if (!validBornAt(card.bornAt)) {
+      errors.push(`卡「${card.id}」的 bornAt「${card.bornAt}」不是 YYYY-MM-DD 或 YYYY-MM-DDTHH:mm`);
+    }
+    for (const rel of card.relations) {
+      if (rel.kind !== "supersede" && rel.kind !== "pivot") {
+        errors.push(`卡「${card.id}」的关系种类「${String(rel.kind)}」不认识，只有 supersede 与 pivot`);
+      }
+    }
   }
-
-  const body = stripFrontmatter(text);
-  const { relations, broken } = extractRelations(body);
-  /* 行头是关系字段却写歪了：文件级病，示众——静默吞行有过前科 */
-  for (const b of broken) {
-    bad("relation", b.target, `${b.key}:: 后须是 [文字](卡身份.md) 形态的一行`);
-  }
-
-  return {
-    card: {
-      id,
-      title,
-      path,
-      mtime,
-      type,
-      parent,
-      domain,
-      label: rawLabel?.trim() || title,
-      status: scalarOf(fm, "status"),
-      bornAt,
-      relations,
-      milestones: isRoot ? extractMilestones(body) : null,
-    },
-    problems,
-  };
+  if (errors.length > 0) throw new Error(`星轨盘的输入不合格：\n${errors.join("\n")}`);
 }
 
 /* ================= 上盘 ================= */
 
-function toCard(raw: RawCard): Card {
+function toCard(input: DiskCard): Card {
   return {
-    id: raw.id,
-    title: raw.title,
-    domain: raw.domain?.trim() || NO_DOMAIN,
-    bornAt: raw.bornAt,
-    label: raw.label,
-    path: raw.path,
+    id: input.id,
+    domain: input.domain?.trim() || NO_DOMAIN,
+    bornAt: input.bornAt,
+    label: input.label,
+    kind: input.kind,
   };
 }
 
-/** 上盘卡：非根卡里 born-at 合格的全部（born-at 坏的半径标度一路 NaN，病已进 sick，这里只挡不收；
- * 其余字段病不挡渲染）。字典序即时间序（同刻日级排在分钟级前），并列按身份收尾。 */
-function collectCards(all: readonly RawCard[]): Card[] {
-  return all
-    .filter((c) => c.type !== "root" && bornAtOk(c.bornAt))
+/** 上盘卡按时刻排：字典序即时间序（同刻日级排在分钟级前），并列按身份收尾。 */
+function collectCards(inputs: readonly DiskCard[]): Card[] {
+  return inputs
     .map(toCard)
     .sort((a, b) => a.bornAt.localeCompare(b.bornAt) || a.id.localeCompare(b.id));
 }
 
 /* ================= 关系边与树 ================= */
 
-/** 求解正文关系边：目标在盘上卡集合里的成边，不在的收进坏关系示众。 */
+/** 求解关系边：目标在盘上卡集合里的成边，不在的收进坏关系。 */
 function collectEdges(
-  all: readonly RawCard[],
+  inputs: readonly DiskCard[],
   cards: readonly Card[],
   byId: Record<string, Card>,
 ): { edges: Edge[]; broken: BrokenRel[] } {
-  const rawById = new Map(all.map((c) => [c.id, c]));
+  const relationsOf = new Map(inputs.map((c) => [c.id, c.relations]));
   const edges: Edge[] = [];
   const broken: BrokenRel[] = [];
   for (const c of cards) {
-    const raw = rawById.get(c.id);
-    if (!raw) continue;
-    for (const rel of raw.relations) {
+    for (const rel of relationsOf.get(c.id) as DiskCard["relations"]) {
       if (byId[rel.target]) edges.push({ from: rel.target, to: c.id, kind: rel.kind });
       else {
         broken.push({
@@ -298,31 +232,30 @@ function extractTrees(
   return { trees, isolated, compOf };
 }
 
+
 /* ================= 建盘 ================= */
 
-/** 建盘的全模型：认根、收卡、求解关系边、按首次出现定领域序、提树。
- * 根卡恰好一张才认主，不是恰好一张时 root 为 null（问题由 scanCards 报进 sick）。
- * day0 含根卡诞生时刻——盘从项目诞生那天起算。 */
-export function buildModel(all: readonly RawCard[]): TrajectoryModel {
-  const roots = all.filter((c) => c.type === "root");
-  const rootRaw = roots.length === 1 ? (roots[0] as RawCard) : null;
-  const root: ProjectRoot | null = rootRaw
-    ? {
-        id: rootRaw.id,
-        title: rootRaw.title,
-        label: rootRaw.label,
-        bornAt: rootRaw.bornAt,
-        path: rootRaw.path,
-      }
-    : null;
-  const cards = collectCards(all);
+/** 盘时间范围外的里程碑不画。 */
+function inRange(milestones: readonly Milestone[], day0: number, dayMax: number): Milestone[] {
+  return milestones.filter((milestone) => {
+    const d = dayNum(milestone.date);
+    return d >= day0 && d <= dayMax;
+  });
+}
+
+/** 建一张盘：校验输入、收卡、求解关系边、按首次出现定领域序、提树、定时间范围。
+ * day0 含盘心诞生时刻——盘从项目诞生那天起算。 */
+export function buildModel(input: DiskInput): TrajectoryModel {
+  assertInput(input);
+  const center = input.center;
+  const cards = collectCards(input.cards);
   const byId: Record<string, Card> = {};
   for (const c of cards) byId[c.id] = c;
 
-  const { edges, broken } = collectEdges(all, cards, byId);
+  const { edges, broken } = collectEdges(input.cards, cards, byId);
   const supersededIds = new Set(edges.filter((e) => e.kind === "supersede").map((e) => e.from));
 
-  /* 领域序 = 按卡的 born-at 序首次出现累积去重。盘上扇区分配靠这个顺序，
+  /* 领域序 = 按卡的 bornAt 序首次出现累积去重。盘上扇区分配靠这个顺序，
    * 换成按卡数或按字母，盘画得不一样、还不报错。
    * 未分道哨兵不进首次出现序，有未分道卡就压尾——隐式组排各泳道之后。 */
   const domains: string[] = [];
@@ -338,15 +271,16 @@ export function buildModel(all: readonly RawCard[]): TrajectoryModel {
 
   const { trees, isolated, compOf } = extractTrees(cards, edges, byId);
   const days = cards.map((c) => dayNum(c.bornAt));
-  /* 根卡诞生时刻参与定盘界：盘从项目诞生那天起算 */
-  if (root && bornAtOk(root.bornAt)) days.push(dayNum(root.bornAt));
-  /* 一张卡都没有、也没有可用的根卡诞生时刻：盘界落在今天 */
+  /* 盘心诞生时刻参与定盘界：盘从项目诞生那天起算 */
+  if (center?.bornAt) days.push(dayNum(center.bornAt));
+  /* 一张卡都没有、也没有盘心诞生时刻：盘界落在今天 */
   const today = dayNum(new Date().toISOString());
   const day0 = days.length ? Math.min(...days) : today;
   const dayMax = days.length ? Math.max(...days) : today;
 
   return {
-    root,
+    center,
+    milestones: center ? inRange(center.milestones, day0, dayMax) : [],
     cards,
     edges,
     broken,
@@ -359,16 +293,4 @@ export function buildModel(all: readonly RawCard[]): TrajectoryModel {
     day0,
     dayMax,
   };
-}
-
-/** 盘时间范围外的里程碑不画。 */
-export function inRange(
-  milestones: readonly { date: string; name: string; desc: string }[],
-  day0: number,
-  dayMax: number,
-): Array<{ date: string; name: string; desc: string }> {
-  return milestones.filter((milestone) => {
-    const d = dayNum(milestone.date);
-    return d >= day0 && d <= dayMax;
-  });
 }

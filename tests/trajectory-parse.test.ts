@@ -15,7 +15,7 @@ import {
   scalarOf,
   splitLines,
   stripFrontmatter,
-} from "@godcreator/docfirst-trajectory";
+} from "@godcreator/docfirst-workflow/cards";
 
 test("日级 born-at 留字符串，不被解析成 Date", () => {
   const fm = parseFrontmatter("---\nborn-at: 2026-05-06\n---\n正文");

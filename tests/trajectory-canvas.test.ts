@@ -12,9 +12,9 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 /* 布局 / 模型也直读源码：画布层吃的是源码里的 RingsLayout 型，跟 dist 里那份是两个声明 */
 import { BASE_RADIUS, RingsLayout } from "../packages/docfirst-trajectory/src/layout.ts";
-import { buildModel, NO_DOMAIN, spineTipIds } from "../packages/docfirst-trajectory/src/model.ts";
-import { scanCardDir } from "../packages/docfirst-workflow/src/project/card-dir.ts";
-import type { Card, RawCard, TrajectoryModel } from "../packages/docfirst-trajectory/src/types.ts";
+import { buildModel, NO_DOMAIN, spineTipIds } from "../packages/docfirst-trajectory/src/model/build.ts";
+import { scanCardDir } from "../packages/docfirst-workflow/src/cards/card-dir.ts";
+import type { Card, TrajectoryModel } from "../packages/docfirst-trajectory/src/model/types.ts";
 import { buildThemes, mix } from "../packages/docfirst-trajectory/src/canvas/theme.ts";
 import {
   buildFilter,
@@ -37,8 +37,7 @@ const SVG_NS = "http://www.w3.org/2000/svg";
 /* 节点工厂建的是游离 DOM，走全局 document——Node 里没有，喂个桩顶上 */
 (globalThis as unknown as { document: SvgStubDocument }).document = new SvgStubDocument();
 
-const fixtureCards: RawCard[] = (await scanCardDir(FIXTURES)).cards;
-const m: TrajectoryModel = buildModel(fixtureCards);
+const m: TrajectoryModel = buildModel(await scanCardDir(FIXTURES));
 
 /* ================= theme ================= */
 
@@ -75,7 +74,7 @@ const THEME = buildThemes(["甲"]).dark;
 
 /** 一张最小卡（工厂只读这几个字段）。 */
 function fakeCard(id: string, domain = "甲"): Card {
-  return { id, title: id, domain, bornAt: "2026-01-01T09:00", label: id, path: `${id}.md` };
+  return { id, domain, bornAt: "2026-01-01T09:00", label: id, kind: null };
 }
 
 /** 给一组节点刷一遍色。 */

@@ -1,10 +1,10 @@
 /* 里程碑层：人工指定的关键时刻，金黄细环；名字沿环写在 12 点方向、嵌进环里（环在字的位置断开），
  * 跟日期标签同池避让，悬停出说明。
- * 里程碑数据本身（从根卡正文解析 + inRange 裁剪）归编排者——本层只从 BuildCtx.milestones
+ * 里程碑数据本身（下游送进来、建模时裁到盘的时间范围内）在模型里——本层只从 model.milestones
  * 拿建好的清单，不认识加载与裁剪逻辑。 */
 
-import { dayNum, formatDay } from "../../model.ts";
-import type { Milestone } from "../../types.ts";
+import { dayNum, formatDay } from "../../model/build.ts";
+import type { Milestone } from "../../model/types.ts";
 import { el } from "../node-dom.ts";
 import { RingLabel } from "../ring-label.ts";
 import type { Theme } from "../theme.ts";
@@ -33,7 +33,7 @@ export class MilestonesLayer implements StarLayer {
 
   private buildMilestones(): void {
     const layout = this.ctx.layout;
-    this.milestoneEls = this.ctx.milestones.map((m) => {
+    this.milestoneEls = this.ctx.model.milestones.map((m) => {
       const g = el("g", {}, this.ctx.world);
       /* 细实线退淡：注记不抢内容戏 */
       const rl = new RingLabel(

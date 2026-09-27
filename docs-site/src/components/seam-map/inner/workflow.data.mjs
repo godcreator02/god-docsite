@@ -1,10 +1,11 @@
 /**
  * 命令行与项目 docfirst-workflow 的内部接缝图：模块页 <SeamMap module="workflow" /> 画的就是它。
- * 虚线框是包里的目录：cli、pinning、mdx、code、marker、reference 各一个框，project 按做的事分成项目装配、读文件与 git、
- * 生成物与读卡三个框，这三个框的包名一栏都写 project/、颜色相同，框里的文件写在 blurb 里；
- * mdx 与 code 是同一个格式接口的两份实现，颜色相同；灰色实线框是包外的调用方、依赖与使用方的仓。
+ * 虚线框是包里的目录：cli、pinning、mdx、code、marker、reference、cards 各一个框，project 按做的事分成项目装配、
+ * 读文件与 git、生成物各一个框，这几个框的包名一栏都写 project/、颜色相同，框里的文件写在 blurb 里；
+ * mdx 与 code 是同一个格式接口的两份实现，颜色相同；cards 与 cli 同色：包里的目录只有 cli import cards。
+ * 灰色实线框是包外的调用方、依赖与使用方的仓。
  * 目录之间的方向从线上看：marker 与 reference 只往钉码核心连，mdx 与 code 往 marker 连、不连 pinning 与 project，
- * pinning 往两个格式与钉码核心连，cli 往下连其余各处。坐标在 workflow.layout.ts。
+ * pinning 往两个格式与钉码核心连，cards 只连 marker 与轨迹核心，cli 往下连其余各处。坐标在 workflow.layout.ts。
  */
 import { defineSeamGraph } from '../graph.mjs';
 
@@ -12,7 +13,7 @@ export const workflowGraph = defineSeamGraph({
   id: 'workflow',
   title: '命令行与项目内部的目录与接缝',
   intro:
-    '命令行与项目内部接缝图：虚线框是包里的目录，project 目录按做的事分成项目装配、读文件与 git、生成物与读卡三个框；框里的方块是它对外给的函数或类型，灰色实线框是包外的调用方、依赖与使用方的仓。mdx 格式与组件格式实现同一个格式接口，都连记号写法、不连钉码编排与 project；记号写法与引用类型只连钉码核心，钉码编排按文件挑格式、连两个格式与钉码核心，命令行连其余各处。',
+    '命令行与项目内部接缝图：虚线框是包里的目录，project 目录按做的事分成项目装配、读文件与 git、生成物各一个框；框里的方块是它对外给的函数或类型，灰色实线框是包外的调用方、依赖与使用方的仓。mdx 格式与组件格式实现同一个格式接口，都连记号写法、不连钉码编排与 project；记号写法与引用类型只连钉码核心，钉码编排按文件挑格式、连两个格式与钉码核心；卡格式读卡目录、校验卡、换成轨迹核心的中性输入，只连记号写法与轨迹核心；命令行连其余各处。',
   frameLabel: '目录',
   modules: [
     {
@@ -22,7 +23,7 @@ export const workflowGraph = defineSeamGraph({
       role: 'emerald',
       outside: false,
       blurb:
-        'run.ts 的 main 把参数译成对装配好的项目的几次调用，打印成人读的行或一行 JSON，交回退出码；每条命令只收自己开关表里的开关。cli.ts 是可执行文件 docfirst，只转发参数与退出码。report.ts 定 check --json 的报告形状。它认识 project、pinning、mdx、marker、reference 与两个核心，这个包里谁都不认识它。',
+        'run.ts 的 main 把参数译成对装配好的项目的几次调用，打印成人读的行或一行 JSON，交回退出码；每条命令只收自己开关表里的开关。cli.ts 是可执行文件 docfirst，只转发参数与退出码。report.ts 定 check --json 的报告形状。它认识 project、cards、pinning、mdx、marker、reference 与两个核心，这个包里谁都不认识它。',
       caps: [
         { id: 'main', name: '命令编排', ident: 'main' },
         { id: 'report', name: '机读报告', ident: 'CheckReport' },
@@ -36,9 +37,10 @@ export const workflowGraph = defineSeamGraph({
       role: null,
       outside: true,
       blurb:
-        '站构建时 remark 插件装配项目、经钉码编排核对、在语法树上认记号打标记，./trajectory 的 loadTrajectory 读轨迹卡。用的是这个包的三个出口：主入口的 loadProject、./mdx 的语法树函数、./cards 的 scanCardDir。',
+        '站构建时 remark 插件装配项目、经钉码编排核对、在语法树上认记号打标记；./trajectory 的 loadTrajectory 读轨迹卡目录；卡集合的 cardSchema 按卡字段认卡，remarkTrajectoryLinks 从链接认出卡身份。用的是这个包的主入口 loadProject、./mdx 的语法树函数，以及 ./cards 的 scanCardDir、CARD_KEYS 与 cardIdFromHref。',
       caps: [
         { id: 'fd-disk', name: '星轨盘读卡', ident: 'loadTrajectory' },
+        { id: 'fd-cardset', name: '卡集合', ident: 'cardSchema' },
         { id: 'fd-remark', name: 'remark 插件', ident: 'loadProject · recognize · stamp' },
       ],
     },
@@ -71,7 +73,7 @@ export const workflowGraph = defineSeamGraph({
       role: 'rose',
       outside: false,
       blurb:
-        'index.ts 一个文件：一个文件的核对与确认只在这里串起来。formatOf 按文件路径挑格式（mdx 页面或组件源码，没有或不止一个格式认领都报错），格式认出引用，每处剥成目标与记录交给钉码核心，结果按原来的顺序配回文件路径与行号；确认时把新记录交回同一个格式写回。命令行、生成物摆放与站构建共用这一份。不认识记号属性怎么写，也不认识 project 与 cli。',
+        'index.ts 一个文件：一个文件的核对与确认只在这里串起来。formatOf 按文件路径挑格式（mdx 页面或组件源码，没有或不止一个格式认领都报错），格式认出引用，每处拆成目标与记录交给钉码核心，结果按原来的顺序配回文件路径与行号；确认时把新记录交回同一个格式写回。命令行、生成物摆放与站构建共用这一份。不认识记号属性怎么写，也不认识 project 与 cli。',
       caps: [
         { id: 'pn-check', name: '核对', ident: 'checkDoc · checkReferences' },
         { id: 'pn-confirm', name: '确认写回', ident: 'confirmDoc' },
@@ -84,7 +86,7 @@ export const workflowGraph = defineSeamGraph({
       role: 'amber',
       outside: false,
       blurb:
-        'index.ts 一个文件：一处引用写成文字是什么样、文字怎么解析回目标与记录，两个格式共用。记号里的属性先目标、后记录，没有记录属性就是未确认；长成记号却认不出动作词、以 @@docfirst 开头的都报错，已经删掉的 has 记号报错时给出改成行段的写法，markerErrors 让格式把一个文件里写坏的记号一次列全；报告里的目标文本也在这里。只从钉码核心 import 类型，不认识哪个格式，也不判状态。',
+        'index.ts 一个文件：一处引用写成文字是什么样、文字怎么解析回目标与记录，两个格式共用。记号里的属性先目标、后记录，没有记录属性就是未确认；长成记号却认不出动作词、以 @@docfirst 开头的都报错，已经删掉的 has 记号报错时给出改成行段的写法，markerErrors 让格式把一个文件里写坏的记号一次列全；isRemovedDraftLine 认以 @@docfirst 开头的一行，parseFormal、mdx 格式与卡格式都用它；报告里的目标文本也在这里。只从钉码核心 import 类型，不认识哪个格式，也不判状态。',
       caps: [
         { id: 'mk-key', name: '目标文本', ident: 'targetKey' },
         { id: 'mk-formal', name: '记号', ident: 'formalOf · parseFormal' },
@@ -132,16 +134,27 @@ export const workflowGraph = defineSeamGraph({
     },
     {
       id: 'output',
-      name: '生成物与读卡',
+      name: '生成物',
       pkg: 'project/',
       role: 'blue',
       outside: false,
       blurb:
-        'placement.ts 的摆放把 outputs 里有映射的正本渲染成生成物写到落点，check 时只核对落点上那份是不是最新；读写落点由装配给的 PlacingHost 做，这个文件不 import node:fs。card-dir.ts 读轨迹卡目录交给轨迹核心，card-refs.ts 再查卡里不许钉码。',
+        'placement.ts 的摆放把 outputs 里有映射的正本渲染成生成物写到落点，check 时只核对落点上那份是不是最新；读写落点由装配给的 PlacingHost 做，这个文件不 import node:fs。',
+      caps: [{ id: 'placing', name: '摆放', ident: 'createPlacing' }],
+    },
+    {
+      id: 'cards',
+      name: '卡格式',
+      pkg: 'cards/ · 出口 ./cards',
+      role: 'emerald',
+      outside: false,
+      blurb:
+        'docfirst 的轨迹卡怎么写、怎么校验、怎么换成星轨盘的中性输入。card-dir.ts 的 scanCardDir 读卡目录一层，目录不在就交回空集合；scan.ts 的 scanCards 用 pickCardFiles 挑出卡文件，card.ts 的 parseCardFile 解析 frontmatter、关系行与里程碑并做单文件校验，scanCards 再做跨文件校验（只有一张根卡、parent 只写根卡身份），用 card-refs.ts 查卡里不许钉码，最后交回 CardScan：中性输入加病卡。parse.ts 放卡字段表 CARD_KEYS 与从链接取卡身份的 cardIdFromHref。只 import marker 与轨迹核心；包里的目录只有 cli import 它，project 不认识它；主入口也转出 scanCardDir 与 CardScan 等类型。',
       caps: [
         { id: 'card-dir', name: '读卡目录', ident: 'scanCardDir' },
-        { id: 'placing', name: '摆放', ident: 'createPlacing' },
+        { id: 'card-keys', name: '卡字段与卡身份', ident: 'CARD_KEYS · cardIdFromHref' },
         { id: 'card-refs', name: '卡里不许钉码', ident: 'checkDocfirstRefs' },
+        { id: 'card-scan', name: '解析与校验', ident: 'scanCards · parseCardFile' },
       ],
     },
     {
@@ -186,11 +199,12 @@ export const workflowGraph = defineSeamGraph({
       pkg: '@godcreator/docfirst-trajectory',
       role: null,
       outside: true,
-      blurb: '卡片的挑选、解析、校验与建模都是纯函数，卡片文件由调用方读好传进来。workflow 从它的主入口取读卡与建模的函数。',
+      blurb:
+        '主入口只收盘心加一组卡的中性输入，buildModel 建出一张盘的模型；卡从哪儿来、怎么写、怎么校验都归 workflow 的卡格式。workflow 从主入口取建模函数、时刻格式的判据 validBornAt 与中性输入的类型。',
       caps: [
-        { id: 'traj-text', name: '正文工具', ident: 'stripFrontmatter · splitLines' },
-        { id: 'traj-scan', name: '读卡解析', ident: 'scanCards · pickCardFiles' },
-        { id: 'traj-build', name: '建模', ident: 'buildTrajectory' },
+        { id: 'traj-types', name: '中性输入', ident: 'DiskInput · DiskCard' },
+        { id: 'traj-born', name: '时刻格式', ident: 'validBornAt' },
+        { id: 'traj-build', name: '建模', ident: 'buildModel' },
       ],
     },
   ],
@@ -221,10 +235,10 @@ export const workflowGraph = defineSeamGraph({
       name: '核对顺带的检查',
       a: ['main', 'report'],
       b: ['probe', 'placing', 'card-dir'],
-      iface: 'createUncommittedProbe(root) → (doc, target) => boolean；placing.check(doc, listing) / render(doc)；scanCardDir(dir) → TrajectoryScan；OutputReport = PlacedCheck',
+      iface: 'createUncommittedProbe(root) → (doc, target) => boolean；placing.check(doc, listing) / render(doc)；scanCardDir(dir) → CardScan（sick）；OutputReport = PlacedCheck',
       convention: false,
       via: 'code',
-      text: 'check 每跑一次造一个未提交改动探针，黄灯的被钉文件在本仓有未提交的改动就算红，组件源码里的黄灯也一样；每篇 mdx 页面核对完把清单交给 placing.check 核对生成物；最后用 scanCardDir 读轨迹卡目录，病卡计进红。confirm 与 render 调 placing.render 重新生成。机读报告的 outputs 直接用摆放的 PlacedCheck 类型，命令行只把这些结果打印成行。',
+      text: 'check 每跑一次造一个未提交改动探针，黄灯的被钉文件在本仓有未提交的改动就算红，组件源码里的黄灯也一样；每篇 mdx 页面核对完把清单交给 placing.check 核对生成物；最后用卡格式的 scanCardDir 读项目的轨迹卡目录，只取病卡，每条病计一处红，目录还没建不算红。confirm 与 render 调 placing.render 重新生成。机读报告的 outputs 直接用摆放的 PlacedCheck 类型，命令行只把这些结果打印成行。',
     },
     {
       n: 4,
@@ -240,11 +254,11 @@ export const workflowGraph = defineSeamGraph({
       n: 5,
       name: '轨迹',
       a: ['main'],
-      b: ['traj-build'],
-      iface: 'buildTrajectory(scan: TrajectoryScan) → Trajectory',
+      b: ['card-dir', 'traj-build'],
+      iface: 'scanCardDir(dir) → CardScan；buildModel(scan) → TrajectoryModel；--json：{ center, cards, sick, trees }',
       convention: false,
       via: 'code',
-      text: 'docfirst trajectory 读完轨迹卡目录，把扫描结果交给 buildTrajectory，打印这张盘每棵树的主干，再汇总支线与孤星；--json 打印整份结果。卡片字段与建模规则都在轨迹核心。',
+      text: 'docfirst trajectory 用卡格式的 scanCardDir 读项目的轨迹卡目录，把交回的中性输入交给轨迹核心的 buildModel，打印盘心、卡数与每棵树的主干，再汇总支线与孤星；--json 打印中性输入、病卡与建模得到的树。卡怎么写、怎么校验在卡格式，建模规则在轨迹核心。',
     },
     {
       n: 6,
@@ -268,13 +282,13 @@ export const workflowGraph = defineSeamGraph({
     },
     {
       n: 8,
-      name: '星轨盘读卡',
-      a: ['fd-disk'],
-      b: ['card-dir'],
-      iface: '@godcreator/docfirst-workflow/cards：scanCardDir(dir) → TrajectoryScan',
+      name: '卡格式出口',
+      a: ['fd-disk', 'fd-cardset'],
+      b: ['card-dir', 'card-keys'],
+      iface: '@godcreator/docfirst-workflow/cards：scanCardDir(dir) → CardScan；CARD_KEYS · cardIdFromHref(href)',
       convention: false,
       via: 'code',
-      text: 'fumadocs 适配的 loadTrajectory 从 ./cards 出口取 scanCardDir 读轨迹卡目录，再交给轨迹核心建模。./cards 的入口是 card-dir.ts，不经主入口，免得把命令行与配置加载带进 Next 的服务端构建。',
+      text: 'fumadocs 适配从 ./cards 出口取卡格式：loadTrajectory 就是 scanCardDir，交回中性输入加病卡，不建模；卡集合的 cardSchema 用 CARD_KEYS 判断一页算不算卡，remarkTrajectoryLinks 用 cardIdFromHref 从链接认出卡身份，跟命令行解析关系行是同一份代码。./cards 的入口是 cards/index.ts，不经主入口，免得把命令行与配置加载带进 Next 的服务端构建。',
     },
     {
       n: 9,
@@ -294,7 +308,7 @@ export const workflowGraph = defineSeamGraph({
       iface: 'createReader(root) · createGitHistory(root) · createPlacing(host: PlacingHost)',
       convention: false,
       via: 'code',
-      text: '装配时按项目根造读取器与旧内容来源；再把钉码编排、每篇的落点表和在磁盘上读正本、读落点、写落点的函数攒成 PlacingHost，交给 createPlacing。摆放拿不到装配的别的部分。',
+      text: '装配时按项目根造读取器与旧内容来源；再把钉码编排、每篇的落点表和在磁盘上读正本、读落点、写落点的函数组成 PlacingHost，交给 createPlacing。摆放拿不到装配的别的部分。',
     },
     {
       n: 11,
@@ -344,7 +358,7 @@ export const workflowGraph = defineSeamGraph({
       iface: 'node:fs 与 node:fs/promises 读写文件、列目录；execFileSync("git", args, { timeout, maxBuffer })',
       convention: false,
       via: 'disk',
-      text: '读取器、装配、读卡目录用 node:fs 读文件与目录，装配把确认后的文档写回、把生成物写到落点。git.ts 启动 git 子进程：查忽略规则、按 blob 名取旧内容、算 hunk 表、查未提交改动，每次都带超时和输出上限。',
+      text: '读取器、装配、卡格式的读卡目录用 node:fs 读文件与目录，装配把确认后的文档写回、把生成物写到落点。git.ts 启动 git 子进程：查忽略规则、按 blob 名取旧内容、算 hunk 表、查未提交改动，每次都带超时和输出上限。',
     },
     {
       n: 16,
@@ -354,17 +368,17 @@ export const workflowGraph = defineSeamGraph({
       iface: 'check(pins: Pin[]) → Verdict[]；confirm(verdicts, { accept }) → Step[]；Pin = { target, record }',
       convention: false,
       via: 'code',
-      text: '钉码编排把每处引用剥成目标与记录交给钉码核心，交回的判定与传入顺序一一对应，按下标配回文档路径与行号；确认时交回的 Step 带着要写回的新目标与记录。钉码核心看不到文档文本。',
+      text: '钉码编排把每处引用拆成目标与记录交给钉码核心，交回的判定与传入顺序一一对应，按下标配回文档路径与行号；确认时交回的 Step 带着要写回的新目标与记录。钉码核心看不到文档文本。',
     },
     {
       n: 17,
       name: '记号写法',
-      a: ['md-rw', 'md-tree', 'cd-rw'],
+      a: ['md-rw', 'md-tree', 'cd-rw', 'card-refs'],
       b: ['mk-formal'],
-      iface: 'parseFormal(payload, where, shell) → { target, record } | null；formalOf(target, record) → payload；markerErrors()；mdx 外壳 {/* … */}，组件外壳 /* … */',
+      iface: 'parseFormal(payload, where, shell) → { target, record } | null；formalOf(target, record) → payload；markerErrors()；isRemovedDraftLine(line) → boolean；mdx 外壳 {/* … */}，组件外壳 /* … */',
       convention: false,
       via: 'code',
-      text: '两个格式各剥掉自己的外壳（mdx 是花括号注释，组件源码是单独一行的块注释），把里面那一截连同自己的外壳函数交给同一个 parseFormal（外壳只用来在报错里给出这个格式里的完整写法）；写回时拿 formalOf 生成的那一截，再包上自己的外壳。同一条引用在两种文件里只有外壳不同，属性叫什么、记录怎么写只在记号写法里定义。两个格式都经 markerErrors 把一个文件里写坏的记号一次列全再报错；mdx 段落里以 @@docfirst 开头的一行也用记号写法给的报错。',
+      text: '两个格式各去掉自己的外壳（mdx 是花括号注释，组件源码是单独一行的块注释），把里面那一截连同自己的外壳函数交给同一个 parseFormal（外壳只用来在报错里给出这个格式里的完整写法）；写回时拿 formalOf 生成的那一截，再包上自己的外壳。同一条引用在两种文件里只有外壳不同，属性叫什么、记录怎么写只在记号写法里定义。两个格式都经 markerErrors 把一个文件里写坏的记号一次列全再报错；mdx 段落里以 @@docfirst 开头的一行用 isRemovedDraftLine 认、用记号写法给的报错。卡格式查卡里不许钉码时，以 @@docfirst 开头的行也用同一个 isRemovedDraftLine 认。',
     },
     {
       n: 18,
@@ -378,13 +392,13 @@ export const workflowGraph = defineSeamGraph({
     },
     {
       n: 19,
-      name: '读卡',
-      a: ['card-dir', 'card-refs'],
-      b: ['traj-scan', 'traj-text'],
-      iface: 'pickCardFiles(names) · scanCards(files: CardFile[]) → TrajectoryScan · stripFrontmatter(src) · splitLines(text)',
+      name: '中性输入',
+      a: ['card-scan'],
+      b: ['traj-types', 'traj-born'],
+      iface: 'CardScan = DiskInput & { sick }；DiskInput { center: { id, label, bornAt, kind, milestones } | null, cards: { id, bornAt, label, domain, kind, relations }[] }；validBornAt(v)',
       convention: false,
       via: 'code',
-      text: 'scanCardDir 读目录，用 pickCardFiles 挑出卡文件，把每张的文件名、全文、修改时间交给 scanCards，拿回卡与病卡；再对每张卡去掉 frontmatter 的正文按 splitLines 逐行查卡里不许钉码，病并进同一份清单。轨迹核心不读文件。',
+      text: 'scanCards 把校验过的卡换成轨迹核心的中性输入：根卡恰好一张时它是盘心，born-at 合格的其余卡都在 cards 里，有病但画得出来的照样送去。born-at 合不合格，parseCardFile 与建模用的是同一个 validBornAt。关系与里程碑的类型也从轨迹核心取。frontmatter、关系行、文件名这些 docfirst 的写法只在卡格式里，轨迹核心不读文件。',
     },
     {
       n: 20,

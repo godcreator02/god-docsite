@@ -11,7 +11,7 @@
  *                                          不动、别的照写，有红退 1。带路径就是**按页限定**：只动点名的那几篇
  *   docfirst confirm <文档路径…> --accept   另外把点名页里的黄灯按今天的内容重新记；不点名页报错退 2
  *   docfirst render                         渲染：挂了 outputs 映射的生成正本摆到指定落点；别的文档不渲染
- *   docfirst trajectory [--json]            列轨迹卡那张盘的树与主干；--json 出 buildTrajectory 的整份模型
+ *   docfirst trajectory [--json]            列轨迹卡那张盘的树与主干；--json 出这张盘的输入（盘心、卡、病卡）与树
  *   docfirst --help | -h | help             打用法，退 0，什么都不动；任一命令后面带 --help / -h 也是
  * 每条命令只收表里认的开关（`FLAGS`），别的开关一律报错退 2、不动手。
  * 给一个新骨架铺各区那件事不在这儿——它只在 agent 手上发生一次、铺的是模板不是判定，归工作台插件
@@ -23,12 +23,13 @@
 import { existsSync } from "node:fs";
 import { join, relative, sep } from "node:path";
 import { REASON_TEXT } from "@godcreator/docfirst-pin";
-import { buildTrajectory } from "@godcreator/docfirst-trajectory";
+import { buildModel } from "@godcreator/docfirst-trajectory";
 import type { Item, Listing } from "../reference/index.ts";
 import { targetKey } from "../marker/index.ts";
 import { lintComponents, mdxFormat } from "../mdx/index.ts";
 import type { ConfirmStep } from "../pinning/index.ts";
-import { createUncommittedProbe, loadProject, scanCardDir } from "../project/index.ts";
+import { scanCardDir } from "../cards/index.ts";
+import { createUncommittedProbe, loadProject } from "../project/index.ts";
 import type { PlacedWrite, UncommittedProbe } from "../project/index.ts";
 import type { CardProblemReport, CheckReport, DocReport, OutputReport, RefReport } from "./report.ts";
 
@@ -247,21 +248,21 @@ async function checkTrajectory(project: Project): Promise<CardProblemReport[]> {
   return out;
 }
 
-/** `docfirst trajectory [--json]`：轨迹卡目录还没建报错退 2；`--json` 出 buildTrajectory
- * 整份模型；不带 `--json` 打印那一张盘——根卡与上盘卡数，每棵树的主干，再一行汇总支线 / 孤星数。 */
+/** `docfirst trajectory [--json]`：轨迹卡目录还没建报错退 2；`--json` 出这张盘的输入（盘心、卡、病卡）与建模得到的树；
+ * 不带 `--json` 打印那一张盘——根卡与上盘卡数，每棵树的主干，再一行汇总支线 / 孤星数。 */
 async function trajectoryCommand(rest: string[]): Promise<number> {
   const project = await loadProject(process.cwd());
   if (!existsSync(project.trajectoryDir)) {
     console.error(`这个项目还没有轨迹卡目录 ${project.contentDir}/trajectory`);
     return 2;
   }
-  const data = buildTrajectory(await scanCardDir(project.trajectoryDir));
+  const scan = await scanCardDir(project.trajectoryDir);
+  const model = buildModel(scan);
   if (rest.includes("--json")) {
-    console.log(JSON.stringify(data));
+    console.log(JSON.stringify({ ...scan, trees: model.trees }));
     return 0;
   }
-  const { model } = data;
-  const rootText = model.root ? `${model.root.label}（${model.root.id}）` : "没认出根卡（卡目录里根卡不是恰好一张，见 docfirst check）";
+  const rootText = model.center ? `${model.center.label}（${model.center.id}）` : "没认出根卡（卡目录里根卡不是恰好一张，见 docfirst check）";
   console.log(`盘 ${rootText}  ${model.cards.length} 张卡`);
   for (const tree of model.trees) console.log(`  主干：${tree.spine.join(" → ")}`);
   const sublineCount = model.trees.reduce((n, t) => n + t.sublines.length, 0);

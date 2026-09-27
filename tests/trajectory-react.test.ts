@@ -2,7 +2,7 @@
  * StarDisk 客户端组件的壳结构测试：`react-dom/server` 把它渲成静态 html。
  * 壳只当编排者——画布层（六层 SVG）由 canvas/stage.ts 在挂载后建，静态渲染那一趟画布区是空 div；
  * 断言的是壳该有的东西：吃满父元素的容器、画布容器、日期轨容器、工具条（三态 home 钮），
- * 以及空盘提示。data 用工作区自带的诗名 fixture 建（tests/fixtures/trajectory）。
+ * 以及空盘提示。data 是工作区自带的诗名 fixture（tests/fixtures/trajectory）经卡格式读出的中性输入。
  *
  * 另一条守鱼眼真接上了引擎：帧推进 RingsLayout.step 不碰 DOM，喂 fixture 建的 RingsLayout
  * 就能单测——补间只要没把 focusDay / strength 写回 layout，displayRadius 与 mag 读到的
@@ -12,14 +12,16 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
-import { buildModel, buildTrajectory, RingsLayout, scanCards } from "@godcreator/docfirst-trajectory";
+import { buildModel } from "@godcreator/docfirst-trajectory";
+import { RingsLayout } from "../packages/docfirst-trajectory/src/layout.ts";
 import { StarDisk } from "@godcreator/docfirst-trajectory/disk";
 import { scanCardDir } from "@godcreator/docfirst-workflow";
+import { scanCards } from "@godcreator/docfirst-workflow/cards";
 import { renderCard, root } from "./trajectory-helpers.ts";
 
 test("StarDisk：壳结构齐——吃满父元素的容器、盘区、画布空 div、日期轨容器、工具条与三态 home 钮，侧栏初始关着", async () => {
-  const data = buildTrajectory(await scanCardDir("tests/fixtures/trajectory"));
-  assert.equal(data.model.root?.id, "tfix-测试项目根卡", "fixture 里唯一那张根卡认主");
+  const data = await scanCardDir("tests/fixtures/trajectory");
+  assert.equal(data.center?.id, "tfix-测试项目根卡", "fixture 里唯一那张根卡认主");
 
   const html = renderToStaticMarkup(createElement(StarDisk, { data, hrefBase: "/trajectory", bodies: {} }));
 
@@ -41,15 +43,14 @@ test("StarDisk：壳结构齐——吃满父元素的容器、盘区、画布空
 });
 
 test("StarDisk：没有上盘卡时照旧显示「这张盘还没有记录」", () => {
-  const data = buildTrajectory(scanCards([{ name: "pj01.md", text: renderCard(root("pj01", "2026-01-01T08:00")), mtime: 0 }]));
-  assert.equal(data.model.cards.length, 0);
+  const data = scanCards([{ name: "pj01.md", text: renderCard(root("pj01", "2026-01-01T08:00")) }]);
+  assert.equal(data.cards.length, 0);
   const html = renderToStaticMarkup(createElement(StarDisk, { data, hrefBase: "/trajectory", bodies: {} }));
   assert.match(html, /<div class="star-empty">这张盘还没有记录<\/div>/);
 });
 
 test("step：focusOn 后推帧，强度趋近 1、显示半径真被鱼眼改写", async () => {
-  const cards = (await scanCardDir("tests/fixtures/trajectory")).cards;
-  const m = buildModel(cards);
+  const m = buildModel(await scanCardDir("tests/fixtures/trajectory"));
   const layout = new RingsLayout(m);
 
   // 取最内那张卡（离焦点带最远、进压缩区最深，形变最确定）当样本

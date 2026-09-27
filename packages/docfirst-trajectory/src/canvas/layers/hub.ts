@@ -75,12 +75,12 @@ export class HubLayer implements StarLayer {
       },
       this.hubG,
     );
-    el("title", {}, this.hubRoot).textContent = `${ctx.model.root?.label ?? NO_ROOT_TITLE} · 根卡`;
+    el("title", {}, this.hubRoot).textContent = `${ctx.model.center?.label ?? NO_ROOT_TITLE} · 根卡`;
     /* 监听器随 DOM 重建销毁（与节点同款生命周期）；hasMoved 守卫排除从盘上起手的拖拽尾梢；
      * 单击延迟一拍：判定窗内来第二击就是双击，走回全景、不开卡 */
     this.hubRoot.addEventListener("click", (ev) => {
       if (ctx.hasMoved()) return;
-      const proot = ctx.model.root;
+      const proot = ctx.model.center;
       if (!proot) return;
       const inNewTab = ev.ctrlKey || ev.metaKey;
       if (this.clickTimer !== null) clearTimeout(this.clickTimer);
@@ -107,7 +107,7 @@ export class HubLayer implements StarLayer {
       0,
       /* 项目名读根卡 label（项目短名），排印在根节点下方；盘心不背状态行
        * （卡 schema 无 status 字段） */
-      ctx.model.root?.label ?? NO_ROOT_TITLE,
+      ctx.model.center?.label ?? NO_ROOT_TITLE,
       "hub-t",
       { "text-anchor": "middle" },
       this.hubG,
@@ -152,7 +152,7 @@ export class HubLayer implements StarLayer {
     const dotR = ROOT_RADIUS * layout.symbolPx * pxToWorld * (1 + 0.4 * this.hubHoverTween);
     this.hubRoot.setAttribute("r", String(dotR));
     /* 侧栏正在看根卡：根节点加选中标记 */
-    const rootSelected = f.selectedId !== null && f.selectedId === this.ctx.model.root?.id;
+    const rootSelected = f.selectedId !== null && f.selectedId === this.ctx.model.center?.id;
     this.hubRoot.setAttribute("class", rootSelected ? "hub-root star-sel" : "hub-root");
     /* 盘心只留项目名：鱼眼态的内外圈日期在焦点带边环（axis 层 placeBandEdges），
      * 端点警示由盘心描边环 + 边环标签后缀两个通道分担；状态行只剩全景空盘的一句提示 */

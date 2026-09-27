@@ -15,7 +15,7 @@
  * role 为 null 的是仓外或包外的东西（站、宿主、别的模块），画成灰色细框。parent 不为 null 的是 workflow 包里的目录。
  * @type {BoundaryNode[]}
  */
-/* tree dir="../packages/docfirst-workflow/src" depth="1" hash="6636e2e09786" */
+/* tree dir="../packages/docfirst-workflow/src" depth="1" hash="27bc7720b289" */
 export const nodes = [
   { id: 'plugin', name: '工作台插件', short: '插件', ident: 'plugins/docfirst', role: 'cyan', parent: null },
   { id: 'site', name: '文档站', short: 'docs-site', ident: 'docs-site', role: null, parent: null },
@@ -29,6 +29,7 @@ export const nodes = [
   { id: 'pinning', name: 'pinning/', short: 'pinning/', ident: '钉码编排', role: 'emerald', parent: 'workflow' },
   { id: 'project', name: 'project/', short: 'project/', ident: '项目装配', role: 'emerald', parent: 'workflow' },
   { id: 'cli', name: 'cli/', short: 'cli/', ident: '命令行', role: 'emerald', parent: 'workflow' },
+  { id: 'cards', name: 'cards/', short: 'cards/', ident: '卡格式', role: 'emerald', parent: 'workflow' },
   { id: 'pin', name: '钉码核心', short: 'pin', ident: 'docfirst-pin', role: 'blue', parent: null },
   { id: 'trajectory', name: '轨迹核心', short: 'trajectory', ident: 'docfirst-trajectory', role: 'violet', parent: null },
   { id: 'host', name: '站的宿主', short: '宿主', ident: 'fumadocs · next · react', role: null, parent: null },
@@ -38,7 +39,7 @@ export const nodes = [
 
 /**
  * 允许的依赖，也就是图上平时画出来的箭头。key 写成「起点>终点」；kind 写这条依赖落在哪里。
- * 包之间的边都是 package.json 里真写着的依赖；workflow 目录之间只画相邻两层之间真实的 import（cli → project → pinning → mdx、code → marker、reference），
+ * 包之间的边都是 package.json 里真写着的依赖；workflow 目录之间只画相邻两层之间真实的 import（cli → project → pinning → mdx、code → marker、reference，cli → cards → marker），
  * 上层还直接 import 更下层的目录（cli 与 project 用 marker、mdx、reference，pinning 用 reference），禁止表都允许，图上不画。
  * @typedef {{ key: string, kind: string }} AllowedEdge
  * @type {AllowedEdge[]}
@@ -67,6 +68,8 @@ export const allowedEdges = [
   { key: 'mdx>reference', kind: '目录间 import，只 import 类型' },
   { key: 'code>marker', kind: '目录间 import' },
   { key: 'code>reference', kind: '目录间 import，只 import 类型' },
+  { key: 'cli>cards', kind: '目录间 import' },
+  { key: 'cards>marker', kind: '目录间 import' },
 ];
 
 /**
@@ -79,7 +82,7 @@ export const allowedEdges = [
  * @typedef {{ id: string, label: string, text: string, allowed: string[], forbidden: Forbidden[], tests: GuardTest[] }} BoundaryRule
  * @type {BoundaryRule[]}
  */
-/* ref file="../tests/boundary.test.ts" hash="7792c355d4f7" blob="620efd5d3544" */
+/* ref file="../tests/boundary.test.ts" hash="bf090e376c37" blob="59252de07558" */
 export const rules = [
   {
     id: 'packages',
@@ -93,7 +96,7 @@ export const rules = [
       },
       {
         edges: ['trajectory>workflow', 'trajectory>fumadocs'],
-        what: '轨迹核心不认识钉码、workflow、fumadocs 适配：卡怎么解析、盘怎么建模画跟钉码无关，读卡目录的那一半在 workflow。',
+        what: '轨迹核心不认识钉码、workflow、fumadocs 适配：它只收盘心加一组卡的中性输入，docfirst 卡格式与读卡目录在 workflow。',
       },
       { edges: ['workflow>fumadocs'], what: 'workflow 不认识任何站的宿主，所以也不认识 fumadocs 适配。' },
       {
@@ -119,7 +122,7 @@ export const rules = [
       },
       {
         edges: ['trajectory>others'],
-        what: '轨迹核心的 . 入口产物一条 import 都不许有，连 node: 内置也不行；.ts 源码只许相对 import；./disk 的产物头一行是 "use client"，只许 import react，react 本体不许打包进来。',
+        what: '轨迹核心的 . 入口产物一条 import 都不许有，连 node: 内置也不行；.ts 源码只许相对 import，建模 src/model/ 只许 import 自己目录里的文件；. 的产物与建模源码里不许出现关系行、frontmatter 字段名这些 docfirst 卡文件的写法；./disk 的产物头一行是 "use client"，只许 import react，react 本体不许打包进来。',
       },
     ],
     tests: [
@@ -127,14 +130,16 @@ export const rules = [
       { name: '钉码核心不接触文档文本：源码与产物里没有 mdx、记号写法、格式接口、引用与清单', checks: '读 pin 的 src/ 与产物 index.mjs、index.d.mts 的全文' },
       { name: 'trajectory 的 `.` 入口零 import：产物一条 import 都没有，连 node: 也没有', checks: '读产物 dist/index.mjs 与 package.json 的 dependencies' },
       { name: 'trajectory 的 `.ts` 源码只有相对 import——`.tsx` 是 `./disk` 入口，由下一条按产物查', checks: '读 src/ 下每个 .ts 的 import' },
+      { name: 'trajectory 的建模 `src/model/` 只 import 自己目录里的文件——布局、画布、组件都在它下游', checks: '读 src/model/ 下每个文件的 import' },
+      { name: 'trajectory 不认识 docfirst 卡格式：`.` 的产物与建模源码里没有关系行、frontmatter 字段名这些卡文件的写法', checks: '读产物 index.mjs、index.d.mts 与 src/model/ 的全文' },
       { name: 'trajectory 的 `./disk`：客户端指令在头一行，只 import react、不内联 react', checks: '读产物 dist/disk.mjs 的头一行、import 行与正文' },
     ],
   },
   {
     id: 'workflow-dirs',
     label: 'workflow 目录方向',
-    text: '这几个目录在同一个包里，编译器不拦跨目录的 import：mdx/ 里写一句 import "../project/load.ts" 不会报错，mdx 格式从此就跟读盘、git 绑在一起。禁止表 WORKFLOW_DIRS 列的是禁止的目录：写成允许的目录的话，加一个新目录会默默地什么都不许，加错地方反而更难发现；src/ 下多出一个表里没有的目录，另一条测试当场失败。图上只画相邻两层之间的 import：cli 与 project 还直接用 marker、mdx、reference，pinning 也直接用 reference，禁止表都允许。',
-    allowed: ['cli>project', 'project>pinning', 'pinning>mdx', 'pinning>code', 'mdx>marker', 'mdx>reference', 'code>marker', 'code>reference', 'marker>pin', 'reference>pin'],
+    text: '这几个目录在同一个包里，编译器不拦跨目录的 import：mdx/ 里写一句 import "../project/load.ts" 不会报错，mdx 格式从此就跟读盘、git 绑在一起。禁止表 WORKFLOW_DIRS 列的是禁止的目录：写成允许的目录的话，加一个新目录会默默地什么都不许，加错地方反而更难发现；src/ 下多出一个表里没有的目录，另一条测试当场失败。图上只画相邻两层之间的 import：cli 与 project 还直接用 marker、mdx、reference，pinning 也直接用 reference，禁止表都允许。cards 是 docfirst 卡格式，卡里不许钉码要认记号，所以只认识 marker，只有 cli 用它。',
+    allowed: ['cli>project', 'project>pinning', 'pinning>mdx', 'pinning>code', 'mdx>marker', 'mdx>reference', 'code>marker', 'code>reference', 'marker>pin', 'reference>pin', 'cli>cards', 'cards>marker'],
     forbidden: [
       {
         edges: ['marker~reference', 'marker>mdx:back', 'reference>code:back'],
@@ -146,6 +151,7 @@ export const rules = [
         what: '组件格式只认识 marker 与 reference：跟 mdx 格式互不认识，也不认识钉码编排、project 与 cli。两种格式由钉码编排按文件挑。',
       },
       { edges: ['pinning>project:back'], what: '钉码编排不认识 project，也不认识记号属性怎么写：记号写法在两种格式后面。' },
+      { edges: ['cards>pinning', 'cards>cli:back'], what: '卡格式只认识 marker：不认识钉码编排、项目装配，也不认识 cli。' },
       { edges: ['project>cli:back', 'pinning>cli'], what: 'cli 是入口，认识另外几个目录，谁都不认识它。' },
       { edges: ['pin>workflow'], what: '钉码核心不认识 workflow：源码的相对 import 都落在自己的 src/ 里，说明符里没有 docfirst-workflow。' },
       {

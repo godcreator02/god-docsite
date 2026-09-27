@@ -7,8 +7,12 @@
  */
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { buildChains, computeDodge, RingsLayout, buildModel } from "@godcreator/docfirst-trajectory";
-import type { Chain, CardPlace } from "@godcreator/docfirst-trajectory";
+import { buildModel } from "@godcreator/docfirst-trajectory";
+/* 布局不从 `.` 出口导出，直读源码 */
+import { buildChains, computeDodge } from "../packages/docfirst-trajectory/src/chains.ts";
+import type { Chain } from "../packages/docfirst-trajectory/src/chains.ts";
+import { RingsLayout } from "../packages/docfirst-trajectory/src/layout.ts";
+import type { CardPlace } from "../packages/docfirst-trajectory/src/layout.ts";
 import { card, D, memCards, root } from "./trajectory-helpers.ts";
 
 /** 一棵树四张卡的主干直链（aa01←aa02←aa03←aa04，supersedes 一路串），

@@ -19,7 +19,7 @@ import {
   SPREAD_DEG,
   smoothstep,
 } from "../../layout.ts";
-import { formOf, spineTipIds } from "../../model.ts";
+import { formOf, spineTipIds } from "../../model/build.ts";
 import { buildNode, isConclusion, isPanoramaLabel, type NodeEl } from "../node-dom.ts";
 import type { BuildCtx, FrameCtx, StarLayer } from "./frame.ts";
 
@@ -70,7 +70,7 @@ export class CardsLayer implements StarLayer {
           formOf(ctx.model, c.id),
           isolatedIds.has(c.id),
           tipIds.has(c.id),
-          ctx.typeOf(c.id),
+          c.kind,
         ),
       );
     }

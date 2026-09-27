@@ -13,7 +13,7 @@ const OTHER_REF = '../../greet-lib/src/greet.ts';
 const MARKER_BEFORE = `{/* ref file="${REF}" lines="4-5" hash="3eb99c2e88e2" blob="58b32ed1c69e" */}`;
 const MARKER_AFTER = `{/* ref file="${REF}" lines="4-5" hash="9a083fec7547" blob="eeec5ca2bd8f" */}`;
 
-/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="295-302" hash="85058fb75fad" blob="ec24566d459a" */
+/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="296-303" hash="85058fb75fad" blob="418434ff646c" */
 const BLOCKING_LINE = `🔴 ${DOC}  ${REF}:4-5  有变动，是本仓还没提交的改动引起的——在同一个提交里复核，再 docfirst confirm ${DOC} --accept`;
 
 export const files = { doc: DOC, ref: REF, cwd: '~/repo/docs-site' };
@@ -30,8 +30,8 @@ export const gateLabel = {
 };
 
 /** check 计入红的几类，退出码只看它们的总数 */
-/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="310-331" hash="efcb24752ad5" blob="ec24566d459a" */
-/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="218-236" hash="f70391e16cf2" blob="68565dfd474a" */
+/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="311-332" hash="efcb24752ad5" blob="418434ff646c" */
+/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="219-237" hash="f70391e16cf2" blob="418434ff646c" */
 export const redSources = [
   { name: '缺失的引用', rule: '被钉的行段、文件、目录不在了；提没提交都算' },
   { name: '拦提交的黄', rule: '状态是「有变动」，且被钉文件在文档所在的仓里有未提交的改动' },
@@ -63,12 +63,12 @@ export const notRed = ['🟢 新鲜', '⚪ 未确认', '🟡 有变动但不是�
  *   sources: boolean, command: string, output: OutLine[], exit: 0 | 1, gate: Gate }} Step
  * @type {Step[]}
  */
-/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="37-43" hash="9ebfdcac2bf1" blob="68565dfd474a" */
-/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="171-189" hash="89872d5416cd" blob="68565dfd474a" */
-/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="334-340" hash="dcd5a37f8b61" blob="ec24566d459a" */
+/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="38-44" hash="9ebfdcac2bf1" blob="418434ff646c" */
+/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="172-190" hash="89872d5416cd" blob="418434ff646c" */
+/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="335-341" hash="dcd5a37f8b61" blob="418434ff646c" */
 /* ref file="../packages/docfirst-workflow/src/project/uncommitted.ts" lines="1-4" hash="4968cfab632f" blob="2ad45230cb96" */
 /* ref file="../packages/docfirst-workflow/src/project/uncommitted.ts" lines="26-35" hash="8fc6d81a0264" blob="ed53157b1c06" */
-/* ref file="../packages/docfirst-trajectory/src/model.ts" lines="100-100" hash="566d53167dfe" blob="3449f87e60a6" */
+/* ref file="../packages/docfirst-workflow/src/cards/card.ts" lines="54-54" hash="566d53167dfe" blob="feb4174fcae5" */
 export const steps = [
   {
     title: '改了被钉的两行，还没提交',

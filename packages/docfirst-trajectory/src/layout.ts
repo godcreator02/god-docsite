@@ -10,8 +10,8 @@
  * 逻辑出自老仓 `god-flow-panels` 的 `node/star/layout.ts`（只读参考，本仓不 import 它）。
  */
 
-import { dayNum, NO_DOMAIN } from "./model.ts";
-import type { Card, TrajectoryModel, Tree } from "./types.ts";
+import { dayNum, NO_DOMAIN } from "./model/build.ts";
+import type { Card, TrajectoryModel, Tree } from "./model/types.ts";
 
 /* ---------- 定型常量 ---------- */
 /** 斜率 smoothstep 过渡半宽（px）。面板要在端上重建同一张鱼眼映射表，随 geometry 透出。 */

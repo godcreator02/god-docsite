@@ -1,6 +1,6 @@
 ---
 title: 轨迹核心 docfirst-trajectory
-description: 卡的解析与校验、给唯一那张根卡建模、布局、星轨盘客户端组件；收读好的卡片文件，交出模型与病卡，自己不读文件
+description: 星轨盘：收盘心加一组卡的中性输入，建模、布局、画成星轨盘；不认识 docfirst 卡文件的写法，也不读文件
 full: true
 ---
 
@@ -11,80 +11,70 @@ full: true
 
 ## 功能
 
-两件事：**卡**（轨迹卡的格式、解析、校验）与**盘**（把一个卡目录的卡建成一个模型、布局、画成星轨盘）。
-一个卡目录只有一张根卡、只画一张盘。卡有哪些字段、怎么校验、半径和角度怎么排，见[轨迹](/docs/trajectory/flow)。
+把一张盘画成星轨盘。下游送进来的是中性数据：盘心加一组卡，每张卡只有身份、时刻、短名、分组、种类和它写着的关系。
+卡从哪儿来、原来写成什么样、哪些字段必填，都归下游；docfirst 的轨迹卡由 workflow 的卡格式换成这份数据，见 [workflow](/docs/workflow)。
 
-卡的身份是文件名去掉 `.mdx` / `.md` 后缀的部分，同一身份两种后缀都在时只认 `.mdx`：
+{/* ref file="../packages/docfirst-trajectory/src/model/types.ts" lines="23-53" hash="d21e32de3093" blob="0b17477bfd79" */}
 
-{/* ref file="../packages/docfirst-trajectory/src/scan.ts" lines="24-27" hash="86a5124a9270" blob="7ace664ccf8b" */}
+建模（`src/model/`）收这份输入，求关系边、提树、挑主干、定领域顺序与时间范围；半径和角度怎么排、主干怎么挑，
+见[轨迹卡怎么变成星轨盘](/docs/trajectory/flow)。布局（`layout.ts`、`chains.ts`）、画布（`src/canvas/`）与组件（`disk.tsx`）都在建模下游。
 
-{/* ref file="../packages/docfirst-trajectory/src/scan.ts" lines="82-92" hash="aa54cc2e797c" blob="7ace664ccf8b" */}
+输入不合格就直接抛错，一次列全：下游只该送画得出来的卡，走到这里说明下游有 bug。关系指向卡集合之外的目标不算不合格，
+放进模型的 `broken`，盘上不画那条边：
+
+{/* ref file="../packages/docfirst-trajectory/src/model/build.ts" lines="54-80" hash="3513ba6be131" blob="fafdd715830c" */}
 
 ## 接口
 
 入口与样式表：
 
-{/* ref file="../packages/docfirst-trajectory/package.json" lines="7-17" hash="c306e90e051b" blob="f560168d1bfb" */}
+{/* ref file="../packages/docfirst-trajectory/package.json" lines="7-17" hash="c306e90e051b" blob="0ef3476a1f42" */}
 
-**`.`** 导出解析、挑卡与扫描、建模、布局这几组纯函数与类型：
+**`.`** 只有建模与类型。`validBornAt` 是时刻合不合格的判据，下游校验卡的时刻与建模校验输入用的是同一个：
 
-{/* ref file="../packages/docfirst-trajectory/src/index.ts" lines="16-72" hash="78a8fa73f13d" blob="cb167e2ee93d" */}
+{/* ref file="../packages/docfirst-trajectory/src/index.ts" hash="9e3e7ad0932f" blob="b9c2a3c2d1d8" */}
 
-哪些 frontmatter 字段算卡由 `CARD_KEYS` 决定。命令行校验卡与 fumadocs 适配的卡集合 schema 用的是这同一张表，
-表里的字段一个都没写的文件不算卡：
+**`./disk`** 导出客户端组件 `StarDisk`。`data` 就是中性输入，组件自己建模、算布局，服务端和客户端之间传的就是这份输入；
+卡页地址由 `hrefBase` 拼出；`bodies` 是每张卡（含盘心）在服务端渲染好的正文，键是卡身份，点节点就在盘右侧的栏里显示，
+盘上有的卡缺正文直接报错。props 里不收函数（服务端组件不能把函数传给客户端组件）。组件占满父容器，只有整页一种形态：
 
-{/* ref file="../packages/docfirst-trajectory/src/parse.ts" lines="16-18" hash="dfeb7aaec458" blob="4e25ee1e4c92" */}
-
-**`buildTrajectory(scan)`** 是组装入口：收 `scanCards` 的结果，给那张根卡的盘建模，交回全部卡、病卡和一个模型。
-它不算布局，布局在客户端按当前设置计算：
-
-{/* ref file="../packages/docfirst-trajectory/src/index.ts" lines="107-119" hash="700374590e8b" blob="cb167e2ee93d" */}
-
-交出去的卡去掉了包内部用的修改时间和标题：
-
-{/* ref file="../packages/docfirst-trajectory/src/index.ts" lines="74-87" hash="765b4bfba590" blob="cb167e2ee93d" */}
-
-模型里被取代卡的集合换成了数组，整份能直接转成 JSON 交给客户端组件：
-
-{/* ref file="../packages/docfirst-trajectory/src/serial.ts" lines="9-11" hash="06fde308bb1c" blob="c519fffe9144" */}
-
-**`./disk`** 导出客户端组件 `StarDisk`，props 是 `data`、`hrefBase` 与 `bodies`：`data` 是 `buildTrajectory` 的结果；卡页地址由 `hrefBase` 拼出；
-`bodies` 是每张卡（含根卡）在服务端渲染好的正文，键是卡身份，点节点就在盘右侧的栏里显示，盘上有的卡缺正文直接报错。
-props 里不收函数（服务端组件不能把函数传给客户端组件），渲染好的正文可以传。组件占满父容器，只有整页一种形态：
-
-{/* ref file="../packages/docfirst-trajectory/src/disk.tsx" lines="33-43" hash="f5758a2b204e" blob="2700460f36a5" */}
+{/* ref file="../packages/docfirst-trajectory/src/disk.tsx" lines="31-39" hash="d841caa075c0" blob="3ecaca179c38" */}
 
 ## 依赖
 
 没有运行时依赖；react 是可选的 peer，只有 `./disk` 用它，只用 `.` 的调用方（命令行）不必装：
 
-{/* ref file="../packages/docfirst-trajectory/package.json" lines="27-34" hash="ef4ae805b5b5" blob="f560168d1bfb" */}
+{/* ref file="../packages/docfirst-trajectory/package.json" lines="27-34" hash="ef4ae805b5b5" blob="0ef3476a1f42" */}
 
 `./disk` 的画布层在浏览器里建 DOM 节点、测标签宽度。
 
 ## 不做的事
 
+**不认识 docfirst 卡文件的写法。** 关系行、frontmatter 字段名、里程碑标题都不出现在 `.` 的产物和建模源码里：
+
+{/* ref file="../tests/boundary.test.ts" lines="220-233" hash="c2b05fe69b60" blob="59252de07558" */}
+
 **不读文件，不认识别的包。** `.` 入口的产物一条 import 都没有，连 `node:` 也没有；`.ts` 源码只有相对 import。
 所以浏览器、服务端、命令行都能直接用：
 
-{/* ref file="../tests/boundary.test.ts" lines="195-208" hash="c35ca7bc8225" blob="e77be7ebc154" */}
+{/* ref file="../tests/boundary.test.ts" lines="195-208" hash="c35ca7bc8225" blob="59252de07558" */}
+
+建模只 import 自己目录里的文件，布局、画布、组件都在它下游：
+
+{/* ref file="../tests/boundary.test.ts" lines="210-218" hash="fde16c5e43bf" blob="59252de07558" */}
 
 它不依赖钉码核心、workflow、fumadocs 适配，反过来 workflow 与 fumadocs 适配依赖它：
 
-{/* ref file="../tests/boundary.test.ts" lines="121-135" hash="3045c8cb7ab9" blob="e77be7ebc154" */}
+{/* ref file="../tests/boundary.test.ts" lines="121-135" hash="2235688de96c" blob="59252de07558" */}
 
 **不把 react 打进产物。** `./disk` 的产物第一行是 `"use client"`，只许 import react：
 
-{/* ref file="../tests/boundary.test.ts" lines="210-222" hash="321c5491dda8" blob="e77be7ebc154" */}
-
-**不认识钉码记号。** 卡里不许钉码这条由 workflow 读卡目录时另查，病并进同一份清单；这个包只在问题类型里留着这个字段名：
-
-{/* ref file="../packages/docfirst-trajectory/src/types.ts" lines="68-72" hash="f241f13e9b0e" blob="7f41de9c5119" */}
+{/* ref file="../tests/boundary.test.ts" lines="235-247" hash="321c5491dda8" blob="59252de07558" */}
 
 **不管 fumadocs 集合与读卡目录。** 卡集合的 schema、正文链接改写、`loadTrajectory` 都在 [fumadocs 适配](/docs/fumadocs)，
 站经它拿到 `StarDisk` 与样式。
 
-**不认识站的路由。** 不读也不写地址栏；顶栏不归组件画。
+**不认识站的路由。** 卡页地址由 `hrefBase` 拼出，地址栏只记当前在侧栏打开的卡；顶栏不归组件画。
 
-**不提供写卡工具，不在一个卡目录里放几个项目。** 卡手写，写完用 `docfirst check` 校验；一个卡目录只有一张根卡，理由见
+**不在一张盘里画几个项目。** 一张盘只有一个盘心；docfirst 那边一个卡目录只有一张根卡，理由见
 [一站一张根卡](/trajectory/2026-09-26-one-root-one-disk)。

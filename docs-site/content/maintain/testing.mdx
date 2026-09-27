@@ -27,15 +27,19 @@ mdx 格式从此就跟读盘、git 绑在一起。补上这两项的是 `tests/b
 禁止表**列的是禁止的，不是允许的**：写成允许的话，新加一个包默认什么都不能依赖，放错位置反而更难发现。
 `packages/` 下多出一个表里没有的目录，另一条测试当场失败，要求先想清楚它能认识谁：
 
-{/* ref file="../tests/boundary.test.ts" lines="121-135" hash="3045c8cb7ab9" blob="e77be7ebc154" */}
+{/* ref file="../tests/boundary.test.ts" lines="121-135" hash="2235688de96c" blob="59252de07558" */}
 
 workflow 目录之间是同样的写法：
 
-{/* ref file="../tests/boundary.test.ts" lines="241-249" hash="fe2a32967054" blob="620efd5d3544" */}
+{/* ref file="../tests/boundary.test.ts" lines="267-276" hash="4e942c086aa2" blob="59252de07558" */}
 
 两个核心的零依赖只看 import 了谁，轨迹核心直接查产物；钉码核心另外查源码与产物里有没有文档文本那一侧的名字：
 
 {/* ref file="../tests/boundary.test.ts" lines="169-199" hash="29865f2198b6" blob="e77be7ebc154" */}
+
+轨迹核心另外查两条：建模只 import 自己目录里的文件；`.` 的产物与建模源码里没有关系行、frontmatter 字段名这些 docfirst 卡文件的写法：
+
+{/* ref file="../tests/boundary.test.ts" lines="210-233" hash="35f8a9960ea0" blob="59252de07558" */}
 
 包与插件互不认识，两个方向分在两处：包里不许出现任何 `@godcreator/gwb-*` 由 `boundary.test.ts` 查；
 插件不许依赖 `@godcreator/docfirst-*` 由插件自己的测试查：
@@ -85,7 +89,8 @@ workflow 目录之间是同样的写法：
 `tests/placement.test.ts` 在临时目录建真项目，`loadProject` 之后直接调摆放的方法，不经命令行。
 命令行把结果打印成什么、退什么码，在 `tests/cli*.test.ts` 那几份。
 
-轨迹核心的测试是 `tests/trajectory-*.test.ts`，星轨盘相关的几份用 `tests/fixtures/trajectory/` 下的卡片；术语标注在 `tests/glossary.test.ts`，
+星轨盘与卡格式的测试是 `tests/trajectory-*.test.ts`：卡格式的解析、扫描、校验在 parse、scan、validate、model 几份，fumadocs 卡集合在 server，
+建模、布局、画布、组件在其余几份；内存造卡走真实的卡格式换成中性输入（`tests/trajectory-helpers.ts`），星轨盘相关的几份用 `tests/fixtures/trajectory/` 下的卡片；术语标注在 `tests/glossary.test.ts`，
 fumadocs 适配不接 Next 的那一半在 `tests/fumadocs.test.ts`，讲解组件包在 `tests/docs-explain.test.ts`，
 各包能装、能出产物、出口解析得到在 `tests/skeleton.test.ts`。
 

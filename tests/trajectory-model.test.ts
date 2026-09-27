@@ -1,12 +1,14 @@
 /**
- * 模型层的规则测试：树提取的择优规则、四层校验（形状 / 存在性 / 一致性 / docfirst 引用记号，
+ * 模型层的规则测试：树提取的择优规则、卡格式的四层校验（形状 / 存在性 / 一致性 / docfirst 引用记号，
  * docfirst 一条在 trajectory-validate.test.ts 单开；跨文件的三条走 scanCards）、
- * 非根卡全部上盘（含未分道哨兵）、根卡认定（卡目录里恰好一张 type: root）、正文 inline 边求解、
- * 里程碑从根卡正文解析、扫盘空态。
+ * 非根卡全部上盘（含未分道哨兵）、盘心认定（卡目录里恰好一张 type: root）、正文 inline 边求解、
+ * 里程碑从根卡正文解析、扫盘空态。卡经 workflow 的卡格式换成中性输入，再交给 buildModel。
  */
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { buildModel, dayNum, NO_DOMAIN, RingsLayout } from "@godcreator/docfirst-trajectory";
+import { buildModel } from "@godcreator/docfirst-trajectory";
+import { dayNum, NO_DOMAIN } from "../packages/docfirst-trajectory/src/model/build.ts";
+import { RingsLayout } from "../packages/docfirst-trajectory/src/layout.ts";
 import { scanCardDir } from "@godcreator/docfirst-workflow";
 import { card, D, flatProblems, memCards, memSick, root, scanSick } from "./trajectory-helpers.ts";
 
@@ -189,7 +191,7 @@ test("根卡多于一张：每张根卡各报一条 type 病，说明里列出�
     { path: "pjbb.md", field: "type", value: "root", reason },
   ]);
   const m = buildModel(memCards(specs));
-  assert.equal(m.root, null, "根卡不是恰好一张：盘心无主");
+  assert.equal(m.center, null, "根卡不是恰好一张：盘心无主");
   assert.deepEqual(m.cards.map((c) => c.id), ["aa01-挂甲的卡", "bb01-挂别处的卡"], "非根卡照样全部上盘");
 });
 
@@ -198,7 +200,7 @@ test("根卡写了 parent：报一条 parent 病，值是它写的 parent", () =
   assert.deepEqual(flatProblems(scanSick(specs)), [
     { path: "pjaa.md", field: "parent", value: "zz99,yy88", reason: "根卡不写 parent" },
   ]);
-  assert.equal(buildModel(memCards(specs)).root?.id, "pjaa", "根卡照样认主");
+  assert.equal(buildModel(memCards(specs)).center?.id, "pjaa", "根卡照样认主");
 });
 
 test("非根卡的 parent 每个值都得是那张根卡的身份，不是就逐个报，说明里写出根卡身份", () => {
@@ -220,7 +222,7 @@ test("卡目录里没有根卡：非根卡的每个 parent 值都报「卡目录
   assert.deepEqual(flatProblems(scanSick(specs)), [
     { path: "aa01-卡.md", field: "parent", value: "pj01", reason: "parent 须指向根卡，但卡目录里没有根卡" },
   ]);
-  assert.equal(buildModel(memCards(specs)).root, null);
+  assert.equal(buildModel(memCards(specs)).center, null);
 });
 
 test("parent 写成带路径 / 带后缀的样子或写成自己：同一个值只报一条「须是根卡的身份」，病卡照样上盘", () => {
@@ -259,7 +261,7 @@ test("缺 label 报病但回退标题上盘；身份带日期段时标题是去�
 
 test("卡体系字段一个都不沾的文件不是卡：不上盘、不报病", () => {
   const specs = [{ name: "ee01-不是卡", fm: { note: "随手写的" } }];
-  assert.deepEqual(memCards(specs), []);
+  assert.deepEqual(memCards(specs), { center: null, cards: [] });
   assert.deepEqual(memSick(specs), []);
 });
 
@@ -270,10 +272,10 @@ const VAULT = [
   card("cc01-parent写错的卡", { domain: "域一", "born-at": D(4), label: "散", parent: ["zz99"] }),
 ];
 
-test("认主与上盘：唯一那张根卡是 model.root、不上盘；非根卡全部上盘不看 parent，无 domain 进未分道；day0 含诞生时刻", () => {
+test("认主与上盘：唯一那张根卡是 model.center、不上盘；非根卡全部上盘不看 parent，无 domain 进未分道；day0 含诞生时刻", () => {
   const m = buildModel(memCards(VAULT));
-  assert.equal(m.root?.id, "pjaa");
-  assert.equal(m.root?.label, "测试项目");
+  assert.equal(m.center?.id, "pjaa");
+  assert.equal(m.center?.label, "测试项目");
   assert.deepEqual(m.cards.map((c) => c.id), ["cc01-parent写错的卡", "aa01-有领域的卡", "aa02-未分道的卡"]);
   /* 未分道哨兵：无 domain 卡归隐式组，压 domains 尾 */
   assert.equal(m.byId["aa02-未分道的卡"]?.domain, NO_DOMAIN);
@@ -285,13 +287,13 @@ test("认主与上盘：唯一那张根卡是 model.root、不上盘；非根卡
 
 test("只有根卡：空盘，盘界落在根卡诞生那天", () => {
   const m = buildModel(memCards([root("pjaa", D(3))]));
-  assert.equal(m.root?.id, "pjaa");
+  assert.equal(m.center?.id, "pjaa");
   assert.deepEqual(m.cards, []);
   assert.equal(m.day0, dayNum(D(3)));
   assert.equal(m.dayMax, dayNum(D(3)));
 });
 
-test("根卡带里程碑，内卡恒 null", () => {
+test("根卡带里程碑：盘心带着它，落在盘时间范围内的进模型", () => {
   const body = [
     "## 在做什么",
     "",
@@ -302,19 +304,40 @@ test("根卡带里程碑，内卡恒 null", () => {
     "- 2026-01-10｜首座｜第一座里程碑的说明。",
     "- 2026-01-20｜次座",
   ].join("\n");
-  const cards = memCards([root("pj01", D(1), { body }), card("aa01-内卡", { domain: "域一" })]);
-  assert.deepEqual(cards.find((c) => c.id === "pj01")?.milestones, [
+  const input = memCards([root("pj01", D(1), { body }), card("aa01-内卡", { domain: "域一", "born-at": D(15) })]);
+  assert.deepEqual(input.center?.milestones, [
     { date: "2026-01-10", name: "首座", desc: "第一座里程碑的说明。" },
     { date: "2026-01-20", name: "次座", desc: "" },
   ]);
-  assert.equal(cards.find((c) => c.id === "aa01-内卡")?.milestones, null);
+  /* 盘的时间范围是 1 日到 15 日，20 日那座在范围外不画 */
+  assert.deepEqual(buildModel(input).milestones.map((m) => m.name), ["首座"]);
 });
 
 test("根卡没这块即空列表", () => {
-  const cards = memCards([root("pj01", D(1), { body: "## 在做什么\n\n没里程碑。" })]);
-  assert.deepEqual(cards[0]?.milestones, []);
+  const input = memCards([root("pj01", D(1), { body: "## 在做什么\n\n没里程碑。" })]);
+  assert.deepEqual(input.center?.milestones, []);
+});
+
+test("buildModel 收到不合格的输入直接抛错，一次列全：身份重复、时刻写坏、关系种类不认识", () => {
+  const good = { id: "a", bornAt: D(1), label: "甲", domain: null, kind: null, relations: [] };
+  assert.throws(
+    () =>
+      buildModel({
+        center: { id: "a", label: "盘心", bornAt: "2026/01/01", kind: "root", milestones: [] },
+        cards: [
+          good,
+          { ...good, id: "b", bornAt: "一月二号" },
+          { ...good, id: "c", relations: [{ kind: "replace" as "supersede", target: "a" }] },
+        ],
+      }),
+    (err: Error) =>
+      err.message.includes("身份「a」重复") &&
+      err.message.includes("盘心「a」的 bornAt「2026/01/01」") &&
+      err.message.includes("卡「b」的 bornAt「一月二号」") &&
+      err.message.includes("卡「c」的关系种类「replace」不认识"),
+  );
 });
 
 test("扫盘：目录不存在，回空集合，不报错、不建目录", async () => {
-  assert.deepEqual(await scanCardDir("D:/这个目录不存在/也不该被建出来"), { cards: [], sick: [] });
+  assert.deepEqual(await scanCardDir("D:/这个目录不存在/也不该被建出来"), { center: null, cards: [], sick: [] });
 });

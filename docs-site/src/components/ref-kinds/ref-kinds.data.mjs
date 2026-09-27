@@ -34,9 +34,9 @@ const NORMALIZE = '算之前先归一化：换行统一成 LF、去掉每行行�
 /* ref file="../packages/docfirst-pin/src/span.ts" lines="21-39" hash="8d9f8b1618fa" blob="23033c685517" */
 /* ref file="../packages/docfirst-pin/src/compare.ts" lines="65-113" hash="74b12acad0bd" blob="f5272b0530fa" */
 /* ref file="../packages/docfirst-workflow/src/project/fs-reader.ts" lines="1-7" hash="47320c54fcd0" blob="34d9e87c179c" */
-/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="37-43" hash="9ebfdcac2bf1" blob="68565dfd474a" */
-/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="274-279" hash="a11866d4fa45" blob="68565dfd474a" */
-/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="295-302" hash="85058fb75fad" blob="ec24566d459a" */
+/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="38-44" hash="9ebfdcac2bf1" blob="418434ff646c" */
+/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="275-280" hash="a11866d4fa45" blob="418434ff646c" */
+/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="296-303" hash="85058fb75fad" blob="418434ff646c" */
 /* ref file="../packages/docfirst-pin/src/types.ts" lines="80-85" hash="70feff6a62c9" blob="32a0167e8d8f" */
 /* ref file="../packages/docfirst-fumadocs/src/blocks.ts" lines="24-37" hash="c3224ec6e495" blob="19f00626cf69" */
 /* ref file="../packages/docfirst-fumadocs/src/blocks.ts" lines="47-61" hash="8a889ba101b1" blob="19f00626cf69" */

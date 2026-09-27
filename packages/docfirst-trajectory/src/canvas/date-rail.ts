@@ -12,7 +12,7 @@
  * 轨的长度变了（窗口缩放）自己重排刻度。监听器直挂自建 DOM、随容器整棵销毁。 */
 
 import type { RingsLayout } from "../layout.ts";
-import { formatDay } from "../model.ts";
+import { formatDay } from "../model/build.ts";
 
 /** 滚轮一格的 deltaY 阈值（鼠标一格恰一步，触控板平滑累积）。 */
 const WHEEL_NOTCH = 120;

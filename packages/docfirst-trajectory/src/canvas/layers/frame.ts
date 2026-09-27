@@ -5,7 +5,7 @@
  * 整搬自 Obsidian 版 star/layers/frame.ts。 */
 
 import type { RingsLayout } from "../../layout.ts";
-import type { Card, Milestone, TrajectoryModel } from "../../types.ts";
+import type { Card, TrajectoryModel } from "../../model/types.ts";
 import type { DefsFactory } from "../node-dom.ts";
 import type { Theme } from "../theme.ts";
 
@@ -64,7 +64,7 @@ export interface FrameCtx {
 }
 
 /** 建构期传入（每轮数据重建一次）：层不认识编排者，交互与宿主动作只走这些回调；
- * layout / model / theme / milestones 是建构期一次性注入的只读引用，层可持有到下一轮重建。 */
+ * layout / model / theme 是建构期一次性注入的只读引用，层可持有到下一轮重建。 */
 export interface BuildCtx {
   world: SVGElement;
   /** 珠光渐变与空窗羽化滤镜的 defs 工厂（每轮建画布一个，id 不撞） */
@@ -72,9 +72,6 @@ export interface BuildCtx {
   layout: RingsLayout;
   model: TrajectoryModel;
   theme: Theme;
-  milestones: Milestone[];
-  /** 卡的 type（形状按它出）：模型里的 Card 不带 type，由编排者从路由卡表查。 */
-  typeOf(id: string): string | null;
   /** 开卡页；inNewTab 对应 Ctrl/Cmd+点（宿主决定怎么开）。 */
   openCard(id: string, inNewTab: boolean): void;
   /** 盘心双击：回全景（两段式回到原点的整链）。 */

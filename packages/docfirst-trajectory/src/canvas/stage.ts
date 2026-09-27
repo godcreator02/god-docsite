@@ -17,7 +17,7 @@
 
 import { buildChains, type Chain, computeDodge } from "../chains.ts";
 import { type LayoutPatch, RingsLayout } from "../layout.ts";
-import type { Card, Milestone, TrajectoryModel } from "../types.ts";
+import type { Card, TrajectoryModel } from "../model/types.ts";
 import { Camera } from "./camera.ts";
 import { DateRail } from "./date-rail.ts";
 import { LabelArbiter } from "./label-arbiter.ts";
@@ -56,18 +56,9 @@ export interface StageHost {
   onHits(hit: number, total: number): void;
 }
 
-/** 一轮数据：模型 + 里程碑 + type 查表。 */
-export interface StageData {
-  model: TrajectoryModel;
-  milestones: Milestone[];
-  typeOf(id: string): string | null;
-}
-
 export class StarStage {
   private model: TrajectoryModel | null = null;
   private layout: RingsLayout | null = null;
-  private milestones: Milestone[] = [];
-  private typeOf: (id: string) => string | null = () => null;
 
   /* ---------- 主题：跟随 html.dark ---------- */
   private themes = buildThemes([]);
@@ -144,12 +135,10 @@ export class StarStage {
 
   /* ================= 数据 ================= */
 
-  /** 一轮数据（首开 / 数据变了）：建模产物灌进来，建构类全跑一遍。
+  /** 一轮数据（首开 / 数据变了）：模型灌进来，建构类全跑一遍。
    * 日期窗跟着数据走，换一份数据复位「全部」（两柄回撑满）。 */
-  setData(data: StageData): void {
-    this.model = data.model;
-    this.milestones = data.milestones;
-    this.typeOf = data.typeOf;
+  setData(model: TrajectoryModel): void {
+    this.model = model;
     this.dateRail.reset();
     this.buildAll();
   }
@@ -226,8 +215,6 @@ export class StarStage {
       layout: this.layout as RingsLayout,
       model: this.model as TrajectoryModel,
       theme: this.theme,
-      milestones: this.milestones,
-      typeOf: (id) => this.typeOf(id),
       openCard: (id, inNewTab) => this.host.openCard(id, inNewTab),
       goHome: () => this.goHome(),
       getHoveredCard: () => this.hoveredCard,

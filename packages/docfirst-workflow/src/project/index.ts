@@ -1,10 +1,10 @@
 /**
- * 碰环境的那一块：读盘、起 git 子进程、把生成物摆到落点、读轨迹卡目录。
+ * 碰环境的那一块：读盘、起 git 子进程、把生成物摆到落点。
  * 读取器与旧内容来源（History）在这儿造；git 那条线（定位文件在哪个仓、按 blob 取旧内容、hunk 表、
  * 哪些文件有未提交的改动）也在这儿——钉码（`@godcreator/docfirst-pin`）不碰子进程。
  * 摆放（mdx 正本 → 落点上的生成物：渲、整形、跟盘上比、状态判定、落盘）也是这里的一个模块。
  *
- * 这个目录可以 import workflow 里除 `../cli/` 之外的目录、`@godcreator/docfirst-pin` 与 `@godcreator/docfirst-trajectory`，
+ * 这个目录可以 import workflow 里除 `../cli/`、`../cards/` 之外的目录与 `@godcreator/docfirst-pin`，
  * **不许 import `../cli/`**（`tests/boundary.test.ts` 守着）。
  */
 
@@ -19,4 +19,3 @@ export { docIdOf, loadProject } from "./load.ts";
 export type { Project, ProjectConfig } from "./load.ts";
 export { createPlacing } from "./placement.ts";
 export type { OutputTarget, PlacedCheck, PlacedStatus, PlacedWrite, Placement, Placing, PlacingHost } from "./placement.ts";
-export { scanCardDir } from "./card-dir.ts";

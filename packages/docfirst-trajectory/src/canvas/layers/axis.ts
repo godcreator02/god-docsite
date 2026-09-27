@@ -9,7 +9,7 @@
  * 之后原位调用，保证 DOM 插入序、也就是层叠序。 */
 
 import { monthGate, smoothstep } from "../../layout.ts";
-import { formatDay } from "../../model.ts";
+import { formatDay } from "../../model/build.ts";
 import { el } from "../node-dom.ts";
 import { RingLabel } from "../ring-label.ts";
 import type { BuildCtx, FrameCtx, StarLayer } from "./frame.ts";

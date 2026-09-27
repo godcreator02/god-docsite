@@ -73,12 +73,13 @@ export const fumadocsGraph = defineSeamGraph({
       role: null,
       outside: true,
       blurb:
-        '主入口的 loadProject 交回钉码编排、名册与文档身份，钉码编排的 checkReferences 核对已经在语法树上认好的引用，清单、清单项与引用的类型也从主入口取；./mdx 提供认记号、打标与遍历语法树的函数，命令行认记号用的是同一份；./cards 的 scanCardDir 读卡目录。workflow 不认识这个包。',
+        '主入口的 loadProject 交回钉码编排、名册与文档身份，钉码编排的 checkReferences 核对已经在语法树上认好的引用，清单、清单项与引用的类型也从主入口取；./mdx 提供认记号、打标与遍历语法树的函数，命令行认记号用的是同一份；./cards 是 docfirst 卡格式：scanCardDir 读卡目录、校验卡、交回中性输入加病卡，CARD_KEYS 与 cardIdFromHref 给卡集合认卡。workflow 不认识这个包。',
       caps: [
         { id: 'wf-load', name: '项目装配', ident: 'loadProject' },
         { id: 'wf-pinning', name: '钉码编排', ident: 'checkReferences' },
         { id: 'wf-mdx', name: '认记号与打标', ident: 'recognize · stamp' },
         { id: 'wf-scan', name: '读卡目录', ident: 'scanCardDir' },
+        { id: 'wf-keys', name: '卡字段与卡身份', ident: 'CARD_KEYS · cardIdFromHref' },
       ],
     },
     {
@@ -190,10 +191,10 @@ export const fumadocsGraph = defineSeamGraph({
       role: 'emerald',
       outside: false,
       blurb:
-        '轨迹卡集合的两样：cardSchema 当 frontmatter schema，缺 born-at 校验失败、缺 label 用文件名当标题、一个卡字段都没有的当普通页放行；remarkTrajectoryLinks 把 supersedes:: 与 pivots-from:: 段落标成关系边，把指向卡身份的 .md 链接与 wikilink 改成卡页地址。',
+        '轨迹卡集合的两样：cardSchema 当 frontmatter schema，只从 frontmatter 派生卡页要的字段、不校验（卡写得对不对由 docfirst check 报）：缺 label 用文件名当标题，被 fumadocs 解析成日期的 born-at 转回字符串，一个卡字段都没有的当普通页；remarkTrajectoryLinks 把 supersedes:: 与 pivots-from:: 段落标成关系边，把指向卡身份的 .md 链接与 wikilink 改成卡页地址。哪些字段算卡、链接怎么换成卡身份，都用 workflow 卡格式的那一份。',
       caps: [
         { id: 'cc-links', name: '链接改写', ident: 'remarkTrajectoryLinks' },
-        { id: 'cc-schema', name: 'frontmatter 校验', ident: 'cardSchema' },
+        { id: 'cc-schema', name: 'frontmatter 字段', ident: 'cardSchema' },
       ],
     },
     {
@@ -202,12 +203,9 @@ export const fumadocsGraph = defineSeamGraph({
       pkg: '@godcreator/docfirst-trajectory',
       role: null,
       outside: true,
-      blurb: '卡片格式与建模都是纯函数，卡片文件由调用方读好传进来；星轨盘组件 StarDisk 在 ./disk，那份产物第一行是 "use client"，样式表是 ./star.css。',
-      caps: [
-        { id: 'tj-keys', name: '卡字段', ident: 'CARD_KEYS' },
-        { id: 'tj-build', name: '建模', ident: 'buildTrajectory' },
-        { id: 'tj-disk', name: '星轨盘组件与样式', ident: './disk · ./star.css' },
-      ],
+      blurb:
+        '星轨盘组件 StarDisk 在 ./disk，那份产物第一行是 "use client"，样式表是 ./star.css。StarDisk 的 data 收中性输入，组件在浏览器里自己调 buildModel 建模。这个包只从轨迹核心取这两样，不从主入口取任何东西。',
+      caps: [{ id: 'tj-disk', name: '星轨盘组件与样式', ident: './disk · ./star.css' }],
     },
     {
       id: 'star',
@@ -216,9 +214,9 @@ export const fumadocsGraph = defineSeamGraph({
       role: 'emerald',
       outside: false,
       blurb:
-        'loadTrajectory(dir) 收卡目录的绝对路径（不是绝对路径直接报错）、读卡并建模；同一个出口按包名转出轨迹核心的 StarDisk，trajectory.css 引入轨迹核心的 star.css。站画星轨盘只 import 这个包。只 import workflow 的 ./cards，不 import 主入口。',
+        'loadTrajectory(dir) 收卡目录的绝对路径（不是绝对路径直接报错），就是 workflow 卡格式的 scanCardDir：交回中性输入加病卡，不建模；同一个出口按包名转出轨迹核心的 StarDisk，trajectory.css 引入轨迹核心的 star.css。站画星轨盘只 import 这个包。只 import workflow 的 ./cards，不 import 主入口。',
       caps: [
-        { id: 'star-load', name: '读卡建模与组件', ident: 'loadTrajectory · StarDisk' },
+        { id: 'star-load', name: '读卡与组件', ident: 'loadTrajectory · StarDisk' },
         { id: 'star-css', name: '盘的样式', ident: 'trajectory.css' },
       ],
     },
@@ -423,27 +421,27 @@ export const fumadocsGraph = defineSeamGraph({
       iface: "import { loadTrajectory, StarDisk } from '@godcreator/docfirst-fumadocs/trajectory'；@import '@godcreator/docfirst-fumadocs/trajectory.css'",
       convention: false,
       via: 'code',
-      text: '本站的星轨整页调用 loadTrajectory 拿模型，把它交给 StarDisk，顶栏由页面自己画；路由组的 disk.css 引入 trajectory.css。站不直接依赖轨迹核心。卡目录由页面用 join(process.cwd(), "content", "trajectory") 拼成绝对路径再传：目录名写死，Turbopack 才看得出只读这一个目录，不把整个项目打进服务端产物。',
+      text: '本站的星轨整页调用 loadTrajectory 拿到中性输入加病卡，原样交给 StarDisk 的 data，顶栏由页面自己画；路由组的 disk.css 引入 trajectory.css。站不直接依赖轨迹核心。卡目录由页面用 join(process.cwd(), "content", "trajectory") 拼成绝对路径再传：目录名写死，Turbopack 才看得出只读这一个目录，不把整个项目打进服务端产物。',
     },
     {
       n: 21,
       name: '读卡',
       a: ['star-load'],
       b: ['wf-scan'],
-      iface: 'scanCardDir(dir) → TrajectoryScan（cards · sick）',
+      iface: 'loadTrajectory(dir) = scanCardDir(dir) → CardScan：{ center, cards, sick }',
       convention: false,
       via: 'code',
-      text: '读文件在 workflow：scanCardDir 读卡目录、交给轨迹核心挑卡与解析，再查卡里不许钉码，目录不在就交回空集合。只从 ./cards 取、不取主入口：主入口带着命令行与配置加载，进了 Next 的服务端构建会让 Turbopack 报按路径读文件的警告。',
+      text: '读文件、解析与校验卡都在 workflow 的卡格式：scanCardDir 读卡目录，挑卡、解析、校验、查卡里不许钉码，交回中性输入加病卡，目录不在就交回空集合。loadTrajectory 只检查路径是不是绝对路径，不建模。只从 ./cards 取、不取主入口：主入口带着命令行与配置加载，进了 Next 的服务端构建会让 Turbopack 报按路径读文件的警告。',
     },
     {
       n: 22,
       name: '轨迹核心',
-      a: ['star-load', 'star-css', 'cc-schema'],
-      b: ['tj-build', 'tj-disk', 'tj-keys'],
-      iface: 'buildTrajectory(scan) · ./disk 的 StarDisk · ./star.css · CARD_KEYS',
+      a: ['star-load', 'star-css'],
+      b: ['tj-disk'],
+      iface: 'export { StarDisk } from "@godcreator/docfirst-trajectory/disk"；@import "@godcreator/docfirst-trajectory/star.css"',
       convention: false,
       via: 'code',
-      text: 'loadTrajectory 用 buildTrajectory 建模。StarDisk 按包名从 ./disk 转出，那份产物第一行的 "use client" 才留在原处，Next 认得出客户端边界；trajectory.css 用 @import 引入 ./star.css。cardSchema 用 CARD_KEYS 判断一页算不算卡，跟轨迹核心自己的判据相同。',
+      text: 'StarDisk 按包名从 ./disk 转出，那份产物第一行的 "use client" 才留在原处，Next 认得出客户端边界；组件收到中性输入自己建模，服务端不调轨迹核心。trajectory.css 用 @import 引入 ./star.css。',
     },
     {
       n: 23,
@@ -454,6 +452,16 @@ export const fumadocsGraph = defineSeamGraph({
       convention: false,
       via: 'code',
       text: 'nodeFor 按清单项的 status 选节点形状与状态点的颜色，这个类型从钉码核心取。这个包不调钉码核心的任何函数：核对经 workflow 的钉码编排，状态全由钉码核心判。',
+    },
+    {
+      n: 24,
+      name: '卡字段与卡身份',
+      a: ['cc-schema', 'cc-links'],
+      b: ['wf-keys'],
+      iface: 'import { CARD_KEYS, cardIdFromHref } from "@godcreator/docfirst-workflow/cards"',
+      convention: false,
+      via: 'code',
+      text: 'cardSchema 用 CARD_KEYS 判断一页算不算卡，一个卡字段都没有的当普通页；remarkTrajectoryLinks 用 cardIdFromHref 把 .md、.mdx 链接的目标换成卡身份，再看它像不像卡身份。两样都跟命令行解析卡用同一份代码，卡集合不另写判据。',
     },
   ],
 });

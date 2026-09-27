@@ -1,17 +1,17 @@
 /**
  * 卡里不许钉码：卡正文里出现 docfirst 正式记号、或以 @@docfirst 开头的一行（已经删掉的草稿写法）一律报病——
- * 轨迹分区冻结历史，不钉活代码。这是钉码那一侧的规矩，在 workflow 包的 project/card-refs.ts；
- * 既测纯函数 checkDocfirstRefs，也测它接进 scanCardDir 之后 sick 自然带上报病，
- * 以及轨迹包自己的 parseCardFile 不再管它。
+ * 轨迹分区冻结历史，不钉活代码。在 workflow 卡格式的 cards/card-refs.ts；
+ * 既测纯函数 checkDocfirstRefs，也测它接进 scanCards 之后 sick 自然带上报病，
+ * 以及单卡解析 parseCardFile 不管它。
  */
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import type { SickFile } from "@godcreator/docfirst-trajectory";
-import { checkDocfirstRefs } from "../packages/docfirst-workflow/src/project/card-refs.ts";
-import { scanCardDir } from "../packages/docfirst-workflow/src/project/card-dir.ts";
+import type { SickFile } from "@godcreator/docfirst-workflow/cards";
+import { checkDocfirstRefs } from "../packages/docfirst-workflow/src/cards/card-refs.ts";
+import { scanCardDir } from "../packages/docfirst-workflow/src/cards/card-dir.ts";
 import { card, D, flatProblems, memSick, renderCard, root } from "./trajectory-helpers.ts";
 import type { CardSpec } from "./trajectory-helpers.ts";
 
@@ -74,7 +74,7 @@ test("卡正文带正式记号：{/* ref ... */} 与 {/* tree ... */} 两种花�
   assert.deepEqual(checkDocfirstRefs('<!-- ref file="src/greet.ts" lines="2-3" -->\n'), [], "md 那种开标签不再是记号");
 });
 
-test("轨迹包的 parseCardFile 不查钉码记号：同一张卡，内存解析不报 docfirst 病", () => {
+test("单卡解析 parseCardFile 不查钉码记号：同一张卡，只跑单卡解析不报 docfirst 病", () => {
   const specs = [card("dd01-带引用记号的卡", { domain: "域一" }, { body: "叙事一段。\n\n@@docfirst ref src/greet.ts @@\n" })];
   assert.deepEqual(memSick(specs), []);
 });

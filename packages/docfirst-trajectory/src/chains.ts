@@ -5,8 +5,8 @@
  */
 
 import { BASE_RADIUS, type CardPlace, DEG, lodOf, type RingsLayout } from "./layout.ts";
-import { formOf, spineTipIds } from "./model.ts";
-import type { Card, TrajectoryModel } from "./types.ts";
+import { formOf, spineTipIds } from "./model/build.ts";
+import type { Card, TrajectoryModel } from "./model/types.ts";
 
 /** 链表（跨日弧向避让用）：每 (树, 槽) 一条，组 = 同日卡集、按日期序；
  * rBase = 节点半径（算所需间距，建构期定死、不随帧变）；

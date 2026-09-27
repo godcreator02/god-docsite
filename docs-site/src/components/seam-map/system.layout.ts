@@ -27,7 +27,7 @@ export const systemLayout: SeamLayout = {
     project: cap(498, 372, 84),
     io: cap(590, 372, 110),
     placement: cap(708, 372, 86),
-    'card-dir': cap(802, 372, 84),
+    cards: cap(802, 372, 84),
 
     types: cap(194, 522, 136),
     pinner: cap(340, 522, 130),
@@ -52,7 +52,7 @@ export const systemLayout: SeamLayout = {
     repo: { x: 180, y: 646, w: 900, h: 90 },
   },
   // 线停在框边上（6、7、8）表示接这个包里的几处能力，是哪几处看高亮。
-  // 5 的另两端（卡集合、建模）与 8 落在项目根的那一端没有单独画线，固定高亮时照样亮
+  // 8 落在项目根的那一端没有单独画线，固定高亮时照样亮
   seamPaths: {
     '1': { d: 'M303,420 V522', badge: [303, 462] },
     '2': { d: 'M600,420 V522', badge: [600, 462] },

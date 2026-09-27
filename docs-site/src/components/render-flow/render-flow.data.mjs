@@ -91,7 +91,7 @@ export const refusalLines = [
 /** 上面几行里渲染不了的那几行的行号 */
 export const refusalBadLines = [17, 19, 21];
 /* ref file="../packages/docfirst-workflow/src/mdx/render.ts" lines="68-104" hash="3c00e366b1d8" blob="ddfb59043229" */
-/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="206-211" hash="d77611f10efb" blob="68565dfd474a" */
+/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="207-212" hash="d77611f10efb" blob="418434ff646c" */
 /* ref file="../packages/docfirst-pin/src/types.ts" lines="80-85" hash="70feff6a62c9" blob="32a0167e8d8f" */
 export const refusalMessage =
   `🔴 ${files.source} → ${files.output}  正本渲染不了：` +
@@ -103,9 +103,9 @@ export const refusalMessage =
  * @typedef {{ text: string, kind: 'cmd' | 'out' | 'ok' | 'err', at: number }} TimedLine
  * @type {Record<'render' | 'check' | 'refuse', TimedLine[]>}
  */
-/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="342-356" hash="0d0da5c61ab5" blob="ec24566d459a" */
-/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="333-340" hash="c28d8799272e" blob="ec24566d459a" */
-/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="37-43" hash="9ebfdcac2bf1" blob="68565dfd474a" */
+/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="343-357" hash="0d0da5c61ab5" blob="418434ff646c" */
+/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="334-341" hash="c28d8799272e" blob="418434ff646c" */
+/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="38-44" hash="9ebfdcac2bf1" blob="418434ff646c" */
 export const terminals = {
   render: [
     { kind: 'cmd', text: 'pnpm docfirst render', at: 0.04 },
