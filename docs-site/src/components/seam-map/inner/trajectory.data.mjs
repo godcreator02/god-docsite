@@ -216,7 +216,7 @@ export const trajectoryGraph = defineSeamGraph({
       iface: '@import "@godcreator/docfirst-trajectory/star.css"',
       convention: false,
       via: 'code',
-      text: 'StarDisk 不自己引入样式；fumadocs 适配的 ./trajectory.css 引入 ./star.css，站引入前者。选择器都带 .star- 前缀或写在 .star-disk 容器下，不影响站的其他页面。盘自带亮暗两套颜色，不取站的颜色变量；站想让盘页的顶栏跟盘同一块底色，给外层挂 .star-surface。',
+      text: 'StarDisk 不自己引入样式；fumadocs 适配的 ./trajectory.css 引入 ./star.css，站引入前者。选择器都带 .star- 前缀或写在 .star-disk 容器下，不影响站的其他页面。底色、文字、边框取 fumadocs 的颜色变量，画在盘上的领域色与连线色由 JS 色板按亮暗选；盘页的顶栏想用同一组变量，给外层挂 .star-surface。',
     },
     {
       n: 7,

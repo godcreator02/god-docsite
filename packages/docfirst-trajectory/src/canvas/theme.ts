@@ -1,6 +1,5 @@
 /* 主题色板与配色工具——SVG 动态着色的唯一色源：两套亮暗底板 + 领域色分配、颜色插值工具。
- * 色值照 trail 星盘：深色是深蓝底上的亮色，盘不跟宿主站的灰底走。
- * 背景线与文字色走 CSS 变量（star.css 里同样两套），不经这里。
+ * 画在盘上的颜色照 trail 星盘；底色、背景线与文字色走 CSS 变量（跟宿主站的 fumadocs 颜色），不经这里。
  * 领域色一律实例持有（buildThemes 出新副本），不走模块级单例。 */
 
 import { NO_DOMAIN } from "../model.ts";
@@ -22,6 +21,7 @@ export interface Theme {
   deadMix: string;
   /** 实心节点的细描边：密集处靠它把彩点分开 */
   nodeStroke: string;
+  /** 盘心填色：跟盘面底色一样（CSS 变量，不进 mix()） */
   hubFill: string;
   /** 盘心描边：要进 mix() 混端点警示色，只能是 hex */
   hubStroke: string;
@@ -45,7 +45,7 @@ const THEMES: Record<ThemeName, Theme> = {
     milestone: "#f5b942",
     deadMix: "#6b7280",
     nodeStroke: "rgba(255,255,255,0.75)",
-    hubFill: "#0b1020",
+    hubFill: "var(--bg)",
     hubStroke: "#5a6a94",
     hubRoot: "#e8eeff",
     warn: "#f5b942",
@@ -60,7 +60,7 @@ const THEMES: Record<ThemeName, Theme> = {
     milestone: "#c07f10",
     deadMix: "#aab1bf",
     nodeStroke: "rgba(22,30,52,0.55)",
-    hubFill: "#ffffff",
+    hubFill: "var(--bg)",
     hubStroke: "#b6c0d8",
     hubRoot: "#1a2238",
     warn: "#d97706",

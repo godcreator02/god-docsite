@@ -377,7 +377,7 @@ export function StarDisk({ data, hrefBase, bodies }: StarDiskProps): ReactNode {
   return (
     <div
       ref={rootRef}
-      className={`star-disk${dark ? " star-dark" : ""}`}
+      className="star-disk"
       style={{ position: "relative", width: "100%", height: "100%", overflow: "hidden", display: "flex" }}
     >
       <div ref={containerRef} className="star-main" onPointerMove={onPointerMove}>
