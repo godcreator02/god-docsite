@@ -163,7 +163,7 @@ export class HubLayer implements StarLayer {
      * 项目名屏径恒定（scale pxToWorld，与 .lb 同律），不跟盘等比放大；
      * 纵向基准跟根节点走（dotR 含 pxToWorld 与 hover 放大），缩放时文字始终贴点下、不压点 */
     const twoLine = !!this.hubStatus.textContent;
-    const base = dotR + 16 * pxToWorld;
+    const base = dotR + 13 * pxToWorld;
     this.hubTitle.setAttribute(
       "transform",
       `translate(0,${base - (twoLine ? 8 : 0) * pxToWorld}) scale(${pxToWorld})`,

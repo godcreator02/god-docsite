@@ -191,11 +191,11 @@
   letter-spacing: 1px;
 }
 
-/* 项目名：排印根节点下方，比节点标签大一号 */
+/* 项目名：排印根节点下方，比节点标签略大 */
 .star-disk .hub-t {
   fill: var(--t1);
-  font-size: 16px;
-  letter-spacing: 2px;
+  font-size: 12px;
+  letter-spacing: 1px;
   dominant-baseline: central;
 }
 
