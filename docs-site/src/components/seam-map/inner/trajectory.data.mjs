@@ -203,10 +203,10 @@ export const trajectoryGraph = defineSeamGraph({
       name: '客户端边界',
       a: ['load'],
       b: ['star-disk'],
-      iface: 'export { StarDisk } from "@godcreator/docfirst-trajectory/disk"；props：data、hrefBase',
+      iface: 'export { StarDisk } from "@godcreator/docfirst-trajectory/disk"；props：data、hrefBase、bodies',
       convention: false,
       via: 'code',
-      text: 'fumadocs 适配按包名从 ./disk 转出 StarDisk：那份产物头一行是 "use client"，按包名引用它才原样留在调用方的产物里，Next 认得出客户端边界。props 只收可转 JSON 的数据、不收函数，卡页地址由 hrefBase 拼出，因为服务端组件不能把函数传给客户端组件。',
+      text: 'fumadocs 适配按包名从 ./disk 转出 StarDisk：那份产物头一行是 "use client"，按包名引用它才原样留在调用方的产物里，Next 认得出客户端边界。props 不收函数，因为服务端组件不能把函数传给客户端组件：卡页地址由 hrefBase 拼出；bodies 是站在服务端渲染好的每张卡的正文，点节点在侧栏里显示。',
     },
     {
       n: 6,
@@ -216,7 +216,7 @@ export const trajectoryGraph = defineSeamGraph({
       iface: '@import "@godcreator/docfirst-trajectory/star.css"',
       convention: false,
       via: 'code',
-      text: 'StarDisk 不自己引入样式；fumadocs 适配的 ./trajectory.css 引入 ./star.css，站引入前者。选择器都带 .star- 前缀或写在 .star-disk 容器下，颜色取 fumadocs 的变量，不影响站的其他页面。',
+      text: 'StarDisk 不自己引入样式；fumadocs 适配的 ./trajectory.css 引入 ./star.css，站引入前者。选择器都带 .star- 前缀或写在 .star-disk 容器下，不影响站的其他页面。盘自带亮暗两套颜色，不取站的颜色变量；站想让盘页的顶栏跟盘同一块底色，给外层挂 .star-surface。',
     },
     {
       n: 7,

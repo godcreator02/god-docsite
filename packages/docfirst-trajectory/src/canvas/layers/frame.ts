@@ -49,6 +49,8 @@ export interface FrameCtx {
   /** 编排者从 chains 算出后灌入：跨日弧向避让角偏，cards 层消费。 */
   dodge: Map<string, number>;
   hoveredCard: Card | null;
+  /** 侧栏正在看的卡的身份：cards 层给它加选中标记、标签常显。 */
+  selectedId: string | null;
   /** 全部标签开关：无视 LOD 与仲裁全显（重叠也显）。 */
   showAllLabels: boolean;
   /** recolor 走静态着色，place 内仍有随帧态变化的取色（如焦点带边环 / 盘心的贴端点警示色）。 */

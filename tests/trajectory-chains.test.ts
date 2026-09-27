@@ -47,10 +47,10 @@ test("同树同槽同日多卡分到同一组、组按日期序；跨槽（主�
   assert.deepEqual(spine?.groups.map((g) => g.ids), [["aa01-链头"], ["aa02-链二", "aa03-链三"], ["aa04-链尾"]]);
   /* 结论卡 = 主干末端那张且在立：只有 aa04-链尾 算 */
   assert.deepEqual(spine?.groups.map((g) => g.hasConclusion), [false, false, true]);
-  /* 基半径吃形态档：被取代压到 0.7（6 × 0.7 = 4.2），末端那张在立仍是 6 */
+  /* 所有卡一样大：被取代与在立的基半径都是 8.4 */
   assert.deepEqual(
     spine?.groups.map((g) => Number(g.rBase.toFixed(6))),
-    [4.2, 4.2, 6],
+    [8.4, 8.4, 8.4],
   );
 
   const subline = chainsOfAa.find((c) => c.groups.some((g) => g.ids.includes("cc01-支线甲")));

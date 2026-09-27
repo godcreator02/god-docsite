@@ -48,10 +48,11 @@ full: true
 
 {/* ref file="../packages/docfirst-trajectory/src/serial.ts" lines="9-11" hash="06fde308bb1c" blob="c519fffe9144" */}
 
-**`./disk`** 导出客户端组件 `StarDisk`，props 只有 `data` 与 `hrefBase`：`data` 是 `buildTrajectory` 的结果；卡页地址由 `hrefBase` 拼出，
-props 里不收函数（服务端组件不能把函数传给客户端组件）。组件占满父容器，只有整页一种形态：
+**`./disk`** 导出客户端组件 `StarDisk`，props 是 `data`、`hrefBase` 与 `bodies`：`data` 是 `buildTrajectory` 的结果；卡页地址由 `hrefBase` 拼出；
+`bodies` 是每张卡（含根卡）在服务端渲染好的正文，键是卡身份，点节点就在盘右侧的栏里显示，盘上有的卡缺正文直接报错。
+props 里不收函数（服务端组件不能把函数传给客户端组件），渲染好的正文可以传。组件占满父容器，只有整页一种形态：
 
-{/* ref file="../packages/docfirst-trajectory/src/disk.tsx" lines="33-39" hash="f65c0598c49a" blob="ab210f01863f" */}
+{/* ref file="../packages/docfirst-trajectory/src/disk.tsx" lines="33-43" hash="f5758a2b204e" blob="2700460f36a5" */}
 
 ## 依赖
 

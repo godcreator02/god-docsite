@@ -1,8 +1,8 @@
 /**
  * 画布层纯函数部分的测试（画布层住 `./react` 入口那一侧，测试直读源码，Node 直跑 .ts）：
- *   theme：矿彩两套色板按出现序分配、未分道走中性灰不占色板；mix 两 hex 线性插值、非 hex 出 color-mix。
- *   node-dom：在立卡珠光渐变 + 底色描边、孤星不套外环、被取代小一号混灰、结论卡（主干末端在立）
- *          吃放大档、连线不带箭头。
+ *   theme：两套色板按出现序分配、未分道走中性灰不占色板；mix 两 hex 线性插值、非 hex 出 color-mix。
+ *   node-dom：所有卡一样大；实心平涂加细描边、在立卡外套同色细环、最外一圈结论实线孤星虚线、
+ *          被取代混灰没有环；连线与箭头同色（取代金黄、转向青）。
  *   label-arbiter：12 点 / 6 点竖线 14px 贪心占位；节点标签按真实文本区间判定、悬停先占坑。
  *   date-rail：滚轮格数结算（余额累进、反向清账）；railTOf / dayAtT 正逆互逆、空窗折成折痕。
  * DOM 相关的元素用手写的最小桩（只实现仲裁真读写的 style / textContent），不引 DOM 库。
@@ -11,7 +11,7 @@ import { fileURLToPath } from "node:url";
 import { test } from "node:test";
 import assert from "node:assert/strict";
 /* 布局 / 模型也直读源码：画布层吃的是源码里的 RingsLayout 型，跟 dist 里那份是两个声明 */
-import { BASE_RADIUS, RingsLayout } from "../packages/docfirst-trajectory/src/layout.ts";
+import { BASE_RADIUS, NODE_RADIUS, RingsLayout } from "../packages/docfirst-trajectory/src/layout.ts";
 import { buildModel, NO_DOMAIN } from "../packages/docfirst-trajectory/src/model.ts";
 import { scanCardDir } from "../packages/docfirst-workflow/src/project/card-dir.ts";
 import type { Card, RawCard, TrajectoryModel } from "../packages/docfirst-trajectory/src/types.ts";
@@ -20,10 +20,13 @@ import {
   buildFilter,
   buildNode,
   DefsFactory,
+  type EdgeEl,
   isConclusion,
   type NodeEl,
+  outerRingOf,
   recolor,
   spineTipIds,
+  supersededColor,
 } from "../packages/docfirst-trajectory/src/canvas/node-dom.ts";
 import { LabelArbiter } from "../packages/docfirst-trajectory/src/canvas/label-arbiter.ts";
 import { consumeWheelNotches, dayAtT, railTOf } from "../packages/docfirst-trajectory/src/canvas/date-rail.ts";
@@ -40,23 +43,20 @@ const m: TrajectoryModel = buildModel(fixtureCards);
 
 /* ================= theme ================= */
 
-test("buildThemes：矿彩两套按出现序循环分配，未分道走中性灰、不占色板位", () => {
+test("buildThemes：两套按出现序循环分配，未分道走中性灰、不占色板位", () => {
   const t = buildThemes(["甲", "乙", NO_DOMAIN, "丙"]);
-  assert.equal(t.dark.domain["甲"], "#6C9BD2", "石青");
-  assert.equal(t.dark.domain["乙"], "#D08A5B", "赭石");
+  assert.equal(t.dark.domain["甲"], "#5ea8ff");
+  assert.equal(t.dark.domain["乙"], "#c78bfa");
   assert.equal(t.dark.domain[NO_DOMAIN], t.dark.noDomain);
-  assert.equal(t.dark.domain["丙"], "#8FBF8A", "哨兵压在中间也不占位，丙拿第三色松绿");
-  assert.equal(t.light.domain["丙"], "#4F8A4A");
-  /* 泥金：盘心描边与里程碑同色，亮色板压深一档 */
-  assert.equal(t.dark.hubStroke, "#CBB27A");
-  assert.equal(t.dark.milestone, t.dark.hubStroke);
-  assert.equal(t.light.hubStroke, "#8A7238");
-  assert.equal(t.light.milestone, t.light.hubStroke);
-  /* 转向线铜绿；底色缝走宿主变量，亮暗共用一份 */
-  assert.equal(t.dark.pivot, "#6FB8AE");
-  assert.equal(t.light.pivot, "#2F8C82");
-  assert.equal(t.dark.bg, "var(--color-fd-background)");
-  assert.equal(t.light.bg, t.dark.bg);
+  assert.equal(t.dark.domain["丙"], "#4ade9e", "哨兵压在中间也不占位，丙拿第三色");
+  assert.equal(t.light.domain["丙"], "#0e9e63");
+  /* 里程碑与取代边同一金黄，亮色板压深一档 */
+  assert.equal(t.dark.milestone, t.dark.supersede);
+  assert.equal(t.light.milestone, t.light.supersede);
+  assert.notEqual(t.light.supersede, t.dark.supersede);
+  /* 盘心描边要进 mix() 混警示色，只能是 hex */
+  assert.match(t.dark.hubStroke, /^#[0-9a-f]{6}$/i);
+  assert.match(t.light.hubStroke, /^#[0-9a-f]{6}$/i);
   /* 每次调用出新副本：改一份不污染另一份 */
   const t2 = buildThemes(["甲"]);
   t2.dark.hubStroke = "#123456";
@@ -82,57 +82,94 @@ function fakeCard(id: string, domain = "甲"): Card {
   return { id, title: id, domain, bornAt: "2026-01-01T09:00", label: id, path: `${id}.md` };
 }
 
-/** 给一组节点刷一遍色：defs 挂在现建的桩 svg 上，一并交回好查渐变。 */
-function paintNodes(nodes: NodeEl[]): SvgStubElement {
-  const root = new SvgStubDocument().createElementNS(SVG_NS, "svg");
-  const defs = new DefsFactory(root as unknown as Element);
-  recolor(nodes, [], THEME, buildFilter(), () => true, defs);
-  return root;
+/** 给一组节点刷一遍色。 */
+function paintNodes(nodes: NodeEl[]): void {
+  recolor(nodes, [], THEME, buildFilter(), () => true);
 }
 
 /** 桩元素视图：工厂返回的句柄名义上是 SVGElement，实际是桩。 */
 const stub = (e: SVGElement | null): SvgStubElement => e as unknown as SvgStubElement;
 
-test("buildNode：在立卡填珠光渐变、外圈底色描边，孤星不套外环", () => {
+test("buildNode：在立卡平涂领域色加细描边，外套一圈同色细环；最外一圈结论实线、孤星虚线", () => {
   const alive = buildNode(fakeCard("a"), "alive", false, false, null);
+  const tip = buildNode(fakeCard("t"), "alive", false, true, null);
   const iso = buildNode(fakeCard("b"), "alive", true, false, null);
-  const root = paintNodes([alive, iso]);
+  paintNodes([alive, tip, iso]);
   const core = stub(alive.core);
-  assert.match(core.getAttribute("fill") ?? "", /^url\(#mk-\d+-pl-\d+\)$/, "在立卡填渐变引用");
-  assert.equal(core.getAttribute("stroke"), "var(--color-fd-background)", "外圈是底色缝");
-  assert.equal(core.getAttribute("stroke-width"), "1.8");
+  assert.equal(core.getAttribute("fill"), "#5ea8ff", "平涂，不用渐变");
+  assert.equal(core.getAttribute("stroke"), THEME.nodeStroke);
   assert.equal(core.getAttribute("r"), String(BASE_RADIUS));
-  /* 渐变真建在 defs 里：中心领域色向白混 22%、边缘本色 */
-  const stops = root.query("stop");
-  assert.equal(stops.length, 2, "一个领域色一支渐变，两个 stop");
-  assert.equal(stops[0]?.getAttribute("stop-color"), mix("#6C9BD2", "#ffffff", 0.22));
-  assert.equal(stops[1]?.getAttribute("stop-color"), "#6C9BD2");
-  /* 孤星：跟普通在立卡一模一样，没有虚线外环 */
-  assert.equal(iso.seam, null);
-  assert.equal(
-    stub(iso.group).children.filter((c) => c.getAttribute("stroke-dasharray")).length,
-    0,
-    "孤星外环已退役",
-  );
-  assert.equal(stub(iso.group).children.length, stub(alive.group).children.length);
+  /* 细环：同一形状、半径大 3、只描不填 */
+  const crown = stub(alive.crown);
+  assert.equal(crown.getAttribute("r"), String(BASE_RADIUS + 3));
+  assert.equal(crown.getAttribute("fill"), "none");
+  assert.equal(crown.getAttribute("stroke"), "#5ea8ff");
+  assert.equal(alive.outerRing, null, "既不是结论也不是孤星，没有最外一圈");
+  /* 结论：最外一圈实线 */
+  const tipRing = stub(tip.outerRing);
+  assert.equal(tipRing.getAttribute("r"), String(BASE_RADIUS + 5.5));
+  assert.equal(tipRing.getAttribute("stroke-dasharray"), null);
+  assert.equal(tipRing.getAttribute("stroke"), "#5ea8ff");
+  /* 孤星：最外一圈虚线 */
+  const isoRing = stub(iso.outerRing);
+  assert.ok(iso.crown);
+  assert.equal(isoRing.getAttribute("stroke-dasharray"), "3 4");
+  assert.equal(isoRing.getAttribute("stroke"), "#5ea8ff");
 });
 
-test("buildNode：被取代实心无渐变、半径 0.7、领域色混灰 40%", () => {
+test("outerRingOf：孤星虚线、结论（主干末端且在立）实线，其余没有", () => {
+  assert.equal(outerRingOf("alive", true, false), "isolated");
+  assert.equal(outerRingOf("alive", false, true), "conclusion");
+  assert.equal(outerRingOf("superseded", false, true), null, "末端被取代了不算结论");
+  assert.equal(outerRingOf("alive", false, false), null);
+});
+
+test("buildNode：所有卡一样大；被取代的领域色混灰、没有环", () => {
   const sup = buildNode(fakeCard("c"), "superseded", false, false, null);
   paintNodes([sup]);
   const core = stub(sup.core);
-  assert.equal(core.getAttribute("r"), String(BASE_RADIUS * 0.7));
-  assert.equal(core.getAttribute("fill"), mix("#6C9BD2", THEME.deadMix, 0.4));
-  assert.doesNotMatch(core.getAttribute("fill") ?? "", /url\(/, "被取代不吃渐变");
-  assert.equal(core.getAttribute("stroke"), "var(--color-fd-background)");
-  assert.equal(core.getAttribute("stroke-width"), "1.2", "缝也细一档");
+  assert.equal(NODE_RADIUS.superseded, NODE_RADIUS.alive);
+  assert.equal(core.getAttribute("r"), String(BASE_RADIUS));
+  assert.equal(core.getAttribute("fill"), supersededColor("#5ea8ff", THEME));
+  assert.notEqual(core.getAttribute("fill"), "#5ea8ff");
+  assert.equal(core.getAttribute("stroke"), THEME.nodeStroke);
+  assert.equal(sup.crown, null, "被取代没有细环");
+  assert.equal(sup.outerRing, null);
+});
+
+test("recolor：连线描自己那支渐变，旧卡端淡、新卡端亮；取代金黄、转向青；两端有一张被筛掉就整条退灰", () => {
+  const a = buildNode(fakeCard("a"), "alive", false, false, null);
+  const b = buildNode(fakeCard("b", "乙"), "alive", false, false, null);
+  const defs = new DefsFactory(new SvgStubDocument().createElementNS(SVG_NS, "svg") as unknown as Element);
+  const edge = (isPivot: boolean): EdgeEl => ({
+    kind: "line",
+    source: a.card,
+    target: b.card,
+    node: new SvgStubDocument().createElementNS(SVG_NS, "line") as unknown as SVGElement,
+    gradient: defs.edgeGradient(),
+    isPivot,
+    baseOpacity: 0.9,
+  });
+  const sup = edge(false);
+  const piv = edge(true);
+  recolor([a, b], [sup, piv], THEME, buildFilter(), () => true);
+  assert.equal(stub(sup.node).getAttribute("stroke"), `url(#${sup.gradient.id})`);
+  assert.equal(stub(sup.gradient.from).getAttribute("stop-color"), THEME.supersede);
+  assert.equal(stub(sup.gradient.to).getAttribute("stop-color"), THEME.supersede);
+  assert.ok(Number(stub(sup.gradient.from).getAttribute("stop-opacity")) < 0.5, "旧卡那端淡");
+  assert.equal(stub(sup.gradient.to).getAttribute("stop-opacity"), null, "新卡那端全亮");
+  assert.equal(stub(piv.gradient.to).getAttribute("stop-color"), THEME.pivot);
+  assert.notEqual(sup.gradient.id, piv.gradient.id, "一条边一支渐变");
+  recolor([a, b], [sup], THEME, buildFilter(), (c) => c.id !== "b");
+  assert.equal(stub(sup.gradient.from).getAttribute("stop-color"), THEME.mute);
+  assert.equal(stub(sup.gradient.to).getAttribute("stop-color"), THEME.mute);
 });
 
 test("结论卡放大档：判定 = 主干末端那张且在立，乘数走布局的 tierMult", () => {
   assert.equal(isConclusion("alive", true), true);
   assert.equal(isConclusion("alive", false), false, "不是主干末端就不放大");
   assert.equal(isConclusion("superseded", true), false, "末端被取代了也不放大");
-  assert.equal(new RingsLayout(m).tierMult, 1.3);
+  assert.equal(new RingsLayout(m).tierMult, 1, "默认不放大，所有卡一样大；设置里可调");
   /* 主干末端集从模型的树里来，一树一张 */
   const tips = spineTipIds(m.trees);
   assert.ok(m.trees.length > 0);
@@ -140,20 +177,17 @@ test("结论卡放大档：判定 = 主干末端那张且在立，乘数走布�
   for (const t of m.trees) assert.ok(tips.has(t.spine.at(-1) as string));
 });
 
-test("快照是唯一的空心：底色缝垫在领域色边下面；缺省形态跟抉择同款实心", () => {
+test("快照是唯一的空心：只描领域色边、不填；细环跟着方形走；缺省形态跟抉择同款实心", () => {
   const snap = buildNode(fakeCard("d"), "alive", false, false, "snapshot");
   const plain = buildNode(fakeCard("e"), "alive", false, false, null);
   paintNodes([snap, plain]);
-  assert.ok(snap.hollow && snap.seam);
+  assert.ok(snap.hollow);
   assert.equal(stub(snap.core).getAttribute("fill"), "none");
-  assert.equal(stub(snap.core).getAttribute("stroke"), "#6C9BD2");
-  assert.equal(stub(snap.seam).getAttribute("stroke"), "var(--color-fd-background)");
-  assert.ok(
-    Math.abs(Number(stub(snap.seam).getAttribute("stroke-width")) - 3.4) < 1e-9,
-    "缝宽 = 缝 1.8 + 边 1.6",
-  );
+  assert.equal(stub(snap.core).getAttribute("stroke"), "#5ea8ff");
+  assert.equal(stub(snap.core).getAttribute("stroke-width"), "2");
+  assert.equal(stub(snap.crown).tagName, "rect", "细环跟本体同一个形状");
   assert.equal(plain.hollow, false);
-  assert.match(stub(plain.core).getAttribute("fill") ?? "", /^url\(#/);
+  assert.equal(stub(plain.core).getAttribute("fill"), "#5ea8ff");
 });
 
 /* ================= label-arbiter ================= */

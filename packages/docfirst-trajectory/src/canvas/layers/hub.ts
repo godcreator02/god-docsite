@@ -151,16 +151,19 @@ export class HubLayer implements StarLayer {
      * hover 放大 1.4 倍与节点同款手感 */
     const dotR = ROOT_RADIUS * layout.symbolPx * pxToWorld * (1 + 0.4 * this.hubHoverTween);
     this.hubRoot.setAttribute("r", String(dotR));
+    /* 侧栏正在看根卡：根节点加选中标记 */
+    const rootSelected = f.selectedId !== null && f.selectedId === this.ctx.model.root?.id;
+    this.hubRoot.setAttribute("class", rootSelected ? "hub-root star-sel" : "hub-root");
     /* 盘心只留项目名：鱼眼态的内外圈日期在焦点带边环（axis 层 placeBandEdges），
      * 端点警示由盘心描边环 + 边环标签后缀两个通道分担；状态行只剩全景空盘的一句提示 */
     this.hubStatus.textContent =
       strength < 0.01 && !this.ctx.model.cards.length ? "还没有记录" : "";
     /* 标题 / status 排印根节点下方，两行排版相对关系不变（twoLine 时标题让位上半行）。
      * status 非空（空盘提示）才是两行排版；绝大多数时候 status 是空串。
-     * 项目名走节点标签口径：10.5px 屏径恒定（scale pxToWorld，与 .lb 同律），不跟盘等比放大；
+     * 项目名屏径恒定（scale pxToWorld，与 .lb 同律），不跟盘等比放大；
      * 纵向基准跟根节点走（dotR 含 pxToWorld 与 hover 放大），缩放时文字始终贴点下、不压点 */
     const twoLine = !!this.hubStatus.textContent;
-    const base = dotR + 12 * pxToWorld;
+    const base = dotR + 16 * pxToWorld;
     this.hubTitle.setAttribute(
       "transform",
       `translate(0,${base - (twoLine ? 8 : 0) * pxToWorld}) scale(${pxToWorld})`,
@@ -175,8 +178,8 @@ export class HubLayer implements StarLayer {
   recolor(theme: Theme): void {
     this.hubC.setAttribute("fill", theme.hubFill);
     this.hubC.setAttribute("stroke", theme.hubStroke);
-    /* 根节点：根卡家族色实心，描边混黑收边（同 nodeEdge 哲学） */
-    this.hubRoot.setAttribute("fill", theme.hubStroke);
-    this.hubRoot.setAttribute("stroke", mix(theme.hubStroke, "#000000", 0.35));
+    /* 根节点：实心亮点，描边用盘心边的颜色 */
+    this.hubRoot.setAttribute("fill", theme.hubRoot);
+    this.hubRoot.setAttribute("stroke", theme.hubStroke);
   }
 }

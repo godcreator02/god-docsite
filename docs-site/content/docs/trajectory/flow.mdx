@@ -29,7 +29,7 @@ description: content/trajectory/ 下的轨迹卡怎么被读出、校验、建�
 `born-at` 不合格的卡不上盘，半径按日期算，没有日期算不出来；其余问题不挡绘制。`docfirst check` 把每条问题
 记一次红：
 
-{/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="226-227" hash="6a87fa27d832" blob="75cc83db6ebd" */}
+{/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="227-228" hash="6a87fa27d832" blob="68565dfd474a" */}
 
 ## 一张根卡、建树、挑主干
 
@@ -60,18 +60,23 @@ description: content/trajectory/ 下的轨迹卡怎么被读出、校验、建�
 
 整页 `/trajectory` 在服务端读卡目录、建模，交给客户端组件 `StarDisk`；两样都从 `@godcreator/docfirst-fumadocs/trajectory` 取：
 
-{/* ref file="src/app/(trajectory-disk)/trajectory/page.tsx" lines="4-4" hash="75e52e0103c2" blob="da67a1b04df3" */}
+{/* ref file="src/app/(trajectory-disk)/trajectory/page.tsx" lines="5-5" hash="75e52e0103c2" blob="da67a1b04df3" */}
 
-{/* ref file="src/app/(trajectory-disk)/trajectory/page.tsx" lines="7-8" hash="79d6f7b6375a" blob="da67a1b04df3" */}
+{/* ref file="src/app/(trajectory-disk)/trajectory/page.tsx" lines="11-12" hash="79d6f7b6375a" blob="da67a1b04df3" */}
 
-{/* ref file="src/app/(trajectory-disk)/trajectory/page.tsx" lines="23-23" hash="2b1da735d05f" blob="da67a1b04df3" */}
+每张卡（含根卡）的正文也在盘页上用轨迹卡集合渲染好，按卡身份交给盘；点节点在盘右侧栏里看这张卡，
+栏里指向别的卡的链接也在栏里切换，地址栏记着 `?card=<卡身份>`，Ctrl/Cmd+点才开卡页：
+
+{/* ref file="src/app/(trajectory-disk)/trajectory/page.tsx" lines="13-23" hash="be1762864246" blob="8b9b202f561e" */}
+
+{/* ref file="src/app/(trajectory-disk)/trajectory/page.tsx" lines="38-38" hash="68a8bf23899d" blob="8b9b202f561e" */}
 
 `loadTrajectory` 只收绝对路径，然后读卡目录、建模。卡目录由页面用写死的目录名拼成绝对路径再传，Turbopack 才看得出只读这一个目录，不会把整个项目打进服务端产物：
 
 {/* ref file="../packages/docfirst-fumadocs/src/trajectory.ts" lines="19-27" hash="fd1c13685fd0" blob="877bcbfc11a5" */}
 
-盘上每张卡链到 `/trajectory/<卡身份>`。那是站里的 fumadocs 卡集合渲染的卡页：`cardSchema` 校验 frontmatter，
-`remarkTrajectoryLinks` 把正文里指向卡的链接改写成卡页地址：
+每张卡另有自己的卡页 `/trajectory/<卡身份>`，由站里的 fumadocs 卡集合渲染：`cardSchema` 校验 frontmatter，
+`remarkTrajectoryLinks` 把正文里指向卡的链接改写成卡页地址（侧栏靠这个前缀认出卡链接）：
 
 {/* has file="src/lib/source.ts" text="hrefBase: '/trajectory'" */}
 
@@ -82,7 +87,7 @@ description: content/trajectory/ 下的轨迹卡怎么被读出、校验、建�
 
 一是 `check`、`confirm`、`render` 遍历的文档不含 `trajectory/` 与 `future/`，卡上的记号不会被核对，也不会被确认：
 
-{/* ref file="../packages/docfirst-workflow/src/project/load.ts" lines="89-90" hash="e60f111d117a" blob="0186be908b77" */}
+{/* ref file="../packages/docfirst-workflow/src/project/load.ts" lines="91-92" hash="e60f111d117a" blob="9fa77c18d282" */}
 
 二是读卡目录时逐行查每张卡的正文，正式记号、以 `@@docfirst` 开头的一行（已经删掉的草稿写法）出现任何一种，都记成一条问题：
 

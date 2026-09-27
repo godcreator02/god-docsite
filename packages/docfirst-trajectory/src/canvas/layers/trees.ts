@@ -22,7 +22,7 @@ import {
   type TreeBox,
 } from "../../layout.ts";
 import { formOf } from "../../model.ts";
-import type { EdgeEl } from "../node-dom.ts";
+import type { BoxGradient, EdgeEl } from "../node-dom.ts";
 import { el, text } from "../node-dom.ts";
 import type { Theme } from "../theme.ts";
 import type { BuildCtx, FrameCtx, FramePos, StarLayer } from "./frame.ts";
@@ -33,8 +33,16 @@ interface BoxEl {
   node: SVGElement;
 }
 
+/** 扇环：多一支从外往内淡掉的领域色渐变。 */
+interface FillBoxEl extends BoxEl {
+  gradient: BoxGradient;
+}
+
+/** 树名的不透明度：用领域色，但比节点标签暗一档。 */
+const TREE_NAME_OPACITY = 0.7;
+
 export class TreesLayer implements StarLayer {
-  private boxEls: BoxEl[] = [];
+  private boxEls: FillBoxEl[] = [];
   private edgeEls: EdgeEl[] = [];
   private nameEls: BoxEl[] = [];
   /** 建构期注入的只读引用，buildNamesLayer()/rebake() 在下一轮数据重建前都有效
@@ -48,21 +56,21 @@ export class TreesLayer implements StarLayer {
     this.buildEdges();
   }
 
-  /** 扇环框：装箱地盘视觉化（内弧-径线-外弧-径线），内外相邻的两组不再误读成一条链。 */
+  /** 扇环：装箱地盘视觉化（内弧-径线-外弧-径线），不描边，填这棵树所属领域的颜色、
+   * 外弧处最亮往内淡到透明，像一束从外缘照进来的光。 */
   private buildBoxes(): void {
-    this.boxEls = this.ctx.layout.treeBoxes.map((box) => ({
-      box,
-      node: el(
-        "path",
-        { "stroke-width": 1, "vector-effect": "non-scaling-stroke" },
-        this.ctx.world,
-      ),
-    }));
+    this.boxEls = this.ctx.layout.treeBoxes.map((box) => {
+      const gradient = this.ctx.defs.boxGradient();
+      return {
+        box,
+        gradient,
+        node: el("path", { stroke: "none", fill: `url(#${gradient.id})` }, this.ctx.world),
+      };
+    });
   }
 
   /** 边（几何每帧重算；颜色由基座 recolor 刷）：两种边都画——转向卡跟源卡同树同扇环，
-   * 连线短程不穿盘；取代边细实线取旧卡领域色、转向边铜绿点线，都不带箭头
-   * （半径即时间，方向天然给定）。 */
+   * 连线短程不穿盘；细实线从旧卡到新卡由淡变亮，取代金黄、转向青。 */
   private buildEdges(): void {
     this.edgeEls = [];
     const layout = this.ctx.layout;
@@ -76,26 +84,25 @@ export class TreesLayer implements StarLayer {
       const sameDay =
         (layout.places.get(source.id) as CardPlace).rLin ===
         (layout.places.get(target.id) as CardPlace).rLin;
-      const isPivot = e.kind === "pivot";
-      /* 取代边实线、转向边点线；线宽与虚线段都走 non-scaling-stroke，屏幕像素恒定 */
-      const attrs: Record<string, string | number> = {
-        fill: "none",
-        "stroke-width": 1,
-        "vector-effect": "non-scaling-stroke",
-      };
-      if (isPivot) {
-        attrs["stroke-dasharray"] = "2 3";
-        attrs["stroke-linecap"] = "round";
-      }
-      const node = el(sameDay ? "path" : "line", attrs, this.ctx.world);
+      /* 线宽走 non-scaling-stroke，屏幕像素恒定 */
+      const node = el(
+        sameDay ? "path" : "line",
+        {
+          fill: "none",
+          "stroke-width": 1.4,
+          "stroke-linecap": "round",
+          "vector-effect": "non-scaling-stroke",
+        },
+        this.ctx.world,
+      );
       this.edgeEls.push({
         kind: sameDay ? "arc" : "line",
         source,
         target,
         node,
-        isPivot,
-        /* 转向线细一档、点线更疏，透明度给高半档才跟取代边一样看得见 */
-        baseOpacity: isPivot ? 0.5 : 0.45,
+        gradient: this.ctx.defs.edgeGradient(),
+        isPivot: e.kind === "pivot",
+        baseOpacity: 0.9,
       });
     };
     for (const t of trees) {
@@ -145,7 +152,8 @@ export class TreesLayer implements StarLayer {
   }
 
   /** 边：端点通则——起止于节点边缘外固定屏幕间隙（不扎进节点）；两种几何各按自己退距，
-   * 挨得太近的两颗按比例压缩退距，宁可留根短须也别整条丢掉。悬停一端的边提亮。 */
+   * 挨得太近的两颗按比例压缩退距，宁可留根短须也别整条丢掉。悬停一端的边提亮。
+   * 渐变两端每帧对准两张卡的中心（旧卡淡、新卡亮）。 */
   private placeEdges(f: FrameCtx): void {
     const { framePos, pxToWorld, hoveredCard } = f;
     const layout = this.ctx.layout;
@@ -195,6 +203,11 @@ export class TreesLayer implements StarLayer {
           e.node.setAttribute("y2", String(b.y - uy * ib));
         }
       }
+      const g = e.gradient.gradient;
+      g.setAttribute("x1", String(a.x));
+      g.setAttribute("y1", String(a.y));
+      g.setAttribute("x2", String(b.x));
+      g.setAttribute("y2", String(b.y));
       const rLinA = (layout.places.get(e.source.id) as CardPlace).rLin;
       const rLinB = (layout.places.get(e.target.id) as CardPlace).rLin;
       const edgeMag = Math.max(layout.mag(rLinA), layout.mag(rLinB));
@@ -214,13 +227,16 @@ export class TreesLayer implements StarLayer {
     this.placeNames(f);
   }
 
-  /** 扇环框：弧半径走 displayRadius() 随鱼眼变形，径向两端各放 16 世界单位余量包住节点。 */
+  /** 扇环框：弧半径走 displayRadius() 随鱼眼变形，径向两端各放 16 世界单位余量包住节点；
+   * 渐变半径对准外弧、透明起点对准内弧，随扇环一起变。 */
   private placeBoxes(): void {
     const layout = this.ctx.layout;
     for (const b of this.boxEls) {
       const box = b.box;
       const r0 = Math.max(layout.innerR, layout.displayRadius(box.rMin) - 16);
       const r1 = layout.displayRadius(box.rMax) + 16;
+      b.gradient.gradient.setAttribute("r", String(r1));
+      b.gradient.inner.setAttribute("offset", String(r0 / r1));
       const large = box.th1 - box.th0 > 180 ? 1 : 0;
       const p0 = polar(box.th0, r0);
       const p1 = polar(box.th1, r0);
@@ -258,10 +274,18 @@ export class TreesLayer implements StarLayer {
     this.recolorBoxes(theme);
   }
 
+  /** 扇环与树名都用这棵树所属领域的颜色。 */
   private recolorBoxes(theme: Theme): void {
+    const colorOf = (box: TreeBox): string => theme.domain[box.domain] ?? theme.noDomain;
     for (const b of this.boxEls) {
-      b.node.setAttribute("stroke", theme.boxStroke);
-      b.node.setAttribute("fill", theme.boxFill);
+      const col = colorOf(b.box);
+      b.gradient.inner.setAttribute("stop-color", col);
+      b.gradient.outer.setAttribute("stop-color", col);
+      b.gradient.outer.setAttribute("stop-opacity", String(theme.boxAlpha));
+    }
+    for (const n of this.nameEls) {
+      n.node.setAttribute("fill", colorOf(n.box));
+      n.node.setAttribute("fill-opacity", String(TREE_NAME_OPACITY));
     }
   }
 }

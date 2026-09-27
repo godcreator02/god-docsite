@@ -197,7 +197,10 @@ describe('结构模板', () => {
     const disk = renderedText('src/app/(trajectory-disk)/trajectory/page.tsx')
     expect(disk).toMatch(/^import \{ loadTrajectory, StarDisk \} from '@godcreator\/docfirst-fumadocs\/trajectory';$/m)
     expect(disk, '卡目录用写死的目录名拼成绝对路径，Turbopack 才不把整个项目打进服务端产物').toMatch(/loadTrajectory\(join\(process\.cwd\(\), 'content', 'trajectory'\)\)/)
-    expect(disk, 'StarDisk 的 hrefBase 与轨迹卡 loader 的 baseUrl 是同一个前缀').toMatch(/<StarDisk data=\{data\} hrefBase="\/trajectory" \/>/)
+    expect(disk, 'StarDisk 的 hrefBase 与轨迹卡 loader 的 baseUrl 是同一个前缀，正文随 bodies 传进去').toMatch(/<StarDisk data=\{data\} hrefBase="\/trajectory" bodies=\{bodies\} \/>/)
+    expect(disk, '每张卡的正文在盘页上用轨迹卡集合渲染好，键是卡身份（跟卡页地址同一个）').toMatch(/sourceTrajectory\.getPages\(\)/)
+    expect(disk).toMatch(/page\.slugs\.join\('\/'\)/)
+    expect(disk, '整页挂 star-surface，顶栏跟盘同一块底色').toMatch(/className="trajectory-page star-surface"/)
 
     const cards = renderedText('src/app/(trajectory-cards)/trajectory/[...slug]/page.tsx')
     expect(cards, '空 slug 归整页盘，卡页不出').toMatch(/generateParams\(\)\.filter\(\(p\) => p\.slug\.length > 0\)/)

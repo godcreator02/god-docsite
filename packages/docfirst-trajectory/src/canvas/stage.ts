@@ -103,6 +103,8 @@ export class StarStage {
 
   /* ---------- 交互态 ---------- */
   private hoveredCard: Card | null = null;
+  /** 侧栏正在看的卡的身份 */
+  private selectedId: string | null = null;
   private showAllLabels = false;
   /** 三维筛选态：图例点选（形态 / 领域）+ 搜索串 */
   private filterSel: FilterSel = buildFilter();
@@ -322,6 +324,12 @@ export class StarStage {
     if (this.svg) this.repaint();
   }
 
+  /** 侧栏正在看的卡：盘上给它加选中标记、标签常显；null = 侧栏关了。身份不在盘上就没有节点可标。 */
+  setSelected(id: string | null): void {
+    this.selectedId = id;
+    this.place();
+  }
+
   /** 全部标签开关：无视 LOD 与仲裁全显。 */
   setShowAllLabels(on: boolean): void {
     this.showAllLabels = on;
@@ -338,7 +346,6 @@ export class StarStage {
       this.theme,
       this.filterSel,
       this.searchHit,
-      this.defs,
     );
     this.hubLayer.recolor(this.theme);
     this.treesLayer.recolor(this.theme);
@@ -560,6 +567,7 @@ export class StarStage {
       framePos: this.framePos,
       dodge: this.dodge,
       hoveredCard: this.hoveredCard,
+      selectedId: this.selectedId,
       showAllLabels: this.showAllLabels,
       theme: this.theme,
       labelClaims,

@@ -9,8 +9,8 @@
  * `renderToStaticMarkup` 那一趟画布区就是空的。日期竖轨由 DateRail 在壳渲的 `.star-rail` 容器里自建 DOM。
  *
  * 交互范式：滚轮 = 空间缩放指哪缩哪 + 拖拽漫游；ctrl + 滚轮 = 时间平移；竖轨收窄窗即进透镜；
- * 回到原点两段式（相机动过先归相机、再按归窗；Esc 同链）；盘心单击开根卡页、双击回全景；
- * 点节点在新标签页开卡页。
+ * 回到原点两段式（相机动过先归相机、再按归窗；Esc 同链）；盘心单击开根卡、双击回全景；
+ * 点节点在右侧栏看卡（正文由盘页在服务端渲染好传进来，不跳页），Ctrl/Cmd+点在新标签页开卡页。
  */
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -31,15 +31,42 @@ import type { Card } from "./types.ts";
 import type { RouteCard, Trajectory } from "./index.ts";
 
 /** StarDisk 的 props：data 是 buildTrajectory 的产物，hrefBase 是卡页路由前缀
- * （节点链接 = `${hrefBase}/${encodeURIComponent(id)}`）——不收函数，服务端组件传不了函数
- * 给客户端组件。容器吃满父元素（高度由页面给），滚轮直接作用于盘。顶栏不归组件画。 */
+ * （卡页地址 = `${hrefBase}/${encodeURIComponent(id)}`），bodies 是每张卡（含根卡）渲染好的正文、
+ * 键是卡身份——不收函数，服务端组件传不了函数给客户端组件。
+ * 容器吃满父元素（高度由页面给），滚轮直接作用于盘。顶栏不归组件画。 */
 export interface StarDiskProps {
   data: Trajectory;
   hrefBase: string;
+  bodies: Record<string, ReactNode>;
 }
 
 /** localStorage 里手感参数的键。 */
 const SETTINGS_KEY = "live-doc-trajectory.settings";
+/** localStorage 里侧栏宽度的键。 */
+const SIDE_WIDTH_KEY = "live-doc-trajectory.side-width";
+/** 侧栏默认宽与可拖范围（px）；上限另受整盘宽度的七成约束。 */
+const SIDE_WIDTH_DEFAULT = 460;
+const SIDE_WIDTH_MIN = 320;
+/** 地址栏里记当前打开的卡的查询参数名。 */
+const CARD_PARAM = "card";
+
+function loadSideWidth(): number {
+  if (typeof window === "undefined") return SIDE_WIDTH_DEFAULT;
+  try {
+    const n = Number(window.localStorage.getItem(SIDE_WIDTH_KEY));
+    return Number.isFinite(n) && n >= SIDE_WIDTH_MIN ? n : SIDE_WIDTH_DEFAULT;
+  } catch {
+    return SIDE_WIDTH_DEFAULT;
+  }
+}
+
+/** 把当前打开的卡写进地址栏（null = 去掉参数）；只换地址不进历史，不触发路由。 */
+function writeCardParam(id: string | null): void {
+  const url = new URL(window.location.href);
+  if (id === null) url.searchParams.delete(CARD_PARAM);
+  else url.searchParams.set(CARD_PARAM, id);
+  window.history.replaceState(window.history.state, "", url);
+}
 
 function loadSettings(): TrajectorySettings {
   if (typeof window === "undefined") return DEFAULT_SETTINGS;
@@ -70,6 +97,7 @@ const ICON_PATHS: Record<string, string> = {
   history: "M3 12a9 9 0 1 0 3-6.7 M3 4v5h5 M12 7v5l3 3",
   settings: "M4 6h10 M18 6h2 M4 12h4 M12 12h8 M4 18h12 M20 18h0 M14 4v4 M8 10v4 M16 16v4",
   help: "M12 2a10 10 0 1 0 0 20a10 10 0 0 0 0-20z M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.7.3-1 .9-1 1.7 M12 17h.01",
+  close: "M6 6l12 12 M18 6L6 18",
 };
 
 function Icon({ name }: { name: string }): ReactNode {
@@ -105,7 +133,8 @@ interface Tip {
   meta: string;
 }
 
-export function StarDisk({ data, hrefBase }: StarDiskProps): ReactNode {
+export function StarDisk({ data, hrefBase, bodies }: StarDiskProps): ReactNode {
+  const rootRef = useRef<HTMLDivElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
   const canvasRef = useRef<HTMLDivElement | null>(null);
   const railRef = useRef<HTMLDivElement | null>(null);
@@ -124,6 +153,9 @@ export function StarDisk({ data, hrefBase }: StarDiskProps): ReactNode {
   const [hits, setHits] = useState<{ hit: number; total: number }>({ hit: 0, total: 0 });
   const [tip, setTip] = useState<Tip | null>(null);
   const [settings, setSettings] = useState<TrajectorySettings>(loadSettings);
+  /** 侧栏里正在看的卡；null = 侧栏关着 */
+  const [openId, setOpenId] = useState<string | null>(null);
+  const [sideWidth, setSideWidth] = useState(loadSideWidth);
 
   /* ---------- 数据联接：路由卡表（拿 type / milestones），运行期模型 ---------- */
   const routeById = useMemo(() => new Map(data.cards.map((c) => [c.id, c])), [data.cards]);
@@ -137,10 +169,24 @@ export function StarDisk({ data, hrefBase }: StarDiskProps): ReactNode {
   const themeName = dark ? "dark" : "light";
   const isEmpty = model.cards.length === 0;
 
+  /* ---------- 侧栏看卡：打开 / 关闭同步盘上的选中标记与地址栏 ---------- */
+  const openInSide = useCallback((id: string) => {
+    setOpenId(id);
+    stageRef.current?.setSelected(id);
+    writeCardParam(id);
+  }, []);
+  const closeSide = useCallback(() => {
+    setOpenId(null);
+    stageRef.current?.setSelected(null);
+    writeCardParam(null);
+  }, []);
+
   /* ---------- 舞台：挂载建一次，随组件存活；数据 / 主题 / 筛选各自经 effect 灌 ---------- */
   const hrefOf = useCallback((id: string) => `${hrefBase}/${encodeURIComponent(id)}`, [hrefBase]);
   const hrefOfRef = useRef(hrefOf);
   hrefOfRef.current = hrefOf;
+  const openInSideRef = useRef(openInSide);
+  openInSideRef.current = openInSide;
   const settingsRef = useRef(settings);
   settingsRef.current = settings;
   const modelRef = useRef(model);
@@ -154,9 +200,10 @@ export function StarDisk({ data, hrefBase }: StarDiskProps): ReactNode {
       {
         canvasEl,
         railEl,
-        /* 点节点 / 盘心：新标签页开卡页 */
-        openCard: (id) => {
-          window.open(hrefOfRef.current(id), "_blank", "noopener");
+        /* 点节点 / 盘心：侧栏看卡；Ctrl/Cmd+点在新标签页开卡页 */
+        openCard: (id, inNewTab) => {
+          if (inNewTab) window.open(hrefOfRef.current(id), "_blank", "noopener");
+          else openInSideRef.current(id);
         },
         onHover: (card: Card | null) => {
           if (card) {
@@ -185,6 +232,12 @@ export function StarDisk({ data, hrefBase }: StarDiskProps): ReactNode {
     setTip(null);
   }, [model, milestones, typeOf]);
 
+  /* 首开：地址栏带着 ?card= 就直接在侧栏打开那张（链接发给别人、刷新都停在同一张卡） */
+  useEffect(() => {
+    const id = new URLSearchParams(window.location.search).get(CARD_PARAM);
+    if (id) openInSide(id);
+  }, [openInSide]);
+
   /* ---------- 主题：挂载时读一次 html.dark，之后靠 MutationObserver 跟随 ---------- */
   useEffect(() => {
     const root = document.documentElement;
@@ -210,7 +263,7 @@ export function StarDisk({ data, hrefBase }: StarDiskProps): ReactNode {
     stageRef.current?.setShowAllLabels(showAllLabels);
   }, [showAllLabels]);
 
-  /* ---------- Esc 分层：先收浮层，再走两段式回原点 ---------- */
+  /* ---------- Esc 分层：先收浮层，再关侧栏，最后走两段式回原点 ---------- */
   useEffect(() => {
     const onKey = (e: KeyboardEvent): void => {
       if (e.key !== "Escape" || e.defaultPrevented) return;
@@ -218,11 +271,54 @@ export function StarDisk({ data, hrefBase }: StarDiskProps): ReactNode {
         setPopOpen(null);
         return;
       }
+      if (openId !== null) {
+        closeSide();
+        return;
+      }
       stageRef.current?.goHome();
     };
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
-  }, [popOpen]);
+  }, [popOpen, openId, closeSide]);
+
+  /* ---------- 侧栏宽度：拖分割条改，松手记进 localStorage ---------- */
+  const onSplitPointerDown = (e: ReactPointerEvent<HTMLDivElement>): void => {
+    const root = rootRef.current;
+    if (!root) return;
+    e.preventDefault();
+    const bar = e.currentTarget;
+    bar.setPointerCapture(e.pointerId);
+    const right = root.getBoundingClientRect().right;
+    const max = root.getBoundingClientRect().width * 0.7;
+    let width = sideWidth;
+    const move = (ev: PointerEvent): void => {
+      width = Math.round(Math.min(max, Math.max(SIDE_WIDTH_MIN, right - ev.clientX)));
+      setSideWidth(width);
+    };
+    const up = (): void => {
+      bar.removeEventListener("pointermove", move);
+      bar.removeEventListener("pointerup", up);
+      try {
+        window.localStorage.setItem(SIDE_WIDTH_KEY, String(width));
+      } catch {
+        /* 存不了就算了：宽度只是便利 */
+      }
+    };
+    bar.addEventListener("pointermove", move);
+    bar.addEventListener("pointerup", up);
+  };
+
+  /* ---------- 侧栏正文里指向别的卡的链接：在侧栏里切换，不跳页（Ctrl/Cmd+点照常） ---------- */
+  const onSideBodyClick = (e: ReactMouseEvent<HTMLDivElement>): void => {
+    if (e.ctrlKey || e.metaKey || e.button !== 0) return;
+    const a = e.target instanceof Element ? e.target.closest("a") : null;
+    if (!a) return;
+    const url = new URL(a.href, window.location.href);
+    const prefix = `${hrefBase}/`;
+    if (url.origin !== window.location.origin || !url.pathname.startsWith(prefix)) return;
+    e.preventDefault();
+    openInSide(decodeURIComponent(url.pathname.slice(prefix.length)));
+  };
 
   /* ---------- 设置滑杆：语义值进状态与 localStorage，舞台按项目表落到布局 ---------- */
   const applySetting = useCallback((key: keyof TrajectorySettings, value: number) => {
@@ -276,14 +372,15 @@ export function StarDisk({ data, hrefBase }: StarDiskProps): ReactNode {
   };
 
   const home = HOME_FACE[homeState];
+  const side = openId === null ? null : sideCardOf(openId);
 
   return (
     <div
-      ref={containerRef}
+      ref={rootRef}
       className={`star-disk${dark ? " star-dark" : ""}`}
-      style={{ position: "relative", width: "100%", height: "100%", overflow: "hidden" }}
-      onPointerMove={onPointerMove}
+      style={{ position: "relative", width: "100%", height: "100%", overflow: "hidden", display: "flex" }}
     >
+      <div ref={containerRef} className="star-main" onPointerMove={onPointerMove}>
       {/* 画布区：空 div 交给画布层，svg 由舞台建；竖轨容器在它左缘 */}
       <div ref={canvasRef} className="star-canvas" aria-label={model.root?.label ?? "星轨盘"} />
       <div ref={railRef} className="star-rail" />
@@ -414,6 +511,56 @@ export function StarDisk({ data, hrefBase }: StarDiskProps): ReactNode {
 
       {/* 没有上盘卡：盘心与环照画，正中叠一句提示 */}
       {isEmpty ? <div className="star-empty">这张盘还没有记录</div> : null}
+      </div>
+
+      {/* 侧栏：盘让出宽度（画布尺寸观察器自己重新适配），分割条可拖 */}
+      {openId !== null && side !== null ? (
+        <>
+          <div className="star-split" title="拖动调整侧栏宽度" onPointerDown={onSplitPointerDown} />
+          {/* 按卡身份重建：换一张卡时滚动回到顶部 */}
+          <aside key={openId} className="star-side" style={{ width: sideWidth }}>
+            <header className="star-side-head">
+              <div className="star-side-title">{side.title}</div>
+              <div className="star-side-actions">
+                <a href={hrefOf(openId)} target="_blank" rel="noopener">
+                  在新标签页打开
+                </a>
+                <button type="button" className="star-mbtn" title="关闭（Esc）" onClick={closeSide}>
+                  <Icon name="close" />
+                </button>
+              </div>
+              {side.meta ? <div className="star-side-meta">{side.meta}</div> : null}
+            </header>
+            <div className="star-side-body" onClick={onSideBodyClick}>
+              {side.body}
+            </div>
+          </aside>
+        </>
+      ) : null}
     </div>
   );
+
+  /** 侧栏要显示的一张卡：标题、元信息行、正文。卡不在这张盘上（地址栏或链接给了不认识的身份）
+   * 就在侧栏里如实说明；在盘上却没传正文是盘页的错，直接抛出。 */
+  function sideCardOf(id: string): { title: string; meta: string; body: ReactNode } {
+    const card = model.byId[id];
+    const root = model.root?.id === id ? model.root : null;
+    if (!card && !root) {
+      return { title: id, meta: "", body: <p className="star-side-missing">这张盘上没有身份为「{id}」的卡。</p> };
+    }
+    if (!(id in bodies)) {
+      throw new Error(`卡「${id}」没有正文：盘页传给 StarDisk 的 bodies 里缺这一张`);
+    }
+    const type = routeById.get(id)?.type;
+    const status = root
+      ? "根卡"
+      : model.supersededIds.has(id)
+        ? "被取代"
+        : model.isolated.some((c) => c.id === id)
+          ? "在立 · 孤星"
+          : "在立";
+    const src = (card ?? root) as { label: string; bornAt: string };
+    const meta = [src.bornAt.slice(0, 10), type, card?.domain, status].filter(Boolean).join(" · ");
+    return { title: src.label, meta, body: bodies[id] };
+  }
 }

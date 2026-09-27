@@ -41,7 +41,7 @@ export const DEFAULT_SETTINGS: TrajectorySettings = {
   gapWide: 53,
   symbolPx: 0.65,
   spreadMult: 1,
-  tierMult: 1.3,
+  tierMult: 1,
   ease: 0.16,
 };
 

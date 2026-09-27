@@ -23,13 +23,18 @@ function emptyFrame(): FrameState {
   return { view: { k: 1, tx: 0, ty: 0 }, vT: null, hv: new Map(), hover: null, raf: null };
 }
 
-test("StarDisk：壳结构齐——吃满父元素的容器、画布空 div、竖轨容器、工具条与三态 home 钮", async () => {
+test("StarDisk：壳结构齐——吃满父元素的容器、盘区、画布空 div、竖轨容器、工具条与三态 home 钮，侧栏初始关着", async () => {
   const data = buildTrajectory(await scanCardDir("tests/fixtures/trajectory"));
   assert.equal(data.model.root?.id, "tfix-测试项目根卡", "fixture 里唯一那张根卡认主");
 
-  const html = renderToStaticMarkup(createElement(StarDisk, { data, hrefBase: "/trajectory" }));
+  const html = renderToStaticMarkup(createElement(StarDisk, { data, hrefBase: "/trajectory", bodies: {} }));
 
-  assert.match(html, /^<div class="star-disk" style="position:relative;width:100%;height:100%;overflow:hidden"/, "容器吃满父元素");
+  assert.match(
+    html,
+    /^<div class="star-disk" style="position:relative;width:100%;height:100%;overflow:hidden;display:flex"><div class="star-main">/,
+    "容器吃满父元素，盘区在里面横排（侧栏打开时排在它右边）",
+  );
+  assert.doesNotMatch(html, /class="star-side"/, "没点卡时侧栏不在");
   assert.match(html, /<div class="star-canvas" aria-label="测试项目"><\/div>/, "画布区是空 div，svg 由画布层挂载后建");
   assert.doesNotMatch(html, /<svg[^>]*class="star-svg"/, "静态渲染那一趟不该有画布 svg");
   assert.match(html, /class="star-rail"/, "竖轨容器在");
@@ -44,7 +49,7 @@ test("StarDisk：壳结构齐——吃满父元素的容器、画布空 div、�
 test("StarDisk：没有上盘卡时照旧显示「这张盘还没有记录」", () => {
   const data = buildTrajectory(scanCards([{ name: "pj01.md", text: renderCard(root("pj01", "2026-01-01T08:00")), mtime: 0 }]));
   assert.equal(data.model.cards.length, 0);
-  const html = renderToStaticMarkup(createElement(StarDisk, { data, hrefBase: "/trajectory" }));
+  const html = renderToStaticMarkup(createElement(StarDisk, { data, hrefBase: "/trajectory", bodies: {} }));
   assert.match(html, /<div class="star-empty">这张盘还没有记录<\/div>/);
 });
 

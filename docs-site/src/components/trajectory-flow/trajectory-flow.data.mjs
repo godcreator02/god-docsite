@@ -233,16 +233,18 @@ export const layout = {
 };
 
 /** 站的整页路由 page.tsx 里接线的几行（原文，start 是行号） */
-/* ref file="src/app/(trajectory-disk)/trajectory/page.tsx" hash="7785977f2762" blob="da67a1b04df3" */
+/* ref file="src/app/(trajectory-disk)/trajectory/page.tsx" hash="baacaed02f18" blob="8b9b202f561e" */
 export const pageLines = [
-  { start: 4, lines: ["import { loadTrajectory, StarDisk } from '@godcreator/docfirst-fumadocs/trajectory';"] },
-  { start: 8, lines: ["  const data = await loadTrajectory(join(process.cwd(), 'content', 'trajectory'));"] },
-  { start: 23, lines: ['        <StarDisk data={data} hrefBase="/trajectory" />'] },
+  { start: 5, lines: ["import { loadTrajectory, StarDisk } from '@godcreator/docfirst-fumadocs/trajectory';"] },
+  { start: 12, lines: ["  const data = await loadTrajectory(join(process.cwd(), 'content', 'trajectory'));"] },
+  { start: 14, lines: ['    sourceTrajectory.getPages().map((page) => {'] },
+  { start: 38, lines: ['        <StarDisk data={data} hrefBase="/trajectory" bodies={bodies} />'] },
 ];
 
 /** 在站上点什么、去哪 */
 export const clicks = [
-  { what: '点盘上的一张卡', then: '在新标签页打开 /trajectory/<卡身份>' },
+  { what: '点盘上的一张卡', then: '盘右侧栏显示这张卡，地址栏变成 /trajectory?card=<卡身份>' },
+  { what: 'Ctrl/Cmd+点盘上的一张卡', then: '在新标签页打开卡页 /trajectory/<卡身份>' },
   { what: '点卡页上的「← 回到盘」', then: '回到 /trajectory' },
 ];
 
@@ -339,8 +341,9 @@ export const steps = [
     title: '站上渲染：/trajectory 整页',
     text:
       '站的整页路由 src/app/(trajectory-disk)/trajectory/page.tsx 从 docfirst-fumadocs/trajectory 取 loadTrajectory（就是 scanCardDir 加 buildTrajectory）与 StarDisk，' +
-      '在服务端读卡建模，把结果交给客户端组件 StarDisk（星轨盘组件，hrefBase="/trajectory"），盘占满顶栏以下的整个视口；样式由路由组的 layout 引入 docfirst-fumadocs/trajectory.css。' +
-      '盘上的卡链到 /trajectory/<卡身份>，那是 fumadocs 卡集合（cardSchema 做 schema、remarkTrajectoryLinks 改写正文链接）渲染的卡页。顶栏的「报病」数是 sick 里的文件数。',
+      '在服务端读卡建模，同时用 fumadocs 卡集合（cardSchema 做 schema、remarkTrajectoryLinks 改写正文链接）把每张卡的正文渲染好，' +
+      '一起交给客户端组件 StarDisk（星轨盘组件，hrefBase="/trajectory"）；盘占满顶栏以下的整个视口，点节点在盘右侧栏里看卡，不跳页。' +
+      '样式由路由组的 layout 引入 docfirst-fumadocs/trajectory.css。每张卡另有卡页 /trajectory/<卡身份>。顶栏的「报病」数是 sick 里的文件数。',
   },
 ];
 

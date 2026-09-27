@@ -1,17 +1,17 @@
-/* 星图 DOM 构件——SVG 工具 / 节点视觉词汇表 / defs 工厂（珠光渐变与羽化滤镜）/
+/* 星图 DOM 构件——SVG 工具 / 节点视觉词汇表 / defs 工厂（箭头与羽化滤镜）/
  * 节点工厂 / 着色 / 筛选判定。不持视图状态。
  *
- * 形态词汇表（节点珠光那版）：
+ * 形态词汇表（照 trail 星盘）：
  * - 颜色只编码领域——被取代的卡用领域色混灰淡出，不许整成中性灰；
- * - 在立卡填径向渐变（中心向白混 22%，焦点偏左上），外圈一圈底色描边把密集处缝开；
+ * - 实心节点平涂领域色，外圈一道细描边（nodeStroke）把密集处分开；
+ * - 所有卡一样大；在立卡外套一圈同色细环（◉），再往外一圈：实线 = 结论（主干末端那张在立卡）、
+ *   虚线 = 孤星（两者不会同时成立）；被取代的卡没有环、颜色混灰更重；
  * - 形状编码卡的 `type`：抉择实心圆、证据三角、推演菱形、参照方形、缺省实心圆，
- *   快照是唯一的空心方（底色缝垫在领域色边下面）；
- * - 被取代：实心无渐变、半径小一档、领域色混灰；孤星不套外环（没有专属形态）；
- * - 连线取旧卡领域色 = 取代、铜绿点线 = 转向，都不带箭头（半径即时间，方向天然给定）。
+ *   快照是唯一的空心方；两圈环跟着同一个形状；
+ * - 连线细实线，金黄 = 取代、青 = 转向，从旧卡到新卡由淡变亮（方向靠渐变读，不画箭头）。
  * 被取代从 supersedes 链读（取代出边），不落字段。
  *
- * defs 序号 / 筛选态一律实例持有，不走模块级单例。
- * 整搬自 Obsidian 版 render/node-dom.ts。 */
+ * defs 序号 / 筛选态一律实例持有，不走模块级单例。 */
 
 import { NODE_RADIUS } from "../layout.ts";
 import type { Card, Tree } from "../types.ts";
@@ -82,22 +82,28 @@ export function isConclusion(form: NodeForm, isTip: boolean): boolean {
   return form === "alive" && isTip;
 }
 
-/** 标签分级口径：在立且非孤星的卡全景即显（eff>0.5），孤星与被取代进透镜才显（eff>1.8）。 */
-export function isPanoramaLabel(form: NodeForm, isolated: boolean): boolean {
-  return form === "alive" && !isolated;
+/** 标签分级口径：在立的卡全景即显（eff>0.5），被取代的进透镜才显（eff>1.8）。 */
+export function isPanoramaLabel(form: NodeForm): boolean {
+  return form === "alive";
 }
 
-/** 颜色只编码领域：被取代不整个变灰，领域色混灰保双语义（淡出）。 */
+/** 被取代卡的领域色混灰比例：跟在立卡一样大，只靠没有环和这层灰分开，灰得要看得出来。 */
+const SUPERSEDED_GRAY = 0.6;
+
+/** 被取代卡的颜色：领域色混灰，不整个变灰，保住领域这层意思。 */
+export function supersededColor(domainColor: string, theme: Theme): string {
+  return mix(domainColor, theme.deadMix, SUPERSEDED_GRAY);
+}
+
+/** 颜色只编码领域：被取代的卡淡出成混灰的领域色。 */
 export function formColor(form: NodeForm, c: Card, theme: Theme): string {
   const base = theme.domain[c.domain] ?? theme.noDomain;
-  if (form === "superseded") return mix(base, theme.deadMix, 0.4);
-  return base;
+  return form === "superseded" ? supersededColor(base, theme) : base;
 }
 
 /* ---------- 形状表：卡的 type → 符号几何 ----------
- * 实心一组（抉择 / 证据 / 推演 / 参照 / 缺省）填领域色（在立吃珠光渐变）、外圈底色缝；
- * 快照是唯一的空心，底色缝垫在领域色边下面。同一张表出大图节点、图例符号两种形态，
- * 几何只写一处。 */
+ * 实心一组（抉择 / 证据 / 推演 / 参照 / 缺省）平涂领域色、外圈细描边；快照是唯一的空心。
+ * 同一张表出大图节点、节点外的两圈环、图例符号三种形态，几何只写一处。 */
 
 /** 缺省形态（type 缺失或不在表里）的键。 */
 export const DEFAULT_SHAPE = "__default__";
@@ -155,24 +161,57 @@ export function shapeGeometry(type: string | null | undefined, r: number): Shape
   }
 }
 
-/** 图例用的符号 markup：与大图节点同一张几何表，颜色由调用方给
- * （`fill` 可以是渐变引用 `url(#…)`，图例自带一份 defs）。 */
+/* 节点各部分的尺寸（节点局部单位，随符号整组缩放 = 屏幕恒定） */
+/** 实心本体的细描边宽 */
+const CORE_W = 1.2;
+/** 空心本体（快照）的领域色边宽 */
+const HOLLOW_W = 2;
+/** 在立细环：离本体的距离与线宽 */
+const CROWN_GAP = 3;
+const CROWN_W = 1.3;
+/** 最外一圈（结论实线 / 孤星虚线）：离本体的距离与线宽 */
+const OUTER_GAP = 5.5;
+const OUTER_W = 1.4;
+
+/** 形状几何的属性串（图例 markup 用）。 */
+function attrString(g: ShapeGeometry): string {
+  return Object.entries(g.attrs)
+    .map(([k, v]) => `${k}="${v}"`)
+    .join(" ");
+}
+
+/** 最外一圈的两种画法：结论实线、孤星虚线。 */
+export type OuterRing = "conclusion" | "isolated" | null;
+
+/** 图例用的符号 markup：与大图节点同一张几何表与同一套画法，颜色由调用方给。
+ * r 是图例里的半径，环距与线宽按 r 与节点半径之比同比缩；
+ * crown = 外套同色细环（在立），outer = 最外一圈（结论实线 / 孤星虚线）。 */
 export function shapeMarkup(
   type: string | null | undefined,
   r: number,
   color: string,
-  seam?: string,
+  outline: string,
+  opts: { crown?: boolean; outer?: OuterRing } = {},
 ): string {
+  const k = r / NODE_RADIUS.alive;
   const g = shapeGeometry(type, r);
-  const attrs = Object.entries(g.attrs)
-    .map(([k, v]) => `${k}="${v}"`)
-    .join(" ");
-  const paint = g.hollow ? `fill="none" stroke="${color}" stroke-width="1.4"` : `fill="${color}"`;
-  const ring = seam && !g.hollow ? ` stroke="${seam}" stroke-width="1.1"` : "";
-  return `<${g.tag} ${attrs} ${paint}${ring}/>`;
+  const ring = (gap: number, extra: string): string =>
+    `<${g.tag} ${attrString(shapeGeometry(type, r + gap * k))} fill="none" stroke="${color}" ${extra}/>`;
+  const paint = g.hollow
+    ? `fill="none" stroke="${color}" stroke-width="${HOLLOW_W * k}"`
+    : `fill="${color}" stroke="${outline}" stroke-width="${CORE_W * k}"`;
+  const outerAttrs =
+    opts.outer === "isolated"
+      ? `stroke-width="${OUTER_W * k}" stroke-dasharray="${3 * k} ${4 * k}" opacity="0.8"`
+      : `stroke-width="${OUTER_W * k}"`;
+  return (
+    (opts.outer ? ring(OUTER_GAP, outerAttrs) : "") +
+    (opts.crown ? ring(CROWN_GAP, `stroke-width="${CROWN_W * k}"`) : "") +
+    `<${g.tag} ${attrString(g)} ${paint}/>`
+  );
 }
 
-/* ---------- defs 工厂：珠光渐变 + 空窗雾带羽化滤镜 ---------- */
+/* ---------- defs 工厂：连线与扇环的渐变 + 空窗雾带羽化滤镜 ---------- */
 
 /** 工厂实例序号：进 defs id 当前缀，同一页面里的几个工厂不撞 id。 */
 let factorySeq = 0;
@@ -182,8 +221,6 @@ export class DefsFactory {
   private readonly defs: SVGElement;
   private readonly prefix: string;
   private seq = 0;
-  /** 珠光渐变按颜色去重：一个领域一支，切主题时新色现建（两套色板共十来支，有界）。 */
-  private readonly pearls = new Map<string, string>();
 
   constructor(parent: Element) {
     this.defs = el("defs", {}, parent);
@@ -199,33 +236,43 @@ export class DefsFactory {
     return id;
   }
 
-  /** 珠光渐变：中心 = 领域色向白混 22%、边缘 = 领域色本色、焦点偏左上，
-   * 返回可直接填进 `fill` 的 `url(#…)`。渐变坐标走对象包围盒，同一支给全部尺寸复用。 */
-  pearl(color: string): string {
-    const hit = this.pearls.get(color);
-    if (hit) return hit;
-    const id = `${this.prefix}-pl-${this.seq++}`;
-    const g = el(
-      "radialGradient",
-      { id, cx: 0.5, cy: 0.5, r: 0.5, fx: 0.4, fy: 0.38 },
-      this.defs,
-    );
-    el("stop", { offset: 0, "stop-color": mix(color, "#ffffff", 0.22) }, g);
-    el("stop", { offset: 1, "stop-color": color }, g);
-    const url = `url(#${id})`;
-    this.pearls.set(color, url);
-    return url;
+  /** 一条边专属的线性渐变（世界坐标）：起点每帧对准旧卡、终点对准新卡，颜色由着色时改两个 stop。 */
+  edgeGradient(): EdgeGradient {
+    const id = `${this.prefix}-eg-${this.seq++}`;
+    const gradient = el("linearGradient", { id, gradientUnits: "userSpaceOnUse" }, this.defs);
+    const from = el("stop", { offset: 0 }, gradient);
+    const to = el("stop", { offset: 1 }, gradient);
+    return { id, gradient, from, to };
+  }
+
+  /** 一个扇环专属的径向渐变（世界坐标、圆心在盘心）：外弧处最亮、内弧处透明，
+   * 半径与透明起点每帧跟着扇环的显示半径改，颜色由着色时改两个 stop。 */
+  boxGradient(): BoxGradient {
+    const id = `${this.prefix}-bg-${this.seq++}`;
+    const gradient = el("radialGradient", { id, gradientUnits: "userSpaceOnUse", cx: 0, cy: 0 }, this.defs);
+    const inner = el("stop", { offset: 0, "stop-opacity": 0 }, gradient);
+    const outer = el("stop", { offset: 1 }, gradient);
+    return { id, gradient, inner, outer };
   }
 }
 
+/** 边的渐变句柄：gradient 每帧改 x1/y1/x2/y2，from/to 着色时改颜色。 */
+export interface EdgeGradient {
+  id: string;
+  gradient: SVGElement;
+  from: SVGElement;
+  to: SVGElement;
+}
+
+/** 扇环的渐变句柄：gradient 每帧改 r，inner 每帧改透明起点，inner/outer 着色时改颜色。 */
+export interface BoxGradient {
+  id: string;
+  gradient: SVGElement;
+  inner: SVGElement;
+  outer: SVGElement;
+}
+
 /* ---------- 节点工厂 ---------- */
-
-/** 底色缝宽（节点局部单位，随符号整组缩放 = 屏幕恒定）：在立 / 被取代两档，
- * 与「在立 5px 半径配 1.5px 缝、被取代配 1px」同比（局部半径基准 BASE_RADIUS 6）。 */
-const SEAM_W: Record<NodeForm, number> = { alive: 1.8, superseded: 1.2 };
-
-/** 空心形状（快照）的领域色边宽（局部单位）：底色缝垫在它下面，两层同几何。 */
-const HOLLOW_W = 1.6;
 
 /** 一个节点的全部句柄：g 与 label 游离建出、由壳挂载定层叠。 */
 export interface NodeEl {
@@ -233,17 +280,19 @@ export interface NodeEl {
   form: NodeForm;
   /** 形状键（type 归一后的值）：筛选按它分组 */
   shape: string;
-  /** 空心形态（快照）：着色只描边不填，底色缝走 seam */
+  /** 空心形态（快照）：着色只描边不填 */
   hollow: boolean;
-  /** 孤星（不属于任何树）：标签分级门槛用，形态上没有专属记号 */
+  /** 孤星（不属于任何树）：最外一圈是虚线 */
   isolated: boolean;
-  /** 主干末端（tree.spine 最后一张）：在立时吃结论放大档 */
+  /** 主干末端（tree.spine 最后一张）：在立时最外一圈是实线，吃结论放大档 */
   isTip: boolean;
   group: SVGElement;
   label: SVGElement;
-  /** 空心形状垫在底下的底色缝（实心形状的缝直接是 core 的描边） */
-  seam: SVGElement | null;
-  core: SVGElement | null;
+  /** 在立卡外套的同色细环；被取代的卡没有 */
+  crown: SVGElement | null;
+  /** 最外一圈：结论实线、孤星虚线，其余的卡没有 */
+  outerRing: SVGElement | null;
+  core: SVGElement;
   /** hover 放大补间量（静态版恒 0） */
   hoverTween: number;
 }
@@ -254,13 +303,20 @@ export interface EdgeEl {
   source: Card;
   target: Card;
   node: SVGElement;
+  /** 由旧卡到新卡由淡变亮的渐变 */
+  gradient: EdgeGradient;
   isPivot: boolean;
   baseOpacity: number;
 }
 
+/** 最外一圈画哪种：孤星一定在立、结论一定在树里，两者不会同时成立。 */
+export function outerRingOf(form: NodeForm, isolated: boolean, isTip: boolean): OuterRing {
+  if (isolated) return "isolated";
+  return isConclusion(form, isTip) ? "conclusion" : null;
+}
+
 /** 节点建构：只建 DOM 返回句柄，交互（click / hover）由布局壳注入。
- * type 定形状，实心形状的外圈底色缝直接是 core 的描边（recolor 给色），
- * 空心形状（快照）另垫一层同几何的缝。 */
+ * type 定形状；由外向里依次是最外一圈、在立细环、本体，两圈环都跟本体同一个形状。 */
 export function buildNode(
   card: Card,
   form: NodeForm,
@@ -273,17 +329,21 @@ export function buildNode(
   /* 命中区：符号外圈点得着 */
   el("circle", { cx: 0, cy: 0, r: r + 7, fill: "transparent" }, group);
   const geometry = shapeGeometry(type, r);
-  const seamW = SEAM_W[form];
-  const seam = geometry.hollow
-    ? el(
-        geometry.tag,
-        { ...geometry.attrs, fill: "none", "stroke-width": seamW + HOLLOW_W },
-        group,
-      )
-    : null;
+  const ring = (gap: number, attrs: Record<string, string | number>): SVGElement => {
+    const g = shapeGeometry(type, r + gap);
+    return el(g.tag, { ...g.attrs, fill: "none", ...attrs }, group);
+  };
+  const outer = outerRingOf(form, isolated, isTip);
+  const outerRing =
+    outer === "isolated"
+      ? ring(OUTER_GAP, { "stroke-width": OUTER_W, "stroke-dasharray": "3 4", opacity: 0.8 })
+      : outer === "conclusion"
+        ? ring(OUTER_GAP, { "stroke-width": OUTER_W })
+        : null;
+  const crown = form === "alive" ? ring(CROWN_GAP, { "stroke-width": CROWN_W }) : null;
   const core = el(
     geometry.tag,
-    { ...geometry.attrs, class: "core", "stroke-width": geometry.hollow ? HOLLOW_W : seamW },
+    { ...geometry.attrs, class: "core", "stroke-width": geometry.hollow ? HOLLOW_W : CORE_W },
     group,
   );
   el("title", {}, group).textContent =
@@ -299,7 +359,8 @@ export function buildNode(
     isTip,
     group,
     label,
-    seam,
+    crown,
+    outerRing,
     core,
     hoverTween: 0,
   };
@@ -335,17 +396,18 @@ export function muted(n: NodeEl, sel: FilterSel, searchHit: SearchHit): boolean 
 
 /* ---------- recolor：按当前主题 + 筛选态刷全部 JS 着色元素 ---------- */
 
+/** 连线渐变旧卡那端的不透明度：新卡那端全亮，方向靠这一段由淡变亮读出来。 */
+const EDGE_TAIL_OPACITY = 0.12;
+
 /** 建构 / 切主题 / 切筛选时各刷一遍，返回命中数（三维交集后未 mute 的卡数，命中统计用）。
- * edgeEls 元素带两端卡引用，两端任一被滤该边即灰；珠光渐变现取现建，走 defs 工厂去重。 */
+ * edgeEls 元素带两端卡引用，两端任一被滤该边即灰。 */
 export function recolor(
   nodeEls: NodeEl[],
   edgeEls: EdgeEl[],
   theme: Theme,
   sel: FilterSel,
   searchHit: SearchHit,
-  defs: DefsFactory,
 ): number {
-  /* 取代边取旧卡（source）的领域色，转向边铜绿——半径即时间，方向不用箭头也读得出 */
   const nodeById = new Map(nodeEls.map((n) => [n.card.id, n]));
   for (const e of edgeEls) {
     const nodeA = nodeById.get(e.source.id);
@@ -355,8 +417,11 @@ export function recolor(
         ? theme.mute
         : e.isPivot
           ? theme.pivot
-          : (theme.domain[e.source.domain] ?? theme.noDomain);
-    e.node.setAttribute("stroke", col);
+          : theme.supersede;
+    e.gradient.from.setAttribute("stop-color", col);
+    e.gradient.from.setAttribute("stop-opacity", String(EDGE_TAIL_OPACITY));
+    e.gradient.to.setAttribute("stop-color", col);
+    e.node.setAttribute("stroke", `url(#${e.gradient.id})`);
   }
   let hit = 0;
   for (const n of nodeEls) {
@@ -365,17 +430,14 @@ export function recolor(
     const col = isMuted ? theme.mute : formColor(n.form, n.card, theme);
     /* 悬停描边换领域色走 CSS（star.css 的 .nd:hover .core），色值经这个自定义属性递进去 */
     n.group.style.setProperty("--dc", col);
-    if (n.seam) n.seam.setAttribute("stroke", theme.bg);
-    if (n.core) {
-      if (n.hollow) {
-        /* 空心形态：只描领域色，不填（底色缝在 seam 那层） */
-        n.core.setAttribute("fill", "none");
-        n.core.setAttribute("stroke", col);
-      } else {
-        /* 在立实心：珠光渐变；被取代与 mute 态实色无渐变 */
-        n.core.setAttribute("fill", n.form === "alive" && !isMuted ? defs.pearl(col) : col);
-        n.core.setAttribute("stroke", theme.bg);
-      }
+    n.crown?.setAttribute("stroke", col);
+    n.outerRing?.setAttribute("stroke", col);
+    if (n.hollow) {
+      n.core.setAttribute("fill", "none");
+      n.core.setAttribute("stroke", col);
+    } else {
+      n.core.setAttribute("fill", col);
+      n.core.setAttribute("stroke", isMuted ? theme.mute : theme.nodeStroke);
     }
     n.label.setAttribute("fill", col);
   }

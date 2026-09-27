@@ -103,7 +103,8 @@ export class CardsLayer implements StarLayer {
 
   /** 节点：先摆卡、存显示坐标（framePos），边与树名随后用；显名标签投递仲裁池。 */
   private placeNodes(f: FrameCtx): void {
-    const { framePos, pxToWorld, kRatio, dodge, hoveredCard, showAllLabels, nodeLabelClaims } = f;
+    const { framePos, pxToWorld, kRatio, dodge, hoveredCard, selectedId, showAllLabels, nodeLabelClaims } =
+      f;
     const layout = this.ctx.layout;
     const strength = layout.strength;
     /* 盘心世界半径（与 placeHub 同一值）：贴盘心的内圈卡标签要向盘外锚 */
@@ -142,17 +143,20 @@ export class CardsLayer implements StarLayer {
       const lp = polar(ang, outward ? r2 + NODE_RADIUS[n.form] * symbolScale + 6 * pxToWorld : rIn);
       const ap = this.anchorLabel(n.label, ang, lp.x, lp.y, pxToWorld, outward);
       const eff = mag * kRatio;
-      /* 标签分级：在立且非孤星的卡全景即显（eff>0.5）——全景读格局；孤星与被取代进鱼眼才显
+      /* 标签分级：在立的卡全景即显（eff>0.5）——全景读格局；被取代的进鱼眼才显
        * （eff>1.8）——鱼眼读细节。「全部标签」开关无视分级与仲裁全显（人就是要看重叠） */
-      const labelGate = isPanoramaLabel(n.form, n.isolated) ? 0.5 : 1.8;
-      if (showAllLabels || hoveredCard === c || eff > labelGate) {
+      const labelGate = isPanoramaLabel(n.form) ? 0.5 : 1.8;
+      /* 侧栏正在看的卡：节点加选中标记，标签跟悬停一样常显、先占坑 */
+      const selected = selectedId === c.id;
+      n.group.setAttribute("class", selected ? "nd star-sel" : "nd");
+      if (showAllLabels || hoveredCard === c || selected || eff > labelGate) {
         if (showAllLabels) n.label.style.display = "";
         else
           nodeLabelClaims.push({
             x: ap.x / pxToWorld,
             y: ap.y / pxToWorld,
             anchor: ap.anchor,
-            force: hoveredCard === c,
+            force: hoveredCard === c || selected,
             label: n.label,
           });
       } else {

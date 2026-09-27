@@ -1,8 +1,7 @@
-/* 主题色板与配色工具——SVG 动态着色的唯一色源：两套亮暗底板（矿彩）+ 领域色分配、
- * 颜色插值工具。
- * 背景线与文字色走 CSS 变量、不经这里；节点底色缝也走变量（`bg`），亮暗由宿主自己翻。
- * 领域色一律实例持有（buildThemes 出新副本），不走模块级单例。
- * 整搬自 Obsidian 版 render/theme.ts，宿主变量换成 fumadocs 的 `--color-fd-*`。 */
+/* 主题色板与配色工具——SVG 动态着色的唯一色源：两套亮暗底板 + 领域色分配、颜色插值工具。
+ * 色值照 trail 星盘：深色是深蓝底上的亮色，盘不跟宿主站的灰底走。
+ * 背景线与文字色走 CSS 变量（star.css 里同样两套），不经这里。
+ * 领域色一律实例持有（buildThemes 出新副本），不走模块级单例。 */
 
 import { NO_DOMAIN } from "../model.ts";
 
@@ -13,21 +12,25 @@ export interface Theme {
   domain: Record<string, string>;
   /** 未分道中性色：混灰基色一档，不从领域色板出 */
   noDomain: string;
-  /** 转向边：铜绿，色相避开领域色板 */
+  /** 取代边与它的箭头：金黄 */
+  supersede: string;
+  /** 转向边与它的箭头：青，色相避开领域色板 */
   pivot: string;
-  /** 里程碑环与标签：泥金（与盘心描边同色） */
+  /** 里程碑环与标签：与取代边同一金黄 */
   milestone: string;
   /** 被取代卡的混灰基色 */
   deadMix: string;
-  /** 节点底色缝（外圈描边）：密集处靠这圈缝把彩点分开 */
-  bg: string;
+  /** 实心节点的细描边：密集处靠它把彩点分开 */
+  nodeStroke: string;
   hubFill: string;
-  /** 盘心描边与根节点：泥金 */
+  /** 盘心描边：要进 mix() 混端点警示色，只能是 hex */
   hubStroke: string;
+  /** 盘心正中的根节点 */
+  hubRoot: string;
   warn: string;
   mute: string;
-  boxStroke: string;
-  boxFill: string;
+  /** 扇环外弧处的领域色不透明度（往内淡到 0） */
+  boxAlpha: number;
 }
 
 export type ThemeName = "dark" | "light";
@@ -36,44 +39,41 @@ export type ThemeName = "dark" | "light";
 const THEMES: Record<ThemeName, Theme> = {
   dark: {
     domain: {},
-    noDomain: "#6B7280",
-    pivot: "#6FB8AE",
-    milestone: "#CBB27A",
-    deadMix: "#6B7280",
-    /* 底色缝与盘心填色走 CSS 变量、跟宿主主题（这两项不经 mix()，可以用 var()） */
-    bg: "var(--color-fd-background)",
-    hubFill: "var(--hub-fill)",
-    /* 泥金，与里程碑同色；要进 mix() 混端点警示色，留 hex */
-    hubStroke: "#CBB27A",
+    noDomain: "#8a8f9c",
+    supersede: "#f5b942",
+    pivot: "#48c9d8",
+    milestone: "#f5b942",
+    deadMix: "#6b7280",
+    nodeStroke: "rgba(255,255,255,0.75)",
+    hubFill: "#0b1020",
+    hubStroke: "#5a6a94",
+    hubRoot: "#e8eeff",
     warn: "#f5b942",
-    mute: "#454A52",
-    /* 扇环框边/底走 CSS 变量跟宿主主题（同 hubFill，不经 mix() 可以 var()） */
-    boxStroke: "var(--box-stroke)",
-    boxFill: "var(--box-fill)",
+    mute: "#3b4250",
+    boxAlpha: 0.16,
   },
   light: {
     domain: {},
-    noDomain: "#AAB1BF",
-    pivot: "#2F8C82",
-    /* 泥金在浅底上发虚，压深一档 */
-    milestone: "#8A7238",
-    deadMix: "#AAB1BF",
-    bg: "var(--color-fd-background)",
-    hubFill: "var(--hub-fill)",
-    hubStroke: "#8A7238",
+    noDomain: "#8d93a0",
+    supersede: "#c07f10",
+    pivot: "#0e7c8a",
+    milestone: "#c07f10",
+    deadMix: "#aab1bf",
+    nodeStroke: "rgba(22,30,52,0.55)",
+    hubFill: "#ffffff",
+    hubStroke: "#b6c0d8",
+    hubRoot: "#1a2238",
     warn: "#d97706",
-    mute: "#C8CCD3",
-    boxStroke: "var(--box-stroke)",
-    boxFill: "var(--box-fill)",
+    mute: "#c6ccd8",
+    boxAlpha: 0.14,
   },
 };
 
-/* 领域色板「矿彩」：石青 / 赭石 / 松绿 / 胭脂 / 藤紫，低饱和暖偏，
- * 色相避开连线占的两段（转向铜绿 175°、里程碑与盘心泥金 45°）。
- * 第六个领域出现先扩色板，不循环复用。 */
+/* 领域色板：色相两两拉开 45° 以上，并整体避开连线占的两段（取代金黄 40°、转向青 190°）。
+ * 第五色用黄绿而不是青——青跟绿只隔 20°、还跟转向线撞。第六个领域出现先扩色板，不循环复用。 */
 const DOMAIN_HUES: Record<ThemeName, string[]> = {
-  dark: ["#6C9BD2", "#D08A5B", "#8FBF8A", "#D07C93", "#A28BD0"],
-  light: ["#3F6FA8", "#A85F32", "#4F8A4A", "#A64B66", "#6E55A0"],
+  dark: ["#5ea8ff", "#c78bfa", "#4ade9e", "#ff7ab8", "#c3e35c"],
+  light: ["#2b6fd4", "#8b47d6", "#0e9e63", "#d6478a", "#6f8f14"],
 };
 
 /** 按领域出现序循环分配领域色，返回两套主题的新副本（不改模板单例）。
