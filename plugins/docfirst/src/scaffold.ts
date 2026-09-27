@@ -24,6 +24,8 @@ import { siteTitle } from './values.js'
  * - 删掉分享图路由 `src/app/og/`（它在请求时为中文标题从 Google 下载字形，本机网络下常失败），
  *   docs 页面的元数据不再指向它
  * - 删掉落地页 `src/app/(home)/`，`next.config.mjs` 里把 `/` 跳到 `/docs`
+ * - `.gitignore`：排除 `next dev` 在站根生成的 `AGENTS.md` 与 `CLAUDE.md`。它们是 Next 给 agent 的提示，
+ *   每次 `dev` 都重写；不排除的话 git 工作区一直不干净，`devkit.release` 拒发
  *
  * 目标目录必须还不存在，所以写文件途中失败时删掉整个目标目录就回到了原样。
  */
@@ -41,6 +43,7 @@ const FIX_HERE = '要跟着改 docfirst 插件的 src/scaffold.ts'
 
 /** 本机约定改过或新增的文件：传入的清单不能再替换、删除它们 */
 export const MANAGED_FILES: readonly string[] = [
+  '.gitignore',
   'package.json',
   'pnpm-workspace.yaml',
   'next.config.mjs',
@@ -57,6 +60,12 @@ export const REMOVED_FILES: readonly string[] = ['src/app/og/docs/[...slug]/rout
 const PNPM_WORKSPACE = `# esbuild（fumadocs-mdx 的依赖）要跑安装脚本才装得下平台二进制，pnpm 默认不跑、直接报错
 allowBuilds:
   esbuild: true
+`
+
+const IGNORE_NEXT_AGENT_FILES = `
+# next dev 在站根生成的 agent 提示，每次 dev 都重写
+/AGENTS.md
+/CLAUDE.md
 `
 
 const FONT_THEME = `
@@ -213,6 +222,7 @@ export function applyConventions(files: readonly SiteFile[], values: { title: st
   layout = replaceOnce(layout, '<html lang="en" className={inter.className} suppressHydrationWarning>', '<html lang="zh-CN" suppressHydrationWarning>', 'src/app/layout.tsx')
   byPath.set('src/app/layout.tsx', layout)
 
+  byPath.set('.gitignore', take('.gitignore') + IGNORE_NEXT_AGENT_FILES)
   byPath.set('src/app/global.css', take('src/app/global.css') + FONT_THEME)
   let shared = take('src/lib/shared.ts')
   shared = replaceOnce(shared, "export const appName = 'My App';", `export const appName = ${JSON.stringify(values.title)};`, 'src/lib/shared.ts')

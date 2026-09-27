@@ -65,6 +65,12 @@ describe('applyConventions：本机约定', () => {
     expect(changed.sort()).toEqual([...MANAGED_FILES].sort())
   })
 
+  it('.gitignore 保留官方的内容，另外排除 next dev 在站根生成的 AGENTS.md 与 CLAUDE.md', () => {
+    const ignore = text(done, '.gitignore')
+    expect(ignore.startsWith(text(official, '.gitignore'))).toBe(true)
+    expect(ignore.split('\n')).toEqual(expect.arrayContaining(['/AGENTS.md', '/CLAUDE.md']))
+  })
+
   it('pnpm-workspace.yaml 放行 esbuild', () => {
     expect(text(done, 'pnpm-workspace.yaml')).toMatch(/allowBuilds:\n {2}esbuild: true/)
   })

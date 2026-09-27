@@ -24,3 +24,7 @@ yarn-error.log*
 .env*.local
 .vercel
 next-env.d.ts
+
+# next dev 在站根生成的 agent 提示，每次 dev 都重写
+/AGENTS.md
+/CLAUDE.md

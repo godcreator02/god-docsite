@@ -141,7 +141,8 @@ docfirst.create-plain {"dir":"D:\\unitfolders\\<单元>\\<仓>\\docs-site"}
 `docfirst.create-plain` 建普通 fumadocs 站；要 docfirst 的现状、轨迹、未来三个区就用 `docfirst.create`。
 `dir` 必须还不存在、上一级得存在；只写文件，接着 `pnpm install`、`pnpm dev`。站来自官方脚手架 `create-fumadocs-app`
 （版本写死在 docfirst 插件里，要联网），加上本机约定：允许 esbuild 运行构建脚本、`dev` / `start` 写端口并只监听 127.0.0.1、
-字体 Sarasa Mono SC、页面语言 zh-CN、站名、去掉 GitHub 链接、删掉分享图与落地页、`/` 跳到 `/docs`。
+字体 Sarasa Mono SC、页面语言 zh-CN、站名、去掉 GitHub 链接、删掉分享图与落地页、`/` 跳到 `/docs`、
+`.gitignore` 排除 `next dev` 在站根生成的 `AGENTS.md` 与 `CLAUDE.md`。
 站里自带搜索（中文不用另配）、`/llms.txt`、每页的 markdown 版本。参数只有 `dir`、`title`（站名）、`port`；
 `port` 不给就挑一个没被别的站占用的，查占用的范围是单元文件夹插件的 `units-root` 设置指的目录。细节看命令的 `usage`。
 

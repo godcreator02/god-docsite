@@ -70,6 +70,7 @@ const SCAFFOLD_OUTPUT = [
 
 /** 本机约定改过的文件（`src/scaffold.ts` 的 `MANAGED_FILES`）：清单不能替换、不能删除 */
 const MANAGED_BY_CONVENTIONS = [
+  '.gitignore',
   'package.json',
   'pnpm-workspace.yaml',
   'next.config.mjs',
