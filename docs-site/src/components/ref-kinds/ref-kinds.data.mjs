@@ -38,9 +38,9 @@ const NORMALIZE = '算之前先归一化：换行统一成 LF、去掉每行行�
 /* ref file="../packages/docfirst-workflow/src/cli/text.ts" lines="47-52" hash="a11866d4fa45" blob="cc1432339eb9" */
 /* ref file="../packages/docfirst-workflow/src/cli/text.ts" lines="54-61" hash="9d2eb01cf9a5" blob="cc1432339eb9" */
 /* ref file="../packages/code-pin/src/types.ts" lines="80-85" hash="70feff6a62c9" blob="32a0167e8d8f" */
-/* ref file="../packages/docfirst-workflow/src/fumadocs/blocks.ts" lines="24-36" hash="4dc66b969a75" blob="e41881a801be" */
-/* ref file="../packages/docfirst-workflow/src/fumadocs/blocks.ts" lines="46-60" hash="8a889ba101b1" blob="e41881a801be" */
-/* ref file="../packages/docfirst-workflow/src/fumadocs/blocks.ts" lines="155-184" hash="48c366c0543b" blob="e41881a801be" */
+/* ref file="../packages/docfirst-workflow/src/fumadocs/blocks.ts" lines="22-34" hash="4dc66b969a75" blob="705792ee655d" */
+/* ref file="../packages/docfirst-workflow/src/fumadocs/blocks.ts" lines="44-58" hash="8a889ba101b1" blob="705792ee655d" */
+/* ref file="../packages/docfirst-workflow/src/fumadocs/blocks.ts" lines="153-182" hash="48c366c0543b" blob="705792ee655d" */
 export const kinds = [
   {
     id: 'span',

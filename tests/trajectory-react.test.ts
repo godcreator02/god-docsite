@@ -15,7 +15,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { buildModel } from "@godcreator/trajectory-disk";
 import { RingsLayout } from "../packages/trajectory-disk/src/layout.ts";
 import { StarDisk } from "@godcreator/trajectory-disk/disk";
-import { scanCardDir } from "@godcreator/docfirst-workflow";
+import { scanCardDir } from "@godcreator/docfirst-workflow/cards";
 import { scanCards } from "@godcreator/docfirst-workflow/cards";
 import { renderCard, root } from "./trajectory-helpers.ts";
 

@@ -444,6 +444,26 @@ test("workflow 除了 src/fumadocs/ 不认识任何站的宿主：源码与命�
   }
 });
 
+/** 去掉注释与字符串字面量，只留代码：报错文字、注释里写着 `process.cwd()` 不算用到 process */
+const codeOnly = (src: string): string =>
+  src
+    .replace(/\/\*[\s\S]*?\*\//g, "")
+    .replace(/\/\/.*$/gm, "")
+    .replace(/`(?:\\.|[^`\\])*`|"(?:\\.|[^"\\\n])*"|'(?:\\.|[^'\\\n])*'/g, '""');
+
+test("workflow 只有 src/node/ 碰磁盘、子进程与系统临时目录，process 只在 node/ 与 cli/ 里用", () => {
+  const NODE_IO = /^node:(fs|fs\/promises|child_process|os)$/;
+  const bad: string[] = [];
+  for (const file of sourcesIn(WORKFLOW_SRC)) {
+    const where = rel(WORKFLOW_SRC, file);
+    const [dir] = where.split("/");
+    const src = readFileSync(file, "utf8");
+    if (dir !== "node") for (const spec of importSpecsOf(src)) if (NODE_IO.test(spec)) bad.push(`${where} import 了 ${spec}`);
+    if (dir !== "node" && dir !== "cli" && /\bprocess\b/.test(codeOnly(src))) bad.push(`${where} 用了 process`);
+  }
+  assert.deepEqual(bad, [], "碰磁盘、git、系统临时目录的代码放进 src/node/，别的目录从那里取");
+});
+
 // ── 四、fumadocs 子入口：宿主只能是可选的 peer，且不许被打包进产物 ──────────────────────
 
 test("workflow 的宿主只能是可选的 peer，不许进 dependencies", () => {

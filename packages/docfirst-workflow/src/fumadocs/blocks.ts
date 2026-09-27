@@ -19,8 +19,6 @@ import type { Item } from "@godcreator/docfirst-workflow";
 import { langOf } from "@godcreator/docfirst-workflow/mdx";
 import type { JsxAttribute, TreeNode } from "@godcreator/docfirst-workflow/mdx";
 
-export { langOf };
-
 export const LABEL: Record<Status, string> = { fresh: "新鲜", changed: "有变动", missing: "缺失", unconfirmed: "未确认" };
 
 /** 状态点的四种颜色。有变动和未确认同是黄，站上靠实心 / 空心区分 */

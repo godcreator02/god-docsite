@@ -25,7 +25,6 @@ export {
   DOT_COLOR,
   filesOf,
   LABEL,
-  langOf,
   metaOf,
   NO_DIR,
   NO_OLD,

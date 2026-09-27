@@ -108,7 +108,7 @@ frontmatter 按行扫描在 `project/placement.ts:158` 与 `cards/parse.ts:71` �
 
 | 出口 | 变化 |
 | --- | --- |
-| `.` | 去掉 `scanCardDir` 与卡的类型（从 `./cards` 取） |
+| `.` | 去掉 `scanCardDir` 与卡的类型（从 `./cards` 取）；去掉单独的 `docIdOf`（用 `project.docIdOf`） |
 | `./fumadocs` | 不再再导出 `langOf` 与 `TREE_SUFFIX`；类型 `GlossaryFile` 并进 `PluginFile` |
 | `./cards` | 加导出卡文件后缀 `CARD_EXT`、关系行头 `EDGE_HEAD`、身份的日期前缀 `ID_DATE_PREFIX` |
 | `./mdx` | 不再导出 `isRenderRefusal` |

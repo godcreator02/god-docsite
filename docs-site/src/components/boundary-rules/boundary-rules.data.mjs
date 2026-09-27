@@ -86,7 +86,7 @@ export const allowedEdges = [
  * @typedef {{ id: string, label: string, text: string, allowed: string[], forbidden: Forbidden[], tests: GuardTest[] }} BoundaryRule
  * @type {BoundaryRule[]}
  */
-/* ref file="../tests/boundary.test.ts" hash="81906c2cf24c" blob="b3c39878725f" */
+/* ref file="../tests/boundary.test.ts" hash="3b6a593c16a4" blob="f364ea40ffcc" */
 export const rules = [
   {
     id: 'packages',
@@ -163,7 +163,7 @@ export const rules = [
       { edges: ['pinning>project:back'], what: '钉码编排不认识 project，也不认识记号属性怎么写：记号写法在两种格式后面。' },
       { edges: ['cards>pinning', 'cards>cli:back'], what: '卡格式只认识 marker：不认识钉码编排、项目装配，也不认识 cli。' },
       { edges: ['project>cli:back', 'pinning>cli'], what: 'cli 是入口，认识另外几个目录，谁都不认识它。' },
-      { edges: ['node>project:back', 'mdx>node'], what: 'node 是 Node 实现：包里只有它碰 node:fs、git 子进程与系统临时目录，不认识 docfirst 的任何格式，所以包里谁都不认识；只有 project、cards、cli 用它，记号、格式、钉码编排都不碰磁盘。' },
+      { edges: ['node>project:back', 'mdx>node'], what: 'node 是 Node 实现：包里只有它碰 node:fs、git 子进程与系统临时目录，不认识 docfirst 的任何格式，所以包里谁都不认识；只有 project、cards、cli 用它，记号、格式、钉码编排都不碰磁盘。node:fs、node:fs/promises、node:child_process、node:os 只许 node/ import，process 只许 node/ 与 cli/ 用。' },
       { edges: ['workflow>fumadocs'], what: '命令行那一侧的目录都不许引用 fumadocs/，也不许按包名引用本包；fumadocs/ 不许用相对路径出自己的目录，按包名只许用 .、./mdx、./cards。' },
       {
         edges: ['workflow>host'],
@@ -178,6 +178,7 @@ export const rules = [
       { name: 'workflow 目录方向：目录一个不少、一个不多——加了新目录得先想清楚它能认识谁', checks: 'src/ 下的目录必须正好是禁止表里列出的那些' },
       { name: 'workflow 的 fumadocs 目录：相对 import 不出 src/fumadocs/，本包只按包名用 `.`、`./mdx`、`./cards`；别的目录不按包名引用本包', checks: '读 src/ 下每个文件的 import，看相对 import 落在哪、按包名引用了本包的哪个出口' },
       { name: 'workflow 除了 src/fumadocs/ 不认识任何站的宿主：源码与命令行那一侧的产物一个 fumadocs / react / next import 都没有', checks: '读 src/fumadocs/ 以外的源码与产物 index.mjs、cli.mjs、mdx.mjs、cards.mjs' },
+      { name: 'workflow 只有 src/node/ 碰磁盘、子进程与系统临时目录，process 只在 node/ 与 cli/ 里用', checks: '读 src/ 下每个文件的 import，再去掉注释与字符串后找 process' },
     ],
   },
   {

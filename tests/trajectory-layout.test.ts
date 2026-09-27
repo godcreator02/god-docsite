@@ -11,7 +11,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { buildModel } from "@godcreator/trajectory-disk";
 import type { TrajectoryModel } from "@godcreator/trajectory-disk";
-import { scanCardDir } from "@godcreator/docfirst-workflow";
+import { scanCardDir } from "@godcreator/docfirst-workflow/cards";
 /* 布局不从 `.` 出口导出，直读源码 */
 import { AXIS_SPAN, gapDots, HUB_RIM, RingsLayout, SPREAD_DEG } from "../packages/trajectory-disk/src/layout.ts";
 import type { GapDot } from "../packages/trajectory-disk/src/layout.ts";

@@ -201,9 +201,9 @@ fumadocs 自带组件的规则在 [fumadocs 适配](/docs/fumadocs)的 `./roster
 
 {/* ref file="../packages/docfirst-workflow/package.json" lines="7-22" hash="1e4e1c65ed7c" blob="ddc68d23c92b" */}
 
-`.` 交出 `main`、`check --json` 报告的类型、`loadProject` / `docIdOf` / `scanCardDir` 与病卡的类型、引用与清单、格式接口和钉码编排的类型：
+`.` 交出 `main`、`check --json` 报告的类型、`loadProject` 与项目的类型、引用与清单、格式接口和钉码编排的类型；读卡目录与卡的类型只在 `./cards`：
 
-{/* ref file="../packages/docfirst-workflow/src/index.ts" hash="52a7edaa4684" blob="ae0c52fe37ec" */}
+{/* ref file="../packages/docfirst-workflow/src/index.ts" hash="d6c25849b80f" blob="b3766af6defa" */}
 
 `main` 自己不调 `process.exit`，可执行文件只转发参数与退出码，别的程序可以直接调 `main` 拿到退出码：
 

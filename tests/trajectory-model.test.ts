@@ -9,7 +9,7 @@ import assert from "node:assert/strict";
 import { buildModel } from "@godcreator/trajectory-disk";
 import { dayNum, NO_DOMAIN } from "../packages/trajectory-disk/src/model/build.ts";
 import { RingsLayout } from "../packages/trajectory-disk/src/layout.ts";
-import { scanCardDir } from "@godcreator/docfirst-workflow";
+import { scanCardDir } from "@godcreator/docfirst-workflow/cards";
 import { card, D, flatProblems, memCards, memSick, root, scanSick } from "./trajectory-helpers.ts";
 
 test("主干择优比终点：终点更晚的短链赢，长链成支线", () => {

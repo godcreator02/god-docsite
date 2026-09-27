@@ -84,14 +84,14 @@ full: true
 
 **也不被 docfirst 的包认识。** docfirst 的包与工作台插件都不依赖它，只有站用它；清单里没有 `dependencies`，react 只作必需 peer：
 
-{/* ref file="../tests/boundary.test.ts" lines="546-554" hash="3a7782b7dcfb" blob="b3c39878725f" */}
+{/* ref file="../tests/boundary.test.ts" lines="566-574" hash="3a7782b7dcfb" blob="f364ea40ffcc" */}
 
 **不把 react 打进产物。** `.` 的产物第一行是 `"use client"`，只许 import react：
 
-{/* ref file="../tests/boundary.test.ts" lines="556-566" hash="638c3fd560fa" blob="b3c39878725f" */}
+{/* ref file="../tests/boundary.test.ts" lines="576-586" hash="638c3fd560fa" blob="f364ea40ffcc" */}
 
 **`./text` 不 import 任何东西。** 站在 Node 里生成机读版时加载它（本仓是 `docfirst.config.mjs`），所以它不带客户端指令、源码和产物都零 import：
 
-{/* ref file="../tests/boundary.test.ts" lines="568-573" hash="4363223b8781" blob="b3c39878725f" */}
+{/* ref file="../tests/boundary.test.ts" lines="588-593" hash="4363223b8781" blob="f364ea40ffcc" */}
 
 **不画题目的画面。** 画面里画什么、每一帧的讲解数据、机读规则都写在各站自己的组件里；这个包只给外壳与零件。
