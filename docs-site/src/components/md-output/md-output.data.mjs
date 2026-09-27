@@ -25,7 +25,9 @@ export const sourceLines = [
   '',
   '{/* ref file="src/greet.ts" lines="2-3" hash="3eb99c2e88e2" blob="c134a7ab15a9" */}',
   '',
-  '<Note>名字为空时照样拼出来。</Note>',
+  '<Note>',
+  '  名字为空时照样拼出来。',
+  '</Note>',
 ];
 
 /** 语法树在各步的样子：只列这篇用到的节点 */
@@ -72,7 +74,7 @@ export const mdBody = [
   '  return `hello, ${name}`;',
   '```',
   '',
-  '> [note] 名字为空时照样拼出来。',
+  '> \\[note] 名字为空时照样拼出来。',
 ];
 
 /** 路由加上标题行之后的整份 md：标题行后面是两个空行 */
@@ -97,7 +99,7 @@ export const buildSteps = [
     id: 'parse',
     title: '解析成语法树',
     text: 'next build 编译这一页时，fumadocs 的 mdx 加载器把正本解析成 mdast 语法树：frontmatter 是 yaml 节点，引用记号是 mdxFlowExpression，Note 组件是 mdxJsxFlowElement。页面和 md 都从这一棵树出来。',
-    source: [1, 10],
+    source: [1, 12],
     tree: 'parsed',
     treeHighlight: [1, 6],
     md: 'none',
@@ -117,7 +119,7 @@ export const buildSteps = [
     id: 'stamp',
     title: '按名册打标',
     text: '插件接着查组件名册：Note 组件的规则把它压成一个引用块「[note] …」，这组替换节点挂在 data.docfirstAi 上。名册里找不到的组件当场报错，这一页编译失败，站构建不过。',
-    source: [10, 10],
+    source: [10, 12],
     tree: 'stamped',
     treeHighlight: [7, 9],
     md: 'none',
@@ -249,6 +251,112 @@ export const serveCases = [
     type: 'text/html',
     result: 'missing',
     body: ['404: This page could not be found.'],
+  },
+];
+
+/**
+ * 各种组件在 md 里变成什么：正本里怎么写、名册里给的规则、序列化出的 md。
+ * md 是用 probes/2609272230_component-md/ 的脚本按本站名册真跑出来的；自包含讲解组件那段照本站实际取回的 md。
+ * @typedef {{ id: string, label: string, text: string, source: string[], ruleTitle: string, rule: string[],
+ *   md: string[] | null, error: string | null }} ComponentCase
+ */
+/* ref file="../packages/docfirst-workflow/src/mdx/roster.ts" lines="9-13" hash="5f32c20ae455" blob="a8241fff7170" */
+/* ref file="../packages/docfirst-workflow/src/mdx/roster.ts" lines="91-107" hash="09207f8b31fa" blob="a8241fff7170" */
+/* ref file="../packages/docfirst-workflow/src/fumadocs/roster.ts" lines="12-19" hash="ad2aa594110a" blob="e605fbea15a7" */
+/* ref file="src/components/tabs/tabs.ai.mjs" lines="7-13" hash="4ac462d9c8e3" blob="b5179bb18970" */
+/* ref file="src/components/seam-map/seam-map.ai.mjs" lines="24-30" hash="2bcdfbfe5455" blob="bee761f6c2f8" */
+/* ref file="../packages/docfirst-workflow/src/fumadocs/blocks.ts" lines="136-151" hash="0646b249c32b" blob="705792ee655d" */
+/* ref file="../packages/docfirst-workflow/src/cli/commands.ts" lines="166-166" hash="1c53b74fcb01" blob="937001d7a349" */
+/** @type {ComponentCase[]} */
+export const componentCases = [
+  {
+    id: 'explainer',
+    label: '自包含的讲解组件',
+    text: '正本里只有一个标签。机读规则跟画面读同一份数据，把图写成一段段文字：图的说明、每个模块一段、每条接缝一段。标签里一个字没写的内容，md 里是全的。',
+    source: ['<SeamMap module="pin" />'],
+    ruleTitle: 'src/components/seam-map/seam-map.ai.mjs',
+    rule: [
+      'export function SeamMap(node, { paragraph, attr }) {',
+      "  const moduleId = attr(node, 'module');",
+      '  …（按 module 挑出同一张图）',
+      '  return seamGraphText(graph).map((text) => paragraph(text));',
+      '}',
+    ],
+    md: [
+      '钉码核心内部接缝图：虚线框是包里的文件，框里的方块是它对外给的函数……',
+      '',
+      '框外「调用方」（@godcreator/docfirst-workflow）：workflow 装配项目时……',
+      '',
+      '文件「核对与确认」（pinner.ts）：createPinner 收下读取器与旧内容来源两样……',
+      '',
+      '……每条接缝一段',
+    ],
+    error: null,
+  },
+  {
+    id: 'children',
+    label: '只留子内容',
+    text: '术语标注是构建时的插件自动包上的：正文里命中术语表的词包成一个 Term，站上悬停出定义。规则写 "children"，md 里去掉外壳，只剩原词，句子不断。',
+    source: ['下面讲到「钉码编排」的地方', '（构建时自动包成：下面讲到「<Term def="…">钉码编排</Term>」的地方）'],
+    ruleTitle: 'docfirst.config.mjs 的 components',
+    rule: ['Term: "children",'],
+    md: ['下面讲到「钉码编排」的地方'],
+    error: null,
+  },
+  {
+    id: 'nested',
+    label: '排版组件与嵌套',
+    text: '排版组件包的是作者写的正文。嵌套的组件各走各的规则：外壳 Tabs 只留子内容，每个 Tab 用 title 出一个三级标题，后面接它自己的子内容。Tab 要像这样分行写：写成一行的 Tab 是句子里的行内组件，规则照样交回标题，md 里标题和正文会粘成一行「### 命令行运行 …」。',
+    source: ['<Tabs>', '  <Tab title="命令行">', '    运行 `docfirst check`。', '  </Tab>', '  <Tab title="站构建">', '    next build 时同样核对。', '  </Tab>', '</Tabs>'],
+    ruleTitle: 'src/components/tabs/tabs.ai.mjs',
+    rule: ['export const Tabs = "children";', '', 'export function Tab(node, { attr, heading, children }) {', '  return [heading(3, attr(node, "title") ?? "标签"), ...children()];', '}'],
+    md: ['### 命令行', '', '运行 `docfirst check`。', '', '### 站构建', '', 'next build 时同样核对。'],
+    error: null,
+  },
+  {
+    id: 'inline',
+    label: '块级与行内',
+    text: '组件标签单独占几行时是块级节点，写在一行里（不管在不在句子中间）都是行内节点。规则看 h.inline：块级交回一个引用块，行内交回一段文字，不把句子拆断。序列化时 md 里的方括号前面会加一个反斜杠。',
+    source: ['<Note>', '  名字为空时照样拼出来。', '</Note>', '', '改完先 <Note>保存</Note> 再运行。'],
+    ruleTitle: '@godcreator/docfirst-workflow/fumadocs/roster',
+    rule: [
+      'Note: (node, h) =>',
+      '  h.inline',
+      '    ? h.text(`[note] ${h.textOf(node).trim()}`)',
+      '    : h.quote(`[note] ${h.textOf(node).trim()}`),',
+    ],
+    md: ['> \\[note] 名字为空时照样拼出来。', '', '改完先 \\[note] 保存 再运行。'],
+    error: null,
+  },
+  {
+    id: 'drop',
+    label: '整个不要',
+    text: '规则写 "drop"，这个组件在 md 里整个去掉：打的是 fumadocs 自家的标 _stringify: { text: "" }，原位置只留下几个空行。适合只有装饰作用、没有内容的组件；本站现在没有用到，下面的 Divider 是示例。',
+    source: ['第一段。', '', '<Divider />', '', '第二段。'],
+    ruleTitle: 'docfirst.config.mjs 的 components',
+    rule: ['Divider: "drop",'],
+    md: ['第一段。', '', '', '', '第二段。'],
+    error: null,
+  },
+  {
+    id: 'tree-ref',
+    label: '引用注入的文件树',
+    text: '目录树引用在站上换成 fumadocs 的 Files 组件，md 那份的标在换节点时就写好了：一行来源注释加一块名字表。打标时看到已经有标，不去名册里找它，也不往里走。',
+    source: ['{/* tree dir="src" hash="8f9bf9539c42" */}'],
+    ruleTitle: '不查名册（换节点时已经写好）',
+    rule: ['data.docfirstAi = [{ type: "code", lang: "text", value: 名字表 }]'],
+    md: ['<!-- 来源 src/ · 新鲜 -->', '', '```text', 'greet.test.ts', 'greet.ts', 'index.ts', '```'],
+    error: null,
+  },
+  {
+    id: 'unknown',
+    label: '名册外组件',
+    text: '名册里没有规则的组件，打标时当场报错，这一页编译失败、站构建不过；docfirst check 也报成红，不用等构建。fumadocs 默认组件表里的 Callout、Card 这些也不在自带的规则里，要用先在 docfirst.config.mjs 给一条规则。',
+    source: ['<Callout>先备份。</Callout>'],
+    ruleTitle: 'docfirst.config.mjs 的 components',
+    rule: ['（没有 Callout）'],
+    md: null,
+    error: '🔴 content/docs/a.mdx  第 7 行 <Callout>  名册外组件，docfirst.config.mjs 里没给它压平规则',
   },
 ];
 

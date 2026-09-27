@@ -67,6 +67,7 @@ export default {
     TrajectoryFlow: trajectoryFlow.TrajectoryFlow,
     BoundaryRules: boundaryRules.BoundaryRules,
     MdBuild: mdOutput.MdBuild,
+    MdComponents: mdOutput.MdComponents,
     MdServe: mdOutput.MdServe,
   },
 };

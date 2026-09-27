@@ -2,13 +2,14 @@
 /**
  * 「一页的 md 怎么来、怎么取」两个讲解组件：
  *   MdBuild  分步：同一篇正本在 next build 里一步步变成语法树、换掉引用、打标、序列化、预渲染成静态文件
+ *   MdComponents  选情况：几种组件按名册规则在 md 里变成什么，名册外的组件怎么报错
  *   MdServe  选情况：几种请求各自经过 src/proxy.ts 改写到哪条路由、拿回什么
  * 讲解文字与示例都在 md-output.data.mjs，机读版由 md-output.ai.mjs 读同一份数据生成。
  */
 import type { JSX, ReactNode } from 'react';
 import { CasePicker, CodeLines, Pane, Pill, Stepper, Terminal } from '@godcreator/explainer-player';
 import type { Tone } from '@godcreator/explainer-player';
-import { buildSteps, files, mdBody, mdFile, mdPaths, serveCases, sourceLines, trees } from './md-output.data.mjs';
+import { buildSteps, componentCases, files, mdBody, mdFile, mdPaths, serveCases, sourceLines, trees } from './md-output.data.mjs';
 
 type BuildStep = (typeof buildSteps)[number];
 type ServeCase = (typeof serveCases)[number];
@@ -64,6 +65,40 @@ export function MdBuild(): JSX.Element {
       <Stepper steps={buildSteps} label="一页的 md 在 next build 里怎么生成">
         {(step) => <BuildScene key={step.id} step={step} />}
       </Stepper>
+    </div>
+  );
+}
+
+type ComponentCase = (typeof componentCases)[number];
+
+function ComponentScene({ item }: { item: ComponentCase }): JSX.Element {
+  return (
+    <div className="grid gap-3">
+      <div className="grid gap-3 @3xl:grid-cols-2">
+        <Pane title={files.page} role="violet" icon="file" extra="正本">
+          <CodeLines lines={item.source} tone="info" />
+        </Pane>
+        <Pane title={item.ruleTitle} role="amber" icon="file" extra="名册规则">
+          <CodeLines lines={item.rule} tone="warn" />
+        </Pane>
+      </div>
+      {item.md === null ? (
+        <Terminal title="~/repo/docs-site" lines={[{ text: 'pnpm docfirst check', kind: 'cmd' }, { text: item.error ?? '', kind: 'err' }]} />
+      ) : (
+        <Pane title="md" role="emerald" icon="file" extra={<Pill tone="good">序列化出的</Pill>}>
+          <CodeLines lines={item.md} tone="good" />
+        </Pane>
+      )}
+    </div>
+  );
+}
+
+export function MdComponents(): JSX.Element {
+  return (
+    <div className="not-prose">
+      <CasePicker cases={componentCases} label="组件在 md 里变成什么">
+        {(item) => <ComponentScene key={item.id} item={item} />}
+      </CasePicker>
     </div>
   );
 }
