@@ -20,7 +20,7 @@ md 不是请求来了才生成的。`next build` 编译每一页时，同一棵�
 
 md 路由在构建时列出每一页、预渲染，请求来了不再编译：
 
-{/* ref file="src/app/llms.mdx/docs/[[...slug]]/route.ts" hash="558535c14d37" blob="048c0b757236" */}
+{/* ref file="src/app/llms.mdx/docs/[[...slug]]/route.ts" hash="e33991a4355f" blob="4cb4ae7b88fc" */}
 
 每一页的 md 前面加一行「# 标题 (网址)」，目录与全站两份也由同一个对象给：
 
@@ -71,6 +71,8 @@ md 里没有组件，只有段落、标题、引用块、代码块这些普通 m
 
 - **组件没有名册规则，站构建不过**：打标那一步在名册里找不到组件就报错，这一页编译失败。新写一个讲解组件，要在
   `docfirst.config.mjs` 的 `components` 里给它一条规则，写明它在 md 里变成什么，见 [fumadocs 适配](/docs/fumadocs) 的名册一节
+- **md 路由的 `Content-Type` 要带 `charset=utf-8`**：官方脚手架生成的这个路由只写了 `text/markdown`，浏览器（包括 VS Code 的内置浏览器）
+  遇到没声明字符集的文本会按 Latin-1 解码，中文全成乱码；curl 与 agent 按字节读不受影响。本站的路由已经补上
 - **改了正文要重新 build，md 才跟着变**：md 是构建时写死的静态文件，`next start` 不会重新生成
 - **响应的 `Vary` 里没有 `Accept`**：proxy 改写时写了 `Vary: Accept`，在 `next start` 下实测，最终响应的 `Vary` 里没有它。
   同一个网址按请求头给出两种内容，前面要是放了按网址缓存的代理，可能把一种内容当成另一种返回；本机直接访问不受影响

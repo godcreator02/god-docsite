@@ -92,7 +92,7 @@ export const mdPaths = {
 /* ref file="../packages/docfirst-workflow/src/fumadocs/markdown.ts" lines="24-45" hash="a74a112c335a" blob="0f8adb086fd4" */
 /* ref file="src/lib/source.ts" lines="35-37" hash="b41af54c6c86" blob="5ee282b98601" */
 /* ref file="src/lib/source.ts" lines="92-96" hash="8836756f3ab1" blob="5ee282b98601" */
-/* ref file="src/app/llms.mdx/docs/[[...slug]]/route.ts" hash="558535c14d37" blob="048c0b757236" */
+/* ref file="src/app/llms.mdx/docs/[[...slug]]/route.ts" hash="e33991a4355f" blob="4cb4ae7b88fc" */
 /** @type {BuildStep[]} */
 export const buildSteps = [
   {
@@ -183,7 +183,7 @@ export const serveCases = [
     ruleNote: 'isMarkdownPreferred 为真：/docs/a → /llms.mdx/docs/a/content.md',
     route: '/llms.mdx/docs/[[...slug]]（md 路由，预渲染的静态文件）',
     status: 200,
-    type: 'text/markdown',
+    type: 'text/markdown; charset=utf-8',
     result: 'md',
     body: mdFile,
   },
@@ -196,7 +196,7 @@ export const serveCases = [
     ruleNote: '后缀规则命中：/docs/a.md → /llms.mdx/docs/a/content.md',
     route: '/llms.mdx/docs/[[...slug]]（md 路由，预渲染的静态文件）',
     status: 200,
-    type: 'text/markdown',
+    type: 'text/markdown; charset=utf-8',
     result: 'md',
     body: mdFile,
   },
@@ -209,7 +209,7 @@ export const serveCases = [
     ruleNote: '不是 /docs 开头，两条规则都不命中',
     route: '/llms.mdx/docs/[[...slug]]（md 路由，预渲染的静态文件）',
     status: 200,
-    type: 'text/markdown',
+    type: 'text/markdown; charset=utf-8',
     result: 'md',
     body: mdFile,
   },
@@ -222,7 +222,7 @@ export const serveCases = [
     ruleNote: '不是 /docs 开头，proxy 不管',
     route: '/llms.txt（docsLlms.index()）',
     status: 200,
-    type: 'text/plain',
+    type: 'text/plain; charset=UTF-8',
     result: 'index',
     body: ['# Docs', '', '- [docfirst](/docs): 把文档里的话钉在真实源码上……', '- 钉码', '  - [钉码核心 code-pin](/docs/pin): 通用包，把文字钉在代码上……', '- [greet](/docs/a): 打招呼的函数'],
   },
@@ -235,7 +235,7 @@ export const serveCases = [
     ruleNote: '不是 /docs 开头，proxy 不管',
     route: '/llms-full.txt（docsLlms.full()）',
     status: 200,
-    type: 'text/plain',
+    type: 'text/plain; charset=UTF-8',
     result: 'full',
     body: ['# 讲解播放器 explainer-player (/docs/explainer-player)', '', '', '包 `@godcreator/explainer-player`，源码在……', '……', `# greet (${files.url})`, '……'],
   },
