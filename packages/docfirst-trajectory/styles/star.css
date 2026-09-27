@@ -271,10 +271,12 @@ html.dark .star-surface {
   stroke: var(--gap-bg);
 }
 
-/* ---------- 日期竖轨：画布左缘贴边常驻的自绘双柄区间滑块（顶 = 最旧、底 = 最新）。
- * 轨线压在 12px 竖线上、命中区往右放宽到 40px；底端让 40px 给窗宽输入 pill（左下角）；
+/* ---------- 日期竖轨：画布左缘常驻的自绘双柄区间滑块（顶 = 最旧、底 = 最新）。
+ * 轨线离左缘 --rail-x，底端让 40px 给窗宽输入 pill，pill 跟轨线同一条中线；
+ * 轨道容器的轨线在它自己的 12px 处、命中区往右放宽到 40px；
  * z-index 压在浮层（7）之下、画布之上 ---------- */
 .star-disk .star-rail {
+  --rail-x: 36px;
   position: absolute;
   left: 0;
   top: 0;
@@ -289,7 +291,7 @@ html.dark .star-surface {
 
 .star-disk .trajectory-date-rail {
   position: absolute;
-  left: 0;
+  left: calc(var(--rail-x) - 12px);
   top: 12px;
   bottom: 40px;
   width: 40px;
@@ -429,7 +431,8 @@ html.dark .star-surface {
 /* 窗宽输入 pill：轨底让位处（左下角），数字直改窗宽（键入提交 / 滚轮 ±1 天） */
 .star-disk .trajectory-date-width {
   position: absolute;
-  left: 6px;
+  left: var(--rail-x);
+  transform: translateX(-50%);
   bottom: 10px;
   z-index: 5;
   display: flex;
