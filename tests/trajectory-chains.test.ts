@@ -3,21 +3,21 @@
  * （全槽仅一个日期）不进表；computeDodge——同链跨日弧向避让，径向间距不足才给角偏，
  * 偏移按索引奇偶交替、上限半槽宽。
  * buildChains 用真实 buildModel + RingsLayout；computeDodge 只碰
- * places / treeBoxes[].slotDeg / mag / displayRadius 几个字段，用最小 duck-typed 假布局精确摆几何。
+ * places / treeBoxes[].slotDeg / mag / displayRadius 几个字段，用最小的 duck-typed 假布局精确给定几何数据。
  */
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { buildModel } from "@godcreator/docfirst-trajectory";
+import { buildModel } from "@godcreator/trajectory-disk";
 /* 布局不从 `.` 出口导出，直读源码 */
-import { buildChains, computeDodge } from "../packages/docfirst-trajectory/src/chains.ts";
-import type { Chain } from "../packages/docfirst-trajectory/src/chains.ts";
-import { RingsLayout } from "../packages/docfirst-trajectory/src/layout.ts";
-import type { CardPlace } from "../packages/docfirst-trajectory/src/layout.ts";
+import { buildChains, computeDodge } from "../packages/trajectory-disk/src/chains.ts";
+import type { Chain } from "../packages/trajectory-disk/src/chains.ts";
+import { RingsLayout } from "../packages/trajectory-disk/src/layout.ts";
+import type { CardPlace } from "../packages/trajectory-disk/src/layout.ts";
 import { card, D, memCards, root } from "./trajectory-helpers.ts";
 
 /** 一棵树四张卡的主干直链（aa01←aa02←aa03←aa04，supersedes 一路串），
  * aa02/aa03 同日（06 号）测多卡同组；
- * 主干外挂一条转向支线（cc01→cc02，pivots-from，另开槽 pos=1）测跨槽不串组；
+ * 主干上接出一条转向支线（cc01→cc02，pivots-from，另开槽 pos=1）测跨槽不串组；
  * 单日两卡树（bb01/bb02 同日 20 号，全槽只一个日期）测单日不成链；
  * 另一棵两日直链树（dd01←dd02）测跨树不串组。 */
 const buildFixtureModel = () =>

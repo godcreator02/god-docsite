@@ -8,7 +8,7 @@
  */
 import { useState } from 'react';
 import type { ComponentType, CSSProperties, KeyboardEvent, ReactNode, SVGProps } from 'react';
-import { Pill } from '@godcreator/docs-explain';
+import { Pill } from '@godcreator/explainer-player';
 import type { SeamGraph } from './graph.mjs';
 
 type Seam = SeamGraph['seams'][number];

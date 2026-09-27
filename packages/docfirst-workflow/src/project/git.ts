@@ -11,8 +11,8 @@ import { execFileSync } from "node:child_process";
 import { existsSync, mkdirSync, mkdtempSync, readFileSync, realpathSync, renameSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { basename, dirname, join, relative, resolve, sep } from "node:path";
-import { hashText, parseHunks } from "@godcreator/docfirst-pin";
-import type { Hunk } from "@godcreator/docfirst-pin";
+import { hashText, parseHunks } from "@godcreator/code-pin";
+import type { Hunk } from "@godcreator/code-pin";
 
 /** 每次调 git 都给上限：卡住的子进程比错误的答案更难查 */
 const LIMITS = { timeout: 30_000, maxBuffer: 64 * 1024 * 1024 } as const;
@@ -61,7 +61,7 @@ function locatedAt(abs: string, searchFrom: string): Located | null {
 }
 
 /** 项目根 + 引用里写的路径 → 文件在哪个仓；不在任何仓里就 null。
- * 从**文件所在目录**起往上找：文件自己不可能是 `.git`，先跳一级才不会白问一次。 */
+ * 从**文件所在目录**起往上找：文件自己不可能是 `.git`，先上移一级省掉一次无用的查找。 */
 export function locate(root: string, file: string): Located | null {
   const abs = realpathLoose(resolve(root, file));
   return locatedAt(abs, dirname(abs));
@@ -79,18 +79,18 @@ export function locateDir(root: string, dir: string): Located | null {
 
 /**
  * 读到过的 blob 内容，键是「仓 + blob 名前缀」。blob 名按内容寻址，一个前缀一旦认出唯一的对象，
- * 记住不会给出过时的答案。同一次 check 里几十处引用钉同一个文件是常态，而 Windows 上起一次 git
+ * 记住不会给出过时的答案。同一次 check 里几十处引用钉同一个文件是常态，而 Windows 上启动一次 git
  * 要 0.1 秒上下。只记读到了的：不在对象库里的 blob 下一次 fetch 就可能出现。
  */
 const blobCache = new Map<string, string>();
 
-/** `cat-file --batch` 回话的头一行：`<名字> <类型> <字节数>`；对象不在时是 `<名字> missing`，缩写有歧义时是 `<名字> ambiguous` */
+/** `cat-file --batch` 输出的第一行：`<名字> <类型> <字节数>`；对象不在时是 `<名字> missing`，缩写有歧义时是 `<名字> ambiguous` */
 const BATCH_HEADER = /^([0-9a-f]+) (\w+) (\d+)$/;
 
 /**
  * 对象库里这个 blob 的内容，blob 可以是缩写。取不到给 null：不在对象库里（没提交过、浅克隆、历史重写后 gc 过）、
  * 缩写有歧义、缩写认出的不是 blob——都只是「没有旧内容」，由比较器退回滑窗。
- * 「在不在」和「是什么」用一次 `cat-file --batch` 一起问到；回话按字节数切：内容里可能有任何字符，按行切会切错。
+ * 「在不在」和「是什么」用一次 `cat-file --batch` 一起问到；输出按字节数切分：内容里可能有任何字符，按行切会切错。
  */
 export function readBlob(repo: string, blob: string): string | null {
   const key = `${repo}\0${blob}`;
@@ -113,7 +113,7 @@ export function readBlob(repo: string, blob: string): string | null {
 const hunkCache = new Map<string, Hunk[]>();
 
 /**
- * hunk 表的落盘那一层。钉住的那段挪了位置、没人会去重新确认的引用，每次 check 都要为它 diff 一遍。
+ * hunk 表写入文件的那一层缓存。钉住的那段挪了位置、没人会去重新确认的引用，每次 check 都要为它 diff 一遍。
  * 键跟内存那层一样按内容寻址，同一对内容的 hunk 表永远不变，所以不用管失效，所有项目共用一份，
  * 放系统临时目录（被清掉只是下次重算）。
  */
@@ -137,7 +137,7 @@ function readDiskHunks(path: string): Hunk[] | undefined {
   return parsed;
 }
 
-/** 先写临时文件再改名，别的进程读不到写了一半的文件。改名撞上别的进程刚写好的同一份就算写过了 */
+/** 先写临时文件再改名，别的进程读不到写了一半的文件。改名失败而别的进程已经写好了同一份，就算写过了 */
 function writeDiskHunks(path: string, hunks: Hunk[]): void {
   mkdirSync(HUNK_DIR, { recursive: true });
   const temp = `${path}.${process.pid}.tmp`;
@@ -172,7 +172,7 @@ export function diffHunks(oldText: string, newText: string): Hunk[] {
     try {
       out = git(dir, ["diff", "--no-index", "-U0", "--no-color", "--", "old", "new"]);
     } catch (err) {
-      // 只有「有差异」这一种非零（退 1，输出在 stdout 里）能吞。别的吞了就是把红判成绿，照原样抛出去
+      // 只有「有差异」这一种非零退出（退出码 1，输出在 stdout 里）当正常结果处理。别的也这样处理就是把红判成绿，照原样抛出去
       const e = err as { status?: number; stdout?: string };
       if (e.status !== 1) throw err;
       out = e.stdout ?? "";
@@ -189,7 +189,7 @@ export function diffHunks(oldText: string, newText: string): Hunk[] {
 /**
  * 这个仓里有未提交改动的路径（仓根相对 posix）：工作区或暂存区跟 HEAD 不一样的、未跟踪的。
  * 未跟踪的目录逐个文件列出来；改名与复制两头的路径都算。
- * `--no-optional-locks`：status 顺手刷新索引要拿锁，别跟同时在这个仓里干活的人抢。
+ * `--no-optional-locks`：status 默认会顺带刷新索引、要拿锁，加上它免得跟同时在这个仓里工作的人争锁。
  */
 export function uncommittedPaths(repo: string): Set<string> {
   const out = git(repo, ["--no-optional-locks", "status", "--porcelain", "-z", "--untracked-files=all"]);

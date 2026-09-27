@@ -4,7 +4,7 @@
  * 讲解文字与每一步的数据都在 story.data.mjs，这里只负责画；步骤控制条、每一步的标题与说明由 Stepper 显示。
  * 机读版由 pin.ai.mjs 读同一份数据生成。
  */
-import { CodeLines, Diff, Dot, Pane, Pill, Stepper, Terminal } from '@godcreator/docs-explain';
+import { CodeLines, Diff, Dot, Pane, Pill, Stepper, Terminal } from '@godcreator/explainer-player';
 import { files, legend, steps } from './story.data.mjs';
 import { toneOfStatus } from './tone';
 
@@ -22,7 +22,7 @@ function Marker({ text }: { text: string }) {
   );
 }
 
-/** 命令行输出那一行的颜色：绿灯与确认成功算 ok，退 1 的（缺失、按红处理的黄灯）算 err */
+/** 命令行输出那一行的颜色：绿灯与确认成功算 ok，让 check 以退出码 1 结束的（缺失、按红处理的黄灯）算 err */
 function cliKind(step: Step): 'ok' | 'err' | 'out' {
   if (step.status === 'missing' || step.blocking) return 'err';
   if (step.status === 'fresh') return 'ok';

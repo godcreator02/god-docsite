@@ -16,7 +16,7 @@ export const files = {
 
 /**
  * 流水线的六段，第 i 步点亮第 i 段。role 是这段代码所在的包在整页里的颜色：
- * 卡文件 amber、docfirst-workflow 的卡格式 blue、docfirst-trajectory violet、站 cyan；docfirst-fumadocs 只在第 6 步的画面里出现，用 emerald。
+ * 卡文件 amber、docfirst-workflow 的卡格式 blue、trajectory-disk violet、站 cyan；docfirst-fumadocs 只在第 6 步的画面里出现，用 emerald。
  * @typedef {'files' | 'read' | 'parse' | 'model' | 'layout' | 'page'} StageId
  * @typedef {{ id: StageId, name: string, pkg: string, exports: string, role: 'amber' | 'blue' | 'violet' | 'cyan' }} Stage
  * @type {Stage[]}
@@ -25,8 +25,8 @@ export const stages = [
   { id: 'files', name: '卡文件', pkg: 'docs-site', exports: 'content/trajectory/*.mdx', role: 'amber' },
   { id: 'read', name: '读卡目录', pkg: 'docfirst-workflow/cards', exports: 'scanCardDir', role: 'blue' },
   { id: 'parse', name: '解析与校验', pkg: 'docfirst-workflow/cards', exports: 'scanCards → parseCardFile', role: 'blue' },
-  { id: 'model', name: '建树、挑主干', pkg: 'docfirst-trajectory', exports: 'buildModel', role: 'violet' },
-  { id: 'layout', name: '布局', pkg: 'docfirst-trajectory', exports: 'RingsLayout', role: 'violet' },
+  { id: 'model', name: '建树、挑主干', pkg: 'trajectory-disk', exports: 'buildModel', role: 'violet' },
+  { id: 'layout', name: '布局', pkg: 'trajectory-disk', exports: 'RingsLayout', role: 'violet' },
   { id: 'page', name: '站上渲染', pkg: 'docs-site /trajectory', exports: 'loadTrajectory → StarDisk', role: 'cyan' },
 ];
 
@@ -233,7 +233,7 @@ export const layout = {
   treeBox: { th0: 270, th1: 288.141, rMin: 190, rMax: 1150 },
 };
 
-/** 站的整页路由 page.tsx 里接线的几行（原文，start 是行号） */
+/** 站的整页路由 page.tsx 里读卡目录、交给 StarDisk 的几行（原文，start 是行号） */
 /* ref file="src/app/(trajectory-disk)/trajectory/page.tsx" hash="07e80ec2c265" blob="79a8ce5f98d9" */
 export const pageLines = [
   { start: 5, lines: ["import { loadTrajectory, StarDisk } from '@godcreator/docfirst-fumadocs/trajectory';"] },
@@ -268,7 +268,7 @@ export const fumadocsLines = {
  * @type {Record<'check' | 'trajectory', Array<{ kind: 'cmd' | 'out' | 'ok' | 'err', text: string }>>}
  */
 /* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="219-237" hash="f70391e16cf2" blob="418434ff646c" */
-/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="251-271" hash="e25515ecd057" blob="418434ff646c" */
+/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="251-271" hash="9d2051f516bd" blob="ff2e6b7ae7d3" */
 export const terminals = {
   check: [
     { kind: 'cmd', text: 'pnpm docfirst check' },
@@ -315,7 +315,7 @@ export const steps = [
     title: '解析与校验：scanCards 逐个调 parseCardFile，再看根卡',
     text:
       'parseCardFile（卡格式的 card.ts）先用 parseFrontmatter 逐行解析 frontmatter，值一律留成字符串或字符串列表，不用 YAML 库：' +
-      'YAML 库会把只写到日的 born-at 解析成 Date，格式校验跟着失效。然后逐条记下问题，不在第一条停下：存在性、形状，外加正文里写歪的关系行。' +
+      'YAML 库会把只写到日的 born-at 解析成 Date，格式校验跟着失效。然后逐条记下问题，不在第一条停下：存在性、形状，外加正文里格式不对的关系行。' +
       '全部卡解析完，scanCards 再看整个目录的根卡：根卡多于一张每张各报一条；根卡写了 parent 报；其余的卡 parent 写了根卡以外的身份报，目录里没有根卡时写了 parent 就报。' +
       '再加上查出的钉码记号，病按文件归成 SickFile。最后换成星轨盘的中性输入：根卡恰好一张时它是盘心；born-at 不合格的卡不进输入（半径按日期算，没有日期算不出来），' +
       '其余的病只列出来、不挡绘制。docfirst check 把每条病打成一行红，退出码 1。',
@@ -324,7 +324,7 @@ export const steps = [
     id: 'model',
     title: '建树、挑主干：buildModel',
     text:
-      'scanCardDir 交回中性输入 { center, cards } 与 sick；buildModel（docfirst-trajectory 的 model/build.ts）只收中性输入，交回那张盘的模型。' +
+      'scanCardDir 交回中性输入 { center, cards } 与 sick；buildModel（trajectory-disk 的 model/build.ts）只收中性输入，交回那张盘的模型。' +
       '盘心画在正中，cards 里的卡都在盘上，domain 只用来分组配色。' +
       '关系边在盘上求解，目标不在盘上的记进 broken。取代边与转向边连在一起的卡组成一棵树；主干（spine）在取代链上挑，整棵树一条取代都没有时改在转向链上挑，几条候选先比终点的 born-at 谁更晚，再比长短；' +
       '不在主干上的是支线（sublines）；两种关系都没有的卡是孤星（isolated）。例子的盘上是 A、B、S，主干 A → B，S 是支线；D 只在 sick 里，不进中性输入、不在盘上。' +
@@ -334,8 +334,8 @@ export const steps = [
     id: 'layout',
     title: '布局：RingsLayout',
     text:
-      'buildModel 不算布局。RingsLayout（docfirst-trajectory 的 layout.ts）是纯计算：半径表示时间，内旧外新，相邻两张卡的空档超过设置里的空窗阈值 gapFree 就折叠；' +
-      '每棵树分到一段角度（扇区），主干在 0 号槽，支线按开始时间排进后面的槽，时间不重叠的两条支线共用一个槽；孤星按领域各打包成一条。' +
+      'buildModel 不算布局。RingsLayout（trajectory-disk 的 layout.ts）是纯计算：半径表示时间，内旧外新，相邻两张卡的空档超过设置里的空窗阈值 gapFree 就折叠；' +
+      '每棵树分到一段角度（扇区），主干在 0 号槽，支线按开始时间排进后面的槽，时间不重叠的两条支线共用一个槽；孤星按领域各归成一条。' +
       '一圈装得下时所有扇区整体放大、铺满整圈，12 点方向留一道缝放日期与里程碑的名字；装不下才让同一领域里时间不重叠的树共用角度。' +
       '布局只在浏览器里算：StarDisk 建好模型后 new RingsLayout，调设置时重算，不用再请求服务端。',
   },

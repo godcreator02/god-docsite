@@ -1,6 +1,6 @@
 ---
 title: 工作台插件 gwb-docfirst-workflow
-description: 两条建站命令 docfirst.create 与 docfirst.create-plain（官方脚手架、本机约定、端口、写盘），加随插件发布的说明书；对 @godcreator/docfirst-* 包零依赖
+description: 两条建站命令 docfirst.create 与 docfirst.create-plain（官方脚手架、本机约定、端口、写入文件），加随插件发布的说明书；对本仓 packages/ 下的 npm 包零依赖
 full: true
 ---
 
@@ -30,7 +30,7 @@ full: true
 
 {/* ref file="../plugins/docfirst/src/scaffold.ts" lines="268-271" hash="68c670cbca41" blob="b62b36fbee8d" */}
 
-写盘途中失败就删掉整个目标目录：
+写入文件途中失败就删掉整个目标目录：
 
 {/* ref file="../plugins/docfirst/src/scaffold.ts" lines="347-364" hash="460179de2867" blob="b62b36fbee8d" */}
 
@@ -88,27 +88,27 @@ full: true
 **写进新站的依赖是一张手写的精确版本表**，只有 workflow 与 fumadocs 适配两个包。这两个包名是写进别人 `package.json` 的字符串，
 不算插件的依赖；两个包发版时这张表跟着改，模板能引用哪些出口由接缝 12 那条测试检查：
 
-{/* ref file="../plugins/docfirst/src/deps.ts" hash="eced1c0bc557" blob="f00216b5fb75" */}
+{/* ref file="../plugins/docfirst/src/deps.ts" hash="5ad3546b89c5" blob="9fb92a27cac8" */}
 
 ## 不做的事
 
-**不依赖 `@godcreator/docfirst-*` 包。** 三档依赖都不写、源码不 import，不启动它们的命令行：
+**不依赖本仓 `packages/` 下的包**，通用包与 docfirst 自己的包都算。包名从 `packages/` 下的清单现读，三档依赖都不写、源码不 import，不启动它们的命令行：
 
-{/* ref file="../plugins/docfirst/tests/artifact.test.ts" lines="118-139" hash="f004ec5622c9" blob="0e911a7127c9" */}
+{/* ref file="../plugins/docfirst/tests/artifact.test.ts" lines="117-139" hash="d4668b255389" blob="792784f3e1dc" */}
 
 **不转发命令行，不读核对结果。** 唯一的子进程是 `scaffold.ts` 运行官方脚手架，带超时：
 
-{/* ref file="../plugins/docfirst/tests/artifact.test.ts" lines="141-157" hash="0e0c85cbf401" blob="0e911a7127c9" */}
+{/* ref file="../plugins/docfirst/tests/artifact.test.ts" lines="146-162" hash="0e0c85cbf401" blob="792784f3e1dc" */}
 
 **不经别的插件建站。** 依赖表、源码、注入与命令调用里都没有站点插件 `@godcreator/gwb-docs-site`，理由见
 [站点插件并入](/trajectory/2026-09-26-site-plugin-merges-into-docfirst)：
 
-{/* ref file="../plugins/docfirst/tests/artifact.test.ts" lines="166-178" hash="70d1ca67ed97" blob="0e911a7127c9" */}
+{/* ref file="../plugins/docfirst/tests/artifact.test.ts" lines="171-183" hash="70d1ca67ed97" blob="792784f3e1dc" */}
 
-**不给已有的站接线，不改仓根。** 站目录必须还不存在；仓根已有、第一次 render 会覆盖的 README / AGENTS / CLAUDE 只写进回执。
+**不给已有的站接入 docfirst，不改仓根。** 站目录必须还不存在；仓根已有、第一次 render 会覆盖的 README / AGENTS / CLAUDE 只写进回执。
 
 **不管站的运行，不注册窗格。** 端口只在建站时选一次，启动与停止站不归本插件；插件只在建站那一刻做事，没有要一直显示的界面：
 
-{/* ref file="../plugins/docfirst/tests/artifact.test.ts" lines="180-184" hash="8db102ca10f4" blob="0e911a7127c9" */}
+{/* ref file="../plugins/docfirst/tests/artifact.test.ts" lines="185-189" hash="8db102ca10f4" blob="792784f3e1dc" */}
 
 **不装依赖、不渲染、不核对。** 只写文件，接着要在站目录里运行的命令写进回执的 `next`。

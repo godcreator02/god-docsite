@@ -27,7 +27,7 @@ full: true
 黄「有变动」时旧行和新行显示在同一个代码块里，块里夹着已经不存在的旧行，所以不带行号；红「缺失」显示确认时那段；
 取不到旧内容、全文也找不到的黄不显示代码。目录树：
 
-{/* ref file="../packages/docfirst-fumadocs/src/blocks.ts" lines="10-13" hash="118edffa7a12" blob="19f00626cf69" */}
+{/* ref file="../packages/docfirst-fumadocs/src/blocks.ts" lines="10-13" hash="d4b2f00a52c6" blob="22c804b6e0e2" */}
 
 **机读版**的序列化回调：
 
@@ -49,12 +49,12 @@ full: true
 `remarkTrajectoryLinks` 把关系边段落转成带 `data-kind` 的 div，把指向卡身份的 `.md` / `.mdx` 链接改成卡页地址。
 哪些字段算卡、链接怎么认出卡身份，都从 workflow 的卡格式取：
 
-{/* ref file="../packages/docfirst-fumadocs/src/card-collection.ts" lines="41-46" hash="9e66c1b3ad49" blob="dba2e3cf7662" */}
+{/* ref file="../packages/docfirst-fumadocs/src/card-collection.ts" lines="41-46" hash="299d0dad075d" blob="bff0fc7197aa" */}
 
-**星轨盘**：`./trajectory` 的 `loadTrajectory(dir)` 读卡目录，交回星轨盘的中性输入与病卡清单（`dir` 只收绝对路径）；同一个出口转出轨迹核心的客户端组件 `StarDisk`，组件自己建模，
+**星轨盘**：`./trajectory` 的 `loadTrajectory(dir)` 读卡目录，交回星轨盘的中性输入与病卡清单（`dir` 只收绝对路径）；同一个出口再导出轨迹核心的客户端组件 `StarDisk`，组件自己建模，
 样式 `./trajectory.css` 引入轨迹核心的 `star.css`。站画星轨盘只 import 这个包，不直接依赖轨迹核心：
 
-{/* ref file="../packages/docfirst-fumadocs/src/trajectory.ts" lines="16-26" hash="2373befc17fd" blob="56741c0227aa" */}
+{/* ref file="../packages/docfirst-fumadocs/src/trajectory.ts" lines="16-26" hash="6f2630939ee1" blob="127ca2597015" */}
 
 ## 接口
 
@@ -79,7 +79,7 @@ full: true
 
 {/* ref file="../packages/docfirst-fumadocs/src/host.ts" lines="46-74" hash="afdcac959006" blob="06eabff6c6af" */}
 
-fumadocs 的 `rehypeCode` 只放行 meta 白名单里的字段，这里换成同形的一张，多放行 `data-dot`：
+fumadocs 的 `rehypeCode` 只保留 meta 白名单里的字段，这里换成同形的一张，多保留 `data-dot`：
 
 {/* ref file="../packages/docfirst-fumadocs/src/host.ts" lines="29-29" hash="2c600f486c3e" blob="543c77f3bcc9" */}
 
@@ -130,15 +130,15 @@ React 表先展开 fumadocs 的默认表，再把 `pre` 换成 `DocfirstPre`：
 **`next.config.mjs`**：`turbopack.root` 设到工作区根，`node_modules` 里指向 `packages/` 的软链接才在 Turbopack 的范围里（用发布版包的站不必设）；
 `serverExternalPackages` 必须为空，这个包与轨迹核心都同时有服务端代码与客户端组件，整包外置会让 `"use client"` 失效：
 
-{/* ref file="next.config.mjs" lines="7-28" hash="bf36362962eb" blob="96a8ad30ead4" */}
+{/* ref file="next.config.mjs" lines="7-28" hash="6240250ce401" blob="84889ca96ee6" */}
 
 ## 依赖
 
 | 依赖 | 用来做什么 |
 | --- | --- |
 | workflow `@godcreator/docfirst-workflow` | `.` 的 `loadProject` 拿钉码编排与名册，`Reference`、`Item`、`Listing` 等类型；`./mdx` 的 `recognize`、`stamp`、`walk`、`langOf` 与名册类型；`./cards` 的 `scanCardDir`、`CARD_KEYS`、`cardIdFromHref` 与病卡的类型 |
-| 钉码核心 `@godcreator/docfirst-pin` | `Status` 类型 |
-| 轨迹核心 `@godcreator/docfirst-trajectory` | `./disk` 的 `StarDisk` 与 `./star.css` 转给站 |
+| 钉码核心 `@godcreator/code-pin`（通用包） | `Status` 类型 |
+| 轨迹核心 `@godcreator/trajectory-disk`（通用包） | `./disk` 的 `StarDisk` 与 `./star.css`，再导出给站 |
 | unified、unist-util-visit | 插件类型；`remarkTrajectoryLinks` 遍历语法树 |
 | fumadocs-core、fumadocs-ui、react | processed markdown、`CodeBlock`、组件渲染；必需的 peer，用站装的那份 |
 
@@ -154,10 +154,10 @@ React 表先展开 fumadocs 的默认表，再把 `pre` 换成 `DocfirstPre`：
 - **不认记号、不判状态**：认记号与打标记用 workflow `./mdx`，核对经项目上的钉码编排，状态由[钉码核心](/docs/pin)算，这个包只把清单换成树上的节点。
 - **不管讲解组件源码里的引用**：remark 插件只处理 mdx 页面；组件源码里写的引用由命令行的 `check` 核对，站上不显示组件的状态。
 - **不管生成物**：生成正本的渲染与写到哪归 [workflow](/docs/workflow)。
-- **不把宿主与兄弟包打进产物**：只按包名 import；`./pre` 的 `"use client"` 在产物第一行，别的出口不带：
+- **不把宿主与本仓别的包打包进产物**：只按包名 import；`./pre` 的 `"use client"` 在产物第一行，别的出口不带：
 
-{/* ref file="../tests/boundary.test.ts" lines="387-412" hash="27348ae73122" blob="59252de07558" */}
+{/* ref file="../tests/boundary.test.ts" lines="436-461" hash="81de3f9b23cb" blob="269b4f418ee0" */}
 
 - **不被命令行加载**（`./roster` 除外）：workflow 不许依赖这个包；`./roster` 的产物不许 import 宿主：
 
-{/* ref file="../tests/boundary.test.ts" lines="414-421" hash="d6c1f158b36d" blob="59252de07558" */}
+{/* ref file="../tests/boundary.test.ts" lines="463-470" hash="d6c1f158b36d" blob="269b4f418ee0" */}

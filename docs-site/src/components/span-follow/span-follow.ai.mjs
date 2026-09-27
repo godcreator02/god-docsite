@@ -1,9 +1,9 @@
 /**
- * SpanFollow 在机读版里变成什么：跟画面读同一份数据（span-follow.data.mjs），每一段一段话（用模板包的 chaptersText，
+ * SpanFollow 在机读版里变成什么：跟画面读同一份数据（span-follow.data.mjs），每一段一段话（用讲解播放器的 chaptersText，
  * 和画面上 Timeline 显示的是同一段话），再把例子里的两版文件、记号、git 的输出、hunk 表、滑窗算出的 hash 逐项列出来。
  * 这个文件不 import React，docfirst.config.mjs 引它，命令行也能运行。
  */
-import { chaptersText } from '@godcreator/docs-explain/text';
+import { chaptersText } from '@godcreator/explainer-player/text';
 import {
   catFile,
   chapters,
@@ -49,7 +49,7 @@ export function SpanFollow(_node, { paragraph }) {
     paragraph(
       `今天第 ${a}–${b} 行的 hash 是 ${today.hashAtRecordedLines}，今天整个文件的 blob 是 ${today.blob}，都跟记号上的不同。`,
     ),
-    paragraph(`取旧文件：$ ${catFile.command}　对象库里有时回 ${catFile.found}，接着是文件内容；没有时回 ${catFile.missing}。`),
+    paragraph(`取旧文件：$ ${catFile.command}　对象库里有时输出 ${catFile.found}，接着是文件内容；没有时输出 ${catFile.missing}。`),
     paragraph(`算 hunk 表：$ ${diffCommand}　输出：`),
     paragraph(diffOutput.join('\n')),
     paragraph(

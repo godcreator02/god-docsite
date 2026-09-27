@@ -3,10 +3,10 @@
  * 结果按原来的顺序配回文件路径与行号；确认时把核心算出的新记录交回同一个格式写回。
  * 命令行、生成物摆放与站构建共用这一份。格式有两种：mdx 页面（`../mdx/`）与讲解组件的源码（`../code/`）。
  *
- * 这个目录认识 `../reference/`、`../mdx/`、`../code/` 与 `@godcreator/docfirst-pin`，不认识记号属性怎么写，
- * 也不认识 project 与 cli（`tests/boundary.test.ts` 守着）。
+ * 这个目录认识 `../reference/`、`../mdx/`、`../code/` 与 `@godcreator/code-pin`，不认识记号属性怎么写，
+ * 也不认识 project 与 cli（由 `tests/boundary.test.ts` 检查）。
  */
-import type { ConfirmAction, ConfirmOptions, Pin, Pinner, Step, Verdict } from "@godcreator/docfirst-pin";
+import type { ConfirmAction, ConfirmOptions, Pin, Pinner, Step, Verdict } from "@godcreator/code-pin";
 import type { Format, Item, Listing, Reference, WrittenReference } from "../reference/index.ts";
 import { mdxFormat } from "../mdx/index.ts";
 import { codeFormat } from "../code/index.ts";
@@ -65,7 +65,7 @@ function confirmStepOf(item: Item, { action, written, problem }: Step): ConfirmS
   return step;
 }
 
-/** 认引用；记号写坏了的报错只说到第几行，这里补上是哪个文件再抛 */
+/** 认引用；记号写错了的报错只说到第几行，这里补上是哪个文件再抛出 */
 function referencesIn(format: Format, doc: string, text: string): Reference[] {
   try {
     return format.parse(text);

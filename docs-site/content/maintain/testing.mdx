@@ -13,12 +13,12 @@ description: 包与目录之间的依赖方向靠什么检查，各组测试检�
 
 仓根那组按主题一个文件：
 
-{/* tree dir="../tests" depth="1" glob="*.test.ts" hash="15c579d6e45d" */}
+{/* tree dir="../tests" depth="1" glob="*.test.ts" hash="61bc4a87e3a5" */}
 
 ## 依赖方向：只有一个文件在检查
 
 pnpm 严格的 `node_modules` 只保证没写进依赖的包 import 不到；「该不该写进依赖」没人管，workflow 包里
-`marker/`、`reference/`、`mdx/`、`code/`、`pinning/`、`project/`、`cli/` 之间编译器也不拦——`mdx/` 里写一句 `import "../project/load.ts"` 不会报错，
+`marker/`、`reference/`、`mdx/`、`code/`、`pinning/`、`project/`、`cards/`、`cli/` 之间编译器也不拦——`mdx/` 里写一句 `import "../project/load.ts"` 不会报错，
 mdx 格式从此就跟读盘、git 绑在一起。补上这两项的是 `tests/boundary.test.ts`，它是包之间、workflow 目录之间**唯一**的边界检查。
 选一类规则，看它允许哪些方向、禁止哪些方向、由哪条测试失败报出来：
 
@@ -27,24 +27,37 @@ mdx 格式从此就跟读盘、git 绑在一起。补上这两项的是 `tests/b
 禁止表**列的是禁止的，不是允许的**：写成允许的话，新加一个包默认什么都不能依赖，放错位置反而更难发现。
 `packages/` 下多出一个表里没有的目录，另一条测试当场失败，要求先想清楚它能认识谁：
 
-{/* ref file="../tests/boundary.test.ts" lines="121-135" hash="2235688de96c" blob="59252de07558" */}
+{/* ref file="../tests/boundary.test.ts" lines="123-137" hash="befd1479b002" blob="269b4f418ee0" */}
 
 workflow 目录之间是同样的写法：
 
-{/* ref file="../tests/boundary.test.ts" lines="267-276" hash="4e942c086aa2" blob="59252de07558" */}
+{/* ref file="../tests/boundary.test.ts" lines="326-335" hash="4e942c086aa2" blob="269b4f418ee0" */}
 
-两个核心的零依赖只看 import 了谁，轨迹核心直接查产物；钉码核心另外查源码与产物里有没有文档文本那一侧的名字：
+## 通用包：不认识 docfirst，能单独拿走用
 
-{/* ref file="../tests/boundary.test.ts" lines="169-199" hash="29865f2198b6" blob="e77be7ebc154" */}
+本仓的包分两类。**通用包**不认识 docfirst：`code-pin` 把文字钉在代码上，`trajectory-disk` 把一组卡画成项目方向演变的圆盘，
+`explainer-player` 把讲解拆成配说明的帧来播放；docfirst 只是它们的一个使用者。docfirst 自己的规矩在
+`docfirst-workflow` 与 `docfirst-fumadocs` 里。通用包列在一张表里，下面三条对表里每个包都一样：
+清单里没有任何 `@godcreator/` 包；源码与产物不 import 它们，源码的相对 import 不出自己的 `src/`；
+包目录里（源码、产物、样式、构建配置、清单）一个 docfirst 字样都没有。
 
-轨迹核心另外查两条：建模只 import 自己目录里的文件；`.` 的产物与建模源码里没有关系行、frontmatter 字段名这些 docfirst 卡文件的写法：
+最后一条连注释也查。通用包里一旦写了「docfirst 站会这样用」，下一个改它的人就会照着 docfirst 的需要改它，
+它就不再通用。讲 docfirst 怎么用这几个包，写在 docfirst 的两个包或这个站里。加一个通用包只要把它加进表里：
 
-{/* ref file="../tests/boundary.test.ts" lines="210-233" hash="35f8a9960ea0" blob="59252de07558" */}
+{/* ref file="../tests/boundary.test.ts" lines="169-229" hash="9c142f441342" blob="269b4f418ee0" */}
+
+各通用包另有自己的几条。钉码只许 import `node:crypto`，源码与产物里没有文档文本那一侧的名字：
+
+{/* ref file="../tests/boundary.test.ts" lines="231-255" hash="f6ad294a7d3e" blob="269b4f418ee0" */}
+
+星轨盘的 `.` 入口产物零 import，建模只 import 自己目录里的文件，整个包里没有关系行、frontmatter 字段名这些 docfirst 卡文件的写法：
+
+{/* ref file="../tests/boundary.test.ts" lines="272-292" hash="4d31db61a2b8" blob="269b4f418ee0" */}
 
 包与插件互不认识，两个方向分在两处：包里不许出现任何 `@godcreator/gwb-*` 由 `boundary.test.ts` 查；
-插件不许依赖 `@godcreator/docfirst-*` 由插件自己的测试查：
+插件不许依赖本仓的任何一个包由插件自己的测试查，包名从 `packages/` 下各包的清单现读：
 
-{/* ref file="../plugins/docfirst/tests/artifact.test.ts" lines="118-128" hash="da6e765089d5" blob="c45ec566b605" */}
+{/* ref file="../plugins/docfirst/tests/artifact.test.ts" lines="117-133" hash="e76cd35c6694" blob="792784f3e1dc" */}
 
 <Note>
   **它失败的时候，出错的是设计，不是测试。** 真要改方向，改的是那张表并写明为什么，
@@ -57,7 +70,7 @@ workflow 目录之间是同样的写法：
 钉码核心不读盘、不启动进程、不接触文档文本，这样测正好把这几条一并检查了；认引用、配回行号、写回的先后顺序在 `tests/pinning.test.ts` 测，
 组件格式认记号、写回、进现状区在 `tests/code-format.test.ts` 测：
 
-{/* ref file="../tests/core.test.ts" lines="1-4" hash="60e6c7a57316" blob="e54b681354bd" */}
+{/* ref file="../tests/core.test.ts" lines="1-4" hash="e8a79d70b5c5" blob="cbf7f17dde84" */}
 
 旧内容来源默认什么都取不到，比较器只能滑窗；走到 hunk 表就说明判定顺序错了：
 
@@ -80,7 +93,7 @@ workflow 目录之间是同样的写法：
 
 `tests/repo.ts` 建的临时仓一律 `core.autocrlf=false`，否则 Windows 上的换行转换会让工作区和 blob 逐字节不同：
 
-{/* ref file="../tests/repo.ts" lines="59-63" hash="41a94bc7fbdc" blob="06b517821111" */}
+{/* ref file="../tests/repo.ts" lines="59-63" hash="9f4d515bddda" blob="bcc236156b77" */}
 
 ## 装配、摆放、命令行
 
@@ -90,8 +103,9 @@ workflow 目录之间是同样的写法：
 命令行把结果打印成什么、退什么码，在 `tests/cli*.test.ts` 那几份。
 
 星轨盘与卡格式的测试是 `tests/trajectory-*.test.ts`：卡格式的解析、扫描、校验在 parse、scan、validate、model 几份，fumadocs 卡集合在 server，
-建模、布局、画布、组件在其余几份；内存造卡走真实的卡格式换成中性输入（`tests/trajectory-helpers.ts`），星轨盘相关的几份用 `tests/fixtures/trajectory/` 下的卡片；术语标注在 `tests/glossary.test.ts`，
-fumadocs 适配不接 Next 的那一半在 `tests/fumadocs.test.ts`，讲解组件包在 `tests/docs-explain.test.ts`，
+建模、布局、画布、组件在其余几份；内存造卡走真实的卡格式换成中性输入（`tests/trajectory-helpers.ts`），星轨盘相关的几份用 `tests/fixtures/trajectory/` 下的卡片。
+所以星轨盘的测试离不开 workflow 的卡格式：包本身是通用的，它的测试还不是。术语标注在 `tests/glossary.test.ts`，
+fumadocs 适配不接 Next 的那一半在 `tests/fumadocs.test.ts`，讲解播放器在 `tests/explainer-player.test.ts`，
 各包能装、能出产物、出口解析得到在 `tests/skeleton.test.ts`。
 
 ## 插件那组

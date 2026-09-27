@@ -4,9 +4,9 @@
  * check 把这种黄算红：改代码的那个提交里就该复核并 `--accept`。
  *
  * 一个探针只用在一次 check 里：每个仓的 `git status` 只跑一次、结果记在探针里；
- * 下一次 check 造新探针，不会拿到过时的答案。
+ * 下一次 check 创建新探针，不会拿到过时的答案。
  */
-import type { Target } from "@godcreator/docfirst-pin";
+import type { Target } from "@godcreator/code-pin";
 import { locate, locateDir, uncommittedPaths } from "./git.ts";
 import type { Located } from "./git.ts";
 

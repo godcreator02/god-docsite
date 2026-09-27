@@ -4,9 +4,9 @@
  * 钉码核心只收目标与记录，文档路径、第几行都定义在这儿，由钉码编排（`../pinning/`）配回去；
  * 各格式认出的引用、按原文渲染要读的清单也是这几个类型。
  *
- * 这个目录只认识 `@godcreator/docfirst-pin`，不认识 workflow 里别的目录（`tests/boundary.test.ts` 守着）。
+ * 这个目录只认识 `@godcreator/code-pin`，不认识 workflow 里别的目录（由 `tests/boundary.test.ts` 检查）。
  */
-import type { MemoRecord, Reason, Span, Status, Target } from "@godcreator/docfirst-pin";
+import type { MemoRecord, Reason, Span, Status, Target } from "@godcreator/code-pin";
 
 /** 文档里的一处引用 */
 export interface Reference {

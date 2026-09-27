@@ -1,6 +1,6 @@
 /**
  * 工作台插件 gwb-docfirst-workflow 的内部接缝图：模块页 <SeamMap module="plugin" /> 画的就是它。
- * 框是插件包里的文件与随包发布的目录，方块是文件对外给的东西；灰色实线框是包外的工作台、官方脚手架、
+ * 框是插件包里的文件与随包发布的目录，方块是文件对外提供的东西；灰色实线框是包外的工作台、官方脚手架、
  * 新站装的 docfirst 包与磁盘。vocab.ts 只有一个收窄类型的小函数，不单画成框。
  * 坐标在 plugin.layout.ts。
  */
@@ -10,7 +10,7 @@ export const pluginGraph = defineSeamGraph({
   id: 'plugin',
   title: '工作台插件内部的文件与接缝',
   intro:
-    '工作台插件内部接缝图：虚线框是包里的文件与随包发布的目录，框里的方块是它对外给的函数，灰色实线框是包外的工作台、官方脚手架、docfirst 的 npm 包与磁盘；实线是代码调用，虚线是读写磁盘上的文件。',
+    '工作台插件内部接缝图：虚线框是包里的文件与随包发布的目录，框里的方块是它对外提供的函数，灰色实线框是包外的工作台、官方脚手架、本仓的 npm 包与磁盘；实线是代码调用，虚线是读写磁盘上的文件。',
   frameLabel: '文件',
   modules: [
     {
@@ -47,7 +47,7 @@ export const pluginGraph = defineSeamGraph({
       role: 'cyan',
       outside: false,
       blurb:
-        'docfirst.create 与 docfirst.create-plain 的参数都是 { dir, title?, port? }，同一个函数校验：多给一个键、dir 不是绝对路径、上一级目录不存在、title 不是非空字符串、port 不是 1 到 65535 之间的整数，都直接回错。',
+        'docfirst.create 与 docfirst.create-plain 的参数都是 { dir, title?, port? }，同一个函数校验：多给一个键、dir 不是绝对路径、上一级目录不存在、title 不是非空字符串、port 不是 1 到 65535 之间的整数，都直接返回错误。',
       caps: [{ id: 'parse-args', name: '参数校验', ident: 'parseCreateArgs' }],
     },
     {
@@ -57,7 +57,7 @@ export const pluginGraph = defineSeamGraph({
       role: 'cyan',
       outside: false,
       blurb:
-        '插件名、必需注入与 apply。建站命令都经 runCreate：校验参数、读容器根、组选项、调 createSite；出错时补上命令名回给调用方，建成了就把站目录、端口、写了哪些文件、接着要运行的命令写进回执。',
+        '插件名、必需注入与 apply。建站命令都经 runCreate：校验参数、读容器根、组选项、调 createSite；出错时补上命令名返回给调用方，建成了就把站目录、端口、写了哪些文件、接着要运行的命令写进回执。',
       caps: [
         { id: 'create-cmd', name: '建 docfirst 站', ident: 'docfirst.create' },
         { id: 'plain-cmd', name: '建普通站', ident: 'docfirst.create-plain' },
@@ -96,7 +96,7 @@ export const pluginGraph = defineSeamGraph({
       role: 'violet',
       outside: false,
       blurb:
-        '只给 docfirst.create 用，不碰盘：模板与仓根 package.json 由调用方读好传入，交回给 createSite 的选项——新增、替换、删除三张清单，docfirst 的依赖与 doc 脚本。删除清单里只有官方的示例页 content/docs/test.mdx。',
+        '只给 docfirst.create 用，不读写磁盘：模板与仓根 package.json 由调用方读好传入，返回交给 createSite 的选项——新增、替换、删除三张清单，docfirst 的依赖与 doc 脚本。删除清单里只有官方的示例页 content/docs/test.mdx。',
       caps: [{ id: 'plan-create', name: '组 docfirst 选项', ident: 'planCreate' }],
     },
     {
@@ -105,7 +105,7 @@ export const pluginGraph = defineSeamGraph({
       pkg: 'units-root.ts',
       role: 'cyan',
       outside: false,
-      blurb: '把设置值转成绝对路径：不是字符串、去掉空白后为空都算没配。另判断站目录在不在容器根里（含根本身）。',
+      blurb: '把设置值转成绝对路径：不是字符串、去掉空白后为空都算没配置。另判断站目录在不在容器根里（含根本身）。',
       caps: [{ id: 'root-setting', name: '容器根判断', ident: 'rootFromSetting · isInside' }],
     },
     {
@@ -135,7 +135,7 @@ export const pluginGraph = defineSeamGraph({
       role: 'violet',
       outside: false,
       blurb:
-        '随插件发布的站模板，不进 dist/，靠 package.json 的 files 发出去。add/ 下是官方输出里没有、要新增的文件，replace/ 下是官方输出里有、要整份替换的文件。',
+        '随插件发布的站模板，不进 dist/，靠 package.json 的 files 字段随包发布。add/ 下是官方输出里没有、要新增的文件，replace/ 下是官方输出里有、要整份替换的文件。',
       caps: [{ id: 'tpl', name: '站模板', ident: 'add/ · replace/' }],
     },
     {
@@ -155,12 +155,12 @@ export const pluginGraph = defineSeamGraph({
       role: 'blue',
       outside: false,
       blurb:
-        '建站命令共用的建站函数。planSite 检查目标、定站名、挑端口，运行官方脚手架并读进内存，应用本机约定、合并 package.json、按清单改文件，任何一步不通过都在写盘前抛出；createSite 再整套写进目标目录。插件里只有这个文件启动子进程。',
+        '建站命令共用的建站函数。planSite 检查目标、定站名、挑端口，运行官方脚手架并读进内存，应用本机约定、合并 package.json、按清单改文件，任何一步不通过都在写入文件前抛出；createSite 再整套写进目标目录。插件里只有这个文件启动子进程。',
       caps: [
         { id: 'changes', name: '三张清单', ident: 'applyChanges' },
         { id: 'conventions', name: '本机约定', ident: 'applyConventions' },
         { id: 'run-cfa', name: '运行脚手架', ident: 'runCreateFumadocsApp' },
-        { id: 'create-site', name: '建站写盘', ident: 'createSite' },
+        { id: 'create-site', name: '建站写入文件', ident: 'createSite' },
       ],
     },
     {
@@ -174,7 +174,7 @@ export const pluginGraph = defineSeamGraph({
     },
     {
       id: 'packages',
-      name: 'docfirst 的 npm 包',
+      name: '本仓的 npm 包',
       pkg: '装进新站',
       role: null,
       outside: true,
@@ -226,7 +226,7 @@ export const pluginGraph = defineSeamGraph({
       iface: "cli.register({ name, description, usage, plugin }, handler)；inject = ['gwbCommands']",
       convention: false,
       via: 'code',
-      text: 'docfirst.create 与 docfirst.create-plain 登记在命令总线上，description 与 usage 是 agent 唯一看得见的说明，回执各字段的意思也写在 usage 里。agent 经 MCP 入口按命令名调用；处理函数回 { ok: true, data } 或 { ok: false, error }。',
+      text: 'docfirst.create 与 docfirst.create-plain 登记在命令总线上，description 与 usage 是 agent 唯一看得见的说明，回执各字段的意思也写在 usage 里。agent 经 MCP 入口按命令名调用；处理函数返回 { ok: true, data } 或 { ok: false, error }。',
     },
     {
       n: 2,
@@ -236,7 +236,7 @@ export const pluginGraph = defineSeamGraph({
       iface: "ctx.inject(['gwbSkills'], …) → gwbSkills.register(new URL('../skills/', import.meta.url))",
       convention: false,
       via: 'code',
-      text: '说明书走可选注入：没装 skills 插件的 home 里插件照常加载。插件只交出包根 skills/ 目录的地址，扫描目录、读每份 SKILL.md 的是 skills 插件。产物在 dist/ 下，所以 ../skills/ 就是包根的 skills/。',
+      text: '说明书用可选注入：没装 skills 插件的 home 里插件照常加载。插件只交出包根 skills/ 目录的地址，扫描目录、读每份 SKILL.md 的是 skills 插件。产物在 dist/ 下，所以 ../skills/ 就是包根的 skills/。',
     },
     {
       n: 3,
@@ -246,7 +246,7 @@ export const pluginGraph = defineSeamGraph({
       iface: "cli.run('settings.get', { section: 'unit-folder', key: 'units-root' })",
       convention: false,
       via: 'code',
-      text: '容器根是单元文件夹插件的设置，每次建站都重新读，因为设置随时可能改。回复不 ok 或没配，原因写进回执，建站照常，端口只在站目录的祖父目录里查重。',
+      text: '容器根是单元文件夹插件的设置，每次建站都重新读，因为设置随时可能改。回复不 ok 或没配置，原因写进回执，建站照常，端口只在站目录的祖父目录里查重。',
     },
     {
       n: 4,
@@ -256,7 +256,7 @@ export const pluginGraph = defineSeamGraph({
       iface: 'parseCreateArgs(command, raw) → { ok: true, args: CreateArgs } | { ok: false, error }',
       convention: false,
       via: 'code',
-      text: '参数是外部输入，建站命令用同一个函数校验，不对就把错误原样回给调用方、不建站。校验过的 CreateArgs 另带 repoDir，就是站目录的上一级。',
+      text: '参数是外部输入，建站命令用同一个函数校验，不对就把错误原样返回给调用方、不建站。校验过的 CreateArgs 另带 repoDir，就是站目录的上一级。',
     },
     {
       n: 5,
@@ -276,7 +276,7 @@ export const pluginGraph = defineSeamGraph({
       iface: 'planCreate({ siteDir, repoManifest, template, title?, port? }) → SiteOptions',
       convention: false,
       via: 'code',
-      text: '只有 docfirst.create 走这里：处理函数读好仓根 package.json 与整套模板传进去，拿回交给 createSite 的选项。docfirst.create-plain 不经过它，选项只有 dir、title、port。',
+      text: '只有 docfirst.create 经过这里：处理函数读好仓根 package.json 与整套模板传进去，得到交给 createSite 的选项。docfirst.create-plain 不经过它，选项只有 dir、title、port。',
     },
     {
       n: 7,
@@ -316,7 +316,7 @@ export const pluginGraph = defineSeamGraph({
       iface: '模板只 import docfirst-workflow/mdx、docfirst-fumadocs 与它的 /roster、/pre、/light.css',
       convention: true,
       via: 'disk',
-      text: '插件对 docfirst 的 npm 包零依赖：三档依赖都不写，源码不 import，tests/artifact.test.ts 检查。所以模板里 import 的出口、依赖表里的包名只能靠约定对上：tests/create.test.ts 检查模板引用的出口都在允许的清单里、所在的包都在依赖表里。',
+      text: '插件对本仓的 npm 包零依赖：dependencies、devDependencies、peerDependencies 都不写，源码不 import，tests/artifact.test.ts 检查。所以模板里 import 的出口、依赖表里的包名只能靠约定对上：tests/create.test.ts 检查模板引用的出口都在允许的清单里、所在的包都在依赖表里。',
     },
     {
       n: 11,
@@ -326,7 +326,7 @@ export const pluginGraph = defineSeamGraph({
       iface: 'FileChanges：addFiles / replaceFiles / removeFiles；ManifestAdditions：devDependencies / scripts / description',
       convention: false,
       via: 'code',
-      text: 'applyChanges 先把三张清单全部查完再改：新增的在官方输出里不能已有，替换与删除的必须有、且不能是本机约定改过的文件，路径要相对站目录、不越出去。有问题一次列全、一个文件都不改。依赖与脚本合进 package.json，跟已有的键重名就报错。',
+      text: 'applyChanges 先把三张清单全部查完再改：新增的在官方输出里不能已有，替换与删除的必须有、且不能是本机约定改过的文件，路径要相对站目录、不越出去。有问题一次列全、一个文件都不改。依赖与脚本合并进 package.json，跟已有的键重名就报错。',
     },
     {
       n: 12,
@@ -336,7 +336,7 @@ export const pluginGraph = defineSeamGraph({
       iface: 'createSite(options: SiteOptions) → SiteResult',
       convention: false,
       via: 'code',
-      text: 'docfirst.create 与 docfirst.create-plain 调同一个 createSite，差别只在传进去的选项。createSite 抛出的错由 runCreate 接住，补上命令名回给调用方；回执里的站目录、端口、写了哪些文件、端口查重结果都从 SiteResult 取。',
+      text: 'docfirst.create 与 docfirst.create-plain 调同一个 createSite，差别只在传进去的选项。createSite 抛出的错由 runCreate 捕获，补上命令名返回给调用方；回执里的站目录、端口、写了哪些文件、端口查重结果都从 SiteResult 取。',
     },
     {
       n: 13,
@@ -366,7 +366,7 @@ export const pluginGraph = defineSeamGraph({
       iface: 'scanUsedPorts(root) → { used, incomplete }；pickPort(used, prefer?)',
       convention: false,
       via: 'code',
-      text: 'planSite 在查重范围里调 scanUsedPorts，拿回别的站占用的端口与没读成的地方；pickPort 给了端口就用给的，没给从 4310 起挑第一个空闲的，全被占了就报错。给的端口已被占用只写进 portTakenBy，不替人改。',
+      text: 'planSite 在查重范围里调 scanUsedPorts，得到别的站占用的端口与没读取成功的位置；pickPort 给了端口就用给的，没给从 4310 起挑第一个空闲的，全被占了就报错。给的端口已被占用只写进 portTakenBy，不替人改。',
     },
     {
       n: 16,
@@ -376,7 +376,7 @@ export const pluginGraph = defineSeamGraph({
       iface: 'package.json 的 scripts 里 next dev / next start … -p <端口>',
       convention: true,
       via: 'disk',
-      text: '按脚本内容认，不按目录名认：扫深三层内的每份 package.json，跳过 node_modules 与点目录。读不成的目录或文件记进 incomplete，写进回执的 portScanIncomplete，不让建站失败。',
+      text: '按脚本内容认，不按目录名认：扫描三层深度以内的每份 package.json，跳过 node_modules 与点目录。读取失败的目录或文件记进 incomplete，写进回执的 portScanIncomplete，不让建站失败。',
     },
     {
       n: 17,
@@ -386,7 +386,7 @@ export const pluginGraph = defineSeamGraph({
       iface: 'execFile：pnpm dlx CREATE_FUMADOCS_APP <站目录名> …SCAFFOLD_ARGS，timeout: SCAFFOLD_TIMEOUT_MS',
       convention: false,
       via: 'code',
-      text: '插件唯一的子进程，带超时、要联网；Windows 上经 cmd.exe 启动 pnpm。生成到系统临时目录下新建的目录，跑完没有 package.json 就报错；生成的文件读进内存后，临时目录总会删掉。',
+      text: '插件唯一的子进程，带超时、要联网；Windows 上经 cmd.exe 启动 pnpm。生成到系统临时目录下新建的目录，运行完没有 package.json 就报错；生成的文件读进内存后，临时目录总会删掉。',
     },
     {
       n: 18,
@@ -400,7 +400,7 @@ export const pluginGraph = defineSeamGraph({
     },
     {
       n: 19,
-      name: '写盘',
+      name: '写入文件',
       a: ['create-site'],
       b: ['site-dir'],
       iface: 'fs.writeFileSync 逐个写 SitePlan.files；失败时 fs.rmSync(plan.target, { recursive: true, force: true })',

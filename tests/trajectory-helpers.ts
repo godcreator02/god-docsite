@@ -1,12 +1,12 @@
 /**
- * 轨迹测试共用的最小积木：时间轴、合法卡的默认 frontmatter、内存造卡。
- * 内存造卡不绕开卡格式：把 frontmatter 渲染回 markdown 文本、再走真实的 parseCardFile / scanCards。
+ * 轨迹测试共用的辅助函数：时间轴、合法卡的默认 frontmatter、内存造卡。
+ * 内存造卡不绕开卡格式：把 frontmatter 渲染回 markdown 文本、再交给真实的 parseCardFile / scanCards。
  */
 import { parseCardFile, scanCards } from "@godcreator/docfirst-workflow/cards";
 import type { CardScan, Problem, SickFile } from "@godcreator/docfirst-workflow/cards";
-import type { DiskInput } from "@godcreator/docfirst-trajectory";
+import type { DiskInput } from "@godcreator/trajectory-disk";
 
-/** 一月内的分钟级 born-at，合成 fixture 铺时间轴用。 */
+/** 一月内的分钟级 born-at，合成 fixture 时用来排时间先后。 */
 export const D = (day: number): string => `2026-01-${String(day).padStart(2, "0")}T08:00`;
 
 /** 一月内某日的天序数，跟 D() 的日期部分对齐。 */
@@ -19,7 +19,7 @@ export interface CardSpec {
   body?: string;
 }
 
-/** 合法内卡的默认 frontmatter（fm 可覆盖造病卡）；关系边走 body inline field。 */
+/** 合法内卡的默认 frontmatter（fm 可覆盖造病卡）；关系边写在正文的 inline field 里。 */
 export const card = (
   name: string,
   fm: Record<string, string | string[]>,
@@ -41,7 +41,7 @@ export const root = (
   ...(extra?.body !== undefined ? { body: extra.body } : {}),
 });
 
-/** frontmatter 渲染回文本：列表走块式（带引号，与真实卡同形），空列表走流式 `[]`。 */
+/** frontmatter 渲染回文本：列表用块式（带引号，与真实卡同形），空列表用流式 `[]`。 */
 function renderFrontmatter(fm: Record<string, string | string[]>): string {
   const lines: string[] = [];
   for (const [key, value] of Object.entries(fm)) {
@@ -56,23 +56,23 @@ function renderFrontmatter(fm: Record<string, string | string[]>): string {
   return lines.join("\n");
 }
 
-/** 一张卡渲回文件全文：frontmatter + 空行 + 正文 */
+/** 一张卡渲染回文件全文：frontmatter + 空行 + 正文 */
 export function renderCard(spec: CardSpec): string {
   return `---\n${renderFrontmatter(spec.fm)}\n---\n\n${spec.body ?? ""}\n`;
 }
 
-/** 内存造一批卡整批走 scanCards：中性输入加病卡清单。 */
+/** 内存造一批卡整批交给 scanCards：返回中性输入加病卡清单。 */
 export function memScan(specs: CardSpec[]): CardScan {
   return scanCards(specs.map((spec) => ({ name: `${spec.name}.md`, text: renderCard(spec) })));
 }
 
-/** 内存造一批卡，交回星轨盘的中性输入（盘心加画得出来的卡）。 */
+/** 内存造一批卡，返回星轨盘的中性输入（盘心加画得出来的卡）。 */
 export function memCards(specs: CardSpec[]): DiskInput {
   const { center, cards } = memScan(specs);
   return { center, cards };
 }
 
-/** 内存造卡的单文件报病清单（按文件归拢，只跑 parseCardFile，不含跨文件校验）。 */
+/** 内存造卡的单文件报病清单（按文件归拢，只调用 parseCardFile，不含跨文件校验）。 */
 export function memSick(specs: CardSpec[]): SickFile[] {
   const sick: SickFile[] = [];
   for (const spec of specs) {
@@ -84,7 +84,7 @@ export function memSick(specs: CardSpec[]): SickFile[] {
   return sick;
 }
 
-/** 一批卡整批走 scanCards 的报病清单：单文件的病加跨文件校验（根卡几张、parent 指不指向根卡）。 */
+/** 一批卡整批交给 scanCards 得到的报病清单：单文件的病加跨文件校验（根卡几张、parent 指不指向根卡）。 */
 export function scanSick(specs: CardSpec[]): SickFile[] {
   return memScan(specs).sick;
 }

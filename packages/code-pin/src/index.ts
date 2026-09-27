@@ -1,9 +1,9 @@
 /**
- * 钉码包 `@godcreator/docfirst-pin` 的唯一出口。**只用 `node:crypto`**——它不读文件、不启动子进程、
+ * 钉码包 `@godcreator/code-pin` 的唯一出口。**只用 `node:crypto`**——它不读文件、不启动子进程、
  * 不接触文档文本，只收目标与记录，看到的一切都是别人传进来的。
  *
  * types 是接口正本，span / diff 是纯函数，compare 是比较器，pinner 是对外的核对与确认。
- * 这个包不依赖任何别的包，自己也只 import 自己（`tests/boundary.test.ts` 守着）。
+ * 这个包不依赖任何别的包，自己也只 import 自己（由 `tests/boundary.test.ts` 检查）。
  */
 
 export { fileOf, REASON_TEXT } from "./types.ts";

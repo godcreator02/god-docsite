@@ -1,6 +1,6 @@
 import { defineConfig } from "tsdown";
 
-// 两个入口各自独立构建：`./text` 由 docfirst.config.mjs 在 Node 里加载，不能带 "use client"，也不能 import react；
+// 两个入口各自独立构建：`./text` 由站在 Node 里生成机读版时加载，不能带 "use client"，也不能 import react；
 // 合成一次构建的话，两边共用的代码会被拆进共享 chunk，入口上的指令管不到它。
 // platform 用 node 只为了让产物是 .mjs 后缀（跟 package.json 的 exports 对得上），两个入口都不碰 node 内置模块。
 export default defineConfig([

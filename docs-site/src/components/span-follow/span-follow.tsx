@@ -5,8 +5,8 @@
  * 都由进度算出来，拖到哪一刻都画得出来。讲解文字与数据都在 span-follow.data.mjs，机读版由 span-follow.ai.mjs 读同一份数据生成。
  */
 import type { CSSProperties, JSX, ReactNode } from 'react';
-import { CodeLines, Dot, Pane, Pill, Terminal, Timeline } from '@godcreator/docs-explain';
-import type { Role, TerminalLine, TimelineFrame, Tone } from '@godcreator/docs-explain';
+import { CodeLines, Dot, Pane, Pill, Terminal, Timeline } from '@godcreator/explainer-player';
+import type { Role, TerminalLine, TimelineFrame, Tone } from '@godcreator/explainer-player';
 import {
   catFile,
   chapters,
@@ -464,7 +464,7 @@ function Detail({ frame }: { frame: Frame }): JSX.Element {
           />
           <Reveal p={p} at={0.62}>
             <Calc>
-              回话头一行是完整对象名、类型、字节数 {recorded.bytes}；按字节数切出后面的内容，就是确认时的 greet.ts（左上）。
+              输出的头一行是完整对象名、类型、字节数 {recorded.bytes}；按字节数截取后面的内容，就是确认时的 greet.ts（左上）。
             </Calc>
           </Reveal>
         </>

@@ -1,7 +1,7 @@
 /**
  * 「行段引用怎么跟着代码挪位置」的全部讲解数据：画面（span-follow.tsx）与机读版规则（span-follow.ai.mjs）都只读这一份。
  * 例子跟钉码页（pin/story.data.mjs）是同一个 greet.ts。hash、blob、hunk 表、滑窗里每个窗口的 hash 都是拿
- * docfirst-pin 的 hashSpan / blobOf / parseHunks / mapRange / findSpan 对这两版文件真算出来的，
+ * code-pin 的 hashSpan / blobOf / parseHunks / mapRange / findSpan 对这两版文件真算出来的，
  * git diff 与 git cat-file 的输出是对同样两份内容真跑 git 得到的。
  */
 
@@ -16,7 +16,7 @@ export const newCode = ['// 打招呼', '// 用法：greet("世界")', '// 返�
 /** 今天的文件里新插进来的行号 */
 export const insertedLines = [2, 3];
 
-/** 确认时写在记号上的三个值；blobFull 与 bytes 是 git cat-file 回话头一行里的完整对象名与字节数 */
+/** 确认时写在记号上的三个值；blobFull 与 bytes 是 git cat-file 输出头一行里的完整对象名与字节数 */
 export const recorded = {
   lines: /** @type {[number, number]} */ ([2, 3]),
   hash: '3eb99c2e88e2',
@@ -46,7 +46,7 @@ export const markers = {
 };
 
 /** 记号上三个值各是怎么算的（span.ts 的 hashSpan、blobOf、normalizeLines） */
-/* ref file="../packages/docfirst-pin/src/span.ts" lines="21-57" hash="f969251f74d4" blob="23033c685517" */
+/* ref file="../packages/code-pin/src/span.ts" lines="21-57" hash="f969251f74d4" blob="23033c685517" */
 export const recordFields = [
   { name: 'lines', value: `${recorded.lines[0]}-${recorded.lines[1]}`, how: '被钉的行号，1 起、含两端' },
   { name: 'hash', value: recorded.hash, how: '这几行换行统一成 LF、去掉行尾空白后，sha256 取前 12 位' },
@@ -54,8 +54,8 @@ export const recordFields = [
 ];
 
 /** judgeSpan 判行段的顺序，前一步能下结论就不往下走（compare.ts） */
-/* ref file="../packages/docfirst-pin/src/compare.ts" lines="6-14" hash="a033f65b0f3e" blob="a2a505a8ece0" */
-/* ref file="../packages/docfirst-pin/src/compare.ts" lines="65-91" hash="cf90a3576cdf" blob="f5272b0530fa" */
+/* ref file="../packages/code-pin/src/compare.ts" lines="6-14" hash="a033f65b0f3e" blob="a2a505a8ece0" */
+/* ref file="../packages/code-pin/src/compare.ts" lines="65-91" hash="cf90a3576cdf" blob="f5272b0530fa" */
 export const judgeOrder = [
   { id: 'here', label: '记号上的行号处 hash 相同' },
   { id: 'blob', label: '今天整个文件的 blob 相同' },
@@ -64,7 +64,7 @@ export const judgeOrder = [
 ];
 
 /** 按 blob 从对象库取旧文件：命令写成等价的 shell，check 里是把 blob 写进 git cat-file --batch 的标准输入 */
-/* ref file="../packages/docfirst-workflow/src/project/git.ts" lines="87-110" hash="58240822df6b" blob="0a80b545c484" */
+/* ref file="../packages/docfirst-workflow/src/project/git.ts" lines="87-110" hash="078f7f5e5a75" blob="834127e543cf" */
 export const catFile = {
   command: `echo ${recorded.blob} | git cat-file --batch`,
   found: `${recorded.blobFull} blob ${recorded.bytes}`,
@@ -72,7 +72,7 @@ export const catFile = {
 };
 
 /** 两份内容写成临时文件 old、new 之后跑的 diff，以及它的完整输出 */
-/* ref file="../packages/docfirst-workflow/src/project/git.ts" lines="153-187" hash="602913b7a3fd" blob="0a80b545c484" */
+/* ref file="../packages/docfirst-workflow/src/project/git.ts" lines="153-187" hash="8debd8fc4e0d" blob="834127e543cf" */
 export const diffCommand = 'git diff --no-index -U0 --no-color -- old new';
 export const diffOutput = [
   'diff --git a/old b/new',
@@ -84,14 +84,14 @@ export const diffOutput = [
   '+// 返回一句问候',
 ];
 /** parseHunks 从上面那行 @@ 解析出的 hunk 表 */
-/* ref file="../packages/docfirst-pin/src/diff.ts" lines="19-31" hash="76da0e06819b" blob="288622632c90" */
+/* ref file="../packages/code-pin/src/diff.ts" lines="19-31" hash="76da0e06819b" blob="288622632c90" */
 export const hunks = [{ oldStart: 1, oldLen: 0, newStart: 2, newLen: 2 }];
 /** mapRange(hunks, 2, 3) 的返回值 */
-/* ref file="../packages/docfirst-pin/src/diff.ts" lines="33-85" hash="99df21e531b1" blob="288622632c90" */
+/* ref file="../packages/code-pin/src/diff.ts" lines="33-85" hash="99df21e531b1" blob="288622632c90" */
 export const mapped = '{ touched: false, start: 4, end: 5 }';
 
 /** 取不到旧文件时，findSpan 在今天的文件里逐个窗口算出的 hash（窗口高度等于记号上的行数） */
-/* ref file="../packages/docfirst-pin/src/compare.ts" lines="34-53" hash="a53b5891c4bc" blob="f5272b0530fa" */
+/* ref file="../packages/code-pin/src/compare.ts" lines="34-53" hash="a53b5891c4bc" blob="f5272b0530fa" */
 export const windows = [
   { start: 1, hash: '9e26e5478323' },
   { start: 2, hash: '8f3849e2f53a' },
@@ -143,7 +143,7 @@ export const chapters = [
     id: 'quick',
     title: 'check 先看能不能直接下结论',
     text:
-      `judgeSpan 按固定顺序判，前一步能下结论就不往下走。第一步：切出记号上的第 2–3 行算 hash，得 ${today.hashAtRecordedLines}，` +
+      `judgeSpan 按固定顺序判，前一步能下结论就不往下走。第一步：取出记号上的第 2–3 行算 hash，得 ${today.hashAtRecordedLines}，` +
       `跟记号上的 ${recorded.hash} 不同。第二步：算今天整个文件的 blob，得 ${today.blob}，跟记号上的 ${recorded.blob} 不同——` +
       '文件变过，要拿确认时的文件来对位置。',
     duration: 6,
@@ -154,7 +154,7 @@ export const chapters = [
     title: '按 blob 从 git 取回确认时的整个文件',
     text:
       `check 从 ${REF} 所在的目录往上找到第一个 .git，把记号上的 blob 交给 git cat-file --batch。对象库里有这个对象，` +
-      `回话头一行是完整对象名、类型 blob、字节数 ${recorded.bytes}，后面按字节数切出内容，就是确认时的 greet.ts。` +
+      `输出的头一行是完整对象名、类型 blob、字节数 ${recorded.bytes}，后面按字节数截取内容，就是确认时的 greet.ts。` +
       '同一次 check 里同一个 blob 只取一次。',
     duration: 6,
     terminal: [{ ...checkCommand, at: 0 }],
@@ -183,7 +183,7 @@ export const chapters = [
     id: 'rehash',
     title: '重算这几行的 hash：跟记号上的相同，绿',
     text:
-      `切出今天的第 4–5 行，按同一套归一化算 hash，得 ${today.hash}，跟记号上的相同：状态是新鲜，行号跟到 4–5。` +
+      `取出今天的第 4–5 行，按同一套归一化算 hash，得 ${today.hash}，跟记号上的相同：状态是新鲜，行号跟到 4–5。` +
       'check 的输出里写的还是记号上的 2-3，它不改文件。hash 不同就是有变动（黄），页面上把旧的几行和新的几行放在一起。',
     duration: 5,
     terminal: [
@@ -204,7 +204,7 @@ export const chapters = [
     id: 'scan',
     title: '取不到旧文件：在整个文件里找 hash 相同的那段',
     text:
-      `另一种情况：confirm 之后没提交就又改了文件，记号上的 blob ${recorded.blob} 从没进过对象库，cat-file 回 missing（仓按 CRLF 存时也会这样）。` +
+      `另一种情况：confirm 之后没提交就又改了文件，记号上的 blob ${recorded.blob} 从没进过对象库，cat-file 输出 missing（仓按 CRLF 存时也会这样）。` +
       '没有旧文件就没有 hunk 表，findSpan 拿一个跟记号上行数一样高的窗口从第 1 行滑到最后，逐个算 hash，只认等于记号上 hash 的窗口，' +
       '取离原行号最近的那处：这里只有第 4–5 行，绿，行号跟到 4–5。找不到、或两处离原行号一样近，就是黄，' +
       '理由是位置不明，要人重读源码后 --accept；记号上的行号已经超出今天的文件时是红。',

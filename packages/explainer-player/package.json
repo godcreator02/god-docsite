@@ -1,19 +1,19 @@
 {
-  "name": "@godcreator/docfirst-trajectory",
-  "version": "0.1.1",
+  "name": "@godcreator/explainer-player",
+  "version": "0.1.0",
   "author": {"name": "godcreator"},
   "type": "module",
-  "description": "星轨盘：收盘心加一组卡的中性输入，建模、布局与画布。`.` 入口是零 import 的建模与类型，`./disk` 是客户端组件 StarDisk，随 docfirst 线发。",
+  "description": "讲解播放器：把一段讲解拆成若干帧、每帧配一句说明，用固定的控制条播放和切换。分步、动画、选情况三种外壳，面板、终端、胶囊、代码行等画帧用的零件，共用一套样式。`.` 是客户端组件，`./text` 把各帧的说明转成机读版的文字。",
   "exports": {
     ".": {
       "types": "./dist/index.d.mts",
       "default": "./dist/index.mjs"
     },
-    "./disk": {
-      "types": "./dist/disk.d.mts",
-      "default": "./dist/disk.mjs"
+    "./text": {
+      "types": "./dist/text.d.mts",
+      "default": "./dist/text.mjs"
     },
-    "./star.css": "./styles/star.css"
+    "./styles.css": "./styles/explain.css"
   },
   "files": [
     "dist",
@@ -26,11 +26,6 @@
   },
   "peerDependencies": {
     "react": ">=19"
-  },
-  "peerDependenciesMeta": {
-    "react": {
-      "optional": true
-    }
   },
   "devDependencies": {
     "@types/react": "^19.3.0",

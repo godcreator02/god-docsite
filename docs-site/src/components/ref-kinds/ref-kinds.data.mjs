@@ -1,15 +1,15 @@
 /**
  * 「引用能指向哪几类东西」的全部讲解数据：画面（ref-kinds.tsx）与机读版规则（ref-kinds.ai.mjs）都只读这一份。
  * 例子跟钉码页是同一个仓：content/docs/a.mdx 引用 src/greet.ts，src/ 下有 greet.test.ts、greet.ts、index.ts。
- * 记号写法照 docfirst-workflow 的 marker/index.ts；比什么照 docfirst-pin 的 compare.ts；命令行那一行照 docfirst-workflow 的 cli/run.ts
- * 与 docfirst-pin types.ts 里的 REASON_TEXT；站上长什么样照 docfirst-fumadocs 的 blocks.ts 与 pre.tsx。
- * hash 与 blob 是用 docfirst-pin 的 span.ts 对这版 greet.ts 与这张名字表真算出来的。
+ * 记号写法照 docfirst-workflow 的 marker/index.ts；比什么照 code-pin 的 compare.ts；命令行那一行照 docfirst-workflow 的 cli/run.ts
+ * 与 code-pin types.ts 里的 REASON_TEXT；站上长什么样照 docfirst-fumadocs 的 blocks.ts 与 pre.tsx。
+ * hash 与 blob 是用 code-pin 的 span.ts 对这版 greet.ts 与这张名字表真算出来的。
  *
  * @typedef {'fresh' | 'changed' | 'missing' | 'unconfirmed'} Status
  * @typedef {{ type: 'code', title: string, start: number | null, lines: string[] }} CodeSite
  *   普通代码块；start 是 lineNumbers，null 表示不带行号
  * @typedef {{ type: 'diff', title: string, lines: Array<[' ' | '-' | '+', string]> }} DiffSite
- *   旧行新行渲在同一块里，不带行号
+ *   旧行新行显示在同一块里，不带行号
  * @typedef {{ type: 'tree', root: string, names: string[], gone: boolean }} TreeSite
  * @typedef {CodeSite | DiffSite | TreeSite} Site
  * @typedef {{ id: string, status: Status, blocking?: true, when: string, cli: string, site: Site }} Outcome
@@ -31,13 +31,13 @@ const NORMALIZE = '算之前先归一化：换行统一成 LF、去掉每行行�
 
 /** @type {RefKind[]} */
 /* ref file="../packages/docfirst-workflow/src/marker/index.ts" lines="19-49" hash="a65b6baa8846" blob="7b1527430cf9" */
-/* ref file="../packages/docfirst-pin/src/span.ts" lines="21-39" hash="8d9f8b1618fa" blob="23033c685517" */
-/* ref file="../packages/docfirst-pin/src/compare.ts" lines="65-113" hash="74b12acad0bd" blob="f5272b0530fa" */
-/* ref file="../packages/docfirst-workflow/src/project/fs-reader.ts" lines="1-7" hash="47320c54fcd0" blob="34d9e87c179c" */
+/* ref file="../packages/code-pin/src/span.ts" lines="21-39" hash="8d9f8b1618fa" blob="23033c685517" */
+/* ref file="../packages/code-pin/src/compare.ts" lines="65-113" hash="74b12acad0bd" blob="f5272b0530fa" */
+/* ref file="../packages/docfirst-workflow/src/project/fs-reader.ts" lines="1-7" hash="d7f39c660a9c" blob="5b1604322176" */
 /* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="38-44" hash="9ebfdcac2bf1" blob="418434ff646c" */
 /* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="275-280" hash="a11866d4fa45" blob="418434ff646c" */
-/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="296-303" hash="85058fb75fad" blob="418434ff646c" */
-/* ref file="../packages/docfirst-pin/src/types.ts" lines="80-85" hash="70feff6a62c9" blob="32a0167e8d8f" */
+/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="296-303" hash="23ad1504ef64" blob="ff2e6b7ae7d3" */
+/* ref file="../packages/code-pin/src/types.ts" lines="80-85" hash="70feff6a62c9" blob="32a0167e8d8f" */
 /* ref file="../packages/docfirst-fumadocs/src/blocks.ts" lines="24-37" hash="c3224ec6e495" blob="19f00626cf69" */
 /* ref file="../packages/docfirst-fumadocs/src/blocks.ts" lines="47-61" hash="8a889ba101b1" blob="19f00626cf69" */
 /* ref file="../packages/docfirst-fumadocs/src/blocks.ts" lines="156-185" hash="48c366c0543b" blob="19f00626cf69" */
@@ -97,7 +97,7 @@ export const kinds = [
         id: 'blocking',
         status: 'changed',
         blocking: true,
-        when: '黄灯，而且 src/greet.ts 在本仓有未提交的改动：是这次改动引起的，check 按红算、退 1；站上仍是黄',
+        when: '黄灯，而且 src/greet.ts 在本仓有未提交的改动：是这次改动引起的，check 按红算、退出码 1；站上仍是黄',
         cli: `🔴 content/docs/a.mdx  src/greet.ts:2-3  有变动，是本仓还没提交的改动引起的${BLOCKING_TAIL}`,
         site: {
           type: 'diff',
@@ -164,7 +164,7 @@ export const kinds = [
         id: 'blocking',
         status: 'changed',
         blocking: true,
-        when: '黄灯，而且 src/greet.ts 在本仓有未提交的改动：check 按红算、退 1；站上仍是黄',
+        when: '黄灯，而且 src/greet.ts 在本仓有未提交的改动：check 按红算、退出码 1；站上仍是黄',
         cli: `🔴 content/docs/a.mdx  src/greet.ts:all  有变动，是本仓还没提交的改动引起的${BLOCKING_TAIL}`,
         site: {
           type: 'diff',
@@ -184,7 +184,7 @@ export const kinds = [
   {
     id: 'tree',
     label: '目录树',
-    text: '钉住一个目录下有哪些名字：depth 默认 1 只列直接子项，glob 只留名字匹配的。记号只记名字表的 hash，不存旧名字表：多了、少了、改名都只知道「变了」，站上摆今天的名字表。文件内容不参与。',
+    text: '钉住一个目录下有哪些名字：depth 默认 1 只列直接子项，glob 只留名字匹配的。记号只记名字表的 hash，不存旧名字表：多了、少了、改名都只知道「变了」，站上显示今天的名字表。文件内容不参与。',
     formal: ['{/* tree dir="src" depth="1" hash="8f9bf9539c42" */}'],
     written: ['{/* tree dir="src" */}'],
     writtenNote: '可带 depth="2"、glob="*.test.ts"',
@@ -217,7 +217,7 @@ export const kinds = [
         id: 'blocking',
         status: 'changed',
         blocking: true,
-        when: '黄灯，而且 src/ 下有未提交的改动：check 按红算、退 1；站上仍是黄',
+        when: '黄灯，而且 src/ 下有未提交的改动：check 按红算、退出码 1；站上仍是黄',
         cli: `🔴 content/docs/a.mdx  tree src depth=1  有变动，是本仓还没提交的改动引起的（4 项）${BLOCKING_TAIL}`,
         site: { type: 'tree', root: 'src/', names: NAMES_PLUS, gone: false },
       },

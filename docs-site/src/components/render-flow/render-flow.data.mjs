@@ -91,8 +91,8 @@ export const refusalLines = [
 /** 上面几行里渲染不了的那几行的行号 */
 export const refusalBadLines = [17, 19, 21];
 /* ref file="../packages/docfirst-workflow/src/mdx/render.ts" lines="68-104" hash="3c00e366b1d8" blob="ddfb59043229" */
-/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="207-212" hash="d77611f10efb" blob="418434ff646c" */
-/* ref file="../packages/docfirst-pin/src/types.ts" lines="80-85" hash="70feff6a62c9" blob="32a0167e8d8f" */
+/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="207-212" hash="8a59b2bce6d3" blob="ff2e6b7ae7d3" */
+/* ref file="../packages/code-pin/src/types.ts" lines="80-85" hash="70feff6a62c9" blob="32a0167e8d8f" */
 export const refusalMessage =
   `🔴 ${files.source} → ${files.output}  正本渲染不了：` +
   '第 17 行的引用缺失（文件不在了），先修好；第 19 行有组件 <Callout>，生成正本只写 markdown；' +
@@ -103,8 +103,8 @@ export const refusalMessage =
  * @typedef {{ text: string, kind: 'cmd' | 'out' | 'ok' | 'err', at: number }} TimedLine
  * @type {Record<'render' | 'check' | 'refuse', TimedLine[]>}
  */
-/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="343-357" hash="0d0da5c61ab5" blob="418434ff646c" */
-/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="334-341" hash="c28d8799272e" blob="418434ff646c" */
+/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="343-357" hash="5a3bbda3cd7c" blob="ff2e6b7ae7d3" */
+/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="334-341" hash="285682472e47" blob="ff2e6b7ae7d3" */
 /* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="38-44" hash="9ebfdcac2bf1" blob="418434ff646c" */
 export const terminals = {
   render: [
@@ -153,7 +153,7 @@ export const chapters = [
     id: 'strip',
     title: '去掉 frontmatter，其余逐字节照抄',
     text:
-      'renderAi 先把 CRLF 换成 LF，再把整段 frontmatter 连同它后面的一个换行切掉；写入落点之前再去掉开头剩下的空行。' +
+      'renderAi 先把 CRLF 换成 LF，再把整段 frontmatter 连同它后面的一个换行去掉；写入落点之前再去掉开头剩下的空行。' +
       '除了 frontmatter 和记号，正文一个字节都不改：标题、空行、句子原样留下。第 11 行的记号这时还没动。',
     duration: 7,
   },

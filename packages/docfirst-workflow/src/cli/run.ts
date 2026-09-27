@@ -1,20 +1,20 @@
 /**
- * docfirst 的动作，编排在这儿。可执行那一头在 cli.ts——测试直接调 main，不用起子进程。
+ * docfirst 的动作，编排在这儿。命令行入口在 cli.ts——测试直接调用 main，不用启动子进程。
  * cwd 就是项目根（那里有 docfirst.config.mjs）。核对与确认的对象是现状区的文件（分区见 project/load.ts）：
  * mdx 页面与 src/components/ 下讲解组件的源码逐个处理；名册检查与生成物摆放只对 mdx 页面。
- *   docfirst check [--json]                 核对：只读，红退 1；被钉文件在文档所在的仓里有未提交改动的黄也算红
- *                                          （这次改动引起的，同一个提交里处理）；挂了 outputs 映射的文档顺手守生成物新鲜度；
- *                                          顺手跑内容根下 trajectory/ 的卡校验，病卡也算红。--json 出整份
+ *   docfirst check [--json]                 核对：只读，有红时退出码 1；被钉文件在文档所在的仓里有未提交改动的黄也算红
+ *                                          （这次改动引起的，同一个提交里处理）；有 outputs 映射的文档同时检查生成物是否新鲜；
+ *                                          同时校验内容根下 trajectory/ 的轨迹卡，病卡也算红。--json 输出整份
  *                                          机读报告（形状见 report.ts），退出码不变
- *   docfirst confirm [文档路径…]            机械写回：未确认的记上记录、挪了位置的写回新行号，再把挂了 outputs
- *                                          映射的文档重新摆一遍（内容变了才写）。黄灯不动、逐条列出；红的那几处
- *                                          不动、别的照写，有红退 1。带路径就是**按页限定**：只动点名的那几篇
- *   docfirst confirm <文档路径…> --accept   另外把点名页里的黄灯按今天的内容重新记；不点名页报错退 2
- *   docfirst render                         渲染：挂了 outputs 映射的生成正本摆到指定落点；别的文档不渲染
- *   docfirst trajectory [--json]            列轨迹卡那张盘的树与主干；--json 出这张盘的输入（盘心、卡、病卡）与树
- *   docfirst --help | -h | help             打用法，退 0，什么都不动；任一命令后面带 --help / -h 也是
- * 每条命令只收表里认的开关（`FLAGS`），别的开关一律报错退 2、不动手。
- * 给一个新骨架铺各区那件事不在这儿——它只在 agent 手上发生一次、铺的是模板不是判定，归工作台插件
+ *   docfirst confirm [文档路径…]            机械写回：未确认的写上记录、挪了位置的写回新行号，再把有 outputs
+ *                                          映射的文档重新摆放一遍（内容变了才写）。黄灯不动、逐条列出；红的那几处
+ *                                          不动、别的照写，有红时退出码 1。带路径就是**按页限定**：只动点名的那几篇
+ *   docfirst confirm <文档路径…> --accept   另外把点名页里的黄灯按今天的内容重新记；没点名页就报错、退出码 2
+ *   docfirst render                         渲染：有 outputs 映射的生成正本摆放到指定落点；别的文档不渲染
+ *   docfirst trajectory [--json]            列出轨迹卡星轨盘的树与主干；--json 输出星轨盘的输入（盘心、卡、病卡）与树
+ *   docfirst --help | -h | help             打印用法，退出码 0，什么都不改；任一命令后面带 --help / -h 也是
+ * 每条命令只接受表里认的开关（`FLAGS`），别的开关一律报错、退出码 2，什么都不改。
+ * 给新建的站生成各分区初始文件那件事不在这儿——它只由 agent 做一次、生成的是模板不是判定，归工作台插件
  * `@godcreator/gwb-docfirst-workflow` 的 `docfirst.create`。这儿留的全是要在**仓**里发生的：
  * 各仓的 `pnpm doc` 与 CI 跑的就是这几条。
  * 新引用不用命令：在文档里写一行不带记录的正式记号 {/* ref file="src/greet.ts" lines="2-3" *\/}
@@ -22,8 +22,8 @@
  */
 import { existsSync } from "node:fs";
 import { join, relative, sep } from "node:path";
-import { REASON_TEXT } from "@godcreator/docfirst-pin";
-import { buildModel } from "@godcreator/docfirst-trajectory";
+import { REASON_TEXT } from "@godcreator/code-pin";
+import { buildModel } from "@godcreator/trajectory-disk";
 import type { Item, Listing } from "../reference/index.ts";
 import { targetKey } from "../marker/index.ts";
 import { lintComponents, mdxFormat } from "../mdx/index.ts";
@@ -44,8 +44,8 @@ const LABEL: Record<string, string> = {
 };
 
 /**
- * 各命令认的开关。**不在表里的一律拒**：confirm 把 `-` 开头的参数从页名里筛掉，开关若静默吞掉，
- * `confirm --help` 就成了不带页名的全部页确认，而且一声不吭。
+ * 各命令认的开关。**不在表里的一律拒绝**：confirm 把 `-` 开头的参数从页名里筛掉，开关若被静默忽略，
+ * `confirm --help` 就成了不带页名的全部页确认，而且没有任何提示。
  */
 const FLAGS: Record<string, readonly string[]> = {
   check: ["--json"],
@@ -76,7 +76,7 @@ export const USAGE = `docfirst——文档钉代码的核对与确认。在有 d
 
 export async function main(argv: string[]): Promise<number> {
   const [command = "check", ...rest] = argv;
-  // 求助先于一切：带着它什么都不做，哪怕同时写了别的参数
+  // 求助开关最先处理：带着它什么都不做，哪怕同时写了别的参数
   if (HELP_COMMANDS.has(command) || rest.some((arg) => HELP_FLAGS.has(arg))) {
     console.log(USAGE);
     return 0;
@@ -97,7 +97,7 @@ export async function main(argv: string[]): Promise<number> {
     console.error(`${command} 不收文档路径（${positional.join(" ")}）——只有 confirm 能点名页，什么都没动。用法看 docfirst --help`);
     return 2;
   }
-  // trajectory 跟 check / confirm / render 不是一套：它不遍历文档，所以在装配之前就分流
+  // trajectory 跟 check / confirm / render 不是一类：它不遍历文档，所以在装配项目之前就单独处理
   if (command === "trajectory") return trajectoryCommand(rest);
 
   const project = await loadProject(process.cwd());
@@ -113,11 +113,11 @@ export async function main(argv: string[]): Promise<number> {
 }
 
 /**
- * confirm 的全过程：逐篇机械写回，再把挂了 outputs 映射的全部文档重新摆一遍。
+ * confirm 的全过程：逐篇机械写回，再把有 outputs 映射的全部文档重新摆放一遍。
  *
- * 带路径是**按页限定**——只动点名的那几篇：同一个仓里别人钉的黄还等着他复核，顺手签掉就是替别人签字。
- * `--accept` 签的就是黄灯，所以必须点名页；不点名直接退 2，什么都不动。
- * 摆放不按页限定：正本改没改、生成物要不要跟，按内容判，内容没变的落点一个字节都不写。
+ * 带路径是**按页限定**——只动点名的那几篇：同一个仓里别人钉的黄还等着他复核，一并确认掉就是替别人做了复核。
+ * `--accept` 确认的就是黄灯，所以必须点名页；不点名直接以退出码 2 退出，什么都不动。
+ * 摆放不按页限定：正本改没改、生成物要不要跟着更新，按内容判断，内容没变的落点一个字节都不写。
  */
 async function confirmCommand(project: Project, docs: string[], rest: string[]): Promise<number> {
   const accept = rest.includes("--accept");
@@ -142,7 +142,7 @@ async function confirmCommand(project: Project, docs: string[], rest: string[]):
   return red > 0 ? 1 : 0;
 }
 
-/** 点名解析：三种路径写法都收，对不上的当场报错，不静默跳过——少确认一页比报错难发现得多 */
+/** 点名解析：三种路径写法都接受，对不上的当场报错，不静默跳过——少确认一页比报错难发现得多 */
 function pickDocs(project: Project, docs: string[], named: string[]): { docs: string[] } | { unknown: string[] } {
   const alive = new Set(docs);
   const picked: string[] = [];
@@ -155,7 +155,7 @@ function pickDocs(project: Project, docs: string[], named: string[]): { docs: st
   return unknown.length > 0 ? { unknown } : { docs: [...new Set(picked)] };
 }
 
-/** 一篇的机械写回：逐处打一行结果，返回这篇的红（缺失与钉不住的） */
+/** 一篇的机械写回：逐处打印一行结果，返回这篇的红（缺失与钉不住的） */
 function confirm(project: Project, doc: string, accept: boolean): number {
   const { text, changed, steps } = project.pinning.confirmDoc(doc, project.read(doc), { accept });
   if (changed) project.write(doc, text);
@@ -168,7 +168,7 @@ function confirm(project: Project, doc: string, accept: boolean): number {
   return red;
 }
 
-/** 确认时一处引用打成的那一行；原地没动的绿不打 */
+/** 确认时一处引用打印的那一行；位置没变的绿灯不打印 */
 function confirmLine(doc: string, { item, action, written, problem }: ConfirmStep): string | null {
   const key = targetKey(item.reference.target);
   switch (action) {
@@ -189,7 +189,7 @@ function confirmLine(doc: string, { item, action, written, problem }: ConfirmSte
   }
 }
 
-/** 把挂了 outputs 映射的文档重新摆一遍，内容变了的才写、才打一行；返回没摆成的落点数（红） */
+/** 把有 outputs 映射的文档重新摆放一遍，内容变了的才写、才打印一行；返回没摆放成功的落点数（红） */
 function replaceOutputs(project: Project, docs: string[]): number {
   let red = 0;
   for (const doc of docs) {
@@ -204,7 +204,7 @@ function replaceOutputs(project: Project, docs: string[]): number {
   return red;
 }
 
-/** 一个落点没摆成打的那一行：源头部缺点名的字段，或源里有渲染不了的东西；again 是改好之后再跑哪条命令 */
+/** 一个落点没摆放成功时打印的那一行：源头部缺点名的字段，或源里有渲染不了的东西；again 是改好之后再跑哪条命令 */
 function unplacedLine(doc: string, { to, status, missing, reason }: PlacedWrite | OutputReport, again: string): string {
   const head = `🔴 ${doc} → ${to}`;
   if (status === "no-frontmatter") return `${head}  mdx 源的 frontmatter 里没有 ${(missing ?? []).join("、")}——补上再 ${again}`;
@@ -212,8 +212,8 @@ function unplacedLine(doc: string, { to, status, missing, reason }: PlacedWrite 
 }
 
 /**
- * check 的全过程：逐篇核对 → 卡校验，先攒成一份报告再决定怎么出。
- * 人读模式一行一处、边算边打（每篇的行在 check 里就排好了）；`--json` 攒完整份一行打出去。
+ * check 的全过程：逐篇核对 → 卡校验，先汇总成一份报告再决定怎么输出。
+ * 人读模式一行一处、边算边打印（每篇的行在 check 里就排好了）；`--json` 汇总完把整份打印成一行。
  * 两种模式算的是同一份报告——红的口径不可能对不上。
  */
 async function checkCommand(project: Project, docs: string[], json: boolean): Promise<number> {
@@ -236,8 +236,8 @@ async function checkCommand(project: Project, docs: string[], json: boolean): Pr
   return report.ok ? 0 : 1;
 }
 
-/** check 顺带跑的卡校验：轨迹卡目录还没建（scanCardDir 回空）不算红。
- * 每条病一条，path 相对项目根；人读模式打成 `🔴 <path>  <field>：<reason>（<value>）`。 */
+/** check 同时做的卡校验：轨迹卡目录还没建（scanCardDir 返回空结果）不算红。
+ * 每条病一条，path 相对项目根；人读模式打印成 `🔴 <path>  <field>：<reason>（<value>）`。 */
 async function checkTrajectory(project: Project): Promise<CardProblemReport[]> {
   const { sick } = await scanCardDir(project.trajectoryDir);
   const out: CardProblemReport[] = [];
@@ -248,8 +248,8 @@ async function checkTrajectory(project: Project): Promise<CardProblemReport[]> {
   return out;
 }
 
-/** `docfirst trajectory [--json]`：轨迹卡目录还没建报错退 2；`--json` 出这张盘的输入（盘心、卡、病卡）与建模得到的树；
- * 不带 `--json` 打印那一张盘——根卡与上盘卡数，每棵树的主干，再一行汇总支线 / 孤星数。 */
+/** `docfirst trajectory [--json]`：轨迹卡目录还没建就报错、退出码 2；`--json` 输出星轨盘的输入（盘心、卡、病卡）与建模得到的树；
+ * 不带 `--json` 打印星轨盘——根卡与盘上的卡数，每棵树的主干，再一行汇总支线 / 孤星数。 */
 async function trajectoryCommand(rest: string[]): Promise<number> {
   const project = await loadProject(process.cwd());
   if (!existsSync(project.trajectoryDir)) {
@@ -293,7 +293,7 @@ function refReport(item: Item, blocking: boolean): RefReport {
   };
 }
 
-/** 一处引用在人读报告里的那一行；拦提交的黄单独一种说法，打成红 */
+/** 一处引用在人读报告里的那一行；拦提交的黄单独一种说法，打印成红 */
 function itemLine(doc: string, item: Item, blocking: boolean): string {
   const key = targetKey(item.reference.target);
   if (blocking) {
@@ -331,7 +331,7 @@ async function check(project: Project, doc: string, text: string, uncommitted: U
   return { report: { doc, red, items, components, outputs }, lines };
 }
 
-/** 一个落点核对完打成的那一行：每种状态各一句人话，不新鲜的都红 */
+/** 一个落点核对完打印的那一行：每种状态各一句说明，不新鲜的都红 */
 function placedLine(doc: string, output: OutputReport): string {
   const head = `${output.fresh ? "🟢" : "🔴"} ${doc} → ${output.to}`;
   if (output.status === "no-frontmatter" || output.status === "unrenderable") return unplacedLine(doc, output, "render");
@@ -340,7 +340,7 @@ function placedLine(doc: string, output: OutputReport): string {
   return `${head}  生成物跟 mdx 源一致`;
 }
 
-/** 一篇生成正本摆到它的落点：落点是纯生成物，内容变了才写；摆放的全过程归 project，这边只印结果 */
+/** 一篇生成正本摆放到它的落点：落点是纯生成物，内容变了才写；摆放的全过程归 project，这里只打印结果 */
 function render(project: Project, doc: string): number {
   let red = 0;
   for (const one of project.placing.render(doc)) {

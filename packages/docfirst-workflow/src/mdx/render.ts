@@ -1,6 +1,6 @@
 /**
  * 解析与 AI 渲染。
- *   parseTree   自己起 remark 认树：parse / write / 名册检查 / 按原文渲染都用它，不碰 fumadocs
+ *   parseTree   自己调用 remark 解析出语法树：parse / write / 名册检查 / 按原文渲染都用它，不碰 fumadocs
  *   renderAi    生成正本按原文渲染成 md：只动 frontmatter 与记号，别的文字逐字节照抄
  *
  * 站上各页的机读版不走这儿，走 fumadocs 的管线（`@godcreator/docfirst-fumadocs` 的 docfirstMarkdownOptions）。
@@ -9,7 +9,7 @@ import { unified } from "unified";
 import remarkParse from "remark-parse";
 import remarkFrontmatter from "remark-frontmatter";
 import remarkMdx from "remark-mdx";
-import { fileOf, REASON_TEXT } from "@godcreator/docfirst-pin";
+import { fileOf, REASON_TEXT } from "@godcreator/code-pin";
 import type { Item, Listing } from "../reference/index.ts";
 import { langOf } from "./lang.ts";
 import { markerOf } from "./recognize.ts";

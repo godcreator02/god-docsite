@@ -1,15 +1,15 @@
 /**
- * `hashText` 对拍真 git：自己算出来的 blob 名必须跟 `git hash-object --stdin` 逐字节相同。
+ * `hashText` 跟真 git 对照：自己算出来的 blob 名必须跟 `git hash-object --stdin` 逐字节相同。
  *
- * 这条断言是「算哈希不起子进程」的全部依据。它一旦松动，比较器会把没动过的内容判成变了——
- * 整站的绿灯集体翻黄，而且看不出是哈希算错了还是文档真的漂了。
+ * 这条断言是「算哈希不启动子进程」的全部依据。它一旦不成立，比较器会把没动过的内容判成变了——
+ * 整站的绿灯全部变黄，而且看不出是哈希算错了还是文档真的跟代码对不上了。
  */
 
 import { strict as assert } from "node:assert";
 import { execFileSync } from "node:child_process";
 import { tmpdir } from "node:os";
 import { test } from "node:test";
-import { hashText } from "../packages/docfirst-pin/src/index.ts";
+import { hashText } from "../packages/code-pin/src/index.ts";
 
 /** git 自己怎么算。跑在临时目录里：算哈希不需要仓，也不往任何对象库写东西 */
 function gitHashObject(text: string): string {
@@ -43,7 +43,7 @@ for (const [name, text] of Object.entries(CASES)) {
 }
 
 test("hashText 认字节数不是字符数", () => {
-  // 一个汉字三字节：字符数算头会得出不同的哈希，这条用来钉住那个错法
+  // 一个汉字三字节：字符数算头会得出不同的哈希，这条专门测那种算错的情况
   const text = "中\n";
   assert.equal(hashText(text), gitHashObject(text));
   assert.notEqual(hashText(text), hashText("ab\n"));

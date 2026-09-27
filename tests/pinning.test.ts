@@ -1,11 +1,11 @@
 /**
- * 钉码编排的账：mdx 认引用、钉码核心判定、结果按顺序配回文档路径与行号、确认时交 mdx 写回。
- * 用内存读取器：判定本身由 core.test.ts 守，这里只看先后顺序与配回去的位置。
+ * 钉码编排的测试：mdx 认引用、钉码核心判定、结果按顺序配回文档路径与行号、确认时交给 mdx 写回。
+ * 用内存读取器：判定本身由 core.test.ts 检查，这里只看先后顺序与配回去的位置。
  */
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { blobOf, createPinner, hashSpan } from "../packages/docfirst-pin/src/index.ts";
-import type { Target } from "../packages/docfirst-pin/src/index.ts";
+import { blobOf, createPinner, hashSpan } from "../packages/code-pin/src/index.ts";
+import type { Target } from "../packages/code-pin/src/index.ts";
 import { createPinning } from "../packages/docfirst-workflow/src/pinning/index.ts";
 import { NO_HISTORY, refLine } from "./repo.ts";
 

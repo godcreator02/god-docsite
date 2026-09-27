@@ -6,7 +6,7 @@
  */
 import { useState } from 'react';
 import type { JSX } from 'react';
-import { CodeLines, Dot, Pane, Pill, Stepper, Terminal } from '@godcreator/docs-explain';
+import { CodeLines, Dot, Pane, Pill, Stepper, Terminal } from '@godcreator/explainer-player';
 import {
   cardKeys,
   cardOf,
@@ -449,7 +449,7 @@ function LayoutScene(): JSX.Element {
   );
 }
 
-/* ── 第 6 步：/trajectory 整页与它的接线 ── */
+/* ── 第 6 步：/trajectory 整页，page.tsx 里读卡目录、交给 StarDisk 的几行 ── */
 
 function PageScene(): JSX.Element {
   return (

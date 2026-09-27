@@ -1,15 +1,15 @@
 /**
- * 讲解组件 docs-explain 的内部接缝图：模块页 <SeamMap module="docs-explain" /> 画的就是它。
+ * 讲解播放器 explainer-player 的内部接缝图：模块页 <SeamMap module="explainer-player" /> 画的就是它。
  * 框是包里的文件，方块是文件对外给的东西；灰色实线框是包外的站、站的配置、react 与 fumadocs。
- * 坐标在 docs-explain.layout.ts。
+ * 坐标在 explainer-player.layout.ts。
  */
 import { defineSeamGraph } from '../graph.mjs';
 
-export const docsExplainGraph = defineSeamGraph({
-  id: 'docs-explain',
-  title: '讲解组件内部的文件与接缝',
+export const explainerPlayerGraph = defineSeamGraph({
+  id: 'explainer-player',
+  title: '讲解播放器内部的文件与接缝',
   intro:
-    '讲解组件内部接缝图：虚线框是包里的文件，框里的方块是它对外给的组件、函数、类型或样式，灰色实线框是包外的站、站的配置、react 与 fumadocs。',
+    '讲解播放器内部接缝图：虚线框是包里的文件，框里的方块是它对外给的组件、函数、类型或样式，灰色实线框是包外的站、站的配置、react 与 fumadocs。讲解播放器是通用包，不认识 docfirst；图里的站是本仓的文档站，它是使用者之一。',
   frameLabel: '文件',
   modules: [
     {
@@ -18,7 +18,7 @@ export const docsExplainGraph = defineSeamGraph({
       pkg: 'docs-site/src/components',
       role: null,
       outside: true,
-      blurb: '画面 *.tsx 用模板与零件画，机读规则 *.ai.mjs 用 ./text 把同一份讲解数据写成文字。本仓的 docs-site 是使用方，普通 fumadocs 站也这样用。',
+      blurb: '画面 *.tsx 用外壳与零件画，机读规则 *.ai.mjs 用 ./text 把同一份讲解数据写成文字。本仓的 docs-site 是使用方，普通 fumadocs 站也这样用。',
       caps: [
         { id: 'view', name: '讲解组件画面', ident: '*.tsx' },
         { id: 'ai', name: '机读规则', ident: '*.ai.mjs' },
@@ -39,7 +39,7 @@ export const docsExplainGraph = defineSeamGraph({
       pkg: 'index.ts',
       role: 'slate',
       outside: false,
-      blurb: '包的主入口（.）：转出三种模板、零件，以及 Role、Tone、PaneIcon 与各模板参数的类型；控制条和 Icon 不转出。第一行是 "use client"。',
+      blurb: '包的主入口（.）：导出三种外壳、零件，以及 Role、Tone、PaneIcon 与各外壳参数的类型；控制条和 Icon 不导出。第一行是 "use client"。',
       caps: [{ id: 'entry', name: '导出表', ident: '"use client"' }],
     },
     {
@@ -48,7 +48,7 @@ export const docsExplainGraph = defineSeamGraph({
       pkg: 'peer',
       role: null,
       outside: true,
-      blurb: '必需的 peer：用站装的那一份，不打进产物。模板用它的 hooks 管当前项、播放与计时。',
+      blurb: '必需的 peer：用站装的那一份，不打进产物。外壳用它的 hooks 管当前项、播放与计时。',
       caps: [{ id: 'react', name: 'react', ident: 'useState · useEffect · useRef' }],
     },
     {
@@ -111,7 +111,7 @@ export const docsExplainGraph = defineSeamGraph({
       pkg: 'controls.tsx',
       role: 'violet',
       outside: false,
-      blurb: '三种模板共用的播放键、翻页键、计数、说明行与键盘处理，不从入口转出。',
+      blurb: '三种外壳共用的播放键、翻页键、计数、说明行与键盘处理，不从入口导出。',
       caps: [
         { id: 'play', name: '播放键', ident: 'PlayButton' },
         { id: 'turn', name: '翻页与计数', ident: 'PrevButton · NextButton · Counter' },
@@ -145,7 +145,7 @@ export const docsExplainGraph = defineSeamGraph({
       pkg: 'docs-site/src/app/site.css',
       role: null,
       outside: true,
-      blurb: '站的全局样式：引入模板包的样式表，再引入各讲解组件自己的画面样式。',
+      blurb: '站的全局样式：引入讲解播放器的样式表，再引入各讲解组件自己的画面样式。',
       caps: [{ id: 'site-css', name: '站的全局样式', ident: 'src/app/site.css' }],
     },
     {
@@ -182,10 +182,10 @@ export const docsExplainGraph = defineSeamGraph({
       name: '客户端入口',
       a: ['view'],
       b: ['entry'],
-      iface: 'import { Stepper, CasePicker, Pane, Pill, … } from "@godcreator/docs-explain"',
+      iface: 'import { Stepper, CasePicker, Pane, Pill, … } from "@godcreator/explainer-player"',
       convention: false,
       via: 'code',
-      text: '站的画面组件从包的主入口 import 模板、零件与 Role、Tone 等类型。入口第一行是 "use client"，构建后留在产物头一行，站 import 到的都是客户端组件。',
+      text: '站的画面组件从包的主入口 import 外壳、零件与 Role、Tone 等类型。入口第一行是 "use client"，构建后留在产物头一行，站 import 到的都是客户端组件。',
     },
     {
       n: 2,
@@ -195,7 +195,7 @@ export const docsExplainGraph = defineSeamGraph({
       iface: 'Stepper: children(step, index) · Timeline: children({ time, chapter, index, progress }) · CasePicker: children(item) → ReactNode',
       convention: false,
       via: 'code',
-      text: '模板只管控制条与说明行，画面由站传一个函数画：分步传当前这一步和序号，动画传这一刻的秒数、章节、序号与本章进度，选情况传选中的情况。步骤、章节、情况的数组也由站给，title 与 text 显示在说明行；数组为空时直接报错。',
+      text: '外壳只管控制条与说明行，画面由站传一个函数画：分步传当前这一步和序号，动画传这一刻的秒数、章节、序号与本章进度，选情况传选中的情况。步骤、章节、情况的数组也由站给，title 与 text 显示在说明行；数组为空时直接报错。',
     },
     {
       n: 3,
@@ -225,7 +225,7 @@ export const docsExplainGraph = defineSeamGraph({
       iface: 'PlayButton · PrevButton · NextButton · Counter · Caption · navKeyHandler({ prev, next, toggle? })',
       convention: false,
       via: 'code',
-      text: '三种模板用同一套按钮、说明行与键盘处理，分步与动画的控制条按钮位置一样，只有中间一格不同：步号或横条。选情况只用说明行和键盘，不传 toggle，空格留给浏览器；带 Alt、Ctrl、Meta 的组合键一律不接。',
+      text: '三种外壳用同一套按钮、说明行与键盘处理，分步与动画的控制条按钮位置一样，只有中间一格不同：步号或横条。选情况只用说明行和键盘，不传 toggle，空格留给浏览器；带 Alt、Ctrl、Meta 的组合键一律不接。',
     },
     {
       n: 6,
@@ -235,7 +235,7 @@ export const docsExplainGraph = defineSeamGraph({
       iface: 'Tone = "good" | "warn" | "bad" | "pending" | "info" · Role = "blue" | "violet" | … | "slate"',
       convention: false,
       via: 'code',
-      text: '零件的 tone、role 参数只收这两组名字，不收颜色值。入口把这两个类型也转出给站，站把自己的状态对到语气上，比如钉码的四种状态各用一种语气。',
+      text: '零件的 tone、role 参数只收这两组名字，不收颜色值。入口把这两个类型也导出给站，站把自己的状态对到语气上，比如钉码的四种状态各用一种语气。',
     },
     {
       n: 7,
@@ -245,7 +245,7 @@ export const docsExplainGraph = defineSeamGraph({
       iface: 'Icon({ name: PaneIcon })，PaneIcon = "file" | "folder" | "terminal" | "server" | "user" | "git"',
       convention: false,
       via: 'code',
-      text: 'Pane 的 icon 参数是图标名，标题栏按名字画线条图标，包里不 import 图标库。Icon 不从入口转出，站只能按名字选。',
+      text: 'Pane 的 icon 参数是图标名，标题栏按名字画线条图标，包里不 import 图标库。Icon 不从入口导出，站只能按名字选。',
     },
     {
       n: 8,
@@ -265,14 +265,14 @@ export const docsExplainGraph = defineSeamGraph({
       iface: 'className="dx dx-stepper not-prose" · dx-bar · dx-btn · dx-caption',
       convention: false,
       via: 'code',
-      text: '模板根元素带 dx 类，颜色变量都定义在这个类上；控制条、按钮、画面、说明行各有 dx- 开头的类名，排布与窄屏时只留箭头都由样式表按类名给。',
+      text: '外壳根元素带 dx 类，颜色变量都定义在这个类上；控制条、按钮、画面、说明行各有 dx- 开头的类名，排布与窄屏时只留箭头都由样式表按类名给。',
     },
     {
       n: 10,
       name: '引入样式表',
       a: ['site-css'],
       b: ['classes', 'attrs', 'vars'],
-      iface: '@import "@godcreator/docs-explain/styles.css" → styles/explain.css',
+      iface: '@import "@godcreator/explainer-player/styles.css" → styles/explain.css',
       convention: false,
       via: 'code',
       text: '主入口不带样式，站在全局样式里引入一次样式表，所有讲解组件共用。包的 exports 把 ./styles.css 指到 styles/explain.css。',

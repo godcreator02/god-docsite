@@ -39,8 +39,8 @@
     "prepublishOnly": "pnpm run build"
   },
   "dependencies": {
-    "@godcreator/docfirst-pin": "workspace:*",
-    "@godcreator/docfirst-trajectory": "workspace:*",
+    "@godcreator/code-pin": "workspace:*",
+    "@godcreator/trajectory-disk": "workspace:*",
     "@godcreator/docfirst-workflow": "workspace:*",
     "unified": "^11.0.0",
     "unist-util-visit": "^5.0.0"

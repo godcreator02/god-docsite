@@ -1,21 +1,21 @@
 /**
- * 画布层纯函数部分的测试（画布层住 `./react` 入口那一侧，测试直读源码，Node 直跑 .ts）：
- *   theme：两套色板按出现序分配、未分道走中性灰不占色板；mix 两 hex 线性插值、非 hex 出 color-mix。
- *   node-dom：所有卡一样大；实心平涂加细描边、在立卡外套同色细环、最外一圈结论实线孤星虚线、
+ * 画布层纯函数部分的测试（画布层住 `./disk` 入口那一侧，测试直接读源码，Node 直接运行 .ts）：
+ *   theme：两套色板按出现序分配、未分道用中性灰不占色板；mix 对两个 hex 线性插值、非 hex 输出 color-mix。
+ *   node-dom：所有卡一样大；实心平涂加细描边、在立卡外加一圈同色细环、最外一圈结论实线孤星虚线、
  *          被取代混灰没有环；连线与箭头同色（取代金黄、转向青）。
- *   label-arbiter：12 点竖线 14px 贪心占位；节点标签按真实文本区间判定、悬停先占坑。
- *   date-rail：滚轮格数结算（余额累进、反向清账）；railTOf / dayAtT 正逆互逆、空窗折成折痕。
+ *   label-arbiter：12 点竖线 14px 贪心占位；节点标签按真实文本区间判定、悬停的标签优先占位。
+ *   date-rail：滚轮格数结算（不足一格的余量累加、换方向时先清零）；railTOf / dayAtT 正逆互逆、空窗折成折痕。
  * DOM 相关的元素用手写的最小桩（只实现仲裁真读写的 style / textContent），不引 DOM 库。
  */
 import { fileURLToPath } from "node:url";
 import { test } from "node:test";
 import assert from "node:assert/strict";
-/* 布局 / 模型也直读源码：画布层吃的是源码里的 RingsLayout 型，跟 dist 里那份是两个声明 */
-import { BASE_RADIUS, RingsLayout } from "../packages/docfirst-trajectory/src/layout.ts";
-import { buildModel, NO_DOMAIN, spineTipIds } from "../packages/docfirst-trajectory/src/model/build.ts";
+/* 布局 / 模型也直接读源码：画布层接收的是源码里的 RingsLayout 类型，跟 dist 里那份是两个声明 */
+import { BASE_RADIUS, RingsLayout } from "../packages/trajectory-disk/src/layout.ts";
+import { buildModel, NO_DOMAIN, spineTipIds } from "../packages/trajectory-disk/src/model/build.ts";
 import { scanCardDir } from "../packages/docfirst-workflow/src/cards/card-dir.ts";
-import type { Card, TrajectoryModel } from "../packages/docfirst-trajectory/src/model/types.ts";
-import { buildThemes, mix } from "../packages/docfirst-trajectory/src/canvas/theme.ts";
+import type { Card, TrajectoryModel } from "../packages/trajectory-disk/src/model/types.ts";
+import { buildThemes, mix } from "../packages/trajectory-disk/src/canvas/theme.ts";
 import {
   buildFilter,
   buildNode,
@@ -26,15 +26,15 @@ import {
   outerRingOf,
   recolor,
   supersededColor,
-} from "../packages/docfirst-trajectory/src/canvas/node-dom.ts";
-import { LabelArbiter } from "../packages/docfirst-trajectory/src/canvas/label-arbiter.ts";
-import { consumeWheelNotches, dayAtT, railTOf } from "../packages/docfirst-trajectory/src/canvas/date-rail.ts";
+} from "../packages/trajectory-disk/src/canvas/node-dom.ts";
+import { LabelArbiter } from "../packages/trajectory-disk/src/canvas/label-arbiter.ts";
+import { consumeWheelNotches, dayAtT, railTOf } from "../packages/trajectory-disk/src/canvas/date-rail.ts";
 import { SvgStubDocument, type SvgStubElement } from "./svg-stub.ts";
 
 const FIXTURES = fileURLToPath(new URL("./fixtures/trajectory", import.meta.url));
 const SVG_NS = "http://www.w3.org/2000/svg";
 
-/* 节点工厂建的是游离 DOM，走全局 document——Node 里没有，喂个桩顶上 */
+/* 节点工厂用全局 document 建还没挂进页面的 DOM 元素——Node 里没有 document，放一个桩代替 */
 (globalThis as unknown as { document: SvgStubDocument }).document = new SvgStubDocument();
 
 const m: TrajectoryModel = buildModel(await scanCardDir(FIXTURES));
@@ -48,11 +48,11 @@ test("buildThemes：两套按出现序循环分配，未分道走中性灰、不
   assert.equal(t.dark.domain[NO_DOMAIN], t.dark.noDomain);
   assert.equal(t.dark.domain["丙"], "#4ade9e", "哨兵压在中间也不占位，丙拿第三色");
   assert.equal(t.light.domain["丙"], "#0e9e63");
-  /* 里程碑与取代边同一金黄，亮色板压深一档 */
+  /* 里程碑与取代边同一金黄，亮色板用深一档的颜色 */
   assert.equal(t.dark.milestone, t.dark.supersede);
   assert.equal(t.light.milestone, t.light.supersede);
   assert.notEqual(t.light.supersede, t.dark.supersede);
-  /* 每次调用出新副本：改一份不污染另一份 */
+  /* 每次调用返回新副本：改一份不影响另一份 */
   const t2 = buildThemes(["甲"]);
   t2.dark.hubStroke = "#123456";
   assert.notEqual(buildThemes(["甲"]).dark.hubStroke, "#123456");
@@ -77,7 +77,7 @@ function fakeCard(id: string, domain = "甲"): Card {
   return { id, domain, bornAt: "2026-01-01T09:00", label: id, kind: null };
 }
 
-/** 给一组节点刷一遍色。 */
+/** 给一组节点重新着色一遍。 */
 function paintNodes(nodes: NodeEl[]): void {
   recolor(nodes, [], THEME, buildFilter(), () => true);
 }
@@ -186,7 +186,7 @@ test("快照是唯一的空心：只描领域色边、不填；细环跟着方�
 
 /* ================= label-arbiter ================= */
 
-/** 最小标签桩：仲裁只读 style.display / textContent，getComputedTextLength 缺席走字符估宽。 */
+/** 最小标签桩：仲裁只读 style.display / textContent，没有 getComputedTextLength 时按字符数估算宽度。 */
 function stubLabel(text = "标签"): SVGElement {
   return { style: { display: "" }, textContent: text } as unknown as SVGElement;
 }
@@ -206,7 +206,7 @@ test("LabelArbiter.arbitrate：同一条竖线上贪心占位，屏幕间距不�
     ["", "none", "", "none"],
     "100 占位后 105 让隐；120 离 100 够远占位，128 离 120 只差 8 让隐",
   );
-  /* 缩放深一倍（pxToWorld = 0.5）：世界间距 8 = 屏幕 16px，够 14 了，128 也能显 */
+  /* 缩放深一倍（pxToWorld = 0.5）：世界间距 8 = 屏幕 16px，够 14 了，128 也能显示 */
   a.arbitrate(claims, 0.5);
   assert.deepEqual(claims.map((c) => c.label.style.display), ["", "none", "", ""]);
 });
@@ -224,7 +224,7 @@ test("LabelArbiter.arbitrateNodeLabels：按真实文本区间判定，悬停先
   assert.equal(apart.label.style.display, "", "横向拉开就不冲突");
   assert.equal(otherRow.label.style.display, "", "行距够 14px 就不冲突");
 
-  /* 悬停强制：报名晚也先占坑，把先报名的挤掉 */
+  /* 悬停强制显示：排在后面也优先占位，把排在前面的挤掉 */
   const hovered = { ...overlap, force: true, label: stubLabel("四个汉字") };
   const plain = { ...first, label: stubLabel("四个汉字") };
   a.arbitrateNodeLabels([plain, hovered]);
@@ -261,13 +261,13 @@ test("railTOf / dayAtT：顶 = d0 归 0、底 = d1 归 1，正逆互逆，空窗
   assert.equal(railTOf(L, span, m.dayMax), 1);
   assert.equal(dayAtT(L, span, 0), m.day0);
   assert.equal(dayAtT(L, span, 1), m.dayMax);
-  /* 正逆互逆：密集区每一天来回都落回自己 */
+  /* 正逆互逆：密集区每一天正算再逆算都回到同一天 */
   for (let d = m.day0; d <= m.dayMax; d += 3) {
     const t = railTOf(L, span, d);
     assert.ok(t >= 0 && t <= 1);
     if (!L.gapBands().some((b) => d > b.d0 && d < b.d1)) assert.equal(dayAtT(L, span, t), d);
   }
-  /* 空窗中段在轨上折成窄条：折痕高远小于按日历线性该占的高 */
+  /* 空窗中段在日期轨上折成窄条：折痕的高度远小于按日历线性该占的高度 */
   const band = L.gapBands()[0];
   assert.ok(band, "fixture 得有空窗");
   const railH = railTOf(L, span, band!.d1) - railTOf(L, span, band!.d0);

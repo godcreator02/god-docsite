@@ -2,14 +2,14 @@
  * 读取器的目录树清单，在临时真 git 仓里跑：清单按 .gitignore 过滤。
  * 目录目标从目录自身起找仓（`locateDir`），目标恰是仓根时不能先跳一级——跳出去了 .gitignore 过滤就整个失效。
  * 忽略判定整棵树问一次 `status --ignored=matching`，那几条边角（目录里全是被忽略的文件、被忽略目录里
- * 强制加进来的文件、目标本身在被忽略的目录里）守着它跟逐项问 `check-ignore` 的口径一样。
+ * 强制加进来的文件、目标本身在被忽略的目录里）检查它跟逐项问 `check-ignore` 的口径一样。
  * 软链接（pnpm 那种 node_modules → 工作区包）按真实路径读。
  */
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { mkdirSync, symlinkSync } from "node:fs";
 import { join } from "node:path";
-import type { Target } from "../packages/docfirst-pin/src/index.ts";
+import type { Target } from "../packages/code-pin/src/index.ts";
 import { CODE, refLine, run, setupRepo } from "./repo.ts";
 
 const DOC = "docs/a.mdx";
@@ -43,7 +43,7 @@ test("目录树：清单按 .gitignore 过滤，多文件黄、改文件内容�
 
 test("目录目标就是仓根：.gitignore 照样过滤——仓从目录自身起找，不先跳一级", () => {
   // 定位跳一级（locate 的口径）时，仓根之上没有 .git 就回 null、忽略集空掉，
-  // 树里冒出 node_modules/、lib/，还会随各台机器的目录布局漂
+  // 树里冒出 node_modules/、lib/，结果还会随各台机器的目录布局变化
   const r = setupRepo();
   try {
     r.write(".gitignore", "node_modules/\nlib/\n");
@@ -123,7 +123,7 @@ test("软链接按真实路径读：node_modules 里指向工作区目录的链�
     r.write("lib/greet.ts", CODE);
     r.commit("起 lib");
     mkdirSync(join(r.root, "node_modules"));
-    // Windows 上目录联接不用管理员权限，pnpm 摆的也是这种；别的平台退成普通目录软链
+    // Windows 上目录联接不用管理员权限，pnpm 建的也是这种；别的平台改用普通目录软链
     symlinkSync(join(r.root, "lib"), join(r.root, "node_modules", "lib"), "junction");
     r.write(DOC, `${refLine({ kind: "span", file: "node_modules/lib/greet.ts", a: 2, b: 3 })}\n`);
     r.confirm(DOC);

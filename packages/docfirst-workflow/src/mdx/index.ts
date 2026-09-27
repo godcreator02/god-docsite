@@ -3,13 +3,13 @@
  *   ① 识别与写回：mdxFormat（claims / parse / write，实现 `../reference/` 的格式接口）与 marker，钉码编排会调的；
  *      名册检查 lintComponents 给 check 用
  *   ② 渲染：renderAi 把生成正本按原文渲染成 md（记号换成代码块）；人看那份就是站本身，命令行没有 human 渲染
- *   ③ 语法树零件：parseTree / recognize / stamp / walk 等，给 `@godcreator/docfirst-fumadocs` 接站用
+ *   ③ 语法树零件：parseTree / recognize / stamp / walk 等，给 `@godcreator/docfirst-fumadocs` 在站构建时用
  * 名册：这里只有机制（stamp / unknownComponents）和写规则用的帮手，没有默认表——哪些组件、怎么压平
  * 由项目在 docfirst.config.mjs 里声明；fumadocs 自带那几个组件的规则在 `@godcreator/docfirst-fumadocs/roster`。
  *
- * 这个目录不认识钉码编排、project 与 cli，也不认识任何站的宿主（`tests/boundary.test.ts` 守着）。
+ * 这个目录不认识钉码编排、project 与 cli，也不认识任何站的宿主（由 `tests/boundary.test.ts` 检查）。
  */
-import type { MemoRecord, Target } from "@godcreator/docfirst-pin";
+import type { MemoRecord, Target } from "@godcreator/code-pin";
 import type { Format, Reference, WrittenReference } from "../reference/index.ts";
 import { formalOf } from "../marker/index.ts";
 import { braceComment, recognize } from "./recognize.ts";

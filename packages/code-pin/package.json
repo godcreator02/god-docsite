@@ -1,35 +1,22 @@
 {
-  "name": "@godcreator/docs-explain",
+  "name": "@godcreator/code-pin",
   "version": "0.1.0",
   "author": {"name": "godcreator"},
   "type": "module",
-  "description": "文档站讲解组件的外壳与零件：分步、动画、选情况三种外壳，卡片、终端、胶囊、代码行等零件，共用一套样式。`.` 是客户端组件，`./text` 是生成机读版用的纯函数。",
+  "description": "把文字钉在代码上：只认目标（行段、整个文件、目录树）与记录，核对出代码变没变、确认出新记录；不读文件，不认识文档文本、记号写法与文档格式。零依赖，只用 node:crypto。",
   "exports": {
     ".": {
       "types": "./dist/index.d.mts",
       "default": "./dist/index.mjs"
-    },
-    "./text": {
-      "types": "./dist/text.d.mts",
-      "default": "./dist/text.mjs"
-    },
-    "./styles.css": "./styles/explain.css"
+    }
   },
   "files": [
-    "dist",
-    "styles"
+    "dist"
   ],
   "scripts": {
     "build": "tsdown",
     "typecheck": "tsc -p tsconfig.json",
     "prepublishOnly": "pnpm run build"
-  },
-  "peerDependencies": {
-    "react": ">=19"
-  },
-  "devDependencies": {
-    "@types/react": "^19.3.0",
-    "react": "^19.3.0"
   },
   "publishConfig": {
     "access": "public",

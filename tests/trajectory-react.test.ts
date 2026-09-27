@@ -1,20 +1,20 @@
 /**
- * StarDisk 客户端组件的壳结构测试：`react-dom/server` 把它渲成静态 html。
- * 壳只当编排者——画布层（六层 SVG）由 canvas/stage.ts 在挂载后建，静态渲染那一趟画布区是空 div；
- * 断言的是壳该有的东西：吃满父元素的容器、画布容器、日期轨容器、工具条（三态 home 钮），
+ * StarDisk 客户端组件的外壳结构测试：`react-dom/server` 把它渲染成静态 html。
+ * 外壳只负责组织各层——画布层（六层 SVG）由 canvas/stage.ts 在挂载后建，静态渲染时画布区是空 div；
+ * 断言的是外壳该有的东西：占满父元素的容器、画布容器、日期轨容器、工具条（三态 home 按钮），
  * 以及空盘提示。data 是工作区自带的诗名 fixture（tests/fixtures/trajectory）经卡格式读出的中性输入。
  *
- * 另一条守鱼眼真接上了引擎：帧推进 RingsLayout.step 不碰 DOM，喂 fixture 建的 RingsLayout
- * 就能单测——补间只要没把 focusDay / strength 写回 layout，displayRadius 与 mag 读到的
+ * 另一条检查鱼眼确实接到了布局引擎上：帧推进 RingsLayout.step 不碰 DOM，传入用 fixture 建的 RingsLayout
+ * 就能单独测——补间只要没把 focusDay / strength 写回 layout，displayRadius 与 mag 读到的
  * 永远是线性态，盘看着一动不动、却零报错。
  */
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
-import { buildModel } from "@godcreator/docfirst-trajectory";
-import { RingsLayout } from "../packages/docfirst-trajectory/src/layout.ts";
-import { StarDisk } from "@godcreator/docfirst-trajectory/disk";
+import { buildModel } from "@godcreator/trajectory-disk";
+import { RingsLayout } from "../packages/trajectory-disk/src/layout.ts";
+import { StarDisk } from "@godcreator/trajectory-disk/disk";
 import { scanCardDir } from "@godcreator/docfirst-workflow";
 import { scanCards } from "@godcreator/docfirst-workflow/cards";
 import { renderCard, root } from "./trajectory-helpers.ts";

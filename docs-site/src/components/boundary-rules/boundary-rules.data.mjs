@@ -19,7 +19,7 @@
 export const nodes = [
   { id: 'plugin', name: '工作台插件', short: '插件', ident: 'plugins/docfirst', role: 'cyan', parent: null },
   { id: 'site', name: '文档站', short: 'docs-site', ident: 'docs-site', role: null, parent: null },
-  { id: 'explain', name: '讲解组件模板', short: 'docs-explain', ident: 'docs-explain', role: 'slate', parent: null },
+  { id: 'explain', name: '讲解播放器', short: 'explainer-player', ident: 'explainer-player', role: 'slate', parent: null },
   { id: 'fumadocs', name: 'fumadocs 适配', short: 'fumadocs', ident: 'docfirst-fumadocs', role: 'amber', parent: null },
   { id: 'workflow', name: '命令行与项目', short: 'workflow', ident: 'docfirst-workflow', role: 'emerald', parent: null },
   { id: 'marker', name: 'marker/', short: 'marker/', ident: '记号写法', role: 'emerald', parent: 'workflow' },
@@ -30,8 +30,8 @@ export const nodes = [
   { id: 'project', name: 'project/', short: 'project/', ident: '项目装配', role: 'emerald', parent: 'workflow' },
   { id: 'cli', name: 'cli/', short: 'cli/', ident: '命令行', role: 'emerald', parent: 'workflow' },
   { id: 'cards', name: 'cards/', short: 'cards/', ident: '卡格式', role: 'emerald', parent: 'workflow' },
-  { id: 'pin', name: '钉码核心', short: 'pin', ident: 'docfirst-pin', role: 'blue', parent: null },
-  { id: 'trajectory', name: '轨迹核心', short: 'trajectory', ident: 'docfirst-trajectory', role: 'violet', parent: null },
+  { id: 'pin', name: '钉码', short: 'code-pin', ident: 'code-pin', role: 'blue', parent: null },
+  { id: 'trajectory', name: '星轨盘', short: 'trajectory-disk', ident: 'trajectory-disk', role: 'violet', parent: null },
   { id: 'host', name: '站的宿主', short: '宿主', ident: 'fumadocs · next · react', role: null, parent: null },
   { id: 'crypto', name: 'node:crypto', short: 'node:crypto', ident: 'Node 内置模块', role: null, parent: null },
   { id: 'others', name: '别的模块', short: '别的模块', ident: 'npm 包 · 别的 node: 内置', role: null, parent: null },
@@ -82,7 +82,7 @@ export const allowedEdges = [
  * @typedef {{ id: string, label: string, text: string, allowed: string[], forbidden: Forbidden[], tests: GuardTest[] }} BoundaryRule
  * @type {BoundaryRule[]}
  */
-/* ref file="../tests/boundary.test.ts" hash="bf090e376c37" blob="59252de07558" */
+/* ref file="../tests/boundary.test.ts" hash="cfe94fbe2e2e" blob="269b4f418ee0" */
 export const rules = [
   {
     id: 'packages',
@@ -92,16 +92,16 @@ export const rules = [
     forbidden: [
       {
         edges: ['pin>workflow', 'pin>fumadocs', 'pin~trajectory'],
-        what: '钉码核心谁都不认识：判新鲜要的读取器、旧内容来源都由构造参数传进来。',
+        what: '钉码谁都不认识：判代码变没变要的读取器、旧内容来源都由构造参数传进来。',
       },
       {
         edges: ['trajectory>workflow', 'trajectory>fumadocs'],
-        what: '轨迹核心不认识钉码、workflow、fumadocs 适配：它只收盘心加一组卡的中性输入，docfirst 卡格式与读卡目录在 workflow。',
+        what: '星轨盘不认识钉码、workflow、fumadocs 适配：它只收盘心加一组卡的中性输入，docfirst 卡格式与读卡目录在 workflow。',
       },
       { edges: ['workflow>fumadocs'], what: 'workflow 不认识任何站的宿主，所以也不认识 fumadocs 适配。' },
       {
         edges: ['explain~pin', 'explain~trajectory', 'explain~workflow', 'explain~fumadocs'],
-        what: '普通 fumadocs 站也要用 docs-explain，所以它不认识 docfirst 的任何包；它只给站用，docfirst 的包也都不认识它。',
+        what: '讲解播放器跟本仓别的包互不认识：普通 fumadocs 站也用它，docfirst 的包都不用它，只有站用。',
       },
     ],
     tests: [
@@ -111,27 +111,34 @@ export const rules = [
     ],
   },
   {
-    id: 'cores',
-    label: '两个核心零依赖',
-    text: '钉码核心与轨迹核心是整块能被别人拿走的部分，浏览器里也跑得动。检查不看措辞，只看 import 了谁：钉码核心只许 node:crypto；轨迹核心唯一对外的依赖是 ./disk 入口（客户端组件 StarDisk）用的 react，它是可选 peer，而且要按包名 import、不许打包进产物。',
-    allowed: ['pin>crypto', 'trajectory>host'],
+    id: 'generic',
+    label: '通用包独立',
+    text: '钉码、星轨盘、讲解播放器是通用包：不认识 docfirst，谁都能单独拿走用，docfirst 只是它们的一个使用者。三个包列在 GENERIC_PACKAGES 一张表里，三条检查对表里每个包都一样：清单里没有任何 @godcreator/ 包；源码与产物不 import 它们，源码的相对 import 不出自己的 src/；包目录里一个 docfirst 字样都没有，连注释也算——通用包里一旦写了「docfirst 会这样用」，下一个改它的人就会照着 docfirst 的需要改它。另外各包有自己的几条：钉码只许 node:crypto；星轨盘唯一对外的依赖是 ./disk 入口（客户端组件 StarDisk）用的 react，它是可选 peer，要按包名 import、不许打包进产物。',
+    allowed: ['pin>crypto', 'trajectory>host', 'explain>host'],
     forbidden: [
       {
+        edges: ['pin~trajectory', 'explain~pin', 'explain~trajectory', 'pin>workflow', 'trajectory>workflow', 'explain~workflow'],
+        what: '三个通用包的清单里不许有任何 @godcreator/ 包，开发期依赖也算；源码与产物不许 import 它们，源码的相对 import 不许出自己的 src/；源码、产物、样式、构建配置与清单里不许出现 docfirst 字样。',
+      },
+      {
         edges: ['pin>others'],
-        what: '钉码核心的 dependencies 与 peerDependencies 必须是空的，源码只许 import 自己的文件和 node:crypto；源码与产物里也不许出现 mdx、记号写法、引用、清单这些文档文本那一侧的名字。',
+        what: '钉码的 dependencies 与 peerDependencies 必须是空的，源码只许 import 自己的文件和 node:crypto；源码与产物里也不许出现 mdx、记号写法、引用、清单这些文档文本那一侧的名字。',
       },
       {
         edges: ['trajectory>others'],
-        what: '轨迹核心的 . 入口产物一条 import 都不许有，连 node: 内置也不行；.ts 源码只许相对 import，建模 src/model/ 只许 import 自己目录里的文件；. 的产物与建模源码里不许出现关系行、frontmatter 字段名这些 docfirst 卡文件的写法；./disk 的产物头一行是 "use client"，只许 import react，react 本体不许打包进来。',
+        what: '星轨盘的 . 入口产物一条 import 都不许有，连 node: 内置也不行；.ts 源码只许相对 import，建模 src/model/ 只许 import 自己目录里的文件；整个包里不许出现关系行、frontmatter 字段名这些 docfirst 卡文件的写法；./disk 的产物头一行是 "use client"，只许 import react，react 本体不许打包进来。',
       },
     ],
     tests: [
-      { name: 'pin 零依赖：清单里没有 dependencies / peerDependencies，源码只 import 自己和 node:crypto', checks: '读 pin 的 package.json 与 src/ 的 import' },
-      { name: '钉码核心不接触文档文本：源码与产物里没有 mdx、记号写法、格式接口、引用与清单', checks: '读 pin 的 src/ 与产物 index.mjs、index.d.mts 的全文' },
+      { name: '通用包独立：清单三类依赖字段里没有任何 @godcreator/ 包', checks: '读三个通用包 package.json 的 dependencies、peerDependencies、devDependencies' },
+      { name: '通用包独立：源码与产物不 import 任何 @godcreator/ 包，源码的相对 import 不出自己的 src/', checks: '读三个通用包 src/ 下每个文件与 dist/ 下每份产物的 import' },
+      { name: '通用包不认识 docfirst：源码、产物、样式、构建配置与清单里一个 docfirst 字样都没有', checks: '逐行读三个通用包目录下除 node_modules 以外的全部文件' },
+      { name: 'pin 零依赖：清单里没有 dependencies / peerDependencies，源码只 import 自己和 node:crypto', checks: '读钉码的 package.json 与 src/ 的 import' },
+      { name: '钉码核心不接触文档文本：源码与产物里没有 mdx、记号写法、格式接口、引用与清单', checks: '读钉码的 src/ 与产物 index.mjs、index.d.mts 的全文' },
       { name: 'trajectory 的 `.` 入口零 import：产物一条 import 都没有，连 node: 也没有', checks: '读产物 dist/index.mjs 与 package.json 的 dependencies' },
       { name: 'trajectory 的 `.ts` 源码只有相对 import——`.tsx` 是 `./disk` 入口，由下一条按产物查', checks: '读 src/ 下每个 .ts 的 import' },
       { name: 'trajectory 的建模 `src/model/` 只 import 自己目录里的文件——布局、画布、组件都在它下游', checks: '读 src/model/ 下每个文件的 import' },
-      { name: 'trajectory 不认识 docfirst 卡格式：`.` 的产物与建模源码里没有关系行、frontmatter 字段名这些卡文件的写法', checks: '读产物 index.mjs、index.d.mts 与 src/model/ 的全文' },
+      { name: 'trajectory 不认识 docfirst 卡格式：整个包（源码、产物、样式）里没有关系行、frontmatter 字段名这些卡文件的写法', checks: '读星轨盘包目录下除 node_modules 以外的全部文件' },
       { name: 'trajectory 的 `./disk`：客户端指令在头一行，只 import react、不内联 react', checks: '读产物 dist/disk.mjs 的头一行、import 行与正文' },
     ],
   },
@@ -143,7 +150,7 @@ export const rules = [
     forbidden: [
       {
         edges: ['marker~reference', 'marker>mdx:back', 'reference>code:back'],
-        what: 'marker 是记号写法，reference 是引用与清单的类型，两个都谁都不认识：marker 只从 @godcreator/docfirst-pin import 类型，reference 只认识 @godcreator/docfirst-pin。',
+        what: 'marker 是记号写法，reference 是引用与清单的类型，两个都谁都不认识：marker 只从 @godcreator/code-pin import 类型，reference 只认识 @godcreator/code-pin。',
       },
       { edges: ['mdx>pinning:back', 'mdx>project'], what: 'mdx 格式认引用、写回、渲染，不认识钉码编排的先后顺序，也不认识项目怎么装配、不碰磁盘与 git。' },
       {
@@ -153,7 +160,6 @@ export const rules = [
       { edges: ['pinning>project:back'], what: '钉码编排不认识 project，也不认识记号属性怎么写：记号写法在两种格式后面。' },
       { edges: ['cards>pinning', 'cards>cli:back'], what: '卡格式只认识 marker：不认识钉码编排、项目装配，也不认识 cli。' },
       { edges: ['project>cli:back', 'pinning>cli'], what: 'cli 是入口，认识另外几个目录，谁都不认识它。' },
-      { edges: ['pin>workflow'], what: '钉码核心不认识 workflow：源码的相对 import 都落在自己的 src/ 里，说明符里没有 docfirst-workflow。' },
       {
         edges: ['workflow>host'],
         what: 'workflow 整个不认识站的宿主：源码、清单、产物 index.mjs / cli.mjs / mdx.mjs 连同它们引的 chunk 里都不许出现 fumadocs、next、react、react-dom。',
@@ -161,10 +167,9 @@ export const rules = [
     ],
     tests: [
       { name: 'workflow 目录方向：marker 与 reference 谁都不认识，mdx 不认识钉码编排与 project，都不认识 cli', checks: '读 src/<目录>/ 下每个文件的相对 import，看它落进哪个目录' },
-      { name: 'workflow 目录方向：reference 只认识 @godcreator/docfirst-pin', checks: '读 src/reference/ 下每个文件的 import' },
-      { name: 'workflow 目录方向：code 只认识 marker、reference 与 @godcreator/docfirst-pin', checks: '读 src/code/ 下每个文件的 import，看相对 import 落进哪个目录' },
-      { name: 'workflow 目录方向：marker 只从 @godcreator/docfirst-pin import 类型，别的只许是目录里的相对路径', checks: '读 src/marker/ 下每条 import 语句的整行' },
-      { name: '钉码核心不认识 workflow：源码的相对 import 都落在自己的 src/ 里，说明符里没有 docfirst-workflow', checks: '读 pin 的 src/ 下每个文件的 import' },
+      { name: 'workflow 目录方向：reference 只认识 @godcreator/code-pin', checks: '读 src/reference/ 下每个文件的 import' },
+      { name: 'workflow 目录方向：code 只认识 marker、reference 与 @godcreator/code-pin', checks: '读 src/code/ 下每个文件的 import，看相对 import 落进哪个目录' },
+      { name: 'workflow 目录方向：marker 只从 @godcreator/code-pin import 类型，别的只许是目录里的相对路径', checks: '读 src/marker/ 下每条 import 语句的整行' },
       { name: 'workflow 目录方向：目录一个不少、一个不多——加了新目录得先想清楚它能认识谁', checks: 'src/ 下的目录必须正好是禁止表里列出的那些' },
       { name: 'workflow 不认识任何站的宿主：源码一个 fumadocs / react / next import 都没有，清单里也没有', checks: '读源码、package.json 与产物' },
     ],
@@ -172,7 +177,7 @@ export const rules = [
   {
     id: 'host-peer',
     label: '宿主只能是 peer',
-    text: 'fumadocs 与 react 用的是消费方项目装的那份。宿主被打包进产物，就是两份 React 各跑一套，现象是预渲染时莫名其妙的 hooks 报错。客户端组件 pre 的 "use client" 要留在产物头一行，不然 Next 不认；星轨盘按包名 import @godcreator/docfirst-trajectory/disk，那份产物头一行的 "use client" 才管得住 StarDisk。./roster 由命令行读 docfirst.config.mjs 时加载，命令行那一侧没有宿主。',
+    text: 'fumadocs 与 react 用的是消费方项目装的那份。宿主被打包进产物，就是两份 React 各跑一套，现象是预渲染时莫名其妙的 hooks 报错。客户端组件 pre 的 "use client" 要留在产物头一行，不然 Next 不认；星轨盘按包名 import @godcreator/trajectory-disk/disk，那份产物头一行的 "use client" 才管得住 StarDisk。./roster 由命令行读 docfirst.config.mjs 时加载，命令行那一侧没有宿主。',
     allowed: ['fumadocs>host', 'fumadocs>pin', 'fumadocs>trajectory', 'fumadocs>workflow'],
     forbidden: [
       {
@@ -189,7 +194,7 @@ export const rules = [
   {
     id: 'plugin',
     label: '包不认识插件',
-    text: '插件跟包在同一个工作区。包一旦认识插件，哪怕只是一条 devDependency，这几个包就不能再发布了：装它们的人不该连带装上整个桌面工作台生态。反方向（插件不许依赖 docfirst 的包）不在这个文件里，由插件自己的 tests/artifact.test.ts 检查，两边互不认识。说明书与建站模板也随插件发：包只发 dist 与样式，包里不许再有 skills/、template/。',
+    text: '插件跟包在同一个工作区。包一旦认识插件，哪怕只是一条 devDependency，这几个包就不能再发布了：装它们的人不该连带装上整个桌面工作台生态。反方向（插件不许依赖本仓 packages/ 下的任何一个包，包名从各包清单现读）不在这个文件里，由插件自己的 tests/artifact.test.ts 检查，两边互不认识。说明书与建站模板也随插件发：包只发 dist 与样式，包里不许再有 skills/、template/。',
     allowed: [],
     forbidden: [
       {
@@ -205,24 +210,20 @@ export const rules = [
   },
   {
     id: 'explain',
-    label: 'docs-explain 只给站用',
-    text: '普通 fumadocs 站也装 docs-explain，所以 docfirst-* 与 gwb-* 一个都不许出现在它的依赖里。它的 . 出口是客户端组件，产物头一行必须是 "use client"；./text 是生成机读版用的纯函数，docfirst.config.mjs 在 Node 里加载它，源码与产物都零 import、不带客户端指令。',
+    label: '讲解播放器的两个入口',
+    text: '讲解播放器的 . 出口是客户端组件，产物头一行必须是 "use client"；./text 把各帧的说明转成机读版文字，站在 Node 里生成机读版时加载它（docfirst 站由 docfirst.config.mjs 加载），源码与产物都零 import、不带客户端指令。它不依赖任何 @godcreator/ 包，由「通用包独立」那一类查。',
     allowed: ['explain>host', 'site>explain'],
     forbidden: [
       {
         edges: ['explain>others'],
         what: '没有 dependencies，peer 只有 react 而且是必需的；. 出口的产物只许 import react，react 与别的模块都不许打包进来。',
       },
-      {
-        edges: ['explain~pin', 'explain~trajectory', 'explain~workflow', 'explain~fumadocs'],
-        what: '依赖字段里不许有任何 @godcreator/ 包，开发期依赖也算；反方向由「包与包的方向」那一类的禁止表查。',
-      },
       { edges: ['plugin>explain'], what: '工作台插件也不许依赖它。' },
     ],
     tests: [
-      { name: 'docs-explain 清单：没有 dependencies，react 只作必需 peer，依赖字段里没有任何 @godcreator/ 包', checks: '读 docs-explain 与工作台插件的 package.json' },
-      { name: 'docs-explain 的 `.`：客户端指令在头一行，只 import react，没有把 react 或别的模块打包进来', checks: '读产物 dist/index.mjs 的头一行、import 行、//#region 来源与正文' },
-      { name: 'docs-explain 的 `./text`：docfirst.config.mjs 在 Node 里加载它，产物零 import、不带客户端指令', checks: '读产物 dist/text.mjs 与源码 text.ts' },
+      { name: 'explainer-player 清单：没有 dependencies，react 只作必需 peer；工作台插件不依赖它', checks: '读讲解播放器与工作台插件的 package.json' },
+      { name: 'explainer-player 的 `.`：客户端指令在头一行，只 import react，没有把 react 或别的模块打包进来', checks: '读产物 dist/index.mjs 的头一行、import 行、//#region 来源与正文' },
+      { name: 'explainer-player 的 `./text`：docfirst.config.mjs 在 Node 里加载它，产物零 import、不带客户端指令', checks: '读产物 dist/text.mjs 与源码 text.ts' },
     ],
   },
 ];
@@ -258,7 +259,7 @@ for (const rule of rules) {
 for (const edge of allowedEdges) parseEdge(edge.key);
 
 /**
- * 一条边读成文字：「pin → workflow」或「docs-explain ↔ pin」
+ * 一条边读成文字：「pin → workflow」或「explainer-player ↔ pin」
  * @param {string} key
  */
 export function edgeText(key) {

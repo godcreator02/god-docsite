@@ -110,26 +110,31 @@ describe('必须同时改的几处', () => {
   })
 
   /**
-   * 插件与包的分界：插件的使用者是 agent，包的使用者是仓，插件不许依赖任何一个 `@godcreator/docfirst-*` 包
-   * （docfirst-pin、docfirst-trajectory、docfirst-workflow、docfirst-fumadocs）。
+   * 插件与包的分界：插件的使用者是 agent，包的使用者是仓，插件不许依赖本仓 `packages/` 下的任何一个包。
    * 把包写进任何一档依赖，插件就会用 home 里解析出来的一条固定路径，包升级后照读旧文件、不报错，
-   * 所以三档都查：运行时、peer、开发期。
+   * 所以三档都查：运行时、peer、开发期。包名从 `packages/` 下的清单现读：按名字前缀判的话，通用包不带 docfirst 前缀，查不到。
    */
-  it('插件对四个 @godcreator/docfirst-* 包零依赖：三档依赖都没有，源码里也不 import', () => {
-    const isDocfirstPackage = (spec: string): boolean => spec.startsWith('@godcreator/docfirst-')
+  it('插件对本仓 packages/ 下的包零依赖：三档依赖都没有，源码里也不 import', () => {
+    const packagesDir = path.resolve(root, '..', '..', 'packages')
+    const repoPackages = fs
+      .readdirSync(packagesDir, { withFileTypes: true })
+      .filter((entry) => entry.isDirectory())
+      .map((entry) => (JSON.parse(fs.readFileSync(path.join(packagesDir, entry.name, 'package.json'), 'utf8')) as { name: string }).name)
+    expect(repoPackages.length, 'packages/ 下一个包都没读到').toBeGreaterThan(0)
+    const isRepoPackage = (spec: string): boolean => repoPackages.includes(packageNameOf(spec))
     for (const [table, deps] of Object.entries({
       dependencies: manifest.dependencies,
       peerDependencies: manifest.peerDependencies,
       devDependencies: manifest.devDependencies,
     })) {
       for (const dep of Object.keys(deps ?? {})) {
-        expect(isDocfirstPackage(dep), `${table} 里出现了 ${dep}：插件不许依赖包`).toBe(false)
+        expect(isRepoPackage(dep), `${table} 里出现了 ${dep}：插件不许依赖包`).toBe(false)
       }
     }
     for (const file of fs.readdirSync(path.join(root, 'src')).filter((f) => f.endsWith('.ts'))) {
       const src = fs.readFileSync(path.join(root, 'src', file), 'utf8')
       for (const m of src.matchAll(BARE)) {
-        expect(isDocfirstPackage(m[1]!), `src/${file} import 了 ${m[1]!}`).toBe(false)
+        expect(isRepoPackage(m[1]!), `src/${file} import 了 ${m[1]!}`).toBe(false)
       }
     }
     // 写进目标站 package.json 的依赖表不算依赖：它是字符串，插件不 import；装出来的站要跑 pnpm doc、要渲染，站当然要装这两个包

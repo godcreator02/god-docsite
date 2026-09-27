@@ -1,0 +1,48 @@
+{
+  "name": "@godcreator/trajectory-disk",
+  "version": "0.1.1",
+  "author": {"name": "godcreator"},
+  "type": "module",
+  "description": "星轨盘：把一组带时间与取代、转向关系的卡画成项目方向演变的圆盘。收盘心加一组卡的中性输入，负责建模、布局与画布；卡从哪来、怎么写归下游。`.` 入口是零 import 的建模与类型，`./disk` 是客户端组件 StarDisk。",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.mts",
+      "default": "./dist/index.mjs"
+    },
+    "./disk": {
+      "types": "./dist/disk.d.mts",
+      "default": "./dist/disk.mjs"
+    },
+    "./star.css": "./styles/star.css"
+  },
+  "files": [
+    "dist",
+    "styles"
+  ],
+  "scripts": {
+    "build": "tsdown",
+    "typecheck": "tsc -p tsconfig.json",
+    "prepublishOnly": "pnpm run build"
+  },
+  "peerDependencies": {
+    "react": ">=19"
+  },
+  "peerDependenciesMeta": {
+    "react": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@types/react": "^19.3.0",
+    "react": "^19.3.0"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://git.tianshen02.online:28377/api/packages/godcreator/npm/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://git.tianshen02.online:28377/godcreator/god-live-doc.git"
+  },
+  "keywords": ["gwb"]
+}

@@ -19,17 +19,19 @@ pnpm add -D @godcreator/docfirst-workflow @godcreator/docfirst-fumadocs
 ```
 
 `@godcreator/docfirst-workflow` 是命令行、项目装配与 mdx 格式，`@godcreator/docfirst-fumadocs` 是 fumadocs 适配，把 docfirst 接到 fumadocs 站上；
-钉码核心 `@godcreator/docfirst-pin` 与轨迹核心 `@godcreator/docfirst-trajectory` 随它们装上。`fumadocs` 与 `react`
+通用包钉码核心 `@godcreator/code-pin`（把文字钉在代码上）与星轨盘 `@godcreator/trajectory-disk`（把轨迹卡画成
+项目方向演变的圆盘）随它们装上。通用包不认识 docfirst，也能单独拿走用；讲解播放器 `@godcreator/explainer-player` 也是通用包，
+把一段讲解拆成配说明的帧来播放，站的讲解组件用它，docfirst 自己的包不依赖它。`fumadocs` 与 `react`
 只是 fumadocs 适配的 **peer**，用你项目里装的那份；只跑命令行、不装 fumadocs 的仓只装 `@godcreator/docfirst-workflow`。
 
 **站的构建配置里 `serverExternalPackages` 必须留空**：`@godcreator/docfirst-fumadocs` 里同时有服务端代码与客户端
 组件（状态点），而那个字段按包名匹配、没有子路径粒度——外置之后 `"use client"` 指令会丢掉；星轨盘的客户端组件在
-`@godcreator/docfirst-trajectory` 里，同样不能外置。
+`@godcreator/trajectory-disk` 里，同样不能外置。
 
 **建一个新站用工作台插件，命令行不管这一步**：工作台插件 `@godcreator/gwb-docfirst-workflow` 的
 `docfirst.create {"dir":"<仓>/docs-site"}` 一步建好接了三个区（现状 `docs`、轨迹 `trajectory`、未来 `future`）的站；
 不接 docfirst 的普通 fumadocs 站用 `docfirst.create-plain`，参数相同。两条都运行官方脚手架 `create-fumadocs-app`、
-应用本机约定、挑端口并写盘，`docfirst.create` 再在官方输出上增、换、删几份文件。站目录必须还不存在；给一个用了很久的站加 docfirst，要手动改站的配置接入。
+应用本机约定、挑端口并写入文件，`docfirst.create` 再在官方输出上增、换、删几份文件。站目录必须还不存在；给一个用了很久的站加 docfirst，要手动改站的配置接入。
 
 建站只在 agent 手上发生一次，所以不在这几个包里——包留的是要在**仓**里反复发生的那几条。
 
@@ -50,7 +52,7 @@ pnpm add -D @godcreator/docfirst-workflow @godcreator/docfirst-fumadocs
 然后：
 
 ```bash
-pnpm docfirst check                                 # 只读，报状态。红退 1；本仓未提交改动引起的黄也算红
+pnpm docfirst check                                 # 只读，报状态。有红时退出码 1；本仓未提交改动引起的黄也算红
 pnpm docfirst confirm                               # 机械写回：给未确认的记号写上记录，挪了位置的写回新行号，重新生成生成物
 pnpm docfirst confirm content/docs/a.mdx --accept   # 复核过后，接受点名页里的黄灯；必须点名页
 pnpm docfirst render                                # 只把 outputs 里有映射的生成正本渲染到落点
@@ -92,7 +94,7 @@ pnpm test           # 先 build 再 node --test tests/*.test.ts
 
 cd docs-site
 pnpm docfirst check
-pnpm test           # 站这一侧的接线（不启动 Next）
+pnpm test           # 站这一侧的接入代码（不启动 Next）
 pnpm build          # next build
 node scripts/verify-roster.mjs
 
@@ -102,4 +104,4 @@ pnpm check && pnpm build      # 工作台插件单独一套门禁，用 vitest
 
 调试站用 `pnpm dev`：用户说要看就一直开着，服务带超时（默认 2 小时）自动停；只是自己验证的，验完停掉。
 `pnpm build` 只在收尾或发版前跑一次，构建通过就结束，不跑 `start`。
-改了站构建时 remark 插件会跑到的包代码（`packages/docfirst-fumadocs/`，连同它调用的 workflow 与 pin），要先删 `.next` 再重新运行。
+改了站构建时 remark 插件会跑到的包代码（`packages/docfirst-fumadocs/`，连同它调用的 workflow 与 code-pin），要先删 `.next` 再重新运行。

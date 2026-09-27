@@ -1,13 +1,13 @@
 /**
- * docs-explain 包：`./text` 三个函数的输出，以及三种外壳用 `react-dom/server` 渲染出的第一帧——
+ * explainer-player 包：`./text` 三个函数的输出，以及三种外壳用 `react-dom/server` 渲染出的第一帧——
  * 控制条按钮都在、说明是第一项、画面拿到的是第一项的数据。
  */
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
-import { CasePicker, CodeLines, Diff, Pane, Pill, Stepper, Terminal, Timeline } from "@godcreator/docs-explain";
-import { casesText, chaptersText, stepsText } from "@godcreator/docs-explain/text";
+import { CasePicker, CodeLines, Diff, Pane, Pill, Stepper, Terminal, Timeline } from "@godcreator/explainer-player";
+import { casesText, chaptersText, stepsText } from "@godcreator/explainer-player/text";
 
 const STEPS = [
   { title: "写下引用", text: "文档里记下源码的行段。" },

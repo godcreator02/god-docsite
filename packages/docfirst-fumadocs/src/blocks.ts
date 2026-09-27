@@ -5,16 +5,16 @@
  *   行段 / 整文件   一个 mdast `code` 节点，写法按 fumadocs 认的那套来：meta 里 `title="…"` 出标题栏、`lineNumbers=N`
  *                   让行号跟源文件对得上、`data-dot="…"` 带状态点的颜色。黄「有变动」把改过的行标上 shiki 原生的
  *                   `[!code --]` / `[!code ++]`，旧行新行渲在同一块里（有行注释的语言才行，没有的退成 `diff` 块），
- *                   所以不再另起一块「当前段」，也**不带 lineNumbers**——块里夹着已经不存在的旧行，行号一定对不上源文件。
+ *                   所以不另外放一块「当前段」，也**不带 lineNumbers**——块里夹着已经不存在的旧行，行号一定对不上源文件。
  *                   红「缺失」显示的是确认时那段（取得到旧内容时的 old）。黄「位置不明」（取不到旧内容、滑窗也找不到这段）不摆代码。
  *   目录树          fumadocs 自己的 `<Files>` / `<Folder>` / `<File>`：根是一个展开的文件夹，名字按路径切成嵌套；
  *                   容器带 `data-dot` 和 `data-docfirst="tree"`，站的样式表在右上角画状态点。黄的时候摆当前的名字表
  *                   （记录只有名字表的哈希，多了少了哪些不知道）；红只剩一个禁用的根文件夹说目录不在了。
- *                   AI 那份的标（来源行 + text 清单）在这儿直接打好，stamp 看到就跳过，不去名册里找它。
+ *                   AI 那份的标（来源行 + text 清单）在这儿直接写好，stamp 看到就跳过，不去名册里找它。
  *
- * 灯长什么样、怎么渲染，全归站点侧的 pre 组件和样式表；这一层只把颜色写进 meta / 属性。
+ * 状态点长什么样、怎么渲染，全归站点侧的 pre 组件和样式表；这一层只把颜色写进 meta / 属性。
  */
-import type { Status } from "@godcreator/docfirst-pin";
+import type { Status } from "@godcreator/code-pin";
 import type { Item } from "@godcreator/docfirst-workflow";
 import { langOf } from "@godcreator/docfirst-workflow/mdx";
 import type { JsxAttribute, TreeNode } from "@godcreator/docfirst-workflow/mdx";
@@ -68,7 +68,7 @@ export function metaOf(title: string, dot: Dot, start?: number): string {
   return [`title="${title.replace(/"/g, "'")}"`, ...(start !== undefined ? [`lineNumbers=${start}`] : []), `data-dot="${dot}"`].join(" ");
 }
 
-/** 给 md 那头的标：来源、状态、AI 那份里该放的内容（不带 diff 标记） */
+/** 给 md 输出用的标：来源、状态、AI 那份里该放的内容（不带 diff 标记） */
 export interface DocfirstMark {
   source: string;
   label: string;
@@ -80,7 +80,7 @@ export function codeNode(lang: string, value: string, title: string, dot: Dot, m
 }
 
 /**
- * 把钉码（`@godcreator/docfirst-pin`）出的 unified 文本（` ` 不变 / `-` 删 / `+` 增）换成 shiki 的 diff 标记，渲在同一块里；
+ * 把钉码核心（`@godcreator/code-pin`）输出的 unified 文本（` ` 不变 / `-` 删 / `+` 增）换成 shiki 的 diff 标记，渲在同一块里；
  * 语言没有注释语法就原样给一块 `diff`。
  */
 export function diffBlock(lang: string, unified: string, title: string, dot: Dot, mark: DocfirstMark): TreeNode {
@@ -136,7 +136,7 @@ export function filesOf(names: string[]): TreeNode[] {
   return [...root.children.values()].map(render);
 }
 
-/** 目录树 → 一棵 `<Files>`：根文件夹叫这处的来源，容器带状态点的颜色；AI 那份的标直接打好 */
+/** 目录树 → 一棵 `<Files>`：根文件夹名是这处的来源，容器带状态点的颜色；AI 那份的标直接写好 */
 export function treeNode(item: Item): TreeNode {
   const where = whereOf(item);
   const dot = DOT_COLOR[item.status];

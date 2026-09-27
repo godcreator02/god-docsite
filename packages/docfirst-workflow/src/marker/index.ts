@@ -7,7 +7,7 @@
  *   载荷 = 动作词 + 目标属性 + 记录属性；没有记录属性就是还没确认，confirm 时写上
  *   报告里用的目标文本形态（`targetKey`），以及已经删掉的两种写法的报错：草稿 `@@docfirst … @@` 与名字记号 `has`
  */
-import type { MemoRecord, Target, TreeTarget } from "@godcreator/docfirst-pin";
+import type { MemoRecord, Target, TreeTarget } from "@godcreator/code-pin";
 
 /** 记号的动作词：ref / tree */
 export function wordOf(target: Target): string {

@@ -1,2 +1,2 @@
-/* 星轨盘的样式：原样转出轨迹包的 star.css，站只依赖 docfirst-fumadocs 就拿得到 */
-@import "@godcreator/docfirst-trajectory/star.css";
+/* 星轨盘的样式：原样再导出 trajectory-disk 的 star.css，站只依赖 docfirst-fumadocs 就拿得到 */
+@import "@godcreator/trajectory-disk/star.css";

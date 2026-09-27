@@ -2,7 +2,7 @@
 /* 术语标注的点线下划线与定义框，随 @godcreator/docfirst-fumadocs 发布 */
 @import '@godcreator/docfirst-fumadocs/term.css';
 /* 讲解组件的外壳与零件（分步、动画、选情况的控制条，面板、终端、胶囊、代码行） */
-@import '@godcreator/docs-explain/styles.css';
+@import '@godcreator/explainer-player/styles.css';
 /* 讲钉码的两个讲解组件 PinStory、PinJudge 自己的画面 */
 @import '../components/pin/pin.css';
 /* 系统地图的接缝图 SeamMap */

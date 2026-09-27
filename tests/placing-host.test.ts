@@ -1,13 +1,13 @@
 /**
- * 摆放的另一个宿主：生成物存在内存里，一个字节都不落盘、一次 git 都不起。
+ * 摆放的另一个宿主：生成物存在内存里，一个字节都不写磁盘、一次 git 都不运行。
  *
- * `createPlacing` 只经 `PlacingHost` 认识外面——项目那半（钉码编排、落点表、正本原文）
- * 和生成物那半（读一个落点、写一个落点）都在接口上。真盘那份适配器住 `load.ts`，这儿是第二份：
- * 落点在一张 Map 里，于是「摆了什么、摆到哪个键上、盘上那份被动过之后判成什么」全部直接看得见。
+ * `createPlacing` 只经 `PlacingHost` 认识外面——项目那部分（钉码编排、落点表、正本原文）
+ * 和生成物那部分（读一个落点、写一个落点）都在接口上。读写真实磁盘的那份适配器住 `load.ts`，这儿是第二份：
+ * 落点在一张 Map 里，于是「摆了什么、摆到哪个键上、落点上的内容被改过之后判成什么」全部直接看得见。
  */
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { createPinner } from "../packages/docfirst-pin/src/index.ts";
+import { createPinner } from "../packages/code-pin/src/index.ts";
 import type { Listing } from "../packages/docfirst-workflow/src/reference/index.ts";
 import { createPinning } from "../packages/docfirst-workflow/src/pinning/index.ts";
 import type { Pinning } from "../packages/docfirst-workflow/src/pinning/index.ts";
@@ -15,10 +15,10 @@ import { createPlacing } from "../packages/docfirst-workflow/src/project/index.t
 import type { PlacingHost, ProjectConfig } from "../packages/docfirst-workflow/src/project/index.ts";
 import { NO_HISTORY } from "./repo.ts";
 
-/** 正本：点名的字段随行到生成物头部，没点名的剥掉；正文里看着像转义的 `&#x2A;` 原样留着 */
+/** 正本：点名的字段带到生成物头部，没点名的去掉；正文里看着像转义的 `&#x2A;` 原样留着 */
 const SOURCE = ["---", "name: block-note", "description: 块笔记怎么用", "secret: 不该随行", "---", "", "# 摆放", "", "一段**加粗**的正文，&#x2A; 原样", ""].join("\n");
 
-/** 整形之后该剩下的那段正文：frontmatter 剥掉、开头空行去掉，别的原样 */
+/** 整形之后该剩下的那段正文：frontmatter 去掉、开头空行去掉，别的原样 */
 const BODY = "# 摆放\n\n一段**加粗**的正文，&#x2A; 原样\n";
 
 /** 什么都读不到的钉码编排：这份测试不验判定 */

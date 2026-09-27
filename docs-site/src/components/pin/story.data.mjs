@@ -1,6 +1,6 @@
 /**
  * 「一条引用的一生」的全部讲解数据：画面（story.tsx）与机读版规则（pin.ai.mjs）都只读这一份。
- * 例子里的 hash 与 blob 是按 docfirst-pin 的算法对这几版 greet.ts 真算出来的：
+ * 例子里的 hash 与 blob 是按 code-pin 的算法对这几版 greet.ts 真算出来的：
  * hash = 被钉的几行去掉行尾空白后 sha256 的前 12 位，blob = 整个文件的 git blob 对象名前 12 位。
  */
 
@@ -39,7 +39,7 @@ export const steps = [
     status: 'unconfirmed',
     command: 'pnpm docfirst check',
     cli: `⚪ ${DOC}  ${REF}:2-3  未确认，等作者确认`,
-    text: '在文档里单独起一行，写一个不带记录的正式记号：只有文件与行号，指向 greet.ts 的第 2–3 行。check 认得它、也读得到这两行，但记号上还没有确认时的记录，所以是空心的「未确认」。讲解组件的源码里也这样写，只是外壳换成单独一行的 /* … */。',
+    text: '在文档里单独写一行，写一个不带记录的正式记号：只有文件与行号，指向 greet.ts 的第 2–3 行。check 认得它、也读得到这两行，但记号上还没有确认时的记录，所以是空心的「未确认」。讲解组件的源码里也这样写，只是外壳换成单独一行的 /* … */。',
   },
   {
     title: '确认：记下 hash 与 blob',
@@ -83,7 +83,7 @@ export const steps = [
     command: 'pnpm docfirst check',
     cli: `🔴 ${DOC}  ${REF}:4-5  有变动，是本仓还没提交的改动引起的——在同一个提交里复核，再 docfirst confirm ${DOC} --accept`,
     diff: { old: '  return `hello, ${name}`;', now: '  return `hi, ${name}`;' },
-    text: '把 hello 改成 hi。这两行算出的 hash 跟记号上的不同了，状态是「有变动」（黄），页面上把旧行和新行放在一起。改动还没提交，说明就是这次改的，check 把它按红处理、退 1，让改代码的人在同一个提交里把文档对上。',
+    text: '把 hello 改成 hi。这两行算出的 hash 跟记号上的不同了，状态是「有变动」（黄），页面上把旧行和新行放在一起。改动还没提交，说明就是这次改的，check 把它按红处理、以退出码 1 结束，让改代码的人在同一个提交里把文档对上。',
   },
   {
     title: '复核后 --accept：回绿',
@@ -104,7 +104,7 @@ export const steps = [
     command: 'pnpm docfirst check',
     cli: `🔴 ${DOC}  ${REF}:4-5  缺失（整段已被删光）`,
     removed: ['export function greet(name: string) {', '  return `hi, ${name}`;', '}'],
-    text: '函数删掉了，被钉的两行在今天的文件里找不到了，状态是「缺失」（红），check 退 1。页面上这一块改成显示文档写下时的那两行，好让人知道原来引的是什么。要么改写这处引用，要么连同那句话一起删掉。',
+    text: '函数删掉了，被钉的两行在今天的文件里找不到了，状态是「缺失」（红），check 以退出码 1 结束。页面上这一块改成显示文档写下时的那两行，好让人知道原来引的是什么。要么改写这处引用，要么连同那句话一起删掉。',
   },
 ];
 

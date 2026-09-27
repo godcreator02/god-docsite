@@ -1,6 +1,6 @@
 /**
  * `docfirst check --json` 的机读形态。形状是契约：读它的是别的程序（门禁、编辑器、想自己列
- * 「待重写页与漂移的钉」的 agent）。整份一行 JSON 打到 stdout，退出码跟人读模式一样（有红退 1）。
+ * 「待重写页与漂移的钉」的 agent）。整份一行 JSON 打印到 stdout，退出码跟人读模式一样（有红时退出码 1）。
  *
  *   {
  *     "ok": false,                 // red === 0
@@ -13,12 +13,12 @@
  *           { "target": "../src/a.ts:2-3", "kind": "span", "status": "changed",
  *             "line": 12,          // 记号在文档里的第几行（1 起）
  *             "lines": [2, 3],     // 行段今天在文件里的位置（跟过 hunk 或滑窗）；别的种类是 [1, 项数]
- *             "reason": "changed", // 状态的细分理由，没有就不带（同钉码核心 `@godcreator/docfirst-pin` 的 Reason）
+ *             "reason": "changed", // 状态的细分理由，没有就不带（同钉码核心 `@godcreator/code-pin` 的 Reason）
  *             "diff": "- a\n+ b",  // 有变动且取得到旧内容时的 - / + 文本，没有就不带
  *             "blocking": true }   // 只出现在黄灯上：被钉文件在文档所在的仓里有未提交的改动，这个黄算红
  *         ],
  *         "components": [{ "name": "Callout", "line": 7 }], // 名册外组件
- *         "outputs": [             // 挂了 outputs 映射的才有；形状归 project 的摆放模块定
+ *         "outputs": [             // 有 outputs 映射的文档才有；形状归 project 的摆放模块定
  *           { "to": "../README.md", "status": "fresh", "fresh": true },   // 状态：fresh / missing（生成物还不在）/
  *           { "to": "../x/SKILL.md", "status": "no-frontmatter", "fresh": false, "missing": ["description"] }
  *         ]                       // stale（跟源不一致）/ no-frontmatter（源头部缺点名的字段）/
@@ -32,11 +32,11 @@
  *
  * 「待重写页」= items 里有 changed / missing 的、或 outputs 里 `fresh` 为假的文档；「漂移的钉」= 那些 item。
  */
-import type { Reason, Status, Target } from "@godcreator/docfirst-pin";
+import type { Reason, Status, Target } from "@godcreator/code-pin";
 import type { PlacedCheck } from "../project/index.ts";
 
-/** 一个摆放落点的新鲜度。**形状由 project 的摆放模块定**，这儿只借个名字给报告用——
- *  各状态怎么算出来的不归命令行解释，读报告的人照 `fresh` 决定要不要重摆 */
+/** 一个摆放落点的新鲜度。**形状由 project 的摆放模块定**，这儿只是给报告用的别名——
+ *  各状态怎么算出来的不归命令行解释，读报告的人照 `fresh` 决定要不要重新摆放 */
 export type OutputReport = PlacedCheck;
 
 /** 一处引用核对完的样子 */

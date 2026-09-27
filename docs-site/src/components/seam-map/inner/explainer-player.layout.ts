@@ -1,6 +1,6 @@
 /**
- * 讲解组件内部接缝图（docs-explain.data.mjs）的坐标与图标。站的画面与机读规则、站的配置在最上，
- * 入口、react、./text 一行，三种模板与零件一行，控制条、颜色名、图标一行，样式表与 fumadocs 在最下。
+ * 讲解播放器内部接缝图（explainer-player.data.mjs）的坐标与图标。站的画面与机读规则、站的配置在最上，
+ * 入口、react、./text 一行，三种外壳与零件一行，控制条、颜色名、图标一行，样式表与 fumadocs 在最下。
  */
 import {
   Atom,
@@ -21,7 +21,7 @@ import {
 import { cap } from '../diagram';
 import type { SeamLayout } from '../diagram';
 
-export const docsExplainLayout: SeamLayout = {
+export const explainerPlayerLayout: SeamLayout = {
   view: { w: 1100, h: 734 },
   caps: {
     view: cap(34, 52, 286),
@@ -73,7 +73,7 @@ export const docsExplainLayout: SeamLayout = {
     styles: { x: 176, y: 620, w: 526, h: 94 },
     fumadocs: { x: 728, y: 620, w: 218, h: 94 },
   },
-  // 线只画到一端的时候，另一端（画面函数的选情况、控制条的各模板、样式表的其余方块这类）固定高亮时照样亮
+  // 线只画到一端的时候，另一端（画面函数的选情况、控制条的各外壳、样式表的其余方块这类）固定高亮时照样亮
   seamPaths: {
     '1': { d: 'M220,100 V202', badge: [220, 150] },
     '2': { d: 'M60,100 V352 M60,290 H236 V352', badge: [60, 150] },

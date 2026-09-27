@@ -23,7 +23,7 @@ export const workflowGraph = defineSeamGraph({
       role: 'emerald',
       outside: false,
       blurb:
-        'run.ts 的 main 把参数译成对装配好的项目的几次调用，打印成人读的行或一行 JSON，交回退出码；每条命令只收自己开关表里的开关。cli.ts 是可执行文件 docfirst，只转发参数与退出码。report.ts 定 check --json 的报告形状。它认识 project、cards、pinning、mdx、marker、reference 与两个核心，这个包里谁都不认识它。',
+        'run.ts 的 main 把参数译成对装配好的项目的几次调用，打印成人读的行或一行 JSON，交回退出码；每条命令只收自己开关表里的开关。cli.ts 是可执行文件 docfirst，只转发参数与退出码。report.ts 定 check --json 的报告形状。它认识 project、cards、pinning、mdx、marker、reference 与钉码核心、轨迹核心，这个包里谁都不认识它。',
       caps: [
         { id: 'main', name: '命令编排', ident: 'main' },
         { id: 'report', name: '机读报告', ident: 'CheckReport' },
@@ -99,7 +99,7 @@ export const workflowGraph = defineSeamGraph({
       role: 'blue',
       outside: false,
       blurb:
-        'fs-reader.ts 的读取器读工作区文件、列目录；history.ts 的旧内容来源按 blob 名从被引文件所在的仓取确认时的内容；git.ts 是启动 git 子进程的几个函数，每次都带超时；uncommitted.ts 的探针回答一处黄是不是本仓还没提交的改动引起的，一次 check 造一个。',
+        'fs-reader.ts 的读取器读工作区文件、列目录；history.ts 的旧内容来源按 blob 名从被引文件所在的仓取确认时的内容；git.ts 是启动 git 子进程的几个函数，每次都带超时；uncommitted.ts 的探针回答一处黄是不是本仓还没提交的改动引起的，每次 check 建一个。',
       caps: [
         { id: 'reader', name: '读取器', ident: 'createReader' },
         { id: 'history', name: '旧内容来源', ident: 'createGitHistory' },
@@ -149,7 +149,7 @@ export const workflowGraph = defineSeamGraph({
       role: 'emerald',
       outside: false,
       blurb:
-        'docfirst 的轨迹卡怎么写、怎么校验、怎么换成星轨盘的中性输入。card-dir.ts 的 scanCardDir 读卡目录一层，目录不在就交回空集合；scan.ts 的 scanCards 用 pickCardFiles 挑出卡文件，card.ts 的 parseCardFile 解析 frontmatter、关系行与里程碑并做单文件校验，scanCards 再做跨文件校验（只有一张根卡、parent 只写根卡身份），用 card-refs.ts 查卡里不许钉码，最后交回 CardScan：中性输入加病卡。parse.ts 放卡字段表 CARD_KEYS 与从链接取卡身份的 cardIdFromHref。只 import marker 与轨迹核心；包里的目录只有 cli import 它，project 不认识它；主入口也转出 scanCardDir 与 CardScan 等类型。',
+        'docfirst 的轨迹卡怎么写、怎么校验、怎么换成星轨盘的中性输入。card-dir.ts 的 scanCardDir 读卡目录一层，目录不在就交回空集合；scan.ts 的 scanCards 用 pickCardFiles 挑出卡文件，card.ts 的 parseCardFile 解析 frontmatter、关系行与里程碑并做单文件校验，scanCards 再做跨文件校验（只有一张根卡、parent 只写根卡身份），用 card-refs.ts 查卡里不许钉码，最后交回 CardScan：中性输入加病卡。parse.ts 放卡字段表 CARD_KEYS 与从链接取卡身份的 cardIdFromHref。只 import marker 与轨迹核心；包里的目录只有 cli import 它，project 不认识它；主入口也再导出 scanCardDir 与 CardScan 等类型。',
       caps: [
         { id: 'card-dir', name: '读卡目录', ident: 'scanCardDir' },
         { id: 'card-keys', name: '卡字段与卡身份', ident: 'CARD_KEYS · cardIdFromHref' },
@@ -170,11 +170,11 @@ export const workflowGraph = defineSeamGraph({
     {
       id: 'pin',
       name: '钉码核心',
-      pkg: '@godcreator/docfirst-pin',
+      pkg: '@godcreator/code-pin',
       role: null,
       outside: true,
       blurb:
-        '状态全在这里判。它只收目标与记录：读取器与旧内容来源由 workflow 实现，装配时传给 createPinner；目标、记录、判定的类型与细分理由的中文说法 REASON_TEXT 也从它取。只用 node:crypto，不读文件、不启动子进程。',
+        '通用包，不认识 docfirst，把文字钉在代码上；状态全在这里判。它只收目标与记录：读取器与旧内容来源由 workflow 实现，装配时传给 createPinner；目标、记录、判定的类型与细分理由的中文说法 REASON_TEXT 也从它取。只用 node:crypto，不读文件、不启动子进程。',
       caps: [
         { id: 'pinner', name: '核对与确认', ident: 'createPinner' },
         { id: 'algo', name: 'hunk 与 hash', ident: 'parseHunks · hashText' },
@@ -196,11 +196,11 @@ export const workflowGraph = defineSeamGraph({
     {
       id: 'trajectory',
       name: '轨迹核心',
-      pkg: '@godcreator/docfirst-trajectory',
+      pkg: '@godcreator/trajectory-disk',
       role: null,
       outside: true,
       blurb:
-        '主入口只收盘心加一组卡的中性输入，buildModel 建出一张盘的模型；卡从哪儿来、怎么写、怎么校验都归 workflow 的卡格式。workflow 从主入口取建模函数、时刻格式的判据 validBornAt 与中性输入的类型。',
+        '通用包星轨盘，不认识 docfirst。主入口只收盘心加一组卡的中性输入，buildModel 建出一张盘的模型；在 docfirst 里，卡从哪儿来、怎么写、怎么校验都归 workflow 的卡格式。workflow 从主入口取建模函数、时刻格式的判据 validBornAt 与中性输入的类型。',
       caps: [
         { id: 'traj-types', name: '中性输入', ident: 'DiskInput · DiskCard' },
         { id: 'traj-born', name: '时刻格式', ident: 'validBornAt' },
@@ -238,7 +238,7 @@ export const workflowGraph = defineSeamGraph({
       iface: 'createUncommittedProbe(root) → (doc, target) => boolean；placing.check(doc, listing) / render(doc)；scanCardDir(dir) → CardScan（sick）；OutputReport = PlacedCheck',
       convention: false,
       via: 'code',
-      text: 'check 每跑一次造一个未提交改动探针，黄灯的被钉文件在本仓有未提交的改动就算红，组件源码里的黄灯也一样；每篇 mdx 页面核对完把清单交给 placing.check 核对生成物；最后用卡格式的 scanCardDir 读项目的轨迹卡目录，只取病卡，每条病计一处红，目录还没建不算红。confirm 与 render 调 placing.render 重新生成。机读报告的 outputs 直接用摆放的 PlacedCheck 类型，命令行只把这些结果打印成行。',
+      text: '每次 check 建一个未提交改动探针，黄灯的被钉文件在本仓有未提交的改动就算红，组件源码里的黄灯也一样；每篇 mdx 页面核对完把清单交给 placing.check 核对生成物；最后用卡格式的 scanCardDir 读项目的轨迹卡目录，只取病卡，每条病计一处红，目录还没建不算红。confirm 与 render 调 placing.render 重新生成。机读报告的 outputs 直接用摆放的 PlacedCheck 类型，命令行只把这些结果打印成行。',
     },
     {
       n: 4,
@@ -302,13 +302,13 @@ export const workflowGraph = defineSeamGraph({
     },
     {
       n: 10,
-      name: '装配零件',
+      name: '装配时建的部件',
       a: ['load'],
       b: ['reader', 'history', 'placing'],
       iface: 'createReader(root) · createGitHistory(root) · createPlacing(host: PlacingHost)',
       convention: false,
       via: 'code',
-      text: '装配时按项目根造读取器与旧内容来源；再把钉码编排、每篇的落点表和在磁盘上读正本、读落点、写落点的函数组成 PlacingHost，交给 createPlacing。摆放拿不到装配的别的部分。',
+      text: '装配时按项目根建读取器与旧内容来源；再把钉码编排、每篇的落点表和在磁盘上读正本、读落点、写落点的函数组成 PlacingHost，交给 createPlacing。摆放拿不到装配的别的部分。',
     },
     {
       n: 11,
@@ -328,7 +328,7 @@ export const workflowGraph = defineSeamGraph({
       iface: 'parseHunks(diffText) · hashText(text)',
       convention: false,
       via: 'code',
-      text: 'git.ts 跑完 git diff 用钉码核心的 parseHunks 解析输出，hunk 表的缓存键是两份内容用 hashText 算出的 blob 名。解析与 hash 只有钉码核心一份，两边对 hunk 和 blob 名的理解不会分叉。',
+      text: 'git.ts 跑完 git diff 用钉码核心的 parseHunks 解析输出，hunk 表的缓存键是两份内容用 hashText 算出的 blob 名。解析与 hash 只有钉码核心一份，两边对 hunk 和 blob 名的理解不会不一致。',
     },
     {
       n: 13,
@@ -398,7 +398,7 @@ export const workflowGraph = defineSeamGraph({
       iface: 'CardScan = DiskInput & { sick }；DiskInput { center: { id, label, bornAt, kind, milestones } | null, cards: { id, bornAt, label, domain, kind, relations }[] }；validBornAt(v)',
       convention: false,
       via: 'code',
-      text: 'scanCards 把校验过的卡换成轨迹核心的中性输入：根卡恰好一张时它是盘心，born-at 合格的其余卡都在 cards 里，有病但画得出来的照样送去。born-at 合不合格，parseCardFile 与建模用的是同一个 validBornAt。关系与里程碑的类型也从轨迹核心取。frontmatter、关系行、文件名这些 docfirst 的写法只在卡格式里，轨迹核心不读文件。',
+      text: 'scanCards 把校验过的卡换成轨迹核心的中性输入：根卡恰好一张时它是盘心，born-at 合格的其余卡都在 cards 里，有病但画得出来的照样放进 cards。born-at 合不合格，parseCardFile 与建模用的是同一个 validBornAt。关系与里程碑的类型也从轨迹核心取。frontmatter、关系行、文件名这些 docfirst 的写法只在卡格式里，轨迹核心不读文件。',
     },
     {
       n: 20,
@@ -425,7 +425,7 @@ export const workflowGraph = defineSeamGraph({
       name: '钉码核心的类型与说法',
       a: ['ref-types', 'mk-formal', 'md-render', 'cd-rw'],
       b: ['pin-types'],
-      iface: 'import type { Target, MemoRecord, Status, Reason } from "@godcreator/docfirst-pin"；REASON_TEXT',
+      iface: 'import type { Target, MemoRecord, Status, Reason } from "@godcreator/code-pin"；REASON_TEXT',
       convention: false,
       via: 'code',
       text: '记号写法解析出来的、引用类型里存的、两个格式写回时拼记号用的，都是钉码核心定义的目标与记录，这几个目录都只 import 类型；钉码核心反过来一行都不引用 workflow。按原文渲染拒绝缺失的引用时，理由取 REASON_TEXT 的中文说法。',

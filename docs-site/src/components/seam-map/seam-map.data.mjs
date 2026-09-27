@@ -1,6 +1,7 @@
 /**
  * 全局接缝图的全部内容：首页的 <SeamMap /> 画的就是它，接缝的正本就在这里。
- * 模块按包分：docfirst 的每个 npm 包与工作台插件各一个虚线框，框里的方块是能力；使用方的站、使用方的仓、fumadocs 本体在框外。
+ * 模块按包分：docfirst 用到的每个 npm 包（通用包与 docfirst 自己的包）与工作台插件各一个虚线框，框里的方块是能力；
+ * 使用方的站、使用方的仓、fumadocs 本体在框外。通用包 explainer-player 跟 docfirst 的包互不认识，不在这张图里。
  * 每条接缝写明两端的能力、接口、是不是约定（没有代码接口，只靠文件名、目录名、配置键对上）、经代码调用还是经磁盘上的文件。
  * 坐标不在这里，在 system.layout.ts：这份只描述系统是什么样。各包内部的接缝图在 inner/ 下。
  */
@@ -14,7 +15,7 @@ const modules = [
     pkg: '@godcreator/docfirst-fumadocs',
     role: 'amber',
     outside: false,
-    blurb: '调用链从 fumadocs 或 Next 开始的部分：mdx 加载器编译页面时调的 remark 插件、机读版、页面渲染时的组件、名册规则、卡集合、星轨盘的读卡与组件。认识另外三个包，谁都不认识它。',
+    blurb: '调用链从 fumadocs 或 Next 开始的部分：mdx 加载器编译页面时调的 remark 插件、机读版、页面渲染时的组件、名册规则、卡集合、星轨盘的读卡与组件。认识命令行与项目、钉码核心、轨迹核心，谁都不认识它。',
     caps: [
       { id: 'remark', name: 'remark 插件', ident: 'docfirstMdxOptions' },
       { id: 'markdown', name: '机读版', ident: 'markdown.ts' },
@@ -30,7 +31,7 @@ const modules = [
     pkg: '@godcreator/docfirst-workflow',
     role: 'emerald',
     outside: false,
-    blurb: '调用链从 docfirst 命令开始的部分：命令行、项目装配（读文件、git、生成物）、钉码编排、mdx 页面与讲解组件源码的格式、记号写法，以及 docfirst 的卡格式（读卡目录、解析与校验卡、换成星轨盘的中性输入）。认识两个核心，不认识任何站的宿主。',
+    blurb: '调用链从 docfirst 命令开始的部分：命令行、项目装配（读文件、git、生成物）、钉码编排、mdx 页面与讲解组件源码的格式、记号写法，以及 docfirst 的卡格式（读卡目录、解析与校验卡、换成星轨盘的中性输入）。认识通用包钉码核心与轨迹核心，不认识任何站的宿主。',
     caps: [
       { id: 'cli', name: '命令行', ident: 'docfirst' },
       { id: 'marker', name: '记号写法', ident: 'marker/' },
@@ -45,10 +46,10 @@ const modules = [
   {
     id: 'pin',
     name: '钉码核心',
-    pkg: '@godcreator/docfirst-pin',
+    pkg: '@godcreator/code-pin',
     role: 'blue',
     outside: false,
-    blurb: '目标与记录的类型、核对与确认、比较器。只收目标与记录，不接触文档文本；只用 node:crypto，不读文件、不启动子进程，读取器与旧内容来源从构造参数传进来。',
+    blurb: '通用包，不认识 docfirst，谁都能单独拿走用：把文字钉在代码上。只认目标与记录，核对出被钉的代码变没变、确认时算出新记录；零依赖，只用 node:crypto，不接触文档文本、不读文件、不启动子进程，读取器与旧内容来源从构造参数传进来。docfirst 用它判定每处钉码的状态。',
     caps: [
       { id: 'types', name: '目标与记录', ident: 'types.ts' },
       { id: 'pinner', name: '核对与确认', ident: 'createPinner' },
@@ -58,10 +59,10 @@ const modules = [
   {
     id: 'trajectory',
     name: '轨迹核心',
-    pkg: '@godcreator/docfirst-trajectory',
+    pkg: '@godcreator/trajectory-disk',
     role: 'violet',
     outside: false,
-    blurb: '建模与布局，另有星轨盘组件 ./disk 与样式 ./star.css。主入口只收盘心加一组卡的中性输入，buildModel 建出一张盘的模型；卡从哪儿来、怎么写、怎么校验归调用方。主入口的产物里一条 import 都没有。',
+    blurb: '通用包星轨盘，不认识 docfirst，谁都能单独拿走用：把一组带时间与取代、转向关系的卡画成项目方向演变的圆盘。主入口只收盘心加一组卡的中性输入，buildModel 建模、布局，另有星轨盘组件 ./disk 与样式 ./star.css；卡从哪儿来、怎么写、怎么校验归调用方。主入口的产物里一条 import 都没有。docfirst 把轨迹卡换成它的中性输入。',
     caps: [
       { id: 'model', name: '中性输入与建模', ident: 'buildModel' },
       { id: 'layout', name: '布局', ident: 'RingsLayout' },
@@ -74,7 +75,7 @@ const modules = [
     pkg: '@godcreator/gwb-docfirst-workflow',
     role: 'cyan',
     outside: false,
-    blurb: '不进 npm 的依赖网，只在桌面工作台里给 agent 提供两条建站命令和说明书。对 docfirst 的 npm 包零依赖：不 import、不运行它们的命令行。',
+    blurb: '不进 npm 的依赖网，只在桌面工作台里给 agent 提供两条建站命令和说明书。对本仓的 npm 包零依赖：不 import、不运行它们的命令行。',
     caps: [
       { id: 'skills', name: '说明书', ident: 'skills/' },
       { id: 'create', name: '建站命令与模板', ident: 'docfirst.create' },
@@ -92,11 +93,11 @@ const modules = [
   {
     id: 'site',
     name: '使用方的站',
-    pkg: 'Next 站的接线代码',
+    pkg: 'Next 站的接入代码',
     role: null,
     outside: true,
     blurb: '装了这几个包的站：src/lib/source.ts 接集合，src/components/mdx.tsx 换组件，星轨整页调用 loadTrajectory 与 StarDisk。本仓的 docs-site/ 就是这样一个站。',
-    caps: [{ id: 'wiring', name: '站的接线代码', ident: 'source.ts · mdx.tsx' }],
+    caps: [{ id: 'wiring', name: '站的接入代码', ident: 'source.ts · mdx.tsx' }],
   },
   {
     id: 'repo',
@@ -134,7 +135,7 @@ const seams = [
     name: '目标与记录',
     a: ['marker', 'mdx'],
     b: ['types'],
-    iface: 'import type { Target, MemoRecord, Status, Reason } from "@godcreator/docfirst-pin"；REASON_TEXT',
+    iface: 'import type { Target, MemoRecord, Status, Reason } from "@godcreator/code-pin"；REASON_TEXT',
     convention: false,
     via: 'code',
     text: 'workflow 的记号写法、两种格式与钉码核心的类型之间。记号写法把记号的属性解析成钉码核心定义的目标与记录（没有记录属性的，记录是 null），写记号时反过来；mdx 页面与讲解组件的源码用的是同一套属性，只有外面的注释不同。这几处只从钉码核心 import 类型。按原文渲染拒绝缺失的引用、命令行打印细分理由时，中文说法取 REASON_TEXT。目标、记录与理由的取值由钉码核心负责，钉码核心不认识任何记号写法与文档格式。',
@@ -177,7 +178,7 @@ const seams = [
     iface: './disk 的 StarDisk（data 收中性输入）、./star.css',
     convention: false,
     via: 'code',
-    text: 'fumadocs 适配与轨迹核心之间。./trajectory 按包名从 ./disk 转出客户端组件 StarDisk，Next 才认得出客户端边界；./trajectory.css 引入 star.css。StarDisk 的 data 就是 loadTrajectory 交回的中性输入，组件在浏览器里自己调 buildModel。站画星轨盘只经过 fumadocs 适配，不直接依赖轨迹核心；fumadocs 适配也不从轨迹核心的主入口取任何东西。组件的形状由轨迹核心负责。',
+    text: 'fumadocs 适配与轨迹核心之间。./trajectory 按包名从 ./disk 再导出客户端组件 StarDisk，Next 才认得出客户端边界；./trajectory.css 引入 star.css。StarDisk 的 data 就是 loadTrajectory 交回的中性输入，组件在浏览器里自己调 buildModel。站画星轨盘只经过 fumadocs 适配，不直接依赖轨迹核心；fumadocs 适配也不从轨迹核心的主入口取任何东西。组件的形状由轨迹核心负责。',
   },
   {
     n: 6,
@@ -191,13 +192,13 @@ const seams = [
   },
   {
     n: 7,
-    name: 'fumadocs 接线',
+    name: '接入 fumadocs',
     a: ['remark', 'markdown', 'pre'],
     b: ['fumadocs-core'],
     iface: 'applyMdxPreset 的参数形状、postprocess、rehypeCode 的 meta 白名单、CodeBlock、Files',
     convention: false,
     via: 'code',
-    text: 'fumadocs 适配与 fumadocs 本体之间。docfirstMdxOptions 的返回值按形状对上 applyMdxPreset 的参数，把 remark 插件放在链尾；docfirstMarkdownOptions 交给 postprocess 生成机读版；parseMetaString 让 rehypeCode 放行状态点的 data-dot；状态点代码块套 fumadocs-ui 的 CodeBlock，目录树用它的 Files。fumadocs 是 peer 依赖，它改了这些形状，要改的是 fumadocs 适配。',
+    text: 'fumadocs 适配与 fumadocs 本体之间。docfirstMdxOptions 的返回值按形状对上 applyMdxPreset 的参数，把 remark 插件放在链尾；docfirstMarkdownOptions 交给 postprocess 生成机读版；parseMetaString 让 rehypeCode 保留状态点的 data-dot；状态点代码块套 fumadocs-ui 的 CodeBlock，目录树用它的 Files。fumadocs 是 peer 依赖，它改了这些形状，要改的是 fumadocs 适配。',
   },
   {
     n: 8,
@@ -207,7 +208,7 @@ const seams = [
     iface: 'docfirstMdxOptions、docfirstMarkdownOptions、cardSchema、remarkTrajectoryLinks；./pre、./term、./trajectory、样式表；./roster',
     convention: false,
     via: 'code',
-    text: 'fumadocs 适配与使用方站的接线代码之间。站的 src/lib/source.ts 把前四个出口接到现状集合与轨迹卡集合上，mdx.tsx 把 pre 换成会画状态点的 DocfirstPre、登记 Term，星轨整页调用 loadTrajectory、渲染 StarDisk，样式表 light.css、term.css、trajectory.css 由站引入；docfirst.config.mjs 展开 ./roster 的 fumadocsRoster。出口名由 fumadocs 适配负责，改名要同时改站的接线代码和接缝 12 的模板。',
+    text: 'fumadocs 适配与使用方站的接入代码之间。站的 src/lib/source.ts 把前四个出口接到现状集合与轨迹卡集合上，mdx.tsx 把 pre 换成会画状态点的 DocfirstPre、登记 Term，星轨整页调用 loadTrajectory、渲染 StarDisk，样式表 light.css、term.css、trajectory.css 由站引入；docfirst.config.mjs 展开 ./roster 的 fumadocsRoster。出口名由 fumadocs 适配负责，改名要同时改站的接入代码和接缝 12 的模板。',
   },
   {
     n: 9,
@@ -255,7 +256,7 @@ export const systemGraph = defineSeamGraph({
   id: 'system',
   title: 'docfirst 的模块、能力与接缝',
   intro:
-    '接缝图：虚线框是模块（docfirst 的 npm 包与工作台插件），框里的方块是能力，跨模块的线带编号就是接缝；实线是代码调用，虚线是读写磁盘上的文件；系统之外的东西画在框外。',
+    '接缝图：虚线框是模块（docfirst 用到的 npm 包与工作台插件），框里的方块是能力，跨模块的线带编号就是接缝；实线是代码调用，虚线是读写磁盘上的文件；系统之外的东西画在框外。',
   frameLabel: '模块（包）',
   modules,
   entries,

@@ -1,16 +1,16 @@
 /**
- * 钉码核心自己的账：check / confirm 两个动作、比较器、确认时记什么。
- * 直接给目标与记录，用内存读取器、内存里的旧内容来源——钉码核心不读盘、不启动子进程、不接触文档文本，这里正好把这条也守住。
+ * 钉码核心自己的测试：check / confirm 两个动作、比较器、确认时记什么。
+ * 直接给目标与记录，用内存读取器、内存里的旧内容来源——钉码核心不读文件、不启动子进程、不接触文档文本，这里正好也检查了这一条。
  */
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { blobOf, createPinner, hashNames, hashSpan, normalizeLines, sliceSpan } from "../packages/docfirst-pin/src/index.ts";
-import type { History, MemoRecord, Pin, Pinner, Reader, Target, Verdict } from "../packages/docfirst-pin/src/index.ts";
+import { blobOf, createPinner, hashNames, hashSpan, normalizeLines, sliceSpan } from "../packages/code-pin/src/index.ts";
+import type { History, MemoRecord, Pin, Pinner, Reader, Target, Verdict } from "../packages/code-pin/src/index.ts";
 import { NO_HISTORY } from "./repo.ts";
 
 const CODE = ["// greet", "export function greet(name: string): string {", "  return `hello ${name}`;", "}", ""];
 
-/** 内存读取器：文件表就是全部世界。目录树按路径前缀算 */
+/** 内存读取器：文件表里有的就是全部文件。目录树按路径前缀算 */
 function memoryReader(files: Map<string, string[]>): Reader {
   return {
     read: (file) => files.get(file) ?? null,
@@ -39,7 +39,7 @@ const UNCONFIRMED: Pin = { target: SPAN, record: null };
 const accept = { accept: true };
 const plain = { accept: false };
 
-/** 确认一处，交回写下的那一处（钉不住就报错） */
+/** 确认一处，返回写下的那一处（没写下记录就报错） */
 function confirmOne(pinner: Pinner, pin: Pin, options = plain): Pin {
   const [step] = pinner.confirm(pinner.check([pin]), options);
   assert.ok(step!.written !== undefined, `这一处没记下来：${step!.action} ${step!.problem ?? ""}`);

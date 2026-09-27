@@ -1,7 +1,7 @@
 /**
  * 「提交门禁拦什么、什么算红」的全部讲解数据：画面（commit-gate.tsx）与机读版规则（commit-gate.ai.mjs）都只读这一份。
  * 例子跟钉码页（pin/story.data.mjs）是同一个 greet.ts：文档 content/docs/a.mdx 钉住它的第 4–5 行，
- * 记号上的 hash 与 blob 取自那份数据（按 docfirst-pin 的算法真算出来的）。
+ * 记号上的 hash 与 blob 取自那份数据（按 code-pin 的算法真算出来的）。
  * 命令行输出照 docfirst-workflow 的 cli/run.ts 实际打印的格式逐字写；项目根是 ~/repo/docs-site，git 仓根是 ~/repo，
  * 所以 git status 列出的路径带 docs-site/ 前缀，引用里写的路径不带。
  */
@@ -13,7 +13,7 @@ const OTHER_REF = '../../greet-lib/src/greet.ts';
 const MARKER_BEFORE = `{/* ref file="${REF}" lines="4-5" hash="3eb99c2e88e2" blob="58b32ed1c69e" */}`;
 const MARKER_AFTER = `{/* ref file="${REF}" lines="4-5" hash="9a083fec7547" blob="eeec5ca2bd8f" */}`;
 
-/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="296-303" hash="85058fb75fad" blob="418434ff646c" */
+/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="296-303" hash="23ad1504ef64" blob="ff2e6b7ae7d3" */
 const BLOCKING_LINE = `🔴 ${DOC}  ${REF}:4-5  有变动，是本仓还没提交的改动引起的——在同一个提交里复核，再 docfirst confirm ${DOC} --accept`;
 
 export const files = { doc: DOC, ref: REF, cwd: '~/repo/docs-site' };
@@ -50,7 +50,7 @@ export const notRed = ['🟢 新鲜', '⚪ 未确认', '🟡 有变动但不是�
  *   probe     check 对这处引用的判定：逐个问题的回答与结论；这一步跑的不是 check、或是汇总，就是 null
  *   sources   这一步画「红从哪里来」
  *   command   终端里敲的命令，output 是它打印的行，exit 是它的退出码
- *   gate      门禁：blocked 被拦、open 放行、pending 还要重跑 check
+ *   gate      门禁：blocked 被拦、open 通过、pending 还要重跑 check
  *
  * @typedef {'good' | 'warn' | 'bad' | 'pending' | 'info'} Tone
  * @typedef {{ text: string, kind: 'out' | 'ok' | 'err' }} OutLine
@@ -96,7 +96,7 @@ export const steps = [
     title: '读一遍文档，--accept 按今天的内容重新记下',
     text:
       `打开 ${DOC}，读讲这两行的那句话。还成立，就点名这一页 confirm --accept：记号上的 hash 换成今天这两行的，blob 换成今天这个文件的，行号不变；` +
-      '不成立就先改那句话再 accept。--accept 必须点名页，不点名退出码 2、什么都不动；点了名只动这一页，同仓别的页里的黄灯不替别人签。' +
+      '不成立就先改那句话再 accept。--accept 必须点名页，不点名退出码 2、什么都不动；点了名只动这一页，同仓别的页里的黄灯不替别人确认。' +
       '现在 git status 里多了 a.mdx，要重跑 check 才知道能不能提交。',
     repos: [
       {
@@ -118,7 +118,7 @@ export const steps = [
     gate: 'pending',
   },
   {
-    title: '代码和文档一起提交，check 退 0',
+    title: '代码和文档一起提交，check 退出码 0',
     text:
       '重跑 check：这两行算出的 hash 等于新记号上的 9a083fec7547，状态是「新鲜」（绿），没有红，退出码 0，门禁通过。' +
       'greet.ts 与 a.mdx 放进同一个提交：改代码和复核文档在历史里是同一次改动。',
@@ -215,8 +215,8 @@ export const steps = [
   {
     title: '汇总：红从哪里来',
     text:
-      'check 的退出码只看红的总数，大于 0 就退 1。红由这几类相加：缺失的引用、拦提交的黄、名册外组件、不新鲜的生成物、轨迹卡的病。' +
-      '🟢 新鲜、⚪ 未确认、不拦提交的 🟡 都只打印、不计入。加 --json 时整份报告打成一行 JSON，退出码的算法相同。',
+      'check 的退出码只看红的总数，大于 0 退出码就是 1。红由这几类相加：缺失的引用、拦提交的黄、名册外组件、不新鲜的生成物、轨迹卡的病。' +
+      '🟢 新鲜、⚪ 未确认、不拦提交的 🟡 都只打印、不计入。加 --json 时整份报告打印成一行 JSON，退出码的算法相同。',
     repos: [{ path: '~/repo', note: '文档所在的仓', lines: [], hit: null }],
     change: null,
     probe: null,

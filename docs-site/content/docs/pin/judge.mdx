@@ -5,7 +5,7 @@ description: 一处引用的四种状态、各算不算红；核对一处行段�
 
 每次 `check` 都拿今天的代码跟[记号](/docs/pin/markers)上的记录比，给每一处四种状态之一：
 
-{/* ref file="../packages/docfirst-pin/src/types.ts" lines="66-67" hash="d2a2e323f0a3" blob="32a0167e8d8f" */}
+{/* ref file="../packages/code-pin/src/types.ts" lines="66-67" hash="d2a2e323f0a3" blob="32a0167e8d8f" */}
 
 | 状态点 | 状态 | 什么意思 | `check` 算不算红 |
 | --- | --- | --- | --- |
@@ -20,7 +20,7 @@ description: 一处引用的四种状态、各算不算红；核对一处行段�
 
 <PinJudge />
 
-{/* ref file="../packages/docfirst-pin/src/compare.ts" lines="6-14" hash="a033f65b0f3e" blob="29bf0bfed8b4" */}
+{/* ref file="../packages/code-pin/src/compare.ts" lines="6-14" hash="a033f65b0f3e" blob="29bf0bfed8b4" */}
 
-第三、四道要的旧文件和 hunk 表不是钉码核心自己取的，由项目装配从 git 传进来，见[行段跟随](/docs/pin/git)。
+第三、四道要的旧文件和 hunk 表不是钉码核心自己取的，由使用方传进来；docfirst 的项目装配从 git 取，见[行段跟随](/docs/pin/git)。
 行段以外的几种引用各比什么，见[引用的种类](/docs/pin/targets)。

@@ -1,6 +1,6 @@
 /**
  * 「核对一处行段引用的顺序」的全部讲解数据：画面（judge.tsx）与机读版规则（pin.ai.mjs）都只读这一份。
- * 五道检查照 docfirst-pin 的 compare.ts 里 judgeSpan 的顺序排，前一道能下结论就不往下走。
+ * 五道检查照 code-pin 的 compare.ts 里 judgeSpan 的顺序排，前一道能下结论就不往下走。
  */
 
 /**

@@ -30,8 +30,8 @@
     "prepublishOnly": "pnpm run build"
   },
   "dependencies": {
-    "@godcreator/docfirst-pin": "workspace:*",
-    "@godcreator/docfirst-trajectory": "workspace:*",
+    "@godcreator/code-pin": "workspace:*",
+    "@godcreator/trajectory-disk": "workspace:*",
     "remark-frontmatter": "^5.0.0",
     "remark-mdx": "^3.0.0",
     "remark-parse": "^11.0.0",

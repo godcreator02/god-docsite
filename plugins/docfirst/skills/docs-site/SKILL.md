@@ -1,6 +1,6 @@
 ---
 name: docs-site
-description: 写或改任何文档站的页面、做教程或教学站、建一个不接 docfirst 的普通 fumadocs 站（`docfirst.create-plain`）、给 fumadocs 站写组件、加分区、在本地看站或构建站、升级 fumadocs、pnpm 安装站的依赖失败时读。讲每一页怎么写成一个讲清原理的网页（控制条与零件用 `@godcreator/docs-explain` 的分步、动画、选情况三种模板，画面按题目设计，动画、图、能动手的部件为主，直接讲原理、少用类比）、描述一个系统时先画接缝图再按接缝讲、这个站能做到什么、组件怎么写（画面与讲解文字都在组件里，mdx 只写标签）、怎么验收，以及两种建站命令、加分区、pnpm 与 next 的常见安装与构建错误。docfirst 站独有的分区、钉码、生成物看 `docfirst-docs`。
+description: 写或改任何文档站的页面、做教程或教学站、建一个不接 docfirst 的普通 fumadocs 站（`docfirst.create-plain`）、给 fumadocs 站写组件、加分区、在本地看站或构建站、升级 fumadocs、pnpm 安装站的依赖失败时读。讲每一页怎么写成一个讲清原理的网页（控制条与零件用 `@godcreator/explainer-player` 的分步、动画、选情况三种模板，画面按题目设计，动画、图、能动手的部件为主，直接讲原理、少用类比）、描述一个系统时先画接缝图再按接缝讲、这个站能做到什么、组件怎么写（画面与讲解文字都在组件里，mdx 只写标签）、怎么验收，以及两种建站命令、加分区、pnpm 与 next 的常见安装与构建错误。docfirst 站独有的分区、钉码、生成物看 `docfirst-docs`。
 ---
 
 # 把每一页做成讲清原理的网页
@@ -9,7 +9,7 @@ description: 写或改任何文档站的页面、做教程或教学站、建一�
 
 假设用户说「做个网页给我讲讲 git 的原理」，你会怎么做，文档站的每一页就怎么做。**控制条与零件是固定的一套，
 画面按题目设计**：分步、动画、选情况三种讲解组件的控制条，以及面板、终端、胶囊、代码行这些零件，所有站都用
-`@godcreator/docs-explain`（见「讲解组件的外壳与零件」一节），读者学一次就会用；组件中间画什么、页面怎么排、
+讲解播放器 `@godcreator/explainer-player`（见「讲解播放器」一节），读者学一次就会用；组件中间画什么、页面怎么排、
 小标题怎么起，每一页按它的题目设计。一大段一大段的文字没人愿意看。
 
 - **先想清楚再动手**：读者看完这一页要明白哪一两件事，读者现在已经知道什么、会在哪一步看不懂
@@ -23,7 +23,7 @@ description: 写或改任何文档站的页面、做教程或教学站、建一�
 - **每张图、每段动画都要讲清一件光读文字拼不起来的事**：跨多台机器、多个时刻、多个文件的机制。
   表格加一句话能说清的不画；读者在真实产品里能直接看到的界面默认不模拟，讲解确实需要时才做
 - **图直接画**（SVG、React 组件），不用 Mermaid
-- **画面跟着题目走**：画面里的布局、动画节奏都为这一页设计，别照搬上一页的画面；颜色用外壳那一套角色色，
+- **画面跟着题目走**：画面里的布局、动画节奏都为这一页设计，别照搬上一页的画面；颜色用讲解播放器那一套角色色，
   每个角色（一台电脑、一个文件、一个包）在整页里固定一种颜色
 - 页面顶上已经按 frontmatter 渲染了 `title` 和 `description`，正文不写 `# 标题`
 
@@ -63,9 +63,10 @@ docfirst 自己的文档站是现成的实现：`docs-site/src/components/seam-m
 做到什么程度可以看两个站：`D:\unitfolders\qrx1l-collab-site\collab-site\docs-site`（多种情况的推演、两台电脑并排、
 终端逐字打出命令）与 `D:\unitfolders\8hv2f-ts-dojo\ts-dojo`（浏览器里写代码、编译、判题）。看的是完成度，不是照抄的样子。
 
-## 讲解组件的外壳与零件
+## 讲解播放器
 
-所有站的讲解组件都用 `@godcreator/docs-explain`：站的 `package.json` 依赖它，全局样式里引入它的 `styles.css`。
+讲解播放器 `@godcreator/explainer-player` 把一段讲解拆成配说明的帧，用固定的控制条播放和切换；它不认识 docfirst，
+普通 fumadocs 站也能用。所有站的讲解组件都用它：站的 `package.json` 依赖它，全局样式里引入它的 `styles.css`。
 风格是**现代开发者工具风**：1px 细边框、大圆角；边框、标题栏、标签都用同一个颜色调淡，不铺实心色块；
 深色终端窗口左上角三个点；很轻的阴影与小动画，不用辉光、渐变、毛玻璃。
 
@@ -78,7 +79,7 @@ docfirst 自己的文档站是现成的实现：`docs-site/src/components/seam-m
 - **选情况** `CasePicker`：一排情况按钮，画面高亮这种情况走过的路径与结论。讲同一套规则下几种情况的差别
 
 零件：`Pane`（同色调淡标题栏的卡片）、`Terminal`、`Pill`、`Dot`、`CodeLines`（行号、高亮行段、新增行、改动行）、
-`Diff`。组件自己的画面只写这一页独有的部分，外壳与零件不重画一套。`@godcreator/docs-explain/text` 把步骤、章节、
+`Diff`。组件自己的画面只写这一页独有的部分，控制条与零件不重画一套。`@godcreator/explainer-player/text` 把步骤、章节、
 情况的数据转成段落，docfirst 站的机读规则用它。
 
 ## 这个站能做到什么
@@ -164,5 +165,5 @@ docfirst.create-plain {"dir":"D:\\unitfolders\\<单元>\\<仓>\\docs-site"}
 - 升级 fumadocs：先在临时目录 `pnpm dlx create-fumadocs-app@<版本>` 生成一份对照、读迁移说明，改 `package.json` 版本
   （`fumadocs-core` 与 `fumadocs-ui` 同号），`pnpm install`、`pnpm build`
 
-人看站用 VS Code 扩展「文档站」（`D:\unitfolders\035mp-vscode-docs-site\vscode-docs-site`）；agent 用 `pnpm dev` 加客户端预览：用户说要看就一直开着，
-服务带超时（默认 2 小时）自动停；只是自己验证的，验完停掉。
+服务由 agent 自己启动：`pnpm dev` 加客户端自带的预览，自己检查页面用客户端的浏览器工具；给人看就在 VS Code 的内置浏览器里打开
+（怎么打开读说明书 `vscode`）。用户说要看就一直开着，服务带超时（默认 2 小时）自动停；只是自己验证的，验完停掉。

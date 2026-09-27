@@ -1,10 +1,10 @@
 /**
  * TrajectoryFlow 在机读版里变成什么：跟画面读同一份数据（trajectory-flow.data.mjs）。
- * 每一步的标题与说明用模板包的 stepsText 生成，和画面上 Stepper 显示的是同一段话；
- * 流水线每一段在哪个包、例子的卡文件、校验结果、两段命令行输出、模型与树、布局落点、站上的接线另写成段落。
+ * 每一步的标题与说明用讲解播放器的 stepsText 生成，和画面上 Stepper 显示的是同一段话；
+ * 流水线每一段在哪个包、例子的卡文件、校验结果、两段命令行输出、模型与树、布局落点、站上 page.tsx 与 loadTrajectory 的原文另写成段落。
  * 这个文件不 import React，docfirst.config.mjs 引它，命令行也能运行。
  */
-import { stepsText } from '@godcreator/docs-explain/text';
+import { stepsText } from '@godcreator/explainer-player/text';
 import {
   cards,
   checks,
@@ -61,7 +61,7 @@ export function TrajectoryFlow(_node, { paragraph }) {
         `这棵树的扇区 ${layout.treeBox.th0}°–${layout.treeBox.th1.toFixed(1)}°。`,
     ),
     paragraph(`/trajectory 整页：顶栏一条，下面是盘。${clicks.map((c) => `${c.what}：${c.then}`).join('；')}。`),
-    paragraph(`${files.page} 里接线的几行：`),
+    paragraph(`${files.page} 里读卡目录、交给 StarDisk 的几行：`),
     ...pageLines.map((block) => paragraph(numbered(block.lines, block.start))),
     paragraph('docfirst-fumadocs 的 src/trajectory.ts 里 loadTrajectory 的定义：'),
     paragraph(numbered(fumadocsLines.lines, fumadocsLines.start)),

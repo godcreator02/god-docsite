@@ -1,20 +1,20 @@
 /**
  * 布局引擎的数学不变量——黄金样本（诗名 fixture，覆盖长空窗 / 爆发簇）。
  * 布局是一整块连续几何：改错一个常量或一处正负号，盘照样画出来、只是「看着不太对」，
- * 零报错——没有这份样本等于没护栏。
+ * 零报错——没有这份样本，这类错误就发现不了。
  *
- * 对基线不对数字，对的是引擎自身的数学自洽：折算正逆互逆、显示半径单调、局部放大率
+ * 不跟基线数字比对，比对的是引擎自身的数学自洽：折算正逆互逆、显示半径单调、局部放大率
  * 与映射本体的数值导数一致、装箱后跨域扇环角向互斥、每张卡都有落点。
  */
 import { fileURLToPath } from "node:url";
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { buildModel } from "@godcreator/docfirst-trajectory";
-import type { TrajectoryModel } from "@godcreator/docfirst-trajectory";
+import { buildModel } from "@godcreator/trajectory-disk";
+import type { TrajectoryModel } from "@godcreator/trajectory-disk";
 import { scanCardDir } from "@godcreator/docfirst-workflow";
 /* 布局不从 `.` 出口导出，直读源码 */
-import { AXIS_SPAN, gapDots, HUB_RIM, RingsLayout, SPREAD_DEG } from "../packages/docfirst-trajectory/src/layout.ts";
-import type { GapDot } from "../packages/docfirst-trajectory/src/layout.ts";
+import { AXIS_SPAN, gapDots, HUB_RIM, RingsLayout, SPREAD_DEG } from "../packages/trajectory-disk/src/layout.ts";
+import type { GapDot } from "../packages/trajectory-disk/src/layout.ts";
 import { memCards } from "./trajectory-helpers.ts";
 import type { CardSpec } from "./trajectory-helpers.ts";
 
@@ -24,7 +24,7 @@ function closeTo(actual: number, expected: number, digits = 2): void {
   assert.ok(diff < Math.pow(10, -digits) / 2, `期望 ${actual} 接近 ${expected}（差 ${diff}）`);
 }
 
-/** 合成一个最小项目：根卡与首张卡同日，后续卡按给定天序落点——用于外锚定不变量测试，
+/** 合成一个最小项目：根卡与首张卡同日，后续卡排在给定的那几天——用于外锚定不变量测试，
  * 不依赖 fixture 目录。 */
 function buildSynthetic(id: string, days: number[]): TrajectoryModel {
   const day = (d: number): string => `2026-01-${String(d).padStart(2, "0")}T08:00`;

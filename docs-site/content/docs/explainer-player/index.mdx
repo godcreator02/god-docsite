@@ -1,0 +1,97 @@
+---
+title: 讲解播放器 explainer-player
+description: 通用包：把一段讲解拆成若干帧、每帧配一句说明，用固定的控制条播放和切换；分步、动画、选情况三种外壳与画帧用的零件，./text 把各帧的说明转成机读版文字；不认识 docfirst
+full: true
+---
+
+包 `@godcreator/explainer-player`，源码在 `packages/explainer-player/src/`，出口是 `.`（客户端组件，`src/index.ts`）、`./text`
+（`src/text.ts`）与样式表 `./styles.css`（`styles/explain.css`）。
+
+它是通用包，叫讲解播放器：把一段讲解拆成若干帧、每帧配一句说明，用固定的控制条播放和切换。它不认识 docfirst，
+普通 fumadocs 站也能单独装它；本仓的文档站是它的一个使用者。它跟 docfirst 的包互不认识，所以首页的全局接缝图里没有它；
+下面是它内部的接缝图。
+
+<SeamMap module="explainer-player" />
+
+## 功能
+
+**三种外壳**：分步 `Stepper`、动画 `Timeline`、选情况 `CasePicker`。控制条在画面上方排成固定的一行，说明行（当前这一帧的 `title` 与 `text`）在画面下方。
+
+`Stepper` 讲有先后的过程：每一步是一个固定状态；播放是每隔 `interval` 毫秒下一步，到最后一步停：
+
+{/* ref file="../packages/explainer-player/src/stepper.tsx" lines="14-22" hash="392da250a524" blob="dafaf7713972" */}
+
+`Timeline` 讲连续变化：时间是秒数，每章给 `duration`；播放按 `requestAnimationFrame` 推进，横条能拖到任意一刻。
+画面是「这一刻 → 画面」的函数，所以往回拖也画得出来：
+
+{/* ref file="../packages/explainer-player/src/timeline.tsx" lines="17-32" hash="7df491c52f49" blob="40324b1df520" */}
+
+`CasePicker` 讲同一套规则下的几种情况：一排按钮选一种；给了 `value` 就是受控的：
+
+{/* ref file="../packages/explainer-player/src/case-picker.tsx" lines="15-26" hash="e5092067dac8" blob="f6d9bff872e4" */}
+
+**零件**（画帧用）：`Pane`（标题栏同色调淡的卡片）、`Terminal`（深色终端窗口）、`Pill`、`Dot`、`CodeLines`（行号、高亮行段、新增行、
+改动行）、`Diff`（新旧行对照）。颜色参数收的名字：
+
+{/* ref file="../packages/explainer-player/src/colors.ts" hash="732169a56104" blob="714797ae3f69" */}
+
+**`./text`** 把各帧的说明转成机读版的文字：
+
+{/* ref file="../packages/explainer-player/src/text.ts" lines="6-19" hash="135f06641462" blob="e40e4aa915ef" */}
+
+**样式表**开头写着配色规则；系统设了「减少动画」时关掉全部过渡与动画：
+
+{/* ref file="../packages/explainer-player/styles/explain.css" lines="1-7" hash="2048a02d3d93" blob="d6052765b283" */}
+
+{/* ref file="../packages/explainer-player/styles/explain.css" lines="247-249" hash="07d1bed1eee1" blob="d6052765b283" */}
+
+**谁在用它**：本仓的 `docs-site/` 在 `package.json` 里依赖它，全局样式引入 `styles.css`：
+
+{/* ref file="src/app/site.css" lines="4-5" hash="262736cfdbc1" blob="900d6a5a77dd" */}
+
+建站命令不把它写进新站的依赖，站要用时自己加：
+
+{/* ref file="../plugins/docfirst/src/deps.ts" lines="17-20" hash="8affbe2b631e" blob="f00216b5fb75" */}
+
+## 接口
+
+`.` 的导出表：
+
+{/* ref file="../packages/explainer-player/src/index.ts" hash="57af15574e0f" blob="a02a9cf607cb" */}
+
+三个出口：
+
+{/* ref file="../packages/explainer-player/package.json" lines="7-17" hash="ef817165c432" blob="1a295a53ee15" */}
+
+## 依赖
+
+没有 `dependencies`，react 是必需的 peer，用站自己装的那份：
+
+{/* ref file="../packages/explainer-player/package.json" lines="27-29" hash="b0cacd73d38e" blob="1a295a53ee15" */}
+
+样式只读 fumadocs 主题的 CSS 变量，没有这些变量时用自带的颜色。
+
+## 不做的事
+
+**不认识 docfirst，也不认识别的包。** 它是通用包：清单里没有任何 `@godcreator/` 包，源码与产物不 import 它们，
+源码的相对 import 不出自己的 `src/`：
+
+{/* ref file="../tests/boundary.test.ts" lines="192-216" hash="5a122995ee1f" blob="269b4f418ee0" */}
+
+包目录里（源码、产物、样式、构建配置、清单）一个 docfirst 字样都没有：
+
+{/* ref file="../tests/boundary.test.ts" lines="218-229" hash="b8be80bfb096" blob="269b4f418ee0" */}
+
+**也不被 docfirst 的包认识。** docfirst 的两个包与工作台插件都不依赖它，只有站用它；清单里没有 `dependencies`，react 只作必需 peer：
+
+{/* ref file="../tests/boundary.test.ts" lines="525-533" hash="3a7782b7dcfb" blob="269b4f418ee0" */}
+
+**不把 react 打进产物。** `.` 的产物第一行是 `"use client"`，只许 import react：
+
+{/* ref file="../tests/boundary.test.ts" lines="535-545" hash="638c3fd560fa" blob="269b4f418ee0" */}
+
+**`./text` 不 import 任何东西。** 站在 Node 里生成机读版时加载它（本仓是 `docfirst.config.mjs`），所以它不带客户端指令、源码和产物都零 import：
+
+{/* ref file="../tests/boundary.test.ts" lines="547-552" hash="4363223b8781" blob="269b4f418ee0" */}
+
+**不画题目的画面。** 画面里画什么、每一帧的讲解数据、机读规则都写在各站自己的组件里；这个包只给外壳与零件。

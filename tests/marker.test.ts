@@ -1,15 +1,15 @@
 /**
- * 记号的账。写法本身在 `docfirst-workflow/src/marker/`（载荷、记录属性、已删掉的草稿写法的报错），
+ * 记号的测试。写法本身在 `docfirst-workflow/src/marker/`（载荷、记录属性、已删掉的草稿写法的报错），
  * 外壳是 mdx 的花括号注释——所以两边分开测：
  *   **往返**：`parse(marker(t, r))` 认回 t 与 r，三种目标都过；不带记录的就是未确认（null）
- *   **记录属性**：只写了一半、值不合法、不认识的属性，都报错到行
+ *   **记录属性**：只写了一半、值不合法、不认识的属性，都报错并带行号
  *   **写错了报错**：以 @@docfirst 开头的一行、已经删了的 has 记号、长成记号却认不出动作词的注释
- *   **mdx 自己的**：围栏里的不认、未确认的写上记录、写坏了报到行
+ *   **mdx 自己的**：围栏里的不认、未确认的写上记录、格式不对报出行号
  */
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import * as mdx from "../packages/docfirst-workflow/src/mdx/index.ts";
-import type { MemoRecord, Target } from "../packages/docfirst-pin/src/index.ts";
+import type { MemoRecord, Target } from "../packages/code-pin/src/index.ts";
 import type { WrittenReference } from "../packages/docfirst-workflow/src/reference/index.ts";
 import { isRemovedDraftLine, parseFormal } from "../packages/docfirst-workflow/src/marker/index.ts";
 

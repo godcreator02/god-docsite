@@ -1,10 +1,10 @@
 /**
  * PinStory、PinJudge 在机读版里变成什么：跟画面读同一份数据（story.data.mjs、judge.data.mjs）。
- * 每一步、每一种情况的标题与说明用模板包的 stepsText / casesText 生成，和画面上 Stepper、CasePicker 显示的是同一段话；
+ * 每一步、每一种情况的标题与说明用讲解播放器的 stepsText / casesText 生成，和画面上 Stepper、CasePicker 显示的是同一段话；
  * 这一页自己的内容（每一步的记号与命令行输出、每道检查、每种情况走过的路径）另写成段落。
  * 这个文件不 import React，docfirst.config.mjs 引它，命令行也能运行。
  */
-import { casesText, stepsText } from '@godcreator/docs-explain/text';
+import { casesText, stepsText } from '@godcreator/explainer-player/text';
 import { legend, steps } from './story.data.mjs';
 import { cases, checks } from './judge.data.mjs';
 

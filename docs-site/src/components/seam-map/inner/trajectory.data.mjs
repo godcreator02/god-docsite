@@ -1,5 +1,5 @@
 /**
- * 轨迹核心 docfirst-trajectory 的内部接缝图：模块页 <SeamMap module="trajectory" /> 画的就是它。
+ * 轨迹核心 trajectory-disk 的内部接缝图：模块页 <SeamMap module="trajectory" /> 画的就是它。
  * 框是包里的模块（src/model/ 目录、layout.ts 与 chains.ts、canvas/ 目录、disk.tsx 与 star.css），方块是它对外给的东西；
  * 灰色实线框是包外的调用方与 react。坐标在 trajectory.layout.ts。
  */
@@ -9,7 +9,7 @@ export const trajectoryGraph = defineSeamGraph({
   id: 'trajectory',
   title: '轨迹核心内部的模块与接缝',
   intro:
-    '轨迹核心内部接缝图：虚线框是包里的模块，框里的方块是它对外给的类型、函数、组件与样式表，灰色实线框是包外的调用方与 react。轨迹核心只收盘心加一组卡的中性输入；docfirst 的卡文件怎么写、怎么校验在 workflow 的卡格式里。',
+    '轨迹核心内部接缝图：虚线框是包里的模块，框里的方块是它对外给的类型、函数、组件与样式表，灰色实线框是包外的调用方与 react。轨迹核心就是星轨盘，是通用包，不认识 docfirst，只收盘心加一组卡的中性输入；docfirst 是它的一个使用者，卡文件怎么写、怎么校验在 workflow 的卡格式里。',
   frameLabel: '模块',
   modules: [
     {
@@ -32,10 +32,10 @@ export const trajectoryGraph = defineSeamGraph({
       role: null,
       outside: true,
       blurb:
-        './trajectory 按包名转出 StarDisk，./trajectory.css 引入 star.css。站读卡目录走 loadTrajectory（即卡格式的 scanCardDir），把结果原样交给 StarDisk；站画星轨盘只经过这个包。',
+        './trajectory 按包名再导出 StarDisk，./trajectory.css 引入 star.css。站读卡目录走 loadTrajectory（即卡格式的 scanCardDir），把结果原样交给 StarDisk；站画星轨盘只经过这个包。',
       caps: [
         { id: 'css', name: '盘的样式', ident: './trajectory.css' },
-        { id: 'reexport', name: '转出组件', ident: 'StarDisk' },
+        { id: 'reexport', name: '再导出组件', ident: 'StarDisk' },
       ],
     },
     {
@@ -84,7 +84,7 @@ export const trajectoryGraph = defineSeamGraph({
       role: 'emerald',
       outside: false,
       blurb:
-        '纯计算、不碰 DOM。RingsLayout 按模型算每张卡的半径与角度，半径表示时间、长空档折叠，step 推进焦点日与鱼眼强度的补间；gapDots 算折叠处的碎石点。chains.ts 把同一棵树同一槽里的同日卡分组，算相邻日组的角度错开。',
+        '纯计算、不碰 DOM。RingsLayout 按模型算每张卡的半径与角度，半径表示时间、长空档折叠，step 推进焦点日与鱼眼强度的补间；gapDots 算空档折叠处画的一片小点。chains.ts 把同一棵树同一槽里的同日卡分组，算相邻日组的角度错开。',
       caps: [
         { id: 'rings', name: '半径与角度', ident: 'RingsLayout · gapDots' },
         { id: 'chains', name: '同日分组与错开', ident: 'buildChains · computeDodge' },
@@ -96,7 +96,7 @@ export const trajectoryGraph = defineSeamGraph({
       pkg: '可选 peer 依赖',
       role: null,
       outside: true,
-      blurb: '只有 ./disk 用它。peer 依赖、标成可选，只用 . 的调用方（命令行）不必装；用的是站自己装的那份。',
+      blurb: '只有 ./disk 用它。peer 依赖、标成可选，只用 . 的调用方（比如 docfirst 的命令行）不必装；用的是站自己装的那份。',
       caps: [{ id: 'react', name: 'react', ident: 'useState · useRef' }],
     },
   ],
@@ -127,17 +127,17 @@ export const trajectoryGraph = defineSeamGraph({
       name: '客户端边界',
       a: ['reexport'],
       b: ['star-disk'],
-      iface: 'export { StarDisk } from "@godcreator/docfirst-trajectory/disk"；props：data（中性输入）、hrefBase、bodies',
+      iface: 'export { StarDisk } from "@godcreator/trajectory-disk/disk"；props：data（中性输入）、hrefBase、bodies',
       convention: false,
       via: 'code',
-      text: 'fumadocs 适配按包名从 ./disk 转出 StarDisk：那份产物头一行是 "use client"，按包名引用它才原样留在调用方的产物里，Next 认得出客户端边界。props 不收函数：卡页地址由 hrefBase 拼出；bodies 是站在服务端渲染好的每张卡的正文，点节点在侧栏里显示。',
+      text: 'fumadocs 适配按包名从 ./disk 再导出 StarDisk：那份产物头一行是 "use client"，按包名引用它才原样留在调用方的产物里，Next 认得出客户端边界。props 不收函数：卡页地址由 hrefBase 拼出；bodies 是站在服务端渲染好的每张卡的正文，点节点在侧栏里显示。',
     },
     {
       n: 4,
       name: '样式表',
       a: ['css'],
       b: ['star-css'],
-      iface: '@import "@godcreator/docfirst-trajectory/star.css"',
+      iface: '@import "@godcreator/trajectory-disk/star.css"',
       convention: false,
       via: 'code',
       text: 'StarDisk 不自己引入样式；fumadocs 适配的 ./trajectory.css 引入 ./star.css，站引入前者。选择器都带 .star- 前缀或写在 .star-disk 容器下，不影响站的其他页面。底色、文字、边框取 fumadocs 的颜色变量，画在盘上的领域色与连线色由 JS 色板按亮暗选。',
@@ -170,7 +170,7 @@ export const trajectoryGraph = defineSeamGraph({
       iface: 'new RingsLayout(model) · configure(LayoutPatch) · step · gapDots · buildChains · computeDodge',
       convention: false,
       via: 'code',
-      text: 'StarStage 用 new RingsLayout(model) 取每张卡的半径与角度；设置经 applyStoredSettings 换算成 LayoutPatch 交给 configure，改完自动重算。每帧用 step 推进补间，空档层用 gapDots 画折叠处的碎石，用 buildChains、computeDodge 错开同日的卡。',
+      text: 'StarStage 用 new RingsLayout(model) 取每张卡的半径与角度；设置经 applyStoredSettings 换算成 LayoutPatch 交给 configure，改完自动重算。每帧用 step 推进补间，空档层用 gapDots 画折叠处的小点，用 buildChains、computeDodge 错开同日的卡。',
     },
     {
       n: 8,

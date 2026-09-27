@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "docfirst 的包工作区：四个包（钉码 pin、轨迹 trajectory、命令行与项目 workflow、fumadocs 适配 fumadocs）与讲解组件包 docs-explain，外加一个工作台插件（在 plugins/docfirst）。文档站在 docs-site，它同时是这几个包唯一的消费方",
+  "description": "docfirst 的包工作区：三个通用包（钉码 code-pin、星轨盘 trajectory-disk、讲解播放器 explainer-player）与 docfirst 自己的两个包（命令行与项目 docfirst-workflow、fumadocs 适配 docfirst-fumadocs），外加一个工作台插件（在 plugins/docfirst）。文档站在 docs-site，它同时是这几个包唯一的使用方",
   "scripts": {
     "build": "pnpm -r --filter \"./plugins/*\" --filter \"./packages/*\" run build",
     "typecheck": "pnpm -r --filter \"./plugins/*\" --filter \"./packages/*\" run typecheck && tsc -p tsconfig.tests.json",
@@ -12,10 +12,10 @@
   },
   "devDependencies": {
     "@godcreator/docfirst-fumadocs": "workspace:*",
-    "@godcreator/docfirst-pin": "workspace:*",
-    "@godcreator/docfirst-trajectory": "workspace:*",
+    "@godcreator/code-pin": "workspace:*",
+    "@godcreator/trajectory-disk": "workspace:*",
     "@godcreator/docfirst-workflow": "workspace:*",
-    "@godcreator/docs-explain": "workspace:*",
+    "@godcreator/explainer-player": "workspace:*",
     "@types/mdast": "^4.0.4",
     "@types/node": "^26.2.0",
     "@types/react": "^19.3.0",

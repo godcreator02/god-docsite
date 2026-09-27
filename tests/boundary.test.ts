@@ -1,20 +1,22 @@
 /**
  * # 边界守卫：五个包之间、workflow 包里面**唯一**的边界检查
  *
- * docfirst 的四个包按接缝切开：钉码 `docfirst-pin`、轨迹 `docfirst-trajectory`、命令行与项目 `docfirst-workflow`、
- * fumadocs 适配 `docfirst-fumadocs`；第五个包 `docs-explain` 是文档站讲解组件的外壳与零件，只给站用，
- * 跟那四个包互不认识。包与包之间的方向，pnpm 严格的 node_modules 能拦住一半——没写进依赖的包
- * import 不到——但「该不该写进依赖」没人检查；workflow 包里各目录之间更是谁都能 import 谁，`mdx/` 里
- * 写一句 `import "../project/load.ts"`，编译器不会报错，mdx 格式从此就跟读盘、git 绑在一起。
- * **这个文件补上的就是这两项检查。**
+ * 五个包分两类。**通用包**三个，不认识 docfirst，谁都能单独拿走用：钉码 `code-pin`（把文字钉在代码上）、
+ * 星轨盘 `trajectory-disk`（把一组卡画成项目方向演变的圆盘）、讲解播放器 `explainer-player`（把讲解拆成配说明的帧来播放）。
+ * **docfirst 的包**两个，用上面的通用包拼出 docfirst：命令行与项目 `docfirst-workflow`、fumadocs 适配 `docfirst-fumadocs`。
+ * 包与包之间的方向，pnpm 严格的 node_modules 能拦住一半——没写进依赖的包 import 不到——但「该不该写进依赖」
+ * 没人检查；workflow 包里各目录之间更是谁都能 import 谁，`mdx/` 里写一句 `import "../project/load.ts"`，
+ * 编译器不会报错，mdx 格式从此就跟读盘、git 绑在一起。**这个文件补上的就是这两项检查。**
  *
  * 它检查六类约束，每一类失败时的表现各不相同：
  *
- * **一、包与包之间的方向**：pin 谁都不认识；trajectory 不认识 pin / workflow / fumadocs；workflow 不认识
- * fumadocs。方向一破，下游的改动就会拖着上游一起发版，而且没有任何别的信号。
+ * **一、包与包之间的方向**：三个通用包互不认识，也不认识 docfirst 的两个包；workflow 不认识 fumadocs 适配。
+ * 方向一破，下游的改动就会拖着上游一起发版，而且没有任何别的信号。
  *
- * **二、pin 与 trajectory 的零依赖**：pin 只许 `node:crypto`，trajectory 的 `.` 入口连 `node:` 都不许——
- * 它们是整块能被别人拿走的部分，浏览器里也跑得动。
+ * **二、通用包独立**（下面 `GENERIC_PACKAGES` 那张表）：清单里没有任何 `@godcreator/` 包，源码与产物不 import 它们、
+ * 相对 import 不出自己的目录，源码、产物、样式与包的说明里一个 docfirst 字样都没有。docfirst 的名字一旦
+ * 写进通用包，哪怕只是一行注释，下一个人就会顺着它把 docfirst 的规矩搬进来。另外各包自己的几条：
+ * code-pin 只许 `node:crypto`、不认识文档文本；trajectory-disk 的 `.` 入口零 import、整个包不认识卡文件的写法。
  *
  * **三、workflow 里各目录的方向**（下面 `WORKFLOW_DIRS` 那张表），以及 workflow 整个不认识任何站的宿主。
  *
@@ -24,8 +26,8 @@
  * **五、包不认识工作台插件**：五个 npm 包不许出现任何 `@godcreator/gwb-*`。
  * 包一旦依赖插件，装 docfirst 的人就得连带装上整个桌面工作台生态。
  *
- * **六、docs-explain 只给站用**：没有 dependencies，react 是必需 peer；`.` 是客户端组件，`./text` 零 import
- * （docfirst.config.mjs 在 Node 里加载它）。别的包都不依赖它。
+ * **六、explainer-player 的两个入口**：react 是必需 peer；`.` 是客户端组件，`./text` 零 import
+ * （站在 Node 里生成机读版时加载它）。
  *
  * **别删这个文件，也别把某一条注释掉「先让门禁通过」。** 它失败的时候，出错的是设计，不是测试。
  * 真要改方向，改的是那几张表加一段说明为什么——不是把断言删掉。
@@ -50,11 +52,11 @@ const PACKAGES = join(ROOT, "packages");
 
 /** 五个 npm 包在 packages/ 下的目录名 → 包名。工作台插件在 plugins/docfirst/，同一个工作区，但不在这几个包的依赖关系里 */
 const NPM_PACKAGES: Record<string, string> = {
-  "docfirst-pin": "@godcreator/docfirst-pin",
-  "docfirst-trajectory": "@godcreator/docfirst-trajectory",
+  "code-pin": "@godcreator/code-pin",
+  "trajectory-disk": "@godcreator/trajectory-disk",
   "docfirst-workflow": "@godcreator/docfirst-workflow",
   "docfirst-fumadocs": "@godcreator/docfirst-fumadocs",
-  "docs-explain": "@godcreator/docs-explain",
+  "explainer-player": "@godcreator/explainer-player",
 };
 const PLUGIN_MANIFEST = join(ROOT, "plugins", "docfirst", "package.json");
 
@@ -120,18 +122,18 @@ function distClosureSpecs(dir: string, file: string): string[] {
 
 /**
  * 每个包不许依赖哪几个兄弟包。**列的是禁止的，不是允许的**——理由跟下面目录那张表一样。
- *   pin         钉码：判新鲜只要读取器、旧内容来源两样传进来的东西，谁都不认识
- *   trajectory  星轨盘：只收盘心加一组卡的中性输入，怎么建模、怎么画；跟钉码无关，docfirst 卡格式与读卡目录在 workflow
- *   workflow    命令行与项目：认识钉码与轨迹，不认识任何站的宿主，所以也不认识 fumadocs 适配
- *   fumadocs    站那一侧：认识以上三个，除了站谁都不认识它
- *   docs-explain 讲解组件：普通 fumadocs 站也要用，所以不认识 docfirst 的任何包；它只给站用，四个包也都不认识它
+ *   code-pin          通用包。判代码变没变只要读取器、旧内容来源两样传进来的东西，谁都不认识
+ *   trajectory-disk   通用包。只收盘心加一组卡的中性输入，怎么建模、怎么画；docfirst 卡格式与读卡目录在 workflow
+ *   explainer-player  通用包。普通 fumadocs 站也要用；docfirst 的两个包都不用它，只有站用
+ *   docfirst-workflow 命令行与项目：认识钉码与星轨盘，不认识任何站的宿主，所以也不认识 fumadocs 适配
+ *   docfirst-fumadocs 站那一侧：认识钉码、星轨盘与 workflow，除了站谁都不认识它
  */
 const PACKAGE_FORBIDDEN: Record<string, string[]> = {
-  "docfirst-pin": ["docfirst-trajectory", "docfirst-workflow", "docfirst-fumadocs", "docs-explain"],
-  "docfirst-trajectory": ["docfirst-pin", "docfirst-workflow", "docfirst-fumadocs", "docs-explain"],
-  "docfirst-workflow": ["docfirst-fumadocs", "docs-explain"],
-  "docfirst-fumadocs": ["docs-explain"],
-  "docs-explain": ["docfirst-pin", "docfirst-trajectory", "docfirst-workflow", "docfirst-fumadocs"],
+  "code-pin": ["trajectory-disk", "docfirst-workflow", "docfirst-fumadocs", "explainer-player"],
+  "trajectory-disk": ["code-pin", "docfirst-workflow", "docfirst-fumadocs", "explainer-player"],
+  "docfirst-workflow": ["docfirst-fumadocs", "explainer-player"],
+  "docfirst-fumadocs": ["explainer-player"],
+  "explainer-player": ["code-pin", "trajectory-disk", "docfirst-workflow", "docfirst-fumadocs"],
 };
 
 test("包的方向：清单三类依赖字段里不许出现禁止的兄弟包", () => {
@@ -164,15 +166,75 @@ test("五个包一个不多一个不少——加了新包得先想清楚它能�
   assert.deepEqual(dirs, Object.keys(PACKAGE_FORBIDDEN).sort());
 });
 
-// ── 二、pin 与 trajectory 的零依赖 ────────────────────────────────────────────
+// ── 二、通用包独立 ────────────────────────────────────────────────────────────
+
+/** 通用包：不认识 docfirst，谁都能单独拿走用。加一个通用包就加进这张表，下面三条自动管上它 */
+const GENERIC_PACKAGES = ["code-pin", "trajectory-disk", "explainer-player"];
+
+/** 包目录下除 node_modules 以外的全部文件：源码、产物、样式、构建配置、清单 */
+function packageFiles(dir: string): string[] {
+  const out: string[] = [];
+  const walk = (current: string): void => {
+    for (const entry of readdirSync(current, { withFileTypes: true })) {
+      if (entry.name === "node_modules") continue;
+      const full = join(current, entry.name);
+      if (entry.isDirectory()) walk(full);
+      else out.push(full);
+    }
+  };
+  walk(join(PACKAGES, dir));
+  return out;
+}
+
+/** 产物里带 import 语句的文件：运行时代码与类型声明 */
+const distCodeOf = (dir: string): string[] => packageFiles(dir).filter((f) => f.includes(`${sep}dist${sep}`) && /\.m?[jt]s$/.test(f));
+
+test("通用包独立：清单三类依赖字段里没有任何 @godcreator/ 包", () => {
+  const bad: string[] = [];
+  for (const dir of GENERIC_PACKAGES) {
+    for (const dep of allDepsOf(manifestOf(dir))) if (dep.startsWith("@godcreator/")) bad.push(`${dir} → ${dep}`);
+  }
+  assert.deepEqual(bad, [], "通用包得能单独拿走用。要用别的包，先想清楚它还算不算通用包");
+});
+
+test("通用包独立：源码与产物不 import 任何 @godcreator/ 包，源码的相对 import 不出自己的 src/", () => {
+  const bad: string[] = [];
+  for (const dir of GENERIC_PACKAGES) {
+    for (const file of sourcesIn(srcOf(dir))) {
+      for (const spec of importSpecsOf(readFileSync(file, "utf8"))) {
+        const outside = spec.startsWith(".") && relative(srcOf(dir), resolve(dirname(file), spec)).startsWith("..");
+        if (spec.startsWith("@godcreator/") || outside) bad.push(`${dir}/${rel(join(PACKAGES, dir), file)} → ${spec}`);
+      }
+    }
+    for (const file of distCodeOf(dir)) {
+      for (const spec of importSpecsOf(readFileSync(file, "utf8"))) {
+        if (spec.startsWith("@godcreator/")) bad.push(`${dir}/${rel(join(PACKAGES, dir), file)} → ${spec}`);
+      }
+    }
+  }
+  assert.deepEqual(bad, []);
+});
+
+test("通用包不认识 docfirst：源码、产物、样式、构建配置与清单里一个 docfirst 字样都没有", () => {
+  const bad: string[] = [];
+  for (const dir of GENERIC_PACKAGES) {
+    for (const file of packageFiles(dir)) {
+      const lines = readFileSync(file, "utf8").split("\n");
+      lines.forEach((line, index) => {
+        if (/docfirst/i.test(line)) bad.push(`${dir}/${rel(join(PACKAGES, dir), file)}:${index + 1}`);
+      });
+    }
+  }
+  assert.deepEqual(bad, [], "通用包里写了 docfirst。讲 docfirst 怎么用它，写进 docfirst 那两个包或文档站，不写进通用包");
+});
 
 test("pin 零依赖：清单里没有 dependencies / peerDependencies，源码只 import 自己和 node:crypto", () => {
-  const pkg = manifestOf("docfirst-pin");
+  const pkg = manifestOf("code-pin");
   assert.deepEqual(Object.keys(pkg.dependencies ?? {}), [], "pin 的 dependencies 得是空的");
   assert.deepEqual(Object.keys(pkg.peerDependencies ?? {}), [], "pin 的 peerDependencies 得是空的");
-  for (const file of sourcesIn(srcOf("docfirst-pin"))) {
+  for (const file of sourcesIn(srcOf("code-pin"))) {
     for (const spec of importSpecsOf(readFileSync(file, "utf8"))) {
-      assert.ok(spec.startsWith("./") || spec === "node:crypto", `pin/${rel(srcOf("docfirst-pin"), file)} import 了 ${spec}`);
+      assert.ok(spec.startsWith("./") || spec === "node:crypto", `pin/${rel(srcOf("code-pin"), file)} import 了 ${spec}`);
     }
   }
 });
@@ -181,25 +243,25 @@ test("pin 零依赖：清单里没有 dependencies / peerDependencies，源码�
 const DOC_SIDE_WORDS = /\bmdx\b|[Mm]arker|[Dd]raft|formalOf|parseFormal|targetKey|@@docfirst|\bFormat\b|\bReference\b|\bListing\b/;
 
 test("钉码核心不接触文档文本：源码与产物里没有 mdx、记号写法、格式接口、引用与清单", () => {
-  const dir = srcOf("docfirst-pin");
+  const dir = srcOf("code-pin");
   for (const file of sourcesIn(dir)) {
     const hit = DOC_SIDE_WORDS.exec(readFileSync(file, "utf8"));
     assert.equal(hit, null, `pin/src/${rel(dir, file)} 里出现了「${hit?.[0]}」`);
   }
   for (const file of ["index.mjs", "index.d.mts"]) {
-    const hit = DOC_SIDE_WORDS.exec(distOf("docfirst-pin", file));
+    const hit = DOC_SIDE_WORDS.exec(distOf("code-pin", file));
     assert.equal(hit, null, `pin 的产物 ${file} 里出现了「${hit?.[0]}」`);
   }
 });
 
 test("trajectory 的 `.` 入口零 import：产物一条 import 都没有，连 node: 也没有", () => {
   // 按产物判比按 package.json 判更准：就算以后 `.` 入口不小心 import 到一个真依赖，这里也查得到
-  assert.deepEqual(importSpecsOf(distOf("docfirst-trajectory", "index.mjs")), []);
-  assert.deepEqual(Object.keys(manifestOf("docfirst-trajectory").dependencies ?? {}), [], "trajectory 的 dependencies 得是空的");
+  assert.deepEqual(importSpecsOf(distOf("trajectory-disk", "index.mjs")), []);
+  assert.deepEqual(Object.keys(manifestOf("trajectory-disk").dependencies ?? {}), [], "trajectory 的 dependencies 得是空的");
 });
 
 test("trajectory 的 `.ts` 源码只有相对 import——`.tsx` 是 `./disk` 入口，由下一条按产物查", () => {
-  const dir = srcOf("docfirst-trajectory");
+  const dir = srcOf("trajectory-disk");
   for (const file of sourcesIn(dir).filter((f) => f.endsWith(".ts"))) {
     for (const spec of importSpecsOf(readFileSync(file, "utf8"))) {
       assert.ok(spec.startsWith("./") || spec.startsWith("../"), `trajectory/src/${rel(dir, file)} import 了 ${spec}`);
@@ -208,7 +270,7 @@ test("trajectory 的 `.ts` 源码只有相对 import——`.tsx` 是 `./disk` �
 });
 
 test("trajectory 的建模 `src/model/` 只 import 自己目录里的文件——布局、画布、组件都在它下游", () => {
-  const dir = join(srcOf("docfirst-trajectory"), "model");
+  const dir = join(srcOf("trajectory-disk"), "model");
   for (const file of sourcesIn(dir)) {
     for (const spec of importSpecsOf(readFileSync(file, "utf8"))) {
       const inside = spec.startsWith("./") && !relative(dir, resolve(dirname(file), spec)).startsWith("..");
@@ -220,22 +282,19 @@ test("trajectory 的建模 `src/model/` 只 import 自己目录里的文件—�
 /** docfirst 卡文件的写法：关系行、frontmatter 字段名、里程碑标题常量。星轨盘只收中性输入，一个都不该认识 */
 const CARD_FORMAT_WORDS = /supersedes::|pivots-from::|born-at|frontmatter|CARD_KEYS|MILESTONE_HEADING/;
 
-test("trajectory 不认识 docfirst 卡格式：`.` 的产物与建模源码里没有关系行、frontmatter 字段名这些卡文件的写法", () => {
-  for (const file of ["index.mjs", "index.d.mts"]) {
-    const hit = CARD_FORMAT_WORDS.exec(distOf("docfirst-trajectory", file));
-    assert.equal(hit, null, `trajectory 的产物 ${file} 里出现了「${hit?.[0]}」`);
-  }
-  const dir = join(srcOf("docfirst-trajectory"), "model");
-  for (const file of sourcesIn(dir)) {
+test("trajectory 不认识 docfirst 卡格式：整个包（源码、产物、样式）里没有关系行、frontmatter 字段名这些卡文件的写法", () => {
+  const bad: string[] = [];
+  for (const file of packageFiles("trajectory-disk")) {
     const hit = CARD_FORMAT_WORDS.exec(readFileSync(file, "utf8"));
-    assert.equal(hit, null, `trajectory/src/model/${rel(dir, file)} 里出现了「${hit?.[0]}」`);
+    if (hit !== null) bad.push(`${rel(join(PACKAGES, "trajectory-disk"), file)}「${hit[0]}」`);
   }
+  assert.deepEqual(bad, []);
 });
 
 test("trajectory 的 `./disk`：客户端指令在头一行，只 import react、不内联 react", () => {
   // 「不把 react 打包进产物」要正着断言：react 真被内联进产物时，产物里根本没有那条 import 行，
   // 反着遍历 import 说明符的写法是恒真的（没有行就一条也遍历不到）。
-  const disk = distOf("docfirst-trajectory", "disk.mjs");
+  const disk = distOf("trajectory-disk", "disk.mjs");
   assert.match(disk, /^"use client";/, "disk.mjs 的 use client 指令得留在头一行");
   const specs = importSpecsOf(disk);
   assert.ok(specs.some(isReact), "disk.mjs 里没有 react 的 import 行——react 被内联进产物了");
@@ -298,19 +357,19 @@ test("workflow 目录方向：marker 与 reference 谁都不认识，mdx 不认�
   assert.deepEqual(bad, [], "方向反了。改的是 WORKFLOW_DIRS 那张表加一段为什么，不是把这条断言删掉");
 });
 
-test("workflow 目录方向：reference 只认识 @godcreator/docfirst-pin", () => {
+test("workflow 目录方向：reference 只认识 @godcreator/code-pin", () => {
   for (const file of sourcesIn(join(WORKFLOW_SRC, "reference"))) {
     for (const spec of importSpecsOf(readFileSync(file, "utf8"))) {
-      assert.ok(spec.startsWith("./") || spec === "@godcreator/docfirst-pin", `reference/${rel(join(WORKFLOW_SRC, "reference"), file)} import 了 ${spec}`);
+      assert.ok(spec.startsWith("./") || spec === "@godcreator/code-pin", `reference/${rel(join(WORKFLOW_SRC, "reference"), file)} import 了 ${spec}`);
     }
   }
 });
 
-test("workflow 目录方向：code 只认识 marker、reference 与 @godcreator/docfirst-pin", () => {
+test("workflow 目录方向：code 只认识 marker、reference 与 @godcreator/code-pin", () => {
   const dir = join(WORKFLOW_SRC, "code");
   for (const file of sourcesIn(dir)) {
     for (const spec of importSpecsOf(readFileSync(file, "utf8"))) {
-      if (spec === "@godcreator/docfirst-pin") continue;
+      if (spec === "@godcreator/code-pin") continue;
       const landed = spec.startsWith(".") ? (dirOf(file, spec) ?? "") : "";
       assert.ok(["code", "marker", "reference"].includes(landed), `code/${rel(dir, file)} import 了 ${spec}`);
     }
@@ -322,29 +381,19 @@ function importStatementsOf(src: string): Array<{ line: string; spec: string }> 
   return [...src.matchAll(/^(?:import|export)\b[^\n]*?\bfrom\s*["']([^"']+)["']/gm)].map((m) => ({ line: m[0], spec: m[1]! }));
 }
 
-test("workflow 目录方向：marker 只从 @godcreator/docfirst-pin import 类型，别的只许是目录里的相对路径", () => {
+test("workflow 目录方向：marker 只从 @godcreator/code-pin import 类型，别的只许是目录里的相对路径", () => {
   const dir = join(WORKFLOW_SRC, "marker");
   for (const file of sourcesIn(dir)) {
     const src = readFileSync(file, "utf8");
     const statements = importStatementsOf(src);
     assert.equal(statements.length, importSpecsOf(src).length, `marker/${rel(dir, file)} 有认不出整行的 import（副作用导入、动态导入或跨行花括号）`);
     for (const { line, spec } of statements) {
-      if (spec === "@godcreator/docfirst-pin") {
+      if (spec === "@godcreator/code-pin") {
         assert.match(line, /^(?:import|export)\s+type\b/, `marker/${rel(dir, file)} 从钉码核心 import 了值：${line}`);
         continue;
       }
       const inside = spec.startsWith("./") && !relative(dir, resolve(dirname(file), spec)).startsWith("..");
       assert.ok(inside, `marker/${rel(dir, file)} import 了 ${spec}`);
-    }
-  }
-});
-
-test("钉码核心不认识 workflow：源码的相对 import 都落在自己的 src/ 里，说明符里没有 docfirst-workflow", () => {
-  const dir = srcOf("docfirst-pin");
-  for (const file of sourcesIn(dir)) {
-    for (const spec of importSpecsOf(readFileSync(file, "utf8"))) {
-      assert.ok(!spec.includes("docfirst-workflow"), `pin/${rel(dir, file)} import 了 ${spec}`);
-      if (spec.startsWith(".")) assert.ok(!relative(dir, resolve(dirname(file), spec)).startsWith(".."), `pin/${rel(dir, file)} 的 ${spec} 落到了 src/ 外面`);
     }
   }
 });
@@ -406,8 +455,8 @@ test("fumadocs 包的产物：宿主与兄弟包只许按包名 import，不许�
   }
   // 星轨盘按包名转出 `./disk`，那份产物头一行的 "use client" 才管得住 StarDisk
   assert.ok(
-    importSpecsOf(distOf("docfirst-fumadocs", "trajectory.mjs")).includes("@godcreator/docfirst-trajectory/disk"),
-    "trajectory.mjs 得按包名引用 @godcreator/docfirst-trajectory/disk",
+    importSpecsOf(distOf("docfirst-fumadocs", "trajectory.mjs")).includes("@godcreator/trajectory-disk/disk"),
+    "trajectory.mjs 得按包名引用 @godcreator/trajectory-disk/disk",
   );
 });
 
@@ -427,11 +476,11 @@ test("fumadocs 包的 `./roster`：命令行读 docfirst.config.mjs 时会加载
  */
 test("包只发 dist 与样式：skills 与 template 跟着插件走了，包里连目录都不该再有", () => {
   const FILES: Record<string, string[]> = {
-    "docfirst-pin": ["dist"],
-    "docfirst-trajectory": ["dist", "styles"],
+    "code-pin": ["dist"],
+    "trajectory-disk": ["dist", "styles"],
     "docfirst-workflow": ["dist"],
     "docfirst-fumadocs": ["dist", "styles"],
-    "docs-explain": ["dist", "styles"],
+    "explainer-player": ["dist", "styles"],
   };
   for (const [dir, files] of Object.entries(FILES)) {
     assert.deepEqual(manifestOf(dir).files, files, `${dir} 的 files`);
@@ -442,7 +491,7 @@ test("包只发 dist 与样式：skills 与 template 跟着插件走了，包里
   for (const path of ["styles/light.css", "styles/term.css", "styles/trajectory.css"]) {
     assert.ok(existsSync(join(PACKAGES, "docfirst-fumadocs", path)), `fumadocs 包少了 ${path}`);
   }
-  assert.ok(existsSync(join(PACKAGES, "docs-explain", "styles", "explain.css")), "docs-explain 包少了 styles/explain.css");
+  assert.ok(existsSync(join(PACKAGES, "explainer-player", "styles", "explain.css")), "explainer-player 包少了 styles/explain.css");
 });
 
 // ── 五、包不认识工作台插件 ──────────────────────────────────────────────────
@@ -471,22 +520,20 @@ test("五个包的源码里一行 @godcreator/gwb-* 都没有", () => {
   }
 });
 
-// ── 六、docs-explain 只给站用 ─────────────────────────────────────────────────
+// ── 六、explainer-player 的两个入口 ─────────────────────────────────────────────────
 
-test("docs-explain 清单：没有 dependencies，react 只作必需 peer，依赖字段里没有任何 @godcreator/ 包", () => {
-  const pkg = manifestOf("docs-explain");
-  assert.deepEqual(Object.keys(pkg.dependencies ?? {}), [], "docs-explain 的 dependencies 得是空的");
-  assert.deepEqual(Object.keys(pkg.peerDependencies ?? {}), ["react"], "docs-explain 的 peer 只有 react");
-  assert.notEqual(pkg.peerDependenciesMeta?.react?.optional, true, "react 是 docs-explain 的必需 peer，不该标可选");
-  // 普通 fumadocs 站也装它：docfirst-* 与 gwb-* 一个都不许出现，开发期依赖也算
-  for (const dep of allDepsOf(pkg)) assert.ok(!dep.startsWith("@godcreator/"), `docs-explain 的清单里有 ${dep}`);
+test("explainer-player 清单：没有 dependencies，react 只作必需 peer；工作台插件不依赖它", () => {
+  const pkg = manifestOf("explainer-player");
+  assert.deepEqual(Object.keys(pkg.dependencies ?? {}), [], "explainer-player 的 dependencies 得是空的");
+  assert.deepEqual(Object.keys(pkg.peerDependencies ?? {}), ["react"], "explainer-player 的 peer 只有 react");
+  assert.notEqual(pkg.peerDependenciesMeta?.react?.optional, true, "react 是 explainer-player 的必需 peer，不该标可选");
   // 反方向：别的包由 PACKAGE_FORBIDDEN 查，工作台插件在这里查
   const plugin = JSON.parse(readFileSync(PLUGIN_MANIFEST, "utf8")) as Pkg;
-  assert.ok(!allDepsOf(plugin).includes(NPM_PACKAGES["docs-explain"]!), "工作台插件依赖了 docs-explain");
+  assert.ok(!allDepsOf(plugin).includes(NPM_PACKAGES["explainer-player"]!), "工作台插件依赖了 explainer-player");
 });
 
-test("docs-explain 的 `.`：客户端指令在头一行，只 import react，没有把 react 或别的模块打包进来", () => {
-  const index = distOf("docs-explain", "index.mjs");
+test("explainer-player 的 `.`：客户端指令在头一行，只 import react，没有把 react 或别的模块打包进来", () => {
+  const index = distOf("explainer-player", "index.mjs");
   assert.match(index, /^"use client";/, "index.mjs 的 use client 指令得留在头一行");
   const specs = importSpecsOf(index);
   assert.ok(specs.some(isReact), "index.mjs 里没有 react 的 import 行——react 被内联进产物了");
@@ -497,9 +544,9 @@ test("docs-explain 的 `.`：客户端指令在头一行，只 import react，�
   assert.doesNotMatch(index, /__CLIENT_INTERNALS|react\.production/, "index.mjs 正文里有 react 本体的痕迹");
 });
 
-test("docs-explain 的 `./text`：docfirst.config.mjs 在 Node 里加载它，产物零 import、不带客户端指令", () => {
-  const text = distOf("docs-explain", "text.mjs");
+test("explainer-player 的 `./text`：docfirst.config.mjs 在 Node 里加载它，产物零 import、不带客户端指令", () => {
+  const text = distOf("explainer-player", "text.mjs");
   assert.deepEqual(importSpecsOf(text), []);
   assert.doesNotMatch(text, /^"use client";/);
-  assert.deepEqual(importSpecsOf(readFileSync(join(srcOf("docs-explain"), "text.ts"), "utf8")), [], "text.ts 源码也不许 import");
+  assert.deepEqual(importSpecsOf(readFileSync(join(srcOf("explainer-player"), "text.ts"), "utf8")), [], "text.ts 源码也不许 import");
 });

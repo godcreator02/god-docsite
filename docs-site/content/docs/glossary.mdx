@@ -7,11 +7,11 @@ description: 这个仓里反复出现的词各指什么、正本在哪、怎么�
 
 下面几个是钉码核心接口正本上的名字，代码里就是这么写的：
 
-{/* ref file="../packages/docfirst-pin/src/types.ts" lines="1-12" hash="3f45a209cece" blob="32a0167e8d8f" */}
+{/* ref file="../packages/code-pin/src/types.ts" lines="1-12" hash="3f45a209cece" blob="32a0167e8d8f" */}
 
 目标（target）是「文档指着的那样东西」，记录（record）是「确认那一刻算出、写在正式记号上的 hash 与 blob 名这类属性」，
 钉（pin）是目标加记录，判定（verdict）是「一处钉核对完的结果」，状态（status）是判定里的结论。带上文档位置之后是 workflow 的两个词：
-引用（reference）是「文档里的一处指」，清单（listing）是「一个文件核对完的结果」；格式（format）是「认领一类文件、在里面认记号与写回的那一份实现」，
+引用（reference）是「文档里指向目标的一处」，清单（listing）是「一个文件核对完的结果」；格式（format）是「认领一类文件、在里面认记号与写回的那一份实现」，
 有 mdx 页面与讲解组件的源码两种。这些词在代码、命令行输出、这个站上是同一套。
 
 ## 站上自动标出来的那些词
@@ -40,3 +40,4 @@ description: 这个仓里反复出现的词各指什么、正本在哪、怎么�
 | 正式记号 | 引用写在文档里的那一行注释：作者只写目标属性（mdx 页面里是 `{/* ref file="…" lines="起-止" */}`，讲解组件的源码里去掉花括号），确认时在同一行添上记录属性（段哈希、blob 名这类） |
 | 投影 | 引用在页面上显示出来的那块内容——构建时现从源码读，不是抄进文档的副本 |
 | 摆放 | 把 `outputs` 里有映射的生成正本渲染后写到映射指定的落点 |
+| 通用包 | 不认识 docfirst、谁都能单独拿走用的包：钉码核心 `code-pin`、星轨盘 `trajectory-disk`、讲解播放器 `explainer-player`。docfirst 只是它们的一个使用者；docfirst 自己的包是 `docfirst-workflow` 与 `docfirst-fumadocs`。边界测试里的名单是 `GENERIC_PACKAGES` |

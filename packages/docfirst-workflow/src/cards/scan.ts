@@ -1,22 +1,22 @@
 /**
- * 一批卡文件 → 星轨盘的中性输入加病卡清单。纯函数：文件从哪儿来（读盘、内存）由调用方定，读卡目录在 card-dir.ts。
- * 根卡恰好一张时它是盘心；born-at 合格的非根卡全部上盘，有病但画得出来的照样上盘。
+ * 一批卡文件 → 星轨盘的中性输入加病卡清单。纯函数：文件从哪儿来（读文件、内存）由调用方定，读卡目录在 card-dir.ts。
+ * 根卡恰好一张时它是盘心；born-at 合格的非根卡全部画上星轨盘，有病但画得出来的照样画上去。
  * 逻辑出自老仓 `god-flow-panels` 的 `node/star/model.ts`（只读参考，本仓不 import 它）。
  */
 
-import { validBornAt } from "@godcreator/docfirst-trajectory";
-import type { DiskCard, DiskCenter } from "@godcreator/docfirst-trajectory";
+import { validBornAt } from "@godcreator/trajectory-disk";
+import type { DiskCard, DiskCenter } from "@godcreator/trajectory-disk";
 import { parseCardFile } from "./card.ts";
 import { checkDocfirstRefs } from "./card-refs.ts";
 import { stripFrontmatter } from "./parse.ts";
 import type { CardFile, CardRecord, CardScan, Problem, SickFile } from "./types.ts";
 
-/** 卡文件的后缀：`.mdx` 是文档站 `content/trajectory/` 里的写法（卡进 fumadocs 集合渲成页），
- * `.md` 是把卡摆在站外某个目录的项目的写法——两种都认，卡身份都是去掉后缀的文件名。
- * 同一身份两种后缀都在时只认 `.mdx`，`.md` 那份跳过、在 `.mdx` 那张卡上报病：身份撞车不该出两张卡。 */
+/** 卡文件的后缀：`.mdx` 是文档站 `content/trajectory/` 里的写法（卡进 fumadocs 集合、渲染成页面），
+ * `.md` 是把卡放在站外某个目录的项目的写法——两种都认，卡身份都是去掉后缀的文件名。
+ * 同一身份两种后缀都在时只认 `.mdx`，`.md` 那份跳过、在 `.mdx` 那张卡上报病：身份重复不该出两张卡。 */
 export const CARD_EXT = /\.mdx?$/;
 
-/** 一批卡文件扫成中性输入与病卡。目录内平铺，名字不带路径。不是卡文件的名字、同身份被 `.mdx` 盖掉的 `.md` 都跳过；
+/** 一批卡文件扫成中性输入与病卡。目录内平铺，名字不带路径。不是卡文件的名字、同一身份已有 `.mdx` 的 `.md` 都跳过；
  * 每张卡先报单文件的病，再跑跨文件的校验（根卡、parent、关系指向、同身份两个文件），再查正文里有没有钉码记号。病卡按路径排序，卡按身份排序，
  * 同一批文件两次扫描产物逐位相等。 */
 export function scanCards(files: readonly CardFile[]): CardScan {
@@ -43,8 +43,8 @@ export function scanCards(files: readonly CardFile[]): CardScan {
   return { ...toDiskInput(records), sick };
 }
 
-/** 记录换成星轨盘的中性输入：根卡恰好一张时它是盘心，born-at 写坏的盘心不给时刻；
- * 非根卡只收 born-at 合格的（算不出半径的画不出来），其余的病不挡上盘。 */
+/** 记录换成星轨盘的中性输入：根卡恰好一张时它是盘心，born-at 格式不对的盘心不给时刻；
+ * 非根卡只收 born-at 合格的（算不出半径的画不出来），别的病不影响画上星轨盘。 */
 function toDiskInput(records: readonly CardRecord[]): { center: DiskCenter | null; cards: DiskCard[] } {
   const roots = records.filter((r) => r.type === "root");
   const root = roots.length === 1 ? (roots[0] as CardRecord) : null;
@@ -100,8 +100,8 @@ function crossFileProblems(records: readonly CardRecord[]): Array<{ path: string
   return out;
 }
 
-/** 关系只能指向盘上的卡：指向根卡的报（根卡代表整个项目，关系要指向具体的卡），指向不存在的卡、
- * 或 born-at 写坏没上盘的卡也报。根卡自己写的关系不画，不查。 */
+/** 关系只能指向星轨盘上的卡：指向根卡的报（根卡代表整个项目，关系要指向具体的卡），指向不存在的卡、
+ * 或 born-at 格式不对、没画上星轨盘的卡也报。根卡自己写的关系不画，不查。 */
 function relationProblems(records: readonly CardRecord[]): Array<{ path: string; problem: Problem }> {
   const out: Array<{ path: string; problem: Problem }> = [];
   const rootIds = new Set(records.filter((r) => r.type === "root").map((r) => r.id));

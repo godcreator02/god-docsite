@@ -1,13 +1,13 @@
 /**
- * 读取器：钉码（`@godcreator/docfirst-pin`）看到的一切都从这儿来。
+ * 读取器：钉码核心（`@godcreator/code-pin`）读到的文件内容与目录清单都从这儿来。
  *   read     读工作区文件，整文件按行给
  *   list     目录的名字表：相对 dir 的 posix 路径，目录带尾斜杠，排过序。在 git 仓里按 .gitignore 过滤（dist/、
- *            node_modules/ 不进清单，也不往里走），.git 自己去掉；不在仓里原样列。glob 只认 * 和 ?，匹配名字不匹配路径
+ *            node_modules/ 不进清单，也不进去遍历），.git 自己去掉；不在仓里原样列。glob 只认 * 和 ?，匹配名字不匹配路径
  * 换成读某个提交、读内存，再写一个这样的文件即可。
  */
 import { readdirSync, readFileSync, statSync } from "node:fs";
 import { join, resolve } from "node:path";
-import type { Reader } from "@godcreator/docfirst-pin";
+import type { Reader } from "@godcreator/code-pin";
 import { git, locateDir } from "./git.ts";
 
 /** glob 只认 * 和 ?；匹配的是名字，不是路径 */
@@ -28,7 +28,7 @@ function statOf(path: string): "file" | "dir" | null {
  * dir 底下被 .gitignore 忽略的路径，相对 dir 的 posix 路径、目录带尾斜杠；整棵树一次
  * `git status --ignored=matching` 问全。口径跟拿 `check-ignore` 一条一条问相同：只列匹配忽略规则的，
  * 被忽略的目录整个算一项、不往里列，目录本身没被忽略而里面的文件被忽略就列那些文件，已跟踪的不算忽略。
- * `--no-optional-locks`：status 顺手刷新索引要拿锁，别跟同时在这个仓里干活的人抢。
+ * `--no-optional-locks`：status 默认会顺带刷新索引、要拿锁，加上它免得跟同时在这个仓里工作的人争锁。
  * dir 本身落在一个被忽略的目录里时，git 报的是那个祖先目录，这时整棵树都算被忽略。
  * 目录不在任何仓里就一个都不忽略。定位走 locateDir（从目录自身起找仓）不走 locate：目标目录恰是仓根时
  * 先跳一级会跳出这个仓，忽略集空掉、过滤整个失效。

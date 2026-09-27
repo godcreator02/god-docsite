@@ -1,5 +1,5 @@
 /**
- * 钉码核心 docfirst-pin 的内部接缝图：模块页 <SeamMap module="pin" /> 画的就是它。
+ * 钉码核心 code-pin 的内部接缝图：模块页 <SeamMap module="pin" /> 画的就是它。
  * 框是包里的文件，方块是文件对外给的东西；灰色实线框是包外的调用方、实现方与 node:crypto。
  * types.ts 是接口正本，不单画成框：接缝上写的 Pin、Verdict、Reader、History 与理由的中文说法 REASON_TEXT 都定义在那里。
  * 坐标在 pin.layout.ts。
@@ -10,7 +10,7 @@ export const pinGraph = defineSeamGraph({
   id: 'pin',
   title: '钉码核心内部的文件与接缝',
   intro:
-    '钉码核心内部接缝图：虚线框是包里的文件，框里的方块是它对外给的函数，灰色实线框是包外的调用方、实现方与 node:crypto。接口的定义都在 types.ts。钉码核心只收目标与记录，不接触文档文本。',
+    '钉码核心内部接缝图：虚线框是包里的文件，框里的方块是它对外给的函数，灰色实线框是包外的调用方、实现方与 node:crypto。接口的定义都在 types.ts。钉码核心是通用包，不认识 docfirst，只收目标与记录，不接触文档文本；图里的调用方与实现方是 docfirst 的 workflow。',
   frameLabel: '文件',
   modules: [
     {
@@ -20,7 +20,7 @@ export const pinGraph = defineSeamGraph({
       role: null,
       outside: true,
       blurb:
-        'workflow 装配项目时用读取器与 git 历史建出钉码核心，交给钉码编排；命令行的 check、confirm、render 与站构建时的 remark 插件都经钉码编排调它。钉码编排把一个文件（mdx 页面或讲解组件的源码）里认出的引用剥成目标与记录交进来，再把结果配回文件路径与行号。',
+        'workflow 装配项目时用读取器与 git 历史建出钉码核心，交给钉码编排；命令行的 check、confirm、render 与站构建时的 remark 插件都经钉码编排调它。钉码编排把一个文件（mdx 页面或讲解组件的源码）里认出的引用拆成目标与记录交进来，再把结果配回文件路径与行号。',
       caps: [
         { id: 'load', name: '项目装配', ident: 'loadProject' },
         { id: 'pinning', name: '钉码编排', ident: 'checkDoc · confirmDoc · checkReferences' },
@@ -127,7 +127,7 @@ export const pinGraph = defineSeamGraph({
       iface: 'check(pins: Pin[]) → Verdict[]；confirm(verdicts, { accept }) → Step[]；Pin = { target, record }',
       convention: false,
       via: 'code',
-      text: '钉码编排把一个文件里的每处引用剥成目标与记录交进来，还没确认的记录是 null：check 交回每处的状态、今天的位置、给人看的旧行新行；confirm 在这些判定上交回每处的动作与要写回的新目标和记录。结果与传入顺序一一对应，文件路径、行号由钉码编排按下标配回去，文件是 mdx 页面还是组件源码、记号长什么样，钉码核心都看不到。',
+      text: '钉码编排把一个文件里的每处引用拆成目标与记录交进来，还没确认的记录是 null：check 交回每处的状态、今天的位置、给人看的旧行新行；confirm 在这些判定上交回每处的动作与要写回的新目标和记录。结果与传入顺序一一对应，文件路径、行号由钉码编排按下标配回去，文件是 mdx 页面还是组件源码、记号长什么样，钉码核心都看不到。',
     },
     {
       n: 3,
@@ -187,7 +187,7 @@ export const pinGraph = defineSeamGraph({
       iface: 'parseHunks(diffText) · hashText(text)',
       convention: false,
       via: 'code',
-      text: 'git 历史跑 git diff 之后用钉码核心的 parseHunks 解析输出，hunk 表的缓存用 hashText 算出的 blob 名做键。解析与 hash 只有钉码核心这一份，两边对 hunk 和 blob 名的理解不会分叉。',
+      text: 'git 历史跑 git diff 之后用钉码核心的 parseHunks 解析输出，hunk 表的缓存用 hashText 算出的 blob 名做键。解析与 hash 只有钉码核心这一份，两边对 hunk 和 blob 名的理解不会不一致。',
     },
     {
       n: 9,

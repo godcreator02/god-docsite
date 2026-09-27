@@ -8,21 +8,21 @@ importers:
 
   .:
     devDependencies:
+      '@godcreator/code-pin':
+        specifier: workspace:*
+        version: link:packages/code-pin
       '@godcreator/docfirst-fumadocs':
         specifier: workspace:*
         version: link:packages/docfirst-fumadocs
-      '@godcreator/docfirst-pin':
-        specifier: workspace:*
-        version: link:packages/docfirst-pin
-      '@godcreator/docfirst-trajectory':
-        specifier: workspace:*
-        version: link:packages/docfirst-trajectory
       '@godcreator/docfirst-workflow':
         specifier: workspace:*
         version: link:packages/docfirst-workflow
-      '@godcreator/docs-explain':
+      '@godcreator/explainer-player':
         specifier: workspace:*
-        version: link:packages/docs-explain
+        version: link:packages/explainer-player
+      '@godcreator/trajectory-disk':
+        specifier: workspace:*
+        version: link:packages/trajectory-disk
       '@types/mdast':
         specifier: ^4.0.4
         version: 4.0.4
@@ -56,9 +56,9 @@ importers:
       '@godcreator/docfirst-workflow':
         specifier: workspace:*
         version: link:../packages/docfirst-workflow
-      '@godcreator/docs-explain':
+      '@godcreator/explainer-player':
         specifier: workspace:*
-        version: link:../packages/docs-explain
+        version: link:../packages/explainer-player
       cn:
         specifier: ^0.3.0
         version: 0.3.3
@@ -109,17 +109,19 @@ importers:
         specifier: ^7.0.2
         version: 7.0.2
 
+  packages/code-pin: {}
+
   packages/docfirst-fumadocs:
     dependencies:
-      '@godcreator/docfirst-pin':
+      '@godcreator/code-pin':
         specifier: workspace:*
-        version: link:../docfirst-pin
-      '@godcreator/docfirst-trajectory':
-        specifier: workspace:*
-        version: link:../docfirst-trajectory
+        version: link:../code-pin
       '@godcreator/docfirst-workflow':
         specifier: workspace:*
         version: link:../docfirst-workflow
+      '@godcreator/trajectory-disk':
+        specifier: workspace:*
+        version: link:../trajectory-disk
       unified:
         specifier: ^11.0.0
         version: 11.0.5
@@ -146,25 +148,14 @@ importers:
         specifier: ^19.3.0
         version: 19.3.0
 
-  packages/docfirst-pin: {}
-
-  packages/docfirst-trajectory:
-    devDependencies:
-      '@types/react':
-        specifier: ^19.3.0
-        version: 19.3.0
-      react:
-        specifier: ^19.3.0
-        version: 19.3.0
-
   packages/docfirst-workflow:
     dependencies:
-      '@godcreator/docfirst-pin':
+      '@godcreator/code-pin':
         specifier: workspace:*
-        version: link:../docfirst-pin
-      '@godcreator/docfirst-trajectory':
+        version: link:../code-pin
+      '@godcreator/trajectory-disk':
         specifier: workspace:*
-        version: link:../docfirst-trajectory
+        version: link:../trajectory-disk
       remark-frontmatter:
         specifier: ^5.0.0
         version: 5.0.0
@@ -178,7 +169,16 @@ importers:
         specifier: ^11.0.0
         version: 11.0.5
 
-  packages/docs-explain:
+  packages/explainer-player:
+    devDependencies:
+      '@types/react':
+        specifier: ^19.3.0
+        version: 19.3.0
+      react:
+        specifier: ^19.3.0
+        version: 19.3.0
+
+  packages/trajectory-disk:
     devDependencies:
       '@types/react':
         specifier: ^19.3.0

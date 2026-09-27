@@ -7,8 +7,8 @@ description: content/trajectory/ 下的轨迹卡怎么被读出、校验、换�
 一个站只有一张根卡、一张盘，根卡画在盘心，其余的卡按日期排在同心环上，半径表示时间、内旧外新。
 同一棵树（或同一领域的孤星）在同一天有好几张卡时，那一天的环带按张数加宽，这几张按角度从当天的环往内排成一斜排，不叠在同一个环上。
 角度按领域分扇区，一圈装得下就整体放大铺满整圈，只在 12 点方向留一道缝放日期与里程碑的名字；装不下才让同一领域里时间不重叠的树共用一段角度。
-从卡文件到站上的盘分几段：读卡目录、解析、校验、换成中性输入在 `docfirst-workflow` 的卡格式；建模、布局、画盘在 `docfirst-trajectory`，
-组件在浏览器里建模；站只负责读卡目录、把结果交给组件：
+从卡文件到站上的盘分几段：读卡目录、解析、校验、换成中性输入在 `docfirst-workflow` 的卡格式；建模、布局、画盘在通用包
+星轨盘 `trajectory-disk`，组件在浏览器里建模；站只负责读卡目录、把结果交给组件：
 
 <TrajectoryFlow />
 
@@ -17,16 +17,16 @@ description: content/trajectory/ 下的轨迹卡怎么被读出、校验、换�
 卡的身份是文件名去掉 `.mdx` / `.md`，`parent` 与正文里的关系都用身份指向别的卡。frontmatter 里下面这些
 字段至少写了一个才算卡，一个都没写的文件整份跳过、不报问题：
 
-{/* ref file="../packages/docfirst-workflow/src/cards/parse.ts" lines="15-17" hash="dfeb7aaec458" blob="f9e17188994b" */}
+{/* ref file="../packages/docfirst-workflow/src/cards/parse.ts" lines="15-17" hash="041cf9a65875" blob="050de2f99d5a" */}
 
 卡与卡之间的两种关系写在正文里，一行一条：`supersedes::`（取代）或 `pivots-from::`（转向）后面跟一条指向卡身份的标准 md 链接，wikilink 与包在 `<>` 里的目标都不认。
 行首是这两个词、整行却不合格式的，记成问题：
 
-{/* ref file="../packages/docfirst-workflow/src/cards/parse.ts" lines="22-26" hash="3fc6f0106192" blob="50669b6a2ab2" */}
+{/* ref file="../packages/docfirst-workflow/src/cards/parse.ts" lines="22-26" hash="268b857dd194" blob="050de2f99d5a" */}
 
-解析一张卡时把问题逐条记下，不在第一条停：字段的形状（该写单个值的写成了列表、`parent` 写成了单个值，报出来、按没写处理，不替它转换）、必填字段、`born-at` 的格式，再加写歪的关系行；根卡另查里程碑区块里写坏的行：
+解析一张卡时把问题逐条记下，不在第一条停：字段的形状（该写单个值的写成了列表、`parent` 写成了单个值，报出来、按没写处理，不替它转换）、必填字段、`born-at` 的格式，再加格式不对的关系行；根卡另查里程碑区块里写坏的行：
 
-{/* ref file="../packages/docfirst-workflow/src/cards/card.ts" lines="44-91" hash="e0c64f0b45d1" blob="d3338eaedca6" */}
+{/* ref file="../packages/docfirst-workflow/src/cards/card.ts" lines="44-91" hash="375d796e6e71" blob="4c1848dfec6c" */}
 
 `docfirst check` 把每条问题记一次红：
 
@@ -43,12 +43,12 @@ description: content/trajectory/ 下的轨迹卡怎么被读出、校验、换�
 - 关系只能指向盘上的卡：指向根卡、指向不存在的卡、指向 `born-at` 写坏没上盘的卡，各记一条
 - 同一身份 `.md` 与 `.mdx` 两个文件都在，只认 `.mdx`，在它上面记一条
 
-{/* ref file="../packages/docfirst-workflow/src/cards/scan.ts" lines="75-139" hash="222d63dd79c8" blob="5a458f2ae3b8" */}
+{/* ref file="../packages/docfirst-workflow/src/cards/scan.ts" lines="75-139" hash="64d1e877dde3" blob="84851160ced5" */}
 
 然后换成星轨盘的中性输入：根卡恰好一张时它是盘心；其余 `born-at` 合格的卡都上盘，别的问题不挡上盘，`parent` 与 `domain`
 不决定卡在不在盘上。`born-at` 不合格的卡算不出半径，不进输入：
 
-{/* ref file="../packages/docfirst-workflow/src/cards/scan.ts" lines="46-73" hash="4fea4043393f" blob="5a458f2ae3b8" */}
+{/* ref file="../packages/docfirst-workflow/src/cards/scan.ts" lines="46-73" hash="ea1b3b8a9e0a" blob="84851160ced5" */}
 
 ## 建树、挑主干
 
@@ -56,11 +56,11 @@ description: content/trajectory/ 下的轨迹卡怎么被读出、校验、换�
 几条取代链先比终点的时刻谁更晚，再比长短，最后按身份排；整棵树一条取代都没有，才在转向链上用同一个比法挑。
 不在主干上的卡按连通分成**支线**；两种关系都没有的卡是**孤星**：
 
-{/* ref file="../packages/docfirst-trajectory/src/model/build.ts" lines="177-204" hash="3efa5ab62617" blob="fafdd715830c" */}
+{/* ref file="../packages/trajectory-disk/src/model/build.ts" lines="177-204" hash="3efa5ab62617" blob="fafdd715830c" */}
 
 建模在浏览器里做：组件 `StarDisk` 收到中性输入，自己建模；盘的布局（`RingsLayout`）也由画布按当前设置算，调设置不用再请求服务端：
 
-{/* ref file="../packages/docfirst-trajectory/src/disk.tsx" lines="158-159" hash="f3f44d34895f" blob="3ecaca179c38" */}
+{/* ref file="../packages/trajectory-disk/src/disk.tsx" lines="158-159" hash="f3f44d34895f" blob="3ecaca179c38" */}
 
 ## 站上怎么渲染
 
@@ -78,9 +78,9 @@ description: content/trajectory/ 下的轨迹卡怎么被读出、校验、换�
 {/* ref file="src/app/(trajectory-disk)/trajectory/page.tsx" lines="38-38" hash="68a8bf23899d" blob="8b9b202f561e" */}
 
 `loadTrajectory` 只收绝对路径，然后读卡目录，交回中性输入与病卡清单。卡目录由页面用写死的目录名拼成绝对路径再传，
-Turbopack 才看得出只读这一个目录，不会把整个项目打进服务端产物：
+Turbopack 才看得出只读这一个目录，不会把整个项目打包进服务端产物：
 
-{/* ref file="../packages/docfirst-fumadocs/src/trajectory.ts" lines="18-26" hash="568db72b8fbc" blob="56741c0227aa" */}
+{/* ref file="../packages/docfirst-fumadocs/src/trajectory.ts" lines="18-26" hash="274aec720515" blob="127ca2597015" */}
 
 每张卡另有自己的卡页 `/trajectory/<卡身份>`，由站里的 fumadocs 卡集合渲染：`cardSchema` 从 frontmatter 派生标题，
 `remarkTrajectoryLinks` 把正文里指向卡的链接改写成卡页地址（侧栏靠这个前缀认出卡链接）：

@@ -1,7 +1,7 @@
 /**
  * fumadocs 适配 docfirst-fumadocs 的内部接缝图：模块页 <SeamMap module="fumadocs" /> 画的就是它。
  * 框是包里的文件，方块是文件对外给的东西；灰色实线框是包外的站、fumadocs 本体、workflow、钉码核心与轨迹核心。
- * 组件与它随包发的样式表合成一个框（pre.tsx 与 light.css、term.tsx 与 term.css）；index.ts 只转出别的文件的出口，不单画成框。
+ * 组件与它随包发的样式表合成一个框（pre.tsx 与 light.css、term.tsx 与 term.css）；index.ts 只再导出别的文件的出口，不单画成框。
  * 坐标在 fumadocs.layout.ts。
  */
 import { defineSeamGraph } from '../graph.mjs';
@@ -16,7 +16,7 @@ export const fumadocsGraph = defineSeamGraph({
     {
       id: 'site',
       name: '使用方的站',
-      pkg: 'Next 站的接线代码',
+      pkg: 'Next 站的接入代码',
       role: null,
       outside: true,
       blurb:
@@ -63,7 +63,7 @@ export const fumadocsGraph = defineSeamGraph({
       role: 'cyan',
       outside: false,
       blurb:
-        'fumadocs 自带的 Note、Files、Folder、File 转成机读文本的规则。命令行加载 docfirst.config.mjs 时会加载它，所以运行时一句 import 都没有：规则只经 stamp 传进来的帮手读节点、造节点，类型从 workflow 的 ./mdx 用 import type 取。',
+        'fumadocs 自带的 Note、Files、Folder、File 转成机读文本的规则。命令行加载 docfirst.config.mjs 时会加载它，所以运行时一句 import 都没有：规则只经 stamp 传进来的 helpers 读节点、生成节点，类型从 workflow 的 ./mdx 用 import type 取。',
       caps: [{ id: 'roster-rules', name: 'fumadocs 组件规则', ident: 'fumadocsRoster' }],
     },
     {
@@ -125,7 +125,7 @@ export const fumadocsGraph = defineSeamGraph({
       role: 'violet',
       outside: false,
       blurb:
-        '纯函数，不认识 remark 与 React：词表建成按长度降序的索引，建表时拒掉空词、单字词和两条术语共用的词；findTerms 在一段文字里交回互不重叠的命中区间，西文词要合词边界。',
+        '纯函数，不认识 remark 与 React：词表建成按长度降序的索引，建表时拒绝空词、单字词和两条术语共用的词；findTerms 在一段文字里交回互不重叠的命中区间，西文词要合词边界。',
       caps: [{ id: 'gl-index', name: '建索引与匹配', ident: 'buildTermIndex · findTerms' }],
     },
     {
@@ -144,7 +144,7 @@ export const fumadocsGraph = defineSeamGraph({
       pkg: 'transform.ts',
       role: 'blue',
       outside: false,
-      blurb: 'applyListing 在树上找记号（确认过的与还没确认的都算），按记号所在的行取清单里的那一项，原地换成 nodeFor 造的节点；清单里没有这一行就直接报错。',
+      blurb: 'applyListing 在树上找记号（确认过的与还没确认的都算），按记号所在的行取清单里的那一项，原地换成 nodeFor 生成的节点；清单里没有这一行就直接报错。',
       caps: [{ id: 'tf-apply', name: '按行号换节点', ident: 'applyListing' }],
     },
     {
@@ -164,11 +164,11 @@ export const fumadocsGraph = defineSeamGraph({
     {
       id: 'pin',
       name: '钉码核心',
-      pkg: '@godcreator/docfirst-pin',
+      pkg: '@godcreator/code-pin',
       role: null,
       outside: true,
       blurb:
-        '状态全由钉码核心判，这个包只读。blocks.ts 从钉码核心只 import 状态的类型 Status，按它选状态点的颜色与节点形状。',
+        '通用包，不认识 docfirst，把文字钉在代码上。状态全由钉码核心判，这个包只读。blocks.ts 从钉码核心只 import 状态的类型 Status，按它选状态点的颜色与节点形状。',
       caps: [{ id: 'pin', name: '钉码核心', ident: 'Status' }],
     },
     {
@@ -200,11 +200,11 @@ export const fumadocsGraph = defineSeamGraph({
     {
       id: 'trajectory',
       name: '轨迹核心',
-      pkg: '@godcreator/docfirst-trajectory',
+      pkg: '@godcreator/trajectory-disk',
       role: null,
       outside: true,
       blurb:
-        '星轨盘组件 StarDisk 在 ./disk，那份产物第一行是 "use client"，样式表是 ./star.css。StarDisk 的 data 收中性输入，组件在浏览器里自己调 buildModel 建模。这个包只从轨迹核心取这两样，不从主入口取任何东西。',
+        '通用包星轨盘，不认识 docfirst。星轨盘组件 StarDisk 在 ./disk，那份产物第一行是 "use client"，样式表是 ./star.css。StarDisk 的 data 收中性输入，组件在浏览器里自己调 buildModel 建模。这个包只从轨迹核心取这两样，不从主入口取任何东西。',
       caps: [{ id: 'tj-disk', name: '星轨盘组件与样式', ident: './disk · ./star.css' }],
     },
     {
@@ -214,7 +214,7 @@ export const fumadocsGraph = defineSeamGraph({
       role: 'emerald',
       outside: false,
       blurb:
-        'loadTrajectory(dir) 收卡目录的绝对路径（不是绝对路径直接报错），就是 workflow 卡格式的 scanCardDir：交回中性输入加病卡，不建模；同一个出口按包名转出轨迹核心的 StarDisk，trajectory.css 引入轨迹核心的 star.css。站画星轨盘只 import 这个包。只 import workflow 的 ./cards，不 import 主入口。',
+        'loadTrajectory(dir) 收卡目录的绝对路径（不是绝对路径直接报错），就是 workflow 卡格式的 scanCardDir：交回中性输入加病卡，不建模；同一个出口按包名再导出轨迹核心的 StarDisk，trajectory.css 引入轨迹核心的 star.css。站画星轨盘只 import 这个包。只 import workflow 的 ./cards，不 import 主入口。',
       caps: [
         { id: 'star-load', name: '读卡与组件', ident: 'loadTrajectory · StarDisk' },
         { id: 'star-css', name: '盘的样式', ident: 'trajectory.css' },
@@ -241,7 +241,7 @@ export const fumadocsGraph = defineSeamGraph({
       iface: 'DocfirstMdxOptions：remarkPlugins(v) → [...v, …]；rehypeCodeOptions { themes, parseMetaString }',
       convention: false,
       via: 'code',
-      text: '返回值按结构对上 applyMdxPreset 的参数，类型里不 import fumadocs。remarkPlugins 接在 fumadocs 的默认插件之后；rehypeCode 只放行白名单里的 meta，parseMetaString 与 fumadocs 默认的白名单同形，多放行 data-dot。themes 写的是 fumadocs 的默认值。',
+      text: '返回值按结构对上 applyMdxPreset 的参数，类型里不 import fumadocs。remarkPlugins 接在 fumadocs 的默认插件之后；rehypeCode 只保留白名单里的 meta，parseMetaString 与 fumadocs 默认的白名单同形，多保留 data-dot。themes 写的是 fumadocs 的默认值。',
     },
     {
       n: 3,
@@ -281,7 +281,7 @@ export const fumadocsGraph = defineSeamGraph({
       iface: 'pinning.checkReferences(doc, references) → Listing；Item · Reference',
       convention: false,
       via: 'code',
-      text: '第二步：认好的引用交给钉码编排的 checkReferences，跳过认引用直接核对，交回 Listing。applyListing 按每一项的 reference.at 对行，nodeFor 读 status、lines、current、old、diff、reason 决定造什么节点。清单、清单项与引用的类型从 workflow 主入口 import。',
+      text: '第二步：认好的引用交给钉码编排的 checkReferences，跳过认引用直接核对，交回 Listing。applyListing 按每一项的 reference.at 对行，nodeFor 读 status、lines、current、old、diff、reason 决定生成什么节点。清单、清单项与引用的类型从 workflow 主入口 import。',
     },
     {
       n: 7,
@@ -305,7 +305,7 @@ export const fumadocsGraph = defineSeamGraph({
     },
     {
       n: 9,
-      name: '语法树零件',
+      name: '语法树工具函数',
       a: ['tf-apply', 'gp-glossary', 'bl-nodefor'],
       b: ['wf-mdx'],
       iface: 'walk · lineOf · markerOf · langOf；类型 TreeNode · JsxAttribute · Roster',
@@ -321,7 +321,7 @@ export const fumadocsGraph = defineSeamGraph({
       iface: 'meta：title="…" lineNumbers=N data-dot="…"；Files 上 data-docfirst="tree" data-dot="…"',
       convention: true,
       via: 'code',
-      text: '给页面的状态写进代码块的 meta 字符串：title 显示在标题栏，lineNumbers 让行号对上源文件，data-dot 带状态点的颜色。rehypeCode 按 parseMetaString 放行后它们成了 pre 的属性，DocfirstPre 读 data-dot。目录树不经过 pre，容器上的 data-docfirst 与 data-dot 由 light.css 画点。两边只靠属性名对上。',
+      text: '给页面的状态写进代码块的 meta 字符串：title 显示在标题栏，lineNumbers 让行号对上源文件，data-dot 带状态点的颜色。rehypeCode 按 parseMetaString 保留下来，它们成了 pre 的属性，DocfirstPre 读 data-dot。目录树不经过 pre，容器上的 data-docfirst 与 data-dot 由 light.css 画点。两边只靠属性名对上。',
     },
     {
       n: 11,
@@ -351,7 +351,7 @@ export const fumadocsGraph = defineSeamGraph({
       iface: 'CodeBlock（Actions）· Pre；名为 Files / Folder / File 的 mdxJsxFlowElement',
       convention: false,
       via: 'code',
-      text: 'DocfirstPre 把普通围栏原样交给 CodeBlock 与 Pre，有状态点的经 Actions 把点放进标题栏。目录树引用造的是名为 Files、Folder、File 的 JSX 节点，渲染时由站的组件表对到 fumadocs-ui 的目录树组件。',
+      text: 'DocfirstPre 把普通围栏原样交给 CodeBlock 与 Pre，有状态点的经 Actions 把点放进标题栏。目录树引用生成的是名为 Files、Folder、File 的 JSX 节点，渲染时由站的组件表对到 fumadocs-ui 的目录树组件。',
     },
     {
       n: 14,
@@ -381,7 +381,7 @@ export const fumadocsGraph = defineSeamGraph({
       iface: '<Term def="…" href="…">词</Term>（mdxJsxTextElement，组件名默认 Term）',
       convention: true,
       via: 'code',
-      text: '插件造的是名为 Term 的行内 JSX 节点，定义与链接写成属性。两边只靠组件名对上：站的组件表里要登记 Term。这些节点接着会经过 stamp，名册里也要有 Term 的规则，否则构建时报名册外组件。',
+      text: '插件生成的是名为 Term 的行内 JSX 节点，定义与链接写成属性。两边只靠组件名对上：站的组件表里要登记 Term。这些节点接着会经过 stamp，名册里也要有 Term 的规则，否则构建时报名册外组件。',
     },
     {
       n: 17,
@@ -438,17 +438,17 @@ export const fumadocsGraph = defineSeamGraph({
       name: '轨迹核心',
       a: ['star-load', 'star-css'],
       b: ['tj-disk'],
-      iface: 'export { StarDisk } from "@godcreator/docfirst-trajectory/disk"；@import "@godcreator/docfirst-trajectory/star.css"',
+      iface: 'export { StarDisk } from "@godcreator/trajectory-disk/disk"；@import "@godcreator/trajectory-disk/star.css"',
       convention: false,
       via: 'code',
-      text: 'StarDisk 按包名从 ./disk 转出，那份产物第一行的 "use client" 才留在原处，Next 认得出客户端边界；组件收到中性输入自己建模，服务端不调轨迹核心。trajectory.css 用 @import 引入 ./star.css。',
+      text: 'StarDisk 按包名从 ./disk 再导出，那份产物第一行的 "use client" 才留在原处，Next 认得出客户端边界；组件收到中性输入自己建模，服务端不调轨迹核心。trajectory.css 用 @import 引入 ./star.css。',
     },
     {
       n: 23,
       name: '状态的类型',
       a: ['bl-nodefor'],
       b: ['pin'],
-      iface: 'import type { Status } from "@godcreator/docfirst-pin"',
+      iface: 'import type { Status } from "@godcreator/code-pin"',
       convention: false,
       via: 'code',
       text: 'nodeFor 按清单项的 status 选节点形状与状态点的颜色，这个类型从钉码核心取。这个包不调钉码核心的任何函数：核对经 workflow 的钉码编排，状态全由钉码核心判。',

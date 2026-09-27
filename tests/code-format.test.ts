@@ -1,11 +1,11 @@
 /**
- * 组件格式（`docfirst-workflow/src/code/`）的账：讲解组件源码里单独一行的块注释是记号。
+ * 组件格式（`docfirst-workflow/src/code/`）的测试：讲解组件源码里单独一行的块注释是记号。
  *   **认领**：只认站的 src/components/ 下的 .ts / .tsx / .mjs
- *   **往返**：`parse(marker(t, r))` 认回 t 与 r；里面那一截跟 mdx 的一字不差
+ *   **往返**：`parse(marker(t, r))` 认回 t 与 r；注释里的载荷跟 mdx 的一字不差
  *   **不算记号的**：JSDoc、行里还有别的代码、一行两个注释、普通注释
  *   **写错了报错**：认不出动作词、以 @@docfirst 开头、已经删了的 has、记录只写了一半
  *   **写回**：整行替换，保留缩进与行尾 \r，别的行一个字节不动
- * 再走一遍钉码编排按文件挑格式、项目装配把组件文件列进现状区、命令行照常核对与确认。
+ * 另外测钉码编排按文件挑格式、项目装配把组件文件列进现状区、命令行照常核对与确认。
  */
 import { test } from "node:test";
 import assert from "node:assert/strict";
@@ -13,8 +13,8 @@ import { mkdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import * as code from "../packages/docfirst-workflow/src/code/index.ts";
 import * as mdx from "../packages/docfirst-workflow/src/mdx/index.ts";
-import { createPinner } from "../packages/docfirst-pin/src/index.ts";
-import type { MemoRecord, Target } from "../packages/docfirst-pin/src/index.ts";
+import { createPinner } from "../packages/code-pin/src/index.ts";
+import type { MemoRecord, Target } from "../packages/code-pin/src/index.ts";
 import { createPinning, formatOf } from "../packages/docfirst-workflow/src/pinning/index.ts";
 import { setupProject } from "./cli-project.ts";
 import { NO_HISTORY } from "./repo.ts";

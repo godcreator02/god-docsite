@@ -1,13 +1,13 @@
 /**
- * 测试夹具：临时目录里起一个真 git 仓，一份代码、几篇文档，装配钉码编排。
- * 不走 loadProject——临时目录里解析不到包名；装配的零件（host 那层的读取器与旧内容来源）直接拿来用。
+ * 测试夹具：临时目录里建一个真 git 仓，一份代码、几篇文档，装配钉码编排。
+ * 不经过 loadProject——临时目录里解析不到包名；装配用的读取器与旧内容来源（project 目录那一层的）直接拿来用。
  */
 import { execFileSync } from "node:child_process";
 import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
-import { createPinner } from "../packages/docfirst-pin/src/index.ts";
-import type { History, Target } from "../packages/docfirst-pin/src/index.ts";
+import { createPinner } from "../packages/code-pin/src/index.ts";
+import type { History, Target } from "../packages/code-pin/src/index.ts";
 import { createPinning } from "../packages/docfirst-workflow/src/pinning/index.ts";
 import type { ConfirmResult, Pinning } from "../packages/docfirst-workflow/src/pinning/index.ts";
 import { createGitHistory, createReader } from "../packages/docfirst-workflow/src/project/index.ts";
@@ -43,7 +43,7 @@ export interface Repo {
   drop(rel: string): void;
   commit(message: string): void;
   statuses(doc: string, text: string): string[];
-  /** 确认一篇并把写回落盘（不带 --accept） */
+  /** 确认一篇并把写回的结果写入文件（accept 默认不带） */
   confirm(doc: string, accept?: boolean): ConfirmResult;
   teardown(): void;
 }
@@ -57,12 +57,12 @@ export interface RepoOptions {
 }
 
 /**
- * 身份与换行策略用 `-c` 现传，不落 `git config`——每条 config 都是一个子进程，
- * 而夹具在整套测试里要起二十来次。工作区一律 LF：Windows 上自动换行转换会让工作区和 blob 逐字节不同。
+ * 身份与换行策略用 `-c` 现传，不写进 `git config`——每条 config 都是一个子进程，
+ * 而夹具在整套测试里要建二十来次。工作区一律 LF：Windows 上自动换行转换会让工作区和 blob 逐字节不同。
  */
 export const SETTINGS = ["-c", "user.email=test@example.com", "-c", "user.name=test", "-c", "core.autocrlf=false"];
 
-/** 起一个临时 git 仓，代码已提交一次 */
+/** 建一个临时 git 仓，代码已提交一次 */
 export function setupRepo({ history }: RepoOptions = {}): Repo {
   const root = mkdtempSync(join(tmpdir(), "god-live-doc-"));
   run(root, ["init", "-q", "-b", "main"]);

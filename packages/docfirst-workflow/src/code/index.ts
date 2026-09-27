@@ -4,9 +4,9 @@
  * 由记号写法（`../marker/`）解析；写回整行替换，保留缩进与行尾的 \r。
  * 不解析 TypeScript：记号就是一行注释，按行认、按行写。一行里除了一个块注释还有别的代码，就不是记号。
  *
- * 这个目录只认识 `../marker/` 与 `../reference/`，不认识 mdx、钉码编排、project 与 cli（`tests/boundary.test.ts` 守着）。
+ * 这个目录只认识 `../marker/` 与 `../reference/`，不认识 mdx、钉码编排、project 与 cli（由 `tests/boundary.test.ts` 检查）。
  */
-import type { MemoRecord, Target } from "@godcreator/docfirst-pin";
+import type { MemoRecord, Target } from "@godcreator/code-pin";
 import type { Format, Reference, WrittenReference } from "../reference/index.ts";
 import { formalOf, markerErrors, parseFormal } from "../marker/index.ts";
 
@@ -27,7 +27,7 @@ export function claims(file: string): boolean {
   return file.startsWith(COMPONENTS_DIR) && EXTENSIONS.some((ext) => file.endsWith(ext));
 }
 
-/** 认出全部记号；写坏的记号一次列全再报错 */
+/** 认出全部记号；写错的记号一次列全再报错 */
 export function parse(text: string): Reference[] {
   const refs: Reference[] = [];
   const errors = markerErrors();

@@ -1,14 +1,14 @@
 /**
  * 模型层的规则测试：树提取的择优规则、卡格式的四层校验（形状 / 存在性 / 一致性 / docfirst 引用记号，
- * docfirst 一条在 trajectory-validate.test.ts 单开；跨文件的三条走 scanCards）、
- * 非根卡全部上盘（含未分道哨兵）、盘心认定（卡目录里恰好一张 type: root）、正文 inline 边求解、
- * 里程碑从根卡正文解析、扫盘空态。卡经 workflow 的卡格式换成中性输入，再交给 buildModel。
+ * docfirst 那一层在 trajectory-validate.test.ts 单独测；跨文件的三条交给 scanCards 测）、
+ * 非根卡全部画到盘上（含未分道哨兵）、盘心认定（卡目录里恰好一张 type: root）、正文 inline 边求解、
+ * 里程碑从根卡正文解析、卡目录不存在时扫描结果为空。卡经 workflow 的卡格式换成中性输入，再交给 buildModel。
  */
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { buildModel } from "@godcreator/docfirst-trajectory";
-import { dayNum, NO_DOMAIN } from "../packages/docfirst-trajectory/src/model/build.ts";
-import { RingsLayout } from "../packages/docfirst-trajectory/src/layout.ts";
+import { buildModel } from "@godcreator/trajectory-disk";
+import { dayNum, NO_DOMAIN } from "../packages/trajectory-disk/src/model/build.ts";
+import { RingsLayout } from "../packages/trajectory-disk/src/layout.ts";
 import { scanCardDir } from "@godcreator/docfirst-workflow";
 import { card, D, flatProblems, memCards, memSick, root, scanSick } from "./trajectory-helpers.ts";
 
@@ -50,7 +50,7 @@ test("支线时间不搭界共槽，搭界另开槽", () => {
     ]),
   );
   const box = new RingsLayout(m).treeBoxes[0];
-  /* 甲乙时间隔开（净空 2 天以上）复用同一条槽；丙贴着甲，只能另开 */
+  /* 甲乙时间隔开（净空 2 天以上）复用同一条槽；丙跟甲离得太近，只能另开一条 */
   assert.equal(box?.pos["cc01-支线甲"], box?.pos["cc02-支线乙隔得远"]);
   assert.notEqual(box?.pos["cc03-支线丙跟甲搭界"], box?.pos["cc01-支线甲"]);
   assert.equal(box?.slots, 3);
@@ -176,7 +176,7 @@ test("born-at 两种长度合法，坏格式报病且不上盘", () => {
 });
 
 
-/* ---------- 跨文件的三条校验：走 scanCards ---------- */
+/* ---------- 跨文件的三条校验：交给 scanCards ---------- */
 
 test("根卡多于一张：每张根卡各报一条 type 病，说明里列出全部根卡；非根卡的 parent 不再逐个比", () => {
   const specs = [
@@ -277,7 +277,7 @@ test("认主与上盘：唯一那张根卡是 model.center、不上盘；非根�
   assert.equal(m.center?.id, "pjaa");
   assert.equal(m.center?.label, "测试项目");
   assert.deepEqual(m.cards.map((c) => c.id), ["cc01-parent写错的卡", "aa01-有领域的卡", "aa02-未分道的卡"]);
-  /* 未分道哨兵：无 domain 卡归隐式组，压 domains 尾 */
+  /* 未分道哨兵：无 domain 卡归隐式组，排在 domains 末尾 */
   assert.equal(m.byId["aa02-未分道的卡"]?.domain, NO_DOMAIN);
   assert.deepEqual(m.domains, ["域一", NO_DOMAIN]);
   /* 根卡诞生早于首张卡：盘从项目诞生那天起算 */
@@ -328,7 +328,7 @@ test("字段写成别的形状报病、不替它转换：该写单个值的写�
     { path: "aa01-形状不对.md", field: "domain", value: "域一", reason: "domain 须写成单个值，不是列表" },
     { path: "aa01-形状不对.md", field: "label", value: "甲,乙", reason: "label 须写成单个值，不是列表" },
   ]);
-  /* 画得出来照样上盘：短名退到文件名，分组归未分道 */
+  /* 画得出来就照样画到盘上：短名改用文件名，分组归未分道 */
   const m = buildModel(memCards(specs));
   assert.deepEqual(m.cards.map((c) => [c.label, c.domain]), [["aa01-形状不对", NO_DOMAIN]]);
 });
@@ -359,7 +359,7 @@ test("关系只能指向盘上的卡：指向根卡、指向不存在的卡、�
       { path: "aa03-乱指.md", field: "relation", value: "aa02-坏时刻", reason: "pivots-from:: 指向的卡不在盘上：没有这张卡，或它的 born-at 写坏了" },
     ],
   );
-  /* 报病不挡上盘，指得对的那条照常成边 */
+  /* 报病不妨碍画到盘上，指得对的那条照常成边 */
   assert.deepEqual(buildModel(memCards(specs)).edges, [{ from: "aa01-甲", to: "aa03-乱指", kind: "supersede" }]);
 });
 

@@ -5,8 +5,8 @@
  * 讲解文字与示例都在 render-flow.data.mjs，机读版由 render-flow.ai.mjs 读同一份数据生成。
  */
 import type { CSSProperties, JSX, ReactNode } from 'react';
-import { CodeLines, Diff, Pane, Pill, Terminal, Timeline } from '@godcreator/docs-explain';
-import type { Role, TerminalLine, TimelineFrame, Tone } from '@godcreator/docs-explain';
+import { CodeLines, Diff, Pane, Pill, Terminal, Timeline } from '@godcreator/explainer-player';
+import type { Role, TerminalLine, TimelineFrame, Tone } from '@godcreator/explainer-player';
 import {
   chapters,
   codeLines,
@@ -252,7 +252,7 @@ function Middle({ frame }: { frame: Frame }): JSX.Element {
       );
     case 'strip':
       return (
-        <Pane title="renderAi：切掉 frontmatter" role="rose" extra={<Pill role="rose">第 1–6 行</Pill>}>
+        <Pane title="renderAi：去掉 frontmatter" role="rose" extra={<Pill role="rose">第 1–6 行</Pill>}>
           <Diff old={sourceLines.slice(0, sourceParts.blankAfterFrontmatter)} now={[]} />
         </Pane>
       );

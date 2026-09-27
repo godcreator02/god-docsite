@@ -1,10 +1,10 @@
 /**
  * 行段与整文件的比较器接上 git 那份旧内容来源，全在临时真 git 仓里跑：
- *   确认不要求先提交——脏文件、未跟踪文件都记得下，而且一次 git 都不起
+ *   确认不要求先提交——有未提交改动的文件、未跟踪文件都记得下，而且一次 git 都不运行
  *   核对：行段按 hunk 跟随、绿只认段哈希、vanished、file-missing、changed 带 diff 和旧段
  *   取不到旧内容（确认后没提交就又改了、blob 名缩写有歧义）——退回滑窗，不报错
  *   对象库问几次——内容没变不问、同一个 blob 只取一次
- *   hunk 表落盘——同一对内容下次用盘上那份，坏了报错
+ *   hunk 表存到磁盘——同一对内容下次直接用磁盘上那份，那份坏了报错
  *   跟取不到任何旧内容的比较一致——同一串改动下状态一样
  */
 import { test } from "node:test";
@@ -15,8 +15,8 @@ import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "nod
 import { createRequire, syncBuiltinESMExports } from "node:module";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
-import { blobOf, hashText } from "../packages/docfirst-pin/src/index.ts";
-import type { History } from "../packages/docfirst-pin/src/index.ts";
+import { blobOf, hashText } from "../packages/code-pin/src/index.ts";
+import type { History } from "../packages/code-pin/src/index.ts";
 import { createGitHistory } from "../packages/docfirst-workflow/src/project/index.ts";
 import { readBlob } from "../packages/docfirst-workflow/src/project/git.ts";
 import { CODE, NO_HISTORY, refLine, run, SETTINGS, setupRepo } from "./repo.ts";
@@ -26,7 +26,7 @@ const DOC = "docs/a.mdx";
 const REF = refLine({ kind: "span", file: "src/greet.ts", a: 2, b: 3 });
 const TEXT = `# 标题\n\n${REF}\n\n尾巴\n`;
 
-/** 起仓、写好文档、确认一次 */
+/** 建仓、写好文档、确认一次 */
 function confirmed(history?: History): Repo {
   const r = setupRepo({ ...(history !== undefined ? { history } : {}) });
   r.write(DOC, TEXT);
@@ -37,7 +37,7 @@ function confirmed(history?: History): Repo {
 
 const first = (r: Repo) => r.pinning.checkDoc(DOC, r.read(DOC)).items[0]!;
 
-/** 数这一段里起了几次 git：换掉 child_process 的 execFileSync，源码里的具名导入经 syncBuiltinESMExports 跟着换 */
+/** 数这一段里运行了几次 git：换掉 child_process 的 execFileSync，源码里的具名导入经 syncBuiltinESMExports 跟着换 */
 function gitCalls<T>(fn: () => T): { value: T; calls: string[][] } {
   const cp = createRequire(import.meta.url)("node:child_process") as typeof import("node:child_process");
   const orig = cp.execFileSync;
@@ -199,7 +199,7 @@ test("取旧内容：缩写不在对象库、缩写有歧义都给 null，不抛
   }
 });
 
-/** 这对内容在盘上那份 hunk 表的位置：跟 git.ts 落盘的布局一致 */
+/** 这对内容的 hunk 表在磁盘上的位置：跟 git.ts 写入时用的路径布局一致 */
 const hunkFile = (oldText: string, newText: string) => join(tmpdir(), "docfirst-cache", "hunks", `${hashText(oldText)}-${hashText(newText)}.json`);
 
 test("hunk 表按内容寻址落盘：同一对内容下次直接用盘上那份，不再 diff", () => {

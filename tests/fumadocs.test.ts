@@ -1,7 +1,7 @@
 /**
- * mdx 格式与 fumadocs 适配不接 Next 的那半：识别、树上换节点、meta 白名单、名册压平、按原文渲染。
- * 认记号与渲染在 `@godcreator/docfirst-workflow/mdx`，换节点、代码块长相、名册规则在 `@godcreator/docfirst-fumadocs`。
- * 接 fumadocs 管线的那半（loader、_markdown、页面上的状态点）由 docs-site 的站测试守。
+ * mdx 格式与 fumadocs 适配里不经过 Next 的那部分：识别、在语法树上替换节点、meta 白名单、名册压平、按原文渲染。
+ * 认记号与渲染在 `@godcreator/docfirst-workflow/mdx`，替换节点、代码块的样子、名册规则在 `@godcreator/docfirst-fumadocs`。
+ * 接入 fumadocs 管线的那部分（loader、_markdown、页面上的状态点）由 docs-site 自己的测试检查。
  */
 import { test } from "node:test";
 import assert from "node:assert/strict";
@@ -11,7 +11,7 @@ import type { Roster, TreeNode } from "../packages/docfirst-workflow/src/mdx/ind
 import * as fumadocs from "../packages/docfirst-fumadocs/src/index.ts";
 import { DOT_COLOR, applyListing, docfirstMarkdownOptions, parseMetaString, whereOf } from "../packages/docfirst-fumadocs/src/index.ts";
 import { fumadocsRoster } from "../packages/docfirst-fumadocs/src/roster.ts";
-import type { MemoRecord, Target } from "../packages/docfirst-pin/src/index.ts";
+import type { MemoRecord, Target } from "../packages/code-pin/src/index.ts";
 import type { Item, Listing, Reference } from "../packages/docfirst-workflow/src/reference/index.ts";
 
 const T: Target = { kind: "span", file: "src/greet.ts", a: 2, b: 3 };
@@ -41,7 +41,7 @@ function itemOf(over: Over): Item {
 
 const mark = (target: Target): string => mdx.marker(target, recordFor(target));
 const listingOf = (items: Item[]): Listing => ({ doc: "a.mdx", items });
-/** 把一篇 mdx 过一遍换节点，交回换出来的代码块 */
+/** 对一篇 mdx 做一遍节点替换，返回替换出来的代码块 */
 function blocksIn(text: string, items: Item[]): TreeNode[] {
   const tree = applyListing(parseTree(text), listingOf(items));
   return (tree.children ?? []).filter((n) => n.type === "code");
@@ -133,7 +133,7 @@ test("目录树：换成 fumadocs 的 Files，根是展开的文件夹、名字�
   assert.deepEqual(root.children![1]!.children!.map((n) => attrsOf(n).name), ["deep.ts"]);
   assert.deepEqual(attrsOf(root.children![2]!), { name: "util", disabled: true }, "到深度尽头没孩子的文件夹禁用");
 
-  // AI 那份的标直接打好：来源 + text 清单；stamp 看到就跳过，不去名册里找 Files
+  // 给 AI 读的那份标注直接写好：来源 + text 清单；stamp 见到已有标注就跳过，不去名册里找 Files
   assert.deepEqual(files.data!.docfirst, { source: "src/", label: "新鲜", value: names.join("\n") });
   assert.doesNotThrow(() => stamp({ type: "root", children: [files] }, {}));
   const state = { containerFlow: (box: TreeNode) => "```text\n" + box.children![0]!.value + "\n```", containerPhrasing: () => "", handle: () => "" };
@@ -235,7 +235,7 @@ test("名册：默认表压平 Note；项目的规则只用 helpers；表外组�
   walk(tree, (n) => {
     if (n.data !== undefined) marks.push(n.data);
   });
-  // Note、Tabs、Tab、Hidden 四个组件各一个标；Hidden 写在一行里，是段落底下的行内组件
+  // Note、Tabs、Tab、Hidden 四个组件各有一个标注；Hidden 写在一行里，是段落底下的行内组件
   assert.equal(marks.length, 4);
   assert.deepEqual(Object.keys(fumadocsRoster).sort(), ["File", "Files", "Folder", "Note"], "默认表：Note 加 fumadocs 的文件树三件");
   assert.equal((marks[0]!.docfirstAi as TreeNode[])[0]!.type, "blockquote", "块级 Note 变引用块");

@@ -1,5 +1,5 @@
 /**
- * 骨架：五个包都在、都能装、都出得来产物，出口按 package.json 的 exports 解析得到。
+ * 工作区结构：五个包都在、都能装、都能构建出产物，出口按 package.json 的 exports 解析得到。
  * 别的规矩（谁能依赖谁、目录方向）归 boundary.test.ts。
  */
 import { test } from "node:test";
@@ -12,11 +12,11 @@ const HERE = dirname(fileURLToPath(import.meta.url));
 const PACKAGES = join(HERE, "..", "packages");
 /** 目录名 → 包名。目录名跟包名去掉 scope 那一截同名 */
 const NAMES: Record<string, string> = {
-  "docfirst-pin": "@godcreator/docfirst-pin",
-  "docfirst-trajectory": "@godcreator/docfirst-trajectory",
+  "code-pin": "@godcreator/code-pin",
+  "trajectory-disk": "@godcreator/trajectory-disk",
   "docfirst-workflow": "@godcreator/docfirst-workflow",
   "docfirst-fumadocs": "@godcreator/docfirst-fumadocs",
-  "docs-explain": "@godcreator/docs-explain",
+  "explainer-player": "@godcreator/explainer-player",
 };
 
 // 这条检查的是版本号的形状，不是那个具体的数——把版本号写死在测试里，

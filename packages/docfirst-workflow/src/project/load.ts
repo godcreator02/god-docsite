@@ -1,7 +1,7 @@
 /**
  * 消费方项目的装配。
  * 一个项目 = 一个根目录 + 一份 docfirst.config（声明内容根、组件名册、生成物摆到哪）。
- * loadProject(root) 把这些串起来交出钉码编排；同一个根只装配一次（站构建时几十个 loader 并发调它）。
+ * loadProject(root) 把这些装配起来，返回带钉码编排的项目；同一个根只装配一次（站构建时几十个 loader 并发调它）。
  *
  * 分区按约定：内容根（`content`，默认 `content`）下 `trajectory/` 是轨迹卡、`future/` 是未来区，
  * 这两个名字固定；内容根下别的一切（目录里的、直接放在根上的）.mdx 文档都是现状区，都进 check。
@@ -11,7 +11,7 @@
 import { existsSync, mkdirSync, readFileSync, readdirSync, statSync, writeFileSync } from "node:fs";
 import { dirname, isAbsolute, join, relative, resolve, sep } from "node:path";
 import { pathToFileURL } from "node:url";
-import { createPinner } from "@godcreator/docfirst-pin";
+import { createPinner } from "@godcreator/code-pin";
 import type { Roster } from "../mdx/index.ts";
 import { codeFormat } from "../code/index.ts";
 import { createPinning } from "../pinning/index.ts";
@@ -29,7 +29,7 @@ export interface ProjectConfig {
   /**
    * 生成正本的摆放：文档身份（相对项目根、正斜杠）→ 目标数组。每个目标是相对项目根的路径（可以出根），
    * 或者 `{ to, frontmatter }`——要生成物保留 frontmatter 里的几个字段时用对象写法。
-   * render 只处理挂了映射的文档
+   * render 只处理有映射的文档
    */
   outputs?: Record<string, Array<string | OutputTarget>>;
 }
@@ -44,11 +44,11 @@ export interface Project {
   contentDir: string;
   /** 轨迹卡目录的绝对路径：内容根下的 trajectory/，不一定已经建了 */
   trajectoryDir: string;
-  /** 摆放：render 摆一趟、check 只核对。渲成什么、跟盘上怎么比、落点状态怎么定，都在它背后 */
+  /** 摆放：render 摆放一次、check 只核对。渲染成什么、跟已有文件怎么比、落点状态怎么定，都由它负责 */
   placing: Placing;
   /** 现状区里的文件：内容根下的 .mdx 文档，加上 src/components/ 下有格式认领的代码文件；相对项目根、正斜杠、排过序 */
   docs(): string[];
-  /** 这篇文档挂的摆放目标（归一化过）；没挂映射给空数组 */
+  /** 这篇文档的摆放目标（归一化过）；没有映射给空数组 */
   placements(doc: string): Placement[];
   /** 路径 → 文档身份；绝对路径按项目根算，相对路径原样收 */
   docIdOf(path: string): string;
@@ -105,7 +105,7 @@ function filesUnder(dir: string): string[] {
 /** 配置认的键 */
 const CONFIG_KEYS = ["content", "components", "outputs"];
 
-/** 配置里要改的地方，一条一句；没有就是空表。只看形状，不碰盘 */
+/** 配置里要改的地方，一条一句；没有就是空表。只检查结构，不读写文件 */
 export function configProblems(config: unknown): string[] {
   if (typeof config !== "object" || config === null) return ["docfirst.config 要 export default 一个对象"];
   const table = config as Record<string, unknown>;
@@ -168,8 +168,8 @@ async function build(root: string): Promise<Project> {
     return filesUnder(dir).map((path) => docIdOf(root, path)).filter(codeFormat.claims);
   }
 
-  // 摆放模块认得的只有这几样，先攒齐再交给它——它拿不到装配的别的部分。
-  // 后三样是真盘那份适配器：落点相对项目根，读写与建父目录都在这儿，摆放本身不碰 node:fs
+  // 摆放模块认得的只有这几样，先备齐再传给它——它拿不到装配的别的部分。
+  // 后三样是读写真实文件的适配器：落点相对项目根，读写与建父目录都在这儿，摆放本身不碰 node:fs
   const placingHost: PlacingHost = {
     pinning,
     placements: (doc) => placements[doc] ?? [],

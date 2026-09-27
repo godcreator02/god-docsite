@@ -3,7 +3,7 @@
  * 首页「一眼看懂钉码」：文档里一句话钉住 greet.ts 两行，选一种代码变化，看那句话旁边的点、源码和 check 的输出怎么变。
  * 数据与讲解文字都在 glance.data.mjs；情况按钮与说明由 CasePicker 显示。机读版由 glance.ai.mjs 读同一份数据生成。
  */
-import { CasePicker, CodeLines, Dot, Pane, Pill, Terminal } from '@godcreator/docs-explain';
+import { CasePicker, CodeLines, Dot, Pane, Pill, Terminal } from '@godcreator/explainer-player';
 import { toneOfStatus } from '../pin/tone';
 import { cases, files, marker, statusName } from './glance.data.mjs';
 

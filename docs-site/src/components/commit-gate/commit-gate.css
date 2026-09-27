@@ -1,6 +1,6 @@
 /*
  * 提交门禁讲解组件（CommitGate）这一页自己的画面：git status 的输出、check 的判定清单、红的几类、门禁那一行。
- * 外壳、控制条、卡片、终端、胶囊的样式与颜色变量（--dx-*）由 @godcreator/docs-explain 提供，
+ * 外壳、控制条、卡片、终端、胶囊的样式与颜色变量（--dx-*）由 @godcreator/explainer-player 提供，
  * 这几块都画在它的 .dx 根元素里，颜色只取那套变量，经 data-role / data-tone 给出的 --dx-c 调淡；深浅主题跟着它切换。
  */
 

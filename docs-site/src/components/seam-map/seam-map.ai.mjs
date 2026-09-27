@@ -9,7 +9,7 @@ import { pinGraph } from './inner/pin.data.mjs';
 import { trajectoryGraph } from './inner/trajectory.data.mjs';
 import { workflowGraph } from './inner/workflow.data.mjs';
 import { fumadocsGraph } from './inner/fumadocs.data.mjs';
-import { docsExplainGraph } from './inner/docs-explain.data.mjs';
+import { explainerPlayerGraph } from './inner/explainer-player.data.mjs';
 import { pluginGraph } from './inner/plugin.data.mjs';
 
 const INNER = {
@@ -17,7 +17,7 @@ const INNER = {
   trajectory: trajectoryGraph,
   workflow: workflowGraph,
   fumadocs: fumadocsGraph,
-  'docs-explain': docsExplainGraph,
+  'explainer-player': explainerPlayerGraph,
   plugin: pluginGraph,
 };
 

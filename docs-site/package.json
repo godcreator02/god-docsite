@@ -14,7 +14,7 @@
   },
   "dependencies": {
     "@godcreator/docfirst-fumadocs": "workspace:*",
-    "@godcreator/docs-explain": "workspace:*",
+    "@godcreator/explainer-player": "workspace:*",
     "@godcreator/docfirst-workflow": "workspace:*",
     "cn": "^0.3.0",
     "fumadocs-core": "16.15.14",

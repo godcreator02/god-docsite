@@ -1,9 +1,9 @@
 /**
  * 一张卡文件 → 一条记录，顺带跑单文件的校验（字段的形状、必填字段、born-at 形状、关系行与里程碑行）。
- * 跨文件的校验（根卡几张、parent 指不指向根卡、关系指不指向盘上的卡、同一身份两个文件）在 scan.ts。
+ * 跨文件的校验（根卡几张、parent 指不指向根卡、关系指不指向星轨盘上的卡、同一身份两个文件）在 scan.ts。
  */
 
-import { validBornAt } from "@godcreator/docfirst-trajectory";
+import { validBornAt } from "@godcreator/trajectory-disk";
 import {
   CARD_KEYS,
   extractMilestones,
@@ -25,13 +25,13 @@ function titleOf(id: string): string {
   return id.replace(ID_DATE_PREFIX, "");
 }
 
-/** 一个文件解析出的卡与它自己的病。不是卡（卡体系字段一个都不沾）时 card 为 null。 */
+/** 一个文件解析出的卡与它自己的病。不是卡（卡体系字段一个都没有）时 card 为 null。 */
 export interface ParsedFile {
   card: CardRecord | null;
   problems: Problem[];
 }
 
-/** 把一份卡文件的全文变成一条记录。卡体系字段（CARD_KEYS）一个都不沾的文件不是卡：card 与 problems 都回空。
+/** 把一份卡文件的全文变成一条记录。卡体系字段（CARD_KEYS）一个都没有的文件不是卡：card 与 problems 都返回空。
  * 字段写成了别的形状（单个值写成列表、列表写成单个值）报病，按没写处理，不替它转换。 */
 export function parseCardFile(id: string, path: string, text: string): ParsedFile {
   const fm: Frontmatter | null = parseFrontmatter(text);
@@ -77,7 +77,7 @@ export function parseCardFile(id: string, path: string, text: string): ParsedFil
 
   const body = stripFrontmatter(text);
   const { relations, broken } = extractRelations(body);
-  /* 行头是关系字段却写歪了：文件级病，报出来——静默吞行有过前科 */
+  /* 行头是关系字段、整行格式却不对：文件级病，要报出来——以前出过这种行被静默丢掉的问题 */
   for (const b of broken) {
     bad("relation", b.target, `${b.key}:: 后须是 [文字](卡身份.md) 形态的一行`);
   }
