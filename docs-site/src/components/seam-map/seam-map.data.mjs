@@ -15,14 +15,14 @@ const modules = [
     pkg: '@godcreator/docfirst-fumadocs',
     role: 'amber',
     outside: false,
-    blurb: '调用链从 fumadocs 或 Next 开始的部分：mdx 加载器编译页面时调的 remark 插件、机读版、页面渲染时的组件、名册规则、卡集合、星轨盘的读卡与组件。认识命令行与项目、钉码核心、轨迹核心，谁都不认识它。',
+    blurb: '调用链从 fumadocs 或 Next 开始的部分：mdx 加载器编译页面时调的 remark 插件、机读版、页面渲染时的组件、名册规则、卡集合、星轨盘的读卡与组件。认识命令行与项目、钉码核心、星轨盘，谁都不认识它。',
     caps: [
       { id: 'remark', name: 'remark 插件', ident: 'docfirstMdxOptions' },
       { id: 'markdown', name: '机读版', ident: 'markdown.ts' },
       { id: 'pre', name: '状态点与术语组件', ident: './pre · ./term' },
       { id: 'roster', name: '组件名册规则', ident: './roster' },
       { id: 'cardset', name: '卡集合', ident: 'cardSchema' },
-      { id: 'disk-load', name: '星轨盘', ident: './trajectory' },
+      { id: 'disk-load', name: '星轨盘读卡', ident: './trajectory' },
     ],
   },
   {
@@ -31,7 +31,7 @@ const modules = [
     pkg: '@godcreator/docfirst-workflow',
     role: 'emerald',
     outside: false,
-    blurb: '调用链从 docfirst 命令开始的部分：命令行、项目装配（读文件、git、生成物）、钉码编排、mdx 页面与讲解组件源码的格式、记号写法，以及 docfirst 的卡格式（读卡目录、解析与校验卡、换成星轨盘的中性输入）。认识通用包钉码核心与轨迹核心，不认识任何站的宿主。',
+    blurb: '调用链从 docfirst 命令开始的部分：命令行、项目装配（读文件、git、生成物）、钉码编排、mdx 页面与讲解组件源码的格式、记号写法，以及 docfirst 的卡格式（读卡目录、解析与校验卡、换成星轨盘的中性输入）。认识通用包钉码核心与星轨盘，不认识任何站的宿主。',
     caps: [
       { id: 'cli', name: '命令行', ident: 'docfirst' },
       { id: 'marker', name: '记号写法', ident: 'marker/' },
@@ -58,7 +58,7 @@ const modules = [
   },
   {
     id: 'trajectory',
-    name: '轨迹核心',
+    name: '星轨盘',
     pkg: '@godcreator/trajectory-disk',
     role: 'violet',
     outside: false,
@@ -168,7 +168,7 @@ const seams = [
     iface: 'DiskInput { center: { id, label, bornAt, kind, milestones } | null, cards: { id, bornAt, label, domain, kind, relations }[] }；buildModel(input) → TrajectoryModel；validBornAt(v)',
     convention: false,
     via: 'code',
-    text: 'workflow 与轨迹核心之间。轨迹核心不读文件，也不认识 docfirst 的卡怎么写：卡格式读轨迹卡目录，解析 frontmatter、关系行与里程碑，做全部校验（一个卡目录只有一张根卡、其余卡的 parent 只写根卡身份、卡里不许钉码），把画得出来的卡换成中性输入，根卡恰好一张时它是盘心。born-at 合不合格，卡格式与建模用同一个 validBornAt。命令行的 check 把病卡打印成行、计进红，docfirst trajectory 调用 buildModel 打印这张盘的主干。中性输入的形状与建模规则由轨迹核心负责，卡的写法与校验规则由卡格式负责。',
+    text: 'workflow 与星轨盘之间。星轨盘不读文件，也不认识 docfirst 的卡怎么写：卡格式读轨迹卡目录，解析 frontmatter、关系行与里程碑，做全部校验（一个卡目录只有一张根卡、其余卡的 parent 只写根卡身份、卡里不许钉码），把画得出来的卡换成中性输入，根卡恰好一张时它是盘心。born-at 合不合格，卡格式与建模用同一个 validBornAt。命令行的 check 把病卡打印成行、计进红，docfirst trajectory 调用 buildModel 打印这张盘的主干。中性输入的形状与建模规则由星轨盘负责，卡的写法与校验规则由卡格式负责。',
   },
   {
     n: 5,
@@ -178,7 +178,7 @@ const seams = [
     iface: './disk 的 StarDisk（data 收中性输入）、./star.css',
     convention: false,
     via: 'code',
-    text: 'fumadocs 适配与轨迹核心之间。./trajectory 按包名从 ./disk 再导出客户端组件 StarDisk，Next 才认得出客户端边界；./trajectory.css 引入 star.css。StarDisk 的 data 就是 loadTrajectory 交回的中性输入，组件在浏览器里自己调 buildModel。站画星轨盘只经过 fumadocs 适配，不直接依赖轨迹核心；fumadocs 适配也不从轨迹核心的主入口取任何东西。组件的形状由轨迹核心负责。',
+    text: 'fumadocs 适配与星轨盘之间。./trajectory 按包名从 ./disk 再导出客户端组件 StarDisk，Next 才认得出客户端边界；./trajectory.css 引入 star.css。StarDisk 的 data 就是 loadTrajectory 交回的中性输入，组件在浏览器里自己调 buildModel。站画星轨盘只经过 fumadocs 适配，不直接依赖星轨盘包；fumadocs 适配也不从星轨盘包的主入口取任何东西。组件的形状由星轨盘负责。',
   },
   {
     n: 6,

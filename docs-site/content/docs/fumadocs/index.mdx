@@ -51,8 +51,8 @@ full: true
 
 {/* ref file="../packages/docfirst-fumadocs/src/card-collection.ts" lines="41-46" hash="299d0dad075d" blob="bff0fc7197aa" */}
 
-**星轨盘**：`./trajectory` 的 `loadTrajectory(dir)` 读卡目录，交回星轨盘的中性输入与病卡清单（`dir` 只收绝对路径）；同一个出口再导出轨迹核心的客户端组件 `StarDisk`，组件自己建模，
-样式 `./trajectory.css` 引入轨迹核心的 `star.css`。站画星轨盘只 import 这个包，不直接依赖轨迹核心：
+**星轨盘**：`./trajectory` 的 `loadTrajectory(dir)` 读卡目录，交回星轨盘的中性输入与病卡清单（`dir` 只收绝对路径）；同一个出口再导出星轨盘包的客户端组件 `StarDisk`，组件自己建模，
+样式 `./trajectory.css` 引入星轨盘包的 `star.css`。站画星轨盘只 import 这个包，不直接依赖星轨盘包：
 
 {/* ref file="../packages/docfirst-fumadocs/src/trajectory.ts" lines="16-26" hash="6f2630939ee1" blob="127ca2597015" */}
 
@@ -128,7 +128,7 @@ React 表先展开 fumadocs 的默认表，再把 `pre` 换成 `DocfirstPre`：
 {/* ref file="src/app/site.css" lines="1-3" hash="f8f86b154171" blob="04b46bc41892" */}
 
 **`next.config.mjs`**：`turbopack.root` 设到工作区根，`node_modules` 里指向 `packages/` 的软链接才在 Turbopack 的范围里（用发布版包的站不必设）；
-`serverExternalPackages` 必须为空，这个包与轨迹核心都同时有服务端代码与客户端组件，整包外置会让 `"use client"` 失效：
+`serverExternalPackages` 必须为空，这个包与星轨盘包都同时有服务端代码与客户端组件，整包外置会让 `"use client"` 失效：
 
 {/* ref file="next.config.mjs" lines="7-28" hash="6240250ce401" blob="84889ca96ee6" */}
 
@@ -138,7 +138,7 @@ React 表先展开 fumadocs 的默认表，再把 `pre` 换成 `DocfirstPre`：
 | --- | --- |
 | workflow `@godcreator/docfirst-workflow` | `.` 的 `loadProject` 拿钉码编排与名册，`Reference`、`Item`、`Listing` 等类型；`./mdx` 的 `recognize`、`stamp`、`walk`、`langOf` 与名册类型；`./cards` 的 `scanCardDir`、`CARD_KEYS`、`cardIdFromHref` 与病卡的类型 |
 | 钉码核心 `@godcreator/code-pin`（通用包） | `Status` 类型 |
-| 轨迹核心 `@godcreator/trajectory-disk`（通用包） | `./disk` 的 `StarDisk` 与 `./star.css`，再导出给站 |
+| 星轨盘 `@godcreator/trajectory-disk`（通用包） | `./disk` 的 `StarDisk` 与 `./star.css`，再导出给站 |
 | unified、unist-util-visit | 插件类型；`remarkTrajectoryLinks` 遍历语法树 |
 | fumadocs-core、fumadocs-ui、react | processed markdown、`CodeBlock`、组件渲染；必需的 peer，用站装的那份 |
 

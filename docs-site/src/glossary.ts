@@ -83,6 +83,12 @@ export const terms: TermEntry[] = [
     href: "/docs/trajectory/flow",
   },
   {
+    term: "病卡",
+    aliases: ["报病"],
+    def: "卡格式检查时查出问题的轨迹卡：字段写错、关系指向盘外或指向根卡、卡里钉了码这类。有病但画得出来的卡照样画上星轨盘；核对时每条病算一处红，星轨盘页顶栏的「报病」数是有病的卡有几张。",
+    href: "/docs/trajectory/flow",
+  },
+  {
     term: "remark",
     def: "把 markdown 解析成语法树、允许插件改这棵树的那套工具链。这套机制接入站，就是往它的插件链上加插件。",
     href: "/docs/fumadocs",

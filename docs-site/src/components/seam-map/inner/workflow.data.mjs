@@ -5,7 +5,7 @@
  * mdx 与 code 是同一个格式接口的两份实现，颜色相同；cards 与 cli 同色：包里的目录只有 cli import cards。
  * 灰色实线框是包外的调用方、依赖与使用方的仓。
  * 目录之间的方向从线上看：marker 与 reference 只往钉码核心连，mdx 与 code 往 marker 连、不连 pinning 与 project，
- * pinning 往两个格式与钉码核心连，cards 只连 marker 与轨迹核心，cli 往下连其余各处。坐标在 workflow.layout.ts。
+ * pinning 往两个格式与钉码核心连，cards 只连 marker 与星轨盘，cli 往下连其余各处。坐标在 workflow.layout.ts。
  */
 import { defineSeamGraph } from '../graph.mjs';
 
@@ -13,7 +13,7 @@ export const workflowGraph = defineSeamGraph({
   id: 'workflow',
   title: '命令行与项目内部的目录与接缝',
   intro:
-    '命令行与项目内部接缝图：虚线框是包里的目录，project 目录按做的事分成项目装配、读文件与 git、生成物各一个框；框里的方块是它对外给的函数或类型，灰色实线框是包外的调用方、依赖与使用方的仓。mdx 格式与组件格式实现同一个格式接口，都连记号写法、不连钉码编排与 project；记号写法与引用类型只连钉码核心，钉码编排按文件挑格式、连两个格式与钉码核心；卡格式读卡目录、校验卡、换成轨迹核心的中性输入，只连记号写法与轨迹核心；命令行连其余各处。',
+    '命令行与项目内部接缝图：虚线框是包里的目录，project 目录按做的事分成项目装配、读文件与 git、生成物各一个框；框里的方块是它对外给的函数或类型，灰色实线框是包外的调用方、依赖与使用方的仓。mdx 格式与组件格式实现同一个格式接口，都连记号写法、不连钉码编排与 project；记号写法与引用类型只连钉码核心，钉码编排按文件挑格式、连两个格式与钉码核心；卡格式读卡目录、校验卡、换成星轨盘的中性输入，只连记号写法与星轨盘；命令行连其余各处。',
   frameLabel: '目录',
   modules: [
     {
@@ -23,7 +23,7 @@ export const workflowGraph = defineSeamGraph({
       role: 'emerald',
       outside: false,
       blurb:
-        'run.ts 的 main 把参数译成对装配好的项目的几次调用，打印成人读的行或一行 JSON，交回退出码；每条命令只收自己开关表里的开关。cli.ts 是可执行文件 docfirst，只转发参数与退出码。report.ts 定 check --json 的报告形状。它认识 project、cards、pinning、mdx、marker、reference 与钉码核心、轨迹核心，这个包里谁都不认识它。',
+        'run.ts 的 main 把参数译成对装配好的项目的几次调用，打印成人读的行或一行 JSON，交回退出码；每条命令只收自己开关表里的开关。cli.ts 是可执行文件 docfirst，只转发参数与退出码。report.ts 定 check --json 的报告形状。它认识 project、cards、pinning、mdx、marker、reference 与钉码核心、星轨盘，这个包里谁都不认识它。',
       caps: [
         { id: 'main', name: '命令编排', ident: 'main' },
         { id: 'report', name: '机读报告', ident: 'CheckReport' },
@@ -149,7 +149,7 @@ export const workflowGraph = defineSeamGraph({
       role: 'emerald',
       outside: false,
       blurb:
-        'docfirst 的轨迹卡怎么写、怎么校验、怎么换成星轨盘的中性输入。card-dir.ts 的 scanCardDir 读卡目录一层，目录不在就交回空集合；scan.ts 的 scanCards 用 pickCardFiles 挑出卡文件，card.ts 的 parseCardFile 解析 frontmatter、关系行与里程碑并做单文件校验，scanCards 再做跨文件校验（只有一张根卡、parent 只写根卡身份），用 card-refs.ts 查卡里不许钉码，最后交回 CardScan：中性输入加病卡。parse.ts 放卡字段表 CARD_KEYS 与从链接取卡身份的 cardIdFromHref。只 import marker 与轨迹核心；包里的目录只有 cli import 它，project 不认识它；主入口也再导出 scanCardDir 与 CardScan 等类型。',
+        'docfirst 的轨迹卡怎么写、怎么校验、怎么换成星轨盘的中性输入。card-dir.ts 的 scanCardDir 读卡目录一层，目录不在就交回空集合；scan.ts 的 scanCards 用 pickCardFiles 挑出卡文件，card.ts 的 parseCardFile 解析 frontmatter、关系行与里程碑并做单文件校验，scanCards 再做跨文件校验（只有一张根卡、parent 只写根卡身份），用 card-refs.ts 查卡里不许钉码，最后交回 CardScan：中性输入加病卡。parse.ts 放卡字段表 CARD_KEYS 与从链接取卡身份的 cardIdFromHref。只 import marker 与星轨盘；包里的目录只有 cli import 它，project 不认识它；主入口也再导出 scanCardDir 与 CardScan 等类型。',
       caps: [
         { id: 'card-dir', name: '读卡目录', ident: 'scanCardDir' },
         { id: 'card-keys', name: '卡字段与卡身份', ident: 'CARD_KEYS · cardIdFromHref' },
@@ -195,7 +195,7 @@ export const workflowGraph = defineSeamGraph({
     },
     {
       id: 'trajectory',
-      name: '轨迹核心',
+      name: '星轨盘',
       pkg: '@godcreator/trajectory-disk',
       role: null,
       outside: true,
@@ -258,7 +258,7 @@ export const workflowGraph = defineSeamGraph({
       iface: 'scanCardDir(dir) → CardScan；buildModel(scan) → TrajectoryModel；--json：{ center, cards, sick, trees }',
       convention: false,
       via: 'code',
-      text: 'docfirst trajectory 用卡格式的 scanCardDir 读项目的轨迹卡目录，把交回的中性输入交给轨迹核心的 buildModel，打印盘心、卡数与每棵树的主干，再汇总支线与孤星；--json 打印中性输入、病卡与建模得到的树。卡怎么写、怎么校验在卡格式，建模规则在轨迹核心。',
+      text: 'docfirst trajectory 用卡格式的 scanCardDir 读项目的轨迹卡目录，把交回的中性输入交给星轨盘的 buildModel，打印盘心、卡数与每棵树的主干，再汇总支线与孤星；--json 打印中性输入、病卡与建模得到的树。卡怎么写、怎么校验在卡格式，建模规则在星轨盘。',
     },
     {
       n: 6,
@@ -398,7 +398,7 @@ export const workflowGraph = defineSeamGraph({
       iface: 'CardScan = DiskInput & { sick }；DiskInput { center: { id, label, bornAt, kind, milestones } | null, cards: { id, bornAt, label, domain, kind, relations }[] }；validBornAt(v)',
       convention: false,
       via: 'code',
-      text: 'scanCards 把校验过的卡换成轨迹核心的中性输入：根卡恰好一张时它是盘心，born-at 合格的其余卡都在 cards 里，有病但画得出来的照样放进 cards。born-at 合不合格，parseCardFile 与建模用的是同一个 validBornAt。关系与里程碑的类型也从轨迹核心取。frontmatter、关系行、文件名这些 docfirst 的写法只在卡格式里，轨迹核心不读文件。',
+      text: 'scanCards 把校验过的卡换成星轨盘的中性输入：根卡恰好一张时它是盘心，born-at 合格的其余卡都在 cards 里，有病但画得出来的照样放进 cards。born-at 合不合格，parseCardFile 与建模用的是同一个 validBornAt。关系与里程碑的类型也从星轨盘取。frontmatter、关系行、文件名这些 docfirst 的写法只在卡格式里，星轨盘不读文件。',
     },
     {
       n: 20,

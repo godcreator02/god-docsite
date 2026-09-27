@@ -1,6 +1,6 @@
 /**
  * fumadocs 适配 docfirst-fumadocs 的内部接缝图：模块页 <SeamMap module="fumadocs" /> 画的就是它。
- * 框是包里的文件，方块是文件对外给的东西；灰色实线框是包外的站、fumadocs 本体、workflow、钉码核心与轨迹核心。
+ * 框是包里的文件，方块是文件对外给的东西；灰色实线框是包外的站、fumadocs 本体、workflow、钉码核心与星轨盘包。
  * 组件与它随包发的样式表合成一个框（pre.tsx 与 light.css、term.tsx 与 term.css）；index.ts 只再导出别的文件的出口，不单画成框。
  * 坐标在 fumadocs.layout.ts。
  */
@@ -10,7 +10,7 @@ export const fumadocsGraph = defineSeamGraph({
   id: 'fumadocs',
   title: 'fumadocs 适配内部的文件与接缝',
   intro:
-    'fumadocs 适配内部接缝图：虚线框是包里的文件，框里的方块是它对外给的函数、组件或样式表，灰色实线框是包外的站、fumadocs 本体、workflow、钉码核心与轨迹核心。组件和它的样式表画在同一个框里。',
+    'fumadocs 适配内部接缝图：虚线框是包里的文件，框里的方块是它对外给的函数、组件或样式表，灰色实线框是包外的站、fumadocs 本体、workflow、钉码核心与星轨盘包。组件和它的样式表画在同一个框里。',
   frameLabel: '文件',
   modules: [
     {
@@ -199,12 +199,12 @@ export const fumadocsGraph = defineSeamGraph({
     },
     {
       id: 'trajectory',
-      name: '轨迹核心',
+      name: '星轨盘包',
       pkg: '@godcreator/trajectory-disk',
       role: null,
       outside: true,
       blurb:
-        '通用包星轨盘，不认识 docfirst。星轨盘组件 StarDisk 在 ./disk，那份产物第一行是 "use client"，样式表是 ./star.css。StarDisk 的 data 收中性输入，组件在浏览器里自己调 buildModel 建模。这个包只从轨迹核心取这两样，不从主入口取任何东西。',
+        '通用包星轨盘，不认识 docfirst。星轨盘组件 StarDisk 在 ./disk，那份产物第一行是 "use client"，样式表是 ./star.css。StarDisk 的 data 收中性输入，组件在浏览器里自己调 buildModel 建模。这个包只从星轨盘包取这两样，不从主入口取任何东西。',
       caps: [{ id: 'tj-disk', name: '星轨盘组件与样式', ident: './disk · ./star.css' }],
     },
     {
@@ -214,7 +214,7 @@ export const fumadocsGraph = defineSeamGraph({
       role: 'emerald',
       outside: false,
       blurb:
-        'loadTrajectory(dir) 收卡目录的绝对路径（不是绝对路径直接报错），就是 workflow 卡格式的 scanCardDir：交回中性输入加病卡，不建模；同一个出口按包名再导出轨迹核心的 StarDisk，trajectory.css 引入轨迹核心的 star.css。站画星轨盘只 import 这个包。只 import workflow 的 ./cards，不 import 主入口。',
+        'loadTrajectory(dir) 收卡目录的绝对路径（不是绝对路径直接报错），就是 workflow 卡格式的 scanCardDir：交回中性输入加病卡，不建模；同一个出口按包名再导出星轨盘包的 StarDisk，trajectory.css 引入星轨盘包的 star.css。站画星轨盘只 import 这个包。只 import workflow 的 ./cards，不 import 主入口。',
       caps: [
         { id: 'star-load', name: '读卡与组件', ident: 'loadTrajectory · StarDisk' },
         { id: 'star-css', name: '盘的样式', ident: 'trajectory.css' },
@@ -421,7 +421,7 @@ export const fumadocsGraph = defineSeamGraph({
       iface: "import { loadTrajectory, StarDisk } from '@godcreator/docfirst-fumadocs/trajectory'；@import '@godcreator/docfirst-fumadocs/trajectory.css'",
       convention: false,
       via: 'code',
-      text: '本站的星轨整页调用 loadTrajectory 拿到中性输入加病卡，原样交给 StarDisk 的 data，顶栏由页面自己画；路由组的 disk.css 引入 trajectory.css。站不直接依赖轨迹核心。卡目录由页面用 join(process.cwd(), "content", "trajectory") 拼成绝对路径再传：目录名写死，Turbopack 才看得出只读这一个目录，不把整个项目打进服务端产物。',
+      text: '本站的星轨整页调用 loadTrajectory 拿到中性输入加病卡，原样交给 StarDisk 的 data，顶栏由页面自己画；路由组的 disk.css 引入 trajectory.css。站不直接依赖星轨盘包。卡目录由页面用 join(process.cwd(), "content", "trajectory") 拼成绝对路径再传：目录名写死，Turbopack 才看得出只读这一个目录，不把整个项目打进服务端产物。',
     },
     {
       n: 21,
@@ -435,13 +435,13 @@ export const fumadocsGraph = defineSeamGraph({
     },
     {
       n: 22,
-      name: '轨迹核心',
+      name: '星轨盘包',
       a: ['star-load', 'star-css'],
       b: ['tj-disk'],
       iface: 'export { StarDisk } from "@godcreator/trajectory-disk/disk"；@import "@godcreator/trajectory-disk/star.css"',
       convention: false,
       via: 'code',
-      text: 'StarDisk 按包名从 ./disk 再导出，那份产物第一行的 "use client" 才留在原处，Next 认得出客户端边界；组件收到中性输入自己建模，服务端不调轨迹核心。trajectory.css 用 @import 引入 ./star.css。',
+      text: 'StarDisk 按包名从 ./disk 再导出，那份产物第一行的 "use client" 才留在原处，Next 认得出客户端边界；组件收到中性输入自己建模，服务端不调星轨盘包。trajectory.css 用 @import 引入 ./star.css。',
     },
     {
       n: 23,

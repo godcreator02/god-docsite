@@ -52,7 +52,7 @@ full: true
 ### 卡格式 cards
 
 docfirst 的轨迹卡怎么写、怎么校验、怎么换成星轨盘要的中性输入，都在 `src/cards/`；星轨盘是通用包，不认识卡文件的写法，
-见[轨迹核心](/docs/trajectory)。卡的字段、关系行与校验逐条讲在[轨迹卡怎么变成星轨盘](/docs/trajectory/flow)。只有这一种卡格式，没有格式接口：
+见[星轨盘](/docs/trajectory)。卡的字段、关系行与校验逐条讲在[轨迹卡怎么变成星轨盘](/docs/trajectory/flow)。只有这一种卡格式，没有格式接口：
 
 {/* ref file="../packages/docfirst-workflow/src/cards/index.ts" lines="1-8" hash="2d12ba3f99d1" blob="a6d4f2866584" */}
 
@@ -189,7 +189,7 @@ fumadocs 自带组件的规则在 [fumadocs 适配](/docs/fumadocs)的 `./roster
 
 {/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="115-143" hash="d89e3ff00971" blob="ff2e6b7ae7d3" */}
 
-`trajectory` 不遍历文档：读卡目录、交给轨迹核心建模，打印那一张盘的树与主干；`--json` 出这张盘的输入（盘心、卡、病卡）与树。没有轨迹卡目录就以退出码 2 结束：
+`trajectory` 不遍历文档：读卡目录、交给星轨盘建模，打印那一张盘的树与主干；`--json` 出这张盘的输入（盘心、卡、病卡）与树。没有轨迹卡目录就以退出码 2 结束：
 
 {/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="251-271" hash="9d2051f516bd" blob="ff2e6b7ae7d3" */}
 
@@ -235,7 +235,7 @@ fumadocs 自带组件的规则在 [fumadocs 适配](/docs/fumadocs)的 `./roster
 | 依赖 | 用来做什么 |
 | --- | --- |
 | 钉码核心 `@godcreator/code-pin`（通用包） | `createPinner`、目标与记录的类型、细分理由的中文说法 `REASON_TEXT`、hash 与 hunk 解析 |
-| 轨迹核心 `@godcreator/trajectory-disk`（通用包） | 中性输入的类型、校验时刻的 `validBornAt`，`buildModel` 给 `docfirst trajectory` 建模 |
+| 星轨盘 `@godcreator/trajectory-disk`（通用包） | 中性输入的类型、校验时刻的 `validBornAt`，`buildModel` 给 `docfirst trajectory` 建模 |
 | unified、remark-parse、remark-mdx、remark-frontmatter | mdx 格式的语法树 |
 | `git` 命令行 | 取旧内容、算 hunk 表、查未提交改动、按 `.gitignore` 过滤；被引的文件与目录都不在 git 仓里时不启动 |
 
@@ -250,7 +250,7 @@ fumadocs 自带组件的规则在 [fumadocs 适配](/docs/fumadocs)的 `./roster
 {/* ref file="../tests/boundary.test.ts" lines="131-137" hash="d1725af384df" blob="269b4f418ee0" */}
 
 - **不判状态**：绿黄白红由[钉码核心](/docs/pin)算，这个包把磁盘、git、配置交给它，再把结果打印出来。
-- **不给盘建模、不画盘**：关系怎么连成树、主干怎么挑、盘怎么画归[轨迹核心](/docs/trajectory)；这个包只把卡文件换成它要的中性输入。
+- **不给盘建模、不画盘**：关系怎么连成树、主干怎么挑、盘怎么画归[星轨盘](/docs/trajectory)；这个包只把卡文件换成它要的中性输入。
 - **摆放不读写文件**：`placement.ts` 经 `PlacingHost` 读写落点，读写磁盘的那份实现在 `load.ts`，测试换成内存那份：
 
 {/* ref file="../packages/docfirst-workflow/src/project/placement.ts" lines="77-91" hash="90be89518ac3" blob="6dc0e3cf3ba7" */}

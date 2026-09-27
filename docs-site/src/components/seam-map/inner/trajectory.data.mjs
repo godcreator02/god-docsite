@@ -1,5 +1,5 @@
 /**
- * 轨迹核心 trajectory-disk 的内部接缝图：模块页 <SeamMap module="trajectory" /> 画的就是它。
+ * 星轨盘 trajectory-disk 的内部接缝图：模块页 <SeamMap module="trajectory" /> 画的就是它。
  * 框是包里的模块（src/model/ 目录、layout.ts 与 chains.ts、canvas/ 目录、disk.tsx 与 star.css），方块是它对外给的东西；
  * 灰色实线框是包外的调用方与 react。坐标在 trajectory.layout.ts。
  */
@@ -7,9 +7,9 @@ import { defineSeamGraph } from '../graph.mjs';
 
 export const trajectoryGraph = defineSeamGraph({
   id: 'trajectory',
-  title: '轨迹核心内部的模块与接缝',
+  title: '星轨盘内部的模块与接缝',
   intro:
-    '轨迹核心内部接缝图：虚线框是包里的模块，框里的方块是它对外给的类型、函数、组件与样式表，灰色实线框是包外的调用方与 react。轨迹核心就是星轨盘，是通用包，不认识 docfirst，只收盘心加一组卡的中性输入；docfirst 是它的一个使用者，卡文件怎么写、怎么校验在 workflow 的卡格式里。',
+    '星轨盘内部接缝图：虚线框是包里的模块，框里的方块是它对外给的类型、函数、组件与样式表，灰色实线框是包外的调用方与 react。星轨盘是通用包，不认识 docfirst，只收盘心加一组卡的中性输入；docfirst 是它的一个使用者，卡文件怎么写、怎么校验在 workflow 的卡格式里。',
   frameLabel: '模块',
   modules: [
     {
@@ -19,7 +19,7 @@ export const trajectoryGraph = defineSeamGraph({
       role: null,
       outside: true,
       blurb:
-        'workflow 的卡格式读卡目录、解析、校验，把画得出来的卡换成中性输入，校验时刻用轨迹核心的 validBornAt；命令行的 docfirst trajectory 拿这份输入调 buildModel，打印主干。',
+        'workflow 的卡格式读卡目录、解析、校验，把画得出来的卡换成中性输入，校验时刻用星轨盘的 validBornAt；命令行的 docfirst trajectory 拿这份输入调 buildModel，打印主干。',
       caps: [
         { id: 'cards', name: '卡格式', ident: 'scanCards · scanCardDir' },
         { id: 'cli', name: '命令行', ident: 'docfirst trajectory' },
