@@ -46,6 +46,6 @@ export type { DocfirstMdxOptions } from "./host.ts";
 export { buildTermIndex, findTerms } from "./glossary.ts";
 export type { TermEntry, TermIndex, TermSpan } from "./glossary.ts";
 export { remarkGlossary } from "./glossary-plugin.ts";
-export type { GlossaryFile, GlossaryOptions } from "./glossary-plugin.ts";
+export type { GlossaryOptions } from "./glossary-plugin.ts";
 export { cardSchema, remarkTrajectoryLinks } from "./card-collection.ts";
 export type { CardFrontmatter, Link, Paragraph, PhrasingContent, RemarkTrajectoryLinksOptions, Root, Text } from "./card-collection.ts";

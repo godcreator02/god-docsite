@@ -23,7 +23,7 @@ export const MILESTONE_HEADING = "里程碑";
 const EDGE_LINE = /^(supersedes|pivots-from)::[ \t]*\[[^\]\n]*\]\(([^()<>\s]*)\)[ \t]*$/;
 
 /** 行头是关系字段：匹配上但整行不合 EDGE_LINE 的，报成格式不对的行。 */
-const EDGE_HEAD = /^(supersedes|pivots-from)::/;
+export const EDGE_HEAD = /^(supersedes|pivots-from)::/;
 
 /** frontmatter 里的一条标量 / 列表起始行。 */
 const KV_LINE = /^([\w-]+):[ \t]*(.*)$/;

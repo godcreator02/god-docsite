@@ -20,7 +20,7 @@ export type { Link, Paragraph, PhrasingContent, Root, Text } from "mdast";
 // devDependency、`import type` 编译期全擦除，dts 打包时会把用到的形状原样内联进
 // 产物的 .d.mts（跟 mdast 的类型是同一个道理），消费方不需要另装这个包。
 import type { StandardSchemaV1 } from "@standard-schema/spec";
-import { CARD_KEYS, cardIdFromHref } from "@godcreator/docfirst-workflow/cards";
+import { CARD_EXT, CARD_KEYS, cardIdFromHref, EDGE_HEAD, ID_DATE_PREFIX } from "@godcreator/docfirst-workflow/cards";
 
 /* ================= cardSchema：fumadocs 卡集合的 frontmatter schema ================= */
 
@@ -44,9 +44,7 @@ export interface CardFrontmatter {
  * fumadocs-mdx 的 schema 支持传一个 `(ctx) => Schema` 工厂（ctx 带 path），
  * 用工厂形态是为了在缺 label 时能拿到文件名。对象字面量手写、不 new 任何校验库的类。 */
 export function cardSchema(ctx: { path: string; source: string }): StandardSchemaV1<unknown, CardFrontmatter> {
-  const fallbackTitle = basename(ctx.path)
-    .replace(/\.mdx?$/, "")
-    .replace(/^\d{4}-\d{2}-\d{2}-/, "");
+  const fallbackTitle = basename(ctx.path).replace(CARD_EXT, "").replace(ID_DATE_PREFIX, "");
   return {
     "~standard": {
       version: 1,
@@ -90,10 +88,6 @@ export interface RemarkTrajectoryLinksOptions {
   /** 卡页路由前缀：形如卡身份的 `.md` / `.mdx` 链接改写成 `${hrefBase}/<卡身份>`。 */
   hrefBase: string;
 }
-
-const EDGE_HEAD = /^(supersedes|pivots-from)::/;
-/** 卡文件的后缀，跟卡格式同一条：`.mdx` 与 `.md` 都是卡。 */
-const CARD_EXT = /\.mdx?$/;
 
 /** 剥完之后这个主干像不像卡身份：非空、不带路径分隔、不以 `.md` / `.mdx` 结尾、不带 `:`
  * ——值来自正文链接，`https://…` 这类协议头得挡在外面。

@@ -20,7 +20,7 @@ export const workflowPlanGraph = defineSeamGraph({
       role: 'cyan',
       outside: false,
       blurb:
-        '站那一侧，内部不动：只按包名用本包的 .、./mdx、./cards。状态的中文说法与卡格式的常量不再自己写一份，改从 . 与 ./cards 取。站构建时装配项目照旧。',
+        '站那一侧，内部不动：只按包名用本包的 .、./mdx、./cards。卡格式的常量不再自己写一份，改从 ./cards 取。站构建时装配项目照旧。',
       caps: [
         { id: 'fd-cards', name: '卡集合与读卡', ident: 'loadTrajectory · cardSchema' },
         { id: 'fd-remark', name: 'remark 插件', ident: 'loadProject · recognize · stamp' },
@@ -73,11 +73,11 @@ export const workflowPlanGraph = defineSeamGraph({
       role: 'violet',
       outside: false,
       blurb:
-        'pinning/、mdx/、code/、marker/、reference/ 这次不动，合成一个框：钉码编排按文件选格式、认引用、交给钉码核心判定、写回；mdx 页面与组件源码两种格式写死在钉码编排的表里；记号写法、引用与清单的类型照旧。只多一样：状态的中文说法挪到 reference/，命令行与 fumadocs 适配共用；组件目录 src/components 只在组件格式里写一份。',
+        'pinning/、mdx/、code/、marker/、reference/ 这次不动，合成一个框：钉码编排按文件选格式、认引用、交给钉码核心判定、写回；mdx 页面与组件源码两种格式写死在钉码编排的表里；记号写法、引用与清单的类型照旧。只多一样：组件目录 src/components 只在组件格式里写一份，装配从那里取。',
       caps: [
         { id: 'fmt', name: '两种格式', ident: 'mdxFormat · codeFormat' },
         { id: 'pn', name: '钉码编排', ident: 'checkDoc · confirmDoc' },
-        { id: 'ref', name: '引用与状态说法', ident: 'Listing · 状态的中文说法' },
+        { id: 'ref', name: '引用与清单', ident: 'Reference · Listing' },
       ],
     },
     {

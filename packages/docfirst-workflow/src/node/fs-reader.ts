@@ -8,7 +8,7 @@
 import { readdirSync, readFileSync, statSync } from "node:fs";
 import { join, resolve } from "node:path";
 import type { Reader } from "@godcreator/code-pin";
-import { git, locateDir } from "./git.ts";
+import { git, locateDir, statusEntries } from "./git.ts";
 
 /** glob 只认 * 和 ?；匹配的是名字，不是路径 */
 export function globToRegExp(glob: string): RegExp {
@@ -40,13 +40,8 @@ function ignoredUnder(root: string, dir: string): (rel: string) => boolean {
   const out = git(at.repo, ["--no-optional-locks", "status", "--porcelain", "-z", "--ignored=matching", "--untracked-files=all", ...scope]);
   const prefix = at.rel === "" ? "" : `${at.rel}/`;
   const ignored = new Set<string>();
-  const fields = out.split("\0");
-  for (let i = 0; i < fields.length; i += 1) {
-    const field = fields[i]!;
-    // 改名与复制那一条后面多跟一个原路径字段，跳过它
-    if (field[0] === "R" || field[0] === "C") i += 1;
-    if (!field.startsWith("!! ")) continue;
-    const path = field.slice(3);
+  for (const { code, path } of statusEntries(out)) {
+    if (code !== "!!") continue;
     if (prefix !== "" && path.endsWith("/") && prefix.startsWith(path)) return () => true;
     if (path.startsWith(prefix)) ignored.add(path.slice(prefix.length));
   }

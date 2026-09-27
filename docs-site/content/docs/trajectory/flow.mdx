@@ -22,7 +22,7 @@ description: content/trajectory/ 下的轨迹卡怎么被读出、校验、换�
 卡与卡之间的两种关系写在正文里，一行一条：`supersedes::`（取代）或 `pivots-from::`（转向）后面跟一条指向卡身份的标准 md 链接，wikilink 与包在 `<>` 里的目标都不认。
 行首是这两个词、整行却不合格式的，记成问题：
 
-{/* ref file="../packages/docfirst-workflow/src/cards/parse.ts" lines="22-26" hash="268b857dd194" blob="050de2f99d5a" */}
+{/* ref file="../packages/docfirst-workflow/src/cards/parse.ts" lines="22-26" hash="7cf7d2fc3fc7" blob="3e529313faaa" */}
 
 解析一张卡时把问题逐条记下，不在第一条停：字段的形状（该写单个值的写成了列表、`parent` 写成了单个值，报出来、按没写处理，不替它转换）、必填字段、`born-at` 的格式，再加格式不对的关系行；根卡另查里程碑区块里写坏的行：
 

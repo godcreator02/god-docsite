@@ -152,8 +152,8 @@ interface PickedFrontmatter {
  * 到下一条顶层键行止（块式列表、多行标量的缩进续行都跟着走）。不解析 YAML：搬的是作者写下的
  * 那几行，生成物头部长什么样作者一眼对得上。源没有 frontmatter、或字段不在，记进 missing。
  *
- * 形状跟轨迹包 `parse.ts` 的 frontmatter 扫描逐字节相同，两处**有意各留一份**：轨迹包零依赖，
- * 不 import 任何兄弟包；这几行是稳定语法的复刻，不是会一起变的逻辑。
+ * 卡格式 `cards/parse.ts` 另有一份 frontmatter 扫描，两处**有意各留一份**：这里逐行原样搬点名的字段，那边要解析出值，
+ * 相同的只有找到 frontmatter 块那几行；装配也不认识卡格式。
  */
 function pickFrontmatter(source: string, fields: string[]): PickedFrontmatter {
   const text = source.replace(/^﻿/, "").replace(/\r\n/g, "\n");

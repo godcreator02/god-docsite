@@ -15,14 +15,11 @@
  */
 import { buildTermIndex, findTerms } from "./glossary.ts";
 import type { TermEntry, TermIndex } from "./glossary.ts";
+import type { PluginFile } from "./remark-plugin.ts";
 import { walk } from "@godcreator/docfirst-workflow/mdx";
 import type { TreeNode } from "@godcreator/docfirst-workflow/mdx";
 
 /** 插件拿到的那份文件信息。跟 remark-plugin.ts 的同形，只用得上路径 */
-export interface GlossaryFile {
-  path?: string;
-}
-
 export interface GlossaryOptions {
   /** 术语表。正本是站里那份数据文件，这儿只收结果 */
   terms: readonly TermEntry[];
@@ -89,7 +86,7 @@ function splitText(value: string, index: TermIndex, name: string, taken?: Set<st
 /**
  * 建插件。索引只建一次——站构建时 loader 并发调，每篇重建一遍词表纯属浪费。
  */
-export function remarkGlossary(options: GlossaryOptions): (tree: TreeNode, file: GlossaryFile) => void {
+export function remarkGlossary(options: GlossaryOptions): (tree: TreeNode, file: PluginFile) => void {
   const index = buildTermIndex(options.terms);
   const name = options.componentName ?? "Term";
   const once = options.oncePerPage !== false;

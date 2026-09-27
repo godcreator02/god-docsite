@@ -67,15 +67,15 @@ full: true
 
 | 概念 | 现在在哪 | 归到 |
 | --- | --- | --- |
-| 状态的中文说法（新鲜、有变动……） | `cli/run.ts:39`、`fumadocs/blocks.ts:24` | `reference/`，经 `.` 出口给 fumadocs |
+| 状态的中文说法（新鲜、有变动……） | `cli/run.ts:39`、`fumadocs/blocks.ts:24` | 不合并：两处措辞不同（命令行带「等作者复核」），给不同地方用 |
 | 卡文件后缀、关系行头、身份去日期前缀 | `cards/scan.ts:17`、`cards/parse.ts:26`、`cards/card.ts:18`，fumadocs `card-collection.ts:49,94,96` 又各写一份 | `cards/`，经 `./cards` 出口给 fumadocs |
 | 解析 `git status --porcelain -z` | `project/fs-reader.ts:43`、`project/git.ts:197` | `node/git.ts` 里一个函数 |
 | 组件目录 `src/components` | `project/load.ts:95`、`code/index.ts:14` | 组件格式 |
-| `PluginFile` 与 `GlossaryFile` | fumadocs `remark-plugin.ts:11`、`glossary-plugin.ts:22` | fumadocs 里一个类型 |
+| `PluginFile` 与 `GlossaryFile` | fumadocs `remark-plugin.ts:11`、`glossary-plugin.ts:22` | 只留 `PluginFile` |
 | `Project` 类型 | `cli/run.ts:273` 用 `ReturnType` 推 | 直接 import |
 
-frontmatter 按行扫描在 `project/placement.ts:158` 与 `cards/parse.ts:71` 各有一份：动手时先对照两边要的口径，
-一样就归进 `mdx/`，不一样就各留各的，写进轨迹卡。
+frontmatter 按行扫描在 `project/placement.ts:158` 与 `cards/parse.ts:71` 各有一份，对照过口径不同：摆放逐行原样搬点名的字段，
+卡格式要解析出值，相同的只有找到 frontmatter 块那几行，装配也不认识卡格式——各留各的。
 
 ## 删掉的多余机制
 
@@ -107,9 +107,10 @@ frontmatter 按行扫描在 `project/placement.ts:158` 与 `cards/parse.ts:71` �
 
 | 出口 | 变化 |
 | --- | --- |
-| `.` | 去掉 `scanCardDir` 与卡的类型（从 `./cards` 取）；加导出状态的中文说法 |
-| `./fumadocs` | 不再再导出 `langOf` 与 `TREE_SUFFIX` |
-| `./mdx`、`./cards`、bin `docfirst` | 不变 |
+| `.` | 去掉 `scanCardDir` 与卡的类型（从 `./cards` 取） |
+| `./fumadocs` | 不再再导出 `langOf` 与 `TREE_SUFFIX`；类型 `GlossaryFile` 并进 `PluginFile` |
+| `./cards` | 加导出卡文件后缀 `CARD_EXT`、关系行头 `EDGE_HEAD`、身份的日期前缀 `ID_DATE_PREFIX` |
+| `./mdx`、bin `docfirst` | 不变 |
 
 站与插件模板都不用 `.` 的 `scanCardDir` 与 `./fumadocs` 的 `langOf`，只有本仓的三份星轨盘测试从 `.` 取 `scanCardDir`，改成从 `./cards` 取。
 升 x 是因为删了出口的名字；下游站都还没迁到 0.4，这一版它们直接迁到 0.5。

@@ -54,7 +54,7 @@ export const sourceParts = {
 
 /** 写到 ../skills/greet/SKILL.md 的生成物全文 */
 /* ref file="../packages/docfirst-workflow/src/mdx/render.ts" lines="38-55" hash="e1060d7157f7" blob="471cfd781c18" */
-/* ref file="../packages/docfirst-workflow/src/project/placement.ts" lines="139-195" hash="11618e867068" blob="d55b5cb67bc7" */
+/* ref file="../packages/docfirst-workflow/src/project/placement.ts" lines="139-195" hash="394815359e95" blob="74b93dc8706d" */
 export const outputLines = [
   '---',
   'name: greet',

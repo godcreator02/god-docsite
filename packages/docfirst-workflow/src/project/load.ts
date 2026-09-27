@@ -10,7 +10,7 @@
 import { isAbsolute, join, relative, resolve, sep } from "node:path";
 import { createPinner } from "@godcreator/code-pin";
 import type { Roster } from "../mdx/index.ts";
-import { codeFormat } from "../code/index.ts";
+import { codeFormat, COMPONENTS_DIR } from "../code/index.ts";
 import { createPinning } from "../pinning/index.ts";
 import type { Pinning } from "../pinning/index.ts";
 import { createGitHistory, createReader, filesUnder, filesUnderFollowingLinks, isDirectory, namesIn, pathExists, readText, readTextIfExists, writeText, writeTextMakingParents } from "../node/index.ts";
@@ -67,9 +67,6 @@ const isDoc = (name: string): boolean => name.endsWith(".mdx");
 
 /** 内容根下固定的两个名字：轨迹卡与未来区，都不进 check */
 const FIXED_AREAS = new Set(["trajectory", "future"]);
-
-/** 讲解组件的源码目录，相对项目根 */
-const COMPONENTS_DIR = "src/components";
 
 async function build(root: string): Promise<Project> {
   const config = await loadConfig(root);

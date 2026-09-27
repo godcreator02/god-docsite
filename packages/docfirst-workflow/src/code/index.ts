@@ -11,7 +11,7 @@ import type { Format, Reference, WrittenReference } from "../reference/index.ts"
 import { formalOf, markerErrors, parseFormal } from "../marker/index.ts";
 
 /** 组件格式认领的目录（相对项目根，也就是站目录）与扩展名 */
-const COMPONENTS_DIR = "src/components/";
+export const COMPONENTS_DIR = "src/components/";
 const EXTENSIONS = [".ts", ".tsx", ".mjs"];
 
 /** 组件里的记号外壳：块注释 */

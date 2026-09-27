@@ -15,7 +15,7 @@ import {
 import type { CardRecord, Problem } from "./types.ts";
 
 /** 卡身份的前置日期段：`<YYYY-MM-DD>-<slug>`，剥掉它剩下的就是 title。 */
-const ID_DATE_PREFIX = /^\d{4}-\d{2}-\d{2}-/;
+export const ID_DATE_PREFIX = /^\d{4}-\d{2}-\d{2}-/;
 
 /** 该写单个值的字段，与它报病时用的字段名 */
 const SCALAR_FIELDS = { "born-at": "born-at", type: "type", label: "label", domain: "domain" } as const;

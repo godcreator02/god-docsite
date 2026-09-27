@@ -194,16 +194,33 @@ export function diffHunks(oldText: string, newText: string): Hunk[] {
 export function uncommittedPaths(repo: string): Set<string> {
   const out = git(repo, ["--no-optional-locks", "status", "--porcelain", "-z", "--untracked-files=all"]);
   const paths = new Set<string>();
+  for (const { path, from } of statusEntries(out)) {
+    paths.add(path);
+    if (from !== undefined) paths.add(from);
+  }
+  return paths;
+}
+
+/** `git status --porcelain -z` 的一条：两位状态码、仓根相对路径；改名与复制那一条另带原路径 */
+export interface StatusEntry {
+  code: string;
+  path: string;
+  from?: string;
+}
+
+/** 把 `git status --porcelain -z` 的输出拆成一条条：字段以 NUL 分隔，改名与复制那一条后面多跟一个原路径字段 */
+export function statusEntries(out: string): StatusEntry[] {
+  const entries: StatusEntry[] = [];
   const fields = out.split("\0");
   for (let i = 0; i < fields.length; i += 1) {
     const field = fields[i]!;
     if (field.length < 4) continue;
-    paths.add(field.slice(3));
-    // 改名与复制那一条后面多跟一个原路径字段
-    if (/[RC]/.test(field.slice(0, 2))) {
+    const entry: StatusEntry = { code: field.slice(0, 2), path: field.slice(3) };
+    if (/[RC]/.test(entry.code)) {
       i += 1;
-      if (fields[i] !== undefined && fields[i] !== "") paths.add(fields[i]!);
+      if (fields[i] !== undefined && fields[i] !== "") entry.from = fields[i]!;
     }
+    entries.push(entry);
   }
-  return paths;
+  return entries;
 }
