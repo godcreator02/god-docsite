@@ -1,0 +1,145 @@
+---
+title: workflow 的接缝
+description: docfirst-workflow 里读盘、git、加载配置、打印这些碰外部环境的事收进一个 node/ 目录，经接口传给装配与命令行；装配、命令行各拆成说得出名字的几块；重复的概念各归一处；出口去掉重复，发 0.5.0
+full: true
+---
+
+**本页回答**：`docfirst-workflow` 现在哪里的接缝不清楚、改成什么样、每一块只认识什么、接口长什么样、怎么证明行为没变、按什么顺序做。
+
+## 验收
+
+- [ ] 包里只有 `src/node/` 与命令行入口 `src/cli/cli.ts` 碰 `node:fs`、`node:child_process`、`node:os` 与 `process`，边界测试守住
+- [ ] `loadProject(root, env)` 的读写文件、git、加载配置都经传进来的 `Environment`，缺省是 Node 实现；测试可以整套换成内存实现
+- [ ] `main(argv, io)` 的 cwd、打印经传进来的 `CliIo`，缺省读 `process`；现有命令行测试一个字不改照样通过
+- [ ] 装配拆成配置、分区、组装三块；命令行拆成参数、各命令、文案三块
+- [ ] 下面「重复的概念归到哪」逐条做完
+- [ ] 第 1 到 5 步期间 `tests/` 一个字不改，每步全绿；另用 git worktree 取改动前的提交，新旧两边对本站运行 `docfirst check --json`、`docfirst trajectory --json`、`docfirst render`，输出一致
+- [ ] 出口去掉重复，发 `docfirst-workflow` 0.5.0；插件建站依赖表跟上，下游升级反馈改成 0.5.0
+- [ ] 模块页、接缝图、边界规则图改成现状，写轨迹卡，本页删掉
+
+## 现在哪里不清楚
+
+**碰外部环境的代码散在各处，外面换不掉。**`project/load.ts` 直接读写文件、遍历目录、动态加载配置，
+`loadProject(root)` 只收一个路径，钉码核心要的读取器与旧内容来源在里面写死成 Node 版；`project/git.ts` 起子进程、写系统临时目录；
+`cards/card-dir.ts` 读卡目录；命令行 `cli/run.ts` 自己读 `process.cwd()`、直接 `console.log`，还越过项目自己建未提交改动探针。
+测试只能建真的临时 git 仓，再 `process.chdir` 过去、替换 `console.log`（`tests/cli-project.ts` 为此只能串行运行）。
+
+**两个文件什么都管。**`project/load.ts` 同时是配置校验、分区规则、文件遍历与组装；`cli/run.ts` 四百多行，参数解析、
+各命令的编排、中文文案与状态符号、打印混在一起。
+
+**同一个概念写了两份以上**，改一处另一处不会跟着变（下面有表）。
+
+**出口有重复**：`scanCardDir` 同时从 `.` 与 `./cards` 出；`langOf` 从 `./mdx` 出，`./fumadocs` 又再出一次。
+
+## 每一块只认识什么
+
+| 块 | 在哪 | 认识 | 不认识 |
+| --- | --- | --- | --- |
+| Node 实现 | 新目录 `src/node/` | `node:fs`、`node:child_process`、`node:os`，钉码核心的 `Reader` / `History` 接口 | docfirst 的任何格式：记号、mdx、卡、分区、配置的键 |
+| 记号、引用、mdx 格式、组件格式、钉码编排 | `marker/` `reference/` `mdx/` `code/` `pinning/` | 不变 | 外部环境 |
+| 装配 | `project/` | `Environment` 接口、配置的键、分区规则、钉码编排、摆放 | Node、命令行 |
+| 卡格式 | `cards/` | 卡的写法与校验，收读好的文件 | Node（列目录、读文件挪进 `node/`，`cards/index.ts` 把两边组合成 `scanCardDir`，照旧从 `./cards` 出） |
+| 命令行 | `cli/` | 装配好的项目、卡格式、星轨盘建模、`CliIo` | Node（只有 `cli.ts` 这个入口把 `process` 包成 `CliIo`） |
+| fumadocs 适配 | `fumadocs/` | 不变：只按包名用 `.`、`./mdx`、`./cards` | 命令行那一侧的目录 |
+
+方向：`node/` 在最底下，只从钉码核心取类型，包里别的目录都不认识；装配与命令行只在「缺省用 Node 实现」那一行认识它，
+这一行各自只写在一个文件里（`project/index.ts`、`cli/cli.ts`、`cards/index.ts`），边界测试点名放行，别处 import `node/` 都报错。
+
+## 接口
+
+装配要的外部环境收成一个接口，每一项都是现在 `load.ts`、`git.ts`、`uncommitted.ts` 里已经在做的事，只是从直接调用改成传进来：
+
+```ts
+interface Environment {
+  /** 项目根下的文本文件：相对项目根、正斜杠 */
+  files: {
+    /** 目录下的全部文件（递归），相对项目根；目录不在回空表 */
+    list(dir: string): string[];
+    exists(path: string): boolean;
+    read(path: string): string;
+    /** 父目录不在就建 */
+    write(path: string, text: string): void;
+  };
+  /** 钉码核心的读取器与旧内容来源，按项目根建 */
+  reader(root: string): Reader;
+  history(root: string): History;
+  /** 加载项目根下的 docfirst.config，交回 default 导出（还没校验）；找不到配置文件就报错 */
+  loadConfig(root: string): Promise<unknown>;
+  /** 一次 check 用的未提交改动探针 */
+  uncommitted(root: string): UncommittedProbe;
+}
+
+function loadProject(root: string, env?: Environment): Promise<Project>;
+```
+
+`Project` 的形状不变，只是 `read` / `write` / `docs()` / 摆放的落点读写都走 `env.files`，另加 `uncommitted()` 交回一个新探针，
+命令行不再自己建。同一个根只装配一次的缓存照旧，键加上 `env`。
+
+命令行要的外部环境：
+
+```ts
+interface CliIo {
+  cwd(): string;
+  out(line: string): void;
+  err(line: string): void;
+}
+
+function main(argv: string[], io?: CliIo): Promise<number>;
+```
+
+缺省的 `CliIo` 每次调用时才读 `process.cwd()` 与 `console`——现有测试靠 `process.chdir` 与替换 `console.log`，这样它们不用改。
+
+## 装配与命令行怎么拆
+
+| 现在 | 拆成 |
+| --- | --- |
+| `project/load.ts` | `config.ts`：配置的键、校验、归一（纯函数）；`zones.ts`：给一张文件清单，定出现状区的文档（纯函数，组件目录从组件格式取）；`load.ts`：只剩组装 |
+| `project/git.ts`、`fs-reader.ts`、`history.ts`、`uncommitted.ts` | 挪进 `node/`，`project/` 不再有它们 |
+| `cards/card-dir.ts` | 挪进 `node/`，只列目录、读文件，挑哪些是卡交回卡格式 |
+| `cli/run.ts` | `args.ts`：命令与开关表、求助、点名页解析；`commands.ts`：check / confirm / render / trajectory 各一个函数，只调用项目与卡格式、交回行与退出码；`text.ts`：状态符号、状态文案、每种结果打成哪一行 |
+
+拆的时候只挪代码、改名，逻辑不动；每个函数的名字要说得出它做什么，说不出就说明那几行还不该单独成一块。
+
+## 重复的概念归到哪
+
+| 概念 | 现在在哪 | 归到 |
+| --- | --- | --- |
+| 状态的中文说法（新鲜、有变动……） | `cli/run.ts:39`、`fumadocs/blocks.ts:24` | `reference/`，经 `.` 出口给 fumadocs |
+| 卡文件后缀、关系行头、身份去日期前缀 | `cards/scan.ts:17`、`cards/parse.ts:26`、`cards/card.ts:18`，fumadocs `card-collection.ts:49,94,96` 又各写一份 | `cards/`，经 `./cards` 出口给 fumadocs |
+| 解析 `git status --porcelain -z` | `project/fs-reader.ts:43`、`project/git.ts:197` | `node/` 里一个函数 |
+| 组件目录 `src/components` | `project/load.ts:95`、`code/index.ts:14` | 组件格式 |
+| `PluginFile` 与 `GlossaryFile` | fumadocs `remark-plugin.ts:11`、`glossary-plugin.ts:22` | fumadocs 里一个类型 |
+| `Project` 类型 | `cli/run.ts:273` 用 `ReturnType` 推 | 直接 import |
+
+frontmatter 按行扫描在 `project/placement.ts:158` 与 `cards/parse.ts:71` 各有一份：动手时先对照两边要的口径，
+一样就归进 `mdx/`，不一样就各留各的，写进轨迹卡。
+
+## 出口的变化（0.5.0）
+
+| 出口 | 变化 |
+| --- | --- |
+| `.` | 去掉 `scanCardDir` 与卡的类型（从 `./cards` 取）；加导出 `Environment`、`CliIo` 两个类型与状态的中文说法 |
+| `./mdx`、`./cards`、`./fumadocs/*` | `./fumadocs` 不再再导出 `langOf`；别的不变 |
+| bin `docfirst` | 不变 |
+
+站与插件模板都不用 `.` 的 `scanCardDir` 与 `./fumadocs` 的 `langOf`，只有本仓的三份星轨盘测试从 `.` 取 `scanCardDir`，改成从 `./cards` 取。
+升 x 是因为删了出口的名字；下游站都还没迁到 0.4，这一版它们直接迁到 0.5。
+
+## 不做的事
+
+- **不做格式接口**：mdx 页面与组件源码两种格式照旧写死在钉码编排的表里，只有这两种，没有第三个使用者
+- **fumadocs 适配内部不动**：只收它重复的那几样
+- **命令行照旧直接用星轨盘建模**打印主干：命令行是入口，认识下面所有块
+- **不改任何命令的输出与退出码**，不改配置的写法
+
+## 顺序
+
+每一步一个提交，前五步是只挪代码、不改行为，`tests/` 一个字不改：
+
+1. 建 `node/`，把 git、读取器、旧内容来源、未提交探针、读卡目录、加载配置、文件读写挪进去；`loadProject` 收 `env`，缺省 Node 实现
+2. 装配拆成 `config.ts`、`zones.ts`、`load.ts`
+3. 命令行拆成 `args.ts`、`commands.ts`、`text.ts`，`main` 收 `io`
+4. 重复的概念归一
+5. worktree 对比：新旧两边对本站运行三条命令，输出一致，证据写进轨迹卡
+6. 边界测试加新规矩（只有 `node/` 与入口碰 Node）；出口去掉重复、改那三份测试，升 0.5.0，插件建站依赖表跟上
+7. 模块页、接缝图、边界规则图改成现状，写轨迹卡，删本页；发版，改下游升级反馈
