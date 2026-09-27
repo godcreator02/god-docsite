@@ -256,7 +256,7 @@ export const serveCases = [
 
 /**
  * 各种组件在 md 里变成什么：正本里怎么写、名册里给的规则、序列化出的 md。
- * md 是用 probes/2609272230_component-md/ 的脚本按本站名册真跑出来的；自包含讲解组件那段照本站实际取回的 md。
+ * md 照「机读版示例」那一页（content/docs/fumadocs/markdown-sample.mdx）构建出的真实 md；自包含讲解组件那段照钉码页的 md。
  * @typedef {{ id: string, label: string, text: string, source: string[], ruleTitle: string, rule: string[],
  *   md: string[] | null, error: string | null }} ComponentCase
  */
@@ -306,7 +306,7 @@ export const componentCases = [
   {
     id: 'nested',
     label: '排版组件与嵌套',
-    text: '排版组件包的是作者写的正文。嵌套的组件各走各的规则：外壳 Tabs 只留子内容，每个 Tab 用 title 出一个三级标题，后面接它自己的子内容。Tab 要像这样分行写：写成一行的 Tab 是句子里的行内组件，规则照样交回标题，md 里标题和正文会粘成一行「### 命令行运行 …」。',
+    text: '排版组件包的是作者写的正文。嵌套的组件各走各的规则：外壳 Tabs 只留子内容，每个 Tab 用 title 出一个三级标题，后面接它自己的子内容。',
     source: ['<Tabs>', '  <Tab title="命令行">', '    运行 `docfirst check`。', '  </Tab>', '  <Tab title="站构建">', '    next build 时同样核对。', '  </Tab>', '</Tabs>'],
     ruleTitle: 'src/components/tabs/tabs.ai.mjs',
     rule: ['export const Tabs = "children";', '', 'export function Tab(node, { attr, heading, children }) {', '  return [heading(3, attr(node, "title") ?? "标签"), ...children()];', '}'],
@@ -316,8 +316,8 @@ export const componentCases = [
   {
     id: 'inline',
     label: '块级与行内',
-    text: '组件标签单独占几行时是块级节点，写在一行里（不管在不在句子中间）都是行内节点。规则看 h.inline：块级交回一个引用块，行内交回一段文字，不把句子拆断。序列化时 md 里的方括号前面会加一个反斜杠。',
-    source: ['<Note>', '  名字为空时照样拼出来。', '</Note>', '', '改完先 <Note>保存</Note> 再运行。'],
+    text: '组件单独占一段时是块级节点（写在一行里也算），夹在句子中间时是行内节点。规则看 h.inline：块级交回一个引用块，行内交回一段文字，不把句子拆断。序列化时 md 里的方括号前面会加一个反斜杠。',
+    source: ['<Note>名字为空时照样拼出来。</Note>', '', '改完先 <Note>保存</Note> 再运行。'],
     ruleTitle: '@godcreator/docfirst-workflow/fumadocs/roster',
     rule: [
       'Note: (node, h) =>',

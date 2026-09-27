@@ -113,11 +113,11 @@ fumadocs 的 `rehypeCode` 只保留 meta 白名单里的字段，这里换成同
 **名册**：一个组件要登记两处，`docfirst.config.mjs` 的 `components` 给机读版规则，`src/components/mdx.tsx` 给 React 组件；
 React 表先展开 fumadocs 的默认表，再把 `pre` 换成 `DocfirstPre`：
 
-{/* ref file="src/components/mdx.tsx" lines="56-63" hash="a6628dd2668d" blob="3a0ab48e1f26" */}
+{/* ref file="src/components/mdx.tsx" lines="62-69" hash="a6628dd2668d" blob="c0356e1a06bd" */}
 
 两处的名单正本是 `registry.ts`，`mdx.tsx` 的类型保证 React 表一个不多一个不少，`scripts/verify-roster.mjs` 核对它与 `components` 一致：
 
-{/* ref file="src/components/registry.ts" lines="12-13" hash="9bd925bfdbd1" blob="2a6cecb2da7e" */}
+{/* ref file="src/components/registry.ts" lines="12-13" hash="092ff6d663ec" blob="291d179d91e3" */}
 
 {/* ref file="scripts/verify-roster.mjs" lines="12-15" hash="33ef553880dc" blob="55aaeb786def" */}
 

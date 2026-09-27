@@ -9,5 +9,5 @@
  * mdx 里只写标签；控制条与零件来自 @godcreator/explainer-player。
  * 这个文件只有可擦除的类型，Node 能直接加载。
  */
-export const componentNames = ['Note', 'Tabs', 'Tab', 'Files', 'Folder', 'File', 'Term', 'PinGlance', 'PinStory', 'PinJudge', 'SeamMap', 'RenderFlow', 'RefKinds', 'SpanFollow', 'CommitGate', 'TrajectoryFlow', 'BoundaryRules', 'MdBuild', 'MdComponents', 'MdServe'] as const;
+export const componentNames = ['Note', 'Divider', 'Tabs', 'Tab', 'Files', 'Folder', 'File', 'Term', 'PinGlance', 'PinStory', 'PinJudge', 'SeamMap', 'RenderFlow', 'RefKinds', 'SpanFollow', 'CommitGate', 'TrajectoryFlow', 'BoundaryRules', 'MdBuild', 'MdComponents', 'MdServe'] as const;
 export type ComponentName = (typeof componentNames)[number];

@@ -55,6 +55,8 @@ export default {
     // 术语标注：自动标出的术语是构建时生成的，不写进源文件，命令行看不到。这条规则管作者
     // 手写的术语标注——机读版里只保留术语原词，不保留样式
     Term: "children",
+    // 只有装饰作用的分隔线，md 里整个去掉
+    Divider: "drop",
     // 自包含的讲解组件：规则读组件自己的讲解数据，把每一步、每一条写成段落
     PinGlance: pinGlance.PinGlance,
     PinStory: pin.PinStory,

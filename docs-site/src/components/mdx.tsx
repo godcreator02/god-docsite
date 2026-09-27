@@ -30,8 +30,14 @@ export function Note({ children }: { children?: ReactNode }) {
   return <div className="note">{children}</div>;
 }
 
+/** 只有装饰作用的分隔线，没有内容：名册里是 drop，md 里整个去掉 */
+export function Divider() {
+  return <hr className="my-6 border-fd-border" />;
+}
+
 const table: Record<ComponentName, MDXComponents[string]> = {
   Note,
+  Divider,
   Tabs,
   Tab,
   Files,
