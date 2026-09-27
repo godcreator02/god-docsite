@@ -1,6 +1,6 @@
 {
   "name": "@godcreator/docfirst-workflow",
-  "version": "0.3.1",
+  "version": "0.4.0",
   "author": {"name": "godcreator"},
   "type": "module",
   "description": "文档站工作流工具：命令行（核对、确认、渲染、轨迹）、项目装配与 mdx 格式，随 docfirst 线发。",

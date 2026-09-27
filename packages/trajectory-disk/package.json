@@ -1,6 +1,6 @@
 {
   "name": "@godcreator/trajectory-disk",
-  "version": "0.1.1",
+  "version": "0.1.0",
   "author": {"name": "godcreator"},
   "type": "module",
   "description": "星轨盘：把一组带时间与取代、转向关系的卡画成项目方向演变的圆盘。收盘心加一组卡的中性输入，负责建模、布局与画布；卡从哪来、怎么写归下游。`.` 入口是零 import 的建模与类型，`./disk` 是客户端组件 StarDisk。",

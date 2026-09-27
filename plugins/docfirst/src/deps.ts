@@ -15,6 +15,6 @@
  * 「表是精确号、跟工作区各包的版本对得上」检查——**这两个包升了版本号，这张表跟着改，那条测试红了就是忘了改**。
  */
 export const DOCFIRST_DEPS: Record<string, string> = {
-  "@godcreator/docfirst-workflow": "0.3.1",
+  "@godcreator/docfirst-workflow": "0.4.0",
   "@godcreator/docfirst-fumadocs": "0.1.0",
 };
