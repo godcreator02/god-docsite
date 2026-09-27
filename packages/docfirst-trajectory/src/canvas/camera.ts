@@ -2,9 +2,10 @@
  * 只认识 svg/world 两个 DOM 句柄与两个回调注入（画布尺寸、世界最大半径），
  * 不认识 RingsLayout / DateRail / place——那些是编排者的事。 */
 
-/** 盘心下移量（px）：顶部日期轨（轨线离顶 22px、刻度文字排在下方，star.css 的 --rail-y）占着画布上沿，
- * 盘取正中会跟它抢地——适配态盘心从正中往下让这么多，竖向适配预算同步扣两倍，上下边距保持对称。 */
-const RAIL_CLEAR = 30;
+/** 盘心左移量（px）：右侧那一列（竖排工具条 + 日期竖轨，刻度文字排在轨线左侧，star.css 的 .star-dock）
+ * 占着画布右边，盘取正中会跟它抢地——适配态盘心从正中往左让这么多，横向适配预算同步扣两倍，左右边距保持对称；
+ * 宽度是松的那维（盘径吃短边、短边通常是高度），这笔扣款不伤盘径。 */
+const RAIL_CLEAR = 40;
 
 /** Camera 的两处外部依赖：画布尺寸源（canvasEl 的量法）与世界最大半径（RingsLayout.maxR），
  * 都以回调注入——Camera 不持有 canvasEl 句柄、不 import RingsLayout，保持最小耦合。 */
@@ -53,16 +54,16 @@ export class Camera {
     return { w: Math.floor(w), h: Math.floor(h) };
   }
 
-  /** 适配盘径仍吃短边：全盘可见的最低缩放。竖向预算扣掉日期轨让位（见 RAIL_CLEAR）。 */
+  /** 适配盘径仍吃短边：全盘可见的最低缩放。横向预算扣掉右侧一列的让位（见 RAIL_CLEAR）。 */
   fitK(): number {
     return (
-      (Math.min(this.width, this.height - 2 * RAIL_CLEAR) / (2 * (this.deps.getMaxR() + 60))) * 0.95
+      (Math.min(this.width - 2 * RAIL_CLEAR, this.height) / (2 * (this.deps.getMaxR() + 60))) * 0.95
     );
   }
 
-  /** 适配态视图目标：盘心横向居中、竖向下移给顶部日期轨让位。fit / 回到原点共用。 */
+  /** 适配态视图目标：盘心竖直居中、横向左移给右侧一列让位。fit / 回到原点共用。 */
   fitView(): { k: number; tx: number; ty: number } {
-    return { k: this.fitK(), tx: this.width / 2, ty: this.height / 2 + RAIL_CLEAR };
+    return { k: this.fitK(), tx: this.width / 2 - RAIL_CLEAR, ty: this.height / 2 };
   }
 
   apply(): void {

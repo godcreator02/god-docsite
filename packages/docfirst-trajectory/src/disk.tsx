@@ -6,7 +6,7 @@
  * 壳管状态与 HUD：容器、工具条、图例、设置 / 帮助 / 搜索浮层、主题监听、悬停小气泡。
  * 画布是一个空 div，交给整搬的画布层（canvas/stage.ts 照 Obsidian 版 star-view 的编排：
  * buildCtx → 六层 build，每帧 place，筛选 / 主题变化 recolor，帧循环 tick）——React 不画任何 SVG，
- * `renderToStaticMarkup` 那一趟画布区就是空的。顶部日期轨由 DateRail 在壳渲的 `.star-rail` 容器里自建 DOM。
+ * `renderToStaticMarkup` 那一趟画布区就是空的。日期竖轨由 DateRail 在壳渲的 `.star-rail` 容器里自建 DOM，跟工具条排在右侧同一列。
  *
  * 交互范式：滚轮 = 空间缩放指哪缩哪 + 拖拽漫游；ctrl + 滚轮 = 时间平移；日期轨收窄窗即进透镜；
  * 回到原点两段式（相机动过先归相机、再按归窗；Esc 同链）；盘心单击开根卡、双击回全景；
@@ -381,9 +381,8 @@ export function StarDisk({ data, hrefBase, bodies }: StarDiskProps): ReactNode {
       style={{ position: "relative", width: "100%", height: "100%", overflow: "hidden", display: "flex" }}
     >
       <div ref={containerRef} className="star-main" onPointerMove={onPointerMove}>
-      {/* 画布区：空 div 交给画布层，svg 由舞台建；日期轨容器在它顶部，侧栏打开时右端让到侧栏左边 */}
+      {/* 画布区：空 div 交给画布层，svg 由舞台建 */}
       <div ref={canvasRef} className="star-canvas" aria-label={model.root?.label ?? "星轨盘"} />
-      <div ref={railRef} className="star-rail" style={openId !== null ? { right: sideWidth } : undefined} />
 
       {/* 悬停小气泡 */}
       {tip ? (
@@ -399,8 +398,10 @@ export function StarDisk({ data, hrefBase, bodies }: StarDiskProps): ReactNode {
         </div>
       ) : null}
 
-      {/* 右上竖排工具条：上簇 搜索 / 图例 / 全部标签，下簇 回到原点 / 设置 / 帮助；浮层从它左侧弹出；侧栏打开时让到侧栏左边 */}
-      <div className="star-hud-top" style={openId !== null ? { right: sideWidth + 10 } : undefined}>
+      {/* 右侧一列：上面竖排工具条，下面日期竖轨（DateRail 在 .star-rail 里自建 DOM）；侧栏打开时整列让到侧栏左边 */}
+      <div className="star-dock" style={openId !== null ? { right: sideWidth + 10 } : undefined}>
+      {/* 竖排工具条：上簇 搜索 / 图例 / 全部标签，下簇 回到原点 / 设置 / 帮助；浮层从它左侧弹出 */}
+      <div className="star-hud-top">
         <button
           type="button"
           className={`star-mbtn${popOpen === "search" ? " star-open" : ""}${searchLower ? " star-active" : ""}`}
@@ -507,6 +508,8 @@ export function StarDisk({ data, hrefBase, bodies }: StarDiskProps): ReactNode {
         {popOpen === "help" ? (
           <div className="star-pop star-help" dangerouslySetInnerHTML={{ __html: HELP_HTML }} />
         ) : null}
+      </div>
+      <div ref={railRef} className="star-rail" />
       </div>
 
       {/* 没有上盘卡：盘心与环照画，正中叠一句提示 */}

@@ -98,7 +98,7 @@ export class StarStage {
   private readonly labelArbiter = new LabelArbiter();
 
   /* ---------- 时间窗 = 引力透镜：窗即焦点带，收窄聚焦、顶满全景，恒为软聚焦零重建。
-   * 锚点 + 窗宽归顶部日期轨（DateRail）持有，本舞台只消费：窗口变更回调驱动 syncLens。 */
+   * 锚点 + 窗宽归右侧日期竖轨（DateRail）持有，本舞台只消费：窗口变更回调驱动 syncLens。 */
   private readonly dateRail: DateRail;
 
   /* ---------- 交互态 ---------- */
