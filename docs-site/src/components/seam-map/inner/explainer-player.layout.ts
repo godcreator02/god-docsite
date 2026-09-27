@@ -1,6 +1,7 @@
 /**
  * 讲解播放器内部接缝图（explainer-player.data.mjs）的坐标与图标。站的画面与机读规则、站的配置在最上，
  * 入口、react、./text 一行，三种外壳与零件一行，控制条、颜色名、图标一行，样式表与 fumadocs 在最下。
+ * 接缝图的三块在最右一列：站的接缝图文件、定义接缝图、画接缝图从上往下排；画图去样式表的线从最下面绕过去。
  */
 import {
   Atom,
@@ -12,17 +13,19 @@ import {
   ListChecks,
   ListOrdered,
   Moon,
+  Network,
   Paintbrush,
   ScrollText,
   Shapes,
   SlidersHorizontal,
   SwatchBook,
+  Waypoints,
 } from 'lucide-react';
 import { cap } from '@godcreator/explainer-player';
 import type { SeamLayout } from '@godcreator/explainer-player';
 
 export const explainerPlayerLayout: SeamLayout = {
-  view: { w: 1100, h: 734 },
+  view: { w: 1364, h: 780 },
   caps: {
     view: cap(34, 52, 286),
     ai: cap(700, 52, 120),
@@ -55,6 +58,13 @@ export const explainerPlayerLayout: SeamLayout = {
     vars: cap(578, 652, 110),
     dark: cap(742, 652, 80),
     'fd-vars': cap(832, 652, 100),
+
+    'seam-ai': cap(1112, 52, 104),
+    'seam-data': cap(1226, 52, 104),
+    'seam-text': cap(1112, 202, 104),
+    define: cap(1226, 202, 104),
+    draw: cap(1112, 352, 104),
+    'layout-type': cap(1226, 352, 104),
   },
   groups: {
     site: { x: 20, y: 20, w: 814, h: 94 },
@@ -72,6 +82,9 @@ export const explainerPlayerLayout: SeamLayout = {
     'site-css': null,
     styles: { x: 176, y: 620, w: 526, h: 94 },
     fumadocs: { x: 728, y: 620, w: 218, h: 94 },
+    'site-seam': { x: 1100, y: 20, w: 242, h: 94 },
+    'seam-graph': { x: 1100, y: 170, w: 242, h: 94 },
+    'seam-diagram': { x: 1100, y: 320, w: 242, h: 94 },
   },
   // 线只画到一端的时候，另一端（画面函数的选情况、控制条的各外壳、样式表的其余方块这类）固定高亮时照样亮
   seamPaths: {
@@ -88,6 +101,11 @@ export const explainerPlayerLayout: SeamLayout = {
     '11': { d: 'M688,676 H742', badge: [715, 676] },
     '12': { d: 'M790,100 V202', badge: [790, 150] },
     '13': { d: 'M874,76 H820', badge: [847, 76] },
+    '14': { d: 'M1164,100 V202', badge: [1164, 150] },
+    '15': { d: 'M1260,100 V202', badge: [1260, 150] },
+    '16': { d: 'M1310,100 V140 H1352 V376 H1330', badge: [1352, 260] },
+    '17': { d: 'M1180,352 V300 H1270 V250', badge: [1225, 300] },
+    '18': { d: 'M1150,400 V750 H640 V700', badge: [900, 750] },
   },
   entries: {},
   moduleIcons: {
@@ -106,6 +124,9 @@ export const explainerPlayerLayout: SeamLayout = {
     'site-css': Globe,
     styles: Paintbrush,
     fumadocs: Moon,
+    'site-seam': Globe,
+    'seam-graph': Network,
+    'seam-diagram': Waypoints,
   },
   entryIcons: {},
 };

@@ -1,7 +1,7 @@
 /**
  * 讲解播放器 explainer-player 的内部接缝图：模块页 <SeamMap module="explainer-player" /> 画的就是它。
  * 框是包里的文件，方块是文件对外给的东西；灰色实线框是包外的站、站的配置、react 与 fumadocs。
- * 坐标在 explainer-player.layout.ts。
+ * 接缝图的三块（站的接缝图文件、定义图与机读文字、画接缝图）放在最右一列。坐标在 explainer-player.layout.ts。
  */
 import { defineSeamGraph } from '@godcreator/explainer-player/seam-graph';
 
@@ -9,7 +9,7 @@ export const explainerPlayerGraph = defineSeamGraph({
   id: 'explainer-player',
   title: '讲解播放器内部的文件与接缝',
   intro:
-    '讲解播放器内部接缝图：虚线框是包里的文件，框里的方块是它对外给的组件、函数、类型或样式，灰色实线框是包外的站、站的配置、react 与 fumadocs。讲解播放器是通用包，不认识 docfirst；图里的站是本仓的文档站，它是使用者之一。',
+    '讲解播放器内部接缝图：虚线框是包里的文件，框里的方块是它对外给的组件、函数、类型或样式，灰色实线框是包外的站、站的配置、react 与 fumadocs。最右一列是接缝图：站只给每张图的内容与坐标，定义图与机读文字在 ./seam-graph，画图在主入口的 SeamDiagram。讲解播放器是通用包，不认识 docfirst；图里的站是本仓的文档站，它是使用者之一。',
   frameLabel: '文件',
   modules: [
     {
@@ -39,7 +39,7 @@ export const explainerPlayerGraph = defineSeamGraph({
       pkg: 'index.ts',
       role: 'slate',
       outside: false,
-      blurb: '包的主入口（.）：导出三种外壳、零件，以及 Role、Tone、PaneIcon 与各外壳参数的类型；控制条和 Icon 不导出。第一行是 "use client"。',
+      blurb: '包的主入口（.）：导出三种外壳、零件、画接缝图的 SeamDiagram 与 cap，以及 Role、Tone、PaneIcon、SeamLayout 与各外壳参数的类型；控制条和卡片图标不导出。第一行是 "use client"。',
       caps: [{ id: 'entry', name: '导出表', ident: '"use client"' }],
     },
     {
@@ -157,7 +157,7 @@ export const explainerPlayerGraph = defineSeamGraph({
       blurb:
         '颜色全是 .dx 上的变量，浅色一套、.dark .dx 下一套；按 data-tone、data-role 给出 --dx-c；控制条、卡片、终端、代码行的样式都在这里。系统设了减少动态时关掉全部过渡与动画。',
       caps: [
-        { id: 'classes', name: '外壳与零件样式', ident: '.dx-bar · .dx-pane · .dx-code' },
+        { id: 'classes', name: '外壳、零件与接缝图样式', ident: '.dx-bar · .dx-pane · .seam-map' },
         { id: 'attrs', name: '按属性上色', ident: '[data-tone] · [data-role]' },
         { id: 'vars', name: '颜色变量', ident: '.dx · .dark .dx' },
       ],
@@ -172,6 +172,45 @@ export const explainerPlayerGraph = defineSeamGraph({
       caps: [
         { id: 'dark', name: '深色类', ident: '.dark' },
         { id: 'fd-vars', name: '主题变量', ident: '--color-fd-*' },
+      ],
+    },
+    {
+      id: 'site-seam',
+      name: '站的接缝图',
+      pkg: 'components/seam-map/',
+      role: null,
+      outside: true,
+      blurb:
+        '站只写每张图的内容 *.data.mjs 与坐标 *.layout.ts，seam-map.tsx 按 module 属性挑出一张交给 SeamDiagram；seam-map.ai.mjs 是 SeamMap 的机读规则，挑出同一张图交给 seamGraphText。图标由站选，用站自己装的图标库。',
+      caps: [
+        { id: 'seam-ai', name: '机读规则', ident: 'seam-map.ai.mjs' },
+        { id: 'seam-data', name: '内容与坐标', ident: 'data · layout' },
+      ],
+    },
+    {
+      id: 'seam-graph',
+      name: '定义接缝图',
+      pkg: 'seam-graph.ts',
+      role: 'cyan',
+      outside: false,
+      blurb:
+        '出口 ./seam-graph。defineSeamGraph 检查 id 重复、接缝两端与入口指向不存在的能力，交回带索引的图；seamGraphText 把一张图写成一段段文字。只 import 颜色名的类型，产物零 import、不带 "use client"，单独构建。',
+      caps: [
+        { id: 'seam-text', name: '机读文字', ident: 'seamGraphText' },
+        { id: 'define', name: '定义图', ident: 'defineSeamGraph' },
+      ],
+    },
+    {
+      id: 'seam-diagram',
+      name: '画接缝图',
+      pkg: 'seam-diagram.tsx',
+      role: 'blue',
+      outside: false,
+      blurb:
+        '虚线框是模块，方块是能力，带编号的线是接缝；鼠标停在编号或模块框上浮出说明，点击固定高亮它连着谁；图例与提示文字也在这里。从主入口导出 SeamDiagram、cap 与布局类型 SeamLayout。',
+      caps: [
+        { id: 'draw', name: '画图', ident: 'SeamDiagram' },
+        { id: 'layout-type', name: '布局', ident: 'SeamLayout · cap' },
       ],
     },
   ],
@@ -200,19 +239,19 @@ export const explainerPlayerGraph = defineSeamGraph({
     {
       n: 3,
       name: '零件',
-      a: ['view'],
+      a: ['view', 'draw'],
       b: ['pill', 'code', 'pane', 'term'],
       iface: 'Pill({ tone | role, dot }) · Dot({ tone }) · CodeLines({ lines, highlight, tone, added, changed }) · Diff({ old, now }) · Pane({ title, role, icon }) · Terminal({ title, lines })',
       convention: false,
       via: 'code',
-      text: '画面里用零件拼出胶囊、状态点、代码行、新旧行对照、卡片与终端。颜色只传语气或角色色的名字；Pill 同时给 tone 和 role 直接报错。',
+      text: '画面里用零件拼出胶囊、状态点、代码行、新旧行对照、卡片与终端。颜色只传语气或角色色的名字；Pill 同时给 tone 和 role 直接报错。接缝图的说明浮层也用胶囊：两端的能力按所在模块的角色色画。',
     },
     {
       n: 4,
       name: '状态与计时',
-      a: ['stepper', 'timeline', 'case-picker'],
+      a: ['stepper', 'timeline', 'case-picker', 'draw'],
       b: ['react'],
-      iface: 'useState · useEffect（Stepper、Timeline）· useRef · useMemo（Timeline）',
+      iface: 'useState · useEffect（Stepper、Timeline）· useRef · useMemo（Timeline）· useState（SeamDiagram 的浮层与高亮）',
       convention: false,
       via: 'code',
       text: '当前项与播放状态存在 useState 里。分步在 useEffect 里每隔 interval 毫秒下一步；动画在 useEffect 里用 requestAnimationFrame 推进，当前秒数另存一份在 useRef，播放途中跳章，下一帧从新时间接着走。react 不打进产物，用站装的那一份。',
@@ -230,12 +269,12 @@ export const explainerPlayerGraph = defineSeamGraph({
     {
       n: 6,
       name: '颜色名',
-      a: ['pill', 'code', 'pane'],
+      a: ['pill', 'code', 'pane', 'define'],
       b: ['tone', 'role'],
       iface: 'Tone = "good" | "warn" | "bad" | "pending" | "info" · Role = "blue" | "violet" | … | "slate"',
       convention: false,
       via: 'code',
-      text: '零件的 tone、role 参数只收这两组名字，不收颜色值。入口把这两个类型也导出给站，站把自己的状态对到语气上，比如钉码的四种状态各用一种语气。',
+      text: '零件的 tone、role 参数只收这两组名字，不收颜色值。入口把这两个类型也导出给站，站把自己的状态对到语气上，比如钉码的四种状态各用一种语气。接缝图里模块的 role 也是 Role，定义图时写错名字，类型检查就不过。',
     },
     {
       n: 7,
@@ -306,6 +345,56 @@ export const explainerPlayerGraph = defineSeamGraph({
       convention: false,
       via: 'code',
       text: 'docfirst.config.mjs import 每个讲解组件的机读规则，排进组件名册；命令行在 Node 里加载这份配置，站读的也是它，所以机读规则不能 import React。',
+    },
+    {
+      n: 14,
+      name: '接缝图机读文字',
+      a: ['seam-ai'],
+      b: ['seam-text'],
+      iface: 'seamGraphText(graph) → string[]',
+      convention: false,
+      via: 'code',
+      text: '站的 SeamMap 机读规则按 module 属性挑出一张图，交给 seamGraphText 拿回一段段文字：图的说明与入口、每个模块一段、每条接缝一段，再各包成一个段落。./seam-graph 零 import，机读规则连同它能直接在 Node 里运行。',
+    },
+    {
+      n: 15,
+      name: '定义接缝图',
+      a: ['seam-data'],
+      b: ['define'],
+      iface: 'import { defineSeamGraph } from "@godcreator/explainer-player/seam-graph"；defineSeamGraph({ id, title, intro, frameLabel, modules, entries, seams }) → SeamGraph',
+      convention: false,
+      via: 'code',
+      text: '每张图的内容写成一个 defineSeamGraph 调用：模块、能力、入口、接缝。id 重复、两端或入口指向不存在的能力，加载时当场报错。画面与机读规则 import 的是同一份数据文件。',
+    },
+    {
+      n: 16,
+      name: '画接缝图',
+      a: ['seam-data'],
+      b: ['draw', 'layout-type'],
+      iface: '<SeamDiagram graph={graph} layout={layout} />；SeamLayout：view · caps（cap(x, y, w)）· groups · seamPaths · entries · moduleIcons · entryIcons',
+      convention: false,
+      via: 'code',
+      text: '站的每张图各写一份坐标：画布大小、能力方块（用 cap 按固定高度建）、模块框、接缝走线与编号圆点、入口箭头、图标。键都是图里的 id，缺一个画到它时报错。图标是站传进来的组件，包不 import 图标库。',
+    },
+    {
+      n: 17,
+      name: '读图',
+      a: ['draw'],
+      b: ['define'],
+      iface: 'import type { SeamGraph } from "./seam-graph.ts"',
+      convention: false,
+      via: 'code',
+      text: '画图只 import 图的类型，用 defineSeamGraph 交回的索引（能力归哪个模块、一个模块连着哪些接缝）画高亮与浮层；客户端产物里没有 ./seam-graph 的代码。',
+    },
+    {
+      n: 18,
+      name: '接缝图样式',
+      a: ['draw'],
+      b: ['classes', 'attrs', 'vars'],
+      iface: 'className="dx seam-map not-prose" · sm-frame · sm-cap · sm-seam · sm-tip；data-role → --dx-c',
+      convention: false,
+      via: 'code',
+      text: '图的根元素带 dx 与 seam-map 两个类；模块框、能力方块、接缝、编号、浮层各有 sm- 开头的类名，模块按 data-role 取角色色，高亮的接缝用 rose。样式跟外壳与零件在同一份 explain.css 里，站不另引。',
     },
   ],
 });
