@@ -26,6 +26,9 @@ const ISO_ARC = 48; // 孤星带内的槽宽（弧长）
 /** 同槽贪心装箱要留的净空（天）：树内支线分道、孤星带两处按日期分槽都用它——
  * 留够这道净空，免得前后两条挨得太近看着像一条。 */
 const LANE_GAP_DAYS = 2;
+/** 同一组（一棵树或一个领域的孤星带）同一天每多一张卡，那一天的环带加宽多少有效天：
+ * 这些卡按角度从当天的环往内排成斜排，一张退一级，不叠在同一个环上。 */
+const CROWD_STEP_EFF = 1.5;
 /** 时间轴环带世界深度定死（外锚定）：不管数据深浅、节点多少，day0 到 dayMax 恒拉伸填满
  * 这段半径——盘是固定仪表盘，数据拉伸填满、不撑深度。每天步长 radPerEff 是实例导出量
  * （buildEff 末尾算，= AXIS_SPAN / effTotal）。 */
@@ -218,6 +221,8 @@ export class RingsLayout {
    * 边环）也由它出——位置模型只此一张表，输入设备只是驱动方式不同；不另设幅度
    * 减半的「穿梭域」，与显示轴脱钩的第二张标度会让滚轮过空窗一格飞几十天。 */
   private effSegs: EffSeg[] = [];
+  /** 每天最挤的那一组有几张卡：buildEff 建表时算，bake 排斜排时用。 */
+  private crowd = new Map<number, number>();
 
   /* ---------- 布局产物 ---------- */
   maxR = 0;
@@ -293,24 +298,62 @@ export class RingsLayout {
     );
   }
 
-  /** 建折算表：相邻两个有记录的日子空档超过阈值的中段走对称双半段对数，两端各留呼吸带。
+  /** 卡所在的组：树按序号、孤星按领域——同组的卡在盘上角度挨着，同一天的才会叠在一起。 */
+  private groupKeys(): Map<string, string> {
+    const keys = new Map<string, string>();
+    this.model.trees.forEach((t, i) => {
+      for (const id of t.ids) keys.set(id, `tree:${i}`);
+    });
+    for (const c of this.model.isolated) keys.set(c.id, `iso:${c.domain}`);
+    return keys;
+  }
+
+  /** 每天最挤的那一组有几张卡（没卡的日子不在表里）。 */
+  private crowdByDay(): Map<number, number> {
+    const keys = this.groupKeys();
+    const perGroupDay = new Map<string, number>();
+    const crowd = new Map<number, number>();
+    for (const c of this.model.cards) {
+      const d = dayNum(c.bornAt);
+      const k = `${keys.get(c.id)}|${d}`;
+      const n = (perGroupDay.get(k) ?? 0) + 1;
+      perGroupDay.set(k, n);
+      crowd.set(d, Math.max(crowd.get(d) ?? 0, n));
+    }
+    return crowd;
+  }
+
+  /** 一天的环带宽（有效天）：它与前一天之间那一段，最挤的组每多一张卡加宽 CROWD_STEP_EFF。 */
+  private dayBandEff(d: number): number {
+    return 1 + CROWD_STEP_EFF * Math.max(0, (this.crowd.get(d) ?? 1) - 1);
+  }
+
+  /** 建折算表：相邻两个有记录的日子空档超过阈值的中段走对称双半段对数，两端各留呼吸带；
+   * 有卡那天之前的一天按 dayBandEff 加宽，给同组同日的卡留出斜排的位置。
    * 表从 day0（含根卡诞生日）起建：根卡早于第一张卡时，day0 落在表外会折出负的有效天数，环掉进盘心。 */
   private buildEff(): void {
+    this.crowd = this.crowdByDay();
     const cardDays = this.model.cards.map((c) => dayNum(c.bornAt));
     const days = [...new Set([this.model.day0, ...cardDays])].sort((a, b) => a - b);
     const amp = this.logAmp();
     const segs: EffSeg[] = [];
     let e = 0;
-    const lin = (d0: number, len: number): void => {
-      segs.push({ d0, e0: e, k: 1 });
-      e += len;
+    const lin = (d0: number, len: number, k = 1): void => {
+      if (len <= 0) return;
+      segs.push({ d0, e0: e, k });
+      e += len * k;
+    };
+    /* 从 from 到有卡的 cur（两者至少隔一天）：前面 1:1，最后一天按 cur 的环带宽 */
+    const linTo = (from: number, cur: number): void => {
+      lin(from, cur - 1 - from);
+      lin(cur - 1, 1, this.dayBandEff(cur));
     };
     for (let i = 1; i < days.length; i++) {
       const cur = days[i] as number;
       const prev = days[i - 1] as number;
       const gap = cur - prev;
       if (gap <= this.gapFree) {
-        lin(prev, gap);
+        linTo(prev, cur);
         continue;
       }
       const h = this.gapFree / 2;
@@ -329,7 +372,7 @@ export class RingsLayout {
         eEnd: e + halfEff,
       });
       e += halfEff;
-      lin(cur - h, h);
+      linTo(cur - h, cur);
     }
     /* 尾段开放 1:1（空态恒等） */
     segs.push({ d0: days[days.length - 1] as number, e0: e, k: 1 });
@@ -424,7 +467,12 @@ export class RingsLayout {
   /** 外锚定映射：最新环恒落 hubR + AXIS_SPAN（R_LATEST），day0 方向按有效天数差往回退——
    * effTotal = 0（单日盘 / 空盘）时退量为 0，全部环自然坍缩到 R_LATEST，不用特例分支。 */
   radiusDay(n: number): number {
-    return this.hubR + AXIS_SPAN - (this.effTotal - this.dayEff(n)) * this.radPerEff;
+    return this.radiusOfEff(this.dayEff(n));
+  }
+
+  /** 有效天数到线性态半径（radiusDay 的后半段，斜排直接按有效天数定半径时用）。 */
+  private radiusOfEff(e: number): number {
+    return this.hubR + AXIS_SPAN - (this.effTotal - e) * this.radPerEff;
   }
 
   /** radiusDay 的逆：radPerEff = 0（单日盘 / 空盘）时直接返回 dayMax 短路，防 NaN 灌进
@@ -656,7 +704,36 @@ export class RingsLayout {
         });
       }
     }
+    this.staggerSameDay();
     this.maxR = this.radiusDay(dayMax) + 50;
+  }
+
+  /** 同组同一天的卡排成斜排：按角度从小到大，第一张留在当天的环上，后面的依次往内退一级，
+   * 一级 = 当天环带宽 / 当天最挤那组的卡数，最里一张也不越过前一天的环。
+   * 树扇环的内缘跟着退到最里那张。 */
+  private staggerSameDay(): void {
+    const keys = this.groupKeys();
+    const byGroupDay = new Map<string, string[]>();
+    for (const c of this.model.cards) {
+      const k = `${keys.get(c.id)}|${dayNum(c.bornAt)}`;
+      byGroupDay.set(k, [...(byGroupDay.get(k) ?? []), c.id]);
+    }
+    const angleOf = (id: string): number => {
+      const p = this.places.get(id) as CardPlace;
+      return p.angBase + p.spreadOff;
+    };
+    for (const ids of byGroupDay.values()) {
+      if (ids.length < 2) continue;
+      const d = dayNum((this.model.byId[ids[0] as string] as Card).bornAt);
+      const step = this.dayBandEff(d) / (this.crowd.get(d) as number);
+      ids.sort((a, b) => angleOf(a) - angleOf(b) || a.localeCompare(b));
+      ids.forEach((id, level) => {
+        (this.places.get(id) as CardPlace).rLin = this.radiusOfEff(this.dayEff(d) - level * step);
+      });
+    }
+    for (const b of this.treeBoxes) {
+      b.rMin = Math.min(...b.tree.ids.map((id) => (this.places.get(id) as CardPlace).rLin));
+    }
   }
 
   /* ================= 鱼眼映射：r' = g(r) 解析闭式 ================= */
