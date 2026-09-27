@@ -17,12 +17,12 @@ export const terms: TermEntry[] = [
     term: "引用",
     aliases: ["reference"],
     def: "文档里一句论断跟一段真实源码之间的绑定。代码变了，这句话旁边就变色——文档跟代码不符会当场看出来。",
-    href: "/docs/pin/judge",
+    href: "/docs/pin/markers",
   },
   {
     term: "记号",
     def: "代表一条引用、单独占一行的注释，写在文档页面里，也可以写在讲解组件的源码里。人手写时只写目标属性，是未确认；确认时在同一行添上记录属性。",
-    href: "/docs/pin/targets",
+    href: "/docs/pin/markers",
   },
   {
     term: "投影",

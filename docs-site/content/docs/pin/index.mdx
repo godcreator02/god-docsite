@@ -20,8 +20,8 @@ full: true
 {/* ref file="../packages/docfirst-pin/src/pinner.ts" lines="16-25" hash="b775aac011bd" blob="89c8a0c744fd" */}
 
 **比较器** `compare.ts` 是纯函数：四种目标各自怎么判新鲜、确认时记什么。行段按什么顺序判、取不到旧内容时怎么降级，
-见[判定](/docs/pin/judge)；四种目标各钉哪种话，见[四类引用](/docs/pin/targets)；旧内容与 hunk 表怎么从 git 来，
-见[git 那一侧](/docs/pin/git)。
+见[钉码状态](/docs/pin/judge)；四种目标各钉哪种话，见[四种引用](/docs/pin/targets)；旧内容与 hunk 表怎么从 git 来，
+见[行段跟随](/docs/pin/git)。
 
 **归一化**只做三件事：换行统一成 LF、去每行行尾空白、去掉末尾空行。展示和算 `hash` 用同一个函数，记号上的 hash 取前 12 位：
 
