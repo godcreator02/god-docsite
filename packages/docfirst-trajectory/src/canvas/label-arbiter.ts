@@ -30,14 +30,17 @@ export class LabelArbiter {
   }
 
   /** 拥挤仲裁：12 点竖线上的注记（空窗起止 / 周月环 / 年环 / 里程碑）按调用方排好的优先级
-   * 贪心占位，屏幕间距不足 14px 的后来者让隐。 */
+   * 贪心占位，屏幕间距不足 14px 的后来者让隐；留下来的调它的 onShown。 */
   arbitrate(claims: LabelClaim[], pxToWorld: number): void {
     const taken: number[] = [];
     const minGap = 14 * pxToWorld;
     for (const c of claims) {
       const ok = !taken.some((y) => Math.abs(y - c.r) < minGap);
       c.label.style.display = ok ? "" : "none";
-      if (ok) taken.push(c.r);
+      if (ok) {
+        taken.push(c.r);
+        c.onShown?.();
+      }
     }
   }
 

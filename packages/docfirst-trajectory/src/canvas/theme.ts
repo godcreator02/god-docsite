@@ -23,7 +23,7 @@ export interface Theme {
   nodeStroke: string;
   /** 盘心填色：跟盘面底色一样（CSS 变量，不进 mix()） */
   hubFill: string;
-  /** 盘心描边：要进 mix() 混端点警示色，只能是 hex */
+  /** 盘心根节点的描边 */
   hubStroke: string;
   /** 盘心正中的根节点 */
   hubRoot: string;

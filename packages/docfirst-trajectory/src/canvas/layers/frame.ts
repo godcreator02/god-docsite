@@ -23,6 +23,8 @@ export interface LabelClaim {
   r: number;
   prio: number;
   label: SVGElement;
+  /** 仲裁后这条标签确实显示时调用（嵌在环里的标签在这里把环断开） */
+  onShown?: () => void;
 }
 
 /** 节点标签拥挤仲裁的一次报名（全景密度兜底，与 12 点注记仲裁分池）。 */

@@ -10,37 +10,40 @@
 
 import { monthGate, smoothstep } from "../../layout.ts";
 import { formatDay } from "../../model.ts";
-import { el, text } from "../node-dom.ts";
+import { el } from "../node-dom.ts";
+import { RingLabel } from "../ring-label.ts";
 import type { BuildCtx, FrameCtx, StarLayer } from "./frame.ts";
 
-/** 周 / 月背景环。 */
+/** 日期标签的屏幕字号（px）：周月环 / 最新环 / 焦点带边环一档，年份大一号。 */
+const DATE_PX = 9;
+const YEAR_PX = 10.5;
+
+/** 环的公共属性：线宽走 non-scaling-stroke，屏幕像素恒定。 */
+const ringAttrs = (cls: string, width: number): Record<string, string | number> => ({
+  class: cls,
+  "stroke-width": width,
+  "vector-effect": "non-scaling-stroke",
+});
+
+/** 周 / 月背景环（日期嵌在环里）。 */
 interface RingEl {
   d: number;
   rLin: number;
   isMonth: boolean;
-  circle: SVGElement;
-  label: SVGElement;
+  rl: RingLabel;
 }
 
-/** 年环：跨年主结构线。 */
+/** 年环：跨年主结构线（年份嵌在环里）。 */
 interface YearEl {
   d: number;
   rLin: number;
-  circle: SVGElement;
-  label: SVGElement;
+  rl: RingLabel;
 }
 
 /** 最新环：dayMax 那天的环，全景态的时间外缘标记。 */
 interface LatestEl {
   rLin: number;
-  circle: SVGElement;
-  label: SVGElement;
-}
-
-/** 焦点带边环（内 / 外各一）：鱼眼态专属，当天日期标签挂 12 点。 */
-interface BandEdge {
-  circle: SVGElement;
-  label: SVGElement;
+  rl: RingLabel;
 }
 
 export class AxisLayer implements StarLayer {
@@ -48,7 +51,8 @@ export class AxisLayer implements StarLayer {
   private ringEls: RingEl[] = [];
   private yearEls: YearEl[] = [];
   private latestEl: LatestEl | null = null;
-  private bandEdges: BandEdge[] = [];
+  /** 焦点带边环（内 / 外各一）：鱼眼态专属，当天日期嵌在环里 */
+  private bandEdges: RingLabel[] = [];
   /** 建构期注入的只读引用，buildRest()/rebake() 在下一轮数据重建前都有效
    * （layout 实例原地 configure，不随 rebake 换引用）。 */
   private ctx!: BuildCtx;
@@ -84,21 +88,9 @@ export class AxisLayer implements StarLayer {
       if (!isMonth && gaps.some((b) => d > b.d0 && d < b.d1)) continue;
       /* 恰好落在 dayMax 的周环让位给最新环（月环是格网身份，撞上也保留） */
       if (!isMonth && d === dayMax) continue;
-      const circle = el(
-        "circle",
-        {
-          cx: 0,
-          cy: 0,
-          r: 0,
-          fill: "none",
-          class: isMonth ? "ringm" : "ringc",
-          "stroke-width": 1,
-          "vector-effect": "non-scaling-stroke",
-        },
-        this.ctx.world,
-      );
-      const label = text(0, 0, formatDay(d), "dl", {}, this.ctx.world);
-      this.ringEls.push({ d, rLin: layout.radiusDay(d), isMonth, circle, label });
+      const rl = new RingLabel(this.ctx.defs, this.ctx.world, ringAttrs(isMonth ? "ringm" : "ringc", 1), "dl", DATE_PX);
+      rl.setText(formatDay(d));
+      this.ringEls.push({ d, rLin: layout.radiusDay(d), isMonth, rl });
     }
   }
 
@@ -111,21 +103,9 @@ export class AxisLayer implements StarLayer {
     const y1 = new Date(dayMax * 86400000).getUTCFullYear();
     for (let y = y0; y <= y1; y++) {
       const d = Date.parse(`${y}-01-01T00:00:00Z`) / 86400000;
-      const circle = el(
-        "circle",
-        {
-          cx: 0,
-          cy: 0,
-          r: 0,
-          fill: "none",
-          class: "ringy",
-          "stroke-width": 1.2,
-          "vector-effect": "non-scaling-stroke",
-        },
-        this.ctx.world,
-      );
-      const label = text(0, 0, String(y), "yl", {}, this.ctx.world);
-      this.yearEls.push({ d, rLin: layout.radiusDay(d), circle, label });
+      const rl = new RingLabel(this.ctx.defs, this.ctx.world, ringAttrs("ringy", 1.2), "yl", YEAR_PX);
+      rl.setText(String(y));
+      this.yearEls.push({ d, rLin: layout.radiusDay(d), rl });
     }
   }
 
@@ -134,43 +114,19 @@ export class AxisLayer implements StarLayer {
   private buildLatest(): void {
     if (!this.ctx.model.cards.length) return;
     const { dayMax } = this.ctx.model;
-    const circle = el(
-      "circle",
-      {
-        cx: 0,
-        cy: 0,
-        r: 0,
-        fill: "none",
-        class: "ringl",
-        "stroke-width": 1.2,
-        "vector-effect": "non-scaling-stroke",
-      },
-      this.ctx.world,
-    );
-    const label = text(0, 0, formatDay(dayMax), "dl", {}, this.ctx.world);
-    this.latestEl = { rLin: this.ctx.layout.radiusDay(dayMax), circle, label };
+    const rl = new RingLabel(this.ctx.defs, this.ctx.world, ringAttrs("ringl", 1.2), "dl", DATE_PX);
+    rl.setText(formatDay(dayMax));
+    this.latestEl = { rLin: this.ctx.layout.radiusDay(dayMax), rl };
   }
 
   /** 焦点带边环：内 / 外两条细实线，给焦点带描出窗口边界；
-   * 当天日期标签挂 12 点（鱼眼态的主角标签，盘心不再背日期），显隐与日期归 placeBandEdges。 */
+   * 当天日期嵌在环里（鱼眼态的主角标签，盘心不再背日期），显隐与日期归 placeBandEdges。 */
   private buildBandEdges(): void {
-    this.bandEdges = [0, 1].map(() => ({
-      circle: el(
-        "circle",
-        {
-          cx: 0,
-          cy: 0,
-          r: 0,
-          fill: "none",
-          class: "ringb",
-          "stroke-width": 1,
-          "vector-effect": "non-scaling-stroke",
-          opacity: 0,
-        },
-        this.ctx.world,
-      ),
-      label: text(0, 0, "", "dl", {}, this.ctx.world),
-    }));
+    this.bandEdges = [0, 1].map(() => {
+      const rl = new RingLabel(this.ctx.defs, this.ctx.world, ringAttrs("ringb", 1), "dl", DATE_PX);
+      rl.setRingOpacity(0);
+      return rl;
+    });
   }
 
   /** 世界尺度参数变更（rebake）重烘焙：day0/dayMax 集合不变，变的只是 layout 的
@@ -220,7 +176,7 @@ export class AxisLayer implements StarLayer {
     for (const ring of this.ringEls) {
       const r2 = layout.displayRadius(ring.rLin);
       const mag = layout.mag(ring.rLin);
-      ring.circle.setAttribute("r", String(r2));
+      ring.rl.place(r2, r2, pxToWorld);
       const t = Math.min(1, Math.max(0, (mag - 0.3) / 0.4));
       /* 缩放门：全景全隐、约 1.2 倍起现身 */
       const tWeek = smoothstep(1.2, 2.2, mag * kRatio);
@@ -229,31 +185,21 @@ export class AxisLayer implements StarLayer {
       /* 月环密度门：环带世界深度定死后密盘（月环间距无下限）会糊成同心圆纹，乘 mag·kRatio
        * 让放大 / 进鱼眼后月环重新现身（同周环缩放门思路）；非月环恒 1，不受影响 */
       const monthGateV = ring.isMonth ? monthGate(layout.monthSpacingWorld(ring.d) * reff) : 1;
-      ring.circle.setAttribute(
-        "opacity",
-        String((ring.isMonth ? 0.27 + 0.73 * t : t * tWeek) * gapMute * monthGateV),
-      );
-      ring.label.setAttribute(
-        "transform",
-        `translate(0,${-r2 - 5 * pxToWorld}) scale(${pxToWorld})`,
-      );
+      ring.rl.setRingOpacity((ring.isMonth ? 0.27 + 0.73 * t : t * tWeek) * gapMute * monthGateV);
       /* 周标签跟环同步展开、略晚现身；月环标签同吃密度门，门 < 0.5 不报名 */
       const want =
         gapMute > 0.5 &&
         monthGateV >= 0.5 &&
         ((!ring.isMonth && reff > 1.6) || (ring.isMonth && reff > 0.25));
-      if (want) labelClaims.push({ r: r2, prio: ring.isMonth ? 2 : 1, label: ring.label });
-      else ring.label.style.display = "none";
+      if (want) {
+        labelClaims.push({ r: r2, prio: ring.isMonth ? 2 : 1, label: ring.rl.label, onShown: () => ring.rl.embed() });
+      } else ring.rl.label.style.display = "none";
     }
     // 年环：跨年主结构线，恒显不吃 LOD 门、空窗内不让位；标签最高优先级
     for (const year of this.yearEls) {
       const r2 = layout.displayRadius(year.rLin);
-      year.circle.setAttribute("r", String(r2));
-      year.label.setAttribute(
-        "transform",
-        `translate(0,${-r2 - 6 * pxToWorld}) scale(${pxToWorld})`,
-      );
-      labelClaims.push({ r: r2, prio: 4, label: year.label });
+      year.rl.place(r2, r2, pxToWorld);
+      labelClaims.push({ r: r2, prio: 4, label: year.rl.label, onShown: () => year.rl.embed() });
     }
   }
 
@@ -264,15 +210,11 @@ export class AxisLayer implements StarLayer {
     if (!e) return;
     const layout = this.ctx.layout;
     const r2 = layout.displayRadius(e.rLin);
-    e.circle.setAttribute("r", String(r2));
+    e.rl.place(r2, r2, f.pxToWorld);
     const vis = 1 - smoothstep(0, 0.4, layout.strength);
-    e.circle.setAttribute("opacity", String(vis));
-    e.label.setAttribute(
-      "transform",
-      `translate(0,${-r2 - 5 * f.pxToWorld}) scale(${f.pxToWorld})`,
-    );
-    if (vis > 0.5) f.labelClaims.push({ r: r2, prio: 3.5, label: e.label });
-    else e.label.style.display = "none";
+    e.rl.setRingOpacity(vis);
+    if (vis > 0.5) f.labelClaims.push({ r: r2, prio: 3.5, label: e.rl.label, onShown: () => e.rl.embed() });
+    else e.rl.label.style.display = "none";
   }
 
   /** 焦点带边环与日期：鱼眼态专属，随强度渐入（与焦点带高亮同门）；
@@ -292,23 +234,19 @@ export class AxisLayer implements StarLayer {
     const hubW = layout.hubWorldR;
     this.bandEdges.forEach((e, i) => {
       if (strength < 0.003) {
-        e.circle.setAttribute("opacity", "0");
+        e.setRingOpacity(0);
         e.label.style.display = "none";
         return;
       }
       const r2 = layout.displayRadius(layout.bandLinear[i] as number);
-      e.circle.setAttribute("r", String(r2));
-      e.circle.setAttribute("opacity", String(0.85 * vis));
+      const rLab = i === 0 ? Math.max(r2, hubW + 10 * f.pxToWorld) : r2;
+      e.place(r2, rLab, f.pxToWorld);
+      e.setRingOpacity(0.85 * vis);
       const warn = i === 0 ? early : late;
       const d = formatDay(Math.round(clampDay(layout.dayOfRadius(layout.bandLinear[i] as number))));
-      e.label.textContent = warn ? `${d} · 已到${i === 0 ? "最早" : "最新"}` : d;
+      e.setText(warn ? `${d} · 已到${i === 0 ? "最早" : "最新"}` : d);
       e.label.style.fill = warn ? f.theme.warn : "";
-      const rLab = i === 0 ? Math.max(r2, hubW + 10 * f.pxToWorld) : r2;
-      e.label.setAttribute(
-        "transform",
-        `translate(0,${-rLab - 5 * f.pxToWorld}) scale(${f.pxToWorld})`,
-      );
-      if (vis > 0.5) f.labelClaims.push({ r: rLab, prio: 5, label: e.label });
+      if (vis > 0.5) f.labelClaims.push({ r: rLab, prio: 5, label: e.label, onShown: () => e.embed() });
       else e.label.style.display = "none";
     });
   }

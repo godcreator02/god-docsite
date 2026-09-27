@@ -399,8 +399,8 @@ export function StarDisk({ data, hrefBase, bodies }: StarDiskProps): ReactNode {
         </div>
       ) : null}
 
-      {/* 右上工具条：左簇 搜索 / 图例 / 全部标签，右簇 回到原点 / 设置 / 帮助 */}
-      <div className="star-hud-top">
+      {/* 右上工具条：左簇 搜索 / 图例 / 全部标签，右簇 回到原点 / 设置 / 帮助；侧栏打开时让到它左边 */}
+      <div className="star-hud-top" style={openId !== null ? { right: sideWidth + 10 } : undefined}>
         <button
           type="button"
           className={`star-mbtn${popOpen === "search" ? " star-open" : ""}${searchLower ? " star-active" : ""}`}
@@ -513,10 +513,15 @@ export function StarDisk({ data, hrefBase, bodies }: StarDiskProps): ReactNode {
       {isEmpty ? <div className="star-empty">这张盘还没有记录</div> : null}
       </div>
 
-      {/* 侧栏：盘让出宽度（画布尺寸观察器自己重新适配），分割条可拖 */}
+      {/* 侧栏：浮在盘上，不改盘的大小与位置（挡住的地方自己拖开）；工具条让到它左边；分割条可拖 */}
       {openId !== null && side !== null ? (
         <>
-          <div className="star-split" title="拖动调整侧栏宽度" onPointerDown={onSplitPointerDown} />
+          <div
+            className="star-split"
+            style={{ right: sideWidth - 3 }}
+            title="拖动调整侧栏宽度"
+            onPointerDown={onSplitPointerDown}
+          />
           {/* 按卡身份重建：换一张卡时滚动回到顶部 */}
           <aside key={openId} className="star-side" style={{ width: sideWidth }}>
             <header className="star-side-head">

@@ -54,9 +54,6 @@ test("buildThemes：两套按出现序循环分配，未分道走中性灰、不
   assert.equal(t.dark.milestone, t.dark.supersede);
   assert.equal(t.light.milestone, t.light.supersede);
   assert.notEqual(t.light.supersede, t.dark.supersede);
-  /* 盘心描边要进 mix() 混警示色，只能是 hex */
-  assert.match(t.dark.hubStroke, /^#[0-9a-f]{6}$/i);
-  assert.match(t.light.hubStroke, /^#[0-9a-f]{6}$/i);
   /* 每次调用出新副本：改一份不污染另一份 */
   const t2 = buildThemes(["甲"]);
   t2.dark.hubStroke = "#123456";

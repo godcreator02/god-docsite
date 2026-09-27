@@ -1,12 +1,16 @@
 /* 空窗小行星带层：压缩掉的空窗期折叠成一条雾带，碎石堆填充暗示「时间被跳过」，
- * 起止边界只挂 12 点日期短标签（不画边界线，带沿由雾带自身收边）。
- * 整搬自 Obsidian 版 star/layers/gaps.ts；碎石形态走 layout.ts 的 gapDots。 */
+ * 起止边界只挂 12 点日期短标签、沿弧写（不画边界线，带沿由雾带自身收边）。
+ * 碎石形态走 layout.ts 的 gapDots。 */
 
 import type { GapBand } from "../../layout.ts";
 import { bandFade, gapDots, LOD_MIN, polar, smoothstep } from "../../layout.ts";
 import { formatDay } from "../../model.ts";
-import { el, text } from "../node-dom.ts";
+import { el } from "../node-dom.ts";
+import { RingLabel } from "../ring-label.ts";
 import type { BuildCtx, FrameCtx, StarLayer } from "./frame.ts";
+
+/** 起止日期的屏幕字号（px），跟日期环同一档。 */
+const DATE_PX = 9;
 
 /** 空窗小行星带的一粒碎石。 */
 interface GapDot {
@@ -17,10 +21,10 @@ interface GapDot {
   node: SVGElement;
 }
 
-/** 空窗起止边界：12 点日期短标签。 */
+/** 空窗起止边界：12 点日期短标签（没有环线，只让字沿弧写）。 */
 interface GapRim {
   rLin: number;
-  label: SVGElement;
+  rl: RingLabel;
 }
 
 /** 空窗雾带暗底。 */
@@ -78,11 +82,10 @@ export class GapsLayer implements StarLayer {
         this.dots.push({ ...d, node: el("circle", { fill: "var(--ring-m)" }, this.layer) });
       }
       for (const d of [b.d0, b.d1]) {
-        this.rims.push({
-          rLin: layout.radiusDay(d),
-          /* 短格式：年份归年环承载 */
-          label: text(0, 0, formatDay(d), "dl", {}, this.layer),
-        });
+        const rl = new RingLabel(this.ctx.defs, this.layer, null, "dl", DATE_PX);
+        /* 短格式：年份归年环承载 */
+        rl.setText(formatDay(d));
+        this.rims.push({ rLin: layout.radiusDay(d), rl });
       }
     });
   }
@@ -117,11 +120,8 @@ export class GapsLayer implements StarLayer {
     }
     for (const rim of this.rims) {
       const r2 = layout.displayRadius(rim.rLin);
-      rim.label.setAttribute(
-        "transform",
-        `translate(0,${-r2 - 5 * pxToWorld}) scale(${pxToWorld})`,
-      );
-      f.labelClaims.push({ r: r2, prio: 3, label: rim.label });
+      rim.rl.place(r2, r2, pxToWorld);
+      f.labelClaims.push({ r: r2, prio: 3, label: rim.rl.label });
     }
   }
 }

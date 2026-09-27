@@ -42,7 +42,7 @@
   user-select: none;
 }
 
-/* 盘区：侧栏打开时让出宽度，里面的画布尺寸观察器自己重新适配 */
+/* 盘区：占满容器；侧栏浮在它上面，不改它的大小 */
 .star-disk .star-main {
   position: relative;
   flex: 1 1 auto;
@@ -50,13 +50,13 @@
   height: 100%;
 }
 
-/* ---------- 侧栏：看卡 ---------- */
+/* ---------- 侧栏：看卡，浮在盘的右侧，挡住的地方自己拖开；分割条贴在它左缘（right 由组件按宽度给） ---------- */
 .star-disk .star-split {
-  flex: none;
+  position: absolute;
+  top: 0;
+  bottom: 0;
   width: 6px;
-  margin-right: -3px;
-  margin-left: -3px;
-  z-index: 9;
+  z-index: 11;
   cursor: col-resize;
   touch-action: none;
 }
@@ -66,12 +66,16 @@
 }
 
 .star-disk .star-side {
-  flex: none;
-  height: 100%;
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 10;
   overflow-y: auto;
   box-sizing: border-box;
   border-left: 1px solid var(--bd);
   background: var(--panel);
+  box-shadow: -10px 0 28px rgba(0, 0, 0, 0.22);
   color: var(--t2);
   user-select: text;
 }

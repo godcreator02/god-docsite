@@ -12,7 +12,7 @@
 
 import { ROOT_RADIUS, smoothstep } from "../../layout.ts";
 import { el, text } from "../node-dom.ts";
-import { mix, type Theme } from "../theme.ts";
+import type { Theme } from "../theme.ts";
 import type { BuildCtx, FrameCtx, StarLayer } from "./frame.ts";
 
 /** 单击开卡的判定窗（毫秒）：窗内再来一击算双击，改走回全景。 */
@@ -140,12 +140,12 @@ export class HubLayer implements StarLayer {
      * （时间轴环带世界深度定死 AXIS_SPAN），同一 hubBase 下跨项目恒等。世界半径
      * 每帧重设，innerR 只在重 bake 时变 */
     this.hubC.setAttribute("r", String(layout.hubWorldR));
+    /* 盘心边平时不画（外面紧贴着第一天的日期环，画出来就是两道环），
+     * 只在透镜贴近时间轴端点时用警示色渐显 */
     const distEnd = Math.min(focusDay - day0, dayMax - focusDay);
     const warnT = strength * (1 - smoothstep(0, 2, distEnd));
-    this.hubC.setAttribute(
-      "stroke",
-      warnT > 0.01 ? mix(theme.hubStroke, theme.warn, warnT) : theme.hubStroke,
-    );
+    this.hubC.setAttribute("stroke", theme.warn);
+    this.hubC.setAttribute("stroke-opacity", String(warnT));
     /* 根节点屏径恒定（与其他节点同一 pxToWorld 律）：不跟盘心世界锚定——推进鱼眼时盘心环等比
      * 放大，根节点若跟着走会远超其他节点；吃 symbolPx 与节点尺寸设置联动，
      * hover 放大 1.4 倍与节点同款手感 */
@@ -174,11 +174,10 @@ export class HubLayer implements StarLayer {
     );
   }
 
-  /** 着色：切主题 / 切筛选共用（与 place 内的帧态取色分工，见 place 的警示环那段）。 */
+  /** 着色：切主题 / 切筛选共用（盘心边的颜色随帧态变，归 place 的警示环那段）。 */
   recolor(theme: Theme): void {
     this.hubC.setAttribute("fill", theme.hubFill);
-    this.hubC.setAttribute("stroke", theme.hubStroke);
-    /* 根节点：实心亮点，描边用盘心边的颜色 */
+    /* 根节点：实心亮点加一道描边 */
     this.hubRoot.setAttribute("fill", theme.hubRoot);
     this.hubRoot.setAttribute("stroke", theme.hubStroke);
   }

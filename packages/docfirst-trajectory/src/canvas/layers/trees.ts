@@ -40,6 +40,8 @@ interface FillBoxEl extends BoxEl {
 
 /** 树名的不透明度：用领域色，但比节点标签暗一档。 */
 const TREE_NAME_OPACITY = 0.7;
+/** 扇环边框的不透明度：领域色细线，看得出这片地盘的边界、不抢节点。 */
+const BOX_EDGE_OPACITY = 0.4;
 
 export class TreesLayer implements StarLayer {
   private boxEls: FillBoxEl[] = [];
@@ -56,15 +58,24 @@ export class TreesLayer implements StarLayer {
     this.buildEdges();
   }
 
-  /** 扇环：装箱地盘视觉化（内弧-径线-外弧-径线），不描边，填这棵树所属领域的颜色、
-   * 外弧处最亮往内淡到透明，像一束从外缘照进来的光。 */
+  /** 扇环：装箱地盘视觉化（内弧-径线-外弧-径线），用这棵树所属领域的颜色描一道淡边、
+   * 填充外弧处最亮往内淡到透明，像一束从外缘照进来的光。 */
   private buildBoxes(): void {
     this.boxEls = this.ctx.layout.treeBoxes.map((box) => {
       const gradient = this.ctx.defs.boxGradient();
       return {
         box,
         gradient,
-        node: el("path", { stroke: "none", fill: `url(#${gradient.id})` }, this.ctx.world),
+        node: el(
+          "path",
+          {
+            fill: `url(#${gradient.id})`,
+            "stroke-width": 1,
+            "stroke-opacity": BOX_EDGE_OPACITY,
+            "vector-effect": "non-scaling-stroke",
+          },
+          this.ctx.world,
+        ),
       };
     });
   }
@@ -279,6 +290,7 @@ export class TreesLayer implements StarLayer {
     const colorOf = (box: TreeBox): string => theme.domain[box.domain] ?? theme.noDomain;
     for (const b of this.boxEls) {
       const col = colorOf(b.box);
+      b.node.setAttribute("stroke", col);
       b.gradient.inner.setAttribute("stop-color", col);
       b.gradient.outer.setAttribute("stop-color", col);
       b.gradient.outer.setAttribute("stop-opacity", String(theme.boxAlpha));
