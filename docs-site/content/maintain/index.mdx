@@ -8,7 +8,7 @@ description: 改这个仓的代码时，东西放在哪、提交前要通过哪�
 仓根 `god-live-doc/` 是 git 仓，同时是 pnpm 包工作区；上一级的单元目录只有一张出生证 `unit.json`，不在 git 里。
 工作区照 devkit 的 workspace 仓布局：插件在 `plugins/`，不是插件的包在 `packages/`，再加上 `docs-site/` 这个站。
 
-{/* has file="../pnpm-workspace.yaml" text="- plugins/*" */}
+{/* ref file="../pnpm-workspace.yaml" lines="3-6" hash="9cdc5208b7e9" blob="efc915f8e1de" */}
 
 `plugins/docfirst/` 是[工作台插件](/docs/plugin) `@godcreator/gwb-docfirst-workflow`：建站命令与说明书。
 `packages/` 下每个目录一个 npm 包：
@@ -80,7 +80,7 @@ devkit 的建仓模板不收文档站，这是本仓有意的例外，理由见�
 唯一的联系是 `plugins/docfirst/src/deps.ts` 那张表：建站时写进新站的依赖版本取自它，表里写精确号。
 `docfirst-workflow` 或 `docfirst-fumadocs` 升了版本号就同时改表，忘了改这条测试当场失败：
 
-{/* ref file="../plugins/docfirst/tests/create.test.ts" lines="368-376" hash="aea19349e525" blob="0560d8057147" */}
+{/* ref file="../plugins/docfirst/tests/create.test.ts" lines="371-379" hash="aea19349e525" blob="4ee8519d039f" */}
 
 表改了之后插件要再发一版，之后新建的站才装到新包。
 

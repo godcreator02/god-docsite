@@ -20,9 +20,7 @@ const OLD = ["export function greet(name: string): string {", "  return `hi ${na
 
 /** 每种目标确认过之后记号上带的记录 */
 function recordFor(target: Target): MemoRecord {
-  if (target.kind === "span" || target.kind === "file") return { kind: "content", hash: "3fa9c2e1b07d", blob: "2689fa073ac6" };
-  if (target.kind === "tree") return { kind: "tree", hash: "3fa9c2e1b07d" };
-  return { kind: "has" };
+  return target.kind === "tree" ? { kind: "tree", hash: "3fa9c2e1b07d" } : { kind: "content", hash: "3fa9c2e1b07d", blob: "2689fa073ac6" };
 }
 
 /** 测试里只关心目标与位置；不给记录就是确认过的记号，未确认的传 record: null */
@@ -172,33 +170,18 @@ test("作者手写的 Files 走默认名册：压成一行一个名字，文件�
   assert.equal(ai[0]!.children![0]!.value, "src/");
 });
 
-test("名字：一行芯片，meta 带 data-chip，标题就是芯片上的字", () => {
-  const kept: Target = { kind: "has", file: "src/greet.ts", text: "greet" };
-  const has: Target = { kind: "has", file: "src/store.ts", text: "export function save" };
-  const text = `${mark(kept)}\n\n${mark(has)}\n`;
-  const blocks = blocksIn(text, [
-    itemOf({ reference: { target: kept, at: 0 }, current: [], lines: [2, 2] }),
-    itemOf({ reference: { target: has, at: 2 }, status: "missing", reason: "text-missing", current: null, lines: [1, 1] }),
-  ]);
-  assert.equal(blocks[0]!.meta, 'title="src/greet.ts · 有 greet" data-dot="green" data-chip');
-  assert.equal(blocks[1]!.meta, 'title="src/store.ts · 有 export function save · 缺失" data-dot="red" data-chip');
-  const state = { containerFlow: () => "", containerPhrasing: () => "", handle: () => "不该到这儿" };
-  assert.equal(docfirstMarkdownOptions().stringify(blocks[0], undefined, state, {}), "<!-- 来源 src/greet.ts · 有 greet · 新鲜 -->", "AI 那份只留来源行");
-});
-
-test("whereOf：标题和来源行用同一个字符串，四种目标各一种写法", () => {
+test("whereOf：标题和来源行用同一个字符串，三种目标各一种写法", () => {
   const at = (target: Target, lines: [number, number] = [1, 1]) => whereOf(itemOf({ reference: { target, at: 0 }, lines }));
   assert.equal(at(T, [7, 8]), "src/greet.ts:7-8");
   assert.equal(at({ kind: "file", file: "config.json" }), "config.json");
   assert.equal(at({ kind: "tree", dir: "src", depth: 2, glob: "*.ts" }), "src/ *.ts");
-  assert.equal(at({ kind: "has", file: "a.ts", text: "x" }), "a.ts · 有 x");
 });
 
 test("四种状态各一种颜色：新鲜绿、有变动实心黄、未确认空心黄、缺失红", () => {
   assert.deepEqual(DOT_COLOR, { fresh: "green", changed: "yellow", unconfirmed: "unpinned", missing: "red" });
 });
 
-test("meta 白名单：认 title / lineNumbers / data-dot / data-chip，别的一律不放行", () => {
+test("meta 白名单：认 title / lineNumbers / data-dot，别的一律不放行", () => {
   assert.deepEqual(parseMetaString('title="来源" lineNumbers=7 data-dot="green"'), {
     title: "来源",
     "data-line-numbers": true,
@@ -207,7 +190,7 @@ test("meta 白名单：认 title / lineNumbers / data-dot / data-chip，别的�
   });
   assert.deepEqual(parseMetaString('onclick="alert(1)" data-dot="red"'), { "data-dot": "red" });
   assert.deepEqual(parseMetaString("noCopy"), { allowCopy: "false" });
-  assert.deepEqual(parseMetaString('title="x" data-dot="green" data-chip'), { title: "x", "data-dot": "green", "data-chip": true });
+  assert.deepEqual(parseMetaString('title="x" data-dot="green" data-chip'), { title: "x", "data-dot": "green" });
 });
 
 test("md 那头：来源行 + 一块干净的代码，diff 标记不漏进 AI 那份", () => {
@@ -270,7 +253,7 @@ test("围栏里、行内的假记号认不出来——走语法树的理由", ()
 test("普通注释不是标记，原样留着；长成记号却认不出动作词的报错到行", () => {
   const tree = applyListing(parseTree("{/* 普通注释 */}\n"), listingOf([]));
   assert.equal(tree.children![0]!.type, "mdxFlowExpression");
-  assert.throws(() => applyListing(parseTree('{/* probe dir="src" */}\n'), listingOf([])), /第 1 行：记号的动作词只有 ref \/ tree \/ has/);
+  assert.throws(() => applyListing(parseTree('{/* probe dir="src" */}\n'), listingOf([])), /第 1 行：记号的动作词只有 ref \/ tree，/);
 });
 
 test("清单里没有的标记：报到行，不静默漏掉", () => {
@@ -298,16 +281,14 @@ test("按原文渲染：行内代码后面紧跟以行内代码开头的加粗�
   assert.equal(renderOf(`# x\n\n${line}\n`), `# x\n\n${line}\n`);
 });
 
-test("按原文渲染：行段标题写今天的位置；整文件标题是 路径:1-行数；目录树给名字表；名字整行去掉", () => {
+test("按原文渲染：行段标题写今天的位置；整文件标题是 路径:1-行数；目录树给名字表", () => {
   const whole: Target = { kind: "file", file: "config.json" };
   const tree: Target = { kind: "tree", dir: "src", depth: 1 };
-  const has: Target = { kind: "has", file: "src/store.ts", text: "save" };
-  const text = [mdx.marker(T, RECORD), "", mdx.marker(whole, RECORD), "", "中间", "", mdx.marker(has, { kind: "has" }), "", mdx.marker(tree, { kind: "tree", hash: RECORD.hash }), ""].join("\n");
+  const text = [mdx.marker(T, RECORD), "", mdx.marker(whole, RECORD), "", "中间", "", mdx.marker(tree, { kind: "tree", hash: RECORD.hash }), ""].join("\n");
   const out = renderOf(text, (ref) => {
     if (ref.target.kind === "file") return { lines: [1, 2], current: ["{", "}"] };
     if (ref.target.kind === "tree") return { lines: [1, 2], current: ["a.ts", "lib/"] };
-    if (ref.target.kind === "span") return { lines: [7, 8] };
-    return { current: [] };
+    return { lines: [7, 8] };
   });
   assert.equal(
     out,

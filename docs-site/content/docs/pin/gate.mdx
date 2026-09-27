@@ -10,7 +10,7 @@ description: check 把哪几类问题计入红；本仓未提交的改动引起�
 
 ## 红从哪来
 
-- **缺失的引用**：被钉的行段、文件、目录、名字不在了。提没提交都算。讲解组件源码里的引用跟页面里的一样算，下一条也是。
+- **缺失的引用**：被钉的行段、文件、目录不在了。提没提交都算。讲解组件源码里的引用跟页面里的一样算，下一条也是。
 - **拦提交的黄**：状态是「有变动」，而且是本仓未提交的改动引起的（下一节）。
 - **名册外组件**：mdx 里用了 `docfirst.config.mjs` 的 `components` 里没有规则的组件。
 - **不新鲜的生成物**：`outputs` 里有映射的落点还不存在、跟正本重新渲染的结果不一致，或者正本渲染不了，见[生成物怎么渲染](/docs/workflow/rendering)。
@@ -18,18 +18,18 @@ description: check 把哪几类问题计入红；本仓未提交的改动引起�
 
 绿、未确认、不拦提交的黄只打印，不计入。加 `--json` 时整份报告打成一行，退出码的算法不变。
 
-{/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="315-330" hash="8afcef0bca0f" blob="68565dfd474a" */}
+{/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="314-329" hash="8afcef0bca0f" blob="ec24566d459a" */}
 
 {/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="227-235" hash="87e007751793" blob="68565dfd474a" */}
 
 ## 本仓未提交的改动引起的黄，按红算
 
-一处黄灯，`check` 再问三件事：它是行段、整文件或目录树吗（`has` 没有黄，不问）；被钉的文件和这篇文档往上找到的是不是同一个 `.git`；
-那个仓的 `git status` 里有没有这个文件（目录树是这个目录下的任何一个路径）。三个都是，这个黄就是这次改动引起的，打成 🔴、计入红。
+一处黄灯，`check` 再问两件事：被钉的文件和这篇文档往上找到的是不是同一个 `.git`；
+那个仓的 `git status` 里有没有这个文件（目录树是这个目录下的任何一个路径）。两个都是，这个黄就是这次改动引起的，打成 🔴、计入红。
 
 {/* ref file="../packages/docfirst-workflow/src/project/git.ts" lines="189-209" hash="519cd2928353" blob="afd0fbdae4c4" */}
 
-{/* ref file="../packages/docfirst-workflow/src/project/uncommitted.ts" lines="26-36" hash="85c1c005ef67" blob="2ad45230cb96" */}
+{/* ref file="../packages/docfirst-workflow/src/project/uncommitted.ts" lines="26-35" hash="8fc6d81a0264" blob="ed53157b1c06" */}
 
 「未提交」包括工作区改了、已经暂存、还没跟踪的新文件，改名两头的路径都算。每个仓一次 `check` 只跑一次 `git status`，
 带 `--no-optional-locks`，不跟同时在这个仓里干活的人抢索引锁。

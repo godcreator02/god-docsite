@@ -1,6 +1,6 @@
 /**
  * 钉码核心自己的账：check / confirm 两个动作、比较器、确认时记什么。
- * 直接给目标与记录，用内存读取器、内存里的旧内容来源——钉码核心不读盘、不起进程、不接触文档文本，这里正好把这条也守住。
+ * 直接给目标与记录，用内存读取器、内存里的旧内容来源——钉码核心不读盘、不启动子进程、不接触文档文本，这里正好把这条也守住。
  */
 import { test } from "node:test";
 import assert from "node:assert/strict";
@@ -74,7 +74,7 @@ test("结果与传入的顺序一一对应：判定带着原来那处钉，确�
   const pins: Pin[] = [
     { target: { kind: "span", file: "src/nowhere.ts", a: 1, b: 2 }, record: null },
     UNCONFIRMED,
-    { target: { kind: "has", file: "src/greet.ts", text: "greet" }, record: null },
+    { target: { kind: "file", file: "src/greet.ts" }, record: null },
   ];
   const verdicts = pinner.check(pins);
   assert.deepEqual(verdicts.map((v) => v.pin), pins);
@@ -128,20 +128,6 @@ test("目录树：记录是名字表的哈希；名字变了是黄、给当前�
   for (const key of [...files.keys()]) if (key.startsWith("src/")) files.delete(key);
   const gone = pinner.check([done])[0]!;
   assert.deepEqual([gone.status, gone.reason], ["missing", "dir-missing"]);
-});
-
-test("名字：有记录就是确认过；文件里有这个字面量就绿，没了红；没记录的要 confirm", () => {
-  const { files, pinner, statuses } = setup();
-  const has: Target = { kind: "has", file: "src/greet.ts", text: "export function greet" };
-  const confirmed: Pin = { target: has, record: { kind: "has" } };
-  const fresh = pinner.check([confirmed])[0]!;
-  assert.deepEqual([fresh.status, fresh.lines], ["fresh", [2, 2]]);
-  const unconfirmed: Pin = { target: has, record: null };
-  assert.deepEqual(statuses([unconfirmed]), ["unconfirmed"]);
-  assert.deepEqual(confirmOne(pinner, unconfirmed), confirmed);
-  files.set("src/greet.ts", CODE.map((l) => l.replace("greet(", "hello(")));
-  assert.deepEqual(pinner.check([confirmed]).map((v) => [v.status, v.reason]), [["missing", "text-missing"]]);
-  assert.equal(pinner.confirm(pinner.check([unconfirmed]), plain)[0]!.action, "refused");
 });
 
 test("取不到旧内容时滑窗跟行段：代码整体下移，绿、带新行号；confirm 记下新行号与新 blob", () => {

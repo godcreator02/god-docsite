@@ -5,14 +5,13 @@
  *   **语言表** `WORDS` 与每个动作词认的属性 `ATTRS`——`toTarget` / `recordOf` 是唯一的语义校验点
  *   **记号的载荷**（`formalOf` / `parseFormal`）——格式只在外面套自己的注释外壳。
  *   载荷 = 动作词 + 目标属性 + 记录属性；没有记录属性就是还没确认，confirm 时写上
- *   报告里用的目标文本形态（`targetKey`），以及已经删掉的草稿写法 `@@docfirst … @@` 的报错
+ *   报告里用的目标文本形态（`targetKey`），以及已经删掉的两种写法的报错：草稿 `@@docfirst … @@` 与名字记号 `has`
  */
 import type { MemoRecord, Target, TreeTarget } from "@godcreator/docfirst-pin";
 
-/** 记号的动作词：ref / tree / has */
+/** 记号的动作词：ref / tree */
 export function wordOf(target: Target): string {
-  if (target.kind === "span" || target.kind === "file") return "ref";
-  return target.kind;
+  return target.kind === "tree" ? "tree" : "ref";
 }
 
 type Attrs = Array<[string, string]>;
@@ -25,8 +24,6 @@ function targetAttrsOf(target: Target): Attrs {
       return [["file", target.file]];
     case "tree":
       return [["dir", target.dir], ["depth", String(target.depth)], ...(target.glob !== undefined ? [["glob", target.glob] as [string, string]] : [])];
-    case "has":
-      return [["file", target.file], ["text", target.text]];
   }
 }
 
@@ -37,8 +34,6 @@ function recordAttrsOf(record: MemoRecord | null): Attrs {
       return [["hash", record.hash], ["blob", record.blob]];
     case "tree":
       return [["hash", record.hash]];
-    case "has":
-      return [];
   }
 }
 
@@ -62,13 +57,12 @@ export function parseAttrs(s: string): Record<string, string> {
   return table;
 }
 
-const WORDS = new Set(["ref", "tree", "has"]);
+const WORDS = new Set(["ref", "tree"]);
 
 /** 每个动作词认的属性：目标属性在前，记录属性在后。别的属性一律报错 */
 const ATTRS: Record<string, readonly string[]> = {
   ref: ["file", "lines", "hash", "blob"],
   tree: ["dir", "depth", "glob", "hash"],
-  has: ["file", "text"],
 };
 
 /** 「一个词 + 至少一个 key="value" 属性」：长成记号的样子，词不认识就报错，不当成普通注释 */
@@ -83,10 +77,23 @@ const EXAMPLE_PAYLOAD = formalOf({ kind: "span", file: "src/a.ts", a: 2, b: 3 },
 /** 以 `@@docfirst` 开头的一行：草稿写法已经删了，格式碰到就报错，不让它悄悄变成普通文字 */
 export const isRemovedDraftLine = (line: string): boolean => /^\s*@@docfirst\b/.test(line);
 
-/** 草稿写法的报错：shell 是格式的外壳，把举例的载荷包成这个格式里的完整记号 */
-export function removedDraftError(where: string, shell: (payload: string) => string): Error {
+/** 格式的记号外壳：把载荷包成这个格式里的完整记号，报错给改法时用 */
+export type MarkerShell = (payload: string) => string;
+
+/** 草稿写法的报错：把举例的载荷包成这个格式里的完整记号 */
+export function removedDraftError(where: string, shell: MarkerShell): Error {
   return new Error(
-    `${where}：@@docfirst 草稿写法已经删了——改写成不带记录的正式记号，如 ${shell(EXAMPLE_PAYLOAD)}（动作词 ref / tree / has），confirm 时写上记录`,
+    `${where}：@@docfirst 草稿写法已经删了——改写成不带记录的正式记号，如 ${shell(EXAMPLE_PAYLOAD)}（动作词 ref / tree），confirm 时写上记录`,
+  );
+}
+
+/** 名字记号 `has` 的报错：改法是钉 text 所在那几行的行段，file 照抄原记号的 */
+function removedHasError(where: string, attrs: Record<string, string>, shell: MarkerShell): Error {
+  const file = attrs.file !== undefined && attrs.file !== "" ? attrs.file : "…";
+  const said = attrs.text !== undefined && attrs.text !== "" ? `「${attrs.text}」所在的那一行` : "要钉的那一行";
+  return new Error(
+    `${where}：has 已经删了——改成行段记号 ${shell(`ref file="${file.replace(/"/g, "&quot;")}" lines="n-n"`)}，n-n 写${said}` +
+      `（钉测试、要看它断言了什么时，从 test( / it( 那行钉到它结束的那行），confirm 时写上记录`,
   );
 }
 
@@ -112,19 +119,20 @@ export function markerErrors(): { attempt<T>(parse: () => T): T | null; throwIfA
 }
 
 /**
- * 记号的载荷 → 目标与记录（还没确认的记录是 null）。格式把外壳剥掉后交给它。
- * 不是记号（普通注释）给 null；长成「一个词 + key="value" 属性」但词不认识、以 @@docfirst 开头、
+ * 记号的载荷 → 目标与记录（还没确认的记录是 null）。格式把外壳剥掉后交给它，shell 是它的外壳，报错给改法时用。
+ * 不是记号（普通注释）给 null；长成「一个词 + key="value" 属性」但词不认识（包括已经删掉的 has）、以 @@docfirst 开头、
  * 属性写成 `key="value"` 之外的样子、出现这个动作词不认的属性，都报错到 where
  */
-export function parseFormal(payload: string, where: string): { target: Target; record: MemoRecord | null } | null {
+export function parseFormal(payload: string, where: string, shell: MarkerShell): { target: Target; record: MemoRecord | null } | null {
   const trimmed = payload.trim();
-  if (isRemovedDraftLine(trimmed)) throw removedDraftError(where, (inner) => inner);
+  if (isRemovedDraftLine(trimmed)) throw removedDraftError(where, shell);
   const m = /^(\w+)\s*(.*)$/s.exec(trimmed);
   if (m === null) return null;
   const word = m[1]!;
   if (!WORDS.has(word)) {
-    if (MARKER_SHAPE.test(trimmed)) throw new Error(`${where}：记号的动作词只有 ref / tree / has，不认识 ${word}——普通注释别写成 key="value" 属性`);
-    return null;
+    if (!MARKER_SHAPE.test(trimmed)) return null;
+    if (word === "has") throw removedHasError(where, parseAttrs(m[2]!), shell);
+    throw new Error(`${where}：记号的动作词只有 ref / tree，不认识 ${word}——普通注释别写成 key="value" 属性`);
   }
   const rest = m[2]!;
   const leftover = rest.replace(ATTR, "").trim();
@@ -142,10 +150,9 @@ function assertHex(value: string, name: string, where: string): void {
 
 /**
  * 动作词 + 属性表 → 记录。`ref` 没有 hash 与 blob、`tree` 没有 hash 就是还没确认（null）；
- * `ref` 只写了其中一个、值不合法，报错到 where。`has` 的记号本身就是记录
+ * `ref` 只写了其中一个、值不合法，报错到 where
  */
 export function recordOf(word: string, attrs: Record<string, string | undefined>, where: string): MemoRecord | null {
-  if (word === "has") return { kind: "has" };
   if (word === "ref") {
     if (attrs.hash === undefined && attrs.blob === undefined) return null;
     if (attrs.hash === undefined || attrs.blob === undefined) {
@@ -171,22 +178,17 @@ export function toTarget(word: string, attrs: Record<string, string | undefined>
     if (a < 1 || b < a) throw new Error(`${where}：行号不合理（${attrs.lines}）`);
     return { kind: "span", file: attrs.file, a, b };
   }
-  if (word === "tree") {
-    if (attrs.dir === undefined || attrs.dir === "") throw new Error(`${where}：目录树要有 dir="…"`);
-    const depth = attrs.depth === undefined ? 1 : Number(attrs.depth);
-    if (!Number.isInteger(depth) || depth < 1) throw new Error(`${where}：depth 要是正整数（${attrs.depth}）`);
-    const target: TreeTarget = { kind: "tree", dir: attrs.dir.replace(/\/+$/, ""), depth };
-    if (attrs.glob !== undefined && attrs.glob !== "") target.glob = attrs.glob;
-    return target;
-  }
-  if (attrs.file === undefined || attrs.file === "") throw new Error(`${where}：has 要有 file="…"`);
-  if (attrs.text === undefined || attrs.text === "") throw new Error(`${where}：has 要有 text="…"`);
-  return { kind: "has", file: attrs.file, text: attrs.text };
+  if (attrs.dir === undefined || attrs.dir === "") throw new Error(`${where}：目录树要有 dir="…"`);
+  const depth = attrs.depth === undefined ? 1 : Number(attrs.depth);
+  if (!Number.isInteger(depth) || depth < 1) throw new Error(`${where}：depth 要是正整数（${attrs.depth}）`);
+  const target: TreeTarget = { kind: "tree", dir: attrs.dir.replace(/\/+$/, ""), depth };
+  if (attrs.glob !== undefined && attrs.glob !== "") target.glob = attrs.glob;
+  return target;
 }
 
 /**
  * 目标的文本形态，给报告用：
- *   行段 `file:a-b`、整文件 `file:all`、目录树 `tree dir depth=1[ glob=…]`、名字 `has file "text"`（text 按 JSON 转义）
+ *   行段 `file:a-b`、整文件 `file:all`、目录树 `tree dir depth=1[ glob=…]`
  */
 export function targetKey(t: Target): string {
   switch (t.kind) {
@@ -196,7 +198,5 @@ export function targetKey(t: Target): string {
       return `${t.file}:all`;
     case "tree":
       return `tree ${t.dir} depth=${t.depth}${t.glob !== undefined ? ` glob=${t.glob}` : ""}`;
-    case "has":
-      return `has ${t.file} ${JSON.stringify(t.text)}`;
   }
 }

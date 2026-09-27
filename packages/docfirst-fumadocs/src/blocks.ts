@@ -1,7 +1,7 @@
 /**
  * 一处引用的状态 → 树上的一个节点。
  *
- * 四种目标三种长相：
+ * 三种目标两种长相：
  *   行段 / 整文件   一个 mdast `code` 节点，写法按 fumadocs 认的那套来：meta 里 `title="…"` 出标题栏、`lineNumbers=N`
  *                   让行号跟源文件对得上、`data-dot="…"` 带状态点的颜色。黄「有变动」把改过的行标上 shiki 原生的
  *                   `[!code --]` / `[!code ++]`，旧行新行渲在同一块里（有行注释的语言才行，没有的退成 `diff` 块），
@@ -11,9 +11,8 @@
  *                   容器带 `data-dot` 和 `data-docfirst="tree"`，站的样式表在右上角画状态点。黄的时候摆当前的名字表
  *                   （记录只有名字表的哈希，多了少了哪些不知道）；红只剩一个禁用的根文件夹说目录不在了。
  *                   AI 那份的标（来源行 + text 清单）在这儿直接打好，stamp 看到就跳过，不去名册里找它。
- *   名字            一行芯片：`code` 节点的 meta 里多一个 `data-chip`，站的 pre 组件看到它就不画代码块，画一行带点的小标签。
  *
- * 灯长什么样、怎么渲染，全归站点侧的 pre 组件和样式表；这一层只把颜色塞进 meta / 属性。
+ * 灯长什么样、怎么渲染，全归站点侧的 pre 组件和样式表；这一层只把颜色写进 meta / 属性。
  */
 import type { Status } from "@godcreator/docfirst-pin";
 import type { Item } from "@godcreator/docfirst-workflow";
@@ -47,7 +46,7 @@ const LINE_COMMENT: Record<string, string> = {
 
 /**
  * 这一处「在哪」，给标题和 AI 那份的来源行用，两边同一个字符串：
- *   行段 `file:a-b`（今天的位置）、整文件 `file`、目录树 `dir/`（带 glob）、名字 `file · 有 text`
+ *   行段 `file:a-b`（今天的位置）、整文件 `file`、目录树 `dir/`（带 glob）
  */
 export function whereOf(item: Item): string {
   const target = item.reference.target;
@@ -58,8 +57,6 @@ export function whereOf(item: Item): string {
       return target.file;
     case "tree":
       return `${target.dir}/${target.glob !== undefined ? ` ${target.glob}` : ""}`;
-    case "has":
-      return `${target.file} · 有 ${target.text}`;
   }
 }
 
@@ -71,21 +68,15 @@ export function metaOf(title: string, dot: Dot, start?: number): string {
   return [`title="${title.replace(/"/g, "'")}"`, ...(start !== undefined ? [`lineNumbers=${start}`] : []), `data-dot="${dot}"`].join(" ");
 }
 
-/** 给 md 那头的标：来源、状态、AI 那份里该放的内容（不带 diff 标记）；chip 为真就只出来源行 */
+/** 给 md 那头的标：来源、状态、AI 那份里该放的内容（不带 diff 标记） */
 export interface DocfirstMark {
   source: string;
   label: string;
   value: string;
-  chip?: boolean;
 }
 
 export function codeNode(lang: string, value: string, title: string, dot: Dot, mark: DocfirstMark, start?: number): TreeNode {
   return { type: "code", lang, meta: metaOf(title, dot, start), value, data: { docfirst: mark } };
-}
-
-/** 芯片：一行带点的小标签。meta 里的 data-chip 让站的 pre 组件认出来 */
-export function chipNode(title: string, dot: Dot, mark: DocfirstMark): TreeNode {
-  return { type: "code", lang: "text", meta: `${metaOf(title, dot)} data-chip`, value: title, data: { docfirst: { ...mark, chip: true } } };
 }
 
 /**
@@ -162,7 +153,7 @@ export function treeNode(item: Item): TreeNode {
   };
 }
 
-/** 一处引用 → 一块代码、一棵文件树或一行芯片 */
+/** 一处引用 → 一块代码或一棵文件树 */
 export function nodeFor(item: Item): TreeNode {
   const target = item.reference.target;
   // 标题写今天的位置：行段跟随之后，记号上那几行可能已经不是这段了
@@ -170,9 +161,6 @@ export function nodeFor(item: Item): TreeNode {
   const dot = DOT_COLOR[item.status];
   const label = LABEL[item.status];
 
-  if (target.kind === "has") {
-    return chipNode(item.status === "fresh" ? where : `${where} · ${label}`, dot, { source: where, label, value: "" });
-  }
   if (target.kind === "tree") return treeNode(item);
 
   const lang = langOf(target.file);

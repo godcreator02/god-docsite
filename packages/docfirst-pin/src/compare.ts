@@ -1,6 +1,6 @@
 /**
- * 比较器：四种目标变没变怎么判、确认时记什么，全在这儿。纯函数，只看交进来的观察
- * （行段 / 整文件 / 名字是文件的行，目录树是名字表；取不到是 null），
+ * 比较器：三种目标变没变怎么判、确认时记什么，全在这儿。纯函数，只看交进来的观察
+ * （行段 / 整文件是文件的行，目录树是名字表；取不到是 null），
  * 行段与整文件要的旧内容和 hunk 表从 `History` 取——那是环境层注进来的唯一不纯的两样。
  *
  * 行段的判定按这个顺序，前一步能下结论就不往下走：
@@ -13,8 +13,7 @@
  * 第 4 步是有意设计的降级：记录里的 blob 名是确认时在进程里算的，确认之后、提交之前又改了文件，
  * 或者仓按 CRLF 存，这个 blob 就不会进对象库——少的只是 diff，不是错。
  *
- * 整文件只比整文件的段哈希；目录树只比名字表的哈希（旧表不存，变了是黄、给当前表）；
- * 名字只看字面量还在不在，没有黄。
+ * 整文件只比整文件的段哈希；目录树只比名字表的哈希（旧表不存，变了是黄、给当前表）。
  */
 
 import { mapRange, mappedSpan, renderDiff } from "./diff.ts";
@@ -51,12 +50,6 @@ export function findSpan(text: string[], length: number, hash: string, near: num
     }
   }
   return tie ? null : best;
-}
-
-/** 文件里第一处含这个字面量的行号（1 起）；没有给 null */
-export function findText(text: string[], needle: string): number | null {
-  const i = text.findIndex((line) => line.includes(needle));
-  return i === -1 ? null : i + 1;
 }
 
 /** 整文件的行段：[1, 行数]，空文件也算一行 */
@@ -119,13 +112,6 @@ function judgeTree(record: TreeRecord | null, names: string[] | null): Judgement
   return { status: "changed", lines, reason: "changed" };
 }
 
-function judgeHas(needle: string, record: MemoRecord | null, text: string[] | null): Judgement {
-  if (text === null) return { status: "missing", lines: [1, 1], reason: "file-missing" };
-  const at = findText(text, needle);
-  if (at === null) return { status: "missing", lines: [1, 1], reason: "text-missing" };
-  return { status: record === null ? "unconfirmed" : "fresh", lines: [at, at] };
-}
-
 /** 核对一处引用：记录是记号上带的那份（null 是未确认），观察由调用方从读取器取好 */
 export function judge(target: Target, record: MemoRecord | null, seen: string[] | null, history: History): Judgement {
   switch (target.kind) {
@@ -135,8 +121,6 @@ export function judge(target: Target, record: MemoRecord | null, seen: string[] 
       return judgeFile(target, record as ContentRecord | null, seen, history);
     case "tree":
       return judgeTree(record as TreeRecord | null, seen);
-    case "has":
-      return judgeHas(target.text, record, seen);
   }
 }
 
@@ -156,9 +140,5 @@ export function snapshot(target: Target, seen: string[] | null): Snapshot {
     case "tree":
       if (seen === null) return { problem: "目录不存在" };
       return { record: { kind: "tree", hash: hashNames(seen) } };
-    case "has":
-      if (seen === null) return { problem: "文件不存在" };
-      if (findText(seen, target.text) === null) return { problem: "文件里没有这个名字" };
-      return { record: { kind: "has" } };
   }
 }

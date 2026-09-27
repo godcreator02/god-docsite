@@ -109,13 +109,6 @@ function SitePreview({ site, tone }: { site: Site; tone: Tone }) {
           </div>
         </div>
       );
-    case 'chip':
-      return (
-        <span className="rk-chip">
-          <Dot tone={tone} />
-          {site.text}
-        </span>
-      );
     default:
       throw new Error(`RefKinds：认不出的站上显示类型「${(site as { type: string }).type}」`);
   }

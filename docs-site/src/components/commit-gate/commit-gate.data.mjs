@@ -13,14 +13,14 @@ const OTHER_REF = '../../greet-lib/src/greet.ts';
 const MARKER_BEFORE = `{/* ref file="${REF}" lines="4-5" hash="3eb99c2e88e2" blob="58b32ed1c69e" */}`;
 const MARKER_AFTER = `{/* ref file="${REF}" lines="4-5" hash="9a083fec7547" blob="eeec5ca2bd8f" */}`;
 
-/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="296-303" hash="85058fb75fad" blob="68565dfd474a" */
+/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="295-302" hash="85058fb75fad" blob="ec24566d459a" */
 const BLOCKING_LINE = `🔴 ${DOC}  ${REF}:4-5  有变动，是本仓还没提交的改动引起的——在同一个提交里复核，再 docfirst confirm ${DOC} --accept`;
 
 export const files = { doc: DOC, ref: REF, cwd: '~/repo/docs-site' };
 
 /** 门禁在本仓是怎么落实的：没有 git 钩子、没有 CI，是仓根 AGENTS.md「门禁」里的一条规矩 */
 export const gateNote =
-  '本仓没有挂 git 钩子，也没有 CI：「docs-site 里 pnpm docfirst check 通过才提交」是仓根 AGENTS.md 门禁里的一条，由提交的人照做。';
+  '本仓没有装 git 钩子，也没有 CI：「docs-site 里 pnpm docfirst check 通过才提交」是仓根 AGENTS.md 门禁里的一条，由提交的人照做。';
 
 /** 门禁三种状态在画面上的说法 */
 export const gateLabel = {
@@ -30,13 +30,13 @@ export const gateLabel = {
 };
 
 /** check 计入红的几类，退出码只看它们的总数 */
-/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="311-332" hash="efcb24752ad5" blob="68565dfd474a" */
+/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="310-331" hash="efcb24752ad5" blob="ec24566d459a" */
 /* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="218-236" hash="f70391e16cf2" blob="68565dfd474a" */
 export const redSources = [
-  { name: '缺失的引用', rule: '被钉的行段、文件、目录、名字不在了；提没提交都算' },
+  { name: '缺失的引用', rule: '被钉的行段、文件、目录不在了；提没提交都算' },
   { name: '拦提交的黄', rule: '状态是「有变动」，且被钉文件在文档所在的仓里有未提交的改动' },
   { name: '名册外组件', rule: 'mdx 里用了 docfirst.config.mjs 的 components 里没有的组件' },
-  { name: '不新鲜的生成物', rule: '挂了 outputs 映射的落点：文件还不存在、跟正本重新渲染的结果不一致、正本头部缺点名的字段、正本渲染不了' },
+  { name: '不新鲜的生成物', rule: 'outputs 映射里写了的落点：文件还不存在、跟正本重新渲染的结果不一致、正本头部缺点名的字段、正本渲染不了' },
   { name: '轨迹卡的病', rule: 'content/trajectory/ 下的卡缺必填字段，或字段格式不对' },
 ];
 
@@ -65,10 +65,10 @@ export const notRed = ['🟢 新鲜', '⚪ 未确认', '🟡 有变动但不是�
  */
 /* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="37-43" hash="9ebfdcac2bf1" blob="68565dfd474a" */
 /* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="171-189" hash="89872d5416cd" blob="68565dfd474a" */
-/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="335-341" hash="dcd5a37f8b61" blob="68565dfd474a" */
+/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="334-340" hash="dcd5a37f8b61" blob="ec24566d459a" */
 /* ref file="../packages/docfirst-workflow/src/project/uncommitted.ts" lines="1-4" hash="4968cfab632f" blob="2ad45230cb96" */
-/* ref file="../packages/docfirst-workflow/src/project/uncommitted.ts" lines="26-36" hash="85c1c005ef67" blob="2ad45230cb96" */
-/* has file="../packages/docfirst-trajectory/src/model.ts" text="born-at 格式须 YYYY-MM-DD 或 YYYY-MM-DDTHH:mm" */
+/* ref file="../packages/docfirst-workflow/src/project/uncommitted.ts" lines="26-35" hash="8fc6d81a0264" blob="ed53157b1c06" */
+/* ref file="../packages/docfirst-trajectory/src/model.ts" lines="100-100" hash="566d53167dfe" blob="3449f87e60a6" */
 export const steps = [
   {
     title: '改了被钉的两行，还没提交',
@@ -166,8 +166,7 @@ export const steps = [
     title: '另一种情况：被钉文件在别的仓',
     text:
       `引用写的是 ${OTHER_REF}，它属于另一个 git 仓 ~/greet-lib，那里有未提交的改动。探针先比仓：被钉文件跟文档不在同一个仓，` +
-      '改代码的提交和改文档的提交不可能是同一个，直接回答「否」，不去看那个仓的 git status。这个黄只报告，退出码 0。' +
-      'has 引用没有黄，也不问 git。',
+      '改代码的提交和改文档的提交不可能是同一个，直接回答「否」，不去看那个仓的 git status。这个黄只报告，退出码 0。',
     repos: [
       { path: '~/repo', note: '文档在这个仓', lines: [], hit: null },
       { path: '~/greet-lib', note: '被钉的 greet.ts 在这个仓', lines: [' M src/greet.ts'], hit: null },

@@ -172,7 +172,7 @@ export const checks = [
 export const failedChecks = { D: ['shape', 'docfirst'] };
 
 /** scanCardDir 交回的 sick：病按文件归拢，path 相对卡目录 */
-/* has file="../packages/docfirst-trajectory/src/model.ts" text="born-at 格式须 YYYY-MM-DD 或 YYYY-MM-DDTHH:mm" */
+/* ref file="../packages/docfirst-trajectory/src/model.ts" lines="100-100" hash="566d53167dfe" blob="3449f87e60a6" */
 export const sick = [
   {
     path: '2026-06-12-pin-in-card.mdx',

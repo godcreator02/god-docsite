@@ -60,10 +60,3 @@
 .rk-tree-row[data-disabled] { opacity: .5; }
 .rk-tree-kids { margin-left: 6px; padding-left: 12px; border-left: 1px solid var(--dx-line); }
 .rk-icon { flex: none; color: var(--dx-dim); }
-
-/* 站上的小标签：一行带点的字 */
-.rk-chip {
-  justify-self: start; display: inline-flex; align-items: center; gap: 8px; padding: 3px 10px;
-  font-family: var(--dx-mono); font-size: 12px; border: 1px solid var(--dx-line); border-radius: 8px;
-  overflow-wrap: anywhere;
-}

@@ -3,7 +3,7 @@
  *   **认领**：只认站的 src/components/ 下的 .ts / .tsx / .mjs
  *   **往返**：`parse(marker(t, r))` 认回 t 与 r；里面那一截跟 mdx 的一字不差
  *   **不算记号的**：JSDoc、行里还有别的代码、一行两个注释、普通注释
- *   **写错了报错**：认不出动作词、以 @@docfirst 开头、记录只写了一半
+ *   **写错了报错**：认不出动作词、以 @@docfirst 开头、已经删了的 has、记录只写了一半
  *   **写回**：整行替换，保留缩进与行尾 \r，别的行一个字节不动
  * 再走一遍钉码编排按文件挑格式、项目装配把组件文件列进现状区、命令行照常核对与确认。
  */
@@ -28,18 +28,16 @@ test("认领：站的 src/components/ 下的 .ts / .tsx / .mjs，别的都不认
   for (const file of ["src/components/a/a.css", "src/lib/source.ts", "content/docs/a.mdx", "scripts/x.mjs"]) assert.equal(code.claims(file), false, file);
 });
 
-test("往返：parse(marker(t, r)) 认回目标与记录，四种目标、确认前后都过；里面那一截跟 mdx 的一字不差", () => {
+test("往返：parse(marker(t, r)) 认回目标与记录，三种目标、确认前后都过；里面那一截跟 mdx 的一字不差", () => {
   const cases: Array<[Target, MemoRecord]> = [
     [T, RECORD],
     [{ kind: "file", file: "a.json" }, RECORD],
     [{ kind: "tree", dir: "src", depth: 2, glob: "*.ts" }, { kind: "tree", hash: "3fa9c2e1b07d" }],
-    [{ kind: "has", file: "a.ts", text: 'say("hi")' }, { kind: "has" }],
   ];
   for (const [target, confirmed] of cases) {
-    // has 的记号本身就是记录，不带记录属性写下也是确认过的
-    for (const [record, expected] of [[null, target.kind === "has" ? confirmed : null], [confirmed, confirmed]] as const) {
+    for (const record of [null, confirmed]) {
       const line = code.marker(target, record);
-      assert.deepEqual(code.parse(`const a = 1;\n  ${line}\n`).map((r) => [r.target, r.record, r.at]), [[target, expected, 1]], line);
+      assert.deepEqual(code.parse(`const a = 1;\n  ${line}\n`).map((r) => [r.target, r.record, r.at]), [[target, record, 1]], line);
       assert.equal(`{${line}}`, mdx.marker(target, record), "同一条引用在两种载体里只有外壳不同");
     }
   }
@@ -60,14 +58,22 @@ test("不算记号的：JSDoc、行里还有别的代码、一行两个注释、
 });
 
 test("写错了报错到行：认不出动作词、以 @@docfirst 开头、记录只写了一半", () => {
-  assert.throws(() => code.parse('x\n/* probe dir="src" */\n'), /第 2 行：记号的动作词只有 ref \/ tree \/ has，不认识 probe/);
-  assert.throws(() => code.parse("/* @@docfirst ref a.ts:1-2 @@ */\n"), /第 1 行：@@docfirst 草稿写法已经删了/);
+  assert.throws(() => code.parse('x\n/* probe dir="src" */\n'), /第 2 行：记号的动作词只有 ref \/ tree，不认识 probe/);
+  assert.throws(() => code.parse("/* @@docfirst ref a.ts:1-2 @@ */\n"), /第 1 行：@@docfirst 草稿写法已经删了——改写成不带记录的正式记号，如 \/\* ref file="src\/a\.ts" lines="2-3" \*\//);
   assert.throws(() => code.parse('/* ref file="a.ts" hash="3fa9c2e1b07d" */\n'), /第 1 行：ref 的记录只写了一半/);
   assert.throws(
     () => code.parse('/* probe dir="src" */\nx\n/* ref file="a.ts" hash="3fa9c2e1b07d" */\n'),
     (err: Error) => err.message.includes("第 1 行：记号的动作词只有") && err.message.includes("第 3 行：ref 的记录只写了一半"),
     "写坏了好几处一次列全",
   );
+});
+
+test("has 记号已经删了：报错到行，给出这个格式里的行段写法，file 照抄原记号的", () => {
+  assert.throws(
+    () => code.parse('x\n/* has file="../src/a.ts" text="export function save" */\n'),
+    /第 2 行：has 已经删了——改成行段记号 \/\* ref file="\.\.\/src\/a\.ts" lines="n-n" \*\/，n-n 写「export function save」所在的那一行（钉测试、要看它断言了什么时，从 test\( \/ it\( 那行钉到它结束的那行）/,
+  );
+  assert.deepEqual(code.parse("/* has 普通注释 */\n"), [], "不长成记号的样子，照旧是普通注释");
 });
 
 test("写回：整行替换，保留缩进与行尾 \\r，别的行一个字节不动；再写一次不变", () => {

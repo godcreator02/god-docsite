@@ -55,7 +55,7 @@ export const recordFields = [
 
 /** judgeSpan 判行段的顺序，前一步能下结论就不往下走（compare.ts） */
 /* ref file="../packages/docfirst-pin/src/compare.ts" lines="6-14" hash="a033f65b0f3e" blob="a2a505a8ece0" */
-/* ref file="../packages/docfirst-pin/src/compare.ts" lines="72-98" hash="cf90a3576cdf" blob="a2a505a8ece0" */
+/* ref file="../packages/docfirst-pin/src/compare.ts" lines="65-91" hash="cf90a3576cdf" blob="f5272b0530fa" */
 export const judgeOrder = [
   { id: 'here', label: '记号上的行号处 hash 相同' },
   { id: 'blob', label: '今天整个文件的 blob 相同' },
@@ -91,7 +91,7 @@ export const hunks = [{ oldStart: 1, oldLen: 0, newStart: 2, newLen: 2 }];
 export const mapped = '{ touched: false, start: 4, end: 5 }';
 
 /** 取不到旧文件时，findSpan 在今天的文件里逐个窗口算出的 hash（窗口高度等于记号上的行数） */
-/* ref file="../packages/docfirst-pin/src/compare.ts" lines="35-54" hash="a53b5891c4bc" blob="a2a505a8ece0" */
+/* ref file="../packages/docfirst-pin/src/compare.ts" lines="34-53" hash="a53b5891c4bc" blob="f5272b0530fa" */
 export const windows = [
   { start: 1, hash: '9e26e5478323' },
   { start: 2, hash: '8f3849e2f53a' },

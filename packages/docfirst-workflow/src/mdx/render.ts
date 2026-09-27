@@ -57,15 +57,6 @@ function blockOf(item: Item): string[] {
 /** 这个节点所在那一行的行首下标 */
 const lineStartOf = (text: string, offset: number): number => text.lastIndexOf("\n", offset - 1) + 1;
 
-/** 整行去掉：连同行尾换行；前后都是空行时再吃掉一个空行，别留下两个空行 */
-function dropLine(text: string, start: number, end: number): Edit {
-  const from = lineStartOf(text, start);
-  const newline = text.indexOf("\n", end);
-  let to = newline === -1 ? text.length : newline + 1;
-  if (text.startsWith("\n", to) && (from === 0 || text.slice(0, from).endsWith("\n\n"))) to += 1;
-  return { start: from, end: to, text: "" };
-}
-
 /** 换成代码块：续行带上记号那一行行首的前缀（列表缩进、引用块的 `> `），块才留在原来的容器里 */
 function replaceWithBlock(text: string, start: number, end: number, block: string[]): Edit {
   const prefix = text.slice(lineStartOf(text, start), start);
@@ -92,9 +83,7 @@ function editFor(text: string, node: TreeNode, listing: Listing, edits: Edit[], 
     const item = listing.items.find((it) => it.reference.at === line - 1);
     if (item === undefined) throw new Error(`第 ${line} 行是引用记号，但清单里没有它`);
     const [start, end] = offsetsOf(node);
-    const kind = item.reference.target.kind;
     if (item.reference.record === null) refusals.push(`第 ${line} 行的引用还没确认，先 docfirst confirm`);
-    else if (kind === "has") edits.push(dropLine(text, start, end));
     else if (item.status === "missing") refusals.push(`第 ${line} 行的引用缺失（${missingReasonOf(item)}），先修好`);
     else edits.push(replaceWithBlock(text, start, end, blockOf(item)));
     return true;
@@ -115,7 +104,7 @@ function editFor(text: string, node: TreeNode, listing: Listing, edits: Edit[], 
 }
 
 /**
- * 生成正本按原文渲染：去掉 frontmatter；每个记号换成一个代码块（名字没有内容，整行去掉）；
+ * 生成正本按原文渲染：去掉 frontmatter；每个记号换成一个代码块；
  * 其余文字逐字节不动。换行先统一成 LF。
  * 未确认的引用、缺失的引用、JSX 组件、别的 mdx 表达式都渲染不了，一次列全、抛 RenderRefusal。
  */

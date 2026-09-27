@@ -59,11 +59,10 @@ test("接进 scanCardDir：正常正文不报 docfirst 病", async () => {
   assert.deepEqual(await dirSick(specs), []);
 });
 
-test("卡正文带正式记号：{/* ref ... */} 等三种花括号注释都报 docfirst 病——confirm 换出来的就是它", () => {
+test("卡正文带正式记号：{/* ref ... */} 与 {/* tree ... */} 两种花括号注释都报 docfirst 病——confirm 换出来的就是它", () => {
   const cases = [
     '{/* ref file="src/greet.ts" lines="2-3" */}',
     '{/* tree dir="src" depth="1" */}',
-    '{/* has file="src/store.ts" text="save" */}',
   ];
   for (const line of cases) {
     const problems = checkDocfirstRefs(`正文一段。\n\n${line}\n`);

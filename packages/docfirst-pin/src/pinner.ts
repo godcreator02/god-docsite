@@ -48,7 +48,7 @@ export interface PinnerDeps {
   history: History;
 }
 
-/** 目标的观察：行段 / 整文件 / 名字看文件的行，目录树看名字表 */
+/** 目标的观察：行段 / 整文件看文件的行，目录树看名字表 */
 function observe(reader: Reader, target: Target): string[] | null {
   if (target.kind === "tree") return reader.list?.(target.dir, target.depth, target.glob) ?? null;
   return reader.read(fileOf(target)!);
@@ -60,11 +60,9 @@ function observeKey(target: Target): string {
   return `file ${fileOf(target)}`;
 }
 
-/** 这一处「当前是什么」：行段 / 整文件切那几行，目录树是名字表，名字没有展示内容 */
+/** 这一处「当前是什么」：行段 / 整文件切那几行，目录树是名字表 */
 function currentOf(target: Target, text: string[] | null, lines: Span): string[] | null {
-  if (target.kind === "span" || target.kind === "file") return sliceSpan(text, lines);
-  if (target.kind === "has") return text === null ? null : [];
-  return text;
+  return target.kind === "tree" ? text : sliceSpan(text, lines);
 }
 
 const sameSpan = (a: Span, b: Span): boolean => a[0] === b[0] && a[1] === b[1];

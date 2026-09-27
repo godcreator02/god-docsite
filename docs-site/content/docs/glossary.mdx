@@ -7,7 +7,7 @@ description: 这个仓里反复出现的词各指什么、正本在哪、怎么�
 
 下面几个是钉码核心接口正本上的名字，代码里就是这么写的：
 
-{/* ref file="../packages/docfirst-pin/src/types.ts" lines="1-12" hash="d8d2bce5db34" blob="f7ca47b13c53" */}
+{/* ref file="../packages/docfirst-pin/src/types.ts" lines="1-12" hash="3f45a209cece" blob="32a0167e8d8f" */}
 
 目标（target）是「文档指着的那样东西」，记录（record）是「确认那一刻算出、写在正式记号上的 hash 与 blob 名这类属性」，
 钉（pin）是目标加记录，判定（verdict）是「一处钉核对完的结果」，状态（status）是判定里的结论。带上文档位置之后是 workflow 的两个词：
@@ -19,7 +19,7 @@ description: 这个仓里反复出现的词各指什么、正本在哪、怎么�
 正文里命中术语表的词，站构建时自动加一层标注，鼠标移上去显示定义——源文件里干净，没有手写的标签。
 这张表的正本是一份数据文件，一条 `term` / `aliases` / `def` / `href`：
 
-{/* has file="src/glossary.ts" text="export const terms" */}
+{/* ref file="src/glossary.ts" lines="15-15" hash="ff19e626bfdb" blob="c17a7769e1f7" */}
 
 收词的判据与「定义里不许写什么」写在数据文件的头注释里，改词之前先读它：
 

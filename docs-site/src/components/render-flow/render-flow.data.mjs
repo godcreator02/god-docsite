@@ -90,9 +90,9 @@ export const refusalLines = [
 ];
 /** 上面几行里渲染不了的那几行的行号 */
 export const refusalBadLines = [17, 19, 21];
-/* ref file="../packages/docfirst-workflow/src/mdx/render.ts" lines="77-115" hash="6c1f19cccf45" blob="54090ab69698" */
+/* ref file="../packages/docfirst-workflow/src/mdx/render.ts" lines="68-104" hash="3c00e366b1d8" blob="ddfb59043229" */
 /* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="206-211" hash="d77611f10efb" blob="68565dfd474a" */
-/* ref file="../packages/docfirst-pin/src/types.ts" lines="92-98" hash="b9f62b148d2e" blob="714c2718e246" */
+/* ref file="../packages/docfirst-pin/src/types.ts" lines="80-85" hash="70feff6a62c9" blob="32a0167e8d8f" */
 export const refusalMessage =
   `🔴 ${files.source} → ${files.output}  正本渲染不了：` +
   '第 17 行的引用缺失（文件不在了），先修好；第 19 行有组件 <Callout>，生成正本只写 markdown；' +
@@ -137,7 +137,7 @@ export const terminals = {
  * @typedef {{ id: SceneId, title: string, text: string, duration: number }} RenderChapter
  * @type {RenderChapter[]}
  */
-/* ref file="../packages/docfirst-workflow/src/mdx/render.ts" lines="117-134" hash="8076880b3f76" blob="54090ab69698" */
+/* ref file="../packages/docfirst-workflow/src/mdx/render.ts" lines="106-123" hash="f7c53029bc73" blob="ddfb59043229" */
 /* ref file="../packages/docfirst-workflow/src/project/placement.ts" lines="119-137" hash="134440fb80cc" blob="3ad1d1a31735" */
 /* ref file="../packages/docfirst-workflow/src/project/placement.ts" lines="197-268" hash="8c252d7102ba" blob="3ad1d1a31735" */
 export const chapters = [
@@ -163,7 +163,7 @@ export const chapters = [
     text:
       `正式记号换成一个代码块：内容是渲染时按记号从 ${files.code} 读出的第 2–4 行，hash 和 blob 不进生成物。` +
       `info 串是按后缀认出的语言 ts，加上 title="路径:起-止"，路径照记号里写的，行号是这段代码今天所在的位置。` +
-      '围栏比内容里最长的一串反引号多一个、至少三个。has 这种没有内容的记号整行去掉。',
+      '围栏比内容里最长的一串反引号多一个、至少三个。',
     duration: 8,
   },
   {

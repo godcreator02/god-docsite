@@ -79,11 +79,11 @@ full: true
 | `gwbSkills` | `@godcreator/gwb-skills` | 局部注入，peer `^0.4.5` 且 `optional` | 命令照常可用，读不到说明书 |
 | 命令 `settings.get` | `@godcreator/gwb-settings` | 按名字调，读分区 `unit-folder` 的键 `units-root` | 端口只在站目录的祖父目录里查重，原因写进回执 |
 
-{/* has file="../plugins/docfirst/src/index.ts" text="export const inject = ['gwbCommands']" */}
+{/* ref file="../plugins/docfirst/src/index.ts" lines="26-26" hash="397a91e60cb0" blob="8a6fffc45d6f" */}
 
-{/* has file="../plugins/docfirst/src/index.ts" text="ctx.inject(['gwbSkills']" */}
+{/* ref file="../plugins/docfirst/src/index.ts" lines="204-207" hash="eb0b315868cd" blob="8a6fffc45d6f" */}
 
-{/* has file="../plugins/docfirst/src/index.ts" text="cli.run('settings.get', UNITS_ROOT_SETTING)" */}
+{/* ref file="../plugins/docfirst/src/index.ts" lines="72-78" hash="568963670f9e" blob="8a6fffc45d6f" */}
 
 **写进新站的依赖是一张手写的精确版本表**，只有 workflow 与 fumadocs 适配两个包。这两个包名是写进别人 `package.json` 的字符串，
 不算插件的依赖；两个包发版时这张表跟着改，模板能引用哪些出口由接缝 12 那条测试检查：

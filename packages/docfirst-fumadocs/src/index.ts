@@ -1,9 +1,9 @@
 /**
  * `@godcreator/docfirst-fumadocs`：把 docfirst 接到 fumadocs 站上。`.` 出口就是站的 `src/lib/source.ts` 要的那些：
- *   现状集合：docfirstMdxOptions 经 applyMdxPreset 挂进 mdxOptions（remark 链尾巴认引用、换状态点代码块、按名册打标），
- *            docfirstMarkdownOptions 挂进 postprocess（站上各页的机读版）
+ *   现状集合：docfirstMdxOptions 经 applyMdxPreset 放进 mdxOptions（remark 链末尾认引用、换状态点代码块、按名册打标），
+ *            docfirstMarkdownOptions 放进 postprocess（站上各页的机读版）
  *   轨迹卡集合：cardSchema 当 frontmatter schema，remarkTrajectoryLinks 改写正文里的卡链接
- *   术语标注：docfirstMdxOptions({ root, glossary }) 给了词表才开；匹配逻辑在 glossary.ts（纯的），挂树在 glossary-plugin.ts
+ *   术语标注：docfirstMdxOptions({ root, glossary }) 给了词表才开；匹配逻辑在 glossary.ts（纯函数），改语法树在 glossary-plugin.ts
  *
  * 认记号、打标记这些格式的事不在这儿：它们在 `@godcreator/docfirst-workflow/mdx`，命令行与站用同一份；
  * 这个包只管 fumadocs 那一侧——代码块长什么样、meta 白名单、组件、样式。
@@ -19,7 +19,6 @@ export { remarkDocfirst } from "./remark-plugin.ts";
 export type { PluginFile, RemarkOptions } from "./remark-plugin.ts";
 export { applyListing } from "./transform.ts";
 export {
-  chipNode,
   codeNode,
   diffBlock,
   DOT_COLOR,

@@ -42,7 +42,7 @@ export interface Format {
 export interface Item {
   doc: string;
   reference: Reference;
-  /** 当前内容：行段 / 整文件是那几行（归一化过），目录树是名字表，名字是空表；读不到是 null */
+  /** 当前内容：行段 / 整文件是那几行（归一化过），目录树是名字表；读不到是 null */
   current: string[] | null;
   status: Status;
   /** 行段今天在文件里的位置——跟过 hunk 或滑窗的结果，可能跟记号上写的不一样。别的种类是 [1, 项数] */

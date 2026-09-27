@@ -16,7 +16,7 @@ description: 记号上的 blob 在进程里算；check 按被钉文件自己的�
 
 {/* ref file="../packages/docfirst-pin/src/span.ts" lines="41-57" hash="c2d846c84d20" blob="349017fffa50" */}
 
-{/* has file="../tests/hash-text.test.ts" text="hashText 跟 git hash-object 算得一样" */}
+{/* ref file="../tests/hash-text.test.ts" lines="39-43" hash="ba1cf5c93d02" blob="6fefe20959e0" */}
 
 代价是：确认之后、提交之前又改了这个文件，或者仓按 CRLF 存，记号上的 `blob` 就从没进过对象库，取不回旧文件，只能在整个文件里找。
 为什么接受这个代价，见轨迹卡[记录进记号](/trajectory/2026-09-25-records-live-in-markers)。
@@ -62,14 +62,14 @@ hunk 表按「旧内容的 blob + 新内容的 blob」缓存两层：进程里�
 
 对完位置还要再比一次 `hash` 才下结论。hunk 表说「没碰到这段」也照样比：行号对得上、内容对不上时，宁可报黄让人复核，也不把红判成绿。
 
-{/* ref file="../packages/docfirst-pin/src/compare.ts" lines="82-91" hash="36a8311c0e6c" blob="a2a505a8ece0" */}
+{/* ref file="../packages/docfirst-pin/src/compare.ts" lines="75-84" hash="36a8311c0e6c" blob="f5272b0530fa" */}
 
 ## 取不到旧内容：在整个文件里找
 
 没有旧文件就没有 hunk 表。这时拿一个跟记号上行数一样高的窗口从头滑到尾，逐个算 `hash`，找等于记号上 `hash` 的那一处；
 有几处就取离原行号最近的，两处一样近就不猜，算找不到。
 
-{/* ref file="../packages/docfirst-pin/src/compare.ts" lines="35-54" hash="a53b5891c4bc" blob="7f6556a69177" */}
+{/* ref file="../packages/docfirst-pin/src/compare.ts" lines="34-53" hash="a53b5891c4bc" blob="f5272b0530fa" */}
 
 ## 未提交的改动
 

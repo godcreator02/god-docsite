@@ -14,28 +14,28 @@ full: true
 这个包里的代码都由 fumadocs 或 Next 调用：mdx 加载器编译页面时调的插件、集合的 schema 与回调、页面渲染时的组件。
 入口文件头写明了每样由站的哪一处调用：
 
-{/* ref file="../packages/docfirst-fumadocs/src/index.ts" lines="1-17" hash="4b76096825ed" blob="927e68e40e97" */}
+{/* ref file="../packages/docfirst-fumadocs/src/index.ts" lines="1-17" hash="87b259852bef" blob="712c5236dc2f" */}
 
 **remark 插件**对每篇依次认引用、算清单、换节点、打标，每一步交给谁见上图：
 
 {/* ref file="../packages/docfirst-fumadocs/src/remark-plugin.ts" lines="21-27" hash="5232a651e6c6" blob="bea22dbd14b5" */}
 
-四种引用在页面上是三种节点：行段与整文件是带状态点的代码块，目录树是 fumadocs 的 `Files`，名字是一行小标签：
+三种引用在页面上是两种节点：行段与整文件是带状态点的代码块，目录树是 fumadocs 的 `Files`：
 
-{/* ref file="../packages/docfirst-fumadocs/src/blocks.ts" lines="4-6" hash="1636c1193ea1" blob="31ca86b30219" */}
+{/* ref file="../packages/docfirst-fumadocs/src/blocks.ts" lines="4-6" hash="58d79505821f" blob="19f00626cf69" */}
 
 黄「有变动」时旧行和新行显示在同一个代码块里，块里夹着已经不存在的旧行，所以不带行号；红「缺失」显示确认时那段；
-取不到旧内容、全文也找不到的黄不显示代码。目录树与小标签：
+取不到旧内容、全文也找不到的黄不显示代码。目录树：
 
-{/* ref file="../packages/docfirst-fumadocs/src/blocks.ts" lines="10-16" hash="a1bad073a51a" blob="31ca86b30219" */}
+{/* ref file="../packages/docfirst-fumadocs/src/blocks.ts" lines="10-13" hash="118edffa7a12" blob="19f00626cf69" */}
 
 **机读版**的序列化回调：
 
-{/* ref file="../packages/docfirst-fumadocs/src/markdown.ts" lines="24-46" hash="0455bbfbe401" blob="26542dea70a7" */}
+{/* ref file="../packages/docfirst-fumadocs/src/markdown.ts" lines="24-45" hash="a74a112c335a" blob="0f8adb086fd4" */}
 
 **状态点组件** `DocfirstPre` 替换站的 `pre`。点经 `Actions` 这个函数放进 `CodeBlock` 的标题栏，服务端组件不能把函数传给客户端组件，所以 `./pre` 是客户端组件：
 
-{/* ref file="../packages/docfirst-fumadocs/src/pre.tsx" lines="45-57" hash="cc45214abd3a" blob="d991b4ac2515" */}
+{/* ref file="../packages/docfirst-fumadocs/src/pre.tsx" lines="35-47" hash="cc45214abd3a" blob="592da2927047" */}
 
 **术语标注**：给 `docfirstMdxOptions` 一份词表才开，词条数据是站的：
 
@@ -43,7 +43,7 @@ full: true
 
 **名册规则** `fumadocsRoster` 管 fumadocs 自带的 `Note`、`Files`、`Folder`、`File`：
 
-{/* has file="../packages/docfirst-fumadocs/src/roster.ts" text="export const fumadocsRoster" */}
+{/* ref file="../packages/docfirst-fumadocs/src/roster.ts" lines="14-18" hash="b15f8564023c" blob="93e4c8c9b929" */}
 
 **轨迹卡集合**：`cardSchema` 缺 `born-at` 校验失败、缺 `label` 用文件名；
 `remarkTrajectoryLinks` 把关系边段落转成带 `data-kind` 的 div，把指向卡身份的链接与 wikilink 改成卡页地址：
@@ -76,11 +76,11 @@ full: true
 `docfirstMdxOptions` 的返回值按结构对上 `applyMdxPreset` 的参数，这个包不 import fumadocs 的类型；插件加在 remark 链末尾，
 前面是 fumadocs 的 `remarkInclude` 与预设：
 
-{/* ref file="../packages/docfirst-fumadocs/src/host.ts" lines="46-74" hash="3270efe65d90" blob="ee5ba8cf517d" */}
+{/* ref file="../packages/docfirst-fumadocs/src/host.ts" lines="46-74" hash="afdcac959006" blob="06eabff6c6af" */}
 
-fumadocs 的 `rehypeCode` 只放行 meta 白名单里的字段，这里换成同形的一张，多放行 `data-dot` 与 `data-chip`：
+fumadocs 的 `rehypeCode` 只放行 meta 白名单里的字段，这里换成同形的一张，多放行 `data-dot`：
 
-{/* ref file="../packages/docfirst-fumadocs/src/host.ts" lines="29-29" hash="6bcfcf51a50c" blob="ee5ba8cf517d" */}
+{/* ref file="../packages/docfirst-fumadocs/src/host.ts" lines="29-29" hash="2c600f486c3e" blob="543c77f3bcc9" */}
 
 `maintain` 集合也是现状区，同样接 `docfirstMdxOptions`、由 check 检查，不开 processed markdown；轨迹卡集合用 `cardSchema` 与
 `remarkTrajectoryLinks`，不接 docfirst 的插件；未来区的集合不写配置：
@@ -103,7 +103,7 @@ fumadocs 的 `rehypeCode` 只放行 meta 白名单里的字段，这里换成同
 {/* tree dir="src/app" depth="4" hash="9d4fedfa30d0" */}
 
 星轨整页调用 `loadTrajectory`，把模型交给 `StarDisk`；同时用轨迹卡集合把每张卡的正文渲染好，按卡身份做成 `bodies` 一起交过去，
-点节点就在盘的侧栏里看卡。整页挂 `star-surface`，顶栏跟盘同一块底色。路由组的 layout 引入 `disk.css`，它再引入 `./trajectory.css`。
+点节点就在盘的侧栏里看卡。整页的最外层元素带 `star-surface` 类，顶栏跟盘同一块底色。路由组的 layout 引入 `disk.css`，它再引入 `./trajectory.css`。
 `StarDisk` 的 `hrefBase`、轨迹卡 loader 的 `baseUrl`、`remarkTrajectoryLinks` 的 `hrefBase` 必须是同一个值，否则卡页链接是 404，
 侧栏里的卡链接也认不出来：
 
@@ -118,7 +118,7 @@ React 表先展开 fumadocs 的默认表，再把 `pre` 换成 `DocfirstPre`：
 
 {/* ref file="src/components/registry.ts" lines="12-13" hash="520584aa7f9f" blob="d774808a81ac" */}
 
-{/* has file="scripts/verify-roster.mjs" text="config.components" */}
+{/* ref file="scripts/verify-roster.mjs" lines="12-15" hash="33ef553880dc" blob="55aaeb786def" */}
 
 **样式**：`global.css` 不改。状态点与术语标注的样式随这个包发，站各引一行，两份 css 都由 docs 的 layout 引入：
 

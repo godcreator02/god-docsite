@@ -1,7 +1,7 @@
 /**
  * 识别器：在 mdast 上认引用标记。只有一份，parse 和 remark 插件都用它。
  * 记号是 mdxFlowExpression 节点，值形如 `/* ref file="…" lines="…" hash="…" blob="…" *\/`（载荷是记号写法
- * （`../marker/`）定的那一截，动作词 ref / tree / has，确认过的带着记录属性，还没确认的没有）。
+ * （`../marker/`）定的那一截，动作词 ref / tree，确认过的带着记录属性，还没确认的没有）。
  * 围栏里的同样文字是 code 节点、行内的是 mdxTextExpression，都认不出来——这就是走语法树的理由。
  * 段落里以 `@@docfirst` 开头的一行是已经删掉的草稿写法，报错。
  */
@@ -26,7 +26,7 @@ function commentOf(node: TreeNode): string | null {
 export function markerOf(node: TreeNode): string | null {
   const payload = commentOf(node);
   if (payload === null) return null;
-  return parseFormal(payload, `第 ${lineOf(node)} 行`) === null ? null : payload.trim();
+  return parseFormal(payload, `第 ${lineOf(node)} 行`, braceComment) === null ? null : payload.trim();
 }
 
 /** 段落里的文字节点有没有以 @@docfirst 开头的一行；有就报错到那一行。节点的第一截只有是段落开头时才算一行的开头 */
@@ -48,7 +48,7 @@ export function recognize(tree: TreeNode): Reference[] {
     const payload = commentOf(node);
     if (payload === null) return;
     const line = lineOf(node);
-    const parsed = errors.attempt(() => parseFormal(payload, `第 ${line} 行`));
+    const parsed = errors.attempt(() => parseFormal(payload, `第 ${line} 行`, braceComment));
     if (parsed !== null) refs.push({ ...parsed, at: line - 1 });
   });
   errors.throwIfAny();

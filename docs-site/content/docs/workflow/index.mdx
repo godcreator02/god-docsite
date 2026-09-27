@@ -53,7 +53,7 @@ full: true
 
 {/* ref file="../packages/docfirst-workflow/src/project/card-dir.ts" lines="13-25" hash="7d367c0d4a7f" blob="775b6e9e6c2d" */}
 
-{/* ref file="../packages/docfirst-workflow/src/project/card-refs.ts" lines="1-7" hash="31775d65a033" blob="7d8a942dfc3c" */}
+{/* ref file="../packages/docfirst-workflow/src/project/card-refs.ts" lines="1-7" hash="54a7affcd8b0" blob="e7c7dda81ecd" */}
 
 ### 钉码编排 pinning
 
@@ -79,7 +79,7 @@ full: true
 认记号走 remark 语法树：记号是 `mdxFlowExpression` 节点，段落里以 `@@docfirst` 开头的一行报错；一篇里写坏的记号走完整棵树一次列全再报错。
 写在围栏里、句子里的同样文字分别是 `code` 与 `mdxTextExpression` 节点，不算记号：
 
-{/* ref file="../packages/docfirst-workflow/src/mdx/recognize.ts" lines="16-56" hash="9396d0206273" blob="28e155966a3c" */}
+{/* ref file="../packages/docfirst-workflow/src/mdx/recognize.ts" lines="16-56" hash="60aef1664825" blob="d7e0f8d45d83" */}
 
 **名册**是一张「组件名 → 规则」的表，说明每个组件在机读版里变成什么。这里只有机制，没有默认表：组件与规则写在项目的配置里，
 fumadocs 自带组件的规则在 [fumadocs 适配](/docs/fumadocs)的 `./roster`。规则三种写法，函数规则只经 helpers 读节点、造节点：
@@ -113,23 +113,27 @@ fumadocs 自带组件的规则在 [fumadocs 适配](/docs/fumadocs)的 `./roster
 ### 记号写法 marker
 
 一处引用写成文字是什么样、文字怎么解析回目标与记录，都在 `src/marker/`，两个格式共用：记号里的属性（先目标、后记录）、
-命令行报告用的目标文本 `targetKey`、以 `@@docfirst` 开头的一行的报错。它只从钉码核心 import 目标与记录的类型，不认识哪个格式，也不判状态：
+命令行报告用的目标文本 `targetKey`、已经删掉的两种写法（以 `@@docfirst` 开头的一行与 `has` 记号）的报错。它只从钉码核心 import 目标与记录的类型，不认识哪个格式，也不判状态：
 
-{/* ref file="../packages/docfirst-workflow/src/marker/index.ts" lines="45-54" hash="3c5323faf69b" blob="7a3452874ed0" */}
+{/* ref file="../packages/docfirst-workflow/src/marker/index.ts" lines="40-49" hash="3c5323faf69b" blob="7b1527430cf9" */}
 
-**没有记录属性就是未确认**：`ref` 没有 hash 与 blob、`tree` 没有 hash，记录是 null，`confirm` 时写上；`has` 的记号本身就是记录。
+**没有记录属性就是未确认**：`ref` 没有 hash 与 blob、`tree` 没有 hash，记录是 null，`confirm` 时写上。
 记录只写了一半、值不合法直接报错到行：
 
-{/* ref file="../packages/docfirst-workflow/src/marker/index.ts" lines="143-161" hash="0eb5643ad8ae" blob="1d392bc3267a" */}
+{/* ref file="../packages/docfirst-workflow/src/marker/index.ts" lines="151-168" hash="ab11512ad2d9" blob="7b1527430cf9" */}
 
 每个动作词认哪些属性是固定的；多出属性、值不合法都报错到行。外壳里是「一个词 + `key="value"` 属性」的样子、这个词却不是
-`ref` / `tree` / `has`，也报错，不当成普通注释：
+`ref` / `tree`，也报错，不当成普通注释：
 
-{/* ref file="../packages/docfirst-workflow/src/marker/index.ts" lines="67-75" hash="f449766404ab" blob="1d392bc3267a" */}
+{/* ref file="../packages/docfirst-workflow/src/marker/index.ts" lines="62-69" hash="29ed9fe4c941" blob="7b1527430cf9" */}
+
+这个词是 `has` 时换一句报错：名字记号已经删了，报错里给出这个格式里改成行段的完整写法，`file` 照抄原记号的：
+
+{/* ref file="../packages/docfirst-workflow/src/marker/index.ts" lines="90-98" hash="cb74201cd4a0" blob="7b1527430cf9" */}
 
 一个文件里写坏的记号一次列全：格式逐处解析时经 `markerErrors` 记下每处的错，认完再合成一条抛出：
 
-{/* ref file="../packages/docfirst-workflow/src/marker/index.ts" lines="93-112" hash="3c75698789b6" blob="1d392bc3267a" */}
+{/* ref file="../packages/docfirst-workflow/src/marker/index.ts" lines="100-119" hash="3c75698789b6" blob="7b1527430cf9" */}
 
 ### 引用与清单 reference
 

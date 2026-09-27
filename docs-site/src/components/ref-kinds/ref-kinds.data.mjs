@@ -11,8 +11,7 @@
  * @typedef {{ type: 'diff', title: string, lines: Array<[' ' | '-' | '+', string]> }} DiffSite
  *   旧行新行渲在同一块里，不带行号
  * @typedef {{ type: 'tree', root: string, names: string[], gone: boolean }} TreeSite
- * @typedef {{ type: 'chip', text: string }} ChipSite
- * @typedef {CodeSite | DiffSite | TreeSite | ChipSite} Site
+ * @typedef {CodeSite | DiffSite | TreeSite} Site
  * @typedef {{ id: string, status: Status, blocking?: true, when: string, cli: string, site: Site }} Outcome
  *   blocking：黄灯且被钉的东西在本仓有未提交改动，check 按红算（站上仍按 status 显示）
  * @typedef {{ attr: string, recorded: string, today: string }} CompareRow
@@ -31,17 +30,17 @@ const BLOCKING_TAIL = '——在同一个提交里复核，再 docfirst confirm 
 const NORMALIZE = '算之前先归一化：换行统一成 LF、去掉每行行尾空白、去掉末尾空行；缩进和注释照算。';
 
 /** @type {RefKind[]} */
-/* ref file="../packages/docfirst-workflow/src/marker/index.ts" lines="20-54" hash="07bef3cfd3d5" blob="7a3452874ed0" */
+/* ref file="../packages/docfirst-workflow/src/marker/index.ts" lines="19-49" hash="a65b6baa8846" blob="7b1527430cf9" */
 /* ref file="../packages/docfirst-pin/src/span.ts" lines="21-39" hash="8d9f8b1618fa" blob="23033c685517" */
-/* ref file="../packages/docfirst-pin/src/compare.ts" lines="72-127" hash="319dd2a20a05" blob="a2a505a8ece0" */
+/* ref file="../packages/docfirst-pin/src/compare.ts" lines="65-113" hash="74b12acad0bd" blob="f5272b0530fa" */
 /* ref file="../packages/docfirst-workflow/src/project/fs-reader.ts" lines="1-7" hash="47320c54fcd0" blob="34d9e87c179c" */
 /* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="37-43" hash="9ebfdcac2bf1" blob="68565dfd474a" */
 /* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="274-279" hash="a11866d4fa45" blob="68565dfd474a" */
-/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="296-303" hash="85058fb75fad" blob="68565dfd474a" */
-/* ref file="../packages/docfirst-pin/src/types.ts" lines="92-98" hash="b9f62b148d2e" blob="714c2718e246" */
-/* ref file="../packages/docfirst-fumadocs/src/blocks.ts" lines="25-38" hash="c3224ec6e495" blob="420f340cf4d9" */
-/* ref file="../packages/docfirst-fumadocs/src/blocks.ts" lines="48-64" hash="2633d3f6fe33" blob="420f340cf4d9" */
-/* ref file="../packages/docfirst-fumadocs/src/blocks.ts" lines="165-197" hash="4cc30c55c14f" blob="420f340cf4d9" */
+/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="295-302" hash="85058fb75fad" blob="ec24566d459a" */
+/* ref file="../packages/docfirst-pin/src/types.ts" lines="80-85" hash="70feff6a62c9" blob="32a0167e8d8f" */
+/* ref file="../packages/docfirst-fumadocs/src/blocks.ts" lines="24-37" hash="c3224ec6e495" blob="19f00626cf69" */
+/* ref file="../packages/docfirst-fumadocs/src/blocks.ts" lines="47-61" hash="8a889ba101b1" blob="19f00626cf69" */
+/* ref file="../packages/docfirst-fumadocs/src/blocks.ts" lines="156-185" hash="48c366c0543b" blob="19f00626cf69" */
 export const kinds = [
   {
     id: 'span',
@@ -231,46 +230,12 @@ export const kinds = [
       },
     ],
   },
-  {
-    id: 'has',
-    label: '名字',
-    text: '说某个文件里有某个名字。check 只看文件里有没有一行包含这串字，是纯文本匹配，不算 hash、不管在第几行。记号没有记录属性，写下就算确认过，没有「未确认」。没有黄：找得到是绿，找不到是红。',
-    formal: ['{/* has file="src/greet.ts" text="export function greet" */}'],
-    written: ['{/* has file="src/greet.ts" text="export function greet" */}'],
-    writtenNote: '跟上面一样：has 的记号本身就是记录，写下就算确认过',
-    compare: [{ attr: 'text', recorded: 'export function greet', today: '今天的 src/greet.ts 里有没有一行包含这串字（区分大小写）' }],
-    rule: '没有记录属性可比，函数体改了、挪了位置都不影响。',
-    observe: { title: 'src/greet.ts（今天）· 第 2 行包含这串字', lines: GREET, highlight: [2, 2] },
-    outcomes: [
-      {
-        id: 'same',
-        status: 'fresh',
-        when: '文件里还有一行包含这串字',
-        cli: '🟢 content/docs/a.mdx  has src/greet.ts "export function greet"  新鲜',
-        site: { type: 'chip', text: 'src/greet.ts · 有 export function greet' },
-      },
-      {
-        id: 'text-missing',
-        status: 'missing',
-        when: '函数改名成 hello，整个文件里找不到这串字',
-        cli: '🔴 content/docs/a.mdx  has src/greet.ts "export function greet"  缺失（文件里没有这个名字了）',
-        site: { type: 'chip', text: 'src/greet.ts · 有 export function greet · 缺失' },
-      },
-      {
-        id: 'file-missing',
-        status: 'missing',
-        when: 'src/greet.ts 删了',
-        cli: '🔴 content/docs/a.mdx  has src/greet.ts "export function greet"  缺失（文件不在了）',
-        site: { type: 'chip', text: 'src/greet.ts · 有 export function greet · 缺失' },
-      },
-    ],
-  },
 ];
 
 export const statusName = { fresh: '新鲜', changed: '有变动', missing: '缺失', unconfirmed: '未确认' };
 
 /** 站上那一处是哪种东西 */
-export const siteKindName = { code: '代码块', diff: '代码块（旧行新行）', tree: '文件树', chip: '小标签' };
+export const siteKindName = { code: '代码块', diff: '代码块（旧行新行）', tree: '文件树' };
 
 /** 一种结果的名字：拦提交的黄叫「按红算」 */
 export function outcomeName(outcome) {
@@ -288,8 +253,6 @@ export function siteSummary(site) {
       return site.gone
         ? `文件树，根文件夹「${site.root}」禁用，里面只有一项「${site.names.join('')}」`
         : `文件树，根文件夹「${site.root}」展开：${site.names.join('、')}`;
-    case 'chip':
-      return `一行带状态点的小标签「${site.text}」`;
     default:
       throw new Error(`ref-kinds：认不出的站上显示类型「${site.type}」`);
   }

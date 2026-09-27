@@ -16,27 +16,25 @@ const DOC = "docs/a.mdx";
 const tree = (dir: string, depth: number): string => `${refLine({ kind: "tree", dir, depth })}\n`;
 const namesOf = (r: ReturnType<typeof setupRepo>, dir: string, depth: number): string[] => r.pinning.checkDoc(DOC, tree(dir, depth)).items[0]!.current!;
 
-test("目录树、名字：清单按 .gitignore 过滤，改名红、多文件黄", () => {
+test("目录树：清单按 .gitignore 过滤，多文件黄、改文件内容不算变", () => {
   const r = setupRepo();
   try {
     r.write(".gitignore", "dist/\n");
     r.write("src/dist/out.js", "x");
     r.write("src/util.ts", "export const a = 1;\n");
     r.commit("起结构");
-    const refs: Target[] = [
-      { kind: "tree", dir: "src", depth: 1 },
-      { kind: "has", file: "src/greet.ts", text: "export function greet" },
-    ];
-    r.write(DOC, refs.map(refLine).join("\n\n"));
+    const target: Target = { kind: "tree", dir: "src", depth: 1 };
+    r.write(DOC, refLine(target));
     r.confirm(DOC);
     const items = r.pinning.checkDoc(DOC, r.read(DOC)).items;
-    assert.deepEqual(items.map((i) => i.status), ["fresh", "fresh"]);
+    assert.deepEqual(items.map((i) => i.status), ["fresh"]);
     assert.deepEqual(items[0]!.current, ["greet.ts", "util.ts"], "dist/ 被忽略，不进清单");
 
-    r.write("src/tag.ts", "export const t = 1;\n");
     r.write("src/greet.ts", CODE.replace("function greet", "function hello"));
+    assert.deepEqual(r.pinning.checkDoc(DOC, r.read(DOC)).items.map((i) => i.status), ["fresh"], "目录树只看名字，不看内容");
+    r.write("src/tag.ts", "export const t = 1;\n");
     const after = r.pinning.checkDoc(DOC, r.read(DOC)).items;
-    assert.deepEqual(after.map((i) => [i.status, i.reason]), [["changed", "changed"], ["missing", "text-missing"]]);
+    assert.deepEqual(after.map((i) => [i.status, i.reason]), [["changed", "changed"]]);
     assert.deepEqual(after[0]!.current, ["greet.ts", "tag.ts", "util.ts"]);
   } finally {
     r.teardown();

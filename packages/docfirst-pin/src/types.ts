@@ -4,7 +4,7 @@
  * **只有目标与记录**：文档里的哪一行、写成什么样、属于哪篇文档，都不归这里。
  *
  * 用词：
- *   目标 Target       钉的是什么：某文件某几行 / 整个文件 / 某目录的形状 / 某文件里有没有某名字，四种（见下）
+ *   目标 Target       钉的是什么：某文件某几行 / 整个文件 / 某目录的形状（见下）
  *   记录 MemoRecord   确认时算出的属性（hash、blob 名这类），按目标种类各一种
  *   钉 Pin            目标 + 记录；没确认过的记录是 null
  *   判定 Verdict      一处核对完的结果：状态、今天的位置、给人看的旧行新行
@@ -34,14 +34,7 @@ export interface TreeTarget {
   glob?: string;
 }
 
-/** 名字：文件里有没有一行含这个字面量 */
-export interface HasTarget {
-  kind: "has";
-  file: string;
-  text: string;
-}
-
-export type Target = SpanTarget | FileTarget | TreeTarget | HasTarget;
+export type Target = SpanTarget | FileTarget | TreeTarget;
 
 /** 行段与整文件的记录：段哈希，加确认时整文件的 blob 名（两样都是 12 位十六进制前缀） */
 export interface ContentRecord {
@@ -56,12 +49,7 @@ export interface TreeRecord {
   hash: string;
 }
 
-/** 名字的记录：没有内容可记，有这条记录就是确认过 */
-export interface HasRecord {
-  kind: "has";
-}
-
-export type MemoRecord = ContentRecord | TreeRecord | HasRecord;
+export type MemoRecord = ContentRecord | TreeRecord;
 
 /** 一处钉：钉的是什么，确认时记了什么；没确认过的记录是 null */
 export interface Pin {
@@ -80,10 +68,10 @@ export type Status = "fresh" | "changed" | "missing" | "unconfirmed";
 
 /**
  * 状态的细分理由：
- *   缺失  vanished（整段删光）/ file-missing / dir-missing / text-missing
+ *   缺失  vanished（整段删光）/ file-missing / dir-missing
  *   变动  changed / unlocated（取不到旧内容，滑窗也找不到这段，位置不明）
  */
-export type Reason = "vanished" | "file-missing" | "dir-missing" | "text-missing" | "changed" | "unlocated";
+export type Reason = "vanished" | "file-missing" | "dir-missing" | "changed" | "unlocated";
 
 /**
  * 细分理由的中文说法，命令行打印与渲染拒绝的提示共用：红说清楚引用的是什么东西不在了，黄说清楚是不是找不着了。
@@ -93,7 +81,6 @@ export const REASON_TEXT: Record<Exclude<Reason, "changed">, string> = {
   vanished: "整段已被删光",
   "file-missing": "文件不在了",
   "dir-missing": "目录不在了",
-  "text-missing": "文件里没有这个名字了",
   unlocated: "取不到确认时的内容，这段也找不到了，位置不明——重读源码后 --accept",
 };
 
@@ -107,7 +94,7 @@ export interface Verdict {
   /** 行段今天在文件里的位置——跟过 hunk 或滑窗的结果，可能跟钉上写的不一样。别的种类是 [1, 项数] */
   lines: Span;
   reason?: Reason;
-  /** 当前内容：行段 / 整文件是那几行（归一化过），目录树是名字表，名字是空表；读不到是 null */
+  /** 当前内容：行段 / 整文件是那几行（归一化过），目录树是名字表；读不到是 null */
   current: string[] | null;
   /** 有变动且取得到旧内容时给人看的 `- / +` 文本 */
   diff?: string;
@@ -147,7 +134,7 @@ export interface Judgement {
   old?: string[];
 }
 
-/** 目标指向的文件（行段、整文件、名字）；目录树不是文件，给 null */
+/** 目标指向的文件（行段、整文件）；目录树不是文件，给 null */
 export function fileOf(target: Target): string | null {
-  return target.kind === "span" || target.kind === "file" || target.kind === "has" ? target.file : null;
+  return target.kind === "tree" ? null : target.file;
 }

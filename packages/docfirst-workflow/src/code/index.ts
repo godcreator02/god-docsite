@@ -1,5 +1,5 @@
 /**
- * 组件格式：站的 `src/components/` 下的 .ts / .tsx / .mjs，讲解组件里照源码抄来的数据在这里挂引用。
+ * 组件格式：站的 `src/components/` 下的 .ts / .tsx / .mjs，讲解组件里照源码抄来的数据在这里写引用。
  * 记号是单独一行的块注释 `/* ref file="…" lines="…" *\/`（前后可有空白），里面那一截跟 mdx 里的一字不差，
  * 由记号写法（`../marker/`）解析；写回整行替换，保留缩进与行尾的 \r。
  * 不解析 TypeScript：记号就是一行注释，按行认、按行写。一行里除了一个块注释还有别的代码，就不是记号。
@@ -34,7 +34,7 @@ export function parse(text: string): Reference[] {
   text.split("\n").forEach((raw, index) => {
     const comment = COMMENT_LINE.exec(raw.replace(/\r$/, ""));
     if (comment === null) return;
-    const parsed = errors.attempt(() => parseFormal(comment[2]!, `第 ${index + 1} 行`));
+    const parsed = errors.attempt(() => parseFormal(comment[2]!, `第 ${index + 1} 行`, blockComment));
     if (parsed !== null) refs.push({ ...parsed, at: index });
   });
   errors.throwIfAny();

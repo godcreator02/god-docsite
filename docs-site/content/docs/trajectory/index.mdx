@@ -33,7 +33,7 @@ full: true
 哪些 frontmatter 字段算卡由 `CARD_KEYS` 决定。命令行校验卡与 fumadocs 适配的卡集合 schema 用的是这同一张表，
 表里的字段一个都没写的文件不算卡：
 
-{/* has file="../packages/docfirst-trajectory/src/parse.ts" text="export const CARD_KEYS" */}
+{/* ref file="../packages/docfirst-trajectory/src/parse.ts" lines="16-18" hash="dfeb7aaec458" blob="4e25ee1e4c92" */}
 
 **`buildTrajectory(scan)`** 是组装入口：收 `scanCards` 的结果，给那张根卡的盘建模，交回全部卡、病卡和一个模型。
 它不算布局，布局在客户端按当前设置计算：

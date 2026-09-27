@@ -161,32 +161,38 @@ test("以 @@docfirst 开头的一行：check 报错，说清是哪篇第几行�
   }
 });
 
-test("四类引用一篇文档：四种记号各自认得回来；多了文件黄、名字没了红", async () => {
+test("目录树与整文件一篇文档：两种记号各自认得回来；多了文件黄", async () => {
   const p = setupProject();
   try {
-    writeFileSync(
-      join(p.root, "docs", "d.mdx"),
-      '# d\n\n{/* tree dir="src" */}\n\n{/* ref file="src/greet.ts" */}\n\n{/* has file="src/greet.ts" text="export function greet" */}\n',
-    );
+    writeFileSync(join(p.root, "docs", "d.mdx"), '# d\n\n{/* tree dir="src" */}\n\n{/* ref file="src/greet.ts" */}\n');
     const done = await p.cli("confirm");
     assert.equal(done.code, 0, done.out);
     assert.match(done.out, /✅ docs\/d\.mdx {2}tree src depth=1 {2}已确认/);
     assert.match(done.out, /✅ docs\/d\.mdx {2}src\/greet\.ts:all {2}已确认/);
-    assert.doesNotMatch(done.out, /has src\/greet\.ts/, "has 的记号本身就是记录，写下就是确认过的，confirm 没什么可写");
     const doc = p.read("docs/d.mdx");
     assert.match(doc, /^\{\/\* tree dir="src" depth="1" hash="[0-9a-f]{12}" \*\/\}$/m);
     assert.match(doc, /^\{\/\* ref file="src\/greet\.ts" hash="[0-9a-f]{12}" blob="[0-9a-f]{12}" \*\/\}$/m);
-    assert.match(doc, /^\{\/\* has file="src\/greet\.ts" text="export function greet" \*\/\}$/m);
 
     const green = await p.cli("check");
     assert.match(green.out, /🟢 docs\/d\.mdx {2}tree src depth=1 {2}新鲜（1 项）/);
 
     writeFileSync(join(p.root, "src", "tag.ts"), "export const t = 1;\n");
-    writeFileSync(join(p.root, "src", "greet.ts"), CODE.replace("function greet", "function hello"));
     const after = await p.cli("check");
     assert.equal(after.code, 1);
     assert.match(after.out, /🔴 docs\/d\.mdx {2}tree src depth=1 {2}有变动，是本仓还没提交的改动引起的（2 项）/, "多出来的文件还没提交，这个黄算红");
-    assert.match(after.out, /🔴 docs\/d\.mdx {2}has src\/greet\.ts "export function greet" {2}缺失（文件里没有这个名字了）/);
+  } finally {
+    p.teardown();
+  }
+});
+
+test("has 记号：check 报错到文档与行，给出改成行段的写法", async () => {
+  const p = setupProject();
+  try {
+    writeFileSync(join(p.root, "docs", "d.mdx"), '# d\n\n{/* has file="src/greet.ts" text="export function greet" */}\n');
+    await assert.rejects(
+      p.cli("check"),
+      /docs\/d\.mdx 第 3 行：has 已经删了——改成行段记号 \{\/\* ref file="src\/greet\.ts" lines="n-n" \*\/\}，n-n 写「export function greet」所在的那一行/,
+    );
   } finally {
     p.teardown();
   }

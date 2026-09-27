@@ -53,7 +53,7 @@ workflow 目录之间是同样的写法：
 钉码核心不读盘、不启动进程、不接触文档文本，这样测正好把这几条一并检查了；认引用、配回行号、写回的先后顺序在 `tests/pinning.test.ts` 测，
 组件格式认记号、写回、进现状区在 `tests/code-format.test.ts` 测：
 
-{/* ref file="../tests/core.test.ts" lines="1-4" hash="e463e5acdc35" blob="cb01529c0ac2" */}
+{/* ref file="../tests/core.test.ts" lines="1-4" hash="60e6c7a57316" blob="e54b681354bd" */}
 
 旧内容来源默认什么都取不到，比较器只能滑窗；走到 hunk 表就说明判定顺序错了：
 
@@ -62,7 +62,7 @@ workflow 目录之间是同样的写法：
 记号的写法由 `tests/marker.test.ts` 验：`parse(marker(t, r))` 必须认回 `t` 与 `r`。
 认得出只是一半，什么时候不认才是记号能放进正文的理由：
 
-{/* ref file="../tests/marker.test.ts" lines="95-98" hash="3386f2608c3a" blob="be8ac6e8ad22" */}
+{/* ref file="../tests/marker.test.ts" lines="111-114" hash="3386f2608c3a" blob="3c0f91ece368" */}
 
 ## git 那一侧：真 git 仓，不打桩
 

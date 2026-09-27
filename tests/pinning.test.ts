@@ -22,7 +22,7 @@ function setup() {
 
 test("checkDoc：mdx 认出的每处按原来的顺序配回文档、行号、记录", () => {
   const { pinning } = setup();
-  const text = `# 标题\n\n${refLine(SPAN)}\n\n${refLine({ kind: "span", file: "src/nowhere.ts", a: 1, b: 2 })}\n\n{/* has file="src/greet.ts" text="greet" */}\n`;
+  const text = `# 标题\n\n${refLine(SPAN)}\n\n${refLine({ kind: "span", file: "src/nowhere.ts", a: 1, b: 2 })}\n\n${refLine({ kind: "file", file: "src/greet.ts" })}\n`;
   const listing = pinning.checkDoc(DOC, text);
   assert.equal(listing.doc, DOC);
   assert.deepEqual(
@@ -30,7 +30,7 @@ test("checkDoc：mdx 认出的每处按原来的顺序配回文档、行号、�
     [
       [DOC, 2, null, "unconfirmed"],
       [DOC, 4, null, "missing"],
-      [DOC, 6, { kind: "has" }, "fresh"],
+      [DOC, 6, null, "unconfirmed"],
     ],
   );
   assert.equal(listing.items[1]!.reason, "file-missing");

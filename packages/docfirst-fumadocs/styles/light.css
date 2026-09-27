@@ -94,23 +94,3 @@
   text-decoration: line-through;
   opacity: 0.75;
 }
-
-/* 芯片：存在性、名字这两种引用没有代码可摆，渲成一行带点的小标签 */
-.docfirst-chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 7px;
-  margin: 0.25rem 0.5rem 0.75rem 0;
-  padding: 3px 11px;
-  border: 1px solid var(--color-fd-border, #e4e4e7);
-  border-radius: 14px;
-  font-family: var(--font-mono, ui-monospace, monospace);
-  font-size: 0.8rem;
-  line-height: 1.5;
-  color: var(--color-fd-muted-foreground, #52525b);
-  background: var(--color-fd-card, #fff);
-}
-
-.docfirst-chip-text {
-  white-space: nowrap;
-}
