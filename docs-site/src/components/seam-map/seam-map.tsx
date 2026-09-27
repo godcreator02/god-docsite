@@ -21,6 +21,8 @@ import { docsExplainGraph } from './inner/docs-explain.data.mjs';
 import { docsExplainLayout } from './inner/docs-explain.layout';
 import { pluginGraph } from './inner/plugin.data.mjs';
 import { pluginLayout } from './inner/plugin.layout';
+import { trajectoryPlanGraph } from './inner/trajectory-plan.data.mjs';
+import { trajectoryPlanLayout } from './inner/trajectory-plan.layout';
 
 const INNER: Record<string, { graph: SeamGraph; layout: SeamLayout }> = {
   pin: { graph: pinGraph, layout: pinLayout },
@@ -29,6 +31,7 @@ const INNER: Record<string, { graph: SeamGraph; layout: SeamLayout }> = {
   fumadocs: { graph: fumadocsGraph, layout: fumadocsLayout },
   'docs-explain': { graph: docsExplainGraph, layout: docsExplainLayout },
   plugin: { graph: pluginGraph, layout: pluginLayout },
+  'trajectory-plan': { graph: trajectoryPlanGraph, layout: trajectoryPlanLayout },
 };
 
 export function SeamMap({ module: moduleId }: { module?: string }) {
