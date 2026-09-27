@@ -1,0 +1,95 @@
+---
+title: 接缝图进讲解播放器
+description: 本站接缝图的画法、定义图、机读文字与样式搬进 @godcreator/explainer-player，各站只留每张图的内容与坐标；unit-folder、dsh 两个站手写的那份经反馈迁过来；发 explainer-player 0.1.1
+full: true
+---
+
+**本页回答**：接缝图的实现现在放在哪、搬进讲解播放器之后包里多了什么、站里还剩什么、下游两个手写的站怎么迁、怎么证明画面与机读文字都没变、按什么顺序做。
+
+## 验收
+
+- [ ] 讲解播放器多一个出口 `./seam-graph`（`defineSeamGraph`、`seamGraphText` 与图的类型），产物零 import、不带 `"use client"`；边界测试守住
+- [ ] 主入口 `.` 多导出 `SeamDiagram`、`cap` 与布局类型 `SeamLayout`，照旧只 import react
+- [ ] 接缝图样式并进 `styles/explain.css`，站的 `seam-map.css` 删掉
+- [ ] 本站 `seam-map/` 下只剩各图的 `*.data.mjs`、`*.layout.ts`、`seam-map.tsx` 与 `seam-map.ai.mjs`；`graph.mjs`、`diagram.tsx` 删掉
+- [ ] 画面与机读文字都没变：用 git worktree 取改动前的提交，两边对每张图生成机读文字逐字相同；首页与一个模块页的截图两边一致
+- [ ] explainer-player 发 0.1.1；说明书 `docs-site` 里「描述一个系统：先画接缝图」改成用这个包画
+- [ ] 给 gwb-unit-folder、gwb-dsh 两个站各写一条迁移反馈
+- [ ] 模块页、它的接缝图、边界规则图改成现状，写轨迹卡，本页与它的接缝图删掉
+
+## 现在在哪
+
+本站的接缝图分在四个文件里：`graph.mjs` 定义图并做检查，`diagram.tsx` 画图（悬停浮出说明、点击固定高亮），
+`seam-map.ai.mjs` 把图写成机读文字，`seam-map.css` 是样式。画法已经用了讲解播放器的 `Pill` 与 `.dx` 颜色变量，
+但只有本站能用。gwb-unit-folder 与 gwb-dsh 的站各手写了一份：数据和坐标混在一个组件文件里，
+悬停、点击、机读文字的做法各不相同，改一处画法三个站要各改一遍。
+
+## 做完之后的接缝图
+
+鼠标停在编号上看每条接缝交换什么，点击固定高亮它连着谁。讲解播放器原有的三种外壳与控制条这次不动，没有画；
+它们的接缝看 [讲解播放器模块页](/docs/explainer-player) 那张现状图：
+
+<SeamMap module="seam-map-plan" />
+
+## 包里多什么
+
+| 文件 | 出口 | 从哪来 | 对外给什么 |
+| --- | --- | --- | --- |
+| `src/seam-graph.ts` | `./seam-graph`（新） | 站的 `graph.mjs` 改成 TypeScript，加上 `seam-map.ai.mjs` 里拼文字的那段 | `defineSeamGraph`、`seamGraphText`，类型 `SeamGraph`、`SeamGraphInput` 与模块、能力、入口、接缝各自的类型 |
+| `src/seam-diagram.tsx` | `.` | 站的 `diagram.tsx` 原样搬来 | `SeamDiagram`、`cap`，类型 `SeamLayout`、`Box`、`Icon` |
+| `styles/explain.css` | `./styles.css` | 站的 `seam-map.css` 接在后面 | `.seam-map .sm-*` |
+
+`./seam-graph` 跟 `./text` 一样单独构建：站的机读规则由 `docfirst.config.mjs` 在 Node 里加载，数据文件又被画面 import，
+两边要能加载同一份，所以它不许 import 任何运行时代码，只 import 颜色名 `Role` 的类型。
+`seamGraphText(graph)` 交回字符串数组，每段一个元素；站的机读规则把每段包成段落，包不认识 docfirst 的段落写法。
+
+`.` 里的 `SeamDiagram` 只 import `./seam-graph` 的类型，客户端产物里没有定义图的代码。图标照旧由站传：
+布局表里的图标是任意一个收 SVG 属性的组件，包不 import 图标库。
+
+## 站里剩什么
+
+| 文件 | 做什么 |
+| --- | --- |
+| `*.data.mjs` | 每张图的内容，`defineSeamGraph` 改从 `@godcreator/explainer-player/seam-graph` 取 |
+| `*.layout.ts` | 每张图的坐标与图标，`cap` 与 `SeamLayout` 改从 `@godcreator/explainer-player` 取 |
+| `seam-map.tsx` | 按 `module` 属性挑出图与坐标交给 `SeamDiagram` |
+| `seam-map.ai.mjs` | 挑出同一张图交给 `seamGraphText`，每段包成段落 |
+
+站的全局样式不再引 `seam-map.css`：它已经引了讲解播放器的样式表。
+
+## 下游两个站怎么迁
+
+两个站手写的那份跟包的数据形状不一样，**包不跟着扩**，迁的时候按包的形状改写：
+
+- **gwb-unit-folder**：有一种接缝一半是调用、一半是读写磁盘，拆成两条接缝；每条接缝的「谁负责」并进说明文字
+- **gwb-dsh**：每条接缝的「谁负责」「测试」并进说明文字；编号圆点现在按连线比例自动放，改成在布局表里写坐标
+
+两个站各收一条反馈（写进各自站的 `content/future/inbox/`）：依赖加 `@godcreator/explainer-player`，组件拆成数据、坐标与薄壳三份，
+机读规则改用 `seamGraphText`，站的全局样式引讲解播放器的样式表。
+
+## 出口的变化（0.1.1）
+
+| 出口 | 变化 |
+| --- | --- |
+| `.` | 加 `SeamDiagram`、`cap`，类型 `SeamLayout`、`Box`、`Icon` |
+| `./seam-graph` | 新出口：`defineSeamGraph`、`seamGraphText` 与图的类型 |
+| `./styles.css` | 加接缝图样式 |
+| `./text` | 不变 |
+
+只加不删，升 y。
+
+## 不做的事
+
+- **不扩数据形状**：下游手写版多出的几个字段（负责方、测试、半调用半读盘、按比例放编号）只有一个站用，迁的时候并进已有字段
+- **不改画法**：图元、交互、配色、图例文字原样搬，换地方不换样子
+- **不做自动布局**：坐标照旧手写，一张图一份布局表
+- **包不管一个站有几张图**：挑图的表与 `SeamMap` 这个组件名都留在站里
+
+## 顺序
+
+每一步一个提交：
+
+1. 包里加 `seam-graph.ts`、`seam-diagram.tsx`，样式并进 `explain.css`；构建配置与 `exports` 加 `./seam-graph`；边界测试加「`./seam-graph` 零 import」；包测试加 `defineSeamGraph` 的几种报错、`seamGraphText` 的输出、`SeamDiagram` 渲染出的第一帧
+2. 本站改用包：数据与布局改 import，薄壳与机读规则改调包，删 `graph.mjs`、`diagram.tsx`、`seam-map.css`
+3. worktree 对比：新旧两边对每张图生成机读文字逐字比较，首页与一个模块页各截一张图比较；证据写进轨迹卡
+4. 模块页、它的接缝图、边界规则图、说明书 `docs-site` 改成现状，写轨迹卡，删本页与计划图；发 explainer-player 0.1.1（说明书随插件，插件升 y）；给两个下游站写迁移反馈

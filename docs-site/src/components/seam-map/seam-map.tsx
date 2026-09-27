@@ -21,6 +21,8 @@ import { explainerPlayerGraph } from './inner/explainer-player.data.mjs';
 import { explainerPlayerLayout } from './inner/explainer-player.layout';
 import { pluginGraph } from './inner/plugin.data.mjs';
 import { pluginLayout } from './inner/plugin.layout';
+import { seamMapPlanGraph } from './inner/seam-map-plan.data.mjs';
+import { seamMapPlanLayout } from './inner/seam-map-plan.layout';
 
 const INNER: Record<string, { graph: SeamGraph; layout: SeamLayout }> = {
   pin: { graph: pinGraph, layout: pinLayout },
@@ -29,6 +31,7 @@ const INNER: Record<string, { graph: SeamGraph; layout: SeamLayout }> = {
   fumadocs: { graph: fumadocsGraph, layout: fumadocsLayout },
   'explainer-player': { graph: explainerPlayerGraph, layout: explainerPlayerLayout },
   plugin: { graph: pluginGraph, layout: pluginLayout },
+  'seam-map-plan': { graph: seamMapPlanGraph, layout: seamMapPlanLayout },
 };
 
 export function SeamMap({ module: moduleId }: { module?: string }) {
