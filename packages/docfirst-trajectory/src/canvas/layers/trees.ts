@@ -41,7 +41,7 @@ interface FillBoxEl extends BoxEl {
 /** 树名的不透明度：用领域色，但比节点标签暗一档。 */
 const TREE_NAME_OPACITY = 0.7;
 /** 扇环边框的不透明度：领域色细线，看得出这片地盘的边界、不抢节点。 */
-const BOX_EDGE_OPACITY = 0.4;
+const BOX_EDGE_OPACITY = 0.18;
 
 export class TreesLayer implements StarLayer {
   private boxEls: FillBoxEl[] = [];
