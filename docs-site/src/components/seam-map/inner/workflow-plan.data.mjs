@@ -1,6 +1,6 @@
 /**
  * 在途方案「workflow 的接缝」做完之后的 docfirst-workflow 接缝图：spec 页 <SeamMap module="workflow-plan" /> 画的就是它。
- * 这张图只讲这次要改的那件事——碰磁盘与 git 的只剩 node/，装配与命令行经接口拿到外部环境——
+ * 这张图只讲这次要改的那件事——碰磁盘与 git 的只剩 node/，装配、卡格式与命令行直接 import 它——
  * 所以这次不动的钉码编排、两种格式、记号写法、引用与清单合成一个框，它们之间的接缝不画，现状看模块页那张图。
  * 坐标在 workflow-plan.layout.ts。方案做完、模块页那张图改成现状之后，这两个文件跟 spec 页一起删掉。
  */
@@ -10,7 +10,7 @@ export const workflowPlanGraph = defineSeamGraph({
   id: 'workflow-plan',
   title: 'workflow 的接缝（方案做完之后）',
   intro:
-    '方案做完之后 docfirst-workflow 的接缝图：虚线框是包里的目录，灰色实线框是包外的东西。碰磁盘与 git 的只剩最下面一层 node/：装配经 Environment 接口拿到读写文件、加载配置、读取器、旧内容来源与未提交改动探针，卡格式经它列目录、读文件，命令行经 CliIo 拿到 cwd 与打印，缺省都是 Node 实现，测试可以整套换成内存实现。这次不动的钉码编排、两种格式、记号写法、引用与清单合成一个框。',
+    '方案做完之后 docfirst-workflow 的接缝图：虚线框是包里的目录，灰色实线框是包外的东西。碰磁盘与 git 的只剩最下面一层 node/：装配从它取读写文件、加载配置、读取器与旧内容来源，卡格式从它列目录、读文件，命令行从它取未提交改动探针，都是直接 import，没有可替换的接口——Node 实现只有一个使用者。这次不动的钉码编排、两种格式、记号写法、引用与清单合成一个框。',
   frameLabel: '目录',
   modules: [
     {
@@ -20,7 +20,7 @@ export const workflowPlanGraph = defineSeamGraph({
       role: 'cyan',
       outside: false,
       blurb:
-        '站那一侧，内部不动：只按包名用本包的 .、./mdx、./cards。状态的中文说法与卡格式的常量不再自己写一份，改从 . 与 ./cards 取。站构建时装配项目用的是缺省的 Node 实现。',
+        '站那一侧，内部不动：只按包名用本包的 .、./mdx、./cards。状态的中文说法与卡格式的常量不再自己写一份，改从 . 与 ./cards 取。站构建时装配项目照旧。',
       caps: [
         { id: 'fd-cards', name: '卡集合与读卡', ident: 'loadTrajectory · cardSchema' },
         { id: 'fd-remark', name: 'remark 插件', ident: 'loadProject · recognize · stamp' },
@@ -33,9 +33,9 @@ export const workflowPlanGraph = defineSeamGraph({
       role: 'emerald',
       outside: false,
       blurb:
-        'run.ts 拆成三份：args.ts 是命令与开关表、求助、点名页解析；commands.ts 里 check / confirm / render / trajectory 各一个函数，只调用项目与卡格式，交回要打印的行与退出码；text.ts 是状态符号、状态文案与每种结果打成哪一行。main(argv, io) 的 cwd 与打印经 CliIo 传进来；cli.ts 是唯一碰 process 的地方，把它包成 CliIo、把退出码交给 process.exit。',
+        'run.ts 拆成三份：args.ts 是命令与开关表、求助、点名页解析；commands.ts 里 check / confirm / render / trajectory 各一个函数，只调用项目与卡格式，交回要打印的行与退出码；text.ts 是状态符号、状态文案与每种结果打成哪一行。cwd、打印与退出码照旧在命令行里直接用 process 与 console。',
       caps: [
-        { id: 'cli-cmds', name: '参数、各命令、文案', ident: 'main(argv, io) · args.ts · commands.ts · text.ts' },
+        { id: 'cli-cmds', name: '参数、各命令、文案', ident: 'main(argv) · args.ts · commands.ts · text.ts' },
         { id: 'cli-entry', name: '入口', ident: 'cli.ts' },
       ],
     },
@@ -59,11 +59,11 @@ export const workflowPlanGraph = defineSeamGraph({
       role: 'blue',
       outside: false,
       blurb:
-        'load.ts 拆成三份：config.ts 管配置认哪些键、怎么校验与归一，zones.ts 给一张文件清单定出现状区的文档，load.ts 只剩组装。loadProject(root, env) 用到的外部环境全经 env，缺省 Node 实现；同一个根只装配一次，缓存的键加上 env。Project 另给 uncommitted() 交回一个新探针，命令行不再自己建。',
+        'load.ts 拆成三份：config.ts 管配置认哪些键、怎么校验与归一，zones.ts 给一张文件清单定出现状区的文档，load.ts 只剩组装：读写文件、加载配置、读取器与旧内容来源都从 node/ 取，自己不再 import node:fs。同一个根只装配一次的缓存照旧。',
       caps: [
         { id: 'cfg', name: '配置', ident: 'config.ts：键、校验、归一' },
         { id: 'zones', name: '现状区', ident: 'zones.ts：定现状区的文档' },
-        { id: 'load', name: '组装', ident: 'loadProject(root, env)' },
+        { id: 'load', name: '组装', ident: 'loadProject(root)' },
       ],
     },
     {
@@ -86,7 +86,7 @@ export const workflowPlanGraph = defineSeamGraph({
       pkg: 'project/',
       role: 'blue',
       outside: false,
-      blurb: 'placement.ts 照旧：读写落点经 PlacingHost，这个 host 由装配用 env.files 组出来。',
+      blurb: 'placement.ts 照旧：读写落点经 PlacingHost，这个 host 由装配用 node/ 的文件读写组出来。',
       caps: [{ id: 'placing', name: '摆放', ident: 'createPlacing(host: PlacingHost)' }],
     },
     {
@@ -99,7 +99,7 @@ export const workflowPlanGraph = defineSeamGraph({
         '新目录，包里唯一碰 node:fs、node:child_process、node:os 的地方。不认识 docfirst 的任何格式：记号、mdx、卡、分区、配置的键都不知道。从 project/ 挪进来 git 原语、读取器、旧内容来源、未提交改动探针，从 load.ts 挪进来读写文件、列目录、加载配置，从 cards/ 挪进来列目录读文件；解析 git status 输出只剩一份。',
       caps: [
         { id: 'dirfiles', name: '列目录读文件', ident: 'readDirFiles' },
-        { id: 'env', name: '文件与配置', ident: 'nodeEnvironment' },
+        { id: 'env', name: '文件与配置', ident: 'files.ts · config-file.ts' },
         { id: 'reader', name: '读取器', ident: 'createReader' },
         { id: 'history', name: '旧内容来源', ident: 'createGitHistory' },
         { id: 'git', name: 'git 原语', ident: 'readBlob · diffHunks' },
@@ -156,10 +156,10 @@ export const workflowPlanGraph = defineSeamGraph({
       name: '项目',
       a: ['cli-cmds'],
       b: ['load'],
-      iface: 'loadProject(io.cwd()) → Project：docs() · read · write · pinning · placing · uncommitted()',
+      iface: 'loadProject(process.cwd()) → Project：docs() · read · write · pinning · placing',
       convention: false,
       via: 'code',
-      text: 'check、confirm、render 先拿装配好的项目，项目根取自 CliIo 的 cwd，不再直接读 process.cwd()。未提交改动探针也从项目上拿，命令行不再自己建。',
+      text: '不变：check、confirm、render 先拿装配好的项目。命令行拆成三份之后，这一条在 commands.ts 里。',
     },
     {
       n: 2,
@@ -169,7 +169,7 @@ export const workflowPlanGraph = defineSeamGraph({
       iface: 'loadProject(root) → Project：pinning · docIdOf · roster',
       convention: false,
       via: 'code',
-      text: '跟现在一样：remark 插件在站构建时装配一次项目，把语法树上认好的引用交给钉码编排核对。不传 env，用的是缺省的 Node 实现。',
+      text: '跟现在一样：remark 插件在站构建时装配一次项目，把语法树上认好的引用交给钉码编排核对。拿不到页面路径时报错，不再用空串继续跑。',
     },
     {
       n: 3,
@@ -196,20 +196,20 @@ export const workflowPlanGraph = defineSeamGraph({
       name: '建钉码编排',
       a: ['load'],
       b: ['pn', 'pinner'],
-      iface: 'createPinning(createPinner({ reader: env.reader(root), history: env.history(root) }))',
+      iface: 'createPinning(createPinner({ reader: createReader(root), history: createGitHistory(root) }))',
       convention: false,
       via: 'code',
-      text: '读取器与旧内容来源从 env 取，不再在装配里写死成 Node 版；钉码编排与钉码核心本身不变。',
+      text: '不变：读取器与旧内容来源从 node/ 取，钉码编排与钉码核心本身不变。',
     },
     {
       n: 6,
       name: '摆放',
       a: ['load'],
       b: ['placing'],
-      iface: 'createPlacing({ pinning, placements, read, readPlaced, writePlaced })：读写落点经 env.files',
+      iface: 'createPlacing({ pinning, placements, read, readPlaced, writePlaced })：读写落点用 node/files.ts',
       convention: false,
       via: 'code',
-      text: '摆放的接口不变，装配组 PlacingHost 时读写落点改用 env.files，不再自己调 node:fs。',
+      text: '摆放的接口不变，只是清单参数改成必填；装配组 PlacingHost 时读写落点改用 node/ 的函数，不再自己调 node:fs。',
     },
     {
       n: 7,
@@ -223,13 +223,13 @@ export const workflowPlanGraph = defineSeamGraph({
     },
     {
       n: 8,
-      name: '外部环境',
-      a: ['load'],
+      name: 'Node 实现',
+      a: ['load', 'cli-cmds'],
       b: ['env', 'reader', 'history', 'probe'],
-      iface: 'Environment { files: { list, exists, read, write }, reader(root), history(root), loadConfig(root), uncommitted(root) }；缺省 nodeEnvironment',
+      iface: 'import { createGitHistory, createReader, createUncommittedProbe, importConfig, listFiles, readText, writeText } from \"../node/index.ts\"',
       convention: false,
       via: 'code',
-      text: '装配要的外部环境全在这一个接口上，每一项都是现在 load.ts、git.ts、uncommitted.ts 里已经在做的事，只是从直接调用改成传进来。测试可以整套换成内存实现，不必再建临时 git 仓、切换工作目录。',
+      text: '装配从 node/ 取读写文件、加载配置、读取器与旧内容来源，命令行从它取未提交改动探针。直接 import，不做可替换的接口：Node 实现只有一个使用者，测试照旧建临时 git 仓。',
     },
     {
       n: 9,
@@ -249,14 +249,14 @@ export const workflowPlanGraph = defineSeamGraph({
       iface: 'node:fs 读写文件、列目录；execFileSync("git", args, { timeout, maxBuffer })',
       convention: false,
       via: 'disk',
-      text: '方案做完之后碰磁盘与 git 的只有这一条接缝，边界测试检查 node/ 以外的目录（命令行入口 cli.ts 除外）不 import node:fs、node:child_process、node:os，不用 process。',
+      text: '方案做完之后碰磁盘与 git 的只有这一条接缝，边界测试检查 node/ 以外的目录不 import node:fs、node:child_process、node:os，process 只在 node/ 与 cli/ 里出现。',
     },
     {
       n: 11,
       name: '加载配置',
       a: ['env'],
       b: ['cfgfile'],
-      iface: 'loadConfig(root)：找 docfirst.config.mjs（也认 .js、.ts），由 Node 原生加载、交回 default 导出',
+      iface: 'importConfig(root)：只认 docfirst.config.mjs，由 Node 原生加载、交回 default 导出',
       convention: true,
       via: 'disk',
       text: '找配置文件与加载在 node/，认哪些键、怎么校验在装配的 config.ts：加载与校验分开，校验可以直接拿一个对象测。',
@@ -269,7 +269,7 @@ export const workflowPlanGraph = defineSeamGraph({
       iface: 'Reader：read(file) / list(dir, depth, glob)；History：oldText(file, blob) / hunks(oldText, newText)',
       convention: false,
       via: 'code',
-      text: '不变：node/ 实现钉码核心的两个接口，装配时经 env 取出来交给 createPinner。',
+      text: '不变：node/ 实现钉码核心的两个接口，装配时交给 createPinner。',
     },
   ],
 });
