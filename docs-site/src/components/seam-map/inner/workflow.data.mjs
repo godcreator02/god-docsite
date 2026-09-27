@@ -23,7 +23,7 @@ export const workflowGraph = defineSeamGraph({
       role: 'emerald',
       outside: false,
       blurb:
-        'run.ts 的 main 把参数译成对装配好的项目的几次调用，打印成人读的行或一行 JSON，交回退出码；每条命令只收自己开关表里的开关。cli.ts 是可执行文件 docfirst，只转发参数与退出码。report.ts 定 check --json 的报告形状。它认识 project、cards、pinning、mdx、marker、reference 与钉码核心、星轨盘，这个包里谁都不认识它。',
+        'run.ts 的 main 认命令与开关（开关表、求助写法与用法在 args.ts），装配项目，交给 commands.ts 里的 check / confirm / render / trajectory；各命令打印人读的行（每种结果打成哪一行在 text.ts）或一行 JSON，交回退出码。cli.ts 是可执行文件 docfirst，只转发参数与退出码。report.ts 定 check --json 的报告形状。它认识 project、cards、pinning、mdx、marker、reference 与钉码核心、星轨盘，这个包里谁都不认识它。',
       caps: [
         { id: 'main', name: '命令编排', ident: 'main' },
         { id: 'report', name: '机读报告', ident: 'CheckReport' },

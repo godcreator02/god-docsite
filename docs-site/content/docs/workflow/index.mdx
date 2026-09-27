@@ -163,16 +163,16 @@ fumadocs 自带组件的规则在 [fumadocs 适配](/docs/fumadocs)的 `./roster
 
 子命令与各自做什么写在入口文件头上：
 
-{/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="1-22" hash="9f0549d827d7" blob="ff2e6b7ae7d3" */}
+{/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="1-22" hash="1d41b72013a9" blob="bd1e29a8b8d5" */}
 
 每条命令只收自己开关表里的开关，别的一律以退出码 2 结束、什么都不动。表必须封闭：`confirm` 把 `-` 开头的参数从页名里筛掉，
 开关若被静默丢掉，`confirm --help` 就成了不带页名的全部页确认：
 
-{/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="46-59" hash="9c6398ce0a21" blob="ff2e6b7ae7d3" */}
+{/* ref file="../packages/docfirst-workflow/src/cli/args.ts" lines="6-19" hash="1cbfcce9eabc" blob="89d13f07b29b" */}
 
 人读输出一行一处引用：状态符号、文档、目标（记号上的行号）、一句说明，括号里是细分理由或目录树的项数：
 
-{/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="38-44" hash="9ebfdcac2bf1" blob="418434ff646c" */}
+{/* ref file="../packages/docfirst-workflow/src/cli/text.ts" lines="11-17" hash="9ebfdcac2bf1" blob="cc1432339eb9" */}
 
 ```text
 🟢 content/docs/a.mdx  src/greet.ts:2-3  新鲜
@@ -184,15 +184,15 @@ fumadocs 自带组件的规则在 [fumadocs 适配](/docs/fumadocs)的 `./roster
 
 `check` 先把逐篇核对与轨迹卡校验汇总成一份报告，人读模式核对一处打印一处，`--json` 汇总完打印一行，两种模式的红出自同一份报告：
 
-{/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="214-237" hash="65f38f3ecf8d" blob="ff2e6b7ae7d3" */}
+{/* ref file="../packages/docfirst-workflow/src/cli/commands.ts" lines="75-98" hash="facadffbc846" blob="937001d7a349" */}
 
 `confirm` 带路径时只动点名的页；`--accept` 必须点名页，点名的路径对不上项目里的文档，当场以退出码 2 结束。重新生成生成物不按页限定，按内容判：
 
-{/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="115-143" hash="d89e3ff00971" blob="ff2e6b7ae7d3" */}
+{/* ref file="../packages/docfirst-workflow/src/cli/commands.ts" lines="17-45" hash="6f34c1d2844a" blob="937001d7a349" */}
 
 `trajectory` 不遍历文档：读卡目录、交给星轨盘建模，打印那一张盘的树与主干；`--json` 出这张盘的输入（盘心、卡、病卡）与树。没有轨迹卡目录就以退出码 2 结束：
 
-{/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="251-271" hash="3afc29a390b9" blob="1b27ae06ba3c" */}
+{/* ref file="../packages/docfirst-workflow/src/cli/commands.ts" lines="112-132" hash="812d4b9bcb55" blob="937001d7a349" */}
 
 退出码、红的来源、未提交改动的黄怎么算红，见[提交门禁](/docs/pin/gate)。
 

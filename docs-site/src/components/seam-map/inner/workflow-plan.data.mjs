@@ -33,7 +33,7 @@ export const workflowPlanGraph = defineSeamGraph({
       role: 'emerald',
       outside: false,
       blurb:
-        'run.ts 拆成三份：args.ts 是命令与开关表、求助、点名页解析；commands.ts 里 check / confirm / render / trajectory 各一个函数，只调用项目与卡格式，交回要打印的行与退出码；text.ts 是状态符号、状态文案与每种结果打成哪一行。cwd、打印与退出码照旧在命令行里直接用 process 与 console。',
+        'run.ts 拆成三份：args.ts 是命令与开关表、求助、点名页解析；commands.ts 里 check / confirm / render / trajectory 各一个函数，调用项目与卡格式、打印结果、交回退出码；text.ts 是状态符号、状态文案与每种结果打成哪一行。cwd、打印与退出码照旧在命令行里直接用 process 与 console。',
       caps: [
         { id: 'cli-cmds', name: '参数、各命令、文案', ident: 'main(argv) · args.ts · commands.ts · text.ts' },
         { id: 'cli-entry', name: '入口', ident: 'cli.ts' },

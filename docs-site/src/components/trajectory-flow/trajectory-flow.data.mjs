@@ -267,8 +267,8 @@ export const fumadocsLines = {
  * 两段命令行输出，原样
  * @type {Record<'check' | 'trajectory', Array<{ kind: 'cmd' | 'out' | 'ok' | 'err', text: string }>>}
  */
-/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="219-237" hash="f70391e16cf2" blob="418434ff646c" */
-/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="251-271" hash="3afc29a390b9" blob="1b27ae06ba3c" */
+/* ref file="../packages/docfirst-workflow/src/cli/commands.ts" lines="80-98" hash="e7af08d1a9b3" blob="937001d7a349" */
+/* ref file="../packages/docfirst-workflow/src/cli/commands.ts" lines="112-132" hash="812d4b9bcb55" blob="937001d7a349" */
 export const terminals = {
   check: [
     { kind: 'cmd', text: 'pnpm docfirst check' },

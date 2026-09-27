@@ -18,9 +18,9 @@ description: check 把哪几类问题计入红；本仓未提交的改动引起�
 
 绿、未确认、不拦提交的黄只打印，不计入。加 `--json` 时整份报告打成一行，退出码的算法不变。
 
-{/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="315-330" hash="8afcef0bca0f" blob="418434ff646c" */}
+{/* ref file="../packages/docfirst-workflow/src/cli/commands.ts" lines="158-173" hash="8afcef0bca0f" blob="937001d7a349" */}
 
-{/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="228-236" hash="87e007751793" blob="418434ff646c" */}
+{/* ref file="../packages/docfirst-workflow/src/cli/commands.ts" lines="89-97" hash="87e007751793" blob="937001d7a349" */}
 
 ## 本仓未提交的改动引起的黄，按红算
 
@@ -45,9 +45,9 @@ description: check 把哪几类问题计入红；本仓未提交的改动引起�
 | 1 | `check` 有红；`confirm` 碰到红、钉不住或生成物摆不出去；`render` 有正本渲染不了 |
 | 2 | 用法错，什么都没动：不认识的命令或开关；`confirm` 以外的命令带了文档路径；`--accept` 没点名页；点名的不是这个项目里的文档；`trajectory` 时还没有轨迹卡目录 |
 
-{/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="84-99" hash="122c339e1c4f" blob="418434ff646c" */}
+{/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="37-52" hash="122c339e1c4f" blob="bd1e29a8b8d5" */}
 
-{/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="123-135" hash="f69acb5f7470" blob="418434ff646c" */}
+{/* ref file="../packages/docfirst-workflow/src/cli/commands.ts" lines="25-37" hash="f69acb5f7470" blob="937001d7a349" */}
 
 `--accept` 必须点名页：它接受的是黄灯，同一个仓里别人钉的黄还等着他自己复核。
 

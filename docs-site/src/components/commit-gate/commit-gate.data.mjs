@@ -2,7 +2,7 @@
  * 「提交门禁拦什么、什么算红」的全部讲解数据：画面（commit-gate.tsx）与机读版规则（commit-gate.ai.mjs）都只读这一份。
  * 例子跟钉码页（pin/story.data.mjs）是同一个 greet.ts：文档 content/docs/a.mdx 钉住它的第 4–5 行，
  * 记号上的 hash 与 blob 取自那份数据（按 code-pin 的算法真算出来的）。
- * 命令行输出照 docfirst-workflow 的 cli/run.ts 实际打印的格式逐字写；项目根是 ~/repo/docs-site，git 仓根是 ~/repo，
+ * 命令行输出照 docfirst-workflow 的 cli/text.ts 实际打印的格式逐字写；项目根是 ~/repo/docs-site，git 仓根是 ~/repo，
  * 所以 git status 列出的路径带 docs-site/ 前缀，引用里写的路径不带。
  */
 
@@ -13,7 +13,7 @@ const OTHER_REF = '../../greet-lib/src/greet.ts';
 const MARKER_BEFORE = `{/* ref file="${REF}" lines="4-5" hash="3eb99c2e88e2" blob="58b32ed1c69e" */}`;
 const MARKER_AFTER = `{/* ref file="${REF}" lines="4-5" hash="9a083fec7547" blob="eeec5ca2bd8f" */}`;
 
-/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="296-303" hash="23ad1504ef64" blob="ff2e6b7ae7d3" */
+/* ref file="../packages/docfirst-workflow/src/cli/text.ts" lines="54-61" hash="9d2eb01cf9a5" blob="cc1432339eb9" */
 const BLOCKING_LINE = `🔴 ${DOC}  ${REF}:4-5  有变动，是本仓还没提交的改动引起的——在同一个提交里复核，再 docfirst confirm ${DOC} --accept`;
 
 export const files = { doc: DOC, ref: REF, cwd: '~/repo/docs-site' };
@@ -30,8 +30,8 @@ export const gateLabel = {
 };
 
 /** check 计入红的几类，退出码只看它们的总数 */
-/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="311-332" hash="efcb24752ad5" blob="418434ff646c" */
-/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="219-237" hash="f70391e16cf2" blob="418434ff646c" */
+/* ref file="../packages/docfirst-workflow/src/cli/commands.ts" lines="154-175" hash="efcb24752ad5" blob="937001d7a349" */
+/* ref file="../packages/docfirst-workflow/src/cli/commands.ts" lines="80-98" hash="e7af08d1a9b3" blob="937001d7a349" */
 export const redSources = [
   { name: '缺失的引用', rule: '被钉的行段、文件、目录不在了；提没提交都算' },
   { name: '拦提交的黄', rule: '状态是「有变动」，且被钉文件在文档所在的仓里有未提交的改动' },
@@ -63,9 +63,9 @@ export const notRed = ['🟢 新鲜', '⚪ 未确认', '🟡 有变动但不是�
  *   sources: boolean, command: string, output: OutLine[], exit: 0 | 1, gate: Gate }} Step
  * @type {Step[]}
  */
-/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="38-44" hash="9ebfdcac2bf1" blob="418434ff646c" */
-/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="172-190" hash="89872d5416cd" blob="418434ff646c" */
-/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="335-341" hash="dcd5a37f8b61" blob="418434ff646c" */
+/* ref file="../packages/docfirst-workflow/src/cli/text.ts" lines="11-17" hash="9ebfdcac2bf1" blob="cc1432339eb9" */
+/* ref file="../packages/docfirst-workflow/src/cli/text.ts" lines="20-38" hash="e7b3a8fc6c68" blob="cc1432339eb9" */
+/* ref file="../packages/docfirst-workflow/src/cli/text.ts" lines="64-70" hash="618abc78ce11" blob="cc1432339eb9" */
 /* ref file="../packages/docfirst-workflow/src/node/uncommitted.ts" lines="1-4" hash="4968cfab632f" blob="2ad45230cb96" */
 /* ref file="../packages/docfirst-workflow/src/node/uncommitted.ts" lines="26-35" hash="8fc6d81a0264" blob="ed53157b1c06" */
 /* ref file="../packages/docfirst-workflow/src/cards/card.ts" lines="69-69" hash="566d53167dfe" blob="d3338eaedca6" */
