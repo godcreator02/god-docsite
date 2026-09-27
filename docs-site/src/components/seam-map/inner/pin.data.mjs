@@ -47,7 +47,7 @@ export const pinGraph = defineSeamGraph({
       role: 'violet',
       outside: false,
       blurb:
-        '三种目标变没变怎么判、确认时记什么都在这里。纯函数，只看交进来的观察；行段与整文件要的旧内容和 hunk 表从 History 取，那是唯一不纯的两样。',
+        '每种目标变没变怎么判、确认时记什么都在这里。纯函数，只看交进来的观察；行段与整文件要的旧内容和 hunk 表从 History 取，那是唯一不纯的两样。',
       caps: [
         { id: 'judge', name: '判定', ident: 'judge' },
         { id: 'snapshot', name: '记录', ident: 'snapshot' },

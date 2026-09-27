@@ -1,6 +1,6 @@
 ---
 title: 钉码核心 docfirst-pin
-description: 核对与确认两个动作、三种目标的比较器；只收目标与记录，读取器、旧内容来源从构造参数传进来，自己不读盘、不启动子进程
+description: 核对与确认两个动作、各种目标的比较器；只收目标与记录，读取器、旧内容来源从构造参数传进来，自己不读盘、不启动子进程
 full: true
 ---
 
@@ -19,8 +19,8 @@ full: true
 
 {/* ref file="../packages/docfirst-pin/src/pinner.ts" lines="16-25" hash="b775aac011bd" blob="89c8a0c744fd" */}
 
-**比较器** `compare.ts` 是纯函数：三种目标各自怎么判新鲜、确认时记什么。行段按什么顺序判、取不到旧内容时怎么降级，
-见[钉码状态](/docs/pin/judge)；三种目标各钉哪种话，见[引用的种类](/docs/pin/targets)；旧内容与 hunk 表怎么从 git 来，
+**比较器** `compare.ts` 是纯函数：每种目标各自怎么判新鲜、确认时记什么。行段按什么顺序判、取不到旧内容时怎么降级，
+见[钉码状态](/docs/pin/judge)；每种目标各钉哪种话，见[引用的种类](/docs/pin/targets)；旧内容与 hunk 表怎么从 git 来，
 见[行段跟随](/docs/pin/git)。
 
 **归一化**只做三件事：换行统一成 LF、去每行行尾空白、去掉末尾空行。展示和算 `hash` 用同一个函数，记号上的 hash 取前 12 位：
@@ -38,7 +38,7 @@ full: true
 
 {/* ref file="../packages/docfirst-pin/src/pinner.ts" lines="36-49" hash="a74c53da60b6" blob="89c8a0c744fd" */}
 
-**目标**三种：行段、整文件、目录树。这几个类型的形状是对外契约：
+**目标**有行段、整文件、目录树。这几个类型的形状是对外契约：
 
 {/* ref file="../packages/docfirst-pin/src/types.ts" lines="15-37" hash="d423c75859e0" blob="32a0167e8d8f" */}
 
