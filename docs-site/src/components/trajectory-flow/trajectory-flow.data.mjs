@@ -234,7 +234,7 @@ export const layout = {
 };
 
 /** 站的整页路由 page.tsx 里接线的几行（原文，start 是行号） */
-/* ref file="src/app/(trajectory-disk)/trajectory/page.tsx" hash="baacaed02f18" blob="8b9b202f561e" */
+/* ref file="src/app/(trajectory-disk)/trajectory/page.tsx" hash="07e80ec2c265" blob="79a8ce5f98d9" */
 export const pageLines = [
   { start: 5, lines: ["import { loadTrajectory, StarDisk } from '@godcreator/docfirst-fumadocs/trajectory';"] },
   { start: 12, lines: ["  const data = await loadTrajectory(join(process.cwd(), 'content', 'trajectory'));"] },

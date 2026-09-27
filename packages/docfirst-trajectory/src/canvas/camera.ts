@@ -2,10 +2,9 @@
  * 只认识 svg/world 两个 DOM 句柄与两个回调注入（画布尺寸、世界最大半径），
  * 不认识 RingsLayout / DateRail / place——那些是编排者的事。 */
 
-/** 盘心右移量（px）：左缘日期竖轨（轨线离左缘 36px，star.css 的 --rail-x）占着画布左边，
- * 盘取正中会跟它抢地——适配态盘心从正中往右让这么多，横向适配预算同步扣两倍，左右边距保持对称；
- * 宽度是松的那维（盘径吃短边、短边通常是高度），这笔扣款不伤盘径。 */
-const RAIL_CLEAR = 40;
+/** 盘心下移量（px）：顶部日期轨（轨线离顶 22px、刻度文字排在下方，star.css 的 --rail-y）占着画布上沿，
+ * 盘取正中会跟它抢地——适配态盘心从正中往下让这么多，竖向适配预算同步扣两倍，上下边距保持对称。 */
+const RAIL_CLEAR = 30;
 
 /** Camera 的两处外部依赖：画布尺寸源（canvasEl 的量法）与世界最大半径（RingsLayout.maxR），
  * 都以回调注入——Camera 不持有 canvasEl 句柄、不 import RingsLayout，保持最小耦合。 */
@@ -54,16 +53,16 @@ export class Camera {
     return { w: Math.floor(w), h: Math.floor(h) };
   }
 
-  /** 适配盘径仍吃短边：全盘可见的最低缩放。横向预算扣掉竖轨让位（见 RAIL_CLEAR）。 */
+  /** 适配盘径仍吃短边：全盘可见的最低缩放。竖向预算扣掉日期轨让位（见 RAIL_CLEAR）。 */
   fitK(): number {
     return (
-      (Math.min(this.width - 2 * RAIL_CLEAR, this.height) / (2 * (this.deps.getMaxR() + 60))) * 0.95
+      (Math.min(this.width, this.height - 2 * RAIL_CLEAR) / (2 * (this.deps.getMaxR() + 60))) * 0.95
     );
   }
 
-  /** 适配态视图目标：盘心竖直居中、横向右移给左缘竖轨让位。fit / 回到原点共用。 */
+  /** 适配态视图目标：盘心横向居中、竖向下移给顶部日期轨让位。fit / 回到原点共用。 */
   fitView(): { k: number; tx: number; ty: number } {
-    return { k: this.fitK(), tx: this.width / 2 + RAIL_CLEAR, ty: this.height / 2 };
+    return { k: this.fitK(), tx: this.width / 2, ty: this.height / 2 + RAIL_CLEAR };
   }
 
   apply(): void {
@@ -76,11 +75,10 @@ export class Camera {
   /** 按容器尺寸重定画布宽高并重摆（首帧与容器尺寸变化共用）。
    * 视图没动过（含鱼眼态，视图恒为适配态）按新尺寸重适配；动过就不重置——
    * k 保持，画布中心平移多少视图跟着平移多少，正在看的那块原地不动。
-   * 返回高度变化量 dh（调用方据此判断要不要重算日期竖轨密度档位）；容器尺寸还没布局出来
-   * （尺寸 0）时返回 null，调用方应跳过本轮重摆、等 ResizeObserver 下一拍。 */
-  fit(): number | null {
+   * 容器尺寸还没布局出来（尺寸 0）时返回 false，调用方应跳过本轮重摆、等 ResizeObserver 下一拍。 */
+  fit(): boolean {
     const { w, h } = this.canvasSize();
-    if (w <= 0 || h <= 0) return null;
+    if (w <= 0 || h <= 0) return false;
     const dw = w - this.width;
     const dh = h - this.height;
     this.width = w;
@@ -97,7 +95,7 @@ export class Camera {
     if (this.viewTarget) this.viewTarget = this.fitView();
     /* view.k 变了，符号层反补偿因子要重算 */
     this.apply();
-    return dh;
+    return true;
   }
 
   /** 视图补间步进（回到原点用）：趋近 viewTarget，足够近即吸附清空。

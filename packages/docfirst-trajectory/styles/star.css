@@ -1,5 +1,5 @@
 /*
- * StarDisk 的样式：盘面、画布文字类、日期竖轨、工具条与浮层、图例、悬停气泡。
+ * StarDisk 的样式：盘面、画布文字类、日期轨、工具条与浮层、图例、悬停气泡。
  * 主题变量全收在容器根 `.star-disk` 下，不撒全局。底色 / 文字 / 边框 / 面板映射 fumadocs 的
  * `--color-fd-*`，背景环从前景色兑透明度，亮暗由宿主变量自己翻，CSS 不判明暗；
  * 画在盘上的颜色（领域 / 连线 / 里程碑 / mute）在 JS 色板里，按 html.dark 选。
@@ -134,7 +134,7 @@
   font-size: 13px;
 }
 
-/* 画布区：svg 直挂它铺满；工具条 / 浮层 / 竖轨是 absolute 兄弟、不占流 */
+/* 画布区：svg 直挂它铺满；工具条 / 浮层 / 日期轨是 absolute 兄弟、不占流 */
 .star-disk .star-canvas {
   position: absolute;
   inset: 0;
@@ -253,17 +253,18 @@
   stroke: var(--gap-bg);
 }
 
-/* ---------- 日期竖轨：画布左缘常驻的自绘双柄区间滑块（顶 = 最旧、底 = 最新）。
- * 轨线离左缘 --rail-x，底端让 40px 给窗宽输入 pill，pill 跟轨线同一条中线；
- * 轨道容器的轨线在它自己的 12px 处、命中区往右放宽到 40px；
- * z-index 压在浮层（7）之下、画布之上 ---------- */
+/* ---------- 日期轨：画布顶部常驻的自绘双柄区间滑块（左 = 最旧、右 = 最新）。
+ * 轨线离顶部 --rail-y；右端让 --rail-end 给窗宽输入 pill 和竖排工具条，pill 跟轨线同一条中线；
+ * 轨道容器的轨线在它自己的 12px 处、命中区往下放宽到 40px（刻度文字排在轨线下方）；
+ * 侧栏打开时容器右缘由组件让到侧栏左边；z-index 压在浮层（7）之下、画布之上 ---------- */
 .star-disk .star-rail {
-  --rail-x: 36px;
+  --rail-y: 22px;
+  --rail-end: 116px;
   position: absolute;
   left: 0;
+  right: 0;
   top: 0;
-  bottom: 0;
-  width: 0;
+  height: 0;
   pointer-events: none;
 }
 
@@ -273,24 +274,24 @@
 
 .star-disk .trajectory-date-rail {
   position: absolute;
-  left: calc(var(--rail-x) - 12px);
-  top: 12px;
-  bottom: 40px;
-  width: 40px;
+  left: 28px;
+  right: var(--rail-end);
+  top: calc(var(--rail-y) - 12px);
+  height: 40px;
   z-index: 5;
   cursor: pointer;
   touch-action: none;
 }
 
-/* 轨道细线：竖贯一条，中线在 12px */
+/* 轨道细线：横贯一条，中线在 12px */
 .star-disk .trajectory-date-rail::before {
   content: "";
   position: absolute;
-  top: 0;
-  bottom: 0;
-  left: 12px;
-  width: 4px;
-  transform: translateX(-50%);
+  left: 0;
+  right: 0;
+  top: 12px;
+  height: 4px;
+  transform: translateY(-50%);
   border-radius: 2px;
   background: var(--bd);
 }
@@ -298,19 +299,19 @@
 /* 空档暗纹层：安静的底纹，不吃指针 */
 .star-disk .trajectory-date-rail .rail-gaps {
   position: absolute;
-  top: 0;
-  bottom: 0;
-  left: 12px;
-  width: 10px;
-  transform: translateX(-50%);
+  left: 0;
+  right: 0;
+  top: 12px;
+  height: 10px;
+  transform: translateY(-50%);
   pointer-events: none;
 }
 
-/* 一段无记录空档：低对比暗条，别抢柄与选中段的戏 */
+/* 一段无记录空档：低对比暗条，别抢柄与选中段的戏（左与宽由组件给） */
 .star-disk .trajectory-date-rail .rail-gap {
   position: absolute;
-  left: 0;
-  right: 0;
+  top: 0;
+  bottom: 0;
   border-radius: 2px;
   background: repeating-linear-gradient(
     -45deg,
@@ -326,21 +327,21 @@
   pointer-events: none;
 }
 
-/* 刻度短刺：横穿轨线的小段细线，与盘面月环同亮度 */
+/* 刻度短刺：竖穿轨线的小段细线，与盘面月环同亮度 */
 .star-disk .trajectory-date-rail .rail-lbl-hr {
   position: absolute;
-  left: 12px;
-  height: 1px;
-  width: 12px;
+  top: 12px;
+  width: 1px;
+  height: 12px;
   transform: translate(-50%, -50%);
   background: var(--ring-m);
 }
 
-/* 刻度日期文字：盘面 .dl 同款（9px / --t4），横排在轨线右侧 */
+/* 刻度日期文字：盘面 .dl 同款（9px / --t4），居中排在轨线下方 */
 .star-disk .trajectory-date-rail .rail-lbl {
   position: absolute;
-  left: 22px;
-  transform: translateY(-50%);
+  top: 21px;
+  transform: translateX(-50%);
   font-size: 9px;
   line-height: 1.3;
   color: var(--t4);
@@ -356,39 +357,39 @@
   color: var(--t3);
 }
 
-/* 轨底端最新日：字往上收齐免得探出画布底缘 */
-.star-disk .trajectory-date-rail .rail-lbl-top {
+/* 轨右端最新日：字往左收齐免得探出轨道右端 */
+.star-disk .trajectory-date-rail .rail-lbl-end {
   color: var(--t3);
-  transform: translateY(-100%);
+  transform: translateX(-100%);
 }
 
-/* 最新日（d1）刻度：轨底端一条短横线 */
+/* 最新日（d1）刻度：轨右端一条短竖线 */
 .star-disk .trajectory-date-rail .rail-tick {
   position: absolute;
-  bottom: 0;
-  left: 12px;
-  height: 2px;
-  width: 18px;
-  transform: translateX(-50%);
+  right: 0;
+  top: 12px;
+  width: 2px;
+  height: 18px;
+  transform: translateY(-50%);
   border-radius: 1px;
   background: var(--ring-l);
   pointer-events: none;
 }
 
-/* 选中段：窗口在轨上的投影 */
+/* 选中段：窗口在轨上的投影（左与宽由组件给） */
 .star-disk .trajectory-date-rail .range {
   position: absolute;
-  left: 12px;
-  width: 4px;
-  transform: translateX(-50%);
+  top: 12px;
+  height: 4px;
+  transform: translateY(-50%);
   border-radius: 2px;
   background: var(--accent);
 }
 
-/* 双柄：底柄 = 终点（锚点）、顶柄 = 起点 */
+/* 双柄：右柄 = 终点（锚点）、左柄 = 起点（左由组件给） */
 .star-disk .trajectory-date-rail .thumb {
   position: absolute;
-  left: 12px;
+  top: 12px;
   width: 12px;
   height: 12px;
   transform: translate(-50%, -50%);
@@ -410,12 +411,12 @@
   pointer-events: none;
 }
 
-/* 窗宽输入 pill：轨底让位处（左下角），数字直改窗宽（键入提交 / 滚轮 ±1 天） */
+/* 窗宽输入 pill：轨右端与竖排工具条之间，跟轨线同一条中线；数字直改窗宽（键入提交 / 滚轮 ±1 天） */
 .star-disk .trajectory-date-width {
   position: absolute;
-  left: var(--rail-x);
-  transform: translateX(-50%);
-  bottom: 10px;
+  right: 58px;
+  top: var(--rail-y);
+  transform: translateY(-50%);
   z-index: 5;
   display: flex;
   align-items: baseline;
@@ -447,16 +448,17 @@
   pointer-events: none;
 }
 
-/* ---------- 右上工具条 + 浮层 ---------- */
+/* ---------- 右上工具条（竖排）+ 浮层 ---------- */
 .star-disk .star-hud-top {
   position: absolute;
   top: 10px;
   right: 10px;
   z-index: 8;
   display: flex;
+  flex-direction: column;
   align-items: center;
   gap: 4px;
-  padding: 4px 6px;
+  padding: 6px 4px;
   border: 1px solid var(--bd);
   border-radius: 9px;
   background: var(--panel);
@@ -464,7 +466,7 @@
 }
 
 .star-disk .star-hud-gap {
-  width: 6px;
+  height: 6px;
 }
 
 .star-disk .star-mbtn {
@@ -516,11 +518,11 @@
   background: var(--accent);
 }
 
-/* 浮层：锚在工具条下方、右缘对齐 */
+/* 浮层：锚在竖排工具条左侧、顶边对齐 */
 .star-disk .star-pop {
   position: absolute;
-  top: calc(100% + 6px);
-  right: 0;
+  top: 0;
+  right: calc(100% + 6px);
   z-index: 7;
   background: var(--panel);
   border: 1px solid var(--bd);

@@ -6,7 +6,7 @@ import { loadTrajectory, StarDisk } from '@godcreator/docfirst-fumadocs/trajecto
 import { sourceTrajectory } from '@/lib/source';
 import { getMDXComponents } from '@/components/mdx';
 
-// 顶栏归页面画（回文档、报病数、主题切换），搜索、设置、帮助、图例、竖轨是组件自己固定在容器四角的浮层。
+// 顶栏归页面画（回文档、报病数、主题切换），搜索、设置、帮助、图例、日期轨是组件自己固定在容器边上的浮层。
 // 每张卡的正文在这里渲染好交给盘，点节点在盘右侧栏里看，不跳页；键是卡身份，跟卡页地址同一个。
 export default async function Page() {
   const data = await loadTrajectory(join(process.cwd(), 'content', 'trajectory'));

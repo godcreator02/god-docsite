@@ -126,7 +126,7 @@ export const trajectoryGraph = defineSeamGraph({
       role: 'rose',
       outside: false,
       blurb:
-        '目录 canvas/ 合成一个框。stage.ts 的 StarStage 在画布里建 SVG，编排 layers/ 下的各个视觉层、相机、日期竖轨与标签避让；settings.ts 是设置滑杆的项目表和换算；theme.ts、node-dom.ts、hud.ts 给色板、节点与图例。',
+        '目录 canvas/ 合成一个框。stage.ts 的 StarStage 在画布里建 SVG，编排 layers/ 下的各个视觉层、相机、日期轨与标签避让；settings.ts 是设置滑杆的项目表和换算；theme.ts、node-dom.ts、hud.ts 给色板、节点与图例。',
       caps: [
         { id: 'settings', name: '设置项', ident: 'SETTING_ITEMS' },
         { id: 'stage', name: '画布编排', ident: 'StarStage' },

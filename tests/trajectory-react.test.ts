@@ -1,7 +1,7 @@
 /**
  * StarDisk 客户端组件的壳结构测试：`react-dom/server` 把它渲成静态 html。
  * 壳只当编排者——画布层（六层 SVG）由 canvas/stage.ts 在挂载后建，静态渲染那一趟画布区是空 div；
- * 断言的是壳该有的东西：吃满父元素的容器、画布容器、竖轨容器、工具条（三态 home 钮），
+ * 断言的是壳该有的东西：吃满父元素的容器、画布容器、日期轨容器、工具条（三态 home 钮），
  * 以及空盘提示。data 用工作区自带的诗名 fixture 建（tests/fixtures/trajectory）。
  *
  * 另一条守鱼眼真接上了引擎：帧推进函数 advanceFrame 不碰 DOM，喂 fixture 建的 RingsLayout
@@ -23,7 +23,7 @@ function emptyFrame(): FrameState {
   return { view: { k: 1, tx: 0, ty: 0 }, vT: null, hv: new Map(), hover: null, raf: null };
 }
 
-test("StarDisk：壳结构齐——吃满父元素的容器、盘区、画布空 div、竖轨容器、工具条与三态 home 钮，侧栏初始关着", async () => {
+test("StarDisk：壳结构齐——吃满父元素的容器、盘区、画布空 div、日期轨容器、工具条与三态 home 钮，侧栏初始关着", async () => {
   const data = buildTrajectory(await scanCardDir("tests/fixtures/trajectory"));
   assert.equal(data.model.root?.id, "tfix-测试项目根卡", "fixture 里唯一那张根卡认主");
 
@@ -37,7 +37,7 @@ test("StarDisk：壳结构齐——吃满父元素的容器、盘区、画布空
   assert.doesNotMatch(html, /class="star-side"/, "没点卡时侧栏不在");
   assert.match(html, /<div class="star-canvas" aria-label="测试项目"><\/div>/, "画布区是空 div，svg 由画布层挂载后建");
   assert.doesNotMatch(html, /<svg[^>]*class="star-svg"/, "静态渲染那一趟不该有画布 svg");
-  assert.match(html, /class="star-rail"/, "竖轨容器在");
+  assert.match(html, /class="star-rail"/, "日期轨容器在");
   assert.match(html, /class="star-hud-top"/, "工具条在");
   for (const title of ["搜索卡片（label 与卡身份）", "图例与筛选", "设置", "帮助"]) {
     assert.ok(html.includes(`title="${title}"`), `工具条得有「${title}」钮`);

@@ -2,7 +2,7 @@
  *
  * 分工：node-dom（节点工厂 / 着色 / 筛选判定）+ theme（色板）+ layout.ts（布局引擎，纯计算
  * 不碰 DOM）+ chains.ts（链表分组 + dodge 几何）+ camera（视图变换 / 适配 / 两种缩放补间）
- * + label-arbiter（三池标签仲裁 + 标签宽度缓存）+ settings（手感参数项目表）+ date-rail（日期竖轨）
+ * + label-arbiter（三池标签仲裁 + 标签宽度缓存）+ settings（手感参数项目表）+ date-rail（日期轨）
  * + layers/（六个视觉层：axis / gaps / milestones / trees / cards / hub，build / place / recolor 三联组，
  * 层间互不 import、互不认识本舞台，契约见 layers/frame.ts）+ 本舞台（画布 DOM 组装 / 层编排调度 /
  * 补间循环 / 视图与交互语义 / 数据刷新）。
@@ -13,7 +13,7 @@
  * 关键结构约定：
  * 一是布局产物住 layout 实例的 places / treeBoxes、每帧显示坐标住本舞台的 framePos 表，
  * 不往共享的 model 卡对象上写（理由见 layout.ts 头注）。
- * 二是画布 svg 直挂 canvasEl（铺满），竖轨挂 railEl；尺寸公式一律吃画布区宽高。 */
+ * 二是画布 svg 直挂 canvasEl（铺满），日期轨挂 railEl；尺寸公式一律吃画布区宽高。 */
 
 import { buildChains, type Chain, computeDodge } from "../chains.ts";
 import { advanceFrame, type FrameState, type LayoutPatch, RingsLayout } from "../layout.ts";
@@ -44,7 +44,7 @@ export type HomeState = "camera" | "window" | "idle";
 export interface StageHost {
   /** 画布区（svg 直挂它，铺满；尺寸观察器盯它） */
   canvasEl: HTMLElement;
-  /** 日期竖轨的容器（DateRail 在里面自建 DOM） */
+  /** 日期轨的容器（DateRail 在里面自建 DOM） */
   railEl: HTMLElement;
   /** 开卡页；inNewTab 对应 Ctrl/Cmd+点 */
   openCard(id: string, inNewTab: boolean): void;
@@ -98,7 +98,7 @@ export class StarStage {
   private readonly labelArbiter = new LabelArbiter();
 
   /* ---------- 时间窗 = 引力透镜：窗即焦点带，收窄聚焦、顶满全景，恒为软聚焦零重建。
-   * 锚点 + 窗宽归左缘日期竖轨（DateRail）持有，本舞台只消费：窗口变更回调驱动 syncLens。 */
+   * 锚点 + 窗宽归顶部日期轨（DateRail）持有，本舞台只消费：窗口变更回调驱动 syncLens。 */
   private readonly dateRail: DateRail;
 
   /* ---------- 交互态 ---------- */
@@ -167,7 +167,7 @@ export class StarStage {
   private buildAll(): void {
     const model = this.model;
     if (!model) return;
-    /* 建模恒全量，完整跨度直接捕获（竖轨的边界） */
+    /* 建模恒全量，完整跨度直接捕获（日期轨的边界） */
     if (model.cards.length) {
       this.dateRail.setSpan({ d0: model.day0, d1: model.dayMax });
     }
@@ -191,7 +191,7 @@ export class StarStage {
     /* 建构 / 切主题 / 切筛选共用同一条重刷链 */
     this.repaint();
     this.fit();
-    /* 竖轨空档暗纹：模型恒全量，每轮直刷 */
+    /* 日期轨空档暗纹：模型恒全量，每轮直刷 */
     this.dateRail.setGaps(this.layout.gapBands().map((b) => ({ d0: b.d0, d1: b.d1 })));
     this.dateRail.syncUi();
     this.dateRail.renderGaps();
@@ -284,7 +284,7 @@ export class StarStage {
     this.milestonesLayer.rebake();
     this.treesLayer.rebake();
     this.gapsLayer.rebuild();
-    /* 折算表变了，竖轨整套标度跟着变：暗纹区段、刻度、双柄位一并重演 */
+    /* 折算表变了，日期轨整套标度跟着变：暗纹区段、刻度、双柄位一并重演 */
     this.dateRail.setGaps(layout.gapBands().map((b) => ({ d0: b.d0, d1: b.d1 })));
     this.dateRail.syncUi();
     this.dateRail.renderGaps();
@@ -378,16 +378,13 @@ export class StarStage {
 
   /* ================= 视图：画布铺满容器 ================= */
 
-  /** 按容器尺寸重定画布宽高并重摆（首帧与容器尺寸变化共用）：相机侧量尺寸 / 定变换 / 判 dh，
-   * place / dateRail.renderScale 是视图侧动作，相机不认识，包装在这层调。 */
+  /** 按容器尺寸重定画布宽高并重摆（首帧与容器尺寸变化共用）：相机侧量尺寸、定变换，
+   * place 是视图侧动作，相机不认识，包装在这层调。日期轨的刻度由日期轨自己跟着轨宽重排。 */
   fit(): void {
     if (!this.svg) return;
-    const dh = this.camera.fit();
     /* 容器还没布局出来（尺寸 0）：camera.fit 已跳过重定，等 ResizeObserver 下一拍 */
-    if (dh === null) return;
+    if (!this.camera.fit()) return;
     this.place();
-    /* 轨高变了，日期刻度的密度档位可能要换挡 */
-    if (dh !== 0) this.dateRail.renderScale();
   }
 
   /* ================= 补间循环 ================= */
@@ -586,7 +583,7 @@ export class StarStage {
 
   /* ================= 销毁 ================= */
 
-  /** 壳卸载：补间循环、文档级监听、尺寸观察器、画布与竖轨 DOM 全撤。 */
+  /** 壳卸载：补间循环、文档级监听、尺寸观察器、画布与日期轨 DOM 全撤。 */
   destroy(): void {
     this.destroyed = true;
     if (this.rafId !== null) cancelAnimationFrame(this.rafId);

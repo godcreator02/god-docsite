@@ -7,7 +7,7 @@ import type { LayoutPatch, RingsLayout } from "../layout.ts";
 
 /** 星轨手感参数：全部语义值，与设置面板滑杆同口径。 */
 export interface TrajectorySettings {
-  /** 焦点带天数（窗宽即带宽，方向盘在日期竖轨上，面板不设滑杆） */
+  /** 焦点带天数（窗宽即带宽，方向盘在日期轨上，面板不设滑杆） */
   focusDays: number;
   /** 内环（旧压缩）百分比 */
   oldSharePct: number;

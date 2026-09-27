@@ -1,15 +1,15 @@
-/* 日期竖轨——画布左缘贴边常驻的自绘双柄区间滑块，时间窗（锚点 + 窗宽）的唯一持有者。
- * 原生 range 做不了双柄与中段整窗拖动，故自绘。**顶 = 最旧（d0）、底 = 最新（d1）**，
+/* 日期轨——画布顶部常驻的自绘双柄区间滑块，时间窗（锚点 + 窗宽）的唯一持有者。
+ * 原生 range 做不了双柄与中段整窗拖动，故自绘。**左 = 最旧（d0）、右 = 最新（d1）**，
  * 时间随阅读方向走；轨位与像素反解都走折算标度
- * （railT / dayAtY 一正一逆）——拖拽保持纯屏幕线性，密集区每天等高、空窗只占折痕高，
+ * （railT / dayAtX 一正一逆）——拖拽保持纯屏幕线性，密集区每天等宽、空窗只占折痕宽，
  * 指针划过折痕那几像素窗就跳过整段空窗（折跃），不做任何分段特判。
  *
  * 时间窗语义：锚点 + 窗宽构成窗口 [锚点-(窗宽-1), 锚点]；没选日期 = 全部；
  * 全跨度窗与全部等价、归一回未选中态。状态跟人走不持久化：换设置重烘焙保留、换一份数据复位。
  *
  * 与宿主（编排者）的接口收窄成两条：layout() 现取当前布局实例（每轮数据重建换新，
- * 竖轨不持引用）、onWindowChange() 通知窗口变更（宿主拿去驱动透镜 syncLens）。
- * 监听器直挂自建 DOM、随容器整棵销毁。整搬自 Obsidian 版 star/date-rail.ts。 */
+ * 日期轨不持引用）、onWindowChange() 通知窗口变更（宿主拿去驱动透镜 syncLens）。
+ * 轨的宽度变了（窗口缩放、侧栏开合）自己重排刻度。监听器直挂自建 DOM、随容器整棵销毁。 */
 
 import type { RingsLayout } from "../layout.ts";
 import { formatDay } from "../model.ts";
@@ -71,38 +71,40 @@ function div(parent: HTMLElement, cls: string): HTMLDivElement {
 }
 
 export class DateRail {
-  /** 选中日期的天序数（= 双柄滑块底柄）；null = 全部 */
+  /** 选中日期的天序数（= 双柄滑块右柄）；null = 全部 */
   private anchor: number | null = null;
   /** 窗宽天数（全部态显示与激活都按全跨度算） */
   private interval = 14;
-  /** 项目完整日期跨度（滑块边界）：建模轮由宿主灌入；项目没卡为 null（竖轨禁用） */
+  /** 项目完整日期跨度（滑块边界）：建模轮由宿主灌入；项目没卡为 null（日期轨禁用） */
   private projectSpan: DaySpan | null = null;
   /** 空档暗纹的日区段缓存：建模轮直刷（模型恒全量，空档恒为真） */
   private gaps: DaySpan[] = [];
-  /** 整窗平移滚轮的 deltaY 累积器（画布 ctrl+滚轮与竖轨悬停滚轮共用 wheelPan，
+  /** 整窗平移滚轮的 deltaY 累积器（画布 ctrl+滚轮与日期轨悬停滚轮共用 wheelPan，
    * 同一时刻只有一处在滚，共享一个余额即可） */
   private panWheelRemainder = 0;
   /** 进行中的滑块拖拽：柄动各自端点、mid 按位移差整窗平移 */
   private drag: {
-    kind: "t" | "b" | "mid";
+    kind: "start" | "end" | "mid";
     grabDay: number;
     startAnchor: number;
     startInterval: number;
   } | null = null;
 
-  /* 轨 DOM：trackEl 既是轨容器也是指针命中面（rect.top/height 即可用行程）；
-   * thumbBottomEl = 底柄 = 终点（锚点）、thumbTopEl = 顶柄 = 起点（拖拽 kind 同名 "t"/"b"） */
+  /* 轨 DOM：trackEl 既是轨容器也是指针命中面（rect.left/width 即可用行程）；
+   * thumbEndEl = 右柄 = 终点（锚点）、thumbStartEl = 左柄 = 起点（拖拽 kind 同名 "end"/"start"） */
   private readonly trackEl: HTMLElement;
   private readonly rangeEl: HTMLElement;
-  private readonly thumbTopEl: HTMLElement;
-  private readonly thumbBottomEl: HTMLElement;
-  /** 窗宽输入 pill（轨底让位处）：数字直改窗宽、悬停滚轮 ±1 天；全景态显示全跨度天数 */
+  private readonly thumbStartEl: HTMLElement;
+  private readonly thumbEndEl: HTMLElement;
+  /** 窗宽输入 pill（轨右端）：数字直改窗宽、悬停滚轮 ±1 天；全景态显示全跨度天数 */
   private readonly widthEl: HTMLElement;
   private readonly widthInput: HTMLInputElement;
   /** 空档暗纹层（pointer-events:none，只做底纹不吃手势） */
   private readonly gapEl: HTMLElement;
   /** 日期刻度层（pointer-events:none，与盘面日期环同语言的轨上标尺） */
   private readonly scaleEl: HTMLElement;
+  /** 轨宽变了就重排刻度 */
+  private readonly resizeObserver: ResizeObserver | null;
   private readonly host: DateRailHost;
 
   constructor(containerEl: HTMLElement, host: DateRailHost) {
@@ -115,9 +117,13 @@ export class DateRail {
     this.scaleEl = div(track, "rail-scale");
     div(track, "rail-tick");
     this.rangeEl = div(track, "range");
-    this.thumbBottomEl = div(track, "thumb");
-    this.thumbTopEl = div(track, "thumb");
+    this.thumbEndEl = div(track, "thumb");
+    this.thumbStartEl = div(track, "thumb");
     this.bindTrack(track);
+    /* 服务端静态渲染与测试环境没有 ResizeObserver：那里也没有要重排的刻度 */
+    this.resizeObserver =
+      typeof ResizeObserver === "undefined" ? null : new ResizeObserver(() => this.renderScale());
+    this.resizeObserver?.observe(track);
 
     this.widthEl = div(containerEl, "trajectory-date-width");
     const input = containerEl.ownerDocument.createElement("input");
@@ -158,21 +164,22 @@ export class DateRail {
     this.gaps = gaps;
   }
 
-  /** 换一份数据复位：日期窗跟着数据走，窗与跨度一起清（两柄回撑满、竖轨禁用待新跨度）。 */
+  /** 换一份数据复位：日期窗跟着数据走，窗与跨度一起清（两柄回撑满、日期轨禁用待新跨度）。 */
   reset(): void {
     this.anchor = null;
     this.projectSpan = null;
     this.syncUi();
   }
 
-  /** 窗回顶满（回到原点第二段）：只清窗、跨度留着。 */
+  /** 窗回撑满（回到原点第二段）：只清窗、跨度留着。 */
   clearWindow(): void {
     this.anchor = null;
     this.syncUi();
   }
 
-  /** 拆掉自建 DOM（宿主销毁时调）。 */
+  /** 拆掉自建 DOM 与尺寸观察器（宿主销毁时调）。 */
   destroy(): void {
+    this.resizeObserver?.disconnect();
     this.trackEl.remove();
     this.widthEl.remove();
   }
@@ -185,10 +192,10 @@ export class DateRail {
     return railTOf(this.host.layout(), span, d);
   }
 
-  /** 像素 → 天序数：像素落进轨的行程占比，再走 dayAtT 逆解（顶 = d0、底 = d1）。 */
-  private dayAtY(y: number, span: DaySpan): number {
+  /** 像素 → 天序数：像素落进轨的行程占比，再走 dayAtT 逆解（左 = d0、右 = d1）。 */
+  private dayAtX(x: number, span: DaySpan): number {
     const r = this.trackEl.getBoundingClientRect();
-    const t = r.height > 0 ? Math.max(0, Math.min(1, (y - r.top) / r.height)) : 0;
+    const t = r.width > 0 ? Math.max(0, Math.min(1, (x - r.left) / r.width)) : 0;
     return dayAtT(this.host.layout(), span, t);
   }
 
@@ -199,16 +206,16 @@ export class DateRail {
       const span = this.projectSpan;
       if (!span) return;
       e.preventDefault();
-      /* 全部态一碰即接管：窗先取全跨度（与两柄顶满的显示一致），拖动收窄才真正聚焦——
+      /* 全部态一碰即接管：窗先取全跨度（与两柄撑满的显示一致），拖动收窄才真正聚焦——
        * 全跨度窗与全部等价，接管本身无感 */
       if (this.anchor === null) {
         this.anchor = span.d1;
         this.interval = span.d1 - span.d0 + 1;
       }
-      const day = this.dayAtY(e.clientY, span);
-      let kind: "t" | "b" | "mid";
-      if (e.target === this.thumbTopEl) kind = "t";
-      else if (e.target === this.thumbBottomEl) kind = "b";
+      const day = this.dayAtX(e.clientX, span);
+      let kind: "start" | "end" | "mid";
+      if (e.target === this.thumbStartEl) kind = "start";
+      else if (e.target === this.thumbEndEl) kind = "end";
       else if (e.target === this.rangeEl) kind = "mid";
       else {
         /* 轨道空白：窗最小平移把点击日纳入窗沿，随后接中段拖 */
@@ -239,18 +246,18 @@ export class DateRail {
       const drag = this.drag;
       const span = this.projectSpan;
       if (!drag || !span) return;
-      const day = this.dayAtY(e.clientY, span);
+      const day = this.dayAtX(e.clientX, span);
       let anchor = this.anchor ?? span.d1;
       let interval = this.interval;
-      if (drag.kind === "b") {
-        /* 底柄：只动终点，起点钉在拖拽起始时的顶沿（柄互不越过，重合 = 单日窗） */
-        const top = Math.max(span.d0, drag.startAnchor - (drag.startInterval - 1));
-        anchor = Math.max(top, Math.min(span.d1, day));
-        interval = anchor - top + 1;
-      } else if (drag.kind === "t") {
-        /* 顶柄：只动起点，终点（锚点）不动 */
-        const top = Math.max(span.d0, Math.min(drag.startAnchor, day));
-        interval = drag.startAnchor - top + 1;
+      if (drag.kind === "end") {
+        /* 右柄：只动终点，起点钉在拖拽起始时的左沿（柄互不越过，重合 = 单日窗） */
+        const start = Math.max(span.d0, drag.startAnchor - (drag.startInterval - 1));
+        anchor = Math.max(start, Math.min(span.d1, day));
+        interval = anchor - start + 1;
+      } else if (drag.kind === "start") {
+        /* 左柄：只动起点，终点（锚点）不动 */
+        const start = Math.max(span.d0, Math.min(drag.startAnchor, day));
+        interval = drag.startAnchor - start + 1;
       } else {
         /* 中段：整窗平移，窗宽不变，到跨度边缘停住不缩宽 */
         const lo = Math.min(span.d1, span.d0 + drag.startInterval - 1);
@@ -265,7 +272,7 @@ export class DateRail {
     const endDrag = (): void => {
       if (!this.drag) return;
       this.drag = null;
-      /* 拖回顶满 = 全部：全跨度窗与不聚焦等价，归一回未选中态 */
+      /* 拖回撑满 = 全部：全跨度窗与不聚焦等价，归一回未选中态 */
       const span = this.projectSpan;
       if (
         span &&
@@ -281,7 +288,7 @@ export class DateRail {
     track.addEventListener("pointerup", endDrag);
     track.addEventListener("pointercancel", endDrag);
     /* 悬停滚轮整窗平移：与画布 ctrl+滚轮同一段代码（wheelPan）——一格窗宽一成、
-     * 下滚向新、120 累积器，竖轨与画布滚哪儿结果完全一样 */
+     * 下滚向新、120 累积器，日期轨与画布滚哪儿结果完全一样 */
     track.addEventListener(
       "wheel",
       (e: WheelEvent) => {
@@ -351,13 +358,13 @@ export class DateRail {
     this.host.onWindowChange();
   }
 
-  /** 整窗平移滚轮：画布 ctrl+滚轮与竖轨悬停滚轮共用的同一段代码——同一个操作在两个
+  /** 整窗平移滚轮：画布 ctrl+滚轮与日期轨悬停滚轮共用的同一段代码——同一个操作在两个
    * 指针位置，滚哪儿都一样。一格 = 窗有效宽 × 10%（下限 1 有效天）沿显示折算域走：
    * 步长跟缩放级别（窗宽）自适应，轨上位移恒为选中段自身的一成，过空窗按折痕显示
    * 宽度匀速划过（不用固定「天/格」增益：宽窗下一格慢得像没动、窄窗下一格飞掉
    * 大半个窗，比例增益才在各缩放级别手感一致）。方向：下滚（deltaY>0）= 向新
    * （捏合手势在系统层即 ctrl+滚轮，方向随之）。
-   * 整窗到跨度边缘停住不缩宽；全景态窗即全跨度、无处可移，不动作——改窗宽走竖轨双柄。 */
+   * 整窗到跨度边缘停住不缩宽；全景态窗即全跨度、无处可移，不动作——改窗宽走日期轨双柄。 */
   wheelPan(e: WheelEvent): void {
     const span = this.projectSpan;
     if (!span || this.anchor === null) return;
@@ -378,9 +385,9 @@ export class DateRail {
 
   /* ---------- 回显 ---------- */
 
-  /** 日期窗回显：竖轨双柄与选中段按竖向百分比摆位。
-   * 竖排映射：top% 走折算标度（railT）——顶 = 最旧、底 = 最新，底柄终点、顶柄起点。
-   * 同样的窗宽天数，选中段在密集区像素高恒定；罩住空窗时段里可见地嵌着折痕、相应变短。
+  /** 日期窗回显：双柄与选中段按横向百分比摆位。
+   * left% 走折算标度（railT）——左 = 最旧、右 = 最新，右柄终点、左柄起点。
+   * 同样的窗宽天数，选中段在密集区像素宽恒定；罩住空窗时段里可见地嵌着折痕、相应变短。
    * 全部态两柄撑满全跨度（所见即现状），拖柄收窄才是聚焦；项目没卡才禁用。 */
   syncUi(): void {
     const span = this.projectSpan;
@@ -388,10 +395,10 @@ export class DateRail {
       const d1 = this.anchor ?? span.d1;
       const d0 = this.anchor === null ? span.d0 : Math.max(span.d0, d1 - (this.interval - 1));
       const pct = (d: number): number => this.railT(d) * 100;
-      this.thumbTopEl.style.top = `${pct(d0)}%`;
-      this.thumbBottomEl.style.top = `${pct(d1)}%`;
-      this.rangeEl.style.top = `${pct(d0)}%`;
-      this.rangeEl.style.height = `${pct(d1) - pct(d0)}%`;
+      this.thumbStartEl.style.left = `${pct(d0)}%`;
+      this.thumbEndEl.style.left = `${pct(d1)}%`;
+      this.rangeEl.style.left = `${pct(d0)}%`;
+      this.rangeEl.style.width = `${pct(d1) - pct(d0)}%`;
     }
     /* 窗宽 pill 跟显（全景态按全跨度算）；聚焦编辑中不回写，别冲掉正打的字 */
     if (span && this.widthInput.ownerDocument.activeElement !== this.widthInput) {
@@ -401,7 +408,7 @@ export class DateRail {
     this.widthEl.classList.toggle("is-disabled", !span);
   }
 
-  /** 空档暗纹重画：按缓存的空档日区段铺暗条，轨位走折算标度——暗条高即折痕高，
+  /** 空档暗纹重画：按缓存的空档日区段铺暗条，轨位走折算标度——暗条宽即折痕宽，
    * 与盘面小行星带径向厚度同比（gapBands 的 d0/d1 就是被折中段边界）。
    * 建模轮 + 重烘焙后各跑一趟，拖拽过程不必重铺 DOM。 */
   renderGaps(): void {
@@ -412,45 +419,45 @@ export class DateRail {
       const t1 = this.railT(g.d1) * 100;
       if (t1 - t0 <= 0) continue;
       const band = div(this.gapEl, "rail-gap");
-      band.style.top = `${t0}%`;
-      band.style.height = `${t1 - t0}%`;
+      band.style.left = `${t0}%`;
+      band.style.width = `${t1 - t0}%`;
     }
   }
 
-  /** 竖轨日期刻度：与盘面日期环同一套语言（MM-DD，年起点标年份加亮），轨底端恒标最新日。
-   * 轨位走折算标度：换挡密度按**密集区**像素/天（轨高/折算跨度，k=1 区每天恰 1 个
-   * 有效天）取标签间距不小于 24px 的最细档（竖排标签占 ~12px 字高，留一倍余量）——
+  /** 日期轨刻度：与盘面日期环同一套语言（MM-DD，年起点标年份加亮），轨右端恒标最新日。
+   * 轨位走折算标度：换挡密度按**密集区**像素/天（轨宽/折算跨度，k=1 区每天恰 1 个
+   * 有效天）取标签间距不小于 44px 的最细档（横排的 MM-DD 约 30px 宽，留出余量）——
    * 空窗折痕不参与换挡，长空窗项目不会被拖进年档；折进折痕的刻度挤作一堆，
    * 由像素间距守卫自然让位，空窗段不堆字。
-   * 跨度或轨高变了才重画（建模轮 + 重烘焙 + 轨高变化），拖拽过程不动。 */
+   * 跨度或轨宽变了才重画（建模轮 + 重烘焙 + 轨宽变化），拖拽过程不动。 */
   renderScale(): void {
     this.scaleEl.textContent = "";
     const span = this.projectSpan;
     if (!span) return;
-    const px = this.trackEl.getBoundingClientRect().height;
+    const px = this.trackEl.getBoundingClientRect().width;
     if (px <= 0) return;
     const layout = this.host.layout();
     const effSpan = Math.max(1, layout.dayEff(span.d1) - layout.dayEff(span.d0));
     const pxPerDay = px / effSpan;
-    const MIN_PX = 24;
+    const MIN_PX = 44;
     /* 已放标签的轨上像素位（折算轴上日距不再正比像素距，守卫只能认像素） */
     const placed: number[] = [];
     const put = (day: number, label: string, cls: string): void => {
       const t = this.railT(day) * 100;
       const hr = div(this.scaleEl, "rail-lbl-hr");
-      hr.style.top = `${t}%`;
+      hr.style.left = `${t}%`;
       const lbl = div(this.scaleEl, cls ? `rail-lbl ${cls}` : "rail-lbl");
-      lbl.style.top = `${t}%`;
+      lbl.style.left = `${t}%`;
       lbl.textContent = label;
       placed.push((t / 100) * px);
     };
-    /* 最小像素间距守卫：防轨底端最新日与相邻档位叠字，兼裁掉折痕两侧挤压的刻度 */
+    /* 最小像素间距守卫：防轨右端最新日与相邻档位叠字，兼裁掉折痕两侧挤压的刻度 */
     const fits = (day: number): boolean => {
-      const yp = this.railT(day) * px;
-      return placed.every((p) => Math.abs(p - yp) >= MIN_PX * 0.8);
+      const xp = this.railT(day) * px;
+      return placed.every((p) => Math.abs(p - xp) >= MIN_PX * 0.8);
     };
-    /* 轨底端恒标最新日：回答「底下那条亮刻度是哪天」 */
-    put(span.d1, formatDay(span.d1), "rail-lbl-top");
+    /* 轨右端恒标最新日：回答「右头那条亮刻度是哪天」 */
+    put(span.d1, formatDay(span.d1), "rail-lbl-end");
     if (7 * pxPerDay >= MIN_PX) {
       /* 周档：短跨度盘，从最新日往回每 7 天一格 */
       for (let d = span.d1 - 7; d >= span.d0; d -= 7) {
