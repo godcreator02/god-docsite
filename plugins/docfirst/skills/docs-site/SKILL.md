@@ -115,6 +115,10 @@ docfirst 自己的文档站是现成的实现：`docs-site/src/components/seam-m
   规则照 `src/components/tabs/tabs.ai.mjs` 的写法，放在组件旁边、不依赖 React 的 `.ai.mjs` 文件里，读组件那份讲解数据
   生成文字（比如每一步一段）。画面和机读版读的是同一份数据，两边不会对不上；mdx 源文件里只有标签，机读版里内容是全的。
   `node scripts/verify-roster.mjs` 核对 `registry.ts` 的名单与 `components` 的规则一致
+- **docfirst 站里，组件照抄源码的地方钉在源码上**：讲解数据里手抄的源码片段与行号、逐字照抄的测试名、命令行的输出格式、
+  接缝图上的函数签名，代码一改就对不上。在那段数据正上方单独一行写记号 `/* ref file="../src/a.ts" lines="10-23" */`
+  （跟 mdx 里的记号一样，只是不带花括号），再 `docfirst confirm`；被钉的代码变了，组件文件在 `check` 里变黄。
+  记号必须独占一行，写法与确认见 `docfirst-docs` 的「四类引用各钉哪种话」
 
 ## 验收
 

@@ -3,7 +3,7 @@
  *
  * 项目根是这个站目录，引用的代码在工作区的 packages/ 与 plugins/ 下，所以引用里写 `../packages/…` 或 `../plugins/…`。
  * 分区按约定：content/ 下 trajectory/ 与 future/ 两个名字固定，其余目录都是现状区、都进 check；
- * 本站的现状区是 content/docs（原理）与 content/maintain（维护这个仓）。
+ * 本站的现状区是 content/docs（原理）与 content/maintain（维护这个仓），外加 src/components/ 下讲解组件的源码。
  * outputs：仓根 README.md / AGENTS.md / CLAUDE.md 和插件里的几份 SKILL.md 是生成物，正本是下面映射左边的 mdx
  * （AGENTS 的正本在 content/maintain/agents.mdx，其余在 content/docs/outputs/）——
  * 改 mdx 源要跑 `pnpm docfirst render`（`confirm` 也会顺带做），两份一起提交，check 检查生成物跟源是否一致。

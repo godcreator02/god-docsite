@@ -127,7 +127,7 @@ export const workflowGraph = defineSeamGraph({
       role: 'violet',
       outside: false,
       blurb:
-        'codeFormat 认领站的 src/components/ 下的 .ts、.tsx、.mjs，讲解组件里照源码抄来的数据在这里挂引用。记号是单独一行的块注释 /* … */，里面那一截跟 mdx 里的一字不差；按行认、按行写，不解析 TypeScript，一行里除了这个注释还有别的代码就不是记号。只认识 marker 与 reference。',
+        'codeFormat 认领站的 src/components/ 下的 .ts、.tsx、.mjs，讲解组件里照源码抄来的数据在这里写引用、钉在源码上。记号是单独一行的块注释 /* … */，里面那一截跟 mdx 里的一字不差；按行认、按行写，不解析 TypeScript，一行里除了这个注释还有别的代码就不是记号。只认识 marker 与 reference。',
       caps: [{ id: 'cd-rw', name: '认引用与写回', ident: 'parse · write' }],
     },
     {

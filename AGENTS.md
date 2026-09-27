@@ -24,7 +24,7 @@ README、CLAUDE.md、这份规矩与插件里的 SKILL.md 都是**生成物**：
 ## 参考，不要改
 
 - 实验室 `D:\dshfiles\260901lab`（台阶七 `step7-packages` / `step7-site` / `step7-mini`）：架构定案的出处，
-  教学代码，**只读**。要搬逻辑就搬，别 import 它。它在**老根** `D:\dshfiles`（DSH 时代的归档区），
+  教学代码，**只读**。要用它的逻辑就复制过来，别 import 它。它在**老根** `D:\dshfiles`（DSH 时代的归档区），
   本仓在 `D:\unitfolders` 下的单元里，这是跨根引用。
 - 老仓 `D:\dshfiles\26082711aju\god-live-doc`（同在老根）：用 git 取旧内容这项功能的出处，**只读**。
   功能已对齐，不再参考，代码只看这个仓。
@@ -40,7 +40,7 @@ README、CLAUDE.md、这份规矩与插件里的 SKILL.md 都是**生成物**：
 - **docfirst 的包按接缝切开，方向单向**：`docfirst-pin`（只用 `node:crypto`）与 `docfirst-trajectory`（`.` 入口零 import）
   谁都不认识；`docfirst-workflow` 认识这两个、不认识任何站的宿主；`docfirst-fumadocs` 认识另外三个，谁都不认识它。
   调用链从 `docfirst` 命令开始的归 workflow，由 fumadocs 或 Next 调用的归 fumadocs 适配。workflow 里
-  `marker` / `reference` / `mdx` / `pinning` / `project` / `cli` 几个目录之间也单向。`docs-explain` 跟 docfirst 的包互不认识，只给站用。
+  `marker` / `reference` / `mdx` / `code` / `pinning` / `project` / `cli` 几个目录之间也单向。`docs-explain` 跟 docfirst 的包互不认识，只给站用。
   **包与插件互不认识**：包不许出现任何 `@godcreator/gwb-*`，
   插件也不许依赖包，两个方向各由 `tests/boundary.test.ts` 与插件的 `tests/artifact.test.ts` 检查。
   **`tests/boundary.test.ts` 是唯一的边界守卫**（包的方向、两个核心零依赖、workflow 目录方向、宿主只能是 peer、

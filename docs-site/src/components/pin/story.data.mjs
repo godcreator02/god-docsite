@@ -39,7 +39,7 @@ export const steps = [
     status: 'unconfirmed',
     command: 'pnpm docfirst check',
     cli: `⚪ ${DOC}  ${REF}:2-3  未确认，等作者确认`,
-    text: '在文档里单独起一行，写一个只有文件与行号的记号，指向 greet.ts 的第 2–3 行。check 认得它、也读得到这两行，但记号上还没有确认时的记录，所以是空心的「未确认」。',
+    text: '在文档里单独起一行，写一个不带记录的正式记号：只有文件与行号，指向 greet.ts 的第 2–3 行。check 认得它、也读得到这两行，但记号上还没有确认时的记录，所以是空心的「未确认」。讲解组件的源码里也这样写，只是外壳换成单独一行的 /* … */。',
   },
   {
     title: '确认：记下 hash 与 blob',
@@ -49,7 +49,7 @@ export const steps = [
     status: 'fresh',
     command: 'pnpm docfirst confirm',
     cli: `✅ ${DOC}  ${REF}:2-3  已确认，写上了记录`,
-    text: 'confirm 在同一行记号上写上两个数：hash 是这两行内容的 sha256 前 12 位，blob 是此刻整个 greet.ts 的 git 对象名前 12 位。记号里没有代码，页面上那块代码是构建时现读的。',
+    text: 'confirm 在同一行记号上写上记录，也就是两个数：hash 是这两行内容的 sha256 前 12 位，blob 是此刻整个 greet.ts 的 git 对象名前 12 位。记号里没有代码，页面上那块代码是构建时现读的。',
   },
   {
     title: '上面插了两行：还是绿',

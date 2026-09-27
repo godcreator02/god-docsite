@@ -18,7 +18,7 @@ description: 包与目录之间的依赖方向靠什么检查，各组测试检�
 ## 依赖方向：只有一个文件在检查
 
 pnpm 严格的 `node_modules` 只保证没写进依赖的包 import 不到；「该不该写进依赖」没人管，workflow 包里
-`marker/`、`reference/`、`mdx/`、`pinning/`、`project/`、`cli/` 之间编译器也不拦——`mdx/` 里写一句 `import "../project/load.ts"` 不会报错，
+`marker/`、`reference/`、`mdx/`、`code/`、`pinning/`、`project/`、`cli/` 之间编译器也不拦——`mdx/` 里写一句 `import "../project/load.ts"` 不会报错，
 mdx 格式从此就跟读盘、git 绑在一起。补上这两项的是 `tests/boundary.test.ts`，它是包之间、workflow 目录之间**唯一**的边界检查。
 选一类规则，看它允许哪些方向、禁止哪些方向、由哪条测试失败报出来：
 
@@ -50,7 +50,8 @@ workflow 目录之间是同样的写法：
 ## 钉码核心：传入两样假的
 
 `tests/core.test.ts` 直接给钉码核心目标与记录，传入内存读取器（能读到的只有一张文件表）和内存里的旧内容来源。
-钉码核心不读盘、不启动进程、不接触文档文本，这样测正好把这几条一并检查了；认引用、配回行号、写回的先后顺序在 `tests/pinning.test.ts` 测：
+钉码核心不读盘、不启动进程、不接触文档文本，这样测正好把这几条一并检查了；认引用、配回行号、写回的先后顺序在 `tests/pinning.test.ts` 测，
+组件格式认记号、写回、进现状区在 `tests/code-format.test.ts` 测：
 
 {/* ref file="../tests/core.test.ts" lines="1-4" hash="e463e5acdc35" blob="cb01529c0ac2" */}
 
