@@ -262,7 +262,7 @@ describe('结构模板', () => {
     expect(body).toMatch(/'content\/docs\/outputs\/claude\.mdx': \['\.\.\/CLAUDE\.md'\]/)
   })
 
-  it('docfirst.config.mjs：不配格式（只有 mdx 一种），名册展开 fumadocs 包的 fumadocsRoster', () => {
+  it('docfirst.config.mjs：不配格式（格式按约定认领文件），名册展开 fumadocs 包的 fumadocsRoster', () => {
     const config = renderedText('docfirst.config.mjs')
     expect(config).not.toMatch(/docfirst-workflow\/mdx/)
     expect(config).toMatch(/^import \{ fumadocsRoster \} from '@godcreator\/docfirst-fumadocs\/roster'$/m)

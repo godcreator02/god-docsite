@@ -13,7 +13,8 @@ import { dirname, isAbsolute, join, relative, resolve, sep } from "node:path";
 import { pathToFileURL } from "node:url";
 import { createPinner } from "@godcreator/docfirst-pin";
 import type { Roster } from "../mdx/index.ts";
-import { createPinning, isClaimed } from "../pinning/index.ts";
+import { codeFormat } from "../code/index.ts";
+import { createPinning } from "../pinning/index.ts";
 import type { Pinning } from "../pinning/index.ts";
 import { createReader } from "./fs-reader.ts";
 import { createGitHistory } from "./history.ts";
@@ -147,7 +148,7 @@ async function build(root: string): Promise<Project> {
     return out;
   }
 
-  /** 现状区：内容根下除 trajectory/、future/ 之外的全部，加上 src/components/ 下有格式认领的代码文件 */
+  /** 现状区：内容根下除 trajectory/、future/ 之外的全部，加上 src/components/ 下组件格式认领的代码文件 */
   function statusDocs(): string[] {
     const out: string[] = [];
     for (const name of readdirSync(contentAbs)) {
@@ -164,7 +165,7 @@ async function build(root: string): Promise<Project> {
   function componentFiles(): string[] {
     const dir = join(root, COMPONENTS_DIR);
     if (!existsSync(dir)) return [];
-    return filesUnder(dir).map((path) => docIdOf(root, path)).filter(isClaimed);
+    return filesUnder(dir).map((path) => docIdOf(root, path)).filter(codeFormat.claims);
   }
 
   // 摆放模块认得的只有这几样，先攒齐再交给它——它拿不到装配的别的部分。

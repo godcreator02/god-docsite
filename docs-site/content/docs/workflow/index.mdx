@@ -22,13 +22,13 @@ full: true
 {/* ref file="../packages/docfirst-workflow/src/project/load.ts" lines="1-10" hash="56d45cc1765f" blob="9af74e0233aa" */}
 
 现状区是内容根下除 `trajectory/`、`future/` 之外的全部 `.mdx` 文档（目录里的和直接放在内容根上的都算），
-加上项目根下 `src/components/` 里有格式认领的代码文件：
+加上项目根下 `src/components/` 里组件格式认领的代码文件（`.ts`、`.tsx`、`.mjs`，放在那里的 `.mdx` 不算页面）：
 
-{/* ref file="../packages/docfirst-workflow/src/project/load.ts" lines="150-168" hash="50c8056ca830" blob="9af74e0233aa" */}
+{/* ref file="../packages/docfirst-workflow/src/project/load.ts" lines="151-169" hash="77de5589ec5c" blob="9fa77c18d282" */}
 
 配置模块由 Node 原生加载：站的打包器会把动态 import 改写成自己的加载器，这一句带着两个打包器的跳过标记。
 
-{/* ref file="../packages/docfirst-workflow/src/project/load.ts" lines="119-125" hash="5d8ed05b1d87" blob="9af74e0233aa" */}
+{/* ref file="../packages/docfirst-workflow/src/project/load.ts" lines="120-126" hash="5d8ed05b1d87" blob="9fa77c18d282" */}
 
 **读取器与旧内容来源**：旧内容来源按被引文件自己的位置找仓，hunk 表用两个临时文件跑 `git diff --no-index` 算，不往任何对象库写：
 
@@ -64,11 +64,11 @@ full: true
 
 格式有两种：mdx 页面与讲解组件的源码（`src/code/`）。一个文件只能有一个格式认领，没有或不止一个都报错：
 
-{/* ref file="../packages/docfirst-workflow/src/pinning/index.ts" lines="41-52" hash="7a51c81ee6c4" blob="846e36be1e3f" */}
+{/* ref file="../packages/docfirst-workflow/src/pinning/index.ts" lines="41-49" hash="9e97a3f281cb" blob="ed48db2f6f1a" */}
 
 钉码核心交回的结果与传入的引用一一对应、同序，配回靠下标；写回只交有新记录的那几处：
 
-{/* ref file="../packages/docfirst-workflow/src/pinning/index.ts" lines="80-98" hash="9182092f5801" blob="846e36be1e3f" */}
+{/* ref file="../packages/docfirst-workflow/src/pinning/index.ts" lines="77-95" hash="9182092f5801" blob="ed48db2f6f1a" */}
 
 ### mdx 格式
 
@@ -198,9 +198,9 @@ fumadocs 自带组件的规则在 [fumadocs 适配](/docs/fumadocs)的 `./roster
 **`loadProject(root)`** 同一个根只装配一次，站构建时 loader 并发调用拿到同一个项目。配置只认三个键，项目上带着钉码编排、名册、
 内容根、轨迹卡目录与摆放：
 
-{/* ref file="../packages/docfirst-workflow/src/project/load.ts" lines="23-34" hash="7749dba9e8a3" blob="9af74e0233aa" */}
+{/* ref file="../packages/docfirst-workflow/src/project/load.ts" lines="24-35" hash="7749dba9e8a3" blob="9fa77c18d282" */}
 
-{/* ref file="../packages/docfirst-workflow/src/project/load.ts" lines="36-56" hash="d98f55069bd0" blob="9af74e0233aa" */}
+{/* ref file="../packages/docfirst-workflow/src/project/load.ts" lines="37-57" hash="d98f55069bd0" blob="9fa77c18d282" */}
 
 **`./mdx`** 除了格式本身，还交出语法树上的函数给 fumadocs 适配：站构建时 remark 插件拿到的树已经解析好，用 `recognize` 认记号、
 `stamp` 打标记，不再解析一遍；`langOf` 让按原文渲染与站上的代码块标同一种语言：

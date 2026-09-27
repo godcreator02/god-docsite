@@ -40,9 +40,6 @@ export interface Pinning {
 
 const FORMATS: readonly Format[] = [mdxFormat, codeFormat];
 
-/** 有没有格式认领这个文件；项目装配按它挑现状区里的代码文件 */
-export const isClaimed = (file: string): boolean => FORMATS.some((format) => format.claims(file));
-
 /** 这个文件归哪个格式：一个文件只能有一个格式认领，没有或不止一个都报错 */
 export function formatOf(file: string): Format {
   const claimed = FORMATS.filter((format) => format.claims(file));

@@ -281,10 +281,10 @@ export const workflowGraph = defineSeamGraph({
       name: '建钉码编排',
       a: ['load'],
       b: ['pn-check', 'pinner'],
-      iface: 'createPinning(createPinner({ reader: createReader(root), history: createGitHistory(root) })) → Pinning；isClaimed(file) → boolean',
+      iface: 'createPinning(createPinner({ reader: createReader(root), history: createGitHistory(root) })) → Pinning；codeFormat.claims(file) → boolean',
       convention: false,
       via: 'code',
-      text: 'loadProject 读完配置，用读取器与 git 版旧内容来源建出钉码核心，再交给 createPinning，交回的钉码编排放在 Project.pinning 上。列现状区时，src/components/ 下的文件经 isClaimed 问钉码编排有没有格式认领，认领了才算。两个格式写死在钉码编排里，配置里没有格式这一项。',
+      text: 'loadProject 读完配置，用读取器与 git 版旧内容来源建出钉码核心，再交给 createPinning，交回的钉码编排放在 Project.pinning 上。列现状区时，src/components/ 下的文件要组件格式认领（.ts / .tsx / .mjs）才算，放在那里的 .mdx 不算页面。两个格式写死在钉码编排里，配置里没有格式这一项。',
     },
     {
       n: 10,
