@@ -18,21 +18,21 @@ full: true
 
 **建站从官方脚手架出发。** 两条命令共用 `createSite`，`docfirst.create-plain` 只要官方输出加本机约定：
 
-{/* ref file="../plugins/docfirst/src/scaffold.ts" lines="10-31" hash="4030ce4a675b" blob="acbeab2fb2ef" */}
+{/* ref file="../plugins/docfirst/src/scaffold.ts" lines="10-33" hash="cd1f30c27596" blob="275a2548d092" */}
 
-{/* ref file="../plugins/docfirst/src/scaffold.ts" lines="33-39" hash="ae296fd32488" blob="acbeab2fb2ef" */}
+{/* ref file="../plugins/docfirst/src/scaffold.ts" lines="35-41" hash="ae296fd32488" blob="275a2548d092" */}
 
 本机约定是精确文本替换，原文对不上就报错：
 
-{/* ref file="../plugins/docfirst/src/scaffold.ts" lines="172-177" hash="4fa12ba781fd" blob="acbeab2fb2ef" */}
+{/* ref file="../plugins/docfirst/src/scaffold.ts" lines="175-180" hash="4fa12ba781fd" blob="275a2548d092" */}
 
 三个清单一次查完再动手：
 
-{/* ref file="../plugins/docfirst/src/scaffold.ts" lines="278-281" hash="68c670cbca41" blob="acbeab2fb2ef" */}
+{/* ref file="../plugins/docfirst/src/scaffold.ts" lines="284-287" hash="68c670cbca41" blob="275a2548d092" */}
 
 写入文件途中失败就删掉整个目标目录：
 
-{/* ref file="../plugins/docfirst/src/scaffold.ts" lines="357-374" hash="460179de2867" blob="acbeab2fb2ef" */}
+{/* ref file="../plugins/docfirst/src/scaffold.ts" lines="363-380" hash="460179de2867" blob="275a2548d092" */}
 
 **`docfirst.create` 在官方输出上多改几份文件**，模板分新增与替换两个目录，另加 doc 脚本：
 
@@ -46,7 +46,7 @@ full: true
 
 查重范围看站在不在容器根里：
 
-{/* ref file="../plugins/docfirst/src/scaffold.ts" lines="314-318" hash="250edd16bd50" blob="acbeab2fb2ef" */}
+{/* ref file="../plugins/docfirst/src/scaffold.ts" lines="320-324" hash="250edd16bd50" blob="275a2548d092" */}
 
 **说明书**在 `skills/` 下，正本是本站 `content/docs/outputs/skills/` 下的 mdx，由 `docfirst.config.mjs` 的 `outputs` 映射生成：
 

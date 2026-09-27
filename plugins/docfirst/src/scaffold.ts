@@ -26,6 +26,8 @@ import { siteTitle } from './values.js'
  * - 删掉落地页 `src/app/(home)/`，`next.config.mjs` 里把 `/` 跳到 `/docs`
  * - `.gitignore`：排除 `next dev` 在站根生成的 `AGENTS.md` 与 `CLAUDE.md`。它们是 Next 给 agent 的提示，
  *   每次 `dev` 都重写；不排除的话 git 工作区一直不干净，`devkit.release` 拒发
+ * - `src/app/llms.mdx/docs/[[...slug]]/route.ts`：md 路由的 `Content-Type` 带上 `charset=utf-8`。官方只写了 `text/markdown`，
+ *   浏览器遇到没声明字符集的文本按 Latin-1 解码，中文全成乱码
  *
  * 目标目录必须还不存在，所以写文件途中失败时删掉整个目标目录就回到了原样。
  */
@@ -52,6 +54,7 @@ export const MANAGED_FILES: readonly string[] = [
   'src/lib/shared.ts',
   'src/lib/layout.shared.tsx',
   'src/app/docs/[[...slug]]/page.tsx',
+  'src/app/llms.mdx/docs/[[...slug]]/route.ts',
 ]
 
 /** 本机约定删掉的官方文件：分享图路由与落地页 */
@@ -250,6 +253,9 @@ export function applyConventions(files: readonly SiteFile[], values: { title: st
   )
   page = replaceOnce(page, '    openGraph: {\n      images: getPageImageUrl(page).url,\n    },\n', '', docsPage)
   byPath.set(docsPage, page)
+
+  const mdRoute = 'src/app/llms.mdx/docs/[[...slug]]/route.ts'
+  byPath.set(mdRoute, replaceOnce(take(mdRoute), "'Content-Type': 'text/markdown',", "'Content-Type': 'text/markdown; charset=utf-8',", mdRoute))
 
   byPath.set(
     'next.config.mjs',

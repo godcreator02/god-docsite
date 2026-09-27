@@ -71,6 +71,12 @@ describe('applyConventions：本机约定', () => {
     expect(ignore.split('\n')).toEqual(expect.arrayContaining(['/AGENTS.md', '/CLAUDE.md']))
   })
 
+  it('md 路由的 Content-Type 带 charset=utf-8，浏览器才按 UTF-8 显示中文', () => {
+    const route = text(done, 'src/app/llms.mdx/docs/[[...slug]]/route.ts')
+    expect(route).toContain("'Content-Type': 'text/markdown; charset=utf-8',")
+    expect(route).not.toContain("'Content-Type': 'text/markdown',")
+  })
+
   it('pnpm-workspace.yaml 放行 esbuild', () => {
     expect(text(done, 'pnpm-workspace.yaml')).toMatch(/allowBuilds:\n {2}esbuild: true/)
   })

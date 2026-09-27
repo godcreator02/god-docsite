@@ -396,7 +396,7 @@ export const pluginGraph = defineSeamGraph({
       iface: 'replaceOnce(text, from, to, file)；MANAGED_FILES · REMOVED_FILES',
       convention: true,
       via: 'disk',
-      text: '本机约定在官方输出上做精确文本替换：允许 esbuild 运行安装脚本、端口与只监听 127.0.0.1、字体与页面语言、站名、去掉 GitHub 链接、删掉分享图路由与落地页；.gitignore 末尾追加两行，排除 next dev 在站根生成的 AGENTS.md 与 CLAUDE.md。要替换的原文必须恰好出现一次、要改的文件必须在，否则报错，说明脚手架的输出变了，要跟着改 scaffold.ts。',
+      text: '本机约定在官方输出上做精确文本替换：允许 esbuild 运行安装脚本、端口与只监听 127.0.0.1、字体与页面语言、站名、去掉 GitHub 链接、删掉分享图路由与落地页；.gitignore 末尾追加两行，排除 next dev 在站根生成的 AGENTS.md 与 CLAUDE.md；md 路由的 Content-Type 补上 charset=utf-8。要替换的原文必须恰好出现一次、要改的文件必须在，否则报错，说明脚手架的输出变了，要跟着改 scaffold.ts。',
     },
     {
       n: 19,

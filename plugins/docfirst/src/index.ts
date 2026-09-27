@@ -105,7 +105,7 @@ export function apply(ctx: GwbContext): void {
   const scaffoldRule =
     '先运行官方脚手架 create-fumadocs-app（版本写死，要联网）生成，再应用本机约定：加 pnpm-workspace.yaml 放行 esbuild、dev / start 脚本写端口并只监听 127.0.0.1、' +
     '不从 Google 加载字体改用 Sarasa Mono SC、页面语言 zh-CN、站名、去掉指向 GitHub 的链接、删掉分享图路由 src/app/og/ 与落地页 src/app/(home)/ 并把 / 跳到 /docs、' +
-    '.gitignore 排除 next dev 在站根生成的 AGENTS.md 与 CLAUDE.md。' +
+    '.gitignore 排除 next dev 在站根生成的 AGENTS.md 与 CLAUDE.md、每页 md 的 Content-Type 带 charset=utf-8。' +
     '有问题一次列全、一个文件不写；写到一半失败就删掉新建的目录。只写文件，不运行 pnpm install。'
 
   ctx.effect(() =>
