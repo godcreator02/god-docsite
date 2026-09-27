@@ -55,6 +55,16 @@ export function formOf(
   return model.supersededIds.has(id) ? "superseded" : "alive";
 }
 
+/** 结论卡集：每棵树主干末端那张（`tree.spine` 最后一张）——尺寸放大档与跨日错开都按它判，在立与否另判。 */
+export function spineTipIds(trees: Tree[]): Set<string> {
+  const out = new Set<string>();
+  for (const t of trees) {
+    const tip = t.spine.at(-1);
+    if (tip) out.add(tip);
+  }
+  return out;
+}
+
 /** born-at 形状 + 可解析双查（分钟级与日级两种长度合法）。 */
 function bornAtOk(v: string): boolean {
   return BORN_AT_RE.test(v) && !Number.isNaN(dayNum(v));

@@ -11,8 +11,8 @@ import { fileURLToPath } from "node:url";
 import { test } from "node:test";
 import assert from "node:assert/strict";
 /* 布局 / 模型也直读源码：画布层吃的是源码里的 RingsLayout 型，跟 dist 里那份是两个声明 */
-import { BASE_RADIUS, NODE_RADIUS, RingsLayout } from "../packages/docfirst-trajectory/src/layout.ts";
-import { buildModel, NO_DOMAIN } from "../packages/docfirst-trajectory/src/model.ts";
+import { BASE_RADIUS, RingsLayout } from "../packages/docfirst-trajectory/src/layout.ts";
+import { buildModel, NO_DOMAIN, spineTipIds } from "../packages/docfirst-trajectory/src/model.ts";
 import { scanCardDir } from "../packages/docfirst-workflow/src/project/card-dir.ts";
 import type { Card, RawCard, TrajectoryModel } from "../packages/docfirst-trajectory/src/types.ts";
 import { buildThemes, mix } from "../packages/docfirst-trajectory/src/canvas/theme.ts";
@@ -25,7 +25,6 @@ import {
   type NodeEl,
   outerRingOf,
   recolor,
-  spineTipIds,
   supersededColor,
 } from "../packages/docfirst-trajectory/src/canvas/node-dom.ts";
 import { LabelArbiter } from "../packages/docfirst-trajectory/src/canvas/label-arbiter.ts";
@@ -125,7 +124,6 @@ test("buildNode：所有卡一样大；被取代的领域色混灰、没有环",
   const sup = buildNode(fakeCard("c"), "superseded", false, false, null);
   paintNodes([sup]);
   const core = stub(sup.core);
-  assert.equal(NODE_RADIUS.superseded, NODE_RADIUS.alive);
   assert.equal(core.getAttribute("r"), String(BASE_RADIUS));
   assert.equal(core.getAttribute("fill"), supersededColor("#5ea8ff", THEME));
   assert.notEqual(core.getAttribute("fill"), "#5ea8ff");

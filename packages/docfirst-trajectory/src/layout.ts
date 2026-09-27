@@ -40,16 +40,9 @@ export const DEG = 57.2958;
  * displayRadius(r) ≥ innerR 恒成立，任何卡任何模式都进不了盘心；第一环（day0 在 innerR + 10）贴盘沿。 */
 export const HUB_RIM = 10;
 
-/** 节点基准半径：所有卡一样大，状态靠环与颜色区分；结论放大档不吃这张表，
- * 走视图侧帧乘数 tierMult（默认 1，设置里可调；符号整组随 scale 放大，命中区同比跟随）。
- * 参与间距计算的布局常量，纯数据——键用字面量联合而非渲染层的 NodeForm 类型，
- * 布局层不反向依赖渲染层（两者结构等价，消费处照样按 NodeForm 索引）。 */
+/** 节点半径：所有卡一样大，状态靠环与颜色区分；结论放大档走视图侧帧乘数 tierMult
+ * （默认 1，设置里可调；符号整组随 scale 放大，命中区同比跟随）。 */
 export const BASE_RADIUS = 8.4;
-
-export const NODE_RADIUS: Record<"alive" | "superseded", number> = {
-  alive: BASE_RADIUS,
-  superseded: BASE_RADIUS,
-};
 
 /** 根节点半径：盘心正中的圆点 = 项目根卡，比卡节点（8.4）大一号，盘心独一档。 */
 export const ROOT_RADIUS = 12;
@@ -133,8 +126,13 @@ export function polar(a: number, r: number): { x: number; y: number } {
 }
 
 export function smoothstep(a: number, b: number, x: number): number {
-  const t = Math.min(1, Math.max(0, (x - a) / (b - a)));
-  return t * t * (3 - 2 * t);
+  return smoothUnit((x - a) / (b - a));
+}
+
+/** smoothstep 的内核：t 钳到 [0, 1] 后走 3t² − 2t³。鱼眼的斜率窗按起点加宽度调它，不先算出终点，免得多一次浮点舍入。 */
+function smoothUnit(t: number): number {
+  const c = Math.min(1, Math.max(0, t));
+  return c * c * (3 - 2 * c);
 }
 
 /** 弧长换角度：取内外半径的几何平均——按最内半径换算等于拿主干独占内圈的那一段
@@ -229,33 +227,13 @@ export const pseudoRandom = (i: number, salt: number): number => {
   return x - Math.floor(x);
 };
 
-/** 哪些字段算「手感参数」——类型与运行期遍历同吃这一份。
- *
- * 单独立成数组而不是只写进 Pick<>：数据变更重建时要把这批值整批搬进新实例，
- * 类型里列一遍、搬运处再手抄一遍的话，加第十一个可调字段时漏抄不会有任何信号——
- * 表现是那个参数每次重建就悄悄弹回默认值。 */
-export const LAYOUT_PATCH_KEYS = [
-  "focusDays",
-  "ease",
-  "oldShare",
-  "newShare",
-  "symbolPx",
-  "spreadMult",
-  "tierMult",
-  "gapFree",
-  "gapWide",
-  "hubBase",
-] as const;
-
 /** configure 的入参形态：一次可整批落的手感参数。 */
-export type LayoutPatch = Partial<Pick<RingsLayout, (typeof LAYOUT_PATCH_KEYS)[number]>>;
-
-/** 从一份布局里摘出全部手感参数——重建时搬运用，字段清单不在这里第二次出现。 */
-export function layoutPatchOf(layout: RingsLayout): LayoutPatch {
-  const patch: LayoutPatch = {};
-  for (const key of LAYOUT_PATCH_KEYS) patch[key] = layout[key];
-  return patch;
-}
+export type LayoutPatch = Partial<
+  Pick<
+    RingsLayout,
+    "focusDays" | "ease" | "oldShare" | "newShare" | "symbolPx" | "spreadMult" | "tierMult" | "gapFree" | "gapWide" | "hubBase"
+  >
+>;
 
 export class RingsLayout {
   /* ---------- 手感参数（设置面板改的是实例的） ----------
@@ -268,9 +246,6 @@ export class RingsLayout {
   symbolPx = 0.65; // 节点屏幕尺寸系数
   spreadMult = 1; // 同日串珠散开乘数（纯角度口径，进扇环宽度——散得开树带拿得宽）
   tierMult = 1; // 结论放大乘数（主干末端在立卡吃放大档，纯屏幕尺寸口径——帧变量，不进装箱）
-  hubR = 190; // 线性态时间零点半径：day0 的环从这里起步
-  /** 有效时间轴内界 = 鱼眼恒等区边界，恒等于 hubBase（setHub 直赋值）。 */
-  innerR = 180;
   /** 盘心设置值：直接定内界（innerR = hubBase），盘心占比天然 = (hubBase − HUB_RIM) /
    * (maxR + 60)——maxR 只随 hub 设置变、不随数据深浅变，同一 hubBase 下跨项目恒等。 */
   hubBase = 180;
@@ -331,27 +306,26 @@ export class RingsLayout {
     this.buildMap();
   }
 
+  /** 有效时间轴内界 = 鱼眼恒等区边界，恒等于 hubBase。 */
+  get innerR(): number {
+    return this.hubBase;
+  }
+
+  /** 线性态时间零点半径：day0 的环从这里起步，比内界多 10。 */
+  get hubR(): number {
+    return this.hubBase + 10;
+  }
+
   /** 盘心世界半径：恒在时间轴内界内、留 HUB_RIM 净空——第一环（day0）贴盘沿，
    * 「盘心不压卡」随 displayRadius(r) ≥ innerR 自动成立。 */
   get hubWorldR(): number {
     return this.innerR - HUB_RIM;
   }
 
-  /** 改盘心大小：hubBase 落设置，直赋内界与线性态零点半径——环带世界深度定死
-   * （AXIS_SPAN），内界直接跟设置值走：innerR = hubBase，hubR = hubBase + 10。
-   * 盘心占比 = (hubBase − HUB_RIM) / (maxR + 60)，maxR 只随 hubR 变、不随数据深浅变，
-   * 同一 hubBase 下跨项目、跨窗格恒等。重烘焙义务由 configure 统一兜。 */
-  setHub(hubBase: number): void {
-    this.hubBase = hubBase;
-    this.innerR = hubBase;
-    this.hubR = hubBase + 10;
-  }
-
   /** 手感参数统一入口：落参数后自动重烘焙 + 重建鱼眼映射——
    * 「改完必须记得 bake / buildMap」的顺序义务收进结构，调用方不背协议。 */
   configure(patch: LayoutPatch): void {
     Object.assign(this, patch);
-    if (patch.hubBase !== undefined) this.setHub(patch.hubBase);
     this.bake();
     this.buildMap();
   }
@@ -502,6 +476,18 @@ export class RingsLayout {
   /** 退回全景。 */
   unfocus(): void {
     this.strengthTarget = 0;
+  }
+
+  /** 推进一帧补间：焦点日与鱼眼强度趋近目标，末尾重建鱼眼映射——下一次 displayRadius / mag
+   * 读到的就是这一帧的形状。返回「还在动没有」，true 就该再排一帧。不碰 DOM，可单独测。 */
+  step(ease: number): boolean {
+    this.focusDay += (this.focusDayTarget - this.focusDay) * ease;
+    this.strength += (this.strengthTarget - this.strength) * ease;
+    if (Math.abs(this.focusDayTarget - this.focusDay) < 0.02) this.focusDay = this.focusDayTarget;
+    if (Math.abs(this.strengthTarget - this.strength) < 0.003) this.strength = this.strengthTarget;
+    const live = this.focusDay !== this.focusDayTarget || this.strength !== this.strengthTarget;
+    this.buildMap();
+    return live;
   }
 
   /** 显示域当地折算率（点云 / 环让位等视觉门控用）。 */
@@ -787,12 +773,6 @@ export class RingsLayout {
     return w * (t <= 0 ? 0 : t >= 1 ? t - 0.5 : t * t * t * (1 - t / 2));
   }
 
-  /** smoothstep 段本体（斜率场用）。 */
-  private smoothWindow(r: number, a: number, w: number): number {
-    const t = Math.min(1, Math.max(0, (r - a) / w));
-    return t * t * (3 - 2 * t);
-  }
-
   private warpIntegral(r: number): number {
     const fisheye = this.fisheye;
     return (
@@ -848,66 +828,10 @@ export class RingsLayout {
     const fisheye = this.fisheye;
     const m =
       fisheye.kO +
-      (fisheye.kF - fisheye.kO) * this.smoothWindow(r, fisheye.aA, fisheye.wA) +
-      (fisheye.kN - fisheye.kF) * this.smoothWindow(r, fisheye.aB, fisheye.wB);
+      (fisheye.kF - fisheye.kO) * smoothUnit((r - fisheye.aA) / fisheye.wA) +
+      (fisheye.kN - fisheye.kF) * smoothUnit((r - fisheye.aB) / fisheye.wB);
     return 1 + (m - 1) * this.strength;
   }
-}
-
-/* ================= 帧推进：补间一步，纯计算 ================= */
-
-/** 视图层每帧要带的那点补间态。
- *
- * 鱼眼的两对补间量（焦点日 / 强度）**不在这里**——它们是 RingsLayout 自己的
- * focusDay / focusDayTarget / strength / strengthTarget，displayRadius 与 mag 直接读它们。
- * 视图层另立一份平行的 f / s 是没有出路的：写进组件的那份传不到引擎里，滚轮滚半天
- * strength 恒 0、鱼眼一动不动、零报错。交互只经 focusOn() / unfocus() 两个门。 */
-export interface FrameState {
-  /** 世界变换：缩放与平移 */
-  view: { k: number; tx: number; ty: number };
-  /** 视图补间目标，null = 不在补间 */
-  vT: { k: number; tx: number; ty: number } | null;
-  /** 逐节点悬停放大补间的当前值 */
-  hv: Map<string, number>;
-  /** 当前悬停的节点身份 */
-  hover: string | null;
-  /** 已排的 requestAnimationFrame 句柄，null = 没排 */
-  raf: number | null;
-}
-
-/** 推进一帧：焦点日与鱼眼强度在 layout 自己的四个字段上趋近目标，视图与逐节点悬停在
- * frame 上趋近，末尾重建鱼眼映射系数——下一次 displayRadius / mag 读到的就是这一帧的形状。
- * 返回「还在动没有」，true 就该再排一帧。只改传进来的两个对象、不碰 DOM，可单独测。 */
-export function advanceFrame(layout: RingsLayout, fr: FrameState, ease: number): boolean {
-  layout.focusDay += (layout.focusDayTarget - layout.focusDay) * ease;
-  layout.strength += (layout.strengthTarget - layout.strength) * ease;
-  if (Math.abs(layout.focusDayTarget - layout.focusDay) < 0.02) layout.focusDay = layout.focusDayTarget;
-  if (Math.abs(layout.strengthTarget - layout.strength) < 0.003) layout.strength = layout.strengthTarget;
-  let live = layout.focusDay !== layout.focusDayTarget || layout.strength !== layout.strengthTarget;
-  for (const [id, hv] of fr.hv) {
-    const t = fr.hover === id ? 1 : 0;
-    const next = hv + (t - hv) * 0.25;
-    if (Math.abs(t - next) < 0.01) fr.hv.set(id, t);
-    else {
-      fr.hv.set(id, next);
-      live = true;
-    }
-  }
-  if (fr.vT) {
-    fr.view.k += (fr.vT.k - fr.view.k) * ease;
-    fr.view.tx += (fr.vT.tx - fr.view.tx) * ease;
-    fr.view.ty += (fr.vT.ty - fr.view.ty) * ease;
-    if (
-      Math.abs(fr.view.k - fr.vT.k) < 0.001 &&
-      Math.abs(fr.view.tx - fr.vT.tx) < 0.5 &&
-      Math.abs(fr.view.ty - fr.vT.ty) < 0.5
-    ) {
-      fr.view = { ...fr.vT };
-      fr.vT = null;
-    } else live = true;
-  }
-  layout.buildMap();
-  return live;
 }
 
 /* ================= 空窗碎石 ================= */

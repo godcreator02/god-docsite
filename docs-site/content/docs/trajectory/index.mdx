@@ -28,7 +28,7 @@ full: true
 
 **`.`** 导出解析、挑卡与扫描、建模、布局这几组纯函数与类型：
 
-{/* ref file="../packages/docfirst-trajectory/src/index.ts" lines="16-76" hash="9fc1adb60125" blob="6e3c47627e1c" */}
+{/* ref file="../packages/docfirst-trajectory/src/index.ts" lines="16-72" hash="78a8fa73f13d" blob="cb167e2ee93d" */}
 
 哪些 frontmatter 字段算卡由 `CARD_KEYS` 决定。命令行校验卡与 fumadocs 适配的卡集合 schema 用的是这同一张表，
 表里的字段一个都没写的文件不算卡：
@@ -38,11 +38,11 @@ full: true
 **`buildTrajectory(scan)`** 是组装入口：收 `scanCards` 的结果，给那张根卡的盘建模，交回全部卡、病卡和一个模型。
 它不算布局，布局在客户端按当前设置计算：
 
-{/* ref file="../packages/docfirst-trajectory/src/index.ts" lines="111-123" hash="700374590e8b" blob="6e3c47627e1c" */}
+{/* ref file="../packages/docfirst-trajectory/src/index.ts" lines="107-119" hash="700374590e8b" blob="cb167e2ee93d" */}
 
 交出去的卡去掉了包内部用的修改时间和标题：
 
-{/* ref file="../packages/docfirst-trajectory/src/index.ts" lines="78-91" hash="765b4bfba590" blob="6e3c47627e1c" */}
+{/* ref file="../packages/docfirst-trajectory/src/index.ts" lines="74-87" hash="765b4bfba590" blob="cb167e2ee93d" */}
 
 模型里被取代卡的集合换成了数组，整份能直接转成 JSON 交给客户端组件：
 

@@ -11,16 +11,16 @@
 
 import {
   bandFade,
+  BASE_RADIUS,
   type CardPlace,
   DEG,
   lodOf,
-  NODE_RADIUS,
   polar,
   SPREAD_DEG,
   smoothstep,
 } from "../../layout.ts";
-import { formOf } from "../../model.ts";
-import { buildNode, isConclusion, isPanoramaLabel, type NodeEl, spineTipIds } from "../node-dom.ts";
+import { formOf, spineTipIds } from "../../model.ts";
+import { buildNode, isConclusion, isPanoramaLabel, type NodeEl } from "../node-dom.ts";
 import type { BuildCtx, FrameCtx, StarLayer } from "./frame.ts";
 
 export class CardsLayer implements StarLayer {
@@ -122,7 +122,7 @@ export class CardsLayer implements StarLayer {
       /* 世界缩放因子：屏幕尺寸恒定；hover 放大 1.4 倍 */
       const symbolScale = layout.symbolPx * lod * pxToWorld * tier * (1 + 0.4 * n.hoverTween);
       /* 节点屏幕直径 */
-      const diamPx = 2 * NODE_RADIUS[n.form] * tier * layout.symbolPx * lod;
+      const diamPx = 2 * BASE_RADIUS * tier * layout.symbolPx * lod;
       /* 焦点带内才按屏幕弧长挤开；基准角距吃散开乘数（spreadOff 布局侧已乘，除回同基准归一） */
       const gate = smoothstep(1.5, 3, mag);
       const baseDeg = SPREAD_DEG * layout.spreadMult;
@@ -138,9 +138,9 @@ export class CardsLayer implements StarLayer {
       n.group.setAttribute("opacity", String(dim));
       /* 锚点半径压进盘心影响圈（盘沿 + 约一条长标签的净空）的内圈卡：翻成向盘外锚。
        * 只比盘沿多半行的锚点没用——文字本体还要向圆心再伸一条标签宽，照样泡盘心 */
-      const rIn = r2 - NODE_RADIUS[n.form] * symbolScale - 6 * pxToWorld;
+      const rIn = r2 - BASE_RADIUS * symbolScale - 6 * pxToWorld;
       const outward = rIn < hubR + 64 * pxToWorld;
-      const lp = polar(ang, outward ? r2 + NODE_RADIUS[n.form] * symbolScale + 6 * pxToWorld : rIn);
+      const lp = polar(ang, outward ? r2 + BASE_RADIUS * symbolScale + 6 * pxToWorld : rIn);
       const ap = this.anchorLabel(n.label, ang, lp.x, lp.y, pxToWorld, outward);
       const eff = mag * kRatio;
       /* 标签分级：在立的卡全景即显（eff>0.5）——全景读格局；被取代的进鱼眼才显

@@ -15,13 +15,12 @@
 
 import {
   bandFade,
+  BASE_RADIUS,
   type CardPlace,
   DEG,
-  NODE_RADIUS,
   polar,
   type TreeBox,
 } from "../../layout.ts";
-import { formOf } from "../../model.ts";
 import type { BoxGradient, EdgeEl } from "../node-dom.ts";
 import { el, text } from "../node-dom.ts";
 import type { Theme } from "../theme.ts";
@@ -169,13 +168,12 @@ export class TreesLayer implements StarLayer {
     const { framePos, pxToWorld, hoveredCard } = f;
     const layout = this.ctx.layout;
     const strength = layout.strength;
-    const model = this.ctx.model;
     for (const e of this.edgeEls) {
       const a = framePos.get(e.source.id) as FramePos;
       const b = framePos.get(e.target.id) as FramePos;
-      /* 退距 = 节点显示半径（symbolScale 已含形态档与结论放大档）+ 2px 净空 */
-      let ia = NODE_RADIUS[formOf(model, e.source.id)] * a.symbolScale + 2 * pxToWorld;
-      let ib = NODE_RADIUS[formOf(model, e.target.id)] * b.symbolScale + 2 * pxToWorld;
+      /* 退距 = 节点显示半径（symbolScale 已含结论放大档）+ 2px 净空 */
+      let ia = BASE_RADIUS * a.symbolScale + 2 * pxToWorld;
+      let ib = BASE_RADIUS * b.symbolScale + 2 * pxToWorld;
       /* 两端退距吃光整段就按比例压缩；连 1.2px 都不剩才判它画不出来 */
       const keep = 1.2 * pxToWorld;
       const fit = (span: number): boolean => {

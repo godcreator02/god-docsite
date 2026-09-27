@@ -4,12 +4,12 @@
  * 逻辑出自老仓 `god-flow-panels` 的 `node/star/chains.ts`（只读参考，本仓不 import 它）。
  */
 
-import { type CardPlace, DEG, lodOf, NODE_RADIUS, type RingsLayout } from "./layout.ts";
-import { formOf } from "./model.ts";
+import { BASE_RADIUS, type CardPlace, DEG, lodOf, type RingsLayout } from "./layout.ts";
+import { formOf, spineTipIds } from "./model.ts";
 import type { Card, TrajectoryModel } from "./types.ts";
 
 /** 链表（跨日弧向避让用）：每 (树, 槽) 一条，组 = 同日卡集、按日期序；
- * rBase = 组内最大节点基半径（算所需间距，建构期定死、不随帧变）；
+ * rBase = 节点半径（算所需间距，建构期定死、不随帧变）；
  * hasConclusion = 组内含结论卡（主干末端那张且在立），dodge 直径现乘 tierMult——
  * 判定与节点放大档的 isConclusion 同一口径。 */
 export interface Chain {
@@ -22,8 +22,7 @@ export interface Chain {
 export function buildChains(model: TrajectoryModel, layout: RingsLayout): Chain[] {
   const { byId } = model;
   const chains: Chain[] = [];
-  /* 结论卡集：每棵树主干末端那张（与渲染层 spineTipIds 同一口径，纯几何这边自算不跨层） */
-  const tips = new Set(model.trees.map((t) => t.spine.at(-1)).filter((id) => !!id));
+  const tips = spineTipIds(model.trees);
   layout.treeBoxes.forEach((box, boxIndex) => {
     const bySlot = new Map<number, Map<string, string[]>>();
     for (const id of box.tree.ids) {
@@ -44,7 +43,7 @@ export function buildChains(model: TrajectoryModel, layout: RingsLayout): Chain[
         .sort((a, b) => a[0].localeCompare(b[0]))
         .map(([, ids]) => ({
           ids,
-          rBase: Math.max(...ids.map((i) => NODE_RADIUS[formOf(model, i)])),
+          rBase: BASE_RADIUS,
           hasConclusion: ids.some((i) => tips.has(i) && formOf(model, i) === "alive"),
         }));
       chains.push({ boxIndex, groups });

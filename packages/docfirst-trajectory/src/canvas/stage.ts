@@ -16,7 +16,7 @@
  * 二是画布 svg 直挂 canvasEl（铺满），日期轨挂 railEl；尺寸公式一律吃画布区宽高。 */
 
 import { buildChains, type Chain, computeDodge } from "../chains.ts";
-import { advanceFrame, type FrameState, type LayoutPatch, RingsLayout } from "../layout.ts";
+import { type LayoutPatch, RingsLayout } from "../layout.ts";
 import type { Card, Milestone, TrajectoryModel } from "../types.ts";
 import { Camera } from "./camera.ts";
 import { DateRail } from "./date-rail.ts";
@@ -115,15 +115,6 @@ export class StarStage {
 
   /* ---------- 补间循环与拖拽 ---------- */
   private rafId: number | null = null;
-  /** 焦点日 / 强度补间走 advanceFrame：它要一份 FrameState，视图与悬停补间不归它
-   * （相机归 Camera、悬停归各层的 stepTweens），故这份只当引擎补间的搭子。 */
-  private readonly frameState: FrameState = {
-    view: { k: 1, tx: 0, ty: 0 },
-    vT: null,
-    hv: new Map(),
-    hover: null,
-    raf: null,
-  };
   private docListeners: [string, EventListener][] = [];
   private isDragging = false;
   private hasMoved = false;
@@ -401,8 +392,8 @@ export class StarStage {
     const layout = this.layout;
     if (!layout || !this.svg) return;
     const ease = layout.ease;
-    /* 焦点日与强度在 layout 自己的四个字段上趋近目标（advanceFrame 末尾重建鱼眼映射） */
-    const lensAnimating = advanceFrame(layout, this.frameState, ease);
+    /* 焦点日与强度在 layout 自己的四个字段上趋近目标（step 末尾重建鱼眼映射） */
+    const lensAnimating = layout.step(ease);
     /* 节点 / 根节点 hover 放大补间：两层各自步进、都要跑（不能短路） */
     const cardsAnimating = this.cardsLayer.stepTweens();
     const hubAnimating = this.hubLayer.stepTweens();

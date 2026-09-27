@@ -33,29 +33,25 @@ export { pickCardFiles, scanCards } from "./scan.ts";
 export type { CardFile, TrajectoryScan } from "./scan.ts";
 
 export {
-  advanceFrame,
   AXIS_SPAN,
   BASE_RADIUS,
   BLEND_W,
   DEG,
   gapDots,
   HUB_RIM,
-  LAYOUT_PATCH_KEYS,
   LOD_MAX,
   LOD_MIN,
-  NODE_RADIUS,
   ROOT_RADIUS,
   RingsLayout,
   SPREAD_DEG,
   bandFade,
-  layoutPatchOf,
   lodOf,
   monthGate,
   polar,
   pseudoRandom,
   smoothstep,
 } from "./layout.ts";
-export type { Box, CardPlace, FrameState, GapBand, GapDot, IsoBox, LayoutPatch, TreeBox } from "./layout.ts";
+export type { Box, CardPlace, GapBand, GapDot, IsoBox, LayoutPatch, TreeBox } from "./layout.ts";
 
 export { buildChains, computeDodge } from "./chains.ts";
 export type { Chain } from "./chains.ts";

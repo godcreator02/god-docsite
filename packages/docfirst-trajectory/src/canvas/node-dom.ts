@@ -13,8 +13,8 @@
  *
  * defs 序号 / 筛选态一律实例持有，不走模块级单例。 */
 
-import { NODE_RADIUS } from "../layout.ts";
-import type { Card, Tree } from "../types.ts";
+import { BASE_RADIUS } from "../layout.ts";
+import type { Card } from "../types.ts";
 import { mix, type Theme } from "./theme.ts";
 
 /* ---------- DOM 工具：parent 显式传、缺省建游离节点（由调用方挂载） ---------- */
@@ -65,17 +65,6 @@ export const FORM_NAME: Record<NodeForm, string> = {
   alive: "在立",
   superseded: "被取代",
 };
-
-/** 结论卡集：每棵树主干末端那张（`tree.spine` 最后一张）——尺寸放大档吃它，
- * 在立与否另判（见 isConclusion）。 */
-export function spineTipIds(trees: Tree[]): Set<string> {
-  const out = new Set<string>();
-  for (const t of trees) {
-    const tip = t.spine.at(-1);
-    if (tip) out.add(tip);
-  }
-  return out;
-}
 
 /** 尺寸放大档口径：主干末端那张在立卡 = 这棵树当前的结论，半径吃 tierMult。 */
 export function isConclusion(form: NodeForm, isTip: boolean): boolean {
@@ -193,7 +182,7 @@ export function shapeMarkup(
   outline: string,
   opts: { crown?: boolean; outer?: OuterRing } = {},
 ): string {
-  const k = r / NODE_RADIUS.alive;
+  const k = r / BASE_RADIUS;
   const g = shapeGeometry(type, r);
   const ring = (gap: number, extra: string): string =>
     `<${g.tag} ${attrString(shapeGeometry(type, r + gap * k))} fill="none" stroke="${color}" ${extra}/>`;
@@ -330,7 +319,7 @@ export function buildNode(
   isTip: boolean,
   type: string | null | undefined,
 ): NodeEl {
-  const r = NODE_RADIUS[form];
+  const r = BASE_RADIUS;
   const group = el("g", { class: "nd" });
   /* 命中区：符号外圈点得着 */
   el("circle", { cx: 0, cy: 0, r: r + 7, fill: "transparent" }, group);

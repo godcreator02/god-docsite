@@ -4,7 +4,7 @@
  * 断言的是壳该有的东西：吃满父元素的容器、画布容器、日期轨容器、工具条（三态 home 钮），
  * 以及空盘提示。data 用工作区自带的诗名 fixture 建（tests/fixtures/trajectory）。
  *
- * 另一条守鱼眼真接上了引擎：帧推进函数 advanceFrame 不碰 DOM，喂 fixture 建的 RingsLayout
+ * 另一条守鱼眼真接上了引擎：帧推进 RingsLayout.step 不碰 DOM，喂 fixture 建的 RingsLayout
  * 就能单测——补间只要没把 focusDay / strength 写回 layout，displayRadius 与 mag 读到的
  * 永远是线性态，盘看着一动不动、却零报错。
  */
@@ -12,16 +12,10 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
-import { advanceFrame, buildModel, buildTrajectory, RingsLayout, scanCards } from "@godcreator/docfirst-trajectory";
-import type { FrameState } from "@godcreator/docfirst-trajectory";
+import { buildModel, buildTrajectory, RingsLayout, scanCards } from "@godcreator/docfirst-trajectory";
 import { StarDisk } from "@godcreator/docfirst-trajectory/disk";
 import { scanCardDir } from "@godcreator/docfirst-workflow";
 import { renderCard, root } from "./trajectory-helpers.ts";
-
-/** 帧态初值：全景、居中，无悬停、无视图补间。 */
-function emptyFrame(): FrameState {
-  return { view: { k: 1, tx: 0, ty: 0 }, vT: null, hv: new Map(), hover: null, raf: null };
-}
 
 test("StarDisk：壳结构齐——吃满父元素的容器、盘区、画布空 div、日期轨容器、工具条与三态 home 钮，侧栏初始关着", async () => {
   const data = buildTrajectory(await scanCardDir("tests/fixtures/trajectory"));
@@ -53,11 +47,10 @@ test("StarDisk：没有上盘卡时照旧显示「这张盘还没有记录」", 
   assert.match(html, /<div class="star-empty">这张盘还没有记录<\/div>/);
 });
 
-test("advanceFrame：focusOn 后推帧，强度趋近 1、显示半径真被鱼眼改写", async () => {
+test("step：focusOn 后推帧，强度趋近 1、显示半径真被鱼眼改写", async () => {
   const cards = (await scanCardDir("tests/fixtures/trajectory")).cards;
   const m = buildModel(cards);
   const layout = new RingsLayout(m);
-  const fr = emptyFrame();
 
   // 取最内那张卡（离焦点带最远、进压缩区最深，形变最确定）当样本
   const radii = [...layout.places.values()].map((p) => p.rLin);
@@ -70,7 +63,7 @@ test("advanceFrame：focusOn 后推帧，强度趋近 1、显示半径真被鱼�
   layout.focusOn(m.dayMax, true);
   assert.equal(layout.strengthTarget, 1);
   let live = true;
-  for (let i = 0; i < 200 && live; i++) live = advanceFrame(layout, fr, 0.16);
+  for (let i = 0; i < 200 && live; i++) live = layout.step(0.16);
 
   assert.equal(live, false, "补间该收敛，200 帧内停下来");
   assert.equal(layout.strength, 1, "强度该到位");
@@ -81,7 +74,7 @@ test("advanceFrame：focusOn 后推帧，强度趋近 1、显示半径真被鱼�
   // 退回全景：强度回 0，显示半径复原
   layout.unfocus();
   live = true;
-  for (let i = 0; i < 200 && live; i++) live = advanceFrame(layout, fr, 0.16);
+  for (let i = 0; i < 200 && live; i++) live = layout.step(0.16);
   assert.equal(layout.strength, 0);
   assert.equal(layout.displayRadius(rLin), rLin, "退回全景该逐位复原线性半径");
 });

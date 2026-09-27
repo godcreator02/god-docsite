@@ -110,9 +110,9 @@ test("鱼眼映射：局部放大率与映射本体的数值导数一致", () =>
   }
 });
 
-test("盘心：setHub 直赋值，hubBase = innerR = 入参，hubR = 入参 + 10，盘心世界锚定不变", () => {
+test("盘心：configure 改 hubBase，innerR = hubBase，hubR = 入参 + 10，盘心世界锚定不变", () => {
   const L3 = new RingsLayout(m);
-  L3.setHub(130);
+  L3.configure({ hubBase: 130 });
   L3.bake();
   assert.equal(L3.hubBase, 130);
   assert.equal(L3.innerR, 130);
@@ -126,10 +126,10 @@ test("盘心：maxR 只随 hubR 变、不随数据深浅变，盘心占比在同
   const narrow = buildSynthetic("narw", [1, 4, 7]);
   const wide = buildSynthetic("wide", [1, 3, 29]);
   const a = new RingsLayout(narrow);
-  a.setHub(150);
+  a.configure({ hubBase: 150 });
   a.bake();
   const b = new RingsLayout(wide);
-  b.setHub(150);
+  b.configure({ hubBase: 150 });
   b.bake();
   assert.equal(a.maxR, b.maxR);
   assert.equal(a.hubWorldR / (a.maxR + 60), b.hubWorldR / (b.maxR + 60));
@@ -137,10 +137,10 @@ test("盘心：maxR 只随 hubR 变、不随数据深浅变，盘心占比在同
 
 test("盘心：占比随设置值单调走，大盘心占比更大", () => {
   const a = new RingsLayout(m);
-  a.setHub(130);
+  a.configure({ hubBase: 130 });
   a.bake();
   const b = new RingsLayout(m);
-  b.setHub(180);
+  b.configure({ hubBase: 180 });
   b.bake();
   assert.ok(b.hubWorldR / (b.maxR + 60) > a.hubWorldR / (a.maxR + 60));
 });
