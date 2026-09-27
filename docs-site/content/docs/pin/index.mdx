@@ -10,8 +10,8 @@ full: true
 
 ## 功能
 
-**核对与确认**是唯一算状态的地方。`check` 只收目标与记录、交回每处的判定；`confirm` 在核对的结果上逐处决定要不要重新记、记成什么，
-改文档归 workflow 的钉码编排。结果与传入的顺序一一对应，一处钉不住只是那一处不动：
+**核对与确认**是唯一算状态的地方。`check` 只收目标与记录（还没确认的记录是 null）、交回每处的判定；`confirm` 在核对的结果上逐处决定要不要重新记、记成什么，
+改文件归 workflow 的钉码编排。结果与传入的顺序一一对应，一处钉不住只是那一处不动：
 
 {/* ref file="../packages/docfirst-pin/src/pinner.ts" lines="1-9" hash="5888e052f3c2" blob="89c8a0c744fd" */}
 
@@ -72,7 +72,8 @@ full: true
 
 {/* ref file="../tests/boundary.test.ts" lines="121-135" hash="3045c8cb7ab9" blob="e77be7ebc154" */}
 
-**不接触文档文本。** 记号写成什么样、在文档第几行、写回时怎么改那一行，都归 workflow 的记号写法、mdx 格式与钉码编排。
+**不接触文档文本。** 记号写成什么样、在文件第几行、写回时怎么改那一行、这个文件是 mdx 页面还是讲解组件的源码，
+都归 workflow 的记号写法、两个格式与钉码编排。
 边界测试查源码与产物里有没有文档文本那一侧的名字：
 
 {/* ref file="../tests/boundary.test.ts" lines="180-193" hash="bed945d7fee3" blob="20992db5df4e" */}

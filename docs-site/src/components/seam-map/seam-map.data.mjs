@@ -30,7 +30,7 @@ const modules = [
     pkg: '@godcreator/docfirst-workflow',
     role: 'emerald',
     outside: false,
-    blurb: '调用链从 docfirst 命令开始的部分：命令行、项目装配（读文件、git、生成物、读卡目录）、钉码编排、mdx 格式、记号写法。认识两个核心，不认识任何站的宿主。',
+    blurb: '调用链从 docfirst 命令开始的部分：命令行、项目装配（读文件、git、生成物、读卡目录）、钉码编排、两种格式（mdx 页面与讲解组件的源码）、记号写法。认识两个核心，不认识任何站的宿主。',
     caps: [
       { id: 'cli', name: '命令行', ident: 'docfirst' },
       { id: 'marker', name: '记号写法', ident: 'marker/' },
@@ -137,7 +137,7 @@ const seams = [
     iface: 'import type { Target, MemoRecord, Status, Reason } from "@godcreator/docfirst-pin"；REASON_TEXT',
     convention: false,
     via: 'code',
-    text: 'workflow 的记号写法、mdx 格式与钉码核心的类型之间。记号写法把正式记号的属性、草稿记号解析成钉码核心定义的目标与记录，写正式记号时反过来；它只从钉码核心 import 类型。按原文渲染拒绝缺失的引用、命令行打印细分理由时，中文说法取 REASON_TEXT。目标、记录与理由的取值由钉码核心负责，钉码核心不认识任何记号写法与文档格式。',
+    text: 'workflow 的记号写法、两种格式与钉码核心的类型之间。记号写法把记号的属性解析成钉码核心定义的目标与记录（没有记录属性的，记录是 null），写记号时反过来；mdx 页面与讲解组件的源码用的是同一套属性，只有外面的注释不同。这几处只从钉码核心 import 类型。按原文渲染拒绝缺失的引用、命令行打印细分理由时，中文说法取 REASON_TEXT。目标、记录与理由的取值由钉码核心负责，钉码核心不认识任何记号写法与文档格式。',
   },
   {
     n: 2,
@@ -157,7 +157,7 @@ const seams = [
     iface: 'createPinner({ reader, history }) → Pinner；check(pins) → Verdict[]；confirm(verdicts, { accept }) → Step[]',
     convention: false,
     via: 'code',
-    text: 'workflow 的钉码编排与钉码核心之间。loadProject 用接缝 2 的两个实现建出钉码核心，交给钉码编排 createPinning，放在 Project.pinning 上；命令行的 check、confirm、render 与 fumadocs 适配的 remark 插件都经钉码编排核对。钉码编排把一篇里认出的每处引用剥成目标与记录交进来，结果与传入顺序一一对应，由它配回文档路径、行号与是不是草稿；确认时交回的每一步带着要写回的新记录，写回交给 mdx 格式。判定全部在钉码核心。',
+    text: 'workflow 的钉码编排与钉码核心之间。loadProject 用接缝 2 的两个实现建出钉码核心，交给钉码编排 createPinning，放在 Project.pinning 上；命令行的 check、confirm、render 与 fumadocs 适配的 remark 插件都经钉码编排核对。钉码编排把一个文件里认出的每处引用剥成目标与记录交进来，结果与传入顺序一一对应，由它配回文件路径与行号；确认时交回的每一步带着要写回的新记录，写回交给这个文件所属的格式。判定全部在钉码核心。',
   },
   {
     n: 4,
@@ -217,7 +217,7 @@ const seams = [
     iface: '配置键 content / components / outputs；内容根下 trajectory/、future/ 两个名字固定',
     convention: true,
     via: 'disk',
-    text: '项目装配与使用方的项目根之间，没有代码接口。loadProject 在项目根找 docfirst.config.mjs，只认这几个配置键，出现别的键当场报错并说明该怎么改；内容根（默认 content/）下 trajectory/ 是轨迹卡、future/ 是未来区，其余 .mdx 文档都是现状区、都进 check。约定由项目装配定，使用方照着写。',
+    text: '项目装配与使用方的项目根之间，没有代码接口。loadProject 在项目根找 docfirst.config.mjs，只认这几个配置键，出现别的键当场报错并说明该怎么改；内容根（默认 content/）下 trajectory/ 是轨迹卡、future/ 是未来区，其余 .mdx 文档都是现状区、都进 check；项目根下 src/components/ 里的 .ts、.tsx、.mjs（讲解组件的源码）也进 check。约定由项目装配定，使用方照着写。',
   },
   {
     n: 10,

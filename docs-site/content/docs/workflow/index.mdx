@@ -1,6 +1,6 @@
 ---
 title: workflow 命令行与项目
-description: docfirst-workflow：命令行 docfirst、项目装配（读文件、git、生成物、读卡目录）、钉码编排、记号写法、mdx 格式；调用链从 docfirst 命令开始的都在这个包里，不认识任何站的宿主
+description: docfirst-workflow：命令行 docfirst、项目装配（读文件、git、生成物、读卡目录）、钉码编排、记号写法、两种格式（mdx 页面与讲解组件的源码）；调用链从 docfirst 命令开始的都在这个包里，不认识任何站的宿主
 full: true
 ---
 
@@ -49,7 +49,7 @@ full: true
 
 {/* ref file="../packages/docfirst-workflow/src/project/placement.ts" lines="119-137" hash="134440fb80cc" blob="b57813645c6a" */}
 
-**读卡目录**：目录不存在回空集合；「卡里不许钉码」认两种形态：正式记号，和以 `@@docfirst` 开头的一行（已经删掉的草稿写法）：
+**读卡目录**：目录不存在回空集合；「卡里不许钉码」认两种形态：记号，和以 `@@docfirst` 开头的一行：
 
 {/* ref file="../packages/docfirst-workflow/src/project/card-dir.ts" lines="13-25" hash="7d367c0d4a7f" blob="775b6e9e6c2d" */}
 
@@ -98,10 +98,22 @@ fumadocs 自带组件的规则在 [fumadocs 适配](/docs/fumadocs)的 `./roster
 
 {/* ref file="../packages/docfirst-workflow/src/mdx/render.ts" lines="19-25" hash="1b1efc688db9" blob="471cfd781c18" */}
 
+### 组件格式 code
+
+讲解组件里照源码抄来的数据（源码片段、测试名、命令行输出）在这里挂引用。认领站的 `src/components/` 下的 `.ts`、`.tsx`、`.mjs`；
+记号是单独一行的块注释，里面那一截跟 mdx 里的一字不差：
+
+{/* ref file="../packages/docfirst-workflow/src/code/index.ts" lines="13-28" hash="dafa0effd22e" blob="24edf1174feb" */}
+
+不解析 TypeScript，按行认、按行写：写回整行替换，保留缩进与行尾的 `\r`。一行里除了这个注释还有别的代码就不是记号，
+所以组件里的记号必须单独占一行，放在它钉住的那段数据正上方。名册检查与按原文渲染只对 mdx 页面，这个格式只认引用、写回：
+
+{/* ref file="../packages/docfirst-workflow/src/code/index.ts" lines="44-54" hash="193e8bfeec89" blob="24edf1174feb" */}
+
 ### 记号写法 marker
 
-一处引用写成文字是什么样、文字怎么解析回目标与记录，都在 `src/marker/`：正式记号里的属性（先目标、后记录）、
-命令行报告用的目标文本 `targetKey`、已经删掉的草稿写法 `@@docfirst` 的报错。它只从钉码核心 import 目标与记录的类型，不认识 mdx，也不判状态：
+一处引用写成文字是什么样、文字怎么解析回目标与记录，都在 `src/marker/`，两个格式共用：记号里的属性（先目标、后记录）、
+命令行报告用的目标文本 `targetKey`、以 `@@docfirst` 开头的一行的报错。它只从钉码核心 import 目标与记录的类型，不认识哪个格式，也不判状态：
 
 {/* ref file="../packages/docfirst-workflow/src/marker/index.ts" lines="45-54" hash="3c5323faf69b" blob="7a3452874ed0" */}
 
@@ -110,17 +122,27 @@ fumadocs 自带组件的规则在 [fumadocs 适配](/docs/fumadocs)的 `./roster
 
 {/* ref file="../packages/docfirst-workflow/src/marker/index.ts" lines="143-161" hash="0eb5643ad8ae" blob="1d392bc3267a" */}
 
-每个动作词认哪些属性是固定的；多出属性、值不合法都报错到行：
+每个动作词认哪些属性是固定的；多出属性、值不合法都报错到行。外壳里是「一个词 + `key="value"` 属性」的样子、这个词却不是
+`ref` / `tree` / `has`，也报错，不当成普通注释：
 
-{/* ref file="../packages/docfirst-workflow/src/marker/index.ts" lines="67-72" hash="ac51ca2c095b" blob="7a3452874ed0" */}
+{/* ref file="../packages/docfirst-workflow/src/marker/index.ts" lines="67-75" hash="f449766404ab" blob="1d392bc3267a" */}
+
+一个文件里写坏的记号一次列全：格式逐处解析时经 `markerErrors` 记下每处的错，认完再合成一条抛出：
+
+{/* ref file="../packages/docfirst-workflow/src/marker/index.ts" lines="93-112" hash="3c75698789b6" blob="1d392bc3267a" */}
 
 ### 引用与清单 reference
 
-引用在文档里的位置与核对结果的类型定义在 `src/reference/`：钉码核心只认目标与记录，文档路径与行号由钉码编排配回去；记录为 null
+引用在文件里的位置与核对结果的类型定义在 `src/reference/`：钉码核心只认目标与记录，文件路径与行号由钉码编排配回去；记录为 null
 的就是还没确认的记号，确认后要写回的一处一定带着记录。
-mdx 格式认出的、按原文渲染要读的、命令行打印的都是这几个类型：
+两个格式认出的、按原文渲染要读的、命令行打印的都是这几个类型：
 
 {/* ref file="../packages/docfirst-workflow/src/reference/index.ts" lines="11-25" hash="c14662ebadbb" blob="ff70f29c64ee" */}
+
+**格式接口** `Format` 也定义在这里：认领哪些文件、从全文认出引用、把确认后的记录写回全文。mdx 格式与组件格式各实现一份，
+钉码编排只经这个接口跟它们打交道：
+
+{/* ref file="../packages/docfirst-workflow/src/reference/index.ts" lines="27-39" hash="cffde6e6314f" blob="7b82e8a0db25" */}
 
 ### 命令行 cli
 
@@ -145,7 +167,7 @@ mdx 格式认出的、按原文渲染要读的、命令行打印的都是这几�
 🔴 content/docs/a.mdx  src/greet.ts:4-5  缺失（整段已被删光）
 ```
 
-`check` 先把逐篇核对与轨迹卡校验汇总成一份报告，人读模式边算边打，`--json` 汇总完打印一行，两种模式的红出自同一份报告：
+`check` 先把逐篇核对与轨迹卡校验汇总成一份报告，人读模式核对一处打印一处，`--json` 汇总完打印一行，两种模式的红出自同一份报告：
 
 {/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="213-236" hash="5f938c9ee287" blob="68565dfd474a" */}
 

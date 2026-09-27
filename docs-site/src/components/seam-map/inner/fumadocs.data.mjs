@@ -143,7 +143,7 @@ export const fumadocsGraph = defineSeamGraph({
       pkg: 'transform.ts',
       role: 'blue',
       outside: false,
-      blurb: 'applyListing 在树上找正式记号与草稿记号，按记号所在的行取清单里的那一项，原地换成 nodeFor 造的节点；清单里没有这一行就直接报错。',
+      blurb: 'applyListing 在树上找记号（确认过的与还没确认的都算），按记号所在的行取清单里的那一项，原地换成 nodeFor 造的节点；清单里没有这一行就直接报错。',
       caps: [{ id: 'tf-apply', name: '按行号换节点', ident: 'applyListing' }],
     },
     {
@@ -273,7 +273,7 @@ export const fumadocsGraph = defineSeamGraph({
       iface: 'recognize(tree) → Reference[]；stamp(tree, roster)',
       convention: false,
       via: 'code',
-      text: '四步的第一步和第四步用 workflow ./mdx 的函数。recognize 在语法树上认正式记号与草稿记号，命令行的 parse 用的也是它；stamp 按名册给每个组件节点写上 data.docfirstAi 或 data._stringify，名册外的组件直接报错。',
+      text: '四步的第一步和第四步用 workflow ./mdx 的函数。recognize 在语法树上认记号，写坏的一次列全再报错，命令行认 mdx 页面用的也是它；讲解组件源码里的引用只在命令行里核对，不经过这个插件；stamp 按名册给每个组件节点写上 data.docfirstAi 或 data._stringify，名册外的组件直接报错。',
     },
     {
       n: 6,
@@ -310,10 +310,10 @@ export const fumadocsGraph = defineSeamGraph({
       name: '语法树零件',
       a: ['tf-apply', 'gp-glossary', 'bl-nodefor'],
       b: ['wf-mdx'],
-      iface: 'walk · lineOf · markerOf · draftIn · langOf；类型 TreeNode · JsxAttribute · Roster',
+      iface: 'walk · lineOf · markerOf · langOf；类型 TreeNode · JsxAttribute · Roster',
       convention: false,
       via: 'code',
-      text: '遍历语法树、取行号、判断节点是不是记号、按扩展名取语言，都用 workflow ./mdx 的函数：applyListing 用 walk、markerOf、draftIn、lineOf 找记号节点，remarkGlossary 用 walk，blocks.ts 用 langOf。树与名册的类型也从那里取。',
+      text: '遍历语法树、取行号、判断节点是不是记号、按扩展名取语言，都用 workflow ./mdx 的函数：applyListing 用 walk、markerOf、lineOf 找记号节点，remarkGlossary 用 walk，blocks.ts 用 langOf。树与名册的类型也从那里取。',
     },
     {
       n: 10,

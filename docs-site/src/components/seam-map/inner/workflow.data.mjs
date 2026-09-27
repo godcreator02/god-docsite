@@ -1,10 +1,10 @@
 /**
  * 命令行与项目 docfirst-workflow 的内部接缝图：模块页 <SeamMap module="workflow" /> 画的就是它。
- * 虚线框是包里的目录：cli、pinning、mdx、marker、reference 各一个框，project 按做的事分成项目装配、读文件与 git、
+ * 虚线框是包里的目录：cli、pinning、mdx、code、marker、reference 各一个框，project 按做的事分成项目装配、读文件与 git、
  * 生成物与读卡三个框，这三个框的包名一栏都写 project/、颜色相同，框里的文件写在 blurb 里；
- * 灰色实线框是包外的调用方、依赖与使用方的仓。
- * 目录之间的方向从线上看：marker 与 reference 只往钉码核心连，mdx 往 marker 连、不连 pinning 与 project，
- * pinning 往 mdx 与钉码核心连，cli 往下连其余各处。坐标在 workflow.layout.ts。
+ * mdx 与 code 是同一个格式接口的两份实现，颜色相同；灰色实线框是包外的调用方、依赖与使用方的仓。
+ * 目录之间的方向从线上看：marker 与 reference 只往钉码核心连，mdx 与 code 往 marker 连、不连 pinning 与 project，
+ * pinning 往两个格式与钉码核心连，cli 往下连其余各处。坐标在 workflow.layout.ts。
  */
 import { defineSeamGraph } from '../graph.mjs';
 
@@ -12,7 +12,7 @@ export const workflowGraph = defineSeamGraph({
   id: 'workflow',
   title: '命令行与项目内部的目录与接缝',
   intro:
-    '命令行与项目内部接缝图：虚线框是包里的目录，project 目录按做的事分成项目装配、读文件与 git、生成物与读卡三个框；框里的方块是它对外给的函数或类型，灰色实线框是包外的调用方、依赖与使用方的仓。记号写法与引用类型只连钉码核心，mdx 格式连记号写法、不连钉码编排与 project，钉码编排连 mdx 格式与钉码核心，命令行连其余各处。',
+    '命令行与项目内部接缝图：虚线框是包里的目录，project 目录按做的事分成项目装配、读文件与 git、生成物与读卡三个框；框里的方块是它对外给的函数或类型，灰色实线框是包外的调用方、依赖与使用方的仓。mdx 格式与组件格式实现同一个格式接口，都连记号写法、不连钉码编排与 project；记号写法与引用类型只连钉码核心，钉码编排按文件挑格式、连两个格式与钉码核心，命令行连其余各处。',
   frameLabel: '目录',
   modules: [
     {
@@ -58,7 +58,7 @@ export const workflowGraph = defineSeamGraph({
       role: 'blue',
       outside: false,
       blurb:
-        'load.ts：loadProject 读配置，用读取器与旧内容来源建出钉码核心、交给 createPinning 建出钉码编排，再把摆放装进项目，同一个根只装配一次；现状区按约定是内容根下 trajectory/、future/ 之外的全部 .mdx；docIdOf 把路径换成文档身份。',
+        'load.ts：loadProject 读配置，用读取器与旧内容来源建出钉码核心、交给 createPinning 建出钉码编排，再把摆放装进项目，同一个根只装配一次。现状区按约定是内容根下 trajectory/、future/ 之外的全部 .mdx，加上项目根下 src/components/ 里有格式认领的代码文件（讲解组件的源码）；docIdOf 把路径换成文档身份。',
       caps: [
         { id: 'config', name: '读配置', ident: 'configProblems' },
         { id: 'load', name: '装配', ident: 'loadProject · docIdOf' },
@@ -71,7 +71,7 @@ export const workflowGraph = defineSeamGraph({
       role: 'rose',
       outside: false,
       blurb:
-        'index.ts 一个文件：一篇文档的核对与确认只在这里串起来。mdx 格式认出引用，每处剥成目标与记录交给钉码核心，结果按原来的顺序配回文档路径、行号与是不是草稿；确认时把新记录交回 mdx 格式写回。命令行、生成物摆放与站构建共用这一份。不认识记号属性怎么写，也不认识 project 与 cli。',
+        'index.ts 一个文件：一个文件的核对与确认只在这里串起来。formatOf 按文件路径挑格式（mdx 页面或组件源码，没有或不止一个格式认领都报错），格式认出引用，每处剥成目标与记录交给钉码核心，结果按原来的顺序配回文件路径与行号；确认时把新记录交回同一个格式写回。命令行、生成物摆放与站构建共用这一份。不认识记号属性怎么写，也不认识 project 与 cli。',
       caps: [
         { id: 'pn-check', name: '核对', ident: 'checkDoc · checkReferences' },
         { id: 'pn-confirm', name: '确认写回', ident: 'confirmDoc' },
@@ -84,11 +84,10 @@ export const workflowGraph = defineSeamGraph({
       role: 'amber',
       outside: false,
       blurb:
-        'index.ts 一个文件：一处引用写成文字是什么样、文字怎么解析回目标与记录。正式记号里的属性（先目标、后记录）、草稿记号、报告里的目标文本都在这里。只从钉码核心 import 类型，不认识 mdx，也不判状态。',
+        'index.ts 一个文件：一处引用写成文字是什么样、文字怎么解析回目标与记录，两个格式共用。记号里的属性先目标、后记录，没有记录属性就是未确认；长成记号却认不出动作词、以 @@docfirst 开头的都报错，markerErrors 让格式把一个文件里写坏的记号一次列全；报告里的目标文本也在这里。只从钉码核心 import 类型，不认识哪个格式，也不判状态。',
       caps: [
-        { id: 'mk-draft', name: '草稿', ident: 'draftOf' },
-        { id: 'mk-formal', name: '正式记号', ident: 'formalOf · parseFormal' },
         { id: 'mk-key', name: '目标文本', ident: 'targetKey' },
+        { id: 'mk-formal', name: '记号', ident: 'formalOf · parseFormal' },
       ],
     },
     {
@@ -113,13 +112,23 @@ export const workflowGraph = defineSeamGraph({
       role: 'violet',
       outside: false,
       blurb:
-        '项目里唯一的文档格式。认引用走 remark 语法树（unified、remark-mdx），正式记号与草稿记号都认；写回只重写记号那一行；名册检查给 check；按原文渲染给摆放，渲染不了就抛 RenderRefusal；语法树上的函数给 fumadocs 适配。认识 marker、reference 与钉码核心，不认识钉码编排、project 与 cli。',
+        'mdxFormat 认领全部 .mdx。认引用走 remark 语法树（unified、remark-mdx）：记号是单独一行的花括号注释 {/* … */}，段落里以 @@docfirst 开头的一行报错；写回只重写记号那一行；名册检查给 check；按原文渲染给摆放，渲染不了就抛 RenderRefusal；语法树上的函数给 fumadocs 适配。名册检查、按原文渲染只有 mdx 页面有。认识 marker、reference 与钉码核心，不认识组件格式、钉码编排、project 与 cli。',
       caps: [
         { id: 'md-tree', name: '语法树函数', ident: 'recognize · stamp · walk' },
-        { id: 'md-rw', name: '认引用与写回', ident: 'parse · write' },
         { id: 'md-lint', name: '名册检查', ident: 'lintComponents' },
+        { id: 'md-rw', name: '认引用与写回', ident: 'parse · write' },
         { id: 'md-render', name: '按原文渲染', ident: 'renderAi · RenderRefusal' },
       ],
+    },
+    {
+      id: 'code',
+      name: '组件格式',
+      pkg: 'code/',
+      role: 'violet',
+      outside: false,
+      blurb:
+        'codeFormat 认领站的 src/components/ 下的 .ts、.tsx、.mjs，讲解组件里照源码抄来的数据在这里挂引用。记号是单独一行的块注释 /* … */，里面那一截跟 mdx 里的一字不差；按行认、按行写，不解析 TypeScript，一行里除了这个注释还有别的代码就不是记号。只认识 marker 与 reference。',
+      caps: [{ id: 'cd-rw', name: '认引用与写回', ident: 'parse · write' }],
     },
     {
       id: 'output',
@@ -142,8 +151,8 @@ export const workflowGraph = defineSeamGraph({
       role: 'cyan',
       outside: false,
       blurb:
-        'index.ts 一个文件，只有类型：一处引用在文档里的位置（目标、记录、第几行、是不是草稿）、一处核对完的清单项、一篇文档的清单。只认识钉码核心。',
-      caps: [{ id: 'ref-types', name: '引用与清单', ident: 'Reference · Listing' }],
+        'index.ts 一个文件，只有类型：一处引用在文件里的位置（目标、记录、第几行；还没确认的记录是 null）、一处核对完的清单项、一个文件的清单，以及两个格式都实现的格式接口 Format（claims、parse、write）。只认识钉码核心。',
+      caps: [{ id: 'ref-types', name: '引用、清单、格式', ident: 'Listing · Format' }],
     },
     {
       id: 'pin',
@@ -195,7 +204,7 @@ export const workflowGraph = defineSeamGraph({
       iface: 'loadProject(process.cwd()) → Project：docs() / read / write / pinning / placing',
       convention: false,
       via: 'code',
-      text: 'check、confirm、render 先调 loadProject 拿到装配好的项目，按 docs() 列出的现状区文档逐篇处理，confirm 写好的全文经 project.write 写回；trajectory 也从项目上拿轨迹卡目录。',
+      text: 'check、confirm、render 先调 loadProject 拿到装配好的项目，按 docs() 列出的现状区文件逐个处理（mdx 页面与讲解组件的源码），confirm 写好的全文经 project.write 写回；trajectory 也从项目上拿轨迹卡目录。',
     },
     {
       n: 2,
@@ -205,7 +214,7 @@ export const workflowGraph = defineSeamGraph({
       iface: 'project.pinning.checkDoc(doc, text) → Listing；confirmDoc(doc, text, { accept }) → ConfirmResult',
       convention: false,
       via: 'code',
-      text: 'check 对每篇调 checkDoc 拿清单，confirm 调 confirmDoc 拿回写好的全文与每处的 ConfirmStep（记上、写回新行号、accept 后重新记、不动、等复核、拒绝）。状态全由钉码核心判，命令行只打印、算退出码。',
+      text: 'check 对每个文件调 checkDoc 拿清单，confirm 调 confirmDoc 拿回写好的全文与每处的 ConfirmStep（记上、写回新行号、accept 后重新记、不动、等复核、拒绝）。页面与组件源码走同一个入口，挑格式是钉码编排的事。状态全由钉码核心判，命令行只打印、算退出码。',
     },
     {
       n: 3,
@@ -215,7 +224,7 @@ export const workflowGraph = defineSeamGraph({
       iface: 'createUncommittedProbe(root) → (doc, target) => boolean；placing.check(doc, listing) / render(doc)；scanCardDir(dir) → TrajectoryScan；OutputReport = PlacedCheck',
       convention: false,
       via: 'code',
-      text: 'check 每跑一次造一个未提交改动探针，黄灯的被钉文件在本仓有未提交的改动就算红；每篇核对完把清单交给 placing.check 核对生成物；最后用 scanCardDir 读轨迹卡目录，病卡计进红。confirm 与 render 调 placing.render 重新生成。机读报告的 outputs 直接用摆放的 PlacedCheck 类型，命令行只把这些结果打印成行。',
+      text: 'check 每跑一次造一个未提交改动探针，黄灯的被钉文件在本仓有未提交的改动就算红，组件源码里的黄灯也一样；每篇 mdx 页面核对完把清单交给 placing.check 核对生成物；最后用 scanCardDir 读轨迹卡目录，病卡计进红。confirm 与 render 调 placing.render 重新生成。机读报告的 outputs 直接用摆放的 PlacedCheck 类型，命令行只把这些结果打印成行。',
     },
     {
       n: 4,
@@ -225,7 +234,7 @@ export const workflowGraph = defineSeamGraph({
       iface: 'lintComponents(text, roster)；REASON_TEXT[item.reason]',
       convention: false,
       via: 'code',
-      text: 'check 对每篇用 mdx 格式的 lintComponents 查名册外组件，每个算一处红，不用等站构建才发现；打印黄灯与红灯的细分理由用钉码核心 REASON_TEXT 的中文说法。',
+      text: 'check 对每篇 mdx 页面用 mdx 格式的 lintComponents 查名册外组件，每个算一处红，不用等站构建才发现；打印黄灯与红灯的细分理由用钉码核心 REASON_TEXT 的中文说法。',
     },
     {
       n: 5,
@@ -252,10 +261,10 @@ export const workflowGraph = defineSeamGraph({
       name: '语法树函数',
       a: ['fd-remark'],
       b: ['md-tree'],
-      iface: './mdx：recognize(tree) · stamp(tree, roster) · walk · markerOf · draftIn · lineOf · langOf',
+      iface: './mdx：recognize(tree) · stamp(tree, roster) · walk · markerOf · lineOf · langOf',
       convention: false,
       via: 'code',
-      text: '站构建时 fumadocs 已经把页面解析成语法树，remark 插件直接用 ./mdx 的 recognize 认记号、用 stamp 按名册打标记，不再解析一遍，认记号跟命令行用同一份代码。换代码块时用 markerOf、draftIn、walk 找记号节点，代码块的语言名用 langOf，跟按原文渲染标同一种语言。',
+      text: '站构建时 fumadocs 已经把页面解析成语法树，remark 插件直接用 ./mdx 的 recognize 认记号、用 stamp 按名册打标记，不再解析一遍，认记号跟命令行用同一份代码。换代码块时用 markerOf、walk 找记号节点，代码块的语言名用 langOf，跟按原文渲染标同一种语言。站构建只处理 mdx 页面，组件格式不经过这里。',
     },
     {
       n: 8,
@@ -272,10 +281,10 @@ export const workflowGraph = defineSeamGraph({
       name: '建钉码编排',
       a: ['load'],
       b: ['pn-check', 'pinner'],
-      iface: 'createPinning(createPinner({ reader: createReader(root), history: createGitHistory(root) })) → Pinning',
+      iface: 'createPinning(createPinner({ reader: createReader(root), history: createGitHistory(root) })) → Pinning；isClaimed(file) → boolean',
       convention: false,
       via: 'code',
-      text: 'loadProject 读完配置，用读取器与 git 版旧内容来源建出钉码核心，再交给 createPinning，交回的钉码编排放在 Project.pinning 上。项目里只有 mdx 一种格式，配置里没有格式这一项。',
+      text: 'loadProject 读完配置，用读取器与 git 版旧内容来源建出钉码核心，再交给 createPinning，交回的钉码编排放在 Project.pinning 上。列现状区时，src/components/ 下的文件经 isClaimed 问钉码编排有没有格式认领，认领了才算。两个格式写死在钉码编排里，配置里没有格式这一项。',
     },
     {
       n: 10,
@@ -319,13 +328,13 @@ export const workflowGraph = defineSeamGraph({
     },
     {
       n: 14,
-      name: '认引用与写回',
+      name: '格式接口',
       a: ['pn-check', 'pn-confirm'],
-      b: ['md-rw'],
-      iface: 'parse(text) → Reference[]；write(text, references) → text',
+      b: ['md-rw', 'cd-rw'],
+      iface: 'formatOf(file) → Format；Format：claims(file) / parse(text) → Reference[] / write(text, written) → text',
       convention: false,
       via: 'code',
-      text: '钉码编排把整篇文本交给 mdx 格式认出全部引用；确认时把带着新记录的引用交回去，mdx 格式只重写那几行，草稿记号也在这时换成正式记号。项目里只有 mdx 一种格式，钉码编排直接 import 它。',
+      text: '钉码编排按文件路径挑格式：.mdx 归 mdx 格式，站的 src/components/ 下的 .ts、.tsx、.mjs 归组件格式，一个文件只能有一个格式认领。整个文件的文本交给那个格式认出全部引用；确认时把带着新记录的引用交回同一个格式，它只重写那几行，未确认的记号在这时写上记录。两个格式写死在钉码编排的表里。',
     },
     {
       n: 15,
@@ -350,12 +359,12 @@ export const workflowGraph = defineSeamGraph({
     {
       n: 17,
       name: '记号写法',
-      a: ['md-rw', 'md-tree'],
-      b: ['mk-formal', 'mk-draft'],
-      iface: 'draftOf(line, where) → Target | null；parseFormal(payload, where) → { target, record } | null；formalOf(target, record) → payload',
+      a: ['md-rw', 'md-tree', 'cd-rw'],
+      b: ['mk-formal'],
+      iface: 'parseFormal(payload, where) → { target, record } | null；formalOf(target, record) → payload；markerErrors()；mdx 外壳 {/* … */}，组件外壳 /* … */',
       convention: false,
       via: 'code',
-      text: 'mdx 格式认出一行草稿文字，或剥掉正式记号外面的花括号注释，把里面那一截交给记号写法解析；写回时拿记号写法生成的那一截，再包上花括号注释。属性叫什么、记录怎么写，只在记号写法里定义。',
+      text: '两个格式各剥掉自己的外壳（mdx 是花括号注释，组件源码是单独一行的块注释），把里面那一截交给同一个 parseFormal；写回时拿 formalOf 生成的那一截，再包上自己的外壳。同一条引用在两种文件里只有外壳不同，属性叫什么、记录怎么写只在记号写法里定义。两个格式都经 markerErrors 把一个文件里写坏的记号一次列全再报错；mdx 段落里以 @@docfirst 开头的一行也用记号写法给的报错。',
     },
     {
       n: 18,
@@ -390,22 +399,22 @@ export const workflowGraph = defineSeamGraph({
     {
       n: 21,
       name: '引用与清单的类型',
-      a: ['md-render', 'pn-check', 'placing', 'main'],
+      a: ['md-render', 'md-rw', 'cd-rw', 'pn-check', 'placing', 'main'],
       b: ['ref-types'],
-      iface: 'import type { Reference, Item, Listing } from "../reference/index.ts"',
+      iface: 'import type { Format, Reference, WrittenReference, Item, Listing } from "../reference/index.ts"',
       convention: false,
       via: 'code',
-      text: '一处引用在文档里的位置、一处核对完的清单项、一篇的清单都定义在 reference/：mdx 格式认出的是 Reference，钉码编排交回的、按原文渲染与摆放读的、命令行打印的都是 Listing。fumadocs 适配从主入口取同一组类型。',
+      text: '一处引用在文件里的位置、一处核对完的清单项、一个文件的清单、格式接口都定义在 reference/：两个格式实现的是 Format、认出的是 Reference，钉码编排交回的、按原文渲染与摆放读的、命令行打印的都是 Listing。fumadocs 适配从主入口取同一组类型。',
     },
     {
       n: 22,
       name: '钉码核心的类型与说法',
-      a: ['ref-types', 'mk-formal', 'md-render'],
+      a: ['ref-types', 'mk-formal', 'md-render', 'cd-rw'],
       b: ['pin-types'],
       iface: 'import type { Target, MemoRecord, Status, Reason } from "@godcreator/docfirst-pin"；REASON_TEXT',
       convention: false,
       via: 'code',
-      text: '记号写法解析出来的、引用类型里存的，都是钉码核心定义的目标与记录，两个目录都只 import 类型；钉码核心反过来一行都不引用 workflow。按原文渲染拒绝缺失的引用时，理由取 REASON_TEXT 的中文说法。',
+      text: '记号写法解析出来的、引用类型里存的、两个格式写回时拼记号用的，都是钉码核心定义的目标与记录，这几个目录都只 import 类型；钉码核心反过来一行都不引用 workflow。按原文渲染拒绝缺失的引用时，理由取 REASON_TEXT 的中文说法。',
     },
   ],
 });

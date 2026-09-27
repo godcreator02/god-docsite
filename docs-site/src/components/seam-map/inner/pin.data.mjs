@@ -20,7 +20,7 @@ export const pinGraph = defineSeamGraph({
       role: null,
       outside: true,
       blurb:
-        'workflow 装配项目时用读取器与 git 历史建出钉码核心，交给钉码编排；命令行的 check、confirm、render 与站构建时的 remark 插件都经钉码编排调它。钉码编排把一篇文档里认出的引用剥成目标与记录交进来，再把结果配回文档路径与行号。',
+        'workflow 装配项目时用读取器与 git 历史建出钉码核心，交给钉码编排；命令行的 check、confirm、render 与站构建时的 remark 插件都经钉码编排调它。钉码编排把一个文件（mdx 页面或讲解组件的源码）里认出的引用剥成目标与记录交进来，再把结果配回文件路径与行号。',
       caps: [
         { id: 'load', name: '项目装配', ident: 'loadProject' },
         { id: 'pinning', name: '钉码编排', ident: 'checkDoc · confirmDoc · checkReferences' },
@@ -127,7 +127,7 @@ export const pinGraph = defineSeamGraph({
       iface: 'check(pins: Pin[]) → Verdict[]；confirm(verdicts, { accept }) → Step[]；Pin = { target, record }',
       convention: false,
       via: 'code',
-      text: '钉码编排把一篇文档里的每处引用剥成目标与记录交进来：check 交回每处的状态、今天的位置、给人看的旧行新行；confirm 在这些判定上交回每处的动作与要写回的新目标和记录。结果与传入顺序一一对应，文档路径、行号、是不是草稿由钉码编排按下标配回去，钉码核心看不到。',
+      text: '钉码编排把一个文件里的每处引用剥成目标与记录交进来，还没确认的记录是 null：check 交回每处的状态、今天的位置、给人看的旧行新行；confirm 在这些判定上交回每处的动作与要写回的新目标和记录。结果与传入顺序一一对应，文件路径、行号由钉码编排按下标配回去，文件是 mdx 页面还是组件源码、记号长什么样，钉码核心都看不到。',
     },
     {
       n: 3,
