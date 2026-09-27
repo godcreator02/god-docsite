@@ -4,7 +4,7 @@
  * 组件与它随包发的样式表合成一个框（pre.tsx 与 light.css、term.tsx 与 term.css）；index.ts 只再导出别的文件的出口，不单画成框。
  * 坐标在 fumadocs.layout.ts。
  */
-import { defineSeamGraph } from '../graph.mjs';
+import { defineSeamGraph } from '@godcreator/explainer-player/seam-graph';
 
 export const fumadocsGraph = defineSeamGraph({
   id: 'fumadocs',

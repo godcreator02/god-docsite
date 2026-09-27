@@ -5,9 +5,9 @@
  * 每条接缝写明两端的能力、接口、是不是约定（没有代码接口，只靠文件名、目录名、配置键对上）、经代码调用还是经磁盘上的文件。
  * 坐标不在这里，在 system.layout.ts：这份只描述系统是什么样。各包内部的接缝图在 inner/ 下。
  */
-import { defineSeamGraph } from './graph.mjs';
+import { defineSeamGraph } from '@godcreator/explainer-player/seam-graph';
 
-/** @type {import('./graph.mjs').Module[]} */
+/** @type {import('@godcreator/explainer-player/seam-graph').SeamModule[]} */
 const modules = [
   {
     id: 'fumadocs',
@@ -116,7 +116,7 @@ const modules = [
 
 /**
  * 从系统外面进来的入口，画成灰色箭头，不编号、不算接缝。to 是进来的那个能力或模块。
- * @type {import('./graph.mjs').Entry[]}
+ * @type {import('@godcreator/explainer-player/seam-graph').SeamEntry[]}
  */
 const entries = [
   { id: 'agent', name: 'agent · 工作台命令总线', to: 'plugin' },
@@ -127,7 +127,7 @@ const entries = [
 /**
  * 接缝。a、b 是两端的能力 id；via 为 code 是代码调用（实线），disk 是读写磁盘上的文件（虚线）。
  * name 与 text 显示在浮层里，text 写连接谁、交换什么、由谁负责。
- * @type {import('./graph.mjs').SeamInput[]}
+ * @type {import('@godcreator/explainer-player/seam-graph').SeamInput[]}
  */
 const seams = [
   {

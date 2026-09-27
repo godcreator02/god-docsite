@@ -4,7 +4,7 @@
  * 讲解播放器原有的三种外壳与控制条这次不动，不画，现状看模块页那张图。
  * 坐标在 seam-map-plan.layout.ts。方案做完、模块页那张图改成现状之后，这两个文件跟 spec 页一起删掉。
  */
-import { defineSeamGraph } from '../graph.mjs';
+import { defineSeamGraph } from '@godcreator/explainer-player/seam-graph';
 
 export const seamMapPlanGraph = defineSeamGraph({
   id: 'seam-map-plan',

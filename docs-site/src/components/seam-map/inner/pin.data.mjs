@@ -4,7 +4,7 @@
  * types.ts 是接口正本，不单画成框：接缝上写的 Pin、Verdict、Reader、History 与理由的中文说法 REASON_TEXT 都定义在那里。
  * 坐标在 pin.layout.ts。
  */
-import { defineSeamGraph } from '../graph.mjs';
+import { defineSeamGraph } from '@godcreator/explainer-player/seam-graph';
 
 export const pinGraph = defineSeamGraph({
   id: 'pin',

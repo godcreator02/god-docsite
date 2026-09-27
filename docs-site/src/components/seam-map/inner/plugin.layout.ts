@@ -23,8 +23,8 @@ import {
   Terminal,
   Type,
 } from 'lucide-react';
-import { cap } from '../diagram';
-import type { SeamLayout } from '../diagram';
+import { cap } from '@godcreator/explainer-player';
+import type { SeamLayout } from '@godcreator/explainer-player';
 
 export const pluginLayout: SeamLayout = {
   view: { w: 1100, h: 734 },

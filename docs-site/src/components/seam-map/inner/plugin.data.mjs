@@ -4,7 +4,7 @@
  * 新站装的 docfirst 包与磁盘。vocab.ts 只有一个收窄类型的小函数，不单画成框。
  * 坐标在 plugin.layout.ts。
  */
-import { defineSeamGraph } from '../graph.mjs';
+import { defineSeamGraph } from '@godcreator/explainer-player/seam-graph';
 
 export const pluginGraph = defineSeamGraph({
   id: 'plugin',

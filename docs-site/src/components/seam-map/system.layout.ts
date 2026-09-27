@@ -2,8 +2,8 @@
  * 全局接缝图（seam-map.data.mjs）的坐标与图标。能力按依赖方向从上往下，工作台插件与框外的东西在最上和最下两行。
  */
 import { Bot, FolderGit2, Globe, Hammer, Layers, Orbit, Pin, Plug, Puzzle, SquareTerminal, Workflow } from 'lucide-react';
-import { cap } from './diagram';
-import type { SeamLayout } from './diagram';
+import { cap } from '@godcreator/explainer-player';
+import type { SeamLayout } from '@godcreator/explainer-player';
 
 export const systemLayout: SeamLayout = {
   view: { w: 1100, h: 750 },

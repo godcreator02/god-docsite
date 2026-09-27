@@ -7,8 +7,8 @@
  * 读文件与 git、钉码编排去钉码核心的线从 mdx 格式右边的空处穿过；摆放去 mdx 格式的线从生成物与引用与清单之间往上走。
  */
 import { Blocks, Braces, Cog, FileCode, FileOutput, FolderGit2, HardDrive, Library, List, Orbit, Pin, Plug, SquareTerminal, Tag, Terminal } from 'lucide-react';
-import { cap } from '../diagram';
-import type { SeamLayout } from '../diagram';
+import { cap } from '@godcreator/explainer-player';
+import type { SeamLayout } from '@godcreator/explainer-player';
 
 export const workflowLayout: SeamLayout = {
   view: { w: 1100, h: 914 },

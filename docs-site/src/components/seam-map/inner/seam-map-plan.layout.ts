@@ -3,8 +3,8 @@
  * 零件、颜色名、样式表与 react。站那一行的方块顺序跟第二行对齐，四条往下的线都是竖直的。
  */
 import { Atom, Blocks, DoorOpen, Globe, Paintbrush, ScrollText, SwatchBook } from 'lucide-react';
-import { cap } from '../diagram';
-import type { SeamLayout } from '../diagram';
+import { cap } from '@godcreator/explainer-player';
+import type { SeamLayout } from '@godcreator/explainer-player';
 
 export const seamMapPlanLayout: SeamLayout = {
   view: { w: 900, h: 434 },

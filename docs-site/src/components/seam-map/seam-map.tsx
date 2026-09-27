@@ -2,11 +2,11 @@
 /**
  * 接缝图。不带属性画全局图：包与包、包与站和仓之间的接缝（首页用）。
  * 带 module 属性画那个包内部的接缝图：包里的文件、文件之间的接缝、包外谁调用它、它要谁实现（模块页用）。
- * 画法全在 diagram.tsx；每张图的内容在 *.data.mjs，坐标在 *.layout.ts；机读版由 seam-map.ai.mjs 读同一份内容生成。
+ * 画法在讲解播放器的 SeamDiagram；每张图的内容在 *.data.mjs，坐标在 *.layout.ts；机读版由 seam-map.ai.mjs 读同一份内容生成。
  */
-import { SeamDiagram } from './diagram';
-import type { SeamLayout } from './diagram';
-import type { SeamGraph } from './graph.mjs';
+import { SeamDiagram } from '@godcreator/explainer-player';
+import type { SeamLayout } from '@godcreator/explainer-player';
+import type { SeamGraph } from '@godcreator/explainer-player/seam-graph';
 import { systemGraph } from './seam-map.data.mjs';
 import { systemLayout } from './system.layout';
 import { pinGraph } from './inner/pin.data.mjs';

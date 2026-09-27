@@ -3,8 +3,8 @@
  * 包外的读取器、node:crypto、旧内容来源在右边一列，各自和连着它的那一行对齐。
  */
 import { Cog, GitCompare, HardDrive, Hash, History, Lock, Scale, SquareTerminal } from 'lucide-react';
-import { cap } from '../diagram';
-import type { SeamLayout } from '../diagram';
+import { cap } from '@godcreator/explainer-player';
+import type { SeamLayout } from '@godcreator/explainer-player';
 
 export const pinLayout: SeamLayout = {
   view: { w: 1100, h: 590 },

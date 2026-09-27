@@ -3,7 +3,7 @@
  * 框是包里的文件，方块是文件对外给的东西；灰色实线框是包外的站、站的配置、react 与 fumadocs。
  * 坐标在 explainer-player.layout.ts。
  */
-import { defineSeamGraph } from '../graph.mjs';
+import { defineSeamGraph } from '@godcreator/explainer-player/seam-graph';
 
 export const explainerPlayerGraph = defineSeamGraph({
   id: 'explainer-player',
