@@ -1,12 +1,16 @@
 /**
  * explainer-player 包：`./text` 三个函数的输出，以及三种外壳用 `react-dom/server` 渲染出的第一帧——
- * 控制条按钮都在、说明是第一项、画面拿到的是第一项的数据。
+ * 控制条按钮都在、说明是第一项、画面拿到的是第一项的数据。接缝图：定义时的几种报错、机读文字、渲染出的图。
  */
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { createElement } from "react";
+import type { SVGProps } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
-import { CasePicker, CodeLines, Diff, Pane, Pill, Stepper, Terminal, Timeline } from "@godcreator/explainer-player";
+import { CasePicker, CodeLines, Diff, Pane, Pill, SeamDiagram, Stepper, Terminal, Timeline, cap } from "@godcreator/explainer-player";
+import type { SeamLayout } from "@godcreator/explainer-player";
+import { defineSeamGraph, seamGraphText } from "@godcreator/explainer-player/seam-graph";
+import type { SeamGraphInput } from "@godcreator/explainer-player/seam-graph";
 import { casesText, chaptersText, stepsText } from "@godcreator/explainer-player/text";
 
 const STEPS = [
@@ -144,4 +148,67 @@ test("零件：卡片带角色色，终端命令行前加 $，代码行的高亮
 
   assert.match(renderToStaticMarkup(createElement(Pill, { tone: "pending", dot: true }, "未确认")), /data-tone="pending"><span class="dx-dot" data-hollow="true"/);
   assert.throws(() => renderToStaticMarkup(createElement(Pill, { tone: "good", role: "blue" })), /tone 与 role 只能给一个/);
+});
+
+const GRAPH: SeamGraphInput = {
+  id: "demo",
+  title: "演示图",
+  intro: "两个模块、一条接缝。",
+  frameLabel: "文件",
+  modules: [
+    { id: "cli", name: "命令行", pkg: "cli.ts", role: "blue", outside: false, blurb: "认参数。", caps: [{ id: "main", name: "入口", ident: "main" }] },
+    { id: "disk", name: "磁盘", pkg: "fs", role: null, outside: true, blurb: "文件。", caps: [{ id: "read", name: "读文件", ident: "readFile" }] },
+  ],
+  entries: [{ id: "human", name: "人", to: "main" }],
+  seams: [{ n: 1, name: "读盘", a: ["main"], b: ["read"], iface: "readFile(path)", convention: false, via: "disk", text: "命令行读配置。" }],
+};
+
+test("defineSeamGraph：能力 id 重复、模块 id 重复、接缝一端或入口指向不存在的能力、接缝编号重复，定义时当场报错", () => {
+  const cli = GRAPH.modules[0]!;
+  const seam = GRAPH.seams[0]!;
+  assert.throws(() => defineSeamGraph({ ...GRAPH, modules: [...GRAPH.modules, { ...cli, id: "cli2" }] }), /能力 id「main」重复/);
+  assert.throws(() => defineSeamGraph({ ...GRAPH, modules: [...GRAPH.modules, { ...cli, caps: [] }] }), /模块 id 重复/);
+  assert.throws(() => defineSeamGraph({ ...GRAPH, seams: [{ ...seam, b: ["nope"] }] }), /接缝 1「读盘」一端是不存在的能力「nope」/);
+  assert.throws(() => defineSeamGraph({ ...GRAPH, entries: [{ id: "human", name: "人", to: "nope" }] }), /入口「human」指向不存在的「nope」/);
+  assert.throws(() => defineSeamGraph({ ...GRAPH, seams: [seam, seam] }), /接缝编号重复/);
+  const graph = defineSeamGraph(GRAPH);
+  assert.equal(graph.seams[0]!.label, "1 读盘");
+  assert.deepEqual(graph.seamsOfModule("disk").map((s) => s.id), ["1"]);
+});
+
+test("seamGraphText：图的说明与入口一段，每个模块一段，每条接缝一段", () => {
+  assert.deepEqual(seamGraphText(defineSeamGraph(GRAPH)), [
+    "两个模块、一条接缝。从外面进来的入口：人 → 入口。",
+    "文件「命令行」（cli.ts）：认参数。能力：入口（main）。",
+    "框外「磁盘」（fs）：文件。能力：读文件（readFile）。",
+    "接缝 1 读盘：命令行读配置。两端：入口 ↔ 读文件。接口：readFile(path)。有代码接口，读写磁盘上的文件。",
+  ]);
+});
+
+test("SeamDiagram：图例、模块框、能力方块、带编号的接缝、入口都画出来；布局表缺一项直接报错", () => {
+  const Glyph = (props: SVGProps<SVGSVGElement>) => createElement("svg", props);
+  const layout: SeamLayout = {
+    view: { w: 400, h: 200 },
+    caps: { main: cap(20, 60, 120), read: cap(240, 60, 120) },
+    groups: { cli: { x: 10, y: 30, w: 140, h: 94 }, disk: null },
+    seamPaths: { "1": { d: "M140,84 H240", badge: [190, 84] } },
+    entries: { human: { box: { x: 20, y: 0, w: 60, h: 20 }, arrow: [50, 20, 50, 60] } },
+    moduleIcons: { cli: Glyph, disk: Glyph },
+    entryIcons: { human: Glyph },
+  };
+  const graph = defineSeamGraph(GRAPH);
+  const html = renderToStaticMarkup(createElement(SeamDiagram, { graph, layout }));
+  assert.match(html, /class="dx seam-map not-prose"/);
+  assert.match(html, /viewBox="0 0 400 200"[^>]*aria-label="演示图"/);
+  assert.match(html, /class="sm-module" data-role="blue" data-outside="false"/);
+  assert.match(html, /class="sm-module" data-role="slate" data-outside="true"/);
+  assert.equal(html.match(/class="sm-cap"/g)?.length, 2);
+  assert.equal(html.match(/class="sm-frame"/g)?.length, 1, "框外只有一个能力的模块写 null，不画外框");
+  assert.match(html, /class="sm-seam" data-via="disk"><path d="M140,84 H240"/);
+  assert.match(html, /aria-label="接缝 1 读盘"/);
+  assert.match(html, /class="sm-entry"/);
+  assert.match(html, /从外面进来的入口/, "有入口时图例带上入口");
+
+  const { human: _dropped, ...entriesWithoutHuman } = layout.entries;
+  assert.throws(() => renderToStaticMarkup(createElement(SeamDiagram, { graph, layout: { ...layout, entries: entriesWithoutHuman } })), /布局表里没有入口「human」/);
 });

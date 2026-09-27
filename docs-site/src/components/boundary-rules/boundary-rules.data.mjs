@@ -86,7 +86,7 @@ export const allowedEdges = [
  * @typedef {{ id: string, label: string, text: string, allowed: string[], forbidden: Forbidden[], tests: GuardTest[] }} BoundaryRule
  * @type {BoundaryRule[]}
  */
-/* ref file="../tests/boundary.test.ts" hash="3b6a593c16a4" blob="f364ea40ffcc" */
+/* ref file="../tests/boundary.test.ts" hash="09b2233705b6" blob="6e2375b43a16" */
 export const rules = [
   {
     id: 'packages',
@@ -217,8 +217,8 @@ export const rules = [
   },
   {
     id: 'explain',
-    label: '讲解播放器的两个入口',
-    text: '讲解播放器的 . 出口是客户端组件，产物头一行必须是 "use client"；./text 把各帧的说明转成机读版文字，站在 Node 里生成机读版时加载它（docfirst 站由 docfirst.config.mjs 加载），源码与产物都零 import、不带客户端指令。它不依赖任何 @godcreator/ 包，由「通用包独立」那一类查。',
+    label: '讲解播放器的三个入口',
+    text: '讲解播放器的 . 出口是客户端组件，产物头一行必须是 "use client"；./text 把各帧的说明转成机读版文字，站在 Node 里生成机读版时加载它（docfirst 站由 docfirst.config.mjs 加载），源码与产物都零 import、不带客户端指令。./seam-graph 定义接缝图、把图写成机读文字，接缝图的数据文件在 Node 与客户端都加载它，产物同样零 import、不带客户端指令，源码只许 import 类型。它不依赖任何 @godcreator/ 包，由「通用包独立」那一类查。',
     allowed: ['explain>host', 'site>explain'],
     forbidden: [
       {
@@ -231,6 +231,7 @@ export const rules = [
       { name: 'explainer-player 清单：没有 dependencies，react 只作必需 peer；工作台插件不依赖它', checks: '读讲解播放器与工作台插件的 package.json' },
       { name: 'explainer-player 的 `.`：客户端指令在头一行，只 import react，没有把 react 或别的模块打包进来', checks: '读产物 dist/index.mjs 的头一行、import 行、//#region 来源与正文' },
       { name: 'explainer-player 的 `./text`：docfirst.config.mjs 在 Node 里加载它，产物零 import、不带客户端指令', checks: '读产物 dist/text.mjs 与源码 text.ts' },
+      { name: 'explainer-player 的 `./seam-graph`：接缝图的数据文件在 Node 与客户端都加载它，产物零 import、不带客户端指令，源码只 import 类型', checks: '读产物 dist/seam-graph.mjs 与源码 seam-graph.ts 的 import 行' },
     ],
   },
 ];

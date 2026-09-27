@@ -10,3 +10,5 @@ export type { CaseItem, CasePickerProps } from "./case-picker.tsx";
 export { CodeLines, Diff, Dot, Pane, Pill, Terminal } from "./parts.tsx";
 export type { CodeLinesProps, PaneProps, PillProps, TerminalLine, TerminalProps } from "./parts.tsx";
 export type { PaneIcon } from "./icons.tsx";
+export { SeamDiagram, cap } from "./seam-diagram.tsx";
+export type { Box, Icon, SeamDiagramProps, SeamLayout } from "./seam-diagram.tsx";

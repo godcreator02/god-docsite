@@ -1,11 +1,11 @@
 ---
 title: 讲解播放器 explainer-player
-description: 通用包：把一段讲解拆成若干帧、每帧配一句说明，用固定的控制条播放和切换；分步、动画、选情况三种外壳与画帧用的零件，./text 把各帧的说明转成机读版文字；不认识 docfirst
+description: 通用包：把一段讲解拆成若干帧、每帧配一句说明，用固定的控制条播放和切换；分步、动画、选情况三种外壳与画帧用的零件，画系统接缝图的 SeamDiagram，./text 与 ./seam-graph 把讲解数据与接缝图转成机读版文字；不认识 docfirst
 full: true
 ---
 
 包 `@godcreator/explainer-player`，源码在 `packages/explainer-player/src/`，出口是 `.`（客户端组件，`src/index.ts`）、`./text`
-（`src/text.ts`）与样式表 `./styles.css`（`styles/explain.css`）。
+（`src/text.ts`）、`./seam-graph`（`src/seam-graph.ts`）与样式表 `./styles.css`（`styles/explain.css`）。
 
 它是通用包，叫讲解播放器：把一段讲解拆成若干帧、每帧配一句说明，用固定的控制条播放和切换。它不认识 docfirst，
 普通 fumadocs 站也能单独装它；本仓的文档站是它的一个使用者。它跟 docfirst 的包互不认识，所以首页的全局接缝图里没有它；
@@ -39,6 +39,21 @@ full: true
 
 {/* ref file="../packages/explainer-player/src/text.ts" lines="6-19" hash="135f06641462" blob="e40e4aa915ef" */}
 
+**接缝图**：把一个系统画成模块框、能力方块与带编号的接缝，鼠标停在编号或模块框上浮出说明，点击固定高亮它连着谁。
+图的内容用 `./seam-graph` 的 `defineSeamGraph` 定义，id 重复、接缝两端或入口指向不存在的能力，定义时当场报错：
+
+{/* ref file="../packages/explainer-player/src/seam-graph.ts" lines="53-62" hash="611181d8fa32" blob="b72a79abda18" */}
+
+{/* ref file="../packages/explainer-player/src/seam-graph.ts" lines="78-79" hash="40d69614fb32" blob="b72a79abda18" */}
+
+坐标与图标由站给，`SeamDiagram` 只照着画；图标是站传进来的组件，包不 import 图标库：
+
+{/* ref file="../packages/explainer-player/src/seam-diagram.tsx" lines="23-41" hash="46f3ecdd7adf" blob="2dad2c6ab83b" */}
+
+同一张图的机读文字由 `seamGraphText` 写成一段段文字：图的说明与入口一段，每个模块一段，每条接缝一段：
+
+{/* ref file="../packages/explainer-player/src/seam-graph.ts" lines="108-109" hash="3c9aee0e1bfa" blob="b72a79abda18" */}
+
 **样式表**开头写着配色规则；系统设了「减少动画」时关掉全部过渡与动画：
 
 {/* ref file="../packages/explainer-player/styles/explain.css" lines="1-7" hash="2048a02d3d93" blob="d6052765b283" */}
@@ -57,17 +72,17 @@ full: true
 
 `.` 的导出表：
 
-{/* ref file="../packages/explainer-player/src/index.ts" hash="57af15574e0f" blob="a02a9cf607cb" */}
+{/* ref file="../packages/explainer-player/src/index.ts" hash="16db3fef7d0e" blob="2bd6b4e55d2d" */}
 
-三个出口：
+四个出口：
 
-{/* ref file="../packages/explainer-player/package.json" lines="7-17" hash="ef817165c432" blob="1a295a53ee15" */}
+{/* ref file="../packages/explainer-player/package.json" lines="7-21" hash="06005b5b0775" blob="5199565aa6ab" */}
 
 ## 依赖
 
 没有 `dependencies`，react 是必需的 peer，用站自己装的那份：
 
-{/* ref file="../packages/explainer-player/package.json" lines="27-29" hash="b0cacd73d38e" blob="1a295a53ee15" */}
+{/* ref file="../packages/explainer-player/package.json" lines="31-33" hash="b0cacd73d38e" blob="5199565aa6ab" */}
 
 样式只读 fumadocs 主题的 CSS 变量，没有这些变量时用自带的颜色。
 
@@ -94,4 +109,9 @@ full: true
 
 {/* ref file="../tests/boundary.test.ts" lines="588-593" hash="4363223b8781" blob="f364ea40ffcc" */}
 
+**`./seam-graph` 只 import 类型。** 接缝图的数据文件既被画面 import，又被机读规则在 Node 里加载，所以它的产物零 import、不带客户端指令：
+
+{/* ref file="../tests/boundary.test.ts" lines="595-603" hash="1ede44577a51" blob="6e2375b43a16" */}
+
 **不画题目的画面。** 画面里画什么、每一帧的讲解数据、机读规则都写在各站自己的组件里；这个包只给外壳与零件。
+接缝图也一样：一个站有几张图、每张图的内容与坐标、按什么名字挑图，都在站里。

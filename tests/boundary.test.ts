@@ -29,8 +29,8 @@
  * **五、包不认识工作台插件**：npm 包不许出现任何 `@godcreator/gwb-*`。
  * 包一旦依赖插件，装 docfirst 的人就得连带装上整个桌面工作台生态。
  *
- * **六、explainer-player 的两个入口**：react 是必需 peer；`.` 是客户端组件，`./text` 零 import
- * （站在 Node 里生成机读版时加载它）。
+ * **六、explainer-player 的三个入口**：react 是必需 peer；`.` 是客户端组件，`./text` 与 `./seam-graph` 零 import
+ * （站在 Node 里生成机读版时加载它们）。
  *
  * **别删这个文件，也别把某一条注释掉「先让门禁通过」。** 它失败的时候，出错的是设计，不是测试。
  * 真要改方向，改的是那几张表加一段说明为什么——不是把断言删掉。
@@ -561,7 +561,7 @@ test("npm 包的源码里一行 @godcreator/gwb-* 都没有", () => {
   }
 });
 
-// ── 六、explainer-player 的两个入口 ─────────────────────────────────────────────────
+// ── 六、explainer-player 的三个入口 ─────────────────────────────────────────────────
 
 test("explainer-player 清单：没有 dependencies，react 只作必需 peer；工作台插件不依赖它", () => {
   const pkg = manifestOf("explainer-player");
@@ -590,4 +590,14 @@ test("explainer-player 的 `./text`：docfirst.config.mjs 在 Node 里加载它�
   assert.deepEqual(importSpecsOf(text), []);
   assert.doesNotMatch(text, /^"use client";/);
   assert.deepEqual(importSpecsOf(readFileSync(join(srcOf("explainer-player"), "text.ts"), "utf8")), [], "text.ts 源码也不许 import");
+});
+
+test("explainer-player 的 `./seam-graph`：接缝图的数据文件在 Node 与客户端都加载它，产物零 import、不带客户端指令，源码只 import 类型", () => {
+  const graph = distOf("explainer-player", "seam-graph.mjs");
+  assert.deepEqual(importSpecsOf(graph), []);
+  assert.doesNotMatch(graph, /^"use client";/);
+  const src = readFileSync(join(srcOf("explainer-player"), "seam-graph.ts"), "utf8");
+  for (const line of src.split("\n").filter((l) => /^import\b/.test(l))) {
+    assert.match(line, /^import type /, `seam-graph.ts 只许 import 类型：${line}`);
+  }
 });
