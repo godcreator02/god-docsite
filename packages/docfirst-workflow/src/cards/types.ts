@@ -31,10 +31,11 @@ export interface CardRecord {
   milestones: Milestone[] | null;
 }
 
-/** 一条病：形状（坏 born-at）、存在性（缺 born-at / label，非根卡缺 parent）、一致性（根卡几张、parent 指不指向根卡）、
- * 关系行写歪，以及卡正文里出现 docfirst 引用记号。 */
+/** 一条病：形状（坏 born-at、该写单个值的写成列表、该写列表的写成单个值）、存在性（缺 born-at / label，非根卡缺 parent）、
+ * 一致性（根卡几张、parent 指不指向根卡、关系指不指向盘上的卡、同一身份两个文件）、关系行与里程碑行写歪，
+ * 以及卡正文里出现 docfirst 引用记号。 */
 export interface Problem {
-  field: "born-at" | "parent" | "type" | "label" | "relation" | "docfirst";
+  field: "born-at" | "parent" | "type" | "label" | "domain" | "relation" | "milestone" | "file" | "docfirst";
   value: string;
   /** 给人看的说明 */
   reason: string;

@@ -25,15 +25,15 @@ const buildFixtureModel = () =>
     memCards([
       root("pj01", D(1)),
       card("aa01-链头", { "born-at": D(2), domain: "域一" }),
-      card("aa02-链二", { "born-at": D(6), domain: "域一" }, { body: "supersedes:: [[aa01-链头]]" }),
-      card("aa03-链三", { "born-at": D(6), domain: "域一" }, { body: "supersedes:: [[aa02-链二]]" }),
-      card("aa04-链尾", { "born-at": D(10), domain: "域一" }, { body: "supersedes:: [[aa03-链三]]" }),
-      card("cc01-支线甲", { "born-at": D(4), domain: "域一" }, { body: "pivots-from:: [[aa01-链头]]" }),
-      card("cc02-支线乙", { "born-at": D(8), domain: "域一" }, { body: "pivots-from:: [[cc01-支线甲]]" }),
+      card("aa02-链二", { "born-at": D(6), domain: "域一" }, { body: "supersedes:: [aa01-链头](aa01-链头.md)" }),
+      card("aa03-链三", { "born-at": D(6), domain: "域一" }, { body: "supersedes:: [aa02-链二](aa02-链二.md)" }),
+      card("aa04-链尾", { "born-at": D(10), domain: "域一" }, { body: "supersedes:: [aa03-链三](aa03-链三.md)" }),
+      card("cc01-支线甲", { "born-at": D(4), domain: "域一" }, { body: "pivots-from:: [aa01-链头](aa01-链头.md)" }),
+      card("cc02-支线乙", { "born-at": D(8), domain: "域一" }, { body: "pivots-from:: [cc01-支线甲](cc01-支线甲.md)" }),
       card("bb01-单日甲", { "born-at": D(20), domain: "域二" }),
-      card("bb02-单日乙", { "born-at": D(20), domain: "域二" }, { body: "supersedes:: [[bb01-单日甲]]" }),
+      card("bb02-单日乙", { "born-at": D(20), domain: "域二" }, { body: "supersedes:: [bb01-单日甲](bb01-单日甲.md)" }),
       card("dd01-别树头", { "born-at": D(25), domain: "域三" }),
-      card("dd02-别树尾", { "born-at": D(30), domain: "域三" }, { body: "supersedes:: [[dd01-别树头]]" }),
+      card("dd02-别树尾", { "born-at": D(30), domain: "域三" }, { body: "supersedes:: [dd01-别树头](dd01-别树头.md)" }),
     ]),
   );
 

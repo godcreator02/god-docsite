@@ -16,9 +16,9 @@ test("主干择优比终点：终点更晚的短链赢，长链成支线", () =>
   const m = buildModel(
     memCards([
       card("aa01-起点", { domain: "域一" }),
-      card("aa02-长链一", { "born-at": D(2) }, { body: "supersedes:: [[aa01-起点]]" }),
-      card("aa03-长链二", { "born-at": D(3) }, { body: "supersedes:: [[aa02-长链一]]" }),
-      card("aa05-短链终点更晚", { "born-at": D(4) }, { body: "supersedes:: [[aa01-起点]]" }),
+      card("aa02-长链一", { "born-at": D(2) }, { body: "supersedes:: [aa01-起点](aa01-起点.md)" }),
+      card("aa03-长链二", { "born-at": D(3) }, { body: "supersedes:: [aa02-长链一](aa02-长链一.md)" }),
+      card("aa05-短链终点更晚", { "born-at": D(4) }, { body: "supersedes:: [aa01-起点](aa01-起点.md)" }),
     ]),
   );
   assert.equal(m.trees.length, 1);
@@ -31,8 +31,8 @@ test("纯转向树退化：一条取代边都没有时主干沿转向链走", ()
   const m = buildModel(
     memCards([
       card("bb01-源头", { domain: "域一" }),
-      card("bb02-长出一", { "born-at": D(2) }, { body: "pivots-from:: [[bb01-源头]]" }),
-      card("bb03-长出二", { "born-at": D(3) }, { body: "pivots-from:: [[bb02-长出一]]" }),
+      card("bb02-长出一", { "born-at": D(2) }, { body: "pivots-from:: [bb01-源头](bb01-源头.md)" }),
+      card("bb03-长出二", { "born-at": D(3) }, { body: "pivots-from:: [bb02-长出一](bb02-长出一.md)" }),
     ]),
   );
   assert.equal(m.trees.length, 1);
@@ -43,10 +43,10 @@ test("支线时间不搭界共槽，搭界另开槽", () => {
   const m = buildModel(
     memCards([
       card("aa01-主干头", { domain: "域一" }),
-      card("aa02-主干尾", { "born-at": D(30) }, { body: "supersedes:: [[aa01-主干头]]" }),
-      card("cc01-支线甲", { "born-at": D(5) }, { body: "pivots-from:: [[aa01-主干头]]" }),
-      card("cc02-支线乙隔得远", { "born-at": D(28) }, { body: "pivots-from:: [[aa02-主干尾]]" }),
-      card("cc03-支线丙跟甲搭界", { "born-at": D(6) }, { body: "pivots-from:: [[aa01-主干头]]" }),
+      card("aa02-主干尾", { "born-at": D(30) }, { body: "supersedes:: [aa01-主干头](aa01-主干头.md)" }),
+      card("cc01-支线甲", { "born-at": D(5) }, { body: "pivots-from:: [aa01-主干头](aa01-主干头.md)" }),
+      card("cc02-支线乙隔得远", { "born-at": D(28) }, { body: "pivots-from:: [aa02-主干尾](aa02-主干尾.md)" }),
+      card("cc03-支线丙跟甲搭界", { "born-at": D(6) }, { body: "pivots-from:: [aa01-主干头](aa01-主干头.md)" }),
     ]),
   );
   const box = new RingsLayout(m).treeBoxes[0];
@@ -60,7 +60,7 @@ test("被取代从链上读：有取代出边的卡进 supersededIds", () => {
   const m = buildModel(
     memCards([
       card("aa01-旧", { domain: "域一" }),
-      card("aa02-新", { "born-at": D(2) }, { body: "supersedes:: [[aa01-旧]]" }),
+      card("aa02-新", { "born-at": D(2) }, { body: "supersedes:: [aa01-旧](aa01-旧.md)" }),
       card("aa03-孤", { "born-at": D(3), domain: "域一" }),
     ]),
   );
@@ -80,9 +80,9 @@ test("正文 inline 边：目标在本盘卡集合里的成边，一行一条、
         {
           body: [
             "叙事一段。",
-            "supersedes:: [[aa01-甲|换个叫法]]",
-            "pivots-from:: [[aa02-乙#某一节]]",
-            "supersedes:: [[aa03-丙]]",
+            "supersedes:: [换个叫法](aa01-甲.md)",
+            "pivots-from:: [aa02-乙](aa02-乙.md#某一节)",
+            "supersedes:: [aa03-丙](aa03-丙.md)",
           ].join("\n"),
         },
       ),
@@ -100,7 +100,7 @@ test("指向本盘卡集合外的关系收进 broken 示众", () => {
   const m = buildModel(
     memCards([
       card("aa01-在的", { domain: "域一" }),
-      card("dd01-指空", { "born-at": D(2), domain: "域一" }, { body: "supersedes:: [[zz99-不存在的卡]]" }),
+      card("dd01-指空", { "born-at": D(2), domain: "域一" }, { body: "supersedes:: [zz99-不存在的卡](zz99-不存在的卡.md)" }),
     ]),
   );
   assert.deepEqual(m.edges, []);
@@ -113,7 +113,7 @@ test("行头是关系字段但行形不合的进 sick（文件级病）——不
     card(
       "dd01-写歪",
       { "born-at": D(2), domain: "域一" },
-      { body: ["supersedes:: [[aa01-在的]] 多了句尾巴", "pivots-from:: 忘了包 wikilink"].join("\n") },
+      { body: ["supersedes:: [aa01-在的](aa01-在的.md) 多了句尾巴", "pivots-from:: 忘了写链接"].join("\n") },
     ),
   ];
   const m = buildModel(memCards(specs));
@@ -123,13 +123,13 @@ test("行头是关系字段但行形不合的进 sick（文件级病）——不
     {
       path: "dd01-写歪.md",
       field: "relation",
-      value: "[[aa01-在的]] 多了句尾巴",
+      value: "[aa01-在的](aa01-在的.md) 多了句尾巴",
       reason: "supersedes:: 后须是 [文字](卡身份.md) 形态的一行",
     },
     {
       path: "dd01-写歪.md",
       field: "relation",
-      value: "忘了包 wikilink",
+      value: "忘了写链接",
       reason: "pivots-from:: 后须是 [文字](卡身份.md) 形态的一行",
     },
   ]);
@@ -316,6 +316,60 @@ test("根卡带里程碑：盘心带着它，落在盘时间范围内的进模�
 test("根卡没这块即空列表", () => {
   const input = memCards([root("pj01", D(1), { body: "## 在做什么\n\n没里程碑。" })]);
   assert.deepEqual(input.center?.milestones, []);
+});
+
+test("字段写成别的形状报病、不替它转换：该写单个值的写成列表、parent 写成单个值；不再另报缺", () => {
+  const specs = [
+    root("pjaa", D(1)),
+    card("aa01-形状不对", { label: ["甲", "乙"], domain: ["域一"], parent: "pjaa" }),
+  ];
+  assert.deepEqual(flatProblems(memSick(specs)), [
+    { path: "aa01-形状不对.md", field: "parent", value: "pjaa", reason: "parent 须写成列表：parent: [根卡身份]" },
+    { path: "aa01-形状不对.md", field: "domain", value: "域一", reason: "domain 须写成单个值，不是列表" },
+    { path: "aa01-形状不对.md", field: "label", value: "甲,乙", reason: "label 须写成单个值，不是列表" },
+  ]);
+  /* 画得出来照样上盘：短名退到文件名，分组归未分道 */
+  const m = buildModel(memCards(specs));
+  assert.deepEqual(m.cards.map((c) => [c.label, c.domain]), [["aa01-形状不对", NO_DOMAIN]]);
+});
+
+test("关系只能指向盘上的卡：指向根卡、指向不存在的卡、指向 born-at 写坏的卡都报病", () => {
+  const specs = [
+    root("pjaa", D(1)),
+    card("aa01-甲", { parent: ["pjaa"] }),
+    card("aa02-坏时刻", { parent: ["pjaa"], "born-at": "一月" }),
+    card(
+      "aa03-乱指",
+      { parent: ["pjaa"], "born-at": D(3) },
+      {
+        body: [
+          "pivots-from:: [项目](pjaa.md)",
+          "supersedes:: [不存在](zz99-没有.md)",
+          "pivots-from:: [坏时刻](aa02-坏时刻.md)",
+          "supersedes:: [甲](aa01-甲.md)",
+        ].join("\n"),
+      },
+    ),
+  ];
+  assert.deepEqual(
+    flatProblems(scanSick(specs)).filter((p) => p.field === "relation"),
+    [
+      { path: "aa03-乱指.md", field: "relation", value: "pjaa", reason: "pivots-from:: 指向了根卡：根卡代表整个项目，关系要指向具体的卡" },
+      { path: "aa03-乱指.md", field: "relation", value: "zz99-没有", reason: "supersedes:: 指向的卡不在盘上：没有这张卡，或它的 born-at 写坏了" },
+      { path: "aa03-乱指.md", field: "relation", value: "aa02-坏时刻", reason: "pivots-from:: 指向的卡不在盘上：没有这张卡，或它的 born-at 写坏了" },
+    ],
+  );
+  /* 报病不挡上盘，指得对的那条照常成边 */
+  assert.deepEqual(buildModel(memCards(specs)).edges, [{ from: "aa01-甲", to: "aa03-乱指", kind: "supersede" }]);
+});
+
+test("根卡里程碑区块里以 - 开头却写坏的行报病", () => {
+  const body = ["## 里程碑", "", "（只追加。日期｜标题｜说明）", "- 2026-01-10｜首座｜说明", "- 一月｜坏日期", "- 缺竖线"].join("\n");
+  assert.deepEqual(flatProblems(memSick([root("pjaa", D(1), { body })])), [
+    { path: "pjaa.md", field: "milestone", value: "- 一月｜坏日期", reason: "里程碑行须是「- 日期｜标题｜说明」，日期以 YYYY-MM-DD 开头" },
+    { path: "pjaa.md", field: "milestone", value: "- 缺竖线", reason: "里程碑行须是「- 日期｜标题｜说明」，日期以 YYYY-MM-DD 开头" },
+  ]);
+  assert.deepEqual(memCards([root("pjaa", D(1), { body })]).center?.milestones.map((m) => m.name), ["首座"]);
 });
 
 test("buildModel 收到不合格的输入直接抛错，一次列全：身份重复、时刻写坏、关系种类不认识", () => {

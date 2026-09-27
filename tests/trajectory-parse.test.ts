@@ -10,9 +10,7 @@ import assert from "node:assert/strict";
 import {
   extractMilestones,
   extractRelations,
-  listOf,
   parseFrontmatter,
-  scalarOf,
   splitLines,
   stripFrontmatter,
 } from "@godcreator/docfirst-workflow/cards";
@@ -45,18 +43,10 @@ test("流式列表 `[a, b]`：card-format 正本里 parent 就是这个写法", 
   assert.deepEqual(parseFrontmatter("---\nparent: []\n---\n")?.parent, []);
 });
 
-test("单值当列表容错成一项；列表取标量取首项", () => {
-  const fm = parseFrontmatter("---\nparent: 2026-01-09-alpha\nlabel: 甲\n---\n") as Record<string, string | string[]>;
-  assert.deepEqual(listOf(fm, "parent"), ["2026-01-09-alpha"]);
-  assert.equal(scalarOf(fm, "label"), "甲");
-  const list = parseFrontmatter('---\ntype:\n  - "root"\n---\n') as Record<string, string | string[]>;
-  assert.equal(scalarOf(list, "type"), "root");
-});
-
-test("缺席的键：标量回 null、列表回空", () => {
-  const fm = parseFrontmatter("---\nlabel: 甲\n---\n") as Record<string, string | string[]>;
-  assert.equal(scalarOf(fm, "domain"), null);
-  assert.deepEqual(listOf(fm, "parent"), []);
+test("单个值与列表各自原样留着，不互相转换", () => {
+  const fm = parseFrontmatter("---\nparent: 2026-01-09-alpha\ntype:\n  - root\n---\n");
+  assert.equal(fm?.parent, "2026-01-09-alpha");
+  assert.deepEqual(fm?.type, ["root"]);
 });
 
 test("CRLF 与 BOM 都吃得下", () => {
@@ -86,13 +76,13 @@ test("切行把 CRLF 一次吃掉，下游正则不必防 \\r", () => {
   assert.deepEqual(splitLines("甲\r\n乙\n丙"), ["甲", "乙", "丙"]);
 });
 
-test("wikilink 带别名 / 锚点照样提取卡身份；一行一条、可多条", () => {
+test("链接文字随便写、目标可带锚，照样提取卡身份；一行一条、可多条", () => {
   const { relations, broken } = extractRelations(
     [
       "叙事一段。",
-      "supersedes:: [[2026-01-01-甲|换个叫法]]",
-      "pivots-from:: [[2026-01-02-乙#某一节]]",
-      "supersedes:: [[2026-01-03-丙]]",
+      "supersedes:: [换个叫法](2026-01-01-甲.md)",
+      "pivots-from:: [2026-01-02-乙](2026-01-02-乙.md#某一节)",
+      "supersedes:: [2026-01-03-丙](2026-01-03-丙.md)",
     ].join("\n"),
   );
   assert.deepEqual(relations, [
@@ -104,23 +94,34 @@ test("wikilink 带别名 / 锚点照样提取卡身份；一行一条、可多�
 });
 
 test("CRLF 行尾的关系行照样收边——Windows 侧写卡工具行尾随缘", () => {
-  const { relations } = extractRelations(["叙事一段。", "supersedes:: [[2026-01-01-甲]]"].join("\r\n"));
+  const { relations } = extractRelations(["叙事一段。", "supersedes:: [2026-01-01-甲](2026-01-01-甲.md)"].join("\r\n"));
   assert.deepEqual(relations, [{ kind: "supersede", target: "2026-01-01-甲" }]);
 });
 
 test("行头是关系字段但行形不合的收进 broken——不静默吞行", () => {
   const { relations, broken } = extractRelations(
-    ["supersedes:: [[2026-01-01-甲]] 多了句尾巴", "pivots-from:: 忘了包 wikilink"].join("\n"),
+    ["supersedes:: [2026-01-01-甲](2026-01-01-甲.md) 多了句尾巴", "pivots-from:: 忘了写链接"].join("\n"),
   );
   assert.deepEqual(relations, []);
   assert.deepEqual(broken, [
-    { key: "supersedes", target: "[[2026-01-01-甲]] 多了句尾巴" },
-    { key: "pivots-from", target: "忘了包 wikilink" },
+    { key: "supersedes", target: "[2026-01-01-甲](2026-01-01-甲.md) 多了句尾巴" },
+    { key: "pivots-from", target: "忘了写链接" },
   ]);
 });
 
 test("正文里的普通 wikilink 不是关系边", () => {
   assert.deepEqual(extractRelations("参见 [[2026-01-01-甲]] 那张卡。"), { relations: [], broken: [] });
+});
+
+test("关系行只认标准 md 链接：wikilink、目标包在 <> 里都算写歪的行", () => {
+  const { relations, broken } = extractRelations(
+    ["supersedes:: [[2026-01-01-甲]]", "pivots-from:: [乙](<2026-01-02-乙.md>)"].join("\n"),
+  );
+  assert.deepEqual(relations, []);
+  assert.deepEqual(broken, [
+    { key: "supersedes", target: "[[2026-01-01-甲]]" },
+    { key: "pivots-from", target: "[乙](<2026-01-02-乙.md>)" },
+  ]);
 });
 
 test("md link 形态照样成边：目标剥 `.md` 后即卡身份，链接文字随便写", () => {
@@ -138,11 +139,10 @@ test("md link 形态照样成边：目标剥 `.md` 后即卡身份，链接文�
   assert.deepEqual(broken, []);
 });
 
-test("md link 的 `./` 前缀 / 百分号编码 / `<>` 包裹 / `#` 锚 / 缺 `.md` 全还原成同一身份", () => {
+test("md link 的 `./` 前缀 / 百分号编码 / `#` 锚 / 缺 `.md` 全还原成同一身份", () => {
   const lines = [
     "supersedes:: [甲](./2026-01-01-甲.md)",
     "supersedes:: [甲](2026-01-01-%E7%94%B2.md)",
-    "supersedes:: [甲](<2026-01-01-甲.md>)",
     "supersedes:: [甲](2026-01-01-甲.md#某一节)",
     "supersedes:: [甲](2026-01-01-甲)",
   ];
@@ -159,22 +159,6 @@ test("目标里的括号与空格走百分号编码，原样带括号的目标�
   assert.deepEqual(extractRelations("pivots-from:: [乙](2026-01-02-lastwarn()-捞-warning.md)").broken, [
     { key: "pivots-from", target: "[乙](2026-01-02-lastwarn()-捞-warning.md)" },
   ]);
-});
-
-test("md link 与 wikilink 混着写，同一份正文里两种都收", () => {
-  const { relations, broken } = extractRelations(
-    [
-      "supersedes:: [[2026-01-01-甲]]",
-      "pivots-from:: [乙](2026-01-02-乙.md)",
-      "supersedes:: [[2026-01-03-丙|别名]]",
-    ].join("\r\n"),
-  );
-  assert.deepEqual(relations, [
-    { kind: "supersede", target: "2026-01-01-甲" },
-    { kind: "pivot", target: "2026-01-02-乙" },
-    { kind: "supersede", target: "2026-01-03-丙" },
-  ]);
-  assert.deepEqual(broken, []);
 });
 
 test("坏形态的 md link 不炸：空目标 / 多尾巴 / 只有文字，全收进 broken", () => {
@@ -208,22 +192,27 @@ const MILESTONE_BODY = [
   "",
   "- 2026-01-20｜次座",
   "- 2026-01-10｜首座｜第一座里程碑的说明。",
-  "- 不是日期｜跳过｜日期解不出来的行跳过。",
+  "- 不是日期｜报出来｜日期解不出来的行报出来。",
+  "- 少了竖线的一行",
+  "（区块里别的说明文字不管）",
   "",
   "## 其他区块",
   "",
   "- 2026-01-25｜不算｜出了区块就不算。",
 ].join("\n");
 
-test("固定区块内每行一座，描述可缺、坏日期跳过、结果按日期升序，下一个 H2 止", () => {
-  assert.deepEqual(extractMilestones(MILESTONE_BODY), [
-    { date: "2026-01-10", name: "首座", desc: "第一座里程碑的说明。" },
-    { date: "2026-01-20", name: "次座", desc: "" },
-  ]);
+test("固定区块内每行一座，描述可缺、结果按日期升序，下一个 H2 止；以 - 开头却写坏的行报出来", () => {
+  assert.deepEqual(extractMilestones(MILESTONE_BODY), {
+    milestones: [
+      { date: "2026-01-10", name: "首座", desc: "第一座里程碑的说明。" },
+      { date: "2026-01-20", name: "次座", desc: "" },
+    ],
+    broken: ["- 不是日期｜报出来｜日期解不出来的行报出来。", "- 少了竖线的一行"],
+  });
 });
 
 test("没这块即空列表", () => {
-  assert.deepEqual(extractMilestones("## 在做什么\n\n没里程碑。"), []);
+  assert.deepEqual(extractMilestones("## 在做什么\n\n没里程碑。"), { milestones: [], broken: [] });
 });
 
 test("md link 目标带 .mdx 后缀也还原成同一身份——卡文件两种后缀都认", () => {

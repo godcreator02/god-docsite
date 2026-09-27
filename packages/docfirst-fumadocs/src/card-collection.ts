@@ -7,7 +7,7 @@
 
 import { basename } from "node:path";
 import { visit } from "unist-util-visit";
-import type { Link, Paragraph, PhrasingContent, Root, Text } from "mdast";
+import type { Link, Paragraph, Root } from "mdast";
 /**
  * 这几个 mdast 节点类型是本出口公共签名的一部分（`remarkTrajectoryLinks` 吃一棵 `Root`）。
  * **消费方要用的是从这儿再导出的这一份**：dts 打包会把 mdast 的形状原样内联进产物的 `.d.mts`，
@@ -87,13 +87,11 @@ export function cardSchema(ctx: { path: string; source: string }): StandardSchem
 /* ================= remarkTrajectoryLinks：关系边打标 + 链接改写 ================= */
 
 export interface RemarkTrajectoryLinksOptions {
-  /** 卡页路由前缀：形如卡身份的 `.md` / `.mdx` 链接与 wikilink 改写成 `${hrefBase}/<卡身份>`。 */
+  /** 卡页路由前缀：形如卡身份的 `.md` / `.mdx` 链接改写成 `${hrefBase}/<卡身份>`。 */
   hrefBase: string;
 }
 
 const EDGE_HEAD = /^(supersedes|pivots-from)::/;
-/** wikilink：`[[身份]]`、`[[身份#锚]]`、`[[身份|别名]]`，锚与别名都可省。 */
-const WIKILINK_RE = /\[\[([^\]|#]+)(?:#[^\]|]*)?(?:\|([^\]]+))?\]\]/g;
 /** 卡文件的后缀，跟卡格式同一条：`.mdx` 与 `.md` 都是卡。 */
 const CARD_EXT = /\.mdx?$/;
 
@@ -106,7 +104,7 @@ function idShapeOk(stem: string): boolean {
 }
 
 /** remark 插件：正文里 `supersedes::` / `pivots-from::` 起头的段落打成
- * `<div class="trajectory-edge" data-kind="...">`；**主干像卡身份的** `.md` / `.mdx` 链接与 wikilink
+ * `<div class="trajectory-edge" data-kind="...">`；**主干像卡身份的** `.md` / `.mdx` 链接
  * 改写成卡页路由，带路径的 `.md`（引材料）原样不动。
  * 挂在 fumadocs 卡集合的 mdxOptions 上，不跑在 docfirst 自己的文档集合上。 */
 export function remarkTrajectoryLinks(options: RemarkTrajectoryLinksOptions) {
@@ -132,40 +130,6 @@ export function remarkTrajectoryLinks(options: RemarkTrajectoryLinksOptions) {
       const stem = cardIdFromHref(node.url);
       if (!idShapeOk(stem)) return;
       node.url = `${hrefBase}/${stem}`;
-    });
-
-    /* wikilink 转真链接：文本节点里找 [[...]]，切成 文本/链接/文本... 的序列 */
-    visit(tree, "paragraph", (node: Paragraph) => {
-      let changed = false;
-      const next: PhrasingContent[] = [];
-      for (const child of node.children) {
-        if (child.type !== "text" || !WIKILINK_RE.test(child.value)) {
-          next.push(child);
-          continue;
-        }
-        changed = true;
-        WIKILINK_RE.lastIndex = 0;
-        let last = 0;
-        let match: RegExpExecArray | null = WIKILINK_RE.exec(child.value);
-        while (match !== null) {
-          if (match.index > last) {
-            next.push({ type: "text", value: child.value.slice(last, match.index) } satisfies Text);
-          }
-          const id = (match[1] as string).trim();
-          const alias = match[2]?.trim() || id;
-          next.push({
-            type: "link",
-            url: `${hrefBase}/${id}`,
-            children: [{ type: "text", value: alias }],
-          } satisfies Link);
-          last = match.index + match[0].length;
-          match = WIKILINK_RE.exec(child.value);
-        }
-        if (last < child.value.length) {
-          next.push({ type: "text", value: child.value.slice(last) } satisfies Text);
-        }
-      }
-      if (changed) node.children = next;
     });
   };
 }

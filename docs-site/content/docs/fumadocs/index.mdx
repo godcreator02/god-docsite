@@ -46,7 +46,7 @@ full: true
 {/* ref file="../packages/docfirst-fumadocs/src/roster.ts" lines="14-18" hash="b15f8564023c" blob="93e4c8c9b929" */}
 
 **轨迹卡集合**：`cardSchema` 只派生页面要的字段、不校验，缺 `label` 用文件名，卡写得对不对由 `docfirst check` 报；
-`remarkTrajectoryLinks` 把关系边段落转成带 `data-kind` 的 div，把指向卡身份的链接与 wikilink 改成卡页地址。
+`remarkTrajectoryLinks` 把关系边段落转成带 `data-kind` 的 div，把指向卡身份的 `.md` / `.mdx` 链接改成卡页地址。
 哪些字段算卡、链接怎么认出卡身份，都从 workflow 的卡格式取：
 
 {/* ref file="../packages/docfirst-fumadocs/src/card-collection.ts" lines="41-46" hash="9e66c1b3ad49" blob="dba2e3cf7662" */}

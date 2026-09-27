@@ -16,7 +16,7 @@ test("pickCardFiles：.md / .mdx 都要，别的后缀不要；同一主干两�
   assert.deepEqual(pickCardFiles([]), []);
 });
 
-test("scanCardDir：.mdx 卡进盘，身份不带后缀；.md 卡照旧；同主干两份只出 .mdx 那张", async () => {
+test("scanCardDir：.mdx 卡进盘，身份不带后缀；.md 卡照旧；同主干两份只出 .mdx 那张、并在它上面报病", async () => {
   const dir = mkdtempSync(join(tmpdir(), "god-live-doc-scan-"));
   try {
     writeFileSync(join(dir, "pj01.mdx"), ["---", "type: root", "born-at: 2026-01-01", "label: 项目", "---", ""].join("\n"));
@@ -35,7 +35,7 @@ test("scanCardDir：.mdx 卡进盘，身份不带后缀；.md 卡照旧；同主
       ],
     );
     assert.equal(center?.id, "pj01");
-    assert.deepEqual(sick, [], "导读页卡体系字段一个不沾，不是卡、不报病");
+    assert.deepEqual(sick, [{ path: "2026-01-04-丙.mdx", problems: [{ field: "file", value: "2026-01-04-丙.md", reason: "同一身份还有一个 2026-01-04-丙.md：只认 .mdx，删掉或改名那一份" }] }], "导读页卡体系字段一个不沾，不是卡、不报病；丙两个文件报在 .mdx 上");
   } finally {
     rmSync(dir, { recursive: true, force: true, maxRetries: 5 });
   }
@@ -54,5 +54,16 @@ test("scanCards：纯函数吃已经读好的文件，挑卡、解析、按身�
     ["2026-01-04-丙", "丙 mdx"],
   ]);
   assert.deepEqual(center, { id: "pj01", label: "项目", bornAt: "2026-01-01", kind: "root", milestones: [] });
-  assert.deepEqual(sick, []);
+  assert.deepEqual(sick, [{ path: "2026-01-04-丙.mdx", problems: [{ field: "file", value: "2026-01-04-丙.md", reason: "同一身份还有一个 2026-01-04-丙.md：只认 .mdx，删掉或改名那一份" }] }]);
+});
+
+test("scanCardDir：只有目录不存在算空盘，别的读取失败原样抛出", async () => {
+  const dir = mkdtempSync(join(tmpdir(), "god-live-doc-scan-"));
+  try {
+    const file = join(dir, "不是目录.md");
+    writeFileSync(file, CARD("甲"));
+    await assert.rejects(scanCardDir(file), (err: NodeJS.ErrnoException) => err.code === "ENOTDIR");
+  } finally {
+    rmSync(dir, { recursive: true, force: true, maxRetries: 5 });
+  }
 });

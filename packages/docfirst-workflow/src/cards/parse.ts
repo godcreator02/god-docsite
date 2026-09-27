@@ -6,7 +6,7 @@
  * 得到「Tue May 06 2026 08:00:00 GMT+0800」——born-at 的格式校验当场全灭，日级存量卡全部
  * 被判字段病并挡在盘外，而且是静默的（盘照出，只是少了卡少了环）。
  *
- * 值读进来谁用谁取，card.ts 只按 CARD_KEYS 与自己要的几个键读。
+ * 值读进来谁用谁取：card.ts 按 CARD_KEYS 与自己要的几个键读，值的形状（单个值还是列表）也由它查。
  * 逻辑出自老仓 `god-flow-panels` 的 `node/star/parse.ts`（只读参考，本仓不 import 它）。
  */
 
@@ -19,13 +19,10 @@ export const CARD_KEYS = ["type", "born-at", "parent", "label", "domain"] as con
 /** 根卡正文末尾装里程碑的固定 H2 区块名。 */
 export const MILESTONE_HEADING = "里程碑";
 
-/** 正文 inline 边：一行一条，值是一条链接，链接目标即卡身份。两种形态都认——
- * 标准 md link `[文字](主干.md)`（现行写法，目标可选 `<>` 包裹、可带百分号编码与 `./` 前缀）
- * 与 wikilink `[[主干]]`（可带 # 锚 / | 别名）。卡是人手写的，两种形态都要容错。 */
-const EDGE_LINE =
-  /^(supersedes|pivots-from)::[ \t]*(?:\[\[([^\]]+)\]\]|\[[^\]\n]*\]\((?:<([^>\n]*)>|([^()\s]*))\))[ \t]*$/;
+/** 正文里的关系：一行一条，整行是「字段:: 一条 md 链接」`[文字](卡身份.md)`，链接目标可带百分号编码、`./` 前缀与 `#` 锚。 */
+const EDGE_LINE = /^(supersedes|pivots-from)::[ \t]*\[[^\]\n]*\]\(([^()<>\s]*)\)[ \t]*$/;
 
-/** 行头是关系字段的兜底判定：匹配上但整行不合 EDGE_LINE 的，示众、不静默吞行。 */
+/** 行头是关系字段：匹配上但整行不合 EDGE_LINE 的，报成写歪的行。 */
 const EDGE_HEAD = /^(supersedes|pivots-from)::/;
 
 /** frontmatter 里的一条标量 / 列表起始行。 */
@@ -59,7 +56,7 @@ function unquote(raw: string): string {
   return trimmed;
 }
 
-/** 流式列表 `[a, b]`：card-format 正本里 parent 就是这个写法，必须容错。
+/** 流式列表 `[a, b]`：card-format 正本里 parent 就是这个写法。
  * 空串项丢掉——`[]` 解析成空列表而不是一个空串项。 */
 function parseFlowList(raw: string): string[] {
   return raw
@@ -100,21 +97,6 @@ export function parseFrontmatter(raw: string): Frontmatter | null {
   return fm;
 }
 
-/** 取标量：列表形态取首项（单值容错的反向），缺省回 null。 */
-export function scalarOf(fm: Frontmatter, key: string): string | null {
-  const raw = fm[key];
-  if (raw === undefined) return null;
-  if (Array.isArray(raw)) return raw.length ? (raw[0] as string) : null;
-  return raw;
-}
-
-/** 取列表：单值也容错成一项。 */
-export function listOf(fm: Frontmatter, key: string): string[] {
-  const raw = fm[key];
-  if (raw === undefined) return [];
-  return (Array.isArray(raw) ? raw : [raw]).map((v) => v.trim()).filter((v) => v !== "");
-}
-
 /** 正文关系边提取的产物：成形的边与写歪的行分开装。
  * broken 只装「行头对但行形不合」这一类（文件级病，跟盘上有哪些卡无关）；
  * 「指向的卡不在盘上」要对盘上的卡集合求解，归星轨盘建模时的 broken。 */
@@ -139,9 +121,8 @@ export function cardIdFromHref(href: string): string {
   return target.replace(/\.mdx?$/, "").trim();
 }
 
-/** 扫正文收关系边：一行一条，md link 目标剥编码与 `.md` / `.mdx` 后即卡身份，
- * wikilink 目标剥 # 锚与 | 别名后即卡身份。
- * 行头是关系字段却没匹配上行形的收进 broken 示众——静默吞行有过前科（CRLF 行尾全军覆没）。 */
+/** 扫正文收关系边：一行一条，链接目标去掉编码、锚与 `.md` / `.mdx` 后即卡身份。
+ * 行头是关系字段却没匹配上行形的收进 broken——静默吞行有过前科（CRLF 行尾全军覆没）。 */
 export function extractRelations(body: string): ExtractedRelations {
   const relations: Relation[] = [];
   const broken: Array<{ key: string; target: string }> = [];
@@ -158,12 +139,8 @@ export function extractRelations(body: string): ExtractedRelations {
       continue;
     }
     const kind: EdgeKind = match[1] === "supersedes" ? "supersede" : "pivot";
-    const wiki = match[2];
-    const target =
-      wiki !== undefined
-        ? (wiki.split(/[|#]/)[0]?.trim() ?? "")
-        : cardIdFromHref((match[3] ?? match[4]) as string);
-    /* 目标段空掉（`[文字]()` 之类）：算写歪，示众不成边 */
+    const target = cardIdFromHref(match[2] as string);
+    /* 目标段空掉（`[文字]()` 之类）：算写歪，不成边 */
     if (target === "") {
       broken.push({ key: match[1] as string, target: line.slice(line.indexOf("::") + 2).trim() });
       continue;
@@ -173,10 +150,17 @@ export function extractRelations(body: string): ExtractedRelations {
   return { relations, broken };
 }
 
-/** 解析根卡正文的「## 里程碑」固定区块：区块到下一个 H2 或文件尾为止。
- * 日期解不出天序数的行跳过；结果按日期升序。 */
-export function extractMilestones(body: string): Milestone[] {
+/** 里程碑区块提取的产物：成形的里程碑，与以 `- ` 开头却不合 `- 日期｜标题｜说明` 或日期解不出来的行。 */
+export interface ExtractedMilestones {
+  milestones: Milestone[];
+  broken: string[];
+}
+
+/** 解析根卡正文的「## 里程碑」固定区块：区块到下一个 H2 或文件尾为止。区块里别的文字（说明、续行）不管；
+ * 结果按日期升序。 */
+export function extractMilestones(body: string): ExtractedMilestones {
   const items: Milestone[] = [];
+  const broken: string[] = [];
   let inBlock = false;
   for (const line of splitLines(body)) {
     const h2 = /^##\s+(.+?)\s*$/.exec(line);
@@ -185,12 +169,15 @@ export function extractMilestones(body: string): Milestone[] {
       continue;
     }
     if (!inBlock) continue;
+    if (!/^-\s/.test(line)) continue;
     const match = MILESTONE_LINE.exec(line);
-    if (!match) continue;
-    const date = (match[1] as string).trim();
-    if (Number.isNaN(Date.parse(`${date.slice(0, 10)}T00:00:00Z`))) continue;
+    const date = match ? (match[1] as string).trim() : "";
+    if (!match || Number.isNaN(Date.parse(`${date.slice(0, 10)}T00:00:00Z`))) {
+      broken.push(line.trim());
+      continue;
+    }
     items.push({ date, name: (match[2] as string).trim(), desc: (match[3] ?? "").trim() });
   }
   items.sort((a, b) => a.date.localeCompare(b.date));
-  return items;
+  return { milestones: items, broken };
 }

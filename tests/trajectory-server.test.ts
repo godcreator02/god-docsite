@@ -1,7 +1,7 @@
 /**
  * `@godcreator/docfirst-fumadocs` 里轨迹卡集合那两样东西的测试：`cardSchema`（合法 / 缺 label / 缺 born-at / Date 型
  * born-at 四种情形，只派生字段、不校验）与 `remarkTrajectoryLinks`（关系边段落打标、卡身份形状的 `.md`
- * 链接改写、带路径的 `.md` 放行、wikilink 转真链接）。mdast 树直接手搭——remarkTrajectoryLinks 本身就是个吃 Root
+ * 链接改写、带路径的 `.md` 放行、wikilink 原样不动）。mdast 树直接手搭——remarkTrajectoryLinks 本身就是个吃 Root
  * 吐 void 的纯函数，不需要真跑一趟 unified 的 parse/stringify 管线。
  */
 import { test } from "node:test";
@@ -120,23 +120,14 @@ test("remarkTrajectoryLinks：带路径的 .md 链接（引材料）不改写—
   assert.equal((p3!.children[0] as Link).url, "https://example.com/readme.md");
 });
 
-test("remarkTrajectoryLinks：wikilink（带别名 / 不带别名）转成真链接，前后文字保留", () => {
+test("remarkTrajectoryLinks：wikilink 不是卡链接，原样留作文字", () => {
   const tree: Root = {
     type: "root",
     children: [paragraph([text("参见 [[old-card|旧卡]] 与 [[other-card]]，完。")])],
   };
   remarkTrajectoryLinks({ hrefBase: "/trajectory" })(tree);
   const p = tree.children[0] as Paragraph;
-  const kinds = p.children.map((c) => c.type);
-  assert.deepEqual(kinds, ["text", "link", "text", "link", "text"]);
-  const [t0, l0, t1, l1, t2] = p.children as [Text, Link, Text, Link, Text];
-  assert.equal(t0.value, "参见 ");
-  assert.equal(l0.url, "/trajectory/old-card");
-  assert.equal((l0.children[0] as Text).value, "旧卡");
-  assert.equal(t1.value, " 与 ");
-  assert.equal(l1.url, "/trajectory/other-card");
-  assert.equal((l1.children[0] as Text).value, "other-card");
-  assert.equal(t2.value, "，完。");
+  assert.deepEqual(p.children, [text("参见 [[old-card|旧卡]] 与 [[other-card]]，完。")]);
 });
 
 test("cardSchema：卡字段一个都不沾的页不是卡——当普通页放行，title 取 frontmatter、缺了退文件名；description 随行", async () => {

@@ -14,7 +14,7 @@ export interface Relation {
 
 /** 里程碑：画成盘上一道金黄的环，名字沿环写在 12 点方向。 */
 export interface Milestone {
-  /** YYYY-MM-DD */
+  /** 以 YYYY-MM-DD 开头，后面可带时刻 */
   date: string;
   name: string;
   desc: string;

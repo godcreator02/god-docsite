@@ -19,14 +19,14 @@ description: content/trajectory/ 下的轨迹卡怎么被读出、校验、换�
 
 {/* ref file="../packages/docfirst-workflow/src/cards/parse.ts" lines="15-17" hash="dfeb7aaec458" blob="f9e17188994b" */}
 
-卡与卡之间的两种关系写在正文里，一行一条：`supersedes::`（取代）或 `pivots-from::`（转向）后面跟一条指向卡身份的链接。
+卡与卡之间的两种关系写在正文里，一行一条：`supersedes::`（取代）或 `pivots-from::`（转向）后面跟一条指向卡身份的标准 md 链接，wikilink 与包在 `<>` 里的目标都不认。
 行首是这两个词、整行却不合格式的，记成问题：
 
-{/* ref file="../packages/docfirst-workflow/src/cards/parse.ts" lines="22-29" hash="ec84ce878892" blob="f9e17188994b" */}
+{/* ref file="../packages/docfirst-workflow/src/cards/parse.ts" lines="22-26" hash="3fc6f0106192" blob="50669b6a2ab2" */}
 
-解析一张卡时把问题逐条记下，不在第一条停：必填字段、`born-at` 的格式，再加写歪的关系行：
+解析一张卡时把问题逐条记下，不在第一条停：字段的形状（该写单个值的写成了列表、`parent` 写成了单个值，报出来、按没写处理，不替它转换）、必填字段、`born-at` 的格式，再加写歪的关系行；根卡另查里程碑区块里写坏的行：
 
-{/* ref file="../packages/docfirst-workflow/src/cards/card.ts" lines="51-66" hash="e207a8069f1e" blob="feb4174fcae5" */}
+{/* ref file="../packages/docfirst-workflow/src/cards/card.ts" lines="44-91" hash="e0c64f0b45d1" blob="d3338eaedca6" */}
 
 `docfirst check` 把每条问题记一次红：
 
@@ -40,13 +40,15 @@ description: content/trajectory/ 下的轨迹卡怎么被读出、校验、换�
 - 根卡多于一张，每张根卡各记一条（字段 `type`）；这时先不查其余卡的 `parent`，没有唯一的根卡可比
 - 根卡不写 `parent`
 - 其余的卡 `parent` 必填，只能写那张根卡的身份；目录里没有根卡时，写了 `parent` 的卡都记一条
+- 关系只能指向盘上的卡：指向根卡、指向不存在的卡、指向 `born-at` 写坏没上盘的卡，各记一条
+- 同一身份 `.md` 与 `.mdx` 两个文件都在，只认 `.mdx`，在它上面记一条
 
-{/* ref file="../packages/docfirst-workflow/src/cards/scan.ts" lines="74-100" hash="92b5b5d04ab7" blob="e88f50e0472c" */}
+{/* ref file="../packages/docfirst-workflow/src/cards/scan.ts" lines="75-139" hash="222d63dd79c8" blob="5a458f2ae3b8" */}
 
 然后换成星轨盘的中性输入：根卡恰好一张时它是盘心；其余 `born-at` 合格的卡都上盘，别的问题不挡上盘，`parent` 与 `domain`
 不决定卡在不在盘上。`born-at` 不合格的卡算不出半径，不进输入：
 
-{/* ref file="../packages/docfirst-workflow/src/cards/scan.ts" lines="45-72" hash="4fea4043393f" blob="e88f50e0472c" */}
+{/* ref file="../packages/docfirst-workflow/src/cards/scan.ts" lines="46-73" hash="4fea4043393f" blob="5a458f2ae3b8" */}
 
 ## 建树、挑主干
 
@@ -100,4 +102,4 @@ Turbopack 才看得出只读这一个目录，不会把整个项目打进服务�
 
 这一条要认识钉码的记号，所以在 workflow 的卡格式里查，病并进同一份清单；星轨盘本身连卡文件的写法都不认识：
 
-{/* ref file="../packages/docfirst-workflow/src/cards/scan.ts" lines="33-37" hash="1460749cec5c" blob="e88f50e0472c" */}
+{/* ref file="../packages/docfirst-workflow/src/cards/scan.ts" lines="35-38" hash="88009f5bb4eb" blob="5a458f2ae3b8" */}

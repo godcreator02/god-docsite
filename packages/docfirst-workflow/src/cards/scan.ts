@@ -13,11 +13,11 @@ import type { CardFile, CardRecord, CardScan, Problem, SickFile } from "./types.
 
 /** 卡文件的后缀：`.mdx` 是文档站 `content/trajectory/` 里的写法（卡进 fumadocs 集合渲成页），
  * `.md` 是把卡摆在站外某个目录的项目的写法——两种都认，卡身份都是去掉后缀的文件名。
- * 同一身份两种后缀都在时只认 `.mdx`（`.md` 那份跳过）：身份撞车不该出两张卡。 */
-const CARD_EXT = /\.mdx?$/;
+ * 同一身份两种后缀都在时只认 `.mdx`，`.md` 那份跳过、在 `.mdx` 那张卡上报病：身份撞车不该出两张卡。 */
+export const CARD_EXT = /\.mdx?$/;
 
 /** 一批卡文件扫成中性输入与病卡。目录内平铺，名字不带路径。不是卡文件的名字、同身份被 `.mdx` 盖掉的 `.md` 都跳过；
- * 每张卡先报单文件的病，再跑跨文件的校验，再查正文里有没有钉码记号。病卡按路径排序，卡按身份排序，
+ * 每张卡先报单文件的病，再跑跨文件的校验（根卡、parent、关系指向、同身份两个文件），再查正文里有没有钉码记号。病卡按路径排序，卡按身份排序，
  * 同一批文件两次扫描产物逐位相等。 */
 export function scanCards(files: readonly CardFile[]): CardScan {
   const byName = new Map(files.map((file) => [file.name, file]));
@@ -30,7 +30,8 @@ export function scanCards(files: readonly CardFile[]): CardScan {
     problemsByPath.set(name, [...parsed.problems]);
   }
   records.sort((a, b) => a.id.localeCompare(b.id));
-  for (const { path, problem } of crossFileProblems(records)) (problemsByPath.get(path) as Problem[]).push(problem);
+  const crossFile = [...crossFileProblems(records), ...relationProblems(records), ...duplicateFileProblems([...byName.keys()], problemsByPath)];
+  for (const { path, problem } of crossFile) (problemsByPath.get(path) as Problem[]).push(problem);
   for (const record of records) {
     const text = (byName.get(record.path) as CardFile).text;
     (problemsByPath.get(record.path) as Problem[]).push(...checkDocfirstRefs(stripFrontmatter(text)));
@@ -95,6 +96,44 @@ function crossFileProblems(records: readonly CardRecord[]): Array<{ path: string
         rootId === null ? "parent 须指向根卡，但卡目录里没有根卡" : `parent 须是根卡的身份 ${rootId}`;
       out.push({ path: c.path, problem: { field: "parent", value: v, reason } });
     }
+  }
+  return out;
+}
+
+/** 关系只能指向盘上的卡：指向根卡的报（根卡代表整个项目，关系要指向具体的卡），指向不存在的卡、
+ * 或 born-at 写坏没上盘的卡也报。根卡自己写的关系不画，不查。 */
+function relationProblems(records: readonly CardRecord[]): Array<{ path: string; problem: Problem }> {
+  const out: Array<{ path: string; problem: Problem }> = [];
+  const rootIds = new Set(records.filter((r) => r.type === "root").map((r) => r.id));
+  const onDisk = new Set(records.filter((r) => r.type !== "root" && validBornAt(r.bornAt)).map((r) => r.id));
+  for (const r of records) {
+    if (r.type === "root") continue;
+    for (const rel of r.relations) {
+      const key = rel.kind === "supersede" ? "supersedes" : "pivots-from";
+      if (rootIds.has(rel.target)) {
+        const reason = `${key}:: 指向了根卡：根卡代表整个项目，关系要指向具体的卡`;
+        out.push({ path: r.path, problem: { field: "relation", value: rel.target, reason } });
+      } else if (!onDisk.has(rel.target)) {
+        const reason = `${key}:: 指向的卡不在盘上：没有这张卡，或它的 born-at 写坏了`;
+        out.push({ path: r.path, problem: { field: "relation", value: rel.target, reason } });
+      }
+    }
+  }
+  return out;
+}
+
+/** 同一身份 `.md` 与 `.mdx` 两个文件都在：只认 `.mdx`，病记在 `.mdx` 那张卡上。 */
+function duplicateFileProblems(
+  names: readonly string[],
+  problemsByPath: ReadonlyMap<string, Problem[]>,
+): Array<{ path: string; problem: Problem }> {
+  const all = new Set(names);
+  const out: Array<{ path: string; problem: Problem }> = [];
+  for (const name of pickCardFiles(names)) {
+    const shadowed = name.replace(/\.mdx$/, ".md");
+    if (shadowed === name || !all.has(shadowed) || !problemsByPath.has(name)) continue;
+    const reason = `同一身份还有一个 ${shadowed}：只认 .mdx，删掉或改名那一份`;
+    out.push({ path: name, problem: { field: "file", value: shadowed, reason } });
   }
   return out;
 }

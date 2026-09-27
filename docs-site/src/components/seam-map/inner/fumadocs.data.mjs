@@ -191,7 +191,7 @@ export const fumadocsGraph = defineSeamGraph({
       role: 'emerald',
       outside: false,
       blurb:
-        '轨迹卡集合的两样：cardSchema 当 frontmatter schema，只从 frontmatter 派生卡页要的字段、不校验（卡写得对不对由 docfirst check 报）：缺 label 用文件名当标题，被 fumadocs 解析成日期的 born-at 转回字符串，一个卡字段都没有的当普通页；remarkTrajectoryLinks 把 supersedes:: 与 pivots-from:: 段落标成关系边，把指向卡身份的 .md 链接与 wikilink 改成卡页地址。哪些字段算卡、链接怎么换成卡身份，都用 workflow 卡格式的那一份。',
+        '轨迹卡集合的两样：cardSchema 当 frontmatter schema，只从 frontmatter 派生卡页要的字段、不校验（卡写得对不对由 docfirst check 报）：缺 label 用文件名当标题，被 fumadocs 解析成日期的 born-at 转回字符串，一个卡字段都没有的当普通页；remarkTrajectoryLinks 把 supersedes:: 与 pivots-from:: 段落标成关系边，把指向卡身份的 .md / .mdx 链接改成卡页地址。哪些字段算卡、链接怎么换成卡身份，都用 workflow 卡格式的那一份。',
       caps: [
         { id: 'cc-links', name: '链接改写', ident: 'remarkTrajectoryLinks' },
         { id: 'cc-schema', name: 'frontmatter 字段', ident: 'cardSchema' },

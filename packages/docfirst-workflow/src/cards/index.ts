@@ -16,13 +16,11 @@ export {
   cardIdFromHref,
   extractMilestones,
   extractRelations,
-  listOf,
   MILESTONE_HEADING,
   parseFrontmatter,
-  scalarOf,
   splitLines,
   stripFrontmatter,
 } from "./parse.ts";
-export type { ExtractedRelations, Frontmatter } from "./parse.ts";
+export type { ExtractedMilestones, ExtractedRelations, Frontmatter } from "./parse.ts";
 export { pickCardFiles, scanCards } from "./scan.ts";
 export type { CardFile, CardRecord, CardScan, Problem, SickFile } from "./types.ts";

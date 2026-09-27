@@ -135,13 +135,13 @@ export function cardOf(code) {
  * scanCardDir 里依次发生的调用，都在 docfirst-workflow 的卡格式里。
  * @type {Array<{ call: string, role: 'blue', what: string }>}
  */
-/* ref file="../packages/docfirst-workflow/src/cards/card-dir.ts" lines="10-20" hash="4f471819c11b" blob="dd3f3a434400" */
-/* ref file="../packages/docfirst-workflow/src/cards/scan.ts" lines="102-112" hash="27fd481efb10" blob="e88f50e0472c" */
+/* ref file="../packages/docfirst-workflow/src/cards/card-dir.ts" lines="10-22" hash="bfbe851ba24e" blob="6bd716954147" */
+/* ref file="../packages/docfirst-workflow/src/cards/scan.ts" lines="141-151" hash="27fd481efb10" blob="5a458f2ae3b8" */
 export const readCalls = [
-  { call: 'readdir(dir)', role: 'blue', what: '列出目录这一层；目录不存在或读不了，整个函数返回 { center: null, cards: [], sick: [] }' },
-  { call: 'pickCardFiles(names)', role: 'blue', what: '只留 .md 与 .mdx；同一个身份两种后缀都有时只留 .mdx' },
-  { call: 'readFile', role: 'blue', what: '并发读每个文件的全文' },
-  { call: 'scanCards(files)', role: 'blue', what: '逐个解析与校验，再看整个目录的根卡（第 3 步），交回中性输入 { center, cards } 与 sick' },
+  { call: 'readdir(dir)', role: 'blue', what: '列出目录这一层；目录不存在时整个函数返回 { center: null, cards: [], sick: [] }，别的读取失败原样抛出' },
+  { call: 'readFile', role: 'blue', what: '并发读每个 .md 与 .mdx 文件的全文' },
+  { call: 'pickCardFiles(names)', role: 'blue', what: 'scanCards 先挑卡文件：同一个身份两种后缀都有时只认 .mdx，并在它上面报病' },
+  { call: 'scanCards(files)', role: 'blue', what: '逐个解析与校验，再看整个目录的根卡与关系（第 3 步），交回中性输入 { center, cards } 与 sick' },
   { call: 'checkDocfirstRefs(body)', role: 'blue', what: 'scanCards 对每张卡去掉 frontmatter 的正文逐行查引用记号，病追加进 sick' },
 ];
 
@@ -158,14 +158,14 @@ export const refForms = ['{/* ref … 与 {/* tree … 这类正式记号', '以
  */
 export const checks = [
   { id: 'presence', name: '存在性', role: 'blue', rule: 'born-at、label 所有卡必填；parent 非根卡必填' },
-  { id: 'shape', name: '形状', role: 'blue', rule: 'born-at 是 YYYY-MM-DD 或 YYYY-MM-DDTHH:mm' },
+  { id: 'shape', name: '形状', role: 'blue', rule: 'born-at 是 YYYY-MM-DD 或 YYYY-MM-DDTHH:mm；born-at、type、label、domain 写成单个值，parent 写成列表' },
   {
     id: 'root',
     name: '根卡',
     role: 'blue',
-    rule: '根卡多于一张，每张各报一条；根卡不写 parent；其余的卡 parent 只写那张根卡的身份，目录里没有根卡时写了 parent 就报',
+    rule: '根卡多于一张，每张各报一条；根卡不写 parent；其余的卡 parent 只写那张根卡的身份，目录里没有根卡时写了 parent 就报；同一身份 .md 与 .mdx 两个文件都在也报',
   },
-  { id: 'relation', name: '关系行', role: 'blue', rule: '行首是 supersedes:: 或 pivots-from:: 的行，整行必须是「字段:: 一条链接」' },
+  { id: 'relation', name: '关系行', role: 'blue', rule: '行首是 supersedes:: 或 pivots-from:: 的行，整行必须是「字段:: 一条 md 链接」，链接只能指向盘上的卡、不能指向根卡' },
   { id: 'docfirst', name: '钉码记号', role: 'blue', rule: '正文里不许出现 docfirst 的正式记号，也不许有以 @@docfirst 开头的一行' },
 ];
 
@@ -173,7 +173,7 @@ export const checks = [
 export const failedChecks = { D: ['shape', 'docfirst'] };
 
 /** scanCardDir 交回的 sick：病按文件归拢，path 相对卡目录 */
-/* ref file="../packages/docfirst-workflow/src/cards/card.ts" lines="54-54" hash="566d53167dfe" blob="feb4174fcae5" */
+/* ref file="../packages/docfirst-workflow/src/cards/card.ts" lines="69-69" hash="566d53167dfe" blob="d3338eaedca6" */
 export const sick = [
   {
     path: '2026-06-12-pin-in-card.mdx',
@@ -305,8 +305,8 @@ export const steps = [
     id: 'read',
     title: '读卡目录：docfirst-workflow 的 scanCardDir',
     text:
-      '读文件的只有 docfirst-workflow 卡格式的 scanCardDir（src/cards/card-dir.ts，经 ./cards 出口导出）：列出目录一层，用 pickCardFiles 挑出卡文件，' +
-      '并发读全文，交给 scanCards 解析（下一步）。scanCards 还对每张卡去掉 frontmatter 的正文逐行查 docfirst 引用记号（card-refs.ts 的 checkDocfirstRefs），' +
+      '读文件的只有 docfirst-workflow 卡格式的 scanCardDir（src/cards/card-dir.ts，经 ./cards 出口导出）：列出目录一层，' +
+      '并发读每个 .md 与 .mdx 的全文，交给 scanCards 挑卡、解析（下一步）。scanCards 还对每张卡去掉 frontmatter 的正文逐行查 docfirst 引用记号（card-refs.ts 的 checkDocfirstRefs），' +
       '命中一行就报一条 field 为 docfirst 的病，追加在这张卡已有的病后面。这条规矩要认识钉码的记号，所以在 workflow 里查，星轨盘连卡文件的写法都不认识。' +
       'D 正文里那行 {/* ref … */} 就这样报了病。目录不存在时返回空结果，不报错。',
   },
