@@ -11,6 +11,21 @@ docfirst: none
 
 <SeamMap />
 
+## 三个名字，各管哪一段
+
+「docfirst」是这套做法的名字，不是哪个包：命令行 `docfirst`、配置 `docfirst.config.mjs`、建站命令 `docfirst.create`、说明书 `docfirst` 都用这个名字。
+做法由一个包实现，另有一个工作台插件负责建站：
+
+| 名字 | 是什么 | 装在哪 | 什么时候运行 |
+| --- | --- | --- | --- |
+| `@godcreator/docfirst-workflow` | 这套做法的实现：核对、确认、渲染生成物、卡格式、命令行 `docfirst`，以及接到 fumadocs 站上的 `./fumadocs` | 每个站的 `node_modules` | 站建好以后的每一次：`pnpm doc`、git hook、CI、`next build` |
+| `@godcreator/gwb-docfirst-workflow` | 工作台插件：建站命令 `docfirst.create` 与 `docfirst.create-plain`，加上给 agent 读的说明书 | gwb 的 home | 建站那一次；说明书在 agent 写文档、改代码时随时读 |
+
+插件只管最开头：它运行官方脚手架、套上本机约定与 docfirst 的分区、把 `docfirst-workflow` 的精确版本写进新站的依赖，然后就不再碰这个站。
+之后的一切都由站里装的那个包完成，工作台开不开都一样；插件不读核对结果，也不转发命令行，卸掉插件站照样能核对、能构建。
+两边互不依赖，唯一的联系是插件里那张建站依赖表。判据是「这件事在哪儿发生」：要在仓里反复运行的归包，只在 agent 手上发生一次的归插件，
+来历见轨迹卡[包给仓件给人](/trajectory/2026-09-10-package-serves-repo-plugin-serves-agent)。
+
 ## 钉码怎么工作
 
 文档里讲到代码的地方，不贴代码副本，只写一行记号：「这句话说的是某个文件的某几行」。讲解组件里照源码抄来的数据也一样，
