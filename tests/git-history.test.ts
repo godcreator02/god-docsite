@@ -18,7 +18,7 @@ import { dirname, join } from "node:path";
 import { blobOf, hashText } from "../packages/code-pin/src/index.ts";
 import type { History } from "../packages/code-pin/src/index.ts";
 import { createGitHistory } from "../packages/docfirst-workflow/src/project/index.ts";
-import { readBlob } from "../packages/docfirst-workflow/src/project/git.ts";
+import { readBlob } from "../packages/docfirst-workflow/src/node/git.ts";
 import { CODE, NO_HISTORY, refLine, run, SETTINGS, setupRepo } from "./repo.ts";
 import type { Repo } from "./repo.ts";
 

@@ -66,8 +66,8 @@ export const notRed = ['🟢 新鲜', '⚪ 未确认', '🟡 有变动但不是�
 /* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="38-44" hash="9ebfdcac2bf1" blob="418434ff646c" */
 /* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="172-190" hash="89872d5416cd" blob="418434ff646c" */
 /* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="335-341" hash="dcd5a37f8b61" blob="418434ff646c" */
-/* ref file="../packages/docfirst-workflow/src/project/uncommitted.ts" lines="1-4" hash="4968cfab632f" blob="2ad45230cb96" */
-/* ref file="../packages/docfirst-workflow/src/project/uncommitted.ts" lines="26-35" hash="8fc6d81a0264" blob="ed53157b1c06" */
+/* ref file="../packages/docfirst-workflow/src/node/uncommitted.ts" lines="1-4" hash="4968cfab632f" blob="2ad45230cb96" */
+/* ref file="../packages/docfirst-workflow/src/node/uncommitted.ts" lines="26-35" hash="8fc6d81a0264" blob="ed53157b1c06" */
 /* ref file="../packages/docfirst-workflow/src/cards/card.ts" lines="69-69" hash="566d53167dfe" blob="d3338eaedca6" */
 export const steps = [
   {

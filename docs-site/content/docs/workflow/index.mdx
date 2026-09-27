@@ -14,7 +14,7 @@ full: true
 
 目录之间的依赖方向见上图。这些目录在同一个包里，编译器不拦跨目录 import，方向由边界测试的禁止表检查：
 
-{/* ref file="../tests/boundary.test.ts" lines="312-337" hash="8bc8334eed36" blob="29557311bd0a" */}
+{/* ref file="../tests/boundary.test.ts" lines="312-339" hash="c1818fae7078" blob="b3c39878725f" */}
 
 ### 项目装配 project
 
@@ -25,25 +25,25 @@ full: true
 现状区是内容根下除 `trajectory/`、`future/` 之外的全部 `.mdx` 文档（目录里的和直接放在内容根上的都算），
 加上项目根下 `src/components/` 里组件格式认领的代码文件（`.ts`、`.tsx`、`.mjs`，放在那里的 `.mdx` 不算页面）：
 
-{/* ref file="../packages/docfirst-workflow/src/project/load.ts" lines="151-169" hash="77de5589ec5c" blob="9fa77c18d282" */}
+{/* ref file="../packages/docfirst-workflow/src/project/load.ts" lines="128-146" hash="dd74d26ff03f" blob="0ea671f02d07" */}
 
 配置模块由 Node 原生加载：站的打包器会把动态 import 改写成自己的加载器，这一句带着两个打包器的跳过标记。
 
-{/* ref file="../packages/docfirst-workflow/src/project/load.ts" lines="120-126" hash="5d8ed05b1d87" blob="9fa77c18d282" */}
+{/* ref file="../packages/docfirst-workflow/src/node/module.ts" lines="3-9" hash="355d983d1663" blob="77f18e11a892" */}
 
 **读取器与旧内容来源**：旧内容来源按被引文件自己的位置找仓，hunk 表用两个临时文件运行 `git diff --no-index` 算，不往任何对象库写：
 
-{/* ref file="../packages/docfirst-workflow/src/project/fs-reader.ts" lines="1-7" hash="d7f39c660a9c" blob="5b1604322176" */}
+{/* ref file="../packages/docfirst-workflow/src/node/fs-reader.ts" lines="1-7" hash="d7f39c660a9c" blob="5b1604322176" */}
 
-{/* ref file="../packages/docfirst-workflow/src/project/history.ts" hash="bcd094f7fd11" blob="00eed07b55cd" */}
+{/* ref file="../packages/docfirst-workflow/src/node/history.ts" hash="bcd094f7fd11" blob="00eed07b55cd" */}
 
 每次启动 git 都带超时与输出上限。按文件位置找仓、blob 名怎么算见 [git 取回旧内容](/docs/pin/git)。
 
-{/* ref file="../packages/docfirst-workflow/src/project/git.ts" lines="17-18" hash="6c30493d4168" blob="afd0fbdae4c4" */}
+{/* ref file="../packages/docfirst-workflow/src/node/git.ts" lines="17-18" hash="6c30493d4168" blob="afd0fbdae4c4" */}
 
 **未提交改动的探针**只回答一处黄是不是本仓未提交的改动引起的，算不算红由命令行决定，规则见[提交门禁](/docs/pin/gate)：
 
-{/* ref file="../packages/docfirst-workflow/src/project/uncommitted.ts" lines="1-8" hash="9f3479ad438b" blob="8b523d262113" */}
+{/* ref file="../packages/docfirst-workflow/src/node/uncommitted.ts" lines="1-8" hash="9f3479ad438b" blob="8b523d262113" */}
 
 **摆放**的渲染过程见[生成物渲染](/docs/workflow/rendering)。落点在装配时就检查：
 得相对项目根、不许落进内容根、一个落点只许一篇文档写，违反任何一条 `loadProject` 当场报错：
@@ -192,7 +192,7 @@ fumadocs 自带组件的规则在 [fumadocs 适配](/docs/fumadocs)的 `./roster
 
 `trajectory` 不遍历文档：读卡目录、交给星轨盘建模，打印那一张盘的树与主干；`--json` 出这张盘的输入（盘心、卡、病卡）与树。没有轨迹卡目录就以退出码 2 结束：
 
-{/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="251-271" hash="9d2051f516bd" blob="ff2e6b7ae7d3" */}
+{/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="251-271" hash="3afc29a390b9" blob="1b27ae06ba3c" */}
 
 退出码、红的来源、未提交改动的黄怎么算红，见[提交门禁](/docs/pin/gate)。
 
@@ -213,9 +213,9 @@ fumadocs 自带组件的规则在 [fumadocs 适配](/docs/fumadocs)的 `./roster
 **`loadProject(root)`** 同一个根只装配一次，站构建时 loader 并发调用拿到同一个项目。配置只认三个键，项目上带着钉码编排、名册、
 内容根、轨迹卡目录与摆放：
 
-{/* ref file="../packages/docfirst-workflow/src/project/load.ts" lines="24-35" hash="5fda9d235fec" blob="d40d73769d17" */}
+{/* ref file="../packages/docfirst-workflow/src/project/load.ts" lines="21-32" hash="5fda9d235fec" blob="0ea671f02d07" */}
 
-{/* ref file="../packages/docfirst-workflow/src/project/load.ts" lines="37-57" hash="1db4678694fd" blob="d40d73769d17" */}
+{/* ref file="../packages/docfirst-workflow/src/project/load.ts" lines="34-54" hash="1db4678694fd" blob="0ea671f02d07" */}
 
 **`./mdx`** 除了格式本身，还交出语法树上的函数给 fumadocs 适配：站构建时 remark 插件拿到的树已经解析好，用 `recognize` 认记号、
 `stamp` 打标记，不再解析一遍；`langOf` 让按原文渲染与站上的代码块标同一种语言：
@@ -246,11 +246,11 @@ fumadocs 自带组件的规则在 [fumadocs 适配](/docs/fumadocs)的 `./roster
 - **命令行那一侧不认识任何站的宿主**：除了 `src/fumadocs/`，fumadocs、react、next 在源码与产物里都不出现，清单里它们只是可选 peer。
   命令行运行在 git hook 与 CI 里，那些环境不一定装了站的依赖：
 
-{/* ref file="../tests/boundary.test.ts" lines="431-443" hash="8ddaab08f765" blob="e4a12e9753de" */}
+{/* ref file="../tests/boundary.test.ts" lines="433-445" hash="8ddaab08f765" blob="b3c39878725f" */}
 
 - **命令行那一侧不认识 fumadocs 适配**：别的目录不许引用 `src/fumadocs/`，`src/fumadocs/` 也只按包名用 `.`、`./mdx`、`./cards`：
 
-{/* ref file="../tests/boundary.test.ts" lines="415-429" hash="6cf7852c8dc4" blob="e4a12e9753de" */}
+{/* ref file="../tests/boundary.test.ts" lines="417-431" hash="6cf7852c8dc4" blob="b3c39878725f" */}
 
 - **不判状态**：绿黄白红由[钉码核心](/docs/pin)算，这个包把磁盘、git、配置交给它，再把结果打印出来。
 - **不给盘建模、不画盘**：关系怎么连成树、主干怎么选、盘怎么画归[星轨盘](/docs/trajectory)；这个包只把卡文件换成它要的中性输入。

@@ -27,9 +27,9 @@ description: check 把哪几类问题计入红；本仓未提交的改动引起�
 一处黄灯，`check` 再问两件事：被钉的文件和这篇文档往上找到的是不是同一个 `.git`；
 那个仓的 `git status` 里有没有这个文件（目录树是这个目录下的任何一个路径）。两个都是，这个黄就是这次改动引起的，打成 🔴、计入红。
 
-{/* ref file="../packages/docfirst-workflow/src/project/git.ts" lines="189-209" hash="3d3f15a80a7e" blob="834127e543cf" */}
+{/* ref file="../packages/docfirst-workflow/src/node/git.ts" lines="189-209" hash="3d3f15a80a7e" blob="834127e543cf" */}
 
-{/* ref file="../packages/docfirst-workflow/src/project/uncommitted.ts" lines="26-35" hash="8fc6d81a0264" blob="ed53157b1c06" */}
+{/* ref file="../packages/docfirst-workflow/src/node/uncommitted.ts" lines="26-35" hash="8fc6d81a0264" blob="ed53157b1c06" */}
 
 「未提交」包括工作区改了、已经暂存、还没跟踪的新文件，改名两头的路径都算。每个仓一次 `check` 只跑一次 `git status`，
 带 `--no-optional-locks`，不跟同时在这个仓里干活的人抢索引锁。

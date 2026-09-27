@@ -319,21 +319,23 @@ const WORKFLOW_SRC = srcOf("docfirst-workflow");
  *   mdx      mdx 格式：认引用、写回、名册检查、按原文渲染，用记号写法；不认识组件格式、钉码编排、项目怎么装配、命令行怎么打印
  *   code     组件格式：讲解组件源码里的记号，按行认、按行写，用记号写法；只认识 marker 与 reference
  *   pinning  钉码编排：按文件选格式，格式认引用、钉码核心判定、格式写回的先后顺序；不认识记号属性怎么写
- *   project  碰环境：读盘、git、摆放；不认识命令行与卡格式
- *   cards    docfirst 卡格式：读卡目录、解析、校验、换成星轨盘的中性输入；卡里不许钉码要认记号，所以只认识 marker
+ *   project  装配与摆放：读盘、git 经 node；不认识命令行与卡格式
+ *   cards    docfirst 卡格式：读卡目录、解析、校验、换成星轨盘的中性输入；卡里不许钉码要认记号，所以只认识 marker，读盘经 node
  *   cli      命令行入口：认识以上全部，谁都不认识它
  *   fumadocs 站那一侧：不用相对路径进任何目录，只按包名用本包的 `.`、`./mdx`、`./cards`（下面单独一条查）；谁都不认识它
+ *   node     Node 实现：读写文件、git、加载模块，不认识 docfirst 的任何格式，所以包里谁都不认识；project、cards、cli 用它
  */
 const WORKFLOW_DIRS: Record<string, string[]> = {
-  marker: ["reference", "mdx", "code", "pinning", "project", "cards", "cli", "fumadocs"],
-  reference: ["marker", "mdx", "code", "pinning", "project", "cards", "cli", "fumadocs"],
-  mdx: ["code", "pinning", "project", "cards", "cli", "fumadocs"],
-  code: ["mdx", "pinning", "project", "cards", "cli", "fumadocs"],
-  pinning: ["marker", "project", "cards", "cli", "fumadocs"],
+  marker: ["reference", "mdx", "code", "pinning", "project", "cards", "cli", "fumadocs", "node"],
+  reference: ["marker", "mdx", "code", "pinning", "project", "cards", "cli", "fumadocs", "node"],
+  mdx: ["code", "pinning", "project", "cards", "cli", "fumadocs", "node"],
+  code: ["mdx", "pinning", "project", "cards", "cli", "fumadocs", "node"],
+  pinning: ["marker", "project", "cards", "cli", "fumadocs", "node"],
   project: ["cards", "cli", "fumadocs"],
   cards: ["reference", "mdx", "code", "pinning", "project", "cli", "fumadocs"],
   cli: ["fumadocs"],
-  fumadocs: ["marker", "reference", "mdx", "code", "pinning", "project", "cards", "cli"],
+  fumadocs: ["marker", "reference", "mdx", "code", "pinning", "project", "cards", "cli", "node"],
+  node: ["marker", "reference", "mdx", "code", "pinning", "project", "cards", "cli", "fumadocs"],
 };
 
 /** 一条相对说明符落在 workflow `src/` 下的哪个目录；落到 src 外面或 src 根上的文件回 null */

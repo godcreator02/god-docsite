@@ -20,7 +20,6 @@
  * 新引用不用命令：在文档里写一行不带记录的正式记号 {/* ref file="src/greet.ts" lines="2-3" *\/}
  * （组件源码里去掉花括号；写法由 `../marker/` 定），check 认它、报未确认，confirm 在这一行写上记录。
  */
-import { existsSync } from "node:fs";
 import { join, relative, sep } from "node:path";
 import { REASON_TEXT } from "@godcreator/code-pin";
 import { buildModel } from "@godcreator/trajectory-disk";
@@ -29,6 +28,7 @@ import { targetKey } from "../marker/index.ts";
 import { lintComponents, mdxFormat } from "../mdx/index.ts";
 import type { ConfirmStep } from "../pinning/index.ts";
 import { scanCardDir } from "../cards/index.ts";
+import { pathExists } from "../node/index.ts";
 import { createUncommittedProbe, loadProject } from "../project/index.ts";
 import type { PlacedWrite, UncommittedProbe } from "../project/index.ts";
 import type { CardProblemReport, CheckReport, DocReport, OutputReport, RefReport } from "./report.ts";
@@ -252,7 +252,7 @@ async function checkTrajectory(project: Project): Promise<CardProblemReport[]> {
  * 不带 `--json` 打印星轨盘——根卡与盘上的卡数，每棵树的主干，再一行汇总支线 / 孤星数。 */
 async function trajectoryCommand(rest: string[]): Promise<number> {
   const project = await loadProject(process.cwd());
-  if (!existsSync(project.trajectoryDir)) {
+  if (!pathExists(project.trajectoryDir)) {
     console.error(`这个项目还没有轨迹卡目录 ${project.contentDir}/trajectory`);
     return 2;
   }

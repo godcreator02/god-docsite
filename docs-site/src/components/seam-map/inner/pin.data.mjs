@@ -82,7 +82,7 @@ export const pinGraph = defineSeamGraph({
     {
       id: 'reader',
       name: '读取器',
-      pkg: 'workflow · project/fs-reader.ts',
+      pkg: 'workflow · node/fs-reader.ts',
       role: null,
       outside: true,
       blurb: 'workflow 的读取器实现 Reader：按行读工作区里的文件，列目录的名字表（在 git 仓里按 .gitignore 过滤）。',
@@ -100,7 +100,7 @@ export const pinGraph = defineSeamGraph({
     {
       id: 'history',
       name: '旧内容来源',
-      pkg: 'workflow · project/history.ts',
+      pkg: 'workflow · node/history.ts',
       role: null,
       outside: true,
       blurb: 'workflow 的旧内容来源实现 History：按被钉文件自己的位置找仓、按 blob 名取确认时的内容，两份内容之间的 hunk 表跑 git diff 算。',

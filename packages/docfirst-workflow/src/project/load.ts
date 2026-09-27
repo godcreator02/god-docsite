@@ -8,16 +8,13 @@
  * 项目根下 `src/components/` 里有格式认领的代码文件（讲解组件的源码）也是现状区。
  * 配置只认 `CONFIG_KEYS` 里那几个键，出现别的键当场报错并说清该怎么改。
  */
-import { existsSync, mkdirSync, readFileSync, readdirSync, statSync, writeFileSync } from "node:fs";
-import { dirname, isAbsolute, join, relative, resolve, sep } from "node:path";
-import { pathToFileURL } from "node:url";
+import { isAbsolute, join, relative, resolve, sep } from "node:path";
 import { createPinner } from "@godcreator/code-pin";
 import type { Roster } from "../mdx/index.ts";
 import { codeFormat } from "../code/index.ts";
 import { createPinning } from "../pinning/index.ts";
 import type { Pinning } from "../pinning/index.ts";
-import { createReader } from "./fs-reader.ts";
-import { createGitHistory } from "./history.ts";
+import { createGitHistory, createReader, filesUnder, filesUnderFollowingLinks, importDefault, isDirectory, namesIn, pathExists, readText, readTextIfExists, writeText, writeTextMakingParents } from "../node/index.ts";
 import { assertTurf, createPlacing, placementsOf } from "./placement.ts";
 import type { OutputTarget, Placement, Placing, PlacingHost } from "./placement.ts";
 
@@ -70,7 +67,7 @@ export function docIdOf(root: string, path: string): string {
 const CONFIG_NAMES = ["docfirst.config.mjs", "docfirst.config.js", "docfirst.config.ts"];
 
 export function configPathOf(root: string): string {
-  const hit = CONFIG_NAMES.map((name) => join(root, name)).find((path) => existsSync(path));
+  const hit = CONFIG_NAMES.map((name) => join(root, name)).find(pathExists);
   if (hit === undefined) throw new Error(`${root} 下没有 docfirst.config.mjs——项目根就是放配置的那个目录`);
   return hit;
 }
@@ -94,14 +91,6 @@ const FIXED_AREAS = new Set(["trajectory", "future"]);
 /** 讲解组件的源码目录，相对项目根 */
 const COMPONENTS_DIR = "src/components";
 
-/** 目录下的全部文件（递归），绝对路径 */
-function filesUnder(dir: string): string[] {
-  return readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
-    const path = join(dir, entry.name);
-    return entry.isDirectory() ? filesUnder(path) : [path];
-  });
-}
-
 /** 配置认的键 */
 const CONFIG_KEYS = ["content", "components", "outputs"];
 
@@ -119,10 +108,7 @@ export function configProblems(config: unknown): string[] {
 
 /** 按 Node 原生加载项目的配置模块，交回 default 导出（还没校验） */
 export async function importConfig(root: string): Promise<unknown> {
-  // 配置是消费方项目里的活模块，必须由 Node 原生加载：站的打包器会把动态 import 改写成
-  // 它自己的加载器，两个标记让它绕开这一句（turbopack / webpack 各认一个）
-  const configUrl = pathToFileURL(configPathOf(root)).href;
-  return ((await import(/* turbopackIgnore: true */ /* webpackIgnore: true */ configUrl)) as { default: unknown }).default;
+  return importDefault(configPathOf(root));
 }
 
 async function build(root: string): Promise<Project> {
@@ -132,57 +118,41 @@ async function build(root: string): Promise<Project> {
   const config = loaded as ProjectConfig;
   const contentDir = (config.content ?? "content").replace(/\\/g, "/").replace(/\/+$/, "");
   const contentAbs = join(root, contentDir);
-  if (!existsSync(contentAbs) || !statSync(contentAbs).isDirectory()) {
+  if (!isDirectory(contentAbs)) {
     throw new Error(`内容根 ${contentDir} 不是项目根下的目录——配置的 content 写错了，或者还没建`);
   }
   const pinning = createPinning(createPinner({ reader: createReader(root), history: createGitHistory(root) }));
   const placements = placementsOf(config);
   assertTurf(root, [contentDir], placements);
 
-  function walk(dir: string, out: string[]): string[] {
-    for (const name of readdirSync(dir)) {
-      const path = join(dir, name);
-      if (statSync(path).isDirectory()) walk(path, out);
-      else if (isDoc(name)) out.push(docIdOf(root, path));
-    }
-    return out;
-  }
-
-  /** 现状区：内容根下除 trajectory/、future/ 之外的全部，加上 src/components/ 下组件格式认领的代码文件 */
+  /** 现状区：内容根下除 trajectory/、future/ 两个目录之外的全部 .mdx，加上 src/components/ 下组件格式认领的代码文件 */
   function statusDocs(): string[] {
-    const out: string[] = [];
-    for (const name of readdirSync(contentAbs)) {
+    const pages: string[] = [];
+    for (const name of namesIn(contentAbs)) {
       const path = join(contentAbs, name);
-      if (statSync(path).isDirectory()) {
-        if (!FIXED_AREAS.has(name)) walk(path, out);
+      if (isDirectory(path)) {
+        if (!FIXED_AREAS.has(name)) pages.push(...filesUnderFollowingLinks(path).filter(isDoc).map((file) => docIdOf(root, file)));
       } else if (isDoc(name)) {
-        out.push(docIdOf(root, path));
+        pages.push(docIdOf(root, path));
       }
     }
-    return [...out, ...componentFiles()].sort();
+    return [...pages, ...componentFiles()].sort();
   }
 
   function componentFiles(): string[] {
     const dir = join(root, COMPONENTS_DIR);
-    if (!existsSync(dir)) return [];
+    if (!pathExists(dir)) return [];
     return filesUnder(dir).map((path) => docIdOf(root, path)).filter(codeFormat.claims);
   }
 
   // 摆放模块认得的只有这几样，先备齐再传给它——它拿不到装配的别的部分。
-  // 后三样是读写真实文件的适配器：落点相对项目根，读写与建父目录都在这儿，摆放本身不碰 node:fs
+  // 后三样是读写真实文件的适配器：落点相对项目根，读写与建父目录经 ../node/，摆放本身不碰 node:fs
   const placingHost: PlacingHost = {
     pinning,
     placements: (doc) => placements[doc] ?? [],
-    read: (doc) => readFileSync(join(root, doc), "utf8"),
-    readPlaced(to) {
-      const abs = join(root, to);
-      return existsSync(abs) ? readFileSync(abs, "utf8") : null;
-    },
-    writePlaced(to, text) {
-      const abs = join(root, to);
-      mkdirSync(dirname(abs), { recursive: true });
-      writeFileSync(abs, text);
-    },
+    read: (doc) => readText(join(root, doc)),
+    readPlaced: (to) => readTextIfExists(join(root, to)),
+    writePlaced: (to, text) => writeTextMakingParents(join(root, to), text),
   };
 
   return {
@@ -196,7 +166,7 @@ async function build(root: string): Promise<Project> {
     docs: statusDocs,
     placements: (doc) => placements[doc] ?? [],
     docIdOf: (path) => docIdOf(root, path),
-    read: (doc) => readFileSync(join(root, doc), "utf8"),
-    write: (doc, text) => writeFileSync(join(root, doc), text),
+    read: (doc) => readText(join(root, doc)),
+    write: (doc, text) => writeText(join(root, doc), text),
   };
 }

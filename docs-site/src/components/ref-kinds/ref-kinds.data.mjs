@@ -33,7 +33,7 @@ const NORMALIZE = '算之前先归一化：换行统一成 LF、去掉每行行�
 /* ref file="../packages/docfirst-workflow/src/marker/index.ts" lines="19-49" hash="a65b6baa8846" blob="7b1527430cf9" */
 /* ref file="../packages/code-pin/src/span.ts" lines="21-39" hash="8d9f8b1618fa" blob="23033c685517" */
 /* ref file="../packages/code-pin/src/compare.ts" lines="65-113" hash="74b12acad0bd" blob="f5272b0530fa" */
-/* ref file="../packages/docfirst-workflow/src/project/fs-reader.ts" lines="1-7" hash="d7f39c660a9c" blob="5b1604322176" */
+/* ref file="../packages/docfirst-workflow/src/node/fs-reader.ts" lines="1-7" hash="d7f39c660a9c" blob="5b1604322176" */
 /* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="38-44" hash="9ebfdcac2bf1" blob="418434ff646c" */
 /* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="275-280" hash="a11866d4fa45" blob="418434ff646c" */
 /* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="296-303" hash="23ad1504ef64" blob="ff2e6b7ae7d3" */

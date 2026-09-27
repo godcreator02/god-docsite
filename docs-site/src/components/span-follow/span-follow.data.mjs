@@ -64,7 +64,7 @@ export const judgeOrder = [
 ];
 
 /** 按 blob 从对象库取旧文件：命令写成等价的 shell，check 里是把 blob 写进 git cat-file --batch 的标准输入 */
-/* ref file="../packages/docfirst-workflow/src/project/git.ts" lines="87-110" hash="078f7f5e5a75" blob="834127e543cf" */
+/* ref file="../packages/docfirst-workflow/src/node/git.ts" lines="87-110" hash="078f7f5e5a75" blob="834127e543cf" */
 export const catFile = {
   command: `echo ${recorded.blob} | git cat-file --batch`,
   found: `${recorded.blobFull} blob ${recorded.bytes}`,
@@ -72,7 +72,7 @@ export const catFile = {
 };
 
 /** 两份内容写成临时文件 old、new 之后跑的 diff，以及它的完整输出 */
-/* ref file="../packages/docfirst-workflow/src/project/git.ts" lines="153-187" hash="8debd8fc4e0d" blob="834127e543cf" */
+/* ref file="../packages/docfirst-workflow/src/node/git.ts" lines="153-187" hash="8debd8fc4e0d" blob="834127e543cf" */
 export const diffCommand = 'git diff --no-index -U0 --no-color -- old new';
 export const diffOutput = [
   'diff --git a/old b/new',

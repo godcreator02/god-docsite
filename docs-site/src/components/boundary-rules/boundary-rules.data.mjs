@@ -16,7 +16,7 @@
  * 画在 workflow 的虚线框里；fumadocs 适配也是 workflow 包里的目录（src/fumadocs/），它是站那一侧，单独画在框外、站的正下方。
  * @type {BoundaryNode[]}
  */
-/* tree dir="../packages/docfirst-workflow/src" depth="1" hash="68dbebf39177" */
+/* tree dir="../packages/docfirst-workflow/src" depth="1" hash="678b25f13fa3" */
 export const nodes = [
   { id: 'plugin', name: '工作台插件', short: '插件', ident: 'plugins/docfirst', role: 'cyan', parent: null },
   { id: 'site', name: '文档站', short: 'docs-site', ident: 'docs-site', role: null, parent: null },
@@ -31,6 +31,7 @@ export const nodes = [
   { id: 'project', name: 'project/', short: 'project/', ident: '项目装配', role: 'emerald', parent: 'workflow' },
   { id: 'cli', name: 'cli/', short: 'cli/', ident: '命令行', role: 'emerald', parent: 'workflow' },
   { id: 'cards', name: 'cards/', short: 'cards/', ident: '卡格式', role: 'emerald', parent: 'workflow' },
+  { id: 'node', name: 'node/', short: 'node/', ident: 'Node 实现', role: 'emerald', parent: 'workflow' },
   { id: 'pin', name: '钉码', short: 'code-pin', ident: 'code-pin', role: 'blue', parent: null },
   { id: 'trajectory', name: '星轨盘', short: 'trajectory-disk', ident: 'trajectory-disk', role: 'violet', parent: null },
   { id: 'host', name: '站的宿主', short: '宿主', ident: 'fumadocs · next · react', role: null, parent: null },
@@ -40,8 +41,8 @@ export const nodes = [
 
 /**
  * 允许的依赖，也就是图上平时画出来的箭头。key 写成「起点>终点」；kind 写这条依赖落在哪里。
- * 包之间的边都是 package.json 里实际写着的依赖；workflow 目录之间只画相邻两层之间实际的 import（cli → project → pinning → mdx、code → marker、reference，cli → cards → marker），
- * 上层还直接 import 更下层的目录（cli 与 project 用 marker、mdx、reference，pinning 用 reference），禁止表都允许，图上不画。
+ * 包之间的边都是 package.json 里实际写着的依赖；workflow 目录之间只画相邻两层之间实际的 import（cli → project → pinning → mdx、code → marker、reference，cli → cards → marker，project → node、cli → node），
+ * 上层还直接 import 更下层的目录（cli 与 project 用 marker、mdx、reference，pinning 用 reference，cards 也用 node），禁止表都允许，图上不画。
  * @typedef {{ key: string, kind: string }} AllowedEdge
  * @type {AllowedEdge[]}
  */
@@ -71,6 +72,8 @@ export const allowedEdges = [
   { key: 'code>reference', kind: '目录间 import，只 import 类型' },
   { key: 'cli>cards', kind: '目录间 import' },
   { key: 'cards>marker', kind: '目录间 import' },
+  { key: 'project>node', kind: '目录间 import' },
+  { key: 'cli>node', kind: '目录间 import' },
 ];
 
 /**
@@ -83,7 +86,7 @@ export const allowedEdges = [
  * @typedef {{ id: string, label: string, text: string, allowed: string[], forbidden: Forbidden[], tests: GuardTest[] }} BoundaryRule
  * @type {BoundaryRule[]}
  */
-/* ref file="../tests/boundary.test.ts" hash="fba28a42c8f6" blob="29557311bd0a" */
+/* ref file="../tests/boundary.test.ts" hash="81906c2cf24c" blob="b3c39878725f" */
 export const rules = [
   {
     id: 'packages',
@@ -146,7 +149,7 @@ export const rules = [
     id: 'workflow-dirs',
     label: 'workflow 目录方向',
     text: '这几个目录在同一个包里，编译器不拦跨目录的 import：mdx/ 里写一句 import "../project/load.ts" 不会报错，mdx 格式从此就跟读盘、git 绑在一起。禁止表 WORKFLOW_DIRS 列的是禁止的目录：写成允许的目录的话，加一个新目录会默默地什么都不许，加错地方反而更难发现；src/ 下多出一个表里没有的目录，另一条测试当场失败。图上只画相邻两层之间的 import：cli 与 project 还直接用 marker、mdx、reference，pinning 也直接用 reference，禁止表都允许。cards 是 docfirst 卡格式，卡里不许钉码要认记号，所以只认识 marker，只有 cli 用它。fumadocs/ 是站那一侧：不用相对路径进任何目录，只按包名用本包的 .、./mdx、./cards，命令行那一侧的目录都不认识它，站构建时加载的产物才不会带上命令行代码。',
-    allowed: ['cli>project', 'project>pinning', 'pinning>mdx', 'pinning>code', 'mdx>marker', 'mdx>reference', 'code>marker', 'code>reference', 'marker>pin', 'reference>pin', 'cli>cards', 'cards>marker', 'fumadocs>workflow'],
+    allowed: ['cli>project', 'project>pinning', 'pinning>mdx', 'pinning>code', 'mdx>marker', 'mdx>reference', 'code>marker', 'code>reference', 'marker>pin', 'reference>pin', 'cli>cards', 'cards>marker', 'project>node', 'cli>node', 'fumadocs>workflow'],
     forbidden: [
       {
         edges: ['marker~reference', 'marker>mdx:back', 'reference>code:back'],
@@ -160,6 +163,7 @@ export const rules = [
       { edges: ['pinning>project:back'], what: '钉码编排不认识 project，也不认识记号属性怎么写：记号写法在两种格式后面。' },
       { edges: ['cards>pinning', 'cards>cli:back'], what: '卡格式只认识 marker：不认识钉码编排、项目装配，也不认识 cli。' },
       { edges: ['project>cli:back', 'pinning>cli'], what: 'cli 是入口，认识另外几个目录，谁都不认识它。' },
+      { edges: ['node>project:back', 'mdx>node'], what: 'node 是 Node 实现：包里只有它碰 node:fs、git 子进程与系统临时目录，不认识 docfirst 的任何格式，所以包里谁都不认识；只有 project、cards、cli 用它，记号、格式、钉码编排都不碰磁盘。' },
       { edges: ['workflow>fumadocs'], what: '命令行那一侧的目录都不许引用 fumadocs/，也不许按包名引用本包；fumadocs/ 不许用相对路径出自己的目录，按包名只许用 .、./mdx、./cards。' },
       {
         edges: ['workflow>host'],

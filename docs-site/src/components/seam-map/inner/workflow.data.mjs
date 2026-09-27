@@ -1,7 +1,7 @@
 /**
  * 命令行与项目 docfirst-workflow 的内部接缝图：模块页 <SeamMap module="workflow" /> 画的就是它。
- * 虚线框是包里的目录：cli、pinning、mdx、code、marker、reference、cards 各一个框，project 按做的事分成项目装配、
- * 读文件与 git、生成物各一个框，这几个框的包名一栏都写 project/、颜色相同，框里的文件写在 blurb 里；
+ * 虚线框是包里的目录：cli、pinning、mdx、code、marker、reference、cards、node 各一个框，project 按做的事分成项目装配、
+ * 生成物两个框，这两个框的包名一栏都写 project/、颜色相同；node 是读文件与 git 那个框，框里的文件写在 blurb 里；
  * mdx 与 code 是同一个格式接口的两份实现，颜色相同；cards 与 cli 同色：包里的目录只有 cli import cards。
  * 灰色实线框是包外的调用方、依赖与使用方的仓。
  * 目录之间的方向从线上看：marker 与 reference 只往钉码核心连，mdx 与 code 往 marker 连、不连 pinning 与 project，
@@ -13,7 +13,7 @@ export const workflowGraph = defineSeamGraph({
   id: 'workflow',
   title: '命令行与项目内部的目录与接缝',
   intro:
-    '命令行与项目内部接缝图：虚线框是包里的目录，project 目录按做的事分成项目装配、读文件与 git、生成物各一个框；框里的方块是它对外给的函数或类型，灰色实线框是命令行那一侧以外的调用方（包括同一个包里站那一侧的 src/fumadocs/，它只按包名调用）、依赖与使用方的仓。mdx 格式与组件格式实现同一个格式接口，都连记号写法、不连钉码编排与 project；记号写法与引用类型只连钉码核心，钉码编排按文件选格式、连两个格式与钉码核心；卡格式读卡目录、校验卡、换成星轨盘的中性输入，只连记号写法与星轨盘；命令行连其余各处。',
+    '命令行与项目内部接缝图：虚线框是包里的目录，project 目录按做的事分成项目装配、生成物两个框，读文件与 git 那个框是 node/ 目录；框里的方块是它对外给的函数或类型，灰色实线框是命令行那一侧以外的调用方（包括同一个包里站那一侧的 src/fumadocs/，它只按包名调用）、依赖与使用方的仓。mdx 格式与组件格式实现同一个格式接口，都连记号写法、不连钉码编排与 project；记号写法与引用类型只连钉码核心，钉码编排按文件选格式、连两个格式与钉码核心；卡格式读卡目录、校验卡、换成星轨盘的中性输入，只连记号写法与星轨盘；命令行连其余各处。',
   frameLabel: '目录',
   modules: [
     {
@@ -95,11 +95,11 @@ export const workflowGraph = defineSeamGraph({
     {
       id: 'io',
       name: '读文件与 git',
-      pkg: 'project/',
-      role: 'blue',
+      pkg: 'node/',
+      role: 'slate',
       outside: false,
       blurb:
-        'fs-reader.ts 的读取器读工作区文件、列目录；history.ts 的旧内容来源按 blob 名从被引文件所在的仓取确认时的内容；git.ts 是启动 git 子进程的几个函数，每次都带超时；uncommitted.ts 的探针回答一处黄是不是本仓还没提交的改动引起的，每次 check 建一个。',
+        '包里只有这个目录碰 node:fs、git 子进程与系统临时目录，不认识 docfirst 的任何格式。fs-reader.ts 的读取器读工作区文件、列目录；history.ts 的旧内容来源按 blob 名从被引文件所在的仓取确认时的内容；git.ts 是启动 git 子进程的几个函数，每次都带超时；uncommitted.ts 的探针回答一处黄是不是本仓还没提交的改动引起的，每次 check 建一个；files.ts 与 module.ts 给装配、卡格式与命令行读写文件、列目录、加载配置模块。',
       caps: [
         { id: 'reader', name: '读取器', ident: 'createReader' },
         { id: 'history', name: '旧内容来源', ident: 'createGitHistory' },
@@ -358,7 +358,7 @@ export const workflowGraph = defineSeamGraph({
       iface: 'node:fs 与 node:fs/promises 读写文件、列目录；execFileSync("git", args, { timeout, maxBuffer })',
       convention: false,
       via: 'disk',
-      text: '读取器、装配、卡格式的读卡目录用 node:fs 读文件与目录，装配把确认后的文档写回、把生成物写到落点。git.ts 启动 git 子进程：查忽略规则、按 blob 名取旧内容、算 hunk 表、查未提交改动，每次都带超时和输出上限。',
+      text: '包里只有 node/ 碰磁盘与 git：读取器用 node:fs 读文件与目录，装配与卡格式读写文件、列目录都调 node/ 的 files.ts；git.ts 启动 git 子进程：查忽略规则、按 blob 名取旧内容、算 hunk 表、查未提交改动，每次都带超时和输出上限。',
     },
     {
       n: 16,

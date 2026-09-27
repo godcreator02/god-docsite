@@ -135,11 +135,11 @@ export function cardOf(code) {
  * scanCardDir 里依次发生的调用，都在 docfirst-workflow 的卡格式里。
  * @type {Array<{ call: string, role: 'blue', what: string }>}
  */
-/* ref file="../packages/docfirst-workflow/src/cards/card-dir.ts" lines="10-22" hash="bfbe851ba24e" blob="6bd716954147" */
+/* ref file="../packages/docfirst-workflow/src/cards/card-dir.ts" lines="9-16" hash="1956906b1916" blob="e57cf74dcaf5" */
+/* ref file="../packages/docfirst-workflow/src/node/files.ts" lines="56-69" hash="b4d83edc8fea" blob="b4042a86e5ab" */
 /* ref file="../packages/docfirst-workflow/src/cards/scan.ts" lines="141-151" hash="27fd481efb10" blob="5a458f2ae3b8" */
 export const readCalls = [
-  { call: 'readdir(dir)', role: 'blue', what: '列出目录这一层；目录不存在时整个函数返回 { center: null, cards: [], sick: [] }，别的读取失败原样抛出' },
-  { call: 'readFile', role: 'blue', what: '并发读每个 .md 与 .mdx 文件的全文' },
+  { call: 'readDirFiles(dir, accept)', role: 'blue', what: '经 node/ 列出目录这一层，挑出 .md 与 .mdx，并发读全文；目录不存在交回 null，scanCardDir 就返回 { center: null, cards: [], sick: [] }，别的读取失败原样抛出' },
   { call: 'pickCardFiles(names)', role: 'blue', what: 'scanCards 先选出卡文件：同一个身份两种后缀都有时只认 .mdx，并在它上面报病' },
   { call: 'scanCards(files)', role: 'blue', what: '逐个解析与校验，再看整个目录的根卡与关系（第 3 步），交回中性输入 { center, cards } 与 sick' },
   { call: 'checkDocfirstRefs(body)', role: 'blue', what: 'scanCards 对每张卡去掉 frontmatter 的正文逐行查引用记号，病追加进 sick' },
@@ -268,7 +268,7 @@ export const fumadocsLines = {
  * @type {Record<'check' | 'trajectory', Array<{ kind: 'cmd' | 'out' | 'ok' | 'err', text: string }>>}
  */
 /* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="219-237" hash="f70391e16cf2" blob="418434ff646c" */
-/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="251-271" hash="9d2051f516bd" blob="ff2e6b7ae7d3" */
+/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="251-271" hash="3afc29a390b9" blob="1b27ae06ba3c" */
 export const terminals = {
   check: [
     { kind: 'cmd', text: 'pnpm docfirst check' },
