@@ -7,8 +7,8 @@
  * 讲解文字与示例都在 md-output.data.mjs，机读版由 md-output.ai.mjs 读同一份数据生成。
  */
 import type { JSX, ReactNode } from 'react';
-import { CasePicker, CodeLines, Pane, Pill, Stepper, Terminal } from '@godcreator/explainer-player';
-import type { Tone } from '@godcreator/explainer-player';
+import { CasePicker, CodeLines, Pane, Pill, Stepper, Terminal } from '@godcreator/docfirst-explainer';
+import type { Tone } from '@godcreator/docfirst-explainer';
 import { buildSteps, componentCases, files, mdBody, mdFile, mdPaths, serveCases, sourceLines, trees } from './md-output.data.mjs';
 
 type BuildStep = (typeof buildSteps)[number];

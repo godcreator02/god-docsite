@@ -5,8 +5,8 @@
  * 讲解文字与示例都在 render-flow.data.mjs，机读版由 render-flow.ai.mjs 读同一份数据生成。
  */
 import type { CSSProperties, JSX, ReactNode } from 'react';
-import { CodeLines, Diff, Pane, Pill, Terminal, Timeline } from '@godcreator/explainer-player';
-import type { Role, TerminalLine, TimelineFrame, Tone } from '@godcreator/explainer-player';
+import { CodeLines, Diff, Pane, Pill, Terminal, Timeline } from '@godcreator/docfirst-explainer';
+import type { Role, TerminalLine, TimelineFrame, Tone } from '@godcreator/docfirst-explainer';
 import {
   chapters,
   codeLines,

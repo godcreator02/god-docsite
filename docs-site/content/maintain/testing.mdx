@@ -13,7 +13,7 @@ description: 包与目录之间的依赖方向靠什么检查，各组测试检�
 
 仓根那组按主题一个文件：
 
-{/* tree dir="../tests" depth="1" glob="*.test.ts" hash="61bc4a87e3a5" */}
+{/* tree dir="../tests" depth="1" glob="*.test.ts" hash="5c868b1fa3cd" */}
 
 ## 依赖方向：只有一个文件在检查
 
@@ -27,32 +27,35 @@ mdx 格式从此就跟读盘、git 绑在一起。补上这两项的是 `tests/b
 禁止表**列的是禁止的，不是允许的**：写成允许的话，新加一个包默认什么都不能依赖，放错位置反而更难发现。
 `packages/` 下多出一个表里没有的目录，另一条测试当场失败，要求先想清楚它能认识谁：
 
-{/* ref file="../tests/boundary.test.ts" lines="126-138" hash="10099a6dad41" blob="85566dfd1f21" */}
+{/* ref file="../tests/boundary.test.ts" lines="133-145" hash="9a8271083263" blob="0d3a5dcc329f" */}
 
 workflow 目录之间是同样的写法：
 
-{/* ref file="../tests/boundary.test.ts" lines="334-345" hash="c81759ee8dbb" blob="85566dfd1f21" */}
+{/* ref file="../tests/boundary.test.ts" lines="344-355" hash="c81759ee8dbb" blob="0d3a5dcc329f" */}
 
-## 通用包：不认识 docfirst，能单独使用
+## 自成一体的包与通用包
 
-本仓的包分两类。**通用包**不认识 docfirst：`code-pin` 把文字钉在代码上，`trajectory-disk` 把一组卡画成项目方向演变的圆盘，
-`explainer-player` 把讲解拆成配说明的帧来播放；docfirst 只是它们的一个使用者。docfirst 自己的规矩在
-`docfirst-workflow` 里。通用包列在一张表里，下面三条对表里每个包都一样：
-清单里没有任何 `@godcreator/` 包；源码与产物不 import 它们，源码的相对 import 不出自己的 `src/`；
-包目录里（源码、产物、样式、构建配置、清单）一个 docfirst 字样都没有，清单里指向本仓的仓地址除外：仓名是 gwb-docfirst，那一行说的是包放在哪，不是包认识 docfirst。
+本仓的包分两类。**通用包**不认识 docfirst：`code-pin` 把文字钉在代码上，`trajectory-disk` 把一组卡画成项目方向演变的圆盘；
+docfirst 只是它们的一个使用者。**docfirst 的包**有两个：`docfirst-workflow` 是命令行、项目装配与格式；
+`docfirst-explainer` 是 docfirst 站上用的讲解组件，只有站用，workflow 与插件都不依赖它。
 
-最后一条连注释也查。通用包里一旦写了「docfirst 站会这样用」，下一个改它的人就会照着 docfirst 的需要改它，
-它就不再通用。讲 docfirst 怎么用这几个包，写在 `docfirst-workflow` 或这个站里。加一个通用包只要把它加进表里：
+两张表管两件事。**自成一体的包**（两个通用包加上 `docfirst-explainer`）各自单独安装、单独升版：
+清单里没有任何 `@godcreator/` 包；源码与产物不 import 它们，源码的相对 import 不出自己的 `src/`。
+**通用包**另外要求包目录里（源码、产物、样式、构建配置、清单）一个 docfirst 字样都没有，清单里指向本仓的仓地址除外：
+仓名是 gwb-docfirst，那一行说的是包放在哪，不是包认识 docfirst。
 
-{/* ref file="../tests/boundary.test.ts" lines="170-235" hash="c33032a71b36" blob="85566dfd1f21" */}
+这一条连注释也查。通用包里一旦写了「docfirst 站会这样用」，下一个改它的人就会照着 docfirst 的需要改它，
+它就不再通用。讲 docfirst 怎么用这几个包，写在 `docfirst-workflow` 或这个站里。加一个包就按它是哪一类加进对应的表：
+
+{/* ref file="../tests/boundary.test.ts" lines="177-245" hash="80a6deb6f659" blob="0d3a5dcc329f" */}
 
 各通用包另有自己的几条。钉码只许 import `node:crypto`，源码与产物里没有文档文本那一侧的名字：
 
-{/* ref file="../tests/boundary.test.ts" lines="237-261" hash="f6ad294a7d3e" blob="85566dfd1f21" */}
+{/* ref file="../tests/boundary.test.ts" lines="247-271" hash="f6ad294a7d3e" blob="0d3a5dcc329f" */}
 
 星轨盘的 `.` 入口产物零 import，建模只 import 自己目录里的文件，整个包里没有关系行、frontmatter 字段名这些 docfirst 卡文件的写法：
 
-{/* ref file="../tests/boundary.test.ts" lines="278-298" hash="4d31db61a2b8" blob="85566dfd1f21" */}
+{/* ref file="../tests/boundary.test.ts" lines="288-308" hash="4d31db61a2b8" blob="0d3a5dcc329f" */}
 
 包与插件互不认识，两个方向分在两处：包里不许出现任何 `@godcreator/gwb-*` 由 `boundary.test.ts` 查；
 插件不许依赖本仓的任何一个包由插件自己的测试查，包名从 `packages/` 下各包的清单现读：
@@ -64,7 +67,7 @@ workflow 目录之间是同样的写法：
   不是删断言，更不是为了让检查通过注释掉某一条。
 </Note>
 
-## 钉码核心：传入两样假的
+## 钉码核心：传入两个假实现
 
 `tests/core.test.ts` 直接给钉码核心目标与记录，传入内存读取器（能读到的只有一张文件表）和内存里的旧内容来源。
 钉码核心不读盘、不启动进程、不接触文档文本，这样测正好把这几条一并检查了；认引用、配回行号、写回的先后顺序在 `tests/pinning.test.ts` 测，
@@ -105,7 +108,7 @@ workflow 目录之间是同样的写法：
 星轨盘与卡格式的测试是 `tests/trajectory-*.test.ts`：卡格式的解析、扫描、校验在 parse、scan、validate、model 几份，fumadocs 卡集合在 server，
 建模、布局、画布、组件在其余几份；内存造卡走真实的卡格式换成中性输入（`tests/trajectory-helpers.ts`），星轨盘相关的几份用 `tests/fixtures/trajectory/` 下的卡片。
 所以星轨盘的测试离不开 workflow 的卡格式：包本身是通用的，它的测试还不是。术语标注在 `tests/glossary.test.ts`，
-fumadocs 适配不接 Next 的那一半在 `tests/fumadocs.test.ts`，讲解播放器在 `tests/explainer-player.test.ts`，
+fumadocs 适配不接 Next 的那一半在 `tests/fumadocs.test.ts`，讲解组件包在 `tests/docfirst-explainer.test.ts`，
 各包能装、能出产物、出口解析得到在 `tests/skeleton.test.ts`。
 
 ## 插件那组

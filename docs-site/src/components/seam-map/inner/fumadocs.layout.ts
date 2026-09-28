@@ -23,8 +23,8 @@ import {
   TextSearch,
   Workflow,
 } from 'lucide-react';
-import { cap } from '@godcreator/explainer-player';
-import type { SeamLayout } from '@godcreator/explainer-player';
+import { cap } from '@godcreator/docfirst-explainer';
+import type { SeamLayout } from '@godcreator/docfirst-explainer';
 
 export const fumadocsLayout: SeamLayout = {
   view: { w: 1100, h: 1040 },

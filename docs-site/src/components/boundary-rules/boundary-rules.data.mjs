@@ -20,7 +20,7 @@
 export const nodes = [
   { id: 'plugin', name: '工作台插件', short: '插件', ident: 'plugins/docfirst', role: 'cyan', parent: null },
   { id: 'site', name: '文档站', short: 'docs-site', ident: 'docs-site', role: null, parent: null },
-  { id: 'explain', name: '讲解播放器', short: 'explainer-player', ident: 'explainer-player', role: 'slate', parent: null },
+  { id: 'explain', name: '讲解组件包', short: 'docfirst-explainer', ident: 'docfirst-explainer', role: 'slate', parent: null },
   { id: 'fumadocs', name: 'fumadocs 适配', short: 'fumadocs/', ident: 'docfirst-workflow/fumadocs', role: 'amber', parent: null },
   { id: 'workflow', name: '命令行与项目', short: 'workflow', ident: 'docfirst-workflow', role: 'emerald', parent: null },
   { id: 'marker', name: 'marker/', short: 'marker/', ident: '记号写法', role: 'emerald', parent: 'workflow' },
@@ -86,7 +86,7 @@ export const allowedEdges = [
  * @typedef {{ id: string, label: string, text: string, allowed: string[], forbidden: Forbidden[], tests: GuardTest[] }} BoundaryRule
  * @type {BoundaryRule[]}
  */
-/* ref file="../tests/boundary.test.ts" hash="25e01211ccb6" blob="85566dfd1f21" */
+/* ref file="../tests/boundary.test.ts" hash="f1f58e291db3" blob="0d3a5dcc329f" */
 export const rules = [
   {
     id: 'packages',
@@ -104,7 +104,7 @@ export const rules = [
       },
       {
         edges: ['explain~pin', 'explain~trajectory', 'explain~workflow', 'explain~fumadocs'],
-        what: '讲解播放器跟本仓别的包互不认识：普通 fumadocs 站也用它，docfirst 的包都不用它，只有站用。',
+        what: '讲解组件包跟本仓别的包互不认识：它是 docfirst 站上用的讲解组件，只有站用，workflow 与 fumadocs 适配都不依赖它，它也不依赖任何兄弟包。',
       },
     ],
     tests: [
@@ -115,13 +115,13 @@ export const rules = [
   },
   {
     id: 'generic',
-    label: '通用包独立',
-    text: '钉码、星轨盘、讲解播放器是通用包：不认识 docfirst，谁都能单独使用，docfirst 只是它们的一个使用者。三个包列在 GENERIC_PACKAGES 一张表里，三条检查对表里每个包都一样：清单里没有任何 @godcreator/ 包；源码与产物不 import 它们，源码的相对 import 不出自己的 src/；包目录里一个 docfirst 字样都没有，连注释也算（只放行清单里指向本仓的仓地址，仓名是 gwb-docfirst）——通用包里一旦写了「docfirst 会这样用」，下一个改它的人就会照着 docfirst 的需要改它。另外各包有自己的几条：钉码只许 node:crypto；星轨盘唯一对外的依赖是 ./disk 入口（客户端组件 StarDisk）用的 react，它是可选 peer，要按包名 import、不许打包进产物。',
+    label: '自成一体的包与通用包',
+    text: '钉码、星轨盘、讲解组件包都自成一体：各自单独安装、单独升版，三个包列在 SELF_CONTAINED_PACKAGES 表里，两条检查对表里每个包都一样：清单里没有任何 @godcreator/ 包；源码与产物不 import 它们，源码的相对 import 不出自己的 src/。钉码与星轨盘还是通用包：不认识 docfirst，谁都能单独使用，docfirst 只是它们的一个使用者；它们列在 GENERIC_PACKAGES 表里，另查包目录里一个 docfirst 字样都没有，连注释也算（只放行清单里指向本仓的仓地址，仓名是 gwb-docfirst）——通用包里一旦写了「docfirst 会这样用」，下一个改它的人就会照着 docfirst 的需要改它。讲解组件包名字里带 docfirst，只给 docfirst 站用，不查这一条。另外各包有自己的几条：钉码只许 node:crypto；星轨盘唯一对外的依赖是 ./disk 入口（客户端组件 StarDisk）用的 react，它是可选 peer，要按包名 import、不许打包进产物。',
     allowed: ['pin>crypto', 'trajectory>host', 'explain>host'],
     forbidden: [
       {
         edges: ['pin~trajectory', 'explain~pin', 'explain~trajectory', 'pin>workflow', 'trajectory>workflow', 'explain~workflow'],
-        what: '三个通用包的清单里不许有任何 @godcreator/ 包，开发期依赖也算；源码与产物不许 import 它们，源码的相对 import 不许出自己的 src/；源码、产物、样式、构建配置与清单里不许出现 docfirst 字样，清单里指向本仓的仓地址除外。',
+        what: '三个自成一体的包的清单里不许有任何 @godcreator/ 包，开发期依赖也算；源码与产物不许 import 它们，源码的相对 import 不许出自己的 src/。两个通用包的源码、产物、样式、构建配置与清单里还不许出现 docfirst 字样，清单里指向本仓的仓地址除外。',
       },
       {
         edges: ['pin>others'],
@@ -133,9 +133,9 @@ export const rules = [
       },
     ],
     tests: [
-      { name: '通用包独立：清单三类依赖字段里没有任何 @godcreator/ 包', checks: '读三个通用包 package.json 的 dependencies、peerDependencies、devDependencies' },
-      { name: '通用包独立：源码与产物不 import 任何 @godcreator/ 包，源码的相对 import 不出自己的 src/', checks: '读三个通用包 src/ 下每个文件与 dist/ 下每份产物的 import' },
-      { name: '通用包不认识 docfirst：源码、产物、样式、构建配置与清单里一个 docfirst 字样都没有（清单里指向本仓的地址除外）', checks: '逐行读三个通用包目录下除 node_modules 以外的全部文件' },
+      { name: '自成一体的包：清单三类依赖字段里没有任何 @godcreator/ 包', checks: '读三个自成一体的包 package.json 的 dependencies、peerDependencies、devDependencies' },
+      { name: '自成一体的包：源码与产物不 import 任何 @godcreator/ 包，源码的相对 import 不出自己的 src/', checks: '读三个自成一体的包 src/ 下每个文件与 dist/ 下每份产物的 import' },
+      { name: '通用包不认识 docfirst：源码、产物、样式、构建配置与清单里一个 docfirst 字样都没有（清单里指向本仓的地址除外）', checks: '逐行读两个通用包目录下除 node_modules 以外的全部文件' },
       { name: 'pin 零依赖：清单里没有 dependencies / peerDependencies，源码只 import 自己和 node:crypto', checks: '读钉码的 package.json 与 src/ 的 import' },
       { name: '钉码核心不接触文档文本：源码与产物里没有 mdx、记号写法、格式接口、引用与清单', checks: '读钉码的 src/ 与产物 index.mjs、index.d.mts 的全文' },
       { name: 'trajectory 的 `.` 入口零 import：产物一条 import 都没有，连 node: 也没有', checks: '读产物 dist/index.mjs 与 package.json 的 dependencies' },
@@ -217,8 +217,8 @@ export const rules = [
   },
   {
     id: 'explain',
-    label: '讲解播放器的三个入口',
-    text: '讲解播放器的 . 出口是客户端组件，产物头一行必须是 "use client"；./text 把各帧的说明转成机读版文字，站在 Node 里生成机读版时加载它（docfirst 站由 docfirst.config.mjs 加载），源码与产物都零 import、不带客户端指令。./seam-graph 定义接缝图、把图写成机读文字，接缝图的数据文件在 Node 与客户端都加载它，产物同样零 import、不带客户端指令，源码只许 import 类型。它不依赖任何 @godcreator/ 包，由「通用包独立」那一类查。',
+    label: '讲解组件包的三个入口',
+    text: '讲解组件包的 . 出口是客户端组件，产物头一行必须是 "use client"；./text 把各帧的说明转成机读版文字，站在 Node 里生成机读版时加载它（docfirst 站由 docfirst.config.mjs 加载），源码与产物都零 import、不带客户端指令。./seam-graph 定义接缝图、把图写成机读文字，接缝图的数据文件在 Node 与客户端都加载它，产物同样零 import、不带客户端指令，源码只许 import 类型。它不依赖任何 @godcreator/ 包，由「自成一体的包与通用包」那一类查。',
     allowed: ['explain>host', 'site>explain'],
     forbidden: [
       {
@@ -228,10 +228,10 @@ export const rules = [
       { edges: ['plugin>explain'], what: '工作台插件也不许依赖它。' },
     ],
     tests: [
-      { name: 'explainer-player 清单：没有 dependencies，react 只作必需 peer；工作台插件不依赖它', checks: '读讲解播放器与工作台插件的 package.json' },
-      { name: 'explainer-player 的 `.`：客户端指令在头一行，只 import react，没有把 react 或别的模块打包进来', checks: '读产物 dist/index.mjs 的头一行、import 行、//#region 来源与正文' },
-      { name: 'explainer-player 的 `./text`：docfirst.config.mjs 在 Node 里加载它，产物零 import、不带客户端指令', checks: '读产物 dist/text.mjs 与源码 text.ts' },
-      { name: 'explainer-player 的 `./seam-graph`：接缝图的数据文件在 Node 与客户端都加载它，产物零 import、不带客户端指令，源码只 import 类型', checks: '读产物 dist/seam-graph.mjs 与源码 seam-graph.ts 的 import 行' },
+      { name: 'docfirst-explainer 清单：没有 dependencies，react 只作必需 peer；工作台插件不依赖它', checks: '读讲解组件包与工作台插件的 package.json' },
+      { name: 'docfirst-explainer 的 `.`：客户端指令在头一行，只 import react，没有把 react 或别的模块打包进来', checks: '读产物 dist/index.mjs 的头一行、import 行、//#region 来源与正文' },
+      { name: 'docfirst-explainer 的 `./text`：docfirst.config.mjs 在 Node 里加载它，产物零 import、不带客户端指令', checks: '读产物 dist/text.mjs 与源码 text.ts' },
+      { name: 'docfirst-explainer 的 `./seam-graph`：接缝图的数据文件在 Node 与客户端都加载它，产物零 import、不带客户端指令，源码只 import 类型', checks: '读产物 dist/seam-graph.mjs 与源码 seam-graph.ts 的 import 行' },
     ],
   },
 ];
@@ -267,7 +267,7 @@ for (const rule of rules) {
 for (const edge of allowedEdges) parseEdge(edge.key);
 
 /**
- * 一条边读成文字：「pin → workflow」或「explainer-player ↔ pin」
+ * 一条边读成文字：「pin → workflow」或「docfirst-explainer ↔ pin」
  * @param {string} key
  */
 export function edgeText(key) {

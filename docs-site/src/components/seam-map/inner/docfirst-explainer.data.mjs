@@ -1,15 +1,15 @@
 /**
- * 讲解播放器 explainer-player 的内部接缝图：模块页 <SeamMap module="explainer-player" /> 画的就是它。
+ * 讲解组件包 docfirst-explainer 的内部接缝图：模块页 <SeamMap module="docfirst-explainer" /> 画的就是它。
  * 框是包里的文件，方块是文件对外给的东西；灰色实线框是包外的站、站的配置、react 与 fumadocs。
- * 接缝图的三块（站的接缝图文件、定义图与机读文字、画接缝图）放在最右一列。坐标在 explainer-player.layout.ts。
+ * 接缝图的三块（站的接缝图文件、定义图与机读文字、画接缝图）放在最右一列。坐标在 docfirst-explainer.layout.ts。
  */
-import { defineSeamGraph } from '@godcreator/explainer-player/seam-graph';
+import { defineSeamGraph } from '@godcreator/docfirst-explainer/seam-graph';
 
-export const explainerPlayerGraph = defineSeamGraph({
-  id: 'explainer-player',
-  title: '讲解播放器内部的文件与接缝',
+export const docfirstExplainerGraph = defineSeamGraph({
+  id: 'docfirst-explainer',
+  title: '讲解组件包内部的文件与接缝',
   intro:
-    '讲解播放器内部接缝图：虚线框是包里的文件，框里的方块是它对外给的组件、函数、类型或样式，灰色实线框是包外的站、站的配置、react 与 fumadocs。最右一列是接缝图：站只给每张图的内容与坐标，定义图与机读文字在 ./seam-graph，画图在主入口的 SeamDiagram。讲解播放器是通用包，不认识 docfirst；图里的站是本仓的文档站，它是使用者之一。',
+    '讲解组件包内部接缝图：虚线框是包里的文件，框里的方块是它对外给的组件、函数、类型或样式，灰色实线框是包外的站、站的配置、react 与 fumadocs。最右一列是接缝图：站只给每张图的内容与坐标，定义图与机读文字在 ./seam-graph，画图在主入口的 SeamDiagram。讲解组件包是 docfirst 站上用的讲解组件，不依赖本仓别的包；图里的站是本仓的文档站，接了 docfirst 的站都这样用它。',
   frameLabel: '文件',
   modules: [
     {
@@ -145,7 +145,7 @@ export const explainerPlayerGraph = defineSeamGraph({
       pkg: 'docs-site/src/app/site.css',
       role: null,
       outside: true,
-      blurb: '站的全局样式：引入讲解播放器的样式表，再引入各讲解组件自己的画面样式。',
+      blurb: '站的全局样式：引入讲解组件包的样式表，再引入各讲解组件自己的画面样式。',
       caps: [{ id: 'site-css', name: '站的全局样式', ident: 'src/app/site.css' }],
     },
     {
@@ -221,7 +221,7 @@ export const explainerPlayerGraph = defineSeamGraph({
       name: '客户端入口',
       a: ['view'],
       b: ['entry'],
-      iface: 'import { Stepper, CasePicker, Pane, Pill, … } from "@godcreator/explainer-player"',
+      iface: 'import { Stepper, CasePicker, Pane, Pill, … } from "@godcreator/docfirst-explainer"',
       convention: false,
       via: 'code',
       text: '站的画面组件从包的主入口 import 外壳、零件与 Role、Tone 等类型。入口第一行是 "use client"，构建后留在产物头一行，站 import 到的都是客户端组件。',
@@ -311,7 +311,7 @@ export const explainerPlayerGraph = defineSeamGraph({
       name: '引入样式表',
       a: ['site-css'],
       b: ['classes', 'attrs', 'vars'],
-      iface: '@import "@godcreator/explainer-player/styles.css" → styles/explain.css',
+      iface: '@import "@godcreator/docfirst-explainer/styles.css" → styles/explain.css',
       convention: false,
       via: 'code',
       text: '主入口不带样式，站在全局样式里引入一次样式表，所有讲解组件共用。包的 exports 把 ./styles.css 指到 styles/explain.css。',
@@ -361,7 +361,7 @@ export const explainerPlayerGraph = defineSeamGraph({
       name: '定义接缝图',
       a: ['seam-data'],
       b: ['define'],
-      iface: 'import { defineSeamGraph } from "@godcreator/explainer-player/seam-graph"；defineSeamGraph({ id, title, intro, frameLabel, modules, entries, seams }) → SeamGraph',
+      iface: 'import { defineSeamGraph } from "@godcreator/docfirst-explainer/seam-graph"；defineSeamGraph({ id, title, intro, frameLabel, modules, entries, seams }) → SeamGraph',
       convention: false,
       via: 'code',
       text: '每张图的内容写成一个 defineSeamGraph 调用：模块、能力、入口、接缝。id 重复、两端或入口指向不存在的能力，加载时当场报错。画面与机读规则 import 的是同一份数据文件。',

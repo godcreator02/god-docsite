@@ -2,23 +2,30 @@
  * # 边界守卫：`packages/` 下各包之间、workflow 包里面**唯一**的边界检查
  *
  * 包分两类。**通用包**不认识 docfirst，谁都能单独使用：钉码 `code-pin`（把文字钉在代码上）、
- * 星轨盘 `trajectory-disk`（把一组卡画成项目方向演变的圆盘）、讲解播放器 `explainer-player`（把讲解拆成配说明的帧来播放）。
- * **docfirst 的包** `docfirst-workflow` 用上面的通用包拼出 docfirst：命令行、项目装配与格式，
- * 接到 fumadocs 站上的部分在它的 `src/fumadocs/`，经子入口 `./fumadocs` 发出去。
+ * 星轨盘 `trajectory-disk`（把一组卡画成项目方向演变的圆盘）。
+ * **docfirst 的包**有两个：`docfirst-workflow` 用上面的通用包拼出 docfirst：命令行、项目装配与格式，
+ * 接到 fumadocs 站上的部分在它的 `src/fumadocs/`，经子入口 `./fumadocs` 发出去；讲解组件包 `docfirst-explainer`
+ * 是 docfirst 站上用的组件（把讲解拆成配说明的帧来播放，外加画接缝图），只有站用，workflow 与工作台插件都不依赖它。
+ * 它名字里带 docfirst，但跟两个通用包一样**自成一体**：不依赖任何 `@godcreator/` 包。
  * 包与包之间的方向，pnpm 严格的 node_modules 能拦住一半——没写进依赖的包 import 不到——但「该不该写进依赖」
  * 没人检查；workflow 包里各目录之间更是谁都能 import 谁，`mdx/` 里写一句 `import "../project/load.ts"`，
  * 编译器不会报错，mdx 格式从此就跟读盘、git 绑在一起。**这个文件补上的就是这两项检查。**
  *
  * 它检查六类约束，每一类失败时的表现各不相同：
  *
- * **一、包与包之间的方向**：通用包互不认识，也不认识 docfirst 的包。
+ * **一、包与包之间的方向**：通用包互不认识，也不认识 docfirst 的包；讲解组件包与 workflow 互不认识。
  * 方向一破，下游的改动就会拖着上游一起发版，而且没有任何别的信号。
  *
- * **二、通用包独立**（下面 `GENERIC_PACKAGES` 那张表）：清单里没有任何 `@godcreator/` 包，源码与产物不 import 它们、
- * 相对 import 不出自己的目录，源码、产物、样式与包的说明里一个 docfirst 字样都没有。docfirst 的名字一旦
- * 写进通用包，哪怕只是一行注释，下一个人就会顺着它把 docfirst 的规矩搬进来。唯一放行的是清单里 `repository.url`
+ * **二、自成一体的包与通用包**：自成一体的包（下面 `SELF_CONTAINED_PACKAGES` 那张表）清单里没有任何 `@godcreator/` 包，
+ * 源码与产物不 import 它们、相对 import 不出自己的目录。通用包（`GENERIC_PACKAGES`，是前一张表的一部分）另外要求
+ * 源码、产物、样式与包的说明里一个 docfirst 字样都没有：docfirst 的名字一旦写进通用包，哪怕只是一行注释，
+ * 下一个人就会顺着它把 docfirst 的规矩搬进来。唯一放行的是清单里 `repository.url`
  * 指向本仓的那一行（`REPOSITORY_URL_LINE`）：仓名是 gwb-docfirst，那一行说的是包放在哪，不是包认识 docfirst。另外各包自己的几条：
  * code-pin 只许 `node:crypto`、不认识文档文本；trajectory-disk 的 `.` 入口零 import、整个包不认识卡文件的写法。
+ *
+ * 为什么分成两张表：讲解组件包的使用方全是 docfirst 站，`./text` 为 docfirst 的机读版生成文字，用法写在 docfirst 插件的说明书里，
+ * 所以它挪到 docfirst 一侧、名字里带上 docfirst，不再受「不认识 docfirst」那条约束；但它仍然不依赖本仓别的包，
+ * 各站单独装它、单独升它，所以「不依赖任何 `@godcreator/` 包」照旧对它检查。理由见轨迹卡「讲解组件包改名 docfirst-explainer」。
  *
  * **三、workflow 里各目录的方向**（下面 `WORKFLOW_DIRS` 那张表），以及除了 `src/fumadocs/` 整个包不认识任何站的宿主；
  * `src/fumadocs/` 只按包名用本包的公开出口，命令行那一侧的代码才不会被带进站的构建。
@@ -30,7 +37,7 @@
  * **五、包不认识工作台插件**：npm 包不许出现任何 `@godcreator/gwb-*`。
  * 包一旦依赖插件，装 docfirst 的人就得连带装上整个桌面工作台生态。
  *
- * **六、explainer-player 的三个入口**：react 是必需 peer；`.` 是客户端组件，`./text` 与 `./seam-graph` 零 import
+ * **六、讲解组件包 docfirst-explainer 的三个入口**：react 是必需 peer；`.` 是客户端组件，`./text` 与 `./seam-graph` 零 import
  * （站在 Node 里生成机读版时加载它们）。
  *
  * **别删这个文件，也别把某一条注释掉「先让门禁通过」。** 它失败的时候，出错的是设计，不是测试。
@@ -59,7 +66,7 @@ const NPM_PACKAGES: Record<string, string> = {
   "code-pin": "@godcreator/code-pin",
   "trajectory-disk": "@godcreator/trajectory-disk",
   "docfirst-workflow": "@godcreator/docfirst-workflow",
-  "explainer-player": "@godcreator/explainer-player",
+  "docfirst-explainer": "@godcreator/docfirst-explainer",
 };
 const PLUGIN_MANIFEST = join(ROOT, "plugins", "docfirst", "package.json");
 
@@ -127,14 +134,14 @@ function distClosureSpecs(dir: string, file: string): string[] {
  * 每个包不许依赖哪几个兄弟包。**列的是禁止的，不是允许的**——理由跟下面目录那张表一样。
  *   code-pin          通用包。判代码变没变只要读取器、旧内容来源两样传进来的东西，谁都不认识
  *   trajectory-disk   通用包。只收盘心加一组卡的中性输入，怎么建模、怎么画；docfirst 卡格式与读卡目录在 workflow
- *   explainer-player  通用包。普通 fumadocs 站也要用；docfirst 的包不用它，只有站用
+ *   docfirst-explainer docfirst 站上用的讲解组件。只有站用，workflow 不用它；它也不认识本仓别的包
  *   docfirst-workflow docfirst 本身：认识钉码与星轨盘，除了站谁都不认识它
  */
 const PACKAGE_FORBIDDEN: Record<string, string[]> = {
-  "code-pin": ["trajectory-disk", "docfirst-workflow", "explainer-player"],
-  "trajectory-disk": ["code-pin", "docfirst-workflow", "explainer-player"],
-  "docfirst-workflow": ["explainer-player"],
-  "explainer-player": ["code-pin", "trajectory-disk", "docfirst-workflow"],
+  "code-pin": ["trajectory-disk", "docfirst-workflow", "docfirst-explainer"],
+  "trajectory-disk": ["code-pin", "docfirst-workflow", "docfirst-explainer"],
+  "docfirst-workflow": ["docfirst-explainer"],
+  "docfirst-explainer": ["code-pin", "trajectory-disk", "docfirst-workflow"],
 };
 
 test("包的方向：清单三类依赖字段里不许出现禁止的兄弟包", () => {
@@ -167,10 +174,13 @@ test("packages/ 下的包一个不多一个不少——加了新包得先想清�
   assert.deepEqual(dirs, Object.keys(PACKAGE_FORBIDDEN).sort());
 });
 
-// ── 二、通用包独立 ────────────────────────────────────────────────────────────
+// ── 二、自成一体的包与通用包 ──────────────────────────────────────────────────
 
-/** 通用包：不认识 docfirst，谁都能单独使用。加一个通用包就加进这张表，下面三条自动管上它 */
-const GENERIC_PACKAGES = ["code-pin", "trajectory-disk", "explainer-player"];
+/** 自成一体的包：不依赖本仓任何别的包，各自单独安装、单独升版。加一个这样的包就加进这张表，下面两条自动管上它 */
+const SELF_CONTAINED_PACKAGES = ["code-pin", "trajectory-disk", "docfirst-explainer"];
+
+/** 通用包：自成一体之外还不认识 docfirst，谁都能单独使用。加一个通用包就加进这张表与上一张表 */
+const GENERIC_PACKAGES = ["code-pin", "trajectory-disk"];
 
 /** 包目录下除 node_modules 以外的全部文件：源码、产物、样式、构建配置、清单 */
 function packageFiles(dir: string): string[] {
@@ -190,17 +200,17 @@ function packageFiles(dir: string): string[] {
 /** 产物里带 import 语句的文件：运行时代码与类型声明 */
 const distCodeOf = (dir: string): string[] => packageFiles(dir).filter((f) => f.includes(`${sep}dist${sep}`) && /\.m?[jt]s$/.test(f));
 
-test("通用包独立：清单三类依赖字段里没有任何 @godcreator/ 包", () => {
+test("自成一体的包：清单三类依赖字段里没有任何 @godcreator/ 包", () => {
   const bad: string[] = [];
-  for (const dir of GENERIC_PACKAGES) {
+  for (const dir of SELF_CONTAINED_PACKAGES) {
     for (const dep of allDepsOf(manifestOf(dir))) if (dep.startsWith("@godcreator/")) bad.push(`${dir} → ${dep}`);
   }
-  assert.deepEqual(bad, [], "通用包得能单独使用。要用别的包，先想清楚它还算不算通用包");
+  assert.deepEqual(bad, [], "自成一体的包得能单独安装。要用别的包，先想清楚它还算不算自成一体");
 });
 
-test("通用包独立：源码与产物不 import 任何 @godcreator/ 包，源码的相对 import 不出自己的 src/", () => {
+test("自成一体的包：源码与产物不 import 任何 @godcreator/ 包，源码的相对 import 不出自己的 src/", () => {
   const bad: string[] = [];
-  for (const dir of GENERIC_PACKAGES) {
+  for (const dir of SELF_CONTAINED_PACKAGES) {
     for (const file of sourcesIn(srcOf(dir))) {
       for (const spec of importSpecsOf(readFileSync(file, "utf8"))) {
         const outside = spec.startsWith(".") && relative(srcOf(dir), resolve(dirname(file), spec)).startsWith("..");
@@ -527,7 +537,7 @@ test("包只发 dist 与样式：skills 与 template 跟着插件走了，包里
     "code-pin": ["dist"],
     "trajectory-disk": ["dist", "styles"],
     "docfirst-workflow": ["dist", "styles"],
-    "explainer-player": ["dist", "styles"],
+    "docfirst-explainer": ["dist", "styles"],
   };
   for (const [dir, files] of Object.entries(FILES)) {
     assert.deepEqual(manifestOf(dir).files, files, `${dir} 的 files`);
@@ -538,7 +548,7 @@ test("包只发 dist 与样式：skills 与 template 跟着插件走了，包里
   for (const path of ["styles/light.css", "styles/term.css", "styles/trajectory.css"]) {
     assert.ok(existsSync(join(PACKAGES, "docfirst-workflow", path)), `workflow 包少了 ${path}`);
   }
-  assert.ok(existsSync(join(PACKAGES, "explainer-player", "styles", "explain.css")), "explainer-player 包少了 styles/explain.css");
+  assert.ok(existsSync(join(PACKAGES, "docfirst-explainer", "styles", "explain.css")), "docfirst-explainer 包少了 styles/explain.css");
 });
 
 // ── 五、包不认识工作台插件 ──────────────────────────────────────────────────
@@ -567,20 +577,20 @@ test("npm 包的源码里一行 @godcreator/gwb-* 都没有", () => {
   }
 });
 
-// ── 六、explainer-player 的三个入口 ─────────────────────────────────────────────────
+// ── 六、docfirst-explainer 的三个入口 ─────────────────────────────────────────────────
 
-test("explainer-player 清单：没有 dependencies，react 只作必需 peer；工作台插件不依赖它", () => {
-  const pkg = manifestOf("explainer-player");
-  assert.deepEqual(Object.keys(pkg.dependencies ?? {}), [], "explainer-player 的 dependencies 得是空的");
-  assert.deepEqual(Object.keys(pkg.peerDependencies ?? {}), ["react"], "explainer-player 的 peer 只有 react");
-  assert.notEqual(pkg.peerDependenciesMeta?.react?.optional, true, "react 是 explainer-player 的必需 peer，不该标可选");
+test("docfirst-explainer 清单：没有 dependencies，react 只作必需 peer；工作台插件不依赖它", () => {
+  const pkg = manifestOf("docfirst-explainer");
+  assert.deepEqual(Object.keys(pkg.dependencies ?? {}), [], "docfirst-explainer 的 dependencies 得是空的");
+  assert.deepEqual(Object.keys(pkg.peerDependencies ?? {}), ["react"], "docfirst-explainer 的 peer 只有 react");
+  assert.notEqual(pkg.peerDependenciesMeta?.react?.optional, true, "react 是 docfirst-explainer 的必需 peer，不该标可选");
   // 反方向：别的包由 PACKAGE_FORBIDDEN 查，工作台插件在这里查
   const plugin = JSON.parse(readFileSync(PLUGIN_MANIFEST, "utf8")) as Pkg;
-  assert.ok(!allDepsOf(plugin).includes(NPM_PACKAGES["explainer-player"]!), "工作台插件依赖了 explainer-player");
+  assert.ok(!allDepsOf(plugin).includes(NPM_PACKAGES["docfirst-explainer"]!), "工作台插件依赖了 docfirst-explainer");
 });
 
-test("explainer-player 的 `.`：客户端指令在头一行，只 import react，没有把 react 或别的模块打包进来", () => {
-  const index = distOf("explainer-player", "index.mjs");
+test("docfirst-explainer 的 `.`：客户端指令在头一行，只 import react，没有把 react 或别的模块打包进来", () => {
+  const index = distOf("docfirst-explainer", "index.mjs");
   assert.match(index, /^"use client";/, "index.mjs 的 use client 指令得留在头一行");
   const specs = importSpecsOf(index);
   assert.ok(specs.some(isReact), "index.mjs 里没有 react 的 import 行——react 被内联进产物了");
@@ -591,18 +601,18 @@ test("explainer-player 的 `.`：客户端指令在头一行，只 import react�
   assert.doesNotMatch(index, /__CLIENT_INTERNALS|react\.production/, "index.mjs 正文里有 react 本体的痕迹");
 });
 
-test("explainer-player 的 `./text`：docfirst.config.mjs 在 Node 里加载它，产物零 import、不带客户端指令", () => {
-  const text = distOf("explainer-player", "text.mjs");
+test("docfirst-explainer 的 `./text`：docfirst.config.mjs 在 Node 里加载它，产物零 import、不带客户端指令", () => {
+  const text = distOf("docfirst-explainer", "text.mjs");
   assert.deepEqual(importSpecsOf(text), []);
   assert.doesNotMatch(text, /^"use client";/);
-  assert.deepEqual(importSpecsOf(readFileSync(join(srcOf("explainer-player"), "text.ts"), "utf8")), [], "text.ts 源码也不许 import");
+  assert.deepEqual(importSpecsOf(readFileSync(join(srcOf("docfirst-explainer"), "text.ts"), "utf8")), [], "text.ts 源码也不许 import");
 });
 
-test("explainer-player 的 `./seam-graph`：接缝图的数据文件在 Node 与客户端都加载它，产物零 import、不带客户端指令，源码只 import 类型", () => {
-  const graph = distOf("explainer-player", "seam-graph.mjs");
+test("docfirst-explainer 的 `./seam-graph`：接缝图的数据文件在 Node 与客户端都加载它，产物零 import、不带客户端指令，源码只 import 类型", () => {
+  const graph = distOf("docfirst-explainer", "seam-graph.mjs");
   assert.deepEqual(importSpecsOf(graph), []);
   assert.doesNotMatch(graph, /^"use client";/);
-  const src = readFileSync(join(srcOf("explainer-player"), "seam-graph.ts"), "utf8");
+  const src = readFileSync(join(srcOf("docfirst-explainer"), "seam-graph.ts"), "utf8");
   for (const line of src.split("\n").filter((l) => /^import\b/.test(l))) {
     assert.match(line, /^import type /, `seam-graph.ts 只许 import 类型：${line}`);
   }

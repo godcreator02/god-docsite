@@ -237,7 +237,7 @@ export const serveCases = [
     status: 200,
     type: 'text/plain; charset=UTF-8',
     result: 'full',
-    body: ['# 讲解播放器 explainer-player (/docs/explainer-player)', '', '', '包 `@godcreator/explainer-player`，源码在……', '……', `# greet (${files.url})`, '……'],
+    body: ['# 讲解组件包 docfirst-explainer (/docs/docfirst-explainer)', '', '', '包 `@godcreator/docfirst-explainer`，源码在……', '……', `# greet (${files.url})`, '……'],
   },
   {
     id: 'other-zone',

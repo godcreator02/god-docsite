@@ -1,9 +1,9 @@
 /**
- * RefKinds 在机读版里变成什么：跟画面读同一份数据（ref-kinds.data.mjs）。每一类目标一段说明（用讲解播放器的 casesText，
+ * RefKinds 在机读版里变成什么：跟画面读同一份数据（ref-kinds.data.mjs）。每一类目标一段说明（用讲解组件包的 casesText，
  * 和画面上 CasePicker 显示的是同一段话），再写它确认后与新写时的记号、check 比什么，以及每种结果的命令行输出与站上显示。
  * 这个文件不 import React，docfirst.config.mjs 引它，命令行也能运行。
  */
-import { casesText } from '@godcreator/explainer-player/text';
+import { casesText } from '@godcreator/docfirst-explainer/text';
 import { files, kinds, outcomeName, siteSummary } from './ref-kinds.data.mjs';
 
 export function RefKinds(_node, { paragraph }) {

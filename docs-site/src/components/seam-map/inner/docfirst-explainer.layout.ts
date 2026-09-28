@@ -1,5 +1,5 @@
 /**
- * 讲解播放器内部接缝图（explainer-player.data.mjs）的坐标与图标。站的画面与机读规则、站的配置在最上，
+ * 讲解组件包内部接缝图（docfirst-explainer.data.mjs）的坐标与图标。站的画面与机读规则、站的配置在最上，
  * 入口、react、./text 一行，三种外壳与零件一行，控制条、颜色名、图标一行，样式表与 fumadocs 在最下。
  * 接缝图的三块在最右一列：站的接缝图文件、定义接缝图、画接缝图从上往下排；画图去样式表的线从最下面绕过去。
  */
@@ -21,10 +21,10 @@ import {
   SwatchBook,
   Waypoints,
 } from 'lucide-react';
-import { cap } from '@godcreator/explainer-player';
-import type { SeamLayout } from '@godcreator/explainer-player';
+import { cap } from '@godcreator/docfirst-explainer';
+import type { SeamLayout } from '@godcreator/docfirst-explainer';
 
-export const explainerPlayerLayout: SeamLayout = {
+export const docfirstExplainerLayout: SeamLayout = {
   view: { w: 1364, h: 780 },
   caps: {
     view: cap(34, 52, 286),

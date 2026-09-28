@@ -6,7 +6,7 @@
  * 内容全在 boundary-rules.data.mjs，这里只有布局与交互；机读版由 boundary-rules.ai.mjs 读同一份数据生成。
  */
 import type { ComponentType, ReactNode, SVGProps } from 'react';
-import { CasePicker, Pane } from '@godcreator/explainer-player';
+import { CasePicker, Pane } from '@godcreator/docfirst-explainer';
 import { Globe, Hash, Layers, Orbit, Package, PanelsTopLeft, Pin, Plug, Puzzle, Workflow } from 'lucide-react';
 import { allowedByKey, allowedEdges, edgeText, nodeById, nodes, parseEdge, rules } from './boundary-rules.data.mjs';
 
@@ -90,7 +90,7 @@ const EDGE_ROUTE: Record<string, Point[]> = {
   'explain~trajectory': [[230, 166], [212, 166], [212, 578], [620, 578], [620, 552]],
   'explain~workflow': [[380, 192], [380, 240]],
   'explain~fumadocs': [[420, 166], [500, 166]],
-  // 通用包独立
+  // 自成一体的包与通用包
   'pin>others': [[410, 552], [460, 610]],
   'trajectory>others': [[600, 552], [600, 610]],
   // workflow 目录方向
@@ -117,7 +117,7 @@ const EDGE_ROUTE: Record<string, Point[]> = {
   'workflow>plugin': [[290, 280], [110, 280], [110, 72]],
   'pin>plugin': [[230, 540], [90, 540], [90, 72]],
   'trajectory>plugin': [[700, 552], [700, 594], [70, 594], [70, 72]],
-  // 讲解播放器的三个入口
+  // 讲解组件包的三个入口
   'explain>others': [[230, 180], [198, 180], [198, 662], [580, 662], [580, 654]],
   'plugin>explain': [[150, 72], [250, 140]],
 };

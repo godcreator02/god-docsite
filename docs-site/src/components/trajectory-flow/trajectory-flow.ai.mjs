@@ -1,10 +1,10 @@
 /**
  * TrajectoryFlow 在机读版里变成什么：跟画面读同一份数据（trajectory-flow.data.mjs）。
- * 每一步的标题与说明用讲解播放器的 stepsText 生成，和画面上 Stepper 显示的是同一段话；
+ * 每一步的标题与说明用讲解组件包的 stepsText 生成，和画面上 Stepper 显示的是同一段话；
  * 流水线每一段在哪个包、例子的卡文件、校验结果、两段命令行输出、模型与树、布局落点、站上 page.tsx 与 loadTrajectory 的原文另写成段落。
  * 这个文件不 import React，docfirst.config.mjs 引它，命令行也能运行。
  */
-import { stepsText } from '@godcreator/explainer-player/text';
+import { stepsText } from '@godcreator/docfirst-explainer/text';
 import {
   cards,
   checks,

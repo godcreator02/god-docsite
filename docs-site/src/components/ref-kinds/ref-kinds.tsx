@@ -6,8 +6,8 @@
  */
 import { useState } from 'react';
 import type { ReactNode } from 'react';
-import { CasePicker, CodeLines, Dot, Pane, Pill, Terminal } from '@godcreator/explainer-player';
-import type { Tone } from '@godcreator/explainer-player';
+import { CasePicker, CodeLines, Dot, Pane, Pill, Terminal } from '@godcreator/docfirst-explainer';
+import type { Tone } from '@godcreator/docfirst-explainer';
 import { toneOfStatus } from '../pin/tone';
 import { files, kinds, outcomeName, siteKindName } from './ref-kinds.data.mjs';
 

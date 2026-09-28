@@ -4,7 +4,7 @@
  * 讲解文字与数据都在 judge.data.mjs，这里只负责画检查阶梯；情况胶囊与每种情况的说明由 CasePicker 显示。
  * 机读版由 pin.ai.mjs 读同一份数据生成。
  */
-import { CasePicker, Pill } from '@godcreator/explainer-player';
+import { CasePicker, Pill } from '@godcreator/docfirst-explainer';
 import { cases, checks } from './judge.data.mjs';
 import { toneOfStatus } from './tone';
 

@@ -7,7 +7,7 @@
  * 目录之间的方向从线上看：marker 与 reference 只往钉码核心连，mdx 与 code 往 marker 连、不连 pinning 与 project，
  * pinning 往两个格式与钉码核心连，cards 只连 marker、node 与星轨盘，cli 往下连其余各处。坐标在 workflow.layout.ts。
  */
-import { defineSeamGraph } from '@godcreator/explainer-player/seam-graph';
+import { defineSeamGraph } from '@godcreator/docfirst-explainer/seam-graph';
 
 export const workflowGraph = defineSeamGraph({
   id: 'workflow',

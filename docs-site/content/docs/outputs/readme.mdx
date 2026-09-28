@@ -26,8 +26,8 @@ pnpm add -D @godcreator/docfirst-workflow
 
 `@godcreator/docfirst-workflow` 是命令行、项目装配与 mdx 格式，子入口 `./fumadocs` 是 fumadocs 适配，把 docfirst 接到 fumadocs 站上；
 通用包钉码核心 `@godcreator/code-pin`（把文字钉在代码上）与星轨盘 `@godcreator/trajectory-disk`（把轨迹卡画成
-项目方向演变的圆盘）随它装上。通用包不认识 docfirst，也能单独使用；讲解播放器 `@godcreator/explainer-player` 也是通用包，
-把一段讲解拆成配说明的帧来播放，站的讲解组件用它，docfirst 自己的包不依赖它。`fumadocs` 与 `react`
+项目方向演变的圆盘）随它装上。通用包不认识 docfirst，也能单独使用。讲解组件包 `@godcreator/docfirst-explainer`
+是 docfirst 站上用的讲解组件，把一段讲解拆成配说明的帧来播放；站要用时自己装，`docfirst-workflow` 不依赖它。`fumadocs` 与 `react`
 是可选的 **peer**，只有 `./fumadocs` 用，用你项目里装的那份；只运行命令行的仓不用装它们。
 
 **站的构建配置里 `serverExternalPackages` 必须留空**：`@godcreator/docfirst-workflow` 的 `./fumadocs` 下同时有服务端代码与客户端

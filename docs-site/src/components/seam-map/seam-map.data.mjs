@@ -1,13 +1,13 @@
 /**
  * 全局接缝图的全部内容：首页的 <SeamMap /> 画的就是它，接缝的正本就在这里。
  * 模块按包分：docfirst 用到的每个 npm 包（通用包与 docfirst 自己的包）与工作台插件各一个虚线框，框里的方块是能力；
- * 使用方的站、使用方的仓、fumadocs 本体在框外。通用包 explainer-player 跟 docfirst 的包互不认识，不在这张图里。
+ * 使用方的站、使用方的仓、fumadocs 本体在框外。讲解组件包 docfirst-explainer 只有站用，workflow 与工作台插件都不依赖它，它也不依赖别的包，不在这张图里。
  * 每条接缝写明两端的能力、接口、是不是约定（没有代码接口，只靠文件名、目录名、配置键对上）、经代码调用还是经磁盘上的文件。
  * 坐标不在这里，在 system.layout.ts：这份只描述系统是什么样。各包内部的接缝图在 inner/ 下。
  */
-import { defineSeamGraph } from '@godcreator/explainer-player/seam-graph';
+import { defineSeamGraph } from '@godcreator/docfirst-explainer/seam-graph';
 
-/** @type {import('@godcreator/explainer-player/seam-graph').SeamModule[]} */
+/** @type {import('@godcreator/docfirst-explainer/seam-graph').SeamModule[]} */
 const modules = [
   {
     id: 'fumadocs',
@@ -49,7 +49,7 @@ const modules = [
     pkg: '@godcreator/code-pin',
     role: 'blue',
     outside: false,
-    blurb: '通用包，不认识 docfirst，谁都能单独拿走用：把文字钉在代码上。只认目标与记录，核对出被钉的代码变没变、确认时算出新记录；零依赖，只用 node:crypto，不接触文档文本、不读文件、不启动子进程，读取器与旧内容来源从构造参数传进来。docfirst 用它判定每处钉码的状态。',
+    blurb: '通用包，不认识 docfirst，谁都能单独使用：把文字钉在代码上。只认目标与记录，核对出被钉的代码变没变、确认时算出新记录；零依赖，只用 node:crypto，不接触文档文本、不读文件、不启动子进程，读取器与旧内容来源从构造参数传进来。docfirst 用它判定每处钉码的状态。',
     caps: [
       { id: 'types', name: '目标与记录', ident: 'types.ts' },
       { id: 'pinner', name: '核对与确认', ident: 'createPinner' },
@@ -62,7 +62,7 @@ const modules = [
     pkg: '@godcreator/trajectory-disk',
     role: 'violet',
     outside: false,
-    blurb: '通用包星轨盘，不认识 docfirst，谁都能单独拿走用：把一组带时间与取代、转向关系的卡画成项目方向演变的圆盘。主入口只收盘心加一组卡的中性输入，buildModel 建模、布局，另有星轨盘组件 ./disk 与样式 ./star.css；卡从哪儿来、怎么写、怎么校验归调用方。主入口的产物里一条 import 都没有。docfirst 把轨迹卡换成它的中性输入。',
+    blurb: '通用包星轨盘，不认识 docfirst，谁都能单独使用：把一组带时间与取代、转向关系的卡画成项目方向演变的圆盘。主入口只收盘心加一组卡的中性输入，buildModel 建模、布局，另有星轨盘组件 ./disk 与样式 ./star.css；卡从哪儿来、怎么写、怎么校验归调用方。主入口的产物里一条 import 都没有。docfirst 把轨迹卡换成它的中性输入。',
     caps: [
       { id: 'model', name: '中性输入与建模', ident: 'buildModel' },
       { id: 'layout', name: '布局', ident: 'RingsLayout' },
@@ -116,7 +116,7 @@ const modules = [
 
 /**
  * 从系统外面进来的入口，画成灰色箭头，不编号、不算接缝。to 是进来的那个能力或模块。
- * @type {import('@godcreator/explainer-player/seam-graph').SeamEntry[]}
+ * @type {import('@godcreator/docfirst-explainer/seam-graph').SeamEntry[]}
  */
 const entries = [
   { id: 'agent', name: 'agent · 工作台命令总线', to: 'plugin' },
@@ -127,7 +127,7 @@ const entries = [
 /**
  * 接缝。a、b 是两端的能力 id；via 为 code 是代码调用（实线），disk 是读写磁盘上的文件（虚线）。
  * name 与 text 显示在浮层里，text 写连接谁、交换什么、由谁负责。
- * @type {import('@godcreator/explainer-player/seam-graph').SeamInput[]}
+ * @type {import('@godcreator/docfirst-explainer/seam-graph').SeamInput[]}
  */
 const seams = [
   {

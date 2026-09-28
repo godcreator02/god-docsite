@@ -3,7 +3,7 @@
  * MdBuild 每一步一段，再逐行列出示例正本与最后写出的 md；MdServe 每种请求一段，写命令、proxy 怎么改写、走哪条路由、返回什么。
  * 这个文件不 import React，docfirst.config.mjs 引它，命令行也能运行。
  */
-import { casesText, stepsText } from '@godcreator/explainer-player/text';
+import { casesText, stepsText } from '@godcreator/docfirst-explainer/text';
 import { buildSteps, componentCases, files, mdFile, serveCases, sourceLines } from './md-output.data.mjs';
 
 /** 逐行列出，每行前面带行号与「│」：行首不会是 #、```、> 这类会被当成 markdown 结构的字符 */

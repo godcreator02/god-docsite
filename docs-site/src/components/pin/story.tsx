@@ -4,7 +4,7 @@
  * 讲解文字与每一步的数据都在 story.data.mjs，这里只负责画；步骤控制条、每一步的标题与说明由 Stepper 显示。
  * 机读版由 pin.ai.mjs 读同一份数据生成。
  */
-import { CodeLines, Diff, Dot, Pane, Pill, Stepper, Terminal } from '@godcreator/explainer-player';
+import { CodeLines, Diff, Dot, Pane, Pill, Stepper, Terminal } from '@godcreator/docfirst-explainer';
 import { files, legend, steps } from './story.data.mjs';
 import { toneOfStatus } from './tone';
 

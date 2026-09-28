@@ -1,9 +1,9 @@
 /**
  * PinGlance 在机读版里变成什么：跟画面读同一份数据（glance.data.mjs），先写文档里那行记号，
- * 再每种情况一段（标题与说明用讲解播放器的 casesText，和画面上 CasePicker 显示的是同一段话）加上 check 的输出。
+ * 再每种情况一段（标题与说明用讲解组件包的 casesText，和画面上 CasePicker 显示的是同一段话）加上 check 的输出。
  * 这个文件不 import React，docfirst.config.mjs 引它，命令行也能运行。
  */
-import { casesText } from '@godcreator/explainer-player/text';
+import { casesText } from '@godcreator/docfirst-explainer/text';
 import { cases, files, marker, statusName } from './glance.data.mjs';
 
 export function PinGlance(_node, { paragraph }) {

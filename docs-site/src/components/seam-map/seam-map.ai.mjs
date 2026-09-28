@@ -1,15 +1,15 @@
 /**
- * SeamMap 在机读版里变成什么：跟画面读同一份内容，交给讲解播放器的 seamGraphText 写成一段段文字，每段包成一个段落。
+ * SeamMap 在机读版里变成什么：跟画面读同一份内容，交给讲解组件包的 seamGraphText 写成一段段文字，每段包成一个段落。
  * 带 module 属性时写的是那个包的内部图。
  * 这个文件不 import React，docfirst.config.mjs 引它，命令行也能运行。
  */
-import { seamGraphText } from '@godcreator/explainer-player/seam-graph';
+import { seamGraphText } from '@godcreator/docfirst-explainer/seam-graph';
 import { systemGraph } from './seam-map.data.mjs';
 import { pinGraph } from './inner/pin.data.mjs';
 import { trajectoryGraph } from './inner/trajectory.data.mjs';
 import { workflowGraph } from './inner/workflow.data.mjs';
 import { fumadocsGraph } from './inner/fumadocs.data.mjs';
-import { explainerPlayerGraph } from './inner/explainer-player.data.mjs';
+import { docfirstExplainerGraph } from './inner/docfirst-explainer.data.mjs';
 import { pluginGraph } from './inner/plugin.data.mjs';
 
 const INNER = {
@@ -17,7 +17,7 @@ const INNER = {
   trajectory: trajectoryGraph,
   workflow: workflowGraph,
   fumadocs: fumadocsGraph,
-  'explainer-player': explainerPlayerGraph,
+  'docfirst-explainer': docfirstExplainerGraph,
   plugin: pluginGraph,
 };
 

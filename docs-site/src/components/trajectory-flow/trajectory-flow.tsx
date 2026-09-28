@@ -6,7 +6,7 @@
  */
 import { useState } from 'react';
 import type { JSX } from 'react';
-import { CodeLines, Dot, Pane, Pill, Stepper, Terminal } from '@godcreator/explainer-player';
+import { CodeLines, Dot, Pane, Pill, Stepper, Terminal } from '@godcreator/docfirst-explainer';
 import {
   cardKeys,
   cardOf,

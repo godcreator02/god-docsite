@@ -15,7 +15,7 @@ const NAMES: Record<string, string> = {
   "code-pin": "@godcreator/code-pin",
   "trajectory-disk": "@godcreator/trajectory-disk",
   "docfirst-workflow": "@godcreator/docfirst-workflow",
-  "explainer-player": "@godcreator/explainer-player",
+  "docfirst-explainer": "@godcreator/docfirst-explainer",
 };
 
 // 这条检查的是版本号的形状，不是那个具体的数——把版本号写死在测试里，

@@ -13,11 +13,12 @@ description: 改这个仓的代码时，东西放在哪、提交前要通过哪�
 `plugins/docfirst/` 是[工作台插件](/docs/plugin) `@godcreator/gwb-docfirst-workflow`：建站命令与说明书。
 `packages/` 下每个目录一个 npm 包：
 
-{/* tree dir="../packages" depth="1" hash="798f01805adf" */}
+{/* tree dir="../packages" depth="1" hash="942f2fe6808b" */}
 
-通用包不认识 docfirst，谁都能单独使用：[钉码核心](/docs/pin) `code-pin`、[星轨盘](/docs/trajectory) `trajectory-disk`、
-讲解播放器 [`explainer-player`](/docs/explainer-player)。docfirst 自己的包是 `docfirst-workflow`：[命令行与项目](/docs/workflow)，
-接到 fumadocs 站上的部分在它的子入口 `./fumadocs`（[fumadocs 适配](/docs/fumadocs)）。谁能依赖谁见[测试与边界](/maintain/testing)。
+通用包不认识 docfirst，谁都能单独使用：[钉码核心](/docs/pin) `code-pin`、[星轨盘](/docs/trajectory) `trajectory-disk`。
+docfirst 自己的包有两个：`docfirst-workflow` 是[命令行与项目](/docs/workflow)，
+接到 fumadocs 站上的部分在它的子入口 `./fumadocs`（[fumadocs 适配](/docs/fumadocs)）；
+[讲解组件包](/docs/docfirst-explainer) `docfirst-explainer` 是 docfirst 站上用的讲解组件，只有站用。谁能依赖谁见[测试与边界](/maintain/testing)。
 
 站也是工作区成员：它用 `workspace:*` 装工作区里的包，钉的是工作区里的实际源码，所以仓里不另留示例项目。
 devkit 的建仓模板不收文档站，这是本仓有意的例外，理由见轨迹卡

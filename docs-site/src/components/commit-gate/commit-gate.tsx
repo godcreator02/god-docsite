@@ -5,8 +5,8 @@
  * 机读版由 commit-gate.ai.mjs 读同一份数据生成。
  */
 import type { JSX } from 'react';
-import { Diff, Dot, Pane, Pill, Stepper, Terminal } from '@godcreator/explainer-player';
-import type { TerminalLine, Tone } from '@godcreator/explainer-player';
+import { Diff, Dot, Pane, Pill, Stepper, Terminal } from '@godcreator/docfirst-explainer';
+import type { TerminalLine, Tone } from '@godcreator/docfirst-explainer';
 import { files, gateLabel, gateNote, notRed, redSources, steps } from './commit-gate.data.mjs';
 
 type Step = (typeof steps)[number];

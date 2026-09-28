@@ -1,6 +1,6 @@
 /*
  * RefKinds 这一页自己的画面：文档卡片里的记号、比什么的对照行、结果按钮、站上显示的几种样子。
- * 外壳、卡片、终端、胶囊、代码行与颜色变量（--dx-*）由 @godcreator/explainer-player 提供，这些都画在它的 .dx 根元素里；
+ * 外壳、卡片、终端、胶囊、代码行与颜色变量（--dx-*）由 @godcreator/docfirst-explainer 提供，这些都画在它的 .dx 根元素里；
  * 颜色只从 data-tone / data-role 给出的 --dx-c 调淡。
  */
 

@@ -1,10 +1,10 @@
 /**
  * CommitGate 在机读版里变成什么：跟画面读同一份数据（commit-gate.data.mjs）。
- * 每一步的标题与说明用讲解播放器的 stepsText 生成，和画面上 Stepper 显示的是同一段话；
+ * 每一步的标题与说明用讲解组件包的 stepsText 生成，和画面上 Stepper 显示的是同一段话；
  * 这一页自己的内容（git status、命令与输出、退出码、判定、门禁、红的几类）另写成段落。
  * 这个文件不 import React，docfirst.config.mjs 引它，命令行也能运行。
  */
-import { stepsText } from '@godcreator/explainer-player/text';
+import { stepsText } from '@godcreator/docfirst-explainer/text';
 import { files, gateLabel, gateNote, notRed, redSources, steps } from './commit-gate.data.mjs';
 
 const answerText = { yes: '是', no: '否', skip: '不问' };

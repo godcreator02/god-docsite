@@ -3,8 +3,8 @@
  * 左列往下是建模，右列往下是组件、画布、布局；react 在组件右边。
  */
 import { Atom, Network, Orbit, Palette, Plug, Radar, Workflow } from 'lucide-react';
-import { cap } from '@godcreator/explainer-player';
-import type { SeamLayout } from '@godcreator/explainer-player';
+import { cap } from '@godcreator/docfirst-explainer';
+import type { SeamLayout } from '@godcreator/docfirst-explainer';
 
 export const trajectoryLayout: SeamLayout = {
   view: { w: 1100, h: 600 },

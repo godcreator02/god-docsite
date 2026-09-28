@@ -11,12 +11,12 @@ importers:
       '@godcreator/code-pin':
         specifier: workspace:*
         version: link:packages/code-pin
+      '@godcreator/docfirst-explainer':
+        specifier: workspace:*
+        version: link:packages/docfirst-explainer
       '@godcreator/docfirst-workflow':
         specifier: workspace:*
         version: link:packages/docfirst-workflow
-      '@godcreator/explainer-player':
-        specifier: workspace:*
-        version: link:packages/explainer-player
       '@godcreator/trajectory-disk':
         specifier: workspace:*
         version: link:packages/trajectory-disk
@@ -47,12 +47,12 @@ importers:
 
   docs-site:
     dependencies:
+      '@godcreator/docfirst-explainer':
+        specifier: workspace:*
+        version: link:../packages/docfirst-explainer
       '@godcreator/docfirst-workflow':
         specifier: workspace:*
         version: link:../packages/docfirst-workflow
-      '@godcreator/explainer-player':
-        specifier: workspace:*
-        version: link:../packages/explainer-player
       cn:
         specifier: ^0.3.0
         version: 0.3.3
@@ -105,6 +105,15 @@ importers:
 
   packages/code-pin: {}
 
+  packages/docfirst-explainer:
+    devDependencies:
+      '@types/react':
+        specifier: ^19.3.0
+        version: 19.3.0
+      react:
+        specifier: ^19.3.0
+        version: 19.3.0
+
   packages/docfirst-workflow:
     dependencies:
       '@godcreator/code-pin':
@@ -144,15 +153,6 @@ importers:
       fumadocs-ui:
         specifier: npm:@fumadocs/base-ui@16.15.14
         version: '@fumadocs/base-ui@16.15.14(@types/mdx@2.0.14)(@types/react@19.3.0)(fumadocs-core@16.15.14(@mdx-js/mdx@3.1.1)(@types/estree-jsx@1.0.5)(@types/hast@3.0.5)(@types/mdast@4.0.4)(@types/react@19.3.0)(lucide-react@1.48.0(react@19.3.0))(next@16.3.5(@types/node@26.4.1)(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(zod@4.6.5))(next@16.3.5(@types/node@26.4.1)(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(react-dom@19.3.0(react@19.3.0))(react@19.3.0)'
-      react:
-        specifier: ^19.3.0
-        version: 19.3.0
-
-  packages/explainer-player:
-    devDependencies:
-      '@types/react':
-        specifier: ^19.3.0
-        version: 19.3.0
       react:
         specifier: ^19.3.0
         version: 19.3.0

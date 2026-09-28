@@ -1,6 +1,6 @@
 /*
  * MdBuild、MdServe 自己的画面：md 还没生成时的占位，以及一个请求经过的几处（请求、proxy、路由、返回）。
- * 外壳、卡片、终端、胶囊、代码行与颜色变量（--dx-*）由 @godcreator/explainer-player 提供。
+ * 外壳、卡片、终端、胶囊、代码行与颜色变量（--dx-*）由 @godcreator/docfirst-explainer 提供。
  */
 
 .mo-empty { font-size: 13px; color: var(--dx-dim); }
