@@ -8,11 +8,14 @@ description: 把 @godcreator/explainer-player 改名为 @godcreator/docfirst-exp
 1. **本仓**
    - [x] 改名：包目录与包名改成 `packages/docfirst-explainer` / `@godcreator/docfirst-explainer`，从 0.1.0 开始；
      全仓引用、边界测试、讲它的页、插件说明书跟着改，插件升 0.9.10
-   - [ ] 发版：`@godcreator/docfirst-explainer` 0.1.0 与插件 0.9.10（发版由主会话做）
-2. [ ] **使用方切到新包**：内核站、界面插件站、块笔记站、academic-deck 站、plecs-studio 站
-3. [ ] **两条反馈改包名**：gwb-dsh 与 gwb-unit-folder 站里 `…seam-map-in-player.mdx` 两条反馈，指的包名改成新名字
-4. [ ] **default 升级 docfirst 插件**：插件说明书里的包名跟着新版本到 default
-5. [ ] **旧包下架**：用户在 gitea 上删掉 `@godcreator/explainer-player`
+   - [x] 发版：`@godcreator/docfirst-explainer` 0.1.0 与插件 0.9.10 已发
+2. **使用方切到新包**
+   - [x] 内核站、界面插件站、块笔记站
+   - [ ] academic-deck 站、plecs-studio 站：两个站引用它的文件都是别的会话还没提交的改动，没有代切；
+     已各投一条反馈 `content/future/inbox/2026-09-28-gwb-docfirst-explainer-renamed.mdx`，等它们提交时换成新包名
+3. [x] **两条反馈改包名**：gwb-dsh 与 gwb-unit-folder 站里 `…seam-map-in-player.mdx` 两条反馈，指的包名已改成新名字
+4. [x] **default 升级 docfirst 插件**：default 已是 0.9.10
+5. [ ] **旧包下架**：第 2 项全部做完后，用户在 gitea 上删掉 `@godcreator/explainer-player`；提前删，还写旧名的站装不上依赖
 
 ## 为什么改
 
