@@ -115,7 +115,7 @@ export class HubLayer implements StarLayer {
     this.hubStatus = text(0, 0, "", "hub-s", { "text-anchor": "middle" }, this.hubG);
   }
 
-  /** hover 放大补间步进（tick() 补间循环专属，不挂每帧重摆的 place()）：根节点同款
+  /** hover 放大补间步进（tick() 补间循环专属，不放进每帧调用的 place()）：根节点同款
    * 1 + 0.4×hv 手感，趋近目标态，返回"还在动"供 tick 判定要不要续帧。 */
   stepTweens(): boolean {
     const t = this.isHubHovered ? 1 : 0;

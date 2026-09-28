@@ -271,7 +271,7 @@ export class StarStage {
     this.fit();
   }
 
-  /** 手感参数改一项：手感级改完重建鱼眼映射重摆；世界尺度级走 rebake。语义值原样记住，
+  /** 手感参数改一项：手感级改完重建鱼眼映射、重新调用 place()；世界尺度级走 rebake。语义值原样记住，
    * 下一轮数据重建照这份灌。 */
   applySetting(key: keyof TrajectorySettings, value: number): void {
     this.settings = { ...this.settings, [key]: value };
@@ -314,7 +314,7 @@ export class StarStage {
     this.place();
   }
 
-  /** 重刷链：着色 + 命中统计 + 重建映射重摆。切主题、切筛选、搜索输入共用这一条。 */
+  /** 重新绘制的调用链：着色 + 命中统计 + 重建映射、重新调用 place()。切主题、切筛选、搜索输入共用这一条。 */
   private repaint(): void {
     const layout = this.layout;
     if (!layout) return;
@@ -330,7 +330,7 @@ export class StarStage {
     this.milestonesLayer.recolor(this.theme);
     this.host.onHits(hit, this.cardsLayer.getNodeEls().length);
     layout.buildMap();
-    /* buildAll 里首次走到这儿时视图还没适配（宽恒 0），重摆交给紧跟着的 fit */
+    /* buildAll 里首次走到这儿时视图还没适配（宽恒 0），place() 交给紧跟着的 fit */
     if (this.camera.width > 0) this.place();
   }
 
@@ -356,7 +356,7 @@ export class StarStage {
 
   /* ================= 视图：画布铺满容器 ================= */
 
-  /** 按容器尺寸重定画布宽高并重摆（首帧与容器尺寸变化共用）：相机侧量尺寸、定变换，
+  /** 按容器尺寸重定画布宽高并重新调用 place()（首帧与容器尺寸变化共用）：相机侧量尺寸、定变换，
    * place 是视图侧动作，相机不认识，包装在这层调。日期轨的刻度由日期轨自己跟着轨宽重排。 */
   fit(): void {
     if (!this.svg) return;
@@ -373,7 +373,7 @@ export class StarStage {
     this.rafId = requestAnimationFrame(() => this.tick());
   }
 
-  /** 一帧：焦点日 / 鱼眼强度 / 节点 hover / 视图各自趋近目标，重建映射后重摆。 */
+  /** 一帧：焦点日 / 鱼眼强度 / 节点 hover / 视图各自趋近目标，重建映射后重新调用 place()。 */
   private tick(): void {
     this.rafId = null;
     const layout = this.layout;
@@ -507,9 +507,9 @@ export class StarStage {
     this.kick();
   }
 
-  /* ================= place：按当前 (f, s) 重摆全部半径依赖元素 ================= */
+  /* ================= place：按当前 (f, s) 重新定位全部随半径变化的元素 ================= */
 
-  /** 每帧重摆总调度：节点先摆（填 framePos），边与树名随后取用；标签报名沿途投递、最后统一仲裁。 */
+  /** 每帧重新定位的总调度：节点先定位（填 framePos），边与树名随后取用；标签报名沿途投递、最后统一仲裁。 */
   private place(): void {
     const layout = this.layout;
     if (!layout || !this.svg || this.camera.width <= 0) return;

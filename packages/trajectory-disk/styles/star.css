@@ -711,7 +711,7 @@
   pointer-events: none;
 }
 
-/* ---------- 关系边段落（remarkTrajectoryLinks 打标） ---------- */
+/* ---------- 关系边段落（remarkTrajectoryLinks 转成的带 data-kind 的 div） ---------- */
 /* 两色跟盘上的连线同源：取代金黄、转向青。卡页正文亮暗共用一档，取亮色板那份——
    深一档，两个底上都够看 */
 .trajectory-edge {

@@ -74,7 +74,7 @@ export function applyStoredSettings(layout: RingsLayout, settings: TrajectorySet
   });
 }
 
-/** 一条滑杆：手感级（tune：改完重建鱼眼映射重摆即可）或世界尺度级
+/** 一条滑杆：手感级（tune：改完重建鱼眼映射、重新调用 place() 即可）或世界尺度级
  * （patch：configure 落参重烘焙，视图侧半径依赖 DOM 全刷 + 重适配）。 */
 export type SettingItem = {
   key: keyof TrajectorySettings;

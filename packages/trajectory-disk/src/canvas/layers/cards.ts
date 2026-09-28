@@ -5,7 +5,7 @@
  * placeEdges/placeNames 随后取用），也是跨日弧向避让角偏（f.dodge，编排者从
  * chains 算出后灌入）的消费者。
  *
- * hover 放大补间（节点逐个进出各自趋近）不挂 place() 的每帧重摆——它是
+ * hover 放大补间（节点逐个进出各自趋近）不放进每帧调用的 place()——它是
  * tick() 补间循环专属的一段状态步进，收进 stepTweens()，读当前悬停态走
  * BuildCtx.getHoveredCard()（层不持编排者引用）。 */
 
@@ -82,7 +82,7 @@ export class CardsLayer implements StarLayer {
     return this.nodeEls;
   }
 
-  /** hover 放大补间步进（tick() 补间循环专属，不挂每帧重摆的 place()）：节点
+  /** hover 放大补间步进（tick() 补间循环专属，不放进每帧调用的 place()）：节点
    * 逐个进出各自趋近，返回"还在动"供 tick 判定要不要续帧。 */
   stepTweens(): boolean {
     let animating = false;

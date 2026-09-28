@@ -599,7 +599,7 @@ export class RingsLayout {
     };
   }
 
-  /** 半径链 + 角度装箱全量重算。改 hubR / gapFree / gapWide 后重跑，幂等。 */
+  /** 半径链 + 角度装箱全量重算。改 hubR / gapFree / gapWide 后再调用一次，幂等。 */
   bake(): void {
     this.buildEff(); // 折算表先行：radiusDay 全下游都吃有效标度
     const { byId, isolated, dayMax } = this.model;
@@ -782,7 +782,7 @@ export class RingsLayout {
     );
   }
 
-  /** 鱼眼作用于 [innerR, maxR]，内盘恒等。改焦点日 / 强度 / 压缩占比后重跑。 */
+  /** 鱼眼作用于 [innerR, maxR]，内盘恒等。改焦点日 / 强度 / 压缩占比后再调用一次。 */
   buildMap(): void {
     const span = this.maxR - this.innerR;
     const rA = Math.max(
