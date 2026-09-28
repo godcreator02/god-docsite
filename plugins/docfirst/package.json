@@ -1,10 +1,10 @@
 {
   "name": "@godcreator/gwb-docfirst-workflow",
-  "version": "0.9.9",
+  "version": "0.9.10",
   "author": {
     "name": "godcreator"
   },
-  "description": "docfirst 插件：两条建站命令——docfirst.create 建接好 docfirst 的文档站（现状、轨迹、未来三个区），docfirst.create-plain 建不接 docfirst 的普通 fumadocs 站；都运行官方脚手架 create-fumadocs-app、应用本机约定（允许 esbuild 运行安装脚本、端口与只监听本机、Sarasa Mono SC 字体、站名、不提交 next dev 生成的 agent 提示文件、每页 md 声明 UTF-8）并写入文件；注册 5 份说明书（讲 docfirst 的 3 份、讲文档站怎么写成讲清原理的网页的 docs-site 1 份、文档与注释治理的 docs-governance 1 份）；对本仓 packages/ 下的 npm 包（通用包 code-pin、trajectory-disk、explainer-player 与 docfirst 自己的 docfirst-workflow）零依赖，核对、确认与渲染在仓里运行。服务无；skill 5 份；命令 2 条。",
+  "description": "docfirst 插件：两条建站命令——docfirst.create 建接好 docfirst 的文档站（现状、轨迹、未来三个区），docfirst.create-plain 建不接 docfirst 的普通 fumadocs 站；都运行官方脚手架 create-fumadocs-app、应用本机约定（允许 esbuild 运行安装脚本、端口与只监听本机、Sarasa Mono SC 字体、站名、不提交 next dev 生成的 agent 提示文件、每页 md 声明 UTF-8）并写入文件；注册 5 份说明书（讲 docfirst 的 3 份、讲文档站怎么写成讲清原理的网页的 docs-site 1 份、文档与注释治理的 docs-governance 1 份）；对本仓 packages/ 下的 npm 包（通用包 code-pin、trajectory-disk 与 docfirst 自己的 docfirst-workflow、讲解组件包 docfirst-explainer）零依赖，核对、确认与渲染在仓里运行。服务无；skill 5 份；命令 2 条。",
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

@@ -8,7 +8,7 @@ description: 要给一个仓建一个接好 docfirst 分区的文档站（`docfi
 本插件有**两条命令**：`docfirst.create` 给一个仓建一个接好 docfirst 分区的文档站，`docfirst.create-plain`
 建一个不接 docfirst 的普通 fumadocs 站。除此之外它只做一件事：把本插件带的其余说明书注册给你读。
 
-**它对本仓发布的 npm 包零依赖**（通用包 `code-pin`、`trajectory-disk`、`explainer-player`，docfirst 自己的 `docfirst-workflow`），装了本插件不必再装什么包。判据是「这件事在哪儿发生」：
+**它对本仓发布的 npm 包零依赖**（通用包 `code-pin`、`trajectory-disk`，docfirst 自己的 `docfirst-workflow` 与讲解组件包 `docfirst-explainer`），装了本插件不必再装什么包。判据是「这件事在哪儿发生」：
 核对 / 确认 / 渲染要在**仓**里发生（那是门禁与站构建要运行的东西），你自己 `cd` 过去运行；只在你手上发生一次的
 （读说明书、给一个仓建一次站）才归插件。**插件不转发命令行。**
 
