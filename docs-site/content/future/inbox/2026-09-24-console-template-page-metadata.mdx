@@ -14,3 +14,7 @@ docfirst: none
 - 没有 `getPage` 的整页路由（比如轨迹区的星轨盘）写一句静态的 `export const metadata = { title: '轨迹' }`
 
 期望：模板带上这几处，之后新建的站自带标题；已经建好的站由各仓自己补。
+
+2026-09-28 补充现状（总控台）：上面说的 `template/attach/` 已经没有了。建站现在是本插件的 `docfirst.create` / `docfirst.create-plain`：
+先运行官方脚手架 `create-fumadocs-app`，再在输出上按本机约定改文件。`plugins/docfirst/src/` 里搜不到 `metadata` 与 `generateMetadata`，
+这条还没处理，要改的地方就是那一步「在脚手架输出上改文件」。gwb-docs-site 插件已退役，它那边同一条反馈已删，只留这一条。
