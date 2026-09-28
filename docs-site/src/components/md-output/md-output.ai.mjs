@@ -17,7 +17,7 @@ export function MdBuild(_node, { paragraph }) {
   return [
     ...stepsText(buildSteps).map((text) => paragraph(text)),
     paragraph(`示例正本 ${files.page}（最后 ${NOTE_LINES} 行是一个 Note 组件，内容「${NOTE_TEXT}」）：`),
-    // 站测试断言机读版里没有组件标签（没压平就会留下），所以那几行不照原样列出
+    // 站测试断言机读版里没有组件标签（没转成机读文字就会留下），所以那几行不照原样列出
     paragraph(numbered(sourceLines.slice(0, -NOTE_LINES))),
     paragraph(`最后写出的 md（${files.url} 的 content.md）：`),
     paragraph(numbered(mdFile)),

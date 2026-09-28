@@ -1,5 +1,5 @@
 /**
- * 页面那一侧的接线：remark 插件确实加上了、meta 白名单确实放行了、状态确实写到了 <pre> 上、
+ * 页面那一侧的接入：remark 插件确实加上了、meta 白名单确实放行了、状态确实写到了 <pre> 上、
  * postprocess 确实带着我们的回调。
  * 不启动 Next：fumadocs-mdx/node 的 register 把它的 loader 注册进 Node，import 一篇 .mdx 走的就是站构建时的同一条处理链。
  * 只断言、不跟命令行比：算状态的是同一个钉码编排（project.pinning），比出来只能相等；跨调用方的比对要启动站后抓取 .md 路由。
@@ -34,7 +34,7 @@ const components = Object.fromEntries(
   ]),
 );
 
-/** 一篇文档：编译产物 + 页面 html + 命令行那头算出来的清单 */
+/** 一篇文档：编译产物 + 页面 html + 命令行那边算出来的清单 */
 async function pageOf(doc) {
   // ?macro_id= 告诉 loader 这篇属于哪个集合（写集合的文件 + 变量名）——集合的 mdxOptions 与
   // postprocess（processed markdown）才会用上。进 check 的只有现状区，本站的现状区只有 content/docs 一个集合
@@ -103,22 +103,22 @@ test("组件由 React 表画，没有裸 JSX 漏到页面", () => {
     for (const name of componentNames) {
       assert.doesNotMatch(page.html, new RegExp(`<${name}[\\s>]`), `${doc}：<${name}> 漏成了裸标签`);
     }
-    // 正文里反引号包着的 `<Files>` 是在讲它，不算；带属性的真标签才是没压平
-    assert.doesNotMatch(page.mod._markdown, /<Files className=|<Folder name=|<File name=/, `${doc}：文件树没被压平`);
+    // 正文里反引号包着的 `<Files>` 是在讲它，不算；带属性的真标签才是没转成机读文字
+    assert.doesNotMatch(page.mod._markdown, /<Files className=|<Folder name=|<File name=/, `${doc}：文件树没转成机读文字`);
   }
   const all = [...pages.values()].map((p) => p.html).join("");
   assert.match(all, /data-component="Note"/);
   assert.match(all, /data-component="Tab"/);
 });
 
-test("模块带着 _markdown，且是我们的回调出的：来源行在、组件被压平", () => {
+test("模块带着 _markdown，且是我们的回调出的：来源行在、组件已转成机读文字", () => {
   for (const [doc, page] of pages) {
     assert.equal(typeof page.mod._markdown, "string", `${doc}：postprocess.includeProcessedMarkdown 没开`);
     for (const item of page.listing.items) {
       const where = whereOf(item);
-      assert.ok(page.mod._markdown.includes(`<!-- 来源 ${where} · `), `${doc}：来源行不在，说明序列化回调没挂上`);
+      assert.ok(page.mod._markdown.includes(`<!-- 来源 ${where} · `), `${doc}：来源行不在，说明序列化回调没注册上`);
     }
-    assert.doesNotMatch(page.mod._markdown, /<Tabs|<Note|<Tab[\s>]/, `${doc}：组件没被名册压平`);
+    assert.doesNotMatch(page.mod._markdown, /<Tabs|<Note|<Tab[\s>]/, `${doc}：组件没按名册转成机读文字`);
     assert.doesNotMatch(page.mod._markdown, /\[!code /, `${doc}：机读版不该带 shiki 的 diff 标记`);
   }
 });
@@ -128,15 +128,15 @@ test("这个站自己的文档全是绿的：写下的引用跟源码没脱节",
     assert.deepEqual(
       page.listing.items.map((i) => i.status),
       page.listing.items.map(() => "fresh"),
-      `${doc} 有引用不是新鲜的——跑 pnpm docfirst check 看看`,
+      `${doc} 有引用不是新鲜的——运行 pnpm docfirst check 看看`,
     );
   }
 });
 
-test("讲解组件的源码也进现状区，里面挂的引用全是绿的", () => {
+test("讲解组件的源码也进现状区，里面写的引用全是绿的", () => {
   assert.ok(COMPONENT_FILES.every((file) => file.startsWith("src/components/")), `现状区里有 src/components/ 之外的代码文件：${COMPONENT_FILES.join("、")}`);
   for (const file of COMPONENT_FILES) {
     const { items } = project.pinning.checkDoc(file, project.read(file));
-    assert.deepEqual(items.map((i) => i.status), items.map(() => "fresh"), `${file} 有引用不是新鲜的——跑 pnpm docfirst check 看看`);
+    assert.deepEqual(items.map((i) => i.status), items.map(() => "fresh"), `${file} 有引用不是新鲜的——运行 pnpm docfirst check 看看`);
   }
 });

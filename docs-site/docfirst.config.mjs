@@ -6,9 +6,9 @@
  * 本站的现状区是 content/docs（原理）与 content/maintain（维护这个仓），外加 src/components/ 下讲解组件的源码。
  * outputs：仓根 README.md / AGENTS.md / CLAUDE.md 和插件里的几份 SKILL.md 是生成物，正本是下面映射左边的 mdx
  * （AGENTS 的正本在 content/maintain/agents.mdx，其余在 content/docs/outputs/）——
- * 改 mdx 源要跑 `pnpm docfirst render`（`confirm` 也会顺带做），两份一起提交，check 检查生成物跟源是否一致。
+ * 改 mdx 源要运行 `pnpm docfirst render`（`confirm` 也会顺带做），两份一起提交，check 检查生成物跟源是否一致。
  * CLAUDE.md 第一行固定是 `@AGENTS.md`，只给 Claude 的指令写在它后面。
- * 组件名册：先展开 fumadocsRoster（fumadocs 自带的 Files / Folder / File 与 Note 的压平规则，纯数据，命令行也能加载），
+ * 组件名册：先展开 fumadocsRoster（fumadocs 自带的 Files / Folder / File 与 Note 的机读规则，纯数据，命令行也能加载），
  * 再加站里自己定义的组件和它们转成机读文本的规则。组件的 React 实现在 src/components/mdx.tsx。
  * 星轨盘不在名册里：它是一条独立的整页路由 /trajectory，不在 mdx 里用。
  */

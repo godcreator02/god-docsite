@@ -101,12 +101,12 @@ docfirst 只是它们的一个使用者。**docfirst 的包**有两个：`docfir
 ## 装配、摆放、命令行
 
 装配的归一（内容根、`outputs` 的两种写法、文档身份）经 `loadProject` 看，在 `tests/project-load.test.ts`。
-摆放用 `PlacingHost` 的两个适配器测：`tests/placing-host.test.ts` 的落点是内存里一张表，一个字节不落盘；
+摆放用 `PlacingHost` 的两个适配器测：`tests/placing-host.test.ts` 的落点是内存里一张表，一个字节都不写磁盘；
 `tests/placement.test.ts` 在临时目录建实际的项目，`loadProject` 之后直接调摆放的方法，不经命令行。
 命令行把结果打印成什么、退什么码，在 `tests/cli*.test.ts` 那几份。
 
 星轨盘与卡格式的测试是 `tests/trajectory-*.test.ts`：卡格式的解析、扫描、校验在 parse、scan、validate、model 几份，fumadocs 卡集合在 server，
-建模、布局、画布、组件在其余几份；内存造卡走真实的卡格式换成中性输入（`tests/trajectory-helpers.ts`），星轨盘相关的几份用 `tests/fixtures/trajectory/` 下的卡片。
+建模、布局、画布、组件在其余几份；在内存里造卡时经真实的卡格式换成中性输入（`tests/trajectory-helpers.ts`），星轨盘相关的几份用 `tests/fixtures/trajectory/` 下的卡片。
 所以星轨盘的测试离不开 workflow 的卡格式：包本身是通用的，它的测试还不是。术语标注在 `tests/glossary.test.ts`，
 fumadocs 适配不接 Next 的那一半在 `tests/fumadocs.test.ts`，讲解组件包在 `tests/docfirst-explainer.test.ts`，
 各包能装、能出产物、出口解析得到在 `tests/skeleton.test.ts`。
@@ -126,10 +126,10 @@ fumadocs 适配不接 Next 的那一半在 `tests/fumadocs.test.ts`，讲解组�
 
 站测试 `docs-site/tests/page.test.mjs` 不启动 Next：`register()` 把 fumadocs 的 Node loader 注册进 Node，`import` 一篇 `.mdx`
 经过的就是站构建时的那条处理流程。导入时带 `?macro_id=src/lib/source.ts%23docs`，loader 才用上集合的 `mdxOptions` 与 postprocess。
-它断言每条引用在页面上都有带状态点和来源标题的元素、组件没有漏成裸标签、机读版里有来源行且组件已压平成文字，
+它断言每条引用在页面上都有带状态点和来源标题的元素、组件没有漏成裸标签、机读版里有来源行且组件已转成机读文字，
 以及这个站自己全绿：
 
-{/* ref file="tests/page.test.mjs" lines="126-134" hash="10ebafcc9456" blob="53b48109f86c" */}
+{/* ref file="tests/page.test.mjs" lines="126-134" hash="58d7543813bd" blob="de1ec02aa8c8" */}
 
 所以每一页钉着的源码一改，`docfirst check` 报出来、站测试直接失败，文档跟不上代码就过不了提交前的检查。
 允许不钉码的页由 frontmatter 明说：`docfirst: none` 是明说不钉的页，`docfirst: draft` 是还没写完的页，两样都没写就必须至少钉一处：

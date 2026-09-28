@@ -32,7 +32,7 @@ type Frame = TimelineFrame<FollowChapter>;
 const clamp01 = (value: number): number => Math.min(1, Math.max(0, value));
 /** 进度 p 在 [from, to] 里走到了哪儿，0–1 */
 const ramp = (p: number, from: number, to: number): number => clamp01((p - from) / (to - from));
-/** 两头慢中间快 */
+/** 开头和结尾慢、中间快 */
 const ease = (value: number): number => value * value * (3 - 2 * value);
 const easedRamp = (p: number, from: number, to: number): number => ease(ramp(p, from, to));
 
