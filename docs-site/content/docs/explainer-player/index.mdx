@@ -91,27 +91,27 @@ full: true
 **不认识 docfirst，也不认识别的包。** 它是通用包：清单里没有任何 `@godcreator/` 包，源码与产物不 import 它们，
 源码的相对 import 不出自己的 `src/`：
 
-{/* ref file="../tests/boundary.test.ts" lines="192-216" hash="5a122995ee1f" blob="269b4f418ee0" */}
+{/* ref file="../tests/boundary.test.ts" lines="193-217" hash="147c0e64318f" blob="85566dfd1f21" */}
 
-包目录里（源码、产物、样式、构建配置、清单）一个 docfirst 字样都没有：
+包目录里（源码、产物、样式、构建配置、清单）一个 docfirst 字样都没有，清单里指向本仓的仓地址除外（仓名是 gwb-docfirst）：
 
-{/* ref file="../tests/boundary.test.ts" lines="218-229" hash="8111ed1a5a3b" blob="29557311bd0a" */}
+{/* ref file="../tests/boundary.test.ts" lines="219-235" hash="488ad8a3f185" blob="85566dfd1f21" */}
 
 **也不被 docfirst 的包认识。** docfirst 的包与工作台插件都不依赖它，只有站用它；清单里没有 `dependencies`，react 只作必需 peer：
 
-{/* ref file="../tests/boundary.test.ts" lines="566-574" hash="3a7782b7dcfb" blob="f364ea40ffcc" */}
+{/* ref file="../tests/boundary.test.ts" lines="572-580" hash="3a7782b7dcfb" blob="85566dfd1f21" */}
 
 **不把 react 打进产物。** `.` 的产物第一行是 `"use client"`，只许 import react：
 
-{/* ref file="../tests/boundary.test.ts" lines="576-586" hash="638c3fd560fa" blob="f364ea40ffcc" */}
+{/* ref file="../tests/boundary.test.ts" lines="582-592" hash="638c3fd560fa" blob="85566dfd1f21" */}
 
 **`./text` 不 import 任何东西。** 站在 Node 里生成机读版时加载它（本仓是 `docfirst.config.mjs`），所以它不带客户端指令、源码和产物都零 import：
 
-{/* ref file="../tests/boundary.test.ts" lines="588-593" hash="4363223b8781" blob="f364ea40ffcc" */}
+{/* ref file="../tests/boundary.test.ts" lines="594-599" hash="4363223b8781" blob="85566dfd1f21" */}
 
 **`./seam-graph` 只 import 类型。** 接缝图的数据文件既被画面 import，又被机读规则在 Node 里加载，所以它的产物零 import、不带客户端指令：
 
-{/* ref file="../tests/boundary.test.ts" lines="595-603" hash="1ede44577a51" blob="6e2375b43a16" */}
+{/* ref file="../tests/boundary.test.ts" lines="601-609" hash="1ede44577a51" blob="85566dfd1f21" */}
 
 **不画题目的画面。** 画面里画什么、每一帧的讲解数据、机读规则都写在各站自己的组件里；这个包只给外壳与零件。
 接缝图也一样：一个站有几张图、每张图的内容与坐标、按什么名字挑图，都在站里。

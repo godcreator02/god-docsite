@@ -1,7 +1,7 @@
 /**
  * # 边界守卫：`packages/` 下各包之间、workflow 包里面**唯一**的边界检查
  *
- * 包分两类。**通用包**不认识 docfirst，谁都能单独拿走用：钉码 `code-pin`（把文字钉在代码上）、
+ * 包分两类。**通用包**不认识 docfirst，谁都能单独使用：钉码 `code-pin`（把文字钉在代码上）、
  * 星轨盘 `trajectory-disk`（把一组卡画成项目方向演变的圆盘）、讲解播放器 `explainer-player`（把讲解拆成配说明的帧来播放）。
  * **docfirst 的包** `docfirst-workflow` 用上面的通用包拼出 docfirst：命令行、项目装配与格式，
  * 接到 fumadocs 站上的部分在它的 `src/fumadocs/`，经子入口 `./fumadocs` 发出去。
@@ -16,7 +16,8 @@
  *
  * **二、通用包独立**（下面 `GENERIC_PACKAGES` 那张表）：清单里没有任何 `@godcreator/` 包，源码与产物不 import 它们、
  * 相对 import 不出自己的目录，源码、产物、样式与包的说明里一个 docfirst 字样都没有。docfirst 的名字一旦
- * 写进通用包，哪怕只是一行注释，下一个人就会顺着它把 docfirst 的规矩搬进来。另外各包自己的几条：
+ * 写进通用包，哪怕只是一行注释，下一个人就会顺着它把 docfirst 的规矩搬进来。唯一放行的是清单里 `repository.url`
+ * 指向本仓的那一行（`REPOSITORY_URL_LINE`）：仓名是 gwb-docfirst，那一行说的是包放在哪，不是包认识 docfirst。另外各包自己的几条：
  * code-pin 只许 `node:crypto`、不认识文档文本；trajectory-disk 的 `.` 入口零 import、整个包不认识卡文件的写法。
  *
  * **三、workflow 里各目录的方向**（下面 `WORKFLOW_DIRS` 那张表），以及除了 `src/fumadocs/` 整个包不认识任何站的宿主；
@@ -168,7 +169,7 @@ test("packages/ 下的包一个不多一个不少——加了新包得先想清�
 
 // ── 二、通用包独立 ────────────────────────────────────────────────────────────
 
-/** 通用包：不认识 docfirst，谁都能单独拿走用。加一个通用包就加进这张表，下面三条自动管上它 */
+/** 通用包：不认识 docfirst，谁都能单独使用。加一个通用包就加进这张表，下面三条自动管上它 */
 const GENERIC_PACKAGES = ["code-pin", "trajectory-disk", "explainer-player"];
 
 /** 包目录下除 node_modules 以外的全部文件：源码、产物、样式、构建配置、清单 */
@@ -194,7 +195,7 @@ test("通用包独立：清单三类依赖字段里没有任何 @godcreator/ 包
   for (const dir of GENERIC_PACKAGES) {
     for (const dep of allDepsOf(manifestOf(dir))) if (dep.startsWith("@godcreator/")) bad.push(`${dir} → ${dep}`);
   }
-  assert.deepEqual(bad, [], "通用包得能单独拿走用。要用别的包，先想清楚它还算不算通用包");
+  assert.deepEqual(bad, [], "通用包得能单独使用。要用别的包，先想清楚它还算不算通用包");
 });
 
 test("通用包独立：源码与产物不 import 任何 @godcreator/ 包，源码的相对 import 不出自己的 src/", () => {
@@ -215,12 +216,17 @@ test("通用包独立：源码与产物不 import 任何 @godcreator/ 包，源�
   assert.deepEqual(bad, []);
 });
 
-test("通用包不认识 docfirst：源码、产物、样式、构建配置与清单里一个 docfirst 字样都没有", () => {
+/** 清单里指向本仓的那一行：仓名带 docfirst，这一行只说包放在哪 */
+const REPOSITORY_URL_LINE = '"url": "https://git.tianshen02.online:28377/godcreator/gwb-docfirst.git"';
+
+test("通用包不认识 docfirst：源码、产物、样式、构建配置与清单里一个 docfirst 字样都没有（清单里指向本仓的地址除外）", () => {
   const bad: string[] = [];
   for (const dir of GENERIC_PACKAGES) {
     for (const file of packageFiles(dir)) {
+      const isManifest = file === join(PACKAGES, dir, "package.json");
       const lines = readFileSync(file, "utf8").split("\n");
       lines.forEach((line, index) => {
+        if (isManifest && line.trim() === REPOSITORY_URL_LINE) return;
         if (/docfirst/i.test(line)) bad.push(`${dir}/${rel(join(PACKAGES, dir), file)}:${index + 1}`);
       });
     }

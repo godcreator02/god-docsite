@@ -27,32 +27,32 @@ mdx 格式从此就跟读盘、git 绑在一起。补上这两项的是 `tests/b
 禁止表**列的是禁止的，不是允许的**：写成允许的话，新加一个包默认什么都不能依赖，放错位置反而更难发现。
 `packages/` 下多出一个表里没有的目录，另一条测试当场失败，要求先想清楚它能认识谁：
 
-{/* ref file="../tests/boundary.test.ts" lines="125-137" hash="10099a6dad41" blob="29557311bd0a" */}
+{/* ref file="../tests/boundary.test.ts" lines="126-138" hash="10099a6dad41" blob="85566dfd1f21" */}
 
 workflow 目录之间是同样的写法：
 
-{/* ref file="../tests/boundary.test.ts" lines="328-339" hash="c81759ee8dbb" blob="b3c39878725f" */}
+{/* ref file="../tests/boundary.test.ts" lines="334-345" hash="c81759ee8dbb" blob="85566dfd1f21" */}
 
-## 通用包：不认识 docfirst，能单独拿走用
+## 通用包：不认识 docfirst，能单独使用
 
 本仓的包分两类。**通用包**不认识 docfirst：`code-pin` 把文字钉在代码上，`trajectory-disk` 把一组卡画成项目方向演变的圆盘，
 `explainer-player` 把讲解拆成配说明的帧来播放；docfirst 只是它们的一个使用者。docfirst 自己的规矩在
 `docfirst-workflow` 里。通用包列在一张表里，下面三条对表里每个包都一样：
 清单里没有任何 `@godcreator/` 包；源码与产物不 import 它们，源码的相对 import 不出自己的 `src/`；
-包目录里（源码、产物、样式、构建配置、清单）一个 docfirst 字样都没有。
+包目录里（源码、产物、样式、构建配置、清单）一个 docfirst 字样都没有，清单里指向本仓的仓地址除外：仓名是 gwb-docfirst，那一行说的是包放在哪，不是包认识 docfirst。
 
 最后一条连注释也查。通用包里一旦写了「docfirst 站会这样用」，下一个改它的人就会照着 docfirst 的需要改它，
 它就不再通用。讲 docfirst 怎么用这几个包，写在 `docfirst-workflow` 或这个站里。加一个通用包只要把它加进表里：
 
-{/* ref file="../tests/boundary.test.ts" lines="169-229" hash="734aabafa30c" blob="29557311bd0a" */}
+{/* ref file="../tests/boundary.test.ts" lines="170-235" hash="c33032a71b36" blob="85566dfd1f21" */}
 
 各通用包另有自己的几条。钉码只许 import `node:crypto`，源码与产物里没有文档文本那一侧的名字：
 
-{/* ref file="../tests/boundary.test.ts" lines="231-255" hash="f6ad294a7d3e" blob="269b4f418ee0" */}
+{/* ref file="../tests/boundary.test.ts" lines="237-261" hash="f6ad294a7d3e" blob="85566dfd1f21" */}
 
 星轨盘的 `.` 入口产物零 import，建模只 import 自己目录里的文件，整个包里没有关系行、frontmatter 字段名这些 docfirst 卡文件的写法：
 
-{/* ref file="../tests/boundary.test.ts" lines="272-292" hash="4d31db61a2b8" blob="269b4f418ee0" */}
+{/* ref file="../tests/boundary.test.ts" lines="278-298" hash="4d31db61a2b8" blob="85566dfd1f21" */}
 
 包与插件互不认识，两个方向分在两处：包里不许出现任何 `@godcreator/gwb-*` 由 `boundary.test.ts` 查；
 插件不许依赖本仓的任何一个包由插件自己的测试查，包名从 `packages/` 下各包的清单现读：
@@ -61,7 +61,7 @@ workflow 目录之间是同样的写法：
 
 <Note>
   **它失败的时候，出错的是设计，不是测试。** 真要改方向，改的是那张表并写明为什么，
-  不是删断言，更不是为了让门禁通过注释掉某一条。
+  不是删断言，更不是为了让检查通过注释掉某一条。
 </Note>
 
 ## 钉码核心：传入两样假的
@@ -128,7 +128,7 @@ fumadocs 适配不接 Next 的那一半在 `tests/fumadocs.test.ts`，讲解播�
 
 {/* ref file="tests/page.test.mjs" lines="126-134" hash="10ebafcc9456" blob="53b48109f86c" */}
 
-所以每一页钉着的源码一改，`docfirst check` 报出来、站测试直接失败，文档跟不上代码就过不了门禁。
+所以每一页钉着的源码一改，`docfirst check` 报出来、站测试直接失败，文档跟不上代码就过不了提交前的检查。
 允许不钉码的页由 frontmatter 明说：`docfirst: none` 是明说不钉的页，`docfirst: draft` 是还没写完的页，两样都没写就必须至少钉一处：
 
 {/* ref file="tests/page.test.mjs" lines="52-53" hash="cfcbeab7ba70" blob="53b48109f86c" */}

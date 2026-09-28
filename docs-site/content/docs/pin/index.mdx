@@ -7,7 +7,7 @@ full: true
 包 `@godcreator/code-pin`，源码在 `packages/code-pin/src/`，出口只有 `.`（`src/index.ts`）。
 
 它是通用包，做一件事：把文字钉在代码上。它只认目标（行段、整个文件、目录树）与记录，核对出代码变没变、确认出新记录；
-不读文件，不认识文档文本、记号写法与文档格式。它不认识 docfirst，谁都能单独拿走用；docfirst 的 workflow 是它的一个使用者，
+不读文件，不认识文档文本、记号写法与文档格式。它不认识 docfirst，谁都能单独使用；docfirst 的 workflow 是它的一个使用者，
 下面讲到「钉码编排」「项目装配」的地方，说的都是 workflow 怎么用它。
 
 <SeamMap module="pin" />
@@ -68,24 +68,24 @@ full: true
 
 ## 不做的事
 
-**不碰磁盘，不启动子进程，不知道 git 存在。** 边界测试只许源码 import 包内文件和 `node:crypto`，清单里不许有依赖：
+**不读写磁盘，不启动子进程，不知道 git 存在。** 边界测试只许源码 import 包内文件和 `node:crypto`，清单里不许有依赖：
 
-{/* ref file="../tests/boundary.test.ts" lines="231-240" hash="e28789728621" blob="269b4f418ee0" */}
+{/* ref file="../tests/boundary.test.ts" lines="237-246" hash="e28789728621" blob="85566dfd1f21" */}
 
 **不认识别的包，也不认识 docfirst。** 它是通用包：清单里没有任何 `@godcreator/` 包，源码与产物不 import 它们，
 源码的相对 import 不出自己的 `src/`：
 
-{/* ref file="../tests/boundary.test.ts" lines="192-216" hash="5a122995ee1f" blob="269b4f418ee0" */}
+{/* ref file="../tests/boundary.test.ts" lines="193-217" hash="147c0e64318f" blob="85566dfd1f21" */}
 
-包目录里（源码、产物、构建配置、清单）一个 docfirst 字样都没有；docfirst 怎么用它，写在 docfirst 的包与这个站里：
+包目录里（源码、产物、构建配置、清单）一个 docfirst 字样都没有（清单里指向本仓的仓地址除外）；docfirst 怎么用它，写在 docfirst 的包与这个站里：
 
-{/* ref file="../tests/boundary.test.ts" lines="218-229" hash="8111ed1a5a3b" blob="29557311bd0a" */}
+{/* ref file="../tests/boundary.test.ts" lines="219-235" hash="488ad8a3f185" blob="85566dfd1f21" */}
 
 **不接触文档文本。** 记号写成什么样、在文件第几行、写回时怎么改那一行、这个文件是 mdx 页面还是讲解组件的源码，
 都归使用方；在 docfirst 里归 workflow 的记号写法、两个格式与钉码编排。
 边界测试查源码与产物里有没有文档文本那一侧的名字：
 
-{/* ref file="../tests/boundary.test.ts" lines="242-255" hash="ecb19e47f9f2" blob="269b4f418ee0" */}
+{/* ref file="../tests/boundary.test.ts" lines="248-261" hash="ecb19e47f9f2" blob="85566dfd1f21" */}
 
 **不渲染，不知道项目根、配置文件和生成物放哪。** 在 docfirst 里，装配、渲染与摆放在 workflow。
 

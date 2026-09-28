@@ -78,7 +78,7 @@ export const allowedEdges = [
 
 /**
  * 每类规则一个按钮。label 与 text 由 CasePicker 显示：text 写这一类为什么要守。
- * allowed：这一类守着的允许方向，画面上实线高亮；forbidden：这一类禁止的方向，画成红色虚线并打叉，
+ * allowed：这一类要求的允许方向，画面上实线高亮；forbidden：这一类禁止的方向，画成红色虚线并打叉，
  * 每项的 edges 写成「起点>终点」（单向禁止）或「甲~乙」（两个方向都禁止），同一对节点上已有允许的边时加「:后缀」另起一条线。
  * tests：违反时会失败的 test，name 照抄 tests/boundary.test.ts，checks 写它读的是什么。
  * @typedef {{ edges: string[], what: string }} Forbidden
@@ -86,7 +86,7 @@ export const allowedEdges = [
  * @typedef {{ id: string, label: string, text: string, allowed: string[], forbidden: Forbidden[], tests: GuardTest[] }} BoundaryRule
  * @type {BoundaryRule[]}
  */
-/* ref file="../tests/boundary.test.ts" hash="09b2233705b6" blob="6e2375b43a16" */
+/* ref file="../tests/boundary.test.ts" hash="25e01211ccb6" blob="85566dfd1f21" */
 export const rules = [
   {
     id: 'packages',
@@ -116,12 +116,12 @@ export const rules = [
   {
     id: 'generic',
     label: '通用包独立',
-    text: '钉码、星轨盘、讲解播放器是通用包：不认识 docfirst，谁都能单独拿走用，docfirst 只是它们的一个使用者。三个包列在 GENERIC_PACKAGES 一张表里，三条检查对表里每个包都一样：清单里没有任何 @godcreator/ 包；源码与产物不 import 它们，源码的相对 import 不出自己的 src/；包目录里一个 docfirst 字样都没有，连注释也算——通用包里一旦写了「docfirst 会这样用」，下一个改它的人就会照着 docfirst 的需要改它。另外各包有自己的几条：钉码只许 node:crypto；星轨盘唯一对外的依赖是 ./disk 入口（客户端组件 StarDisk）用的 react，它是可选 peer，要按包名 import、不许打包进产物。',
+    text: '钉码、星轨盘、讲解播放器是通用包：不认识 docfirst，谁都能单独使用，docfirst 只是它们的一个使用者。三个包列在 GENERIC_PACKAGES 一张表里，三条检查对表里每个包都一样：清单里没有任何 @godcreator/ 包；源码与产物不 import 它们，源码的相对 import 不出自己的 src/；包目录里一个 docfirst 字样都没有，连注释也算（只放行清单里指向本仓的仓地址，仓名是 gwb-docfirst）——通用包里一旦写了「docfirst 会这样用」，下一个改它的人就会照着 docfirst 的需要改它。另外各包有自己的几条：钉码只许 node:crypto；星轨盘唯一对外的依赖是 ./disk 入口（客户端组件 StarDisk）用的 react，它是可选 peer，要按包名 import、不许打包进产物。',
     allowed: ['pin>crypto', 'trajectory>host', 'explain>host'],
     forbidden: [
       {
         edges: ['pin~trajectory', 'explain~pin', 'explain~trajectory', 'pin>workflow', 'trajectory>workflow', 'explain~workflow'],
-        what: '三个通用包的清单里不许有任何 @godcreator/ 包，开发期依赖也算；源码与产物不许 import 它们，源码的相对 import 不许出自己的 src/；源码、产物、样式、构建配置与清单里不许出现 docfirst 字样。',
+        what: '三个通用包的清单里不许有任何 @godcreator/ 包，开发期依赖也算；源码与产物不许 import 它们，源码的相对 import 不许出自己的 src/；源码、产物、样式、构建配置与清单里不许出现 docfirst 字样，清单里指向本仓的仓地址除外。',
       },
       {
         edges: ['pin>others'],
@@ -135,7 +135,7 @@ export const rules = [
     tests: [
       { name: '通用包独立：清单三类依赖字段里没有任何 @godcreator/ 包', checks: '读三个通用包 package.json 的 dependencies、peerDependencies、devDependencies' },
       { name: '通用包独立：源码与产物不 import 任何 @godcreator/ 包，源码的相对 import 不出自己的 src/', checks: '读三个通用包 src/ 下每个文件与 dist/ 下每份产物的 import' },
-      { name: '通用包不认识 docfirst：源码、产物、样式、构建配置与清单里一个 docfirst 字样都没有', checks: '逐行读三个通用包目录下除 node_modules 以外的全部文件' },
+      { name: '通用包不认识 docfirst：源码、产物、样式、构建配置与清单里一个 docfirst 字样都没有（清单里指向本仓的地址除外）', checks: '逐行读三个通用包目录下除 node_modules 以外的全部文件' },
       { name: 'pin 零依赖：清单里没有 dependencies / peerDependencies，源码只 import 自己和 node:crypto', checks: '读钉码的 package.json 与 src/ 的 import' },
       { name: '钉码核心不接触文档文本：源码与产物里没有 mdx、记号写法、格式接口、引用与清单', checks: '读钉码的 src/ 与产物 index.mjs、index.d.mts 的全文' },
       { name: 'trajectory 的 `.` 入口零 import：产物一条 import 都没有，连 node: 也没有', checks: '读产物 dist/index.mjs 与 package.json 的 dependencies' },
@@ -155,7 +155,7 @@ export const rules = [
         edges: ['marker~reference', 'marker>mdx:back', 'reference>code:back'],
         what: 'marker 是记号写法，reference 是引用与清单的类型，两个都谁都不认识：marker 只从 @godcreator/code-pin import 类型，reference 只认识 @godcreator/code-pin。',
       },
-      { edges: ['mdx>pinning:back', 'mdx>project'], what: 'mdx 格式认引用、写回、渲染，不认识钉码编排的先后顺序，也不认识项目怎么装配、不碰磁盘与 git。' },
+      { edges: ['mdx>pinning:back', 'mdx>project'], what: 'mdx 格式认引用、写回、渲染，不认识钉码编排的先后顺序，也不认识项目怎么装配、不读写磁盘、不调用 git。' },
       {
         edges: ['mdx~code', 'code>pinning:back'],
         what: '组件格式只认识 marker 与 reference：跟 mdx 格式互不认识，也不认识钉码编排、project 与 cli。两种格式由钉码编排按文件选。',
@@ -163,7 +163,7 @@ export const rules = [
       { edges: ['pinning>project:back'], what: '钉码编排不认识 project，也不认识记号属性怎么写：记号写法在两种格式后面。' },
       { edges: ['cards>pinning', 'cards>cli:back'], what: '卡格式只认识 marker：不认识钉码编排、项目装配，也不认识 cli。' },
       { edges: ['project>cli:back', 'pinning>cli'], what: 'cli 是入口，认识另外几个目录，谁都不认识它。' },
-      { edges: ['node>project:back', 'mdx>node'], what: 'node 是 Node 实现：包里只有它碰 node:fs、git 子进程与系统临时目录，不认识 docfirst 的任何格式，所以包里谁都不认识；只有 project、cards、cli 用它，记号、格式、钉码编排都不碰磁盘。node:fs、node:fs/promises、node:child_process、node:os 只许 node/ import，process 只许 node/ 与 cli/ 用。' },
+      { edges: ['node>project:back', 'mdx>node'], what: 'node 是 Node 实现：包里只有它用 node:fs、启动 git 子进程、用系统临时目录，不认识 docfirst 的任何格式，所以包里谁都不认识；只有 project、cards、cli 用它，记号、格式、钉码编排都不读写磁盘。node:fs、node:fs/promises、node:child_process、node:os 只许 node/ import，process 只许 node/ 与 cli/ 用。' },
       { edges: ['workflow>fumadocs'], what: '命令行那一侧的目录都不许引用 fumadocs/，也不许按包名引用本包；fumadocs/ 不许用相对路径出自己的目录，按包名只许用 .、./mdx、./cards。' },
       {
         edges: ['workflow>host'],

@@ -38,7 +38,7 @@ README、CLAUDE.md、这份规矩与插件里的 SKILL.md 都是**生成物**：
 - 工具链两套并存，别互相照搬：`packages/` 下的 npm 包是 tsdown + TS 6；工作台插件是 `tsc`，运行在 TS 7 上。
   以各自的 `package.json` 为准。
 - **包按接缝切开，方向单向**：通用包 `code-pin`（只用 `node:crypto`）、`trajectory-disk`（`.` 入口零 import）、`explainer-player`
-  互不认识，也不认识 docfirst，包里一个 docfirst 字样都没有；`docfirst-workflow` 认识 `code-pin` 与 `trajectory-disk`，除了 `src/fumadocs/` 不认识任何站的宿主。调用链从 `docfirst` 命令开始的归 `cli` 及它下面的目录，
+  互不认识，也不认识 docfirst，包里一个 docfirst 字样都没有（清单里指向本仓的仓地址除外）；`docfirst-workflow` 认识 `code-pin` 与 `trajectory-disk`，除了 `src/fumadocs/` 不认识任何站的宿主。调用链从 `docfirst` 命令开始的归 `cli` 及它下面的目录，
   由 fumadocs 或 Next 调用的归 `src/fumadocs/`；`src/fumadocs/` 只按包名用本包的 `.`、`./mdx`、`./cards`，别的目录不认识它。
   workflow 里 `marker` / `reference` / `mdx` / `code` / `pinning` / `project` / `cards` / `node` / `cli` / `fumadocs` 几个目录之间也单向，只有 `node` 读写磁盘、启动子进程。`explainer-player` 只给站用，docfirst 自己的包不用它。
   **包与插件互不认识**：包不许出现任何 `@godcreator/gwb-*`，

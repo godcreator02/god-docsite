@@ -1,0 +1,30 @@
+---
+born-at: 2026-09-28T10:30
+type: choice
+parent: [2026-09-03-god-live-doc]
+label: 通用包的清单放行仓地址
+domain: 模块边界
+---
+
+## 背景
+
+仓按用户要求从 god-live-doc 改名为 gwb-docfirst（本地目录与 gitea 仓一起改）。三个通用包 `code-pin`、`explainer-player`、`trajectory-disk`
+的清单里 `repository.url` 指向本仓，改成新地址后，边界测试「通用包不认识 docfirst」逐行查到 `docfirst` 字样，失败。
+
+## 结论与边界
+
+边界测试只放行一行：通用包清单里 `"url": "https://git.tianshen02.online:28377/godcreator/gwb-docfirst.git"`（`REPOSITORY_URL_LINE`）。
+这一行说的是包放在哪，不是包认识 docfirst；清单里别的地方、源码、产物、样式、构建配置照旧一个 docfirst 字样都不许有。
+测试文件头的说明、测试名、讲这条边界的三页与讲解组件同一个提交改。
+
+## 否掉的候选
+
+**通用包继续指旧地址 `god-live-doc.git`**：靠 gitea 改名后的跳转能用，但地址名跟仓对不上，以后有人再建一个叫 god-live-doc 的仓，跳转就断了。
+
+**删掉通用包的 `repository` 字段**：gitea 靠这个字段把包关联到仓，删了包页上就找不到源码在哪。
+
+**整行按正则放行所有 `repository` 地址**：口子比需要的大，写错成别的带 docfirst 的地址也会被放过；只放行本仓地址这一行。
+
+## 代价与遗留
+
+仓再改名，这一行常量要跟着改，不改测试当场失败。三个通用包的新地址要等它们下次发版才进源。

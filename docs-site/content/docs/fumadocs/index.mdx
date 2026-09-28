@@ -156,10 +156,10 @@ React 表先展开 fumadocs 的默认表，再把 `pre` 换成 `DocfirstPre`：
 - **不管生成物**：生成正本的渲染与写到哪归 [workflow](/docs/workflow)。
 - **不把宿主、本仓别的包与本包的命令行代码打包进产物**：只按包名 import；`./fumadocs/pre` 的 `"use client"` 在产物第一行，别的出口不带：
 
-{/* ref file="../tests/boundary.test.ts" lines="478-503" hash="d79252940b87" blob="f364ea40ffcc" */}
+{/* ref file="../tests/boundary.test.ts" lines="484-509" hash="d79252940b87" blob="85566dfd1f21" */}
 
 - **不被命令行加载**（`./fumadocs/roster` 除外）：workflow 别的目录不许引用这个目录，这个目录也只按包名用 `.`、`./mdx`、`./cards`；`./fumadocs/roster` 的产物不许 import 宿主：
 
-{/* ref file="../tests/boundary.test.ts" lines="417-431" hash="6cf7852c8dc4" blob="b3c39878725f" */}
+{/* ref file="../tests/boundary.test.ts" lines="423-437" hash="6cf7852c8dc4" blob="85566dfd1f21" */}
 
-{/* ref file="../tests/boundary.test.ts" lines="505-512" hash="1dfc84292866" blob="f364ea40ffcc" */}
+{/* ref file="../tests/boundary.test.ts" lines="511-518" hash="1dfc84292866" blob="85566dfd1f21" */}
