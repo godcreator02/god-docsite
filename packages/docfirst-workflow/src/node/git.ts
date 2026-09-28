@@ -101,7 +101,7 @@ export function readBlob(repo: string, blob: string): string | null {
   const header = out.subarray(0, headerEnd).toString("utf8");
   if (header === `${blob} missing` || header === `${blob} ambiguous`) return null;
   const parsed = BATCH_HEADER.exec(header);
-  if (parsed === null) throw new Error(`${repo}：git cat-file --batch 对 ${blob} 的回话认不出（${header}）`);
+  if (parsed === null) throw new Error(`${repo}：git cat-file --batch 对 ${blob} 的输出认不出（${header}）`);
   if (parsed[2] !== "blob") return null;
   const start = headerEnd + 1;
   const text = out.subarray(start, start + Number(parsed[3])).toString("utf8");
@@ -109,7 +109,7 @@ export function readBlob(repo: string, blob: string): string | null {
   return text;
 }
 
-/** 算过的 hunk 表，键是「旧 blob 名 + 新内容的 blob 名」：两头都按内容寻址，同一对内容只 diff 一次 */
+/** 算过的 hunk 表，键是「旧 blob 名 + 新内容的 blob 名」：两个名字都按内容寻址，同一对内容只 diff 一次 */
 const hunkCache = new Map<string, Hunk[]>();
 
 /**
@@ -143,7 +143,7 @@ export function diffHunks(oldText: string, newText: string): Hunk[] {
 
 /**
  * 这个仓里有未提交改动的路径（仓根相对 posix）：工作区或暂存区跟 HEAD 不一样的、未跟踪的。
- * 未跟踪的目录逐个文件列出来；改名与复制两头的路径都算。
+ * 未跟踪的目录逐个文件列出来；改名与复制前后的路径都算。
  * `--no-optional-locks`：status 默认会顺带刷新索引、要拿锁，加上它免得跟同时在这个仓里工作的人争锁。
  */
 export function uncommittedPaths(repo: string): Set<string> {

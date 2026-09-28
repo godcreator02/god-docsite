@@ -263,10 +263,10 @@ export const serveCases = [
 /* ref file="../packages/docfirst-workflow/src/mdx/roster.ts" lines="9-13" hash="5f32c20ae455" blob="a8241fff7170" */
 /* ref file="../packages/docfirst-workflow/src/mdx/roster.ts" lines="91-107" hash="09207f8b31fa" blob="a8241fff7170" */
 /* ref file="../packages/docfirst-workflow/src/fumadocs/roster.ts" lines="12-19" hash="ad2aa594110a" blob="e605fbea15a7" */
-/* ref file="src/components/tabs/tabs.ai.mjs" lines="7-13" hash="4ac462d9c8e3" blob="b5179bb18970" */
+/* ref file="src/components/tabs/tabs.ai.mjs" lines="7-13" hash="d9e081072a18" blob="49753e4af3a6" */
 /* ref file="src/components/seam-map/seam-map.ai.mjs" lines="24-30" hash="2bcdfbfe5455" blob="bee761f6c2f8" */
 /* ref file="../packages/docfirst-workflow/src/fumadocs/blocks.ts" lines="136-151" hash="0646b249c32b" blob="705792ee655d" */
-/* ref file="../packages/docfirst-workflow/src/cli/commands.ts" lines="166-166" hash="1c53b74fcb01" blob="937001d7a349" */
+/* ref file="../packages/docfirst-workflow/src/cli/commands.ts" lines="166-166" hash="d3c5b04d2f38" blob="2732fec328d4" */
 /** @type {ComponentCase[]} */
 export const componentCases = [
   {
@@ -356,7 +356,7 @@ export const componentCases = [
     ruleTitle: 'docfirst.config.mjs 的 components',
     rule: ['（没有 Callout）'],
     md: null,
-    error: '🔴 content/docs/a.mdx  第 7 行 <Callout>  名册外组件，docfirst.config.mjs 里没给它压平规则',
+    error: '🔴 content/docs/a.mdx  第 7 行 <Callout>  名册外组件，docfirst.config.mjs 里没给它机读规则',
   },
 ];
 

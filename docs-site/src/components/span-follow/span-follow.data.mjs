@@ -64,7 +64,7 @@ export const judgeOrder = [
 ];
 
 /** 按 blob 从对象库取旧文件：命令写成等价的 shell，check 里是把 blob 写进 git cat-file --batch 的标准输入 */
-/* ref file="../packages/docfirst-workflow/src/node/git.ts" lines="87-110" hash="078f7f5e5a75" blob="834127e543cf" */
+/* ref file="../packages/docfirst-workflow/src/node/git.ts" lines="87-110" hash="dadfa6b33494" blob="ac7c0022dac9" */
 export const catFile = {
   command: `echo ${recorded.blob} | git cat-file --batch`,
   found: `${recorded.blobFull} blob ${recorded.bytes}`,

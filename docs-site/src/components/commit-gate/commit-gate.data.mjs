@@ -26,11 +26,11 @@ export const gateNote =
 export const gateLabel = {
   blocked: 'check 退出码 1：不能提交',
   open: 'check 退出码 0：可以提交',
-  pending: '文档改了：先重跑 check',
+  pending: '文档改了：先重新运行 check',
 };
 
 /** check 计入红的几类，退出码只看它们的总数 */
-/* ref file="../packages/docfirst-workflow/src/cli/commands.ts" lines="154-175" hash="efcb24752ad5" blob="937001d7a349" */
+/* ref file="../packages/docfirst-workflow/src/cli/commands.ts" lines="154-175" hash="8b8a1ba5607e" blob="2732fec328d4" */
 /* ref file="../packages/docfirst-workflow/src/cli/commands.ts" lines="80-98" hash="e7af08d1a9b3" blob="937001d7a349" */
 export const redSources = [
   { name: '缺失的引用', rule: '被钉的行段、文件、目录不在了；提没提交都算' },
@@ -50,7 +50,7 @@ export const notRed = ['🟢 新鲜', '⚪ 未确认', '🟡 有变动但不是�
  *   probe     check 对这处引用的判定：逐个问题的回答与结论；这一步跑的不是 check、或是汇总，就是 null
  *   sources   这一步画「红从哪里来」
  *   command   终端里敲的命令，output 是它打印的行，exit 是它的退出码
- *   gate      门禁：blocked 被拦、open 通过、pending 还要重跑 check
+ *   gate      门禁：blocked 被拦、open 通过、pending 还要重新运行 check
  *
  * @typedef {'good' | 'warn' | 'bad' | 'pending' | 'info'} Tone
  * @typedef {{ text: string, kind: 'out' | 'ok' | 'err' }} OutLine
@@ -97,7 +97,7 @@ export const steps = [
     text:
       `打开 ${DOC}，读讲这两行的那句话。还成立，就点名这一页 confirm --accept：记号上的 hash 换成今天这两行的，blob 换成今天这个文件的，行号不变；` +
       '不成立就先改那句话再 accept。--accept 必须点名页，不点名退出码 2、什么都不动；点了名只动这一页，同仓别的页里的黄灯不替别人确认。' +
-      '现在 git status 里多了 a.mdx，要重跑 check 才知道能不能提交。',
+      '现在 git status 里多了 a.mdx，要重新运行 check 才知道能不能提交。',
     repos: [
       {
         path: '~/repo',
@@ -120,7 +120,7 @@ export const steps = [
   {
     title: '代码和文档一起提交，check 退出码 0',
     text:
-      '重跑 check：这两行算出的 hash 等于新记号上的 9a083fec7547，状态是「新鲜」（绿），没有红，退出码 0，门禁通过。' +
+      '重新运行 check：这两行算出的 hash 等于新记号上的 9a083fec7547，状态是「新鲜」（绿），没有红，退出码 0，门禁通过。' +
       'greet.ts 与 a.mdx 放进同一个提交：改代码和复核文档在历史里是同一次改动。',
     repos: [
       {
@@ -225,7 +225,7 @@ export const steps = [
     output: [
       { text: `⚪ ${DOC}  src/bye.ts:1-3  未确认，等作者确认`, kind: 'out' },
       { text: `🟡 ${DOC}  ${OTHER_REF}:4-5  有变动，等作者复核`, kind: 'out' },
-      { text: `🔴 ${DOC}  第 12 行 <Chart>  名册外组件，docfirst.config.mjs 里没给它压平规则`, kind: 'err' },
+      { text: `🔴 ${DOC}  第 12 行 <Chart>  名册外组件，docfirst.config.mjs 里没给它机读规则`, kind: 'err' },
       {
         text: '🔴 content/docs/outputs/readme.mdx → ../README.md  生成物跟 mdx 源不一致（源改了没重摆，或有人直接改了生成物）——重跑 render',
         kind: 'err',

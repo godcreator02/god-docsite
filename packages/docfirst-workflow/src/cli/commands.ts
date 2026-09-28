@@ -17,7 +17,7 @@ import { confirmLine, itemLine, placedLine, unplacedLine } from "./text.ts";
 /**
  * confirm 的全过程：逐篇机械写回，再把有 outputs 映射的全部文档重新摆放一遍。
  *
- * 带路径是**按页限定**——只动点名的那几篇：同一个仓里别人钉的黄还等着他复核，一并确认掉就是替别人做了复核。
+ * 带路径是**按页限定**——只动点名的那几篇：同一个仓里别人的黄灯引用还等着他复核，一并确认掉就是替别人做了复核。
  * `--accept` 确认的就是黄灯，所以必须点名页；不点名直接以退出码 2 退出，什么都不动。
  * 摆放不按页限定：正本改没改、生成物要不要跟着更新，按内容判断，内容没变的落点一个字节都不写。
  */
@@ -25,7 +25,7 @@ export async function confirmCommand(project: Project, docs: string[], rest: str
   const accept = rest.includes("--accept");
   const named = rest.filter((arg) => !arg.startsWith("-"));
   if (accept && named.length === 0) {
-    console.error("--accept 要点名页：docfirst confirm <文档路径…> --accept——签黄灯得说清是哪几页，什么都没动");
+    console.error("--accept 要点名页：docfirst confirm <文档路径…> --accept——确认黄灯得说清是哪几页，什么都没动");
     return 2;
   }
   let pages = docs;
@@ -163,7 +163,7 @@ async function check(project: Project, doc: string, text: string, uncommitted: U
   const isPage = mdxFormat.claims(doc);
   const components = isPage ? lintComponents(text, project.roster) : [];
   for (const { name, line } of components) {
-    lines.push(`🔴 ${doc}  第 ${line} 行 <${name}>  名册外组件，docfirst.config.mjs 里没给它压平规则`);
+    lines.push(`🔴 ${doc}  第 ${line} 行 <${name}>  名册外组件，docfirst.config.mjs 里没给它机读规则`);
   }
   const outputs = isPage ? project.placing.check(doc, listing) : [];
   for (const output of outputs) lines.push(placedLine(doc, output));

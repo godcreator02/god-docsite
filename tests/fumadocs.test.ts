@@ -1,5 +1,5 @@
 /**
- * mdx 格式与 fumadocs 适配里不经过 Next 的那部分：识别、在语法树上替换节点、meta 白名单、名册压平、按原文渲染。
+ * mdx 格式与 fumadocs 适配里不经过 Next 的那部分：识别、在语法树上替换节点、meta 白名单、名册的机读规则、按原文渲染。
  * 认记号与渲染在 `@godcreator/docfirst-workflow/mdx`，替换节点、代码块的样子、名册规则在 `@godcreator/docfirst-workflow/fumadocs`。
  * 接入 fumadocs 管线的那部分（loader、_markdown、页面上的状态点）由 docs-site 自己的测试检查。
  */
@@ -129,9 +129,9 @@ test("目录树：换成 fumadocs 的 Files，根是展开的文件夹、名字�
   assert.equal(root.name, "Folder");
   assert.deepEqual(attrsOf(root), { name: "src/", defaultOpen: true });
   assert.deepEqual(root.children!.map((n) => [n.name, attrsOf(n).name]), [["File", "add.ts"], ["Folder", "lib"], ["Folder", "util"]]);
-  assert.deepEqual(attrsOf(root.children![1]!), { name: "lib", defaultOpen: true }, "有孩子的文件夹展开");
+  assert.deepEqual(attrsOf(root.children![1]!), { name: "lib", defaultOpen: true }, "有子项的文件夹展开");
   assert.deepEqual(root.children![1]!.children!.map((n) => attrsOf(n).name), ["deep.ts"]);
-  assert.deepEqual(attrsOf(root.children![2]!), { name: "util", disabled: true }, "到深度尽头没孩子的文件夹禁用");
+  assert.deepEqual(attrsOf(root.children![2]!), { name: "util", disabled: true }, "到最大深度、没有子项的文件夹禁用");
 
   // 给 AI 读的那份标注直接写好：来源 + text 清单；stamp 见到已有标注就跳过，不去名册里找 Files
   assert.deepEqual(files.data!.docfirst, { source: "src/", label: "新鲜", value: names.join("\n") });
@@ -160,7 +160,7 @@ test("目录树的黄和红：黄摆当前的名字表、容器是黄点；目�
   assert.equal(attrsOf(gone.children![0]!.children![0]!).name, "（目录不在了）");
 });
 
-test("作者手写的 Files 走默认名册：压成一行一个名字，文件夹带尾斜杠", () => {
+test("作者手写的 Files 走默认名册：转成一行一个名字，文件夹带尾斜杠", () => {
   const doc = '<Files>\n  <Folder name="src" defaultOpen>\n    <File name="add.ts" />\n  </Folder>\n  <File name="package.json" />\n</Files>\n';
   const tree = stamp(parseTree(doc), fumadocsRoster);
   const files = tree.children![0]!;
@@ -207,7 +207,7 @@ test("md 那头：来源行 + 一块干净的代码，diff 标记不漏进 AI �
   assert.ok(out.includes(CURRENT.join("\n")), "AI 那份放的是当前段");
 });
 
-test("名册：默认表压平 Note；项目的规则只用 helpers；表外组件报到行", () => {
+test("名册：默认表把 Note 转成机读文字；项目的规则只用 helpers；表外组件报到行", () => {
   const rules: Roster = {
     ...fumadocsRoster,
     Tabs: "children",
@@ -237,7 +237,7 @@ test("名册：默认表压平 Note；项目的规则只用 helpers；表外组�
   });
   // Note、Tabs、Tab、Hidden 四个组件各有一个标注；Hidden 写在一行里，是段落底下的行内组件
   assert.equal(marks.length, 4);
-  assert.deepEqual(Object.keys(fumadocsRoster).sort(), ["File", "Files", "Folder", "Note"], "默认表：Note 加 fumadocs 的文件树三件");
+  assert.deepEqual(Object.keys(fumadocsRoster).sort(), ["File", "Files", "Folder", "Note"], "默认表：Note 加 fumadocs 的文件树三个组件");
   assert.equal((marks[0]!.docfirstAi as TreeNode[])[0]!.type, "blockquote", "块级 Note 变引用块");
   assert.deepEqual(marks[3]!._stringify, { text: "" }, "drop 的组件整个不要");
   assert.throws(() => stamp(parseTree("# x\n\n<Tabs>\n  x\n</Tabs>\n"), fumadocsRoster), /第 3 行：名册外组件 <Tabs>/);

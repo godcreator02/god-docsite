@@ -9,7 +9,7 @@ import type { OutputTarget } from "./placement.ts";
 export interface ProjectConfig {
   /** 内容根，相对项目根；默认 content */
   content?: string;
-  /** 组件名册（压平规则），mdx 格式用；没声明就是空表，出现任何组件都算名册外 */
+  /** 组件名册（机读规则），mdx 格式用；没声明就是空表，出现任何组件都算名册外 */
   components?: Roster;
   /**
    * 生成正本的摆放：文档身份（相对项目根、正斜杠）→ 目标数组。每个目标是相对项目根的路径（可以出根），

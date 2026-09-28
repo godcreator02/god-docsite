@@ -6,7 +6,7 @@
  * **定义直接写成属性**，不在浏览器里查表：组件因此是纯展示的，不用带一份词表进客户端包，
  * 静态导出也照跑。一篇只标第一次，重复的量很小。
  *
- * **挂在 docfirst 自己那个插件之前**（`docfirstMdxOptions` 里就是这个顺序）：那时树上还只有
+ * **排在 docfirst 自己那个插件之前**（`docfirstMdxOptions` 里就是这个顺序）：那时树上还只有
  * 作者写的散文，引用投影的代码块、目录树都还没注入，标注碰不到它们。
  *
  * 源文件里没有 `<Term>`，它是站构建时加进树的，所以命令行的 check 与 `render` 看到的是原文。
@@ -27,12 +27,12 @@ export interface GlossaryOptions {
   skipFile?: (path: string) => boolean;
 }
 
-/** 标出来的组件名。站的 React 表与压平表里都得有这个名字 */
+/** 标出来的组件名。站的 React 表与机读规则表里都得有这个名字 */
 const TERM = "Term";
 
 /**
  * 这些地方不标，一条都不能少：
- *   code / inlineCode  代码里换词就是改代码。docfirst 的投影块全是代码，这条顺带把它们保住了
+ *   code / inlineCode  代码里换词就是改代码。docfirst 的投影块全是代码，这条顺带把它们排除在外
  *   heading            标题里换节点会动到 TOC 与锚点
  *   link / 定义        链接里再套一层交互是坏体验；链接定义换了就指不到地方
  *   yaml / toml        frontmatter 不是正文

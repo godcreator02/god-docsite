@@ -42,7 +42,7 @@ description: 记号上的 blob 在进程里算；check 按被钉文件自己的�
 不在对象库（没提交过、浅克隆、gc 过）、缩写有歧义、认出的不是 blob，都只是「没有旧内容」，交回 `null`，不报错；
 取到的按「仓 + blob」记在进程里，一次 `check` 里同一个 blob 只启动一次 git。
 
-{/* ref file="../packages/docfirst-workflow/src/node/git.ts" lines="80-110" hash="e2ae5457dc1d" blob="834127e543cf" */}
+{/* ref file="../packages/docfirst-workflow/src/node/git.ts" lines="80-110" hash="a21fdd8f7231" blob="ac7c0022dac9" */}
 
 ## hunk 表：两份内容跑一次 git diff
 
@@ -55,7 +55,7 @@ hunk 表按「旧内容的 blob + 新内容的 blob」缓存在进程里：键�
 同一次 `check` 里钉在同一个文件上的几十处引用只 diff 一次。不写到磁盘上：只挪了位置、没人重新确认的引用每次 `check` 要再对一次位置，
 实测只多 0.15 秒左右（轨迹卡「挪代码前后输出一致」）。
 
-{/* ref file="../packages/docfirst-workflow/src/node/git.ts" lines="112-113" hash="f2e403602a76" blob="3f76fa2cf505" */}
+{/* ref file="../packages/docfirst-workflow/src/node/git.ts" lines="112-113" hash="841bf9665835" blob="ac7c0022dac9" */}
 
 把旧行段对到今天的是钉码核心里的纯函数，它只收 hunk 表，不认识 git：
 

@@ -7,7 +7,7 @@
  *
  * **包名出现在这儿不算依赖**：它是写进别人 `package.json` 的字符串，插件自己一行都不
  * import、发出去也不会被谁装上。插件对本仓 `packages/` 下各包的零依赖检查查的是本插件
- * `package.json` 的三档依赖与源码 import，跟这张表不冲突——建出来的站要运行 `pnpm doc`、要渲染，
+ * `package.json` 的三类依赖与源码 import，跟这张表不冲突——建出来的站要运行 `pnpm doc`、要渲染，
  * 那是**仓**里的事，仓当然该装这个包。
  *
  * 这是一张**手写的表**，不从别处读：工作区里写的是 `workspace:*`，写进别人的站里装不上；
@@ -15,5 +15,5 @@
  * 「表是精确号、跟工作区各包的版本对得上」检查——**包升了版本号，这张表跟着改，那条测试红了就是忘了改**。
  */
 export const DOCFIRST_DEPS: Record<string, string> = {
-  "@godcreator/docfirst-workflow": "0.5.0",
+  "@godcreator/docfirst-workflow": "0.5.1",
 };

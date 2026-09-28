@@ -196,7 +196,7 @@ fumadocs 自带组件的规则在 [fumadocs 适配](/docs/fumadocs)的 `./roster
 
 `confirm` 带路径时只动点名的页；`--accept` 必须点名页，点名的路径对不上项目里的文档，当场以退出码 2 结束。重新生成生成物不按页限定，按内容判：
 
-{/* ref file="../packages/docfirst-workflow/src/cli/commands.ts" lines="17-45" hash="6f34c1d2844a" blob="937001d7a349" */}
+{/* ref file="../packages/docfirst-workflow/src/cli/commands.ts" lines="17-45" hash="6aeaa422bbfc" blob="2732fec328d4" */}
 
 `trajectory` 不遍历文档：读卡目录、交给星轨盘建模，打印那一张盘的树与主干；`--json` 出这张盘的输入（盘心、卡、病卡）与树。没有轨迹卡目录就以退出码 2 结束：
 
@@ -221,7 +221,7 @@ fumadocs 自带组件的规则在 [fumadocs 适配](/docs/fumadocs)的 `./roster
 **`loadProject(root)`** 同一个根只装配一次，站构建时 loader 并发调用拿到同一个项目。配置只认三个键，项目上带着钉码编排、名册、
 内容根、轨迹卡目录与摆放：
 
-{/* ref file="../packages/docfirst-workflow/src/project/config.ts" lines="9-20" hash="5fda9d235fec" blob="4917ab14c441" */}
+{/* ref file="../packages/docfirst-workflow/src/project/config.ts" lines="9-20" hash="134a6a7d493a" blob="4d000ef02d9b" */}
 
 {/* ref file="../packages/docfirst-workflow/src/project/load.ts" lines="22-43" hash="ccbed082425c" blob="205ed5645903" */}
 

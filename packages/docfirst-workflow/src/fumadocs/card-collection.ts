@@ -12,7 +12,7 @@ import type { Link, Paragraph, Root } from "mdast";
  * 这几个 mdast 节点类型是本出口公共签名的一部分（`remarkTrajectoryLinks` 接收一棵 `Root`）。
  * **消费方要用的是从这儿再导出的这一份**：dts 打包会把 mdast 的形状原样内联进产物的 `.d.mts`，
  * 那份跟消费方自己 `import type { Root } from "mdast"` 拿到的不是同一个名义类型，直接接会报
- * 「Root 不能赋给 Root」这种读起来像绕口令的错。再导出一次，两头说的就是同一个名字。
+ * 「Root 不能赋给 Root」这种看不出原因的错。再导出一次，产物与消费方用的就是同一个类型。
  */
 export type { Link, Paragraph, PhrasingContent, Root, Text } from "mdast";
 // 类型专用：不引 zod、不引任何校验库，schema 对象仍是手写的字面量——只借这份官方类型
@@ -26,7 +26,7 @@ import { CARD_EXT, CARD_KEYS, cardIdFromHref, EDGE_HEAD, ID_DATE_PREFIX } from "
 
 /** 卡页渲染需要的字段：label 派生成 title（缺 label 时退到文件名，见下），其余原样透出，
  * born-at 若被 fumadocs 自己的 YAML 解析成 Date（日级写法的已知问题，卡格式自己的
- * `parseFrontmatter` 绕开了它，但 fumadocs 走的是它自己的 gray-matter，躲不掉）就转回字符串。
+ * `parseFrontmatter` 绕开了它，但 fumadocs 用的是它自己的 gray-matter，避免不了）就转回字符串。
  * 同一集合里不是卡的页（`trajectory/index.mdx` 这种导读页）只有 title / description。 */
 export interface CardFrontmatter {
   title: string;
