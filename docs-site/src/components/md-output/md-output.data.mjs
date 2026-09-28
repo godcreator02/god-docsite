@@ -1,7 +1,7 @@
 /**
  * 「一页的 md 怎么来、怎么取」的全部讲解数据：画面（md-output.tsx）与机读版规则（md-output.ai.mjs）都只读这一份。
  * 例子跟钉码页是同一个仓：content/docs/a.mdx 钉 src/greet.ts 第 2–3 行，外加一个 Note 组件。
- * 构建时那几步照 fumadocs-mdx 的 remarkPostprocess、docfirst-workflow 的 remark 插件、名册打标与序列化回调；
+ * 构建时那几步照 fumadocs-mdx 的 remarkPostprocess、docfirst-workflow 的 remark 插件、按名册标上机读文字的 stamp 与序列化回调；
  * 请求时那几种照站的 src/proxy.ts、llms 路由与 fumadocs-core 的 isMarkdownPreferred。
  * md 的样子（标题行后两个空行、来源注释、引用块）照本站实际取回的 md。
  *
@@ -87,7 +87,7 @@ export const mdPaths = {
 
 /* ref file="../packages/docfirst-workflow/src/fumadocs/remark-plugin.ts" lines="26-32" hash="ac17d35141a4" blob="0723b1e3439d" */
 /* ref file="../packages/docfirst-workflow/src/fumadocs/blocks.ts" lines="64-77" hash="ad638e9c6e35" blob="705792ee655d" */
-/* ref file="../packages/docfirst-workflow/src/mdx/roster.ts" lines="115-128" hash="f7aab65c4ab2" blob="a8241fff7170" */
+/* ref file="../packages/docfirst-workflow/src/mdx/roster.ts" lines="115-128" hash="62ded788a80a" blob="96d12516ef43" */
 /* ref file="../packages/docfirst-workflow/src/fumadocs/roster.ts" lines="13-14" hash="e7f78550c886" blob="e605fbea15a7" */
 /* ref file="../packages/docfirst-workflow/src/fumadocs/markdown.ts" lines="24-45" hash="a74a112c335a" blob="0f8adb086fd4" */
 /* ref file="src/lib/source.ts" lines="35-37" hash="b41af54c6c86" blob="5ee282b98601" */
@@ -98,7 +98,7 @@ export const buildSteps = [
   {
     id: 'parse',
     title: '解析成语法树',
-    text: 'next build 编译这一页时，fumadocs 的 mdx 加载器把正本解析成 mdast 语法树：frontmatter 是 yaml 节点，引用记号是 mdxFlowExpression，Note 组件是 mdxJsxFlowElement。页面和 md 都从这一棵树出来。',
+    text: 'next build 编译这一页时，fumadocs 的 mdx 加载器把正本解析成 mdast 语法树：frontmatter 是 yaml 节点，引用记号是 mdxFlowExpression，Note 组件是 mdxJsxFlowElement。页面和 md 都从这一棵树生成。',
     source: [1, 12],
     tree: 'parsed',
     treeHighlight: [1, 6],
@@ -117,8 +117,8 @@ export const buildSteps = [
   },
   {
     id: 'stamp',
-    title: '按名册打标',
-    text: '插件接着查组件名册：Note 组件的规则把它压成一个引用块「[note] …」，这组替换节点挂在 data.docfirstAi 上。名册里找不到的组件当场报错，这一页编译失败，站构建不过。',
+    title: '按名册标上机读文字',
+    text: '插件接着查组件名册：Note 组件的规则把它转成一个引用块「[note] …」，这组替换节点写在 data.docfirstAi 上。名册里找不到的组件当场报错，这一页编译失败，站构建不过。',
     source: [10, 12],
     tree: 'stamped',
     treeHighlight: [7, 9],
@@ -164,7 +164,7 @@ export const serveCases = [
   {
     id: 'browser',
     label: '浏览器打开页面',
-    text: '路径不以 .md 结尾；浏览器的 Accept 里没有 md 类型，只有 text/html 与 */*，proxy 原样放行，页面路由出 HTML。',
+    text: '路径不以 .md 结尾；浏览器的 Accept 里没有 md 类型，只有 text/html 与 */*，proxy 原样放行，由页面路由生成 HTML。',
     command: 'curl -H "Accept: text/html,application/xhtml+xml,*/*;q=0.8" http://127.0.0.1:4310/docs/a',
     rule: 'none',
     ruleNote: '后缀规则不命中；Accept 里 md 类型的权重是 0，不改写',
@@ -260,7 +260,7 @@ export const serveCases = [
  * @typedef {{ id: string, label: string, text: string, source: string[], ruleTitle: string, rule: string[],
  *   md: string[] | null, error: string | null }} ComponentCase
  */
-/* ref file="../packages/docfirst-workflow/src/mdx/roster.ts" lines="9-13" hash="5f32c20ae455" blob="a8241fff7170" */
+/* ref file="../packages/docfirst-workflow/src/mdx/roster.ts" lines="9-13" hash="6018c9c5ef77" blob="96d12516ef43" */
 /* ref file="../packages/docfirst-workflow/src/mdx/roster.ts" lines="91-107" hash="09207f8b31fa" blob="a8241fff7170" */
 /* ref file="../packages/docfirst-workflow/src/fumadocs/roster.ts" lines="12-19" hash="ad2aa594110a" blob="e605fbea15a7" */
 /* ref file="src/components/tabs/tabs.ai.mjs" lines="7-13" hash="d9e081072a18" blob="49753e4af3a6" */
@@ -306,7 +306,7 @@ export const componentCases = [
   {
     id: 'nested',
     label: '排版组件与嵌套',
-    text: '排版组件包的是作者写的正文。嵌套的组件各走各的规则：外壳 Tabs 只留子内容，每个 Tab 用 title 出一个三级标题，后面接它自己的子内容。',
+    text: '排版组件包的是作者写的正文。嵌套的组件各按各的规则：外壳 Tabs 只留子内容，每个 Tab 用 title 生成一个三级标题，后面接它自己的子内容。',
     source: ['<Tabs>', '  <Tab title="命令行">', '    运行 `docfirst check`。', '  </Tab>', '  <Tab title="站构建">', '    next build 时同样核对。', '  </Tab>', '</Tabs>'],
     ruleTitle: 'src/components/tabs/tabs.ai.mjs',
     rule: ['export const Tabs = "children";', '', 'export function Tab(node, { attr, heading, children }) {', '  return [heading(3, attr(node, "title") ?? "标签"), ...children()];', '}'],
@@ -331,7 +331,7 @@ export const componentCases = [
   {
     id: 'drop',
     label: '整个不要',
-    text: '规则写 "drop"，这个组件在 md 里整个去掉：打的是 fumadocs 自家的标 _stringify: { text: "" }，原位置只留下几个空行。适合只有装饰作用、没有内容的组件；本站现在没有用到，下面的 Divider 是示例。',
+    text: '规则写 "drop"，这个组件在 md 里整个去掉：写的是 fumadocs 自己定义的字段 _stringify: { text: "" }，原位置只留下几个空行。适合只有装饰作用、没有内容的组件；本站现在没有用到，下面的 Divider 是示例。',
     source: ['第一段。', '', '<Divider />', '', '第二段。'],
     ruleTitle: 'docfirst.config.mjs 的 components',
     rule: ['Divider: "drop",'],
@@ -341,7 +341,7 @@ export const componentCases = [
   {
     id: 'tree-ref',
     label: '引用注入的文件树',
-    text: '目录树引用在站上换成 fumadocs 的 Files 组件，md 那份的标在换节点时就写好了：一行来源注释加一块名字表。打标时看到已经有标，不去名册里找它，也不往里走。',
+    text: '目录树引用在站上换成 fumadocs 的 Files 组件，md 那份的替换节点在换节点时就写好了：一行来源注释加一块名字表。stamp 这一步看到它已经带着替换节点，不去名册里找它，也不往里走。',
     source: ['{/* tree dir="src" hash="8f9bf9539c42" */}'],
     ruleTitle: '不查名册（换节点时已经写好）',
     rule: ['data.docfirstAi = [{ type: "code", lang: "text", value: 名字表 }]'],
@@ -351,7 +351,7 @@ export const componentCases = [
   {
     id: 'unknown',
     label: '名册外组件',
-    text: '名册里没有规则的组件，打标时当场报错，这一页编译失败、站构建不过；docfirst check 也报成红，不用等构建。fumadocs 默认组件表里的 Callout、Card 这些也不在自带的规则里，要用先在 docfirst.config.mjs 给一条规则。',
+    text: '名册里没有规则的组件，stamp 这一步当场报错，这一页编译失败、站构建不过；docfirst check 也报成红，不用等构建。fumadocs 默认组件表里的 Callout、Card 这些也不在自带的规则里，要用先在 docfirst.config.mjs 给一条规则。',
     source: ['<Callout>先备份。</Callout>'],
     ruleTitle: 'docfirst.config.mjs 的 components',
     rule: ['（没有 Callout）'],

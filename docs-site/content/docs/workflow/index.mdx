@@ -1,12 +1,12 @@
 ---
 title: workflow 命令行与项目
-description: docfirst-workflow：命令行 docfirst、项目装配（读文件、git、生成物）、钉码编排、记号写法、两种格式（mdx 页面与讲解组件的源码）、docfirst 卡格式；调用链从 docfirst 命令开始的都在这个包里，这一侧不认识任何站的宿主；接到 fumadocs 站上的子入口 ./fumadocs 也在这个包里，讲在 fumadocs 适配页
+description: docfirst-workflow：命令行 docfirst、项目装配（读文件、git、生成物）、钉码编排、记号写法、两种格式（mdx 页面与讲解组件的源码）、docfirst 卡格式；调用链从 docfirst 命令开始的都在这个包里，这一侧不认识任何站的宿主；给 fumadocs 站用的子入口 ./fumadocs 也在这个包里，讲在 fumadocs 适配页
 full: true
 ---
 
 包 `@godcreator/docfirst-workflow`，源码在 `packages/docfirst-workflow/src/`。出口 `.`（`src/index.ts`）、`./mdx`（`src/mdx/index.ts`）、
 `./cards`（`src/cards/index.ts`），可执行文件 `docfirst`（`src/cli/cli.ts`）。
-接到 fumadocs 站上的部分在 `src/fumadocs/`，经 `./fumadocs` 开头的出口发出去，讲在 [fumadocs 适配](/docs/fumadocs)。
+给 fumadocs 站用的部分在 `src/fumadocs/`，经 `./fumadocs` 开头的出口导出，讲在 [fumadocs 适配](/docs/fumadocs)。
 
 <SeamMap module="workflow" />
 
@@ -65,7 +65,7 @@ docfirst 的轨迹卡怎么写、怎么校验、怎么换成星轨盘要的中�
 
 {/* ref file="../packages/docfirst-workflow/src/cards/index.ts" lines="1-8" hash="6308243858b8" blob="bc29d773b18a" */}
 
-`scanCards` 收读好的卡文件，交回中性输入加病卡清单：先报单卡的病，再做跨文件的校验，再查「卡里不许钉码」，有病但画得出来的卡照样上盘。
+`scanCards` 收读好的卡文件，交回中性输入加病卡清单：先报单张卡自己的错，再做跨文件的校验，再查「卡里不许钉码」，有错但画得出来的卡照样画进星轨盘。
 `scanCardDir` 读一个卡目录再交给它，目录不存在回空集合：
 
 {/* ref file="../packages/docfirst-workflow/src/cards/scan.ts" lines="19-44" hash="af462fe9dae6" blob="84851160ced5" */}
@@ -76,7 +76,7 @@ docfirst 的轨迹卡怎么写、怎么校验、怎么换成星轨盘要的中�
 
 ### 钉码编排 pinning
 
-一个文件的核对与确认只在这里串起来：按文件选格式，格式认出引用，每处剥成目标与记录交给钉码核心，结果按原来的顺序配回文件路径与
+一个文件的核对与确认只在这里串起来：按文件选格式，格式认出引用，每处拆成目标与记录交给钉码核心，结果按原来的顺序配回文件路径与
 行号；确认时把钉码核心算出的新记录交回同一个格式写回。命令行、生成物摆放与站构建共用这一份，入口有三个：
 
 {/* ref file="../packages/docfirst-workflow/src/pinning/index.ts" lines="32-39" hash="f1fbdd9d8360" blob="846e36be1e3f" */}
@@ -95,7 +95,7 @@ docfirst 的轨迹卡怎么写、怎么校验、怎么换成星轨盘要的中�
 
 {/* ref file="../packages/docfirst-workflow/src/mdx/index.ts" lines="20-41" hash="00a0ec519d2a" blob="26de56e31ba1" */}
 
-认记号走 remark 语法树：记号是 `mdxFlowExpression` 节点，段落里以 `@@docfirst` 开头的一行报错；一篇里写坏的记号走完整棵树一次列全再报错。
+认记号用 remark 语法树：记号是 `mdxFlowExpression` 节点，段落里以 `@@docfirst` 开头的一行报错；一篇里写坏的记号遍历完整棵树、一次列全再报错。
 写在围栏里、句子里的同样文字分别是 `code` 与 `mdxTextExpression` 节点，不算记号：
 
 {/* ref file="../packages/docfirst-workflow/src/mdx/recognize.ts" lines="16-56" hash="60aef1664825" blob="d7e0f8d45d83" */}
@@ -107,9 +107,9 @@ fumadocs 自带组件的规则在 [fumadocs 适配](/docs/fumadocs)的 `./roster
 
 {/* ref file="../packages/docfirst-workflow/src/mdx/roster.ts" lines="22-33" hash="efedd191320a" blob="d192d3db2a0c" */}
 
-`stamp` 按名册给树上每个组件加标记、不换节点（同一棵树还要出页面），名册外的组件报错并给出行号；把标记序列化成 md 的回调在 fumadocs 适配：
+`stamp` 按名册给树上每个组件标上机读文字（写在节点的 data 上）、不换节点（同一棵树还要生成页面），名册外的组件报错并给出行号；把机读文字序列化成 md 的回调在 fumadocs 适配：
 
-{/* ref file="../packages/docfirst-workflow/src/mdx/roster.ts" lines="109-128" hash="c5990a4e9fe5" blob="d192d3db2a0c" */}
+{/* ref file="../packages/docfirst-workflow/src/mdx/roster.ts" lines="109-128" hash="2f46ee591d59" blob="96d12516ef43" */}
 
 `renderAi` 把生成正本按原文渲染成 md，不经过 fumadocs，见[生成物渲染](/docs/workflow/rendering)。
 按原文渲染拒绝渲染时抛的错误类也在这里，摆放用 `instanceof` 认出它，把这篇的每个落点报成红，别的错照原样抛：
@@ -168,7 +168,7 @@ fumadocs 自带组件的规则在 [fumadocs 适配](/docs/fumadocs)的 `./roster
 
 ### 命令行 cli
 
-`run.ts` 的 `main` 认命令与开关（开关表、求助与用法在 `args.ts`），装配项目，交给 `commands.ts` 里各命令的函数；每种结果打成哪一行在 `text.ts`。
+`run.ts` 的 `main` 认命令与开关（开关表、求助与用法在 `args.ts`），装配项目，交给 `commands.ts` 里各命令的函数；每种结果打印成哪一行在 `text.ts`。
 子命令与各自做什么写在入口文件头上：
 
 {/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="1-22" hash="1d41b72013a9" blob="bd1e29a8b8d5" */}
@@ -198,7 +198,7 @@ fumadocs 自带组件的规则在 [fumadocs 适配](/docs/fumadocs)的 `./roster
 
 {/* ref file="../packages/docfirst-workflow/src/cli/commands.ts" lines="17-45" hash="6aeaa422bbfc" blob="2732fec328d4" */}
 
-`trajectory` 不遍历文档：读卡目录、交给星轨盘建模，打印那一张盘的树与主干；`--json` 出这张盘的输入（盘心、卡、病卡）与树。没有轨迹卡目录就以退出码 2 结束：
+`trajectory` 不遍历文档：读卡目录、交给星轨盘建模，打印那一张盘的树与主干；`--json` 输出这张盘的输入（盘心、卡、病卡）与树。没有轨迹卡目录就以退出码 2 结束：
 
 {/* ref file="../packages/docfirst-workflow/src/cli/commands.ts" lines="112-132" hash="812d4b9bcb55" blob="937001d7a349" */}
 
@@ -226,12 +226,12 @@ fumadocs 自带组件的规则在 [fumadocs 适配](/docs/fumadocs)的 `./roster
 {/* ref file="../packages/docfirst-workflow/src/project/load.ts" lines="22-43" hash="ccbed082425c" blob="205ed5645903" */}
 
 **`./mdx`** 除了格式本身，还交出语法树上的函数给 fumadocs 适配：站构建时 remark 插件拿到的树已经解析好，用 `recognize` 认记号、
-`stamp` 打标记，不再解析一遍；`langOf` 让按原文渲染与站上的代码块标同一种语言：
+`stamp` 按名册标上机读文字，不再解析一遍；`langOf` 让按原文渲染与站上的代码块标同一种语言：
 
 {/* ref file="../packages/docfirst-workflow/src/mdx/index.ts" lines="43-49" hash="fc17028f62dc" blob="231d2e8eb8e6" */}
 
 **`./cards`** 是整个卡格式：读卡目录、解析、字段表、卡身份。fumadocs 适配的 `loadTrajectory` 与卡集合用它；
-走 `.` 会把命令行与配置加载带进 Next 的服务端构建：
+从 `.` 取会把命令行与配置加载带进 Next 的服务端构建：
 
 {/* ref file="../packages/docfirst-workflow/tsdown.config.ts" lines="8-11" hash="0160c388d13b" blob="15c1ca54010e" */}
 
@@ -261,7 +261,7 @@ fumadocs 自带组件的规则在 [fumadocs 适配](/docs/fumadocs)的 `./roster
 {/* ref file="../tests/boundary.test.ts" lines="433-447" hash="6cf7852c8dc4" blob="0d3a5dcc329f" */}
 
 - **`node/` 以外不碰磁盘与子进程**：别的目录不 import `node:fs`、`node:child_process`、`node:os`；`process` 只有 `node/` 与命令行用。
-  记号、格式、钉码编排、卡的解析因此都能直接拿文本测：
+  记号、格式、钉码编排、卡的解析因此都能直接用文本测试：
 
 {/* ref file="../tests/boundary.test.ts" lines="470-481" hash="7430135f6d42" blob="0d3a5dcc329f" */}
 
@@ -269,6 +269,6 @@ fumadocs 自带组件的规则在 [fumadocs 适配](/docs/fumadocs)的 `./roster
 - **不给盘建模、不画盘**：关系怎么连成树、主干怎么选、盘怎么画归[星轨盘](/docs/trajectory)；这个包只把卡文件换成它要的中性输入。
 - **摆放不读写文件**：`placement.ts` 经 `PlacingHost` 读写落点，读写磁盘的那份实现在 `load.ts`，测试换成内存那份：
 
-{/* ref file="../packages/docfirst-workflow/src/project/placement.ts" lines="77-91" hash="90be89518ac3" blob="6dc0e3cf3ba7" */}
+{/* ref file="../packages/docfirst-workflow/src/project/placement.ts" lines="77-91" hash="a7aad4d374e5" blob="6e09accb1712" */}
 
 - **不建站**：建站命令与模板归[工作台插件](/docs/plugin)。

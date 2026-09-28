@@ -1,5 +1,5 @@
 /**
- * remark 插件：挂在 fumadocs 的 remark 链尾巴上。认引用 → 钉码编排算清单 → 树上换节点 → 按名册打标。
+ * remark 插件：加在 fumadocs 的 remark 链末尾。认引用 → 钉码编排算清单 → 树上换节点 → 按名册标上机读文字。
  * 调用方提供三样：钉码编排（从项目装配来）、由 vfile 算文档身份的函数、名册（项目上的那份）。
  */
 import type { Listing, Reference } from "@godcreator/docfirst-workflow";

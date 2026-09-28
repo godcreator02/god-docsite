@@ -1,16 +1,16 @@
 /**
  * 组件名册的机制。名册的内容不在这里：项目在 docfirst.config.mjs 里声明自己的表，
- * 这里只提供「按一张表打标」的能力与写规则用的几个帮手。fumadocs 自带组件的规则
+ * 这里只提供「按一张表给组件标上机读文字」的能力与写规则用的几个帮手。fumadocs 自带组件的规则
  * 在 `@godcreator/docfirst-workflow/fumadocs/roster`，项目展开它再加自己的。
  *
- * 打标不动树：同一棵树还要出页面。每个组件节点挂上「AI 那份里它长什么样」，
+ * 标上机读文字时不改树：同一棵树还要生成页面。每个组件节点的 data 上写明「机读版里它是什么样」，
  * 真正序列化是 fumadocs 的事（见 `@godcreator/docfirst-workflow/fumadocs` 的 markdown.ts 回调）。
  *
  * 规则三种写法：
  *   函数        (node, helpers) => 一个或一组普通 markdown 节点。纯函数：节点进节点出，不读文件
  *   "children"  只留子内容，去掉外壳
- *   "drop"      整个不进 AI 那份
- * 嵌套的组件不用规则操心：子节点还在树上，各自有各自的标。名册外的组件硬失败，报到行。
+ *   "drop"      整个不进机读版
+ * 嵌套的组件不用规则处理：子节点还在树上，各自标上各自的机读文字。名册外的组件直接报错，报出行号。
  *
  * 契约：函数规则只能通过 helpers 读节点（attr / textOf）、造节点（text / heading / paragraph / quote /
  * children），节点本身对规则是黑盒——不碰 node.type、node.children 这些字段。守住这条，同一张表换个
@@ -64,9 +64,9 @@ const PHRASING = new Set([
 ]);
 
 /**
- * 组件的子内容，摆成规则能交回的形状。
- * 块级组件写在一行里时，子节点是行内内容（文字、行内组件），不能直接摆到块级位置：
- * 连续的行内节点归成一个段落，块级节点原样放行。行内组件的子内容原样交回。
+ * 组件的子内容，整理成规则能交回的形状。
+ * 块级组件写在一行里时，子节点是行内内容（文字、行内组件），不能直接放到块级位置：
+ * 连续的行内节点归成一个段落，块级节点原样保留。行内组件的子内容原样交回。
  */
 export function childrenOf(node: TreeNode): TreeNode[] {
   const kids = node.children ?? [];
@@ -107,14 +107,14 @@ function apply(rule: Rule, node: TreeNode, roster: Roster): TreeNode[] {
 }
 
 /**
- * 给树上每个组件打标。挂两种标，都是 fumadocs 序列化时认的：
+ * 按名册给树上每个组件标上机读文字。写进节点 data 的有两种字段，都是 fumadocs 序列化时认的：
  *   data.docfirstAi     一组替换节点，回调里用 fumadocs 的 state 序列化（嵌套组件顺着走）
- *   data._stringify    fumadocs 自家的标；{ text: "" } 表示整个不要
+ *   data._stringify    fumadocs 自己定义的字段；{ text: "" } 表示整个不要
  * 已经带 docfirstAi 的节点（目录树引用注入的 Files）跳过、不往里走。import 语句不用管：fumadocs 自己会把 mdxjsEsm 滤掉。
  */
 export function stamp(tree: TreeNode, roster: Roster): TreeNode {
   walk(tree, (node, index) => {
-    // 机制注入的节点（目录树那棵 Files）标已经打好，不在名册里找它，也不往它里面走
+    // 换节点时生成的节点（目录树那棵 Files）已经带着机读文字，不在名册里找它，也不往它里面走
     if (node.data?.docfirstAi !== undefined) return index === null ? undefined : index + 1;
     if (!isComponent(node)) return;
     const rule = roster[node.name ?? ""];

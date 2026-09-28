@@ -114,7 +114,7 @@ function RedSources(): JSX.Element {
   );
 }
 
-/** 提交按钮的图标：锁（被拦）、对勾（通过）、时钟（等重跑 check）；笔画取自 Lucide（ISC 许可） */
+/** 提交按钮的图标：锁（被拦）、对勾（通过）、时钟（等重新运行 check）；笔画取自 Lucide（ISC 许可） */
 function GateIcon({ gate }: { gate: Gate }): JSX.Element {
   return (
     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">

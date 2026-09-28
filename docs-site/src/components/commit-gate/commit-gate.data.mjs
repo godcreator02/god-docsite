@@ -1,7 +1,7 @@
 /**
  * 「提交门禁拦什么、什么算红」的全部讲解数据：画面（commit-gate.tsx）与机读版规则（commit-gate.ai.mjs）都只读这一份。
  * 例子跟钉码页（pin/story.data.mjs）是同一个 greet.ts：文档 content/docs/a.mdx 钉住它的第 4–5 行，
- * 记号上的 hash 与 blob 取自那份数据（按 code-pin 的算法真算出来的）。
+ * 记号上的 hash 与 blob 取自那份数据（按 code-pin 的算法实际算出来的）。
  * 命令行输出照 docfirst-workflow 的 cli/text.ts 实际打印的格式逐字写；项目根是 ~/repo/docs-site，git 仓根是 ~/repo，
  * 所以 git status 列出的路径带 docs-site/ 前缀，引用里写的路径不带。
  */
@@ -13,7 +13,7 @@ const OTHER_REF = '../../greet-lib/src/greet.ts';
 const MARKER_BEFORE = `{/* ref file="${REF}" lines="4-5" hash="3eb99c2e88e2" blob="58b32ed1c69e" */}`;
 const MARKER_AFTER = `{/* ref file="${REF}" lines="4-5" hash="9a083fec7547" blob="eeec5ca2bd8f" */}`;
 
-/* ref file="../packages/docfirst-workflow/src/cli/text.ts" lines="54-61" hash="9d2eb01cf9a5" blob="cc1432339eb9" */
+/* ref file="../packages/docfirst-workflow/src/cli/text.ts" lines="54-61" hash="1463f08e694b" blob="dfe396df5a65" */
 const BLOCKING_LINE = `🔴 ${DOC}  ${REF}:4-5  有变动，是本仓还没提交的改动引起的——在同一个提交里复核，再 docfirst confirm ${DOC} --accept`;
 
 export const files = { doc: DOC, ref: REF, cwd: '~/repo/docs-site' };
@@ -47,9 +47,9 @@ export const notRed = ['🟢 新鲜', '⚪ 未确认', '🟡 有变动但不是�
  * 每一步是一个固定状态。
  *   repos     每个相关 git 仓此刻 `git status --porcelain` 的输出；lines 为空表示没有未提交改动；hit 是探针认出的那一行路径
  *   change    这一步动了哪个文件（git diff 的旧行与新行）；没有就是 null
- *   probe     check 对这处引用的判定：逐个问题的回答与结论；这一步跑的不是 check、或是汇总，就是 null
+ *   probe     check 对这处引用的判定：逐个问题的回答与结论；这一步运行的不是 check、或是汇总，就是 null
  *   sources   这一步画「红从哪里来」
- *   command   终端里敲的命令，output 是它打印的行，exit 是它的退出码
+ *   command   终端里输入的命令，output 是它打印的行，exit 是它的退出码
  *   gate      门禁：blocked 被拦、open 通过、pending 还要重新运行 check
  *
  * @typedef {'good' | 'warn' | 'bad' | 'pending' | 'info'} Tone
@@ -65,7 +65,7 @@ export const notRed = ['🟢 新鲜', '⚪ 未确认', '🟡 有变动但不是�
  */
 /* ref file="../packages/docfirst-workflow/src/cli/text.ts" lines="11-17" hash="9ebfdcac2bf1" blob="cc1432339eb9" */
 /* ref file="../packages/docfirst-workflow/src/cli/text.ts" lines="20-38" hash="e7b3a8fc6c68" blob="cc1432339eb9" */
-/* ref file="../packages/docfirst-workflow/src/cli/text.ts" lines="64-70" hash="618abc78ce11" blob="cc1432339eb9" */
+/* ref file="../packages/docfirst-workflow/src/cli/text.ts" lines="64-70" hash="3131f1914c98" blob="dfe396df5a65" */
 /* ref file="../packages/docfirst-workflow/src/node/uncommitted.ts" lines="1-4" hash="4968cfab632f" blob="2ad45230cb96" */
 /* ref file="../packages/docfirst-workflow/src/node/uncommitted.ts" lines="26-35" hash="8fc6d81a0264" blob="ed53157b1c06" */
 /* ref file="../packages/docfirst-workflow/src/cards/card.ts" lines="69-69" hash="566d53167dfe" blob="d3338eaedca6" */
@@ -227,7 +227,7 @@ export const steps = [
       { text: `🟡 ${DOC}  ${OTHER_REF}:4-5  有变动，等作者复核`, kind: 'out' },
       { text: `🔴 ${DOC}  第 12 行 <Chart>  名册外组件，docfirst.config.mjs 里没给它机读规则`, kind: 'err' },
       {
-        text: '🔴 content/docs/outputs/readme.mdx → ../README.md  生成物跟 mdx 源不一致（源改了没重摆，或有人直接改了生成物）——重跑 render',
+        text: '🔴 content/docs/outputs/readme.mdx → ../README.md  生成物跟 mdx 源不一致（源改了没重新生成，或有人直接改了生成物）——重新运行 render',
         kind: 'err',
       },
       {

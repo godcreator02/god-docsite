@@ -4,7 +4,7 @@ description: docfirst-workflow 的子入口 ./fumadocs：mdx 加载器编译页�
 full: true
 ---
 
-包 `@godcreator/docfirst-workflow` 里接到 fumadocs 站上的那部分，源码在 `packages/docfirst-workflow/src/fumadocs/`。出口 `./fumadocs`（`src/fumadocs/index.ts`），另有 `./fumadocs/roster`、`./fumadocs/pre`、
+包 `@godcreator/docfirst-workflow` 里给 fumadocs 站用的那部分，源码在 `packages/docfirst-workflow/src/fumadocs/`。出口 `./fumadocs`（`src/fumadocs/index.ts`），另有 `./fumadocs/roster`、`./fumadocs/pre`、
 `./fumadocs/term`、`./fumadocs/trajectory`，样式表 `./fumadocs/light.css`、`./fumadocs/term.css`、`./fumadocs/trajectory.css`。
 
 <SeamMap module="fumadocs" />
@@ -14,9 +14,9 @@ full: true
 这个目录里的代码都由 fumadocs 或 Next 调用：mdx 加载器编译页面时调的插件、集合的 schema 与回调、页面渲染时的组件。
 入口文件头写明了每样由站的哪一处调用：
 
-{/* ref file="../packages/docfirst-workflow/src/fumadocs/index.ts" lines="1-18" hash="072ee31f5400" blob="2feaa84e8083" */}
+{/* ref file="../packages/docfirst-workflow/src/fumadocs/index.ts" lines="1-18" hash="09a36cc9676d" blob="eaeb0307d8cc" */}
 
-**remark 插件**对每篇依次认引用、算清单、换节点、打标，每一步交给谁见上图：
+**remark 插件**对每篇依次认引用、算清单、换节点、按名册标上机读文字，每一步交给谁见上图：
 
 {/* ref file="../packages/docfirst-workflow/src/fumadocs/remark-plugin.ts" lines="26-32" hash="ac17d35141a4" blob="0723b1e3439d" */}
 
@@ -70,7 +70,7 @@ full: true
 {/* ref file="docfirst.config.mjs" lines="15-15" hash="f32e4a37d2ec" blob="7e58918504da" */}
 
 **集合 `src/lib/source.ts`**：集合用 fumadocs-mdx 的 macro 写，没有全局配置，所以按集合接。集合级 `mdxOptions` 会去掉 fumadocs 的默认
-插件，`applyMdxPreset` 把它们加回来。`docs` 集合接 `docfirstMdxOptions` 与 `docfirstMarkdownOptions`，站上各页的机读版与 llms 路由从这里出：
+插件，`applyMdxPreset` 把它们加回来。`docs` 集合接 `docfirstMdxOptions` 与 `docfirstMarkdownOptions`，站上各页的机读版与 llms 路由从这里生成：
 
 {/* ref file="src/lib/source.ts" lines="23-42" hash="3e9dcbabc58b" blob="0e069abf8afb" */}
 
@@ -151,7 +151,7 @@ React 表先展开 fumadocs 的默认表，再把 `pre` 换成 `DocfirstPre`：
 ## 不做的事
 
 - **不认识 Next**：这个目录里没有一处 `next`，卡页地址由调用方传 `hrefBase`。
-- **不认记号、不判状态**：认记号与打标记用 workflow `./mdx`，核对经项目上的钉码编排，状态由[钉码核心](/docs/pin)算，这里只把清单换成树上的节点。
+- **不认记号、不判状态**：认记号与标上机读文字用 workflow 的 `./mdx`，核对经项目上的钉码编排，状态由[钉码核心](/docs/pin)算，这里只把清单换成树上的节点。
 - **不管讲解组件源码里的引用**：remark 插件只处理 mdx 页面；组件源码里写的引用由命令行的 `check` 核对，站上不显示组件的状态。
 - **不管生成物**：生成正本的渲染与写到哪归 [workflow](/docs/workflow)。
 - **不把宿主、本仓别的包与本包的命令行代码打包进产物**：只按包名 import；`./fumadocs/pre` 的 `"use client"` 在产物第一行，别的出口不带：

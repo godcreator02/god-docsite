@@ -73,11 +73,11 @@ export const fumadocsGraph = defineSeamGraph({
       role: null,
       outside: true,
       blurb:
-        '主入口的 loadProject 交回钉码编排、名册与文档身份，钉码编排的 checkReferences 核对已经在语法树上认好的引用，清单、清单项与引用的类型也从主入口取；./mdx 提供认记号、打标与遍历语法树的函数，命令行认记号用的是同一份；./cards 是 docfirst 卡格式：scanCardDir 读卡目录、校验卡、交回中性输入加病卡，CARD_KEYS 与 cardIdFromHref 给卡集合认卡。都按包名引用，workflow 别的目录不认识这个目录。',
+        '主入口的 loadProject 交回钉码编排、名册与文档身份，钉码编排的 checkReferences 核对已经在语法树上认好的引用，清单、清单项与引用的类型也从主入口取；./mdx 提供认记号、按名册标上机读文字与遍历语法树的函数，命令行认记号用的是同一份；./cards 是 docfirst 卡格式：scanCardDir 读卡目录、校验卡、交回中性输入加病卡，CARD_KEYS 与 cardIdFromHref 给卡集合认卡。都按包名引用，workflow 别的目录不认识这个目录。',
       caps: [
         { id: 'wf-load', name: '项目装配', ident: 'loadProject' },
         { id: 'wf-pinning', name: '钉码编排', ident: 'checkReferences' },
-        { id: 'wf-mdx', name: '认记号与打标', ident: 'recognize · stamp' },
+        { id: 'wf-mdx', name: '认记号、标上机读文字', ident: 'recognize · stamp' },
         { id: 'wf-scan', name: '读卡目录', ident: 'scanCardDir' },
         { id: 'wf-keys', name: '卡字段与卡身份', ident: 'CARD_KEYS · cardIdFromHref' },
       ],
@@ -115,8 +115,8 @@ export const fumadocsGraph = defineSeamGraph({
       role: 'blue',
       outside: false,
       blurb:
-        'remarkDocfirst 对每篇做四步：recognize 认出引用，钉码编排的 checkReferences 算出清单，applyListing 换节点，stamp 按名册打标。调用方给三样：钉码编排、由文件路径算文档身份的 docOf、名册（项目上的那份，配置里没写就是空表）。',
-      caps: [{ id: 'remark', name: '认引用到打标', ident: 'remarkDocfirst' }],
+        'remarkDocfirst 对每篇做四步：recognize 认出引用，钉码编排的 checkReferences 算出清单，applyListing 换节点，stamp 按名册标上机读文字。调用方给三样：钉码编排、由文件路径算文档身份的 docOf、名册（项目上的那份，配置里没写就是空表）。',
+      caps: [{ id: 'remark', name: '每篇的四步', ident: 'remarkDocfirst' }],
     },
     {
       id: 'glossary',
@@ -265,7 +265,7 @@ export const fumadocsGraph = defineSeamGraph({
     },
     {
       n: 5,
-      name: '认引用与打标',
+      name: '认记号与标上机读文字',
       a: ['remark'],
       b: ['wf-mdx'],
       iface: 'recognize(tree) → Reference[]；stamp(tree, roster)',
@@ -371,7 +371,7 @@ export const fumadocsGraph = defineSeamGraph({
       iface: 'buildTermIndex(terms) → TermIndex；findTerms(text, index, taken) → TermSpan[]',
       convention: false,
       via: 'code',
-      text: '插件建出来时建一次索引；每个文字节点交给 findTerms，taken 记这一篇已经标过的术语，所以一篇只标第一次。匹配规则全在 glossary.ts，那边不认识语法树，能单独测。',
+      text: '插件建出来时建一次索引；每个文字节点交给 findTerms，taken 记这一篇已经标过的术语，所以一篇只标第一次。匹配规则全在 glossary.ts，那边不认识语法树，能单独测试。',
     },
     {
       n: 16,
@@ -421,7 +421,7 @@ export const fumadocsGraph = defineSeamGraph({
       iface: "import { loadTrajectory, StarDisk } from '@godcreator/docfirst-workflow/fumadocs/trajectory'；@import '@godcreator/docfirst-workflow/fumadocs/trajectory.css'",
       convention: false,
       via: 'code',
-      text: '本站的星轨整页调用 loadTrajectory 拿到中性输入加病卡，原样交给 StarDisk 的 data，顶栏由页面自己画；路由组的 disk.css 引入 trajectory.css。站不直接依赖星轨盘包。卡目录由页面用 join(process.cwd(), "content", "trajectory") 拼成绝对路径再传：目录名写死，Turbopack 才看得出只读这一个目录，不把整个项目打进服务端产物。',
+      text: '本站的星轨整页调用 loadTrajectory 拿到中性输入加病卡，原样交给 StarDisk 的 data，顶栏由页面自己画；路由组的 disk.css 引入 trajectory.css。站不直接依赖星轨盘包。卡目录由页面用 join(process.cwd(), "content", "trajectory") 拼成绝对路径再传：目录名写成字面量，Turbopack 才看得出只读这一个目录，不把整个项目打包进服务端产物。',
     },
     {
       n: 21,

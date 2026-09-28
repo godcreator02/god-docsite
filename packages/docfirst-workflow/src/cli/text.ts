@@ -1,5 +1,5 @@
 /**
- * 命令行打印的文字：状态符号、状态的中文说法，以及每种结果打成哪一行。只拼字符串，不打印、不读写文件。
+ * 命令行打印的文字：状态符号、状态的中文说法，以及每种结果打印成哪一行。只拼字符串，不打印、不读写文件。
  */
 import { REASON_TEXT } from "@godcreator/code-pin";
 import type { Item } from "../reference/index.ts";
@@ -37,7 +37,7 @@ export function confirmLine(doc: string, { item, action, written, problem }: Con
   }
 }
 
-/** 一个落点没摆放成功时打印的那一行：源头部缺点名的字段，或源里有渲染不了的东西；again 是改好之后再跑哪条命令 */
+/** 一个落点没摆放成功时打印的那一行：源头部缺点名的字段，或源里有渲染不了的东西；again 是改好之后再运行哪条命令 */
 export function unplacedLine(doc: string, { to, status, missing, reason }: PlacedWrite | OutputReport, again: string): string {
   const head = `🔴 ${doc} → ${to}`;
   if (status === "no-frontmatter") return `${head}  mdx 源的 frontmatter 里没有 ${(missing ?? []).join("、")}——补上再 ${again}`;
@@ -51,7 +51,7 @@ function detailOf(item: Item): string {
   return `（${item.current.length} 项）`;
 }
 
-/** 一处引用在人读报告里的那一行；拦提交的黄单独一种说法，打印成红 */
+/** 一处引用在人读报告里的那一行；拦提交的黄色引用单独一种说法，打印成红 */
 export function itemLine(doc: string, item: Item, blocking: boolean): string {
   const key = targetKey(item.reference.target);
   if (blocking) {
@@ -64,7 +64,7 @@ export function itemLine(doc: string, item: Item, blocking: boolean): string {
 export function placedLine(doc: string, output: OutputReport): string {
   const head = `${output.fresh ? "🟢" : "🔴"} ${doc} → ${output.to}`;
   if (output.status === "no-frontmatter" || output.status === "unrenderable") return unplacedLine(doc, output, "render");
-  if (output.status === "missing") return `${head}  生成物还不存在——render 摆过去`;
-  if (output.status === "stale") return `${head}  生成物跟 mdx 源不一致（源改了没重摆，或有人直接改了生成物）——重跑 render`;
+  if (output.status === "missing") return `${head}  生成物还不存在——运行 render 生成`;
+  if (output.status === "stale") return `${head}  生成物跟 mdx 源不一致（源改了没重新生成，或有人直接改了生成物）——重新运行 render`;
   return `${head}  生成物跟 mdx 源一致`;
 }

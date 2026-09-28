@@ -75,7 +75,7 @@ const modules = [
     pkg: '@godcreator/gwb-docfirst-workflow',
     role: 'cyan',
     outside: false,
-    blurb: '不进 npm 的依赖网，只在桌面工作台里给 agent 提供两条建站命令和说明书。对本仓的 npm 包零依赖：不 import、不运行它们的命令行。',
+    blurb: '不在 npm 的依赖关系里，只在桌面工作台里给 agent 提供两条建站命令和说明书。对本仓的 npm 包零依赖：不 import、不运行它们的命令行。',
     caps: [
       { id: 'skills', name: '说明书', ident: 'skills/' },
       { id: 'create', name: '建站命令与模板', ident: 'docfirst.create' },
@@ -87,7 +87,7 @@ const modules = [
     pkg: 'peer 依赖，用站自己装的那份',
     role: null,
     outside: true,
-    blurb: 'fumadocs-mdx 编译 mdx、fumadocs-ui 提供代码块与目录树组件。不属于这个仓，fumadocs 适配按它的形状接上去。',
+    blurb: 'fumadocs-mdx 编译 mdx、fumadocs-ui 提供代码块与目录树组件。不属于这个仓，fumadocs 适配按它的形状接入。',
     caps: [{ id: 'fumadocs-core', name: 'fumadocs 本体', ident: 'fumadocs-mdx · fumadocs-ui' }],
   },
   {
@@ -188,7 +188,7 @@ const seams = [
     iface: '主入口的 loadProject（pinning、roster、docIdOf）与 Listing 等类型；./mdx 的 recognize、stamp 等语法树函数；./cards 的 scanCardDir、CARD_KEYS、cardIdFromHref',
     convention: false,
     via: 'code',
-    text: 'workflow 与 fumadocs 适配之间。站构建时 remark 插件调用 loadProject 装配一次项目，拿到钉码编排与组件名册，用 ./mdx 的 recognize 在语法树上认记号、交给钉码编排的 checkReferences 核对、用 stamp 按名册打标记，认记号用的是和命令行同一份代码。./fumadocs/trajectory 的 loadTrajectory 就是 ./cards 的 scanCardDir，交回中性输入加病卡、不建模；卡集合的 cardSchema 用 CARD_KEYS 判断一页算不算卡，remarkTrajectoryLinks 用 cardIdFromHref 从链接认出卡身份。卡格式只从 ./cards 取、不从主入口取，免得把命令行与配置加载带进 Next 的服务端构建。两边在同一个包 docfirst-workflow 里，fumadocs 适配只按包名用这几个出口，不用相对路径进命令行那一侧的目录。出口由 workflow 负责。',
+    text: 'workflow 与 fumadocs 适配之间。站构建时 remark 插件调用 loadProject 装配一次项目，拿到钉码编排与组件名册，用 ./mdx 的 recognize 在语法树上认记号、交给钉码编排的 checkReferences 核对、用 stamp 按名册标上机读文字，认记号用的是和命令行同一份代码。./fumadocs/trajectory 的 loadTrajectory 就是 ./cards 的 scanCardDir，交回中性输入加病卡、不建模；卡集合的 cardSchema 用 CARD_KEYS 判断一页算不算卡，remarkTrajectoryLinks 用 cardIdFromHref 从链接认出卡身份。卡格式只从 ./cards 取、不从主入口取，免得把命令行与配置加载带进 Next 的服务端构建。两边在同一个包 docfirst-workflow 里，fumadocs 适配只按包名用这几个出口，不用相对路径引用命令行那一侧的目录。出口由 workflow 负责。',
   },
   {
     n: 7,
@@ -198,7 +198,7 @@ const seams = [
     iface: 'applyMdxPreset 的参数形状、postprocess、rehypeCode 的 meta 白名单、CodeBlock、Files',
     convention: false,
     via: 'code',
-    text: 'fumadocs 适配与 fumadocs 本体之间。docfirstMdxOptions 的返回值按形状对上 applyMdxPreset 的参数，把 remark 插件放在链尾；docfirstMarkdownOptions 交给 postprocess 生成机读版；parseMetaString 让 rehypeCode 保留状态点的 data-dot；状态点代码块套 fumadocs-ui 的 CodeBlock，目录树用它的 Files。fumadocs 是 peer 依赖，它改了这些形状，要改的是 fumadocs 适配。',
+    text: 'fumadocs 适配与 fumadocs 本体之间。docfirstMdxOptions 的返回值按形状对上 applyMdxPreset 的参数，把 remark 插件放在链末尾；docfirstMarkdownOptions 交给 postprocess 生成机读版；parseMetaString 让 rehypeCode 保留状态点的 data-dot；状态点代码块用 fumadocs-ui 的 CodeBlock，目录树用它的 Files。fumadocs 是 peer 依赖，它改了这些形状，要改的是 fumadocs 适配。',
   },
   {
     n: 8,
@@ -208,7 +208,7 @@ const seams = [
     iface: 'docfirstMdxOptions、docfirstMarkdownOptions、cardSchema、remarkTrajectoryLinks；./fumadocs/pre、./fumadocs/term、./fumadocs/trajectory、样式表；./fumadocs/roster',
     convention: false,
     via: 'code',
-    text: 'fumadocs 适配与使用方站的接入代码之间。站的 src/lib/source.ts 把前四个出口接到现状集合与轨迹卡集合上，mdx.tsx 把 pre 换成会画状态点的 DocfirstPre、登记 Term，星轨整页调用 loadTrajectory、渲染 StarDisk，样式表 light.css、term.css、trajectory.css 由站引入；docfirst.config.mjs 展开 ./fumadocs/roster 的 fumadocsRoster。出口名由 fumadocs 适配负责，改名要同时改站的接入代码和接缝 12 的模板。',
+    text: 'fumadocs 适配与使用方站的接入代码之间。站的 src/lib/source.ts 把前四个出口用在现状集合与轨迹卡集合上，mdx.tsx 把 pre 换成会画状态点的 DocfirstPre、登记 Term，星轨整页调用 loadTrajectory、渲染 StarDisk，样式表 light.css、term.css、trajectory.css 由站引入；docfirst.config.mjs 展开 ./fumadocs/roster 的 fumadocsRoster。出口名由 fumadocs 适配负责，改名要同时改站的接入代码和接缝 12 的模板。',
   },
   {
     n: 9,

@@ -1,6 +1,6 @@
 /**
- * 扫哪些文档、报告长什么样：内容根下除 trajectory/、future/ 之外都进 check、轨迹卡目录顺带跑卡校验、
- * 配置里不认识的键报错、`check --json` 那份机读报告。台子在 cli-project.ts（内容根是 docs/）。
+ * 检查哪些文档、报告长什么样：内容根下除 trajectory/、future/ 之外都进 check、轨迹卡目录顺带做卡校验、
+ * 配置里不认识的键报错、`check --json` 那份机读报告。测试用的项目在 cli-project.ts 里搭建（内容根是 docs/）。
  */
 import { test } from "node:test";
 import assert from "node:assert/strict";
@@ -28,7 +28,7 @@ function card(root: string, name: string, lines: string[]): void {
   writeFileSync(join(root, "docs", "trajectory", name), lines.join("\n"));
 }
 
-test("内容根下的 trajectory/：check 顺带跑卡校验，病卡退 1 且输出含 🔴；卡本身不当文档核对", async () => {
+test("内容根下的 trajectory/：check 顺带做卡校验，有病卡时退出码 1 且输出含 🔴；卡本身不当文档核对", async () => {
   const p = setupProject();
   try {
     card(p.root, "2026-01-01-bad.md", ["---", "born-at: 一月一号", "type: root", "label: 坏卡", "---", "", "@@docfirst ref src/greet.ts:2-3 @@", ""]);
@@ -41,7 +41,7 @@ test("内容根下的 trajectory/：check 顺带跑卡校验，病卡退 1 且�
   }
 });
 
-test("轨迹卡目录还没建：check 退 0、一条红都不打——「这里还没有轨迹记录」是合法状态；trajectory 子命令退 2", async () => {
+test("轨迹卡目录还没建：check 退出码 0、一条红都不打印——「这里还没有轨迹记录」是合法状态；trajectory 子命令退出码 2", async () => {
   const p = setupProject();
   try {
     const green = await p.cli("check");
@@ -53,7 +53,7 @@ test("轨迹卡目录还没建：check 退 0、一条红都不打——「这里
   }
 });
 
-test("合法根卡加子卡：trajectory --json 出那一张盘的输入（盘心、卡、病卡）与树，不带 --json 打印根卡与卡数", async () => {
+test("合法根卡加子卡：trajectory --json 输出那一张盘的输入（盘心、卡、病卡）与树，不带 --json 打印根卡与卡数", async () => {
   const p = setupProject();
   try {
     card(p.root, "2026-01-01-root.md", ["---", "born-at: 2026-01-01T08:00", "type: root", "label: 测试项目", "---", ""]);
@@ -73,7 +73,7 @@ test("合法根卡加子卡：trajectory --json 出那一张盘的输入（盘�
   }
 });
 
-test("分区按约定：内容根下除 trajectory/、future/ 之外都是现状区，目录里的、根上的都扫，按文档身份排序", async () => {
+test("分区按约定：内容根下除 trajectory/、future/ 之外都是现状区，目录里的、根上的都检查，按文档身份排序", async () => {
   const p = setupProject();
   try {
     const unconfirmed = '# x\n\n{/* ref file="src/greet.ts" lines="2-3" */}\n';
@@ -110,7 +110,7 @@ test("配置里不认识的键报错：列出认得的有哪些；一次列全",
   }
 });
 
-test("content 写错、内容根不在：装配时拒", async () => {
+test("content 写错、内容根不在：装配时报错", async () => {
   for (const [config, message] of [
     [CONFIG.replace(`content: "docs"`, `content: ""`), /content 要是一个非空目录/],
     [CONFIG.replace(`content: "docs"`, `content: "nope"`), /内容根 nope 不是项目根下的目录/],
@@ -128,8 +128,8 @@ test("check --json：整份报告一行 JSON，退出码跟人读模式一样；
   const p = setupProject(withOutputs(`{ "docs/a.mdx": ["README.md"] }`));
   try {
     const white = await p.cli("check", "--json");
-    assert.equal(white.code, 1, "生成物还没摆过，落点是红，退出码跟人读模式一样");
-    assert.equal(white.out.split("\n").length, 1, "一行 JSON，别的什么都不打");
+    assert.equal(white.code, 1, "生成物还没生成过，落点是红，退出码跟人读模式一样");
+    assert.equal(white.out.split("\n").length, 1, "一行 JSON，别的什么都不打印");
     const first = JSON.parse(white.out) as JsonReport;
     // 正本里的引用还没确认，生成物渲染不了：落点红，ok 假；引用本身是未确认，不算红
     assert.equal(first.ok, false);
@@ -147,7 +147,7 @@ test("check --json：整份报告一行 JSON，退出码跟人读模式一样；
     assert.deepEqual(green.docs.find((d) => d.doc === "docs/a.mdx")!.outputs, [{ to: "README.md", status: "fresh", fresh: true }]);
 
     // 代码改了：引用报黄、带 diff。按原文渲染的投影是**渲染那一刻现取的**，所以生成物当场跟源不一致
-    // ——outputs 转 stale，整趟因此退 1。黄本身不是红：红的是那个没重摆的落点
+    // ——outputs 转 stale，这次 check 因此退出码 1。黄本身不是红：红的是那个没重新生成的落点
     writeFileSync(join(p.root, "src", "greet.ts"), CODE.replace("hello", "hey"));
     run(p.root, ["commit", "-qam", "改问候语"]);
     const yellow = await p.cli("check", "--json");
@@ -158,9 +158,9 @@ test("check --json：整份报告一行 JSON，退出码跟人读模式一样；
     assert.equal(changed.docs.find((d) => d.doc === "docs/a.mdx")!.outputs[0]!.status, "stale");
     assert.equal(yellow.code, 1);
     await p.cli("render");
-    assert.equal((await p.cli("check", "--json")).code, 0, "重摆之后只剩那处黄，退 0");
+    assert.equal((await p.cli("check", "--json")).code, 0, "重新生成之后只剩那处黄，退出码 0");
 
-    // 源改了没重摆 → 生成物 stale；病卡 → trajectory
+    // 源改了没重新生成 → 生成物 stale；病卡 → trajectory
     writeFileSync(join(p.root, "docs", "a.mdx"), "# md\n\n没有引用了\n");
     rmSync(join(p.root, "docs", "b.mdx"));
     card(p.root, "2026-01-01-bad.mdx", ["---", "born-at: 一月一号", "type: root", "label: 坏卡", "---", ""]);

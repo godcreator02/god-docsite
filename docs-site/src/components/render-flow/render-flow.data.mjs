@@ -1,6 +1,6 @@
 /**
  * 「生成物怎么从 mdx 正本渲染出来」的全部讲解数据：画面（render-flow.tsx）与机读版规则（render-flow.ai.mjs）都只读这一份。
- * 示例正本、生成物、命令行输出都是在一个临时项目里用 docfirst-workflow 0.3.1 的命令行实际运行得到的：
+ * 示例正本、生成物是在一个临时项目里用 docfirst-workflow 的命令行实际运行得到的，命令行输出照 cli/text.ts 实际打印的格式逐字写：
  * 配置只有下面这一条 outputs，正本先写不带记录的记号再 confirm，记号上的 hash / blob 是 confirm 写回的。
  */
 
@@ -54,7 +54,7 @@ export const sourceParts = {
 
 /** 写到 ../skills/greet/SKILL.md 的生成物全文 */
 /* ref file="../packages/docfirst-workflow/src/mdx/render.ts" lines="35-52" hash="e1060d7157f7" blob="905d5a4a5a96" */
-/* ref file="../packages/docfirst-workflow/src/project/placement.ts" lines="139-195" hash="394815359e95" blob="74b93dc8706d" */
+/* ref file="../packages/docfirst-workflow/src/project/placement.ts" lines="139-195" hash="b379a8714392" blob="6e09accb1712" */
 export const outputLines = [
   '---',
   'name: greet',
@@ -91,7 +91,7 @@ export const refusalLines = [
 /** 上面几行里渲染不了的那几行的行号 */
 export const refusalBadLines = [17, 19, 21];
 /* ref file="../packages/docfirst-workflow/src/mdx/render.ts" lines="65-101" hash="3c00e366b1d8" blob="905d5a4a5a96" */
-/* ref file="../packages/docfirst-workflow/src/cli/text.ts" lines="40-45" hash="c3ab9ff5abaa" blob="cc1432339eb9" */
+/* ref file="../packages/docfirst-workflow/src/cli/text.ts" lines="40-45" hash="39edf1f696fb" blob="dfe396df5a65" */
 /* ref file="../packages/code-pin/src/types.ts" lines="80-85" hash="70feff6a62c9" blob="32a0167e8d8f" */
 export const refusalMessage =
   `🔴 ${files.source} → ${files.output}  正本渲染不了：` +
@@ -104,7 +104,7 @@ export const refusalMessage =
  * @type {Record<'render' | 'check' | 'refuse', TimedLine[]>}
  */
 /* ref file="../packages/docfirst-workflow/src/cli/commands.ts" lines="177-191" hash="5a3bbda3cd7c" blob="937001d7a349" */
-/* ref file="../packages/docfirst-workflow/src/cli/text.ts" lines="63-70" hash="12810153a617" blob="cc1432339eb9" */
+/* ref file="../packages/docfirst-workflow/src/cli/text.ts" lines="63-70" hash="272e7834a64c" blob="dfe396df5a65" */
 /* ref file="../packages/docfirst-workflow/src/cli/text.ts" lines="11-17" hash="9ebfdcac2bf1" blob="cc1432339eb9" */
 export const terminals = {
   render: [
@@ -121,7 +121,7 @@ export const terminals = {
     { kind: 'ok', text: `🟢 ${files.source}  ${files.code}:2-4  新鲜`, at: 0.8 },
     {
       kind: 'err',
-      text: `🔴 ${files.source} → ${files.output}  生成物跟 mdx 源不一致（源改了没重摆，或有人直接改了生成物）——重跑 render`,
+      text: `🔴 ${files.source} → ${files.output}  生成物跟 mdx 源不一致（源改了没重新生成，或有人直接改了生成物）——重新运行 render`,
       at: 0.86,
     },
   ],
@@ -139,14 +139,14 @@ export const terminals = {
  */
 /* ref file="../packages/docfirst-workflow/src/mdx/render.ts" lines="103-120" hash="f7c53029bc73" blob="905d5a4a5a96" */
 /* ref file="../packages/docfirst-workflow/src/project/placement.ts" lines="119-137" hash="134440fb80cc" blob="3ad1d1a31735" */
-/* ref file="../packages/docfirst-workflow/src/project/placement.ts" lines="197-268" hash="370032d9b713" blob="d5c3ddbacf73" */
+/* ref file="../packages/docfirst-workflow/src/project/placement.ts" lines="197-268" hash="a65815a0f6e5" blob="6e09accb1712" */
 export const chapters = [
   {
     id: 'source',
     title: '正本：一篇普通的 mdx',
     text:
       `正本 ${files.source} 有三部分：第 1–5 行的 frontmatter、正文、第 11 行一处确认过的正式记号，指向 ${files.code} 的第 2–4 行。` +
-      `${files.config} 的 outputs 把这篇对到 ${files.output}，并点名 name、description 两个字段要带进生成物。`,
+      `${files.config} 的 outputs 把这篇映射到 ${files.output}，并点名 name、description 两个字段要带进生成物。`,
     duration: 6,
   },
   {
@@ -170,7 +170,7 @@ export const chapters = [
     id: 'fields',
     title: '点名的字段加回头部',
     text:
-      '这个落点点名了 name 和 description：这两个字段按 outputs 里点名的顺序逐行照搬（不解析 YAML，多行的值连同缩进的续行一起搬），' +
+      '这个落点点名了 name 和 description：这两个字段按 outputs 里点名的顺序逐行照抄（不解析 YAML，多行的值连同缩进的续行一起抄），' +
       '外面补上两行 ---，空一行再接正文。title 没点名，不带。outputs 里只写一个路径字符串的落点（比如仓根 README.md）什么都不带；' +
       '点名的字段正本里没有，这个落点不写，报「frontmatter 里没有 …」。',
     duration: 7,
@@ -197,7 +197,7 @@ export const chapters = [
     title: '渲染不了：一次列全，一个文件都不写',
     text:
       '正本里出现这四样就渲染不了：还没确认的引用、指向的东西不在了的引用、JSX 组件、mdx 表达式（import / export 也算）。' +
-      'renderAi 走完整棵语法树，把每一处连同行号一次列全再拒绝；这一篇的落点都不写，磁盘上的旧生成物原样留着，render 和 check 都报红。' +
+      'renderAi 遍历完整棵语法树，把每一处连同行号一次列全再拒绝；这一篇的落点都不写，磁盘上的旧生成物原样留着，render 和 check 都报红。' +
       '代码块里写的同样文字不算：记号是在语法树上认的。',
     duration: 9,
   },

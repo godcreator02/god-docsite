@@ -48,7 +48,7 @@ export const fumadocsLayout: SeamLayout = {
     'fd-preset': cap(254, 352, 93),
     'fd-rehype': cap(357, 352, 67),
     remark: cap(514, 352, 120),
-    'wf-mdx': cap(822, 352, 120),
+    'wf-mdx': cap(822, 352, 160),
 
     'gl-index': cap(34, 502, 175),
     'fd-post': cap(254, 502, 85),
