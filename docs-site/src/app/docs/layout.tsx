@@ -22,7 +22,7 @@ function zone(id: string, name: string, root: Root): Node {
 
 export default function Layout({ children }: { children: ReactNode }) {
   const tree: Root = {
-    name: 'god-live-doc',
+    name: 'gwb-docfirst',
     children: [
       zone('docs', '现状 · 原理', source.getPageTree()),
       zone('maintain', '现状 · 维护', sourceMaintain.getPageTree()),

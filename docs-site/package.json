@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "god-live-doc 自己的文档站：用这套机制写自己的文档，引用的是本仓源码里的真实行段",
+  "description": "gwb-docfirst 自己的文档站：用这套机制写自己的文档，引用的是本仓源码里的真实行段",
   "scripts": {
     "build": "next build",
     "dev": "next dev -p 4310 -H 127.0.0.1",

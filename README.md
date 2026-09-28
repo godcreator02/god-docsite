@@ -1,4 +1,4 @@
-# god-live-doc
+# gwb-docfirst
 
 ## 是什么
 
@@ -20,7 +20,7 @@ pnpm add -D @godcreator/docfirst-workflow
 
 `@godcreator/docfirst-workflow` 是命令行、项目装配与 mdx 格式，子入口 `./fumadocs` 是 fumadocs 适配，把 docfirst 接到 fumadocs 站上；
 通用包钉码核心 `@godcreator/code-pin`（把文字钉在代码上）与星轨盘 `@godcreator/trajectory-disk`（把轨迹卡画成
-项目方向演变的圆盘）随它装上。通用包不认识 docfirst，也能单独拿走用；讲解播放器 `@godcreator/explainer-player` 也是通用包，
+项目方向演变的圆盘）随它装上。通用包不认识 docfirst，也能单独使用；讲解播放器 `@godcreator/explainer-player` 也是通用包，
 把一段讲解拆成配说明的帧来播放，站的讲解组件用它，docfirst 自己的包不依赖它。`fumadocs` 与 `react`
 是可选的 **peer**，只有 `./fumadocs` 用，用你项目里装的那份；只运行命令行的仓不用装它们。
 
@@ -60,7 +60,7 @@ pnpm docfirst render                                # 只把 outputs 里有映�
 
 **正常工作的样子**：`check` 打出一行一处引用，每行带一个状态符号（🟢 新鲜 / 🟡 有变动 / ⚪ 未确认 /
 🔴 缺失）；`confirm` 把记录写进记号的属性，站上每个代码块的标题栏里多一个对应颜色的点。
-门禁里加上 `pnpm docfirst check` 就行。**改了被钉的代码，就在同一个提交里处理它引起的黄灯**：
+提交前的检查里加上 `pnpm docfirst check` 就行。**改了被钉的代码，就在同一个提交里处理它引起的黄灯**：
 先 `confirm`，再逐条复核剩下的黄灯、点名页 `--accept`。确认不要求先提交。
 
 ## 文档在哪
@@ -99,7 +99,7 @@ pnpm build          # next build
 node scripts/verify-roster.mjs
 
 cd ../plugins/docfirst
-pnpm check && pnpm build      # 工作台插件单独一套门禁，用 vitest
+pnpm check && pnpm build      # 工作台插件单独一套检查，用 vitest
 ```
 
 站不用 `pnpm dev`：看页面也是先 `pnpm build` 再 `pnpm start`，改了内容重新 build。`build` 集中在收尾或发版前运行一次，
