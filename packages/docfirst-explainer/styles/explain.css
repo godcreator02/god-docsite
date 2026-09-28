@@ -141,7 +141,7 @@
 
 /* ── 画面与说明 ── */
 .dx-stage { display: grid; gap: 12px; min-width: 0; }
-.dx-caption { margin: 0; max-width: 70ch; }
+.dx-caption { margin: 0; }
 .dx-caption-title { font-weight: 600; margin-right: .6em; }
 
 /* 选情况：一排胶囊 */
