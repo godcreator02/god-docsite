@@ -1,6 +1,6 @@
 {
   "name": "@godcreator/gwb-docfirst-workflow",
-  "version": "0.9.12",
+  "version": "0.10.0",
   "author": {
     "name": "godcreator"
   },
@@ -35,7 +35,7 @@
   },
   "peerDependencies": {
     "@godcreator/gwb-kernel-desktop": "^0.10.0",
-    "@godcreator/gwb-commands": "^0.5.6",
+    "@godcreator/gwb-commands": "^0.6.0",
     "@godcreator/gwb-skills": "^0.4.5"
   },
   "peerDependenciesMeta": {
@@ -44,7 +44,7 @@
     }
   },
   "devDependencies": {
-    "@godcreator/gwb-commands": "^0.5.6",
+    "@godcreator/gwb-commands": "^0.6.0",
     "@godcreator/gwb-kernel-desktop": "^0.10.0",
     "@godcreator/gwb-skills": "^0.4.5",
     "@types/node": "^24.0.0",

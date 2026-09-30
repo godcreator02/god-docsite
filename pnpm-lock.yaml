@@ -169,8 +169,8 @@ importers:
   plugins/docfirst:
     devDependencies:
       '@godcreator/gwb-commands':
-        specifier: ^0.5.6
-        version: 0.5.6(@godcreator/gwb-kernel-desktop@0.10.0(cordis@4.0.0-rc.10))(cordis@4.0.0-rc.10)
+        specifier: ^0.6.0
+        version: 0.6.0(@godcreator/gwb-kernel-desktop@0.10.0(cordis@4.0.0-rc.10))(cordis@4.0.0-rc.10)
       '@godcreator/gwb-kernel-desktop':
         specifier: ^0.10.0
         version: 0.10.0(cordis@4.0.0-rc.10)
@@ -463,10 +463,10 @@ packages:
   '@fumari/image-size@0.1.1':
     resolution: {integrity: sha512-iaiV2wyzJ4mW358NX4CX3yGit+WjKYzpaQ+rldK9BjL/5jFpeV6ruWnZVq7MEyMn3Gd0DLi8g/79NZAAQaGscw==}
 
-  '@godcreator/gwb-commands@0.5.6':
-    resolution: {integrity: sha512-qTaY/Xp6Asou07i0OvtrnMGTxK5D+uWCCpPwIkcrDmKqxfQS/jHZ+EJ+YESeQw4x9MUizM1GnM8LyZ6pFIqiPA==, tarball: https://git.tianshen02.online:28377/api/packages/godcreator/npm/%40godcreator%2Fgwb-commands/-/0.5.6/gwb-commands-0.5.6.tgz}
+  '@godcreator/gwb-commands@0.6.0':
+    resolution: {integrity: sha512-+qi66ZZ4Q4ouV21R+AD70dtwkhs9uSlHPJoHPicpCL4ky0OdLzuGadxgBHg8juNksct5hBcNHXjylM0YL1Qgig==, tarball: https://git.tianshen02.online:28377/api/packages/godcreator/npm/%40godcreator%2Fgwb-commands/-/0.6.0/gwb-commands-0.6.0.tgz}
     peerDependencies:
-      '@godcreator/gwb-kernel-desktop': ^0.9.0
+      '@godcreator/gwb-kernel-desktop': ^0.10.0
       cordis: ^4.0.0-rc.10
 
   '@godcreator/gwb-kernel-desktop@0.10.0':
@@ -3048,7 +3048,7 @@ snapshots:
 
   '@fumari/image-size@0.1.1': {}
 
-  '@godcreator/gwb-commands@0.5.6(@godcreator/gwb-kernel-desktop@0.10.0(cordis@4.0.0-rc.10))(cordis@4.0.0-rc.10)':
+  '@godcreator/gwb-commands@0.6.0(@godcreator/gwb-kernel-desktop@0.10.0(cordis@4.0.0-rc.10))(cordis@4.0.0-rc.10)':
     dependencies:
       '@godcreator/gwb-kernel-desktop': 0.10.0(cordis@4.0.0-rc.10)
       cordis: 4.0.0-rc.10(@cordisjs/plugin-include@1.1.0)(@cordisjs/plugin-loader@1.0.0-rc.7)

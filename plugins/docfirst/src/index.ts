@@ -127,6 +127,7 @@ export function apply(ctx: GwbContext): void {
           '回 { dir, repoDir, port, written, overwrites, portScanIncomplete, next, warn? }——written 是写了哪些文件（相对站目录），' +
           'overwrites 是仓根已有、第一次 render 会覆盖的文件，next 是接着要在站目录里运行的命令，warn 汇总要人注意的事（覆盖、端口查重）',
         plugin: PLUGIN,
+        effect: 'write',
       },
       (raw) =>
         runCreate(
@@ -176,6 +177,7 @@ export function apply(ctx: GwbContext): void {
           scaffoldRule +
           '回 { dir, port, portTakenBy?, title, files: string[], usedPorts: [{ port, dir }], portScanIncomplete: [{ path, reason }], note }',
         plugin: PLUGIN,
+        effect: 'write',
       },
       (raw) =>
         runCreate(
