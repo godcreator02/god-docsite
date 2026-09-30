@@ -1,162 +1,154 @@
 ---
 title: docs-site
 name: docs-site
-description: 写或改任何文档站的页面、做教程或教学站、建一个不接 docfirst 的普通 fumadocs 站（`docfirst.create-plain`）、给 fumadocs 站写组件、加分区、在本地看站或构建站、升级 fumadocs、pnpm 安装站的依赖失败时读。讲每一页怎么写成一个讲清原理的网页（控制条与零件用 `@godcreator/docfirst-explainer` 的分步、动画、选情况三种外壳，画面按题目设计，动画、图、能动手的部件为主，直接讲原理、少用类比）、描述一个系统时先画接缝图再按接缝讲、这个站能做到什么、组件怎么写（画面与讲解文字都在组件里，mdx 只写标签）、怎么验收，以及两种建站命令、加分区、pnpm 与 next 的常见安装与构建错误。docfirst 站独有的分区、钉码、生成物看 `docfirst-docs`。
+description: 对文档站执行命令时读：建站（docfirst.create / create-plain）、加分区、登记组件、构建与查看、依赖安装或构建失败、升级 fumadocs；docfirst 站的核对、确认、重新生成生成物，改了被钉的代码怎么提交，给别的仓写反馈。页面内容怎么写看 docs-writing。
 docfirst: none
 ---
 
-# 把每一页做成讲清原理的网页
+# 文档站的操作
 
-## 怎么写
+这份只讲**对站执行什么命令**：建站、改站的结构、构建与查看、核对与确认、出错了怎么办。页面内容怎么写、钉码钉哪种话、
+黄灯以后正文怎么改，看同一个插件的说明书 `docs-writing`；轨迹卡看 `trajectory`。
 
-假设用户说「做个网页给我讲讲 git 的原理」，你会怎么做，文档站的每一页就怎么做。**控制条与零件是固定的一套，
-画面按题目设计**：分步、动画、选情况三种讲解组件的控制条，以及面板、终端、胶囊、代码行这些零件，docfirst 站都用
-讲解组件包 `@godcreator/docfirst-explainer`（见「讲解组件包」一节），读者学一次就会用；组件中间画什么、页面怎么排、
-小标题怎么起，每一页按它的题目设计。一大段一大段的文字没人愿意看。
+**只有建站经过工作台**：本插件（`@godcreator/gwb-docfirst-workflow`）的命令只有 `docfirst.create` 与 `docfirst.create-plain` 两条。
+其余的事都在站目录里自己运行 `pnpm …`：核对、确认、渲染要在仓里反复运行（git hook、CI、`next build` 也在运行它们），
+归站里装的包，插件不转发命令行，也不启动、不停止站。
 
-- **先想清楚再动手**：读者看完这一页要明白哪一两件事，读者现在已经知道什么、会在哪一步看不懂
-- **直接讲原理**：是什么东西、按什么规则、在什么时候、变成什么。用实际的名字、实际的数据结构、真实的命令与输出。
-  类比少用，只在实际的东西讲不清时才用，用了就说清它哪一点对得上、哪一点对不上，别拿类比代替解释
-- **一个具体例子贯穿全页**：同一个仓、同一组数据从头用到尾，读者不用每一节重新理解一遍场景。
-  描述一个系统时，这个例子就是它的接缝图（下一节）
-- **能看、能动、能自己操作的东西承担主要解释**，文字负责引出和收尾。读者自己点一步、拨一个参数、换一种情况，
-  比看一段描述更容易懂
-- **一次只推进一个概念**，后一个建立在前一个之上
-- **每张图、每段动画都要讲清一件光读文字拼不起来的事**：跨多台机器、多个时刻、多个文件的机制。
-  表格加一句话能说清的不画；读者在真实产品里能直接看到的界面默认不模拟，讲解确实需要时才做
-- **图直接画**（SVG、React 组件），不用 Mermaid
-- **画面跟着题目走**：画面里的布局、动画节奏都为这一页设计，别照搬上一页的画面；颜色用讲解组件包那一套角色色，
-  每个角色（一台电脑、一个文件、一个包）在整页里固定一种颜色
-- 页面顶上已经按 frontmatter 渲染了 `title` 和 `description`，正文不写 `# 标题`
+站约定放在 `<仓>/docs-site/`，是一个独立的 pnpm 项目，下面的命令都在这个目录里运行。
 
-## 描述一个系统：先画接缝图
-
-讲一个代码仓、一组插件、一套架构时，**先放一张接缝图把整个系统分成模块，再按接缝逐条讲功能**。
-别一开始就选一段看起来关键的代码逐行讲：读者还不知道它在系统里处于什么位置，讲得再细也用不上。讲一个概念
-（比如 git 的原理）没有可切分的模块，不用这张图。
-
-图上几种元素的意思是固定的，画法用讲解组件包的 `SeamDiagram`，每张图的布局按系统自己设计：
-
-- **虚线框是模块**（包或层），标包名和一句话的角色，按依赖方向从上往下排
-- **框里的方块是能力**：能力名加最关键的标识符（文件名、类型名、命令名），不展开实现
-- **每条跨过模块边界的线带一个编号，这就是接缝**。实线是代码调用或 import，虚线是读写磁盘上的文件。
-  模块内部的线不画
-- **系统之外的东西放在框外**：人、git hook、CI、别的系统，箭头指向它们进来的入口
-- 画的是能力和它们之间的契约，不是文件之间的 import 依赖图
-- **能交互**（`SeamDiagram` 已经做好），悬停和点击各管一件事：鼠标停在接缝编号或模块框上，旁边浮出它的说明，挪开就收起；
-  点击固定高亮它连着谁，点编号亮起两端的能力，点模块亮起跟它有关的接缝，再点一次取消
-
-图后面的正文用同一套编号：
-
-1. **逐条讲接缝**：连着哪两端，中间传的是什么（函数签名、数据形状、文件格式），哪一边负责，改了会让哪一边出问题
-2. **再讲各模块对外能做什么**
-
-代码只在契约那一行出现，内部实现确实影响理解时才讲。系统大时分两层：首页的全局图只画包与包之间的接缝；
-每个包的模块页开头画**这个包内部的接缝图**：虚线框是包里的文件（或目录），方块是文件对外给的函数，
-跨框的编号线是文件之间靠什么接口接，包外的调用方、实现方、依赖画成灰色实线框。模块页用整页宽度（frontmatter
-`full: true`），图才能按原尺寸显示。只有一个模块的系统，画它和外部（工作台、磁盘、用户、别的服务）之间的接缝。
-
-**现状区按包分目录**：每个包一个目录（如 `content/docs/pin/`），目录首页 `index.mdx` 就是这个包的模块页（内部接缝图、
-功能、接口、依赖、不做的事），讲这个包原理的页放在同一个目录里、排在首页后面，侧栏点开一个包先看到接缝。
-横跨几个包的机制，讲解页放进读者最先要找的那个包的目录，不另开一个按机制分的目录。
-站只写每张图的内容与坐标：内容用 `@godcreator/docfirst-explainer/seam-graph` 的 `defineSeamGraph` 定义（模块、能力、入口、接缝），
-坐标写成一张 `SeamLayout`（方块用 `cap` 建，图标传站自己选的组件），两样交给 `SeamDiagram` 画；机读规则把同一份内容交给
-`seamGraphText` 写成段落。docfirst 自己的文档站是现成的例子：`docs-site/src/components/seam-map/` 里每张图一份
-`*.data.mjs` 与 `*.layout.ts`，`seam-map.tsx` 按 `module` 属性挑图。
-
-做到什么程度可以看两个站：`D:\unitfolders\qrx1l-collab-site\collab-site\docs-site`（多种情况的推演、两台电脑并排、
-终端逐字打出命令）与 `D:\unitfolders\8hv2f-ts-dojo\ts-dojo`（浏览器里写代码、编译、判题）。看的是完成度，不是照抄的样子。
-
-## 讲解组件包
-
-讲解组件包 `@godcreator/docfirst-explainer` 是 docfirst 站上用的讲解组件：把一段讲解拆成配说明的帧，用固定的控制条播放和切换。
-docfirst 站的讲解组件都用它：站的 `package.json` 依赖它，全局样式里引入它的 `styles.css`；建站命令不把它写进新站的依赖，站要用时自己加。
-风格是**现代开发者工具风**：1px 细边框、大圆角；边框、标题栏、标签都用同一个颜色调淡，不铺实心色块；
-深色终端窗口左上角三个点；很轻的阴影与小动画，不用辉光、渐变、毛玻璃。
-
-三种外壳，控制条都在画面上方、排成固定的一行，切换时按钮不挪位置；说明文字在画面下方：
-
-- **分步** `Stepper`：`[▶/⏸] [‹ 上一步] [1 2 … n] [下一步 ›]`。每一步是一个固定状态，播放是每隔几秒自动下一步。
-  讲有先后的过程
-- **动画** `Timeline`：同一行，中间换成带章节刻度的横条。时间连续，能拖到任意一刻、往回拖。画面必须写成
-  「时间 → 画面」的函数（模板把当前时刻、第几章、本章进度传进来），不能用一次性的 CSS 动画
-- **选情况** `CasePicker`：一排情况按钮，画面高亮这种情况走过的路径与结论。讲同一套规则下几种情况的差别
-
-零件：`Pane`（同色调淡标题栏的卡片）、`Terminal`、`Pill`、`Dot`、`CodeLines`（行号、高亮行段、新增行、改动行）、
-`Diff`。组件自己的画面只写这一页独有的部分，控制条与零件不重画一套。`@godcreator/docfirst-explainer/text` 把步骤、章节、
-情况的数据转成段落，docfirst 站的机读规则用它。系统接缝图 `SeamDiagram` 见上一节。
-
-## 这个站能做到什么
-
-- **任意 React 组件**：写在 `src/components/`，登记进 `src/components/mdx.tsx` 的组件表，mdx 里直接写 `<名字 />`。
-  Tailwind 可以直接用。fumadocs 自带的组件从 `fumadocs-ui/components/<名>` 导入（`callout`、`steps`、`tabs`、`card`、
-  `accordion`、`files`、`type-table`、`image-zoom`），默认组件表里只有 `Card`、`Callout`、代码块与标题几样，别的要自己登记
-- **不用正文版式**：组件最外层加 `not-prose`，不受正文排版的字号、间距影响；宽窄屏用容器查询（外层 `@container`，
-  里面 `@2xl:` 这类前缀）。frontmatter 写 `full: true`，这一页去掉右侧目录、内容铺满宽度。要一整页完全自己设计，
-  在 `src/app/` 下另写路由和布局，代价是它不在侧栏、搜索与 `llms.txt` 里
-- **深浅两种主题**：背景、边框、次要文字用 fumadocs 的主题色（`bg-fd-card`、`border-fd-border`、`text-fd-muted-foreground`，
-  SVG 里 `fill-fd-*` / `stroke-fd-*`），会自动切换。自己的彩色定义成一组 CSS 变量，`.dark` 下另给一套；
-  浅底用 `color-mix(in srgb, 颜色 12%, transparent)` 调。中性主题的 `fd-primary` 是接近黑白的灰，不能用作强调色
-- **动画**：CSS 关键帧与 `transition` 做得了的用 CSS；弹簧、拖拽、元素从一处移到另一处用 `motion`
-  （fumadocs 已经带着它，写进站自己的 `package.json` 再用）。讲状态怎么变时，同一个东西在前后两步里用同一个稳定的 `key`，
-  它会移过去，读者看得见变化本身，而不是消失再重画
-- **系统设了「减少动画」**（`prefers-reduced-motion`）就关掉动画，用 `motion` 的在外层包 `<MotionConfig reducedMotion="user">`
-
-组件的几条硬性规则：
-
-- **图、动画、能动手的部件这类讲解组件自包含**：画面和讲解文字都写在组件里，mdx 里只写 `<名字 />` 这样的标签，
-  不把讲解写成组件的子元素或参数。讲解文字写成组件的一份数据（比如分步动画每一步的说明），放在不依赖 React 的模块里，
-  画面的 React 代码读它。直接读 mdx 源文件只看到标签，要看讲的内容打开组件文件。`Tabs`、`Callout` 这类排版组件
-  包的是作者写的正文，照常用子元素
-- 用到状态、事件、动画的组件，第一行写 `'use client'`；只画静态 SVG 的不用
-- 浏览器 API 放进 `useEffect`：页面先在服务端渲染一遍，那时没有 `window`
-- 带 `'use client'` 的模块不能给服务端组件导出常量：服务端拿到的是客户端引用，不是值。共用的常量放进不带它的模块
-- 颜色别交给 `motion` 插值：它解析不了 `var(--x)`，过渡中途给出无效颜色，线整条消失。颜色写在 `stroke` / `style` 上、
-  用 CSS `transition` 渐变，`motion` 只管位置、大小、透明度
-- SVG 路径字符串不能做弹簧动画，`motion` 只会在两端之间跳：让端点坐标各自 `useSpring`，用 `useTransform` 每帧算出 `d`
-- `pathLength` 会覆盖虚线设置：要画成虚线的线不做「从头画出」的动画，只淡入
-- **docfirst 站还要改两个地方**：`src/components/registry.ts` 的名单加上组件名；`docfirst.config.mjs` 的 `components`
-  给它一条规则，写明它在机读版与 `llms.txt` 里变成什么文字——动画和图在那里只剩文字，规则里要把它讲的事写出来。
-  规则照 `src/components/tabs/tabs.ai.mjs` 的写法，放在组件旁边、不依赖 React 的 `.ai.mjs` 文件里，读组件那份讲解数据
-  生成文字（比如每一步一段）。画面和机读版读的是同一份数据，两边不会对不上；mdx 源文件里只有标签，机读版里内容是全的。
-  `node scripts/verify-roster.mjs` 核对 `registry.ts` 的名单与 `components` 的规则一致
-- **docfirst 站里，组件照抄源码的地方钉在源码上**：讲解数据里手抄的源码片段与行号、逐字照抄的测试名、命令行的输出格式、
-  接缝图上的函数签名，代码一改就对不上。在那段数据正上方单独一行写记号 `/* ref file="../src/a.ts" lines="10-23" */`
-  （跟 mdx 里的记号一样，只是不带花括号），再 `docfirst confirm`；被钉的代码变了，组件文件在 `check` 里变黄。
-  记号必须独占一行，写法与确认见 `docfirst-docs` 的「引用各钉哪种话」
-
-## 验收
-
-- 先 `pnpm build` 再 `pnpm start`，加客户端的预览：每个按钮点一下、每种情况都试一遍，深浅主题各看一次，把窗口拉窄看一次
-- 预览面板被隐藏时，页面的逐帧回调不运行，动画停在中途；这时连续截几张图让它往前走，再看最终画面。
-  面板隐藏时页面宽度是 0，先用预览工具给页面设一个尺寸。预览把窗口缩放过时按坐标点会点偏，改用元素引用
-- 不用 `pnpm dev`：它重新编译时内存一路上涨，出现过涨到约 16 GB 退出。改了内容重新 `pnpm build` 再重启 `start`；改完一批再 build，不改一页 build 一次
-- docfirst 站再运行 `pnpm doc` 与 `node scripts/verify-roster.mjs`，看一眼机读版（`/llms.mdx/docs/<页>/content.md`）里组件变成的文字读得懂
-- 组件里的文字不进站内搜索：读者会搜的词要出现在页面标题、描述或正文里
-
-## 生成站
-
-站约定放在 `<仓>/docs-site`，是一个独立的 pnpm 项目，命令都在站目录里运行。建站是 docfirst 插件的两条命令，参数相同：
+## 建站
 
 ```
-docfirst.create-plain {"dir":"D:\\unitfolders\\<单元>\\<仓>\\docs-site"}
+docfirst.create        {"dir":"<仓>/docs-site"}    接好 docfirst 的站：现状、轨迹、未来三个区，钉码与生成物
+docfirst.create-plain  {"dir":"<仓>/docs-site"}    普通 fumadocs 站，没有 docfirst
 ```
 
-`docfirst.create-plain` 建普通 fumadocs 站；要 docfirst 的现状、轨迹、未来三个区就用 `docfirst.create`。
-`dir` 必须还不存在、上一级得存在；只写文件，接着 `pnpm install`、`pnpm build`、`pnpm start`。站来自官方脚手架 `create-fumadocs-app`
-（版本写死在 docfirst 插件里，要联网），加上本机约定：允许 esbuild 运行构建脚本、`dev` / `start` 写端口并只监听 127.0.0.1、
-字体 Sarasa Mono SC、页面语言 zh-CN、站名、去掉 GitHub 链接、删掉分享图与落地页、`/` 跳到 `/docs`、
-`.gitignore` 排除 `next dev` 在站根生成的 `AGENTS.md` 与 `CLAUDE.md`、每页 md 的 `Content-Type` 带 `charset=utf-8`（不带的话浏览器显示中文是乱码）。
-站里自带搜索（中文不用另配）、`/llms.txt`、每页的 markdown 版本（网址后加 `.md`，或请求带 `Accept: text/markdown`）。
-agent 读一个站的页面时取 md，不解析 HTML：先读 `/llms.txt` 找页，再取那几页的 `.md`。参数只有 `dir`、`title`（站名）、`port`；
-`port` 不给就选一个没被别的站占用的，查占用的范围是单元文件夹插件的 `units-root` 设置指的目录。细节看命令的 `usage`。
+参数两条相同，多给别的键直接报错：
+
+- `dir`：站目录的绝对路径。**必须还不存在**，上一级（仓目录）必须已经存在。已经有站的仓不能用这两条命令，给已经在用的站加 docfirst 要手动接入
+- `title`：站名，不给就依次用仓根 `package.json` 的 `title`、包名去掉 scope、仓的目录名
+- `port`：不给就在单元文件夹插件的设置 `unit-folder.units-root` 指的目录里找没被别的站脚本占用的，从 4310 起选；
+  读不了的目录或 `package.json` 列在回执的 `portScanIncomplete` 里
+
+两条都先运行官方脚手架 `create-fumadocs-app`（版本写死在插件里，要联网），再套上本机约定：允许 esbuild 运行构建脚本、
+`dev` / `start` 写端口并只监听 127.0.0.1、字体 Sarasa Mono SC、页面语言 zh-CN、站名、去掉 GitHub 链接与分享图、`/` 跳到 `/docs`、
+`.gitignore` 排除 `next dev` 在站根生成的 `AGENTS.md` 与 `CLAUDE.md`、每页 md 的 `Content-Type` 带 `charset=utf-8`。
+站里自带搜索、`/llms.txt` 与每页的 markdown 版本（网址后加 `.md`）。`docfirst.create` 另外写进三个内容集合、各区的路由与侧栏、
+整页星轨盘 `/trajectory`、`docfirst.config.mjs`、组件名册与名册核对脚本、起始页，以及 `doc` / `doc:confirm` / `doc:render` / `verify:roster` 几条脚本。
+
+**只写文件**，不运行 install。回执里的 `next` 就是接着要运行的：
+
+```
+cd <站目录>
+pnpm install
+pnpm doc:render     # 只有 docfirst 站：生成仓根 README.md / AGENTS.md / CLAUDE.md
+pnpm doc            # 只有 docfirst 站：核对
+pnpm build
+```
+
+仓根已经有 `README.md` / `AGENTS.md` / `CLAUDE.md` 时回执多一条 `warn`：第一次 `doc:render` 会**覆盖**它们。
+先把原有内容移进 `content/docs/outputs/` 下对应的 mdx 正本，再 render。
+
+建站报错：
+
+- 「dir 要是绝对路径」：插件在工作台主进程里运行，不知道相对于哪个目录
+- 「站目录的上一级要是已经存在的仓目录」：`dir` 多写或少写了一层，或者仓还没建
+- 「docfirst.create 没建成：……」：后面是原话。最常见是站目录已经存在，其次是脚手架联网失败或超时；
+  脚手架输出变了、要替换的原文找不到时，报错指向插件的 `src/scaffold.ts`
+- 「不认识的参数」：只接受 `dir`、`title`、`port`
+
+## 改站的结构
 
 **加一个分区**（`content/notes/` → `/notes`）改四处：`src/lib/source.ts` 里用 `fumadocs-mdx/macro` 的 `defineDocs` 加集合、
 再加一条 `loader`；`src/app/notes/[[...slug]]/page.tsx` 照 docs 的写；侧栏在 `src/app/docs/layout.tsx` 里把各 loader 的
-`getPageTree()` 拼成一棵树、每个分区一个 `root: true` 的文件夹节点，新分区的 `layout.tsx` 写
-`export { default } from '../docs/layout'`。集合写了 `mdxOptions` 会去掉缺省处理，用 `applyMdxPreset(...)` 加回来。
+`getPageTree()` 拼成一棵树、每个分区一个 `root: true` 的文件夹节点；新分区的 `layout.tsx` 写 `export { default } from '../docs/layout'`。
+集合写了 `mdxOptions` 会去掉缺省处理，用 `applyMdxPreset(...)` 加回来。docfirst 站里 `content/` 下新建的目录自动算现状区，不用登记。
 
 **侧栏顺序**写在各目录的 `meta.json`：`{ "pages": ["index", "...", "glossary"] }`，`"..."` 是其余按文件名排。
+
+**登记一个组件**：写在 `src/components/`，登记进 `src/components/mdx.tsx` 的组件表，mdx 里才能写 `<名字 />`。
+fumadocs 自带的组件从 `fumadocs-ui/components/<名>` 导入，默认组件表里只有 `Card`、`Callout`、代码块与标题几样。docfirst 站还要改两处：
+
+1. `src/components/registry.ts` 的名单加上组件名
+2. `docfirst.config.mjs` 的 `components` 给它一条机读规则：放在组件旁边、不依赖 React 的 `.ai.mjs` 文件里，照 `src/components/tabs/tabs.ai.mjs` 写
+
+然后 `node scripts/verify-roster.mjs` 核对名单与规则一致。名册外的组件 `pnpm doc` 直接报错。
+
+用到 fumadocs 间接带进来的包（`motion`、`next-themes`）或讲解组件包 `@godcreator/docfirst-explainer`，写进站自己的 `package.json`；
+用讲解组件包还要在全局样式里引入它的 `styles.css`。
+
+## 构建与查看
+
+- **不用 `pnpm dev`**：它重新编译时内存一路上涨，出现过涨到约 16 GB 退出。看页面一律先 `pnpm build` 再 `pnpm start`，
+  改了内容重新 build、重启 start。改完一批再 build，不改一页 build 一次；改的是站构建时会调用到的包代码，先删 `.next` 再 build
+- **服务由 agent 自己启动**：Claude Code 桌面版写进 `.claude/launch.json` 用 `preview_start`，外面包一层到点自动停的超时脚本
+  （默认 12 小时）；别的客户端在后台运行。给人看就在 VS Code 的内置浏览器里打开（读说明书 `vscode`）。
+  用户说要看就一直开着；只是自己验证的，验完停掉。用户没说要看，build 通过就结束
+- **agent 读站取 md，不解析 HTML**：先读 `/llms.txt` 找页，再取那几页的 `.md`
+
+**验收一页**：
+
+- 每个按钮点一下、每种情况都试一遍，深浅主题各看一次，把窗口拉窄看一次
+- 预览面板被隐藏时页面宽度是 0、逐帧回调不运行，动画停在中途：先给页面设一个尺寸，连续截几张图让它往前走再看最终画面；
+  预览把窗口缩放过时按坐标点会点偏，改用元素引用
+- docfirst 站再运行 `pnpm doc` 与 `node scripts/verify-roster.mjs`，看一眼机读版（`/llms.mdx/docs/<页>/content.md`）里组件变成的文字读得懂
+
+## docfirst 站：核对、确认、生成
+
+```
+pnpm doc                                       核对。有红时退出码 1——那是核对结果，不是命令失败
+pnpm docfirst check --json                     机读报告，一行 JSON
+pnpm doc:confirm                               机械写回：未确认的记号写上记录、挪了位置的写回新行号、重新渲染生成物
+pnpm doc:confirm content/docs/a.mdx --accept   复核过后，接受点名页里的黄灯
+pnpm doc:render                                只重新生成生成物
+pnpm docfirst trajectory                       列出轨迹卡在星轨盘上的树与主干
+```
+
+各仓脚本名不完全一样，以站的 `package.json` 为准（有的直接写 `pnpm docfirst render`）。
+
+**读 `--json` 报告**：`docs[].items[]` 里 `status` 是 `changed`（内容变了）或 `missing`（目标不在了）的就是待处理；
+`line` 是记号在文档里第几行，`lines` 是被引的那段今天在源文件里的位置，`diff` 是变了的那几行。`unconfirmed` 不算对不上。
+`doc` 也可能是站 `src/components/` 下讲解组件的源码。
+
+### 改了被钉的代码：同一个提交里处理黄灯
+
+1. 改代码，先运行不带文档的检查（类型、lint、测试）
+2. 在站目录运行 `pnpm doc`：钉住的文件在本仓有未提交改动、内容又变了的黄灯**算红**
+3. `pnpm doc:confirm`：机械写回，不需要判断；黄灯原样留着、逐条列出
+4. 逐条看剩下的黄灯：论断还成立就 `pnpm doc:confirm <页…> --accept`；不成立先改正文再确认——正文怎么改看 `docs-writing` 的「黄灯以后改正文」
+5. 代码、文档、记号上的新记录放进同一个提交
+
+`--accept` 必须点名页：同一个仓里别人还没复核的黄灯不替他接受。确认不要求先提交。已经提交的代码、别的仓的代码引起的黄灯，
+`check` 只报告不拦，碰到了照样按第 4 步处理。
+
+### 生成物
+
+README、AGENTS.md、CLAUDE.md、包里的 SKILL.md 是生成物：`docfirst.config.mjs` 的 `outputs` 把 mdx 正本对到生成位置。
+**改正本，不改生成物**，改完 `pnpm doc:render`，正本与生成物放进同一个提交；生成物跟正本对不上 `pnpm doc` 报红。
+渲染按原文处理：去掉 frontmatter，每个钉码记号换成一个代码块，其余文字一个字节不动，所以正本里能钉码、不能用 JSX 组件。
+SKILL.md 要在映射里写对象形式、保留 `name` / `description` 两个 frontmatter 字段，否则生成出去是一份永远不会被读到的文档。
+
+## 给别的仓写反馈
+
+在 A 仓工作时发现 B 仓的问题，**直接放进 B 仓站的未来区**，不需要命令：
+
+```
+<B 仓>/docs-site/content/future/inbox/<yyyy-MM-dd>-<来源仓>-<英文短标题>.mdx
+```
+
+文件名用英文小写和短横线（git 会把中文路径显示成八进制转义），中文标题写进 frontmatter：
+
+```
+---
+title: <一句话标题>
+description: 来源：<哪个仓 / 哪次会话>
+---
+
+<碰到什么、期望怎样、证据在哪、你觉得该改哪儿>
+```
+
+然后在 B 仓里 `git add` 这个文件、`git commit --only` 这个文件。一条一个文件，不会跟 B 仓里别人未提交的改动冲突。
+收件的仓处理完删掉这个文件，结论写进现状页或轨迹卡。
 
 ## 安装或构建失败
 
@@ -164,12 +156,9 @@ agent 读一个站的页面时取 md，不解析 HTML：先读 `/llms.txt` 找�
 - 发布不满一天的包 pnpm 拒绝安装（`ERR_PNPM_MINIMUM_RELEASE_AGE_VIOLATION`），锁文件里有这种包时连 `pnpm build` 都运行不了：
   把版本退回上一个。只在本机临时验证可以在当前终端设 `$env:pnpm_config_minimum_release_age='0'`，不写进仓里
 - 安装设置写 `pnpm-workspace.yaml`，项目级 `.npmrc` 里的安装设置 pnpm 不读
-- 用 fumadocs 间接带进来的包（`motion`、`next-themes`）也写进站自己的 `package.json`：pnpm 不让代码 import 没声明的依赖
+- pnpm 不让代码 import 没声明的依赖：fumadocs 间接带进来的包也写进站自己的 `package.json`
 - `next.config.mjs` 的 `serverExternalPackages` 里不放带 `'use client'` 组件的包，否则预渲染报
   `Cannot read properties of null (reading 'use')`
 - `-H 127.0.0.1` 别删：next 缺省监听所有网卡
 - 升级 fumadocs：先在临时目录 `pnpm dlx create-fumadocs-app@<版本>` 生成一份对照、读迁移说明，改 `package.json` 版本
   （`fumadocs-core` 与 `fumadocs-ui` 同号），`pnpm install`、`pnpm build`
-
-服务由 agent 自己启动：先 `pnpm build` 再 `pnpm start`，加客户端自带的预览，自己检查页面用客户端的浏览器工具；给人看就在 VS Code 的内置浏览器里打开
-（怎么打开读说明书 `vscode`）。用户说要看就一直开着，服务带超时（默认 12 小时）自动停；只是自己验证的，验完停掉。

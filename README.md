@@ -77,10 +77,10 @@ pnpm docfirst check
 先读首页的接缝图（包与包之间怎么接），再读要改的那块的模块页；改这个仓要知道的在维护区 `content/maintain/`。
 
 文档本身怎么写、分区各放什么、每页写到哪为止，正本是**随工作台插件发的 skill**，在
-`plugins/docfirst/skills/`：写文档读 `docfirst-docs`、写轨迹卡读 `trajectory`、建站读 `docfirst`、
-设计站的页面与组件、构建站读 `docs-site`。
+`plugins/docfirst/skills/`：写页面、钉码、治理文档与注释读 `docs-writing`，建站、构建、核对与确认读 `docs-site`，
+写轨迹卡读 `trajectory`。
 说明书随插件发布而不随包发布，是因为包没有独立的途径让 agent 读到——放在 `node_modules` 里的一份
-SKILL.md 没有说明指向它、没人会读。治理文档与注释读同在这儿的 `docs-governance`。
+SKILL.md 没有说明指向它、没人会读。
 
 **这份 README 与仓根 `AGENTS.md`、`CLAUDE.md` 是生成物**，改 mdx 正本再 `pnpm docfirst render`；哪份正本生成到哪看 `docs-site/docfirst.config.mjs` 的 `outputs`。
 

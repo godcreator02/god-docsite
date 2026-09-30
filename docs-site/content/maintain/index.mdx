@@ -68,7 +68,7 @@ devkit 的建仓模板不收文档站，这是本仓有意的例外，理由见�
 - 同一个仓常有别的会话在改：新文件用 `git add <自己的路径…>`，提交一律 `git commit --only <自己的路径…>`。
 - **代码、文档、轨迹卡放进同一个提交**。改了被钉的代码，本仓未提交改动引起的黄灯 `docfirst check` 算红
   （见[门禁](/docs/pin/gate)）：`docfirst confirm` 做机械写回，剩下的黄灯逐条复核，论断还成立就
-  `docfirst confirm <页…> --accept` 点名确认。步骤照说明书 [docfirst-docs](/docs/outputs/skills/docfirst-docs)。
+  `docfirst confirm <页…> --accept` 点名确认。步骤照说明书 [docs-site](/docs/outputs/skills/docs-site)。
 - 改生成物的正本（README、AGENTS、CLAUDE、插件里的 SKILL.md）后 `pnpm docfirst render`，正本与生成物同一个提交。
 
 ## 发布
