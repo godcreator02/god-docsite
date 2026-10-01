@@ -5,12 +5,14 @@
  */
 import { test } from "node:test";
 import assert from "node:assert/strict";
+import { join, resolve } from "node:path";
 import * as mdx from "../packages/docfirst-workflow/src/mdx/index.ts";
 import { parseTree, stamp, walk } from "../packages/docfirst-workflow/src/mdx/index.ts";
 import type { Roster, TreeNode } from "../packages/docfirst-workflow/src/mdx/index.ts";
 import * as fumadocs from "../packages/docfirst-workflow/src/fumadocs/index.ts";
 import { DOT_COLOR, applyListing, docfirstMarkdownOptions, parseMetaString, whereOf } from "../packages/docfirst-workflow/src/fumadocs/index.ts";
 import { fumadocsRoster } from "../packages/docfirst-workflow/src/fumadocs/roster.ts";
+import { markMarkdownImages } from "../packages/docfirst-workflow/src/fumadocs/image.ts";
 import type { MemoRecord, Target } from "../packages/code-pin/src/index.ts";
 import type { Item, Listing, Reference } from "../packages/docfirst-workflow/src/reference/index.ts";
 
@@ -168,6 +170,63 @@ test("作者手写的 Files 走默认名册：转成一行一个名字，文件�
   const folder = files.children!.find((n) => n.name === "Folder")!;
   const ai = folder.data!.docfirstAi as TreeNode[];
   assert.equal(ai[0]!.children![0]!.value, "src/");
+});
+
+/** remarkImage 产物的样子：文件开头注入默认 import，段落里的图片换成没有 position、src 是那个变量的 <img> */
+function remarkImageOutput(importPath: string, alt: string): TreeNode {
+  const esm = {
+    type: "mdxjsEsm",
+    data: {
+      estree: {
+        body: [
+          {
+            type: "ImportDeclaration",
+            source: { type: "Literal", value: importPath },
+            specifiers: [{ type: "ImportDefaultSpecifier", local: { type: "Identifier", name: "__img0" } }],
+          },
+        ],
+      },
+    },
+  };
+  const img: TreeNode = {
+    type: "mdxJsxFlowElement",
+    name: "img",
+    children: [],
+    attributes: [
+      { type: "mdxJsxAttribute", name: "alt", value: alt },
+      { type: "mdxJsxAttribute", name: "src", value: { value: "__img0" } },
+    ],
+  };
+  return { type: "root", children: [esm, { type: "paragraph", children: [{ type: "text", value: "见下图 " }, img] }] };
+}
+
+const SITE = resolve("site");
+const PAGE = join(SITE, "content", "docs", "a.mdx");
+const imgOf = (tree: TreeNode): TreeNode => tree.children![1]!.children![1]!;
+
+test("Markdown 图片：remarkImage 生成的 <img> 挂上 ![说明](原地址)，public/ 下的还原成站内路径，名册检查跳过它", () => {
+  const tree = remarkImageOutput("../../public/p2/x.png", "降压电路");
+  markMarkdownImages(tree, { page: PAGE, publicDir: join(SITE, "public") });
+  assert.deepEqual(imgOf(tree).data!.docfirstAi, [{ type: "image", url: "/p2/x.png", alt: "降压电路", title: null }]);
+  assert.doesNotThrow(() => stamp(tree, fumadocsRoster), "生成的 <img> 不进名册");
+  const state = { containerFlow: (box: TreeNode) => JSON.stringify(box.children), containerPhrasing: () => "", handle: () => "" };
+  assert.equal(
+    docfirstMarkdownOptions().stringify(imgOf(tree), undefined, state, {}),
+    JSON.stringify([{ type: "image", url: "/p2/x.png", alt: "降压电路", title: null }]),
+    "机读版交给序列化的是一个 mdast 图片节点",
+  );
+});
+
+test("Markdown 图片：跟页面放在一起的图片写 import 路径", () => {
+  const tree = remarkImageOutput("./x.png", "波形");
+  markMarkdownImages(tree, { page: PAGE, publicDir: join(SITE, "public") });
+  assert.equal((imgOf(tree).data!.docfirstAi as Array<{ url: string }>)[0]!.url, "./x.png");
+});
+
+test("作者手写的 <img> 带位置，不当成 Markdown 图片，照旧按名册外组件报错", () => {
+  const tree = parseTree('import pic from "./x.png";\n\n<img alt="波形" src={pic} />\n');
+  markMarkdownImages(tree, { page: PAGE, publicDir: join(SITE, "public") });
+  assert.throws(() => stamp(tree, fumadocsRoster), /第 3 行：名册外组件 <img>/);
 });
 
 test("whereOf：标题和来源行用同一个字符串，三种目标各一种写法", () => {

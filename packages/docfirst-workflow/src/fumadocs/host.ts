@@ -2,19 +2,23 @@
  * fumadocs 接线。三样东西：
  *   docfirstMdxOptions({ root })   现状集合的 mdxOptions，交给 fumadocs-mdx 的 applyMdxPreset：remark 链末尾加上插件 + meta 白名单
  *   parseMetaString               fumadocs 的 rehypeCode 只放行白名单里的 meta，把状态点的颜色 data-dot 加进去
- *   remarkDocfirstHost({ root })   异步 attacher：站构建时 loader 并发调，项目只装配一次
- * 插件加在链末尾：前面是 fumadocs 的 remarkInclude 和预设（标题 id、gfm……），后面就是它自己的 postprocess。
+ *   remarkDocfirstHost({ root })   异步 attacher：站构建时 loader 并发调，项目只装配一次；先给 Markdown 图片挂机读文字，再交给 remarkDocfirst
+ * 插件加在链末尾：前面是 fumadocs 的 remarkInclude 和预设（标题 id、gfm、remarkImage……），后面就是它自己的 postprocess。
  */
+import { join } from "node:path";
 import type { Pluggable } from "unified";
 import { loadProject } from "@godcreator/docfirst-workflow";
 import type { TreeNode } from "@godcreator/docfirst-workflow/mdx";
 import { remarkGlossary } from "./glossary-plugin.ts";
 import type { GlossaryOptions } from "./glossary-plugin.ts";
+import { markMarkdownImages } from "./image.ts";
 import { pathOf, remarkDocfirst } from "./remark-plugin.ts";
 import type { PluginFile } from "./remark-plugin.ts";
 
 export function remarkDocfirstHost({ root }: { root: string }): (tree: TreeNode, file: PluginFile) => Promise<void> {
   let inner: ((tree: TreeNode, file: PluginFile) => void) | null = null;
+  // remarkImage 缺省的 public 目录是 process.cwd()/public，站的 source.ts 传的 root 就是 process.cwd()
+  const publicDir = join(root, "public");
   return async (tree, file) => {
     const project = await loadProject(root);
     inner ??= remarkDocfirst({
@@ -22,6 +26,7 @@ export function remarkDocfirstHost({ root }: { root: string }): (tree: TreeNode,
       docOf: (f) => project.docIdOf(pathOf(f)),
       roster: project.roster,
     });
+    markMarkdownImages(tree, { page: pathOf(file), publicDir });
     inner(tree, file);
   };
 }

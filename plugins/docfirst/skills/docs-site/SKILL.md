@@ -72,6 +72,9 @@ fumadocs 自带的组件从 `fumadocs-ui/components/<名>` 导入，默认组件
 
 然后 `node scripts/verify-roster.mjs` 核对名单与规则一致。名册外的组件 `pnpm doc` 直接报错。
 
+Markdown 图片 `![说明](/p2/x.png)` 不用登记：图片放在站的 `public/` 下或页面旁边，页面上由 fumadocs 默认的图片组件显示，
+机读版里原样写成 `![说明](/p2/x.png)`。在 mdx 里手写的 `<img>` 才算组件，要登记。
+
 用到 fumadocs 间接带进来的包（`motion`、`next-themes`）或讲解组件包 `@godcreator/docfirst-explainer`，写进站自己的 `package.json`；
 用讲解组件包还要在全局样式里引入它的 `styles.css`。
 
@@ -79,7 +82,7 @@ fumadocs 自带的组件从 `fumadocs-ui/components/<名>` 导入，默认组件
 
 - **不用 `pnpm dev`**：它重新编译时内存一路上涨，出现过涨到约 16 GB 退出。看页面一律先 `pnpm build` 再 `pnpm start`，
   改了内容重新 build、重启 start。改完一批再 build，不改一页 build 一次；改的是站构建时会调用到的包代码，先删 `.next` 再 build
-- **服务由 agent 自己启动**：Claude Code 桌面版写进 `.claude/launch.json` 用 `preview_start`，外面包一层到点自动停的超时脚本
+- **服务由 agent 自己启动**：Claude Code 桌面版写进 `.claude/launch.json` 用 `preview_start`，经到点自动停止的超时脚本启动
   （默认 12 小时）；别的客户端在后台运行。给人看就在 VS Code 的内置浏览器里打开（读说明书 `vscode`）。
   用户说要看就一直开着；只是自己验证的，验完停掉。用户没说要看，build 通过就结束
 - **agent 读站取 md，不解析 HTML**：先读 `/llms.txt` 找页，再取那几页的 `.md`
@@ -117,7 +120,7 @@ pnpm docfirst trajectory                       列出轨迹卡在星轨盘上的
 5. 代码、文档、记号上的新记录放进同一个提交
 
 `--accept` 必须点名页：同一个仓里别人还没复核的黄灯不替他接受。确认不要求先提交。已经提交的代码、别的仓的代码引起的黄灯，
-`check` 只报告不拦，碰到了照样按第 4 步处理。
+`check` 只报告、不算红，碰到了照样按第 4 步处理。
 
 ### 生成物
 
@@ -160,6 +163,8 @@ description: 来源：<哪个仓 / 哪次会话>
 - 含粗体或斜体的页面构建时报 `RangeError: Maximum call stack size exceeded`，栈在 fumadocs-core 的 `stringifier.js` 与
   mdast-util-to-markdown 的 `handle/strong.js` 之间来回：fumadocs-core 16.15.14 及更早配 mdast-util-to-markdown 2.1.3 就是这样。
   把 `fumadocs-core`、`fumadocs-ui` 升到 16.15.17 或更新，不要用 `overrides` 把 mdast-util-to-markdown 退回 2.1.2
+- 有 Markdown 图片的页面构建时报 `第 1 行：名册外组件 <img>`：`@godcreator/docfirst-workflow` 0.5.2 及更早不认识 fumadocs 由 Markdown 图片
+  生成的 `<img>`。把它升到 0.5.3 或更新，不要把 `img` 加进名册
 - `-H 127.0.0.1` 别删：next 缺省监听所有网卡
 - 升级 fumadocs：先在临时目录 `pnpm dlx create-fumadocs-app@<版本>` 生成一份对照、读迁移说明，改 `package.json` 版本
   （`fumadocs-core` 与 `fumadocs-ui` 同号），`pnpm install`、`pnpm build`

@@ -45,6 +45,12 @@ full: true
 
 {/* ref file="../packages/docfirst-workflow/src/fumadocs/roster.ts" lines="14-18" hash="b15f8564023c" blob="93e4c8c9b929" */}
 
+**Markdown 图片**不进名册：fumadocs 预设里的 `remarkImage` 排在 docfirst 插件之前，把 `![说明](/p2/x.png)` 换成 `<img>`、在文件开头注入一条 import，
+这个 `<img>` 不是作者写的组件。`remarkDocfirstHost` 先给它挂上机读文字 `![说明](/p2/x.png)`，按名册标机读文字时就跳过它；
+认的是没有位置、src 指向一条默认 import 的 `<img>`，作者手写的 `<img>` 带位置，照旧要登记：
+
+{/* ref file="../packages/docfirst-workflow/src/fumadocs/image.ts" lines="57-70" hash="7a563ccb62b2" blob="4cfa6f228c26" */}
+
 **轨迹卡集合**：`cardSchema` 只派生页面要的字段、不校验，缺 `label` 用文件名，卡写得对不对由 `docfirst check` 报；
 `remarkTrajectoryLinks` 把关系边段落转成带 `data-kind` 的 div，把指向卡身份的 `.md` / `.mdx` 链接改成卡页地址。
 哪些字段算卡、链接怎么认出卡身份，都从 workflow 的卡格式取：
@@ -77,11 +83,11 @@ full: true
 `docfirstMdxOptions` 的返回值按结构对上 `applyMdxPreset` 的参数，这里不 import fumadocs 的类型；插件加在 remark 链末尾，
 前面是 fumadocs 的 `remarkInclude` 与预设：
 
-{/* ref file="../packages/docfirst-workflow/src/fumadocs/host.ts" lines="46-74" hash="afdcac959006" blob="06eabff6c6af" */}
+{/* ref file="../packages/docfirst-workflow/src/fumadocs/host.ts" lines="51-79" hash="afdcac959006" blob="d3d30563fce4" */}
 
 fumadocs 的 `rehypeCode` 只保留 meta 白名单里的字段，这里换成同形的一张，多保留 `data-dot`：
 
-{/* ref file="../packages/docfirst-workflow/src/fumadocs/host.ts" lines="29-29" hash="2c600f486c3e" blob="543c77f3bcc9" */}
+{/* ref file="../packages/docfirst-workflow/src/fumadocs/host.ts" lines="34-34" hash="2c600f486c3e" blob="d3d30563fce4" */}
 
 `maintain` 集合也是现状区，同样接 `docfirstMdxOptions`、由 check 检查，不开 processed markdown；轨迹卡集合用 `cardSchema` 与
 `remarkTrajectoryLinks`，不接 docfirst 的插件；未来区的集合不写配置：
@@ -144,7 +150,7 @@ React 表先展开 fumadocs 的默认表，再把 `pre` 换成 `DocfirstPre`：
 
 插件在 `remarkDocfirstHost` 这个异步 attacher 里调用 `loadProject`，站的 remark 链上没有命令行替它装配：
 
-{/* ref file="../packages/docfirst-workflow/src/fumadocs/host.ts" lines="16-27" hash="cfcaa16a5f7c" blob="ddc4d292552e" */}
+{/* ref file="../packages/docfirst-workflow/src/fumadocs/host.ts" lines="18-32" hash="5004e01206ce" blob="d3d30563fce4" */}
 
 {/* ref file="../packages/docfirst-workflow/package.json" lines="65-74" hash="f7e5ebc6ff68" blob="ddc68d23c92b" */}
 
