@@ -36,7 +36,7 @@ const TEMPLATE_IMPORTABLE = [
 ]
 
 /**
- * 清单作用的那一套文件：官方脚手架 `create-fumadocs-app@16.2.8`（`src/scaffold.ts` 写死的版本，参数
+ * 清单作用的那一套文件：官方脚手架 `create-fumadocs-app@16.2.12`（`src/scaffold.ts` 写死的版本，参数
  * `--template +next+fuma-docs-mdx --src --search orama`）的输出，应用本机约定之后——
  * 多了 pnpm-workspace.yaml，少了分享图路由 `src/app/og/docs/[...slug]/route.tsx` 与落地页 `src/app/(home)/` 两份。
  * `src/scaffold.ts` 换脚手架版本或改本机约定时这张表跟着改：新增清单里的文件在这张表里就是重名，替换、删除清单里的不在就是找不到。

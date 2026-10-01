@@ -1,0 +1,5 @@
+# fumadocs-core 的 peer（next、react 等）这里用不到，不装
+autoInstallPeers: false
+# 这个组合要测的 mdast-util-to-markdown 版本
+overrides:
+  mdast-util-to-markdown: 2.1.3

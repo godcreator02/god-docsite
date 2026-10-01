@@ -30,7 +30,7 @@ docfirst.create-plain  {"dir":"<仓>/docs-site"}    普通 fumadocs 站，没有
 - `port`：不给就在单元文件夹插件的设置 `unit-folder.units-root` 指的目录里找没被别的站脚本占用的，从 4310 起选；
   读不了的目录或 `package.json` 列在回执的 `portScanIncomplete` 里
 
-两条都先运行官方脚手架 `create-fumadocs-app`（版本写死在插件里，要联网），再套上本机约定：允许 esbuild 运行构建脚本、
+两条都先运行官方脚手架 `create-fumadocs-app`（版本写死在插件里，要联网），再应用本机约定：允许 esbuild 运行构建脚本、
 `dev` / `start` 写端口并只监听 127.0.0.1、字体 Sarasa Mono SC、页面语言 zh-CN、站名、去掉 GitHub 链接与分享图、`/` 跳到 `/docs`、
 `.gitignore` 排除 `next dev` 在站根生成的 `AGENTS.md` 与 `CLAUDE.md`、每页 md 的 `Content-Type` 带 `charset=utf-8`。
 站里自带搜索、`/llms.txt` 与每页的 markdown 版本（网址后加 `.md`）。`docfirst.create` 另外写进三个内容集合、各区的路由与侧栏、
@@ -159,6 +159,9 @@ description: 来源：<哪个仓 / 哪次会话>
 - pnpm 不让代码 import 没声明的依赖：fumadocs 间接带进来的包也写进站自己的 `package.json`
 - `next.config.mjs` 的 `serverExternalPackages` 里不放带 `'use client'` 组件的包，否则预渲染报
   `Cannot read properties of null (reading 'use')`
+- 含粗体或斜体的页面构建时报 `RangeError: Maximum call stack size exceeded`，栈在 fumadocs-core 的 `stringifier.js` 与
+  mdast-util-to-markdown 的 `handle/strong.js` 之间来回：fumadocs-core 16.15.14 及更早配 mdast-util-to-markdown 2.1.3 就是这样。
+  把 `fumadocs-core`、`fumadocs-ui` 升到 16.15.17 或更新，不要用 `overrides` 把 mdast-util-to-markdown 退回 2.1.2
 - `-H 127.0.0.1` 别删：next 缺省监听所有网卡
 - 升级 fumadocs：先在临时目录 `pnpm dlx create-fumadocs-app@<版本>` 生成一份对照、读迁移说明，改 `package.json` 版本
   （`fumadocs-core` 与 `fumadocs-ui` 同号），`pnpm install`、`pnpm build`

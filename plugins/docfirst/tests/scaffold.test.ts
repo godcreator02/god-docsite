@@ -23,7 +23,7 @@ import {
  */
 
 const here = path.dirname(fileURLToPath(import.meta.url))
-const FIXTURE = path.join(here, 'fixtures', 'create-fumadocs-app-16.2.8')
+const FIXTURE = path.join(here, 'fixtures', 'create-fumadocs-app-16.2.12')
 
 /** 不联网的脚手架：把样本复制过去 */
 const fixtureScaffold: Scaffold = async (into) => {

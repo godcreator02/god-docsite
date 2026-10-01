@@ -33,7 +33,7 @@ import { siteTitle } from './values.js'
  */
 
 /** 官方脚手架的版本。升级 fumadocs 就改这里，再运行慢测试看输出变了没有 */
-export const CREATE_FUMADOCS_APP = 'create-fumadocs-app@16.2.8'
+export const CREATE_FUMADOCS_APP = 'create-fumadocs-app@16.2.12'
 
 /** 非交互运行脚手架的参数：Next + fumadocs-mdx 模板、用 src 目录、自带 Orama 搜索、不装依赖、不 git init */
 export const SCAFFOLD_ARGS = ['--template', '+next+fuma-docs-mdx', '--src', '--search', 'orama', '--pm', 'pnpm', '--no-git', '-y']
