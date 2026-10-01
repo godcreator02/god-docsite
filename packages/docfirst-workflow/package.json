@@ -76,8 +76,8 @@
     "@standard-schema/spec": "^1.1.0",
     "@types/mdast": "^4.0.4",
     "@types/react": "^19.3.0",
-    "fumadocs-core": "16.15.14",
-    "fumadocs-ui": "npm:@fumadocs/base-ui@16.15.14",
+    "fumadocs-core": "16.15.17",
+    "fumadocs-ui": "npm:@fumadocs/base-ui@16.15.17",
     "react": "^19.3.0"
   },
   "publishConfig": {
