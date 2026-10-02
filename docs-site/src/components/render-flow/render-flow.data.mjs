@@ -53,7 +53,7 @@ export const sourceParts = {
 };
 
 /** 写到 ../skills/greet/SKILL.md 的生成物全文 */
-/* ref file="../packages/docfirst-workflow/src/mdx/render.ts" lines="35-52" hash="e1060d7157f7" blob="905d5a4a5a96" */
+/* ref file="../packages/docfirst-workflow/src/mdx/render.ts" lines="37-54" hash="e1060d7157f7" blob="3ae7ad9b294f" */
 /* ref file="../packages/docfirst-workflow/src/project/placement.ts" lines="139-195" hash="b379a8714392" blob="6e09accb1712" */
 export const outputLines = [
   '---',
@@ -90,7 +90,7 @@ export const refusalLines = [
 ];
 /** 上面几行里渲染不了的那几行的行号 */
 export const refusalBadLines = [17, 19, 21];
-/* ref file="../packages/docfirst-workflow/src/mdx/render.ts" lines="65-101" hash="3c00e366b1d8" blob="905d5a4a5a96" */
+/* ref file="../packages/docfirst-workflow/src/mdx/render.ts" lines="67-103" hash="3c00e366b1d8" blob="3ae7ad9b294f" */
 /* ref file="../packages/docfirst-workflow/src/cli/text.ts" lines="40-45" hash="39edf1f696fb" blob="dfe396df5a65" */
 /* ref file="../packages/code-pin/src/types.ts" lines="80-85" hash="70feff6a62c9" blob="32a0167e8d8f" */
 export const refusalMessage =
@@ -137,7 +137,7 @@ export const terminals = {
  * @typedef {{ id: SceneId, title: string, text: string, duration: number }} RenderChapter
  * @type {RenderChapter[]}
  */
-/* ref file="../packages/docfirst-workflow/src/mdx/render.ts" lines="103-120" hash="f7c53029bc73" blob="905d5a4a5a96" */
+/* ref file="../packages/docfirst-workflow/src/mdx/render.ts" lines="105-122" hash="f7c53029bc73" blob="3ae7ad9b294f" */
 /* ref file="../packages/docfirst-workflow/src/project/placement.ts" lines="119-137" hash="134440fb80cc" blob="3ad1d1a31735" */
 /* ref file="../packages/docfirst-workflow/src/project/placement.ts" lines="197-268" hash="a65815a0f6e5" blob="6e09accb1712" */
 export const chapters = [

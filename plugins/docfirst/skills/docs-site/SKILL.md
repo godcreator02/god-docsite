@@ -78,6 +78,21 @@ Markdown 图片 `![说明](/p2/x.png)` 不用登记：图片放在站的 `public
 用到 fumadocs 间接带进来的包（`motion`、`next-themes`）或讲解组件包 `@godcreator/docfirst-explainer`，写进站自己的 `package.json`；
 用讲解组件包还要在全局样式里引入它的 `styles.css`。
 
+**接数学公式**照 fumadocs 官方做法，不另写组件：站里装 `remark-math`、`rehype-katex`、`katex`；现状区集合的 `mdxOptions` 里
+`remarkPlugins` 加上 `remarkMath`、`rehypePlugins` 写 `(v) => [rehypeKatex, ...v]`（排在代码高亮之前）；全局样式引入 `katex/dist/katex.css`。
+docfirst 站的集合已经用 `docfirstMdxOptions` 给了 `remarkPlugins`，在它外面再包一层：
+
+```ts
+const base = docfirstMdxOptions({ root: process.cwd() });
+mdxOptions: applyMdxPreset({
+  ...base,
+  remarkPlugins: (v) => base.remarkPlugins([remarkMath, ...v]),
+  rehypePlugins: (v) => [rehypeKatex, ...v],
+}),
+```
+
+`docfirst-workflow` 0.5.4 起核对、确认与渲染也按 remark-math 解析，公式里的花括号不会被当成 mdx 表达式。
+
 ## 构建与查看
 
 - **不用 `pnpm dev`**：它重新编译时内存一路上涨，出现过涨到约 16 GB 退出。看页面一律先 `pnpm build` 再 `pnpm start`，
@@ -165,6 +180,8 @@ description: 来源：<哪个仓 / 哪次会话>
   把 `fumadocs-core`、`fumadocs-ui` 升到 16.15.17 或更新，不要用 `overrides` 把 mdast-util-to-markdown 退回 2.1.2
 - 有 Markdown 图片的页面构建时报 `第 1 行：名册外组件 <img>`：`@godcreator/docfirst-workflow` 0.5.2 及更早不认识 fumadocs 由 Markdown 图片
   生成的 `<img>`。把它升到 0.5.3 或更新，不要把 `img` 加进名册
+- 写了公式的页面 `pnpm doc` 报 `Could not parse expression with acorn`：`@godcreator/docfirst-workflow` 0.5.3 及更早不认 remark-math 的公式，
+  把公式里的花括号当成 mdx 表达式。把它升到 0.5.4 或更新，不要为了绕开它把公式改写成组件或代码块
 - `-H 127.0.0.1` 别删：next 缺省监听所有网卡
 - 升级 fumadocs：先在临时目录 `pnpm dlx create-fumadocs-app@<版本>` 生成一份对照、读迁移说明，改 `package.json` 版本
   （`fumadocs-core` 与 `fumadocs-ui` 同号），`pnpm install`、`pnpm build`

@@ -4,10 +4,12 @@
  *   renderAi    生成正本按原文渲染成 md：只动 frontmatter 与记号，别的文字逐字节照抄
  *
  * 站上各页的机读版不走这儿，走 fumadocs 的管线（`@godcreator/docfirst-workflow/fumadocs` 的 docfirstMarkdownOptions）。
+ * 解析认 remark-math 的公式（`$…$`、`$$…$$`），跟照 fumadocs 官方做法接了公式的站读法一致：公式里的花括号不是 mdx 表达式。
  */
 import { unified } from "unified";
 import remarkParse from "remark-parse";
 import remarkFrontmatter from "remark-frontmatter";
+import remarkMath from "remark-math";
 import remarkMdx from "remark-mdx";
 import { fileOf, REASON_TEXT } from "@godcreator/code-pin";
 import type { Item, Listing } from "../reference/index.ts";
@@ -22,7 +24,7 @@ export class RenderRefusal extends Error {
 }
 
 export function parseTree(text: string): TreeNode {
-  return unified().use(remarkParse).use(remarkFrontmatter).use(remarkMdx).parse(text) as unknown as TreeNode;
+  return unified().use(remarkParse).use(remarkFrontmatter).use(remarkMath).use(remarkMdx).parse(text) as unknown as TreeNode;
 }
 
 /** 原文里的一处改写：把 [start, end) 换成 text */

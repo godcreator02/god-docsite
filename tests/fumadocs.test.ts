@@ -315,6 +315,19 @@ test("普通注释不是标记，原样留着；长成记号却认不出动作�
   assert.throws(() => applyListing(parseTree('{/* probe dir="src" */}\n'), listingOf([])), /第 1 行：记号的动作词只有 ref \/ tree，/);
 });
 
+test("公式按 remark-math 解析：$…$ 与 $$…$$ 里的花括号不是 mdx 表达式", () => {
+  const text = "状态 $x = [\\,i,\\ v_c\\,]^{\\mathsf T}$，候选 $\\Delta_{(+,-)}$。\n\n$$\nS \\in \\{-1,\\ 0,\\ +1\\}\n$$\n";
+  const types: string[] = [];
+  walk(parseTree(text), (node) => {
+    types.push(node.type);
+    return undefined;
+  });
+  assert.ok(types.includes("inlineMath"));
+  assert.ok(types.includes("math"));
+  assert.ok(!types.some((t) => t.startsWith("mdx")), "公式里没有一处被当成 mdx 表达式");
+  assert.equal(renderOf(text), text, "按原文渲染时公式逐字节不动");
+});
+
 test("清单里没有的标记：报到行，不静默漏掉", () => {
   assert.throws(() => applyListing(parseTree(`${mark(T)}\n`), listingOf([])), /第 1 行是引用标记，但清单里没有它/);
 });

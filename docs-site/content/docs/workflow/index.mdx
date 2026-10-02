@@ -114,7 +114,7 @@ fumadocs 自带组件的规则在 [fumadocs 适配](/docs/fumadocs)的 `./roster
 `renderAi` 把生成正本按原文渲染成 md，不经过 fumadocs，见[生成物渲染](/docs/workflow/rendering)。
 按原文渲染拒绝渲染时抛的错误类也在这里，摆放用 `instanceof` 认出它，把这篇的每个落点报成红，别的错照原样抛：
 
-{/* ref file="../packages/docfirst-workflow/src/mdx/render.ts" lines="19-22" hash="81f85d47f420" blob="905d5a4a5a96" */}
+{/* ref file="../packages/docfirst-workflow/src/mdx/render.ts" lines="21-24" hash="81f85d47f420" blob="3ae7ad9b294f" */}
 
 ### 组件格式 code
 
@@ -245,7 +245,7 @@ fumadocs 自带组件的规则在 [fumadocs 适配](/docs/fumadocs)的 `./roster
 | --- | --- |
 | 钉码核心 `@godcreator/code-pin`（通用包） | `createPinner`、目标与记录的类型、细分理由的中文说法 `REASON_TEXT`、hash 与 hunk 解析 |
 | 星轨盘 `@godcreator/trajectory-disk`（通用包） | 中性输入的类型、校验时刻的 `validBornAt`，`buildModel` 给 `docfirst trajectory` 建模 |
-| unified、remark-parse、remark-mdx、remark-frontmatter | mdx 格式的语法树 |
+| unified、remark-parse、remark-mdx、remark-frontmatter、remark-math | mdx 格式的语法树；remark-math 让公式里的花括号不被当成 mdx 表达式 |
 | fumadocs-core、fumadocs-ui、react、unist-util-visit | 只有 `src/fumadocs/` 用；前三个是可选 peer，只用命令行的项目不装 |
 | `git` 命令行 | 取旧内容、算 hunk 表、查未提交改动、按 `.gitignore` 过滤；被引的文件与目录都不在 git 仓里时不启动 |
 
