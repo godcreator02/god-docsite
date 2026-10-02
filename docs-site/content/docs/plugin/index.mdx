@@ -42,7 +42,15 @@ full: true
 
 **端口从 4310 起选第一个空闲的**，调用方给了端口就用给的：
 
-{/* ref file="../plugins/docfirst/src/ports.ts" lines="90-101" hash="b91169faf764" blob="163d5c8b6267" */}
+{/* ref file="../plugins/docfirst/src/ports.ts" lines="95-106" hash="b91169faf764" blob="706e2a36ab77" */}
+
+**别的站占用了哪些端口，按 `package.json` 脚本里的端口参数认**，next 的 `-p` 与 vite 的 `--port` 都认，不管启动的是什么程序：
+
+{/* ref file="../plugins/docfirst/src/ports.ts" lines="28-37" hash="f957083d2979" blob="706e2a36ab77" */}
+
+扫描深四层，`<容器根>/<单元>/<仓>/<子目录>/<站>` 这样多套一层的站也扫得到：
+
+{/* ref file="../plugins/docfirst/src/ports.ts" lines="43-48" hash="964f45a835b0" blob="706e2a36ab77" */}
 
 查重范围看站在不在容器根里：
 

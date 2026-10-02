@@ -373,10 +373,10 @@ export const pluginGraph = defineSeamGraph({
       name: '别的站的端口',
       a: ['pick-port'],
       b: ['other-sites'],
-      iface: 'package.json 的 scripts 里 next dev / next start … -p <端口>',
+      iface: 'package.json 的 scripts 里的 -p <端口> / --port <端口>（也认 = 写法）',
       convention: true,
       via: 'disk',
-      text: '按脚本内容认，不按目录名认：扫描三层深度以内的每份 package.json，跳过 node_modules 与点目录。读取失败的目录或文件记进 incomplete，写进回执的 portScanIncomplete，不让建站失败。',
+      text: '按脚本里的端口参数认，不按目录名、也不按启动的是 next 还是 vite 认：扫描四层深度以内的每份 package.json，跳过 node_modules 与点目录。读取失败的目录或文件记进 incomplete，写进回执的 portScanIncomplete，不让建站失败。',
     },
     {
       n: 17,

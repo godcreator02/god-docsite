@@ -241,6 +241,19 @@ describe('planSite / createSite', () => {
     expect(outside.portScan.root).toBe(path.join(tmp, 'unit-b'))
   })
 
+  it('容器根里别的单元用 vite --port 占着的端口也跳过（2026-10-02 在 lceda-test 撞过 4330）', async () => {
+    const vite = (port: number): string => JSON.stringify({ scripts: { dev: `vite --port ${String(port)} --host 127.0.0.1` } })
+    fs.mkdirSync(path.join(tmp, 'unit-a', 'repo', 'docs-site'), { recursive: true })
+    fs.writeFileSync(path.join(tmp, 'unit-a', 'repo', 'docs-site', 'package.json'), JSON.stringify({ scripts: { dev: 'next dev -p 4310' } }))
+    fs.mkdirSync(path.join(tmp, 'unit-b', 'hybrid-mmc', 'collab', 'site'), { recursive: true })
+    fs.writeFileSync(path.join(tmp, 'unit-b', 'hybrid-mmc', 'collab', 'site', 'package.json'), vite(4311))
+    fs.mkdirSync(path.join(tmp, 'unit-b', 'chb-dab-sst', 'collab', 'site'), { recursive: true })
+    fs.writeFileSync(path.join(tmp, 'unit-b', 'chb-dab-sst', 'collab', 'site', 'package.json'), vite(4312))
+    fs.mkdirSync(path.join(tmp, 'unit-c', 'repo'), { recursive: true })
+    const plan = await planSite({ dir: path.join(tmp, 'unit-c', 'repo', 'docs-site'), unitsRoot: tmp }, fixtureScaffold)
+    expect(plan.port).toBe(4313)
+  })
+
   it('查重时没读成的 package.json 进 portScan.incomplete，照常建站', async () => {
     fs.mkdirSync(path.join(tmp, 'broken'))
     fs.writeFileSync(path.join(tmp, 'broken', 'package.json'), '{ nope')

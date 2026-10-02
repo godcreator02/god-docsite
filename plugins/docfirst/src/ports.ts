@@ -5,8 +5,8 @@ import { isRecord } from './vocab.js'
 /**
  * 端口：别的站占了哪些、新站用哪个。只读文件系统，能单测（tests/ports.test.ts）。
  *
- * **按脚本内容认，不按目录名认**：站不一定叫 `docs-site`，认的是 `package.json` 的 scripts 里
- * `next dev -p <端口>` / `next start -p <端口>` 这样的命令。
+ * **按脚本内容认，不按目录名认**：站不一定叫 `docs-site`，认的是 `package.json` 的 scripts 里写死的端口参数，
+ * 不管启动的是 next、vite 还是别的服务。
  */
 
 /** 端口从这一段里找。4310–4399 留给文档站 */
@@ -25,10 +25,15 @@ export interface PortScan {
   incomplete: PortScanProblem[]
 }
 
-/** 从一条脚本里认出它指定的端口，认不出回 undefined */
-export function portInScript(command: string): number | undefined {
-  const hit = /\bnext\s+(?:dev|start)\b[^&|]*?-p\s+(\d{2,5})/.exec(command)
-  return hit === null ? undefined : Number(hit[1])
+/** 端口参数：`-p 4310`、`-p=4310`、`--port 4310`、`--port=4310`（next 用 -p，vite 用 --port） */
+const PORT_FLAG = /(?<![\w-])(?:-p|--port)(?:=|\s+)(\d{2,5})(?!\d)/g
+
+/**
+ * 从一条脚本里认出它写死的全部端口，一个都没有回空数组。不看启动的是哪个程序：
+ * 把不相干的 `-p <数字>` 认成端口只让新站跳过一个端口，漏认一个就是两个站用同一个端口。
+ */
+export function portsInScript(command: string): number[] {
+  return [...command.matchAll(PORT_FLAG)].map((hit) => Number(hit[1]))
 }
 
 function reasonOf(error: unknown): string {
@@ -36,7 +41,8 @@ function reasonOf(error: unknown): string {
 }
 
 /**
- * 扫描给定目录下深三层内的每一份 package.json，找出别的站已占用的端口。跳过 node_modules 与点目录。
+ * 扫描给定目录下深四层内的每一份 package.json，找出别的站已占用的端口。跳过 node_modules 与点目录。
+ * 四层是为了扫到 `<容器根>/<单元>/<仓>/<子目录>/<站>/package.json` 这样多套一层的站。
  * 读不成的目录或文件不让建站失败，也不静默跳过：记进 `incomplete`，回执里告诉人查重不完整。
  */
 export function scanUsedPorts(root: string): PortScan {
@@ -59,13 +65,12 @@ export function scanUsedPorts(root: string): PortScan {
     if (!isRecord(scripts)) return
     for (const command of Object.values(scripts)) {
       if (typeof command !== 'string') continue
-      const port = portInScript(command)
-      if (port !== undefined) used.set(port, dir)
+      for (const port of portsInScript(command)) used.set(port, dir)
     }
   }
 
   const visit = (dir: string, depth: number): void => {
-    if (depth > 3) return
+    if (depth > 4) return
     let entries: fs.Dirent[]
     try {
       entries = fs.readdirSync(dir, { withFileTypes: true })
