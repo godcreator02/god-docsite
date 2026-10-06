@@ -73,7 +73,7 @@ full: true
 
 登记时的 `description` 与 `usage` 是 agent 唯一看得见的说明，回执各字段的意思写在 `usage` 里：
 
-{/* ref file="../plugins/docfirst/src/index.ts" lines="114-128" hash="a979ddaf8994" blob="97eae2d486d7" */}
+{/* ref file="../plugins/docfirst/src/index.ts" lines="119-133" hash="a979ddaf8994" blob="5c7cdb26c696" */}
 
 命令名是公共接口，改名就破坏兼容；产物检查确认总线上只有这两条：
 
@@ -83,15 +83,15 @@ full: true
 
 | 服务 / 通道 | 对方 | 怎么接 | 缺了会怎样 |
 | --- | --- | --- | --- |
-| `gwbCommands` | `@godcreator/gwb-commands` | 必需注入，peer `^0.5.6` | 插件不加载 |
+| `gwbCommands` | `@godcreator/gwb-commands` | 必需注入，peer `^0.6.0` | 插件不加载 |
 | `gwbSkills` | `@godcreator/gwb-skills` | 局部注入，peer `^0.4.5` 且 `optional` | 命令照常可用，读不到说明书 |
-| 命令 `settings.get` | `@godcreator/gwb-settings` | 按名字调，读分区 `unit-folder` 的键 `units-root` | 端口只在站目录的祖父目录里查重，原因写进回执 |
+| `gwbUnitFolder` | `@godcreator/gwb-unit-folder` | 局部注入，peer `^0.7.21` 且 `optional`；建站时调 `unitsRoot()` 现读容器根 | 端口只在站目录的祖父目录里查重，原因写进回执 |
 
 {/* ref file="../plugins/docfirst/src/index.ts" lines="26-26" hash="397a91e60cb0" blob="8a6fffc45d6f" */}
 
-{/* ref file="../plugins/docfirst/src/index.ts" lines="208-211" hash="eb0b315868cd" blob="1d0f81790144" */}
+{/* ref file="../plugins/docfirst/src/index.ts" lines="213-216" hash="eb0b315868cd" blob="5c7cdb26c696" */}
 
-{/* ref file="../plugins/docfirst/src/index.ts" lines="73-79" hash="568963670f9e" blob="97eae2d486d7" */}
+{/* ref file="../plugins/docfirst/src/index.ts" lines="70-84" hash="8e0849ddd0ca" blob="5c7cdb26c696" */}
 
 **写进新站的依赖是一张手写的精确版本表**，只有 `docfirst-workflow` 一个包。包名是写进别人 `package.json` 的字符串，
 不算插件的依赖；这个包发版时这张表跟着改，模板能引用哪些出口由接缝 12 那条测试检查：

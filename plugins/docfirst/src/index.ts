@@ -1,13 +1,13 @@
 import type { GwbContext } from '@godcreator/gwb-kernel-desktop'
-// 只为让这两个插件的 `declare module 'cordis'` 生效，它们给 ctx 加上各自的服务名
+// 只为让这几个插件的 `declare module 'cordis'` 生效，它们给 ctx 加上各自的服务名
 import type {} from '@godcreator/gwb-commands'
 import type {} from '@godcreator/gwb-skills'
+import type { GwbUnitFolderApi } from '@godcreator/gwb-unit-folder'
 import { parseCreateArgs, type CreateArgs } from './args.js'
 import { planCreate } from './create.js'
 import { filesFirstRenderOverwrites, readRepoManifest } from './repo-root.js'
 import { createSite, type SiteOptions, type SiteResult } from './scaffold.js'
 import { readTemplate } from './template.js'
-import { rootFromSetting } from './units-root.js'
 
 /**
  * docfirst 插件：两条建站命令，加 `skills/` 下的说明书。
@@ -26,9 +26,6 @@ export const CREATE_PLAIN_COMMAND = 'docfirst.create-plain'
 export const inject = ['gwbCommands']
 
 const PLUGIN = '@godcreator/gwb-docfirst-workflow'
-
-/** 容器根的设置归单元文件夹插件，经命令总线现读 */
-const UNITS_ROOT_SETTING = { section: 'unit-folder', key: 'units-root' }
 
 /** 读容器根设置的结果：读到了就是路径，读不到或没配就是原因，写进回执 */
 type UnitsRootLookup = { root: string } | { missing: string }
@@ -70,11 +67,19 @@ export function apply(ctx: GwbContext): void {
   // inject 保证了它在，这句只是把类型收窄
   if (cli === undefined) return
 
+  // 单元文件夹插件局部注入：没装时建站照常，端口只在站目录的祖父目录里查重
+  let unitFolder: GwbUnitFolderApi | undefined
+  ctx.inject(['gwbUnitFolder'], (scoped) => {
+    unitFolder = scoped.gwbUnitFolder
+    scoped.effect(() => () => {
+      unitFolder = undefined
+    })
+  })
+
   /** 容器根每次现读：设置可能随时改 */
-  const lookupUnitsRoot = async (): Promise<UnitsRootLookup> => {
-    const reply = await cli.run('settings.get', UNITS_ROOT_SETTING)
-    if (!reply.ok) return { missing: `读不到单元文件夹插件的设置 unit-folder.units-root（${reply.error ?? '没给原因'}）` }
-    const root = rootFromSetting(reply.data)
+  const lookupUnitsRoot = (): UnitsRootLookup => {
+    if (unitFolder === undefined) return { missing: '没装单元文件夹插件（容器根是它的设置 unit-folder.units-root）' }
+    const root = unitFolder.unitsRoot()
     return root === undefined ? { missing: '没配容器根（单元文件夹插件的设置 unit-folder.units-root）' } : { root }
   }
 
@@ -87,7 +92,7 @@ export function apply(ctx: GwbContext): void {
   ): Promise<{ ok: true; data: T } | { ok: false; error: string }> => {
     const parsed = parseCreateArgs(command, raw)
     if (!parsed.ok) return parsed
-    const lookup = await lookupUnitsRoot()
+    const lookup = lookupUnitsRoot()
     let site: SiteResult
     try {
       const options = optionsFor(parsed.args)

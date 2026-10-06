@@ -48,7 +48,7 @@ README、CLAUDE.md、这份规矩与插件里的 SKILL.md 都是**生成物**：
   包不认识插件、docfirst-explainer 的三个入口），别绕、别删、别为了让检查通过注释掉某一条。
 - **要在仓里发生的（核对、确认、渲染）归包，只在 agent 手上发生一次的归插件**：建站
   （`docfirst.create` 与 `docfirst.create-plain`）与说明书在 `plugins/docfirst/`。建站的每一步（运行官方脚手架、本机约定、
-  选端口、写入文件）都在插件的 `src/` 里，插件必需注入的只有命令总线 `gwbCommands`，不依赖别的插件建站。
+  选端口、写入文件）都在插件的 `src/` 里，插件必需注入的只有命令总线 `gwbCommands`，不依赖别的插件建站（单元文件夹插件的 `gwbUnitFolder` 是局部注入，只用来读容器根查端口）。
 - 子进程调用一律带超时。
 - 提交前的检查，下面每处都要通过才提交：
   - 仓根：`pnpm test`、`pnpm typecheck`、`pnpm build`
