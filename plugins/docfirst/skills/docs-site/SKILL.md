@@ -134,7 +134,7 @@ pnpm docfirst trajectory                       列出轨迹卡在星轨盘上的
 4. 逐条看剩下的黄灯：论断还成立就 `pnpm doc:confirm <页…> --accept`；不成立先改正文再确认——正文怎么改看 `docs-writing` 的「黄灯以后改正文」
 5. 代码、文档、记号上的新记录放进同一个提交
 
-`--accept` 必须点名页：同一个仓里别人还没复核的黄灯不替他接受。确认不要求先提交。已经提交的代码、别的仓的代码引起的黄灯，
+`--accept` 必须点名页：同一个仓里别人还没复核的黄灯不替别人接受。确认不要求先提交。已经提交的代码、别的仓的代码引起的黄灯，
 `check` 只报告、不算红，碰到了照样按第 4 步处理。
 
 ### 生成物
@@ -146,25 +146,23 @@ SKILL.md 要在映射里写对象形式、保留 `name` / `description` 两个 f
 
 ## 给别的仓写反馈
 
-在 A 仓工作时发现 B 仓的问题，**直接放进 B 仓站的未来区**，不需要命令：
+在 A 仓工作时发现 B 仓的问题，**在 B 仓在 gitea 上的仓里开一条 issue**，不往 B 仓里写文件：
 
-```
-<B 仓>/docs-site/content/future/inbox/<yyyy-MM-dd>-<来源仓>-<英文短标题>.mdx
-```
+1. 找到 B 仓在 gitea 上是 `<owner>/<仓名>`：插件包看它 `package.json` 的 `repository.url`，别的仓在仓里运行 `git remote get-url gitea`。
+   B 仓在 gitea 上没有仓的，告诉人，不开 issue、也不写文件
+2. 经 gwb-gitea 开 issue（说明书 `gitea` 的「工单」一节）：
 
-文件名用英文小写和短横线（git 会把中文路径显示成八进制转义），中文标题写进 frontmatter：
+   ```
+   gitea.http { "method": "POST", "path": "/repos/<owner>/<仓名>/issues",
+     "body": { "title": "<一句话标题>", "body": "<正文>" } }
+   ```
 
-```
----
-title: <一句话标题>
-description: 来源：<哪个仓 / 哪次会话>
----
+   正文写碰到什么、期望怎样、证据在哪、你觉得该改哪儿，最后一行写 `来源：<哪个仓 / 哪次会话>`。回执 `status: 201` 才算开好，
+   `body.number` 是编号
 
-<碰到什么、期望怎样、证据在哪、你觉得该改哪儿>
-```
-
-然后在 B 仓里 `git add` 这个文件、`git commit --only` 这个文件。一条一个文件，不会跟 B 仓里别人未提交的改动冲突。
-收件的仓处理完删掉这个文件，结论写进现状页或轨迹卡。
+开着的 issue 在工作台的「issue 反馈」窗格里看，agent 调 `gitea-issues.list`（插件 `@godcreator/gwb-gitea-issues`）。
+收件的仓处理完：结论写进现状页或轨迹卡，在 issue 下留言写明改在哪个提交，再关掉它
+（`PATCH /repos/<owner>/<仓名>/issues/<编号>`，`body` 写 `{"state":"closed"}`）。
 
 ## 安装或构建失败
 

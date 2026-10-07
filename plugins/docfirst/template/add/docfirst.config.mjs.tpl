@@ -2,7 +2,7 @@
  * docfirst 配置：命令行和站读的是同一份。项目根是这个站目录，被引用的代码在仓根，引用写 `../src/…`。
  *
  * content 是各区的上一级目录。它下面只有两个名字是固定的：`trajectory/` 是轨迹卡目录，
- * `future/` 是未来区（路线、在途方案 `future/spec/`、别的仓投来的反馈 `future/inbox/`）。
+ * `future/` 是未来区（路线、在途方案 `future/spec/`）；别的仓写来的反馈是 gitea 上的 issue，不放进站里。
  * 其余目录都是现状区，全部进 check；本站预置的现状区是 `content/docs/`。
  *
  * outputs 把正本映射到生成物：仓根 README.md / AGENTS.md / CLAUDE.md 由 `content/docs/outputs/` 下的

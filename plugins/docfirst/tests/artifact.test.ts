@@ -74,7 +74,7 @@ describe('产物', () => {
     expect(host).toContain("'docfirst.create-plain'")
     expect(host, '建站一步完成，不再有先建骨架再装配的第二条命令').not.toContain("'docfirst.attach'")
     // 核对要在仓里发生，agent 在仓里跑 pnpm doc，插件不转发命令行。
-    // 投反馈是在目标仓站里的 content/future/inbox/ 下新建一个文件，不经命令
+    // 给别的仓写反馈是在那个仓的 gitea 上开 issue，不经本插件的命令
     for (const gone of ['live-doc.cli', 'live-doc.cli-raw', 'live-doc.stale', 'live-doc.feedback', 'live-doc.feedback-list']) {
       expect(host, `${gone} 还在总线上`).not.toContain(`'${gone}'`)
     }
