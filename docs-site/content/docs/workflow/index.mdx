@@ -103,13 +103,13 @@ docfirst 的轨迹卡怎么写、怎么校验、怎么换成星轨盘要的中�
 **名册**是一张「组件名 → 规则」的表，说明每个组件在机读文字里变成什么；`check` 只要求生成正本里用到的组件有规则。这里只有机制，没有默认表：组件与规则写在项目的配置里，
 fumadocs 自带组件的规则在 [fumadocs 适配](/docs/fumadocs)的 `./roster`。规则三种写法，函数规则只经 helpers 读节点、造节点：
 
-{/* ref file="../packages/docfirst-workflow/src/mdx/roster.ts" lines="36-37" hash="69cdb1ca8839" blob="449061a61452" */}
+{/* ref file="../packages/docfirst-workflow/src/mdx/roster.ts" lines="37-38" hash="69cdb1ca8839" blob="79ca02da1010" */}
 
-{/* ref file="../packages/docfirst-workflow/src/mdx/roster.ts" lines="23-34" hash="efedd191320a" blob="449061a61452" */}
+{/* ref file="../packages/docfirst-workflow/src/mdx/roster.ts" lines="24-35" hash="efedd191320a" blob="79ca02da1010" */}
 
-`stamp` 给站上每页的机读版用（站的集合接了 `docfirstMarkdownOptions` 才有）：按名册给树上每个组件标上机读文字（写在节点的 data 上）、不换节点（同一棵树还要生成页面），名册外的组件报错并给出行号；把机读文字序列化成 md 的回调在 fumadocs 适配。`docfirst.create` 新建的站不接它，机读文字只出现在生成物里：
+`stamp` 给站上每页的机读版用（站的集合接了 `docfirstMarkdownOptions` 才有）：按名册给树上每个组件标上机读文字（写在节点的 data 上）、不换节点（同一棵树还要生成页面），名册外的组件不标、不报错；把机读文字序列化成 md 的回调在 fumadocs 适配。`docfirst.create` 新建的站不接它，机读文字只出现在生成物里：
 
-{/* ref file="../packages/docfirst-workflow/src/mdx/roster.ts" lines="110-129" hash="2f46ee591d59" blob="449061a61452" */}
+{/* ref file="../packages/docfirst-workflow/src/mdx/roster.ts" lines="111-131" hash="ba46fcd2b5aa" blob="79ca02da1010" */}
 
 `renderAi` 把生成正本按原文渲染成 md，不经过 fumadocs，见[生成物渲染](/docs/workflow/rendering)。
 按原文渲染拒绝渲染时抛的错误类也在这里，摆放用 `instanceof` 认出它，把这篇的每个落点报成红，别的错照原样抛：

@@ -2,7 +2,7 @@
 /**
  * 「一页的 md 怎么来、怎么取」两个讲解组件：
  *   MdBuild  分步：同一篇正本在 next build 里一步步变成语法树、换掉引用、按名册标上机读文字、序列化、预渲染成静态文件
- *   MdComponents  选情况：几种组件按名册规则在 md 里变成什么，名册外的组件怎么报错
+ *   MdComponents  选情况：几种组件按名册规则在 md 里变成什么，名册外的组件在哪儿报错
  *   MdServe  选情况：几种请求各自经过 src/proxy.ts 改写到哪条路由、拿回什么
  * 讲解文字与示例都在 md-output.data.mjs，机读版由 md-output.ai.mjs 读同一份数据生成。
  */

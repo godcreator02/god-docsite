@@ -11,7 +11,8 @@
  *   函数        (node, helpers) => 一个或一组普通 markdown 节点。纯函数：节点进节点出，不读文件
  *   "children"  只留子内容，去掉外壳
  *   "drop"      整个不进机读版
- * 嵌套的组件不用规则处理：子节点还在树上，各自标上各自的机读文字。名册外的组件直接报错，报出行号。
+ * 嵌套的组件不用规则处理：子节点还在树上，各自标上各自的机读文字。
+ * 机读文字只给生成物：生成正本里的名册外组件由 check 与 render 报错；站构建时 stamp 不标它们，也不报错。
  *
  * 契约：函数规则只能通过 helpers 读节点（attr / textOf）、造节点（text / heading / paragraph / quote /
  * children），节点本身对规则是黑盒——不碰 node.type、node.children 这些字段。守住这条，同一张表换个
@@ -111,7 +112,8 @@ function apply(rule: Rule, node: TreeNode, roster: Roster): TreeNode[] {
  * 按名册给树上每个组件标上机读文字。写进节点 data 的有两种字段，都是 fumadocs 序列化时认的：
  *   data.docfirstAi     一组替换节点，回调里用 fumadocs 的 state 序列化（嵌套组件顺着走）
  *   data._stringify    fumadocs 自己定义的字段；{ text: "" } 表示整个不要
- * 已经带 docfirstAi 的节点（目录树引用注入的 Files）跳过、不往里走。import 语句不用管：fumadocs 自己会把 mdxjsEsm 滤掉。
+ * 已经带 docfirstAi 的节点（目录树引用注入的 Files）跳过、不往里走。名册外的组件不标：普通页面上的组件不要求机读规则。
+ * import 语句不用管：fumadocs 自己会把 mdxjsEsm 滤掉。
  */
 export function stamp(tree: TreeNode, roster: Roster): TreeNode {
   walk(tree, (node, index) => {
@@ -119,7 +121,7 @@ export function stamp(tree: TreeNode, roster: Roster): TreeNode {
     if (node.data?.docfirstAi !== undefined) return index === null ? undefined : index + 1;
     if (!isComponent(node)) return;
     const rule = roster[node.name ?? ""];
-    if (rule === undefined) throw new Error(`第 ${lineOf(node)} 行：名册外组件 <${node.name}>`);
+    if (rule === undefined) return;
     const nodes = apply(rule, node, roster);
     node.data ??= {};
     if (nodes.length === 0) node.data._stringify = { text: "" };

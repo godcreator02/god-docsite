@@ -87,7 +87,7 @@ export const mdPaths = {
 
 /* ref file="../packages/docfirst-workflow/src/fumadocs/remark-plugin.ts" lines="26-32" hash="ac17d35141a4" blob="0723b1e3439d" */
 /* ref file="../packages/docfirst-workflow/src/fumadocs/blocks.ts" lines="64-77" hash="ad638e9c6e35" blob="705792ee655d" */
-/* ref file="../packages/docfirst-workflow/src/mdx/roster.ts" lines="116-129" hash="62ded788a80a" blob="449061a61452" */
+/* ref file="../packages/docfirst-workflow/src/mdx/roster.ts" lines="118-131" hash="6841ade7ba2b" blob="79ca02da1010" */
 /* ref file="../packages/docfirst-workflow/src/fumadocs/roster.ts" lines="13-14" hash="e7f78550c886" blob="e605fbea15a7" */
 /* ref file="../packages/docfirst-workflow/src/fumadocs/markdown.ts" lines="24-45" hash="a74a112c335a" blob="0f8adb086fd4" */
 /* ref file="src/lib/source.ts" lines="35-37" hash="b41af54c6c86" blob="5ee282b98601" */
@@ -118,7 +118,7 @@ export const buildSteps = [
   {
     id: 'stamp',
     title: '按名册标上机读文字',
-    text: '插件接着查组件名册：Note 组件的规则把它转成一个引用块「[note] …」，这组替换节点写在 data.docfirstAi 上。名册里找不到的组件当场报错，这一页编译失败，站构建不过。',
+    text: '插件接着查组件名册：Note 组件的规则把它转成一个引用块「[note] …」，这组替换节点写在 data.docfirstAi 上。名册里找不到的组件不标，机读版里不会有它的机读文字。',
     source: [10, 12],
     tree: 'stamped',
     treeHighlight: [7, 9],
@@ -260,8 +260,8 @@ export const serveCases = [
  * @typedef {{ id: string, label: string, text: string, source: string[], ruleTitle: string, rule: string[],
  *   md: string[] | null, error: string | null }} ComponentCase
  */
-/* ref file="../packages/docfirst-workflow/src/mdx/roster.ts" lines="10-14" hash="6018c9c5ef77" blob="449061a61452" */
-/* ref file="../packages/docfirst-workflow/src/mdx/roster.ts" lines="92-108" hash="09207f8b31fa" blob="449061a61452" */
+/* ref file="../packages/docfirst-workflow/src/mdx/roster.ts" lines="10-15" hash="19ad7d272e40" blob="79ca02da1010" */
+/* ref file="../packages/docfirst-workflow/src/mdx/roster.ts" lines="93-109" hash="09207f8b31fa" blob="79ca02da1010" */
 /* ref file="../packages/docfirst-workflow/src/fumadocs/roster.ts" lines="12-19" hash="ad2aa594110a" blob="e605fbea15a7" */
 /* ref file="src/components/tabs/tabs.ai.mjs" lines="7-13" hash="d9e081072a18" blob="49753e4af3a6" */
 /* ref file="src/components/seam-map/seam-map.ai.mjs" lines="24-30" hash="2bcdfbfe5455" blob="bee761f6c2f8" */
@@ -351,7 +351,7 @@ export const componentCases = [
   {
     id: 'unknown',
     label: '名册外组件',
-    text: '名册里没有规则的组件，stamp 这一步当场报错，这一页编译失败、站构建不过（只有接了每页机读版的站才走这一步）。这一页是生成正本时，docfirst check 也报成红，不用等构建；普通页面 check 不查。fumadocs 默认组件表里的 Callout、Card 这些也不在自带的规则里，要用先在 docfirst.config.mjs 给一条规则。',
+    text: '名册里没有规则的组件，stamp 这一步不标、不报错，站照常构建，机读版里没有它的机读文字。机读文字只给生成物：这一页是生成正本时，docfirst check 与 render 报成红；普通页面不查。fumadocs 默认组件表里的 Callout、Card 这些也不在自带的规则里，放进生成正本前先在 docfirst.config.mjs 给一条规则。',
     source: ['<Callout>先备份。</Callout>'],
     ruleTitle: 'docfirst.config.mjs 的 components',
     rule: ['（没有 Callout）'],

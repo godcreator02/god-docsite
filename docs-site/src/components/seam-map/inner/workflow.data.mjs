@@ -248,7 +248,7 @@ export const workflowGraph = defineSeamGraph({
       iface: 'lintComponents(text, roster)；REASON_TEXT[item.reason]',
       convention: false,
       via: 'code',
-      text: 'check 对每篇 mdx 页面用 mdx 格式的 lintComponents 查名册外组件，每个算一处红，不用等站构建才发现；打印黄灯与红灯的细分理由用钉码核心 REASON_TEXT 的中文说法。',
+      text: 'check 对每篇生成正本用 mdx 格式的 lintComponents 查名册外组件，每个算一处红，普通页面不查；打印黄灯与红灯的细分理由用钉码核心 REASON_TEXT 的中文说法。',
     },
     {
       n: 5,

@@ -223,10 +223,12 @@ test("Markdown 图片：跟页面放在一起的图片写 import 路径", () => 
   assert.equal((imgOf(tree).data!.docfirstAi as Array<{ url: string }>)[0]!.url, "./x.png");
 });
 
-test("作者手写的 <img> 带位置，不当成 Markdown 图片，照旧按名册外组件报错", () => {
+test("作者手写的 <img> 带位置，不当成 Markdown 图片：不挂机读文字，当名册外组件看", () => {
   const tree = parseTree('import pic from "./x.png";\n\n<img alt="波形" src={pic} />\n');
   markMarkdownImages(tree, { page: PAGE, publicDir: join(SITE, "public") });
-  assert.throws(() => stamp(tree, fumadocsRoster), /第 3 行：名册外组件 <img>/);
+  stamp(tree, fumadocsRoster);
+  walk(tree, (n) => assert.equal(n.data?.docfirstAi, undefined, `${n.type} 不该挂机读文字`));
+  assert.deepEqual(mdx.lintComponents('import pic from "./x.png";\n\n<img alt="波形" src={pic} />\n', fumadocsRoster), [{ name: "img", line: 3 }]);
 });
 
 test("whereOf：标题和来源行用同一个字符串，三种目标各一种写法", () => {
@@ -299,7 +301,12 @@ test("名册：默认表把 Note 转成机读文字；项目的规则只用 help
   assert.deepEqual(Object.keys(fumadocsRoster).sort(), ["File", "Files", "Folder", "Note"], "默认表：Note 加 fumadocs 的文件树三个组件");
   assert.equal((marks[0]!.docfirstAi as TreeNode[])[0]!.type, "blockquote", "块级 Note 变引用块");
   assert.deepEqual(marks[3]!._stringify, { text: "" }, "drop 的组件整个不要");
-  assert.throws(() => stamp(parseTree("# x\n\n<Tabs>\n  x\n</Tabs>\n"), fumadocsRoster), /第 3 行：名册外组件 <Tabs>/);
+  const unknown = stamp(parseTree("# x\n\n<Tabs>\n  <Note>里层</Note>\n</Tabs>\n"), fumadocsRoster);
+  const stamped: string[] = [];
+  walk(unknown, (n) => {
+    if (n.data?.docfirstAi !== undefined) stamped.push(n.name ?? "");
+  });
+  assert.deepEqual(stamped, ["Note"], "名册外的 Tabs 不标、不报错，里面名册内的 Note 照样标");
   assert.deepEqual(mdx.lintComponents("# x\n\n<Tabs>\n  x\n</Tabs>\n"), [{ name: "Tabs", line: 3 }]);
 });
 

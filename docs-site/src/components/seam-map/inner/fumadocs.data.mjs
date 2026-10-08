@@ -271,7 +271,7 @@ export const fumadocsGraph = defineSeamGraph({
       iface: 'recognize(tree) → Reference[]；stamp(tree, roster)',
       convention: false,
       via: 'code',
-      text: '四步的第一步和第四步用 workflow ./mdx 的函数。recognize 在语法树上认记号，写坏的一次列全再报错，命令行认 mdx 页面用的也是它；讲解组件源码里的引用只在命令行里核对，不经过这个插件；stamp 按名册给每个组件节点写上 data.docfirstAi 或 data._stringify，名册外的组件直接报错。',
+      text: '四步的第一步和第四步用 workflow ./mdx 的函数。recognize 在语法树上认记号，写坏的一次列全再报错，命令行认 mdx 页面用的也是它；讲解组件源码里的引用只在命令行里核对，不经过这个插件；stamp 按名册给每个组件节点写上 data.docfirstAi 或 data._stringify，名册外的组件不标、不报错（机读文字只给生成物，生成正本里的名册外组件由命令行报）。',
     },
     {
       n: 6,
@@ -381,7 +381,7 @@ export const fumadocsGraph = defineSeamGraph({
       iface: '<Term def="…" href="…">词</Term>（mdxJsxTextElement，组件名默认 Term）',
       convention: true,
       via: 'code',
-      text: '插件生成的是名为 Term 的行内 JSX 节点，定义与链接写成属性。两边只靠组件名对上：站的组件表里要登记 Term。这些节点接着会经过 stamp，名册里也要有 Term 的规则，否则构建时报名册外组件。',
+      text: '插件生成的是名为 Term 的行内 JSX 节点，定义与链接写成属性。两边只靠组件名对上：站的组件表里要登记 Term。这些节点接着会经过 stamp；站接了每页机读版时，名册里要有 Term 的规则，机读版里才只留原词。',
     },
     {
       n: 17,
