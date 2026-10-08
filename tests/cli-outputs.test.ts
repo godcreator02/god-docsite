@@ -3,7 +3,7 @@
  * 摆放本身（渲染成什么、四种状态怎么判、frontmatter 怎么挑）归 project 的摆放模块，测试在 placement.test.ts；
  * 这里只测命令行这一层，加装配时的地盘规则与配置形状。测试用的项目在 cli-project.ts 里搭建。
  */
-import { test } from "node:test";
+import { test } from "vitest";
 import assert from "node:assert/strict";
 import { existsSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";

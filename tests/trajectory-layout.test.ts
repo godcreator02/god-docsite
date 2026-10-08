@@ -7,7 +7,7 @@
  * 与映射本体的数值导数一致、装箱后跨域扇环角向互斥、每张卡都有落点。
  */
 import { fileURLToPath } from "node:url";
-import { test } from "node:test";
+import { test } from "vitest";
 import assert from "node:assert/strict";
 import { buildModel } from "@godcreator/trajectory-disk";
 import type { TrajectoryModel } from "@godcreator/trajectory-disk";

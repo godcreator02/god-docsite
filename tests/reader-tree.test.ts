@@ -5,7 +5,7 @@
  * 强制加进来的文件、目标本身在被忽略的目录里）检查它跟逐项问 `check-ignore` 的口径一样。
  * 软链接（pnpm 那种 node_modules → 工作区包）按真实路径读。
  */
-import { test } from "node:test";
+import { test } from "vitest";
 import assert from "node:assert/strict";
 import { mkdirSync, symlinkSync } from "node:fs";
 import { join } from "node:path";

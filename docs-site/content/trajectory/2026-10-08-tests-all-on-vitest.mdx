@@ -1,0 +1,37 @@
+---
+born-at: 2026-10-08T17:50
+type: choice
+parent: [2026-09-03-god-live-doc]
+label: 仓根与站的测试也换成 vitest，全仓只剩一种测试工具
+domain: 仓形
+---
+
+## 背景
+
+pivots-from:: [件合仓](2026-09-09-plugin-joins-the-workspace.md)
+
+插件并进工作区时定过「测试一律 `node --test`，工作台插件例外用 vitest」，于是仓里两种测试工具并存：仓根 `tests/` 与 `docs-site/tests/` 用 `node --test`，`plugins/docfirst/` 用 vitest。
+gwb 生态里其余插件的测试都是 vitest，人决定把还在用 `node --test` 的几个仓统一换掉，原话：「直接改吧」。那张卡里插件与工作区同仓、工具链两套并存的结论不变，变的只是测试这一条。
+
+## 结论与边界
+
+- **仓根 `tests/`**：`test:only` 改成 `vitest run`，仓根的 `vitest.config.ts` 只收 `tests/*.test.ts`，所以不会把插件的测试也收进来。28 个文件只把 `test` 的导入换成 `vitest`，`project-load.test.ts` 的 `test.after` 换成 `afterAll`，断言仍用 `node:assert`。`test` 仍先构建再跑：有的测试按包名引用各包，走的是 `exports` 指向的构建产物
+- **超时**：`node --test` 默认不限时，vitest 默认每条 5 秒。`git-history.test.ts` 要启动 git 子进程，文件并行时第一次就超了，配置里照 devkit 插件模板设 `testTimeout: 20_000`
+- **`docs-site/tests/page.test.mjs`**：它靠 `fumadocs-mdx/node` 的 `register()` 往 Node 的模块加载器里注册 `.mdx` 处理，测的是跟站构建时同一条处理流程。vitest 自己加载测试里 import 的文件，所以站的 `vitest.config.mjs` 把 `.mdx` 列进 `server.deps.external`，交回 Node 原生 import；导入地址改成绝对的 `file://` 并加 `/* @vite-ignore */`，否则 vite 会改写模板字符串形式的动态 import，而它只认一层目录
+- 「不用 threads 池、同仓不并行运行测试」那条规矩不变，现在对三处都适用
+
+## 依据
+
+无 `probes/` 目录，数据来自换完当场的运行：
+
+| 跑法 | 结果 |
+| --- | --- |
+| 换之前仓根 `pnpm test` | 326 条全过 |
+| 换之后仓根 `pnpm test:only`，未设超时 | 325 过，`git-history.test.ts` 一条超过 5 秒 |
+| 设 `testTimeout: 20_000` 后连跑 3 遍 | 每遍 28 个文件、326 条全过 |
+| 换之前站 `pnpm test` | 6 条全过 |
+| 换之后站 `pnpm test` | 6 条全过 |
+
+## 代价与遗留
+
+仓根的测试仍要先构建，vitest 省不掉这一步；要省，得让按包名引用的测试改成解析到源码，那就不再测发出去的产物。

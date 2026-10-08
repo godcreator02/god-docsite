@@ -4,7 +4,7 @@
  * 链接改写、带路径的 `.md` 不改写、wikilink 原样不动）。mdast 树直接手写——remarkTrajectoryLinks 本身就是个收 Root、
  * 返回 void 的函数，不需要实际运行 unified 的 parse/stringify 流程。
  */
-import { test } from "node:test";
+import { test } from "vitest";
 import assert from "node:assert/strict";
 import { cardSchema, remarkTrajectoryLinks } from "@godcreator/docfirst-workflow/fumadocs";
 import type { CardFrontmatter } from "@godcreator/docfirst-workflow/fumadocs";

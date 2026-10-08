@@ -8,7 +8,7 @@
  * 就能单独测——补间只要没把 focusDay / strength 写回 layout，displayRadius 与 mag 读到的
  * 永远是线性态，盘看着一动不动、却零报错。
  */
-import { test } from "node:test";
+import { test } from "vitest";
 import assert from "node:assert/strict";
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";

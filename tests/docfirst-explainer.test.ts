@@ -2,7 +2,7 @@
  * docfirst-explainer 包：`./text` 三个函数的输出，以及三种外壳用 `react-dom/server` 渲染出的第一帧——
  * 控制条按钮都在、说明是第一项、画面拿到的是第一项的数据。接缝图：定义时的几种报错、机读文字、渲染出的图。
  */
-import { test } from "node:test";
+import { test } from "vitest";
 import assert from "node:assert/strict";
 import { createElement } from "react";
 import type { SVGProps } from "react";

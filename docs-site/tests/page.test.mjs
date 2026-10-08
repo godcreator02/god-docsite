@@ -5,8 +5,10 @@
  * 只断言、不跟命令行比：算状态的是同一个钉码编排（project.pinning），比出来只能相等；跨调用方的比对要启动站后抓取 .md 路由。
  * 组件表按 registry.ts 的名单生成占位 div：只为让渲染不缺组件，不管外观。
  */
-import { test } from "node:test";
+import { test } from "vitest";
 import assert from "node:assert/strict";
+import { join } from "node:path";
+import { pathToFileURL } from "node:url";
 import { register } from "fumadocs-mdx/node";
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
@@ -38,7 +40,7 @@ const components = Object.fromEntries(
 async function pageOf(doc) {
   // ?macro_id= 告诉 loader 这篇属于哪个集合（写集合的文件 + 变量名）——集合的 mdxOptions 与
   // postprocess（processed markdown）才会用上。进 check 的只有现状区，本站的现状区只有 content/docs 一个集合
-  const mod = await import(`../${doc}?macro_id=src/lib/source.ts%23docs`);
+  const mod = await import(/* @vite-ignore */ `${pathToFileURL(join(import.meta.dirname, "..", doc)).href}?macro_id=src/lib/source.ts%23docs`);
   return {
     mod,
     html: renderToStaticMarkup(createElement(mod.default, { components })),

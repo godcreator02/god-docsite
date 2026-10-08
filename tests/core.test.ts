@@ -2,7 +2,7 @@
  * 钉码核心自己的测试：check / confirm 两个动作、比较器、确认时记什么。
  * 直接给目标与记录，用内存读取器、内存里的旧内容来源——钉码核心不读文件、不启动子进程、不接触文档文本，这里正好也检查了这一条。
  */
-import { test } from "node:test";
+import { test } from "vitest";
 import assert from "node:assert/strict";
 import { blobOf, createPinner, hashNames, hashSpan, normalizeLines, sliceSpan } from "../packages/code-pin/src/index.ts";
 import type { History, MemoRecord, Pin, Pinner, Reader, Target, Verdict } from "../packages/code-pin/src/index.ts";

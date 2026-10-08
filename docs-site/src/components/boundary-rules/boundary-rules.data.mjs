@@ -86,7 +86,7 @@ export const allowedEdges = [
  * @typedef {{ id: string, label: string, text: string, allowed: string[], forbidden: Forbidden[], tests: GuardTest[] }} BoundaryRule
  * @type {BoundaryRule[]}
  */
-/* ref file="../tests/boundary.test.ts" hash="f1f58e291db3" blob="0d3a5dcc329f" */
+/* ref file="../tests/boundary.test.ts" hash="999e4a6858d3" blob="e07ca500063d" */
 export const rules = [
   {
     id: 'packages',

@@ -3,7 +3,7 @@
  * 四类引用各自的报法、黄灯要点名页带 --accept、红的那几处不挡别的，也在这儿。
  * 台子在 cli-project.ts；outputs 摆放在 cli-outputs.test.ts，装配与报告在 cli-report.test.ts。
  */
-import { test } from "node:test";
+import { test } from "vitest";
 import assert from "node:assert/strict";
 import { existsSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";

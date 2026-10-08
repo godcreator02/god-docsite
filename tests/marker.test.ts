@@ -6,7 +6,7 @@
  *   **写错了报错**：以 @@docfirst 开头的一行、已经删了的 has 记号、长成记号却认不出动作词的注释
  *   **mdx 自己的**：围栏里的不认、未确认的写上记录、格式不对报出行号
  */
-import { test } from "node:test";
+import { test } from "vitest";
 import assert from "node:assert/strict";
 import * as mdx from "../packages/docfirst-workflow/src/mdx/index.ts";
 import type { MemoRecord, Target } from "../packages/code-pin/src/index.ts";

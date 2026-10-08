@@ -39,7 +39,7 @@ devkit 的建仓模板不收文档站，这是本仓有意的例外，理由见�
 <Tabs>
   <Tab title="仓根">
     `pnpm test`、`pnpm typecheck`、`pnpm build`。`build` 与 `typecheck` 按 `./plugins/*` 与 `./packages/*` 过滤，插件在其中；
-    `test` 只运行 `tests/` 下的 `node --test`，不包括插件的 vitest。
+    `test` 先构建，再用仓根的 vitest 配置只运行 `tests/` 下的测试，不包括插件自己的测试。
   </Tab>
   <Tab title="docs-site/">
     `pnpm docfirst check`、`pnpm test`、`pnpm build`、`node scripts/verify-roster.mjs`。`verify-roster.mjs` 核对组件名册两边
@@ -52,9 +52,9 @@ devkit 的建仓模板不收文档站，这是本仓有意的例外，理由见�
 
 三处的脚本，依次是仓根、站、插件：
 
-{/* ref file="../package.json" lines="7-12" hash="6e15b3e305d3" blob="e5ffbb1a9dc4" */}
+{/* ref file="../package.json" lines="7-12" hash="c46eead39bdb" blob="893a99e31694" */}
 
-{/* ref file="package.json" lines="7-15" hash="06917a2611c7" blob="3eccd3ca82ab" */}
+{/* ref file="package.json" lines="7-15" hash="37ad58ad2df1" blob="61c93ed4eb5e" */}
 
 {/* ref file="../plugins/docfirst/package.json" lines="24-31" hash="c94db08cbe3b" blob="f285e7cbd770" */}
 

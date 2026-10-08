@@ -8,7 +8,7 @@
  * DOM 相关的元素用手写的最小桩（只实现仲裁真读写的 style / textContent），不引 DOM 库。
  */
 import { fileURLToPath } from "node:url";
-import { test } from "node:test";
+import { test } from "vitest";
 import assert from "node:assert/strict";
 /* 布局 / 模型也直接读源码：画布层接收的是源码里的 RingsLayout 类型，跟 dist 里那份是两个声明 */
 import { BASE_RADIUS, RingsLayout } from "../packages/trajectory-disk/src/layout.ts";

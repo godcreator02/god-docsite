@@ -39,7 +39,7 @@ pnpm add -D @godcreator/docfirst-workflow
 不接 docfirst 的普通 fumadocs 站用 `docfirst.create-plain`，参数相同。两条都运行官方脚手架 `create-fumadocs-app`、
 应用本机约定、选端口并写入文件，`docfirst.create` 再在官方输出上增、换、删几份文件。站目录必须还不存在；给一个用了很久的站加 docfirst，要手动改站的配置接入。
 
-建站只在 agent 手上发生一次，所以不在包里——包留的是要在**仓**里反复发生的那几条。
+建站只由 agent 执行一次，所以不在包里——包留的是要在**仓**里反复发生的那几条。
 
 ## 怎么用
 
@@ -61,7 +61,7 @@ pnpm add -D @godcreator/docfirst-workflow
 pnpm docfirst check                                 # 只读，报状态。有红时退出码 1；本仓未提交改动引起的黄也算红
 pnpm docfirst confirm                               # 机械写回：给未确认的记号写上记录，挪了位置的写回新行号，重新生成生成物
 pnpm docfirst confirm content/docs/a.mdx --accept   # 复核过后，接受点名页里的黄灯；必须点名页
-pnpm docfirst render                                # 只把 outputs 里有映射的生成正本渲染到落点
+pnpm docfirst render                                # 只把 outputs 里有映射的生成正本渲染到生成位置
 ```
 
 **正常工作的样子**：`check` 打出一行一处引用，每行带一个状态符号（🟢 新鲜 / 🟡 有变动 / ⚪ 未确认 /
@@ -96,7 +96,7 @@ SKILL.md 没有说明指向它、没人会读。
 pnpm install
 pnpm build          # plugins/ 与 packages/ 下各自构建（插件 tsc、各包 tsdown），拓扑序
 pnpm typecheck
-pnpm test           # 先 build 再 node --test tests/*.test.ts
+pnpm test           # 先 build 再 vitest run（只跑 tests/）
 
 cd docs-site
 pnpm docfirst check
@@ -105,7 +105,7 @@ pnpm build          # next build
 node scripts/verify-roster.mjs
 
 cd ../plugins/docfirst
-pnpm check && pnpm build      # 工作台插件单独一套检查，用 vitest
+pnpm check && pnpm build      # 工作台插件单独一套检查
 ```
 
 站不用 `pnpm dev`：看页面也是先 `pnpm build` 再 `pnpm start`，改了内容重新 build。`build` 集中在收尾或发版前运行一次，

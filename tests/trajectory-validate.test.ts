@@ -4,7 +4,7 @@
  * 既测纯函数 checkDocfirstRefs，也测它接进 scanCards 之后 sick 自然带上报病，
  * 以及单卡解析 parseCardFile 不管它。
  */
-import { test } from "node:test";
+import { test } from "vitest";
 import assert from "node:assert/strict";
 import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";

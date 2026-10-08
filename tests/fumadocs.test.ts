@@ -3,7 +3,7 @@
  * 认记号与渲染在 `@godcreator/docfirst-workflow/mdx`，替换节点、代码块的样子、名册规则在 `@godcreator/docfirst-workflow/fumadocs`。
  * 接入 fumadocs 管线的那部分（loader、_markdown、页面上的状态点）由 docs-site 自己的测试检查。
  */
-import { test } from "node:test";
+import { test } from "vitest";
 import assert from "node:assert/strict";
 import { join, resolve } from "node:path";
 import * as mdx from "../packages/docfirst-workflow/src/mdx/index.ts";

@@ -2,7 +2,7 @@
  * 钉码编排的测试：mdx 认引用、钉码核心判定、结果按顺序配回文档路径与行号、确认时交给 mdx 写回。
  * 用内存读取器：判定本身由 core.test.ts 检查，这里只看先后顺序与配回去的位置。
  */
-import { test } from "node:test";
+import { test } from "vitest";
 import assert from "node:assert/strict";
 import { blobOf, createPinner, hashSpan } from "../packages/code-pin/src/index.ts";
 import type { Target } from "../packages/code-pin/src/index.ts";

@@ -3,7 +3,7 @@
  * （改了、暂存了、未跟踪），这个黄算红；已经提交的改动引起的黄、被钉文件在别的仓里的黄只报告。
  * 每个仓一次 check 只问一次 status。台子在 cli-project.ts。
  */
-import { test } from "node:test";
+import { test } from "vitest";
 import assert from "node:assert/strict";
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { createRequire, syncBuiltinESMExports } from "node:module";

@@ -6,7 +6,7 @@
  *   对象库问几次——内容没变不问、同一个 blob 只取一次
  *   跟取不到任何旧内容的比较一致——同一串改动下状态一样
  */
-import { test } from "node:test";
+import { test } from "vitest";
 import assert from "node:assert/strict";
 import { execFileSync } from "node:child_process";
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";

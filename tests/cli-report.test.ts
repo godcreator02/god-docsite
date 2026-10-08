@@ -2,7 +2,7 @@
  * 检查哪些文档、报告长什么样：内容根下除 trajectory/、future/ 之外都进 check、轨迹卡目录顺带做卡校验、
  * 配置里不认识的键报错、`check --json` 那份机读报告。测试用的项目在 cli-project.ts 里搭建（内容根是 docs/）。
  */
-import { test } from "node:test";
+import { test } from "vitest";
 import assert from "node:assert/strict";
 import { mkdirSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";

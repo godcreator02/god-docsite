@@ -6,7 +6,7 @@
  * 这几条不经文档，所以项目只有一份 `docfirst.config.mjs` 和空的内容根。
  * 装配那一整趟（地盘规则、真扫目录）在 cli 那几份测试，摆放那一摊在 placement.test.ts。
  */
-import { test } from "node:test";
+import { afterAll, test } from "vitest";
 import assert from "node:assert/strict";
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
@@ -25,7 +25,7 @@ function project(body: string, contentDir = "content"): Promise<Project> {
   return loadProject(root);
 }
 
-test.after(() => {
+afterAll(() => {
   for (const root of roots) rmSync(root, { recursive: true, force: true, maxRetries: 5 });
 });
 

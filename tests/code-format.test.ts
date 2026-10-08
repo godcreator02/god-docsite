@@ -7,7 +7,7 @@
  *   **写回**：整行替换，保留缩进与行尾 \r，别的行一个字节不动
  * 另外测钉码编排按文件挑格式、项目装配把组件文件列进现状区、命令行照常核对与确认。
  */
-import { test } from "node:test";
+import { test } from "vitest";
 import assert from "node:assert/strict";
 import { mkdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";

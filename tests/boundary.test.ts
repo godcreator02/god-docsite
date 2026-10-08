@@ -43,7 +43,7 @@
  * **别删这个文件，也别把某一条注释掉「先让门禁通过」。** 它失败的时候，出错的是设计，不是测试。
  * 真要改方向，改的是那几张表加一段说明为什么——不是把断言删掉。
  */
-import { test } from "node:test";
+import { test } from "vitest";
 import assert from "node:assert/strict";
 import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { dirname, join, relative, resolve, sep } from "node:path";

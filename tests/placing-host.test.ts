@@ -5,7 +5,7 @@
  * 和生成物那部分（读一个落点、写一个落点）都在接口上。读写真实磁盘的那份适配器住 `load.ts`，这儿是第二份：
  * 落点在一张 Map 里，于是「摆了什么、摆到哪个键上、落点上的内容被改过之后判成什么」全部直接看得见。
  */
-import { test } from "node:test";
+import { test } from "vitest";
 import assert from "node:assert/strict";
 import { createPinner } from "../packages/code-pin/src/index.ts";
 import type { Roster } from "../packages/docfirst-workflow/src/mdx/index.ts";

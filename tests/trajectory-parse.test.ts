@@ -5,7 +5,7 @@
  * 都会给出 Date 对象，String() 之后格式校验全灭、全部日级存量卡被判病挡在盘外——而且是
  * 静默的（盘照出，只是少了卡少了环）。这一条塌了，整个数据层跟着塌。
  */
-import { test } from "node:test";
+import { test } from "vitest";
 import assert from "node:assert/strict";
 import {
   extractMilestones,

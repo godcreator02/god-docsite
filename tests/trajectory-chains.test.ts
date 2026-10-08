@@ -5,7 +5,7 @@
  * buildChains 用真实 buildModel + RingsLayout；computeDodge 只碰
  * places / treeBoxes[].slotDeg / mag / displayRadius 几个字段，用最小的 duck-typed 假布局精确给定几何数据。
  */
-import { test } from "node:test";
+import { test } from "vitest";
 import assert from "node:assert/strict";
 import { buildModel } from "@godcreator/trajectory-disk";
 /* 布局不从 `.` 出口导出，直读源码 */

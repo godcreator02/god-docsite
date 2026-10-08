@@ -6,7 +6,7 @@
  *
  * 临时目录里不建 git 仓：确认不查 git，源里那条引用照样能写上记录。
  */
-import { test } from "node:test";
+import { test } from "vitest";
 import assert from "node:assert/strict";
 import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";

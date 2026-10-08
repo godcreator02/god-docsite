@@ -2,7 +2,7 @@
  * 扫卡目录那一处碰盘的逻辑：`.mdx` 与 `.md` 都是卡、身份是去掉后缀的文件名主干、同一主干两种
  * 后缀都在只认 `.mdx`。临时目录里造几张真文件跑 scanCardDir；挑文件那半（pickCardFiles）纯函数直接喂。
  */
-import { test } from "node:test";
+import { test } from "vitest";
 import assert from "node:assert/strict";
 import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";

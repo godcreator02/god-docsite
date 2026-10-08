@@ -4,7 +4,7 @@
  * 非根卡全部画到盘上（含未分道哨兵）、盘心认定（卡目录里恰好一张 type: root）、正文 inline 边求解、
  * 里程碑从根卡正文解析、卡目录不存在时扫描结果为空。卡经 workflow 的卡格式换成中性输入，再交给 buildModel。
  */
-import { test } from "node:test";
+import { test } from "vitest";
 import assert from "node:assert/strict";
 import { buildModel } from "@godcreator/trajectory-disk";
 import { dayNum, NO_DOMAIN } from "../packages/trajectory-disk/src/model/build.ts";

@@ -3,7 +3,7 @@
  * 加 remark 半在树上换节点的行为（哪些地方不标、换出来的形状）。
  * 站上长什么样由 docs-site 的构建守，这里不碰 React。
  */
-import { test } from "node:test";
+import { test } from "vitest";
 import assert from "node:assert/strict";
 import { buildTermIndex, findTerms, remarkGlossary } from "../packages/docfirst-workflow/src/fumadocs/index.ts";
 import type { TermEntry } from "../packages/docfirst-workflow/src/fumadocs/index.ts";

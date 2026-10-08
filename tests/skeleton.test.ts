@@ -2,7 +2,7 @@
  * 工作区结构：`packages/` 下的包都在、都能装、都能构建出产物，出口按 package.json 的 exports 解析得到。
  * 别的规矩（谁能依赖谁、目录方向）归 boundary.test.ts。
  */
-import { test } from "node:test";
+import { test } from "vitest";
 import assert from "node:assert/strict";
 import { existsSync, readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
