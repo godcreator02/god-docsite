@@ -161,9 +161,11 @@ async function check(project: Project, doc: string, text: string, uncommitted: U
     lines.push(itemLine(doc, item, blocking));
   }
   const isPage = mdxFormat.claims(doc);
-  const components = isPage ? lintComponents(text, project.roster) : [];
+  // 机读文字只给生成物：只有生成正本里的组件要在名册里有规则，普通页面上的组件不查
+  const isOutputSource = isPage && project.placements(doc).length > 0;
+  const components = isOutputSource ? lintComponents(text, project.roster) : [];
   for (const { name, line } of components) {
-    lines.push(`🔴 ${doc}  第 ${line} 行 <${name}>  名册外组件，docfirst.config.mjs 里没给它机读规则`);
+    lines.push(`🔴 ${doc}  第 ${line} 行 <${name}>  名册外组件，这篇是生成正本，docfirst.config.mjs 里要给它机读规则`);
   }
   const outputs = isPage ? project.placing.check(doc, listing) : [];
   for (const output of outputs) lines.push(placedLine(doc, output));

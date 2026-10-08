@@ -9,9 +9,9 @@ import { siteTitle } from './values.js'
 
 /**
  * 建一个 fumadocs 站，两条命令共用：`docfirst.create-plain` 只要官方输出加本机约定，
- * `docfirst.create` 再传入 docfirst 的三个文件清单与 package.json 的补充。
+ * `docfirst.create` 再传入 docfirst 的文件清单与 package.json 的补充。
  * 先用官方脚手架 `create-fumadocs-app`（版本写死）生成到临时目录，再应用本机约定，
- * 再按传入的三个清单新增、替换、删除文件，最后整套写到目标目录。
+ * 再按传入的清单新增、替换、删除、改文件，最后整套写到目标目录。
  *
  * 本机约定只改这几处，每一处都是精确文本替换，官方输出里找不到要替换的原文就报错——
  * 那说明脚手架的输出变了，要来这里跟着改：
@@ -43,7 +43,7 @@ const SCAFFOLD_TIMEOUT_MS = 5 * 60_000
 /** 脚手架输出变了时，报错里指向要跟着改的文件 */
 const FIX_HERE = '要跟着改 docfirst 插件的 src/scaffold.ts'
 
-/** 本机约定改过或新增的文件：传入的清单不能再替换、删除它们 */
+/** 本机约定改过或新增的文件：传入的清单不能整份替换它们，只能删除或经 editFiles 再改几处 */
 export const MANAGED_FILES: readonly string[] = [
   '.gitignore',
   'package.json',
@@ -93,14 +93,22 @@ export interface ManifestAdditions {
   scripts?: Record<string, string>
 }
 
+/** 一份文件里的几处精确替换：每个 `[原文, 新文]` 的原文在这份文件里必须恰好出现一次 */
+export interface FileEdit {
+  path: string
+  replacements: Array<[string, string]>
+}
+
 /** 在官方输出上的改动 */
 export interface FileChanges {
   /** 新增，官方输出里已经有同名文件就报错 */
   addFiles?: SiteFile[]
-  /** 整份替换，官方输出里必须有这份 */
+  /** 整份替换，官方输出里必须有这份，且不能是本机约定改过的 */
   replaceFiles?: SiteFile[]
   /** 删除，官方输出里必须有这份 */
   removeFiles?: string[]
+  /** 在本机约定之后再改几处，官方输出里必须有这份；本机约定改过的也能改，两边的改动叠在一起 */
+  editFiles?: FileEdit[]
 }
 
 /** 建一个站要的全部输入。除了 `dir` 都可以不给 */
@@ -281,30 +289,42 @@ function pathProblem(rel: string): string | undefined {
   return undefined
 }
 
+const VERB: Record<'replace' | 'remove' | 'edit', string> = { replace: '替换', remove: '删除', edit: '改' }
+
 /**
- * 按传入的三个清单改官方输出。新增的不能已存在；替换、删除的必须存在，且不能是本机约定改过的那几份；
- * 同一个路径不能出现两次；也不能既是文件又是别的文件的上级目录。有问题的一次列全，一个都不改。
+ * 按传入的四个清单改官方输出。新增的不能已存在；替换、删除、改的必须存在；替换的不能是本机约定改过的那几份
+ * （整份换掉会丢掉本机约定的改动，要改就放进 editFiles）；同一个路径不能出现两次；
+ * 也不能既是文件又是别的文件的上级目录。有问题的一次列全，一个都不改。
  */
 export function applyChanges(files: readonly SiteFile[], changes: FileChanges): SiteFile[] {
   const byPath = new Map(files.map((file) => [file.path, file.text]))
   const managed = new Set(MANAGED_FILES)
   const problems: string[] = []
   const touched = new Set<string>()
-  const check = (rel: string, kind: 'add' | 'replace' | 'remove'): void => {
+  const check = (rel: string, kind: 'add' | 'replace' | 'remove' | 'edit'): void => {
     const bad = pathProblem(rel)
     if (bad !== undefined) return void problems.push(bad)
     if (touched.has(rel)) return void problems.push(`${rel}：在清单里出现了不止一次`)
     touched.add(rel)
-    if (kind === 'add' && byPath.has(rel)) problems.push(`${rel}：官方输出里已经有，要换请放进 replaceFiles`)
-    if (kind !== 'add' && !byPath.has(rel)) problems.push(`${rel}：官方输出里没有这份，没法${kind === 'replace' ? '替换' : '删除'}`)
-    if (kind !== 'add' && managed.has(rel)) problems.push(`${rel}：本机约定已经改过这份，不能再${kind === 'replace' ? '替换' : '删除'}`)
+    if (kind === 'add') {
+      if (byPath.has(rel)) problems.push(`${rel}：官方输出里已经有，要换请放进 replaceFiles`)
+      return
+    }
+    if (!byPath.has(rel)) problems.push(`${rel}：官方输出里没有这份，没法${VERB[kind]}`)
+    if (kind === 'replace' && managed.has(rel)) problems.push(`${rel}：本机约定已经改过这份，不能整份替换，要改请放进 editFiles`)
   }
   for (const file of changes.addFiles ?? []) check(file.path, 'add')
   for (const file of changes.replaceFiles ?? []) check(file.path, 'replace')
   for (const rel of changes.removeFiles ?? []) check(rel, 'remove')
+  for (const edit of changes.editFiles ?? []) check(edit.path, 'edit')
   if (problems.length === 0) {
     for (const rel of changes.removeFiles ?? []) byPath.delete(rel)
     for (const file of [...(changes.addFiles ?? []), ...(changes.replaceFiles ?? [])]) byPath.set(file.path, file.text)
+    for (const edit of changes.editFiles ?? []) {
+      let text = byPath.get(edit.path)!
+      for (const [from, to] of edit.replacements) text = replaceOnce(text, from, to, edit.path)
+      byPath.set(edit.path, text)
+    }
     for (const rel of byPath.keys()) {
       const segments = rel.split('/')
       for (let depth = 1; depth < segments.length; depth++) {

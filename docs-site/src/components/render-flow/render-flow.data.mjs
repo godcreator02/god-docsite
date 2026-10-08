@@ -103,7 +103,7 @@ export const refusalMessage =
  * @typedef {{ text: string, kind: 'cmd' | 'out' | 'ok' | 'err', at: number }} TimedLine
  * @type {Record<'render' | 'check' | 'refuse', TimedLine[]>}
  */
-/* ref file="../packages/docfirst-workflow/src/cli/commands.ts" lines="177-191" hash="5a3bbda3cd7c" blob="937001d7a349" */
+/* ref file="../packages/docfirst-workflow/src/cli/commands.ts" lines="179-193" hash="5a3bbda3cd7c" blob="0c73c55ad647" */
 /* ref file="../packages/docfirst-workflow/src/cli/text.ts" lines="63-70" hash="272e7834a64c" blob="dfe396df5a65" */
 /* ref file="../packages/docfirst-workflow/src/cli/text.ts" lines="11-17" hash="9ebfdcac2bf1" blob="cc1432339eb9" */
 export const terminals = {

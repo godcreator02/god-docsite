@@ -3,7 +3,7 @@ import os from 'node:os'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { describe, expect, it } from 'vitest'
-import { DOC_SCRIPTS, planCreate, SCAFFOLD_FILES_REMOVED, type CreateInput } from '../src/create.js'
+import { DOC_SCRIPTS, planCreate, SCAFFOLD_EDITS, SCAFFOLD_FILES_REMOVED, type CreateInput } from '../src/create.js'
 import { DOCFIRST_DEPS } from '../src/deps.js'
 import { filesFirstRenderOverwrites, readRepoManifest } from '../src/repo-root.js'
 import { readTemplate, renderFiles, renderText, TEMPLATE_ROOT, type SiteValues, type TemplateFile } from '../src/template.js'
@@ -67,7 +67,7 @@ const SCAFFOLD_OUTPUT = [
   'tsconfig.json',
 ]
 
-/** 本机约定改过的文件（`src/scaffold.ts` 的 `MANAGED_FILES`）：清单不能替换、不能删除 */
+/** 本机约定改过的文件（`src/scaffold.ts` 的 `MANAGED_FILES`）：清单不能整份替换，只能删除或再改几处 */
 const MANAGED_BY_CONVENTIONS = [
   '.gitignore',
   'package.json',
@@ -154,12 +154,21 @@ describe('结构模板', () => {
     for (const file of renderFiles(readTemplate().add, VALUES)) expect(SCAFFOLD_OUTPUT, `新增清单里的 ${file.rel} 官方输出里已经有`).not.toContain(file.rel)
   })
 
-  it('替换与删除的文件官方输出里都有，且都不是本机约定改过的', () => {
-    const touched = [...renderFiles(readTemplate().replace, VALUES).map((f) => f.rel), ...SCAFFOLD_FILES_REMOVED]
-    for (const rel of touched) {
-      expect(SCAFFOLD_OUTPUT, `${rel} 官方输出里没有，没法替换或删除`).toContain(rel)
-      expect(MANAGED_BY_CONVENTIONS, `${rel} 本机约定已经改过`).not.toContain(rel)
+  it('替换、删除、改的文件官方输出里都有；替换的都不是本机约定改过的', () => {
+    const replaced = renderFiles(readTemplate().replace, VALUES).map((f) => f.rel)
+    for (const rel of [...replaced, ...SCAFFOLD_FILES_REMOVED, ...SCAFFOLD_EDITS.map((edit) => edit.path)]) {
+      expect(SCAFFOLD_OUTPUT, `${rel} 官方输出里没有，没法替换、删除或改`).toContain(rel)
     }
+    for (const rel of replaced) expect(MANAGED_BY_CONVENTIONS, `${rel} 本机约定已经改过，不能整份替换`).not.toContain(rel)
+  })
+
+  it('站上不出每页的机读版：llms 路由与 proxy 删掉，docs 页面去掉复制与查看 markdown 的按钮', () => {
+    for (const gone of ['src/app/llms.txt/route.ts', 'src/app/llms-full.txt/route.ts', 'src/app/llms.mdx/docs/[[...slug]]/route.ts', 'src/proxy.ts']) {
+      expect(SCAFFOLD_FILES_REMOVED).toContain(gone)
+    }
+    const page = SCAFFOLD_EDITS.find((edit) => edit.path === 'src/app/docs/[[...slug]]/page.tsx')
+    expect(page?.replacements.map(([from]) => from).join('')).toMatch(/MarkdownCopyButton[\s\S]*ViewOptionsPopover/)
+    expect(renderedText('src/lib/source.ts')).not.toMatch(/llms|includeProcessedMarkdown|docfirstMarkdownOptions/)
   })
 
   it('官方的 docs 页面不替换：它从 @/components/mdx 取组件，状态点靠替换 mdx.tsx 接上', () => {
@@ -209,15 +218,14 @@ describe('结构模板', () => {
     expect(JSON.parse(renderedText('content/trajectory/meta.json'))).toEqual({ pages: ['[星轨盘](/trajectory)', '...'] })
   })
 
-  it('src/lib/source.ts：三个区各一个 macro 集合，现状集合经 applyMdxPreset 接 docfirst，官方的导出名还在', () => {
+  it('src/lib/source.ts：三个区各一个 macro 集合，现状集合经 applyMdxPreset 接 docfirst，官方搜索用的导出名还在', () => {
     const source = renderedText('src/lib/source.ts')
     expect(source).toMatch(/from 'fumadocs-mdx\/macro'/)
     expect([...source.matchAll(/const (\w+) = defineDocs\(\{\s*dir: 'content\/(\w+)'/g)].map((m) => [m[1], m[2]])).toEqual(ZONES.map((zone) => [zone, zone]))
     expect(source).toMatch(/mdxOptions: applyMdxPreset\(docfirstMdxOptions\(\{ root: process\.cwd\(\) \}\)\),/)
-    expect((source.match(/includeProcessedMarkdown/g) ?? []).length, '只有现状区开 processed markdown').toBe(1)
     expect(source).toMatch(/schema: cardSchema/)
     expect(source, '不许靠强转过类型检查').not.toMatch(/\bas (never|unknown|any)\b/)
-    for (const name of ['source', 'sourceTrajectory', 'sourceFuture', 'docsLlms']) expect(source).toMatch(new RegExp(`export const ${name} = `))
+    for (const name of ['source', 'sourceTrajectory', 'sourceFuture']) expect(source).toMatch(new RegExp(`export const ${name} = `))
     expect([...source.matchAll(/baseUrl: ([^,\n]+),/g)].map((m) => m[1])).toEqual(['docsRoute', "'/trajectory'", "'/future'"])
   })
 
@@ -299,15 +307,16 @@ describe('结构模板', () => {
 })
 
 describe('planCreate：交给 createSite 的选项', () => {
-  it('三个清单：新增、替换来自模板，删除是官方的示例页', () => {
+  it('四个清单：新增、替换来自模板，删除是官方的示例页与机读版路由，改的是还连着机读版的两份', () => {
     const template = readTemplate()
     const args = planCreate(inputWith({ template }))
     const values: SiteValues = { title: '我的仓', site: 'docs-site' }
     expect(args.dir).toBe(SITE_DIR)
     expect(args.addFiles).toEqual(renderFiles(template.add, values).map((f) => ({ path: f.rel, text: f.text })))
     expect(args.replaceFiles).toEqual(renderFiles(template.replace, values).map((f) => ({ path: f.rel, text: f.text })))
-    expect(args.removeFiles).toEqual(['content/docs/test.mdx'])
-    const paths = [...args.addFiles!.map((f) => f.path), ...args.replaceFiles!.map((f) => f.path), ...args.removeFiles!]
+    expect(args.removeFiles).toEqual([...SCAFFOLD_FILES_REMOVED])
+    expect(args.editFiles!.map((edit) => edit.path)).toEqual(['src/app/docs/[[...slug]]/page.tsx', 'src/lib/shared.ts'])
+    const paths = [...args.addFiles!.map((f) => f.path), ...args.replaceFiles!.map((f) => f.path), ...args.removeFiles!, ...args.editFiles!.map((f) => f.path)]
     expect(new Set(paths).size, '三个清单之间有重复路径').toBe(paths.length)
   })
 

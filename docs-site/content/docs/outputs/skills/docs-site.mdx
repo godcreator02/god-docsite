@@ -33,7 +33,8 @@ docfirst.create-plain  {"dir":"<仓>/docs-site"}    普通 fumadocs 站，没有
 两条都先运行官方脚手架 `create-fumadocs-app`（版本写死在插件里，要联网），再应用本机约定：允许 esbuild 运行构建脚本、
 `dev` / `start` 写端口并只监听 127.0.0.1、字体 Sarasa Mono SC、页面语言 zh-CN、站名、去掉 GitHub 链接与分享图、`/` 跳到 `/docs`、
 `.gitignore` 排除 `next dev` 在站根生成的 `AGENTS.md` 与 `CLAUDE.md`、每页 md 的 `Content-Type` 带 `charset=utf-8`。
-站里自带搜索、`/llms.txt` 与每页的 markdown 版本（网址后加 `.md`）。`docfirst.create` 另外写进三个内容集合、各区的路由与侧栏、
+普通站里自带搜索、`/llms.txt` 与每页的 markdown 版本（网址后加 `.md`）。`docfirst.create` 建的站只留搜索，删掉每页的机读版
+（llms 路由、`.md` 地址、页面上复制与查看 markdown 的按钮）：机读文字只给生成物。它另外写进三个内容集合、各区的路由与侧栏、
 整页星轨盘 `/trajectory`、`docfirst.config.mjs`、组件名册与名册核对脚本、起始页，以及 `doc` / `doc:confirm` / `doc:render` / `verify:roster` 几条脚本。
 
 **只写文件**，不运行 install。回执里的 `next` 就是接着要运行的：
@@ -67,15 +68,16 @@ pnpm build
 **侧栏顺序**写在各目录的 `meta.json`：`{ "pages": ["index", "...", "glossary"] }`，`"..."` 是其余按文件名排。
 
 **登记一个组件**：写在 `src/components/`，登记进 `src/components/mdx.tsx` 的组件表，mdx 里才能写 `<名字 />`。
-fumadocs 自带的组件从 `fumadocs-ui/components/<名>` 导入，默认组件表里只有 `Card`、`Callout`、代码块与标题几样。docfirst 站还要改两处：
+fumadocs 自带的组件从 `fumadocs-ui/components/<名>` 导入，默认组件表里只有 `Card`、`Callout`、代码块与标题几样。docfirst 站还要：
 
 1. `src/components/registry.ts` 的名单加上组件名
-2. `docfirst.config.mjs` 的 `components` 给它一条机读规则：放在组件旁边、不依赖 React 的 `.ai.mjs` 文件里，照 `src/components/tabs/tabs.ai.mjs` 写
+2. **只有组件要放进生成正本时**，在 `docfirst.config.mjs` 的 `components` 给它一条机读规则：放在组件旁边、不依赖 React 的 `.ai.mjs` 文件里，
+   交回的文字就是它在生成物里的样子。普通页面上的组件不写规则
 
-然后 `node scripts/verify-roster.mjs` 核对名单与规则一致。名册外的组件 `pnpm doc` 直接报错。
+然后 `node scripts/verify-roster.mjs` 核对机读规则表里的组件都在名单里。生成正本里用了名册外的组件，`pnpm doc` 直接报错。
 
-Markdown 图片 `![说明](/p2/x.png)` 不用登记：图片放在站的 `public/` 下或页面旁边，页面上由 fumadocs 默认的图片组件显示，
-机读版里原样写成 `![说明](/p2/x.png)`。在 mdx 里手写的 `<img>` 才算组件，要登记。
+Markdown 图片 `![说明](/p2/x.png)` 不用登记：图片放在站的 `public/` 下或页面旁边，页面上由 fumadocs 默认的图片组件显示。
+在 mdx 里手写的 `<img>` 才算组件，要登记。
 
 用到 fumadocs 间接带进来的包（`motion`、`next-themes`）或讲解组件包 `@godcreator/docfirst-explainer`，写进站自己的 `package.json`；
 用讲解组件包还要在全局样式里引入它的 `styles.css`。
@@ -102,14 +104,16 @@ mdxOptions: applyMdxPreset({
 - **服务由 agent 自己启动**：Claude Code 桌面版写进 `.claude/launch.json` 用 `preview_start`，经到点自动停止的超时脚本启动
   （默认 12 小时）；别的客户端在后台运行。给人看就在 VS Code 的内置浏览器里打开（读说明书 `vscode`）。
   用户说要看就一直开着；只是自己验证的，验完停掉。用户没说要看，build 通过就结束
-- **agent 读站取 md，不解析 HTML**：先读 `/llms.txt` 找页，再取那几页的 `.md`
+- **一个站只在一个端口跑最新构建**：重新 build 以后，停掉这个站端口上原来的 `start`（不管是谁启动的）再用原配置重启，
+  不另开一个端口验证
+- **agent 读 mdx 正本，不解析 HTML**：docfirst 站不出每页的机读版，直接读仓里 `content/` 下的 mdx；普通站可以先读 `/llms.txt` 找页，再取那几页的 `.md`
 
 **验收一页**：
 
 - 每个按钮点一下、每种情况都试一遍，深浅主题各看一次，把窗口拉窄看一次
 - 预览面板被隐藏时页面宽度是 0、逐帧回调不运行，动画停在中途：先给页面设一个尺寸，连续截几张图让它往前走再看最终画面；
   预览把窗口缩放过时按坐标点会点偏，改用元素引用
-- docfirst 站再运行 `pnpm doc` 与 `node scripts/verify-roster.mjs`，看一眼机读版（`/llms.mdx/docs/<页>/content.md`）里组件变成的文字读得懂
+- docfirst 站再运行 `pnpm doc` 与 `node scripts/verify-roster.mjs`；页面是生成正本的，看一眼生成物里组件变成的文字读得懂
 
 ## docfirst 站：核对、确认、生成
 

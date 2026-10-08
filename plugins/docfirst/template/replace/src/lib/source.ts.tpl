@@ -6,18 +6,18 @@
  *   future      未来区：还没发生的事
  *
  * 集合级 mdxOptions 会去掉 fumadocs 的全部默认插件，所以写了 mdxOptions 的集合都经 applyMdxPreset 把默认插件加回来。
- * 只有现状区开 processed markdown：站上各页的机读版与 llms 路由从这儿出。
- * source 与 docsLlms 两个导出名是官方的搜索与 llms 路由在用的，别改名。
+ * 站上不出每页的机读版：机读文字只给 outputs 里的生成物，由 docfirst render 生成。
+ * source 这个导出名是官方的搜索路由在用的，别改名。
  *
  * 在 content/ 下新建现状区目录时，这里加一个集合与 loader，src/app/docs/layout.tsx 的侧栏加一个根节点，
  * src/app/<目录>/ 下加路由。
  */
-import { llms, loader } from 'fumadocs-core/source';
+import { loader } from 'fumadocs-core/source';
 import { lucideIconsPlugin } from 'fumadocs-core/source/lucide-icons';
 import { metaSchema, pageSchema } from 'fumadocs-core/source/schema';
 import { applyMdxPreset } from 'fumadocs-mdx/config';
 import { defineDocs } from 'fumadocs-mdx/macro';
-import { cardSchema, docfirstMarkdownOptions, docfirstMdxOptions, remarkTrajectoryLinks } from '@godcreator/docfirst-workflow/fumadocs';
+import { cardSchema, docfirstMdxOptions, remarkTrajectoryLinks } from '@godcreator/docfirst-workflow/fumadocs';
 import { docsRoute } from './shared';
 
 const docs = defineDocs({
@@ -25,9 +25,6 @@ const docs = defineDocs({
   docs: {
     schema: pageSchema,
     mdxOptions: applyMdxPreset(docfirstMdxOptions({ root: process.cwd() })),
-    postprocess: {
-      includeProcessedMarkdown: docfirstMarkdownOptions(),
-    },
   },
   meta: {
     schema: metaSchema,
@@ -62,10 +59,4 @@ export const sourceTrajectory = loader({
 export const sourceFuture = loader({
   baseUrl: '/future',
   source: future.toFumadocsSource(),
-});
-
-export const docsLlms = llms(source, {
-  renderPage: async (page) => `# ${page.data.title} (${page.url})
-
-${await page.data.getText('processed')}`,
 });

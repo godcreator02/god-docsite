@@ -30,12 +30,12 @@ export const gateLabel = {
 };
 
 /** check 计入红的几类，退出码只看它们的总数 */
-/* ref file="../packages/docfirst-workflow/src/cli/commands.ts" lines="154-175" hash="8b8a1ba5607e" blob="2732fec328d4" */
+/* ref file="../packages/docfirst-workflow/src/cli/commands.ts" lines="154-177" hash="0e7e8a33ed97" blob="0c73c55ad647" */
 /* ref file="../packages/docfirst-workflow/src/cli/commands.ts" lines="80-98" hash="e7af08d1a9b3" blob="937001d7a349" */
 export const redSources = [
   { name: '缺失的引用', rule: '被钉的行段、文件、目录不在了；提没提交都算' },
   { name: '拦提交的黄', rule: '状态是「有变动」，且被钉文件在文档所在的仓里有未提交的改动' },
-  { name: '名册外组件', rule: 'mdx 里用了 docfirst.config.mjs 的 components 里没有的组件' },
+  { name: '名册外组件', rule: '生成正本里用了 docfirst.config.mjs 的 components 里没有的组件；普通页面不查' },
   { name: '不新鲜的生成物', rule: 'outputs 映射里写了的落点：文件还不存在、跟正本重新渲染的结果不一致、正本头部缺点名的字段、正本渲染不了' },
   { name: '轨迹卡的病', rule: 'content/trajectory/ 下的卡缺必填字段，或字段格式不对' },
 ];
@@ -225,7 +225,7 @@ export const steps = [
     output: [
       { text: `⚪ ${DOC}  src/bye.ts:1-3  未确认，等作者确认`, kind: 'out' },
       { text: `🟡 ${DOC}  ${OTHER_REF}:4-5  有变动，等作者复核`, kind: 'out' },
-      { text: `🔴 ${DOC}  第 12 行 <Chart>  名册外组件，docfirst.config.mjs 里没给它机读规则`, kind: 'err' },
+      { text: '🔴 content/docs/outputs/readme.mdx  第 12 行 <Chart>  名册外组件，这篇是生成正本，docfirst.config.mjs 里要给它机读规则', kind: 'err' },
       {
         text: '🔴 content/docs/outputs/readme.mdx → ../README.md  生成物跟 mdx 源不一致（源改了没重新生成，或有人直接改了生成物）——重新运行 render',
         kind: 'err',

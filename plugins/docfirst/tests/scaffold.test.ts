@@ -16,9 +16,11 @@ import {
   type Scaffold,
   type SiteFile,
 } from '../src/scaffold.js'
+import { planCreate } from '../src/create.js'
+import { readTemplate } from '../src/template.js'
 
 /**
- * 建站：本机约定改了官方输出的哪几处、传入的三个清单怎么检查、package.json 怎么合并、
+ * 建站：本机约定改了官方输出的哪几处、传入的四个清单怎么检查、package.json 怎么合并、
  * 端口在哪儿查重、写入磁盘的前置条件。官方输出用 tests/fixtures 下存的那份（实际运行脚手架的对照在 scaffold.slow.test.ts）。
  */
 
@@ -116,18 +118,25 @@ describe('applyConventions：本机约定', () => {
   })
 })
 
-describe('applyChanges：传入的三个清单', () => {
+describe('applyChanges：传入的四个清单', () => {
   const base = applyConventions(official, { title: 't', port: 4310 })
 
-  it('增、换、删都照做', () => {
+  it('增、换、删、改都照做；本机约定改过的也能删、能再改几处', () => {
     const out = applyChanges(base, {
       addFiles: [{ path: 'src/app/extra/page.tsx', text: 'add' }],
       replaceFiles: [{ path: 'src/lib/source.ts', text: 'replaced' }],
-      removeFiles: ['content/docs/test.mdx'],
+      removeFiles: ['content/docs/test.mdx', 'src/app/llms.mdx/docs/[[...slug]]/route.ts'],
+      editFiles: [{ path: 'src/app/layout.tsx', replacements: [['<html lang="zh-CN"', '<html lang="zh-CN" data-x']] }],
     })
     expect(text(out, 'src/app/extra/page.tsx')).toBe('add')
     expect(text(out, 'src/lib/source.ts')).toBe('replaced')
     expect(out.map((f) => f.path)).not.toContain('content/docs/test.mdx')
+    expect(out.map((f) => f.path)).not.toContain('src/app/llms.mdx/docs/[[...slug]]/route.ts')
+    expect(text(out, 'src/app/layout.tsx'), '改动叠在本机约定之上').toContain('<html lang="zh-CN" data-x suppressHydrationWarning>')
+  })
+
+  it('改的原文找不到就报错，说清是哪份文件', () => {
+    expect(() => applyChanges(base, { editFiles: [{ path: 'src/app/layout.tsx', replacements: [['不存在的原文', '']] }] })).toThrow(/src\/app\/layout\.tsx 里「不存在的原文」出现了 0 次/)
   })
 
   it('有问题的一次列全，一个都不改', () => {
@@ -143,14 +152,15 @@ describe('applyChanges：传入的三个清单', () => {
           { path: 'nope.ts', text: '' },
           { path: 'src/app/layout.tsx', text: '' },
         ],
-        removeFiles: ['src/lib/shared.ts', 'nope.ts'],
+        removeFiles: ['nope.ts'],
+        editFiles: [{ path: 'gone.ts', replacements: [] }],
       })
     expect(run).toThrow(/src\/lib\/source\.ts：官方输出里已经有/)
     expect(run).toThrow(/a\\b\.ts：要相对站目录/)
     expect(run).toThrow(/\.\.\/up\.ts：路径里不能有/)
     expect(run).toThrow(/nope\.ts：官方输出里没有这份，没法替换/)
-    expect(run).toThrow(/src\/app\/layout\.tsx：本机约定已经改过这份，不能再替换/)
-    expect(run).toThrow(/src\/lib\/shared\.ts：本机约定已经改过这份，不能再删除/)
+    expect(run).toThrow(/src\/app\/layout\.tsx：本机约定已经改过这份，不能整份替换/)
+    expect(run).toThrow(/gone\.ts：官方输出里没有这份，没法改/)
     expect(run).toThrow(/nope\.ts：在清单里出现了不止一次/)
   })
 
@@ -287,6 +297,17 @@ describe('planSite / createSite', () => {
     const result = await createSite({ dir: path.join(tmp, 'repo', 'docs-site'), title: '仓的站', port: 4321 }, fixtureScaffold)
     expect(result.written).toEqual(result.files.map((f) => f.path))
     for (const file of result.files) expect(fs.readFileSync(path.join(result.target, file.path), 'utf8'), file.path).toBe(file.text)
+  })
+
+  it('docfirst 站的整套清单落在官方输出上：不剩每页机读版的路由、按钮与算 md 地址的函数', async () => {
+    fs.mkdirSync(path.join(tmp, 'repo'))
+    const options = planCreate({ siteDir: path.join(tmp, 'repo', 'docs-site'), repoManifest: null, template: readTemplate() })
+    const plan = await planSite(options, fixtureScaffold)
+    const paths = plan.files.map((f) => f.path)
+    for (const gone of ['src/app/llms.txt/route.ts', 'src/app/llms-full.txt/route.ts', 'src/app/llms.mdx/docs/[[...slug]]/route.ts', 'src/proxy.ts']) expect(paths).not.toContain(gone)
+    expect(text(plan.files, 'src/app/docs/[[...slug]]/page.tsx')).not.toMatch(/MarkdownCopyButton|ViewOptionsPopover|markdownUrl/)
+    expect(text(plan.files, 'src/lib/shared.ts')).not.toMatch(/getPageMarkdownUrl|docsContentRoute/)
+    for (const file of plan.files) expect(file.text, file.path).not.toMatch(/docsLlms|getPageMarkdownUrl|llms\.mdx/)
   })
 
   it('清单检查不过时目标目录不会被建出来', async () => {

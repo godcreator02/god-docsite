@@ -151,6 +151,20 @@ test("render：正本里有渲染不了的东西，报红退 1、不写落点", 
   }
 });
 
+test("check 只查生成正本里的名册外组件：普通页面上的组件不要机读规则", async () => {
+  const p = setupProject(withOutputs(`{ "docs/a.mdx": ["README.md"] }`));
+  try {
+    writeFileSync(join(p.root, "docs", "b.mdx"), `# 普通页\n\n<Steps />\n`);
+    writeFileSync(join(p.root, "docs", "a.mdx"), `# 正本\n\n<Steps />\n`);
+    const checked = await p.cli("check");
+    assert.equal(checked.code, 1);
+    assert.match(checked.out, /🔴 docs\/a\.mdx {2}第 3 行 <Steps> {2}名册外组件/);
+    assert.doesNotMatch(checked.out, /docs\/b\.mdx {2}第 3 行 <Steps>/, "普通页面上的组件不进名册检查");
+  } finally {
+    p.teardown();
+  }
+});
+
 test("以 @@docfirst 开头的一行：check 报错，说清是哪篇第几行、正式记号怎么写", async () => {
   const p = setupProject();
   try {

@@ -10,7 +10,8 @@
  * 要保留 frontmatter 字段的生成物（比如 SKILL.md），目标写成对象：
  *   'content/docs/outputs/skills/x.mdx': [{ to: '../skills/x/SKILL.md', frontmatter: ['name', 'description'] }]
  *
- * components 是组件名册，fumadocsRoster 给 fumadocs 自带文件树 Files / Folder / File 与 Note 的机读规则，
+ * components 是组件名册：render 把生成正本里的组件换成这里给的机读文字。只有生成正本里用到的组件要写，
+ * 普通页面上的组件不用。fumadocsRoster 给 fumadocs 自带文件树 Files / Folder / File 与 Note 的机读规则，
  * 站里自己加的组件在它后面追加。
  */
 import { fumadocsRoster } from '@godcreator/docfirst-workflow/fumadocs/roster'

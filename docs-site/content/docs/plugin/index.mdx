@@ -18,27 +18,31 @@ full: true
 
 **建站从官方脚手架出发。** 两条命令共用 `createSite`，`docfirst.create-plain` 只要官方输出加本机约定：
 
-{/* ref file="../plugins/docfirst/src/scaffold.ts" lines="10-33" hash="cd1f30c27596" blob="275a2548d092" */}
+{/* ref file="../plugins/docfirst/src/scaffold.ts" lines="10-33" hash="af8d6dc9a21a" blob="c63747b8e10f" */}
 
 {/* ref file="../plugins/docfirst/src/scaffold.ts" lines="35-41" hash="145e4396603e" blob="3cb0f4a6ee6a" */}
 
 本机约定是精确文本替换，原文对不上就报错：
 
-{/* ref file="../plugins/docfirst/src/scaffold.ts" lines="175-180" hash="4fa12ba781fd" blob="275a2548d092" */}
+{/* ref file="../plugins/docfirst/src/scaffold.ts" lines="183-188" hash="4fa12ba781fd" blob="c63747b8e10f" */}
 
-三个清单一次查完再动手：
+新增、替换、删除、改四个清单一次查完再动手：
 
-{/* ref file="../plugins/docfirst/src/scaffold.ts" lines="284-287" hash="68c670cbca41" blob="275a2548d092" */}
+{/* ref file="../plugins/docfirst/src/scaffold.ts" lines="294-298" hash="186f132e409d" blob="c63747b8e10f" */}
 
 写入文件途中失败就删掉整个目标目录：
 
-{/* ref file="../plugins/docfirst/src/scaffold.ts" lines="363-380" hash="460179de2867" blob="275a2548d092" */}
+{/* ref file="../plugins/docfirst/src/scaffold.ts" lines="383-400" hash="460179de2867" blob="c63747b8e10f" */}
 
 **`docfirst.create` 在官方输出上多改几份文件**，模板分新增与替换两个目录，另加 doc 脚本：
 
 {/* ref file="../plugins/docfirst/src/template.ts" lines="1-8" hash="24fa9ba9f089" blob="80056932433a" */}
 
 {/* ref file="../plugins/docfirst/src/create.ts" lines="15-22" hash="38db1def4857" blob="ba7789e519b3" */}
+
+**docfirst 站不出每页的机读版**：删掉 llms 的三个路由与 proxy，去掉页面上复制与查看 markdown 的按钮，机读文字只给生成物：
+
+{/* ref file="../plugins/docfirst/tests/create.test.ts" lines="165-172" hash="5e20c74775b1" blob="a48282005ff2" */}
 
 **端口从 4310 起选第一个空闲的**，调用方给了端口就用给的：
 
@@ -54,7 +58,7 @@ full: true
 
 查重范围看站在不在容器根里：
 
-{/* ref file="../plugins/docfirst/src/scaffold.ts" lines="320-324" hash="250edd16bd50" blob="275a2548d092" */}
+{/* ref file="../plugins/docfirst/src/scaffold.ts" lines="340-344" hash="250edd16bd50" blob="c63747b8e10f" */}
 
 **说明书**在 `skills/` 下，正本是本站 `content/docs/outputs/skills/` 下的 mdx，由 `docfirst.config.mjs` 的 `outputs` 映射生成：
 

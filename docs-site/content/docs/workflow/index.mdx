@@ -100,14 +100,14 @@ docfirst 的轨迹卡怎么写、怎么校验、怎么换成星轨盘要的中�
 
 {/* ref file="../packages/docfirst-workflow/src/mdx/recognize.ts" lines="16-56" hash="60aef1664825" blob="d7e0f8d45d83" */}
 
-**名册**是一张「组件名 → 规则」的表，说明每个组件在机读版里变成什么。这里只有机制，没有默认表：组件与规则写在项目的配置里，
+**名册**是一张「组件名 → 规则」的表，说明每个组件在机读文字里变成什么；`check` 只要求生成正本里用到的组件有规则。这里只有机制，没有默认表：组件与规则写在项目的配置里，
 fumadocs 自带组件的规则在 [fumadocs 适配](/docs/fumadocs)的 `./roster`。规则三种写法，函数规则只经 helpers 读节点、造节点：
 
 {/* ref file="../packages/docfirst-workflow/src/mdx/roster.ts" lines="36-37" hash="69cdb1ca8839" blob="449061a61452" */}
 
 {/* ref file="../packages/docfirst-workflow/src/mdx/roster.ts" lines="23-34" hash="efedd191320a" blob="449061a61452" */}
 
-`stamp` 按名册给树上每个组件标上机读文字（写在节点的 data 上）、不换节点（同一棵树还要生成页面），名册外的组件报错并给出行号；把机读文字序列化成 md 的回调在 fumadocs 适配：
+`stamp` 给站上每页的机读版用（站的集合接了 `docfirstMarkdownOptions` 才有）：按名册给树上每个组件标上机读文字（写在节点的 data 上）、不换节点（同一棵树还要生成页面），名册外的组件报错并给出行号；把机读文字序列化成 md 的回调在 fumadocs 适配。`docfirst.create` 新建的站不接它，机读文字只出现在生成物里：
 
 {/* ref file="../packages/docfirst-workflow/src/mdx/roster.ts" lines="110-129" hash="2f46ee591d59" blob="449061a61452" */}
 
@@ -124,7 +124,7 @@ fumadocs 自带组件的规则在 [fumadocs 适配](/docs/fumadocs)的 `./roster
 {/* ref file="../packages/docfirst-workflow/src/code/index.ts" lines="13-28" hash="2e4e0fa1a0f9" blob="5c5cc5340a27" */}
 
 不解析 TypeScript，按行认、按行写：写回整行替换，保留缩进与行尾的 `\r`。一行里除了这个注释还有别的代码就不是记号，
-所以组件里的记号必须单独占一行，放在它钉住的那段数据正上方。名册检查与按原文渲染只对 mdx 页面，这个格式只认引用、写回：
+所以组件里的记号必须单独占一行，放在它钉住的那段数据正上方。名册检查与按原文渲染只对 mdx 写的生成正本，这个格式只认引用、写回：
 
 {/* ref file="../packages/docfirst-workflow/src/code/index.ts" lines="44-54" hash="193e8bfeec89" blob="24edf1174feb" */}
 

@@ -12,13 +12,13 @@ description: check 把哪几类问题计入红；本仓未提交的改动引起�
 
 - **缺失的引用**：被钉的行段、文件、目录不在了。提没提交都算。讲解组件源码里的引用跟页面里的一样算，下一条也是。
 - **拦提交的黄**：状态是「有变动」，而且是本仓未提交的改动引起的（下一节）。
-- **名册外组件**：mdx 里用了 `docfirst.config.mjs` 的 `components` 里没有规则的组件。
+- **名册外组件**：生成正本（`outputs` 里有映射的页）里用了 `docfirst.config.mjs` 的 `components` 里没有规则的组件。普通页面上的组件不查：机读文字只给生成物。
 - **不新鲜的生成物**：`outputs` 里有映射的落点还不存在、跟正本重新渲染的结果不一致，或者正本渲染不了，见[生成物怎么渲染](/docs/workflow/rendering)。
 - **轨迹卡的病**：`content/trajectory/` 下的卡缺必填字段或格式不对。
 
 绿、未确认、不拦提交的黄只打印，不计入。加 `--json` 时整份报告打印成一行，退出码的算法不变。
 
-{/* ref file="../packages/docfirst-workflow/src/cli/commands.ts" lines="158-173" hash="8012cbfaab88" blob="2732fec328d4" */}
+{/* ref file="../packages/docfirst-workflow/src/cli/commands.ts" lines="158-175" hash="eaefaa288e12" blob="0c73c55ad647" */}
 
 {/* ref file="../packages/docfirst-workflow/src/cli/commands.ts" lines="89-97" hash="87e007751793" blob="937001d7a349" */}
 

@@ -266,7 +266,7 @@ export const serveCases = [
 /* ref file="src/components/tabs/tabs.ai.mjs" lines="7-13" hash="d9e081072a18" blob="49753e4af3a6" */
 /* ref file="src/components/seam-map/seam-map.ai.mjs" lines="24-30" hash="2bcdfbfe5455" blob="bee761f6c2f8" */
 /* ref file="../packages/docfirst-workflow/src/fumadocs/blocks.ts" lines="136-151" hash="0646b249c32b" blob="705792ee655d" */
-/* ref file="../packages/docfirst-workflow/src/cli/commands.ts" lines="166-166" hash="d3c5b04d2f38" blob="2732fec328d4" */
+/* ref file="../packages/docfirst-workflow/src/cli/commands.ts" lines="168-168" hash="d81816e00846" blob="0c73c55ad647" */
 /** @type {ComponentCase[]} */
 export const componentCases = [
   {
@@ -351,12 +351,12 @@ export const componentCases = [
   {
     id: 'unknown',
     label: '名册外组件',
-    text: '名册里没有规则的组件，stamp 这一步当场报错，这一页编译失败、站构建不过；docfirst check 也报成红，不用等构建。fumadocs 默认组件表里的 Callout、Card 这些也不在自带的规则里，要用先在 docfirst.config.mjs 给一条规则。',
+    text: '名册里没有规则的组件，stamp 这一步当场报错，这一页编译失败、站构建不过（只有接了每页机读版的站才走这一步）。这一页是生成正本时，docfirst check 也报成红，不用等构建；普通页面 check 不查。fumadocs 默认组件表里的 Callout、Card 这些也不在自带的规则里，要用先在 docfirst.config.mjs 给一条规则。',
     source: ['<Callout>先备份。</Callout>'],
     ruleTitle: 'docfirst.config.mjs 的 components',
     rule: ['（没有 Callout）'],
     md: null,
-    error: '🔴 content/docs/a.mdx  第 7 行 <Callout>  名册外组件，docfirst.config.mjs 里没给它机读规则',
+    error: '🔴 content/docs/outputs/a.mdx  第 7 行 <Callout>  名册外组件，这篇是生成正本，docfirst.config.mjs 里要给它机读规则',
   },
 ];
 

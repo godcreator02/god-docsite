@@ -96,7 +96,7 @@ export const pluginGraph = defineSeamGraph({
       role: 'violet',
       outside: false,
       blurb:
-        '只给 docfirst.create 用，不读写磁盘：模板与仓根 package.json 由调用方读好传入，返回交给 createSite 的选项——新增、替换、删除三张清单，docfirst 的依赖与 doc 脚本。删除清单里只有官方的示例页 content/docs/test.mdx。',
+        '只给 docfirst.create 用，不读写磁盘：模板与仓根 package.json 由调用方读好传入，返回交给 createSite 的选项——新增、替换、删除、改四张清单，docfirst 的依赖与 doc 脚本。删除清单里是官方的示例页 content/docs/test.mdx 与每页机读版的 llms 路由、proxy，改的是 docs 页面与 shared.ts 里连着机读版的几处。',
       caps: [{ id: 'plan-create', name: '组 docfirst 选项', ident: 'planCreate' }],
     },
     {
@@ -323,7 +323,7 @@ export const pluginGraph = defineSeamGraph({
       name: '三张清单',
       a: ['plan-create'],
       b: ['changes'],
-      iface: 'FileChanges：addFiles / replaceFiles / removeFiles；ManifestAdditions：devDependencies / scripts / description',
+      iface: 'FileChanges：addFiles / replaceFiles / removeFiles / editFiles；ManifestAdditions：devDependencies / scripts / description',
       convention: false,
       via: 'code',
       text: 'applyChanges 先把三张清单全部查完再改：新增的在官方输出里不能已有，替换与删除的必须有、且不能是本机约定改过的文件，路径要相对站目录、不越出去。有问题一次列全、一个文件都不改。依赖与脚本合并进 package.json，跟已有的键重名就报错。',

@@ -19,7 +19,7 @@ frontmatter；写成 `{ to, frontmatter }`，点名的字段逐行搬进生成�
 
 render 只遍历现状区的文档，映射的键写成 `trajectory/` 或 `future/` 下的页，永远不会被渲染：
 
-{/* ref file="../packages/docfirst-workflow/src/cli/commands.ts" lines="195-199" hash="f4afd688f402" blob="937001d7a349" */}
+{/* ref file="../packages/docfirst-workflow/src/cli/commands.ts" lines="197-201" hash="f4afd688f402" blob="0c73c55ad647" */}
 
 ## render 做什么
 
@@ -50,7 +50,7 @@ render 只遍历现状区的文档，映射的键写成 `trajectory/` 或 `futur
 
 只有 `fresh` 算新鲜，其余状态（落点上还没有文件、内容不一致、缺点名的字段、渲染不了）每个落点记一次红：
 
-{/* ref file="../packages/docfirst-workflow/src/cli/commands.ts" lines="168-173" hash="a1553519e7ac" blob="937001d7a349" */}
+{/* ref file="../packages/docfirst-workflow/src/cli/commands.ts" lines="170-175" hash="a1553519e7ac" blob="0c73c55ad647" */}
 
 代码块的内容取自被钉文件今天的内容，所以有人直接改了生成物、改了正本没渲染、改了被钉的代码没渲染，这三种都会让
 check 变红。

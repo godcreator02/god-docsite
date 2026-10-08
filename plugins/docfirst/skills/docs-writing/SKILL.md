@@ -19,7 +19,7 @@ description: 写或改文档站页面内容之前读（普通 fumadocs 站与 do
 | 一个包的首页：包内接缝图，再按功能、接口、依赖、不做的事四段逐条钉码 | `content/docs/pin/index.mdx` |
 | 讲一条原理的页：一个选情况组件承担主要解释，文字只引出和收尾 | `content/docs/pin/judge.mdx`（组件 `<PinJudge />`） |
 | 接缝图的内容与坐标 | `src/components/seam-map/`：每张图一份 `*.data.mjs` 与 `*.layout.ts`，`seam-map.tsx` 按 `module` 挑图 |
-| 自包含的讲解组件：讲解数据、画面、机读规则各一个文件 | `src/components/pin/`：`judge.data.mjs`、`judge.tsx`、`pin.ai.mjs` |
+| 自包含的讲解组件：讲解数据与画面各一个文件，放进生成正本的再加一个机读规则 | `src/components/pin/`：`judge.data.mjs`、`judge.tsx`、`pin.ai.mjs` |
 | 组件数据里照抄源码的地方钉码 | `src/components/commit-gate/commit-gate.data.mjs` |
 | 给改这个仓的人看的维护区 | `content/maintain/` |
 | 术语表 | 数据在 `src/glossary.ts`，页在 `content/docs/glossary.mdx` |
@@ -77,7 +77,7 @@ docfirst 站就钉码引用那段代码，普通站就删掉。
 （虚线框是文件或目录，方块是文件对外给的函数，包外的调用方画成灰色实线框），用 frontmatter `full: true` 铺满宽度。
 
 站只写每张图的内容与坐标：内容用 `@godcreator/docfirst-explainer/seam-graph` 的 `defineSeamGraph` 定义，坐标写成一张 `SeamLayout`，
-两样交给 `SeamDiagram`；机读规则把同一份内容交给 `seamGraphText` 写成段落。
+两样交给 `SeamDiagram`；图要放进生成正本时，机读规则把同一份内容交给 `seamGraphText` 写成段落。
 
 ## 讲解组件
 
@@ -94,7 +94,9 @@ docfirst 站就钉码引用那段代码，普通站就删掉。
 **组件的硬性规则**：
 
 - **讲解组件自包含**：画面和讲解文字都写在组件里，mdx 里只写 `<名字 />`。讲解文字是一份不依赖 React 的数据（`*.data.mjs`），
-  画面读它，机读规则（`*.ai.mjs`）也读它生成文字，两边不会对不上。`Tabs`、`Callout` 这类包着正文的排版组件照常用子元素
+  画面读它。`Tabs`、`Callout` 这类包着正文的排版组件照常用子元素
+- **机读规则只给放进生成正本的组件写**：站上不出每页的机读版，组件要用在 README、AGENTS、SKILL.md 的正本里，才写一份 `*.ai.mjs`，
+  交回的就是它在生成物里的样子，读同一份 `*.data.mjs`
 - 用到状态、事件、动画的组件第一行写 `'use client'`；浏览器 API 放进 `useEffect`；带 `'use client'` 的模块不给服务端组件导出常量
 - 组件最外层加 `not-prose`，宽窄屏用容器查询（外层 `@container`，里面 `@2xl:` 这类前缀）
 - 颜色用 fumadocs 的主题色（`bg-fd-card`、`border-fd-border`、`text-fd-muted-foreground`，SVG 里 `fill-fd-*` / `stroke-fd-*`）；
