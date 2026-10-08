@@ -102,8 +102,10 @@ async function build(root: string): Promise<Project> {
 
   // 摆放模块认得的只有这几样，先备齐再传给它——它拿不到装配的别的部分。
   // 后三样是读写真实文件的适配器：落点相对项目根，读写与建父目录经 ../node/，摆放本身不碰 node:fs
+  const roster = config.components ?? {};
   const placingHost: PlacingHost = {
     pinning,
+    roster,
     placements: (doc) => placements[doc] ?? [],
     read: (doc) => readText(join(root, doc)),
     readPlaced: (to) => readTextIfExists(join(root, to)),
@@ -114,7 +116,7 @@ async function build(root: string): Promise<Project> {
     root,
     config,
     pinning,
-    roster: config.components ?? {},
+    roster,
     contentDir,
     trajectoryDir: join(contentAbs, "trajectory"),
     placing: createPlacing(placingHost),

@@ -193,9 +193,12 @@ content/
 
 ## 生成物的正本怎么写
 
-README、AGENTS.md、CLAUDE.md、SKILL.md 的正本是现状区的 mdx（参考案例在 `content/docs/outputs/`），渲染时一个字节不改，所以正本里能钉码、不能用 JSX。
+README、AGENTS.md、CLAUDE.md、SKILL.md 的正本是现状区的 mdx（参考案例在 `content/docs/outputs/`）。渲染时记号换成代码块、
+组件换成它自己的机读文字，别的一个字节不改：正本里能钉码，也能放讲解组件。
 
 - **AGENTS 与 skill 要精简**：前者每个会话都读一遍，后者触发就读，每行都要有用——只留硬约束与「怎么做」，为什么写在站里
+- **正本里的解释交给讲解组件**：人在站上看分步、动画，生成物里只剩组件的机读规则交回的那几句。所以放进正本的组件，
+  机读规则只写结论，不把每一步逐条展开
 - 每仓的 AGENTS 正本只写本仓专属的（怎么运行、端口、检查命令、禁止事项、从哪读起），生成出的 AGENTS.md 控制在 60 行内
 - CLAUDE 正本第一行固定是 `@AGENTS.md`，只给 Claude 的指令写在后面
 - skill 的 `description` 写「什么时候读」，控制在 200 字以内：工作台的 `index` 会截断更长的描述

@@ -144,7 +144,7 @@ test("render：正本里有渲染不了的东西，报红退 1、不写落点", 
     writeFileSync(join(p.root, "docs", "a.mdx"), `# md\n\n<Note>提示</Note>\n`);
     const rendered = await p.cli("render");
     assert.equal(rendered.code, 1);
-    assert.match(rendered.out, /🔴 docs\/a\.mdx → README\.md {2}.*第 3 行有组件 <Note>/);
+    assert.match(rendered.out, /🔴 docs\/a\.mdx → README\.md {2}.*第 3 行有名册外组件 <Note>/);
     assert.equal(existsSync(join(p.root, "README.md")), false);
   } finally {
     p.teardown();

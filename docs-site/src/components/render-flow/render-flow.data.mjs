@@ -53,8 +53,8 @@ export const sourceParts = {
 };
 
 /** 写到 ../skills/greet/SKILL.md 的生成物全文 */
-/* ref file="../packages/docfirst-workflow/src/mdx/render.ts" lines="37-54" hash="e1060d7157f7" blob="3ae7ad9b294f" */
-/* ref file="../packages/docfirst-workflow/src/project/placement.ts" lines="139-195" hash="b379a8714392" blob="6e09accb1712" */
+/* ref file="../packages/docfirst-workflow/src/mdx/render.ts" lines="42-59" hash="e1060d7157f7" blob="ede0b1ddc96a" */
+/* ref file="../packages/docfirst-workflow/src/project/placement.ts" lines="142-198" hash="b379a8714392" blob="72dfb173b0b0" */
 export const outputLines = [
   '---',
   'name: greet',
@@ -90,12 +90,12 @@ export const refusalLines = [
 ];
 /** 上面几行里渲染不了的那几行的行号 */
 export const refusalBadLines = [17, 19, 21];
-/* ref file="../packages/docfirst-workflow/src/mdx/render.ts" lines="67-103" hash="3c00e366b1d8" blob="3ae7ad9b294f" */
+/* ref file="../packages/docfirst-workflow/src/mdx/render.ts" lines="72-126" hash="2a50b50245b7" blob="ede0b1ddc96a" */
 /* ref file="../packages/docfirst-workflow/src/cli/text.ts" lines="40-45" hash="39edf1f696fb" blob="dfe396df5a65" */
 /* ref file="../packages/code-pin/src/types.ts" lines="80-85" hash="70feff6a62c9" blob="32a0167e8d8f" */
 export const refusalMessage =
   `🔴 ${files.source} → ${files.output}  正本渲染不了：` +
-  '第 17 行的引用缺失（文件不在了），先修好；第 19 行有组件 <Callout>，生成正本只写 markdown；' +
+  '第 17 行的引用缺失（文件不在了），先修好；第 19 行有名册外组件 <Callout>，先在 docfirst.config 的 components 里给它写机读规则；' +
   '第 21 行有 mdx 表达式 {1 + 1}，生成正本只写 markdown——改好再 render';
 
 /**
@@ -137,9 +137,9 @@ export const terminals = {
  * @typedef {{ id: SceneId, title: string, text: string, duration: number }} RenderChapter
  * @type {RenderChapter[]}
  */
-/* ref file="../packages/docfirst-workflow/src/mdx/render.ts" lines="105-122" hash="f7c53029bc73" blob="3ae7ad9b294f" */
-/* ref file="../packages/docfirst-workflow/src/project/placement.ts" lines="119-137" hash="134440fb80cc" blob="3ad1d1a31735" */
-/* ref file="../packages/docfirst-workflow/src/project/placement.ts" lines="197-268" hash="a65815a0f6e5" blob="6e09accb1712" */
+/* ref file="../packages/docfirst-workflow/src/mdx/render.ts" lines="128-145" hash="5f54dc804a47" blob="ede0b1ddc96a" */
+/* ref file="../packages/docfirst-workflow/src/project/placement.ts" lines="122-140" hash="134440fb80cc" blob="72dfb173b0b0" */
+/* ref file="../packages/docfirst-workflow/src/project/placement.ts" lines="200-271" hash="7bddbe787327" blob="72dfb173b0b0" */
 export const chapters = [
   {
     id: 'source',
@@ -154,7 +154,7 @@ export const chapters = [
     title: '去掉 frontmatter，其余逐字节照抄',
     text:
       'renderAi 先把 CRLF 换成 LF，再把整段 frontmatter 连同它后面的一个换行去掉；写入落点之前再去掉开头剩下的空行。' +
-      '除了 frontmatter 和记号，正文一个字节都不改：标题、空行、句子原样留下。第 11 行的记号这时还没动。',
+      '除了 frontmatter、记号和组件，正文一个字节都不改：标题、空行、句子原样留下。第 11 行的记号这时还没动。',
     duration: 7,
   },
   {
@@ -196,7 +196,8 @@ export const chapters = [
     id: 'refuse',
     title: '渲染不了：一次列全，一个文件都不写',
     text:
-      '正本里出现这四样就渲染不了：还没确认的引用、指向的东西不在了的引用、JSX 组件、mdx 表达式（import / export 也算）。' +
+      '正本里出现这四样就渲染不了：还没确认的引用、指向的东西不在了的引用、名册外的组件、mdx 表达式（import / export 也算）。' +
+      '这个例子的配置没写 components，<Callout> 就在名册外；名册里的组件换成它的机读规则交回的文字。' +
       'renderAi 遍历完整棵语法树，把每一处连同行号一次列全再拒绝；这一篇的落点都不写，磁盘上的旧生成物原样留着，render 和 check 都报红。' +
       '代码块里写的同样文字不算：记号是在语法树上认的。',
     duration: 9,

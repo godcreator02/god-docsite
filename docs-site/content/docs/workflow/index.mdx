@@ -33,7 +33,7 @@ full: true
 **摆放**的渲染过程见[生成物渲染](/docs/workflow/rendering)。落点在装配时就检查：
 得相对项目根、不许落进内容根、一个落点只许一篇文档写，违反任何一条 `loadProject` 当场报错：
 
-{/* ref file="../packages/docfirst-workflow/src/project/placement.ts" lines="119-137" hash="134440fb80cc" blob="b57813645c6a" */}
+{/* ref file="../packages/docfirst-workflow/src/project/placement.ts" lines="122-140" hash="134440fb80cc" blob="72dfb173b0b0" */}
 
 ### Node 实现 node
 
@@ -103,18 +103,18 @@ docfirst 的轨迹卡怎么写、怎么校验、怎么换成星轨盘要的中�
 **名册**是一张「组件名 → 规则」的表，说明每个组件在机读版里变成什么。这里只有机制，没有默认表：组件与规则写在项目的配置里，
 fumadocs 自带组件的规则在 [fumadocs 适配](/docs/fumadocs)的 `./roster`。规则三种写法，函数规则只经 helpers 读节点、造节点：
 
-{/* ref file="../packages/docfirst-workflow/src/mdx/roster.ts" lines="35-36" hash="69cdb1ca8839" blob="d192d3db2a0c" */}
+{/* ref file="../packages/docfirst-workflow/src/mdx/roster.ts" lines="36-37" hash="69cdb1ca8839" blob="449061a61452" */}
 
-{/* ref file="../packages/docfirst-workflow/src/mdx/roster.ts" lines="22-33" hash="efedd191320a" blob="d192d3db2a0c" */}
+{/* ref file="../packages/docfirst-workflow/src/mdx/roster.ts" lines="23-34" hash="efedd191320a" blob="449061a61452" */}
 
 `stamp` 按名册给树上每个组件标上机读文字（写在节点的 data 上）、不换节点（同一棵树还要生成页面），名册外的组件报错并给出行号；把机读文字序列化成 md 的回调在 fumadocs 适配：
 
-{/* ref file="../packages/docfirst-workflow/src/mdx/roster.ts" lines="109-128" hash="2f46ee591d59" blob="96d12516ef43" */}
+{/* ref file="../packages/docfirst-workflow/src/mdx/roster.ts" lines="110-129" hash="2f46ee591d59" blob="449061a61452" */}
 
 `renderAi` 把生成正本按原文渲染成 md，不经过 fumadocs，见[生成物渲染](/docs/workflow/rendering)。
 按原文渲染拒绝渲染时抛的错误类也在这里，摆放用 `instanceof` 认出它，把这篇的每个落点报成红，别的错照原样抛：
 
-{/* ref file="../packages/docfirst-workflow/src/mdx/render.ts" lines="21-24" hash="81f85d47f420" blob="3ae7ad9b294f" */}
+{/* ref file="../packages/docfirst-workflow/src/mdx/render.ts" lines="26-29" hash="b7da25f980d9" blob="ede0b1ddc96a" */}
 
 ### 组件格式 code
 
@@ -269,6 +269,6 @@ fumadocs 自带组件的规则在 [fumadocs 适配](/docs/fumadocs)的 `./roster
 - **不给盘建模、不画盘**：关系怎么连成树、主干怎么选、盘怎么画归[星轨盘](/docs/trajectory)；这个包只把卡文件换成它要的中性输入。
 - **摆放不读写文件**：`placement.ts` 经 `PlacingHost` 读写落点，读写磁盘的那份实现在 `load.ts`，测试换成内存那份：
 
-{/* ref file="../packages/docfirst-workflow/src/project/placement.ts" lines="77-91" hash="a7aad4d374e5" blob="6e09accb1712" */}
+{/* ref file="../packages/docfirst-workflow/src/project/placement.ts" lines="78-94" hash="94fa6614886c" blob="72dfb173b0b0" */}
 
 - **不建站**：建站命令与模板归[工作台插件](/docs/plugin)。

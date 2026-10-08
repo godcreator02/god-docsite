@@ -143,7 +143,8 @@ pnpm docfirst trajectory                       列出轨迹卡在星轨盘上的
 
 README、AGENTS.md、CLAUDE.md、包里的 SKILL.md 是生成物：`docfirst.config.mjs` 的 `outputs` 把 mdx 正本对到生成位置。
 **改正本，不改生成物**，改完 `pnpm doc:render`，正本与生成物放进同一个提交；生成物跟正本对不上 `pnpm doc` 报红。
-渲染按原文处理：去掉 frontmatter，每个钉码记号换成一个代码块，其余文字一个字节不动，所以正本里能钉码、不能用 JSX 组件。
+渲染按原文处理：去掉 frontmatter，每个钉码记号换成一个代码块，每个组件换成它在名册里的机读文字，其余文字一个字节不动。
+名册外的组件、mdx 表达式渲染不了，`pnpm doc` 报红。
 SKILL.md 要在映射里写对象形式、保留 `name` / `description` 两个 frontmatter 字段，否则生成出去是一份永远不会被读到的文档。
 
 ## 给别的仓写反馈

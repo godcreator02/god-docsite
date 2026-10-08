@@ -1,7 +1,7 @@
 /**
  * 解析与 AI 渲染。
  *   parseTree   自己调用 remark 解析出语法树：parse / write / 名册检查 / 按原文渲染都用它，不碰 fumadocs
- *   renderAi    生成正本按原文渲染成 md：只动 frontmatter 与记号，别的文字逐字节照抄
+ *   renderAi    生成正本按原文渲染成 md：只动 frontmatter、记号与组件，别的文字逐字节照抄
  *
  * 站上各页的机读版不走这儿，走 fumadocs 的管线（`@godcreator/docfirst-workflow/fumadocs` 的 docfirstMarkdownOptions）。
  * 解析认 remark-math 的公式（`$…$`、`$$…$$`），跟照 fumadocs 官方做法接了公式的站读法一致：公式里的花括号不是 mdx 表达式。
@@ -11,14 +11,19 @@ import remarkParse from "remark-parse";
 import remarkFrontmatter from "remark-frontmatter";
 import remarkMath from "remark-math";
 import remarkMdx from "remark-mdx";
+import type { Root } from "mdast";
+import { mathToMarkdown } from "mdast-util-math";
+import { toMarkdown } from "mdast-util-to-markdown";
 import { fileOf, REASON_TEXT } from "@godcreator/code-pin";
 import type { Item, Listing } from "../reference/index.ts";
 import { langOf } from "./lang.ts";
 import { markerOf } from "./recognize.ts";
+import { machineNodesOf } from "./roster.ts";
+import type { Roster } from "./roster.ts";
 import { lineOf, walk } from "./tree.ts";
 import type { TreeNode } from "./tree.ts";
 
-/** 按原文渲染拒绝渲染（缺失的引用、组件、mdx 表达式）时抛它；摆放按这一类把它报成红，别的错照原样抛 */
+/** 按原文渲染拒绝渲染（缺失的引用、名册外组件、mdx 表达式）时抛它；摆放按这一类把它报成红，别的错照原样抛 */
 export class RenderRefusal extends Error {
   override name = "RenderRefusal";
 }
@@ -70,8 +75,17 @@ function missingReasonOf(item: Item): string {
   return REASON_TEXT[item.reason];
 }
 
+/** 组件换成它在名册里的机读文字：续行带上组件那一行行首的前缀，跟记号换成代码块一样 */
+function componentEdit(text: string, node: TreeNode, roster: Roster): Edit {
+  const [start, end] = offsetsOf(node);
+  const nodes = machineNodesOf(node, roster);
+  if (nodes.length === 0) return { start, end, text: "" };
+  const markdown = toMarkdown({ type: "root", children: nodes } as unknown as Root, { extensions: [mathToMarkdown()] }).replace(/\n+$/, "");
+  return replaceWithBlock(text, start, end, markdown.split("\n"));
+}
+
 /** 一个节点要做的改写；渲染不了的记进 refusals。交回 true 表示这个节点已经处理完，不往里走 */
-function editFor(text: string, node: TreeNode, listing: Listing, edits: Edit[], refusals: string[]): boolean {
+function editFor(text: string, node: TreeNode, listing: Listing, roster: Roster, edits: Edit[], refusals: string[]): boolean {
   const line = lineOf(node);
   if (node.type === "yaml") {
     const [start, end] = offsetsOf(node);
@@ -92,7 +106,16 @@ function editFor(text: string, node: TreeNode, listing: Listing, edits: Edit[], 
     return true;
   }
   if (node.type === "mdxJsxFlowElement" || node.type === "mdxJsxTextElement") {
-    refusals.push(`第 ${line} 行有组件 <${node.name ?? ""}>，生成正本只写 markdown`);
+    const name = node.name ?? "";
+    if (roster[name] === undefined) {
+      refusals.push(`第 ${line} 行有名册外组件 <${name}>，先在 docfirst.config 的 components 里给它写机读规则`);
+      return true;
+    }
+    try {
+      edits.push(componentEdit(text, node, roster));
+    } catch (err) {
+      refusals.push(`第 ${line} 行的组件 <${name}> 换不成机读文字：${(err as Error).message}`);
+    }
     return true;
   }
   if (node.type === "mdxjsEsm") {
@@ -103,16 +126,16 @@ function editFor(text: string, node: TreeNode, listing: Listing, edits: Edit[], 
 }
 
 /**
- * 生成正本按原文渲染：去掉 frontmatter；每个记号换成一个代码块；
- * 其余文字逐字节不动。换行先统一成 LF。
- * 未确认的引用、缺失的引用、JSX 组件、别的 mdx 表达式都渲染不了，一次列全、抛 RenderRefusal。
+ * 生成正本按原文渲染：去掉 frontmatter；每个记号换成一个代码块；每个组件换成名册里它的机读文字
+ * （跟站上那页机读版里的是同一段）；其余文字逐字节不动。换行先统一成 LF。
+ * 未确认的引用、缺失的引用、名册外组件、别的 mdx 表达式都渲染不了，一次列全、抛 RenderRefusal。
  */
-export function renderAi(source: string, listing: Listing): string {
+export function renderAi(source: string, listing: Listing, roster: Roster): string {
   const text = source.replace(/\r\n/g, "\n");
   const edits: Edit[] = [];
   const refusals: string[] = [];
   walk(parseTree(text), (node, index) => {
-    if (!editFor(text, node, listing, edits, refusals)) return undefined;
+    if (!editFor(text, node, listing, roster, edits, refusals)) return undefined;
     return index === null ? undefined : index + 1;
   });
   if (refusals.length > 0) throw new RenderRefusal(refusals.join("；"));

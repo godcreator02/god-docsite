@@ -3,7 +3,8 @@
  * 这里只提供「按一张表给组件标上机读文字」的能力与写规则用的几个帮手。fumadocs 自带组件的规则
  * 在 `@godcreator/docfirst-workflow/fumadocs/roster`，项目展开它再加自己的。
  *
- * 标上机读文字时不改树：同一棵树还要生成页面。每个组件节点的 data 上写明「机读版里它是什么样」，
+ * 同一张表有两处用：站上每页的机读版（stamp），与生成正本渲染成 md（machineNodesOf，见 render.ts）。
+ * 给站标上机读文字时不改树：同一棵树还要生成页面。每个组件节点的 data 上写明「机读版里它是什么样」，
  * 真正序列化是 fumadocs 的事（见 `@godcreator/docfirst-workflow/fumadocs` 的 markdown.ts 回调）。
  *
  * 规则三种写法：
@@ -125,6 +126,22 @@ export function stamp(tree: TreeNode, roster: Roster): TreeNode {
     else node.data.docfirstAi = nodes;
   });
   return tree;
+}
+
+/**
+ * 一个组件按名册换成的机读节点，规则交回的节点里再嵌套的组件也逐个换掉。生成正本渲染用：
+ * 那边要的是一串能直接写成 markdown 的节点，不像 stamp 那样留给 fumadocs 顺着树序列化
+ */
+export function machineNodesOf(node: TreeNode, roster: Roster): TreeNode[] {
+  const rule = roster[node.name ?? ""];
+  if (rule === undefined) throw new Error(`第 ${lineOf(node)} 行：名册外组件 <${node.name}>`);
+  return apply(rule, node, roster).flatMap((out) => withNestedReplaced(out, roster));
+}
+
+function withNestedReplaced(node: TreeNode, roster: Roster): TreeNode[] {
+  if (isComponent(node)) return machineNodesOf(node, roster);
+  if (node.children === undefined) return [node];
+  return [{ ...node, children: node.children.flatMap((child) => withNestedReplaced(child, roster)) }];
 }
 
 /** 名册检查：树里出现、表里没有的组件，给 check 用，不用等构建才发现 */

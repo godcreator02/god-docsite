@@ -87,7 +87,7 @@ export const mdPaths = {
 
 /* ref file="../packages/docfirst-workflow/src/fumadocs/remark-plugin.ts" lines="26-32" hash="ac17d35141a4" blob="0723b1e3439d" */
 /* ref file="../packages/docfirst-workflow/src/fumadocs/blocks.ts" lines="64-77" hash="ad638e9c6e35" blob="705792ee655d" */
-/* ref file="../packages/docfirst-workflow/src/mdx/roster.ts" lines="115-128" hash="62ded788a80a" blob="96d12516ef43" */
+/* ref file="../packages/docfirst-workflow/src/mdx/roster.ts" lines="116-129" hash="62ded788a80a" blob="449061a61452" */
 /* ref file="../packages/docfirst-workflow/src/fumadocs/roster.ts" lines="13-14" hash="e7f78550c886" blob="e605fbea15a7" */
 /* ref file="../packages/docfirst-workflow/src/fumadocs/markdown.ts" lines="24-45" hash="a74a112c335a" blob="0f8adb086fd4" */
 /* ref file="src/lib/source.ts" lines="35-37" hash="b41af54c6c86" blob="5ee282b98601" */
@@ -260,8 +260,8 @@ export const serveCases = [
  * @typedef {{ id: string, label: string, text: string, source: string[], ruleTitle: string, rule: string[],
  *   md: string[] | null, error: string | null }} ComponentCase
  */
-/* ref file="../packages/docfirst-workflow/src/mdx/roster.ts" lines="9-13" hash="6018c9c5ef77" blob="96d12516ef43" */
-/* ref file="../packages/docfirst-workflow/src/mdx/roster.ts" lines="91-107" hash="09207f8b31fa" blob="a8241fff7170" */
+/* ref file="../packages/docfirst-workflow/src/mdx/roster.ts" lines="10-14" hash="6018c9c5ef77" blob="449061a61452" */
+/* ref file="../packages/docfirst-workflow/src/mdx/roster.ts" lines="92-108" hash="09207f8b31fa" blob="449061a61452" */
 /* ref file="../packages/docfirst-workflow/src/fumadocs/roster.ts" lines="12-19" hash="ad2aa594110a" blob="e605fbea15a7" */
 /* ref file="src/components/tabs/tabs.ai.mjs" lines="7-13" hash="d9e081072a18" blob="49753e4af3a6" */
 /* ref file="src/components/seam-map/seam-map.ai.mjs" lines="24-30" hash="2bcdfbfe5455" blob="bee761f6c2f8" */

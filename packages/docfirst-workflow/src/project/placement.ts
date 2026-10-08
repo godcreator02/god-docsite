@@ -14,6 +14,7 @@
 import { isAbsolute, relative, resolve, sep } from "node:path";
 import type { Listing } from "../reference/index.ts";
 import { RenderRefusal, renderAi } from "../mdx/index.ts";
+import type { Roster } from "../mdx/index.ts";
 import type { Pinning } from "../pinning/index.ts";
 import type { ProjectConfig } from "./config.ts";
 
@@ -32,7 +33,7 @@ export interface Placement {
 
 /**
  * 一个落点核对完的状态：fresh 生成物跟源一致；missing 生成物还不在；stale 跟源不一致；
- * no-frontmatter 源头部缺点名的字段；unrenderable 源里有渲染不了的东西（缺失的引用、组件、mdx 表达式）
+ * no-frontmatter 源头部缺点名的字段；unrenderable 源里有渲染不了的东西（缺失的引用、名册外组件、mdx 表达式）
  */
 export type PlacedStatus = "fresh" | "missing" | "stale" | "no-frontmatter" | "unrenderable";
 
@@ -75,12 +76,14 @@ export interface Placing {
 }
 
 /**
- * 摆放依赖的外部接口。前半是项目这一侧（钉码编排、这篇配置了哪些落点、这篇的原文），
+ * 摆放依赖的外部接口。前半是项目这一侧（钉码编排、组件名册、这篇配置了哪些落点、这篇的原文），
  * 装配时把装好的项目传进来；后半是**生成物的存放**——摆放不知道落点是文件还是别的什么，
  * 正式运行用读写磁盘那份，测试用内存那份。
  */
 export interface PlacingHost {
   pinning: Pinning;
+  /** 正本里的组件按它换成机读文字 */
+  roster: Roster;
   placements(doc: string): Placement[];
   /** mdx 正本的原文 */
   read(doc: string): string;
@@ -208,7 +211,7 @@ export function createPlacing(host: PlacingHost): Placing {
    */
   function bodyOf(doc: string, text: string, listing = host.pinning.checkDoc(doc, text)): { body: string } | { refusal: string } {
     try {
-      return { body: tidy(renderAi(text, listing)) };
+      return { body: tidy(renderAi(text, listing, host.roster)) };
     } catch (err) {
       if (err instanceof RenderRefusal) return { refusal: err.message };
       throw err;

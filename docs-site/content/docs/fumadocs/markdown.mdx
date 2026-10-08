@@ -31,7 +31,7 @@ md 路由在构建时列出每一页、预渲染，请求来了不再编译：
 md 里没有组件，只有段落、标题、引用块、代码块这些普通 md 节点。每个组件变成什么，由组件名册里它那一条规则决定：
 名册在 `docfirst.config.mjs` 的 `components`，先展开 fumadocs 自带组件的规则，再加站自己的。规则有三种写法：
 
-{/* ref file="../packages/docfirst-workflow/src/mdx/roster.ts" lines="9-17" hash="c5c9e34b1b18" blob="96d12516ef43" */}
+{/* ref file="../packages/docfirst-workflow/src/mdx/roster.ts" lines="10-18" hash="c5c9e34b1b18" blob="449061a61452" */}
 
 按名册标上机读文字时，只在组件节点的 data 上写一组替换节点，不改树（同一棵树还要生成页面）；序列化时回调把替换节点照普通 md 写出来，嵌套在里面的组件各有各的替换节点。
 选一种组件，看正本、规则与序列化出的 md。这几种写法都用在了一页上，那一页编出来的页面与 md 看[机读版示例](/docs/fumadocs/markdown-sample)，

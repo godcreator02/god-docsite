@@ -336,9 +336,9 @@ test("清单里没有的标记：报到行，不静默漏掉", () => {
 
 const RECORD = { kind: "content", hash: "3fa9c2e1b07d", blob: "2689fa073ac6" } as const;
 /** 一篇正本在清单里的样子：按 parse 认出的引用逐处配上给定的状态与当前内容 */
-function renderOf(text: string, over: (ref: Reference) => Over = () => ({})): string {
+function renderOf(text: string, over: (ref: Reference) => Over = () => ({}), roster: Roster = {}): string {
   const items = mdx.parse(text).map((reference) => ({ ...itemOf({ reference, ...over(reference) }), reference }));
-  return mdx.renderAi(text, listingOf(items));
+  return mdx.renderAi(text, listingOf(items), roster);
 }
 
 test("按原文渲染：去掉 frontmatter，正式记号换成带语言与 title 的代码块，别的文字逐字节不动", () => {
@@ -387,7 +387,30 @@ test("按原文渲染：未确认的记号渲染不了——生成物里只放�
   );
 });
 
-test("按原文渲染：缺失的引用、组件、mdx 表达式、import 都渲染不了，一次列全、抛 RenderRefusal", () => {
+test("按原文渲染：组件换成名册给的机读文字，跟站上机读版用同一条规则；前后文字逐字节不动", () => {
+  const roster: Roster = {
+    Steps: (_node, { paragraph }) => [paragraph("第 1 步：注册"), paragraph("第 2 步：撤掉")],
+    Hint: (node, { paragraph, textOf }) => paragraph(`注意：${textOf(node)}`),
+    Hidden: "drop",
+  };
+  const text = "# x\n\n前一段 **加粗**\n\n<Steps />\n\n<Hidden>不要</Hidden>\n\n后一段\n";
+  assert.equal(renderOf(text, () => ({}), roster), "# x\n\n前一段 **加粗**\n\n第 1 步：注册\n\n第 2 步：撤掉\n\n\n\n后一段\n");
+  assert.equal(renderOf("- 一项：\n\n  <Hint>小心</Hint>\n", () => ({}), roster), "- 一项：\n\n  注意：小心\n", "写在列表项里的组件，续行带上列表缩进");
+});
+
+test("按原文渲染：规则交回的子内容里再嵌套的组件也换成它的机读文字", () => {
+  const roster: Roster = { Box: "children", Hint: (node, { paragraph, textOf }) => paragraph(`注意：${textOf(node)}`) };
+  assert.equal(renderOf("<Box>\n  外层\n\n  <Hint>里层</Hint>\n</Box>\n", () => ({}), roster), "外层\n\n注意：里层\n");
+});
+
+test("按原文渲染：名册外组件、规则交回里嵌套的名册外组件都渲染不了", () => {
+  assert.throws(
+    () => renderOf("<Box>\n  <Unknown />\n</Box>\n", () => ({}), { Box: "children" }),
+    (err: Error) => err.name === "RenderRefusal" && err.message.includes("第 1 行的组件 <Box> 换不成机读文字：第 2 行：名册外组件 <Unknown>"),
+  );
+});
+
+test("按原文渲染：缺失的引用、名册外组件、mdx 表达式、import 都渲染不了，一次列全、抛 RenderRefusal", () => {
   const text = [
     "import x from 'y';",
     "",
@@ -406,7 +429,7 @@ test("按原文渲染：缺失的引用、组件、mdx 表达式、import 都渲
     () => renderOf(text, (ref) => (ref.target.kind === "span" && ref.target.file === "src/gone.ts" ? { status: "missing", reason: "file-missing", current: null } : {})),
     (err: Error) => {
       assert.equal(err.name, "RenderRefusal");
-      for (const piece of ["第 1 行有 import / export","第 5 行的引用缺失（文件不在了）", "第 7 行有组件 <Note>", "第 9 行有 mdx 表达式 {1 + 1}", "第 11 行有 mdx 表达式 {/* 普通注释 */}"]) {
+      for (const piece of ["第 1 行有 import / export","第 5 行的引用缺失（文件不在了）", "第 7 行有名册外组件 <Note>", "第 9 行有 mdx 表达式 {1 + 1}", "第 11 行有 mdx 表达式 {/* 普通注释 */}"]) {
         assert.ok(err.message.includes(piece), `报错里该有「${piece}」：${err.message}`);
       }
       return true;

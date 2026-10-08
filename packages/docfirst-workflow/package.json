@@ -1,6 +1,6 @@
 {
   "name": "@godcreator/docfirst-workflow",
-  "version": "0.5.4",
+  "version": "0.5.5",
   "author": {"name": "godcreator"},
   "type": "module",
   "description": "docfirst 文档工作流：命令行（核对、确认、渲染、轨迹）、项目装配、mdx 格式与卡格式，外加接到 fumadocs 站上的子入口 ./fumadocs（remark 接入、状态点与术语组件、轨迹卡集合与星轨盘、样式），随 docfirst 线发。",
@@ -56,6 +56,8 @@
   "dependencies": {
     "@godcreator/code-pin": "workspace:*",
     "@godcreator/trajectory-disk": "workspace:*",
+    "mdast-util-math": "^3.0.0",
+    "mdast-util-to-markdown": "^2.1.2",
     "remark-frontmatter": "^5.0.0",
     "remark-math": "^6.0.0",
     "remark-mdx": "^3.0.0",

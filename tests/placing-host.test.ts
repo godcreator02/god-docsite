@@ -8,6 +8,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { createPinner } from "../packages/code-pin/src/index.ts";
+import type { Roster } from "../packages/docfirst-workflow/src/mdx/index.ts";
 import type { Listing } from "../packages/docfirst-workflow/src/reference/index.ts";
 import { createPinning } from "../packages/docfirst-workflow/src/pinning/index.ts";
 import type { Pinning } from "../packages/docfirst-workflow/src/pinning/index.ts";
@@ -25,10 +26,11 @@ const BODY = "# 摆放\n\n一段**加粗**的正文，&#x2A; 原样\n";
 const pinningOf = (): Pinning => createPinning(createPinner({ reader: { read: () => null }, history: NO_HISTORY }));
 
 /** 内存宿主：落点是一张 `to → 内容` 的表，没有目录、没有路径解析、没有磁盘 */
-function memoryHost(outputs: ProjectConfig["outputs"], source = SOURCE) {
+function memoryHost(outputs: ProjectConfig["outputs"], source = SOURCE, roster: Roster = {}) {
   const placed = new Map<string, string>();
   const host: PlacingHost = {
     pinning: pinningOf(),
+    roster,
     placements: (doc) => (outputs?.[doc] ?? []).map((raw) => (typeof raw === "string" ? { to: raw, frontmatter: [] } : { to: raw.to, frontmatter: raw.frontmatter ?? [] })),
     read: () => source,
     readPlaced: (to) => placed.get(to) ?? null,
@@ -84,6 +86,7 @@ test("内存宿主：check 收到调用方判好的清单就直接渲染，不�
   let resolved = 0;
   const placing = createPlacing({
     pinning: { ...pinning, checkDoc: (doc, text) => (resolved += 1, pinning.checkDoc(doc, text)) },
+    roster: {},
     placements: () => [{ to: "README.md", frontmatter: [] }],
     read: () => SOURCE,
     readPlaced: () => BODY,
@@ -101,7 +104,7 @@ test("内存宿主：check 收到调用方判好的清单就直接渲染，不�
 test("内存宿主：正本渲染不了，每个落点都报 unrenderable、一个字不写；别的错照原样抛", () => {
   const targets = { "docs/a.mdx": ["README.md", { to: "SKILL.md", frontmatter: ["name"] }] };
   const { placed, placing } = memoryHost(targets, `${SOURCE}\n<Note>提示</Note>\n`);
-  const reason = "第 11 行有组件 <Note>，生成正本只写 markdown";
+  const reason = "第 11 行有名册外组件 <Note>，先在 docfirst.config 的 components 里给它写机读规则";
   assert.deepEqual(placing.render("docs/a.mdx"), [
     { to: "README.md", status: "unrenderable", reason },
     { to: "SKILL.md", status: "unrenderable", reason },
@@ -114,6 +117,13 @@ test("内存宿主：正本渲染不了，每个落点都报 unrenderable、一�
 
   const formal = memoryHost(targets, `${SOURCE}\n{/* ref file="src/greet.ts" lines="2-3" */}\n`).placing;
   assert.throws(() => formal.check("docs/a.mdx", { doc: "docs/a.mdx", items: [] }), /第 11 行是引用记号，但清单里没有它/, "清单对不上正本不是拒绝渲染，照原样抛");
+});
+
+test("内存宿主：正本里名册内的组件换成名册给的机读文字，落点照常摆", () => {
+  const roster: Roster = { Note: (node, { paragraph, textOf }) => paragraph(`注意：${textOf(node)}`) };
+  const { placed, placing } = memoryHost({ "docs/a.mdx": ["README.md"] }, `${SOURCE}\n<Note>提示</Note>\n`, roster);
+  assert.deepEqual(placing.render("docs/a.mdx"), [{ to: "README.md", status: "placed" }]);
+  assert.equal(placed.get("README.md"), `${BODY}\n注意：提示\n`);
 });
 
 test("内存宿主：没挂落点的文档，两个方法都回空清单，宿主一次都没被写过", async () => {
