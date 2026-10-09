@@ -7,8 +7,8 @@ import { describe, expect, it } from 'vitest'
 /**
  * 产物检查，加几处必须同时改的对照。没有产物时产物那组整组跳过：门禁不依赖 build。
  *
- * 本插件只有 node 侧产物（tsc 输出）：相对 import 带扩展名，包名 import 只许 node 内置模块、electron 与 peer 里写了的包。
- * 本插件没有窗格，也就没有浏览器侧产物。
+ * node 侧产物（tsc 输出）：相对 import 带扩展名，包名 import 只许 node 内置模块、electron 与 peer 里写了的包。
+ * 浏览器侧产物是窗格的 client.js（esbuild 打成一个文件）与 style.css，不在 node 侧的检查里。
  */
 
 const here = path.dirname(fileURLToPath(import.meta.url))
@@ -32,23 +32,28 @@ function read(file: string): string {
 }
 
 describe('产物', () => {
-  const nodeHalf = built ? fs.readdirSync(distDir).filter((f) => f.endsWith('.js')) : []
+  const nodeHalf = built ? fs.readdirSync(distDir).filter((f) => f.endsWith('.js') && f !== 'client.js') : []
 
   it.skipIf(!built)('产物只有一层：`../template/` 在源码与产物里是同一个相对位置，靠的就是这一点', () => {
     expect(nodeHalf.sort()).toEqual([
       'args.js',
       'create.js',
       'deps.js',
+      'hosted-sites.js',
       'index.js',
       'ports.js',
       'repo-root.js',
       'scaffold.js',
+      'site-args.js',
+      'site-host.js',
+      'site-process.js',
       'template.js',
       'units-root.js',
       'values.js',
       'vocab.js',
     ])
-    expect(fs.existsSync(path.join(distDir, 'client.js'))).toBe(false)
+    expect(fs.existsSync(path.join(distDir, 'client.js')), '窗格的浏览器侧').toBe(true)
+    expect(fs.existsSync(path.join(distDir, 'style.css')), '窗格的样式').toBe(true)
     expect(fs.existsSync(path.join(distDir, 'template')), '模板不进 dist，它在包根，靠 files 发布').toBe(false)
   })
 
@@ -68,17 +73,18 @@ describe('产物', () => {
     expect([...bare].filter((spec) => !isNodeBuiltin(spec) && spec !== 'electron' && !ownPeers.has(packageNameOf(spec)))).toEqual([])
   })
 
-  it.skipIf(!built)('命令总线上只有 docfirst.create 与 docfirst.create-plain 两条：命令名是公共接口，改名就是破坏兼容', () => {
+  it.skipIf(!built)('命令总线上是两条建站命令与四条托管命令：命令名是公共接口，改名就是破坏兼容', () => {
     const host = read('index.js')
-    expect(host).toContain("'docfirst.create'")
-    expect(host).toContain("'docfirst.create-plain'")
+    for (const command of ['docfirst.create', 'docfirst.create-plain', 'docfirst.site.list', 'docfirst.site.add', 'docfirst.site.remove', 'docfirst.site.restart']) {
+      expect(host).toContain(`'${command}'`)
+    }
     expect(host, '建站一步完成，不再有先建骨架再装配的第二条命令').not.toContain("'docfirst.attach'")
     // 核对要在仓里发生，agent 在仓里跑 pnpm doc，插件不转发命令行。
     // 给别的仓写反馈是在那个仓的 gitea 上开 issue，不经本插件的命令
     for (const gone of ['live-doc.cli', 'live-doc.cli-raw', 'live-doc.stale', 'live-doc.feedback', 'live-doc.feedback-list']) {
       expect(host, `${gone} 还在总线上`).not.toContain(`'${gone}'`)
     }
-    // 扫描站、启动与停止站不归本插件；端口只在建站时选一次
+    // 托管只认登记过的站，不扫描容器根找站、不打开浏览器
     for (const gone of ['live-doc.sites', 'live-doc.start', 'live-doc.stop', 'live-doc.open', 'live-doc.extend', 'live-doc.running', 'live-doc.init']) {
       expect(host).not.toContain(`'${gone}'`)
     }
@@ -143,27 +149,35 @@ describe('必须同时改的几处', () => {
   })
 
   /**
-   * 唯一的子进程是 `src/scaffold.ts` 运行官方脚手架 `pnpm dlx create-fumadocs-app`：建站只在 agent 手上发生一次，归插件。
-   * 别的文件一概不启动子进程——转发命令行就是把该在仓里发生的事搬进插件。
+   * 子进程只在两处启动：`src/scaffold.ts` 运行官方脚手架 `pnpm dlx create-fumadocs-app`（建站只在 agent 手上发生一次），
+   * `src/site-process.ts` 在托管的站目录里运行 `pnpm build` 与 `pnpm start`（站的运行跟会话无关，归工作台）。
+   * 别的文件一概不启动子进程——转发 docfirst 命令行就是把该在仓里发生的事搬进插件。
    */
-  it('只有 scaffold.ts 启动子进程（运行官方脚手架），不登记 node CLI', () => {
+  it('只有 scaffold.ts 与 site-process.ts 启动子进程，不转发 docfirst 命令行，不登记 node CLI', () => {
     for (const file of fs.readdirSync(path.join(root, 'src')).filter((f) => f.endsWith('.ts'))) {
       const src = fs.readFileSync(path.join(root, 'src', file), 'utf8')
       expect(src, `src/${file} 登记了 node CLI`).not.toMatch(/gwbNodeCli/)
-      if (file === 'scaffold.ts') continue
+      if (file === 'scaffold.ts' || file === 'site-process.ts') continue
       expect(src, `src/${file} 启动了子进程`).not.toMatch(/node:child_process/)
     }
     const scaffold = fs.readFileSync(path.join(root, 'src', 'scaffold.ts'), 'utf8')
     expect([...scaffold.matchAll(/execFile\(/g)], 'scaffold.ts 只启动一次子进程：运行官方脚手架').toHaveLength(1)
     expect(scaffold, '子进程要带超时').toMatch(/timeout: SCAFFOLD_TIMEOUT_MS/)
+    const siteProcess = fs.readFileSync(path.join(root, 'src', 'site-process.ts'), 'utf8')
+    expect(siteProcess, '托管只运行站自己的 build 与 start 脚本').not.toMatch(/docfirst|'doc'|doc:render|doc:confirm/)
+    expect(siteProcess, '构建、等启动、停进程都有超时').toMatch(/BUILD_TIMEOUT_MS[\s\S]*READY_TIMEOUT_MS[\s\S]*KILL_TIMEOUT_MS/)
     expect(manifest.peerDependencies?.['@godcreator/gwb-node-cli']).toBeUndefined()
     expect(manifest.devDependencies?.['@godcreator/gwb-node-cli']).toBeUndefined()
   })
 
-  it('skills 是可选 peer，注册说明书走 ctx.inject、不进 export const inject', () => {
-    expect(manifest.peerDependencies?.['@godcreator/gwb-skills']).toBeDefined()
-    expect(manifest.peerDependenciesMeta?.['@godcreator/gwb-skills']?.optional).toBe(true)
+  it('skills、data、shell 是可选 peer，注册说明书、托管站点、窗格走 ctx.inject、不进 export const inject', () => {
+    for (const peer of ['@godcreator/gwb-skills', '@godcreator/gwb-data', '@godcreator/gwb-shell']) {
+      expect(manifest.peerDependencies?.[peer]).toBeDefined()
+      expect(manifest.peerDependenciesMeta?.[peer]?.optional).toBe(true)
+    }
     expect(index).toMatch(/ctx\.inject\(\['gwbSkills'\]/)
+    expect(index).toMatch(/ctx\.inject\(\['gwbData'\]/)
+    expect(index).toMatch(/ctx\.inject\(\['gwbShell'\]/)
     expect(index).toMatch(/export const inject = \['gwbCommands'\]/)
   })
 
@@ -181,10 +195,17 @@ describe('必须同时改的几处', () => {
     }
   })
 
-  it('本插件不注册窗格', () => {
-    expect(index).not.toContain('registerPane')
-    expect(index).not.toContain('gwbShell')
-    expect(manifest.peerDependencies?.['@godcreator/gwb-shell']).toBeUndefined()
+  /** 窗格只显示托管着哪些站：开关、重启都由 agent 调命令，窗格里不调别的命令、不放按钮 */
+  it('只有一个窗格，它只读 docfirst.site.list，没有按钮', () => {
+    expect([...index.matchAll(/registerPane\(/g)]).toHaveLength(1)
+    const clientDir = path.join(root, 'src', 'client')
+    const client = fs
+      .readdirSync(clientDir)
+      .filter((file) => /\.tsx?$/.test(file))
+      .map((file) => fs.readFileSync(path.join(clientDir, file), 'utf8'))
+      .join('\n')
+    expect([...client.matchAll(/'docfirst\.[\w.-]+'/g)].map((m) => m[0])).toEqual(["'docfirst.site.list'"])
+    expect(client).not.toMatch(/<button|onClick|<Button/)
   })
 
   it('cordis 与 electron 都不在 dependencies：前者写进去就是第二份实例，后者本插件不用', () => {

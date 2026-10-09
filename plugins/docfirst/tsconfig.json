@@ -11,7 +11,7 @@
     "skipLibCheck": true,
     "noEmit": true
   },
-  // 本插件只有 node 侧代码，没有窗格与浏览器侧代码，所以只有这一份 tsconfig、不用 esbuild 打包。
+  // node 侧、纯逻辑测试与构建脚本；窗格的浏览器侧代码由 src/client/tsconfig.json 检查。
   // tests/fixtures/ 下是官方脚手架的输出样本，不参与类型检查
-  "include": ["src/*.ts", "tests/*.ts", "vitest.config.ts"]
+  "include": ["src/*.ts", "src/client/*.ts", "tests/*.ts", "build.ts", "vitest.config.ts"]
 }

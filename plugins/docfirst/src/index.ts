@@ -1,18 +1,25 @@
 import type { GwbContext } from '@godcreator/gwb-kernel-desktop'
 // 只为让这几个插件的 `declare module 'cordis'` 生效，它们给 ctx 加上各自的服务名
 import type {} from '@godcreator/gwb-commands'
+import type {} from '@godcreator/gwb-data'
+import type {} from '@godcreator/gwb-shell'
 import type {} from '@godcreator/gwb-skills'
 import type { GwbUnitFolderApi } from '@godcreator/gwb-unit-folder'
 import { parseCreateArgs, type CreateArgs } from './args.js'
 import { planCreate } from './create.js'
+import { HOSTED_SITES_DOC } from './hosted-sites.js'
 import { filesFirstRenderOverwrites, readRepoManifest } from './repo-root.js'
 import { createSite, type SiteOptions, type SiteResult } from './scaffold.js'
+import { parseListArgs, parseRestartArgs, parseSiteDirArgs, type ParsedSiteArgs } from './site-args.js'
+import { SiteHost, SiteHostRejected } from './site-host.js'
+import { nodeSiteRunner } from './site-process.js'
 import { readTemplate } from './template.js'
 
 /**
- * docfirst 插件：两条建站命令，加 `skills/` 下的说明书。
+ * docfirst 插件：两条建站命令、四条托管站点的命令、一个只显示的窗格，加 `skills/` 下的说明书。
  * `docfirst.create` 建接好 docfirst 的站，`docfirst.create-plain` 建不接 docfirst 的普通 fumadocs 站；
  * 两条都调用 `scaffold.ts` 的 `createSite`：运行官方脚手架、应用本机约定、写盘。
+ * `docfirst.site.*` 由工作台托管登记过的站：插件加载时启动、每次开 12 小时，重新构建调 restart（`site-host.ts`）；窗格「文档站」只显示它们。
  *
  * 核对、确认、渲染在仓里发生，归 `@godcreator/docfirst-*` 四个 npm 包（pin、trajectory、workflow、fumadocs），
  * agent 在仓里运行 `pnpm doc`；本插件对四个包都零依赖（`tests/artifact.test.ts` 检查），建站时只把 workflow 与 fumadocs
@@ -22,6 +29,11 @@ export const name = 'gwb-docfirst-workflow'
 
 export const CREATE_COMMAND = 'docfirst.create'
 export const CREATE_PLAIN_COMMAND = 'docfirst.create-plain'
+export const SITE_LIST_COMMAND = 'docfirst.site.list'
+export const SITE_ADD_COMMAND = 'docfirst.site.add'
+export const SITE_REMOVE_COMMAND = 'docfirst.site.remove'
+export const SITE_RESTART_COMMAND = 'docfirst.site.restart'
+export const SITES_PANE = 'sites'
 
 export const inject = ['gwbCommands']
 
@@ -210,10 +222,98 @@ export function apply(ctx: GwbContext): void {
     ),
   )
 
+  // 托管站点要把登记表存进工作台数据，是局部注入：没装数据插件的 home 里建站照常，四条托管命令不出现
+  ctx.inject(['gwbData'], (scoped) => {
+    const data = scoped.gwbData
+    const host = new SiteHost(nodeSiteRunner, { read: () => data.readDoc(HOSTED_SITES_DOC), write: (value) => data.writeDoc(HOSTED_SITES_DOC, value) }, log)
+    scoped.effect(() => () => host.stopAll())
+    // 登记表读进来之前不受理命令：不然 add 写回的登记表会漏掉还没读进来的站。登记表坏了，每条托管命令都报这个错
+    const loaded = host.startAll()
+    loaded.catch((error: unknown) => log.warn(`托管的站没有启动：${messageOf(error)}`))
+
+    /** 校验参数 → 调托管；托管拒绝的写明原因回 ok: false，别的错误照常抛给命令总线 */
+    const runSite = async <A, T>(parsed: ParsedSiteArgs<A>, work: (args: A) => Promise<T> | T): Promise<{ ok: true; data: T } | { ok: false; error: string }> => {
+      if (!parsed.ok) return parsed
+      await loaded
+      try {
+        return { ok: true, data: await work(parsed.args) }
+      } catch (error) {
+        if (error instanceof SiteHostRejected) return { ok: false, error: error.message }
+        throw error
+      }
+    }
+    const stateFields =
+      '每个站是 { dir, port, status, pid, url, expiresAt, error }：status 是 running / building / starting / stopped / expired / failed，' +
+      'url 与 expiresAt（ISO 时间，到点自动停）只在 running 时有，每次启动开 12 小时，restart 重新计时、到期的也用 restart 再开；' +
+      'error 是最近一次失败的原因（构建失败、启动失败、意外退出），带输出的最后几行'
+
+    scoped.effect(() =>
+      cli.register(
+        { name: SITE_LIST_COMMAND, description: '列出工作台托管着的文档站与各自的状态', usage: `{}。${stateFields}。回 { sites }`, plugin: PLUGIN, effect: 'read' },
+        (raw) => runSite(parseListArgs(SITE_LIST_COMMAND, raw), () => ({ sites: host.list() })),
+      ),
+    )
+    scoped.effect(() =>
+      cli.register(
+        {
+          name: SITE_ADD_COMMAND,
+          description: '让工作台托管一个文档站：登记并启动 pnpm start，插件每次加载时自动启动，跟会话无关',
+          usage:
+            '{ dir: string }。dir 是站目录的绝对路径，站的 package.json 要有 start 脚本、里面写死一个端口（next start -p <端口> -H 127.0.0.1），端口就从那里读。' +
+            '登记表存在工作台数据里；没构建过（没有 .next/BUILD_ID）的先 pnpm build。端口已经被别的进程占着（比如会话自己开的 next start）就不启动，error 里写明，停掉那个进程再 docfirst.site.restart。' +
+            `已经登记过的只回它此刻的样子。意外退出只记下原因、不自动重启。${stateFields}。回这个站，外加 added（这次是不是新登记的）`,
+          plugin: PLUGIN,
+          effect: 'write',
+        },
+        (raw) => runSite(parseSiteDirArgs(SITE_ADD_COMMAND, raw), (args) => host.add(args.dir)),
+      ),
+    )
+    scoped.effect(() =>
+      cli.register(
+        {
+          name: SITE_REMOVE_COMMAND,
+          description: '不再托管一个文档站：停掉它并从登记表里去掉',
+          usage: '{ dir: string }。连同子进程一起停；没托管的报错。回 { dir, removed: true }',
+          plugin: PLUGIN,
+          effect: 'write',
+        },
+        (raw) => runSite(parseSiteDirArgs(SITE_REMOVE_COMMAND, raw), (args) => host.remove(args.dir)),
+      ),
+    )
+    scoped.effect(() =>
+      cli.register(
+        {
+          name: SITE_RESTART_COMMAND,
+          description: '重新构建并重启一个托管的文档站：停掉 → pnpm build → pnpm start',
+          usage:
+            '{ dir: string, build?: boolean }。改完文档调它，build 不给就是 true；build: false 只重启不构建。' +
+            '构建期间站打不开（next build 会覆盖正在用的 .next）；构建最长 10 分钟，启动后 60 秒内端口连不上算失败。' +
+            `构建或启动失败时站保持停着，原因写进 error（带输出的最后几行），回执照常回。没托管的报错。${stateFields}。回这个站，外加 built（这次构建了没有）`,
+          plugin: PLUGIN,
+          effect: 'write',
+        },
+        (raw) => runSite(parseRestartArgs(SITE_RESTART_COMMAND, raw), (args) => host.restart(args.dir, { build: args.build })),
+      ),
+    )
+  })
+
+  // 只显示托管着哪些站、还剩多久到期的窗格，没有按钮：开关与重启都由 agent 调命令。外壳是局部注入，没装外壳的 home 里命令照常
+  ctx.inject(['gwbShell'], (scoped) => {
+    scoped.gwbShell.describeSelf({ title: 'docfirst', icon: 'book-open' })
+    scoped.gwbShell.registerPane({
+      id: SITES_PANE,
+      title: '文档站',
+      icon: 'globe',
+      kind: 'tool',
+      client: new URL('./client.js', import.meta.url).href,
+      style: new URL('./style.css', import.meta.url).href,
+    })
+  })
+
   // 说明书是可选注入：没装 skills 插件的 home 里本插件照常加载。产物在 dist/ 下，包根的 skills/ 是 '../skills/'
   ctx.inject(['gwbSkills'], (scoped) => {
     scoped.effect(() => scoped.gwbSkills.register(new URL('../skills/', import.meta.url)))
   })
 
-  log.info(`docfirst 插件就绪：命令 ${CREATE_COMMAND}、${CREATE_PLAIN_COMMAND} 与 skills/ 下的说明书，对 @godcreator/docfirst-* 四个包零依赖`)
+  log.info(`docfirst 插件就绪：命令 ${CREATE_COMMAND}、${CREATE_PLAIN_COMMAND}、docfirst.site.* 与 skills/ 下的说明书，对 @godcreator/docfirst-* 四个包零依赖`)
 }

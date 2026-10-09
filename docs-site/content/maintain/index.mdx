@@ -56,10 +56,10 @@ devkit 的建仓模板不收文档站，这是本仓有意的例外，理由见�
 
 {/* ref file="package.json" lines="7-15" hash="37ad58ad2df1" blob="61c93ed4eb5e" */}
 
-{/* ref file="../plugins/docfirst/package.json" lines="24-31" hash="c94db08cbe3b" blob="f285e7cbd770" */}
+{/* ref file="../plugins/docfirst/package.json" lines="26-33" hash="296371d8b9dc" blob="3c024252c035" */}
 
 站不用 `pnpm dev`：看页面也是先 `pnpm build` 再 `pnpm start`，改了内容重新 build。`build` 集中在收尾或发版前运行一次，
-用户没说要看就构建通过即结束；说要看就一直开着 `start`，服务带超时（默认 12 小时）自动停。
+用户没说要看就构建通过即结束；说要看就交给工作台托管（`docfirst.site.add`），改了内容调 `docfirst.site.restart`，开满 12 小时自动停。
 改了站构建时 remark 插件会调用到的包代码（`docfirst-workflow/src/fumadocs/` 及它调用的 workflow 别的出口、code-pin），要先删 `.next` 再重新构建。
 
 ## 提交规矩
@@ -86,6 +86,8 @@ devkit 的建仓模板不收文档站，这是本仓有意的例外，理由见�
 表改了之后插件要再发一版，之后新建的站才装到新包。
 
 插件发布前，在隔离 home 里用 `docfirst.create` 与 `docfirst.create-plain` 各建一个站验证一遍（步骤在说明书「gwb-devkit」）。
+改了托管，在隔离 home 里用一个假站（build 脚本写 `.next/BUILD_ID`、start 脚本起一个监听写死端口的 node 服务）把 `add`、`restart`、插件重新加载、杀掉进程、`remove` 各走一遍，
+看端口与进程有没有残留，再打开窗格「文档站」截图。
 改了官方脚手架的版本或本机约定，先在 `plugins/docfirst/` 里运行 `pnpm test:all`：多出的那条实际运行官方脚手架、
 跟存下的样本逐份比较，要联网。
 

@@ -1,6 +1,7 @@
 /**
  * 工作台插件内部接缝图（plugin.data.mjs）的坐标与图标。工作台与使用方的仓在最上，入口与命令登记在第二行，
- * 模板、选项、容器根、站名在第三行，建站与端口在第四行，官方脚手架、新站、容器根与本仓的 npm 包在最下。
+ * 模板、选项、容器根、站名在第三行，建站与端口在第四行，官方脚手架、新站、容器根与本仓的 npm 包在第五行；
+ * 下面三行是托管站点：托管命令与工作台数据、托管与它用的规则和子进程、窗格与托管的站。
  */
 import {
   BookOpen,
@@ -9,16 +10,21 @@ import {
   Braces,
   ClipboardList,
   Construction,
+  Cpu,
+  Database,
   FileCode,
   FileText,
   FolderGit2,
   FolderSearch,
   Folders,
   Globe,
+  ListChecks,
   Monitor,
   Network,
   PackagePlus,
+  PanelsTopLeft,
   Puzzle,
+  Server,
   ShieldCheck,
   Terminal,
   Type,
@@ -27,7 +33,7 @@ import { cap } from '@godcreator/docfirst-explainer';
 import type { SeamLayout } from '@godcreator/docfirst-explainer';
 
 export const pluginLayout: SeamLayout = {
-  view: { w: 1100, h: 734 },
+  view: { w: 1100, h: 1184 },
   caps: {
     bus: cap(204, 52, 250),
     settings: cap(480, 52, 112),
@@ -63,6 +69,17 @@ export const pluginLayout: SeamLayout = {
     cfa: cap(560, 652, 160),
     'site-dir': cap(754, 652, 112),
     'other-sites': cap(914, 652, 130),
+
+    'parse-site-args': cap(30, 802, 112),
+    'site-cmd': cap(190, 802, 320),
+    'data-svc': cap(756, 802, 180),
+
+    'host-class': cap(190, 952, 272),
+    'site-rules': cap(510, 952, 198),
+    runner: cap(756, 952, 172),
+
+    'hosted-site': cap(756, 1102, 172),
+    'pane-view': cap(190, 1102, 272),
   },
   groups: {
     host: { x: 176, y: 20, w: 546, h: 94 },
@@ -83,6 +100,14 @@ export const pluginLayout: SeamLayout = {
     cfa: null,
     newsite: { x: 740, y: 620, w: 140, h: 94 },
     units: { x: 900, y: 620, w: 158, h: 94 },
+    'site-args': { x: 16, y: 770, w: 140, h: 94 },
+    'site-cmds': { x: 176, y: 770, w: 546, h: 94 },
+    data: { x: 742, y: 770, w: 210, h: 94 },
+    'site-host': { x: 176, y: 920, w: 300, h: 94 },
+    'hosted-sites': { x: 496, y: 920, w: 226, h: 94 },
+    'site-process': { x: 742, y: 920, w: 200, h: 94 },
+    hosted: { x: 742, y: 1070, w: 200, h: 94 },
+    pane: { x: 176, y: 1070, w: 300, h: 94 },
   },
   // 线只画到一端的时候，另一端（普通站、组 docfirst 选项、建站写入文件这类）固定高亮时照样亮
   seamPaths: {
@@ -105,6 +130,14 @@ export const pluginLayout: SeamLayout = {
     '17': { d: 'M660,550 V652', badge: [660, 592] },
     '18': { d: 'M575,550 V652', badge: [575, 592] },
     '19': { d: 'M800,550 V652', badge: [800, 592] },
+    '20': { d: 'M350,802 V742', badge: [350, 742] },
+    '21': { d: 'M190,826 H142', badge: [166, 826] },
+    '22': { d: 'M510,826 H756', badge: [633, 826] },
+    '23': { d: 'M326,850 V952', badge: [326, 892] },
+    '24': { d: 'M462,976 H510', badge: [486, 976] },
+    '25': { d: 'M400,1000 V1036 H800 V1000', badge: [600, 1036] },
+    '26': { d: 'M880,1000 V1102 M609,1000 V1126 H756', badge: [880, 1050] },
+    '27': { d: 'M462,1126 H486 V850', badge: [486, 1060] },
   },
   entries: {
     agent: { box: { x: 16, y: 52, w: 140, h: 48 }, arrow: [156, 76, 204, 76] },
@@ -128,6 +161,14 @@ export const pluginLayout: SeamLayout = {
     cfa: Terminal,
     newsite: Globe,
     units: Folders,
+    'site-args': ShieldCheck,
+    'site-cmds': Puzzle,
+    data: Database,
+    'site-host': Server,
+    'hosted-sites': ListChecks,
+    'site-process': Cpu,
+    hosted: Globe,
+    pane: PanelsTopLeft,
   },
   entryIcons: { agent: Bot },
 };

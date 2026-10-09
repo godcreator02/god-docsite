@@ -1,6 +1,6 @@
 ---
 name: docs-site
-description: 对文档站执行命令时读：建站（docfirst.create / create-plain）、加分区、登记组件、构建与查看、依赖安装或构建失败、升级 fumadocs；docfirst 站的核对、确认、重新生成生成物，改了被钉的代码怎么提交，给别的仓写反馈。页面内容怎么写看 docs-writing。
+description: 对文档站执行命令时读：建站（docfirst.create / create-plain）、托管与重启（docfirst.site.*）、加分区、登记组件、构建、安装或构建失败、升级 fumadocs；docfirst 站的核对、确认、生成，改了被钉的代码怎么提交，给别的仓写反馈。页面内容怎么写看 docs-writing。
 ---
 
 # 文档站的操作
@@ -8,9 +8,9 @@ description: 对文档站执行命令时读：建站（docfirst.create / create-
 这份只讲**对站执行什么命令**：建站、改站的结构、构建与查看、核对与确认、出错了怎么办。页面内容怎么写、钉码钉哪种话、
 黄灯以后正文怎么改，看同一个插件的说明书 `docs-writing`；轨迹卡看 `trajectory`。
 
-**只有建站经过工作台**：本插件（`@godcreator/gwb-docfirst-workflow`）的命令只有 `docfirst.create` 与 `docfirst.create-plain` 两条。
-其余的事都在站目录里自己运行 `pnpm …`：核对、确认、渲染要在仓里反复运行（git hook、CI、`next build` 也在运行它们），
-归站里装的包，插件不转发命令行，也不启动、不停止站。
+**建站与站的运行经过工作台**：本插件（`@godcreator/gwb-docfirst-workflow`）的命令是建站的 `docfirst.create`、`docfirst.create-plain`，
+与托管站点的 `docfirst.site.list` / `add` / `remove` / `restart`。核对、确认、渲染都在站目录里自己运行 `pnpm …`：
+它们要在仓里反复运行（git hook、CI、`next build` 也在运行它们），归站里装的包，插件不转发命令行。
 
 站约定放在 `<仓>/docs-site/`，是一个独立的 pnpm 项目，下面的命令都在这个目录里运行。
 
@@ -99,11 +99,24 @@ mdxOptions: applyMdxPreset({
 
 - **不用 `pnpm dev`**：它重新编译时内存一路上涨，出现过涨到约 16 GB 退出。看页面一律先 `pnpm build` 再 `pnpm start`，
   改了内容重新 build、重启 start。改完一批再 build，不改一页 build 一次；改的是站构建时会调用到的包代码，先删 `.next` 再 build
-- **服务由 agent 自己启动**：Claude Code 桌面版写进 `.claude/launch.json` 用 `preview_start`，经到点自动停止的超时脚本启动
-  （默认 12 小时）；别的客户端在后台运行。给人看就在 VS Code 的内置浏览器里打开（读说明书 `vscode`）。
-  用户说要看就一直开着；只是自己验证的，验完停掉。用户没说要看，build 通过就结束
-- **一个站只在一个端口跑最新构建**：重新 build 以后，停掉这个站端口上原来的 `start`（不管是谁启动的）再用原配置重启，
-  不另开一个端口验证
+- **用户要看的站交给工作台托管，不由会话自己启动**：会话自己开的服务归那个会话，会话一停、一结束站就掉，几个会话还会抢同一个端口
+  （理由见站上的轨迹卡「文档站改由工作台托管」）：
+
+  ```
+  docfirst.site.add      {"dir":"<仓>/docs-site"}               登记并启动 pnpm start；没构建过的先 build
+  docfirst.site.restart  {"dir":"<仓>/docs-site"}               改完文档调它：停掉 → pnpm build → 启动，重新计时 12 小时
+  docfirst.site.restart  {"dir":"<仓>/docs-site","build":false}  只重启不构建（到期了再开）
+  docfirst.site.list     {}                                      托管着哪些站、各自状态、到期时刻、最近一次失败的原因
+  docfirst.site.remove   {"dir":"<仓>/docs-site"}               停掉并不再托管
+  ```
+
+  - 端口从站 `package.json` 的 start 脚本读，脚本里要写死一个 `-p <端口>`
+  - 每次启动开 12 小时，到点自动停，状态变成 `expired`；人在工作台的窗格「文档站」里看开着哪些站、还剩多久，窗格没有按钮，开关都由 agent 调命令
+  - 端口已经被别的进程占着（多半是会话自己开的 `next start`）就不启动，`error` 里写明：停掉那个进程再 `restart`
+  - 构建期间站打不开；构建或启动失败时站保持停着，回执的 `error` 带输出的最后几行，照它修好再 `restart`
+  - 给人看就在 VS Code 的内置浏览器里打开地址（读说明书 `vscode`）。用户没说要看，build 通过就结束，不登记
+- **只是自己验证、用户没说要看**：在站目录 `pnpm build` 再 `pnpm start`（Claude Code 桌面版写进 `.claude/launch.json` 用 `preview_start`，
+  经到点自动停止的超时脚本启动），验完停掉。这个站已经由工作台托管的，直接 `restart`，不另开一个端口
 - **agent 读 mdx 正本，不解析 HTML**：docfirst 站不出每页的机读版，直接读仓里 `content/` 下的 mdx；普通站可以先读 `/llms.txt` 找页，再取那几页的 `.md`
 
 **验收一页**：

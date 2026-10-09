@@ -35,6 +35,9 @@ pnpm add -D @godcreator/docfirst-workflow
 
 建站只由 agent 执行一次，所以不在包里——包留的是要在**仓**里反复发生的那几条。
 
+**要一直开着看的站交给工作台托管**：`docfirst.site.add {"dir":"<仓>/docs-site"}` 登记，站的进程归工作台、跟哪个会话都无关，
+每次启动开 12 小时；改完文档调 `docfirst.site.restart`（停掉、`pnpm build`、再启动）。工作台的窗格「文档站」只显示开着哪些站、还剩多久到期。
+
 ## 怎么用
 
 项目根放一份 `docfirst.config.mjs`（内容根在哪、组件名册、生成物写到哪；认哪些文件是写死的，不用配置）。内容根下 `trajectory/` 是轨迹卡、
@@ -103,5 +106,5 @@ pnpm check && pnpm build      # 工作台插件单独一套检查
 ```
 
 站不用 `pnpm dev`：看页面也是先 `pnpm build` 再 `pnpm start`，改了内容重新 build。`build` 集中在收尾或发版前运行一次，
-用户没说要看就构建通过即结束；说要看就一直开着 `start`，服务带超时（默认 12 小时）自动停。
+用户没说要看就构建通过即结束；说要看就交给工作台托管（`docfirst.site.add`），改了内容调 `docfirst.site.restart`，开满 12 小时自动停。
 改了站构建时 remark 插件会调用到的包代码（`packages/docfirst-workflow/src/fumadocs/`，连同它调用的 workflow 别的出口与 code-pin），要先删 `.next` 再重新构建。

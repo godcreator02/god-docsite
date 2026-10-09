@@ -51,9 +51,10 @@ README、CLAUDE.md、这份规矩与插件里的 SKILL.md 都是**生成物**：
   插件也不许依赖包，两个方向各由 `tests/boundary.test.ts` 与插件的 `tests/artifact.test.ts` 检查。
   **`tests/boundary.test.ts` 是唯一检查这些边界的测试**（包的方向、自成一体的包与通用包、workflow 目录方向、宿主只能是可选的 peer、
   包不认识插件、docfirst-explainer 的三个入口），别绕、别删、别为了让检查通过注释掉某一条。
-- **要在仓里发生的（核对、确认、渲染）归包，只由 agent 执行一次的归插件**：建站
-  （`docfirst.create` 与 `docfirst.create-plain`）与说明书在 `plugins/docfirst/`。建站的每一步（运行官方脚手架、本机约定、
-  选端口、写入文件）都在插件的 `src/` 里，插件必需注入的只有命令总线 `gwbCommands`，不依赖别的插件建站（单元文件夹插件的 `gwbUnitFolder` 是局部注入，只用来读容器根查端口）。
+- **要在仓里发生的（核对、确认、渲染）归包，只由 agent 执行一次的、跟会话无关要一直开着的归插件**：建站
+  （`docfirst.create` 与 `docfirst.create-plain`）、托管站点（`docfirst.site.*` 与只显示的窗格「文档站」）与说明书在 `plugins/docfirst/`。建站的每一步（运行官方脚手架、本机约定、
+  选端口、写入文件）都在插件的 `src/` 里，插件必需注入的只有命令总线 `gwbCommands`，不依赖别的插件建站（单元文件夹插件的 `gwbUnitFolder` 是局部注入，只用来读容器根查端口；
+  托管用的 `gwbData`、窗格用的 `gwbShell` 也是局部注入）。托管只运行站自己的 `build` 与 `start` 脚本，不转发 docfirst 命令行。
 - 子进程调用一律带超时。
 - 提交前的检查，下面每处都要通过才提交：
   - 仓根：`pnpm test`、`pnpm typecheck`、`pnpm build`
@@ -63,6 +64,6 @@ README、CLAUDE.md、这份规矩与插件里的 SKILL.md 都是**生成物**：
   `plugins/docfirst/src/deps.ts` 那张表——插件的 `tests/create.test.ts` 检查它。
 - 改了站构建时 remark 插件会调用到的包代码（`docfirst-workflow/src/fumadocs/` 及它调用的 workflow 别的出口、code-pin），要先删 `.next` 再重新构建。
   站不用 `pnpm dev`：看页面也是先 `pnpm build` 再 `pnpm start`，改了内容重新 build。`build` 集中在收尾或发版前运行一次，
-  用户没说要看就构建通过即结束；说要看就一直开着 `start`，服务带超时（默认 12 小时）自动停。
+  用户没说要看就构建通过即结束；说要看就交给工作台托管（`docfirst.site.add`），改了内容调 `docfirst.site.restart`，开满 12 小时自动停。
 - 提交按步骤拆，一个提交一件事。
 - 不碰 `D:\dshfiles\26082412vto\homes\`（在 `D:\dshfiles`，DSH 时代的归档区）；不碰主实例。
