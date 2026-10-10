@@ -34,7 +34,8 @@
     "@godcreator/gwb-commands": "^0.6.1",
     "@godcreator/gwb-kernel-desktop": "^0.10.1",
     "@godcreator/gwb-settings": "^0.4.0",
-    "@godcreator/gwb-skills": "^0.4.12"
+    "@godcreator/gwb-skills": "^0.4.12",
+    "cordis": "^4.0.0-rc.10"
   },
   "peerDependenciesMeta": {
     "@godcreator/gwb-skills": {
