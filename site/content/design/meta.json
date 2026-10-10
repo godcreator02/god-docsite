@@ -1,0 +1,7 @@
+{
+  "title": "设计",
+  "description": "正在做的：基础插件 gwb-docsite 与协作站新形态",
+  "icon": "Compass",
+  "root": true,
+  "pages": ["index"]
+}
