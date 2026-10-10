@@ -12,25 +12,32 @@
   background-color: color-mix(in oklab, #f5b301 55%, transparent);
 }
 
-/* 评论右侧栏：宽屏时整个页面布局往左让出这一栏，窄屏时右侧栏盖在页面上。属性名与 src/ui/comments.tsx 里的一致 */
+/*
+ * 宽屏布局：fumadocs 的 docs 布局在窗口比 97rem 宽时整体居中，左侧栏左边、目录右边各空出一截。
+ * 这里让布局铺满窗口：左侧栏贴左边，本页目录那一列贴右边、宽度固定，正文在中间那一列里居中。
+ * 评论右侧栏正好盖在目录那一列上（同样的宽度、同样的位置），打开、关上都不改布局，正文不动
+ */
 :root {
-  --docsite-comments-sidebar-width: 400px;
+  --docsite-side-column-width: 340px;
+  /* 短页面没有滚动条、长页面有，不留出它的位置时正文居中会差半个滚动条宽 */
+  scrollbar-gutter: stable;
 }
 
-/* 右侧栏打开时本页目录收起：右边那一列不占地方，目录改用正文上方的下拉条（fumadocs 窄屏时的样子） */
 @media (width >= 80rem) {
-  html[data-comments-sidebar-open] #nd-docs-layout {
-    margin-inline-end: var(--docsite-comments-sidebar-width);
-    --fd-toc-width: 0px !important;
-    --fd-toc-popover-height: 2.5rem !important;
+  #nd-docs-layout {
+    --fd-layout-width: 100%;
+    --fd-toc-width: var(--docsite-side-column-width) !important;
   }
 
+  #nd-page {
+    width: 100%;
+    max-width: calc(900px + 4rem);
+    margin-inline: auto;
+  }
+
+  /* 评论右侧栏打开时，目录被它盖住，不再响应鼠标 */
   html[data-comments-sidebar-open] #nd-toc {
-    display: none;
-  }
-
-  html[data-comments-sidebar-open] [data-toc-popover] {
-    display: block;
+    visibility: hidden;
   }
 }
 

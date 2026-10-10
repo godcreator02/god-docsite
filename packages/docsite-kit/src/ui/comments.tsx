@@ -490,8 +490,9 @@ function CommentsPanel<Entry extends CommentEntry>(props: CommentsPanelProps<Ent
         </button>
       )}
       {open && (
-        <aside data-comment-ui="" aria-label="本页评论" className="fixed inset-y-0 end-0 z-40 flex w-(--docsite-comments-sidebar-width) max-w-full flex-col border-s bg-fd-background text-fd-foreground shadow-xl xl:shadow-none">
-          <div className="flex items-center gap-1 border-b p-2 text-sm">
+        // 和左侧栏对称：同样的底色与边框，顶上一行与左侧栏的站名那一行同高（p-4 下 30px）
+        <aside data-comment-ui="" aria-label="本页评论" className="fixed inset-y-0 end-0 z-40 flex w-(--docsite-side-column-width) max-w-full flex-col border-s bg-fd-card text-sm text-fd-card-foreground shadow-xl xl:shadow-none">
+          <div className="flex h-[30px] box-content items-center gap-1 px-4 pt-4 pb-2">
             {!detail && <span className="flex items-center gap-1.5 px-2 font-medium"><MessageIcon />评论</span>}
             {detail ? (
               <button type="button" onClick={() => onDetailChange(undefined)} className="rounded-md px-2 py-1 text-fd-muted-foreground hover:bg-fd-accent">
