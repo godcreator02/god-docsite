@@ -8,7 +8,7 @@ import { source } from '../lib/source'
 import type { Route } from './+types/layout'
 
 export async function loader() {
-  return { pageTree: await source.serializePageTree(source.getPageTree()), commenter: await siteCommenter() }
+  return { pageTree: await source.serializePageTree(source.getPageTree()), commenter: siteCommenter() }
 }
 
 export default function Layout({ loaderData }: Route.ComponentProps) {

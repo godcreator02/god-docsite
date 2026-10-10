@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, type ComponentProps, type ReactNode } from 'react'
 import { createPortal } from 'react-dom'
 import { ThemeSwitch } from '@fumadocs/base-ui/layouts/shared/slots/theme-switch'
-import type { CommentElementKind, CommentEntry, Commenter, CommentRange, CommentThread } from '../comments.js'
+import type { CommentElementKind, CommentEntry, Commenter, CommentRange, CommentThread, Person } from '../comments.js'
 import { createRangeMapper } from '../comment-ranges.js'
 import { commentScopeAttribute } from '../page-text-rules.js'
 import {
@@ -18,7 +18,7 @@ import {
   placeOfThread,
   type ThreadPlace,
 } from './comment-anchors.js'
-import { CommentEditor, CommenterChip, CommentItem, postComment, recentThreadToOpen, rememberThreadToOpen, ThreadView, type CommentApi } from './comment-cards.js'
+import { CommentEditor, CommenterChip, CommentItem, PeopleContext, postComment, recentThreadToOpen, rememberThreadToOpen, ThreadView, type CommentApi } from './comment-cards.js'
 
 /** 页面正文的容器带上这个属性，评论在它里面找被批的原文：<DocsBody {...commentScopeProps}> */
 export { commentScopeAttribute }
@@ -128,6 +128,8 @@ export type PageCommentsProps<Entry extends CommentEntry> = {
   snapshots: Readonly<Record<string, string>>
   /** 写评论的人；发布站传 null，只能看 */
   commenter: Commenter | null
+  /** 站点人员列表（服务端用 sitePeople 读出来）：评论里的 author、resolvedBy 按它显示名字 */
+  people: readonly Person[]
   /** 渲染一条评论的正文；项目在这里把 MDX 组件传给编译好的正文 */
   renderBody: (entry: Entry) => ReactNode
   /** 评论接口的地址，默认 /api/comments */
@@ -206,7 +208,15 @@ function MessageIcon() {
  * 能写评论时（开发服务里），右下角「批注」打开批注模式：鼠标下的元素画虚线框，点一下批这个元素；选中文字浮出「评论」按钮，批这段文字。
  * 右下角的「评论」按钮打开右侧栏，列出这一页全部评论，分未解决、已解决，也能评论整页
  */
-export function PageComments<Entry extends CommentEntry>({ page, threads, snapshots, commenter, renderBody, apiUrl = '/api/comments', children }: PageCommentsProps<Entry>) {
+export function PageComments<Entry extends CommentEntry>({ people, ...props }: PageCommentsProps<Entry>) {
+  return (
+    <PeopleContext value={people}>
+      <CommentLayer {...props} />
+    </PeopleContext>
+  )
+}
+
+function CommentLayer<Entry extends CommentEntry>({ page, threads, snapshots, commenter, renderBody, apiUrl = '/api/comments', children }: Omit<PageCommentsProps<Entry>, 'people'>) {
   const api: CommentApi = { url: apiUrl }
   const layerRef = useRef<HTMLDivElement>(null)
   const [mapRange] = useState(createRangeMapper)

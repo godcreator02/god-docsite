@@ -34,7 +34,29 @@ icon: MessageSquare
 
 只在本机的开发服务（`pnpm dev`）里能写。发布出去的站只读：能看评论，没有输入框、「批注」和「解决」按钮。
 
-写评论的人是本机 git 的 `user.name`，侧栏底部那一栏左边显示它的头像（名字第一个字加一个由名字算出的底色）和名字。没设 `user.name` 时页面报错，写明怎么设。
+### 谁在写评论
+
+每个站自己配人员，不取机器上的信息（git 的 `user.name` 常常不是本人，也和别人对不上）。站点目录里放两个文件：
+
+| 文件 | 进不进 git | 写什么 |
+| --- | --- | --- |
+| `people.json` | 进 | 参与的人，每项 `{ "id": "zhou", "name": "小周" }`；agent 加 `"agent": true` |
+| `me.json` | 不进（写在 `.gitignore` 里），每人本机一份 | 我是谁：`{ "id": "zhou" }`，写 `people.json` 里自己的 `id` |
+
+```json title="people.json"
+[
+  { "id": "zhou", "name": "小周" },
+  { "id": "claude", "name": "Claude", "agent": true }
+]
+```
+
+评论文件的 `author`、`resolvedBy` 存 `id`，页面上显示 `name`：改名只改 `people.json`，旧评论跟着变。
+网页上没有「换成别人」的地方，写评论的人只取 `me.json`。侧栏底部那一栏左边显示这个人的头像（名字第一个字，底色由 `id` 算出，改名不变色）和名字。
+
+开发服务直接报错、写明怎么改的几种情况：没有 `people.json` 或写错了；没有 `me.json`，或者它写的 `id` 不在 `people.json` 里、是 agent；
+评论的 `author`、`resolvedBy` 不在 `people.json` 里。两个文件每次都重新读，改了不用重启开发服务。
+
+### 怎么写
 
 | 想做什么 | 怎么做 |
 | --- | --- |
@@ -71,17 +93,17 @@ Ctrl+Enter（Mac 上 ⌘+Enter）发送，Esc 取消。正在写的新评论点�
 
 ### agent 发起评论
 
-agent 没有浏览器，拿不到页面文字，调评论接口时只说批这一页上第几处的哪段文字：
+agent 没有浏览器，拿不到页面文字，调评论接口时只说批这一页上第几处的哪段文字，再用 `as` 说明自己是 `people.json` 里哪个 agent：
 
 ```text
 POST /api/comments
-op=create  page=/page-types/tsx-page  body=评论正文
+op=create  page=/page-types/tsx-page  body=评论正文  as=claude
 anchor={"quote":"export default function Page()","occurrence":1}
 ```
 
 开发服务向自己请求这一页，从渲染出的 HTML 里按同样的规则算出页面文字当快照（`pageTextOfHtml`），在里面找第 `occurrence` 处 `quote`（从 1 数），
 后面和网页上发起的一样写文件。找不到时接口回原话，如「这一页的文字里没有第 2 处「useState(0)」，一共有 1 处」。
-写评论的人照样是本机 git 的 `user.name`；要署 agent 的名字，发完把 `index.mdx` 的 `author` 改掉。
+回复、解决、编辑自己的评论也带 `as`。`as` 只给 agent 用：写了人的 `id` 时拒绝，人的身份只取 `me.json`。
 
 只在浏览器里渲染的内容，服务端渲染出的 HTML 里没有或不一样，算出的文字就和浏览器里差几个字。
 比如 TSX 页面里的代码块在浏览器里才着色，服务端那一版没有换行符。这种差别和页面改过一样，由打开页面时的差异推算吸收：
@@ -106,7 +128,7 @@ comments/
 
 ```mdx title="comments/2026-10-10-heading-levels/reply-indent.mdx"
 ---
-author: Claude
+author: claude
 createdAt: 2026-10-10T15:31:00+08:00
 ---
 
@@ -121,7 +143,7 @@ import { IndentPreview } from './indent-preview'
 
 ```mdx title="comments/2026-10-10-heading-levels/index.mdx"
 ---
-author: 小周
+author: zhou
 createdAt: 2026-10-10T15:20:00+08:00
 page: /writing
 quote: 四级标题用来给一小节里的几段起名字
@@ -136,7 +158,7 @@ status: open
 
 | 字段 | 写什么 |
 | --- | --- |
-| `author` | 谁写的 |
+| `author` | 谁写的：`people.json` 里的 `id` |
 | `createdAt` | 什么时候写的，如 `2026-10-10T15:20:00+08:00` |
 | `page` | 被批页面的地址，以 `/` 开头 |
 | `status` | `open` 或 `resolved` |
@@ -144,7 +166,7 @@ status: open
 | `element` | 批一个元素：它是哪类，见下表 |
 | `range` | 批的是快照里的第几个字到第几个字，写成 `[开始, 结束]`，从 0 数，不含结束那个字；批元素时是这个元素里第一个字到最后一个字 |
 | `openers` | 被批的内容在几层能收起的内容里时，打开每一层要点的按钮在快照里的位置，由外到里，如 `[[658, 663], [686, 693]]`；没有就不写 |
-| `resolvedBy`、`resolvedAt` | 谁、什么时候标的已解决 |
+| `resolvedBy`、`resolvedAt` | 谁（`people.json` 里的 `id`）、什么时候标的已解决 |
 
 `quote` 与 `element` 只能写一个，写了就要写 `range`；都不写就是批整页，没有快照。同一文件夹里其余的 `.mdx` 每个是一条回复，只写 `author` 与 `createdAt`。
 
@@ -229,6 +251,7 @@ status: open
 - 评论文件不是 `.mdx`
 - 文件没放在评论串自己的文件夹里，或者文件夹里只有回复、没有发起的那条
 - `page` 写的页面不存在
+- `author`、`resolvedBy` 不在 `people.json` 里
 
 网页上的操作出错（页面不存在、编辑别人写的评论、文件名不对、评论按 MDX 编译不过）时，接口回原话，显示在卡片里。
 
@@ -242,12 +265,14 @@ export const comments = defineCollections({ type: 'doc', dir: 'comments', async:
 
 `app/lib/source.ts` 用 `commentThreadsOf` 把文件分成评论串，再用 `assertCommentPagesExist` 检查批的页面在不在。
 
-写评论的人由基础包的 `siteCommenter()` 给：开发服务里返回 `currentCommenter()`（本机 git 的 `user.name`），发布出去的站返回 `null`。
+写评论的人由基础包的 `siteCommenter()` 给：开发服务里是站点目录 `me.json` 写的那个人，发布出去的站返回 `null`。
 布局路由与内容页路由的 `loader` 都返回它：布局传给 `themeSwitchWithCommenter` 显示在侧栏底部，内容页传给 `PageComments`。
-`app/lib/commenter.server.ts` 的 `pageCommentSnapshots(threads)` 调用基础包的 `commentSnapshotsOf`，读出这一页各评论串的 `snapshot.txt`；
-内容页路由的 `loader` 返回它，再传给 `PageComments` 的 `snapshots`。发布出去的站也在运行时读这些文件，`comments/` 要跟着站点一起发布。
+`app/lib/commenter.server.ts` 的 `pageCommentData(allThreads, pageThreads)` 用 `sitePeople()` 读出 `people.json`、
+用 `assertCommentAuthorsKnown` 核对全站评论的作者都在里面，再调用 `commentSnapshotsOf` 读出这一页各评论串的 `snapshot.txt`；
+内容页路由的 `loader` 返回这两样，传给 `PageComments` 的 `people` 与 `snapshots`。
+发布出去的站也在运行时读这些文件，`comments/` 与 `people.json` 要跟着站点一起发布。
 
-`app/routes/comments.ts` 是评论接口：`action` 调用 `commentRequestResponse` 写文件，`loader` 调用 `commentSourceResponse` 取原文给编辑用。
+`app/routes/comments.ts` 是评论接口：`action` 调用 `commentRequestResponse` 写文件（传入 `siteCommenter()` 与 `sitePeople()`），`loader` 调用 `commentSourceResponse` 取原文给编辑用。
 接口只改 `comments/` 里的文件，不碰 git。agent 用 `{ quote, occurrence }` 发起评论时，接口默认向开发服务自己请求那一页的 HTML；
 `commentRequestResponse` 的 `pageHtmlOf` 选项可以换成别的取法，测试里就传了假的。
 

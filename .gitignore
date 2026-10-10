@@ -4,3 +4,4 @@ dist/
 site/build/
 site/.source/
 site/.react-router/
+site/me.json

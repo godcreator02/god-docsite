@@ -1,8 +1,7 @@
-import { execFile } from 'node:child_process'
 import { randomBytes } from 'node:crypto'
+import { existsSync, readFileSync } from 'node:fs'
 import { mkdir, readFile, readdir, rm, stat, writeFile } from 'node:fs/promises'
 import path from 'node:path'
-import { promisify } from 'node:util'
 import { compile } from '@mdx-js/mdx'
 import {
   commentElementKinds,
@@ -10,42 +9,42 @@ import {
   isCommentOpeners,
   isCommentRange,
   isThreadHeadFile,
+  meFile,
+  parseMe,
+  parsePeople,
+  peopleFile,
   snapshotMismatchOf,
   type CommentElementKind,
   type Commenter,
   type CommentRange,
   type CommentThreadFrontmatter,
+  type Person,
 } from '../comments.js'
 import { pageTextOfHtml } from './page-text.js'
 
-const commenterOfDir = new Map<string, Promise<Commenter>>()
-
-/** 本机 git 的 user.name 当作写评论的人；没设时报错，写明怎么设 */
-export function currentCommenter(cwd = process.cwd()): Promise<Commenter> {
-  let commenter = commenterOfDir.get(cwd)
-  if (!commenter) {
-    commenter = promisify(execFile)('git', ['config', 'user.name'], { cwd }).then(
-      ({ stdout }) => {
-        const name = stdout.trim()
-        if (name === '') throw new Error('git 的 user.name 是空的：运行 git config --global user.name "你的名字"')
-        return { name }
-      },
-      (error: unknown) => {
-        commenterOfDir.delete(cwd)
-        throw new Error(`读不到 git 的 user.name，评论不知道是谁写的：运行 git config --global user.name "你的名字"（${String(error)}）`)
-      },
-    )
-    commenterOfDir.set(cwd, commenter)
+function jsonFileOf(file: string, missing: string) {
+  if (!existsSync(file)) throw new Error(missing)
+  try {
+    return JSON.parse(readFileSync(file, 'utf8')) as unknown
+  } catch (error) {
+    throw new Error(`${file} 不是 JSON：${String(error)}`)
   }
-  return commenter
+}
+
+/** 站点人员列表：站点目录里的 people.json，每次都重新读，改了不用重启开发服务 */
+export function sitePeople(siteDir = process.cwd()): Person[] {
+  const file = path.join(siteDir, peopleFile)
+  return parsePeople(jsonFileOf(file, `站点目录里没有 ${peopleFile}：写一个数组列出参与的人，每项 { "id": "zhou", "name": "小周" }，agent 加 "agent": true`))
 }
 
 /**
- * 这个站写评论的人：开发服务里是本机 git 的 user.name；发布出去的站（react-router-serve）只读，返回 null。
+ * 这个站写评论的人：开发服务里是站点目录 me.json 写的那个人（me.json 不进 git，每人本机一份）；发布出去的站（react-router-serve）只读，返回 null。
  * import.meta.env.DEV 由 Vite 编译时换掉：基础包和站点代码一起经 Vite 处理
  */
-export async function siteCommenter(): Promise<Commenter | null> {
-  return import.meta.env.DEV ? await currentCommenter() : null
+export function siteCommenter(siteDir = process.cwd()): Commenter | null {
+  if (!import.meta.env.DEV) return null
+  const file = path.join(siteDir, meFile)
+  return parseMe(jsonFileOf(file, `站点目录里没有 ${meFile}：写 { "id": "<${peopleFile} 里你的 id>" } 说明你是谁，这个文件不进 git`), sitePeople(siteDir))
 }
 
 /** 网页能做的几件事 */
@@ -237,10 +236,24 @@ function frontmatterValue(frontmatter: string, key: string) {
   return raw
 }
 
-async function assertAuthor(file: string, commenter: Commenter, action: string) {
+async function assertAuthor(file: string, actor: Person, action: string) {
   const { frontmatter } = splitComment(await readFile(file, 'utf8'), file)
   const author = frontmatterValue(frontmatter, 'author')
-  if (author !== commenter.name) throw new RejectedRequest(403, `只有作者 ${author} 能${action}这条评论`)
+  if (author !== actor.id) throw new RejectedRequest(403, `只有作者 ${author} 能${action}这条评论`)
+}
+
+/**
+ * 这次是谁在操作：表单带 as 时是 people.json 里那个 agent（agent 调接口时说明自己是谁），不带时是 me.json 写的那个人。
+ * as 只给 agent 用：人不能经接口换成别人
+ */
+function actorOf(form: FormData, commenter: Commenter, people: readonly Person[]): Person {
+  const as = form.get('as')
+  if (as === null) return commenter
+  if (typeof as !== 'string') throw new RejectedRequest(400, 'as 要是 people.json 里一个 agent 的 id')
+  const person = people.find((candidate) => candidate.id === as)
+  if (!person) throw new RejectedRequest(400, `${peopleFile} 里没有 ${as}`)
+  if (!person.agent) throw new RejectedRequest(403, `as 只给 agent 用：${as} 不是 agent，人的身份取站点目录里的 ${meFile}`)
+  return person
 }
 
 /** frontmatter 里改掉、去掉几项，其余照原样留着 */
@@ -257,8 +270,10 @@ function withFrontmatterFields(frontmatter: string, changes: Record<string, stri
 }
 
 type CommentRequestOptions = {
-  /** 写评论的人；发布站传 null，只读 */
+  /** 写评论的人（siteCommenter）；发布站传 null，只读 */
   commenter: Commenter | null
+  /** 站点人员列表（sitePeople）：agent 用 as 说明自己是谁时在这里找 */
+  people: readonly Person[]
   /** 站点全部页面的地址：新评论串批的页面要在里面 */
   pageUrls: readonly string[]
   /** 评论目录，默认是站点目录下的 comments */
@@ -267,9 +282,10 @@ type CommentRequestOptions = {
   pageHtmlOf?: PageHtmlOf
 }
 
-async function handleForm(form: FormData, { commenter, pageUrls, commentsDir, pageHtmlOf }: Required<CommentRequestOptions> & { commenter: Commenter }) {
+async function handleForm(form: FormData, { commenter, people, pageUrls, commentsDir, pageHtmlOf }: Required<CommentRequestOptions> & { commenter: Commenter }) {
   const operation = requiredField(form, 'op') as CommentOperation
   if (!operations.includes(operation)) throw new RejectedRequest(400, `op 要是 ${operations.join('、')} 之一`)
+  const actor = actorOf(form, commenter, people)
   const now = new Date()
   const createdAt = now.toISOString()
 
@@ -283,7 +299,7 @@ async function handleForm(form: FormData, { commenter, pageUrls, commentsDir, pa
     await mkdir(dir, { recursive: true })
     await writePastedImages(form, dir)
     if (anchor.snapshot !== undefined) await writeFile(path.join(dir, commentSnapshotFile), anchor.snapshot)
-    await writeFile(path.join(dir, 'index.mdx'), `${frontmatterOf({ author: commenter.name, createdAt, page, status: 'open', ...anchor.fields })}\n${body}\n`)
+    await writeFile(path.join(dir, 'index.mdx'), `${frontmatterOf({ author: actor.id, createdAt, page, status: 'open', ...anchor.fields })}\n${body}\n`)
     return { thread, file: 'index.mdx' }
   }
 
@@ -292,19 +308,19 @@ async function handleForm(form: FormData, { commenter, pageUrls, commentsDir, pa
     const body = await bodyOf(form)
     await writePastedImages(form, dir)
     const file = newReplyFile(now)
-    await writeFile(path.join(dir, file), `${frontmatterOf({ author: commenter.name, createdAt })}\n${body}\n`)
+    await writeFile(path.join(dir, file), `${frontmatterOf({ author: actor.id, createdAt })}\n${body}\n`)
     return { thread, file }
   }
   if (operation === 'resolve' || operation === 'reopen') {
     const head = await threadHeadFile(dir)
     const { frontmatter, body } = splitComment(await readFile(head, 'utf8'), head)
-    const changes = operation === 'resolve' ? { status: 'resolved', resolvedBy: commenter.name, resolvedAt: createdAt } : { status: 'open', resolvedBy: undefined, resolvedAt: undefined }
+    const changes = operation === 'resolve' ? { status: 'resolved', resolvedBy: actor.id, resolvedAt: createdAt } : { status: 'open', resolvedBy: undefined, resolvedAt: undefined }
     await writeFile(head, `${withFrontmatterFields(frontmatter, changes)}\n${body}`)
     return { thread, file: path.basename(head) }
   }
   const target = await commentFileOf(dir, form)
   if (operation === 'edit') {
-    await assertAuthor(target, commenter, '编辑')
+    await assertAuthor(target, actor, '编辑')
     const body = await bodyOf(form)
     await writePastedImages(form, dir)
     const { frontmatter } = splitComment(await readFile(target, 'utf8'), target)
@@ -312,7 +328,7 @@ async function handleForm(form: FormData, { commenter, pageUrls, commentsDir, pa
     return { thread, file: path.basename(target) }
   }
   // 删除：删发起的那条就是删整串，只有发起人能删
-  await assertAuthor(target, commenter, '删除')
+  await assertAuthor(target, actor, '删除')
   if (isThreadHeadFile(target)) await rm(dir, { recursive: true })
   else await rm(target)
   return { thread, file: path.basename(target) }
@@ -320,7 +336,8 @@ async function handleForm(form: FormData, { commenter, pageUrls, commentsDir, pa
 
 /**
  * 评论接口的 POST：项目 routes.ts 里 route('api/comments', …) 的 action 调它。
- * 表单字段：op（create、reply、edit、delete、resolve、reopen）、page 与 anchor（create）、thread、file（edit、delete）、body、image（粘贴的图片，可多个）。
+ * 表单字段：op（create、reply、edit、delete、resolve、reopen）、page 与 anchor（create）、thread、file（edit、delete）、body、image（粘贴的图片，可多个），
+ * as（agent 说明自己是 people.json 里哪个 agent；人不带，身份取 me.json）。
  * anchor 是网页传的 { quote, range, snapshot, openers? }、{ element, range, snapshot, openers? }、{}，或 agent 传的 { quote, occurrence }（occurrence 从 1 数）。
  * 网页传来的 snapshot 是页面文字的快照；agent 那种由服务端取这一页渲染出的 HTML 算出页面文字当快照。快照存成评论串文件夹里的 snapshot.txt。
  * 只改 comments/ 里的文件，不碰 git；开发服务看到文件变了自己刷新页面

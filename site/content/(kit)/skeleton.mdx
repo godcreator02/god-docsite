@@ -19,14 +19,16 @@ icon: FolderTree
 | `app/routes.ts` | 路由表：`api/search` 搜索，`api/content/*` 送内容文件，`api/comments` 写评论，首页 `/` 与其余地址都交给内容页（`*` 不匹配 `/`，首页另写一条 `index` 路由） |
 | `app/lib/collections.ts` | 列出页面文件与评论文件：MDX 页面用 `defineDocs`，TSX 页面用 `import.meta.glob` 按需加载组件，评论用 `defineCollections` |
 | `app/lib/source.ts` | 把三种页面交给 fumadocs 的 `loader()`，进同一棵页面树；`lucideIconsPlugin()` 把 `icon` 里写的 lucide 图标名换成图标；检查页面有没有占用 `api` 这类地址、评论批的页面在不在 |
-| `app/lib/commenter.server.ts` | 读这一页各评论串的页面文字快照（`snapshot.txt`），交给内容页 |
-| `app/routes/layout.tsx` | 整站布局：docs 的 `DocsLayout`，左侧是页面树，侧栏里的下拉框切换 `"root": true` 的文件夹；`slots.themeSwitch` 用 `themeSwitchWithCommenter`，侧栏底部显示写评论的人（`siteCommenter()`：开发服务里是本机 git 的 `user.name`，发布出去的站是 `null`） |
+| `app/lib/commenter.server.ts` | 读人员列表、核对评论作者都在里面，读这一页各评论串的页面文字快照（`snapshot.txt`），交给内容页 |
+| `app/routes/layout.tsx` | 整站布局：docs 的 `DocsLayout`，左侧是页面树，侧栏里的下拉框切换 `"root": true` 的文件夹；`slots.themeSwitch` 用 `themeSwitchWithCommenter`，侧栏底部显示写评论的人（`siteCommenter()`：开发服务里是 `me.json` 写的那个人，发布出去的站是 `null`） |
 | `app/routes/page.tsx` | 内容页：用 docs 的页面组件，按页面类型渲染 MDX 正文、TSX 组件或放 HTML 的 iframe；正文外面套 `PageComments` 显示和写评论 |
 | `app/routes/comments.ts` | 评论接口：POST 调用 `commentRequestResponse` 写 `comments/` 里的文件，GET 调用 `commentSourceResponse` 取一条评论的原文给编辑用 |
 | `app/routes/search.ts` | 搜索接口，调用 `siteSearchServer`，三种页面一起搜 |
 | `app/routes/content-file.ts` | 调用 `contentFileResponse`，把 `content/` 里的文件原样送出 |
 | `content/` | 页面放在这里，每个文件夹的 `meta.json` 写标题和页面顺序；写了 `"root": true` 的文件夹是侧栏里切换下拉框的一项 |
 | `comments/` | 评论放在这里，一个评论串一个文件夹，见[评论](/comments) |
+| `people.json` | 这个站的人员列表：评论署名用的 `id` 与显示的名字，agent 也在里面，见[评论](/comments#谁在写评论) |
+| `me.json` | 我是谁：`{ "id": "…" }`，不进 git，每人本机一份；没有它开发服务报错 |
 
 ## 用基础包源码还是构建产物
 

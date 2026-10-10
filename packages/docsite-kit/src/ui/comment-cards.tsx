@@ -1,5 +1,5 @@
-import { Component, Suspense, useRef, useState, type ClipboardEvent, type KeyboardEvent, type ReactNode } from 'react'
-import { commentFileName, type CommentEntry, type Commenter, type CommentThread } from '../comments.js'
+import { Component, createContext, Suspense, useContext, useRef, useState, type ClipboardEvent, type KeyboardEvent, type ReactNode } from 'react'
+import { commentFileName, personOf, type CommentEntry, type Commenter, type CommentThread, type Person } from '../comments.js'
 
 /** 评论接口：项目 routes.ts 里 route('api/comments', …) 的地址 */
 export type CommentApi = { url: string }
@@ -46,21 +46,30 @@ export function recentThreadToOpen(): string | undefined {
   }
 }
 
-function hueOfName(name: string) {
+/** 站点人员列表：PageComments 提供，评论卡片按 author、resolvedBy 里的 id 取名字 */
+export const PeopleContext = createContext<readonly Person[] | null>(null)
+
+function usePeople() {
+  const people = useContext(PeopleContext)
+  if (!people) throw new Error('评论卡片要放在 PageComments 里面：人员列表由它提供')
+  return people
+}
+
+function hueOfId(id: string) {
   let hash = 0
-  for (const char of name) hash = (hash * 31 + char.codePointAt(0)!) % 360
+  for (const char of id) hash = (hash * 31 + char.codePointAt(0)!) % 360
   return hash
 }
 
-/** 头像：名字的第一个字加一个由名字算出的底色，不联网取图 */
-export function Avatar({ name, size = 24 }: { name: string; size?: number }) {
+/** 头像：名字的第一个字加一个由 id 算出的底色（改名不变色），不联网取图 */
+export function Avatar({ person, size = 24 }: { person: Person; size?: number }) {
   return (
     <span
       aria-hidden="true"
       className="inline-flex shrink-0 items-center justify-center rounded-full font-medium text-white"
-      style={{ width: size, height: size, fontSize: size * 0.45, backgroundColor: `hsl(${hueOfName(name)} 45% 45%)` }}
+      style={{ width: size, height: size, fontSize: size * 0.45, backgroundColor: `hsl(${hueOfId(person.id)} 45% 45%)` }}
     >
-      {[...name][0]!.toUpperCase()}
+      {[...person.name][0]!.toUpperCase()}
     </span>
   )
 }
@@ -68,8 +77,8 @@ export function Avatar({ name, size = 24 }: { name: string; size?: number }) {
 /** 侧栏底部显示的当前身份 */
 export function CommenterChip({ commenter }: { commenter: Commenter }) {
   return (
-    <span className="flex min-w-0 items-center gap-2 px-1.5 text-sm text-fd-foreground" title={`评论署名：${commenter.name}（本机 git 的 user.name）`}>
-      <Avatar name={commenter.name} size={22} />
+    <span className="flex min-w-0 items-center gap-2 px-1.5 text-sm text-fd-foreground" title={`评论署名：${commenter.name}（站点目录 me.json 写的 ${commenter.id}）`}>
+      <Avatar person={commenter} size={22} />
       <span className="truncate">{commenter.name}</span>
     </span>
   )
@@ -213,7 +222,8 @@ export function CommentItem<Entry extends CommentEntry>({ entry, thread, renderB
   const [editingText, setEditingText] = useState<string>()
   const [error, setError] = useState<string>()
   const file = commentFileName(entry)
-  const isOwn = commenter !== null && commenter.name === entry.author && !clamped
+  const author = personOf(usePeople(), entry.author)
+  const isOwn = commenter !== null && commenter.id === entry.author && !clamped
   const startEditing = async () => {
     setError(undefined)
     try {
@@ -234,10 +244,10 @@ export function CommentItem<Entry extends CommentEntry>({ entry, thread, renderB
   }
   return (
     <div className="group/comment flex gap-2">
-      <Avatar name={entry.author} />
+      <Avatar person={author} />
       <div className="min-w-0 flex-1">
         <div className="flex items-baseline gap-2 text-xs">
-          <span className="font-medium text-fd-foreground">{entry.author}</span>
+          <span className="font-medium text-fd-foreground">{author.name}</span>
           <time dateTime={entry.createdAt} title={fullTime.format(new Date(entry.createdAt))} className="text-fd-muted-foreground">
             {relativeTime(entry.createdAt)}
           </time>
@@ -295,6 +305,7 @@ type ThreadViewProps<Entry extends CommentEntry> = {
  */
 export function ThreadView<Entry extends CommentEntry>({ thread, renderBody, commenter, api, note, onClose }: ThreadViewProps<Entry>) {
   const { head, replies } = thread
+  const people = usePeople()
   const [repliesShown, setRepliesShown] = useState(replies.length <= 1)
   const [error, setError] = useState<string>()
   const resolved = head.status === 'resolved'
@@ -311,7 +322,7 @@ export function ThreadView<Entry extends CommentEntry>({ thread, renderBody, com
     <div className="flex flex-col gap-3">
       <div className="flex items-center gap-2 text-xs">
         <span className={`rounded px-1.5 py-0.5 ${resolved ? 'bg-fd-muted text-fd-muted-foreground' : 'bg-amber-500/15 text-amber-700 dark:text-amber-300'}`}>
-          {resolved ? `已解决${head.resolvedBy ? ` · ${head.resolvedBy}` : ''}` : '未解决'}
+          {resolved ? `已解决${head.resolvedBy ? ` · ${personOf(people, head.resolvedBy).name}` : ''}` : '未解决'}
         </span>
         <span className="ms-auto flex gap-1">
           {commenter && (
@@ -339,7 +350,7 @@ export function ThreadView<Entry extends CommentEntry>({ thread, renderBody, com
         ))}
       {commenter && (
         <div className="flex gap-2">
-          <Avatar name={commenter.name} />
+          <Avatar person={commenter} />
           <div className="min-w-0 flex-1">
             <CommentEditor
               placeholder="回复…"

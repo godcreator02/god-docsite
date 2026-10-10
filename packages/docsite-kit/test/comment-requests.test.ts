@@ -2,7 +2,14 @@ import { mkdtemp, readFile, readdir, rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import path from 'node:path'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
+import { personOf, type Person } from '../src/people.js'
 import { commentRequestResponse, commentSnapshotsOf, commentSourceResponse } from '../src/server/comments.js'
+
+const people: Person[] = [
+  { id: 'zhou', name: '小周' },
+  { id: 'li', name: '小李' },
+  { id: 'claude', name: 'Claude', agent: true },
+]
 
 let commentsDir: string
 
@@ -14,28 +21,30 @@ afterEach(async () => {
   await rm(commentsDir, { recursive: true })
 })
 
-function post(fields: Record<string, string>, as = '小周', images: File[] = []) {
+/** me 是这台机器 me.json 写的人 */
+function post(fields: Record<string, string>, me = 'zhou', images: File[] = []) {
   const form = new FormData()
   for (const [key, value] of Object.entries(fields)) form.set(key, value)
   for (const image of images) form.append('image', image)
-  return commentRequestResponse(new Request('http://site/api/comments', { method: 'POST', body: form }), { commenter: { name: as }, pageUrls: ['/writing'], commentsDir })
+  return commentRequestResponse(new Request('http://site/api/comments', { method: 'POST', body: form }), { commenter: personOf(people, me), people, pageUrls: ['/writing'], commentsDir })
 }
 
-/** agent 发评论：页面 HTML 由假的 pageHtmlOf 给出，记下它被问到的页面 */
+/** agent 用 as 说明自己是谁、按原文与第几处发评论：页面 HTML 由假的 pageHtmlOf 给出，记下它被问到的页面 */
 function postAsAgent(anchor: unknown, html: string) {
   const askedPages: string[] = []
   const form = new FormData()
-  for (const [key, value] of Object.entries({ op: 'create', page: '/writing', anchor: JSON.stringify(anchor), body: '看这里' })) form.set(key, value)
+  for (const [key, value] of Object.entries({ op: 'create', page: '/writing', anchor: JSON.stringify(anchor), body: '看这里', as: 'claude' })) form.set(key, value)
   const pageHtmlOf = async (page: string) => {
     askedPages.push(page)
     return html
   }
-  const response = commentRequestResponse(new Request('http://site/api/comments', { method: 'POST', body: form }), { commenter: { name: 'Claude' }, pageUrls: ['/writing'], commentsDir, pageHtmlOf })
+  const options = { commenter: personOf(people, 'zhou'), people, pageUrls: ['/writing'], commentsDir, pageHtmlOf }
+  const response = commentRequestResponse(new Request('http://site/api/comments', { method: 'POST', body: form }), options)
   return { response, askedPages }
 }
 
 async function created(fields: Record<string, string>, images: File[] = []) {
-  const response = await post({ op: 'create', page: '/writing', ...fields }, '小周', images)
+  const response = await post({ op: 'create', page: '/writing', ...fields }, 'zhou', images)
   expect(response.status).toBe(200)
   return (await response.json()) as { thread: string; file: string }
 }
@@ -49,7 +58,7 @@ describe('评论接口', () => {
     expect(file).toBe('index.mdx')
     expect(thread).toMatch(/^\d{4}-\d{2}-\d{2}-[0-9a-f]{6}$/)
     const source = await readFile(path.join(commentsDir, thread, 'index.mdx'), 'utf8')
-    expect(source).toMatch(/^---\nauthor: "小周"\ncreatedAt: "[^"]+"\npage: "\/writing"\nstatus: "open"\nquote: "原文"\nrange: \[1,3\]\n---\n\n/)
+    expect(source).toMatch(/^---\nauthor: "zhou"\ncreatedAt: "[^"]+"\npage: "\/writing"\nstatus: "open"\nquote: "原文"\nrange: \[1,3\]\n---\n\n/)
     expect(source.endsWith(`---\n\n${body}\n`)).toBe(true)
     expect(await readFile(path.join(commentsDir, thread, 'snapshot.txt'), 'utf8')).toBe('前原文后\n下一段')
     expect((await readdir(path.join(commentsDir, thread))).sort()).toEqual(['index.mdx', 'paste-abc-0.png', 'snapshot.txt'])
@@ -90,7 +99,7 @@ describe('评论接口', () => {
     const { thread } = (await result.json()) as { thread: string }
     expect(askedPages).toEqual(['/writing'])
     expect(await readFile(path.join(commentsDir, thread, 'snapshot.txt'), 'utf8')).toBe('原文一再看原文二')
-    expect(await readFile(path.join(commentsDir, thread, 'index.mdx'), 'utf8')).toMatch(/^---\nauthor: "Claude"\ncreatedAt: "[^"]+"\npage: "\/writing"\nstatus: "open"\nquote: "原文"\nrange: \[5,7\]\n---\n\n看这里\n$/)
+    expect(await readFile(path.join(commentsDir, thread, 'index.mdx'), 'utf8')).toMatch(/^---\nauthor: "claude"\ncreatedAt: "[^"]+"\npage: "\/writing"\nstatus: "open"\nquote: "原文"\nrange: \[5,7\]\n---\n\n看这里\n$/)
   })
 
   it('agent 要的第 occurrence 处不存在、occurrence 不是从 1 数的整数、多带了别的项时拒绝', async () => {
@@ -117,15 +126,15 @@ describe('评论接口', () => {
     )
   })
 
-  it('回复、解决、重新打开：回复是新文件，解决改 status 并记下是谁', async () => {
+  it('回复、解决、重新打开：回复是新文件，解决改 status 并记下是谁；agent 用 as 说明自己是谁', async () => {
     const { thread } = await created({ anchor: '{}', body: '整页' })
-    const replied = await post({ op: 'reply', thread, body: '收到' }, 'Claude')
+    const replied = await post({ op: 'reply', thread, body: '收到', as: 'claude' })
     const { file } = (await replied.json()) as { file: string }
-    expect(await readFile(path.join(commentsDir, thread, file), 'utf8')).toMatch(/^---\nauthor: "Claude"\ncreatedAt: "[^"]+"\n---\n\n收到\n$/)
+    expect(await readFile(path.join(commentsDir, thread, file), 'utf8')).toMatch(/^---\nauthor: "claude"\ncreatedAt: "[^"]+"\n---\n\n收到\n$/)
 
-    expect((await post({ op: 'resolve', thread }, 'Claude')).status).toBe(200)
+    expect((await post({ op: 'resolve', thread }, 'li')).status).toBe(200)
     const resolved = await readFile(path.join(commentsDir, thread, 'index.mdx'), 'utf8')
-    expect(resolved).toContain('status: "resolved"\nresolvedBy: "Claude"\nresolvedAt: "')
+    expect(resolved).toContain('status: "resolved"\nresolvedBy: "li"\nresolvedAt: "')
     expect((await post({ op: 'reopen', thread })).status).toBe(200)
     const reopened = await readFile(path.join(commentsDir, thread, 'index.mdx'), 'utf8')
     expect(reopened).toContain('status: "open"')
@@ -133,9 +142,19 @@ describe('评论接口', () => {
     expect(reopened).toMatch(/\n---\n\n整页\n$/)
   })
 
+  it('as 只给 agent 用：人不能经接口换成别人，as 写了人员列表里没有的人时拒绝，不写文件', async () => {
+    const asPerson = await post({ op: 'create', page: '/writing', anchor: '{}', body: 'x', as: 'li' })
+    expect(asPerson.status).toBe(403)
+    expect(await asPerson.text()).toBe('as 只给 agent 用：li 不是 agent，人的身份取站点目录里的 me.json')
+    const asStranger = await post({ op: 'create', page: '/writing', anchor: '{}', body: 'x', as: 'nobody' })
+    expect(asStranger.status).toBe(400)
+    expect(await asStranger.text()).toBe('people.json 里没有 nobody')
+    expect(await readdir(commentsDir)).toEqual([])
+  })
+
   it('只有作者能编辑、删除；删发起的那条就是删整串', async () => {
     const { thread } = await created({ anchor: '{}', body: '原话' })
-    expect(await (await post({ op: 'edit', thread, file: 'index.mdx', body: '别人改' }, '小李')).text()).toBe('只有作者 小周 能编辑这条评论')
+    expect(await (await post({ op: 'edit', thread, file: 'index.mdx', body: '别人改' }, 'li')).text()).toBe('只有作者 zhou 能编辑这条评论')
     expect((await post({ op: 'edit', thread, file: 'index.mdx', body: '改过 `a<b`' })).status).toBe(200)
     const source = await commentSourceResponse(new Request(`http://site/api/comments?thread=${thread}&file=index.mdx`), commentsDir)
     expect(await source.text()).toBe('改过 `a<b`')
@@ -144,7 +163,7 @@ describe('评论接口', () => {
   })
 
   it('发布站只读；页面不存在、op 写错、文件名带路径时拒绝', async () => {
-    const readOnly = await commentRequestResponse(new Request('http://site/api/comments', { method: 'POST', body: new FormData() }), { commenter: null, pageUrls: [], commentsDir })
+    const readOnly = await commentRequestResponse(new Request('http://site/api/comments', { method: 'POST', body: new FormData() }), { commenter: null, people, pageUrls: [], commentsDir })
     expect(readOnly.status).toBe(403)
     expect(await (await post({ op: 'create', page: '/gone', anchor: '{}', body: 'x' })).text()).toBe('没有页面 /gone')
     expect((await post({ op: 'move', thread: 'a' })).status).toBe(400)

@@ -1,4 +1,7 @@
 import type { CommentRange } from './comment-ranges.js'
+import { peopleFile, type Person } from './people.js'
+
+export { meFile, parseMe, parsePeople, peopleFile, personOf, type Person } from './people.js'
 
 /**
  * 评论的存储格式。一个评论串一个文件夹：index.mdx 是发起的那条，frontmatter 写它批的是哪一页、哪段原文或哪个元素；
@@ -11,8 +14,8 @@ export type { CommentRange }
 
 export type CommentStatus = 'open' | 'resolved'
 
-/** 写评论的人。开发服务里取本机 git 的 user.name；发布站只读，没有写评论的人 */
-export type Commenter = { name: string }
+/** 写评论的人：开发服务里是站点目录 me.json 写的那个人；发布站只读，没有写评论的人 */
+export type Commenter = Person
 
 /** 批一个元素时，那个元素是哪类：图片（含 SVG、画布、视频）、公式、代码块、表格、一段文字或其中的行内元素、其余的组件 */
 export type CommentElementKind = 'image' | 'formula' | 'code' | 'table' | 'text' | 'component'
@@ -227,6 +230,20 @@ export function assertCommentPagesExist(threads: ReadonlyArray<CommentThread<Com
   const known = new Set(pageUrls)
   const orphans = threads.filter((thread) => !known.has(thread.head.page))
   if (orphans.length > 0) throw new Error(orphans.map((thread) => `评论串 ${thread.id} 批的页面 ${thread.head.page} 不存在`).join('\n'))
+}
+
+/** 评论的 author、resolvedBy 不在人员列表里时报错，一次列出全部 */
+export function assertCommentAuthorsKnown(threads: ReadonlyArray<CommentThread<CommentEntry>>, people: readonly Person[]) {
+  const known = new Set(people.map((person) => person.id))
+  const problems: string[] = []
+  for (const thread of threads) {
+    for (const entry of [thread.head, ...thread.replies]) {
+      if (!known.has(entry.author)) problems.push(`${entry.info.path} 的 author ${entry.author} 不在 ${peopleFile} 里`)
+    }
+    const { resolvedBy } = thread.head
+    if (resolvedBy !== undefined && !known.has(resolvedBy)) problems.push(`${thread.head.info.path} 的 resolvedBy ${resolvedBy} 不在 ${peopleFile} 里`)
+  }
+  if (problems.length > 0) throw new Error(problems.join('\n'))
 }
 
 /** frontmatter 与快照对不上时说明哪里不对：range 或 openers 超出了快照，或者 quote 不等于快照里 range 那一段 */
