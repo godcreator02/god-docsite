@@ -2,7 +2,7 @@ import { readFile } from 'node:fs/promises'
 import path from 'node:path'
 
 export { siteSearchServer } from './search.js'
-export { commentRequestResponse, commentSnapshotsOf, commentSourceResponse, currentCommenter, type CommentOperation } from './comments.js'
+export { commentRequestResponse, commentSnapshotsOf, commentSourceResponse, currentCommenter, siteCommenter, type CommentOperation } from './comments.js'
 export { pageTextOfHtml } from './page-text.js'
 
 /**

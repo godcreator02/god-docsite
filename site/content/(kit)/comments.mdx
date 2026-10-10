@@ -1,10 +1,11 @@
 ---
 title: 评论
-description: 选中文字或点一个元素发起评论，被批的地方标黄或画框，点开弹出评论卡片；评论存成文件，一个评论串一个文件夹
+description: 打开批注模式，选中文字或点一个元素发起评论，被批的地方标黄或画框，点开弹出评论卡片；评论存成 MDX 文件，一个评论串一个文件夹
 icon: MessageSquare
 ---
 
-评论的做法照 Notion：在正文里选中一段文字，或者打开批注模式点一个元素（一张卡片、一个代码块、一张图片、列表里的一项），就能发起评论；
+评论的做法照 Notion：打开右下角的批注模式，在正文里选中一段文字，或者点一个元素（一张卡片、一个代码块、一张图片、列表里的一项），就能发起评论；
+平时选中文字不弹按钮，方便复制。
 被批的文字标黄，原文末尾插着评论数按钮；被批的图片、代码块、表格、组件画框，评论数按钮在它右上角。点按钮弹出这串评论。
 右下角的「评论」按钮打开右侧栏，列出这一页全部评论。
 
@@ -21,7 +22,7 @@ icon: MessageSquare
 - **右侧栏**：右下角「评论」按钮打开，分「未解决」「已解决」两栏。点一条找得到原文的评论，正文滚到原文、弹出卡片；
   被批的内容收在没选中的标签页、收起的折叠块或文件夹里时，这条写着「在收起的「npm」里」，点它先替你点开再滚过去（见[被批的内容收起来了](#被批的内容收起来了)）；
   整页评论、已解决的、原文找不到了的，在右侧栏里展开看。宽屏时右侧栏和本页目录那一列一样宽、在同一个位置，
-  打开时盖住目录，正文的位置和宽度不变；窄屏时右侧栏盖在页面上
+  打开时盖住目录，正文的位置和宽度不变，本页目录改成标题上方的下拉条；窄屏时右侧栏盖在页面上
 
 插进正文的评论数按钮是评论自己放进去的：只在原文结尾处切开那一个文字节点，撤掉时拼回原来那个节点；
 取页面文字时跳过这些按钮里的字，选区带上了按钮也不会把数字记进原文。
@@ -37,8 +38,8 @@ icon: MessageSquare
 
 | 想做什么 | 怎么做 |
 | --- | --- |
-| 批一段文字 | 在正文里选中它，选区上方浮出「评论」按钮；可以跨段落、跨列表项，也能批标题 |
-| 批一个元素 | 右下角「批注」打开批注模式，鼠标下的元素画虚线框、标出它是什么，点一下就批它；Esc 或再点「批注」退出 |
+| 批一段文字 | 右下角「批注」打开批注模式，在正文里选中它，选区上方浮出「评论」按钮；可以跨段落、跨列表项，也能批标题 |
+| 批一个元素 | 打开批注模式，鼠标下的元素画虚线框、标出它是什么，点一下就批它；Esc 或再点「批注」退出 |
 | 批整页 | 右侧栏顶上的「评论整页」 |
 | 回复 | 卡片底部的回复框 |
 | 编辑、删除 | 鼠标移到自己写的那条上，名字后面出现「编辑」「删除」；删发起的那条就是删整串 |
@@ -241,16 +242,16 @@ export const comments = defineCollections({ type: 'doc', dir: 'comments', async:
 
 `app/lib/source.ts` 用 `commentThreadsOf` 把文件分成评论串，再用 `assertCommentPagesExist` 检查批的页面在不在。
 
-`app/lib/commenter.server.ts` 的 `pageCommenter()` 在开发服务里返回 `currentCommenter()`（本机 git 的 `user.name`），发布出去的站返回 `null`。
+写评论的人由基础包的 `siteCommenter()` 给：开发服务里返回 `currentCommenter()`（本机 git 的 `user.name`），发布出去的站返回 `null`。
 布局路由与内容页路由的 `loader` 都返回它：布局传给 `themeSwitchWithCommenter` 显示在侧栏底部，内容页传给 `PageComments`。
-同一个文件里的 `pageCommentSnapshots(threads)` 调用基础包的 `commentSnapshotsOf`，读出这一页各评论串的 `snapshot.txt`；
+`app/lib/commenter.server.ts` 的 `pageCommentSnapshots(threads)` 调用基础包的 `commentSnapshotsOf`，读出这一页各评论串的 `snapshot.txt`；
 内容页路由的 `loader` 返回它，再传给 `PageComments` 的 `snapshots`。发布出去的站也在运行时读这些文件，`comments/` 要跟着站点一起发布。
 
 `app/routes/comments.ts` 是评论接口：`action` 调用 `commentRequestResponse` 写文件，`loader` 调用 `commentSourceResponse` 取原文给编辑用。
 接口只改 `comments/` 里的文件，不碰 git。agent 用 `{ quote, occurrence }` 发起评论时，接口默认向开发服务自己请求那一页的 HTML；
 `commentRequestResponse` 的 `pageHtmlOf` 选项可以换成别的取法，测试里就传了假的。
 
-`app/routes/page.tsx` 按页面地址取出这一页的评论串，正文外面套 `PageComments`；正文的容器要带上 `commentScopeProps`，评论在它里面取页面文字：
+`app/routes/page.tsx` 用 `commentThreadsByPage` 按页面地址取出这一页的评论串，正文外面套 `PageComments`；正文的容器要带上 `commentScopeProps`，评论在它里面取页面文字：
 
 ```tsx title="app/routes/page.tsx"
 <DocsPage toc={toc}>

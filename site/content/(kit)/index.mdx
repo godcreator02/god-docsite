@@ -16,16 +16,17 @@ icon: BookOpen
 | --- | --- | --- |
 | `./vite` | `vite.config.ts` | 开发服务插件 `docsite()`，见[开发服务插件](/dev-plugin) |
 | `./page-sources` | `app/lib/source.ts`、页面路由 | TSX 页面与 HTML 页面的来源、保留地址检查、内容文件的地址，见[三种页面](/page-types) |
-| `./comments` | `app/lib/collections.ts`、`app/lib/source.ts`、页面路由 | 评论文件的 frontmatter 校验、按文件夹分成评论串、检查评论批的页面在不在，见[评论](/comments) |
-| `./server` | `app/routes/search.ts`、`app/routes/content-file.ts`、`app/routes/comments.ts`、`app/lib/commenter.server.ts` | 中文站点用的搜索接口 `siteSearchServer`；把 `content/` 里的文件原样送给浏览器；评论接口、读评论快照、从 HTML 算页面文字（见[评论](/comments)） |
+| `./comments` | `app/lib/collections.ts`、`app/lib/source.ts`、页面路由 | 评论文件的 frontmatter 校验、按文件夹分成评论串、按页面分组、检查评论批的页面在不在，见[评论](/comments) |
+| `./server` | 布局与页面路由、`app/routes/search.ts`、`app/routes/content-file.ts`、`app/routes/comments.ts`、`app/lib/commenter.server.ts` | 中文站点用的搜索接口 `siteSearchServer`；把 `content/` 里的文件原样送给浏览器；写评论的人 `siteCommenter`、评论接口、读评论快照、从 HTML 算页面文字（见[评论](/comments)） |
 | `./ui` | `app/root.tsx`、布局与页面路由 | TSX 页面与 HTML 页面的正文组件、页面上的评论、侧栏底部的身份、fumadocs 界面文字的中文 |
-| `./styles.css` | `app/app.css` | 让 Tailwind 扫到包里组件用的类名；评论原文的高亮颜色 |
+| `./styles.css` | `app/app.css` | 让 Tailwind 扫到包里组件用的类名；宽屏布局；评论的高亮与画框 |
 
 布局用 fumadocs 默认的 docs 布局：左侧侧栏里从上到下是站名、搜索、切换下拉框、页面树，侧栏底部那一栏左边是写评论的人（本机开发时才有）、右边是主题切换；本页目录在正文右边。
 
 宽屏时布局铺满窗口：左侧栏贴左边，本页目录那一列贴右边、宽 340px，正文在中间那一列里居中、最宽 900px。
 fumadocs 默认在窗口比 97rem 宽时把整个布局居中，左右各空出一截；基础包的 `styles.css` 改成铺满，
-评论右侧栏也就能正好盖在目录那一列上，打开、关上都不改布局。
+评论右侧栏也就能正好盖在目录那一列上，打开、关上都不改布局。右侧栏打开时，本页目录改成正文上方的下拉条
+（fumadocs 窄屏时用的那个），浮在标题上方那段空白里，往下滚时吸在顶上，正文不往下挪。
 骨架直接引用这个布局，包里不另外包一层。
 
 `meta.json` 写了 `"root": true` 的文件夹，是侧栏里切换下拉框的一项，切换后侧栏只列那个文件夹里的页面。

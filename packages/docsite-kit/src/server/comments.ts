@@ -40,6 +40,14 @@ export function currentCommenter(cwd = process.cwd()): Promise<Commenter> {
   return commenter
 }
 
+/**
+ * 这个站写评论的人：开发服务里是本机 git 的 user.name；发布出去的站（react-router-serve）只读，返回 null。
+ * import.meta.env.DEV 由 Vite 编译时换掉：基础包和站点代码一起经 Vite 处理
+ */
+export async function siteCommenter(): Promise<Commenter | null> {
+  return import.meta.env.DEV ? await currentCommenter() : null
+}
+
 /** 网页能做的几件事 */
 export type CommentOperation = 'create' | 'reply' | 'edit' | 'delete' | 'resolve' | 'reopen'
 const operations: readonly CommentOperation[] = ['create', 'reply', 'edit', 'delete', 'resolve', 'reopen']

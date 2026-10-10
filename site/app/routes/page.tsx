@@ -2,11 +2,12 @@ import { use, type ReactNode } from 'react'
 import type { TOCItemType } from 'fumadocs-core/toc'
 import { DocsBody, DocsDescription, DocsPage, DocsTitle } from '@fumadocs/base-ui/layouts/docs/page'
 import defaultMdxComponents from '@fumadocs/base-ui/mdx'
-import { commentThreadsOf, type Commenter, type CommentThread } from '@godcreator/docsite-kit/comments'
+import { commentThreadsByPage, commentThreadsOf, type Commenter, type CommentThread } from '@godcreator/docsite-kit/comments'
 import { contentFileUrlOf } from '@godcreator/docsite-kit/page-sources'
+import { siteCommenter } from '@godcreator/docsite-kit/server'
 import { commentScopeProps, HtmlPageFrame, PageComments, TsxPageBody } from '@godcreator/docsite-kit/ui'
 import { comments, docs, tsxPageModules } from '../lib/collections'
-import { pageCommenter, pageCommentSnapshots } from '../lib/commenter.server'
+import { pageCommentSnapshots } from '../lib/commenter.server'
 import { source } from '../lib/source'
 import type { Route } from './+types/page'
 
@@ -16,7 +17,7 @@ export async function loader({ params }: Route.LoaderArgs) {
   if (!page) throw new Response('没有这一页', { status: 404 })
   const { title, description } = page.data
   const snapshots = await pageCommentSnapshots(threadsOfPage.get(page.url) ?? noThreads)
-  const shared = { title, description, url: page.url, commenter: await pageCommenter(), snapshots }
+  const shared = { title, description, url: page.url, commenter: await siteCommenter(), snapshots }
   if (page.type === 'mdx') return { type: 'mdx' as const, ...shared, path: page.path }
   if (page.type === 'tsx') return { type: 'tsx' as const, ...shared, file: page.data.file }
   return { type: 'html' as const, ...shared, src: contentFileUrlOf(page.data.file) }
@@ -24,8 +25,7 @@ export async function loader({ params }: Route.LoaderArgs) {
 
 type CommentEntry = (typeof comments.entries)[number]
 
-const threadsOfPage = new Map<string, CommentThread<CommentEntry>[]>()
-for (const thread of commentThreadsOf(comments.entries)) threadsOfPage.set(thread.head.page, [...(threadsOfPage.get(thread.head.page) ?? []), thread])
+const threadsOfPage = commentThreadsByPage(commentThreadsOf(comments.entries))
 
 /** 不用 entry.body：它加载完后不再调用 use()，React 报 conditional use of use() */
 function CommentBody({ entry }: { entry: CommentEntry }) {

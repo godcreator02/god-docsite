@@ -215,6 +215,13 @@ export function commentThreadsOf<Entry extends CommentEntry>(entries: readonly E
     .sort((a, b) => byCreatedAt(a.head, b.head))
 }
 
+/** 评论串按批的页面分组：内容页路由按页面地址取 */
+export function commentThreadsByPage<Entry extends CommentEntry>(threads: ReadonlyArray<CommentThread<Entry>>) {
+  const threadsOfPage = new Map<string, CommentThread<Entry>[]>()
+  for (const thread of threads) threadsOfPage.set(thread.head.page, [...(threadsOfPage.get(thread.head.page) ?? []), thread])
+  return threadsOfPage
+}
+
 /** 评论批的页面不存在时报错，一次列出全部；pageUrls 是站点全部页面的地址 */
 export function assertCommentPagesExist(threads: ReadonlyArray<CommentThread<CommentEntry>>, pageUrls: readonly string[]) {
   const known = new Set(pageUrls)

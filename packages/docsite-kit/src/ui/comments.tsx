@@ -203,7 +203,7 @@ function MessageIcon() {
 /**
  * 页面上的评论（照 Notion）：被批的文字标黄，原文末尾插着评论数按钮；被批的图片、公式、代码块、表格、组件画框，评论数按钮在它右上角
  * （行内的如行内公式插在它后面）。点按钮或点标黄的文字弹出这串评论。
- * 能写评论时（开发服务里），选中正文里的文字浮出「评论」按钮；右下角「批注」打开批注模式，鼠标下的元素画虚线框，点一下批这个元素。
+ * 能写评论时（开发服务里），右下角「批注」打开批注模式：鼠标下的元素画虚线框，点一下批这个元素；选中文字浮出「评论」按钮，批这段文字。
  * 右下角的「评论」按钮打开右侧栏，列出这一页全部评论，分未解决、已解决，也能评论整页
  */
 export function PageComments<Entry extends CommentEntry>({ page, threads, snapshots, commenter, renderBody, apiUrl = '/api/comments', children }: PageCommentsProps<Entry>) {
@@ -360,9 +360,9 @@ export function PageComments<Entry extends CommentEntry>({ page, threads, snapsh
     }
   }, [threads, snapshots, openId])
 
-  // 选中正文里的文字：松开鼠标时在选区上方浮出「评论」按钮
+  // 批注模式里选中正文里的文字：松开鼠标时在选区上方浮出「评论」按钮。平时选文字是为了复制，不弹按钮
   useEffect(() => {
-    if (!writable) return
+    if (!writable || !picking) return
     const layer = layerRef.current!
     const scope = scopeOf()
     const showForSelection = () => {
@@ -393,8 +393,9 @@ export function PageComments<Entry extends CommentEntry>({ page, threads, snapsh
     return () => {
       scope.removeEventListener('mouseup', showForSelection)
       document.removeEventListener('selectionchange', hideWhenCollapsed)
+      setSelectionAction(undefined)
     }
-  }, [writable])
+  }, [writable, picking])
 
   // 批注模式：鼠标下的元素画虚线框，点一下批这个元素；拖选文字照旧批那段文字；Esc 退出。模式里点链接不跳转、点组件不触发
   useEffect(() => {
@@ -631,7 +632,7 @@ function CommentsPanel<Entry extends CommentEntry>(props: CommentsPanelProps<Ent
         type="button"
         data-comment-ui=""
         aria-pressed={picking}
-        title="批注模式：点正文里的一个元素批它；Esc 退出"
+        title="批注模式：点正文里的一个元素批它，选中几个字批这几个字；Esc 退出"
         onClick={() => onPickingChange(!picking)}
         className={`${className} flex items-center gap-1.5 border ${picking ? 'border-amber-500 bg-amber-500 text-white' : 'bg-fd-card text-fd-card-foreground hover:bg-fd-accent'}`}
       >

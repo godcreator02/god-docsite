@@ -39,6 +39,19 @@
   html[data-comments-sidebar-open] #nd-toc {
     visibility: hidden;
   }
+
+  /*
+   * 目录改成正文上方的下拉条（fumadocs 窄屏时用的那个）。它在网格里单独占一行，负的下边距把这一行抵成 0 高：
+   * 下拉条浮在标题上方那段空白里，正文不往下挪；往下滚时吸在顶上
+   */
+  html[data-comments-sidebar-open] [data-toc-popover] {
+    display: block;
+    width: 100%;
+    max-width: calc(900px + 4rem);
+    height: 2.5rem;
+    margin-inline: auto;
+    margin-bottom: -2.5rem;
+  }
 }
 
 /* 评论批的元素（图片、公式、代码块、表格、组件；文字类的元素标黄，不画框） */
