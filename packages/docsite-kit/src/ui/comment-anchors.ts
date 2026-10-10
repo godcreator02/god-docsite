@@ -1,88 +1,75 @@
-import { locateQuote, quoteContextLength, type CommentBlockAnchor, type CommentBlockKind, type CommentThreadFrontmatter } from '../comments.js'
+import { imageCharacter, type CommentBlockKind, type CommentRange, type CommentThreadFrontmatter } from '../comments.js'
+import type { RangeMapper } from '../comment-ranges.js'
 
-/** 评论自己放进页面的东西（插进正文的评论数按钮等）都带这个属性；找原文、取文字时跳过它们 */
+/** 评论自己放进页面的东西（插进正文的评论数按钮等）都带这个属性；取页面文字时跳过它们 */
 export const commentUiAttribute = 'data-comment-ui'
 
-function isInsideCommentUi(node: Node) {
-  return node.parentElement?.closest(`[${commentUiAttribute}]`) != null
+type TextPiece = { node: Text | HTMLImageElement; start: number }
+
+/**
+ * 正文显示出来的全部文字：文字节点照原样，一张图片记成一个 imageCharacter，评论自己的按钮不算。
+ * pieces 记下每个文字节点、每张图片从第几个字开始，用来在文字位置与 DOM 位置之间换算
+ */
+export type PageText = { text: string; pieces: TextPiece[] }
+
+function lengthOf(node: Text | HTMLImageElement) {
+  return node.nodeType === Node.TEXT_NODE ? (node as Text).length : 1
 }
 
-/** 正文里的文字节点，跳过评论自己的按钮 */
-function textWalkerOf(root: Node) {
-  return root.ownerDocument!.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
-    acceptNode: (node) => (isInsideCommentUi(node) ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT),
+export function pageTextOf(scope: Node): PageText {
+  const walker = scope.ownerDocument!.createTreeWalker(scope, NodeFilter.SHOW_TEXT | NodeFilter.SHOW_ELEMENT, {
+    acceptNode(node) {
+      if (node.nodeType === Node.TEXT_NODE) return NodeFilter.FILTER_ACCEPT
+      const element = node as Element
+      if (element.hasAttribute(commentUiAttribute)) return NodeFilter.FILTER_REJECT
+      return element.tagName === 'IMG' ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_SKIP
+    },
   })
-}
-
-/** 元素里的文字，不算评论自己的按钮 */
-function visibleTextOf(element: Node) {
-  const walker = textWalkerOf(element)
-  let text = ''
-  for (let node = walker.nextNode(); node; node = walker.nextNode()) text += (node as Text).data
-  return text
-}
-
-/** 正文的全部文字，以及每个文字节点从第几个字开始：文字位置与 DOM 位置互相换算 */
-type TextIndex = { text: string; textNodes: Text[]; startOffsets: number[] }
-
-function indexText(scope: Node): TextIndex {
-  const walker = textWalkerOf(scope)
-  const textNodes: Text[] = []
-  const startOffsets: number[] = []
+  const pieces: TextPiece[] = []
   let text = ''
   for (let node = walker.nextNode(); node; node = walker.nextNode()) {
-    startOffsets.push(text.length)
-    textNodes.push(node as Text)
-    text += (node as Text).data
+    pieces.push({ node: node as Text | HTMLImageElement, start: text.length })
+    text += node.nodeType === Node.TEXT_NODE ? (node as Text).data : imageCharacter
   }
-  return { text, textNodes, startOffsets }
+  return { text, pieces }
 }
 
-function rangeOfOffsets({ textNodes, startOffsets }: TextIndex, start: number, end: number) {
-  const nodeAt = (offset: number, isEnd: boolean) => {
-    let index = textNodes.length - 1
-    while (index > 0 && (isEnd ? startOffsets[index]! >= offset : startOffsets[index]! > offset)) index--
-    return { node: textNodes[index]!, offset: offset - startOffsets[index]! }
-  }
-  const from = nodeAt(start, false)
-  const to = nodeAt(end, true)
-  const range = from.node.ownerDocument.createRange()
-  range.setStart(from.node, from.offset)
-  range.setEnd(to.node, to.offset)
+/** 页面文字里第 start 到 end 个字在 DOM 里的范围；图片整张算进去 */
+export function rangeOfOffsets({ pieces }: PageText, start: number, end: number): Range {
+  const first = pieces.find((piece) => piece.start <= start && start < piece.start + lengthOf(piece.node))
+  const last = pieces.findLast((piece) => piece.start < end && end <= piece.start + lengthOf(piece.node))
+  if (!first || !last) throw new Error(`页面文字里没有第 ${start} 到 ${end} 个字`)
+  const range = first.node.ownerDocument.createRange()
+  if (first.node.nodeType === Node.TEXT_NODE) range.setStart(first.node, start - first.start)
+  else range.setStartBefore(first.node)
+  if (last.node.nodeType === Node.TEXT_NODE) range.setEnd(last.node, end - last.start)
+  else range.setEndAfter(last.node)
   return range
 }
 
-/** 文字评论批的原文在正文里的位置；找不到时返回 undefined */
-export function rangeOfQuote(scope: Node, quote: string, prefix?: string, suffix?: string): Range | undefined {
-  const index = indexText(scope)
-  const start = locateQuote(index.text, quote, prefix, suffix)
-  return start === undefined ? undefined : rangeOfOffsets(index, start, start + quote.length)
-}
-
-/** 正文里某个位置前面有几个字（不算评论自己的按钮） */
-function textOffsetOf({ textNodes, startOffsets }: TextIndex, container: Node, offset: number) {
+/** DOM 里某个位置前面有几个字 */
+function offsetOfPoint({ pieces }: PageText, container: Node, offset: number) {
+  if (pieces.length === 0) return 0
   const before = container.ownerDocument!.createRange()
-  before.setStart(textNodes[0] ?? container, 0)
+  before.setStartBefore(pieces[0]!.node)
   before.setEnd(container, offset)
   let count = 0
-  textNodes.forEach((node, index) => {
-    if (!before.intersectsNode(node)) return
-    count = startOffsets[index]! + (node === before.endContainer ? before.endOffset : node.length)
-  })
+  for (const piece of pieces) {
+    if (!before.intersectsNode(piece.node)) continue
+    count = piece.start + (piece.node === container ? offset : lengthOf(piece.node))
+  }
   return count
 }
 
-/** 选中的一段文字换成文字评论的 anchor：原文（不含评论按钮里的字）与前后各几个字 */
-export function quoteAnchorOfRange(scope: Node, range: Range) {
-  const index = indexText(scope)
-  const { text } = index
-  const start = textOffsetOf(index, range.startContainer, range.startOffset)
-  const quote = text.slice(start, textOffsetOf(index, range.endContainer, range.endOffset))
-  return {
-    quote,
-    quotePrefix: text.slice(Math.max(0, start - quoteContextLength), start),
-    quoteSuffix: text.slice(start + quote.length, start + quote.length + quoteContextLength),
-  }
+/** 选中的一段换成页面文字里的位置 */
+export function offsetsOfRange(pageText: PageText, range: Range): CommentRange | undefined {
+  const start = offsetOfPoint(pageText, range.startContainer, range.startOffset)
+  const end = offsetOfPoint(pageText, range.endContainer, range.endOffset)
+  return start < end ? [start, end] : undefined
+}
+
+function visibleTextOf(element: Element) {
+  return pageTextOf(element).text.replaceAll(imageCharacter, '')
 }
 
 const textBlockTags = new Set(['H1', 'H2', 'H3', 'H4', 'H5', 'H6', 'UL', 'OL', 'BLOCKQUOTE', 'HR'])
@@ -98,66 +85,60 @@ function blockKindOf(element: Element): CommentBlockKind | undefined {
   return 'component'
 }
 
-const blockTextLength = 40
+export type PageBlock = { element: HTMLElement; kind: CommentBlockKind }
 
-/** 块的文字开头：图片取 alt；代码块与表格只取代码、表格本身的文字，不带标题栏上「复制」这类按钮的字 */
-function blockTextOf(element: Element, kind: CommentBlockKind) {
-  if (kind === 'image') return (element.tagName === 'IMG' ? (element as HTMLImageElement) : element.querySelector('img'))?.alt ?? ''
-  const textElement = kind === 'code' ? element.querySelector('pre') : kind === 'table' ? element.querySelector('table') : element
-  return (textElement ? visibleTextOf(textElement) : '').replace(/\s+/g, ' ').trim().slice(0, blockTextLength)
-}
-
-export type PageBlock = { element: HTMLElement; anchor: CommentBlockAnchor }
-
-/** 正文里能整块评论的块，按出现顺序；每块记下它前面最近的二到四级标题、在这个标题下同类块里排第几 */
+/** 正文里能整块评论的块（正文的顶层元素），按出现顺序 */
 export function blocksOf(scope: Element): PageBlock[] {
-  const blocks: PageBlock[] = []
-  let heading = ''
-  const countOfKind = new Map<CommentBlockKind, number>()
-  for (const element of scope.children) {
-    if (/^H[2-4]$/.test(element.tagName)) {
-      heading = element.id
-      countOfKind.clear()
-      continue
-    }
+  return [...scope.children].flatMap((element) => {
     const kind = blockKindOf(element)
-    if (!kind) continue
-    const index = (countOfKind.get(kind) ?? 0) + 1
-    countOfKind.set(kind, index)
-    blocks.push({ element: element as HTMLElement, anchor: { kind, heading, index, text: blockTextOf(element, kind) } })
-  }
-  return blocks
+    return kind ? [{ element: element as HTMLElement, kind }] : []
+  })
 }
 
-/** 正文里某个元素所在的那一块（正文的顶层元素）；它不是能整块评论的块时返回 undefined */
+/** 正文里某个元素所在的那一块；它不是能整块评论的块时返回 undefined */
 export function blockContaining(blocks: readonly PageBlock[], target: Node) {
   return blocks.find((block) => block.element.contains(target))
 }
 
-function sameBlock(a: CommentBlockAnchor, b: CommentBlockAnchor) {
-  return a.kind === b.kind && a.heading === b.heading && a.index === b.index && a.text === b.text
+/** 一整块在页面文字里的位置：从它的第一个字（或图片）到最后一个；块里没有文字也没有图片时返回 undefined */
+export function blockOffsetsOf({ pieces }: PageText, element: Element): CommentRange | undefined {
+  const inside = pieces.filter((piece) => element.contains(piece.node))
+  if (inside.length === 0) return undefined
+  const last = inside.at(-1)!
+  return [inside[0]!.start, last.start + lengthOf(last.node)]
 }
 
-/** 评论批的位置：一段文字（Range）、一整块（元素）、整页，或者原文找不到了 */
-export type ThreadPlace = { type: 'text'; range: Range } | { type: 'block'; element: HTMLElement } | { type: 'page' } | { type: 'missing' }
+/**
+ * 评论批的位置：一段文字（Range）、一整块（元素）、整页，或者原文找不到了。
+ * changed 表示被批的那段在快照之后被改过（首尾还对得上）
+ */
+export type ThreadPlace = { type: 'text'; range: Range; changed: boolean } | { type: 'block'; element: HTMLElement; changed: boolean } | { type: 'page' } | { type: 'missing' }
 
-export function placeOfThread(scope: Element, blocks: readonly PageBlock[], head: CommentThreadFrontmatter): ThreadPlace {
-  if (head.quote !== undefined) {
-    const range = rangeOfQuote(scope, head.quote, head.quotePrefix, head.quoteSuffix)
-    return range ? { type: 'text', range } : { type: 'missing' }
-  }
-  if (head.block !== undefined) {
-    const block = blocks.find((candidate) => sameBlock(candidate.anchor, head.block!))
-    return block ? { type: 'block', element: block.element } : { type: 'missing' }
-  }
-  return { type: 'page' }
+export function placeOfThread(pageText: PageText, blocks: readonly PageBlock[], head: CommentThreadFrontmatter, snapshot: string | undefined, mapRange: RangeMapper): ThreadPlace {
+  if (!head.range) return { type: 'page' }
+  if (snapshot === undefined) throw new Error('批一段文字或一整块的评论串要传快照')
+  const mapped = mapRange(snapshot, pageText.text, head.range)
+  if (!mapped) return { type: 'missing' }
+  if (head.quote !== undefined) return { type: 'text', range: rangeOfOffsets(pageText, mapped.start, mapped.end), changed: mapped.changed }
+  // 整块：推算出的位置开头落在哪一块，那一块还得是同一类
+  const firstPiece = pageText.pieces.find((piece) => piece.start <= mapped.start && mapped.start < piece.start + lengthOf(piece.node))
+  const block = firstPiece && blockContaining(blocks, firstPiece.node)
+  return block && block.kind === head.block ? { type: 'block', element: block.element, changed: mapped.changed } : { type: 'missing' }
 }
 
 const blockKindNames: Record<CommentBlockKind, string> = { image: '图片', code: '代码块', table: '表格', component: '组件' }
+const labelTextLength = 40
 
-/** 评论批的是什么，写给人看：「原文」、整块的类别，或「整页」 */
-export function anchorLabelOf(head: Pick<CommentThreadFrontmatter, 'quote' | 'block'>) {
-  if (head.quote !== undefined) return `「${head.quote}」`
-  if (head.block !== undefined) return head.block.text === '' ? `整块${blockKindNames[head.block.kind]}` : `${blockKindNames[head.block.kind]}「${head.block.text}」`
+function readableText(text: string) {
+  return text.replaceAll(imageCharacter, ' ').replace(/\s+/g, ' ').trim()
+}
+
+/** 评论批的是什么，写给人看：「原文」、整块的类别加它开头的字，或「整页」 */
+export function anchorLabelOf(head: Pick<CommentThreadFrontmatter, 'quote' | 'block' | 'range'>, snapshot: string | undefined) {
+  if (head.quote !== undefined) return `「${readableText(head.quote)}」`
+  if (head.block !== undefined) {
+    const text = head.range && snapshot !== undefined ? readableText(snapshot.slice(...head.range)).slice(0, labelTextLength) : ''
+    return text === '' ? `整块${blockKindNames[head.block]}` : `${blockKindNames[head.block]}「${text}」`
+  }
   return '整页'
 }

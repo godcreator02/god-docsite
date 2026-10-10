@@ -1,8 +1,9 @@
 import { useEffect, useRef, useState, type ComponentProps, type ReactNode } from 'react'
 import { createPortal } from 'react-dom'
 import { ThemeSwitch } from '@fumadocs/base-ui/layouts/shared/slots/theme-switch'
-import type { CommentBlockAnchor, CommentEntry, Commenter, CommentThread } from '../comments.js'
-import { anchorLabelOf, blockContaining, blocksOf, commentUiAttribute, placeOfThread, quoteAnchorOfRange, type PageBlock, type ThreadPlace } from './comment-anchors.js'
+import type { CommentBlockKind, CommentEntry, Commenter, CommentRange, CommentThread } from '../comments.js'
+import { createRangeMapper } from '../comment-ranges.js'
+import { anchorLabelOf, blockContaining, blockOffsetsOf, blocksOf, commentUiAttribute, offsetsOfRange, pageTextOf, placeOfThread, type PageBlock, type ThreadPlace } from './comment-anchors.js'
 import { CommentEditor, CommenterChip, CommentItem, postComment, recentThreadToOpen, rememberThreadToOpen, ThreadView, type CommentApi } from './comment-cards.js'
 
 /** 页面正文的容器带上这个属性，评论在它里面找被批的原文：<DocsBody {...commentScopeProps}> */
@@ -17,7 +18,8 @@ const commentedBlockAttribute = 'data-commented-block'
 
 const cardWidth = 360
 
-type NewAnchor = { quote: string; quotePrefix: string; quoteSuffix: string } | { block: CommentBlockAnchor } | Record<string, never>
+/** 新评论串批的位置，连同发起那一刻的整页文字（存成快照）；批整页时是 {} */
+type NewAnchor = { quote: string; range: CommentRange; snapshot: string } | { block: CommentBlockKind; range: CommentRange; snapshot: string } | Record<string, never>
 
 /** 正文上评论的几样东西在评论层里的位置（相对评论层左上角） */
 type Placement = {
@@ -29,15 +31,24 @@ type Placement = {
   blockBadges: Map<string, { top: number; right: number }>
   /** 原文找不到了的评论串 */
   missing: Set<string>
+  /** 找得到位置、但被批的那段在发起评论之后改过的评论串 */
+  changed: Set<string>
 }
 
-const emptyPlacement: Placement = { anchored: new Map(), inline: [], blockBadges: new Map(), missing: new Set() }
+const emptyPlacement: Placement = { anchored: new Map(), inline: [], blockBadges: new Map(), missing: new Set(), changed: new Set() }
 
 /**
  * 发起评论前的按钮与草稿卡片的位置：选中文字时按钮在选区上方（top），整块评论的按钮在那一块右上角（top、right，
- * 那一块已有评论数按钮时排在它下面）；草稿卡片在原文下方（cardTop、cardLeft）
+ * 那一块已有评论数按钮时排在它下面）；草稿卡片在原文下方（cardTop、cardLeft）。
+ * 批的位置在点了按钮时才算（makeAnchor）：整块评论的按钮随鼠标移动出现，每次都取整页文字太费
  */
-type PendingAction = { top: number; right?: number; anchor: NewAnchor; label: string; cardTop: number; cardLeft: number }
+type PendingAction = { top: number; right?: number; makeAnchor: () => NewAnchor; cardTop: number; cardLeft: number }
+
+type Draft = Omit<PendingAction, 'makeAnchor'> & { anchor: NewAnchor; label: string }
+
+function labelOfNewAnchor(anchor: NewAnchor) {
+  return 'range' in anchor ? anchorLabelOf(anchor, anchor.snapshot) : anchorLabelOf({}, undefined)
+}
 
 /** 插进正文的评论数按钮的外壳；插的时候要是切开了文字节点，记下切开的两半，撤掉时拼回去 */
 type InsertedBadge = { host: HTMLElement; split?: { first: Text; second: Text } }
@@ -77,6 +88,8 @@ export type PageCommentsProps<Entry extends CommentEntry> = {
   page: string
   /** 这一页的评论串 */
   threads: ReadonlyArray<CommentThread<Entry>>
+  /** 各评论串发起时的整页文字快照，按评论串文件夹名；服务端用 commentSnapshotsOf 读出来。批整页的评论串没有 */
+  snapshots: Readonly<Record<string, string>>
   /** 写评论的人；发布站传 null，只能看 */
   commenter: Commenter | null
   /** 渲染一条评论的正文；项目在这里把 MDX 组件传给编译好的正文 */
@@ -111,7 +124,7 @@ function containsPoint(rect: DOMRect, x: number, y: number) {
 }
 
 function samePlacement(a: Placement, b: Placement) {
-  if (a.anchored.size !== b.anchored.size || a.blockBadges.size !== b.blockBadges.size || a.missing.size !== b.missing.size) return false
+  if (a.anchored.size !== b.anchored.size || a.blockBadges.size !== b.blockBadges.size || a.missing.size !== b.missing.size || a.changed.size !== b.changed.size) return false
   if (a.inline.join() !== b.inline.join()) return false
   for (const [id, spot] of a.anchored) {
     const other = b.anchored.get(id)
@@ -122,6 +135,7 @@ function samePlacement(a: Placement, b: Placement) {
     if (!other || other.top !== spot.top || other.right !== spot.right) return false
   }
   for (const id of a.missing) if (!b.missing.has(id)) return false
+  for (const id of a.changed) if (!b.changed.has(id)) return false
   return true
 }
 
@@ -155,17 +169,19 @@ function MessageIcon() {
  * 能写评论时（开发服务里），选中正文里的文字浮出「评论」按钮；鼠标移到图片、代码块、表格、组件上，那一块右上角出现「评论这一块」按钮。
  * 右下角的「评论」按钮打开右侧栏，列出这一页全部评论，分未解决、已解决，也能评论整页
  */
-export function PageComments<Entry extends CommentEntry>({ page, threads, commenter, renderBody, apiUrl = '/api/comments', children }: PageCommentsProps<Entry>) {
+export function PageComments<Entry extends CommentEntry>({ page, threads, snapshots, commenter, renderBody, apiUrl = '/api/comments', children }: PageCommentsProps<Entry>) {
   const api: CommentApi = { url: apiUrl }
   const layerRef = useRef<HTMLDivElement>(null)
   const blocksRef = useRef<PageBlock[]>([])
+  const [mapRange] = useState(createRangeMapper)
+  const labelOf = (thread: CommentThread<Entry>) => anchorLabelOf(thread.head, snapshots[thread.id])
   /** 插进正文的评论数按钮的外壳，每串一个、一直用同一个元素，React 经 portal 往里渲染按钮 */
   const inlineHostsRef = useRef(new Map<string, HTMLElement>())
   const [openId, setOpenId] = useState<string>()
   const [placement, setPlacement] = useState<Placement>(emptyPlacement)
   const [selectionAction, setSelectionAction] = useState<PendingAction>()
   const [blockAction, setBlockAction] = useState<PendingAction>()
-  const [draft, setDraft] = useState<PendingAction>()
+  const [draft, setDraft] = useState<Draft>()
   const [panelOpen, setPanelOpen] = useState(false)
   const [panelThreadId, setPanelThreadId] = useState<string>()
   const writable = commenter !== null
@@ -207,8 +223,9 @@ export function PageComments<Entry extends CommentEntry>({ page, threads, commen
       const blocks = blocksOf(scope)
       blocksRef.current = blocks
       for (const element of scope.querySelectorAll(`[${commentedBlockAttribute}]`)) element.removeAttribute(commentedBlockAttribute)
+      const pageText = pageTextOf(scope)
       placeOf.clear()
-      for (const thread of threads) placeOf.set(thread.id, placeOfThread(scope, blocks, thread.head))
+      for (const thread of threads) placeOf.set(thread.id, placeOfThread(pageText, blocks, thread.head, snapshots[thread.id], mapRange))
       const openThreads = threads.filter((thread) => thread.head.status === 'open')
       const openRanges = openThreads.flatMap((thread) => {
         const place = placeOf.get(thread.id)!
@@ -219,6 +236,14 @@ export function PageComments<Entry extends CommentEntry>({ page, threads, commen
       paintHighlights(openRanges, activePlace?.type === 'text' ? activePlace.range : undefined)
 
       const missing = new Set(threads.filter((thread) => placeOf.get(thread.id)!.type === 'missing').map((thread) => thread.id))
+      const changed = new Set(
+        threads
+          .filter((thread) => {
+            const place = placeOf.get(thread.id)!
+            return (place.type === 'text' || place.type === 'block') && place.changed
+          })
+          .map((thread) => thread.id),
+      )
       const shown = threads.filter((thread) => {
         const type = placeOf.get(thread.id)!.type
         return (type === 'text' || type === 'block') && (thread.head.status === 'open' || thread.id === openId)
@@ -240,7 +265,7 @@ export function PageComments<Entry extends CommentEntry>({ page, threads, commen
         anchored.set(thread.id, { cardTop: rects.whole.bottom - layerRect.top + 8, cardLeft: clampCardLeft(rects.whole.left - layerRect.left, layerRect.width) })
         if (placeOf.get(thread.id)!.type === 'block') blockBadges.set(thread.id, { top: rects.whole.top - layerRect.top + 6, right: rects.whole.right - layerRect.left - 6 })
       }
-      const next: Placement = { anchored, inline, blockBadges, missing }
+      const next: Placement = { anchored, inline, blockBadges, missing, changed }
       setPlacement((current) => (samePlacement(current, next) ? current : next))
     }
     const measureNextFrame = () => {
@@ -272,7 +297,7 @@ export function PageComments<Entry extends CommentEntry>({ page, threads, commen
       for (const element of scope.querySelectorAll(`[${commentedBlockAttribute}]`)) element.removeAttribute(commentedBlockAttribute)
       removeInsertedBadges(inserted)
     }
-  }, [threads, openId])
+  }, [threads, snapshots, openId])
 
   // 选中正文里的文字：松开鼠标时在选区上方浮出「评论」按钮
   useEffect(() => {
@@ -284,14 +309,16 @@ export function PageComments<Entry extends CommentEntry>({ page, threads, commen
       if (!selection || selection.isCollapsed || selection.rangeCount === 0) return setSelectionAction(undefined)
       const range = selection.getRangeAt(0)
       if (!scope.contains(range.startContainer) || !scope.contains(range.endContainer) || range.toString().trim() === '') return setSelectionAction(undefined)
-      const anchor = quoteAnchorOfRange(scope, range)
+      const pageText = pageTextOf(scope)
+      const offsets = offsetsOfRange(pageText, range)
+      if (!offsets) return setSelectionAction(undefined)
+      const anchor: NewAnchor = { quote: pageText.text.slice(...offsets), range: offsets, snapshot: pageText.text }
       const layerRect = layer.getBoundingClientRect()
       const first = range.getClientRects()[0] ?? range.getBoundingClientRect()
       const whole = range.getBoundingClientRect()
       setSelectionAction({
         top: first.top - layerRect.top - 34,
-        anchor,
-        label: `「${anchor.quote}」`,
+        makeAnchor: () => anchor,
         cardTop: whole.bottom - layerRect.top + 8,
         cardLeft: clampCardLeft(whole.left - layerRect.left, layerRect.width),
       })
@@ -323,8 +350,12 @@ export function PageComments<Entry extends CommentEntry>({ page, threads, commen
     setBlockAction({
       top,
       right,
-      anchor: { block: block.anchor },
-      label: anchorLabelOf({ block: block.anchor }),
+      makeAnchor: (): NewAnchor => {
+        const pageText = pageTextOf(scopeOf())
+        const range = blockOffsetsOf(pageText, block.element)
+        // 没有文字也没有图片的块（如空的组件）在页面文字里没有位置，只能评论整页
+        return range ? { block: block.kind, range, snapshot: pageText.text } : {}
+      },
       cardTop: rect.bottom - layerRect.top + 8,
       cardLeft: clampCardLeft(rect.left - layerRect.left, layerRect.width),
     })
@@ -341,11 +372,12 @@ export function PageComments<Entry extends CommentEntry>({ page, threads, commen
     return () => document.removeEventListener('mousedown', closeOnOutsideClick)
   }, [openId])
 
-  const startDraft = (action: PendingAction) => {
+  const startDraft = ({ makeAnchor, ...spot }: PendingAction) => {
+    const anchor = makeAnchor()
     setOpenId(undefined)
     setSelectionAction(undefined)
     setBlockAction(undefined)
-    setDraft(action)
+    setDraft({ ...spot, anchor, label: labelOfNewAnchor(anchor) })
   }
   const createThread = async (anchor: NewAnchor, body: string, images: File[]) => {
     const { thread } = await postComment(api, { op: 'create', page, anchor: JSON.stringify(anchor), body }, images)
@@ -363,7 +395,7 @@ export function PageComments<Entry extends CommentEntry>({ page, threads, commen
       {placement.inline.map((id) => {
         const thread = threads.find((candidate) => candidate.id === id)!
         return createPortal(
-          <CountBadge count={1 + thread.replies.length} active={id === openId} label={anchorLabelOf(thread.head)} onClick={() => setOpenId(id === openId ? undefined : id)} />,
+          <CountBadge count={1 + thread.replies.length} active={id === openId} label={labelOf(thread)} onClick={() => setOpenId(id === openId ? undefined : id)} />,
           inlineHostOf(id),
           id,
         )
@@ -372,7 +404,7 @@ export function PageComments<Entry extends CommentEntry>({ page, threads, commen
         const thread = threads.find((candidate) => candidate.id === id)!
         return (
           <span key={id} data-comment-ui="" className="absolute z-10 -translate-x-full" style={{ top: badge.top, left: badge.right }}>
-            <CountBadge count={1 + thread.replies.length} active={id === openId} label={anchorLabelOf(thread.head)} onClick={() => setOpenId(id === openId ? undefined : id)} className="shadow-sm" />
+            <CountBadge count={1 + thread.replies.length} active={id === openId} label={labelOf(thread)} onClick={() => setOpenId(id === openId ? undefined : id)} className="shadow-sm" />
           </span>
         )
       })}
@@ -381,7 +413,7 @@ export function PageComments<Entry extends CommentEntry>({ page, threads, commen
           type="button"
           data-comment-ui=""
           aria-label="评论这一块"
-          title={`评论这一块：${blockAction.label}`}
+          title="评论这一块"
           onClick={() => startDraft(blockAction)}
           className={`${badgeClassName} absolute z-10 -translate-x-full bg-fd-card text-fd-muted-foreground shadow-sm hover:text-fd-foreground`}
           style={{ top: blockAction.top, left: blockAction.right }}
@@ -410,12 +442,21 @@ export function PageComments<Entry extends CommentEntry>({ page, threads, commen
       )}
       {openThread && openSpot && (
         <div data-comment-ui="" className="absolute z-30 max-h-[60vh] overflow-y-auto rounded-xl border bg-fd-popover p-3 text-fd-popover-foreground shadow-lg" style={{ top: openSpot.cardTop, left: openSpot.cardLeft, width: cardWidth }}>
-          <ThreadView key={openThread.id} thread={openThread} renderBody={renderBody} commenter={commenter} api={api} onClose={() => setOpenId(undefined)} />
+          <ThreadView
+            key={openThread.id}
+            thread={openThread}
+            renderBody={renderBody}
+            commenter={commenter}
+            api={api}
+            note={placement.changed.has(openThread.id) ? `原文改过，当时批的是${labelOf(openThread)}` : undefined}
+            onClose={() => setOpenId(undefined)}
+          />
         </div>
       )}
       {hasCommentUi && (
         <CommentsPanel
           threads={threads}
+          labelOf={labelOf}
           placement={placement}
           commenter={commenter}
           renderBody={renderBody}
@@ -440,6 +481,8 @@ export function PageComments<Entry extends CommentEntry>({ page, threads, commen
 
 type CommentsPanelProps<Entry extends CommentEntry> = {
   threads: ReadonlyArray<CommentThread<Entry>>
+  /** 评论串批的是什么，写给人看 */
+  labelOf: (thread: CommentThread<Entry>) => string
   placement: Placement
   commenter: Commenter | null
   renderBody: (entry: Entry) => ReactNode
@@ -459,7 +502,7 @@ const commentsSidebarOpenAttribute = 'data-comments-sidebar-open'
 
 /** 右下角的「评论」按钮和它打开的右侧栏 */
 function CommentsPanel<Entry extends CommentEntry>(props: CommentsPanelProps<Entry>) {
-  const { threads, placement, commenter, renderBody, api, open, onOpenChange, detailId, onDetailChange, onCreatePageComment, onGoToThread } = props
+  const { threads, labelOf, placement, commenter, renderBody, api, open, onOpenChange, detailId, onDetailChange, onCreatePageComment, onGoToThread } = props
   const [tab, setTab] = useState<'open' | 'resolved'>('open')
   const [writingPageComment, setWritingPageComment] = useState(false)
   useEffect(() => {
@@ -471,7 +514,11 @@ function CommentsPanel<Entry extends CommentEntry>(props: CommentsPanelProps<Ent
   const resolvedThreads = threads.filter((thread) => thread.head.status === 'resolved')
   const shown = tab === 'open' ? openThreads : resolvedThreads
   const detail = detailId === undefined ? undefined : threads.find((thread) => thread.id === detailId)
-  const noteOf = (thread: CommentThread<Entry>) => (placement.missing.has(thread.id) ? `原文找不到了：${anchorLabelOf(thread.head)}` : anchorLabelOf(thread.head))
+  const noteOf = (thread: CommentThread<Entry>) => {
+    if (placement.missing.has(thread.id)) return `原文找不到了：${labelOf(thread)}`
+    if (placement.changed.has(thread.id)) return `原文改过：${labelOf(thread)}`
+    return labelOf(thread)
+  }
   const choose = (thread: CommentThread<Entry>) => {
     if (thread.head.status === 'open' && placement.anchored.has(thread.id)) onGoToThread(thread.id)
     else onDetailChange(thread.id)
@@ -553,7 +600,7 @@ function CommentsPanel<Entry extends CommentEntry>(props: CommentsPanelProps<Ent
                     }}
                     className="flex cursor-pointer flex-col gap-1 rounded-lg px-2 py-2 text-start hover:bg-fd-accent"
                   >
-                    <span className={`line-clamp-1 text-xs ${placement.missing.has(thread.id) ? 'text-red-500' : 'text-fd-muted-foreground'}`}>{noteOf(thread)}</span>
+                    <span className={`line-clamp-1 text-xs ${placement.missing.has(thread.id) ? 'text-red-500' : placement.changed.has(thread.id) ? 'text-amber-600' : 'text-fd-muted-foreground'}`}>{noteOf(thread)}</span>
                     <CommentItem entry={thread.head} thread={thread.id} renderBody={renderBody} commenter={commenter} api={api} clamped />
                     {thread.replies.length > 0 && <span className="ms-8 text-xs text-fd-muted-foreground">{thread.replies.length} 条回复</span>}
                   </div>

@@ -1,9 +1,14 @@
+import type { CommentRange } from './comment-ranges.js'
+
 /**
  * 评论的存储格式。一个评论串一个文件夹：index.md（或 index.mdx）是发起的那条，frontmatter 写它批的是哪一页、哪段原文或哪一块；
  * 同一文件夹里其余的 .md / .mdx 每个是一条回复。网页上写的评论存成 .md（纯文字里的 < 和 { 不会被当成 JSX）；
  * 要放 TSX 组件的评论写成 .mdx，可以引用同一文件夹里的组件。图片放在同一文件夹里。
+ * 批一段文字或一整块时，文件夹里还有 snapshot.txt：发起评论那一刻整页显示出来的文字，range 是在它里面数的位置。
  * 项目在 collections.ts 里用 fumadocs-mdx 的 defineCollections 列出这些文件，schema 传 commentFrontmatterSchema
  */
+
+export type { CommentRange }
 
 export type CommentStatus = 'open' | 'resolved'
 
@@ -14,11 +19,11 @@ export type Commenter = { name: string }
 export type CommentBlockKind = 'image' | 'code' | 'table' | 'component'
 export const commentBlockKinds: readonly CommentBlockKind[] = ['image', 'code', 'table', 'component']
 
-/**
- * 整块评论批的那一块：它前面最近的标题（id，页面开头没有标题时是空字符串）下，同一类块里的第 index 个（从 1 数）。
- * text 是那一块的文字开头（图片是 alt），用来核对：块挪了位置、对不上 text 时当作原文找不到了
- */
-export type CommentBlockAnchor = { kind: CommentBlockKind; heading: string; index: number; text: string }
+/** 评论串文件夹里的页面文字快照 */
+export const commentSnapshotFile = 'snapshot.txt'
+
+/** 页面文字里一张图片记成这一个字 */
+export const imageCharacter = '￼'
 
 /** 发起评论串的那条（index.md / index.mdx） */
 export type CommentThreadFrontmatter = {
@@ -29,13 +34,12 @@ export type CommentThreadFrontmatter = {
   /** 被批页面的地址，如 /writing */
   page: string
   status: CommentStatus
-  /** 被批的原文，要和页面上显示的文字一字不差；quote 与 block 都不写就是批整页 */
+  /** 批一段文字：被批的原文，等于快照里 range 那一段；quote 与 block 都不写就是批整页 */
   quote?: string
-  /** 原文前后紧挨着的几个字：原文在页面上出现好几次时靠它们认出是哪一处 */
-  quotePrefix?: string
-  quoteSuffix?: string
-  /** 被批的那一块（图片、代码块、表格、组件） */
-  block?: CommentBlockAnchor
+  /** 批一整块：那一块是哪类（图片、代码块、表格、组件） */
+  block?: CommentBlockKind
+  /** 批的是快照里的第几个字到第几个字（不含后一个），写了 quote 或 block 就要写 */
+  range?: CommentRange
   resolvedBy?: string
   resolvedAt?: string
 }
@@ -57,9 +61,8 @@ export type CommentFrontmatterSchema = {
   }
 }
 
-const threadKeys = ['author', 'createdAt', 'page', 'status', 'quote', 'quotePrefix', 'quoteSuffix', 'block', 'resolvedBy', 'resolvedAt']
+const threadKeys = ['author', 'createdAt', 'page', 'status', 'quote', 'block', 'range', 'resolvedBy', 'resolvedAt']
 const replyKeys = ['author', 'createdAt']
-const blockKeys = ['kind', 'heading', 'index', 'text']
 const statuses: readonly CommentStatus[] = ['open', 'resolved']
 
 function nonEmptyString(data: Record<string, unknown>, key: string, issues: Issue[]) {
@@ -91,21 +94,9 @@ function unknownKeyIssues(data: Record<string, unknown>, allowedKeys: string[], 
     .map((key) => ({ message: `认不出 ${prefix}${key}，能写的只有 ${allowedKeys.join('、')}`, path: [key] }))
 }
 
-function validateBlock(value: unknown, issues: Issue[]): CommentBlockAnchor | undefined {
-  if (typeof value !== 'object' || value === null || Array.isArray(value)) {
-    issues.push({ message: 'block 要写成 { kind, heading, index, text }', path: ['block'] })
-    return undefined
-  }
-  const block = value as Record<string, unknown>
-  issues.push(...unknownKeyIssues(block, blockKeys, 'block.'))
-  const { kind, heading, index, text } = block
-  const before = issues.length
-  if (!commentBlockKinds.includes(kind as CommentBlockKind)) issues.push({ message: `block.kind 要是 ${commentBlockKinds.join('、')} 之一`, path: ['block', 'kind'] })
-  if (typeof heading !== 'string') issues.push({ message: 'block.heading 要是字符串（页面开头没有标题时写空字符串）', path: ['block', 'heading'] })
-  if (!Number.isInteger(index) || (index as number) < 1) issues.push({ message: 'block.index 要是从 1 数的整数', path: ['block', 'index'] })
-  if (typeof text !== 'string') issues.push({ message: 'block.text 要是字符串', path: ['block', 'text'] })
-  if (issues.length > before) return undefined
-  return { kind: kind as CommentBlockKind, heading: heading as string, index: index as number, text: text as string }
+/** range 写成 [start, end]：两个从 0 数的整数，start 小于 end */
+export function isCommentRange(value: unknown): value is CommentRange {
+  return Array.isArray(value) && value.length === 2 && value.every((at) => Number.isInteger(at) && at >= 0) && value[0] < value[1]
 }
 
 function validateThread(data: Record<string, unknown>) {
@@ -117,19 +108,20 @@ function validateThread(data: Record<string, unknown>) {
   const status = data.status as CommentStatus
   if (!statuses.includes(status)) issues.push({ message: `status 要是 ${statuses.join(' 或 ')}`, path: ['status'] })
   const quote = data.quote === undefined ? undefined : nonEmptyString(data, 'quote', issues)
-  const quotePrefix = optionalString(data, 'quotePrefix', issues)
-  const quoteSuffix = optionalString(data, 'quoteSuffix', issues)
-  if (quote === undefined && (quotePrefix !== undefined || quoteSuffix !== undefined)) issues.push({ message: 'quotePrefix、quoteSuffix 要和 quote 一起写', path: ['quote'] })
-  const block = data.block === undefined ? undefined : validateBlock(data.block, issues)
+  const block = data.block as CommentBlockKind | undefined
+  if (block !== undefined && !commentBlockKinds.includes(block)) issues.push({ message: `block 要是 ${commentBlockKinds.join('、')} 之一`, path: ['block'] })
   if (data.quote !== undefined && data.block !== undefined) issues.push({ message: 'quote 和 block 只能写一个：批一段文字写 quote，批一整块写 block', path: ['block'] })
+  const range = data.range
+  if (range !== undefined && !isCommentRange(range)) issues.push({ message: 'range 要写成 [start, end]：快照里从 0 数的两个位置，start 小于 end', path: ['range'] })
+  if ((data.quote !== undefined || data.block !== undefined) && range === undefined) issues.push({ message: '写了 quote 或 block 就要写 range：批的是快照里的哪一段', path: ['range'] })
+  if (data.quote === undefined && data.block === undefined && range !== undefined) issues.push({ message: 'range 要和 quote 或 block 一起写；都不写是批整页', path: ['range'] })
   const resolvedBy = optionalString(data, 'resolvedBy', issues)
   const resolvedAt = data.resolvedAt === undefined ? undefined : isoTime(data, 'resolvedAt', issues)
   if (issues.length > 0) return { issues }
   const value: CommentThreadFrontmatter = { kind: 'thread', author, createdAt, page, status }
   if (quote !== undefined) value.quote = quote
-  if (quotePrefix !== undefined) value.quotePrefix = quotePrefix
-  if (quoteSuffix !== undefined) value.quoteSuffix = quoteSuffix
   if (block !== undefined) value.block = block
+  if (range !== undefined) value.range = range as CommentRange
   if (resolvedBy !== undefined) value.resolvedBy = resolvedBy
   if (resolvedAt !== undefined) value.resolvedAt = resolvedAt
   return { value }
@@ -221,16 +213,11 @@ export function assertCommentPagesExist(threads: ReadonlyArray<CommentThread<Com
   if (orphans.length > 0) throw new Error(orphans.map((thread) => `评论串 ${thread.id} 批的页面 ${thread.head.page} 不存在`).join('\n'))
 }
 
-/**
- * 原文在整页文字里从哪开始。只出现一次就是那一处；出现好几次时，取前后文都对得上的那一处。
- * 找不到、或者好几处都对不上前后文时返回 undefined，不去猜
- */
-export function locateQuote(text: string, quote: string, prefix = '', suffix = ''): number | undefined {
-  const starts: number[] = []
-  for (let at = text.indexOf(quote); at !== -1; at = text.indexOf(quote, at + 1)) starts.push(at)
-  if (starts.length === 1) return starts[0]
-  return starts.find((start) => text.slice(0, start).endsWith(prefix) && text.slice(start + quote.length).startsWith(suffix))
+/** frontmatter 与快照对不上时说明哪里不对：range 超出了快照，或者 quote 不等于快照里 range 那一段 */
+export function snapshotMismatchOf(head: Pick<CommentThreadFrontmatter, 'quote' | 'range'>, snapshot: string): string | undefined {
+  if (!head.range) return undefined
+  const [start, end] = head.range
+  if (end > snapshot.length) return `range [${start}, ${end}] 超出了快照（共 ${snapshot.length} 个字）`
+  if (head.quote !== undefined && snapshot.slice(start, end) !== head.quote) return `quote 和快照里 range 那一段不一样：快照里是「${snapshot.slice(start, end)}」`
+  return undefined
 }
-
-/** 选中的原文前后各取几个字作前后文 */
-export const quoteContextLength = 20

@@ -1,21 +1,27 @@
 import { describe, expect, it } from 'vitest'
-import { assertCommentPagesExist, commentFrontmatterSchema, commentThreadsOf, locateQuote, type CommentEntry } from '../src/comments.js'
+import { assertCommentPagesExist, commentFrontmatterSchema, commentThreadsOf, snapshotMismatchOf, type CommentEntry } from '../src/comments.js'
 
 const validate = (path: string, value: unknown) => commentFrontmatterSchema({ path })['~standard'].validate(value)
 
 describe('评论的 frontmatter', () => {
   it('index.md 与 index.mdx 按发起的那条校验，时间统一成 ISO；YAML 读成 Date 的也收', () => {
-    const thread = { author: '小周', createdAt: new Date('2026-10-10T14:05:00+08:00'), page: '/writing', quote: '原文', quotePrefix: '前', quoteSuffix: '后', status: 'open' }
-    const expected = { kind: 'thread', author: '小周', createdAt: '2026-10-10T06:05:00.000Z', page: '/writing', quote: '原文', quotePrefix: '前', quoteSuffix: '后', status: 'open' }
+    const thread = { author: '小周', createdAt: new Date('2026-10-10T14:05:00+08:00'), page: '/writing', quote: '原文', range: [3, 5], status: 'open' }
+    const expected = { kind: 'thread', author: '小周', createdAt: '2026-10-10T06:05:00.000Z', page: '/writing', quote: '原文', range: [3, 5], status: 'open' }
     expect(validate('/site/comments/a/index.mdx', thread)).toEqual({ value: expected })
     expect(validate('/site/comments/a/index.md', thread)).toEqual({ value: expected })
   })
 
-  it('整块评论写 block，已解决的写解决人与时间', () => {
-    const block = { kind: 'code', heading: '代码', index: 1, text: 'import' }
-    expect(validate('/c/a/index.md', { author: 'a', createdAt: '2026-10-10', page: '/', status: 'resolved', block, resolvedBy: 'b', resolvedAt: '2026-10-11' })).toEqual({
-      value: { kind: 'thread', author: 'a', createdAt: '2026-10-10T00:00:00.000Z', page: '/', status: 'resolved', block, resolvedBy: 'b', resolvedAt: '2026-10-11T00:00:00.000Z' },
+  it('整块评论写 block 与 range，已解决的写解决人与时间', () => {
+    expect(validate('/c/a/index.md', { author: 'a', createdAt: '2026-10-10', page: '/', status: 'resolved', block: 'code', range: [0, 9], resolvedBy: 'b', resolvedAt: '2026-10-11' })).toEqual({
+      value: { kind: 'thread', author: 'a', createdAt: '2026-10-10T00:00:00.000Z', page: '/', status: 'resolved', block: 'code', range: [0, 9], resolvedBy: 'b', resolvedAt: '2026-10-11T00:00:00.000Z' },
     })
+  })
+
+  it('quote、block 少了 range，range 写错或单独写时报错', () => {
+    const base = { author: 'a', createdAt: '2026-10-10', page: '/', status: 'open' }
+    expect(validate('/c/a/index.md', { ...base, quote: 'x' }).issues?.map((issue) => issue.message)).toEqual(['写了 quote 或 block 就要写 range：批的是快照里的哪一段'])
+    expect(validate('/c/a/index.md', { ...base, block: 'code', range: [5, 5] }).issues?.map((issue) => issue.message)).toEqual(['range 要写成 [start, end]：快照里从 0 数的两个位置，start 小于 end'])
+    expect(validate('/c/a/index.md', { ...base, range: [0, 1] }).issues?.map((issue) => issue.message)).toEqual(['range 要和 quote 或 block 一起写；都不写是批整页'])
   })
 
   it('其余文件按回复校验，回复里不能写 page', () => {
@@ -27,14 +33,13 @@ describe('评论的 frontmatter', () => {
   })
 
   it('缺字段、page 不以 / 开头、status 写错、quote 与 block 都写、block 写错时一次列出全部', () => {
-    const result = validate('/site/comments/a/index.mdx', { createdAt: 'yesterday', page: 'writing', status: 'done', quote: 'x', block: { kind: 'video', heading: '', index: 0, text: '' } })
+    const result = validate('/site/comments/a/index.mdx', { createdAt: 'yesterday', page: 'writing', status: 'done', quote: 'x', block: 'video', range: [0, 1] })
     expect(result.issues?.map((issue) => issue.message)).toEqual([
       'author 要是非空字符串',
       'createdAt 要是时间，如 2026-10-10T12:00:00+08:00',
       'page 写页面地址，以 / 开头，如 /writing',
       'status 要是 open 或 resolved',
-      'block.kind 要是 image、code、table、component 之一',
-      'block.index 要是从 1 数的整数',
+      'block 要是 image、code、table、component 之一',
       'quote 和 block 只能写一个：批一段文字写 quote，批一整块写 block',
     ])
   })
@@ -64,17 +69,11 @@ describe('评论串', () => {
   })
 })
 
-describe('在正文里找原文', () => {
-  it('只出现一次就是那一处，前后文对不上也认', () => {
-    expect(locateQuote('甲乙丙丁', '乙丙', '不是这个', '也不是')).toBe(1)
-  })
-
-  it('出现好几次时取前后文都对得上的那一处', () => {
-    expect(locateQuote('左A右，前A后', 'A', '前', '后')).toBe(5)
-  })
-
-  it('找不到、或者好几处都对不上前后文时返回 undefined', () => {
-    expect(locateQuote('甲乙', '丙')).toBeUndefined()
-    expect(locateQuote('左A右，前A后', 'A', '上', '下')).toBeUndefined()
+describe('frontmatter 与快照', () => {
+  it('quote 等于快照里 range 那一段才对得上；批整页的不用快照', () => {
+    expect(snapshotMismatchOf({ quote: '乙丙', range: [1, 3] }, '甲乙丙丁')).toBeUndefined()
+    expect(snapshotMismatchOf({}, '')).toBeUndefined()
+    expect(snapshotMismatchOf({ quote: '乙丙', range: [0, 2] }, '甲乙丙丁')).toBe('quote 和快照里 range 那一段不一样：快照里是「甲乙」')
+    expect(snapshotMismatchOf({ range: [2, 9] }, '甲乙丙丁')).toBe('range [2, 9] 超出了快照（共 4 个字）')
   })
 })

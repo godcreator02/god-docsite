@@ -3,7 +3,17 @@ import { randomBytes } from 'node:crypto'
 import { mkdir, readFile, readdir, rm, stat, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 import { promisify } from 'node:util'
-import { commentBlockKinds, isThreadHeadFile, type CommentBlockAnchor, type Commenter } from '../comments.js'
+import {
+  commentBlockKinds,
+  commentSnapshotFile,
+  isCommentRange,
+  isThreadHeadFile,
+  snapshotMismatchOf,
+  type CommentBlockKind,
+  type Commenter,
+  type CommentRange,
+  type CommentThreadFrontmatter,
+} from '../comments.js'
 
 const commenterOfDir = new Map<string, Promise<Commenter>>()
 
@@ -65,7 +75,7 @@ function yamlString(value: string) {
   return JSON.stringify(value)
 }
 
-function frontmatterOf(fields: Record<string, string | CommentBlockAnchor | undefined>) {
+function frontmatterOf(fields: Record<string, string | CommentRange | undefined>) {
   const lines = Object.entries(fields)
     .filter(([, value]) => value !== undefined)
     .map(([key, value]) => `${key}: ${typeof value === 'string' ? yamlString(value) : JSON.stringify(value)}`)
@@ -82,9 +92,12 @@ function newReplyFile(now: Date) {
   return `${now.toISOString().slice(0, 19).replace(/[-:]/g, '').toLowerCase()}-${randomBytes(2).toString('hex')}.md`
 }
 
-type NewAnchor = { quote: string; quotePrefix: string; quoteSuffix: string } | { block: CommentBlockAnchor } | Record<string, never>
+/** 新评论串批的位置：frontmatter 里写的几项，加上要存成 snapshot.txt 的页面文字；批整页时都没有 */
+type NewAnchor = { fields: { quote: string; range: CommentRange } | { block: CommentBlockKind; range: CommentRange } | Record<string, never>; snapshot?: string }
 
-/** 网页传来的 anchor：{ quote, quotePrefix, quoteSuffix }、{ block } 或 {}（批整页） */
+const anchorShapes = '{ quote, range, snapshot }、{ block, range, snapshot } 或 {}'
+
+/** 网页传来的 anchor：{ quote, range, snapshot }（批一段文字）、{ block, range, snapshot }（批一整块）或 {}（批整页） */
 function anchorOf(form: FormData): NewAnchor {
   let anchor: unknown
   try {
@@ -93,18 +106,16 @@ function anchorOf(form: FormData): NewAnchor {
     if (error instanceof RejectedRequest) throw error
     throw new RejectedRequest(400, 'anchor 不是 JSON')
   }
-  if (typeof anchor !== 'object' || anchor === null) throw new RejectedRequest(400, 'anchor 要是对象')
-  const { quote, quotePrefix, quoteSuffix, block } = anchor as Record<string, unknown>
-  if (typeof quote === 'string' && quote.trim() !== '' && typeof quotePrefix === 'string' && typeof quoteSuffix === 'string') return { quote, quotePrefix, quoteSuffix }
-  if (block !== undefined) {
-    const { kind, heading, index, text } = block as Record<string, unknown>
-    if (commentBlockKinds.includes(kind as CommentBlockAnchor['kind']) && typeof heading === 'string' && Number.isInteger(index) && (index as number) >= 1 && typeof text === 'string') {
-      return { block: { kind: kind as CommentBlockAnchor['kind'], heading, index: index as number, text } }
-    }
-    throw new RejectedRequest(400, 'anchor.block 要写成 { kind, heading, index, text }')
-  }
-  if (Object.keys(anchor).length === 0) return {}
-  throw new RejectedRequest(400, 'anchor 要是 { quote, quotePrefix, quoteSuffix }、{ block } 或 {}')
+  if (typeof anchor !== 'object' || anchor === null) throw new RejectedRequest(400, `anchor 要是 ${anchorShapes}`)
+  if (Object.keys(anchor).length === 0) return { fields: {} }
+  const { quote, block, range, snapshot } = anchor as Record<string, unknown>
+  if (!isCommentRange(range)) throw new RejectedRequest(400, 'anchor.range 要是 [start, end]，start 小于 end')
+  if (typeof snapshot !== 'string' || snapshot.includes('\r')) throw new RejectedRequest(400, 'anchor.snapshot 要是页面文字，换行只用 \\n')
+  const fields = typeof quote === 'string' && quote.trim() !== '' ? { quote, range } : commentBlockKinds.includes(block as CommentBlockKind) ? { block: block as CommentBlockKind, range } : undefined
+  if (!fields) throw new RejectedRequest(400, `anchor 要是 ${anchorShapes}`)
+  const mismatch = snapshotMismatchOf(fields, snapshot)
+  if (mismatch) throw new RejectedRequest(400, `anchor 对不上：${mismatch}`)
+  return { fields, snapshot }
 }
 
 async function exists(file: string) {
@@ -207,7 +218,8 @@ async function handleForm(form: FormData, { commenter, pageUrls, commentsDir }: 
     const dir = path.join(commentsDir, thread)
     await mkdir(dir, { recursive: true })
     await writePastedImages(form, dir)
-    await writeFile(path.join(dir, 'index.md'), `${frontmatterOf({ author: commenter.name, createdAt, page, status: 'open', ...anchor })}\n${body}\n`)
+    if (anchor.snapshot !== undefined) await writeFile(path.join(dir, commentSnapshotFile), anchor.snapshot)
+    await writeFile(path.join(dir, 'index.md'), `${frontmatterOf({ author: commenter.name, createdAt, page, status: 'open', ...anchor.fields })}\n${body}\n`)
     return { thread, file: 'index.md' }
   }
 
@@ -245,6 +257,7 @@ async function handleForm(form: FormData, { commenter, pageUrls, commentsDir }: 
 /**
  * 评论接口的 POST：项目 routes.ts 里 route('api/comments', …) 的 action 调它。
  * 表单字段：op（create、reply、edit、delete、resolve、reopen）、page 与 anchor（create）、thread、file（edit、delete）、body、image（粘贴的图片，可多个）。
+ * anchor 里带着页面文字的快照，存成评论串文件夹里的 snapshot.txt。
  * 只改 comments/ 里的文件，不碰 git；开发服务看到文件变了自己刷新页面
  */
 export async function commentRequestResponse(request: Request, options: CommentRequestOptions): Promise<Response> {
@@ -258,6 +271,33 @@ export async function commentRequestResponse(request: Request, options: CommentR
     if (error instanceof RejectedRequest) return new Response(error.message, { status: error.status })
     throw error
   }
+}
+
+/**
+ * 一页上各评论串的页面文字快照，按评论串文件夹名：内容页路由的 loader 调它，传给 PageComments。
+ * 批整页的评论串没有快照。快照缺了、frontmatter 的 range 或 quote 和快照对不上时报错，一次列出全部。
+ * 读出来统一成 \n 换行：git 在 Windows 上取出文件时可能把换行改成 \r\n，位置就差了
+ */
+export async function commentSnapshotsOf(
+  threads: ReadonlyArray<{ id: string; head: Pick<CommentThreadFrontmatter, 'quote' | 'range'> }>,
+  commentsDir = path.resolve(process.cwd(), 'comments'),
+): Promise<Record<string, string>> {
+  const snapshots: Record<string, string> = {}
+  const problems: string[] = []
+  for (const { id, head } of threads) {
+    if (!head.range) continue
+    const file = path.join(commentsDir, id, commentSnapshotFile)
+    if (!(await exists(file))) {
+      problems.push(`评论串 ${id} 写了 range，但文件夹里没有 ${commentSnapshotFile}`)
+      continue
+    }
+    const snapshot = (await readFile(file, 'utf8')).replace(/\r\n/g, '\n')
+    const mismatch = snapshotMismatchOf(head, snapshot)
+    if (mismatch) problems.push(`评论串 ${id}：${mismatch}`)
+    else snapshots[id] = snapshot
+  }
+  if (problems.length > 0) throw new Error(problems.join('\n'))
+  return snapshots
 }
 
 /** 评论接口的 GET：编辑时取一条评论的原文（不含 frontmatter）。查询参数 thread、file */

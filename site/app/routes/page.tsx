@@ -6,7 +6,7 @@ import { commentThreadsOf, type Commenter, type CommentThread } from '@godcreato
 import { contentFileUrlOf } from '@godcreator/docsite-kit/page-sources'
 import { commentScopeProps, HtmlPageFrame, PageComments, TsxPageBody } from '@godcreator/docsite-kit/ui'
 import { comments, docs, tsxPageModules } from '../lib/collections'
-import { pageCommenter } from '../lib/commenter.server'
+import { pageCommenter, pageCommentSnapshots } from '../lib/commenter.server'
 import { source } from '../lib/source'
 import type { Route } from './+types/page'
 
@@ -15,7 +15,8 @@ export async function loader({ params }: Route.LoaderArgs) {
   const page = source.getPage(slugs)
   if (!page) throw new Response('没有这一页', { status: 404 })
   const { title, description } = page.data
-  const shared = { title, description, url: page.url, commenter: await pageCommenter() }
+  const snapshots = await pageCommentSnapshots(threadsOfPage.get(page.url) ?? noThreads)
+  const shared = { title, description, url: page.url, commenter: await pageCommenter(), snapshots }
   if (page.type === 'mdx') return { type: 'mdx' as const, ...shared, path: page.path }
   if (page.type === 'tsx') return { type: 'tsx' as const, ...shared, file: page.data.file }
   return { type: 'html' as const, ...shared, src: contentFileUrlOf(page.data.file) }
@@ -38,15 +39,23 @@ function renderCommentBody(entry: CommentEntry) {
 
 const noThreads: CommentThread<CommentEntry>[] = []
 
-type PageFrameProps = { title: string | undefined; description: string | undefined; url: string; commenter: Commenter | null; toc?: TOCItemType[]; children: ReactNode }
+type PageFrameProps = {
+  title: string | undefined
+  description: string | undefined
+  url: string
+  commenter: Commenter | null
+  snapshots: Record<string, string>
+  toc?: TOCItemType[]
+  children: ReactNode
+}
 
-function PageFrame({ title, description, url, commenter, toc, children }: PageFrameProps) {
+function PageFrame({ title, description, url, commenter, snapshots, toc, children }: PageFrameProps) {
   return (
     <DocsPage toc={toc}>
       <title>{title}</title>
       <DocsTitle>{title}</DocsTitle>
       <DocsDescription>{description}</DocsDescription>
-      <PageComments page={url} threads={threadsOfPage.get(url) ?? noThreads} commenter={commenter} renderBody={renderCommentBody}>
+      <PageComments page={url} threads={threadsOfPage.get(url) ?? noThreads} snapshots={snapshots} commenter={commenter} renderBody={renderCommentBody}>
         <DocsBody {...commentScopeProps}>{children}</DocsBody>
       </PageComments>
     </DocsPage>
@@ -75,8 +84,8 @@ function TsxPage({ file, ...frame }: Omit<PageFrameProps, 'children'> & { file: 
 }
 
 export default function Page({ loaderData }: Route.ComponentProps) {
-  const { title, description, url, commenter } = loaderData
-  const frame = { title, description, url, commenter }
+  const { title, description, url, commenter, snapshots } = loaderData
+  const frame = { title, description, url, commenter, snapshots }
   if (loaderData.type === 'mdx') return <MdxPage path={loaderData.path} {...frame} />
   if (loaderData.type === 'tsx') return <TsxPage file={loaderData.file} {...frame} />
   return (

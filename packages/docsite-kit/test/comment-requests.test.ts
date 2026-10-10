@@ -1,8 +1,8 @@
-import { mkdtemp, readFile, readdir, rm } from 'node:fs/promises'
+import { mkdtemp, readFile, readdir, rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import path from 'node:path'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
-import { commentRequestResponse, commentSourceResponse } from '../src/server/comments.js'
+import { commentRequestResponse, commentSnapshotsOf, commentSourceResponse } from '../src/server/comments.js'
 
 let commentsDir: string
 
@@ -28,14 +28,35 @@ async function created(fields: Record<string, string>, images: File[] = []) {
 }
 
 describe('评论接口', () => {
-  it('新建评论串：写 index.md，frontmatter 带作者、页面、原文与前后文；粘贴的图片存进同一文件夹', async () => {
+  it('新建评论串：写 index.md，frontmatter 带作者、页面、原文与位置；页面文字存成 snapshot.txt，粘贴的图片存进同一文件夹', async () => {
     const image = new File([new Uint8Array([1, 2, 3])], 'paste-abc-0.png', { type: 'image/png' })
-    const { thread, file } = await created({ anchor: JSON.stringify({ quote: '原文', quotePrefix: '前', quoteSuffix: '后' }), body: '看这里 <b> {x}\n![](./paste-abc-0.png)' }, [image])
+    const anchor = { quote: '原文', range: [1, 3], snapshot: '前原文后\n下一段' }
+    const { thread, file } = await created({ anchor: JSON.stringify(anchor), body: '看这里 <b> {x}\n![](./paste-abc-0.png)' }, [image])
     expect(file).toBe('index.md')
     expect(thread).toMatch(/^\d{4}-\d{2}-\d{2}-[0-9a-f]{6}$/)
     const source = await readFile(path.join(commentsDir, thread, 'index.md'), 'utf8')
-    expect(source).toMatch(/^---\nauthor: "小周"\ncreatedAt: "[^"]+"\npage: "\/writing"\nstatus: "open"\nquote: "原文"\nquotePrefix: "前"\nquoteSuffix: "后"\n---\n\n看这里 &lt;b> \{x\}\n!\[\]\(\.\/paste-abc-0\.png\)\n$/)
-    expect(await readdir(path.join(commentsDir, thread))).toEqual(['index.md', 'paste-abc-0.png'])
+    expect(source).toMatch(/^---\nauthor: "小周"\ncreatedAt: "[^"]+"\npage: "\/writing"\nstatus: "open"\nquote: "原文"\nrange: \[1,3\]\n---\n\n看这里 &lt;b> \{x\}\n!\[\]\(\.\/paste-abc-0\.png\)\n$/)
+    expect(await readFile(path.join(commentsDir, thread, 'snapshot.txt'), 'utf8')).toBe('前原文后\n下一段')
+    expect((await readdir(path.join(commentsDir, thread))).sort()).toEqual(['index.md', 'paste-abc-0.png', 'snapshot.txt'])
+  })
+
+  it('整块评论写 block 与 range；原文和快照里那一段对不上、range 超出快照、anchor 缺快照时拒绝', async () => {
+    const { thread } = await created({ anchor: JSON.stringify({ block: 'image', range: [2, 3], snapshot: '图前￼图后' }), body: '这张图' })
+    expect(await readFile(path.join(commentsDir, thread, 'index.md'), 'utf8')).toContain('block: "image"\nrange: [2,3]\n')
+    const rejected = async (anchor: unknown) => (await post({ op: 'create', page: '/writing', anchor: JSON.stringify(anchor), body: 'x' })).text()
+    expect(await rejected({ quote: '原文', range: [0, 2], snapshot: '前原文后' })).toBe('anchor 对不上：quote 和快照里 range 那一段不一样：快照里是「前原」')
+    expect(await rejected({ quote: '原文', range: [1, 9], snapshot: '前原文后' })).toBe('anchor 对不上：range [1, 9] 超出了快照（共 4 个字）')
+    expect(await rejected({ quote: '原文', range: [1, 3] })).toBe('anchor.snapshot 要是页面文字，换行只用 \\n')
+    expect(await rejected({ quote: '原文', range: [3, 1], snapshot: '前原文后' })).toBe('anchor.range 要是 [start, end]，start 小于 end')
+  })
+
+  it('读快照：换行统一成 \\n；缺快照、和 frontmatter 对不上时报错，一次列出全部', async () => {
+    const { thread } = await created({ anchor: JSON.stringify({ quote: '原文', range: [1, 3], snapshot: '前原文后\n下一段' }), body: 'x' })
+    await writeFile(path.join(commentsDir, thread, 'snapshot.txt'), '前原文后\r\n下一段')
+    expect(await commentSnapshotsOf([{ id: thread, head: { quote: '原文', range: [1, 3] } }, { id: 'page-only', head: {} }], commentsDir)).toEqual({ [thread]: '前原文后\n下一段' })
+    await expect(commentSnapshotsOf([{ id: thread, head: { quote: '别的', range: [1, 3] } }, { id: 'gone', head: { quote: 'x', range: [0, 1] } }], commentsDir)).rejects.toThrow(
+      `评论串 ${thread}：quote 和快照里 range 那一段不一样：快照里是「原文」\n评论串 gone 写了 range，但文件夹里没有 snapshot.txt`,
+    )
   })
 
   it('回复、解决、重新打开：回复是新文件，解决改 status 并记下是谁', async () => {

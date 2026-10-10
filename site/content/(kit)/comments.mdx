@@ -53,6 +53,7 @@ Ctrl+Enter（Mac 上 ⌘+Enter）发送，Esc 取消。正在写的新评论点�
 comments/
 └── 2026-10-10-heading-levels/
     ├── index.mdx            ← 发起的那条
+    ├── snapshot.txt         ← 发起评论那一刻整页显示出来的文字
     ├── reply-indent.mdx     ← 一条回复
     ├── toc-sketch.svg       ← 评论里的图片
     └── indent-preview.tsx   ← 评论里的组件
@@ -82,6 +83,7 @@ author: 小周
 createdAt: 2026-10-10T15:20:00+08:00
 page: /writing
 quote: 四级标题用来给一小节里的几段起名字
+range: [718, 735]
 status: open
 ---
 
@@ -96,28 +98,35 @@ status: open
 | `createdAt` | 什么时候写的，如 `2026-10-10T15:20:00+08:00` |
 | `page` | 被批页面的地址，以 `/` 开头 |
 | `status` | `open` 或 `resolved` |
-| `quote` | 批一段文字：原文，和页面上显示的文字一字不差 |
-| `quotePrefix`、`quoteSuffix` | 原文前后紧挨着的各约 20 个字，原文在页面上出现好几次时靠它们认出是哪一处；网页上选中文字时自动记下 |
-| `block` | 批一整块：`{ kind, heading, index, text }`，见下文 |
+| `quote` | 批一段文字：原文，等于快照里 `range` 那一段 |
+| `block` | 批一整块：`image`（图片）、`code`（代码块）、`table`（表格）、`component`（其余的组件，如提示框、TSX 组件） |
+| `range` | 批的是快照里的第几个字到第几个字，写成 `[开始, 结束]`，从 0 数，不含结束那个字 |
 | `resolvedBy`、`resolvedAt` | 谁、什么时候标的已解决 |
 
-`quote` 与 `block` 只能写一个，都不写就是批整页。同一文件夹里其余的 `.md` / `.mdx` 每个是一条回复，只写 `author` 与 `createdAt`。
-
-### 整块评论怎么认出是哪一块
-
-`block` 的四项：
-
-- `kind`：`image`（图片）、`code`（代码块）、`table`（表格）、`component`（其余的组件，如提示框、TSX 组件）
-- `heading`：这一块前面最近的二到四级标题的 id；页面开头、还没有标题时是空字符串
-- `index`：在这个标题下，同一类块里排第几个，从 1 数
-- `text`：这一块的文字开头（约 40 个字），图片是 alt。用来核对：块挪了位置、对不上时当作原文找不到了
+`quote` 与 `block` 只能写一个，写了就要写 `range`；都不写就是批整页，没有快照。同一文件夹里其余的 `.md` / `.mdx` 每个是一条回复，只写 `author` 与 `createdAt`。
 
 段落、标题、列表、引用里的字用选中文字来批，不算整块。TSX 页面整个正文是一块组件；HTML 页面的正文在 iframe 里，只能整块或整页批。
 
+### 怎么找到批的是哪里
+
+发起评论时，网页把整页显示出来的文字存成评论串文件夹里的 `snapshot.txt`：文字照页面上显示的样子，一张图片记成一个 `U+FFFC` 字符，评论自己的按钮不算。
+`range` 就是在这份文字里数的位置；整块评论的 `range` 从那一块的第一个字（或图片）到最后一个。
+
+打开页面时，网页取出现在显示的整页文字，和快照逐字对比差异，把 `range` 推算到现在的位置：
+
+- 被批的那段没改过，前后插了、删了别的段落：准确落到新位置。同样的文字在页面上出现好几次也不会认错，差异是按前后顺序对齐的
+- 被批的那段里改了几个字，但开头和结尾的字还在：照样挂在改后的那段上，标「原文改过」，卡片和右侧栏里写着当时批的原文
+- 开头或结尾的字被改掉、整段重写、整段挪到了别处：找不到
+
+快照读出来时换行统一成 `\n`：git 在 Windows 上取出文件可能把换行改成 `\r\n`，位置就会差。
+快照缺了、`range` 超出快照、`quote` 和快照里那一段不一样时，开发服务报错。
+
 ### 原文找不到了
 
-原文在页面上改掉了、出现好几次又对不上前后文、整块挪了位置，都不算错：
-评论照样在右侧栏里，标红写着「原文找不到了」和原来批的东西，不去猜位置。
+找不到不算错：评论照样在右侧栏里，标红写着「原文找不到了」和原来批的东西，不去猜位置。
+
+有一种情况注定找不到：同样的一句话连着出现几次，删掉其中一次，单看文字分不出删的是哪一次。
+差异算法认定删的是其中一处，批在那一处的评论就找不到了，批在其余几处的照样能找到。
 
 ## 写错了会怎样
 
@@ -143,6 +152,8 @@ export const comments = defineCollections({ type: 'doc', dir: 'comments', async:
 
 `app/lib/commenter.server.ts` 的 `pageCommenter()` 在开发服务里返回 `currentCommenter()`（本机 git 的 `user.name`），发布出去的站返回 `null`。
 布局路由与内容页路由的 `loader` 都返回它：布局传给 `themeSwitchWithCommenter` 显示在侧栏底部，内容页传给 `PageComments`。
+同一个文件里的 `pageCommentSnapshots(threads)` 调用基础包的 `commentSnapshotsOf`，读出这一页各评论串的 `snapshot.txt`；
+内容页路由的 `loader` 返回它，再传给 `PageComments` 的 `snapshots`。发布出去的站也在运行时读这些文件，`comments/` 要跟着站点一起发布。
 
 `app/routes/comments.ts` 是评论接口：`action` 调用 `commentRequestResponse` 写文件，`loader` 调用 `commentSourceResponse` 取原文给编辑用。
 接口只改 `comments/` 里的文件，不碰 git。
@@ -151,7 +162,7 @@ export const comments = defineCollections({ type: 'doc', dir: 'comments', async:
 
 ```tsx title="app/routes/page.tsx"
 <DocsPage toc={toc}>
-  <PageComments page={url} threads={threads} commenter={commenter} renderBody={renderCommentBody}>
+  <PageComments page={url} threads={threads} snapshots={snapshots} commenter={commenter} renderBody={renderCommentBody}>
     <DocsBody {...commentScopeProps}>{children}</DocsBody>
   </PageComments>
 </DocsPage>
