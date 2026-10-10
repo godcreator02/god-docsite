@@ -34,6 +34,35 @@ export default function Page() {
 没导出 `meta`、`meta.title` 是空的，开发服务直接报错，写明是哪个文件。
 TSX 页面要运行组件才知道正文，所以搜索只收标题和 `meta.description`。
 
+## 一页要用几个 TSX 组件
+
+侧栏按 `content/` 的文件夹分层：一个文件夹就是侧栏里一个能展开的组，组名取文件夹的 `meta.json` 或里面的 `index.mdx`。
+不是页面的文件（组件的 `.tsx`、图片）不进侧栏；只放了这类文件的文件夹也不进侧栏。
+
+所以一页要用几个组件时，组件放进和页面同名的文件夹，页面本身放在文件夹外面：
+
+```text
+content/notes/
+├── waveform.mdx          ← 页面，地址 /notes/waveform
+└── waveform/             ← 只放组件，不进侧栏
+    ├── duty-slider.tsx
+    └── spectrum.tsx
+```
+
+```mdx title="content/notes/waveform.mdx"
+import { DutySlider } from './waveform/duty-slider'
+import { Spectrum } from './waveform/spectrum'
+
+<DutySlider />
+
+<Spectrum />
+```
+
+TSX 页面也一样：`waveform.page.tsx` 放在外面，从 `./waveform/` 引用组件。
+
+不要把页面写成 `waveform/index.mdx` 再把组件放在旁边：那样 `waveform/` 成了侧栏里的一个组，
+带一个展开箭头，点开却是空的。组件文件名不要以 `.page.tsx` 结尾，否则会被当成一个页面。
+
 ## HTML 页面
 
 整个文件放进 iframe 显示，由 `/api/content/` 原样送出，所以文件里相对路径的图片、样式、脚本照常能用。

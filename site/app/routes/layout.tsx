@@ -1,6 +1,6 @@
 import { Outlet } from 'react-router'
 import { useFumadocsLoader } from 'fumadocs-core/source/client'
-import { DocsLayout } from '@fumadocs/base-ui/layouts/notebook'
+import { DocsLayout } from '@fumadocs/base-ui/layouts/docs'
 import { source } from '../lib/source'
 import type { Route } from './+types/layout'
 

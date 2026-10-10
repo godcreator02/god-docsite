@@ -15,15 +15,16 @@ icon: FolderTree
 | `vite.config.ts` | 插件依次是 `docsite()`、`fumadocsMdx()`、`tailwindcss()`、`reactRouter()` |
 | `react-router.config.ts` | `ssr: true`：页面在服务端渲染，发布时用 `react-router-serve` 开服务 |
 | `app/root.tsx` | 整个 HTML 外框；`RootProvider` 传入中文界面文字 `zhTranslations`；出错时显示原话 |
-| `app/app.css` | 依次引入 Tailwind、fumadocs 的配色与 preset（notebook 布局的样式在 preset 里）、基础包的 `styles.css` |
+| `app/app.css` | 依次引入 Tailwind、fumadocs 的配色与 preset（docs 布局的样式在 preset 里）、基础包的 `styles.css` |
 | `app/routes.ts` | 路由表：`api/search` 搜索，`api/content/*` 送内容文件，首页 `/` 与其余地址都交给内容页（`*` 不匹配 `/`，首页另写一条 `index` 路由） |
-| `app/lib/collections.ts` | 列出页面文件：MDX 用 `defineDocs`，TSX 页面用 `import.meta.glob` 按需加载组件 |
-| `app/lib/source.ts` | 把三种页面交给 fumadocs 的 `loader()`，进同一棵页面树；`lucideIconsPlugin()` 把 `icon` 里写的 lucide 图标名换成图标；检查页面有没有占用 `api` 这类地址 |
-| `app/routes/layout.tsx` | 整站布局：notebook 的 `DocsLayout`，左侧是页面树，顶上的下拉框切换 `"root": true` 的文件夹 |
-| `app/routes/page.tsx` | 内容页：用 notebook 的页面组件，按页面类型渲染 MDX 正文、TSX 组件或放 HTML 的 iframe |
+| `app/lib/collections.ts` | 列出页面文件与评论文件：MDX 页面用 `defineDocs`，TSX 页面用 `import.meta.glob` 按需加载组件，评论用 `defineCollections` |
+| `app/lib/source.ts` | 把三种页面交给 fumadocs 的 `loader()`，进同一棵页面树；`lucideIconsPlugin()` 把 `icon` 里写的 lucide 图标名换成图标；检查页面有没有占用 `api` 这类地址、评论批的页面在不在 |
+| `app/routes/layout.tsx` | 整站布局：docs 的 `DocsLayout`，左侧是页面树，侧栏里的下拉框切换 `"root": true` 的文件夹 |
+| `app/routes/page.tsx` | 内容页：用 docs 的页面组件，按页面类型渲染 MDX 正文、TSX 组件或放 HTML 的 iframe；有评论的页面加上评论栏 |
 | `app/routes/search.ts` | 搜索接口，调用 `siteSearchServer`，三种页面一起搜 |
 | `app/routes/content-file.ts` | 调用 `contentFileResponse`，把 `content/` 里的文件原样送出 |
-| `content/` | 页面放在这里，每个文件夹的 `meta.json` 写标题和页面顺序；写了 `"root": true` 的文件夹是侧栏顶上下拉框里的一项 |
+| `content/` | 页面放在这里，每个文件夹的 `meta.json` 写标题和页面顺序；写了 `"root": true` 的文件夹是侧栏里切换下拉框的一项 |
+| `comments/` | 评论放在这里，一个评论串一个文件夹，见[评论](/comments) |
 
 ## 用基础包源码还是构建产物
 

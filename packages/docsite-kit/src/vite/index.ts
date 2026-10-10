@@ -19,12 +19,12 @@ function processedWithSite(): Plugin {
   }
 }
 
-/** 放页面的目录与列出页面的模块，都相对站点根；项目骨架就是这样摆的 */
-const contentDirs = ['content']
+/** 放页面与评论的目录、列出它们的模块，都相对站点根；项目骨架就是这样摆的 */
+const contentDirs = ['content', 'comments']
 const pageListFiles = ['app/lib/collections.ts', 'app/lib/source.ts']
 
 /**
- * 页面目录里新增、删除文件（改名是一删一增）以及改 TSX 页面时，让列出页面的模块重新生成，再让浏览器整页刷新。
+ * 页面目录与评论目录里新增、删除文件（改名是一删一增）以及改 TSX 页面时，让列出页面的模块重新生成，再让浏览器整页刷新。
  * 改别的文件不经过这里，照 Vite 与 React Router 的默认处理。
  * 要补这一处：defineDocs 展开出的 import.meta.glob 带 base 选项，Vite 在文件增减时不让它失效，开发服务端一直拿着旧清单，新页面直接 404；
  * 改 TSX 页面默认走组件热替换，正文变了但页面树里的标题还是旧的（布局的 loader 不重新运行）

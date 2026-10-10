@@ -1,0 +1,109 @@
+---
+title: 评论
+description: 一个评论串一个文件夹，每条评论一个 MDX 文件；宽屏时评论栏在正文右边，卡片对齐被批的原文
+icon: MessageSquare
+---
+
+评论和页面分开放，在站点目录的 `comments/` 里。正文是 MDX，能写的和页面一样：
+格式、图片、同一文件夹里的 TSX 组件都行。这一页讲文件怎么写、页面上怎么显示。
+[写一页说明](/writing)和[文档站基础包](/)两页上有几条示例评论，可以对照着看。
+
+## 文件
+
+一个评论串一个文件夹，文件夹名就是评论串的名字，建议写成「日期-几个词」：
+
+```text
+comments/
+└── 2026-10-10-heading-levels/
+    ├── index.mdx            ← 发起的那条
+    ├── reply-indent.mdx     ← 一条回复
+    ├── toc-sketch.svg       ← 评论里的图片
+    └── indent-preview.tsx   ← 评论里的组件
+```
+
+`index.mdx` 是发起的那条，写它批的是哪一页、哪段原文：
+
+```mdx title="comments/2026-10-10-heading-levels/index.mdx"
+---
+author: 小周
+createdAt: 2026-10-10T15:20:00+08:00
+page: /writing
+quote: 四级标题用来给一小节里的几段起名字
+status: open
+---
+
+四级标题在本页目录里缩进得太深了，像下面这样只缩一层行不行？
+
+![本页目录只缩一层的草图](./toc-sketch.svg)
+```
+
+| 字段 | 写什么 |
+| --- | --- |
+| `author` | 谁写的 |
+| `createdAt` | 什么时候写的，如 `2026-10-10T15:20:00+08:00` |
+| `page` | 被批页面的地址，以 `/` 开头 |
+| `quote` | 被批的原文，和页面上显示的文字一字不差；不写就是批整页 |
+| `status` | `open` 或 `resolved` |
+
+同一文件夹里其余的 `.mdx` 每个是一条回复，只写 `author` 与 `createdAt`，按时间排在发起的那条后面：
+
+```mdx title="comments/2026-10-10-heading-levels/reply-indent.mdx"
+---
+author: Claude
+createdAt: 2026-10-10T15:31:00+08:00
+---
+
+import { IndentPreview } from './indent-preview'
+
+可以试试不同的缩进，拖动看效果：
+
+<IndentPreview />
+```
+
+## 写错了会怎样
+
+开发服务直接报错，写明是哪个文件、哪里不对，一次列出全部：
+
+- 缺字段、字段写错，或者写了表里没有的字段
+- 回复里写了 `page`、`quote` 这类只有发起的那条才有的字段
+- 文件没放在评论串自己的文件夹里，或者文件夹里只有回复、没有 `index.mdx`
+- `page` 写的页面不存在
+
+`quote` 在页面上找不到（原文改过了）不算错：卡片照样显示，排在正文顶端，上面写着「原文找不到了」和原来的那段文字。
+
+## 页面上怎么显示
+
+宽屏时，有评论的页面把评论栏放在正文右边，本页目录收进正文上方的下拉条：
+
+- 评论栏跟着正文一起滚动，每张卡片和它批的原文对齐，挨得太近就往下让
+- 被批的原文标黄；点卡片或点标黄的原文，选中这个评论串：卡片正好对齐原文、边框变色，原文颜色加深
+- 批整页的评论排在正文顶端
+- 已解决的评论串颜色变淡，原文不标黄
+
+窄屏放不下评论栏，评论串依次列在正文后面，每张卡片上方写出它批的原文。
+
+原文在页面上出现好几次时，对齐第一处。HTML 页面的正文在 iframe 里，评论栏找不到其中的文字，只能批整页。
+
+## 在骨架里接上
+
+`app/lib/collections.ts` 里列出评论文件，`schema` 用基础包的 `commentFrontmatterSchema`：
+
+```ts title="app/lib/collections.ts"
+export const comments = defineCollections({ type: 'doc', dir: 'comments', async: true, schema: commentFrontmatterSchema })
+```
+
+`app/lib/source.ts` 用 `commentThreadsOf` 把文件分成评论串，再用 `assertCommentPagesExist` 检查批的页面在不在。
+
+`app/routes/page.tsx` 按页面地址取出这一页的评论串，交给 `CommentColumn`（宽屏）与 `CommentList`（窄屏）。
+`docsPagePropsWithComments` 给出传给 `DocsPage` 的两项设置：评论栏放在本页目录那一列，本页目录收进下拉条。
+正文的容器要带上 `commentScopeProps`，评论栏在它里面找原文：
+
+```tsx title="app/routes/page.tsx"
+<DocsPage toc={toc} {...docsPagePropsWithComments(<CommentColumn threads={threads} renderBody={renderCommentBody} />)}>
+  <DocsBody {...commentScopeProps}>{children}</DocsBody>
+  <CommentList threads={threads} renderBody={renderCommentBody} />
+</DocsPage>
+```
+
+`renderCommentBody` 用 `use(entry.load())` 取出编译好的正文再渲染。不用 fumadocs-mdx 给的 `entry.body`：
+它加载完以后不再调用 `use()`，React 会报 `conditional use of use()`。

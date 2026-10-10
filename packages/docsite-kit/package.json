@@ -1,7 +1,7 @@
 {
   "name": "@godcreator/docsite-kit",
   "version": "0.1.0",
-  "description": "基于 fumadocs（React Router 框架模式 + Vite）的文档站基础包：MDX、TSX、HTML 三种页面来源，开发服务插件，服务端函数，页面正文组件与中文界面文字",
+  "description": "基于 fumadocs（React Router 框架模式 + Vite）的文档站基础包：MDX、TSX、HTML 三种页面来源，开发服务插件，服务端函数，页面正文组件，评论，中文界面文字",
   "type": "module",
   "exports": {
     "./vite": {
@@ -12,6 +12,11 @@
       "development": "./src/page-sources.ts",
       "types": "./dist/page-sources.d.ts",
       "default": "./dist/page-sources.js"
+    },
+    "./comments": {
+      "development": "./src/comments.ts",
+      "types": "./dist/comments.d.ts",
+      "default": "./dist/comments.js"
     },
     "./server": {
       "development": "./src/server/index.ts",

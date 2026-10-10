@@ -1,2 +1,11 @@
 /* 站点的 app.css 引入这一份：让 Tailwind 扫到基础包组件里用的类名 */
 @source './src';
+
+/* 评论批的原文：CSS Custom Highlight API 的高亮，名字和 src/ui/comments.tsx 里的一致 */
+::highlight(docsite-comment) {
+  background-color: color-mix(in oklab, #f5b301 30%, transparent);
+}
+
+::highlight(docsite-comment-active) {
+  background-color: color-mix(in oklab, #f5b301 65%, transparent);
+}

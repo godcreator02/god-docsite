@@ -1,10 +1,11 @@
 import { use, type ReactNode } from 'react'
 import type { TOCItemType } from 'fumadocs-core/toc'
-import { DocsBody, DocsDescription, DocsPage, DocsTitle } from '@fumadocs/base-ui/layouts/notebook/page'
+import { DocsBody, DocsDescription, DocsPage, DocsTitle } from '@fumadocs/base-ui/layouts/docs/page'
 import defaultMdxComponents from '@fumadocs/base-ui/mdx'
+import { commentThreadsOf, type CommentThread } from '@godcreator/docsite-kit/comments'
 import { contentFileUrlOf } from '@godcreator/docsite-kit/page-sources'
-import { HtmlPageFrame, TsxPageBody } from '@godcreator/docsite-kit/ui'
-import { docs, tsxPageModules } from '../lib/collections'
+import { CommentColumn, CommentList, commentScopeProps, docsPagePropsWithComments, HtmlPageFrame, TsxPageBody } from '@godcreator/docsite-kit/ui'
+import { comments, docs, tsxPageModules } from '../lib/collections'
 import { source } from '../lib/source'
 import type { Route } from './+types/page'
 
@@ -13,20 +14,39 @@ export async function loader({ params }: Route.LoaderArgs) {
   const page = source.getPage(slugs)
   if (!page) throw new Response('没有这一页', { status: 404 })
   const { title, description } = page.data
-  if (page.type === 'mdx') return { type: 'mdx' as const, title, description, path: page.path }
-  if (page.type === 'tsx') return { type: 'tsx' as const, title, description, file: page.data.file }
-  return { type: 'html' as const, title, description, src: contentFileUrlOf(page.data.file) }
+  const shared = { title, description, url: page.url }
+  if (page.type === 'mdx') return { type: 'mdx' as const, ...shared, path: page.path }
+  if (page.type === 'tsx') return { type: 'tsx' as const, ...shared, file: page.data.file }
+  return { type: 'html' as const, ...shared, src: contentFileUrlOf(page.data.file) }
 }
 
-type PageFrameProps = { title: string | undefined; description: string | undefined; toc?: TOCItemType[]; children: ReactNode }
+type CommentEntry = (typeof comments.entries)[number]
 
-function PageFrame({ title, description, toc, children }: PageFrameProps) {
+const threadsOfPage = new Map<string, CommentThread<CommentEntry>[]>()
+for (const thread of commentThreadsOf(comments.entries)) threadsOfPage.set(thread.head.page, [...(threadsOfPage.get(thread.head.page) ?? []), thread])
+
+/** 不用 entry.body：它加载完后不再调用 use()，React 报 conditional use of use() */
+function CommentBody({ entry }: { entry: CommentEntry }) {
+  const { body: Mdx } = use(entry.load())
+  return <Mdx components={defaultMdxComponents} />
+}
+
+function renderCommentBody(entry: CommentEntry) {
+  return <CommentBody entry={entry} />
+}
+
+type PageFrameProps = { title: string | undefined; description: string | undefined; url: string; toc?: TOCItemType[]; children: ReactNode }
+
+function PageFrame({ title, description, url, toc, children }: PageFrameProps) {
+  const threads = threadsOfPage.get(url) ?? []
+  const commentProps = threads.length > 0 ? docsPagePropsWithComments(<CommentColumn threads={threads} renderBody={renderCommentBody} />) : {}
   return (
-    <DocsPage toc={toc}>
+    <DocsPage toc={toc} {...commentProps}>
       <title>{title}</title>
       <DocsTitle>{title}</DocsTitle>
       <DocsDescription>{description}</DocsDescription>
-      <DocsBody>{children}</DocsBody>
+      <DocsBody {...commentScopeProps}>{children}</DocsBody>
+      <CommentList threads={threads} renderBody={renderCommentBody} />
     </DocsPage>
   )
 }
@@ -53,11 +73,11 @@ function TsxPage({ file, ...frame }: Omit<PageFrameProps, 'children'> & { file: 
 }
 
 export default function Page({ loaderData }: Route.ComponentProps) {
-  const { title, description } = loaderData
-  if (loaderData.type === 'mdx') return <MdxPage path={loaderData.path} title={title} description={description} />
-  if (loaderData.type === 'tsx') return <TsxPage file={loaderData.file} title={title} description={description} />
+  const { title, description, url } = loaderData
+  if (loaderData.type === 'mdx') return <MdxPage path={loaderData.path} title={title} description={description} url={url} />
+  if (loaderData.type === 'tsx') return <TsxPage file={loaderData.file} title={title} description={description} url={url} />
   return (
-    <PageFrame title={title} description={description}>
+    <PageFrame title={title} description={description} url={url}>
       <HtmlPageFrame src={loaderData.src} title={title ?? ''} />
     </PageFrame>
   )

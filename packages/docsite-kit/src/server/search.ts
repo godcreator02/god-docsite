@@ -7,6 +7,6 @@ import type { LoaderConfig, LoaderOutput } from 'fumadocs-core/source'
  * tolerance 1 允许一个字的出入，搜「滑块」会命中「模块」；threshold 1 只要切出的词有一个出现就算命中，
  * 搜「页面树」时含「页面」的页全都返回。这里两项都设为 0：每个词都要原样出现
  */
-export function siteSearchServer<C extends LoaderConfig>(source: LoaderOutput<C>) {
+export function siteSearchServer<C extends LoaderConfig>(source: LoaderOutput<C>): ReturnType<typeof createFromSource> {
   return createFromSource(source, { search: { tolerance: 0, threshold: 0 } })
 }
