@@ -39,8 +39,10 @@ TSX 页面要运行组件才知道正文，所以搜索只收标题和 `meta.des
 整个文件放进 iframe 显示，由 `/api/content/` 原样送出，所以文件里相对路径的图片、样式、脚本照常能用。
 iframe 的高度跟着里面的内容走，不出现第二条滚动条。没有 `<title>` 时开发服务直接报错。
 
-iframe 里的页面跟着系统的深浅色走，不跟着站点右上角的主题切换。文件里要写 `:root { color-scheme: light dark; }`：
-不写的话，系统是深色时 iframe 的底色是白的，文字却可能变成浅色，看不清。
+iframe 里的页面跟着站点右上角的主题切换深浅色：iframe 从站点继承 `color-scheme`，
+里面的 `prefers-color-scheme` 看到的就是站点当前的主题，切换时当场跟着变。
+文件里要写 `:root { color-scheme: light dark; }`，配色写成随 `prefers-color-scheme` 变或用系统默认色。
+不写的话，站点是深色时 iframe 里仍是白底，和站点不一致；如果文件又按 `prefers-color-scheme` 改了文字颜色，白底上的浅色字会看不清。
 
 ## 保留地址
 

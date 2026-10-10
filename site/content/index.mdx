@@ -15,11 +15,20 @@ description: 基于 fumadocs 的文档站基础包，协作站、docfirst 文档
 | --- | --- | --- |
 | `./vite` | `vite.config.ts` | 开发服务插件 `docsite()`，见[开发服务插件](/dev-plugin) |
 | `./page-sources` | `app/lib/source.ts`、页面路由 | TSX 页面与 HTML 页面的来源、保留地址检查、内容文件的地址，见[三种页面](/page-types) |
-| `./server` | `app/routes/content-file.ts` | 把 `content/` 里的文件原样送给浏览器 |
+| `./server` | `app/routes/search.ts`、`app/routes/content-file.ts` | 中文站点用的搜索接口 `siteSearchServer`；把 `content/` 里的文件原样送给浏览器 |
 | `./ui` | `app/root.tsx`、页面路由 | TSX 页面与 HTML 页面的正文组件、fumadocs 界面文字的中文 |
 | `./styles.css` | `app/app.css` | 让 Tailwind 扫到包里组件用的类名 |
 
-布局用 fumadocs 自带的 spacious 布局（正文是一张圆角卡片），骨架直接引用，包里不另外包一层。
+布局用 fumadocs 自带的 glass 布局：侧栏和顶栏是浮在正文上的半透明圆角面板，搜索和主题切换在右上角。
+骨架直接引用这个布局，包里不另外包一层。
+
+## 搜索
+
+`siteSearchServer(source)` 是 fumadocs 搜索接口加上适合中文的两项设置，三种页面一起搜。
+fumadocs 默认按 Unicode 规则切词，中文能切开；但它还默认允许一个字的出入（搜「滑块」会命中「模块」），
+而且只要切出的词有一个出现就算命中（搜「页面树」时含「页面」的页全都返回）。这两项都关掉了：每个词都要原样出现。
+
+代码块里的文字不进搜索，这是 fumadocs 的做法。
 
 ## 这个站
 

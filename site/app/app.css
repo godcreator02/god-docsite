@@ -1,6 +1,6 @@
 @import 'tailwindcss';
+/* preset.css 不带 glass 布局的样式，要另外引入，照 fumadocs 的说明放在配色与 preset 前面 */
+@import '@fumadocs/base-ui/css/generated/glass.css';
 @import '@fumadocs/base-ui/css/neutral.css';
 @import '@fumadocs/base-ui/css/preset.css';
-/* preset.css 只带 docs、flux、notebook、home 几种布局的样式，spacious 要另外引入 */
-@import '@fumadocs/base-ui/css/generated/spacious.css';
 @import '@godcreator/docsite-kit/styles.css';
