@@ -1,0 +1,27 @@
+服务端（server-page-text.mjs，解析开发服务渲染出的 HTML）：
+{"page":"/","length":1318,"sha1":"fbadd5abc060"}
+{"page":"/skeleton","length":1770,"sha1":"eb16ec12f9fa"}
+{"page":"/comments","length":4571,"sha1":"9576b74822bd"}
+{"page":"/dev-plugin","length":871,"sha1":"363775321751"}
+{"page":"/page-types","length":1803,"sha1":"8bb66e5d8b7f"}
+{"page":"/page-types/tsx-page","length":412,"sha1":"f20dec0f08c1"}
+{"page":"/page-types/html-page","length":1,"sha1":"8dae9042ceed"}
+{"page":"/writing","length":1543,"sha1":"0b9f032f23f6"}
+{"page":"/writing/components","length":859,"sha1":"0e7ecafd7312"}
+{"page":"/zz-anchor-test","length":59,"sha1":"80ef53c6cc73"}
+
+浏览器（browser-page-text.js，渲染完以后走 DOM）：
+{"page":"/","length":1318,"sha1":"fbadd5abc060"}
+{"page":"/skeleton","length":1770,"sha1":"eb16ec12f9fa"}
+{"page":"/comments","length":4571,"sha1":"9576b74822bd"}
+{"page":"/dev-plugin","length":871,"sha1":"363775321751"}
+{"page":"/page-types","length":1803,"sha1":"8bb66e5d8b7f"}
+{"page":"/page-types/tsx-page","length":419,"sha1":"a2712a963c7f"}
+{"page":"/page-types/html-page","length":1,"sha1":"8dae9042ceed"}
+{"page":"/writing","length":1543,"sha1":"0b9f032f23f6"}
+{"page":"/writing/components","length":859,"sha1":"0e7ecafd7312"}
+{"page":"/zz-anchor-test","length":59,"sha1":"80ef53c6cc73"}
+
+10 页里 9 页一字不差。/page-types/tsx-page 差 7 个字，全是代码块里的换行：TSX 页面的代码块（DynamicCodeBlock）在浏览器里才着色，
+服务端渲染出的那一版每行之间没有 \n。MDX 页面的代码块在构建时着色，两边一致。
+/comments 页在算的时候还是改说明页之前的版本（4571 字），说明页改过以后数字会变，对比的结论不变。

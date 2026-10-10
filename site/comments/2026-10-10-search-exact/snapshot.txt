@@ -1,0 +1,21 @@
+@godcreator/docsite-kit 是一个 npm 包。项目里的站点目录放一套固定的骨架文件（见项目骨架），
+骨架引用这个包，就得到一个 fumadocs 文档站。
+站点用 React Router 的框架模式加 Vite：本机开发时运行 pnpm dev，改了页面立刻看到；
+发布时 pnpm build 之后用 react-router-serve 开服务，发布出去的站只读。
+包里有什么复制这一节的链接
+导出用在哪内容./vitevite.config.ts开发服务插件 docsite()，见开发服务插件./page-sourcesapp/lib/source.ts、页面路由TSX 页面与 HTML 页面的来源、保留地址检查、内容文件的地址，见三种页面./commentsapp/lib/collections.ts、app/lib/source.ts、页面路由评论文件的 frontmatter 校验、按文件夹分成评论串、检查评论批的页面在不在，见评论./serverapp/routes/search.ts、app/routes/content-file.ts中文站点用的搜索接口 siteSearchServer；把 content/ 里的文件原样送给浏览器./uiapp/root.tsx、布局与页面路由TSX 页面与 HTML 页面的正文组件、页面上的评论、侧栏底部的身份、fumadocs 界面文字的中文./styles.cssapp/app.css让 Tailwind 扫到包里组件用的类名；评论原文的高亮颜色
+布局用 fumadocs 默认的 docs 布局：左侧侧栏里从上到下是站名、搜索、切换下拉框、页面树，侧栏底部那一栏左边是写评论的人（本机开发时才有）、右边是主题切换；本页目录在正文右边。
+宽屏时布局铺满窗口：左侧栏贴左边，本页目录那一列贴右边、宽 340px，正文在中间那一列里居中、最宽 900px。
+fumadocs 默认在窗口比 97rem 宽时把整个布局居中，左右各空出一截；基础包的 styles.css 改成铺满，
+评论右侧栏也就能正好盖在目录那一列上，打开、关上都不改布局。
+骨架直接引用这个布局，包里不另外包一层。
+meta.json 写了 "root": true 的文件夹，是侧栏里切换下拉框的一项，切换后侧栏只列那个文件夹里的页面。
+这个站有「基础包」和「写作示例」两项。
+搜索复制这一节的链接
+siteSearchServer(source) 是 fumadocs 搜索接口加上适合中文的两项设置，三种页面一起搜。
+fumadocs 默认按 Unicode 规则切词，中文能切开；但它还默认允许一个字的出入（搜「滑块」会命中「模块」），
+而且只要切出的词有一个出现就算命中（搜「页面树」时含「页面」的页全都返回）。这两项都关掉了：每个词都要原样出现。
+代码块里的文字不进搜索，这是 fumadocs 的做法。
+这个站复制这一节的链接
+你正在看的站就是用这个包搭的，站点目录是仓里的 site/，内容是这个包自己的说明。
+开发基础包时也在这个站上看效果：开发服务直接用包的源码，改了包里的组件，页面马上变。

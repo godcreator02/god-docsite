@@ -2,7 +2,8 @@ import { readFile } from 'node:fs/promises'
 import path from 'node:path'
 
 export { siteSearchServer } from './search.js'
-export { commentRequestResponse, commentSourceResponse, currentCommenter, type CommentOperation } from './comments.js'
+export { commentRequestResponse, commentSnapshotsOf, commentSourceResponse, currentCommenter, type CommentOperation } from './comments.js'
+export { pageTextOfHtml } from './page-text.js'
 
 /**
  * 只在服务端用的函数：项目骨架里路由文件的 loader 调用它们，像 fumadocs 模板里 search.ts 调用 createFromSource 一样。

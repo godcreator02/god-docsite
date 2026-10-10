@@ -41,13 +41,18 @@
   }
 }
 
-/* 整块评论批的那一块 */
-[data-commented-block] {
+/* 评论批的元素（图片、公式、代码块、表格、组件；文字类的元素标黄，不画框） */
+[data-commented-element] {
   outline: 2px solid color-mix(in oklab, #f5b301 55%, transparent);
   outline-offset: 4px;
   border-radius: 4px;
 }
 
-[data-commented-block='active'] {
+[data-commented-element='active'] {
   outline-color: #f5b301;
+}
+
+/* 批注模式：正文里鼠标换成十字，点一下批鼠标下的元素 */
+html[data-comment-picking] [data-comment-scope] {
+  cursor: crosshair;
 }

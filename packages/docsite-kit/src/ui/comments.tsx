@@ -1,43 +1,90 @@
 import { useEffect, useRef, useState, type ComponentProps, type ReactNode } from 'react'
 import { createPortal } from 'react-dom'
 import { ThemeSwitch } from '@fumadocs/base-ui/layouts/shared/slots/theme-switch'
-import type { CommentBlockAnchor, CommentEntry, Commenter, CommentThread } from '../comments.js'
-import { anchorLabelOf, blockContaining, blocksOf, commentUiAttribute, placeOfThread, quoteAnchorOfRange, type PageBlock, type ThreadPlace } from './comment-anchors.js'
+import type { CommentElementKind, CommentEntry, Commenter, CommentRange, CommentThread } from '../comments.js'
+import { createRangeMapper } from '../comment-ranges.js'
+import { commentScopeAttribute } from '../page-text-rules.js'
+import {
+  anchorLabelOf,
+  commentUiAttribute,
+  elementKindOf,
+  elementLabelOf,
+  elementOffsetsOf,
+  offsetsOfRange,
+  openerLabelOf,
+  openerRangesOf,
+  pageTextOf,
+  pickedElementOf,
+  placeOfThread,
+  type ThreadPlace,
+} from './comment-anchors.js'
 import { CommentEditor, CommenterChip, CommentItem, postComment, recentThreadToOpen, rememberThreadToOpen, ThreadView, type CommentApi } from './comment-cards.js'
 
 /** 页面正文的容器带上这个属性，评论在它里面找被批的原文：<DocsBody {...commentScopeProps}> */
-export const commentScopeAttribute = 'data-comment-scope'
+export { commentScopeAttribute }
 export const commentScopeProps = { [commentScopeAttribute]: '' }
 
 /** 原文高亮用 CSS Custom Highlight API，不改正文的 DOM；颜色在 styles.css 的 ::highlight() 里 */
 const quoteHighlight = 'docsite-comment'
 const activeQuoteHighlight = 'docsite-comment-active'
-/** 整块评论批的块加这个属性，styles.css 给它画框 */
-const commentedBlockAttribute = 'data-commented-block'
+/** 批的元素（文字类以外的：图片、公式、代码块、表格、组件）加这个属性，styles.css 给它画框 */
+const commentedElementAttribute = 'data-commented-element'
+/** 批注模式打开时 <html> 上的属性：styles.css 据此把鼠标换成十字 */
+const pickingAttribute = 'data-comment-picking'
 
 const cardWidth = 360
 
-type NewAnchor = { quote: string; quotePrefix: string; quoteSuffix: string } | { block: CommentBlockAnchor } | Record<string, never>
+/** 新评论串批的位置，连同发起那一刻的整页文字（存成快照）与外面几层收起内容的打开按钮；批整页时是 {} */
+type NewAnchor =
+  | ({ quote: string; range: CommentRange; snapshot: string } | { element: CommentElementKind; range: CommentRange; snapshot: string }) & { openers?: CommentRange[] }
+  | Record<string, never>
 
 /** 正文上评论的几样东西在评论层里的位置（相对评论层左上角） */
 type Placement = {
   /** 显示在正文上的评论串（没解决的，加上正打开的那串）：卡片弹出的位置 */
   anchored: Map<string, { cardTop: number; cardLeft: number }>
-  /** 评论数按钮插进了原文末尾的文字评论串 */
+  /** 评论数按钮插进了原文末尾的评论串：批文字的、批文字类元素的、批行内元素（如行内公式）的 */
   inline: string[]
-  /** 整块评论串：评论数按钮在那一块右上角，left 是按钮右边缘 */
-  blockBadges: Map<string, { top: number; right: number }>
+  /** 批块级元素（图片、代码块、表格、组件）的评论串：评论数按钮在元素右上角，right 是按钮右边缘 */
+  cornerBadges: Map<string, { top: number; right: number }>
   /** 原文找不到了的评论串 */
   missing: Set<string>
+  /** 被批的内容收着、看不见的评论串：现在要点的打开按钮和它上面的字；认不出按钮时都没有 */
+  collapsed: Map<string, { opener: HTMLElement; label: string } | undefined>
+  /** 找得到位置、但被批的那段在发起评论之后改过的评论串 */
+  changed: Set<string>
 }
 
-const emptyPlacement: Placement = { anchored: new Map(), inline: [], blockBadges: new Map(), missing: new Set() }
+const emptyPlacement: Placement = { anchored: new Map(), inline: [], cornerBadges: new Map(), missing: new Set(), collapsed: new Map(), changed: new Set() }
 
-/**
- * 发起评论前的按钮与草稿卡片的位置：选中文字时按钮在选区上方（top），整块评论的按钮在那一块右上角（top、right，
- * 那一块已有评论数按钮时排在它下面）；草稿卡片在原文下方（cardTop、cardLeft）
- */
-type PendingAction = { top: number; right?: number; anchor: NewAnchor; label: string; cardTop: number; cardLeft: number }
+/** 点开一层收起内容后等它露出来的最长时间：过了还没露出来就不再点 */
+const revealTimeoutMs = 5000
+
+/** 选中文字后浮出的「评论」按钮（top）与草稿卡片（cardTop、cardLeft）的位置 */
+type PendingAction = { top: number; anchor: NewAnchor; cardTop: number; cardLeft: number }
+
+type Draft = Omit<PendingAction, 'top'> & { label: string }
+
+function labelOfNewAnchor(anchor: NewAnchor) {
+  return 'range' in anchor ? anchorLabelOf(anchor, anchor.snapshot) : anchorLabelOf({}, undefined)
+}
+
+type Box = { top: number; left: number; width: number; height: number }
+
+function boxOf(element: Element, layer: Element): Box {
+  const rect = element.getBoundingClientRect()
+  const base = layer.getBoundingClientRect()
+  return { top: rect.top - base.top, left: rect.left - base.left, width: rect.width, height: rect.height }
+}
+
+function isInlineElement(element: Element) {
+  return getComputedStyle(element).display.startsWith('inline')
+}
+
+/** 正文上标黄的评论串：批文字的，和批文字类元素（段落、列表项、单元格、加粗等）的 */
+function highlightedRangeOf(place: ThreadPlace, kind: CommentElementKind | undefined) {
+  return place.type === 'text' || (place.type === 'element' && kind === 'text') ? place.range : undefined
+}
 
 /** 插进正文的评论数按钮的外壳；插的时候要是切开了文字节点，记下切开的两半，撤掉时拼回去 */
 type InsertedBadge = { host: HTMLElement; split?: { first: Text; second: Text } }
@@ -77,6 +124,8 @@ export type PageCommentsProps<Entry extends CommentEntry> = {
   page: string
   /** 这一页的评论串 */
   threads: ReadonlyArray<CommentThread<Entry>>
+  /** 各评论串发起时的整页文字快照，按评论串文件夹名；服务端用 commentSnapshotsOf 读出来。批整页的评论串没有 */
+  snapshots: Readonly<Record<string, string>>
   /** 写评论的人；发布站传 null，只能看 */
   commenter: Commenter | null
   /** 渲染一条评论的正文；项目在这里把 MDX 组件传给编译好的正文 */
@@ -92,11 +141,8 @@ function clampCardLeft(left: number, width: number) {
 }
 
 function rectOfPlace(place: ThreadPlace) {
-  if (place.type === 'text') return { first: place.range.getClientRects()[0] ?? place.range.getBoundingClientRect(), whole: place.range.getBoundingClientRect() }
-  if (place.type === 'block') {
-    const rect = place.element.getBoundingClientRect()
-    return { first: rect, whole: rect }
-  }
+  if (place.type === 'text') return place.range.getBoundingClientRect()
+  if (place.type === 'element') return place.element.getBoundingClientRect()
   return undefined
 }
 
@@ -111,17 +157,21 @@ function containsPoint(rect: DOMRect, x: number, y: number) {
 }
 
 function samePlacement(a: Placement, b: Placement) {
-  if (a.anchored.size !== b.anchored.size || a.blockBadges.size !== b.blockBadges.size || a.missing.size !== b.missing.size) return false
+  if (a.anchored.size !== b.anchored.size || a.cornerBadges.size !== b.cornerBadges.size || a.missing.size !== b.missing.size || a.collapsed.size !== b.collapsed.size || a.changed.size !== b.changed.size) return false
   if (a.inline.join() !== b.inline.join()) return false
   for (const [id, spot] of a.anchored) {
     const other = b.anchored.get(id)
     if (!other || other.cardTop !== spot.cardTop || other.cardLeft !== spot.cardLeft) return false
   }
-  for (const [id, spot] of a.blockBadges) {
-    const other = b.blockBadges.get(id)
+  for (const [id, spot] of a.cornerBadges) {
+    const other = b.cornerBadges.get(id)
     if (!other || other.top !== spot.top || other.right !== spot.right) return false
   }
   for (const id of a.missing) if (!b.missing.has(id)) return false
+  for (const [id, spot] of a.collapsed) {
+    if (!b.collapsed.has(id) || b.collapsed.get(id)?.opener !== spot?.opener || b.collapsed.get(id)?.label !== spot?.label) return false
+  }
+  for (const id of a.changed) if (!b.changed.has(id)) return false
   return true
 }
 
@@ -151,21 +201,25 @@ function MessageIcon() {
 }
 
 /**
- * 页面上的评论（照 Notion）：被批的文字标黄，原文末尾插着评论数按钮；被批的整块画框，评论数按钮在那一块右上角。点按钮或点标黄的文字弹出这串评论。
- * 能写评论时（开发服务里），选中正文里的文字浮出「评论」按钮；鼠标移到图片、代码块、表格、组件上，那一块右上角出现「评论这一块」按钮。
+ * 页面上的评论（照 Notion）：被批的文字标黄，原文末尾插着评论数按钮；被批的图片、公式、代码块、表格、组件画框，评论数按钮在它右上角
+ * （行内的如行内公式插在它后面）。点按钮或点标黄的文字弹出这串评论。
+ * 能写评论时（开发服务里），选中正文里的文字浮出「评论」按钮；右下角「批注」打开批注模式，鼠标下的元素画虚线框，点一下批这个元素。
  * 右下角的「评论」按钮打开右侧栏，列出这一页全部评论，分未解决、已解决，也能评论整页
  */
-export function PageComments<Entry extends CommentEntry>({ page, threads, commenter, renderBody, apiUrl = '/api/comments', children }: PageCommentsProps<Entry>) {
+export function PageComments<Entry extends CommentEntry>({ page, threads, snapshots, commenter, renderBody, apiUrl = '/api/comments', children }: PageCommentsProps<Entry>) {
   const api: CommentApi = { url: apiUrl }
   const layerRef = useRef<HTMLDivElement>(null)
-  const blocksRef = useRef<PageBlock[]>([])
+  const [mapRange] = useState(createRangeMapper)
+  const labelOf = (thread: CommentThread<Entry>) => anchorLabelOf(thread.head, snapshots[thread.id])
   /** 插进正文的评论数按钮的外壳，每串一个、一直用同一个元素，React 经 portal 往里渲染按钮 */
   const inlineHostsRef = useRef(new Map<string, HTMLElement>())
   const [openId, setOpenId] = useState<string>()
   const [placement, setPlacement] = useState<Placement>(emptyPlacement)
   const [selectionAction, setSelectionAction] = useState<PendingAction>()
-  const [blockAction, setBlockAction] = useState<PendingAction>()
-  const [draft, setDraft] = useState<PendingAction>()
+  const [picking, setPicking] = useState(false)
+  const [hovered, setHovered] = useState<{ box: Box; label: string }>()
+  const [hint, setHint] = useState<string>()
+  const [draft, setDraft] = useState<Draft>()
   const [panelOpen, setPanelOpen] = useState(false)
   const [panelThreadId, setPanelThreadId] = useState<string>()
   const writable = commenter !== null
@@ -201,32 +255,62 @@ export function PageComments<Entry extends CommentEntry>({ page, threads, commen
     const placeOf = new Map<string, ThreadPlace>()
     const inserted: InsertedBadge[] = []
     let frame = 0
+    // 正文的字变了、内容开合了也要重新找：切换标签页、展开折叠块时正文的高度不一定变。评论数按钮里的变化不算
+    const isCommentUiMutation = (record: MutationRecord) => (record.target instanceof Element ? record.target : record.target.parentElement)?.closest(`[${commentUiAttribute}]`) != null
+    const mutationObserver = new MutationObserver((records) => {
+      if (records.some((record) => !isCommentUiMutation(record))) measureNextFrame()
+    })
     const measure = () => {
+      // 找位置时自己会撤、插评论数按钮，切开、拼回文字节点：这期间不看正文的变化，免得自己触发自己
+      mutationObserver.disconnect()
+      measureWithoutObserving()
+      // 折叠块开合时内容一直在页面里，只改这几个属性
+      mutationObserver.observe(scope, { childList: true, subtree: true, characterData: true, attributes: true, attributeFilter: ['hidden', 'open', 'aria-expanded', 'aria-selected'] })
+    }
+    const measureWithoutObserving = () => {
       // 先撤掉上次插的按钮，在原样的正文上找原文，再插回去
       removeInsertedBadges(inserted)
-      const blocks = blocksOf(scope)
-      blocksRef.current = blocks
-      for (const element of scope.querySelectorAll(`[${commentedBlockAttribute}]`)) element.removeAttribute(commentedBlockAttribute)
+      for (const element of scope.querySelectorAll(`[${commentedElementAttribute}]`)) element.removeAttribute(commentedElementAttribute)
+      const pageText = pageTextOf(scope)
       placeOf.clear()
-      for (const thread of threads) placeOf.set(thread.id, placeOfThread(scope, blocks, thread.head))
-      const openThreads = threads.filter((thread) => thread.head.status === 'open')
-      const openRanges = openThreads.flatMap((thread) => {
+      for (const thread of threads) placeOf.set(thread.id, placeOfThread(scope, pageText, thread.head, snapshots[thread.id], mapRange))
+      const openRanges: Range[] = []
+      for (const thread of threads) {
         const place = placeOf.get(thread.id)!
-        if (place.type === 'block') place.element.setAttribute(commentedBlockAttribute, thread.id === openId ? 'active' : '')
-        return place.type === 'text' ? [place.range] : []
-      })
-      const activePlace = openId === undefined ? undefined : placeOf.get(openId)
-      paintHighlights(openRanges, activePlace?.type === 'text' ? activePlace.range : undefined)
+        if (thread.head.status !== 'open') continue
+        const highlighted = highlightedRangeOf(place, thread.head.element)
+        if (highlighted) openRanges.push(highlighted)
+        else if (place.type === 'element') place.element.setAttribute(commentedElementAttribute, thread.id === openId ? 'active' : '')
+      }
+      const activeThread = openId === undefined ? undefined : threads.find((thread) => thread.id === openId)
+      paintHighlights(openRanges, activeThread && highlightedRangeOf(placeOf.get(activeThread.id)!, activeThread.head.element))
 
       const missing = new Set(threads.filter((thread) => placeOf.get(thread.id)!.type === 'missing').map((thread) => thread.id))
+      const collapsed: Placement['collapsed'] = new Map()
+      for (const thread of threads) {
+        const place = placeOf.get(thread.id)!
+        if (place.type === 'collapsed') collapsed.set(thread.id, place.opener && { opener: place.opener, label: openerLabelOf(place.opener) })
+      }
+      const changed = new Set(
+        threads
+          .filter((thread) => {
+            const place = placeOf.get(thread.id)!
+            return (place.type === 'text' || place.type === 'element') && place.changed
+          })
+          .map((thread) => thread.id),
+      )
       const shown = threads.filter((thread) => {
         const type = placeOf.get(thread.id)!.type
-        return (type === 'text' || type === 'block') && (thread.head.status === 'open' || thread.id === openId)
+        return (type === 'text' || type === 'element') && (thread.head.status === 'open' || thread.id === openId)
       })
       const inline: string[] = []
+      const cornerThreads: string[] = []
       for (const thread of shown) {
-        const place = placeOf.get(thread.id)!
-        if (place.type !== 'text') continue
+        const place = placeOf.get(thread.id) as Extract<ThreadPlace, { range: Range }>
+        if (place.type === 'element' && !highlightedRangeOf(place, thread.head.element) && !isInlineElement(place.element)) {
+          cornerThreads.push(thread.id)
+          continue
+        }
         inserted.push(insertAtRangeEnd(inlineHostOf(thread.id), place.range))
         inline.push(thread.id)
       }
@@ -234,13 +318,13 @@ export function PageComments<Entry extends CommentEntry>({ page, threads, commen
       // 插完按钮再量位置：按钮占了地方，后面的文字可能挪了
       const layerRect = layer.getBoundingClientRect()
       const anchored = new Map<string, { cardTop: number; cardLeft: number }>()
-      const blockBadges = new Map<string, { top: number; right: number }>()
+      const cornerBadges = new Map<string, { top: number; right: number }>()
       for (const thread of shown) {
-        const rects = rectOfPlace(placeOf.get(thread.id)!)!
-        anchored.set(thread.id, { cardTop: rects.whole.bottom - layerRect.top + 8, cardLeft: clampCardLeft(rects.whole.left - layerRect.left, layerRect.width) })
-        if (placeOf.get(thread.id)!.type === 'block') blockBadges.set(thread.id, { top: rects.whole.top - layerRect.top + 6, right: rects.whole.right - layerRect.left - 6 })
+        const rect = rectOfPlace(placeOf.get(thread.id)!)!
+        anchored.set(thread.id, { cardTop: rect.bottom - layerRect.top + 8, cardLeft: clampCardLeft(rect.left - layerRect.left, layerRect.width) })
+        if (cornerThreads.includes(thread.id)) cornerBadges.set(thread.id, { top: rect.top - layerRect.top + 6, right: rect.right - layerRect.left - 6 })
       }
-      const next: Placement = { anchored, inline, blockBadges, missing }
+      const next: Placement = { anchored, inline, cornerBadges, missing, collapsed, changed }
       setPlacement((current) => (samePlacement(current, next) ? current : next))
     }
     const measureNextFrame = () => {
@@ -248,10 +332,11 @@ export function PageComments<Entry extends CommentEntry>({ page, threads, commen
       frame = requestAnimationFrame(measure)
     }
     const openFromQuote = (event: MouseEvent) => {
-      if (!document.getSelection()?.isCollapsed) return
-      for (const [id, place] of placeOf) {
-        if (place.type === 'text' && [...place.range.getClientRects()].some((rect) => containsPoint(rect, event.clientX, event.clientY))) {
-          setOpenId(id)
+      if (!document.getSelection()?.isCollapsed || document.documentElement.hasAttribute(pickingAttribute)) return
+      for (const thread of threads) {
+        const highlighted = highlightedRangeOf(placeOf.get(thread.id)!, thread.head.element)
+        if (highlighted && [...highlighted.getClientRects()].some((rect) => containsPoint(rect, event.clientX, event.clientY))) {
+          setOpenId(thread.id)
           return
         }
       }
@@ -265,14 +350,15 @@ export function PageComments<Entry extends CommentEntry>({ page, threads, commen
     return () => {
       cancelAnimationFrame(frame)
       observer.disconnect()
+      mutationObserver.disconnect()
       scope.removeEventListener('click', openFromQuote)
       window.removeEventListener('resize', measureNextFrame)
       CSS.highlights.delete(quoteHighlight)
       CSS.highlights.delete(activeQuoteHighlight)
-      for (const element of scope.querySelectorAll(`[${commentedBlockAttribute}]`)) element.removeAttribute(commentedBlockAttribute)
+      for (const element of scope.querySelectorAll(`[${commentedElementAttribute}]`)) element.removeAttribute(commentedElementAttribute)
       removeInsertedBadges(inserted)
     }
-  }, [threads, openId])
+  }, [threads, snapshots, openId])
 
   // 选中正文里的文字：松开鼠标时在选区上方浮出「评论」按钮
   useEffect(() => {
@@ -284,14 +370,17 @@ export function PageComments<Entry extends CommentEntry>({ page, threads, commen
       if (!selection || selection.isCollapsed || selection.rangeCount === 0) return setSelectionAction(undefined)
       const range = selection.getRangeAt(0)
       if (!scope.contains(range.startContainer) || !scope.contains(range.endContainer) || range.toString().trim() === '') return setSelectionAction(undefined)
-      const anchor = quoteAnchorOfRange(scope, range)
+      const pageText = pageTextOf(scope)
+      const offsets = offsetsOfRange(pageText, range)
+      if (!offsets) return setSelectionAction(undefined)
+      const openers = openerRangesOf(scope, pageText, range.commonAncestorContainer)
+      const anchor: NewAnchor = { quote: pageText.text.slice(...offsets), range: offsets, snapshot: pageText.text, ...(openers && { openers }) }
       const layerRect = layer.getBoundingClientRect()
       const first = range.getClientRects()[0] ?? range.getBoundingClientRect()
       const whole = range.getBoundingClientRect()
       setSelectionAction({
         top: first.top - layerRect.top - 34,
         anchor,
-        label: `「${anchor.quote}」`,
         cardTop: whole.bottom - layerRect.top + 8,
         cardLeft: clampCardLeft(whole.left - layerRect.left, layerRect.width),
       })
@@ -307,28 +396,58 @@ export function PageComments<Entry extends CommentEntry>({ page, threads, commen
     }
   }, [writable])
 
-  // 鼠标移到图片、代码块、表格、组件上：那一块右上角出现「评论这一块」
-  const showBlockAction = (target: EventTarget | null) => {
-    if (!writable || !(target instanceof Node)) return
-    if (target instanceof Element && target.closest(`[${commentUiAttribute}]`)) return
-    const block = blockContaining(blocksRef.current, target)
-    if (!block) return setBlockAction(undefined)
-    const layerRect = layerRef.current!.getBoundingClientRect()
-    const rect = block.element.getBoundingClientRect()
-    const right = rect.right - layerRect.left - 6
-    // 这一块已有评论数按钮时排在它下面
-    const hasBadge = [...placement.blockBadges.values()].some((badge) => badge.right === right && badge.top === rect.top - layerRect.top + 6)
-    const top = rect.top - layerRect.top + 6 + (hasBadge ? 26 : 0)
-    if (blockAction && blockAction.top === top && blockAction.right === right) return
-    setBlockAction({
-      top,
-      right,
-      anchor: { block: block.anchor },
-      label: anchorLabelOf({ block: block.anchor }),
-      cardTop: rect.bottom - layerRect.top + 8,
-      cardLeft: clampCardLeft(rect.left - layerRect.left, layerRect.width),
-    })
-  }
+  // 批注模式：鼠标下的元素画虚线框，点一下批这个元素；拖选文字照旧批那段文字；Esc 退出。模式里点链接不跳转、点组件不触发
+  useEffect(() => {
+    if (!picking) return
+    const layer = layerRef.current!
+    const scope = scopeOf()
+    const pickableAt = (target: EventTarget | null) => {
+      if (!(target instanceof Element) || !scope.contains(target) || target.closest(`[${commentUiAttribute}]`)) return undefined
+      const element = pickedElementOf(target)
+      return element === scope ? undefined : element
+    }
+    const hover = (event: MouseEvent) => {
+      const element = pickableAt(event.target)
+      setHovered(element && { box: boxOf(element, layer), label: elementLabelOf(element) })
+    }
+    const clearHover = () => setHovered(undefined)
+    const pick = (event: MouseEvent) => {
+      const element = pickableAt(event.target)
+      if (!element) return
+      event.preventDefault()
+      event.stopPropagation()
+      // 拖选了文字就是批那段文字，交给选中文字那一路
+      if (!document.getSelection()?.isCollapsed) return
+      const pageText = pageTextOf(scope)
+      const range = elementOffsetsOf(pageText, element)
+      if (!range) return setHint('这个元素里没有字，也没有图片：在页面文字里没有位置，可以评论整页')
+      const box = boxOf(element, layer)
+      const openers = openerRangesOf(scope, pageText, element)
+      startDraft({ anchor: { element: elementKindOf(element), range, snapshot: pageText.text, ...(openers && { openers }) }, cardTop: box.top + box.height + 8, cardLeft: clampCardLeft(box.left, layer.getBoundingClientRect().width) })
+    }
+    const exitOnEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setPicking(false)
+    }
+    document.documentElement.setAttribute(pickingAttribute, '')
+    scope.addEventListener('mousemove', hover)
+    scope.addEventListener('mouseleave', clearHover)
+    scope.addEventListener('click', pick, true)
+    document.addEventListener('keydown', exitOnEscape)
+    return () => {
+      document.documentElement.removeAttribute(pickingAttribute)
+      scope.removeEventListener('mousemove', hover)
+      scope.removeEventListener('mouseleave', clearHover)
+      scope.removeEventListener('click', pick, true)
+      document.removeEventListener('keydown', exitOnEscape)
+      setHovered(undefined)
+    }
+  }, [picking])
+
+  useEffect(() => {
+    if (hint === undefined) return
+    const timer = setTimeout(() => setHint(undefined), 4000)
+    return () => clearTimeout(timer)
+  }, [hint])
 
   // 点评论卡片以外的地方关上卡片；写了一半的新评论不因此丢掉，要点「取消」或按 Esc
   useEffect(() => {
@@ -341,11 +460,10 @@ export function PageComments<Entry extends CommentEntry>({ page, threads, commen
     return () => document.removeEventListener('mousedown', closeOnOutsideClick)
   }, [openId])
 
-  const startDraft = (action: PendingAction) => {
+  const startDraft = ({ anchor, cardTop, cardLeft }: Omit<PendingAction, 'top'>) => {
     setOpenId(undefined)
     setSelectionAction(undefined)
-    setBlockAction(undefined)
-    setDraft(action)
+    setDraft({ anchor, cardTop, cardLeft, label: labelOfNewAnchor(anchor) })
   }
   const createThread = async (anchor: NewAnchor, body: string, images: File[]) => {
     const { thread } = await postComment(api, { op: 'create', page, anchor: JSON.stringify(anchor), body }, images)
@@ -354,40 +472,74 @@ export function PageComments<Entry extends CommentEntry>({ page, threads, commen
     document.getSelection()?.removeAllRanges()
   }
 
+  /** 滚到正文里的原文、弹出这串的卡片 */
+  const goToThread = (id: string) => {
+    // 窄屏时右侧栏盖住正文，先关上才看得到正文里弹出的卡片
+    if (!window.matchMedia('(width >= 80rem)').matches) setPanelOpen(false)
+    setOpenId(id)
+    const spot = placement.anchored.get(id)
+    if (spot) window.scrollTo({ top: layerRef.current!.getBoundingClientRect().top + window.scrollY + spot.cardTop - window.innerHeight / 3, behavior: 'smooth' })
+  }
+
+  /** 正在点开收起内容的那串、已经点过的按钮（同一个按钮点过一次还收着，就不再点），和等这一层露出来的计时器 */
+  const revealingRef = useRef<{ id: string; clicked: Set<Element>; timer: ReturnType<typeof setTimeout> }>(undefined)
+  /** 点开一层，等正文变了重新找位置；一层点了 revealTimeoutMs 还没露出东西就放弃 */
+  const clickOpener = (id: string, opener: HTMLElement, clicked: Set<Element>) => {
+    clearTimeout(revealingRef.current?.timer)
+    clicked.add(opener)
+    const timer = setTimeout(() => {
+      revealingRef.current = undefined
+      setHint('点开了收起的内容，还是找不到被批的地方')
+    }, revealTimeoutMs)
+    revealingRef.current = { id, clicked, timer }
+    opener.click()
+  }
+  /** 被批的内容收着：点开现在收着的那一层；露出来以后正文变了会重新找位置，再由下面的 effect 点下一层，直到找到 */
+  const revealThread = (id: string, opener: HTMLElement) => clickOpener(id, opener, new Set())
+  useEffect(() => {
+    const revealing = revealingRef.current
+    if (!revealing) return
+    if (placement.anchored.has(revealing.id)) {
+      clearTimeout(revealing.timer)
+      revealingRef.current = undefined
+      goToThread(revealing.id)
+      return
+    }
+    const opener = placement.collapsed.get(revealing.id)?.opener
+    if (opener && !revealing.clicked.has(opener)) clickOpener(revealing.id, opener, revealing.clicked)
+  }, [placement])
+
   const openThread = openId === undefined ? undefined : threads.find((thread) => thread.id === openId)
   const openSpot = openId === undefined ? undefined : placement.anchored.get(openId)
 
   return (
-    <div ref={layerRef} className="relative" onMouseMove={(event) => showBlockAction(event.target)} onMouseLeave={() => setBlockAction(undefined)}>
+    <div ref={layerRef} className="relative">
       {children}
       {placement.inline.map((id) => {
         const thread = threads.find((candidate) => candidate.id === id)!
         return createPortal(
-          <CountBadge count={1 + thread.replies.length} active={id === openId} label={anchorLabelOf(thread.head)} onClick={() => setOpenId(id === openId ? undefined : id)} />,
+          <CountBadge count={1 + thread.replies.length} active={id === openId} label={labelOf(thread)} onClick={() => setOpenId(id === openId ? undefined : id)} />,
           inlineHostOf(id),
           id,
         )
       })}
-      {[...placement.blockBadges].map(([id, badge]) => {
+      {[...placement.cornerBadges].map(([id, badge]) => {
         const thread = threads.find((candidate) => candidate.id === id)!
         return (
           <span key={id} data-comment-ui="" className="absolute z-10 -translate-x-full" style={{ top: badge.top, left: badge.right }}>
-            <CountBadge count={1 + thread.replies.length} active={id === openId} label={anchorLabelOf(thread.head)} onClick={() => setOpenId(id === openId ? undefined : id)} className="shadow-sm" />
+            <CountBadge count={1 + thread.replies.length} active={id === openId} label={labelOf(thread)} onClick={() => setOpenId(id === openId ? undefined : id)} className="shadow-sm" />
           </span>
         )
       })}
-      {blockAction && !draft && (
-        <button
-          type="button"
-          data-comment-ui=""
-          aria-label="评论这一块"
-          title={`评论这一块：${blockAction.label}`}
-          onClick={() => startDraft(blockAction)}
-          className={`${badgeClassName} absolute z-10 -translate-x-full bg-fd-card text-fd-muted-foreground shadow-sm hover:text-fd-foreground`}
-          style={{ top: blockAction.top, left: blockAction.right }}
-        >
-          <MessageIcon />+
-        </button>
+      {picking && hovered && !draft && (
+        <div data-comment-ui="" className="pointer-events-none absolute z-20 rounded-sm outline-2 outline-offset-2 outline-amber-500 outline-dashed" style={hovered.box}>
+          <span className="absolute -top-1 left-0 -translate-y-full rounded bg-amber-500 px-1.5 text-xs leading-5 whitespace-nowrap text-white">{hovered.label}</span>
+        </div>
+      )}
+      {hint && (
+        <p data-comment-ui="" role="status" className="fixed bottom-16 end-4 z-50 max-w-80 rounded-lg border bg-fd-popover px-3 py-2 text-sm text-fd-popover-foreground shadow-md">
+          {hint}
+        </p>
       )}
       {selectionAction && !draft && (
         <button
@@ -410,12 +562,23 @@ export function PageComments<Entry extends CommentEntry>({ page, threads, commen
       )}
       {openThread && openSpot && (
         <div data-comment-ui="" className="absolute z-30 max-h-[60vh] overflow-y-auto rounded-xl border bg-fd-popover p-3 text-fd-popover-foreground shadow-lg" style={{ top: openSpot.cardTop, left: openSpot.cardLeft, width: cardWidth }}>
-          <ThreadView key={openThread.id} thread={openThread} renderBody={renderBody} commenter={commenter} api={api} onClose={() => setOpenId(undefined)} />
+          <ThreadView
+            key={openThread.id}
+            thread={openThread}
+            renderBody={renderBody}
+            commenter={commenter}
+            api={api}
+            note={placement.changed.has(openThread.id) ? `原文改过，当时批的是${labelOf(openThread)}` : undefined}
+            onClose={() => setOpenId(undefined)}
+          />
         </div>
       )}
       {hasCommentUi && (
         <CommentsPanel
           threads={threads}
+          labelOf={labelOf}
+          picking={picking}
+          onPickingChange={setPicking}
           placement={placement}
           commenter={commenter}
           renderBody={renderBody}
@@ -425,13 +588,8 @@ export function PageComments<Entry extends CommentEntry>({ page, threads, commen
           detailId={panelThreadId}
           onDetailChange={setPanelThreadId}
           onCreatePageComment={(body, images) => createThread({}, body, images)}
-          onGoToThread={(id) => {
-            // 窄屏时右侧栏盖住正文，先关上才看得到正文里弹出的卡片
-            if (!window.matchMedia('(width >= 80rem)').matches) setPanelOpen(false)
-            setOpenId(id)
-            const spot = placement.anchored.get(id)
-            if (spot) window.scrollTo({ top: layerRef.current!.getBoundingClientRect().top + window.scrollY + spot.cardTop - window.innerHeight / 3, behavior: 'smooth' })
-          }}
+          onGoToThread={goToThread}
+          onRevealThread={revealThread}
         />
       )}
     </div>
@@ -440,6 +598,11 @@ export function PageComments<Entry extends CommentEntry>({ page, threads, commen
 
 type CommentsPanelProps<Entry extends CommentEntry> = {
   threads: ReadonlyArray<CommentThread<Entry>>
+  /** 评论串批的是什么，写给人看 */
+  labelOf: (thread: CommentThread<Entry>) => string
+  /** 批注模式开着没有；能写评论时右下角与右侧栏里都有开关 */
+  picking: boolean
+  onPickingChange: (picking: boolean) => void
   placement: Placement
   commenter: Commenter | null
   renderBody: (entry: Entry) => ReactNode
@@ -452,6 +615,8 @@ type CommentsPanelProps<Entry extends CommentEntry> = {
   onCreatePageComment: (body: string, images: File[]) => Promise<void>
   /** 正文里找得到原文的评论串：滚到原文、弹出卡片 */
   onGoToThread: (id: string) => void
+  /** 被批的内容收着的评论串：点开它（opener 是现在要点的按钮），露出来以后滚过去 */
+  onRevealThread: (id: string, opener: HTMLElement) => void
 }
 
 /** 右侧栏打开时 <html> 上的属性：styles.css 据此在宽屏上给整个页面布局让出右侧栏的宽度 */
@@ -459,7 +624,20 @@ const commentsSidebarOpenAttribute = 'data-comments-sidebar-open'
 
 /** 右下角的「评论」按钮和它打开的右侧栏 */
 function CommentsPanel<Entry extends CommentEntry>(props: CommentsPanelProps<Entry>) {
-  const { threads, placement, commenter, renderBody, api, open, onOpenChange, detailId, onDetailChange, onCreatePageComment, onGoToThread } = props
+  const { threads, labelOf, picking, onPickingChange, placement, commenter, renderBody, api, open, onOpenChange, detailId, onDetailChange, onCreatePageComment, onGoToThread, onRevealThread } = props
+  const pickingToggle = (className: string) =>
+    commenter && (
+      <button
+        type="button"
+        data-comment-ui=""
+        aria-pressed={picking}
+        title="批注模式：点正文里的一个元素批它；Esc 退出"
+        onClick={() => onPickingChange(!picking)}
+        className={`${className} flex items-center gap-1.5 border ${picking ? 'border-amber-500 bg-amber-500 text-white' : 'bg-fd-card text-fd-card-foreground hover:bg-fd-accent'}`}
+      >
+        {picking ? '批注中 · Esc 退出' : '批注'}
+      </button>
+    )
   const [tab, setTab] = useState<'open' | 'resolved'>('open')
   const [writingPageComment, setWritingPageComment] = useState(false)
   useEffect(() => {
@@ -471,23 +649,41 @@ function CommentsPanel<Entry extends CommentEntry>(props: CommentsPanelProps<Ent
   const resolvedThreads = threads.filter((thread) => thread.head.status === 'resolved')
   const shown = tab === 'open' ? openThreads : resolvedThreads
   const detail = detailId === undefined ? undefined : threads.find((thread) => thread.id === detailId)
-  const noteOf = (thread: CommentThread<Entry>) => (placement.missing.has(thread.id) ? `原文找不到了：${anchorLabelOf(thread.head)}` : anchorLabelOf(thread.head))
+  const noteOf = (thread: CommentThread<Entry>) => {
+    if (placement.missing.has(thread.id)) return `原文找不到了：${labelOf(thread)}`
+    if (placement.collapsed.has(thread.id)) {
+      const label = placement.collapsed.get(thread.id)?.label
+      return label === undefined ? `在页面上看不见：${labelOf(thread)}` : `在收起的「${label}」里：${labelOf(thread)}`
+    }
+    if (placement.changed.has(thread.id)) return `原文改过：${labelOf(thread)}`
+    return labelOf(thread)
+  }
+  const noteColorOf = (id: string) => {
+    if (placement.missing.has(id)) return 'text-red-500'
+    if (placement.collapsed.has(id)) return 'text-sky-600'
+    if (placement.changed.has(id)) return 'text-amber-600'
+    return 'text-fd-muted-foreground'
+  }
   const choose = (thread: CommentThread<Entry>) => {
+    const opener = placement.collapsed.get(thread.id)?.opener
     if (thread.head.status === 'open' && placement.anchored.has(thread.id)) onGoToThread(thread.id)
+    else if (thread.head.status === 'open' && opener) onRevealThread(thread.id, opener)
     else onDetailChange(thread.id)
   }
   return (
     <>
       {!open && (
-        <button
-          type="button"
-          data-comment-ui=""
-          onClick={() => onOpenChange(true)}
-          className="fixed end-4 bottom-4 z-40 flex items-center gap-1.5 rounded-full border bg-fd-card px-3 py-1.5 text-sm text-fd-card-foreground shadow-md hover:bg-fd-accent"
-        >
-          <MessageIcon />
-          评论{openThreads.length > 0 ? ` ${openThreads.length}` : ''}
-        </button>
+        <div data-comment-ui="" className="fixed end-4 bottom-4 z-40 flex gap-2">
+          {pickingToggle('rounded-full px-3 py-1.5 text-sm shadow-md')}
+          <button
+            type="button"
+            onClick={() => onOpenChange(true)}
+            className="flex items-center gap-1.5 rounded-full border bg-fd-card px-3 py-1.5 text-sm text-fd-card-foreground shadow-md hover:bg-fd-accent"
+          >
+            <MessageIcon />
+            评论{openThreads.length > 0 ? ` ${openThreads.length}` : ''}
+          </button>
+        </div>
       )}
       {open && (
         // 和左侧栏对称：同样的底色与边框，顶上一行与左侧栏的站名那一行同高（p-4 下 30px）
@@ -533,9 +729,12 @@ function CommentsPanel<Entry extends CommentEntry>(props: CommentsPanelProps<Ent
                       />
                     </div>
                   ) : (
-                    <button type="button" onClick={() => setWritingPageComment(true)} className="rounded-lg border border-dashed px-2 py-1.5 text-start text-sm text-fd-muted-foreground hover:bg-fd-accent">
-                      ＋ 评论整页
-                    </button>
+                    <div className="flex gap-1">
+                      <button type="button" onClick={() => setWritingPageComment(true)} className="flex-1 rounded-lg border border-dashed px-2 py-1.5 text-start text-sm text-fd-muted-foreground hover:bg-fd-accent">
+                        ＋ 评论整页
+                      </button>
+                      {pickingToggle('rounded-lg px-2 py-1.5 text-sm')}
+                    </div>
                   ))}
                 {shown.length === 0 && <p className="px-2 py-6 text-center text-sm text-fd-muted-foreground">{tab === 'open' ? '这一页没有未解决的评论' : '这一页没有已解决的评论'}</p>}
                 {/* 列表项不用 <button>：评论正文里可能有链接、组件里的按钮，按钮里不能再套按钮 */}
@@ -553,7 +752,7 @@ function CommentsPanel<Entry extends CommentEntry>(props: CommentsPanelProps<Ent
                     }}
                     className="flex cursor-pointer flex-col gap-1 rounded-lg px-2 py-2 text-start hover:bg-fd-accent"
                   >
-                    <span className={`line-clamp-1 text-xs ${placement.missing.has(thread.id) ? 'text-red-500' : 'text-fd-muted-foreground'}`}>{noteOf(thread)}</span>
+                    <span className={`line-clamp-1 text-xs ${noteColorOf(thread.id)}`}>{noteOf(thread)}</span>
                     <CommentItem entry={thread.head} thread={thread.id} renderBody={renderBody} commenter={commenter} api={api} clamped />
                     {thread.replies.length > 0 && <span className="ms-8 text-xs text-fd-muted-foreground">{thread.replies.length} 条回复</span>}
                   </div>
