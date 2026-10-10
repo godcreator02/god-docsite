@@ -18,7 +18,7 @@ export default function Page() {
   return (
     <>
       <p>
-        这一页的文件是 <code>content/page-types/tsx-page.page.tsx</code>。下面的按钮由页面自己的状态驱动，点了次数会变：
+        这一页的文件是 <code>content/(kit)/page-types/tsx-page.page.tsx</code>。下面的按钮由页面自己的状态驱动，点了次数会变：
       </p>
       <p>
         <button type="button" onClick={() => setCount((current) => current + 1)} className="rounded-md border px-3 py-1.5 text-sm hover:bg-fd-accent">

@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 560 180" width="560" height="180" font-family="system-ui, sans-serif" font-size="14">
+  <rect x="0" y="0" width="560" height="180" rx="12" fill="#f6f7f9" />
+  <rect x="24" y="24" width="120" height="36" rx="8" fill="#e0ecff" stroke="#4a7bd0" />
+  <text x="84" y="47" text-anchor="middle">MDX</text>
+  <rect x="24" y="72" width="120" height="36" rx="8" fill="#e6f6e6" stroke="#3f9b3f" />
+  <text x="84" y="95" text-anchor="middle">TSX</text>
+  <rect x="24" y="120" width="120" height="36" rx="8" fill="#fff0dc" stroke="#d08a2a" />
+  <text x="84" y="143" text-anchor="middle">HTML</text>
+  <path d="M144 42 L330 90 M144 90 L330 90 M144 138 L330 90" stroke="#888" fill="none" />
+  <rect x="330" y="64" width="200" height="52" rx="10" fill="#ffffff" stroke="#666" />
+  <text x="430" y="86" text-anchor="middle">同一棵页面树</text>
+  <text x="430" y="104" text-anchor="middle" font-size="12" fill="#666">侧栏 · 搜索 · 上一页下一页</text>
+</svg>

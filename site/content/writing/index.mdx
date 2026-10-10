@@ -1,0 +1,130 @@
+---
+title: 写一页说明
+description: 在 content/ 里写一页 MDX 说明：标题分几级、正文怎么排、代码和图片怎么放
+icon: FileText
+---
+
+这一页本身就是按它讲的写法写的，可以对照着看。右边的本页目录列出了二到四级标题。
+
+## 文件放在哪
+
+一页说明是 `content/` 里的一个 `.mdx` 文件。文件夹里的 `meta.json` 决定侧栏里的标题和顺序；
+`meta.json` 写了 `"root": true` 的文件夹，是侧栏顶上下拉框里的一项。
+
+### 文件名与地址
+
+地址就是文件相对 `content/` 的路径，去掉扩展名：
+
+| 文件 | 地址 |
+| --- | --- |
+| `content/writing/index.mdx` | `/writing` |
+| `content/writing/components.mdx` | `/writing/components` |
+| `content/(kit)/skeleton.mdx` | `/skeleton` |
+
+文件夹名写在括号里（如 `(kit)`）时，它只用来分组，不进地址。
+
+### frontmatter
+
+文件开头的 frontmatter 写这一页的元数据：
+
+```mdx title="content/writing/index.mdx"
+---
+title: 写一页说明
+description: 在 content/ 里写一页 MDX 说明
+icon: FileText
+---
+```
+
+- `title`：页面标题，也是侧栏与搜索结果里的名字
+- `description`：标题下面的一句话，搜索也收
+- `icon`：侧栏里的图标，写 [lucide](https://lucide.dev/icons) 的图标名
+
+## 标题分几级
+
+正文从二级标题开始，一级标题由 `title` 生成。
+
+### 二级标题
+
+一页分成几大块，每块一个二级标题。本页目录列出每个二级标题。
+
+### 三级标题
+
+一块里再分几小节时用三级标题，本页目录里缩进一层。
+
+#### 四级标题
+
+四级标题用来给一小节里的几段起名字，本页目录里再缩进一层。再往下的五级、六级标题很少需要。
+
+## 正文
+
+### 段落与强调
+
+段落之间空一行。**加粗**用来标出一段里最要紧的词，`行内代码`写文件名、命令和标识符。
+链接写成 [项目骨架](/skeleton) 这样，站内链接写地址，不写文件名。
+
+> 引用块放别人的原话，或者需要单独标出来的一句提醒。
+
+### 列表
+
+没有先后的几项用无序列表：
+
+- 布局：glass
+- 搜索：`siteSearchServer`
+- 页面：MDX、TSX、HTML
+
+有先后的步骤用有序列表：
+
+1. 在 `content/` 里新建 `.mdx` 文件
+2. 在同一个文件夹的 `meta.json` 里写上它的名字
+3. 开发服务里马上能看到新页面
+
+要逐项勾掉的清单：
+
+- [x] 写好 frontmatter
+- [x] 正文从二级标题开始
+- [ ] 补一张图
+
+### 表格
+
+表格适合列对照，比如三种页面各自的标题从哪来：
+
+| 类型 | 标题从哪来 | 搜索收什么 |
+| :-- | :-- | :-- |
+| MDX | frontmatter 的 `title` | 全文 |
+| TSX | 导出的 `meta.title` | 标题和描述 |
+| HTML | `<title>` | 正文纯文字 |
+
+## 代码
+
+代码块写上语言，fumadocs 按语言着色；`title` 写文件名。用注释 `// [!code highlight]` 标出要看的那一行：
+
+```ts title="site/app/routes/search.ts"
+import { siteSearchServer } from '@godcreator/docsite-kit/server'
+import { source } from '../lib/source'
+
+const server = siteSearchServer(source) // [!code highlight]
+
+export async function loader({ request }) {
+  return server.GET(request)
+}
+```
+
+命令行写成 `bash`：
+
+```bash
+pnpm dev
+```
+
+## 图片
+
+图片放在页面旁边，用相对路径引用，构建时一起打包：
+
+![三种页面进同一棵页面树](./figure.svg)
+
+点图片可以放大看。
+
+## 脚注
+
+需要补一句又不想打断正文时用脚注[^1]。
+
+[^1]: 脚注集中显示在页面最后。
