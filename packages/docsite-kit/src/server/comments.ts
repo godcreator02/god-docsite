@@ -6,6 +6,7 @@ import { promisify } from 'node:util'
 import {
   commentElementKinds,
   commentSnapshotFile,
+  isCommentOpeners,
   isCommentRange,
   isThreadHeadFile,
   snapshotMismatchOf,
@@ -76,7 +77,7 @@ function yamlString(value: string) {
   return JSON.stringify(value)
 }
 
-function frontmatterOf(fields: Record<string, string | CommentRange | undefined>) {
+function frontmatterOf(fields: Record<string, string | CommentRange | CommentRange[] | undefined>) {
   const lines = Object.entries(fields)
     .filter(([, value]) => value !== undefined)
     .map(([key, value]) => `${key}: ${typeof value === 'string' ? yamlString(value) : JSON.stringify(value)}`)
@@ -95,9 +96,9 @@ function newReplyFile(now: Date) {
 
 /** 新评论串批的位置：frontmatter 里写的几项，加上要存成 snapshot.txt 的页面文字；批整页时都没有 */
 type NewAnchor = { fields: AnchorFieldsWithRange | Record<string, never>; snapshot?: string }
-type AnchorFieldsWithRange = { quote: string; range: CommentRange } | { element: CommentElementKind; range: CommentRange }
+type AnchorFieldsWithRange = ({ quote: string; range: CommentRange } | { element: CommentElementKind; range: CommentRange }) & { openers?: CommentRange[] }
 
-const anchorShapes = '{ quote, range, snapshot }、{ element, range, snapshot }、{ quote, occurrence } 或 {}'
+const anchorShapes = '{ quote, range, snapshot, openers? }、{ element, range, snapshot, openers? }、{ quote, occurrence } 或 {}'
 
 /** 一页渲染出的 HTML：默认向开发服务自己请求这一页，测试里换成假的 */
 type PageHtmlOf = (page: string) => Promise<string>
@@ -148,16 +149,18 @@ async function anchorOf(form: FormData, page: string, pageHtmlOf: PageHtmlOf): P
   if (typeof anchor !== 'object' || anchor === null) throw new RejectedRequest(400, `anchor 要是 ${anchorShapes}`)
   if (Object.keys(anchor).length === 0) return { fields: {} }
   if ('occurrence' in anchor) return anchorOfOccurrence(anchor as Record<string, unknown>, page, pageHtmlOf)
-  const { quote, element, range, snapshot } = anchor as Record<string, unknown>
+  const { quote, element, range, snapshot, openers } = anchor as Record<string, unknown>
   if (!isCommentRange(range)) throw new RejectedRequest(400, 'anchor.range 要是 [start, end]，start 小于 end')
   if (typeof snapshot !== 'string' || snapshot.includes('\r')) throw new RejectedRequest(400, 'anchor.snapshot 要是页面文字，换行只用 \\n')
-  const fields =
+  if (openers !== undefined && !isCommentOpeners(openers)) throw new RejectedRequest(400, 'anchor.openers 要是 [[start, end], …]，至少一个')
+  const fields: AnchorFieldsWithRange | undefined =
     typeof quote === 'string' && quote.trim() !== ''
       ? { quote, range }
       : commentElementKinds.includes(element as CommentElementKind)
         ? { element: element as CommentElementKind, range }
         : undefined
   if (!fields) throw new RejectedRequest(400, `anchor 要是 ${anchorShapes}`)
+  if (openers !== undefined) fields.openers = openers
   return checkedAgainstSnapshot(fields, snapshot)
 }
 
@@ -302,7 +305,7 @@ async function handleForm(form: FormData, { commenter, pageUrls, commentsDir, pa
 /**
  * 评论接口的 POST：项目 routes.ts 里 route('api/comments', …) 的 action 调它。
  * 表单字段：op（create、reply、edit、delete、resolve、reopen）、page 与 anchor（create）、thread、file（edit、delete）、body、image（粘贴的图片，可多个）。
- * anchor 是网页传的 { quote, range, snapshot }、{ element, range, snapshot }、{}，或 agent 传的 { quote, occurrence }（occurrence 从 1 数）。
+ * anchor 是网页传的 { quote, range, snapshot, openers? }、{ element, range, snapshot, openers? }、{}，或 agent 传的 { quote, occurrence }（occurrence 从 1 数）。
  * 网页传来的 snapshot 是页面文字的快照；agent 那种由服务端取这一页渲染出的 HTML 算出页面文字当快照。快照存成评论串文件夹里的 snapshot.txt。
  * 只改 comments/ 里的文件，不碰 git；开发服务看到文件变了自己刷新页面
  */
@@ -326,7 +329,7 @@ export async function commentRequestResponse(request: Request, options: CommentR
  * 读出来统一成 \n 换行：git 在 Windows 上取出文件时可能把换行改成 \r\n，位置就差了
  */
 export async function commentSnapshotsOf(
-  threads: ReadonlyArray<{ id: string; head: Pick<CommentThreadFrontmatter, 'quote' | 'range'> }>,
+  threads: ReadonlyArray<{ id: string; head: Pick<CommentThreadFrontmatter, 'quote' | 'range' | 'openers'> }>,
   commentsDir = path.resolve(process.cwd(), 'comments'),
 ): Promise<Record<string, string>> {
   const snapshots: Record<string, string> = {}

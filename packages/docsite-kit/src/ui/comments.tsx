@@ -4,7 +4,20 @@ import { ThemeSwitch } from '@fumadocs/base-ui/layouts/shared/slots/theme-switch
 import type { CommentElementKind, CommentEntry, Commenter, CommentRange, CommentThread } from '../comments.js'
 import { createRangeMapper } from '../comment-ranges.js'
 import { commentScopeAttribute } from '../page-text-rules.js'
-import { anchorLabelOf, commentUiAttribute, elementKindOf, elementLabelOf, elementOffsetsOf, offsetsOfRange, pageTextOf, pickedElementOf, placeOfThread, type ThreadPlace } from './comment-anchors.js'
+import {
+  anchorLabelOf,
+  commentUiAttribute,
+  elementKindOf,
+  elementLabelOf,
+  elementOffsetsOf,
+  offsetsOfRange,
+  openerLabelOf,
+  openerRangesOf,
+  pageTextOf,
+  pickedElementOf,
+  placeOfThread,
+  type ThreadPlace,
+} from './comment-anchors.js'
 import { CommentEditor, CommenterChip, CommentItem, postComment, recentThreadToOpen, rememberThreadToOpen, ThreadView, type CommentApi } from './comment-cards.js'
 
 /** 页面正文的容器带上这个属性，评论在它里面找被批的原文：<DocsBody {...commentScopeProps}> */
@@ -21,8 +34,10 @@ const pickingAttribute = 'data-comment-picking'
 
 const cardWidth = 360
 
-/** 新评论串批的位置，连同发起那一刻的整页文字（存成快照）；批整页时是 {} */
-type NewAnchor = { quote: string; range: CommentRange; snapshot: string } | { element: CommentElementKind; range: CommentRange; snapshot: string } | Record<string, never>
+/** 新评论串批的位置，连同发起那一刻的整页文字（存成快照）与外面几层收起内容的打开按钮；批整页时是 {} */
+type NewAnchor =
+  | ({ quote: string; range: CommentRange; snapshot: string } | { element: CommentElementKind; range: CommentRange; snapshot: string }) & { openers?: CommentRange[] }
+  | Record<string, never>
 
 /** 正文上评论的几样东西在评论层里的位置（相对评论层左上角） */
 type Placement = {
@@ -34,11 +49,16 @@ type Placement = {
   cornerBadges: Map<string, { top: number; right: number }>
   /** 原文找不到了的评论串 */
   missing: Set<string>
+  /** 被批的内容收着、看不见的评论串：现在要点的打开按钮和它上面的字；认不出按钮时都没有 */
+  collapsed: Map<string, { opener: HTMLElement; label: string } | undefined>
   /** 找得到位置、但被批的那段在发起评论之后改过的评论串 */
   changed: Set<string>
 }
 
-const emptyPlacement: Placement = { anchored: new Map(), inline: [], cornerBadges: new Map(), missing: new Set(), changed: new Set() }
+const emptyPlacement: Placement = { anchored: new Map(), inline: [], cornerBadges: new Map(), missing: new Set(), collapsed: new Map(), changed: new Set() }
+
+/** 点开一层收起内容后等它露出来的最长时间：过了还没露出来就不再点 */
+const revealTimeoutMs = 5000
 
 /** 选中文字后浮出的「评论」按钮（top）与草稿卡片（cardTop、cardLeft）的位置 */
 type PendingAction = { top: number; anchor: NewAnchor; cardTop: number; cardLeft: number }
@@ -137,7 +157,7 @@ function containsPoint(rect: DOMRect, x: number, y: number) {
 }
 
 function samePlacement(a: Placement, b: Placement) {
-  if (a.anchored.size !== b.anchored.size || a.cornerBadges.size !== b.cornerBadges.size || a.missing.size !== b.missing.size || a.changed.size !== b.changed.size) return false
+  if (a.anchored.size !== b.anchored.size || a.cornerBadges.size !== b.cornerBadges.size || a.missing.size !== b.missing.size || a.collapsed.size !== b.collapsed.size || a.changed.size !== b.changed.size) return false
   if (a.inline.join() !== b.inline.join()) return false
   for (const [id, spot] of a.anchored) {
     const other = b.anchored.get(id)
@@ -148,6 +168,9 @@ function samePlacement(a: Placement, b: Placement) {
     if (!other || other.top !== spot.top || other.right !== spot.right) return false
   }
   for (const id of a.missing) if (!b.missing.has(id)) return false
+  for (const [id, spot] of a.collapsed) {
+    if (!b.collapsed.has(id) || b.collapsed.get(id)?.opener !== spot?.opener || b.collapsed.get(id)?.label !== spot?.label) return false
+  }
   for (const id of a.changed) if (!b.changed.has(id)) return false
   return true
 }
@@ -232,7 +255,7 @@ export function PageComments<Entry extends CommentEntry>({ page, threads, snapsh
     const placeOf = new Map<string, ThreadPlace>()
     const inserted: InsertedBadge[] = []
     let frame = 0
-    // 正文的字变了也要重新找：切换标签页、展开折叠块时正文的高度不一定变。评论数按钮里的变化不算
+    // 正文的字变了、内容开合了也要重新找：切换标签页、展开折叠块时正文的高度不一定变。评论数按钮里的变化不算
     const isCommentUiMutation = (record: MutationRecord) => (record.target instanceof Element ? record.target : record.target.parentElement)?.closest(`[${commentUiAttribute}]`) != null
     const mutationObserver = new MutationObserver((records) => {
       if (records.some((record) => !isCommentUiMutation(record))) measureNextFrame()
@@ -241,7 +264,8 @@ export function PageComments<Entry extends CommentEntry>({ page, threads, snapsh
       // 找位置时自己会撤、插评论数按钮，切开、拼回文字节点：这期间不看正文的变化，免得自己触发自己
       mutationObserver.disconnect()
       measureWithoutObserving()
-      mutationObserver.observe(scope, { childList: true, subtree: true, characterData: true })
+      // 折叠块开合时内容一直在页面里，只改这几个属性
+      mutationObserver.observe(scope, { childList: true, subtree: true, characterData: true, attributes: true, attributeFilter: ['hidden', 'open', 'aria-expanded', 'aria-selected'] })
     }
     const measureWithoutObserving = () => {
       // 先撤掉上次插的按钮，在原样的正文上找原文，再插回去
@@ -262,6 +286,11 @@ export function PageComments<Entry extends CommentEntry>({ page, threads, snapsh
       paintHighlights(openRanges, activeThread && highlightedRangeOf(placeOf.get(activeThread.id)!, activeThread.head.element))
 
       const missing = new Set(threads.filter((thread) => placeOf.get(thread.id)!.type === 'missing').map((thread) => thread.id))
+      const collapsed: Placement['collapsed'] = new Map()
+      for (const thread of threads) {
+        const place = placeOf.get(thread.id)!
+        if (place.type === 'collapsed') collapsed.set(thread.id, place.opener && { opener: place.opener, label: openerLabelOf(place.opener) })
+      }
       const changed = new Set(
         threads
           .filter((thread) => {
@@ -295,7 +324,7 @@ export function PageComments<Entry extends CommentEntry>({ page, threads, snapsh
         anchored.set(thread.id, { cardTop: rect.bottom - layerRect.top + 8, cardLeft: clampCardLeft(rect.left - layerRect.left, layerRect.width) })
         if (cornerThreads.includes(thread.id)) cornerBadges.set(thread.id, { top: rect.top - layerRect.top + 6, right: rect.right - layerRect.left - 6 })
       }
-      const next: Placement = { anchored, inline, cornerBadges, missing, changed }
+      const next: Placement = { anchored, inline, cornerBadges, missing, collapsed, changed }
       setPlacement((current) => (samePlacement(current, next) ? current : next))
     }
     const measureNextFrame = () => {
@@ -344,7 +373,8 @@ export function PageComments<Entry extends CommentEntry>({ page, threads, snapsh
       const pageText = pageTextOf(scope)
       const offsets = offsetsOfRange(pageText, range)
       if (!offsets) return setSelectionAction(undefined)
-      const anchor: NewAnchor = { quote: pageText.text.slice(...offsets), range: offsets, snapshot: pageText.text }
+      const openers = openerRangesOf(scope, pageText, range.commonAncestorContainer)
+      const anchor: NewAnchor = { quote: pageText.text.slice(...offsets), range: offsets, snapshot: pageText.text, ...(openers && { openers }) }
       const layerRect = layer.getBoundingClientRect()
       const first = range.getClientRects()[0] ?? range.getBoundingClientRect()
       const whole = range.getBoundingClientRect()
@@ -392,7 +422,8 @@ export function PageComments<Entry extends CommentEntry>({ page, threads, snapsh
       const range = elementOffsetsOf(pageText, element)
       if (!range) return setHint('这个元素里没有字，也没有图片：在页面文字里没有位置，可以评论整页')
       const box = boxOf(element, layer)
-      startDraft({ anchor: { element: elementKindOf(element), range, snapshot: pageText.text }, cardTop: box.top + box.height + 8, cardLeft: clampCardLeft(box.left, layer.getBoundingClientRect().width) })
+      const openers = openerRangesOf(scope, pageText, element)
+      startDraft({ anchor: { element: elementKindOf(element), range, snapshot: pageText.text, ...(openers && { openers }) }, cardTop: box.top + box.height + 8, cardLeft: clampCardLeft(box.left, layer.getBoundingClientRect().width) })
     }
     const exitOnEscape = (event: KeyboardEvent) => {
       if (event.key === 'Escape') setPicking(false)
@@ -440,6 +471,43 @@ export function PageComments<Entry extends CommentEntry>({ page, threads, snapsh
     setDraft(undefined)
     document.getSelection()?.removeAllRanges()
   }
+
+  /** 滚到正文里的原文、弹出这串的卡片 */
+  const goToThread = (id: string) => {
+    // 窄屏时右侧栏盖住正文，先关上才看得到正文里弹出的卡片
+    if (!window.matchMedia('(width >= 80rem)').matches) setPanelOpen(false)
+    setOpenId(id)
+    const spot = placement.anchored.get(id)
+    if (spot) window.scrollTo({ top: layerRef.current!.getBoundingClientRect().top + window.scrollY + spot.cardTop - window.innerHeight / 3, behavior: 'smooth' })
+  }
+
+  /** 正在点开收起内容的那串、已经点过的按钮（同一个按钮点过一次还收着，就不再点），和等这一层露出来的计时器 */
+  const revealingRef = useRef<{ id: string; clicked: Set<Element>; timer: ReturnType<typeof setTimeout> }>(undefined)
+  /** 点开一层，等正文变了重新找位置；一层点了 revealTimeoutMs 还没露出东西就放弃 */
+  const clickOpener = (id: string, opener: HTMLElement, clicked: Set<Element>) => {
+    clearTimeout(revealingRef.current?.timer)
+    clicked.add(opener)
+    const timer = setTimeout(() => {
+      revealingRef.current = undefined
+      setHint('点开了收起的内容，还是找不到被批的地方')
+    }, revealTimeoutMs)
+    revealingRef.current = { id, clicked, timer }
+    opener.click()
+  }
+  /** 被批的内容收着：点开现在收着的那一层；露出来以后正文变了会重新找位置，再由下面的 effect 点下一层，直到找到 */
+  const revealThread = (id: string, opener: HTMLElement) => clickOpener(id, opener, new Set())
+  useEffect(() => {
+    const revealing = revealingRef.current
+    if (!revealing) return
+    if (placement.anchored.has(revealing.id)) {
+      clearTimeout(revealing.timer)
+      revealingRef.current = undefined
+      goToThread(revealing.id)
+      return
+    }
+    const opener = placement.collapsed.get(revealing.id)?.opener
+    if (opener && !revealing.clicked.has(opener)) clickOpener(revealing.id, opener, revealing.clicked)
+  }, [placement])
 
   const openThread = openId === undefined ? undefined : threads.find((thread) => thread.id === openId)
   const openSpot = openId === undefined ? undefined : placement.anchored.get(openId)
@@ -520,13 +588,8 @@ export function PageComments<Entry extends CommentEntry>({ page, threads, snapsh
           detailId={panelThreadId}
           onDetailChange={setPanelThreadId}
           onCreatePageComment={(body, images) => createThread({}, body, images)}
-          onGoToThread={(id) => {
-            // 窄屏时右侧栏盖住正文，先关上才看得到正文里弹出的卡片
-            if (!window.matchMedia('(width >= 80rem)').matches) setPanelOpen(false)
-            setOpenId(id)
-            const spot = placement.anchored.get(id)
-            if (spot) window.scrollTo({ top: layerRef.current!.getBoundingClientRect().top + window.scrollY + spot.cardTop - window.innerHeight / 3, behavior: 'smooth' })
-          }}
+          onGoToThread={goToThread}
+          onRevealThread={revealThread}
         />
       )}
     </div>
@@ -552,6 +615,8 @@ type CommentsPanelProps<Entry extends CommentEntry> = {
   onCreatePageComment: (body: string, images: File[]) => Promise<void>
   /** 正文里找得到原文的评论串：滚到原文、弹出卡片 */
   onGoToThread: (id: string) => void
+  /** 被批的内容收着的评论串：点开它（opener 是现在要点的按钮），露出来以后滚过去 */
+  onRevealThread: (id: string, opener: HTMLElement) => void
 }
 
 /** 右侧栏打开时 <html> 上的属性：styles.css 据此在宽屏上给整个页面布局让出右侧栏的宽度 */
@@ -559,7 +624,7 @@ const commentsSidebarOpenAttribute = 'data-comments-sidebar-open'
 
 /** 右下角的「评论」按钮和它打开的右侧栏 */
 function CommentsPanel<Entry extends CommentEntry>(props: CommentsPanelProps<Entry>) {
-  const { threads, labelOf, picking, onPickingChange, placement, commenter, renderBody, api, open, onOpenChange, detailId, onDetailChange, onCreatePageComment, onGoToThread } = props
+  const { threads, labelOf, picking, onPickingChange, placement, commenter, renderBody, api, open, onOpenChange, detailId, onDetailChange, onCreatePageComment, onGoToThread, onRevealThread } = props
   const pickingToggle = (className: string) =>
     commenter && (
       <button
@@ -586,11 +651,23 @@ function CommentsPanel<Entry extends CommentEntry>(props: CommentsPanelProps<Ent
   const detail = detailId === undefined ? undefined : threads.find((thread) => thread.id === detailId)
   const noteOf = (thread: CommentThread<Entry>) => {
     if (placement.missing.has(thread.id)) return `原文找不到了：${labelOf(thread)}`
+    if (placement.collapsed.has(thread.id)) {
+      const label = placement.collapsed.get(thread.id)?.label
+      return label === undefined ? `在页面上看不见：${labelOf(thread)}` : `在收起的「${label}」里：${labelOf(thread)}`
+    }
     if (placement.changed.has(thread.id)) return `原文改过：${labelOf(thread)}`
     return labelOf(thread)
   }
+  const noteColorOf = (id: string) => {
+    if (placement.missing.has(id)) return 'text-red-500'
+    if (placement.collapsed.has(id)) return 'text-sky-600'
+    if (placement.changed.has(id)) return 'text-amber-600'
+    return 'text-fd-muted-foreground'
+  }
   const choose = (thread: CommentThread<Entry>) => {
+    const opener = placement.collapsed.get(thread.id)?.opener
     if (thread.head.status === 'open' && placement.anchored.has(thread.id)) onGoToThread(thread.id)
+    else if (thread.head.status === 'open' && opener) onRevealThread(thread.id, opener)
     else onDetailChange(thread.id)
   }
   return (
@@ -675,7 +752,7 @@ function CommentsPanel<Entry extends CommentEntry>(props: CommentsPanelProps<Ent
                     }}
                     className="flex cursor-pointer flex-col gap-1 rounded-lg px-2 py-2 text-start hover:bg-fd-accent"
                   >
-                    <span className={`line-clamp-1 text-xs ${placement.missing.has(thread.id) ? 'text-red-500' : placement.changed.has(thread.id) ? 'text-amber-600' : 'text-fd-muted-foreground'}`}>{noteOf(thread)}</span>
+                    <span className={`line-clamp-1 text-xs ${noteColorOf(thread.id)}`}>{noteOf(thread)}</span>
                     <CommentItem entry={thread.head} thread={thread.id} renderBody={renderBody} commenter={commenter} api={api} clamped />
                     {thread.replies.length > 0 && <span className="ms-8 text-xs text-fd-muted-foreground">{thread.replies.length} 条回复</span>}
                   </div>

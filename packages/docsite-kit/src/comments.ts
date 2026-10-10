@@ -37,6 +37,11 @@ export type CommentThreadFrontmatter = {
   element?: CommentElementKind
   /** 批的是快照里的第几个字到第几个字（不含后一个），写了 quote 或 element 就要写 */
   range?: CommentRange
+  /**
+   * 被批的内容在几层可收起的容器里（标签页、折叠块、文件夹）时，打开每一层要点的按钮在快照里的位置，由外到里。
+   * 被批的内容收起来、在页面上找不到或看不见时，按顺序点开这些按钮再找
+   */
+  openers?: CommentRange[]
   resolvedBy?: string
   resolvedAt?: string
 }
@@ -58,7 +63,7 @@ export type CommentFrontmatterSchema = {
   }
 }
 
-const threadKeys = ['author', 'createdAt', 'page', 'status', 'quote', 'element', 'range', 'resolvedBy', 'resolvedAt']
+const threadKeys = ['author', 'createdAt', 'page', 'status', 'quote', 'element', 'range', 'openers', 'resolvedBy', 'resolvedAt']
 const replyKeys = ['author', 'createdAt']
 const statuses: readonly CommentStatus[] = ['open', 'resolved']
 
@@ -96,6 +101,11 @@ export function isCommentRange(value: unknown): value is CommentRange {
   return Array.isArray(value) && value.length === 2 && value.every((at) => Number.isInteger(at) && at >= 0) && value[0] < value[1]
 }
 
+/** openers 写成 [[start, end], …]，至少一个 */
+export function isCommentOpeners(value: unknown): value is CommentRange[] {
+  return Array.isArray(value) && value.length > 0 && value.every(isCommentRange)
+}
+
 function validateThread(data: Record<string, unknown>) {
   const issues = unknownKeyIssues(data, threadKeys)
   const author = nonEmptyString(data, 'author', issues)
@@ -112,6 +122,9 @@ function validateThread(data: Record<string, unknown>) {
   if (range !== undefined && !isCommentRange(range)) issues.push({ message: 'range 要写成 [start, end]：快照里从 0 数的两个位置，start 小于 end', path: ['range'] })
   if ((data.quote !== undefined || data.element !== undefined) && range === undefined) issues.push({ message: '写了 quote 或 element 就要写 range：批的是快照里的哪一段', path: ['range'] })
   if (data.quote === undefined && data.element === undefined && range !== undefined) issues.push({ message: 'range 要和 quote 或 element 一起写；都不写是批整页', path: ['range'] })
+  const openers = data.openers
+  if (openers !== undefined && !isCommentOpeners(openers)) issues.push({ message: 'openers 要写成 [[start, end], …]：每个按钮在快照里从 0 数的两个位置，由外到里', path: ['openers'] })
+  if (openers !== undefined && range === undefined) issues.push({ message: 'openers 要和 range 一起写', path: ['openers'] })
   const resolvedBy = optionalString(data, 'resolvedBy', issues)
   const resolvedAt = data.resolvedAt === undefined ? undefined : isoTime(data, 'resolvedAt', issues)
   if (issues.length > 0) return { issues }
@@ -119,6 +132,7 @@ function validateThread(data: Record<string, unknown>) {
   if (quote !== undefined) value.quote = quote
   if (element !== undefined) value.element = element
   if (range !== undefined) value.range = range as CommentRange
+  if (openers !== undefined) value.openers = openers as CommentRange[]
   if (resolvedBy !== undefined) value.resolvedBy = resolvedBy
   if (resolvedAt !== undefined) value.resolvedAt = resolvedAt
   return { value }
@@ -210,11 +224,13 @@ export function assertCommentPagesExist(threads: ReadonlyArray<CommentThread<Com
   if (orphans.length > 0) throw new Error(orphans.map((thread) => `评论串 ${thread.id} 批的页面 ${thread.head.page} 不存在`).join('\n'))
 }
 
-/** frontmatter 与快照对不上时说明哪里不对：range 超出了快照，或者 quote 不等于快照里 range 那一段 */
-export function snapshotMismatchOf(head: Pick<CommentThreadFrontmatter, 'quote' | 'range'>, snapshot: string): string | undefined {
+/** frontmatter 与快照对不上时说明哪里不对：range 或 openers 超出了快照，或者 quote 不等于快照里 range 那一段 */
+export function snapshotMismatchOf(head: Pick<CommentThreadFrontmatter, 'quote' | 'range' | 'openers'>, snapshot: string): string | undefined {
   if (!head.range) return undefined
   const [start, end] = head.range
   if (end > snapshot.length) return `range [${start}, ${end}] 超出了快照（共 ${snapshot.length} 个字）`
   if (head.quote !== undefined && snapshot.slice(start, end) !== head.quote) return `quote 和快照里 range 那一段不一样：快照里是「${snapshot.slice(start, end)}」`
+  const outside = head.openers?.find(([, openerEnd]) => openerEnd > snapshot.length)
+  if (outside) return `openers 里的 [${outside[0]}, ${outside[1]}] 超出了快照（共 ${snapshot.length} 个字）`
   return undefined
 }

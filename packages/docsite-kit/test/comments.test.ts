@@ -24,6 +24,15 @@ describe('评论的 frontmatter', () => {
     expect(validate('/c/a/index.md', { ...base, range: [0, 1] }).issues?.map((issue) => issue.message)).toEqual(['range 要和 quote 或 element 一起写；都不写是批整页'])
   })
 
+  it('openers 写成 [[start, end], …] 并和 range 一起写；写错、单独写时报错', () => {
+    const base = { author: 'a', createdAt: '2026-10-10', page: '/', status: 'open' }
+    expect(validate('/c/a/index.md', { ...base, element: 'component', range: [13, 19], openers: [[0, 5], [5, 13]] })).toEqual({
+      value: { kind: 'thread', author: 'a', createdAt: '2026-10-10T00:00:00.000Z', page: '/', status: 'open', element: 'component', range: [13, 19], openers: [[0, 5], [5, 13]] },
+    })
+    expect(validate('/c/a/index.md', { ...base, quote: 'x', range: [0, 1], openers: [] }).issues?.map((issue) => issue.message)).toEqual(['openers 要写成 [[start, end], …]：每个按钮在快照里从 0 数的两个位置，由外到里'])
+    expect(validate('/c/a/index.md', { ...base, openers: [[0, 1]] }).issues?.map((issue) => issue.message)).toEqual(['openers 要和 range 一起写'])
+  })
+
   it('其余文件按回复校验，回复里不能写 page', () => {
     expect(validate('C:\\site\\comments\\a\\answer.md', { author: 'Claude', createdAt: '2026-10-10T14:12:00+08:00' })).toEqual({
       value: { kind: 'reply', author: 'Claude', createdAt: '2026-10-10T06:12:00.000Z' },

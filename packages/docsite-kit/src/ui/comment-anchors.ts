@@ -149,21 +149,122 @@ function elementAt(scope: Element, pageText: PageText, range: CommentRange, kind
 }
 
 /**
- * 评论批的位置：一段文字（Range）、一个元素、整页，或者原文找不到了。
- * changed 表示被批的那段在快照之后被改过（首尾还对得上）
+ * 打开一层可收起内容的按钮，按 ARIA（读屏软件读的那套属性）认：标签页的标签（role="tab"）、
+ * 折叠块与文件夹的按钮（带 aria-expanded）、<details> 的 <summary>。组件照 ARIA 写了这些属性才认得出
+ */
+const openerSelector = '[role="tab"], [aria-expanded], summary'
+
+/** 这个按钮管的内容现在收着：没选中的标签、aria-expanded="false" 的按钮、没打开的 <details> 的 <summary> */
+function isClosedOpener(opener: Element) {
+  if (opener.getAttribute('role') === 'tab') return opener.getAttribute('aria-selected') !== 'true'
+  if (opener.tagName === 'SUMMARY') return !(opener.parentElement as HTMLDetailsElement).open
+  return opener.getAttribute('aria-expanded') === 'false'
+}
+
+/**
+ * 一个元素是一块可收起的内容时，打开它的那个按钮：<details> 的 <summary>；内容块的 aria-labelledby 指着的按钮
+ * （标签页的 tabpanel 指标签，折叠块的 region 指按钮）；或者 aria-controls 指着它 id 的按钮（文件夹展开着时按钮上有 aria-controls）
+ */
+function openerOfContainer(container: Element, scope: Element): Element | undefined {
+  if (container.tagName === 'DETAILS') return container.querySelector(':scope > summary') ?? undefined
+  for (const labelId of container.getAttribute('aria-labelledby')?.split(/\s+/) ?? []) {
+    const label = container.ownerDocument.getElementById(labelId)
+    if (label?.matches(openerSelector)) return label
+  }
+  if (!container.id) return undefined
+  return scope.querySelector(`[aria-controls~="${CSS.escape(container.id)}"]:is(${openerSelector})`) ?? undefined
+}
+
+/** node 外面每一层可收起内容的打开按钮，由外到里，到 scope 为止；node 在按钮自己里面的那一层不算 */
+function openersOf(scope: Element, node: Node): Element[] {
+  const openers: Element[] = []
+  for (let element = node instanceof Element ? node : node.parentElement; element && element !== scope; element = element.parentElement) {
+    const opener = openerOfContainer(element, scope)
+    if (opener && scope.contains(opener) && !opener.contains(node)) openers.unshift(opener)
+  }
+  return openers
+}
+
+/** 新评论串的 openers：node 外面每一层的打开按钮在页面文字里的位置，由外到里；一层也没有时返回 undefined */
+export function openerRangesOf(scope: Element, pageText: PageText, node: Node): CommentRange[] | undefined {
+  const ranges = openersOf(scope, node)
+    .map((opener) => elementOffsetsOf(pageText, opener))
+    .filter((range) => range !== undefined)
+  return ranges.length > 0 ? ranges : undefined
+}
+
+/** 推算出的位置上的打开按钮：这段字在哪个按钮里 */
+function openerAt(scope: Element, pageText: PageText, start: number, end: number): HTMLElement | undefined {
+  const common = rangeOfOffsets(pageText, start, end).commonAncestorContainer
+  const opener = (common instanceof Element ? common : common.parentElement)?.closest<HTMLElement>(openerSelector)
+  return opener && scope.contains(opener) ? opener : undefined
+}
+
+/** 按钮上的字，写给人看：「npm」「site」 */
+export function openerLabelOf(opener: Element) {
+  return readableText(pageTextOf(opener).text)
+}
+
+/**
+ * 一段字看得见：收着的内容（display: none，或 hidden="until-found" 带来的 content-visibility: hidden）里的看不见。
+ * 后者里的字照样排版、有框，只能用 checkVisibility 认；display: contents 的元素自己没有框，从它外面那层看
+ */
+function isRangeVisible(range: Range) {
+  const start = range.startContainer
+  let element = start instanceof Element ? start : start.parentElement
+  while (element && getComputedStyle(element).display === 'contents') element = element.parentElement
+  return element?.checkVisibility() ?? false
+}
+
+/**
+ * 评论批的位置：一段文字（Range）、一个元素、整页、收着看不见，或者原文找不到了。
+ * changed 表示被批的那段在快照之后被改过（首尾还对得上）。
+ * collapsed 的 opener 是现在要点的那个按钮（由外到里第一个收着的）；内容在页面里但看不见、又认不出打开它的按钮时 opener 没有
  */
 export type ThreadPlace =
   | { type: 'text'; range: Range; changed: boolean }
   | { type: 'element'; element: HTMLElement; range: Range; changed: boolean }
   | { type: 'page' }
+  | { type: 'collapsed'; opener: HTMLElement | undefined }
   | { type: 'missing' }
+
+/**
+ * 记下的按钮现在在哪：按钮上的字常随开合变（展开箭头 ▸ 变 ▾），不要求首尾都对得上，按钮里有一个字没改过就找得到它
+ */
+function openerFromRecorded(scope: Element, pageText: PageText, recorded: CommentRange, snapshot: string, mapRange: RangeMapper) {
+  for (let at = recorded[0]; at < recorded[1]; at++) {
+    const mapped = mapRange(snapshot, pageText.text, [at, at + 1])
+    if (mapped && !mapped.changed) return openerAt(scope, pageText, mapped.start, mapped.end)
+  }
+  return undefined
+}
+
+/**
+ * 被批的内容不在页面上时，按记下的 openers 由外到里看：第一个收着的按钮就是现在要点的；
+ * 某一层的按钮推算不到、或者每层都开着内容还是找不到，就是原文找不到了
+ */
+function placeOfRecordedOpeners(scope: Element, pageText: PageText, head: CommentThreadFrontmatter, snapshot: string, mapRange: RangeMapper): ThreadPlace {
+  for (const recorded of head.openers ?? []) {
+    const opener = openerFromRecorded(scope, pageText, recorded, snapshot, mapRange)
+    if (!opener) return { type: 'missing' }
+    if (isClosedOpener(opener)) return { type: 'collapsed', opener }
+  }
+  return { type: 'missing' }
+}
+
+/** 被批的内容在页面里但看不见（如折叠块收着时内容带 hidden="until-found" 还在页面里）：现在页面上由外到里第一个收着的按钮 */
+function placeOfHiddenNode(scope: Element, node: Node): ThreadPlace {
+  const opener = openersOf(scope, node).find(isClosedOpener)
+  return { type: 'collapsed', opener: opener as HTMLElement | undefined }
+}
 
 export function placeOfThread(scope: Element, pageText: PageText, head: CommentThreadFrontmatter, snapshot: string | undefined, mapRange: RangeMapper): ThreadPlace {
   if (!head.range) return { type: 'page' }
   if (snapshot === undefined) throw new Error('批一段文字或一个元素的评论串要传快照')
   const mapped = mapRange(snapshot, pageText.text, head.range)
-  if (!mapped) return { type: 'missing' }
+  if (!mapped) return placeOfRecordedOpeners(scope, pageText, head, snapshot, mapRange)
   const range = rangeOfOffsets(pageText, mapped.start, mapped.end)
+  if (!isRangeVisible(range)) return placeOfHiddenNode(scope, range.commonAncestorContainer)
   if (head.quote !== undefined) return { type: 'text', range, changed: mapped.changed }
   const element = elementAt(scope, pageText, [mapped.start, mapped.end], head.element!)
   return element ? { type: 'element', element: element as HTMLElement, range, changed: mapped.changed } : { type: 'missing' }

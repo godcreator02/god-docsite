@@ -63,6 +63,16 @@ describe('评论接口', () => {
     expect(await rejected({ quote: '原文', range: [3, 1], snapshot: '前原文后' })).toBe('anchor.range 要是 [start, end]，start 小于 end')
   })
 
+  it('被批的内容在收起的标签页、文件夹里时写 openers：要先点的按钮在快照里的位置，由外到里；超出快照、写法不对时拒绝', async () => {
+    const snapshot = '￼site￼content￼(kit)'
+    const { thread } = await created({ anchor: JSON.stringify({ element: 'component', range: [13, 19], snapshot, openers: [[0, 5], [5, 13]] }), body: '这个文件夹' })
+    expect(await readFile(path.join(commentsDir, thread, 'index.md'), 'utf8')).toContain('element: "component"\nrange: [13,19]\nopeners: [[0,5],[5,13]]\n')
+    const rejected = async (anchor: unknown) => (await post({ op: 'create', page: '/writing', anchor: JSON.stringify(anchor), body: 'x' })).text()
+    expect(await rejected({ element: 'component', range: [13, 19], snapshot, openers: [[0, 30]] })).toBe('anchor 对不上：openers 里的 [0, 30] 超出了快照（共 19 个字）')
+    expect(await rejected({ element: 'component', range: [13, 19], snapshot, openers: [] })).toBe('anchor.openers 要是 [[start, end], …]，至少一个')
+    expect(await rejected({ element: 'component', range: [13, 19], snapshot, openers: [0, 5] })).toBe('anchor.openers 要是 [[start, end], …]，至少一个')
+  })
+
   it('agent 传 { quote, occurrence }：服务端取这一页的 HTML 算出页面文字当快照，range 指第 occurrence 处', async () => {
     const html = '<html><body><nav>原文</nav><article data-comment-scope=""><p>原文一</p><p>再看原文<span class="sr-only">原文</span>二</p></article></body></html>'
     const { response, askedPages } = postAsAgent({ quote: '原文', occurrence: 2 }, html)
@@ -85,7 +95,7 @@ describe('评论接口', () => {
     expect(await rejected({ quote: '没有', occurrence: 1 })).toBe('这一页的文字里没有第 1 处「没有」，一共有 0 处')
     expect(await rejected({ quote: '原文', occurrence: 0 })).toBe('anchor.occurrence 要是从 1 数的整数')
     expect(await rejected({ quote: '原文', occurrence: 1.5 })).toBe('anchor.occurrence 要是从 1 数的整数')
-    expect(await rejected({ quote: '原文', occurrence: 1, range: [0, 2] })).toBe('anchor 要是 { quote, range, snapshot }、{ element, range, snapshot }、{ quote, occurrence } 或 {}')
+    expect(await rejected({ quote: '原文', occurrence: 1, range: [0, 2] })).toBe('anchor 要是 { quote, range, snapshot, openers? }、{ element, range, snapshot, openers? }、{ quote, occurrence } 或 {}')
     expect(await readdir(commentsDir)).toEqual([])
   })
 
