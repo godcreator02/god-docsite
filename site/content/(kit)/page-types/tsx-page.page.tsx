@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { DynamicCodeBlock } from '@fumadocs/base-ui/components/dynamic-codeblock'
 
 export const meta = { title: 'TSX 页面', description: '这一页本身就是一个 TSX 页面：导出 meta 与默认组件，组件里能用 React 的状态' }
 
@@ -25,10 +26,8 @@ export default function Page() {
           点了 {count} 次
         </button>
       </p>
-      <p>文件的写法：</p>
-      <pre className="overflow-x-auto rounded-lg border bg-fd-secondary/50 p-3 text-sm">
-        <code>{sourceLines.join('\n')}</code>
-      </pre>
+      <p>文件的写法（TSX 页面里放代码用 fumadocs 的 DynamicCodeBlock，和 MDX 里的代码块一样着色）：</p>
+      <DynamicCodeBlock lang="tsx" code={sourceLines.join('\n')} codeblock={{ title: 'tsx-page.page.tsx' }} />
     </>
   )
 }
