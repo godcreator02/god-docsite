@@ -3,8 +3,7 @@ import { randomBytes } from 'node:crypto'
 import { mkdir, readFile, readdir, rm, stat, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 import { promisify } from 'node:util'
-import { anchorTagOf, offsetOfPoint, parseCommentBlockSpec, sourceHash } from '../comment-source.js'
-import { commentAnchorComponent, commentAnchorIdPattern, isThreadHeadFile, type Commenter } from '../comments.js'
+import { commentBlockKinds, isThreadHeadFile, type CommentBlockAnchor, type Commenter } from '../comments.js'
 
 const commenterOfDir = new Map<string, Promise<Commenter>>()
 
@@ -26,14 +25,6 @@ export function currentCommenter(cwd = process.cwd()): Promise<Commenter> {
     commenterOfDir.set(cwd, commenter)
   }
   return commenter
-}
-
-/**
- * 这个站写评论的人：开发服务里是本机 git 的 user.name；发布出去的站（react-router-serve）只读，返回 null。
- * import.meta.env.DEV 由 Vite 编译时换掉：基础包和站点代码一起经 Vite 处理
- */
-export async function siteCommenter(): Promise<Commenter | null> {
-  return import.meta.env.DEV ? await currentCommenter() : null
 }
 
 /** 网页能做的几件事 */
@@ -74,10 +65,10 @@ function yamlString(value: string) {
   return JSON.stringify(value)
 }
 
-function frontmatterOf(fields: Record<string, string | number | undefined>) {
+function frontmatterOf(fields: Record<string, string | CommentBlockAnchor | undefined>) {
   const lines = Object.entries(fields)
     .filter(([, value]) => value !== undefined)
-    .map(([key, value]) => `${key}: ${typeof value === 'string' ? yamlString(value) : value}`)
+    .map(([key, value]) => `${key}: ${typeof value === 'string' ? yamlString(value) : JSON.stringify(value)}`)
   return `---\n${lines.join('\n')}\n---\n`
 }
 
@@ -91,73 +82,29 @@ function newReplyFile(now: Date) {
   return `${now.toISOString().slice(0, 19).replace(/[-:]/g, '').toLowerCase()}-${randomBytes(2).toString('hex')}.md`
 }
 
-/**
- * 网页传来的 target：{} 批整页；{ anchor } 批已有标记的块；{ block } 批还没有标记的块，block 是块上 data-comment-block 的值。
- * 后两种可以再带 { quote, quoteIndex }，批块里的几个字
- */
-type CommentTarget = { anchor?: string; block?: string; quote?: string; quoteIndex?: number }
+type NewAnchor = { quote: string; quotePrefix: string; quoteSuffix: string } | { block: CommentBlockAnchor } | Record<string, never>
 
-function targetOf(form: FormData): CommentTarget {
-  let target: unknown
+/** 网页传来的 anchor：{ quote, quotePrefix, quoteSuffix }、{ block } 或 {}（批整页） */
+function anchorOf(form: FormData): NewAnchor {
+  let anchor: unknown
   try {
-    target = JSON.parse(requiredField(form, 'target'))
+    anchor = JSON.parse(requiredField(form, 'anchor'))
   } catch (error) {
     if (error instanceof RejectedRequest) throw error
-    throw new RejectedRequest(400, 'target 不是 JSON')
+    throw new RejectedRequest(400, 'anchor 不是 JSON')
   }
-  if (typeof target !== 'object' || target === null || Array.isArray(target)) throw new RejectedRequest(400, 'target 要是对象')
-  const { anchor, block, quote, quoteIndex, ...rest } = target as Record<string, unknown>
-  if (Object.keys(rest).length > 0) throw new RejectedRequest(400, `target 里认不出 ${Object.keys(rest).join('、')}`)
-  if (anchor !== undefined && (typeof anchor !== 'string' || !commentAnchorIdPattern.test(anchor))) throw new RejectedRequest(400, 'target.anchor 要是标记的 id')
-  if (block !== undefined && typeof block !== 'string') throw new RejectedRequest(400, 'target.block 要是块上 data-comment-block 的值')
-  if (anchor !== undefined && block !== undefined) throw new RejectedRequest(400, 'target 里 anchor 和 block 只能写一个')
-  if (quote !== undefined) {
-    if (anchor === undefined && block === undefined) throw new RejectedRequest(400, 'target.quote 要和 anchor 或 block 一起写')
-    if (typeof quote !== 'string' || quote.trim() === '') throw new RejectedRequest(400, 'target.quote 要是非空字符串')
-    if (!Number.isInteger(quoteIndex) || (quoteIndex as number) < 1) throw new RejectedRequest(400, 'target.quoteIndex 要是从 1 数的整数')
-  } else if (quoteIndex !== undefined) throw new RejectedRequest(400, 'target.quoteIndex 要和 quote 一起写')
-  return { anchor, block, quote, quoteIndex } as CommentTarget
-}
-
-/** 新标记的 id：几个随机字母数字，和这一页已有的标记不重复 */
-function newAnchorId(pageSource: string) {
-  for (;;) {
-    const id = randomBytes(3).toString('hex')
-    if (!pageSource.includes(`id="${id}"`)) return id
+  if (typeof anchor !== 'object' || anchor === null) throw new RejectedRequest(400, 'anchor 要是对象')
+  const { quote, quotePrefix, quoteSuffix, block } = anchor as Record<string, unknown>
+  if (typeof quote === 'string' && quote.trim() !== '' && typeof quotePrefix === 'string' && typeof quoteSuffix === 'string') return { quote, quotePrefix, quoteSuffix }
+  if (block !== undefined) {
+    const { kind, heading, index, text } = block as Record<string, unknown>
+    if (commentBlockKinds.includes(kind as CommentBlockAnchor['kind']) && typeof heading === 'string' && Number.isInteger(index) && (index as number) >= 1 && typeof text === 'string') {
+      return { block: { kind: kind as CommentBlockAnchor['kind'], heading, index: index as number, text } }
+    }
+    throw new RejectedRequest(400, 'anchor.block 要写成 { kind, heading, index, text }')
   }
-}
-
-/**
- * 在页面源码里给这一块插上标记，返回新的源码与标记 id。块的位置与指纹由编译插件写在网页上；
- * 源码里这一块和网页打开时不一样了（文件改过、位置挪了）就拒绝，不去猜
- */
-function withNewAnchor(pageSource: string, blockSpec: string, file: string) {
-  const spec = parseCommentBlockSpec(blockSpec)
-  if (!spec) throw new RejectedRequest(400, `target.block 写错了：${blockSpec}`)
-  const start = offsetOfPoint(pageSource, spec.start)
-  const end = offsetOfPoint(pageSource, spec.end)
-  if (start === undefined || end === undefined || sourceHash(pageSource.slice(start, end)) !== spec.hash) {
-    throw new RejectedRequest(409, `${path.basename(file)} 在网页打开以后改过了，这一块对不上：刷新页面再批`)
-  }
-  const id = newAnchorId(pageSource)
-  if (spec.placement === 'inline') return { id, source: `${pageSource.slice(0, start)}${anchorTagOf(id)}${pageSource.slice(start)}` }
-  // 单独一行插在块前面，带上和这一块第一行一样的前缀（列表里的缩进、引用的 >），不然 MDX 会认成别的结构
-  const lineStart = pageSource.lastIndexOf('\n', start - 1) + 1
-  const prefix = pageSource.slice(lineStart, start)
-  if (!/^[ \t>]*$/.test(prefix)) throw new RejectedRequest(400, `这一块和列表符号或别的内容写在同一行（${prefix.trim()}），插不进标记：把它挪到下一行再批`)
-  return { id, source: `${pageSource.slice(0, lineStart)}${prefix}${anchorTagOf(id)}\n${pageSource.slice(lineStart)}` }
-}
-
-/** 删掉页面源码里的标记：单独占一行的连这一行一起删，写在文字开头的只删标记本身；源码里已经没有它时原样返回 */
-function withoutAnchor(pageSource: string, id: string) {
-  const tag = anchorTagOf(id)
-  const at = pageSource.indexOf(tag)
-  if (at === -1) return pageSource
-  const lineStart = pageSource.lastIndexOf('\n', at - 1) + 1
-  const lineEnd = pageSource.indexOf('\n', at)
-  const ownsLine = /^[ \t>]*$/.test(pageSource.slice(lineStart, at)) && pageSource.slice(at + tag.length, lineEnd === -1 ? undefined : lineEnd).trim() === ''
-  if (ownsLine) return `${pageSource.slice(0, lineStart)}${lineEnd === -1 ? '' : pageSource.slice(lineEnd + 1)}`
-  return `${pageSource.slice(0, at)}${pageSource.slice(at + tag.length)}`
+  if (Object.keys(anchor).length === 0) return {}
+  throw new RejectedRequest(400, 'anchor 要是 { quote, quotePrefix, quoteSuffix }、{ block } 或 {}')
 }
 
 async function exists(file: string) {
@@ -236,92 +183,31 @@ function withFrontmatterFields(frontmatter: string, changes: Record<string, stri
   return `---\n${[...kept, ...added].join('\n')}\n---\n`
 }
 
-/** 能评论的页面：地址，和它的源文件（MDX 与 TSX 页面；HTML 页面没有，只能批整页） */
-export type CommentablePage = { url: string; sourceFile: string | undefined }
-
-/**
- * 站点全部页面换成评论接口要的样子：pages 是 source.getPages()。
- * TSX 与 HTML 页面的 data.file 是 glob 给的路径（/content/…），MDX 页面的 path 相对内容目录
- */
-export function commentablePagesOf(pages: ReadonlyArray<{ url: string; path: string; data: object }>, siteRoot = process.cwd(), contentDir = 'content'): CommentablePage[] {
-  return pages.map((page) => {
-    const file = 'file' in page.data && typeof page.data.file === 'string' ? page.data.file : undefined
-    if (file === undefined) return { url: page.url, sourceFile: path.join(siteRoot, contentDir, page.path) }
-    return { url: page.url, sourceFile: file.endsWith('.html') ? undefined : path.join(siteRoot, file) }
-  })
-}
-
 type CommentRequestOptions = {
   /** 写评论的人；发布站传 null，只读 */
   commenter: Commenter | null
-  /** 站点全部页面：新评论串批的页面要在里面；批块时在页面源文件里插标记 */
-  pages: readonly CommentablePage[]
+  /** 站点全部页面的地址：新评论串批的页面要在里面 */
+  pageUrls: readonly string[]
   /** 评论目录，默认是站点目录下的 comments */
   commentsDir?: string
 }
 
-function pageOf(pages: readonly CommentablePage[], url: string) {
-  const page = pages.find((candidate) => candidate.url === url)
-  if (!page) throw new RejectedRequest(400, `没有页面 ${url}`)
-  return page
-}
-
-/**
- * 新评论串批的块：已有标记就用它（核对源文件里有这个标记）；还没有就在页面源文件里插一个，
- * 返回插好的源码，等评论文件写好再写回页面
- */
-async function anchorForTarget(page: CommentablePage, target: CommentTarget) {
-  if (target.anchor === undefined && target.block === undefined) return { anchor: undefined, pageSourceToWrite: undefined }
-  if (!page.sourceFile) throw new RejectedRequest(400, `${page.url} 是 HTML 页面，只能批整页`)
-  const pageSource = await readFile(page.sourceFile, 'utf8')
-  if (target.anchor !== undefined) {
-    if (!pageSource.includes(`<${commentAnchorComponent} id="${target.anchor}"`)) throw new RejectedRequest(409, `${path.basename(page.sourceFile)} 里没有标记 ${target.anchor}：刷新页面再批`)
-    return { anchor: target.anchor, pageSourceToWrite: undefined }
-  }
-  if (!page.sourceFile.endsWith('.mdx') && !page.sourceFile.endsWith('.md')) throw new RejectedRequest(400, `${page.url} 是 TSX 页面，只能批整页和页面里手放的标记`)
-  const { id, source } = withNewAnchor(pageSource, target.block!, page.sourceFile)
-  return { anchor: id, pageSourceToWrite: source }
-}
-
-/** 评论目录里还有没有别的评论串引用这一页的这个标记 */
-async function isAnchorStillUsed(commentsDir: string, page: string, anchor: string) {
-  for (const thread of await readdir(commentsDir)) {
-    const dir = path.join(commentsDir, thread)
-    if (!(await stat(dir)).isDirectory()) continue
-    const head = (await readdir(dir)).find((file) => isThreadHeadFile(file))
-    if (!head) continue
-    const { frontmatter } = splitComment(await readFile(path.join(dir, head), 'utf8'), head)
-    if (frontmatterValue(frontmatter, 'page') === page && frontmatterValue(frontmatter, 'anchor') === anchor) return true
-  }
-  return false
-}
-
-async function handleForm(form: FormData, { commenter, pages, commentsDir }: Required<CommentRequestOptions> & { commenter: Commenter }) {
+async function handleForm(form: FormData, { commenter, pageUrls, commentsDir }: Required<CommentRequestOptions> & { commenter: Commenter }) {
   const operation = requiredField(form, 'op') as CommentOperation
   if (!operations.includes(operation)) throw new RejectedRequest(400, `op 要是 ${operations.join('、')} 之一`)
   const now = new Date()
   const createdAt = now.toISOString()
 
   if (operation === 'create') {
-    const page = pageOf(pages, requiredField(form, 'page'))
-    const target = targetOf(form)
+    const page = requiredField(form, 'page')
+    if (!pageUrls.includes(page)) throw new RejectedRequest(400, `没有页面 ${page}`)
+    const anchor = anchorOf(form)
     const body = bodyOf(form)
-    const { anchor, pageSourceToWrite } = await anchorForTarget(page, target)
     const thread = newThreadId(now)
     const dir = path.join(commentsDir, thread)
     await mkdir(dir, { recursive: true })
     await writePastedImages(form, dir)
-    const fields = { author: commenter.name, createdAt, page: page.url, status: 'open', anchor, quote: target.quote, quoteIndex: target.quoteIndex }
-    await writeFile(path.join(dir, 'index.md'), `${frontmatterOf(fields)}\n${body}\n`)
-    if (pageSourceToWrite !== undefined) {
-      try {
-        await writeFile(page.sourceFile!, pageSourceToWrite)
-      } catch (error) {
-        // 页面写不进去，刚写的评论串就批不到东西，删掉再报错
-        await rm(dir, { recursive: true })
-        throw error
-      }
-    }
+    await writeFile(path.join(dir, 'index.md'), `${frontmatterOf({ author: commenter.name, createdAt, page, status: 'open', ...anchor })}\n${body}\n`)
     return { thread, file: 'index.md' }
   }
 
@@ -349,29 +235,17 @@ async function handleForm(form: FormData, { commenter, pages, commentsDir }: Req
     await writeFile(target, `${frontmatter}\n${body}\n`)
     return { thread, file: path.basename(target) }
   }
-  // 删除：删发起的那条就是删整串，只有发起人能删；没有别的评论串再用这个标记时，连页面里的标记一起删
+  // 删除：删发起的那条就是删整串，只有发起人能删
   await assertAuthor(target, commenter, '删除')
-  if (!isThreadHeadFile(target)) {
-    await rm(target)
-    return { thread, file: path.basename(target) }
-  }
-  const { frontmatter } = splitComment(await readFile(target, 'utf8'), target)
-  await rm(dir, { recursive: true })
-  const anchor = frontmatterValue(frontmatter, 'anchor')
-  const pageUrl = frontmatterValue(frontmatter, 'page')
-  const sourceFile = pages.find((page) => page.url === pageUrl)?.sourceFile
-  if (anchor !== undefined && pageUrl !== undefined && sourceFile?.match(/\.mdx?$/) && !(await isAnchorStillUsed(commentsDir, pageUrl, anchor))) {
-    const pageSource = await readFile(sourceFile, 'utf8')
-    const cleaned = withoutAnchor(pageSource, anchor)
-    if (cleaned !== pageSource) await writeFile(sourceFile, cleaned)
-  }
+  if (isThreadHeadFile(target)) await rm(dir, { recursive: true })
+  else await rm(target)
   return { thread, file: path.basename(target) }
 }
 
 /**
  * 评论接口的 POST：项目 routes.ts 里 route('api/comments', …) 的 action 调它。
- * 表单字段：op（create、reply、edit、delete、resolve、reopen）、page 与 target（create）、thread、file（edit、delete）、body、image（粘贴的图片，可多个）。
- * 改 comments/ 里的文件；批还没有标记的块时在页面源文件里插标记，删掉最后一个用它的评论串时把标记删掉。不碰 git；开发服务看到文件变了自己刷新页面
+ * 表单字段：op（create、reply、edit、delete、resolve、reopen）、page 与 anchor（create）、thread、file（edit、delete）、body、image（粘贴的图片，可多个）。
+ * 只改 comments/ 里的文件，不碰 git；开发服务看到文件变了自己刷新页面
  */
 export async function commentRequestResponse(request: Request, options: CommentRequestOptions): Promise<Response> {
   const { commenter } = options
