@@ -17,15 +17,14 @@ icon: BookOpen
 | `./vite` | `vite.config.ts` | 开发服务插件 `docsite()`，见[开发服务插件](/dev-plugin) |
 | `./page-sources` | `app/lib/source.ts`、页面路由 | TSX 页面与 HTML 页面的来源、保留地址检查、内容文件的地址，见[三种页面](/page-types) |
 | `./server` | `app/routes/search.ts`、`app/routes/content-file.ts` | 中文站点用的搜索接口 `siteSearchServer`；把 `content/` 里的文件原样送给浏览器 |
-| `./ui` | `app/root.tsx`、布局与页面路由 | TSX 页面与 HTML 页面的正文组件、fumadocs 界面文字的中文、侧栏下拉框的图标框 `layoutTabsWithFramedIcons` |
+| `./ui` | `app/root.tsx`、布局与页面路由 | TSX 页面与 HTML 页面的正文组件、fumadocs 界面文字的中文 |
 | `./styles.css` | `app/app.css` | 让 Tailwind 扫到包里组件用的类名 |
 
-布局用 fumadocs 自带的 glass 布局：侧栏和顶栏是浮在正文上的半透明圆角面板，搜索和主题切换在右上角。
+布局用 fumadocs 自带的 notebook 布局：左侧是侧栏，顶栏在正文上方，搜索在顶栏左边、主题切换在右边，本页目录在正文右边。
 骨架直接引用这个布局，包里不另外包一层。
 
 `meta.json` 写了 `"root": true` 的文件夹，是侧栏顶上下拉框里的一项，切换后侧栏只列那个文件夹里的页面。
-这个站有「基础包」和「写作示例」两项。下拉框里的图标要交给布局的 `tabs={layoutTabsWithFramedIcons}`：
-fumadocs 默认的写法在 glass 的下拉按钮里会让图标撑满整个按钮。
+这个站有「基础包」和「写作示例」两项。
 
 ## 搜索
 

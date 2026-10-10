@@ -1,6 +1,6 @@
 import { use, type ReactNode } from 'react'
 import type { TOCItemType } from 'fumadocs-core/toc'
-import { DocsBody, DocsDescription, DocsPage, DocsTitle } from '@fumadocs/base-ui/layouts/glass/page'
+import { DocsBody, DocsDescription, DocsPage, DocsTitle } from '@fumadocs/base-ui/layouts/notebook/page'
 import defaultMdxComponents from '@fumadocs/base-ui/mdx'
 import { contentFileUrlOf } from '@godcreator/docsite-kit/page-sources'
 import { HtmlPageFrame, TsxPageBody } from '@godcreator/docsite-kit/ui'
