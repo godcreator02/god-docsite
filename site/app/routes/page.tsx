@@ -4,7 +4,7 @@ import { DocsBody, DocsDescription, DocsPage, DocsTitle } from '@fumadocs/base-u
 import defaultMdxComponents from '@fumadocs/base-ui/mdx'
 import { commentThreadsOf, type CommentThread } from '@godcreator/docsite-kit/comments'
 import { contentFileUrlOf } from '@godcreator/docsite-kit/page-sources'
-import { CommentColumn, CommentList, commentScopeProps, docsPagePropsWithComments, HtmlPageFrame, TsxPageBody } from '@godcreator/docsite-kit/ui'
+import { CommentColumn, CommentList, commentScopeProps, docsPagePropsWithSideColumn, HtmlPageFrame, TsxPageBody } from '@godcreator/docsite-kit/ui'
 import { comments, docs, tsxPageModules } from '../lib/collections'
 import { source } from '../lib/source'
 import type { Route } from './+types/page'
@@ -39,9 +39,9 @@ type PageFrameProps = { title: string | undefined; description: string | undefin
 
 function PageFrame({ title, description, url, toc, children }: PageFrameProps) {
   const threads = threadsOfPage.get(url) ?? []
-  const commentProps = threads.length > 0 ? docsPagePropsWithComments(<CommentColumn threads={threads} renderBody={renderCommentBody} />) : {}
+  const commentColumn = threads.length > 0 ? <CommentColumn threads={threads} renderBody={renderCommentBody} /> : undefined
   return (
-    <DocsPage toc={toc} {...commentProps}>
+    <DocsPage toc={toc} {...docsPagePropsWithSideColumn(commentColumn)}>
       <title>{title}</title>
       <DocsTitle>{title}</DocsTitle>
       <DocsDescription>{description}</DocsDescription>

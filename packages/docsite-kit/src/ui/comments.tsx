@@ -130,7 +130,7 @@ function samePlacement(a: Placement, b: Placement) {
 }
 
 /**
- * 宽屏的评论栏：放在 fumadocs 页面本页目录那一列（见 docsPagePropsWithComments），跟着正文一起滚动。
+ * 宽屏的评论栏：放在正文右边那一列、目录窄条的左边（见 docsPagePropsWithSideColumn），跟着正文一起滚动。
  * 每张卡片对齐它批的原文，原文高亮；点卡片或点高亮的原文选中这个评论串。批整页的评论排在正文顶端
  */
 export function CommentColumn<Entry extends CommentEntry>({ threads, renderBody }: CommentViewProps<Entry>) {
@@ -202,7 +202,7 @@ export function CommentColumn<Entry extends CommentEntry>({ threads, renderBody 
   }, [threads, activeId])
 
   return (
-    <div ref={columnRef} className="relative [grid-area:toc] w-(--fd-toc-width) pe-4 xl:layout:[--fd-toc-width:320px] max-xl:hidden" style={{ minHeight: placement.height }}>
+    <div ref={columnRef} className="relative min-w-0 flex-1" style={{ minHeight: placement.height }}>
       {threads.map((thread) => (
         <ThreadCard
           key={thread.id}
@@ -237,15 +237,4 @@ export function CommentList<Entry extends CommentEntry>({ threads, renderBody }:
       ))}
     </section>
   )
-}
-
-/**
- * 有评论的页面传给 docs 布局的 DocsPage：评论栏占本页目录那一列，本页目录收进正文上方的下拉条（宽屏也显示）。
- * 没有评论的页面不传，本页目录照常在右边
- */
-export function docsPagePropsWithComments(commentColumn: ReactNode) {
-  return {
-    tableOfContent: { component: commentColumn },
-    tableOfContentPopover: { enabled: true, container: { className: 'xl:block xl:layout:[--fd-toc-popover-height:--spacing(10)]' } },
-  }
 }

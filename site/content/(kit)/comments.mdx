@@ -73,7 +73,7 @@ import { IndentPreview } from './indent-preview'
 
 ## 页面上怎么显示
 
-宽屏时，有评论的页面把评论栏放在正文右边，本页目录收进正文上方的下拉条：
+宽屏时，有评论的页面把评论栏放在正文和最右边的目录窄条之间：
 
 - 评论栏跟着正文一起滚动，每张卡片和它批的原文对齐，挨得太近就往下让
 - 被批的原文标黄；点卡片或点标黄的原文，选中这个评论串：卡片正好对齐原文、边框变色，原文颜色加深
@@ -95,11 +95,11 @@ export const comments = defineCollections({ type: 'doc', dir: 'comments', async:
 `app/lib/source.ts` 用 `commentThreadsOf` 把文件分成评论串，再用 `assertCommentPagesExist` 检查批的页面在不在。
 
 `app/routes/page.tsx` 按页面地址取出这一页的评论串，交给 `CommentColumn`（宽屏）与 `CommentList`（窄屏）。
-`docsPagePropsWithComments` 给出传给 `DocsPage` 的两项设置：评论栏放在本页目录那一列，本页目录收进下拉条。
+`docsPagePropsWithSideColumn` 给出传给 `DocsPage` 的设置：正文右边那一列放评论栏（没有评论就不放）和目录窄条。
 正文的容器要带上 `commentScopeProps`，评论栏在它里面找原文：
 
 ```tsx title="app/routes/page.tsx"
-<DocsPage toc={toc} {...docsPagePropsWithComments(<CommentColumn threads={threads} renderBody={renderCommentBody} />)}>
+<DocsPage toc={toc} {...docsPagePropsWithSideColumn(<CommentColumn threads={threads} renderBody={renderCommentBody} />)}>
   <DocsBody {...commentScopeProps}>{children}</DocsBody>
   <CommentList threads={threads} renderBody={renderCommentBody} />
 </DocsPage>
