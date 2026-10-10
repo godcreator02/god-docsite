@@ -23,6 +23,11 @@
       "types": "./dist/server/index.d.ts",
       "default": "./dist/server/index.js"
     },
+    "./files": {
+      "development": "./src/server/files.ts",
+      "types": "./dist/server/files.d.ts",
+      "default": "./dist/server/files.js"
+    },
     "./site-feed": {
       "development": "./src/site-feed.ts",
       "types": "./dist/site-feed.d.ts",

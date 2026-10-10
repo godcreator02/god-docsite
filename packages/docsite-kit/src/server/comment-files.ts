@@ -13,7 +13,7 @@ import {
   type CommentThreadFrontmatter,
   type Person,
 } from '../comments.js'
-import { sitePeople } from './comments.js'
+import { sitePeople } from './site-people.js'
 
 /** 评论文件读出来的样子：frontmatter 加文件名（不含文件夹）与正文 */
 export type CommentFile<Frontmatter extends CommentFrontmatter> = Frontmatter & { file: string; body: string }

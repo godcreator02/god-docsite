@@ -14,14 +14,14 @@ export async function loader() {
   const commenter = siteCommenter()
   const aboutMe = commenter ? commentThreadIdsAbout(await readCommentThreads(path.resolve('comments')), commenter.id, people) : []
   const pageTitles = Object.fromEntries(source.getPages().map((page) => [page.url, page.data.title ?? page.url]))
-  return { people, commenter, aboutMe, pageTitles }
+  return { people, commenter, aboutMe, pageTitles, siteName: String(source.getPageTree().name) }
 }
 
 export default function AllCommentsPage({ loaderData }: Route.ComponentProps) {
-  const { people, commenter, aboutMe, pageTitles } = loaderData
+  const { people, commenter, aboutMe, pageTitles, siteName } = loaderData
   return (
     <DocsPage>
-      <title>全部评论</title>
+      <title>{`全部评论 · ${siteName}`}</title>
       <DocsTitle>全部评论</DocsTitle>
       <DocsDescription>全站的评论，按最近活动排；挂在页面上的点了去那一页</DocsDescription>
       <DocsBody>

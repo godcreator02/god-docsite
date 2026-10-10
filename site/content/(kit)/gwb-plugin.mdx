@@ -1,0 +1,49 @@
+---
+title: gwb 基础插件
+description: gwb-docsite：本 home 的身份码、托管站点的开发服务、往站点推数据、agent 读写评论的命令
+icon: Plug2
+---
+
+`@godcreator/gwb-docsite` 是 gwb 工作台的插件，在这个仓的 `plugins/docsite/`。用基础包搭的站都由它托管：
+会话、终端自己启动的开发服务没有身份码，站点只读；会话一停站就掉，几个会话还会抢同一个端口。
+各站自己的功能插件（协作站的 gwb-collab）注入它的服务 `gwbDocsite`，不各管各的站点进程。
+
+## 功能
+
+| 做什么 | 怎么做 |
+| --- | --- |
+| 身份码 | 设置 `identity-code`，第一次加载时生成；启动开发服务时放进环境变量 `DOCSITE_IDENTITY_CODE`，站点按它在 `people.json` 里认人，见[评论](/commenting#谁在写评论) |
+| 托管站点 | 在站点目录里运行 `pnpm dev`（端口写死在 `scripts.dev` 的 `--port` 里），常驻：意外退出就重启，5 分钟内失败 3 次就停下、记下原因 |
+| 启动前检查 | 有 `package.json`、装了依赖，基础包的 `siteProblems` 查人员列表与评论文件；不过就不启动，原因写在状态里 |
+| 推数据 | 启动时给开发服务一个口令，之后经[推送通道](/dev-plugin#收-gwb-插件推来的数据)推；每个频道记着最新的一份，站点重启后补推 |
+| 打开 | 设置 `site-window`：`chrome-app` 用 Chrome 的应用窗口，一个站一个窗口，开着就切到前台（按窗口标题里的站名认，所以页面标题写成「页面名 · 站名」）；`default-browser` 在默认浏览器里开 |
+| 评论 | 读：直接读 `comments/` 里的文件；写：经运行中的开发服务的评论接口，和网页同一套规则 |
+
+## 命令
+
+| 命令 | 做什么 |
+| --- | --- |
+| `docsite.identity` | 本 home 的身份码 |
+| `docsite.site.list` / `add` / `remove` / `start` / `stop` | 托管着的站点与状态；登记进设置 `sites`、去掉；启动并打开；停掉 |
+| `docsite.people.join` | 把本 home 的码加进站点的 `people.json` |
+| `docsite.comments` | 列出评论，可按页面、状态、和谁有关筛 |
+| `docsite.comment.create` / `reply` / `resolve` / `reopen` | 写评论；agent 以自己的名义写时给 `as` |
+
+每条命令的参数与回执写在它的 usage 里（MCP 入口 `search {"prefix":"docsite."}`），agent 怎么用写在随包发布的说明书 `docsite` 里。
+
+## 服务 gwbDocsite
+
+| 方法 | 做什么 |
+| --- | --- |
+| `identityCode()` | 本 home 的身份码 |
+| `keep(dir)` / `forget(dir)` | 托管、不再托管：功能插件按自己的项目列表调，不写设置 `sites` |
+| `start(dir)` / `open(dir)` / `stop(dir)` / `status(dir)` | 人为启动、启动并打开、停止、此刻的样子 `{ dir, url, running, kept, error }` |
+| `whileStopped(dir, work)` | 先停，做完再按常驻的规矩启动：装依赖、换站点文件时用 |
+| `push(dir, channel, data)` | 推一份数据 |
+| `join(dir, person)` | 把本 home 的码加进 `people.json` |
+| `onStatus(listener)` | 某个站启动、停止、出错时调用 |
+
+## 不做的事
+
+- 不提交、不碰 git：站点目录里的改动由各站自己的流程提交
+- 发布服务（`react-router-serve`）还没有：现在只托管本机的开发服务

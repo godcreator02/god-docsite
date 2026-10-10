@@ -1,5 +1,4 @@
 import { randomBytes } from 'node:crypto'
-import { existsSync, readFileSync } from 'node:fs'
 import { mkdir, readFile, readdir, rm, stat, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 import { compile } from '@mdx-js/mdx'
@@ -11,7 +10,6 @@ import {
   isCommentOpeners,
   isCommentRange,
   isThreadHeadFile,
-  parsePeople,
   peopleFile,
   snapshotMismatchOf,
   type CommentElementKind,
@@ -22,21 +20,9 @@ import {
   type SiteIdentity,
 } from '../comments.js'
 import { pageTextOfHtml } from './page-text.js'
+import { sitePeople } from './site-people.js'
 
-function jsonFileOf(file: string, missing: string) {
-  if (!existsSync(file)) throw new Error(missing)
-  try {
-    return JSON.parse(readFileSync(file, 'utf8')) as unknown
-  } catch (error) {
-    throw new Error(`${file} 不是 JSON：${String(error)}`)
-  }
-}
-
-/** 站点人员列表：站点目录里的 people.json，每次都重新读，改了不用重启开发服务 */
-export function sitePeople(siteDir = process.cwd()): Person[] {
-  const file = path.join(siteDir, peopleFile)
-  return parsePeople(jsonFileOf(file, `站点目录里没有 ${peopleFile}：写一个数组列出参与的人，每项 { "id": "zhou", "name": "小周", "codes": ["<身份码>"] }，agent 加 "agent": true`))
-}
+export { sitePeople }
 
 /**
  * 这个站的本机身份：开发服务里按环境变量 DOCSITE_IDENTITY_CODE 的身份码在人员列表里找人（gwb-docsite 启动开发服务时放进去）；

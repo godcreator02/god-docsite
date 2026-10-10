@@ -2,10 +2,10 @@
   "name": "docsite-kit-workspace",
   "private": true,
   "type": "module",
-  "description": "文档站基础包的 pnpm workspace：packages/docsite-kit 是基础包，site/ 是用它搭的自述站（内容是基础包自己的说明，也是开发基础包时看效果的地方）",
+  "description": "文档站基础包的 pnpm workspace：packages/docsite-kit 是基础包，plugins/docsite 是 gwb 基础插件 gwb-docsite，site/ 是用基础包搭的自述站（内容是基础包与插件的说明，也是开发时看效果的地方）",
   "scripts": {
     "dev": "pnpm --filter docsite-kit-site dev",
-    "build": "pnpm --filter @godcreator/docsite-kit build && pnpm --filter docsite-kit-site build",
+    "build": "pnpm --filter @godcreator/docsite-kit build && pnpm --filter @godcreator/gwb-docsite build && pnpm --filter docsite-kit-site build",
     "check": "pnpm -r --no-bail check"
   },
   "engines": { "node": ">=24" }

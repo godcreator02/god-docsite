@@ -1,0 +1,55 @@
+{
+  "name": "@godcreator/gwb-docsite",
+  "version": "0.1.0",
+  "description": "文档站的基础插件：本 home 的身份码，托管基础包 @godcreator/docsite-kit 搭的站点的开发服务（常驻、打开、停止），往站点推数据，agent 读写站点评论的命令；别的插件注入服务 gwbDocsite 托管自己的站点",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "skills"
+  ],
+  "keywords": [
+    "gwb-plugin"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://git.tianshen02.online:28377/godcreator/docsite-kit.git"
+  },
+  "publishConfig": {
+    "registry": "https://git.tianshen02.online:28377/api/packages/godcreator/npm/"
+  },
+  "scripts": {
+    "build": "node build.ts && tsc -p tsconfig.build.json",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "lint": "oxlint . --deny-warnings",
+    "test": "vitest run",
+    "check": "pnpm run typecheck && pnpm run lint && pnpm run test"
+  },
+  "peerDependencies": {
+    "@godcreator/gwb-commands": "^0.6.1",
+    "@godcreator/gwb-kernel-desktop": "^0.10.1",
+    "@godcreator/gwb-settings": "^0.4.0",
+    "@godcreator/gwb-skills": "^0.4.12"
+  },
+  "peerDependenciesMeta": {
+    "@godcreator/gwb-skills": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@godcreator/docsite-kit": "workspace:*",
+    "@godcreator/gwb-skills": "^0.4.12",
+    "@types/node": "^24.0.0",
+    "cordis": "4.0.0-rc.10",
+    "esbuild": "^0.28.2",
+    "oxlint": "1.76.0",
+    "oxlint-tsgolint": "7.0.2001",
+    "typescript": "^7.0.2",
+    "vitest": "^4.1.10"
+  }
+}

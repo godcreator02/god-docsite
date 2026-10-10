@@ -1,7 +1,8 @@
-# 仓根是不发布的 private 包：基础包在 packages/，自述站在 site/
+# 仓根是不发布的 private 包：基础包在 packages/，gwb 插件在 plugins/，自述站在 site/
 
 packages:
   - packages/*
+  - plugins/*
   - site
 
 allowBuilds:

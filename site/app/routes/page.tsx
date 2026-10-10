@@ -18,7 +18,7 @@ export async function loader({ params }: Route.LoaderArgs) {
   if (!page) throw new Response('没有这一页', { status: 404 })
   const { title, description } = page.data
   const { people, snapshots } = await pageCommentData(allThreads, threadsOfPage.get(page.url) ?? noThreads)
-  const shared = { title, description, url: page.url, commenter: siteCommenter(), people, snapshots }
+  const shared = { title, description, url: page.url, siteName: String(source.getPageTree().name), commenter: siteCommenter(), people, snapshots }
   if (page.type === 'mdx') return { type: 'mdx' as const, ...shared, path: page.path }
   if (page.type === 'tsx') return { type: 'tsx' as const, ...shared, file: page.data.file }
   return { type: 'html' as const, ...shared, src: contentFileUrlOf(page.data.file) }
@@ -30,6 +30,7 @@ type PageFrameProps = {
   title: string | undefined
   description: string | undefined
   url: string
+  siteName: string
   commenter: Commenter | null
   people: Person[]
   snapshots: Record<string, string>
@@ -37,10 +38,11 @@ type PageFrameProps = {
   children: ReactNode
 }
 
-function PageFrame({ title, description, url, commenter, people, snapshots, toc, children }: PageFrameProps) {
+/** 窗口标题写「页面名 · 站名」：gwb-docsite 按站名认出这个站已经开着的 Chrome 应用窗口 */
+function PageFrame({ title, description, url, siteName, commenter, people, snapshots, toc, children }: PageFrameProps) {
   return (
     <DocsPage toc={toc}>
-      <title>{title}</title>
+      <title>{`${title} · ${siteName}`}</title>
       <DocsTitle>{title}</DocsTitle>
       <DocsDescription>{description}</DocsDescription>
       <PageComments page={url} threads={threadsOfPage.get(url) ?? noThreads} snapshots={snapshots} commenter={commenter} people={people} renderBody={renderCommentBody}>
@@ -72,8 +74,8 @@ function TsxPage({ file, ...frame }: Omit<PageFrameProps, 'children'> & { file: 
 }
 
 export default function Page({ loaderData }: Route.ComponentProps) {
-  const { title, description, url, commenter, people, snapshots } = loaderData
-  const frame = { title, description, url, commenter, people, snapshots }
+  const { title, description, url, siteName, commenter, people, snapshots } = loaderData
+  const frame = { title, description, url, siteName, commenter, people, snapshots }
   if (loaderData.type === 'mdx') return <MdxPage path={loaderData.path} {...frame} />
   if (loaderData.type === 'tsx') return <TsxPage file={loaderData.file} {...frame} />
   return (
