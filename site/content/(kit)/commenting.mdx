@@ -37,25 +37,45 @@ icon: MessageSquare
 
 ### 谁在写评论
 
-每个站自己配人员，不取机器上的信息（git 的 `user.name` 常常不是本人，也和别人对不上）。站点目录里放两个文件：
+每个站自己配人员，不取机器上的信息（git 的 `user.name` 常常不是本人，也和别人对不上）。
+站点目录里的 `people.json`（进 git）列出参与的人；「我是谁」由本机的**身份码**认出：
 
-| 文件 | 进不进 git | 写什么 |
-| --- | --- | --- |
-| `people.json` | 进 | 参与的人，每项 `{ "id": "zhou", "name": "小周" }`；agent 加 `"agent": true` |
-| `me.json` | 不进（写在 `.gitignore` 里），每人本机一份 | 我是谁：`{ "id": "zhou" }`，写 `people.json` 里自己的 `id` |
+- 每个 gwb home 的设置里有一串身份码（`docsite` 分区的 `identity-code`），基础插件 gwb-docsite 第一次加载时生成。隔离 home 各有各的码，所以各是一个人；换电脑时把旧的码填进新电脑的设置
+- gwb-docsite 启动开发服务时把码放进环境变量 `DOCSITE_IDENTITY_CODE`，站点按码在 `people.json` 里找到人
+- 把自己加进一个站：`docsite.people.join`，把本 home 的码加进人员列表里自己那一项的 `codes`
+
+| 字段 | 写什么 |
+| --- | --- |
+| `id` | 评论的 `author`、`resolvedBy` 记的名字：字母、数字、`_`、`-` |
+| `name` | 页面上显示的名字 |
+| `codes` | 这个人用过的身份码；同一个码只能是一个人的 |
+| `gitea` | Gitea 账号，协作站核对权限用；普通站点不写 |
+| `agent` | `true` 是 agent：没有码，经接口写评论时用 `as` 说明自己是谁 |
 
 ```json title="people.json"
 [
-  { "id": "zhou", "name": "小周" },
+  { "id": "zhou", "name": "小周", "codes": ["k3v9q2x7m1ab"] },
   { "id": "claude", "name": "Claude", "agent": true }
 ]
 ```
 
-评论文件的 `author`、`resolvedBy` 存 `id`，页面上显示 `name`：改名只改 `people.json`，旧评论跟着变。
-网页上没有「换成别人」的地方，写评论的人只取 `me.json`。侧栏底部那一栏左边显示这个人的头像（名字第一个字，底色由 `id` 算出，改名不变色）和名字。
+码不是秘密：它进 git，挡不住组里的人冒用别人的码。
 
-开发服务直接报错、写明怎么改的几种情况：没有 `people.json` 或写错了；没有 `me.json`，或者它写的 `id` 不在 `people.json` 里、是 agent；
-评论的 `author`、`resolvedBy` 不在 `people.json` 里。两个文件每次都重新读，改了不用重启开发服务。
+评论文件的 `author`、`resolvedBy` 存 `id`，页面上显示 `name`：改名只改 `people.json`，旧评论跟着变。
+网页上没有「换成别人」的地方。侧栏底部那一栏左边显示这个人的头像（名字第一个字，底色由 `id` 算出，改名不变色）和名字；
+不是经 gwb-docsite 启动的开发服务、码不在 `people.json` 里时站点只读，那里写「只读」，鼠标停上去看原因。
+
+开发服务直接报错、写明怎么改的几种情况：没有 `people.json` 或写错了（码重复、agent 写了码等）；
+评论的 `author`、`resolvedBy` 不在 `people.json` 里。`people.json` 每次都重新读，改了不用重启开发服务。
+
+### 全部评论页
+
+`/comments` 是全部评论页：全站的评论串按最近活动排，可以筛未解决、已解决、全部，筛某一页，筛「和我有关」（我发起的、回复过的、@ 了我的）。
+挂在页面上的评论点了去那一页（地址带 `?comment=<评论串>`），那一页找好位置后打开它，收起的内容先替你点开。
+
+**不挂在页面上的评论**在这一页顶上发起，frontmatter 不写 `page`，只出现在这一页，就在这里展开、回复。
+
+**@ 某人**：正文里写 `@<id>`（`people.json` 里的 id），他的「和我有关」里就有这一串。
 
 ### 怎么写
 
@@ -104,7 +124,8 @@ anchor={"quote":"export default function Page()","occurrence":1}
 
 开发服务向自己请求这一页，从渲染出的 HTML 里按同样的规则算出页面文字当快照（`pageTextOfHtml`），在里面找第 `occurrence` 处 `quote`（从 1 数），
 后面和网页上发起的一样写文件。找不到时接口回原话，如「这一页的文字里没有第 2 处「useState(0)」，一共有 1 处」。
-回复、解决、编辑自己的评论也带 `as`。`as` 只给 agent 用：写了人的 `id` 时拒绝，人的身份只取 `me.json`。
+回复、解决、编辑自己的评论也带 `as`。`as` 只给 agent 用：写了人的 `id` 时拒绝，人的身份只按本机的身份码认。
+不给 `page` 是发起一条不挂在页面上的评论，这时不带 `anchor`。agent 一般不直接调这个接口，而是用 gwb-docsite 的 `docsite.comment.*` 命令，它们经这个接口写。
 
 只在浏览器里渲染的内容，服务端渲染出的 HTML 里没有或不一样，算出的文字就和浏览器里差几个字。
 比如 TSX 页面里的代码块在浏览器里才着色，服务端那一版没有换行符。这种差别和页面改过一样，由打开页面时的差异推算吸收：
@@ -161,7 +182,7 @@ status: open
 | --- | --- |
 | `author` | 谁写的：`people.json` 里的 `id` |
 | `createdAt` | 什么时候写的，如 `2026-10-10T15:20:00+08:00` |
-| `page` | 被批页面的地址，以 `/` 开头 |
+| `page` | 被批页面的地址，以 `/` 开头；不写就是不挂在页面上的评论 |
 | `status` | `open` 或 `resolved` |
 | `quote` | 批一段文字：原文，等于快照里 `range` 那一段 |
 | `element` | 批一个元素：它是哪类，见下表 |
@@ -169,7 +190,7 @@ status: open
 | `openers` | 被批的内容在几层能收起的内容里时，打开每一层要点的按钮在快照里的位置，由外到里，如 `[[658, 663], [686, 693]]`；没有就不写 |
 | `resolvedBy`、`resolvedAt` | 谁（`people.json` 里的 `id`）、什么时候标的已解决 |
 
-`quote` 与 `element` 只能写一个，写了就要写 `range`；都不写就是批整页，没有快照。同一文件夹里其余的 `.mdx` 每个是一条回复，只写 `author` 与 `createdAt`。
+`quote` 与 `element` 只能写一个，写了就要写 `range` 与 `page`；都不写就是批整页（或不挂在页面上），没有快照。同一文件夹里其余的 `.mdx` 每个是一条回复，只写 `author` 与 `createdAt`。
 
 | `element` | 哪些元素 | 页面上怎么标 |
 | --- | --- | --- |
@@ -266,8 +287,8 @@ export const comments = defineCollections({ type: 'doc', dir: 'comments', async:
 
 `app/lib/source.ts` 用 `commentThreadsOf` 把文件分成评论串，再用 `assertCommentPagesExist` 检查批的页面在不在。
 
-写评论的人由基础包的 `siteCommenter()` 给：开发服务里是站点目录 `me.json` 写的那个人，发布出去的站返回 `null`。
-布局路由与内容页路由的 `loader` 都返回它：布局传给 `themeSwitchWithCommenter` 显示在侧栏底部，内容页传给 `PageComments`。
+本机身份由基础包的 `siteIdentity()` 给：开发服务里按环境变量的身份码在 `people.json` 里找到的人，只读时 `person` 是 `null`、`reason` 写原因；
+`siteCommenter()` 只取其中的人。布局路由的 `loader` 返回 `siteIdentity()`，传给 `themeSwitchWithIdentity` 显示在侧栏底部；内容页的 `loader` 返回 `siteCommenter()`，传给 `PageComments`。
 `app/lib/commenter.server.ts` 的 `pageCommentData(allThreads, pageThreads)` 用 `sitePeople()` 读出 `people.json`、
 用 `assertCommentAuthorsKnown` 核对全站评论的作者都在里面，再调用 `commentSnapshotsOf` 读出这一页各评论串的 `snapshot.txt`；
 内容页路由的 `loader` 返回这两样，传给 `PageComments` 的 `people` 与 `snapshots`。
@@ -288,4 +309,10 @@ export const comments = defineCollections({ type: 'doc', dir: 'comments', async:
 ```
 
 `renderCommentBody` 用 `use(entry.load())` 取出编译好的正文再渲染。不用 fumadocs-mdx 给的 `entry.body`：
-它加载完以后不再调用 `use()`，React 会报 `conditional use of use()`。
+它加载完以后不再调用 `use()`，React 会报 `conditional use of use()`。全站的评论串与 `renderCommentBody` 放在 `app/lib/comment-threads.tsx`，内容页与全部评论页共用。
+
+`app/routes/all-comments.tsx` 是全部评论页，挂在 `/comments`：`loader` 返回人员列表、写评论的人、页面标题，
+和「和我有关」的评论串（`readCommentThreads` 从文件读出正文，`commentThreadIdsAbout` 找我发起的、回复过的、@ 了我的），页面渲染 `AllComments`。
+
+不经开发服务读评论用 `./server` 的 `readCommentThreads(评论目录)`；`siteProblems(站点目录)` 查人员列表、评论文件的格式、作者、快照，
+gwb-docsite 与协作站提交前用它。

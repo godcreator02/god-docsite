@@ -77,7 +77,7 @@ export function Avatar({ person, size = 24 }: { person: Person; size?: number })
 /** 侧栏底部显示的当前身份 */
 export function CommenterChip({ commenter }: { commenter: Commenter }) {
   return (
-    <span className="flex min-w-0 items-center gap-2 px-1.5 text-sm text-fd-foreground" title={`评论署名：${commenter.name}（站点目录 me.json 写的 ${commenter.id}）`}>
+    <span className="flex min-w-0 items-center gap-2 px-1.5 text-sm text-fd-foreground" title={`评论署名：${commenter.name}（人员列表里的 ${commenter.id}，按本机的身份码认出）`}>
       <Avatar person={commenter} size={22} />
       <span className="truncate">{commenter.name}</span>
     </span>

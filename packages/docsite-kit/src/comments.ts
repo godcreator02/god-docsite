@@ -1,7 +1,7 @@
 import type { CommentRange } from './comment-ranges.js'
 import { peopleFile, type Person } from './people.js'
 
-export { meFile, parseMe, parsePeople, peopleFile, personOf, type Person } from './people.js'
+export { identityCodeEnvName, identityCodePattern, identityOf, mentionsOf, parsePeople, peopleFile, peopleWithJoined, personOf, type Person, type SiteIdentity } from './people.js'
 
 /**
  * 评论的存储格式。一个评论串一个文件夹：index.mdx 是发起的那条，frontmatter 写它批的是哪一页、哪段原文或哪个元素；
@@ -14,7 +14,7 @@ export type { CommentRange }
 
 export type CommentStatus = 'open' | 'resolved'
 
-/** 写评论的人：开发服务里是站点目录 me.json 写的那个人；发布站只读，没有写评论的人 */
+/** 写评论的人：开发服务里是本机身份码在人员列表里对应的那个人；发布站只读，没有写评论的人 */
 export type Commenter = Person
 
 /** 批一个元素时，那个元素是哪类：图片（含 SVG、画布、视频）、公式、代码块、表格、一段文字或其中的行内元素、其余的组件 */
@@ -30,8 +30,8 @@ export type CommentThreadFrontmatter = {
   author: string
   /** ISO 时间 */
   createdAt: string
-  /** 被批页面的地址，如 /writing */
-  page: string
+  /** 被批页面的地址，如 /writing；不写就是不挂在页面上的评论，只在全部评论页上 */
+  page?: string
   status: CommentStatus
   /** 批一段文字：被批的原文，等于快照里 range 那一段；quote 与 element 都不写就是批整页 */
   quote?: string
@@ -112,8 +112,9 @@ function validateThread(data: Record<string, unknown>) {
   const issues = unknownKeyIssues(data, threadKeys)
   const author = nonEmptyString(data, 'author', issues)
   const createdAt = isoTime(data, 'createdAt', issues)
-  const page = nonEmptyString(data, 'page', issues)
-  if (page !== '' && !page.startsWith('/')) issues.push({ message: 'page 写页面地址，以 / 开头，如 /writing', path: ['page'] })
+  const page = data.page === undefined ? undefined : nonEmptyString(data, 'page', issues)
+  if (page && !page.startsWith('/')) issues.push({ message: 'page 写页面地址，以 / 开头，如 /writing', path: ['page'] })
+  if (page === undefined && (data.quote !== undefined || data.element !== undefined)) issues.push({ message: '写了 quote 或 element 就要写 page：批的是哪一页', path: ['page'] })
   const status = data.status as CommentStatus
   if (!statuses.includes(status)) issues.push({ message: `status 要是 ${statuses.join(' 或 ')}`, path: ['status'] })
   const quote = data.quote === undefined ? undefined : nonEmptyString(data, 'quote', issues)
@@ -130,7 +131,8 @@ function validateThread(data: Record<string, unknown>) {
   const resolvedBy = optionalString(data, 'resolvedBy', issues)
   const resolvedAt = data.resolvedAt === undefined ? undefined : isoTime(data, 'resolvedAt', issues)
   if (issues.length > 0) return { issues }
-  const value: CommentThreadFrontmatter = { kind: 'thread', author, createdAt, page, status }
+  const value: CommentThreadFrontmatter = { kind: 'thread', author, createdAt, status }
+  if (page !== undefined) value.page = page
   if (quote !== undefined) value.quote = quote
   if (element !== undefined) value.element = element
   if (range !== undefined) value.range = range as CommentRange
@@ -218,17 +220,20 @@ export function commentThreadsOf<Entry extends CommentEntry>(entries: readonly E
     .sort((a, b) => byCreatedAt(a.head, b.head))
 }
 
-/** 评论串按批的页面分组：内容页路由按页面地址取 */
+/** 评论串按批的页面分组：内容页路由按页面地址取；不挂在页面上的不在里面 */
 export function commentThreadsByPage<Entry extends CommentEntry>(threads: ReadonlyArray<CommentThread<Entry>>) {
   const threadsOfPage = new Map<string, CommentThread<Entry>[]>()
-  for (const thread of threads) threadsOfPage.set(thread.head.page, [...(threadsOfPage.get(thread.head.page) ?? []), thread])
+  for (const thread of threads) {
+    const { page } = thread.head
+    if (page !== undefined) threadsOfPage.set(page, [...(threadsOfPage.get(page) ?? []), thread])
+  }
   return threadsOfPage
 }
 
 /** 评论批的页面不存在时报错，一次列出全部；pageUrls 是站点全部页面的地址 */
 export function assertCommentPagesExist(threads: ReadonlyArray<CommentThread<CommentEntry>>, pageUrls: readonly string[]) {
   const known = new Set(pageUrls)
-  const orphans = threads.filter((thread) => !known.has(thread.head.page))
+  const orphans = threads.filter((thread) => thread.head.page !== undefined && !known.has(thread.head.page))
   if (orphans.length > 0) throw new Error(orphans.map((thread) => `评论串 ${thread.id} 批的页面 ${thread.head.page} 不存在`).join('\n'))
 }
 

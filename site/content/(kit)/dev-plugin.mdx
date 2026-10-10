@@ -1,11 +1,11 @@
 ---
 title: 开发服务插件
-description: vite.config.ts 里的 docsite() 做的两件事
+description: vite.config.ts 里的 docsite() 做的三件事
 icon: Plug
 ---
 
 项目的 `vite.config.ts` 里写 `plugins: [docsite(), fumadocsMdx(), tailwindcss(), reactRouter()]`。
-`docsite()` 做两件事。
+`docsite()` 做三件事。
 
 ## 基础包和站点的代码一起处理
 
@@ -23,7 +23,7 @@ icon: Plug
 | 改动 | 结果 |
 | --- | --- |
 | 新增、删除、改名页面 | 侧栏、搜索马上更新，新页面能打开 |
-| 新增、删除评论文件 | 整页刷新，评论跟着更新（网页上发评论也是这样，见[评论](/comments)） |
+| 新增、删除评论文件 | 整页刷新，评论跟着更新（网页上发评论也是这样，见[评论](/commenting)） |
 | 改 TSX 页面 | 正文和侧栏里的标题一起更新 |
 | 改 MDX 页面 | 不经过插件，fumadocs-mdx 自己处理，正文马上更新 |
 | 改 HTML 页面 | 不经过插件，整页刷新后看到新内容 |
@@ -36,3 +36,18 @@ icon: Plug
 
 刷新时，服务端只让受影响的那几个模块和引用它们的模块重新加载，不重启整个服务端：
 改名会连着来两个事件，整个重启两次叠在一起时会报错。
+
+## 收 gwb 插件推来的数据
+
+gwb 插件往站点推数据走这里，比如协作站的通知与项目负责人。数据按频道分，每个频道只留最新的一份：
+
+| 谁 | 怎么做 |
+| --- | --- |
+| gwb-docsite 启动开发服务时 | 环境变量 `DOCSITE_FEED_TOKEN` 给一个随机口令 |
+| 推数据 | `POST /__docsite/feed/<频道>`，请求头 `x-docsite-token` 带口令，正文是 JSON；口令不对回 403 |
+| 开发服务 | 存下这一份，经 Vite 的 WebSocket 发事件 `docsite:feed` 给浏览器 |
+| 浏览器里 | `useSiteFeed(频道)`（`./ui`）：先取一次，之后推来新的就跟着变；发布出去的站一直是 `undefined` |
+| 路由的 `loader`、`action` | `siteFeedOf(频道)`（`./server`） |
+
+频道名只用字母、数字、`_`、`-`。`GET /__docsite/feed/<频道>` 回最新的一份，还没推过是 `null`。
+gwb-docsite 记着每个站每个频道的最新一份，站点重启后补推。

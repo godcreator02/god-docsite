@@ -1,7 +1,9 @@
+import type { IncomingMessage, ServerResponse } from 'node:http'
 import path from 'node:path'
 import { isRunnableDevEnvironment, normalizePath, type Plugin, type PluginOption, type ViteDevServer } from 'vite'
 import type { EvaluatedModuleNode, EvaluatedModules } from 'vite/module-runner'
 import { tsxPageSuffix } from '../page-sources.js'
+import { feedEndpointPrefix, feedEvent, feedStore, feedTokenEnvName, feedTokenHeader, isFeedChannel, type FeedMessage } from '../site-feed.js'
 
 /** 基础包自己的包名：要和站点自己的代码一样经 Vite 处理 */
 const ownPackageName = '@godcreator/docsite-kit'
@@ -85,7 +87,58 @@ function invalidateWithImporters(evaluatedModules: EvaluatedModules, file: strin
   }
 }
 
+function readBody(request: IncomingMessage) {
+  return new Promise<string>((resolve, reject) => {
+    let body = ''
+    request.setEncoding('utf8')
+    request.on('data', (chunk: string) => (body += chunk))
+    request.on('end', () => resolve(body))
+    request.on('error', reject)
+  })
+}
+
+function sendText(response: ServerResponse, status: number, text: string) {
+  response.statusCode = status
+  response.setHeader('Content-Type', 'text/plain; charset=utf-8')
+  response.end(text)
+}
+
+/** 推送通道的开发服务一侧：POST 存下最新一份并告诉浏览器，GET 回最新一份（还没推过是 null）。格式见 site-feed.ts */
+function siteFeeds(): Plugin {
+  return {
+    name: 'docsite-kit:site-feeds',
+    apply: 'serve',
+    configureServer(server) {
+      server.middlewares.use(feedEndpointPrefix, (request, response) => {
+        const channel = decodeURIComponent((request.url ?? '').replace(/^\//, '').replace(/\?.*$/, ''))
+        if (!isFeedChannel(channel)) return sendText(response, 404, `频道名 ${channel} 不对：只用字母、数字、_、-`)
+        if (request.method === 'GET') {
+          response.setHeader('Content-Type', 'application/json; charset=utf-8')
+          response.setHeader('Cache-Control', 'no-cache')
+          return response.end(JSON.stringify(feedStore().get(channel) ?? null))
+        }
+        if (request.method !== 'POST') return sendText(response, 405, '只收 GET 与 POST')
+        const token = process.env[feedTokenEnvName]
+        if (!token) return sendText(response, 403, `开发服务没有 ${feedTokenEnvName}：只有 gwb-docsite 启动的开发服务收推送`)
+        if (request.headers[feedTokenHeader] !== token) return sendText(response, 403, `${feedTokenHeader} 不对`)
+        void readBody(request).then((body) => {
+          let data: unknown
+          try {
+            data = JSON.parse(body)
+          } catch {
+            return sendText(response, 400, '正文要是 JSON')
+          }
+          feedStore().set(channel, data)
+          const message: FeedMessage = { channel, data }
+          server.ws.send({ type: 'custom', event: feedEvent, data: message })
+          sendText(response, 204, '')
+        }, (error: unknown) => sendText(response, 400, `读请求正文失败：${String(error)}`))
+      })
+    },
+  }
+}
+
 /** 项目的 vite.config.ts 里写 plugins: [docsite(), fumadocsMdx(), tailwindcss(), reactRouter()] */
 export function docsite(): PluginOption[] {
-  return [processedWithSite(), pageListRefresh()]
+  return [processedWithSite(), pageListRefresh(), siteFeeds()]
 }

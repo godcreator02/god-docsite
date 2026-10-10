@@ -2,11 +2,12 @@ import { use, type ReactNode } from 'react'
 import type { TOCItemType } from 'fumadocs-core/toc'
 import { DocsBody, DocsDescription, DocsPage, DocsTitle } from '@fumadocs/base-ui/layouts/docs/page'
 import defaultMdxComponents from '@fumadocs/base-ui/mdx'
-import { commentThreadsByPage, commentThreadsOf, type Commenter, type CommentThread, type Person } from '@godcreator/docsite-kit/comments'
+import type { Commenter, CommentThread, Person } from '@godcreator/docsite-kit/comments'
 import { contentFileUrlOf } from '@godcreator/docsite-kit/page-sources'
 import { siteCommenter } from '@godcreator/docsite-kit/server'
 import { commentScopeProps, HtmlPageFrame, PageComments, TsxPageBody } from '@godcreator/docsite-kit/ui'
-import { comments, docs, tsxPageModules } from '../lib/collections'
+import { docs, tsxPageModules } from '../lib/collections'
+import { allThreads, renderCommentBody, threadsOfPage, type CommentEntry } from '../lib/comment-threads'
 import { pageCommentData } from '../lib/commenter.server'
 import { source } from '../lib/source'
 import type { Route } from './+types/page'
@@ -21,21 +22,6 @@ export async function loader({ params }: Route.LoaderArgs) {
   if (page.type === 'mdx') return { type: 'mdx' as const, ...shared, path: page.path }
   if (page.type === 'tsx') return { type: 'tsx' as const, ...shared, file: page.data.file }
   return { type: 'html' as const, ...shared, src: contentFileUrlOf(page.data.file) }
-}
-
-type CommentEntry = (typeof comments.entries)[number]
-
-const allThreads = commentThreadsOf(comments.entries)
-const threadsOfPage = commentThreadsByPage(allThreads)
-
-/** 不用 entry.body：它加载完后不再调用 use()，React 报 conditional use of use() */
-function CommentBody({ entry }: { entry: CommentEntry }) {
-  const { body: Mdx } = use(entry.load())
-  return <Mdx components={defaultMdxComponents} />
-}
-
-function renderCommentBody(entry: CommentEntry) {
-  return <CommentBody entry={entry} />
 }
 
 const noThreads: CommentThread<CommentEntry>[] = []

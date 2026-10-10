@@ -16,7 +16,7 @@ export const source = loader({
 })
 
 /** routes.ts 里内容页以外的路由占用的第一段地址 */
-assertNoReservedSlugs(source.getPages(), ['api'])
+assertNoReservedSlugs(source.getPages(), ['api', 'comments'])
 
 assertCommentPagesExist(
   commentThreadsOf(comments.entries),

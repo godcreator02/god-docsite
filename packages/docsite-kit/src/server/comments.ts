@@ -6,11 +6,11 @@ import { compile } from '@mdx-js/mdx'
 import {
   commentElementKinds,
   commentSnapshotFile,
+  identityCodeEnvName,
+  identityOf,
   isCommentOpeners,
   isCommentRange,
   isThreadHeadFile,
-  meFile,
-  parseMe,
   parsePeople,
   peopleFile,
   snapshotMismatchOf,
@@ -19,6 +19,7 @@ import {
   type CommentRange,
   type CommentThreadFrontmatter,
   type Person,
+  type SiteIdentity,
 } from '../comments.js'
 import { pageTextOfHtml } from './page-text.js'
 
@@ -34,17 +35,21 @@ function jsonFileOf(file: string, missing: string) {
 /** 站点人员列表：站点目录里的 people.json，每次都重新读，改了不用重启开发服务 */
 export function sitePeople(siteDir = process.cwd()): Person[] {
   const file = path.join(siteDir, peopleFile)
-  return parsePeople(jsonFileOf(file, `站点目录里没有 ${peopleFile}：写一个数组列出参与的人，每项 { "id": "zhou", "name": "小周" }，agent 加 "agent": true`))
+  return parsePeople(jsonFileOf(file, `站点目录里没有 ${peopleFile}：写一个数组列出参与的人，每项 { "id": "zhou", "name": "小周", "codes": ["<身份码>"] }，agent 加 "agent": true`))
 }
 
 /**
- * 这个站写评论的人：开发服务里是站点目录 me.json 写的那个人（me.json 不进 git，每人本机一份）；发布出去的站（react-router-serve）只读，返回 null。
- * import.meta.env.DEV 由 Vite 编译时换掉：基础包和站点代码一起经 Vite 处理
+ * 这个站的本机身份：开发服务里按环境变量 DOCSITE_IDENTITY_CODE 的身份码在人员列表里找人（gwb-docsite 启动开发服务时放进去）；
+ * 发布出去的站（react-router-serve）只读。import.meta.env.DEV 由 Vite 编译时换掉：基础包和站点代码一起经 Vite 处理
  */
+export function siteIdentity(siteDir = process.cwd()): SiteIdentity {
+  if (!import.meta.env.DEV) return { person: null, reason: '只读：发布出去的站只能看，评论在本机的开发服务里写' }
+  return identityOf(sitePeople(siteDir), process.env[identityCodeEnvName])
+}
+
+/** 写评论的人：siteIdentity 找到的那个人，只读时是 null */
 export function siteCommenter(siteDir = process.cwd()): Commenter | null {
-  if (!import.meta.env.DEV) return null
-  const file = path.join(siteDir, meFile)
-  return parseMe(jsonFileOf(file, `站点目录里没有 ${meFile}：写 { "id": "<${peopleFile} 里你的 id>" } 说明你是谁，这个文件不进 git`), sitePeople(siteDir))
+  return siteIdentity(siteDir).person
 }
 
 /** 网页能做的几件事 */
@@ -179,6 +184,13 @@ async function anchorOf(form: FormData, page: string, pageHtmlOf: PageHtmlOf): P
   return checkedAgainstSnapshot(fields, snapshot)
 }
 
+/** 不挂在页面上的评论：anchor 不给或给 {} */
+function noPageAnchorOf(form: FormData): NewAnchor {
+  const anchor = form.get('anchor')
+  if (anchor !== null && anchor !== '{}') throw new RejectedRequest(400, '不挂在页面上的评论没有 anchor：要批页面上的地方，给 page')
+  return { fields: {} }
+}
+
 async function exists(file: string) {
   return stat(file).then(
     () => true,
@@ -252,7 +264,7 @@ function actorOf(form: FormData, commenter: Commenter, people: readonly Person[]
   if (typeof as !== 'string') throw new RejectedRequest(400, 'as 要是 people.json 里一个 agent 的 id')
   const person = people.find((candidate) => candidate.id === as)
   if (!person) throw new RejectedRequest(400, `${peopleFile} 里没有 ${as}`)
-  if (!person.agent) throw new RejectedRequest(403, `as 只给 agent 用：${as} 不是 agent，人的身份取站点目录里的 ${meFile}`)
+  if (!person.agent) throw new RejectedRequest(403, `as 只给 agent 用：${as} 不是 agent，人的身份取本机的身份码`)
   return person
 }
 
@@ -270,7 +282,7 @@ function withFrontmatterFields(frontmatter: string, changes: Record<string, stri
 }
 
 type CommentRequestOptions = {
-  /** 写评论的人（siteCommenter）；发布站传 null，只读 */
+  /** 写评论的人（siteCommenter）；只读时传 null */
   commenter: Commenter | null
   /** 站点人员列表（sitePeople）：agent 用 as 说明自己是谁时在这里找 */
   people: readonly Person[]
@@ -290,9 +302,10 @@ async function handleForm(form: FormData, { commenter, people, pageUrls, comment
   const createdAt = now.toISOString()
 
   if (operation === 'create') {
-    const page = requiredField(form, 'page')
-    if (!pageUrls.includes(page)) throw new RejectedRequest(400, `没有页面 ${page}`)
-    const anchor = await anchorOf(form, page, pageHtmlOf)
+    const pageField = form.get('page')
+    const page = typeof pageField === 'string' && pageField !== '' ? pageField : undefined
+    if (page !== undefined && !pageUrls.includes(page)) throw new RejectedRequest(400, `没有页面 ${page}`)
+    const anchor: NewAnchor = page === undefined ? noPageAnchorOf(form) : await anchorOf(form, page, pageHtmlOf)
     const body = await bodyOf(form)
     const thread = newThreadId(now)
     const dir = path.join(commentsDir, thread)
@@ -336,8 +349,8 @@ async function handleForm(form: FormData, { commenter, people, pageUrls, comment
 
 /**
  * 评论接口的 POST：项目 routes.ts 里 route('api/comments', …) 的 action 调它。
- * 表单字段：op（create、reply、edit、delete、resolve、reopen）、page 与 anchor（create）、thread、file（edit、delete）、body、image（粘贴的图片，可多个），
- * as（agent 说明自己是 people.json 里哪个 agent；人不带，身份取 me.json）。
+ * 表单字段：op（create、reply、edit、delete、resolve、reopen）、page 与 anchor（create；不给 page 是不挂在页面上的评论）、thread、file（edit、delete）、body、image（粘贴的图片，可多个），
+ * as（agent 说明自己是 people.json 里哪个 agent；人不带，身份取本机的身份码）。
  * anchor 是网页传的 { quote, range, snapshot, openers? }、{ element, range, snapshot, openers? }、{}，或 agent 传的 { quote, occurrence }（occurrence 从 1 数）。
  * 网页传来的 snapshot 是页面文字的快照；agent 那种由服务端取这一页渲染出的 HTML 算出页面文字当快照。快照存成评论串文件夹里的 snapshot.txt。
  * 只改 comments/ 里的文件，不碰 git；开发服务看到文件变了自己刷新页面

@@ -9,7 +9,7 @@
 | --- | --- |
 | `packages/docsite-kit/` | 基础包 `@godcreator/docsite-kit`：页面来源、开发服务插件、服务端函数、页面正文组件、评论、站点人员列表、中文界面文字 |
 | `site/` | 自述站：用基础包搭，内容是基础包自己的说明，也是开发基础包时看效果的地方 |
-| `site/people.json` | 自述站的人员列表，评论署名用；`site/me.json` 写「我是谁」，不进 git |
+| `site/people.json` | 自述站的人员列表，评论署名用；「我是谁」按 gwb 设置里的身份码认 |
 | `trajectory/` | 轨迹卡：方向上的结论（试过什么、选了哪条路、实验得出了什么），只增不改 |
 | `probes/` | 实验材料，一个实验一个目录，照目录里 README 第一行就能重新运行 |
 
@@ -19,8 +19,8 @@
 
 * `pnpm install` 之后，`pnpm --filter @godcreator/docsite-kit build` 构建一次基础包：`vite.config.ts` 与评论文件的 schema
   由 Node 直接加载，只认构建产物
-* 在 `site/` 里建 `me.json`，写 `{ "id": "<people.json 里你的 id>" }`；没有它开发服务报错
-* `pnpm dev` 启动自述站的开发服务（`http://127.0.0.1:4430`）。开发服务直接用基础包 `src/` 下的源码，
+* `pnpm dev` 启动自述站的开发服务（`http://127.0.0.1:4430`）；要写评论，开发服务的环境变量 `DOCSITE_IDENTITY_CODE` 要是 `site/people.json` 里某人的码
+  （经 gwb-docsite 启动时它自己给），不然站点只读。开发服务直接用基础包 `src/` 下的源码，
   改了包里的组件页面马上变；改了 `src/vite/` 或评论文件的 schema（`src/comments.ts`、`src/people.ts`）要重新构建基础包、重启开发服务
 * 日常只用开发服务，不为了看效果运行 build；build 只在发布前做
 * 改完一批：基础包里 `pnpm check`（类型检查加测试），站点里 `pnpm check`（类型检查）；整批做完在仓根 `pnpm check`

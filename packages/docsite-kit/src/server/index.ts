@@ -1,9 +1,16 @@
 import { readFile } from 'node:fs/promises'
 import path from 'node:path'
+import { feedStore } from '../site-feed.js'
 
 export { siteSearchServer } from './search.js'
-export { commentRequestResponse, commentSnapshotsOf, commentSourceResponse, siteCommenter, sitePeople, type CommentOperation } from './comments.js'
+export { commentRequestResponse, commentSnapshotsOf, commentSourceResponse, siteCommenter, siteIdentity, sitePeople, type CommentOperation } from './comments.js'
+export { commentThreadIdsAbout, readCommentThreads, siteProblems, type CommentFile, type CommentThreadFile } from './comment-files.js'
 export { pageTextOfHtml } from './page-text.js'
+
+/** 推送通道里某个频道最新的一份（路由的 loader、action 用）；还没推过、不是经 gwb-docsite 启动的开发服务时是 undefined */
+export function siteFeedOf<Data>(channel: string): Data | undefined {
+  return feedStore().get(channel) as Data | undefined
+}
 
 /**
  * 只在服务端用的函数：项目骨架里路由文件的 loader 调用它们，像 fumadocs 模板里 search.ts 调用 createFromSource 一样。

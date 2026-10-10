@@ -21,7 +21,7 @@ afterEach(async () => {
   await rm(commentsDir, { recursive: true })
 })
 
-/** me 是这台机器 me.json 写的人 */
+/** me 是本机身份码对应的那个人 */
 function post(fields: Record<string, string>, me = 'zhou', images: File[] = []) {
   const form = new FormData()
   for (const [key, value] of Object.entries(fields)) form.set(key, value)
@@ -62,6 +62,15 @@ describe('评论接口', () => {
     expect(source.endsWith(`---\n\n${body}\n`)).toBe(true)
     expect(await readFile(path.join(commentsDir, thread, 'snapshot.txt'), 'utf8')).toBe('前原文后\n下一段')
     expect((await readdir(path.join(commentsDir, thread))).sort()).toEqual(['index.mdx', 'paste-abc-0.png', 'snapshot.txt'])
+  })
+
+  it('不给 page 是不挂在页面上的评论：frontmatter 不写 page；这时带了 anchor 就拒绝', async () => {
+    const response = await post({ op: 'create', body: '大家看一下 @li' })
+    expect(response.status).toBe(200)
+    const { thread } = (await response.json()) as { thread: string }
+    expect(await readFile(path.join(commentsDir, thread, 'index.mdx'), 'utf8')).toMatch(/^---\nauthor: "zhou"\ncreatedAt: "[^"]+"\nstatus: "open"\n---\n\n大家看一下 @li\n$/)
+    const withAnchor = await post({ op: 'create', anchor: JSON.stringify({ quote: 'x', occurrence: 1 }), body: 'x' })
+    expect(await withAnchor.text()).toBe('不挂在页面上的评论没有 anchor：要批页面上的地方，给 page')
   })
 
   it('正文按 MDX 编译不过时拒绝，回第几行第几列哪里错，不写文件', async () => {
@@ -145,7 +154,7 @@ describe('评论接口', () => {
   it('as 只给 agent 用：人不能经接口换成别人，as 写了人员列表里没有的人时拒绝，不写文件', async () => {
     const asPerson = await post({ op: 'create', page: '/writing', anchor: '{}', body: 'x', as: 'li' })
     expect(asPerson.status).toBe(403)
-    expect(await asPerson.text()).toBe('as 只给 agent 用：li 不是 agent，人的身份取站点目录里的 me.json')
+    expect(await asPerson.text()).toBe('as 只给 agent 用：li 不是 agent，人的身份取本机的身份码')
     const asStranger = await post({ op: 'create', page: '/writing', anchor: '{}', body: 'x', as: 'nobody' })
     expect(asStranger.status).toBe(400)
     expect(await asStranger.text()).toBe('people.json 里没有 nobody')

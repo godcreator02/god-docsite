@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, type ComponentProps, type ReactNode } from 'react'
 import { createPortal } from 'react-dom'
 import { ThemeSwitch } from '@fumadocs/base-ui/layouts/shared/slots/theme-switch'
-import type { CommentElementKind, CommentEntry, Commenter, CommentRange, CommentThread, Person } from '../comments.js'
+import type { CommentElementKind, CommentEntry, Commenter, CommentRange, CommentThread, Person, SiteIdentity } from '../comments.js'
 import { createRangeMapper } from '../comment-ranges.js'
 import { commentScopeAttribute } from '../page-text-rules.js'
 import {
@@ -18,6 +18,7 @@ import {
   placeOfThread,
   type ThreadPlace,
 } from './comment-anchors.js'
+import { linkedCommentParam } from './all-comments.js'
 import { CommentEditor, CommenterChip, CommentItem, PeopleContext, postComment, recentThreadToOpen, rememberThreadToOpen, ThreadView, type CommentApi } from './comment-cards.js'
 
 /** 页面正文的容器带上这个属性，评论在它里面找被批的原文：<DocsBody {...commentScopeProps}> */
@@ -533,6 +534,27 @@ function CommentLayer<Entry extends CommentEntry>({ page, threads, snapshots, co
     if (opener && !revealing.clicked.has(opener)) clickOpener(revealing.id, opener, revealing.clicked)
   }, [placement])
 
+  // 从全部评论页点过来：地址带着 ?comment=<评论串>。批整页的直接在右侧栏打开；批了地方的等找好位置，在原文处打开或先点开收起的内容
+  const linkedThreadRef = useRef<string>(undefined)
+  useEffect(() => {
+    linkedThreadRef.current = new URLSearchParams(window.location.search).get(linkedCommentParam) ?? undefined
+  }, [])
+  useEffect(() => {
+    const linked = threads.find((thread) => thread.id === linkedThreadRef.current)
+    if (!linked) return
+    const placed = placement.anchored.has(linked.id) || placement.collapsed.has(linked.id) || placement.missing.has(linked.id)
+    // 未解决、批了地方的要等找好位置（第一次找之前 placement 是空的）
+    if (linked.head.status === 'open' && linked.head.range && !placed) return
+    linkedThreadRef.current = undefined
+    const opener = placement.collapsed.get(linked.id)?.opener
+    if (linked.head.status === 'open' && placement.anchored.has(linked.id)) goToThread(linked.id)
+    else if (linked.head.status === 'open' && opener) revealThread(linked.id, opener)
+    else {
+      setPanelOpen(true)
+      setPanelThreadId(linked.id)
+    }
+  }, [placement, threads])
+
   const threadOf = (id: string) => threads.find((thread) => thread.id === id)!
   /** 打开的那串所在的组：同一个元素上的几串在一张卡片里依次列出 */
   const openGroup = openId === undefined ? [] : ([...placement.groups.values()].find((ids) => ids.includes(openId)) ?? [openId]).map(threadOf)
@@ -797,14 +819,20 @@ function CommentsPanel<Entry extends CommentEntry>(props: CommentsPanelProps<Ent
 }
 
 /**
- * 侧栏底部那一栏左边显示当前写评论的人、右边照旧是主题切换：传给 DocsLayout 的 slots.themeSwitch。
- * 发布站（commenter 为 null）只有主题切换
+ * 侧栏底部那一栏左边显示本机身份（只读时写「只读」，鼠标停上去看原因）、右边照旧是主题切换：传给 DocsLayout 的 slots.themeSwitch。
+ * identity 是服务端 siteIdentity() 的结果
  */
-export function themeSwitchWithCommenter(commenter: Commenter | null) {
-  return function ThemeSwitchWithCommenter(props: ComponentProps<typeof ThemeSwitch>) {
+export function themeSwitchWithIdentity(identity: SiteIdentity) {
+  return function ThemeSwitchWithIdentity(props: ComponentProps<typeof ThemeSwitch>) {
     return (
       <>
-        {commenter && <CommenterChip commenter={commenter} />}
+        {identity.person ? (
+          <CommenterChip commenter={identity.person} />
+        ) : (
+          <span className="truncate px-1.5 text-sm text-fd-muted-foreground" title={identity.reason}>
+            只读
+          </span>
+        )}
         <ThemeSwitch {...props} />
       </>
     )
