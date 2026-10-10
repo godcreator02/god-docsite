@@ -3,6 +3,7 @@ import { randomBytes } from 'node:crypto'
 import { mkdir, readFile, readdir, rm, stat, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 import { promisify } from 'node:util'
+import { compile } from '@mdx-js/mdx'
 import {
   commentElementKinds,
   commentSnapshotFile,
@@ -53,7 +54,7 @@ class RejectedRequest extends Error {
 }
 
 const threadIdPattern = /^[\w-]+$/
-const commentFilePattern = /^[\w-]+\.mdx?$/
+const commentFilePattern = /^[\w-]+\.mdx$/
 const pastedImagePattern = /^paste-[\w-]+\.(png|jpe?g|gif|webp)$/
 const maxImageBytes = 10 * 1024 * 1024
 
@@ -64,13 +65,20 @@ function requiredField(form: FormData, name: string) {
 }
 
 /**
- * 网页上写的评论按纯文字加 Markdown 存：< 转义成 &lt;，打出来的 <code> 照原样显示，不被当成 HTML 标签吞掉。
- * 编辑时取原文再换回来（commentSourceResponse）
+ * 网页上写的评论原样存成 MDX，能写组件，也能在评论里 export 一个组件再用。
+ * 先编译一遍：写错的 MDX 存进去，开发服务编译评论集合时整站报错，所以编译不过就拒绝，回第几行第几列哪里错
  */
-function bodyOf(form: FormData) {
+async function bodyOf(form: FormData) {
   const body = requiredField(form, 'body').replace(/\r\n/g, '\n').trim()
   if (body === '') throw new RejectedRequest(400, '评论是空的')
-  return body.replace(/</g, '&lt;')
+  try {
+    await compile(body)
+  } catch (error) {
+    const { line, column, reason } = error as { line?: number; column?: number; reason?: string }
+    const place = line === undefined ? '' : `第 ${line} 行第 ${column} 列：`
+    throw new RejectedRequest(400, `评论按 MDX 编译不过，${place}${reason ?? String(error)}。要写字面的 < 或 {，写成 \\< 、\\{ 或放进反引号里`)
+  }
+  return body
 }
 
 function yamlString(value: string) {
@@ -91,7 +99,7 @@ function newThreadId(now: Date) {
 
 /** 一条回复的文件名：时间加随机字母数字，按名字排就是按时间排 */
 function newReplyFile(now: Date) {
-  return `${now.toISOString().slice(0, 19).replace(/[-:]/g, '').toLowerCase()}-${randomBytes(2).toString('hex')}.md`
+  return `${now.toISOString().slice(0, 19).replace(/[-:]/g, '').toLowerCase()}-${randomBytes(2).toString('hex')}.mdx`
 }
 
 /** 新评论串批的位置：frontmatter 里写的几项，加上要存成 snapshot.txt 的页面文字；批整页时都没有 */
@@ -261,19 +269,19 @@ async function handleForm(form: FormData, { commenter, pageUrls, commentsDir, pa
     const page = requiredField(form, 'page')
     if (!pageUrls.includes(page)) throw new RejectedRequest(400, `没有页面 ${page}`)
     const anchor = await anchorOf(form, page, pageHtmlOf)
-    const body = bodyOf(form)
+    const body = await bodyOf(form)
     const thread = newThreadId(now)
     const dir = path.join(commentsDir, thread)
     await mkdir(dir, { recursive: true })
     await writePastedImages(form, dir)
     if (anchor.snapshot !== undefined) await writeFile(path.join(dir, commentSnapshotFile), anchor.snapshot)
-    await writeFile(path.join(dir, 'index.md'), `${frontmatterOf({ author: commenter.name, createdAt, page, status: 'open', ...anchor.fields })}\n${body}\n`)
-    return { thread, file: 'index.md' }
+    await writeFile(path.join(dir, 'index.mdx'), `${frontmatterOf({ author: commenter.name, createdAt, page, status: 'open', ...anchor.fields })}\n${body}\n`)
+    return { thread, file: 'index.mdx' }
   }
 
   const { thread, dir } = await threadDirOf(commentsDir, form)
   if (operation === 'reply') {
-    const body = bodyOf(form)
+    const body = await bodyOf(form)
     await writePastedImages(form, dir)
     const file = newReplyFile(now)
     await writeFile(path.join(dir, file), `${frontmatterOf({ author: commenter.name, createdAt })}\n${body}\n`)
@@ -289,7 +297,7 @@ async function handleForm(form: FormData, { commenter, pageUrls, commentsDir, pa
   const target = await commentFileOf(dir, form)
   if (operation === 'edit') {
     await assertAuthor(target, commenter, '编辑')
-    const body = bodyOf(form)
+    const body = await bodyOf(form)
     await writePastedImages(form, dir)
     const { frontmatter } = splitComment(await readFile(target, 'utf8'), target)
     await writeFile(target, `${frontmatter}\n${body}\n`)
@@ -359,7 +367,7 @@ export async function commentSourceResponse(request: Request, commentsDir = path
     const { dir } = await threadDirOf(commentsDir, form)
     const target = await commentFileOf(dir, form)
     const { body } = splitComment(await readFile(target, 'utf8'), target)
-    return new Response(body.trimEnd().replace(/&lt;/g, '<'), { headers: { 'Content-Type': 'text/plain; charset=utf-8', 'Cache-Control': 'no-cache' } })
+    return new Response(body.trimEnd(), { headers: { 'Content-Type': 'text/plain; charset=utf-8', 'Cache-Control': 'no-cache' } })
   } catch (error) {
     if (error instanceof RejectedRequest) return new Response(error.message, { status: error.status })
     throw error

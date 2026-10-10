@@ -1,9 +1,8 @@
 import type { CommentRange } from './comment-ranges.js'
 
 /**
- * 评论的存储格式。一个评论串一个文件夹：index.md（或 index.mdx）是发起的那条，frontmatter 写它批的是哪一页、哪段原文或哪一块；
- * 同一文件夹里其余的 .md / .mdx 每个是一条回复。网页上写的评论存成 .md（纯文字里的 < 和 { 不会被当成 JSX）；
- * 要放 TSX 组件的评论写成 .mdx，可以引用同一文件夹里的组件。图片放在同一文件夹里。
+ * 评论的存储格式。一个评论串一个文件夹：index.mdx 是发起的那条，frontmatter 写它批的是哪一页、哪段原文或哪个元素；
+ * 同一文件夹里其余的 .mdx 每个是一条回复。评论一律是 MDX，网页上写的也一样：能写组件、引用同一文件夹里的组件。图片放在同一文件夹里。
  * 批一段文字或一个元素时，文件夹里还有 snapshot.txt：发起评论那一刻整页的文字（怎么算见 page-text-rules.ts），range 是在它里面数的位置。
  * 项目在 collections.ts 里用 fumadocs-mdx 的 defineCollections 列出这些文件，schema 传 commentFrontmatterSchema
  */
@@ -22,7 +21,7 @@ export const commentElementKinds: readonly CommentElementKind[] = ['image', 'for
 /** 评论串文件夹里的页面文字快照 */
 export const commentSnapshotFile = 'snapshot.txt'
 
-/** 发起评论串的那条（index.md / index.mdx） */
+/** 发起评论串的那条（index.mdx） */
 export type CommentThreadFrontmatter = {
   kind: 'thread'
   author: string
@@ -146,12 +145,12 @@ function validateReply(data: Record<string, unknown>) {
   return { value: { kind: 'reply' as const, author, createdAt } }
 }
 
-/** 发起评论串的那个文件名：index.md 或 index.mdx */
+/** 发起评论串的那个文件名：index.mdx */
 export function isThreadHeadFile(file: string) {
-  return /(^|[\\/])index\.mdx?$/.test(file)
+  return /(^|[\\/])index\.mdx$/.test(file)
 }
 
-/** 交给 defineCollections 的 schema：fumadocs-mdx 传入文件路径，index.md / index.mdx 按发起的那条校验，其余按回复校验 */
+/** 交给 defineCollections 的 schema：fumadocs-mdx 传入文件路径，index.mdx 按发起的那条校验，其余按回复校验；评论文件只能是 .mdx */
 export function commentFrontmatterSchema({ path }: { path: string }): CommentFrontmatterSchema {
   const validateFields = isThreadHeadFile(path) ? validateThread : validateReply
   return {
@@ -159,6 +158,7 @@ export function commentFrontmatterSchema({ path }: { path: string }): CommentFro
       version: 1,
       vendor: 'docsite-kit',
       validate(value) {
+        if (!path.endsWith('.mdx')) return { issues: [{ message: '评论文件一律写成 .mdx：把扩展名改成 .mdx' }] }
         if (typeof value !== 'object' || value === null || Array.isArray(value)) return { issues: [{ message: '评论文件开头要有 frontmatter' }] }
         return validateFields(value as Record<string, unknown>)
       },
@@ -166,7 +166,7 @@ export function commentFrontmatterSchema({ path }: { path: string }): CommentFro
   }
 }
 
-/** 集合里的一项：frontmatter 加文件信息；info.path 相对评论目录，如 2026-10-10-search/index.md */
+/** 集合里的一项：frontmatter 加文件信息；info.path 相对评论目录，如 2026-10-10-search/index.mdx */
 export type CommentEntry = CommentFrontmatter & { info: { path: string } }
 
 export type CommentThread<Entry extends CommentEntry> = {
@@ -185,14 +185,14 @@ function byCreatedAt(a: { createdAt: string }, b: { createdAt: string }) {
   return a.createdAt.localeCompare(b.createdAt)
 }
 
-/** 评论文件的文件名（不含文件夹），如 index.md、2026-10-10t0631-x7k2.md */
+/** 评论文件的文件名（不含文件夹），如 index.mdx、2026-10-10t0631-x7k2.mdx */
 export function commentFileName(entry: CommentEntry) {
   return entry.info.path.split('/')[1]!
 }
 
 /**
  * 把集合里的文件按文件夹分成评论串，按发起时间排。文件不在「评论串文件夹/文件名」这一层、
- * 文件夹里没有发起的那条、或者 index.md 与 index.mdx 都有时报错，一次列出全部
+ * 文件夹里没有发起的那条时报错，一次列出全部
  */
 export function commentThreadsOf<Entry extends CommentEntry>(entries: readonly Entry[]): CommentThread<Entry>[] {
   const problems: string[] = []
@@ -201,16 +201,14 @@ export function commentThreadsOf<Entry extends CommentEntry>(entries: readonly E
   for (const entry of entries) {
     const segments = entry.info.path.split('/')
     if (segments.length !== 2) {
-      problems.push(`${entry.info.path} 要放在评论串自己的文件夹里，一层，如 2026-10-10-search/index.md`)
+      problems.push(`${entry.info.path} 要放在评论串自己的文件夹里，一层，如 2026-10-10-search/index.mdx`)
       continue
     }
     const id = segments[0]!
-    if (isThreadEntry(entry)) {
-      if (heads.has(id)) problems.push(`评论串 ${id} 里 index.md 和 index.mdx 只能有一个`)
-      heads.set(id, entry)
-    } else repliesOf.set(id, [...(repliesOf.get(id) ?? []), entry as Entry & CommentReplyFrontmatter])
+    if (isThreadEntry(entry)) heads.set(id, entry)
+    else repliesOf.set(id, [...(repliesOf.get(id) ?? []), entry as Entry & CommentReplyFrontmatter])
   }
-  for (const id of repliesOf.keys()) if (!heads.has(id)) problems.push(`评论串 ${id} 只有回复，没有发起的 index.md`)
+  for (const id of repliesOf.keys()) if (!heads.has(id)) problems.push(`评论串 ${id} 只有回复，没有发起的 index.mdx`)
   if (problems.length > 0) throw new Error(problems.join('\n'))
   return [...heads.entries()]
     .map(([id, head]) => ({ id, head, replies: (repliesOf.get(id) ?? []).sort(byCreatedAt) }))

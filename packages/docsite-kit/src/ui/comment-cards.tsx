@@ -1,4 +1,4 @@
-import { Suspense, useRef, useState, type ClipboardEvent, type KeyboardEvent, type ReactNode } from 'react'
+import { Component, Suspense, useRef, useState, type ClipboardEvent, type KeyboardEvent, type ReactNode } from 'react'
 import { commentFileName, type CommentEntry, type Commenter, type CommentThread } from '../comments.js'
 
 /** 评论接口：项目 routes.ts 里 route('api/comments', …) 的地址 */
@@ -100,7 +100,22 @@ type CommentEditorProps = {
 }
 
 /**
- * 写评论的输入框：纯文字为主，Ctrl+Enter（Mac 上 ⌘+Enter）发送、Esc 取消。
+ * 评论正文渲染出错（如用了没定义的组件）时，在这条评论的位置写出错的原话；整页和别的评论照常显示。
+ * 编译不过的在接口那一步就拒绝了，到这里的是编译过了、运行时才出错的
+ */
+class CommentBodyBoundary extends Component<{ children: ReactNode }, { error?: Error }> {
+  override state: { error?: Error } = {}
+  static getDerivedStateFromError(error: Error) {
+    return { error }
+  }
+  override render() {
+    if (this.state.error) return <p className="text-red-500">这条评论显示不出来：{this.state.error.message}</p>
+    return this.props.children
+  }
+}
+
+/**
+ * 写评论的输入框：写 MDX，纯文字、Markdown、组件都行；Ctrl+Enter（Mac 上 ⌘+Enter）发送、Esc 取消。
  * 粘贴图片时把图片记下来，在光标处插入 ![](./paste-….png)，发送时和文字一起交给接口，存进评论串的文件夹
  */
 export function CommentEditor({ placeholder, submitLabel, initialText = '', autoFocus, onSubmit, onCancel }: CommentEditorProps) {
@@ -239,7 +254,9 @@ export function CommentItem<Entry extends CommentEntry>({ entry, thread, renderB
         </div>
         {editingText === undefined ? (
           <div className={`prose prose-no-margin mt-0.5 text-sm ${clamped ? 'max-h-16 overflow-hidden' : ''}`}>
-            <Suspense fallback={<p className="text-fd-muted-foreground">正在加载……</p>}>{renderBody(entry)}</Suspense>
+            <CommentBodyBoundary>
+              <Suspense fallback={<p className="text-fd-muted-foreground">正在加载……</p>}>{renderBody(entry)}</Suspense>
+            </CommentBodyBoundary>
           </div>
         ) : (
           <div className="mt-1">

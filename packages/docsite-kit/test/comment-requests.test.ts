@@ -41,21 +41,30 @@ async function created(fields: Record<string, string>, images: File[] = []) {
 }
 
 describe('评论接口', () => {
-  it('新建评论串：写 index.md，frontmatter 带作者、页面、原文与位置；页面文字存成 snapshot.txt，粘贴的图片存进同一文件夹', async () => {
+  it('新建评论串：正文原样存成 index.mdx，frontmatter 带作者、页面、原文与位置；页面文字存成 snapshot.txt，粘贴的图片存进同一文件夹', async () => {
     const image = new File([new Uint8Array([1, 2, 3])], 'paste-abc-0.png', { type: 'image/png' })
     const anchor = { quote: '原文', range: [1, 3], snapshot: '前原文后\n下一段' }
-    const { thread, file } = await created({ anchor: JSON.stringify(anchor), body: '看这里 <b> {x}\n![](./paste-abc-0.png)' }, [image])
-    expect(file).toBe('index.md')
+    const body = 'export const Dot = () => <svg width="8" height="8"><circle cx="4" cy="4" r="4" /></svg>\n\n看这里 <Dot /> <Callout>提示</Callout> `a<b`\n![](./paste-abc-0.png)'
+    const { thread, file } = await created({ anchor: JSON.stringify(anchor), body }, [image])
+    expect(file).toBe('index.mdx')
     expect(thread).toMatch(/^\d{4}-\d{2}-\d{2}-[0-9a-f]{6}$/)
-    const source = await readFile(path.join(commentsDir, thread, 'index.md'), 'utf8')
-    expect(source).toMatch(/^---\nauthor: "小周"\ncreatedAt: "[^"]+"\npage: "\/writing"\nstatus: "open"\nquote: "原文"\nrange: \[1,3\]\n---\n\n看这里 &lt;b> \{x\}\n!\[\]\(\.\/paste-abc-0\.png\)\n$/)
+    const source = await readFile(path.join(commentsDir, thread, 'index.mdx'), 'utf8')
+    expect(source).toMatch(/^---\nauthor: "小周"\ncreatedAt: "[^"]+"\npage: "\/writing"\nstatus: "open"\nquote: "原文"\nrange: \[1,3\]\n---\n\n/)
+    expect(source.endsWith(`---\n\n${body}\n`)).toBe(true)
     expect(await readFile(path.join(commentsDir, thread, 'snapshot.txt'), 'utf8')).toBe('前原文后\n下一段')
-    expect((await readdir(path.join(commentsDir, thread))).sort()).toEqual(['index.md', 'paste-abc-0.png', 'snapshot.txt'])
+    expect((await readdir(path.join(commentsDir, thread))).sort()).toEqual(['index.mdx', 'paste-abc-0.png', 'snapshot.txt'])
+  })
+
+  it('正文按 MDX 编译不过时拒绝，回第几行第几列哪里错，不写文件', async () => {
+    const response = await post({ op: 'create', page: '/writing', anchor: '{}', body: '第一行\n看这里 <b> {x' })
+    expect(response.status).toBe(400)
+    expect(await response.text()).toMatch(/^评论按 MDX 编译不过，第 2 行第 \d+ 列：.+。要写字面的 < 或 \{，写成 \\< 、\\\{ 或放进反引号里$/)
+    expect(await readdir(commentsDir)).toEqual([])
   })
 
   it('批一个元素写 element 与 range；原文和快照里那一段对不上、range 超出快照、anchor 缺快照时拒绝', async () => {
     const { thread } = await created({ anchor: JSON.stringify({ element: 'image', range: [2, 3], snapshot: '图前￼图后' }), body: '这张图' })
-    expect(await readFile(path.join(commentsDir, thread, 'index.md'), 'utf8')).toContain('element: "image"\nrange: [2,3]\n')
+    expect(await readFile(path.join(commentsDir, thread, 'index.mdx'), 'utf8')).toContain('element: "image"\nrange: [2,3]\n')
     const rejected = async (anchor: unknown) => (await post({ op: 'create', page: '/writing', anchor: JSON.stringify(anchor), body: 'x' })).text()
     expect(await rejected({ quote: '原文', range: [0, 2], snapshot: '前原文后' })).toBe('anchor 对不上：quote 和快照里 range 那一段不一样：快照里是「前原」')
     expect(await rejected({ quote: '原文', range: [1, 9], snapshot: '前原文后' })).toBe('anchor 对不上：range [1, 9] 超出了快照（共 4 个字）')
@@ -66,7 +75,7 @@ describe('评论接口', () => {
   it('被批的内容在收起的标签页、文件夹里时写 openers：要先点的按钮在快照里的位置，由外到里；超出快照、写法不对时拒绝', async () => {
     const snapshot = '￼site￼content￼(kit)'
     const { thread } = await created({ anchor: JSON.stringify({ element: 'component', range: [13, 19], snapshot, openers: [[0, 5], [5, 13]] }), body: '这个文件夹' })
-    expect(await readFile(path.join(commentsDir, thread, 'index.md'), 'utf8')).toContain('element: "component"\nrange: [13,19]\nopeners: [[0,5],[5,13]]\n')
+    expect(await readFile(path.join(commentsDir, thread, 'index.mdx'), 'utf8')).toContain('element: "component"\nrange: [13,19]\nopeners: [[0,5],[5,13]]\n')
     const rejected = async (anchor: unknown) => (await post({ op: 'create', page: '/writing', anchor: JSON.stringify(anchor), body: 'x' })).text()
     expect(await rejected({ element: 'component', range: [13, 19], snapshot, openers: [[0, 30]] })).toBe('anchor 对不上：openers 里的 [0, 30] 超出了快照（共 19 个字）')
     expect(await rejected({ element: 'component', range: [13, 19], snapshot, openers: [] })).toBe('anchor.openers 要是 [[start, end], …]，至少一个')
@@ -81,7 +90,7 @@ describe('评论接口', () => {
     const { thread } = (await result.json()) as { thread: string }
     expect(askedPages).toEqual(['/writing'])
     expect(await readFile(path.join(commentsDir, thread, 'snapshot.txt'), 'utf8')).toBe('原文一再看原文二')
-    expect(await readFile(path.join(commentsDir, thread, 'index.md'), 'utf8')).toMatch(/^---\nauthor: "Claude"\ncreatedAt: "[^"]+"\npage: "\/writing"\nstatus: "open"\nquote: "原文"\nrange: \[5,7\]\n---\n\n看这里\n$/)
+    expect(await readFile(path.join(commentsDir, thread, 'index.mdx'), 'utf8')).toMatch(/^---\nauthor: "Claude"\ncreatedAt: "[^"]+"\npage: "\/writing"\nstatus: "open"\nquote: "原文"\nrange: \[5,7\]\n---\n\n看这里\n$/)
   })
 
   it('agent 要的第 occurrence 处不存在、occurrence 不是从 1 数的整数、多带了别的项时拒绝', async () => {
@@ -115,10 +124,10 @@ describe('评论接口', () => {
     expect(await readFile(path.join(commentsDir, thread, file), 'utf8')).toMatch(/^---\nauthor: "Claude"\ncreatedAt: "[^"]+"\n---\n\n收到\n$/)
 
     expect((await post({ op: 'resolve', thread }, 'Claude')).status).toBe(200)
-    const resolved = await readFile(path.join(commentsDir, thread, 'index.md'), 'utf8')
+    const resolved = await readFile(path.join(commentsDir, thread, 'index.mdx'), 'utf8')
     expect(resolved).toContain('status: "resolved"\nresolvedBy: "Claude"\nresolvedAt: "')
     expect((await post({ op: 'reopen', thread })).status).toBe(200)
-    const reopened = await readFile(path.join(commentsDir, thread, 'index.md'), 'utf8')
+    const reopened = await readFile(path.join(commentsDir, thread, 'index.mdx'), 'utf8')
     expect(reopened).toContain('status: "open"')
     expect(reopened).not.toContain('resolvedBy')
     expect(reopened).toMatch(/\n---\n\n整页\n$/)
@@ -126,11 +135,11 @@ describe('评论接口', () => {
 
   it('只有作者能编辑、删除；删发起的那条就是删整串', async () => {
     const { thread } = await created({ anchor: '{}', body: '原话' })
-    expect(await (await post({ op: 'edit', thread, file: 'index.md', body: '别人改' }, '小李')).text()).toBe('只有作者 小周 能编辑这条评论')
-    expect((await post({ op: 'edit', thread, file: 'index.md', body: '改过 a<b' })).status).toBe(200)
-    const source = await commentSourceResponse(new Request(`http://site/api/comments?thread=${thread}&file=index.md`), commentsDir)
-    expect(await source.text()).toBe('改过 a<b')
-    expect((await post({ op: 'delete', thread, file: 'index.md' })).status).toBe(200)
+    expect(await (await post({ op: 'edit', thread, file: 'index.mdx', body: '别人改' }, '小李')).text()).toBe('只有作者 小周 能编辑这条评论')
+    expect((await post({ op: 'edit', thread, file: 'index.mdx', body: '改过 `a<b`' })).status).toBe(200)
+    const source = await commentSourceResponse(new Request(`http://site/api/comments?thread=${thread}&file=index.mdx`), commentsDir)
+    expect(await source.text()).toBe('改过 `a<b`')
+    expect((await post({ op: 'delete', thread, file: 'index.mdx' })).status).toBe(200)
     expect(await readdir(commentsDir)).toEqual([])
   })
 
@@ -140,7 +149,8 @@ describe('评论接口', () => {
     expect(await (await post({ op: 'create', page: '/gone', anchor: '{}', body: 'x' })).text()).toBe('没有页面 /gone')
     expect((await post({ op: 'move', thread: 'a' })).status).toBe(400)
     const { thread } = await created({ anchor: '{}', body: 'x' })
-    expect(await (await post({ op: 'edit', thread, file: '../index.md', body: 'x' })).text()).toBe('评论文件名 ../index.md 不对')
+    expect(await (await post({ op: 'edit', thread, file: '../index.mdx', body: 'x' })).text()).toBe('评论文件名 ../index.mdx 不对')
+    expect(await (await post({ op: 'edit', thread, file: 'index.md', body: 'x' })).text()).toBe('评论文件名 index.md 不对')
     expect(await (await post({ op: 'reply', thread: '..', body: 'x' })).text()).toBe('评论串名 .. 不对')
   })
 })
