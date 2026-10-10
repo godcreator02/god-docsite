@@ -43,9 +43,11 @@ type NewAnchor =
 type Placement = {
   /** 显示在正文上的评论串（没解决的，加上正打开的那串）：卡片弹出的位置 */
   anchored: Map<string, { cardTop: number; cardLeft: number }>
-  /** 评论数按钮插进了原文末尾的评论串：批文字的、批文字类元素的、批行内元素（如行内公式）的 */
+  /** 共用一个评论数按钮的几串，按带按钮的那串（排在最前）：批同一个元素的几串共用一个，批文字的一串一个 */
+  groups: Map<string, string[]>
+  /** 评论数按钮插进了原文末尾的那几组（带按钮的那串）：批文字的、批文字类元素的、批行内元素（如行内公式）的 */
   inline: string[]
-  /** 批块级元素（图片、代码块、表格、组件）的评论串：评论数按钮在元素右上角，right 是按钮右边缘 */
+  /** 批块级元素（图片、代码块、表格、组件）的那几组：评论数按钮在元素右上角，right 是按钮右边缘 */
   cornerBadges: Map<string, { top: number; right: number }>
   /** 原文找不到了的评论串 */
   missing: Set<string>
@@ -55,7 +57,7 @@ type Placement = {
   changed: Set<string>
 }
 
-const emptyPlacement: Placement = { anchored: new Map(), inline: [], cornerBadges: new Map(), missing: new Set(), collapsed: new Map(), changed: new Set() }
+const emptyPlacement: Placement = { anchored: new Map(), groups: new Map(), inline: [], cornerBadges: new Map(), missing: new Set(), collapsed: new Map(), changed: new Set() }
 
 /** 点开一层收起内容后等它露出来的最长时间：过了还没露出来就不再点 */
 const revealTimeoutMs = 5000
@@ -160,7 +162,8 @@ function containsPoint(rect: DOMRect, x: number, y: number) {
 
 function samePlacement(a: Placement, b: Placement) {
   if (a.anchored.size !== b.anchored.size || a.cornerBadges.size !== b.cornerBadges.size || a.missing.size !== b.missing.size || a.collapsed.size !== b.collapsed.size || a.changed.size !== b.changed.size) return false
-  if (a.inline.join() !== b.inline.join()) return false
+  if (a.inline.join() !== b.inline.join() || a.groups.size !== b.groups.size) return false
+  for (const [leader, ids] of a.groups) if (b.groups.get(leader)?.join() !== ids.join()) return false
   for (const [id, spot] of a.anchored) {
     const other = b.anchored.get(id)
     if (!other || other.cardTop !== spot.cardTop || other.cardLeft !== spot.cardLeft) return false
@@ -290,7 +293,8 @@ function CommentLayer<Entry extends CommentEntry>({ page, threads, snapshots, co
         if (thread.head.status !== 'open') continue
         const highlighted = highlightedRangeOf(place, thread.head.element)
         if (highlighted) openRanges.push(highlighted)
-        else if (place.type === 'element') place.element.setAttribute(commentedElementAttribute, thread.id === openId ? 'active' : '')
+        // 同一个元素上可能有几串：其中一串打开着就算打开
+        else if (place.type === 'element') place.element.setAttribute(commentedElementAttribute, thread.id === openId || place.element.getAttribute(commentedElementAttribute) === 'active' ? 'active' : '')
       }
       const activeThread = openId === undefined ? undefined : threads.find((thread) => thread.id === openId)
       paintHighlights(openRanges, activeThread && highlightedRangeOf(placeOf.get(activeThread.id)!, activeThread.head.element))
@@ -313,10 +317,19 @@ function CommentLayer<Entry extends CommentEntry>({ page, threads, snapshots, co
         const type = placeOf.get(thread.id)!.type
         return (type === 'text' || type === 'element') && (thread.head.status === 'open' || thread.id === openId)
       })
+      const groups = new Map<string, string[]>()
+      const leaderOfElement = new Map<Element, string>()
       const inline: string[] = []
       const cornerThreads: string[] = []
       for (const thread of shown) {
         const place = placeOf.get(thread.id) as Extract<ThreadPlace, { range: Range }>
+        const leader = place.type === 'element' ? leaderOfElement.get(place.element) : undefined
+        if (leader !== undefined) {
+          groups.get(leader)!.push(thread.id)
+          continue
+        }
+        if (place.type === 'element') leaderOfElement.set(place.element, thread.id)
+        groups.set(thread.id, [thread.id])
         if (place.type === 'element' && !highlightedRangeOf(place, thread.head.element) && !isInlineElement(place.element)) {
           cornerThreads.push(thread.id)
           continue
@@ -334,7 +347,7 @@ function CommentLayer<Entry extends CommentEntry>({ page, threads, snapshots, co
         anchored.set(thread.id, { cardTop: rect.bottom - layerRect.top + 8, cardLeft: clampCardLeft(rect.left - layerRect.left, layerRect.width) })
         if (cornerThreads.includes(thread.id)) cornerBadges.set(thread.id, { top: rect.top - layerRect.top + 6, right: rect.right - layerRect.left - 6 })
       }
-      const next: Placement = { anchored, inline, cornerBadges, missing, collapsed, changed }
+      const next: Placement = { anchored, groups, inline, cornerBadges, missing, collapsed, changed }
       setPlacement((current) => (samePlacement(current, next) ? current : next))
     }
     const measureNextFrame = () => {
@@ -520,28 +533,27 @@ function CommentLayer<Entry extends CommentEntry>({ page, threads, snapshots, co
     if (opener && !revealing.clicked.has(opener)) clickOpener(revealing.id, opener, revealing.clicked)
   }, [placement])
 
-  const openThread = openId === undefined ? undefined : threads.find((thread) => thread.id === openId)
+  const threadOf = (id: string) => threads.find((thread) => thread.id === id)!
+  /** 打开的那串所在的组：同一个元素上的几串在一张卡片里依次列出 */
+  const openGroup = openId === undefined ? [] : ([...placement.groups.values()].find((ids) => ids.includes(openId)) ?? [openId]).map(threadOf)
   const openSpot = openId === undefined ? undefined : placement.anchored.get(openId)
+  /** 一组共用的评论数按钮：数字是这几串的评论总数，点它打开或关上这一组 */
+  const groupBadge = (leader: string, className?: string) => {
+    const ids = placement.groups.get(leader)!
+    const isOpen = openId !== undefined && ids.includes(openId)
+    const count = ids.reduce((total, id) => total + 1 + threadOf(id).replies.length, 0)
+    return <CountBadge count={count} active={isOpen} label={labelOf(threadOf(leader))} onClick={() => setOpenId(isOpen ? undefined : leader)} className={className} />
+  }
 
   return (
     <div ref={layerRef} className="relative">
       {children}
-      {placement.inline.map((id) => {
-        const thread = threads.find((candidate) => candidate.id === id)!
-        return createPortal(
-          <CountBadge count={1 + thread.replies.length} active={id === openId} label={labelOf(thread)} onClick={() => setOpenId(id === openId ? undefined : id)} />,
-          inlineHostOf(id),
-          id,
-        )
-      })}
-      {[...placement.cornerBadges].map(([id, badge]) => {
-        const thread = threads.find((candidate) => candidate.id === id)!
-        return (
-          <span key={id} data-comment-ui="" className="absolute z-10 -translate-x-full" style={{ top: badge.top, left: badge.right }}>
-            <CountBadge count={1 + thread.replies.length} active={id === openId} label={labelOf(thread)} onClick={() => setOpenId(id === openId ? undefined : id)} className="shadow-sm" />
-          </span>
-        )
-      })}
+      {placement.inline.map((leader) => createPortal(groupBadge(leader), inlineHostOf(leader), leader))}
+      {[...placement.cornerBadges].map(([leader, badge]) => (
+        <span key={leader} data-comment-ui="" className="absolute z-10 -translate-x-full" style={{ top: badge.top, left: badge.right }}>
+          {groupBadge(leader, 'shadow-sm')}
+        </span>
+      ))}
       {picking && hovered && !draft && (
         <div data-comment-ui="" className="pointer-events-none absolute z-20 rounded-sm outline-2 outline-offset-2 outline-amber-500 outline-dashed" style={hovered.box}>
           <span className="absolute -top-1 left-0 -translate-y-full rounded bg-amber-500 px-1.5 text-xs leading-5 whitespace-nowrap text-white">{hovered.label}</span>
@@ -571,17 +583,24 @@ function CommentLayer<Entry extends CommentEntry>({ page, threads, snapshots, co
           <CommentEditor placeholder="写评论…" submitLabel="评论" autoFocus onCancel={() => setDraft(undefined)} onSubmit={(body, images) => createThread(draft.anchor, body, images)} />
         </div>
       )}
-      {openThread && openSpot && (
-        <div data-comment-ui="" className="absolute z-30 max-h-[60vh] overflow-y-auto rounded-xl border bg-fd-popover p-3 text-fd-popover-foreground shadow-lg" style={{ top: openSpot.cardTop, left: openSpot.cardLeft, width: cardWidth }}>
-          <ThreadView
-            key={openThread.id}
-            thread={openThread}
-            renderBody={renderBody}
-            commenter={commenter}
-            api={api}
-            note={placement.changed.has(openThread.id) ? `原文改过，当时批的是${labelOf(openThread)}` : undefined}
-            onClose={() => setOpenId(undefined)}
-          />
+      {openGroup.length > 0 && openSpot && (
+        <div
+          data-comment-ui=""
+          className="absolute z-30 flex max-h-[60vh] flex-col divide-y overflow-y-auto rounded-xl border bg-fd-popover text-fd-popover-foreground shadow-lg"
+          style={{ top: openSpot.cardTop, left: openSpot.cardLeft, width: cardWidth }}
+        >
+          {openGroup.map((thread, index) => (
+            <div key={thread.id} className="p-3">
+              <ThreadView
+                thread={thread}
+                renderBody={renderBody}
+                commenter={commenter}
+                api={api}
+                note={placement.changed.has(thread.id) ? `原文改过，当时批的是${labelOf(thread)}` : undefined}
+                onClose={index === 0 ? () => setOpenId(undefined) : undefined}
+              />
+            </div>
+          ))}
         </div>
       )}
       {hasCommentUi && (
