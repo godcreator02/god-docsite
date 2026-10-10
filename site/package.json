@@ -1,0 +1,37 @@
+{
+  "name": "docsite-kit-site",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "文档站基础包的自述站：用基础包搭，内容是基础包自己的说明",
+  "scripts": {
+    "dev": "react-router dev --port 4430 --host 127.0.0.1 --strictPort",
+    "build": "react-router build",
+    "start": "react-router-serve ./build/server/index.js",
+    "typecheck": "react-router typegen && tsc --noEmit",
+    "check": "react-router typegen && tsc --noEmit"
+  },
+  "dependencies": {
+    "@fumadocs/base-ui": "16.16.2",
+    "@godcreator/docsite-kit": "workspace:*",
+    "@react-router/node": "^8.4.0",
+    "@react-router/serve": "^8.4.0",
+    "fumadocs-core": "16.16.2",
+    "fumadocs-mdx": "15.4.4",
+    "isbot": "^5.2.2",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0",
+    "react-router": "^8.4.0"
+  },
+  "devDependencies": {
+    "@react-router/dev": "^8.4.0",
+    "@tailwindcss/vite": "^4.3.3",
+    "@types/mdx": "^2.0.14",
+    "@types/node": "^26.6.2",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "tailwindcss": "^4.3.3",
+    "typescript": "^6.0.3",
+    "vite": "^8.3.0"
+  }
+}

@@ -1,0 +1,11 @@
+# 仓根是不发布的 private 包：基础包在 packages/，自述站在 site/
+
+packages:
+  - packages/*
+  - site
+
+allowBuilds:
+  '@parcel/watcher': false
+  esbuild: true
+onlyBuiltDependencies:
+  - esbuild

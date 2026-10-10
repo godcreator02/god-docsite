@@ -1,0 +1,2 @@
+/* 站点的 app.css 引入这一份：让 Tailwind 扫到基础包组件里用的类名 */
+@source './src';

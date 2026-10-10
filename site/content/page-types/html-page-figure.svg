@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 140" width="480" height="140" font-family="system-ui, sans-serif" font-size="14">
+  <rect x="10" y="10" width="110" height="36" rx="8" fill="#e0ecff" stroke="#4a7bd0" />
+  <text x="65" y="33" text-anchor="middle">MDX</text>
+  <rect x="10" y="52" width="110" height="36" rx="8" fill="#e6f6e6" stroke="#3f9b3f" />
+  <text x="65" y="75" text-anchor="middle">TSX</text>
+  <rect x="10" y="94" width="110" height="36" rx="8" fill="#fff0dc" stroke="#d08a2a" />
+  <text x="65" y="117" text-anchor="middle">HTML</text>
+  <path d="M120 28 L300 70 M120 70 L300 70 M120 112 L300 70" stroke="#888" fill="none" />
+  <rect x="300" y="48" width="170" height="44" rx="8" fill="#f2f2f2" stroke="#666" />
+  <text x="385" y="75" text-anchor="middle">同一棵页面树</text>
+</svg>

@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <title>HTML 页面</title>
+    <meta name="description" content="这一页本身就是一个 HTML 页面：放在 iframe 里显示，相对路径的图片和脚本照常能用" />
+    <style>
+      :root { color-scheme: light dark; }
+      body { margin: 0; font: 15px/1.7 system-ui, sans-serif; }
+      code { font-size: 0.9em; }
+      img { display: block; max-width: 100%; margin: 12px 0; }
+    </style>
+  </head>
+  <body>
+    <p>这一页的文件是 <code>content/page-types/html-page.html</code>，整个文件放在 iframe 里显示。</p>
+    <p>下面这张图是同一个文件夹里的 <code>html-page-figure.svg</code>，用相对路径引用：</p>
+    <img src="html-page-figure.svg" alt="三种页面进同一棵页面树" />
+    <p>下面这一行由页面自己的脚本写出：</p>
+    <p id="script-output">脚本没有运行</p>
+    <script>
+      document.getElementById('script-output').textContent = '页面自己的脚本运行了'
+    </script>
+  </body>
+</html>

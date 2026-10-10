@@ -1,0 +1,27 @@
+---
+title: 文档站基础包
+description: 基于 fumadocs 的文档站基础包，协作站、docfirst 文档站与论文阅读站都用它搭
+---
+
+`@godcreator/docsite-kit` 是一个 npm 包。项目里的站点目录放一套固定的骨架文件（见[项目骨架](/skeleton)），
+骨架引用这个包，就得到一个 fumadocs 文档站。
+
+站点用 React Router 的框架模式加 Vite：本机开发时运行 `pnpm dev`，改了页面立刻看到；
+发布时 `pnpm build` 之后用 `react-router-serve` 开服务，发布出去的站只读。
+
+## 包里有什么
+
+| 导出 | 用在哪 | 内容 |
+| --- | --- | --- |
+| `./vite` | `vite.config.ts` | 开发服务插件 `docsite()`，见[开发服务插件](/dev-plugin) |
+| `./page-sources` | `app/lib/source.ts`、页面路由 | TSX 页面与 HTML 页面的来源、保留地址检查、内容文件的地址，见[三种页面](/page-types) |
+| `./server` | `app/routes/content-file.ts` | 把 `content/` 里的文件原样送给浏览器 |
+| `./ui` | `app/root.tsx`、页面路由 | TSX 页面与 HTML 页面的正文组件、fumadocs 界面文字的中文 |
+| `./styles.css` | `app/app.css` | 让 Tailwind 扫到包里组件用的类名 |
+
+布局用 fumadocs 自带的 spacious 布局（正文是一张圆角卡片），骨架直接引用，包里不另外包一层。
+
+## 这个站
+
+你正在看的站就是用这个包搭的，站点目录是仓里的 `site/`，内容是这个包自己的说明。
+开发基础包时也在这个站上看效果：开发服务直接用包的源码，改了包里的组件，页面马上变。

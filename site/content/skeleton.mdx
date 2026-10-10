@@ -1,0 +1,34 @@
+---
+title: 项目骨架
+description: 每个站点目录里放的那套文件，各自做什么
+---
+
+骨架照 fumadocs 官方的 React Router 模板摆，放在每个项目自己的站点目录里，不在包里。
+原因是有几样东西只能写在项目里：`defineDocs` 与 `import.meta.glob` 的参数要能在构建时直接读出来，
+路由的 `loader` 也要写在项目的路由文件里。功能都在包里，骨架只是把它们接起来。
+
+## 文件
+
+| 文件 | 做什么 |
+| --- | --- |
+| `vite.config.ts` | 插件依次是 `docsite()`、`fumadocsMdx()`、`tailwindcss()`、`reactRouter()` |
+| `react-router.config.ts` | `ssr: true`：页面在服务端渲染，发布时用 `react-router-serve` 开服务 |
+| `app/root.tsx` | 整个 HTML 外框；`RootProvider` 传入中文界面文字 `zhTranslations`；出错时显示原话 |
+| `app/app.css` | 依次引入 Tailwind、fumadocs 的配色与布局样式（spacious 的样式要单独引入）、基础包的 `styles.css` |
+| `app/routes.ts` | 路由表：`api/search` 搜索，`api/content/*` 送内容文件，其余地址都交给内容页 |
+| `app/lib/collections.ts` | 列出页面文件：MDX 用 `defineDocs`，TSX 页面用 `import.meta.glob` 按需加载组件 |
+| `app/lib/source.ts` | 把三种页面交给 fumadocs 的 `loader()`，进同一棵页面树；检查页面有没有占用 `api` 这类地址 |
+| `app/routes/layout.tsx` | 整站布局：spacious 的 `DocsLayout`，左侧是页面树 |
+| `app/routes/page.tsx` | 内容页：按页面类型渲染 MDX 正文、TSX 组件或放 HTML 的 iframe |
+| `app/routes/search.ts` | 搜索接口，三种页面一起搜 |
+| `app/routes/content-file.ts` | 调用 `contentFileResponse`，把 `content/` 里的文件原样送出 |
+| `content/` | 页面放在这里，每个文件夹的 `meta.json` 写标题和页面顺序 |
+
+## 用基础包源码还是构建产物
+
+包的 `./page-sources`、`./server`、`./ui` 在 `package.json` 的 `exports` 里多写了一项 `development`，指向 `src/` 下的源码。
+开发服务按 `development` 找，用的是源码；`pnpm build` 按默认找，用的是 `dist/`。
+站点的 `tsconfig.json` 里写了 `customConditions: ["development"]`，类型检查也看源码。
+
+`./vite` 只有构建产物：`vite.config.ts` 由 Node 直接加载，Node 不认 `development`。
+改了开发服务插件，要先在包里运行 `pnpm build` 再重启开发服务。

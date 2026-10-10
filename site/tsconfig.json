@@ -1,0 +1,15 @@
+{
+  "compilerOptions": {
+    "target": "esnext",
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "customConditions": ["development"],
+    "jsx": "react-jsx",
+    "strict": true,
+    "skipLibCheck": true,
+    "noEmit": true,
+    "types": ["vite/client", "node", "@react-router/node"],
+    "rootDirs": [".", "./.react-router/types"]
+  },
+  "include": ["app", "content", "react-router.config.ts", "vite.config.ts", ".react-router/types/**/*"]
+}

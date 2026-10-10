@@ -1,0 +1,4 @@
+{
+  "title": "三种页面",
+  "pages": ["index", "tsx-page", "html-page"]
+}
