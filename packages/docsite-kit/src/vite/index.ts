@@ -3,6 +3,8 @@ import { isRunnableDevEnvironment, normalizePath, type Plugin, type PluginOption
 import type { EvaluatedModuleNode, EvaluatedModules } from 'vite/module-runner'
 import { tsxPageSuffix } from '../page-sources.js'
 
+export { rehypeCommentAnchors } from './comment-anchors.js'
+
 /** 基础包自己的包名：要和站点自己的代码一样经 Vite 处理 */
 const ownPackageName = '@godcreator/docsite-kit'
 

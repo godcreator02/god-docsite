@@ -1,20 +1,19 @@
 import { describe, expect, it } from 'vitest'
-import { assertCommentPagesExist, commentFrontmatterSchema, commentThreadsOf, locateQuote, type CommentEntry } from '../src/comments.js'
+import { assertCommentPagesExist, commentFrontmatterSchema, commentThreadsByPage, commentThreadsOf, nthIndexOf, occurrenceIndexAt, type CommentEntry } from '../src/comments.js'
 
 const validate = (path: string, value: unknown) => commentFrontmatterSchema({ path })['~standard'].validate(value)
 
 describe('评论的 frontmatter', () => {
   it('index.md 与 index.mdx 按发起的那条校验，时间统一成 ISO；YAML 读成 Date 的也收', () => {
-    const thread = { author: '小周', createdAt: new Date('2026-10-10T14:05:00+08:00'), page: '/writing', quote: '原文', quotePrefix: '前', quoteSuffix: '后', status: 'open' }
-    const expected = { kind: 'thread', author: '小周', createdAt: '2026-10-10T06:05:00.000Z', page: '/writing', quote: '原文', quotePrefix: '前', quoteSuffix: '后', status: 'open' }
+    const thread = { author: '小周', createdAt: new Date('2026-10-10T14:05:00+08:00'), page: '/writing', anchor: 'k3f9a1', quote: '原文', quoteIndex: 2, status: 'open' }
+    const expected = { kind: 'thread', author: '小周', createdAt: '2026-10-10T06:05:00.000Z', page: '/writing', anchor: 'k3f9a1', quote: '原文', quoteIndex: 2, status: 'open' }
     expect(validate('/site/comments/a/index.mdx', thread)).toEqual({ value: expected })
     expect(validate('/site/comments/a/index.md', thread)).toEqual({ value: expected })
   })
 
-  it('整块评论写 block，已解决的写解决人与时间', () => {
-    const block = { kind: 'code', heading: '代码', index: 1, text: 'import' }
-    expect(validate('/c/a/index.md', { author: 'a', createdAt: '2026-10-10', page: '/', status: 'resolved', block, resolvedBy: 'b', resolvedAt: '2026-10-11' })).toEqual({
-      value: { kind: 'thread', author: 'a', createdAt: '2026-10-10T00:00:00.000Z', page: '/', status: 'resolved', block, resolvedBy: 'b', resolvedAt: '2026-10-11T00:00:00.000Z' },
+  it('批整块只写 anchor，已解决的写解决人与时间', () => {
+    expect(validate('/c/a/index.md', { author: 'a', createdAt: '2026-10-10', page: '/', status: 'resolved', anchor: 'b1', resolvedBy: 'b', resolvedAt: '2026-10-11' })).toEqual({
+      value: { kind: 'thread', author: 'a', createdAt: '2026-10-10T00:00:00.000Z', page: '/', status: 'resolved', anchor: 'b1', resolvedBy: 'b', resolvedAt: '2026-10-11T00:00:00.000Z' },
     })
   })
 
@@ -26,17 +25,22 @@ describe('评论的 frontmatter', () => {
     expect(result.issues?.map((issue) => issue.message)).toEqual(['认不出 page，能写的只有 author、createdAt'])
   })
 
-  it('缺字段、page 不以 / 开头、status 写错、quote 与 block 都写、block 写错时一次列出全部', () => {
-    const result = validate('/site/comments/a/index.mdx', { createdAt: 'yesterday', page: 'writing', status: 'done', quote: 'x', block: { kind: 'video', heading: '', index: 0, text: '' } })
+  it('缺字段、page 不以 / 开头、status 写错、quote 没有 anchor、quoteIndex 写错、写了认不出的字段时一次列出全部', () => {
+    const result = validate('/site/comments/a/index.mdx', { createdAt: 'yesterday', page: 'writing', status: 'done', quote: 'x', quoteIndex: 0, block: {} })
     expect(result.issues?.map((issue) => issue.message)).toEqual([
+      '认不出 block，能写的只有 author、createdAt、page、status、anchor、quote、quoteIndex、resolvedBy、resolvedAt',
       'author 要是非空字符串',
       'createdAt 要是时间，如 2026-10-10T12:00:00+08:00',
       'page 写页面地址，以 / 开头，如 /writing',
       'status 要是 open 或 resolved',
-      'block.kind 要是 image、code、table、component 之一',
-      'block.index 要是从 1 数的整数',
-      'quote 和 block 只能写一个：批一段文字写 quote，批一整块写 block',
+      'quote 要和 anchor 一起写：先标出是哪一块，再写块里的哪几个字',
+      'quoteIndex 要是从 1 数的整数：quote 在这一块的文字里第几次出现',
     ])
+  })
+
+  it('anchor 只能有字母数字，quoteIndex 不能单独写', () => {
+    const result = validate('/c/a/index.md', { author: 'a', createdAt: '2026-10-10', page: '/', status: 'open', anchor: 'a b', quoteIndex: 1 })
+    expect(result.issues?.map((issue) => issue.message)).toEqual(['anchor 只能有字母、数字、- 和 _，现在是 a b', 'quoteIndex 要和 quote 一起写'])
   })
 })
 
@@ -62,19 +66,26 @@ describe('评论串', () => {
     const threads = commentThreadsOf([thread('a/index.md', '1', '/gone'), thread('b/index.md', '2', '/')])
     expect(() => assertCommentPagesExist(threads, ['/'])).toThrow('评论串 a 批的页面 /gone 不存在')
   })
+
+  it('按批的页面分组', () => {
+    const byPage = commentThreadsByPage(commentThreadsOf([thread('a/index.md', '1', '/x'), thread('b/index.md', '2', '/'), thread('c/index.md', '3', '/x')]))
+    expect([...byPage].map(([page, threads]) => [page, threads.map((t) => t.id)])).toEqual([
+      ['/x', ['a', 'c']],
+      ['/', ['b']],
+    ])
+  })
 })
 
-describe('在正文里找原文', () => {
-  it('只出现一次就是那一处，前后文对不上也认', () => {
-    expect(locateQuote('甲乙丙丁', '乙丙', '不是这个', '也不是')).toBe(1)
+describe('在一块的文字里数第几次出现', () => {
+  it('第 n 次出现的位置；出现不到那么多次时返回 undefined', () => {
+    expect(nthIndexOf('A一A二A', 'A', 1)).toBe(0)
+    expect(nthIndexOf('A一A二A', 'A', 3)).toBe(4)
+    expect(nthIndexOf('A一A二A', 'A', 4)).toBeUndefined()
   })
 
-  it('出现好几次时取前后文都对得上的那一处', () => {
-    expect(locateQuote('左A右，前A后', 'A', '前', '后')).toBe(5)
-  })
-
-  it('找不到、或者好几处都对不上前后文时返回 undefined', () => {
-    expect(locateQuote('甲乙', '丙')).toBeUndefined()
-    expect(locateQuote('左A右，前A后', 'A', '上', '下')).toBeUndefined()
+  it('选中的那一处是第几次出现', () => {
+    expect(occurrenceIndexAt('A一A二A', 'A', 0)).toBe(1)
+    expect(occurrenceIndexAt('A一A二A', 'A', 2)).toBe(2)
+    expect(occurrenceIndexAt('AAA', 'AA', 1)).toBe(2)
   })
 })

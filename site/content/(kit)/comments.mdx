@@ -1,43 +1,59 @@
 ---
 title: 评论
-description: 选中文字或整块内容发起评论，被批的地方标黄，点开弹出评论卡片；评论存成文件，一个评论串一个文件夹
+description: 选中一块或块里的几个字发起评论，被批的地方画框或标黄，点开弹出评论卡片；评论存成文件，一个评论串一个文件夹，页面源文件里只留一个标记
 icon: MessageSquare
 ---
 
-评论的做法照 Notion：在正文里选中一段文字，或者鼠标移到图片、代码块上，就能发起评论；
-被批的文字标黄，原文末尾插着评论数按钮；被批的整块画框，评论数按钮在那一块右上角。点按钮弹出这串评论。
+评论的做法照 Notion：打开右下角的「批注」，鼠标移到哪一块就框出哪一块，点一下批这一整块，在一块里拖选文字就批那几个字。
+被批的块画框，评论数按钮在那一块右上角；批的是几个字时那几个字标黄，评论数按钮插在它们末尾。点按钮弹出这串评论。
 右下角的「评论」按钮打开右侧栏，列出这一页全部评论。
 
-评论存成文件，放在站点目录的 `comments/` 里，和页面分开。
+评论存成文件，放在站点目录的 `comments/` 里，和页面分开。页面源文件里只在被批的那一块留一个标记 `<CommentAnchor id="…" />`，
+评论按标记的 id 找到那一块，同样的文字在页面上出现几次都不会认错。
 [写一页说明](/writing)和[文档站基础包](/)两页上有几条示例评论，可以对照着看。
 
 ## 在页面上看评论
 
-- **标黄与评论数**：没解决的评论串，被批的文字标黄并画下划线，原文末尾插着评论数按钮，跟着文字一起排版、换行；
-  被批的整块画框，评论数按钮在那一块右上角
-- **弹出卡片**：点评论数按钮或点标黄的文字，在原文下方弹出这串评论；同一时间只开一张，点别处就关上
+- **画框、标黄与评论数**：没解决的评论串，被批的块画框，评论数按钮在那一块右上角，同一块上的几串竖着排；
+  批的是块里几个字时，那几个字标黄并画下划线，评论数按钮插在它们末尾，跟着文字一起排版、换行
+- **弹出卡片**：点评论数按钮或点标黄的字，在被批的地方下方弹出这串评论；同一时间只开一张，点别处就关上
 - **长评论串**：卡片先只显示发起的那条和「展开 N 条回复」，点开才看全部；卡片有最大高度，超出了在卡片里滚动
-- **右侧栏**：右下角「评论」按钮打开，分「未解决」「已解决」两栏。点一条找得到原文的评论，正文滚到原文、弹出卡片；
-  整页评论、已解决的、原文找不到了的，在右侧栏里展开看。宽屏时右侧栏和本页目录那一列一样宽、在同一个位置，
-  打开时盖住目录，正文的位置和宽度不变；窄屏时右侧栏盖在页面上
+- **右侧栏**：右下角「评论」按钮打开，分「未解决」「已解决」两栏。点一条正文里找得到的评论，正文滚过去、弹出卡片；
+  整页评论、已解决的、找不到了的，在右侧栏里展开看。宽屏时右侧栏和本页目录那一列一样宽、在同一个位置，
+  打开时盖住目录，目录改成正文上方的下拉条，正文的位置和宽度不变；窄屏时右侧栏盖在页面上
 
-插进正文的评论数按钮是评论自己放进去的：只在原文结尾处切开那一个文字节点，撤掉时拼回原来那个节点；
-找原文、选中文字记原文时跳过这些按钮里的字，选区带上了按钮也不会把数字记进原文。
+插进正文的评论数按钮是评论自己放进去的：只在那几个字的结尾处切开那一个文字节点，撤掉时拼回原来那个节点；
+数第几次出现、选中文字记下批的字时，跳过这些按钮里的字。
 
 ## 写评论
 
-只在本机的开发服务（`pnpm dev`）里能写。发布出去的站只读：能看评论，没有输入框和「解决」按钮。
+只在本机的开发服务（`pnpm dev`）里能写。发布出去的站只读：能看评论，没有「批注」按钮、输入框和「解决」按钮。
 
 写评论的人是本机 git 的 `user.name`，侧栏底部那一栏左边显示它的头像（名字第一个字加一个由名字算出的底色）和名字。没设 `user.name` 时页面报错，写明怎么设。
 
 | 想做什么 | 怎么做 |
 | --- | --- |
-| 批一段文字 | 在正文里选中它，选区上方浮出「评论」按钮 |
-| 批一整块（图片、代码块、表格、组件） | 鼠标移到那一块上，那一块右上角出现带 ＋ 的按钮 |
+| 批一整块 | 打开「批注」，点那一块 |
+| 批一块里的几个字 | 打开「批注」，在那一块里拖选文字；选区跨了两块时不认，提示一次只能批一块里的字 |
 | 批整页 | 右侧栏顶上的「评论整页」 |
 | 回复 | 卡片底部的回复框 |
 | 编辑、删除 | 鼠标移到自己写的那条上，名字后面出现「编辑」「删除」；删发起的那条就是删整串 |
 | 标为已解决、重新打开 | 卡片顶上的按钮，谁都能点 |
+
+「批注」在右下角「评论」按钮上面，右侧栏顶上「评论整页」旁边也有一个。打开后一直开着，按 Esc 或再点一次才关，
+发评论引起的整页刷新后也还开着：审一页时通常一连批好几处。开着的时候点链接不跳转；关着的时候选文字就是普通的选文字。
+
+能单独批的块：
+
+| 块 | 怎么算一块 |
+| --- | --- |
+| 段落 | 一个段落，只有一张图片的段落也是 |
+| 列表项 | 紧凑列表里的一项；项与项之间空了行的列表，每项里的段落各算一块 |
+| 代码块、表格 | 整个代码块、整张表格 |
+| 组件 | 正文里的一个 JSX 组件，如提示框、选项卡；组件里的子组件不单算，组件里的段落、代码块照样能单独批 |
+
+标题不能批：标题外面套了标记，本页目录可能就认不出它。要批这一节，就批它下面那一段。
+TSX 页面只能批整页和页面里手放的标记（见下文），HTML 页面只能批整页。
 
 输入框写纯文字，也可以用 Markdown（`**加粗**`、`` `代码` ``）。粘贴图片会存进这个评论串的文件夹，并在光标处插入图片引用。
 Ctrl+Enter（Mac 上 ⌘+Enter）发送，Esc 取消。正在写的新评论点到别处不会丢，要点「取消」才关。
@@ -45,7 +61,56 @@ Ctrl+Enter（Mac 上 ⌘+Enter）发送，Esc 取消。正在写的新评论点�
 发出去以后，开发服务看到 `comments/` 里的文件变了，整页刷新：滚动位置不变，刚才那串评论自动重新打开。
 不刷新只换评论这条路试过，走不通：编译好的 MDX 正文模块也引用了列出评论的模块，Vite 的热更新绕一圈后还是整页刷新。
 
-## 文件
+## 页面源文件里的标记
+
+批一块还没有标记的块时，评论接口先在页面源文件里给它插上标记，再写评论文件：
+
+````mdx title="content/writing/index.mdx"
+<CommentAnchor id="bold-usage" />段落之间空一行。**加粗**用来标出一段里最要紧的词。
+
+- <CommentAnchor id="3f9a1c" />列表项的标记也写在文字开头
+
+<CommentAnchor id="9e0b42" />
+```ts
+const server = siteSearchServer(source)
+```
+````
+
+- 段落、列表项的标记写在文字开头
+- 代码块、表格、组件的标记单独一行写在它前面，带上和它第一行一样的缩进（列表里的空格、引用里的 `>`）
+- 同一块只放一个标记，几个评论串共用它：再批已有标记的块不另插
+- 删掉最后一个用某个标记的评论串时，评论接口把标记一起删掉；评论串标为已解决时标记留着，重新打开还能对上
+- 网页上插的标记 id 是六位随机字母数字；人或 agent 手写时可以起看得懂的名字，只能有字母、数字、`-` 和 `_`，一页里不能重复
+
+标记只给评论用，不出现在网页上：编译 MDX 时由基础包的 `rehypeCommentAnchors` 拿掉，被标的那一块带上它的 id。
+改页面正文时标记要跟着它标的那一块走：整块删掉时连标记一起删，改写那一块时留着标记。
+
+### 网页怎么告诉评论接口插在哪
+
+`rehypeCommentAnchors` 编译时给每个能批的块记下它在源文件里的起止行号列号和这一块源码的指纹，写在块的 `data-comment-block` 属性上；
+代码块、表格、组件外面为此包了一层 `display: contents` 的 `div`，不占版面。
+网页发起评论时把这个值传给评论接口，接口在源文件里核对指纹：页面打开以后这一块改过、或者前面的内容挪了位置，指纹对不上，
+接口拒绝并提示刷新页面再批，不去猜是哪一块。
+
+位置记行号列号，不记第几个字符：fumadocs-mdx 编译前把 frontmatter 换成同样行数的空行，行列和源文件对得上，字符数对不上。
+
+代码块和列表符号写在同一行（`- ```ts`）时插不进标记，接口拒绝并说明，把代码块挪到下一行再批。
+
+### TSX 页面手放标记
+
+TSX 页面要让某一块能单独批，用基础包的 `CommentAnchor` 组件包住它，id 在这一页里不重复：
+
+```tsx
+import { CommentAnchor } from '@godcreator/docsite-kit/ui'
+
+<CommentAnchor id="waveform-chart">
+  <WaveformChart />
+</CommentAnchor>
+```
+
+它只包一个元素，外面这层不占版面。打开「批注」时这一块和 MDX 页面里的块一样能点；评论接口只核对页面源文件里有这个标记，不改 TSX 文件。
+
+## 评论文件
 
 一个评论串一个文件夹，网页上发起的评论文件夹名是「日期-六位随机字母数字」：
 
@@ -74,14 +139,16 @@ import { IndentPreview } from './indent-preview'
 <IndentPreview />
 ```
 
-`index.md`（或 `index.mdx`）是发起的那条，写它批的是哪一页、批的是什么：
+`index.md`（或 `index.mdx`）是发起的那条，写它批的是哪一页、哪一块、块里的哪几个字：
 
 ```mdx title="comments/2026-10-10-heading-levels/index.mdx"
 ---
 author: 小周
 createdAt: 2026-10-10T15:20:00+08:00
 page: /writing
+anchor: heading-levels
 quote: 四级标题用来给一小节里的几段起名字
+quoteIndex: 1
 status: open
 ---
 
@@ -96,58 +163,79 @@ status: open
 | `createdAt` | 什么时候写的，如 `2026-10-10T15:20:00+08:00` |
 | `page` | 被批页面的地址，以 `/` 开头 |
 | `status` | `open` 或 `resolved` |
-| `quote` | 批一段文字：原文，和页面上显示的文字一字不差 |
-| `quotePrefix`、`quoteSuffix` | 原文前后紧挨着的各约 20 个字，原文在页面上出现好几次时靠它们认出是哪一处；网页上选中文字时自动记下 |
-| `block` | 批一整块：`{ kind, heading, index, text }`，见下文 |
+| `anchor` | 被批的块的标记 id；不写就是批整页 |
+| `quote` | 批块里的几个字：和页面上显示的文字一字不差；不写就是批整块 |
+| `quoteIndex` | `quote` 在这一块的文字里第几次出现，从 1 数；网页上选中文字时由选区算出 |
 | `resolvedBy`、`resolvedAt` | 谁、什么时候标的已解决 |
 
-`quote` 与 `block` 只能写一个，都不写就是批整页。同一文件夹里其余的 `.md` / `.mdx` 每个是一条回复，只写 `author` 与 `createdAt`。
+`quote` 要和 `anchor`、`quoteIndex` 一起写。同一文件夹里其余的 `.md` / `.mdx` 每个是一条回复，只写 `author` 与 `createdAt`。
 
-### 整块评论怎么认出是哪一块
+### 找不到了
 
-`block` 的四项：
+不算错，评论照样在右侧栏里，标红写明是哪种情况，不去猜位置：
 
-- `kind`：`image`（图片）、`code`（代码块）、`table`（表格）、`component`（其余的组件，如提示框、TSX 组件）
-- `heading`：这一块前面最近的二到四级标题的 id；页面开头、还没有标题时是空字符串
-- `index`：在这个标题下，同一类块里排第几个，从 1 数
-- `text`：这一块的文字开头（约 40 个字），图片是 alt。用来核对：块挪了位置、对不上时当作原文找不到了
+- **批的那一块找不到了**：页面里已经没有这个标记，多半是那一块整个删了
+- **批的字在这一块里找不到了**：块还在，批的那几个字改掉了，或者出现的次数不到 `quoteIndex`；这串评论退成批整块，在那一块上画框
 
-段落、标题、列表、引用里的字用选中文字来批，不算整块。TSX 页面整个正文是一块组件；HTML 页面的正文在 iframe 里，只能整块或整页批。
+还有一种情况会认错：有人在同一块里、被批的字前面加了一模一样的几个字，`quoteIndex` 就指到新加的那一处。只会错到同一块里，不会挂到别的块上。
 
-### 原文找不到了
-
-原文在页面上改掉了、出现好几次又对不上前后文、整块挪了位置，都不算错：
-评论照样在右侧栏里，标红写着「原文找不到了」和原来批的东西，不去猜位置。
+页面源文件里有标记、却没有评论串用它时，右侧栏顶上标红列出这些标记：多半是删评论串时漏删了，到源文件里删掉。
+TSX 页面手放的标记不算，它本来就是留给人批的位置。
 
 ## 写错了会怎样
 
 开发服务直接报错，写明是哪个文件、哪里不对，一次列出全部：
 
 - 缺字段、字段写错，或者写了表里没有的字段
-- 回复里写了 `page`、`quote` 这类只有发起的那条才有的字段
-- `quote` 和 `block` 都写了
+- 回复里写了 `page`、`anchor` 这类只有发起的那条才有的字段
+- 写了 `quote` 没写 `anchor` 或 `quoteIndex`
 - 文件没放在评论串自己的文件夹里，文件夹里只有回复、没有发起的那条，或者 `index.md` 与 `index.mdx` 都有
 - `page` 写的页面不存在
 
-网页上的操作出错（页面不存在、编辑别人写的评论、文件名不对）时，接口回原话，显示在卡片里。
+页面源文件里的标记写错时，编译那一页就报错，写明文件与行号：
+
+- 标记除了 `id` 还写了别的属性，或者包了内容
+- 同一个 id 在一页里出现两次，或者同一块放了两个标记
+- 写在文字里的标记不在段落或列表项里；单独一行的标记后面紧跟着的不是段落、代码块、表格或组件
+
+网页上的操作出错（页面不存在、页面打开后改过、编辑别人写的评论、文件名不对）时，接口回原话，显示在卡片里。
 
 ## 在骨架里接上
 
-`app/lib/collections.ts` 里列出评论文件，`schema` 用基础包的 `commentFrontmatterSchema`：
+接上评论要改这几处，前两处只能写在项目里：fumadocs-mdx 和 React Router 都要在构建时直接读出它们的参数。
+
+| 文件 | 写什么 |
+| --- | --- |
+| `app/lib/collections.ts` | 列出评论文件，`schema` 用 `commentFrontmatterSchema` |
+| `app/routes.ts` | `route('api/comments', 'routes/comments.ts')` |
+| `vite.config.ts` | `fumadocsMdx()` 的 rehype 插件最前面加上 `rehypeCommentAnchors` |
+| `app/lib/source.ts` | 用 `commentThreadsOf` 把文件分成评论串，`assertCommentPagesExist` 检查批的页面在不在 |
+| `app/routes/comments.ts` | 评论接口：`action` 调用 `commentRequestResponse`，`loader` 调用 `commentSourceResponse` |
+| `app/routes/layout.tsx` | `loader` 返回 `siteCommenter()`，传给 `themeSwitchWithCommenter` 显示在侧栏底部 |
+| `app/routes/page.tsx` | `loader` 返回 `siteCommenter()`；正文外面套 `PageComments` |
 
 ```ts title="app/lib/collections.ts"
 export const comments = defineCollections({ type: 'doc', dir: 'comments', async: true, schema: commentFrontmatterSchema })
 ```
 
-`app/lib/source.ts` 用 `commentThreadsOf` 把文件分成评论串，再用 `assertCommentPagesExist` 检查批的页面在不在。
+`rehypeCommentAnchors` 要排在 fumadocs 自己的 rehype 插件前面：代码块被 fumadocs 换成着色后的节点，原来的位置就没了。
 
-`app/lib/commenter.server.ts` 的 `pageCommenter()` 在开发服务里返回 `currentCommenter()`（本机 git 的 `user.name`），发布出去的站返回 `null`。
-布局路由与内容页路由的 `loader` 都返回它：布局传给 `themeSwitchWithCommenter` 显示在侧栏底部，内容页传给 `PageComments`。
+```ts title="vite.config.ts"
+fumadocsMdx({ globalOptions: { mdxOptions: { rehypePlugins: (plugins) => [rehypeCommentAnchors, ...plugins] } } })
+```
 
-`app/routes/comments.ts` 是评论接口：`action` 调用 `commentRequestResponse` 写文件，`loader` 调用 `commentSourceResponse` 取原文给编辑用。
-接口只改 `comments/` 里的文件，不碰 git。
+`siteCommenter()` 在开发服务里返回本机 git 的 `user.name`，发布出去的站返回 `null`。
 
-`app/routes/page.tsx` 按页面地址取出这一页的评论串，正文外面套 `PageComments`；正文的容器要带上 `commentScopeProps`，评论在它里面找原文：
+评论接口要知道每一页的源文件，批块时往里插标记：`commentablePagesOf(source.getPages())` 把页面换成地址加源文件，
+MDX 页面的源文件在内容目录里，TSX 页面取 glob 给的文件，HTML 页面没有。接口只改 `comments/` 和页面源文件，不碰 git。
+
+```ts title="app/routes/comments.ts"
+export async function action({ request }: Route.ActionArgs) {
+  return commentRequestResponse(request, { commenter: await siteCommenter(), pages: commentablePagesOf(source.getPages()) })
+}
+```
+
+`app/routes/page.tsx` 用 `commentThreadsByPage` 按页面地址取出这一页的评论串，正文外面套 `PageComments`；正文的容器要带上 `commentScopeProps`，评论在它里面找被批的块：
 
 ```tsx title="app/routes/page.tsx"
 <DocsPage toc={toc}>
