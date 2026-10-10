@@ -1,0 +1,31 @@
+---
+born-at: 2026-10-11T02:50
+type: finding
+parent: [2026-10-10-docsite-kit]
+label: 装进 node_modules 的站点只能用基础包的构建产物，功能包也要经 Vite 处理
+domain: 骨架
+---
+
+## 背景
+
+协作站迁到基础包上，第一次在一个从源上装包的站点（SST 协作仓的迁移试验，包是本机打的 tgz）里启动开发服务。
+基础包自己的站在 workspace 里一直正常，装进 `node_modules` 后接连出了三个错。
+
+## 结论
+
+- `react-router dev` 总是以 `--conditions=development` 重新启动 Node。出口按 `development` 指向 `src/` 的 `.ts`，
+  Node 加载 `app/lib/collections.ts` 里引用的基础包时报「不能剥离 node_modules 里文件的类型」。
+  workspace 里没出错，是因为链接过去的真实路径不在 `node_modules` 下。出口去掉 `development`，站点一律用 `dist/`
+- 功能包（`@godcreator/collab-site`）不在 `ssr.noExternal` 里时由 Node 直接加载，它再引用的基础包也绕过 Vite，
+  `import.meta.env.DEV` 是 undefined。`docsite()` 加参数 `featurePackages`，和基础包一样经 Vite 处理
+- 不预打包的包，它们依赖的 CommonJS 库（`diff-match-patch`）被原样送进浏览器，报「没有 default 导出」，页面不能交互。
+  插件读这些包的 `dependencies`，写成 `包 > 依赖` 交给 `optimizeDeps.include`；没有根出口的依赖跳过
+
+## 否掉的候选
+
+- 换一个自定义条件名代替 `development`：自述站要在 Vite 与 tsconfig 里各配一遍，只为省一次构建
+- 把 `@types/diff-match-patch` 挪进依赖：只解决了类型检查，Node 加载 `.ts` 的错还在
+
+## 代价
+
+改了基础包要先构建、再重启自述站的开发服务，不能改了源码马上看到。

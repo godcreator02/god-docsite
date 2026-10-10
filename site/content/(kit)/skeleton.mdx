@@ -31,12 +31,9 @@ icon: FolderTree
 | `comments/` | 评论放在这里，一个评论串一个文件夹，见[评论](/commenting) |
 | `people.json` | 这个站的人员列表：评论署名用的 `id`、显示的名字、各人的身份码，agent 也在里面，见[评论](/commenting#谁在写评论) |
 
-## 用基础包源码还是构建产物
+## 站点用的是基础包的构建产物
 
-包的 `./page-sources`、`./server`、`./ui` 在 `package.json` 的 `exports` 里多写了一项 `development`，指向 `src/` 下的源码。
-开发服务按 `development` 找，用的是源码；`pnpm build` 按默认找，用的是 `dist/`。
-站点的 `tsconfig.json` 里写了 `customConditions: ["development"]`，类型检查也看源码。
-
-`./vite` 只有构建产物：`vite.config.ts` 由 Node 直接加载，Node 不认 `development`。
-改了开发服务插件，要先在包里运行 `pnpm build` 再重启开发服务。
-评论文件的 schema（`./comments` 的 `commentFrontmatterSchema`）也一样：`app/lib/collections.ts` 由 fumadocs-mdx 在 Node 里加载，读的是 `dist/`。
+`exports` 里每个出口都只指向 `dist/`，开发服务、类型检查与 `pnpm build` 都用它。
+`react-router dev` 总是以 `--conditions=development` 重新启动 Node，出口若按 `development` 指向 `src/` 下的 `.ts`，
+装在 `node_modules` 里的站点一启动就报「不能剥离 node_modules 里文件的类型」，所以不设这个条件。
+在这个仓里改了基础包，先在包里运行 `pnpm build`，再重启自述站的开发服务。

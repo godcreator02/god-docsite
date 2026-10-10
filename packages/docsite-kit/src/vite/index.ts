@@ -1,3 +1,4 @@
+import { existsSync, readFileSync, realpathSync } from 'node:fs'
 import type { IncomingMessage, ServerResponse } from 'node:http'
 import path from 'node:path'
 import { isRunnableDevEnvironment, normalizePath, type Plugin, type PluginOption, type ViteDevServer } from 'vite'
@@ -10,15 +11,56 @@ const ownPackageName = '@godcreator/docsite-kit'
 
 /**
  * 基础包要和站点自己的代码一样经 Vite 处理：fumadocs 由 Vite 处理，基础包若交给 Node 直接加载（服务端）或单独预打包（浏览器端），
- * 它引用的 fumadocs 就是另一份，React 上下文对不上（报 You need to wrap your application inside `FrameworkProvider`）
+ * 它引用的 fumadocs 就是另一份，React 上下文对不上（报 You need to wrap your application inside `FrameworkProvider`）；
+ * 服务端函数也读不到 import.meta.env。接在基础包上的功能包引用基础包，同样要经 Vite 处理
  */
-function processedWithSite(): Plugin {
+function processedWithSite(featurePackages: readonly string[]): Plugin {
+  const packages = [ownPackageName, ...featurePackages]
   return {
     name: 'docsite-kit:processed-with-site',
-    config() {
-      return { ssr: { noExternal: [ownPackageName] }, optimizeDeps: { exclude: [ownPackageName] } }
+    config(config) {
+      const root = path.resolve(config.root ?? process.cwd())
+      return { ssr: { noExternal: packages }, optimizeDeps: { exclude: packages, include: nestedDependenciesOf(root, packages) } }
     },
   }
+}
+
+/**
+ * 不预打包的包，它们自己依赖的库照样要预打包：里面有 CommonJS 的（diff-match-patch、react-markdown 底下的几个），
+ * 原样送进浏览器读不出 default；站点根目录下也解析不到它们（pnpm 不把间接依赖放到顶层），要写成「包 > 依赖」
+ */
+function nestedDependenciesOf(root: string, packages: readonly string[]): string[] {
+  return packages.flatMap((name) => {
+    const manifestFile = manifestFileOf(root, name)
+    if (manifestFile === null) throw new Error(`站点的 node_modules 里没有 ${name}：在站点目录运行 pnpm install`)
+    const { dependencies = {} } = readManifest(manifestFile)
+    return Object.keys(dependencies)
+      .filter((dependency) => !packages.includes(dependency) && hasRootEntry(path.dirname(realpathSync(manifestFile)), dependency))
+      .map((dependency) => `${name} > ${dependency}`)
+  })
+}
+
+type Manifest = { dependencies?: Record<string, string>; exports?: unknown }
+
+const readManifest = (file: string) => JSON.parse(readFileSync(file, 'utf8')) as Manifest
+
+/** 照 Node 的找法，从 fromDir 往上找 node_modules/<name>/package.json；找不到为 null */
+function manifestFileOf(fromDir: string, name: string): string | null {
+  for (let dir = fromDir; ; dir = path.dirname(dir)) {
+    const candidate = path.join(dir, 'node_modules', name, 'package.json')
+    if (existsSync(candidate)) return candidate
+    if (path.dirname(dir) === dir) return null
+  }
+}
+
+/** 依赖有没有根出口：只有子路径出口的包（如 @godcreator/collab-model）没法整个预打包，它的子路径由 Vite 按用到的去找 */
+function hasRootEntry(fromDir: string, name: string): boolean {
+  const manifestFile = manifestFileOf(fromDir, name)
+  if (manifestFile === null) throw new Error(`${fromDir} 往上找不到依赖 ${name}：在站点目录运行 pnpm install`)
+  const { exports } = readManifest(manifestFile)
+  if (exports === undefined || typeof exports === 'string' || Array.isArray(exports)) return true
+  const keys = Object.keys(exports as object)
+  return !keys.some((key) => key.startsWith('.')) || keys.includes('.')
 }
 
 /** 放页面与评论的目录、列出它们的模块，都相对站点根；项目骨架就是这样摆的 */
@@ -138,7 +180,12 @@ function siteFeeds(): Plugin {
   }
 }
 
+export type DocsiteOptions = {
+  /** 接在基础包上的功能包（如协作站的 @godcreator/collab-site）：它们引用基础包，要和基础包一样经 Vite 处理 */
+  featurePackages?: readonly string[]
+}
+
 /** 项目的 vite.config.ts 里写 plugins: [docsite(), fumadocsMdx(), tailwindcss(), reactRouter()] */
-export function docsite(): PluginOption[] {
-  return [processedWithSite(), pageListRefresh(), siteFeeds()]
+export function docsite({ featurePackages = [] }: DocsiteOptions = {}): PluginOption[] {
+  return [processedWithSite(featurePackages), pageListRefresh(), siteFeeds()]
 }

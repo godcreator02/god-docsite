@@ -3,7 +3,6 @@
     "target": "esnext",
     "module": "esnext",
     "moduleResolution": "bundler",
-    "customConditions": ["development"],
     "jsx": "react-jsx",
     "strict": true,
     "skipLibCheck": true,

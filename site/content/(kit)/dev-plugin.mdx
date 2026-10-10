@@ -13,7 +13,17 @@ icon: Plug
 浏览器端不单独预打包（`optimizeDeps.exclude`）。
 
 不这样做，基础包引用的 fumadocs 和站点引用的就是两份，React 上下文对不上，
-页面报 `You need to wrap your application inside FrameworkProvider`。
+页面报 `You need to wrap your application inside FrameworkProvider`；服务端函数里的 `import.meta.env` 也读不到。
+
+接在基础包上的功能包（比如协作站的 `@godcreator/collab-site`）引用基础包，同样要这样处理，写进参数：
+
+```ts
+docsite({ featurePackages: ['@godcreator/collab-site'] })
+```
+
+这些包自己依赖的库照样预打包，插件读它们 `package.json` 的 `dependencies`，写成 `包 > 依赖` 交给 Vite：
+里面有 CommonJS 的库（基础包的 `diff-match-patch`），原样送进浏览器会报「没有 default 导出」。
+只有子路径出口、没有根出口的依赖（如 `@godcreator/collab-model`）跳过，用到哪个子路径 Vite 就处理哪个。
 
 ## 增删页面后刷新页面清单
 

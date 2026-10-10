@@ -18,11 +18,9 @@
 
 ## 怎么跑
 
-* `pnpm install` 之后，`pnpm --filter @godcreator/docsite-kit build` 构建一次基础包：`vite.config.ts` 与评论文件的 schema
-  由 Node 直接加载，只认构建产物
+* `pnpm install` 之后，`pnpm --filter @godcreator/docsite-kit build` 构建一次基础包：站点只用基础包的构建产物
 * `pnpm dev` 启动自述站的开发服务（`http://127.0.0.1:4430`）；要写评论，开发服务的环境变量 `DOCSITE_IDENTITY_CODE` 要是 `site/people.json` 里某人的码
-  （经 gwb-docsite 启动时它自己给），不然站点只读。开发服务直接用基础包 `src/` 下的源码，
-  改了包里的组件页面马上变；改了 `src/vite/` 或评论文件的 schema（`src/comments.ts`、`src/people.ts`）要重新构建基础包、重启开发服务
+  （经 gwb-docsite 启动时它自己给），不然站点只读。改了基础包要重新构建它、再重启开发服务
 * 日常只用开发服务，不为了看效果运行 build；build 只在发布前做
 * 插件 `plugins/docsite` 打包时带进基础包的构建产物：改了基础包要先构建基础包；在隔离 home 里验插件用 `devkit.dev`（说明书 gwb-devkit）
 * 改完一批：基础包里 `pnpm check`（类型检查加测试），插件里 `pnpm check`，站点里 `pnpm check`（类型检查）；整批做完在仓根 `pnpm check`
