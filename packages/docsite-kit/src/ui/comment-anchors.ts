@@ -228,13 +228,35 @@ export type ThreadPlace =
   | { type: 'collapsed'; opener: HTMLElement | undefined }
   | { type: 'missing' }
 
+function longestCommonRunLength(a: string, b: string) {
+  let longest = 0
+  for (let i = 0; i < a.length; i++) {
+    for (let j = 0; j < b.length; j++) {
+      let length = 0
+      while (i + length < a.length && j + length < b.length && a[i + length] === b[j + length]) length++
+      longest = Math.max(longest, length)
+    }
+  }
+  return longest
+}
+
+/** 两个按钮上的字算同一个按钮：最长的相同一段至少占短的那个一半（「site」与「my-site」算，「content」与「pnpm」不算） */
+function isSameOpenerText(recorded: string, current: string) {
+  const shorter = Math.min(recorded.length, current.length)
+  return shorter > 0 && longestCommonRunLength(recorded, current) * 2 >= shorter
+}
+
 /**
- * 记下的按钮现在在哪：按钮上的字常随开合变（展开箭头 ▸ 变 ▾），不要求首尾都对得上，按钮里有一个字没改过就找得到它
+ * 记下的按钮现在在哪：按钮上的字常随开合变（展开箭头 ▸ 变 ▾）、会被改名，不要求首尾都对得上，按钮里有一个字没改过就按它找；
+ * 单个字可能碰巧对到别处的同一个字上，所以找到的按钮上的字还要和当时的大半相同
  */
 function openerFromRecorded(scope: Element, pageText: PageText, recorded: CommentRange, snapshot: string, mapRange: RangeMapper) {
+  const recordedText = readableText(snapshot.slice(...recorded))
   for (let at = recorded[0]; at < recorded[1]; at++) {
     const mapped = mapRange(snapshot, pageText.text, [at, at + 1])
-    if (mapped && !mapped.changed) return openerAt(scope, pageText, mapped.start, mapped.end)
+    if (!mapped || mapped.changed) continue
+    const opener = openerAt(scope, pageText, mapped.start, mapped.end)
+    if (opener && isSameOpenerText(recordedText, openerLabelOf(opener))) return opener
   }
   return undefined
 }
