@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState, type ComponentProps, type ReactNode } from 'react'
+import { createPortal } from 'react-dom'
 import { ThemeSwitch } from '@fumadocs/base-ui/layouts/shared/slots/theme-switch'
 import type { CommentBlockAnchor, CommentEntry, Commenter, CommentThread } from '../comments.js'
-import { anchorLabelOf, blockContaining, blocksOf, placeOfThread, quoteAnchorOfRange, type PageBlock, type ThreadPlace } from './comment-anchors.js'
+import { anchorLabelOf, blockContaining, blocksOf, commentUiAttribute, placeOfThread, quoteAnchorOfRange, type PageBlock, type ThreadPlace } from './comment-anchors.js'
 import { CommentEditor, CommenterChip, CommentItem, postComment, recentThreadToOpen, rememberThreadToOpen, ThreadView, type CommentApi } from './comment-cards.js'
 
 /** 页面正文的容器带上这个属性，评论在它里面找被批的原文：<DocsBody {...commentScopeProps}> */
@@ -15,19 +16,61 @@ const activeQuoteHighlight = 'docsite-comment-active'
 const commentedBlockAttribute = 'data-commented-block'
 
 const cardWidth = 360
-const badgeHeight = 24
 
 type NewAnchor = { quote: string; quotePrefix: string; quoteSuffix: string } | { block: CommentBlockAnchor } | Record<string, never>
 
 /** 正文上评论的几样东西在评论层里的位置（相对评论层左上角） */
 type Placement = {
-  /** 没被解决、找得到原文的评论串：右侧评论数按钮的高度，卡片弹出的位置 */
-  anchored: Map<string, { badgeTop: number; cardTop: number; cardLeft: number }>
+  /** 显示在正文上的评论串（没解决的，加上正打开的那串）：卡片弹出的位置 */
+  anchored: Map<string, { cardTop: number; cardLeft: number }>
+  /** 评论数按钮插进了原文末尾的文字评论串 */
+  inline: string[]
+  /** 整块评论串：评论数按钮在那一块右上角，left 是按钮右边缘 */
+  blockBadges: Map<string, { top: number; right: number }>
   /** 原文找不到了的评论串 */
   missing: Set<string>
 }
 
-type PendingAction = { top: number; anchor: NewAnchor; label: string; cardTop: number; cardLeft: number }
+const emptyPlacement: Placement = { anchored: new Map(), inline: [], blockBadges: new Map(), missing: new Set() }
+
+/**
+ * 发起评论前的按钮与草稿卡片的位置：选中文字时按钮在选区上方（top），整块评论的按钮在那一块右上角（top、right，
+ * 那一块已有评论数按钮时排在它下面）；草稿卡片在原文下方（cardTop、cardLeft）
+ */
+type PendingAction = { top: number; right?: number; anchor: NewAnchor; label: string; cardTop: number; cardLeft: number }
+
+/** 插进正文的评论数按钮的外壳；插的时候要是切开了文字节点，记下切开的两半，撤掉时拼回去 */
+type InsertedBadge = { host: HTMLElement; split?: { first: Text; second: Text } }
+
+function insertAtRangeEnd(host: HTMLElement, range: Range): InsertedBadge {
+  const { endContainer, endOffset } = range
+  if (endContainer.nodeType === Node.TEXT_NODE) {
+    const text = endContainer as Text
+    if (endOffset < text.length) {
+      const second = text.splitText(endOffset)
+      text.after(host)
+      return { host, split: { first: text, second } }
+    }
+    text.after(host)
+    return { host }
+  }
+  endContainer.insertBefore(host, endContainer.childNodes[endOffset] ?? null)
+  return { host }
+}
+
+/**
+ * 撤掉插进正文的按钮，切开的文字节点原样拼回去：拼回到原来那个节点（React 记着的就是它），后插的先撤
+ */
+function removeInsertedBadges(inserted: InsertedBadge[]) {
+  for (const { host, split } of inserted.reverse()) {
+    host.remove()
+    if (split && split.second.parentNode) {
+      split.first.data += split.second.data
+      split.second.remove()
+    }
+  }
+  inserted.length = 0
+}
 
 export type PageCommentsProps<Entry extends CommentEntry> = {
   /** 这一页的地址 */
@@ -68,13 +111,35 @@ function containsPoint(rect: DOMRect, x: number, y: number) {
 }
 
 function samePlacement(a: Placement, b: Placement) {
-  if (a.anchored.size !== b.anchored.size || a.missing.size !== b.missing.size) return false
+  if (a.anchored.size !== b.anchored.size || a.blockBadges.size !== b.blockBadges.size || a.missing.size !== b.missing.size) return false
+  if (a.inline.join() !== b.inline.join()) return false
   for (const [id, spot] of a.anchored) {
     const other = b.anchored.get(id)
-    if (!other || other.badgeTop !== spot.badgeTop || other.cardTop !== spot.cardTop || other.cardLeft !== spot.cardLeft) return false
+    if (!other || other.cardTop !== spot.cardTop || other.cardLeft !== spot.cardLeft) return false
+  }
+  for (const [id, spot] of a.blockBadges) {
+    const other = b.blockBadges.get(id)
+    if (!other || other.top !== spot.top || other.right !== spot.right) return false
   }
   for (const id of a.missing) if (!b.missing.has(id)) return false
   return true
+}
+
+const badgeClassName = 'inline-flex select-none items-center gap-0.5 rounded-full border px-1.5 align-middle text-xs leading-5 font-normal not-italic transition-colors'
+
+function CountBadge({ count, active, label, onClick, className = '' }: { count: number; active: boolean; label: string; onClick: () => void; className?: string }) {
+  return (
+    <button
+      type="button"
+      data-comment-ui=""
+      aria-label={`打开评论：${label}`}
+      onClick={onClick}
+      className={`${badgeClassName} ${active ? 'border-fd-primary bg-fd-primary text-fd-primary-foreground' : 'bg-fd-card text-fd-muted-foreground hover:text-fd-foreground'} ${className}`}
+    >
+      <MessageIcon />
+      {count}
+    </button>
+  )
 }
 
 function MessageIcon() {
@@ -86,23 +151,37 @@ function MessageIcon() {
 }
 
 /**
- * 页面上的评论（照 Notion）：被批的文字标黄、被批的整块画框，正文右侧对应的高度上有评论数按钮，点按钮或点标黄的文字弹出这串评论。
- * 能写评论时（开发服务里），选中正文里的文字浮出「评论」按钮；鼠标移到图片、代码块、表格、组件上，右侧出现「评论这一块」按钮。
- * 右下角的「评论」按钮打开这一页全部评论的列表，分未解决、已解决，也能评论整页
+ * 页面上的评论（照 Notion）：被批的文字标黄，原文末尾插着评论数按钮；被批的整块画框，评论数按钮在那一块右上角。点按钮或点标黄的文字弹出这串评论。
+ * 能写评论时（开发服务里），选中正文里的文字浮出「评论」按钮；鼠标移到图片、代码块、表格、组件上，那一块右上角出现「评论这一块」按钮。
+ * 右下角的「评论」按钮打开右侧栏，列出这一页全部评论，分未解决、已解决，也能评论整页
  */
 export function PageComments<Entry extends CommentEntry>({ page, threads, commenter, renderBody, apiUrl = '/api/comments', children }: PageCommentsProps<Entry>) {
   const api: CommentApi = { url: apiUrl }
   const layerRef = useRef<HTMLDivElement>(null)
   const blocksRef = useRef<PageBlock[]>([])
+  /** 插进正文的评论数按钮的外壳，每串一个、一直用同一个元素，React 经 portal 往里渲染按钮 */
+  const inlineHostsRef = useRef(new Map<string, HTMLElement>())
   const [openId, setOpenId] = useState<string>()
-  const [placement, setPlacement] = useState<Placement>({ anchored: new Map(), missing: new Set() })
+  const [placement, setPlacement] = useState<Placement>(emptyPlacement)
   const [selectionAction, setSelectionAction] = useState<PendingAction>()
   const [blockAction, setBlockAction] = useState<PendingAction>()
   const [draft, setDraft] = useState<PendingAction>()
   const [panelOpen, setPanelOpen] = useState(false)
   const [panelThreadId, setPanelThreadId] = useState<string>()
   const writable = commenter !== null
-  const showGutter = writable || threads.length > 0
+  const hasCommentUi = writable || threads.length > 0
+
+  const inlineHostOf = (id: string) => {
+    let host = inlineHostsRef.current.get(id)
+    if (!host) {
+      host = document.createElement('span')
+      host.setAttribute(commentUiAttribute, '')
+      host.contentEditable = 'false'
+      host.className = 'ms-1'
+      inlineHostsRef.current.set(id, host)
+    }
+    return host
+  }
 
   // 发评论后开发服务整页刷新，刷新后重新打开刚才那串
   useEffect(() => {
@@ -120,8 +199,11 @@ export function PageComments<Entry extends CommentEntry>({ page, threads, commen
     const layer = layerRef.current!
     const scope = scopeOf()
     const placeOf = new Map<string, ThreadPlace>()
+    const inserted: InsertedBadge[] = []
     let frame = 0
     const measure = () => {
+      // 先撤掉上次插的按钮，在原样的正文上找原文，再插回去
+      removeInsertedBadges(inserted)
       const blocks = blocksOf(scope)
       blocksRef.current = blocks
       for (const element of scope.querySelectorAll(`[${commentedBlockAttribute}]`)) element.removeAttribute(commentedBlockAttribute)
@@ -136,23 +218,29 @@ export function PageComments<Entry extends CommentEntry>({ page, threads, commen
       const activePlace = openId === undefined ? undefined : placeOf.get(openId)
       paintHighlights(openRanges, activePlace?.type === 'text' ? activePlace.range : undefined)
 
-      const layerRect = layer.getBoundingClientRect()
-      const anchored = new Map<string, { badgeTop: number; cardTop: number; cardLeft: number }>()
-      const missing = new Set<string>()
-      const spots = threads
-        .map((thread) => ({ thread, rects: rectOfPlace(placeOf.get(thread.id)!) }))
-        .filter((spot) => {
-          if (placeOf.get(spot.thread.id)!.type === 'missing') missing.add(spot.thread.id)
-          return spot.rects !== undefined && (spot.thread.head.status === 'open' || spot.thread.id === openId)
-        })
-        .sort((a, b) => a.rects!.first.top - b.rects!.first.top)
-      let lastBadgeBottom = -Infinity
-      for (const { thread, rects } of spots) {
-        const badgeTop = Math.max(rects!.first.top - layerRect.top, lastBadgeBottom + 4)
-        lastBadgeBottom = badgeTop + badgeHeight
-        anchored.set(thread.id, { badgeTop, cardTop: rects!.whole.bottom - layerRect.top + 8, cardLeft: clampCardLeft(rects!.whole.left - layerRect.left, layerRect.width) })
+      const missing = new Set(threads.filter((thread) => placeOf.get(thread.id)!.type === 'missing').map((thread) => thread.id))
+      const shown = threads.filter((thread) => {
+        const type = placeOf.get(thread.id)!.type
+        return (type === 'text' || type === 'block') && (thread.head.status === 'open' || thread.id === openId)
+      })
+      const inline: string[] = []
+      for (const thread of shown) {
+        const place = placeOf.get(thread.id)!
+        if (place.type !== 'text') continue
+        inserted.push(insertAtRangeEnd(inlineHostOf(thread.id), place.range))
+        inline.push(thread.id)
       }
-      const next = { anchored, missing }
+
+      // 插完按钮再量位置：按钮占了地方，后面的文字可能挪了
+      const layerRect = layer.getBoundingClientRect()
+      const anchored = new Map<string, { cardTop: number; cardLeft: number }>()
+      const blockBadges = new Map<string, { top: number; right: number }>()
+      for (const thread of shown) {
+        const rects = rectOfPlace(placeOf.get(thread.id)!)!
+        anchored.set(thread.id, { cardTop: rects.whole.bottom - layerRect.top + 8, cardLeft: clampCardLeft(rects.whole.left - layerRect.left, layerRect.width) })
+        if (placeOf.get(thread.id)!.type === 'block') blockBadges.set(thread.id, { top: rects.whole.top - layerRect.top + 6, right: rects.whole.right - layerRect.left - 6 })
+      }
+      const next: Placement = { anchored, inline, blockBadges, missing }
       setPlacement((current) => (samePlacement(current, next) ? current : next))
     }
     const measureNextFrame = () => {
@@ -182,6 +270,7 @@ export function PageComments<Entry extends CommentEntry>({ page, threads, commen
       CSS.highlights.delete(quoteHighlight)
       CSS.highlights.delete(activeQuoteHighlight)
       for (const element of scope.querySelectorAll(`[${commentedBlockAttribute}]`)) element.removeAttribute(commentedBlockAttribute)
+      removeInsertedBadges(inserted)
     }
   }, [threads, openId])
 
@@ -218,21 +307,22 @@ export function PageComments<Entry extends CommentEntry>({ page, threads, commen
     }
   }, [writable])
 
-  // 鼠标移到图片、代码块、表格、组件上：右侧出现「评论这一块」
+  // 鼠标移到图片、代码块、表格、组件上：那一块右上角出现「评论这一块」
   const showBlockAction = (target: EventTarget | null) => {
     if (!writable || !(target instanceof Node)) return
-    if (target instanceof Element && target.closest('[data-comment-ui]')) return
+    if (target instanceof Element && target.closest(`[${commentUiAttribute}]`)) return
     const block = blockContaining(blocksRef.current, target)
     if (!block) return setBlockAction(undefined)
     const layerRect = layerRef.current!.getBoundingClientRect()
     const rect = block.element.getBoundingClientRect()
-    // 和已有的评论数按钮错开，排在它们下面
-    const badgeTops = [...placement.anchored.values()].map((spot) => spot.badgeTop)
-    let top = rect.top - layerRect.top
-    while (badgeTops.some((badgeTop) => Math.abs(badgeTop - top) < badgeHeight + 4)) top += badgeHeight + 4
-    if (blockAction && blockAction.top === top) return
+    const right = rect.right - layerRect.left - 6
+    // 这一块已有评论数按钮时排在它下面
+    const hasBadge = [...placement.blockBadges.values()].some((badge) => badge.right === right && badge.top === rect.top - layerRect.top + 6)
+    const top = rect.top - layerRect.top + 6 + (hasBadge ? 26 : 0)
+    if (blockAction && blockAction.top === top && blockAction.right === right) return
     setBlockAction({
       top,
+      right,
       anchor: { block: block.anchor },
       label: anchorLabelOf({ block: block.anchor }),
       cardTop: rect.bottom - layerRect.top + 8,
@@ -244,7 +334,7 @@ export function PageComments<Entry extends CommentEntry>({ page, threads, commen
   useEffect(() => {
     if (openId === undefined) return
     const closeOnOutsideClick = (event: MouseEvent) => {
-      if (event.target instanceof Element && event.target.closest('[data-comment-ui]')) return
+      if (event.target instanceof Element && event.target.closest(`[${commentUiAttribute}]`)) return
       setOpenId(undefined)
     }
     document.addEventListener('mousedown', closeOnOutsideClick)
@@ -268,23 +358,22 @@ export function PageComments<Entry extends CommentEntry>({ page, threads, commen
   const openSpot = openId === undefined ? undefined : placement.anchored.get(openId)
 
   return (
-    <div ref={layerRef} className={`relative ${showGutter ? 'pe-10' : ''}`} onMouseMove={(event) => showBlockAction(event.target)} onMouseLeave={() => setBlockAction(undefined)}>
+    <div ref={layerRef} className="relative" onMouseMove={(event) => showBlockAction(event.target)} onMouseLeave={() => setBlockAction(undefined)}>
       {children}
-      {[...placement.anchored].map(([id, spot]) => {
+      {placement.inline.map((id) => {
+        const thread = threads.find((candidate) => candidate.id === id)!
+        return createPortal(
+          <CountBadge count={1 + thread.replies.length} active={id === openId} label={anchorLabelOf(thread.head)} onClick={() => setOpenId(id === openId ? undefined : id)} />,
+          inlineHostOf(id),
+          id,
+        )
+      })}
+      {[...placement.blockBadges].map(([id, badge]) => {
         const thread = threads.find((candidate) => candidate.id === id)!
         return (
-          <button
-            key={id}
-            type="button"
-            data-comment-ui=""
-            aria-label={`打开评论：${anchorLabelOf(thread.head)}`}
-            onClick={() => setOpenId(id === openId ? undefined : id)}
-            className={`absolute end-0 flex h-6 items-center gap-1 rounded-full border px-1.5 text-xs transition-colors ${id === openId ? 'border-fd-primary bg-fd-primary text-fd-primary-foreground' : 'bg-fd-card text-fd-muted-foreground hover:text-fd-foreground'}`}
-            style={{ top: spot.badgeTop }}
-          >
-            <MessageIcon />
-            {1 + thread.replies.length}
-          </button>
+          <span key={id} data-comment-ui="" className="absolute z-10 -translate-x-full" style={{ top: badge.top, left: badge.right }}>
+            <CountBadge count={1 + thread.replies.length} active={id === openId} label={anchorLabelOf(thread.head)} onClick={() => setOpenId(id === openId ? undefined : id)} className="shadow-sm" />
+          </span>
         )
       })}
       {blockAction && !draft && (
@@ -294,8 +383,8 @@ export function PageComments<Entry extends CommentEntry>({ page, threads, commen
           aria-label="评论这一块"
           title={`评论这一块：${blockAction.label}`}
           onClick={() => startDraft(blockAction)}
-          className="absolute end-0 flex h-6 items-center gap-0.5 rounded-full border bg-fd-card px-1.5 text-xs text-fd-muted-foreground hover:text-fd-foreground"
-          style={{ top: blockAction.top }}
+          className={`${badgeClassName} absolute z-10 -translate-x-full bg-fd-card text-fd-muted-foreground shadow-sm hover:text-fd-foreground`}
+          style={{ top: blockAction.top, left: blockAction.right }}
         >
           <MessageIcon />+
         </button>
@@ -324,7 +413,7 @@ export function PageComments<Entry extends CommentEntry>({ page, threads, commen
           <ThreadView key={openThread.id} thread={openThread} renderBody={renderBody} commenter={commenter} api={api} onClose={() => setOpenId(undefined)} />
         </div>
       )}
-      {showGutter && (
+      {hasCommentUi && (
         <CommentsPanel
           threads={threads}
           placement={placement}
@@ -341,7 +430,7 @@ export function PageComments<Entry extends CommentEntry>({ page, threads, commen
             if (!window.matchMedia('(width >= 80rem)').matches) setPanelOpen(false)
             setOpenId(id)
             const spot = placement.anchored.get(id)
-            if (spot) window.scrollTo({ top: layerRef.current!.getBoundingClientRect().top + window.scrollY + spot.badgeTop - window.innerHeight / 3, behavior: 'smooth' })
+            if (spot) window.scrollTo({ top: layerRef.current!.getBoundingClientRect().top + window.scrollY + spot.cardTop - window.innerHeight / 3, behavior: 'smooth' })
           }}
         />
       )}

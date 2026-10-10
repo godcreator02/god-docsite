@@ -17,9 +17,20 @@
   --docsite-comments-sidebar-width: 400px;
 }
 
+/* 右侧栏打开时本页目录收起：右边那一列不占地方，目录改用正文上方的下拉条（fumadocs 窄屏时的样子） */
 @media (width >= 80rem) {
   html[data-comments-sidebar-open] #nd-docs-layout {
     margin-inline-end: var(--docsite-comments-sidebar-width);
+    --fd-toc-width: 0px !important;
+    --fd-toc-popover-height: 2.5rem !important;
+  }
+
+  html[data-comments-sidebar-open] #nd-toc {
+    display: none;
+  }
+
+  html[data-comments-sidebar-open] [data-toc-popover] {
+    display: block;
   }
 }
 

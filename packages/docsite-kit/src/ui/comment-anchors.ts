@@ -1,10 +1,32 @@
 import { locateQuote, quoteContextLength, type CommentBlockAnchor, type CommentBlockKind, type CommentThreadFrontmatter } from '../comments.js'
 
+/** 评论自己放进页面的东西（插进正文的评论数按钮等）都带这个属性；找原文、取文字时跳过它们 */
+export const commentUiAttribute = 'data-comment-ui'
+
+function isInsideCommentUi(node: Node) {
+  return node.parentElement?.closest(`[${commentUiAttribute}]`) != null
+}
+
+/** 正文里的文字节点，跳过评论自己的按钮 */
+function textWalkerOf(root: Node) {
+  return root.ownerDocument!.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
+    acceptNode: (node) => (isInsideCommentUi(node) ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT),
+  })
+}
+
+/** 元素里的文字，不算评论自己的按钮 */
+function visibleTextOf(element: Node) {
+  const walker = textWalkerOf(element)
+  let text = ''
+  for (let node = walker.nextNode(); node; node = walker.nextNode()) text += (node as Text).data
+  return text
+}
+
 /** 正文的全部文字，以及每个文字节点从第几个字开始：文字位置与 DOM 位置互相换算 */
 type TextIndex = { text: string; textNodes: Text[]; startOffsets: number[] }
 
 function indexText(scope: Node): TextIndex {
-  const walker = scope.ownerDocument!.createTreeWalker(scope, NodeFilter.SHOW_TEXT)
+  const walker = textWalkerOf(scope)
   const textNodes: Text[] = []
   const startOffsets: number[] = []
   let text = ''
@@ -37,14 +59,25 @@ export function rangeOfQuote(scope: Node, quote: string, prefix?: string, suffix
   return start === undefined ? undefined : rangeOfOffsets(index, start, start + quote.length)
 }
 
-/** 选中的一段文字换成文字评论的 anchor：原文与前后各几个字 */
+/** 正文里某个位置前面有几个字（不算评论自己的按钮） */
+function textOffsetOf({ textNodes, startOffsets }: TextIndex, container: Node, offset: number) {
+  const before = container.ownerDocument!.createRange()
+  before.setStart(textNodes[0] ?? container, 0)
+  before.setEnd(container, offset)
+  let count = 0
+  textNodes.forEach((node, index) => {
+    if (!before.intersectsNode(node)) return
+    count = startOffsets[index]! + (node === before.endContainer ? before.endOffset : node.length)
+  })
+  return count
+}
+
+/** 选中的一段文字换成文字评论的 anchor：原文（不含评论按钮里的字）与前后各几个字 */
 export function quoteAnchorOfRange(scope: Node, range: Range) {
-  const before = scope.ownerDocument!.createRange()
-  before.setStart(scope, 0)
-  before.setEnd(range.startContainer, range.startOffset)
-  const start = before.toString().length
-  const quote = range.toString()
-  const { text } = indexText(scope)
+  const index = indexText(scope)
+  const { text } = index
+  const start = textOffsetOf(index, range.startContainer, range.startOffset)
+  const quote = text.slice(start, textOffsetOf(index, range.endContainer, range.endOffset))
   return {
     quote,
     quotePrefix: text.slice(Math.max(0, start - quoteContextLength), start),
@@ -56,8 +89,8 @@ const textBlockTags = new Set(['H1', 'H2', 'H3', 'H4', 'H5', 'H6', 'UL', 'OL', '
 
 /** 正文里一个顶层元素算哪类块；段落、标题、列表、引用这些是文字，用选中文字来批，返回 undefined */
 function blockKindOf(element: Element): CommentBlockKind | undefined {
-  if (textBlockTags.has(element.tagName)) return undefined
-  const hasText = (element.textContent ?? '').trim() !== ''
+  if (textBlockTags.has(element.tagName) || element.hasAttribute(commentUiAttribute)) return undefined
+  const hasText = visibleTextOf(element).trim() !== ''
   if (element.tagName === 'IMG' || (element.querySelector('img') && !hasText)) return 'image'
   if (element.tagName === 'P') return undefined
   if (element.querySelector('pre')) return 'code'
@@ -71,7 +104,7 @@ const blockTextLength = 40
 function blockTextOf(element: Element, kind: CommentBlockKind) {
   if (kind === 'image') return (element.tagName === 'IMG' ? (element as HTMLImageElement) : element.querySelector('img'))?.alt ?? ''
   const textElement = kind === 'code' ? element.querySelector('pre') : kind === 'table' ? element.querySelector('table') : element
-  return (textElement?.textContent ?? '').replace(/\s+/g, ' ').trim().slice(0, blockTextLength)
+  return (textElement ? visibleTextOf(textElement) : '').replace(/\s+/g, ' ').trim().slice(0, blockTextLength)
 }
 
 export type PageBlock = { element: HTMLElement; anchor: CommentBlockAnchor }
