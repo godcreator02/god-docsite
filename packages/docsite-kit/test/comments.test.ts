@@ -11,17 +11,17 @@ describe('评论的 frontmatter', () => {
     expect(validate('/site/comments/a/index.md', thread)).toEqual({ value: expected })
   })
 
-  it('整块评论写 block 与 range，已解决的写解决人与时间', () => {
-    expect(validate('/c/a/index.md', { author: 'a', createdAt: '2026-10-10', page: '/', status: 'resolved', block: 'code', range: [0, 9], resolvedBy: 'b', resolvedAt: '2026-10-11' })).toEqual({
-      value: { kind: 'thread', author: 'a', createdAt: '2026-10-10T00:00:00.000Z', page: '/', status: 'resolved', block: 'code', range: [0, 9], resolvedBy: 'b', resolvedAt: '2026-10-11T00:00:00.000Z' },
+  it('批一个元素写 element 与 range，已解决的写解决人与时间', () => {
+    expect(validate('/c/a/index.md', { author: 'a', createdAt: '2026-10-10', page: '/', status: 'resolved', element: 'formula', range: [0, 1], resolvedBy: 'b', resolvedAt: '2026-10-11' })).toEqual({
+      value: { kind: 'thread', author: 'a', createdAt: '2026-10-10T00:00:00.000Z', page: '/', status: 'resolved', element: 'formula', range: [0, 1], resolvedBy: 'b', resolvedAt: '2026-10-11T00:00:00.000Z' },
     })
   })
 
-  it('quote、block 少了 range，range 写错或单独写时报错', () => {
+  it('quote、element 少了 range，range 写错或单独写时报错', () => {
     const base = { author: 'a', createdAt: '2026-10-10', page: '/', status: 'open' }
-    expect(validate('/c/a/index.md', { ...base, quote: 'x' }).issues?.map((issue) => issue.message)).toEqual(['写了 quote 或 block 就要写 range：批的是快照里的哪一段'])
-    expect(validate('/c/a/index.md', { ...base, block: 'code', range: [5, 5] }).issues?.map((issue) => issue.message)).toEqual(['range 要写成 [start, end]：快照里从 0 数的两个位置，start 小于 end'])
-    expect(validate('/c/a/index.md', { ...base, range: [0, 1] }).issues?.map((issue) => issue.message)).toEqual(['range 要和 quote 或 block 一起写；都不写是批整页'])
+    expect(validate('/c/a/index.md', { ...base, quote: 'x' }).issues?.map((issue) => issue.message)).toEqual(['写了 quote 或 element 就要写 range：批的是快照里的哪一段'])
+    expect(validate('/c/a/index.md', { ...base, element: 'code', range: [5, 5] }).issues?.map((issue) => issue.message)).toEqual(['range 要写成 [start, end]：快照里从 0 数的两个位置，start 小于 end'])
+    expect(validate('/c/a/index.md', { ...base, range: [0, 1] }).issues?.map((issue) => issue.message)).toEqual(['range 要和 quote 或 element 一起写；都不写是批整页'])
   })
 
   it('其余文件按回复校验，回复里不能写 page', () => {
@@ -33,14 +33,14 @@ describe('评论的 frontmatter', () => {
   })
 
   it('缺字段、page 不以 / 开头、status 写错、quote 与 block 都写、block 写错时一次列出全部', () => {
-    const result = validate('/site/comments/a/index.mdx', { createdAt: 'yesterday', page: 'writing', status: 'done', quote: 'x', block: 'video', range: [0, 1] })
+    const result = validate('/site/comments/a/index.mdx', { createdAt: 'yesterday', page: 'writing', status: 'done', quote: 'x', element: 'video', range: [0, 1] })
     expect(result.issues?.map((issue) => issue.message)).toEqual([
       'author 要是非空字符串',
       'createdAt 要是时间，如 2026-10-10T12:00:00+08:00',
       'page 写页面地址，以 / 开头，如 /writing',
       'status 要是 open 或 resolved',
-      'block 要是 image、code、table、component 之一',
-      'quote 和 block 只能写一个：批一段文字写 quote，批一整块写 block',
+      'element 要是 image、formula、code、table、text、component 之一',
+      'quote 和 element 只能写一个：批一段文字写 quote，批一个元素写 element',
     ])
   })
 })

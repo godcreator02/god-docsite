@@ -21,6 +21,19 @@ function post(fields: Record<string, string>, as = '小周', images: File[] = []
   return commentRequestResponse(new Request('http://site/api/comments', { method: 'POST', body: form }), { commenter: { name: as }, pageUrls: ['/writing'], commentsDir })
 }
 
+/** agent 发评论：页面 HTML 由假的 pageHtmlOf 给出，记下它被问到的页面 */
+function postAsAgent(anchor: unknown, html: string) {
+  const askedPages: string[] = []
+  const form = new FormData()
+  for (const [key, value] of Object.entries({ op: 'create', page: '/writing', anchor: JSON.stringify(anchor), body: '看这里' })) form.set(key, value)
+  const pageHtmlOf = async (page: string) => {
+    askedPages.push(page)
+    return html
+  }
+  const response = commentRequestResponse(new Request('http://site/api/comments', { method: 'POST', body: form }), { commenter: { name: 'Claude' }, pageUrls: ['/writing'], commentsDir, pageHtmlOf })
+  return { response, askedPages }
+}
+
 async function created(fields: Record<string, string>, images: File[] = []) {
   const response = await post({ op: 'create', page: '/writing', ...fields }, '小周', images)
   expect(response.status).toBe(200)
@@ -40,14 +53,40 @@ describe('评论接口', () => {
     expect((await readdir(path.join(commentsDir, thread))).sort()).toEqual(['index.md', 'paste-abc-0.png', 'snapshot.txt'])
   })
 
-  it('整块评论写 block 与 range；原文和快照里那一段对不上、range 超出快照、anchor 缺快照时拒绝', async () => {
-    const { thread } = await created({ anchor: JSON.stringify({ block: 'image', range: [2, 3], snapshot: '图前￼图后' }), body: '这张图' })
-    expect(await readFile(path.join(commentsDir, thread, 'index.md'), 'utf8')).toContain('block: "image"\nrange: [2,3]\n')
+  it('批一个元素写 element 与 range；原文和快照里那一段对不上、range 超出快照、anchor 缺快照时拒绝', async () => {
+    const { thread } = await created({ anchor: JSON.stringify({ element: 'image', range: [2, 3], snapshot: '图前￼图后' }), body: '这张图' })
+    expect(await readFile(path.join(commentsDir, thread, 'index.md'), 'utf8')).toContain('element: "image"\nrange: [2,3]\n')
     const rejected = async (anchor: unknown) => (await post({ op: 'create', page: '/writing', anchor: JSON.stringify(anchor), body: 'x' })).text()
     expect(await rejected({ quote: '原文', range: [0, 2], snapshot: '前原文后' })).toBe('anchor 对不上：quote 和快照里 range 那一段不一样：快照里是「前原」')
     expect(await rejected({ quote: '原文', range: [1, 9], snapshot: '前原文后' })).toBe('anchor 对不上：range [1, 9] 超出了快照（共 4 个字）')
     expect(await rejected({ quote: '原文', range: [1, 3] })).toBe('anchor.snapshot 要是页面文字，换行只用 \\n')
     expect(await rejected({ quote: '原文', range: [3, 1], snapshot: '前原文后' })).toBe('anchor.range 要是 [start, end]，start 小于 end')
+  })
+
+  it('agent 传 { quote, occurrence }：服务端取这一页的 HTML 算出页面文字当快照，range 指第 occurrence 处', async () => {
+    const html = '<html><body><nav>原文</nav><article data-comment-scope=""><p>原文一</p><p>再看原文<span class="sr-only">原文</span>二</p></article></body></html>'
+    const { response, askedPages } = postAsAgent({ quote: '原文', occurrence: 2 }, html)
+    const result = await response
+    expect(result.status).toBe(200)
+    const { thread } = (await result.json()) as { thread: string }
+    expect(askedPages).toEqual(['/writing'])
+    expect(await readFile(path.join(commentsDir, thread, 'snapshot.txt'), 'utf8')).toBe('原文一再看原文二')
+    expect(await readFile(path.join(commentsDir, thread, 'index.md'), 'utf8')).toMatch(/^---\nauthor: "Claude"\ncreatedAt: "[^"]+"\npage: "\/writing"\nstatus: "open"\nquote: "原文"\nrange: \[5,7\]\n---\n\n看这里\n$/)
+  })
+
+  it('agent 要的第 occurrence 处不存在、occurrence 不是从 1 数的整数、多带了别的项时拒绝', async () => {
+    const html = '<html><body><article data-comment-scope=""><p>原文一</p><p>原文二</p></article></body></html>'
+    const rejected = async (anchor: unknown) => {
+      const response = await postAsAgent(anchor, html).response
+      expect(response.status).toBe(400)
+      return response.text()
+    }
+    expect(await rejected({ quote: '原文', occurrence: 3 })).toBe('这一页的文字里没有第 3 处「原文」，一共有 2 处')
+    expect(await rejected({ quote: '没有', occurrence: 1 })).toBe('这一页的文字里没有第 1 处「没有」，一共有 0 处')
+    expect(await rejected({ quote: '原文', occurrence: 0 })).toBe('anchor.occurrence 要是从 1 数的整数')
+    expect(await rejected({ quote: '原文', occurrence: 1.5 })).toBe('anchor.occurrence 要是从 1 数的整数')
+    expect(await rejected({ quote: '原文', occurrence: 1, range: [0, 2] })).toBe('anchor 要是 { quote, range, snapshot }、{ element, range, snapshot }、{ quote, occurrence } 或 {}')
+    expect(await readdir(commentsDir)).toEqual([])
   })
 
   it('读快照：换行统一成 \\n；缺快照、和 frontmatter 对不上时报错，一次列出全部', async () => {

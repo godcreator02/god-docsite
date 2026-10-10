@@ -1,43 +1,58 @@
-import { imageCharacter, type CommentBlockKind, type CommentRange, type CommentThreadFrontmatter } from '../comments.js'
+import type { CommentElementKind, CommentRange, CommentThreadFrontmatter } from '../comments.js'
 import type { RangeMapper } from '../comment-ranges.js'
+import { atomicCharacter, commentUiAttribute, pageTextRoleOf } from '../page-text-rules.js'
 
-/** 评论自己放进页面的东西（插进正文的评论数按钮等）都带这个属性；取页面文字时跳过它们 */
-export const commentUiAttribute = 'data-comment-ui'
+export { commentUiAttribute }
 
-type TextPiece = { node: Text | HTMLImageElement; start: number }
+/** 页面文字里的一段：一个文字节点，或一个整个算一个字的元素（图片、SVG、公式等） */
+type TextPiece = { node: Text | Element; start: number }
 
 /**
- * 正文显示出来的全部文字：文字节点照原样，一张图片记成一个 imageCharacter，评论自己的按钮不算。
- * pieces 记下每个文字节点、每张图片从第几个字开始，用来在文字位置与 DOM 位置之间换算
+ * 正文的全部文字，规则见 page-text-rules.ts（服务端解析 HTML 时按同一份规则算）。
+ * pieces 记下每一段从第几个字开始，用来在文字位置与 DOM 位置之间换算
  */
 export type PageText = { text: string; pieces: TextPiece[] }
 
-function lengthOf(node: Text | HTMLImageElement) {
+function lengthOf(node: Text | Element) {
   return node.nodeType === Node.TEXT_NODE ? (node as Text).length : 1
 }
 
+function endOf(piece: TextPiece) {
+  return piece.start + lengthOf(piece.node)
+}
+
+function roleOf(element: Element) {
+  return pageTextRoleOf(element.tagName, [...element.classList], element.hasAttribute(commentUiAttribute))
+}
+
 export function pageTextOf(scope: Node): PageText {
-  const walker = scope.ownerDocument!.createTreeWalker(scope, NodeFilter.SHOW_TEXT | NodeFilter.SHOW_ELEMENT, {
-    acceptNode(node) {
-      if (node.nodeType === Node.TEXT_NODE) return NodeFilter.FILTER_ACCEPT
-      const element = node as Element
-      if (element.hasAttribute(commentUiAttribute)) return NodeFilter.FILTER_REJECT
-      return element.tagName === 'IMG' ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_SKIP
-    },
-  })
   const pieces: TextPiece[] = []
   let text = ''
-  for (let node = walker.nextNode(); node; node = walker.nextNode()) {
-    pieces.push({ node: node as Text | HTMLImageElement, start: text.length })
-    text += node.nodeType === Node.TEXT_NODE ? (node as Text).data : imageCharacter
+  const walk = (parent: Node) => {
+    for (const child of parent.childNodes) {
+      if (child.nodeType === Node.TEXT_NODE) {
+        pieces.push({ node: child as Text, start: text.length })
+        text += (child as Text).data
+      } else if (child.nodeType === Node.ELEMENT_NODE) {
+        const role = roleOf(child as Element)
+        if (role === 'skip') continue
+        if (role === 'walk') {
+          walk(child)
+          continue
+        }
+        pieces.push({ node: child as Element, start: text.length })
+        text += atomicCharacter
+      }
+    }
   }
+  walk(scope)
   return { text, pieces }
 }
 
-/** 页面文字里第 start 到 end 个字在 DOM 里的范围；图片整张算进去 */
+/** 页面文字里第 start 到 end 个字在 DOM 里的范围；整个算一个字的元素整个算进去 */
 export function rangeOfOffsets({ pieces }: PageText, start: number, end: number): Range {
-  const first = pieces.find((piece) => piece.start <= start && start < piece.start + lengthOf(piece.node))
-  const last = pieces.findLast((piece) => piece.start < end && end <= piece.start + lengthOf(piece.node))
+  const first = pieces.find((piece) => piece.start <= start && start < endOf(piece))
+  const last = pieces.findLast((piece) => piece.start < end && end <= endOf(piece))
   if (!first || !last) throw new Error(`页面文字里没有第 ${start} 到 ${end} 个字`)
   const range = first.node.ownerDocument.createRange()
   if (first.node.nodeType === Node.TEXT_NODE) range.setStart(first.node, start - first.start)
@@ -47,9 +62,11 @@ export function rangeOfOffsets({ pieces }: PageText, start: number, end: number)
   return range
 }
 
-/** DOM 里某个位置前面有几个字 */
-function offsetOfPoint({ pieces }: PageText, container: Node, offset: number) {
+/** DOM 里某个位置前面有几个字；位置落在整个算一个字的元素里面时，开头算到它前面、结尾算到它后面 */
+function offsetOfPoint({ pieces }: PageText, container: Node, offset: number, isStart: boolean) {
   if (pieces.length === 0) return 0
+  const insideAtomic = pieces.find((piece) => piece.node.nodeType === Node.ELEMENT_NODE && piece.node.contains(container))
+  if (insideAtomic) return isStart ? insideAtomic.start : endOf(insideAtomic)
   const before = container.ownerDocument!.createRange()
   before.setStartBefore(pieces[0]!.node)
   before.setEnd(container, offset)
@@ -61,84 +78,117 @@ function offsetOfPoint({ pieces }: PageText, container: Node, offset: number) {
   return count
 }
 
-/** 选中的一段换成页面文字里的位置 */
+/** 选中的一段换成页面文字里的位置；什么字也没选到时返回 undefined */
 export function offsetsOfRange(pageText: PageText, range: Range): CommentRange | undefined {
-  const start = offsetOfPoint(pageText, range.startContainer, range.startOffset)
-  const end = offsetOfPoint(pageText, range.endContainer, range.endOffset)
+  const start = offsetOfPoint(pageText, range.startContainer, range.startOffset, true)
+  const end = offsetOfPoint(pageText, range.endContainer, range.endOffset, false)
   return start < end ? [start, end] : undefined
 }
 
-function visibleTextOf(element: Element) {
-  return pageTextOf(element).text.replaceAll(imageCharacter, '')
+/** 一个元素在页面文字里的位置：从它里面第一个字到最后一个；里面一个字也没有时返回 undefined */
+export function elementOffsetsOf({ pieces }: PageText, element: Element): CommentRange | undefined {
+  const inside = pieces.filter((piece) => element.contains(piece.node))
+  if (inside.length === 0) return undefined
+  return [inside[0]!.start, endOf(inside.at(-1)!)]
 }
 
-const textBlockTags = new Set(['H1', 'H2', 'H3', 'H4', 'H5', 'H6', 'UL', 'OL', 'BLOCKQUOTE', 'HR'])
+const atomicMediaSelector = 'img, svg, canvas, video, iframe'
+const textBlockTags = new Set(['P', 'LI', 'H1', 'H2', 'H3', 'H4', 'H5', 'H6', 'TD', 'TH', 'DT', 'DD', 'BLOCKQUOTE', 'FIGCAPTION'])
+/** 这些标签按行内显示时是一段文字里的几个字；被样式做成块（如整张卡片是一个 <a>）时算组件 */
+const phrasingTags = new Set(['SPAN', 'A', 'STRONG', 'EM', 'B', 'I', 'CODE', 'MARK', 'DEL', 'INS', 'SUB', 'SUP'])
 
-/** 正文里一个顶层元素算哪类块；段落、标题、列表、引用这些是文字，用选中文字来批，返回 undefined */
-function blockKindOf(element: Element): CommentBlockKind | undefined {
-  if (textBlockTags.has(element.tagName) || element.hasAttribute(commentUiAttribute)) return undefined
-  const hasText = visibleTextOf(element).trim() !== ''
-  if (element.tagName === 'IMG' || (element.querySelector('img') && !hasText)) return 'image'
-  if (element.tagName === 'P') return undefined
-  if (element.querySelector('pre')) return 'code'
-  if (element.querySelector('table')) return 'table'
+function isTextElement(element: Element) {
+  return textBlockTags.has(element.tagName) || (phrasingTags.has(element.tagName) && getComputedStyle(element).display === 'inline')
+}
+
+/** 一个元素算哪类，存进评论串的 element，找回位置时核对 */
+export function elementKindOf(element: Element): CommentElementKind {
+  if (element.classList.contains('katex')) return 'formula'
+  if (element.matches(atomicMediaSelector)) return 'image'
+  const hasText = (element.textContent ?? '').trim() !== ''
+  if (!hasText && element.querySelector(atomicMediaSelector)) return 'image'
+  if (element.tagName === 'PRE' || element.querySelector('pre')) return 'code'
+  if (element.tagName === 'TABLE' || element.querySelector('table')) return 'table'
+  if (isTextElement(element)) return 'text'
   return 'component'
 }
 
-export type PageBlock = { element: HTMLElement; kind: CommentBlockKind }
-
-/** 正文里能整块评论的块（正文的顶层元素），按出现顺序 */
-export function blocksOf(scope: Element): PageBlock[] {
-  return [...scope.children].flatMap((element) => {
-    const kind = blockKindOf(element)
-    return kind ? [{ element: element as HTMLElement, kind }] : []
-  })
+/**
+ * 批注模式下点到的是哪个元素：一般就是鼠标下面那个元素。公式整个算一个（KaTeX 渲染出来是几十层 span），
+ * SVG 图整张算一个，代码块整块算一个（里面是一个个着色的 span）
+ */
+export function pickedElementOf(target: Element): Element {
+  return target.closest('.katex') ?? target.closest('svg') ?? target.closest('figure:has(pre)') ?? target.closest('pre') ?? target
 }
 
-/** 正文里某个元素所在的那一块；它不是能整块评论的块时返回 undefined */
-export function blockContaining(blocks: readonly PageBlock[], target: Node) {
-  return blocks.find((block) => block.element.contains(target))
+function isSameRange(a: CommentRange | undefined, b: CommentRange) {
+  return a !== undefined && a[0] === b[0] && a[1] === b[1]
 }
 
-/** 一整块在页面文字里的位置：从它的第一个字（或图片）到最后一个；块里没有文字也没有图片时返回 undefined */
-export function blockOffsetsOf({ pieces }: PageText, element: Element): CommentRange | undefined {
-  const inside = pieces.filter((piece) => element.contains(piece.node))
-  if (inside.length === 0) return undefined
-  const last = inside.at(-1)!
-  return [inside[0]!.start, last.start + lengthOf(last.node)]
+function containsRange(outer: CommentRange | undefined, inner: CommentRange) {
+  return outer !== undefined && outer[0] <= inner[0] && inner[1] <= outer[1]
 }
 
 /**
- * 评论批的位置：一段文字（Range）、一整块（元素）、整页，或者原文找不到了。
- * changed 表示被批的那段在快照之后被改过（首尾还对得上）
+ * 推算出的位置上，批的是哪个元素：先看正好整个是一个图片、公式这类整体元素的；否则从这段文字的公共祖先往上找同一类的元素。
+ * 文字正好是这一段的几层元素里取最外层（批的时候点的是哪一层分不出来，外层框得全）；文字改过、对不上整段时取最近的一层
  */
-export type ThreadPlace = { type: 'text'; range: Range; changed: boolean } | { type: 'block'; element: HTMLElement; changed: boolean } | { type: 'page' } | { type: 'missing' }
-
-export function placeOfThread(pageText: PageText, blocks: readonly PageBlock[], head: CommentThreadFrontmatter, snapshot: string | undefined, mapRange: RangeMapper): ThreadPlace {
-  if (!head.range) return { type: 'page' }
-  if (snapshot === undefined) throw new Error('批一段文字或一整块的评论串要传快照')
-  const mapped = mapRange(snapshot, pageText.text, head.range)
-  if (!mapped) return { type: 'missing' }
-  if (head.quote !== undefined) return { type: 'text', range: rangeOfOffsets(pageText, mapped.start, mapped.end), changed: mapped.changed }
-  // 整块：推算出的位置开头落在哪一块，那一块还得是同一类
-  const firstPiece = pageText.pieces.find((piece) => piece.start <= mapped.start && mapped.start < piece.start + lengthOf(piece.node))
-  const block = firstPiece && blockContaining(blocks, firstPiece.node)
-  return block && block.kind === head.block ? { type: 'block', element: block.element, changed: mapped.changed } : { type: 'missing' }
+function elementAt(scope: Element, pageText: PageText, range: CommentRange, kind: CommentElementKind): Element | undefined {
+  const single = pageText.pieces.find((piece) => piece.start === range[0] && endOf(piece) === range[1] && piece.node.nodeType === Node.ELEMENT_NODE)
+  if (single && elementKindOf(single.node as Element) === kind) return single.node as Element
+  const common = rangeOfOffsets(pageText, ...range).commonAncestorContainer
+  let nearestContaining: Element | undefined
+  let outermostExact: Element | undefined
+  for (let element = common instanceof Element ? common : common.parentElement; element && element !== scope; element = element.parentElement) {
+    if (elementKindOf(element) !== kind) continue
+    const offsets = elementOffsetsOf(pageText, element)
+    if (isSameRange(offsets, range)) outermostExact = element
+    else if (!nearestContaining && containsRange(offsets, range)) nearestContaining = element
+  }
+  return outermostExact ?? nearestContaining
 }
 
-const blockKindNames: Record<CommentBlockKind, string> = { image: '图片', code: '代码块', table: '表格', component: '组件' }
+/**
+ * 评论批的位置：一段文字（Range）、一个元素、整页，或者原文找不到了。
+ * changed 表示被批的那段在快照之后被改过（首尾还对得上）
+ */
+export type ThreadPlace =
+  | { type: 'text'; range: Range; changed: boolean }
+  | { type: 'element'; element: HTMLElement; range: Range; changed: boolean }
+  | { type: 'page' }
+  | { type: 'missing' }
+
+export function placeOfThread(scope: Element, pageText: PageText, head: CommentThreadFrontmatter, snapshot: string | undefined, mapRange: RangeMapper): ThreadPlace {
+  if (!head.range) return { type: 'page' }
+  if (snapshot === undefined) throw new Error('批一段文字或一个元素的评论串要传快照')
+  const mapped = mapRange(snapshot, pageText.text, head.range)
+  if (!mapped) return { type: 'missing' }
+  const range = rangeOfOffsets(pageText, mapped.start, mapped.end)
+  if (head.quote !== undefined) return { type: 'text', range, changed: mapped.changed }
+  const element = elementAt(scope, pageText, [mapped.start, mapped.end], head.element!)
+  return element ? { type: 'element', element: element as HTMLElement, range, changed: mapped.changed } : { type: 'missing' }
+}
+
+const elementKindNames: Record<CommentElementKind, string> = { image: '图片', formula: '公式', code: '代码块', table: '表格', text: '文字', component: '组件' }
 const labelTextLength = 40
 
 function readableText(text: string) {
-  return text.replaceAll(imageCharacter, ' ').replace(/\s+/g, ' ').trim()
+  return text.replaceAll(atomicCharacter, ' ').replace(/\s+/g, ' ').trim()
 }
 
-/** 评论批的是什么，写给人看：「原文」、整块的类别加它开头的字，或「整页」 */
-export function anchorLabelOf(head: Pick<CommentThreadFrontmatter, 'quote' | 'block' | 'range'>, snapshot: string | undefined) {
+function labelOfKindAndText(kind: CommentElementKind, text: string) {
+  const start = readableText(text).slice(0, labelTextLength)
+  return start === '' ? elementKindNames[kind] : `${elementKindNames[kind]}「${start}」`
+}
+
+/** 页面上一个元素写给人看：类别加它开头的字 */
+export function elementLabelOf(element: Element) {
+  return labelOfKindAndText(elementKindOf(element), roleOf(element) === 'atomic' ? '' : pageTextOf(element).text)
+}
+
+/** 评论批的是什么，写给人看：「原文」、元素的类别加它开头的字，或「整页」 */
+export function anchorLabelOf(head: Pick<CommentThreadFrontmatter, 'quote' | 'element' | 'range'>, snapshot: string | undefined) {
   if (head.quote !== undefined) return `「${readableText(head.quote)}」`
-  if (head.block !== undefined) {
-    const text = head.range && snapshot !== undefined ? readableText(snapshot.slice(...head.range)).slice(0, labelTextLength) : ''
-    return text === '' ? `整块${blockKindNames[head.block]}` : `${blockKindNames[head.block]}「${text}」`
-  }
+  if (head.element !== undefined) return labelOfKindAndText(head.element, head.range && snapshot !== undefined ? snapshot.slice(...head.range) : '')
   return '整页'
 }

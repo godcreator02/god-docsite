@@ -4,7 +4,7 @@ import type { CommentRange } from './comment-ranges.js'
  * 评论的存储格式。一个评论串一个文件夹：index.md（或 index.mdx）是发起的那条，frontmatter 写它批的是哪一页、哪段原文或哪一块；
  * 同一文件夹里其余的 .md / .mdx 每个是一条回复。网页上写的评论存成 .md（纯文字里的 < 和 { 不会被当成 JSX）；
  * 要放 TSX 组件的评论写成 .mdx，可以引用同一文件夹里的组件。图片放在同一文件夹里。
- * 批一段文字或一整块时，文件夹里还有 snapshot.txt：发起评论那一刻整页显示出来的文字，range 是在它里面数的位置。
+ * 批一段文字或一个元素时，文件夹里还有 snapshot.txt：发起评论那一刻整页的文字（怎么算见 page-text-rules.ts），range 是在它里面数的位置。
  * 项目在 collections.ts 里用 fumadocs-mdx 的 defineCollections 列出这些文件，schema 传 commentFrontmatterSchema
  */
 
@@ -15,15 +15,12 @@ export type CommentStatus = 'open' | 'resolved'
 /** 写评论的人。开发服务里取本机 git 的 user.name；发布站只读，没有写评论的人 */
 export type Commenter = { name: string }
 
-/** 整块评论能批的几类块：图片、代码块、表格、其余的组件 */
-export type CommentBlockKind = 'image' | 'code' | 'table' | 'component'
-export const commentBlockKinds: readonly CommentBlockKind[] = ['image', 'code', 'table', 'component']
+/** 批一个元素时，那个元素是哪类：图片（含 SVG、画布、视频）、公式、代码块、表格、一段文字或其中的行内元素、其余的组件 */
+export type CommentElementKind = 'image' | 'formula' | 'code' | 'table' | 'text' | 'component'
+export const commentElementKinds: readonly CommentElementKind[] = ['image', 'formula', 'code', 'table', 'text', 'component']
 
 /** 评论串文件夹里的页面文字快照 */
 export const commentSnapshotFile = 'snapshot.txt'
-
-/** 页面文字里一张图片记成这一个字 */
-export const imageCharacter = '￼'
 
 /** 发起评论串的那条（index.md / index.mdx） */
 export type CommentThreadFrontmatter = {
@@ -34,11 +31,11 @@ export type CommentThreadFrontmatter = {
   /** 被批页面的地址，如 /writing */
   page: string
   status: CommentStatus
-  /** 批一段文字：被批的原文，等于快照里 range 那一段；quote 与 block 都不写就是批整页 */
+  /** 批一段文字：被批的原文，等于快照里 range 那一段；quote 与 element 都不写就是批整页 */
   quote?: string
-  /** 批一整块：那一块是哪类（图片、代码块、表格、组件） */
-  block?: CommentBlockKind
-  /** 批的是快照里的第几个字到第几个字（不含后一个），写了 quote 或 block 就要写 */
+  /** 批一个元素：那个元素是哪类 */
+  element?: CommentElementKind
+  /** 批的是快照里的第几个字到第几个字（不含后一个），写了 quote 或 element 就要写 */
   range?: CommentRange
   resolvedBy?: string
   resolvedAt?: string
@@ -61,7 +58,7 @@ export type CommentFrontmatterSchema = {
   }
 }
 
-const threadKeys = ['author', 'createdAt', 'page', 'status', 'quote', 'block', 'range', 'resolvedBy', 'resolvedAt']
+const threadKeys = ['author', 'createdAt', 'page', 'status', 'quote', 'element', 'range', 'resolvedBy', 'resolvedAt']
 const replyKeys = ['author', 'createdAt']
 const statuses: readonly CommentStatus[] = ['open', 'resolved']
 
@@ -108,19 +105,19 @@ function validateThread(data: Record<string, unknown>) {
   const status = data.status as CommentStatus
   if (!statuses.includes(status)) issues.push({ message: `status 要是 ${statuses.join(' 或 ')}`, path: ['status'] })
   const quote = data.quote === undefined ? undefined : nonEmptyString(data, 'quote', issues)
-  const block = data.block as CommentBlockKind | undefined
-  if (block !== undefined && !commentBlockKinds.includes(block)) issues.push({ message: `block 要是 ${commentBlockKinds.join('、')} 之一`, path: ['block'] })
-  if (data.quote !== undefined && data.block !== undefined) issues.push({ message: 'quote 和 block 只能写一个：批一段文字写 quote，批一整块写 block', path: ['block'] })
+  const element = data.element as CommentElementKind | undefined
+  if (element !== undefined && !commentElementKinds.includes(element)) issues.push({ message: `element 要是 ${commentElementKinds.join('、')} 之一`, path: ['element'] })
+  if (data.quote !== undefined && data.element !== undefined) issues.push({ message: 'quote 和 element 只能写一个：批一段文字写 quote，批一个元素写 element', path: ['element'] })
   const range = data.range
   if (range !== undefined && !isCommentRange(range)) issues.push({ message: 'range 要写成 [start, end]：快照里从 0 数的两个位置，start 小于 end', path: ['range'] })
-  if ((data.quote !== undefined || data.block !== undefined) && range === undefined) issues.push({ message: '写了 quote 或 block 就要写 range：批的是快照里的哪一段', path: ['range'] })
-  if (data.quote === undefined && data.block === undefined && range !== undefined) issues.push({ message: 'range 要和 quote 或 block 一起写；都不写是批整页', path: ['range'] })
+  if ((data.quote !== undefined || data.element !== undefined) && range === undefined) issues.push({ message: '写了 quote 或 element 就要写 range：批的是快照里的哪一段', path: ['range'] })
+  if (data.quote === undefined && data.element === undefined && range !== undefined) issues.push({ message: 'range 要和 quote 或 element 一起写；都不写是批整页', path: ['range'] })
   const resolvedBy = optionalString(data, 'resolvedBy', issues)
   const resolvedAt = data.resolvedAt === undefined ? undefined : isoTime(data, 'resolvedAt', issues)
   if (issues.length > 0) return { issues }
   const value: CommentThreadFrontmatter = { kind: 'thread', author, createdAt, page, status }
   if (quote !== undefined) value.quote = quote
-  if (block !== undefined) value.block = block
+  if (element !== undefined) value.element = element
   if (range !== undefined) value.range = range as CommentRange
   if (resolvedBy !== undefined) value.resolvedBy = resolvedBy
   if (resolvedAt !== undefined) value.resolvedAt = resolvedAt

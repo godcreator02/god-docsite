@@ -4,16 +4,17 @@ import { mkdir, readFile, readdir, rm, stat, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 import { promisify } from 'node:util'
 import {
-  commentBlockKinds,
+  commentElementKinds,
   commentSnapshotFile,
   isCommentRange,
   isThreadHeadFile,
   snapshotMismatchOf,
-  type CommentBlockKind,
+  type CommentElementKind,
   type Commenter,
   type CommentRange,
   type CommentThreadFrontmatter,
 } from '../comments.js'
+import { pageTextOfHtml } from './page-text.js'
 
 const commenterOfDir = new Map<string, Promise<Commenter>>()
 
@@ -93,12 +94,50 @@ function newReplyFile(now: Date) {
 }
 
 /** 新评论串批的位置：frontmatter 里写的几项，加上要存成 snapshot.txt 的页面文字；批整页时都没有 */
-type NewAnchor = { fields: { quote: string; range: CommentRange } | { block: CommentBlockKind; range: CommentRange } | Record<string, never>; snapshot?: string }
+type NewAnchor = { fields: AnchorFieldsWithRange | Record<string, never>; snapshot?: string }
+type AnchorFieldsWithRange = { quote: string; range: CommentRange } | { element: CommentElementKind; range: CommentRange }
 
-const anchorShapes = '{ quote, range, snapshot }、{ block, range, snapshot } 或 {}'
+const anchorShapes = '{ quote, range, snapshot }、{ element, range, snapshot }、{ quote, occurrence } 或 {}'
 
-/** 网页传来的 anchor：{ quote, range, snapshot }（批一段文字）、{ block, range, snapshot }（批一整块）或 {}（批整页） */
-function anchorOf(form: FormData): NewAnchor {
+/** 一页渲染出的 HTML：默认向开发服务自己请求这一页，测试里换成假的 */
+type PageHtmlOf = (page: string) => Promise<string>
+
+async function fetchedPageHtml(url: URL) {
+  const response = await fetch(url)
+  if (!response.ok) throw new Error(`取页面 ${url.pathname} 的 HTML 失败：开发服务回了 ${response.status}`)
+  return response.text()
+}
+
+/** quote 在 text 里每一处的开头位置；相互重叠的也各算一处 */
+function startsOfQuote(quote: string, text: string) {
+  const starts: number[] = []
+  for (let at = text.indexOf(quote); at !== -1; at = text.indexOf(quote, at + 1)) starts.push(at)
+  return starts
+}
+
+/** agent 传来的 { quote, occurrence }：agent 拿不到页面文字，由服务端取这一页的页面文字，在里面找第 occurrence 处 quote */
+async function anchorOfOccurrence(anchor: Record<string, unknown>, page: string, pageHtmlOf: PageHtmlOf): Promise<NewAnchor> {
+  const { quote, occurrence } = anchor
+  if (Object.keys(anchor).length !== 2 || typeof quote !== 'string' || quote.trim() === '') throw new RejectedRequest(400, `anchor 要是 ${anchorShapes}`)
+  if (!Number.isInteger(occurrence) || (occurrence as number) < 1) throw new RejectedRequest(400, 'anchor.occurrence 要是从 1 数的整数')
+  const snapshot = pageTextOfHtml(await pageHtmlOf(page))
+  const starts = startsOfQuote(quote, snapshot)
+  const start = starts[(occurrence as number) - 1]
+  if (start === undefined) throw new RejectedRequest(400, `这一页的文字里没有第 ${occurrence as number} 处「${quote}」，一共有 ${starts.length} 处`)
+  return checkedAgainstSnapshot({ quote, range: [start, start + quote.length] }, snapshot)
+}
+
+function checkedAgainstSnapshot(fields: AnchorFieldsWithRange, snapshot: string): NewAnchor {
+  const mismatch = snapshotMismatchOf(fields, snapshot)
+  if (mismatch) throw new RejectedRequest(400, `anchor 对不上：${mismatch}`)
+  return { fields, snapshot }
+}
+
+/**
+ * 传来的 anchor：网页传 { quote, range, snapshot }（批一段文字）、{ element, range, snapshot }（批一个元素）或 {}（批整页）；
+ * agent 传 { quote, occurrence }（批这一页上第 occurrence 处 quote）
+ */
+async function anchorOf(form: FormData, page: string, pageHtmlOf: PageHtmlOf): Promise<NewAnchor> {
   let anchor: unknown
   try {
     anchor = JSON.parse(requiredField(form, 'anchor'))
@@ -108,14 +147,18 @@ function anchorOf(form: FormData): NewAnchor {
   }
   if (typeof anchor !== 'object' || anchor === null) throw new RejectedRequest(400, `anchor 要是 ${anchorShapes}`)
   if (Object.keys(anchor).length === 0) return { fields: {} }
-  const { quote, block, range, snapshot } = anchor as Record<string, unknown>
+  if ('occurrence' in anchor) return anchorOfOccurrence(anchor as Record<string, unknown>, page, pageHtmlOf)
+  const { quote, element, range, snapshot } = anchor as Record<string, unknown>
   if (!isCommentRange(range)) throw new RejectedRequest(400, 'anchor.range 要是 [start, end]，start 小于 end')
   if (typeof snapshot !== 'string' || snapshot.includes('\r')) throw new RejectedRequest(400, 'anchor.snapshot 要是页面文字，换行只用 \\n')
-  const fields = typeof quote === 'string' && quote.trim() !== '' ? { quote, range } : commentBlockKinds.includes(block as CommentBlockKind) ? { block: block as CommentBlockKind, range } : undefined
+  const fields =
+    typeof quote === 'string' && quote.trim() !== ''
+      ? { quote, range }
+      : commentElementKinds.includes(element as CommentElementKind)
+        ? { element: element as CommentElementKind, range }
+        : undefined
   if (!fields) throw new RejectedRequest(400, `anchor 要是 ${anchorShapes}`)
-  const mismatch = snapshotMismatchOf(fields, snapshot)
-  if (mismatch) throw new RejectedRequest(400, `anchor 对不上：${mismatch}`)
-  return { fields, snapshot }
+  return checkedAgainstSnapshot(fields, snapshot)
 }
 
 async function exists(file: string) {
@@ -201,9 +244,11 @@ type CommentRequestOptions = {
   pageUrls: readonly string[]
   /** 评论目录，默认是站点目录下的 comments */
   commentsDir?: string
+  /** 一页渲染出的 HTML，anchor 是 { quote, occurrence } 时用它算页面文字；默认向开发服务自己请求这一页 */
+  pageHtmlOf?: PageHtmlOf
 }
 
-async function handleForm(form: FormData, { commenter, pageUrls, commentsDir }: Required<CommentRequestOptions> & { commenter: Commenter }) {
+async function handleForm(form: FormData, { commenter, pageUrls, commentsDir, pageHtmlOf }: Required<CommentRequestOptions> & { commenter: Commenter }) {
   const operation = requiredField(form, 'op') as CommentOperation
   if (!operations.includes(operation)) throw new RejectedRequest(400, `op 要是 ${operations.join('、')} 之一`)
   const now = new Date()
@@ -212,7 +257,7 @@ async function handleForm(form: FormData, { commenter, pageUrls, commentsDir }: 
   if (operation === 'create') {
     const page = requiredField(form, 'page')
     if (!pageUrls.includes(page)) throw new RejectedRequest(400, `没有页面 ${page}`)
-    const anchor = anchorOf(form)
+    const anchor = await anchorOf(form, page, pageHtmlOf)
     const body = bodyOf(form)
     const thread = newThreadId(now)
     const dir = path.join(commentsDir, thread)
@@ -257,15 +302,17 @@ async function handleForm(form: FormData, { commenter, pageUrls, commentsDir }: 
 /**
  * 评论接口的 POST：项目 routes.ts 里 route('api/comments', …) 的 action 调它。
  * 表单字段：op（create、reply、edit、delete、resolve、reopen）、page 与 anchor（create）、thread、file（edit、delete）、body、image（粘贴的图片，可多个）。
- * anchor 里带着页面文字的快照，存成评论串文件夹里的 snapshot.txt。
+ * anchor 是网页传的 { quote, range, snapshot }、{ element, range, snapshot }、{}，或 agent 传的 { quote, occurrence }（occurrence 从 1 数）。
+ * 网页传来的 snapshot 是页面文字的快照；agent 那种由服务端取这一页渲染出的 HTML 算出页面文字当快照。快照存成评论串文件夹里的 snapshot.txt。
  * 只改 comments/ 里的文件，不碰 git；开发服务看到文件变了自己刷新页面
  */
 export async function commentRequestResponse(request: Request, options: CommentRequestOptions): Promise<Response> {
   const { commenter } = options
   if (!commenter) return new Response('这个站只读：评论在本机的开发服务里写', { status: 403 })
   const commentsDir = options.commentsDir ?? path.resolve(process.cwd(), 'comments')
+  const pageHtmlOf = options.pageHtmlOf ?? ((page: string) => fetchedPageHtml(new URL(page, request.url)))
   try {
-    const result = await handleForm(await request.formData(), { ...options, commenter, commentsDir })
+    const result = await handleForm(await request.formData(), { ...options, commenter, commentsDir, pageHtmlOf })
     return Response.json(result)
   } catch (error) {
     if (error instanceof RejectedRequest) return new Response(error.message, { status: error.status })
