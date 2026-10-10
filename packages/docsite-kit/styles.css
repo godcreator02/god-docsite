@@ -3,9 +3,33 @@
 
 /* 评论批的原文：CSS Custom Highlight API 的高亮，名字和 src/ui/comments.tsx 里的一致 */
 ::highlight(docsite-comment) {
-  background-color: color-mix(in oklab, #f5b301 30%, transparent);
+  background-color: color-mix(in oklab, #f5b301 25%, transparent);
+  text-decoration: underline 2px color-mix(in oklab, #f5b301 80%, transparent);
+  text-underline-offset: 3px;
 }
 
 ::highlight(docsite-comment-active) {
-  background-color: color-mix(in oklab, #f5b301 65%, transparent);
+  background-color: color-mix(in oklab, #f5b301 55%, transparent);
+}
+
+/* 评论右侧栏：宽屏时整个页面布局往左让出这一栏，窄屏时右侧栏盖在页面上。属性名与 src/ui/comments.tsx 里的一致 */
+:root {
+  --docsite-comments-sidebar-width: 400px;
+}
+
+@media (width >= 80rem) {
+  html[data-comments-sidebar-open] #nd-docs-layout {
+    margin-inline-end: var(--docsite-comments-sidebar-width);
+  }
+}
+
+/* 整块评论批的那一块 */
+[data-commented-block] {
+  outline: 2px solid color-mix(in oklab, #f5b301 55%, transparent);
+  outline-offset: 4px;
+  border-radius: 4px;
+}
+
+[data-commented-block='active'] {
+  outline-color: #f5b301;
 }

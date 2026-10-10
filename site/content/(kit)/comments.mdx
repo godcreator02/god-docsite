@@ -1,16 +1,48 @@
 ---
 title: 评论
-description: 一个评论串一个文件夹，每条评论一个 MDX 文件；宽屏时评论栏在正文右边，卡片对齐被批的原文
+description: 选中文字或整块内容发起评论，被批的地方标黄，点开弹出评论卡片；评论存成文件，一个评论串一个文件夹
 icon: MessageSquare
 ---
 
-评论和页面分开放，在站点目录的 `comments/` 里。正文是 MDX，能写的和页面一样：
-格式、图片、同一文件夹里的 TSX 组件都行。这一页讲文件怎么写、页面上怎么显示。
+评论的做法照 Notion：在正文里选中一段文字，或者鼠标移到图片、代码块上，就能发起评论；
+被批的地方标黄（整块的画框），正文右侧对应的高度上有评论数按钮，点开弹出这串评论。
+右下角的「评论」按钮打开右侧栏，列出这一页全部评论。
+
+评论存成文件，放在站点目录的 `comments/` 里，和页面分开。
 [写一页说明](/writing)和[文档站基础包](/)两页上有几条示例评论，可以对照着看。
+
+## 在页面上看评论
+
+- **标黄与评论数**：没解决的评论串，被批的文字标黄并画下划线，被批的整块画框；正文右侧同一高度有评论数按钮
+- **弹出卡片**：点评论数按钮或点标黄的文字，在原文下方弹出这串评论；同一时间只开一张，点别处就关上
+- **长评论串**：卡片先只显示发起的那条和「展开 N 条回复」，点开才看全部；卡片有最大高度，超出了在卡片里滚动
+- **右侧栏**：右下角「评论」按钮打开，分「未解决」「已解决」两栏。点一条找得到原文的评论，正文滚到原文、弹出卡片；
+  整页评论、已解决的、原文找不到了的，在右侧栏里展开看。宽屏时整个页面往左让出右侧栏，不被遮住；窄屏时右侧栏盖在页面上
+
+## 写评论
+
+只在本机的开发服务（`pnpm dev`）里能写。发布出去的站只读：能看评论，没有输入框和「解决」按钮。
+
+写评论的人是本机 git 的 `user.name`，侧栏底部那一栏左边显示它的头像（名字第一个字加一个由名字算出的底色）和名字。没设 `user.name` 时页面报错，写明怎么设。
+
+| 想做什么 | 怎么做 |
+| --- | --- |
+| 批一段文字 | 在正文里选中它，选区上方浮出「评论」按钮 |
+| 批一整块（图片、代码块、表格、组件） | 鼠标移到那一块上，正文右侧出现带 ＋ 的按钮 |
+| 批整页 | 右侧栏顶上的「评论整页」 |
+| 回复 | 卡片底部的回复框 |
+| 编辑、删除 | 鼠标移到自己写的那条上，名字后面出现「编辑」「删除」；删发起的那条就是删整串 |
+| 标为已解决、重新打开 | 卡片顶上的按钮，谁都能点 |
+
+输入框写纯文字，也可以用 Markdown（`**加粗**`、`` `代码` ``）。粘贴图片会存进这个评论串的文件夹，并在光标处插入图片引用。
+Ctrl+Enter（Mac 上 ⌘+Enter）发送，Esc 取消。正在写的新评论点到别处不会丢，要点「取消」才关。
+
+发出去以后，开发服务看到 `comments/` 里的文件变了，整页刷新：滚动位置不变，刚才那串评论自动重新打开。
+不刷新只换评论这条路试过，走不通：编译好的 MDX 正文模块也引用了列出评论的模块，Vite 的热更新绕一圈后还是整页刷新。
 
 ## 文件
 
-一个评论串一个文件夹，文件夹名就是评论串的名字，建议写成「日期-几个词」：
+一个评论串一个文件夹，网页上发起的评论文件夹名是「日期-六位随机字母数字」：
 
 ```text
 comments/
@@ -21,7 +53,23 @@ comments/
     └── indent-preview.tsx   ← 评论里的组件
 ```
 
-`index.mdx` 是发起的那条，写它批的是哪一页、哪段原文：
+网页上写的评论存成 `.md`：纯文字里的 `<` 存成 `&lt;`，打出来的 `<code>` 照原样显示，不会被当成标签。
+要在评论里放 TSX 组件，由 agent 直接写 `.mdx` 文件，可以引用同一文件夹里的组件：
+
+```mdx title="comments/2026-10-10-heading-levels/reply-indent.mdx"
+---
+author: Claude
+createdAt: 2026-10-10T15:31:00+08:00
+---
+
+import { IndentPreview } from './indent-preview'
+
+可以试试不同的缩进，拖动看效果：
+
+<IndentPreview />
+```
+
+`index.md`（或 `index.mdx`）是发起的那条，写它批的是哪一页、批的是什么：
 
 ```mdx title="comments/2026-10-10-heading-levels/index.mdx"
 ---
@@ -42,23 +90,29 @@ status: open
 | `author` | 谁写的 |
 | `createdAt` | 什么时候写的，如 `2026-10-10T15:20:00+08:00` |
 | `page` | 被批页面的地址，以 `/` 开头 |
-| `quote` | 被批的原文，和页面上显示的文字一字不差；不写就是批整页 |
 | `status` | `open` 或 `resolved` |
+| `quote` | 批一段文字：原文，和页面上显示的文字一字不差 |
+| `quotePrefix`、`quoteSuffix` | 原文前后紧挨着的各约 20 个字，原文在页面上出现好几次时靠它们认出是哪一处；网页上选中文字时自动记下 |
+| `block` | 批一整块：`{ kind, heading, index, text }`，见下文 |
+| `resolvedBy`、`resolvedAt` | 谁、什么时候标的已解决 |
 
-同一文件夹里其余的 `.mdx` 每个是一条回复，只写 `author` 与 `createdAt`，按时间排在发起的那条后面：
+`quote` 与 `block` 只能写一个，都不写就是批整页。同一文件夹里其余的 `.md` / `.mdx` 每个是一条回复，只写 `author` 与 `createdAt`。
 
-```mdx title="comments/2026-10-10-heading-levels/reply-indent.mdx"
----
-author: Claude
-createdAt: 2026-10-10T15:31:00+08:00
----
+### 整块评论怎么认出是哪一块
 
-import { IndentPreview } from './indent-preview'
+`block` 的四项：
 
-可以试试不同的缩进，拖动看效果：
+- `kind`：`image`（图片）、`code`（代码块）、`table`（表格）、`component`（其余的组件，如提示框、TSX 组件）
+- `heading`：这一块前面最近的二到四级标题的 id；页面开头、还没有标题时是空字符串
+- `index`：在这个标题下，同一类块里排第几个，从 1 数
+- `text`：这一块的文字开头（约 40 个字），图片是 alt。用来核对：块挪了位置、对不上时当作原文找不到了
 
-<IndentPreview />
-```
+段落、标题、列表、引用里的字用选中文字来批，不算整块。TSX 页面整个正文是一块组件；HTML 页面的正文在 iframe 里，只能整块或整页批。
+
+### 原文找不到了
+
+原文在页面上改掉了、出现好几次又对不上前后文、整块挪了位置，都不算错：
+评论照样在右侧栏里，标红写着「原文找不到了」和原来批的东西，不去猜位置。
 
 ## 写错了会怎样
 
@@ -66,23 +120,11 @@ import { IndentPreview } from './indent-preview'
 
 - 缺字段、字段写错，或者写了表里没有的字段
 - 回复里写了 `page`、`quote` 这类只有发起的那条才有的字段
-- 文件没放在评论串自己的文件夹里，或者文件夹里只有回复、没有 `index.mdx`
+- `quote` 和 `block` 都写了
+- 文件没放在评论串自己的文件夹里，文件夹里只有回复、没有发起的那条，或者 `index.md` 与 `index.mdx` 都有
 - `page` 写的页面不存在
 
-`quote` 在页面上找不到（原文改过了）不算错：卡片照样显示，排在正文顶端，上面写着「原文找不到了」和原来的那段文字。
-
-## 页面上怎么显示
-
-宽屏时，有评论的页面把评论栏放在正文和最右边的目录窄条之间：
-
-- 评论栏跟着正文一起滚动，每张卡片和它批的原文对齐，挨得太近就往下让
-- 被批的原文标黄；点卡片或点标黄的原文，选中这个评论串：卡片正好对齐原文、边框变色，原文颜色加深
-- 批整页的评论排在正文顶端
-- 已解决的评论串颜色变淡，原文不标黄
-
-窄屏放不下评论栏，评论串依次列在正文后面，每张卡片上方写出它批的原文。
-
-原文在页面上出现好几次时，对齐第一处。HTML 页面的正文在 iframe 里，评论栏找不到其中的文字，只能批整页。
+网页上的操作出错（页面不存在、编辑别人写的评论、文件名不对）时，接口回原话，显示在卡片里。
 
 ## 在骨架里接上
 
@@ -94,14 +136,19 @@ export const comments = defineCollections({ type: 'doc', dir: 'comments', async:
 
 `app/lib/source.ts` 用 `commentThreadsOf` 把文件分成评论串，再用 `assertCommentPagesExist` 检查批的页面在不在。
 
-`app/routes/page.tsx` 按页面地址取出这一页的评论串，交给 `CommentColumn`（宽屏）与 `CommentList`（窄屏）。
-`docsPagePropsWithSideColumn` 给出传给 `DocsPage` 的设置：正文右边那一列放评论栏（没有评论就不放）和目录窄条。
-正文的容器要带上 `commentScopeProps`，评论栏在它里面找原文：
+`app/lib/commenter.server.ts` 的 `pageCommenter()` 在开发服务里返回 `currentCommenter()`（本机 git 的 `user.name`），发布出去的站返回 `null`。
+布局路由与内容页路由的 `loader` 都返回它：布局传给 `themeSwitchWithCommenter` 显示在侧栏底部，内容页传给 `PageComments`。
+
+`app/routes/comments.ts` 是评论接口：`action` 调用 `commentRequestResponse` 写文件，`loader` 调用 `commentSourceResponse` 取原文给编辑用。
+接口只改 `comments/` 里的文件，不碰 git。
+
+`app/routes/page.tsx` 按页面地址取出这一页的评论串，正文外面套 `PageComments`；正文的容器要带上 `commentScopeProps`，评论在它里面找原文：
 
 ```tsx title="app/routes/page.tsx"
-<DocsPage toc={toc} {...docsPagePropsWithSideColumn(<CommentColumn threads={threads} renderBody={renderCommentBody} />)}>
-  <DocsBody {...commentScopeProps}>{children}</DocsBody>
-  <CommentList threads={threads} renderBody={renderCommentBody} />
+<DocsPage toc={toc}>
+  <PageComments page={url} threads={threads} commenter={commenter} renderBody={renderCommentBody}>
+    <DocsBody {...commentScopeProps}>{children}</DocsBody>
+  </PageComments>
 </DocsPage>
 ```
 

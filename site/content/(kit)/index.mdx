@@ -18,14 +18,10 @@ icon: BookOpen
 | `./page-sources` | `app/lib/source.ts`、页面路由 | TSX 页面与 HTML 页面的来源、保留地址检查、内容文件的地址，见[三种页面](/page-types) |
 | `./comments` | `app/lib/collections.ts`、`app/lib/source.ts`、页面路由 | 评论文件的 frontmatter 校验、按文件夹分成评论串、检查评论批的页面在不在，见[评论](/comments) |
 | `./server` | `app/routes/search.ts`、`app/routes/content-file.ts` | 中文站点用的搜索接口 `siteSearchServer`；把 `content/` 里的文件原样送给浏览器 |
-| `./ui` | `app/root.tsx`、布局与页面路由 | TSX 页面与 HTML 页面的正文组件、评论栏、目录窄条、fumadocs 界面文字的中文 |
+| `./ui` | `app/root.tsx`、布局与页面路由 | TSX 页面与 HTML 页面的正文组件、页面上的评论、侧栏底部的身份、fumadocs 界面文字的中文 |
 | `./styles.css` | `app/app.css` | 让 Tailwind 扫到包里组件用的类名；评论原文的高亮颜色 |
 
-布局用 fumadocs 默认的 docs 布局：左侧侧栏里从上到下是站名、搜索、切换下拉框、页面树，主题切换在侧栏底部。
-
-本页目录照 Notion 的做法，在页面最右边是一根窄条：每个标题一根短横线，级别越低越短，读到的那几根亮起来；
-鼠标移上去，左边弹出完整目录，点一条跳过去。窄条只占很窄一列，评论栏可以放在正文和它之间，互不遮挡。
-窄屏不显示窄条，用正文上方的下拉条。
+布局用 fumadocs 默认的 docs 布局：左侧侧栏里从上到下是站名、搜索、切换下拉框、页面树，侧栏底部那一栏左边是写评论的人（本机开发时才有）、右边是主题切换；本页目录在正文右边。
 骨架直接引用这个布局，包里不另外包一层。
 
 `meta.json` 写了 `"root": true` 的文件夹，是侧栏里切换下拉框的一项，切换后侧栏只列那个文件夹里的页面。
