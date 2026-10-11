@@ -16,16 +16,24 @@ E-2 依赖登记），实验目录在单元里的 docsite-kit 仓 `../docsite-ki
 
 ## 结论与边界
 
-**E-8 机制成立**。集合开 `postprocess: { includeProcessedMarkdown: { output: 'function', headingIds: false } }`，
-命令行脚本用 `createServer({ middlewareMode: true, appType: 'custom' })` 加载站点、`docs.getPage(path).load()`，
-async 集合的导出在 `mod._exports._markdown`，`renderToMarkdown(createElement(_markdown,
-{ components: jsxComponents(组件表) }))` 渲成文字。组件里的 `asMarkdown()` 给出自己的机读文字；
+**E-8 机制成立；补做改用公开接口后输出逐字节一致**。集合开
+`postprocess: { includeProcessedMarkdown: { output: 'function', headingIds: false } }`，命令行脚本用
+`createServer({ middlewareMode: true, appType: 'custom' })` 加载站点、`docs.getPage(path)`。
+**补做后走公开接口** `page.getText('processed', { components: jsxComponents(组件表) })`（集合条目的
+顶层方法，`'processed'` 只在集合开了 includeProcessedMarkdown 时可用、`components` 只在
+`output: 'function'` 时可用；它内部取 `_markdown` 组件并 renderToMarkdown——第一轮手写的
+`mod._exports._markdown` + `createElement` + `renderToMarkdown` 那套被它包好了）。**输出与第一轮
+逐字节一致**：单页与全部 31 页（含 E-1 的 6 份正本）git diff 都是 0 行，同时验证了插件挪到
+source.config.ts 后编译结果不变。组件里的 `asMarkdown()` 给出自己的机读文字；
 `'use client'` 文件在 React Router 非 RSC 模式下照常执行（模块照常在 Node 端加载，`asMarkdown()`
 照常为真）；不调 `asMarkdown` 的组件在输出里**原样保留 JSX**，可靠找法是扫输出里残留的大写标签
 （实测精确点名）——D-16 的「组件有没有给出 Markdown 形式」用这个检查。钉码的 `replaceSource` 登记文字
 进了输出（用独特标记验证走的是登记、不是组件渲染兜底）：登记必须挂在**原节点**上（无 position 的编辑
-被忽略），替换出的外层组件继承原 position，与 remarkLLMs 的 marker 同 range 时预登记先应用。
-耗时：1 页总 2300 ms（Vite 启动 951 ms）、25 页总 2589 ms（每页 10–16 ms），一次启动可复用。
+被忽略），替换出的外层组件继承原 position，与 remarkLLMs 的 marker 同 range 时预登记先应用；外层组件
+（PinBlock 一类）要注册进站点的 mdx-components 表，否则该页浏览器端渲染报
+`Expected component … to be defined`。
+耗时：第一轮 1 页 2300 ms / 25 页 2589 ms；补做（公开接口）1 页 2721 ms / 31 页 4073 ms——
+每次跑的主要成本是 Vite 启动约 1–1.6 s，页面渲染每页 10–350 ms，一次启动可复用。
 坑：`@/` 别名对 content/ 下 mdx 的 import 不生效（dev 与 middlewareMode 都 500），正本要用相对路径。
 
 **E-1 输出一致**。6 份正本（README、AGENTS、CLAUDE 与三份 SKILL 的正本）经新流水线的输出与现在
@@ -40,10 +48,18 @@ async 集合的导出在 `mod._exports._markdown`，`renderToMarkdown(createElem
 `file.data._compiler.addDependency(文件绝对路径)` 登记的文件，改动后 1 秒内触发重编（页面更新）；
 登记目录则目录里增、删文件都不触发。要生效需要 Vite 插件：`configureServer` 里 `watcher.add(dir)`，
 `add`/`unlink` 事件桥接成被钉文件的 change 事件走正常失效链——加了以后增删都在 1 秒内生效。
+**当晚补做修正挂法**：Node-only 插件（node:fs）静态 import 写进 `app/lib/source.ts`（浏览器端也
+加载它）会让客户端模块图带进 node:fs、**整站 hydration 死**（SSR 正常、页面看着是好的，点按钮与
+客户端导航才暴露）；mdxOptions 改异步函数内动态 import 又让宏求值报 `Vite module runner has been
+closed`。**可行写法是插件放全局 `source.config.ts`**（只构建期在 Node 加载），同一个 applyMdxPreset、
+插件顺序不变，编译输出逐字节不变。D-05 的「挂各集合的 mdxOptions」要按这条修正为全局配置（或等
+fumadocs-mdx 支持浏览器安全的集合级挂法）。
 
 ## 依据
 
 实验目录在 docsite-kit 仓：`../docsite-kit/probes/2610111754_fumadocs-16-17-1/`（README 有运行方法）。
-E-8 观察记录 `runs/30-e8-notes.md`、输出 `out/e8/`；E-1 记录 `runs/31-e1-notes.md`、比对报告
-`out/e1-compare-report.txt`；E-2 记录 `runs/28-e2-notes.md`。E-1 对照的本仓生成物是 2026-10-11 的
-工作区状态（README.md、AGENTS.md、CLAUDE.md 与 `plugins/docfirst/skills/*/SKILL.md`）。
+E-8 观察记录 `runs/30-e8-notes.md`、补做记录 `runs/40-e8-public-api-notes.md`、输出 `out/e8/`；
+E-1 记录 `runs/31-e1-notes.md`、比对报告 `out/e1-compare-report.txt`；E-2 记录 `runs/28-e2-notes.md`、
+挂法修正的证据在 `runs/36`–`39`（hydration 死与 source.config.ts 修复）。
+E-1 对照的本仓生成物是 2026-10-11 的工作区状态（README.md、AGENTS.md、CLAUDE.md 与
+`plugins/docfirst/skills/*/SKILL.md`）。
