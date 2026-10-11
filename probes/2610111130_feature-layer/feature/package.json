@@ -1,0 +1,15 @@
+{
+  "name": "@probe/feature",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "试验用的假功能包：路由列表、放在包里的路由模块（一个只用包自己的东西，一个经别名读站点的页面树）",
+  "exports": {
+    "./routes": { "types": "./routes.d.ts", "default": "./routes.js" },
+    "./pages/*": "./pages/*"
+  },
+  "peerDependencies": {
+    "react": "^19.3.0",
+    "react-router": "^8.4.0"
+  }
+}

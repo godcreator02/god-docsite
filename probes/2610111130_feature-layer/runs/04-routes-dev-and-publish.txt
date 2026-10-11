@@ -1,0 +1,26 @@
+probe-routes.mjs 的输出（状态码、有没有标记、路径、页面里的那一行）。路由表用真实路径（app/routes.ts 现在的写法）。
+
+开发服务 http://127.0.0.1:4439/
+200 有标记 /
+200 有标记 /second
+200 有标记 /probe/in-package
+200 有标记 /probe/via-alias 经别名读到的页面：/、/second
+200 有标记 /probe/journal/2026-10-11 第二个集合文件里的日志：
+
+发布（pnpm build 后 pnpm start，PORT=4438）http://127.0.0.1:4438/
+200 有标记 /
+200 有标记 /second
+200 有标记 /probe/in-package
+200 有标记 /probe/via-alias 经别名读到的页面：/、/second
+200 有标记 /probe/journal/2026-10-11 第二个集合文件里的日志：
+
+日志那一行后面的日期被 React 的文字节点分隔截断，不是空的；浏览器里读到的是「第二个集合文件里的日志：2026-10-11.mdx」。
+
+浏览器里客户端跳转（window.__reactRouterDataRouter.navigate），开发服务与发布两边结果相同，控制台没有报错：
+/probe/via-alias            经别名读到的页面：/、/second
+/probe/in-package           包里的路由模块：loader 运行了
+/probe/journal/2026-10-11   第二个集合文件里的日志：2026-10-11.mdx / 今天的试验日志：日志正文渲染出来了
+
+路由表写符号链接路径（node_modules/@probe/feature/...）时：开发服务与上面一样全通过，
+pnpm build 报 Chunk not found（runs/01-build-symlink-path.log），via-alias 的浏览器端文件 635 KB（服务端代码没剥掉）；
+改成真实路径后构建通过，via-alias 的浏览器端文件 0.32 KB（runs/02-build-real-path.log）。

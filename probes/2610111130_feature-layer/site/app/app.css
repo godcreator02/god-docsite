@@ -1,0 +1,4 @@
+@import 'tailwindcss';
+@import '@fumadocs/base-ui/css/neutral.css';
+@import '@fumadocs/base-ui/css/preset.css';
+@import '@godcreator/docsite-kit/styles.css';
