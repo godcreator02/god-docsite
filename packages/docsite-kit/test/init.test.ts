@@ -58,7 +58,7 @@ describe('writeSiteSkeleton', () => {
     expect(readText('app/lib/journal.ts')).toBe('export const journal = 1\n')
     expect(readText('.gitignore')).toContain('node_modules/')
     expect(readText('people.json')).toBe('[{"id":"a","name":"甲"}]\n')
-    expect(readdirSync(path.join(siteDir, 'comments'))).toEqual(['.gitkeep'])
+    expect(existsSync(path.join(siteDir, 'comments'))).toBe(false)
     expect(readText('journal/first.mdx')).toBe('第一篇\n')
     expect(readText('content/index.mdx')).toBe('首页\n')
     expect(readText('app/site/features.ts')).toContain(`export const siteFeatures: string[] = ['${featureName}']`)

@@ -26,7 +26,7 @@ gwb-docsite 的命令 `docsite.site.init`（别的插件调服务 `gwbDocsite.in
 | 目录 | 写进站点时 |
 | --- | --- |
 | `template/skeleton/` | 每次整份覆盖，`app/` 先整个删掉再写。`package.json` 不整份覆盖：脚本与依赖合并进站点的，同名的照模板，`dev` 保留站点自己的端口。`gitignore` 写成 `.gitignore`：发布到源上的包不带 `.gitignore` |
-| `template/initial/` | 顶层的文件或目录在站点里还没有时才写：`people.json`、`comments/` |
+| `template/initial/` | 顶层的文件或目录在站点里还没有时才写：基础包的只有 `people.json`。`comments/` 不预先建，写第一条评论时建出来 |
 
 `content/`、`comments/`、`people.json` 由站点自己维护，初始化不碰已有的。`app/` 里不放自己的文件：下次初始化会删掉。
 
