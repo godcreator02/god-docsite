@@ -1,0 +1,52 @@
+---
+born-at: 2026-10-11T19:40
+type: evidence
+parent: [2026-10-10-docsite-kit]
+label: 基础包改造前的五个探针：页面清单增删、评论 tsx、feeds 写文件、库共用上下文、复制布局
+domain: 骨架
+---
+
+## 背景
+
+文档站基础包与 docfirst 要照 `design/30-refactor-plan.html` 重做（fumadocs 升 16.17.1、fumadocs-mdx 15.4.7，
+机制 M1–M5），第 1 批（K-01 到 K-14）动工前有五个点从源码推不出结论：E-3 评论文件夹里的 `.tsx`、
+E-4 构建好的库与站点共用 React 上下文要不要 `ssr.noExternal`、E-5 增删内容文件页面清单会不会自动更新、
+E-6 `customise` 复制布局后宽屏与侧栏停组能不能做、E-7 `feeds/` 写文件当集合读的更新方式。
+全部在 fumadocs 官方 react-router 示例搭的探针站上做，不加基础包、不加自写 Vite 插件（E-4/E-6/E-7 各自的改动除外）。
+
+## 结论与边界
+
+**E-5 增删内容文件：fumadocs-mdx 自己处理不了（K-04 的「文件增删后让模块失效」要保留）**。新建 mdx
+不触发任何重编译，侧栏与页面树不变、新地址 404，等 22 秒也不出现，要重启 dev 才进清单；改已有文件的标题
+1 秒内生效，但方式是整页刷新（mdx 模块不能 Fast Refresh）；删除已有文件更糟——侧栏清掉了该页，集合的
+虚拟模块却仍引用它，SSR 报 `Failed to load url … only=frontmatter`，整站 500 不自愈，重启才恢复。
+失效时机要在集合虚拟模块重新解析之前，否则就是删除后看到的 500。
+
+**E-3 评论里的 `.tsx`：成立，条件是新增评论文件夹要重启（K-05 照此设计）**。评论集合（`type: 'doc'`、
+`async: true`）里 `index.mdx` import 同文件夹的动画组件，dev 下整页渲染、组件进 SSR HTML、改它整页刷新生效；
+build + start 下同样正常。dev 运行时复制出的新评论文件夹 15 秒内不出现，与 E-5 新建文件同根。
+无 schema 时条目把 frontmatter 字段摊平在 `entry` 顶层，没有 `entry.data`。
+
+**E-7 feeds 写文件：数据到得快，但每次都是整页刷新（K-08 的「写完马上看到」成立，「不打断页面」不成立）**。
+写 `feeds/demo.json` 后同一秒客户端与服务端同时 page reload，SSR 输出 277 ms 更新，但页面上的计数器归零、
+`window` 标记丢失——页面上未保存的交互状态（评论草稿一类）会丢。另发现 fumadocs-mdx 15.4.7 的 bug：
+`defineCollections({ type: 'meta' })` 单独使用直接 500，宏展开生成的参数名（`meta`）与运行时读的
+（`entries`）对不上，`defineDocs` 内置的 meta 集合不受影响；实验里用手写宏展开的等价形式（eager glob）绕过。
+
+**E-4 库共用上下文：`ssr.noExternal` 仍然必须（K-04 保留点名 noExternal 的部分）**。构建好的 ESM 库
+（对 `fumadocs-ui/contexts/tree` 保持外部 import）不加 noExternal 时 dev 直接 500（Context 双实例，
+"You must wrap this component under <DocsLayout />"）、build 在 prerender 就红；加了以后 dev、build + start、
+浏览器 hydration 全部正常。
+
+**E-6 复制布局：成立（K-09 照此做）**。`@fumadocs/cli@1.7.5 customise` 把布局写进 `app/layouts/` 等
+并自动改写路由的 import，直接可用。全宽用 `DocsPage` 自带的 `full` prop（右侧目录自动不渲染）加
+container 里 full 分支改 `max-w-none`，一个按钮切换；侧栏停组改复制出的 `page-tree.tsx`：当前地址不在
+页面树里时按缓存的根组名找回那个 root folder 渲染（根组 name 是 revive 出的 React 元素，文字在
+`dangerouslySetInnerHTML.__html` 里）。全程没覆盖 `#nd-*`、没动 `--fd-*`、没塞假页面项。边界：侧栏顶部的
+组下拉不跟随（它的 active 判断基于当前路径，空路径时没有 active 组，下拉不显示）。
+
+## 依据
+
+全部材料在 `probes/2610111754_fumadocs-16-17-1/`（README 有每个实验的运行方法与逐项证据）：
+观察记录 `runs/05-e5-e3-notes.md`、`runs/11-e7-notes.md`、`runs/19-e4-notes.md`、`runs/25-e6-notes.md`
+（含 customise 交互记录与三张验收截图 `out/e6/`），原始日志同目录 `.log` 文件。

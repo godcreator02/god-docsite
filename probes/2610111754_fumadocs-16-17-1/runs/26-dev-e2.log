@@ -1,0 +1,40 @@
+$ react-router dev --port 4446 --host 127.0.0.1
+[restart] Relaunching with --conditions=development
+  [32m➜[39m  [1mLocal[22m:   [36mhttp://127.0.0.1:[1m4446[22m/[39m
+[2m6:46:30 PM[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m connected.
+[2m6:47:02 PM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/app/app.css[22m
+[2m6:47:02 PM[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m [32mpage reload [39m[2mpinned/a.ts[22m
+[2m6:47:54 PM[22m [36m[1m[vite][22m[39m [32mvite.config.ts changed, restarting server...[39m
+[2m6:47:54 PM[22m [36m[1m[vite][22m[39m server restarted.
+[2m6:47:55 PM[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m connected.
+[2m6:48:02 PM[22m [36m[1m[vite][22m[39m [32mvite.config.ts changed, restarting server...[39m
+[2m6:48:02 PM[22m [36m[1m[vite][22m[39m server restarted.
+[2m6:48:02 PM[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m connected.
+[2m6:48:08 PM[22m [36m[1m[vite][22m[39m [32mvite.config.ts changed, restarting server...[39m
+[2m6:48:08 PM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m Re-optimizing dependencies because vite config has changed
+[2m6:48:09 PM[22m [36m[1m[vite][22m[39m server restarted.
+[2m6:48:09 PM[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m connected.
+[2m6:48:12 PM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [optimizer] bundling dependencies...
+[2m6:48:16 PM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mdependencies optimized: [33m@base-ui/react/direction-provider, @base-ui/react/navigation-menu, @fuma-translate/react, class-variance-authority, cn, lucide-react, next-themes[32m[39m
+[2m6:48:17 PM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [optimizer] bundling dependencies...
+[2m6:48:18 PM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mdependencies optimized: [33m@base-ui/react/collapsible, @base-ui/react/dialog, @base-ui/react/popover, @base-ui/react/scroll-area, scroll-into-view-if-needed[32m[39m
+[2m6:48:18 PM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32moptimized dependencies changed. reloading[39m
+[2m6:48:24 PM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/app/app.css[22m
+[2m6:48:24 PM[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m [32mpage reload [39m[2mpinned/a.ts[22m
+[2m6:48:25 PM[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m [32mhmr update [39m[2m/app/app.css[22m
+[2m6:48:25 PM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/app/app.css[22m
+[2m6:48:25 PM[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m [32mpage reload [39m[2mpinned/a.ts[22m
+[2m6:49:47 PM[22m [36m[1m[react-router][22m[39m [32mConfig changed.[39m
+[2m6:49:55 PM[22m [36m[1m[react-router][22m[39m [32mConfig changed.[39m
+[2m6:50:05 PM[22m [36m[1m[react-router][22m[39m [32mConfig changed.[39m
+[2m6:50:06 PM[22m [36m[1m[react-router][22m[39m [32mConfig changed.[39m
+[2m6:50:06 PM[22m [36m[1m[react-router][22m[39m [32mConfig changed.[39m
+[2m6:50:06 PM[22m [36m[1m[react-router][22m[39m [32mConfig changed.[39m
+[2m6:53:50 PM[22m [36m[1m[react-router][22m[39m [32mConfig changed.[39m
+[2m6:53:59 PM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/app/routes/comments.tsx[22m
+[2m6:53:59 PM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/app/routes/comments.tsx[22m
+[2m6:53:59 PM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/app/routes/comments.tsx, /app/app.css[22m
+[2m6:53:59 PM[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m [32mpage reload [39m[2mapp/lib/source.ts[22m
+[2m6:53:59 PM[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m program reload
+[2m6:54:15 PM[22m [36m[1m[react-router][22m[39m [32mConfig changed.[39m
+[ELIFECYCLE] Command failed with exit code 1.

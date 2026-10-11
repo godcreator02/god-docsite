@@ -1,0 +1,17 @@
+@import 'tailwindcss';
+@import 'fumadocs-ui/css/neutral.css';
+@import 'fumadocs-ui/css/preset.css';
+
+html {
+  scrollbar-gutter: stable;
+}
+
+html > body[data-scroll-locked] {
+  margin-right: 0px !important;
+  --removed-body-scroll-bar-size: 0px !important;
+}
+
+/* E-3 探针：评论里 .tsx 组件的 CSS 动画 */
+@keyframes e3-pulse { 0% { background: #fca5a5; } 100% { background: #86efac; } }
+.e3-diagram { display: flex; gap: 8px; align-items: center; padding: 8px 12px; border: 1px solid #888; border-radius: 8px; animation: e3-pulse 1.5s ease-in-out infinite alternate; }
+.e3-dot { width: 10px; height: 10px; border-radius: 9999px; background: currentColor; animation: e3-pulse 1.5s ease-in-out infinite alternate; }

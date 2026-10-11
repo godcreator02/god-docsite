@@ -1,0 +1,85 @@
+$ react-router dev --port 4446 --host 127.0.0.1
+[restart] Relaunching with --conditions=development
+  [32m➜[39m  [1mLocal[22m:   [36mhttp://127.0.0.1:[1m4446[22m/[39m
+[2m6:56:24 PM[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m connected.
+Error: Cannot find module '@/components/e8-a' imported from 'D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/content/docs/e8.mdx'
+    at fetchModule (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/chunks/node.js:36152:32)
+    at RunnableDevEnvironment.fetchModule (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/chunks/node.js:37032:10)
+    at fetchModule (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/chunks/node.js:36965:17)
+    at handleInvoke (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/chunks/node.js:25347:27)
+    at EventEmitter.listenerForInvokeHandler (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/chunks/node.js:25402:19)
+    at EventEmitter.emit (node:events:508:28)
+    at Object.send (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/chunks/node.js:15872:37)
+    at Object.invoke (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/module-runner.js:616:31)
+    at Object.invoke (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/module-runner.js:669:31)
+    at ModuleRunner.getModuleInformation (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/module-runner.js:1228:28) {
+  code: 'ERR_MODULE_NOT_FOUND',
+  runnerError: Error: RunnerError
+      at reviveInvokeError (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/module-runner.js:557:64)
+      at Object.invoke (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/module-runner.js:630:11)
+      at async ModuleRunner.getModuleInformation (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/module-runner.js:1228:7)
+      at async request (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/module-runner.js:1245:83)
+      at async eval (eval at runInlinedModule (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/module-runner.js:825:9), <anonymous>:11:31)
+      at async ESModulesEvaluator.runInlinedModule (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/module-runner.js:825:3)
+      at async ModuleRunner.directRequest (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/module-runner.js:1288:59)
+      at async ModuleRunner.cachedRequest (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/module-runner.js:1195:73)
+      at async Object.load (D:\unitfolders\oz47p-docsite-kit\docsite-kit\probes\2610111754_fumadocs-16-17-1\site\node_modules\.pnpm\fumadocs-mdx@15.4.7_@types+_4cbb2e517fc4b66733860c06f2550baa\node_modules\fumadocs-mdx\dist\runtime\server.js:41:25)
+}
+Error: Cannot find module '@/components/e8-a' imported from 'D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/content/docs/e8.mdx'
+    at fetchModule (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/chunks/node.js:36152:32)
+    at RunnableDevEnvironment.fetchModule (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/chunks/node.js:37032:10)
+    at fetchModule (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/chunks/node.js:36965:17)
+    at handleInvoke (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/chunks/node.js:25347:27)
+    at EventEmitter.listenerForInvokeHandler (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/chunks/node.js:25402:19)
+    at EventEmitter.emit (node:events:508:28)
+    at Object.send (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/chunks/node.js:15872:37)
+    at Object.invoke (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/module-runner.js:616:31)
+    at Object.invoke (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/module-runner.js:669:31)
+    at ModuleRunner.getModuleInformation (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/module-runner.js:1228:28) {
+  code: 'ERR_MODULE_NOT_FOUND',
+  runnerError: Error: RunnerError
+      at reviveInvokeError (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/module-runner.js:557:64)
+      at Object.invoke (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/module-runner.js:630:11)
+      at async ModuleRunner.getModuleInformation (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/module-runner.js:1228:7)
+      at async request (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/module-runner.js:1245:83)
+      at async eval (eval at runInlinedModule (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/module-runner.js:825:9), <anonymous>:11:31)
+      at async ESModulesEvaluator.runInlinedModule (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/module-runner.js:825:3)
+      at async ModuleRunner.directRequest (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/module-runner.js:1288:59)
+      at async ModuleRunner.cachedRequest (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/module-runner.js:1195:73)
+      at async Object.load (D:\unitfolders\oz47p-docsite-kit\docsite-kit\probes\2610111754_fumadocs-16-17-1\site\node_modules\.pnpm\fumadocs-mdx@15.4.7_@types+_4cbb2e517fc4b66733860c06f2550baa\node_modules\fumadocs-mdx\dist\runtime\server.js:41:25)
+}
+[2m6:56:49 PM[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m [32mpage reload [39m[2mcontent/docs/e8.mdx[22m
+[2m6:56:49 PM[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m program reload
+Error: Expected component `PinBlock` to be defined: you likely forgot to import, pass, or provide it.
+It’s referenced in your code at `24:1-24:39` in `D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/content/docs/e8.mdx`
+    at _missingMdxReference (eval at runInlinedModule (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/module-runner.js:825:9), <anonymous>:229:9)
+    at _createMdxContent (eval at runInlinedModule (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/module-runner.js:825:9), <anonymous>:87:18)
+    at MDXContent (eval at runInlinedModule (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/module-runner.js:825:9), <anonymous>:226:14)
+    at Object.react_stack_bottom_frame (D:\unitfolders\oz47p-docsite-kit\docsite-kit\probes\2610111754_fumadocs-16-17-1\site\node_modules\.pnpm\react-dom@19.3.0_react@19.3.0\node_modules\react-dom\cjs\react-dom-server.node.development.js:10940:18)
+    at renderWithHooks (D:\unitfolders\oz47p-docsite-kit\docsite-kit\probes\2610111754_fumadocs-16-17-1\site\node_modules\.pnpm\react-dom@19.3.0_react@19.3.0\node_modules\react-dom\cjs\react-dom-server.node.development.js:5622:19)
+    at renderElement (D:\unitfolders\oz47p-docsite-kit\docsite-kit\probes\2610111754_fumadocs-16-17-1\site\node_modules\.pnpm\react-dom@19.3.0_react@19.3.0\node_modules\react-dom\cjs\react-dom-server.node.development.js:6057:23)
+    at retryNode (D:\unitfolders\oz47p-docsite-kit\docsite-kit\probes\2610111754_fumadocs-16-17-1\site\node_modules\.pnpm\react-dom@19.3.0_react@19.3.0\node_modules\react-dom\cjs\react-dom-server.node.development.js:7088:31)
+    at renderNodeDestructive (D:\unitfolders\oz47p-docsite-kit\docsite-kit\probes\2610111754_fumadocs-16-17-1\site\node_modules\.pnpm\react-dom@19.3.0_react@19.3.0\node_modules\react-dom\cjs\react-dom-server.node.development.js:7033:11)
+    at finishFunctionComponent (D:\unitfolders\oz47p-docsite-kit\docsite-kit\probes\2610111754_fumadocs-16-17-1\site\node_modules\.pnpm\react-dom@19.3.0_react@19.3.0\node_modules\react-dom\cjs\react-dom-server.node.development.js:5666:13)
+    at renderElement (D:\unitfolders\oz47p-docsite-kit\docsite-kit\probes\2610111754_fumadocs-16-17-1\site\node_modules\.pnpm\react-dom@19.3.0_react@19.3.0\node_modules\react-dom\cjs\react-dom-server.node.development.js:6112:11)
+Error: Expected component `PinBlock` to be defined: you likely forgot to import, pass, or provide it.
+It’s referenced in your code at `24:1-24:39` in `D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/content/docs/e8.mdx`
+    at _missingMdxReference (eval at runInlinedModule (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/module-runner.js:825:9), <anonymous>:229:9)
+    at _createMdxContent (eval at runInlinedModule (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/module-runner.js:825:9), <anonymous>:87:18)
+    at MDXContent (eval at runInlinedModule (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/module-runner.js:825:9), <anonymous>:226:14)
+    at Object.react_stack_bottom_frame (D:\unitfolders\oz47p-docsite-kit\docsite-kit\probes\2610111754_fumadocs-16-17-1\site\node_modules\.pnpm\react-dom@19.3.0_react@19.3.0\node_modules\react-dom\cjs\react-dom-server.node.development.js:10940:18)
+    at renderWithHooks (D:\unitfolders\oz47p-docsite-kit\docsite-kit\probes\2610111754_fumadocs-16-17-1\site\node_modules\.pnpm\react-dom@19.3.0_react@19.3.0\node_modules\react-dom\cjs\react-dom-server.node.development.js:5622:19)
+    at renderElement (D:\unitfolders\oz47p-docsite-kit\docsite-kit\probes\2610111754_fumadocs-16-17-1\site\node_modules\.pnpm\react-dom@19.3.0_react@19.3.0\node_modules\react-dom\cjs\react-dom-server.node.development.js:6057:23)
+    at retryNode (D:\unitfolders\oz47p-docsite-kit\docsite-kit\probes\2610111754_fumadocs-16-17-1\site\node_modules\.pnpm\react-dom@19.3.0_react@19.3.0\node_modules\react-dom\cjs\react-dom-server.node.development.js:7088:31)
+    at renderNodeDestructive (D:\unitfolders\oz47p-docsite-kit\docsite-kit\probes\2610111754_fumadocs-16-17-1\site\node_modules\.pnpm\react-dom@19.3.0_react@19.3.0\node_modules\react-dom\cjs\react-dom-server.node.development.js:7033:11)
+    at finishFunctionComponent (D:\unitfolders\oz47p-docsite-kit\docsite-kit\probes\2610111754_fumadocs-16-17-1\site\node_modules\.pnpm\react-dom@19.3.0_react@19.3.0\node_modules\react-dom\cjs\react-dom-server.node.development.js:5666:13)
+    at renderElement (D:\unitfolders\oz47p-docsite-kit\docsite-kit\probes\2610111754_fumadocs-16-17-1\site\node_modules\.pnpm\react-dom@19.3.0_react@19.3.0\node_modules\react-dom\cjs\react-dom-server.node.development.js:6112:11)
+[2m6:58:07 PM[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m [32mhmr update [39m[2m/app/app.css[22m
+[2m6:58:12 PM[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m [32mpage reload [39m[2mapp/lib/probe-pin.ts[22m
+[2m6:58:12 PM[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m program reload
+[2m6:58:39 PM[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m [32mpage reload [39m[2mapp/lib/probe-pin.ts[22m
+[2m6:58:39 PM[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m program reload
+[2m6:59:14 PM[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m [32mpage reload [39m[2mapp/lib/probe-pin.ts[22m
+[2m6:59:14 PM[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m program reload
+[2m6:59:20 PM[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m [32mhmr update [39m[2m/app/app.css[22m
+[ELIFECYCLE] Command failed with exit code 1.

@@ -1,0 +1,3 @@
+$ react-router-serve ./build/server/index.js
+[react-router-serve] http://localhost:4447 (http://198.18.0.1:4447)
+[ELIFECYCLE] Command failed with exit code 1.

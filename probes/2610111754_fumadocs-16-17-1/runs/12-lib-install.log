@@ -1,0 +1,31 @@
+Progress: resolved 0, reused 1, downloaded 0, added 0
+Progress: resolved 0, reused 6, downloaded 0, added 0
+Progress: resolved 0, reused 131, downloaded 1, added 0
+Progress: resolved 0, reused 143, downloaded 1, added 0
+Packages are hard linked from the content-addressable store to the virtual store.
+  Content-addressable store is at: D:\.pnpm-store\v11
+  Virtual store is at:             node_modules/.pnpm
+Progress: resolved 1, reused 200, downloaded 1, added 0
+Progress: resolved 130, reused 200, downloaded 1, added 113
+Progress: resolved 198, reused 200, downloaded 1, added 189
+Progress: resolved 201, reused 200, downloaded 1, added 195
+Progress: resolved 201, reused 200, downloaded 1, added 196
+Packages: +201
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+Progress: resolved 201, reused 200, downloaded 1, added 201, done
+
+dependencies:
++ fumadocs-ui 16.17.1
++ react 19.3.0
+
+devDependencies:
++ @types/react 19.3.0
++ typescript 7.0.2
+
+Done in 15.9s using pnpm v12.4.2
+$ tsc && node check-dist.mjs
+tsconfig.json(9,5): error TS5011: The common source directory of 'tsconfig.json' is './src'. The 'rootDir' setting must be explicitly set to this or another path to adjust your output's file layout.
+  Visit https://aka.ms/ts6 for migration information.
+[ELIFECYCLE] Command failed with exit code 2.
+$ tsc && node check-dist.mjs
+dist ok: external import 保留，类型已生成

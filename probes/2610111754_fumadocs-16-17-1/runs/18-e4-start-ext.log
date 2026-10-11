@@ -1,0 +1,4 @@
+$ react-router-serve ./build/server/index.js
+[react-router-serve] http://localhost:4447 (http://198.18.0.1:4447)
+GET /__manifest?paths=%2F%2C%2Fdocs%2C%2Fdocs%2Ftest&version=7fdd55a4 200 - - 14.051 ms
+[ELIFECYCLE] Command failed with exit code 1.

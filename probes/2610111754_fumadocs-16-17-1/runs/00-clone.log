@@ -1,0 +1,19 @@
+Cloning into '_upstream'...
+Note: switching to 'd6cfc48d62aa9ea413f0fc5033617c0c923681ec'.
+
+You are in 'detached HEAD' state. You can look around, make experimental
+changes and commit them, and you can discard any commits you make in this
+state without impacting any branches by switching back to a branch.
+
+If you want to create a new branch to retain commits you create, you may
+do so (now or later) by using -c with the switch command. Example:
+
+  git switch -c <new-branch-name>
+
+Or undo this operation with:
+
+  git switch -
+
+Turn off this advice by setting config variable advice.detachedHead to false
+
+Updating files:  56% (1513/2662)Updating files:  57% (1518/2662)Updating files:  58% (1544/2662)Updating files:  59% (1571/2662)Updating files:  60% (1598/2662)Updating files:  61% (1624/2662)Updating files:  62% (1651/2662)Updating files:  63% (1678/2662)Updating files:  64% (1704/2662)Updating files:  65% (1731/2662)Updating files:  66% (1757/2662)Updating files:  67% (1784/2662)Updating files:  68% (1811/2662)Updating files:  69% (1837/2662)Updating files:  70% (1864/2662)Updating files:  71% (1891/2662)Updating files:  72% (1917/2662)Updating files:  73% (1944/2662)Updating files:  74% (1970/2662)Updating files:  75% (1997/2662)Updating files:  76% (2024/2662)Updating files:  77% (2050/2662)Updating files:  78% (2077/2662)Updating files:  79% (2103/2662)Updating files:  80% (2130/2662)Updating files:  81% (2157/2662)Updating files:  82% (2183/2662)Updating files:  83% (2210/2662)Updating files:  84% (2237/2662)Updating files:  85% (2263/2662)Updating files:  86% (2290/2662)Updating files:  87% (2316/2662)Updating files:  88% (2343/2662)Updating files:  89% (2370/2662)Updating files:  90% (2396/2662)Updating files:  91% (2423/2662)Updating files:  92% (2450/2662)Updating files:  93% (2476/2662)Updating files:  94% (2503/2662)Updating files:  95% (2529/2662)Updating files:  96% (2556/2662)Updating files:  97% (2583/2662)Updating files:  98% (2609/2662)Updating files:  99% (2636/2662)Updating files: 100% (2662/2662)Updating files: 100% (2662/2662), done.

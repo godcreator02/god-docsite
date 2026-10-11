@@ -1,0 +1,7 @@
+Error: ERR_PNPM_IGNORED_BUILDS
+
+  × installing dependencies
+  ╰─▶ Ignored build scripts: node-pty@1.1.0
+  help: Run "pnpm approve-builds" to pick which dependencies should be allowed
+        to run scripts.
+

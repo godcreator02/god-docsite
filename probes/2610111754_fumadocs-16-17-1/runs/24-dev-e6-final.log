@@ -1,0 +1,277 @@
+$ react-router dev --port 4446 --host 127.0.0.1
+[restart] Relaunching with --conditions=development
+  [32m➜[39m  [1mLocal[22m:   [36mhttp://127.0.0.1:[1m4446[22m/[39m
+[2m6:37:07 PM[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m connected.
+[2m6:38:03 PM[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m [32mpage reload [39m[2mapp/components/docs-sidebar/page-tree.tsx[22m
+[2m6:38:03 PM[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m program reload
+[e6] pathname=/docs/guides/hello path=2 root.type=folder lastRootName=null
+[e6] pathname=/comments path=0 root.type=root lastRootName=[object Object]
+[2m6:38:25 PM[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m [32mpage reload [39m[2mapp/components/docs-sidebar/page-tree.tsx[22m
+[2m6:38:25 PM[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m program reload
+TypeError: Converting circular structure to JSON
+    --> starting at object with constructor 'Object'
+    --- property 'Provider' closes the circle
+    at JSON.stringify (<anonymous>)
+    at SidebarPageTree (D:\unitfolders\oz47p-docsite-kit\docsite-kit\probes\2610111754_fumadocs-16-17-1\site\app\components\docs-sidebar\page-tree.tsx:112:103)
+    at Object.react_stack_bottom_frame (D:\unitfolders\oz47p-docsite-kit\docsite-kit\probes\2610111754_fumadocs-16-17-1\site\node_modules\.pnpm\react-dom@19.3.0_react@19.3.0\node_modules\react-dom\cjs\react-dom-server.node.development.js:10940:18)
+    at renderWithHooks (D:\unitfolders\oz47p-docsite-kit\docsite-kit\probes\2610111754_fumadocs-16-17-1\site\node_modules\.pnpm\react-dom@19.3.0_react@19.3.0\node_modules\react-dom\cjs\react-dom-server.node.development.js:5622:19)
+    at renderElement (D:\unitfolders\oz47p-docsite-kit\docsite-kit\probes\2610111754_fumadocs-16-17-1\site\node_modules\.pnpm\react-dom@19.3.0_react@19.3.0\node_modules\react-dom\cjs\react-dom-server.node.development.js:6057:23)
+    at retryNode (D:\unitfolders\oz47p-docsite-kit\docsite-kit\probes\2610111754_fumadocs-16-17-1\site\node_modules\.pnpm\react-dom@19.3.0_react@19.3.0\node_modules\react-dom\cjs\react-dom-server.node.development.js:7088:31)
+    at renderNodeDestructive (D:\unitfolders\oz47p-docsite-kit\docsite-kit\probes\2610111754_fumadocs-16-17-1\site\node_modules\.pnpm\react-dom@19.3.0_react@19.3.0\node_modules\react-dom\cjs\react-dom-server.node.development.js:7033:11)
+    at renderNode (D:\unitfolders\oz47p-docsite-kit\docsite-kit\probes\2610111754_fumadocs-16-17-1\site\node_modules\.pnpm\react-dom@19.3.0_react@19.3.0\node_modules\react-dom\cjs\react-dom-server.node.development.js:7584:18)
+    at renderChildrenArray (D:\unitfolders\oz47p-docsite-kit\docsite-kit\probes\2610111754_fumadocs-16-17-1\site\node_modules\.pnpm\react-dom@19.3.0_react@19.3.0\node_modules\react-dom\cjs\react-dom-server.node.development.js:7345:11)
+    at retryNode (D:\unitfolders\oz47p-docsite-kit\docsite-kit\probes\2610111754_fumadocs-16-17-1\site\node_modules\.pnpm\react-dom@19.3.0_react@19.3.0\node_modules\react-dom\cjs\react-dom-server.node.development.js:7112:13)
+TypeError: Converting circular structure to JSON
+    --> starting at object with constructor 'Object'
+    --- property 'Provider' closes the circle
+    at JSON.stringify (<anonymous>)
+    at SidebarPageTree (D:\unitfolders\oz47p-docsite-kit\docsite-kit\probes\2610111754_fumadocs-16-17-1\site\app\components\docs-sidebar\page-tree.tsx:112:103)
+    at Object.react_stack_bottom_frame (D:\unitfolders\oz47p-docsite-kit\docsite-kit\probes\2610111754_fumadocs-16-17-1\site\node_modules\.pnpm\react-dom@19.3.0_react@19.3.0\node_modules\react-dom\cjs\react-dom-server.node.development.js:10940:18)
+    at renderWithHooks (D:\unitfolders\oz47p-docsite-kit\docsite-kit\probes\2610111754_fumadocs-16-17-1\site\node_modules\.pnpm\react-dom@19.3.0_react@19.3.0\node_modules\react-dom\cjs\react-dom-server.node.development.js:5622:19)
+    at renderElement (D:\unitfolders\oz47p-docsite-kit\docsite-kit\probes\2610111754_fumadocs-16-17-1\site\node_modules\.pnpm\react-dom@19.3.0_react@19.3.0\node_modules\react-dom\cjs\react-dom-server.node.development.js:6057:23)
+    at retryNode (D:\unitfolders\oz47p-docsite-kit\docsite-kit\probes\2610111754_fumadocs-16-17-1\site\node_modules\.pnpm\react-dom@19.3.0_react@19.3.0\node_modules\react-dom\cjs\react-dom-server.node.development.js:7088:31)
+    at renderNodeDestructive (D:\unitfolders\oz47p-docsite-kit\docsite-kit\probes\2610111754_fumadocs-16-17-1\site\node_modules\.pnpm\react-dom@19.3.0_react@19.3.0\node_modules\react-dom\cjs\react-dom-server.node.development.js:7033:11)
+    at renderNode (D:\unitfolders\oz47p-docsite-kit\docsite-kit\probes\2610111754_fumadocs-16-17-1\site\node_modules\.pnpm\react-dom@19.3.0_react@19.3.0\node_modules\react-dom\cjs\react-dom-server.node.development.js:7584:18)
+    at renderChildrenArray (D:\unitfolders\oz47p-docsite-kit\docsite-kit\probes\2610111754_fumadocs-16-17-1\site\node_modules\.pnpm\react-dom@19.3.0_react@19.3.0\node_modules\react-dom\cjs\react-dom-server.node.development.js:7345:11)
+    at retryNode (D:\unitfolders\oz47p-docsite-kit\docsite-kit\probes\2610111754_fumadocs-16-17-1\site\node_modules\.pnpm\react-dom@19.3.0_react@19.3.0\node_modules\react-dom\cjs\react-dom-server.node.development.js:7112:13)
+TypeError: Converting circular structure to JSON
+    --> starting at object with constructor 'Object'
+    --- property 'Provider' closes the circle
+    at JSON.stringify (<anonymous>)
+    at SidebarPageTree (D:\unitfolders\oz47p-docsite-kit\docsite-kit\probes\2610111754_fumadocs-16-17-1\site\app\components\docs-sidebar\page-tree.tsx:112:103)
+    at Object.react_stack_bottom_frame (D:\unitfolders\oz47p-docsite-kit\docsite-kit\probes\2610111754_fumadocs-16-17-1\site\node_modules\.pnpm\react-dom@19.3.0_react@19.3.0\node_modules\react-dom\cjs\react-dom-server.node.development.js:10940:18)
+    at renderWithHooks (D:\unitfolders\oz47p-docsite-kit\docsite-kit\probes\2610111754_fumadocs-16-17-1\site\node_modules\.pnpm\react-dom@19.3.0_react@19.3.0\node_modules\react-dom\cjs\react-dom-server.node.development.js:5622:19)
+    at renderElement (D:\unitfolders\oz47p-docsite-kit\docsite-kit\probes\2610111754_fumadocs-16-17-1\site\node_modules\.pnpm\react-dom@19.3.0_react@19.3.0\node_modules\react-dom\cjs\react-dom-server.node.development.js:6057:23)
+    at retryNode (D:\unitfolders\oz47p-docsite-kit\docsite-kit\probes\2610111754_fumadocs-16-17-1\site\node_modules\.pnpm\react-dom@19.3.0_react@19.3.0\node_modules\react-dom\cjs\react-dom-server.node.development.js:7088:31)
+    at renderNodeDestructive (D:\unitfolders\oz47p-docsite-kit\docsite-kit\probes\2610111754_fumadocs-16-17-1\site\node_modules\.pnpm\react-dom@19.3.0_react@19.3.0\node_modules\react-dom\cjs\react-dom-server.node.development.js:7033:11)
+    at renderNode (D:\unitfolders\oz47p-docsite-kit\docsite-kit\probes\2610111754_fumadocs-16-17-1\site\node_modules\.pnpm\react-dom@19.3.0_react@19.3.0\node_modules\react-dom\cjs\react-dom-server.node.development.js:7584:18)
+    at renderChildrenArray (D:\unitfolders\oz47p-docsite-kit\docsite-kit\probes\2610111754_fumadocs-16-17-1\site\node_modules\.pnpm\react-dom@19.3.0_react@19.3.0\node_modules\react-dom\cjs\react-dom-server.node.development.js:7345:11)
+    at retryNode (D:\unitfolders\oz47p-docsite-kit\docsite-kit\probes\2610111754_fumadocs-16-17-1\site\node_modules\.pnpm\react-dom@19.3.0_react@19.3.0\node_modules\react-dom\cjs\react-dom-server.node.development.js:7112:13)
+TypeError: Converting circular structure to JSON
+    --> starting at object with constructor 'Object'
+    --- property 'Provider' closes the circle
+    at JSON.stringify (<anonymous>)
+    at SidebarPageTree (D:\unitfolders\oz47p-docsite-kit\docsite-kit\probes\2610111754_fumadocs-16-17-1\site\app\components\docs-sidebar\page-tree.tsx:112:103)
+    at Object.react_stack_bottom_frame (D:\unitfolders\oz47p-docsite-kit\docsite-kit\probes\2610111754_fumadocs-16-17-1\site\node_modules\.pnpm\react-dom@19.3.0_react@19.3.0\node_modules\react-dom\cjs\react-dom-server.node.development.js:10940:18)
+    at renderWithHooks (D:\unitfolders\oz47p-docsite-kit\docsite-kit\probes\2610111754_fumadocs-16-17-1\site\node_modules\.pnpm\react-dom@19.3.0_react@19.3.0\node_modules\react-dom\cjs\react-dom-server.node.development.js:5622:19)
+    at renderElement (D:\unitfolders\oz47p-docsite-kit\docsite-kit\probes\2610111754_fumadocs-16-17-1\site\node_modules\.pnpm\react-dom@19.3.0_react@19.3.0\node_modules\react-dom\cjs\react-dom-server.node.development.js:6057:23)
+    at retryNode (D:\unitfolders\oz47p-docsite-kit\docsite-kit\probes\2610111754_fumadocs-16-17-1\site\node_modules\.pnpm\react-dom@19.3.0_react@19.3.0\node_modules\react-dom\cjs\react-dom-server.node.development.js:7088:31)
+    at renderNodeDestructive (D:\unitfolders\oz47p-docsite-kit\docsite-kit\probes\2610111754_fumadocs-16-17-1\site\node_modules\.pnpm\react-dom@19.3.0_react@19.3.0\node_modules\react-dom\cjs\react-dom-server.node.development.js:7033:11)
+    at renderNode (D:\unitfolders\oz47p-docsite-kit\docsite-kit\probes\2610111754_fumadocs-16-17-1\site\node_modules\.pnpm\react-dom@19.3.0_react@19.3.0\node_modules\react-dom\cjs\react-dom-server.node.development.js:7584:18)
+    at renderChildrenArray (D:\unitfolders\oz47p-docsite-kit\docsite-kit\probes\2610111754_fumadocs-16-17-1\site\node_modules\.pnpm\react-dom@19.3.0_react@19.3.0\node_modules\react-dom\cjs\react-dom-server.node.development.js:7345:11)
+    at retryNode (D:\unitfolders\oz47p-docsite-kit\docsite-kit\probes\2610111754_fumadocs-16-17-1\site\node_modules\.pnpm\react-dom@19.3.0_react@19.3.0\node_modules\react-dom\cjs\react-dom-server.node.development.js:7112:13)
+[2m6:39:21 PM[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m [32mpage reload [39m[2mapp/components/docs-sidebar/page-tree.tsx[22m
+[2m6:39:21 PM[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m program reload
+[e6] pathname=/docs/guides/world path=2 root.type=folder rootNameKeys=$$typeof,type,key,props,_owner,_store lastRootName=(obj)
+[2m6:39:37 PM[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m [32mpage reload [39m[2mapp/components/docs-sidebar/page-tree.tsx[22m
+[2m6:39:37 PM[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m program reload
+[2m6:39:43 PM[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m [32mpage reload [39m[2mapp/components/docs-sidebar/page-tree.tsx[22m
+[2m6:39:43 PM[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m program reload
+[2m6:39:57 PM[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m [32mpage reload [39m[2mapp/components/docs-sidebar/page-tree.tsx[22m
+[2m6:39:57 PM[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m program reload
+[e6] in-tree pathname=/docs/guides/hello root.type=folder nameText=""
+[2m6:40:14 PM[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m [32mpage reload [39m[2mapp/components/docs-sidebar/page-tree.tsx[22m
+[2m6:40:14 PM[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m program reload
+[e6] in-tree pathname=/docs/guides/hello root.type=folder nameText="" nameProps=["className","dangerouslySetInnerHTML"] nameType=span childrenSample=""
+[2m6:40:32 PM[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m [32mpage reload [39m[2mapp/components/docs-sidebar/page-tree.tsx[22m
+[2m6:40:32 PM[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m program reload
+[e6] in-tree pathname=/docs/guides/hello root.type=folder nameText="指南" nameProps=["className","dangerouslySetInnerHTML"] nameType=span childrenSample=""
+[e6] off-tree pathname=/comments lastRootName="指南"
+[2m6:40:52 PM[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m [32mpage reload [39m[2mapp/components/docs-sidebar/page-tree.tsx[22m
+[2m6:40:52 PM[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m program reload
+[2m6:44:09 PM[22m [36m[1m[react-router][22m[39m [32mConfig changed.[39m
+[2m6:44:15 PM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/app/routes/docs.tsx, /content/docs/guides/hello.mdx?macro_id=app%2Flib%2Fsource.ts%23docs, /app/routes/comments.tsx, /comments/t1/index.mdx?macro_id=app%2Flib%2Fsource.ts%23comments, /comments/t2/index.mdx?macro_id=app%2Flib%2Fsource.ts%23comments[22m
+[2m6:44:15 PM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/app/routes/docs.tsx, /content/docs/guides/hello.mdx?macro_id=app%2Flib%2Fsource.ts%23docs, /app/routes/comments.tsx, /comments/t1/index.mdx?macro_id=app%2Flib%2Fsource.ts%23comments, /comments/t2/index.mdx?macro_id=app%2Flib%2Fsource.ts%23comments[22m
+[2m6:44:15 PM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/app/routes/docs.tsx, /content/docs/guides/hello.mdx?macro_id=app%2Flib%2Fsource.ts%23docs, /app/routes/comments.tsx, /comments/t1/index.mdx?macro_id=app%2Flib%2Fsource.ts%23comments, /comments/t2/index.mdx?macro_id=app%2Flib%2Fsource.ts%23comments, /app/app.css[22m
+[2m6:44:15 PM[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m [32mpage reload [39m[2mapp/lib/source.ts[22m
+[2m6:44:15 PM[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m program reload
+[2m6:44:15 PM[22m [31m[1m[vite][22m[39m [31mInternal server error: [vite] The requested module 'fumadocs-mdx' does not provide an export named 'applyMdxPreset'[39m
+  Plugin: [35mfumadocs-mdx:mdx[39m
+  File: [36mD:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/content/docs/guides/hello.mdx?macro_id=app%2Flib%2Fsource.ts%23docs[39m
+      at analyzeImportedModDifference (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/module-runner.js:729:10)
+      at ModuleRunner.processImport (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/module-runner.js:1174:54)
+      at ModuleRunner.cachedRequest (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/module-runner.js:1195:59)
+      at async eval (D:\unitfolders\oz47p-docsite-kit\docsite-kit\probes\2610111754_fumadocs-16-17-1\site\app\lib\source.ts:3:1)
+      at async ESModulesEvaluator.runInlinedModule (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/module-runner.js:825:3)
+      at async ModuleRunner.directRequest (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/module-runner.js:1288:59)
+      at async ModuleRunner.cachedRequest (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/module-runner.js:1195:73)
+      at async ModuleRunner.import (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/module-runner.js:1150:10)
+      at async runnerImport (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/chunks/node.js:37205:18)
+      at async MacroCollector.evaluator (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/fumadocs-mdx@15.4.7_@types+_4cbb2e517fc4b66733860c06f2550baa/node_modules/fumadocs-mdx/dist/vite/index.js:16:28)
+      at async MacroCollector.evaluate (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/fumadocs-mdx@15.4.7_@types+_4cbb2e517fc4b66733860c06f2550baa/node_modules/fumadocs-mdx/dist/eval-DxGmVc3G.js:146:14)
+[2m6:44:15 PM[22m [31m[1m[vite][22m[39m [31mInternal server error: [vite] The requested module 'fumadocs-mdx' does not provide an export named 'applyMdxPreset'[39m
+  Plugin: [35mfumadocs-mdx:mdx[39m
+  File: [36mD:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/comments/t1/index.mdx?macro_id=app%2Flib%2Fsource.ts%23comments[39m
+      at analyzeImportedModDifference (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/module-runner.js:729:10)
+      at ModuleRunner.processImport (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/module-runner.js:1174:54)
+      at ModuleRunner.cachedRequest (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/module-runner.js:1195:59)
+      at async eval (D:\unitfolders\oz47p-docsite-kit\docsite-kit\probes\2610111754_fumadocs-16-17-1\site\app\lib\source.ts:3:1)
+      at async ESModulesEvaluator.runInlinedModule (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/module-runner.js:825:3)
+      at async ModuleRunner.directRequest (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/module-runner.js:1288:59)
+      at async ModuleRunner.cachedRequest (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/module-runner.js:1195:73)
+      at async ModuleRunner.import (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/module-runner.js:1150:10)
+      at async runnerImport (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/chunks/node.js:37205:18)
+      at async MacroCollector.evaluator (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/fumadocs-mdx@15.4.7_@types+_4cbb2e517fc4b66733860c06f2550baa/node_modules/fumadocs-mdx/dist/vite/index.js:16:28)
+      at async MacroCollector.evaluate (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/fumadocs-mdx@15.4.7_@types+_4cbb2e517fc4b66733860c06f2550baa/node_modules/fumadocs-mdx/dist/eval-DxGmVc3G.js:146:14)
+[2m6:44:15 PM[22m [31m[1m[vite][22m[39m [31mInternal server error: [vite] The requested module 'fumadocs-mdx' does not provide an export named 'applyMdxPreset'[39m
+  Plugin: [35mfumadocs-mdx:mdx[39m
+  File: [36mD:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/comments/t2/index.mdx?macro_id=app%2Flib%2Fsource.ts%23comments[39m
+      at analyzeImportedModDifference (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/module-runner.js:729:10)
+      at ModuleRunner.processImport (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/module-runner.js:1174:54)
+      at ModuleRunner.cachedRequest (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/module-runner.js:1195:59)
+      at async eval (D:\unitfolders\oz47p-docsite-kit\docsite-kit\probes\2610111754_fumadocs-16-17-1\site\app\lib\source.ts:3:1)
+      at async ESModulesEvaluator.runInlinedModule (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/module-runner.js:825:3)
+      at async ModuleRunner.directRequest (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/module-runner.js:1288:59)
+      at async ModuleRunner.cachedRequest (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/module-runner.js:1195:73)
+      at async ModuleRunner.import (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/module-runner.js:1150:10)
+      at async runnerImport (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/chunks/node.js:37205:18)
+      at async MacroCollector.evaluator (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/fumadocs-mdx@15.4.7_@types+_4cbb2e517fc4b66733860c06f2550baa/node_modules/fumadocs-mdx/dist/vite/index.js:16:28)
+      at async MacroCollector.evaluate (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/fumadocs-mdx@15.4.7_@types+_4cbb2e517fc4b66733860c06f2550baa/node_modules/fumadocs-mdx/dist/eval-DxGmVc3G.js:146:14)
+[2m6:44:15 PM[22m [31m[1m[vite][22m[39m [31mInternal server error: [vite] The requested module 'fumadocs-mdx' does not provide an export named 'applyMdxPreset'[39m
+  Plugin: [35mfumadocs-mdx:mdx[39m
+  File: [36mD:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/content/docs/guides/world.mdx?macro_id=app%2Flib%2Fsource.ts%23docs&only=frontmatter[39m
+      at analyzeImportedModDifference (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/module-runner.js:729:10)
+      at ModuleRunner.processImport (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/module-runner.js:1174:54)
+      at ModuleRunner.cachedRequest (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/module-runner.js:1195:59)
+      at async eval (D:\unitfolders\oz47p-docsite-kit\docsite-kit\probes\2610111754_fumadocs-16-17-1\site\app\lib\source.ts:3:1)
+      at async ESModulesEvaluator.runInlinedModule (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/module-runner.js:825:3)
+      at async ModuleRunner.directRequest (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/module-runner.js:1288:59)
+      at async ModuleRunner.cachedRequest (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/module-runner.js:1195:73)
+      at async ModuleRunner.import (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/module-runner.js:1150:10)
+      at async runnerImport (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/chunks/node.js:37205:18)
+      at async MacroCollector.evaluator (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/fumadocs-mdx@15.4.7_@types+_4cbb2e517fc4b66733860c06f2550baa/node_modules/fumadocs-mdx/dist/vite/index.js:16:28)
+      at async MacroCollector.evaluate (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/fumadocs-mdx@15.4.7_@types+_4cbb2e517fc4b66733860c06f2550baa/node_modules/fumadocs-mdx/dist/eval-DxGmVc3G.js:146:14)
+[2m6:44:15 PM[22m [31m[1m[vite][22m[39m [31m[2m(client)[22m[39m Pre-transform error: [vite] The requested module 'fumadocs-mdx' does not provide an export named 'applyMdxPreset'
+  Plugin: [35mfumadocs-mdx:mdx[39m
+  File: [36mD:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/content/docs/guides/world.mdx?macro_id=app%2Flib%2Fsource.ts%23docs&only=frontmatter[39m
+[2m6:44:15 PM[22m [31m[1m[vite][22m[39m [31m[2m(client)[22m[39m Pre-transform error: [vite] The requested module 'fumadocs-mdx' does not provide an export named 'applyMdxPreset'
+  Plugin: [35mfumadocs-mdx:mdx[39m
+  File: [36mD:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/comments/t2/index.mdx?macro_id=app%2Flib%2Fsource.ts%23comments&only=frontmatter[39m
+[2m6:44:15 PM[22m [31m[1m[vite][22m[39m [31m[2m(client)[22m[39m Pre-transform error: [vite] The requested module 'fumadocs-mdx' does not provide an export named 'applyMdxPreset'
+  Plugin: [35mfumadocs-mdx:mdx[39m
+  File: [36mD:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/comments/t1/index.mdx?macro_id=app%2Flib%2Fsource.ts%23comments&only=frontmatter[39m
+[2m6:44:15 PM[22m [31m[1m[vite][22m[39m [31mInternal server error: [vite] The requested module 'fumadocs-mdx' does not provide an export named 'applyMdxPreset'[39m
+  Plugin: [35mfumadocs-mdx:mdx[39m
+  File: [36mD:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/content/docs/pin-probe.mdx?macro_id=app%2Flib%2Fsource.ts%23docs&only=frontmatter[39m
+      at analyzeImportedModDifference (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/module-runner.js:729:10)
+      at ModuleRunner.processImport (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/module-runner.js:1174:54)
+      at ModuleRunner.cachedRequest (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/module-runner.js:1195:59)
+      at async eval (D:\unitfolders\oz47p-docsite-kit\docsite-kit\probes\2610111754_fumadocs-16-17-1\site\app\lib\source.ts:3:1)
+      at async ESModulesEvaluator.runInlinedModule (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/module-runner.js:825:3)
+      at async ModuleRunner.directRequest (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/module-runner.js:1288:59)
+      at async ModuleRunner.cachedRequest (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/module-runner.js:1195:73)
+      at async ModuleRunner.import (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/module-runner.js:1150:10)
+      at async runnerImport (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/chunks/node.js:37205:18)
+      at async MacroCollector.evaluator (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/fumadocs-mdx@15.4.7_@types+_4cbb2e517fc4b66733860c06f2550baa/node_modules/fumadocs-mdx/dist/vite/index.js:16:28)
+      at async MacroCollector.evaluate (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/fumadocs-mdx@15.4.7_@types+_4cbb2e517fc4b66733860c06f2550baa/node_modules/fumadocs-mdx/dist/eval-DxGmVc3G.js:146:14)
+[2m6:44:15 PM[22m [31m[1m[vite][22m[39m [31m[2m(client)[22m[39m Pre-transform error: [vite] The requested module 'fumadocs-mdx' does not provide an export named 'applyMdxPreset'
+  Plugin: [35mfumadocs-mdx:mdx[39m
+  File: [36mD:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/content/docs/pin-probe.mdx?macro_id=app%2Flib%2Fsource.ts%23docs&only=frontmatter[39m
+[2m6:44:15 PM[22m [31m[1m[vite][22m[39m [31mInternal server error: [vite] The requested module 'fumadocs-mdx' does not provide an export named 'applyMdxPreset'[39m
+  Plugin: [35mfumadocs-mdx:mdx[39m
+  File: [36mD:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/content/docs/index.mdx?macro_id=app%2Flib%2Fsource.ts%23docs&only=frontmatter[39m
+      at analyzeImportedModDifference (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/module-runner.js:729:10)
+      at ModuleRunner.processImport (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/module-runner.js:1174:54)
+      at ModuleRunner.cachedRequest (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/module-runner.js:1195:59)
+      at async eval (D:\unitfolders\oz47p-docsite-kit\docsite-kit\probes\2610111754_fumadocs-16-17-1\site\app\lib\source.ts:3:1)
+      at async ESModulesEvaluator.runInlinedModule (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/module-runner.js:825:3)
+      at async ModuleRunner.directRequest (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/module-runner.js:1288:59)
+      at async ModuleRunner.cachedRequest (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/module-runner.js:1195:73)
+      at async ModuleRunner.import (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/module-runner.js:1150:10)
+      at async runnerImport (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/chunks/node.js:37205:18)
+      at async MacroCollector.evaluator (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/fumadocs-mdx@15.4.7_@types+_4cbb2e517fc4b66733860c06f2550baa/node_modules/fumadocs-mdx/dist/vite/index.js:16:28)
+      at async MacroCollector.evaluate (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/fumadocs-mdx@15.4.7_@types+_4cbb2e517fc4b66733860c06f2550baa/node_modules/fumadocs-mdx/dist/eval-DxGmVc3G.js:146:14)
+[2m6:44:15 PM[22m [31m[1m[vite][22m[39m [31m[2m(client)[22m[39m Pre-transform error: [vite] The requested module 'fumadocs-mdx' does not provide an export named 'applyMdxPreset'
+  Plugin: [35mfumadocs-mdx:mdx[39m
+  File: [36mD:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/content/docs/index.mdx?macro_id=app%2Flib%2Fsource.ts%23docs&only=frontmatter[39m
+[2m6:44:15 PM[22m [31m[1m[vite][22m[39m [31mInternal server error: [vite] The requested module 'fumadocs-mdx' does not provide an export named 'applyMdxPreset'[39m
+  Plugin: [35mfumadocs-mdx:mdx[39m
+  File: [36mD:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/content/docs/test.mdx?macro_id=app%2Flib%2Fsource.ts%23docs&only=frontmatter[39m
+      at analyzeImportedModDifference (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/module-runner.js:729:10)
+      at ModuleRunner.processImport (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/module-runner.js:1174:54)
+      at ModuleRunner.cachedRequest (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/module-runner.js:1195:59)
+      at async eval (D:\unitfolders\oz47p-docsite-kit\docsite-kit\probes\2610111754_fumadocs-16-17-1\site\app\lib\source.ts:3:1)
+      at async ESModulesEvaluator.runInlinedModule (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/module-runner.js:825:3)
+      at async ModuleRunner.directRequest (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/module-runner.js:1288:59)
+      at async ModuleRunner.cachedRequest (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/module-runner.js:1195:73)
+      at async ModuleRunner.import (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/module-runner.js:1150:10)
+      at async runnerImport (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/chunks/node.js:37205:18)
+      at async MacroCollector.evaluator (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/fumadocs-mdx@15.4.7_@types+_4cbb2e517fc4b66733860c06f2550baa/node_modules/fumadocs-mdx/dist/vite/index.js:16:28)
+      at async MacroCollector.evaluate (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/fumadocs-mdx@15.4.7_@types+_4cbb2e517fc4b66733860c06f2550baa/node_modules/fumadocs-mdx/dist/eval-DxGmVc3G.js:146:14)
+[2m6:44:15 PM[22m [31m[1m[vite][22m[39m [31m[2m(client)[22m[39m Pre-transform error: [vite] The requested module 'fumadocs-mdx' does not provide an export named 'applyMdxPreset'
+  Plugin: [35mfumadocs-mdx:mdx[39m
+  File: [36mD:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/content/docs/test.mdx?macro_id=app%2Flib%2Fsource.ts%23docs&only=frontmatter[39m
+[2m6:44:15 PM[22m [31m[1m[vite][22m[39m [31mInternal server error: [vite] The requested module 'fumadocs-mdx' does not provide an export named 'applyMdxPreset'[39m
+  Plugin: [35mfumadocs-mdx:mdx[39m
+  File: [36mD:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/content/docs/guides/hello.mdx?macro_id=app%2Flib%2Fsource.ts%23docs&only=frontmatter[39m
+      at analyzeImportedModDifference (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/module-runner.js:729:10)
+      at ModuleRunner.processImport (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/module-runner.js:1174:54)
+      at ModuleRunner.cachedRequest (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/module-runner.js:1195:59)
+      at async eval (D:\unitfolders\oz47p-docsite-kit\docsite-kit\probes\2610111754_fumadocs-16-17-1\site\app\lib\source.ts:3:1)
+      at async ESModulesEvaluator.runInlinedModule (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/module-runner.js:825:3)
+      at async ModuleRunner.directRequest (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/module-runner.js:1288:59)
+      at async ModuleRunner.cachedRequest (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/module-runner.js:1195:73)
+      at async ModuleRunner.import (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/module-runner.js:1150:10)
+      at async runnerImport (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/chunks/node.js:37205:18)
+      at async MacroCollector.evaluator (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/fumadocs-mdx@15.4.7_@types+_4cbb2e517fc4b66733860c06f2550baa/node_modules/fumadocs-mdx/dist/vite/index.js:16:28)
+      at async MacroCollector.evaluate (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/fumadocs-mdx@15.4.7_@types+_4cbb2e517fc4b66733860c06f2550baa/node_modules/fumadocs-mdx/dist/eval-DxGmVc3G.js:146:14)
+[2m6:44:15 PM[22m [31m[1m[vite][22m[39m [31m[2m(client)[22m[39m Pre-transform error: [vite] The requested module 'fumadocs-mdx' does not provide an export named 'applyMdxPreset'
+  Plugin: [35mfumadocs-mdx:mdx[39m
+  File: [36mD:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/content/docs/guides/hello.mdx?macro_id=app%2Flib%2Fsource.ts%23docs&only=frontmatter[39m
+[2m6:44:15 PM[22m [31m[1m[vite][22m[39m [31m[2m(ssr)[22m[39m An error happened during full reload
+[vite] The requested module 'fumadocs-mdx' does not provide an export named 'applyMdxPreset'
+SyntaxError: [vite] The requested module 'fumadocs-mdx' does not provide an export named 'applyMdxPreset'
+    at analyzeImportedModDifference (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/module-runner.js:729:10)
+    at ModuleRunner.processImport (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/module-runner.js:1174:54)
+    at ModuleRunner.cachedRequest (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/module-runner.js:1195:59)
+    at async eval (D:\unitfolders\oz47p-docsite-kit\docsite-kit\probes\2610111754_fumadocs-16-17-1\site\app\lib\source.ts:3:1)
+    at async ESModulesEvaluator.runInlinedModule (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/module-runner.js:825:3)
+    at async ModuleRunner.directRequest (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/module-runner.js:1288:59)
+    at async ModuleRunner.cachedRequest (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/module-runner.js:1195:73)
+    at async ModuleRunner.import (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/module-runner.js:1150:10)
+    at async runnerImport (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/chunks/node.js:37205:18)
+    at async MacroCollector.evaluator (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/fumadocs-mdx@15.4.7_@types+_4cbb2e517fc4b66733860c06f2550baa/node_modules/fumadocs-mdx/dist/vite/index.js:16:28)
+    at async MacroCollector.evaluate (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/fumadocs-mdx@15.4.7_@types+_4cbb2e517fc4b66733860c06f2550baa/node_modules/fumadocs-mdx/dist/eval-DxGmVc3G.js:146:14)
+[2m6:44:15 PM[22m [31m[1m[vite][22m[39m [31mInternal server error: [vite] The requested module 'fumadocs-mdx' does not provide an export named 'applyMdxPreset'[39m
+  Plugin: [35mfumadocs-mdx:mdx[39m
+  File: [36mD:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/content/docs/guides/hello.mdx?macro_id=app%2Flib%2Fsource.ts%23docs&only=frontmatter[39m
+      at analyzeImportedModDifference (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/module-runner.js:729:10)
+      at ModuleRunner.processImport (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/module-runner.js:1174:54)
+      at ModuleRunner.cachedRequest (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/module-runner.js:1195:59)
+      at async eval (D:\unitfolders\oz47p-docsite-kit\docsite-kit\probes\2610111754_fumadocs-16-17-1\site\app\lib\source.ts:3:1)
+      at async ESModulesEvaluator.runInlinedModule (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/module-runner.js:825:3)
+      at async ModuleRunner.directRequest (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/module-runner.js:1288:59)
+      at async ModuleRunner.cachedRequest (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/module-runner.js:1195:73)
+      at async ModuleRunner.import (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/module-runner.js:1150:10)
+      at async runnerImport (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/chunks/node.js:37205:18)
+      at async MacroCollector.evaluator (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/fumadocs-mdx@15.4.7_@types+_4cbb2e517fc4b66733860c06f2550baa/node_modules/fumadocs-mdx/dist/vite/index.js:16:28)
+      at async MacroCollector.evaluate (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/fumadocs-mdx@15.4.7_@types+_4cbb2e517fc4b66733860c06f2550baa/node_modules/fumadocs-mdx/dist/eval-DxGmVc3G.js:146:14)
+[2m6:44:15 PM[22m [31m[1m[vite][22m[39m [31mInternal server error: [vite] The requested module 'fumadocs-mdx' does not provide an export named 'applyMdxPreset'[39m
+  Plugin: [35mfumadocs-mdx:mdx[39m
+  File: [36mD:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/comments/t1/index.mdx?macro_id=app%2Flib%2Fsource.ts%23comments&only=frontmatter[39m
+      at analyzeImportedModDifference (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/module-runner.js:729:10)
+      at ModuleRunner.processImport (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/module-runner.js:1174:54)
+      at ModuleRunner.cachedRequest (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/module-runner.js:1195:59)
+      at async eval (D:\unitfolders\oz47p-docsite-kit\docsite-kit\probes\2610111754_fumadocs-16-17-1\site\app\lib\source.ts:3:1)
+      at async ESModulesEvaluator.runInlinedModule (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/module-runner.js:825:3)
+      at async ModuleRunner.directRequest (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/module-runner.js:1288:59)
+      at async ModuleRunner.cachedRequest (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/module-runner.js:1195:73)
+      at async ModuleRunner.import (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/module-runner.js:1150:10)
+      at async runnerImport (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/chunks/node.js:37205:18)
+      at async MacroCollector.evaluator (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/fumadocs-mdx@15.4.7_@types+_4cbb2e517fc4b66733860c06f2550baa/node_modules/fumadocs-mdx/dist/vite/index.js:16:28)
+      at async MacroCollector.evaluate (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/fumadocs-mdx@15.4.7_@types+_4cbb2e517fc4b66733860c06f2550baa/node_modules/fumadocs-mdx/dist/eval-DxGmVc3G.js:146:14)
+[2m6:44:15 PM[22m [31m[1m[vite][22m[39m [31mInternal server error: [vite] The requested module 'fumadocs-mdx' does not provide an export named 'applyMdxPreset'[39m
+  Plugin: [35mfumadocs-mdx:mdx[39m
+  File: [36mD:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/comments/t2/index.mdx?macro_id=app%2Flib%2Fsource.ts%23comments&only=frontmatter[39m
+      at analyzeImportedModDifference (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/module-runner.js:729:10)
+      at ModuleRunner.processImport (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/module-runner.js:1174:54)
+      at ModuleRunner.cachedRequest (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/module-runner.js:1195:59)
+      at async eval (D:\unitfolders\oz47p-docsite-kit\docsite-kit\probes\2610111754_fumadocs-16-17-1\site\app\lib\source.ts:3:1)
+      at async ESModulesEvaluator.runInlinedModule (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/module-runner.js:825:3)
+      at async ModuleRunner.directRequest (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/module-runner.js:1288:59)
+      at async ModuleRunner.cachedRequest (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/module-runner.js:1195:73)
+      at async ModuleRunner.import (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/module-runner.js:1150:10)
+      at async runnerImport (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/chunks/node.js:37205:18)
+      at async MacroCollector.evaluator (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/fumadocs-mdx@15.4.7_@types+_4cbb2e517fc4b66733860c06f2550baa/node_modules/fumadocs-mdx/dist/vite/index.js:16:28)
+      at async MacroCollector.evaluate (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/fumadocs-mdx@15.4.7_@types+_4cbb2e517fc4b66733860c06f2550baa/node_modules/fumadocs-mdx/dist/eval-DxGmVc3G.js:146:14)
+[ELIFECYCLE] Command failed with exit code 1.

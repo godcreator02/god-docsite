@@ -1,0 +1,17 @@
+┌  [40m[97mCustomize Fumadocs UI[39m[49m
+[?25l│
+◆  What do you want to customize?
+│  ● Docs Layout (the default docs layout)
+│  ○ Notebook Layout
+│  ○ Flux Layout
+│  ○ Glass Layout
+│  ○ Spacious Layout
+│  ○ Home Layout
+│  ↑/↓ to navigate • Enter: confirm
+└
+Warning: Detected unsettled top-level await at file:///C:/Users/godamericatb14/AppData/Local/pnpm-cache/dlx/79a5192e3892eb5a2b626e3749c1f861/mv3oc4aj-22uw/node_modules/.pacquet/@fumadocs+cli@1.7.5/node_modules/@fumadocs/cli/dist/index.js:644
+	await cli.runMatchedCommand();
+	^
+
+
+
