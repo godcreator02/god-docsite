@@ -1,0 +1,49 @@
+---
+born-at: 2026-10-11T19:45
+type: evidence
+parent: [2026-09-03-god-live-doc]
+label: 生成正本经编译器与依赖登记的三个探针：E-1、E-2、E-8
+domain: 渲染
+---
+
+## 背景
+
+改造计划（docsite-kit 仓 `design/30-refactor-plan.html`）把生成正本从命令行的 `renderAi` 改成经站点自己的
+编译器（D-02：Vite 加载站点、取每页 `_markdown`、`renderToMarkdown` 渲染），钉码插件改挂集合的
+`mdxOptions` 并用 `replaceSource` 登记机读文字、`_compiler.addDependency` 登记依赖（D-05、D-08）。
+这三个点先在 fumadocs 16.17.1 / fumadocs-mdx 15.4.7 的探针站上验证（E-8 机制、E-1 与现有输出逐字节比、
+E-2 依赖登记），实验目录在单元里的 docsite-kit 仓 `../docsite-kit/probes/2610111754_fumadocs-16-17-1/`。
+
+## 结论与边界
+
+**E-8 机制成立**。集合开 `postprocess: { includeProcessedMarkdown: { output: 'function', headingIds: false } }`，
+命令行脚本用 `createServer({ middlewareMode: true, appType: 'custom' })` 加载站点、`docs.getPage(path).load()`，
+async 集合的导出在 `mod._exports._markdown`，`renderToMarkdown(createElement(_markdown,
+{ components: jsxComponents(组件表) }))` 渲成文字。组件里的 `asMarkdown()` 给出自己的机读文字；
+`'use client'` 文件在 React Router 非 RSC 模式下照常执行（模块照常在 Node 端加载，`asMarkdown()`
+照常为真）；不调 `asMarkdown` 的组件在输出里**原样保留 JSX**，可靠找法是扫输出里残留的大写标签
+（实测精确点名）——D-16 的「组件有没有给出 Markdown 形式」用这个检查。钉码的 `replaceSource` 登记文字
+进了输出（用独特标记验证走的是登记、不是组件渲染兜底）：登记必须挂在**原节点**上（无 position 的编辑
+被忽略），替换出的外层组件继承原 position，与 remarkLLMs 的 marker 同 range 时预登记先应用。
+耗时：1 页总 2300 ms（Vite 启动 951 ms）、25 页总 2589 ms（每页 10–16 ms），一次启动可复用。
+坑：`@/` 别名对 content/ 下 mdx 的 import 不生效（dev 与 middlewareMode 都 500），正本要用相对路径。
+
+**E-1 输出一致**。6 份正本（README、AGENTS、CLAUDE 与三份 SKILL 的正本）经新流水线的输出与现在
+`renderAi` 的生成物**正文逐字节一致**，全部差异是空行（旧生成物末尾多一个空行；SKILL.md 的 frontmatter
+后有一个空行，是落点写入器加的）——D-02 写落点时补尾换行、沿用 frontmatter 拼接格式即可零 diff。
+素材缺口：这批正本没有可被认的记号（示例记号全在行内或代码块里，markerOf 只认独占一行的）、没有真图片
+节点、没有 npm 专用代码块——钉码与组件的机读形式已由 E-8 验证，图片与 npm 块（D-13 相关）实施时补验。
+
+**E-2 依赖登记：文件成立、目录不成立（D-08 选 Vite 插件方案）**。站点 remark 插件经
+`mdxOptions: applyMdxPreset({ remarkPlugins: [probeDep] })` 接进集合（`applyMdxPreset` 从
+`fumadocs-mdx/config` 出口拿，自定义插件排在默认工序之后、remarkStructure 之前）。
+`file.data._compiler.addDependency(文件绝对路径)` 登记的文件，改动后 1 秒内触发重编（页面更新）；
+登记目录则目录里增、删文件都不触发。要生效需要 Vite 插件：`configureServer` 里 `watcher.add(dir)`，
+`add`/`unlink` 事件桥接成被钉文件的 change 事件走正常失效链——加了以后增删都在 1 秒内生效。
+
+## 依据
+
+实验目录在 docsite-kit 仓：`../docsite-kit/probes/2610111754_fumadocs-16-17-1/`（README 有运行方法）。
+E-8 观察记录 `runs/30-e8-notes.md`、输出 `out/e8/`；E-1 记录 `runs/31-e1-notes.md`、比对报告
+`out/e1-compare-report.txt`；E-2 记录 `runs/28-e2-notes.md`。E-1 对照的本仓生成物是 2026-10-11 的
+工作区状态（README.md、AGENTS.md、CLAUDE.md 与 `plugins/docfirst/skills/*/SKILL.md`）。
