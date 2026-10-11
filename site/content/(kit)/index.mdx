@@ -18,20 +18,29 @@ icon: BookOpen
 | `./page-sources` | `app/lib/source.ts`、页面路由 | TSX 页面与 HTML 页面的来源、保留地址检查、内容文件的地址，见[三种页面](/page-types) |
 | `./comments` | `app/lib/collections.ts`、`app/lib/source.ts`、页面路由 | 评论文件的 frontmatter 校验、按文件夹分成评论串、按页面分组、检查评论批的页面在不在、作者在不在人员列表里；人员列表的格式，见[评论](/commenting) |
 | `./server` | 布局与页面路由、`app/routes/search.ts`、`app/routes/content-file.ts`、`app/routes/comments.ts`、`app/lib/commenter.server.ts` | 中文站点用的搜索接口 `siteSearchServer`；把 `content/` 里的文件原样送给浏览器；读人员列表 `sitePeople`、本机身份 `siteIdentity`、评论接口、读评论快照、从 HTML 算页面文字、不经开发服务读评论 `readCommentThreads`、站点检查 `siteProblems`（见[评论](/commenting)）；推送通道 `siteFeedOf`（见[开发服务插件](/dev-plugin#收-gwb-插件推来的数据)） |
-| `./ui` | `app/root.tsx`、布局与页面路由 | TSX 页面与 HTML 页面的正文组件、页面上的评论、全部评论页 `AllComments`、侧栏底部的身份、推送通道 `useSiteFeed`、fumadocs 界面文字的中文 |
+| `./ui` | `app/root.tsx`、布局与页面路由 | TSX 页面与 HTML 页面的正文组件、页面上的评论、全部评论页 `AllComments`、侧栏底部的身份、侧栏 `groupKeepingSidebar` 与入口横排 `SidebarRouteLinks`、推送通道 `useSiteFeed`、fumadocs 界面文字的中文 |
 | `./site-feed` | gwb 插件 | 推送通道的环境变量名、地址、请求头这几个常量 |
-| `./styles.css` | `app/app.css` | 让 Tailwind 扫到包里组件用的类名；宽屏布局；评论的高亮与画框 |
+| `./styles.css` | `app/app.css` | 让 Tailwind 扫到包里组件用的类名；宽屏布局；评论的高亮与画框；藏起侧栏塞进分组的页面项 |
 
-布局用 fumadocs 默认的 docs 布局：左侧侧栏里从上到下是站名、搜索、切换下拉框、页面树，侧栏底部那一栏左边是写评论的人（本机开发时才有）、右边是主题切换；本页目录在正文右边。
+布局用 fumadocs 的 docs 布局：左侧侧栏里从上到下是站名、搜索、切换下拉框、入口横排、当前这一组的页面，侧栏底部那一栏左边是写评论的人（本机开发时才有）、右边是主题切换；本页目录在正文右边。
 
 宽屏时布局铺满窗口：左侧栏贴左边，本页目录那一列贴右边、宽 340px，正文在中间那一列里居中、最宽 900px。
 fumadocs 默认在窗口比 97rem 宽时把整个布局居中，左右各空出一截；基础包的 `styles.css` 改成铺满，
 评论右侧栏也就能正好盖在目录那一列上，打开、关上都不改布局。右侧栏打开时，本页目录改成正文上方的下拉条
 （fumadocs 窄屏时用的那个），浮在标题上方那段空白里，往下滚时吸在顶上，正文不往下挪。
-骨架直接引用这个布局，包里不另外包一层。
+骨架直接用 fumadocs 的 `DocsLayout`，基础包只换掉其中的侧栏（`slots.sidebar`）。
 
-`meta.json` 写了 `"root": true` 的文件夹，是侧栏里切换下拉框的一项，切换后侧栏只列那个文件夹里的页面。
-这个站有「基础包」和「写作示例」两项。
+## 侧栏
+
+`meta.json` 写了 `"root": true` 的文件夹是一组，是侧栏里切换下拉框的一项，切换后侧栏只列那一组的页面。
+这个站有「基础包」和「写作示例」两组。
+
+全部评论页这类站点自己的页面不在页面树里，不属于哪一组。fumadocs 自己的侧栏在这种页面上找不到当前组，会收起下拉框、列出整棵页面树；
+基础包的 `groupKeepingSidebar` 让侧栏停在最近看过的那一组：下拉框和页面列表都不变，还没看过哪一组时停在第一组，刷新后从第一组开始。
+它只改侧栏：正文上方的面包屑、页尾的上一页下一页仍按真实的页面树，这种页面上照旧没有。
+
+站点自己的页面的入口用 `SidebarRouteLinks` 排成一横排，放在下拉框下面（`DocsLayout` 的 `sidebar.banner`），每项是图标加短名字；
+当前地址就是它、或在它下面（`/tasks/…` 算「任务」）时高亮。这个站只有一项「评论」，写法见 `app/routes/layout.tsx`。
 
 ## 搜索
 

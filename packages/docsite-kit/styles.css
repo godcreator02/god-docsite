@@ -69,3 +69,8 @@
 html[data-comment-picking] [data-comment-scope] {
   cursor: crosshair;
 }
+
+/* 侧栏停在最近那一组时塞进组里的页面项（src/ui/sidebar.tsx）：只让 fumadocs 认出当前组，不显示 */
+a:has([data-docsite-sidebar-hidden-page]) {
+  display: none;
+}
