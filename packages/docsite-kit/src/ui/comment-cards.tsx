@@ -1,5 +1,6 @@
 import { Component, createContext, Suspense, useContext, useRef, useState, type ClipboardEvent, type KeyboardEvent, type ReactNode } from 'react'
 import { commentFileName, personOf, type CommentEntry, type Commenter, type CommentThread, type Person } from '../comments.js'
+import { mentionBeingTyped, peopleMatching } from '../people.js'
 
 /** 评论接口：项目 routes.ts 里 route('api/comments', …) 的地址 */
 export type CommentApi = { url: string }
@@ -123,9 +124,37 @@ class CommentBodyBoundary extends Component<{ children: ReactNode }, { error?: E
   }
 }
 
+/** @ 后面弹出的名单最多列几个人 */
+const mentionPickerSize = 8
+
+/** 写 @ 时输入框下面的名单：点一个人填进他的 id；onMouseDown 不让输入框失去焦点 */
+function MentionPicker({ candidates, activeIndex, onPick }: { candidates: Person[]; activeIndex: number; onPick: (person: Person) => void }) {
+  return (
+    <ul role="listbox" className="absolute top-full left-0 z-50 mt-1 w-64 overflow-hidden rounded-lg border bg-fd-popover p-1 text-sm shadow-lg">
+      {candidates.map((person, index) => (
+        <li
+          key={person.id}
+          role="option"
+          aria-selected={index === activeIndex}
+          onMouseDown={(event) => {
+            event.preventDefault()
+            onPick(person)
+          }}
+          className="flex cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 aria-selected:bg-fd-accent"
+        >
+          <Avatar person={person} size={20} />
+          <span className="truncate">{person.name}</span>
+          <span className="ms-auto text-xs text-fd-muted-foreground">@{person.id}</span>
+        </li>
+      ))}
+    </ul>
+  )
+}
+
 /**
  * 写评论的输入框：写 MDX，纯文字、Markdown、组件都行；Ctrl+Enter（Mac 上 ⌘+Enter）发送、Esc 取消。
- * 粘贴图片时把图片记下来，在光标处插入 ![](./paste-….png)，发送时和文字一起交给接口，存进评论串的文件夹
+ * 粘贴图片时把图片记下来，在光标处插入 ![](./paste-….png)，发送时和文字一起交给接口，存进评论串的文件夹。
+ * 打 @ 时弹出人员名单，按 id 或名字筛：上下键选、Enter 或 Tab 填进 @id、Esc 只关名单
  */
 export function CommentEditor({ placeholder, submitLabel, initialText = '', autoFocus, onSubmit, onCancel }: CommentEditorProps) {
   const [text, setText] = useState(initialText)
@@ -133,6 +162,23 @@ export function CommentEditor({ placeholder, submitLabel, initialText = '', auto
   const [sending, setSending] = useState(false)
   const [error, setError] = useState<string>()
   const textareaRef = useRef<HTMLTextAreaElement>(null)
+  const people = usePeople()
+  const [cursor, setCursor] = useState(initialText.length)
+  const [activeMentionIndex, setActiveMentionIndex] = useState(0)
+  /** 按 Esc 关掉名单时那个 @ 的位置：同一个 @ 不再弹，打新的 @ 照弹 */
+  const [dismissedMentionStart, setDismissedMentionStart] = useState<number>()
+  const typedMention = mentionBeingTyped(text.slice(0, cursor))
+  const mentionCandidates =
+    typedMention && typedMention.start !== dismissedMentionStart ? peopleMatching(people, typedMention.query).slice(0, mentionPickerSize) : []
+  const pickMention = (person: Person) => {
+    const textarea = textareaRef.current!
+    const inserted = `@${person.id} `
+    const caret = typedMention!.start + inserted.length
+    setText(`${text.slice(0, typedMention!.start)}${inserted}${text.slice(cursor)}`)
+    setCursor(caret)
+    requestAnimationFrame(() => textarea.setSelectionRange(caret, caret))
+  }
+  const followCursor = () => setCursor(textareaRef.current!.selectionStart)
 
   const insertAtCursor = (inserted: string) => {
     const textarea = textareaRef.current!
@@ -164,7 +210,18 @@ export function CommentEditor({ placeholder, submitLabel, initialText = '', auto
       setSending(false)
     }
   }
+  const onMentionKey = (event: KeyboardEvent<HTMLTextAreaElement>) => {
+    const count = mentionCandidates.length
+    if (event.key === 'ArrowDown') setActiveMentionIndex((index) => (index + 1) % count)
+    else if (event.key === 'ArrowUp') setActiveMentionIndex((index) => (index - 1 + count) % count)
+    else if ((event.key === 'Enter' && !event.ctrlKey && !event.metaKey) || event.key === 'Tab') pickMention(mentionCandidates[Math.min(activeMentionIndex, count - 1)]!)
+    else if (event.key === 'Escape') setDismissedMentionStart(typedMention!.start)
+    else return false
+    event.preventDefault()
+    return true
+  }
   const onKeyDown = (event: KeyboardEvent<HTMLTextAreaElement>) => {
+    if (mentionCandidates.length > 0 && onMentionKey(event)) return
     if (event.key === 'Enter' && (event.ctrlKey || event.metaKey)) {
       event.preventDefault()
       void submit()
@@ -175,17 +232,25 @@ export function CommentEditor({ placeholder, submitLabel, initialText = '', auto
   }
   return (
     <div className="flex flex-col gap-1.5">
-      <textarea
-        ref={textareaRef}
-        value={text}
-        autoFocus={autoFocus}
-        placeholder={placeholder}
-        rows={Math.min(8, Math.max(2, text.split('\n').length))}
-        onChange={(event) => setText(event.target.value)}
-        onPaste={pasteImages}
-        onKeyDown={onKeyDown}
-        className="w-full resize-none rounded-lg border bg-fd-background px-2.5 py-1.5 text-sm outline-none focus:border-fd-primary"
-      />
+      <div className="relative">
+        <textarea
+          ref={textareaRef}
+          value={text}
+          autoFocus={autoFocus}
+          placeholder={placeholder}
+          rows={Math.min(8, Math.max(2, text.split('\n').length))}
+          onChange={(event) => {
+            setText(event.target.value)
+            setCursor(event.target.selectionStart)
+            setActiveMentionIndex(0)
+          }}
+          onSelect={followCursor}
+          onPaste={pasteImages}
+          onKeyDown={onKeyDown}
+          className="w-full resize-none rounded-lg border bg-fd-background px-2.5 py-1.5 text-sm outline-none focus:border-fd-primary"
+        />
+        {mentionCandidates.length > 0 && <MentionPicker candidates={mentionCandidates} activeIndex={Math.min(activeMentionIndex, mentionCandidates.length - 1)} onPick={pickMention} />}
+      </div>
       {error && <p className="text-xs text-red-500">{error}</p>}
       <div className="flex items-center justify-end gap-2 text-xs">
         <span className="me-auto text-fd-muted-foreground">Ctrl+Enter 发送{pastedImages.length > 0 ? ` · ${pastedImages.length} 张图片` : ''}</span>

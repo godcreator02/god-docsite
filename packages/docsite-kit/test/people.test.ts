@@ -3,7 +3,7 @@ import { tmpdir } from 'node:os'
 import path from 'node:path'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { assertCommentAuthorsKnown, type CommentEntry } from '../src/comments.js'
-import { identityCodeEnvName, identityOf, mentionsOf, parsePeople, peopleWithJoined, type Person } from '../src/people.js'
+import { identityCodeEnvName, identityOf, mentionBeingTyped, mentionsOf, parsePeople, peopleMatching, peopleWithJoined, type Person } from '../src/people.js'
 import { siteCommenter, siteIdentity, sitePeople } from '../src/server/comments.js'
 
 const people: Person[] = [
@@ -86,5 +86,25 @@ describe('站点目录里的人员列表', () => {
     expect(siteIdentity(siteDir).reason).toContain('没有本机的身份码')
     process.env[identityCodeEnvName] = 'zhoucode0001'
     expect(siteCommenter(siteDir)).toEqual(people[0])
+  })
+})
+
+describe('写 @ 时弹出的名单', () => {
+  it('光标前是 @ 加几个字：认出 @ 的位置和已经打的字', () => {
+    expect(mentionBeingTyped('看一下 @zh')).toEqual({ start: 4, query: 'zh' })
+    expect(mentionBeingTyped('@')).toEqual({ start: 0, query: '' })
+  })
+
+  it('邮箱、@@、@ 后面已经打了空格：不算在打 @', () => {
+    expect(mentionBeingTyped('mail a@b')).toBeNull()
+    expect(mentionBeingTyped('@@zh')).toBeNull()
+    expect(mentionBeingTyped('@zhou ')).toBeNull()
+  })
+
+  it('按 id 或名字筛，id 以打的字开头的排前面', () => {
+    const team: Person[] = [{ id: 'azhou', name: '阿周' }, { id: 'zhou', name: '小周' }, { id: 'li', name: '小李' }]
+    expect(peopleMatching(team, 'zh').map((person) => person.id)).toEqual(['zhou', 'azhou'])
+    expect(peopleMatching(team, '小').map((person) => person.id)).toEqual(['zhou', 'li'])
+    expect(peopleMatching(team, '').map((person) => person.id)).toEqual(['azhou', 'zhou', 'li'])
   })
 })
