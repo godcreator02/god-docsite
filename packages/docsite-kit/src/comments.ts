@@ -230,10 +230,26 @@ export function commentThreadsByPage<Entry extends CommentEntry>(threads: Readon
   return threadsOfPage
 }
 
-/** 评论批的页面不存在时报错，一次列出全部；pageUrls 是站点全部页面的地址 */
-export function assertCommentPagesExist(threads: ReadonlyArray<CommentThread<CommentEntry>>, pageUrls: readonly string[]) {
+/** 功能包路由的 path（如 tasks/:recordId，不带开头的 /）换成认页面地址的正则：:参数是一段，* 是余下的全部 */
+export function commentRoutePatternOf(routePath: string) {
+  const segments = routePath.split('/').map((segment) => (segment === '*' ? '.+' : segment.startsWith(':') ? '[^/]+' : segment.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')))
+  return new RegExp(`^/${segments.join('/')}$`)
+}
+
+/**
+ * 能批的页面：content/ 里的页面（pageUrls），和功能包里标了 comments 的路由（commentRoutes，写路由的 path）下的页面。
+ * 路由下的页面不查那条记录还在不在：删了任务，批它那一页的评论照样留着
+ */
+export function commentablePagesOf(pageUrls: readonly string[], commentRoutes: readonly string[] = []) {
   const known = new Set(pageUrls)
-  const orphans = threads.filter((thread) => thread.head.page !== undefined && !known.has(thread.head.page))
+  const patterns = commentRoutes.map(commentRoutePatternOf)
+  return (url: string) => known.has(url) || patterns.some((pattern) => pattern.test(url))
+}
+
+/** 评论批的页面不能批时报错，一次列出全部 */
+export function assertCommentPagesExist(threads: ReadonlyArray<CommentThread<CommentEntry>>, pageUrls: readonly string[], commentRoutes: readonly string[] = []) {
+  const isCommentable = commentablePagesOf(pageUrls, commentRoutes)
+  const orphans = threads.filter((thread) => thread.head.page !== undefined && !isCommentable(thread.head.page))
   if (orphans.length > 0) throw new Error(orphans.map((thread) => `评论串 ${thread.id} 批的页面 ${thread.head.page} 不存在`).join('\n'))
 }
 

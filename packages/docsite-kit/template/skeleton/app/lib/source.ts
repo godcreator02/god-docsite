@@ -20,9 +20,13 @@ export const source = loader({
 const featureSlugs = featureRoutes.flatMap(({ routes }) => routes.flatMap((each) => ('path' in each ? [each.path.split('/')[0]!] : [])))
 assertNoReservedSlugs(source.getPages(), ['api', 'comments', ...featureSlugs])
 
+/** 功能包里能批评论的路由的 path */
+export const commentRoutes = featureRoutes.flatMap(({ routes }) => routes.flatMap((each) => ('path' in each && each.comments ? [each.path] : [])))
+
 assertCommentPagesExist(
   commentThreadsOf(comments.entries),
   source.getPages().map((page) => page.url),
+  commentRoutes,
 )
 
 /** 站里每一页的地址与标题：交给功能包的 layoutData */

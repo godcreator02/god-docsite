@@ -17,8 +17,11 @@ export type FeatureContent = {
   remarkPlugins?: NonNullable<ProcessorOptions['remarkPlugins']>
 }
 
-/** 一条路由：file 相对功能包的包根。layout 为 false 的放在整站布局外面（接口这类不出页面的） */
-export type FeatureRoute = { path: string; file: string; layout?: false } | { index: true; file: string }
+/**
+ * 一条路由：file 相对功能包的包根。layout 为 false 的放在整站布局外面（接口这类不出页面的）。
+ * comments 为 true 的，这条路由下的页面能批评论：评论接口与页面检查都认它们，页面自己放 PageComments
+ */
+export type FeatureRoute = { path: string; file: string; layout?: false; comments?: true } | { index: true; file: string }
 
 /** ./routes 出口的默认导出：在 Node 里读路由表时用，不能引用 React 组件 */
 export type FeatureRoutes = { routes: readonly FeatureRoute[] }

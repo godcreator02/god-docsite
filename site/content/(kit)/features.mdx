@@ -19,7 +19,7 @@ icon: Blocks
 
 | 出口 | 默认导出的类型 | 内容 |
 | --- | --- | --- |
-| `./routes` | `FeatureRoutes` | 路由列表。每条 `{ path, file }`，`file` 相对功能包的包根；`layout: false` 的放在整站布局外面（不出页面的接口）；`{ index: true, file }` 是首页，全站只能有一个。在 Node 里读路由表时用，不能引用 React 组件 |
+| `./routes` | `FeatureRoutes` | 路由列表。每条 `{ path, file }`，`file` 相对功能包的包根；`layout: false` 的放在整站布局外面（不出页面的接口）；`comments: true` 的路由下的页面能批评论（见下面「功能包页面上的评论」）；`{ index: true, file }` 是首页，全站只能有一个。在 Node 里读路由表时用，不能引用 React 组件 |
 | `./site` | `FeatureSite` | 浏览器端也用的：侧栏那一排的入口 `routeLinks`（排在「评论」前面），MDX 组件 `mdxComponents`，自己的链接种类 `linkKinds`（见下面「链接种类」），包住整个布局的 `Provider`，放在每一页正文上面的 `PageTop` |
 | `./site-server` | `FeatureSiteServer` | 只在服务端运行的：`layoutData({ pages })`，整站布局的 `loader` 调用它，读出的数据交给 `Provider` 的 `data` |
 | `./styles.css` | | 功能包的样式，`app.css` 最后引入 |
@@ -69,9 +69,19 @@ const site: FeatureSite = {
 | --- | --- |
 | `@site/lib/source` | `siteName()`、`sitePageRefs()` |
 | `@site/lib/mdx-components` | `mdxComponents` |
+| `@site/lib/comment-threads` | `allThreads`、`threadsOfPage`、`renderCommentBody` |
+| `@site/lib/commenter.server` | `pageCommentData`（只在 `loader` 里用） |
 
 类型声明在 `@godcreator/docsite-kit/site-modules`，功能包在源码里写 `/// <reference types="@godcreator/docsite-kit/site-modules" />`。
 React Router 只给项目里的路由文件生成 `+types`，包里路由模块的 `loader` 参数与返回值的类型由功能包自己写。
+
+## 功能包页面上的评论
+
+路由写了 `comments: true`，评论接口收批这条路由下页面的评论，启动时检查评论批的页面也认这些地址（`tasks/:recordId` 认 `/tasks/` 后面跟一段的地址）。
+只认地址的样子，不查那条记录还在不在：删了任务，批它那一页的评论照样留着。
+
+页面上的评论由路由模块自己放，写法和骨架的 `app/routes/page.tsx` 一样：`loader` 用 `pageCommentData` 取人员列表与快照、`siteCommenter()` 取写评论的人，
+页面用 `PageComments` 包住正文，正文的 `DocsBody` 加 `commentScopeProps`。
 
 ## 集合定义只能在项目里
 

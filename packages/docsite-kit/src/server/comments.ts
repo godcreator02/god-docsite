@@ -3,6 +3,7 @@ import { mkdir, readFile, readdir, rm, stat, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 import { compile } from '@mdx-js/mdx'
 import {
+  commentablePagesOf,
   commentElementKinds,
   commentSnapshotFile,
   identityCodeEnvName,
@@ -272,15 +273,17 @@ type CommentRequestOptions = {
   commenter: Commenter | null
   /** 站点人员列表（sitePeople）：agent 用 as 说明自己是谁时在这里找 */
   people: readonly Person[]
-  /** 站点全部页面的地址：新评论串批的页面要在里面 */
+  /** 站点全部页面的地址：新评论串批的页面要在里面，或在 commentRoutes 下 */
   pageUrls: readonly string[]
+  /** 功能包里标了 comments 的路由的 path，这些路由下的页面也能批 */
+  commentRoutes?: readonly string[]
   /** 评论目录，默认是站点目录下的 comments */
   commentsDir?: string
   /** 一页渲染出的 HTML，anchor 是 { quote, occurrence } 时用它算页面文字；默认向开发服务自己请求这一页 */
   pageHtmlOf?: PageHtmlOf
 }
 
-async function handleForm(form: FormData, { commenter, people, pageUrls, commentsDir, pageHtmlOf }: Required<CommentRequestOptions> & { commenter: Commenter }) {
+async function handleForm(form: FormData, { commenter, people, pageUrls, commentRoutes, commentsDir, pageHtmlOf }: Required<CommentRequestOptions> & { commenter: Commenter }) {
   const operation = requiredField(form, 'op') as CommentOperation
   if (!operations.includes(operation)) throw new RejectedRequest(400, `op 要是 ${operations.join('、')} 之一`)
   const actor = actorOf(form, commenter, people)
@@ -290,7 +293,7 @@ async function handleForm(form: FormData, { commenter, people, pageUrls, comment
   if (operation === 'create') {
     const pageField = form.get('page')
     const page = typeof pageField === 'string' && pageField !== '' ? pageField : undefined
-    if (page !== undefined && !pageUrls.includes(page)) throw new RejectedRequest(400, `没有页面 ${page}`)
+    if (page !== undefined && !commentablePagesOf(pageUrls, commentRoutes)(page)) throw new RejectedRequest(400, `没有页面 ${page}`)
     const anchor: NewAnchor = page === undefined ? noPageAnchorOf(form) : await anchorOf(form, page, pageHtmlOf)
     const body = await bodyOf(form)
     const thread = newThreadId(now)
@@ -347,7 +350,7 @@ export async function commentRequestResponse(request: Request, options: CommentR
   const commentsDir = options.commentsDir ?? path.resolve(process.cwd(), 'comments')
   const pageHtmlOf = options.pageHtmlOf ?? ((page: string) => fetchedPageHtml(new URL(page, request.url)))
   try {
-    const result = await handleForm(await request.formData(), { ...options, commenter, commentsDir, pageHtmlOf })
+    const result = await handleForm(await request.formData(), { ...options, commentRoutes: options.commentRoutes ?? [], commenter, commentsDir, pageHtmlOf })
     return Response.json(result)
   } catch (error) {
     if (error instanceof RejectedRequest) return new Response(error.message, { status: error.status })

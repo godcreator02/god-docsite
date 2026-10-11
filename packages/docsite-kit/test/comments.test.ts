@@ -1,7 +1,15 @@
 import { describe, expect, it } from 'vitest'
-import { assertCommentPagesExist, commentFrontmatterSchema, commentThreadsOf, snapshotMismatchOf, type CommentEntry } from '../src/comments.js'
+import { assertCommentPagesExist, commentablePagesOf, commentFrontmatterSchema, commentThreadsOf, snapshotMismatchOf, type CommentEntry } from '../src/comments.js'
 
 const validate = (path: string, value: unknown) => commentFrontmatterSchema({ path })['~standard'].validate(value)
+
+describe('能批的页面', () => {
+  it('content/ 的页面，加上功能包标了 comments 的路由下的页面：:参数是一段，* 是余下的全部', () => {
+    const isCommentable = commentablePagesOf(['/writing'], ['tasks', 'tasks/:recordId', 'files/*'])
+    expect(['/writing', '/tasks', '/tasks/t-1', '/files/a/b.pdf'].filter(isCommentable)).toHaveLength(4)
+    expect(['/writing/x', '/tasks/t-1/more', '/taskss', '/calendar/2026-10-11'].some(isCommentable)).toBe(false)
+  })
+})
 
 describe('评论的 frontmatter', () => {
   it('index.mdx 按发起的那条校验，时间统一成 ISO；YAML 读成 Date 的也收；评论文件写成 .md 时报错', () => {
@@ -76,6 +84,7 @@ describe('评论串', () => {
   it('批的页面不存在时报错', () => {
     const threads = commentThreadsOf([thread('a/index.mdx', '1', '/gone'), thread('b/index.mdx', '2', '/')])
     expect(() => assertCommentPagesExist(threads, ['/'])).toThrow('评论串 a 批的页面 /gone 不存在')
+    expect(() => assertCommentPagesExist(threads, ['/'], ['gone'])).not.toThrow()
   })
 })
 

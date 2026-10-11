@@ -10,6 +10,26 @@ declare module '@site/lib/source' {
   export function sitePageRefs(): Array<{ url: string; title: string }>
 }
 
+declare module '@site/lib/comment-threads' {
+  import type { ReactNode } from 'react'
+  import type { CommentEntry, CommentThread } from '@godcreator/docsite-kit/comments'
+  /** 全站的评论串 */
+  export const allThreads: CommentThread<CommentEntry>[]
+  /** 页面地址到批这一页的评论串 */
+  export const threadsOfPage: Map<string, CommentThread<CommentEntry>[]>
+  /** 评论正文：交给 PageComments 的 renderBody */
+  export function renderCommentBody(entry: CommentEntry): ReactNode
+}
+
+declare module '@site/lib/commenter.server' {
+  import type { CommentEntry, CommentThread, CommentThreadFrontmatter, Person } from '@godcreator/docsite-kit/comments'
+  /** 一页要的评论数据：站点人员列表与这一页各评论串的页面文字快照；功能包路由的 loader 调它 */
+  export function pageCommentData(
+    allThreads: ReadonlyArray<CommentThread<CommentEntry>>,
+    pageThreads: ReadonlyArray<{ id: string; head: CommentThreadFrontmatter }>,
+  ): Promise<{ people: Person[]; snapshots: Record<string, string> }>
+}
+
 declare module '@site/lib/mdx-components' {
   import type { ComponentType } from 'react'
   /** fumadocs 的 MDX 组件并上各功能包的 mdxComponents */
