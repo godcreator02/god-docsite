@@ -1,10 +1,10 @@
 ---
 title: 功能包
-description: 接在基础包上的功能包（比如协作站）要提供什么、骨架怎样接上它们
+description: 建在基础包上的功能包（比如协作站）要提供什么、骨架怎样引入它们
 icon: Blocks
 ---
 
-功能包是一个 npm 包，往基础骨架上添加页面、侧栏入口、布局数据和样式，比如协作站的 `@godcreator/collab-site`。
+功能包是一个 npm 包，往基础骨架上添加页面、侧栏入口、布局数据、样式和 MDX 的 remark 插件，比如协作站的 `@godcreator/collab-site`。
 站点的 `package.json` 写明用到哪几个：
 
 ```json
@@ -23,6 +23,20 @@ icon: Blocks
 | `./site` | `FeatureSite` | 浏览器端也用的：侧栏那一排的入口 `routeLinks`（排在「评论」前面），MDX 组件 `mdxComponents`，包住整个布局的 `Provider`，放在每一页正文上面的 `PageTop` |
 | `./site-server` | `FeatureSiteServer` | 只在服务端运行的：`layoutData({ pages })`，整站布局的 `loader` 调用它，读出的数据交给 `Provider` 的 `data` |
 | `./styles.css` | | 功能包的样式，`app.css` 最后引入 |
+| `./content`（可以没有） | `FeatureContent` | 构建页面时在 Node 里执行的：`remarkPlugins`，接在 fumadocs 默认的 remark 插件后面，`content/` 下的 MDX 页面与评论正文都经过它们，插件要区分就看 vfile 的路径。`package.json` 的 `exports` 里有这个键，初始化才引入它 |
+
+## remark 插件放在 fumadocs-mdx 的全局设置里
+
+骨架的 `source.config.ts` 引入 `app/site/content.ts`，把各功能包的 remark 插件写进 `fumadocs-mdx` 的全局设置 `mdxOptions`。
+这个文件只在构建页面时在 Node 里执行，remark 插件用到的 Node 模块不会进浏览器端。
+
+写在 `app/lib/collections.ts` 里 `defineDocs` 的 `mdxOptions` 上不行：
+
+- `collections.ts` 浏览器端也用。`fumadocs-mdx` 在浏览器端的代码里只把 `defineDocs` 调用换掉，文件顶上的 `import` 留着，静态引入 `content.ts` 会把插件带进浏览器端
+- 构建页面时 `fumadocs-mdx` 用 Vite 的模块加载器执行 `collections.ts`，执行完就关掉加载器。`mdxOptions` 函数在那之后才被调用，里面的动态 `import` 报 `Vite module runner has been closed`；
+  在调用参数里先发出动态 `import` 也一样，加载还没完成加载器就关了
+
+全局设置对所有集合生效，所以评论正文也经过这些插件。
 
 包根下的 `template/` 是要复制进站点的文件，和基础包的模板一样分 `skeleton/`（每次覆盖）与 `initial/`（没有时才写）。
 和基础包模板里同名的文件、写在 `app/site/` 下的文件都会报错：功能包只能添加文件。

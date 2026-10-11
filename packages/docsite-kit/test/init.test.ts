@@ -66,6 +66,14 @@ describe('writeSiteSkeleton', () => {
     expect(readText('app/site/ui.ts')).toContain(`{ name: '${featureName}', ...feature0 }`)
     expect(readText('app/site/data.server.ts')).toContain(`from '${featureName}/site-server'`)
     expect(readText('app/site/styles.css')).toContain(`@import '${featureName}/styles.css';`)
+    expect(readText('app/site/content.ts')).toContain('export const featureContents: ReadonlyArray<{ name: string } & FeatureContent> = []')
+  })
+
+  it('功能包的 exports 里有 ./content 才进 app/site/content.ts', () => {
+    writeFiles(featureDir, { 'package.json': JSON.stringify({ name: featureName, exports: { './content': './dist/content.js' } }) })
+    writeSiteSkeleton(siteDir)
+    expect(readText('app/site/content.ts')).toContain(`import feature0 from '${featureName}/content'`)
+    expect(readText('app/site/content.ts')).toContain(`[{ name: '${featureName}', ...feature0 }]`)
   })
 
   it('模板的脚本与依赖合并进 package.json：dev 保留站点的端口，站点自己的脚本与依赖留着', () => {

@@ -76,12 +76,23 @@ const siteFileOf = (relative: string) => (relative === gitignoreInTemplate ? '.g
 /** import 名：包名换成合法的标识符 */
 const importNameOf = (index: number) => `feature${index}`
 
-function generatedFiles(features: readonly string[]): Record<string, string> {
+/** 功能包可以没有的出口 */
+const contentExport = './content'
+
+/** 功能包的 package.json 的 exports 里有没有 ./content */
+function exportsContent(siteDir: string, name: string): boolean {
+  const manifestFile = path.join(installedPackageDirOf(siteDir, name), 'package.json')
+  const manifest = readJson(manifestFile)
+  return isRecord(manifest) && isRecord(manifest['exports']) && contentExport in manifest['exports']
+}
+
+function generatedFiles(features: readonly string[], contentFeatures: readonly string[]): Record<string, string> {
   const header = '// 初始化按 package.json 的 docsite.features 生成，不要手改\n'
-  const imports = (entry: string) => features.map((name, index) => `import ${importNameOf(index)} from '${name}/${entry}'\n`).join('')
-  const list = (exported: string, type: string) =>
-    `export const ${exported}: ReadonlyArray<{ name: string } & ${type}> = [${features.map((name, index) => `{ name: '${name}', ...${importNameOf(index)} }`).join(', ')}]\n`
+  const imports = (entry: string, names = features) => names.map((name, index) => `import ${importNameOf(index)} from '${name}/${entry}'\n`).join('')
+  const list = (exported: string, type: string, names = features) =>
+    `export const ${exported}: ReadonlyArray<{ name: string } & ${type}> = [${names.map((name, index) => `{ name: '${name}', ...${importNameOf(index)} }`).join(', ')}]\n`
   return {
+    'content.ts': `${header}import type { FeatureContent } from '@godcreator/docsite-kit/feature'\n${imports('content', contentFeatures)}\n${list('featureContents', 'FeatureContent', contentFeatures)}`,
     'features.ts': `${header}export const siteFeatures: string[] = [${features.map((name) => `'${name}'`).join(', ')}]\n`,
     'routes.ts': `${header}import type { FeatureRoutes } from '@godcreator/docsite-kit/feature'\n${imports('routes')}\n${list('featureRoutes', 'FeatureRoutes')}`,
     'ui.ts': `${header}import type { FeatureSite } from '@godcreator/docsite-kit/feature'\n${imports('site')}\n${list('featureSites', 'FeatureSite')}`,
@@ -142,7 +153,8 @@ export function writeSiteSkeleton(siteDir: string): WrittenSkeleton {
   }
 
   mkdirSync(path.join(siteDir, generatedDir), { recursive: true })
-  for (const [file, text] of Object.entries(generatedFiles(features))) writeFileSync(path.join(siteDir, generatedDir, file), text)
+  const contentFeatures = features.filter((name) => exportsContent(siteDir, name))
+  for (const [file, text] of Object.entries(generatedFiles(features, contentFeatures))) writeFileSync(path.join(siteDir, generatedDir, file), text)
 
   const manifestChanged = JSON.stringify(manifest) !== JSON.stringify(siteManifest)
   if (manifestChanged) writeFileSync(manifestFile, `${JSON.stringify(manifest, null, 2)}\n`)
