@@ -36,7 +36,7 @@ export const routeLinksSearchTrigger = { sm: SearchTrigger, full: () => null }
 export type SidebarRouteLink = { text: string; url: string; icon: ReactNode }
 
 const routeLinkClassName =
-  'flex items-center justify-center gap-1.5 rounded-md px-2 py-1.5 text-nowrap text-fd-muted-foreground transition-colors hover:bg-fd-accent/50 hover:text-fd-accent-foreground/80 data-[active=true]:bg-fd-primary/10 data-[active=true]:text-fd-primary [&_svg]:size-4 [&_svg]:shrink-0'
+  'flex items-center justify-center gap-1 rounded-md px-1.5 py-1.5 text-nowrap text-fd-muted-foreground transition-colors hover:bg-fd-accent/50 hover:text-fd-accent-foreground/80 data-[active=true]:bg-fd-primary/10 data-[active=true]:text-fd-primary [&_svg]:size-4 [&_svg]:shrink-0'
 
 /**
  * 侧栏切换按钮下的一横排：最左边是搜索按钮（只有图标，Ctrl K 照样能打开搜索），后面是站点自己的页面的入口，
@@ -54,7 +54,7 @@ export function SidebarRouteLinks({ links }: { links: SidebarRouteLink[] }) {
           key={link.url}
           href={link.url}
           data-active={pathname === link.url || pathname.startsWith(`${link.url}/`)}
-          className={`${routeLinkClassName} flex-1`}
+          className={`${routeLinkClassName} min-w-0 flex-1`}
         >
           {link.icon}
           {link.text}
