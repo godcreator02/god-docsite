@@ -316,4 +316,5 @@ export const comments = defineCollections({ type: 'doc', dir: 'comments', async:
 和「和我有关」的评论串（`readCommentThreads` 从文件读出正文，`commentThreadIdsAbout` 找我发起的、回复过的、@ 了我的），页面渲染 `AllComments`。
 
 不经开发服务读评论用 `./server` 的 `readCommentThreads(评论目录)`；`siteProblems(站点目录)` 查人员列表、评论文件的格式、作者、快照，
-gwb-docsite 与协作站提交前用它。
+gwb-docsite 与协作站提交前用它。`./files` 的 `siteMdxProblems(站点目录, ['content', 'comments'])` 按骨架的公式设置把这些目录里的 `.md`、`.mdx` 都编译一遍，
+每个编不过的文件回一句「路径 第几行第几列：原话」，写错的公式也算；要几秒，只在提交前查，打开站点前不查。

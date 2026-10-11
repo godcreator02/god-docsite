@@ -133,7 +133,7 @@ $$
 T_f(z) = \frac{1}{2\pi i} \oint_\gamma \frac{f(w)}{w - z} \, dw
 $$
 
-公式写错了开发服务直接报错，写明是哪个公式、错在哪。TSX 页面里用基础包的 `Tex` 组件：`` <Tex>{String.raw`\frac{a}{b}`}</Tex> ``，加 `block` 单独成一行。
+公式写错了，页面上把原式标红显示；提交前的检查按同样的规则编译，写明哪个文件第几行的公式错在哪，拒绝提交。TSX 页面里用基础包的 `Tex` 组件：`` <Tex>{String.raw`\frac{a}{b}`}</Tex> ``，加 `block` 单独成一行。
 
 ## 图片
 
