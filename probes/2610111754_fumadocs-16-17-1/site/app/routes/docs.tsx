@@ -8,7 +8,8 @@ import {
   MarkdownCopyButton,
   ViewOptionsPopover,
 } from '@/layouts/docs/page';
-import { docs, feeds, source } from '@/lib/source';
+import { docs, source } from '@/lib/source';
+import { demoFeedMessage } from '@/lib/feeds.server';
 import { baseOptions } from '@/lib/layout.shared';
 import { useFumadocsLoader } from 'fumadocs-core/source/client';
 import { useMDXComponents } from '@/components/mdx';
@@ -25,7 +26,7 @@ export async function loader({ params }: Route.LoaderArgs) {
     markdownUrl: getPageMarkdownUrl(page).url,
     pageTree: await source.serializePageTree(source.getPageTree()),
     imagePath: getPageImageUrl(page).url,
-    feedMessage: feeds.entries.find((e) => e.info.path.endsWith('/demo.json'))?.message ?? '(missing)',
+    feedMessage: demoFeedMessage(),
   };
 }
 

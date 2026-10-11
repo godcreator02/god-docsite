@@ -1,6 +1,7 @@
 _upstream/
 site/node_modules/
 site/.react-router/
+site/.source/
 site/build/
 lib/dist/
 lib/node_modules/

@@ -27,11 +27,25 @@ E-6 `customise` 复制布局后宽屏与侧栏停组能不能做、E-7 `feeds/` 
 build + start 下同样正常。dev 运行时复制出的新评论文件夹 15 秒内不出现，与 E-5 新建文件同根。
 无 schema 时条目把 frontmatter 字段摊平在 `entry` 顶层，没有 `entry.data`。
 
-**E-7 feeds 写文件：数据到得快，但每次都是整页刷新（K-08 的「写完马上看到」成立，「不打断页面」不成立）**。
-写 `feeds/demo.json` 后同一秒客户端与服务端同时 page reload，SSR 输出 277 ms 更新，但页面上的计数器归零、
-`window` 标记丢失——页面上未保存的交互状态（评论草稿一类）会丢。另发现 fumadocs-mdx 15.4.7 的 bug：
+**E-7 feeds 写文件：第一轮不成立，补做（server-only 写法）后成立——K-08 按补做写法实现**。
+第一轮把读 feeds 的代码放在 `app/lib/source.ts`（浏览器端也加载它）：写 `feeds/demo.json` 后同一秒
+客户端与服务端同时 page reload，SSR 输出 277 ms 更新，但页面上的计数器归零、`window` 标记丢失——
+整页刷新，未保存的交互状态（评论草稿一类）会丢。**当晚补做**：读 feeds 的代码挪进
+`app/lib/feeds.server.ts`（`.server.ts` 后缀不进客户端 bundle），只在路由 loader 里 import、
+浏览器端代码不碰它——文件一变 292 ms SSR 出新值，页面上数据更新、计数器保持原值、`window` 标记
+保留（没有整页刷新），dev 日志客户端侧只有 hmr update（SSR 程序重载对浏览器透明），两轮稳定；
+「写完马上看到」与「不打断页面」都成立。另发现 fumadocs-mdx 15.4.7 的 bug：
 `defineCollections({ type: 'meta' })` 单独使用直接 500，宏展开生成的参数名（`meta`）与运行时读的
-（`entries`）对不上，`defineDocs` 内置的 meta 集合不受影响；实验里用手写宏展开的等价形式（eager glob）绕过。
+（`entries`）对不上，`defineDocs` 内置的 meta 集合不受影响；最小复现与英文 issue 草稿在
+`probes/2610111754_fumadocs-16-17-1/repro-meta-collection/`（打开即 500），待报给上游。
+
+**补做 E-7 时发现并修复：站点插件静态 import 进 source.ts 会弄死整站 hydration**。E-2 把
+Node-only 的 remark 插件（node:fs）静态 import 在 `app/lib/source.ts` 顶层，而这个文件浏览器端
+也加载——客户端模块图带进 node:fs，加载失败，**浏览器端整站无 React**（SSR 正常所以页面看着是好的；
+计数器点不动、点链接整页跳转才暴露）。mdxOptions 改异步函数内动态 import 则让 fumadocs-mdx 的
+宏求值报 `Vite module runner has been closed`。可行写法是插件放全局 `source.config.ts`（只构建期在
+Node 加载），插件顺序不变、编译输出逐字节不变；代价是 15.4.7 下不能按集合挑插件。K-03 的
+「集合 mdxOptions 写明接哪些插件」要按这条修正。
 
 **E-4 库共用上下文：`ssr.noExternal` 仍然必须（K-04 保留点名 noExternal 的部分）**。构建好的 ESM 库
 （对 `fumadocs-ui/contexts/tree` 保持外部 import）不加 noExternal 时 dev 直接 500（Context 双实例，
@@ -49,4 +63,5 @@ container 里 full 分支改 `max-w-none`，一个按钮切换；侧栏停组改
 
 全部材料在 `probes/2610111754_fumadocs-16-17-1/`（README 有每个实验的运行方法与逐项证据）：
 观察记录 `runs/05-e5-e3-notes.md`、`runs/11-e7-notes.md`、`runs/19-e4-notes.md`、`runs/25-e6-notes.md`
-（含 customise 交互记录与三张验收截图 `out/e6/`），原始日志同目录 `.log` 文件。
+（含 customise 交互记录与三张验收截图 `out/e6/`）、补做记录 `runs/39-e7-redo-notes.md`
+（E-7 server-only 写法与 hydration 修复，日志 36–38），原始日志同目录 `.log` 文件。

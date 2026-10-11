@@ -1,0 +1,11 @@
+? Verifying lockfile against supply-chain policies (364 entries)...
+✓ Lockfile passes supply-chain policies (364 entries in 8.9s)
+Lockfile is up to date, resolution step is skipped
+Already up to date
+Error: ERR_PNPM_IGNORED_BUILDS
+
+  × installing dependencies
+  ╰─▶ Ignored build scripts: esbuild@0.28.2
+  help: Run "pnpm approve-builds" to pick which dependencies should be allowed
+        to run scripts.
+

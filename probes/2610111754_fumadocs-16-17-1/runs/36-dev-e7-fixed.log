@@ -1,0 +1,376 @@
+$ react-router dev --port 4446 --host 127.0.0.1
+[restart] Relaunching with --conditions=development
+  [32m➜[39m  [1mLocal[22m:   [36mhttp://127.0.0.1:[1m4446[22m/[39m
+[2m7:26:19 PM[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m connected.
+TypeError: Cannot read properties of undefined (reading 'entries')
+    at loader (D:\unitfolders\oz47p-docsite-kit\docsite-kit\probes\2610111754_fumadocs-16-17-1\site\app\routes\docs.tsx:28:24)
+    at async callRouteHandler (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/server-runtime/data.js:14:15)
+    at async commonRoute.loader (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/server-runtime/routes.js:57:12)
+    at async file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/router/router.js:2470:14
+    at async callLoaderOrAction (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/router/router.js:2514:19)
+    at async Promise.all (index 0)
+    at async defaultDataStrategy (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/router/router.js:2264:3)
+    at async callDataStrategyImpl (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/router/router.js:2436:16)
+    at async callDataStrategy (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/router/router.js:1771:17)
+    at async loadRouteData (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/router/router.js:1763:17)
+TypeError: Cannot read properties of undefined (reading 'entries')
+    at loader (D:\unitfolders\oz47p-docsite-kit\docsite-kit\probes\2610111754_fumadocs-16-17-1\site\app\routes\docs.tsx:28:24)
+    at async callRouteHandler (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/server-runtime/data.js:14:15)
+    at async commonRoute.loader (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/server-runtime/routes.js:57:12)
+    at async file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/router/router.js:2470:14
+    at async callLoaderOrAction (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/router/router.js:2514:19)
+    at async Promise.all (index 0)
+    at async defaultDataStrategy (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/router/router.js:2264:3)
+    at async callDataStrategyImpl (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/router/router.js:2436:16)
+    at async callDataStrategy (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/router/router.js:1771:17)
+    at async loadRouteData (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/router/router.js:1763:17)
+TypeError: Cannot read properties of undefined (reading 'entries')
+    at loader (D:\unitfolders\oz47p-docsite-kit\docsite-kit\probes\2610111754_fumadocs-16-17-1\site\app\routes\docs.tsx:28:24)
+    at async callRouteHandler (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/server-runtime/data.js:14:15)
+    at async commonRoute.loader (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/server-runtime/routes.js:57:12)
+    at async file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/router/router.js:2470:14
+    at async callLoaderOrAction (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/router/router.js:2514:19)
+    at async Promise.all (index 0)
+    at async defaultDataStrategy (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/router/router.js:2264:3)
+    at async callDataStrategyImpl (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/router/router.js:2436:16)
+    at async callDataStrategy (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/router/router.js:1771:17)
+    at async loadRouteData (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/router/router.js:1763:17)
+TypeError: Cannot read properties of undefined (reading 'entries')
+    at loader (D:\unitfolders\oz47p-docsite-kit\docsite-kit\probes\2610111754_fumadocs-16-17-1\site\app\routes\docs.tsx:28:24)
+    at async callRouteHandler (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/server-runtime/data.js:14:15)
+    at async commonRoute.loader (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/server-runtime/routes.js:57:12)
+    at async file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/router/router.js:2470:14
+    at async callLoaderOrAction (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/router/router.js:2514:19)
+    at async Promise.all (index 0)
+    at async defaultDataStrategy (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/router/router.js:2264:3)
+    at async callDataStrategyImpl (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/router/router.js:2436:16)
+    at async callDataStrategy (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/router/router.js:1771:17)
+    at async loadRouteData (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/router/router.js:1763:17)
+TypeError: Cannot read properties of undefined (reading 'entries')
+    at loader (D:\unitfolders\oz47p-docsite-kit\docsite-kit\probes\2610111754_fumadocs-16-17-1\site\app\routes\docs.tsx:28:24)
+    at async callRouteHandler (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/server-runtime/data.js:14:15)
+    at async commonRoute.loader (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/server-runtime/routes.js:57:12)
+    at async file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/router/router.js:2470:14
+    at async callLoaderOrAction (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/router/router.js:2514:19)
+    at async Promise.all (index 0)
+    at async defaultDataStrategy (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/router/router.js:2264:3)
+    at async callDataStrategyImpl (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/router/router.js:2436:16)
+    at async callDataStrategy (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/router/router.js:1771:17)
+    at async loadRouteData (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/router/router.js:1763:17)
+TypeError: Cannot read properties of undefined (reading 'entries')
+    at loader (D:\unitfolders\oz47p-docsite-kit\docsite-kit\probes\2610111754_fumadocs-16-17-1\site\app\routes\docs.tsx:28:24)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async callRouteHandler (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/server-runtime/data.js:14:15)
+    at async commonRoute.loader (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/server-runtime/routes.js:57:12)
+    at async file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/router/router.js:2470:14
+    at async callLoaderOrAction (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/router/router.js:2514:19)
+    at async Promise.all (index 0)
+    at async defaultDataStrategy (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/router/router.js:2264:3)
+    at async callDataStrategyImpl (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/router/router.js:2436:16)
+    at async callDataStrategy (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/router/router.js:1771:17)
+TypeError: Cannot read properties of undefined (reading 'entries')
+    at loader (D:\unitfolders\oz47p-docsite-kit\docsite-kit\probes\2610111754_fumadocs-16-17-1\site\app\routes\docs.tsx:28:24)
+    at async callRouteHandler (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/server-runtime/data.js:14:15)
+    at async commonRoute.loader (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/server-runtime/routes.js:57:12)
+    at async file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/router/router.js:2470:14
+    at async callLoaderOrAction (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/router/router.js:2514:19)
+    at async Promise.all (index 0)
+    at async defaultDataStrategy (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/router/router.js:2264:3)
+    at async callDataStrategyImpl (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/router/router.js:2436:16)
+    at async callDataStrategy (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/router/router.js:1771:17)
+    at async loadRouteData (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/router/router.js:1763:17)
+    at async queryImpl (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/router/router.js:1653:17)
+    at async file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/router/router.js:1525:20
+    at async generateMiddlewareResponse (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/server-runtime/server.js:217:24)
+    at async file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/router/router.js:1524:13
+    at async callRouteMiddleware (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/router/router.js:2314:21)
+    at async next (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/router/router.js:2320:26)
+    at async callRouteMiddleware (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/router/router.js:2328:15)
+    at async runMiddlewarePipeline (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/router/router.js:2308:9)
+    at async Object.query (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/router/router.js:1516:20)
+    at async handleDocumentRequest (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/server-runtime/server.js:213:16)
+    at async requestHandler (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/server-runtime/server.js:123:15)
+    at async nodeHandler (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/@react-router+dev@8.4.0_@re_35cc8d5226b1e2eb3a98fe9fc953e8c0/node_modules/@react-router/dev/dist/vite.js:1666:37)
+    at async file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/@react-router+dev@8.4.0_@re_35cc8d5226b1e2eb3a98fe9fc953e8c0/node_modules/@react-router/dev/dist/vite.js:1668:8
+TypeError: Cannot read properties of undefined (reading 'entries')
+    at loader (D:\unitfolders\oz47p-docsite-kit\docsite-kit\probes\2610111754_fumadocs-16-17-1\site\app\routes\docs.tsx:28:24)
+    at async callRouteHandler (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/server-runtime/data.js:14:15)
+    at async commonRoute.loader (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/server-runtime/routes.js:57:12)
+    at async file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/router/router.js:2470:14
+    at async callLoaderOrAction (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/router/router.js:2514:19)
+    at async Promise.all (index 0)
+    at async defaultDataStrategy (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/router/router.js:2264:3)
+    at async callDataStrategyImpl (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/router/router.js:2436:16)
+    at async callDataStrategy (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/router/router.js:1771:17)
+    at async loadRouteData (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/router/router.js:1763:17)
+    at async queryImpl (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/router/router.js:1653:17)
+    at async file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/router/router.js:1525:20
+    at async generateMiddlewareResponse (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/server-runtime/server.js:217:24)
+    at async file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/router/router.js:1524:13
+    at async callRouteMiddleware (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/router/router.js:2314:21)
+    at async next (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/router/router.js:2320:26)
+    at async callRouteMiddleware (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/router/router.js:2328:15)
+    at async runMiddlewarePipeline (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/router/router.js:2308:9)
+    at async Object.query (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/router/router.js:1516:20)
+    at async handleDocumentRequest (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/server-runtime/server.js:213:16)
+    at async requestHandler (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/server-runtime/server.js:123:15)
+    at async nodeHandler (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/@react-router+dev@8.4.0_@re_35cc8d5226b1e2eb3a98fe9fc953e8c0/node_modules/@react-router/dev/dist/vite.js:1666:37)
+    at async file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/@react-router+dev@8.4.0_@re_35cc8d5226b1e2eb3a98fe9fc953e8c0/node_modules/@react-router/dev/dist/vite.js:1668:8
+[2m7:26:38 PM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/app/routes/docs.tsx[22m
+[2m7:26:38 PM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/app/routes/docs.tsx[22m
+[2m7:26:38 PM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/app/routes/docs.tsx, /app/app.css[22m
+[2m7:26:38 PM[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m [32mpage reload [39m[2mapp/routes/docs.tsx[22m
+[2m7:26:38 PM[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m program reload
+[2m7:26:38 PM[22m [31m[1m[vite][22m[39m [31mInternal server error: Vite module runner has been closed.[39m
+  Plugin: [35mfumadocs-mdx:mdx[39m
+  File: [36mD:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/content/docs/index.mdx?macro_id=app%2Flib%2Fsource.ts%23docs[39m
+      at ModuleRunner.getModuleInformation (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/module-runner.js:1223:26)
+      at ModuleRunner.cachedModule (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/module-runner.js:1205:18)
+      at request (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/module-runner.js:1245:94)
+      at dynamicRequest (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/module-runner.js:1247:122)
+      at mdxOptions (D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/app/lib/source.ts:16:37)
+      at getMDXOptions (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/fumadocs-mdx@15.4.7_@types+_4cbb2e517fc4b66733860c06f2550baa/node_modules/fumadocs-mdx/dist/build-default-CSiWktEh.js:164:46)
+      at buildJSMDX (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/fumadocs-mdx@15.4.7_@types+_4cbb2e517fc4b66733860c06f2550baa/node_modules/fumadocs-mdx/dist/build-default-CSiWktEh.js:97:27)
+      at buildMDX (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/fumadocs-mdx@15.4.7_@types+_4cbb2e517fc4b66733860c06f2550baa/node_modules/fumadocs-mdx/dist/build-H2VN-Hpm.js:10:9)
+      at async Object.load (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/fumadocs-mdx@15.4.7_@types+_4cbb2e517fc4b66733860c06f2550baa/node_modules/fumadocs-mdx/dist/mdx-D0Qtc99b.js:64:20)
+      at async TransformPluginContext.transform (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/fumadocs-mdx@15.4.7_@types+_4cbb2e517fc4b66733860c06f2550baa/node_modules/fumadocs-mdx/dist/adapter-XBO81DIE.js:68:19)
+      at async EnvironmentPluginContainer.transform (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/chunks/node.js:8545:14)
+      at async loadAndTransform (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/chunks/node.js:20184:26)
+[2m7:26:38 PM[22m [31m[1m[vite][22m[39m [31mInternal server error: Vite module runner has been closed.[39m
+  Plugin: [35mfumadocs-mdx:mdx[39m
+  File: [36mD:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/content/docs/index.mdx?macro_id=app%2Flib%2Fsource.ts%23docs[39m
+      at ModuleRunner.getModuleInformation (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/module-runner.js:1223:26)
+      at ModuleRunner.cachedModule (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/module-runner.js:1205:18)
+      at request (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/module-runner.js:1245:94)
+      at dynamicRequest (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/module-runner.js:1247:122)
+      at mdxOptions (D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/app/lib/source.ts:16:37)
+      at getMDXOptions (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/fumadocs-mdx@15.4.7_@types+_4cbb2e517fc4b66733860c06f2550baa/node_modules/fumadocs-mdx/dist/build-default-CSiWktEh.js:164:46)
+      at buildJSMDX (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/fumadocs-mdx@15.4.7_@types+_4cbb2e517fc4b66733860c06f2550baa/node_modules/fumadocs-mdx/dist/build-default-CSiWktEh.js:97:27)
+      at buildMDX (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/fumadocs-mdx@15.4.7_@types+_4cbb2e517fc4b66733860c06f2550baa/node_modules/fumadocs-mdx/dist/build-H2VN-Hpm.js:10:9)
+      at async Object.load (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/fumadocs-mdx@15.4.7_@types+_4cbb2e517fc4b66733860c06f2550baa/node_modules/fumadocs-mdx/dist/mdx-D0Qtc99b.js:64:20)
+      at async TransformPluginContext.transform (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/fumadocs-mdx@15.4.7_@types+_4cbb2e517fc4b66733860c06f2550baa/node_modules/fumadocs-mdx/dist/adapter-XBO81DIE.js:68:19)
+      at async EnvironmentPluginContainer.transform (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/chunks/node.js:8545:14)
+      at async loadAndTransform (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/chunks/node.js:20184:26)
+[2m7:26:38 PM[22m [31m[1m[vite][22m[39m [31mInternal server error: Vite module runner has been closed.[39m
+  Plugin: [35mfumadocs-mdx:mdx[39m
+  File: [36mD:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/content/docs/index.mdx?macro_id=app%2Flib%2Fsource.ts%23docs[39m
+      at ModuleRunner.getModuleInformation (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/module-runner.js:1223:26)
+      at ModuleRunner.cachedModule (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/module-runner.js:1205:18)
+      at request (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/module-runner.js:1245:94)
+      at dynamicRequest (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/module-runner.js:1247:122)
+      at mdxOptions (D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/app/lib/source.ts:16:37)
+      at getMDXOptions (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/fumadocs-mdx@15.4.7_@types+_4cbb2e517fc4b66733860c06f2550baa/node_modules/fumadocs-mdx/dist/build-default-CSiWktEh.js:164:46)
+      at buildJSMDX (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/fumadocs-mdx@15.4.7_@types+_4cbb2e517fc4b66733860c06f2550baa/node_modules/fumadocs-mdx/dist/build-default-CSiWktEh.js:97:27)
+      at buildMDX (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/fumadocs-mdx@15.4.7_@types+_4cbb2e517fc4b66733860c06f2550baa/node_modules/fumadocs-mdx/dist/build-H2VN-Hpm.js:10:9)
+      at async Object.load (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/fumadocs-mdx@15.4.7_@types+_4cbb2e517fc4b66733860c06f2550baa/node_modules/fumadocs-mdx/dist/mdx-D0Qtc99b.js:64:20)
+      at async TransformPluginContext.transform (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/fumadocs-mdx@15.4.7_@types+_4cbb2e517fc4b66733860c06f2550baa/node_modules/fumadocs-mdx/dist/adapter-XBO81DIE.js:68:19)
+      at async EnvironmentPluginContainer.transform (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/chunks/node.js:8545:14)
+      at async loadAndTransform (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/chunks/node.js:20184:26)
+[2m7:26:38 PM[22m [31m[1m[vite][22m[39m [31mInternal server error: Vite module runner has been closed.[39m
+  Plugin: [35mfumadocs-mdx:mdx[39m
+  File: [36mD:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/content/docs/index.mdx?macro_id=app%2Flib%2Fsource.ts%23docs[39m
+      at ModuleRunner.getModuleInformation (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/module-runner.js:1223:26)
+      at ModuleRunner.cachedModule (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/module-runner.js:1205:18)
+      at request (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/module-runner.js:1245:94)
+      at dynamicRequest (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/module-runner.js:1247:122)
+      at mdxOptions (D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/app/lib/source.ts:16:37)
+      at getMDXOptions (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/fumadocs-mdx@15.4.7_@types+_4cbb2e517fc4b66733860c06f2550baa/node_modules/fumadocs-mdx/dist/build-default-CSiWktEh.js:164:46)
+      at buildJSMDX (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/fumadocs-mdx@15.4.7_@types+_4cbb2e517fc4b66733860c06f2550baa/node_modules/fumadocs-mdx/dist/build-default-CSiWktEh.js:97:27)
+      at buildMDX (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/fumadocs-mdx@15.4.7_@types+_4cbb2e517fc4b66733860c06f2550baa/node_modules/fumadocs-mdx/dist/build-H2VN-Hpm.js:10:9)
+      at async Object.load (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/fumadocs-mdx@15.4.7_@types+_4cbb2e517fc4b66733860c06f2550baa/node_modules/fumadocs-mdx/dist/mdx-D0Qtc99b.js:64:20)
+      at async TransformPluginContext.transform (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/fumadocs-mdx@15.4.7_@types+_4cbb2e517fc4b66733860c06f2550baa/node_modules/fumadocs-mdx/dist/adapter-XBO81DIE.js:68:19)
+      at async EnvironmentPluginContainer.transform (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/chunks/node.js:8545:14)
+      at async loadAndTransform (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/chunks/node.js:20184:26)
+[2m7:26:38 PM[22m [31m[1m[vite][22m[39m [31mInternal server error: Vite module runner has been closed.[39m
+  Plugin: [35mfumadocs-mdx:mdx[39m
+  File: [36mD:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/content/docs/index.mdx?macro_id=app%2Flib%2Fsource.ts%23docs[39m
+      at ModuleRunner.getModuleInformation (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/module-runner.js:1223:26)
+      at ModuleRunner.cachedModule (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/module-runner.js:1205:18)
+      at request (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/module-runner.js:1245:94)
+      at dynamicRequest (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/module-runner.js:1247:122)
+      at mdxOptions (D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/app/lib/source.ts:16:37)
+      at getMDXOptions (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/fumadocs-mdx@15.4.7_@types+_4cbb2e517fc4b66733860c06f2550baa/node_modules/fumadocs-mdx/dist/build-default-CSiWktEh.js:164:46)
+      at buildJSMDX (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/fumadocs-mdx@15.4.7_@types+_4cbb2e517fc4b66733860c06f2550baa/node_modules/fumadocs-mdx/dist/build-default-CSiWktEh.js:97:27)
+      at buildMDX (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/fumadocs-mdx@15.4.7_@types+_4cbb2e517fc4b66733860c06f2550baa/node_modules/fumadocs-mdx/dist/build-H2VN-Hpm.js:10:9)
+      at async Object.load (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/fumadocs-mdx@15.4.7_@types+_4cbb2e517fc4b66733860c06f2550baa/node_modules/fumadocs-mdx/dist/mdx-D0Qtc99b.js:64:20)
+      at async TransformPluginContext.transform (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/fumadocs-mdx@15.4.7_@types+_4cbb2e517fc4b66733860c06f2550baa/node_modules/fumadocs-mdx/dist/adapter-XBO81DIE.js:68:19)
+      at async EnvironmentPluginContainer.transform (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/chunks/node.js:8545:14)
+      at async loadAndTransform (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/chunks/node.js:20184:26)
+[2m7:26:38 PM[22m [31m[1m[vite][22m[39m [31mInternal server error: Vite module runner has been closed.[39m
+  Plugin: [35mfumadocs-mdx:mdx[39m
+  File: [36mD:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/content/docs/index.mdx?macro_id=app%2Flib%2Fsource.ts%23docs[39m
+      at ModuleRunner.getModuleInformation (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/module-runner.js:1223:26)
+      at ModuleRunner.cachedModule (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/module-runner.js:1205:18)
+      at request (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/module-runner.js:1245:94)
+      at dynamicRequest (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/module-runner.js:1247:122)
+      at mdxOptions (D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/app/lib/source.ts:16:37)
+      at getMDXOptions (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/fumadocs-mdx@15.4.7_@types+_4cbb2e517fc4b66733860c06f2550baa/node_modules/fumadocs-mdx/dist/build-default-CSiWktEh.js:164:46)
+      at buildJSMDX (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/fumadocs-mdx@15.4.7_@types+_4cbb2e517fc4b66733860c06f2550baa/node_modules/fumadocs-mdx/dist/build-default-CSiWktEh.js:97:27)
+      at buildMDX (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/fumadocs-mdx@15.4.7_@types+_4cbb2e517fc4b66733860c06f2550baa/node_modules/fumadocs-mdx/dist/build-H2VN-Hpm.js:10:9)
+      at async Object.load (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/fumadocs-mdx@15.4.7_@types+_4cbb2e517fc4b66733860c06f2550baa/node_modules/fumadocs-mdx/dist/mdx-D0Qtc99b.js:64:20)
+      at async TransformPluginContext.transform (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/fumadocs-mdx@15.4.7_@types+_4cbb2e517fc4b66733860c06f2550baa/node_modules/fumadocs-mdx/dist/adapter-XBO81DIE.js:68:19)
+      at async EnvironmentPluginContainer.transform (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/chunks/node.js:8545:14)
+      at async loadAndTransform (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/chunks/node.js:20184:26)
+Error: Vite module runner has been closed.
+    at ModuleRunner.getModuleInformation (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/module-runner.js:1223:26)
+    at ModuleRunner.cachedModule (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/module-runner.js:1205:18)
+    at request (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/module-runner.js:1245:94)
+    at dynamicRequest (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/module-runner.js:1247:122)
+    at mdxOptions (D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/app/lib/source.ts:16:37)
+    at getMDXOptions (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/fumadocs-mdx@15.4.7_@types+_4cbb2e517fc4b66733860c06f2550baa/node_modules/fumadocs-mdx/dist/build-default-CSiWktEh.js:164:46)
+    at buildJSMDX (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/fumadocs-mdx@15.4.7_@types+_4cbb2e517fc4b66733860c06f2550baa/node_modules/fumadocs-mdx/dist/build-default-CSiWktEh.js:97:27)
+    at buildMDX (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/fumadocs-mdx@15.4.7_@types+_4cbb2e517fc4b66733860c06f2550baa/node_modules/fumadocs-mdx/dist/build-H2VN-Hpm.js:10:9)
+    at async Object.load (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/fumadocs-mdx@15.4.7_@types+_4cbb2e517fc4b66733860c06f2550baa/node_modules/fumadocs-mdx/dist/mdx-D0Qtc99b.js:64:20)
+    at async TransformPluginContext.transform (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/fumadocs-mdx@15.4.7_@types+_4cbb2e517fc4b66733860c06f2550baa/node_modules/fumadocs-mdx/dist/adapter-XBO81DIE.js:68:19)
+    at async EnvironmentPluginContainer.transform (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/chunks/node.js:8545:14)
+    at async loadAndTransform (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/chunks/node.js:20184:26) {
+  plugin: 'fumadocs-mdx:mdx',
+  id: 'D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/content/docs/index.mdx?macro_id=app%2Flib%2Fsource.ts%23docs',
+  pluginCode: '---\n' +
+    'title: Hello World\n' +
+    'description: |\n' +
+    '  Your first `document`\n' +
+    "  You'll love it!\n" +
+    '---\n' +
+    '\n' +
+    'Hey there! Fumadocs is the docs framework that also works on React Router!\n' +
+    '\n' +
+    '## Heading\n' +
+    '\n' +
+    'Hello World\n' +
+    '\n' +
+    '<Cards>\n' +
+    '  <Card title="Learn more about React Router" href="https://reactrouter.com" />\n' +
+    '  <Card title="Learn more about Fumadocs" href="https://fumadocs.dev" />\n' +
+    '</Cards>\n' +
+    '\n' +
+    '```ts\n' +
+    "console.log('I love React!');\n" +
+    '```\n' +
+    '\n' +
+    '### Heading\n' +
+    '\n' +
+    '#### Heading\n' +
+    '\n' +
+    '| Head                            | Description                         |\n' +
+    '| ------------------------------- | ----------------------------------- |\n' +
+    '| `hello`                         | Hello World                         |\n' +
+    '| very **important**              | Hey                                 |\n' +
+    '| _Surprisingly_                  | Fumadocs                            |\n' +
+    '| very long text that looks weird | hello world hello world hello world |\n',
+  runnerError: Error: RunnerError
+      at reviveInvokeError (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/module-runner.js:557:64)
+      at Object.invoke (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/module-runner.js:630:11)
+      at async ModuleRunner.getModuleInformation (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/module-runner.js:1228:7)
+      at async request (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/module-runner.js:1245:83)
+      at async Object.load (D:\unitfolders\oz47p-docsite-kit\docsite-kit\probes\2610111754_fumadocs-16-17-1\site\node_modules\.pnpm\fumadocs-mdx@15.4.7_@types+_4cbb2e517fc4b66733860c06f2550baa\node_modules\fumadocs-mdx\dist\runtime\server.js:41:25)
+}
+Error: Vite module runner has been closed.
+    at ModuleRunner.getModuleInformation (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/module-runner.js:1223:26)
+    at ModuleRunner.cachedModule (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/module-runner.js:1205:18)
+    at request (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/module-runner.js:1245:94)
+    at dynamicRequest (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/module-runner.js:1247:122)
+    at mdxOptions (D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/app/lib/source.ts:16:37)
+    at getMDXOptions (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/fumadocs-mdx@15.4.7_@types+_4cbb2e517fc4b66733860c06f2550baa/node_modules/fumadocs-mdx/dist/build-default-CSiWktEh.js:164:46)
+    at buildJSMDX (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/fumadocs-mdx@15.4.7_@types+_4cbb2e517fc4b66733860c06f2550baa/node_modules/fumadocs-mdx/dist/build-default-CSiWktEh.js:97:27)
+    at buildMDX (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/fumadocs-mdx@15.4.7_@types+_4cbb2e517fc4b66733860c06f2550baa/node_modules/fumadocs-mdx/dist/build-H2VN-Hpm.js:10:9)
+    at async Object.load (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/fumadocs-mdx@15.4.7_@types+_4cbb2e517fc4b66733860c06f2550baa/node_modules/fumadocs-mdx/dist/mdx-D0Qtc99b.js:64:20)
+    at async TransformPluginContext.transform (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/fumadocs-mdx@15.4.7_@types+_4cbb2e517fc4b66733860c06f2550baa/node_modules/fumadocs-mdx/dist/adapter-XBO81DIE.js:68:19)
+    at async EnvironmentPluginContainer.transform (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/chunks/node.js:8545:14)
+    at async loadAndTransform (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/chunks/node.js:20184:26) {
+  plugin: 'fumadocs-mdx:mdx',
+  id: 'D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/content/docs/index.mdx?macro_id=app%2Flib%2Fsource.ts%23docs',
+  pluginCode: '---\n' +
+    'title: Hello World\n' +
+    'description: |\n' +
+    '  Your first `document`\n' +
+    "  You'll love it!\n" +
+    '---\n' +
+    '\n' +
+    'Hey there! Fumadocs is the docs framework that also works on React Router!\n' +
+    '\n' +
+    '## Heading\n' +
+    '\n' +
+    'Hello World\n' +
+    '\n' +
+    '<Cards>\n' +
+    '  <Card title="Learn more about React Router" href="https://reactrouter.com" />\n' +
+    '  <Card title="Learn more about Fumadocs" href="https://fumadocs.dev" />\n' +
+    '</Cards>\n' +
+    '\n' +
+    '```ts\n' +
+    "console.log('I love React!');\n" +
+    '```\n' +
+    '\n' +
+    '### Heading\n' +
+    '\n' +
+    '#### Heading\n' +
+    '\n' +
+    '| Head                            | Description                         |\n' +
+    '| ------------------------------- | ----------------------------------- |\n' +
+    '| `hello`                         | Hello World                         |\n' +
+    '| very **important**              | Hey                                 |\n' +
+    '| _Surprisingly_                  | Fumadocs                            |\n' +
+    '| very long text that looks weird | hello world hello world hello world |\n',
+  runnerError: Error: RunnerError
+      at reviveInvokeError (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/module-runner.js:557:64)
+      at Object.invoke (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/module-runner.js:630:11)
+      at async ModuleRunner.getModuleInformation (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/module-runner.js:1228:7)
+      at async request (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/module-runner.js:1245:83)
+      at async Object.load (D:\unitfolders\oz47p-docsite-kit\docsite-kit\probes\2610111754_fumadocs-16-17-1\site\node_modules\.pnpm\fumadocs-mdx@15.4.7_@types+_4cbb2e517fc4b66733860c06f2550baa\node_modules\fumadocs-mdx\dist\runtime\server.js:41:25)
+}
+Error: Vite module runner has been closed.
+    at ModuleRunner.getModuleInformation (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/module-runner.js:1223:26)
+    at ModuleRunner.cachedModule (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/module-runner.js:1205:18)
+    at request (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/module-runner.js:1245:94)
+    at dynamicRequest (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/module-runner.js:1247:122)
+    at mdxOptions (D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/app/lib/source.ts:16:37)
+    at getMDXOptions (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/fumadocs-mdx@15.4.7_@types+_4cbb2e517fc4b66733860c06f2550baa/node_modules/fumadocs-mdx/dist/build-default-CSiWktEh.js:164:46)
+    at buildJSMDX (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/fumadocs-mdx@15.4.7_@types+_4cbb2e517fc4b66733860c06f2550baa/node_modules/fumadocs-mdx/dist/build-default-CSiWktEh.js:97:27)
+    at buildMDX (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/fumadocs-mdx@15.4.7_@types+_4cbb2e517fc4b66733860c06f2550baa/node_modules/fumadocs-mdx/dist/build-H2VN-Hpm.js:10:9)
+    at async Object.load (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/fumadocs-mdx@15.4.7_@types+_4cbb2e517fc4b66733860c06f2550baa/node_modules/fumadocs-mdx/dist/mdx-D0Qtc99b.js:64:20)
+    at async TransformPluginContext.transform (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/fumadocs-mdx@15.4.7_@types+_4cbb2e517fc4b66733860c06f2550baa/node_modules/fumadocs-mdx/dist/adapter-XBO81DIE.js:68:19)
+    at async EnvironmentPluginContainer.transform (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/chunks/node.js:8545:14)
+    at async loadAndTransform (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/chunks/node.js:20184:26) {
+  plugin: 'fumadocs-mdx:mdx',
+  id: 'D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/content/docs/index.mdx?macro_id=app%2Flib%2Fsource.ts%23docs',
+  pluginCode: '---\n' +
+    'title: Hello World\n' +
+    'description: |\n' +
+    '  Your first `document`\n' +
+    "  You'll love it!\n" +
+    '---\n' +
+    '\n' +
+    'Hey there! Fumadocs is the docs framework that also works on React Router!\n' +
+    '\n' +
+    '## Heading\n' +
+    '\n' +
+    'Hello World\n' +
+    '\n' +
+    '<Cards>\n' +
+    '  <Card title="Learn more about React Router" href="https://reactrouter.com" />\n' +
+    '  <Card title="Learn more about Fumadocs" href="https://fumadocs.dev" />\n' +
+    '</Cards>\n' +
+    '\n' +
+    '```ts\n' +
+    "console.log('I love React!');\n" +
+    '```\n' +
+    '\n' +
+    '### Heading\n' +
+    '\n' +
+    '#### Heading\n' +
+    '\n' +
+    '| Head                            | Description                         |\n' +
+    '| ------------------------------- | ----------------------------------- |\n' +
+    '| `hello`                         | Hello World                         |\n' +
+    '| very **important**              | Hey                                 |\n' +
+    '| _Surprisingly_                  | Fumadocs                            |\n' +
+    '| very long text that looks weird | hello world hello world hello world |\n',
+  runnerError: Error: RunnerError
+      at reviveInvokeError (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/module-runner.js:557:64)
+      at Object.invoke (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/module-runner.js:630:11)
+      at async ModuleRunner.getModuleInformation (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/module-runner.js:1228:7)
+      at async request (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/module-runner.js:1245:83)
+      at async Object.load (D:\unitfolders\oz47p-docsite-kit\docsite-kit\probes\2610111754_fumadocs-16-17-1\site\node_modules\.pnpm\fumadocs-mdx@15.4.7_@types+_4cbb2e517fc4b66733860c06f2550baa\node_modules\fumadocs-mdx\dist\runtime\server.js:41:25)
+}
+[ELIFECYCLE] Command failed with exit code 1.

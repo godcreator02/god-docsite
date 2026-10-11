@@ -1,0 +1,20 @@
+$ react-router dev --port 4446 --host 127.0.0.1
+[restart] Relaunching with --conditions=development
+  [32m➜[39m  [1mLocal[22m:   [36mhttp://127.0.0.1:[1m4446[22m/[39m
+[2m7:23:21 PM[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m connected.
+[2m7:23:30 PM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [optimizer] bundling dependencies...
+[2m7:23:30 PM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mdependencies optimized: [33m@base-ui/react/collapsible, @base-ui/react/dialog, @base-ui/react/direction-provider, @base-ui/react/navigation-menu, @base-ui/react/popover, @fuma-translate/react, class-variance-authority, cn, lucide-react, next-themes[32m[39m
+[2m7:23:31 PM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [optimizer] bundling dependencies...
+[2m7:23:31 PM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mdependencies optimized: [33m@base-ui/react/scroll-area, @base-ui/react/tabs, scroll-into-view-if-needed[32m[39m
+[2m7:23:31 PM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32moptimized dependencies changed. reloading[39m
+[2m7:24:07 PM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/app/routes/docs.tsx[22m
+[2m7:24:07 PM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/app/routes/docs.tsx[22m
+[2m7:24:07 PM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/app/app.css, /app/routes/docs.tsx[22m
+[2m7:24:07 PM[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m [32mpage reload [39m[2mapp/components/mdx.tsx[22m
+[2m7:24:07 PM[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m program reload
+[2m7:25:56 PM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/app/routes/docs.tsx, /app/routes/comments.tsx[22m
+[2m7:25:56 PM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/app/routes/docs.tsx, /app/routes/comments.tsx[22m
+[2m7:25:56 PM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/app/app.css, /app/routes/docs.tsx, /app/routes/comments.tsx[22m
+[2m7:25:56 PM[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m [32mpage reload [39m[2mapp/lib/source.ts[22m
+[2m7:25:56 PM[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m program reload
+[ELIFECYCLE] Command failed with exit code 1.
