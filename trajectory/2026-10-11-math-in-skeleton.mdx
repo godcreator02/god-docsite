@@ -1,0 +1,23 @@
+---
+born-at: 2026-10-11T11:30
+type: choice
+parent: [2026-10-10-docsite-kit]
+label: 骨架支持公式
+domain: 页面
+---
+
+## 背景
+
+协作站迁到基础包上时，旧站点 MDX 里的 `$…$` 公式和 TSX 的 `Tex` 组件都算作「格式适配不上就改内容」，SST 迁移时把公式改成了文字。
+对照新旧功能时发现 SST 还有 44 行 `$` 公式和矩阵公式，MMC 用得更多，改成文字等于丢内容。用户让先看 fumadocs 官方有没有公式的做法。
+
+## 结论与边界
+
+照 fumadocs 文档「Math」页的做法：骨架的 `source.config.ts` 加 `remark-math`（接在默认 remark 插件后面、功能包的前面）和 `rehype-katex`（排在 rehype 插件最前面，代码高亮之前），
+`root.tsx` 引入 `katex/dist/katex.css`。写错的公式直接报错（`throwOnError`）。TSX 页面用基础包 `./ui` 的 `Tex`，同样用 KaTeX 排版。
+
+katex 用 `^0.16`：`rehype-katex` 7 依赖的是 `katex ^0.16`，基础包与骨架跟它同一版，不装出两份。
+
+## 否掉的候选
+
+公式改写成文字或代码：矩阵、积分这类写不成文字，用户也没打算放弃公式。

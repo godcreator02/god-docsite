@@ -115,6 +115,26 @@ export async function loader({ request }) {
 pnpm dev
 ```
 
+## 公式
+
+公式用 KaTeX 的写法。行内的写在一对 `$` 里，单独成一行的写在一对 `$$` 里：
+
+```mdx
+DAB 传输功率是 $P = \frac{n V_1 V_2}{2 f L} D (1 - D)$，其中 $D$ 是移相比。
+
+$$
+T_f(z) = \frac{1}{2\pi i} \oint_\gamma \frac{f(w)}{w - z} \, dw
+$$
+```
+
+DAB 传输功率是 $P = \frac{n V_1 V_2}{2 f L} D (1 - D)$，其中 $D$ 是移相比。
+
+$$
+T_f(z) = \frac{1}{2\pi i} \oint_\gamma \frac{f(w)}{w - z} \, dw
+$$
+
+公式写错了开发服务直接报错，写明是哪个公式、错在哪。TSX 页面里用基础包的 `Tex` 组件：`` <Tex>{String.raw`\frac{a}{b}`}</Tex> ``，加 `block` 单独成一行。
+
 ## 图片
 
 图片放在页面旁边，用相对路径引用，构建时一起打包：

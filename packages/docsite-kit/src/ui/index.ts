@@ -4,4 +4,5 @@ export { commentScopeAttribute, commentScopeProps, PageComments, themeSwitchWith
 export { AllComments, commentLinkOf, type AllCommentsProps } from './all-comments.js'
 export { Avatar } from './comment-cards.js'
 export { useSiteFeed } from './site-feed.js'
+export { Tex } from './tex.js'
 export { groupKeepingSidebar, routeLinksSearchTrigger, SidebarRouteLinks, type SidebarRouteLink } from './sidebar.js'

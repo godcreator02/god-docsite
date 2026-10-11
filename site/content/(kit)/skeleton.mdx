@@ -37,9 +37,9 @@ gwb-docsite 的命令 `docsite.site.init`（别的插件调服务 `gwbDocsite.in
 | 文件 | 做什么 |
 | --- | --- |
 | `vite.config.ts` | 插件依次是 `docsite()`、`fumadocsMdx()`、`tailwindcss()`、`reactRouter()`；`docsite()` 的 `featurePackages` 取 `app/site/features.ts` |
-| `source.config.ts` | `fumadocs-mdx` 的全局设置：MDX 的 remark 插件在默认的后面加上各功能包 `./content` 给的（`app/site/content.ts`），见[功能包](/features#remark-插件放在-fumadocs-mdx-的全局设置里) |
+| `source.config.ts` | `fumadocs-mdx` 的全局设置：MDX 的 remark 插件在默认的后面加上公式的 `remark-math` 和各功能包 `./content` 给的（`app/site/content.ts`），见[功能包](/features#remark-插件放在-fumadocs-mdx-的全局设置里)；rehype 插件最前面是排公式的 `rehype-katex`，写法见[写一页说明](/writing#公式) |
 | `react-router.config.ts` | `ssr: true`：页面在服务端渲染，发布时用 `react-router-serve` 开服务 |
-| `app/root.tsx` | 整个 HTML 外框；`RootProvider` 传入中文界面文字 `zhTranslations`；出错时显示原话 |
+| `app/root.tsx` | 整个 HTML 外框；`RootProvider` 传入中文界面文字 `zhTranslations`；引入公式的样式 `katex/dist/katex.css`；出错时显示原话 |
 | `app/app.css` | 依次引入 Tailwind、fumadocs 的配色与 preset（docs 布局的样式在 preset 里）、基础包的 `styles.css`，最后是各功能包的样式 `app/site/styles.css` |
 | `app/routes.ts` | 路由表：`api/search` 搜索，`api/content/*` 送内容文件，`api/comments` 写评论，`comments` 全部评论页，其余地址交给内容页；功能包的路由插在中间（见[功能包](/features)）。`*` 不匹配 `/`，首页另写一条 `index` 路由：功能包给了首页就用它的，不然交给内容页 |
 | `app/lib/collections.ts` | 列出页面文件与评论文件：MDX 页面用 `defineDocs`，TSX 页面用 `import.meta.glob` 按需加载组件，评论用 `defineCollections` |

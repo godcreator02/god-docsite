@@ -3,6 +3,7 @@ import { isRouteErrorResponse, Links, Meta, Outlet, Scripts, ScrollRestoration }
 import { RootProvider } from '@fumadocs/base-ui/provider/react-router'
 import { zhTranslations } from '@godcreator/docsite-kit/ui'
 import type { Route } from './+types/root'
+import 'katex/dist/katex.css'
 import './app.css'
 
 export function Layout({ children }: { children: ReactNode }) {
