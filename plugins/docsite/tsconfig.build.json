@@ -7,5 +7,5 @@
     "outDir": "dist",
     "rootDir": "src"
   },
-  "include": ["src/index.ts", "src/electron.d.ts"]
+  "include": ["src/index.ts", "src/electron.d.ts", "src/build-constants.d.ts"]
 }
