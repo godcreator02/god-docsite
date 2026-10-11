@@ -44,10 +44,10 @@ gwb-docsite 的命令 `docsite.site.init`（别的插件调服务 `gwbDocsite.in
 | `app/routes.ts` | 路由表：`api/search` 搜索，`api/content/*` 送内容文件，`api/comments` 写评论，`comments` 全部评论页，其余地址交给内容页；功能包的路由插在中间（见[功能包](/features)）。`*` 不匹配 `/`，首页另写一条 `index` 路由：功能包给了首页就用它的，不然交给内容页 |
 | `app/lib/collections.ts` | 列出页面文件与评论文件：MDX 页面用 `defineDocs`，TSX 页面用 `import.meta.glob` 按需加载组件，评论用 `defineCollections` |
 | `app/lib/source.ts` | 把三种页面交给 fumadocs 的 `loader()`，进同一棵页面树；`lucideIconsPlugin()` 把 `icon` 里写的 lucide 图标名换成图标；检查页面有没有占用 `api`、`comments` 与功能包各条路由的第一段地址，评论批的页面在不在；`sitePageRefs()` 交出每一页的地址与标题，`siteName()` 是站名 |
-| `app/lib/mdx-components.ts` | MDX 页面与评论正文不用 `import` 就能写的组件：fumadocs 的排版组件，加上标签页、步骤、折叠、文件树、参数表、横幅、正文内目录，图片换成能放大的 `ImageZoom`，再并上各功能包的 |
+| `app/lib/mdx-components.ts` | MDX 页面与评论正文不用 `import` 就能写的组件：fumadocs 的排版组件，加上标签页、步骤、折叠、文件树、参数表、横幅、正文内目录，图片换成能放大的 `ImageZoom`，链接 `a` 换成 `siteLinkComponent` 显示的小卡片（各功能包的 `linkKinds` 排在前面），再并上各功能包的 |
 | `app/lib/comment-threads.tsx` | 全站的评论串、按页面分组的评论串、渲染一条评论正文的 `renderCommentBody`：内容页与全部评论页共用 |
 | `app/lib/commenter.server.ts` | 读人员列表、核对评论作者都在里面，读这一页各评论串的页面文字快照（`snapshot.txt`），交给内容页 |
-| `app/routes/layout.tsx` | 整站布局：docs 的 `DocsLayout`，左侧是页面树，侧栏里的下拉框切换 `"root": true` 的文件夹；`slots.sidebar` 用 `groupKeepingSidebar`，在站点自己的页面上侧栏停在最近看过的那一组；`sidebar.banner` 放 `SidebarRouteLinks` 那一排（搜索、各功能包的入口、「评论」），`slots.searchTrigger` 用 `routeLinksSearchTrigger`；`slots.themeSwitch` 用 `themeSwitchWithIdentity`，侧栏底部显示本机身份（`siteIdentity()`，只读时写「只读」和原因）。`loader` 多读各功能包的 `layoutData`，功能包的 `Provider` 包住整个布局，`PageTop` 放在每一页正文上面 |
+| `app/routes/layout.tsx` | 整站布局：docs 的 `DocsLayout`，左侧是页面树，侧栏里的下拉框切换 `"root": true` 的文件夹；`slots.sidebar` 用 `groupKeepingSidebar`，在站点自己的页面上侧栏停在最近看过的那一组；`sidebar.banner` 放 `SidebarRouteLinks` 那一排（搜索、各功能包的入口、「评论」），`slots.searchTrigger` 用 `routeLinksSearchTrigger`；`slots.themeSwitch` 用 `themeSwitchWithIdentity`，侧栏底部显示本机身份（`siteIdentity()`，只读时写「只读」和原因）。`loader` 多读各功能包的 `layoutData` 和全站页面的标题，`SiteLinksProvider` 把页面标题、那一排入口、评论串交给正文里的链接；功能包的 `Provider` 包住整个布局，`PageTop` 放在每一页正文上面 |
 | `app/routes/all-comments.tsx` | 全部评论页 `/comments`，见[评论](/commenting#全部评论页) |
 | `app/routes/page.tsx` | 内容页：用 docs 的页面组件，按页面类型渲染 MDX 正文、TSX 组件或放 HTML 的 iframe；正文外面套 `PageComments` 显示和写评论 |
 | `app/routes/comments.ts` | 评论接口：POST 调用 `commentRequestResponse` 写 `comments/` 里的文件，GET 调用 `commentSourceResponse` 取一条评论的原文给编辑用 |

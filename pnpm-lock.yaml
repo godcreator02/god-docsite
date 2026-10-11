@@ -19,6 +19,9 @@ importers:
       katex:
         specifier: ^0.16.47
         version: 0.16.47
+      lucide-react:
+        specifier: 1.54.0
+        version: 1.54.0(@types/react@19.3.0)(react@19.3.0)
       parse5:
         specifier: 7.3.0
         version: 7.3.0

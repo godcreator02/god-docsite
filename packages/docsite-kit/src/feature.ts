@@ -1,6 +1,7 @@
 import type { ProcessorOptions } from '@mdx-js/mdx'
 import type { ComponentType, ReactNode } from 'react'
 import type { SidebarRouteLink } from './ui/sidebar.js'
+import type { SiteLinkKind } from './ui/site-links.js'
 
 /**
  * 功能包（如协作站的 @godcreator/collab-site）往基础骨架上添加的东西。站点 package.json 的 docsite.features 列出用到的功能包，
@@ -28,6 +29,8 @@ export type FeatureSite = {
   routeLinks?: readonly SidebarRouteLink[]
   /** MDX 页面与评论正文里不用 import 就能写的组件 */
   mdxComponents?: Readonly<Record<string, ComponentType<any>>>
+  /** 正文与评论里这个功能包自己的链接（如协作站的任务、日志）怎么显示，排在站点自己的链接种类前面 */
+  linkKinds?: readonly SiteLinkKind[]
   /** 包在整站布局外面的组件；data 是 ./site-server 的 layoutData 读出的那一份 */
   Provider?: ComponentType<{ data: unknown; children: ReactNode }>
   /** 放在每一页正文最上面的组件 */

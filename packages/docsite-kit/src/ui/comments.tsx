@@ -18,7 +18,7 @@ import {
   placeOfThread,
   type ThreadPlace,
 } from './comment-anchors.js'
-import { linkedCommentParam } from './all-comments.js'
+import { linkedCommentParam } from '../site-link-targets.js'
 import { CommentEditor, CommenterChip, CommentItem, PeopleContext, postComment, recentThreadToOpen, rememberThreadToOpen, ThreadView, type CommentApi } from './comment-cards.js'
 
 /** 页面正文的容器带上这个属性，评论在它里面找被批的原文：<DocsBody {...commentScopeProps}> */

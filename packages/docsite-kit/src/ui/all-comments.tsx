@@ -1,10 +1,9 @@
 import { useEffect, useState, type ReactNode } from 'react'
 import type { CommentEntry, Commenter, CommentThread, Person } from '../comments.js'
+import { linkedCommentParam } from '../site-link-targets.js'
 import { CommentEditor, CommentItem, PeopleContext, postComment, recentThreadToOpen, rememberThreadToOpen, ThreadView, type CommentApi } from './comment-cards.js'
 
-/** 从全部评论页去一串评论批的那一页：地址带上 comment，那一页找好位置后打开它 */
-export const linkedCommentParam = 'comment'
-
+/** 从全部评论页去一串评论批的那一页 */
 export function commentLinkOf(page: string, thread: string) {
   return `${page}?${new URLSearchParams({ [linkedCommentParam]: thread })}`
 }

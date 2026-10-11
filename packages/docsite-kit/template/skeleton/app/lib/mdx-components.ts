@@ -7,10 +7,14 @@ import { InlineTOC } from '@fumadocs/base-ui/components/inline-toc'
 import { Step, Steps } from '@fumadocs/base-ui/components/steps'
 import { Tab, Tabs } from '@fumadocs/base-ui/components/tabs'
 import { TypeTable } from '@fumadocs/base-ui/components/type-table'
+import { siteLinkComponent } from '@godcreator/docsite-kit/ui'
 import { featureSites } from '../site/ui'
 
 /** fumadocs 的排版组件也不用 import；图片换成点了能放大的 ImageZoom */
 const fumadocsComponents = { Accordion, Accordions, Banner, File, Files, Folder, InlineTOC, Step, Steps, Tab, Tabs, TypeTable, img: ImageZoom }
 
+/** 链接显示成带图标的小卡片，功能包登记的链接种类排在前面 */
+const a = siteLinkComponent(featureSites.flatMap((feature) => feature.linkKinds ?? []))
+
 /** MDX 页面与评论正文不用 import 就能写的组件：fumadocs 的，加上各功能包的 */
-export const mdxComponents = Object.assign({}, defaultMdxComponents, fumadocsComponents, ...featureSites.map((feature) => feature.mdxComponents ?? {})) as typeof defaultMdxComponents
+export const mdxComponents = Object.assign({}, defaultMdxComponents, fumadocsComponents, { a }, ...featureSites.map((feature) => feature.mdxComponents ?? {})) as typeof defaultMdxComponents

@@ -4,7 +4,8 @@ import { MessageSquare } from 'lucide-react'
 import { useFumadocsLoader } from 'fumadocs-core/source/client'
 import { DocsLayout } from '@fumadocs/base-ui/layouts/docs'
 import { siteIdentity } from '@godcreator/docsite-kit/server'
-import { groupKeepingSidebar, routeLinksSearchTrigger, SidebarRouteLinks, themeSwitchWithIdentity } from '@godcreator/docsite-kit/ui'
+import { commentLinkTargetsOf, groupKeepingSidebar, routeLinksSearchTrigger, SidebarRouteLinks, SiteLinksProvider, themeSwitchWithIdentity } from '@godcreator/docsite-kit/ui'
+import { allThreads } from '../lib/comment-threads'
 import { sitePageRefs, source } from '../lib/source'
 import { featureServers } from '../site/data.server'
 import { featureSites } from '../site/ui'
@@ -15,20 +16,26 @@ export async function loader() {
   const pages = sitePageRefs()
   const featureData: Record<string, unknown> = {}
   for (const { name, layoutData } of featureServers) featureData[name] = layoutData ? await layoutData({ pages }) : null
-  return { pageTree: await source.serializePageTree(source.getPageTree()), identity: siteIdentity(), featureData }
+  const pageTitles = Object.fromEntries(pages.map((page) => [page.url, page.title]))
+  return { pageTree: await source.serializePageTree(source.getPageTree()), identity: siteIdentity(), featureData, pageTitles }
 }
 
-const routeLinks = <SidebarRouteLinks links={[...featureSites.flatMap((feature) => feature.routeLinks ?? []), { text: '评论', url: '/comments', icon: <MessageSquare /> }]} />
+const routeLinkList = [...featureSites.flatMap((feature) => feature.routeLinks ?? []), { text: '评论', url: '/comments', icon: <MessageSquare /> }]
+const routeLinks = <SidebarRouteLinks links={routeLinkList} />
+const commentLinkTargets = commentLinkTargetsOf(allThreads)
 
 export default function Layout({ loaderData }: Route.ComponentProps) {
   const { pageTree } = useFumadocsLoader(loaderData)
-  const { identity, featureData } = loaderData
+  const { identity, featureData, pageTitles } = loaderData
   const themeSwitch = useMemo(() => themeSwitchWithIdentity(identity), [identity.person?.id, identity.reason])
+  const siteLinks = useMemo(() => ({ pageTitles, routeLinks: routeLinkList, comments: commentLinkTargets }), [pageTitles])
   const docsLayout = (
-    <DocsLayout tree={pageTree} nav={{ title: pageTree.name }} sidebar={{ banner: routeLinks }} slots={{ themeSwitch, sidebar: groupKeepingSidebar, searchTrigger: routeLinksSearchTrigger }}>
-      {featureSites.map(({ name, PageTop }) => PageTop && <PageTop key={name} />)}
-      <Outlet />
-    </DocsLayout>
+    <SiteLinksProvider value={siteLinks}>
+      <DocsLayout tree={pageTree} nav={{ title: pageTree.name }} sidebar={{ banner: routeLinks }} slots={{ themeSwitch, sidebar: groupKeepingSidebar, searchTrigger: routeLinksSearchTrigger }}>
+        {featureSites.map(({ name, PageTop }) => PageTop && <PageTop key={name} />)}
+        <Outlet />
+      </DocsLayout>
+    </SiteLinksProvider>
   )
   return featureSites.reduceRight<ReactNode>((children, { name, Provider }) => (Provider ? <Provider data={featureData[name]}>{children}</Provider> : children), docsLayout)
 }

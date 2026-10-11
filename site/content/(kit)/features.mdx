@@ -20,10 +20,26 @@ icon: Blocks
 | 出口 | 默认导出的类型 | 内容 |
 | --- | --- | --- |
 | `./routes` | `FeatureRoutes` | 路由列表。每条 `{ path, file }`，`file` 相对功能包的包根；`layout: false` 的放在整站布局外面（不出页面的接口）；`{ index: true, file }` 是首页，全站只能有一个。在 Node 里读路由表时用，不能引用 React 组件 |
-| `./site` | `FeatureSite` | 浏览器端也用的：侧栏那一排的入口 `routeLinks`（排在「评论」前面），MDX 组件 `mdxComponents`，包住整个布局的 `Provider`，放在每一页正文上面的 `PageTop` |
+| `./site` | `FeatureSite` | 浏览器端也用的：侧栏那一排的入口 `routeLinks`（排在「评论」前面），MDX 组件 `mdxComponents`，自己的链接种类 `linkKinds`（见下面「链接种类」），包住整个布局的 `Provider`，放在每一页正文上面的 `PageTop` |
 | `./site-server` | `FeatureSiteServer` | 只在服务端运行的：`layoutData({ pages })`，整站布局的 `loader` 调用它，读出的数据交给 `Provider` 的 `data` |
 | `./styles.css` | | 功能包的样式，`app.css` 最后引入 |
 | `./content`（可以没有） | `FeatureContent` | 构建页面时在 Node 里执行的：`remarkPlugins`，接在 fumadocs 默认的 remark 插件后面，`content/` 下的 MDX 页面与评论正文都经过它们，插件要区分就看 vfile 的路径。`package.json` 的 `exports` 里有这个键，初始化才引入它 |
+
+## 链接种类
+
+正文与评论里的链接由骨架的 `a` 组件（`siteLinkComponent`，出口 `./ui`）显示：站里的页面、评论、侧栏入口、`content/` 里的文件显示成带图标的小卡片，
+找不到的页面标红（写法与样子见[写一页说明](/writing#链接)）。功能包自己的路由（比如协作站的任务页）站点不认得，会被当成找不到的页面，
+所以功能包在 `linkKinds` 里登记：
+
+```ts
+const site: FeatureSite = {
+  linkKinds: [{ matches: (href) => href.startsWith('/tasks/'), Chip: TaskChip }],
+}
+```
+
+`matches` 认得这个地址，就由 `Chip` 显示，参数是 `href` 和正文里写的链接文字 `children`（没写时是空的，这时显示目标现在的名字）。
+各功能包登记的种类按 `docsite.features` 的顺序排在站点自己的种类前面，第一个认得的显示。
+`Chip` 用 `linkChipClassName`、`linkChipIconClassName` 画卡片和图标，和站里其余的链接一个样子。
 
 ## remark 插件放在 fumadocs-mdx 的全局设置里
 
