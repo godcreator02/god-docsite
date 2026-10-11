@@ -1,8 +1,9 @@
-import { existsSync, readFileSync, realpathSync } from 'node:fs'
+import { realpathSync } from 'node:fs'
 import type { IncomingMessage, ServerResponse } from 'node:http'
 import path from 'node:path'
 import { isRunnableDevEnvironment, normalizePath, type Plugin, type PluginOption, type ViteDevServer } from 'vite'
 import type { EvaluatedModuleNode, EvaluatedModules } from 'vite/module-runner'
+import { manifestFileOf, readManifest } from '../package-dirs.js'
 import { tsxPageSuffix } from '../page-sources.js'
 import { feedEndpointPrefix, feedEvent, feedStore, feedTokenEnvName, feedTokenHeader, isFeedChannel, type FeedMessage } from '../site-feed.js'
 
@@ -20,7 +21,12 @@ function processedWithSite(featurePackages: readonly string[]): Plugin {
     name: 'docsite-kit:processed-with-site',
     config(config) {
       const root = path.resolve(config.root ?? process.cwd())
-      return { ssr: { noExternal: packages }, optimizeDeps: { exclude: packages, include: nestedDependenciesOf(root, packages) } }
+      return {
+        ssr: { noExternal: packages },
+        optimizeDeps: { exclude: packages, include: nestedDependenciesOf(root, packages) },
+        // 功能包里的路由模块经 @site 读骨架里的模块（页面树、MDX 组件、功能包复制进来的集合文件），类型见 ./site-modules
+        resolve: { alias: { '@site': path.join(root, 'app') } },
+      }
     },
   }
 }
@@ -38,19 +44,6 @@ function nestedDependenciesOf(root: string, packages: readonly string[]): string
       .filter((dependency) => !packages.includes(dependency) && hasRootEntry(path.dirname(realpathSync(manifestFile)), dependency))
       .map((dependency) => `${name} > ${dependency}`)
   })
-}
-
-type Manifest = { dependencies?: Record<string, string>; exports?: unknown }
-
-const readManifest = (file: string) => JSON.parse(readFileSync(file, 'utf8')) as Manifest
-
-/** 照 Node 的找法，从 fromDir 往上找 node_modules/<name>/package.json；找不到为 null */
-function manifestFileOf(fromDir: string, name: string): string | null {
-  for (let dir = fromDir; ; dir = path.dirname(dir)) {
-    const candidate = path.join(dir, 'node_modules', name, 'package.json')
-    if (existsSync(candidate)) return candidate
-    if (path.dirname(dir) === dir) return null
-  }
 }
 
 /** 依赖有没有根出口：只有子路径出口的包（如 @godcreator/collab-model）没法整个预打包，它的子路径由 Vite 按用到的去找 */

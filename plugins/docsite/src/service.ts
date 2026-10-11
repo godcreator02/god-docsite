@@ -1,6 +1,7 @@
 import { Service, type Context } from 'cordis'
 import type { SiteStarted, SiteStatus } from './site-host.js'
 import type { JoiningPerson } from './people-file.js'
+import type { SiteInitOptions, SiteInitResult } from './site-init.js'
 
 /**
  * 别的插件注入的服务 gwbDocsite：托管站点的开发服务、往站点推数据、本 home 的身份码。
@@ -29,6 +30,8 @@ export interface GwbDocsiteApi {
   join(dir: string, person: JoiningPerson): Promise<{ changed: boolean }>
   /** 某个站的状态变了（启动、停止、出错）时调用；返回撤掉的函数 */
   onStatus(listener: (dir: string) => void): () => void
+  /** 初始化站点或更新它的骨架：照装好的基础包与功能包的模板写 app/ 与配置，装依赖；content/、comments/、people.json 不动。在运行就先停、做完再启动 */
+  init(dir: string, options: SiteInitOptions): Promise<SiteInitResult>
 }
 
 /** 只存闭包：cordis 读服务属性时会把属性里存的服务重新绑到调用方上下文 */
@@ -71,5 +74,8 @@ export class DocsiteService extends Service implements GwbDocsiteApi {
   }
   onStatus(listener: (dir: string) => void) {
     return this.api.onStatus(listener)
+  }
+  init(dir: string, options: SiteInitOptions) {
+    return this.api.init(dir, options)
   }
 }

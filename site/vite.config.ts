@@ -3,7 +3,8 @@ import tailwindcss from '@tailwindcss/vite'
 import { defineConfig } from 'vite'
 import { fumadocsMdx } from 'fumadocs-mdx/vite'
 import { docsite } from '@godcreator/docsite-kit/vite'
+import { siteFeatures } from './app/site/features'
 
 export default defineConfig({
-  plugins: [docsite(), fumadocsMdx(), tailwindcss(), reactRouter()],
+  plugins: [docsite({ featurePackages: siteFeatures }), fumadocsMdx(), tailwindcss(), reactRouter()],
 })

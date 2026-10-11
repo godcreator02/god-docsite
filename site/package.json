@@ -3,7 +3,10 @@
   "version": "0.0.0",
   "private": true,
   "type": "module",
-  "description": "文档站基础包的自述站：用基础包搭，内容是基础包自己的说明",
+  "description": "文档站基础包的自述站：用基础包搭，内容是基础包自己的说明；app/ 与根目录的配置由 pnpm site:skeleton 照基础包的模板生成",
+  "docsite": {
+    "features": []
+  },
   "scripts": {
     "dev": "react-router dev --port 4430 --host 127.0.0.1 --strictPort",
     "build": "react-router build",

@@ -11,6 +11,7 @@ import { chromeCandidatesOf, findChrome, openInChromeApp, siteWindowModeOf } fro
 import { isIdentityCode, joinPeople, newIdentityCode } from './people-file.js'
 import { DocsiteService, type GwbDocsiteApi } from './service.js'
 import { SiteHost } from './site-host.js'
+import { initSite, pnpmInstall } from './site-init.js'
 
 /** 写在包入口：devkit.release 只读类型入口 dist/index.d.ts 认服务由谁提供 */
 declare module 'cordis' {
@@ -22,6 +23,7 @@ declare module 'cordis' {
 export type { GwbDocsiteApi } from './service.js'
 export type { SiteStarted, SiteStatus } from './site-host.js'
 export type { JoiningPerson } from './people-file.js'
+export type { SiteInitOptions, SiteInitResult } from './site-init.js'
 
 export const name = 'gwb-docsite'
 
@@ -100,6 +102,7 @@ export function apply(ctx: GwbContext): void {
     push: (dir, channel, data) => host.push(dir, channel, data),
     join: (dir, person) => joinPeople(dir, identityCode(), person),
     onStatus: (listener) => host.onStatus(listener),
+    init: (dir, options) => initSite(dir, options, { kitVersion: __DOCSITE_KIT_VERSION__, install: pnpmInstall }, (siteDir, work) => host.whileStopped(siteDir, work)),
   }
   new DocsiteService(ctx, api)
 

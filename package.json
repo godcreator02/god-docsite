@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "pnpm --filter docsite-kit-site dev",
     "build": "pnpm --filter @godcreator/docsite-kit build && pnpm --filter @godcreator/gwb-docsite build && pnpm --filter docsite-kit-site build",
-    "check": "pnpm -r --no-bail check"
+    "check": "pnpm -r --no-bail check",
+    "site:skeleton": "pnpm --filter @godcreator/docsite-kit build && node scripts/write-site-skeleton.mjs"
   },
   "engines": { "node": ">=24" }
 }

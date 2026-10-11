@@ -3,5 +3,5 @@
   "description": "包里有什么、项目骨架怎么摆",
   "icon": "Package",
   "root": true,
-  "pages": ["index", "skeleton", "page-types", "commenting", "dev-plugin", "gwb-plugin"]
+  "pages": ["index", "skeleton", "features", "page-types", "commenting", "dev-plugin", "gwb-plugin"]
 }

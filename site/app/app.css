@@ -2,3 +2,5 @@
 @import '@fumadocs/base-ui/css/neutral.css';
 @import '@fumadocs/base-ui/css/preset.css';
 @import '@godcreator/docsite-kit/styles.css';
+/* 各功能包的样式，初始化按 package.json 的 docsite.features 生成 */
+@import './site/styles.css';

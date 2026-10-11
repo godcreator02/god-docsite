@@ -1,6 +1,6 @@
 ---
 name: docsite
-description: 用基础包 @godcreator/docsite-kit 搭的文档站（协作站也是）：开站、看站、把自己加进站点、读写站点评论、写页面时读。
+description: 用基础包 @godcreator/docsite-kit 搭的文档站（协作站也是）：新建或更新站点、开站、看站、把自己加进站点、读写站点评论、写页面时读。
 ---
 
 # 文档站（docsite-kit）
@@ -13,6 +13,18 @@ description: 用基础包 @godcreator/docsite-kit 搭的文档站（协作站也
 - 站点由工作台托管，不在会话里自己 `pnpm dev`：会话一停站就掉，还会抢端口，自己启动的也没有身份码、只读
 - 只写站点目录里的文件，不碰 git；要提交由各站自己的流程（协作站是 `collab.submit`）
 - 评论只经网页或下面的 `docsite.comment.*` 写，不手拼评论文件
+
+## 新建站点、更新骨架
+
+站点目录里的 `app/` 与根目录的配置文件由初始化照基础包（和功能包）的模板写出，不手改，`app/` 里也不放自己的文件：
+
+```text
+docsite.site.init {"dir":"<站点目录>","port":<开发端口>,"title":"<站名>"}
+```
+
+- 新站点（没有 `package.json`）要给 `port` 与 `title`；已有站点不能给，再运行一次就是照装上的新版模板更新骨架
+- 要用功能包时给 `features`，如 `{"@godcreator/collab-site":"^0.31.0"}`；协作站由 gwb-collab 的命令初始化，不直接调这里
+- `content/`、`comments/`、`people.json` 已有的不动；写完不提交
 
 ## 开站、看站
 

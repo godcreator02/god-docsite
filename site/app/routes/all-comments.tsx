@@ -4,7 +4,7 @@ import { assertCommentAuthorsKnown } from '@godcreator/docsite-kit/comments'
 import { commentThreadIdsAbout, readCommentThreads, siteCommenter, sitePeople } from '@godcreator/docsite-kit/server'
 import { AllComments } from '@godcreator/docsite-kit/ui'
 import { allThreads, renderCommentBody } from '../lib/comment-threads'
-import { source } from '../lib/source'
+import { siteName, source } from '../lib/source'
 import type { Route } from './+types/all-comments'
 
 /** 全部评论页：「和我有关」要看评论正文里的 @，正文只有从文件读 */
@@ -14,7 +14,7 @@ export async function loader() {
   const commenter = siteCommenter()
   const aboutMe = commenter ? commentThreadIdsAbout(await readCommentThreads(path.resolve('comments')), commenter.id, people) : []
   const pageTitles = Object.fromEntries(source.getPages().map((page) => [page.url, page.data.title ?? page.url]))
-  return { people, commenter, aboutMe, pageTitles, siteName: String(source.getPageTree().name) }
+  return { people, commenter, aboutMe, pageTitles, siteName: siteName() }
 }
 
 export default function AllCommentsPage({ loaderData }: Route.ComponentProps) {

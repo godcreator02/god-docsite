@@ -1,32 +1,58 @@
 ---
 title: 项目骨架
-description: 每个站点目录里放的那套文件，各自做什么
+description: 站点目录里那套文件从哪来、各自做什么，怎么初始化与更新
 icon: FolderTree
 ---
 
-骨架照 fumadocs 官方的 React Router 模板排布，放在每个项目自己的站点目录里，不在包里。
+骨架照 fumadocs 官方的 React Router 模板排布，放在每个站点自己的目录里。
 原因是有几样东西只能写在项目里：`defineDocs` 与 `import.meta.glob` 的参数要能在构建时直接读出来，
 路由的 `loader` 也要写在项目的路由文件里。功能都在包里，骨架只是把它们接起来。
+
+骨架的正本是基础包里的 `template/`，随包发布。站点目录里的那一份由初始化照它写出，不手改。
+
+## 初始化与更新
+
+gwb-docsite 的命令 `docsite.site.init`（别的插件调服务 `gwbDocsite.init`，见 [gwb 基础插件](/gwb-plugin)）做这几步：
+
+1. 新站点先写最少的几样：`package.json`（带端口的 `dev` 脚本、基础包与功能包的依赖、`docsite.features`）、`pnpm-workspace.yaml`、`content/meta.json`（站名）
+2. 装依赖
+3. 基础包的 `writeSiteSkeleton`（出口 `./init`）照站点**装好的**基础包与各功能包的 `template/` 写骨架，生成 `app/site/`
+4. 模板带来了新依赖就再装一次
+
+更新已有站点也用这个命令：包升级以后再运行一次，骨架就和装上的那一版对上。
+
+每份模板分两部分：
+
+| 目录 | 写进站点时 |
+| --- | --- |
+| `template/skeleton/` | 每次整份覆盖，`app/` 先整个删掉再写。`package.json` 不整份覆盖：脚本与依赖合并进站点的，同名的照模板，`dev` 保留站点自己的端口。`gitignore` 写成 `.gitignore`：发布到源上的包不带 `.gitignore` |
+| `template/initial/` | 顶层的文件或目录在站点里还没有时才写：`people.json`、`comments/` |
+
+`content/`、`comments/`、`people.json` 由站点自己维护，初始化不碰已有的。`app/` 里不放自己的文件：下次初始化会删掉。
+
+这个仓的自述站也照模板生成：改了 `packages/docsite-kit/template/` 之后在仓根运行 `pnpm site:skeleton`，基础包的测试检查 `site/app/` 和模板一致。
 
 ## 文件
 
 | 文件 | 做什么 |
 | --- | --- |
-| `vite.config.ts` | 插件依次是 `docsite()`、`fumadocsMdx()`、`tailwindcss()`、`reactRouter()` |
+| `vite.config.ts` | 插件依次是 `docsite()`、`fumadocsMdx()`、`tailwindcss()`、`reactRouter()`；`docsite()` 的 `featurePackages` 取 `app/site/features.ts` |
 | `react-router.config.ts` | `ssr: true`：页面在服务端渲染，发布时用 `react-router-serve` 开服务 |
 | `app/root.tsx` | 整个 HTML 外框；`RootProvider` 传入中文界面文字 `zhTranslations`；出错时显示原话 |
-| `app/app.css` | 依次引入 Tailwind、fumadocs 的配色与 preset（docs 布局的样式在 preset 里）、基础包的 `styles.css` |
-| `app/routes.ts` | 路由表：`api/search` 搜索，`api/content/*` 送内容文件，`api/comments` 写评论，`comments` 全部评论页，首页 `/` 与其余地址都交给内容页（`*` 不匹配 `/`，首页另写一条 `index` 路由） |
+| `app/app.css` | 依次引入 Tailwind、fumadocs 的配色与 preset（docs 布局的样式在 preset 里）、基础包的 `styles.css`，最后是各功能包的样式 `app/site/styles.css` |
+| `app/routes.ts` | 路由表：`api/search` 搜索，`api/content/*` 送内容文件，`api/comments` 写评论，`comments` 全部评论页，其余地址交给内容页；功能包的路由插在中间（见[功能包](/features)）。`*` 不匹配 `/`，首页另写一条 `index` 路由：功能包给了首页就用它的，不然交给内容页 |
 | `app/lib/collections.ts` | 列出页面文件与评论文件：MDX 页面用 `defineDocs`，TSX 页面用 `import.meta.glob` 按需加载组件，评论用 `defineCollections` |
-| `app/lib/source.ts` | 把三种页面交给 fumadocs 的 `loader()`，进同一棵页面树；`lucideIconsPlugin()` 把 `icon` 里写的 lucide 图标名换成图标；检查页面有没有占用 `api`、`comments` 这两个地址，评论批的页面在不在 |
+| `app/lib/source.ts` | 把三种页面交给 fumadocs 的 `loader()`，进同一棵页面树；`lucideIconsPlugin()` 把 `icon` 里写的 lucide 图标名换成图标；检查页面有没有占用 `api`、`comments` 与功能包各条路由的第一段地址，评论批的页面在不在；`sitePageRefs()` 交出每一页的地址与标题，`siteName()` 是站名 |
+| `app/lib/mdx-components.ts` | MDX 页面与评论正文不用 `import` 就能写的组件：fumadocs 的排版组件，并上各功能包的 |
 | `app/lib/comment-threads.tsx` | 全站的评论串、按页面分组的评论串、渲染一条评论正文的 `renderCommentBody`：内容页与全部评论页共用 |
 | `app/lib/commenter.server.ts` | 读人员列表、核对评论作者都在里面，读这一页各评论串的页面文字快照（`snapshot.txt`），交给内容页 |
-| `app/routes/layout.tsx` | 整站布局：docs 的 `DocsLayout`，左侧是页面树，侧栏里的下拉框切换 `"root": true` 的文件夹，`links` 里一项「全部评论」；`slots.themeSwitch` 用 `themeSwitchWithIdentity`，侧栏底部显示本机身份（`siteIdentity()`，只读时写「只读」和原因） |
+| `app/routes/layout.tsx` | 整站布局：docs 的 `DocsLayout`，左侧是页面树，侧栏里的下拉框切换 `"root": true` 的文件夹；`slots.sidebar` 用 `groupKeepingSidebar`，在站点自己的页面上侧栏停在最近看过的那一组；`sidebar.banner` 放 `SidebarRouteLinks` 那一排（搜索、各功能包的入口、「评论」），`slots.searchTrigger` 用 `routeLinksSearchTrigger`；`slots.themeSwitch` 用 `themeSwitchWithIdentity`，侧栏底部显示本机身份（`siteIdentity()`，只读时写「只读」和原因）。`loader` 多读各功能包的 `layoutData`，功能包的 `Provider` 包住整个布局，`PageTop` 放在每一页正文上面 |
 | `app/routes/all-comments.tsx` | 全部评论页 `/comments`，见[评论](/commenting#全部评论页) |
 | `app/routes/page.tsx` | 内容页：用 docs 的页面组件，按页面类型渲染 MDX 正文、TSX 组件或放 HTML 的 iframe；正文外面套 `PageComments` 显示和写评论 |
 | `app/routes/comments.ts` | 评论接口：POST 调用 `commentRequestResponse` 写 `comments/` 里的文件，GET 调用 `commentSourceResponse` 取一条评论的原文给编辑用 |
 | `app/routes/search.ts` | 搜索接口，调用 `siteSearchServer`，三种页面一起搜 |
 | `app/routes/content-file.ts` | 调用 `contentFileResponse`，把 `content/` 里的文件原样送出 |
+| `app/site/` | 初始化照 `package.json` 的 `docsite.features` 生成：`features.ts` 是包名列表，`routes.ts`、`ui.ts`、`data.server.ts`、`styles.css` 分别引入各功能包的 `./routes`、`./site`、`./site-server`、`./styles.css`。没有功能包时也有，列表是空的 |
 | `content/` | 页面放在这里，每个文件夹的 `meta.json` 写标题和页面顺序；写了 `"root": true` 的文件夹是侧栏里切换下拉框的一项 |
 | `comments/` | 评论放在这里，一个评论串一个文件夹，见[评论](/commenting) |
 | `people.json` | 这个站的人员列表：评论署名用的 `id`、显示的名字、各人的身份码，agent 也在里面，见[评论](/commenting#谁在写评论) |

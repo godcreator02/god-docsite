@@ -148,6 +148,32 @@ export function registerCommands({ commands, docsite, sitesSetting, list }: Comm
   register(
     commands,
     {
+      name: 'docsite.site.init',
+      description: '初始化一个站点，或照装好的基础包与功能包的新模板更新已有站点的骨架（app/ 与根目录的配置）',
+      usage:
+        "{ dir, features?, port?, title? }：dir 是站点目录的绝对路径。没有 package.json 是新站点，要给 port（开发端口）与 title（站名，写进 content/meta.json）；已有站点不能给这两样。features 是功能包与版本范围，如 { \"@godcreator/collab-site\": \"^0.31.0\" }，给了就换掉 package.json 的 docsite.features 与这几项依赖，不给照站点现有的。基础包依赖写成 ^插件带的那一版。先装依赖，再照装好的模板整个重写 app/、覆盖配置文件、生成 app/site/，模板带来新依赖就再装一次；content/、comments/、people.json 已有的不动。站点在运行就先停、做完再启动。只写文件、不提交。回 { created, features }",
+      effect: 'write',
+    },
+    async (args) => {
+      const parsed = argsOf(args, ['dir', 'features', 'port', 'title'])
+      const features = parsed['features']
+      if (features !== undefined && !(typeof features === 'object' && features !== null && !Array.isArray(features) && Object.values(features).every((range) => typeof range === 'string' && range !== ''))) {
+        throw new DocsiteRejected('features 要是 { 包名: 版本范围 }，版本范围是非空字符串')
+      }
+      const port = parsed['port']
+      if (port !== undefined && !(Number.isInteger(port) && (port as number) > 0 && (port as number) < 65536)) throw new DocsiteRejected('port 要是 1 到 65535 的整数')
+      const title = optionalString(parsed, 'title')
+      return docsite.init(dirOf(parsed), {
+        ...(features !== undefined ? { features: features as Record<string, string> } : {}),
+        ...(port !== undefined ? { port: port as number } : {}),
+        ...(title !== undefined ? { title } : {}),
+      })
+    },
+  )
+
+  register(
+    commands,
+    {
       name: 'docsite.people.join',
       description: '把本 home 的身份码加进站点的 people.json，之后在这个站上写的评论署这个人',
       usage: '{ dir, id, name, gitea? }：dir 是站点目录的绝对路径；id 只用字母、数字、_、-。people.json 里已有这个 id 就把码加进它的 codes（gitea 给了就核对或补上），没有就新加一项。码已经在别人名下、id 是 agent 时拒绝。只写文件、不提交。回 { changed }：false 是本来就在',

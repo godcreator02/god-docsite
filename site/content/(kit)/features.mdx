@@ -1,0 +1,50 @@
+---
+title: 功能包
+description: 接在基础包上的功能包（比如协作站）要提供什么、骨架怎样接上它们
+icon: Blocks
+---
+
+功能包是一个 npm 包，往基础骨架上添加页面、侧栏入口、布局数据和样式，比如协作站的 `@godcreator/collab-site`。
+站点的 `package.json` 写明用到哪几个：
+
+```json
+"docsite": { "features": ["@godcreator/collab-site"] }
+```
+
+初始化照它生成 `app/site/` 下的几个文件，骨架只读这几个文件，所以功能包不改骨架里任何一个文件（见[项目骨架](/skeleton)）。
+
+## 功能包要提供的
+
+类型在出口 `./feature`：
+
+| 出口 | 默认导出的类型 | 内容 |
+| --- | --- | --- |
+| `./routes` | `FeatureRoutes` | 路由列表。每条 `{ path, file }`，`file` 相对功能包的包根；`layout: false` 的放在整站布局外面（不出页面的接口）；`{ index: true, file }` 是首页，全站只能有一个。在 Node 里读路由表时用，不能引用 React 组件 |
+| `./site` | `FeatureSite` | 浏览器端也用的：侧栏那一排的入口 `routeLinks`（排在「评论」前面），MDX 组件 `mdxComponents`，包住整个布局的 `Provider`，放在每一页正文上面的 `PageTop` |
+| `./site-server` | `FeatureSiteServer` | 只在服务端运行的：`layoutData({ pages })`，整站布局的 `loader` 调用它，读出的数据交给 `Provider` 的 `data` |
+| `./styles.css` | | 功能包的样式，`app.css` 最后引入 |
+
+包根下的 `template/` 是要复制进站点的文件，和基础包的模板一样分 `skeleton/`（每次覆盖）与 `initial/`（没有时才写）。
+和基础包模板里同名的文件、写在 `app/site/` 下的文件都会报错：功能包只能添加文件。
+
+## 路由模块留在包里
+
+路由模块不复制进站点，路由表直接指向装在 `node_modules` 里的文件。`app/routes.ts` 调用 `featureRouteFilesOf`（出口 `./init`）
+把 `file` 换成相对 `app/` 的**真实路径**：pnpm 的 `node_modules/<包>` 是符号链接，写链接路径时 `react-router build` 找不到打包出的文件，
+也认不出它是路由模块，`loader` 引用的服务端代码会留在浏览器端。
+
+包里的路由模块经别名 `@site`（站点的 `app/`，由 [`docsite()`](/dev-plugin) 设）读骨架里的模块：
+
+| 模块 | 有什么 |
+| --- | --- |
+| `@site/lib/source` | `siteName()`、`sitePageRefs()` |
+| `@site/lib/mdx-components` | `mdxComponents` |
+
+类型声明在 `@godcreator/docsite-kit/site-modules`，功能包在源码里写 `/// <reference types="@godcreator/docsite-kit/site-modules" />`。
+React Router 只给项目里的路由文件生成 `+types`，包里路由模块的 `loader` 参数与返回值的类型由功能包自己写。
+
+## 集合定义只能在项目里
+
+`fumadocs-mdx` 只处理项目里的 `defineDocs`、`defineCollections`，跳过 `node_modules`，而且不能配置。
+功能包要列出自己的 MDX 文件（比如协作站的日志页 `journal/`），就把定义集合的文件放进 `template/skeleton/app/lib/`，
+包里的路由模块经 `@site/lib/<文件名>` 读它；这个模块的类型由功能包自己声明。

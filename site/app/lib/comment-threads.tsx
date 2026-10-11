@@ -1,7 +1,7 @@
 import { use } from 'react'
-import defaultMdxComponents from '@fumadocs/base-ui/mdx'
 import { commentThreadsByPage, commentThreadsOf } from '@godcreator/docsite-kit/comments'
 import { comments } from './collections'
+import { mdxComponents } from './mdx-components'
 
 export type CommentEntry = (typeof comments.entries)[number]
 
@@ -12,7 +12,7 @@ export const threadsOfPage = commentThreadsByPage(allThreads)
 /** 不用 entry.body：它加载完后不再调用 use()，React 报 conditional use of use() */
 function CommentBody({ entry }: { entry: CommentEntry }) {
   const { body: Mdx } = use(entry.load())
-  return <Mdx components={defaultMdxComponents} />
+  return <Mdx components={mdxComponents} />
 }
 
 export function renderCommentBody(entry: CommentEntry) {

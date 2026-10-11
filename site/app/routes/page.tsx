@@ -1,7 +1,6 @@
 import { use, type ReactNode } from 'react'
 import type { TOCItemType } from 'fumadocs-core/toc'
 import { DocsBody, DocsDescription, DocsPage, DocsTitle } from '@fumadocs/base-ui/layouts/docs/page'
-import defaultMdxComponents from '@fumadocs/base-ui/mdx'
 import type { Commenter, CommentThread, Person } from '@godcreator/docsite-kit/comments'
 import { contentFileUrlOf } from '@godcreator/docsite-kit/page-sources'
 import { siteCommenter } from '@godcreator/docsite-kit/server'
@@ -9,7 +8,8 @@ import { commentScopeProps, HtmlPageFrame, PageComments, TsxPageBody } from '@go
 import { docs, tsxPageModules } from '../lib/collections'
 import { allThreads, renderCommentBody, threadsOfPage, type CommentEntry } from '../lib/comment-threads'
 import { pageCommentData } from '../lib/commenter.server'
-import { source } from '../lib/source'
+import { mdxComponents } from '../lib/mdx-components'
+import { siteName, source } from '../lib/source'
 import type { Route } from './+types/page'
 
 export async function loader({ params }: Route.LoaderArgs) {
@@ -18,7 +18,7 @@ export async function loader({ params }: Route.LoaderArgs) {
   if (!page) throw new Response('没有这一页', { status: 404 })
   const { title, description } = page.data
   const { people, snapshots } = await pageCommentData(allThreads, threadsOfPage.get(page.url) ?? noThreads)
-  const shared = { title, description, url: page.url, siteName: String(source.getPageTree().name), commenter: siteCommenter(), people, snapshots }
+  const shared = { title, description, url: page.url, siteName: siteName(), commenter: siteCommenter(), people, snapshots }
   if (page.type === 'mdx') return { type: 'mdx' as const, ...shared, path: page.path }
   if (page.type === 'tsx') return { type: 'tsx' as const, ...shared, file: page.data.file }
   return { type: 'html' as const, ...shared, src: contentFileUrlOf(page.data.file) }
@@ -58,7 +58,7 @@ function MdxPage({ path, ...frame }: Omit<PageFrameProps, 'children'> & { path: 
   const { body: Mdx, toc } = use(page.load())
   return (
     <PageFrame {...frame} toc={toc}>
-      <Mdx components={defaultMdxComponents} />
+      <Mdx components={mdxComponents} />
     </PageFrame>
   )
 }
