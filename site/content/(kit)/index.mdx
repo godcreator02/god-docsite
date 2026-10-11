@@ -18,7 +18,7 @@ icon: BookOpen
 | `./page-sources` | `app/lib/source.ts`、页面路由 | TSX 页面与 HTML 页面的来源、保留地址检查、内容文件的地址，见[三种页面](/page-types) |
 | `./comments` | `app/lib/collections.ts`、`app/lib/source.ts`、页面路由 | 评论文件的 frontmatter 校验、按文件夹分成评论串、按页面分组、检查评论批的页面在不在、作者在不在人员列表里；人员列表的格式，见[评论](/commenting) |
 | `./server` | 布局与页面路由、`app/routes/search.ts`、`app/routes/content-file.ts`、`app/routes/comments.ts`、`app/lib/commenter.server.ts` | 中文站点用的搜索接口 `siteSearchServer`；把 `content/` 里的文件原样送给浏览器；读人员列表 `sitePeople`、本机身份 `siteIdentity`、评论接口、读评论快照、从 HTML 算页面文字、不经开发服务读评论 `readCommentThreads`、站点检查 `siteProblems`（见[评论](/commenting)）；推送通道 `siteFeedOf`（见[开发服务插件](/dev-plugin#收-gwb-插件推来的数据)） |
-| `./ui` | `app/root.tsx`、布局与页面路由 | TSX 页面与 HTML 页面的正文组件、TSX 页面里的公式 `Tex`、页面上的评论、全部评论页 `AllComments`、侧栏底部的身份、侧栏 `groupKeepingSidebar`、搜索与入口横排 `SidebarRouteLinks` 和配套的 `routeLinksSearchTrigger`、推送通道 `useSiteFeed`、fumadocs 界面文字的中文 |
+| `./ui` | `app/root.tsx`、布局与页面路由 | TSX 页面与 HTML 页面的正文组件、TSX 页面里的公式 `Tex`、全宽按钮 `PageTitleWithWideToggle` 与 `widePageScript`、页面上的评论、全部评论页 `AllComments`、侧栏底部的身份、侧栏 `groupKeepingSidebar`、搜索与入口横排 `SidebarRouteLinks` 和配套的 `routeLinksSearchTrigger`、推送通道 `useSiteFeed`、fumadocs 界面文字的中文 |
 | `./site-feed` | gwb 插件 | 推送通道的环境变量名、地址、请求头这几个常量 |
 | `./styles.css` | `app/app.css` | 让 Tailwind 扫到包里组件用的类名；宽屏布局；评论的高亮与画框；藏起侧栏塞进分组的页面项 |
 
@@ -28,6 +28,11 @@ icon: BookOpen
 fumadocs 默认在窗口比 97rem 宽时把整个布局居中，左右各空出一截；基础包的 `styles.css` 改成铺满，
 评论右侧栏也就能正好盖在目录那一列上，打开、关上都不改布局。右侧栏打开时，本页目录改成正文上方的下拉条
 （fumadocs 窄屏时用的那个），浮在标题上方那段空白里，往下滚时吸在顶上，正文不往下挪。
+
+每页标题右边有「全宽」按钮（`PageTitleWithWideToggle`，各页面路由用它代替 `DocsTitle`）：点了正文不限最大宽度，宽屏时目录那一列也让给正文、目录改成上方的下拉条；
+评论右侧栏打开时照样空出那一列给它。开关记在浏览器里，全站的页面一起变；`root.tsx` 的 `<head>` 里放了 `widePageScript`，
+页面画出来之前就按记下的开关打上标记，打开页面时不会先窄后宽地跳一下。
+
 骨架直接用 fumadocs 的 `DocsLayout`，基础包只换掉其中的侧栏（`slots.sidebar`）和侧栏里的搜索框（`slots.searchTrigger`）。
 
 ## 侧栏

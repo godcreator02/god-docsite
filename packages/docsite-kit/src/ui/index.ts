@@ -5,4 +5,5 @@ export { AllComments, commentLinkOf, type AllCommentsProps } from './all-comment
 export { Avatar } from './comment-cards.js'
 export { useSiteFeed } from './site-feed.js'
 export { Tex } from './tex.js'
+export { PageTitleWithWideToggle, WidePageToggle, widePageScript } from './wide-page.js'
 export { groupKeepingSidebar, routeLinksSearchTrigger, SidebarRouteLinks, type SidebarRouteLink } from './sidebar.js'

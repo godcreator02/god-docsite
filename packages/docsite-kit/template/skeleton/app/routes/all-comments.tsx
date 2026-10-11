@@ -1,8 +1,8 @@
 import path from 'node:path'
-import { DocsBody, DocsDescription, DocsPage, DocsTitle } from '@fumadocs/base-ui/layouts/docs/page'
+import { DocsBody, DocsDescription, DocsPage } from '@fumadocs/base-ui/layouts/docs/page'
 import { assertCommentAuthorsKnown } from '@godcreator/docsite-kit/comments'
 import { commentThreadIdsAbout, readCommentThreads, siteCommenter, sitePeople } from '@godcreator/docsite-kit/server'
-import { AllComments } from '@godcreator/docsite-kit/ui'
+import { AllComments, PageTitleWithWideToggle } from '@godcreator/docsite-kit/ui'
 import { allThreads, renderCommentBody } from '../lib/comment-threads'
 import { siteName, source } from '../lib/source'
 import type { Route } from './+types/all-comments'
@@ -22,7 +22,7 @@ export default function AllCommentsPage({ loaderData }: Route.ComponentProps) {
   return (
     <DocsPage>
       <title>{`全部评论 · ${siteName}`}</title>
-      <DocsTitle>全部评论</DocsTitle>
+      <PageTitleWithWideToggle>全部评论</PageTitleWithWideToggle>
       <DocsDescription>全站的评论，按最近活动排；挂在页面上的点了去那一页</DocsDescription>
       <DocsBody>
         <AllComments threads={allThreads} people={people} commenter={commenter} aboutMe={aboutMe} pageTitles={pageTitles} renderBody={renderCommentBody} />

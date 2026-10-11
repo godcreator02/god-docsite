@@ -1,10 +1,10 @@
 import { use, type ReactNode } from 'react'
 import type { TOCItemType } from 'fumadocs-core/toc'
-import { DocsBody, DocsDescription, DocsPage, DocsTitle } from '@fumadocs/base-ui/layouts/docs/page'
+import { DocsBody, DocsDescription, DocsPage } from '@fumadocs/base-ui/layouts/docs/page'
 import type { Commenter, CommentThread, Person } from '@godcreator/docsite-kit/comments'
 import { contentFileUrlOf } from '@godcreator/docsite-kit/page-sources'
 import { siteCommenter } from '@godcreator/docsite-kit/server'
-import { commentScopeProps, HtmlPageFrame, PageComments, TsxPageBody } from '@godcreator/docsite-kit/ui'
+import { commentScopeProps, HtmlPageFrame, PageComments, PageTitleWithWideToggle, TsxPageBody } from '@godcreator/docsite-kit/ui'
 import { docs, tsxPageModules } from '../lib/collections'
 import { allThreads, renderCommentBody, threadsOfPage, type CommentEntry } from '../lib/comment-threads'
 import { pageCommentData } from '../lib/commenter.server'
@@ -43,7 +43,7 @@ function PageFrame({ title, description, url, siteName, commenter, people, snaps
   return (
     <DocsPage toc={toc}>
       <title>{`${title} · ${siteName}`}</title>
-      <DocsTitle>{title}</DocsTitle>
+      <PageTitleWithWideToggle>{title}</PageTitleWithWideToggle>
       <DocsDescription>{description}</DocsDescription>
       <PageComments page={url} threads={threadsOfPage.get(url) ?? noThreads} snapshots={snapshots} commenter={commenter} people={people} renderBody={renderCommentBody}>
         <DocsBody {...commentScopeProps}>{children}</DocsBody>
