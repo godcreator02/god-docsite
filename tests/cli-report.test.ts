@@ -98,8 +98,8 @@ test("配置里不认识的键报错：列出认得的有哪些；一次列全",
     await assert.rejects(p.cli("check"), (err: Error) => {
       for (const piece of [
         "有 2 处要改",
-        "不认识的键 formats：配置只认 content / components / outputs",
-        "不认识的键 docz：配置只认 content / components / outputs",
+        "不认识的键 formats：配置只认 content / components / outputs / trajectory / glossary",
+        "不认识的键 docz：配置只认 content / components / outputs / trajectory / glossary",
       ]) {
         assert.ok(err.message.includes(piece), `报错里该有「${piece}」：${err.message}`);
       }

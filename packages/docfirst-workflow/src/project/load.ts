@@ -3,8 +3,9 @@
  * 一个项目 = 一个根目录 + 一份 docfirst.config（声明内容根、组件名册、生成物摆到哪）。
  * loadProject(root) 把这些装配起来，返回带钉码编排的项目；同一个根只装配一次（站构建时几十个 loader 并发调它）。
  *
- * 分区按约定：内容根（`content`，默认 `content`）下 `trajectory/` 是轨迹卡、`future/` 是未来区，
- * 这两个名字固定；内容根下别的一切（目录里的、直接放在根上的）.mdx 文档都是现状区，都进 check。
+ * 分区按约定：内容根（`content`，默认 `content`）下 `trajectory/` 与 `future/` 两个名字固定、不进 check；
+ * 内容根下别的一切（目录里的、直接放在根上的）.mdx 文档都是现状区，都进 check。
+ * 轨迹卡目录默认是内容根下的 `trajectory/`，配置 `trajectory` 可以把它放到内容根外面（建在文档站基础包上的站这样放）。
  * 项目根下 `src/components/` 里有格式认领的代码文件（讲解组件的源码）也是现状区。配置怎么读、怎么校验在 config.ts。
  */
 import { isAbsolute, join, relative, resolve, sep } from "node:path";
@@ -14,7 +15,7 @@ import { codeFormat, COMPONENTS_DIR } from "../code/index.ts";
 import { createPinning } from "../pinning/index.ts";
 import type { Pinning } from "../pinning/index.ts";
 import { createGitHistory, createReader, filesUnder, filesUnderFollowingLinks, isDirectory, namesIn, pathExists, readText, readTextIfExists, writeText, writeTextMakingParents } from "../node/index.ts";
-import { contentDirOf, loadConfig } from "./config.ts";
+import { contentDirOf, loadConfig, trajectoryDirOf } from "./config.ts";
 import type { ProjectConfig } from "./config.ts";
 import { assertTurf, createPlacing, placementsOf } from "./placement.ts";
 import type { Placement, Placing, PlacingHost } from "./placement.ts";
@@ -28,7 +29,7 @@ export interface Project {
   roster: Roster;
   /** 内容根，相对项目根、正斜杠 */
   contentDir: string;
-  /** 轨迹卡目录的绝对路径：内容根下的 trajectory/，不一定已经建了 */
+  /** 轨迹卡目录的绝对路径：配置的 trajectory，没配是内容根下的 trajectory/；不一定已经建了 */
   trajectoryDir: string;
   /** 摆放：render 摆放一次、check 只核对。渲染成什么、跟已有文件怎么比、落点状态怎么定，都由它负责 */
   placing: Placing;
@@ -118,7 +119,7 @@ async function build(root: string): Promise<Project> {
     pinning,
     roster,
     contentDir,
-    trajectoryDir: join(contentAbs, "trajectory"),
+    trajectoryDir: join(root, trajectoryDirOf(config)),
     placing: createPlacing(placingHost),
     docs: statusDocs,
     placements: (doc) => placements[doc] ?? [],

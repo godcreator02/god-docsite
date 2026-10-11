@@ -16,6 +16,6 @@ export type { CardProblemReport, CheckReport, ComponentReport, DocReport, Output
 // 装配好的项目：站侧的测试要拿它自己核对一遍（`page.test.mjs`），命令行内部用的也是它。
 // project 别的零件不出这个口——它们是模块内部，仓里的测试直接 import 源码
 export { loadProject } from "./project/index.ts";
-export type { Project, ProjectConfig } from "./project/index.ts";
+export type { GlossaryConfig, Project, ProjectConfig } from "./project/index.ts";
 export type { Format, Item, Listing, Reference } from "./reference/index.ts";
 export type { ConfirmResult, ConfirmStep, Pinning } from "./pinning/index.ts";

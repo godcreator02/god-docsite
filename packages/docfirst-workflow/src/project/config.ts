@@ -17,6 +17,15 @@ export interface ProjectConfig {
    * render 只处理有映射的文档
    */
   outputs?: Record<string, Array<string | OutputTarget>>;
+  /** 轨迹卡目录，相对项目根；不写时是内容根下的 trajectory/。建在文档站基础包上的站写 `trajectory`，卡放在站点根下 */
+  trajectory?: string;
+  /** 术语自动标注：terms 是术语表模块（相对项目根，default 导出词条数组），skip 是不标注的文档（文档身份）。站构建时用，命令行只校验形状 */
+  glossary?: GlossaryConfig;
+}
+
+export interface GlossaryConfig {
+  terms: string;
+  skip?: string[];
 }
 
 /** 配置文件只有这一个名字 */
@@ -29,7 +38,20 @@ export function configPathOf(root: string): string {
 }
 
 /** 配置认的键 */
-const CONFIG_KEYS = ["content", "components", "outputs"];
+const CONFIG_KEYS = ["content", "components", "outputs", "trajectory", "glossary"];
+
+const isNonEmptyString = (value: unknown): value is string => typeof value === "string" && value.trim() !== "";
+
+function glossaryProblems(glossary: unknown): string[] {
+  if (typeof glossary !== "object" || glossary === null || Array.isArray(glossary)) return ["glossary 要是 { terms, skip? } 对象"];
+  const table = glossary as Record<string, unknown>;
+  const problems = Object.keys(table)
+    .filter((key) => key !== "terms" && key !== "skip")
+    .map((key) => `glossary 里不认识的键 ${key}：只认 terms / skip`);
+  if (!isNonEmptyString(table.terms)) problems.push("glossary.terms 要是术语表模块的路径（相对项目根）");
+  if (table.skip !== undefined && (!Array.isArray(table.skip) || !table.skip.every(isNonEmptyString))) problems.push("glossary.skip 要是文档身份（相对项目根）的数组");
+  return problems;
+}
 
 /** 配置里要改的地方，一条一句；没有就是空表。只检查结构，不读写文件 */
 export function configProblems(config: unknown): string[] {
@@ -39,7 +61,9 @@ export function configProblems(config: unknown): string[] {
   for (const key of Object.keys(table)) {
     if (!CONFIG_KEYS.includes(key)) problems.push(`不认识的键 ${key}：配置只认 ${CONFIG_KEYS.join(" / ")}`);
   }
-  if (table.content !== undefined && (typeof table.content !== "string" || table.content.trim() === "")) problems.push("content 要是一个非空目录（相对项目根）");
+  if (table.content !== undefined && !isNonEmptyString(table.content)) problems.push("content 要是一个非空目录（相对项目根）");
+  if (table.trajectory !== undefined && !isNonEmptyString(table.trajectory)) problems.push("trajectory 要是一个非空目录（相对项目根）");
+  if (table.glossary !== undefined) problems.push(...glossaryProblems(table.glossary));
   return problems;
 }
 
@@ -56,7 +80,15 @@ export async function loadConfig(root: string): Promise<ProjectConfig> {
   return loaded as ProjectConfig;
 }
 
+/** 相对项目根的目录：正斜杠、不带尾斜杠 */
+const normalizedDir = (dir: string): string => dir.replace(/\\/g, "/").replace(/\/+$/, "");
+
 /** 内容根：相对项目根、正斜杠、不带尾斜杠；没配就是 content */
 export function contentDirOf(config: ProjectConfig): string {
-  return (config.content ?? "content").replace(/\\/g, "/").replace(/\/+$/, "");
+  return normalizedDir(config.content ?? "content");
+}
+
+/** 轨迹卡目录：相对项目根、正斜杠、不带尾斜杠；没配就是内容根下的 trajectory */
+export function trajectoryDirOf(config: ProjectConfig): string {
+  return config.trajectory === undefined ? `${contentDirOf(config)}/trajectory` : normalizedDir(config.trajectory);
 }

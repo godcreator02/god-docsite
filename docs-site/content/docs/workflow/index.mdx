@@ -18,14 +18,14 @@ full: true
 
 ### 项目装配 project
 
-一个项目是一个根目录加一份 `docfirst.config`，分区按约定，不在配置里登记：
+一个项目是一个根目录加一份 `docfirst.config`，分区按约定，不在配置里登记；只有轨迹卡目录可以用配置 `trajectory` 放到内容根外面（建在文档站基础包上的站这样放）：
 
-{/* ref file="../packages/docfirst-workflow/src/project/load.ts" lines="1-9" hash="ed8cc6431170" blob="06fa3d94f4bf" */}
+{/* ref file="../packages/docfirst-workflow/src/project/load.ts" lines="1-10" hash="0d43538021d9" blob="69a379c0beab" */}
 
 现状区是内容根下除 `trajectory/`、`future/` 之外的全部 `.mdx` 文档（目录里的和直接放在内容根上的都算），
 加上项目根下 `src/components/` 里组件格式认领的代码文件（`.ts`、`.tsx`、`.mjs`，放在那里的 `.mdx` 不算页面）：
 
-{/* ref file="../packages/docfirst-workflow/src/project/load.ts" lines="83-101" hash="dd74d26ff03f" blob="205ed5645903" */}
+{/* ref file="../packages/docfirst-workflow/src/project/load.ts" lines="84-102" hash="dd74d26ff03f" blob="69a379c0beab" */}
 
 配置认哪些键、怎么校验、内容根怎么归一在 `config.ts`，`load.ts` 只做组装。project 自己不 import `node:fs`，读写文件、加载配置、
 读取器与旧内容来源都从 `node/` 取。
@@ -212,18 +212,18 @@ fumadocs 自带组件的规则在 [fumadocs 适配](/docs/fumadocs)的 `./roster
 
 `.` 交出 `main`、`check --json` 报告的类型、`loadProject` 与项目的类型、引用与清单、格式接口和钉码编排的类型；读卡目录与卡的类型只在 `./cards`：
 
-{/* ref file="../packages/docfirst-workflow/src/index.ts" hash="d6c25849b80f" blob="b3766af6defa" */}
+{/* ref file="../packages/docfirst-workflow/src/index.ts" hash="097cd902d3a2" blob="e8e5eb01c9f8" */}
 
 `main` 自己不调 `process.exit`，可执行文件只转发参数与退出码，别的程序可以直接调 `main` 拿到退出码：
 
 {/* ref file="../packages/docfirst-workflow/src/cli/cli.ts" hash="db36f021285e" blob="e451ab0dc72b" */}
 
-**`loadProject(root)`** 同一个根只装配一次，站构建时 loader 并发调用拿到同一个项目。配置只认三个键，项目上带着钉码编排、名册、
+**`loadProject(root)`** 同一个根只装配一次，站构建时 loader 并发调用拿到同一个项目。配置只认五个键（`glossary` 是站构建时术语标注用的，命令行只校验形状），项目上带着钉码编排、名册、
 内容根、轨迹卡目录与摆放：
 
-{/* ref file="../packages/docfirst-workflow/src/project/config.ts" lines="9-20" hash="134a6a7d493a" blob="4d000ef02d9b" */}
+{/* ref file="../packages/docfirst-workflow/src/project/config.ts" lines="9-29" hash="5ce6b2c61a23" blob="d259f3e1b09d" */}
 
-{/* ref file="../packages/docfirst-workflow/src/project/load.ts" lines="22-43" hash="ccbed082425c" blob="205ed5645903" */}
+{/* ref file="../packages/docfirst-workflow/src/project/load.ts" lines="23-44" hash="c476443b8ac0" blob="69a379c0beab" */}
 
 **`./mdx`** 除了格式本身，还交出语法树上的函数给 fumadocs 适配：站构建时 remark 插件拿到的树已经解析好，用 `recognize` 认记号、
 `stamp` 按名册标上机读文字，不再解析一遍；`langOf` 让按原文渲染与站上的代码块标同一种语言：

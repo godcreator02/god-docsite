@@ -29,11 +29,27 @@ afterAll(() => {
   for (const root of roots) rmSync(root, { recursive: true, force: true, maxRetries: 5 });
 });
 
-test("内容根：没配退 content；配了照用，尾斜杠与反斜杠归一；轨迹卡目录固定在内容根下", async () => {
+test("内容根：没配退 content；配了照用，尾斜杠与反斜杠归一；轨迹卡目录没配时在内容根下", async () => {
   const plain = await project("");
   assert.equal(plain.contentDir, "content");
   assert.equal(plain.trajectoryDir, join(plain.root, "content", "trajectory"));
   assert.equal((await project(String.raw`content: "site\\content/"`, "site/content")).contentDir, "site/content");
+});
+
+test("轨迹卡目录：配了 trajectory 就是项目根下的那个目录，反斜杠与尾斜杠归一", async () => {
+  const p = await project(String.raw`trajectory: "trajectory\\"`);
+  assert.equal(p.trajectoryDir, join(p.root, "trajectory"));
+});
+
+test("术语表配置：terms 必填，skip 是文档身份数组；形状不对装配当场拒", async () => {
+  const p = await project(`glossary: { terms: "src/glossary.mjs", skip: ["content/docs/a.mdx"] }`);
+  assert.deepEqual(p.config.glossary, { terms: "src/glossary.mjs", skip: ["content/docs/a.mdx"] });
+  await assert.rejects(project(`glossary: { skip: "a.mdx", words: [] }`), (err: Error) => {
+    assert.match(err.message, /glossary 里不认识的键 words/);
+    assert.match(err.message, /glossary\.terms 要是术语表模块的路径/);
+    assert.match(err.message, /glossary\.skip 要是文档身份/);
+    return true;
+  });
 });
 
 test("配置形状不对：不认识的键、content 空串，装配当场拒", async () => {
@@ -43,7 +59,7 @@ test("配置形状不对：不认识的键、content 空串，装配当场拒", 
   writeFileSync(join(root, "docfirst.config.mjs"), `export default { formats: "fumadocs", content: " ", comparator: "git" };\n`);
   await assert.rejects(loadProject(root), (err: Error) => {
     assert.match(err.message, /有 3 处要改/);
-    assert.match(err.message, /不认识的键 formats：配置只认 content \/ components \/ outputs/);
+    assert.match(err.message, /不认识的键 formats：配置只认 content \/ components \/ outputs \/ trajectory \/ glossary/);
     assert.match(err.message, /content 要是一个非空目录/);
     assert.match(err.message, /不认识的键 comparator/);
     return true;
