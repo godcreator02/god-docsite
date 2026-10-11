@@ -33,6 +33,7 @@ export default function Page() {
 
 没导出 `meta`、`meta.title` 是空的，开发服务直接报错，写明是哪个文件。
 TSX 页面要运行组件才知道正文，所以搜索只收标题和 `meta.description`。
+本页目录在浏览器里画出正文后再找：正文里的 `<h2>`、`<h3>` 进目录，没写 `id` 的按文字给一个；组件后来又画出新内容时重新找。
 
 ## 一页要用几个 TSX 组件
 
@@ -67,6 +68,8 @@ TSX 页面也一样：`waveform.page.tsx` 放在外面，从 `./waveform/` 引�
 
 整个文件放进 iframe 显示，由 `/api/content/` 原样送出，所以文件里相对路径的图片、样式、脚本照常能用。
 iframe 的高度跟着里面的内容走，不出现第二条滚动条。没有 `<title>` 时开发服务直接报错。
+文件里的 `<h2>`、`<h3>` 也进本页目录：外层页面找不到 iframe 里的标题，所以在 iframe 上面对准每个标题放一个看不见的定位点，
+目录点了跳到那里、读到哪一节就高亮哪一条；iframe 高度变了重新对准。
 
 iframe 里的页面跟着站点右上角的主题切换深浅色：iframe 从站点继承 `color-scheme`，
 里面的 `prefers-color-scheme` 看到的就是站点当前的主题，切换时当场跟着变。

@@ -1,4 +1,4 @@
-import { use, type ReactNode } from 'react'
+import { use, useState, type ReactNode } from 'react'
 import type { TOCItemType } from 'fumadocs-core/toc'
 import { DocsBody, DocsDescription, DocsPage } from '@fumadocs/base-ui/layouts/docs/page'
 import type { Commenter, CommentThread, Person } from '@godcreator/docsite-kit/comments'
@@ -63,12 +63,23 @@ function MdxPage({ path, ...frame }: Omit<PageFrameProps, 'children'> & { path: 
   )
 }
 
+/** TSX 与 HTML 页面的本页目录在浏览器里渲染出正文后才知道，由正文组件交出来 */
 function TsxPage({ file, ...frame }: Omit<PageFrameProps, 'children'> & { file: string }) {
   const load = tsxPageModules[file]
   if (!load) throw new Error(`浏览器端没有这个 TSX 页面：${file}`)
+  const [toc, setToc] = useState<TOCItemType[]>([])
   return (
-    <PageFrame {...frame}>
-      <TsxPageBody load={load} />
+    <PageFrame {...frame} toc={toc}>
+      <TsxPageBody load={load} onToc={setToc} />
+    </PageFrame>
+  )
+}
+
+function HtmlPage({ src, ...frame }: Omit<PageFrameProps, 'children'> & { src: string }) {
+  const [toc, setToc] = useState<TOCItemType[]>([])
+  return (
+    <PageFrame {...frame} toc={toc}>
+      <HtmlPageFrame src={src} title={frame.title ?? ''} onToc={setToc} />
     </PageFrame>
   )
 }
@@ -78,9 +89,5 @@ export default function Page({ loaderData }: Route.ComponentProps) {
   const frame = { title, description, url, siteName, commenter, people, snapshots }
   if (loaderData.type === 'mdx') return <MdxPage path={loaderData.path} {...frame} />
   if (loaderData.type === 'tsx') return <TsxPage file={loaderData.file} {...frame} />
-  return (
-    <PageFrame {...frame}>
-      <HtmlPageFrame src={loaderData.src} title={title ?? ''} />
-    </PageFrame>
-  )
+  return <HtmlPage src={loaderData.src} {...frame} />
 }
