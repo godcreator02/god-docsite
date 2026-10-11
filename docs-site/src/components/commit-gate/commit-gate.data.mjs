@@ -1,5 +1,5 @@
 /**
- * 「提交门禁拦什么、什么算红」的全部讲解数据：画面（commit-gate.tsx）与机读版规则（commit-gate.ai.mjs）都只读这一份。
+ * 「提交门禁拦什么、什么算红」的全部讲解数据：画面（commit-gate.tsx）与机读规则（commit-gate.ai.mjs）都只读这一份。
  * 例子跟钉码页（pin/story.data.mjs）是同一个 greet.ts：文档 content/docs/a.mdx 钉住它的第 4–5 行，
  * 记号上的 hash 与 blob 取自那份数据（按 code-pin 的算法实际算出来的）。
  * 命令行输出照 docfirst-workflow 的 cli/text.ts 实际打印的格式逐字写；项目根是 ~/repo/docs-site，git 仓根是 ~/repo，
@@ -37,7 +37,7 @@ export const redSources = [
   { name: '拦提交的黄', rule: '状态是「有变动」，且被钉文件在文档所在的仓里有未提交的改动' },
   { name: '名册外组件', rule: '生成正本里用了 docfirst.config.mjs 的 components 里没有的组件；普通页面不查' },
   { name: '不新鲜的生成物', rule: 'outputs 映射里写了的落点：文件还不存在、跟正本重新渲染的结果不一致、正本头部缺点名的字段、正本渲染不了' },
-  { name: '轨迹卡的病', rule: 'content/trajectory/ 下的卡缺必填字段，或字段格式不对' },
+  { name: '轨迹卡的病', rule: '轨迹卡目录（配置的 trajectory，本站是 trajectory/）下的卡缺必填字段，或字段格式不对' },
 ];
 
 /** 只打印、不计入红的几种行 */
@@ -231,7 +231,7 @@ export const steps = [
         kind: 'err',
       },
       {
-        text: '🔴 content/trajectory/2026-09-26-gate-demo.mdx  born-at：born-at 格式须 YYYY-MM-DD 或 YYYY-MM-DDTHH:mm（九月二十六）',
+        text: '🔴 trajectory/2026-09-26-gate-demo.mdx  born-at：born-at 格式须 YYYY-MM-DD 或 YYYY-MM-DDTHH:mm（九月二十六）',
         kind: 'err',
       },
     ],

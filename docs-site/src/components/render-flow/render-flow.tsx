@@ -2,11 +2,12 @@
 /**
  * 「生成物怎么从 mdx 正本渲染出来」：左边正本、右边生成物，中间一列是这一段在做的那一步。
  * 画面是 (段号, 本段进度) → 画面 的纯函数：每一行的高度、透明度、位移、颜色都由进度算出来，拖到哪一刻都画得出来。
- * 讲解文字与示例都在 render-flow.data.mjs，机读版由 render-flow.ai.mjs 读同一份数据生成。
+ * 讲解文字与示例都在 render-flow.data.mjs，生成物里的机读文字由 render-flow.ai.mjs 读同一份数据生成。
  */
 import type { CSSProperties, JSX, ReactNode } from 'react';
 import { CodeLines, Diff, Pane, Pill, Terminal, Timeline } from '@godcreator/docfirst-explainer';
 import type { Role, TerminalLine, TimelineFrame, Tone } from '@godcreator/docfirst-explainer';
+import '@godcreator/docfirst-explainer/styles.css';
 import {
   chapters,
   codeLines,

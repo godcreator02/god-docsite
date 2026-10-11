@@ -1,5 +1,5 @@
 /**
- * 星轨盘内部接缝图（trajectory.data.mjs）的坐标与图标。调用方在最上：左边 workflow，右边 fumadocs 适配；
+ * 星轨盘内部接缝图（trajectory.data.mjs）的坐标与图标。调用方在最上：左边 workflow，右边站的一侧（功能包与 fumadocs 适配）；
  * 左列往下是建模，右列往下是组件、画布、布局；react 在组件右边。
  */
 import { Atom, Network, Orbit, Palette, Plug, Radar, Workflow } from 'lucide-react';

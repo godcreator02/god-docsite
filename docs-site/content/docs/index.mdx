@@ -5,25 +5,30 @@ full: true
 docfirst: none
 ---
 
+import { PinGlance } from '../../src/components/pin-glance/glance';
+import { SeamMap } from '../../src/components/seam-map/seam-map';
+
 钉码核心与星轨盘不读文件、不认文件格式、不认站点框架，要的东西全从接缝上传进来；命令行与项目、fumadocs 适配（同在 `docfirst-workflow` 包里）把它们接到
-磁盘、git 和站上；工作台插件只管建站和给 agent 注册说明书。外面进来的入口：git hook 与 CI 运行命令行，`next build`
-编译站，agent 经 MCP 调插件。鼠标停在编号上看每条接缝交换什么，点击固定高亮它连着谁：
+磁盘、git 和 fumadocs 上；站的功能包 `docfirst-site` 再把这些接到文档站基础包的站点骨架上；工作台插件只管建 Next 站、托管它和给 agent 注册说明书。
+外面进来的入口：git hook 与 CI 运行命令行，站点构建与开发服务编译页面，agent 经 MCP 调插件。鼠标停在编号上看每条接缝交换什么，点击固定高亮它连着谁：
 
 <SeamMap />
 
-## 三个名字，各管哪一段
+## 几个名字，各管哪一段
 
 「docfirst」是这套做法的名字，不是哪个包：命令行 `docfirst`、配置 `docfirst.config.mjs`、建站命令 `docfirst.create` 都用这个名字。
-做法由一个包实现，另有一个工作台插件负责建站：
+做法由一个包实现，另一个包把它接到文档站基础包的站上，还有一个工作台插件负责建 Next 站：
 
 | 名字 | 是什么 | 装在哪 | 什么时候运行 |
 | --- | --- | --- | --- |
-| `@godcreator/docfirst-workflow` | 这套做法的实现：核对、确认、渲染生成物、卡格式、命令行 `docfirst`，以及接到 fumadocs 站上的 `./fumadocs` | 每个站的 `node_modules` | 站建好以后的每一次：`pnpm doc`、git hook、CI、`next build` |
+| `@godcreator/docfirst-workflow` | 这套做法的实现：核对、确认、渲染生成物、卡格式、命令行 `docfirst`，以及接到 fumadocs 上的 `./fumadocs` | 每个站的 `node_modules` | 站建好以后的每一次：在站里运行 `docfirst`、git hook、CI、站点构建 |
+| `@godcreator/docfirst-site` | 文档站基础包 `@godcreator/docsite-kit` 的功能包：构建页面时的 remark 插件、侧栏入口与 MDX 组件、星轨盘与卡页两条路由、轨迹卡集合模板、样式 | 建在文档站基础包上的站的 `node_modules`，站点 `package.json` 的 `docsite.features` 声明它 | 站点构建与开发服务编译页面时 |
 | `@godcreator/gwb-docfirst-workflow` | 工作台插件：建站命令 `docfirst.create` 与 `docfirst.create-plain`，托管站点的命令 `docfirst.site.*` 与窗格「文档站」，加上给 agent 读的说明书 | gwb 的 home | 建站那一次；托管的站在工作台开着时一直开着；说明书在 agent 写文档、改代码时随时读 |
 
-插件管最开头：它运行官方脚手架、套上本机约定与 docfirst 的分区、把 `docfirst-workflow` 的精确版本写进新站的依赖。之后核对、确认、渲染都由站里装的那个包完成，
-工作台开不开都一样；插件不读核对结果，也不转发命令行，卸掉插件站照样能核对、能构建。插件另外能托管站的运行：登记过的站由工作台运行 `pnpm start`，改完文档调 `docfirst.site.restart` 重新构建并重启。
-两边互不依赖，唯一的联系是插件里那张建站依赖表。判据是「这件事在哪儿发生」：要在仓里反复运行的归包，只在 agent 手上发生一次的归插件，
+插件建的是 Next 站：它运行官方脚手架、套上本机约定与 docfirst 的分区、把 `docfirst-workflow` 的精确版本写进新站的依赖，托管时由工作台运行登记过的站的 `pnpm start`，
+改完文档调 `docfirst.site.restart` 重新构建并重启。建在文档站基础包上的站（本仓的文档站就是）不经这个插件：初始化与托管归工作台的 gwb-docsite 插件。
+不管哪种站，核对、确认、渲染都由站里装的 `docfirst-workflow` 完成，工作台开不开都一样；插件不读核对结果，也不转发命令行，卸掉插件站照样能核对、能构建。
+包与插件互不依赖，唯一的联系是插件里那张建站依赖表。判据是「这件事在哪儿发生」：要在仓里反复运行的归包，只在 agent 手上发生一次的归插件，
 来历见轨迹卡[包给仓件给人](/trajectory/2026-09-10-package-serves-repo-plugin-serves-agent)。
 
 ## 钉码怎么工作
@@ -38,12 +43,12 @@ docfirst: none
 
 ## 内容分三个区
 
-`content/` 下只有 `trajectory/` 和 `future/` 两个名字是固定的，其余目录都是现状：
+`content/` 下 `future/` 是未来区，轨迹卡目录不在配置里指定时是 `content/trajectory/`，其余目录都是现状：
 
 | 区 | 放在哪 | 写什么 | 能不能钉码 | 核对 |
 | --- | --- | --- | --- | --- |
 | 现状 | `content/docs/` 是总入口；内容多了，在 `content/` 下再建顶层目录，需要几个建几个 | 此刻是什么：机制、模块、接缝 | 能，讲到代码就该钉 | 全部进 `docfirst check`，站的 `src/components/` 下讲解组件的源码也进 |
-| 轨迹 | `content/trajectory/` | 每次取舍的理由，一个结论一张卡，只增不改 | 不能，出现记号就报错 | 只校验卡的格式 |
+| 轨迹 | `docfirst.config.mjs` 的 `trajectory` 指的目录，没写就是 `content/trajectory/`；建在文档站基础包上的站放在站点根下的 `trajectory/` | 每次取舍的理由，一个结论一张卡，只增不改 | 不能，出现记号就报错 | 只校验卡的格式 |
 | 未来 | `content/future/` | 路线图、在途方案、别的仓写来的反馈 | 不钉 | 不核对 |
 
 一句话能不能被代码推翻，决定它该不该带引用；一句话如果只是复述代码，它就不该写。

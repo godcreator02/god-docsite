@@ -18,30 +18,38 @@
 pnpm add -D @godcreator/docfirst-workflow
 ```
 
-`@godcreator/docfirst-workflow` 是命令行、项目装配与 mdx 格式，子入口 `./fumadocs` 是 fumadocs 适配，把 docfirst 接到 fumadocs 站上；
+`@godcreator/docfirst-workflow` 是命令行、项目装配与 mdx 格式，子入口 `./fumadocs` 是 fumadocs 适配：Next 站直接用它接入，功能包 `docfirst-site` 用其中的 remark 插件；
 通用包钉码核心 `@godcreator/code-pin`（把文字钉在代码上）与星轨盘 `@godcreator/trajectory-disk`（把轨迹卡画成
-项目方向演变的圆盘）随它装上。通用包不认识 docfirst，也能单独使用。讲解组件包 `@godcreator/docfirst-explainer`
-是 docfirst 站上用的讲解组件，把一段讲解拆成配说明的帧来播放；站要用时自己装，`docfirst-workflow` 不依赖它。`fumadocs` 与 `react`
+项目方向演变的圆盘）随它装上。通用包不认识 docfirst，也能单独使用。`fumadocs` 与 `react`
 是可选的 **peer**，只有 `./fumadocs` 用，用你项目里装的那份；只运行命令行的仓不用装它们。
 
-**站的构建配置里 `serverExternalPackages` 必须留空**：`@godcreator/docfirst-workflow` 的 `./fumadocs` 下同时有服务端代码与客户端
+站另装的两个包：
+
+- `@godcreator/docfirst-site`：文档站基础包 `@godcreator/docsite-kit` 的功能包，在站 `package.json` 的 `"docsite": { "features": [...] }` 里声明。
+  它给构建页面时的 remark 插件（钉码投影成带状态点的代码块与文件树、术语标注、轨迹卡里的链接）、页面里不用 import 的 `Term` 与文件树组件、
+  星轨盘 `/trajectory` 与卡页 `/trajectory/<卡身份>` 两条路由、侧栏入口「轨迹」与样式。建在基础包上的站装它；还没迁的 Next 站用 `docfirst-workflow` 的 `./fumadocs`
+- `@godcreator/docfirst-explainer`：docfirst 站上用的讲解组件，把一段讲解拆成配说明的帧来播放；站要用时自己装，`docfirst-workflow` 与 `docfirst-site` 都不依赖它
+
+**Next 站的构建配置里 `serverExternalPackages` 必须留空**：`@godcreator/docfirst-workflow` 的 `./fumadocs` 下同时有服务端代码与客户端
 组件（状态点），而那个字段按包名匹配、没有子路径粒度——外置之后 `"use client"` 指令会丢掉；星轨盘的客户端组件在
 `@godcreator/trajectory-disk` 里，同样不能外置。
 
-**建一个新站用工作台插件，命令行不管这一步**：工作台插件 `@godcreator/gwb-docfirst-workflow` 的
-`docfirst.create {"dir":"<仓>/docs-site"}` 一步建好接了三个区（现状 `docs`、轨迹 `trajectory`、未来 `future`）的站；
-不接 docfirst 的普通 fumadocs 站用 `docfirst.create-plain`，参数相同。两条都运行官方脚手架 `create-fumadocs-app`、
-应用本机约定、选端口并写入文件，`docfirst.create` 再在官方输出上增、换、删几份文件。站目录必须还不存在；给一个用了很久的站加 docfirst，要手动改站的配置接入。
+**建站与托管由工作台插件做，命令行不管这两步**。建在基础包上的站用工作台插件 gwb-docsite：`docsite.site.init` 写骨架
+（`features` 给 `@godcreator/docfirst-site`），`docfirst.config.mjs`、`trajectory/` 与内容由站自己写；`docsite.site.add` 托管开发服务，
+站的进程归工作台、跟哪个会话都无关。
+
+Next 站用本仓的工作台插件 `@godcreator/gwb-docfirst-workflow`：`docfirst.create {"dir":"<仓>/docs-site"}` 一步建好接了三个区
+（现状 `docs`、轨迹 `trajectory`、未来 `future`）的站；不接 docfirst 的普通 fumadocs 站用 `docfirst.create-plain`，参数相同。
+两条都运行官方脚手架 `create-fumadocs-app`、应用本机约定、选端口并写入文件，`docfirst.create` 再在官方输出上增、换、删几份文件。
+站目录必须还不存在；给一个用了很久的站加 docfirst，要手动改站的配置接入。Next 站要一直开着看就 `docfirst.site.add` 登记，每次启动开 12 小时；
+改完文档调 `docfirst.site.restart`（停掉、`pnpm build`、再启动）。工作台的窗格「文档站」只显示开着哪些 Next 站、还剩多久到期。
 
 建站只由 agent 执行一次，所以不在包里——包留的是要在**仓**里反复发生的那几条。
 
-**要一直开着看的站交给工作台托管**：`docfirst.site.add {"dir":"<仓>/docs-site"}` 登记，站的进程归工作台、跟哪个会话都无关，
-每次启动开 12 小时；改完文档调 `docfirst.site.restart`（停掉、`pnpm build`、再启动）。工作台的窗格「文档站」只显示开着哪些站、还剩多久到期。
-
 ## 怎么用
 
-项目根放一份 `docfirst.config.mjs`（内容根在哪、组件名册、生成物写到哪；认哪些文件是写死的，不用配置）。内容根下 `trajectory/` 是轨迹卡、
-`future/` 是未来区，其余目录都是现状区、都进核对，不用登记；项目根下 `src/components/` 里讲解组件的源码（`.ts`、`.tsx`、`.mjs`）也进核对。
+项目根放一份 `docfirst.config.mjs`（内容根在哪、组件名册、生成物写到哪、轨迹卡目录 `trajectory`、术语表 `glossary`；认哪些文件是写死的，不用配置）。
+轨迹卡在 `trajectory` 指的目录（相对项目根，不写时是内容根下的 `trajectory/`），内容根下 `future/` 是未来区，其余目录都是现状区、都进核对，不用登记；项目根下 `src/components/` 里讲解组件的源码（`.ts`、`.tsx`、`.mjs`）也进核对。
 文档里单独写一行不带记录的正式记号，路径相对项目根：
 
 ```mdx
@@ -62,18 +70,18 @@ pnpm docfirst render                                # 只把 outputs 里有映�
 ```
 
 **正常工作的样子**：`check` 打出一行一处引用，每行带一个状态符号（🟢 新鲜 / 🟡 有变动 / ⚪ 未确认 /
-🔴 缺失）；`confirm` 把记录写进记号的属性，站上每个代码块的标题栏里多一个对应颜色的点。
+🔴 缺失）；`confirm` 把记录写进记号的属性，站上每个被钉的代码块、文件树多一个对应颜色的点。
 提交前的检查里加上 `pnpm docfirst check` 就行。**改了被钉的代码，就在同一个提交里处理它引起的黄灯**：
 先 `confirm`，再逐条复核剩下的黄灯、点名页 `--accept`。确认不要求先提交。
 
 ## 文档在哪
 
-`docs-site/` 是这几个包的文档站，也是它们唯一的使用方——装的是工作区里的这几个包，钉的是
-工作区里的实际源码，所以仓里不另留示例。
+`docs-site/` 是这几个包的文档站，也是它们唯一的使用方——建在文档站基础包上，装的是工作区里的这几个包，钉的是
+工作区里的实际源码，所以仓里不另留示例。开发服务交给 gwb-docsite 托管：`docsite.site.add {"dir":"<仓>/docs-site"}`，
+看 http://127.0.0.1:4340，改了页面自己刷新。
 
 ```bash
 cd docs-site
-pnpm build && pnpm start        # 看 http://127.0.0.1:4310，改了文件要重新 build
 pnpm docfirst check
 ```
 
@@ -97,14 +105,14 @@ pnpm test           # 先 build 再 vitest run（只跑 tests/）
 
 cd docs-site
 pnpm docfirst check
-pnpm test           # 站这一侧的接入代码（不启动 Next）
-pnpm build          # next build
-node scripts/verify-roster.mjs
+pnpm test           # 用功能包的 remark 插件编译现状区每一页，核对投影与 import（不启动站点）
+pnpm typecheck      # react-router typegen && tsc --noEmit
+pnpm build          # react-router build
 
 cd ../plugins/docfirst
 pnpm check && pnpm build      # 工作台插件单独一套检查
 ```
 
-站不用 `pnpm dev`：看页面也是先 `pnpm build` 再 `pnpm start`，改了内容重新 build。`build` 集中在收尾或发版前运行一次，
-用户没说要看就构建通过即结束；说要看就交给工作台托管（`docfirst.site.add`），改了内容调 `docfirst.site.restart`，开满 12 小时自动停。
-改了站构建时 remark 插件会调用到的包代码（`packages/docfirst-workflow/src/fumadocs/`，连同它调用的 workflow 别的出口与 code-pin），要先删 `.next` 再重新构建。
+站的开发服务由 gwb-docsite 托管，不在会话里自己 `pnpm dev`；`pnpm build` 只作提交前的检查。
+改了构建页面时 remark 插件会调用到的包代码（`packages/docfirst-site`，`packages/docfirst-workflow/src/fumadocs/` 连同它调用的 workflow 别的出口与 code-pin），
+先在改过的包里 `pnpm build`，再 `docsite.site.stop`、`docsite.site.start` 重启开发服务。

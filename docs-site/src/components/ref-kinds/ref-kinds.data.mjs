@@ -1,8 +1,9 @@
 /**
- * 「引用能指向哪几类东西」的全部讲解数据：画面（ref-kinds.tsx）与机读版规则（ref-kinds.ai.mjs）都只读这一份。
+ * 「引用能指向哪几类东西」的全部讲解数据：画面（ref-kinds.tsx）与机读规则（ref-kinds.ai.mjs）都只读这一份。
  * 例子跟钉码页是同一个仓：content/docs/a.mdx 引用 src/greet.ts，src/ 下有 greet.test.ts、greet.ts、index.ts。
  * 记号写法照 docfirst-workflow 的 marker/index.ts；比什么照 code-pin 的 compare.ts；命令行那一行照 docfirst-workflow 的 cli/text.ts
- * 与 code-pin types.ts 里的 REASON_TEXT；站上长什么样照 docfirst-workflow 的 src/fumadocs/blocks.ts 与 pre.tsx。
+ * 与 code-pin types.ts 里的 REASON_TEXT；站上投影成什么块照 docfirst-workflow 的 src/fumadocs/blocks.ts，
+ * 代码块的状态点由功能包 docfirst-site 的 src/pin-frame.ts 包上的外层与它的样式画出。
  * hash 与 blob 是用 code-pin 的 span.ts 对这版 greet.ts 与这张名字表真算出来的。
  *
  * @typedef {'fresh' | 'changed' | 'missing' | 'unconfirmed'} Status
@@ -242,7 +243,7 @@ export function outcomeName(outcome) {
   return outcome.blocking === true ? '有变动 · 按红算' : statusName[outcome.status];
 }
 
-/** 站上显示成什么，写成一句话，给机读版用 */
+/** 站上显示成什么，写成一句话，给机读规则用 */
 export function siteSummary(site) {
   switch (site.type) {
     case 'code':

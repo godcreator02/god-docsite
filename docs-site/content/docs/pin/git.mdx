@@ -3,6 +3,8 @@ title: 行段跟随
 description: 记号上的 blob 在进程里算；check 按被钉文件自己的位置找仓，从对象库取回确认时的文件，用 git diff 的 hunk 表把行段对到今天；取不到就在整个文件里找 hash 相同的一段
 ---
 
+import { SpanFollow } from '../../../src/components/span-follow/span-follow';
+
 记号上只有 `hash` 和 `blob`，没有代码。今天的内容对不上 `hash` 时，要知道「挪了还是改了」、要给出旧行新行，都得拿回确认时的整个文件。
 钉码核心只收旧内容来源 `History`，从哪儿取由使用方实现；本页讲的是 docfirst 的 workflow 那一份（`node/git.ts`）。
 下面跟着一次「上面插了两行」的 `check` 走一遍：

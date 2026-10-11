@@ -10,8 +10,8 @@ description: 写或改文档站页面内容之前读（普通 fumadocs 站与 do
 
 ## 参考案例：docfirst 自己的文档站
 
-站在 `D:\unitfolders\oz47p-docsite-kit\gwb-docfirst\docs-site`，下面这些规矩它都照做了。拿不准时先打开同类的页对照，
-读 mdx 源文件、组件源码，或 build 后在浏览器里看：
+站在 `D:\unitfolders\oz47p-docsite-kit\gwb-docfirst\docs-site`，建在文档站基础包上，下面这些规矩它都照做了。拿不准时先打开同类的页对照，
+读 mdx 源文件、组件源码，或在托管的开发服务上看：
 
 | 要写的东西 | 照着看 |
 | --- | --- |
@@ -22,9 +22,9 @@ description: 写或改文档站页面内容之前读（普通 fumadocs 站与 do
 | 自包含的讲解组件：讲解数据与画面各一个文件，放进生成正本的再加一个机读规则 | `src/components/pin/`：`judge.data.mjs`、`judge.tsx`、`pin.ai.mjs` |
 | 组件数据里照抄源码的地方钉码 | `src/components/commit-gate/commit-gate.data.mjs` |
 | 给改这个仓的人看的维护区 | `content/maintain/` |
-| 术语表 | 数据在 `src/glossary.ts`，页在 `content/docs/glossary.mdx` |
+| 术语表 | 数据在 `src/glossary.mjs`（`docfirst.config.mjs` 的 `glossary` 写着它），页在 `content/docs/glossary.mdx` |
 | 生成物的正本 | `content/docs/outputs/`，AGENTS 的在 `content/maintain/agents.mdx` |
-| 轨迹卡、未来区 | `content/trajectory/`、`content/future/` |
+| 轨迹卡、未来区 | 站点根下的 `trajectory/`、`content/future/` |
 
 它是 docfirst 站；普通站照它的页面写法与现状区的拆法，跳过钉码与轨迹、未来两区。交互做到什么程度还可以看另外两个站：
 `D:\unitfolders\oz47p-docsite-kit\collab-site\docs-site`（多种情况的推演、两台电脑并排、终端逐字打出命令）与
@@ -96,8 +96,11 @@ docfirst 站就钉码引用那段代码，普通站就删掉。
 - **讲解组件自包含**：画面和讲解文字都写在组件里，mdx 里只写 `<名字 />`。讲解文字是一份不依赖 React 的数据（`*.data.mjs`），
   画面读它。`Tabs`、`Callout` 这类包着正文的排版组件照常用子元素
 - **机读规则只给放进生成正本的组件写**：站上不出每页的机读版，组件要用在 README、AGENTS、SKILL.md 的正本里，才写一份 `*.ai.mjs`，
-  交回的就是它在生成物里的样子，读同一份 `*.data.mjs`
-- 用到状态、事件、动画的组件第一行写 `'use client'`；浏览器 API 放进 `useEffect`；带 `'use client'` 的模块不给服务端组件导出常量
+  交回的就是它在生成物里的样子，读同一份 `*.data.mjs`；规则登记进 `docfirst.config.mjs` 的组件名册 `components`
+- **页面用到站内组件就在开头 `import`**（基础包上的站）：路径相对页面，如 `import { SeamMap } from '../../src/components/seam-map/seam-map';`。
+  `Term` 与文件树 `Files` / `Folder` / `File` 由功能包 `@godcreator/docfirst-site` 提供，不用 import
+- **组件自己 `import` 样式**：`./xx.css`，用了讲解组件包的再 import `@godcreator/docfirst-explainer/styles.css`，不靠全局样式
+- 浏览器 API 放进 `useEffect`：页面先在服务端渲染一遍
 - 组件最外层加 `not-prose`，宽窄屏用容器查询（外层 `@container`，里面 `@2xl:` 这类前缀）
 - 颜色用 fumadocs 的主题色（`bg-fd-card`、`border-fd-border`、`text-fd-muted-foreground`，SVG 里 `fill-fd-*` / `stroke-fd-*`）；
   自己的彩色定义成 CSS 变量、`.dark` 下另给一套，浅底用 `color-mix(in srgb, 颜色 12%, transparent)`。中性主题的 `fd-primary` 接近黑白，不能当强调色
@@ -106,6 +109,9 @@ docfirst 站就钉码引用那段代码，普通站就删掉。
   `useTransform` 每帧算 `d`；要画成虚线的线只淡入，不做 `pathLength` 动画；外层包 `<MotionConfig reducedMotion="user">`
 - 组件里的文字不进站内搜索：读者会搜的词写进页面标题、描述或正文
 
+**还没迁到基础包上的 Next 站**写法不同：页面不 import 组件，组件登记进站的组件表（`src/components/mdx.tsx`）与名单；用到状态、事件、动画的组件
+第一行写 `'use client'`，带 `'use client'` 的模块不给服务端组件导出常量；讲解组件包的样式在全局样式里引入一次。
+
 写完组件怎么登记、怎么验收，看 `docs-site`。
 
 ## docfirst 站额外的规矩
@@ -113,11 +119,14 @@ docfirst 站就钉码引用那段代码，普通站就删掉。
 ### 分区
 
 ```
-content/
-├── trajectory/   轨迹：怎么走到今天、每次取舍的理由。卡只增不改
-├── future/       未来：roadmap.mdx（在等什么前提）、spec/（在途方案，做完删）。别的仓写来的反馈是 gitea 上的 issue，不放这里
-└── <其余目录>/    现状：此刻是什么。除上面两个名字外的目录都是现状区，几个、叫什么按文档规模定
+<站目录>/
+├── trajectory/       轨迹：怎么走到今天、每次取舍的理由。卡只增不改
+└── content/
+    ├── future/       未来：roadmap.mdx（在等什么前提）、spec/（在途方案，做完删）。别的仓写来的反馈是 gitea 上的 issue，不放这里
+    └── <其余目录>/    现状：此刻是什么。除 future/ 外的目录都是现状区，几个、叫什么按文档规模定
 ```
+
+轨迹卡的目录由 `docfirst.config.mjs` 的 `trajectory` 指定（相对站目录），基础包上的站写 `"trajectory"`；不写时是 `content/trajectory/`，Next 站多是这样。
 
 **此刻是什么归现状，怎么走到今天归轨迹，还没发生的归未来。**为什么存在、刻意不做什么也是此刻的边界，写在现状区，
 每条「不做」一句话，理由链到轨迹卡。
@@ -131,7 +140,7 @@ content/
 | 还有别的读者（维护这个仓的人、扩展插件的作者） | `content/` 下再建顶层目录，一类读者一个，侧栏里各是一个区 | `maintain/` 给改这个仓的人 |
 
 按包、按读者拆，**不按机制拆**：按机制分会让同一个包的接缝页和原理页散到几个目录里。横跨几个包的机制，放进读者最先会去找的那个包的目录。
-新加顶层目录要在站里加集合与路由（看 `docs-site` 的「加一个分区」），`docfirst check` 自动把它算进现状区。
+新加顶层目录照 `docs-site` 的「加一个分区」做（基础包上的站建目录、写 `meta.json`，Next 站还要加集合与路由），`docfirst check` 自动把它算进现状区。
 现状区的入口页按「接缝图 → 逐条接缝 → 各模块」展开，术语表也在现状区。
 
 ### 写到哪为止
@@ -175,7 +184,7 @@ content/
 ### 术语表
 
 收三类：仓自己造的词、通用词在这里有特定含义的、外来框架词。不收通用编程词与单字词。正本是一份数据文件
-（`src/glossary.ts` 一类），每条 `term / aliases / def / href`；**定义只写概念，不写服务名、类型名、路径**——数据文件里没法钉码，
+（`src/glossary.mjs` 一类，基础包上的站在 `docfirst.config.mjs` 的 `glossary` 写它的位置），每条 `term / aliases / def / href`；**定义只写概念，不写服务名、类型名、路径**——数据文件里没法钉码，
 具体名字留给 `href` 指的那一页。全站自动标注在构建时发生，不改源文件。
 
 ### 写代码时文档跟着改什么

@@ -4,14 +4,19 @@ description: 两条建站命令 docfirst.create 与 docfirst.create-plain（官�
 full: true
 ---
 
+import { SeamMap } from '../../../src/components/seam-map/seam-map';
+
 包 `@godcreator/gwb-docfirst-workflow`，在 `plugins/docfirst/`，源码在 `src/`，入口 `src/index.ts`；说明书在 `skills/`，
 建站模板在 `template/`。它是 god 工作台（gwb）的插件，不发成 npm 库。
+
+它建与托管的是 Next 站，站接的是 workflow 的 [fumadocs 适配](/docs/fumadocs)。建在文档站基础包上的站（本仓的文档站就是）不经这个插件：
+初始化、更新骨架与托管归工作台的 gwb-docsite 插件，docfirst 经[站的功能包](/docs/site)接进去。
 
 <SeamMap module="plugin" />
 
 ## 功能
 
-**包的使用者是仓，插件的使用者是 agent。** 要在仓里发生的核对、确认、渲染归 npm 包，agent `cd` 到仓里运行 `pnpm doc`；
+**包的使用者是仓，插件的使用者是 agent。** 要在仓里发生的核对、确认、渲染归 npm 包，agent `cd` 到站目录里运行站装的 `docfirst` 命令行；
 只在 agent 手上发生一次的建站与读说明书归插件，跟会话无关、要一直开着的站也由插件托管。判据的来历见[包给仓、插件给人](/trajectory/2026-09-10-package-serves-repo-plugin-serves-agent)：
 
 {/* ref file="../plugins/docfirst/src/index.ts" lines="18-27" hash="56af1b6b6895" blob="ec068c28d71e" */}
@@ -40,7 +45,7 @@ full: true
 
 {/* ref file="../plugins/docfirst/src/create.ts" lines="15-22" hash="38db1def4857" blob="ba7789e519b3" */}
 
-**docfirst 站不出每页的机读版**：删掉 llms 的三个路由与 proxy，去掉页面上复制与查看 markdown 的按钮，机读文字只给生成物：
+**建出的站不出每页的机读版**：删掉官方模板里 llms 的三个路由与 proxy，去掉页面上复制与查看 markdown 的按钮，机读文字只给生成物：
 
 {/* ref file="../plugins/docfirst/tests/create.test.ts" lines="165-172" hash="5e20c74775b1" blob="a48282005ff2" */}
 

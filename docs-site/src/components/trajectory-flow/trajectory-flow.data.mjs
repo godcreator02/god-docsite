@@ -1,7 +1,7 @@
 /**
- * 「一批轨迹卡文件怎么变成星轨盘」的全部讲解数据：画面（trajectory-flow.tsx）与机读版规则（trajectory-flow.ai.mjs）都只读这一份。
+ * 「一批轨迹卡文件怎么变成星轨盘」的全部讲解数据：画面（trajectory-flow.tsx）与机读规则（trajectory-flow.ai.mjs）都只读这一份。
  * 例子里的校验结果、中性输入、模型、树、布局落点与两段命令行输出，是把下面五个卡文件放进一个临时项目
- * （docfirst.config.mjs 是一个空对象，没有现状区文档），实际运行 `docfirst check`、`docfirst trajectory`、
+ * （docfirst.config.mjs 只写了 trajectory: "trajectory"，卡放在项目根下的 trajectory/，没有现状区文档），实际运行 `docfirst check`、`docfirst trajectory`、
  * `scanCardDir`、`buildModel` 与 `new RingsLayout(model)` 得到的；包的输出格式变了要重新运行一遍再抄。
  */
 
@@ -9,25 +9,26 @@ const ROOT = '2026-06-01-docfirst';
 const MARKER = '{/* ref file="../packages/docfirst-workflow/src/cards/parse.ts" lines="1-12" hash="da66cb5417e4" blob="f4b46a71d249" */}';
 
 export const files = {
-  dir: 'content/trajectory',
+  dir: 'trajectory',
   cwd: '~/repo/docs-site',
-  page: 'src/app/(trajectory-disk)/trajectory/page.tsx',
+  page: 'docfirst-site/src/routes/disk.tsx',
+  collection: 'app/lib/trajectory.ts',
 };
 
 /**
  * 流水线的六段，第 i 步点亮第 i 段。role 是这段代码所在的包在整页里的颜色：
- * 卡文件 amber、docfirst-workflow 的卡格式 blue、trajectory-disk violet、站 cyan；docfirst-workflow/fumadocs 只在第 6 步的画面里出现，用 emerald。
+ * 卡文件 amber、docfirst-workflow 的卡格式 blue、trajectory-disk violet、功能包 docfirst-site 的路由 cyan；站点里的轨迹卡集合只在第 6 步的画面里出现，用 emerald。
  * @typedef {'files' | 'read' | 'parse' | 'model' | 'layout' | 'page'} StageId
  * @typedef {{ id: StageId, name: string, pkg: string, exports: string, role: 'amber' | 'blue' | 'violet' | 'cyan' }} Stage
  * @type {Stage[]}
  */
 export const stages = [
-  { id: 'files', name: '卡文件', pkg: 'docs-site', exports: 'content/trajectory/*.mdx', role: 'amber' },
+  { id: 'files', name: '卡文件', pkg: 'docs-site', exports: 'trajectory/*.mdx', role: 'amber' },
   { id: 'read', name: '读卡目录', pkg: 'docfirst-workflow/cards', exports: 'scanCardDir', role: 'blue' },
   { id: 'parse', name: '解析与校验', pkg: 'docfirst-workflow/cards', exports: 'scanCards → parseCardFile', role: 'blue' },
   { id: 'model', name: '建树、选主干', pkg: 'trajectory-disk', exports: 'buildModel', role: 'violet' },
   { id: 'layout', name: '布局', pkg: 'trajectory-disk', exports: 'RingsLayout', role: 'violet' },
-  { id: 'page', name: '站上渲染', pkg: 'docs-site /trajectory', exports: 'loadTrajectory → StarDisk', role: 'cyan' },
+  { id: 'page', name: '站上渲染', pkg: 'docfirst-site /trajectory', exports: 'loader → StarDisk', role: 'cyan' },
 ];
 
 /** 卡字段，顺序照卡格式 parse.ts 的 CARD_KEYS */
@@ -233,34 +234,42 @@ export const layout = {
   treeBox: { th0: 270, th1: 288.141, rMin: 190, rMax: 1150 },
 };
 
-/** 站的整页路由 page.tsx 里读卡目录、交给 StarDisk 的几行（原文，start 是行号） */
-/* ref file="src/app/(trajectory-disk)/trajectory/page.tsx" hash="31c684bb9f4a" blob="656dac5215ca" */
+/** 功能包的星轨盘路由 disk.tsx 里读卡目录、交给 StarDisk 的几行（原文，start 是行号） */
+/* ref file="../packages/docfirst-site/src/routes/disk.tsx" hash="6143d1c6a7ec" blob="4333c2115175" */
 export const pageLines = [
-  { start: 5, lines: ["import { loadTrajectory, StarDisk } from '@godcreator/docfirst-workflow/fumadocs/trajectory';"] },
-  { start: 12, lines: ["  const data = await loadTrajectory(join(process.cwd(), 'content', 'trajectory'));"] },
-  { start: 14, lines: ['    sourceTrajectory.getPages().map((page) => {'] },
-  { start: 38, lines: ['        <StarDisk data={data} hrefBase="/trajectory" bodies={bodies} />'] },
+  {
+    start: 10,
+    lines: [
+      'import { StarDisk } from "@godcreator/trajectory-disk/disk";',
+      'import { loadProject } from "@godcreator/docfirst-workflow";',
+      'import { scanCardDir } from "@godcreator/docfirst-workflow/cards";',
+    ],
+  },
+  {
+    start: 23,
+    lines: [
+      'export async function loader() {',
+      '  const project = await loadProject(process.cwd());',
+      '  return { scan: await scanCardDir(project.trajectoryDir), siteName: siteName(), docsHome: docsHomeOf(sitePageRefs()) };',
+      '}',
+    ],
+  },
+  { start: 31, lines: ['    trajectoryCards.entries.map((entry) => {'] },
+  { start: 62, lines: ['        <StarDisk data={scan} hrefBase={trajectoryHrefBase} bodies={cardBodies()} />'] },
 ];
 
 /** 在站上点什么、去哪 */
 export const clicks = [
   { what: '点盘上的一张卡', then: '盘右侧栏显示这张卡，地址栏变成 /trajectory?card=<卡身份>' },
   { what: 'Ctrl/Cmd+点盘上的一张卡', then: '在新标签页打开卡页 /trajectory/<卡身份>' },
-  { what: '点卡页上的「← 回到盘」', then: '回到 /trajectory' },
+  { what: '点卡页上的「← 回到星轨盘」', then: '回到 /trajectory' },
 ];
 
-/** docfirst-workflow 的 src/fumadocs/trajectory.ts 里 loadTrajectory 的定义（原文，start 是行号） */
-/* ref file="../packages/docfirst-workflow/src/fumadocs/trajectory.ts" lines="21-26" hash="e5d512427a98" blob="56741c0227aa" */
-export const fumadocsLines = {
-  start: 21,
-  lines: [
-    'export async function loadTrajectory(dir: string): Promise<CardScan> {',
-    '  if (!isAbsolute(dir)) {',
-    '    throw new Error(`loadTrajectory 只收绝对路径，收到「${dir}」：在站里用 join(process.cwd(), "content", "trajectory") 拼好再传`);',
-    '  }',
-    '  return scanCardDir(dir);',
-    '}',
-  ],
+/** 站点里的轨迹卡集合 app/lib/trajectory.ts（由功能包的模板写进站点，原文，start 是行号） */
+/* ref file="../packages/docfirst-site/template/skeleton/app/lib/trajectory.ts" lines="7-7" hash="b541f74038da" blob="55562eb102dd" */
+export const collectionLines = {
+  start: 7,
+  lines: ["export const trajectoryCards = defineCollections({ type: 'doc', dir: 'trajectory', async: true })"],
 };
 
 /**
@@ -293,9 +302,9 @@ export const terminals = {
 export const steps = [
   {
     id: 'files',
-    title: '卡文件：content/trajectory/ 下一卡一文件',
+    title: '卡文件：轨迹卡目录下一卡一文件',
     text:
-      '轨迹卡是文档站 content/trajectory/ 下的 .mdx（或 .md）文件，卡身份就是文件名去掉后缀。' +
+      '轨迹卡是轨迹卡目录下的 .mdx（或 .md）文件，卡身份就是文件名去掉后缀。目录由 docfirst.config.mjs 的 trajectory 指定（相对站点目录，例子和本站都是站点根下的 trajectory/），不写时是内容根下的 trajectory/。' +
       'frontmatter 里的卡字段（docfirst-workflow 卡格式的 CARD_KEYS：type、born-at、parent、label、domain）决定它是不是根卡、落在哪个时刻、跟哪些卡同组；' +
       '一个卡字段都没写的文件不算卡。一个卡目录只有一张根卡（type: root），其余每张卡的 parent 都写这张根卡的身份。' +
       '取代与转向两种关系写在正文里：一行 supersedes:: 或 pivots-from:: 加一条指向卡身份的链接。' +
@@ -343,10 +352,11 @@ export const steps = [
     id: 'page',
     title: '站上渲染：/trajectory 整页',
     text:
-      '站的整页路由 src/app/(trajectory-disk)/trajectory/page.tsx 从 docfirst-workflow/fumadocs/trajectory 取 loadTrajectory（就是 scanCardDir）与 StarDisk，' +
-      '在服务端读卡目录，同时用 fumadocs 卡集合（cardSchema 派生标题、remarkTrajectoryLinks 改写正文链接）把每张卡的正文渲染好，' +
-      '一起交给客户端组件 StarDisk（星轨盘组件，hrefBase="/trajectory"）；盘占满顶栏以下的整个视口，点节点在盘右侧栏里看卡，不跳页。' +
-      '样式由路由组的 layout 引入 docfirst-workflow/fumadocs/trajectory.css。每张卡另有卡页 /trajectory/<卡身份>。顶栏的「报病」数是 sick 里的文件数。',
+      '星轨盘 /trajectory 是功能包 @godcreator/docfirst-site 的路由（src/routes/disk.tsx），放在整站布局外面，盘占满顶栏以下的整个窗口。' +
+      'loader 在服务端用 loadProject 找到配置的轨迹卡目录，交给 scanCardDir 读出中性输入与 sick；每张卡（含根卡）的正文来自站点里的轨迹卡集合 trajectoryCards' +
+      '（app/lib/trajectory.ts，集合定义只能写在站点里，由功能包的模板在初始化时写进去），点到哪张才加载哪张。' +
+      '两样一起交给星轨盘组件 StarDisk（直接从 @godcreator/trajectory-disk/disk 取，hrefBase 是 /trajectory），点节点在盘右侧栏里看卡，不跳页。顶栏的「报病」数是 sick 里的文件数。' +
+      '每张卡另有卡页 /trajectory/<卡身份>（src/routes/card.tsx，在整站布局里）；卡正文里指向别的卡的链接，由功能包的 remark 插件在构建时改写成卡页地址。',
   },
 ];
 

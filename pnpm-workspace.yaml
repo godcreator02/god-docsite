@@ -15,6 +15,11 @@ onlyBuiltDependencies:
 # format-fumadocs 把 fumadocs 声明成 peer，用的是消费方项目装的那份：这里别自动装一份进来
 autoInstallPeers: false
 
+# fumadocs-core 的可选 peer zod 在站与 docfirst-site 两处解析成不同版本时，会装出两份 @fumadocs/base-ui，
+# 卡页里功能包用的 DocsPage 找不到站点 DocsLayout 的上下文。只留一个版本
+overrides:
+  zod: 4.6.5
+
 # 这份文件**整份盖掉**用户级 pnpm 配置（不合并），所以全局那条 @godcreator/* 的放行得在这儿再写一遍——
 # 少了它 pnpm 装 plugins/docfirst 的 gwb 依赖时会被 minimumReleaseAge（默认一天）全拦下
 minimumReleaseAgeExclude:

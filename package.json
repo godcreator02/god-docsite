@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "docfirst 的包工作区：两个通用包（钉码 code-pin、星轨盘 trajectory-disk）与 docfirst 自己的两个包：docfirst-workflow（命令行、项目装配与格式，fumadocs 适配在它的子入口 ./fumadocs）、docfirst-explainer（docfirst 站上用的讲解组件，只有站用），外加一个工作台插件（在 plugins/docfirst）。文档站在 docs-site，它同时是这几个包唯一的使用方",
+  "description": "docfirst 的包工作区：两个通用包（钉码 code-pin、星轨盘 trajectory-disk）与 docfirst 自己的三个包：docfirst-workflow（命令行、项目装配与格式，fumadocs 适配在它的子入口 ./fumadocs）、docfirst-site（建在文档站基础包上的 docfirst 站的功能包）、docfirst-explainer（docfirst 站上用的讲解组件，只有站用），外加一个工作台插件（在 plugins/docfirst）。文档站在 docs-site，它同时是这几个包唯一的使用方",
   "scripts": {
     "build": "pnpm -r --filter \"./plugins/*\" --filter \"./packages/*\" run build",
     "typecheck": "pnpm -r --filter \"./plugins/*\" --filter \"./packages/*\" run typecheck && tsc -p tsconfig.tests.json",

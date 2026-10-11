@@ -1,5 +1,5 @@
 /**
- * SeamMap 在机读版里变成什么：跟画面读同一份内容，交给讲解组件包的 seamGraphText 写成一段段文字，每段包成一个段落。
+ * SeamMap 在生成物里变成什么机读文字：跟画面读同一份内容，交给讲解组件包的 seamGraphText 写成一段段文字，每段包成一个段落。
  * 带 module 属性时写的是那个包的内部图。
  * 这个文件不 import React，docfirst.config.mjs 引它，命令行也能运行。
  */
@@ -9,6 +9,7 @@ import { pinGraph } from './inner/pin.data.mjs';
 import { trajectoryGraph } from './inner/trajectory.data.mjs';
 import { workflowGraph } from './inner/workflow.data.mjs';
 import { fumadocsGraph } from './inner/fumadocs.data.mjs';
+import { docfirstSiteGraph } from './inner/docfirst-site.data.mjs';
 import { docfirstExplainerGraph } from './inner/docfirst-explainer.data.mjs';
 import { pluginGraph } from './inner/plugin.data.mjs';
 
@@ -17,6 +18,7 @@ const INNER = {
   trajectory: trajectoryGraph,
   workflow: workflowGraph,
   fumadocs: fumadocsGraph,
+  'docfirst-site': docfirstSiteGraph,
   'docfirst-explainer': docfirstExplainerGraph,
   plugin: pluginGraph,
 };

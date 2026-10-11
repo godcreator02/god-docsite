@@ -1,6 +1,7 @@
 /**
  * fumadocs 适配（docfirst-workflow 的 src/fumadocs/）的内部接缝图：模块页 <SeamMap module="fumadocs" /> 画的就是它。
- * 框是包里的文件，方块是文件对外给的东西；灰色实线框是包外的站、fumadocs 本体、workflow、钉码核心与星轨盘包。
+ * 框是包里的文件，方块是文件对外给的东西；灰色实线框是包外的调用方（站的功能包、还没迁到文档站基础包的 Next 站、项目配置）、
+ * fumadocs 本体、workflow、钉码核心与星轨盘包。
  * 组件与它随包发的样式表合成一个框（pre.tsx 与 light.css、term.tsx 与 term.css）；index.ts 只再导出别的文件的出口，不单画成框。
  * 坐标在 fumadocs.layout.ts。
  */
@@ -10,24 +11,40 @@ export const fumadocsGraph = defineSeamGraph({
   id: 'fumadocs',
   title: 'fumadocs 适配内部的文件与接缝',
   intro:
-    'fumadocs 适配内部接缝图：虚线框是包里的文件，框里的方块是它对外给的函数、组件或样式表，灰色实线框是包外的站、fumadocs 本体、workflow、钉码核心与星轨盘包。组件和它的样式表画在同一个框里。',
+    'fumadocs 适配内部接缝图：虚线框是包里的文件，框里的方块是它对外给的函数、组件或样式表，灰色实线框是包外的调用方、fumadocs 本体、workflow、钉码核心与星轨盘包。组件和它的样式表画在同一个框里。调用方有三个：站的功能包只用 remark 插件与样式表，项目配置展开名册规则，其余出口给还没迁到文档站基础包的 Next 站。',
   frameLabel: '文件',
   modules: [
     {
-      id: 'site',
-      name: '使用方的站',
-      pkg: 'Next 站的接入代码',
+      id: 'feature',
+      name: '站的功能包',
+      pkg: '@godcreator/docfirst-site',
       role: null,
       outside: true,
       blurb:
-        '装了 docfirst-workflow、接入 ./fumadocs 的站：src/lib/source.ts 接集合，src/components/mdx.tsx 换组件，样式表各引一行 css，docfirst.config.mjs 展开名册规则，星轨整页调用 loadTrajectory、渲染 StarDisk，它的 disk.css 引入 trajectory.css。本仓的 docs-site/ 就是这样一个站。',
+        '建在文档站基础包上的站用的功能包。它的 remark 插件按文件所在的区调用这里的三个插件：现状区先 remarkGlossary（配置里有 glossary 时）、再 remarkDocfirstHost，轨迹卡目录用 remarkTrajectoryLinks；它的样式表引入 light.css、term.css、trajectory.css。别的出口它都不用：代码块的状态点由它自己包一层外层 div、用自己的样式画，Term 组件与星轨盘页也是它自己的。',
       caps: [
-        { id: 'site-source', name: '集合', ident: 'src/lib/source.ts' },
-        { id: 'site-css', name: '样式表', ident: 'docfirst.css · site.css' },
-        { id: 'site-mdx', name: '组件表', ident: 'src/components/mdx.tsx' },
-        { id: 'site-config', name: '名册配置', ident: 'docfirst.config.mjs' },
-        { id: 'site-page', name: '星轨整页', ident: 'page.tsx · disk.css' },
+        { id: 'fs-content', name: 'remark 插件', ident: 'src/content.ts' },
+        { id: 'fs-css', name: '样式', ident: 'styles/site.css' },
       ],
+    },
+    {
+      id: 'site-config',
+      name: '项目配置',
+      pkg: 'docfirst.config.mjs',
+      role: null,
+      outside: true,
+      blurb: '使用方项目根上的配置模块：components 先展开 fumadocsRoster，再加站自己的组件。命令行与构建页面时的 stamp 读同一张名册。',
+      caps: [{ id: 'site-config', name: '项目配置', ident: 'docfirst.config.mjs' }],
+    },
+    {
+      id: 'next-site',
+      name: '还没迁的 Next 站',
+      pkg: 'docfirst.create 建出的站',
+      role: null,
+      outside: true,
+      blurb:
+        '工作台插件的 docfirst.create 建出的 Next 站，还没迁到文档站基础包：集合接 docfirstMdxOptions、docfirstMarkdownOptions、cardSchema 与 remarkTrajectoryLinks，组件表把 pre 换成 DocfirstPre、登记 Term，星轨整页调用 loadTrajectory、渲染 StarDisk，三份样式表都由站引入。本仓的文档站不是这样的站。',
+      caps: [{ id: 'next-site', name: '还没迁的 Next 站', ident: 'source.ts · mdx.tsx · 星轨整页' }],
     },
     {
       id: 'term',
@@ -36,7 +53,7 @@ export const fumadocsGraph = defineSeamGraph({
       role: 'violet',
       outside: false,
       blurb:
-        'Term 是服务端组件，没有状态：定义框靠 term.css 的 :hover 与 :focus-within 展开，词本身可以聚焦，定义框经 aria-describedby 关联。定义在构建时已经写进属性，组件不查任何表。',
+        'Term 是服务端组件，没有状态：定义框靠 term.css 的 :hover 与 :focus-within 展开，词本身可以聚焦，定义框经 aria-describedby 关联。定义在构建时已经写进属性，组件不查任何表。组件只给 Next 站；term.css 两边都用，站的功能包有自己的 Term，类名与这份相同。',
       caps: [
         { id: 'term-comp', name: '术语组件', ident: 'Term' },
         { id: 'term-css', name: '定义框样式', ident: 'term.css' },
@@ -49,7 +66,7 @@ export const fumadocsGraph = defineSeamGraph({
       role: 'blue',
       outside: false,
       blurb:
-        'docfirstMdxOptions 交回现状集合的 mdx 选项：remark 链末尾先加术语标注（给了词表才加），再加 remarkDocfirstHost；rehypeCode 的 meta 解析换成 parseMetaString。remarkDocfirstHost 是异步插件，每篇 await loadProject，remarkDocfirst 只建一次。',
+        'remarkDocfirstHost 是异步插件，每篇 await loadProject，remarkDocfirst 只建一次，两种站都用它。docfirstMdxOptions 与 parseMetaString 只给 Next 站：前者交回现状集合的 mdx 选项（remark 链末尾先加术语标注、再加 remarkDocfirstHost），后者是 rehypeCode 的 meta 白名单。',
       caps: [
         { id: 'host-options', name: '现状集合选项', ident: 'docfirstMdxOptions' },
         { id: 'host-meta', name: 'meta 白名单', ident: 'parseMetaString' },
@@ -89,7 +106,7 @@ export const fumadocsGraph = defineSeamGraph({
       role: 'violet',
       outside: false,
       blurb:
-        'remarkGlossary 在正文的文字节点里找术语，把命中的词换成 Term 节点，定义直接写成属性。代码、标题、链接、frontmatter、mdx 表达式里不标，每篇只标第一次。',
+        'remarkGlossary 在正文的文字节点里找术语，把命中的词换成 Term 节点，定义直接写成属性。代码、标题、链接、frontmatter、mdx 表达式里不标，每篇只标第一次；skipFile 认出的文件整篇不标。',
       caps: [{ id: 'gp-glossary', name: '包成 Term', ident: 'remarkGlossary' }],
     },
     {
@@ -135,7 +152,7 @@ export const fumadocsGraph = defineSeamGraph({
       role: 'cyan',
       outside: false,
       blurb:
-        'docfirstMarkdownOptions 交回一个 stringify 回调：节点带 data.docfirstAi 就序列化那组替换节点，带 data.docfirst 的代码块换成一行来源注释加一块不带 meta 与 diff 标记的代码，别的交回 undefined，由 fumadocs 照默认方式序列化。不 import fumadocs。',
+        '只给接了每页机读版的 Next 站。docfirstMarkdownOptions 交回一个 stringify 回调：节点带 data.docfirstAi 就序列化那组替换节点，带 data.docfirst 的代码块换成一行来源注释加一块不带 meta 与 diff 标记的代码，别的交回 undefined，由 fumadocs 照默认方式序列化。不 import fumadocs。',
       caps: [{ id: 'md-stringify', name: '序列化回调', ident: 'docfirstMarkdownOptions' }],
     },
     {
@@ -154,7 +171,7 @@ export const fumadocsGraph = defineSeamGraph({
       role: 'amber',
       outside: false,
       blurb:
-        '一处引用换成树上的一个节点：行段与整文件是代码块（黄的有变动由 diffBlock 把旧行新行排在同一块），目录树是名为 Files 的 JSX 节点。状态写两处：meta 字符串给页面，节点的 data 给机读版。',
+        '一处引用换成树上的一个节点：行段与整文件是代码块（黄的有变动由 diffBlock 把旧行新行排在同一块），目录树是名为 Files 的 JSX 节点。状态写两处：meta 字符串给页面，节点的 data 给机读文字。',
       caps: [
         { id: 'bl-tree', name: '目录树', ident: 'treeNode · filesOf' },
         { id: 'bl-code', name: '代码块', ident: 'codeNode · diffBlock' },
@@ -178,7 +195,7 @@ export const fumadocsGraph = defineSeamGraph({
       role: 'amber',
       outside: false,
       blurb:
-        'DocfirstPre 替换站的 pre：有 data-dot 的交给 CodeBlock、点经 Actions 放进标题栏，没有的照 CodeBlock 渲染。文件第一行是 "use client"：Actions 是函数，服务端组件不能把函数传给客户端组件。点的颜色与空心实心、目录树右上角的点由 light.css 画。',
+        'DocfirstPre 只给 Next 站：替换站的 pre，有 data-dot 的交给 CodeBlock、点经 Actions 放进标题栏，没有的照 CodeBlock 渲染。文件第一行是 "use client"：Actions 是函数，服务端组件不能把函数传给客户端组件。light.css 画 DocfirstPre 的点与目录树右上角的点，站的功能包也引入它，用的是目录树那一半。',
       caps: [
         { id: 'pre-pre', name: '状态点代码块', ident: 'DocfirstPre' },
         { id: 'pre-light', name: '状态点样式', ident: 'light.css' },
@@ -191,7 +208,7 @@ export const fumadocsGraph = defineSeamGraph({
       role: 'emerald',
       outside: false,
       blurb:
-        '轨迹卡集合的两样：cardSchema 当 frontmatter schema，只从 frontmatter 派生卡页要的字段、不校验（卡写得对不对由 docfirst check 报）：缺 label 用文件名当标题，被 fumadocs 解析成日期的 born-at 转回字符串，一个卡字段都没有的当普通页；remarkTrajectoryLinks 把 supersedes:: 与 pivots-from:: 段落标成关系边，把指向卡身份的 .md / .mdx 链接改成卡页地址。哪些字段算卡、链接怎么换成卡身份，都用 workflow 卡格式的那一份。',
+        '轨迹卡集合的两样。remarkTrajectoryLinks 两种站都用：把 supersedes:: 与 pivots-from:: 段落标成关系边，把指向卡身份的 .md / .mdx 链接改成卡页地址。cardSchema 只给 Next 站的卡集合当 frontmatter schema，只派生卡页要的字段、不校验（卡写得对不对由 docfirst check 报）：缺 label 用文件名当标题，被 fumadocs 解析成日期的 born-at 转回字符串，一个卡字段都没有的当普通页。哪些字段算卡、链接怎么换成卡身份，都用 workflow 卡格式的那一份。',
       caps: [
         { id: 'cc-links', name: '链接改写', ident: 'remarkTrajectoryLinks' },
         { id: 'cc-schema', name: 'frontmatter 字段', ident: 'cardSchema' },
@@ -214,7 +231,7 @@ export const fumadocsGraph = defineSeamGraph({
       role: 'emerald',
       outside: false,
       blurb:
-        'loadTrajectory(dir) 收卡目录的绝对路径（不是绝对路径直接报错），就是 workflow 卡格式的 scanCardDir：交回中性输入加病卡，不建模；同一个出口按包名再导出星轨盘包的 StarDisk，trajectory.css 引入星轨盘包的 star.css。站画星轨盘只 import 这个出口。只按包名 import workflow 的 ./cards，不 import 主入口。',
+        'loadTrajectory(dir) 只给 Next 站：收卡目录的绝对路径（不是绝对路径直接报错），就是 workflow 卡格式的 scanCardDir，交回中性输入加病卡，不建模；同一个出口按包名再导出星轨盘包的 StarDisk。trajectory.css 引入星轨盘包的 star.css，两种站都引入它。只按包名 import workflow 的 ./cards，不 import 主入口。',
       caps: [
         { id: 'star-load', name: '读卡与组件', ident: 'loadTrajectory · StarDisk' },
         { id: 'star-css', name: '盘的样式', ident: 'trajectory.css' },
@@ -225,13 +242,13 @@ export const fumadocsGraph = defineSeamGraph({
   seams: [
     {
       n: 1,
-      name: '现状集合',
-      a: ['site-source'],
-      b: ['host-options', 'md-stringify'],
-      iface: 'mdxOptions: applyMdxPreset(docfirstMdxOptions({ root, glossary }))；postprocess.includeProcessedMarkdown: docfirstMarkdownOptions()',
+      name: '功能包的 remark 插件',
+      a: ['fs-content'],
+      b: ['host-attach', 'gp-glossary', 'cc-links'],
+      iface: 'remarkDocfirstHost({ root }) · remarkGlossary({ terms, skipFile }) · remarkTrajectoryLinks({ hrefBase })',
       convention: false,
       via: 'code',
-      text: '站的 source.ts 在现状集合上接这两个出口：docfirstMdxOptions 的返回值交给 applyMdxPreset 当 mdxOptions，docfirstMarkdownOptions 交给 postprocess 生成各页的机读版。root 传站的项目根，插件在那里找 docfirst.config.mjs。',
+      text: '站的功能包在构建页面时按文件所在的区调用这三个插件：现状区先 remarkGlossary 再 remarkDocfirstHost，root 是站点目录；轨迹卡目录用 remarkTrajectoryLinks，hrefBase 是星轨盘的地址。术语表与不标注的文档由功能包按配置的 glossary 读好再传进来。未来区与评论两边都不处理。',
     },
     {
       n: 2,
@@ -241,7 +258,7 @@ export const fumadocsGraph = defineSeamGraph({
       iface: 'DocfirstMdxOptions：remarkPlugins(v) → [...v, …]；rehypeCodeOptions { themes, parseMetaString }',
       convention: false,
       via: 'code',
-      text: '返回值按结构对上 applyMdxPreset 的参数，类型里不 import fumadocs。remarkPlugins 接在 fumadocs 的默认插件之后；rehypeCode 只保留白名单里的 meta，parseMetaString 与 fumadocs 默认的白名单同形，多保留 data-dot。themes 写的是 fumadocs 的默认值。',
+      text: '只有 Next 站用。返回值按结构对上 applyMdxPreset 的参数，类型里不 import fumadocs。remarkPlugins 接在 fumadocs 的默认插件之后；rehypeCode 只保留白名单里的 meta，parseMetaString 与 fumadocs 默认的白名单同形，多保留 data-dot。themes 写的是 fumadocs 的默认值。',
     },
     {
       n: 3,
@@ -261,7 +278,7 @@ export const fumadocsGraph = defineSeamGraph({
       iface: 'remarkDocfirst({ pinning, docOf, roster }) → (tree, file) => void',
       convention: false,
       via: 'code',
-      text: 'pinning 只要求有 checkReferences；docOf 把文件路径换成文档身份；项目没声明名册时不传 roster，插件用 fumadocsRoster。',
+      text: 'pinning 只要求有 checkReferences；docOf 把文件路径换成文档身份；roster 是项目上的名册。',
     },
     {
       n: 5,
@@ -271,7 +288,7 @@ export const fumadocsGraph = defineSeamGraph({
       iface: 'recognize(tree) → Reference[]；stamp(tree, roster)',
       convention: false,
       via: 'code',
-      text: '四步的第一步和第四步用 workflow ./mdx 的函数。recognize 在语法树上认记号，写坏的一次列全再报错，命令行认 mdx 页面用的也是它；讲解组件源码里的引用只在命令行里核对，不经过这个插件；stamp 按名册给每个组件节点写上 data.docfirstAi 或 data._stringify，名册外的组件不标、不报错（机读文字只给生成物，生成正本里的名册外组件由命令行报）。',
+      text: '四步的第一步和第四步用 workflow ./mdx 的函数。recognize 在语法树上认记号，写坏的一次列全再报错，命令行认 mdx 页面用的也是它；讲解组件源码里的引用只在命令行里核对，不经过这个插件；stamp 按名册给每个组件节点写上 data.docfirstAi 或 data._stringify，名册外的组件不标、不报错（机读文字只给生成物与 Next 站的机读版，生成正本里的名册外组件由命令行报）。',
     },
     {
       n: 6,
@@ -291,7 +308,7 @@ export const fumadocsGraph = defineSeamGraph({
       iface: 'applyListing(tree, listing) → tree',
       convention: false,
       via: 'code',
-      text: '第三步：清单交给 applyListing，在同一棵树上原地换节点，换完这棵树再交给 stamp。页面和机读版都从这棵树生成，所以换出来的节点要同时带着两边要的东西。',
+      text: '第三步：清单交给 applyListing，在同一棵树上原地换节点，换完这棵树再交给 stamp。页面和机读文字都从这棵树来，所以换出来的节点要同时带着两边要的东西。',
     },
     {
       n: 8,
@@ -317,11 +334,11 @@ export const fumadocsGraph = defineSeamGraph({
       n: 10,
       name: 'meta 字符串',
       a: ['bl-code', 'bl-tree'],
-      b: ['pre-pre', 'pre-light'],
-      iface: 'meta：title="…" lineNumbers=N data-dot="…"；Files 上 data-docfirst="tree" data-dot="…"',
+      b: ['pre-pre', 'pre-light', 'fs-content'],
+      iface: 'meta：title="…" lineNumbers=N data-dot="…"；Files 上 className="docfirst-files" data-docfirst="tree" data-dot="…"',
       convention: true,
       via: 'code',
-      text: '给页面的状态写进代码块的 meta 字符串：title 显示在标题栏，lineNumbers 让行号对上源文件，data-dot 带状态点的颜色。rehypeCode 按 parseMetaString 保留下来，它们成了 pre 的属性，DocfirstPre 读 data-dot。目录树不经过 pre，容器上的 data-docfirst 与 data-dot 由 light.css 画点。两边只靠属性名对上。',
+      text: '给页面的状态写进代码块的 meta 字符串：title 显示在标题栏，lineNumbers 让行号对上源文件，data-dot 带状态点的颜色。Next 站的 rehypeCode 按 parseMetaString 保留它们，成了 pre 的属性，DocfirstPre 读 data-dot；站的功能包从 meta 里读出 data-dot，给代码块包一层带同一个 data-dot 的 div。目录树不经过 pre，容器上的 data-docfirst 与 data-dot 由 light.css 画点。两边只靠属性名对上。',
     },
     {
       n: 11,
@@ -331,7 +348,7 @@ export const fumadocsGraph = defineSeamGraph({
       iface: 'node.data.docfirst: DocfirstMark { source, label, value }；node.data.docfirstAi',
       convention: false,
       via: 'code',
-      text: '给机读版的内容放在节点的 data 上：每处引用带 docfirst 标记（来源、状态、机读版里放的内容），目录树另带 docfirstAi 替换节点。stringify 回调只看这两样，不读 meta。',
+      text: '给机读文字的内容放在节点的 data 上：每处引用带 docfirst 标记（来源、状态、机读版里放的内容），目录树另带 docfirstAi 替换节点。stringify 回调只看这两样，不读 meta。站的功能包只用 docfirst 标记认出哪些代码块是钉码投影的。',
     },
     {
       n: 12,
@@ -341,7 +358,7 @@ export const fumadocsGraph = defineSeamGraph({
       iface: 'postprocess.includeProcessedMarkdown：stringify(node, parent, state, info) → string | undefined',
       convention: false,
       via: 'code',
-      text: 'fumadocs 生成机读版时，序列化每个节点前先调这个回调。回调用 mdast-util-to-markdown 的状态机（containerFlow、containerPhrasing、handle）输出替换节点，转义与围栏跟文档其余部分同一套规则；形参写成 unknown，才对得上 fumadocs 要求的签名。',
+      text: '只有接了每页机读版的 Next 站用。fumadocs 生成机读版时，序列化每个节点前先调这个回调。回调用 mdast-util-to-markdown 的状态机（containerFlow、containerPhrasing、handle）输出替换节点，转义与围栏跟文档其余部分同一套规则；形参写成 unknown，才对得上 fumadocs 要求的签名。',
     },
     {
       n: 13,
@@ -351,7 +368,7 @@ export const fumadocsGraph = defineSeamGraph({
       iface: 'CodeBlock（Actions）· Pre；名为 Files / Folder / File 的 mdxJsxFlowElement',
       convention: false,
       via: 'code',
-      text: 'DocfirstPre 把普通围栏原样交给 CodeBlock 与 Pre，有状态点的经 Actions 把点放进标题栏。目录树引用生成的是名为 Files、Folder、File 的 JSX 节点，渲染时由站的组件表对到 fumadocs-ui 的目录树组件。',
+      text: 'DocfirstPre 把普通围栏原样交给 CodeBlock 与 Pre，有状态点的经 Actions 把点放进标题栏。目录树引用生成的是名为 Files、Folder、File 的 JSX 节点，渲染时由站的组件表对到 fumadocs 的目录树组件。',
     },
     {
       n: 14,
@@ -361,7 +378,7 @@ export const fumadocsGraph = defineSeamGraph({
       iface: 'remarkPlugins: [...v, [remarkGlossary, glossary], [remarkDocfirstHost, { root }]]',
       convention: false,
       via: 'code',
-      text: '给了 glossary 才加术语标注，排在 docfirst 插件之前：那时树上还只有作者写的正文，引用换出来的代码块和目录树还没放进去，标注碰不到它们。',
+      text: '给了 glossary 才加术语标注，排在 docfirst 插件之前：那时树上还只有作者写的正文，引用换出来的代码块和目录树还没放进去，标注碰不到它们。站的功能包在现状区也按这个顺序调用。',
     },
     {
       n: 15,
@@ -381,17 +398,17 @@ export const fumadocsGraph = defineSeamGraph({
       iface: '<Term def="…" href="…">词</Term>（mdxJsxTextElement，组件名默认 Term）',
       convention: true,
       via: 'code',
-      text: '插件生成的是名为 Term 的行内 JSX 节点，定义与链接写成属性。两边只靠组件名对上：站的组件表里要登记 Term。这些节点接着会经过 stamp；站接了每页机读版时，名册里要有 Term 的规则，机读版里才只留原词。',
+      text: '插件生成的是名为 Term 的行内 JSX 节点，定义与链接写成属性。两边只靠组件名对上：Next 站的组件表登记这里的 Term，站的功能包在 ./site 里给出自己的 Term，属性与类名相同。这些节点接着会经过 stamp，名册里要有 Term 的规则，机读文字里才只留原词。',
     },
     {
       n: 17,
-      name: '组件与样式',
-      a: ['site-mdx', 'site-css'],
-      b: ['pre-pre', 'pre-light', 'term-comp', 'term-css'],
-      iface: "pre: DocfirstPre · Term；@import '@godcreator/docfirst-workflow/fumadocs/light.css' · '…/term.css'",
+      name: '功能包的样式',
+      a: ['fs-css'],
+      b: ['pre-light', 'term-css', 'star-css'],
+      iface: "@import '@godcreator/docfirst-workflow/fumadocs/light.css' · '…/term.css' · '…/trajectory.css'",
       convention: false,
       via: 'code',
-      text: '站的 mdx.tsx 先展开 fumadocs 的默认组件表，再把 pre 换成 DocfirstPre、登记 Term；两份样式表由站各引一行，本站 docfirst.css 引 light.css、site.css 引 term.css。',
+      text: '站的功能包的样式表引入这三份：light.css 画目录树引用右上角的状态点，term.css 是术语定义框，trajectory.css 再引入星轨盘包的 star.css。钉码代码块的状态点不用 light.css 里 DocfirstPre 那一半，由功能包自己的样式画在外层 div 上。',
     },
     {
       n: 18,
@@ -401,30 +418,20 @@ export const fumadocsGraph = defineSeamGraph({
       iface: 'components: { ...fumadocsRoster, … }',
       convention: false,
       via: 'code',
-      text: 'docfirst.config.mjs 展开 fumadocsRoster 再加站自己的组件，命令行的 check 与站构建时的 stamp 读同一张表；项目没声明名册时 remarkDocfirst 直接用 fumadocsRoster。命令行在没有站依赖的环境里（git hook、CI）也要加载这份配置，所以 ./fumadocs/roster 不 import fumadocs 与 react。',
+      text: 'docfirst.config.mjs 展开 fumadocsRoster 再加站自己的组件，命令行的 check 与构建页面时的 stamp 读同一张表。命令行在没有站依赖的环境里（git hook、CI）也要加载这份配置，所以 ./fumadocs/roster 不 import fumadocs 与 react。',
     },
     {
       n: 19,
-      name: '卡集合',
-      a: ['site-source'],
-      b: ['cc-links', 'cc-schema'],
-      iface: 'schema: cardSchema；mdxOptions: applyMdxPreset({ remarkPlugins: [remarkTrajectoryLinks, { hrefBase }] })',
+      name: 'Next 站接入',
+      a: ['next-site'],
+      b: ['host-options', 'md-stringify', 'cc-schema', 'cc-links', 'pre-pre', 'pre-light', 'term-comp', 'term-css', 'star-load', 'star-css'],
+      iface: "mdxOptions: applyMdxPreset(docfirstMdxOptions({ root, glossary }))；postprocess: docfirstMarkdownOptions()；schema: cardSchema；pre: DocfirstPre · Term；import { loadTrajectory, StarDisk } from '@godcreator/docfirst-workflow/fumadocs/trajectory'",
       convention: false,
       via: 'code',
-      text: '站在轨迹卡集合上接这两样，不接 docfirst 的插件。fumadocs-mdx 调用 cardSchema(ctx) 这个工厂，缺 label 时用 ctx.path 算出文件名当标题。hrefBase 要与星轨整页、卡页 loader 用同一个地址前缀，否则卡页链接 404。',
+      text: '还没迁到文档站基础包的 Next 站用这些出口：现状集合接 docfirstMdxOptions 与 docfirstMarkdownOptions，轨迹卡集合接 cardSchema 与 remarkTrajectoryLinks，组件表把 pre 换成 DocfirstPre、登记 Term，星轨整页调用 loadTrajectory、把结果交给 StarDisk，三份样式表由站引入。这几个出口原样保留，改名要同时改工作台插件的建站模板。',
     },
     {
       n: 20,
-      name: '星轨整页',
-      a: ['site-page'],
-      b: ['star-load', 'star-css'],
-      iface: "import { loadTrajectory, StarDisk } from '@godcreator/docfirst-workflow/fumadocs/trajectory'；@import '@godcreator/docfirst-workflow/fumadocs/trajectory.css'",
-      convention: false,
-      via: 'code',
-      text: '本站的星轨整页调用 loadTrajectory 拿到中性输入加病卡，原样交给 StarDisk 的 data，顶栏由页面自己画；路由组的 disk.css 引入 trajectory.css。站不直接依赖星轨盘包。卡目录由页面用 join(process.cwd(), "content", "trajectory") 拼成绝对路径再传：目录名写成字面量，Turbopack 才看得出只读这一个目录，不把整个项目打包进服务端产物。',
-    },
-    {
-      n: 21,
       name: '读卡',
       a: ['star-load'],
       b: ['wf-scan'],
@@ -434,7 +441,7 @@ export const fumadocsGraph = defineSeamGraph({
       text: '读文件、解析与校验卡都在 workflow 的卡格式：scanCardDir 读卡目录，选卡、解析、校验、查卡里不许钉码，交回中性输入加病卡，目录不在就交回空集合。loadTrajectory 只检查路径是不是绝对路径，不建模。只从 ./cards 取、不取主入口：主入口带着命令行与配置加载，进了 Next 的服务端构建会让 Turbopack 报按路径读文件的警告。',
     },
     {
-      n: 22,
+      n: 21,
       name: '星轨盘包',
       a: ['star-load', 'star-css'],
       b: ['tj-disk'],
@@ -444,7 +451,7 @@ export const fumadocsGraph = defineSeamGraph({
       text: 'StarDisk 按包名从 ./disk 再导出，那份产物第一行的 "use client" 才留在原处，Next 认得出客户端边界；组件收到中性输入自己建模，服务端不调星轨盘包。trajectory.css 用 @import 引入 ./star.css。',
     },
     {
-      n: 23,
+      n: 22,
       name: '状态的类型',
       a: ['bl-nodefor'],
       b: ['pin'],
@@ -454,7 +461,7 @@ export const fumadocsGraph = defineSeamGraph({
       text: 'nodeFor 按清单项的 status 选节点形状与状态点的颜色，这个类型从钉码核心取。这个目录不调钉码核心的任何函数：核对经 workflow 的钉码编排，状态全由钉码核心判。',
     },
     {
-      n: 24,
+      n: 23,
       name: '卡字段与卡身份',
       a: ['cc-schema', 'cc-links'],
       b: ['wf-keys'],

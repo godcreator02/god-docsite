@@ -16,19 +16,27 @@ description: 这个仓里反复出现的词各指什么、正本在哪、怎么�
 
 ## 站上自动标出来的那些词
 
-正文里命中术语表的词，站构建时自动加一层标注，鼠标移上去显示定义——源文件里干净，没有手写的标签。
+正文里命中术语表的词，站构建页面时自动加一层标注，鼠标移上去显示定义——源文件里干净，没有手写的标签。
+标注由功能包 `docfirst-site` 的 remark 插件做：术语表模块是配置 `glossary` 指的那个文件，`skip` 里的页不标：
+
+{/* ref file="docfirst.config.mjs" lines="72-73" hash="7bd985bedb25" blob="57d64b6b2e69" */}
+
+插件加载这个模块、取出它导出的 `terms` 交给 workflow 的术语标注，`skip` 按文档身份比对：
+
+{/* ref file="../packages/docfirst-site/src/content.ts" lines="28-40" hash="eb7244717128" blob="c197951793e7" */}
+
 这张表的正本是一份数据文件，一条 `term` / `aliases` / `def` / `href`：
 
-{/* ref file="src/glossary.ts" lines="15-15" hash="ff19e626bfdb" blob="c17a7769e1f7" */}
+{/* ref file="src/glossary.mjs" lines="13-14" hash="6993cf4a87a8" blob="dc6b7dc1e07f" */}
 
 收词的判据与「定义里不许写什么」写在数据文件的头注释里，改词之前先读它：
 
-{/* ref file="src/glossary.ts" lines="1-12" hash="e0963182d039" blob="e29c7fc6a0d9" */}
+{/* ref file="src/glossary.mjs" lines="1-12" hash="527bd2afc334" blob="dc6b7dc1e07f" */}
 
 **定义只写概念，不写服务名、类型名、路径**——这份数据钉不住（它既不是 mdx 页面，也不在讲解组件的 `src/components/` 下，引用管不到它），
 写进去的具体名字会悄悄过时。具体名字留给 `href` 指的那一页，在那儿钉码。
 
-作者手写 `<Term>` 也行，但要在名册里有一条，机读版里只留术语原词、样式不带过去。
+作者手写 `<Term>` 也行：`Term` 由功能包提供，页面里不用 import；名册里它的规则是只留子内容，生成物里只剩术语原词、样式不带过去。
 机制那一半见 [workflow 的 mdx 格式](/docs/workflow) 的名册与 [fumadocs 适配](/docs/fumadocs) 的术语标注。
 
 ## 只在这个站里出现的几个词

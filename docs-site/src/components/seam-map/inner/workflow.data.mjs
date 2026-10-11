@@ -13,7 +13,7 @@ export const workflowGraph = defineSeamGraph({
   id: 'workflow',
   title: '命令行与项目内部的目录与接缝',
   intro:
-    '命令行与项目内部接缝图：虚线框是包里的目录，project 目录按做的事分成项目装配、生成物两个框，读文件与 git 那个框是 node/ 目录；框里的方块是它对外给的函数或类型，灰色实线框是命令行那一侧以外的调用方（包括同一个包里站那一侧的 src/fumadocs/，它只按包名调用）、依赖与使用方的仓。mdx 格式与组件格式实现同一个格式接口，都连记号写法、不连钉码编排与 project；记号写法与引用类型只连钉码核心，钉码编排按文件选格式、连两个格式与钉码核心；卡格式读卡目录、校验卡、换成星轨盘的中性输入，只连记号写法、读文件与 git、星轨盘；命令行连其余各处。',
+    '命令行与项目内部接缝图：虚线框是包里的目录，project 目录按做的事分成项目装配、生成物两个框，读文件与 git 那个框是 node/ 目录；框里的方块是它对外给的函数或类型，灰色实线框是命令行那一侧以外的调用方（站的一侧：同一个包里的 src/fumadocs/ 与站的功能包 docfirst-site，都只按包名调用）、依赖与使用方的仓。mdx 格式与组件格式实现同一个格式接口，都连记号写法、不连钉码编排与 project；记号写法与引用类型只连钉码核心，钉码编排按文件选格式、连两个格式与钉码核心；卡格式读卡目录、校验卡、换成星轨盘的中性输入，只连记号写法、读文件与 git、星轨盘；命令行连其余各处。',
   frameLabel: '目录',
   modules: [
     {
@@ -32,14 +32,14 @@ export const workflowGraph = defineSeamGraph({
     },
     {
       id: 'fumadocs',
-      name: 'fumadocs 适配',
-      pkg: '@godcreator/docfirst-workflow/fumadocs',
+      name: '站的一侧',
+      pkg: 'docfirst-workflow/fumadocs · docfirst-site',
       role: null,
       outside: true,
       blurb:
-        '站构建时 remark 插件装配项目、经钉码编排核对、在语法树上认记号、按名册标上机读文字；./fumadocs/trajectory 的 loadTrajectory 读轨迹卡目录；卡集合的 cardSchema 按卡字段认卡，remarkTrajectoryLinks 从链接认出卡身份。按包名用的是这个包的主入口 loadProject、./mdx 的语法树函数，以及 ./cards 的 scanCardDir、CARD_KEYS、cardIdFromHref 与卡文件后缀、关系行头、身份的日期前缀这几个常量。',
+        '构建页面时，fumadocs 适配的 remark 插件装配项目、经钉码编排核对、在语法树上认记号、按名册标上机读文字；站的功能包也装配项目，按内容根与轨迹卡目录分区，它的星轨盘页用 scanCardDir 读轨迹卡目录（还没迁的 Next 站经 ./fumadocs/trajectory 的 loadTrajectory 读）；卡集合的 cardSchema 按卡字段认卡，remarkTrajectoryLinks 从链接认出卡身份。按包名用的是这个包的主入口 loadProject、./mdx 的语法树函数，以及 ./cards 的 scanCardDir、CARD_KEYS、cardIdFromHref 与卡文件后缀、关系行头、身份的日期前缀这几个常量。',
       caps: [
-        { id: 'fd-disk', name: '星轨盘读卡', ident: 'loadTrajectory' },
+        { id: 'fd-disk', name: '星轨盘读卡', ident: 'scanCardDir' },
         { id: 'fd-cardset', name: '卡集合', ident: 'cardSchema' },
         { id: 'fd-remark', name: 'remark 插件', ident: 'loadProject · recognize · stamp' },
       ],
@@ -268,7 +268,7 @@ export const workflowGraph = defineSeamGraph({
       iface: 'loadProject(root) → Project：pinning · docIdOf · roster；pinning.checkReferences(doc, references) → Listing',
       convention: false,
       via: 'code',
-      text: 'fumadocs 适配的 remark 插件在站构建时调 loadProject：同一个根只装配一次，并发调用拿到同一个项目。插件把语法树上认好的引用交给项目上钉码编排的 checkReferences，用 docIdOf 把页面路径换成文档身份，把项目的组件名册交给 stamp。',
+      text: 'fumadocs 适配的 remark 插件在构建页面时调 loadProject：同一个根只装配一次，并发调用拿到同一个项目。插件把语法树上认好的引用交给项目上钉码编排的 checkReferences，用 docIdOf 把页面路径换成文档身份，把项目的组件名册交给 stamp。站的功能包以站点目录为根调同一个 loadProject，拿到的是同一个项目。',
     },
     {
       n: 7,
@@ -278,7 +278,7 @@ export const workflowGraph = defineSeamGraph({
       iface: './mdx：recognize(tree) · stamp(tree, roster) · walk · markerOf · lineOf · langOf',
       convention: false,
       via: 'code',
-      text: '站构建时 fumadocs 已经把页面解析成语法树，remark 插件直接用 ./mdx 的 recognize 认记号、用 stamp 按名册标上机读文字，不再解析一遍，认记号跟命令行用同一份代码。换代码块时用 markerOf、walk 找记号节点，代码块的语言名用 langOf，跟按原文渲染标同一种语言。站构建只处理 mdx 页面，组件格式不经过这里。',
+      text: '构建页面时 fumadocs 已经把页面解析成语法树，remark 插件直接用 ./mdx 的 recognize 认记号、用 stamp 按名册标上机读文字，不再解析一遍，认记号跟命令行用同一份代码。换代码块时用 markerOf、walk 找记号节点，代码块的语言名用 langOf，跟按原文渲染标同一种语言。构建页面只处理 mdx 页面，组件格式不经过这里。',
     },
     {
       n: 8,
@@ -288,7 +288,7 @@ export const workflowGraph = defineSeamGraph({
       iface: '@godcreator/docfirst-workflow/cards：scanCardDir(dir) → CardScan；CARD_KEYS · cardIdFromHref(href)',
       convention: false,
       via: 'code',
-      text: 'fumadocs 适配从 ./cards 出口取卡格式：loadTrajectory 就是 scanCardDir，交回中性输入加病卡，不建模；卡集合的 cardSchema 用 CARD_KEYS 判断一页算不算卡，remarkTrajectoryLinks 用 cardIdFromHref 从链接认出卡身份，跟命令行解析关系行是同一份代码。./cards 的入口是 cards/index.ts，不经主入口，免得把命令行与配置加载带进 Next 的服务端构建。',
+      text: '站的一侧从 ./cards 出口取卡格式：功能包的星轨盘页直接调 scanCardDir，fumadocs 适配的 loadTrajectory 就是 scanCardDir，都交回中性输入加病卡，不建模；卡集合的 cardSchema 用 CARD_KEYS 判断一页算不算卡，remarkTrajectoryLinks 用 cardIdFromHref 从链接认出卡身份，跟命令行解析关系行是同一份代码。./cards 的入口是 cards/index.ts，不经主入口：fumadocs 适配只从这里取，免得把命令行与配置加载带进 Next 的服务端构建。',
     },
     {
       n: 9,

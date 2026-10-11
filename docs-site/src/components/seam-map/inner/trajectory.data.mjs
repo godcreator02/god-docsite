@@ -27,15 +27,15 @@ export const trajectoryGraph = defineSeamGraph({
     },
     {
       id: 'fumadocs',
-      name: 'fumadocs 适配',
-      pkg: '@godcreator/docfirst-workflow/fumadocs',
+      name: '站的一侧',
+      pkg: 'docfirst-site · docfirst-workflow/fumadocs',
       role: null,
       outside: true,
       blurb:
-        './fumadocs/trajectory 按包名再导出 StarDisk，./fumadocs/trajectory.css 引入 star.css。站读卡目录走 loadTrajectory（即卡格式的 scanCardDir），把结果原样交给 StarDisk；站画星轨盘只经过这个出口。',
+        '站的功能包 docfirst-site 的星轨盘页按包名从 ./disk 取 StarDisk，把卡格式 scanCardDir 交回的中性输入原样交给它；fumadocs 适配的 ./fumadocs/trajectory.css 引入 star.css，功能包的样式表再引入它。./fumadocs/trajectory 另外按包名再导出 StarDisk，给还没迁到文档站基础包的 Next 站。',
       caps: [
         { id: 'css', name: '盘的样式', ident: './fumadocs/trajectory.css' },
-        { id: 'reexport', name: '再导出组件', ident: 'StarDisk' },
+        { id: 'reexport', name: '星轨盘页与再导出', ident: 'StarDisk' },
       ],
     },
     {
@@ -127,10 +127,10 @@ export const trajectoryGraph = defineSeamGraph({
       name: '客户端边界',
       a: ['reexport'],
       b: ['star-disk'],
-      iface: 'export { StarDisk } from "@godcreator/trajectory-disk/disk"；props：data（中性输入）、hrefBase、bodies',
+      iface: 'import { StarDisk } from "@godcreator/trajectory-disk/disk"；props：data（中性输入）、hrefBase、bodies',
       convention: false,
       via: 'code',
-      text: 'fumadocs 适配按包名从 ./disk 再导出 StarDisk：那份产物头一行是 "use client"，按包名引用它才原样留在调用方的产物里，Next 认得出客户端边界。props 不收函数：卡页地址由 hrefBase 拼出；bodies 是站在服务端渲染好的每张卡的正文，点节点在侧栏里显示。',
+      text: '调用方都按包名从 ./disk 取 StarDisk：那份产物头一行是 "use client"，按包名引用它才原样留在调用方的产物里，打包工具认得出客户端边界。props 不收函数：卡页地址由 hrefBase 拼出；bodies 是调用方准备好的每张卡的正文（React 节点，可以按需加载），点节点在侧栏里显示。',
     },
     {
       n: 4,
@@ -140,7 +140,7 @@ export const trajectoryGraph = defineSeamGraph({
       iface: '@import "@godcreator/trajectory-disk/star.css"',
       convention: false,
       via: 'code',
-      text: 'StarDisk 不自己引入样式；fumadocs 适配的 ./fumadocs/trajectory.css 引入 ./star.css，站引入前者。选择器都带 .star- 前缀或写在 .star-disk 容器下，不影响站的其他页面。底色、文字、边框取 fumadocs 的颜色变量，画在盘上的领域色与连线色由 JS 色板按亮暗选。',
+      text: 'StarDisk 不自己引入样式；fumadocs 适配的 ./fumadocs/trajectory.css 引入 ./star.css，站的功能包的样式表（或还没迁的 Next 站）再引入前者。选择器都带 .star- 前缀或写在 .star-disk 容器下，不影响站的其他页面。底色、文字、边框取 fumadocs 的颜色变量，画在盘上的领域色与连线色由 JS 色板按亮暗选。',
     },
     {
       n: 5,

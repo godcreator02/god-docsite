@@ -3,12 +3,14 @@
  * 边界规则图：包、工作台插件、站与 workflow 包里的目录画成一张依赖图，平时的灰色箭头是允许的依赖方向。
  * 选一类边界规则（tests/boundary.test.ts 文件头注释里的一类约束），它守着的允许方向实线高亮，
  * 禁止的方向画成红色虚线并在线中间打叉；图下面列出这一类禁止什么、违反时哪几条 test 失败。
- * 内容全在 boundary-rules.data.mjs，这里只有布局与交互；机读版由 boundary-rules.ai.mjs 读同一份数据生成。
+ * 内容全在 boundary-rules.data.mjs，这里只有布局与交互；生成物里的机读文字由 boundary-rules.ai.mjs 读同一份数据生成。
  */
 import type { ComponentType, ReactNode, SVGProps } from 'react';
 import { CasePicker, Pane } from '@godcreator/docfirst-explainer';
-import { Globe, Hash, Layers, Orbit, Package, PanelsTopLeft, Pin, Plug, Puzzle, Workflow } from 'lucide-react';
+import { Blocks, Globe, Hash, Layers, Orbit, Package, PanelsTopLeft, Pin, Plug, Puzzle, Workflow } from 'lucide-react';
 import { allowedByKey, allowedEdges, edgeText, nodeById, nodes, parseEdge, rules } from './boundary-rules.data.mjs';
+import '@godcreator/docfirst-explainer/styles.css';
+import './boundary-rules.css';
 
 type Rule = (typeof rules)[number];
 type BoundaryNode = (typeof nodes)[number];
@@ -20,16 +22,17 @@ interface Box {
   h: number;
 }
 
-const VIEW_W = 1020;
+const VIEW_W = 1100;
 const VIEW_H = 670;
 
-/** 节点的位置：按依赖方向从上往下，站与插件在最上面，node:crypto 与别的模块在最下面，宿主是右边一整列 */
+/** 节点的位置：按依赖方向从上往下，站、功能包与插件在最上面，node:crypto 与别的模块在最下面，宿主是右边一整列 */
 const NODE_BOX: Record<string, Box> = {
   plugin: { x: 20, y: 20, w: 180, h: 52 },
   site: { x: 380, y: 20, w: 320, h: 52 },
+  feature: { x: 730, y: 20, w: 160, h: 52 },
   explain: { x: 230, y: 140, w: 190, h: 52 },
   fumadocs: { x: 500, y: 140, w: 300, h: 52 },
-  host: { x: 850, y: 250, w: 160, h: 302 },
+  host: { x: 910, y: 20, w: 180, h: 532 },
   workflow: { x: 290, y: 240, w: 410, h: 210 },
   project: { x: 470, y: 276, w: 100, h: 36 },
   cli: { x: 604, y: 276, w: 80, h: 36 },
@@ -55,15 +58,19 @@ const EDGE_ROUTE: Record<string, Point[]> = {
   'site>fumadocs': [[620, 72], [620, 140]],
   'site>workflow': [[460, 72], [460, 240]],
   'site>explain': [[400, 72], [340, 140]],
-  'site>trajectory': [[700, 46], [830, 46], [830, 514], [760, 514]],
+  'site>feature': [[700, 46], [730, 46]],
+  'feature>fumadocs': [[760, 72], [760, 140]],
+  'feature>workflow': [[820, 72], [820, 224], [690, 224], [690, 240]],
+  'feature>trajectory': [[850, 72], [850, 514], [760, 514]],
+  'feature>host': [[890, 46], [910, 46]],
   'fumadocs>workflow': [[600, 192], [600, 240]],
   'fumadocs>pin': [[520, 192], [520, 216], [255, 216], [255, 500]],
   'fumadocs>trajectory': [[740, 192], [740, 500]],
-  'fumadocs>host': [[800, 166], [900, 166], [900, 250]],
+  'fumadocs>host': [[800, 166], [910, 166]],
   'workflow>pin': [[300, 450], [300, 500]],
   'workflow>trajectory': [[640, 450], [640, 500]],
-  'trajectory>host': [[760, 532], [850, 532]],
-  'explain>host': [[325, 140], [325, 106], [960, 106], [960, 250]],
+  'trajectory>host': [[760, 532], [910, 532]],
+  'explain>host': [[325, 140], [325, 106], [910, 106]],
   'pin>crypto': [[300, 552], [300, 610]],
   'marker>pin': [[330, 428], [330, 500]],
   'reference>pin': [[425, 428], [425, 500]],
@@ -90,6 +97,10 @@ const EDGE_ROUTE: Record<string, Point[]> = {
   'explain~trajectory': [[230, 166], [212, 166], [212, 578], [620, 578], [620, 552]],
   'explain~workflow': [[380, 192], [380, 240]],
   'explain~fumadocs': [[420, 166], [500, 166]],
+  'feature~pin': [[865, 72], [865, 568], [400, 568], [400, 552]],
+  'feature~explain': [[745, 72], [745, 120], [410, 120], [410, 140]],
+  'workflow>feature:back': [[700, 256], [835, 256], [835, 72]],
+  'trajectory>feature:back': [[760, 523], [880, 523], [880, 72]],
   // 自成一体的包与通用包
   'pin>others': [[410, 552], [460, 610]],
   'trajectory>others': [[600, 552], [600, 610]],
@@ -108,15 +119,16 @@ const EDGE_ROUTE: Record<string, Point[]> = {
   'cards>cli:back': [[644, 334], [644, 312]],
   'node>project:back': [[436, 304], [470, 304]],
   'mdx>node': [[346, 334], [346, 312]],
-  'workflow>host': [[700, 300], [850, 300]],
+  'workflow>host': [[700, 300], [910, 300]],
   // 宿主只能是 peer
-  'fumadocs>host:bundled': [[800, 180], [880, 180], [880, 250]],
+  'fumadocs>host:bundled': [[800, 180], [910, 180]],
   // 包不认识插件
   'fumadocs>plugin': [[540, 140], [540, 90], [170, 90], [170, 72]],
   'explain>plugin': [[250, 140], [150, 72]],
   'workflow>plugin': [[290, 280], [110, 280], [110, 72]],
   'pin>plugin': [[230, 540], [90, 540], [90, 72]],
   'trajectory>plugin': [[700, 552], [700, 594], [70, 594], [70, 72]],
+  'feature>plugin': [[810, 20], [810, 8], [110, 8], [110, 20]],
   // 讲解组件包的三个入口
   'explain>others': [[230, 180], [198, 180], [198, 662], [580, 662], [580, 654]],
   'plugin>explain': [[150, 72], [250, 140]],
@@ -128,6 +140,7 @@ type Icon = ComponentType<SVGProps<SVGSVGElement>>;
 const NODE_ICON: Record<string, Icon> = {
   plugin: Puzzle,
   site: Globe,
+  feature: Blocks,
   explain: PanelsTopLeft,
   fumadocs: Plug,
   workflow: Workflow,

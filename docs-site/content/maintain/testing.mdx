@@ -3,6 +3,9 @@ title: 测试与边界
 description: 包与目录之间的依赖方向靠什么检查，各组测试检查什么，这个站为什么也是一组测试
 ---
 
+import { Note } from '../../src/components/prose/prose';
+import { BoundaryRules } from '../../src/components/boundary-rules/boundary-rules';
+
 ## 三处测试，各自运行
 
 | 在哪儿 | 怎么运行 | 用什么 |
@@ -27,17 +30,21 @@ mdx 格式从此就跟读盘、git 绑在一起。补上这两项的是 `tests/b
 禁止表**列的是禁止的，不是允许的**：写成允许的话，新加一个包默认什么都不能依赖，放错位置反而更难发现。
 `packages/` 下多出一个表里没有的目录，另一条测试当场失败，要求先想清楚它能认识谁：
 
-{/* ref file="../tests/boundary.test.ts" lines="133-145" hash="9a8271083263" blob="0d3a5dcc329f" */}
+{/* ref file="../tests/boundary.test.ts" lines="135-149" hash="f5aed8e4b2c5" blob="f1a4307dac6e" */}
 
 workflow 目录之间是同样的写法：
 
-{/* ref file="../tests/boundary.test.ts" lines="344-355" hash="c81759ee8dbb" blob="0d3a5dcc329f" */}
+{/* ref file="../tests/boundary.test.ts" lines="348-359" hash="c81759ee8dbb" blob="f1a4307dac6e" */}
 
 ## 自成一体的包与通用包
 
 本仓的包分两类。**通用包**不认识 docfirst：`code-pin` 把文字钉在代码上，`trajectory-disk` 把一组卡画成项目方向演变的圆盘；
-docfirst 只是它们的一个使用者。**docfirst 的包**有两个：`docfirst-workflow` 是命令行、项目装配与格式；
-`docfirst-explainer` 是 docfirst 站上用的讲解组件，只有站用，workflow 与插件都不依赖它。
+docfirst 只是它们的一个使用者。**docfirst 的包**有三个：`docfirst-workflow` 是命令行、项目装配与格式；
+`docfirst-site` 是文档站基础包的功能包，用 workflow 与星轨盘，不碰钉码核心与讲解组件，别的包都不依赖它；
+`docfirst-explainer` 是 docfirst 站上用的讲解组件，只有站用，workflow、`docfirst-site` 与插件都不依赖它。
+包发出去的只有 `dist` 与样式，唯一的例外是 `docfirst-site` 的 `template/`：那是基础包初始化时写进站点的轨迹卡集合定义，不是建站模板：
+
+{/* ref file="../tests/boundary.test.ts" lines="539-553" hash="7ee535b60aa6" blob="f1a4307dac6e" */}
 
 两张表管两件事。**自成一体的包**（两个通用包加上 `docfirst-explainer`）各自单独安装、单独升版：
 清单里没有任何 `@godcreator/` 包；源码与产物不 import 它们，源码的相对 import 不出自己的 `src/`。
@@ -47,15 +54,15 @@ docfirst 只是它们的一个使用者。**docfirst 的包**有两个：`docfir
 这一条连注释也查。通用包里一旦写了「docfirst 站会这样用」，下一个改它的人就会照着 docfirst 的需要改它，
 它就不再通用。讲 docfirst 怎么用这几个包，写在 `docfirst-workflow` 或这个站里。加一个包就按它是哪一类加进对应的表：
 
-{/* ref file="../tests/boundary.test.ts" lines="177-245" hash="80a6deb6f659" blob="0d3a5dcc329f" */}
+{/* ref file="../tests/boundary.test.ts" lines="181-249" hash="80a6deb6f659" blob="f1a4307dac6e" */}
 
 各通用包另有自己的几条。钉码只许 import `node:crypto`，源码与产物里没有文档文本那一侧的名字：
 
-{/* ref file="../tests/boundary.test.ts" lines="247-271" hash="f6ad294a7d3e" blob="0d3a5dcc329f" */}
+{/* ref file="../tests/boundary.test.ts" lines="251-275" hash="f6ad294a7d3e" blob="f1a4307dac6e" */}
 
 星轨盘的 `.` 入口产物零 import，建模只 import 自己目录里的文件，整个包里没有关系行、frontmatter 字段名这些 docfirst 卡文件的写法：
 
-{/* ref file="../tests/boundary.test.ts" lines="288-308" hash="4d31db61a2b8" blob="0d3a5dcc329f" */}
+{/* ref file="../tests/boundary.test.ts" lines="292-312" hash="4d31db61a2b8" blob="f1a4307dac6e" */}
 
 包与插件互不认识，两个方向分在两处：包里不许出现任何 `@godcreator/gwb-*` 由 `boundary.test.ts` 查；
 插件不许依赖本仓的任何一个包由插件自己的测试查，包名从 `packages/` 下各包的清单现读：
@@ -124,18 +131,25 @@ fumadocs 适配不接 Next 的那一半在 `tests/fumadocs.test.ts`，讲解组�
 
 {/* ref file="docfirst.config.mjs" lines="4-4" hash="8afea51faa05" blob="ef8b98ac9425" */}
 
-站测试 `docs-site/tests/page.test.mjs` 不启动 Next：`register()` 把 fumadocs 的 Node loader 注册进 Node，`import` 一篇 `.mdx`
-经过的就是站构建时的那条处理流程；站的 `vitest.config.mjs` 把 `.mdx` 列进 `server.deps.external`，让它由 Node 自己 import、用上这个 loader，而不是由 vitest 转换。导入时带 `?macro_id=src/lib/source.ts%23docs`，loader 才用上集合的 `mdxOptions` 与 postprocess。
-它断言每条引用在页面上都有带状态点和来源标题的元素、组件没有漏成裸标签、机读版里有来源行且组件已转成机读文字，
-以及这个站自己全绿：
+站测试 `docs-site/tests/page.test.mjs` 不启动站点：用 `@mdx-js/mdx` 编译现状区每一篇，remark 插件就是功能包 `./content` 给的那一份，
+跟站点构建页面时用的相同；编译时在插件前后各取下一棵语法树，作者写下的与投影之后的：
 
-{/* ref file="tests/page.test.mjs" lines="128-136" hash="58d7543813bd" blob="c7059a4825ee" */}
+{/* ref file="tests/page.test.mjs" lines="34-42" hash="392b3104234e" blob="64ecf13a50d3" */}
+
+投影之后的树里，每条引用都要变成一个带对应颜色状态点的元素：代码块包在 `docfirst-pin` 里、标题写着来源，目录树是 `<Files>`、根文件夹叫来源。
+作者写下的树里，页面用到的组件要么在开头 import 了，要么是功能包提供的 `Term`、`Files`、`Folder`、`File`——漏了 import 的组件，站点渲染那一页时才报组件未定义：
+
+{/* ref file="tests/page.test.mjs" lines="106-118" hash="e0ecf808e629" blob="64ecf13a50d3" */}
+
+最后是这个站自己全绿：
+
+{/* ref file="tests/page.test.mjs" lines="120-128" hash="58d7543813bd" blob="64ecf13a50d3" */}
 
 所以每一页钉着的源码一改，`docfirst check` 报出来、站测试直接失败，文档跟不上代码就过不了提交前的检查。
 允许不钉码的页由 frontmatter 明说：`docfirst: none` 是明说不钉的页，`docfirst: draft` 是还没写完的页，两样都没写就必须至少钉一处：
 
-{/* ref file="tests/page.test.mjs" lines="54-55" hash="cfcbeab7ba70" blob="c7059a4825ee" */}
+{/* ref file="tests/page.test.mjs" lines="47-48" hash="cfcbeab7ba70" blob="64ecf13a50d3" */}
 
 <Note>
-  站测试不跟命令行比状态：算状态的是同一个钉码编排，比出来只能相等。跨调用方的比对要启动站后请求 `.md` 路由。
+  站测试不跟命令行比状态：算状态的是同一个钉码编排，比出来只能相等。它也不渲染页面，组件与状态点画成什么样要在开发服务上看。
 </Note>

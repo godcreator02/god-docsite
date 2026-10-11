@@ -1,5 +1,5 @@
 /**
- * 边界规则图（BoundaryRules）的全部内容：画面（boundary-rules.tsx）与机读版规则（boundary-rules.ai.mjs）都只读这一份。
+ * 边界规则图（BoundaryRules）的全部内容：画面（boundary-rules.tsx）与机读规则（boundary-rules.ai.mjs）都只读这一份。
  * 事实的正本是 tests/boundary.test.ts：每类规则对应它文件头注释里的一类约束，禁止什么、为什么照它的注释写，
  * 失败的 test 名照抄；允许的边照各包 package.json 的依赖字段与 workflow 各目录真实的 import 画。
  * 坐标不在这里，在 boundary-rules.tsx 的布局表里：这份只描述谁能依赖谁。
@@ -13,13 +13,13 @@
 /**
  * 图上的节点。role 与系统地图接缝图（seam-map.data.mjs）里同一个包的角色色一致；
  * role 为 null 的是仓外或包外的东西（站、宿主、别的模块），画成灰色细框。parent 不为 null 的是 workflow 命令行那一侧的目录，
- * 画在 workflow 的虚线框里；fumadocs 适配也是 workflow 包里的目录（src/fumadocs/），它是站那一侧，单独画在框外、站的正下方。
- * @type {BoundaryNode[]}
+ * 画在 workflow 的虚线框里；fumadocs 适配也是 workflow 包里的目录（src/fumadocs/），它是站那一侧，单独画在框外、站的正下方。 * @type {BoundaryNode[]}
  */
 /* tree dir="../packages/docfirst-workflow/src" depth="1" hash="678b25f13fa3" */
 export const nodes = [
   { id: 'plugin', name: '工作台插件', short: '插件', ident: 'plugins/docfirst', role: 'cyan', parent: null },
   { id: 'site', name: '文档站', short: 'docs-site', ident: 'docs-site', role: null, parent: null },
+  { id: 'feature', name: '站的功能包', short: 'docfirst-site', ident: 'docfirst-site', role: 'rose', parent: null },
   { id: 'explain', name: '讲解组件包', short: 'docfirst-explainer', ident: 'docfirst-explainer', role: 'slate', parent: null },
   { id: 'fumadocs', name: 'fumadocs 适配', short: 'fumadocs/', ident: 'docfirst-workflow/fumadocs', role: 'amber', parent: null },
   { id: 'workflow', name: '命令行与项目', short: 'workflow', ident: 'docfirst-workflow', role: 'emerald', parent: null },
@@ -34,7 +34,7 @@ export const nodes = [
   { id: 'node', name: 'node/', short: 'node/', ident: 'Node 实现', role: 'emerald', parent: 'workflow' },
   { id: 'pin', name: '钉码', short: 'code-pin', ident: 'code-pin', role: 'blue', parent: null },
   { id: 'trajectory', name: '星轨盘', short: 'trajectory-disk', ident: 'trajectory-disk', role: 'violet', parent: null },
-  { id: 'host', name: '站的宿主', short: '宿主', ident: 'fumadocs · next · react', role: null, parent: null },
+  { id: 'host', name: '站的宿主', short: '宿主', ident: 'fumadocs · react · 基础包', role: null, parent: null },
   { id: 'crypto', name: 'node:crypto', short: 'node:crypto', ident: 'Node 内置模块', role: null, parent: null },
   { id: 'others', name: '别的模块', short: '别的模块', ident: 'npm 包 · 别的 node: 内置', role: null, parent: null },
 ];
@@ -47,10 +47,14 @@ export const nodes = [
  * @type {AllowedEdge[]}
  */
 export const allowedEdges = [
-  { key: 'site>fumadocs', kind: '站的 dependencies，import ./fumadocs 开头的出口' },
-  { key: 'site>workflow', kind: '站的 dependencies，运行命令行 docfirst、docfirst.config.mjs import ./mdx' },
-  { key: 'site>trajectory', kind: '站的 dependencies' },
+  { key: 'site>fumadocs', kind: '站的 dependencies：docfirst.config.mjs import ./fumadocs/roster，站的测试 import ./fumadocs' },
+  { key: 'site>workflow', kind: '站的 dependencies：运行命令行 docfirst，站的测试 import .' },
+  { key: 'site>feature', kind: '站的 dependencies，package.json 的 docsite.features 里声明，基础包的骨架按它接进站' },
   { key: 'site>explain', kind: '站的 dependencies' },
+  { key: 'feature>fumadocs', kind: 'dependencies（docfirst-workflow）：import ./fumadocs 的 remark 插件与类型' },
+  { key: 'feature>workflow', kind: 'dependencies：import . 的 loadProject、./cards 的 scanCardDir、./mdx 的类型' },
+  { key: 'feature>trajectory', kind: 'dependencies：import ./disk 的 StarDisk' },
+  { key: 'feature>host', kind: '必需 peer：文档站基础包、@fumadocs/base-ui、react、react-router、lucide-react' },
   { key: 'fumadocs>pin', kind: 'dependencies，只 import 类型' },
   { key: 'fumadocs>trajectory', kind: 'dependencies，按包名再导出 ./disk 与样式' },
   { key: 'fumadocs>workflow', kind: '按包名 import 本包的 .、./mdx、./cards' },
@@ -86,13 +90,13 @@ export const allowedEdges = [
  * @typedef {{ id: string, label: string, text: string, allowed: string[], forbidden: Forbidden[], tests: GuardTest[] }} BoundaryRule
  * @type {BoundaryRule[]}
  */
-/* ref file="../tests/boundary.test.ts" hash="999e4a6858d3" blob="e07ca500063d" */
+/* ref file="../tests/boundary.test.ts" hash="daf1b74adc2a" blob="f1a4307dac6e" */
 export const rules = [
   {
     id: 'packages',
     label: '包与包的方向',
     text: '方向一破，下游的改动就会拖着上游一起发版，而且没有任何别的信号。pnpm 严格的 node_modules 只拦得住没写进依赖的 import，「该不该写进依赖」没人检查，这一类补的就是它。禁止表 PACKAGE_FORBIDDEN 按包列出它不许依赖的兄弟包，列的是禁止的、不是允许的；packages/ 下多出一个表里没有的目录，另一条测试当场失败，逼着先想清楚新包能认识谁。',
-    allowed: ['workflow>pin', 'workflow>trajectory', 'fumadocs>pin', 'fumadocs>trajectory'],
+    allowed: ['workflow>pin', 'workflow>trajectory', 'fumadocs>pin', 'fumadocs>trajectory', 'feature>workflow', 'feature>fumadocs', 'feature>trajectory'],
     forbidden: [
       {
         edges: ['pin>workflow', 'pin>fumadocs', 'pin~trajectory'],
@@ -105,6 +109,10 @@ export const rules = [
       {
         edges: ['explain~pin', 'explain~trajectory', 'explain~workflow', 'explain~fumadocs'],
         what: '讲解组件包跟本仓别的包互不认识：它是 docfirst 站上用的讲解组件，只有站用，workflow 与 fumadocs 适配都不依赖它，它也不依赖任何兄弟包。',
+      },
+      {
+        edges: ['feature~pin', 'feature~explain', 'workflow>feature:back', 'trajectory>feature:back'],
+        what: '功能包 docfirst-site 是建在文档站基础包上的 docfirst 站的功能包：经 workflow 用钉码，不直接依赖 code-pin；自己用星轨盘的组件；讲解组件归站自己用，它不依赖讲解组件包。谁都不许依赖它：workflow、两个通用包、讲解组件包都不认识它。',
       },
     ],
     tests: [
@@ -201,24 +209,24 @@ export const rules = [
   {
     id: 'plugin',
     label: '包不认识插件',
-    text: '插件跟包在同一个工作区。包一旦认识插件，哪怕只是一条 devDependency，这几个包就不能再发布了：装它们的人不该连带装上整个桌面工作台生态。反方向（插件不许依赖本仓 packages/ 下的任何一个包，包名从各包清单现读）不在这个文件里，由插件自己的 tests/artifact.test.ts 检查，两边互不认识。说明书与建站模板也随插件发：包只发 dist 与样式，包里不许再有 skills/、template/。',
+    text: '插件跟包在同一个工作区。包一旦认识插件，哪怕只是一条 devDependency，这几个包就不能再发布了：装它们的人不该连带装上整个桌面工作台生态。反方向（插件不许依赖本仓 packages/ 下的任何一个包，包名从各包清单现读）不在这个文件里，由插件自己的 tests/artifact.test.ts 检查，两边互不认识。说明书与建站模板也随插件发：包只发 dist 与样式，包里不许有 skills/、template/；唯一的例外是 docfirst-site 的 template/，那是文档站基础包初始化时写进站点的功能包文件（轨迹卡的集合定义只能写在站点里），不是建站模板。',
     allowed: [],
     forbidden: [
       {
-        edges: ['pin>plugin', 'trajectory>plugin', 'workflow>plugin', 'fumadocs>plugin', 'explain>plugin'],
+        edges: ['pin>plugin', 'trajectory>plugin', 'workflow>plugin', 'fumadocs>plugin', 'explain>plugin', 'feature>plugin'],
         what: '各包的依赖字段（运行时、peer、开发期）与源码里都不许出现工作台插件，也不许出现任何 @godcreator/gwb-*。',
       },
     ],
     tests: [
       { name: 'npm 包的依赖字段里不许出现工作台插件，也不许出现任何 @godcreator/gwb-*', checks: '读各包 package.json 的三类依赖字段' },
       { name: 'npm 包的源码里一行 @godcreator/gwb-* 都没有', checks: '读各包 src/ 下每个文件的 import' },
-      { name: '包只发 dist 与样式：skills 与 template 跟着插件走了，包里连目录都不该再有', checks: '读各包 package.json 的 files，并查包目录里有没有 skills/、template/' },
+      { name: '包只发 dist 与样式：skills 与建站模板跟着插件走了，包里连目录都不该再有', checks: '读各包 package.json 的 files，并查包目录里有没有 files 之外的 skills/、template/' },
     ],
   },
   {
     id: 'explain',
     label: '讲解组件包的三个入口',
-    text: '讲解组件包的 . 出口是客户端组件，产物头一行必须是 "use client"；./text 把各帧的说明转成机读版文字，站在 Node 里生成机读版时加载它（docfirst 站由 docfirst.config.mjs 加载），源码与产物都零 import、不带客户端指令。./seam-graph 定义接缝图、把图写成机读文字，接缝图的数据文件在 Node 与客户端都加载它，产物同样零 import、不带客户端指令，源码只许 import 类型。它不依赖任何 @godcreator/ 包，由「自成一体的包与通用包」那一类查。',
+    text: '讲解组件包的 . 出口是客户端组件，产物头一行必须是 "use client"；./text 把各帧的说明转成生成物里的机读文字，命令行与功能包的 remark 插件读 docfirst.config.mjs 时在 Node 里加载它，源码与产物都零 import、不带客户端指令。./seam-graph 定义接缝图、把图写成机读文字，接缝图的数据文件在 Node 与客户端都加载它，产物同样零 import、不带客户端指令，源码只许 import 类型。它不依赖任何 @godcreator/ 包，由「自成一体的包与通用包」那一类查。',
     allowed: ['explain>host', 'site>explain'],
     forbidden: [
       {

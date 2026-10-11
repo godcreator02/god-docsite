@@ -3,8 +3,9 @@
  *
  * 包分两类。**通用包**不认识 docfirst，谁都能单独使用：钉码 `code-pin`（把文字钉在代码上）、
  * 星轨盘 `trajectory-disk`（把一组卡画成项目方向演变的圆盘）。
- * **docfirst 的包**有两个：`docfirst-workflow` 用上面的通用包拼出 docfirst：命令行、项目装配与格式，
- * 接到 fumadocs 站上的部分在它的 `src/fumadocs/`，经子入口 `./fumadocs` 发出去；讲解组件包 `docfirst-explainer`
+ * **docfirst 的包**有三个：`docfirst-workflow` 用上面的通用包拼出 docfirst：命令行、项目装配与格式，
+ * 接到 fumadocs 站上的部分在它的 `src/fumadocs/`，经子入口 `./fumadocs` 发出去；`docfirst-site` 是建在文档站基础包上的
+ * docfirst 站的功能包，用 workflow 与星轨盘；讲解组件包 `docfirst-explainer`
  * 是 docfirst 站上用的组件（把讲解拆成配说明的帧来播放，外加画接缝图），只有站用，workflow 与工作台插件都不依赖它。
  * 它名字里带 docfirst，但跟两个通用包一样**自成一体**：不依赖任何 `@godcreator/` 包。
  * 包与包之间的方向，pnpm 严格的 node_modules 能拦住一半——没写进依赖的包 import 不到——但「该不该写进依赖」
@@ -67,6 +68,7 @@ const NPM_PACKAGES: Record<string, string> = {
   "trajectory-disk": "@godcreator/trajectory-disk",
   "docfirst-workflow": "@godcreator/docfirst-workflow",
   "docfirst-explainer": "@godcreator/docfirst-explainer",
+  "docfirst-site": "@godcreator/docfirst-site",
 };
 const PLUGIN_MANIFEST = join(ROOT, "plugins", "docfirst", "package.json");
 
@@ -135,13 +137,15 @@ function distClosureSpecs(dir: string, file: string): string[] {
  *   code-pin          通用包。判代码变没变只要读取器、旧内容来源两样传进来的东西，谁都不认识
  *   trajectory-disk   通用包。只收盘心加一组卡的中性输入，怎么建模、怎么画；docfirst 卡格式与读卡目录在 workflow
  *   docfirst-explainer docfirst 站上用的讲解组件。只有站用，workflow 不用它；它也不认识本仓别的包
- *   docfirst-workflow docfirst 本身：认识钉码与星轨盘，除了站谁都不认识它
+ *   docfirst-workflow docfirst 本身：认识钉码与星轨盘，除了站与 docfirst-site 谁都不认识它
+ *   docfirst-site     建在文档站基础包上的站的功能包：经 workflow 用钉码，自己用星轨盘的组件；谁都不认识它，讲解组件归站自己用
  */
 const PACKAGE_FORBIDDEN: Record<string, string[]> = {
-  "code-pin": ["trajectory-disk", "docfirst-workflow", "docfirst-explainer"],
-  "trajectory-disk": ["code-pin", "docfirst-workflow", "docfirst-explainer"],
-  "docfirst-workflow": ["docfirst-explainer"],
-  "docfirst-explainer": ["code-pin", "trajectory-disk", "docfirst-workflow"],
+  "code-pin": ["trajectory-disk", "docfirst-workflow", "docfirst-explainer", "docfirst-site"],
+  "trajectory-disk": ["code-pin", "docfirst-workflow", "docfirst-explainer", "docfirst-site"],
+  "docfirst-workflow": ["docfirst-explainer", "docfirst-site"],
+  "docfirst-explainer": ["code-pin", "trajectory-disk", "docfirst-workflow", "docfirst-site"],
+  "docfirst-site": ["code-pin", "docfirst-explainer"],
 };
 
 test("包的方向：清单三类依赖字段里不许出现禁止的兄弟包", () => {
@@ -532,16 +536,18 @@ test("fumadocs 子入口的 `./fumadocs/roster`：命令行读 docfirst.config.m
  * node_modules 里，没有东西指向它，一份 SKILL.md 放在那儿等于没有。agent 能读到说明书，全靠插件
  * `register` 了自己包里那个目录。判据见轨迹卡「包给仓、插件给人」。
  */
-test("包只发 dist 与样式：skills 与 template 跟着插件走了，包里连目录都不该再有", () => {
+test("包只发 dist 与样式：skills 与建站模板跟着插件走了，包里连目录都不该再有", () => {
   const FILES: Record<string, string[]> = {
     "code-pin": ["dist"],
     "trajectory-disk": ["dist", "styles"],
     "docfirst-workflow": ["dist", "styles"],
     "docfirst-explainer": ["dist", "styles"],
+    // 这里的 template/ 不是建站模板：是文档站基础包初始化时写进站点的功能包文件（轨迹卡的集合定义只能写在站点里）
+    "docfirst-site": ["dist", "styles", "template"],
   };
   for (const [dir, files] of Object.entries(FILES)) {
     assert.deepEqual(manifestOf(dir).files, files, `${dir} 的 files`);
-    for (const path of ["skills", "template"]) {
+    for (const path of ["skills", "template"].filter((path) => !files.includes(path))) {
       assert.equal(existsSync(join(PACKAGES, dir, path)), false, `${dir} 里还留着 ${path}/——它归插件 gwb-docfirst-workflow`);
     }
   }

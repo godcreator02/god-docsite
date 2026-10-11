@@ -1,5 +1,5 @@
 /**
- * 「生成物怎么从 mdx 正本渲染出来」的全部讲解数据：画面（render-flow.tsx）与机读版规则（render-flow.ai.mjs）都只读这一份。
+ * 「生成物怎么从 mdx 正本渲染出来」的全部讲解数据：画面（render-flow.tsx）与机读规则（render-flow.ai.mjs）都只读这一份。
  * 示例正本、生成物是在一个临时项目里用 docfirst-workflow 的命令行实际运行得到的，命令行输出照 cli/text.ts 实际打印的格式逐字写：
  * 配置只有下面这一条 outputs，正本先写不带记录的记号再 confirm，记号上的 hash / blob 是 confirm 写回的。
  */
@@ -132,7 +132,7 @@ export const terminals = {
 };
 
 /**
- * 七段，每段只变一件事。id 给画面选这一段怎么画，机读版不用它。
+ * 七段，每段只变一件事。id 给画面选这一段怎么画，机读规则不用它。
  * @typedef {'source' | 'strip' | 'block' | 'fields' | 'write' | 'check' | 'refuse'} SceneId
  * @typedef {{ id: SceneId, title: string, text: string, duration: number }} RenderChapter
  * @type {RenderChapter[]}

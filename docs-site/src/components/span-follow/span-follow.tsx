@@ -2,11 +2,13 @@
 /**
  * 「行段引用怎么跟着代码挪位置」：上面是文档里的记号，中间左右两个 greet.ts（确认时的、今天的），下面是 check 的判定顺序、
  * 这一段 check 内部在算什么、终端输出。画面是 (段号, 本段进度) → 画面 的纯函数：插入行的高度、框的位置、每一行出现与否
- * 都由进度算出来，拖到哪一刻都画得出来。讲解文字与数据都在 span-follow.data.mjs，机读版由 span-follow.ai.mjs 读同一份数据生成。
+ * 都由进度算出来，拖到哪一刻都画得出来。讲解文字与数据都在 span-follow.data.mjs，生成物里的机读文字由 span-follow.ai.mjs 读同一份数据生成。
  */
 import type { CSSProperties, JSX, ReactNode } from 'react';
 import { CodeLines, Dot, Pane, Pill, Terminal, Timeline } from '@godcreator/docfirst-explainer';
 import type { Role, TerminalLine, TimelineFrame, Tone } from '@godcreator/docfirst-explainer';
+import '@godcreator/docfirst-explainer/styles.css';
+import './span-follow.css';
 import {
   catFile,
   chapters,

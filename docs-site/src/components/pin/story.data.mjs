@@ -1,5 +1,5 @@
 /**
- * 「一条引用的一生」的全部讲解数据：画面（story.tsx）与机读版规则（pin.ai.mjs）都只读这一份。
+ * 「一条引用的一生」的全部讲解数据：画面（story.tsx）与机读规则（pin.ai.mjs）都只读这一份。
  * 例子里的 hash 与 blob 是按 code-pin 的算法对这几版 greet.ts 真算出来的：
  * hash = 被钉的几行去掉行尾空白后 sha256 的前 12 位，blob = 整个文件的 git blob 对象名前 12 位。
  */

@@ -1,3 +1,5 @@
 {
-  "pages": ["index", "pin", "workflow", "trajectory", "fumadocs", "docfirst-explainer", "plugin", "glossary", "human-write-spec-dont-change", "outputs"]
+  "title": "现状 · 原理",
+  "root": true,
+  "pages": ["index", "pin", "workflow", "trajectory", "fumadocs", "site", "docfirst-explainer", "plugin", "glossary", "human-write-spec-dont-change", "outputs"]
 }

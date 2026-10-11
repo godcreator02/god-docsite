@@ -2,11 +2,13 @@
 /**
  * 「一批轨迹卡文件怎么变成星轨盘」：上面一条固定的流水线，第几步就点亮第几段；下面是例子里的五个卡文件在这一段变成了什么
  * （字段表 → 读目录 → 校验结果 → 模型与树 → 布局落点 → 站上的页面）。
- * 讲解文字与例子都在 trajectory-flow.data.mjs，这里只负责画；机读版由 trajectory-flow.ai.mjs 读同一份数据生成。
+ * 讲解文字与例子都在 trajectory-flow.data.mjs，这里只负责画；生成物里的机读文字由 trajectory-flow.ai.mjs 读同一份数据生成。
  */
 import { useState } from 'react';
 import type { JSX } from 'react';
 import { CodeLines, Dot, Pane, Pill, Stepper, Terminal } from '@godcreator/docfirst-explainer';
+import '@godcreator/docfirst-explainer/styles.css';
+import './trajectory-flow.css';
 import {
   cardKeys,
   cardOf,
@@ -14,9 +16,9 @@ import {
   checks,
   clicks,
   codeOf,
+  collectionLines,
   failedChecks,
   files,
-  fumadocsLines,
   input,
   layout,
   model,
@@ -449,7 +451,7 @@ function LayoutScene(): JSX.Element {
   );
 }
 
-/* ── 第 6 步：/trajectory 整页，page.tsx 里读卡目录、交给 StarDisk 的几行 ── */
+/* ── 第 6 步：/trajectory 整页，功能包的 disk.tsx 里读卡目录、交给 StarDisk 的几行 ── */
 
 function PageScene(): JSX.Element {
   return (
@@ -475,8 +477,8 @@ function PageScene(): JSX.Element {
             <CodeLines key={block.start} lines={block.lines} start={block.start} />
           ))}
         </Pane>
-        <Pane title="docfirst-workflow/fumadocs/trajectory（fumadocs/trajectory.ts）" role="emerald" icon="file">
-          <CodeLines lines={fumadocsLines.lines} start={fumadocsLines.start} tone="good" highlight={[fumadocsLines.start + 1, fumadocsLines.start + fumadocsLines.lines.length - 2]} />
+        <Pane title={`${files.collection}（站点里的轨迹卡集合）`} role="emerald" icon="file">
+          <CodeLines lines={collectionLines.lines} start={collectionLines.start} tone="good" />
         </Pane>
       </div>
     </div>

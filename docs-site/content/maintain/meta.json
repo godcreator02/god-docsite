@@ -1,4 +1,5 @@
 {
-  "title": "维护",
+  "title": "现状 · 维护",
+  "root": true,
   "pages": ["index", "testing", "agents"]
 }

@@ -3,6 +3,8 @@ title: 生成物怎么从 mdx 正本渲染出来
 description: 仓根的 README.md、AGENTS.md、CLAUDE.md 与插件里的 SKILL.md 由 docfirst render 从现状区的 mdx 正本生成：outputs 映射定落点，渲染只动 frontmatter、记号和组件，check 再渲染一次跟磁盘上的比
 ---
 
+import { RenderFlow } from '../../../src/components/render-flow/render-flow';
+
 仓根的 README.md、AGENTS.md、CLAUDE.md 和插件里的 SKILL.md 都是生成物，正本是现状区里的 mdx。
 `docfirst.config.mjs` 的 `outputs` 把每篇正本对到一个或几个落点，`docfirst render` 渲染后写过去，`docfirst confirm`
 写回记号之后也会渲染一遍。下面用一篇小 SKILL 正本从头走到尾：
@@ -28,7 +30,7 @@ render 只遍历现状区的文档，映射的键写成 `trajectory/` 或 `futur
 
 {/* ref file="../packages/docfirst-workflow/src/mdx/render.ts" lines="87-126" hash="63ef9bbe2966" blob="ede0b1ddc96a" */}
 
-组件换成它在名册里的机读规则交回的文字，跟站上那一页机读版里的是同一段：正本可以放动画给人在站上看，生成物里只剩组件自己定义的几句话。
+组件换成它在名册里的机读规则交回的文字：正本可以放动画给人在站上看，生成物里只剩组件自己定义的几句话。
 规则交回的内容里再嵌套组件，也逐个换掉；续行带上组件那一行行首的前缀，写在列表项里的组件换完还在列表项里：
 
 {/* ref file="../tests/fumadocs.test.ts" lines="397-411" hash="259d6b3d7be6" blob="7017ef1d73f1" */}

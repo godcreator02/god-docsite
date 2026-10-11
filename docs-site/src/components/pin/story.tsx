@@ -2,11 +2,13 @@
 /**
  * 「一条引用的一生」：七步，每一步只变一件事——文档里的记号、源码、状态、命令行输出同时显示。
  * 讲解文字与每一步的数据都在 story.data.mjs，这里只负责画；步骤控制条、每一步的标题与说明由 Stepper 显示。
- * 机读版由 pin.ai.mjs 读同一份数据生成。
+ * 生成物里的机读文字由 pin.ai.mjs 读同一份数据生成。
  */
 import { CodeLines, Diff, Dot, Pane, Pill, Stepper, Terminal } from '@godcreator/docfirst-explainer';
 import { files, legend, steps } from './story.data.mjs';
 import { toneOfStatus } from './tone';
+import '@godcreator/docfirst-explainer/styles.css';
+import './pin.css';
 
 type Step = (typeof steps)[number];
 

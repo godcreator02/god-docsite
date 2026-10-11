@@ -3,6 +3,8 @@ title: 记号的写法
 description: 记号写在 mdx 页面与讲解组件源码里各长什么样；confirm 在记号上写下什么；一条引用从写下记号到被删掉，每一步记号、命令行和状态怎么变
 ---
 
+import { PinStory } from '../../../src/components/pin/story';
+
 文档里钉一处码，是在一句话下面单独写一行记号，指向源码里的几行。新写的记号只带目标，`confirm` 在同一行记号上写下两个值：`hash` 是被钉那几行（去掉行尾空白）的
 sha256 前 12 位，`blob` 是整个文件当时的 git blob 名前 12 位。之后每次 `check` 都拿今天的代码去比，给出一种[状态](/docs/pin/judge)。
 

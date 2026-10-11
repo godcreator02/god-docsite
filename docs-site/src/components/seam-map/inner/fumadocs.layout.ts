@@ -1,11 +1,12 @@
 /**
- * fumadocs 适配内部接缝图（fumadocs.data.mjs）的坐标与图标。站在最上；左列是术语标注的三个文件，
- * 中间两列是 fumadocs 本体，以及 mdx 选项、remark 插件、换节点、节点形状、机读版回调、状态点组件与钉码核心，
- * 右列是 workflow；最下一行是卡集合、星轨盘包与星轨盘。站连到卡集合与星轨盘的线沿画布左右两边，
+ * fumadocs 适配内部接缝图（fumadocs.data.mjs）的坐标与图标。调用方在最上：左边站的功能包，中间项目配置，右边还没迁的 Next 站；
+ * 左列是术语标注的三个文件，中间两列是 fumadocs 本体，以及 mdx 选项、remark 插件、换节点、节点形状、机读版回调、状态点组件与钉码核心，
+ * 右列是 workflow；最下一行是卡集合、星轨盘包与星轨盘。功能包连到卡集合、Next 站连到星轨盘的线沿画布左右两边，
  * 读卡目录去星轨盘的线沿 workflow 框右侧往下，卡字段与卡身份去卡集合的线从状态点组件下面往左走。
  */
 import {
   CircleDot,
+  FileCog,
   FileText,
   Globe,
   Highlighter,
@@ -14,6 +15,7 @@ import {
   ListChecks,
   MessageSquareText,
   Orbit,
+  Package,
   Pin,
   Puzzle,
   Replace,
@@ -29,11 +31,10 @@ import type { SeamLayout } from '@godcreator/docfirst-explainer';
 export const fumadocsLayout: SeamLayout = {
   view: { w: 1100, h: 1040 },
   caps: {
-    'site-source': cap(34, 52, 125),
-    'site-css': cap(169, 52, 160),
-    'site-mdx': cap(339, 52, 160),
+    'fs-content': cap(34, 52, 140),
+    'fs-css': cap(184, 52, 150),
     'site-config': cap(655, 52, 135),
-    'site-page': cap(925, 52, 140),
+    'next-site': cap(840, 52, 225),
 
     'term-comp': cap(34, 202, 75),
     'term-css': cap(119, 202, 85),
@@ -74,7 +75,9 @@ export const fumadocsLayout: SeamLayout = {
     'star-css': cap(924, 952, 110),
   },
   groups: {
-    site: { x: 20, y: 20, w: 1060, h: 94 },
+    feature: { x: 20, y: 20, w: 328, h: 94 },
+    'site-config': null,
+    'next-site': null,
     term: { x: 20, y: 170, w: 198, h: 94 },
     host: { x: 240, y: 170, w: 403, h: 94 },
     roster: { x: 650, y: 170, w: 146, h: 94 },
@@ -92,11 +95,10 @@ export const fumadocsLayout: SeamLayout = {
     trajectory: { x: 400, y: 920, w: 311, h: 94 },
     star: { x: 725, y: 920, w: 323, h: 94 },
   },
-  // 一端有几个方块时线只画到其中一个，其余的（机读版回调、状态点样式、组件表这类）固定高亮时照样亮。
-  // 1 与 17 交叉一次：集合在站的最左、要连到右下方的现状集合选项，样式表那条竖线挡在中间；
+  // 一端有几个方块时线只画到其中一个，其余的（术语标注插件、状态点样式、Next 站接的各个出口这类）固定高亮时照样亮。
   // 6 与 5 交叉一次：6 从 remark 插件右边出来绕开框名，往右上去钉码编排，5 的横线在它下面
   seamPaths: {
-    '1': { d: 'M100,100 V152 H375 V202', badge: [300, 152] },
+    '1': { d: 'M34,76 H10 V976 H34', badge: [10, 880] },
     '2': { d: 'M300,250 V352 M408,250 V352', badge: [300, 300] },
     '3': { d: 'M600,250 V290 H870 V250', badge: [735, 290] },
     '4': { d: 'M540,250 V352', badge: [540, 300] },
@@ -112,18 +114,19 @@ export const fumadocsLayout: SeamLayout = {
     '14': { d: 'M154,376 H232 V226 H254', badge: [232, 300] },
     '15': { d: 'M100,400 V502', badge: [100, 450] },
     '16': { d: 'M70,250 V352', badge: [70, 300] },
-    '17': { d: 'M186,100 V202', badge: [186, 128] },
+    '17': { d: 'M195,100 V202', badge: [195, 136] },
     '18': { d: 'M720,100 V202', badge: [720, 142] },
-    '19': { d: 'M34,76 H10 V976 H34', badge: [10, 880] },
-    '20': { d: 'M1065,76 H1090 V976 H1034', badge: [1090, 860] },
-    '21': { d: 'M917,526 H1030 V900 H880 V952', badge: [1030, 800] },
-    '22': { d: 'M697,976 H739', badge: [718, 976] },
-    '23': { d: 'M757,700 V802', badge: [757, 751] },
-    '24': { d: 'M840,700 V890 H250 V952', badge: [600, 890] },
+    '19': { d: 'M1065,76 H1090 V976 H1034', badge: [1090, 860] },
+    '20': { d: 'M917,526 H1030 V900 H880 V952', badge: [1030, 800] },
+    '21': { d: 'M697,976 H739', badge: [718, 976] },
+    '22': { d: 'M757,700 V802', badge: [757, 751] },
+    '23': { d: 'M840,700 V890 H250 V952', badge: [600, 890] },
   },
   entries: {},
   moduleIcons: {
-    site: Globe,
+    feature: Package,
+    'site-config': FileCog,
+    'next-site': Globe,
     term: MessageSquareText,
     host: SlidersHorizontal,
     roster: ListChecks,

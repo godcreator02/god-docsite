@@ -1,0 +1,155 @@
+---
+title: 站的功能包 docfirst-site
+description: docfirst-site 是文档站基础包 docsite-kit 的功能包：构建页面时的 remark 插件按区做术语标注、钉码投影与轨迹卡链接改写，钉码代码块包一层带状态点的 div；侧栏入口「轨迹」与页面里不用 import 的 Term、文件树；星轨盘 /trajectory 与卡页两条路由；轨迹卡集合模板与样式；站点在 package.json 的 docsite.features 声明它
+full: true
+---
+
+import { SeamMap } from '../../../src/components/seam-map/seam-map';
+
+包 `@godcreator/docfirst-site`，源码在 `packages/docfirst-site/src/`，样式在 `styles/`，要复制进站点的文件在 `template/`。
+它是文档站基础包 `@godcreator/docsite-kit` 的功能包：基础包给出站点骨架（fumadocs 加 React Router 框架模式与 Vite），功能包按基础包的约定交出几个出口，
+骨架读它们，站点就有了 docfirst 要的钉码状态点、术语标注、星轨盘与卡页。钉码、卡格式与 remark 插件本身在 workflow，这个包只把它们接到基础包上。
+
+<SeamMap module="docfirst-site" />
+
+## 功能
+
+### ./content：构建页面时的 remark 插件
+
+基础包骨架的 `source.config.ts` 是 fumadocs-mdx 的全局设置，把每个功能包 `./content` 的 remark 插件接在 fumadocs 默认插件后面，页面、评论正文与轨迹卡都经过它。
+插件按文件所在的区决定做什么，入口文件头写着这张表：
+
+{/* ref file="../packages/docfirst-site/src/content.ts" lines="1-8" hash="09438263863d" blob="c197951793e7" */}
+
+项目根是 `process.cwd()`：站点构建与开发服务都在站点目录里运行。第一次运行时装配项目，建好两组变换，之后每篇复用；拿到的文件没有路径就直接报错：
+
+{/* ref file="../packages/docfirst-site/src/content.ts" lines="59-66" hash="862e50aee640" blob="c197951793e7" */}
+
+两组变换都用 workflow 的插件。现状区先术语标注、再钉码投影、最后给钉码代码块包外层；术语标注要排在钉码投影前面，那时引用投影出的代码块还没放进树里。
+轨迹卡目录只改写关系行与卡链接，`hrefBase` 是星轨盘的地址：
+
+{/* ref file="../packages/docfirst-site/src/content.ts" lines="35-48" hash="beb0f0856fea" blob="c197951793e7" */}
+
+按区分派看的是项目的轨迹卡目录与内容根：轨迹卡目录优先，内容根之外（评论）与 `future/` 下（未来区）不处理：
+
+{/* ref file="../packages/docfirst-site/src/content.ts" lines="50-57" hash="464d99cb35ba" blob="c197951793e7" */}
+
+术语表是配置 `glossary.terms` 指的模块，要导出数组 `terms`：
+
+{/* ref file="../packages/docfirst-site/src/content.ts" lines="28-33" hash="49eea1efc32f" blob="c197951793e7" */}
+
+### 状态点为什么包一层 div
+
+钉码投影把状态点的颜色写在代码块 meta 的 `data-dot` 里，可 fumadocs 的代码块只把白名单里的 meta 放进属性，颜色到不了页面。
+所以给每个投影出的代码块包一层带 `data-dot` 的 div，点由样式画在这层 div 上；认投影出的代码块看节点 data 上的 `docfirst` 标记，颜色读不到直接报错。
+目录树引用投影成的 `<Files>` 自己带 `data-dot`，不用包：
+
+{/* ref file="../packages/docfirst-site/src/pin-frame.ts" lines="1-33" hash="8c18d85f77af" blob="c6df8d2524bb" */}
+
+### ./site：侧栏入口与页面里不用 import 的组件
+
+侧栏入口「轨迹」指向星轨盘；`Term` 是术语标注插进来的组件，`Files`、`Folder`、`File` 是目录树引用投影成的组件，都由骨架并进 MDX 组件表，页面里不用 import：
+
+{/* ref file="../packages/docfirst-site/src/site.tsx" lines="1-12" hash="f2af48864b29" blob="612bc30338f8" */}
+
+`Term` 用 `useId` 给定义框取 id，类名与 workflow 的 `term.css` 对上，展开靠样式：
+
+{/* ref file="../packages/docfirst-site/src/term.tsx" lines="16-22" hash="bc5e76db2c9f" blob="8ee907b7e80a" */}
+
+`./site-server` 没有每一页都要用的布局数据，是空的：
+
+{/* ref file="../packages/docfirst-site/src/site-server.ts" lines="1-5" hash="b5c2b7af71aa" blob="738bed9328b8" */}
+
+### ./routes：两条路由
+
+星轨盘占满整个窗口，放在整站布局外面；卡页在整站布局里。`file` 是路由模块在包里的路径：
+
+{/* ref file="../packages/docfirst-site/src/routes.ts" lines="1-10" hash="c3a77595db13" blob="1a50868d9271" */}
+
+星轨盘的地址与卡身份只定义一次，remark 插件、侧栏入口与两条路由都用它：
+
+{/* ref file="../packages/docfirst-site/src/trajectory-href.ts" lines="1-5" hash="2e8efa8705f9" blob="ad9ef283ed3b" */}
+
+**星轨盘 `/trajectory`**：loader 装配项目、用 `scanCardDir` 读轨迹卡目录；顶栏由这一页画，「← 文档」回到现状区的第一页：
+
+{/* ref file="../packages/docfirst-site/src/routes/disk.tsx" lines="18-26" hash="d41092df1ba3" blob="4333c2115175" */}
+
+每张卡的正文从轨迹卡集合取，包在 `Suspense` 里按需加载，点到哪张才加载哪张；盘是星轨盘包的 `StarDisk`：
+
+{/* ref file="../packages/docfirst-site/src/routes/disk.tsx" lines="28-43" hash="8d70aae68d69" blob="4333c2115175" */}
+
+{/* ref file="../packages/docfirst-site/src/routes/disk.tsx" lines="61-63" hash="1ec2ee03aa08" blob="4333c2115175" */}
+
+**卡页 `/trajectory/<卡身份>`**：在轨迹卡集合里按卡身份找卡，找不到回 404；页面用 fumadocs 的 `DocsPage`，标题下一行是出生时间、类型、领域与父卡：
+
+{/* ref file="../packages/docfirst-site/src/routes/card.tsx" lines="14-20" hash="90ab07fe97e3" blob="454ea44adc3d" */}
+
+卡页只取字段、不校验，卡写得对不对由 `docfirst check` 报：
+
+{/* ref file="../packages/docfirst-site/src/card-fields.ts" lines="16-32" hash="10f07d649c99" blob="c9e3273f9b79" */}
+
+### 轨迹卡集合模板
+
+集合定义只能写在项目里，所以放在 `template/` 下，由基础包的初始化复制进站点；两条路由经别名 `@site/lib/trajectory` 读它，`async: true` 让正文按需加载：
+
+{/* ref file="../packages/docfirst-site/template/skeleton/app/lib/trajectory.ts" lines="1-7" hash="d857ba3c3e6a" blob="55562eb102dd" */}
+
+路由模块在包里构建，这个模块的类型由包自己声明：
+
+{/* ref file="../packages/docfirst-site/src/site-modules.d.ts" lines="1-2" hash="7410af221422" blob="7e2e282818fb" */}
+
+### ./styles.css：样式
+
+引入 workflow 的三份样式表，再加钉码代码块的状态点、卡页标题下那一行与星轨盘页的排布。状态点画在外层 div 的 `::after` 上，四种颜色对应新鲜、有变动、未确认、缺失：
+
+{/* ref file="../packages/docfirst-site/styles/site.css" lines="1-6" hash="7f3286e801b2" blob="2d1a912f5818" */}
+
+{/* ref file="../packages/docfirst-site/styles/site.css" lines="12-27" hash="00d8a0fffdd8" blob="2d1a912f5818" */}
+
+## 站点怎么用它
+
+站点在 `package.json` 的 `docsite.features` 里声明它，基础包的初始化照这一项生成骨架里引用功能包出口的文件：
+
+{/* ref file="package.json" lines="7-11" hash="6160cf6c1af8" blob="32c606e8d42e" */}
+
+骨架的 `source.config.ts` 把功能包的 remark 插件接在 fumadocs 默认插件后面，这个文件由初始化写出、不手改：
+
+{/* ref file="source.config.ts" lines="8-10" hash="6822d62ff0a2" blob="19ed57bb3244" */}
+
+`docfirst.config.mjs` 里两项给它用：`trajectory` 指轨迹卡目录（相对项目根，要跟模板里集合的目录一致），`glossary` 指术语表模块与不标注的文档：
+
+{/* ref file="docfirst.config.mjs" lines="71-73" hash="50ba4ed36064" blob="57d64b6b2e69" */}
+
+## 接口
+
+五个出口，加上要复制进站点的 `template/`：
+
+{/* ref file="../packages/docfirst-site/package.json" lines="7-30" hash="08dec1345b18" blob="8c4aa7b069d5" */}
+
+用 tsdown 构建，两条路由模块也单独出一份产物，路由表里写的就是它们的路径；React、fumadocs、基础包、本仓的兄弟包与骨架里的模块都按包名留在产物里：
+
+{/* ref file="../packages/docfirst-site/tsdown.config.ts" lines="12-25" hash="d14c6f2406da" blob="d9247dfc9926" */}
+
+## 依赖
+
+| 依赖 | 用来做什么 |
+| --- | --- |
+| workflow `@godcreator/docfirst-workflow` | `.` 的 `loadProject`；`./cards` 的 `scanCardDir`；`./fumadocs` 的 `remarkDocfirstHost`、`remarkGlossary`、`remarkTrajectoryLinks` 与三份样式表；`./mdx` 的语法树类型 |
+| 星轨盘 `@godcreator/trajectory-disk`（通用包） | `./disk` 的 `StarDisk` |
+| 文档站基础包 `@godcreator/docsite-kit`（peer） | 功能包出口的类型，骨架里经别名 `@site` 给路由模块的站名、页面列表、MDX 组件表 |
+| `@fumadocs/base-ui`、react、react-router、lucide-react（peer） | 文件树、文档页与深浅色切换的组件，路由的 loader，侧栏入口的图标；都用站点装的那份 |
+
+{/* ref file="../packages/docfirst-site/package.json" lines="36-46" hash="663d83cf0607" blob="8c4aa7b069d5" */}
+
+## 不做的事
+
+- **不认识钉码核心与讲解组件包**：钉码经 workflow 用；讲解组件归站自己的组件用。谁都不依赖它：
+
+{/* ref file="../tests/boundary.test.ts" lines="135-149" hash="f5aed8e4b2c5" blob="f1a4307dac6e" */}
+
+- **不写建站模板**：`template/` 下只有基础包初始化时写进站点的轨迹卡集合定义，建一个新站是基础包与 gwb-docsite 的事：
+
+{/* ref file="../tests/boundary.test.ts" lines="539-558" hash="7ae344d3476d" blob="f1a4307dac6e" */}
+
+- **不出每页的机读版**：基础包没有 llms 路由与复制 Markdown 的按钮，功能包也不接 workflow 的机读版回调；机读文字只出现在 `docfirst render` 渲染的生成物里。
+- **不画状态点组件**：代码块就是 fumadocs 自己的，功能包只包一层 div、由样式画点，不替换 `pre`。

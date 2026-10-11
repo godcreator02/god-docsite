@@ -4,9 +4,12 @@ description: docfirst-workflow：命令行 docfirst、项目装配（读文件�
 full: true
 ---
 
+import { SeamMap } from '../../../src/components/seam-map/seam-map';
+
 包 `@godcreator/docfirst-workflow`，源码在 `packages/docfirst-workflow/src/`。出口 `.`（`src/index.ts`）、`./mdx`（`src/mdx/index.ts`）、
 `./cards`（`src/cards/index.ts`），可执行文件 `docfirst`（`src/cli/cli.ts`）。
-给 fumadocs 站用的部分在 `src/fumadocs/`，经 `./fumadocs` 开头的出口导出，讲在 [fumadocs 适配](/docs/fumadocs)。
+给 fumadocs 站用的部分在 `src/fumadocs/`，经 `./fumadocs` 开头的出口导出，讲在 [fumadocs 适配](/docs/fumadocs)；
+建在文档站基础包上的站经[站的功能包](/docs/site)用这个包，功能包按包名取 `.`、`./cards` 与 `./fumadocs`。
 
 <SeamMap module="workflow" />
 
@@ -14,7 +17,7 @@ full: true
 
 目录之间的依赖方向见上图。这些目录在同一个包里，编译器不拦跨目录 import，方向由边界测试的禁止表检查：
 
-{/* ref file="../tests/boundary.test.ts" lines="328-355" hash="c1818fae7078" blob="0d3a5dcc329f" */}
+{/* ref file="../tests/boundary.test.ts" lines="332-359" hash="c1818fae7078" blob="f1a4307dac6e" */}
 
 ### 项目装配 project
 
@@ -107,7 +110,8 @@ fumadocs 自带组件的规则在 [fumadocs 适配](/docs/fumadocs)的 `./roster
 
 {/* ref file="../packages/docfirst-workflow/src/mdx/roster.ts" lines="24-35" hash="efedd191320a" blob="79ca02da1010" */}
 
-`stamp` 给站上每页的机读版用（站的集合接了 `docfirstMarkdownOptions` 才有）：按名册给树上每个组件标上机读文字（写在节点的 data 上）、不换节点（同一棵树还要生成页面），名册外的组件不标、不报错；把机读文字序列化成 md 的回调在 fumadocs 适配。`docfirst.create` 新建的站不接它，机读文字只出现在生成物里：
+`stamp` 在构建页面时由 fumadocs 适配的 remark 插件调用：按名册给树上每个组件标上机读文字（写在节点的 data 上）、不换节点（同一棵树还要生成页面），名册外的组件不标、不报错。
+标上的文字只有集合接了 `docfirstMarkdownOptions` 的站才用来出每页的机读版，序列化回调在 fumadocs 适配；`docfirst.create` 新建的站与建在文档站基础包上的站都不接它，机读文字只出现在生成物里：
 
 {/* ref file="../packages/docfirst-workflow/src/mdx/roster.ts" lines="111-131" hash="ba46fcd2b5aa" blob="79ca02da1010" */}
 
@@ -218,20 +222,20 @@ fumadocs 自带组件的规则在 [fumadocs 适配](/docs/fumadocs)的 `./roster
 
 {/* ref file="../packages/docfirst-workflow/src/cli/cli.ts" hash="db36f021285e" blob="e451ab0dc72b" */}
 
-**`loadProject(root)`** 同一个根只装配一次，站构建时 loader 并发调用拿到同一个项目。配置只认五个键（`glossary` 是站构建时术语标注用的，命令行只校验形状），项目上带着钉码编排、名册、
+**`loadProject(root)`** 同一个根只装配一次，构建页面时并发调用拿到同一个项目。配置只认五个键（`glossary` 是构建页面时站的功能包做术语标注用的，命令行只校验形状），项目上带着钉码编排、名册、
 内容根、轨迹卡目录与摆放：
 
 {/* ref file="../packages/docfirst-workflow/src/project/config.ts" lines="9-29" hash="5ce6b2c61a23" blob="d259f3e1b09d" */}
 
 {/* ref file="../packages/docfirst-workflow/src/project/load.ts" lines="23-44" hash="c476443b8ac0" blob="69a379c0beab" */}
 
-**`./mdx`** 除了格式本身，还交出语法树上的函数给 fumadocs 适配：站构建时 remark 插件拿到的树已经解析好，用 `recognize` 认记号、
+**`./mdx`** 除了格式本身，还交出语法树上的函数给 fumadocs 适配：构建页面时 remark 插件拿到的树已经解析好，用 `recognize` 认记号、
 `stamp` 按名册标上机读文字，不再解析一遍；`langOf` 让按原文渲染与站上的代码块标同一种语言：
 
 {/* ref file="../packages/docfirst-workflow/src/mdx/index.ts" lines="43-49" hash="fc17028f62dc" blob="231d2e8eb8e6" */}
 
-**`./cards`** 是整个卡格式：读卡目录、解析、字段表、卡身份。fumadocs 适配的 `loadTrajectory` 与卡集合用它；
-从 `.` 取会把命令行与配置加载带进 Next 的服务端构建：
+**`./cards`** 是整个卡格式：读卡目录、解析、字段表、卡身份。站的功能包的星轨盘页、fumadocs 适配的 `loadTrajectory` 与卡集合用它；
+fumadocs 适配只从这里取卡格式，从 `.` 取会把命令行与配置加载带进还没迁的 Next 站的服务端构建：
 
 {/* ref file="../packages/docfirst-workflow/tsdown.config.ts" lines="8-11" hash="0160c388d13b" blob="15c1ca54010e" */}
 
@@ -254,16 +258,16 @@ fumadocs 自带组件的规则在 [fumadocs 适配](/docs/fumadocs)的 `./roster
 - **命令行那一侧不认识任何站的宿主**：除了 `src/fumadocs/`，fumadocs、react、next 在源码与产物里都不出现，清单里它们只是可选 peer。
   命令行运行在 git hook 与 CI 里，那些环境不一定装了站的依赖：
 
-{/* ref file="../tests/boundary.test.ts" lines="449-461" hash="8ddaab08f765" blob="0d3a5dcc329f" */}
+{/* ref file="../tests/boundary.test.ts" lines="453-465" hash="8ddaab08f765" blob="f1a4307dac6e" */}
 
 - **命令行那一侧不认识 fumadocs 适配**：别的目录不许引用 `src/fumadocs/`，`src/fumadocs/` 也只按包名用 `.`、`./mdx`、`./cards`：
 
-{/* ref file="../tests/boundary.test.ts" lines="433-447" hash="6cf7852c8dc4" blob="0d3a5dcc329f" */}
+{/* ref file="../tests/boundary.test.ts" lines="437-451" hash="6cf7852c8dc4" blob="f1a4307dac6e" */}
 
 - **`node/` 以外不碰磁盘与子进程**：别的目录不 import `node:fs`、`node:child_process`、`node:os`；`process` 只有 `node/` 与命令行用。
   记号、格式、钉码编排、卡的解析因此都能直接用文本测试：
 
-{/* ref file="../tests/boundary.test.ts" lines="470-481" hash="7430135f6d42" blob="0d3a5dcc329f" */}
+{/* ref file="../tests/boundary.test.ts" lines="474-485" hash="7430135f6d42" blob="f1a4307dac6e" */}
 
 - **不判状态**：绿黄白红由[钉码核心](/docs/pin)算，这个包把磁盘、git、配置交给它，再把结果打印出来。
 - **不给盘建模、不画盘**：关系怎么连成树、主干怎么选、盘怎么画归[星轨盘](/docs/trajectory)；这个包只把卡文件换成它要的中性输入。

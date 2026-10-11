@@ -2,12 +2,14 @@
 /**
  * 「提交门禁拦什么、什么算红」：每一步同时显示 git status、check 的输出与退出码、check 对这处引用的判定、门禁状态。
  * 讲解文字与每一步的数据都在 commit-gate.data.mjs，这里只负责画；步骤控制条、每一步的标题与说明由 Stepper 显示。
- * 机读版由 commit-gate.ai.mjs 读同一份数据生成。
+ * 生成物里的机读文字由 commit-gate.ai.mjs 读同一份数据生成。
  */
 import type { JSX } from 'react';
 import { Diff, Dot, Pane, Pill, Stepper, Terminal } from '@godcreator/docfirst-explainer';
 import type { TerminalLine, Tone } from '@godcreator/docfirst-explainer';
 import { files, gateLabel, gateNote, notRed, redSources, steps } from './commit-gate.data.mjs';
+import '@godcreator/docfirst-explainer/styles.css';
+import './commit-gate.css';
 
 type Step = (typeof steps)[number];
 type Gate = Step['gate'];

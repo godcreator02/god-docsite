@@ -1,5 +1,5 @@
 /**
- * SpanFollow 在机读版里变成什么：跟画面读同一份数据（span-follow.data.mjs），每一段一段话（用讲解组件包的 chaptersText，
+ * SpanFollow 在生成物里变成什么机读文字：跟画面读同一份数据（span-follow.data.mjs），每一段一段话（用讲解组件包的 chaptersText，
  * 和画面上 Timeline 显示的是同一段话），再把例子里的两版文件、记号、git 的输出、hunk 表、滑窗算出的 hash 逐项列出来。
  * 这个文件不 import React，docfirst.config.mjs 引它，命令行也能运行。
  */
@@ -41,7 +41,7 @@ export function SpanFollow(_node, { paragraph }) {
     paragraph(`作者写下的记号：${markers.unconfirmed}　确认后的记号：${markers.confirmed}`),
     paragraph(`记号上三个值怎么来：${recordFields.map((f) => `${f.name}="${f.value}"——${f.how}`).join('；')}。`),
     paragraph(`check 判行段的顺序，前一步能下结论就不往下走：${judgeOrder.map((s, i) => `${i + 1}. ${s.label}`).join('；')}。`),
-    // at 为 0 的是上一段留在终端里的行，机读版只写这一段新出现的
+    // at 为 0 的是上一段留在终端里的行，机读文字只写这一段新出现的
     ...chapters.flatMap((chapter, i) => {
       const fresh = chapter.terminal.filter((line) => line.at > 0);
       return fresh.length === 0 ? [paragraph(texts[i])] : [paragraph(texts[i]), paragraph(`终端：${fresh.map(terminalText).join('　')}`)];

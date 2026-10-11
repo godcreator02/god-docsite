@@ -1,14 +1,21 @@
 ---
 title: 轨迹卡怎么变成星轨盘
-description: content/trajectory/ 下的轨迹卡怎么被读出、校验、换成星轨盘的中性输入、建成一张盘、在每棵树里选出主干，再画到站的 /trajectory 上；以及卡里为什么不许钉码
+description: 轨迹卡目录下的卡怎么被读出、校验、换成星轨盘的中性输入、建成一张盘、在每棵树里选出主干，再画到站的 /trajectory 上；以及卡里为什么不许钉码
 ---
 
-轨迹卡是 `content/trajectory/` 下一卡一文件的 mdx，一张卡记一次取舍的结论，只增不改。星轨盘是这些卡的图：
+import { TrajectoryFlow } from '../../../src/components/trajectory-flow/trajectory-flow';
+
+轨迹卡是轨迹卡目录下一卡一文件的 mdx，一张卡记一次取舍的结论，只增不改。目录由 `docfirst.config.mjs` 的 `trajectory` 指定，
+本站是站点根下的 `trajectory/`；不写时是内容根下的 `trajectory/`：
+
+{/* ref file="../packages/docfirst-workflow/src/project/config.ts" lines="91-94" hash="f65934fb954b" blob="d259f3e1b09d" */}
+
+星轨盘是这些卡的图：
 一个站只有一张根卡、一张盘，根卡画在盘心，其余的卡按日期排在同心环上，半径表示时间、内旧外新。
 同一棵树（或同一领域的孤星）在同一天有好几张卡时，那一天的环带按张数加宽，这几张按角度从当天的环往内排成一斜排，不叠在同一个环上。
 角度按领域分扇区，一圈装得下就整体放大铺满整圈，只在 12 点方向留一道缝放日期与里程碑的名字；装不下才让同一领域里时间不重叠的树共用一段角度。
 从卡文件到站上的盘分几段：读卡目录、解析、校验、换成中性输入在 `docfirst-workflow` 的卡格式；建模、布局、画盘在通用包
-星轨盘 `trajectory-disk`，组件在浏览器里建模；站只负责读卡目录、把结果交给组件：
+星轨盘 `trajectory-disk`，组件在浏览器里建模；站上的路由在功能包 `docfirst-site`，只负责读卡目录、把结果交给组件：
 
 <TrajectoryFlow />
 
@@ -64,35 +71,45 @@ description: content/trajectory/ 下的轨迹卡怎么被读出、校验、换�
 
 ## 站上怎么渲染
 
-整页 `/trajectory` 在服务端读卡目录，把结果交给客户端组件 `StarDisk`；两样都从 `@godcreator/docfirst-workflow/fumadocs/trajectory` 取：
+星轨盘 `/trajectory` 与卡页 `/trajectory/<卡身份>` 是功能包 `docfirst-site` 的两条路由：星轨盘占满整个窗口，放在整站布局外面；卡页在整站布局里：
 
-{/* ref file="src/app/(trajectory-disk)/trajectory/page.tsx" lines="8-8" hash="e3b0c44298fc" blob="656dac5215ca" */}
+{/* ref file="../packages/docfirst-site/src/routes.ts" hash="c3a77595db13" blob="1a50868d9271" */}
 
-{/* ref file="src/app/(trajectory-disk)/trajectory/page.tsx" lines="11-12" hash="79d6f7b6375a" blob="da67a1b04df3" */}
+星轨盘的 loader 在服务端用 `loadProject` 找到配置的轨迹卡目录，交给卡格式的 `scanCardDir`，交回中性输入与病卡清单；
+星轨盘组件 `StarDisk` 直接从 `@godcreator/trajectory-disk/disk` 取：
 
-每张卡（含根卡）的正文也在盘页上用轨迹卡集合渲染好，按卡身份交给盘；点节点在盘右侧栏里看这张卡，
+{/* ref file="../packages/docfirst-site/src/routes/disk.tsx" lines="10-12" hash="a6fd0a297788" blob="4333c2115175" */}
+
+{/* ref file="../packages/docfirst-site/src/routes/disk.tsx" lines="23-26" hash="c35cfccef10d" blob="4333c2115175" */}
+
+每张卡（含根卡）的正文来自站点里的轨迹卡集合，按卡身份交给盘，点到哪张才加载哪张；点节点在盘右侧栏里看这张卡，
 栏里指向别的卡的链接也在栏里切换，地址栏记着 `?card=<卡身份>`，Ctrl/Cmd+点才开卡页：
 
-{/* ref file="src/app/(trajectory-disk)/trajectory/page.tsx" lines="13-23" hash="be1762864246" blob="8b9b202f561e" */}
+{/* ref file="../packages/docfirst-site/src/routes/disk.tsx" lines="28-43" hash="8d70aae68d69" blob="4333c2115175" */}
 
-{/* ref file="src/app/(trajectory-disk)/trajectory/page.tsx" lines="38-38" hash="68a8bf23899d" blob="8b9b202f561e" */}
+{/* ref file="../packages/docfirst-site/src/routes/disk.tsx" lines="62-62" hash="92272822ac7c" blob="4333c2115175" */}
 
-`loadTrajectory` 只收绝对路径，然后读卡目录，交回中性输入与病卡清单。卡目录由页面用写死的目录名拼成绝对路径再传，
-Turbopack 才看得出只读这一个目录，不会把整个项目打包进服务端产物：
+轨迹卡集合的定义只能写在站点里，所以它在功能包的模板里，初始化站点时写成站点的 `app/lib/trajectory.ts`，两条路由经别名 `@site/lib/trajectory` 读它。
+集合的目录要和配置的 `trajectory` 一致：
 
-{/* ref file="../packages/docfirst-workflow/src/fumadocs/trajectory.ts" lines="18-26" hash="274aec720515" blob="127ca2597015" */}
+{/* ref file="../packages/docfirst-site/template/skeleton/app/lib/trajectory.ts" lines="7-7" hash="b541f74038da" blob="55562eb102dd" */}
 
-每张卡另有自己的卡页 `/trajectory/<卡身份>`，由站里的 fumadocs 卡集合渲染：`cardSchema` 从 frontmatter 派生标题，
-`remarkTrajectoryLinks` 把正文里指向卡的链接改写成卡页地址（侧栏靠这个前缀认出卡链接）：
+卡页的标题依次取 frontmatter 的 `label`、`title`，都没有就用卡身份：
 
-{/* ref file="src/lib/source.ts" lines="59-62" hash="3f19f19dd147" blob="5128ac69a760" */}
+{/* ref file="../packages/docfirst-site/src/card-fields.ts" lines="26-26" hash="0de0baa6d3cc" blob="c9e3273f9b79" */}
+
+卡正文里指向卡的链接，由功能包的 remark 插件在构建时改写成卡页地址（盘右侧栏靠 `/trajectory/` 这个前缀认出卡链接）。
+轨迹卡目录里的文件只经过 `remarkTrajectoryLinks`，不做钉码投影与术语标注：
+
+{/* ref file="../packages/docfirst-site/src/content.ts" lines="52-57" hash="83c7d3f9596e" blob="c197951793e7" */}
 
 ## 卡里为什么不许钉码
 
 钉一处码是在说「这句话跟着这段代码走，代码变了要回来复核」。卡记的是当时的结论，代码后来怎么变都不该改它；
 卡里钉了码，代码一改卡就变黄，它就成了一份要维护的现状文档。所以两处把卡挡在钉码之外。
 
-一是 `check`、`confirm`、`render` 遍历的文档不含 `trajectory/` 与 `future/`，卡上的记号不会被核对，也不会被确认：
+一是 `check`、`confirm`、`render` 只遍历现状区：内容根下的 `trajectory/` 与 `future/` 不进；轨迹卡目录配在内容根外面时（本站就是这样），
+它本来就不在内容根里。卡上的记号不会被核对，也不会被确认：
 
 {/* ref file="../packages/docfirst-workflow/src/project/load.ts" lines="70-71" hash="e60f111d117a" blob="69a379c0beab" */}
 

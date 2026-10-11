@@ -1,0 +1,38 @@
+---
+born-at: 2026-10-11T15:00
+type: choice
+parent: [2026-09-03-god-live-doc]
+label: docfirst 站建在文档站基础包上，docfirst 做成功能包 docfirst-site
+domain: 分发
+---
+
+## 背景
+
+pivots-from:: [文档站改由工作台托管](2026-10-09-workbench-hosts-sites.md)
+
+协作站、论文阅读站已经建在文档站基础包 `@godcreator/docsite-kit`（fumadocs + React Router 框架模式 + Vite）上，
+有评论、人员列表、gwb-docsite 托管开发服务。docfirst 站还是各自一份 Next 骨架：每个站自己写 `source.ts`、布局、组件表，
+改一处要逐个站抄，也写不了评论。先迁本仓自己的文档站，验收以它能用为准。
+
+## 结论与边界
+
+- **docfirst 做成基础包的一个功能包 `@godcreator/docfirst-site`**（本仓 `packages/docfirst-site`）：`./content` 给 remark 插件，
+  `./site` 给侧栏入口「轨迹」与 MDX 组件 `Term`、文件树，`./routes` 给星轨盘与卡页两条路由，模板只有轨迹卡的集合定义。
+  站点骨架由基础包的初始化写出，站里只剩内容、站内组件、术语表、配置与测试
+- **基础包为此加了可选出口 `./content`**：remark 插件写进骨架 `source.config.ts` 的 fumadocs-mdx 全局设置，评论正文也经过它们；
+  docfirst-site 的插件按文件所在区分别处理（现状区标术语、投影钉码；轨迹卡目录改写卡链接；未来区与评论不处理）
+- **配置加两项**：`trajectory`（轨迹卡目录，基础包上的站放在站点根下的 `trajectory/`，跟内容集合分开，不跟卡页路由抢地址）、
+  `glossary`（术语表模块与不标注的页，插件按项目根装配项目时一起读到，骨架里不写站自己的代码）。不写时行为不变，没迁的 Next 站不用改
+- **状态点改成包在代码块外面的一层**：fumadocs 的代码块只把白名单里的 meta 放进属性，Next 站靠覆盖 `pre` 和改白名单，
+  基础包上的站这两样都改不了；插件给钉码代码块包一层带 `data-dot` 的 div，点由样式画在标题栏右侧
+- **站内组件在页面里 `import`**：照基础包的写法，组件各自引入样式；名册仍登记机读规则，生成物照旧按它渲染。
+  原来核对 React 组件表与名册的脚本删掉，页面用了却没 import 的组件改由站的测试查
+- **不带过来**：每页的机读版路由（`llms.txt` 等）、复制 Markdown 按钮、`proxy.ts`。生成物不受影响
+- **托管交给 gwb-docsite**；`docfirst.site.*` 与 `docfirst-workflow` 的 `./fumadocs` 出口留给还没迁的 Next 站，最后一个迁完再删
+
+## 代价
+
+- 站内组件的样式随组件按需加载，页面第一次渲染出来时可能先没有样式
+- 在本仓的工作区里，站和 docfirst-site 各自解析 fumadocs 的 peer，可选 peer zod 解析成两个版本时会装出两份 `@fumadocs/base-ui`，
+  卡页报「DocsPage 要在 DocsLayout 下」；工作区用 `overrides` 把 zod 固定成一个版本。站点从源上装功能包时没有这个问题
+- 评论正文也会经过功能包的 remark 插件，插件要自己按路径区分

@@ -1,7 +1,7 @@
 /**
  * 全局接缝图的全部内容：首页的 <SeamMap /> 画的就是它，接缝的正本就在这里。
  * 模块按包分：docfirst 用到的每个 npm 包（通用包与 docfirst 自己的包）与工作台插件各一个虚线框，框里的方块是能力；
- * 使用方的站、使用方的仓、fumadocs 本体在框外。讲解组件包 docfirst-explainer 只有站用，workflow 与工作台插件都不依赖它，它也不依赖别的包，不在这张图里。
+ * 文档站基础包、fumadocs 本体、使用方的仓在框外。讲解组件包 docfirst-explainer 只有站自己的组件用，别的包与工作台插件都不依赖它，它也不依赖别的包，不在这张图里。
  * 每条接缝写明两端的能力、接口、是不是约定（没有代码接口，只靠文件名、目录名、配置键对上）、经代码调用还是经磁盘上的文件。
  * 坐标不在这里，在 system.layout.ts：这份只描述系统是什么样。各包内部的接缝图在 inner/ 下。
  */
@@ -10,19 +10,35 @@ import { defineSeamGraph } from '@godcreator/docfirst-explainer/seam-graph';
 /** @type {import('@godcreator/docfirst-explainer/seam-graph').SeamModule[]} */
 const modules = [
   {
+    id: 'docfirst-site',
+    name: '站的功能包',
+    pkg: '@godcreator/docfirst-site',
+    role: 'rose',
+    outside: false,
+    blurb:
+      '建在文档站基础包上的 docfirst 站用的功能包：构建页面时的 remark 插件（现状区做术语标注、钉码投影、给钉码代码块包上带状态点的外层，轨迹卡目录改写关系行与卡链接）、侧栏入口「轨迹」与页面里不用 import 的组件 Term 和文件树、星轨盘与卡页两条路由、轨迹卡集合的模板、样式。认识 workflow、fumadocs 适配与星轨盘，谁都不认识它。',
+    caps: [
+      { id: 'site-content', name: 'remark 插件', ident: './content' },
+      { id: 'site-mdx', name: '侧栏入口与组件', ident: './site' },
+      { id: 'site-cards', name: '轨迹卡集合', ident: 'template/' },
+      { id: 'site-css', name: '样式', ident: './styles.css' },
+      { id: 'site-routes', name: '星轨盘与卡页', ident: './routes' },
+    ],
+  },
+  {
     id: 'fumadocs',
     name: 'fumadocs 适配',
     pkg: '@godcreator/docfirst-workflow/fumadocs',
     role: 'amber',
     outside: false,
-    blurb: '调用链从 fumadocs 或 Next 开始的部分：mdx 加载器编译页面时调的 remark 插件、机读版、页面渲染时的组件、名册规则、卡集合、星轨盘的读卡与组件。认识命令行与项目、钉码核心、星轨盘，谁都不认识它。',
+    blurb:
+      '调用链从 fumadocs 的 mdx 编译开始的部分：钉码投影的 remark 插件、术语标注、轨迹卡正文的链接改写、状态点与术语标注的样式表，另有 ./fumadocs/roster（fumadocs 自带组件的名册规则，docfirst.config.mjs 展开它）。站的功能包用其中的 remark 插件与样式表；集合选项、meta 白名单、状态点组件、机读版回调、读卡等其余出口给还没迁到文档站基础包的 Next 站。认识命令行与项目、钉码核心、星轨盘。',
     caps: [
-      { id: 'remark', name: 'remark 插件', ident: 'docfirstMdxOptions' },
-      { id: 'markdown', name: '机读版', ident: 'markdown.ts' },
-      { id: 'pre', name: '状态点与术语组件', ident: './fumadocs/pre · ./fumadocs/term' },
-      { id: 'roster', name: '组件名册规则', ident: './fumadocs/roster' },
-      { id: 'cardset', name: '卡集合', ident: 'cardSchema' },
-      { id: 'disk-load', name: '星轨盘读卡', ident: './fumadocs/trajectory' },
+      { id: 'remark', name: 'remark 接入', ident: 'remarkDocfirstHost' },
+      { id: 'glossary', name: '术语标注', ident: 'remarkGlossary' },
+      { id: 'cardset', name: '卡链接改写', ident: 'remarkTrajectoryLinks' },
+      { id: 'styles', name: '样式表', ident: './fumadocs/*.css' },
+      { id: 'other', name: '其余出口', ident: 'docfirstMdxOptions · DocfirstPre' },
     ],
   },
   {
@@ -75,11 +91,20 @@ const modules = [
     pkg: '@godcreator/gwb-docfirst-workflow',
     role: 'cyan',
     outside: false,
-    blurb: '不在 npm 的依赖关系里，只在桌面工作台里给 agent 提供两条建站命令和说明书。对本仓的 npm 包零依赖：不 import、不运行它们的命令行。',
+    blurb: '不在 npm 的依赖关系里，只在桌面工作台里给 agent 提供建站命令、托管站点的命令和说明书；建站命令建出的站接的是 fumadocs 适配，不是站的功能包。对本仓的 npm 包零依赖：不 import、不运行它们的命令行。',
     caps: [
       { id: 'skills', name: '说明书', ident: 'skills/' },
       { id: 'create', name: '建站命令与模板', ident: 'docfirst.create' },
     ],
+  },
+  {
+    id: 'docsite-kit',
+    name: '文档站基础包',
+    pkg: '@godcreator/docsite-kit',
+    role: null,
+    outside: true,
+    blurb: '基于 fumadocs（React Router 框架模式与 Vite）的文档站基础包：站点骨架与初始化、功能包的约定。站点 package.json 的 docsite.features 列出用到的功能包，初始化照它生成骨架里引用功能包的几个文件。不属于这个仓，站的功能包按它的约定接入。',
+    caps: [{ id: 'kit', name: '文档站基础包', ident: '@godcreator/docsite-kit' }],
   },
   {
     id: 'fumadocs-core',
@@ -87,17 +112,8 @@ const modules = [
     pkg: 'peer 依赖，用站自己装的那份',
     role: null,
     outside: true,
-    blurb: 'fumadocs-mdx 编译 mdx、fumadocs-ui 提供代码块与目录树组件。不属于这个仓，fumadocs 适配按它的形状接入。',
-    caps: [{ id: 'fumadocs-core', name: 'fumadocs 本体', ident: 'fumadocs-mdx · fumadocs-ui' }],
-  },
-  {
-    id: 'site',
-    name: '使用方的站',
-    pkg: 'Next 站的接入代码',
-    role: null,
-    outside: true,
-    blurb: '装了这几个包的站：src/lib/source.ts 接集合，src/components/mdx.tsx 换组件，星轨整页调用 loadTrajectory 与 StarDisk。本仓的 docs-site/ 就是这样一个站。',
-    caps: [{ id: 'wiring', name: '站的接入代码', ident: 'source.ts · mdx.tsx' }],
+    blurb: 'fumadocs-mdx 编译 mdx、定义集合，@fumadocs/base-ui 提供代码块、文件树与文档页的组件。不属于这个仓，fumadocs 适配与站的功能包按它的形状接入。',
+    caps: [{ id: 'fumadocs-core', name: 'fumadocs 本体', ident: 'fumadocs-mdx · @fumadocs/base-ui' }],
   },
   {
     id: 'repo',
@@ -105,7 +121,7 @@ const modules = [
     pkg: '磁盘上的文件',
     role: null,
     outside: true,
-    blurb: '站所在的仓：项目根的配置与内容、被钉的源码与 git 历史、仓根的生成物。docfirst 的包只经约定读写它们。',
+    blurb: '站所在的仓：项目根的配置、package.json、内容与轨迹卡目录，被钉的源码与 git 历史，仓根的生成物。docfirst 的包只经约定读写它们。',
     caps: [
       { id: 'root', name: '站的项目根', ident: 'docfirst.config.mjs · content/' },
       { id: 'source', name: '被钉的源码与 git 历史', ident: '源码 · .git' },
@@ -120,7 +136,7 @@ const modules = [
  */
 const entries = [
   { id: 'agent', name: 'agent · 工作台命令总线', to: 'plugin' },
-  { id: 'next', name: 'Next 构建', to: 'remark' },
+  { id: 'build', name: '站点构建 · 开发服务', to: 'kit' },
   { id: 'human', name: '人 · git hook · CI', to: 'cli' },
 ];
 
@@ -173,52 +189,52 @@ const seams = [
   {
     n: 5,
     name: '星轨盘组件',
-    a: ['disk-load'],
+    a: ['site-routes', 'styles', 'other'],
     b: ['disk'],
-    iface: './disk 的 StarDisk（data 收中性输入）、./star.css',
+    iface: "import { StarDisk } from '@godcreator/trajectory-disk/disk'（data 收中性输入）；@import '@godcreator/trajectory-disk/star.css'",
     convention: false,
     via: 'code',
-    text: 'fumadocs 适配与星轨盘之间。./fumadocs/trajectory 按包名从 ./disk 再导出客户端组件 StarDisk，Next 才认得出客户端边界；./fumadocs/trajectory.css 引入 star.css。StarDisk 的 data 就是 loadTrajectory 交回的中性输入，组件在浏览器里自己调 buildModel。站画星轨盘只经过 fumadocs 适配，不直接依赖星轨盘包；fumadocs 适配也不从星轨盘包的主入口取任何东西。组件的形状由星轨盘负责。',
+    text: '站的功能包、fumadocs 适配与星轨盘之间。功能包的星轨盘路由按包名从 ./disk 取客户端组件 StarDisk，data 就是 scanCardDir 交回的中性输入，组件在浏览器里自己调 buildModel；fumadocs 适配的 ./fumadocs/trajectory.css 引入 star.css，功能包的样式表再引入它。./fumadocs/trajectory 另外按包名再导出 StarDisk，给还没迁到文档站基础包的 Next 站。两边都不从星轨盘包的主入口取任何东西。组件的形状由星轨盘负责。',
   },
   {
     n: 6,
     name: '项目',
     a: ['project', 'pinning', 'mdx', 'cards'],
-    b: ['remark', 'disk-load', 'cardset'],
+    b: ['remark', 'cardset', 'other'],
     iface: '主入口的 loadProject（pinning、roster、docIdOf）与 Listing 等类型；./mdx 的 recognize、stamp 等语法树函数；./cards 的 scanCardDir、CARD_KEYS、cardIdFromHref',
     convention: false,
     via: 'code',
-    text: 'workflow 与 fumadocs 适配之间。站构建时 remark 插件调用 loadProject 装配一次项目，拿到钉码编排与组件名册，用 ./mdx 的 recognize 在语法树上认记号、交给钉码编排的 checkReferences 核对、用 stamp 按名册标上机读文字，认记号用的是和命令行同一份代码。./fumadocs/trajectory 的 loadTrajectory 就是 ./cards 的 scanCardDir，交回中性输入加病卡、不建模；卡集合的 cardSchema 用 CARD_KEYS 判断一页算不算卡，remarkTrajectoryLinks 用 cardIdFromHref 从链接认出卡身份。卡格式只从 ./cards 取、不从主入口取，免得把命令行与配置加载带进 Next 的服务端构建。两边在同一个包 docfirst-workflow 里，fumadocs 适配只按包名用这几个出口，不用相对路径引用命令行那一侧的目录。出口由 workflow 负责。',
+    text: 'workflow 与 fumadocs 适配之间。remarkDocfirstHost 在构建页面时调用 loadProject 装配一次项目，拿到钉码编排与组件名册，用 ./mdx 的 recognize 在语法树上认记号、交给钉码编排的 checkReferences 核对、用 stamp 按名册标上机读文字，认记号用的是和命令行同一份代码。remarkTrajectoryLinks 用 ./cards 的 cardIdFromHref 从链接认出卡身份；其余出口里的 cardSchema 用 CARD_KEYS 判断一页算不算卡，loadTrajectory 就是 scanCardDir。两边在同一个包 docfirst-workflow 里，fumadocs 适配只按包名用 .、./mdx、./cards 这几个出口，不用相对路径引用命令行那一侧的目录。出口由 workflow 负责。',
   },
   {
     n: 7,
     name: '接入 fumadocs',
-    a: ['remark', 'markdown', 'pre'],
+    a: ['remark', 'other'],
     b: ['fumadocs-core'],
-    iface: 'applyMdxPreset 的参数形状、postprocess、rehypeCode 的 meta 白名单、CodeBlock、Files',
+    iface: 'remark 插件 (tree, file) => void；名为 Files / Folder / File 的节点；applyMdxPreset 的参数形状、rehypeCode 的 meta 白名单、postprocess、CodeBlock',
     convention: false,
     via: 'code',
-    text: 'fumadocs 适配与 fumadocs 本体之间。docfirstMdxOptions 的返回值按形状对上 applyMdxPreset 的参数，把 remark 插件放在链末尾；docfirstMarkdownOptions 交给 postprocess 生成机读版；parseMetaString 让 rehypeCode 保留状态点的 data-dot；状态点代码块用 fumadocs-ui 的 CodeBlock，目录树用它的 Files。fumadocs 是 peer 依赖，它改了这些形状，要改的是 fumadocs 适配。',
+    text: 'fumadocs 适配与 fumadocs 本体之间。remark 插件是 fumadocs-mdx 编译每一篇时调用的 (tree, file)，从 file.path 认出是哪一篇；目录树引用投影成名为 Files 的节点，由站的组件表对到文件树组件。其余出口按形状对上 fumadocs 的 applyMdxPreset、rehypeCode 的 meta 白名单、postprocess 与 CodeBlock。fumadocs 是 peer 依赖，它改了这些形状，要改的是 fumadocs 适配。',
   },
   {
     n: 8,
-    name: '站接入',
-    a: ['remark', 'markdown', 'pre', 'roster', 'cardset', 'disk-load'],
-    b: ['wiring', 'root'],
-    iface: 'docfirstMdxOptions、docfirstMarkdownOptions、cardSchema、remarkTrajectoryLinks；./fumadocs/pre、./fumadocs/term、./fumadocs/trajectory、样式表；./fumadocs/roster',
+    name: '功能包用适配',
+    a: ['site-content', 'site-css'],
+    b: ['remark', 'glossary', 'cardset', 'styles'],
+    iface: "remarkDocfirstHost({ root })、remarkGlossary({ terms, skipFile })、remarkTrajectoryLinks({ hrefBase })；@import '@godcreator/docfirst-workflow/fumadocs/light.css' · term.css · trajectory.css",
     convention: false,
     via: 'code',
-    text: 'fumadocs 适配与使用方站的接入代码之间。站的 src/lib/source.ts 把前四个出口用在现状集合与轨迹卡集合上，mdx.tsx 把 pre 换成会画状态点的 DocfirstPre、登记 Term，星轨整页调用 loadTrajectory、渲染 StarDisk，样式表 light.css、term.css、trajectory.css 由站引入；docfirst.config.mjs 展开 ./fumadocs/roster 的 fumadocsRoster。出口名由 fumadocs 适配负责，改名要同时改站的接入代码和接缝 12 的模板。',
+    text: '站的功能包与 fumadocs 适配之间。功能包的 remark 插件按文件所在的区分别调用：现状区依次是术语标注（配置里有 glossary 时）与钉码投影，轨迹卡目录用卡链接改写，hrefBase 是星轨盘的地址 /trajectory。功能包的样式表引入适配的三份样式表（目录树的状态点、术语标注、星轨盘），钉码代码块的状态点由功能包自己的样式画。适配改了这几个函数的参数，要同时改功能包。',
   },
   {
     n: 9,
     name: '项目根',
     a: ['project'],
     b: ['root'],
-    iface: '配置键 content / components / outputs；内容根下 trajectory/、future/ 两个名字固定',
+    iface: '配置键 content / components / outputs / trajectory / glossary；内容根下 future/ 名字固定，轨迹卡目录不配置时是内容根下 trajectory/',
     convention: true,
     via: 'disk',
-    text: '项目装配与使用方的项目根之间，没有代码接口。loadProject 在项目根找 docfirst.config.mjs，只认这几个配置键，出现别的键当场报错并说明该怎么改；内容根（默认 content/）下 trajectory/ 是轨迹卡、future/ 是未来区，其余 .mdx 文档都是现状区、都进 check；项目根下 src/components/ 里的 .ts、.tsx、.mjs（讲解组件的源码）也进 check。约定由项目装配定，使用方照着写。',
+    text: '项目装配与使用方的项目根之间，没有代码接口。loadProject 在项目根找 docfirst.config.mjs，只认这五个配置键，出现别的键当场报错并说明该怎么改；内容根（默认 content/）下 future/ 是未来区，轨迹卡目录由 trajectory 指定（相对项目根），不写时是内容根下 trajectory/，其余 .mdx 文档都是现状区、都进 check；项目根下 src/components/ 里的 .ts、.tsx、.mjs（讲解组件的源码）也进 check。名册里 fumadocs 自带组件的规则，由配置展开 fumadocs 适配的 ./fumadocs/roster。约定由项目装配定，使用方照着写。',
   },
   {
     n: 10,
@@ -244,11 +260,51 @@ const seams = [
     n: 12,
     name: '模板',
     a: ['create'],
-    b: ['wiring', 'root'],
+    b: ['root'],
     iface: '模板 import 的出口都在 docfirst-workflow 的 /fumadocs 与 /fumadocs/roster、/fumadocs/pre、/fumadocs/light.css、/fumadocs/trajectory 里；站依赖表 src/deps.ts',
     convention: true,
     via: 'disk',
-    text: '工作台插件与它建出来的站之间。docfirst.create 把模板写成新站的 source.ts、mdx.tsx、docfirst.config.mjs 等文件，并把 docfirst-workflow 按精确版本写进站的依赖。插件不依赖这个包，模板里的包名和出口名只能靠约定对上：插件的 tests/create.test.ts 检查模板引用的出口都在这个包的清单里、依赖表的版本等于工作区里各包的版本。',
+    text: '工作台插件与它建出来的站之间。docfirst.create 把模板写成新站的集合、组件表、docfirst.config.mjs 等文件，接的是 fumadocs 适配的出口，并把 docfirst-workflow 按精确版本写进站的依赖。插件不依赖这个包，模板里的包名和出口名只能靠约定对上：插件的 tests/create.test.ts 检查模板引用的出口都在这个包的清单里、依赖表的版本等于工作区里各包的版本。建在文档站基础包上的站不经这个插件建。',
+  },
+  {
+    n: 13,
+    name: '功能包用项目',
+    a: ['site-content', 'site-routes'],
+    b: ['project', 'cards'],
+    iface: 'loadProject(process.cwd()) → Project：config.glossary · docIdOf · contentDir · trajectoryDir；scanCardDir(project.trajectoryDir) → CardScan',
+    convention: false,
+    via: 'code',
+    text: '站的功能包与 workflow 之间。功能包以站点目录 process.cwd() 当项目根调用 loadProject：remark 插件按项目的内容根与轨迹卡目录判断一篇在哪个区，按配置的 glossary 读术语表、用 docIdOf 认出不标注的文档；星轨盘路由的 loader 用 scanCardDir 读轨迹卡目录，交回中性输入加病卡。配置与卡格式由 workflow 负责。',
+  },
+  {
+    n: 14,
+    name: '基础包',
+    a: ['site-content', 'site-mdx', 'site-routes', 'site-cards'],
+    b: ['kit'],
+    iface: 'FeatureContent { remarkPlugins } · FeatureSite { routeLinks, mdxComponents } · FeatureRoutes { routes } · FeatureSiteServer；别名 @site/lib/source · mdx-components · trajectory',
+    convention: false,
+    via: 'code',
+    text: '站的功能包与文档站基础包之间。站点 package.json 的 docsite.features 列出功能包，初始化照它生成骨架里引用功能包的文件，并把功能包 template/ 下的轨迹卡集合定义写进站点。骨架的 source.config.ts 把 ./content 的 remark 插件接在 fumadocs 默认插件后面；./site 的侧栏入口与组件、./routes 的路由表由骨架读进整站；路由模块经别名 @site 读骨架里的 source、mdx-components 与轨迹卡集合。出口的形状由基础包定。',
+  },
+  {
+    n: 15,
+    name: '站点目录',
+    a: ['site-content', 'site-cards'],
+    b: ['root'],
+    iface: "项目根 = process.cwd()；glossary.terms 指的模块导出 terms；集合 dir: 'trajectory' 与配置 trajectory 指同一个目录",
+    convention: true,
+    via: 'disk',
+    text: '站的功能包与使用方的项目根之间，没有代码接口。站点构建与开发服务都在站点目录里运行，功能包把 process.cwd() 当项目根；remark 插件 import 配置 glossary.terms 指的术语表模块，要求它导出数组 terms；模板写进站点的轨迹卡集合读站点根下的 trajectory/，配置的 trajectory 要指同一个目录，否则卡页与星轨盘读到的不是同一批卡。',
+  },
+  {
+    n: 16,
+    name: 'fumadocs 组件',
+    a: ['site-mdx', 'site-routes', 'site-cards'],
+    b: ['fumadocs-core'],
+    iface: '@fumadocs/base-ui 的 Files · Folder · File、DocsPage · DocsBody · DocsTitle、ThemeSwitch；fumadocs-mdx/macro 的 defineCollections',
+    convention: false,
+    via: 'code',
+    text: '站的功能包与 fumadocs 本体之间。目录树引用投影成的 Files、Folder、File 交给 @fumadocs/base-ui 的文件树组件；卡页用它的 DocsPage 等组件放进整站布局，星轨盘页用 DocsBody 排卡正文、ThemeSwitch 切换深浅色；轨迹卡集合用 fumadocs-mdx 的 defineCollections 定义，正文按需加载。@fumadocs/base-ui 是 peer 依赖，用站点装的那份。',
   },
 ];
 

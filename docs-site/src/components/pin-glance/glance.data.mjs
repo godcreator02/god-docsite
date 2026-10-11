@@ -1,5 +1,5 @@
 /**
- * 首页「一眼看懂钉码」的全部讲解数据：画面（glance.tsx）与机读版规则（glance.ai.mjs）都只读这一份。
+ * 首页「一眼看懂钉码」的全部讲解数据：画面（glance.tsx）与机读规则（glance.ai.mjs）都只读这一份。
  * 例子跟钉码页（pin/story.data.mjs）是同一个 greet.ts：文档钉住第 2–3 行、确认时写下了 hash 与 blob，之后代码发生四种变化。
  * hash 与 blob 是按 code-pin 的算法对这版 greet.ts 真算出来的，命令行输出照 `docfirst check` 的真实输出写。
  *

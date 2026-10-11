@@ -57,7 +57,7 @@ export const docfirstExplainerGraph = defineSeamGraph({
       pkg: 'text.ts',
       role: 'cyan',
       outside: false,
-      blurb: '把步骤、章节、情况的数据转成一行行文字，给机读版用。不 import 任何东西、不带 "use client"，单独构建。',
+      blurb: '把步骤、章节、情况的数据转成一行行文字，给生成物里的机读文字用。不 import 任何东西、不带 "use client"，单独构建。',
       caps: [
         { id: 'steps-text', name: '分步', ident: 'stepsText' },
         { id: 'chapters-text', name: '动画', ident: 'chaptersText' },
@@ -141,12 +141,12 @@ export const docfirstExplainerGraph = defineSeamGraph({
     },
     {
       id: 'site-css',
-      name: '站的全局样式',
-      pkg: 'docs-site/src/app/site.css',
+      name: '组件引入样式',
+      pkg: 'src/components/*/*.tsx',
       role: null,
       outside: true,
-      blurb: '站的全局样式：引入讲解组件包的样式表，再引入各讲解组件自己的画面样式。',
-      caps: [{ id: 'site-css', name: '站的全局样式', ident: 'src/app/site.css' }],
+      blurb: '站里每个用到外壳或零件的讲解组件，在自己的 .tsx 开头 import 讲解组件包的样式表，再 import 自己的画面样式。',
+      caps: [{ id: 'site-css', name: '组件引入样式', ident: "import 'styles.css'" }],
     },
     {
       id: 'styles',
@@ -311,10 +311,10 @@ export const docfirstExplainerGraph = defineSeamGraph({
       name: '引入样式表',
       a: ['site-css'],
       b: ['classes', 'attrs', 'vars'],
-      iface: '@import "@godcreator/docfirst-explainer/styles.css" → styles/explain.css',
+      iface: "import '@godcreator/docfirst-explainer/styles.css' → styles/explain.css",
       convention: false,
       via: 'code',
-      text: '主入口不带样式，站在全局样式里引入一次样式表，所有讲解组件共用。包的 exports 把 ./styles.css 指到 styles/explain.css。',
+      text: '主入口不带样式，用到外壳或零件的组件各自 import 样式表，打包工具只放进一份，所有讲解组件共用。包的 exports 把 ./styles.css 指到 styles/explain.css。',
     },
     {
       n: 11,

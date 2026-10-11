@@ -2,15 +2,18 @@
  * 这个项目的 docfirst 配置：生成物写到哪、组件名册是什么。命令行和站读的是同一份。
  *
  * 项目根是这个站目录，引用的代码在工作区的 packages/ 与 plugins/ 下，所以引用里写 `../packages/…` 或 `../plugins/…`。
- * 分区按约定：content/ 下 trajectory/ 与 future/ 两个名字固定，其余目录都是现状区、都进 check；
+ * 分区按约定：content/ 下 future/ 是未来区，其余目录都是现状区、都进 check；
  * 本站的现状区是 content/docs（原理）与 content/maintain（维护这个仓），外加 src/components/ 下讲解组件的源码。
  * outputs：仓根 README.md / AGENTS.md / CLAUDE.md 和插件里的几份 SKILL.md 是生成物，正本是下面映射左边的 mdx
  * （AGENTS 的正本在 content/maintain/agents.mdx，其余在 content/docs/outputs/）——
  * 改 mdx 源要运行 `pnpm docfirst render`（`confirm` 也会顺带做），两份一起提交，check 检查生成物跟源是否一致。
  * CLAUDE.md 第一行固定是 `@AGENTS.md`，只给 Claude 的指令写在它后面。
  * 组件名册：先展开 fumadocsRoster（fumadocs 自带的 Files / Folder / File 与 Note 的机读规则，纯数据，命令行也能加载），
- * 再加站里自己定义的组件和它们转成机读文本的规则。组件的 React 实现在 src/components/mdx.tsx。
- * 星轨盘不在名册里：它是一条独立的整页路由 /trajectory，不在 mdx 里用。
+ * 再加站里自己定义的组件和它们转成机读文本的规则。站内组件的 React 实现在 src/components/ 下，页面里 import；
+ * Term 与 Files / Folder / File 由功能包 @godcreator/docfirst-site 提供，页面里不用 import。
+ * 星轨盘不在名册里：它是功能包的整页路由 /trajectory，不在 mdx 里用。
+ * trajectory：轨迹卡放在站点根下的 trajectory/（功能包的卡集合读这个目录）。
+ * glossary：术语表在 src/glossary.mjs，构建页面时功能包的 remark 插件按它标注术语；skip 里的页不标。
  */
 import { fumadocsRoster } from "@godcreator/docfirst-workflow/fumadocs/roster";
 import * as tabs from "./src/components/tabs/tabs.ai.mjs";
@@ -23,7 +26,6 @@ import * as spanFollow from "./src/components/span-follow/span-follow.ai.mjs";
 import * as commitGate from "./src/components/commit-gate/commit-gate.ai.mjs";
 import * as trajectoryFlow from "./src/components/trajectory-flow/trajectory-flow.ai.mjs";
 import * as boundaryRules from "./src/components/boundary-rules/boundary-rules.ai.mjs";
-import * as mdOutput from "./src/components/md-output/md-output.ai.mjs";
 
 /**
  * 一份 skill 的生成位置：正本是 `content/docs/outputs/skills/<名>.mdx`，生成到**插件**里那份 SKILL.md。
@@ -65,8 +67,8 @@ export default {
     CommitGate: commitGate.CommitGate,
     TrajectoryFlow: trajectoryFlow.TrajectoryFlow,
     BoundaryRules: boundaryRules.BoundaryRules,
-    MdBuild: mdOutput.MdBuild,
-    MdComponents: mdOutput.MdComponents,
-    MdServe: mdOutput.MdServe,
   },
+  trajectory: "trajectory",
+  // 术语页规范那篇是人写的规范文本，里头的词按字面读，不标注
+  glossary: { terms: "src/glossary.mjs", skip: ["content/docs/human-write-spec-dont-change.mdx"] },
 };

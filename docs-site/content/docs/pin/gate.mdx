@@ -3,6 +3,8 @@ title: 提交门禁
 description: check 把哪几类问题计入红；本仓未提交的改动引起的黄为什么按红算、怎么认出来；退出码 0、1、2 各是什么；这个仓的门禁怎么落实
 ---
 
+import { CommitGate } from '../../../src/components/commit-gate/commit-gate';
+
 `check` 只读不写，退出码只看红的总数：有红时退出码是 1，门禁不通过。下面还是 `src/greet.ts` 那个例子，改了被钉的两行之后，
 依次演示被拦下、复核、通过，再看另外几种情况：
 

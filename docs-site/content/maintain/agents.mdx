@@ -9,13 +9,13 @@ docfirst: none
 **仓根就是这个目录 `gwb-docfirst/`**，它同时是 pnpm 包工作区。上一级是单元目录，那儿只有一张
 出生证 `unit.json`，不在 git 里。布局照 devkit 的 workspace 仓：`plugins/docfirst/` 是工作台插件 `@godcreator/gwb-docfirst-workflow`，
 `packages/` 下是 npm 包：通用包 `code-pin`（钉码核心）、`trajectory-disk`（星轨盘）不认识 docfirst，谁都能单独使用；
-docfirst 自己的包是 `docfirst-workflow`（命令行、项目装配与格式，接到 fumadocs 站上的部分在子入口 `./fumadocs`）与
-`docfirst-explainer`（docfirst 站上用的讲解组件：分步、动画、选情况模板与零件，还有画接缝图的 `SeamDiagram`）。`docs-site/` 是自己的 fumadocs 文档站（用这套机制写自己的文档；站用 `workspace:*`
+docfirst 自己的包是 `docfirst-workflow`（命令行、项目装配与格式，接到 fumadocs 站上的部分在子入口 `./fumadocs`）、
+`docfirst-site`（文档站基础包 `@godcreator/docsite-kit` 的功能包：构建页面时的 remark 插件、`Term` 与文件树、星轨盘与卡页两条路由）与
+`docfirst-explainer`（docfirst 站上用的讲解组件：分步、动画、选情况模板与零件，还有画接缝图的 `SeamDiagram`）。`docs-site/` 是自己的文档站（建在基础包上，用这套机制写自己的文档；站用 `workspace:*`
 引这几个包，也是工作区成员，这是本仓有意的例外），`tests/` 是工作区级测试。
 **怎么装、怎么接、怎么运行，看 `README.md`**，这儿不复述。
 
-使用方示例不在仓里：`docs-site` 就是「装了这几个包的项目」，钉的是工作区里的实际源码。
-星轨盘的诗名 fixture 在 `tests/fixtures/trajectory/`，轨迹卡在 `docs-site/content/trajectory/`。
+使用方示例不在仓里：`docs-site` 就是「装了这几个包的项目」，钉的是工作区里的实际源码。星轨盘的诗名 fixture 在 `tests/fixtures/trajectory/`，轨迹卡在 `docs-site/trajectory/`。站的 `app/` 与根目录的配置文件由 `docsite.site.init` 照模板写出，不手改。
 
 README、CLAUDE.md、这份规矩与插件里的 SKILL.md 都是**生成物**：正本是 `docs-site/content/` 下的 mdx
 （这份的正本是 `docs-site/content/maintain/agents.mdx`，其余在 `docs-site/content/docs/outputs/`），对应关系看
@@ -29,11 +29,9 @@ README、CLAUDE.md、这份规矩与插件里的 SKILL.md 都是**生成物**：
 
 ## 参考，不要改
 
-- 实验室 `D:\dshfiles\260901lab`（台阶七 `step7-packages` / `step7-site` / `step7-mini`）：架构定案的出处，
-  教学代码，**只读**。要用它的逻辑就复制过来，别 import 它。它在 `D:\dshfiles`（DSH 时代的归档区），
-  本仓在 `D:\unitfolders` 下的单元里，这条引用跨出了 `D:\unitfolders`。
-- 老仓 `D:\dshfiles\26082711aju\god-live-doc`（同在 `D:\dshfiles`）：用 git 取旧内容这项功能的出处，**只读**。
-  功能已对齐，不再参考，代码只看这个仓。
+- 实验室 `D:\dshfiles\260901lab`（台阶七 `step7-packages` / `step7-site` / `step7-mini`）：架构定案的出处，教学代码，**只读**。
+  要用它的逻辑就复制过来，别 import 它。它在 `D:\dshfiles`（DSH 时代的归档区），这条引用跨出了 `D:\unitfolders`。
+- 老仓 `D:\dshfiles\26082711aju\god-live-doc`（同在 `D:\dshfiles`）：用 git 取旧内容这项功能的出处，**只读**。功能已对齐，不再参考，代码只看这个仓。
 
 ## 规矩
 
@@ -46,24 +44,22 @@ README、CLAUDE.md、这份规矩与插件里的 SKILL.md 都是**生成物**：
   互不认识，也不认识 docfirst，包里一个 docfirst 字样都没有（清单里指向本仓的仓地址除外）；`docfirst-explainer` 跟它们一样
   不依赖任何 `@godcreator/` 包，只是名字里带 docfirst；`docfirst-workflow` 认识 `code-pin` 与 `trajectory-disk`，除了 `src/fumadocs/` 不认识任何站的宿主。调用链从 `docfirst` 命令开始的归 `cli` 及它下面的目录，
   由 fumadocs 或 Next 调用的归 `src/fumadocs/`；`src/fumadocs/` 只按包名用本包的 `.`、`./mdx`、`./cards`，别的目录不认识它。
-  workflow 里 `marker` / `reference` / `mdx` / `code` / `pinning` / `project` / `cards` / `node` / `cli` / `fumadocs` 几个目录之间也单向，只有 `node` 读写磁盘、启动子进程。`docfirst-explainer` 只给站用，`docfirst-workflow` 与插件都不依赖它。
-  **包与插件互不认识**：包不许出现任何 `@godcreator/gwb-*`，
-  插件也不许依赖包，两个方向各由 `tests/boundary.test.ts` 与插件的 `tests/artifact.test.ts` 检查。
+  workflow 里 `marker` / `reference` / `mdx` / `code` / `pinning` / `project` / `cards` / `node` / `cli` / `fumadocs` 几个目录之间也单向，只有 `node` 读写磁盘、启动子进程。`docfirst-explainer` 只给站用，`docfirst-workflow`、`docfirst-site` 与插件都不依赖它。
+  `docfirst-site` 用 `docfirst-workflow` 与 `trajectory-disk`，不依赖 `code-pin`，别的包都不依赖它；它的 `template/` 是基础包初始化时写进站点的文件。
+  **包与插件互不认识**：包不许出现任何 `@godcreator/gwb-*`，插件也不许依赖包，两个方向各由 `tests/boundary.test.ts` 与插件的 `tests/artifact.test.ts` 检查。
   **`tests/boundary.test.ts` 是唯一检查这些边界的测试**（包的方向、自成一体的包与通用包、workflow 目录方向、宿主只能是可选的 peer、
   包不认识插件、docfirst-explainer 的三个入口），别绕、别删、别为了让检查通过注释掉某一条。
 - **要在仓里发生的（核对、确认、渲染）归包，只由 agent 执行一次的、跟会话无关要一直开着的归插件**：建站
-  （`docfirst.create` 与 `docfirst.create-plain`）、托管站点（`docfirst.site.*` 与只显示的窗格「文档站」）与说明书在 `plugins/docfirst/`。建站的每一步（运行官方脚手架、本机约定、
+  （`docfirst.create` 与 `docfirst.create-plain`）、托管站点（`docfirst.site.*` 与只显示的窗格「文档站」，都只管还没迁到基础包上的 Next 站）与说明书在 `plugins/docfirst/`。建站的每一步（运行官方脚手架、本机约定、
   选端口、写入文件）都在插件的 `src/` 里，插件必需注入的只有命令总线 `gwbCommands`，不依赖别的插件建站（单元文件夹插件的 `gwbUnitFolder` 是局部注入，只用来读容器根查端口；
   托管用的 `gwbData`、窗格用的 `gwbShell` 也是局部注入）。托管只运行站自己的 `build` 与 `start` 脚本，不转发 docfirst 命令行。
 - 子进程调用一律带超时。
 - 提交前的检查，下面每处都要通过才提交：
   - 仓根：`pnpm test`、`pnpm typecheck`、`pnpm build`
-  - `docs-site/`：`pnpm docfirst check`、`pnpm test`、`pnpm build`、`node scripts/verify-roster.mjs`
+  - `docs-site/`：`pnpm docfirst check`、`pnpm test`、`pnpm typecheck`、`pnpm build`
   - `plugins/docfirst/`：`pnpm check`（typecheck + oxlint + vitest）、`pnpm build`
-- 发版 **两边各发各的、没有先后**：插件对 `packages/` 下的包零依赖。`docfirst-workflow` 升版本号时跟着改
-  `plugins/docfirst/src/deps.ts` 那张表——插件的 `tests/create.test.ts` 检查它。
-- 改了站构建时 remark 插件会调用到的包代码（`docfirst-workflow/src/fumadocs/` 及它调用的 workflow 别的出口、code-pin），要先删 `.next` 再重新构建。
-  站不用 `pnpm dev`：看页面也是先 `pnpm build` 再 `pnpm start`，改了内容重新 build。`build` 集中在收尾或发版前运行一次，
-  用户没说要看就构建通过即结束；说要看就交给工作台托管（`docfirst.site.add`），改了内容调 `docfirst.site.restart`，开满 12 小时自动停。
-- 提交按步骤拆，一个提交一件事。
-- 不碰 `D:\dshfiles\26082412vto\homes\`（在 `D:\dshfiles`，DSH 时代的归档区）；不碰主实例。
+- 发版 **两边各发各的、没有先后**：插件对 `packages/` 下的包零依赖。`docfirst-workflow` 升版本号时跟着改 `plugins/docfirst/src/deps.ts` 那张表——插件的 `tests/create.test.ts` 检查它。
+- 站的开发服务（端口 4340）交给 gwb-docsite 托管（`docsite.site.add`），不在会话里自己 `pnpm dev`；`pnpm build` 只作提交前的检查。
+  改了构建页面时 remark 插件会调用到的包代码（`docfirst-site`，`docfirst-workflow/src/fumadocs/` 及它调用的 workflow 别的出口、code-pin），
+  先在改过的包里 `pnpm build`，再 `docsite.site.stop`、`docsite.site.start` 重启开发服务。
+- 提交按步骤拆，一个提交一件事。不碰 `D:\dshfiles\26082412vto\homes\`（在 `D:\dshfiles`，DSH 时代的归档区）；不碰主实例。

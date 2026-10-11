@@ -1,5 +1,5 @@
 /**
- * 「行段引用怎么跟着代码挪位置」的全部讲解数据：画面（span-follow.tsx）与机读版规则（span-follow.ai.mjs）都只读这一份。
+ * 「行段引用怎么跟着代码挪位置」的全部讲解数据：画面（span-follow.tsx）与机读规则（span-follow.ai.mjs）都只读这一份。
  * 例子跟钉码页（pin/story.data.mjs）是同一个 greet.ts。hash、blob、hunk 表、滑窗里每个窗口的 hash 都是拿
  * code-pin 的 hashSpan / blobOf / parseHunks / mapRange / findSpan 对这两版文件真算出来的，
  * git diff 与 git cat-file 的输出是对同样两份内容真跑 git 得到的。

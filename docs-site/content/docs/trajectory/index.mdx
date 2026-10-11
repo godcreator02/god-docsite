@@ -4,6 +4,8 @@ description: 通用包：把一组带时间与取代、转向关系的卡画成�
 full: true
 ---
 
+import { SeamMap } from '../../../src/components/seam-map/seam-map';
+
 包 `@godcreator/trajectory-disk`，源码在 `packages/trajectory-disk/src/`，出口是 `.`（`src/index.ts`）、
 `./disk`（`src/disk.tsx`）与样式表 `./star.css`。
 
@@ -39,7 +41,7 @@ full: true
 {/* ref file="../packages/trajectory-disk/src/index.ts" hash="a98e330c7e01" blob="ae8fe7494dc8" */}
 
 **`./disk`** 导出客户端组件 `StarDisk`。`data` 就是中性输入，组件自己建模、算布局，服务端和客户端之间传的就是这份输入；
-卡页地址由 `hrefBase` 拼出；`bodies` 是每张卡（含盘心）在服务端渲染好的正文，键是卡身份，点节点就在盘右侧的栏里显示，
+卡页地址由 `hrefBase` 拼出；`bodies` 是调用方准备好的每张卡（含盘心）的正文（React 节点，可以按需加载），键是卡身份，点节点就在盘右侧的栏里显示，
 盘上有的卡缺正文直接报错。props 里不收函数（服务端组件不能把函数传给客户端组件）。组件占满父容器，只有整页一种形态：
 
 {/* ref file="../packages/trajectory-disk/src/disk.tsx" lines="31-39" hash="d841caa075c0" blob="3ecaca179c38" */}
@@ -57,33 +59,33 @@ full: true
 **不认识 docfirst，也不认识别的包。** 它是通用包，也自成一体：清单里没有任何 `@godcreator/` 包，源码与产物不 import 它们，
 源码的相对 import 不出自己的 `src/`：
 
-{/* ref file="../tests/boundary.test.ts" lines="213-237" hash="ce004dadbbe6" blob="0d3a5dcc329f" */}
+{/* ref file="../tests/boundary.test.ts" lines="217-241" hash="ce004dadbbe6" blob="f1a4307dac6e" */}
 
 包目录里（源码、产物、样式、构建配置、清单）一个 docfirst 字样都没有，清单里指向本仓的仓地址除外（仓名是 gwb-docfirst）：
 
-{/* ref file="../tests/boundary.test.ts" lines="229-245" hash="488ad8a3f185" blob="0d3a5dcc329f" */}
+{/* ref file="../tests/boundary.test.ts" lines="233-249" hash="488ad8a3f185" blob="f1a4307dac6e" */}
 
-方向只有一个：docfirst 的 workflow 与 fumadocs 适配依赖它，它不依赖它们。
+方向只有一个：docfirst 的 workflow（含 fumadocs 适配）与站的功能包依赖它，它不依赖它们。
 
 **不认识 docfirst 卡文件的写法。** 关系行、frontmatter 字段名、里程碑标题，整个包（源码、产物、样式）里都不出现：
 
-{/* ref file="../tests/boundary.test.ts" lines="298-308" hash="995ed87c2134" blob="0d3a5dcc329f" */}
+{/* ref file="../tests/boundary.test.ts" lines="302-312" hash="995ed87c2134" blob="f1a4307dac6e" */}
 
 **不读文件。** `.` 入口的产物一条 import 都没有，连 `node:` 也没有；`.ts` 源码只有相对 import。
 所以浏览器、服务端、命令行都能直接用：
 
-{/* ref file="../tests/boundary.test.ts" lines="273-286" hash="4f3a3d56a173" blob="0d3a5dcc329f" */}
+{/* ref file="../tests/boundary.test.ts" lines="277-290" hash="4f3a3d56a173" blob="f1a4307dac6e" */}
 
 建模只 import 自己目录里的文件，布局、画布、组件都在它下游：
 
-{/* ref file="../tests/boundary.test.ts" lines="288-296" hash="18889b5b49b5" blob="0d3a5dcc329f" */}
+{/* ref file="../tests/boundary.test.ts" lines="292-300" hash="18889b5b49b5" blob="f1a4307dac6e" */}
 
 **不把 react 打进产物。** `./disk` 的产物第一行是 `"use client"`，只许 import react：
 
-{/* ref file="../tests/boundary.test.ts" lines="310-322" hash="184a302dbdad" blob="0d3a5dcc329f" */}
+{/* ref file="../tests/boundary.test.ts" lines="314-326" hash="184a302dbdad" blob="f1a4307dac6e" */}
 
-**不管 fumadocs 集合与读卡目录。** 卡集合的 schema、正文链接改写、`loadTrajectory` 都在 [fumadocs 适配](/docs/fumadocs)，
-站经它拿到 `StarDisk` 与样式。
+**不管 fumadocs 集合与读卡目录。** 读卡目录在 workflow 的卡格式，正文链接改写在 [fumadocs 适配](/docs/fumadocs)，轨迹卡集合、星轨盘页与卡页在[站的功能包](/docs/site)。
+功能包的星轨盘页按包名从 `./disk` 取 `StarDisk`，样式经 fumadocs 适配的 `trajectory.css` 引入；还没迁的 Next 站经 `./fumadocs/trajectory` 拿到同一个组件。
 
 **不认识站的路由。** 卡页地址由 `hrefBase` 拼出，地址栏只记当前在侧栏打开的卡；顶栏不归组件画。
 

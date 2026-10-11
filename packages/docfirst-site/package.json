@@ -1,0 +1,66 @@
+{
+  "name": "@godcreator/docfirst-site",
+  "version": "0.1.0",
+  "author": {"name": "godcreator"},
+  "type": "module",
+  "description": "docfirst 站的功能包，建在文档站基础包 @godcreator/docsite-kit 上：构建页面时的 remark 插件（钉码投影成带状态点的代码块、目录树、术语标注、轨迹卡里的链接），MDX 组件 Term 与文件树，星轨盘 /trajectory 与卡页 /trajectory/<卡身份> 两条路由，侧栏入口「轨迹」与样式；template/ 是轨迹卡的集合",
+  "exports": {
+    "./routes": {
+      "types": "./dist/routes.d.mts",
+      "default": "./dist/routes.mjs"
+    },
+    "./site": {
+      "types": "./dist/site.d.mts",
+      "default": "./dist/site.mjs"
+    },
+    "./site-server": {
+      "types": "./dist/site-server.d.mts",
+      "default": "./dist/site-server.mjs"
+    },
+    "./content": {
+      "types": "./dist/content.d.mts",
+      "default": "./dist/content.mjs"
+    },
+    "./styles.css": "./styles/site.css"
+  },
+  "files": [
+    "dist",
+    "styles",
+    "template"
+  ],
+  "scripts": {
+    "build": "tsdown",
+    "typecheck": "tsc -p tsconfig.json",
+    "prepublishOnly": "pnpm run build"
+  },
+  "dependencies": {
+    "@godcreator/docfirst-workflow": "workspace:*",
+    "@godcreator/trajectory-disk": "workspace:*"
+  },
+  "peerDependencies": {
+    "@fumadocs/base-ui": "16.16.2",
+    "@godcreator/docsite-kit": "^0.1.7",
+    "lucide-react": "^1.54.0",
+    "react": "^19.3.0",
+    "react-router": "^8.4.0"
+  },
+  "devDependencies": {
+    "@fumadocs/base-ui": "16.16.2",
+    "@godcreator/docsite-kit": "^0.1.7",
+    "@types/mdx": "^2.0.14",
+    "@types/node": "^26.2.0",
+    "@types/react": "^19.3.0",
+    "fumadocs-core": "16.16.2",
+    "lucide-react": "1.54.0",
+    "react": "^19.3.0",
+    "react-router": "^8.4.0"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://git.tianshen02.online:28377/api/packages/godcreator/npm/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://git.tianshen02.online:28377/godcreator/gwb-docfirst.git"
+  }
+}
