@@ -4,7 +4,7 @@ import { MessageSquare } from 'lucide-react'
 import { useFumadocsLoader } from 'fumadocs-core/source/client'
 import { DocsLayout } from '@fumadocs/base-ui/layouts/docs'
 import { siteIdentity } from '@godcreator/docsite-kit/server'
-import { groupKeepingSidebar, SidebarRouteLinks, themeSwitchWithIdentity } from '@godcreator/docsite-kit/ui'
+import { groupKeepingSidebar, routeLinksSearchTrigger, SidebarRouteLinks, themeSwitchWithIdentity } from '@godcreator/docsite-kit/ui'
 import { source } from '../lib/source'
 import type { Route } from './+types/layout'
 
@@ -19,7 +19,7 @@ export default function Layout({ loaderData }: Route.ComponentProps) {
   const { identity } = loaderData
   const themeSwitch = useMemo(() => themeSwitchWithIdentity(identity), [identity.person?.id, identity.reason])
   return (
-    <DocsLayout tree={pageTree} nav={{ title: pageTree.name }} sidebar={{ banner: routeLinks }} slots={{ themeSwitch, sidebar: groupKeepingSidebar }}>
+    <DocsLayout tree={pageTree} nav={{ title: pageTree.name }} sidebar={{ banner: routeLinks }} slots={{ themeSwitch, sidebar: groupKeepingSidebar, searchTrigger: routeLinksSearchTrigger }}>
       <Outlet />
     </DocsLayout>
   )

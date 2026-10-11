@@ -3,6 +3,7 @@ import Link from 'fumadocs-core/link'
 import { usePathname } from 'fumadocs-core/framework'
 import { TreeContextProvider, useTreeContext } from '@fumadocs/base-ui/contexts/tree'
 import { Sidebar, SidebarProvider, SidebarTrigger, useSidebar, type SidebarProps } from '@fumadocs/base-ui/layouts/docs/slots/sidebar'
+import { SearchTrigger } from '@fumadocs/base-ui/layouts/shared/slots/search-trigger'
 import { sidebarTreeOf } from '../sidebar-tree.js'
 
 /** 塞进分组里的那条页面项的名字带这个属性，styles.css 据此把它藏起来 */
@@ -29,19 +30,31 @@ function GroupKeepingSidebar(props: SidebarProps) {
  */
 export const groupKeepingSidebar = { provider: SidebarProvider, root: GroupKeepingSidebar, trigger: SidebarTrigger, useSidebar }
 
+/** DocsLayout 的 slots.searchTrigger：侧栏里不再有整行的搜索框（搜索按钮在 SidebarRouteLinks 那一排里），窄屏顶栏的搜索按钮照旧 */
+export const routeLinksSearchTrigger = { sm: SearchTrigger, full: () => null }
+
 export type SidebarRouteLink = { text: string; url: string; icon: ReactNode }
 
-/** 侧栏切换按钮下的一横排：站点自己的页面的入口，当前地址就是它或在它下面时高亮。放在 DocsLayout 的 sidebar.banner */
+const routeLinkClassName =
+  'flex items-center justify-center gap-1.5 rounded-md px-2 py-1.5 text-nowrap text-fd-muted-foreground transition-colors hover:bg-fd-accent/50 hover:text-fd-accent-foreground/80 data-[active=true]:bg-fd-primary/10 data-[active=true]:text-fd-primary [&_svg]:size-4 [&_svg]:shrink-0'
+
+/**
+ * 侧栏切换按钮下的一横排：最左边是搜索按钮（只有图标，Ctrl K 照样能打开搜索），后面是站点自己的页面的入口，
+ * 当前地址就是它或在它下面时高亮。放在 DocsLayout 的 sidebar.banner，slots.searchTrigger 用 routeLinksSearchTrigger
+ */
 export function SidebarRouteLinks({ links }: { links: SidebarRouteLink[] }) {
   const pathname = usePathname()
   return (
     <nav className="flex gap-0.5 rounded-lg border bg-fd-secondary/50 p-0.5 text-sm">
+      <span title="搜索（Ctrl K）" className="flex">
+        <SearchTrigger hideIfDisabled className={routeLinkClassName} />
+      </span>
       {links.map((link) => (
         <Link
           key={link.url}
           href={link.url}
           data-active={pathname === link.url || pathname.startsWith(`${link.url}/`)}
-          className="flex flex-1 items-center justify-center gap-1.5 rounded-md px-2 py-1.5 text-nowrap text-fd-muted-foreground transition-colors hover:bg-fd-accent/50 hover:text-fd-accent-foreground/80 data-[active=true]:bg-fd-primary/10 data-[active=true]:text-fd-primary [&_svg]:size-4 [&_svg]:shrink-0"
+          className={`${routeLinkClassName} flex-1`}
         >
           {link.icon}
           {link.text}
