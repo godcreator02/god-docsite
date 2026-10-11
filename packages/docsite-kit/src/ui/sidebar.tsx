@@ -35,30 +35,29 @@ export const routeLinksSearchTrigger = { sm: SearchTrigger, full: () => null }
 
 export type SidebarRouteLink = { text: string; url: string; icon: ReactNode }
 
+/** 一横排里的一格：各格等宽，格与格之间是 nav 的 divide-x 画的竖线 */
+const routeCellClassName = 'flex min-w-0 flex-1 px-0.5'
 const routeLinkClassName =
-  'flex items-center justify-center gap-1 rounded-md px-1.5 py-1.5 text-nowrap text-fd-muted-foreground transition-colors hover:bg-fd-accent/50 hover:text-fd-accent-foreground/80 data-[active=true]:bg-fd-primary/10 data-[active=true]:text-fd-primary [&_svg]:size-4 [&_svg]:shrink-0'
+  'flex w-full items-center justify-center gap-1 rounded-md px-0.5 py-1.5 text-nowrap text-fd-muted-foreground transition-colors hover:bg-fd-accent/50 hover:text-fd-accent-foreground/80 data-[active=true]:bg-fd-primary/10 data-[active=true]:text-fd-primary [&_svg]:size-4 [&_svg]:shrink-0'
 
 /**
  * 侧栏切换按钮下的一横排：最左边是搜索按钮（只有图标，Ctrl K 照样能打开搜索），后面是站点自己的页面的入口，
- * 当前地址就是它或在它下面时高亮。放在 DocsLayout 的 sidebar.banner，slots.searchTrigger 用 routeLinksSearchTrigger
+ * 当前地址就是它或在它下面时高亮。各格等宽，中间有竖线隔开。放在 DocsLayout 的 sidebar.banner，slots.searchTrigger 用 routeLinksSearchTrigger
  */
 export function SidebarRouteLinks({ links }: { links: SidebarRouteLink[] }) {
   const pathname = usePathname()
   return (
-    <nav className="flex gap-0.5 rounded-lg border bg-fd-secondary/50 p-0.5 text-sm">
-      <span title="搜索（Ctrl K）" className="flex">
-        <SearchTrigger hideIfDisabled className={routeLinkClassName} />
+    <nav className="flex divide-x divide-fd-border rounded-lg border bg-fd-secondary/50 py-0.5 text-sm">
+      <span title="搜索（Ctrl K）" className={routeCellClassName}>
+        <SearchTrigger hideIfDisabled className={`${routeLinkClassName} h-auto`} />
       </span>
       {links.map((link) => (
-        <Link
-          key={link.url}
-          href={link.url}
-          data-active={pathname === link.url || pathname.startsWith(`${link.url}/`)}
-          className={`${routeLinkClassName} min-w-0 flex-1`}
-        >
-          {link.icon}
-          {link.text}
-        </Link>
+        <span key={link.url} className={routeCellClassName}>
+          <Link href={link.url} data-active={pathname === link.url || pathname.startsWith(`${link.url}/`)} className={routeLinkClassName}>
+            {link.icon}
+            {link.text}
+          </Link>
+        </span>
       ))}
     </nav>
   )
