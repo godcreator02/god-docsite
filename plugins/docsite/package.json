@@ -1,6 +1,6 @@
 {
   "name": "@godcreator/gwb-docsite",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "文档站的基础插件：本 home 的身份码，托管基础包 @godcreator/docsite-kit 搭的站点的开发服务（常驻、打开、停止），往站点推数据，agent 读写站点评论的命令；别的插件注入服务 gwbDocsite 托管自己的站点",
   "type": "module",
   "exports": {

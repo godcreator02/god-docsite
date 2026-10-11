@@ -1,14 +1,17 @@
 import { existsSync } from 'node:fs'
 import path from 'node:path'
-import type { DevServer, LaunchDevServer } from './dev-server.js'
+import { expectedSiteUrlOf, type DevServer, type LaunchDevServer } from './dev-server.js'
 import { DocsiteRejected, messageOf } from './errors.js'
 
 /** 这么长时间里失败到这么多次就不再自动重启 */
 const failureWindowMilliseconds = 5 * 60_000
 const failuresBeforeGivingUp = 3
 
-/** 一个站此刻的样子：url 在运行时是实际地址；error 是常驻失败停下、启动前就失败的原因 */
-export type SiteStatus = { dir: string; url: string | null; running: boolean; kept: boolean; error: string | null }
+/**
+ * 一个站此刻的样子：url 在运行时是实际地址；expectedUrl 是按 package.json 的 scripts.dev 里的 --port 预期的地址（没写端口为 null），
+ * 没运行时给人看站点在哪；error 是常驻失败停下、启动前就失败的原因
+ */
+export type SiteStatus = { dir: string; url: string | null; expectedUrl: string | null; running: boolean; kept: boolean; error: string | null }
 
 export type SiteStarted = { url: string; pid: number; alreadyRunning: boolean }
 
@@ -94,7 +97,14 @@ export class SiteHost {
 
   statusOf(dir: string): SiteStatus {
     const site = this.sites.get(siteKeyOf(dir))
-    return { dir: site?.dir ?? path.resolve(dir), url: site?.running?.url ?? null, running: site?.running != null, kept: site?.kept ?? false, error: site?.error ?? null }
+    return {
+      dir: site?.dir ?? path.resolve(dir),
+      url: site?.running?.url ?? null,
+      expectedUrl: expectedSiteUrlOf(dir),
+      running: site?.running != null,
+      kept: site?.kept ?? false,
+      error: site?.error ?? null,
+    }
   }
 
   list(): SiteStatus[] {

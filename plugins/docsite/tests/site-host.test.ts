@@ -68,7 +68,7 @@ describe('托管站点', () => {
     await new Promise((resolve) => setTimeout(resolve, 10))
     expect(launched[0]!.code).toBe('mycode000001')
     expect(launched[0]!.pushed).toEqual([['collab', { n: 2 }]])
-    expect(host.statusOf(siteDir)).toMatchObject({ running: true, kept: true, url: 'http://127.0.0.1:4001', error: null })
+    expect(host.statusOf(siteDir)).toMatchObject({ running: true, kept: true, url: 'http://127.0.0.1:4001', expectedUrl: 'http://127.0.0.1:4430', error: null })
   })
 
   it('没装依赖、站点检查不过时不启动，原因记在 error 里', async () => {

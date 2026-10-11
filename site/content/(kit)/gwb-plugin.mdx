@@ -5,7 +5,7 @@ icon: Plug2
 ---
 
 `@godcreator/gwb-docsite` 是 gwb 工作台的插件，在这个仓的 `plugins/docsite/`。用基础包搭的站都由它托管：
-会话、终端自己启动的开发服务没有身份码，站点只读；会话一停站就掉，几个会话还会抢同一个端口。
+会话、终端自己启动的开发服务没有身份码，站点只读；会话一停站点就停了，几个会话还会抢同一个端口。
 各站自己的功能插件（协作站的 gwb-collab）注入它的服务 `gwbDocsite`，不各管各的站点进程。
 
 ## 功能
@@ -16,7 +16,7 @@ icon: Plug2
 | 托管站点 | 在站点目录里运行 `pnpm dev`（端口写死在 `scripts.dev` 的 `--port` 里），常驻：意外退出就重启，5 分钟内失败 3 次就停下、记下原因 |
 | 启动前检查 | 有 `package.json`、装了依赖，基础包的 `siteProblems` 查人员列表与评论文件；不过就不启动，原因写在状态里 |
 | 推数据 | 启动时给开发服务一个口令，之后经[推送通道](/dev-plugin#收-gwb-插件推来的数据)推；每个频道记着最新的一份，站点重启后补推 |
-| 打开 | 设置 `site-window`：`chrome-app` 用 Chrome 的应用窗口，一个站一个窗口，开着就切到前台（按窗口标题里的站名认，所以页面标题写成「页面名 · 站名」）；`default-browser` 在默认浏览器里开 |
+| 打开 | 设置 `site-window`：`chrome-app` 用 Chrome 的应用窗口，一个站一个窗口，开着就切到前台（按窗口标题里的站名认，站名是基础包 `siteTitleOf` 读出的 `content/meta.json` 的 `title`，所以页面标题写成「页面名 · 站名」）；Windows 不让切到前台时窗口留在原处、任务栏按钮闪烁，不算失败；`default-browser` 在默认浏览器里开 |
 | 评论 | 读：直接读 `comments/` 里的文件；写：经运行中的开发服务的评论接口，和网页同一套规则 |
 
 ## 命令
@@ -37,7 +37,7 @@ icon: Plug2
 | --- | --- |
 | `identityCode()` | 本 home 的身份码 |
 | `keep(dir)` / `forget(dir)` | 托管、不再托管：功能插件按自己的项目列表调，不写设置 `sites` |
-| `start(dir)` / `open(dir)` / `stop(dir)` / `status(dir)` | 人为启动、启动并打开、停止、此刻的样子 `{ dir, url, running, kept, error }` |
+| `start(dir)` / `open(dir)` / `stop(dir)` / `status(dir)` | 人为启动、启动并打开、停止、此刻的样子 `{ dir, url, expectedUrl, running, kept, error }`：`url` 是运行时的实际地址，`expectedUrl` 是按 `scripts.dev` 的 `--port` 预期的地址，没运行时给人看站点在哪 |
 | `whileStopped(dir, work)` | 先停，做完再按常驻的规矩启动：装依赖、换站点文件时用 |
 | `push(dir, channel, data)` | 推一份数据 |
 | `join(dir, person)` | 把本 home 的码加进 `people.json` |

@@ -51,16 +51,17 @@ export function chromeAppIdOf(url: string): string {
   return `Chrome.${parsed.hostname}_${parsed.pathname}`
 }
 
-/** 找这个站点已经开着的应用窗口，找到就恢复、切到前台。窗口按应用身份与标题里的站名认 */
+/**
+ * 找这个站点已经开着的应用窗口，找到就恢复、试着切到前台。窗口按应用身份与标题里的站名认。
+ * Windows 不让后台进程抢前台时窗口留在原处、任务栏按钮闪烁，站点照样是开着的，不算失败
+ */
 async function focusChromeApp(chrome: string, url: string, siteTitle: string): Promise<boolean> {
   const { stdout } = await runFile(
     'pwsh',
     ['-NoLogo', '-NoProfile', '-NonInteractive', '-File', fileURLToPath(new URL('./chrome-window.ps1', import.meta.url)), '-ChromePath', path.resolve(chrome), '-SiteTitle', siteTitle, '-AppId', chromeAppIdOf(url)],
     { windowsHide: true, timeout: 20_000 },
   )
-  const reply = JSON.parse(stdout) as { found: boolean; focused: boolean }
-  if (reply.found && !reply.focused) throw new DocsiteRejected('站点窗口已经打开，但 Windows 没有允许切到前台；没有重复打开')
-  return reply.found
+  return (JSON.parse(stdout) as { found: boolean }).found
 }
 
 /** 每个站点只用一个应用窗口：开着就切到前台（最小化的先恢复），没有才启动。同一站点同时点几次共用一次打开 */

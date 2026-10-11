@@ -4,3 +4,4 @@
  */
 export { commentThreadIdsAbout, readCommentThreads, siteProblems, type CommentFile, type CommentThreadFile } from './comment-files.js'
 export { jsonFileOf, sitePeople } from './site-people.js'
+export { siteTitleOf } from './site-title.js'

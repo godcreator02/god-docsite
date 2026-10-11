@@ -91,5 +91,6 @@ public static class CollabChromeWindow {
 }
 "@
 $windows = [CollabChromeWindow]::Candidates($ChromePath, $AppId, $SiteTitle)
-if ($windows.Count -eq 0) { @{ found = $false; focused = $false } | ConvertTo-Json -Compress; exit 0 }
-@{ found = $true; focused = [CollabChromeWindow]::Focus($windows[0]) } | ConvertTo-Json -Compress
+if ($windows.Count -eq 0) { @{ found = $false } | ConvertTo-Json -Compress; exit 0 }
+[void][CollabChromeWindow]::Focus($windows[0])
+@{ found = $true } | ConvertTo-Json -Compress

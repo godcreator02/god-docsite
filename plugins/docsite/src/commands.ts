@@ -59,7 +59,7 @@ function register(commands: GwbCommandsApi, definition: { name: string; descript
 }
 
 const siteShape =
-  '每个站是 { dir, url, running, kept, error }：url 在运行时是实际地址；kept 是托管着（常驻）；error 是常驻失败停下、启动前就失败（不是站点目录、没装依赖、站点检查不过）的原因，没有为 null'
+  '每个站是 { dir, url, expectedUrl, running, kept, error }：url 在运行时是实际地址；expectedUrl 是按 package.json 的 scripts.dev 里的 --port 预期的地址（没写端口为 null）；kept 是托管着（常驻）；error 是常驻失败停下、启动前就失败（不是站点目录、没装依赖、站点检查不过）的原因，没有为 null'
 
 const commentWriteUsage =
   '要站点在运行（经开发服务的评论接口写，和网页同一套规则：正文是 MDX，编译不过就拒绝）；署名是本 home 的身份码在 people.json 里对应的人，agent 写时给 as（people.json 里 agent 为 true 的 id）'
@@ -124,7 +124,7 @@ export function registerCommands({ commands, docsite, sitesSetting, list }: Comm
     {
       name: 'docsite.site.start',
       description: '启动并打开一个站点（默认用 Chrome 的应用窗口，见设置 site-window）',
-      usage: '{ dir, open? }：站点目录的绝对路径；open 默认 true，false 只启动不打开。人为停止、连续失败停下的也用它再启动（清掉这两种记录）；已经在运行就只打开。启动前查站点（装没装依赖、人员列表与评论文件对不对），不过就拒绝、写明每条问题。回 { url, pid, alreadyRunning }',
+      usage: '{ dir, open? }：站点目录的绝对路径；open 默认 true，false 只启动不打开。人为停止、连续失败停下的也用它再启动（清掉这两种记录）；已经在运行就只打开；Chrome 应用窗口已经开着就试着切到前台，Windows 不让切时窗口留在原处、任务栏按钮闪烁，照常回执。启动前查站点（装没装依赖、人员列表与评论文件对不对），不过就拒绝、写明每条问题。回 { url, pid, alreadyRunning }',
       effect: 'external',
     },
     async (args) => {

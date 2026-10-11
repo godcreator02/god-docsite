@@ -53,15 +53,6 @@ export function expectedSiteUrlOf(siteDir: string): string | null {
   return port === null ? null : `http://127.0.0.1:${port}`
 }
 
-/** 站名：content/meta.json 的 title（侧栏顶上那个名字）；没有这个文件或没写 title 时为 null */
-export function siteTitleOf(siteDir: string): string | null {
-  const file = path.join(siteDir, 'content', 'meta.json')
-  if (!existsSync(file)) return null
-  const meta = readJsonFile(file)
-  const title = isRecord(meta) ? meta['title'] : undefined
-  return typeof title === 'string' && title !== '' ? title : null
-}
-
 /** 一个在运行的开发服务 */
 export type DevServer = {
   url: string
