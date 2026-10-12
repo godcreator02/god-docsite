@@ -1,0 +1,13 @@
+import { createServer } from '../site/node_modules/vite/dist/node/index.js';
+import { readFile } from 'node:fs/promises';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+const site = fileURLToPath(new URL('../site/', import.meta.url));
+process.chdir(site);
+const people = JSON.parse(await readFile('people.json', 'utf8'));
+process.env.DOCSITE_IDENTITY_CODE = people.find(p => p.id === 'zk').codes[0];
+process.env.PROBE_SITE_ORIGIN = 'http://127.0.0.1:5462';
+const commentsDir = path.join(site,'comments').replaceAll('\\','/') + '/';
+const server = await createServer({root:site,configFile:path.join(site,'vite.config.ts'),server:{port:5462,host:'127.0.0.1',strictPort:true},plugins:[{name:'diagnostic-deleted-module-filter',enforce:'pre',hotUpdate({type,file,modules}){if(type !== 'delete' || !file.startsWith(commentsDir) || !/\.mdx?$/.test(file)) return;const keep=modules.filter(m=>m.file!==file);console.log('DIAG delete',this.environment.name,file,modules.length,'=>',keep.length);return keep;}}]});
+await server.listen();
+console.log('Delete HMR diagnostic ready on5462');

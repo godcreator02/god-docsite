@@ -1,0 +1,5 @@
+[
+  { "id": "owner", "name": "站长", "codes": ["probe-code-owner"] },
+  { "id": "zhou", "name": "小周" },
+  { "id": "assistant", "name": "助手", "agent": true }
+]

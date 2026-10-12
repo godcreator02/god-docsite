@@ -1,0 +1,35 @@
+
+ RUN  v5.0.3 D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/261011_docsite-kit-complete/review
+
+ ❯ create-rollback.test.ts (1 test | 1 failed) 24ms
+   × partially written file is also removed on IO failure 23ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  create-rollback.test.ts > partially written file is also removed on IO failure
+AssertionError: expected [ 'file.txt' ] to deeply equal []
+
+- Expected
++ Received
+
+- []
++ [
++   "file.txt",
++ ]
+
+ ❯ create-rollback.test.ts:21:36
+     19|     });
+     20|     expect(() => createSite({dir:target, templateDir:template})).toThr…
+     21|     expect(fs.readdirSync(target)).toEqual([]);
+       |                                    ^
+     22|   } finally {
+     23|     vi.restoreAllMocks();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed (1)
+   Start at  00:13:26
+   Duration  387ms (transform 52%, import 26%, tests 18%, worker 5%)
+

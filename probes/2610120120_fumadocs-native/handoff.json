@@ -1,0 +1,72 @@
+{
+  "line": "N",
+  "probe": "probes/2610120120_fumadocs-native",
+  "date": "2026-10-12",
+  "revision": "2026-10-12 定点返工轮：真实浏览器复现三个评审问题并定性上游故障层；试验性 client-store/草稿方案按用户指示回退；修复 as 下拉真实 bug",
+  "scope": "Fumadocs 原生评论读写闭环第一段：标准 Fumadocs + React Router 站点、Config API 集合、.source/server 与 .source/browser 入口分离、官方 createClientLoader/useContent 按需正文、一页正文 + 旁栏评论（新建/回复/删回复/删串）、身份/Origin/as 校验、纯评论模型包。不含覆盖层（O 线）、身份公开能力（P 线）、来源搜索（Q 线）、写作插件（R 线）。",
+  "rerun": "在 probe 目录：pnpm install && pnpm test",
+  "tests": {
+    "total": 31,
+    "files": {
+      "tests/model.test.ts": 8,
+      "tests/dev-loop.test.ts": 14,
+      "tests/dev-readonly.test.ts": 4,
+      "tests/build-start.test.ts": 5
+    },
+    "result": "回退实验代码后 31/31 通过（tests/logs/vitest-focused-revision2.log）"
+  },
+  "focusedRevision": {
+    "reproduced": [
+      "新增评论：POST 200 后约 300ms loaderData 已含新串而浏览器入口未到，useContent 抛 [createClientLoader] … does not exist（console 原文已存 repro 文档）；0.7–1.5s 后正文渲染、无整页刷新，但草稿清空、组件状态归零",
+      "MutationObserver：卡片 section 复用而内部 fetcher.Form DOM 全部替换（组件重挂，useId 驱动的 fetcherKey 变化）",
+      "对照实验：touch 纯服务端模块（comments.server.ts）同样触发 (client) hmr update /app/routes/docs.tsx → 客户端 route 更新由 SSR 模块图失效驱动"
+    ],
+    "faultLayers": [
+      "React Router @react-router/dev 8.4.0 内部插件 react-router-server-change-trigger-client-hmr：SSR 模块失效 → getParentClientNodes → reloadModule 客户端 route → 组件树 remount；无公开配置开关，属 RR 预期开发行为，但在『action 写文件→集合入口重新生成』场景下丢未提交状态",
+      "fumadocs-mdx 15.4.7 createClientLoader：入口未到时同步 throw，把可预期时序变成渲染错误；boundary failed 无恢复路径——这部分是缺陷"
+    ],
+    "evidence": "tests/repro/upstream-rr-server-hmr-remount.md（步骤、采样、源码位置、选项、成本）；原始日志 tests/logs/dev-repro-20261012.log",
+    "options": [
+      "上游 RR：给 server-change-trigger-client-hmr 加公开开关或缩小触发面（提 issue + touch 对照最小复现）",
+      "上游 fumadocs：createClientLoader 提供非抛错入口查询/占位语义",
+      "公开配置绕开：ssr:false（代价大不推荐，仅证明无无损开关）",
+      "版本核对：RR 后续版本是否调整该行为（本轮不升级）"
+    ],
+    "fixedThisRound": "浏览器表单 as 下拉把本人当带 id 的选项提交 → 全部写操作 403 as-not-agent（HTTP 测试不带 as 未踩到）；本人选项改为 value=\"\"（docs.tsx AuthorSelect）",
+    "revertedThisRound": [
+      "app/lib/client-content.ts（HMR store：accept + hot.data + revision）→ 回退为第一段模块级导出 client-content.tsx",
+      "app/lib/content-renderers.tsx、app/lib/draft-storage.ts → 已删除",
+      "docs.tsx 的 CommentBody 入口占位/版本 key/Suspense、表单草稿保存 → 回退为第一段 boundary 版本"
+    ],
+    "notPassing": [
+      "新增评论浏览器端窗口（入口错误 + boundary 不恢复 + 草稿丢失）在 RR 8.4.0 当前行为下无公开无损解，标未完成，等上游选项决定",
+      "删除已加载正文的 Vite reload 报错未深挖未修（root-cause 已记录）",
+      "真实浏览器验收中的『已加载回复后删除、连续增删、草稿保留』因上述未完成项未达通过标准；浏览器 Playwright click 协议在本机 IAB 超时，实际用 requestSubmit/DOM click 与 CUA 坐标等价触发并记录（合成事件按自检口径对待）"
+    ]
+  },
+  "keyFindings": [
+    "fumadocsMdx({ index: { target: 'default' } })：公开类型（IndexFilePluginOptions.target，15.4.7 dist/vite/index.d.ts）但官网文档未写，B 类接口；生成静态枚举 import 的 server/browser 入口并由插件 watcher 在集合文件增删时重新生成，绕开 Windows 相对 glob base 红例；实测增删链亚秒级反映到 SSR",
+    "fumadocs-mdx 的 postInstall CLI 不带插件选项，会生成 target 'vite' 的临时产物，首次 dev/build 会按插件配置重写",
+    "React Router 8.4 自带文档 POST Origin 核对（throwIfPotentialCSRFAttack），与站点显式 sameOrigin 双层防护",
+    "构建里小图片被 Vite 内联为 data URI（默认 4KB 阈值），dev 里是 /comments/ 路径，测试两种形态都验",
+    "react-router-serve 只认 PORT/HOST 环境变量，不接受 --port/--host 参数"
+  ],
+  "knownGaps": [
+    "新增评论的浏览器端窗口（useContent 入口错误、boundary 不恢复、remount 丢草稿）标未完成，定性为 RR server-change-trigger-client-hmr（预期行为）+ fumadocs createClientLoader 抛错（缺陷），选项见 repro 文档",
+    "删除已加载评论的 Vite reload 报错为已知问题，不修（不做 utimes/hotUpdate 过滤/生成代码改写）",
+    "评论编辑、@ 提及、无页面评论、元素定位、快照映射不在本段",
+    "as 授权面较宽（认证通过即可 as 任何 agent 人员），细化归 P 线",
+    "评论集合未写 schema，frontmatter 字段以 unknown 收窄后交模型，缺字段抛错点名条目"
+  ],
+  "versions": {
+    "fumadocs-core": "16.17.1",
+    "@fumadocs/base-ui": "16.17.1",
+    "fumadocs-mdx": "15.4.7",
+    "vite": "8.3.4",
+    "react-router": "8.4.0",
+    "vitest": "5.0.3"
+  },
+  "authorBoundary": "评论文件只存人员 id；站点（宿主）解析为可信 {id,name} 传递；@probe/comments-model 不 import 身份模块、不认识身份码/Origin/as",
+  "services": "测试自起自停；交回时 5470/5471 已确认无监听",
+  "writes": "仅本 probe 目录；未改其他并行线目录、packages、父 workspace/lock、正式站、其他仓；未提交/推送/发布"
+}

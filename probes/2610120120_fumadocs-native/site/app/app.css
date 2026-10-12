@@ -1,0 +1,16 @@
+@import 'tailwindcss';
+@import '@fumadocs/base-ui/css/neutral.css';
+@import '@fumadocs/base-ui/css/preset.css';
+
+/* 评论旁栏：本段只做最小样式，覆盖层（O 线）不在这里 */
+[data-comments-sidebar] {
+  font-size: 14px;
+}
+[data-comment-card] {
+  border: 1px solid var(--color-fd-border);
+  border-radius: 8px;
+  padding: 8px 12px;
+}
+[data-comment-body] :is(p) {
+  margin: 4px 0;
+}

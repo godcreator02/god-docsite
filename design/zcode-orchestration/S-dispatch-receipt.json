@@ -1,0 +1,8 @@
+{
+  "content": [
+    {
+      "type": "text",
+      "text": "{\n  \"ok\": true,\n  \"data\": {\n    \"taskId\": \"sess_b3f73028-083a-479a-82d4-4a68ddd9e336\",\n    \"title\": \"任务S：评论dev热更新的最小独立实验。用户已批准“稳定页面组件 + 原生MDX热更新 + 正文入口就绪后显示”的...\",\n    \"status\": \"running\",\n    \"mode\": \"yolo\",\n    \"roundStarted\": true\n  }\n}"
+    }
+  ]
+}

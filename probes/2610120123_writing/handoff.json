@@ -1,0 +1,88 @@
+{
+  "task": "R",
+  "title": "写作组件与集合编译插件",
+  "probeDir": "docsite-kit/probes/2610120123_writing",
+  "date": "2026-10-12",
+  "status": "done",
+  "revision": "focused-rework-0206 后：依赖基线、Config API 集合隔离、Term useId、真实 getText('processed') 验收",
+  "summary": "写作能力库与 Fumadocs 原生配置样本。术语 remark 插件与 Term、TSX 公式 Tex；代码块/表格/Tabs/Files/折叠/图片直接复用锁定版 Fumadocs 公开组件。集合 A/B 用 Config API 命名集合各自 mdxOptions/applyMdxPreset 隔离，服务端 .source/server 进 loader、浏览器正文走 .source/browser 的 createClientLoader/useContent；编译插件与词表不进客户端包。",
+  "deliverables": {
+    "library": {
+      "name": "@probe/writing",
+      "dir": "packages/writing",
+      "finalHome": "docsite-kit 写作模块（主会话串行集成）",
+      "exports": {
+        ".": ["Term（useId 生成 id，SSR/hydrate 一致）", "TermProps", "Tex", "TexProps"],
+        "./compile": ["remarkGlossary", "GlossaryOptions", "buildTermIndex", "findTerms", "TermEntry", "TermIndex", "TermSpan"],
+        "./styles.css": "术语样式（类名前缀 docsite-term）"
+      },
+      "removedInRework": ["termMarkdownRule（第二套还原协议，删）", "TERM_COMPONENT_NAME 导出（内联为插件内部常量）"]
+    },
+    "fixtureSite": {
+      "dir": "fixture-site",
+      "framework": "react-router framework mode + fumadocs-mdx（Config API）",
+      "collectionWiring": {
+        "config": "source.config.ts 命名导出 docs（A，含术语插件）与 notes（B，不含），各自 docs.mdxOptions = applyMdxPreset(...)，remarkMath 在术语前、rehypeKatex 用函数形式排 rehypeCode 前",
+        "server": ".source/server → app/source.ts 两条 loader；页面 loader 只交本页元数据 + clientLoader.preload",
+        "browser": ".source/browser 的 createClientLoader/useContent 渲染正文，组件表在此传给 MDX；只 type-import 配置",
+        "postprocess": "两集合 includeProcessedMarkdown: { output: 'function', headingIds: false }"
+      },
+      "pages": ["/docs", "/docs/writing-demo", "/docs/glossary-demo", "/notes", "/tex"],
+      "tests": ["test/processed-markdown.test.ts（真实 getText('processed')，3 用例）"]
+    }
+  },
+  "checks": {
+    "typecheck": { "library": "pass", "fixtureSite": "pass" },
+    "vitest": { "library": { "files": 3, "tests": 30, "failed": 0 }, "fixtureSite": { "files": 1, "tests": 3, "failed": 0 } },
+    "build": { "library": "pass", "fixtureSite": "pass" },
+    "browser": {
+      "url": "http://127.0.0.1:5510",
+      "mode": "react-router-serve（真实构建产物）",
+      "verifiedThisRound": [
+        "Term hydrate：SSR HTML 与 hydrate 后 DOM 的 useId 完全一致（_R_* 形态），aria-describedby 全部配对",
+        "术语 hover（真实鼠标注入）展开、移开收起",
+        "客户端导航：React Router 站内跳转后 useContent 按需加载新页正文且带标注",
+        "集合隔离（浏览器 DOM）：/notes 同样词 0 标注、公式正常；/docs 1 处、/docs/glossary-demo 3 处",
+        "writing-demo：表格/Tabs/KaTeX 3/代码高亮 20 span/图片/折叠均在"
+      ],
+      "toolLimitation": "本机 IAB 后端点击与键盘注入不落页面事件（hover 正常）；Tabs/Accordion/Files/ImageZoom 的 JS 交互仅在上一轮经页面事件层 click 自检（aria 状态与内容变化），不声称真实鼠标操作通过，本轮未重做（返工未触及）"
+    },
+    "staticEvidence": {
+      "clientBuild": "buildTermIndex/remarkGlossary 0 命中；.source/browser 仅 type-import 配置",
+      "serverBuild": "集合 A 页面 jsx(Term)（glossary-demo 3、docs 1），集合 B 0 处",
+      "clientCollectionModules": "集合 A 浏览器模块含标注结果（def 文本），集合 B 无"
+    },
+    "processedMarkdown": "getText('processed') 实测：Remark LLMs 把 <Term> 还原为 children 原词，无标记、无属性泄漏；集合 B 无痕迹"
+  },
+  "dependencies": {
+    "locked": {
+      "@fumadocs/base-ui": "16.17.1",
+      "fumadocs-core": "16.17.1",
+      "fumadocs-mdx": "15.4.7",
+      "vite": "8.3.4",
+      "react-router": "^8.4.0",
+      "@mdx-js/mdx": "3.1.1",
+      "katex": "^0.16.47",
+      "remark-math": "^6.0.0",
+      "rehype-katex": "^7.0.1"
+    },
+    "note": "本批基线；probe 自己的 pnpm-lock.yaml，不追新；改前已读 gwb-release"
+  },
+  "conventions": [
+    "术语 Markdown 输出不设库侧协议：getText('processed') 实测还原为原词；需要别的形态在导出调用处传 GetTextOptions.components（公开契约）",
+    "术语样式与 gwb-docfirst 基线行为一致；类名前缀 docsite-term",
+    "Term 的 id 用 useId（同构渲染 SSR/hydrate 一致），无 'use client' 概念混入",
+    "正文语义标记只有 Term（编译期注入）；无评论运行时标志、无锚点协议",
+    "插件顺序约束：remarkMath 在术语标注前、rehypeKatex 在 rehypeCode 前（每集合各自配置）"
+  ],
+  "incomplete": [
+    "未接入 @godcreator/docsite-kit 本体（主会话串行集成）",
+    "评论集合的术语接线未做（N/O 范围；库支持无路径树照标，有用例）",
+    "Tabs/Accordion/Files/ImageZoom 的真实鼠标操作验证缺（IAB 注入限制，自检通过）；不为工具限制增加产品机制"
+  ],
+  "writingsReleased": {
+    "scope": "只写 probes/2610120123_writing/**",
+    "services": { "5510": "stopped", "5511": "stopped" },
+    "workspaceIsolation": "pnpm-workspace.yaml 截断向上查找；父 workspace/lock 未动"
+  }
+}

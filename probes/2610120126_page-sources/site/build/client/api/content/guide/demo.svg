@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="240" height="90" viewBox="0 0 240 90">
+  <rect width="240" height="90" fill="#f8fafc"/>
+  <path d="M10 45 Q 40 5, 70 45 T 130 45 T 190 45 T 230 45" fill="none" stroke="#6366f1" stroke-width="3"/>
+  <text x="120" y="80" text-anchor="middle" font-size="13" fill="#475569">波形示意（HTML 同目录图片）</text>
+</svg>

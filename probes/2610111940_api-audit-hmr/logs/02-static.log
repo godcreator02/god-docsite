@@ -1,0 +1,9 @@
+[restart] Relaunching with --conditions=development
+[MDX] generated files in 7.604600000000119ms
+[MDX] generated files in 19.85590000000002ms
+  ➜  Local:   http://127.0.0.1:5456/
+7:45:29 PM [vite] (ssr) connected.
+7:45:35 PM [vite] (client) [Unhandled error] Error: Module "node:url" has been externalized for browser compatibility. Cannot access "node:url.fileURLToPath" in client code.  See https://vite.dev/guide/troubleshooting.html#module-externalized-for-browser-compatibility for more details.
+ > Object.get ../../../../../../@id/__vite-browser-external:node:url:3:11
+ > ../../2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/fumadocs-core@16.17.1_@mdx-_11ae55ae1af62cf101cec7ced32746d4/node_modules/fumadocs-core/dist/mdx-plugins/remark-image.js?v=f162028e:1:50
+

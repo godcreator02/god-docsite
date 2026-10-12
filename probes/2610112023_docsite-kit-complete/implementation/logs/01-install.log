@@ -1,0 +1,11 @@
+Progress: resolved 0, reused 1, downloaded 0, added 0
+Packages are hard linked from the content-addressable store to the virtual store.
+  Content-addressable store is at: D:\.pnpm-store\v11
+  Virtual store is at:             node_modules/.pnpm
+Progress: resolved 1, reused 257, downloaded 0, added 0
+Progress: resolved 256, reused 257, downloaded 0, added 251
+Progress: resolved 256, reused 257, downloaded 0, added 252
+Packages: +257
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+Progress: resolved 257, reused 257, downloaded 0, added 257, done
+Done in 8.8s using pnpm v12.4.2

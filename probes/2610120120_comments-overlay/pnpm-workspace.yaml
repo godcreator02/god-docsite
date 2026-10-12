@@ -1,0 +1,4 @@
+# 本目录自身是一个独立 workspace（packages 留空：根包即唯一项目）。
+# 它的存在阻断 pnpm 向上查找 docsite-kit 仓根的 pnpm-workspace.yaml，
+# 使安装、pnpm-lock.yaml 都只落在本 probe 目录内。
+packages: []

@@ -1,0 +1,6 @@
+[
+  { "id": "zhou", "name": "小周", "codes": ["probezhou001"] },
+  { "id": "li", "name": "小李", "codes": ["probeli00001"] },
+  { "id": "claude", "name": "Claude", "agent": true },
+  { "id": "zcode", "name": "ZCode", "agent": true }
+]

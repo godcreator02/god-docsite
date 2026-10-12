@@ -1,0 +1,26 @@
+/* 身份包公开组件的样式：宿主引 /styles.css 后就有，类名前缀 ib- 可整体覆盖 */
+
+.ib-avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  color: #fff;
+  flex: none;
+  user-select: none;
+  line-height: 1;
+  overflow: hidden;
+}
+
+.ib-identity {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+}
+
+.ib-identity-readonly .ib-identity-name {
+  color: #888;
+  cursor: help;
+  border-bottom: 1px dotted #888;
+}

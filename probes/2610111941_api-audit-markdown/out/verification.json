@@ -1,0 +1,17 @@
+{
+  "passed": 12,
+  "checks": [
+    "31 original outputs match byte for byte",
+    "24 successful fixtures need no explicit jsxComponents wrapper",
+    "line-start scanner misses author inline JSX and component-produced inline JSX",
+    "line-start scanner falsely flags code fence examples",
+    "scanner loses alias identity and misses lowercase implementation names",
+    "missing component and nested unresolved children remain JSX",
+    "pre-opt-in throw serializes JSX, post-opt-in throw propagates",
+    "Term no-position transformation retains source word in Markdown and search",
+    "same-node mutation loses prior registration; separate same-range objects retain first edit",
+    "current E8 Pin and PinTree search still contain code/tree bodies",
+    "public structuredData plus generated nodes without positions keeps code output but narrows search",
+    "real local PNG, MDX include, TS include and npm source forms are preserved/expanded"
+  ]
+}

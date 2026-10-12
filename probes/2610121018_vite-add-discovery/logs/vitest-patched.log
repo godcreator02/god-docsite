@@ -1,0 +1,35 @@
+$ vitest run
+
+[1m[30m[46m RUN [49m[39m[22m [36mv5.0.3 [39m[90mD:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610121018_vite-add-discovery[39m
+
+[90mstdout[2m | test/glob-add.test.mjs[2m > [22m[2mσÅÿΣ╜ô A τ¢╕σ»╣ base ./../content∩╝êfumadocs codegen σ╜óµÇü∩╝ë∩╝êσ«ëΦúàτè╢µÇü∩╝ÜΦíÑΣ╕üτëê vite∩╝êposix.join∩╝ë∩╝ë[2m > [22m[2mΦ┐ÉΦíîΣ╕¡µû░σó₧µûçΣ╗╢∩╝Üwatcher addπÇühotUpdateπÇüΣ║ºτë⌐Θö«µÿ»σÉªµ¢┤µû░
+[22m[39m[variant-a] σ«ëΦúà=patched∩╝îΣ║ºτë⌐Θö«=["./added-variant-a-1791775319201.txt","./initial-a.txt"]∩╝îσÉ½µû░σó₧=true∩╝îµ¿íσ¥ùΦó½σèáσàÑµ¢┤µû░σêùΦí¿=true
+[variant-a] Σ║ºτë⌐Θö«=["./added-variant-a-1791775319201.txt","./initial-a.txt"]∩╝îσÉ½µû░σó₧=true∩╝îµ¿íσ¥ùΦó½σèáσàÑµ¢┤µû░σêùΦí¿=true
+
+[90mstdout[2m | test/glob-add.test.mjs[2m > [22m[2mσÅÿΣ╜ô B µá╣τ¢╕σ»╣ base /content∩╝êσ«ëΦúàτè╢µÇü∩╝ÜΦíÑΣ╕üτëê vite∩╝êposix.join∩╝ë∩╝ë[2m > [22m[2mΦ┐ÉΦíîΣ╕¡µû░σó₧µûçΣ╗╢∩╝Üwatcher addπÇühotUpdateπÇüΣ║ºτë⌐Θö«µÿ»σÉªµ¢┤µû░
+[22m[39m[variant-b] σ«ëΦúà=patched∩╝îΣ║ºτë⌐Θö«=["./added-variant-b-1791775322522.txt","./initial-b.txt"]∩╝îσÉ½µû░σó₧=true∩╝îµ¿íσ¥ùΦó½σèáσàÑµ¢┤µû░σêùΦí¿=true
+[variant-b] Σ║ºτë⌐Θö«=["./added-variant-b-1791775322522.txt","./initial-b.txt"]∩╝îσÉ½µû░σó₧=true∩╝îµ¿íσ¥ùΦó½σèáσàÑµ¢┤µû░σêùΦí¿=true
+
+[90mstdout[2m | test/glob-add.test.mjs[2m > [22m[2mσÅÿΣ╜ô C µùá base∩╝îτ¢┤µÄÑ ../content/**/*.txt∩╝êσ«ëΦúàτè╢µÇü∩╝ÜΦíÑΣ╕üτëê vite∩╝êposix.join∩╝ë∩╝ë[2m > [22m[2mΦ┐ÉΦíîΣ╕¡µû░σó₧µûçΣ╗╢∩╝Üwatcher addπÇühotUpdateπÇüΣ║ºτë⌐Θö«µÿ»σÉªµ¢┤µû░
+[22m[39m[variant-c] σ«ëΦúà=patched∩╝îΣ║ºτë⌐Θö«=["../content/added-variant-c-1791775325827.txt","../content/initial-c.txt"]∩╝îσÉ½µû░σó₧=true∩╝îµ¿íσ¥ùΦó½σèáσàÑµ¢┤µû░σêùΦí¿=true
+[variant-c] Σ║ºτë⌐Θö«=["../content/added-variant-c-1791775325827.txt","../content/initial-c.txt"]∩╝îσÉ½µû░σó₧=true∩╝îµ¿íσ¥ùΦó½σèáσàÑµ¢┤µû░σêùΦí¿=true
+
+[90mstdout[2m | test/glob-add.test.mjs[2m > [22m[2mσÅÿΣ╜ô D τ¢╕σ»╣ base + σÉªσ«Ü glob !./skip-*.txt∩╝êσ«ëΦúàτè╢µÇü∩╝ÜΦíÑΣ╕üτëê vite∩╝êposix.join∩╝ë∩╝ë[2m > [22m[2mΦ┐ÉΦíîΣ╕¡µû░σó₧µûçΣ╗╢∩╝Üwatcher addπÇühotUpdateπÇüΣ║ºτë⌐Θö«µÿ»σÉªµ¢┤µû░
+[22m[39m[variant-d] σ«ëΦúà=patched∩╝îΣ║ºτë⌐Θö«=["./added-variant-d-1791775329150.txt","./initial-d.txt"]∩╝îσÉ½µû░σó₧=true∩╝îµ¿íσ¥ùΦó½σèáσàÑµ¢┤µû░σêùΦí¿=true
+[variant-d] Σ║ºτë⌐Θö«=["./added-variant-d-1791775329150.txt","./initial-d.txt"]∩╝îσÉ½µû░σó₧=true∩╝îµ¿íσ¥ùΦó½σèáσàÑµ¢┤µû░σêùΦí¿=true
+
+ [32mΓ£ô[39m test/glob-add.test.mjs [2m([22m[2m10 tests[22m[2m)[22m[33m 13063[2mms[22m[39m
+   [32mΓ£ô[39m σÅÿΣ╜ô A τ¢╕σ»╣ base ./../content∩╝êfumadocs codegen σ╜óµÇü∩╝ë∩╝êσ«ëΦúàτè╢µÇü∩╝ÜΦíÑΣ╕üτëê vite∩╝êposix.join∩╝ë∩╝ë [2m(2)[22m
+     [33m[2mΓ£ô[22m[39m Φ┐ÉΦíîΣ╕¡µû░σó₧µûçΣ╗╢∩╝Üwatcher addπÇühotUpdateπÇüΣ║ºτë⌐Θö«µÿ»σÉªµ¢┤µû░[33m 3282[2mms[22m[39m
+   [32mΓ£ô[39m σÅÿΣ╜ô B µá╣τ¢╕σ»╣ base /content∩╝êσ«ëΦúàτè╢µÇü∩╝ÜΦíÑΣ╕üτëê vite∩╝êposix.join∩╝ë∩╝ë [2m(2)[22m
+     [33m[2mΓ£ô[22m[39m Φ┐ÉΦíîΣ╕¡µû░σó₧µûçΣ╗╢∩╝Üwatcher addπÇühotUpdateπÇüΣ║ºτë⌐Θö«µÿ»σÉªµ¢┤µû░[33m 3268[2mms[22m[39m
+   [32mΓ£ô[39m σÅÿΣ╜ô C µùá base∩╝îτ¢┤µÄÑ ../content/**/*.txt∩╝êσ«ëΦúàτè╢µÇü∩╝ÜΦíÑΣ╕üτëê vite∩╝êposix.join∩╝ë∩╝ë [2m(2)[22m
+     [33m[2mΓ£ô[22m[39m Φ┐ÉΦíîΣ╕¡µû░σó₧µûçΣ╗╢∩╝Üwatcher addπÇühotUpdateπÇüΣ║ºτë⌐Θö«µÿ»σÉªµ¢┤µû░[33m 3283[2mms[22m[39m
+   [32mΓ£ô[39m σÅÿΣ╜ô D τ¢╕σ»╣ base + σÉªσ«Ü glob !./skip-*.txt∩╝êσ«ëΦúàτè╢µÇü∩╝ÜΦíÑΣ╕üτëê vite∩╝êposix.join∩╝ë∩╝ë [2m(2)[22m
+     [33m[2mΓ£ô[22m[39m Φ┐ÉΦíîΣ╕¡µû░σó₧µûçΣ╗╢∩╝Üwatcher addπÇühotUpdateπÇüΣ║ºτë⌐Θö«µÿ»σÉªµ¢┤µû░[33m 3013[2mms[22m[39m
+
+[2m Test Files [22m [1m[32m1 passed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[32m10 passed[39m[22m[90m (10)[39m
+[2m   Start at [22m 11:21:58
+[2m   Duration [22m 13.48s[2m (tests 98%, import 1%)[22m
+

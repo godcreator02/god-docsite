@@ -1,0 +1,230 @@
+:root {
+  --comment-overlay-accent: #d97706;
+  color-scheme: light;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: ui-sans-serif, system-ui, 'Segoe UI', 'Microsoft YaHei', sans-serif;
+  color: #1f2937;
+  background: #f8fafc;
+}
+
+.page {
+  max-width: 52rem;
+  margin: 0 auto;
+  padding: 1rem 1.25rem 4rem;
+}
+
+/* 工具条 */
+.toolbar {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 1rem;
+  padding: 0.5rem 0.75rem;
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgb(15 23 42 / 0.06);
+}
+
+.toolbar-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.toolbar button,
+.unplaced-panel button {
+  font: inherit;
+  font-size: 0.85rem;
+  padding: 0.2rem 0.6rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 7px;
+  background: #f8fafc;
+  cursor: pointer;
+}
+
+.toolbar button:hover,
+.unplaced-panel button:hover {
+  background: #e2e8f0;
+}
+
+.toolbar-hint {
+  font-size: 0.85rem;
+  color: #475569;
+}
+
+.toolbar-check {
+  width: 100%;
+  margin: 0;
+  font-size: 0.8rem;
+  color: #334155;
+}
+
+/* 无定位面板 */
+.unplaced-panel {
+  margin: 0.75rem 0;
+  padding: 0.6rem 0.9rem;
+  border: 1px dashed #94a3b8;
+  border-radius: 10px;
+  background: #fff;
+  font-size: 0.85rem;
+}
+
+.unplaced-item {
+  margin: 0.25rem 0 0;
+}
+
+.unplaced-item.missing {
+  color: #b91c1c;
+}
+
+.unplaced-item.hidden {
+  color: #1d4ed8;
+}
+
+.unplaced-item.none {
+  color: #64748b;
+}
+
+.unplaced-item .reveal {
+  margin-left: 0.5rem;
+}
+
+/* 覆盖层宿主：包住正文、随正文长高、作为覆盖层的定位基准 */
+.overlay-host {
+  position: relative;
+}
+
+/* 滚动容器场景 */
+.scroll-box {
+  height: 320px;
+  overflow: auto;
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+  padding: 0 1rem;
+  background: #fff;
+}
+
+/* 正文排版 */
+.doc-body {
+  max-width: 44rem;
+  margin: 0 auto;
+  line-height: 1.75;
+  font-size: 1rem;
+}
+
+.doc-body h2 {
+  font-size: 1.25rem;
+  margin: 1.5rem 0 0.75rem;
+}
+
+.doc-body p {
+  margin: 0.75rem 0;
+}
+
+.doc-body pre {
+  background: #0f172a;
+  color: #e2e8f0;
+  padding: 0.9rem 1rem;
+  border-radius: 10px;
+  overflow: auto;
+  font-size: 0.85rem;
+  line-height: 1.6;
+}
+
+.doc-body figure {
+  margin: 1rem 0;
+  text-align: center;
+}
+
+.doc-body figure img {
+  max-width: 100%;
+  border-radius: 8px;
+}
+
+.doc-body figcaption {
+  font-size: 0.8rem;
+  color: #64748b;
+  margin-top: 0.35rem;
+}
+
+.doc-body details {
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 0.5rem 0.9rem;
+  margin: 0.75rem 0;
+  background: #fff;
+}
+
+.doc-body summary {
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.collapsible {
+  margin: 0.75rem 0;
+}
+
+.collapsible-toggle {
+  font: inherit;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  background: #f1f5f9;
+  padding: 0.25rem 0.8rem;
+  cursor: pointer;
+}
+
+.collapsible-panel {
+  border: 1px dashed #cbd5e1;
+  border-radius: 8px;
+  padding: 0.25rem 0.9rem;
+  margin-top: 0.4rem;
+  background: #fff;
+}
+
+.filler {
+  color: #64748b;
+}
+
+.demo-section h1 {
+  font-size: 1.4rem;
+}
+
+.section-note {
+  font-size: 0.85rem;
+  color: #64748b;
+}
+
+.bottom-note {
+  margin-top: 2rem;
+  font-size: 0.85rem;
+  color: #64748b;
+  border-top: 1px solid #e2e8f0;
+  padding-top: 0.75rem;
+}
+
+/* 宿主给卡片内容的样式（renderCard 渲染的部分） */
+.demo-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.demo-card p {
+  margin: 0;
+}
+
+.demo-card-meta {
+  font-size: 0.75rem;
+  color: #6b7280;
+}

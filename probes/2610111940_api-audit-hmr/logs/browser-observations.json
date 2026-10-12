@@ -1,0 +1,15 @@
+{
+  "recording":"Transcribed from actual cua_repl DOM, UI click, and CDP outputs, not an unattended assertion report",
+  "port":5456,
+  "e7":[
+    {"stage":"hydrated baseline","feed":"推送消息 v5","counter":3,"input":"audit-unsaved-123","windowMarker":"bf21abf6-bf23-417d-94dc-3547ebc50609","timeOrigin":1791718932237.4},
+    {"stage":"modify demo.json","feed":"audit-E7-edit-1","counter":3,"input":"audit-unsaved-123","windowMarker":"bf21abf6-bf23-417d-94dc-3547ebc50609","timeOrigin":1791718932237.4},
+    {"stage":"remove demo.json","feed":"(missing)","counter":3,"input":"audit-unsaved-123","windowMarker":"bf21abf6-bf23-417d-94dc-3547ebc50609","timeOrigin":1791718932237.4},
+    {"stage":"readd demo.json","browserFeed":"(missing)","ssrFeed":"audit-E7-add-2","counter":3,"input":"audit-unsaved-123","windowMarker":"bf21abf6-bf23-417d-94dc-3547ebc50609","timeOrigin":1791718932237.4}
+  ],
+  "e2Static":{"SSR":200,"counterAfterClick":0,"windowMarker":"undefined","displayedMarker":"unhydrated","error":"node:url.fileURLToPath externalized for browser compatibility, fumadocs-core remark-image via fumadocs-mdx/config"},
+  "e2Dynamic":{"SSR":500,"error":"Vite module runner has been closed."},
+  "e2Config":{"serverA":"A body\nA-ONLY-NODE-COMPILED","serverB":"B body","browserA":"A body\nA-ONLY-NODE-COMPILED","browserB":"B body","hydrationButtonBefore":0,"hydrationButtonAfter":1},
+  "e5Baseline":{"addedDocSSR":404,"addedDocSidebarCount":0,"addedCommentSSR":200,"addedCommentPresent":false,"mixedDeletedDocAndCommentSSR":500,"independentCommentDeleteBefore":200,"independentCommentDeleteAfter":500},
+  "e5PublicRestart":{"addedDocSSR":200,"addedCommentPresent":true,"deletedDocSSR":404,"otherDocsSSR":200,"deletedCommentPresent":false,"browserDeletedDocSidebarCount":1,"status":"SSR regeneration validated; automatic browser convergence not validated"}
+}

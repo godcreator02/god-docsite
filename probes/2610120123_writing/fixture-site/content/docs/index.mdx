@@ -1,0 +1,12 @@
+---
+title: 集合 A：启用术语标注
+description: content/docs 集合的编译配置里带术语 remark 插件；同样的词在集合 B 不标
+---
+
+这一页属于集合 A（`content/docs/`）：source.config.ts 里这个集合的 mdxOptions 配了术语插件，正文里的词会被自动包上 Term——把鼠标移到**隔离 home**上看看。
+
+第二次出现就不再标了：隔离 home 在这一页只标第一次。
+
+- 术语表在 `content/glossary.terms.ts`，构建期读，不进浏览器包
+- 组件表在 `app/mdx-components.ts`：Fumadocs 公开组件原样登记，写作库只添 Term 一个
+- [写作组件样本](/docs/writing-demo) 与 [术语边界样本](/docs/glossary-demo) 在集合 A 里；[集合 B 的对照页](/notes) 用同样的词，不标

@@ -1,0 +1,28 @@
+[MDX] generated files in 15.603299999999763ms
+[MDX] generated files in 15.135299999999916ms
+12:31:14 AM [vite] (client) Re-optimizing dependencies because vite config has changed
+Delete HMR diagnostic ready on5462
+12:31:16 AM [vite] (ssr) connected.
+12:31:20 AM [vite] (client) dependency optimized: diff-match-patch
+12:31:32 AM [vite] (client) hmr update /app/lib/comment-body.tsx
+12:31:32 AM [vite] (ssr) page reload comments/2026-10-11-2ea875/index.mdx
+12:31:32 AM [vite] (client) hmr invalidate /app/lib/comment-body.tsx Could not Fast Refresh. Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
+12:31:32 AM [vite] (client) hmr update /app/routes/comments.tsx
+12:31:49 AM [vite] (client) hmr update /app/lib/comment-body.tsx
+12:31:49 AM [vite] (ssr) page reload comments/2026-10-11-2ea875/20261011t163149-a7bb.mdx
+12:31:49 AM [vite] (client) hmr invalidate /app/lib/comment-body.tsx Could not Fast Refresh. Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
+12:31:49 AM [vite] (client) hmr update /app/routes/comments.tsx
+DIAG delete client D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/261011_docsite-kit-complete/site/comments/2026-10-11-2ea875/20261011t163149-a7bb.mdx 1 => 0
+DIAG delete ssr D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/261011_docsite-kit-complete/site/comments/2026-10-11-2ea875/20261011t163149-a7bb.mdx 2 => 0
+12:32:00 AM [vite] (client) hmr update /app/lib/comment-body.tsx
+12:32:00 AM [vite] (ssr) page reload comments/2026-10-11-2ea875/20261011t163149-a7bb.mdx
+12:32:00 AM [vite] (ssr) program reload
+12:32:00 AM [vite] (client) hmr invalidate /app/lib/comment-body.tsx Could not Fast Refresh. Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
+12:32:00 AM [vite] (client) hmr update /app/routes/comments.tsx
+DIAG delete client D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/261011_docsite-kit-complete/site/comments/2026-10-11-2ea875/index.mdx 1 => 0
+DIAG delete ssr D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/261011_docsite-kit-complete/site/comments/2026-10-11-2ea875/index.mdx 2 => 0
+12:32:13 AM [vite] (client) hmr update /app/lib/comment-body.tsx
+12:32:13 AM [vite] (ssr) page reload comments/2026-10-11-2ea875/index.mdx
+12:32:13 AM [vite] (ssr) program reload
+12:32:14 AM [vite] (client) hmr invalidate /app/lib/comment-body.tsx Could not Fast Refresh. Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
+12:32:14 AM [vite] (client) hmr update /app/routes/comments.tsx

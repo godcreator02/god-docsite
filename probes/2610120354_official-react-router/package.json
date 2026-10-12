@@ -1,0 +1,9 @@
+{
+  "name": "probe-2610120354-official-react-router",
+  "private": true,
+  "scripts": {
+    "dev": "pnpm --filter example-react-router dev",
+    "build": "pnpm --filter example-react-router build",
+    "start": "pnpm --filter example-react-router start"
+  }
+}

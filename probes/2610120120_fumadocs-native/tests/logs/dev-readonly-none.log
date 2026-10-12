@@ -1,0 +1,5 @@
+[restart] Relaunching with --conditions=development
+[MDX] generated files in 13.964799999999968ms
+[MDX] generated files in 27.21679999999992ms
+  [32m➜[39m  [1mLocal[22m:   [36mhttp://127.0.0.1:[1m5470[22m/[39m
+[2m2:36:13 AM[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m connected.

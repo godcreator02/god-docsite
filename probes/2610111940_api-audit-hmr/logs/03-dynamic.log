@@ -1,0 +1,113 @@
+[restart] Relaunching with --conditions=development
+[MDX] generated files in 11.541999999999916ms
+[MDX] generated files in 19.47510000000011ms
+  ➜  Local:   http://127.0.0.1:5456/
+7:45:55 PM [vite] (ssr) connected.
+Error: Vite module runner has been closed.
+    at ModuleRunner.getModuleInformation (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/module-runner.js:1223:26)
+    at ModuleRunner.cachedModule (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/module-runner.js:1205:18)
+    at request (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/module-runner.js:1245:94)
+    at dynamicRequest (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/module-runner.js:1247:122)
+    at mdxOptions (D:\unitfolders\oz47p-docsite-kit\docsite-kit\probes\261011-api-audit-hmr\site\app\lib\source.ts:9:71)
+    at getMDXOptions (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/fumadocs-mdx@15.4.7_@types+_4cbb2e517fc4b66733860c06f2550baa/node_modules/fumadocs-mdx/dist/build-default-CSiWktEh.js:164:46)
+    at buildJSMDX (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/fumadocs-mdx@15.4.7_@types+_4cbb2e517fc4b66733860c06f2550baa/node_modules/fumadocs-mdx/dist/build-default-CSiWktEh.js:97:27)
+    at buildMDX (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/fumadocs-mdx@15.4.7_@types+_4cbb2e517fc4b66733860c06f2550baa/node_modules/fumadocs-mdx/dist/build-H2VN-Hpm.js:10:9)
+    at async Object.load (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/fumadocs-mdx@15.4.7_@types+_4cbb2e517fc4b66733860c06f2550baa/node_modules/fumadocs-mdx/dist/mdx-D0Qtc99b.js:64:20)
+    at async TransformPluginContext.transform (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/fumadocs-mdx@15.4.7_@types+_4cbb2e517fc4b66733860c06f2550baa/node_modules/fumadocs-mdx/dist/adapter-XBO81DIE.js:68:19) {
+  plugin: 'fumadocs-mdx:mdx',
+  id: 'D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/261011-api-audit-hmr/site/content/docs/index.mdx?macro_id=app%2Flib%2Fsource.ts%23docs',
+  pluginCode: '---\n' +
+    'title: Hello World\n' +
+    'description: |\n' +
+    '  Your first `document`\n' +
+    "  You'll love it!\n" +
+    '---\n' +
+    '\n' +
+    'Hey there! Fumadocs is the docs framework that also works on React Router!\n' +
+    '\n' +
+    '## Heading\n' +
+    '\n' +
+    'Hello World\n' +
+    '\n' +
+    '<Cards>\n' +
+    '  <Card title="Learn more about React Router" href="https://reactrouter.com" />\n' +
+    '  <Card title="Learn more about Fumadocs" href="https://fumadocs.dev" />\n' +
+    '</Cards>\n' +
+    '\n' +
+    '```ts\n' +
+    "console.log('I love React!');\n" +
+    '```\n' +
+    '\n' +
+    '### Heading\n' +
+    '\n' +
+    '#### Heading\n' +
+    '\n' +
+    '| Head                            | Description                         |\n' +
+    '| ------------------------------- | ----------------------------------- |\n' +
+    '| `hello`                         | Hello World                         |\n' +
+    '| very **important**              | Hey                                 |\n' +
+    '| _Surprisingly_                  | Fumadocs                            |\n' +
+    '| very long text that looks weird | hello world hello world hello world |\n',
+  runnerError: Error: RunnerError
+      at reviveInvokeError (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/module-runner.js:557:64)
+      at Object.invoke (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/module-runner.js:630:11)
+      at async ModuleRunner.getModuleInformation (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/module-runner.js:1228:7)
+      at async request (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/module-runner.js:1245:83)
+      at async Object.load (D:\unitfolders\oz47p-docsite-kit\docsite-kit\probes\2610111754_fumadocs-16-17-1\site\node_modules\.pnpm\fumadocs-mdx@15.4.7_@types+_4cbb2e517fc4b66733860c06f2550baa\node_modules\fumadocs-mdx\dist\runtime\server.js:41:25)
+}
+7:46:00 PM [vite] (client) [Unhandled error] Error: Module "node:url" has been externalized for browser compatibility. Cannot access "node:url.fileURLToPath" in client code.  See https://vite.dev/guide/troubleshooting.html#module-externalized-for-browser-compatibility for more details.
+ > Object.get ../../../../../../@id/__vite-browser-external:node:url:3:11
+ > ../../2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/fumadocs-core@16.17.1_@mdx-_11ae55ae1af62cf101cec7ced32746d4/node_modules/fumadocs-core/dist/mdx-plugins/remark-image.js?v=f162028e:1:50
+
+Error: Vite module runner has been closed.
+    at ModuleRunner.getModuleInformation (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/module-runner.js:1223:26)
+    at ModuleRunner.cachedModule (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/module-runner.js:1205:18)
+    at request (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/module-runner.js:1245:94)
+    at dynamicRequest (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/module-runner.js:1247:122)
+    at mdxOptions (D:\unitfolders\oz47p-docsite-kit\docsite-kit\probes\261011-api-audit-hmr\site\app\lib\source.ts:9:71)
+    at getMDXOptions (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/fumadocs-mdx@15.4.7_@types+_4cbb2e517fc4b66733860c06f2550baa/node_modules/fumadocs-mdx/dist/build-default-CSiWktEh.js:164:46)
+    at buildJSMDX (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/fumadocs-mdx@15.4.7_@types+_4cbb2e517fc4b66733860c06f2550baa/node_modules/fumadocs-mdx/dist/build-default-CSiWktEh.js:97:27)
+    at buildMDX (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/fumadocs-mdx@15.4.7_@types+_4cbb2e517fc4b66733860c06f2550baa/node_modules/fumadocs-mdx/dist/build-H2VN-Hpm.js:10:9)
+    at async Object.load (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/fumadocs-mdx@15.4.7_@types+_4cbb2e517fc4b66733860c06f2550baa/node_modules/fumadocs-mdx/dist/mdx-D0Qtc99b.js:64:20)
+    at async TransformPluginContext.transform (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/fumadocs-mdx@15.4.7_@types+_4cbb2e517fc4b66733860c06f2550baa/node_modules/fumadocs-mdx/dist/adapter-XBO81DIE.js:68:19) {
+  plugin: 'fumadocs-mdx:mdx',
+  id: 'D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/261011-api-audit-hmr/site/content/docs/index.mdx?macro_id=app%2Flib%2Fsource.ts%23docs',
+  pluginCode: '---\n' +
+    'title: Hello World\n' +
+    'description: |\n' +
+    '  Your first `document`\n' +
+    "  You'll love it!\n" +
+    '---\n' +
+    '\n' +
+    'Hey there! Fumadocs is the docs framework that also works on React Router!\n' +
+    '\n' +
+    '## Heading\n' +
+    '\n' +
+    'Hello World\n' +
+    '\n' +
+    '<Cards>\n' +
+    '  <Card title="Learn more about React Router" href="https://reactrouter.com" />\n' +
+    '  <Card title="Learn more about Fumadocs" href="https://fumadocs.dev" />\n' +
+    '</Cards>\n' +
+    '\n' +
+    '```ts\n' +
+    "console.log('I love React!');\n" +
+    '```\n' +
+    '\n' +
+    '### Heading\n' +
+    '\n' +
+    '#### Heading\n' +
+    '\n' +
+    '| Head                            | Description                         |\n' +
+    '| ------------------------------- | ----------------------------------- |\n' +
+    '| `hello`                         | Hello World                         |\n' +
+    '| very **important**              | Hey                                 |\n' +
+    '| _Surprisingly_                  | Fumadocs                            |\n' +
+    '| very long text that looks weird | hello world hello world hello world |\n',
+  runnerError: Error: RunnerError
+      at reviveInvokeError (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/module-runner.js:557:64)
+      at Object.invoke (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/module-runner.js:630:11)
+      at async ModuleRunner.getModuleInformation (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/module-runner.js:1228:7)
+      at async request (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/module-runner.js:1245:83)
+      at async Object.load (D:\unitfolders\oz47p-docsite-kit\docsite-kit\probes\2610111754_fumadocs-16-17-1\site\node_modules\.pnpm\fumadocs-mdx@15.4.7_@types+_4cbb2e517fc4b66733860c06f2550baa\node_modules\fumadocs-mdx\dist\runtime\server.js:41:25)
+}

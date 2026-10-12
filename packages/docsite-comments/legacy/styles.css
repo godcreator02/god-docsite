@@ -1,0 +1,174 @@
+/* 站点的 app.css 引入这一份：让 Tailwind 扫到评论包组件里用的类名 */
+@source './src';
+
+/* 评论包自己的 token。颜色不依赖 fumadocs 或别的主题：浅色是默认值，.dark（宿主的深色模式类挂在 <html> 上时）换成深色一套；宿主想配色就覆盖这些变量 */
+:root {
+  --docsite-comments-sidebar-width: 340px;
+  --docsite-comments-background: #ffffff;
+  --docsite-comments-card: #ffffff;
+  --docsite-comments-card-foreground: #1f2328;
+  --docsite-comments-foreground: #1f2328;
+  --docsite-comments-muted: #e9edf1;
+  --docsite-comments-muted-foreground: #6a737d;
+  --docsite-comments-border: #d8dee4;
+  --docsite-comments-accent: #eaeef2;
+  --docsite-comments-accent-foreground: #1f2328;
+  --docsite-comments-primary: #1f6feb;
+  --docsite-comments-primary-foreground: #ffffff;
+}
+
+.dark {
+  --docsite-comments-background: #16181d;
+  --docsite-comments-card: #1c1f26;
+  --docsite-comments-card-foreground: #e6e8eb;
+  --docsite-comments-foreground: #e6e8eb;
+  --docsite-comments-muted: #3a414c;
+  --docsite-comments-muted-foreground: #9aa4af;
+  --docsite-comments-border: #333942;
+  --docsite-comments-accent: #262b33;
+  --docsite-comments-accent-foreground: #e6e8eb;
+  --docsite-comments-primary: #4c8dff;
+  --docsite-comments-primary-foreground: #0b1220;
+}
+
+/* 评论批的原文：CSS Custom Highlight API 的高亮，名字和 src/react/comments.tsx 里的一致 */
+::highlight(docsite-comment) {
+  background-color: color-mix(in oklab, #f5b301 25%, transparent);
+  text-decoration: underline 2px color-mix(in oklab, #f5b301 80%, transparent);
+  text-underline-offset: 3px;
+}
+
+::highlight(docsite-comment-active) {
+  background-color: color-mix(in oklab, #f5b301 55%, transparent);
+}
+
+/* 评论批的元素（图片、公式、代码块、表格、组件；文字类的元素标黄，不画框） */
+[data-commented-element] {
+  outline: 2px solid color-mix(in oklab, #f5b301 55%, transparent);
+  outline-offset: 4px;
+  border-radius: 4px;
+}
+
+[data-commented-element='active'] {
+  outline-color: #f5b301;
+}
+
+/* 批注模式：正文里鼠标换成十字，点一下批鼠标下的元素 */
+html[data-comment-picking] [data-comment-scope] {
+  cursor: crosshair;
+}
+
+/* 评论正文的排版：评论正文是 MDX，包不依赖 typography 插件或宿主的 prose 样式，自己给最小一套 */
+.dc-comment-body {
+  overflow-wrap: anywhere;
+}
+
+.dc-comment-body > :first-child {
+  margin-top: 0;
+}
+
+.dc-comment-body > :last-child {
+  margin-bottom: 0;
+}
+
+.dc-comment-body p {
+  margin: 0.375rem 0;
+}
+
+.dc-comment-body h1,
+.dc-comment-body h2,
+.dc-comment-body h3,
+.dc-comment-body h4 {
+  font-weight: 600;
+  line-height: 1.3;
+  margin: 0.625rem 0 0.375rem;
+}
+
+.dc-comment-body h1 {
+  font-size: 1.125rem;
+}
+
+.dc-comment-body h2 {
+  font-size: 1.0625rem;
+}
+
+.dc-comment-body h3,
+.dc-comment-body h4 {
+  font-size: 1rem;
+}
+
+.dc-comment-body ul,
+.dc-comment-body ol {
+  margin: 0.375rem 0;
+  padding-inline-start: 1.375rem;
+}
+
+.dc-comment-body ul {
+  list-style: disc;
+}
+
+.dc-comment-body ol {
+  list-style: decimal;
+}
+
+.dc-comment-body li {
+  margin: 0.125rem 0;
+}
+
+.dc-comment-body a {
+  color: var(--docsite-comments-primary);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.dc-comment-body code {
+  font-family: ui-monospace, Consolas, monospace;
+  font-size: 0.875em;
+  background: var(--docsite-comments-muted);
+  border-radius: 4px;
+  padding: 0.1em 0.3em;
+}
+
+.dc-comment-body pre {
+  background: var(--docsite-comments-muted);
+  border-radius: 8px;
+  padding: 0.625rem 0.75rem;
+  overflow-x: auto;
+  margin: 0.375rem 0;
+}
+
+.dc-comment-body pre code {
+  background: none;
+  padding: 0;
+}
+
+.dc-comment-body blockquote {
+  border-inline-start: 2px solid var(--docsite-comments-border);
+  color: var(--docsite-comments-muted-foreground);
+  margin: 0.375rem 0;
+  padding-inline-start: 0.75rem;
+}
+
+.dc-comment-body table {
+  border-collapse: collapse;
+  margin: 0.375rem 0;
+}
+
+.dc-comment-body th,
+.dc-comment-body td {
+  border: 1px solid var(--docsite-comments-border);
+  padding: 0.25rem 0.5rem;
+}
+
+.dc-comment-body img,
+.dc-comment-body svg,
+.dc-comment-body video {
+  max-width: 100%;
+  height: auto;
+}
+
+.dc-comment-body hr {
+  border: none;
+  border-top: 1px solid var(--docsite-comments-border);
+  margin: 0.625rem 0;
+}

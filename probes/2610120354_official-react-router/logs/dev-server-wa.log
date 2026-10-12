@@ -1,0 +1,8 @@
+[restart] Relaunching with --conditions=development
+[2m10:51:21 AM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m Re-optimizing dependencies because lockfile has changed
+  [32m➜[39m  [1mLocal[22m:   [36mhttp://127.0.0.1:[1m5530[22m/[39m
+[2m10:51:41 AM[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m connected.
+[2m10:53:14 AM[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m [32mpage reload [39m[2mapp/lib/source.ts[22m
+[2m10:53:14 AM[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m program reload
+[2m10:53:45 AM[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m [32mpage reload [39m[2mapp/lib/source.ts[22m
+[2m10:53:45 AM[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m program reload

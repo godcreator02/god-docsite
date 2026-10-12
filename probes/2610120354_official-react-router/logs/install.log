@@ -1,0 +1,18 @@
+Scope: all 2 workspace projects
+Progress: resolved 0, reused 452, downloaded 0, added 0
+Packages are hard linked from the content-addressable store to the virtual store.
+  Content-addressable store is at: D:\.pnpm-store\v11
+  Virtual store is at:             node_modules/.pnpm
+Progress: resolved 1, reused 455, downloaded 0, added 0
+Progress: resolved 126, reused 455, downloaded 0, added 111
+Progress: resolved 189, reused 455, downloaded 0, added 173
+Progress: resolved 296, reused 455, downloaded 0, added 281
+Progress: resolved 369, reused 455, downloaded 0, added 356
+Progress: resolved 444, reused 455, downloaded 0, added 428
+Progress: resolved 455, reused 455, downloaded 0, added 447
+Progress: resolved 455, reused 455, downloaded 0, added 448
+Packages: +455
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+Progress: resolved 455, reused 455, downloaded 0, added 455, done
+[WARN] Issues with peer dependencies found. Run "pnpm peers check" to list them.
+Done in 16.8s using pnpm v12.4.2

@@ -1,0 +1,41 @@
+{
+  "name": "fixture-site",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "写作能力的 Fumadocs 原生配置样本：集合 A（docs，启用术语插件）与集合 B（notes，不启用）＋ TSX 公式页。组件表与 source.config 的组合都在这个站里，库只提供组件与插件",
+  "scripts": {
+    "dev": "react-router dev --port 5511 --host 127.0.0.1 --strictPort",
+    "build": "react-router build",
+    "start": "react-router-serve ./build/server/index.js",
+    "check": "react-router typegen && tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@fumadocs/base-ui": "16.17.1",
+    "@probe/writing": "workspace:*",
+    "@react-router/node": "^8.4.0",
+    "@react-router/serve": "^8.4.0",
+    "fumadocs-core": "16.17.1",
+    "fumadocs-mdx": "15.4.7",
+    "katex": "^0.16.47",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0",
+    "react-router": "^8.4.0",
+    "rehype-katex": "^7.0.1",
+    "remark-math": "^6.0.0",
+    "isbot": "^5"
+  },
+  "devDependencies": {
+    "@react-router/dev": "^8.4.0",
+    "@tailwindcss/vite": "^4.3.3",
+    "@types/mdx": "^2.0.14",
+    "@types/node": "^26.6.2",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "tailwindcss": "^4.3.3",
+    "typescript": "^6.0.3",
+    "vite": "8.3.4",
+    "vitest": "^5.0.1"
+  }
+}

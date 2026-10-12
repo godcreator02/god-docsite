@@ -1,0 +1,1 @@
+<p>prefix <Inner /> suffix</p>

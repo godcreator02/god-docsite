@@ -1,0 +1,50 @@
+{
+  "name": "@probe/writing",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "文档站写作能力库（probe 版，最终归 docsite-kit 写作模块）：术语 remark 插件与 Term 组件、TSX 公式 Tex；代码块/表格/Tabs/Files/折叠/图片直接复用锁定版 Fumadocs 公开组件，不在这里包装",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./compile": {
+      "types": "./dist/compile.d.ts",
+      "default": "./dist/compile.js"
+    },
+    "./styles.css": "./src/term.css"
+  },
+  "files": [
+    "dist",
+    "src/term.css"
+  ],
+  "scripts": {
+    "build": "node -e \"require('node:fs').rmSync('dist',{recursive:true,force:true})\" && tsc -p tsconfig.build.json",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "peerDependencies": {
+    "katex": "^0.16.47",
+    "react": "^19.3.0"
+  },
+  "devDependencies": {
+    "@mdx-js/mdx": "3.1.1",
+    "@types/mdast": "^4.0.4",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@types/unist": "^3.0.3",
+    "katex": "^0.16.47",
+    "mdast-util-mdx-jsx": "^3.2.0",
+    "mdast-util-to-markdown": "^2.1.2",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0",
+    "remark-math": "^6.0.0",
+    "remark-mdx": "^3.1.0",
+    "remark-parse": "^11.0.0",
+    "typescript": "^6.0.3",
+    "unified": "^11.0.5",
+    "vite": "^8.3.0",
+    "vitest": "^5.0.1"
+  }
+}

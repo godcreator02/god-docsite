@@ -1,0 +1,60 @@
+{
+  "probe": "2610120242_comment-hmr-minimal",
+  "line": "S",
+  "date": "2026-10-12",
+  "latestPriority": "新增正文页面基线（docs-add-result.md），已完成并交回",
+  "rounds": [
+    {
+      "round": 1（评论链，已暂停）",
+      "status": "paused-by-user",
+      "evidence": "result.md：A/B/C/D 对照。要点：SSR 模块失效链不重挂组件树（N 的『无公开无损解』不成立）；丢失仅两类——fetcher.Form 子树非受控 DOM 状态、Renderer 子树内组件状态；raw 预查消除 createClientLoader 的 throw；新增评论零错误无刷新。未解决：vpys 消失未复现、touch 延迟、Vitest 未写（当时被收住）。"
+    },
+    {
+      "round": 2（新增正文基线，唯一优先）",
+      "status": "completed",
+      "evidence": "docs-add-result.md",
+      "answers": {
+        "新增是否成功": "default-target 下成功（~300ms 导航自动出现）；默认接线（vite glob）下失败（33s 不出现、直开 404、零 HMR 事件，Windows+Vite 8.3.4）",
+        "需要多长": "default-target 首帧 200ms 采样粒度内（<500ms 实感）；Vitest HTTP 层轮询 468ms 达可直达",
+        "是否整页重载": "否（Link 客户端导航 timeOrigin 不变）；直开新 URL 为整页加载属预期",
+        "未改动状态": "外壳 state、受控与非受控草稿全部保留；未改动的 MDX 内 TSX 计数器归零（Renderer 子树重挂，已单独列出不混报）",
+        "入口未到/SSR500/模块错误": "default-target 下无（零 console 错误）；默认接线的问题是清单不更新（404），不是渲染错误",
+        "客户端导航 vs 直开": "分别验证均正常（内容、新 TSX 交互、图片加载）"
+      },
+      "comparison": {
+        "variable": "只切 fumadocsMdx() 与 fumadocsMdx({ index: { target: 'default' } })",
+        "sharedCode": "官方 createClientLoader/useContent + raw 预查（预查非官方标准示例，是本 probe 的防护，已在文档注明）",
+        "voidedClaim": "中途『默认 target 报 async Client Component』结论作废：错误出自自写 use().default 渲染组合与一次标签页绑定错误，两个 target 都会出现，与接线无关"
+      },
+      "vitest": "pnpm test：2/2 通过（logs/vitest-docs-add.log）——起 dev→SSR 检查→运行中新增 MDX→轮询新 URL 可直达→清理"
+    }
+  ],
+  "siteState": {
+    "viteConfig": "交付形态 index: { target: 'default' }",
+    "routes": "/docs/*（docs.tsx，新增正文基线，无评论）、/page（page.tsx，评论实验，保留）",
+    "contentMaterials": "content/docs：index.mdx（含自写 page-counter.tsx 与 dot.svg）、new-page.mdx（default-target 轮新增）、second-page.mdx（默认接线轮新增，含 second-page-counter.tsx、second-dot.svg）",
+    "tests": "tests/docs-add.test.ts + tests/vitest.config.ts（spawn node 直跑 @react-router/dev bin，Vitest 沙箱 PATH 无 cmd.exe/npx）"
+  },
+  "notVerified": [
+    "删除正文页、多页树、meta.json 分组（不在本轮范围）",
+    "Renderer 子树重挂的缓解（评论轮的纯组件模块+use() 方案触发 async Client Component，未继续排查，材料在 result.md C 线）",
+    "vpys 评论消失（评论轮遗留，未复现）"
+  ],
+  "versions": {
+    "react-router": "8.4.0",
+    "vite": "8.3.4",
+    "fumadocs-core": "16.17.1",
+    "fumadocs-mdx": "15.4.7",
+    "react": "19.3.0",
+    "typescript": "5.9.2",
+    "vitest": "5.0.3"
+  },
+  "boundaries": "未升级依赖、未提交推送、未改其他 probe/父 workspace、无自建 hot.data/store/持久化草稿/第二编译器/热更新过滤；两站 tsc 通过；服务已停（5520/5521 释放）；真实浏览器为 ZCode 内置浏览器（坐标级真实点击与输入）。",
+  "artifacts": {
+    "readme": "README.md（首行复跑命令）",
+    "round1": "result.md（评论链 A/B/C/D）",
+    "round2": "docs-add-result.md（新增正文基线）",
+    "logs": ["logs/dev-a.log", "logs/dev-b.log", "logs/vitest-docs-add.log"],
+    "tests": ["tests/docs-add.test.ts", "tests/vitest.config.ts"]
+  }
+}

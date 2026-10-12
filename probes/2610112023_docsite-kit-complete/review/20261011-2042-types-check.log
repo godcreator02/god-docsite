@@ -1,0 +1,2 @@
+$ react-router typegen && tsc --noEmit
+[MDX] generated files in 5.601900000000114ms

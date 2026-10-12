@@ -1,0 +1,17 @@
+recorded dev launcher PID: 99756
+SUCCESS: The process with PID 67844 (child process of PID 85780) has been terminated.
+SUCCESS: The process with PID 85780 (child process of PID 92424) has been terminated.
+SUCCESS: The process with PID 92424 (child process of PID 49020) has been terminated.
+SUCCESS: The process with PID 49020 (child process of PID 71952) has been terminated.
+SUCCESS: The process with PID 66280 (child process of PID 99756) has been terminated.
+SUCCESS: The process with PID 71952 (child process of PID 99756) has been terminated.
+SUCCESS: The process with PID 99756 (child process of PID 79700) has been terminated.
+port 5460 after stop: free
+port 5461 after stop: free
+hash compare after acceptance: 18 files, 0 mismatch
+dev-server.log tail:
+[MDX] generated files in 16.515699999999924ms
+[MDX] generated files in 38.666499999999814ms
+  [32m➜[39m  [1mLocal[22m:   [36mhttp://127.0.0.1:[1m5460[22m/[39m
+[2m[32m  ➜[39m[22m[2m  press [22m[1mh + enter[22m[2m to show help[22m
+[2m8:56:08 PM[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m connected.

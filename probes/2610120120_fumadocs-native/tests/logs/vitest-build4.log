@@ -1,0 +1,12 @@
+
+[1m[30m[46m RUN [49m[39m[22m [36mv5.0.3 [39m[90mD:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/261012_fumadocs-native[39m
+
+(node:97444) [DEP0190] DeprecationWarning: Passing args to a child process with shell option true can lead to security vulnerabilities, as the arguments are not escaped, only concatenated.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+ [32m✓[39m tests/build-start.test.ts [2m([22m[2m5 tests[22m[2m)[22m[33m 8855[2mms[22m[39m
+
+[2m Test Files [22m [1m[32m1 passed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[32m5 passed[39m[22m[90m (5)[39m
+[2m   Start at [22m 01:40:37
+[2m   Duration [22m 9.11s[2m (tests 99%)[22m
+

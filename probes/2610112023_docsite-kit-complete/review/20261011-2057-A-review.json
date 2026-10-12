@@ -1,0 +1,15 @@
+{
+  "unique": 76,
+  "scopeCorrections": "PG-multi-source 1.2; WR split 1.1/1.2; HS-service compatibility statement qualified",
+  "step1": 72,
+  "total": 76,
+  "result": "passed",
+  "currentSliceItems": [
+    "PG-config-api",
+    "TL-compile-plugins",
+    "WR-per-collection-plugins"
+  ],
+  "later": 4,
+  "missingMarkdownIds": [],
+  "acceptance": "inventory artifact only; feature behavior not accepted"
+}

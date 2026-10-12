@@ -1,0 +1,375 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>fumadocs 图解总览</title>
+<link rel="stylesheet" href="style.css">
+<style>
+  :root { --c-site: #bf8700; --c-mdx: #0a6cbd; --c-core: #1a7f37; --c-ui: #8250df; --c-rr: #6e7781; }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --c-site: #e3b341; --c-mdx: #5aa9f0; --c-core: #57ab5a; --c-ui: #b083f0; --c-rr: #9aa4af; } }
+  :root[data-theme="dark"] { --c-site: #e3b341; --c-mdx: #5aa9f0; --c-core: #57ab5a; --c-ui: #b083f0; --c-rr: #9aa4af; }
+
+  .level { margin-top: 44px; }
+  .level-head { display: flex; align-items: baseline; gap: 10px; border-top: 1px solid var(--border); padding-top: 16px; }
+  .level-head .n { font-size: 12px; font-weight: 700; color: #fff; background: var(--accent); border-radius: 999px; padding: 2px 10px; white-space: nowrap; }
+  .level-head h2 { border: 0; margin: 0; padding: 0; }
+  .level.hidden { display: none; }
+  .deeper { display: block; margin: 18px auto 0; font: inherit; font-size: 14px; padding: 8px 18px; border-radius: 999px; border: 1px solid var(--accent); background: var(--accent-soft); color: var(--accent); cursor: pointer; }
+  .deeper:hover { filter: brightness(1.05); }
+
+  .stage { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 12px; margin: 12px 0; }
+  svg text { font-family: inherit; }
+  .controls { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin: 8px 0; }
+  .controls button { font: inherit; font-size: 13px; padding: 4px 12px; border-radius: 6px; border: 1px solid var(--border); background: var(--surface); color: var(--text); cursor: pointer; }
+  .controls button:hover { border-color: var(--accent); }
+  .controls .count { color: var(--muted); font-size: 13px; }
+
+  /* 第 1 层动画 */
+  @keyframes doc-in { 0%,10% { transform: translateX(0); opacity: 1; } 40% { transform: translateX(250px); opacity: 1; } 45%,100% { transform: translateX(250px); opacity: 0; } }
+  @keyframes box-pulse { 0%,38% { transform: scale(1); } 45% { transform: scale(1.06); } 55%,100% { transform: scale(1); } }
+  @keyframes web-out { 0%,52% { opacity: 0; transform: translateX(-30px); } 70%,92% { opacity: 1; transform: none; } 100% { opacity: 0; } }
+  .l1-doc { animation: doc-in 4.5s infinite; }
+  .l1-box { animation: box-pulse 4.5s infinite; transform-origin: 440px 95px; transform-box: view-box; }
+  .l1-web { animation: web-out 4.5s infinite; }
+
+  /* 第 2 层 */
+  .l2-box { cursor: pointer; transition: transform .2s; }
+  .l2-box:hover rect.frame { stroke-width: 3; }
+  .l2-box.active rect.frame { stroke-width: 3.5; }
+  .l2-cap { text-align: center; margin: 6px 0 0; min-height: 52px; }
+  .l2-cap b { color: var(--accent); }
+
+  /* 第 3 层 */
+  .boxtabs { display: flex; gap: 8px; flex-wrap: wrap; margin: 10px 0; }
+  .boxtab { font: inherit; font-size: 14px; padding: 6px 14px; border-radius: 8px; border: 2px solid var(--border); background: var(--surface); color: var(--text); cursor: pointer; }
+  .boxtab.on { border-color: var(--c); background: color-mix(in srgb, var(--c) 10%, var(--surface)); }
+  .steps { display: flex; gap: 0; align-items: center; flex-wrap: wrap; margin: 6px 0 10px; }
+  .step { font-size: 13px; padding: 4px 10px; border-radius: 999px; border: 1px solid var(--border); background: var(--surface); cursor: pointer; transition: all .25s; }
+  .step.on { background: var(--c); border-color: var(--c); color: #fff; }
+  .step.done { border-color: var(--c); }
+  .steps .sep { width: 18px; height: 2px; background: var(--border); }
+  .panel { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; min-height: 360px; }
+  .panel h3 { margin: 0 0 6px; font-size: 18px; }
+  .panel .say { margin: 6px 0 12px; }
+  .panel .label { font-size: 12px; color: var(--muted); margin: 14px 0 6px; }
+  .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  @media (max-width: 760px) { .cols { grid-template-columns: 1fr; } }
+  .call { display: flex; align-items: center; gap: 8px; opacity: 0; transform: translateX(-8px); animation: slidein .35s forwards; }
+  .call .fn { font-family: ui-monospace, Consolas, monospace; font-size: 12.5px; background: var(--code-bg); border-radius: 5px; padding: 2px 8px; border-left: 3px solid var(--c); }
+  .call .where { font-size: 12px; color: var(--muted); }
+  .arrow-down { margin-left: 16px; height: 12px; border-left: 2px dashed var(--border); opacity: 0; animation: fadein .3s forwards; }
+  @keyframes slidein { to { opacity: 1; transform: none; } }
+  @keyframes fadein { to { opacity: 1; } }
+  .data { font-family: ui-monospace, Consolas, monospace; font-size: 12.5px; background: var(--code-bg); border-radius: 6px; padding: 10px 12px; white-space: pre; overflow-x: auto; line-height: 1.55; animation: fadein .5s; }
+  .data b { color: var(--c); }
+  .mock { display: grid; grid-template-columns: 1fr 2.2fr 1fr; gap: 6px; height: 150px; animation: fadein .5s; }
+  .mock > div { border-radius: 6px; border: 1px solid var(--border); padding: 6px 8px; font-size: 12px; }
+  .mock .lab { font-weight: 600; margin-bottom: 4px; }
+  .mock .bar { height: 7px; border-radius: 4px; background: var(--border); margin: 5px 0; transform-origin: left; animation: grow .6s both; }
+  @keyframes grow { from { transform: scaleX(0); } }
+
+  /* 第 4 层时序图 */
+  #seq .lane { stroke: var(--border); stroke-dasharray: 4 4; }
+  #seq .msg line, #seq .msg path { stroke: var(--accent); stroke-width: 1.8; fill: none; }
+  #seq .msg text { font-size: 12.5px; fill: var(--text); }
+  #seq .msg { opacity: 0; transition: opacity .35s; }
+  #seq .msg.show { opacity: 1; }
+  #seq .msg.cur line, #seq .msg.cur path { stroke-width: 3; }
+  #seq .msg.cur text { font-weight: 700; }
+  .caption { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 8px 12px; margin-top: 8px; min-height: 46px; }
+
+  /* 第 5 层 */
+  .plugmap { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 10px; }
+  .pm { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 10px 12px; border-top: 4px solid var(--c); }
+  .pm h4 { margin: 0 0 6px; font-size: 15px; }
+  .pm ul { margin: 0; padding-left: 18px; font-size: 13.5px; }
+  .pm li::marker { content: "🔌 "; }
+</style>
+</head>
+<body>
+<main>
+
+<p class="crumbs"><a href="index.html">← 目录</a>　·　fumadocs 图解</p>
+<h1>fumadocs 是怎么工作的</h1>
+<p class="lead">从最外面的一句话开始，一层一层往里看。每一层看懂了，点下面的按钮再往里放大一层。</p>
+
+<!-- 第 1 层 -->
+<section class="level" id="lv1">
+  <div class="level-head"><span class="n">第 1 层</span><h2>一句话</h2></div>
+  <p>你在文件夹里写 <code>.mdx</code> 文件（带一点组件的 Markdown），fumadocs 把它们变成一个带侧栏、目录、搜索的文档网站。</p>
+  <div class="stage">
+    <svg viewBox="0 0 880 190" width="100%" aria-label="文件变成网站">
+      <g class="l1-doc">
+        <rect x="40" y="55" width="90" height="110" rx="6" fill="var(--surface)" stroke="var(--c-site)" stroke-width="2"/>
+        <path d="M110 55 v20 h20" fill="none" stroke="var(--c-site)" stroke-width="2"/>
+        <text x="85" y="100" text-anchor="middle" font-size="13" fill="var(--text)">intro.mdx</text>
+        <rect x="55" y="112" width="60" height="5" rx="2" fill="var(--border)"/><rect x="55" y="124" width="48" height="5" rx="2" fill="var(--border)"/><rect x="55" y="136" width="55" height="5" rx="2" fill="var(--border)"/>
+      </g>
+      <g class="l1-box">
+        <rect x="340" y="45" width="200" height="100" rx="14" fill="color-mix(in srgb, var(--accent) 12%, var(--surface))" stroke="var(--accent)" stroke-width="2.5"/>
+        <text x="440" y="92" text-anchor="middle" font-size="20" font-weight="700" fill="var(--accent)">fumadocs</text>
+        <text x="440" y="116" text-anchor="middle" font-size="12" fill="var(--muted)">（先当它是个黑盒）</text>
+      </g>
+      <g class="l1-web">
+        <rect x="620" y="35" width="230" height="140" rx="8" fill="var(--surface)" stroke="var(--c-ui)" stroke-width="2"/>
+        <rect x="620" y="35" width="230" height="18" rx="8" fill="color-mix(in srgb, var(--c-ui) 18%, var(--surface))"/>
+        <circle cx="632" cy="44" r="3" fill="var(--muted)"/><circle cx="642" cy="44" r="3" fill="var(--muted)"/>
+        <rect x="628" y="62" width="50" height="104" rx="4" fill="color-mix(in srgb, var(--c-core) 14%, var(--surface))"/>
+        <text x="653" y="80" text-anchor="middle" font-size="10" fill="var(--text)">侧栏</text>
+        <rect x="686" y="62" width="106" height="104" rx="4" fill="color-mix(in srgb, var(--c-mdx) 12%, var(--surface))"/>
+        <text x="739" y="80" text-anchor="middle" font-size="10" fill="var(--text)">正文</text>
+        <rect x="798" y="62" width="44" height="104" rx="4" fill="color-mix(in srgb, var(--c-ui) 14%, var(--surface))"/>
+        <text x="820" y="80" text-anchor="middle" font-size="10" fill="var(--text)">目录</text>
+      </g>
+      <text x="85" y="185" text-anchor="middle" font-size="12" fill="var(--muted)">你写的文件</text>
+      <text x="735" y="190" text-anchor="middle" font-size="12" fill="var(--muted)">浏览器里的网站</text>
+      <path d="M180 95 H330 M550 95 H610" stroke="var(--muted)" stroke-width="2" stroke-dasharray="6 6" fill="none"/>
+    </svg>
+  </div>
+  <button class="deeper" data-open="lv2">看懂了，打开黑盒 ↓</button>
+</section>
+
+<!-- 第 2 层 -->
+<section class="level hidden" id="lv2">
+  <div class="level-head"><span class="n">第 2 层</span><h2>黑盒里是三个部件</h2></div>
+  <p>fumadocs 不是一个整体，而是三个分工明确的部件，像一条流水线。点「播放」看一个文件怎么流过去，点任意一个部件看它负责什么。</p>
+  <div class="controls"><button id="l2play">▶ 播放</button></div>
+  <div class="stage">
+    <svg id="l2" viewBox="0 0 880 230" width="100%" aria-label="三个部件"></svg>
+    <p class="l2-cap" id="l2cap">点「播放」，或点一个部件。</p>
+  </div>
+  <p class="meta">另外还有两个配角：<strong>React Router</strong> 负责把数据从服务器送到浏览器；<strong>站点自己的代码</strong>负责把这三个部件接起来（写哪个文件夹是内容、页面长什么样）。</p>
+  <button class="deeper" data-open="lv3">看懂了，打开每个部件 ↓</button>
+</section>
+
+<!-- 第 3 层 -->
+<section class="level hidden" id="lv3">
+  <div class="level-head"><span class="n">第 3 层</span><h2>每个部件里面有几步</h2></div>
+  <p>选一个部件，再一步一步看：这一步做了什么、调用了哪些函数、做完以后数据变成什么样。</p>
+  <div class="boxtabs" id="boxtabs"></div>
+  <div class="steps" id="steps"></div>
+  <div class="controls"><button id="prev">◀ 上一步</button><button id="next">下一步 ▶</button><span class="count" id="count"></span></div>
+  <div class="panel" id="panel"></div>
+  <button class="deeper" data-open="lv4">看懂了，看打开一页时谁调用谁 ↓</button>
+</section>
+
+<!-- 第 4 层 -->
+<section class="level hidden" id="lv4">
+  <div class="level-head"><span class="n">第 4 层</span><h2>打开一页的那一刻，谁调用谁</h2></div>
+  <p>第 3 层是「准备工作」，大部分在启动时就做完了。这一层看浏览器真正打开 <code>/docs/guide/intro</code> 时发生的事。四条竖线是四个参与者，箭头是一次调用或返回。</p>
+  <div class="controls"><button id="sprev">◀ 上一步</button><button id="splay">▶ 自动播放</button><button id="snext">下一步 ▶</button><span class="count" id="scount"></span></div>
+  <div class="stage"><svg id="seq" viewBox="0 0 880 540" width="100%" aria-label="调用时序"></svg></div>
+  <div class="caption" id="scap"></div>
+  <button class="deeper" data-open="lv5">看懂了，看哪里能插进我们的东西 ↓</button>
+</section>
+
+<!-- 第 5 层 -->
+<section class="level hidden" id="lv5">
+  <div class="level-head"><span class="n">第 5 层</span><h2>哪里可以插进我们自己的东西</h2></div>
+  <p>每个部件都留了插口。我们写的库只往这些插口里放东西，不改 fumadocs 本身。后面每一页会把一个部件的插口讲透。</p>
+  <div class="plugmap" id="plugmap"></div>
+  <p class="meta">下一页：<a href="11-fumadocs-mdx.html">部件一 fumadocs-mdx 拆开看 →</a></p>
+</section>
+
+<div class="pager"><a href="index.html">← 目录</a><a href="#" id="openall">全部展开</a></div>
+</main>
+
+<script>
+const B = 'https://github.com/fuma-nama/fumadocs/blob/fumadocs%4016.17.1/';
+const src = (p, l) => `<a class="src" href="${B}${p}${l ? '#L' + l.replace('-', '-L') : ''}" target="_blank">${p.split('/').slice(-2).join('/')}${l ? ':' + l : ''}</a>`;
+const NS = 'http://www.w3.org/2000/svg';
+function el(tag, attrs, parent, text) { const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); if (text != null) e.textContent = text; parent && parent.appendChild(e); return e; }
+
+/* 逐层展开 */
+document.querySelectorAll('.deeper').forEach(b => b.onclick = () => {
+  const s = document.getElementById(b.dataset.open); s.classList.remove('hidden'); b.style.display = 'none';
+  s.scrollIntoView({ behavior: 'smooth', block: 'start' });
+});
+document.getElementById('openall').onclick = e => { e.preventDefault(); document.querySelectorAll('.level').forEach(s => s.classList.remove('hidden')); document.querySelectorAll('.deeper').forEach(b => b.style.display = 'none'); };
+
+/* ---------- 第 2 层：三个部件 ---------- */
+const BOXES = [
+  { key: 'mdx', c: 'var(--c-mdx)', name: '① fumadocs-mdx', job: '把文件变成数据', out: '一堆页面数据',
+    cap: '<b>① fumadocs-mdx</b>：读你写的 <code>.mdx</code> 文件，编译成程序能用的数据——每页的标题、正文、目录、搜索用的文字。' },
+  { key: 'core', c: 'var(--c-core)', name: '② fumadocs-core', job: '把数据整理成一本书', out: '有地址、有目录树的书',
+    cap: '<b>② fumadocs-core</b>：把页面数据整理成「一本书」：每页分配一个网址，按 <code>meta.json</code> 排出侧栏的目录树，还负责搜索。它不画界面。' },
+  { key: 'ui', c: 'var(--c-ui)', name: '③ 界面（base-ui）', job: '把书画成网页', out: '浏览器里的网页',
+    cap: '<b>③ 界面</b>：把这本书画出来：目录树画成侧栏，正文放中间，本页目录放右边，再加上搜索框、主题切换。' },
+];
+const l2 = document.getElementById('l2'), l2cap = document.getElementById('l2cap');
+const bx = i => 30 + i * 290;
+el('text', { x: 0, y: 20, 'font-size': 12, fill: 'var(--muted)' }, l2, '');
+el('defs', {}, l2).innerHTML = '<marker id="a2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0,0 L10,5 L0,10 z" style="fill:var(--muted)"/></marker>';
+const boxEls = BOXES.map((b, i) => {
+  const g = el('g', { class: 'l2-box' }, l2);
+  el('rect', { class: 'frame', x: bx(i), y: 40, width: 240, height: 110, rx: 12, fill: `color-mix(in srgb, ${b.c} 10%, var(--surface))`, stroke: b.c, 'stroke-width': 2 }, g);
+  el('text', { x: bx(i) + 120, y: 80, 'text-anchor': 'middle', 'font-size': 16, 'font-weight': 700, fill: b.c }, g, b.name);
+  el('text', { x: bx(i) + 120, y: 108, 'text-anchor': 'middle', 'font-size': 14, fill: 'var(--text)' }, g, b.job);
+  el('text', { x: bx(i) + 120, y: 190, 'text-anchor': 'middle', 'font-size': 12, fill: 'var(--muted)' }, l2, '产出：' + b.out);
+  if (i < 2) el('line', { x1: bx(i) + 244, y1: 95, x2: bx(i + 1) - 6, y2: 95, stroke: 'var(--muted)', 'stroke-width': 2, 'marker-end': 'url(#a2)' }, l2);
+  g.onclick = () => { pick(i); openLevel3(i); };
+  return g;
+});
+const dot = el('g', {}, l2);
+el('circle', { r: 13, fill: 'var(--c-site)' }, dot);
+const dotT = el('text', { 'text-anchor': 'middle', y: 4, 'font-size': 10, fill: '#fff' }, dot, 'mdx');
+dot.style.transition = 'transform .8s cubic-bezier(.4,0,.2,1)';
+dot.style.transform = 'translate(10px, 215px)';
+function pick(i) {
+  boxEls.forEach((g, j) => g.classList.toggle('active', j === i));
+  l2cap.innerHTML = BOXES[i].cap;
+}
+let l2t = null;
+document.getElementById('l2play').onclick = () => {
+  clearTimeout(l2t);
+  const seq = [[10, 215, 'mdx', null], [bx(0) + 120, 215, '文件', 0], [bx(1) + 120, 215, '数据', 1], [bx(2) + 120, 215, '书', 2], [bx(2) + 120 + 0, 215, '网页', 2]];
+  let k = 0;
+  const go = () => { const [x, y, t, b] = seq[k]; dot.style.transform = `translate(${x}px, ${y}px)`; dotT.textContent = t; if (b != null) pick(b); if (++k < seq.length) l2t = setTimeout(go, 1600); };
+  go();
+};
+
+/* ---------- 第 3 层：每个部件的步骤 ---------- */
+const STEPS = {
+  mdx: [
+    { t: '站点说「这个文件夹是内容」', say: '站点在 <code>lib/source.ts</code> 里写一行 <code>defineDocs</code>，告诉 fumadocs-mdx：<code>content/docs</code> 下的文件都是页面。文件夹里的 <code>meta.json</code> 决定侧栏顺序。',
+      chain: [['defineDocs({ dir: "content/docs" })', '站点写在 app/lib/source.ts']],
+      data: `content/docs/guide/<b>intro.mdx</b>
+---
+title: 入门
+---
+## 安装
+先装依赖……
+
+content/docs/guide/<b>meta.json</b>
+{ "pages": ["intro", "..."] }` },
+    { t: '把这一行改写成「批量导入」', say: '开发服务启动时，fumadocs-mdx 的构建插件把 <code>defineDocs(...)</code> 原地换成 Vite 的 <code>import.meta.glob</code>，意思是「把这个文件夹下所有 mdx 都导入进来」。每个文件后面挂一个标记，后面的步骤靠它认出这个文件属于哪个集合。',
+      chain: [['Vite 处理 lib/source.ts', 'Vite'], ['fumadocs-mdx:macro 插件', src('packages/mdx/src/vite/index.ts', '151-176')], ['transformMacroModule()', src('packages/mdx/src/macro/transform.ts', '404-571')]],
+      data: `// 改写前
+const docs = defineDocs({ dir: 'content/docs' })
+
+// 改写后（大意）
+const docs = await __fdm.docs({
+  doc: <b>import.meta.glob</b>('./**/*.mdx', {
+         query: '<b>?macro_id=…#docs</b>' }),   // ← 标记
+  meta: import.meta.glob('./**/meta.json', …) })` },
+    { t: '把每个 mdx 编译成 JS', say: 'Vite 去加载每个带标记的 <code>.mdx</code>，fumadocs-mdx 接手：先检查开头的 frontmatter 对不对，再让文本依次过一串小工序（remark、rehype 插件），最后变成一个 JS 模块：正文变成一个组件，同时导出目录和搜索用的文字。',
+      chain: [['Vite 加载 intro.mdx?macro_id=…', 'Vite'], ['createMdxLoader().load()', src('packages/mdx/src/loaders/mdx/index.ts', '25-122')], ['检查 frontmatter', src('packages/mdx/src/core.ts', '167-183')], ['一串 remark 工序 → 一串 rehype 工序', src('packages/mdx/src/config/preset.ts', '50-131')]],
+      data: `// intro.mdx 编译后（大意）
+export const <b>frontmatter</b> = { title: '入门' }
+export const <b>toc</b> = [{ title: '安装', url: '#安装' }]
+export const <b>structuredData</b> = {        // 给搜索用
+  contents: [{ heading: '安装', content: '先装依赖……' }] }
+export default function <b>MDXContent</b>() { … }  // 正文` },
+    { t: '收拢成一个列表，再翻译成通用格式', say: '所有页面模块导入完，收拢成一个列表。但 ② fumadocs-core 不认这个列表，它只认一种通用格式 <code>{ type, path, data }</code>，叫「虚拟文件」。<code>toFumadocsSource()</code> 负责翻译。<strong>任何东西只要能翻译成这种格式，就能成为页面</strong>——这是后面扩展的关键。',
+      chain: [['server().docs()', src('packages/mdx/src/runtime/server.ts', '85-121')], ['docs.toFumadocsSource()', src('packages/mdx/src/runtime/server.ts', '242-280')]],
+      data: `[
+  { type: '<b>page</b>', path: 'guide/intro.mdx',
+    data: { title: '入门', body, toc, structuredData } },
+  { type: '<b>meta</b>', path: 'guide/meta.json',
+    data: { pages: ['intro', '...'] } } ]` },
+  ],
+  core: [
+    { t: '放进一个内存里的小文件系统', say: '<code>loader()</code> 拿到虚拟文件列表，先把它们放进一个只存在内存里的文件系统（就是两张表：路径 → 文件、文件夹 → 里面有什么）。',
+      chain: [['loader({ source, baseUrl: "/docs" })', src('packages/core/src/source/loader.ts', '304-509')], ['写进 FileSystem', src('packages/core/src/source/storage/content.ts', '50-175')]],
+      data: `FileSystem（内存里）
+  guide/
+    intro.mdx
+    meta.json` },
+    { t: '给每页算网址，建一张查找表', say: '网址就是「文件夹名 + 文件名」，<code>index</code> 省略，括号里的文件夹名不算。算完建一张表：给一个网址，马上找到是哪一页。',
+      chain: [['slugs 插件', src('packages/core/src/source/plugins/slugs.ts', '43-125')], ['建索引表', src('packages/core/src/source/loader.ts', '195-261')]],
+      data: `guide/intro.mdx  →  slugs ['guide', 'intro']
+                  →  网址 <b>/docs/guide/intro</b>
+
+查找表：'guide/intro' → 这一页` },
+    { t: '按 meta.json 排出目录树', say: '侧栏要的是一棵树。第一次有人要的时候，loader 一个文件夹一个文件夹地读 <code>meta.json</code>，按 <code>pages</code> 的顺序排；<code>"..."</code> 表示「其余的都放这里」。排好就记住，下次直接用。',
+      chain: [['source.pageTree（第一次读时才建）', src('packages/core/src/source/loader.ts', '333-372')], ['逐个文件夹 buildFolder()', src('packages/core/src/source/page-tree/builder.ts', '341-445')]],
+      data: `📚 Docs
+ └─ 📁 Guide
+     ├─ 📄 入门          /docs/guide/intro
+     └─ 📄 …（"..." 展开的其余页面）` },
+  ],
+  ui: [
+    { t: '服务器只交两样东西', say: '浏览器请求 <code>/docs/guide/intro</code>。站点的路由在服务器上运行，用网址查到是哪一页，然后只把「是哪一页」和「目录树」交给浏览器，正文不在这里传。',
+      chain: [['路由 routes/docs.tsx 的 loader()', '站点写'], ['source.getPage(["guide","intro"])', src('packages/core/src/source/loader.ts', '430')], ['source.serializePageTree(树)', src('packages/core/src/source/loader.ts', '477-497')]],
+      data: `交给浏览器：
+{ path: 'guide/intro.mdx',
+  tree: { name: 'Docs', children: [ … ] } }` },
+    { t: '浏览器只下载这一页的正文', say: '浏览器里也有一份页面列表（只有标题之类的小数据）。它用 path 找到这一页，再去下载这一页正文的代码。别的页面不下载，所以页面再多也不慢。',
+      chain: [['useFumadocsLoader(数据)', '还原目录树'], ['docs.getPage(path)', '找到这一页'], ['use(page.load())', '下载这一页的正文']],
+      data: `拿到：{ body: 正文组件, toc: [ 安装 … ] }` },
+    { t: '画出来', say: '交给界面组件：目录树进侧栏，正文进中间，本页目录进右边。正文里的每个标签按「组件映射表」换成真正的组件，比如 <code>&lt;a&gt;</code> 换成站内链接、<code>&lt;pre&gt;</code> 换成带复制按钮的代码块。',
+      chain: [['&lt;DocsLayout tree={树}&gt;', src('packages/base-ui/src/layouts/docs/index.tsx', '39-65')], ['&lt;DocsPage toc={目录}&gt;', src('packages/base-ui/src/layouts/docs/page/index.tsx', '103-146')], ['&lt;Body components={映射表} /&gt;', '站点写']],
+      mock: true },
+  ],
+};
+let box = 0, cur = 0;
+const tabs = document.getElementById('boxtabs');
+tabs.innerHTML = BOXES.map((b, i) => `<button class="boxtab" style="--c:${b.c}" data-i="${i}">${b.name}：${b.job}</button>`).join('');
+tabs.querySelectorAll('.boxtab').forEach(t => t.onclick = () => { box = +t.dataset.i; cur = 0; render(); });
+function openLevel3(i) { box = i; cur = 0; render(); }
+function render() {
+  const b = BOXES[box], list = STEPS[b.key], s = list[cur];
+  tabs.querySelectorAll('.boxtab').forEach((t, i) => t.classList.toggle('on', i === box));
+  document.getElementById('steps').innerHTML = list.map((x, i) => `${i ? '<span class="sep"></span>' : ''}<span class="step ${i === cur ? 'on' : i < cur ? 'done' : ''}" style="--c:${b.c}" data-i="${i}">${i + 1}. ${x.t}</span>`).join('');
+  document.querySelectorAll('#steps .step').forEach(x => x.onclick = () => { cur = +x.dataset.i; render(); });
+  let chain = '';
+  s.chain.forEach((c, k) => { if (k) chain += `<div class="arrow-down" style="animation-delay:${k * .35 - .1}s"></div>`; chain += `<div class="call" style="animation-delay:${k * .35}s"><span class="fn">${c[0]}</span><span class="where">${c[1]}</span></div>`; });
+  const out = s.mock
+    ? `<div class="mock"><div style="background:color-mix(in srgb,var(--c-core) 10%,var(--surface))"><div class="lab">侧栏 ← 树</div><div class="bar" style="width:70%"></div><div class="bar" style="width:55%;animation-delay:.1s"></div><div class="bar" style="width:62%;animation-delay:.2s"></div></div><div style="background:color-mix(in srgb,var(--c-mdx) 10%,var(--surface))"><div class="lab">正文 ← body</div><div class="bar" style="width:40%;height:12px"></div><div class="bar" style="width:92%;animation-delay:.15s"></div><div class="bar" style="width:86%;animation-delay:.3s"></div><div class="bar" style="width:70%;animation-delay:.45s"></div></div><div style="background:color-mix(in srgb,var(--c-ui) 10%,var(--surface))"><div class="lab">目录 ← toc</div><div class="bar" style="width:60%;animation-delay:.3s"></div><div class="bar" style="width:45%;animation-delay:.4s"></div></div></div>`
+    : `<div class="data">${s.data}</div>`;
+  const panel = document.getElementById('panel');
+  panel.style.setProperty('--c', b.c);
+  panel.innerHTML = `<h3>${b.name} · 第 ${cur + 1} 步：${s.t}</h3><p class="say">${s.say}</p>
+    <div class="cols"><div><div class="label">调用了谁（从上往下）</div>${chain}</div><div><div class="label">${s.mock ? '屏幕上' : '做完以后，数据变成'}</div>${out}</div></div>`;
+  document.getElementById('count').textContent = `${b.name}：${cur + 1} / ${list.length}`;
+}
+document.getElementById('prev').onclick = () => { if (cur > 0) cur--; else if (box > 0) { box--; cur = STEPS[BOXES[box].key].length - 1; } render(); };
+document.getElementById('next').onclick = () => { if (cur < STEPS[BOXES[box].key].length - 1) cur++; else if (box < 2) { box++; cur = 0; } render(); };
+render();
+
+/* ---------- 第 4 层：时序图 ---------- */
+const LANES = [['浏览器', 'var(--c-ui)'], ['站点服务器（路由）', 'var(--c-rr)'], ['② loader', 'var(--c-core)'], ['① 页面集合', 'var(--c-mdx)']];
+const MSGS = [
+  [0, 1, 'GET /docs/guide/intro', '用户打开这一页，请求先到站点服务器。'],
+  [1, 2, 'getPage(["guide","intro"])', '路由把网址拆成 ["guide","intro"]，去 loader 查。'],
+  [2, 2, '查表', '查第 3 层建好的查找表，几乎不花时间。'],
+  [2, 1, '这一页（path）', '只拿到「是哪一页」。'],
+  [1, 2, '要目录树', '再要一份目录树。第一次要的时候才按 meta.json 排出来，之后直接用记住的。'],
+  [2, 1, '目录树（转成字符串）', '树里有图标之类的 React 内容，转成字符串才能从服务器传到浏览器。'],
+  [1, 0, '网页骨架 + { path, 树 }', '服务器返回。正文还没传。'],
+  [0, 3, 'getPage(path)', '浏览器在自己那份页面列表里找到这一页。'],
+  [0, 3, 'load()', '这时才下载这一页的正文代码。'],
+  [3, 0, '{ 正文, 本页目录 }', '拿到正文组件和本页目录。'],
+  [0, 0, '画出侧栏、正文、目录', '交给界面组件画出来。'],
+];
+const seq = document.getElementById('seq');
+const lx = i => 110 + i * 220, y0 = 56, st = 42;
+el('defs', {}, seq).innerHTML = '<marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" style="fill:var(--accent)"/></marker>';
+LANES.forEach(([n, c], i) => { el('text', { x: lx(i), y: 26, 'text-anchor': 'middle', 'font-size': 13, 'font-weight': 700, fill: c }, seq, n); el('line', { class: 'lane', x1: lx(i), y1: 36, x2: lx(i), y2: y0 + st * MSGS.length }, seq); });
+const msgEls = MSGS.map(([a, b, label], i) => {
+  const y = y0 + 10 + i * st, g = el('g', { class: 'msg' }, seq);
+  if (a === b) { el('path', { d: `M${lx(a)},${y - 8} h34 v16 h-32`, 'marker-end': 'url(#ah)' }, g); el('text', { x: lx(a) + 42, y: y + 4 }, g, label); }
+  else { el('line', { x1: lx(a), y1: y, x2: lx(b) + (b > a ? -4 : 4), y2: y, 'marker-end': 'url(#ah)' }, g); el('text', { x: (lx(a) + lx(b)) / 2, y: y - 6, 'text-anchor': 'middle' }, g, label); }
+  return g;
+});
+seq.setAttribute('viewBox', `0 0 880 ${y0 + st * MSGS.length + 10}`);
+let sc = -1, stm = null;
+function sshow(i) { sc = i; msgEls.forEach((g, j) => { g.classList.toggle('show', j <= i); g.classList.toggle('cur', j === i); }); document.getElementById('scap').innerHTML = i < 0 ? '点「下一步」或「自动播放」。' : `<b>${i + 1}.</b> ${MSGS[i][3]}`; document.getElementById('scount').textContent = `${i + 1} / ${MSGS.length}`; }
+function sstop() { clearInterval(stm); stm = null; document.getElementById('splay').textContent = '▶ 自动播放'; }
+document.getElementById('sprev').onclick = () => { sstop(); sshow(Math.max(-1, sc - 1)); };
+document.getElementById('snext').onclick = () => { sstop(); sshow(Math.min(MSGS.length - 1, sc + 1)); };
+document.getElementById('splay').onclick = () => { if (stm) return sstop(); document.getElementById('splay').textContent = '⏸ 暂停'; if (sc >= MSGS.length - 1) sshow(-1); stm = setInterval(() => { if (sc >= MSGS.length - 1) return sstop(); sshow(sc + 1); }, 2200); };
+sshow(-1);
+
+/* ---------- 第 5 层：插口 ---------- */
+const PM = [
+  { c: 'var(--c-mdx)', t: '① fumadocs-mdx 的插口', items: ['往编译工序里加自己的小工序（remark / rehype 插件）', '给 frontmatter 多加几个字段', '每个文件夹各用各的工序'] },
+  { c: 'var(--c-core)', t: '② fumadocs-core 的插口', items: ['自己的页面来源：交出 { type, path, data } 列表，HTML、TSX、数据库都行', '几种来源一起用：loader({ docs, html })', '改目录树：改名字、加徽标、加图标'] },
+  { c: 'var(--c-ui)', t: '③ 界面的插口', items: ['换掉某个部件：侧栏、搜索按钮、目录、页脚', '在右边目录那一列放自己的面板（评论栏就放这）', '组件映射表：换掉链接、代码块，加自己的组件'] },
+  { c: 'var(--c-site)', t: '实在不够用：复制进站点', items: ['用官方命令把整个布局复制进站点，站点自己改', '只复制一个部件也行'] },
+];
+document.getElementById('plugmap').innerHTML = PM.map(p => `<div class="pm" style="--c:${p.c}"><h4>${p.t}</h4><ul>${p.items.map(x => `<li>${x}</li>`).join('')}</ul></div>`).join('');
+</script>
+</body>
+</html>

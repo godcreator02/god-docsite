@@ -1,0 +1,13 @@
+[restart] Relaunching with --conditions=development
+[MDX] generated files in 5.409400000000005ms
+[MDX] generated files in 21.04189999999994ms
+  ➜  Local:   http://127.0.0.1:5456/
+7:46:44 PM [vite] (ssr) connected.
+7:47:04 PM [vite] (client) [optimizer] bundling dependencies...
+7:47:04 PM [vite] (client) dependency optimized: react-dom/server
+7:47:04 PM [vite] (client) optimized dependencies changed. reloading
+7:47:44 PM [vite] (client) hmr update /app/routes/audit.tsx
+7:47:44 PM [vite] (client) hmr update /app/routes/audit.tsx
+7:47:44 PM [vite] (client) hmr update /app/app.css, /app/routes/audit.tsx
+7:47:44 PM [vite] (ssr) page reload app/routes/audit.tsx
+7:47:44 PM [vite] (ssr) program reload

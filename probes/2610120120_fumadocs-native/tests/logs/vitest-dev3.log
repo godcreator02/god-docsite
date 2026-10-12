@@ -1,0 +1,21 @@
+
+[1m[30m[46m RUN [49m[39m[22m [36mv5.0.3 [39m[90mD:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/261012_fumadocs-native[39m
+
+(node:75960) [DEP0190] DeprecationWarning: Passing args to a child process with shell option true can lead to security vulnerabilities, as the arguments are not escaped, only concatenated.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+ [32m✓[39m tests/dev-loop.test.ts [2m([22m[2m14 tests[22m[2m)[22m[33m 10590[2mms[22m[39m
+   [32m✓[39m dev：写闭环（action → 文件 → 集合更新 → SSR 反映） [2m(5)[22m
+     [33m[2m✓[22m[39m 新建评论串：action 200、串文件夹落盘、SSR 随后出现该串[33m 729[2mms[22m[39m
+     [33m[2m✓[22m[39m 回复：action 200、回复文件落盘、SSR 随后出现该回复[33m 790[2mms[22m[39m
+     [33m[2m✓[22m[39m agent 以 as 署名写入：目标必须是 agent 人员[33m 826[2mms[22m[39m
+     [33m[2m✓[22m[39m 删回复：action 200、文件消失、SSR 随后不再包含该回复[33m 626[2mms[22m[39m
+     [33m[2m✓[22m[39m 删整串：action 200、文件夹消失、SSR 随后不再包含该串[33m 622[2mms[22m[39m
+(node:61588) [DEP0190] DeprecationWarning: Passing args to a child process with shell option true can lead to security vulnerabilities, as the arguments are not escaped, only concatenated.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+ [32m✓[39m tests/dev-readonly.test.ts [2m([22m[2m4 tests[22m[2m)[22m[33m 12934[2mms[22m[39m
+
+[2m Test Files [22m [1m[32m2 passed[39m[22m[90m (2)[39m
+[2m      Tests [22m [1m[32m18 passed[39m[22m[90m (18)[39m
+[2m   Start at [22m 01:36:26
+[2m   Duration [22m 23.98s[2m (tests 100%)[22m
+

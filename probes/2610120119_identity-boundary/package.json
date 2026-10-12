@@ -1,0 +1,14 @@
+{
+  "name": "identity-boundary-probe",
+  "private": true,
+  "type": "module",
+  "description": "实验：身份包与站点授权边界（任务 P）。身份核心是纯函数，输入由宿主显式提供；组合样本按 React Router 资源路由形状接线",
+  "scripts": {
+    "build": "pnpm --filter @probe/identity build && pnpm --filter @probe/sample build",
+    "check": "pnpm --filter @probe/identity check && pnpm --filter @probe/sample check",
+    "test": "pnpm -r --no-bail test",
+    "sample:writable": "node sample/dist/http-server.js --port 5490 --identity-code probezhou001",
+    "sample:readonly": "node sample/dist/http-server.js --port 5491"
+  },
+  "engines": { "node": ">=24" }
+}

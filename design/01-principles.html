@@ -1,0 +1,377 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>设计原则与总体划分</title>
+<style>
+  :root {
+    --bg: #fbfbfa;
+    --surface: #ffffff;
+    --text: #1f2328;
+    --muted: #59636e;
+    --border: #d8dee4;
+    --accent: #0a6cbd;
+    --accent-soft: #e6f0fa;
+    --warn: #9a6700;
+    --warn-soft: #fff6dc;
+    --del: #b42318;
+    --del-soft: #fdecea;
+    --ok: #1a7f37;
+    --ok-soft: #e6f4ea;
+    --code-bg: #f3f4f6;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #131416;
+      --surface: #1b1d20;
+      --text: #e6e8eb;
+      --muted: #9aa4af;
+      --border: #30353b;
+      --accent: #5aa9f0;
+      --accent-soft: #1a2a3a;
+      --warn: #e3b341;
+      --warn-soft: #2e2611;
+      --del: #f47067;
+      --del-soft: #3a1d1b;
+      --ok: #57ab5a;
+      --ok-soft: #17291a;
+      --code-bg: #23262a;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #131416; --surface: #1b1d20; --text: #e6e8eb; --muted: #9aa4af; --border: #30353b;
+    --accent: #5aa9f0; --accent-soft: #1a2a3a; --warn: #e3b341; --warn-soft: #2e2611;
+    --del: #f47067; --del-soft: #3a1d1b; --ok: #57ab5a; --ok-soft: #17291a; --code-bg: #23262a;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--text);
+    font: 15px/1.7 system-ui, -apple-system, "Segoe UI", "Microsoft YaHei", sans-serif;
+  }
+  main { max-width: 960px; margin: 0 auto; padding: 32px 16px 80px; }
+  h1 { font-size: 28px; margin: 0 0 4px; }
+  h2 { font-size: 20px; margin: 40px 0 12px; padding-top: 12px; border-top: 1px solid var(--border); }
+  h3 { font-size: 16px; margin: 24px 0 8px; }
+  p, li { color: var(--text); }
+  .lead { color: var(--muted); margin: 0 0 16px; }
+  .meta { color: var(--muted); font-size: 13px; }
+  code { font-family: ui-monospace, "Cascadia Code", Consolas, monospace; font-size: 13px; background: var(--code-bg); padding: 1px 5px; border-radius: 4px; }
+  pre { background: var(--code-bg); padding: 12px 14px; border-radius: 6px; overflow-x: auto; font-size: 13px; line-height: 1.55; }
+  pre code { background: none; padding: 0; }
+  .table-wrap { overflow-x: auto; }
+  table { border-collapse: collapse; width: 100%; margin: 8px 0 16px; font-size: 14px; background: var(--surface); }
+  th, td { border: 1px solid var(--border); padding: 6px 10px; text-align: left; vertical-align: top; }
+  th { background: var(--code-bg); font-weight: 600; white-space: nowrap; }
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 12px 16px; margin: 12px 0; }
+  .rule { border-left: 3px solid var(--accent); }
+  .rule h3 { margin-top: 4px; }
+  .tag { display: inline-block; font-size: 12px; padding: 0 6px; border-radius: 4px; margin-right: 4px; white-space: nowrap; }
+  .tag.del { background: var(--del-soft); color: var(--del); }
+  .tag.keep { background: var(--ok-soft); color: var(--ok); }
+  .tag.check { background: var(--warn-soft); color: var(--warn); }
+  .tag.open { background: var(--accent-soft); color: var(--accent); }
+  nav.toc { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 8px 16px; margin: 16px 0 8px; }
+  nav.toc ol { margin: 4px 0; padding-left: 20px; }
+  nav.toc a { color: var(--accent); text-decoration: none; }
+  svg text { fill: var(--text); font-size: 13px; font-family: inherit; }
+  svg .box { fill: var(--surface); stroke: var(--border); }
+  svg .box.site { stroke: var(--accent); }
+  svg .box.lib { stroke: var(--ok); }
+  svg .box.host { stroke: var(--warn); }
+  svg .arrow { stroke: var(--muted); fill: none; marker-end: url(#arrowhead); }
+  svg .sub { fill: var(--muted); font-size: 12px; }
+</style>
+</head>
+<body>
+<main>
+
+<p class="meta"><a href="index.html" style="color: var(--accent); text-decoration: none">← 目录</a>　·　下一页 <a href="02-site-lifecycle.html" style="color: var(--accent); text-decoration: none">需求一：站点生命周期</a></p>
+<h1>设计原则与总体划分</h1>
+<p class="lead">文档站基础包、gwb-docsite 插件与 docfirst 重写的第一份设计文档：先定原则和各部分的边界，后面每章需求都按这里的划分写。</p>
+<p class="meta">范围：基础包 <code>@godcreator/docsite-kit</code>、插件 <code>@godcreator/gwb-docsite</code>、docfirst 各包与插件。协作站下一轮再做；本机现有的 Next 站不考虑。</p>
+
+<nav class="toc">
+  <ol>
+    <li><a href="#rules">原则</a></li>
+    <li><a href="#parts">各部分管什么</a></li>
+    <li><a href="#deps">依赖方向</a></li>
+    <li><a href="#wiring">站点怎么引用这些库</a></li>
+    <li><a href="#runtime">前端与后端</a></li>
+    <li><a href="#removed">按原则删掉的需求与机制</a></li>
+    <li><a href="#verify">要拿 fumadocs 官方做法核对的</a></li>
+    <li><a href="#open">待定</a></li>
+  </ol>
+</nav>
+
+<h2 id="rules">原则</h2>
+
+<div class="card rule">
+  <h3>一、站点生成一次，之后归站点自己</h3>
+  <p>新建站点就是照模板生成一份 fumadocs + React Router 项目，和 <code>create-fumadocs-app</code> 一样。生成以后，站点里的每个文件都由站点自己维护、想怎么改就怎么改。基础包升级不负责让站点自动跟上，站点要用新功能就自己改代码。</p>
+</div>
+
+<div class="card rule">
+  <h3>二、站点固定依赖版本，旧站一直能运行</h3>
+  <p>站点的 <code>package.json</code> 写明它用的每个库的版本，站点按这些版本运行。基础包、docfirst 发了新版，没升级的站点照旧运行，不会因为别人升级而坏掉。库的版本号照 gwb-release 的规矩：破坏站点用法的改动只随 x 升级，并附升级说明，站点要升级时由 agent 照说明改站点代码。</p>
+</div>
+
+<div class="card rule">
+  <h3>三、照 fumadocs 的框架和扩展点做，不另造机制</h3>
+  <p>页面来源用 <code>loader()</code>，内容编译用 fumadocs-mdx 的 <code>source.config.ts</code>，组件表用 <code>mdx-components</code>，布局用 <code>DocsLayout</code> 和它的配置项，搜索用 <code>createFromSource</code>。需要的能力 fumadocs 已经有扩展点，就用那个扩展点；没有的，先回头问这个需求是否真的需要，再决定怎么做。</p>
+</div>
+
+<div class="card rule">
+  <h3>四、基础包、docfirst 的站点部分都是普通的库</h3>
+  <p>像 fumadocs-openapi、fumadocs-typescript 那样：只导出组件、remark / rehype 插件、服务端函数、Vite 配置用的函数和类型。不导出路由模块，不往站点里写文件，不反过来读站点里的模块。路由文件由站点自己写，在 loader / action 里调用库的函数。</p>
+</div>
+
+<div class="card rule">
+  <h3>五、前端和后端按 React Router 框架模式原样分开</h3>
+  <p>loader、action、资源路由是后端，组件是前端；两边只经 loader 的返回值和 action 的请求来往，返回值和请求的类型由库导出。不另起一个后端服务。</p>
+</div>
+
+<div class="card rule">
+  <h3>六、gwb 插件和站点之间只经写明的约定来往，并且向后兼容</h3>
+  <p>gwb 插件会升级，站点不一定跟着升级（原则二），所以插件碰站点的每一处都是要守住的约定：启动站点时交给它的参数、调用的站点接口、读写的站点文件（人员列表、评论）的格式。这些约定写成文档、带版本号；插件升级后仍要能托管和读写按旧约定运行的站点。确实要改约定时，插件认出站点是旧约定，就明确报错说明站点要升级到哪一版，不按新约定硬读。凡是要按站点版本的规则做的检查（比如编译 MDX、核对评论格式），用站点自己装的那一版库来做。</p>
+</div>
+
+<div class="card rule">
+  <h3>七、能不能写只看身份</h3>
+  <p>站点服务端拿到本机的身份码、并且在人员列表里认得出这个人，就能写评论；认不出就只读。和运行的是开发服务还是构建后的服务无关。</p>
+</div>
+
+<div class="card rule">
+  <h3>八、docfirst 的核心不依赖站点的代码，钉码的写法可以重新设计</h3>
+  <p>钉码判定、记号、confirm、轨迹卡校验只对着仓库的文件工作，在命令行里运行。站点上显示钉码状态、生成正本，都属于站点一侧：docfirst 的站点库调用核心的公开函数，生成正本经站点的编译器取每页的 Markdown 形式（见<a href="30-refactor-plan.html">改造计划</a> M4）；核心里不出现任何为站点写的东西。钉码现有的记号写法、记录存放方式、红黄绿的口径都不当作需求，需求里只写要做到什么，写法和这次重写一起重新设计。</p>
+</div>
+
+<div class="card rule">
+  <h3>九、错了就报错</h3>
+  <p>只在系统边界校验：读文件、读配置、收请求、起子进程。校验不过就拒绝并说清楚错在哪，不替调用方修正、不静默跳过。</p>
+</div>
+
+<h2 id="parts">各部分管什么</h2>
+
+<div class="table-wrap">
+<table>
+  <thead><tr><th>部分</th><th>是什么</th><th>管</th><th>不管</th></tr></thead>
+  <tbody>
+    <tr>
+      <td>站点</td>
+      <td>一个 fumadocs + React Router 项目，从模板生成一次</td>
+      <td>自己的路由文件、布局配置、组件表、<code>source.config.ts</code>、样式、内容、评论、人员列表；决定引用哪些库</td>
+      <td>—</td>
+    </tr>
+    <tr>
+      <td>站点模板</td>
+      <td>新建站点时复制的一份项目</td>
+      <td>给出一个能直接运行、已经引用好基础包的起点</td>
+      <td>生成以后的任何事</td>
+    </tr>
+    <tr>
+      <td>基础包<br><code>@godcreator/docsite-kit</code></td>
+      <td>库</td>
+      <td>评论（数据格式、定位、界面组件、读写函数）、人员与身份、TSX 与 HTML 页面来源、链接卡片、中文界面文字、通用正文组件（术语、讲解组件、文件树等，待定见下）、公式</td>
+      <td>站点的文件结构、路由、站点生成以后的升级</td>
+    </tr>
+    <tr>
+      <td>gwb-docsite</td>
+      <td>gwb 插件</td>
+      <td>本 home 的身份码、照模板新建站点、托管站点进程、给 agent 用的评论命令</td>
+      <td>页面怎么显示；站点里的代码</td>
+    </tr>
+    <tr>
+      <td>code-pin</td>
+      <td>库</td>
+      <td>判定一段被引用的代码是否变了</td>
+      <td>提示文字、命令行概念、站点显示</td>
+    </tr>
+    <tr>
+      <td>docfirst 核心与命令行</td>
+      <td>库 + 命令行</td>
+      <td>记号、钉码核对、confirm、轨迹卡校验、<code>docfirst.config.mjs</code></td>
+      <td>站点</td>
+    </tr>
+    <tr>
+      <td>docfirst 站点库</td>
+      <td>库</td>
+      <td>把钉码结果显示到页面上的 remark 插件和组件、生成正本（render、check）、轨迹卡页面要用的服务端函数和组件</td>
+      <td>站点的路由与配置（由站点自己写）</td>
+    </tr>
+    <tr>
+      <td>星轨盘</td>
+      <td>库</td>
+      <td>画盘和盘上的交互，输入是一组节点和关系</td>
+      <td>轨迹卡的文件格式</td>
+    </tr>
+    <tr>
+      <td>gwb-docfirst</td>
+      <td>gwb 插件</td>
+      <td>说明书（docs-writing、docs-site、trajectory）</td>
+      <td>建站、托管（都删掉）</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<h2 id="deps">依赖方向</h2>
+<p>箭头指向被依赖的一方。站点在最上面，只有站点同时依赖多个库；库之间只沿箭头单向依赖。</p>
+
+<svg viewBox="0 0 900 400" width="100%" role="img" aria-label="依赖方向图">
+  <defs>
+    <marker id="arrowhead" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="currentColor" style="fill: var(--muted)"/>
+    </marker>
+  </defs>
+
+  <rect class="box site" x="330" y="10" width="240" height="56" rx="8"/>
+  <text x="450" y="34" text-anchor="middle">站点（从模板生成一次）</text>
+  <text class="sub" x="450" y="54" text-anchor="middle">路由、布局、组件表、配置都是自己的</text>
+
+  <rect class="box lib" x="40" y="140" width="200" height="56" rx="8"/>
+  <text x="140" y="164" text-anchor="middle">fumadocs</text>
+  <text class="sub" x="140" y="184" text-anchor="middle">core / mdx / base-ui</text>
+
+  <rect class="box lib" x="290" y="140" width="200" height="56" rx="8"/>
+  <text x="390" y="164" text-anchor="middle">基础包 docsite-kit</text>
+  <text class="sub" x="390" y="184" text-anchor="middle">评论、身份、页面来源、组件</text>
+
+  <rect class="box lib" x="540" y="140" width="200" height="56" rx="8"/>
+  <text x="640" y="164" text-anchor="middle">docfirst 站点库</text>
+  <text class="sub" x="640" y="184" text-anchor="middle">钉码显示、轨迹卡页面</text>
+
+  <rect class="box lib" x="540" y="250" width="200" height="56" rx="8"/>
+  <text x="640" y="274" text-anchor="middle">docfirst 核心与命令行</text>
+  <text class="sub" x="640" y="294" text-anchor="middle">不知道站点存在</text>
+
+  <rect class="box lib" x="770" y="250" width="110" height="56" rx="8"/>
+  <text x="825" y="274" text-anchor="middle">星轨盘</text>
+  <text class="sub" x="825" y="294" text-anchor="middle">不认卡格式</text>
+
+  <rect class="box lib" x="540" y="340" width="200" height="50" rx="8"/>
+  <text x="640" y="370" text-anchor="middle">code-pin</text>
+
+  <rect class="box host" x="40" y="250" width="200" height="56" rx="8"/>
+  <text x="140" y="274" text-anchor="middle">gwb-docsite 插件</text>
+  <text class="sub" x="140" y="294" text-anchor="middle">身份码、新建、托管、评论命令</text>
+
+  <path class="arrow" d="M380,66 L170,138"/>
+  <path class="arrow" d="M430,66 L400,138"/>
+  <path class="arrow" d="M500,66 L620,138"/>
+  <path class="arrow" d="M290,168 L242,168"/>
+  <path class="arrow" d="M640,196 L640,248"/>
+  <path class="arrow" d="M700,196 L800,248"/>
+  <path class="arrow" d="M640,306 L640,338"/>
+  <path class="arrow" d="M540,160 L492,160"/>
+  <path class="arrow" d="M200,250 L340,198"/>
+</svg>
+
+<ul>
+  <li>docfirst 站点库依赖基础包，只用基础包公开导出的组件和类型；基础包不知道 docfirst。</li>
+  <li>gwb-docsite 依赖基础包的评论数据格式与读写函数、人员列表格式；不依赖任何站点的代码。</li>
+  <li>docfirst 核心只依赖 code-pin；code-pin 不依赖任何人。</li>
+</ul>
+
+<h2 id="wiring">站点怎么引用这些库</h2>
+<p>全部走 fumadocs 项目本来就有的位置，站点自己写，库只提供被引用的东西。</p>
+
+<div class="table-wrap">
+<table>
+  <thead><tr><th>fumadocs 项目里的位置</th><th>站点在这里做什么</th><th>基础包提供</th><th>docfirst 站点库提供</th></tr></thead>
+  <tbody>
+    <tr><td><code>source.config.ts</code></td><td>定义内容集合，配置 remark / rehype 插件</td><td>公式插件的推荐配置</td><td>钉码显示插件、轨迹卡链接插件</td></tr>
+    <tr><td><code>app/lib/source.ts</code></td><td>用 <code>loader()</code> 组合页面来源</td><td>TSX、HTML 页面来源</td><td>—</td></tr>
+    <tr><td><code>mdx-components</code></td><td>决定 MDX 里不用 import 就能写的组件</td><td>链接卡片、正文通用组件</td><td>被钉代码的显示组件</td></tr>
+    <tr><td>布局配置</td><td>侧栏链接、站名、底部内容</td><td>评论层、身份显示</td><td>「轨迹」入口由站点自己加一条链接</td></tr>
+    <tr><td><code>app/routes.ts</code> 与路由文件</td><td>写全部路由；loader / action 里调用库的函数</td><td>评论读写函数、搜索、内容文件送出</td><td>轨迹卡列表与单卡的读取函数</td></tr>
+    <tr><td><code>root.tsx</code></td><td>RootProvider、界面语言</td><td>中文界面文字</td><td>—</td></tr>
+    <tr><td><code>vite.config.ts</code></td><td>Vite 插件与配置</td><td>让基础包与站点用同一份 fumadocs 的配置函数（待核对是否需要）</td><td>—</td></tr>
+    <tr><td>样式</td><td><code>@import</code> 需要的样式</td><td>评论、组件样式</td><td>钉码显示样式</td></tr>
+  </tbody>
+</table>
+</div>
+
+<p>以 docfirst 站为例，站点自己的 <code>source.config.ts</code> 大致是这样，接哪些插件、接在哪一区都由站点写明：</p>
+<pre><code>import { defineConfig, defineDocs } from 'fumadocs-mdx/config'
+import { remarkMath } from '@godcreator/docsite-kit/mdx'
+import { remarkPinnedCode, remarkCardLinks } from '@godcreator/docfirst-site/mdx'
+
+export const docs = defineDocs({ dir: 'content' })
+export const cards = defineDocs({ dir: 'trajectory' })
+
+export default defineConfig({
+  mdxOptions: { remarkPlugins: [remarkMath, remarkPinnedCode, remarkCardLinks] },
+})</code></pre>
+<p class="meta">示例里的导出名只是示意，真正的名字在逐章设计里定。</p>
+
+<h2 id="runtime">前端与后端</h2>
+<p>按代码在哪里运行分五处。一项能力跨几处时，跨界的那一份数据形状由库导出类型。</p>
+
+<div class="table-wrap">
+<table>
+  <thead><tr><th>运行位置</th><th>是什么</th><th>放什么</th></tr></thead>
+  <tbody>
+    <tr><td>构建时</td><td>fumadocs-mdx 编译 MDX</td><td>remark / rehype 插件：公式、钉码显示、轨迹卡链接、术语标注</td></tr>
+    <tr><td>站点服务端</td><td>loader、action、资源路由</td><td>读评论与人员列表、写评论、认身份、搜索、送出内容文件、轨迹卡读取</td></tr>
+    <tr><td>浏览器</td><td>组件</td><td>布局、正文、评论界面、链接卡片、星轨盘</td></tr>
+    <tr><td>gwb 插件进程</td><td>gwb-docsite</td><td>身份码、新建站点、托管、agent 的评论命令</td></tr>
+    <tr><td>命令行</td><td>docfirst</td><td>钉码 check、confirm、轨迹卡校验；生成正本的 render、check 由 docfirst 站点库经站点的编译器做</td></tr>
+  </tbody>
+</table>
+</div>
+
+<h2 id="removed">按原则删掉的需求与机制</h2>
+<p>需求编号见前一轮整理的五章需求表。</p>
+
+<div class="table-wrap">
+<table>
+  <thead><tr><th>删掉的</th><th>原因</th></tr></thead>
+  <tbody>
+    <tr><td><span class="tag del">改写</span>L-02、L-03 基础包或功能包升级后站点不用手改就能跟上</td><td>改成「站点固定版本，旧站一直能运行；插件和站点之间的约定向后兼容」（原则二、六）</td></tr>
+    <tr><td><span class="tag del">删</span>L-05 站点用了哪些功能包写在 <code>package.json</code> 的 <code>docsite.features</code></td><td>站点在代码里引用了什么，就是用了什么</td></tr>
+    <tr><td><span class="tag del">删</span>L-14、L-15 功能包只能添加不能替换、用不到的出口不用写</td><td>没有自动装配，就没有冲突规则</td></tr>
+    <tr><td><span class="tag del">删</span>L-19 插件把基础包版本固定成打包时那一版，靠它保证插件与站点不错位</td><td>站点自己管依赖版本；插件与站点不错位改由原则六的约定保证</td></tr>
+    <tr><td><span class="tag del">删</span>每次初始化整份覆盖 <code>app/</code>，模板分 <code>skeleton/</code> 与 <code>initial/</code></td><td>原则一，模板只在新建时用一次</td></tr>
+    <tr><td><span class="tag del">删</span>生成的 <code>app/site/*</code> 转接文件</td><td>站点直接 import</td></tr>
+    <tr><td><span class="tag del">删</span><code>@site/*</code> 别名与 <code>site-modules.d.ts</code></td><td>原则四，库不反过来读站点</td></tr>
+    <tr><td><span class="tag del">删</span>功能包必须导出 routes / site / site-server / styles.css 四个出口，路由模块放在包里</td><td>原则四，路由由站点写</td></tr>
+    <tr><td><span class="tag del">删</span>自述站 <code>app/</code> 必须与模板一致的测试、<code>pnpm site:skeleton</code></td><td>自述站也是一个普通站点</td></tr>
+    <tr><td><span class="tag del">删</span>docfirst 的建站命令、Next 托管命令与窗格、create-fumadocs-app 模板、只给 Next 站用的出口</td><td>Next 站不考虑；新建与托管归 gwb-docsite</td></tr>
+    <tr><td><span class="tag del">删</span>站点构建时给每页写机读文字（<code>stamp</code>、<code>docfirstAi</code>）</td><td>没有读取方</td></tr>
+  </tbody>
+</table>
+</div>
+
+<h2 id="verify">要拿 fumadocs 官方做法核对的</h2>
+<p>这些是现有代码自己写的机制。逐章设计时先查 fumadocs 有没有官方做法：有就改用官方的；没有就回头看需求是否还要。</p>
+
+<div class="table-wrap">
+<table>
+  <thead><tr><th>现有机制</th><th>为的需求</th><th>状态</th></tr></thead>
+  <tbody>
+    <tr><td>往页面树里塞隐藏项、用 CSS <code>:has()</code> 藏起来，让侧栏停在最近看过的一组</td><td>R-07</td><td><span class="tag check">待核对</span></td></tr>
+    <tr><td>替换 <code>searchTrigger</code>，把搜索按钮挪进侧栏一横排</td><td>R-08</td><td><span class="tag check">待核对</span></td></tr>
+    <tr><td>覆盖 fumadocs 内部的选择器与变量做宽屏布局</td><td>R-22</td><td><span class="tag check">待核对</span></td></tr>
+    <tr><td>自写插件让页面清单失效再整页刷新</td><td>R-26、L-17</td><td><span class="tag check">待核对</span></td></tr>
+    <tr><td>TSX、HTML 页面做成虚拟文件并进 <code>loader()</code></td><td>R-01</td><td><span class="tag check">待核对</span>（大概率就是官方的多来源写法）</td></tr>
+    <tr><td>评论走 fumadocs-mdx 集合，同时又从文件读一遍</td><td>C-01、C-28</td><td><span class="tag check">待核对</span></td></tr>
+    <tr><td><code>ssr.noExternal</code>、<code>optimizeDeps</code> 让基础包与站点用同一份 fumadocs</td><td>L-16</td><td><span class="tag check">待核对</span></td></tr>
+    <tr><td>经 Vite 中间件和热更新事件往页面推数据</td><td>L-31 到 L-33（协作站用）</td><td><span class="tag open">随协作站一起定</span></td></tr>
+  </tbody>
+</table>
+</div>
+
+<h2 id="open">待定</h2>
+<ol>
+  <li><strong>通用正文组件归哪。</strong>术语标注、讲解组件（不含跟名册绑定的那部分）、文件树、Tabs、占满整个窗口的页面，推荐归基础包，docfirst 只留钉码显示和轨迹卡。</li>
+  <li><strong>agent 写评论要不要站点在运行。</strong>现在插件经站点的接口写，站点必须在运行。按原则五，写评论本来就是站点服务端的 action，插件调用它是正常做法（调用方式属于原则六的约定）；要改成不运行也能写，就得在插件里另做一份渲染页面算快照的逻辑。推荐维持经站点写，只把请求的类型由基础包导出、两边共用。</li>
+  <li><strong>生成正本能不能用组件。</strong>已定：能。生成正本经站点的编译器渲染，组件自己给出 Markdown 形式（改造计划 M4、D-02）。</li>
+  <li><strong>gwb-docsite 托管开发服务还是构建后的服务。</strong>按原则七，能不能写已经和这件事无关，剩下的只是改了内容要不要即时看到。</li>
+</ol>
+
+<p class="meta">下一份：逐章需求（站点生命周期、阅读与页面、评论与身份、docfirst 核心、docfirst 站点显示），每章末尾列出由需求推出的接口。</p>
+
+</main>
+</body>
+</html>

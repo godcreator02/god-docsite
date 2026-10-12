@@ -1,0 +1,10 @@
+packages:
+  - 'site'
+  - 'bare-vite'
+  - 'rr-vite-glob'
+  - 'clean-fumadocs'
+allowBuilds:
+  esbuild: true
+  '@parcel/watcher': false
+onlyBuiltDependencies:
+  - esbuild

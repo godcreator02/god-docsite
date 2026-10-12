@@ -1,0 +1,147 @@
+{
+  "task": "I-docsite-identity",
+  "date": "2026-10-11",
+  "lastFix": "2026-10-11 第二轮：主会话实证 authorizeWrite 两条成功路径未投影（结构化类型下 codes/extra 原样带出），已改为 return publicPersonOf(...) 并补真实覆盖的回归测试；详见 result.md 修正记录",
+  "status": "completed",
+  "package": "@godcreator/docsite-identity",
+  "packageDir": "packages/docsite-identity",
+  "writeScope": [
+    "packages/docsite-identity/",
+    "probes/2610112023_docsite-kit-complete/package-split/identity/"
+  ],
+  "createdFiles": {
+    "packages/docsite-identity": [
+      "package.json",
+      "tsconfig.json",
+      "tsconfig.build.json",
+      "README.md",
+      "src/index.ts",
+      "src/model.ts",
+      "src/server/index.ts",
+      "src/server/people-file.ts",
+      "src/server/site-people.ts",
+      "src/server/identity.ts",
+      "src/server/write-access.ts",
+      "src/react/index.tsx",
+      "test/model.test.ts",
+      "test/people-file.test.ts",
+      "test/identity.test.ts",
+      "test/write-access.test.ts"
+    ],
+    "probes/2610112023_docsite-kit-complete/package-split/identity": [
+      "selfcheck.ts",
+      "ts-extension-hooks.mjs",
+      "run-checks.ps1",
+      "checks.log",
+      "result.md",
+      "handoff.json"
+    ]
+  },
+  "exports": {
+    ".": {
+      "types": ["Person", "SiteIdentity"],
+      "values": ["peopleFile", "personOf", "publicPersonOf", "publicPeopleOf", "mentionsOf", "mentionBeingTyped", "peopleMatching"]
+    },
+    "./server": {
+      "types": ["Person", "SiteIdentity", "StoredPerson"],
+      "values": [
+        "peopleFile",
+        "personOf",
+        "publicPersonOf",
+        "publicPeopleOf",
+        "mentionsOf",
+        "mentionBeingTyped",
+        "peopleMatching",
+        "identityCodePattern",
+        "parsePeople",
+        "peopleWithJoined",
+        "sitePeople",
+        "identityCodeEnvName",
+        "identityOf",
+        "siteIdentity",
+        "authorizeWrite",
+        "WriteAccessError"
+      ]
+    },
+    "./react": {
+      "values": ["Avatar", "IdentityBadge"]
+    }
+  },
+  "contractNotes": {
+    "authorizeWrite": "authorizeWrite(request: Request, options: { identity: SiteIdentity; people: readonly Person[]; as?: string | null; origin: string }): Person；Origin 精确匹配否则 403，无身份 403，as 省略用当前身份，as 只允许已登记 agent（未知 400、冒充人 403），供 J 直接使用",
+    "identityCode": "identityCodePattern = /^[a-z0-9]{8,64}$/（8 到 64 位），identityCodeEnvName = 'DOCSITE_IDENTITY_CODE'",
+    "codesIsolation": "公开 Person 无 codes；identityOf/siteIdentity/authorizeWrite 返回经 publicPersonOf 投影的人，只读 reason 不含码"
+  },
+  "dependencies": {
+    "peer": { "react": "^19.3.0" },
+    "runtime": {},
+    "declaredDevNotInstalled": ["@types/node ^26.6.2", "@types/react ^19.3.0", "react ^19.3.0", "typescript ^6.0.3", "vitest ^5.0.1"]
+  },
+  "checks": [
+    {
+      "command": "node --import ./ts-extension-hooks.mjs selfcheck.ts",
+      "cwd": "probes/2610112023_docsite-kit-complete/package-split/identity",
+      "exitCode": 0,
+      "result": "44 项断言全部通过（model、people.json 校验与 join、身份与磁盘、authorizeWrite 全部路径）"
+    },
+    {
+      "command": "tsc -p tsconfig.json --noEmit（调用 packages/docsite-kit 的 tsc）",
+      "cwd": "packages/docsite-identity",
+      "exitCode": 2,
+      "result": "仅 TS2688 Cannot find type definition file for 'node'（@types/node 未装，完整类型检查无法进行，类型未验证）"
+    },
+    {
+      "command": "vitest run（用 packages/docsite-kit 的 vitest v5.0.3 跑，cwd 本包）",
+      "cwd": "packages/docsite-identity",
+      "exitCode": 0,
+      "result": "4 个测试文件 20 个测试全部通过；跑完删除了 vitest 生成的 node_modules/.vite 缓存"
+    }
+  ],
+  "fixChecks": [
+    {
+      "command": "node --import file:///…/ts-extension-hooks.mjs 20261011-2151-authorize-projection.mjs（主会话的复现脚本，只读未改；直接 node 跑会因 .js 扩展名解析失败，带钩子跑才可执行）",
+      "cwd": "probes/2610112023_docsite-kit-complete/review",
+      "exitCode": 0,
+      "result": "两条 projected:true（首次 txt 为两条 projected:false）"
+    },
+    {
+      "command": "node --import ./ts-extension-hooks.mjs selfcheck.ts",
+      "cwd": "probes/2610112023_docsite-kit-complete/package-split/identity",
+      "exitCode": 0,
+      "result": "48 项断言全部通过（新增 5 项：输入直接带 codes/extra 的两条成功路径投影与输入不变）"
+    },
+    {
+      "command": "vitest run（本包 node_modules/.bin/vitest）",
+      "cwd": "packages/docsite-identity",
+      "exitCode": 0,
+      "result": "4 个测试文件 22 个测试全部通过（write-access 新增「返回的人经白名单投影」2 个用例，输入直接构造携带 codes/extra 的对象，不经 identityOf 预投影）"
+    },
+    {
+      "command": "tsc -p tsconfig.json --noEmit（本包 node_modules/.bin/tsc）",
+      "cwd": "packages/docsite-identity",
+      "exitCode": 0,
+      "result": "完整类型检查通过，react 入口（Avatar/IdentityBadge，jsx: react-jsx）类型首次真正验证"
+    }
+  ],
+  "dependencyState": "本包 node_modules（@types、react、typescript、vitest、.bin）是上一轮 J 会话因 pnpm exec 触发安装留下的实际状态（lock 已由 J 恢复）；本会话未执行任何安装，全部检查直接调用已有可执行文件，未用 pnpm exec",
+  "pendingIntegration": [
+    "K 正式安装依赖后用包脚本 pnpm check 复跑确认（本轮借助 J 留下的 node_modules 已实际跑过 tsc 与 vitest 全绿）",
+    "pnpm build 验证 tsconfig.build.json 的 dist 与声明 emit",
+    "node ESM 按三入口导入的运行时解析",
+    "Avatar/IdentityBadge 浏览器渲染验证",
+    "与 J 评论包集成：CommentRequestOptions.siteOrigin + authorizeWrite"
+  ],
+  "knownDeltas": [
+    "只读 reason 不再包含身份码本身（契约要求；旧断言随之改写）",
+    "siteIdentity 不再看 import.meta.env.DEV，只看环境变量；发布站由宿主保证不设 DOCSITE_IDENTITY_CODE，宿主设了码则行为与旧版不同",
+    "siteCommenter 未迁入（评论概念，不在契约接口内；等价 siteIdentity(siteDir).person）",
+    "actorOf 并入 authorizeWrite：as 由调用方从表单读出后传入；无身份 403 文案从固定句变为 identity.reason",
+    "IdentityBadge 不含 ThemeSwitch，配色不用 fd-* 主题类（标准 Tailwind 类 + 透明度），主题切换由站点放在旁边"
+  ],
+  "risks": [
+    "dist 产物 emit 未验证（pnpm build 待 K）",
+    "version 0.0.0 为占位，首次发版前按 gwb-release 定号",
+    "依赖的正式安装与包脚本（pnpm check）仍由 K 串行执行；当前验证依赖的是 J 意外安装留下的 node_modules 实体"
+  ],
+  "processes": "无遗留进程：未启动服务，一次性进程均已退出，临时目录与 vitest 缓存已清理"
+}

@@ -1,0 +1,54 @@
+
+ RUN  v5.0.3 D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/261011_docsite-kit-complete/review
+
+stdout | no-touch.test.ts > real validation site: create and delete without touching source.config.ts
+[MDX] generated files in 10.359199999999873ms
+
+stdout | no-touch.test.ts > real validation site: create and delete without touching source.config.ts
+[MDX] generated files in 15.91419999999971ms
+
+stdout | no-touch.test.ts > real validation site: create and delete without touching source.config.ts
+12:07:23 AM [vite] (ssr) connected.
+
+stdout | no-touch.test.ts > real validation site: create and delete without touching source.config.ts
+DIAG created 2026-10-11-7d2e35 disk entries true
+
+stdout | no-touch.test.ts > real validation site: create and delete without touching source.config.ts
+DIAG file events [{"event":"addDir","file":"D:\\unitfolders\\oz47p-docsite-kit\\docsite-kit\\probes\\261011_docsite-kit-complete\\site\\comments\\2026-10-11-7d2e35"},{"event":"add","file":"D:\\unitfolders\\oz47p-docsite-kit\\docsite-kit\\probes\\261011_docsite-kit-complete\\site\\comments\\2026-10-11-7d2e35\\index.mdx"},{"hook":"vite:import-glob","env":"client","type":"create","file":"D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/261011_docsite-kit-complete/site/comments/2026-10-11-7d2e35/index.mdx","before":[]},{"hook":"vite:import-glob","env":"ssr","type":"create","file":"D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/261011_docsite-kit-complete/site/comments/2026-10-11-7d2e35/index.mdx","before":[]},{"event":"unlinkDir","file":"D:\\unitfolders\\oz47p-docsite-kit\\docsite-kit\\probes\\261011_docsite-kit-complete\\site\\comments\\2026-10-11-7d2e35"}]
+DIAG glob module ids [
+  'D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/261011_docsite-kit-complete/site/.source/server.ts'
+]
+
+ ❯ no-touch.test.ts (1 test | 1 failed) 9755ms
+   × real validation site: create and delete without touching source.config.ts 9754ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  no-touch.test.ts > real validation site: create and delete without touching source.config.ts
+AssertionError: expected false to be true // Object.is equality
+
+- Expected
++ Received
+
+- true
++ false
+
+ ❯ no-touch.test.ts:39:165
+     37|     expect(typeof thread).toBe('string');
+     38|     console.log('DIAG created', thread, 'disk entries', (await readdir…
+     39|     await expect.poll(async () => (await (await fetch('http://127.0.0.…
+       |                                                                                                                                                                     ^
+     40|     console.log('DIAG create SSR updated without touch');
+     41|     const deleted = await post({ op: 'delete', thread: thread!, file: …
+
+Caused by: Error: Matcher did not succeed in time.
+ ❯ no-touch.test.ts:39:5
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed (1)
+   Start at  00:07:21
+   Duration  10.19s (tests 98%, import 2%)
+

@@ -1,0 +1,864 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>底座：Vite 与 React Router</title>
+<link rel="stylesheet" href="style.css">
+<script src="fig.js"></script>
+<style>
+  .part { font-size: 13px; font-weight: 700; color: #fff; border-radius: 999px; padding: 2px 10px; margin-right: 8px; vertical-align: 3px; }
+  .why { background: var(--accent-soft); border-radius: 8px; padding: 8px 12px; margin: 10px 0; font-size: 14px; }
+  .why::before { content: "为什么要懂这个："; font-weight: 700; }
+  .row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  @media (max-width: 760px) { .row { grid-template-columns: 1fr; } }
+  .code { font-family: ui-monospace, Consolas, monospace; font-size: 12.5px; background: var(--code-bg); border-radius: 6px; padding: 10px 12px; white-space: pre; overflow-x: auto; line-height: 1.6; }
+  .code .hl { background: color-mix(in srgb, var(--c-vite) 22%, transparent); border-radius: 3px; }
+  .flash { animation: flash 1s; }
+  @keyframes flash { 0%,100% { background: transparent; } 30% { background: color-mix(in srgb, var(--warn) 35%, transparent); } }
+
+  /* 插件流水线 */
+  .pipe { display: flex; align-items: stretch; gap: 0; overflow-x: auto; padding: 4px 0 8px; }
+  .station { min-width: 118px; border: 2px solid var(--border); border-radius: 10px; padding: 6px 8px; text-align: center; font-size: 13px; background: var(--surface); transition: all .3s; }
+  .station small { display: block; color: var(--muted); font-size: 11.5px; }
+  .station.on { border-color: var(--c-vite); background: color-mix(in srgb, var(--c-vite) 12%, var(--surface)); transform: translateY(-3px); }
+  .station.skip { opacity: .4; text-decoration: line-through; }
+  .station.off { display: none; }
+  .pipe .arr { align-self: center; color: var(--muted); padding: 0 4px; }
+
+  /* 模块图 */
+  #mg .node rect { fill: var(--surface); stroke: var(--border); stroke-width: 2; transition: all .3s; }
+  #mg .node.boundary rect { stroke-dasharray: 5 3; }
+  #mg .node { cursor: pointer; }
+  #mg .node.hit rect { stroke: var(--warn); fill: color-mix(in srgb, var(--warn) 22%, var(--surface)); }
+  #mg .node.stop rect { stroke: var(--ok); fill: color-mix(in srgb, var(--ok) 22%, var(--surface)); }
+  #mg .node.reload rect { stroke: var(--del); fill: color-mix(in srgb, var(--del) 22%, var(--surface)); }
+  #mg .edge { stroke: var(--border); stroke-width: 2; fill: none; transition: stroke .3s; }
+  #mg .edge.hit { stroke: var(--warn); stroke-width: 3; }
+  .log { font-size: 13.5px; min-height: 64px; }
+  .log div { animation: fadein .3s; }
+  @keyframes fadein { from { opacity: 0; } }
+
+  /* glob */
+  .folder { font-family: ui-monospace, Consolas, monospace; font-size: 13px; background: var(--code-bg); border-radius: 6px; padding: 10px 12px; line-height: 1.8; }
+  .folder .f { transition: all .4s; }
+  .folder .f.new { animation: fadein .6s; color: var(--ok); font-weight: 700; }
+
+  /* 环境 */
+  .envs { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .env { border: 2px solid var(--c); border-radius: 10px; padding: 10px 12px; background: color-mix(in srgb, var(--c) 6%, var(--surface)); }
+  .env h4 { margin: 0 0 6px; }
+  .env ol { margin: 0; padding-left: 20px; font-size: 13.5px; }
+  .env .lib { transition: all .4s; }
+
+  /* 路由 */
+  #rt .r rect { fill: var(--surface); stroke: var(--border); stroke-width: 2; transition: all .3s; }
+  #rt .r.on rect { stroke: var(--c-rr); fill: color-mix(in srgb, var(--c-rr) 14%, var(--surface)); }
+  #rt .l { stroke: var(--border); stroke-width: 2; fill: none; }
+
+  /* 路由模块拆分 */
+  .split { font-family: ui-monospace, Consolas, monospace; font-size: 12.5px; background: var(--code-bg); border-radius: 6px; padding: 8px 0; line-height: 1.6; }
+  .split div { padding: 0 12px; white-space: pre; overflow: hidden; max-height: 22px; transition: max-height .5s, opacity .5s, background .3s; }
+  .split .server { background: color-mix(in srgb, var(--c-rr) 10%, transparent); }
+  .split.client .server { max-height: 0; opacity: 0; }
+  .tagline { display: inline-block; font-size: 12px; padding: 1px 8px; border-radius: 999px; margin-right: 6px; }
+
+  /* 三种运行方式 */
+  :root { --m-dev: #0a6cbd; --m-prod: #1a7f37; --m-static: #6e7781; }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --m-dev: #5aa9f0; --m-prod: #57ab5a; --m-static: #9aa4af; } }
+  :root[data-theme="dark"] { --m-dev: #5aa9f0; --m-prod: #57ab5a; --m-static: #9aa4af; }
+  .mode { display: inline-block; font-size: 11.5px; font-weight: 600; padding: 0 7px; border-radius: 999px; margin-left: 4px; vertical-align: 2px; border: 1px solid var(--m); color: var(--m); }
+  .mode.no { opacity: .35; text-decoration: line-through; }
+  .modetabs { display: flex; gap: 8px; flex-wrap: wrap; margin: 10px 0; }
+  .modetab { font: inherit; font-size: 14px; padding: 6px 14px; border-radius: 8px; border: 2px solid var(--border); background: var(--surface); color: var(--text); cursor: pointer; }
+  .modetab.on { border-color: var(--m); background: color-mix(in srgb, var(--m) 12%, var(--surface)); }
+  #modefig .p rect { stroke-width: 2; }
+  #modefig .anim { animation: fadein .6s both; }
+  #modefig .flow { stroke-dasharray: 6 6; animation: dash 1.2s linear infinite; }
+  @keyframes dash { to { stroke-dashoffset: -24; } }
+  .verdict { border-left: 4px solid var(--m); padding: 6px 12px; background: color-mix(in srgb, var(--m) 8%, var(--surface)); border-radius: 0 8px 8px 0; margin-top: 8px; }
+</style>
+</head>
+<body>
+<main>
+
+<p class="crumbs"><a href="index.html">← 目录</a>　·　fumadocs 原理 · 第一部分</p>
+<h1>底座：Vite 与 React Router</h1>
+<p class="lead">fumadocs 自己几乎不发明机制，它的每一样能力都借了底下两样东西的机制。这一页先不提 fumadocs，只把这两样东西讲清楚。</p>
+
+<!-- ====================== Vite 是什么 ====================== -->
+<h2>先说 Vite 是什么</h2>
+<p><strong>浏览器只认识 JS、CSS、HTML。</strong>可站点里写的是 <code>.tsx</code>（TypeScript 加 JSX）、<code>.mdx</code>（Markdown 里夹组件），浏览器一个都执行不了。<strong>Vite 就是把这些源文件转换成 JS 和 CSS 的工具。</strong></p>
+<p>说它是「打包器」只对一半：build 时它转换完所有文件，再打包成少数几个文件，这时它是打包器；dev 时它根本不打包，谁要哪个文件就当场转换哪个，这时它是一个开发服务器。</p>
+
+<h3>一个文件被导入时：三道工序，每道只调用写了这一步的插件</h3>
+<p>Vite 自己只会转换少数几种格式。遇到不认识的格式（比如 <code>.mdx</code>），就靠<strong>插件</strong>。每个文件进来时，Vite 按固定的三道工序处理：<code>resolveId</code>（这个 import 是哪个文件）、<code>load</code>（读出内容）、<code>transform</code>（改写内容）。这三个都是插件<strong>可以选写</strong>的函数（叫「钩子」）。<strong>每到一道工序，Vite 只按顺序调用写了这个钩子的插件</strong>，没写的根本不会被调用；写了的插件被调用后，看一眼文件不归自己管，就原样放过。这就是流水线。</p>
+<p>下面每行是一个插件，每列是一道工序。实线格子表示这个插件写了这一步，虚线灰格表示没写：</p>
+<div id="sc-pipeline"></div>
+<p>插件本身没什么神秘的，就是一个 JS 对象，里面写好几个函数，Vite 在对应的工序调用它们。一个最简单的 MDX 插件只写 <code>transform</code>，大概长这样：</p>
+<pre><code>{
+  name: 'my-mdx',
+  transform(code, id) {
+    if (!id.endsWith('.mdx')) return   // 不是我管的文件，跳过
+    return compileMdx(code)            // 把 Markdown 文本改写成 JS
+  }
+}</code></pre>
+<p>fumadocs-mdx 就是这样一个插件，只是 <code>transform</code> 里写得复杂得多。React Router 的框架模式也是一个 Vite 插件。</p>
+
+<h3>这条流水线，dev 和 build 共用吗</h3>
+<p><strong>共用。</strong>同一套插件、同一组钩子（resolveId → load → transform），dev 和 build 都走这条流水线，插件只写一次。区别只在谁来调用、调用多少次、前后还多了哪些步骤：</p>
+<div class="table-wrap"><table>
+  <tr><th></th><th><span class="mode" style="--m:var(--m-dev)">dev</span></th><th><span class="mode" style="--m:var(--m-prod)">build</span></th></tr>
+  <tr><td>谁调用插件</td><td>Vite 开发服务器</td><td>打包器（Rollup；新版 Vite 换成了 Rolldown），Vite 把插件交给它</td></tr>
+  <tr><td>什么时候调用</td><td>谁要哪个文件，才对那个文件走一遍；结果缓存，文件没改就不再走</td><td>从入口出发，顺着 import 把能到达的文件全走一遍</td></tr>
+  <tr><td>resolveId / load / transform</td><td colspan="2">同一套</td></tr>
+  <tr><td>只在这种模式下有的钩子</td><td><code>configureServer</code>（往开发服务器里加东西）、<code>hotUpdate</code>（热更新）</td><td><code>renderChunk</code>、<code>generateBundle</code> 等（打包之后合并、压缩、写文件）</td></tr>
+  <tr><td>Vite 自带的那部分</td><td>把 import 路径改写成浏览器能直接请求的地址</td><td>不用改写，打包器自己把文件连起来，最后压缩</td></tr>
+</table></div>
+<p>插件也可以自己区分两种模式：写 <code>apply: 'serve'</code> 或 <code>apply: 'build'</code> 只在一种模式下装上，或者在钩子里看当前是哪种模式。fumadocs-mdx 就是后一种：它的 <code>config</code> 钩子按 <code>env.command</code> 是 <code>'serve'</code> 还是 <code>'build'</code> 决定要不要每次检查 <code>lib/source.ts</code> 改没改；<code>configureServer</code> 只在 dev 下被调用。<strong>所以编译 .mdx 的工序在两种模式下完全一样</strong>，不一样的只是 dev 下按需编译、有热更新，build 下一次编译完。</p>
+
+<h3>dev 和 build + start 下，Vite 一样吗</h3>
+<p><strong>流水线和插件是同一套，区别在什么时候转换、转换多少，以及 Vite 在不在。</strong>上下两行同时往前播：</p>
+<div id="sc-vite-modes"></div>
+<div class="table-wrap"><table>
+  <tr><th></th><th><span class="mode" style="--m:var(--m-dev)">dev</span></th><th><span class="mode" style="--m:var(--m-prod)">build</span></th><th><span class="mode" style="--m:var(--m-prod)">start</span></th></tr>
+  <tr><td>Vite 在不在</td><td>一直在，是个常驻的服务器进程</td><td>跑一次就退出</td><td><strong>不在</strong></td></tr>
+  <tr><td>什么时候转换文件</td><td>谁要哪个才转换哪个</td><td>一次把所有文件转换完</td><td>不转换，只读 build 的成品</td></tr>
+  <tr><td>打不打包</td><td>不打包</td><td>打包，写进 <code>build/</code></td><td>—</td></tr>
+  <tr><td>插件（包括 fumadocs-mdx）</td><td>每个文件被要时调用</td><td>build 时全部调用一遍</td><td>不在场</td></tr>
+  <tr><td>改了文件</td><td>只重新转换那一个，热更新</td><td>—</td><td>不知道，要重新 build</td></tr>
+  <tr><td>产出什么</td><td>每个文件转成一个 JS 模块；CSS 也包成 JS，运行时插进 <code>&lt;style&gt;</code></td><td><code>build/server</code> 的 JS；<code>build/client</code> 的 JS、抽出来的 CSS 文件、图片。<strong>没有 HTML 文件</strong></td><td>HTML 在请求来时，运行组件现场渲染出来</td></tr>
+</table></div>
+
+<div class="stage">
+<svg viewBox="0 0 880 250" width="100%" aria-label="套在一起的几层">
+  <rect x="10" y="10" width="860" height="230" rx="14" fill="color-mix(in srgb, var(--c-vite) 7%, var(--surface))" stroke="var(--c-vite)" stroke-width="2"/>
+  <text x="30" y="36" font-size="15" font-weight="700" fill="var(--c-vite)">Vite：开发服务器 + 打包工具。所有代码都经过它</text>
+  <rect x="40" y="52" width="800" height="176" rx="12" fill="color-mix(in srgb, var(--c-rr) 7%, var(--surface))" stroke="var(--c-rr)" stroke-width="2"/>
+  <text x="60" y="78" font-size="15" font-weight="700" fill="var(--c-rr)">React Router（Vite 的一个插件）：网址 → 页面，服务器渲染，浏览器接管</text>
+  <rect x="70" y="94" width="740" height="120" rx="10" fill="var(--surface)" stroke="var(--border)" stroke-width="2"/>
+  <text x="90" y="120" font-size="14" font-weight="700" fill="var(--text)">你的站点：routes.ts、路由文件、root.tsx</text>
+  <rect x="100" y="134" width="210" height="64" rx="8" fill="color-mix(in srgb, var(--c-fd) 10%, var(--surface))" stroke="var(--c-fd)" stroke-dasharray="5 4"/>
+  <text x="205" y="162" text-anchor="middle" font-size="13" fill="var(--c-fd)">fumadocs-mdx</text><text x="205" y="182" text-anchor="middle" font-size="11" fill="var(--muted)">下一页讲</text>
+  <rect x="335" y="134" width="210" height="64" rx="8" fill="color-mix(in srgb, var(--c-fd) 10%, var(--surface))" stroke="var(--c-fd)" stroke-dasharray="5 4"/>
+  <text x="440" y="162" text-anchor="middle" font-size="13" fill="var(--c-fd)">fumadocs-core</text><text x="440" y="182" text-anchor="middle" font-size="11" fill="var(--muted)">下一页讲</text>
+  <rect x="570" y="134" width="210" height="64" rx="8" fill="color-mix(in srgb, var(--c-fd) 10%, var(--surface))" stroke="var(--c-fd)" stroke-dasharray="5 4"/>
+  <text x="675" y="162" text-anchor="middle" font-size="13" fill="var(--c-fd)">fumadocs-ui</text><text x="675" y="182" text-anchor="middle" font-size="11" fill="var(--muted)">下一页讲</text>
+</svg>
+</div>
+
+<!-- ====================== 三种运行方式 ====================== -->
+<h2>先分清三种运行方式</h2>
+<p>同一个站点有三种跑法，下面每个机制都会标出它在哪种跑法下起作用：<span class="mode" style="--m:var(--m-dev)">dev</span><span class="mode" style="--m:var(--m-prod)">build + start</span><span class="mode" style="--m:var(--m-static)">静态</span>。点一种看看它是怎么跑的：</p>
+<div class="modetabs" id="modetabs"></div>
+<div class="stage"><svg id="modefig" viewBox="0 0 880 250" width="100%" aria-label="运行方式"></svg></div>
+<div class="caption" id="modecap"></div>
+<div class="table-wrap"><table>
+  <tr><th></th><th><span class="mode" style="--m:var(--m-dev)">dev</span></th><th><span class="mode" style="--m:var(--m-prod)">build + start</span></th><th><span class="mode" style="--m:var(--m-static)">静态</span></th></tr>
+  <tr><td>命令</td><td><code>react-router dev</code></td><td><code>react-router build</code> → <code>react-router-serve</code></td><td><code>ssr: false</code> + 预渲染 → <code>react-router build</code></td></tr>
+  <tr><td>有没有 Vite 在跑</td><td>有，每个请求现场编译</td><td>只在 build 时打一次包；start 时只是普通 Node 进程</td><td>只在 build 时；之后连 Node 都没有</td></tr>
+  <tr><td>loader 什么时候跑</td><td>每次请求</td><td>每次请求</td><td>只在 build 时跑一次</td></tr>
+  <tr><td>action（写入）</td><td>能</td><td>能</td><td>不能</td></tr>
+  <tr><td>改了文档怎么生效</td><td>马上</td><td>重新 build 再重启</td><td>重新 build</td></tr>
+  <tr><td>运行时变化的数据（评论、协作）</td><td>能读能写</td><td>能读能写，<strong>但必须在 loader 里运行时读，不能 build 时编译进包</strong></td><td>不行</td></tr>
+  <tr><td>用在</td><td>作者和 agent 写文档时</td><td>发布：工作台在本机或 NAS 上开服务</td><td>放到没有 Node 的静态托管上</td></tr>
+</table></div>
+<div class="verdict" style="--m:var(--m-static)"><strong>结论：静态这一种对我们没有实际意义。</strong>站点都由工作台托管，本机和 NAS 都有 Node；评论要写、身份要认、协作数据要推，都离不开服务器。以后只考虑 dev 和 build + start。</div>
+<div class="verdict" style="--m:var(--m-prod)"><strong>要记住的一点：</strong>build + start 下没有 Vite，fumadocs-mdx 编译过的内容已经固定在包里。所以凡是运行时会变的东西（评论、协作数据），都不能走「build 时编译」这条路。</div>
+
+<h2>服务器到底是谁：一个请求在 dev 和 build + start 下怎么走</h2>
+<p><strong>服务器就是一个 Node 进程</strong>，负责接收浏览器的请求，两种方式都一样。<strong>Vite 不是服务器，是编译器</strong>：dev 时它装在这个进程里面，请求来了现场编译；build + start 时它不在进程里，编译早在 build 时做完了，进程只读现成的文件。左右两边同时播放，看哪里不一样：</p>
+<div class="modetabs" id="sv-tabs"></div>
+<div id="sv-ctl"></div>
+<div class="stage"><svg id="sv" viewBox="0 0 880 430" width="100%" aria-label="dev 与 build+start 的服务器"></svg></div>
+<div class="row"><div class="caption" id="sv-dev" style="border-left:4px solid var(--m-dev)"></div><div class="caption" id="sv-prod" style="border-left:4px solid var(--m-prod)"></div></div>
+
+<!-- ====================== Vite ====================== -->
+<h2><span class="part" style="background:var(--c-vite)">Vite</span>五个机制</h2>
+
+<h3>1. 开发时不打包：浏览器要哪个文件，就现场编译哪个 <span class="mode" style="--m:var(--m-dev)" title="dev">dev</span><span class="mode no" style="--m:var(--m-prod)" title="">build+start</span><span class="mode no" style="--m:var(--m-static)">静态</span></h3>
+<p>传统做法是先把所有代码打包成一个大文件再给浏览器。Vite 开发时反过来：浏览器自己按 <code>import</code> 一个一个地要，Vite 收到一个请求就编译一个文件。没打开的页面，代码永远不会被编译。</p>
+<div id="seq-nobundle"></div>
+
+<h3>2. 插件流水线：每个文件都要过这几道工序 <span class="mode" style="--m:var(--m-dev)" title="dev">dev</span><span class="mode" style="--m:var(--m-prod)" title="build 时">build+start：build 时</span><span class="mode" style="--m:var(--m-static)">静态：build 时</span></h3>
+<p>Vite 收到一个文件请求后，依次问每个插件三个问题：这个地址对应哪个文件（<code>resolveId</code>）？文件内容是什么（<code>load</code>）？要不要把内容改一改（<code>transform</code>）？浏览器只认识 JS，所以 <code>.mdx</code>、<code>.tsx</code> 这类文件全靠某个插件在 transform 里把它变成 JS。</p>
+<div class="controls"><button class="btn" id="pp-toggle">去掉 MDX 插件试试</button></div>
+<div id="pp-ctl"></div>
+<div class="stage">
+  <div class="pipe" id="pipe"></div>
+  <div class="code" id="pp-data"></div>
+</div>
+<div class="why">fumadocs-mdx 本身就是这条流水线上的一个插件。</div>
+
+<h4 style="margin:22px 0 6px">为什么最后返回的是 JS，不是 HTML？</h4>
+<p>网页上看到的确实是 HTML 和 CSS。但在 React 网站里，HTML 不是直接写出来的：<strong>内容被编译进一个 JS 函数（React 组件），运行这个函数才得到 HTML</strong>。这个函数在服务器上跑一次，生成首屏 HTML；在浏览器里再跑一次，把页面接管下来。</p>
+<div id="whyjs-ctl"></div>
+<div class="stage"><svg id="whyjs" viewBox="0 0 880 260" width="100%" aria-label="JS 变成 HTML"></svg></div>
+<div class="caption" id="whyjs-cap"></div>
+
+<h3>3. <code>import.meta.glob</code>：一行代码导入一整个文件夹 <span class="mode" style="--m:var(--m-dev)" title="dev">dev</span><span class="mode" style="--m:var(--m-prod)" title="build 时展开一次">build+start：build 时展开一次</span><span class="mode" style="--m:var(--m-static)">静态：build 时展开一次</span></h3>
+<p>写一行 <code>import.meta.glob('./content/*.mdx')</code>，Vite 在编译时把它展开成「逐个导入每个文件」的代码。更关键的是：Vite 记住了这个模式，<strong>文件夹里新建或删除文件时，它会让写这一行的模块失效、重新展开</strong>。试试下面的按钮：</p>
+<div class="controls"><button class="btn" id="g-add">新建 c.mdx</button><button class="btn" id="g-del">删除 b.mdx</button><button class="btn" id="g-reset">↺ 重来</button></div>
+<div class="row">
+  <div><div class="meta">磁盘上的 content/ 文件夹</div><div class="folder" id="g-folder"></div></div>
+  <div><div class="meta">lib.ts 里那一行，Vite 编译后变成</div><div class="code" id="g-code"></div></div>
+</div>
+<div class="caption" id="g-log">点上面的按钮。</div>
+<div class="why">fumadocs-mdx 就是靠它导入内容文件夹，所以增删页面不用它自己写任何代码。</div>
+
+<h3>4. 模块图和热更新：改一个文件，最少要更新多少 <span class="mode" style="--m:var(--m-dev)" title="dev">dev</span><span class="mode no" style="--m:var(--m-prod)" title="">build+start</span><span class="mode no" style="--m:var(--m-static)">静态</span></h3>
+<p>Vite 记着「谁导入了谁」，这叫模块图。改了一个文件，Vite 顺着「谁导入了我」往上找，直到找到一个能自己接住更新的模块，就只替换到这一层，页面状态保留；一直找到最顶上都没人接，就只好整页刷新。</p>
+<p><strong>谁能接住，不看文件后缀，看它导出了什么</strong>：React 的热更新插件只给「导出的全是组件」的模块加上接住更新的能力（图里虚线框），因为把一个组件换成新版、保留它的状态是安全的。<code>main.tsx</code> 虽然也是 .tsx，但它是入口，干的事是 <code>createRoot().render()</code>，一个组件都不导出；重新执行它等于再挂载一次整个应用，所以接不住。<strong>点任意一个方块，假装改了它：</strong></p>
+<div class="controls"><button class="btn" id="mg-toggle">让 Page.tsx 多导出一个常量</button></div>
+<div class="stage"><svg id="mg" viewBox="0 0 880 340" width="100%" aria-label="模块图"></svg></div>
+<div class="row">
+  <div class="caption log" id="mg-log">点一个方块。</div>
+  <div><div class="meta" id="mg-file">源码</div><div class="code" id="mg-code"></div></div>
+</div>
+<div class="why">改了 .mdx，页面自己更新，靠的就是这一套；fumadocs 没有写热更新代码。</div>
+
+<h3>5. 两套环境：同一个文件，服务器一份、浏览器一份 <span class="mode" style="--m:var(--m-dev)" title="dev">dev</span><span class="mode" style="--m:var(--m-prod)" title="build 时打两个包">build+start：build 时打两个包</span><span class="mode" style="--m:var(--m-static)">静态：只打浏览器包</span></h3>
+<p>站点要在服务器上先渲染一遍，再到浏览器里接管。所以 Vite 开发时同时有两套环境，各有自己的模块图，<strong>同一个文件会被编译两次</strong>。两边处理第三方库的方式不一样：</p>
+<div class="controls"><button class="btn" id="env-toggle">把这个库加进 ssr.noExternal</button></div>
+<div class="envs">
+  <div class="env" style="--c:var(--c-browser)"><h4>浏览器环境（client）</h4><ol><li>你的文件：按需编译，过插件流水线</li><li class="lib">第三方库：启动时预先打包成少数几个文件（<code>optimizeDeps</code>）</li></ol></div>
+  <div class="env" style="--c:var(--c-node)"><h4>服务器环境（ssr）</h4><ol><li>你的文件：按需编译，过插件流水线，在 Node 里执行</li><li class="lib" id="env-lib">第三方库：<strong>默认不经过 Vite</strong>，Node 直接从 node_modules 导入</li></ol></div>
+</div>
+<div class="caption" id="env-log">第三方库在服务器端默认不经过 Vite。库里如果有 <code>.mdx</code>、<code>.css</code> 要编译，或者库要和站点共用同一份 React context，就必须让 Vite 处理它。</div>
+<div class="why">fumadocs 只会自动把名字以 <code>fumadocs-</code>、<code>@fumadocs/</code> 开头的包加进这个名单；我们的 <code>@godcreator/…</code> 包要站点自己加。</div>
+
+<!-- ====================== React Router ====================== -->
+<h2><span class="part" style="background:var(--c-rr)">React Router</span>五个机制</h2>
+<p>先记住一件事：在框架模式下，React Router 自己就是一个 Vite 插件（<code>vite.config.ts</code> 里的 <code>reactRouter()</code>）。它的所有功能都搭在上面 Vite 的机制上。</p>
+<div class="table-wrap"><table>
+  <tr><th>React Router v7 的三种用法</th><th>是什么</th><th>服务器渲染</th></tr>
+  <tr><td>声明式</td><td>只在浏览器里用 <code>&lt;Routes&gt;</code> 匹配网址</td><td>没有</td></tr>
+  <tr><td>数据模式</td><td>浏览器里 <code>createBrowserRouter</code>，loader 在浏览器跑</td><td>没有</td></tr>
+  <tr><td><strong>框架模式（我们用的）</strong></td><td><code>@react-router/dev</code> 的 Vite 插件 <code>reactRouter()</code> + <code>routes.ts</code> + 路由文件</td><td>有</td></tr>
+</table></div>
+<div class="why" style="background:color-mix(in srgb, var(--c-fd) 10%, var(--surface))">「用 React Router 框架」和「装了 React Router 的 Vite 插件」是同一件事。<strong>fumadocs 本身不依赖 React Router</strong>：Next.js、TanStack Start、Waku、Astro 它都支持。它和 React Router 的关系只有两处：一是适配层 <code>fumadocs-core/framework/react-router</code>，界面要「当前网址」「站内链接」「刷新数据」时，通过它调用 React Router 的 <code>useLocation</code>、<code>&lt;Link&gt;</code>、<code>useRevalidator</code>；二是路由文件由站点自己写，站点在 loader 里调用 fumadocs。<code>vite.config.ts</code> 里 <code>fumadocsMdx()</code> 和 <code>reactRouter()</code> 两个插件并排放着，互不知道对方。</div>
+
+<h3>1. <code>routes.ts</code>：网址对应哪个文件 <span class="mode" style="--m:var(--m-dev)" title="dev">dev</span><span class="mode" style="--m:var(--m-prod)" title="1">build+start</span><span class="mode" style="--m:var(--m-static)">静态</span></h3>
+<p>站点在 <code>app/routes.ts</code> 里写一张表。一个网址会匹配一串路由（外层布局 + 里层页面），这一串路由的组件套在一起渲染，它们的 <code>loader</code> 同时运行。<strong>选一个网址看看匹配到谁：</strong></p>
+<div class="row">
+  <div class="code">import { index, layout, route } from '@react-router/dev/routes'
+
+export default [
+  index('routes/home.tsx'),
+  layout('routes/docs-layout.tsx', [
+    route('docs/*', 'routes/docs.tsx'),
+  ]),
+  route('api/search', 'routes/search.ts'),
+]</div>
+  <div>
+    <div class="controls" id="rt-urls"></div>
+    <div class="stage" style="margin:0"><svg id="rt" viewBox="0 0 420 230" width="100%" aria-label="路由树"></svg></div>
+  </div>
+</div>
+<div class="caption" id="rt-log"></div>
+
+<h3>2. 一个路由文件，服务器和浏览器各拿一半 <span class="mode" style="--m:var(--m-dev)" title="dev">dev</span><span class="mode" style="--m:var(--m-prod)" title="1">build+start</span><span class="mode" style="--m:var(--m-static)">静态：loader 只在 build 时跑</span></h3>
+<p>路由文件里的 <code>loader</code> 只在服务器上运行（可以读文件、查数据库），组件两边都运行。构建浏览器的代码时，React Router 的插件会<strong>把 <code>loader</code> 和只有它用到的 import 整个删掉</strong>，所以服务器代码不会漏到浏览器。点按钮切换：</p>
+<div class="controls"><button class="btn" id="sp-server">服务器拿到的版本</button><button class="btn" id="sp-client">浏览器拿到的版本</button></div>
+<div class="split" id="split"></div>
+<div class="caption"><span class="tagline" style="background:color-mix(in srgb, var(--c-rr) 18%, transparent)">红底</span>只在服务器上。浏览器版本里，这些行连同 <code>import { readFile }</code> 一起被删掉。</div>
+<div class="why">fumadocs 的页面索引表（loader 建的那张）只在服务器上，浏览器只拿到 loader 返回的那一小份数据。</div>
+
+<h3>3. 第一次打开：服务器渲染，浏览器接管 <span class="mode" style="--m:var(--m-dev)" title="dev">dev</span><span class="mode" style="--m:var(--m-prod)" title="1">build+start</span><span class="mode" style="--m:var(--m-static)">静态：build 时预渲染</span></h3>
+<p>第一次打开一个网址，服务器先跑匹配到的 <code>loader</code>，用拿到的数据把组件渲染成 HTML 发给浏览器，数据也嵌在 HTML 里。浏览器先把 HTML 显示出来，再下载 JS，用嵌进来的同一份数据把组件再渲染一遍、接上点击事件（hydration，下文叫「接管」）。</p>
+<div id="seq-ssr"></div>
+
+<h3>4. 站内点链接：只要数据，不要整页 <span class="mode" style="--m:var(--m-dev)" title="dev">dev</span><span class="mode" style="--m:var(--m-prod)" title="1">build+start</span><span class="mode" style="--m:var(--m-static)">静态：数据 build 时生成</span></h3>
+<p>接管以后，在站内点 <code>&lt;Link&gt;</code> 不会整页刷新。浏览器向服务器要的只是新页面的数据（网址后面加 <code>.data</code>），服务器只跑需要换的那几个路由的 <code>loader</code>。</p>
+<div id="seq-nav"></div>
+
+<h3>5. 开发时，React Router 怎么借 Vite 跑服务器渲染 <span class="mode" style="--m:var(--m-dev)" title="dev">dev</span><span class="mode no" style="--m:var(--m-prod)" title="">build+start</span><span class="mode no" style="--m:var(--m-static)">静态</span></h3>
+<p>开发时 React Router 插件往 Vite 开发服务器里挂了一个处理请求的函数（Vite 插件的 <code>configureServer</code> 钩子），页面请求就由它接手，路由代码向 Vite 的服务器环境现要。build + start 时这个函数换成从 <code>build/server</code> 导入的现成处理函数。完整的对照见上面的 <a href="#sv">「服务器到底是谁」</a>。</p>
+
+<!-- ====================== 小结 ====================== -->
+<h2>小结：底座提供的机制，下一页 fumadocs 会怎么用</h2>
+<div class="table-wrap"><table>
+  <tr><th>机制</th><th>谁提供</th><th>一句话</th><th>fumadocs 会拿它来</th></tr>
+  <tr><td>按需编译</td><td>Vite</td><td>浏览器要哪个文件才编译哪个</td><td>没打开的文档页不编译</td></tr>
+  <tr><td>插件流水线</td><td>Vite</td><td>resolveId → load → transform</td><td>fumadocs-mdx 把 .mdx 编译成 JS</td></tr>
+  <tr><td><code>import.meta.glob</code></td><td>Vite</td><td>一行导入整个文件夹，增删文件自动失效</td><td>导入整个内容文件夹</td></tr>
+  <tr><td>模块图 + 热更新</td><td>Vite</td><td>改文件只更新受影响的一块</td><td>改文档页面自动刷新</td></tr>
+  <tr><td>两套环境、<code>ssr.noExternal</code></td><td>Vite</td><td>服务器端默认不处理第三方库</td><td>fumadocs 的包要经 Vite 处理；我们的包要站点自己配</td></tr>
+  <tr><td><code>routes.ts</code></td><td>React Router</td><td>网址 → 一串路由</td><td>站点自己写文档页、搜索的路由</td></tr>
+  <tr><td>loader 只在服务器</td><td>React Router</td><td>浏览器版删掉 loader</td><td>页面索引表只在服务器，浏览器只拿一小份</td></tr>
+  <tr><td>服务器渲染 + 接管</td><td>React Router</td><td>先出 HTML，再接上交互</td><td>界面组件两边都跑</td></tr>
+  <tr><td>站内跳转只要数据</td><td>React Router</td><td>请求 <code>.data</code></td><td>跳页只传页面树和「是哪一页」</td></tr>
+</table></div>
+
+<div class="pager"><a href="index.html">← 目录</a><a href="21-three-pieces.html">下一页：三大件各借了底座的哪个机制 →</a></div>
+</main>
+
+<script>
+const K = {
+  vite: { name: 'Vite 的机制', color: 'var(--c-vite)' },
+  rr: { name: 'React Router 的机制', color: 'var(--c-rr)' },
+  plain: { name: '数据往返', color: 'var(--c-node)' },
+};
+
+/* 三种运行方式 */
+const box = (x, y, w, h, c, title, sub, cls = '') => `<g class="p anim ${cls}"><rect x="${x}" y="${y}" width="${w}" height="${h}" rx="10" fill="color-mix(in srgb, ${c} 10%, var(--surface))" stroke="${c}"/><text x="${x + w / 2}" y="${y + (sub ? h / 2 - 2 : h / 2 + 5)}" text-anchor="middle" font-size="13.5" font-weight="700">${title}</text>${sub ? `<text x="${x + w / 2}" y="${y + h / 2 + 16}" text-anchor="middle" font-size="11.5" fill="var(--muted)">${sub}</text>` : ''}</g>`;
+const arrow = (x1, y1, x2, y2, c = 'var(--muted)', both = false) => `<line class="flow" x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${c}" stroke-width="2" marker-end="url(#ma)" ${both ? 'marker-start="url(#ma)"' : ''}/>`;
+const MODES = [
+  { key: 'dev', name: 'dev', c: 'var(--m-dev)',
+    svg: () => box(20, 90, 150, 70, 'var(--c-node)', '磁盘上的源文件', '.tsx  .mdx  meta.json')
+      + `<g class="anim"><rect x="250" y="30" width="380" height="190" rx="12" fill="color-mix(in srgb, var(--c-vite) 7%, var(--surface))" stroke="var(--c-vite)" stroke-width="2"/><text x="440" y="54" text-anchor="middle" font-size="14" font-weight="700" fill="var(--c-vite)">Vite 开发服务器（一直在跑）</text></g>`
+      + box(270, 70, 340, 40, 'var(--c-rr)', 'React Router 插件：处理页面请求', '')
+      + box(270, 124, 160, 80, 'var(--c-browser)', '浏览器环境', '按需编译、热更新') + box(450, 124, 160, 80, 'var(--c-node)', '服务器环境', '按需编译、执行 loader')
+      + box(710, 90, 150, 70, 'var(--c-browser)', '浏览器', '')
+      + arrow(172, 125, 248, 125) + arrow(632, 125, 708, 125, 'var(--m-dev)', true),
+    cap: '<b>dev</b>：只有一个进程，就是 Vite 开发服务器。每个请求都现场从源文件编译，改了任何文件马上生效。作者和 agent 写文档时用它。' },
+  { key: 'prod', name: 'build + start', c: 'var(--m-prod)',
+    svg: () => `<text x="20" y="22" font-size="12.5" font-weight="700" fill="var(--muted)">build（做一次）</text>`
+      + box(20, 32, 140, 56, 'var(--c-node)', '源文件', '') + box(230, 32, 160, 56, 'var(--c-vite)', 'Vite 打包', '只在这一步出现')
+      + box(470, 22, 180, 36, 'var(--c-browser)', 'build/client', '') + box(470, 66, 180, 36, 'var(--c-node)', 'build/server', '')
+      + `<text x="660" y="44" font-size="11.5" fill="var(--muted)">JS、CSS、图片</text><text x="660" y="88" font-size="11.5" fill="var(--muted)">路由、loader、编译好的文档</text>`
+      + arrow(162, 60, 228, 60) + arrow(392, 50, 468, 40) + arrow(392, 70, 468, 84)
+      + `<line x1="10" y1="122" x2="870" y2="122" stroke="var(--border)" stroke-dasharray="4 4"/><text x="20" y="146" font-size="12.5" font-weight="700" fill="var(--muted)">start（一直跑）</text>`
+      + box(250, 160, 300, 70, 'var(--m-prod)', 'Node：react-router-serve', '运行 build/server，没有 Vite')
+      + box(710, 160, 150, 70, 'var(--c-browser)', '浏览器', '')
+      + arrow(552, 195, 708, 195, 'var(--m-prod)', true) + arrow(560, 102, 420, 158, 'var(--muted)'),
+    cap: '<b>build + start</b>：先用 Vite 打一次包，得到浏览器用的文件和服务器用的文件；之后只跑一个普通 Node 进程，<b>没有 Vite</b>。loader、action 照样每次请求都跑，但文档内容已经在 build 时编译死了，改了要重新 build。发布用它。' },
+  { key: 'static', name: '静态', c: 'var(--m-static)',
+    svg: () => box(20, 90, 140, 70, 'var(--c-node)', '源文件', '')
+      + box(220, 90, 170, 70, 'var(--c-vite)', 'Vite 打包', 'loader 在这里跑一次')
+      + box(450, 90, 190, 70, 'var(--c-browser)', 'build/client', '每页预先生成好的 HTML')
+      + box(700, 30, 160, 60, 'var(--m-static)', '任意静态托管', 'Nginx、Pages…') + box(700, 160, 160, 60, 'var(--c-browser)', '浏览器', '')
+      + arrow(162, 125, 218, 125) + arrow(392, 125, 448, 125) + arrow(642, 110, 698, 70) + arrow(780, 92, 780, 158, 'var(--m-static)')
+      + `<text x="450" y="200" font-size="12" fill="var(--del)">没有服务器：不能写评论、不能认身份、没有实时数据</text>`,
+    cap: '<b>静态</b>：build 时把每一页都预先渲染成 HTML，之后连 Node 都不需要，放到任何静态托管上就行。代价是没有服务器：loader 只在 build 时跑一次，不能写入。<b>对我们没有实际意义。</b>' },
+];
+const modefig = document.getElementById('modefig');
+document.getElementById('modetabs').innerHTML = MODES.map((m, i) => `<button class="modetab" style="--m:${m.c}" data-i="${i}">${m.name}</button>`).join('');
+document.querySelectorAll('.modetab').forEach(b => b.onclick = () => modeShow(+b.dataset.i));
+function modeShow(i) {
+  const m = MODES[i];
+  document.querySelectorAll('.modetab').forEach((b, j) => b.classList.toggle('on', j === i));
+  modefig.innerHTML = '<defs><marker id="ma" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" style="fill:var(--muted)"/></marker></defs>' + m.svg();
+  document.getElementById('modecap').innerHTML = m.cap;
+}
+modeShow(0);
+
+/* 服务器到底是谁 */
+(() => {
+  const s = document.getElementById('sv');
+  const esc = t => t.replace(/</g, '&lt;');
+  const col = (ox, dev) => {
+    const c = dev ? 'var(--m-dev)' : 'var(--m-prod)', p = dev ? 'd' : 'p';
+    const R = (id, x, y, w, h, color, t, sub, extra = '') => `<g class="svn" data-id="${p}-${id}"><rect x="${ox + x}" y="${y}" width="${w}" height="${h}" rx="8" fill="color-mix(in srgb, ${color} 9%, var(--surface))" stroke="${color}" stroke-width="2" ${extra}/><text x="${ox + x + w / 2}" y="${y + (sub ? h / 2 - 3 : h / 2 + 5)}" text-anchor="middle" font-size="12.5" font-weight="700">${esc(t)}</text>${sub ? `<text x="${ox + x + w / 2}" y="${y + h / 2 + 14}" text-anchor="middle" font-size="11" fill="var(--muted)">${esc(sub)}</text>` : ''}</g>`;
+    const L = (id, d) => `<path class="svn" data-id="${p}-${id}" d="${d.replace(/X(\d+)/g, (_, n) => ox + +n)}" stroke="var(--accent)" stroke-width="2" fill="none" marker-end="url(#sva)"/>`;
+    return `<text x="${ox + 215}" y="0" text-anchor="middle"></text>`
+      + R('browser', 20, 8, 390, 34, 'var(--c-browser)', '浏览器', '')
+      + `<g><rect x="${ox + 10}" y="62" width="410" height="300" rx="12" fill="none" stroke="${c}" stroke-width="2.5" stroke-dasharray="7 4"/><text x="${ox + 22}" y="82" font-size="13" font-weight="700" fill="${c}">${dev ? 'Node 进程：Vite 开发服务器' : 'Node 进程：react-router-serve（Express）'}</text></g>`
+      + R('chain', 30, 94, 370, 38, 'var(--c-node)', dev ? 'Vite 的中间件链：先看请求的是什么' : 'Express：先看请求的是什么', '')
+      + R('rr', 30, 166, 175, 58, 'var(--c-rr)', 'React Router', '请求处理函数：匹配、loader、渲染')
+      + R('file', 225, 166, 175, 58, dev ? 'var(--c-vite)' : 'var(--c-node)', dev ? 'Vite 编译中间件' : '静态文件中间件', dev ? '浏览器环境，按需编译' : '直接读文件，不编译')
+      + R('code', 30, 256, 175, 76, dev ? 'var(--c-vite)' : 'var(--c-node)', dev ? 'Vite 服务器环境' : 'build/server/index.js', dev ? '按需编译路由代码，在 Node 里执行' : '启动时导入一次（这里没有 Vite）', dev ? '' : 'stroke-dasharray="4 3"')
+      + R('disk', 20, 386, 390, 36, 'var(--c-node)', dev ? '磁盘：源文件 app/*.tsx、content/*.mdx' : '磁盘：build/client、build/server（build 时生成）', '')
+      + L('b2c', 'MX215,42 V92') + L('c2rr', 'MX117,132 V164') + L('c2f', 'MX312,132 V164') + L('rr2code', 'MX117,224 V254') + L('code2disk', 'MX117,332 V384') + L('f2disk', 'MX312,224 V384')
+      + L('rr2b', 'MX30,195 HX16 V25 HX18') + L('f2b', 'MX400,195 HX414 V25 HX412');
+  };
+  s.innerHTML = '<defs><marker id="sva" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" style="fill:var(--accent)"/></marker></defs>' + col(0, true) + col(450, false);
+  const nodes = [...s.querySelectorAll('.svn')];
+  const SC = [
+    { name: '打开一页 /docs/guide/intro', steps: [
+      [['browser', 'b2c', 'chain'], '浏览器请求 <code>/docs/guide/intro</code>，到达这个 Node 进程。', ['browser', 'b2c', 'chain'], '浏览器请求 <code>/docs/guide/intro</code>，到达这个 Node 进程（里面是一个 Express 服务器）。'],
+      [['chain', 'c2rr', 'rr'], '中间件链一看：要的是页面，不是某个 JS 文件 → 交给 React Router 插件挂进来的处理函数。', ['chain', 'c2rr', 'rr'], 'Express 一看：不是 <code>/assets/</code> 下的文件 → 交给 React Router 的处理函数。'],
+      [['rr', 'rr2code', 'code'], '处理函数需要路由代码，向 Vite 的服务器环境要「服务器入口」（routes.ts 加所有路由模块）。', ['rr', 'rr2code', 'code'], '处理函数用的路由代码，早在进程启动时就从 <code>build/server/index.js</code> 导入好了，直接用。'],
+      [['code', 'code2disk', 'disk'], 'Vite 从磁盘读源文件，过插件流水线编译（.tsx、.mdx 都在这一步变成 JS），在 Node 里执行。编译结果有缓存，文件不变就不再编译。', ['code'], '<b>这一步不存在。</b>代码在 build 时就编译好了，进程里没有 Vite，也不读源文件。'],
+      [['rr'], '拿到代码后：匹配路由 → 运行 loader（这里会调用 fumadocs）→ 把组件渲染成 HTML。', ['rr'], '完全一样：匹配路由 → 运行 loader → 把组件渲染成 HTML。'],
+      [['rr', 'rr2b', 'browser'], '返回 HTML。HTML 里引用的 JS 是源文件地址，比如 <code>/app/root.tsx</code>。', ['rr', 'rr2b', 'browser'], '返回 HTML。HTML 里引用的 JS 是打包好的文件，比如 <code>/assets/root-3f2a.js</code>。'],
+    ] },
+    { name: '浏览器要一个 JS 文件', steps: [
+      [['browser', 'b2c', 'chain'], '浏览器接管页面时要 JS：<code>GET /app/routes/docs.tsx</code>。', ['browser', 'b2c', 'chain'], '浏览器接管页面时要 JS：<code>GET /assets/docs-8c1d.js</code>。'],
+      [['chain', 'c2f', 'file'], '中间件链：要的是一个模块 → Vite 的编译中间件接手。', ['chain', 'c2f', 'file'], 'Express：是 <code>/assets/</code> 下的文件 → 静态文件中间件接手。'],
+      [['file', 'f2disk', 'disk'], '从磁盘读源文件，过插件流水线（浏览器环境）编译成 JS。', ['file', 'f2disk', 'disk'], '直接从 <code>build/client/assets/</code> 读出现成的文件，不编译。'],
+      [['file', 'f2b', 'browser'], '返回 JS。浏览器执行时遇到 import，再来要下一个，一个一个要。', ['file', 'f2b', 'browser'], '返回。文件是合并打包过的，数量少；文件名带哈希，浏览器可以长期缓存。'],
+    ] },
+    { name: '改了 intro.mdx', steps: [
+      [['disk'], '作者或 agent 改了 <code>content/docs/guide/intro.mdx</code>。', ['disk'], '同样改了 <code>content/docs/guide/intro.mdx</code>。'],
+      [['disk', 'code2disk', 'code', 'f2disk', 'file'], 'Vite 的文件监视器发现了：两套环境里这个模块、以及导入它的模块都作废。', ['disk'], '没有人监视源文件：进程只认 <code>build/</code> 里的东西，源文件改了它根本不知道。'],
+      [['file', 'f2b', 'browser'], '通过 WebSocket 通知浏览器热更新，页面马上变。', ['browser'], '浏览器怎么刷新都还是旧内容。'],
+      [['rr', 'code'], '下一个页面请求，服务器环境重新编译这个模块，服务器渲染出来的也是新内容。', ['rr', 'code'], '要看到新内容：重新 build，再重启进程。<b>评论这类运行时写入的文件也一样：如果是 build 时编译进包的，新评论看不到；只有 loader 每次请求现读文件，才看得到。</b>'],
+    ] },
+  ];
+  let sc = 0, ctl;
+  const tabs = document.getElementById('sv-tabs');
+  tabs.innerHTML = SC.map((x, i) => `<button class="modetab" style="--m:var(--accent)" data-i="${i}">${x.name}</button>`).join('');
+  tabs.querySelectorAll('button').forEach(b => b.onclick = () => pick(+b.dataset.i));
+  function paint(i) {
+    const st = SC[sc].steps;
+    const on = new Set(), cur = new Set();
+    for (let k = 0; k <= i; k++) { st[k][0].forEach(x => on.add('d-' + x)); st[k][2].forEach(x => on.add('p-' + x)); }
+    if (i >= 0) { st[i][0].forEach(x => cur.add('d-' + x)); st[i][2].forEach(x => cur.add('p-' + x)); }
+    nodes.forEach(n => { const id = n.dataset.id, isLine = n.tagName === 'path'; n.style.transition = 'opacity .35s'; n.style.opacity = cur.has(id) ? 1 : on.has(id) ? .45 : (isLine ? .08 : .3); if (isLine) n.setAttribute('stroke-width', cur.has(id) ? 3.5 : 2); });
+    document.getElementById('sv-dev').innerHTML = '<b style="color:var(--m-dev)">dev</b>　' + (i < 0 ? '点「下一步」。' : st[i][1]);
+    document.getElementById('sv-prod').innerHTML = '<b style="color:var(--m-prod)">build + start</b>　' + (i < 0 ? '点「下一步」。' : st[i][3]);
+  }
+  function pick(i) {
+    sc = i; tabs.querySelectorAll('button').forEach((b, j) => b.classList.toggle('on', j === i));
+    ctl && ctl.stop();
+    ctl = Fig.controls(document.getElementById('sv-ctl'), SC[i].steps.length, paint, { interval: 3200 });
+  }
+  pick(0);
+})();
+
+/* Vite 1：不打包 */
+Fig.sequence(document.getElementById('seq-nobundle'), {
+  kinds: K,
+  lanes: [{ name: '浏览器', color: 'var(--c-browser)' }, { name: 'Vite 开发服务器', color: 'var(--c-vite)' }, { name: '磁盘', color: 'var(--c-node)' }],
+  msgs: [
+    { from: 0, to: 1, label: 'GET /app/entry.client.tsx', kind: 'vite', note: '打开页面，浏览器先要入口文件。' },
+    { from: 1, to: 2, label: '读这一个文件', kind: 'plain', note: 'Vite 只读这一个文件。' },
+    { from: 1, to: 1, label: '编译：TSX → JS，import 改成网址', kind: 'vite', note: '现场编译成浏览器能跑的 JS，并把 import "./root" 改写成 import "/app/root.tsx"。' },
+    { from: 1, to: 0, label: '返回 JS', kind: 'vite', note: '浏览器拿到 JS，开始执行。' },
+    { from: 0, to: 1, label: 'GET /app/root.tsx', kind: 'vite', note: '执行时遇到 import，浏览器再去要下一个文件。' },
+    { from: 1, to: 1, label: '编译这一个', kind: 'vite', note: '同样只编译这一个。编译结果会缓存，文件不变就不再编译。' },
+    { from: 1, to: 0, label: '返回 JS', kind: 'vite', note: '一层一层，浏览器把用到的文件都要齐。' },
+    { from: 0, to: 1, label: 'GET /node_modules/.vite/deps/react.js', kind: 'vite', note: '第三方库例外：启动时 Vite 已经把它们预先打包成少数几个文件，省得浏览器为一个库发几百个请求。' },
+    { from: 0, to: 0, label: '用到哪个才要哪个', kind: 'plain', note: '没打开的页面，它的代码从来没被请求，也就从来没被编译。' },
+  ],
+});
+
+/* Vite 2：插件流水线 */
+const ST = [
+  { id: 'req', t: '请求', s: '/content/intro.mdx', d: `浏览器（或服务器环境）要：
+/content/intro.mdx` },
+  { id: 'resolve', t: 'resolveId', s: '地址 → 哪个文件', d: `→ D:/site/content/intro.mdx
+（这一步可以把一个地址指到别处，
+ 甚至指到一个不存在于磁盘的「虚拟模块」）` },
+  { id: 'load', t: 'load', s: '读出内容', d: `---
+title: 入门
+---
+## 安装
+先装依赖……` },
+  { id: 'react', t: 'transform', s: 'React 插件', d: `React 插件：只处理 .tsx / .jsx（把 JSX 改写成
+_jsx(...) 函数调用，浏览器才认识）。
+这个文件不是，原样往下传。
+
+---
+title: 入门
+---
+## 安装 …` },
+  { id: 'mdx', t: 'transform', s: 'MDX 插件', d: `MDX 插件：认出 .mdx，把文本编译成纯 JS（没有 JSX）
+
+import { jsx as _jsx, jsxs as _jsxs } from 'react/jsx-runtime'
+export const frontmatter = { title: '入门' }
+export default function MDXContent() {
+  return _jsxs(_Fragment, { children: [
+    _jsx('h2', { children: '安装' }),
+    _jsx('p',  { children: '先装依赖……' }),
+  ] })
+}` },
+  { id: 'out', t: '返回', s: '浏览器能跑的 JS', d: `返回编译后的 JS，并缓存起来。
+文件不变，下次直接用缓存。` },
+];
+let noMdx = false;
+const pipeEl = document.getElementById('pipe'), ppData = document.getElementById('pp-data');
+pipeEl.innerHTML = ST.map((s, i) => `${i ? '<span class="arr">→</span>' : ''}<div class="station" data-id="${s.id}">${s.t}<small>${s.s}</small></div>`).join('');
+const stations = [...pipeEl.querySelectorAll('.station')];
+function ppShow(i) {
+  stations.forEach((e, j) => { e.classList.toggle('on', j === i); e.classList.toggle('skip', noMdx && ST[j].id === 'mdx'); });
+  if (i < 0) { ppData.innerHTML = '点「下一步」，跟着一个 .mdx 文件走一遍。'; return; }
+  let d = ST[i].d;
+  if (noMdx && ST[i].id === 'mdx') d = '（没有 MDX 插件，没人处理 .mdx）';
+  if (noMdx && ST[i].id === 'out') d = `返回的还是原始文本：
+---
+title: 入门
+---
+浏览器把它当 JS 执行 → 报语法错误。
+没有插件把它变成 JS，浏览器就用不了。`;
+  ppData.innerHTML = d;
+  ppData.classList.remove('flash'); void ppData.offsetWidth; ppData.classList.add('flash');
+}
+const pp = Fig.controls(document.getElementById('pp-ctl'), ST.length, ppShow, { interval: 2400 });
+document.getElementById('pp-toggle').onclick = e => { noMdx = !noMdx; e.target.textContent = noMdx ? '把 MDX 插件装回来' : '去掉 MDX 插件试试'; pp.go(-1); };
+
+/* 为什么返回 JS */
+(() => {
+  const s = document.getElementById('whyjs');
+  const B = (id, x, y, w, h, c, t, sub) => `<g id="wj-${id}" class="wj"><rect x="${x}" y="${y}" width="${w}" height="${h}" rx="9" fill="color-mix(in srgb, ${c} 10%, var(--surface))" stroke="${c}" stroke-width="2"/><text x="${x + w / 2}" y="${y + 22}" text-anchor="middle" font-size="13" font-weight="700">${t}</text>${sub.map((l, i) => `<text x="${x + 10}" y="${y + 42 + i * 16}" font-size="11.5" font-family="ui-monospace,Consolas,monospace" fill="var(--muted)">${l.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</text>`).join('')}</g>`;
+  const A = (id, d) => `<path id="wj-${id}" class="wj" d="${d}" stroke="var(--accent)" stroke-width="2" fill="none" marker-end="url(#wja)"/>`;
+  s.innerHTML = '<defs><marker id="wja" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" style="fill:var(--accent)"/></marker></defs>'
+    + B('mdx', 10, 90, 150, 80, 'var(--c-node)', 'intro.mdx', ['## 安装', '先装依赖……'])
+    + B('js', 200, 80, 240, 100, 'var(--c-vite)', '流水线返回的 JS', ['function MDXContent() {', "  return [_jsx('h2', '安装'),", "          _jsx('p', '先装依赖…')]", '}'])
+    + B('srv', 490, 10, 170, 90, 'var(--c-node)', '服务器上运行它', ['renderToString(…)', '→ HTML 字符串'])
+    + B('html', 700, 10, 170, 90, 'var(--c-browser)', '浏览器先显示', ['<h2>安装</h2>', '<p>先装依赖…</p>', '（还点不动）'])
+    + B('cli', 490, 160, 170, 90, 'var(--c-browser)', '浏览器里再运行它', ['hydrateRoot(…)', '和 HTML 对上'])
+    + B('live', 700, 160, 170, 90, 'var(--c-browser)', '页面能交互了', ['点击、展开、', '搜索框都能用'])
+    + A('a1', 'M160 130 H206') + A('a2', 'M430 110 L486 60') + A('a3', 'M660 55 H696') + A('a4', 'M430 150 L486 200') + A('a5', 'M660 205 H696') + A('a6', 'M785 100 V156');
+  const steps = [
+    [['mdx'], '作者写的是 MDX 文本。浏览器不认识它。'],
+    [['mdx', 'a1', 'js'], '流水线把它编译成一个 JS 函数，这就是 React 组件：运行它会返回一段页面结构。图里是大意，真正的代码是一串 <code>_jsx(\'h2\', { children: \'安装\' })</code> 这样的函数调用。平时手写组件用的 JSX（<code>&lt;h2&gt;安装&lt;/h2&gt;</code>）只是这种调用的简便写法，<code>.tsx</code> 文件也要经过流水线改写成这样，浏览器才能运行。'],
+    [['js', 'a2', 'srv'], '服务器上：React Router 运行这个函数，把返回的结构转成 HTML 字符串。'],
+    [['srv', 'a3', 'html'], 'HTML 发给浏览器，用户马上看到内容。这一刻页面只是静态的，按钮还点不动。'],
+    [['js', 'a4', 'cli'], '浏览器里：再下载同一段 JS，运行一遍，React 把结果和已经显示的 HTML 对上（接管）。'],
+    [['cli', 'a5', 'live', 'html', 'a6'], '接上点击事件，页面能交互了。之后站内跳转都由浏览器里的 JS 渲染，不再要整页 HTML。'],
+  ];
+  const all = [...s.querySelectorAll('.wj')];
+  Fig.controls(document.getElementById('whyjs-ctl'), steps.length, i => {
+    const on = i < 0 ? [] : steps.slice(0, i + 1).flatMap(x => x[0]);
+    const cur = i < 0 ? [] : steps[i][0];
+    all.forEach(e => { const id = e.id.slice(3); e.style.opacity = on.includes(id) ? (cur.includes(id) ? 1 : .45) : .1; e.style.transition = 'opacity .4s'; });
+    document.getElementById('whyjs-cap').innerHTML = i < 0 ? '点「下一步」。CSS 也一样走流水线：开发时被包成一小段 JS，运行后往页面里插 &lt;style&gt;；build 时单独抽成 .css 文件，写进 HTML 的 &lt;link&gt;。' : `<b>${i + 1}.</b> ${steps[i][1]}`;
+  }, { interval: 2600 });
+})();
+
+/* Vite 3：glob */
+let files;
+function gRender(newName, log) {
+  document.getElementById('g-folder').innerHTML = 'content/<br>' + files.map(f => `&nbsp;&nbsp;<span class="f ${f === newName ? 'new' : ''}">${f}</span>`).join('<br>');
+  const code = document.getElementById('g-code');
+  code.innerHTML = `// 你写的
+const pages = import.meta.glob('./content/*.mdx')
+
+// Vite 编译后（大意）
+const pages = {
+${files.map(f => `  './content/${f}': () => import('./content/${f}'),`).join('\n')}
+}`;
+  if (log) { code.classList.remove('flash'); void code.offsetWidth; code.classList.add('flash'); document.getElementById('g-log').innerHTML = log; }
+}
+function gReset() { files = ['a.mdx', 'b.mdx']; gRender(null); document.getElementById('g-log').textContent = '点上面的按钮。'; }
+document.getElementById('g-add').onclick = () => { if (files.includes('c.mdx')) return; files.push('c.mdx'); gRender('c.mdx', '① 文件监视器发现 <code>content/c.mdx</code> 新建 → ② 它符合 lib.ts 里那个模式 → ③ Vite 让 lib.ts 失效、重新编译，右边的列表多了一项 → ④ 导入 lib.ts 的模块跟着更新。'); };
+document.getElementById('g-del').onclick = () => { if (!files.includes('b.mdx')) return; files = files.filter(f => f !== 'b.mdx'); gRender(null, '删除也一样：<code>b.mdx</code> 符合模式 → lib.ts 失效 → 重新展开，列表少了一项。'); };
+document.getElementById('g-reset').onclick = gReset;
+gReset();
+
+/* Vite 4：模块图 */
+const N = {
+  main:   { x: 440, y: 34,  t: 'main.tsx',   b: false, by: [], ex: '入口：createRoot().render()，不导出组件' },
+  config: { x: 180, y: 124, t: 'config.ts',  b: false, by: ['main'], ex: '导出常量' },
+  app:    { x: 560, y: 124, t: 'App.tsx',    b: true,  by: ['main'], ex: '只导出组件 App' },
+  page:   { x: 560, y: 208, t: 'Page.tsx',   b: true,  by: ['app'], ex: '只导出组件 Page' },
+  button: { x: 400, y: 292, t: 'Button.tsx', b: true,  by: ['page'], ex: '只导出组件 Button' },
+  utils:  { x: 720, y: 292, t: 'utils.ts',   b: false, by: ['page', 'button'], ex: '导出普通函数' },
+};
+const mg = document.getElementById('mg'), nEl = {}, eEl = {}, exEl = {};
+for (const k in N) for (const p of N[k].by) { eEl[k + '>' + p] = Fig.svg('line', { class: 'edge', x1: N[p].x, y1: N[p].y + 22, x2: N[k].x, y2: N[k].y - 22 }, mg); }
+for (const k in N) {
+  const n = N[k], g = Fig.svg('g', { class: 'node' + (n.b ? ' boundary' : '') }, mg);
+  Fig.svg('rect', { x: n.x - 120, y: n.y - 22, width: 240, height: 44, rx: 7 }, g);
+  Fig.svg('text', { x: n.x, y: n.y - 3, 'text-anchor': 'middle', 'font-size': 13, 'font-weight': 700 }, g, n.t);
+  exEl[k] = Fig.svg('text', { x: n.x, y: n.y + 14, 'text-anchor': 'middle', 'font-size': 11, fill: 'var(--muted)' }, g, n.ex);
+  g.onclick = () => { edit(k); showSrc(k); }; nEl[k] = g;
+}
+Fig.svg('text', { x: 10, y: 334, 'font-size': 11.5, fill: 'var(--muted)' }, mg, '箭头方向：上面的导入下面的。虚线框 = 导出的全是组件，能自己接住更新。');
+const ACCEPT = `
+<span style="color:var(--muted)">// ↓ React 插件编译时在末尾加上（大意）：
+//   导出的全是组件，所以登记「我能自己接住更新」</span>
+<span class="hl">import.meta.hot.accept(…)</span>`;
+const NOACCEPT = `
+<span style="color:var(--muted)">// 编译后末尾没有 import.meta.hot.accept：
+// 它接不住更新，只能交给导入它的模块</span>`;
+const SRC = {
+  main: () => `import { createRoot } from 'react-dom/client'
+import { App } from './App'
+import { config } from './config'
+
+<span class="hl">document.title = config.siteName</span>
+<span class="hl">createRoot(document.getElementById('root')).render(&lt;App /&gt;)</span>
+
+<span style="color:var(--muted)">// 一个组件都不导出；顶层在「做事」：挂载整个应用。
+// 重新执行它 = 再挂载一次，所以接不住，也没人能接它（它在最顶上）</span>`,
+  config: () => `<span class="hl">export const config</span> = { siteName: '文档站', pageSize: 20 }` + NOACCEPT,
+  app: () => `import { Page } from './Page'
+
+<span class="hl">export function App()</span> {
+  return &lt;main&gt;&lt;Page /&gt;&lt;/main&gt;
+}` + ACCEPT,
+  page: () => `import { useState } from 'react'
+import { Button } from './Button'
+import { formatDate } from './utils'
+` + (pageExtra ? `
+<span class="hl">export const PAGE_SIZE = 20</span>   <span style="color:var(--del)">// ← 多导出了一个常量</span>
+` : '') + `
+<span class="hl">export function Page()</span> {
+  const [count, setCount] = useState(0)   <span style="color:var(--muted)">// 接住更新时，这个状态保留</span>
+  return &lt;section&gt;{formatDate(new Date())}
+    &lt;Button onClick={() =&gt; setCount(count + 1)} /&gt;&lt;/section&gt;
+}` + (pageExtra ? `
+<span style="color:var(--muted)">// 不是「导出的全是组件」了 → 编译后不再加 import.meta.hot.accept</span>` : ACCEPT),
+  button: () => `import { formatDate } from './utils'
+
+<span class="hl">export function Button(props)</span> {
+  return &lt;button {...props}&gt;点我（{formatDate(new Date())}）&lt;/button&gt;
+}` + ACCEPT,
+  utils: () => `<span class="hl">export function formatDate(d)</span> {
+  return d.toLocaleDateString('zh-CN')
+}` + NOACCEPT,
+};
+function showSrc(k) {
+  document.getElementById('mg-file').textContent = N[k].t + ' 的源码';
+  const c = document.getElementById('mg-code');
+  c.innerHTML = SRC[k]();
+  c.classList.remove('flash'); void c.offsetWidth; c.classList.add('flash');
+}
+let pageExtra = false;
+document.getElementById('mg-toggle').onclick = e => {
+  pageExtra = !pageExtra;
+  N.page.b = !pageExtra;
+  nEl.page.classList.toggle('boundary', N.page.b);
+  N.page.ex = pageExtra ? '导出组件 Page + 常量 PAGE_SIZE' : '只导出组件 Page';
+  exEl.page.textContent = N.page.ex;
+  e.target.textContent = pageExtra ? '让 Page.tsx 只导出组件' : '让 Page.tsx 多导出一个常量';
+  edit('utils');
+  showSrc('page');
+};
+showSrc('main');
+let mgTimers = [];
+function edit(k) {
+  mgTimers.forEach(clearTimeout); mgTimers = [];
+  Object.values(nEl).forEach(g => g.classList.remove('hit', 'stop', 'reload'));
+  Object.values(eEl).forEach(e => e.classList.remove('hit'));
+  const log = document.getElementById('mg-log'); log.innerHTML = '';
+  const say = (t, d) => mgTimers.push(setTimeout(() => { log.insertAdjacentHTML('beforeend', `<div>${t}</div>`); }, d));
+  const mark = (key, cls, d) => mgTimers.push(setTimeout(() => nEl[key].classList.add(cls), d));
+  const markE = (key, d) => mgTimers.push(setTimeout(() => eEl[key].classList.add('hit'), d));
+  mark(k, 'hit', 0); say(`改了 <b>${N[k].t}</b>。`, 0);
+  if (N[k].b) { mark(k, 'stop', 700); say(`它导出的全是组件，自己就能接住：只替换它，页面不刷新，输入框里的字也还在。`, 700); return; }
+  let frontier = [k], d = 700, seen = new Set([k]), reload = false;
+  while (frontier.length) {
+    const next = [];
+    for (const f of frontier) {
+      if (!N[f].by.length) { reload = true; continue; }
+      for (const p of N[f].by) {
+        markE(f + '>' + p, d);
+        if (seen.has(p)) continue; seen.add(p);
+        if (N[p].b) { mark(p, 'stop', d + 300); say(`往上找到 <b>${N[p].t}</b>：导出的全是组件，在这里接住。`, d + 300); }
+        else { mark(p, 'hit', d + 300); say(`往上到 <b>${N[p].t}</b>（${N[p].ex}）：不是「只导出组件」，接不住，继续往上。`, d + 300); next.push(p); }
+      }
+    }
+    frontier = next; d += 900;
+  }
+  if (reload) { mark('main', 'reload', d); say('一直找到最顶上的 <b>main.tsx</b> 也没人接住 → <b>整页刷新</b>。', d); }
+  else say('更新到此为止，别的模块不动。', d);
+}
+
+/* Vite 5：两套环境 */
+let nx = false;
+document.getElementById('env-toggle').onclick = e => {
+  nx = !nx;
+  const lib = document.getElementById('env-lib');
+  lib.innerHTML = nx ? '第三方库：<strong>在 noExternal 名单里</strong>，和你的文件一样过插件流水线' : '第三方库：<strong>默认不经过 Vite</strong>，Node 直接从 node_modules 导入';
+  lib.classList.remove('flash'); void lib.offsetWidth; lib.classList.add('flash');
+  e.target.textContent = nx ? '从 ssr.noExternal 里拿掉' : '把这个库加进 ssr.noExternal';
+  document.getElementById('env-log').innerHTML = nx
+    ? '现在服务器端也会用 Vite 编译这个库：库里的 <code>.mdx</code>、<code>.css</code> 能被插件处理，库里的 React 也和站点用同一份。'
+    : '第三方库在服务器端默认不经过 Vite。库里如果有 <code>.mdx</code>、<code>.css</code> 要编译，或者库要和站点共用同一份 React context，就必须让 Vite 处理它。';
+};
+
+/* React Router 1：路由匹配 */
+const R = {
+  root:   { x: 210, y: 25,  t: 'root.tsx（总是在）' },
+  home:   { x: 70,  y: 100, t: 'home.tsx', p: 'root' },
+  layout: { x: 210, y: 100, t: 'docs-layout.tsx', p: 'root' },
+  docs:   { x: 210, y: 180, t: 'docs.tsx', p: 'layout' },
+  search: { x: 350, y: 100, t: 'search.ts', p: 'root' },
+};
+const rt = document.getElementById('rt'), rEl = {};
+for (const k in R) if (R[k].p) Fig.svg('line', { class: 'l', x1: R[R[k].p].x, y1: R[R[k].p].y + 15, x2: R[k].x, y2: R[k].y - 15 }, rt);
+for (const k in R) { const g = Fig.svg('g', { class: 'r' }, rt); Fig.svg('rect', { x: R[k].x - 66, y: R[k].y - 15, width: 132, height: 30, rx: 7 }, g); Fig.svg('text', { x: R[k].x, y: R[k].y + 5, 'text-anchor': 'middle', 'font-size': 12 }, g, R[k].t); rEl[k] = g; }
+const URLS = [
+  ['/', ['root', 'home'], '匹配到 root + home。两个文件的组件套在一起渲染，两个 <code>loader</code> 同时运行。'],
+  ['/docs/guide/intro', ['root', 'layout', 'docs'], '匹配到 root → docs-layout → docs。<code>docs/*</code> 里的 <code>*</code> 接住了 <code>guide/intro</code>，在 loader 里用 <code>params["*"]</code> 取到。三个 loader 同时运行。'],
+  ['/api/search?query=安装', ['root', 'search'], '匹配到 search.ts。它没有组件，只有 loader，返回的不是页面而是数据：这叫资源路由，搜索接口就这样写。'],
+];
+document.getElementById('rt-urls').innerHTML = URLS.map((u, i) => `<button data-i="${i}">${u[0]}</button>`).join('');
+document.querySelectorAll('#rt-urls button').forEach(b => b.onclick = () => rtShow(+b.dataset.i));
+function rtShow(i) { const [, on, t] = URLS[i]; for (const k in rEl) rEl[k].classList.toggle('on', on.includes(k)); document.getElementById('rt-log').innerHTML = t; }
+rtShow(1);
+
+/* React Router 2：一个文件拆两半 */
+const SPLIT = [
+  ['server', "import { readFile } from 'node:fs/promises'"],
+  ['both', "import { Markdown } from '~/components/markdown'"],
+  ['both', ''],
+  ['server', 'export async function loader({ params }) {'],
+  ['server', "  const text = await readFile(`content/${params['*']}.md`, 'utf8')"],
+  ['server', '  return { text }'],
+  ['server', '}'],
+  ['server', ''],
+  ['both', 'export default function Page({ loaderData }) {'],
+  ['both', '  return &lt;Markdown&gt;{loaderData.text}&lt;/Markdown&gt;'],
+  ['both', '}'],
+];
+const split = document.getElementById('split');
+split.innerHTML = SPLIT.map(([k, t]) => `<div class="${k}">${t || ' '}</div>`).join('');
+document.getElementById('sp-server').onclick = () => split.classList.remove('client');
+document.getElementById('sp-client').onclick = () => split.classList.add('client');
+
+/* React Router 3：首屏 */
+Fig.sequence(document.getElementById('seq-ssr'), {
+  kinds: K, interval: 2600,
+  lanes: [{ name: '浏览器', color: 'var(--c-browser)' }, { name: 'React Router（服务器）', color: 'var(--c-rr)' }, { name: '路由的 loader', color: 'var(--c-node)' }, { name: 'React 渲染', color: 'var(--c-node)' }],
+  msgs: [
+    { from: 0, to: 1, label: 'GET /docs/guide/intro', kind: 'plain', note: '第一次打开这个网址。' },
+    { from: 1, to: 1, label: '按 routes.ts 匹配', kind: 'rr', note: '匹配到 root → docs-layout → docs 一串路由。' },
+    { from: 1, to: 2, label: '同时运行这几个 loader', kind: 'rr', note: '几个 loader 并行运行，不是一个等一个。' },
+    { from: 2, to: 1, label: '数据', kind: 'plain', note: '每个 loader 返回自己的数据。' },
+    { from: 1, to: 3, label: '用数据渲染组件 → HTML', kind: 'rr', note: '在服务器上把组件渲染成 HTML 字符串。' },
+    { from: 1, to: 0, label: 'HTML（数据也嵌在里面）', kind: 'rr', note: '发给浏览器。loader 的数据也一起嵌进 HTML，浏览器接管时要用。' },
+    { from: 0, to: 0, label: '先显示 HTML', kind: 'plain', note: '用户马上看到内容，但这时按钮还点不动。' },
+    { from: 0, to: 1, label: '下载入口和这几个路由的 JS', kind: 'rr', note: '只下载这次匹配到的路由的代码。' },
+    { from: 0, to: 0, label: '接管：用嵌入的数据再渲染一遍', kind: 'rr', note: '浏览器用同一份数据把组件再渲染一遍，和 HTML 对上，接上点击事件。不会再向服务器要一次数据。' },
+  ],
+});
+
+/* React Router 4：站内跳转 */
+Fig.sequence(document.getElementById('seq-nav'), {
+  kinds: K, interval: 2400,
+  lanes: [{ name: '浏览器', color: 'var(--c-browser)' }, { name: 'React Router（服务器）', color: 'var(--c-rr)' }, { name: '路由的 loader', color: 'var(--c-node)' }],
+  msgs: [
+    { from: 0, to: 0, label: '点 <Link to="/docs/guide/setup">', kind: 'rr', note: '用户在侧栏里点了另一页。' },
+    { from: 0, to: 0, label: '算出要换哪些路由', kind: 'rr', note: 'root 和 docs-layout 不变，只有 docs 这一层要换。' },
+    { from: 0, to: 1, label: 'GET /docs/guide/setup.data', kind: 'rr', note: '只要数据：网址后面加 .data。' },
+    { from: 1, to: 2, label: '只跑要换的 loader', kind: 'rr', note: '不变的路由不重跑。' },
+    { from: 2, to: 0, label: '数据', kind: 'plain', note: '返回数据，不是 HTML。' },
+    { from: 0, to: 0, label: '需要的话下载新路由的 JS', kind: 'rr', note: '这个路由的代码没下载过才下载。' },
+    { from: 0, to: 0, label: '渲染新页面，地址栏更新', kind: 'rr', note: '不整页刷新，侧栏的滚动位置、展开状态都还在。' },
+  ],
+});
+
+</script>
+<script>
+/* 「先说 Vite 是什么」的两张动画 */
+(() => {
+  const S = Fig.svg;
+  const C = { vite: 'var(--c-vite)', rr: 'var(--c-rr)', mdx: 'var(--p-mdx)', node: 'var(--c-node)', browser: 'var(--c-browser)', prod: 'var(--m-prod)', warn: 'var(--warn)', site: 'var(--p-site)' };
+  const DEV = '<span class="mode" style="--m:var(--m-dev)">dev</span>';
+  const PROD = '<span class="mode" style="--m:var(--m-prod)">build + start</span>';
+  const panel = (s, x, y, w, h, color, title, size = 13) => {
+    S('rect', { x, y, width: w, height: h, rx: 10, fill: `color-mix(in srgb, ${color} 7%, var(--surface))`, stroke: color, 'stroke-width': 1.5 }, s);
+    if (title) S('text', { x: x + 12, y: y + 20, 'font-size': size, 'font-weight': 700, fill: color }, s, title);
+  };
+  const label = (s, x, y, str, { size = 12, color = 'var(--text)', anchor = 'start', weight = 400 } = {}) =>
+    S('text', { x, y, 'font-size': size, fill: color, 'text-anchor': anchor, 'font-weight': weight }, s, str);
+  const arrow = (s, d, head) => S('path', { d, fill: 'none', stroke: 'var(--muted)', 'stroke-width': 1.8, 'marker-end': head }, s);
+
+  /* ---------- 插件 × 工序：每道工序只调用写了这一步的插件 ---------- */
+  const HOOKS = [
+    ['resolveId', '这个 import 是哪个文件？'],
+    ['load', '文件内容是什么？'],
+    ['transform', '要不要改写内容？'],
+  ];
+  /* [名字, 颜色, 说明, 写了哪几个钩子] */
+  const PLUGINS = [
+    ['fumadocs-mdx', C.mdx, 'vite.config.ts 第 1 个', [false, false, true]],
+    ['Tailwind', C.node, 'vite.config.ts 第 2 个', [false, false, true]],
+    ['React Router', C.rr, 'vite.config.ts 第 3 个', [true, true, true]],
+    ['Vite 自带', C.vite, '不用装，一直都在', [true, true, true]],
+  ];
+  const colX = col => 210 + col * 225;
+  const rowY = row => 98 + row * 58;
+  const cell = (row, col) => `cell${row}${col}`;
+  const pipelineInit = { packet: { x: 8, y: 350, o: 0 } };
+  PLUGINS.forEach(([, , , hooks], row) => hooks.forEach((written, col) => {
+    pipelineInit[cell(row, col)] = { x: colX(col), y: rowY(row), o: written ? 1 : 0.4 };
+  }));
+  const called = text => ({ t2: text, o: 0.6 });
+  const handled = text => ({ t2: text, hl: true });
+
+  Fig.scene(document.getElementById('sc-pipeline'), {
+    height: 420,
+    draw(s, { box, arrowHead }) {
+      HOOKS.forEach(([name, question], col) => {
+        S('rect', { x: colX(col), y: 30, width: 210, height: 50, rx: 8, fill: `color-mix(in srgb, ${C.vite} 12%, var(--surface))`, stroke: C.vite, 'stroke-width': 1.5 }, s);
+        label(s, colX(col) + 105, 51, `${'①②③'[col]} ${name}`, { anchor: 'middle', weight: 700, size: 13 });
+        label(s, colX(col) + 105, 69, question, { anchor: 'middle', size: 11.5, color: 'var(--muted)' });
+        if (col < 2) arrow(s, `M${colX(col) + 210},55 H${colX(col) + 221}`, arrowHead);
+      });
+      label(s, 100, 60, '从上到下就是', { anchor: 'middle', size: 11.5, color: 'var(--muted)' });
+      label(s, 100, 76, '调用的顺序 ↓', { anchor: 'middle', size: 11.5, color: 'var(--muted)' });
+      PLUGINS.forEach(([name, color, note, hooks], row) => {
+        S('rect', { x: 20, y: rowY(row), width: 175, height: 46, rx: 8, fill: `color-mix(in srgb, ${color} 14%, var(--surface))`, stroke: color, 'stroke-width': 1.5 }, s);
+        label(s, 107, rowY(row) + 20, name, { anchor: 'middle', weight: 700, size: 12.5 });
+        label(s, 107, rowY(row) + 37, note, { anchor: 'middle', size: 10.5, color: 'var(--muted)' });
+        hooks.forEach((written, col) => box(cell(row, col), written
+          ? { w: 210, h: 46, color, t: `写了 ${HOOKS[col][0]}`, t2: '等着被调用', fs: 12 }
+          : { w: 210, h: 46, color: 'var(--muted)', dashed: true, t: '没写这一步', t2: '不会被调用', fs: 12 }));
+      });
+      label(s, 108, 343, '要转换的文件', { anchor: 'middle', size: 12, weight: 600 });
+      label(s, 545, 412, '交出去：dev 下回给要它的浏览器或服务器；build 下交给打包器继续合并、压缩', { anchor: 'middle', size: 11, color: 'var(--muted)' });
+      box('packet', { w: 200, h: 46, color: C.site, t: "import './intro.mdx'", t2: 'lib/source.ts 里写的', fs: 12 });
+    },
+    init: pipelineInit,
+    intro: '每行一个插件，每列一道工序。实线格子 = 这个插件写了这一步；虚线灰格 = 没写。下面是要转换的文件。',
+    steps: [
+      { at: { packet: { o: 1 } }, cap: '有个文件里写了 <code>import \'./intro.mdx\'</code>。Vite 要把 intro.mdx 变成能执行的 JS，让它进流水线。插件被调用的顺序，就是从上到下：先按 vite.config.ts 里列的顺序，Vite 自带的那部分合成一行放在最后（实际上它有的排在前、有的排在后）。' },
+      { at: { packet: { x: colX(0) + 5, t: '① 找到文件', t2: 'content/docs/intro.mdx' }, [cell(2, 0)]: called('被调用：不是它的虚拟模块，放过'), [cell(3, 0)]: handled('查到 content/docs/intro.mdx') },
+        cap: '第一道 resolveId：fumadocs-mdx 和 Tailwind <b>没写这一步，Vite 根本不调用它们</b>。React Router 写了，被调用了，但它只认自己的虚拟模块（比如服务器入口），这次原样放过。Vite 自带的查到了磁盘上的路径。' },
+      { at: { packet: { x: colX(1) + 5, t: '② 读出内容', t2: '## 安装 …（Markdown 文本）' }, [cell(2, 1)]: called('被调用：不是它的，放过'), [cell(3, 1)]: handled('从磁盘读出') },
+        cap: '第二道 load：同样只调用写了 load 的两个插件。React Router 放过，Vite 自带的从磁盘读出内容。现在手里是一段 Markdown 文本，浏览器执行不了。' },
+      { at: { packet: { x: colX(2) + 5, t: '③ 编译成 JS', t2: 'MDXContent 组件 …' }, [cell(0, 2)]: handled('是 .mdx：编译成 JS') },
+        cap: '第三道 transform：第一个写了这一步的是 fumadocs-mdx。它还声明了「只看 .mdx 文件」，别的文件 Vite 连调用都不调用它。这个文件正好是，它接手编译成 JS。<b>这就是插件：Vite 本身不认识 .mdx，装上这个插件就认识了。</b>' },
+      { at: { packet: { t: '③ 处理完', t2: '最终的 JS' }, [cell(1, 2)]: called('被调用：不是 CSS，放过'), [cell(2, 2)]: called('被调用：不是路由文件，放过'), [cell(3, 2)]: handled('改写 import 路径') },
+        cap: '同一道工序里，后面的插件接着处理上一个交出来的内容：Tailwind 只管 CSS、React Router 只管路由文件，都放过；Vite 自带的把里面的 import 路径改好。' },
+      { at: { packet: { t: '最终的 JS', t2: '交出去', hl: true } },
+        cap: '三道工序走完，得到最终的 JS。' + DEV + ' 下直接回给要它的浏览器或服务器；build 时交给打包器，和别的文件合并、压缩，写进 <code>build/</code>。<b>这三道工序和调用顺序，dev 和 build 完全一样</b>（见下面的对照表）。' },
+    ],
+  });
+
+  /* ---------- dev 与 build + start 下的 Vite ---------- */
+  Fig.scene(document.getElementById('sc-vite-modes'), {
+    height: 420,
+    draw(s, { box, group, arrowHead }) {
+      label(s, 20, 16, 'dev', { size: 13, weight: 700, color: 'var(--m-dev)' });
+      panel(s, 20, 30, 150, 140, C.node, '源文件');
+      ['intro.mdx', 'install.mdx', 'Page.tsx'].forEach((n, i) => label(s, 34, 74 + i * 24, n));
+      panel(s, 200, 20, 450, 160, C.vite, 'Vite 开发服务器（一直在跑）');
+      ['resolveId', 'load', 'transform'].forEach((n, i) => {
+        S('rect', { x: 220 + i * 140, y: 56, width: 120, height: 40, rx: 7, fill: 'var(--surface)', stroke: C.vite }, s);
+        label(s, 280 + i * 140, 81, n, { anchor: 'middle', weight: 600 });
+        if (i < 2) arrow(s, `M${340 + i * 140},76 H${356 + i * 140}`, arrowHead);
+      });
+      label(s, 425, 172, '每一站调用写了这一步的插件', { anchor: 'middle', size: 11, color: 'var(--muted)' });
+      panel(s, 690, 40, 170, 120, C.browser, '浏览器');
+
+      label(s, 20, 244, 'build + start', { size: 13, weight: 700, color: C.prod });
+      panel(s, 20, 260, 140, 130, C.node, '源文件');
+      ['intro.mdx', 'install.mdx', 'Page.tsx'].forEach((n, i) => label(s, 34, 304 + i * 24, n));
+      const viteBuild = group('viteBuild');
+      panel(viteBuild, 190, 250, 210, 150, C.vite, 'build：Vite 跑一次');
+      label(viteBuild, 295, 392, '插件在这时全部被调用', { anchor: 'middle', size: 11, color: 'var(--muted)' });
+      panel(s, 430, 260, 120, 130, C.prod, 'build/');
+      const serve = group('serve');
+      panel(serve, 580, 260, 140, 130, C.node, 'start');
+      label(serve, 592, 302, 'react-router-serve', { size: 11.5 });
+      label(serve, 592, 324, '没有 Vite', { size: 11.5, color: 'var(--muted)' });
+      label(serve, 592, 344, '没有插件', { size: 11.5, color: 'var(--muted)' });
+      panel(s, 750, 270, 110, 110, C.browser, '浏览器');
+
+      box('devEdit', { w: 130, h: 22, color: C.warn, t: 'intro.mdx（改了）', fs: 12 });
+      box('devPacket', { w: 120, h: 30, color: C.mdx, t: 'intro.mdx', fs: 12 });
+      box('devRecompile', { w: 120, h: 30, color: C.mdx, t: '只转 intro.mdx', fs: 12 });
+      ['intro.mdx', 'install.mdx', 'Page.tsx'].forEach((n, i) => box('buildPacket' + i, { w: 110, h: 24, color: i === 2 ? C.node : C.mdx, t: n, fs: 11.5 }));
+      box('servePacket', { w: 100, h: 34, color: C.prod, t: 'HTML', t2: '请求时现渲染', fs: 12 });
+      box('serveAssets', { w: 100, h: 34, color: C.prod, t: 'JS、CSS', t2: '直接读文件', fs: 12 });
+      box('prodEdit', { w: 125, h: 22, color: C.warn, t: 'intro.mdx（改了）', fs: 12 });
+    },
+    init: {
+      devEdit: { x: 27, y: 58, o: 0 }, devPacket: { x: 30, y: 58, o: 0 }, devRecompile: { x: 30, y: 58, o: 0 },
+      buildPacket0: { x: 25, y: 288, o: 0 }, buildPacket1: { x: 25, y: 312, o: 0 }, buildPacket2: { x: 25, y: 336, o: 0 },
+      viteBuild: { o: 1 }, serve: { o: 0 },
+      servePacket: { x: 600, y: 290, o: 0 }, serveAssets: { x: 440, y: 322, o: 0 }, prodEdit: { x: 22, y: 288, o: 0 },
+    },
+    intro: '上面一行是 dev，下面一行是 build + start。前三步看 dev，后五步看 build + start。',
+    steps: [
+      { at: { devPacket: { x: 500, y: 108, o: 1 } }, cap: DEV + ' 浏览器要 intro.mdx，Vite 当场让它过流水线。没人要的文件（install.mdx、Page.tsx）这时不转换。' },
+      { at: { devPacket: { x: 715, y: 90, t: 'intro 的 JS' } }, cap: DEV + ' 转换完直接回给浏览器，不打包，也不写成文件。' },
+      { at: { devEdit: { o: 1, hl: true }, devRecompile: { x: 500, y: 108, o: 1, hl: true } }, cap: DEV + ' 改了 intro.mdx：Vite 一直在跑，马上发现，只重新转换这一个文件，推给浏览器热更新。' },
+      { at: { buildPacket0: { x: 240, y: 282, o: 1 }, buildPacket1: { x: 240, y: 314, o: 1 }, buildPacket2: { x: 240, y: 346, o: 1 } }, cap: PROD + ' build：Vite 跑一次，把所有文件都过一遍流水线，不管有没有人要。插件就在这时全部被调用。' },
+      { at: { buildPacket0: { x: 435, y: 292, t: 'server/*.js' }, buildPacket1: { x: 435, y: 322, t: 'client/*.js' }, buildPacket2: { x: 435, y: 352, t: 'client/*.css' } }, cap: PROD + ' 转换好的结果打包，写进 <code>build/</code>：服务器用的 JS 在 <code>build/server</code>；浏览器用的 JS、<b>从 JS 里抽出来的 CSS 文件</b>、图片在 <code>build/client</code>。<b>没有 HTML 文件</b>：HTML 要等请求来了才渲染。' },
+      { at: { viteBuild: { o: 0.2 }, serve: { o: 1 } }, cap: PROD + ' Vite 退出了。start 用的是 <code>react-router-serve</code>：一个普通的 Node 服务器，进程里没有 Vite，也没有插件。' },
+      { at: { servePacket: { x: 755, y: 290, o: 1 }, serveAssets: { x: 755, y: 330, o: 1 } }, cap: PROD + ' 浏览器要页面：服务器运行 <code>build/server</code> 里的 JS，把组件<b>现场渲染成 HTML</b> 给它；页面接着要的 JS、CSS 文件，直接从 <code>build/client</code> 读出来给它。整个过程不转换任何源文件。' },
+      { at: { prodEdit: { o: 1, hl: true } }, cap: PROD + ' 改了 intro.mdx：没人知道，因为 Vite 不在。要重新 build、再重启 start 才能看到。<b>所以运行时才出现的数据（比如评论）不能指望 build 时编译进去，要在服务器上现读。</b>' },
+    ],
+  });
+})();
+</script>
+</body>
+</html>

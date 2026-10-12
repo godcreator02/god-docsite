@@ -1,0 +1,1 @@
+export{l as fetchClient}from"./search-default-DHCHuRB-.js";

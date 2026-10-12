@@ -1,0 +1,8 @@
+{
+  "content": [
+    {
+      "type": "text",
+      "text": "{\n  \"ok\": true,\n  \"data\": {\n    \"taskId\": \"sess_ba6d08d3-e545-4ab0-ba11-2f7bf3696049\",\n    \"title\": \"任务U：责任定位——纯Vite能否复现Fumadocs新增正文失效。用户问“是Vite还是Fumadocs的问题”...\",\n    \"status\": \"running\",\n    \"mode\": \"yolo\",\n    \"roundStarted\": true\n  }\n}"
+    }
+  ]
+}

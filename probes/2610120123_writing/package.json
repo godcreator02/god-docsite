@@ -1,0 +1,14 @@
+{
+  "name": "probe-261012-writing",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build:lib": "pnpm --filter @probe/writing build",
+    "test": "pnpm --filter @probe/writing test",
+    "typecheck": "pnpm --filter @probe/writing typecheck",
+    "build:site": "pnpm --filter fixture-site build",
+    "check:site": "pnpm --filter fixture-site check",
+    "dev:site": "pnpm --filter fixture-site dev",
+    "start:site": "pnpm --filter fixture-site start"
+  }
+}

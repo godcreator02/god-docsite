@@ -1,0 +1,8 @@
+{
+  "content": [
+    {
+      "type": "text",
+      "text": "{\n  \"ok\": true,\n  \"data\": {\n    \"taskId\": \"sess_5be82782-f206-45ef-8be0-ab33d938f269\",\n    \"title\": \"任务T：原样官方React Router模板的dev新增正文验证。这是用户最新明确要求“试官方模板吧”，不是续写N...\",\n    \"status\": \"running\",\n    \"mode\": \"yolo\",\n    \"roundStarted\": true\n  }\n}"
+    }
+  ]
+}

@@ -1,0 +1,36 @@
+=== identity check ===
+$ tsc --noEmit && vitest run
+
+[1m[30m[46m RUN [49m[39m[22m [36mv5.0.3 [39m[90mD:/unitfolders/oz47p-docsite-kit/docsite-kit/packages/docsite-identity[39m
+
+ [32mΓ£ô[39m test/model.test.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 6[2mms[22m[39m
+ [32mΓ£ô[39m test/people-file.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 4[2mms[22m[39m
+ [32mΓ£ô[39m test/identity.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 23[2mms[22m[39m
+ [32mΓ£ô[39m test/write-access.test.ts [2m([22m[2m8 tests[22m[2m)[22m[32m 29[2mms[22m[39m
+
+[2m Test Files [22m [1m[32m4 passed[39m[22m[90m (4)[39m
+[2m      Tests [22m [1m[32m22 passed[39m[22m[90m (22)[39m
+[2m   Start at [22m 22:24:23
+[2m   Duration [22m 362ms[2m (transform 53%, import 28%, tests 14%, worker 4%)[22m
+
+=== identity build ===
+$ node -e "require('node:fs').rmSync('dist',{recursive:true,force:true})" && tsc -p tsconfig.build.json
+=== comments check ===
+$ tsc --noEmit && vitest run
+
+[1m[30m[46m RUN [49m[39m[22m [36mv5.0.3 [39m[90mD:/unitfolders/oz47p-docsite-kit/docsite-kit/packages/docsite-comments[39m
+
+ [32mΓ£ô[39m test/comment-ranges.test.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 8[2mms[22m[39m
+ [32mΓ£ô[39m test/comments.test.ts [2m([22m[2m11 tests[22m[2m)[22m[32m 16[2mms[22m[39m
+ [32mΓ£ô[39m test/page-text.test.ts [2m([22m[2m6 tests[22m[2m)[22m[32m 15[2mms[22m[39m
+ [32mΓ£ô[39m test/comment-files.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 76[2mms[22m[39m
+ [32mΓ£ô[39m test/comment-requests.test.ts [2m([22m[2m14 tests[22m[2m)[22m[32m 164[2mms[22m[39m
+
+[2m Test Files [22m [1m[32m5 passed[39m[22m[90m (5)[39m
+[2m      Tests [22m [1m[32m41 passed[39m[22m[90m (41)[39m
+[2m   Start at [22m 22:24:27
+[2m   Duration [22m 933ms[2m (import 50%, transform 24%, tests 23%, worker 2%)[22m
+
+=== comments build ===
+$ node -e "require('node:fs').rmSync('dist',{recursive:true,force:true})" && tsc -p tsconfig.build.json
+identity-check=0 identity-build=0 comments-check=0 comments-build=0

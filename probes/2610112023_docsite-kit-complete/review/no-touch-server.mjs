@@ -1,0 +1,12 @@
+import { createServer } from '../site/node_modules/vite/dist/node/index.js';
+import { readFile } from 'node:fs/promises';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+const site = fileURLToPath(new URL('../site/', import.meta.url));
+process.chdir(site);
+const people = JSON.parse(await readFile('people.json', 'utf8'));
+process.env.DOCSITE_IDENTITY_CODE = people.find(p => p.id === 'zk').codes[0];
+process.env.PROBE_SITE_ORIGIN = 'http://127.0.0.1:5462';
+const server = await createServer({root:site,configFile:path.join(site,'vite.config.ts'),server:{port:5462,host:'127.0.0.1',strictPort:true},plugins:[{name:'diagnostic-no-config-touch',enforce:'pre',transform(code,id){if(id.replaceAll('\\','/').split('?')[0].endsWith('/app/routes/api-comments.ts')){if(!code.includes('if (response.ok) await refreshCollections();')) throw new Error('diagnostic patch not applied'); return code.replace('if (response.ok) await refreshCollections();','/* diagnostic: no config touch */');}}}]});
+await server.listen();
+console.log('Diagnostic server ready on 5462: config touch removed in memory only');

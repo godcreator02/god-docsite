@@ -1,0 +1,14 @@
+{
+  "name": "probe-2610121018-vite-add-discovery",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "vitest run",
+    "test:original": "node scripts/test-original.mjs",
+    "path-check": "node path-check.mjs"
+  },
+  "devDependencies": {
+    "vite": "8.3.4",
+    "vitest": "^5.0.3"
+  }
+}

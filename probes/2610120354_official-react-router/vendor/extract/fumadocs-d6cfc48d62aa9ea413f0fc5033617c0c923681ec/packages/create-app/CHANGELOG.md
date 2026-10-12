@@ -1,0 +1,1436 @@
+## create-fumadocs-app@16.2.18
+
+### OG images in every template
+
+- The TanStack Start, TanStack Start SPA and React Router SPA templates generate OG images of docs pages with Takumi.
+- `--og-image next-og` warns on templates other than Next.js, instead of being ignored silently.
+- The `og` feature tells you how to prerender the images in SPA mode.
+
+## create-fumadocs-app@16.2.17
+
+### Search hooks for each provider
+
+`fumadocs-core/search/client` exports a hook for each search client, like `useFetchSearch()`. They return the props of `<SearchDialog />`:
+
+```tsx
+const search = useFetchSearch({ locale });
+
+<SearchDialog {...search} {...props}>
+  <SearchDialogList />
+</SearchDialog>;
+```
+
+`data` is the last successful search, its `items` have their content parsed into `hastContent`. `error` is set when the last search failed.
+
+- `experimental_useSearch()` creates a search hook from a memoized search function.
+- `useDocsSearch()` is deprecated.
+- `useFlexsearchStatic()` and `useOramaCloudLegacySearch()` are exported from the paths of their clients.
+- `<SearchDialogList />` shows `defaultItems` without results.
+- `useSearchList()` is removed, `useSearch()` returns `getActive()`, `setActive()` and `subscribeActive()` for the active item.
+- `<SearchDialogListItem />` renders a `div` instead of a `button`, table rows render their cells only.
+- `renderMarkdown` of `<SearchDialogListItem />` renders `content` instead of `hastContent`. Without it, the string content of custom items is shown as text.
+- The templates of Fumadocs CLI and Create Fumadocs App use the new hooks.
+
+## create-fumadocs-app@16.2.13
+
+### Meilisearch integration
+
+Search your docs with [Meilisearch](https://www.meilisearch.com), self-hosted or on Meilisearch Cloud.
+
+- `toDocuments()` and `sync()` from `fumadocs-core/search/meilisearch` export your pages and replace the documents of an index, old documents stay searchable until the new ones are indexed.
+- `meilisearchClient()` from `fumadocs-core/search/client/meilisearch` searches from the browser with `useDocsSearch()`, filtered by tag and locale.
+
+```tsx
+const client = new Meilisearch({ host, apiKey: searchKey });
+
+useDocsSearch({
+  client: meilisearchClient({ client, indexName: 'docs', locale }),
+});
+```
+
+Set it up with `npx @fumadocs/cli feature search --provider meilisearch`, or choose it in `create-fumadocs-app`.
+
+Fix [#3627](https://github.com/fuma-nama/fumadocs/issues/3627)
+
+### Simpler search sync setup
+
+- `feature search` writes the path of the pre-rendered `static.json` into `scripts/sync-content.ts`, and the `build` script runs it without arguments.
+- On TanStack Start, the path follows the Nitro output: `.output/public`, `.vercel/output/static` with the `vercel` preset, or `dist/client` without Nitro.
+- Typesense documents are built in the `static.json` route, without a separate `lib/export-search-indexes.ts`.
+
+## create-fumadocs-app@16.2.7
+
+### Move `proxy.ts` into `src` when the `/src` directory is enabled
+
+The Next.js template ships a `proxy.ts` that rewrites `<page>.md` and `Accept: text/markdown` requests to the Markdown route.
+With the `/src` option, the CLI moved `app`, `lib` and `components` into `src` but left `proxy.ts` at the project root, where Next.js silently ignores it.
+
+The CLI now moves `proxy.ts` (and the other root convention files Next.js reads next to `app`) into `src`, so the Markdown rewrite runs in generated projects.
+
+## create-fumadocs-app@16.2.5
+
+### New registry format
+
+The CLI is upgraded to Fuma CLI 0.3, the registry is now a manifest with the raw files instead of one JSON per component.
+
+- Installing fetches every needed file in parallel, and no longer parses the installed files to link their imports.
+- Layouts are imported from `fumadocs-ui` unless you have installed them, without a Fumadocs-specific plugin.
+
+Older versions of the CLI cannot read the new registry, upgrade to install components.
+
+### Moved files
+
+Some components are installed to a location that follows their source, update your imports if you install them again:
+
+| Before                                                                          | Now                                             |
+| ------------------------------------------------------------------------------- | ----------------------------------------------- |
+| `components/sanity/<name>.tsx`                                                  | `components/sanity/<name>.component.tsx`        |
+| `components/docs-sidebar/tabs-dropdown.tsx`                                     | `components/docs-sidebar/tabs/dropdown.tsx`     |
+| `components/openapi/playground/{result-display,server-select,oauth-dialog}.tsx` | `components/openapi/playground/components/*`    |
+| `components/graphql/playground/code-editor.tsx`                                 | `components/graphql/components/code-editor.tsx` |
+
+### Names of layout slots
+
+Slots are named after their path, like `layouts/docs/slots/sidebar` instead of `slots/docs/sidebar`. `fumadocs customise` is unchanged.
+
+## create-fumadocs-app@16.2.2
+
+### Mark packages side-effect free
+
+All packages now declare `sideEffects` in `package.json`, so bundlers can tree-shake unused modules. Packages shipping stylesheets list them as side effects to keep CSS imports.
+
+## create-fumadocs-app@16.2.0
+
+### Search providers and shared CLI features
+
+`--search` accepts `algolia`, `typesense` and `mixedbread` in addition to `orama` and `orama-cloud`.
+
+Search, linter, OG image and Ask AI options are now applied by the features of `@fumadocs/cli`, the same code that configures them on an existing app, instead of template plugins. `create-fumadocs-versions` pins the versions of the new search dependencies.
+
+### CLIs on `cac`
+
+The CLIs are now built on [cac](https://github.com/cacjs/cac).
+
+## create-fumadocs-app@16.1.26
+
+### Add `--yes` flag for non-interactive usage
+
+`create-fumadocs-app -y` (`--yes`) skips every prompt and uses the default for options you didn't pass, so scripts and AI coding agents can scaffold a project without a TTY:
+
+```bash
+npx create-fumadocs-app@latest my-docs --template +next+fuma-docs-mdx --install --yes
+```
+
+Previously this required setting `CI=1`. In `--yes` mode, a non-empty target directory fails instead of prompting for deletion.
+
+## create-fumadocs-app@16.1.25
+
+### Replace ts-morph with oxc-parser
+
+Template transforms (routes, prerender config, `RootProvider` search dialog, AI chat layout) now parse files with `oxc-parser` and edit the source text in place, instead of `ts-morph` and the TypeScript 6 compiler it bundles. Edits preserve the original formatting, including trailing commas.
+
+## create-fumadocs-app@16.1.24
+
+### Replace `cnfast` with `cn`
+
+Internal refactor only.
+
+## create-fumadocs-app@16.1.10
+
+### Replace Orama with ZBSearch, zero-config i18n search
+
+The built-in search engine moved from `@orama/orama` to [ZBSearch](https://www.zbsearch.dev), a near drop-in successor. All module paths and APIs are unchanged, and search now works with **every language out of the box**: the new default `multilingual` mode uses Unicode word segmentation, so i18n search needs zero config.
+
+```ts
+import { createFromSource } from 'fumadocs-core/search/server';
+
+// no `localeMap`, no `@orama/tokenizers`, CJK included
+export const { GET } = createFromSource(source);
+```
+
+All locales now share a single search database — results are filtered by the locale of your pages at query time. Same for static mode:
+
+```ts
+import { staticClient } from 'fumadocs-core/search/client/orama-static';
+
+const client = staticClient({ locale });
+```
+
+### Renames
+
+- `oramaStaticClient` → `staticClient` (old name kept as deprecated alias)
+- `initOrama` → `initDB`, it now creates a ZBSearch instance and is optional — the exported data restores the tokenizer on load
+
+### Deprecated
+
+- `localeMap` is no longer needed. It still works for language-specific stemming/stop-words and keeps the legacy per-locale databases when specified.
+
+### Notes for advanced usage
+
+- `language`, `components`, `plugins` and `search` options are now typed against ZBSearch instead of `@orama/orama` — custom tokenizers or plugins written for Orama must be swapped to their ZBSearch equivalents.
+- The exported static search data is now a ZBSearch database (i18n exports became a single unified database), so server and client should be on the same fumadocs-core version.
+- `@orama/orama` and `@orama/tokenizers` can be removed from your dependencies unless you use them directly. Orama **Cloud** integrations (`fumadocs-core/search/orama-cloud`) are unaffected.
+
+## create-fumadocs-app@16.1.8
+
+### Fix React Router template
+
+## create-fumadocs-app@16.1.7
+
+### Improve hints for create app CLI
+
+Show details for pros & cons of each framework.
+
+## create-fumadocs-app@16.1.2
+
+### Add Astro framework support
+
+Add Astro as a supported framework with React islands, including framework providers, an example app, create-app template support, search integration, OG image generation, and documentation.
+
+## create-fumadocs-app@16.1.0
+
+### Default to Base UI
+
+Internal packages & templates now use Base UI rather than Radix UI.
+
+# create-next-docs-app
+
+## 16.0.124
+
+## 16.0.123
+
+## 16.0.122
+
+## 16.0.121
+
+## 16.0.120
+
+## 16.0.119
+
+## 16.0.118
+
+## 16.0.117
+
+## 16.0.116
+
+## 16.0.115
+
+## 16.0.114
+
+## 16.0.113
+
+## 16.0.112
+
+## 16.0.111
+
+## 16.0.110
+
+## 16.0.109
+
+## 16.0.108
+
+## 16.0.107
+
+## 16.0.106
+
+## 16.0.105
+
+## 16.0.104
+
+## 16.0.103
+
+## 16.0.102
+
+### Patch Changes
+
+- Updated dependencies [2d22086]
+  - @fumadocs/cli@1.3.10
+
+## 16.0.101
+
+### Patch Changes
+
+- Updated dependencies [af7ee2d]
+  - @fumadocs/cli@1.3.9
+
+## 16.0.100
+
+## 16.0.99
+
+## 16.0.98
+
+## 16.0.97
+
+## 16.0.96
+
+## 16.0.95
+
+### Patch Changes
+
+- f51b849: update Waku template
+- Updated dependencies [71c15fd]
+  - @fumadocs/cli@1.3.8
+
+## 16.0.94
+
+## 16.0.93
+
+## 16.0.92
+
+### Patch Changes
+
+- 2d8f596: fix `npm pack` skipping nested `node_modules`
+- Updated dependencies [2d8f596]
+  - @fumadocs/cli@1.3.7
+
+## 16.0.91
+
+### Patch Changes
+
+- 690ddb9: bundle more deps
+- Updated dependencies [690ddb9]
+  - @fumadocs/cli@1.3.6
+
+## 16.0.90
+
+## 16.0.89
+
+### Patch Changes
+
+- 7c59264: Adopt Fuma CLI
+- Updated dependencies [7c59264]
+  - @fumadocs/cli@1.3.5
+
+## 16.0.88
+
+## 16.0.87
+
+## 16.0.86
+
+### Patch Changes
+
+- 1a84b96: hotfix cwd for default config
+- Updated dependencies [1a84b96]
+  - @fumadocs/cli@1.3.4
+
+## 16.0.85
+
+### Patch Changes
+
+- a77a4ad: Support other React.js frameworks for AI chat
+- Updated dependencies [3ff78c9]
+  - @fumadocs/cli@1.3.3
+
+## 16.0.84
+
+### Patch Changes
+
+- 43cd8db: Support Oxlint as linter
+
+## 16.0.83
+
+## 16.0.82
+
+### Patch Changes
+
+- 3d4bc07: fix templates
+
+## 16.0.81
+
+### Patch Changes
+
+- d050370: include shared.ts in all templates
+
+## 16.0.80
+
+## 16.0.79
+
+### Patch Changes
+
+- Updated dependencies [823d880]
+  - @fumadocs/cli@1.3.2
+
+## 16.0.78
+
+## 16.0.77
+
+## 16.0.76
+
+## 16.0.75
+
+### Patch Changes
+
+- Updated dependencies [e201942]
+  - @fumadocs/cli@1.3.1
+
+## 16.0.74
+
+### Patch Changes
+
+- Updated dependencies [0ddaa8a]
+  - @fumadocs/cli@1.3.0
+
+## 16.0.73
+
+## 16.0.72
+
+### Patch Changes
+
+- a52d30f: fix default template
+
+## 16.0.71
+
+### Patch Changes
+
+- e7ab329: Add AI chat option for Next.js
+- Updated dependencies [42e17a4]
+- Updated dependencies [b2191f5]
+  - @fumadocs/cli@1.2.6
+
+## 16.0.70
+
+## 16.0.69
+
+### Patch Changes
+
+- 2065a32: update templates
+
+## 16.0.68
+
+## 16.0.67
+
+## 16.0.66
+
+## 16.0.65
+
+## 16.0.64
+
+## 16.0.63
+
+### Patch Changes
+
+- 3140798: fix Takumi plugin
+
+## 16.0.62
+
+### Patch Changes
+
+- 5453502: use Shiki.js v4
+
+## 16.0.61
+
+## 16.0.60
+
+## 16.0.59
+
+### Patch Changes
+
+- d6b271f: update template
+
+## 16.0.58
+
+## 16.0.57
+
+## 16.0.56
+
+## 16.0.55
+
+## 16.0.54
+
+### Patch Changes
+
+- 0e48cbe: Force CLI update
+
+## 16.0.53
+
+## 16.0.52
+
+## 16.0.51
+
+## 16.0.50
+
+## 16.0.49
+
+### Patch Changes
+
+- 8d63b55: fix Waku template
+- c22f6ee: bump tsdown
+
+## 16.0.48
+
+## 16.0.47
+
+## 16.0.45
+
+## 16.0.44
+
+## 16.0.43
+
+## 16.0.42
+
+## 16.0.41
+
+## 16.0.40
+
+## 16.0.39
+
+## 16.0.38
+
+## 16.0.37
+
+## 16.0.36
+
+### Patch Changes
+
+- 2f6391b: hotfix wrong dep version
+
+## 16.0.35
+
+## 16.0.34
+
+### Patch Changes
+
+- b16a32f: Switch to tsdown for bundling
+
+## 16.0.33
+
+## 16.0.32
+
+## 16.0.31
+
+## 16.0.30
+
+## 16.0.29
+
+## 16.0.28
+
+## 16.0.27
+
+## 16.0.26
+
+## 16.0.25
+
+### Patch Changes
+
+- 07fb964: update Next.js ESLint config
+
+## 16.0.24
+
+## 16.0.23
+
+## 16.0.22
+
+## 16.0.21
+
+## 16.0.20
+
+## 16.0.19
+
+## 16.0.18
+
+## 16.0.17
+
+## 16.0.16
+
+## 16.0.15
+
+## 16.0.14
+
+## 16.0.13
+
+## 16.0.12
+
+## 16.0.11
+
+## 16.0.10
+
+## 16.0.9
+
+## 16.0.8
+
+## 16.0.7
+
+## 16.0.6
+
+### Patch Changes
+
+- 3668baf: bump deps & update templates
+- eece4f8: Support Tanstack Start SPA
+
+## 16.0.5
+
+## 16.0.4
+
+### Patch Changes
+
+- 33c4129: Support `CI` environment variable, remove negatives options from CLI usage
+
+## 16.0.3
+
+### Patch Changes
+
+- 4500ce0: Use plugins for `create()` to configure linters & app dir
+- e051a7f: Support Biome for other templates
+- b171be1: Support `CI` environment variable, remove negatives options from CLI usage
+- 0ac2f82: Use smarter AST transform for modifying app configs
+- 0ac2f82: fix type info lost on `create`
+
+## 16.0.2
+
+### Patch Changes
+
+- 91d7509: Support Orama Cloud template
+- d20e90a: Add SPA template for React Router
+
+## 16.0.1
+
+## 16.0.0
+
+### Patch Changes
+
+- 4c535f3: fix outdated Tanstack Start template
+- 5210f18: Support Fumadocs 16 in `peerDependencies`.
+
+## 15.8.4
+
+## 15.8.3
+
+### Patch Changes
+
+- a3a14e7: Bump deps
+
+## 15.8.2
+
+## 15.8.1
+
+### Patch Changes
+
+- eaf06c4: [Next.js] configure `llms-full.txt` and og image generation by default
+
+## 15.8.0
+
+## 15.7.13
+
+## 15.7.12
+
+## 15.7.11
+
+### Patch Changes
+
+- 5a763d6: Support choosing between Biome and ESLint
+
+## 15.7.10
+
+## 15.7.9
+
+## 15.7.8
+
+### Patch Changes
+
+- be40967: Fixed imports for the React Router template.
+
+## 15.7.7
+
+## 15.7.6
+
+## 15.7.5
+
+## 15.7.4
+
+## 15.7.3
+
+## 15.7.2
+
+## 15.7.1
+
+## 15.7.0
+
+## 15.6.12
+
+## 15.6.11
+
+## 15.6.10
+
+## 15.6.9
+
+## 15.6.8
+
+### Patch Changes
+
+- 9f67fb8: Support `--no-git` option in CLI
+- dd4d8fc: Support Waku template
+
+## 15.6.7
+
+## 15.6.6
+
+### Patch Changes
+
+- 526fd82: Update Tanstack Start & React Router templates to use Fumadocs MDX
+
+## 15.6.5
+
+### Patch Changes
+
+- 619806d: Fix Vite and Tanstack Router configuration warnings
+
+## 15.6.4
+
+### Patch Changes
+
+- a375da3: support passing options
+- a375da3: Update templates
+
+## 15.6.3
+
+## 15.6.2
+
+## 15.6.1
+
+## 15.6.0
+
+## 15.5.5
+
+## 15.5.4
+
+## 15.5.3
+
+## 15.5.2
+
+## 15.5.1
+
+## 15.5.0
+
+## 15.4.2
+
+## 15.4.1
+
+## 15.4.0
+
+## 15.3.4
+
+### Patch Changes
+
+- a6c909b: Removed unused devDependencies and migrated from `fast-glob` to `tinyglobby`
+
+## 15.3.3
+
+## 15.3.2
+
+## 15.3.1
+
+## 15.3.0
+
+## 15.2.15
+
+## 15.2.14
+
+## 15.2.13
+
+## 15.2.12
+
+## 15.2.11
+
+## 15.2.10
+
+## 15.2.9
+
+## 15.2.8
+
+## 15.2.7
+
+### Patch Changes
+
+- b8485e1: Enable TypeScript declaration generation in tsup config
+
+## 15.2.6
+
+### Patch Changes
+
+- e9f2b70: Allow code usage of `create()`
+
+## 15.2.5
+
+### Patch Changes
+
+- 74c4bb1: enable turbopack by default
+- 3aac8e0: Include `mdx-components.tsx` by default
+
+## 15.2.4
+
+## 15.2.3
+
+## 15.2.2
+
+## 15.2.1
+
+## 15.2.0
+
+### Patch Changes
+
+- 372843d: Add React Router example
+- d5193e7: improve install experience
+- 372843d: Remove Tailwind CSS option, enable by default
+
+## 15.1.3
+
+## 15.1.2
+
+## 15.1.1
+
+## 15.1.0
+
+## 15.0.18
+
+## 15.0.17
+
+## 15.0.16
+
+### Patch Changes
+
+- 91c8568: add comments to generated template
+
+## 15.0.15
+
+## 15.0.14
+
+## 15.0.13
+
+## 15.0.12
+
+## 15.0.11
+
+## 15.0.10
+
+## 15.0.9
+
+## 15.0.8
+
+## 15.0.7
+
+### Patch Changes
+
+- b3c0ee8: Fix windows problems
+
+## 15.0.6
+
+### Patch Changes
+
+- e9225e1: Support src directory config
+
+## 15.0.5
+
+## 15.0.4
+
+### Patch Changes
+
+- 4be74f6: Improve CLI
+
+## 15.0.3
+
+## 15.0.2
+
+## 15.0.1
+
+## 15.0.0
+
+### Patch Changes
+
+- a89d6e0: Support Fumadocs v15
+
+## 14.7.7
+
+## 14.7.6
+
+## 14.7.5
+
+## 14.7.4
+
+## 14.7.3
+
+## 14.7.2
+
+## 14.7.1
+
+## 14.7.0
+
+## 14.6.8
+
+## 14.6.7
+
+## 14.6.6
+
+## 14.6.5
+
+## 14.6.4
+
+## 14.6.3
+
+## 14.6.2
+
+## 14.6.1
+
+## 14.6.0
+
+## 14.5.6
+
+## 14.5.5
+
+## 14.5.4
+
+## 14.5.3
+
+## 14.5.2
+
+## 14.5.1
+
+## 14.5.0
+
+## 14.4.2
+
+## 14.4.1
+
+## 14.4.0
+
+## 14.3.1
+
+## 14.3.0
+
+### Patch Changes
+
+- 46d9208: Add option for ESLint
+
+## 14.2.1
+
+## 14.2.0
+
+## 14.1.1
+
+## 14.1.0
+
+## 14.0.2
+
+## 14.0.1
+
+## 14.0.0
+
+## 13.4.10
+
+## 13.4.9
+
+## 13.4.8
+
+## 13.4.7
+
+### Patch Changes
+
+- 6e1923e: Fix typos
+
+## 13.4.6
+
+### Patch Changes
+
+- 9c2095e: Add home layout by default
+
+## 13.4.5
+
+## 13.4.4
+
+## 13.4.3
+
+### Patch Changes
+
+- e409799: Fix typos
+
+## 13.4.2
+
+### Patch Changes
+
+- 0c251e5: Bump deps
+
+## 13.4.1
+
+## 13.4.0
+
+## 13.3.3
+
+## 13.3.2
+
+## 13.3.1
+
+## 13.3.0
+
+### Patch Changes
+
+- 5ed3e08: Install the @types/node package
+
+## 13.2.2
+
+## 13.2.1
+
+## 13.2.0
+
+### Patch Changes
+
+- 70f15af: Support to initialize git repo
+
+## 13.1.0
+
+## 13.0.7
+
+## 13.0.6
+
+## 13.0.5
+
+## 13.0.4
+
+## 13.0.3
+
+## 13.0.2
+
+## 13.0.1
+
+### Patch Changes
+
+- 1f1989e: Update versions
+
+## 13.0.0
+
+## 12.5.6
+
+## 12.5.5
+
+## 12.5.4
+
+## 12.5.3
+
+## 12.5.2
+
+## 12.5.1
+
+## 12.5.0
+
+## 12.4.2
+
+## 12.4.1
+
+### Patch Changes
+
+- dd1e4f3: Change type definitions of built-in schemas
+
+## 12.4.0
+
+### Patch Changes
+
+- 8efc775: Fix Content Collections compatibility
+
+## 12.3.6
+
+## 12.3.5
+
+### Patch Changes
+
+- ff7bcc4: Replace `contentlayer` with `content-collections`
+
+## 12.3.4
+
+## 12.3.3
+
+## 12.3.2
+
+## 12.3.1
+
+## 12.3.0
+
+## 12.2.5
+
+## 12.2.4
+
+### Patch Changes
+
+- 7a326d3: Fix missing imports from template
+
+## 12.2.3
+
+## 12.2.2
+
+## 12.2.1
+
+## 12.2.0
+
+### Patch Changes
+
+- 7601b35: Move DocsLayout options to layout.config.tsx
+
+## 12.1.3
+
+## 12.1.2
+
+## 12.1.1
+
+## 12.1.0
+
+## 12.0.7
+
+## 12.0.6
+
+## 12.0.5
+
+## 12.0.4
+
+## 12.0.3
+
+## 12.0.2
+
+## 12.0.1
+
+## 12.0.0
+
+### Patch Changes
+
+- c7b0e23: Add `layout.config.tsx` for sharing layout options
+
+## 11.3.2
+
+## 11.3.1
+
+## 11.3.0
+
+## 11.2.2
+
+## 11.2.1
+
+## 11.2.0
+
+## 11.1.3
+
+## 11.1.2
+
+## 11.1.1
+
+### Patch Changes
+
+- 8ef2b68: Bump deps
+
+## 11.1.0
+
+## 11.0.8
+
+## 11.0.7
+
+## 11.0.6
+
+## 11.0.5
+
+## 11.0.4
+
+## 11.0.3
+
+## 11.0.2
+
+## 11.0.1
+
+## 11.0.0
+
+## 10.1.3
+
+## 10.1.2
+
+## 10.1.1
+
+## 10.1.0
+
+## 10.0.5
+
+## 10.0.4
+
+### Patch Changes
+
+- c28c80f: Bump dependencies in templates
+
+## 10.0.3
+
+## 10.0.2
+
+## 10.0.1
+
+## 10.0.0
+
+## 9.1.0
+
+## 9.0.0
+
+### Patch Changes
+
+- c1e65b72: Fix typos
+
+## 8.3.0
+
+## 8.2.0
+
+## 8.1.1
+
+## 8.1.0
+
+### Patch Changes
+
+- 6c5a39a: Rename Git repository to `fumadocs`
+
+## 8.0.0
+
+### Major Changes
+
+- 2b11c20: **Rename to Fumadocs**
+
+  `next-docs-zeta` -> `fumadocs-core`
+
+  `next-docs-ui` -> `fumadocs-ui`
+
+  `next-docs-mdx` -> `fumadocs-mdx`
+
+  `@fuma-docs/openapi` -> `fumadocs-openapi`
+
+  `create-next-docs-app` -> `create-fumadocs-app`
+
+## 7.1.2
+
+### Patch Changes
+
+- b836055: Remove deprecated usage from templates
+
+## 7.1.1
+
+### Patch Changes
+
+- 65f71d4: Fix picocolors import errors
+
+## 7.1.0
+
+## 7.0.0
+
+### Major Changes
+
+- 579ecaa: **Support template for Tailwind CSS + Next Docs MDX**
+
+## 6.1.0
+
+### Patch Changes
+
+- 65b7f30: Update examples
+- 3e34d14: Sync version with next-docs
+
+## 1.7.4
+
+### Patch Changes
+
+- 3840ad6: Update to 6.0.0
+
+## 1.7.3
+
+### Patch Changes
+
+- b9af5ed: Update tsup & dependencies
+
+## 1.7.2
+
+### Patch Changes
+
+- 0686061: Restrict node.js environment
+
+## 1.7.1
+
+### Patch Changes
+
+- 955a575: Fix CLI errors
+
+## 1.7.0
+
+### Minor Changes
+
+- 334a960: Support installing packages automatically
+
+### Patch Changes
+
+- 334a960: Support relative paths as project name (e.g. ".")
+
+## 1.6.2
+
+### Patch Changes
+
+- 94075b8: Fix type errors in examples
+
+## 1.6.1
+
+### Patch Changes
+
+- 01b23e2: Support Next.js 14
+
+## 1.6.0
+
+### Minor Changes
+
+- c36c395: Support Next Docs MDX example
+
+## 1.5.28
+
+### Patch Changes
+
+- 33914b0: Update Examples
+
+## 1.5.27
+
+### Patch Changes
+
+- 45a4571: Update Examples
+
+## 1.5.26
+
+### Patch Changes
+
+- 65eee50: Use async fs APIs
+- eac081c: Update github urls & author name
+
+## 1.5.25
+
+### Patch Changes
+
+- cbea678: Update Examples
+
+## 1.5.24
+
+### Patch Changes
+
+- cd5fb12: Update Examples
+
+## 1.5.23
+
+### Patch Changes
+
+- 379033d: Update Examples
+
+## 1.5.22
+
+### Patch Changes
+
+- 7560a42: Update Examples
+
+## 1.5.21
+
+### Patch Changes
+
+- d70fb5b: Update Examples
+
+## 1.5.20
+
+### Patch Changes
+
+- Update Examples
+
+## 1.5.18
+
+### Patch Changes
+
+- Update examples
+
+## 1.5.17
+
+### Patch Changes
+
+- Update examples
+
+## 1.5.16
+
+### Patch Changes
+
+- Update examples
+
+## 1.5.15
+
+### Patch Changes
+
+- Update examples
+
+## 1.5.14
+
+### Patch Changes
+
+- Update examples
+
+## 1.5.13
+
+### Patch Changes
+
+- Update example
+
+## 1.5.12
+
+### Patch Changes
+
+- Update examples
+
+## 1.5.11
+
+### Patch Changes
+
+- Update examples
+
+## 1.5.10
+
+### Patch Changes
+
+- Update examples
+
+## 1.5.9
+
+### Patch Changes
+
+- Update dependencies
+
+## 1.5.8
+
+### Patch Changes
+
+- 8f6f3c6: Update examples
+
+## 1.5.7
+
+### Patch Changes
+
+- Update examples
+
+## 1.5.6
+
+### Patch Changes
+
+- ebfdb88: Fix default warnings
+
+## 1.5.5
+
+### Patch Changes
+
+- 3b0f469: Generate .gitignore file by default
+- fa8d4cf: Update dependencies
+
+## 1.5.4
+
+### Patch Changes
+
+- Update next docs
+
+## 1.5.3
+
+### Patch Changes
+
+- Update next docs
+
+## 1.5.2
+
+### Patch Changes
+
+- 9abd9de: Fix create-next-docs-app version conflicts
+
+## 1.5.0
+
+### Minor Changes
+
+- Create create-next-docs-app CLI

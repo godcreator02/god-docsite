@@ -1,0 +1,1 @@
+export{c as fetchClient}from"./search-default-D6SuHaj-.js";

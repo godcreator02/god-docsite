@@ -1,0 +1,16 @@
+[react-router-serve] http://localhost:5471 (http://127.0.0.1:5471)
+GET /docs 200 - - 87.941 ms
+GET /docs 200 - - 13.674 ms
+GET /docs 200 - - 12.597 ms
+GET /docs 200 - - 14.405 ms
+POST /docs 403 - - 17.713 ms
+GET /docs 200 - - 14.644 ms
+GET / 200 - - 5.879 ms
+ErrorResponseImpl {
+  status: 404,
+  statusText: '',
+  data: 'Not Found',
+  error: undefined,
+  internal: false
+}
+GET /docs/nope 404 - - 4.248 ms

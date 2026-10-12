@@ -1,0 +1,74 @@
+[restart] Relaunching with --conditions=development
+[MDX] generated files in 6.039700000000039ms
+[MDX] generated files in 13.465799999999945ms
+  ➜  Local:   http://127.0.0.1:5456/
+7:41:26 PM [vite] (ssr) connected.
+7:41:42 PM [vite] (ssr) page reload app/routes/docs.tsx
+7:41:42 PM [vite] (ssr) program reload
+7:41:50 PM [vite] (client) [optimizer] bundling dependencies...
+7:41:51 PM [vite] (client) dependencies optimized: @base-ui/react/dialog, @base-ui/react/direction-provider, @base-ui/react/navigation-menu, @fuma-translate/react, class-variance-authority, cn, lucide-react, next-themes
+7:41:52 PM [vite] (client) [optimizer] bundling dependencies...
+7:41:52 PM [vite] (client) dependencies optimized: @base-ui/react/collapsible, @base-ui/react/popover, @base-ui/react/scroll-area, @base-ui/react/tabs, scroll-into-view-if-needed
+7:41:52 PM [vite] (client) optimized dependencies changed. reloading
+7:42:37 PM [vite] (client) hmr update /app/routes/docs.tsx
+7:42:37 PM [vite] (ssr) page reload feeds/demo.json
+7:42:37 PM [vite] (ssr) program reload
+7:42:57 PM [vite] (client) hmr update /app/routes/docs.tsx
+7:42:57 PM [vite] (ssr) page reload feeds/demo.json
+7:42:57 PM [vite] (ssr) program reload
+7:43:14 PM [vite] (ssr) page reload feeds/demo.json
+7:43:45 PM [vite] (client) hmr update /app/routes/docs.tsx, /content/docs/index.mdx?macro_id=app%2Flib%2Fsource.ts%23docs
+7:43:45 PM [vite] (client) hmr update /app/routes/docs.tsx, /content/docs/index.mdx?macro_id=app%2Flib%2Fsource.ts%23docs
+7:43:45 PM [vite] (client) hmr update /app/routes/docs.tsx, /content/docs/index.mdx?macro_id=app%2Flib%2Fsource.ts%23docs, /app/app.css
+7:43:45 PM [vite] (ssr) page reload content/docs/test.mdx
+7:43:45 PM [vite] (ssr) program reload
+7:43:45 PM [vite] (client) hmr update /app/routes/docs.tsx, /content/docs/index.mdx?macro_id=app%2Flib%2Fsource.ts%23docs
+7:43:45 PM [vite] (client) hmr update /app/routes/docs.tsx, /content/docs/index.mdx?macro_id=app%2Flib%2Fsource.ts%23docs
+7:43:45 PM [vite] (client) hmr update /app/routes/docs.tsx, /content/docs/index.mdx?macro_id=app%2Flib%2Fsource.ts%23docs, /app/app.css
+7:43:45 PM [vite] (ssr) page reload comments/t2/index.mdx
+7:43:45 PM [vite] (client) Pre-transform error: Failed to load url /content/docs/test.mdx?macro_id=app%2Flib%2Fsource.ts%23docs&only=frontmatter (resolved id: D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/261011-api-audit-hmr/site/content/docs/test.mdx?macro_id=app%2Flib%2Fsource.ts%23docs&only=frontmatter) in D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/261011-api-audit-hmr/site/app/lib/source.ts. Does the file exist?
+7:43:45 PM [vite] (client) Pre-transform error: Failed to load url /comments/t2/index.mdx?macro_id=app%2Flib%2Fsource.ts%23comments&only=frontmatter (resolved id: D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/261011-api-audit-hmr/site/comments/t2/index.mdx?macro_id=app%2Flib%2Fsource.ts%23comments&only=frontmatter) in D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/261011-api-audit-hmr/site/app/lib/source.ts. Does the file exist?
+7:43:45 PM [vite] (ssr) An error happened during full reload
+Failed to load url /content/docs/test.mdx?macro_id=app%2Flib%2Fsource.ts%23docs&only=frontmatter (resolved id: D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/261011-api-audit-hmr/site/content/docs/test.mdx?macro_id=app%2Flib%2Fsource.ts%23docs&only=frontmatter) in D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/261011-api-audit-hmr/site/app/lib/source.ts. Does the file exist?
+Error: Failed to load url /content/docs/test.mdx?macro_id=app%2Flib%2Fsource.ts%23docs&only=frontmatter (resolved id: D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/261011-api-audit-hmr/site/content/docs/test.mdx?macro_id=app%2Flib%2Fsource.ts%23docs&only=frontmatter) in D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/261011-api-audit-hmr/site/app/lib/source.ts. Does the file exist?
+    at loadAndTransform (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/chunks/node.js:20173:31)
+    at async fetchModule (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/chunks/node.js:36165:15)
+    at async handleInvoke (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/chunks/node.js:25347:21)
+    at async EventEmitter.listenerForInvokeHandler (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/chunks/node.js:25402:13)
+7:43:45 PM [vite] Internal server error: Failed to load url /content/docs/test.mdx?macro_id=app%2Flib%2Fsource.ts%23docs&only=frontmatter (resolved id: D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/261011-api-audit-hmr/site/content/docs/test.mdx?macro_id=app%2Flib%2Fsource.ts%23docs&only=frontmatter) in D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/261011-api-audit-hmr/site/app/lib/source.ts. Does the file exist?
+      at loadAndTransform (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/chunks/node.js:20173:31)
+      at async fetchModule (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/chunks/node.js:36165:15)
+      at async handleInvoke (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/chunks/node.js:25347:21)
+      at async EventEmitter.listenerForInvokeHandler (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/chunks/node.js:25402:13)
+7:43:45 PM [vite] Internal server error: Failed to load url /content/docs/test.mdx?macro_id=app%2Flib%2Fsource.ts%23docs&only=frontmatter (resolved id: D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/261011-api-audit-hmr/site/content/docs/test.mdx?macro_id=app%2Flib%2Fsource.ts%23docs&only=frontmatter) in D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/261011-api-audit-hmr/site/app/lib/source.ts. Does the file exist?
+      at loadAndTransform (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/chunks/node.js:20173:31)
+      at async fetchModule (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/chunks/node.js:36165:15)
+      at async handleInvoke (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/chunks/node.js:25347:21)
+      at async EventEmitter.listenerForInvokeHandler (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/chunks/node.js:25402:13)
+7:43:45 PM [vite] (client) [console.error] [vite] Failed to reload /app/routes/docs.tsx. This could be due to syntax errors or importing non-existent modules. (see errors above)
+7:43:45 PM [vite] (client) hmr invalidate /content/docs/index.mdx?macro_id=app%2Flib%2Fsource.ts%23docs Could not Fast Refresh. Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
+7:43:45 PM [vite] (client) page reload content/docs/index.mdx (circular import invalidate)
+7:43:45 PM [vite] (client) [console.error] [vite] Failed to reload /app/routes/docs.tsx. This could be due to syntax errors or importing non-existent modules. (see errors above)
+7:43:45 PM [vite] (client) hmr invalidate /content/docs/index.mdx?macro_id=app%2Flib%2Fsource.ts%23docs Could not Fast Refresh. Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
+7:43:45 PM [vite] (client) page reload content/docs/index.mdx (circular import invalidate)
+7:43:45 PM [vite] (client) [console.error] [vite] Failed to reload /app/routes/docs.tsx. This could be due to syntax errors or importing non-existent modules. (see errors above)
+7:43:45 PM [vite] (client) [console.error] [vite] Failed to reload /app/routes/docs.tsx. This could be due to syntax errors or importing non-existent modules. (see errors above)
+7:43:45 PM [vite] (client) hmr invalidate /content/docs/index.mdx?macro_id=app%2Flib%2Fsource.ts%23docs Could not Fast Refresh. Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
+7:43:45 PM [vite] (client) page reload content/docs/index.mdx (circular import invalidate)
+7:43:45 PM [vite] (client) [console.error] [vite] Failed to reload /app/routes/docs.tsx. This could be due to syntax errors or importing non-existent modules. (see errors above)
+7:43:45 PM [vite] (client) [console.error] [vite] Failed to reload /app/routes/docs.tsx. This could be due to syntax errors or importing non-existent modules. (see errors above)
+7:43:46 PM [vite] Internal server error: Failed to load url /content/docs/test.mdx?macro_id=app%2Flib%2Fsource.ts%23docs&only=frontmatter (resolved id: D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/261011-api-audit-hmr/site/content/docs/test.mdx?macro_id=app%2Flib%2Fsource.ts%23docs&only=frontmatter) in D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/261011-api-audit-hmr/site/app/lib/source.ts. Does the file exist?
+      at loadAndTransform (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/chunks/node.js:20173:31)
+      at async fetchModule (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/chunks/node.js:36165:15)
+      at async handleInvoke (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/chunks/node.js:25347:21)
+      at async EventEmitter.listenerForInvokeHandler (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/chunks/node.js:25402:13)
+7:43:47 PM [vite] Internal server error: Failed to load url /content/docs/test.mdx?macro_id=app%2Flib%2Fsource.ts%23docs&only=frontmatter (resolved id: D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/261011-api-audit-hmr/site/content/docs/test.mdx?macro_id=app%2Flib%2Fsource.ts%23docs&only=frontmatter) in D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/261011-api-audit-hmr/site/app/lib/source.ts. Does the file exist?
+      at loadAndTransform (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/chunks/node.js:20173:31)
+      at async fetchModule (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/chunks/node.js:36165:15)
+      at async handleInvoke (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/chunks/node.js:25347:21)
+      at async EventEmitter.listenerForInvokeHandler (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/chunks/node.js:25402:13)
+7:43:47 PM [vite] Internal server error: Failed to load url /content/docs/test.mdx?macro_id=app%2Flib%2Fsource.ts%23docs&only=frontmatter (resolved id: D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/261011-api-audit-hmr/site/content/docs/test.mdx?macro_id=app%2Flib%2Fsource.ts%23docs&only=frontmatter) in D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/261011-api-audit-hmr/site/app/lib/source.ts. Does the file exist?
+      at loadAndTransform (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/chunks/node.js:20173:31)
+      at async fetchModule (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/chunks/node.js:36165:15)
+      at async handleInvoke (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/chunks/node.js:25347:21)
+      at async EventEmitter.listenerForInvokeHandler (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/chunks/node.js:25402:13)

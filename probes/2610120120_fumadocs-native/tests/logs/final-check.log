@@ -1,0 +1,4 @@
+$ pnpm --filter @probe/comments-model check && pnpm --filter probe-native-site check
+$ tsc --noEmit
+$ react-router typegen && tsc --noEmit
+[MDX] generated files in 7.244599999999991ms

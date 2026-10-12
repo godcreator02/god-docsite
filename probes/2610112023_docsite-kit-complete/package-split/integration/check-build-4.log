@@ -1,0 +1,18 @@
+$ tsc --noEmit && vitest run
+
+[1m[30m[46m RUN [49m[39m[22m [36mv5.0.3 [39m[90mD:/unitfolders/oz47p-docsite-kit/docsite-kit/packages/docsite-comments[39m
+
+ [32mΓ£ô[39m test/comment-ranges.test.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 8[2mms[22m[39m
+ [32mΓ£ô[39m test/comments.test.ts [2m([22m[2m11 tests[22m[2m)[22m[32m 20[2mms[22m[39m
+ [32mΓ£ô[39m test/page-text.test.ts [2m([22m[2m6 tests[22m[2m)[22m[32m 16[2mms[22m[39m
+ [32mΓ£ô[39m test/post-comment.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 64[2mms[22m[39m
+ [32mΓ£ô[39m test/comment-files.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 92[2mms[22m[39m
+ [32mΓ£ô[39m test/comment-requests.test.ts [2m([22m[2m14 tests[22m[2m)[22m[32m 188[2mms[22m[39m
+
+[2m Test Files [22m [1m[32m6 passed[39m[22m[90m (6)[39m
+[2m      Tests [22m [1m[32m44 passed[39m[22m[90m (44)[39m
+[2m   Start at [22m 00:51:45
+[2m   Duration [22m 1.09s[2m (import 45%, transform 30%, tests 23%, worker 2%)[22m
+
+$ node -e "require('node:fs').rmSync('dist',{recursive:true,force:true})" && tsc -p tsconfig.build.json
+check=0 build=0

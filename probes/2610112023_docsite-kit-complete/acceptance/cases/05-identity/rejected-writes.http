@@ -1,0 +1,38 @@
+# 身份与写入边界的请求样例（验收条目 G5-01/G5-03/G5-05，1.4 轮接入后执行）
+#
+# 用法：把 5460 换成验证站实际端口（以 B 交付的 handoff.json 为准）。
+# 路径 /api/comments、字段 op/page/body/as 是基础包骨架的现状契约（见自述站「评论」页）；
+# 若新骨架改了接口形状，以任务 A 交付的功能清单记录的契约为准替换写法，断言目标不变。
+# 每条请求都在验收记录里写下实际状态码与响应正文，作为证据。
+
+### 1. 无身份码的站点：写评论要被拒绝
+# 预期：非 2xx，错误说明只读原因；界面同时隐藏输入框（界面那条在浏览器里另验）。
+POST http://127.0.0.1:5460/api/comments
+Content-Type: application/x-www-form-urlencoded
+
+op=create&page=/&body=验收样例：无身份码时的写入应被拒绝
+
+### 2. 有身份码，但 Origin 不是站点自己：应 403
+# 预期：403；不带这个头或换成别的来源同样拒绝。防御的是本机浏览器里别的网页向本机端口提交表单。
+POST http://127.0.0.1:5460/api/comments
+Content-Type: application/x-www-form-urlencoded
+Origin: http://evil.example
+
+op=create&page=/&body=验收样例：伪造 Origin 的写入应回 403
+
+### 3. as 冒充人员：要被拒绝
+# 预期：非 2xx；as 只给 agent 用，写了人的 id（zhou 是 people.json 里的人员）就拒绝。
+POST http://127.0.0.1:5460/api/comments
+Content-Type: application/x-www-form-urlencoded
+Origin: http://127.0.0.1:5460
+
+op=create&page=/&body=验收样例：as 写人员的 id 应被拒绝&as=zhou
+
+### 4. as 声明 agent：在有身份的开发服务里应成功
+# 预期：2xx，写出 comments/ 下的评论串文件夹，author 是 acceptance-agent；
+# 同一条请求发到 build/start 的发布站上要被拒绝（发布站只读，G5-07 另验）。
+POST http://127.0.0.1:5460/api/comments
+Content-Type: application/x-www-form-urlencoded
+Origin: http://127.0.0.1:5460
+
+op=create&page=/&body=验收样例：agent 以 as 署名写入&as=acceptance-agent

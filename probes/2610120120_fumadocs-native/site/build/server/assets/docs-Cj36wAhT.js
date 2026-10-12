@@ -1,0 +1,151 @@
+import { Fragment, jsx, jsxs } from "react/jsx-runtime";
+//#region content/docs/index.mdx?collection=docs
+var frontmatter = {
+	"title": "第一页",
+	"description": "Fumadocs 原生接线的评论闭环验证页"
+};
+var structuredData = {
+	"contents": [
+		{
+			"heading": "这页验证什么",
+			"content": "正文、评论、评论里的同目录 TSX 与图片，都走同一个编译器：Vite 加 fumadocs-mdx。"
+		},
+		{
+			"heading": "这页验证什么",
+			"content": "服务端 loader 只交付本页评论的元数据，正文在浏览器按需加载"
+		},
+		{
+			"heading": "这页验证什么",
+			"content": "评论的读写在右侧旁栏：新建、回复、删回复、删整串"
+		},
+		{
+			"heading": "这页验证什么",
+			"content": "覆盖层（正文里的批注按钮）不在本段，这里只有旁栏"
+		},
+		{
+			"heading": "正文一段",
+			"content": "页面路径会作为评论归属的键，右侧旁栏只显示属于这一页的评论串。"
+		}
+	],
+	"headings": [{
+		"id": "这页验证什么",
+		"content": "这页验证什么"
+	}, {
+		"id": "正文一段",
+		"content": "正文一段"
+	}]
+};
+var toc = [{
+	depth: 2,
+	url: "#这页验证什么",
+	title: jsx(Fragment, { children: "这页验证什么" })
+}, {
+	depth: 2,
+	url: "#正文一段",
+	title: jsx(Fragment, { children: "正文一段" })
+}];
+function _createMdxContent(props) {
+	const _components = {
+		code: "code",
+		h2: "h2",
+		li: "li",
+		p: "p",
+		pre: "pre",
+		span: "span",
+		ul: "ul",
+		...props.components
+	};
+	return jsxs(Fragment, { children: [
+		jsx(_components.h2, {
+			id: "这页验证什么",
+			children: "这页验证什么"
+		}),
+		"\n",
+		jsx(_components.p, { children: "正文、评论、评论里的同目录 TSX 与图片，都走同一个编译器：Vite 加 fumadocs-mdx。" }),
+		"\n",
+		jsxs(_components.ul, { children: [
+			"\n",
+			jsx(_components.li, { children: "服务端 loader 只交付本页评论的元数据，正文在浏览器按需加载" }),
+			"\n",
+			jsx(_components.li, { children: "评论的读写在右侧旁栏：新建、回复、删回复、删整串" }),
+			"\n",
+			jsx(_components.li, { children: "覆盖层（正文里的批注按钮）不在本段，这里只有旁栏" }),
+			"\n"
+		] }),
+		"\n",
+		jsx(_components.h2, {
+			id: "正文一段",
+			children: "正文一段"
+		}),
+		"\n",
+		jsx(Fragment, { children: jsx(_components.pre, {
+			className: "shiki shiki-themes github-light github-dark",
+			style: {
+				"--shiki-light": "#24292e",
+				"--shiki-dark": "#e1e4e8",
+				"--shiki-light-bg": "#fff",
+				"--shiki-dark-bg": "#24292e"
+			},
+			tabIndex: "0",
+			icon: "<svg viewBox=\"0 0 24 24\"><path d=\"M1.125 0C.502 0 0 .502 0 1.125v21.75C0 23.498.502 24 1.125 24h21.75c.623 0 1.125-.502 1.125-1.125V1.125C24 .502 23.498 0 22.875 0zm17.363 9.75c.612 0 1.154.037 1.627.111a6.38 6.38 0 0 1 1.306.34v2.458a3.95 3.95 0 0 0-.643-.361 5.093 5.093 0 0 0-.717-.26 5.453 5.453 0 0 0-1.426-.2c-.3 0-.573.028-.819.086a2.1 2.1 0 0 0-.623.242c-.17.104-.3.229-.393.374a.888.888 0 0 0-.14.49c0 .196.053.373.156.529.104.156.252.304.443.444s.423.276.696.41c.273.135.582.274.926.416.47.197.892.407 1.266.628.374.222.695.473.963.753.268.279.472.598.614.957.142.359.214.776.214 1.253 0 .657-.125 1.21-.373 1.656a3.033 3.033 0 0 1-1.012 1.085 4.38 4.38 0 0 1-1.487.596c-.566.12-1.163.18-1.79.18a9.916 9.916 0 0 1-1.84-.164 5.544 5.544 0 0 1-1.512-.493v-2.63a5.033 5.033 0 0 0 3.237 1.2c.333 0 .624-.03.872-.09.249-.06.456-.144.623-.25.166-.108.29-.234.373-.38a1.023 1.023 0 0 0-.074-1.089 2.12 2.12 0 0 0-.537-.5 5.597 5.597 0 0 0-.807-.444 27.72 27.72 0 0 0-1.007-.436c-.918-.383-1.602-.852-2.053-1.405-.45-.553-.676-1.222-.676-2.005 0-.614.123-1.141.369-1.582.246-.441.58-.804 1.004-1.089a4.494 4.494 0 0 1 1.47-.629 7.536 7.536 0 0 1 1.77-.201zm-15.113.188h9.563v2.166H9.506v9.646H6.789v-9.646H3.375z\" fill=\"currentColor\" /></svg>",
+			children: jsx(_components.code, { children: jsxs(_components.span, {
+				className: "line",
+				children: [
+					jsx(_components.span, {
+						style: {
+							"--shiki-light": "#D73A49",
+							"--shiki-dark": "#F97583"
+						},
+						children: "export"
+					}),
+					jsx(_components.span, {
+						style: {
+							"--shiki-light": "#D73A49",
+							"--shiki-dark": "#F97583"
+						},
+						children: " const"
+					}),
+					jsx(_components.span, {
+						style: {
+							"--shiki-light": "#005CC5",
+							"--shiki-dark": "#79B8FF"
+						},
+						children: " answer"
+					}),
+					jsx(_components.span, {
+						style: {
+							"--shiki-light": "#D73A49",
+							"--shiki-dark": "#F97583"
+						},
+						children: " ="
+					}),
+					jsx(_components.span, {
+						style: {
+							"--shiki-light": "#005CC5",
+							"--shiki-dark": "#79B8FF"
+						},
+						children: " 42"
+					}),
+					jsx(_components.span, {
+						style: {
+							"--shiki-light": "#24292E",
+							"--shiki-dark": "#E1E4E8"
+						},
+						children: ";"
+					})
+				]
+			}) })
+		}) }),
+		"\n",
+		jsx(_components.p, { children: "页面路径会作为评论归属的键，右侧旁栏只显示属于这一页的评论串。" })
+	] });
+}
+function MDXContent(props = {}) {
+	const { wrapper: MDXLayout } = props.components || {};
+	return MDXLayout ? jsx(MDXLayout, {
+		...props,
+		children: jsx(_createMdxContent, { ...props })
+	}) : _createMdxContent(props);
+}
+//#endregion
+export { MDXContent as default, frontmatter, structuredData, toc };

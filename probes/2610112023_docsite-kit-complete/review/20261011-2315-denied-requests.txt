@@ -1,0 +1,9 @@
+{"name":"missing Origin","status":403,"expected":403,"body":"写入只接受来自 http://127.0.0.1:5460 的请求"}
+{"name":"wrong Origin","status":403,"expected":403,"body":"写入只接受来自 http://127.0.0.1:5460 的请求"}
+{"name":"human as","status":403,"expected":403,"body":"as 只给 agent 用：zk 不是 agent，人的身份取本机的身份码"}
+{"name":"unknown as","status":400,"expected":400,"body":"people.json 里没有 missing-review-agent"}
+{"name":"empty as","status":400,"expected":400,"body":"people.json 里没有 "}
+{"name":"File as","status":400,"expected":400,"body":"as 要是 people.json 里一个 agent 的 id"}
+{"name":"non-author edit","status":403,"expected":403,"body":"只有作者 zk 能编辑这条评论"}
+{"name":"non-author delete","status":403,"expected":403,"body":"只有作者 zk 能删除这条评论"}
+{"fileCount":7,"unchanged":true}

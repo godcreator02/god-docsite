@@ -1,0 +1,106 @@
+{
+  "hash": "8b416380",
+  "configHash": "59fa23e6",
+  "lockfileHash": "891de010",
+  "browserHash": "90995ed5",
+  "optimized": {
+    "@fumadocs/base-ui > @base-ui/react > use-sync-external-store": {
+      "src": "../../../../2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/use-sync-external-store@1.7.0_react@19.3.0/node_modules/use-sync-external-store/index.js",
+      "file": "@fumadocs_base-ui_n_@base-ui_react_n_use-sync-external-store.js",
+      "fileHash": "e65f4bd6",
+      "needsInterop": true
+    },
+    "@fumadocs/base-ui > @base-ui/react > use-sync-external-store/shim": {
+      "src": "../../../../2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/use-sync-external-store@1.7.0_react@19.3.0/node_modules/use-sync-external-store/shim/index.js",
+      "file": "@fumadocs_base-ui_n_@base-ui_react_n_use-sync-external-store_shim.js",
+      "fileHash": "dc899b94",
+      "needsInterop": true
+    },
+    "@fumadocs/base-ui > @base-ui/react > use-sync-external-store/shim/with-selector": {
+      "src": "../../../../2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/use-sync-external-store@1.7.0_react@19.3.0/node_modules/use-sync-external-store/shim/with-selector.js",
+      "file": "@fumadocs_base-ui_n_@base-ui_react_n_use-sync-external-store_shim_with-selector.js",
+      "fileHash": "f74c853a",
+      "needsInterop": true
+    },
+    "@fumadocs/base-ui > @base-ui/react > use-sync-external-store/with-selector": {
+      "src": "../../../../2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/use-sync-external-store@1.7.0_react@19.3.0/node_modules/use-sync-external-store/with-selector.js",
+      "file": "@fumadocs_base-ui_n_@base-ui_react_n_use-sync-external-store_with-selector.js",
+      "fileHash": "22cedc5c",
+      "needsInterop": true
+    },
+    "@fumadocs/base-ui > hast-util-to-jsx-runtime > style-to-js": {
+      "src": "../../../../2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/style-to-js@1.1.21/node_modules/style-to-js/cjs/index.js",
+      "file": "@fumadocs_base-ui_n_hast-util-to-jsx-runtime_n_style-to-js.js",
+      "fileHash": "b0b73261",
+      "needsInterop": true
+    },
+    "fumadocs-core > micromark > debug": {
+      "src": "../../../../2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/debug@4.4.3/node_modules/debug/src/browser.js",
+      "file": "fumadocs-core_n_micromark_n_debug.js",
+      "fileHash": "fe175441",
+      "needsInterop": true
+    },
+    "fumadocs-core > unified > extend": {
+      "src": "../../../../2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/extend@3.0.2/node_modules/extend/index.js",
+      "file": "fumadocs-core_n_unified_n_extend.js",
+      "fileHash": "857347fa",
+      "needsInterop": true
+    },
+    "fumadocs-core > yaml": {
+      "src": "../../../../2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/yaml@2.9.1/node_modules/yaml/browser/index.js",
+      "file": "fumadocs-core_n_yaml.js",
+      "fileHash": "42eea919",
+      "needsInterop": false
+    },
+    "fumadocs-core > yaml/util": {
+      "src": "../../../../2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/yaml@2.9.1/node_modules/yaml/browser/dist/util.js",
+      "file": "fumadocs-core_n_yaml_util.js",
+      "fileHash": "8a4062d4",
+      "needsInterop": false
+    },
+    "fumadocs-mdx > @mdx-js/mdx > recma-jsx > acorn-jsx": {
+      "src": "../../../../2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/acorn-jsx@5.3.2_acorn@8.19.0/node_modules/acorn-jsx/index.js",
+      "file": "fumadocs-mdx_n_@mdx-js_mdx_n_recma-jsx_n_acorn-jsx.js",
+      "fileHash": "08074b93",
+      "needsInterop": true
+    },
+    "fumadocs-mdx > @mdx-js/mdx > source-map": {
+      "src": "../../../../2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/source-map@0.7.6/node_modules/source-map/source-map.js",
+      "file": "fumadocs-mdx_n_@mdx-js_mdx_n_source-map.js",
+      "fileHash": "43a03b99",
+      "needsInterop": true
+    },
+    "fumadocs-mdx > esbuild": {
+      "src": "../../../../2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/esbuild@0.28.2/node_modules/esbuild/lib/main.js",
+      "file": "fumadocs-mdx_n_esbuild.js",
+      "fileHash": "28ebd071",
+      "needsInterop": true
+    },
+    "fumadocs-mdx > picocolors": {
+      "src": "../../../../2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/picocolors@1.1.1/node_modules/picocolors/picocolors.browser.js",
+      "file": "fumadocs-mdx_n_picocolors.js",
+      "fileHash": "24c1e4f9",
+      "needsInterop": true
+    },
+    "fumadocs-mdx > picomatch": {
+      "src": "../../../../2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/picomatch@4.0.7/node_modules/picomatch/index.js",
+      "file": "fumadocs-mdx_n_picomatch.js",
+      "fileHash": "5385d0e3",
+      "needsInterop": true
+    }
+  },
+  "chunks": {
+    "react-D5uHwTOJ": {
+      "file": "react-D5uHwTOJ.js",
+      "isDynamicEntry": false
+    },
+    "rolldown-runtime-xMd7gp_u": {
+      "file": "rolldown-runtime-xMd7gp_u.js",
+      "isDynamicEntry": false
+    },
+    "stringifyNumber-lXWPI9dX": {
+      "file": "stringifyNumber-lXWPI9dX.js",
+      "isDynamicEntry": false
+    }
+  }
+}

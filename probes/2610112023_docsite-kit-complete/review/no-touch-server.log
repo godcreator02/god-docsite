@@ -1,0 +1,6 @@
+[MDX] generated files in 17.268299999999726ms
+[MDX] generated files in 19.818499999999858ms
+12:03:49 AM [vite] (client) Re-optimizing dependencies because vite config has changed
+Diagnostic server ready on 5462: config touch removed in memory only
+12:03:55 AM [vite] (ssr) connected.
+12:04:00 AM [vite] (client) dependency optimized: diff-match-patch

@@ -1,0 +1,8 @@
+{
+  "content": [
+    {
+      "type": "text",
+      "text": "{\n  \"ok\": true,\n  \"data\": {\n    \"taskId\": \"sess_1fc9b03f-da80-4c50-91fb-ad988dfadd07\",\n    \"title\": \"docsite-kit 1.1 功能盘点与覆盖清单\",\n    \"status\": \"running\",\n    \"mode\": \"yolo\",\n    \"roundStarted\": true\n  }\n}"
+    }
+  ]
+}

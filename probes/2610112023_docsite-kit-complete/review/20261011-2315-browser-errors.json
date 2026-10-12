@@ -1,0 +1,27 @@
+{
+  "source": "Actual CUA tab.dev.logs results in this chat; primary review",
+  "entries": [
+    {
+      "timestamp": "2026-10-11T15:16:26.618Z",
+      "route": "/comments",
+      "error": "In HTML, <a> cannot be a descendant of <a>. This will cause a hydration error.",
+      "source": "AllComments outer a > CommentItem > renderBody > MDX p > a"
+    },
+    {
+      "timestamp": "2026-10-11T15:18:11.955Z",
+      "action": "delete reply",
+      "error": "浏览器端没有评论正文模块 2026-10-11-e143c5/20261011t151736-eb82.mdx",
+      "component": "CommentBody",
+      "boundary": "CommentBodyBoundary"
+    },
+    {
+      "timestamp": "2026-10-11T15:19:12.263Z",
+      "action": "delete thread",
+      "error": "浏览器端没有评论正文模块 2026-10-11-e143c5/index.mdx",
+      "component": "CommentBody",
+      "boundary": "CommentBodyBoundary"
+    }
+  ],
+  "eventualRecovery": true,
+  "acceptance": "failed_pending_fix"
+}

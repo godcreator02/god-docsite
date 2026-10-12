@@ -1,0 +1,8 @@
+{
+  "content": [
+    {
+      "type": "text",
+      "text": "{\n  \"ok\": true,\n  \"data\": {\n    \"taskId\": \"sess_fcceed26-2526-4008-bb0c-e9a74e60d8cb\",\n    \"title\": \"O任务：正文外评论悬浮层重写\",\n    \"status\": \"running\",\n    \"mode\": \"yolo\",\n    \"roundStarted\": true\n  }\n}"
+    }
+  ]
+}

@@ -1,0 +1,23 @@
+{
+  "reviewer": "main",
+  "date": "2026-10-11",
+  "browser": "Codex In-app Browser via mcp__cua_repl",
+  "tabId": "1",
+  "interaction": "native accessible-index click and typeText; no synthetic DOM events",
+  "homeCounter": [0, 1, 2, 3],
+  "typedText": "main-review-2112",
+  "echoVerified": true,
+  "navigation": ["/", "/second", "/"],
+  "secondCounter": [0, 1, 2],
+  "directSecondLoadCounter": [0, 1],
+  "markerObservations": {"server-a": 1, "browser-a": 1, "server-b": 0, "browser-b": 0, "second-browser-b": 0},
+  "consoleReads": [
+    {"phase": "initial home load", "api": "tab.dev.logs", "levels": ["error", "warn"], "limit": 100, "entries": []},
+    {"phase": "client navigation to second", "api": "tab.dev.logs", "levels": ["error", "warn"], "limit": 100, "entries": []},
+    {"phase": "client navigation back home", "api": "tab.dev.logs", "levels": ["error", "warn"], "limit": 100, "entries": []},
+    {"phase": "direct second load", "api": "tab.dev.logs", "levels": ["error", "warn"], "limit": 100, "entries": []}
+  ],
+  "evidenceOrigin": "Transcription of actual CUA tool outputs in this chat; not a simulated browser report",
+  "knownNonblocking": "dev server logs favicon.ico 404; do not claim all server logs clean",
+  "tabClosed": true
+}

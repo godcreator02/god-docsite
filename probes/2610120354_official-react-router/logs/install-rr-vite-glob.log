@@ -1,0 +1,8 @@
+Scope: all 4 workspace projects
+Γ£ô Lockfile passes supply-chain policies (verified 8m ago)
+[WARN] 1 deprecated subdependencies found: sourcemap-codec@1.4.8
+Already up to date
+Progress: resolved 0, reused 407, downloaded 0, added 0, done
+[WARN] Issues with peer dependencies found. Run "pnpm peers check" to list them.
+Progress: resolved 0, reused 409, downloaded 0, added 0
+Done in 2.3s using pnpm v12.4.2

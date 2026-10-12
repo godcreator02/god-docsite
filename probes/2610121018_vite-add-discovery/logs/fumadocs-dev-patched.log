@@ -1,0 +1,5 @@
+[restart] Relaunching with --conditions=development
+[2m11:08:20 AM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m Re-optimizing dependencies because lockfile has changed
+  [32mΓ₧£[39m  [1mLocal[22m:   [36mhttp://127.0.0.1:[1m5540[22m/[39m
+[2m11:08:28 AM[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m connected.
+[2m11:08:37 AM[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m [32mpage reload [39m[2mcontent/docs/probe-add-patched.mdx[22m

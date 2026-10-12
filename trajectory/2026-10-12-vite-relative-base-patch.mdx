@@ -1,0 +1,33 @@
+---
+born-at: 2026-10-12T11:30
+type: choice
+parent: [2026-10-11-refactor-in-five-steps]
+label: vite 8.3.4 打补丁修 Windows 相对 base 新增失效，不降级、不改 fumadocs 生成形态
+domain: 骨架
+---
+
+## 背景
+
+第 1 步的排障链（S 评论热更新最小实验 → T 官方模板验证 → U 纯 Vite 定位）确认：dev 运行中
+新增正文页不被发现，不是 docsite-kit 代码的问题。U 在纯 Vite 8.3.4 最小样本上复现并定位：
+`toAbsoluteGlob` 对相对 base 用 `posix.resolve` 解析 `D:/…` 的 importer，Windows 上被当相对
+路径拼上 cwd 前缀，产出不含盘符的假绝对 glob，热更新匹配永不命中；初始扫描走 tinyglobby
+（win32 语义，容错命中），所以已有文件正常——「重启出现、运行中不出现」由此而来。
+
+## 定下的做法
+
+三条路里选了补丁：降级不可行（vite 7.3.7 同一分支同样坏；vite 5/6 无 base 选项，而
+fumadocs-mdx 15.4.7 的 peer 限 vite 7/8）；fumadocs-mdx 的生成形态没有公开选项可改。补丁一行
+（`posix.resolve` → `posix.join`，与 `'/'`、`'../'` 分支同构），登记在仓根
+`pnpm-workspace.yaml` 的 patchedDependencies。验证：probe 内纯 Vite 四变体（相对 base /
+根相对 base / 无 base / 否定 glob）双轨各 10/10；fumadocs 官方快照站两阶段（原版 29 次 404、
+补丁后第 1 秒 200）；build 预渲染完整；正式自述站运行中新增第 1 秒 200、索引即含链接。
+未测：非 Windows 平台（`posix.join` 纯字符串拼接，语义平台无关）、真实虚拟模块端到端。
+
+## 接续入口
+
+复现与验证正本在 `probes/2610121018_vite-add-discovery`：`pnpm test`（补丁态）、
+`pnpm run test:original`（原版基线，跑完自动恢复补丁）。升级 vite 前先跑它们看上游修了没有：
+修了删补丁与登记，没修按新版本用 `pnpm patch` 重新生成。给 vite 上游的最小复现与一行修法
+建议在该 probe 的 result.md。注意：`test:original` 中途被杀会留下无补丁状态，重跑
+`pnpm install` 即恢复。

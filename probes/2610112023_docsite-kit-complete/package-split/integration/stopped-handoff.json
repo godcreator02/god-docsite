@@ -1,0 +1,72 @@
+{
+  "task": "K-integration（返工轮三中途停止）",
+  "stoppedAt": "2026-10-12 01:05 +08:00",
+  "stopReason": "用户纠正根本方向：按 Fumadocs 最佳适配形式重写（30-refactor-plan M2：Vite + fumadocs-mdx 单编译器、评论仍是集合）。本轮正在做的 compile/function-body/AsyncFunction 运行时 MDX 渲染链方向作废；身份/评论解耦（站点组合）与正文外悬浮覆盖层（K-06）仍是有效目标，由新的独立 ZCode 会话从这些目标实现。按指令停止扩展、不修兼容层、不删除不回滚不覆盖已有代码、不提交不发布、不新增依赖。",
+
+  "changedFiles": {
+    "packages/docsite-comments": {
+      "完成且检查过": [
+        "src/react/comment-cards.tsx —— CommentApi 加可选 onWritten（写成功回调：接口 2xx 且解出 thread/file 后调一次，失败不调）；postComment 成功后通知；删除上一轮的 onDeleted/onEntryDeleted 链",
+        "src/react/comments.tsx —— PageCommentsProps 加可选 onWritten 并构造 api；删除 removedKeys/live 派生，恢复直接用 threads；CommentsPanel 去掉 onEntryDeleted",
+        "src/react/all-comments.tsx —— AllCommentsProps 加可选 onWritten；删除 removedKeys",
+        "test/post-comment.test.ts（新）—— onWritten 成功调/失败不调/不传也工作，三个用例"
+      ],
+      "半途（未接线）": [
+        "src/authors.ts（新）—— 解耦第一步：自有 CommentAuthor 结构与 authorOf/mentionsOf/mentionBeingTyped/authorsMatching 纯函数；尚未被任何文件引用，包内其余源文件仍 import @godcreator/docsite-identity（comments.ts / comment-cards.tsx / all-comments.tsx / comments.tsx(react) / server/comments.ts / server/comment-files.ts / 三个入口注释）"
+      ],
+      "未动": [
+        "package.json —— 仍声明 @godcreator/docsite-identity: workspace:* 依赖（解耦未完成，删依赖的步骤没执行）",
+        "上一轮的 styles.css tokens、页内确认条等保持原样"
+      ]
+    },
+    "site": {
+      "注意": "以下返工三改动属于【已作废的运行时渲染链方向】，文件保持现状未回滚；后续按 Fumadocs 集合方式重写时大部分要被替换",
+      "列表": [
+        "package.json —— dependencies 新增 @mdx-js/mdx 3.1.1（本站 lock 已更新；叫停前所加，未移除）",
+        "source.config.ts —— 删除了 comments 集合声明（A/B/Demo 三个 Fumadocs 集合保留）",
+        "vite.config.ts —— 移除了 commentsGlobRootBase 插件接线；app/lib/comments-glob-root-base.ts 文件已删除",
+        "app/lib/comment-entry.ts（新）—— CompiledCommentEntry 类型（CommentEntry & { body: 编译产物字符串 }）",
+        "app/lib/comment-data.server.ts —— 重写为：loader 每次调公开 readCommentThreads 读盘 + 每条当场 @mdx-js/mdx compile(outputFormat:'function-body')，同一次读取算 aboutMe/pageTitles/snapshots",
+        "app/lib/comment-body.tsx —— 重写为：浏览器端 AsyncFunction 运行编译产物（官方 run 的等价内联）+ baseUrl 解析同目录组件 import + 相对图片 src 重写 + SSR/水合首帧占位（修过一次 SSR window 500）",
+        "app/routes/comments-demo.tsx / app/routes/comments.tsx —— loader 换新数据层，PageComments/AllComments 传 onWritten={() => window.location.reload()}",
+        "app/routes/api-comments.ts —— 返工二已移除 utimes，本轮未再改",
+        "comments/2026-10-12-mdx-capabilities/（新样本）—— index.mdx（import './Dot.tsx' + <Dot /> + ![](./paste-dot.png) + 粗体链接）、Dot.tsx（计数按钮交互组件）、paste-dot.png",
+        "test/comments-data.server.test.ts（新）—— 真实读盘+编译+run 渲染三用例",
+        "test/comments-api.e2e.test.ts —— 重写为 hmr=false 版（六写操作+失败不刷新+Origin+不动 source.config）——最后一次运行失败在 resolve 断言（第 76 行，页面数据流恒含全部串导致 includes 断言无法区分），修正进行中被叫停",
+        "test/vitest.config.mjs —— include 扩为 test/*.test.ts",
+        "tsconfig.json —— 返工二所改：exclude test + allowImportingTsExtensions（保持）"
+      ]
+    },
+    "旧有且仍有效": [
+      "packages/docsite-identity —— 本轮未改（Avatar/Badge 自有 class、styles.css、22 测试均为此前状态）",
+      "site 的 A/B/Demo 集合、页面基线、people.json、start-site.ps1、README —— 返工二状态"
+    ]
+  },
+
+  "lastChecks": {
+    "评论包": "check 44/44 测试 + build 全绿（integration/check-build-4.log，onWritten 轮）；authors.ts 加入后未再跑过 check（它是无引用独立模块，预计可过但未验证）",
+    "站点数据层测试": "comments-data.server 3/3 绿",
+    "站点 e2e（hmr=false）": "失败中：3 passed 1 failed，失败点为 resolve 后的列表断言写法（site-tests-final.log 最后一次）；SSR 两页 curl 200（debug 服务上验证，服务已停）",
+    "站点 types:check": "本轮未跑（comment-body SSR 修复后没有跑过）",
+    "未验证项": "编译器不进浏览器 bundle 的最终确认、浏览器端 onWritten 刷新链、MDX 组件样本在浏览器的实际运行（IAB 点击通道失效未复测，未做 UI 验证）"
+  },
+
+  "superseded": [
+    "作废（用户 2026-10-12 01:04 指令）：runtime compile/function-body + AsyncFunction 渲染链方向 —— M2 明确 Vite+fumadocs-mdx 单编译器、评论仍是集合",
+    "作废（返工二结论，仍有效部分重申）：utimes source.config 补丁已移除不再回来；「utimes 闭环」「根因全在 Fumadocs」结论此前已作废",
+    "仍有效的目标：评论包与身份包解耦、全部组合由站点完成（本轮只走到 authors.ts）；评论标志正文外悬浮覆盖层（K-06，不切文本/不包节点/不插标记/不写元素属性，Range 只读测量，CSS Highlight 可保留）——覆盖层待独立实现，comments.tsx 现存 splitText/内联 span/data-commented-element 是待替换基线，本轮未动"
+  ],
+
+  "coverage": {
+    "覆盖层": "待独立实现（K-06）；本轮未改 comments.tsx 的定位实现，作为待替换基线保留",
+    "测试归属": "评论包测可信 actor 的归属规则；站点集成测身份+Origin+as+只读组合——identity-gate.test.ts 尚未写"
+  },
+
+  "processes": "全部停止：debug dev（83292、16260 两批）已杀并清 pid 记录；vitest 自起自停；收尾核对 5460/5461/5462 均无监听",
+
+  "writeRelease": [
+    "释放全部原 K 写入范围：packages/docsite-identity/、packages/docsite-comments/、probes/2610112023_docsite-kit-complete/site/、probes/2610112023_docsite-kit-complete/package-split/integration/",
+    "共享文件现状：仓根 pnpm-lock.yaml 仍只 +61 行（两个新包 importer，返工一状态）；site 自己的 lock 含 @mdx-js/mdx 3.1.1（本轮新增）；pnpm-workspace.yaml 与根 package.json 未改",
+    "不自动归档；未提交未推送未发布"
+  ]
+}

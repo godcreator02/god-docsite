@@ -1,0 +1,5 @@
+# 探实验的独立 workspace：只装本目录的包，与仓根 workspace、其他 probe 互不影响
+
+packages:
+  - packages/*
+  - sample

@@ -1,0 +1,526 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>编译 .mdx 的工序</title>
+<link rel="stylesheet" href="style.css">
+<script src="fig.js"></script>
+<style>
+  :root { --p-ours: #d4500b; }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --p-ours: #ff8a3d; } }
+  :root[data-theme="dark"] { --p-ours: #ff8a3d; }
+  main { max-width: 1480px; }
+  .flow-wrap { display: grid; grid-template-columns: minmax(0, 1fr) 400px; gap: 14px; align-items: start; }
+  .flow-wrap .side { position: sticky; top: 10px; }
+  .flow-wrap .side .caption { font-size: 14.5px; min-height: 120px; }
+  #flow svg { max-height: 86vh; display: block; margin: 0 auto; }
+  @media (max-width: 1100px) { .flow-wrap { grid-template-columns: 1fr; } .flow-wrap .side { position: static; } }
+  .toolbar { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0; align-items: center; }
+  .toolbar .meta { margin-right: 4px; }
+  .toolbar button { font: inherit; font-size: 13px; padding: 3px 11px; border-radius: 999px; border: 1px solid var(--border); background: var(--surface); color: var(--text); cursor: pointer; }
+  .toolbar button.on { border-color: var(--accent); background: var(--accent-soft); color: var(--accent); font-weight: 600; }
+  .codebox { margin-top: 8px; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+  .codebox .file { font-family: ui-monospace, Consolas, monospace; font-size: 12px; padding: 4px 12px; background: var(--code-bg); border-bottom: 1px solid var(--border); color: var(--muted); }
+  .codebox .file a { color: inherit; }
+  .codebox .lines { font-family: ui-monospace, Consolas, monospace; font-size: 12px; line-height: 1.6; padding: 6px 0; background: var(--surface); overflow-x: auto; }
+  .codebox .ln { white-space: pre; padding: 0 12px; border-left: 4px solid transparent; }
+  .codebox .ln.hl { border-left-color: var(--warn); background: color-mix(in srgb, var(--warn) 18%, transparent); font-weight: 600; }
+  .codebox.empty .lines { color: var(--muted); padding: 8px 12px; font-family: inherit; font-size: 13px; }
+</style>
+</head>
+<body>
+<main>
+
+<p class="crumbs"><a href="index.html">← 目录</a>　·　fumadocs 原理　·　<a href="22-full-flow.html">全流程大图</a>里「编译 .mdx」那一格放大</p>
+<h1>编译一个 .mdx：从一段文本到一个 JS 模块</h1>
+<p class="lead">全流程图里，Vite 把 <code>install.mdx</code> 交给 fumadocs-mdx，出来就是 JS 模块，中间只画了一格。这一页把那一格拆开：左边是原文和设置，中间是按顺序排的工序，右边是语法树怎么一步步被改、最后导出了什么。我们的钉码就挂在这条工序里（橙色）。</p>
+<p class="meta">按 fumadocs 16.17.1 源码（默认编译器 <code>@mdx-js/mdx</code>）。右栏的源码行都能点开看原文件。</p>
+
+<div class="toolbar" id="phases"></div>
+<div class="flow-wrap">
+  <div id="flow"></div>
+  <aside class="side">
+    <div id="caption-slot"></div>
+    <div class="codebox" id="code"><div class="file"></div><div class="lines"></div></div>
+  </aside>
+</div>
+
+<h2 id="outputs">同一套 Markdown 规则，有几个出口</h2>
+<p>上图第 9 道工序后面，钉码插件用 <code>replaceSource</code> 登记了 <code>&lt;Pin&gt;</code> 的 Markdown 形式。这张图看同一个正本走两条路：站点里编译（搜索、fumadocs 的 LLM 输出），以及命令行里生成 AGENTS.md 这类生成物。橙色是我们的包，虚线是可选、现在不开的。</p>
+<div id="sc-outputs"></div>
+
+<div class="pager"><a href="22-full-flow.html">← 全流程大图</a><a href="index.html">目录 →</a></div>
+</main>
+
+<script>
+const S = Fig.svg;
+const C = { vite: 'var(--c-vite)', mdx: 'var(--p-mdx)', core: 'var(--p-core)', mdxjs: 'var(--c-node)', ours: 'var(--p-ours)', site: 'var(--p-site)', warn: 'var(--warn)', prod: 'var(--m-prod)' };
+const WHO = { vite: ['Vite', C.vite], mdx: ['fumadocs-mdx', C.mdx], core: ['fumadocs-core', C.core], mdxjs: ['@mdx-js/mdx（第三方编译器）', C.mdxjs], ours: ['我们的包', C.ours], site: ['站点', C.site] };
+const tags = who => who.map(k => `<span class="fx-tag" style="background:${WHO[k][1]}">${WHO[k][0]}</span>`).join('');
+const SRC = 'https://github.com/fuma-nama/fumadocs/blob/fumadocs%4016.17.1/packages/';
+
+function panel(s, x, y, w, h, color, title, { fill = 6, size = 12.5 } = {}) {
+  S('rect', { x, y, width: w, height: h, rx: 10, fill: `color-mix(in srgb, ${color} ${fill}%, var(--surface))`, stroke: color, 'stroke-width': 1.5 }, s);
+  if (title) S('text', { x: x + 10, y: y + 18, 'font-size': size, 'font-weight': 700, fill: color }, s, title);
+}
+function label(s, x, y, str, { size = 11, color = 'var(--text)', anchor = 'start', weight = 400 } = {}) {
+  return S('text', { x, y, 'font-size': size, fill: color, 'text-anchor': anchor, 'font-weight': weight }, s, str);
+}
+
+/* 中间的工序：[名字, 做什么, 是谁的, 是否是留给站点的位置] */
+const STATIONS = [
+  ['收到原文', 'Vite 的 transform 交来', 'vite'],
+  ['找集合设置', '凭 macro_id 执行 lib/source.ts', 'mdx'],
+  ['拆 frontmatter、校验', '按 schema，写错直接报错', 'mdx'],
+  ['解析成语法树', 'Markdown → mdast', 'mdxjs'],
+  ['remarkInclude', '嵌入 <include> 引的文件', 'mdx'],
+  ['remarkGfm', '表格、任务列表', 'core'],
+  ['remarkHeading', '标题加 id（锚点）', 'core'],
+  ['remarkImage', '本地图片改成 import', 'core'],
+  ['remarkCodeTab、remarkNpm', '代码块分组成标签页', 'core'],
+  ['站点的 remark 插件', '钉码插件排在这里', 'ours', true],
+  ['remarkStructure', '切出搜索用的文字', 'core'],
+  ['remarkPostprocess', '补标题、出 _markdown、写成 export', 'mdx'],
+  ['转成 HTML 语法树', 'mdast → hast', 'mdxjs'],
+  ['rehypeCode', 'Shiki 高亮代码', 'core'],
+  ['站点的 rehype 插件', '我们暂时没有', 'site', true],
+  ['rehypeToc', '生成本页目录', 'core'],
+  ['生成 JS', 'hast → JS，交回 Vite', 'mdxjs'],
+];
+const ST_Y = i => 34 + i * 37;
+const DEFAULT_STATIONS = [5, 6, 7, 8, 10, 13, 15];
+const SOURCE_LINES = ['---', 'title: 安装', '---', '## 用 pnpm 安装', '先装依赖，再写配置：', '```ts  export default {}  ```', '<include>./env.mdx</include>', '<Pin file="src/setup.ts" lines="3-9" … />', '<PinTree dir="src" depth="1" … />', '![架构](./arch.png)'];
+const OURS_SOURCE_LINES = [7, 8];
+const TREE_ROWS = ['root', 'heading（2 级）：用 pnpm 安装', 'paragraph：先装依赖，再写配置：', 'code（ts）：export default {}', '<include>：./env.mdx', '<Pin file="src/setup.ts" lines="3-9" />', '<PinTree dir="src" depth="1" />', 'image：./arch.png', 'import arch.png', 'export structuredData', 'export _markdown（开了才有）', 'export frontmatter', 'export toc'];
+const OURS_TREE_ROWS = [5, 6];
+const FIRST_EXPORT_ROW = 8;
+const EXPORT_ROWS = ['import arch.png（交给 Vite 打包）', "export frontmatter = { title: '安装' }", 'export structuredData = { 标题、正文… }', "export _markdown = '## 用 pnpm 安装…'", 'export toc = [ 用 pnpm 安装 ]', 'export default MDXContent（正文组件）', '标签先查 props.components 再渲染'];
+
+function draw(s, { box, group }) {
+  /* 左：原文 */
+  panel(s, 10, 30, 240, 280, C.mdxjs, 'content/docs/install.mdx（原文）');
+  SOURCE_LINES.forEach((t, i) => box('src' + i, OURS_SOURCE_LINES.includes(i)
+    ? { w: 228, h: 20, color: C.ours, t, fs: 10, align: 'start', weight: 500 }
+    : { w: 228, h: 20, plain: true, t, fs: 10.5, align: 'start', weight: 500 }));
+
+  /* 左：设置从哪来 */
+  const gCfg = group('gCfg');
+  panel(gCfg, 10, 320, 240, 205, C.mdx, '设置从哪来');
+  label(gCfg, 20, 356, 'install.mdx?macro_id=', { size: 10.5 });
+  label(gCfg, 20, 372, '　app/lib/source.ts#docs', { size: 10.5, weight: 600 });
+  label(gCfg, 20, 394, '↓ 执行一遍 lib/source.ts，取出', { size: 10.5, color: 'var(--muted)' });
+  label(gCfg, 20, 416, 'docs.mdxOptions =', { size: 10.5 });
+  box('cfgPreset', { w: 226, h: 18, plain: true, t: '　applyMdxPreset({', fs: 10.5, align: 'start', weight: 500 });
+  box('cfgPin', { w: 226, h: 18, color: C.ours, t: '　　remarkPlugins: [remarkDocfirst()]', fs: 10.5, align: 'start', weight: 500 });
+  label(gCfg, 20, 472, '　})', { size: 10.5 });
+  box('cfgResult', { w: 226, h: 22, color: C.mdx, t: '= 默认工序 + 钉码插件', fs: 10.5, weight: 700 });
+
+  /* 左下：被引用的文件与依赖 */
+  box('dEnv', { w: 240, h: 34, color: C.mdx, t: './env.mdx', t2: '被 <include> 引用，内容嵌进来', fs: 11 });
+  box('dPinned', { w: 240, h: 34, color: C.ours, t: 'src/setup.ts、src/', t2: '被 <Pin>、<PinTree> 钉住', fs: 11 });
+  box('depList', { w: 240, h: 34, color: C.vite, t: 'Vite 记下的依赖', t2: '（还没有）', fs: 11 });
+  box('reg', { w: 240, h: 34, color: C.core, t: 'replaceSource 登记表', t2: '（还没有）', fs: 11 });
+
+  /* 中：工序 */
+  STATIONS.forEach(([name, what, who, slot], i) => box('st' + i, { w: 260, h: 31, color: C[who], t: name, t2: what, fs: 11.5, dashed: !!slot }));
+  [['编译前', 0, 2], ['remark：改 Markdown 语法树', 3, 11], ['rehype：改 HTML 语法树', 12, 15], ['JS', 16, 16]].forEach(([name, a, b]) => {
+    const y0 = ST_Y(a), y1 = ST_Y(b) + 31, cy = (y0 + y1) / 2;
+    S('rect', { x: 532, y: y0, width: 14, height: y1 - y0, rx: 4, fill: 'var(--muted)', opacity: 0.55 }, s);
+    S('text', { x: 539, y: cy, 'font-size': 10, fill: 'var(--surface)', 'font-weight': 700, 'text-anchor': 'middle', 'dominant-baseline': 'central', transform: `rotate(-90 539 ${cy})` }, s, name);
+  });
+  box('cursor', { w: 16, h: 16, plain: true, t: '▶', fs: 13 });
+
+  /* 右：语法树 */
+  S('rect', { x: 552, y: 30, width: 318, height: 400, rx: 10, fill: `color-mix(in srgb, ${C.mdxjs} 5%, var(--surface))`, stroke: C.mdxjs, 'stroke-width': 1.5 }, s);
+  box('treeTitle', { w: 300, h: 20, plain: true, t: '语法树：还没有', fs: 12.5, align: 'start', weight: 700 });
+  TREE_ROWS.forEach((t, i) => box('n' + i, { w: 300, h: 22, color: OURS_TREE_ROWS.includes(i) ? C.ours : (i >= FIRST_EXPORT_ROW ? C.mdx : C.mdxjs), t, fs: 10.5, align: 'start', weight: 500 }));
+  box('fmData', { w: 300, h: 24, color: C.mdx, t: "vfile.data.frontmatter = { title: '安装' }", fs: 10.5, align: 'start', weight: 500 });
+
+  /* 右：最后的 JS 模块 */
+  panel(s, 552, 440, 318, 245, C.prod, '最后交给 Vite 的 JS 模块');
+  EXPORT_ROWS.forEach((t, i) => box('e' + i, { w: 300, h: 24, color: C.prod, t, fs: 10.5, align: 'start', weight: 500 }));
+
+  /* 图例 */
+  Object.values(WHO).forEach(([name, color], i) => {
+    const x = 556 + (i % 2) * 160, y = 704 + Math.floor(i / 2) * 14;
+    S('rect', { x, y: y - 8, width: 12, height: 8, rx: 2, fill: color }, s);
+    label(s, x + 16, y, name, { size: 10, color: 'var(--muted)' });
+  });
+}
+
+const init = { cursor: { x: 252, y: ST_Y(0) + 8, o: 0 }, gCfg: { o: 0 }, cfgPreset: { x: 18, y: 422 }, cfgPin: { x: 18, y: 441 }, cfgResult: { x: 18, y: 494 },
+  dEnv: { x: 10, y: 538, o: 0 }, dPinned: { x: 10, y: 580, o: 0 }, depList: { x: 10, y: 622, o: 0 }, reg: { x: 10, y: 664, o: 0 },
+  treeTitle: { x: 562, y: 36 }, fmData: { x: 562, y: 402, o: 0 } };
+SOURCE_LINES.forEach((_, i) => init['src' + i] = { x: 16, y: 50 + i * 25.5 });
+STATIONS.forEach((_, i) => init['st' + i] = { x: 268, y: ST_Y(i), o: 0.55 });
+TREE_ROWS.forEach((_, i) => init['n' + i] = { x: 562, y: 62 + i * 26, o: 0 });
+EXPORT_ROWS.forEach((_, i) => init['e' + i] = { x: 562, y: 468 + i * 30, o: 0 });
+
+/* 当前工序：光标移过去、工序亮起，之前走过的工序保持全亮 */
+const at = (i, extra = {}) => {
+  const out = { cursor: { y: ST_Y(i) + 8, o: 1 }, ['st' + i]: { o: 1, hl: true } };
+  for (const k in extra) out[k] = Object.assign({}, out[k], extra[k]);
+  return out;
+};
+const code = (path, from, to, lines, hl) => ({ file: `${path}:${from}-${to}`, href: `${SRC}${path}#L${from}-L${to}`, lines, hl });
+const NO_CODE = text => ({ empty: text });
+
+const STEPS = [
+  { phase: '编译前', who: ['vite', 'mdx'], at: at(0, { src3: { hl: true } }),
+    code: code('mdx/src/loaders/adapter.ts', 98, 119, [
+      'async transform(value, id) {',
+      "  const [file, query = ''] = id.split('?', 2)",
+      '  const result = await loader.load({',
+      '    filePath: file, query: parse(query),',
+      '    getSource() { return value },',
+      '    compiler: {',
+      '      addDependency: (file) => { this.addWatchFile(file) },',
+      '    },',
+      '  })'], 2),
+    cap: 'Vite 加载 <code>install.mdx?macro_id=…</code>，transform 这一步轮到 fumadocs-mdx 的编译插件，它拿到这个文件的原文。注意这里顺手交给后面一个 <code>addDependency</code>：之后谁调用它，就等于让 Vite 盯住那个文件。' },
+  { who: ['mdx'], at: at(1, { gCfg: { o: 1 } }),
+    code: code('mdx/src/loaders/mdx/index.ts', 71, 77, [
+      'if (macro && macroId !== undefined) {',
+      '  const resolved = await macro.resolve(macroId)',
+      '  for (const input of resolved.inputs) compiler.addDependency(input)',
+      '  const item = resolved.collection',
+      "  if (item.type === 'docs') docCollection = item.docs",
+      '}'], 1),
+    cap: '先弄清按谁的设置编译：凭网址后面的 <code>macro_id</code> 找到 <code>app/lib/source.ts</code> 里的 <code>docs</code> 集合，把那个文件执行一遍，取出 <code>mdxOptions</code> 和 schema。我们的钉码插件就是这样被带进来的。（设置也可以写在全局的 <code>source.config.ts</code> 里，现在的 docfirst 站就是这样，要点一会讲两种写法的差别。）lib/source.ts 也被登记成依赖：改了它，所有页面都重新编译。' },
+  { who: ['mdx', 'core'], at: at(2, { src0: { o: 0.3 }, src1: { o: 0.3 }, src2: { o: 0.3 }, fmData: { o: 1, hl: true } }),
+    code: code('mdx/src/loaders/mdx/index.ts', 91, 100, [
+      'if (docCollection) {',
+      '  matter.data = await core.transformFrontmatter(',
+      '    { collection: docCollection, filePath, source: value },',
+      '    matter.data,',
+      '  )',
+      '}',
+      "if (only === 'frontmatter') {",
+      '  return { code: `export const frontmatter = ${JSON.stringify(matter.data)}` }',
+      '}'], 1),
+    cap: '拆出开头的 frontmatter（解析用的是 fumadocs-core 的函数），按集合的 schema 校验，字段写错直接报错。它先存在编译过程的数据里（<code>vfile.data</code>），还不在语法树上。async 模式下「只要 frontmatter」的那个请求到这里就返回了，不再往下编译。' },
+  { phase: 'remark', who: ['mdxjs', 'mdx'], at: at(3, { treeTitle: { t: 'Markdown 语法树（mdast）' }, n0: { o: 1 }, n1: { o: 1 }, n2: { o: 1 }, n3: { o: 1 }, n4: { o: 1 }, n5: { o: 1 }, n6: { o: 1 }, n7: { o: 1 } }),
+    code: code('mdx/src/loaders/mdx/build-default.ts', 58, 68, [
+      'processor = createProcessor({',
+      "  outputFormat: 'program',",
+      '  ...mdxOptions,',
+      '  remarkPlugins: [',
+      '    remarkInclude,',
+      '    ...(mdxOptions.remarkPlugins ?? []),',
+      '    [remarkPostprocess, postprocessOptions],',
+      '  ],',
+      '  format,',
+      '})'], 3),
+    cap: '剩下的正文交给 MDX 编译器 <code>@mdx-js/mdx</code>（fumadocs-mdx 用的第三方库）解析成语法树：每个标题、段落、代码块、组件标签都成了一个节点。后面每道 remark 工序都是在改这棵树。右栏是 fumadocs-mdx 排工序的那段代码：<b>include 永远第一个，postprocess 永远最后一个，中间是集合设置里的插件</b>。' },
+  { who: ['mdx'], at: at(4, { n4: { t: 'paragraph：（env.mdx 的内容）', hl: true }, src6: { hl: true }, dEnv: { o: 1, hl: true }, depList: { o: 1, t2: 'env.mdx' } }),
+    code: code('mdx/src/loaders/mdx/remark-include.ts', 205, 217, [
+      'const { _getProcessor = () => this, _compiler } = parent.data',
+      'let content: string',
+      'try {',
+      "  content = await fs.readFile(targetPath, 'utf-8')",
+      '} catch (e) {',
+      '  throw new Error(`failed to read file ${targetPath}…`)',
+      '}',
+      'const ext = path.extname(targetPath)',
+      '_compiler?.addDependency(targetPath)'], 8),
+    cap: 'remarkInclude 找到 <code>&lt;include&gt;</code>，读出 env.mdx，把它的内容换进这个位置，再调 <code>addDependency</code> 登记依赖。引的是代码文件时，它还能只取其中一段（按 <code>#region</code> 标记）。<b>这就是钉码要的「读别的文件、嵌进来、文件改了重新编译」的现成样板。</b>' },
+  { who: ['core'], at: at(5),
+    code: code('mdx/src/config/preset.ts', 68, 77, [
+      'const remarkPlugins = pluginOption(',
+      '  (v) => [',
+      '    plugins.remarkGfm,',
+      '    [plugins.remarkHeading, { generateToc: false, ...remarkHeadingOptions }],',
+      '    remarkImageOptions !== false && [plugins.remarkImage, …],',
+      '    … remarkCodeTab, remarkNpm …',
+      '    ...v,',
+      '    … remarkStructure …',
+      '  ],'], 2),
+    cap: '从这里开始是 fumadocs-core 提供的默认工序，由 <code>applyMdxPreset</code> 排好顺序。gfm 把表格、任务列表这些 GitHub 写法变成节点（这一页没有，树不变）。' },
+  { who: ['core'], at: at(6, { n1: { t: 'heading（2 级）id="用-pnpm-安装"', hl: true } }),
+    code: code('mdx/src/config/preset.ts', 68, 77, [
+      'const remarkPlugins = pluginOption(',
+      '  (v) => [',
+      '    plugins.remarkGfm,',
+      '    [plugins.remarkHeading, { generateToc: false, ...remarkHeadingOptions }],',
+      '    remarkImageOptions !== false && [plugins.remarkImage, …],',
+      '    … remarkCodeTab, remarkNpm …',
+      '    ...v,',
+      '    … remarkStructure …',
+      '  ],'], 3),
+    cap: '给每个标题生成 id，网址后面的 <code>#用-pnpm-安装</code>、本页目录的跳转都靠它。以后评论要定位到「某一段」，也是在这一层给节点加标记。' },
+  { who: ['core', 'vite'], at: at(7, { n7: { t: 'image：src = 导入的 arch.png', hl: true }, n8: { o: 1, hl: true } }),
+    code: code('mdx/src/config/preset.ts', 78, 84, [
+      'remarkImageOptions !== false && [',
+      '  plugins.remarkImage,',
+      '  {',
+      '    ...remarkImageOptions,',
+      "    useImport: remarkImageOptions?.useImport ?? environment === 'bundler',",
+      '  },',
+      '],'], 4),
+    cap: '本地图片改成 <code>import</code>：树上多出一个导入节点。生成 JS 以后，这个 import 会交还 Vite，由 Vite 打包图片（文件名带哈希）。' },
+  { who: ['core'], at: at(8),
+    code: code('mdx/src/config/preset.ts', 85, 89, [
+      "'remarkCodeTab' in plugins &&",
+      '  remarkCodeTabOptions !== false && [plugins.remarkCodeTab, remarkCodeTabOptions],',
+      "'remarkNpm' in plugins &&",
+      '  remarkNpmOptions !== false && [plugins.remarkNpm, remarkNpmOptions],',
+      '...v,'], 4),
+    cap: '标了 <code>tab</code> 的几个代码块合成一组标签页；<code>```npm</code> 写法展开成 npm / pnpm / yarn 三个标签（这一页没有，树不变）。注意紧跟着的 <code>...v</code>：站点的插件就插在这里。' },
+  { phase: '我们的工序', who: ['ours', 'site'], at: at(9, { n5: { t: '<PinBlock 状态=绿> > code（setup.ts 3-9 行）', hl: true }, n6: { t: '<PinTreeBlock> > <Files> > <Folder>…', hl: true }, src7: { hl: true }, src8: { hl: true }, cfgPin: { hl: true }, dPinned: { o: 1, hl: true }, depList: { t2: 'env.mdx、setup.ts、src/', hl: true } }),
+    code: { file: 'app/lib/source.ts（站点写的；包名、导出名、组件名都暂定）', lines: [
+      "import { applyMdxPreset } from 'fumadocs-mdx/config'",
+      "import { remarkDocfirst } from '@godcreator/docfirst-site/mdx'",
+      'export const docs = defineDocs({',
+      "  dir: 'content/docs',",
+      '  docs: { mdxOptions: applyMdxPreset({ remarkPlugins: [remarkDocfirst()] }) },',
+      '})'], hl: 4 },
+    cap: '站点用 <code>applyMdxPreset({ remarkPlugins: [remarkDocfirst()] })</code> 挂的插件，排在默认工序之后、structure 之前。它做三件事：<br>① 找到 <code>&lt;Pin file lines hash blob /&gt;</code>，读 src/setup.ts 第 3–9 行，和标签上的 hash、blob 比对，算出绿 / 黄 / 红；把 <code>&lt;Pin&gt;</code> 换成<b>钉码代码块</b>：外层是我们的 <code>&lt;PinBlock&gt;</code>（状态点、标题、黄灯时的增删行），里面是一个<b>普通的 code 节点</b>，后面照常交给 Shiki 高亮、用 fumadocs 的代码块显示。<br>② 找到 <code>&lt;PinTree dir depth glob hash /&gt;</code>，列出目录、比对，换成 <code>&lt;PinTreeBlock&gt;</code>，里面是 fumadocs-ui 的 <code>&lt;Files&gt;/&lt;Folder&gt;/&lt;File&gt;</code>。<br>③ 读过的文件和目录都登记依赖。<br>现在的 docfirst 接在 structure <b>之后</b>、也没登记依赖，新设计把这两点改掉。另外还要登记「这个 &lt;Pin&gt; 写成 Markdown 是什么样」，见下一步。' },
+  { who: ['ours', 'core'], at: at(9, { n5: { hl: true }, reg: { o: 1, hl: true, t2: '<Pin> → ```ts title="src/setup.ts:3-9"' } }),
+    code: { file: '钉码插件里处理一个 <Pin>（示意，名字暂定）', lines: [
+      "import { replaceSource } from 'fumadocs-core/mdx-plugins/stringifier'",
+      '',
+      "const code = readLines('src/setup.ts', 3, 9)",
+      '// 登记：这个 <Pin> 写成 Markdown 就是一块代码',
+      'replaceSource(file, pinNode,',
+      "  '```ts title=\"src/setup.ts:3-9\"\\n' + code + '\\n```')",
+      '// 再把节点换成 PinBlock 给网页显示',
+      'parent.children[index] = pinBlock(pinNode, code)'], hl: 4 },
+    cap: '钉码插件还要说明一件事：<b>这个 <code>&lt;Pin&gt;</code> 写成 Markdown 是什么样</b>。做法是调用 fumadocs-core 公开的 <code>replaceSource</code>，按这个节点在原文里的位置登记一段替换文字（左下的登记表）。fumadocs 自己的 include、npm、图片、文件树插件都这样登记。<br>后面需要「整页的 Markdown」的地方都读这张表：fumadocs 的 LLM 输出（第 11 道工序里的 <code>_markdown</code>），以及我们的生成正本（页面最下面那张图）。这样一个组件的 Markdown 形式只写一处，跟组件放在同一个包里。现在的 docfirst 是另写一张名册加一套 <code>renderAi</code>，新设计把它们换成这一步。' },
+  { phase: 'remark 收尾', who: ['core'], at: at(10, { n9: { o: 1, hl: true }, reg: { hl: true } }),
+    code: code('core/src/mdx-plugins/remark-structure.ts', 158, 171, [
+      'if (node.data?.structuredData) {',
+      '  const { contents } = node.data.structuredData',
+      '  records.push(() => {',
+      '    for (const item of contents)',
+      '      data.contents.push({ ...item, heading: item.heading ?? heading })',
+      '  })',
+      '  covered = s.range(node) ?? covered',
+      '  return',
+      '}',
+      'if (!isType(node)) return',
+      '',
+      "// nodes without a source, generated by plugins, and nodes in a record aren't records",
+      'const range = s.range(node)',
+      'if (!range || (covered && s.within(range, covered))) return'], 0),
+    cap: '把标题和正文切成搜索记录，作为 <code>export structuredData</code> 挂到树上，后面的搜索接口用它。注意三点：它<b>只收标题、段落、引用、表格，以及没有子节点的组件标签，代码块默认不收</b>；文字是<b>从作者写的原文里切的</b>，也会读左下那张登记表（只给搜索用的替换可以单独登记在 <code>search</code> 名下）；PinBlock 里包着一个 code 子节点，默认不算一条记录，所以钉进来的代码默认搜不到。<b>口子是节点上的 <code>data.structuredData</code></b>：钉码插件在 PinBlock、PinTreeBlock 节点上挂上它（比如文件路径、函数名），这些内容就替代节点进入搜索记录（右栏第一行）。现在的 docfirst 排在 structure 之后，挂了也没用。' },
+  { who: ['mdx'], at: at(11, { n11: { o: 1, hl: true }, fmData: { hl: true } }),
+    code: code('mdx/src/loaders/mdx/remark-postprocess.ts', 52, 66, [
+      'const frontmatter = (file.data.frontmatter ??= {})',
+      'if (!frontmatter.title) {',
+      '  walk(tree, (node) => {',
+      "    if (node.type === 'heading' && node.depth === 1) {",
+      '      frontmatter.title = flattenNode(node)',
+      '    }',
+      '  })',
+      '}',
+      "file.data['mdx-export'].push({ name: 'frontmatter', value: frontmatter })"], 8),
+    cap: 'fumadocs-mdx 收尾：frontmatter 没写 title，就拿一级标题补上；然后把 frontmatter 等要导出的值写成 export 节点挂到树上。任何 remark 插件往 <code>file.data[\'mdx-export\']</code> 里放的值，也在这里变成导出。' },
+  { phase: 'LLM 输出', who: ['mdx', 'core'], at: at(11, { n10: { o: 1, hl: true }, reg: { hl: true } }),
+    code: code('mdx/src/loaders/mdx/remark-postprocess.ts', 85, 90, [
+      'if (includeProcessedMarkdown) {',
+      '  const llms = remarkLLMs(',
+      "    typeof includeProcessedMarkdown === 'object' ? includeProcessedMarkdown : undefined,",
+      '  )',
+      '  llms(tree, file, () => undefined)',
+      '}'], 1),
+    cap: '<b>fumadocs 的 LLM 功能在编译这一侧就是这一步。</b>集合设置里开了 <code>postprocess: { includeProcessedMarkdown: true }</code>，postprocess 就在这里调用 fumadocs-core 的 <code>remarkLLMs</code>：从作者写的原文切出整页 Markdown，登记过的节点换成登记的文字（<code>&lt;Pin&gt;</code> 换成那块代码），import / export 去掉，结果导出为 <code>_markdown</code>。<br>它只产出一个导出，不写文件。站点运行时用 <code>page.data.getText(\'processed\')</code> 读它，<code>llms.txt</code>、每页 <code>.md</code>、页面上的「复制 Markdown」按钮都靠它（请求时的那一半见全流程大图）。没开就没有这一行；docfirst 的站目前不开。' },
+  { phase: 'rehype', who: ['mdxjs'], at: at(12, { treeTitle: { t: 'HTML 语法树（hast）' }, n1: { t: 'h2 id="用-pnpm-安装"' }, n2: { t: 'p' }, n3: { t: 'pre > code（ts）' }, n4: { t: 'p（env.mdx 的内容）' }, n5: { t: 'PinBlock（组件标签保留）> pre > code' }, n6: { t: 'PinTreeBlock > Files > Folder…（都保留）' }, n7: { t: 'img src={arch.png}' } }),
+    code: NO_CODE('这一步在 @mdx-js/mdx 内部（remark-rehype），fumadocs 没有代码。'),
+    cap: 'MDX 编译器把 Markdown 语法树转成 HTML 语法树：heading 变 h2，paragraph 变 p，code 变 pre。<code>&lt;PinBlock&gt;</code>、<code>&lt;Files&gt;</code> 这类组件标签原样保留，等到渲染时再换成真正的组件；PinBlock 里面那个 code 节点也变成了 pre。' },
+  { who: ['core'], at: at(13, { n3: { t: 'pre（Shiki 已高亮，每个词带颜色）', hl: true }, n5: { t: 'PinBlock > pre（Shiki 已高亮）', hl: true } }),
+    code: code('mdx/src/config/preset.ts', 116, 123, [
+      'const rehypePlugins = pluginOption(',
+      '  (v) => [',
+      '    rehypeCodeOptions !== false && [plugins.rehypeCode, rehypeCodeOptions],',
+      '    ...v,',
+      '    plugins.rehypeToc,',
+      '  ],',
+      '  mdxOptions.rehypePlugins,',
+      ')'], 2),
+    cap: '代码块用 Shiki 高亮，结果直接写进树里。高亮在编译时就做完了，浏览器不用再跑高亮。<b>钉码代码块里的代码也在这一步被高亮</b>：这就是让钉码插件产出普通 code 节点、而不是自己渲染代码的好处，高亮、复制按钮都复用 fumadocs 现成的。' },
+  { who: ['site'], at: at(14),
+    code: code('mdx/src/config/preset.ts', 116, 123, [
+      'const rehypePlugins = pluginOption(',
+      '  (v) => [',
+      '    rehypeCodeOptions !== false && [plugins.rehypeCode, rehypeCodeOptions],',
+      '    ...v,',
+      '    plugins.rehypeToc,',
+      '  ],',
+      '  mdxOptions.rehypePlugins,',
+      ')'], 3),
+    cap: '站点挂的 rehype 插件排在这里（<code>applyMdxPreset({ rehypePlugins: [...] })</code>）。remark 改的是「稿子」：标题、段落、代码块；rehype 改的是「排好版的网页」：<code>h2</code>、<code>pre</code>、带颜色的 <code>span</code>。只有要改的东西在 Markdown 里没有、只在最终 HTML 里才出现时，才需要写 rehype 插件，比如改高亮后的某一行、给外链加 <code>target</code>。钉码放在 remark：它把 <code>&lt;Pin&gt;</code> 换成代码块，高亮就由上一步的 rehypeCode 自动完成。<b>我们目前用不到这个位置。</b>' },
+  { who: ['core'], at: at(15, { n12: { o: 1, hl: true } }),
+    code: code('mdx/src/config/preset.ts', 116, 123, [
+      'const rehypePlugins = pluginOption(',
+      '  (v) => [',
+      '    rehypeCodeOptions !== false && [plugins.rehypeCode, rehypeCodeOptions],',
+      '    ...v,',
+      '    plugins.rehypeToc,',
+      '  ],',
+      '  mdxOptions.rehypePlugins,',
+      ')'], 4),
+    cap: '按 h2、h3 生成本页目录，作为 <code>export toc</code>。fumadocs-ui 右侧的目录就是它。' },
+  { phase: '生成 JS', who: ['mdxjs', 'vite'], at: at(16, { treeTitle: { t: '语法树 → 已生成 JS' }, e0: { o: 1, hl: true }, e1: { o: 1, hl: true }, e2: { o: 1, hl: true }, e3: { o: 1, hl: true }, e4: { o: 1, hl: true }, e5: { o: 1, hl: true }, e6: { o: 1, hl: true } }),
+    code: { file: '生成的 JS（示意）', lines: [
+      "import __img0 from './arch.png'",
+      "export let frontmatter = { title: '安装' }",
+      'export let structuredData = { headings: […], contents: […] }',
+      "export let _markdown = '## 用 pnpm 安装\\n…\\n```ts title=\"src/setup.ts:3-9\"\\n…'",
+      "export let toc = [{ title: '用 pnpm 安装', url: '#用-pnpm-安装', depth: 2 }]",
+      'export default function MDXContent(props) {',
+      "  const _components = { h2: 'h2', p: 'p', pre: 'pre', ...props.components }",
+      '  const { PinBlock, PinTreeBlock, Files, Folder, File } = _components',
+      "  if (!PinBlock) _missingMdxReference('PinBlock', true)",
+      '  return _jsxs(_Fragment, { children: [',
+      "    _jsx(_components.h2, { id: '用-pnpm-安装', children: '用 pnpm 安装' }),",
+      '    …,',
+      "    _jsx(PinBlock, { status: 'fresh', title: 'src/setup.ts:3-9',",
+      '      children: _jsx(_components.pre, { … 高亮好的代码 … }) }),',
+      '    _jsx(PinTreeBlock, { …, children: _jsx(Files, { … }) }),',
+      '  ] })',
+      '}'], hl: 6 },
+    cap: '树变成 JS 交回 Vite。每个标签都写成 <code>_components.xxx</code>，渲染时先查站点传进来的组件映射表：fumadocs-ui 的组件、我们的 <code>PinBlock</code>、<code>PinTreeBlock</code> 就是这样接上的。<b>组件映射表里少了哪个，渲染时直接报错</b>；站点没装钉码插件、<code>&lt;Pin&gt;</code> 原样留到这里，也会报「Pin 没有定义」，不会静默显示空白。' },
+  { phase: '要点一：applyMdxPreset', who: ['mdx', 'site'],
+    at: Object.assign({ cursor: { o: 0 }, cfgPreset: { o: 0.2 }, cfgPin: { t: '{ remarkPlugins: [remarkDocfirst()] }', hl: true }, cfgResult: { t: '= 只剩 include、钉码插件、postprocess', hl: true } },
+      Object.fromEntries(DEFAULT_STATIONS.map(i => ['st' + i, { o: 0.15 }]))),
+    code: code('mdx/src/loaders/mdx/build-default.ts', 119, 128, [
+      'if (collection?.mdxOptions) {',
+      '  const optionsFn = collection.mdxOptions',
+      "  result = typeof optionsFn === 'function' ? optionsFn(environment) : optionsFn",
+      '} else {',
+      '  result = (async () => {',
+      '    const options = … config.global.mdxOptions …',
+      '    return applyMdxPreset(options)(environment)',
+      '  })()',
+      '}'], 2),
+    cap: '如果站点在集合上只写 <code>mdxOptions: { remarkPlugins: [remarkDocfirst()] }</code>、没用 applyMdxPreset 包一层：集合有自己的 mdxOptions 时，fumadocs-mdx 直接拿来用，不再套默认工序。于是灰掉的这几道全部消失：标题没了 id、没有搜索记录、没有本页目录、代码不高亮。<br>写在全局 <code>source.config.ts</code> 的设置会自动套 applyMdxPreset（右栏 else 那一支）。另一个细节是插件写成数组还是函数：<code>remarkPlugins: [x]</code> 插在默认工序中间、structure 之前；<code>remarkPlugins: (defaults) =&gt; [...defaults, x]</code> 接在所有默认工序之后、structure 之后。<b>现在的 docfirst 站用的就是函数写法，所以排在 structure 后面。</b>' },
+  { phase: '要点二：登记依赖', who: ['ours', 'vite'],
+    at: Object.assign({ cursor: { y: ST_Y(0) + 8, o: 1 }, st0: { hl: true }, cfgPreset: { o: 1 }, cfgPin: { t: '　　remarkPlugins: [remarkDocfirst()]' }, cfgResult: { t: '= 默认工序 + 钉码插件' },
+      dPinned: { t: 'src/setup.ts（改了）', hl: true }, depList: { hl: true } },
+      Object.fromEntries(DEFAULT_STATIONS.map(i => ['st' + i, { o: 1 }]))),
+    code: code('mdx/src/loaders/adapter.ts', 114, 118, [
+      'compiler: {',
+      '  addDependency: (file) => {',
+      '    this.addWatchFile(file)',
+      '  },',
+      '},'], 2),
+    cap: 'dev 下改了 src/setup.ts：钉码插件编译时登记过依赖，fumadocs-mdx 把它转成 Vite 的 <code>addWatchFile</code>，Vite 就让 install.mdx 失效，从第 1 步重新编译，钉住的代码和状态点跟着更新。<b>现在的 docfirst 没有登记依赖</b>：dev 下改了被钉的代码，页面不会变，要再存一下 .mdx 或重启。<code>&lt;PinTree&gt;</code> 钉的是目录，目录里增删文件也要能触发，这一点登记单个文件做不到，要另想办法（比如登记目录、或在 dev 下监听）。注意 <code>_compiler</code> 带下划线，是 fumadocs-mdx 内部的东西，不算公开接口，升级时要留意。' },
+];
+
+function showCode(entry) {
+  const boxEl = document.getElementById('code');
+  boxEl.classList.toggle('empty', !!entry.empty);
+  boxEl.querySelector('.file').innerHTML = entry.empty ? '这一步没有 fumadocs 的代码'
+    : entry.href ? `<a href="${entry.href}" target="_blank">${Fig.esc(entry.file)}</a>` : Fig.esc(entry.file);
+  boxEl.querySelector('.lines').innerHTML = entry.empty ? entry.empty
+    : entry.lines.map((l, i) => `<div class="ln ${i === entry.hl ? 'hl' : ''}">${Fig.esc(l) || ' '}</div>`).join('');
+}
+
+STEPS.forEach(s => s.cap = tags(s.who) + ' ' + s.cap);
+const phases = STEPS.map((s, i) => s.phase && { label: s.phase, step: i }).filter(Boolean);
+
+const flow = Fig.scene(document.getElementById('flow'), {
+  height: 750, interval: 4200, draw, init, steps: STEPS,
+  intro: '点「下一步」或「自动播放」，跟着 install.mdx 从原文走到 JS 模块。',
+  onStep(i) {
+    showCode(i < 0 ? NO_CODE('还没开始。') : STEPS[i].code);
+    let current = -1;
+    phases.forEach((p, k) => { if (i >= p.step) current = k; });
+    document.querySelectorAll('#phases button').forEach((b, k) => b.classList.toggle('on', k === current));
+  },
+});
+document.getElementById('caption-slot').appendChild(document.querySelector('#flow .caption'));
+const bar = document.getElementById('phases');
+bar.innerHTML = '<span class="meta">跳到：</span>';
+phases.forEach(p => {
+  const b = document.createElement('button');
+  b.textContent = p.label;
+  b.onclick = () => { flow.stop(); flow.go(p.step); };
+  bar.appendChild(b);
+});
+
+/* 下图：同一个正本的两条路 */
+const COL = [240, 400, 560, 720], COL_W = 135;
+const SITE_Y = [50, 145], CLI_Y = [290, 385];
+function drawOutputs(s, { box, arrowHead }) {
+  const lane = (y, color, title) => {
+    S('rect', { x: 225, y, width: 645, height: 205, rx: 10, fill: `color-mix(in srgb, ${color} 5%, var(--surface))`, stroke: color, 'stroke-width': 1.5 }, s);
+    label(s, 237, y + 20, title, { size: 12, color, weight: 700 });
+  };
+  lane(10, C.mdx, '站点：在 Vite 里，dev 与 build 都走这条（fumadocs-mdx 编译）');
+  lane(250, C.ours, '命令行：docfirst render / confirm / check，不启动 Vite，提交前运行');
+  const arrow = (d, { dashed = false, color = 'var(--muted)' } = {}) =>
+    S('path', Object.assign({ d, fill: 'none', stroke: color, 'stroke-width': 1.5, 'marker-end': arrowHead }, dashed ? { 'stroke-dasharray': '5 4' } : {}), s);
+  const mid = (col) => COL[col] + COL_W / 2;
+  arrow('M210,212 C222,190 222,72 238,72');
+  arrow('M210,238 C222,260 222,312 238,312');
+  [[SITE_Y[0]], [CLI_Y[0]]].forEach(([y]) => [0, 1, 2].forEach(c => arrow(`M${COL[c] + COL_W},${y + 22} H${COL[c + 1] - 2}`)));
+  arrow(`M${mid(1)},${SITE_Y[0] + 44} V${SITE_Y[1] - 2}`);
+  /* 登记表被两道工序读：一条虚线走两行之间的空隙，分两支向上 */
+  const gapY = SITE_Y[0] + 72;
+  arrow(`M${COL[1] + COL_W},${SITE_Y[1] + 16} H${COL[1] + COL_W + 12} V${gapY} H${mid(3) - 20} V${SITE_Y[0] + 46}`, { dashed: true, color: C.core });
+  arrow(`M${mid(2) - 20},${gapY} V${SITE_Y[0] + 46}`, { dashed: true, color: C.core });
+  arrow(`M${mid(2) + 20},${SITE_Y[0] + 44} V${SITE_Y[1] - 2}`);
+  arrow(`M${mid(3) + 20},${SITE_Y[0] + 44} V${SITE_Y[1] - 2}`, { dashed: true });
+  arrow(`M${mid(1)},${CLI_Y[0] + 44} V${CLI_Y[1] - 2}`);
+  arrow(`M${COL[1] + COL_W},${CLI_Y[1] + 16} H${COL[1] + COL_W + 12} V${CLI_Y[0] + 72} H${mid(2) - 20} V${CLI_Y[0] + 46}`, { dashed: true, color: C.core });
+  arrow(`M${mid(3)},${CLI_Y[0] + 44} V${CLI_Y[1] - 2}`);  arrow(`M${COL[3] - 2},${CLI_Y[1] + 22} H${COL[2] + COL_W + 2}`);
+
+  box('doc', { w: 200, h: 56, color: C.mdxjs, t: 'outputs/agents.mdx', t2: '正本，里面有 <Pin>', fs: 12 });
+  const B = (key, color, t, t2, extra = {}) => box(key, Object.assign({ w: COL_W, h: 44, color, t, t2, fs: 11.5 }, extra));
+  B('pPreset', C.core, 'fumadocs 默认工序', 'gfm、标题 id、图片…');
+  B('pOurs', C.ours, 'remarkDocfirst', '换成 PinBlock、登记');
+  B('pStruct', C.core, 'remarkStructure', '切搜索记录');
+  B('pLLMs', C.core, 'remarkLLMs', '开了才运行', { dashed: true });
+  B('reg1', C.core, '登记表', '<Pin> → 一块代码');
+  B('oSearch', C.core, '搜索', '钉码靠 structuredData');
+  B('oRoute', C.core, 'llms.txt、每页 .md', '请求时由路由读出', { dashed: true });
+  B('cParse', C.mdxjs, '解析', 'remark-parse + mdx');
+  B('cOurs', C.ours, 'remarkDocfirst', '同一个插件，更严');
+  B('cLLMs', C.core, 'remarkLLMs', '读登记表出 Markdown');
+  B('cFm', C.ours, '加 frontmatter', 'outputs 点名的字段');
+  B('reg2', C.core, '登记表', '同样的登记');
+  B('old', C.warn, '现在：renderAi', '加一张名册，另一套规则');
+  B('oCheck', C.ours, 'docfirst check', '再出一遍，逐字节比');
+  B('oFiles', C.prod, 'AGENTS.md 等落点', '写成文件，随正本提交');
+  box('pk', { w: 54, h: 22, color: C.ours, t: '<Pin>', fs: 11 });
+}
+const OUT_POS = { pPreset: [0, SITE_Y[0]], pOurs: [1, SITE_Y[0]], pStruct: [2, SITE_Y[0]], pLLMs: [3, SITE_Y[0]],
+  reg1: [1, SITE_Y[1]], oSearch: [2, SITE_Y[1]], oRoute: [3, SITE_Y[1]],
+  cParse: [0, CLI_Y[0]], cOurs: [1, CLI_Y[0]], cLLMs: [2, CLI_Y[0]], cFm: [3, CLI_Y[0]],
+  old: [0, CLI_Y[1]], reg2: [1, CLI_Y[1]], oCheck: [2, CLI_Y[1]], oFiles: [3, CLI_Y[1]] };
+const outInit = { doc: { x: 10, y: 197 }, pk: { x: 82, y: 170, o: 0 } };
+for (const k in OUT_POS) outInit[k] = { x: COL[OUT_POS[k][0]], y: OUT_POS[k][1], o: 0.25 };
+outInit.old.o = 0;
+const pkAt = (k) => ({ x: COL[OUT_POS[k][0]] + COL_W / 2 - 27, y: OUT_POS[k][1] - 24, o: 1 });
+
+const outputsFlow = Fig.scene(document.getElementById('sc-outputs'), {
+  height: 470, interval: 5200, draw: drawOutputs, init: outInit,
+  intro: '点「下一步」，看同一个 &lt;Pin&gt; 的 Markdown 形式被谁读走。',
+  steps: [
+    { at: { doc: { hl: true }, pk: { o: 1 } },
+      cap: '一个正本 <code>content/docs/outputs/agents.mdx</code>，里面有一个 <code>&lt;Pin&gt;</code>。它既是站上的一页，又要生成仓根的 AGENTS.md，所以要走两条路。' },
+    { at: { pPreset: { o: 1 }, pOurs: { o: 1, hl: true }, reg1: { o: 1, hl: true }, pk: pkAt('pOurs') },
+      cap: 'dev 或 build 时，Vite 把它交给 fumadocs-mdx。走过默认工序以后，钉码插件把 <code>&lt;Pin&gt;</code> 换成 PinBlock 给网页显示，同时用 <code>replaceSource</code> 登记它的 Markdown 形式，就是上图第 9 道工序后面那一步。' },
+    { at: { pStruct: { o: 1, hl: true }, oSearch: { o: 1, hl: true }, reg1: { hl: true }, pk: pkAt('pStruct') },
+      cap: 'remarkStructure 切搜索记录时也读这张登记表。但 PinBlock 里包着子节点，默认不算一条记录，钉码要进搜索，得在节点上挂 <code>data.structuredData</code>。' },
+    { at: { pLLMs: { o: 1, hl: true }, oRoute: { o: 1, hl: true }, reg1: { hl: true }, pk: pkAt('pLLMs') },
+      cap: '<b>fumadocs 的 LLM 功能</b>：集合开了 <code>includeProcessedMarkdown</code>，remarkLLMs 读登记表出整页 Markdown，导出成 <code>_markdown</code>；站点运行时，<code>llms.txt</code>、每页 <code>.md</code> 的路由在请求时把它读出来。它不写文件。docfirst 的站现在不开（虚线）；规则统一以后，开不开只是站点自己的选择，出来的文字和生成物一样。' },
+    { at: { cParse: { o: 1, hl: true }, old: { o: 1, hl: true }, pk: pkAt('cParse') },
+      cap: '生成正本走另一条路：<code>docfirst render</code>（<code>confirm</code> 写回钉码记录以后也会顺带生成）在命令行里读同一个 mdx，不启动 Vite。不放进 build 的原因：AGENTS.md、SKILL.md 是给客户端、插件包、Gitea 直接读的文件，站点不运行也得在；让 build 去改仓里受版本管理的文件，不 build 就不更新。<br>现在这一段是 <code>renderAi</code> 加一张名册（左下）：自己写了一套按原文位置改写的规则，跟 fumadocs 的 stringifier 做的是同一件事。' },
+    { at: { cOurs: { o: 1, hl: true }, reg2: { o: 1, hl: true }, old: { o: 0.3, t: '删掉：renderAi', t2: '名册也删掉' }, pk: pkAt('cOurs') },
+      cap: '<b>推荐做法</b>：命令行跑一条普通的 unified 流水线，挂的是和站点<b>同一个</b> remarkDocfirst，只是打开生成正本模式：钉码没确认、钉码缺失，都拒绝生成。它照样用 <code>replaceSource</code> 登记 Markdown 形式。renderAi 和名册删掉。' },
+    { at: { cLLMs: { o: 1, hl: true }, reg2: { hl: true }, pk: pkAt('cLLMs') },
+      cap: '再用 fumadocs-core 公开导出的 <code>remarkLLMs</code> 出 Markdown（关掉标题 id：<code>headingIds: false</code>）。正本里如果有没登记 Markdown 形式的组件，remarkLLMs 会把原样的 JSX 写出来，所以命令行要先查出这种组件并报错。' },
+    { at: { cFm: { o: 1, hl: true }, oFiles: { o: 1, hl: true }, pk: Object.assign(pkAt('oFiles'), { o: 0 }) },
+      cap: '加上 <code>outputs</code> 里点名的 frontmatter 字段（SKILL.md 要 name、description），写到每个落点。生成物和正本放进同一个提交。' },
+    { at: { oCheck: { o: 1, hl: true }, oFiles: { hl: true } },
+      cap: '<code>docfirst check</code> 在提交前再出一遍，和落点逐字节比：一致是绿，不一致报红，要先 render。它和站点 build 无关，站点不运行也能查。' },
+    { at: Object.assign({ pOurs: { hl: true }, cOurs: { hl: true } }, Object.fromEntries(['pPreset', 'pStruct', 'pLLMs', 'reg1', 'oSearch', 'oRoute', 'cParse', 'cLLMs', 'cFm', 'reg2', 'oCheck', 'oFiles'].map(k => [k, { o: 1 }]))),
+      cap: '<b>小结</b>：一个组件的 Markdown 形式只在插件里写一次（<code>replaceSource</code>），有两个读的：remarkStructure 切搜索记录，remarkLLMs 出 Markdown。remarkLLMs 的结果又有两个去处：站点上的 <code>_markdown</code>（可选），命令行写出的生成物。要先做小实验确认：和现在 renderAi 的输出逐字节比对，看差在哪。' },
+  ],
+});
+</script>
+</body>
+</html>

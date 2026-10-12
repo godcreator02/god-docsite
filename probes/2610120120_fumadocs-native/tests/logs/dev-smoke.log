@@ -1,0 +1,72 @@
+[restart] Relaunching with --conditions=development
+[MDX] generated files in 11.841800000000148ms
+[MDX] generated files in 26.752899999999954ms
+  [32m➜[39m  [1mLocal[22m:   [36mhttp://127.0.0.1:[1m5470[22m/[39m
+[2m1:24:43 AM[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m connected.
+ErrorResponseImpl {
+  status: 404,
+  statusText: '',
+  data: 'Not Found',
+  error: undefined,
+  internal: false
+}
+[2m1:25:03 AM[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m [32mpage reload [39m[2m.source/server.ts[22m
+[2m1:25:03 AM[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m program reload
+[MDX] generated files in 22.346600000000763ms
+[2m1:25:03 AM[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m [32mhmr update [39m[2m/app/app.css[22m
+[2m1:25:03 AM[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m [32mpage reload [39m[2m.source/browser.ts[22m
+[2m1:25:03 AM[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m program reload
+[2m1:25:30 AM[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m [32mpage reload [39m[2mcomments/20261012t012503-8t0q/index.mdx[22m
+[2m1:25:30 AM[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m program reload
+[2m1:25:30 AM[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m [32mpage reload [39m[2m.source/browser.ts[22m
+[MDX] generated files in 34.52699999999459ms
+[2m1:25:30 AM[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m [32mpage reload [39m[2m.source/server.ts[22m
+[2m1:25:30 AM[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m [32mhmr update [39m[2m/app/app.css[22m
+[2m1:25:30 AM[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m program reload
+[2m1:25:31 AM[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m [32mpage reload [39m[2m.source/server.ts[22m
+[MDX] generated files in 42.416000000004715ms
+[2m1:25:31 AM[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m [32mpage reload [39m[2m.source/browser.ts[22m
+[2m1:25:31 AM[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m [32mhmr update [39m[2m/app/app.css[22m
+[2m1:25:31 AM[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m program reload
+[2m1:25:31 AM[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m program reload
+[2m1:25:31 AM[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m program reload
+Error: The `request.url` origin does not match `origin` header from a forwarded action request. Aborting the action.
+    at throwIfPotentialCSRFAttack (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/261012_fumadocs-native/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/actions.js:27:67)
+    at handleDocumentRequest (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/261012_fumadocs-native/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/server-runtime/server.js:208:4)
+    at requestHandler (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/261012_fumadocs-native/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/server-runtime/server.js:123:21)
+[2m1:25:31 AM[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m [32mpage reload [39m[2m.source/server.ts[22m
+[2m1:25:31 AM[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m program reload
+[MDX] generated files in 12.186900000000605ms
+[2m1:25:31 AM[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m [32mhmr update [39m[2m/app/app.css[22m
+[2m1:25:31 AM[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m [32mpage reload [39m[2m.source/browser.ts[22m
+[2m1:25:31 AM[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m program reload
+[2m1:25:37 AM[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m [32mpage reload [39m[2m.source/server.ts[22m
+[2m1:25:37 AM[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m program reload
+[MDX] generated files in 12.164700000001176ms
+[2m1:25:37 AM[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m [32mhmr update [39m[2m/app/app.css[22m
+[2m1:25:37 AM[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m [32mpage reload [39m[2m.source/browser.ts[22m
+[2m1:25:37 AM[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m program reload
+[2m1:26:01 AM[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m [32mpage reload [39m[2mcomments/20261012t080000-seed1/20261012t012530-zg1e.mdx[22m
+[2m1:26:01 AM[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m program reload
+[2m1:26:01 AM[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m [32mhmr update [39m[2m/app/app.css[22m
+[MDX] generated files in 12.119699999995646ms
+[2m1:26:01 AM[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m [32mpage reload [39m[2m.source/server.ts[22m
+[2m1:26:01 AM[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m [32mpage reload [39m[2m.source/browser.ts[22m
+[2m1:26:01 AM[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m program reload
+[2m1:26:01 AM[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m program reload
+[2m1:26:02 AM[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m [32mpage reload [39m[2mcomments/20261012t080000-seed1/20261012t012531-yrzc.mdx[22m
+[2m1:26:02 AM[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m program reload
+[2m1:26:02 AM[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m [32mpage reload [39m[2m.source/server.ts[22m
+[MDX] generated files in 16.702100000009523ms
+[2m1:26:02 AM[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m [32mhmr update [39m[2m/app/app.css[22m
+[2m1:26:02 AM[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m [32mpage reload [39m[2m.source/browser.ts[22m
+[2m1:26:02 AM[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m program reload
+[2m1:26:02 AM[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m program reload
+[2m1:26:02 AM[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m [32mpage reload [39m[2mcomments/20261012t080000-seed1/20261012t012537-urgq.mdx[22m
+[2m1:26:02 AM[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m program reload
+[2m1:26:02 AM[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m [32mpage reload [39m[2m.source/server.ts[22m
+[2m1:26:02 AM[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m [32mpage reload [39m[2m.source/browser.ts[22m
+[MDX] generated files in 19.042700000005425ms
+[2m1:26:02 AM[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m [32mhmr update [39m[2m/app/app.css[22m
+[2m1:26:02 AM[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m program reload
+[2m1:26:02 AM[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m program reload

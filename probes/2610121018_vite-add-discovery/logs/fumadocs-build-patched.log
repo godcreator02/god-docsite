@@ -1,0 +1,140 @@
+Using Vite Environment API
+[36mvite v8.3.4 [32mbuilding client environment for production...[36m[39m
+transforming...
+Found 2 warnings while optimizing generated CSS:
+
+Issue #1:
+Γöé     }
+Γöé   }
+Γöé   .\[\&_\:\:highlight\(fd-search\)\]\:text-fd-primary ::highlight(fd-search) {
+Γöå                                                                   ^-- 'highlight' is not recognized as a valid pseudo-element. Did you mean ':highlight' (pseudo-class) or is this a typo?
+Γöå
+Γöé     color: var(--color-fd-primary);
+Γöé   }
+
+Issue #2:
+Γöé     color: var(--color-fd-primary);
+Γöé   }
+Γöé   .\[\&_\:\:highlight\(fd-search\)\]\:underline ::highlight(fd-search) {
+Γöå                                                             ^-- 'highlight' is not recognized as a valid pseudo-element. Did you mean ':highlight' (pseudo-class) or is this a typo?
+Γöå
+Γöé     text-decoration-line: underline;
+Γöé   }
+
+[plugin rolldown:vite-resolve] Module "node:fs/promises" has been externalized for browser compatibility, imported by "D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610121018_vite-add-discovery/node_modules/.pnpm/fumadocs-mdx@15.4.7_@types+_62a8e108b05335cb937a6ed6d5ecb21f/node_modules/fumadocs-mdx/dist/runtime/server.js". See https://vite.dev/guide/troubleshooting.html#module-externalized-for-browser-compatibility for more details.
+[plugin rolldown:vite-resolve] Module "node:fs/promises" has been externalized for browser compatibility, imported by "D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610121018_vite-add-discovery/node_modules/.pnpm/fumadocs-mdx@15.4.7_@types+_62a8e108b05335cb937a6ed6d5ecb21f/node_modules/fumadocs-mdx/dist/runtime/server.js". See https://vite.dev/guide/troubleshooting.html#module-externalized-for-browser-compatibility for more details.
+Γ£ô 2576 modules transformed.
+rendering chunks...
+computing gzip size...
+build/client/.vite/manifest.json                                        15.54 kB Γöé gzip:  1.88 kB
+build/client/assets/root-Df78aodZ.css                                   86.77 kB Γöé gzip: 14.34 kB
+build/client/assets/full-BvRk9kiK.js                                     0.00 kB Γöé gzip:  0.02 kB
+build/client/assets/index-BvRk9kiK.js                                    0.00 kB Γöé gzip:  0.02 kB
+build/client/assets/mdx-BvRk9kiK.js                                      0.00 kB Γöé gzip:  0.02 kB
+build/client/assets/og.docs-BvRk9kiK.js                                  0.00 kB Γöé gzip:  0.02 kB
+build/client/assets/search-BvRk9kiK.js                                   0.00 kB Γöé gzip:  0.02 kB
+build/client/assets/fetch-7Okcibp2.js                                    0.05 kB Γöé gzip:  0.06 kB
+build/client/assets/not-found-CxdBMuZT.js                                0.06 kB Γöé gzip:  0.07 kB
+build/client/assets/__vite-browser-external-2W3EstLn.js                  0.10 kB Γöé gzip:  0.11 kB
+build/client/assets/server.browser-Kej9oXXm.js                           0.11 kB Γöé gzip:  0.11 kB
+build/client/assets/url-BVHvi3_K-Cs729U5G.js                             0.30 kB Γöé gzip:  0.19 kB
+build/client/assets/remove-undefined-CzMSKybq-CP3jfHCp.js                0.33 kB Γöé gzip:  0.22 kB
+build/client/assets/jsx-runtime-NZYk81nU.js                              0.43 kB Γöé gzip:  0.30 kB
+build/client/assets/fetch-DxzKxGhE.js                                    0.61 kB Γöé gzip:  0.41 kB
+build/client/assets/rolldown-runtime-hePW80VL.js                         0.71 kB Γöé gzip:  0.42 kB
+build/client/assets/algolia-DLi4Jcb0.js                                  0.78 kB Γöé gzip:  0.49 kB
+build/client/assets/home-DDcIe0me.js                                     0.94 kB Γöé gzip:  0.51 kB
+build/client/assets/orama-cloud-legacy-XJ3QMniA.js                       1.15 kB Γöé gzip:  0.62 kB
+build/client/assets/orama-cloud-poNelfXA.js                              1.21 kB Γöé gzip:  0.65 kB
+build/client/assets/not-found-BEKR-WP9.js                                1.39 kB Γöé gzip:  0.76 kB
+build/client/assets/preload-helper-BLdHbfdN.js                           1.51 kB Γöé gzip:  0.79 kB
+build/client/assets/mixedbread-DPsc5_Iv.js                               1.68 kB Γöé gzip:  0.88 kB
+build/client/assets/use-search-Dy8lBrbN-JRVgDnD_.js                      1.72 kB Γöé gzip:  0.99 kB
+build/client/assets/root-DBYl0PAg.js                                     3.10 kB Γöé gzip:  1.51 kB
+build/client/assets/react-dom-B-VxWsjA.js                                3.89 kB Γöé gzip:  1.41 kB
+build/client/assets/test.mdx_macro_id_app_2Flib_2Fsource-6W3XW-YJ.js     3.91 kB Γöé gzip:  1.68 kB
+build/client/assets/dist-CMtfAUJf.js                                     4.05 kB Γöé gzip:  1.84 kB
+build/client/assets/index.mdx_macro_id_app_2Flib_2Fsource-7yZ8nt54.js    6.40 kB Γöé gzip:  2.14 kB
+build/client/assets/react-Cvdyeg_0.js                                    7.87 kB Γöé gzip:  3.00 kB
+build/client/assets/lib-DMI3pd40.js                                     10.04 kB Γöé gzip:  4.00 kB
+build/client/assets/space-separated-tokens-dfRxDlVB.js                  18.30 kB Γöé gzip:  6.21 kB
+build/client/assets/home-kUePsCC5.js                                    28.37 kB Γöé gzip:  9.84 kB
+build/client/assets/search-default-C_6r_cs-.js                          29.41 kB Γöé gzip: 11.03 kB
+build/client/assets/errorBoundaries-Bk9Ld3kx.js                         32.25 kB Γöé gzip: 11.32 kB
+build/client/assets/parse-BU3fTLtO-Bhu_yzXI.js                          65.09 kB Γöé gzip: 18.96 kB
+build/client/assets/orama-static-CMQqOTEq.js                            74.97 kB Γöé gzip: 26.15 kB
+build/client/assets/components-I6c1T90H.js                              78.69 kB Γöé gzip: 25.86 kB
+build/client/assets/merge-refs-DJDR772O.js                              91.13 kB Γöé gzip: 33.56 kB
+build/client/assets/docs-CLS7D20v.js                                    91.41 kB Γöé gzip: 30.22 kB
+build/client/assets/layout.shared-QjDW8d14.js                           96.67 kB Γöé gzip: 35.23 kB
+build/client/assets/server.edge-D4Q7HLoW.js                            207.57 kB Γöé gzip: 63.43 kB
+build/client/assets/entry.client-CzUCviOD.js                           211.08 kB Γöé gzip: 66.29 kB
+
+[32mΓ£ô built in 2.54s[39m
+[36mvite v8.3.4 [32mbuilding ssr environment for production...[36m[39m
+transforming...
+Found 2 warnings while optimizing generated CSS:
+
+Issue #1:
+Γöé     }
+Γöé   }
+Γöé   .\[\&_\:\:highlight\(fd-search\)\]\:text-fd-primary ::highlight(fd-search) {
+Γöå                                                                   ^-- 'highlight' is not recognized as a valid pseudo-element. Did you mean ':highlight' (pseudo-class) or is this a typo?
+Γöå
+Γöé     color: var(--color-fd-primary);
+Γöé   }
+
+Issue #2:
+Γöé     color: var(--color-fd-primary);
+Γöé   }
+Γöé   .\[\&_\:\:highlight\(fd-search\)\]\:underline ::highlight(fd-search) {
+Γöå                                                             ^-- 'highlight' is not recognized as a valid pseudo-element. Did you mean ':highlight' (pseudo-class) or is this a typo?
+Γöå
+Γöé     text-decoration-line: underline;
+Γöé   }
+
+Γ£ô 588 modules transformed.
+rendering chunks...
+
+[32mΓ£ô[39m 1 asset cleaned from React Router server build.
+[2mbuild\server\assets\server-build-Df78aodZ.css[22m
+
+computing gzip size...
+build/server/.vite/manifest.json                                         8.34 kB Γöé gzip:   1.13 kB
+build/server/assets/server-build-Df78aodZ.css                           86.77 kB Γöé gzip:  14.34 kB
+build/server/assets/fetch-BZ_C2PhK.js                                    0.05 kB Γöé gzip:   0.07 kB
+build/server/assets/url-BVHvi3_K-O95YmUkP.js                             0.74 kB Γöé gzip:   0.44 kB
+build/server/assets/remove-undefined-CzMSKybq-DHMHsQDm.js                0.85 kB Γöé gzip:   0.43 kB
+build/server/assets/endpoint-MyoBU5IC-DKLf6zag.js                        0.95 kB Γöé gzip:   0.49 kB
+build/server/assets/fetch-CFZlq8-K.js                                    1.05 kB Γöé gzip:   0.60 kB
+build/server/assets/algolia-BivBjbib.js                                  1.36 kB Γöé gzip:   0.69 kB
+build/server/assets/rolldown-runtime-B4iAMlE-.js                         1.58 kB Γöé gzip:   0.74 kB
+build/server/assets/orama-cloud-legacy-rkhdM_-R.js                       2.10 kB Γöé gzip:   0.89 kB
+build/server/assets/orama-cloud-CuGmA6NG.js                              2.14 kB Γöé gzip:   0.91 kB
+build/server/assets/mixedbread-DGpgAd6V.js                               2.82 kB Γöé gzip:   1.22 kB
+build/server/assets/orama-static-CfvnNlXm.js                             2.91 kB Γöé gzip:   1.33 kB
+build/server/assets/use-search-Dy8lBrbN-Cxr6OgVl.js                      3.25 kB Γöé gzip:   1.46 kB
+build/server/assets/test.mdx_macro_id_app_2Flib_2Fsource-Dej0AbIB.js     5.16 kB Γöé gzip:   1.91 kB
+build/server/assets/index.mdx_macro_id_app_2Flib_2Fsource-DZcARGsN.js    7.92 kB Γöé gzip:   2.39 kB
+build/server/assets/server-B_vrqvU3.js                                  13.59 kB Γöé gzip:   4.71 kB
+build/server/assets/space-separated-tokens-BkTuTTG2.js                  33.71 kB Γöé gzip:   8.61 kB
+build/server/assets/search-default-6zoasYf1.js                          71.35 kB Γöé gzip:  19.34 kB
+build/server/assets/advanced-cJMxLDd5-XthnPkt3.js                      154.01 kB Γöé gzip:  37.09 kB
+build/server/assets/dist-CchlGWW6.js                                   203.20 kB Γöé gzip:  49.99 kB
+build/server/assets/parse-BU3fTLtO-zktQxViL.js                         275.62 kB Γöé gzip:  61.27 kB
+build/server/index.js                                                  559.62 kB Γöé gzip: 131.20 kB
+
+[32mΓ£ô built in 683ms[39m
+Prerender (html): / -> [1mbuild\client\index.html[22m
+Prerender (data): /llms.txt -> [1mbuild\client\llms.txt.data[22m
+Prerender (resource): /llms.txt -> [1mbuild\client\llms.txt[22m
+Prerender (data): /llms-full.txt -> [1mbuild\client\llms-full.txt.data[22m
+Prerender (resource): /llms-full.txt -> [1mbuild\client\llms-full.txt[22m
+Prerender (data): /docs -> [1mbuild\client\docs.data[22m
+Prerender (html): /docs -> [1mbuild\client\docs\index.html[22m
+Prerender (data): /og/docs/image.webp -> [1mbuild\client\og\docs\image.webp.data[22m
+Prerender (resource): /og/docs/image.webp -> [1mbuild\client\og\docs\image.webp[22m
+Prerender (data): /docs/test -> [1mbuild\client\docs\test.data[22m
+Prerender (html): /docs/test -> [1mbuild\client\docs\test\index.html[22m
+Prerender (data): /og/docs/test/image.webp -> [1mbuild\client\og\docs\test\image.webp.data[22m
+Prerender (resource): /og/docs/test/image.webp -> [1mbuild\client\og\docs\test\image.webp[22m

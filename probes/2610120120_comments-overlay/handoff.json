@@ -1,0 +1,82 @@
+{
+  "task": "O",
+  "title": "正文外评论悬浮层重写（定点返工后）",
+  "probe": "docsite-kit/probes/2610120120_comments-overlay",
+  "date": "2026-10-12",
+  "revision": "focused-review 返工：多实例高亮、底部卡片、调度去重（parallel-focused-review.md 的 O 节意见全部处理）",
+  "contracts": [
+    "design/zcode-orchestration/package-split-contract.md#K-06",
+    "design/zcode-orchestration/parallel-rewrite-contract.md",
+    "design/zcode-orchestration/parallel-focused-review.md#O覆盖层"
+  ],
+  "exports": {
+    "module": "src/index.ts",
+    "names": [
+      { "name": "CommentOverlay", "kind": "component", "note": "覆盖层主组件，正文容器的兄弟节点渲染；一页可多实例" },
+      { "name": "CommentOverlayProps", "kind": "type" },
+      { "name": "OverlayMarker", "kind": "type", "note": "{ id, count } 宿主聚合后的评论标记" },
+      { "name": "UnplacedReport", "kind": "type", "note": "{ missing, hidden } 无定位上报" },
+      { "name": "MarkerPlacement", "kind": "type", "note": "测量结果：text/element/hidden/missing，含卡片坐标" },
+      { "name": "Box", "kind": "type" },
+      { "name": "CardConstraint", "kind": "type", "note": "卡片视口约束输入：实测卡片高度 + 视口尺寸" },
+      { "name": "HighlightPainter", "kind": "type", "note": "每实例的高亮画笔" },
+      { "name": "measureAllPlacements", "kind": "function", "note": "测量纯函数（含卡片翻转/夹限），包内测试可复用" },
+      { "name": "samePlacements", "kind": "function" },
+      { "name": "defaultCardHeight", "kind": "const", "note": "卡片未渲染时的高度估计 240" },
+      { "name": "overlayCssFor", "kind": "function", "note": "按实例 key 生成 ::highlight() 规则与徽章样式" },
+      { "name": "createHighlightPainter", "kind": "function", "note": "每实例高亮注册与清理（useId 派生注册名）" },
+      { "name": "highlightsAvailable", "kind": "function" }
+    ],
+    "integration": "src/ 四文件并入评论包；仅依赖 react；多实例注册名由 useId 派生，::highlight() 规则按实例注入"
+  },
+  "rework": {
+    "multiInstanceHighlight": "createHighlightPainter + overlayCssFor + useId：注册名每实例独立，卸载只清自己的注册名与样式；CSS.highlights 被环境拆走时清理跳过",
+    "cardViewportConstraint": "constrainCard：下方优先/上方翻转/贴底夹限，水平夹进视口（窄屏）；实测高度经 useLayoutEffect 回量补测；滚动/resize 重算翻转",
+    "scheduleDedup": "150ms setTimeout 仍是事件触发兜底（非轮询）；rAF 与兜底谁先到谁跑并撤销另一个，同一轮只测一次",
+    "unchanged": "正文外兄弟覆盖层、Range 只读测量、不插节点/属性/包裹/拆文本均保持；未为 IAB 输入问题增加任何产品机制"
+  },
+  "checks": {
+    "typecheck": { "command": "pnpm typecheck（本地 ./node_modules/.bin/tsc --noEmit）", "result": "pass" },
+    "test": { "command": "pnpm test", "result": "pass", "count": "31 passed (2 files)" },
+    "build": { "command": "pnpm build", "result": "pass" },
+    "browser": {
+      "result": "self-check passed; final acceptance by main session",
+      "port": 5480,
+      "notes": [
+        "IAB 点击输入通道仍不可用（playwright click 超时重试确认；CUA/DOM 通道也送不进页面）——环境限制，交互用合成事件自检并如实标注，不声称真实操作通过",
+        "双实例注册名 _r_0_/_r_1_ 共存、激活实例一出现独立 active 名与卡片",
+        "底部卡片：目标贴视口底时卡片翻到上方（231..404 vs 目标底 500）且完整在视口内",
+        "滚动跟随、折叠展开/收起双向稳定、两份正文标注类元素 0 个",
+        "一次『展开后徽章未恢复』经排查为自检脚本污染与 IAB 节流抖动，干净复验通过，非组件缺陷"
+      ]
+    }
+  },
+  "dependencies": {
+    "runtime": { "react": "^19.3.0", "react-dom": "^19.3.0" },
+    "dev": {
+      "@types/react": "^19.3.0",
+      "@types/react-dom": "^19.3.0",
+      "@types/node": "^26.6.2",
+      "@vitejs/plugin-react": "^6.1.2",
+      "jsdom": "^30.1.2",
+      "typescript": "^6.0.3",
+      "vite": "^8.3.0",
+      "vitest": "^5.0.1"
+    },
+    "isolation": "本地 node_modules/.bin 调用工具；未用 pnpm exec 共享 workspace install；本轮未改任何依赖版本"
+  },
+  "issuesFound": [
+    "jsdom 30 已带原生 Highlight API（Set 形态）：fake 需 defineProperty 强制覆盖，构造器按原生收 rest 参数",
+    "『卸载清理』用例把正文移出 React 树后未删，残留 #body/#quote 污染后续用例查询（已在该用例收尾删除）"
+  ],
+  "unfinished": [
+    "真实浏览器最终验收由主会话真实操作（fixture 就绪，pnpm preview 端口 5480）",
+    "首测坐标一次性竞态（约 882px）已防御未归因（scroll restoration 疑似）",
+    "卡片若需『粘性跟随目标、贴底才翻』的交互，集成时在 constrainCard 上再调"
+  ],
+  "writeRelease": {
+    "written": "仅 docsite-kit/probes/2610120120_comments-overlay/ 内的 src/、test/、README.md、result.md、handoff.json 与本地 dist/ 构建产物",
+    "untouched": "其他 probe 目录、packages/、plugins/、site/、父 workspace 与 lock、台账、其他仓；依赖版本未改",
+    "services": "端口 5480 preview 已在交回前停止"
+  }
+}

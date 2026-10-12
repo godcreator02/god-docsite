@@ -1,0 +1,24 @@
+---
+title: 折叠定位试验
+---
+
+import { AriaToggle } from './collapse-target/aria-toggle'
+import { PlainToggle } from './collapse-target/plain-toggle'
+
+说明：下面几块内容各自能收起来，收起来以后评论要能指出在收起的哪一块里、点评论自动打开。
+
+## ARIA 折叠块
+
+<Accordion title="ARIA 折叠：内容还在页面上">
+  aria 藏着的一句话：收起时这句话还在页面里，只是藏看不见。
+</Accordion>
+
+<AriaToggle title="ARIA 展开：内容从页面拿掉">
+  aria 拿掉的一句话：收起时这句话从页面上拿掉。
+</AriaToggle>
+
+## 无 ARIA 的组件
+
+<PlainToggle title="没写 ARIA 的展开块">
+  没有 ARIA 的组件里的一句话：收起后认不出该点哪个按钮。
+</PlainToggle>

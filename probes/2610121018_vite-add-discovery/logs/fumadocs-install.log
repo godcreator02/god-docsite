@@ -1,0 +1,17 @@
+Scope: all 2 workspace projects
+Γ£ô Lockfile passes supply-chain policies (verified 5m ago)
+Progress: resolved 0, reused 453, downloaded 0, added 0
+Progress: resolved 116, reused 455, downloaded 0, added 101
+Progress: resolved 199, reused 455, downloaded 0, added 184
+Progress: resolved 273, reused 456, downloaded 0, added 258
+Progress: resolved 333, reused 456, downloaded 0, added 319
+Progress: resolved 390, reused 457, downloaded 0, added 377
+Progress: resolved 421, reused 457, downloaded 0, added 411
+Progress: resolved 432, reused 457, downloaded 0, added 428
+Progress: resolved 432, reused 457, downloaded 0, added 429
+Progress: resolved 432, reused 457, downloaded 0, added 430
+Packages: +434 -3
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++-
+Progress: resolved 434, reused 457, downloaded 0, added 434, done
+[WARN] Issues with peer dependencies found. Run "pnpm peers check" to list them.
+Done in 17.3s using pnpm v12.4.2

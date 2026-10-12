@@ -1,0 +1,77 @@
+{
+  "task": "J",
+  "package": "@godcreator/docsite-comments",
+  "packageDir": "packages/docsite-comments",
+  "completedAt": "2026-10-11",
+  "writablePaths": ["packages/docsite-comments", "probes/2610112023_docsite-kit-complete/package-split/comments"],
+  "changes": {
+    "created": [
+      "packages/docsite-comments/package.json (private, version 0.0.0)",
+      "packages/docsite-comments/tsconfig.json",
+      "packages/docsite-comments/tsconfig.build.json",
+      "packages/docsite-comments/styles.css",
+      "packages/docsite-comments/README.md",
+      "packages/docsite-comments/src/index.ts",
+      "packages/docsite-comments/src/comments.ts",
+      "packages/docsite-comments/src/comment-ranges.ts",
+      "packages/docsite-comments/src/page-text-rules.ts",
+      "packages/docsite-comments/src/comment-links.ts",
+      "packages/docsite-comments/src/server/index.ts",
+      "packages/docsite-comments/src/server/comments.ts",
+      "packages/docsite-comments/src/server/comment-files.ts",
+      "packages/docsite-comments/src/server/page-text.ts",
+      "packages/docsite-comments/src/browser/index.ts",
+      "packages/docsite-comments/src/browser/comment-anchors.ts",
+      "packages/docsite-comments/src/react/index.ts",
+      "packages/docsite-comments/src/react/comments.tsx",
+      "packages/docsite-comments/src/react/comment-cards.tsx",
+      "packages/docsite-comments/src/react/all-comments.tsx",
+      "packages/docsite-comments/test/comments.test.ts",
+      "packages/docsite-comments/test/comment-ranges.test.ts",
+      "packages/docsite-comments/test/comment-files.test.ts",
+      "packages/docsite-comments/test/comment-requests.test.ts",
+      "packages/docsite-comments/test/page-text.test.ts"
+    ],
+    "modifiedOutsideWritablePaths": [],
+    "oldPackageUntouched": true,
+    "identityPackageUntouched": true
+  },
+  "exports": {
+    ".": ["commentFrontmatterSchema", "commentThreadsOf", "commentThreadsByPage", "commentablePagesOf", "assertCommentPagesExist", "assertCommentAuthorsKnown", "commentRoutePatternOf", "commentFileName", "isThreadHeadFile", "isCommentRange", "isCommentOpeners", "snapshotMismatchOf", "commentElementKinds", "commentSnapshotFile", "diffOfTexts", "mapRangeThroughDiff", "createRangeMapper", "atomicCharacter", "commentScopeAttribute", "commentUiAttribute", "pageTextRoleOf", "commentLinkOf", "linkedCommentParam"],
+    "./server": ["commentRequestResponse", "commentSourceResponse", "commentSnapshotsOf", "readCommentThreads", "commentSiteProblems", "commentThreadIdsAbout", "pageTextOfHtml"],
+    "./browser": ["pageTextOf", "rangeOfOffsets", "offsetsOfRange", "elementOffsetsOf", "elementKindOf", "pickedElementOf", "openerRangesOf", "openerLabelOf", "placeOfThread", "elementLabelOf", "anchorLabelOf", "commentUiAttribute"],
+    "./react": ["PageComments", "AllComments", "commentScopeAttribute", "commentScopeProps", "CommentEditor", "CommentItem", "ThreadView", "PeopleContext", "postComment", "rememberThreadToOpen", "recentThreadToOpen"],
+    "./styles.css": "样式：原文高亮 ::highlight、被批元素画框、批注十字光标、:root 自有 token --docsite-comments-sidebar-width: 340px"
+  },
+  "siteIntegration": {
+    "PageCommentsProps": ["page", "threads", "snapshots", "commenter", "people", "renderBody(正文由站点传入，包不导入组件表)", "apiUrl?", "children(正文容器带 commentScopeProps)"],
+    "AllCommentsProps": ["threads", "people", "commenter", "aboutMe", "pageTitles", "renderBody", "apiUrl?"],
+    "CommentRequestOptions": ["commenter(宿主服务端身份解析，null 即只读 403)", "identity(身份包 siteIdentity() 结果)", "people(身份包 sitePeople())", "pageUrls", "commentRoutes?", "commentsDir?(默认 <cwd>/comments)", "pageHtmlOf?", "siteOrigin(必填，authorizeWrite 按 it 核对请求 Origin)"],
+    "stylesLoading": "站点 app.css 引入 @godcreator/docsite-comments/styles.css（内含 @source './src' 供 Tailwind 扫类名）；组件类名沿用 fd-*，须宿主提供 fumadocs 主题；评论侧栏宽度用包 token --docsite-comments-sidebar-width，站点要目录列同宽就把两边设成同一个值；旧包 styles.css 的 fumadocs 布局让位段属站点，未迁"
+  },
+  "commandsRun": [
+    { "command": "pnpm exec tsc --noEmit (新包目录)", "exitCode": 2, "note": "意外触发 pnpm 隐式安装（见 risks.implicitInstall），并暴露 1 个 JSX 笔误（已修）" },
+    { "command": "./node_modules/.bin/tsc --noEmit", "exitCode": 2, "note": "8 处 Cannot find module '@godcreator/docsite-identity*'（I 会话包无 dist）+ 2 处连带 TS18046；identity 就位后应清零" },
+    { "command": "./node_modules/.bin/vitest run test/comment-ranges.test.ts test/page-text.test.ts", "exitCode": 0, "note": "13/13 通过" },
+    { "command": "./node_modules/.bin/vitest run test/comments.test.ts test/comment-files.test.ts test/comment-requests.test.ts", "exitCode": 1, "note": "3 文件全挂在 identity 模块解析，0 用例执行，待集成" },
+    { "command": "对照：旧包 packages/docsite-kit 里 vitest run test/page-text.test.ts", "exitCode": 0, "note": "6/6 通过，用于定位 U+00A0 抄写差异" }
+  ],
+  "pendingIntegration": [
+    "I 会话交付并构建 identity（dist）后重跑 tsc --noEmit 与三个 identity 依赖的测试文件（用例已按新入口与新 Origin 预期写好）",
+    "authorizeWrite 的 Origin 缺失/不匹配 403、as 未知 400、as 冒充人 403 只断言了状态码，消息文本由身份包定",
+    "仓根正式 pnpm install 重建 lock 的新包条目 + 新包 pnpm check + 旧包回归",
+    "验证站接入后实测：读评论、写回复、解决/重开、只读拒写、collapse-test 等价定位样本"
+  ],
+  "knownDeltasAndRisks": [
+    "siteProblems(siteDir) 改为 commentSiteProblems(commentsDir, people)：人员显式传入，不再 process.cwd 读另一包人员配置",
+    "CommentRequestOptions 新增必填 siteOrigin 与 identity；身份/as/Origin 校验移交身份包 authorizeWrite，旧 actorOf 删除；只读 403 文案与作者编辑/删除鉴权保留",
+    "评论侧栏宽度 token 由旧 --docsite-side-column-width 改为包自有 --docsite-comments-sidebar-width（默认同为 340px）；旧包 fumadocs 布局让位段（#nd-docs-layout/#nd-toc/全宽）属站点布局未迁",
+    "组件类名沿用 fd-*（fumadocs 主题色），宿主须提供；高亮/画框/光标样式不依赖 fd 变量",
+    "MDX 编译校验为 @mdx-js/mdx 默认配置，与宿主 fumadocs-mdx 集合的 remark/rehype 对齐未实现（代码注释与 README 已声明）",
+    "themeSwitchWithIdentity / CommenterChip / 旧包 Avatar 转出口不迁：主题切换属站点，身份显示用身份包 /react 的 IdentityBadge 与 Avatar",
+    "sessionStorage key 改名 docsite-comments:open-comment-thread，与旧实现 15 秒窗口内不互通（无实际影响）",
+    "折叠适配与取字沿用旧 DOM/ARIA 假设（role=tab、aria-expanded、details、hidden=until-found），未替换，待 K 站上抽检",
+    "implicitInstall：pnpm exec 在新包触发了 pnpm 隐式安装，短暂写入 pnpm-lock.yaml（+61 行，仅新包 importer 条目），已 git checkout 恢复至 HEAD；新包与 identity 的 node_modules 链接留在原处（被 .gitignore 忽略，K 正式 install 会重建）"
+  ],
+  "leftoverProcesses": "无（仅运行过 tsc/vitest，均已退出；未启动开发服务）"
+}

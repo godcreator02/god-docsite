@@ -1,0 +1,5 @@
+[
+  { "id": "zhou", "name": "小周", "codes": ["acc1111code1"] },
+  { "id": "li", "name": "小李", "codes": ["acc2222code2"] },
+  { "id": "acceptance-agent", "name": "验收 agent", "agent": true }
+]

@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="360" height="180" viewBox="0 0 360 180">
+  <rect width="360" height="180" fill="#fafafa"/>
+  <circle cx="150" cy="90" r="70" fill="#3b82f6" fill-opacity="0.25" stroke="#3b82f6" stroke-width="2"/>
+  <circle cx="210" cy="90" r="70" fill="#f97316" fill-opacity="0.25" stroke="#f97316" stroke-width="2"/>
+  <text x="115" y="95" font-size="16" fill="#1e3a8a">集合 A</text>
+  <text x="215" y="95" font-size="16" fill="#7c2d12">集合 B</text>
+  <text x="60" y="170" font-size="12" fill="#52525b">docs：启用术语插件 · notes：不启用</text>
+</svg>

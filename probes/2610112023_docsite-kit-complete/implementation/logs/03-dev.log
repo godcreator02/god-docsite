@@ -1,0 +1,74 @@
+$ react-router dev --port 5460 --host 127.0.0.1 --strictPort
+[restart] Relaunching with --conditions=development
+adding `isbot@5` to your package.json, you should commit this change
+Γ£ô Lockfile passes supply-chain policies (verified 19s ago)
+Lockfile is up to date, resolution step is skipped
+Already up to date
+
+dependencies:
++ isbot 5.2.2
+
+Done in 341ms using pnpm v12.4.2
+[MDX] generated files in 9.757200000000012ms
+[MDX] generated files in 14.903999999999996ms
+  [32mΓ₧£[39m  [1mLocal[22m:   [36mhttp://127.0.0.1:[1m5460[22m/[39m
+[2m8:32:02 PM[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m connected.
+[2m8:32:34 PM[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m [32mpage reload [39m[2m.source/server.ts[22m
+[2m8:32:34 PM[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m program reload
+[2m8:32:34 PM[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m [32mpage reload [39m[2m.source/browser.ts[22m
+[2m8:32:34 PM[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m program reload
+[2m8:32:57 PM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mdependency optimized: [33mreact-dom/server[32m[39m
+Error: No route matches URL "/favicon.ico"
+    at getInternalRouterError (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/261011_docsite-kit-complete/site/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/router/router.js:2779:58)
+    at Object.query (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/261011_docsite-kit-complete/site/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/router/router.js:1495:16)
+    at handleDocumentRequest (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/261011_docsite-kit-complete/site/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/server-runtime/server.js:213:36)
+    at requestHandler (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/261011_docsite-kit-complete/site/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/server-runtime/server.js:123:21)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+ErrorResponseImpl {
+  status: 404,
+  statusText: 'Not Found',
+  data: 'Error: No route matches URL "/favicon.ico"',
+  error: Error: No route matches URL "/favicon.ico"
+      at getInternalRouterError (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/261011_docsite-kit-complete/site/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/router/router.js:2779:58)
+      at Object.query (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/261011_docsite-kit-complete/site/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/router/router.js:1495:16)
+      at handleDocumentRequest (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/261011_docsite-kit-complete/site/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/server-runtime/server.js:213:36)
+      at requestHandler (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/261011_docsite-kit-complete/site/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/server-runtime/server.js:123:21)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5),
+  internal: true
+}
+Error: No route matches URL "/favicon.ico"
+    at getInternalRouterError (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/261011_docsite-kit-complete/site/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/router/router.js:2779:58)
+    at Object.query (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/261011_docsite-kit-complete/site/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/router/router.js:1495:16)
+    at handleDocumentRequest (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/261011_docsite-kit-complete/site/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/server-runtime/server.js:213:36)
+    at requestHandler (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/261011_docsite-kit-complete/site/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/server-runtime/server.js:123:21)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+ErrorResponseImpl {
+  status: 404,
+  statusText: 'Not Found',
+  data: 'Error: No route matches URL "/favicon.ico"',
+  error: Error: No route matches URL "/favicon.ico"
+      at getInternalRouterError (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/261011_docsite-kit-complete/site/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/router/router.js:2779:58)
+      at Object.query (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/261011_docsite-kit-complete/site/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/router/router.js:1495:16)
+      at handleDocumentRequest (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/261011_docsite-kit-complete/site/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/server-runtime/server.js:213:36)
+      at requestHandler (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/261011_docsite-kit-complete/site/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/server-runtime/server.js:123:21)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5),
+  internal: true
+}
+Error: No route matches URL "/favicon.ico"
+    at getInternalRouterError (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/261011_docsite-kit-complete/site/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/router/router.js:2779:58)
+    at Object.query (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/261011_docsite-kit-complete/site/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/router/router.js:1495:16)
+    at handleDocumentRequest (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/261011_docsite-kit-complete/site/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/server-runtime/server.js:213:36)
+    at requestHandler (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/261011_docsite-kit-complete/site/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/server-runtime/server.js:123:21)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+ErrorResponseImpl {
+  status: 404,
+  statusText: 'Not Found',
+  data: 'Error: No route matches URL "/favicon.ico"',
+  error: Error: No route matches URL "/favicon.ico"
+      at getInternalRouterError (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/261011_docsite-kit-complete/site/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/router/router.js:2779:58)
+      at Object.query (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/261011_docsite-kit-complete/site/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/router/router.js:1495:16)
+      at handleDocumentRequest (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/261011_docsite-kit-complete/site/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/server-runtime/server.js:213:36)
+      at requestHandler (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/261011_docsite-kit-complete/site/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/server-runtime/server.js:123:21)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5),
+  internal: true
+}

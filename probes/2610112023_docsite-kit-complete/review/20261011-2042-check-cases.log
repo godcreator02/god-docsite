@@ -1,0 +1,72 @@
+PASS  G1-mdx-title                 resource-page.mdx 要有 frontmatter title
+PASS  G1-mdx-image                 resource-page.mdx 引用相对路径 figure.svg
+PASS  G1-figure                    figure.svg 是 SVG
+PASS  G1-include                   shared-note.md 有正文
+PASS  G1-tsx-meta                  demo.page.tsx 导出 meta.title
+PASS  G1-tsx-import                demo.page.tsx 引用同目录组件
+PASS  G1-tsx-interactive           counter-panel.tsx 有状态与 effect
+PASS  G1-tsx-ui                    counter-panel.tsx 提供计数与输入
+PASS  G1-html-title                html-figure.html 有 <title>
+PASS  G1-html-scheme               html-figure.html 声明 color-scheme
+PASS  G1-html-image                html-figure.html 引用相对路径图片
+PASS  G2-plugin-nodefs             插件用 node:fs，保证 Node-only
+PASS  G2-plugin-marker             插件写入唯一标记 A-COLLECTION-NODE-MARKER
+PASS  G2-plugin-proof              package-proof.json 可解析
+PASS  G2-a-title                   collection-a.mdx 有 title
+PASS  G2-b-title                   collection-b.mdx 有 title
+PASS  G2-a-anchor                  A 集合样本有正文锚段
+PASS  G2-b-anchor                  B 集合样本有正文锚段
+PASS  G2-b-clean                   B 集合样本源文件不含 A 的标记字符串
+PASS  G4-dup-step1                 step1 恰好三句一样的话
+PASS  G4-dup-step2                 step2 删成两句
+PASS  G4-dup-step3                 step3 删成两句
+PASS  G4-dup-prefix                step2 与 step1 前文一致
+PASS  G4-dup-suffix                step2 与 step1 后文一致
+PASS  G4-dup-steps-equal           step2 与 step3 最终文本相同（差异只在语义：删的是哪一句）
+PASS  G4-collapse-imports          collapse-target.mdx 引用两个展开组件
+PASS  G4-collapse-anchor           collapse-target.mdx 含被批锚句
+PASS  G4-aria-attrs                ARIA 版组件带 aria-expanded 与 aria-controls
+PASS  G4-plain-noaria              反面样本确实没写 ARIA
+PASS  G4-2026-10-11-duplicate-line-2-required index.mdx 有 author 与 createdAt
+PASS  G4-2026-10-11-duplicate-line-2-author author zhou 在 people.json 里
+PASS  G4-2026-10-11-duplicate-line-2-page page 以 / 开头
+PASS  G4-2026-10-11-duplicate-line-2-one-anchor quote 与 element 只写一个
+PASS  G4-2026-10-11-duplicate-line-2-range range 是 [开始, 结束]
+PASS  G4-2026-10-11-duplicate-line-2-snapshot snapshot.txt 非空
+PASS  G4-2026-10-11-duplicate-line-2-quote-slice quote 要等于快照 range 那一段（得到 "同一句话。"）
+PASS  G4-2026-10-11-duplicate-line-2-reply-agree-fields 回复不得带发起字段（发现 ）
+PASS  G4-2026-10-11-duplicate-line-2-reply-agree-author 回复 author li 在 people.json 里
+PASS  G4-2026-10-11-collapse-inside-required index.mdx 有 author 与 createdAt
+PASS  G4-2026-10-11-collapse-inside-author author zhou 在 people.json 里
+PASS  G4-2026-10-11-collapse-inside-page page 以 / 开头
+PASS  G4-2026-10-11-collapse-inside-one-anchor quote 与 element 只写一个
+PASS  G4-2026-10-11-collapse-inside-range range 是 [开始, 结束]
+PASS  G4-2026-10-11-collapse-inside-snapshot snapshot.txt 非空
+PASS  G4-2026-10-11-collapse-inside-quote-slice quote 要等于快照 range 那一段（得到 "aria 拿掉的一句话：收起时这句话从页面上拿掉。"）
+PASS  G4-2026-10-11-collapse-inside-opener-range opener [102,117] 在快照范围内
+PASS  G4-2026-10-11-collapse-inside-reply-plain-toggle-fields 回复不得带发起字段（发现 ）
+PASS  G4-2026-10-11-collapse-inside-reply-plain-toggle-author 回复 author li 在 people.json 里
+PASS  G5-people-shape              people.json 至少三个人（两人一 agent）
+PASS  G5-people-id                 id zhou 字符合法
+PASS  G5-people-name               zhou 有 name
+PASS  G5-person-codes              人员 zhou 有 codes
+PASS  G5-code-format               身份码 acc1111code1 是 12 位小写字母数字
+PASS  G5-code-unique               身份码 acc1111code1 不重复
+PASS  G5-people-id                 id li 字符合法
+PASS  G5-people-name               li 有 name
+PASS  G5-person-codes              人员 li 有 codes
+PASS  G5-code-format               身份码 acc2222code2 是 12 位小写字母数字
+PASS  G5-code-unique               身份码 acc2222code2 不重复
+PASS  G5-people-id                 id acceptance-agent 字符合法
+PASS  G5-people-name               acceptance-agent 有 name
+PASS  G5-agent-no-codes            agent acceptance-agent 不写 codes
+PASS  G5-http-cases                拒写样例至少四条
+PASS  G5-http-origin               有伪造 Origin 与 403 预期
+PASS  G5-http-as                   覆盖 as 冒充人员与 as 声明 agent
+PASS  G6-feed-shape                demo.step0-initial.json 有 message 与 seq
+PASS  G6-feed-shape                demo.step1-edited.json 有 message 与 seq
+PASS  G6-feed-shape                demo.step2-readded.json 有 message 与 seq
+PASS  G6-feed-distinct             三个阶段的 message 互不相同，页面才能区分
+PASS  G6-feed-keys-same            同一频道的 JSON 顶层键一致
+
+70/70 项通过

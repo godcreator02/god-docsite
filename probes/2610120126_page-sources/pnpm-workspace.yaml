@@ -1,0 +1,12 @@
+# 截断向上的 workspace 查找：本 probe 独立装依赖，不进 docsite-kit 仓的 workspace，lock 也留在这里
+
+packages:
+  - lib
+  - site
+
+# 照仓根的写法：esbuild 的安装脚本放行（vite 依赖它），其余默认拒绝
+allowBuilds:
+  '@parcel/watcher': false
+  esbuild: true
+onlyBuiltDependencies:
+  - esbuild

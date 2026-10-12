@@ -1,0 +1,5 @@
+[
+  { "id": "zk", "name": "任务K", "codes": ["k8v1r2w3x4"] },
+  { "id": "zk-agent", "name": "K的代理", "agent": true },
+  { "id": "other", "name": "另一位" }
+]

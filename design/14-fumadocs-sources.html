@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>fumadocs 内容来源导读</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<main>
+
+<p class="crumbs"><a href="index.html">← 目录</a>　·　<a href="10-fumadocs-overview.html">fumadocs 源码导读</a>　·　4 / 5</p>
+<h1>内容来源：local-md、local-html 与自己写一种来源</h1>
+<p class="lead">fumadocs-mdx 只是来源之一。官方还有一批「运行时来源」：不经打包器，运行时读文件、编译、渲染。看懂它们，就知道我们的 TSX 页面、HTML 页面、评论这类东西该怎么做成来源。</p>
+
+<nav class="toc"><ol>
+  <li><a href="#contract">来源要交出什么</a></li>
+  <li><a href="#two">两类来源</a></li>
+  <li><a href="#local">local-content：运行时来源的公共部分</a></li>
+  <li><a href="#md">local-md</a></li>
+  <li><a href="#html">local-html：HTML 怎么显示</a></li>
+  <li><a href="#site">站点里怎么接</a></li>
+  <li><a href="#adapters">其他适配器与 story、preview</a></li>
+  <li><a href="#own">自己写一种来源的正确做法</a></li>
+</ol></nav>
+
+<h2 id="contract">来源要交出什么</h2>
+<p>loader 只认 <code>title</code>、<code>description</code>、<code>icon</code>、<code>structuredData</code>（见<a href="12-fumadocs-core-source.html#source">上一页</a>）。正文和目录由路由自己取。官方几个运行时来源都遵守同一个写法：</p>
+<pre><code>data: {
+  title, description, icon,
+  structuredData: () =&gt; Promise&lt;StructuredData&gt;,     // 搜索要的时候才编译
+  load: () =&gt; Promise&lt;Renderer&gt;,                     // 用 ??= 缓存，最多编译一次
+}
+Renderer = { render(components) =&gt; { body, toc }, structuredData, serialize?() }</code></pre>
+<p class="meta"><a class="src" href="https://github.com/fuma-nama/fumadocs/blob/fumadocs%4016.17.1/packages/local-md/src/index.ts#L64-L76">local-md/src/index.ts:64-76</a>、<a class="src" href="https://github.com/fuma-nama/fumadocs/blob/fumadocs%4016.17.1/packages/local-html/src/index.ts#L47-L57">local-html/src/index.ts:47-57</a></p>
+<div class="card warn"><p><strong>标题 id 要三处一致</strong>：页面 DOM 里的 id、目录项的 <code>url</code>（<code>#id</code>）、<code>structuredData.headings[].id</code>。搜索结果跳转靠它。</p></div>
+
+<h2 id="two">两类来源</h2>
+<div class="table-wrap"><table>
+  <tr><th></th><th>构建时来源</th><th>运行时来源</th></tr>
+  <tr><td>例子</td><td>fumadocs-mdx、content-collections、fuma-content</td><td>local-md、local-html、obsidian、python</td></tr>
+  <tr><td>谁编译</td><td>打包器（Vite transform）</td><td>站点服务端，请求时编译</td></tr>
+  <tr><td>交给 loader 的</td><td><code>StaticSource</code>，<code>structuredData</code> 是现成的值，<code>body</code> 是组件</td><td><code>DynamicSource</code>，<code>load()</code> 懒编译，<code>structuredData</code> 是函数</td></tr>
+  <tr><td>能不能执行代码</td><td>能，页面就是模块（可以 import 组件）</td><td>不能直接执行；local-md 的 MDX 用 <code>new AsyncFunction</code> 执行编译结果</td></tr>
+  <tr><td>开发时更新</td><td>打包器的模块图</td><td>自己监视文件、让缓存失效、通知浏览器刷新</td></tr>
+</table></div>
+<p>适配器的共同模式：外部系统负责扫描和编译，适配器只做「条目 → 虚拟文件」的映射，slug、url、页面树交给 loader。</p>
+
+<h2 id="local">local-content：运行时来源的公共部分</h2>
+<p><code>@fumadocs/local-content</code> 0.2.2 是给运行时来源复用的。写一个新来源只需要实现一个接口（<a class="src" href="https://github.com/fuma-nama/fumadocs/blob/fumadocs%4016.17.1/packages/local-content/src/integration.ts#L19-L29">integration.ts:19-29</a>）：</p>
+<pre><code>interface ContentIntegration {
+  include: string[]                                   // 例如 ['**/*.{md,mdx}', '**/meta.json']
+  parse(file: { path; absolutePath; read() }):        // 返回 undefined 表示跳过
+    { type: 'page' | 'meta'; data } | undefined
+}</code></pre>
+<ul>
+  <li><strong>扫描与缓存</strong>：每次取文件列表都重新匹配（所以增删文件自然被发现）；按绝对路径复用已解析结果；100 个并发；解析出错只打印、跳过这个文件（<a class="src" href="https://github.com/fuma-nama/fumadocs/blob/fumadocs%4016.17.1/packages/local-content/src/storage.ts#L28-L65">storage.ts:28-65</a>）。</li>
+  <li><strong>对象引用稳定</strong>：用 <code>WeakMap&lt;解析结果, 虚拟文件&gt;</code> 保证没变的文件始终是同一个对象，正好配合 <code>dynamicLoader</code> 的「比引用」（<a class="src" href="https://github.com/fuma-nama/fumadocs/blob/fumadocs%4016.17.1/packages/local-content/src/source.ts#L49-L98">source.ts:49-98</a>）。</li>
+  <li><strong>改内容</strong>要调 <code>invalidateFile</code> 丢掉缓存，之后生成新对象，loader 随之重建。</li>
+  <li><strong>Vite 监视器</strong> <code>localContentPlugin()</code>：把内容目录加进 Vite 的监视器，收到增删改就失效对应文件，再发 <code>full-reload</code> 让浏览器整页刷新。Vite 插件和来源在两份模块实例里，所以用 <code>globalThis[Symbol.for(…)]</code> 放进程级登记表（<a class="src" href="https://github.com/fuma-nama/fumadocs/blob/fumadocs%4016.17.1/packages/local-content/src/dev/vite/index.ts#L16-L79">dev/vite/index.ts:16-79</a>）。</li>
+  <li>Next 这类多进程框架用独立的监视服务（WebSocket）加浏览器端 <code>&lt;DevClient/&gt;</code>。</li>
+</ul>
+
+<h2 id="md">local-md</h2>
+<ul>
+  <li><code>parse</code> 按扩展名分：<code>.json</code> 当 meta，<code>.md/.mdx</code> 当页面；frontmatter 用 schema 校验，不过就抛错（<a class="src" href="https://github.com/fuma-nama/fumadocs/blob/fumadocs%4016.17.1/packages/local-md/src/index.ts#L121-L173">index.ts:121-173</a>）。</li>
+  <li><code>.md</code>：remark → hast，用 core 的 <code>remarkHeading</code>、<code>remarkStructure</code>、<code>rehypeCode</code>、<code>rehypeToc</code>；再用 <code>hast-util-to-jsx-runtime</code> 生成 React 元素，Markdown 里的表达式交给一个虚拟 JS 引擎求值，不用 <code>eval</code>。</li>
+  <li><code>.mdx</code>：<code>@mdx-js/mdx</code> 编译成函数体，<code>new AsyncFunction</code> 执行。</li>
+  <li>不支持 RSC 的框架：服务端 <code>serialize()</code>，浏览器从 <code>@fumadocs/local-md/client</code> 还原。</li>
+</ul>
+
+<h2 id="html">local-html：HTML 怎么显示</h2>
+<div class="card key"><p><strong>解析成 React，不是原样插入，也不是 iframe。</strong>（<a class="src" href="https://github.com/fuma-nama/fumadocs/blob/fumadocs%4016.17.1/packages/local-html/src/html/compiler.ts#L126-L220">html/compiler.ts:126-220</a>）</p>
+<ol>
+  <li>正文范围：自定义 <code>selectContent</code>，否则依次找唯一的 <code>&lt;main&gt;</code>、唯一的 <code>&lt;article&gt;</code>、<code>&lt;body&gt;</code>。</li>
+  <li>删掉 <code>script</code>、<code>style</code>、<code>iframe</code>、<code>object</code>、<code>embed</code>、<code>form</code>；没有 main/article 时再删 <code>header</code>、<code>footer</code>、<code>nav</code>、<code>aside</code>。</li>
+  <li>删 <code>on*</code> 事件属性和 <code>javascript:</code> 链接；默认删 <code>style</code>、<code>class</code>，保留 <code>language-*</code> 给代码高亮。</li>
+  <li>标题用已有 id，没有就生成；同时写进目录和 <code>structuredData</code>；段落、列表项、表格单元格按所属标题写进搜索数据。</li>
+  <li><code>toJsxRuntime</code> 生成 React 元素，代码块懒加载 <code>rehypeCode</code> 高亮。</li>
+</ol>
+<p>标题优先级：<code>&lt;meta name="fumadocs:title"&gt;</code> &gt; <code>&lt;title&gt;</code> &gt; 文件名。</p></div>
+<p>这和我们现在「iframe 原样显示、页面里的脚本照常运行、目录靠在 iframe 里找标题」是两种取舍：官方得到的是和 MDX 一样的排版、目录、搜索和评论定位，失去的是 HTML 自己的样式和脚本。</p>
+
+<h2 id="site">站点里怎么接</h2>
+<pre><code>// app/lib/source.ts
+const html = localHtml({ dir: 'content' })
+const l = dynamicLoader({ docs: docs.toFumadocsSource(), html: html.dynamicSource({ baseDir: 'html' }) }, { baseUrl: '/' })
+export const getSource = () =&gt; l.get()
+
+// vite.config.ts（开发时）
+plugins: [localContentPlugin(), fumadocsMdx(), reactRouter()]
+
+// 路由
+const page = (await getSource()).getPage(slugs)
+if (page.type === 'html') { const { body, toc } = (await page.data.load()).render(mdxComponents) }
+// 搜索：createFromSource(getSource) —— 接受函数，按需调用每页的 structuredData()</code></pre>
+<p class="meta">按 <code>apps/docs/content/docs/(framework)/integrations/content/local-html.mdx</code> 与 <code>local-md.mdx</code> 改写。和 fumadocs-mdx 并进同一棵页面树，用对象形式，不用 <code>multiple()</code>。</p>
+
+<h2 id="adapters">其他适配器与 story、preview</h2>
+<ul>
+  <li><strong>mdx-remote</strong> 不是来源，只是一个运行时 MDX 编译器，页面列表要自己写。</li>
+  <li><strong>content-collections</strong>、<strong>fuma-content</strong>：编译在它们自己的构建阶段完成，适配器只把条目映射成虚拟文件。</li>
+  <li><strong>@fumadocs/story</strong> 不产生页面，只在 MDX 里嵌入组件演示：Vite 插件在转换 <code>.story.*</code> 文件时用 TypeScript 编译器从组件 props 类型生成控件描述，注入到 <code>defineStory</code> 的参数里。这是「打包器转换阶段做静态分析」的例子。</li>
+  <li><strong>fumadocs-preview</strong> 是独立的 Waku 应用（<code>fumadocs-preview &lt;目录&gt;</code>），自己把 local-content 的模式又写了一遍，热更新走 WebSocket + <code>router.reload()</code>。</li>
+</ul>
+
+<h2 id="own">自己写一种来源的正确做法</h2>
+<div class="table-wrap"><table>
+  <tr><th>要做的来源</th><th>做法</th></tr>
+  <tr><td>目录里的数据文件渲染成页面（JSON、YAML…）</td><td>实现 <code>ContentIntegration</code>，交给 local-content 的 <code>createLocalSource</code>，缓存、引用稳定、失效、Vite 监视器全都现成。编译渲染部分自己组合 core 的 <code>remarkHeading</code>、<code>remarkStructure</code>、<code>rehypeToc({ exportToc: { as: 'data' } })</code>（照 python 来源的写法），local-md / local-html 的编译器不对外导出</td></tr>
+  <tr><td>React 组件文件直接当页面（<code>*.page.tsx</code>）</td><td>不适合 local-content（运行时读文本，TSX 必须进打包器才能执行）。用 <code>import.meta.glob</code> 产出一个 <code>StaticSource</code>，页面模块导出 <code>meta</code>；热更新交给打包器。官方没有现成实现</td></tr>
+  <tr><td>注意 slug</td><td>slug 和 <code>meta.json</code> 匹配都只去掉一个扩展名：<code>foo.page.tsx</code> → <code>foo.page</code>，<code>index.page.tsx</code> 不会成为文件夹首页。来源自己给出 <code>slugs</code>，或者在 <code>path</code> 里去掉 <code>.page</code></td></tr>
+  <tr><td>并进站点</td><td><code>loader({ docs, mine: mySource })</code>，路由按 <code>page.type</code> 分别渲染；<code>structuredData</code> 给对了，搜索不用另外写</td></tr>
+</table></div>
+
+<div class="pager"><a href="13-fumadocs-ui.html">← 界面层</a><a href="15-fumadocs-integrations.html">官方扩展包 →</a></div>
+</main>
+</body>
+</html>

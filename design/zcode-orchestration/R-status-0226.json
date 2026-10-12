@@ -1,0 +1,8 @@
+{
+  "content": [
+    {
+      "type": "text",
+      "text": "{\n  \"ok\": true,\n  \"data\": {\n    \"taskId\": \"sess_3d740d3d-44a5-4cda-bf25-50b440c44587\",\n    \"title\": \"ZCode任务R：写作组件与集合编译插件重写\",\n    \"status\": \"running\",\n    \"roundIsOver\": false,\n    \"replies\": [\n      \"继续返工。类型修完，重跑检查与构建：路径深度错了：路由在 `app/routes/` 下，`.source` 在站根，应为 `../../.source`：类型全绿。构建真实产物：构建成功。验证 Config API 下的集合隔离静态证据：client/browser 侧隔离也确认（docs 模块含标注、notes 无）。返工④：查 15.4.7 是否有公开的 asMarkdown 辅助（getText('processed') 的组件还原契约）：官方契约确认（remark-llms 生成、getText('processed') 读）。给 fixture 加 vitest 与独立配置（只挂 fumadocsMdx 插件，处理 `.source` 的虚拟查询）：跑 fixture 测试看 processed 的真实输出形态：全过。探查 Term 在 processed 输出里的真实形态（一次性确认，写进文档）：转义踩坑，改用临时脚本文件（放 probe 内，跑完删）：真实输出确认：Term 在 `getText('processed')` 里被官方链路还原为原词（无标记、无属性泄漏）。但发现两页文案还提旧的 skipFile 方案——一并修正，并把测试断言写实：全部改动就位。跑完整检查链：SSR 层全绿（id 是 React 19 useId 形态）。浏览器关键回归——重点验 hydrate 一致性与新接线的客户端导航：hydrate 一致性与真实悬停通过。再验新接线的客户端导航（站内链接跳转，useContent 客户端按需加载）：客户端导航正常（新页正文按需加载且带标注）。补 notes 隔离与组件页回归：浏览器回归全绿。停服务、更新三份交付文档：按 README 第一行完整复跑核对，并确认目录与端口干净：\"\n    ],\n    \"fileChanges\": [],\n    \"pendingPermissions\": [],\n    \"mode\": \"yolo\",\n    \"omittedReplyChars\": 0\n  }\n}"
+    }
+  ]
+}

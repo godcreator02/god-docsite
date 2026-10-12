@@ -1,0 +1,47 @@
+
+[1m[30m[46m RUN [49m[39m[22m [36mv5.0.3 [39m[90mD:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/261011_docsite-kit-complete/site[39m
+
+stderr | test/comments-api.e2e.test.ts > τ£ƒσ«₧τ½Ö∩╝ÜΦ»äΦ«║σó₧σêáσÉÄΘ¢åσÉêµò░µì«Φç¬σ╖▒µ¢┤µû░∩╝îΣ╕ìτó░ source.config.ts∩╝îµùáσ╖▓σêáµ¿íσ¥ùτÜä reload ΘöÖΦ»»
+(!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
+  - import "./app/lib/comments-glob-root-base" without a file extension (vite.config.ts:5:38). Add the file extension
+Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.
+
+stderr | test/comments-api.e2e.test.ts > τ£ƒσ«₧τ½Ö∩╝ÜΦ»äΦ«║σó₧σêáσÉÄΘ¢åσÉêµò░µì«Φç¬σ╖▒µ¢┤µû░∩╝îΣ╕ìτó░ source.config.ts∩╝îµùáσ╖▓σêáµ¿íσ¥ùτÜä reload ΘöÖΦ»»
+(!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
+  - import "./app/lib/comments-glob-root-base" without a file extension (vite.config.ts:5:38). Add the file extension
+Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.
+
+[90mstdout[2m | test/comments-api.e2e.test.ts[2m > [22m[2mτ£ƒσ«₧τ½Ö∩╝ÜΦ»äΦ«║σó₧σêáσÉÄΘ¢åσÉêµò░µì«Φç¬σ╖▒µ¢┤µû░∩╝îΣ╕ìτó░ source.config.ts∩╝îµùáσ╖▓σêáµ¿íσ¥ùτÜä reload ΘöÖΦ»»
+[22m[39m[MDX] generated files in 14.788300000000163ms
+
+[90mstdout[2m | test/comments-api.e2e.test.ts[2m > [22m[2mτ£ƒσ«₧τ½Ö∩╝ÜΦ»äΦ«║σó₧σêáσÉÄΘ¢åσÉêµò░µì«Φç¬σ╖▒µ¢┤µû░∩╝îΣ╕ìτó░ source.config.ts∩╝îµùáσ╖▓σêáµ¿íσ¥ùτÜä reload ΘöÖΦ»»
+[22m[39m[MDX] generated files in 20.15650000000005ms
+
+[90mstdout[2m | test/comments-api.e2e.test.ts[2m > [22m[2mτ£ƒσ«₧τ½Ö∩╝ÜΦ»äΦ«║σó₧σêáσÉÄΘ¢åσÉêµò░µì«Φç¬σ╖▒µ¢┤µû░∩╝îΣ╕ìτó░ source.config.ts∩╝îµùáσ╖▓σêáµ¿íσ¥ùτÜä reload ΘöÖΦ»»
+[22m[39m[2m12:14:20 AM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m Re-optimizing dependencies because vite config has changed
+
+[90mstdout[2m | test/comments-api.e2e.test.ts[2m > [22m[2mτ£ƒσ«₧τ½Ö∩╝ÜΦ»äΦ«║σó₧σêáσÉÄΘ¢åσÉêµò░µì«Φç¬σ╖▒µ¢┤µû░∩╝îΣ╕ìτó░ source.config.ts∩╝îµùáσ╖▓σêáµ¿íσ¥ùτÜä reload ΘöÖΦ»»
+[22m[39m[2m12:14:21 AM[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m connected.
+
+[90mstdout[2m | test/comments-api.e2e.test.ts[2m > [22m[2mτ£ƒσ«₧τ½Ö∩╝ÜΦ»äΦ«║σó₧σêáσÉÄΘ¢åσÉêµò░µì«Φç¬σ╖▒µ¢┤µû░∩╝îΣ╕ìτó░ source.config.ts∩╝îµùáσ╖▓σêáµ¿íσ¥ùτÜä reload ΘöÖΦ»»
+[22m[39m[2m12:14:24 AM[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m [32mpage reload [39m[2mcomments/2026-10-11-3a83c7/index.mdx[22m
+
+[90mstdout[2m | test/comments-api.e2e.test.ts[2m > [22m[2mτ£ƒσ«₧τ½Ö∩╝ÜΦ»äΦ«║σó₧σêáσÉÄΘ¢åσÉêµò░µì«Φç¬σ╖▒µ¢┤µû░∩╝îΣ╕ìτó░ source.config.ts∩╝îµùáσ╖▓σêáµ¿íσ¥ùτÜä reload ΘöÖΦ»»
+[22m[39m[2m12:14:24 AM[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m [32mpage reload [39m[2mcomments/2026-10-11-3a83c7/20261011t161424-339c.mdx[22m
+
+[90mstdout[2m | test/comments-api.e2e.test.ts[2m > [22m[2mτ£ƒσ«₧τ½Ö∩╝ÜΦ»äΦ«║σó₧σêáσÉÄΘ¢åσÉêµò░µì«Φç¬σ╖▒µ¢┤µû░∩╝îΣ╕ìτó░ source.config.ts∩╝îµùáσ╖▓σêáµ¿íσ¥ùτÜä reload ΘöÖΦ»»
+[22m[39m[2m12:14:24 AM[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m [32mpage reload [39m[2mcomments/2026-10-11-3a83c7/20261011t161424-339c.mdx[22m
+[2m12:14:24 AM[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m program reload
+
+[90mstdout[2m | test/comments-api.e2e.test.ts[2m > [22m[2mτ£ƒσ«₧τ½Ö∩╝ÜΦ»äΦ«║σó₧σêáσÉÄΘ¢åσÉêµò░µì«Φç¬σ╖▒µ¢┤µû░∩╝îΣ╕ìτó░ source.config.ts∩╝îµùáσ╖▓σêáµ¿íσ¥ùτÜä reload ΘöÖΦ»»
+[22m[39m[2m12:14:25 AM[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m [32mpage reload [39m[2mcomments/2026-10-11-3a83c7/index.mdx[22m
+[2m12:14:25 AM[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m program reload
+
+ [32mΓ£ô[39m test/comments-api.e2e.test.ts [2m([22m[2m1 test[22m[2m)[22m[33m 7548[2mms[22m[39m
+   [33m[2mΓ£ô[22m[39m τ£ƒσ«₧τ½Ö∩╝ÜΦ»äΦ«║σó₧σêáσÉÄΘ¢åσÉêµò░µì«Φç¬σ╖▒µ¢┤µû░∩╝îΣ╕ìτó░ source.config.ts∩╝îµùáσ╖▓σêáµ¿íσ¥ùτÜä reload ΘöÖΦ»»[33m 7545[2mms[22m[39m
+
+[2m Test Files [22m [1m[32m1 passed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[32m1 passed[39m[22m[90m (1)[39m
+[2m   Start at [22m 00:14:17
+[2m   Duration [22m 8.20s[2m (tests 96%, import 3%)[22m
+

@@ -1,0 +1,21 @@
+Legend: production dependency, optional only, dev only
+
+docsite-kit-complete-site D:\unitfolders\oz47p-docsite-kit\docsite-kit\probes\261011_docsite-kit-complete\site (PRIVATE)
+Γöé
+Γöé   dependencies:
+Γö£ΓöÇΓöÇ @react-router/node@8.4.0
+Γö£ΓöÇΓöÇ fumadocs-core@16.17.1
+Γö£ΓöÇΓöÇ fumadocs-mdx@15.4.7
+Γö£ΓöÇΓöÇ react@19.3.0
+Γö£ΓöÇΓöÇ react-dom@19.3.0
+Γö£ΓöÇΓöÇ react-router@8.4.0
+Γöé
+Γöé   devDependencies:
+Γö£ΓöÇΓöÇ @react-router/dev@8.4.0
+Γö£ΓöÇΓöÇ @types/node@24.19.2
+Γö£ΓöÇΓöÇ @types/react@19.3.0
+Γö£ΓöÇΓöÇ @types/react-dom@19.3.0
+Γö£ΓöÇΓöÇ typescript@7.0.2
+ΓööΓöÇΓöÇ vite@8.3.4
+
+12 packages

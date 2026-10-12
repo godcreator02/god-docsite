@@ -1,0 +1,267 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>三大件借了哪些机制</title>
+<link rel="stylesheet" href="style.css">
+<script src="fig.js"></script>
+</head>
+<body>
+<main>
+
+<p class="crumbs"><a href="index.html">← 目录</a>　·　fumadocs 原理 · 第二部分</p>
+<h1>三大件各借了底座的哪个机制</h1>
+<p class="lead">上一页讲了底座：<a href="20-base-vite-rr.html">Vite 和 React Router</a>。这一页看 fumadocs 的三个包各插在底座的哪里。每张图都点「下一步」或「自动播放」看。</p>
+
+<h2>一、总图：三个包各插在底座的哪里</h2>
+<div id="sc-all"></div>
+
+<h2>二、fumadocs-mdx：一个 .mdx 文件的旅程</h2>
+<p>它是 Vite 插件，所以它做的事全发生在 Vite 的插件流水线上。跟着站点的 <code>lib/source.ts</code> 和一个 <code>intro.mdx</code> 走一遍：</p>
+<div id="sc-mdx"></div>
+
+<h2>三、fumadocs-core：一堆页面变成一张表和一棵树</h2>
+<p>它是普通函数，不是插件。它建好表和树放在服务器内存里，React Router 的 loader 来查：</p>
+<div id="sc-core"></div>
+
+<h2>四、fumadocs-ui：点下一页，只有正文在换</h2>
+<p>它是 React 组件，放在站点的路由组件里。在侧栏点下一页时：</p>
+<div id="sc-ui"></div>
+
+<h2>五、总表</h2>
+<div class="table-wrap"><table>
+  <tr><th>能力</th><th>哪个包</th><th>借的底座机制</th><th><span class="mode" style="--m:var(--m-dev)">dev</span></th><th><span class="mode" style="--m:var(--m-prod)">build + start</span></th></tr>
+  <tr><td>.mdx 变成 JS</td><td>mdx</td><td>Vite 插件流水线</td><td>用到哪个编译哪个</td><td>build 时全部编译好</td></tr>
+  <tr><td>导入整个内容文件夹</td><td>mdx</td><td>Vite 的 <code>import.meta.glob</code></td><td>增删文件自动跟上</td><td>build 时固定</td></tr>
+  <tr><td>改文档自动刷新</td><td>mdx</td><td>Vite 的热更新</td><td>有</td><td>没有，要重新 build</td></tr>
+  <tr><td>网址表、侧栏树</td><td>core</td><td>模块只执行一次</td><td>文件改了，下次请求重建</td><td>进程启动时建一次</td></tr>
+  <tr><td>查本页</td><td>core</td><td>React Router 的 loader（只在服务器）</td><td colspan="2">每次请求</td></tr>
+  <tr><td>页面外观、切页只换正文</td><td>ui</td><td>React Router 的渲染、接管、站内跳转</td><td colspan="2">一样</td></tr>
+</table></div>
+<div class="why"><b>由此推出我们的库该怎么做：</b>要改写文档内容的，做成挂在 fumadocs-mdx 编译里的插件；要建表、读文件的（比如评论），做成普通函数，由站点在 loader 里调用；界面做成 React 组件，由站点放进路由组件。三样都由站点自己接上，不需要发明新机制。</div>
+
+<div class="pager"><a href="20-base-vite-rr.html">← 第一部分：底座</a><a href="22-full-flow.html">回到全流程大图 →</a></div>
+</main>
+
+<script>
+const S = Fig.svg;
+const C = { vite: 'var(--c-vite)', rr: 'var(--c-rr)', mdx: 'var(--p-mdx)', core: 'var(--p-core)', ui: 'var(--p-ui)', site: 'var(--p-site)', node: 'var(--c-node)', dev: 'var(--m-dev)', prod: 'var(--m-prod)' };
+const DEV = '<span class="mode" style="--m:var(--m-dev)">dev</span>';
+
+function panel(s, x, y, w, h, color, title, { dashed = false, fill = 7, size = 13 } = {}) {
+  S('rect', { x, y, width: w, height: h, rx: 10, fill: `color-mix(in srgb, ${color} ${fill}%, var(--surface))`, stroke: color, 'stroke-width': 1.5, 'stroke-dasharray': dashed ? '6 4' : '' }, s);
+  if (title) S('text', { x: x + 12, y: y + 20, 'font-size': size, 'font-weight': 700, fill: color }, s, title);
+}
+function label(s, x, y, str, { size = 12, color = 'var(--text)', anchor = 'start', weight = 400 } = {}) {
+  return S('text', { x, y, 'font-size': size, fill: color, 'text-anchor': anchor, 'font-weight': weight }, s, str);
+}
+function arrow(s, d, head, { color = 'var(--muted)', dashed = false, width = 1.8 } = {}) {
+  return S('path', { d, fill: 'none', stroke: color, 'stroke-width': width, 'stroke-dasharray': dashed ? '5 4' : '', 'marker-end': head }, s);
+}
+/* 流水线上的一站：框 + 框顶的小标题 */
+function station(s, x, y, w, h, color, name) {
+  S('rect', { x, y, width: w, height: h, rx: 8, fill: 'var(--surface)', stroke: color, 'stroke-width': 1.5 }, s);
+  label(s, x + w / 2, y + 16, name, { size: 11.5, anchor: 'middle', weight: 600, color });
+}
+
+/* ========== 一、总图 ========== */
+Fig.scene(document.getElementById('sc-all'), {
+  height: 470,
+  draw(s, { box, group, arrowHead }) {
+    panel(s, 20, 30, 840, 140, C.vite, 'Vite：把源文件变成能执行的 JS');
+    S('rect', { x: 40, y: 80, width: 140, height: 56, rx: 8, fill: 'var(--surface)', stroke: 'var(--border)' }, s);
+    label(s, 110, 113, '读文件', { anchor: 'middle', weight: 600 });
+    arrow(s, 'M180,108 H226', arrowHead);
+    S('rect', { x: 230, y: 76, width: 240, height: 64, rx: 8, fill: 'none', stroke: C.vite, 'stroke-width': 1.5, 'stroke-dasharray': '6 4' }, s);
+    label(s, 350, 104, '插件位', { anchor: 'middle', weight: 600, color: C.vite });
+    label(s, 350, 122, '在这里改写文件内容', { anchor: 'middle', size: 11, color: 'var(--muted)' });
+    arrow(s, 'M470,108 H516', arrowHead);
+    S('rect', { x: 520, y: 80, width: 140, height: 56, rx: 8, fill: 'var(--surface)', stroke: 'var(--border)' }, s);
+    label(s, 590, 113, 'JS 模块', { anchor: 'middle', weight: 600 });
+    label(s, 680, 102, '路由文件、lib/source.ts、', { size: 11.5, color: 'var(--muted)' });
+    label(s, 680, 120, '.mdx 都这样变成 JS', { size: 11.5, color: 'var(--muted)' });
+    arrow(s, 'M590,136 V196', arrowHead);
+    label(s, 600, 186, '交给 React Router 执行', { size: 11.5, color: 'var(--muted)' });
+
+    panel(s, 20, 200, 840, 140, C.rr, 'React Router：按网址找路由，在服务器渲染，在浏览器接管');
+    S('rect', { x: 40, y: 246, width: 160, height: 72, rx: 8, fill: 'var(--surface)', stroke: 'var(--border)' }, s);
+    label(s, 120, 276, 'routes.ts', { anchor: 'middle', weight: 600 });
+    label(s, 120, 296, '按网址找到路由文件', { anchor: 'middle', size: 11, color: 'var(--muted)' });
+    arrow(s, 'M200,282 H236', arrowHead);
+    S('rect', { x: 240, y: 232, width: 280, height: 96, rx: 8, fill: 'var(--surface)', stroke: C.rr }, s);
+    label(s, 252, 250, 'loader（只在服务器跑）', { size: 12, weight: 600, color: C.rr });
+    S('rect', { x: 260, y: 262, width: 240, height: 52, rx: 8, fill: 'none', stroke: C.rr, 'stroke-dasharray': '6 4' }, s);
+    label(s, 380, 292, '在这里调用的函数', { anchor: 'middle', size: 11.5, color: 'var(--muted)' });
+    arrow(s, 'M520,282 H546', arrowHead);
+    S('rect', { x: 550, y: 232, width: 290, height: 96, rx: 8, fill: 'var(--surface)', stroke: C.rr }, s);
+    label(s, 562, 250, '组件（服务器渲染、浏览器接管）', { size: 12, weight: 600, color: C.rr });
+    S('rect', { x: 575, y: 262, width: 240, height: 52, rx: 8, fill: 'none', stroke: C.rr, 'stroke-dasharray': '6 4' }, s);
+    label(s, 695, 292, '放进来的组件', { anchor: 'middle', size: 11.5, color: 'var(--muted)' });
+
+    const flowMdxToCore = group('flowMdxToCore');
+    arrow(flowMdxToCore, 'M450,130 C450,200 460,200 460,262', arrowHead, { color: C.mdx, width: 2.5 });
+    label(flowMdxToCore, 466, 186, '编译好的页面', { size: 11.5, color: C.mdx, weight: 600 });
+    const flowCoreToUi = group('flowCoreToUi');
+    arrow(flowCoreToUi, 'M490,288 H583', arrowHead, { color: C.core, width: 2.5 });
+
+    box('shelfTitle', { w: 840, h: 20, plain: true, t: '下面是 fumadocs 的三个包', fs: 13, weight: 700 });
+    box('mdx', { w: 220, h: 44, color: C.mdx, t: 'fumadocs-mdx', t2: '一个 Vite 插件' });
+    box('core', { w: 220, h: 44, color: C.core, t: 'fumadocs-core', t2: '一组普通函数' });
+    box('ui', { w: 220, h: 44, color: C.ui, t: 'fumadocs-ui', t2: '一组 React 组件' });
+    box('fileViteConfig', { w: 270, h: 50, color: C.site, t: 'vite.config.ts', t2: '把 fumadocs-mdx 装进 Vite' });
+    box('fileSource', { w: 270, h: 50, color: C.site, t: 'lib/source.ts', t2: '把编译好的页面交给 core' });
+    box('fileDocsRoute', { w: 270, h: 50, color: C.site, t: 'routes/docs.tsx', t2: 'loader 里调 core，组件里放 ui' });
+  },
+  init: {
+    shelfTitle: { x: 20, y: 362 },
+    mdx: { x: 60, y: 395 }, core: { x: 330, y: 395 }, ui: { x: 600, y: 395 },
+    flowMdxToCore: { o: 0 }, flowCoreToUi: { o: 0 },
+    fileViteConfig: { x: 20, y: 400, o: 0 }, fileSource: { x: 305, y: 400, o: 0 }, fileDocsRoute: { x: 590, y: 400, o: 0 },
+  },
+  intro: '上面两层是底座，下面是 fumadocs 的三个包。点「下一步」，看它们各插到哪里。',
+  steps: [
+    { at: { mdx: { x: 240, y: 86, hl: true } }, cap: 'fumadocs-mdx 是 Vite 插件，插进 Vite 的插件位。之后 Vite 每读一个 .mdx 文件，都先交给它改写成 JS。它只和 Vite 打交道，不认识 React Router。' },
+    { at: { core: { x: 270, y: 266, hl: true } }, cap: 'fumadocs-core 是一组普通函数，不是插件。站点在路由的 loader 里调用它：查「这个网址是哪一页」、拿侧栏的目录树。loader 只在服务器上跑，这些函数和数据都不进浏览器。' },
+    { at: { ui: { x: 585, y: 266, hl: true } }, cap: 'fumadocs-ui 是一组 React 组件（侧栏、正文区、本页目录）。站点把它们放进路由组件里；服务器渲染、浏览器接管、站内跳转，都是 React Router 替它做的。' },
+    { at: { flowMdxToCore: { o: 1 }, flowCoreToUi: { o: 1 } }, cap: '三个包之间只传两样东西：fumadocs-mdx 编译好的页面，交给 fumadocs-core 建表；fumadocs-core 查到的本页和目录树，经 loader 交给 fumadocs-ui 显示。' },
+    { at: { shelfTitle: { t: '把三个包接到底座上的，是站点自己写的三个文件' }, fileViteConfig: { o: 1, hl: true }, fileSource: { o: 1, hl: true }, fileDocsRoute: { o: 1, hl: true } }, cap: 'fumadocs 不替站点接线，接线的是站点自己写的三个文件。<b>我们的库也照这样：做成普通的插件、函数、组件，由站点在这几个文件里接上。</b>' },
+  ],
+});
+
+/* ========== 二、fumadocs-mdx ========== */
+Fig.scene(document.getElementById('sc-mdx'), {
+  height: 420,
+  draw(s, { box, group, arrowHead }) {
+    panel(s, 20, 30, 200, 240, C.node, 'content/docs/');
+    for (const [i, name] of ['intro.mdx', 'install.mdx', 'meta.json'].entries()) {
+      S('rect', { x: 35, y: 60 + i * 40, width: 170, height: 32, rx: 6, fill: 'var(--surface)', stroke: 'var(--border)' }, s);
+      label(s, 47, 81 + i * 40, name, { size: 12.5 });
+    }
+    panel(s, 540, 30, 320, 240, C.site, 'app/lib/source.ts（站点写的）');
+
+    panel(s, 20, 290, 840, 110, C.vite, 'Vite 插件流水线', { size: 12 });
+    station(s, 40, 316, 200, 70, 'var(--muted)', '读文件');
+    arrow(s, 'M240,351 H296', arrowHead);
+    station(s, 300, 316, 200, 70, C.mdx, 'fumadocs-mdx');
+    arrow(s, 'M500,351 H566', arrowHead);
+    station(s, 570, 316, 200, 70, 'var(--muted)', 'JS 模块');
+
+    box('sourceLine', { w: 300, h: 22, plain: true, align: 'start', fs: 12, weight: 500, t: "defineDocs({ dir: 'content/docs' })" });
+    box('globIntro', { w: 300, h: 20, plain: true, align: 'start', fs: 12, weight: 400, t: '　↳ intro.mdx' });
+    box('globInstall', { w: 300, h: 20, plain: true, align: 'start', fs: 12, weight: 400, t: '　↳ install.mdx' });
+    box('globMeta', { w: 300, h: 20, plain: true, align: 'start', fs: 12, weight: 400, t: '　↳ meta.json' });
+    box('globConfig', { w: 300, h: 20, plain: true, align: 'start', fs: 12, weight: 700, t: '　↳ config.mdx（新）' });
+    box('newFile', { w: 170, h: 32, color: C.mdx, t: 'config.mdx（新建）' });
+    box('editedIntro', { w: 170, h: 32, color: 'var(--warn)', t: 'intro.mdx（改了）' });
+    box('hmr', { w: 80, h: 44, color: C.vite, t: '热更新', t2: '→ 浏览器', fs: 12 });
+    box('sourcePacket', { w: 180, h: 40, color: C.site, t: 'lib/source.ts', t2: 'defineDocs(...)' });
+    box('introPacket', { w: 180, h: 40, color: C.mdx, t: 'intro.mdx', t2: 'Markdown 文本' });
+  },
+  init: {
+    sourceLine: { x: 552, y: 62 },
+    globIntro: { x: 552, y: 96, o: 0 }, globInstall: { x: 552, y: 120, o: 0 }, globMeta: { x: 552, y: 144, o: 0 }, globConfig: { x: 552, y: 168, o: 0 },
+    newFile: { x: 35, y: 180, o: 0 }, editedIntro: { x: 35, y: 60, o: 0 },
+    hmr: { x: 775, y: 329, o: 0 },
+    sourcePacket: { x: 600, y: 200, o: 0 }, introPacket: { x: 35, y: 56, o: 0 },
+  },
+  intro: '左上是内容文件夹，右上是站点的 lib/source.ts，下面是 Vite 的插件流水线。',
+  steps: [
+    { at: { sourcePacket: { x: 50, y: 338, o: 1 } }, cap: 'Vite 要执行站点的 lib/source.ts（三个包在这里接上）。和所有文件一样，它先进插件流水线。' },
+    { at: { sourcePacket: { x: 310, y: 338, hl: true, t2: '改写 defineDocs' } }, cap: 'fumadocs-mdx 认出 <code>defineDocs</code> 这个记号，把它改写成 Vite 的 <code>import.meta.glob</code>，意思是「把 content/docs 里的文件全部导入」。' },
+    { at: { sourcePacket: { x: 580, y: 338, t2: '改写好了' }, sourceLine: { t: "import.meta.glob('content/docs/**')" }, globIntro: { o: 1 }, globInstall: { o: 1 }, globMeta: { o: 1 } }, cap: '改写完交还 Vite。Vite 展开 glob，列出文件夹里的每个文件，接着一个个去加载。' },
+    { at: { sourcePacket: { x: 600, y: 200, o: 0 }, introPacket: { x: 50, y: 338, o: 1 } }, cap: '加载 intro.mdx。它是 Markdown 文本，浏览器和服务器都执行不了，也先进流水线。' },
+    { at: { introPacket: { x: 310, y: 338, hl: true, t2: '编译中' } }, cap: 'fumadocs-mdx 编译它：解析 Markdown，给标题加锚点，抽出本页目录和搜索用的文字。' },
+    { at: { introPacket: { x: 580, y: 338, t: 'intro 的 JS 模块', t2: '正文组件 + 目录 + 标题' } }, cap: '出来的是普通 JS 模块：正文是一个 React 组件，外加本页目录和标题。其余文件也各走一遍。' },
+    { at: { newFile: { o: 1, hl: true }, globConfig: { o: 1 } }, cap: DEV + ' 新建 config.mdx：Vite 发现 glob 的结果变了，让 lib/source.ts 重新展开，侧栏多出一页。build + start 下没有 Vite，要重新 build 才会有。' },
+    { at: { editedIntro: { o: 1, hl: true }, introPacket: { x: 310, y: 338, t: 'intro.mdx', t2: '只重新编译这一个', hl: true }, hmr: { o: 1 } }, cap: DEV + ' 改了 intro.mdx：Vite 只重新编译这一个文件，推给浏览器热更新。增删文件、热更新都是 Vite 的机制，fumadocs-mdx 没写这方面的代码。' },
+  ],
+});
+
+/* ========== 三、fumadocs-core ========== */
+Fig.scene(document.getElementById('sc-core'), {
+  height: 465,
+  draw(s, { box, group, arrowHead }) {
+    label(s, 20, 30, 'fumadocs-mdx 交来的页面', { size: 12.5, weight: 700, color: C.mdx });
+    panel(s, 230, 40, 210, 190, C.core, 'loader()（fumadocs-core）');
+    panel(s, 490, 40, 370, 110, C.core, '网址 → 页面', { fill: 3 });
+    panel(s, 490, 165, 370, 125, C.core, '侧栏的树', { fill: 3 });
+    panel(s, 20, 320, 420, 80, C.rr, 'routes/docs.tsx 的 loader（服务器上）');
+    panel(s, 490, 320, 370, 80, C.ui, '组件（fumadocs-ui 显示）');
+
+    const lookup = group('lookup');
+    arrow(lookup, 'M330,318 V234', arrowHead, { color: C.core, width: 2.5 });
+    label(lookup, 338, 282, 'source.getPage()', { size: 11.5, color: C.core, weight: 600 });
+
+    ['intro.mdx', 'install.mdx', 'guide/config.mdx', 'meta.json'].forEach((name, i) => box('page' + i, { w: 150, h: 30, color: i === 3 ? C.node : C.mdx, t: name, fs: 12 }));
+    ['/docs/intro　→　intro.mdx', '/docs/install　→　install.mdx', '/docs/guide/config　→　config.mdx'].forEach((t, i) => box('row' + i, { w: 350, h: 22, color: C.core, t, fs: 12, align: 'start', weight: 500 }));
+    ['开始', '安装', '▾ 指南', '　　配置'].forEach((t, i) => box('tree' + i, { w: 300, h: 20, plain: true, align: 'start', t, fs: 12.5, weight: 500 }));
+    box('request', { w: 270, h: 34, color: C.rr, t: 'GET /docs/install' });
+    box('result', { w: 200, h: 34, color: C.rr, t: '{ 本页, 目录树 }' });
+    box('devRebuild', { w: 420, h: 40, color: C.dev, t: 'dev：改了 .mdx，下次请求时重建这张表', fs: 12 });
+    box('prodRebuild', { w: 370, h: 40, color: C.prod, t: 'build + start：进程启动时建一次，用到进程结束', fs: 12 });
+  },
+  init: {
+    page0: { x: 20, y: 45 }, page1: { x: 20, y: 85 }, page2: { x: 20, y: 125 }, page3: { x: 20, y: 165 },
+    row0: { x: 500, y: 62, o: 0 }, row1: { x: 500, y: 89, o: 0 }, row2: { x: 500, y: 116, o: 0 },
+    tree0: { x: 500, y: 196, o: 0 }, tree1: { x: 500, y: 218, o: 0 }, tree2: { x: 500, y: 240, o: 0 }, tree3: { x: 500, y: 262, o: 0 },
+    lookup: { o: 0 }, request: { x: 40, y: 352, o: 0 }, result: { x: 230, y: 352, o: 0 },
+    devRebuild: { x: 20, y: 415, o: 0 }, prodRebuild: { x: 490, y: 415, o: 0 },
+  },
+  intro: '左上是 fumadocs-mdx 交来的页面，中间是 fumadocs-core 的 loader()，右边是它要建的表和树，下面是一次请求。',
+  steps: [
+    { at: { page0: { x: 260, y: 72 }, page1: { x: 260, y: 108 }, page2: { x: 260, y: 144 }, page3: { x: 260, y: 180 } }, cap: '站点的 lib/source.ts 执行到 <code>loader()</code> 时，fumadocs-core 收下 fumadocs-mdx 交来的所有页面。对它来说每页只是「路径 + 数据」，它不管页面是怎么编译出来的。' },
+    { at: { row0: { o: 1 }, row1: { o: 1 }, row2: { o: 1 } }, cap: '按文件路径算出网址，建成「网址 → 页面」的表。' },
+    { at: { tree0: { o: 1 }, tree1: { o: 1 }, tree2: { o: 1 }, tree3: { o: 1 } }, cap: '按文件夹和 meta.json 里写的顺序，排出侧栏的目录树。表和树都放在服务器内存里，等请求来。' },
+    { at: { request: { o: 1 }, lookup: { o: 1 }, row1: { hl: true } }, cap: '请求 /docs/install 来了。React Router 跑 docs 路由的 loader，站点在里面调 <code>source.getPage()</code>：查表就行，不再读文件、不再编译。' },
+    { at: { result: { x: 510, y: 352, o: 1 } }, cap: 'loader 把本页和目录树交给组件，由 fumadocs-ui 显示。数据从 loader 交到组件，这一段是 React Router 的机制。' },
+    { at: { devRebuild: { o: 1, hl: true }, prodRebuild: { o: 1, hl: true } }, cap: '这张表什么时候重建，两种运行方式不同。build + start 下表在启动时就定了，所以<b>评论这种运行时会变的数据不能放进这张表</b>，要在 loader 里每次现读。' },
+  ],
+});
+
+/* ========== 四、fumadocs-ui ========== */
+Fig.scene(document.getElementById('sc-ui'), {
+  height: 360,
+  draw(s, { box, group, arrowHead }) {
+    S('rect', { x: 20, y: 30, width: 500, height: 310, rx: 10, fill: 'var(--surface)', stroke: 'var(--border)', 'stroke-width': 1.5 }, s);
+    S('rect', { x: 20, y: 30, width: 500, height: 30, rx: 10, fill: 'var(--code-bg)' }, s);
+    S('rect', { x: 30, y: 70, width: 130, height: 260, rx: 6, fill: `color-mix(in srgb, ${C.ui} 6%, var(--surface))`, stroke: C.ui, 'stroke-dasharray': '4 3' }, s);
+    label(s, 95, 322, '侧栏', { size: 11, anchor: 'middle', color: C.ui });
+    box('activeItem', { w: 118, h: 24, color: C.ui, t: '' });
+    ['开始', '安装', '配置'].forEach((t, i) => label(s, 48, 101 + i * 30, t, { size: 13 }));
+    box('address', { w: 480, h: 20, plain: true, align: 'start', fs: 12, weight: 500, t: 'localhost/docs/intro' });
+    box('mainArea', { w: 240, h: 260, color: C.ui, t: '开始', t2: '（「开始」的正文）', fs: 20 });
+    box('tocArea', { w: 90, h: 260, color: C.ui, t: '本页目录', t2: '「开始」的', fs: 12 });
+    box('cursor', { w: 24, h: 24, plain: true, t: '👆', fs: 18 });
+
+    panel(s, 740, 100, 120, 150, C.rr, '服务器');
+    label(s, 752, 150, 'docs 的 loader', { size: 11.5 });
+    label(s, 752, 170, '（core 查表）', { size: 11.5, color: 'var(--muted)' });
+    label(s, 630, 90, 'React Router', { size: 12, weight: 700, color: C.rr, anchor: 'middle' });
+    const askData = group('askData');
+    arrow(askData, 'M524,150 H736', arrowHead, { color: C.rr, dashed: true });
+    label(askData, 630, 128, '只要数据', { size: 11.5, anchor: 'middle', color: C.rr });
+    const giveData = group('giveData');
+    arrow(giveData, 'M738,210 H524', arrowHead, { color: C.rr, dashed: true });
+    label(giveData, 630, 240, '本页是谁 + 目录树', { size: 11.5, anchor: 'middle', color: C.rr });
+    box('dataRequest', { w: 110, h: 28, color: C.rr, t: 'install.data', fs: 12 });
+    box('dataReply', { w: 110, h: 28, color: C.rr, t: '{ 本页, 树 }', fs: 12 });
+  },
+  init: {
+    activeItem: { x: 36, y: 82 }, address: { x: 30, y: 35 },
+    mainArea: { x: 170, y: 70 }, tocArea: { x: 420, y: 70 }, cursor: { x: 300, y: 280 },
+    askData: { o: 0 }, giveData: { o: 0 },
+    dataRequest: { x: 525, y: 136, o: 0 }, dataReply: { x: 625, y: 196, o: 0 },
+  },
+  intro: '左边是浏览器里的一页：侧栏、正文、本页目录都是 fumadocs-ui 的组件。右边是服务器。',
+  steps: [
+    { at: { cursor: { x: 84, y: 116 } }, cap: '点侧栏的「安装」。侧栏里的链接经过 fumadocs 的框架适配层，其实就是 React Router 的 Link。' },
+    { at: { askData: { o: 1 }, dataRequest: { x: 625, o: 1 } }, cap: 'React Router 不要整页 HTML，只向服务器要这一页的数据（网址后面加 .data）。' },
+    { at: { giveData: { o: 1 }, dataReply: { x: 525, o: 1 } }, cap: '服务器跑 docs 路由的 loader（fumadocs-core 查表），只回「本页是谁」和目录树。' },
+    { at: { cursor: { o: 0 }, activeItem: { y: 112, hl: true }, address: { t: 'localhost/docs/install' } }, cap: '目录树没变，fumadocs-ui 就不重建侧栏：展开状态、滚动位置都不动，只把高亮挪到「安装」。地址栏同时更新。' },
+    { at: { mainArea: { t: '安装', t2: '（「安装」的正文）', hl: true }, tocArea: { t2: '「安装」的', hl: true } }, cap: '正文区和本页目录换成「安装」这一页（正文的 JS 用到才下载）。整页没有刷新，fumadocs 站点切页快就是因为这个。' },
+  ],
+});
+</script>
+</body>
+</html>

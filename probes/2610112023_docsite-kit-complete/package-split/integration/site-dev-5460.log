@@ -1,0 +1,57 @@
+[restart] Relaunching with --conditions=development
+[MDX] generated files in 10.080199999999877ms
+[MDX] generated files in 24.13899999999967ms
+12:28:45 AM [vite] (client) Re-optimizing dependencies because vite config has changed
+  ➜  Local:   http://127.0.0.1:5460/
+  ➜  press h + enter to show help
+12:28:46 AM [vite] (ssr) connected.
+12:28:51 AM [vite] (client) dependency optimized: diff-match-patch
+12:28:58 AM [vite] (client) hmr update /app/routes/comments-demo.tsx, /app/lib/comment-body.tsx
+12:28:58 AM [vite] (ssr) page reload comments/2026-10-11-41d118/index.mdx
+12:28:58 AM [vite] (client) hmr invalidate /app/lib/comment-body.tsx Could not Fast Refresh. Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
+12:28:58 AM [vite] (client) hmr update /app/routes/comments.tsx, /app/routes/comments-demo.tsx
+12:29:14 AM [vite] (client) hmr update /app/routes/comments-demo.tsx, /app/lib/comment-body.tsx
+12:29:14 AM [vite] (ssr) page reload comments/2026-10-11-41d118/20261011t162914-a35f.mdx
+12:29:14 AM [vite] (client) hmr invalidate /app/lib/comment-body.tsx Could not Fast Refresh. Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
+12:29:14 AM [vite] (client) hmr update /app/routes/comments.tsx, /app/routes/comments-demo.tsx
+12:29:29 AM [vite] (client) hmr update /comments/2026-10-11-41d118/20261011t162914-a35f.mdx?collection=comments
+12:29:29 AM [vite] (client) hmr update /comments/2026-10-11-41d118/20261011t162914-a35f.mdx?collection=comments
+12:29:29 AM [vite] (client) hmr update /app/routes/comments-demo.tsx
+12:29:29 AM [vite] (client) hmr update /app/routes/comments.tsx
+12:29:29 AM [vite] (client) hmr update /comments/2026-10-11-41d118/20261011t162914-a35f.mdx?collection=comments
+12:29:29 AM [vite] (ssr) page reload comments/2026-10-11-41d118/20261011t162914-a35f.mdx
+12:29:29 AM [vite] (ssr) program reload
+12:29:29 AM [vite] (client) hmr invalidate /comments/2026-10-11-41d118/20261011t162914-a35f.mdx?collection=comments Could not Fast Refresh. Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
+12:29:29 AM [vite] (client) hmr update /app/routes/comments-demo.tsx, /app/lib/comment-body.tsx
+12:29:40 AM [vite] (client) hmr update /comments/2026-10-11-41d118/20261011t162914-a35f.mdx?collection=comments
+12:29:40 AM [vite] (client) hmr update /comments/2026-10-11-41d118/20261011t162914-a35f.mdx?collection=comments
+12:29:40 AM [vite] (client) hmr update /app/routes/comments-demo.tsx
+12:29:40 AM [vite] (client) hmr update /app/routes/comments.tsx
+12:29:40 AM [vite] (client) hmr update /comments/2026-10-11-41d118/20261011t162914-a35f.mdx?collection=comments, /app/routes/comments-demo.tsx, /app/lib/comment-body.tsx
+12:29:40 AM [vite] (ssr) page reload comments/2026-10-11-41d118/20261011t162914-a35f.mdx
+12:29:40 AM [vite] (ssr) program reload
+12:29:44 AM [vite] (client) hmr update /comments/2026-10-11-41d118/index.mdx?collection=comments
+12:29:44 AM [vite] (client) hmr update /comments/2026-10-11-41d118/index.mdx?collection=comments
+12:29:44 AM [vite] (client) hmr update /app/routes/comments-demo.tsx
+12:29:44 AM [vite] (client) hmr update /app/routes/comments.tsx
+12:29:44 AM [vite] (client) hmr update /comments/2026-10-11-41d118/index.mdx?collection=comments
+12:29:44 AM [vite] (ssr) page reload comments/2026-10-11-41d118/index.mdx
+12:29:44 AM [vite] (ssr) program reload
+12:29:44 AM [vite] (client) hmr invalidate /comments/2026-10-11-41d118/index.mdx?collection=comments Could not Fast Refresh. Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
+12:29:44 AM [vite] (client) hmr update /app/routes/comments-demo.tsx, /app/lib/comment-body.tsx
+12:30:20 AM [vite] (client) hmr update /comments/2026-10-11-41d118/index.mdx?collection=comments
+12:30:20 AM [vite] (client) hmr update /comments/2026-10-11-41d118/index.mdx?collection=comments
+12:30:20 AM [vite] (client) hmr update /app/routes/comments-demo.tsx
+12:30:20 AM [vite] (client) hmr update /app/routes/comments.tsx
+12:30:20 AM [vite] (client) hmr update /comments/2026-10-11-41d118/index.mdx?collection=comments
+12:30:20 AM [vite] (ssr) page reload comments/2026-10-11-41d118/index.mdx
+12:30:20 AM [vite] (ssr) program reload
+12:30:20 AM [vite] (client) hmr invalidate /comments/2026-10-11-41d118/index.mdx?collection=comments Could not Fast Refresh. Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
+12:30:20 AM [vite] (client) hmr update /app/routes/comments-demo.tsx, /app/lib/comment-body.tsx
+12:30:36 AM [vite] (client) hmr update /comments/2026-10-11-41d118/index.mdx?collection=comments
+12:30:36 AM [vite] (client) hmr update /comments/2026-10-11-41d118/index.mdx?collection=comments
+12:30:36 AM [vite] (client) hmr update /app/routes/comments-demo.tsx
+12:30:36 AM [vite] (client) hmr update /app/routes/comments.tsx
+12:30:36 AM [vite] (client) hmr update /comments/2026-10-11-41d118/index.mdx?collection=comments, /app/routes/comments-demo.tsx, /app/lib/comment-body.tsx
+12:30:36 AM [vite] (ssr) page reload comments/2026-10-11-41d118/index.mdx
+12:30:36 AM [vite] (ssr) program reload

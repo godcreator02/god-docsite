@@ -1,0 +1,54 @@
+{
+  "task": "U：责任定位——纯 Vite 能否复现 Fumadocs 新增正文失效（是 Vite 还是 Fumadocs 的问题）",
+  "probe": "2610121018_vite-add-discovery",
+  "date": "2026-10-12",
+  "verdict": "纯 Vite 8.3.4 完整复现，责任定位在 Vite：import.meta.glob 相对 base（'./../content'，fumadocs codegen 在 Windows 的生成形态、公开合法用法）时，toAbsoluteGlob 的 posix.resolve 把 D:/… importer 当相对路径拼上 cwd 前缀，产出不含盘符的假绝对 glob；热更新的 picomatch matcher 匹配不了 D:/… 事件文件，glob 使用模块永不失效。watcher add 正常到达。B（base '/content'）与 C（无 base）对照全部正常。",
+  "keyEvidence": {
+    "watcherAddArrived": "A/B/C 全部收到（logs/serve-events-variant-{a,b}.json 与 logs/events-variant-*.json）",
+    "hotUpdateMatching": "A 的 hotUpdate(create) moduleIds 恒空；B/C 第一条 create post 含 src/main.js（pre 空 post 补上，即 vite:import-glob 追加）",
+    "transformKeys": "A 产物键不含新增文件；B/C 含（logs/vitest.log 两轮一致，8/8 通过）",
+    "browser": "真实页面不刷新：A 10 秒清单不变；B 自动出现新键",
+    "rootCausePath": "node v24.14.1 实测 posix.isAbsolute('D:/…')=false；posix.resolve('D:/…/src','./../content')='/unitfolders/…/D:/…/content'（假），win32.resolve 正确",
+    "whyInitialScanWorks": "tinyglobby normalizePattern（index.mjs:136-143）用 win32 语义 isAbsolute + posix.relative 相对化后从 cwd 爬树匹配，对假 glob 容错命中（tinyglobby-check.mjs 实测），故已有文件正常、唯运行中新增失效——与 T 的重启 200 / 运行中 404 同构",
+    "viteSourceLines": "vite 8.3.4 dist/node/chunks/node.js: 27965-27968(toAbsoluteGlob base 分支)、27862(初次扫描 tinyglobby)、27668-27689(matcher 构建)、27694-27704(hotUpdate 匹配)"
+  },
+  "fumadocsSide": "命中已闭合（源码实测）：fumadocs-mdx 15.4.7 dev 宏展开固定 target='vite'（dist/vite/index.js:100、transform-YLS_tnU6.js:268-271），async 与否都经 generateViteGlobImport 生成相对 base（:282 path.resolve(root,dir) 后 codegen:33 再 path.relative 折回 './../content/docs'）；无公开选项可改写法；其自身 watcher（vite/index.js:125-131）只盯 fumadocs.config.ts，内容文件完全依赖 vite 的 glob 热更新链路",
+  "downgradeVite": "不可行（实测）：vite 7.3.7 dist 存在同一 posix.resolve(importer…) 分支同样命中；vite 6.4.4/5.4.21 的 toAbsoluteGlob 无 base 选项（base 为 vite 7 新增），但 fumadocs-mdx 15.4.7 peer 限 vite 7.x||8.x、@react-router/dev 8.4.0 限 ^7||^8——能降到的最低版本恰好同样坏，再往下要连 fumadocs/react-router 全家降。tarball 对照在 logs/vite-history/",
+  "fixHint": "上游：toAbsoluteGlob 相对 base 分支改用平台正确 resolve（path.resolve+normalizePath）。站点侧无公开配置可规避；现实路径按推荐序：① pnpm patch vite 一行修（根因层，覆盖一切相对 base 用法）；② pnpm patch fumadocs-mdx 生成根相对 base（'/' + slash(path.relative(root,base))，transformMacroModule 作用域有 root；键集合语义不变）；③ 给 vite 上游报 issue/PR（本 probe 即最小复现），修掉后撤补丁",
+  "instructionSource": {
+    "originalTaskU": "任务书（新独立上下文）：责任定位——纯 Vite 能否复现 Fumadocs 新增正文失效",
+    "followUpUserZCode": "用户在 ZCode 会话追加原话：「改vite只有一行是吗？加上试试呢」（2026-10-12），据此在 probe 内追加实验补丁",
+    "followUpUserZCode2": "用户在 ZCode 会话追加原话：「那你把这个补丁加上fumadocs看看能不能成功运行」（2026-10-12），据此在 probe 内搭 fumadocs 站做两阶段验证（不碰 T 本体与正式仓）",
+    "mainSessionScopeRule": "主会话收口指令（2026-10-12）：补丁只留本 probe；原版基线与补丁对照双轨保留；给两条独立复跑命令；标实验补丁不宣称跨平台安全；停服务写 result/handoff 交回"
+  },
+  "adoptedInRepo": "补丁已进 docsite-kit 正式仓（用户 2026-10-12 授权「属于关键改动……全面验证一下没有问题先」）：patches/vite@8.3.4.patch + 仓根 pnpm-workspace.yaml patchedDependencies + install；lock 全部 vite 实例为补丁版（无补丁目录为孤儿残留、引用 0）。全面验证：四变体（新增 D 否定 glob）双轨各 10/10、补丁版 react-router build 预渲染完整、无 importer 用例 join 正确且原版同样坏；正式自述站 dev（5542）运行中新增 mdx 第 1 秒 200 + 索引链接 + (ssr) page reload，测试页已删服务已停。记录：AGENTS.md「怎么跑」加补丁条目、轨迹卡 trajectory/2026-10-12-vite-relative-base-patch.mdx（CLAUDE.md 为引用式无需同步）；未提交",
+  "fumadocsValidation": {
+    "site": "probe 内 fumadocs-site/（复制 T 官方快照 25 文件，依赖同 T：fumadocs-core/base-ui 16.17.1、fumadocs-mdx 15.4.7、react 19.3.0、react-router 8.4.0、vite 8.3.4）",
+    "phaseOriginal": "原版 vite：站正常（/docs 200）；运行中新增 probe-add-original.mdx → 29 次/秒轮询全 404、索引无链接、dev 日志零新行（logs/fumadocs-dev-original.log）",
+    "phasePatched": "补丁版（唯一变量）：站正常；重启扫描照常发现旧文件（基线不回归）；运行中新增 probe-add-patched.mdx → 第 1 秒 200、SSR HTML 含标题、索引含链接、日志出现 (ssr) page reload（logs/fumadocs-dev-patched.log）",
+    "conclusion": "实验补丁 + fumadocs 能成功运行，且把运行中新增失效修复为写入即被发现；7a 未测场景不因此关闭"
+  },
+  "experimentalPatch": {
+    "file": "patches/vite@8.3.4.patch（经 pnpm patch 流程挂在本 probe 的 pnpm-workspace.yaml，不碰全局 store）",
+    "change": "vite dist/node/chunks/node.js:27967 相对 base 分支 posix.resolve → posix.join（一行；diff 另有 4 行无害缩进）",
+    "basis": "patch-check.mjs 实测 4 组 base 用例 posix.join 与 win32.resolve 输出一致；与 '/' 分支、'../' 分支同构",
+    "verification": "双轨：原版基线 pnpm run test:original（自动移补丁→跑→恢复）8/8，A 失效断言成立；补丁对照 pnpm test 8/8，三变体全部成功；断言组由测试探测已安装 vite 自动选择",
+    "limits": "实验补丁，仅证因果，不宣称通用修复；未测：非 Windows、importer 缺省（虚拟模块）、'**' 开头 glob、否定 glob、build 路径、rolldown-vite"
+  },
+  "rerun": "pnpm install && pnpm test（补丁对照：三变体全部成功）；pnpm run test:original（原版基线：A 失效/B、C 成功，跑完自动恢复补丁）；node path-check.mjs；node patch-check.mjs；node tinyglobby-check.mjs；浏览器对照见 README 第 4 步（5540/5541）",
+  "versions": {
+    "node": "v24.14.1",
+    "windows": "10.0.26200 x64",
+    "pnpm": "12.4.2",
+    "vite": "8.3.4",
+    "vitest": "5.0.3",
+    "tinyglobby": "0.2.17"
+  },
+  "gaps": [
+    "T 站 fumadocs 生成形态已源码闭合（见 fumadocsSide 字段）；如需可再补运行时抓包",
+    "浏览器 console 流取不到（同 T 工具缺口）；以 DOM 文本 + 服务端诊断事件判定，无合成事件",
+    "C 变体未做浏览器层观察（服务端证据与 B 同构）",
+    "vite 5/6/7 的结论基于 dist 代码对照，未各装一版跑行为实验（5/6 无 base 选项，由选项校验直接决定）"
+  ],
+  "cleanup": "两个变体 dev server 与 fumadocs 站 dev 均已停（5540/5541 无监听）；cases/*/content 与 fumadocs-site/content/docs 的测试新增文件已清（各只剩官方初始内容）；实验补丁挂在本 probe（pnpm-workspace.yaml patchedDependencies + patches/ + 本目录 lock，fumadocs-site 也在本 probe workspace 内）；T 官方样本本体、docsite-kit 正式仓（含其 workspace/lock）、父 workspace、全局依赖与全局 pnpm store 均未改动；未提交/推送/发版/发 issue/归档；主会话台账未动"
+}

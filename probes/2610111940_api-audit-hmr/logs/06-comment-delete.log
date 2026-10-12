@@ -1,0 +1,20 @@
+[restart] Relaunching with --conditions=development
+[MDX] generated files in 5.1607000000001335ms
+[MDX] generated files in 28.840599999999995ms
+7:50:43 PM [vite] (client) Re-optimizing dependencies because vite config has changed
+  ➜  Local:   http://127.0.0.1:5456/
+7:51:00 PM [vite] (ssr) connected.
+7:51:03 PM [vite] (ssr) page reload comments/t2/index.mdx
+7:51:03 PM [vite] (ssr) program reload
+7:51:04 PM [vite] (ssr) An error happened during full reload
+Failed to load url /comments/t2/index.mdx?macro_id=app%2Flib%2Fsource.ts%23comments&only=frontmatter (resolved id: D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/261011-api-audit-hmr/site/comments/t2/index.mdx?macro_id=app%2Flib%2Fsource.ts%23comments&only=frontmatter) in D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/261011-api-audit-hmr/site/app/lib/source.ts. Does the file exist?
+Error: Failed to load url /comments/t2/index.mdx?macro_id=app%2Flib%2Fsource.ts%23comments&only=frontmatter (resolved id: D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/261011-api-audit-hmr/site/comments/t2/index.mdx?macro_id=app%2Flib%2Fsource.ts%23comments&only=frontmatter) in D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/261011-api-audit-hmr/site/app/lib/source.ts. Does the file exist?
+    at loadAndTransform (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/chunks/node.js:20173:31)
+    at async fetchModule (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/chunks/node.js:36165:15)
+    at async handleInvoke (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/chunks/node.js:25347:21)
+    at async EventEmitter.listenerForInvokeHandler (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/chunks/node.js:25402:13)
+7:51:05 PM [vite] Internal server error: Failed to load url /comments/t2/index.mdx?macro_id=app%2Flib%2Fsource.ts%23comments&only=frontmatter (resolved id: D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/261011-api-audit-hmr/site/comments/t2/index.mdx?macro_id=app%2Flib%2Fsource.ts%23comments&only=frontmatter) in D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/261011-api-audit-hmr/site/app/lib/source.ts. Does the file exist?
+      at loadAndTransform (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/chunks/node.js:20173:31)
+      at async fetchModule (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/chunks/node.js:36165:15)
+      at async handleInvoke (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/chunks/node.js:25347:21)
+      at async EventEmitter.listenerForInvokeHandler (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610111754_fumadocs-16-17-1/site/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/chunks/node.js:25402:13)

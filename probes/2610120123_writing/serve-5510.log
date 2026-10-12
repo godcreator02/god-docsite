@@ -1,0 +1,20 @@
+$ react-router-serve ./build/server/index.js
+[react-router-serve] http://localhost:5510 (http://198.18.0.1:5510)
+GET /docs 200 - - 96.119 ms
+GET /docs 200 - - 9.448 ms
+GET /docs/glossary-demo 200 - - 13.235 ms
+GET /docs/writing-demo 200 - - 21.866 ms
+GET /notes 200 - - 6.266 ms
+GET /tex 200 - - 12.137 ms
+GET /docs 200 - - 6.982 ms
+GET /docs/glossary-demo 200 - - 9.103 ms
+GET /notes 200 - - 7.261 ms
+GET /docs/glossary-demo 200 - - 4.747 ms
+GET /tex 200 - - 6.602 ms
+GET /docs/glossary-demo 200 - - 8.845 ms
+GET /__manifest?paths=%2F%2C%2Fdocs%2C%2Fdocs%2Fglossary-demo%2C%2Fdocs%2Fwriting-demo&version=2e0268b8 200 - - 2.553 ms
+GET /docs.data 200 - - 3.853 ms
+GET /__manifest?paths=%2Fnotes&version=2e0268b8 200 - - 0.925 ms
+GET /notes 200 - - 5.165 ms
+GET /docs/writing-demo 200 - - 13.715 ms
+[ELIFECYCLE] Command failed with exit code 1.

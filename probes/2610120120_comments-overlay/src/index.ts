@@ -1,0 +1,7 @@
+export { CommentOverlay } from './comment-overlay.js'
+export type { CommentOverlayProps, OverlayMarker, UnplacedReport } from './comment-overlay.js'
+export type { MarkerPlacement, Box, CardConstraint } from './placement.js'
+export { measureAllPlacements, samePlacements, defaultCardHeight } from './placement.js'
+export { overlayCssFor } from './overlay-css.js'
+export { createHighlightPainter, highlightsAvailable } from './highlight.js'
+export type { HighlightPainter } from './highlight.js'

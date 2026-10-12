@@ -1,0 +1,1 @@
+补充一个必要的实验有效性要求，其余当前任务不变：你刚才已经发现 async Client Component 失败来自自己写的 use().default 组合/标签绑定错误，而非target。那一轮“默认vite target失败”不能再作为默认接线的失败证据或结论。当前用官方createClientLoader/useContent后，请保持同一份渲染代码、同一组步骤，分别测默认fumadocsMdx()与index.target=default；只切该变量。两边都用同样raw预查（如有），注明它是否属于标准示例以免混淆。已经得到的300ms对照保留。明确分开：外壳state、草稿、未改动的MDX内TSX计数器、是否整页刷新。不要把正文计数归零混报“状态全保留”。完成新增导航点击/新URL直开后交回；不要扩展别的实验。

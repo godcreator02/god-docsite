@@ -1,0 +1,28 @@
+[restart] Relaunching with --conditions=development
+[2m10:20:58 AM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m Re-optimizing dependencies because vite config has changed
+  [32m➜[39m  [1mLocal[22m:   [36mhttp://127.0.0.1:[1m5530[22m/[39m
+[2m10:21:01 AM[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m connected.
+Error: The render was aborted by the server without a reason.
+    at abort (D:\unitfolders\oz47p-docsite-kit\docsite-kit\probes\2610120354_official-react-router\node_modules\.pnpm\react-dom@19.3.0_react@19.3.0\node_modules\react-dom\cjs\react-dom-server.node.development.js:9248:15)
+    at abort (D:\unitfolders\oz47p-docsite-kit\docsite-kit\probes\2610120354_official-react-router\node_modules\.pnpm\react-dom@19.3.0_react@19.3.0\node_modules\react-dom\cjs\react-dom-server.node.development.js:11142:11)
+    at Timeout.eval (D:\unitfolders\oz47p-docsite-kit\docsite-kit\probes\2610120354_official-react-router\node_modules\.pnpm\@react-router+dev@8.4.0_@re_35cc8d5226b1e2eb3a98fe9fc953e8c0\node_modules\@react-router\dev\dist\config\defaults\entry.server.node.tsx:41:13)
+    at listOnTimeout (node:internal/timers:605:17)
+    at process.processTimers (node:internal/timers:541:7)
+[2m10:21:22 AM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [optimizer] bundling dependencies...
+[2m10:21:23 AM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mdependencies optimized: [33mcn, lucide-react[32m[39m
+[2m10:21:30 AM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/app/routes/docs.tsx[22m
+[2m10:21:30 AM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/app/routes/docs.tsx[22m
+[2m10:21:30 AM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/app/routes/docs.tsx, /app/app.css[22m
+[2m10:21:30 AM[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m [32mpage reload [39m[2mcontent/docs/baseline.mdx[22m
+[2m10:21:30 AM[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m program reload
+[2m10:23:55 AM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/app/routes/docs.tsx, /content/docs/baseline.mdx?macro_id=app%2Flib%2Fsource.ts%23docs[22m
+[2m10:23:55 AM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/content/docs/baseline.mdx?macro_id=app%2Flib%2Fsource.ts%23docs[22m
+[2m10:23:55 AM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/app/routes/docs.tsx, /content/docs/baseline.mdx?macro_id=app%2Flib%2Fsource.ts%23docs[22m
+[2m10:23:55 AM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/content/docs/baseline.mdx?macro_id=app%2Flib%2Fsource.ts%23docs[22m
+[2m10:23:55 AM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/app/routes/docs.tsx, /content/docs/baseline.mdx?macro_id=app%2Flib%2Fsource.ts%23docs, /app/app.css[22m
+[2m10:23:55 AM[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m [32mpage reload [39m[2mcontent/docs/baseline.mdx[22m
+[2m10:23:55 AM[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m program reload
+[2m10:23:55 AM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [33mhmr invalidate [39m[2m/content/docs/baseline.mdx?macro_id=app%2Flib%2Fsource.ts%23docs[22m Could not Fast Refresh. Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
+[2m10:23:55 AM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2mcontent/docs/baseline.mdx[22m[2m (circular import invalidate)[22m
+[2m10:23:55 AM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [33mhmr invalidate [39m[2m/content/docs/baseline.mdx?macro_id=app%2Flib%2Fsource.ts%23docs[22m Could not Fast Refresh. Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
+[2m10:23:55 AM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2mcontent/docs/baseline.mdx[22m[2m (circular import invalidate)[22m

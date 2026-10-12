@@ -1,0 +1,56 @@
+$ node scripts/test-original.mjs
+=== Σ╕┤µù╢τº╗ΘÖñΦíÑΣ╕ü∩╝îµüóσñìσÄƒτëê vite 8.3.4 ===
+Scope: all 2 workspace projects
+Γ£ô Lockfile passes supply-chain policies (verified 32s ago)
+Packages: +9 -8
++++++++++--------
+Progress: resolved 9, reused 314, downloaded 0, added 9, done
+[WARN] Issues with peer dependencies found. Run "pnpm peers check" to list them.
+Done in 1.1s using pnpm v12.4.2
+=== σÄƒτëêσƒ║τ║┐∩╝êΘóäµ£ƒ∩╝ÜA σñ▒Φ┤Ñµû¡Φ¿ÇΘÇÜΦ┐ç / BπÇüC µêÉσèƒ∩╝ë===
+$ vitest run
+
+[1m[30m[46m RUN [49m[39m[22m [36mv5.0.3 [39m[90mD:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610121018_vite-add-discovery[39m
+
+[90mstdout[2m | test/glob-add.test.mjs[2m > [22m[2mσÅÿΣ╜ô A τ¢╕σ»╣ base ./../content∩╝êfumadocs codegen σ╜óµÇü∩╝ë∩╝êσ«ëΦúàτè╢µÇü∩╝ÜσÄƒτëê vite 8.3.4∩╝êposix.resolve∩╝ë∩╝ë[2m > [22m[2mΦ┐ÉΦíîΣ╕¡µû░σó₧µûçΣ╗╢∩╝Üwatcher addπÇühotUpdateπÇüΣ║ºτë⌐Θö«µÿ»σÉªµ¢┤µû░
+[22m[39m[variant-a] σ«ëΦúà=unpatched∩╝îΣ║ºτë⌐Θö«=["./initial-a.txt"]∩╝îσÉ½µû░σó₧=false∩╝îµ¿íσ¥ùΦó½σèáσàÑµ¢┤µû░σêùΦí¿=false
+[variant-a] Σ║ºτë⌐Θö«=["./initial-a.txt"]∩╝îσÉ½µû░σó₧=false∩╝îµ¿íσ¥ùΦó½σèáσàÑµ¢┤µû░σêùΦí¿=false
+
+[90mstdout[2m | test/glob-add.test.mjs[2m > [22m[2mσÅÿΣ╜ô B µá╣τ¢╕σ»╣ base /content∩╝êσ«ëΦúàτè╢µÇü∩╝ÜσÄƒτëê vite 8.3.4∩╝êposix.resolve∩╝ë∩╝ë[2m > [22m[2mΦ┐ÉΦíîΣ╕¡µû░σó₧µûçΣ╗╢∩╝Üwatcher addπÇühotUpdateπÇüΣ║ºτë⌐Θö«µÿ»σÉªµ¢┤µû░
+[22m[39m[variant-b] σ«ëΦúà=unpatched∩╝îΣ║ºτë⌐Θö«=["./added-variant-b-1791775344539.txt","./initial-b.txt"]∩╝îσÉ½µû░σó₧=true∩╝îµ¿íσ¥ùΦó½σèáσàÑµ¢┤µû░σêùΦí¿=true
+[variant-b] Σ║ºτë⌐Θö«=["./added-variant-b-1791775344539.txt","./initial-b.txt"]∩╝îσÉ½µû░σó₧=true∩╝îµ¿íσ¥ùΦó½σèáσàÑµ¢┤µû░σêùΦí¿=true
+
+[90mstdout[2m | test/glob-add.test.mjs[2m > [22m[2mσÅÿΣ╜ô C µùá base∩╝îτ¢┤µÄÑ ../content/**/*.txt∩╝êσ«ëΦúàτè╢µÇü∩╝ÜσÄƒτëê vite 8.3.4∩╝êposix.resolve∩╝ë∩╝ë[2m > [22m[2mΦ┐ÉΦíîΣ╕¡µû░σó₧µûçΣ╗╢∩╝Üwatcher addπÇühotUpdateπÇüΣ║ºτë⌐Θö«µÿ»σÉªµ¢┤µû░
+[22m[39m[variant-c] σ«ëΦúà=unpatched∩╝îΣ║ºτë⌐Θö«=["../content/added-variant-c-1791775347847.txt","../content/initial-c.txt"]∩╝îσÉ½µû░σó₧=true∩╝îµ¿íσ¥ùΦó½σèáσàÑµ¢┤µû░σêùΦí¿=true
+[variant-c] Σ║ºτë⌐Θö«=["../content/added-variant-c-1791775347847.txt","../content/initial-c.txt"]∩╝îσÉ½µû░σó₧=true∩╝îµ¿íσ¥ùΦó½σèáσàÑµ¢┤µû░σêùΦí¿=true
+
+[90mstdout[2m | test/glob-add.test.mjs[2m > [22m[2mσÅÿΣ╜ô D τ¢╕σ»╣ base + σÉªσ«Ü glob !./skip-*.txt∩╝êσ«ëΦúàτè╢µÇü∩╝ÜσÄƒτëê vite 8.3.4∩╝êposix.resolve∩╝ë∩╝ë[2m > [22m[2mΦ┐ÉΦíîΣ╕¡µû░σó₧µûçΣ╗╢∩╝Üwatcher addπÇühotUpdateπÇüΣ║ºτë⌐Θö«µÿ»σÉªµ¢┤µû░
+[22m[39m[variant-d] σ«ëΦúà=unpatched∩╝îΣ║ºτë⌐Θö«=["./initial-d.txt"]∩╝îσÉ½µû░σó₧=false∩╝îµ¿íσ¥ùΦó½σèáσàÑµ¢┤µû░σêùΦí¿=false
+[variant-d] Σ║ºτë⌐Θö«=["./initial-d.txt"]∩╝îσÉ½µû░σó₧=false∩╝îµ¿íσ¥ùΦó½σèáσàÑµ¢┤µû░σêùΦí¿=false
+
+ [32mΓ£ô[39m test/glob-add.test.mjs [2m([22m[2m10 tests[22m[2m)[22m[33m 13046[2mms[22m[39m
+   [32mΓ£ô[39m σÅÿΣ╜ô A τ¢╕σ»╣ base ./../content∩╝êfumadocs codegen σ╜óµÇü∩╝ë∩╝êσ«ëΦúàτè╢µÇü∩╝ÜσÄƒτëê vite 8.3.4∩╝êposix.resolve∩╝ë∩╝ë [2m(2)[22m
+     [33m[2mΓ£ô[22m[39m Φ┐ÉΦíîΣ╕¡µû░σó₧µûçΣ╗╢∩╝Üwatcher addπÇühotUpdateπÇüΣ║ºτë⌐Θö«µÿ»σÉªµ¢┤µû░[33m 3268[2mms[22m[39m
+   [32mΓ£ô[39m σÅÿΣ╜ô B µá╣τ¢╕σ»╣ base /content∩╝êσ«ëΦúàτè╢µÇü∩╝ÜσÄƒτëê vite 8.3.4∩╝êposix.resolve∩╝ë∩╝ë [2m(2)[22m
+     [33m[2mΓ£ô[22m[39m Φ┐ÉΦíîΣ╕¡µû░σó₧µûçΣ╗╢∩╝Üwatcher addπÇühotUpdateπÇüΣ║ºτë⌐Θö«µÿ»σÉªµ¢┤µû░[33m 3274[2mms[22m[39m
+   [32mΓ£ô[39m σÅÿΣ╜ô C µùá base∩╝îτ¢┤µÄÑ ../content/**/*.txt∩╝êσ«ëΦúàτè╢µÇü∩╝ÜσÄƒτëê vite 8.3.4∩╝êposix.resolve∩╝ë∩╝ë [2m(2)[22m
+     [33m[2mΓ£ô[22m[39m Φ┐ÉΦíîΣ╕¡µû░σó₧µûçΣ╗╢∩╝Üwatcher addπÇühotUpdateπÇüΣ║ºτë⌐Θö«µÿ»σÉªµ¢┤µû░[33m 3285[2mms[22m[39m
+   [32mΓ£ô[39m σÅÿΣ╜ô D τ¢╕σ»╣ base + σÉªσ«Ü glob !./skip-*.txt∩╝êσ«ëΦúàτè╢µÇü∩╝ÜσÄƒτëê vite 8.3.4∩╝êposix.resolve∩╝ë∩╝ë [2m(2)[22m
+     [33m[2mΓ£ô[22m[39m Φ┐ÉΦíîΣ╕¡µû░σó₧µûçΣ╗╢∩╝Üwatcher addπÇühotUpdateπÇüΣ║ºτë⌐Θö«µÿ»σÉªµ¢┤µû░[33m 3020[2mms[22m[39m
+
+[2m Test Files [22m [1m[32m1 passed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[32m10 passed[39m[22m[90m (10)[39m
+[2m   Start at [22m 11:22:20
+[2m   Duration [22m 13.45s[2m (tests 98%, import 1%)[22m
+
+=== µüóσñìΦíÑΣ╕üΘàìτ╜«σ╣╢ΘçìΦúà ===
+Scope: all 2 workspace projects
+Γ£ô Lockfile passes supply-chain policies (verified 14s ago)
+Packages: +9 -8
++++++++++--------
+Progress: resolved 9, reused 315, downloaded 0, added 9, done
+[WARN] Issues with peer dependencies found. Run "pnpm peers check" to list them.
+Done in 1s using pnpm v12.4.2
+ΦíÑΣ╕üσ╖▓µüóσñì∩╝êpatchedDependencies + lock + node_modules σ¥çσ¢₧σê░ΦíÑΣ╕üτëê∩╝ë
+(node:11132) [DEP0190] DeprecationWarning: Passing args to a child process with shell option true can lead to security vulnerabilities, as the arguments are not escaped, only concatenated.
+(Use `node --trace-deprecation ...` to show where the warning was created)

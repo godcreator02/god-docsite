@@ -1,0 +1,16 @@
+---
+title: 三种页面来源
+description: MDX、TSX、HTML 三种格式的页面进同一棵页面树与同一个搜索索引。
+---
+
+这一页是 MDX 写的。同一目录下还有 [TSX 页面](/guide/counter)与 [HTML 页面](/guide/waveform)，
+三种格式在导航树里并列，搜索也一起收。
+
+## MDX 走集合编译
+
+MDX 由 fumadocs-mdx 的集合编译：标题、描述来自 frontmatter，搜索分段由 remark 的 structure 插件切出，
+Markdown 形式由官方 `getText('processed')` 通道给出。
+
+### 标题层级
+
+三级的标题也会进目录与搜索，锚点由编译链生成。

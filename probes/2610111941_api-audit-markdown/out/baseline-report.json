@@ -1,0 +1,162 @@
+{
+  "count": 31,
+  "identical": 31,
+  "elapsedMs": 1689,
+  "results": [
+    {
+      "path": "e8-01.mdx",
+      "bytes": 326,
+      "identical": true
+    },
+    {
+      "path": "e8-02.mdx",
+      "bytes": 326,
+      "identical": true
+    },
+    {
+      "path": "e8-03.mdx",
+      "bytes": 326,
+      "identical": true
+    },
+    {
+      "path": "e8-04.mdx",
+      "bytes": 326,
+      "identical": true
+    },
+    {
+      "path": "e8-05.mdx",
+      "bytes": 326,
+      "identical": true
+    },
+    {
+      "path": "e8-06.mdx",
+      "bytes": 326,
+      "identical": true
+    },
+    {
+      "path": "e8-07.mdx",
+      "bytes": 326,
+      "identical": true
+    },
+    {
+      "path": "e8-08.mdx",
+      "bytes": 326,
+      "identical": true
+    },
+    {
+      "path": "e8-09.mdx",
+      "bytes": 326,
+      "identical": true
+    },
+    {
+      "path": "e8-10.mdx",
+      "bytes": 326,
+      "identical": true
+    },
+    {
+      "path": "e8-11.mdx",
+      "bytes": 326,
+      "identical": true
+    },
+    {
+      "path": "e8-12.mdx",
+      "bytes": 326,
+      "identical": true
+    },
+    {
+      "path": "e8-13.mdx",
+      "bytes": 326,
+      "identical": true
+    },
+    {
+      "path": "e8-14.mdx",
+      "bytes": 326,
+      "identical": true
+    },
+    {
+      "path": "e8-15.mdx",
+      "bytes": 326,
+      "identical": true
+    },
+    {
+      "path": "e8-16.mdx",
+      "bytes": 326,
+      "identical": true
+    },
+    {
+      "path": "e8-17.mdx",
+      "bytes": 326,
+      "identical": true
+    },
+    {
+      "path": "e8-18.mdx",
+      "bytes": 326,
+      "identical": true
+    },
+    {
+      "path": "e8-19.mdx",
+      "bytes": 326,
+      "identical": true
+    },
+    {
+      "path": "e8.mdx",
+      "bytes": 326,
+      "identical": true
+    },
+    {
+      "path": "guides/hello.mdx",
+      "bytes": 148,
+      "identical": true
+    },
+    {
+      "path": "guides/world.mdx",
+      "bytes": 49,
+      "identical": true
+    },
+    {
+      "path": "index.mdx",
+      "bytes": 780,
+      "identical": true
+    },
+    {
+      "path": "maintain/agents.mdx",
+      "bytes": 7479,
+      "identical": true
+    },
+    {
+      "path": "outputs/claude.mdx",
+      "bytes": 10,
+      "identical": true
+    },
+    {
+      "path": "outputs/readme.mdx",
+      "bytes": 8564,
+      "identical": true
+    },
+    {
+      "path": "outputs/skills/docs-site.mdx",
+      "bytes": 21183,
+      "identical": true
+    },
+    {
+      "path": "outputs/skills/docs-writing.mdx",
+      "bytes": 19865,
+      "identical": true
+    },
+    {
+      "path": "outputs/skills/trajectory.mdx",
+      "bytes": 8312,
+      "identical": true
+    },
+    {
+      "path": "pin-probe.mdx",
+      "bytes": 141,
+      "identical": true
+    },
+    {
+      "path": "test.mdx",
+      "bytes": 270,
+      "identical": true
+    }
+  ]
+}

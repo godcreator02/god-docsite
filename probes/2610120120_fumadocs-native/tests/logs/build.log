@@ -1,0 +1,67 @@
+[MDX] generated files in 6.5978999999999814ms
+Using Vite Environment API
+[36mvite v8.3.4 [32mbuilding client environment for production...[36m[39m
+[MDX] generated files in 2.6422999999999774ms
+transforming...
+✓ 2524 modules transformed.
+rendering chunks...
+computing gzip size...
+build/client/.vite/manifest.json                             9.44 kB │ gzip:   1.17 kB
+build/client/assets/root-Bs9i-v9v.css                       87.64 kB │ gzip:  14.47 kB
+build/client/assets/fetch-DXL1eGns.js                        0.05 kB │ gzip:   0.07 kB
+build/client/assets/remove-undefined-CzMSKybq-CP3jfHCp.js    0.33 kB │ gzip:   0.22 kB
+build/client/assets/20261012t080500-r1a2-Bi-7bluo.js         0.59 kB │ gzip:   0.42 kB
+build/client/assets/home-DBPrCQgC.js                         0.71 kB │ gzip:   0.52 kB
+build/client/assets/algolia-DRf5HolV.js                      0.75 kB │ gzip:   0.47 kB
+build/client/assets/20261012t080000-seed1-fr5mHdLb.js        1.10 kB │ gzip:   0.76 kB
+build/client/assets/orama-cloud-legacy-BtmMMrT-.js           1.12 kB │ gzip:   0.61 kB
+build/client/assets/orama-cloud-v0VycB6B.js                  1.18 kB │ gzip:   0.63 kB
+build/client/assets/mixedbread-DPsc5_Iv.js                   1.68 kB │ gzip:   0.88 kB
+build/client/assets/root-ZEgUzFrG.js                         2.26 kB │ gzip:   1.10 kB
+build/client/assets/docs-DKv6SyN1.js                         4.32 kB │ gzip:   1.86 kB
+build/client/assets/react-dom-BSCSl36w.js                    9.59 kB │ gzip:   2.98 kB
+build/client/assets/lib-Xma_Zb0o.js                         10.69 kB │ gzip:   4.25 kB
+build/client/assets/DirectionContext-9OmT7AHQ.js            35.65 kB │ gzip:  12.74 kB
+build/client/assets/search-default-DHCHuRB-.js              50.01 kB │ gzip:  18.02 kB
+build/client/assets/dist-BitE223P.js                        70.70 kB │ gzip:  27.29 kB
+build/client/assets/orama-static-C1cb-TmY.js                74.93 kB │ gzip:  26.12 kB
+build/client/assets/parse-BU3fTLtO-CDkvlijp.js              89.24 kB │ gzip:  25.79 kB
+build/client/assets/jsx-runtime-CHaZvRis.js                141.41 kB │ gzip:  46.50 kB
+build/client/assets/docs-D9VZXigj.js                       163.00 kB │ gzip:  54.23 kB
+build/client/assets/entry.client-CaI0Nk6C.js               393.85 kB │ gzip: 120.09 kB
+
+[32m✓ built in 2.09s[39m
+[36mvite v8.3.4 [32mbuilding ssr environment for production...[36m[39m
+[MDX] generated files in 4.460199999999986ms
+transforming...
+✓ 2454 modules transformed.
+rendering chunks...
+
+[32m✓[39m 1 asset cleaned from React Router server build.
+[2mbuild\server\assets\server-build-B_k7hFc2.css[22m
+
+computing gzip size...
+build/server/.vite/manifest.json                             8.10 kB │ gzip:   1.08 kB
+build/server/assets/server-build-B_k7hFc2.css               90.09 kB │ gzip:  14.93 kB
+build/server/assets/fetch-BZ_C2PhK.js                        0.05 kB │ gzip:   0.07 kB
+build/server/assets/url-BVHvi3_K-O95YmUkP.js                 0.74 kB │ gzip:   0.44 kB
+build/server/assets/remove-undefined-CzMSKybq-DHMHsQDm.js    0.85 kB │ gzip:   0.43 kB
+build/server/assets/20261012t080500-r1a2-BCLvV83u.js         0.92 kB │ gzip:   0.55 kB
+build/server/assets/fetch-CFZlq8-K.js                        1.05 kB │ gzip:   0.60 kB
+build/server/assets/algolia-BivBjbib.js                      1.36 kB │ gzip:   0.69 kB
+build/server/assets/rolldown-runtime-B4iAMlE-.js             1.58 kB │ gzip:   0.74 kB
+build/server/assets/20261012t080000-seed1-WQB_pkB4.js        1.80 kB │ gzip:   1.00 kB
+build/server/assets/orama-cloud-legacy-rkhdM_-R.js           2.10 kB │ gzip:   0.89 kB
+build/server/assets/orama-cloud-CuGmA6NG.js                  2.14 kB │ gzip:   0.91 kB
+build/server/assets/use-search-Dy8lBrbN-CG2zVcmy.js          3.25 kB │ gzip:   1.46 kB
+build/server/assets/mixedbread-BJnr6sYc.js                   3.65 kB │ gzip:   1.44 kB
+build/server/assets/docs-Cj36wAhT.js                         5.38 kB │ gzip:   2.05 kB
+build/server/assets/server-B_vrqvU3.js                      13.59 kB │ gzip:   4.71 kB
+build/server/assets/space-separated-tokens--1wesS2p.js      35.88 kB │ gzip:   9.34 kB
+build/server/assets/search-default-D1anWgVH.js              72.30 kB │ gzip:  19.67 kB
+build/server/assets/orama-static-kVoARsjh.js               152.87 kB │ gzip:  37.08 kB
+build/server/assets/dist-CjL-XmQ7.js                       258.31 kB │ gzip:  66.00 kB
+build/server/assets/parse-BU3fTLtO-D9fswoTM.js             322.09 kB │ gzip:  72.59 kB
+build/server/index.js                                      458.62 kB │ gzip: 111.01 kB
+
+[32m✓ built in 1.73s[39m

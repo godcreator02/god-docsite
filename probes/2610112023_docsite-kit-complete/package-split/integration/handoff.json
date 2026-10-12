@@ -1,0 +1,86 @@
+{
+  "task": "K-integration",
+  "date": "2026-10-12",
+  "status": "completed",
+  "writeScope": [
+    "packages/docsite-identity/",
+    "packages/docsite-comments/",
+    "probes/2610112023_docsite-kit-complete/site/",
+    "probes/2610112023_docsite-kit-complete/package-split/integration/"
+  ],
+  "sharedFiles": {
+    "pnpm-lock.yaml": "+61 行（两个新包 importer），基线在 integration/baseline/",
+    "pnpm-workspace.yaml": "未改",
+    "根 package.json": "未改"
+  },
+  "superseded": [
+    "作废：「action 内 utimes source.config.ts 已让评论写删闭环」（诊断第三层：utimes 是删除时六次 Failed to reload 的放大器，已移除）",
+    "作废：「集合失效根因在 Fumadocs watch/codegen」（真因：本机 Vite 8.3.4 对相对 glob base 的 Windows 监听匹配缺陷）"
+  ],
+  "fixesRound1": [
+    "CommentRequestOptions 去掉 identity，从 commenter 构造；as 非字符串/空串 400；fd-* 全部换包 tokens；页内删除确认条",
+    "嵌套 a 修复：all-comments 卡片不再包外层交互元素，说明行独立链接/展开按钮（Tab 可达），侧栏命中 a/button 不当选卡",
+    "删除乐观移除：CommentItem.onDeleted → ThreadView.onEntryDeleted → CommentLayer/AllComments removedKeys→live"
+  ],
+  "fixesRound2": {
+    "date": "2026-10-12 00:08 诊断后",
+    "apiUtimesRemoved": "app/routes/api-comments.ts 移除 utimes/refreshCollections",
+    "globBasePlugin": {
+      "file": "site/app/lib/comments-glob-root-base.ts",
+      "what": "Vite 插件 commentsGlobRootBase：transform .source/{server,browser}.ts，把 comments 集合 base \"./../comments\" 替换为根相对 \"/comments\"（Vite 8.3.4 Windows 相对 base 监听匹配缺陷的隔离修正）",
+      "scope": "仅 comments 集合两个生成文件；不改生成物/node_modules；不用私有方法；fumadocs-mdx 改生成格式时由 e2e 测试报警"
+    },
+    "e2eTest": {
+      "file": "site/test/comments-api.e2e.test.ts",
+      "what": "真实开发服务（5462）HTTP 全链：新建→回复→删回复→删整串；断言 SSR 集合数据自动跟上、source.config.ts 未动、logger 无 /comments/ 报错（已删模块 Failed to reload 不再出现）",
+      "red": "integration/e2e-red.log（无 base 修正时新建后 SSR 不更新，复现诊断）",
+      "green": "integration/e2e-green.log、e2e-green-2.log",
+      "command": "在 site 目录：..\\..\\packages\\docsite-kit\\node_modules\\.bin\\vitest.ps1 run --config test/vitest.config.mjs"
+    },
+    "tsconfig": "exclude test（e2e 由运行时验证）+ allowImportingTsExtensions",
+    "readme": "utimes 段替换为 base 适配说明与 e2e 命令"
+  },
+  "checks": [
+    {
+      "what": "identity check/build",
+      "result": "22 测试 + build 全绿"
+    },
+    {
+      "what": "comments check/build",
+      "result": "41 测试 + build 全绿（check-build-3.log）"
+    },
+    {
+      "what": "9 入口 exports 运行时解析",
+      "result": "全过（resolve-exports.log）"
+    },
+    {
+      "what": "站点 e2e（红→绿）",
+      "result": "先红后绿，见 fixesRound2.e2eTest"
+    },
+    {
+      "what": "站点 types:check",
+      "result": "exit 0（site-types-2.log）"
+    }
+  ],
+  "browserAcceptanceDone": [
+    "选中文字批注（真实拖选）",
+    "评论正文真 MDX",
+    "回复/agent as/解决重开/编辑",
+    "页内确认条取消与确认",
+    "八项拒绝矩阵+文件不变",
+    "折叠定位 details 样本",
+    "元素批注代码块",
+    "原文改动映射",
+    "只读站 403+无码泄露",
+    "/comments 首屏 DOM：无嵌套 a、链接独立、console hook 空"
+  ],
+  "pendingForReview": [
+    "浏览器全链（修复后代码）：创建(带链接)→回复→编辑→删回复→删整串→他串无损，重复一轮，tab.dev.logs 全程 console",
+    "/comments 展开按钮与说明链接交互、正文链接不被吞",
+    "AriaToggle aria-expanded 找回",
+    "已删模块 HMR 的浏览器侧最终表现（e2e 已证服务端 logger 无报错）"
+  ],
+  "toolGap": "本会话 IAB 自 10-11 23:32 起点击通道失效（playwright/cua/dom_cua/focus+Enter/组合键均不触发，type 与单键正常，跨页面跨标签跨服务重启依旧）；未用合成事件、未改站点适配工具，浏览器项交主会话 CUA",
+  "processes": "测试自起自停；无遗留监听（收尾核对 5460/5461/5462）",
+  "rerun": "site/README.md；start-site.ps1 start identity|readonly <port> / stop；e2e 见 fixesRound2.e2eTest.command"
+}

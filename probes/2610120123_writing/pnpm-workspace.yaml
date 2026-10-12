@@ -1,0 +1,8 @@
+packages:
+  - 'packages/*'
+  - 'fixture-site'
+
+allowBuilds:
+  esbuild: true
+onlyBuiltDependencies:
+  - esbuild

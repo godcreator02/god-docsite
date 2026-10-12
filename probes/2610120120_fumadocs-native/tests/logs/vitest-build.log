@@ -1,0 +1,62 @@
+
+[1m[30m[46m RUN [49m[39m[22m [36mv5.0.3 [39m[90mD:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/261012_fumadocs-native[39m
+
+ [31m❯[39m tests/build-start.test.ts [2m([22m[2m5 tests[22m[2m | [22m[33m5 skipped[39m[2m)[22m[33m 3114[2mms[22m[39m
+   [2m[90m↓[39m[22m build/start：只读快照（评论与正文同一时刻编译） [2m(5)[22m
+     [2m[90m↓[39m[22m SSR 快照里有正文与样例评论（含 TSX 组件与图片）
+     [2m[90m↓[39m[22m 快照里的图片资源可取
+     [2m[90m↓[39m[22m 启动没有身份码：界面只读、写接口拒绝
+     [2m[90m↓[39m[22m 首页可取
+     [2m[90m↓[39m[22m 未知页面 404
+
+[31m⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Suites 1 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m tests/build-start.test.ts[2m [ tests/build-start.test.ts ][22m
+[31m[1mError[22m: react-router build 失败（全文见 tests/logs/build.log）：
+
+  But other route exports in 'app/routes/docs.tsx' depend on '@/lib/identity.server'.
+
+  See https://reactrouter.com/explanation/code-splitting#removal-of-server-code
+    at PluginContextImpl.resolveId (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/261012_fumadocs-native/node_modules/.pnpm/@react-router+dev@8.4.0_@re_35cc8d5226b1e2eb3a98fe9fc953e8c0/node_modules/@react-router/dev/dist/vite.js:1918:12)
+    at async plugin (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/261012_fumadocs-native/node_modules/.pnpm/rolldown@1.2.13/node_modules/rolldown/dist/shared/bindingify-input-options-C0gEvtnB.mjs:1646:16)
+    at async plugin.<computed> (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/261012_fumadocs-native/node_modules/.pnpm/rolldown@1.2.13/node_modules/rolldown/dist/shared/bindingify-input-options-C0gEvtnB.mjs:2316:12)[31m
+    at aggregateBindingErrorsIntoJsError (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/261012_fumadocs-native/node_modules/.pnpm/rolldown@1.2.13/node_modules/rolldown/dist/shared/error-Dsqzw0Oa.mjs:49:18)
+    at unwrapBindingResult (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/261012_fumadocs-native/node_modules/.pnpm/rolldown@1.2.13/node_modules/rolldown/dist/shared/error-Dsqzw0Oa.mjs:19:128)
+    at #build (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/261012_fumadocs-native/node_modules/.pnpm/rolldown@1.2.13/node_modules/rolldown/dist/shared/rolldown-D_vNlorD.mjs:133:34)
+    at async buildEnvironment (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/261012_fumadocs-native/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/chunks/node.js:34716:66)
+    at async Object.build (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/261012_fumadocs-native/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/chunks/node.js:35137:19)
+    at async buildApp (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/261012_fumadocs-native/node_modules/.pnpm/@react-router+dev@8.4.0_@re_35cc8d5226b1e2eb3a98fe9fc953e8c0/node_modules/@react-router/dev/dist/vite.js:1543:8)
+    at async buildApp (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/261012_fumadocs-native/node_modules/.pnpm/@react-router+dev@8.4.0_@re_35cc8d5226b1e2eb3a98fe9fc953e8c0/node_modules/@react-router/dev/dist/vite.js:800:6)
+    at async Object.buildApp (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/261012_fumadocs-native/node_modules/.pnpm/@react-router+dev@8.4.0_@re_35cc8d5226b1e2eb3a98fe9fc953e8c0/node_modules/@react-router/dev/dist/vite.js:2211:8)
+    at async Object.buildApp (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/261012_fumadocs-native/node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/chunks/node.js:35133:38)
+    at async build (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/261012_fumadocs-native/node_modules/.pnpm/@react-router+dev@8.4.0_@re_35cc8d5226b1e2eb3a98fe9fc953e8c0/node_modules/@react-router/dev/dist/build-CsJF5XUO.js:16:2) {
+  errors: [Getter/Setter]
+}
+[39m
+[90m [2m❯[22m PluginContextImpl.resolveId node_modules/.pnpm/@react-router+dev@8.4.0_@re_35cc8d5226b1e2eb3a98fe9fc953e8c0/node_modules/@react-router/dev/dist/vite.js:[2m1918:12[22m[39m
+[90m [2m❯[22m plugin node_modules/.pnpm/rolldown@1.2.13/node_modules/rolldown/dist/shared/bindingify-input-options-C0gEvtnB.mjs:[2m1646:16[22m[39m
+[90m [2m❯[22m aggregateBindingErrorsIntoJsError node_modules/.pnpm/rolldown@1.2.13/node_modules/rolldown/dist/shared/error-Dsqzw0Oa.mjs:[2m49:18[22m[39m
+[90m [2m❯[22m unwrapBindingResult node_modules/.pnpm/rolldown@1.2.13/node_modules/rolldown/dist/shared/error-Dsqzw0Oa.mjs:[2m19:128[22m[39m
+[90m [2m❯[22m #build node_modules/.pnpm/rolldown@1.2.13/node_modules/rolldown/dist/shared/rolldown-D_vNlorD.mjs:[2m133:34[22m[39m
+[90m [2m❯[22m buildEnvironment node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/chunks/node.js:[2m34716:66[22m[39m
+[90m [2m❯[22m Object.build node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/chunks/node.js:[2m35137:19[22m[39m
+[90m [2m❯[22m buildApp node_modules/.pnpm/@react-router+dev@8.4.0_@re_35cc8d5226b1e2eb3a98fe9fc953e8c0/node_modules/@react-router/dev/dist/vite.js:[2m1543:8[22m[39m
+[90m [2m❯[22m buildApp node_modules/.pnpm/@react-router+dev@8.4.0_@re_35cc8d5226b1e2eb3a98fe9fc953e8c0/node_modules/@react-router/dev/dist/vite.js:[2m800:6[22m[39m
+[90m [2m❯[22m Object.buildApp node_modules/.pnpm/@react-router+dev@8.4.0_@re_35cc8d5226b1e2eb3a98fe9fc953e8c0/node_modules/@react-router/dev/dist/vite.js:[2m2211:8[22m[39m
+[90m [2m❯[22m Object.buildApp node_modules/.pnpm/vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92/node_modules/vite/dist/node/chunks/node.js:[2m35133:38[22m[39m
+[36m [2m❯[22m tests/build-start.test.ts:[2m35:11[22m[39m
+    [90m 33|[39m     const detail = error instanceof Error && 'stdout' in error ? `${(e…
+    [90m 34|[39m     writeFileSync(path.join(LOGS_DIR, 'build.log'), detail, 'utf-8');
+    [90m 35|[39m     throw new Error(`react-router build 失败（全文见 tests/logs/build.log）：\…
+    [90m   |[39m           [31m^[39m
+    [90m 36|[39m   }
+    [90m 37|[39m   if (!existsSync(path.join(SITE_DIR, 'build', 'server', 'index.js')))…
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [33m5 skipped[39m[90m (5)[39m
+[2m   Start at [22m 01:36:56
+[2m   Duration [22m 3.40s[2m (tests 98%, transform 1%)[22m
+

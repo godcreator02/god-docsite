@@ -1,0 +1,268 @@
+$ react-router dev --port 5520 --host 127.0.0.1
+[restart] Relaunching with --conditions=development
+  [32mΓ₧£[39m  [1mLocal[22m:   [36mhttp://127.0.0.1:[1m5520[22m/[39m
+[2m[32m  Γ₧£[39m[22m[2m  press [22m[1mh + enter[22m[2m to show help[22m
+[2m2:56:09 AM[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m connected.
+Error: No route matches URL "/favicon.ico"
+    at getInternalRouterError (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610120242_comment-hmr-minimal/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/router/router.js:2779:58)
+    at Object.query (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610120242_comment-hmr-minimal/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/router/router.js:1495:16)
+    at handleDocumentRequest (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610120242_comment-hmr-minimal/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/server-runtime/server.js:213:36)
+    at requestHandler (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610120242_comment-hmr-minimal/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/server-runtime/server.js:123:21)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+ErrorResponseImpl {
+  status: 404,
+  statusText: 'Not Found',
+  data: 'Error: No route matches URL "/favicon.ico"',
+  error: Error: No route matches URL "/favicon.ico"
+      at getInternalRouterError (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610120242_comment-hmr-minimal/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/router/router.js:2779:58)
+      at Object.query (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610120242_comment-hmr-minimal/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/router/router.js:1495:16)
+      at handleDocumentRequest (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610120242_comment-hmr-minimal/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/server-runtime/server.js:213:36)
+      at requestHandler (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610120242_comment-hmr-minimal/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/server-runtime/server.js:123:21)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5),
+  internal: true
+}
+Error: No route matches URL "/favicon.ico"
+    at getInternalRouterError (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610120242_comment-hmr-minimal/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/router/router.js:2779:58)
+    at Object.query (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610120242_comment-hmr-minimal/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/router/router.js:1495:16)
+    at handleDocumentRequest (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610120242_comment-hmr-minimal/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/server-runtime/server.js:213:36)
+    at requestHandler (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610120242_comment-hmr-minimal/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/server-runtime/server.js:123:21)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+ErrorResponseImpl {
+  status: 404,
+  statusText: 'Not Found',
+  data: 'Error: No route matches URL "/favicon.ico"',
+  error: Error: No route matches URL "/favicon.ico"
+      at getInternalRouterError (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610120242_comment-hmr-minimal/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/router/router.js:2779:58)
+      at Object.query (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610120242_comment-hmr-minimal/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/router/router.js:1495:16)
+      at handleDocumentRequest (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610120242_comment-hmr-minimal/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/server-runtime/server.js:213:36)
+      at requestHandler (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610120242_comment-hmr-minimal/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/server-runtime/server.js:123:21)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5),
+  internal: true
+}
+Error: No route matches URL "/favicon.ico"
+    at getInternalRouterError (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610120242_comment-hmr-minimal/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/router/router.js:2779:58)
+    at Object.query (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610120242_comment-hmr-minimal/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/router/router.js:1495:16)
+    at handleDocumentRequest (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610120242_comment-hmr-minimal/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/server-runtime/server.js:213:36)
+    at requestHandler (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610120242_comment-hmr-minimal/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/server-runtime/server.js:123:21)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+ErrorResponseImpl {
+  status: 404,
+  statusText: 'Not Found',
+  data: 'Error: No route matches URL "/favicon.ico"',
+  error: Error: No route matches URL "/favicon.ico"
+      at getInternalRouterError (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610120242_comment-hmr-minimal/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/router/router.js:2779:58)
+      at Object.query (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610120242_comment-hmr-minimal/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/router/router.js:1495:16)
+      at handleDocumentRequest (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610120242_comment-hmr-minimal/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/server-runtime/server.js:213:36)
+      at requestHandler (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610120242_comment-hmr-minimal/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/server-runtime/server.js:123:21)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5),
+  internal: true
+}
+Error: No route matches URL "/favicon.ico"
+    at getInternalRouterError (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610120242_comment-hmr-minimal/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/router/router.js:2779:58)
+    at Object.query (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610120242_comment-hmr-minimal/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/router/router.js:1495:16)
+    at handleDocumentRequest (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610120242_comment-hmr-minimal/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/server-runtime/server.js:213:36)
+    at requestHandler (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610120242_comment-hmr-minimal/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/server-runtime/server.js:123:21)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+ErrorResponseImpl {
+  status: 404,
+  statusText: 'Not Found',
+  data: 'Error: No route matches URL "/favicon.ico"',
+  error: Error: No route matches URL "/favicon.ico"
+      at getInternalRouterError (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610120242_comment-hmr-minimal/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/router/router.js:2779:58)
+      at Object.query (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610120242_comment-hmr-minimal/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/router/router.js:1495:16)
+      at handleDocumentRequest (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610120242_comment-hmr-minimal/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/server-runtime/server.js:213:36)
+      at requestHandler (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610120242_comment-hmr-minimal/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/server-runtime/server.js:123:21)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5),
+  internal: true
+}
+[2m2:57:05 AM[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m [32mpage reload [39m[2mapp/root.tsx[22m
+[2m2:57:05 AM[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m program reload
+Error: No route matches URL "/favicon.ico"
+    at getInternalRouterError (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610120242_comment-hmr-minimal/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/router/router.js:2779:58)
+    at Object.query (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610120242_comment-hmr-minimal/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/router/router.js:1495:16)
+    at handleDocumentRequest (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610120242_comment-hmr-minimal/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/server-runtime/server.js:213:36)
+    at requestHandler (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610120242_comment-hmr-minimal/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/server-runtime/server.js:123:21)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+ErrorResponseImpl {
+  status: 404,
+  statusText: 'Not Found',
+  data: 'Error: No route matches URL "/favicon.ico"',
+  error: Error: No route matches URL "/favicon.ico"
+      at getInternalRouterError (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610120242_comment-hmr-minimal/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/router/router.js:2779:58)
+      at Object.query (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610120242_comment-hmr-minimal/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/router/router.js:1495:16)
+      at handleDocumentRequest (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610120242_comment-hmr-minimal/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/server-runtime/server.js:213:36)
+      at requestHandler (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610120242_comment-hmr-minimal/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/server-runtime/server.js:123:21)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5),
+  internal: true
+}
+Error: No route matches URL "/favicon.ico"
+    at getInternalRouterError (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610120242_comment-hmr-minimal/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/router/router.js:2779:58)
+    at Object.query (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610120242_comment-hmr-minimal/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/router/router.js:1495:16)
+    at handleDocumentRequest (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610120242_comment-hmr-minimal/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/server-runtime/server.js:213:36)
+    at requestHandler (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610120242_comment-hmr-minimal/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/server-runtime/server.js:123:21)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+ErrorResponseImpl {
+  status: 404,
+  statusText: 'Not Found',
+  data: 'Error: No route matches URL "/favicon.ico"',
+  error: Error: No route matches URL "/favicon.ico"
+      at getInternalRouterError (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610120242_comment-hmr-minimal/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/router/router.js:2779:58)
+      at Object.query (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610120242_comment-hmr-minimal/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/router/router.js:1495:16)
+      at handleDocumentRequest (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610120242_comment-hmr-minimal/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/server-runtime/server.js:213:36)
+      at requestHandler (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610120242_comment-hmr-minimal/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/server-runtime/server.js:123:21)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5),
+  internal: true
+}
+[2m2:57:36 AM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/app/routes/page.tsx[22m
+[2m2:57:36 AM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/app/routes/page.tsx[22m
+[2m2:57:36 AM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/app/routes/page.tsx[22m
+[2m2:57:36 AM[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m [32mpage reload [39m[2mapp/routes/page.tsx[22m
+[2m2:57:36 AM[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m program reload
+[2m2:57:37 AM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/app/routes/page.tsx[22m
+[2m2:57:37 AM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/app/routes/page.tsx[22m
+[2m2:57:37 AM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/app/routes/page.tsx[22m
+[2m2:57:37 AM[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m [32mpage reload [39m[2mapp/routes/page.tsx[22m
+[2m2:57:37 AM[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m program reload
+Error: No route matches URL "/favicon.ico"
+    at getInternalRouterError (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610120242_comment-hmr-minimal/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/router/router.js:2779:58)
+    at Object.query (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610120242_comment-hmr-minimal/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/router/router.js:1495:16)
+    at handleDocumentRequest (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610120242_comment-hmr-minimal/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/server-runtime/server.js:213:36)
+    at requestHandler (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610120242_comment-hmr-minimal/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/server-runtime/server.js:123:21)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+ErrorResponseImpl {
+  status: 404,
+  statusText: 'Not Found',
+  data: 'Error: No route matches URL "/favicon.ico"',
+  error: Error: No route matches URL "/favicon.ico"
+      at getInternalRouterError (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610120242_comment-hmr-minimal/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/router/router.js:2779:58)
+      at Object.query (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610120242_comment-hmr-minimal/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/router/router.js:1495:16)
+      at handleDocumentRequest (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610120242_comment-hmr-minimal/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/server-runtime/server.js:213:36)
+      at requestHandler (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610120242_comment-hmr-minimal/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/server-runtime/server.js:123:21)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5),
+  internal: true
+}
+[2m2:57:55 AM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/app/routes/page.tsx[22m
+[2m2:57:55 AM[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m [32mpage reload [39m[2mapp/lib/data.server.ts[22m
+[2m2:57:55 AM[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m program reload
+Error: No route matches URL "/favicon.ico"
+    at getInternalRouterError (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610120242_comment-hmr-minimal/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/router/router.js:2779:58)
+    at Object.query (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610120242_comment-hmr-minimal/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/router/router.js:1495:16)
+    at handleDocumentRequest (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610120242_comment-hmr-minimal/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/server-runtime/server.js:213:36)
+    at requestHandler (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610120242_comment-hmr-minimal/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/server-runtime/server.js:123:21)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+ErrorResponseImpl {
+  status: 404,
+  statusText: 'Not Found',
+  data: 'Error: No route matches URL "/favicon.ico"',
+  error: Error: No route matches URL "/favicon.ico"
+      at getInternalRouterError (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610120242_comment-hmr-minimal/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/router/router.js:2779:58)
+      at Object.query (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610120242_comment-hmr-minimal/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/router/router.js:1495:16)
+      at handleDocumentRequest (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610120242_comment-hmr-minimal/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/server-runtime/server.js:213:36)
+      at requestHandler (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610120242_comment-hmr-minimal/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/server-runtime/server.js:123:21)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5),
+  internal: true
+}
+[2m2:58:17 AM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/app/routes/page.tsx[22m
+[2m2:58:17 AM[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m [32mpage reload [39m[2mapp/lib/data.server.ts[22m
+[2m2:58:17 AM[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m program reload
+Error: No route matches URL "/favicon.ico"
+    at getInternalRouterError (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610120242_comment-hmr-minimal/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/router/router.js:2779:58)
+    at Object.query (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610120242_comment-hmr-minimal/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/router/router.js:1495:16)
+    at handleDocumentRequest (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610120242_comment-hmr-minimal/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/server-runtime/server.js:213:36)
+    at requestHandler (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610120242_comment-hmr-minimal/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/server-runtime/server.js:123:21)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+ErrorResponseImpl {
+  status: 404,
+  statusText: 'Not Found',
+  data: 'Error: No route matches URL "/favicon.ico"',
+  error: Error: No route matches URL "/favicon.ico"
+      at getInternalRouterError (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610120242_comment-hmr-minimal/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/router/router.js:2779:58)
+      at Object.query (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610120242_comment-hmr-minimal/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/router/router.js:1495:16)
+      at handleDocumentRequest (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610120242_comment-hmr-minimal/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/server-runtime/server.js:213:36)
+      at requestHandler (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610120242_comment-hmr-minimal/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/server-runtime/server.js:123:21)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5),
+  internal: true
+}
+Error: No route matches URL "/favicon.ico"
+    at getInternalRouterError (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610120242_comment-hmr-minimal/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/router/router.js:2779:58)
+    at Object.query (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610120242_comment-hmr-minimal/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/router/router.js:1495:16)
+    at handleDocumentRequest (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610120242_comment-hmr-minimal/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/server-runtime/server.js:213:36)
+    at requestHandler (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610120242_comment-hmr-minimal/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/server-runtime/server.js:123:21)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+ErrorResponseImpl {
+  status: 404,
+  statusText: 'Not Found',
+  data: 'Error: No route matches URL "/favicon.ico"',
+  error: Error: No route matches URL "/favicon.ico"
+      at getInternalRouterError (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610120242_comment-hmr-minimal/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/router/router.js:2779:58)
+      at Object.query (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610120242_comment-hmr-minimal/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/router/router.js:1495:16)
+      at handleDocumentRequest (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610120242_comment-hmr-minimal/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/server-runtime/server.js:213:36)
+      at requestHandler (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610120242_comment-hmr-minimal/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/server-runtime/server.js:123:21)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5),
+  internal: true
+}
+[2m2:58:32 AM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/app/components/StableWidget.tsx[22m
+[2m2:58:32 AM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/app/components/StableWidget.tsx[22m
+[2m2:58:32 AM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/app/components/StableWidget.tsx[22m
+[2m2:58:32 AM[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m [32mpage reload [39m[2mapp/components/StableWidget.tsx[22m
+[2m2:58:32 AM[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m program reload
+Error: No route matches URL "/favicon.ico"
+    at getInternalRouterError (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610120242_comment-hmr-minimal/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/router/router.js:2779:58)
+    at Object.query (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610120242_comment-hmr-minimal/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/router/router.js:1495:16)
+    at handleDocumentRequest (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610120242_comment-hmr-minimal/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/server-runtime/server.js:213:36)
+    at requestHandler (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610120242_comment-hmr-minimal/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/server-runtime/server.js:123:21)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+ErrorResponseImpl {
+  status: 404,
+  statusText: 'Not Found',
+  data: 'Error: No route matches URL "/favicon.ico"',
+  error: Error: No route matches URL "/favicon.ico"
+      at getInternalRouterError (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610120242_comment-hmr-minimal/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/router/router.js:2779:58)
+      at Object.query (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610120242_comment-hmr-minimal/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/router/router.js:1495:16)
+      at handleDocumentRequest (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610120242_comment-hmr-minimal/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/server-runtime/server.js:213:36)
+      at requestHandler (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610120242_comment-hmr-minimal/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/server-runtime/server.js:123:21)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5),
+  internal: true
+}
+[2m2:58:43 AM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/app/routes/page.tsx[22m
+[2m2:58:43 AM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/app/routes/page.tsx[22m
+[2m2:58:43 AM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/app/routes/page.tsx[22m
+[2m2:58:43 AM[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m [32mpage reload [39m[2mapp/routes/page.tsx[22m
+[2m2:58:43 AM[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m program reload
+Error: No route matches URL "/favicon.ico"
+    at getInternalRouterError (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610120242_comment-hmr-minimal/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/router/router.js:2779:58)
+    at Object.query (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610120242_comment-hmr-minimal/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/router/router.js:1495:16)
+    at handleDocumentRequest (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610120242_comment-hmr-minimal/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/server-runtime/server.js:213:36)
+    at requestHandler (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610120242_comment-hmr-minimal/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/server-runtime/server.js:123:21)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+ErrorResponseImpl {
+  status: 404,
+  statusText: 'Not Found',
+  data: 'Error: No route matches URL "/favicon.ico"',
+  error: Error: No route matches URL "/favicon.ico"
+      at getInternalRouterError (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610120242_comment-hmr-minimal/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/router/router.js:2779:58)
+      at Object.query (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610120242_comment-hmr-minimal/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/router/router.js:1495:16)
+      at handleDocumentRequest (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610120242_comment-hmr-minimal/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/server-runtime/server.js:213:36)
+      at requestHandler (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610120242_comment-hmr-minimal/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/server-runtime/server.js:123:21)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5),
+  internal: true
+}
+Error: No route matches URL "/favicon.ico"
+    at getInternalRouterError (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610120242_comment-hmr-minimal/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/router/router.js:2779:58)
+    at Object.query (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610120242_comment-hmr-minimal/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/router/router.js:1495:16)
+    at handleDocumentRequest (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610120242_comment-hmr-minimal/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/server-runtime/server.js:213:36)
+    at requestHandler (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610120242_comment-hmr-minimal/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/server-runtime/server.js:123:21)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+ErrorResponseImpl {
+  status: 404,
+  statusText: 'Not Found',
+  data: 'Error: No route matches URL "/favicon.ico"',
+  error: Error: No route matches URL "/favicon.ico"
+      at getInternalRouterError (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610120242_comment-hmr-minimal/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/router/router.js:2779:58)
+      at Object.query (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610120242_comment-hmr-minimal/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/router/router.js:1495:16)
+      at handleDocumentRequest (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610120242_comment-hmr-minimal/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/server-runtime/server.js:213:36)
+      at requestHandler (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610120242_comment-hmr-minimal/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/server-runtime/server.js:123:21)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5),
+  internal: true
+}
+[ELIFECYCLE] Command failed with exit code -1.

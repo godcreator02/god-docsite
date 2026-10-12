@@ -1,0 +1,13 @@
+{
+  "name": "comment-hmr-minimal-probe",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "vitest run --root tests",
+    "dev:a": "pnpm --filter probe-a-site dev",
+    "dev:b": "pnpm --filter probe-b-site dev"
+  },
+  "devDependencies": {
+    "vitest": "5.0.3"
+  }
+}

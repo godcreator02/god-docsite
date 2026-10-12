@@ -1,0 +1,40 @@
+{
+  "variant": "variant-a",
+  "addedFile": "D:\\unitfolders\\oz47p-docsite-kit\\docsite-kit\\probes\\2610121018_vite-add-discovery\\cases\\variant-a\\content\\added-variant-a-1791775341239.txt",
+  "events": [
+    {
+      "source": "watcher",
+      "type": "add",
+      "file": "D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610121018_vite-add-discovery/cases/variant-a/content/added-variant-a-1791775341239.txt"
+    },
+    {
+      "source": "watcher",
+      "type": "add",
+      "file": "D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610121018_vite-add-discovery/cases/variant-a/content/added-variant-a-1791775341239.txt"
+    },
+    {
+      "source": "hotUpdate:pre",
+      "type": "create",
+      "file": "D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610121018_vite-add-discovery/cases/variant-a/content/added-variant-a-1791775341239.txt",
+      "moduleIds": []
+    },
+    {
+      "source": "hotUpdate:post",
+      "type": "create",
+      "file": "D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610121018_vite-add-discovery/cases/variant-a/content/added-variant-a-1791775341239.txt",
+      "moduleIds": []
+    },
+    {
+      "source": "hotUpdate:pre",
+      "type": "create",
+      "file": "D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610121018_vite-add-discovery/cases/variant-a/content/added-variant-a-1791775341239.txt",
+      "moduleIds": []
+    },
+    {
+      "source": "hotUpdate:post",
+      "type": "create",
+      "file": "D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610121018_vite-add-discovery/cases/variant-a/content/added-variant-a-1791775341239.txt",
+      "moduleIds": []
+    }
+  ]
+}

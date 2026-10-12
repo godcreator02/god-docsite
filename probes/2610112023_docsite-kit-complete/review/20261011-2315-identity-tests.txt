@@ -1,0 +1,9 @@
+
+ RUN  v5.0.3 D:/unitfolders/oz47p-docsite-kit/docsite-kit/packages/docsite-identity
+
+
+ Test Files  4 passed (4)
+      Tests  22 passed (22)
+   Start at  23:16:00
+   Duration  836ms (transform 47%, import 26%, worker 17%, tests 11%)
+

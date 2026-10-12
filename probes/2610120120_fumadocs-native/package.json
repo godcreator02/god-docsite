@@ -1,0 +1,17 @@
+{
+  "name": "probe-261012-fumadocs-native",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "pnpm --filter probe-native-site dev",
+    "build": "pnpm --filter probe-native-site build",
+    "start": "pnpm --filter probe-native-site start",
+    "test": "vitest run --config tests/vitest.config.ts",
+    "check": "pnpm --filter @probe/comments-model check && pnpm --filter probe-native-site check"
+  },
+  "devDependencies": {
+    "@probe/comments-model": "workspace:*",
+    "@types/node": "^26.6.4",
+    "vitest": "^5.0.1"
+  }
+}

@@ -1,0 +1,5 @@
+[restart] Relaunching with --conditions=development
+  [32m➜[39m  [1mLocal[22m:   [36mhttp://127.0.0.1:[1m5530[22m/[39m
+[2m11:02:44 AM[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m connected.
+[2m11:03:11 AM[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m [32mpage reload [39m[2mapp/lib/source.ts[22m
+[2m11:03:11 AM[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m program reload

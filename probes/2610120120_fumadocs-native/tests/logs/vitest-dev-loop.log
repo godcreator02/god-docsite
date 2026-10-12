@@ -1,0 +1,59 @@
+
+[1m[30m[46m RUN [49m[39m[22m [36mv5.0.3 [39m[90mD:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/261012_fumadocs-native[39m
+
+(node:93248) [DEP0190] DeprecationWarning: Passing args to a child process with shell option true can lead to security vulnerabilities, as the arguments are not escaped, only concatenated.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+ [31m❯[39m tests/dev-loop.test.ts [2m([22m[2m14 tests[22m[2m | [22m[31m2 failed[39m[2m)[22m[33m 41197[2mms[22m[39m
+   [32m✓[39m dev：SSR 只读面（loader 只交付本页评论元数据，正文含同目录 TSX/图片） [2m(4)[22m
+     [32m✓[39m 页面正文按需入口 SSR 渲染[32m 51[2mms[22m[39m
+     [32m✓[39m 样例评论串：串头 MDX、同目录 TSX 组件、图片、回复都经同一编译链[32m 31[2mms[22m[39m
+     [32m✓[39m 评论图片资源可取[32m 5[2mms[22m[39m
+     [32m✓[39m 旁栏可写：显示新建表单，不显示只读原因[32m 38[2mms[22m[39m
+   [31m❯[39m dev：写闭环（action → 文件 → 集合更新 → SSR 反映） [2m(5)[22m
+[31m     [31m×[31m 新建评论串：action 200、串文件夹落盘、SSR 随后出现该串[39m[33m 30272[2mms[22m[39m
+     [33m[2m✓[22m[39m 回复：action 200、回复文件落盘、SSR 随后出现该回复[33m 751[2mms[22m[39m
+     [33m[2m✓[22m[39m agent 以 as 署名写入：目标必须是 agent 人员[33m 776[2mms[22m[39m
+     [33m[2m✓[22m[39m 删回复：action 200、文件消失、SSR 随后不再包含该回复[33m 612[2mms[22m[39m
+     [32m✓[39m 删整串：action 200、文件夹消失、SSR 随后不再包含该串[32m 73[2mms[22m[39m
+   [31m❯[39m dev：写入保护（身份/来源/as 校验） [2m(5)[22m
+     [32m✓[39m 缺 Origin 的写请求被拒绝[32m 56[2mms[22m[39m
+[31m     [31m×[31m 跨站 Origin 被拒绝[39m[32m 223[2mms[22m[39m
+     [32m✓[39m as 指向不存在的人被拒绝（403，无文件落盘）[32m 31[2mms[22m[39m
+     [32m✓[39m as 指向非 agent 人员被拒绝（403，无文件落盘）[32m 33[2mms[22m[39m
+     [32m✓[39m 未知 intent 与坏 id 被拒绝[32m 53[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 2 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m tests/dev-loop.test.ts[2m > [22mdev：写闭环（action → 文件 → 集合更新 → SSR 反映）[2m > [22m新建评论串：action 200、串文件夹落盘、SSR 随后出现该串
+[31m[1mError[22m: waitFor 超时：新评论串出现在 SSR（30000ms）最后一次：(no attempt)[39m
+[36m [2m❯[22m waitFor tests/helpers.ts:[2m95:9[22m[39m
+    [90m 93|[39m     await sleep(intervalMs);
+    [90m 94|[39m   }
+    [90m 95|[39m   throw new Error(`waitFor 超时：${what}（${timeoutMs}ms）最后一次：${last}`);
+    [90m   |[39m         [31m^[39m
+    [90m 96|[39m }
+    [90m 97|[39m
+[90m [2m❯[22m waitPageContains tests/helpers.ts:[2m112:3[22m[39m
+[90m [2m❯[22m tests/dev-loop.test.ts:[2m80:5[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/dev-loop.test.ts[2m > [22mdev：写入保护（身份/来源/as 校验）[2m > [22m跨站 Origin 被拒绝
+[31m[1mError[22m: GET /docs -> 500[39m
+[36m [2m❯[22m getDocs tests/helpers.ts:[2m100:22[22m[39m
+    [90m 98|[39m export async function getDocs(base: string): Promise<string> {
+    [90m 99|[39m   const res = await fetch(`${base}/docs`);
+    [90m100|[39m   if (!res.ok) throw new Error(`GET /docs -> ${res.status}`);
+    [90m   |[39m                      [31m^[39m
+    [90m101|[39m   return res.text();
+    [90m102|[39m }
+[90m [2m❯[22m tests/dev-loop.test.ts:[2m138:18[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m2 failed[39m[22m[2m | [22m[1m[32m12 passed[39m[22m[90m (14)[39m
+[2m   Start at [22m 01:34:01
+[2m   Duration [22m 41.53s[2m (tests 100%)[22m
+

@@ -1,0 +1,45 @@
+[restart] Relaunching with --conditions=development
+[MDX] generated files in 10.414899999999989ms
+[MDX] generated files in 12.001700000000028ms
+  [32m➜[39m  [1mLocal[22m:   [36mhttp://127.0.0.1:[1m5470[22m/[39m
+[2m2:36:25 AM[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m connected.
+[2m2:36:27 AM[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m [32mhmr update [39m[2m/app/app.css[22m
+[MDX] generated files in 42.924700000000485ms
+[2m2:36:27 AM[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m [32mpage reload [39m[2m.source/server.ts[22m
+[2m2:36:27 AM[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m program reload
+[2m2:36:27 AM[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m [32mpage reload [39m[2m.source/browser.ts[22m
+[2m2:36:27 AM[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m program reload
+[2m2:36:28 AM[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m [32mpage reload [39m[2m.source/server.ts[22m
+[2m2:36:28 AM[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m program reload
+[MDX] generated files in 12.288900000000467ms
+[2m2:36:28 AM[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m [32mhmr update [39m[2m/app/app.css[22m
+[2m2:36:28 AM[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m [32mpage reload [39m[2m.source/browser.ts[22m
+[2m2:36:28 AM[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m program reload
+[2m2:36:28 AM[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m [32mpage reload [39m[2m.source/server.ts[22m
+[2m2:36:28 AM[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m program reload
+[MDX] generated files in 15.657200000000557ms
+[2m2:36:28 AM[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m [32mhmr update [39m[2m/app/app.css[22m
+[2m2:36:28 AM[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m [32mpage reload [39m[2m.source/browser.ts[22m
+[2m2:36:28 AM[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m program reload
+[2m2:36:29 AM[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m [32mpage reload [39m[2mcomments/20261012t023627-q82l/20261012t023628-a2xy.mdx[22m
+[2m2:36:29 AM[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m program reload
+[2m2:36:29 AM[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m [32mpage reload [39m[2m.source/server.ts[22m
+[2m2:36:29 AM[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m [32mhmr update [39m[2m/app/app.css[22m
+[MDX] generated files in 18.83179999999993ms
+[2m2:36:29 AM[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m [32mpage reload [39m[2m.source/browser.ts[22m
+[2m2:36:29 AM[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m program reload
+[2m2:36:29 AM[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m program reload
+[2m2:36:30 AM[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m [32mpage reload [39m[2mcomments/20261012t023627-q82l/20261012t023628-be5q.mdx[22m
+[2m2:36:30 AM[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m program reload
+[2m2:36:30 AM[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m [32mpage reload [39m[2mcomments/20261012t023627-q82l/index.mdx[22m
+[2m2:36:30 AM[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m [32mpage reload [39m[2m.source/server.ts[22m
+[MDX] generated files in 45.30969999999979ms
+[2m2:36:30 AM[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m [32mpage reload [39m[2m.source/browser.ts[22m
+[2m2:36:30 AM[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m [32mhmr update [39m[2m/app/app.css[22m
+[MDX] generated files in 26.339500000000044ms
+[2m2:36:30 AM[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m program reload
+[2m2:36:30 AM[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m program reload
+Error: The `request.url` origin does not match `origin` header from a forwarded action request. Aborting the action.
+    at throwIfPotentialCSRFAttack (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610120120_fumadocs-native/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/actions.js:27:67)
+    at handleDocumentRequest (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610120120_fumadocs-native/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/server-runtime/server.js:208:4)
+    at requestHandler (file:///D:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/2610120120_fumadocs-native/node_modules/.pnpm/react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791/node_modules/react-router/dist/development/lib/server-runtime/server.js:123:21)

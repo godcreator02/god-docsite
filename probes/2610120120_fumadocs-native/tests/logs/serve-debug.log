@@ -1,0 +1,7 @@
+[react-router-serve] http://localhost:5471 (http://127.0.0.1:5471)
+GET /docs 200 - - 126.248 ms
+Error: ERR_PNPM_RECURSIVE_EXEC_FIRST_FAIL
+
+  × "pnpm recursive exec" failed in D:\unitfolders\oz47p-docsite-kit\docsite-
+  │ kit\probes\261012_fumadocs-native\site
+

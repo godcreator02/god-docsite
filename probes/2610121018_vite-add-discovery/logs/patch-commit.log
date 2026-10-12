@@ -1,0 +1,6 @@
+../../../../../..                        | Progress: resolved 0, reused 1, downloaded 0, added 0
+Γ£ô Lockfile passes supply-chain policies (verified 22m ago)
+Packages: +3 -3
++++---
+Progress: resolved 3, reused 3, downloaded 0, added 3, done
+Done in 985ms using pnpm v12.4.2

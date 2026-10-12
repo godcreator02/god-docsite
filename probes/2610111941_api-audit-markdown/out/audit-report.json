@@ -1,0 +1,400 @@
+[
+  {
+    "path": "audit-flow.mdx",
+    "detected": [
+      "Inner"
+    ],
+    "text": "<Inner />",
+    "noWrapperIdentical": true,
+    "structuredData": {
+      "contents": [],
+      "headings": []
+    },
+    "toc": []
+  },
+  {
+    "path": "audit-inline.mdx",
+    "detected": [],
+    "text": "prefix <Inner /> suffix",
+    "noWrapperIdentical": true,
+    "structuredData": {
+      "contents": [
+        {
+          "content": "prefix  suffix"
+        }
+      ],
+      "headings": []
+    },
+    "toc": []
+  },
+  {
+    "path": "audit-fence.mdx",
+    "detected": [
+      "ExampleOnly"
+    ],
+    "text": "```tsx\n<ExampleOnly />\n```",
+    "noWrapperIdentical": true,
+    "structuredData": {
+      "contents": [],
+      "headings": []
+    },
+    "toc": []
+  },
+  {
+    "path": "audit-inlinecode.mdx",
+    "detected": [],
+    "text": "`<ExampleOnly />`",
+    "noWrapperIdentical": true,
+    "structuredData": {
+      "contents": [
+        {
+          "content": "`<ExampleOnly />`"
+        }
+      ],
+      "headings": []
+    },
+    "toc": []
+  },
+  {
+    "path": "audit-nested.mdx",
+    "detected": [
+      "Outer",
+      "Inner"
+    ],
+    "text": "<Outer>\n<Inner />\n</Outer>",
+    "noWrapperIdentical": true,
+    "structuredData": {
+      "contents": [],
+      "headings": []
+    },
+    "toc": []
+  },
+  {
+    "path": "audit-good-nested.mdx",
+    "detected": [
+      "Inner"
+    ],
+    "text": "<Inner />",
+    "noWrapperIdentical": true,
+    "structuredData": {
+      "contents": [],
+      "headings": []
+    },
+    "toc": []
+  },
+  {
+    "path": "audit-missing.mdx",
+    "detected": [
+      "Missing"
+    ],
+    "text": "<Missing />",
+    "noWrapperIdentical": true,
+    "structuredData": {
+      "contents": [],
+      "headings": []
+    },
+    "toc": []
+  },
+  {
+    "path": "audit-alias.mdx",
+    "detected": [
+      "RenamedImplementation"
+    ],
+    "text": "<RenamedImplementation />",
+    "noWrapperIdentical": true,
+    "structuredData": {
+      "contents": [],
+      "headings": []
+    },
+    "toc": []
+  },
+  {
+    "path": "audit-produced-inline.mdx",
+    "detected": [],
+    "text": "text <Inner /> tail",
+    "noWrapperIdentical": true,
+    "structuredData": {
+      "contents": [],
+      "headings": []
+    },
+    "toc": []
+  },
+  {
+    "path": "audit-produced-raw.mdx",
+    "detected": [],
+    "text": "text <MissingInline /> tail",
+    "noWrapperIdentical": true,
+    "structuredData": {
+      "contents": [],
+      "headings": []
+    },
+    "toc": []
+  },
+  {
+    "path": "audit-throw-before.mdx",
+    "detected": [
+      "ThrowBefore"
+    ],
+    "text": "<ThrowBefore />",
+    "noWrapperIdentical": true,
+    "structuredData": {
+      "contents": [],
+      "headings": []
+    },
+    "toc": []
+  },
+  {
+    "path": "audit-throw-after.mdx",
+    "error": "Error: after opt-in"
+  },
+  {
+    "path": "audit-term.mdx",
+    "detected": [],
+    "text": "prefix TermWord suffix",
+    "noWrapperIdentical": true,
+    "structuredData": {
+      "contents": [
+        {
+          "content": "prefix TermWord suffix"
+        }
+      ],
+      "headings": []
+    },
+    "toc": []
+  },
+  {
+    "path": "audit-pin-same.mdx",
+    "detected": [
+      "Outer"
+    ],
+    "text": "<Outer mode=\"same-node\" />",
+    "noWrapperIdentical": true,
+    "structuredData": {
+      "contents": [],
+      "headings": []
+    },
+    "toc": []
+  },
+  {
+    "path": "audit-pin-position.mdx",
+    "detected": [],
+    "text": "PIN_REGISTERED_distinct-position",
+    "noWrapperIdentical": true,
+    "structuredData": {
+      "contents": [
+        {
+          "content": "PIN_REGISTERED_distinct-position"
+        }
+      ],
+      "headings": []
+    },
+    "toc": []
+  },
+  {
+    "path": "audit-pin-no-position.mdx",
+    "detected": [],
+    "text": "PIN_REGISTERED_no-position",
+    "noWrapperIdentical": true,
+    "structuredData": {
+      "contents": [],
+      "headings": []
+    },
+    "toc": []
+  },
+  {
+    "path": "audit-pin-second.mdx",
+    "detected": [],
+    "text": "PIN_REGISTERED_second-edit",
+    "noWrapperIdentical": true,
+    "structuredData": {
+      "contents": [
+        {
+          "content": "PIN_REGISTERED_second-edit"
+        }
+      ],
+      "headings": []
+    },
+    "toc": []
+  },
+  {
+    "path": "audit-pin-search-record.mdx",
+    "detected": [],
+    "text": "PIN_REGISTERED_search-record",
+    "noWrapperIdentical": true,
+    "structuredData": {
+      "contents": [
+        {
+          "content": "src/needle.ts : Heading only"
+        }
+      ],
+      "headings": []
+    },
+    "toc": []
+  },
+  {
+    "path": "e8.mdx",
+    "detected": [
+      "ComponentC"
+    ],
+    "text": "# E-8 生成正本探针\n\n正文一段：普通文字照抄。\n\n组件A的机读文字：把界面上的示意讲成一句话。\n\n组件B的机读文字：client 组件也能给 Markdown 形式。\n\n<ComponentC>\n界面上的C\n</ComponentC>\n\n下面是钉码：\n\n```ts title=\"pinned/a.ts:1-1\"\nexport const pinnedValue = 'v2';\n```",
+    "noWrapperIdentical": true,
+    "structuredData": {
+      "contents": [
+        {
+          "heading": "e-8-生成正本探针",
+          "content": "正文一段：普通文字照抄。"
+        },
+        {
+          "heading": "e-8-生成正本探针",
+          "content": "界面上的A"
+        },
+        {
+          "heading": "e-8-生成正本探针",
+          "content": "界面上的B"
+        },
+        {
+          "heading": "e-8-生成正本探针",
+          "content": "界面上的C"
+        },
+        {
+          "heading": "e-8-生成正本探针",
+          "content": "下面是钉码："
+        },
+        {
+          "heading": "e-8-生成正本探针",
+          "content": "```ts title=\"pinned/a.ts:1-1\"\nexport const pinnedValue = 'v2';\n```"
+        }
+      ],
+      "headings": [
+        {
+          "id": "e-8-生成正本探针",
+          "content": "E-8 生成正本探针"
+        }
+      ]
+    },
+    "toc": [
+      {
+        "depth": 1,
+        "url": "#e-8-生成正本探针",
+        "title": {
+          "key": null,
+          "props": {
+            "children": "E-8 生成正本探针"
+          },
+          "_owner": null,
+          "_store": {}
+        }
+      }
+    ]
+  },
+  {
+    "path": "audit-assets.mdx",
+    "detected": [],
+    "text": "![Local real PNG](./audit-image.png)\n\n## Included heading\n\nINCLUDED_REAL_CONTENT **bold**.\n\nincluded component text\n\n```ts\nexport const includedValue = 'INCLUDED_REAL_CODE';\n```\n\n```npm\nnpm i fumadocs-core\n```\n\n```package-install\nfumadocs-core\n```\n\n```npm\nnpm i one-package -D\n```",
+    "noWrapperIdentical": true,
+    "structuredData": {
+      "contents": [
+        {
+          "heading": "included-heading",
+          "content": "INCLUDED_REAL_CONTENT **bold**."
+        },
+        {
+          "heading": "included-heading",
+          "content": "included component text"
+        }
+      ],
+      "headings": [
+        {
+          "id": "included-heading",
+          "content": "Included heading"
+        }
+      ]
+    },
+    "toc": [
+      {
+        "depth": 2,
+        "url": "#included-heading",
+        "title": {
+          "key": null,
+          "props": {
+            "children": "Included heading"
+          },
+          "_owner": null,
+          "_store": {}
+        }
+      }
+    ]
+  },
+  {
+    "path": "audit-pin-tree.mdx",
+    "detected": [],
+    "text": "```text title=\"pinned/dir/\"\none.ts\n```",
+    "noWrapperIdentical": true,
+    "structuredData": {
+      "contents": [
+        {
+          "content": "```text title=\"pinned/dir/\"\none.ts\n```"
+        }
+      ],
+      "headings": []
+    },
+    "toc": []
+  },
+  {
+    "path": "audit-lower-alias.mdx",
+    "detected": [],
+    "text": "<lowerImplementation />",
+    "noWrapperIdentical": true,
+    "structuredData": {
+      "contents": [],
+      "headings": []
+    },
+    "toc": []
+  },
+  {
+    "path": "audit-member.mdx",
+    "detected": [
+      "UI"
+    ],
+    "text": "<UI.Box />",
+    "noWrapperIdentical": true,
+    "structuredData": {
+      "contents": [],
+      "headings": []
+    },
+    "toc": []
+  },
+  {
+    "path": "audit-html-container.mdx",
+    "detected": [],
+    "text": "<p>prefix <Inner /> suffix</p>",
+    "noWrapperIdentical": true,
+    "structuredData": {
+      "contents": [
+        {
+          "content": "prefix  suffix"
+        }
+      ],
+      "headings": []
+    },
+    "toc": []
+  },
+  {
+    "path": "audit-pin-lowcoupling.mdx",
+    "detected": [],
+    "text": "```ts title=\"pinned/a.ts:1-1\"\nexport const pinnedValue = 'v2';\n```\n\n```text title=\"pinned/dir/\"\none.ts\n```",
+    "noWrapperIdentical": true,
+    "structuredData": {
+      "contents": [
+        {
+          "content": "pinned/a.ts:1-1"
+        },
+        {
+          "content": "pinned/dir/"
+        }
+      ],
+      "headings": []
+    },
+    "toc": []
+  }
+]

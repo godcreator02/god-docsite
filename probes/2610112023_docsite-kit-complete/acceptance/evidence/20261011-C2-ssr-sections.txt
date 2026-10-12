@@ -1,0 +1,28 @@
+GET / (SSR) µò┤Θí╡ A-ONLY-NODE-COMPILED σç║τÄ░ 3 µ¼í∩╝¢externalized µÅÉτñ║ µùá∩╝¢module runner closed µùá
+  [server-a] marker=1 AΘöÜµ«╡=σ£¿ µ¡úµûç="A Θ¢åσÉêµ¡úµûç∩╝ÜΦ┐Öµ«╡Φ»¥τö▒ source.config.ts Θçî A Θ¢åσÉêΦç¬σ╖▒τÜä mdxOptions τ╝ûΦ»æ∩╝î µ£½σ░╛σ║öσç║τÄ░τ╝ûΦ»æµ£ƒ Node µÅÆΣ╗╢ΘÖäσèáτÜäµáçΦ«░πÇé A-ONLY-NODE-COMPILED"
+  [server-b] marker=0 BΘöÜµ«╡=σ£¿ µ¡úµûç="B Θ¢åσÉêµ¡úµûç∩╝ÜB Θ¢åσÉêτÜä mdxOptions Σ╕ìµîé Node µÅÆΣ╗╢∩╝îµ£½σ░╛Σ╕ìσ║öσç║τÄ░Σ╗╗Σ╜òµáçΦ«░πÇé"
+  [browser-a] marker=1 AΘöÜµ«╡=σ£¿ µ¡úµûç="A Θ¢åσÉêµ¡úµûç∩╝ÜΦ┐Öµ«╡Φ»¥τö▒ source.config.ts Θçî A Θ¢åσÉêΦç¬σ╖▒τÜä mdxOptions τ╝ûΦ»æ∩╝î µ£½σ░╛σ║öσç║τÄ░τ╝ûΦ»æµ£ƒ Node µÅÆΣ╗╢ΘÖäσèáτÜäµáçΦ«░πÇé A-ONLY-NODE-COMPILED"
+  [browser-b] marker=0 BΘöÜµ«╡=σ£¿ µ¡úµûç="B Θ¢åσÉêµ¡úµûç∩╝ÜB Θ¢åσÉêτÜä mdxOptions Σ╕ìµîé Node µÅÆΣ╗╢∩╝îµ£½σ░╛Σ╕ìσ║öσç║τÄ░Σ╗╗Σ╜òµáçΦ«░πÇé"
+  σî║σ¥ùσñûµáçΦ«░ 1 σñä∩╝êΘóäµ£ƒ 1∩╝îσ║öµ¥ÑΦç¬ loader σ║ÅσêùσîûτÜä A µ¡úµûçµò░µì«∩╝ë∩╝Ü
+    ΓÇªs τ╝ûΦ»æ∩╝î\\nµ£½σ░╛σ║öσç║τÄ░τ╝ûΦ»æµ£ƒ Node µÅÆΣ╗╢ΘÖäσèáτÜäµáçΦ«░πÇé\u003c/p\u003e\\n\u003cp\u003eA-ONLY-NODE-COMPILED\u003c/p\u003e\",\"b\",\"\u003cp\u003eB Θ¢åσÉêµ¡úµûç∩╝ÜB Θ¢åσÉêτÜä mdxOptionΓÇª
+GET /second (SSR) µò┤Θí╡ A-ONLY-NODE-COMPILED σç║τÄ░ 0 µ¼í∩╝¢externalized µÅÉτñ║ µùá∩╝¢module runner closed µùá
+  [second-browser-b] marker=0 BΘöÜµ«╡=σ£¿ µ¡úµûç="B Θ¢åσÉêµ¡úµûç∩╝ÜB Θ¢åσÉêτÜä mdxOptions Σ╕ìµîé Node µÅÆΣ╗╢∩╝îµ£½σ░╛Σ╕ìσ║öσç║τÄ░Σ╗╗Σ╜òµáçΦ«░πÇé"
+  σî║σ¥ùσñûµáçΦ«░ 0 σñä∩╝êΘóäµ£ƒ 0∩╝îσ║öµ¥ÑΦç¬ loader σ║ÅσêùσîûτÜä A µ¡úµûçµò░µì«∩╝ë∩╝Ü
+PASS  GET / (SSR)-section-count: σî║σ¥ùµò░ 4∩╝îΘóäµ£ƒ 4
+PASS  GET / (SSR)-server-a-anchor: A Θ¢åσÉêΘöÜµ«╡σ║öσç║τÄ░σ£¿Φ»Ñσî║σ¥ù
+PASS  GET / (SSR)-server-a-marker: A σî║σ¥ùσ║öµü░µ£ë 1 Σ╕¬µáçΦ«░∩╝êσ«₧ΘÖà 1∩╝ë
+PASS  GET / (SSR)-server-b-anchor: B Θ¢åσÉêΘöÜµ«╡σ║öσç║τÄ░σ£¿Φ»Ñσî║σ¥ù
+PASS  GET / (SSR)-server-b-no-marker: B σî║σ¥ùΣ╕ìσ║öµ£ëµáçΦ«░∩╝êσ«₧ΘÖà 0∩╝ë
+PASS  GET / (SSR)-browser-a-anchor: A Θ¢åσÉêΘöÜµ«╡σ║öσç║τÄ░σ£¿Φ»Ñσî║σ¥ù
+PASS  GET / (SSR)-browser-a-marker: A σî║σ¥ùσ║öµü░µ£ë 1 Σ╕¬µáçΦ«░∩╝êσ«₧ΘÖà 1∩╝ë
+PASS  GET / (SSR)-browser-b-anchor: B Θ¢åσÉêΘöÜµ«╡σ║öσç║τÄ░σ£¿Φ»Ñσî║σ¥ù
+PASS  GET / (SSR)-browser-b-no-marker: B σî║σ¥ùΣ╕ìσ║öµ£ëµáçΦ«░∩╝êσ«₧ΘÖà 0∩╝ë
+PASS  GET / (SSR)-outside-count: σî║σ¥ùσñûµáçΦ«░µò░ 1 σ║öτ¡ëΣ║Ä loader µÉ║σ╕ªτÜä A µò░µì«Σ╗╜µò░ 1
+PASS  GET / (SSR)-whole-count: µò┤Θí╡µáçΦ«░µò░ 3 = σî║σ¥ùσåà 2 + A µò░µì« 1
+PASS  GET /second (SSR)-section-count: σî║σ¥ùµò░ 1∩╝îΘóäµ£ƒ 1
+PASS  GET /second (SSR)-second-browser-b-anchor: B Θ¢åσÉêΘöÜµ«╡σ║öσç║τÄ░σ£¿Φ»Ñσî║σ¥ù
+PASS  GET /second (SSR)-second-browser-b-no-marker: B σî║σ¥ùΣ╕ìσ║öµ£ëµáçΦ«░∩╝êσ«₧ΘÖà 0∩╝ë
+PASS  GET /second (SSR)-outside-count: σî║σ¥ùσñûµáçΦ«░µò░ 0 σ║öτ¡ëΣ║Ä loader µÉ║σ╕ªτÜä A µò░µì«Σ╗╜µò░ 0
+PASS  GET /second (SSR)-whole-count: µò┤Θí╡µáçΦ«░µò░ 0 = σî║σ¥ùσåà 0 + A µò░µì« 0
+
+16/16 Θí╣µû¡Φ¿ÇΘÇÜΦ┐ç

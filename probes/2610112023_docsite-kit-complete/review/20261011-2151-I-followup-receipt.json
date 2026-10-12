@@ -1,0 +1,10 @@
+{
+  "ok": true,
+  "data": {
+    "taskId": "sess_2ad9d669-3511-4bbb-bb1c-656571ad3904",
+    "title": "实现 @godcreator/docsite-identity 独立包",
+    "status": "running",
+    "mode": "yolo",
+    "roundStarted": true
+  }
+}

@@ -1,0 +1,5 @@
+# 这个文件让 pnpm 把本目录当 workspace 根，不再并入 docsite-kit 仓根的 workspace
+allowBuilds:
+  esbuild: true
+onlyBuiltDependencies:
+  - esbuild

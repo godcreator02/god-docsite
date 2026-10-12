@@ -1,0 +1,40 @@
+{
+  "name": "@probe/page-sources-site",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "react-router dev --port 5500 --host 127.0.0.1",
+    "build": "react-router build",
+    "start": "react-router-serve ./build/server/index.js",
+    "types:check": "react-router typegen && tsc --noEmit",
+    "test": "vitest run",
+    "test:source": "vitest run test/source-conventions.test.ts",
+    "test:dev": "vitest run test/dev-server.test.ts",
+    "test:build": "vitest run test/build-start.test.ts"
+  },
+  "dependencies": {
+    "@probe/page-sources": "workspace:*",
+    "@react-router/node": "^8.4.0",
+    "@react-router/serve": "^8.4.0",
+    "fumadocs-core": "16.17.1",
+    "fumadocs-mdx": "15.4.7",
+    "fumadocs-ui": "npm:@fumadocs/base-ui@16.17.1",
+    "isbot": "^5.2.2",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0",
+    "react-router": "^8.4.0"
+  },
+  "devDependencies": {
+    "@react-router/dev": "^8.4.0",
+    "@tailwindcss/vite": "^4.3.3",
+    "@types/node": "^26.6.4",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "tailwindcss": "^4.3.3",
+    "typescript": "^7.0.2",
+    "vite": "^8.3.2",
+    "vitest": "^5.0.1",
+    "@types/mdx": "^2.0.14"
+  }
+}

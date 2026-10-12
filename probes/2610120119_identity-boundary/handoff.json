@@ -1,0 +1,111 @@
+{
+  "task": "P：身份包与站点授权边界（并行重写批次，独占 docsite-kit/probes/2610120119_identity-boundary）",
+  "date": "2026-10-12",
+  "probeDirectory": "docsite-kit/probes/2610120119_identity-boundary",
+  "baseline": {
+    "reviewed": "packages/docsite-identity（K 已停、已验 22 测试），只读审查，未改原包",
+    "reused": [
+      "parsePeople 的 people.json 盘协议校验矩阵（协议未改）",
+      "publicPersonOf 白名单投影",
+      "按身份码找人的判定（resolveIdentity）",
+      "authorizeWrite 的 Origin 精确比对与 as 规则矩阵",
+      "Avatar 的 id 色相算法"
+    ],
+    "rewritten": [
+      "删自读 cwd 的 sitePeople 与自读环境变量的 siteIdentity，拆成 readPeopleFile(siteDir) + 纯函数 resolveIdentity(people, code)，输入由宿主显式提供",
+      "as 参数类型改为 unknown：宿主直接传表单值，包内判定非字符串/空字符串 400",
+      "新增 writeAccessResponse（非 WriteAccessError 原样再抛，不吞服务端错误）",
+      "IdentityBadge 增加 children 宿主插槽；样式类名前缀 dc- 改 ib-",
+      "收窄范围：peopleWithJoined（插件 join 命令域）与 mentionsOf/peopleMatching（评论线）不搬"
+    ]
+  },
+  "deliverables": {
+    "packages": [
+      {
+        "name": "@probe/identity",
+        "path": "packages/identity",
+        "exports": {
+          ".": ["Person (type)", "SiteIdentity (type)", "peopleFile", "personOf", "publicPersonOf", "publicPeopleOf"],
+          "./server": ["StoredPerson (type)", "identityCodePattern", "parsePeople", "readPeopleFile", "identityCodeEnvName", "resolveIdentity", "authorizeWrite", "writeAccessResponse", "WriteAccessError"],
+          "./react": ["Avatar", "IdentityBadge"],
+          "./styles.css": "组件样式（类名前缀 ib-）"
+        },
+        "notes": "浏览器安全的 . 入口不含 node:fs；判定不依赖 DEV/NODE_ENV；不依赖 fumadocs 与 react-router"
+      },
+      {
+        "name": "@probe/sample",
+        "path": "sample",
+        "exports": ["createSampleRoutes(host)（React Router 资源路由形状的 loader/action）", "startIdentitySampleServer(options)（Node http 驱动）", "comments.ts 纯函数桩（addComment/commentBodyProblem，不 import 身份包）"],
+        "notes": "评论桩作者类型结构化 { id, name }；宿主接线里表单自报 actor 字段被忽略"
+      }
+    ],
+    "httpSample": {
+      "writable": "pnpm sample:writable → http://127.0.0.1:5490（身份码 probezhou001，虚构）",
+      "readonly": "pnpm sample:readonly → http://127.0.0.1:5491（无身份码）"
+    }
+  },
+  "checks": {
+    "install": "pnpm install（独立 workspace + 自己的 pnpm-lock.yaml，44 包全部复用本地 store，零下载）",
+    "build": "pnpm build 通过（两包 tsc 产物在各自 dist/）",
+    "typecheck": "两包 tsc --noEmit 通过",
+    "vitest": "38 个测试全绿：identity 26（投影 3、盘协议 6、身份解析 3、写入矩阵 10、组件 4）；sample 12（组合边界 7、HTTP 全链路 5）",
+    "log": "check.log（最近一次 pnpm check 完整输出）"
+  },
+  "boundaryGuarantees": {
+    "inputsByHost": "people、身份码、可信 origin 全部参数传入；authorizeWrite 不从 request.url 推导 origin（Host 伪造测试）",
+    "publicProjection": "出服务端的人只有 id/name/gitea?/agent?；codes 与多余字段带不出去；全部拒绝路径消息无码（矩阵遍历断言）",
+    "originCheck": "Origin 头与宿主配置逐字符相等；缺失/不同/大小写不同/子域伪装 403",
+    "asRules": "省略或 null 用当前身份；空字符串/非字符串/未登记 400；是人 403；是已登记 agent 以它署名",
+    "serverResolvedAuthor": "表单自报 actor 被忽略，署名只取 authorizeWrite 返回的 actor（组合测试 + 浏览器实测）",
+    "noDevFlag": "DEV/NODE_ENV 三种组合下同一矩阵结论一致（有测试）",
+    "packageIsolation": "评论桩不 import 身份包；身份包不依赖评论；无跨包 src 导入/alias/junction"
+  },
+  "browserAcceptance": {
+    "writable5490": [
+      "以本人提交（真实点击发表按钮）→ 303 跳回，评论署名小周（zhou），自报 actor=li 未生效",
+      "选「代发为 Claude」提交（坐标点击）→ 署名 Claude（agent），表单重置"
+    ],
+    "readonly5491": [
+      "首页显示只读徽章（title 为只读原因）",
+      "填表提交（浏览器原生表单提交 requestSubmit）→ 403 错误页：标题、只读原因、返回链接，无码泄露"
+    ],
+    "screenshots": [
+      "verification/writable-5490.png",
+      "verification/readonly-5491-rejected.png",
+      "verification/readonly-5491-home.png"
+    ],
+    "flashworkerVerdicts": [
+      "首页 writable-5490：排版/头像/区块/无码 全部通过",
+      "错误页 readonly-5491-rejected：内容与无码通过；「样式未生效」经 computed style 查证为截图通道给到样式应用前的帧（styleSheets 各 3/14 条规则、body 背景 250,250,250、main max-width 720px 均生效），另截 GET 渲染的同模板首页 readonly-5491-home.png 终审（结论见 finalVerdict）"
+    ],
+    "finalVerdict": "全部通过：writable-5490 首页四项通过；readonly-5491-home 终审样式生效与无码泄露两项通过，并确认错误页截图的无样式表现是截图通道竞态帧、页面本身无问题（computed style 与 styleSheets 规则数佐证）"
+  },
+  "dependencies": {
+    "pinned": {
+      "typescript": "6.0.3",
+      "vitest": "5.0.3",
+      "react": "19.3.0",
+      "react-dom": "19.3.0",
+      "@types/node": "26.6.4",
+      "@types/react": "19.3.0",
+      "@types/react-dom": "19.3.0"
+    },
+    "runtime": "无新增运行时依赖（react 为 peer，仅 react 入口）",
+    "framework": "不依赖 fumadocs、react-router（资源路由按 Web 标准 Request/Response 写）",
+    "lock": "probe 自己的 pnpm-lock.yaml；未动父 workspace/lock"
+  },
+  "incomplete": [
+    "IAB 环境按钮点击不稳定（role/CSS locator 点击超时、坐标点击间歇落空）：两条真实点击路径各成功一次，其余用浏览器原生 form.requestSubmit 补齐（POST+Origin+导航仍是浏览器原生链路）——验收工具问题，非交付物问题",
+    "评论桩为内存态（重启清空），持久化归评论线",
+    "样本页 as 下拉只列 agent（页面层不提供冒充人入口）；冒充人 403 由包层与组合层测试覆盖"
+  ],
+  "writesAndReleases": {
+    "touched": [
+      "仅 docsite-kit/probes/2610120119_identity-boundary/ 内新建文件",
+      "未改：其他 probe、packages/*（含 docsite-identity 原包）、plugins、site、父 workspace/lock、台账、其他仓"
+    ],
+    "ports": "5490/5491 启动前确认空闲，验完后停止服务交回",
+    "git": "未 add、未 commit、未 push、未发布",
+    "sessions": "未派子会话做实现（仅一个 flashworker 视觉验收）"
+  }
+}

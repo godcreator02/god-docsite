@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>站点生命周期需求</title>
+<style>
+  :root {
+    --bg: #fbfbfa; --surface: #ffffff; --text: #1f2328; --muted: #59636e; --border: #d8dee4;
+    --accent: #0a6cbd; --warn: #9a6700; --warn-soft: #fff6dc; --code-bg: #f3f4f6;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #131416; --surface: #1b1d20; --text: #e6e8eb; --muted: #9aa4af; --border: #30353b;
+      --accent: #5aa9f0; --warn: #e3b341; --warn-soft: #2e2611; --code-bg: #23262a;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #131416; --surface: #1b1d20; --text: #e6e8eb; --muted: #9aa4af; --border: #30353b;
+    --accent: #5aa9f0; --warn: #e3b341; --warn-soft: #2e2611; --code-bg: #23262a;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text); font: 15px/1.7 system-ui, -apple-system, "Segoe UI", "Microsoft YaHei", sans-serif; }
+  main { max-width: 860px; margin: 0 auto; padding: 32px 16px 80px; }
+  h1 { font-size: 28px; margin: 0 0 4px; }
+  h2 { font-size: 20px; margin: 36px 0 10px; padding-top: 12px; border-top: 1px solid var(--border); }
+  .lead { color: var(--muted); margin: 0 0 16px; }
+  .meta { color: var(--muted); font-size: 13px; }
+  a { color: var(--accent); text-decoration: none; }
+  code { font-family: ui-monospace, "Cascadia Code", Consolas, monospace; font-size: 13px; background: var(--code-bg); padding: 1px 5px; border-radius: 4px; }
+  table { border-collapse: collapse; width: 100%; margin: 8px 0 16px; font-size: 14px; background: var(--surface); }
+  th, td { border: 1px solid var(--border); padding: 6px 10px; text-align: left; vertical-align: top; }
+  th { background: var(--code-bg); font-weight: 600; }
+  td:first-child { white-space: nowrap; width: 56px; font-family: ui-monospace, Consolas, monospace; font-size: 13px; }
+  .open { background: var(--warn-soft); color: var(--warn); font-size: 12px; padding: 0 6px; border-radius: 4px; white-space: nowrap; }
+</style>
+</head>
+<body>
+<main>
+
+<p class="meta"><a href="index.html">← 目录</a>　·　上一页 <a href="01-principles.html">设计原则与总体划分</a></p>
+<h1>站点生命周期需求</h1>
+<p class="lead">新建、版本、托管，以及给 agent 的命令。只写要做到什么；原则见 <a href="01-principles.html">设计原则与总体划分</a>。</p>
+
+<h2>新建</h2>
+<table>
+  <tr><th>编号</th><th>要求</th></tr>
+  <tr><td>L-01</td><td>agent 用一条命令新建站点：给出目录、端口、站名，得到一个依赖已装好、能直接启动的普通 fumadocs + React Router 项目。生成以后站点文件归站点自己</td></tr>
+  <tr><td>L-02</td><td>目标目录不是空的就拒绝。新建只写文件，不碰 git</td></tr>
+</table>
+
+<h2>版本</h2>
+<table>
+  <tr><th>编号</th><th>要求</th></tr>
+  <tr><td>L-03</td><td>站点在 <code>package.json</code> 里固定所用库的版本；库发新版，没升级的站点照旧运行</td></tr>
+  <tr><td>L-04</td><td>库里破坏站点用法的改动只随 x 升级，并附升级说明；站点要升级时由 agent 照说明改</td></tr>
+  <tr><td>L-05</td><td>插件和站点之间的约定（启动时交给站点的参数、插件调用的站点接口、人员列表与评论文件的格式）写明并带版本号；插件升级后照样能用旧站，碰到不再支持的旧版本就报错，说明站点要升到哪一版</td></tr>
+</table>
+
+<h2>托管</h2>
+<table>
+  <tr><th>编号</th><th>要求</th></tr>
+  <tr><td>L-06</td><td>工作台能启动、停止一个站点；登记过的站点在工作台启动时自动启动</td></tr>
+  <tr><td>L-07</td><td>每个站点的地址固定不变，只有本机能访问</td></tr>
+  <tr><td>L-08</td><td>启动时把本 home 的身份交给站点；不经工作台启动的站点只读</td></tr>
+  <tr><td>L-09</td><td>agent 或人改了页面、评论以后，开着的站点马上能看到新内容，不用重新构建</td></tr>
+  <tr><td>L-10</td><td>站点在本机或 NAS 上发布成只读的站 <span class="open">待定</span>　你以前定过要只读发布；这一轮做不做</td></tr>
+</table>
+
+<h2>给 agent 的命令</h2>
+<table>
+  <tr><th>编号</th><th>要求</th></tr>
+  <tr><td>L-11</td><td>新建、登记、移除、列出（带状态和地址）、启动、停止站点，查本 home 的身份码。评论命令见评论章</td></tr>
+</table>
+
+<h2>不作为需求的</h2>
+<ul>
+  <li>启动失败报出原因、端口被占时报错：属于原则九「错了就报错」，不单列。</li>
+  <li>托管跑开发服务还是构建后的服务：是实现 L-09 的手段，设计时再定。</li>
+  <li>自动重启与失败计数、启动前检查、同一站点的操作排队、路径写法归一、卸载时的清理：现有实现里的防护，不是谁提出的要求。</li>
+  <li>打开站点的方式：不归这个插件，给人看时由 VS Code 插件打开站点地址。</li>
+  <li>给别的插件用的服务、往站点推数据：只有协作站用，下一轮按协作站的需要再定。</li>
+  <li>功能包接进站点的机制：站点自己引用库（原则一、四）。</li>
+</ul>
+
+<p class="meta">下一章：阅读与页面。</p>
+
+</main>
+</body>
+</html>

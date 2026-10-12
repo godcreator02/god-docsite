@@ -1,0 +1,134 @@
+{
+  "task": "Q",
+  "title": "页面来源与搜索原生适配（MDX / TSX / HTML）",
+  "directory": "docsite-kit/probes/2610120126_page-sources",
+  "date": "2026-10-12（第二轮定点返工完成）",
+  "rerun": "cd docsite-kit/probes/2610120126_page-sources && pnpm install && (cd lib && pnpm check && pnpm test) && (cd site && pnpm types:check && pnpm test)",
+  "deliverables": {
+    "lib": {
+      "package": "@probe/page-sources",
+      "exports": {
+        ".": [
+          "tsxPageSource(entries, contentDir?)",
+          "htmlPageSource(entries, contentDir?)",
+          "extractHtmlPage(file, html)",
+          "decodeHtmlEntities(text)",
+          "contentFileUrlOf(file, contentDir?)",
+          "contentFileUrlPrefix",
+          "tsxPageSuffix",
+          "htmlPageSuffix"
+        ],
+        "types": [
+          "TsxPageMeta",
+          "FilePageData",
+          "FilePageSource",
+          "HtmlHeadingAnchor",
+          "HtmlSearchSection",
+          "HtmlPageExtract"
+        ],
+        "./server": [
+          "searchServerOf(getSource)",
+          "contentFileResponse(urlPath, contentDir)",
+          "copyContentAssetsToBuild(contentDir, clientOutDir)",
+          "contentFileUrlPrefix"
+        ]
+      },
+      "consumption": "站点把 import.meta.glob（根路径模式）的清单传给 tsxPageSource / htmlPageSource，产出 StaticSource，与 docs.toFumadocsSource() 一起传给 loader({ source: { mdx, tsx, html } })；page.type 分支渲染；搜索路由用 searchServerOf(() => source).GET"
+    },
+    "site": {
+      "kind": "最小 fixture 站（React Router 框架模式 + fumadocs-ui DocsLayout）",
+      "routes": [
+        "routes/page.tsx（splat 内容页，按 page.type 分 mdx/tsx/html 渲染）",
+        "routes/api.search.ts",
+        "routes/api.markdown.ts",
+        "routes/api.content.$.ts",
+        "routes/home.tsx"
+      ],
+      "content": "content/ 三格式同目录混排中文样本：index.mdx、guide/quickstart.mdx（含同目录 svg）、guide/counter.page.tsx（含同目录 counter-model.ts）、guide/waveform.html（含样式/脚本/相对图片 demo.svg）、两级 meta.json"
+    }
+  },
+  "conventions": {
+    "url": "guide/demo.page.tsx → /guide/demo（.page 去掉）；guide/x.html → /guide/x；index.mdx → /",
+    "tsxMeta": "页面文件 export const meta = { title（必填）, description?, searchText?, markdown? }，缺 title / 类型不对直接报错",
+    "htmlMeta": "<title> 必须有，可被 <meta name=\"fumadocs:title\"> 覆盖；description 取 <meta name=\"description\">",
+    "anchors": "HTML 标题锚点 = 内容里标题自带的 id（<h2 id=\"…\">）：structuredData.headings[].id = toc url = DOM 定位点 = iframe 内 getElementById 共用；无 id 标题不产锚点、段落归上一个有 id 标题；iframe 内部 #id 导航浏览器原生处理",
+    "markdown": "MDX：官方 getText('processed')（集合 postprocess.includeProcessedMarkdown: true）；TSX：meta.markdown 或由标题描述派生；HTML：从结构派生",
+    "search": "createFromSource 传函数（loader 实例变化重建索引）；中文参数 tolerance 0 / threshold 0；查询参数名 query",
+    "contentFiles": "dev：api.content 路由读 content 源目录；build：vite 插件（copyContentAssetsToBuild）按与 contentFileResponse 同一张扩展名表复制到 build/client/api/content/，start 静态接管、路由 PROD 落到即 404——正文/资源与标题/索引同一份构建快照",
+    "iframeMeasure": "高度与定位点只在 iframe onLoad、iframe 文档 documentElement 的 ResizeObserver、document.fonts.ready 后更新，无周期轮询"
+  },
+  "checks": {
+    "libTypes": "tsc --noEmit 0 错误",
+    "libTests": "20/20（html-text 9、sources 6、search 5）",
+    "siteTypes": "tsc --noEmit 0 错误（typegen 后）",
+    "siteTests": "10/10（source-conventions 1、dev-server 4、build-start 5，含「构建后改源/移走源仍是快照」；该测试在旧实现上先跑红留证，修复后转绿）",
+    "browser": "真实浏览器（build 产物，坐标点击）：目录锚点 #how-to-read 定位点 210 vs iframe 标题 209、#scripts-run 440 vs 439（几何对准）；iframe 高度 442px 事件驱动自适应；iframe 内「换个颜色」真实点击换色 rgb(112,222,159)；搜索弹层返回真实锚点记录；截图 out/browser-{mdx,tsx,html,search}.png",
+    "browserToolGap": "waveform 页侧栏搜索按钮的 Playwright 定位器点击超时两次（actionability 稳定判不过），改用真实坐标点击完成同等操作；未深查定位器路径"
+  },
+  "upstreamIssues": [
+    {
+      "issue": "Windows dev 下 fumadocs-mdx 集合新建 MDX 不进清单",
+      "evidence": "本 probe 实测新建 8–12 秒仍 404、搜索不返回；与 probes/2610112023_docsite-kit-complete/review/20261012-0008-root-cause.md 一致：codegen 的 generateViteGlobImport 把 base 写成相对 .source/ 的相对路径且无配置可改，Vite toAbsoluteGlob 相对分支在 Windows 算错匹配路径",
+      "probeStance": "未打 HMR 补丁、未改生成代码；TSX/HTML 来源用根路径 glob（/content/**，无 base）实测增删改名 1 秒生效，作为根因文档修复方向（公开根路径模式）的验证数据；dev-server.test.ts 末尾留回归探针",
+      "owner": "交主会话决策"
+    }
+  ],
+  "knownGaps": [
+    "HTML 锚点依赖内容写 id：不写 id 的标题没有目录/搜索锚点（段落归上一个有 id 标题）；手写持久锚点因此可用",
+    "MDX dev 增删：上游缺陷，见 upstreamIssues",
+    "SSR HTML 中 MDX 本地图片缺位（remarkImage 懒加载），浏览器端正常显示",
+    "HTML 提取轻量：pre 代码块压平、表格不逐行结构化",
+    "按任务边界未做：N 主站路由、全站布局、评论/身份、docfirst 钉码、协作站、llms.txt 完整路由"
+  ],
+  "dependencies": {
+    "pinned": {
+      "fumadocs-core": "16.17.1",
+      "fumadocs-mdx": "15.4.7",
+      "fumadocs-ui": "npm:@fumadocs/base-ui@16.17.1"
+    },
+    "caret": {
+      "react": "^19.3.0",
+      "react-router": "^8.4.0",
+      "vite": "^8.3.2",
+      "typescript": "^7.0.2",
+      "vitest": "^5.0.1",
+      "@tailwindcss/vite": "^4.3.3"
+    },
+    "workspace": "probe 根 pnpm-workspace.yaml 截断父级查找，lock 在本目录；esbuild 安装脚本照仓根放行"
+  },
+  "writeScope": {
+    "written": [
+      "docsite-kit/probes/2610120126_page-sources/**"
+    ],
+    "untouched": [
+      "其他 probe 目录",
+      "packages/",
+      "plugins/",
+      "site/",
+      "父 workspace 与 lock",
+      "台账",
+      "其他仓"
+    ],
+    "committed": false,
+    "pushed": false,
+    "released": false
+  },
+  "ports": {
+    "dev": 5500,
+    "buildStart": 5501,
+    "released": true
+  },
+  "reworkRound2": {
+    "trigger": "design/zcode-orchestration/parallel-focused-review.md 的 Q 节",
+    "scope": "只修 build/start 快照与 iframe 接线两处；StaticSource/loader/search 与 HTML iframe 原样展示方向保留，不改 local-html 剥离转换",
+    "changes": [
+      "lib copyContentAssetsToBuild + vite.config client 收尾复制 + api.content 路由 PROD 404（快照：先红后绿）",
+      "page-bodies 去 500ms 轮询，改 onLoad/ResizeObserver/fonts.ready 事件驱动",
+      "锚点从序号 html-n 改为标题自带真实 id（lib 提取、样本、全部测试与浏览器断言同步）"
+    ],
+    "notExtended": [
+      "MDX dev 新建不进清单归 N 主查，未加 HMR 补丁",
+      "SSR 本地图片缺位、HTML 表格逐行结构化维持缺口原样"
+    ]
+  }
+}

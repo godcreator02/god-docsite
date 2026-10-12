@@ -1,0 +1,80 @@
+== node selfcheck ==
+
+== 根入口：公开模型 ==
+PASS 人员列表文件名是 people.json
+PASS personOf 按 id 取人
+PASS personOf 取不到时报错
+PASS publicPersonOf 白名单投影，codes 不出现
+PASS publicPeopleOf 整个列表投影
+PASS mentionsOf 只认列表里的人，按出现顺序不重复
+PASS mentionBeingTyped 认出 @ 的位置和已打的字
+PASS 邮箱不算在打 @
+PASS @ 后打了空格不算在打 @
+PASS peopleMatching 按 id 或名字筛，id 开头的排前面
+
+== server：people.json 的校验与登记 ==
+PASS 合法的 people.json 原样读回
+PASS 写错的 people.json 一次列出全部问题
+PASS 身份码是 8 到 64 个小写字母或数字
+PASS join：已有这个人就加进他的 codes
+PASS join：没有就新加一项
+PASS join：码在别人名下时报错
+PASS join：id 是 agent 时报错
+PASS join：gitea 和已写的不一样时报错
+
+== server：本机身份 ==
+PASS 码在列表里就是那个人，person 不带 codes
+PASS identityOf 的 person 没有 codes 字段
+PASS 没有码时只读并写明原因
+PASS 码不在列表里时只读，原因里不出现码
+PASS 没有 people.json 时报错写明怎么写
+PASS sitePeople 读站点目录里的 people.json
+PASS siteIdentity 没有环境变量时只读
+PASS siteIdentity 按环境变量的码找人
+PASS siteIdentity 的只读原因不泄露码
+
+== server：写入前的核对 authorizeWrite ==
+PASS Origin 和宿主配置完全一样时放行
+PASS Origin 缺失 403
+PASS Origin 缺失抛 WriteAccessError，status 403
+PASS Origin 不匹配 403
+PASS Origin 不匹配 status 403
+PASS 前缀相同的别的 origin 不放行
+PASS 伪造的 origin status 403
+PASS 没有本机身份 403
+PASS 无身份 status 403
+PASS as 省略用当前身份
+PASS as 是 null 也算省略
+PASS authorizeWrite 返回的 person 不带 codes
+PASS as 是已登记的 agent：以它身份写
+PASS as 未知 400
+PASS as 未知 status 400
+PASS as 冒充人 403
+PASS as 冒充人 status 403
+
+== 未覆盖（缺依赖，待集成会话安装后检查） ==
+- src/react/index.tsx 的 Avatar、IdentityBadge：需要 react，本机未装
+- test/*.test.ts 的 vitest 正式测试：需要 vitest，本机未装
+
+selfcheck 完成：44 项全部通过
+node selfcheck exit=0
+== tsc --noEmit（依赖未装，预期报缺模块，看纯逻辑部分有无真实类型错误）==
+error TS2688: Cannot find type definition file for 'node'.
+  The file is in the program because:
+    Entry point of type library 'node' specified in compilerOptions
+tsc exit=2
+== vitest run（借用 docsite-kit 的 vitest；测试不 import react，看 vite 能否解析 .js 后缀到 .ts 源）==
+
+[1m[30m[46m RUN [49m[39m[22m [36mv5.0.3 [39m[90mD:/unitfolders/oz47p-docsite-kit/docsite-kit/packages/docsite-identity[39m
+
+ [32m✓[39m test/model.test.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 12[2mms[22m[39m
+ [32m✓[39m test/people-file.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 6[2mms[22m[39m
+ [32m✓[39m test/identity.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 34[2mms[22m[39m
+ [32m✓[39m test/write-access.test.ts [2m([22m[2m6 tests[22m[2m)[22m[32m 37[2mms[22m[39m
+
+[2m Test Files [22m [1m[32m4 passed[39m[22m[90m (4)[39m
+[2m      Tests [22m [1m[32m20 passed[39m[22m[90m (20)[39m
+[2m   Start at [22m 21:44:24
+[2m   Duration [22m 1.31s[2m (transform 46%, import 25%, worker 20%, tests 9%)[22m
+
+vitest exit=0

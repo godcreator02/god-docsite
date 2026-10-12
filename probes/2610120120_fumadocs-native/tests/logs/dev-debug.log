@@ -1,0 +1,18 @@
+[restart] Relaunching with --conditions=development
+[MDX] generated files in 15.797300000000178ms
+[MDX] generated files in 31.85850000000005ms
+[2m1:31:39 AM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m Re-optimizing dependencies because vite config has changed
+  [32m➜[39m  [1mLocal[22m:   [36mhttp://127.0.0.1:[1m5470[22m/[39m
+[2m1:31:40 AM[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m connected.
+[2m1:31:42 AM[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m [32mhmr update [39m[2m/app/app.css[22m
+[MDX] generated files in 12.561899999999696ms
+[2m1:31:42 AM[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m [32mpage reload [39m[2m.source/browser.ts[22m
+[2m1:31:42 AM[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m program reload
+[2m1:31:42 AM[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m [32mpage reload [39m[2m.source/server.ts[22m
+[2m1:31:42 AM[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m program reload
+[2m1:33:00 AM[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m [32mpage reload [39m[2m.source/server.ts[22m
+[2m1:33:00 AM[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m program reload
+[MDX] generated files in 12.36600000000908ms
+[2m1:33:00 AM[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m [32mhmr update [39m[2m/app/app.css[22m
+[2m1:33:00 AM[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m [32mpage reload [39m[2m.source/browser.ts[22m
+[2m1:33:00 AM[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m program reload

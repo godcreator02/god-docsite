@@ -20,6 +20,7 @@
 ## 怎么跑
 
 * `pnpm install` 之后，`pnpm --filter @godcreator/docsite-kit build` 构建一次基础包：站点只用基础包的构建产物
+* `vite` 挂着 8.3.4 的补丁（`patches/vite@8.3.4.patch`，登记在仓根 `pnpm-workspace.yaml`）：Windows 上 Vite 对 `import.meta.glob` 相对 base 的处理有缺陷，dev 运行中新增的文件不进 glob 集合（fumadocs-mdx 生成的正是相对 base，所以新增正文页要重启 dev 才出现）。补丁把 `toAbsoluteGlob` 相对 base 分支的 `posix.resolve` 改为 `posix.join`，运行中新增第 1 秒即被发现。成因、复现命令（原版失效与补丁生效双轨，测试按已安装的 vite 自动分组）与全部验证记录在 `probes/2610121018_vite-add-discovery`。升级 vite 前先跑该 probe 的测试看上游修了没有：修了就删补丁与登记；没修就用 `pnpm patch` 按新版本重新生成补丁
 * `pnpm dev` 启动自述站的开发服务（`http://127.0.0.1:4430`）；要写评论，开发服务的环境变量 `DOCSITE_IDENTITY_CODE` 要是 `site/people.json` 里某人的码
   （经 gwb-docsite 启动时它自己给），不然站点只读。改了基础包要重新构建它、再重启开发服务
 * 骨架只改 `packages/docsite-kit/template/`，不改 `site/app/`：改完在仓根运行 `pnpm site:skeleton`（先构建基础包，再照模板重写自述站），基础包的测试检查两边一致

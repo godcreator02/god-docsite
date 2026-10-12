@@ -1,0 +1,186 @@
+{
+  "probe": "2610120354_official-react-router",
+  "task": "任务T：原样官方React Router模板的dev新增正文验证",
+  "date": "2026-10-12",
+  "source": {
+    "repo": "fuma-nama/fumadocs",
+    "commit": "d6cfc48d62aa9ea413f0fc5033617c0c923681ec",
+    "path": "examples/react-router",
+    "tarball": "vendor/fumadocs-d6cfc48.tar.gz",
+    "tarballBytes": 47250040,
+    "snapshotHashList": "official-snapshot.sha256",
+    "snapshotFiles": 25,
+    "cliTemplateEvidence": "vendor/evidence/sync.ts"
+  },
+  "install": {
+    "isolation": "probe 根自带 pnpm-workspace.yaml（packages: ['site']），独立 lock，父仓 docsite-kit/pnpm-lock.yaml 未动（mtime 比对）",
+    "onlyDiffVsSnapshot": "site/package.json 三处 workspace 依赖替换（对齐官方 create-app replaceWorkspaceDeps 规则）",
+    "resolved": {
+      "fumadocs-core": "16.17.1",
+      "fumadocs-ui(actual @fumadocs/base-ui)": "16.17.1",
+      "fumadocs-mdx": "15.4.7",
+      "react": "19.3.0",
+      "react-dom": "19.3.0",
+      "react-router": "8.4.0",
+      "@react-router/dev": "8.4.0",
+      "vite": "8.3.4",
+      "tailwindcss": "4.3.3",
+      "typescript": "7.0.2",
+      "pnpm": "12.4.2"
+    },
+    "peerWarning": "@tanstack/devtools-vite@0.4.1（react-router-devtools 传递依赖）want vite ^6||^7，官方模板自身现状，非适配引入"
+  },
+  "run": {
+    "startCommand": "node D:/unitfolders/00000-console/console/.claude/dev-timeout.mjs <分钟> <site目录> 'node_modules\\.bin\\react-router.cmd' dev --port 5530 --host 127.0.0.1",
+    "cmdPathNote": "react-router.cmd 必须反斜杠（cmd.exe 不认正斜杠），首次启动失败原因",
+    "port": 5530,
+    "serviceStateNow": "stopped（无监听）"
+  },
+  "addedTestFiles": [
+    "site/content/docs/baseline-widget.tsx",
+    "site/content/docs/baseline-figure.svg",
+    "site/content/docs/baseline.mdx",
+    "site/public/probe-photo.png"
+  ],
+  "collectionDir": "content/docs（官方 defineDocs dir，未改）",
+  "observations": {
+    "templateStart": "成功；/docs 200；SSR HTML 32,342 字节含正文；DOM 保留 6 注释节点（SSR 含 3 个 <!--$）；无 vite overlay",
+    "runtimeAdd": {
+      "autoNavInOpenPage": "30.7s / 37 次轮询未出现 Baseline 导航链接；console 收集器无任何 vite/HMR 消息",
+      "serverStatus": "fetch /docs/baseline 全程 404（延长窗口 95s / 19 次仍 404，从写入起合计 >2 分钟）",
+      "indexHtml": "不含 /docs/baseline 链接",
+      "devLogNewLines": "无（写入前后日志零新增）",
+      "claimScope": "只记录观察；未排查 watcher 事件层，不定责任层（fumadocs-mdx dist/vite/index.js:130-131 挂 server.watcher.on change/add，仅代码事实）"
+    },
+    "restartControl": {
+      "markedAs": "重启对照，不计运行中通过",
+      "result": "重启后 /docs/baseline 200；索引与侧栏出现链接；页面完整渲染"
+    },
+    "directOpenAfterRestart": "goto /docs/baseline 成功，title=Baseline Probe",
+    "tsxInteraction": {
+      "controlledInput": "真实键入 kbd-test，value/mirror 同步（React 链路走通）",
+      "uncontrolledInput": "真实键入，值 typed-liveseed（Ctrl+A 未生效为追加），mirror 同步",
+      "counterButton": "未验证：locator/CUA/dom_cua 点击与 focus+Enter 均未触发 onClick；官方侧栏链接同样点不动（工具点击通道问题，非页面问题）",
+      "images": "SVG 内联 data URI naturalWidth 160；/probe-photo.png naturalWidth 80，均加载成功",
+      "consoleDuringInteraction": "收集器无 error/warn（仅内嵌浏览器自身 RUM 警告 3 条）"
+    },
+    "originalTsxStateRetention": "未验证（运行中新增未被发现，无观察时机）",
+    "editTsxHmr": "未验证（未进行）"
+  },
+  "attributionFollowup": {
+    "question": "运行中新增文件的问题是 fumadocs 还是 vite 的",
+    "verdict": "断点在 vite 侧的 import.meta.glob 新增文件（add）更新链；fumadocs 是「完全委托 vite 该机制、自己不处理 content 文件事件」（Macro/Vite 适配的设计），不是 fumadocs 自己的监听坏了",
+    "discriminatingExperiment": "重启后修改已存在 baseline.mdx：服务端 <2.5s 反映，日志出现 hmr update /app/routes/docs.tsx + (ssr) page reload content/docs/baseline.mdx + program reload —— change 路径完整，与新增路径零日志/持续 404 精确对照（logs/dev-server-attrib.log）",
+    "codeFacts": [
+      "defineDocs(Macro) 不落盘（.source 不存在），集合枚举由 macro 转换生成 vite 原生 import.meta.glob（dist/transform-YLS_tnU6.js:268-316、dist/codegen-CNSKFlLn.js:26-37）",
+      "dist/vite/index.js:125-131 的 change/add 监听只处理 source.config.ts（Macro 模板无此文件）",
+      "dist/index-file-Dxxx3V3H.js:76-89 在 target==='vite' 且集合非 dynamic 时对 content 文件事件直接 return"
+    ],
+    "undecidedLayer": "vite watcher 是否发出 add 事件（chokidar/FS 层）或事件已到但 glob 失效未执行（vite 内部层）——需打点，两者都在 vite 侧",
+    "probeRestored": true
+  },
+  "gapsForMainSession": [
+    "内嵌浏览器无 console 流能力：页面加载期逐条 console（含 hydration 提示）缺失，仅组合探针替代",
+    "内嵌浏览器鼠标点击合成事件未到达页面（官方链接对照复现）；键盘打字有效、Ctrl+A/Enter 无效",
+    "计数按钮交互未验证；客户端导航到新页未验证；第二篇新增 MDX / 状态保留 / 编辑 TSX HMR 未做",
+    "运行中新增不被发现的根因层（vite watcher 事件是否发出、fumadocs-mdx onChange 是否收到/处理）未排查"
+  ],
+  "timeline": [
+    {
+      "t": "04:05:16",
+      "e": "dev 首次启动就绪"
+    },
+    {
+      "t": "~04:06:01",
+      "e": "浏览器首开 /docs（timeOrigin 1791749161079）"
+    },
+    {
+      "t": "~04:08",
+      "e": "写入基线页 4 文件（先依赖后 MDX）"
+    },
+    {
+      "t": "+30.7s",
+      "e": "37 次轮询导航未出现、无 HMR 消息"
+    },
+    {
+      "t": "+~2min",
+      "e": "19 次轮询 /docs/baseline 全 404"
+    },
+    {
+      "t": "04:13:27",
+      "e": "dev 重启（同命令）"
+    },
+    {
+      "t": "重启后数秒",
+      "e": "/docs/baseline 200（timeOrigin 1791749628720）"
+    },
+    {
+      "t": "收尾",
+      "e": "停服务，5530 无监听"
+    }
+  ],
+  "bareViteFollowup": {
+    "question": "裸 vite + react（无 RR / fumadocs）里 import.meta.glob 新增文件失效是否工作",
+    "setup": "bare-vite/ 子目录，vite 8.3.4 + react 19.3.0 + @vitejs/plugin-react 2.2.0，端口 5531，两种 glob 写法同页（标准相对 + base 形态）",
+    "resultAdd": "工作：新增 src/pages/b.jsx 后服务端编译产物首次轮询（~12s 内）包含 ./pages/b.jsx，日志 hmr update /src/main.jsx → hmr invalidate → page reload，浏览器页面未刷新自动更新列表（timeOrigin 不变，HMR ws 通道通）",
+    "resultChange": "工作：修改 a.jsx 首次轮询（<2.5s）即反映",
+    "sideFindingBaseBug": "vite 8.3.4 glob 的 base 参数被无视：'./pages' 与 '/src/pages' 枚举结果相同且均为工作目录全域匹配（D:/unitfolders 相邻项目与旧 probe 的 jsx 全部进入产物，key 按 7 层 ../ 相对计算）；官方 site 因 **/*.{mdx,md} 全域匹配恰好覆盖 content/docs，启动枚举碰巧正确；该 bug 与新增失效的因果未验证",
+    "verdictUpdate": "第 11 节「断点在 vite 侧 add 失效」被修正：裸 vite 该机制正常；断点收窄到 RR dev 的 SSR environment × fumadocs 宏转换模块组合，两因素未分离（需 RR 裸站 glob 或 fumadocs 非 SSR 实验，未做）",
+    "log": "logs/bare-vite-dev.log"
+  },
+  "rrViteFollowup": {
+    "question": "RR SSR 裸站（无 fumadocs）里 glob 新增文件失效是否工作；fumadocs 生成物形态 glob 单独引入会怎样",
+    "setup": "rr-vite-glob/ 子目录，react-router 8.4.0 + @react-router/dev 8.4.0 + vite 8.3.4 + react 19.3.0、ssr: true，端口 5531；路由组件含三种 glob（标准 jsx、base jsx、fumadocs 形态 **/*.{mdx,md}+base+query）",
+    "resultJsjGlobs": "正常：运行中新增 app/pages/b.jsx，SSR HTML（curl）约 9 秒内包含，日志 (ssr) page reload app/pages/b.jsx —— RR dev 的 SSR environment 本身不是致因",
+    "resultFumadocsShaped": "冷启动 200 三列表全对；保存含该 glob 的模块后 SSR 持续 500，日志反复 Internal server error: transport invoke timed out after 60000ms（fetchModule /app/routes/_index.tsx）；重启恢复。该站无任何 fumadocs 依赖，是 vite/RR 层的最小复现",
+    "verdictFinal": "变量阶梯：裸 vite ✓ / RR SSR + jsx glob ✓ / RR SSR + fumadocs 形态 glob（无 fumadocs 包）→ 运行中失效卡死 / 官方模板（真 fumadocs）→ 静默不失效。问题域锁定「fumadocs 形态 glob（**/*.{mdx,md}+base+query）× vite 8.3.4 运行中失效」；fumadocs 的委托设计（index-file 对 vite target 显式跳过）使它完全暴露在该 vite 行为下",
+    "handoffTo": "vite issue：base 被无视 + SSR fetchModule 卡死（rr-vite-glob 即最小复现）；fumadocs issue：RR 模板 dev 新增 MDX 不被发现（官方站重启对照复现），fix 方向 index-file 已监听 watcher all、可对集合目录 add/unlink 自做失效；短期 workaround：dev 中新增/删除正文后重启 dev（change 无需处理）",
+    "logs": [
+      "logs/rr-vite-glob-dev.log",
+      "logs/rr-vite-glob-restart.log"
+    ]
+  },
+  "noRestartWorkaround": {
+    "verified": "W1 touch app/lib/source.ts：运行中新增 wa2/wa3.mdx 均 404 → 字节级原样重写 source.ts（内容零变化）→ vite (ssr) page reload app/lib/source.ts + program reload → 约 3 秒内新页 200，/docs 索引 pageTree 同步更新；两轮可重复，无 60s 卡死",
+    "usage": "dev 中新增/删除 MDX 后，对 app/lib/source.ts 保存一次（无需真实改动）即可不重启生效；改动已有文件本就自动生效",
+    "principle": "宏转换注入的 import.meta.glob 位于 source.ts 模块，touch 触发该模块走 vite 常规 change 失效（此路径一直正常），重编译时 glob 重新枚举",
+    "notTested": [
+      "defineDocs dynamic:true（副作用大，未测）",
+      "fumadocsMdx index.target default（Macro 模式推断无效，未测）",
+      "删除文件场景"
+    ],
+    "log": "logs/dev-server-wa.log",
+    "automated": {
+      "plugin": "site/vite.config.ts 内 probe-revalidate-source-on-content-change（监听 add/unlink 命中 content/docs 时自动原样重写 app/lib/source.ts，250ms 节流）",
+      "verified": "wa4/wa5 两轮零手动：新页约 2 秒内自动 200，索引同步，日志 (ssr) page reload app/lib/source.ts + program reload",
+      "cost": "装插件改 vite.config.ts 需一次重启（此后全自动）；unlink 已挂接未单独实测",
+      "note": "site/vite.config.ts 自此带实验插件，第 1-11 节原样结论在插件加入前取得",
+      "log": "logs/dev-server-auto.log",
+      "timing": "wa6 精确计时：写入后立即发起的请求即 200，端到端约 106ms（含新 MDX 编译与 pageTree 更新）；log: logs/dev-server-timing.log"
+    },
+    "commentsNote": "插件只管 content/docs 正文新增/删除；评论在 comments/ 目录走独立机制（页面表单 POST api/comments 的 action + 自动 revalidate，agent 写文件场景由 docsite-kit 开发服务插件负责），互不影响"
+  },
+  "logs": [
+    "logs/install.log",
+    "logs/dev-server.log",
+    "logs/dev-server-restart.log",
+    "logs/dev-server-attrib.log",
+    "logs/bare-vite-dev.log",
+    "logs/rr-vite-glob-dev.log",
+    "logs/rr-vite-glob-restart.log",
+    "logs/dev-server-wa.log",
+    "logs/clean-fumadocs-dev.log"
+  ],
+  "notDone": [
+    "未提交",
+    "未推送",
+    "未发版",
+    "未归档"
+  ],
+  "cleanFumadocsWithPlugin": {
+    "dir": "clean-fumadocs/",
+    "diffs": "与 official-snapshot 对照仅 package.json（依赖适配）与 vite.config.ts（插件）两处，无预置测试内容",
+    "result": "运行中新增 clean-new-1/clean-new-2.mdx：161/163ms 自动 200，正文真实渲染，侧栏同步，日志 page reload source.ts + program reload，零手动",
+    "log": "logs/clean-fumadocs-dev.log"
+  }
+}

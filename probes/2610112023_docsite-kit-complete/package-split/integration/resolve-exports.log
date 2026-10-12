@@ -1,0 +1,10 @@
+PASS identity -> D:\unitfolders\oz47p-docsite-kit\docsite-kit\packages\docsite-identity\dist\index.js（7 个导出齐全）
+PASS identity/server -> D:\unitfolders\oz47p-docsite-kit\docsite-kit\packages\docsite-identity\dist\server\index.js（9 个导出齐全）
+PASS identity/react -> D:\unitfolders\oz47p-docsite-kit\docsite-kit\packages\docsite-identity\dist\react\index.js（2 个导出齐全）
+PASS identity/styles.css -> D:\unitfolders\oz47p-docsite-kit\docsite-kit\packages\docsite-identity\styles.css
+PASS comments -> D:\unitfolders\oz47p-docsite-kit\docsite-kit\packages\docsite-comments\dist\index.js（10 个导出齐全）
+PASS comments/server -> D:\unitfolders\oz47p-docsite-kit\docsite-kit\packages\docsite-comments\dist\server\index.js（7 个导出齐全）
+PASS comments/browser -> D:\unitfolders\oz47p-docsite-kit\docsite-kit\packages\docsite-comments\dist\browser\index.js（6 个导出齐全）
+PASS comments/react -> D:\unitfolders\oz47p-docsite-kit\docsite-kit\packages\docsite-comments\dist\react\index.js（10 个导出齐全）
+PASS comments/styles.css -> D:\unitfolders\oz47p-docsite-kit\docsite-kit\packages\docsite-comments\styles.css
+全部入口解析与导出核对通过

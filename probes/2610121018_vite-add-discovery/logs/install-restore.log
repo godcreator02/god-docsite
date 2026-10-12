@@ -1,0 +1,7 @@
+Scope: all 2 workspace projects
+Γ£ô Lockfile passes supply-chain policies (verified 1m ago)
+Packages: +9 -8
++++++++++--------
+Progress: resolved 9, reused 315, downloaded 0, added 9, done
+[WARN] Issues with peer dependencies found. Run "pnpm peers check" to list them.
+Done in 1.1s using pnpm v12.4.2

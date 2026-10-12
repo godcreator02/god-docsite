@@ -1,0 +1,42 @@
+
+[1m[30m[46m RUN [49m[39m[22m [36mv5.0.3 [39m[90mD:/unitfolders/oz47p-docsite-kit/docsite-kit/probes/261011_docsite-kit-complete/site[39m
+
+[90mstdout[2m | test/comments-api.e2e.test.ts[2m > [22m[2mτ£ƒσ«₧τ½Ö∩╝êHMR σà│Θù¡∩╝ë∩╝ÜΦ»äΦ«║σà¡τºìσåÖµôìΣ╜£σÉÄµû░ GET Θâ╜µ¡úτí«∩╝îσåÖσñ▒Φ┤ÑΣ╕ìµö╣µò░µì«
+[22m[39m[MDX] generated files in 10.499499999999898ms
+
+[90mstdout[2m | test/comments-api.e2e.test.ts[2m > [22m[2mτ£ƒσ«₧τ½Ö∩╝êHMR σà│Θù¡∩╝ë∩╝ÜΦ»äΦ«║σà¡τºìσåÖµôìΣ╜£σÉÄµû░ GET Θâ╜µ¡úτí«∩╝îσåÖσñ▒Φ┤ÑΣ╕ìµö╣µò░µì«
+[22m[39m[MDX] generated files in 6.306700000000092ms
+
+[90mstdout[2m | test/comments-api.e2e.test.ts[2m > [22m[2mτ£ƒσ«₧τ½Ö∩╝êHMR σà│Θù¡∩╝ë∩╝ÜΦ»äΦ«║σà¡τºìσåÖµôìΣ╜£σÉÄµû░ GET Θâ╜µ¡úτí«∩╝îσåÖσñ▒Φ┤ÑΣ╕ìµö╣µò░µì«
+[22m[39m[2m12:55:59 AM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m Re-optimizing dependencies because lockfile has changed
+
+ [31mΓ¥»[39m test/comments-api.e2e.test.ts [2m([22m[2m1 test[22m[2m | [22m[31m1 failed[39m[2m)[22m[33m 5264[2mms[22m[39m
+[31m   [31m├ù[31m τ£ƒσ«₧τ½Ö∩╝êHMR σà│Θù¡∩╝ë∩╝ÜΦ»äΦ«║σà¡τºìσåÖµôìΣ╜£σÉÄµû░ GET Θâ╜µ¡úτí«∩╝îσåÖσñ▒Φ┤ÑΣ╕ìµö╣µò░µì«[39m[33m 5262[2mms[22m[39m
+
+ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ» Failed Tests 1 ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»
+
+ FAIL  test/comments-api.e2e.test.ts > τ£ƒσ«₧τ½Ö∩╝êHMR σà│Θù¡∩╝ë∩╝ÜΦ»äΦ«║σà¡τºìσåÖµôìΣ╜£σÉÄµû░ GET Θâ╜µ¡úτí«∩╝îσåÖσñ▒Φ┤ÑΣ╕ìµö╣µò░µì«
+AssertionError: expected 500 to be 200 // Object.is equality
+
+- Expected
++ Received
+
+- 200
++ 500
+
+ Γ¥» test/comments-api.e2e.test.ts:51:71
+     49|     }
+     50|     await server.listen()
+     51|     expect((await fetch(`http://127.0.0.1:${port}/comments`)).status).ΓÇª
+       |                                                                       ^
+     52|     const before = await pageText()
+     53|
+
+ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»[1/1]ΓÄ»
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m   Start at [22m 00:55:56
+[2m   Duration [22m 5.79s[2m (tests 95%, import 4%, transform 1%)[22m
+

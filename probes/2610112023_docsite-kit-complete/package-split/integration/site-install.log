@@ -1,0 +1,16 @@
+? Verifying lockfile against supply-chain policies (337 entries)...
+Progress: resolved 1, reused 194, downloaded 0, added 0
+Γ£ô Lockfile passes supply-chain policies (337 entries in 8.7s)
+Packages: +15 -3
++++++++++++++++---
+Progress: resolved 15, reused 196, downloaded 0, added 15, done
+
+dependencies:
++ @godcreator/docsite-comments link:../../packages/docsite-comments
++ @godcreator/docsite-identity link:../../packages/docsite-identity
+
+devDependencies:
++ @tailwindcss/vite 4.3.3
++ tailwindcss 4.3.3
+
+Done in 9.3s using pnpm v12.4.2

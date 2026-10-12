@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <title>波形图说明</title>
+  <meta name="description" content="HTML 展示页面：原样渲染文件本身，样式与脚本照常工作。" />
+  <style>
+    body { font-family: system-ui, sans-serif; margin: 0; padding: 1rem; color: #1f2937; }
+    .wave-card { border: 1px solid #cbd5e1; border-radius: 8px; padding: 1rem; }
+    .wave-card:hover { border-color: #6366f1; }
+    button { cursor: pointer; }
+  </style>
+</head>
+<body>
+  <div class="wave-card" id="wave-card">
+    <h2 id="how-to-read">波形图怎么看</h2>
+    <p>这一页是 HTML 文件原样渲染的：上面的圆角卡片样式来自页面自己的 style 标签，图片按相对地址引用同目录文件。</p>
+    <p><img src="demo.svg" alt="波形示意" width="240" /></p>
+    <h3 id="scripts-run">脚本也在跑</h3>
+    <p>下面的按钮是页面里的脚本，点了会换卡片颜色：<button type="button" id="recolor">换个颜色</button></p>
+    <p>HTML 页面是展示边界：内容不进站点的组件树，样式与脚本独立于站点运行。</p>
+  </div>
+  <script>
+    document.getElementById('recolor').addEventListener('click', function () {
+      var card = document.getElementById('wave-card');
+      card.style.borderColor = '#' + Math.floor(Math.random() * 0xffffff).toString(16).padStart(6, '0');
+    });
+  </script>
+</body>
+</html>

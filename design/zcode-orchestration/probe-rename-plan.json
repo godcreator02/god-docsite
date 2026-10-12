@@ -1,0 +1,74 @@
+{
+  "format": "yymmddhhmm_description",
+  "status": "complete_sources_references_dependencies_relinked",
+  "timezone": "Asia/Shanghai",
+  "entries": [
+    {
+      "oldName": "261011_docsite-kit-complete",
+      "newName": "2610112023_docsite-kit-complete",
+      "sourcePath": "D:\\unitfolders\\oz47p-docsite-kit\\docsite-kit\\probes\\261011_docsite-kit-complete",
+      "targetPath": "D:\\unitfolders\\oz47p-docsite-kit\\docsite-kit\\probes\\2610112023_docsite-kit-complete",
+      "timestampSource": "filesystem_creation_time_for_missing_time_only",
+      "status": "renamed"
+    },
+    {
+      "oldName": "261011-api-audit-hmr",
+      "newName": "2610111940_api-audit-hmr",
+      "sourcePath": "D:\\unitfolders\\oz47p-docsite-kit\\docsite-kit\\probes\\261011-api-audit-hmr",
+      "targetPath": "D:\\unitfolders\\oz47p-docsite-kit\\docsite-kit\\probes\\2610111940_api-audit-hmr",
+      "timestampSource": "filesystem_creation_time_for_missing_time_only",
+      "status": "renamed"
+    },
+    {
+      "oldName": "261011-api-audit-markdown",
+      "newName": "2610111941_api-audit-markdown",
+      "sourcePath": "D:\\unitfolders\\oz47p-docsite-kit\\docsite-kit\\probes\\261011-api-audit-markdown",
+      "targetPath": "D:\\unitfolders\\oz47p-docsite-kit\\docsite-kit\\probes\\2610111941_api-audit-markdown",
+      "timestampSource": "filesystem_creation_time_for_missing_time_only",
+      "status": "renamed"
+    },
+    {
+      "oldName": "261012_comments-overlay",
+      "newName": "2610120120_comments-overlay",
+      "sourcePath": "D:\\unitfolders\\oz47p-docsite-kit\\docsite-kit\\probes\\261012_comments-overlay",
+      "targetPath": "D:\\unitfolders\\oz47p-docsite-kit\\docsite-kit\\probes\\2610120120_comments-overlay",
+      "timestampSource": "filesystem_creation_time_for_missing_time_only",
+      "status": "renamed"
+    },
+    {
+      "oldName": "261012_fumadocs-native",
+      "newName": "2610120120_fumadocs-native",
+      "sourcePath": "D:\\unitfolders\\oz47p-docsite-kit\\docsite-kit\\probes\\261012_fumadocs-native",
+      "targetPath": "D:\\unitfolders\\oz47p-docsite-kit\\docsite-kit\\probes\\2610120120_fumadocs-native",
+      "timestampSource": "filesystem_creation_time_for_missing_time_only",
+      "status": "renamed"
+    },
+    {
+      "oldName": "261012_identity-boundary",
+      "newName": "2610120119_identity-boundary",
+      "sourcePath": "D:\\unitfolders\\oz47p-docsite-kit\\docsite-kit\\probes\\261012_identity-boundary",
+      "targetPath": "D:\\unitfolders\\oz47p-docsite-kit\\docsite-kit\\probes\\2610120119_identity-boundary",
+      "timestampSource": "filesystem_creation_time_for_missing_time_only",
+      "status": "renamed"
+    },
+    {
+      "oldName": "261012_page-sources",
+      "newName": "2610120126_page-sources",
+      "sourcePath": "D:\\unitfolders\\oz47p-docsite-kit\\docsite-kit\\probes\\261012_page-sources",
+      "targetPath": "D:\\unitfolders\\oz47p-docsite-kit\\docsite-kit\\probes\\2610120126_page-sources",
+      "timestampSource": "filesystem_creation_time_for_missing_time_only",
+      "status": "renamed"
+    },
+    {
+      "oldName": "261012_writing",
+      "newName": "2610120123_writing",
+      "sourcePath": "D:\\unitfolders\\oz47p-docsite-kit\\docsite-kit\\probes\\261012_writing",
+      "targetPath": "D:\\unitfolders\\oz47p-docsite-kit\\docsite-kit\\probes\\2610120123_writing",
+      "timestampSource": "filesystem_creation_time_for_missing_time_only",
+      "status": "renamed"
+    }
+  ],
+  "preserveExisting": "All existing 10-digit yymmddhhmm names are unchanged, regardless of filesystem CreationTime",
+  "recoveryNote": "Old complete probe encountered a broken pnpm link during Move-Item. Source/tests consolidated; remaining dependency fragment preserved at 2610112023_docsite-kit-complete/.move-remnant. Six workspaces relinked using frozen lockfiles; dependency imports resolve. No source files deleted or overwritten in recovery.",
+  "referenceFilesUpdated": 69
+}

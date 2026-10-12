@@ -1,0 +1,15 @@
+$ react-router dev --port 5511 --host 127.0.0.1 --strictPort
+[restart] Relaunching with --conditions=development
+[MDX] generated files in 17.66860000000088ms
+[MDX] generated files in 38.42020000000048ms
+  [32m➜[39m  [1mLocal[22m:   [36mhttp://127.0.0.1:[1m5511[22m/[39m
+[2m1:40:58 AM[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m connected.
+LaTeX-incompatible input and strict mode is set to 'warn': Unicode text character "命" used in math mode [unicodeTextInMathMode]
+LaTeX-incompatible input and strict mode is set to 'warn': Unicode text character "令" used in math mode [unicodeTextInMathMode]
+LaTeX-incompatible input and strict mode is set to 'warn': Unicode text character "总" used in math mode [unicodeTextInMathMode]
+LaTeX-incompatible input and strict mode is set to 'warn': Unicode text character "线" used in math mode [unicodeTextInMathMode]
+LaTeX-incompatible input and strict mode is set to 'warn': Unicode text character "命" used in math mode [unicodeTextInMathMode]
+LaTeX-incompatible input and strict mode is set to 'warn': Unicode text character "令" used in math mode [unicodeTextInMathMode]
+LaTeX-incompatible input and strict mode is set to 'warn': Unicode text character "总" used in math mode [unicodeTextInMathMode]
+LaTeX-incompatible input and strict mode is set to 'warn': Unicode text character "线" used in math mode [unicodeTextInMathMode]
+[ELIFECYCLE] Command failed with exit code 1.

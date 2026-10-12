@@ -1,0 +1,30 @@
+{
+  "node": "v24.14.1",
+  "versions": {
+    "fumadocs-core": {
+      "version": "16.17.1",
+      "packageJson": "D:\\unitfolders\\oz47p-docsite-kit\\docsite-kit\\probes\\2610111754_fumadocs-16-17-1\\site\\node_modules\\.pnpm\\fumadocs-core@16.17.1_@mdx-_11ae55ae1af62cf101cec7ced32746d4\\node_modules\\fumadocs-core\\package.json"
+    },
+    "fumadocs-mdx": {
+      "version": "15.4.7",
+      "packageJson": "D:\\unitfolders\\oz47p-docsite-kit\\docsite-kit\\probes\\2610111754_fumadocs-16-17-1\\site\\node_modules\\.pnpm\\fumadocs-mdx@15.4.7_@types+_4cbb2e517fc4b66733860c06f2550baa\\node_modules\\fumadocs-mdx\\package.json"
+    },
+    "vite": {
+      "version": "8.3.4",
+      "packageJson": "D:\\unitfolders\\oz47p-docsite-kit\\docsite-kit\\probes\\2610111754_fumadocs-16-17-1\\site\\node_modules\\.pnpm\\vite@8.3.4_@types+node@26.6_18d562414d29f796f23423c22369ab92\\node_modules\\vite\\package.json"
+    },
+    "react": {
+      "version": "19.3.0",
+      "packageJson": "D:\\unitfolders\\oz47p-docsite-kit\\docsite-kit\\probes\\2610111754_fumadocs-16-17-1\\site\\node_modules\\.pnpm\\react@19.3.0\\node_modules\\react\\package.json"
+    },
+    "react-router": {
+      "version": "8.4.0",
+      "packageJson": "D:\\unitfolders\\oz47p-docsite-kit\\docsite-kit\\probes\\2610111754_fumadocs-16-17-1\\site\\node_modules\\.pnpm\\react-router@8.4.0_react-do_8c7b91c66c8115d08033ff54fc817791\\node_modules\\react-router\\package.json"
+    }
+  },
+  "upstreamTag": "fumadocs@16.17.1",
+  "upstreamCommit": "d6cfc48d62aa9ea413f0fc5033617c0c923681ec",
+  "dependencyJunction": "D:\\unitfolders\\oz47p-docsite-kit\\docsite-kit\\probes\\2610111754_fumadocs-16-17-1\\site\\node_modules",
+  "cacheDir": "out/vite-cache",
+  "httpListening": false
+}

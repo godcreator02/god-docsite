@@ -1,0 +1,58 @@
+{
+  "task": "L：create-docsite 一次性建站文件生成核心",
+  "slot": "L",
+  "status": "rework_completed_pending_review",
+  "packageDir": "docsite-kit/packages/create-docsite",
+  "publicApi": {
+    "module": "src/create.ts",
+    "function": "createSite({ dir, templateDir }): { createdFiles: string[]; keptFiles: string[] }",
+    "errorType": "CreateSiteError { code, details }",
+    "errorCodes": ["invalid-argument", "invalid-path", "overlap", "template-error", "existing-site", "conflict", "io-error"],
+    "cli": "node src/cli.ts --dir <站点目录> --template <模板目录>（退出码 0 成功 / 1 拒绝或失败 / 2 用法错误）",
+    "internalExports": ["writeNewFileOnly", "rollbackCreatedEntries"]
+  },
+  "templateConvention": {
+    "shape": "单一普通文件树（按用户纠偏，无 skeleton/initial 子目录协议）",
+    "dataMaterialRules": "src/plan.ts 的 dataMaterialPathRules：content/、comments/ 前缀与顶层 people.json；已存在保留对方、只填缺失",
+    "skeleton": "数据材料之外的文件：目标已有同名则全量预检后整体拒绝",
+    "gitignore": "模板顶层的 gitignore 写进目标时改名 .gitignore",
+    "existingSiteMarks": ["package.json", "app", ".create-docsite.json（本工具创建标记）"],
+    "writeFlag": "wx（只新建不覆盖）",
+    "rollbackBoundary": "单进程常规文件系统错误；不承诺并发/断电原子性（README 已写明）"
+  },
+  "tests": {
+    "framework": "Vitest（describe/it/expect + vi.spyOn，无 node:test/node:assert）",
+    "command": "../docsite-kit/node_modules/.bin/vitest.ps1 run（在 packages/create-docsite 下）",
+    "result": "Test Files 3 passed (3)，Tests 34 passed (34)（plan 9 + create 19 + cli 6），无跳过；前两轮验收项全部保留",
+    "reviewReplay": "create-core/create-rollback-replay.test.ts 已同步为主会话 review/create-rollback.test.ts 最新两用例版（半写回滚 + nested-only 根回滚；断言与 mock 一字未改，仅调整 import 层级），2 passed",
+    "typeCheck": "../docsite-kit/node_modules/.bin/tsc -p tsconfig.json，exit 0；vitest 类型经 tsconfig paths 映射到 ../docsite-kit/node_modules/vitest/dist/index.d.ts，静态类型无缺口",
+    "borrows": "packages/docsite-kit/node_modules（vitest 5.0.3、tsc、@types/node，均只读，未改其所在包）",
+    "mockNote": "此环境里 fs.readFileSync 也经过 fs.openSync（flags='r'）导出属性；open 阶段 mock 按路径 + 'wx' 过滤、其余透传真实 open，避免误拦模板读取"
+  },
+  "reworkFixes": {
+    "ownershipLifecycle": "createFileExclusive：openSync(targetPath,'wx') 成功才登记进 createdFilePaths，随后 writeFileSync(fd, content)（保留现有注入点）+ finally closeSync(fd)；EEXIST 或 open 阶段任何错误发生在登记之前——不登记、不删。正文与 marker 同路",
+    "nestedRootRegistration": "ensureDirChain 统一根登记：根不存在时无论 dirToEnsure 是根本身还是更深的目录都先登记根，回滚删得掉；预存在目录绝不登记绝不删；未扩大删除范围",
+    "siteRootBoundary": "rollbackCreatedEntries 界内判定含站点根本身（第一轮已修，保留）",
+    "openFailureTests": "新增 open 阶段 EEXIST（判 conflict 不覆盖不删）与 EACCES（不登记不删除）两条；nested-only 根回滚一条；正文与 marker 半写回滚两条保留",
+    "isJunctionRemoved": "第一轮已删（本机实测 isSymbolicLink 对 junction 为 true、isJunction 不存在），保留",
+    "gitignoreWording": "第一轮已收窄为「npm 打包默认不把 .gitignore 放进发布的包」，保留"
+  },
+  "pendingSerialRegistration": [
+    "packages/create-docsite/package.json：name、bin（create-docsite）、exports、private/版本与依赖声明（vitest 定为 devDependency）——版本策略按 gwb-release 当场读",
+    "tsconfig.json 现在借用 ../docsite-kit/node_modules（typeRoots 与 paths），包装好自己的依赖后改回默认解析",
+    "最终站点模板组装：真实 fumadocs 骨架内容等 K 的站点结构稳定后再接（当前测试用自造单树模板）",
+    "gwb-docsite 插件建站命令接线（由主会话决定改用本包还是并行保留）",
+    "本包源码与测试纳入仓统一检查链（pnpm check 等）——本轮未执行 pnpm"
+  ],
+  "constraintsHeld": [
+    "未创建 create-docsite/package.json（避免 K 的 workspace 安装扫到半成品包）",
+    "未执行任何 pnpm 命令（vitest 直接调 packages/docsite-kit/node_modules/.bin/vitest.ps1）、未改 workspace / 根 lock / 其他包 / 其他仓 / default home",
+    "未提交、未推送、未发布；未派任何子会话；未读 K 的在途实现",
+    "CLI 保持纯 Node 运行（node src/cli.ts），只有测试框架换为 Vitest"
+  ],
+  "leftovers": {
+    "tempDirs": "无（测试自清理，手工实跑目录已删，create-core/tmp 已清空删除）",
+    "processes": "无"
+  },
+  "resultPath": "probes/2610112023_docsite-kit-complete/package-split/create-core/result.md"
+}

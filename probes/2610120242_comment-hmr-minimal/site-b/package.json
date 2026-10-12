@@ -1,0 +1,30 @@
+{
+  "name": "probe-b-site",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "react-router dev --port 5521 --host 127.0.0.1",
+    "build": "react-router build",
+    "start": "react-router-serve ./build/server/index.js",
+    "check": "react-router typegen && tsc --noEmit"
+  },
+  "dependencies": {
+    "@react-router/node": "8.4.0",
+    "@react-router/serve": "8.4.0",
+    "fumadocs-core": "16.17.1",
+    "fumadocs-mdx": "15.4.7",
+    "isbot": "^5.2.2",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0",
+    "react-router": "8.4.0"
+  },
+  "devDependencies": {
+    "@react-router/dev": "8.4.0",
+    "@types/mdx": "^2.0.14",
+    "@types/node": "^26.6.4",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "typescript": "^5.9.2",
+    "vite": "8.3.4"
+  }
+}

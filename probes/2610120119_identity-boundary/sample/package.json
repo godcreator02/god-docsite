@@ -1,0 +1,25 @@
+{
+  "name": "@probe/sample",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "实验组合样本（任务 P）：宿主按 React Router 资源路由的形状接线——loader 解析身份渲染页面，action 调身份包拿到可信 actor 后再调评论纯函数。评论桩不 import 身份包",
+  "scripts": {
+    "build": "node -e \"require('node:fs').rmSync('dist',{recursive:true,force:true})\" && tsc -p tsconfig.build.json",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "check": "tsc --noEmit && vitest run"
+  },
+  "dependencies": {
+    "@probe/identity": "workspace:*",
+    "react": "19.3.0",
+    "react-dom": "19.3.0"
+  },
+  "devDependencies": {
+    "@types/node": "26.6.4",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
+    "typescript": "6.0.3",
+    "vitest": "5.0.3"
+  }
+}
