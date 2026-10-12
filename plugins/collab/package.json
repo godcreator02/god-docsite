@@ -29,7 +29,6 @@
     "test:verified": "vitest run --config vitest.verified.config.ts"
   },
   "peerDependencies": {
-    "@godcreator/docsite-comments": "^0.2.0",
     "@godcreator/gwb-data": "^0.1.12",
     "@cordisjs/plugin-timer": "^1.1.3",
     "@godcreator/gwb-commands": "^0.6.0",
