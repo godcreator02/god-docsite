@@ -80,7 +80,7 @@ const exitAfterFailedKillMilliseconds = 3000
  * taskkill 逐个停子进程时，有的子进程恰好自己先退出了，它就报「没有运行的实例」、退出码不为 0，其实整棵树已经停了；
  * 所以它报失败时再等一会儿，启动的那个进程退出了就算停掉，没退出才报错
  */
-function stopProcessTree(child: ChildProcess): Promise<void> {
+export function stopProcessTree(child: ChildProcess): Promise<void> {
   if (child.exitCode !== null || child.pid === undefined) return Promise.resolve()
   const exited = new Promise<void>((resolve) => child.once('exit', () => resolve()))
   return new Promise<void>((resolve, reject) => {

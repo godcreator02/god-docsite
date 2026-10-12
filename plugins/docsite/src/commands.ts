@@ -59,7 +59,7 @@ function register(commands: GwbCommandsApi, definition: { name: string; descript
 }
 
 const siteShape =
-  '每个站是 { dir, url, expectedUrl, running, kept, error }：url 在运行时是实际地址；expectedUrl 是按 package.json 的 scripts.dev 里的 --port 预期的地址（没写端口为 null）；kept 是托管着（常驻）；error 是常驻失败停下、启动前就失败（不是站点目录、没装依赖、站点检查不过）的原因，没有为 null'
+  '每个站是 { dir, state, url, expectedUrl, error }：state 是 running（进程在，url 是实际地址）、stopped（没有进程）、failed（进程退出了或没能启动，error 记退出码与最后几行输出）；expectedUrl 是按 package.json 的 scripts.dev 里的 --port 预期的地址（没写端口为 null），没运行时给人看站点在哪'
 
 const commentWriteUsage =
   '要站点在运行（经开发服务的评论接口写，和网页同一套规则：正文是 MDX，编译不过就拒绝）；署名是本 home 的身份码在 people.json 里对应的人，agent 写时给 as（people.json 里 agent 为 true 的 id）'
@@ -67,7 +67,7 @@ const commentWriteUsage =
 export function registerCommands({ commands, docsite, sitesSetting, list }: CommandServices): void {
   const urlOfRunning = (dir: string) => {
     const status = docsite.status(dir)
-    if (!status.running || status.url === null) throw new DocsiteRejected(`${dir} 的站点没在运行：先 docsite.site.start`)
+    if (status.state !== 'running' || status.url === null) throw new DocsiteRejected(`${dir} 的站点没在运行：先 docsite.site.start`)
     return status.url
   }
 
@@ -93,28 +93,28 @@ export function registerCommands({ commands, docsite, sitesSetting, list }: Comm
     commands,
     {
       name: 'docsite.site.add',
-      description: '托管一个站点：登记进设置 sites，开发服务常驻（插件每次加载时启动）',
-      usage: `{ dir }：站点目录的绝对路径，要有 package.json（scripts.dev 写死 --port）、装好依赖、有 people.json。已经登记过的只回它此刻的样子。别的插件（如 gwb-collab）托管的站点不经这里。回这个站。${siteShape}`,
+      description: '托管一个站点：登记进设置 sites 并启动（工作台每次启动时也会启动登记着的站）',
+      usage: `{ dir }：站点目录的绝对路径，要有 package.json（scripts.dev 写死 --port）、装好依赖、装着插件支持的最低版以上的 @godcreator/docsite-kit。已经登记过的只回它此刻的样子。别的插件（如 gwb-collab）托管的站点不经这里。回这个站。${siteShape}`,
       effect: 'write',
     },
     async (args) => {
       const dir = dirOf(argsOf(args, ['dir']))
       const listed = sitesSetting.get()
       if (!listed.some((each) => siteKeyOf(each) === siteKeyOf(dir))) await sitesSetting.set([...listed, dir])
-      await docsite.keep(dir)
+      await docsite.start(dir)
       return docsite.status(dir)
     },
   )
 
   register(
     commands,
-    { name: 'docsite.site.remove', description: '不再托管一个站点：停掉它、从设置 sites 里去掉', usage: '{ dir }：docsite.site.add 登记过的站点目录，没登记过就拒绝。回 { dir, removed: true }', effect: 'write' },
+    { name: 'docsite.site.remove', description: '不再托管一个站点：从设置 sites 里去掉，在运行就停掉', usage: '{ dir }：docsite.site.add 登记过的站点目录，没登记过就拒绝。回 { dir, removed: true }', effect: 'write' },
     async (args) => {
       const dir = dirOf(argsOf(args, ['dir']))
       const listed = sitesSetting.get()
       if (!listed.some((each) => siteKeyOf(each) === siteKeyOf(dir))) throw new DocsiteRejected(`${dir} 不在设置 sites 里：别的插件托管的站点由那个插件管`)
       await sitesSetting.set(listed.filter((each) => siteKeyOf(each) !== siteKeyOf(dir)))
-      await docsite.forget(dir)
+      if (docsite.status(dir).state === 'running') await docsite.stop(dir)
       return { dir, removed: true }
     },
   )
@@ -123,16 +123,14 @@ export function registerCommands({ commands, docsite, sitesSetting, list }: Comm
     commands,
     {
       name: 'docsite.site.start',
-      description: '启动并打开一个站点（默认用 Chrome 的应用窗口，见设置 site-window）',
-      usage: '{ dir, open? }：站点目录的绝对路径；open 默认 true，false 只启动不打开。人为停止、连续失败停下的也用它再启动（清掉这两种记录）；已经在运行就只打开；Chrome 应用窗口已经开着就试着切到前台，Windows 不让切时窗口留在原处、任务栏按钮闪烁，照常回执。启动前查站点（装没装依赖、人员列表与评论文件对不对），不过就拒绝、写明每条问题。回 { url, pid, alreadyRunning }',
-      effect: 'external',
+      description: '启动一个站点的开发服务（在站点目录里运行 pnpm dev，只绑本机）',
+      usage: '{ dir }：站点目录的绝对路径。启动前做版本核对（站点装的 @godcreator/docsite-kit 低于插件支持的最低版就拒绝、写明要升到哪版）与目录有效性，起不来把开发服务的输出报出来。已在运行或正在启动就回现状。回 { url, pid, alreadyRunning }。要看页面把 url 给 VS Code 插件打开',
+      effect: 'write',
     },
     async (args) => {
-      const parsed = argsOf(args, ['dir', 'open'])
-      const dir = dirOf(parsed)
-      if (parsed['open'] !== undefined && typeof parsed['open'] !== 'boolean') throw new DocsiteRejected('open 要是 true 或 false')
+      const dir = dirOf(argsOf(args, ['dir']))
       try {
-        return parsed['open'] === false ? await docsite.start(dir) : await docsite.open(dir)
+        return await docsite.start(dir)
       } catch (error) {
         throw new DocsiteRejected(messageOf(error))
       }
@@ -141,7 +139,7 @@ export function registerCommands({ commands, docsite, sitesSetting, list }: Comm
 
   register(
     commands,
-    { name: 'docsite.site.stop', description: '停掉一个站点的开发服务，这次加载期间不再自动启动', usage: '{ dir }：站点目录的绝对路径；没在运行就拒绝。回 { url }', effect: 'write' },
+    { name: 'docsite.site.stop', description: '停掉一个站点的开发服务', usage: '{ dir }：站点目录的绝对路径；没在运行就拒绝。回 { url }', effect: 'write' },
     async (args) => docsite.stop(dirOf(argsOf(args, ['dir']))),
   )
 
@@ -149,22 +147,17 @@ export function registerCommands({ commands, docsite, sitesSetting, list }: Comm
     commands,
     {
       name: 'docsite.site.init',
-      description: '初始化一个站点，或照装好的基础包与功能包的新模板更新已有站点的骨架（app/ 与根目录的配置）',
+      description: '一条命令从零建站，或照装好的基础包与功能包的新模板更新已有站点的骨架（app/ 与根目录的配置）',
       usage:
-        "{ dir, features?, port?, title? }：dir 是站点目录的绝对路径。没有 package.json 是新站点，要给 port（开发端口）与 title（站名，写进 content/meta.json）；已有站点不能给这两样。features 是功能包与版本范围，如 { \"@godcreator/collab-site\": \"^0.31.0\" }，给了就换掉 package.json 的 docsite.features 与这几项依赖，不给照站点现有的。基础包依赖写成 ^插件带的那一版。先装依赖，再照装好的模板整个重写 app/、覆盖配置文件、生成 app/site/，模板带来新依赖就再装一次；content/、comments/、people.json 已有的不动。站点在运行就先停、做完再启动。只写文件、不提交。回 { created, features }",
+        '{ dir, port, title }：dir 是站点目录的绝对路径。新站点（目录是空的，或里面只有 package.json）要给 port（开发端口）与 title（站名，写进 content/meta.json），插件装基础包（registry 里已发布的版本）→ 照模板写骨架 → 装全部依赖 → 起服务检查，检查通过后登记进设置 sites 的站保持运行、没登记的停掉。已有站点（package.json 有 docsite.features）不能给 port 与 title，再运行一次就是照新模板更新骨架，不重装基础包，模板带来新依赖就装一次。content/、comments/、people.json 已有的不动。只写文件、不碰 git。回 { created, features }',
       effect: 'write',
     },
     async (args) => {
-      const parsed = argsOf(args, ['dir', 'features', 'port', 'title'])
-      const features = parsed['features']
-      if (features !== undefined && !(typeof features === 'object' && features !== null && !Array.isArray(features) && Object.values(features).every((range) => typeof range === 'string' && range !== ''))) {
-        throw new DocsiteRejected('features 要是 { 包名: 版本范围 }，版本范围是非空字符串')
-      }
+      const parsed = argsOf(args, ['dir', 'port', 'title'])
       const port = parsed['port']
       if (port !== undefined && !(Number.isInteger(port) && (port as number) > 0 && (port as number) < 65536)) throw new DocsiteRejected('port 要是 1 到 65535 的整数')
       const title = optionalString(parsed, 'title')
       return docsite.init(dirOf(parsed), {
-        ...(features !== undefined ? { features: features as Record<string, string> } : {}),
         ...(port !== undefined ? { port: port as number } : {}),
         ...(title !== undefined ? { title } : {}),
       })

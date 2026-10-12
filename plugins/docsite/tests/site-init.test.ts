@@ -3,70 +3,157 @@ import { tmpdir } from 'node:os'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
-import { initSite } from '../src/site-init.js'
+import { initSite, type SiteInitDeps } from '../src/site-init.js'
 
 const kitDir = path.join(path.dirname(fileURLToPath(import.meta.url)), '../../../packages/docsite-kit')
 
 let root: string
 let siteDir: string
-let installs: number
 
-/** 假的装依赖：只在站点的 node_modules 里放指向基础包的链接 */
-const deps = {
-  kitVersion: '0.1.5',
-  install: async (dir: string) => {
-    installs += 1
-    const link = path.join(dir, 'node_modules', '@godcreator', 'docsite-kit')
-    if (existsSync(link)) return
-    mkdirSync(path.dirname(link), { recursive: true })
-    symlinkSync(kitDir, link, 'junction')
-  },
+/** 假的依赖：记下调用顺序；addKit / install 照真 pnpm 的效果装包——基础包链到本仓的（模板是真的），别的包装成没有模板的空包 */
+function fakeDeps(options: { registered?: boolean; startFails?: boolean } = {}) {
+  const events: string[] = []
+  const installAs = (dir: string, name: string) => {
+    const target = path.join(dir, 'node_modules', ...name.split('/'))
+    if (existsSync(target)) return
+    mkdirSync(path.dirname(target), { recursive: true })
+    if (name === '@godcreator/docsite-kit') {
+      symlinkSync(kitDir, target, 'junction')
+    } else {
+      mkdirSync(target)
+      writeFileSync(path.join(target, 'package.json'), `${JSON.stringify({ name, version: '0.0.0' }, null, 2)}\n`)
+    }
+  }
+  const deps: SiteInitDeps = {
+    addKit: async (dir) => {
+      events.push('add-kit')
+      installAs(dir, '@godcreator/docsite-kit')
+    },
+    install: async (dir) => {
+      events.push('install')
+      const manifest = JSON.parse(readFileSync(path.join(dir, 'package.json'), 'utf8')) as { dependencies?: Record<string, string> }
+      for (const name of Object.keys(manifest.dependencies ?? {})) installAs(dir, name)
+    },
+    isRegistered: () => options.registered ?? false,
+    start: async () => {
+      events.push('start')
+      if (options.startFails) throw new Error('开发服务 60 秒内没有报出地址，已停掉')
+      return { url: 'http://127.0.0.1:4560', pid: 1, alreadyRunning: false }
+    },
+    stop: async () => {
+      events.push('stop')
+      return { url: 'http://127.0.0.1:4560' }
+    },
+  }
+  return { events, deps }
 }
-const whileStopped = async <T>(_dir: string, work: () => Promise<T>) => ({ result: await work() })
-type Manifest = { scripts: Record<string, string>; dependencies: Record<string, string>; docsite: { features: string[] } }
+
+type Manifest = { name?: string; private?: boolean; type?: string; scripts: Record<string, string>; dependencies: Record<string, string>; docsite: { features: string[] } }
 const manifestOf = () => JSON.parse(readFileSync(path.join(siteDir, 'package.json'), 'utf8')) as Manifest
 
 beforeEach(() => {
   root = mkdtempSync(path.join(tmpdir(), 'docsite-site-init-'))
   siteDir = path.join(root, 'site')
-  installs = 0
 })
 
 afterEach(() => {
   rmSync(root, { recursive: true, force: true })
 })
 
-describe('initSite', () => {
-  it('新站点：写最少的 package.json、pnpm-workspace.yaml、content/meta.json，装依赖、写骨架，模板带来依赖就再装一次', async () => {
-    const result = await initSite(siteDir, { port: 4560, title: '新站' }, deps, whileStopped)
+describe('initSite：从零建站', () => {
+  it('空目录：装基础包、写最少的 package.json 等几样、照模板写骨架、装全部依赖、起服务检查后停掉（没登记）', async () => {
+    const { events, deps } = fakeDeps()
+    const result = await initSite(siteDir, { port: 4560, title: '新站' }, deps)
     expect(result).toEqual({ created: true, features: [] })
+    expect(events).toEqual(['add-kit', 'install', 'start', 'stop'])
     const manifest = manifestOf()
-    expect(manifest.dependencies['@godcreator/docsite-kit']).toBe('^0.1.5')
+    expect(manifest['private']).toBe(true)
+    expect(manifest['type']).toBe('module')
+    expect(manifest.scripts['dev']).toBe('react-router dev --port 4560 --host 127.0.0.1 --strictPort')
     expect(manifest.dependencies['react-router']).toBeDefined()
-    expect(manifest.scripts.dev).toMatch(/--port 4560/)
     expect(manifest.docsite).toEqual({ features: [] })
     expect(JSON.parse(readFileSync(path.join(siteDir, 'content', 'meta.json'), 'utf8'))).toEqual({ title: '新站', pages: [] })
     expect(readFileSync(path.join(siteDir, 'pnpm-workspace.yaml'), 'utf8')).toContain("'@godcreator/*'")
     expect(existsSync(path.join(siteDir, 'app', 'routes.ts'))).toBe(true)
-    expect(installs).toBe(2)
   })
 
-  it('新站点没给 port 或 title、已有站点给了，都拒绝', async () => {
-    await expect(initSite(siteDir, { port: 4560 }, deps, whileStopped)).rejects.toThrow('要给 port 与 title')
-    await initSite(siteDir, { port: 4560, title: '新站' }, deps, whileStopped)
-    await expect(initSite(siteDir, { title: '别的名字' }, deps, whileStopped)).rejects.toThrow('不能给 port 与 title')
+  it('登记着的站起服务检查后保持运行，不停', async () => {
+    const { events, deps } = fakeDeps({ registered: true })
+    await initSite(siteDir, { port: 4560, title: '新站' }, deps)
+    expect(events).toEqual(['add-kit', 'install', 'start'])
   })
 
-  it('已有站点：基础包依赖写成 ^插件带的那一版，给了 features 就换掉 docsite.features 与那几项依赖，content/ 不动', async () => {
-    await initSite(siteDir, { port: 4560, title: '新站' }, deps, whileStopped)
-    writeFileSync(path.join(siteDir, 'content', 'meta.json'), '{"title":"改过的名字","pages":[]}\n')
+  it('目录里只有 package.json：当新站，保留里面原有的字段', async () => {
+    mkdirSync(siteDir, { recursive: true })
+    writeFileSync(path.join(siteDir, 'package.json'), '{"name":"my-docs"}')
+    const { deps } = fakeDeps()
+    await initSite(siteDir, { port: 4560, title: '新站' }, deps)
+    expect(manifestOf().name).toBe('my-docs')
+  })
+
+  it('给了 features（服务面给协作站用）：写进 docsite.features 与依赖，写骨架前先装上功能包', async () => {
+    const { events, deps } = fakeDeps()
+    await initSite(siteDir, { port: 4560, title: '新站', features: { '@probe/missing': '^1.0.0' } }, deps)
     const manifest = manifestOf()
-    writeFileSync(path.join(siteDir, 'package.json'), JSON.stringify({ ...manifest, dependencies: { ...manifest.dependencies, '@godcreator/docsite-kit': '^0.1.2' } }))
-    await expect(initSite(siteDir, { features: { '@probe/missing': '^1.0.0' } }, deps, whileStopped)).rejects.toThrow('node_modules 里没有 @probe/missing')
-    const updated = manifestOf()
-    expect(updated.dependencies['@godcreator/docsite-kit']).toBe('^0.1.5')
-    expect(updated.dependencies['@probe/missing']).toBe('^1.0.0')
-    expect(updated.docsite).toEqual({ features: ['@probe/missing'] })
+    expect(manifest.docsite).toEqual({ features: ['@probe/missing'] })
+    expect(manifest.dependencies['@probe/missing']).toBe('^1.0.0')
+    expect(events).toEqual(['add-kit', 'install', 'install', 'start', 'stop'])
+  })
+
+  it('目录里有别的文件、没给 port 或 title，都拒绝，什么也不做', async () => {
+    mkdirSync(siteDir, { recursive: true })
+    writeFileSync(path.join(siteDir, 'readme.txt'), 'hi')
+    const notEmpty = fakeDeps()
+    await expect(initSite(siteDir, { port: 4560, title: '新站' }, notEmpty.deps)).rejects.toThrow('不是空目录')
+    expect(notEmpty.events).toEqual([])
+    rmSync(path.join(siteDir, 'readme.txt'))
+    const noPort = fakeDeps()
+    await expect(initSite(siteDir, { title: '新站' }, noPort.deps)).rejects.toThrow('要给 port（开发端口）与 title（站名）')
+    expect(notEmpty.events).toEqual([])
+  })
+
+  it('起服务检查起不来：原样报错', async () => {
+    const { deps } = fakeDeps({ startFails: true })
+    await expect(initSite(siteDir, { port: 4560, title: '新站' }, deps)).rejects.toThrow('没有报出地址')
+  })
+})
+
+describe('initSite：更新已有站点', () => {
+  beforeEach(async () => {
+    await initSite(siteDir, { port: 4560, title: '新站' }, fakeDeps().deps)
+  })
+
+  it('照装上的模板重写骨架，不重装基础包；模板没带来新依赖就不装', async () => {
+    const { events, deps } = fakeDeps()
+    const result = await initSite(siteDir, {}, deps)
+    expect(result).toEqual({ created: false, features: [] })
+    expect(events).toEqual([])
+    expect(existsSync(path.join(siteDir, 'app', 'routes.ts'))).toBe(true)
+  })
+
+  it('模板带来了新依赖就再装一次', async () => {
+    const manifest = manifestOf()
+    delete manifest.dependencies['react-router']
+    writeFileSync(path.join(siteDir, 'package.json'), JSON.stringify(manifest))
+    const { events, deps } = fakeDeps()
+    await initSite(siteDir, {}, deps)
+    expect(events).toEqual(['install'])
+  })
+
+  it('给了 port 或 title 拒绝；给了 features 换掉 docsite.features 与那几项依赖，content/ 不动', async () => {
+    const { deps } = fakeDeps()
+    await expect(initSite(siteDir, { port: 4561 }, deps)).rejects.toThrow('不能给 port 与 title')
+    writeFileSync(path.join(siteDir, 'content', 'meta.json'), '{"title":"改过的名字","pages":[]}\n')
+    await expect(initSite(siteDir, { features: { '@probe/missing': '^1.0.0' } }, deps)).rejects.toThrow('node_modules 里没有 @probe/missing')
+    const manifest = manifestOf()
+    expect(manifest.docsite).toEqual({ features: ['@probe/missing'] })
+    expect(manifest.dependencies['@probe/missing']).toBe('^1.0.0')
     expect(readFileSync(path.join(siteDir, 'content', 'meta.json'), 'utf8')).toBe('{"title":"改过的名字","pages":[]}\n')
+  })
+
+  it('登记着的站更新完就启动', async () => {
+    const { events, deps } = fakeDeps({ registered: true })
+    await initSite(siteDir, {}, deps)
+    expect(events).toEqual(['start'])
   })
 })

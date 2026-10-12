@@ -3,15 +3,13 @@ import type { GwbContext } from '@godcreator/gwb-kernel-desktop'
 import type {} from '@godcreator/gwb-commands'
 import type {} from '@godcreator/gwb-settings'
 import type {} from '@godcreator/gwb-skills'
-import { siteProblems, siteTitleOf } from './site-files.js'
-import { shell } from 'electron'
 import { registerCommands } from './commands.js'
 import { launchDevServer } from './dev-server.js'
-import { chromeCandidatesOf, findChrome, openInChromeApp, siteWindowModeOf } from './open-site.js'
+import { messageOf } from './errors.js'
 import { isIdentityCode, joinPeople, newIdentityCode } from './people-file.js'
 import { DocsiteService, type GwbDocsiteApi } from './service.js'
-import { SiteHost } from './site-host.js'
-import { initSite, pnpmInstall } from './site-init.js'
+import { initSite, pnpmAddKit, pnpmInstall } from './site-init.js'
+import { SiteHost, siteKeyOf } from './site-host.js'
 
 /** 写在包入口：devkit.release 只读类型入口 dist/index.d.ts 认服务由谁提供 */
 declare module 'cordis' {
@@ -21,7 +19,7 @@ declare module 'cordis' {
 }
 
 export type { GwbDocsiteApi } from './service.js'
-export type { SiteStarted, SiteStatus } from './site-host.js'
+export type { SiteStarted, SiteState, SiteStatus } from './site-host.js'
 export type { JoiningPerson } from './people-file.js'
 export type { SiteInitOptions, SiteInitResult } from './site-init.js'
 
@@ -31,9 +29,6 @@ export const inject = ['gwbCommands', 'gwbSettings']
 
 /** 产物在 dist/index.js，说明书目录是它上一级的 skills/ */
 const skillsDir = new URL('../skills/', import.meta.url)
-
-/** 站点意外退出后隔多久再启动：等上一个进程放开端口 */
-const siteRestartDelayMilliseconds = 3_000
 
 const settingDefinitions = [
   {
@@ -45,13 +40,6 @@ const settingDefinitions = [
     default: '',
   },
   { key: 'sites', type: 'string-list', title: '托管的站点', description: 'docsite.site.add 登记的站点目录，一行一个绝对路径；插件每次加载时启动它们。别的插件（如 gwb-collab）托管的站点不在这里', default: [] },
-  {
-    key: 'site-window',
-    type: 'string',
-    title: '站点用什么窗口打开',
-    description: 'chrome-app 用 Chrome 的应用窗口（--app），独立窗口，没有标签栏和地址栏，要装 Chrome；default-browser 在系统默认浏览器里开新标签页',
-    default: 'chrome-app',
-  },
 ] as const
 
 function stringList(value: unknown): string[] {
@@ -78,36 +66,37 @@ export function apply(ctx: GwbContext): void {
     return code
   }
 
-  const host = new SiteHost({ log, launchDevServer, identityCode, siteProblems, now: () => Date.now(), restartDelayMilliseconds: siteRestartDelayMilliseconds })
-  ctx.effect(() => () => host.stopAll())
+  const host = new SiteHost({ log, launchDevServer, identityCode })
+  ctx.effect(() => () => void host.stopAll())
 
-  const openInBrowser = (dir: string, url: string) => {
-    if (siteWindowModeOf(settings.get('site-window')) === 'default-browser') return shell.openExternal(url)
-    return openInChromeApp(findChrome(chromeCandidatesOf(process.env)), url, siteTitleOf(dir))
-  }
+  const sitesSetting = { get: () => stringList(settings.get('sites')), set: (dirs: string[]) => settings.set('sites', dirs) }
 
   const api: GwbDocsiteApi = {
     identityCode,
-    keep: (dir) => host.keep(dir),
-    forget: (dir) => host.forget(dir),
     start: (dir) => host.start(dir),
-    open: async (dir) => {
-      const started = await host.start(dir)
-      await openInBrowser(dir, started.url)
-      return started
-    },
     stop: (dir) => host.stop(dir),
     status: (dir) => host.statusOf(dir),
-    whileStopped: (dir, work) => host.whileStopped(dir, work),
     push: (dir, channel, data) => host.push(dir, channel, data),
     join: (dir, person) => joinPeople(dir, identityCode(), person),
     onStatus: (listener) => host.onStatus(listener),
-    init: (dir, options) => initSite(dir, options, { kitVersion: __DOCSITE_KIT_VERSION__, install: pnpmInstall }, (siteDir, work) => host.whileStopped(siteDir, work)),
+    init: async (dir, options) => {
+      // 骨架更新要整份重写 app/，在运行的先停
+      if (host.statusOf(dir).state === 'running') await host.stop(dir)
+      return initSite(dir, options, {
+        addKit: pnpmAddKit,
+        install: pnpmInstall,
+        isRegistered: (siteDir) => sitesSetting.get().some((each) => siteKeyOf(each) === siteKeyOf(siteDir)),
+        start: (siteDir) => host.start(siteDir),
+        stop: (siteDir) => host.stop(siteDir),
+      })
+    },
   }
   new DocsiteService(ctx, api)
 
-  const sitesSetting = { get: () => stringList(settings.get('sites')), set: (dirs: string[]) => settings.set('sites', dirs) }
-  for (const dir of sitesSetting.get()) void host.keep(dir)
+  // 工作台启动：对登记表逐个 start，异步、不阻塞加载；起不来的标 failed，原因在状态里
+  for (const dir of sitesSetting.get()) {
+    host.start(dir).catch((error) => log.warn(`${dir} 的站点没有启动：${messageOf(error)}`))
+  }
 
   registerCommands({ commands, docsite: api, sitesSetting, list: () => host.list() })
 

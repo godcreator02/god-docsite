@@ -1,14 +1,20 @@
 import { spawn } from 'node:child_process'
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
+import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs'
 import path from 'node:path'
 import { writeSiteSkeleton } from '@godcreator/docsite-kit/init'
-import { lastLinesOf } from './dev-server.js'
+import { lastLinesOf, stopProcessTree } from './dev-server.js'
 import { DocsiteRejected } from './errors.js'
+import type { SiteStarted } from './site-host.js'
 
 const kitPackageName = '@godcreator/docsite-kit'
 
+/** 新站点等待装基础包的时间；再久多半是网络不通 */
+const addKitTimeoutMilliseconds = 300_000
+/** 装全部依赖的时间 */
+const installTimeoutMilliseconds = 600_000
+
 export type SiteInitOptions = {
-  /** 站点用到的功能包与版本范围，如 { '@godcreator/collab-site': '^0.31.0' }；给了就换掉 docsite.features 与这几项依赖，不给就照站点现有的 */
+  /** 站点用到的功能包与版本范围，如 { '@godcreator/collab-site': '^0.31.0' }；给了就换掉 docsite.features 与这几项依赖，不给照站点现有的（服务面给协作站用） */
   features?: Record<string, string>
   /** 新站点的开发端口；已有站点沿用自己 scripts.dev 里的，不能给 */
   port?: number
@@ -16,15 +22,19 @@ export type SiteInitOptions = {
   title?: string
 }
 
+/** 测试里换成假的：跑 pnpm 的三样、起服务检查的两样、登记表查询 */
 export type SiteInitDeps = {
-  /** gwb-docsite 打包时带的基础包版本：站点的基础包依赖写成 ^这一版，装上的一定带模板 */
-  kitVersion: string
-  install: (dir: string) => Promise<void>
+  addKit(dir: string): Promise<void>
+  install(dir: string): Promise<void>
+  /** 站点登记在工作台设置 sites 里（init 结束时保持运行） */
+  isRegistered(dir: string): boolean
+  start(dir: string): Promise<SiteStarted>
+  stop(dir: string): Promise<{ url: string }>
 }
 
 export type SiteInitResult = { created: boolean; features: string[] }
 
-type Manifest = Record<string, unknown> & { dependencies?: Record<string, string>; docsite?: { features: string[] } }
+type Manifest = Record<string, unknown> & { scripts?: Record<string, string>; dependencies?: Record<string, string>; docsite?: { features?: unknown } }
 
 function readManifest(file: string): Manifest {
   try {
@@ -36,66 +46,121 @@ function readManifest(file: string): Manifest {
 
 const writeJson = (file: string, value: unknown) => writeFileSync(file, `${JSON.stringify(value, null, 2)}\n`)
 
-/** 新站点要的最少几样：带端口的 dev 脚本、基础包与功能包的依赖、docsite.features，团队的包刚发就能装，站名 */
-function createSite(dir: string, features: Record<string, string>, port: number, title: string, kitVersion: string) {
-  mkdirSync(dir, { recursive: true })
-  writeJson(path.join(dir, 'package.json'), {
-    private: true,
-    type: 'module',
-    scripts: { dev: `react-router dev --port ${port} --host 127.0.0.1 --strictPort` },
-    dependencies: { [kitPackageName]: `^${kitVersion}`, ...features },
-    docsite: { features: Object.keys(features) },
-  })
-  writeFileSync(path.join(dir, 'pnpm-workspace.yaml'), "allowBuilds:\n  esbuild: true\nonlyBuiltDependencies:\n  - esbuild\n# 团队的包刚发就要用：@godcreator 的包不受「发布不满一天不装」的限制\nminimumReleaseAgeExclude:\n  - '@godcreator/*'\n")
-  mkdirSync(path.join(dir, 'content'), { recursive: true })
-  writeJson(path.join(dir, 'content', 'meta.json'), { title, pages: [] })
+/** package.json 的 docsite.features 是不是本插件建的站点的样子（与基础包 init 的校验同一口径） */
+function hasSiteFeatures(manifest: Manifest): boolean {
+  const features = manifest.docsite?.features
+  return Array.isArray(features) && features.every((each) => typeof each === 'string' && each !== '')
 }
 
-/** 已有站点：基础包依赖写成 ^插件带的那一版，给了功能包就换掉 docsite.features 与那几项依赖 */
-function updateSite(manifestFile: string, features: Record<string, string> | undefined, kitVersion: string) {
-  const manifest = readManifest(manifestFile)
-  const dependencies = { ...manifest.dependencies, [kitPackageName]: `^${kitVersion}`, ...features }
-  const docsite = features === undefined ? manifest.docsite : { features: Object.keys(features) }
-  writeJson(manifestFile, { ...manifest, dependencies, docsite })
-}
-
-/**
- * 初始化站点：新站点先写最少的 package.json 等几样；装依赖，照装好的基础包与功能包的模板写骨架（./init 的 writeSiteSkeleton），
- * 模板带来了新依赖就再装一次。已有站点也是这样更新骨架，content/、comments/、people.json 不动。站点在运行就先停、做完再启动
- */
-export async function initSite(dir: string, options: SiteInitOptions, deps: SiteInitDeps, whileStopped: <T>(dir: string, work: () => Promise<T>) => Promise<{ result: T }>): Promise<SiteInitResult> {
-  const manifestFile = path.join(dir, 'package.json')
-  const created = !existsSync(manifestFile)
-  if (created) {
-    if (options.port === undefined || options.title === undefined) throw new DocsiteRejected(`${dir} 下没有 package.json，是新站点：要给 port 与 title`)
-    createSite(dir, options.features ?? {}, options.port, options.title, deps.kitVersion)
-  } else {
-    if (options.port !== undefined || options.title !== undefined) throw new DocsiteRejected(`${dir} 已经是站点：端口照 package.json 的 scripts.dev、站名照 content/meta.json，不能给 port 与 title`)
-    updateSite(manifestFile, options.features, deps.kitVersion)
+/** 目录里的条目，目录不在算空 */
+function entriesOf(dir: string): string[] {
+  try {
+    return readdirSync(dir)
+  } catch {
+    return []
   }
-  const { result } = await whileStopped(dir, async () => {
-    await deps.install(dir)
-    let written
-    try {
-      written = writeSiteSkeleton(dir)
-    } catch (error) {
-      throw new DocsiteRejected(error instanceof Error ? error.message : String(error))
-    }
-    if (written.manifestChanged) await deps.install(dir)
-    return written.features
-  })
-  return { created, features: result }
 }
 
-/** 在站点目录里 pnpm install；失败就把最后的输出报出来 */
-export function pnpmInstall(dir: string): Promise<void> {
-  const child = spawn('pnpm', ['install'], { cwd: dir, shell: true, windowsHide: true })
+/** 在站点目录里跑一条 pnpm 命令，等它退出；超时就停掉整棵进程，失败把最后的输出原样报出来 */
+function pnpmIn(dir: string, args: string[], timeoutMilliseconds: number, doing: string): Promise<void> {
+  const child = spawn('pnpm', args, { cwd: dir, shell: true, windowsHide: true })
   let output = ''
   const collect = (chunk: string) => (output = (output + chunk).slice(-4000))
   child.stdout.setEncoding('utf8').on('data', collect)
   child.stderr.setEncoding('utf8').on('data', collect)
   return new Promise((resolve, reject) => {
-    child.on('error', (error) => reject(new DocsiteRejected(`pnpm 启动不了：${error.message}`)))
-    child.on('exit', (code) => (code === 0 ? resolve() : reject(new DocsiteRejected(`${dir} 里 pnpm install 失败（退出码 ${String(code)}）：\n${lastLinesOf(output, 30)}`))))
+    let timer: ReturnType<typeof setTimeout> | undefined
+    const fail = (error: DocsiteRejected) => {
+      if (timer !== undefined) clearTimeout(timer)
+      reject(error)
+    }
+    timer = setTimeout(() => {
+      stopProcessTree(child).then(
+        () => fail(new DocsiteRejected(`${doing} ${timeoutMilliseconds / 1000} 秒没做完，已停掉。输出：\n${lastLinesOf(output, 30)}`)),
+        (stopError: unknown) => fail(new DocsiteRejected(`${doing} ${timeoutMilliseconds / 1000} 秒没做完，停掉时又出错（${String(stopError)}）。输出：\n${lastLinesOf(output, 30)}`)),
+      )
+    }, timeoutMilliseconds)
+    child.on('error', (error) => fail(new DocsiteRejected(`pnpm 启动不了：${error.message}`)))
+    child.on('exit', (code) => {
+      if (code === 0) {
+        if (timer !== undefined) clearTimeout(timer)
+        resolve()
+        return
+      }
+      fail(new DocsiteRejected(`${doing}失败（退出码 ${String(code)}）。输出：\n${lastLinesOf(output, 30)}`))
+    })
   })
+}
+
+/** 装基础包（registry 里已发布的最新版）；装不上多半是网络或 registry 不可达 */
+export function pnpmAddKit(dir: string): Promise<void> {
+  return pnpmIn(dir, ['add', kitPackageName], addKitTimeoutMilliseconds, `在 ${dir} 里 pnpm add ${kitPackageName}（registry 里装不上这一版，多半是网络不通或 registry 不可达）`)
+}
+
+/** 在站点目录里 pnpm install */
+export function pnpmInstall(dir: string): Promise<void> {
+  return pnpmIn(dir, ['install'], installTimeoutMilliseconds, `${dir} 里 pnpm install`)
+}
+
+/**
+ * 初始化站点：新站点（目录是空的，或里面只有 package.json）装基础包、写最少的 package.json 等几样，
+ * 照装好的基础包与功能包的模板写骨架（./init 的 writeSiteSkeleton），装全部依赖，起服务检查（L-01：得到能直接启动的项目），
+ * 检查通过后没登记的站停掉、登记着的保持运行。已有站点做骨架更新：不重装基础包，模板带来新依赖就再装一次。
+ * content/、comments/、people.json 已有的不动。调用方负责先停在运行的站点
+ */
+export async function initSite(dir: string, options: SiteInitOptions, deps: SiteInitDeps): Promise<SiteInitResult> {
+  const manifestFile = path.join(dir, 'package.json')
+  const existingSite = existsSync(manifestFile) && hasSiteFeatures(readManifest(manifestFile))
+  const created = !existingSite
+  let features: Record<string, string> | undefined
+  if (created) {
+    const entries = entriesOf(dir).filter((entry) => entry !== 'package.json')
+    if (entries.length > 0) throw new DocsiteRejected(`${dir} 不是空目录，里面已经有别的文件：${entries.join('、')}。初始化只从空目录（或只有 package.json 的目录）建站`)
+    if (options.port === undefined || options.title === undefined) throw new DocsiteRejected(`${dir} 是新站点：要给 port（开发端口）与 title（站名）`)
+    features = options.features
+  } else {
+    if (options.port !== undefined || options.title !== undefined) throw new DocsiteRejected(`${dir} 已经是站点：端口照 package.json 的 scripts.dev、站名照 content/meta.json，不能给 port 与 title`)
+    features = options.features
+  }
+
+  let written
+  if (created) {
+    mkdirSync(dir, { recursive: true })
+    writeFileSync(
+      path.join(dir, 'pnpm-workspace.yaml'),
+      "allowBuilds:\n  esbuild: true\nonlyBuiltDependencies:\n  - esbuild\n# 团队的包刚发就要用：@godcreator 的包不受「发布不满一天不装」的限制\nminimumReleaseAgeExclude:\n  - '@godcreator/*'\n",
+    )
+    await deps.addKit(dir)
+    const manifest = existsSync(manifestFile) ? readManifest(manifestFile) : {}
+    writeJson(manifestFile, {
+      ...manifest,
+      private: true,
+      type: 'module',
+      scripts: { ...manifest.scripts, dev: `react-router dev --port ${options.port} --host 127.0.0.1 --strictPort` },
+      dependencies: { ...manifest.dependencies, ...(features ?? {}) },
+      docsite: { features: Object.keys(features ?? {}) },
+    })
+    mkdirSync(path.join(dir, 'content'), { recursive: true })
+    writeJson(path.join(dir, 'content', 'meta.json'), { title: options.title, pages: [] })
+    // 写骨架要读各功能包的 template/：有功能包就先装上（没有时基础包已在 addKit 装好，直接写骨架）
+    if (Object.keys(features ?? {}).length > 0) await deps.install(dir)
+    written = writeSiteSkeleton(dir)
+    await deps.install(dir)
+  } else {
+    if (features !== undefined) {
+      const manifest = readManifest(manifestFile)
+      writeJson(manifestFile, { ...manifest, dependencies: { ...manifest.dependencies, ...features }, docsite: { features: Object.keys(features) } })
+    }
+    written = writeSiteSkeleton(dir)
+    if (written.manifestChanged) await deps.install(dir)
+  }
+
+  const registered = deps.isRegistered(dir)
+  if (created) {
+    await deps.start(dir)
+    if (!registered) await deps.stop(dir)
+  } else if (registered) {
+    await deps.start(dir)
+  }
+  return { created, features: written.features }
 }

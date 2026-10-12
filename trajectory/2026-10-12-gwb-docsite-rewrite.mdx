@@ -1,0 +1,29 @@
+---
+born-at: 2026-10-12T15:55
+type: choice
+parent: [2026-10-12-explainer-into-docsite]
+label: gwb-docsite 照设计页重写：能力包组合层、契约 v1 版本核对、三态状态机砍掉六项防护
+domain: 骨架
+---
+
+## 背景
+
+插件旧实现跟着一体化大包长出来：状态机 301 行混了状态、重启、检查三件事；自动重启、5 分钟 3 次失败上限、
+启动前人员评论检查、同站操作排队、whileStopped、推送补投队列六项防护没有一项来自需求（生命周期需求页「不作为需求的」
+一栏点名），是旧机制时代防坏数据的遗产。设计正本进站：`site/content/design/gwb-plugin.mdx`（契约 v1、命令面、服务面）。
+
+## 做了
+
+- src 重组为 10 个文件（site-host 157 行三态状态机：running/stopped/failed，start/stop/add/remove/init 幂等，
+  并发 start 复用同一次启动；进程退出只记 failed 不自动重启）。六项防护全删，保留路径归一、spawn 超时、卸载清理；
+  keep/forget/open/whileStopped 服务面删（open 打开窗口归 VS Code 插件，keep/forget 与 add/remove 是同一件事两套词）。
+- 新增 kit-contract.ts：启动前核对站点装的 docsite-kit 版本，低于 MIN_KIT_VERSION（0.2.0，契约 v1 对应版）拒绝并写明
+  要升到哪版。三个能力包（identity/comments/feed）从 peer 挪进 devDependencies 由 esbuild 打包进 dist——peer 意味着
+  指望宿主装着，而它们是新包、home 里没人装（隔离 home 首次验证即炸在裸 import）。
+- docsite.site.init 一条命令从零建站（L-01）：装基础包 → 写最少 package.json 与 pnpm-workspace.yaml →
+  writeSiteSkeleton → 装全部依赖 → 起服务检查；已有站点做骨架更新不重装包。
+- SKILL.md 重写（契约 v1 条目表 + 十二命令）；站内 gwb-plugin 页照新实现重写。
+
+## 验收
+
+插件 pnpm check 绿（27 测试）；隔离 home devkit.dev 装上 active；init 建站与评论链路随发版后在隔离 home 实测。
