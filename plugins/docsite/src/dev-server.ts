@@ -2,7 +2,7 @@ import { spawn, type ChildProcess } from 'node:child_process'
 import { randomUUID } from 'node:crypto'
 import { existsSync, readFileSync } from 'node:fs'
 import path from 'node:path'
-import { identityCodeEnvName } from '@godcreator/docsite-kit/comments'
+import { identityCodeEnvName } from '@godcreator/docsite-identity/server'
 import { feedEndpointPrefix, feedTokenEnvName, feedTokenHeader } from '@godcreator/docsite-kit/site-feed'
 import { DocsiteRejected } from './errors.js'
 

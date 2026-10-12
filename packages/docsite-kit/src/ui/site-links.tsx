@@ -2,9 +2,7 @@ import { createContext, use, type AnchorHTMLAttributes, type ComponentType, type
 import Link from 'fumadocs-core/link'
 import { usePathname } from 'fumadocs-core/framework'
 import { ArrowUpRight, FileText, MessageSquare, Paperclip, TriangleAlert } from 'lucide-react'
-import type { CommentEntry, CommentThread } from '../comments.js'
 import { siteLinkTargetOf } from '../site-link-targets.js'
-import { anchorLabelOf } from './comment-anchors.js'
 import type { SidebarRouteLink } from './sidebar.js'
 
 /** 站内链接显示成的小卡片；功能包自己的链接种类也用它，和站里其余的链接一个样子 */
@@ -50,8 +48,9 @@ function useSiteLinks() {
 }
 
 /** 评论串到评论链接要显示的；批了元素的没有页面快照，只写元素类别 */
-export function commentLinkTargetsOf(threads: ReadonlyArray<CommentThread<CommentEntry>>) {
-  return Object.fromEntries(threads.map((thread) => [thread.id, { page: thread.head.page, label: anchorLabelOf(thread.head, undefined), resolved: thread.head.status === 'resolved' }]))
+/** 评论链接的目标清单：threads 是站点侧从评论模型组装的串摘要（resolved 状态是评论模型还没收编的能力，先恒为未解决） */
+export function commentLinkTargetsOf(threads: ReadonlyArray<{ id: string; page: string; anchor?: string }>): Record<string, CommentLinkTarget> {
+  return Object.fromEntries(threads.map((thread) => [thread.id, { page: thread.page, label: thread.anchor ?? '页面评论', resolved: false }]))
 }
 
 function hasWrittenText(children: ReactNode) {

@@ -1,13 +1,28 @@
 /**
  * 不经开发服务、直接读站点目录里的文件：gwb 插件（gwb-docsite、gwb-collab）在 Node 里用。
- * 不引用评论接口那一份（它带着 MDX 编译器），插件打包时不把它带进去
+ * 身份与人员表在 @godcreator/docsite-identity，评论在 @godcreator/docsite-comments，
+ * 这里只留组合层需要的读取与检查
  */
 import path from 'node:path'
 import { pathToFileURL } from 'node:url'
+import { readCommentThreads } from '@godcreator/docsite-comments/server'
+import { sitePeople } from '@godcreator/docsite-identity/server'
 
-export { commentThreadIdsAbout, readCommentThreads, siteProblems, type CommentFile, type CommentThreadFile } from './comment-files.js'
-export { jsonFileOf, sitePeople } from './site-people.js'
-export { siteTitleOf } from './site-title.js'
+export { sitePeople }
+export { jsonFileOf, siteTitleOf } from './site-title.js'
+
+/**
+ * 评论文件的问题清单：读不出评论目录（形状错、frontmatter 缺字段）就是问题；
+ * 作者是否在人员表由读的人核对（listComments 里做）。空数组 = 没问题
+ */
+export async function siteProblems(siteDir: string): Promise<string[]> {
+  try {
+    await readCommentThreads(path.join(siteDir, 'comments'))
+    return []
+  } catch (error) {
+    return [error instanceof Error ? error.message : String(error)]
+  }
+}
 
 /**
  * 编译站点 dirs 下的 MDX（如 ['content', 'comments']），回每个编不过的文件一句话；提交前查，打开站点前不查（要几秒）。

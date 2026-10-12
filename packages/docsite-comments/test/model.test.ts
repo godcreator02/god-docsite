@@ -7,7 +7,7 @@ import {
   serializeCommentFile,
   threadsForPage,
 } from '../src/index.js';
-import { createReply, createThread, deleteReply, deleteThread } from '../src/server.js';
+import { createReply, createThread, deleteReply, deleteThread, readCommentThreads } from '../src/server.js';
 
 const PROBE_ROOT = process.cwd();
 const tmpRoot = path.join(PROBE_ROOT, '.tmp-model');
@@ -135,3 +135,19 @@ describe('锚点（anchor）：评论串可锚定页面元素 id', () => {
     expect(withoutAnchor).not.toMatch(/^anchor:/m);
   });
 });
+
+describe('readCommentThreads：插件用的磁盘读取', () => {
+  it('读出串头与回复的 frontmatter 与正文；跳过非评论目录', async () => {
+    const dir = freshDir('read-threads')
+    await createThread(dir, { page: 'index.mdx', authorId: 'owner', body: '串头正文' })
+    const [threadId] = readdirSync(dir)
+    await createReply(dir, threadId!, { authorId: 'zhou', body: '回复正文' })
+    writeFileSync(path.join(dir, 'not-a-thread.mdx'), 'x')
+    const threads = await readCommentThreads(dir)
+    expect(threads).toHaveLength(1)
+    expect(threads[0]!.head.page).toBe('index.mdx')
+    expect(threads[0]!.head.body).toContain('串头正文')
+    expect(threads[0]!.replies).toHaveLength(1)
+    expect(threads[0]!.replies[0]!.body).toContain('回复正文')
+  })
+})

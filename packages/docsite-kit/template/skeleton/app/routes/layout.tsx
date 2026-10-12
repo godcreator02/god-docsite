@@ -3,10 +3,10 @@ import { Outlet } from 'react-router'
 import { MessageSquare } from 'lucide-react'
 import { useFumadocsLoader } from 'fumadocs-core/source/client'
 import { DocsLayout } from '@fumadocs/base-ui/layouts/docs'
-import { siteIdentity } from '@godcreator/docsite-kit/server'
 import { commentLinkTargetsOf, groupKeepingSidebar, routeLinksSearchTrigger, SidebarRouteLinks, SiteLinksProvider, themeSwitchWithIdentity } from '@godcreator/docsite-kit/ui'
-import { allThreads } from '../lib/comment-threads'
-import { sitePageRefs, source } from '../lib/source'
+import { siteIdentity } from '../lib/identity.server'
+import { allPageThreads } from '../lib/comments.server'
+import { sitePageRefs, source } from '../lib/source.server'
 import { featureServers } from '../site/data.server'
 import { featureSites } from '../site/ui'
 import type { Route } from './+types/layout'
@@ -22,7 +22,7 @@ export async function loader() {
 
 const routeLinkList = [...featureSites.flatMap((feature) => feature.routeLinks ?? []), { text: '评论', url: '/comments', icon: <MessageSquare /> }]
 const routeLinks = <SidebarRouteLinks links={routeLinkList} />
-const commentLinkTargets = commentLinkTargetsOf(allThreads)
+const commentLinkTargets = commentLinkTargetsOf([...allPageThreads().values()].flat())
 
 export default function Layout({ loaderData }: Route.ComponentProps) {
   const { pageTree } = useFumadocsLoader(loaderData)

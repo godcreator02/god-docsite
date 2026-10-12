@@ -1,7 +1,7 @@
 import { randomInt } from 'node:crypto'
 import { readFile, writeFile } from 'node:fs/promises'
 import path from 'node:path'
-import { identityCodePattern, parsePeople, peopleFile, peopleWithJoined } from '@godcreator/docsite-kit/comments'
+import { identityCodePattern, parsePeople, peopleFile, peopleWithJoined } from '@godcreator/docsite-identity/server'
 import { DocsiteRejected } from './errors.js'
 
 const codeAlphabet = 'abcdefghijkmnpqrstuvwxyz23456789'

@@ -10,8 +10,10 @@
 | `packages/docsite-kit/` | 基础包 `@godcreator/docsite-kit`：站点模板与初始化、功能包的约定、页面来源、开发服务插件、服务端函数、页面正文组件、评论、站点人员列表、推送通道、中文界面文字；`./writing` 出口是写作组件（Term/Tex/术语插件） |
 | `packages/docsite-kit/template/` | 站点骨架的正本：`skeleton/` 每次初始化整份覆盖，`initial/` 只在站点里没有时写 |
 | `packages/docsite-identity/` | 身份包：people.json 盘协议、身份码解析、authorizeWrite 写入校验、@ 提及，身份与评论互不依赖 |
-| `packages/docsite-comments/` | 评论包（fumadocs 原生机制）：评论串模型与文件读写（评论是集合文件）、正文外批注覆盖层、评论界面；`legacy/` 是旧机制实现，定位算法拆借完就删 |
+| `packages/docsite-comments/` | 评论包（fumadocs 原生机制）：评论串模型与文件读写（评论是集合文件）、正文外批注覆盖层、评论界面 |
 | `packages/create-docsite/` | 一次性建站包：给定目录与选项，生成站点文件 |
+| `packages/docsite-page-sources/` | 页面来源包：TSX/HTML 页面做成 StaticSource 进同一棵页面树与搜索、中文搜索服务、content 资产的 dev/build 快照、TSX/HTML 正文组件 |
+| `packages/docsite-writing/` | 写作包：Term 术语组件与 remark 标注插件、TSX 公式 Tex |
 | `plugins/docsite/` | gwb 基础插件 `@godcreator/gwb-docsite`：身份码、初始化站点、托管站点、推数据、评论命令、说明书 `docsite` |
 | `site/` | 自述站：用基础包搭，内容是基础包自己的说明，也是开发基础包时看效果的地方；`app/` 与根目录的配置照模板生成 |
 | `site/people.json` | 自述站的人员列表，评论署名用；「我是谁」按 gwb 设置里的身份码认 |

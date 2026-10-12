@@ -7,6 +7,7 @@ import { mkdir, readdir, readFile, rm, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import {
   assertCommentId,
+  COMMENT_ID_PATTERN,
   newCommentId,
   serializeCommentFile,
   THREAD_HEAD_FILE,
@@ -96,4 +97,61 @@ export async function deleteThread(commentsDir: string, threadId: string): Promi
   }
   await rm(dir, { recursive: true, force: true });
   return removed;
+}
+
+/** 磁盘上的一条评论文件：frontmatter 字段加正文（轻量解析，不经集合编译） */
+export interface CommentFileOnDisk {
+  path: string
+  page?: string
+  anchor?: string
+  authorId: string
+  createdAt: string
+  body: string
+}
+
+/** 轻量解析本项目写的 frontmatter（值都是 JSON 字符串，见 serializeCommentFile）；不是这个形状直接报错 */
+function parseCommentFile(file: string, text: string): CommentFileOnDisk {
+  const match = /^---\n([\s\S]*?)\n---\n?/.exec(text)
+  if (!match) throw new Error(`${file} 没有 frontmatter`)
+  const fields: Record<string, string> = {}
+  for (const line of match[1].split('\n')) {
+    const colon = line.indexOf(': ')
+    if (colon <= 0) throw new Error(`${file} 的 frontmatter 有一行认不出：${line}`)
+    const key = line.slice(0, colon)
+    let value = line.slice(colon + 2)
+    if (value.startsWith('"') && value.endsWith('"')) value = value.slice(1, -1)
+    fields[key] = value
+  }
+  if (typeof fields.author !== 'string' || fields.author === '') throw new Error(`${file} 缺 author 字段`)
+  if (typeof fields.createdAt !== 'string' || fields.createdAt === '') throw new Error(`${file} 缺 createdAt 字段`)
+  return {
+    path: file.replaceAll('\\', '/'),
+    ...(typeof fields.page === 'string' ? { page: fields.page } : {}),
+    ...(typeof fields.anchor === 'string' && fields.anchor !== '' ? { anchor: fields.anchor } : {}),
+    authorId: fields.author,
+    createdAt: fields.createdAt,
+    body: text.slice(match[0].length).trim(),
+  }
+}
+
+/**
+ * 直接读评论目录（不经集合编译）：gwb 插件在 Node 里列评论用（站点不必在运行）。
+ * 目录形状必须已经是串文件夹（<id>/index.mdx + 回复 mdx）；旧机制目录（文字锚点那版）不在支持范围
+ */
+export async function readCommentThreads(commentsDir: string): Promise<Array<{ head: CommentFileOnDisk; replies: CommentFileOnDisk[] }>> {
+  const threads: Array<{ head: CommentFileOnDisk; replies: CommentFileOnDisk[] }> = []
+  for (const entry of await readdir(commentsDir, { withFileTypes: true })) {
+    if (!entry.isDirectory() || !COMMENT_ID_PATTERN.test(entry.name)) continue
+    const replies: CommentFileOnDisk[] = []
+    let head: CommentFileOnDisk | undefined
+    for (const file of await readdir(path.join(commentsDir, entry.name))) {
+      if (!file.endsWith('.mdx')) continue
+      const parsed = parseCommentFile(`${entry.name}/${file}`, await readFile(path.join(commentsDir, entry.name, file), 'utf-8'))
+      if (file === THREAD_HEAD_FILE) head = parsed
+      else replies.push(parsed)
+    }
+    if (head === undefined) throw new Error(`评论串没有串头：${entry.name}/${THREAD_HEAD_FILE}`)
+    threads.push({ head, replies: replies.sort((a, b) => (a.path < b.path ? -1 : 1)) })
+  }
+  return threads
 }

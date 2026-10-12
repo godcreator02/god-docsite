@@ -9,8 +9,8 @@ const pageRoutes = featureRouteFiles.flatMap((each) => ('path' in each ? [each] 
 
 export default [
   route('api/search', 'routes/search.ts'),
+  route('api/markdown', 'routes/markdown.ts'),
   route('api/content/*', 'routes/content-file.ts'),
-  route('api/comments', 'routes/comments.ts'),
   ...pageRoutes.filter((each) => each.layout === false).map((each) => route(each.path, each.file)),
   // 整站布局放在外层路由：跳页时侧栏不重新挂载。* 不匹配根地址 /：首页另用一条 index 路由，功能包给了首页就用它的
   layout('routes/layout.tsx', [

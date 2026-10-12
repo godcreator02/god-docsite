@@ -18,7 +18,11 @@
     "react-dom": "^19.3.0",
     "react-router": "^8.4.0",
     "rehype-katex": "^7.0.1",
-    "remark-math": "^6.0.0"
+    "remark-math": "^6.0.0",
+    "@godcreator/docsite-identity": "workspace:*",
+    "@godcreator/docsite-comments": "workspace:*",
+    "@godcreator/docsite-writing": "workspace:*",
+    "@godcreator/docsite-page-sources": "workspace:*"
   },
   "devDependencies": {
     "@react-router/dev": "^8.4.0",

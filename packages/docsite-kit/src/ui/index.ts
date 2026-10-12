@@ -1,8 +1,5 @@
-export { HtmlPageFrame, TsxPageBody, type TsxPageModule } from './page-bodies.js'
 export { zhTranslations } from './translations.js'
-export { commentScopeAttribute, commentScopeProps, PageComments, themeSwitchWithIdentity, type PageCommentsProps } from './comments.js'
-export { AllComments, commentLinkOf, type AllCommentsProps } from './all-comments.js'
-export { Avatar } from './comment-cards.js'
+export { themeSwitchWithIdentity } from './theme-switch.js'
 export { useSiteFeed } from './site-feed.js'
 export { PageTitleWithWideToggle, WidePageToggle, widePageScript } from './wide-page.js'
 export {

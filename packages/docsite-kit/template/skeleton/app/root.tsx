@@ -4,6 +4,9 @@ import { RootProvider } from '@fumadocs/base-ui/provider/react-router'
 import { widePageScript, zhTranslations } from '@godcreator/docsite-kit/ui'
 import type { Route } from './+types/root'
 import 'katex/dist/katex.css'
+import '@godcreator/docsite-writing/styles.css'
+import '@godcreator/docsite-identity/styles.css'
+import '@godcreator/docsite-comments/styles.css'
 import './app.css'
 
 export function Layout({ children }: { children: ReactNode }) {

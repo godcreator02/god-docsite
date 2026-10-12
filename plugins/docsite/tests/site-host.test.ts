@@ -124,11 +124,10 @@ describe('开发服务的输出与评论表单', () => {
     expect(devPortOf('react-router dev --port 4430 --host 127.0.0.1')).toBe(4430)
   })
 
-  it('批一页上的字、批整页、不挂在页面上，表单字段和网页一样', () => {
+  it('批整页、批页面元素，表单字段和网页的 action 一样', () => {
     const fields = (form: FormData) => Object.fromEntries(form.entries())
-    expect(fields(commentFormOf({ op: 'create', page: '/a', quote: '原文', occurrence: 2, body: 'x', as: 'claude' }))).toEqual({ op: 'create', as: 'claude', body: 'x', page: '/a', anchor: '{"quote":"原文","occurrence":2}' })
-    expect(fields(commentFormOf({ op: 'create', page: '/a', body: 'x' }))).toEqual({ op: 'create', body: 'x', page: '/a', anchor: '{}' })
-    expect(fields(commentFormOf({ op: 'create', body: 'x' }))).toEqual({ op: 'create', body: 'x' })
-    expect(fields(commentFormOf({ op: 'resolve', thread: 't' }))).toEqual({ op: 'resolve', thread: 't' })
+    expect(fields(commentFormOf({ op: 'create', page: '/a', anchor: 'some-heading', body: 'x', as: 'claude' }))).toEqual({ intent: 'create-thread', as: 'claude', body: 'x', page: '/a', anchor: 'some-heading' })
+    expect(fields(commentFormOf({ op: 'create', page: '/a', body: 'x' }))).toEqual({ intent: 'create-thread', body: 'x', page: '/a' })
+    expect(fields(commentFormOf({ op: 'reply', thread: 't', body: 'x' }))).toEqual({ intent: 'reply', threadId: 't', body: 'x' })
   })
 })

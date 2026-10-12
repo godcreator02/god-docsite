@@ -198,12 +198,11 @@ export function registerCommands({ commands, docsite, sitesSetting, list }: Comm
     async (args) => {
       const parsed = argsOf(args, ['dir', 'page', 'status', 'about'])
       const status = parsed['status']
-      if (status !== undefined && status !== 'open' && status !== 'resolved') throw new DocsiteRejected('status 要是 open 或 resolved')
+      if (status !== undefined) throw new DocsiteRejected('评论模型还没收编 resolved 状态，status 筛选先不支持')
       const filter: CommentFilter = {}
       const page = optionalString(parsed, 'page')
       const about = optionalString(parsed, 'about')
       if (page) filter.page = page
-      if (status) filter.status = status
       if (about) filter.about = about
       return { threads: await listComments(dirOf(parsed), filter) }
     },
@@ -213,19 +212,15 @@ export function registerCommands({ commands, docsite, sitesSetting, list }: Comm
     commands,
     {
       name: 'docsite.comment.create',
-      description: '在站点上发起一串评论：批页面上的一段字、批整页，或不挂在页面上',
-      usage: `{ dir, body, page?, quote?, occurrence?, as? }：不给 page 是不挂在页面上的评论（只在全部评论页 /comments 上）；给 page 不给 quote 是批整页；给 quote 是批这一页文字里第 occurrence 处（从 1 数，默认 1）这段字。${commentWriteUsage}。回 { thread, file }`,
+      description: '在站点上发起一串评论：批整页或批页面上的一个元素',
+      usage: `{ dir, body, page, anchor?, as? }：page 是页面的 URL（如 /writing/collapse-test）；anchor 是页面元素的 id，给了就批那个元素，不给批整页。${commentWriteUsage}。回 { thread }`,
       effect: 'write',
     },
     async (args) => {
-      const parsed = argsOf(args, ['dir', 'body', 'page', 'quote', 'occurrence', 'as'])
-      const occurrence = parsed['occurrence']
-      if (occurrence !== undefined && !Number.isInteger(occurrence)) throw new DocsiteRejected('occurrence 要是从 1 数的整数')
-      const page = optionalString(parsed, 'page')
-      const quote = optionalString(parsed, 'quote')
-      if (quote !== undefined && page === undefined) throw new DocsiteRejected('给了 quote 就要给 page：批的是哪一页')
+      const parsed = argsOf(args, ['dir', 'body', 'page', 'anchor', 'as'])
+      const anchor = optionalString(parsed, 'anchor')
       const as = optionalString(parsed, 'as')
-      const write: CommentWrite = { op: 'create', body: requiredString(parsed, 'body'), ...(page ? { page } : {}), ...(quote ? { quote } : {}), ...(occurrence !== undefined ? { occurrence: occurrence as number } : {}), ...(as ? { as } : {}) }
+      const write: CommentWrite = { op: 'create', page: requiredString(parsed, 'page'), body: requiredString(parsed, 'body'), ...(anchor ? { anchor } : {}), ...(as ? { as } : {}) }
       const dir = dirOf(parsed)
       return writeComment(urlOfRunning(dir), write)
     },
@@ -248,14 +243,11 @@ export function registerCommands({ commands, docsite, sitesSetting, list }: Comm
       {
         name: `docsite.comment.${op}`,
         description: op === 'resolve' ? '把站点上的一串评论标为已解决' : '把站点上一串已解决的评论重新打开',
-        usage: `{ dir, thread, as? }：thread 是评论串的文件夹名。${commentWriteUsage}。回 { thread, file }`,
+        usage: '{ dir, thread, as? }：评论模型还没收编 resolved 状态，这个命令先不可用',
         effect: 'write',
       },
-      async (args) => {
-        const parsed = argsOf(args, ['dir', 'thread', 'as'])
-        const as = optionalString(parsed, 'as')
-        const dir = dirOf(parsed)
-        return writeComment(urlOfRunning(dir), { op, thread: requiredString(parsed, 'thread'), ...(as ? { as } : {}) })
+      async () => {
+        throw new DocsiteRejected('评论模型还没收编 resolved 状态，docsite.comment.resolve / reopen 先不可用')
       },
     )
   }

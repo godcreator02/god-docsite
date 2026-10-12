@@ -4,7 +4,7 @@ import path from 'node:path'
 import { isRunnableDevEnvironment, normalizePath, type Plugin, type PluginOption, type ViteDevServer } from 'vite'
 import type { EvaluatedModuleNode, EvaluatedModules } from 'vite/module-runner'
 import { manifestFileOf, readManifest } from '../package-dirs.js'
-import { tsxPageSuffix } from '../page-sources.js'
+import { tsxPageSuffix } from '@godcreator/docsite-page-sources'
 import { feedEndpointPrefix, feedEvent, feedStore, feedTokenEnvName, feedTokenHeader, isFeedChannel, type FeedMessage } from '../site-feed.js'
 
 /** 基础包自己的包名：要和站点自己的代码一样经 Vite 处理 */
