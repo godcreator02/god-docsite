@@ -1,0 +1,53 @@
+---
+born-at: 2026-10-12T11:58
+type: choice
+parent: [2026-10-11-comments-identity-packages]
+label: 五模块验收后开始收进正式包：评论包整包换新机制，写作进基础包，页面来源与自述站迁移未做
+domain: 骨架
+---
+
+## 背景
+
+五模块并行重写（N 原生评论、O 覆盖层、P 身份边界、Q 页面来源、R 写作能力）探针全部交回并
+通过聚焦验收后（五步计划第 1 步收尾），开始第 2 步「收进正式基础包并迁自述站」。
+用户明确：集成是正常开发不是探针，目标是能用的 fumadocs 站点，代码写进正式包。
+
+## 选了
+
+按 2026-10-11 拆包决策的包结构收编，2026-10-12 本轮完成：
+
+- `packages/docsite-comments` 整包换成新机制：模型（threadsForPage、串文件夹文件形状、anchor
+  可选锚点）＋文件读写（./server）＋正文外覆盖层（./overlay，来自 O）＋评论界面（./react，
+  CommentsSidebar 表单按约定字段 POST 宿主 action）。评论是 fumadocs-mdx 集合文件，
+  不再有运行时编译（@mdx-js/mdx、diff-match-patch、parse5 依赖退场）。旧实现（拆包阶段
+  的运行时编译方向）整体挪进包内 `legacy/` 保留，不参与构建，待删。
+- `packages/docsite-identity` 补 P 线验收点：authorizeWrite 对 as 非字符串/空字符串 400、
+  writeAccessResponse 把 WriteAccessError 转响应；包原有的 @ 提及与 join 能力保留。
+- `packages/docsite-kit` 新增 `./writing`、`./writing/compile`、`./writing.css` 出口
+  （R 线的 Term/Tex/术语 remark 插件）；旧出口全部保留（collab-site、gwb-docfirst 还依赖）。
+
+## 未竟（下一轮从这里开始）
+
+- Q 线页面来源（TSX/HTML StaticSource、搜索服务、content 资产快照）未收进基础包；
+  `./page-sources` 出口还是旧实现，自述站与模板（template/skeleton）整体还在旧机制上，
+  功能包约定（featureRoutes/featureContents、docsite vite 插件）向 Config API 集合级
+  mdxOptions 的搬法要先定。
+- 自述站评论数据是旧磁盘格式（目录名非 COMMENT_ID_PATTERN），迁移时要转成串文件夹格式。
+- 基础包新增出口对应的 site/content 说明页未写（提交前必须补齐，与代码同提交）。
+- gwb-docsite 插件的评论命令仍对接旧接口，切到 docsite-comments 新出口另行小段。
+- 版本：新模块按探针基线 fumadocs 16.17.1 / fumadocs-mdx 15.4.7 验收，基础包 peer 仍是
+  16.16.2；发版前统一版本并按 gwb-release 定版本号。
+
+## 提交归属
+
+identity 的补齐与评论包的模型/覆盖层部分被 07704c2 的现状快照先行收进 git；其余（评论界面与样式、
+基础包 writing 出口、AGENTS 包清单、本卡）在紧随其后的一笔提交里。两笔合起来是本卡记录的收编段。
+
+## 依据
+
+- 五模块验收：design/zcode-orchestration/parallel-focused-review.md 与
+  OR/Q 聚焦复核（design/zcode-orchestration/*-focused-review-*.md）。
+- 探针正本：probes/2610120120_fumadocs-native、2610120120_comments-overlay、
+  2610120119_identity-boundary、2610120126_page-sources、2610120123_writing。
+- Windows 下 Vite 相对 base 的文件新增缺陷由仓根 patch（pnpm-workspace.yaml 的
+  patchedDependencies，probes/2610121018_vite-add-discovery）另行解决，收编代码不含此 workaround。

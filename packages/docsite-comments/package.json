@@ -1,8 +1,7 @@
 {
   "name": "@godcreator/docsite-comments",
   "version": "0.0.0",
-  "private": true,
-  "description": "文档站评论：评论串的模型与校验、页面文字快照与定位、Node 服务端接口与文件检查、浏览器定位与 React 界面。站点集合、路由、正文渲染和布局由宿主站点提供",
+  "description": "文档站评论（fumadocs 原生机制）：评论串模型与文件读写（评论是集合文件，与页面同一编译链）、正文外批注覆盖层、评论界面。身份与授权在 @godcreator/docsite-identity，站点组合两者；本包不依赖它",
   "type": "module",
   "exports": {
     ".": {
@@ -10,12 +9,12 @@
       "default": "./dist/index.js"
     },
     "./server": {
-      "types": "./dist/server/index.d.ts",
-      "default": "./dist/server/index.js"
+      "types": "./dist/server.d.ts",
+      "default": "./dist/server.js"
     },
-    "./browser": {
-      "types": "./dist/browser/index.d.ts",
-      "default": "./dist/browser/index.js"
+    "./overlay": {
+      "types": "./dist/overlay/index.d.ts",
+      "default": "./dist/overlay/index.js"
     },
     "./react": {
       "types": "./dist/react/index.d.ts",
@@ -43,23 +42,18 @@
   },
   "peerDependencies": {
     "react": "^19.3.0",
-    "react-dom": "^19.3.0"
+    "react-dom": "^19.3.0",
+    "react-router": "^8.4.0"
   },
   "devDependencies": {
-    "@types/diff-match-patch": "^1.0.36",
     "@types/node": "^26.6.2",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
+    "jsdom": "^30.1.2",
     "react": "^19.3.0",
     "react-dom": "^19.3.0",
+    "react-router": "8.4.0",
     "typescript": "^6.0.3",
     "vitest": "^5.0.1"
-  },
-  "dependencies": {
-    "@godcreator/docsite-identity": "workspace:*",
-    "@mdx-js/mdx": "3.1.1",
-    "diff-match-patch": "1.0.5",
-    "parse5": "7.3.0",
-    "yaml": "2.9.1"
   }
 }

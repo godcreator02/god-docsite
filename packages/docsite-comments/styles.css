@@ -1,0 +1,132 @@
+/* 评论旁栏与评论卡（界面组件在 ./react）。覆盖层的徽章/卡片样式由组件按实例注入，不在这里 */
+
+.docsite-comments-sidebar {
+  font-size: 14px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+@media (min-width: 1024px) {
+  .docsite-comments-sidebar {
+    width: 20rem;
+    flex-shrink: 0;
+  }
+}
+.docsite-comments-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.docsite-comments-title {
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 0;
+}
+.docsite-comments-count {
+  color: var(--color-fd-muted-foreground, #666);
+}
+.docsite-comment-card {
+  border: 1px solid var(--color-fd-border, #ddd);
+  border-radius: 8px;
+  padding: 8px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.docsite-comment-card-active {
+  border-color: var(--comment-overlay-accent, #d97706);
+  box-shadow: 0 0 0 1px var(--comment-overlay-accent, #d97706);
+}
+.docsite-comment-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--color-fd-muted-foreground, #666);
+}
+.docsite-comment-anchor-link {
+  border: 0;
+  background: none;
+  cursor: pointer;
+  font-size: 14px;
+  line-height: 1;
+  padding: 0 2px;
+}
+.docsite-new-thread,
+.docsite-reply-form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.docsite-new-thread textarea,
+.docsite-reply-form textarea {
+  width: 100%;
+  border: 1px solid var(--color-fd-border, #ddd);
+  border-radius: 6px;
+  padding: 8px;
+  font: inherit;
+  resize: vertical;
+}
+.docsite-anchor-input,
+.docsite-author-select {
+  font-size: 12px;
+  color: var(--color-fd-muted-foreground, #666);
+}
+.docsite-anchor-input input,
+.docsite-author-select select {
+  margin-left: 6px;
+  border: 1px solid var(--color-fd-border, #ddd);
+  border-radius: 4px;
+  background: transparent;
+  padding: 2px 4px;
+  font: inherit;
+}
+.docsite-form-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.docsite-form-row button {
+  border: 1px solid var(--color-fd-border, #ddd);
+  border-radius: 6px;
+  padding: 4px 12px;
+  cursor: pointer;
+}
+.docsite-comment-meta form {
+  display: inline;
+}
+.docsite-comment-meta button {
+  border: 0;
+  background: none;
+  color: inherit;
+  text-decoration: underline;
+  cursor: pointer;
+  font-size: 12px;
+  padding: 0;
+}
+.docsite-reply {
+  margin-left: 12px;
+  padding-left: 10px;
+  border-left: 2px solid var(--color-fd-border, #ddd);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.docsite-comment-pending {
+  font-size: 12px;
+  color: var(--color-fd-muted-foreground, #666);
+}
+[data-action-error] {
+  color: #b91c1c;
+  font-size: 12px;
+  margin: 0;
+}
+.docsite-readonly-reason {
+  border: 1px dashed var(--color-fd-border, #ddd);
+  border-radius: 6px;
+  padding: 8px;
+  color: var(--color-fd-muted-foreground, #666);
+}

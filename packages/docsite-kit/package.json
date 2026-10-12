@@ -32,6 +32,15 @@
       "types": "./dist/ui/index.d.ts",
       "default": "./dist/ui/index.js"
     },
+    "./writing": {
+      "types": "./dist/writing/index.d.ts",
+      "default": "./dist/writing/index.js"
+    },
+    "./writing/compile": {
+      "types": "./dist/writing/compile.d.ts",
+      "default": "./dist/writing/compile.js"
+    },
+    "./writing.css": "./src/writing/term.css",
     "./feature": {
       "types": "./dist/feature.d.ts",
       "default": "./dist/feature.js"
@@ -75,13 +84,19 @@
   "devDependencies": {
     "@fumadocs/base-ui": "16.16.2",
     "@types/diff-match-patch": "^1.0.36",
+    "@types/mdast": "^4.0.4",
     "@types/node": "^26.6.2",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
+    "@types/unist": "^3.0.3",
     "fumadocs-core": "16.16.2",
+    "mdast-util-mdx-jsx": "^3.2.0",
     "react": "^19.3.0",
     "react-dom": "^19.3.0",
+    "remark-mdx": "^3.1.0",
+    "remark-parse": "^11.0.0",
     "typescript": "^6.0.3",
+    "unified": "^11.0.5",
     "vite": "^8.3.0",
     "vitest": "^5.0.1"
   },
