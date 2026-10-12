@@ -1,0 +1,8 @@
+---
+page: "writing/collapse-test.mdx"
+author: "user"
+createdAt: "2026-10-12T12:10:55.923Z"
+anchor: "{\"quote\":\"折叠块甲里的一句话：收起时这句话还在页面里，只是藏着。\",\"start\":184,\"end\":211,\"snapshot\":\"改动 A：开头新插的一段，让后面所有文字整体往后挪。\\n这一页专门用来试：被批的字收起来以后，评论还能不能找回。每个组件里各批一处，再收起来，看右侧栏怎么显示、点评论能不能自动打开。\\n标签页￼\\nbunpnpmnpm 9yarn改动 B：新加的 bun 这一页排在最前面，打开页面时默认显示它。\\n折叠块￼\\n￼改动 F：新插的折叠块新插在前面的折叠块。￼折叠块甲（改了标题）折叠块甲里的一句话：收起时这句话还在页面里，只是藏着。\\n文件树￼\\n文件树的文件项是布局 div，批注协议认不出，要批的那一项按协议显式声明 data-comment-target：\\n￼my-site￼app￼root.tsx￼content￼first-page.mdx\\n自定义组件：照 ARIA 写的￼\\n▸自定义展开块：写了 aria-expanded\\n自定义组件：没写 ARIA 的￼\\n▸自定义展开块：没写 ARIA\"}"
+---
+
+批注实测（划字）：批折叠块甲里这句话。fumadocs 折叠块收起时这句话还在页面里（hidden=until-found），卡上应写「批的内容现在看不见」；展开后高亮出现。

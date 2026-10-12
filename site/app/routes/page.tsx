@@ -2,15 +2,15 @@ import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { useState, type ComponentType } from 'react'
 import type { TOCItemType } from 'fumadocs-core/toc'
-import { DocsBody, DocsDescription, DocsPage } from '@fumadocs/base-ui/layouts/docs/page'
+import { DocsBody, DocsDescription, DocsPage, DocsTitle } from '@fumadocs/base-ui/layouts/docs/page'
 import { data } from 'react-router'
 import { contentFileUrlOf, type HtmlHeadingAnchor } from '@godcreator/docsite-page-sources'
 import { HtmlPageBody, TsxPageBody } from '@godcreator/docsite-page-sources/ui'
 import { createReply, createThread, deleteReply, deleteThread } from '@godcreator/docsite-comments/server'
-import { CommentsSidebar } from '@godcreator/docsite-comments/react'
-import { PageTitleWithWideToggle } from '@godcreator/docsite-ui'
+import { CommentsDock, commentScopeProps, type CommentAvatar } from '@godcreator/docsite-comments/react'
+import { Avatar } from '@godcreator/docsite-identity/react'
 import { pageThreads } from '../lib/comments.server'
-import { authorizeCommentWrite, siteIdentity, sitePeople, writeAccessResponse } from '../lib/identity.server'
+import { authorizeCommentWrite, siteIdentity, writeAccessResponse } from '../lib/identity.server'
 import { siteName, source } from '../lib/source.server'
 import { tsxPageModules } from '../lib/collections'
 import { commentContent, docsContent } from '../lib/client-content'
@@ -36,18 +36,10 @@ export async function loader({ params }: Route.LoaderArgs) {
     writable: identity.person !== null,
     writer: identity.person ? { id: identity.person.id, name: identity.person.name } : null,
     readOnlyReason: identity.person ? null : identity.reason,
-    asChoices: identity.person
-      ? [identity.person, ...sitePeopleAgents(identity.person.id)]
-      : [],
   }
   if (page.type === 'mdx') return { type: 'mdx' as const, ...shared, path: page.path }
   if (page.type === 'tsx') return { type: 'tsx' as const, ...shared, file: page.data.file }
   return { type: 'html' as const, ...shared, src: contentFileUrlOf(page.data.file), headings: page.data.headings }
-}
-
-/** 可代署名的 agent（本人之外） */
-function sitePeopleAgents(exceptId: string) {
-  return sitePeople().filter((person) => person.agent && person.id !== exceptId).map((person) => ({ id: person.id, name: person.name }))
 }
 
 export async function action({ request }: Route.ActionArgs) {
@@ -89,24 +81,24 @@ function CommentBody({ path: commentPath }: { path: string }) {
   return commentContent.useContent(commentPath)
 }
 
+/** 评论卡的头像：身份包的 Avatar（名字第一个字、底色由 id 算出），评论包只收插槽 */
+const commentAvatar: CommentAvatar = ({ id, name, size }) => <Avatar person={{ id, name }} size={size} />
+
 export default function Page({ loaderData }: Route.ComponentProps) {
-  const { type, pageKey, threads, writable, writer, readOnlyReason, asChoices, siteName, title, description } = loaderData
-  const sidebar = (
-    <CommentsSidebar
-      pagePath={pageKey}
-      threads={threads}
-      access={writable && writer ? { kind: 'writable', writer, asChoices } : { kind: 'readonly', reasonCode: 'readonly', reasonText: readOnlyReason ?? '站点只读' }}
-      BodyComponent={CommentBody as ComponentType<{ path: string }>}
-    />
-  )
+  const { type, pageKey, threads, writable, writer, readOnlyReason, siteName, title, description } = loaderData
   return (
-    <div className="flex flex-col gap-6 lg:flex-row">
-      <div className="min-w-0 flex-1">
-        <title>{`${title} · ${siteName}`}</title>
-        {type === 'mdx' ? <MdxPage path={loaderData.path} /> : type === 'tsx' ? <TsxPage file={loaderData.file} title={title} description={description} /> : <HtmlPage src={loaderData.src} title={title} description={description} headings={loaderData.headings} />}
-      </div>
-      {sidebar}
-    </div>
+    <>
+      <title>{`${title} · ${siteName}`}</title>
+      {type === 'mdx' ? <MdxPage path={loaderData.path} /> : type === 'tsx' ? <TsxPage file={loaderData.file} title={title} description={description} /> : <HtmlPage src={loaderData.src} title={title} description={description} headings={loaderData.headings} />}
+      {/* 评论交互台：右下角浮标唤起评论栏（fixed，盖在目录那一列上），批注模式与划字高亮都在它里面 */}
+      <CommentsDock
+        pagePath={pageKey}
+        threads={threads}
+        access={writable && writer ? { kind: 'writable', writer } : { kind: 'readonly', reasonCode: 'readonly', reasonText: readOnlyReason ?? '站点只读' }}
+        BodyComponent={CommentBody as ComponentType<{ path: string }>}
+        AvatarComponent={commentAvatar}
+      />
+    </>
   )
 }
 
@@ -120,9 +112,9 @@ function TsxPage({ file, title, description }: { file: string; title: string; de
   const [toc, setToc] = useState<TOCItemType[]>([])
   return (
     <DocsPage toc={toc} tableOfContentPopover={{ enabled: toc.length > 0 }}>
-      <PageTitleWithWideToggle>{title}</PageTitleWithWideToggle>
+      <DocsTitle>{title}</DocsTitle>
       <DocsDescription>{description}</DocsDescription>
-      <DocsBody>
+      <DocsBody {...commentScopeProps}>
         <TsxPageBody load={load} onToc={setToc} />
       </DocsBody>
     </DocsPage>
@@ -133,9 +125,9 @@ function HtmlPage({ src, title, description, headings }: { src: string; title: s
   const toc = headings.map(({ id, text, level }) => ({ title: text, url: `#${id}`, depth: level }) satisfies TOCItemType)
   return (
     <DocsPage toc={toc} tableOfContentPopover={{ enabled: toc.length > 0 }}>
-      <PageTitleWithWideToggle>{title}</PageTitleWithWideToggle>
+      <DocsTitle>{title}</DocsTitle>
       <DocsDescription>{description}</DocsDescription>
-      <DocsBody>
+      <DocsBody {...commentScopeProps}>
         <HtmlPageBody src={src} headings={headings} />
       </DocsBody>
     </DocsPage>

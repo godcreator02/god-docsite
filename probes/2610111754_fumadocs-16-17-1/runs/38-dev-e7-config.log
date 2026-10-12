@@ -62,3 +62,4 @@ $ react-router dev --port 4446 --host 127.0.0.1
 [2m7:35:16 PM[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m [32mhmr update [39m[2m/app/app.css[22m
 [2m7:35:16 PM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/app/app.css[22m
 [2m7:35:16 PM[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m [32mhmr update [39m[2m/app/app.css[22m
+[ELIFECYCLE] Command failed with exit code -1.

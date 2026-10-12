@@ -13,6 +13,6 @@ export {
   type SiteLinkKind,
   type SiteLinksData,
 } from './site-links.js'
-export { PageTitleWithWideToggle, WidePageToggle, widePageScript } from './wide-page.js'
+export { WidePageToggle, widePageScript } from './wide-page.js'
 export { themeSwitchWithIdentity } from './theme-switch.js'
 export { zhTranslations } from './translations.js'

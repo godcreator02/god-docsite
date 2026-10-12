@@ -1,4 +1,5 @@
 import { DocsBody, DocsDescription, DocsPage, DocsTitle } from '@fumadocs/base-ui/layouts/docs/page'
+import { commentScopeProps } from '@godcreator/docsite-comments/react'
 import browserCollections from '../../.source/browser'
 import { mdxComponents } from './mdx-components'
 
@@ -13,7 +14,8 @@ export const docsContent = browserCollections.docs.createClientLoader({
       <DocsPage toc={toc}>
         <DocsTitle>{frontmatter.title}</DocsTitle>
         {frontmatter.description ? <DocsDescription>{frontmatter.description}</DocsDescription> : null}
-        <DocsBody>
+        {/* 正文容器带评论的范围属性：批注与划字定位都在它里面找 */}
+        <DocsBody {...commentScopeProps}>
           <MDX components={mdxComponents} />
         </DocsBody>
       </DocsPage>

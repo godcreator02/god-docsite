@@ -1,6 +1,7 @@
 [
-  { "id": "godtb14", "name": "godtb14", "codes": ["preview0godtb14"] },
-  { "id": "zhou", "name": "小周" },
-  { "id": "li", "name": "小李" },
-  { "id": "claude", "name": "Claude", "agent": true }
+  {"id":"godtb14","name":"godtb14","codes":["preview0godtb14"]},
+  {"id":"zhou","name":"小周"},
+  {"id":"li","name":"小李"},
+  {"id":"claude","name":"Claude","agent":true},
+  {"id":"user","name":"用户","codes":["y893nabqixve"]}
 ]

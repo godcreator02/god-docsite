@@ -43,13 +43,15 @@ import { AriaToggle, PlainToggle } from './collapse-test/toggles'
 
 ## 文件树
 
+文件树的文件项是布局 div，批注协议认不出，要批的那一项按协议显式声明 `data-comment-target`：
+
 <Files>
   <Folder name="my-site" defaultOpen>
     <Folder name="app" defaultOpen>
       <File name="root.tsx" />
     </Folder>
     <Folder name="content" defaultOpen>
-      <File name="first-page.mdx" />
+      <File name="first-page.mdx" data-comment-target />
     </Folder>
   </Folder>
 </Files>
