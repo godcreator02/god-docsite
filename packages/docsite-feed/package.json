@@ -1,6 +1,6 @@
 {
   "name": "@godcreator/docsite-feed",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "推送通道（能力小包）：gwb 插件往跑着的开发服务按频道推数据、只留最新一份。协议、进程内存储、开发服务收发端点、浏览器 hook 三面都在这里；组合包的 vite 插件接 feedDevServer",
   "type": "module",
   "exports": {

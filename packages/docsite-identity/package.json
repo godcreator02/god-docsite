@@ -1,6 +1,6 @@
 {
   "name": "@godcreator/docsite-identity",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "文档站的人员与身份：people.json 的读取与校验、本机身份码找人、写入请求的身份与来源核对、头像与身份标识组件",
   "type": "module",
   "private": true,

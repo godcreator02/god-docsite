@@ -1,6 +1,6 @@
 {
   "name": "@godcreator/docsite-page-sources",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "文档站页面来源（fumadocs 原生形态）：TSX/HTML 页面做成 StaticSource 与 MDX 集合进同一棵页面树与搜索索引、中文搜索服务、content 资产的 dev 服务与 build 快照、TSX/HTML 页面正文组件",
   "type": "module",
   "exports": {

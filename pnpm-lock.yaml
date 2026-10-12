@@ -252,15 +252,6 @@ importers:
 
   plugins/docsite:
     dependencies:
-      '@godcreator/docsite-comments':
-        specifier: workspace:*
-        version: link:../../packages/docsite-comments
-      '@godcreator/docsite-feed':
-        specifier: workspace:*
-        version: link:../../packages/docsite-feed
-      '@godcreator/docsite-identity':
-        specifier: workspace:*
-        version: link:../../packages/docsite-identity
       '@godcreator/gwb-commands':
         specifier: ^0.6.1
         version: 0.6.1(@godcreator/gwb-kernel-desktop@0.10.1(cordis@4.0.0-rc.10))(cordis@4.0.0-rc.10)
@@ -271,6 +262,15 @@ importers:
         specifier: ^0.4.0
         version: 0.4.0(@godcreator/gwb-commands@0.6.1(@godcreator/gwb-kernel-desktop@0.10.1(cordis@4.0.0-rc.10))(cordis@4.0.0-rc.10))(@godcreator/gwb-kernel-desktop@0.10.1(cordis@4.0.0-rc.10))(@godcreator/gwb-skills@0.4.13(@godcreator/gwb-commands@0.6.1(@godcreator/gwb-kernel-desktop@0.10.1(cordis@4.0.0-rc.10))(cordis@4.0.0-rc.10))(@godcreator/gwb-kernel-desktop@0.10.1(cordis@4.0.0-rc.10))(cordis@4.0.0-rc.10))(cordis@4.0.0-rc.10)
     devDependencies:
+      '@godcreator/docsite-comments':
+        specifier: workspace:*
+        version: link:../../packages/docsite-comments
+      '@godcreator/docsite-feed':
+        specifier: workspace:*
+        version: link:../../packages/docsite-feed
+      '@godcreator/docsite-identity':
+        specifier: workspace:*
+        version: link:../../packages/docsite-identity
       '@godcreator/docsite-kit':
         specifier: workspace:*
         version: link:../../packages/docsite-kit
@@ -286,12 +286,6 @@ importers:
       esbuild:
         specifier: ^0.28.2
         version: 0.28.2
-      oxlint:
-        specifier: 1.76.0
-        version: 1.76.0(oxlint-tsgolint@7.0.2001)
-      oxlint-tsgolint:
-        specifier: 7.0.2001
-        version: 7.0.2001
       typescript:
         specifier: ^7.0.2
         version: 7.0.2

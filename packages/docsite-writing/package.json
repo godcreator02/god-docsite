@@ -1,6 +1,6 @@
 {
   "name": "@godcreator/docsite-writing",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "文档站写作组件：术语（Term 组件 + remark 标注插件，正文首现标注、hover/焦点展开定义）与 TSX 公式（Tex）；代码块/表格/Tabs 等直接用锁定版 Fumadocs 公开组件，不在这里包装",
   "type": "module",
   "exports": {
