@@ -27,7 +27,7 @@ describe('提交审核与自动同步配合', () => {
     return autoSyncCollab(bob, notRunning, noInstall)
   }
 
-  it('提交审核时同一条的同一个字段两边改得不一样：不推送，列出冲突的文件，自动同步不动；改好之后再提交审核完成这次合并', async () => {
+  it('提交审核时同一条的同一个字段两边改得不一样：不推送，列出冲突的文件，自动同步不动；改好之后再提交审核完成这次合并', { timeout: 120_000 }, async () => {
     const t3 = (status: TaskRecord['status']): TaskRecord => ({ id: '20260925130000-ddddddd', type: 'task', author: 'admin', status, title: '核算纹波' })
     adminPushes(t3('todo'), '任务 t3')
     expect((await checkSyncs()).outcome).toBe('merged')

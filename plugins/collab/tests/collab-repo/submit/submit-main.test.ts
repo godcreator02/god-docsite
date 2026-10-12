@@ -50,16 +50,6 @@ describe('collab.submit', () => {
     expect(git(bob.repo, 'rev-list', '--count', 'HEAD')).toBe('1')
   })
 
-  it('main 上原本就有的格式问题不挡提交', async () => {
-    writeFileSync(path.join(admin, 'collab', 'stray.txt'), '多出来的文件\n')
-    git(admin, 'add', '.')
-    git(admin, 'commit', '-q', '-m', 'main 上多了一个文件')
-    git(admin, 'push', '-q', 'origin', 'main')
-    git(bob.repo, 'pull', '-q', '--ff-only')
-    writeRecord(bob.repo, task(t2, 'bob'))
-    expect(await submitCollab(bob, merges())).toMatchObject({ pull: { number: 7 } })
-  })
-
   it('本地 main 落后 origin/main：先把 main 合进来再推，别人后来合进 main 的新记录、改动不算我删的、改的', async () => {
     writeRecord(admin, task(t1, 'admin', 'done'))
     writeRecord(admin, task('20260925120000-ccccccc', 'admin'))

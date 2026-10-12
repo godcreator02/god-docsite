@@ -41,22 +41,18 @@ function collabRepoWithRemote() {
 }
 
 describe('协作仓的本机状态', () => {
-  it('没改动时是空的，在 main 上', async () => {
-    const { repo } = collabRepoWithRemote()
+  // 一条用例在一个仓里演进四种状态：空 → 没提交审核的文件 → 合并冲突 → 别的分支与分离头
+  it('没改动时是空的；未提交的 collab/、site/ 分开、仓里别处不算；冲突从状态码里读；不在 main 写分支名、分离头为 null', async () => {
+    const { base, repo } = collabRepoWithRemote()
     expect(await collabRepoLocalStateOf(repo)).toEqual({ branch: 'main', unsubmitted: { records: [], siteFiles: [] }, conflicts: [] })
-  })
 
-  it('还没提交审核的文件 collab/、site/ 分开，路径各自相对；仓里别处的改动不算', async () => {
-    const { repo } = collabRepoWithRemote()
     write(path.join(repo, 'collab', 'records', '20260926120000-abc1234.json'), '{}\n')
     write(path.join(repo, 'site', 'people.json'), '[ ]\n')
     write(path.join(repo, 'site', 'content', 'a.mdx'), '# a\n')
     write(path.join(repo, 'README.md'), 'y\n')
     expect((await collabRepoLocalStateOf(repo)).unsubmitted).toEqual({ records: ['records/20260926120000-abc1234.json'], siteFiles: ['content/a.mdx', 'people.json'] })
-  })
 
-  it('合并留下的冲突从状态码里读，路径相对仓根', async () => {
-    const { base, repo } = collabRepoWithRemote()
+    git(repo, 'checkout', '-q', '--', '.')
     const other = path.join(base, 'other')
     git(base, 'clone', '-q', path.join(base, 'remote.git'), other)
     write(path.join(other, 'README.md'), 'theirs\n')
@@ -67,10 +63,8 @@ describe('协作仓的本机状态', () => {
     git(repo, 'fetch', '-q', 'origin')
     expect(() => execFileSync('git', ['merge', '-q', 'origin/main'], { cwd: repo, stdio: 'ignore' })).toThrow()
     expect((await collabRepoLocalStateOf(repo)).conflicts).toEqual(['README.md'])
-  })
 
-  it('不在 main 上：写出分支名；分离的 HEAD 为 null', async () => {
-    const { repo } = collabRepoWithRemote()
+    git(repo, 'merge', '--abort')
     git(repo, 'checkout', '-q', '-b', 'research')
     expect((await collabRepoLocalStateOf(repo)).branch).toBe('research')
     git(repo, 'checkout', '-q', '--detach')
@@ -177,36 +171,31 @@ describe('协作仓那一边的自动同步', () => {
       return { changed, failures, sync: syncWith([], failures) }
     }
 
-    it('被拒后撤掉改动：下一次自动同步后这条消失', async () => {
+    it('改动留着就保留：在工作区、提交在还没进的本地 main 上都保留', async () => {
+      const { failures, sync } = rejectedWithChangeInWorkTree()
+      await sync.autoSync(bob)
+      expect(failures.failureOf(bob.repo)).toEqual(rejected)
+      git(bob.repo, 'commit', '-q', '-am', 'bob 的改动')
+      await sync.autoSync(bob)
+      expect(sync.syncProblemOf(bob.repo)).toMatch(/^本地 main 上有还没进 main 的提交/)
+      expect(failures.failureOf(bob.repo)).toEqual(rejected)
+    })
+
+    it('改动撤掉了就消失：下一次自动同步后清掉，撤掉时 main 上正好有新提交也一样', async () => {
       const { changed, failures, sync } = rejectedWithChangeInWorkTree()
       git(bob.repo, 'checkout', '-q', '--', seedRecord)
       await sync.autoSync(bob)
       expect(failures.failureOf(bob.repo)).toBeNull()
       expect(changed).toEqual([bob.repo, bob.repo])
-    })
 
-    it('撤掉改动时 main 上正好有新提交：快进以后同样消失', async () => {
-      const { failures, sync } = rejectedWithChangeInWorkTree()
+      writeFileSync(changedRecord(), '{ }\n')
+      failures.record(bob.repo, rejected)
       git(bob.repo, 'checkout', '-q', '--', seedRecord)
       adminPushes('a.md')
       await sync.fetch(bob)
       await sync.autoSync(bob)
       expect(sync.lastSyncOf(bob.repo)?.outcome).toBe('merged')
       expect(failures.failureOf(bob.repo)).toBeNull()
-    })
-
-    it('改动还在工作区：保留', async () => {
-      const { failures, sync } = rejectedWithChangeInWorkTree()
-      await sync.autoSync(bob)
-      expect(failures.failureOf(bob.repo)).toEqual(rejected)
-    })
-
-    it('改动提交在本地 main 上、还没进 main：保留', async () => {
-      const { failures, sync } = rejectedWithChangeInWorkTree()
-      git(bob.repo, 'commit', '-q', '-am', 'bob 的改动')
-      await sync.autoSync(bob)
-      expect(sync.syncProblemOf(bob.repo)).toMatch(/^本地 main 上有还没进 main 的提交/)
-      expect(failures.failureOf(bob.repo)).toEqual(rejected)
     })
   })
 })

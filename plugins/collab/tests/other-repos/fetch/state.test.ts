@@ -6,7 +6,7 @@ import { fetchOtherRepo, otherRepoHeadOf, OtherReposFetch } from '../../../src/o
 import { git, localOrganization, type LocalOrganization } from '../../fixtures/local-organization.js'
 
 // 每条测试都新建几个 git 仓；和别的测试并行时 Windows 上启动 git 进程慢，5 秒不够
-vi.setConfig({ testTimeout: 30_000 })
+vi.setConfig({ testTimeout: 90_000 })
 
 let organization: LocalOrganization
 
