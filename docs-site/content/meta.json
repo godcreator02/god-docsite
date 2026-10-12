@@ -1,4 +1,9 @@
 {
-  "title": "gwb-docfirst",
-  "pages": ["docs", "maintain", "future"]
+  "title": "docfirst",
+  "pages": [
+    "index",
+    "docs",
+    "maintain",
+    "future"
+  ]
 }
