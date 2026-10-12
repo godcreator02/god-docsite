@@ -8,18 +8,30 @@ import { feedDevServer } from '@godcreator/docsite-feed'
 
 /** 基础包自己的包名：要和站点自己的代码一样经 Vite 处理 */
 const ownPackageName = '@godcreator/docsite-kit'
+/** 骨架直接引用的能力包：与基础包同因要经 Vite 处理——workspace 内 pnpm 链接让 fumadocs 侥幸单例，从 registry 安装的站会解析出多份实例 */
+const capabilityPackages = [
+  '@godcreator/docsite-identity',
+  '@godcreator/docsite-comments',
+  '@godcreator/docsite-page-sources',
+  '@godcreator/docsite-ui',
+  '@godcreator/docsite-writing',
+  '@godcreator/docsite-feed',
+  '@godcreator/docsite-explainer',
+]
 
 /**
- * 基础包要和站点自己的代码一样经 Vite 处理：fumadocs 由 Vite 处理，基础包若交给 Node 直接加载（服务端）或单独预打包（浏览器端），
- * 它引用的 fumadocs 就是另一份，React 上下文对不上（报 You need to wrap your application inside `FrameworkProvider`）；
+ * 基础包与能力包要和站点自己的代码一样经 Vite 处理：fumadocs 由 Vite 处理，它们若交给 Node 直接加载（服务端）或单独预打包（浏览器端），
+ * 它们引用的 fumadocs 就是另一份，React 上下文对不上（报 You need to wrap your application inside `FrameworkProvider`）；
  * 服务端函数也读不到 import.meta.env。接在基础包上的功能包引用基础包，同样要经 Vite 处理
  */
 function processedWithSite(featurePackages: readonly string[]): Plugin {
-  const packages = [ownPackageName, ...featurePackages]
   return {
     name: 'docsite-kit:processed-with-site',
     config(config) {
       const root = path.resolve(config.root ?? process.cwd())
+      // 能力包按站点实际装着的算（feed、explainer 这类骨架不直接用的可以不装）；功能包是调用方显式给的，没装就报错
+      const installedCapabilities = capabilityPackages.filter((name) => manifestFileOf(root, name) !== null)
+      const packages = [ownPackageName, ...installedCapabilities, ...featurePackages]
       return {
         ssr: { noExternal: packages },
         optimizeDeps: { exclude: packages, include: nestedDependenciesOf(root, packages) },
