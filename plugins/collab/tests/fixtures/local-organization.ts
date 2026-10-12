@@ -1,5 +1,6 @@
 import { execFileSync } from 'node:child_process'
-import { mkdirSync, mkdtempSync, readdirSync, writeFileSync } from 'node:fs'
+import { createHash } from 'node:crypto'
+import { appendFileSync, mkdirSync, mkdtempSync, readdirSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import path from 'node:path'
 import type { OrganizationSource } from '../../src/other-repos/fetch/clone-new-repos.js'
@@ -28,6 +29,15 @@ export const collabRepoFiles = {
   'site/package.json': '{"name":"site","private":true}\n',
 }
 
+/*
+ * 同名同文件的仓（尤其每个用例都要的协作仓）只在每个测试进程里现建一次模板，之后每个用例从模板
+ * 本地 clone 裸仓与 seed：git 对本地克隆用硬链接共享对象文件，毫秒级；用例往副本 push 新对象写的是
+ * 新文件，模板不受影响。每仓从「init+clone+add+commit+push 共 5 次 git」降到 2 次 clone。
+ */
+const repoTemplates = new Map<string, { bare: string; seed: string }>()
+let templateRoot: string | undefined
+const templateRootOf = () => (templateRoot ??= mkdtempSync(path.join(tmpdir(), 'gwb-collab-template-')))
+
 export type LocalOrganization = {
   root: string
   organizationDir: string
@@ -35,7 +45,7 @@ export type LocalOrganization = {
   collabRepo: string
   source: OrganizationSource
   dirOf(name: string): string
-  /** 在组织里建一个裸仓，带上给定的文件，推一个提交到 main */
+  /** 在组织里建一个裸仓，带上给定的文件，推一个提交到 main；同名同文件的仓第二次起从进程内模板克隆 */
   bareRepoWith(name: string, files: Record<string, string>): void
   /** 维护者往组织的裸仓 main 上推一个提交 */
   pushToOrigin(name: string, file: string, content: string): void
@@ -58,14 +68,26 @@ export async function localOrganization(repos: Record<string, Record<string, str
   }
   const bareRepoWith = (name: string, files: Record<string, string>) => {
     const bare = path.join(organizationDir, `${name}.git`)
-    git(root, 'init', '-q', '--bare', '-b', 'main', bare)
-    git(root, 'clone', '-q', bare, seedOf(name))
-    for (const [file, content] of Object.entries(files)) {
-      mkdirSync(path.dirname(path.join(seedOf(name), file)), { recursive: true })
-      writeFileSync(path.join(seedOf(name), file), content)
+    const seed = seedOf(name)
+    const key = `${name}\0${JSON.stringify(files)}`
+    let template = repoTemplates.get(key)
+    if (template === undefined) {
+      const t = templateRootOf()
+      const id = createHash('sha1').update(key).digest('hex').slice(0, 12)
+      template = { bare: path.join(t, `${id}.git`), seed: path.join(t, `${id}-seed`) }
+      git(t, 'init', '-q', '--bare', '-b', 'main', template.bare)
+      git(t, 'clone', '-q', template.bare, template.seed)
+      for (const [file, content] of Object.entries(files)) {
+        mkdirSync(path.dirname(path.join(template.seed, file)), { recursive: true })
+        writeFileSync(path.join(template.seed, file), content)
+      }
+      commitAs(template.seed, '起点')
+      git(template.seed, 'push', '-q', 'origin', 'main')
+      repoTemplates.set(key, template)
     }
-    commitAs(seedOf(name), '起点')
-    git(seedOf(name), 'push', '-q', 'origin', 'main')
+    git(root, 'clone', '-q', '--bare', template.bare, bare)
+    // seed 从用例自己的裸仓克隆：origin 天然指向它，pushToOrigin 推对地方
+    git(root, 'clone', '-q', bare, seed)
   }
   const source: OrganizationSource = {
     organization: 'hybrid-mmc',
@@ -80,9 +102,8 @@ export async function localOrganization(repos: Record<string, Record<string, str
   const cloned = await cloneOrganization(path.join(root, 'projects'), source, 'bob', { env: {} })
   const dirOf = (name: string) => path.join(cloned.projectDir, name)
   for (const name of cloned.repos) {
-    git(dirOf(name), 'config', 'user.name', 'bob')
-    git(dirOf(name), 'config', 'user.email', 'bob@local')
-    git(dirOf(name), 'config', 'core.autocrlf', 'false')
+    // 三项配置直接写进 .git/config（git config 就是改这个文件），每仓省 3 次 git
+    appendFileSync(path.join(dirOf(name), '.git', 'config'), '[user]\n\tname = bob\n\temail = bob@local\n[core]\n\tautocrlf = false\n')
   }
   return {
     root,
