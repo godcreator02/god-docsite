@@ -1,0 +1,5 @@
+{
+  "title": "研究与复核",
+  "description": "2026-10-11 的两份复核：改造计划接的接口面、Fumadocs 版本稳定性",
+  "pages": ["research-2026-10-11-api-surface-audit", "research-2026-10-11-fumadocs-stability"]
+}

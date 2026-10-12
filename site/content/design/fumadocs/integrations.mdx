@@ -1,0 +1,97 @@
+---
+title: fumadocs 官方扩展包导读
+description: 官方扩展包怎么组织、怎么接进站点：入口类型、openapi 样板、元素名约定、peer 与打包
+---
+
+我们的基础包、docfirst 站点库要照搬的就是这一套。看了 fumadocs-openapi、fumadocs-typescript、fumadocs-twoslash、fumadocs-docgen、fumadocs-obsidian，以及 shared-api、@fumadocs/language、@fumadocs/ai-chat。
+
+## 通用模式
+
+扩展包从不改站点、不读站点模块，只导出东西，站点在四个地方接：`lib/*.ts`（服务端实例与 loader）、MDX 插件配置、`mdx-components`、全局 CSS。
+
+| 入口类型 | 放什么 | 站点在哪接 |
+| --- | --- | --- |
+| 服务端实例工厂 | `createXxx(options)` 返回带方法的实例，缓存等状态放在闭包里 | `lib/xxx.ts` 导出一个实例 |
+| loader 插件 / 页面来源 | `xxxPlugin()`（改页面树）；`staticSource()` / `dynamicSource()` | `lib/source.ts` 的 `loader({ docs, xxx }, { plugins })` |
+| remark / rehype / Shiki 插件 | 构建时转换；**输出元素名，不输出 import 语句** | MDX 插件配置 |
+| 界面 | `'use client'` 组件，或工厂 `createXxxPage(options)`；能用 `components` 换掉其中一块 | `components/xxx.tsx` 再进 `mdx-components` |
+| 无界面部分 | Provider、hooks、纯逻辑，给站点自写的界面或 CLI 复制的界面用 | 站点的组件里导入 |
+| 客户端还原 | 把服务端序列化的数据还原成渲染器（不开 RSC 的框架用） | 路由组件 |
+| CSS | `css/preset.css`：构建时生成的 `@source inline("类名…")`，颜色全用 `fd-*` | 全局 CSS，写在 `fumadocs-ui/css/preset.css` 之后 |
+| 翻译 | `xxxTranslations()` 返回本包的界面文字键 | `translations().extend(...)` |
+| 可复制界面 | `registry/index.ts`，不发布到 npm | `npx @fumadocs/cli add xxx/组件` |
+| 生成脚本 / 命令行 | `generateFiles()`（浏览器构建换成会报错的空实现）；`bin` | `scripts/*.ts`、`package.json` 的 scripts |
+
+> **「输出元素名」是一个关键约定。**remark / rehype 插件把内容转换成 `<TypeTable>`、`<Popup>` 这样的 MDX 元素，不在 MDX 里写 import；站点在 `mdx-components` 里提供同名组件。构建时的插件和运行时的组件就靠名字对上，彼此不导入。
+
+## fumadocs-openapi：最完整的样板
+
+### 入口
+
+| 入口 | 内容 | 运行位置 |
+| --- | --- | --- |
+| `./server` | `createOpenAPI()`、`openapiPlugin()`、`openapiSource()`、代理 | 只在服务端（直接用 `node:fs`） |
+| `.` | `generateFiles`、无界面 API、类型；带 `browser` 条件，浏览器拿到的是会报错的空实现 | 通用 |
+| `./ui` | `createOpenAPIPage()` | 浏览器 |
+| `./operation`、`./playground` | 无界面 hooks，给复制进站点的界面用 | 浏览器 |
+| `./i18n`、`./css/*` | 翻译、样式 | — |
+
+服务端和浏览器代码按入口分开；构建用 `unbundle: true`（一个源文件一个产物），这样 `'use client'` 能保留，而且 context 只存在于一个模块里，几个入口导入的是同一份（[openapi/tsdown.config.ts:20-47](https://github.com/fuma-nama/fumadocs/blob/fumadocs%4016.17.1/packages/openapi/tsdown.config.ts#L20-L47)）。
+
+### 挂在哪些扩展点上
+
+1. **loader 插件**：给页面树节点加请求方法徽标（[server/index.tsx:315-356](https://github.com/fuma-nama/fumadocs/blob/fumadocs%4016.17.1/packages/openapi/src/server/index.tsx#L315-L356)）。
+2. **页面来源**：虚拟页面的 `data` 里放 `getOpenAPIPageProps()`、`structuredData`、`toc`。
+3. **或者生成 MDX 文件**：生成的 MDX 不导入组件，默认导出一个布局，从 `props.components` 里取 `OpenAPIPage`（[to-text.ts:198-206](https://github.com/fuma-nama/fumadocs/blob/fumadocs%4016.17.1/packages/openapi/src/utils/pages/to-text.ts#L198-L206)）。
+4. **服务端函数**：代理、OAuth，由站点挂成路由。
+5. **MDX 组件**、**CLI 复制的界面**。
+
+openapi 在 core 里有专门的照顾：默认 frontmatter schema 内置 `_openapi` 字段，`remarkStructure` 会合并它的搜索数据。第三方扩展没有这个待遇，要自己扩展 schema。
+
+### 站点要写的
+
+```ts
+/* app.css */  @import 'fumadocs-openapi/css/preset.css';
+// lib/openapi.ts
+export const openapi = createOpenAPI({ input: ['./openapi.json'] })          // 'fumadocs-openapi/server'
+// components/api-page.tsx
+'use client'; export const OpenAPIPage = createOpenAPIPage()                  // 'fumadocs-openapi/ui'
+// lib/source.ts
+loader({ docs: docs.toFumadocsSource(), openapi: await openapi.staticSource({ baseDir: 'openapi' }) },
+       { plugins: [openapi.loaderPlugin()] })
+// 不开 RSC 的框架（React Router）：服务端 loader 里 preloadOpenAPIPage，组件里 useLoaderData 取出传给组件
+```
+
+### 服务端和浏览器怎么共享配置
+
+不共享对象。服务端实例只把**能序列化的数据**传给浏览器组件；浏览器组件的选项（可以含函数）只在 `'use client'` 的 `api-page.tsx` 里写一次。
+
+## 其他几个包
+
+| 包 | 挂在哪 | 站点要写的 | 值得学的地方 |
+| --- | --- | --- | --- |
+| fumadocs-typescript | remark 插件 `remarkAutoTypeTable` 把 `<auto-type-table>` 变成 `<TypeTable>`；或者服务端组件 `AutoTypeTable`（要 RSC） | MDX 插件配置加 `[remarkAutoTypeTable, { generator }]`，组件表加 `TypeTable` | React Router 不开 RSC 时只能走 remark 插件；`fumadocs-ui` 标为可选 peer |
+| fumadocs-twoslash | Shiki transformer，输出 `Popup` 等元素名 | `rehypeCodeOptions.transformers` 加一项；组件表展开 `...Twoslash`；导入 CSS | 源码里一处都不导入 fumadocs，只靠元素名对接；用了 core 的私有钩子，所以 peer 抬到 `^16.15.7` |
+| fumadocs-docgen | 只有 remark 插件；`remarkDocGen({ generators })` 是插件里再挂生成器 | MDX 插件配置；组件表加 `Tabs`、`Tab` | 没有界面、没有 CSS，peer 只有 core |
+| fumadocs-obsidian | 页面来源（基于 local-content） | `dynamicLoader(vault.dynamicSource())`；`(await page.data.load()).render(components)`；Vite 监视器 | 不依赖 fumadocs-ui，界面只用 `fd-*` 变量；`./client` 给不开 RSC 的框架还原渲染器 |
+| @fumadocs/language | 翻译预设 `zhCN()` | `translations().extend(uiTranslations()).preset('cn', zhCN())` | 只做类型导入，peer 全写 `*` 且可选 |
+
+## 界面放包里还是复制进站点
+
+两种同时提供：
+
+- **默认**：站点从 `xxx/ui` 导入，用 `components` 换掉其中一块。
+- **深改**：`npx @fumadocs/cli add openapi/page` 把界面源码复制进站点。复制进去的界面**从包的无界面入口拿状态**（`fumadocs-openapi/operation`、`/playground`），所以包里的逻辑和 context 只有一份。源码里的原话：无界面部分让「安装进站点的界面来驱动，而不是复制它们」（[playground/index.ts:1](https://github.com/fuma-nama/fumadocs/blob/fumadocs%4016.17.1/packages/openapi/src/playground/index.ts#L1)）。
+- 注册表只有「最新」一份，复制后的代码不会自动更新；站点里装的包是独立的 npm 版本，两边能不能对上靠无界面 API 稳定。
+- shared-api 是私有包：打进 openapi 的产物里，同时有自己的注册表（名字 `api-docs`），由 CLI 复制进站点。
+
+## 约定：peer、打包、避免两份实例
+
+1. **`fumadocs-core`、`fumadocs-ui` 只写在 peerDependencies**，范围写 `^16.<实际用到的最低次版本>`；只在部分功能用到的标为可选；用不到 ui 就不声明。
+2. 开发依赖写 `"fumadocs-ui": "workspace:@fumadocs/base-ui@*"`；扩展包只导入 `fumadocs-ui/...`，两种界面实现都能用。
+3. 打包用白名单 `deps.onlyBundle`，只打进私有包和小依赖，其余保持裸导入交给站点解析；带 context 的包用 `unbundle: true`。
+4. 扩展包自己的版本号独立，不跟 core 的 16.x（openapi 12.x、typescript 5.x、twoslash 4.x）。
+5. 命名：主包 `fumadocs-xxx` 或 `@fumadocs/xxx`；工厂 `createXxx`；插件 `remarkXxx` / `xxxPlugin`；界面工厂 `createXxxPage`；翻译 `xxxTranslations`；CSS 固定 `css/preset.css`；loader 插件的 `name` 用 `fumadocs:xxx`。
+6. `"type": "module"`、只出 ESM、`files: ["dist", "css"]`、CSS 包的 `sideEffects` 只写 CSS。
+
+> **对我们的影响：**官方包靠名字前缀 `fumadocs-` / `@fumadocs/` 被 fumadocs-mdx 自动加进 `ssr.noExternal`。我们的包叫 `@godcreator/…`，站点的 `vite.config.ts` 要自己写这一项（站点自己的配置，符合「站点归站点」）。

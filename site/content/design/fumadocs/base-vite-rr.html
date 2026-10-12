@@ -3,6 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="fumadocs 底座讲解：Vite 是什么、插件流水线、import.meta.glob、模块图与热更新、两套环境；React Router 的路由、loader、服务器渲染与接管，全部可以点播">
 <title>底座：Vite 与 React Router</title>
 <link rel="stylesheet" href="style.css">
 <script src="fig.js"></script>
@@ -82,16 +83,16 @@
 <body>
 <main>
 
-<p class="crumbs"><a href="index.html">← 目录</a>　·　fumadocs 原理 · 第一部分</p>
+<p class="crumbs">fumadocs 原理 · 第一部分</p>
 <h1>底座：Vite 与 React Router</h1>
 <p class="lead">fumadocs 自己几乎不发明机制，它的每一样能力都借了底下两样东西的机制。这一页先不提 fumadocs，只把这两样东西讲清楚。</p>
 
 <!-- ====================== Vite 是什么 ====================== -->
-<h2>先说 Vite 是什么</h2>
+<h2 id="vite-intro">先说 Vite 是什么</h2>
 <p><strong>浏览器只认识 JS、CSS、HTML。</strong>可站点里写的是 <code>.tsx</code>（TypeScript 加 JSX）、<code>.mdx</code>（Markdown 里夹组件），浏览器一个都执行不了。<strong>Vite 就是把这些源文件转换成 JS 和 CSS 的工具。</strong></p>
 <p>说它是「打包器」只对一半：build 时它转换完所有文件，再打包成少数几个文件，这时它是打包器；dev 时它根本不打包，谁要哪个文件就当场转换哪个，这时它是一个开发服务器。</p>
 
-<h3>一个文件被导入时：三道工序，每道只调用写了这一步的插件</h3>
+<h3 id="pipeline-stations">一个文件被导入时：三道工序，每道只调用写了这一步的插件</h3>
 <p>Vite 自己只会转换少数几种格式。遇到不认识的格式（比如 <code>.mdx</code>），就靠<strong>插件</strong>。每个文件进来时，Vite 按固定的三道工序处理：<code>resolveId</code>（这个 import 是哪个文件）、<code>load</code>（读出内容）、<code>transform</code>（改写内容）。这三个都是插件<strong>可以选写</strong>的函数（叫「钩子」）。<strong>每到一道工序，Vite 只按顺序调用写了这个钩子的插件</strong>，没写的根本不会被调用；写了的插件被调用后，看一眼文件不归自己管，就原样放过。这就是流水线。</p>
 <p>下面每行是一个插件，每列是一道工序。实线格子表示这个插件写了这一步，虚线灰格表示没写：</p>
 <div id="sc-pipeline"></div>
@@ -105,7 +106,7 @@
 }</code></pre>
 <p>fumadocs-mdx 就是这样一个插件，只是 <code>transform</code> 里写得复杂得多。React Router 的框架模式也是一个 Vite 插件。</p>
 
-<h3>这条流水线，dev 和 build 共用吗</h3>
+<h3 id="shared-pipeline">这条流水线，dev 和 build 共用吗</h3>
 <p><strong>共用。</strong>同一套插件、同一组钩子（resolveId → load → transform），dev 和 build 都走这条流水线，插件只写一次。区别只在谁来调用、调用多少次、前后还多了哪些步骤：</p>
 <div class="table-wrap"><table>
   <tr><th></th><th><span class="mode" style="--m:var(--m-dev)">dev</span></th><th><span class="mode" style="--m:var(--m-prod)">build</span></th></tr>
@@ -117,7 +118,7 @@
 </table></div>
 <p>插件也可以自己区分两种模式：写 <code>apply: 'serve'</code> 或 <code>apply: 'build'</code> 只在一种模式下装上，或者在钩子里看当前是哪种模式。fumadocs-mdx 就是后一种：它的 <code>config</code> 钩子按 <code>env.command</code> 是 <code>'serve'</code> 还是 <code>'build'</code> 决定要不要每次检查 <code>lib/source.ts</code> 改没改；<code>configureServer</code> 只在 dev 下被调用。<strong>所以编译 .mdx 的工序在两种模式下完全一样</strong>，不一样的只是 dev 下按需编译、有热更新，build 下一次编译完。</p>
 
-<h3>dev 和 build + start 下，Vite 一样吗</h3>
+<h3 id="vite-dev-build">dev 和 build + start 下，Vite 一样吗</h3>
 <p><strong>流水线和插件是同一套，区别在什么时候转换、转换多少，以及 Vite 在不在。</strong>上下两行同时往前播：</p>
 <div id="sc-vite-modes"></div>
 <div class="table-wrap"><table>
@@ -148,7 +149,7 @@
 </div>
 
 <!-- ====================== 三种运行方式 ====================== -->
-<h2>先分清三种运行方式</h2>
+<h2 id="three-modes">先分清三种运行方式</h2>
 <p>同一个站点有三种跑法，下面每个机制都会标出它在哪种跑法下起作用：<span class="mode" style="--m:var(--m-dev)">dev</span><span class="mode" style="--m:var(--m-prod)">build + start</span><span class="mode" style="--m:var(--m-static)">静态</span>。点一种看看它是怎么跑的：</p>
 <div class="modetabs" id="modetabs"></div>
 <div class="stage"><svg id="modefig" viewBox="0 0 880 250" width="100%" aria-label="运行方式"></svg></div>
@@ -166,7 +167,7 @@
 <div class="verdict" style="--m:var(--m-static)"><strong>结论：静态这一种对我们没有实际意义。</strong>站点都由工作台托管，本机和 NAS 都有 Node；评论要写、身份要认、协作数据要推，都离不开服务器。以后只考虑 dev 和 build + start。</div>
 <div class="verdict" style="--m:var(--m-prod)"><strong>要记住的一点：</strong>build + start 下没有 Vite，fumadocs-mdx 编译过的内容已经固定在包里。所以凡是运行时会变的东西（评论、协作数据），都不能走「build 时编译」这条路。</div>
 
-<h2>服务器到底是谁：一个请求在 dev 和 build + start 下怎么走</h2>
+<h2 id="server">服务器到底是谁：一个请求在 dev 和 build + start 下怎么走</h2>
 <p><strong>服务器就是一个 Node 进程</strong>，负责接收浏览器的请求，两种方式都一样。<strong>Vite 不是服务器，是编译器</strong>：dev 时它装在这个进程里面，请求来了现场编译；build + start 时它不在进程里，编译早在 build 时做完了，进程只读现成的文件。左右两边同时播放，看哪里不一样：</p>
 <div class="modetabs" id="sv-tabs"></div>
 <div id="sv-ctl"></div>
@@ -174,13 +175,13 @@
 <div class="row"><div class="caption" id="sv-dev" style="border-left:4px solid var(--m-dev)"></div><div class="caption" id="sv-prod" style="border-left:4px solid var(--m-prod)"></div></div>
 
 <!-- ====================== Vite ====================== -->
-<h2><span class="part" style="background:var(--c-vite)">Vite</span>五个机制</h2>
+<h2 id="vite-mechanisms"><span class="part" style="background:var(--c-vite)">Vite</span>五个机制</h2>
 
-<h3>1. 开发时不打包：浏览器要哪个文件，就现场编译哪个 <span class="mode" style="--m:var(--m-dev)" title="dev">dev</span><span class="mode no" style="--m:var(--m-prod)" title="">build+start</span><span class="mode no" style="--m:var(--m-static)">静态</span></h3>
+<h3 id="no-bundle">1. 开发时不打包：浏览器要哪个文件，就现场编译哪个 <span class="mode" style="--m:var(--m-dev)" title="dev">dev</span><span class="mode no" style="--m:var(--m-prod)" title="">build+start</span><span class="mode no" style="--m:var(--m-static)">静态</span></h3>
 <p>传统做法是先把所有代码打包成一个大文件再给浏览器。Vite 开发时反过来：浏览器自己按 <code>import</code> 一个一个地要，Vite 收到一个请求就编译一个文件。没打开的页面，代码永远不会被编译。</p>
 <div id="seq-nobundle"></div>
 
-<h3>2. 插件流水线：每个文件都要过这几道工序 <span class="mode" style="--m:var(--m-dev)" title="dev">dev</span><span class="mode" style="--m:var(--m-prod)" title="build 时">build+start：build 时</span><span class="mode" style="--m:var(--m-static)">静态：build 时</span></h3>
+<h3 id="plugin-pipeline">2. 插件流水线：每个文件都要过这几道工序 <span class="mode" style="--m:var(--m-dev)" title="dev">dev</span><span class="mode" style="--m:var(--m-prod)" title="build 时">build+start：build 时</span><span class="mode" style="--m:var(--m-static)">静态：build 时</span></h3>
 <p>Vite 收到一个文件请求后，依次问每个插件三个问题：这个地址对应哪个文件（<code>resolveId</code>）？文件内容是什么（<code>load</code>）？要不要把内容改一改（<code>transform</code>）？浏览器只认识 JS，所以 <code>.mdx</code>、<code>.tsx</code> 这类文件全靠某个插件在 transform 里把它变成 JS。</p>
 <div class="controls"><button class="btn" id="pp-toggle">去掉 MDX 插件试试</button></div>
 <div id="pp-ctl"></div>
@@ -196,7 +197,7 @@
 <div class="stage"><svg id="whyjs" viewBox="0 0 880 260" width="100%" aria-label="JS 变成 HTML"></svg></div>
 <div class="caption" id="whyjs-cap"></div>
 
-<h3>3. <code>import.meta.glob</code>：一行代码导入一整个文件夹 <span class="mode" style="--m:var(--m-dev)" title="dev">dev</span><span class="mode" style="--m:var(--m-prod)" title="build 时展开一次">build+start：build 时展开一次</span><span class="mode" style="--m:var(--m-static)">静态：build 时展开一次</span></h3>
+<h3 id="glob">3. <code>import.meta.glob</code>：一行代码导入一整个文件夹 <span class="mode" style="--m:var(--m-dev)" title="dev">dev</span><span class="mode" style="--m:var(--m-prod)" title="build 时展开一次">build+start：build 时展开一次</span><span class="mode" style="--m:var(--m-static)">静态：build 时展开一次</span></h3>
 <p>写一行 <code>import.meta.glob('./content/*.mdx')</code>，Vite 在编译时把它展开成「逐个导入每个文件」的代码。更关键的是：Vite 记住了这个模式，<strong>文件夹里新建或删除文件时，它会让写这一行的模块失效、重新展开</strong>。试试下面的按钮：</p>
 <div class="controls"><button class="btn" id="g-add">新建 c.mdx</button><button class="btn" id="g-del">删除 b.mdx</button><button class="btn" id="g-reset">↺ 重来</button></div>
 <div class="row">
@@ -206,7 +207,7 @@
 <div class="caption" id="g-log">点上面的按钮。</div>
 <div class="why">fumadocs-mdx 就是靠它导入内容文件夹，所以增删页面不用它自己写任何代码。</div>
 
-<h3>4. 模块图和热更新：改一个文件，最少要更新多少 <span class="mode" style="--m:var(--m-dev)" title="dev">dev</span><span class="mode no" style="--m:var(--m-prod)" title="">build+start</span><span class="mode no" style="--m:var(--m-static)">静态</span></h3>
+<h3 id="module-graph-hmr">4. 模块图和热更新：改一个文件，最少要更新多少 <span class="mode" style="--m:var(--m-dev)" title="dev">dev</span><span class="mode no" style="--m:var(--m-prod)" title="">build+start</span><span class="mode no" style="--m:var(--m-static)">静态</span></h3>
 <p>Vite 记着「谁导入了谁」，这叫模块图。改了一个文件，Vite 顺着「谁导入了我」往上找，直到找到一个能自己接住更新的模块，就只替换到这一层，页面状态保留；一直找到最顶上都没人接，就只好整页刷新。</p>
 <p><strong>谁能接住，不看文件后缀，看它导出了什么</strong>：React 的热更新插件只给「导出的全是组件」的模块加上接住更新的能力（图里虚线框），因为把一个组件换成新版、保留它的状态是安全的。<code>main.tsx</code> 虽然也是 .tsx，但它是入口，干的事是 <code>createRoot().render()</code>，一个组件都不导出；重新执行它等于再挂载一次整个应用，所以接不住。<strong>点任意一个方块，假装改了它：</strong></p>
 <div class="controls"><button class="btn" id="mg-toggle">让 Page.tsx 多导出一个常量</button></div>
@@ -217,7 +218,7 @@
 </div>
 <div class="why">改了 .mdx，页面自己更新，靠的就是这一套；fumadocs 没有写热更新代码。</div>
 
-<h3>5. 两套环境：同一个文件，服务器一份、浏览器一份 <span class="mode" style="--m:var(--m-dev)" title="dev">dev</span><span class="mode" style="--m:var(--m-prod)" title="build 时打两个包">build+start：build 时打两个包</span><span class="mode" style="--m:var(--m-static)">静态：只打浏览器包</span></h3>
+<h3 id="two-environments">5. 两套环境：同一个文件，服务器一份、浏览器一份 <span class="mode" style="--m:var(--m-dev)" title="dev">dev</span><span class="mode" style="--m:var(--m-prod)" title="build 时打两个包">build+start：build 时打两个包</span><span class="mode" style="--m:var(--m-static)">静态：只打浏览器包</span></h3>
 <p>站点要在服务器上先渲染一遍，再到浏览器里接管。所以 Vite 开发时同时有两套环境，各有自己的模块图，<strong>同一个文件会被编译两次</strong>。两边处理第三方库的方式不一样：</p>
 <div class="controls"><button class="btn" id="env-toggle">把这个库加进 ssr.noExternal</button></div>
 <div class="envs">
@@ -228,7 +229,7 @@
 <div class="why">fumadocs 只会自动把名字以 <code>fumadocs-</code>、<code>@fumadocs/</code> 开头的包加进这个名单；我们的 <code>@godcreator/…</code> 包要站点自己加。</div>
 
 <!-- ====================== React Router ====================== -->
-<h2><span class="part" style="background:var(--c-rr)">React Router</span>五个机制</h2>
+<h2 id="rr-mechanisms"><span class="part" style="background:var(--c-rr)">React Router</span>五个机制</h2>
 <p>先记住一件事：在框架模式下，React Router 自己就是一个 Vite 插件（<code>vite.config.ts</code> 里的 <code>reactRouter()</code>）。它的所有功能都搭在上面 Vite 的机制上。</p>
 <div class="table-wrap"><table>
   <tr><th>React Router v7 的三种用法</th><th>是什么</th><th>服务器渲染</th></tr>
@@ -238,7 +239,7 @@
 </table></div>
 <div class="why" style="background:color-mix(in srgb, var(--c-fd) 10%, var(--surface))">「用 React Router 框架」和「装了 React Router 的 Vite 插件」是同一件事。<strong>fumadocs 本身不依赖 React Router</strong>：Next.js、TanStack Start、Waku、Astro 它都支持。它和 React Router 的关系只有两处：一是适配层 <code>fumadocs-core/framework/react-router</code>，界面要「当前网址」「站内链接」「刷新数据」时，通过它调用 React Router 的 <code>useLocation</code>、<code>&lt;Link&gt;</code>、<code>useRevalidator</code>；二是路由文件由站点自己写，站点在 loader 里调用 fumadocs。<code>vite.config.ts</code> 里 <code>fumadocsMdx()</code> 和 <code>reactRouter()</code> 两个插件并排放着，互不知道对方。</div>
 
-<h3>1. <code>routes.ts</code>：网址对应哪个文件 <span class="mode" style="--m:var(--m-dev)" title="dev">dev</span><span class="mode" style="--m:var(--m-prod)" title="1">build+start</span><span class="mode" style="--m:var(--m-static)">静态</span></h3>
+<h3 id="routes-ts">1. <code>routes.ts</code>：网址对应哪个文件 <span class="mode" style="--m:var(--m-dev)" title="dev">dev</span><span class="mode" style="--m:var(--m-prod)" title="1">build+start</span><span class="mode" style="--m:var(--m-static)">静态</span></h3>
 <p>站点在 <code>app/routes.ts</code> 里写一张表。一个网址会匹配一串路由（外层布局 + 里层页面），这一串路由的组件套在一起渲染，它们的 <code>loader</code> 同时运行。<strong>选一个网址看看匹配到谁：</strong></p>
 <div class="row">
   <div class="code">import { index, layout, route } from '@react-router/dev/routes'
@@ -257,26 +258,26 @@ export default [
 </div>
 <div class="caption" id="rt-log"></div>
 
-<h3>2. 一个路由文件，服务器和浏览器各拿一半 <span class="mode" style="--m:var(--m-dev)" title="dev">dev</span><span class="mode" style="--m:var(--m-prod)" title="1">build+start</span><span class="mode" style="--m:var(--m-static)">静态：loader 只在 build 时跑</span></h3>
+<h3 id="route-split">2. 一个路由文件，服务器和浏览器各拿一半 <span class="mode" style="--m:var(--m-dev)" title="dev">dev</span><span class="mode" style="--m:var(--m-prod)" title="1">build+start</span><span class="mode" style="--m:var(--m-static)">静态：loader 只在 build 时跑</span></h3>
 <p>路由文件里的 <code>loader</code> 只在服务器上运行（可以读文件、查数据库），组件两边都运行。构建浏览器的代码时，React Router 的插件会<strong>把 <code>loader</code> 和只有它用到的 import 整个删掉</strong>，所以服务器代码不会漏到浏览器。点按钮切换：</p>
 <div class="controls"><button class="btn" id="sp-server">服务器拿到的版本</button><button class="btn" id="sp-client">浏览器拿到的版本</button></div>
 <div class="split" id="split"></div>
 <div class="caption"><span class="tagline" style="background:color-mix(in srgb, var(--c-rr) 18%, transparent)">红底</span>只在服务器上。浏览器版本里，这些行连同 <code>import { readFile }</code> 一起被删掉。</div>
 <div class="why">fumadocs 的页面索引表（loader 建的那张）只在服务器上，浏览器只拿到 loader 返回的那一小份数据。</div>
 
-<h3>3. 第一次打开：服务器渲染，浏览器接管 <span class="mode" style="--m:var(--m-dev)" title="dev">dev</span><span class="mode" style="--m:var(--m-prod)" title="1">build+start</span><span class="mode" style="--m:var(--m-static)">静态：build 时预渲染</span></h3>
+<h3 id="ssr-takeover">3. 第一次打开：服务器渲染，浏览器接管 <span class="mode" style="--m:var(--m-dev)" title="dev">dev</span><span class="mode" style="--m:var(--m-prod)" title="1">build+start</span><span class="mode" style="--m:var(--m-static)">静态：build 时预渲染</span></h3>
 <p>第一次打开一个网址，服务器先跑匹配到的 <code>loader</code>，用拿到的数据把组件渲染成 HTML 发给浏览器，数据也嵌在 HTML 里。浏览器先把 HTML 显示出来，再下载 JS，用嵌进来的同一份数据把组件再渲染一遍、接上点击事件（hydration，下文叫「接管」）。</p>
 <div id="seq-ssr"></div>
 
-<h3>4. 站内点链接：只要数据，不要整页 <span class="mode" style="--m:var(--m-dev)" title="dev">dev</span><span class="mode" style="--m:var(--m-prod)" title="1">build+start</span><span class="mode" style="--m:var(--m-static)">静态：数据 build 时生成</span></h3>
+<h3 id="client-nav">4. 站内点链接：只要数据，不要整页 <span class="mode" style="--m:var(--m-dev)" title="dev">dev</span><span class="mode" style="--m:var(--m-prod)" title="1">build+start</span><span class="mode" style="--m:var(--m-static)">静态：数据 build 时生成</span></h3>
 <p>接管以后，在站内点 <code>&lt;Link&gt;</code> 不会整页刷新。浏览器向服务器要的只是新页面的数据（网址后面加 <code>.data</code>），服务器只跑需要换的那几个路由的 <code>loader</code>。</p>
 <div id="seq-nav"></div>
 
-<h3>5. 开发时，React Router 怎么借 Vite 跑服务器渲染 <span class="mode" style="--m:var(--m-dev)" title="dev">dev</span><span class="mode no" style="--m:var(--m-prod)" title="">build+start</span><span class="mode no" style="--m:var(--m-static)">静态</span></h3>
-<p>开发时 React Router 插件往 Vite 开发服务器里挂了一个处理请求的函数（Vite 插件的 <code>configureServer</code> 钩子），页面请求就由它接手，路由代码向 Vite 的服务器环境现要。build + start 时这个函数换成从 <code>build/server</code> 导入的现成处理函数。完整的对照见上面的 <a href="#sv">「服务器到底是谁」</a>。</p>
+<h3 id="dev-ssr">5. 开发时，React Router 怎么借 Vite 跑服务器渲染 <span class="mode" style="--m:var(--m-dev)" title="dev">dev</span><span class="mode no" style="--m:var(--m-prod)" title="">build+start</span><span class="mode no" style="--m:var(--m-static)">静态</span></h3>
+<p>开发时 React Router 插件往 Vite 开发服务器里挂了一个处理请求的函数（Vite 插件的 <code>configureServer</code> 钩子），页面请求就由它接手，路由代码向 Vite 的服务器环境现要。build + start 时这个函数换成从 <code>build/server</code> 导入的现成处理函数。完整的对照见上面的 <a href="#server">「服务器到底是谁」</a>。</p>
 
 <!-- ====================== 小结 ====================== -->
-<h2>小结：底座提供的机制，下一页 fumadocs 会怎么用</h2>
+<h2 id="summary">小结：底座提供的机制，下一页 fumadocs 会怎么用</h2>
 <div class="table-wrap"><table>
   <tr><th>机制</th><th>谁提供</th><th>一句话</th><th>fumadocs 会拿它来</th></tr>
   <tr><td>按需编译</td><td>Vite</td><td>浏览器要哪个文件才编译哪个</td><td>没打开的文档页不编译</td></tr>
@@ -290,7 +291,7 @@ export default [
   <tr><td>站内跳转只要数据</td><td>React Router</td><td>请求 <code>.data</code></td><td>跳页只传页面树和「是哪一页」</td></tr>
 </table></div>
 
-<div class="pager"><a href="index.html">← 目录</a><a href="21-three-pieces.html">下一页：三大件各借了底座的哪个机制 →</a></div>
+<div class="pager"><a href="/design/fumadocs/three-pieces">下一页：三大件各借了底座的哪个机制 →</a></div>
 </main>
 
 <script>

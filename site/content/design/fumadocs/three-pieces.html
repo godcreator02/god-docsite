@@ -3,6 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="fumadocs 三个包各插在底座的哪里：总图、fumadocs-mdx 的编译流水线、fumadocs-core 的表和树、fumadocs-ui 切页只换正文，四段可点播的动画">
 <title>三大件借了哪些机制</title>
 <link rel="stylesheet" href="style.css">
 <script src="fig.js"></script>
@@ -10,26 +11,26 @@
 <body>
 <main>
 
-<p class="crumbs"><a href="index.html">← 目录</a>　·　fumadocs 原理 · 第二部分</p>
+<p class="crumbs">fumadocs 原理 · 第二部分</p>
 <h1>三大件各借了底座的哪个机制</h1>
-<p class="lead">上一页讲了底座：<a href="20-base-vite-rr.html">Vite 和 React Router</a>。这一页看 fumadocs 的三个包各插在底座的哪里。每张图都点「下一步」或「自动播放」看。</p>
+<p class="lead">上一页讲了底座：<a href="/design/fumadocs/base-vite-rr">Vite 和 React Router</a>。这一页看 fumadocs 的三个包各插在底座的哪里。每张图都点「下一步」或「自动播放」看。</p>
 
-<h2>一、总图：三个包各插在底座的哪里</h2>
+<h2 id="overview">一、总图：三个包各插在底座的哪里</h2>
 <div id="sc-all"></div>
 
-<h2>二、fumadocs-mdx：一个 .mdx 文件的旅程</h2>
+<h2 id="mdx-journey">二、fumadocs-mdx：一个 .mdx 文件的旅程</h2>
 <p>它是 Vite 插件，所以它做的事全发生在 Vite 的插件流水线上。跟着站点的 <code>lib/source.ts</code> 和一个 <code>intro.mdx</code> 走一遍：</p>
 <div id="sc-mdx"></div>
 
-<h2>三、fumadocs-core：一堆页面变成一张表和一棵树</h2>
+<h2 id="core-table-tree">三、fumadocs-core：一堆页面变成一张表和一棵树</h2>
 <p>它是普通函数，不是插件。它建好表和树放在服务器内存里，React Router 的 loader 来查：</p>
 <div id="sc-core"></div>
 
-<h2>四、fumadocs-ui：点下一页，只有正文在换</h2>
+<h2 id="ui-body-swap">四、fumadocs-ui：点下一页，只有正文在换</h2>
 <p>它是 React 组件，放在站点的路由组件里。在侧栏点下一页时：</p>
 <div id="sc-ui"></div>
 
-<h2>五、总表</h2>
+<h2 id="summary-table">五、总表</h2>
 <div class="table-wrap"><table>
   <tr><th>能力</th><th>哪个包</th><th>借的底座机制</th><th><span class="mode" style="--m:var(--m-dev)">dev</span></th><th><span class="mode" style="--m:var(--m-prod)">build + start</span></th></tr>
   <tr><td>.mdx 变成 JS</td><td>mdx</td><td>Vite 插件流水线</td><td>用到哪个编译哪个</td><td>build 时全部编译好</td></tr>
@@ -41,7 +42,7 @@
 </table></div>
 <div class="why"><b>由此推出我们的库该怎么做：</b>要改写文档内容的，做成挂在 fumadocs-mdx 编译里的插件；要建表、读文件的（比如评论），做成普通函数，由站点在 loader 里调用；界面做成 React 组件，由站点放进路由组件。三样都由站点自己接上，不需要发明新机制。</div>
 
-<div class="pager"><a href="20-base-vite-rr.html">← 第一部分：底座</a><a href="22-full-flow.html">回到全流程大图 →</a></div>
+<div class="pager"><a href="/design/fumadocs/base-vite-rr">← 第一部分：底座</a><a href="/design/fumadocs/full-flow">回到全流程大图 →</a></div>
 </main>
 
 <script>

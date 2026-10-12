@@ -3,6 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="编译一个 .mdx 的 17 道工序：frontmatter、语法树、remark 与 rehype 插件链、生成 JS 模块；钉码插件排在哪、依赖怎么登记，同一正本的两条出路">
 <title>编译 .mdx 的工序</title>
 <link rel="stylesheet" href="style.css">
 <script src="fig.js"></script>
@@ -32,7 +33,7 @@
 <body>
 <main>
 
-<p class="crumbs"><a href="index.html">← 目录</a>　·　fumadocs 原理　·　<a href="22-full-flow.html">全流程大图</a>里「编译 .mdx」那一格放大</p>
+<p class="crumbs">fumadocs 原理　·　<a href="/design/fumadocs/full-flow">全流程大图</a>里「编译 .mdx」那一格放大</p>
 <h1>编译一个 .mdx：从一段文本到一个 JS 模块</h1>
 <p class="lead">全流程图里，Vite 把 <code>install.mdx</code> 交给 fumadocs-mdx，出来就是 JS 模块，中间只画了一格。这一页把那一格拆开：左边是原文和设置，中间是按顺序排的工序，右边是语法树怎么一步步被改、最后导出了什么。我们的钉码就挂在这条工序里（橙色）。</p>
 <p class="meta">按 fumadocs 16.17.1 源码（默认编译器 <code>@mdx-js/mdx</code>）。右栏的源码行都能点开看原文件。</p>
@@ -50,7 +51,7 @@
 <p>上图第 9 道工序后面，钉码插件用 <code>replaceSource</code> 登记了 <code>&lt;Pin&gt;</code> 的 Markdown 形式。这张图看同一个正本走两条路：站点里编译（搜索、fumadocs 的 LLM 输出），以及命令行里生成 AGENTS.md 这类生成物。橙色是我们的包，虚线是可选、现在不开的。</p>
 <div id="sc-outputs"></div>
 
-<div class="pager"><a href="22-full-flow.html">← 全流程大图</a><a href="index.html">目录 →</a></div>
+<div class="pager"><a href="/design/fumadocs/full-flow">← 全流程大图</a></div>
 </main>
 
 <script>

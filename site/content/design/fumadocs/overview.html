@@ -3,6 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="fumadocs 是怎么工作的：从一句话开始逐层放大——三个部件、每个部件的步骤、打开一页时谁调用谁、哪里能插进自己的东西，全部可以点播">
 <title>fumadocs 图解总览</title>
 <link rel="stylesheet" href="style.css">
 <style>
@@ -90,13 +91,13 @@
 <body>
 <main>
 
-<p class="crumbs"><a href="index.html">← 目录</a>　·　fumadocs 图解</p>
+<p class="crumbs">fumadocs 图解</p>
 <h1>fumadocs 是怎么工作的</h1>
 <p class="lead">从最外面的一句话开始，一层一层往里看。每一层看懂了，点下面的按钮再往里放大一层。</p>
 
 <!-- 第 1 层 -->
 <section class="level" id="lv1">
-  <div class="level-head"><span class="n">第 1 层</span><h2>一句话</h2></div>
+  <div class="level-head"><span class="n">第 1 层</span><h2 id="one-sentence">一句话</h2></div>
   <p>你在文件夹里写 <code>.mdx</code> 文件（带一点组件的 Markdown），fumadocs 把它们变成一个带侧栏、目录、搜索的文档网站。</p>
   <div class="stage">
     <svg viewBox="0 0 880 190" width="100%" aria-label="文件变成网站">
@@ -132,7 +133,7 @@
 
 <!-- 第 2 层 -->
 <section class="level hidden" id="lv2">
-  <div class="level-head"><span class="n">第 2 层</span><h2>黑盒里是三个部件</h2></div>
+  <div class="level-head"><span class="n">第 2 层</span><h2 id="three-parts">黑盒里是三个部件</h2></div>
   <p>fumadocs 不是一个整体，而是三个分工明确的部件，像一条流水线。点「播放」看一个文件怎么流过去，点任意一个部件看它负责什么。</p>
   <div class="controls"><button id="l2play">▶ 播放</button></div>
   <div class="stage">
@@ -145,7 +146,7 @@
 
 <!-- 第 3 层 -->
 <section class="level hidden" id="lv3">
-  <div class="level-head"><span class="n">第 3 层</span><h2>每个部件里面有几步</h2></div>
+  <div class="level-head"><span class="n">第 3 层</span><h2 id="steps-inside">每个部件里面有几步</h2></div>
   <p>选一个部件，再一步一步看：这一步做了什么、调用了哪些函数、做完以后数据变成什么样。</p>
   <div class="boxtabs" id="boxtabs"></div>
   <div class="steps" id="steps"></div>
@@ -156,7 +157,7 @@
 
 <!-- 第 4 层 -->
 <section class="level hidden" id="lv4">
-  <div class="level-head"><span class="n">第 4 层</span><h2>打开一页的那一刻，谁调用谁</h2></div>
+  <div class="level-head"><span class="n">第 4 层</span><h2 id="who-calls-whom">打开一页的那一刻，谁调用谁</h2></div>
   <p>第 3 层是「准备工作」，大部分在启动时就做完了。这一层看浏览器真正打开 <code>/docs/guide/intro</code> 时发生的事。四条竖线是四个参与者，箭头是一次调用或返回。</p>
   <div class="controls"><button id="sprev">◀ 上一步</button><button id="splay">▶ 自动播放</button><button id="snext">下一步 ▶</button><span class="count" id="scount"></span></div>
   <div class="stage"><svg id="seq" viewBox="0 0 880 540" width="100%" aria-label="调用时序"></svg></div>
@@ -166,13 +167,13 @@
 
 <!-- 第 5 层 -->
 <section class="level hidden" id="lv5">
-  <div class="level-head"><span class="n">第 5 层</span><h2>哪里可以插进我们自己的东西</h2></div>
+  <div class="level-head"><span class="n">第 5 层</span><h2 id="where-to-extend">哪里可以插进我们自己的东西</h2></div>
   <p>每个部件都留了插口。我们写的库只往这些插口里放东西，不改 fumadocs 本身。后面每一页会把一个部件的插口讲透。</p>
   <div class="plugmap" id="plugmap"></div>
-  <p class="meta">下一页：<a href="11-fumadocs-mdx.html">部件一 fumadocs-mdx 拆开看 →</a></p>
+  <p class="meta">下一页：<a href="/design/fumadocs/mdx">部件一 fumadocs-mdx 拆开看 →</a></p>
 </section>
 
-<div class="pager"><a href="index.html">← 目录</a><a href="#" id="openall">全部展开</a></div>
+<div class="pager"><a href="#" id="openall">全部展开</a></div>
 </main>
 
 <script>

@@ -1,0 +1,32 @@
+---
+born-at: 2026-10-12T15:50
+type: choice
+parent: [2026-10-12-explainer-into-docsite]
+label: design/ 的 HTML 设计讲解整体搬进自述站，动画页保 iframe 原样、文字页转 mdx
+domain: 骨架
+---
+
+## 背景
+
+设计文档与 fumadocs 调研讲解一直住在 `design/` 下的手写静态 HTML（fig.js 逐步播放的 SVG 场景、每页自带样式与脚本），
+浏览器直接开文件看，不进站点、不进搜索、批不了评论。自述站三种页面机制（mdx、`.page.tsx`、`.html` 经 iframe 原样渲染）
+落定后，讲解该由站承载。
+
+## 做了
+
+- `site/content/design/` 新组（root 分组「设计讲解」）：现行方案 `plan`、插件设计 `gwb-plugin`、设计原则 `principles`、
+  站点生命周期 `site-lifecycle`、`fumadocs/`（图解与源码导读）、`research/`（接口复核与稳定性调研）。
+- 纯文字 8 页转 mdx；动画重的 5 页（overview、base-vite-rr、three-pieces、full-flow、mdx-compile）`.html` 原样搬进
+  `fumadocs/`（fig.js 与 style.css 作为页面资产随行，h2/h3 补 id 出锚点，页间链接改站内绝对路由）。
+- `mdx-compile` 一页另做了组件版 `mdx-compile-explainer`：用 `@godcreator/docsite-explainer` 的 Stepper/Timeline 重写
+  编译工序的演示（第一批使用新讲解组件的页面）。
+- `design/` 整目录删除（含孤儿 site-files.js）；两份 research md 转入 `research/` 组（裸尖括号包内联代码，mdx 可编译）。
+
+## 边界
+
+- 其余动画页仍是 iframe 里的 fig.js 手写场景：保真优先，将来要用 explainer 组件重做的按页另做
+- 轨迹卡与 probes 里指向旧 `design/*.html` 的引用是历史记录，不改
+
+## 验收
+
+site `pnpm build` 过；typecheck 与 lint 绿。
