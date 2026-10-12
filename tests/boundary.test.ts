@@ -154,22 +154,30 @@ function distClosureSpecs(dir: string, file: string): string[] {
  */
 const DOCFIRST_PACKAGES = ["code-pin", "trajectory-disk", "docfirst-workflow", "docfirst-explainer", "docfirst-site"];
 const KIT_PACKAGES = ["docsite-kit", "docsite-identity", "docsite-comments", "docsite-page-sources", "docsite-writing", "docsite-ui", "docsite-feed", "docsite-explainer"];
+// collab 三包是另一场搬入（提交 2b70e91）带进来的，接线提交会调整它们的边界——这里的条目按它们当时的真实依赖写
+const COLLAB_PACKAGES = ["collab-model", "collab-site", "collab-merge-check"];
+const ALL_SIBLINGS = [...DOCFIRST_PACKAGES, ...KIT_PACKAGES, ...COLLAB_PACKAGES];
+const without = (self: string, allowed: string[]): string[] => ALL_SIBLINGS.filter((each) => each !== self && !allowed.includes(each));
 const PACKAGE_FORBIDDEN: Record<string, string[]> = {
   // 地基：不认识 docfirst 任何包
-  "docsite-kit": ["docsite-identity", "docsite-comments", "docsite-writing", "docsite-explainer", ...DOCFIRST_PACKAGES],
-  "docsite-identity": [...KIT_PACKAGES.filter((each) => each !== "docsite-identity"), ...DOCFIRST_PACKAGES],
-  "docsite-comments": [...KIT_PACKAGES.filter((each) => each !== "docsite-comments"), ...DOCFIRST_PACKAGES],
-  "docsite-page-sources": [...KIT_PACKAGES.filter((each) => each !== "docsite-page-sources"), ...DOCFIRST_PACKAGES],
-  "docsite-writing": [...KIT_PACKAGES.filter((each) => each !== "docsite-writing"), ...DOCFIRST_PACKAGES],
-  "docsite-ui": [...KIT_PACKAGES.filter((each) => each !== "docsite-identity" && each !== "docsite-ui"), ...DOCFIRST_PACKAGES],
-  "docsite-feed": [...KIT_PACKAGES.filter((each) => each !== "docsite-feed"), ...DOCFIRST_PACKAGES],
-  "docsite-explainer": [...KIT_PACKAGES.filter((each) => each !== "docsite-explainer"), ...DOCFIRST_PACKAGES],
+  "docsite-kit": without("docsite-kit", ["docsite-page-sources", "docsite-ui", "docsite-feed"]),
+  "docsite-identity": without("docsite-identity", []),
+  "docsite-comments": without("docsite-comments", []),
+  "docsite-page-sources": without("docsite-page-sources", []),
+  "docsite-writing": without("docsite-writing", []),
+  "docsite-ui": without("docsite-ui", ["docsite-identity"]),
+  "docsite-feed": without("docsite-feed", []),
+  "docsite-explainer": without("docsite-explainer", []),
   // docfirst 与通用包
-  "code-pin": ["trajectory-disk", "docfirst-workflow", "docfirst-explainer", "docfirst-site", ...KIT_PACKAGES],
-  "trajectory-disk": ["code-pin", "docfirst-workflow", "docfirst-explainer", "docfirst-site", ...KIT_PACKAGES],
-  "docfirst-workflow": ["docfirst-explainer", "docfirst-site", ...KIT_PACKAGES],
-  "docfirst-explainer": ["code-pin", "trajectory-disk", "docfirst-workflow", "docfirst-site", ...KIT_PACKAGES],
-  "docfirst-site": ["code-pin", "docfirst-explainer", ...KIT_PACKAGES.filter((each) => each !== "docsite-kit")],
+  "code-pin": without("code-pin", []),
+  "trajectory-disk": without("trajectory-disk", []),
+  "docfirst-workflow": without("docfirst-workflow", ["code-pin", "trajectory-disk"]),
+  "docfirst-explainer": without("docfirst-explainer", []),
+  "docfirst-site": without("docfirst-site", ["docsite-kit", "docfirst-workflow", "trajectory-disk"]),
+  // collab：model 只用组合包，site 再用 model，merge-check 只用 model
+  "collab-model": without("collab-model", ["docsite-kit"]),
+  "collab-site": without("collab-site", ["docsite-kit", "collab-model"]),
+  "collab-merge-check": without("collab-merge-check", ["collab-model"]),
 };
 
 test("包的方向：清单三类依赖字段里不许出现禁止的兄弟包", () => {

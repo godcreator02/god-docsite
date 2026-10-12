@@ -21,7 +21,7 @@ test("docfirst-site 模板的 devDependencies 范围罩得住工作区的版本"
     const lower = range.slice(1).split(".").map(Number);
     const actual = manifest.version.split(".").map(Number);
     assert.ok(
-      actual[0] === lower[0] && actual[1] >= lower[1],
+      actual[0]! === lower[0]! && actual[1]! >= lower[1]!,
       `${name} 工作区版本 ${manifest.version} 不在模板范围 ${range} 里：发版时模板里的范围忘了跟`,
     );
   }
