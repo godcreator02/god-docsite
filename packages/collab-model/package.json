@@ -38,7 +38,7 @@
     "check": "tsc --noEmit && vitest run"
   },
   "peerDependencies": {
-    "@godcreator/docsite-kit": "workspace:*"
+    "@godcreator/docsite-kit": "^0.1.0"
   },
   "peerDependenciesMeta": {
     "@godcreator/docsite-kit": {
@@ -46,7 +46,7 @@
     }
   },
   "devDependencies": {
-    "@godcreator/docsite-kit": "workspace:*",
+    "@godcreator/docsite-kit": "^0.1.0",
     "@types/node": "^26.6.2",
     "typescript": "^6.0.3",
     "vitest": "^5.0.1"

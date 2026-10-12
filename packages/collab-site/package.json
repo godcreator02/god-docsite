@@ -52,7 +52,7 @@
   },
   "peerDependencies": {
     "@fumadocs/base-ui": "16.16.2",
-    "@godcreator/docsite-kit": "workspace:*",
+    "@godcreator/docsite-kit": "^0.1.9",
     "lucide-react": "^1.54.0",
     "react": "^19.3.0",
     "react-dom": "^19.3.0",
@@ -65,7 +65,7 @@
   },
   "devDependencies": {
     "@fumadocs/base-ui": "16.16.2",
-    "@godcreator/docsite-kit": "workspace:*",
+    "@godcreator/docsite-kit": "^0.1.9",
     "@testing-library/react": "^16.3.3",
     "@types/node": "^26.6.2",
     "@types/react": "^19.3.0",
