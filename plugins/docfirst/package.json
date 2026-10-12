@@ -64,5 +64,15 @@
     "oxlint-tsgolint": "7.0.2001",
     "typescript": "^7.0.2",
     "vitest": "^4.1.10"
-  }
+  },
+  "publishConfig": {
+    "registry": "https://git.tianshen02.online:28377/api/packages/godcreator/npm/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://git.tianshen02.online:28377/godcreator/docsite-kit.git"
+  },
+  "keywords": [
+    "gwb-plugin"
+  ]
 }
