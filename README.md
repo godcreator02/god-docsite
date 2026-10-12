@@ -16,7 +16,7 @@
 pnpm add -D @godcreator/docfirst-workflow
 ```
 
-`@godcreator/docfirst-workflow` 是命令行、项目装配与 mdx 格式，子入口 `./fumadocs` 是 fumadocs 适配（功能包 `docsite-docfirst` 用其中的 remark 插件）；通用包钉码核心 `@godcreator/code-pin`（把文字钉在代码上）与星轨盘 `@godcreator/trajectory-disk`（把轨迹卡画成项目方向演变的圆盘）随它装上。通用包不认识 docfirst，也能单独使用。`fumadocs` 与 `react` 是可选的 **peer**，只有 `./fumadocs` 用，用你项目里装的那份；只运行命令行的仓不用装它们。
+`@godcreator/docfirst-workflow` 是命令行、项目装配与 mdx 格式；子入口 `./fumadocs` 是自足的 fumadocs 适配——钉码 remark、名册、状态点、星轨盘都在这个出口里，**任何 fumadocs 站**（不经基础包也行）在集合的 `mdxOptions` 里直接挂它就有钉码，功能包 `docsite-docfirst` 只是把它接进基础包骨架的那一层；通用包钉码核心 `@godcreator/code-pin`（把文字钉在代码上）与星轨盘 `@godcreator/trajectory-disk`（把轨迹卡画成项目方向演变的圆盘）随它装上。通用包不认识 docfirst，也能单独使用。`fumadocs` 与 `react` 是可选的 **peer**，只有 `./fumadocs` 用，用你项目里装的那份；只运行命令行的仓不用装它们。
 
 站另装的两个包：
 
