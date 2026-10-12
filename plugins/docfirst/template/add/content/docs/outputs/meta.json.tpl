@@ -1,4 +1,0 @@
-{
-  "title": "生成正本",
-  "pages": ["readme", "agents", "claude"]
-}

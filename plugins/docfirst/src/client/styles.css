@@ -1,5 +1,0 @@
-@import 'tailwindcss/theme.css' theme(reference) prefix(docfirst);
-@import '@godcreator/gwb-shell/theme.reference.css' theme(reference);
-@import 'tailwindcss/utilities.css' layer(utilities) source(none);
-@import 'tw-animate-css';
-@source "./";
