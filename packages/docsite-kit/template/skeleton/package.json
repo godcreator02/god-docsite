@@ -19,10 +19,10 @@
     "react-router": "^8.4.0",
     "rehype-katex": "^7.0.1",
     "remark-math": "^6.0.0",
-    "@godcreator/docsite-identity": "workspace:*",
-    "@godcreator/docsite-comments": "workspace:*",
-    "@godcreator/docsite-writing": "workspace:*",
-    "@godcreator/docsite-page-sources": "workspace:*"
+    "@godcreator/docsite-identity": "^0.1.0",
+    "@godcreator/docsite-comments": "^0.1.0",
+    "@godcreator/docsite-writing": "^0.1.0",
+    "@godcreator/docsite-page-sources": "^0.1.0"
   },
   "devDependencies": {
     "@react-router/dev": "^8.4.0",
