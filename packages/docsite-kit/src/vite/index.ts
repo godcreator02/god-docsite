@@ -61,10 +61,9 @@ const contentDirs = ['content', 'comments']
 const pageListFiles = ['app/lib/collections.ts', 'app/lib/source.ts']
 
 /**
- * 页面目录与评论目录里新增、删除文件（改名是一删一增）以及改 TSX 页面时，让列出页面的模块重新生成，再让浏览器整页刷新。
- * 改别的文件不经过这里，照 Vite 与 React Router 的默认处理。
- * 要补这一处：defineDocs 展开出的 import.meta.glob 带 base 选项，Vite 在文件增减时不让它失效，开发服务端一直拿着旧清单，新页面直接 404；
- * 改 TSX 页面默认走组件热替换，正文变了但页面树里的标题还是旧的（布局的 loader 不重新运行）
+ * 改 TSX 页面时，让列出页面的模块重新生成，再让浏览器整页刷新。改别的文件不经过这里，照 Vite 与 React Router 的默认处理。
+ * 目录里新增、删除文件不再拦：Windows 上 glob 相对 base 的缺陷已由仓内补丁修复（patches/vite@8.3.4.patch），
+ * 原生链路自己能发现新增文件（清理清单 #3）。要补的只剩：改 TSX 页面默认走组件热替换，正文变了但页面树里的标题还是旧的（布局的 loader 不重新运行）
  */
 function pageListRefresh(): Plugin {
   let watchedDirs: string[] = []
@@ -81,7 +80,7 @@ function pageListRefresh(): Plugin {
       handler({ type, file, server }) {
         const changed = normalizePath(file)
         if (!watchedDirs.some((dir) => changed.startsWith(`${dir}/`))) return
-        if (type === 'update' && !changed.endsWith(tsxPageSuffix)) return
+        if (type !== 'update' || !changed.endsWith(tsxPageSuffix)) return
         // 浏览器一侧与开发服务端一侧各调用一次；两边的失效都在浏览器一侧这一次里做完，再让浏览器刷新，免得刷新后的请求赶在开发服务端失效之前。
         // 改了的 TSX 页面本身也要在模块运行器里失效：这里拦下了默认的热更新，运行器不会自己去失效它
         if (this.environment.name === 'client') {
