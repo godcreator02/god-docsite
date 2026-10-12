@@ -32,7 +32,7 @@
 <h2>二、工作流程（定死的规矩）</h2>
 <ul>
   <li><strong>直接写正式代码。</strong>packages/ 与 site/ 是工作对象，不做「先搭验证站、再收编」的两段式。</li>
-  <li><strong>探针（probes/）只在遇到不知道上游会怎么表现的问题时写。</strong>写之前说清要判什么、有哪几种可能；判完留 result.md。本来就该是正式代码的东西，不进探针。</li>
+  <li><strong>探针（probes/）只在遇到不知道上游会怎么表现的问题时写。</strong>守 AGENTS 里的 probes 规矩：一个实验一个目录（目录名 yymmddhhmm_描述），<strong>目录 README 第一行就是能照着跑的复跑命令</strong>；写之前说清要判什么、有哪几种可能；判完留 result.md、handoff 与精确版本/日志。本来就该是正式代码的东西，不进探针。</li>
   <li><strong>每完成一段就收口：</strong>改到的包 <code>pnpm check</code> 绿、自述站过一遍对应场景、AGENTS 与文档同步、提交一笔。每笔提交自成一体、可单独回退。</li>
   <li><strong>测试一律 Vitest</strong>（真实文件、真实 dev/build，不 mock 文件系统）。</li>
 </ul>
