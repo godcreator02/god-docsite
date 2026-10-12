@@ -6,11 +6,11 @@
  */
 import { useState } from 'react';
 import type { ReactNode } from 'react';
-import { CasePicker, CodeLines, Dot, Pane, Pill, Terminal } from '@godcreator/docfirst-explainer';
-import type { Tone } from '@godcreator/docfirst-explainer';
+import { CasePicker, CodeLines, Dot, Pane, Pill, Terminal } from '@godcreator/docsite-explainer';
+import type { Tone } from '@godcreator/docsite-explainer';
 import { toneOfStatus } from '../pin/tone';
 import { files, kinds, outcomeName, siteKindName } from './ref-kinds.data.mjs';
-import '@godcreator/docfirst-explainer/styles.css';
+import '@godcreator/docsite-explainer/styles.css';
 import './ref-kinds.css';
 
 type Kind = (typeof kinds)[number];

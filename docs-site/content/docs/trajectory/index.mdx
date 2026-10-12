@@ -59,30 +59,30 @@ import { SeamMap } from '../../../src/components/seam-map/seam-map';
 **不认识 docfirst，也不认识别的包。** 它是通用包，也自成一体：清单里没有任何 `@godcreator/` 包，源码与产物不 import 它们，
 源码的相对 import 不出自己的 `src/`：
 
-{/* ref file="../tests/boundary.test.ts" lines="251-275" hash="94b742a6ba47" blob="e8a07d24ed10" */}
+{/* ref file="../tests/boundary.test.ts" lines="258-282" hash="94b742a6ba47" blob="03e2140e3c08" */}
 
 包目录里（源码、产物、样式、构建配置、清单）一个 docfirst 字样都没有，清单里指向本仓的仓地址除外（仓名是 gwb-docfirst）：
 
-{/* ref file="../tests/boundary.test.ts" lines="267-283" hash="a88dde7bd571" blob="e8a07d24ed10" */}
+{/* ref file="../tests/boundary.test.ts" lines="274-290" hash="a88dde7bd571" blob="03e2140e3c08" */}
 
 方向只有一个：docfirst 的 workflow（含 fumadocs 适配）与站的功能包依赖它，它不依赖它们。
 
 **不认识 docfirst 卡文件的写法。** 关系行、frontmatter 字段名、里程碑标题，整个包（源码、产物、样式）里都不出现：
 
-{/* ref file="../tests/boundary.test.ts" lines="336-346" hash="995ed87c2134" blob="e8a07d24ed10" */}
+{/* ref file="../tests/boundary.test.ts" lines="343-353" hash="995ed87c2134" blob="03e2140e3c08" */}
 
 **不读文件。** `.` 入口的产物一条 import 都没有，连 `node:` 也没有；`.ts` 源码只有相对 import。
 所以浏览器、服务端、命令行都能直接用：
 
-{/* ref file="../tests/boundary.test.ts" lines="311-324" hash="4f3a3d56a173" blob="e8a07d24ed10" */}
+{/* ref file="../tests/boundary.test.ts" lines="318-331" hash="4f3a3d56a173" blob="03e2140e3c08" */}
 
 建模只 import 自己目录里的文件，布局、画布、组件都在它下游：
 
-{/* ref file="../tests/boundary.test.ts" lines="326-334" hash="18889b5b49b5" blob="e8a07d24ed10" */}
+{/* ref file="../tests/boundary.test.ts" lines="333-341" hash="18889b5b49b5" blob="03e2140e3c08" */}
 
 **不把 react 打进产物。** `./disk` 的产物第一行是 `"use client"`，只许 import react：
 
-{/* ref file="../tests/boundary.test.ts" lines="348-360" hash="184a302dbdad" blob="e8a07d24ed10" */}
+{/* ref file="../tests/boundary.test.ts" lines="355-367" hash="184a302dbdad" blob="03e2140e3c08" */}
 
 **不管 fumadocs 集合与读卡目录。** 读卡目录在 workflow 的卡格式，正文链接改写在 [fumadocs 适配](/docs/fumadocs)，轨迹卡集合、星轨盘页与卡页在[站的功能包](/docs/site)。
 功能包的星轨盘页按包名从 `./disk` 取 `StarDisk`，样式经 fumadocs 适配的 `trajectory.css` 引入；还没迁的 Next 站经 `./fumadocs/trajectory` 拿到同一个组件。

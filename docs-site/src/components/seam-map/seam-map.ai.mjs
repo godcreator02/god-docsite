@@ -3,7 +3,7 @@
  * 带 module 属性时写的是那个包的内部图。
  * 这个文件不 import React，docfirst.config.mjs 引它，命令行也能运行。
  */
-import { seamGraphText } from '@godcreator/docfirst-explainer/seam-graph';
+import { seamGraphText } from '@godcreator/docsite-explainer/seam-graph';
 import { systemGraph } from './seam-map.data.mjs';
 import { pinGraph } from './inner/pin.data.mjs';
 import { trajectoryGraph } from './inner/trajectory.data.mjs';

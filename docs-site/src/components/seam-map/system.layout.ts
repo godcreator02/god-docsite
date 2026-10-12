@@ -5,8 +5,8 @@
  * 功能包去项目根的线走画布最左边，工作台插件去项目根的线走画布最右边。
  */
 import { Bot, FolderGit2, Hammer, Layers, LayoutTemplate, Orbit, Package, Pin, Plug, Puzzle, SquareTerminal, Workflow } from 'lucide-react';
-import { cap } from '@godcreator/docfirst-explainer';
-import type { SeamLayout } from '@godcreator/docfirst-explainer';
+import { cap } from '@godcreator/docsite-explainer';
+import type { SeamLayout } from '@godcreator/docsite-explainer';
 
 export const systemLayout: SeamLayout = {
   view: { w: 1100, h: 900 },

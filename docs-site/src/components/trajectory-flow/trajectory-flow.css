@@ -1,6 +1,6 @@
 /*
  * TrajectoryFlow 这一页自己的画面：流水线、字段表与校验表、调用列表、树与盘的 SVG、整页示意。
- * 外壳、控制条、卡片、终端、胶囊、代码行的样式与颜色变量（--dx-*）由 @godcreator/docfirst-explainer 提供，
+ * 外壳、控制条、卡片、终端、胶囊、代码行的样式与颜色变量（--dx-*）由 @godcreator/docsite-explainer 提供，
  * 这里全部画在它的 .dx 根元素里，颜色只取 --dx-* 变量与 data-role / data-tone 给出的 --dx-c。
  * SVG 用世界坐标画，线宽用 non-scaling-stroke 固定成屏幕上的 1px 左右。
  */

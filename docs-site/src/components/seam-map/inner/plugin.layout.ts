@@ -29,8 +29,8 @@ import {
   Terminal,
   Type,
 } from 'lucide-react';
-import { cap } from '@godcreator/docfirst-explainer';
-import type { SeamLayout } from '@godcreator/docfirst-explainer';
+import { cap } from '@godcreator/docsite-explainer';
+import type { SeamLayout } from '@godcreator/docsite-explainer';
 
 export const pluginLayout: SeamLayout = {
   view: { w: 1100, h: 1184 },

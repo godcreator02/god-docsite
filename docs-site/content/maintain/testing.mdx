@@ -16,7 +16,7 @@ import { BoundaryRules } from '../../src/components/boundary-rules/boundary-rule
 
 仓根那组按主题一个文件：
 
-{/* tree dir="../tests" depth="1" glob="*.test.ts" hash="d8a17db0c6bc" */}
+{/* tree dir="../tests" depth="1" glob="*.test.ts" hash="d14cba059ffd" */}
 
 ## 依赖方向：只有一个文件在检查
 
@@ -30,11 +30,11 @@ mdx 格式从此就跟读盘、git 绑在一起。补上这两项的是 `tests/b
 禁止表**列的是禁止的，不是允许的**：写成允许的话，新加一个包默认什么都不能依赖，放错位置反而更难发现。
 `packages/` 下多出一个表里没有的目录，另一条测试当场失败，要求先想清楚它能认识谁：
 
-{/* ref file="../tests/boundary.test.ts" lines="144-173" hash="87257bfcf303" blob="e8a07d24ed10" */}
+{/* ref file="../tests/boundary.test.ts" lines="144-181" hash="b14536dacdee" blob="03e2140e3c08" */}
 
 workflow 目录之间是同样的写法：
 
-{/* ref file="../tests/boundary.test.ts" lines="382-393" hash="c81759ee8dbb" blob="e8a07d24ed10" */}
+{/* ref file="../tests/boundary.test.ts" lines="389-400" hash="c81759ee8dbb" blob="03e2140e3c08" */}
 
 ## 自成一体的包与通用包
 
@@ -44,7 +44,7 @@ docfirst 只是它们的一个使用者。**docfirst 的包**有三个：`docfir
 `docfirst-explainer` 是 docfirst 站上用的讲解组件，只有站用，workflow、`docfirst-site` 与插件都不依赖它。
 包发出去的只有 `dist` 与样式，唯一的例外是 `docfirst-site` 的 `template/`：那是基础包初始化时写进站点的轨迹卡集合定义，不是建站模板：
 
-{/* ref file="../tests/boundary.test.ts" lines="573-587" hash="7ee535b60aa6" blob="e8a07d24ed10" */}
+{/* ref file="../tests/boundary.test.ts" lines="580-594" hash="7ee535b60aa6" blob="03e2140e3c08" */}
 
 两张表管两件事。**自成一体的包**（两个通用包加上 `docfirst-explainer`）各自单独安装、单独升版：
 清单里没有任何 `@godcreator/` 包；源码与产物不 import 它们，源码的相对 import 不出自己的 `src/`。
@@ -54,15 +54,15 @@ docfirst 只是它们的一个使用者。**docfirst 的包**有三个：`docfir
 这一条连注释也查。通用包里一旦写了「docfirst 站会这样用」，下一个改它的人就会照着 docfirst 的需要改它，
 它就不再通用。讲 docfirst 怎么用这几个包，写在 `docfirst-workflow` 或这个站里。加一个包就按它是哪一类加进对应的表：
 
-{/* ref file="../tests/boundary.test.ts" lines="205-283" hash="0c8d66df62b6" blob="e8a07d24ed10" */}
+{/* ref file="../tests/boundary.test.ts" lines="213-290" hash="08f4acb894c0" blob="03e2140e3c08" */}
 
 各通用包另有自己的几条。钉码只许 import `node:crypto`，源码与产物里没有文档文本那一侧的名字：
 
-{/* ref file="../tests/boundary.test.ts" lines="285-309" hash="f6ad294a7d3e" blob="e8a07d24ed10" */}
+{/* ref file="../tests/boundary.test.ts" lines="292-316" hash="f6ad294a7d3e" blob="03e2140e3c08" */}
 
 星轨盘的 `.` 入口产物零 import，建模只 import 自己目录里的文件，整个包里没有关系行、frontmatter 字段名这些 docfirst 卡文件的写法：
 
-{/* ref file="../tests/boundary.test.ts" lines="326-346" hash="4d31db61a2b8" blob="e8a07d24ed10" */}
+{/* ref file="../tests/boundary.test.ts" lines="333-353" hash="4d31db61a2b8" blob="03e2140e3c08" */}
 
 包与插件互不认识，两个方向分在两处：包里不许出现任何 `@godcreator/gwb-*` 由 `boundary.test.ts` 查；
 插件不许依赖本仓的任何一个包由插件自己的测试查，包名从 `packages/` 下各包的清单现读：

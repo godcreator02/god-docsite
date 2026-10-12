@@ -145,11 +145,11 @@ import { SeamMap } from '../../../src/components/seam-map/seam-map';
 
 - **不认识钉码核心与讲解组件包**：钉码经 workflow 用；讲解组件归站自己的组件用。谁都不依赖它：
 
-{/* ref file="../tests/boundary.test.ts" lines="144-173" hash="87257bfcf303" blob="e8a07d24ed10" */}
+{/* ref file="../tests/boundary.test.ts" lines="144-181" hash="b14536dacdee" blob="03e2140e3c08" */}
 
 - **不写建站模板**：`template/` 下只有基础包初始化时写进站点的轨迹卡集合定义，建一个新站是基础包与 gwb-docsite 的事：
 
-{/* ref file="../tests/boundary.test.ts" lines="573-592" hash="7ae344d3476d" blob="e8a07d24ed10" */}
+{/* ref file="../tests/boundary.test.ts" lines="580-599" hash="7ae344d3476d" blob="03e2140e3c08" */}
 
 - **不出每页的机读版**：基础包没有 llms 路由与复制 Markdown 的按钮，功能包也不接 workflow 的机读版回调；机读文字只出现在 `docfirst render` 渲染的生成物里。
 - **不画状态点组件**：代码块就是 fumadocs 自己的，功能包只包一层 div、由样式画点，不替换 `pre`。

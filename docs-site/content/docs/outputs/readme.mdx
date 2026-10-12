@@ -27,7 +27,7 @@ pnpm add -D @godcreator/docfirst-workflow
 站另装的两个包：
 
 - `@godcreator/docfirst-site`：地基的功能包，在站 `package.json` 的 `"docsite": { "features": [...] }` 里声明。它给构建页面时的 remark 插件（钉码投影成带状态点的代码块与文件树、术语标注、轨迹卡里的链接）、页面里不用 import 的 `Term` 与文件树组件、星轨盘 `/trajectory` 与卡页 `/trajectory/<卡身份>` 两条路由、侧栏入口「轨迹」与样式
-- `@godcreator/docfirst-explainer`：docfirst 站上用的讲解组件，把一段讲解拆成配说明的帧来播放；站要用时自己装，`docfirst-workflow` 与 `docfirst-site` 都不依赖它
+- `@godcreator/docsite-explainer`：讲解组件，把一段讲解拆成配说明的帧来播放、画系统接缝图；地基能力包，站要用时自己装（旧名 `@godcreator/docfirst-explainer` 0.2.0 起是转发薄壳）
 
 **建站与托管由工作台插件做，命令行不管这两步**。装了 gwb 工作台的机器上，`docfirst.create {"dir":"<仓>/docs-site"}` 一步建好接了三个区（现状、轨迹、未来）的 docfirst 站：地基骨架与功能包起始物（`docfirst.config.mjs`、README 系生成物的正本、两区起始页、docfirst 系脚本）一次写全，装依赖、起服务探活。骨架写完就归站点，随便改。`docsite.site.add {"dir":…}` 托管开发服务，站的进程归工作台、跟哪个会话都无关。建站只由 agent 执行一次，所以不在包里——包留的是要在**仓**里反复发生的那几条。
 

@@ -21,8 +21,8 @@ import {
   SwatchBook,
   Waypoints,
 } from 'lucide-react';
-import { cap } from '@godcreator/docfirst-explainer';
-import type { SeamLayout } from '@godcreator/docfirst-explainer';
+import { cap } from '@godcreator/docsite-explainer';
+import type { SeamLayout } from '@godcreator/docsite-explainer';
 
 export const docfirstExplainerLayout: SeamLayout = {
   view: { w: 1364, h: 780 },

@@ -4,9 +4,9 @@
  * 带 module 属性画那个包内部的接缝图：包里的文件、文件之间的接缝、包外谁调用它、它要谁实现（模块页用）。
  * 画法在讲解组件包的 SeamDiagram；每张图的内容在 *.data.mjs，坐标在 *.layout.ts；生成物里的机读文字由 seam-map.ai.mjs 读同一份内容生成。
  */
-import { SeamDiagram } from '@godcreator/docfirst-explainer';
-import type { SeamLayout } from '@godcreator/docfirst-explainer';
-import type { SeamGraph } from '@godcreator/docfirst-explainer/seam-graph';
+import { SeamDiagram } from '@godcreator/docsite-explainer';
+import type { SeamLayout } from '@godcreator/docsite-explainer';
+import type { SeamGraph } from '@godcreator/docsite-explainer/seam-graph';
 import { systemGraph } from './seam-map.data.mjs';
 import { systemLayout } from './system.layout';
 import { pinGraph } from './inner/pin.data.mjs';
@@ -23,7 +23,7 @@ import { docfirstExplainerGraph } from './inner/docfirst-explainer.data.mjs';
 import { docfirstExplainerLayout } from './inner/docfirst-explainer.layout';
 import { pluginGraph } from './inner/plugin.data.mjs';
 import { pluginLayout } from './inner/plugin.layout';
-import '@godcreator/docfirst-explainer/styles.css';
+import '@godcreator/docsite-explainer/styles.css';
 
 const INNER: Record<string, { graph: SeamGraph; layout: SeamLayout }> = {
   pin: { graph: pinGraph, layout: pinLayout },

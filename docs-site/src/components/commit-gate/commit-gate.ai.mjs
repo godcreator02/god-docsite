@@ -4,7 +4,7 @@
  * 这一页自己的内容（git status、命令与输出、退出码、判定、门禁、红的几类）另写成段落。
  * 这个文件不 import React，docfirst.config.mjs 引它，命令行也能运行。
  */
-import { stepsText } from '@godcreator/docfirst-explainer/text';
+import { stepsText } from '@godcreator/docsite-explainer/text';
 import { files, gateLabel, gateNote, notRed, redSources, steps } from './commit-gate.data.mjs';
 
 const answerText = { yes: '是', no: '否', skip: '不问' };

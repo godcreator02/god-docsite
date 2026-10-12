@@ -1,5 +1,5 @@
 /** 钉码的四种状态在讲解组件包里用哪种状态色；PinStory 与 PinJudge 共用，保证同一种状态两处颜色一致 */
-import type { Tone } from '@godcreator/docfirst-explainer';
+import type { Tone } from '@godcreator/docsite-explainer';
 
 export type PinStatus = 'fresh' | 'changed' | 'missing' | 'unconfirmed';
 

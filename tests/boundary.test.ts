@@ -39,7 +39,7 @@
  * **五、包不认识工作台插件**：npm 包不许出现任何 `@godcreator/gwb-*`。
  * 包一旦依赖插件，装 docfirst 的人就得连带装上整个桌面工作台生态。
  *
- * **六、讲解组件包 docfirst-explainer 的三个入口**：react 是必需 peer；`.` 是客户端组件，`./text` 与 `./seam-graph` 零 import
+ * **六、讲解组件包 docfirst-explainer 的三个入口**：它是转发薄壳——依赖只有正本 docsite-explainer，三入口原样转发，`.` 的客户端指令留在头一行
  * （站在 Node 里生成机读版时加载它们）。
  *
  * **别删这个文件，也别把某一条注释掉「先让门禁通过」。** 它失败的时候，出错的是设计，不是测试。
@@ -172,7 +172,7 @@ const PACKAGE_FORBIDDEN: Record<string, string[]> = {
   "code-pin": without("code-pin", []),
   "trajectory-disk": without("trajectory-disk", []),
   "docfirst-workflow": without("docfirst-workflow", ["code-pin", "trajectory-disk"]),
-  "docfirst-explainer": without("docfirst-explainer", []),
+  "docfirst-explainer": without("docfirst-explainer", ["docsite-explainer"]),
   "docfirst-site": without("docfirst-site", ["docsite-kit", "docfirst-workflow", "trajectory-disk"]),
   // collab：model 只用组合包，site 再用 model，merge-check 只用 model
   "collab-model": without("collab-model", ["docsite-kit"]),
@@ -216,7 +216,6 @@ test("packages/ 下的包一个不多一个不少——加了新包得先想清�
 const SELF_CONTAINED_PACKAGES = [
   "code-pin",
   "trajectory-disk",
-  "docfirst-explainer",
   "docsite-identity",
   "docsite-comments",
   "docsite-page-sources",
@@ -625,11 +624,11 @@ test("npm 包的源码里一行 @godcreator/gwb-* 都没有", () => {
   }
 });
 
-// ── 六、docfirst-explainer 的三个入口 ─────────────────────────────────────────────────
+// ── 六、docfirst-explainer 的三个入口（转发薄壳） ─────────────────────────────────────
 
-test("docfirst-explainer 清单：没有 dependencies，react 只作必需 peer；工作台插件不依赖它", () => {
+test("docfirst-explainer 是转发薄壳：只依赖 docsite-explainer，react 只作必需 peer；工作台插件不依赖它", () => {
   const pkg = manifestOf("docfirst-explainer");
-  assert.deepEqual(Object.keys(pkg.dependencies ?? {}), [], "docfirst-explainer 的 dependencies 得是空的");
+  assert.deepEqual(Object.keys(pkg.dependencies ?? {}), ["@godcreator/docsite-explainer"], "薄壳的 dependencies 只有正本一个");
   assert.deepEqual(Object.keys(pkg.peerDependencies ?? {}), ["react"], "docfirst-explainer 的 peer 只有 react");
   assert.notEqual(pkg.peerDependenciesMeta?.react?.optional, true, "react 是 docfirst-explainer 的必需 peer，不该标可选");
   // 反方向：别的包由 PACKAGE_FORBIDDEN 查，工作台插件在这里查
@@ -637,31 +636,14 @@ test("docfirst-explainer 清单：没有 dependencies，react 只作必需 peer�
   assert.ok(!allDepsOf(plugin).includes(NPM_PACKAGES["docfirst-explainer"]!), "工作台插件依赖了 docfirst-explainer");
 });
 
-test("docfirst-explainer 的 `.`：客户端指令在头一行，只 import react，没有把 react 或别的模块打包进来", () => {
+test("docfirst-explainer 的三个入口原样转发正本：`.` 的客户端指令留在头一行", () => {
   const index = distOf("docfirst-explainer", "index.mjs");
   assert.match(index, /^"use client";/, "index.mjs 的 use client 指令得留在头一行");
-  const specs = importSpecsOf(index);
-  assert.ok(specs.some(isReact), "index.mjs 里没有 react 的 import 行——react 被内联进产物了");
-  for (const spec of specs) assert.ok(isReact(spec), `index.mjs（客户端组件）import 了 react 之外的 ${spec}`);
-  for (const m of index.matchAll(/^\/\/#region (.+)$/gm)) {
-    assert.ok(m[1]!.startsWith("src/"), `index.mjs 把 ${m[1]} 打包进了产物`);
-  }
-  assert.doesNotMatch(index, /__CLIENT_INTERNALS|react\.production/, "index.mjs 正文里有 react 本体的痕迹");
-});
-
-test("docfirst-explainer 的 `./text`：docfirst.config.mjs 在 Node 里加载它，产物零 import、不带客户端指令", () => {
+  assert.deepEqual(importSpecsOf(index), ["@godcreator/docsite-explainer"], "index.mjs 只许转发正本");
   const text = distOf("docfirst-explainer", "text.mjs");
-  assert.deepEqual(importSpecsOf(text), []);
+  assert.deepEqual(importSpecsOf(text), ["@godcreator/docsite-explainer/text"], "text.mjs 只许转发正本");
   assert.doesNotMatch(text, /^"use client";/);
-  assert.deepEqual(importSpecsOf(readFileSync(join(srcOf("docfirst-explainer"), "text.ts"), "utf8")), [], "text.ts 源码也不许 import");
-});
-
-test("docfirst-explainer 的 `./seam-graph`：接缝图的数据文件在 Node 与客户端都加载它，产物零 import、不带客户端指令，源码只 import 类型", () => {
   const graph = distOf("docfirst-explainer", "seam-graph.mjs");
-  assert.deepEqual(importSpecsOf(graph), []);
+  assert.deepEqual(importSpecsOf(graph), ["@godcreator/docsite-explainer/seam-graph"], "seam-graph.mjs 只许转发正本");
   assert.doesNotMatch(graph, /^"use client";/);
-  const src = readFileSync(join(srcOf("docfirst-explainer"), "seam-graph.ts"), "utf8");
-  for (const line of src.split("\n").filter((l) => /^import\b/.test(l))) {
-    assert.match(line, /^import type /, `seam-graph.ts 只许 import 类型：${line}`);
-  }
 });

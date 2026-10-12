@@ -3,7 +3,7 @@
  * 框是包里的文件，方块是文件对外给的东西；灰色实线框是包外的站、站的配置、react 与 fumadocs。
  * 接缝图的三块（站的接缝图文件、定义图与机读文字、画接缝图）放在最右一列。坐标在 docfirst-explainer.layout.ts。
  */
-import { defineSeamGraph } from '@godcreator/docfirst-explainer/seam-graph';
+import { defineSeamGraph } from '@godcreator/docsite-explainer/seam-graph';
 
 export const docfirstExplainerGraph = defineSeamGraph({
   id: 'docfirst-explainer',
@@ -221,7 +221,7 @@ export const docfirstExplainerGraph = defineSeamGraph({
       name: '客户端入口',
       a: ['view'],
       b: ['entry'],
-      iface: 'import { Stepper, CasePicker, Pane, Pill, … } from "@godcreator/docfirst-explainer"',
+      iface: 'import { Stepper, CasePicker, Pane, Pill, … } from "@godcreator/docsite-explainer"',
       convention: false,
       via: 'code',
       text: '站的画面组件从包的主入口 import 外壳、零件与 Role、Tone 等类型。入口第一行是 "use client"，构建后留在产物头一行，站 import 到的都是客户端组件。',
@@ -311,7 +311,7 @@ export const docfirstExplainerGraph = defineSeamGraph({
       name: '引入样式表',
       a: ['site-css'],
       b: ['classes', 'attrs', 'vars'],
-      iface: "import '@godcreator/docfirst-explainer/styles.css' → styles/explain.css",
+      iface: "import '@godcreator/docsite-explainer/styles.css' → styles/explain.css",
       convention: false,
       via: 'code',
       text: '主入口不带样式，用到外壳或零件的组件各自 import 样式表，打包工具只放进一份，所有讲解组件共用。包的 exports 把 ./styles.css 指到 styles/explain.css。',
@@ -361,7 +361,7 @@ export const docfirstExplainerGraph = defineSeamGraph({
       name: '定义接缝图',
       a: ['seam-data'],
       b: ['define'],
-      iface: 'import { defineSeamGraph } from "@godcreator/docfirst-explainer/seam-graph"；defineSeamGraph({ id, title, intro, frameLabel, modules, entries, seams }) → SeamGraph',
+      iface: 'import { defineSeamGraph } from "@godcreator/docsite-explainer/seam-graph"；defineSeamGraph({ id, title, intro, frameLabel, modules, entries, seams }) → SeamGraph',
       convention: false,
       via: 'code',
       text: '每张图的内容写成一个 defineSeamGraph 调用：模块、能力、入口、接缝。id 重复、两端或入口指向不存在的能力，加载时当场报错。画面与机读规则 import 的是同一份数据文件。',

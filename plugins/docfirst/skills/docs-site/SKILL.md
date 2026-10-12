@@ -51,7 +51,7 @@ docfirst.create        {"dir":"<仓>/docs-site"}    接好 docfirst 的站：现
 **侧栏顺序**写在各目录的 `meta.json`：`{ "pages": ["index", "...", "glossary"] }`，`"..."` 是其余按文件名排。
 
 **用一个组件**：站内组件写在 `src/components/`，在用到它的页面开头按相对路径 `import`（`import { SeamMap } from '../../src/components/seam-map/seam-map';`），
-组件自己 `import` 样式（`./xx.css`、`@godcreator/docfirst-explainer/styles.css`）。`Term` 与文件树 `Files` / `Folder` / `File` 由功能包提供，页面里不用 import；
+组件自己 `import` 样式（`./xx.css`、`@godcreator/docsite-explainer/styles.css`）。`Term` 与文件树 `Files` / `Folder` / `File` 由功能包提供，页面里不用 import；
 fumadocs 自带的组件从 `@fumadocs/base-ui/components/<名>` 在页面开头 import。**只有组件要放进生成正本时**，在 `docfirst.config.mjs` 的 `components`
 给它一条机读规则：放在组件旁边、不依赖 React 的 `.ai.mjs` 文件里，交回的文字就是它在生成物里的样子；普通页面上的组件不写规则。
 生成正本里用了名册外的组件，`pnpm docfirst check` 报红、`render` 拒绝渲染；页面里用了却没 import 的组件，页面渲染时报组件未定义。

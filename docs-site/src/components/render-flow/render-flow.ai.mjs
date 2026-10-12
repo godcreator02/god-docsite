@@ -2,7 +2,7 @@
  * RenderFlow 在生成物里变成什么机读文字：跟画面读同一份数据（render-flow.data.mjs），每一段一段话，
  * 再把示例正本、生成物、拒绝渲染的输出逐行列出来。这个文件不 import React，docfirst.config.mjs 引它，命令行也能运行。
  */
-import { chaptersText } from '@godcreator/docfirst-explainer/text';
+import { chaptersText } from '@godcreator/docsite-explainer/text';
 import {
   chapters,
   codeLines,

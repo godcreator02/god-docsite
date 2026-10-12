@@ -78,18 +78,18 @@ docfirst 站就钉码引用那段代码，普通站就删掉。
 系统大时分两层：首页的全局图只画包与包之间的接缝；每个包的模块页（目录怎么拆见「分区」）开头画包内接缝图
 （虚线框是文件或目录，方块是文件对外给的函数，包外的调用方画成灰色实线框），用 frontmatter `full: true` 铺满宽度。
 
-站只写每张图的内容与坐标：内容用 `@godcreator/docfirst-explainer/seam-graph` 的 `defineSeamGraph` 定义，坐标写成一张 `SeamLayout`，
+站只写每张图的内容与坐标：内容用 `@godcreator/docsite-explainer/seam-graph` 的 `defineSeamGraph` 定义，坐标写成一张 `SeamLayout`，
 两样交给 `SeamDiagram`；图要放进生成正本时，机读规则把同一份内容交给 `seamGraphText` 写成段落。
 
 ## 讲解组件
 
-**讲解组件包** `@godcreator/docfirst-explainer` 给出三种外壳，控制条都在画面上方、排成固定的一行，说明文字在画面下方：
+**讲解组件包** `@godcreator/docsite-explainer` 给出三种外壳，控制条都在画面上方、排成固定的一行，说明文字在画面下方：
 
 - **分步** `Stepper`：每一步是一个固定状态，讲有先后的过程
 - **动画** `Timeline`：时间连续、能拖到任意一刻。画面必须写成「时间 → 画面」的函数，不能用一次性的 CSS 动画
 - **选情况** `CasePicker`：画面高亮这种情况走过的路径与结论，讲同一套规则下几种情况的差别
 
-零件有 `Pane`、`Terminal`、`Pill`、`Dot`、`CodeLines`、`Diff`；`@godcreator/docfirst-explainer/text` 把步骤、章节、情况的数据转成段落。
+零件有 `Pane`、`Terminal`、`Pill`、`Dot`、`CodeLines`、`Diff`；`@godcreator/docsite-explainer/text` 把步骤、章节、情况的数据转成段落。
 组件自己只画这一页独有的部分，控制条与零件不重画。风格是现代开发者工具风：1px 细边框、大圆角，边框、标题栏、标签用同一个颜色调淡，
 很轻的阴影与小动画，不用辉光、渐变、毛玻璃。
 
@@ -101,7 +101,7 @@ docfirst 站就钉码引用那段代码，普通站就删掉。
   交回的就是它在生成物里的样子，读同一份 `*.data.mjs`；规则登记进 `docfirst.config.mjs` 的组件名册 `components`
 - **页面用到站内组件就在开头 `import`**（基础包上的站）：路径相对页面，如 `import { SeamMap } from '../../src/components/seam-map/seam-map';`。
   `Term` 与文件树 `Files` / `Folder` / `File` 由功能包 `@godcreator/docfirst-site` 提供，不用 import
-- **组件自己 `import` 样式**：`./xx.css`，用了讲解组件包的再 import `@godcreator/docfirst-explainer/styles.css`，不靠全局样式
+- **组件自己 `import` 样式**：`./xx.css`，用了讲解组件包的再 import `@godcreator/docsite-explainer/styles.css`，不靠全局样式
 - 浏览器 API 放进 `useEffect`：页面先在服务端渲染一遍
 - 组件最外层加 `not-prose`，宽窄屏用容器查询（外层 `@container`，里面 `@2xl:` 这类前缀）
 - 颜色用 fumadocs 的主题色（`bg-fd-card`、`border-fd-border`、`text-fd-muted-foreground`，SVG 里 `fill-fd-*` / `stroke-fd-*`）；

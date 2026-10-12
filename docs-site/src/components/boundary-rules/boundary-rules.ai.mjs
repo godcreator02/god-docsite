@@ -4,7 +4,7 @@
  * 和画面上 CasePicker 显示的是同一段话）、守着的允许方向与禁止的方向、违反时失败的 test。
  * 这个文件不 import React，docfirst.config.mjs 引它，命令行也能运行。
  */
-import { casesText } from '@godcreator/docfirst-explainer/text';
+import { casesText } from '@godcreator/docsite-explainer/text';
 import { allowedEdges, edgeText, nodes, rules } from './boundary-rules.data.mjs';
 
 const nodeText = (n) => `${n.name}（${n.ident}）`;

@@ -6,10 +6,10 @@
  * 内容全在 boundary-rules.data.mjs，这里只有布局与交互；生成物里的机读文字由 boundary-rules.ai.mjs 读同一份数据生成。
  */
 import type { ComponentType, ReactNode, SVGProps } from 'react';
-import { CasePicker, Pane } from '@godcreator/docfirst-explainer';
+import { CasePicker, Pane } from '@godcreator/docsite-explainer';
 import { Blocks, Globe, Hash, Layers, Orbit, Package, PanelsTopLeft, Pin, Plug, Puzzle, Workflow } from 'lucide-react';
 import { allowedByKey, allowedEdges, edgeText, nodeById, nodes, parseEdge, rules } from './boundary-rules.data.mjs';
-import '@godcreator/docfirst-explainer/styles.css';
+import '@godcreator/docsite-explainer/styles.css';
 import './boundary-rules.css';
 
 type Rule = (typeof rules)[number];

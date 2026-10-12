@@ -144,10 +144,10 @@ import { SeamMap } from '../../../src/components/seam-map/seam-map';
 - **不分区**：哪篇是现状区、哪篇是轨迹卡由调用方判断，站的功能包按项目的内容根与轨迹卡目录分。
 - **不把宿主、本仓别的包与本包的命令行代码打包进产物**：只按包名 import；`./fumadocs/pre` 的 `"use client"` 在产物第一行，别的出口不带：
 
-{/* ref file="../tests/boundary.test.ts" lines="532-557" hash="d79252940b87" blob="e8a07d24ed10" */}
+{/* ref file="../tests/boundary.test.ts" lines="539-564" hash="d79252940b87" blob="03e2140e3c08" */}
 
 - **不被命令行加载**（`./fumadocs/roster` 除外）：workflow 别的目录不许引用这个目录，这个目录也只按包名用 `.`、`./mdx`、`./cards`；`./fumadocs/roster` 的产物不许 import 宿主：
 
-{/* ref file="../tests/boundary.test.ts" lines="471-485" hash="6cf7852c8dc4" blob="e8a07d24ed10" */}
+{/* ref file="../tests/boundary.test.ts" lines="478-492" hash="6cf7852c8dc4" blob="03e2140e3c08" */}
 
-{/* ref file="../tests/boundary.test.ts" lines="559-566" hash="1dfc84292866" blob="e8a07d24ed10" */}
+{/* ref file="../tests/boundary.test.ts" lines="566-573" hash="1dfc84292866" blob="03e2140e3c08" */}

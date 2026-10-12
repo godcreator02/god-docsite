@@ -1,0 +1,25 @@
+---
+born-at: 2026-10-12T23:48
+type: choice
+parent: [2026-09-03-god-live-doc]
+label: docfirst-explainer 切成转发薄壳，docs-site 直连正本 docsite-explainer
+---
+
+## 背景
+
+讲解组件正本已搬到 docsite-kit 仓的 `@godcreator/docsite-explainer`（0.1.0 已发版），旧包 `docfirst-explainer` 0.1.1 冻结等待。docs-site 仍双依赖两个包，讲解组件 42 处 import 走旧名。
+
+## 选了
+
+- `docfirst-explainer` 0.2.0 起是转发薄壳：三入口（`.`、`./text`、`./seam-graph`）与 `./styles.css` 原样转发正本，装旧包名的站不用改代码；新站装新名
+- docs-site 的 42 处 import 与依赖全部直连 `docsite-explainer`，不再经薄壳；讲解组件页重钉到正本源码
+- 边界守卫第六节改为薄壳形状检查（只依赖正本、三入口只转发一处、`.` 的客户端指令留在头一行）；它移出「自成一体」表
+
+## 否掉的候选
+
+- 直接删旧包：下游站装着旧名，删了它们的安装与构建全断；薄壳是零成本的兼容层
+- 薄壳带 `"use client"` 指令靠手工保留：tsdown 产物会丢指令，源文件头一行写字面量即可保留
+
+## 代价
+
+- 两个包名并存一段时间，文档要写清哪个是正本

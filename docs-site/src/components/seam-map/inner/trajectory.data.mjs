@@ -3,7 +3,7 @@
  * 框是包里的模块（src/model/ 目录、layout.ts 与 chains.ts、canvas/ 目录、disk.tsx 与 star.css），方块是它对外给的东西；
  * 灰色实线框是包外的调用方与 react。坐标在 trajectory.layout.ts。
  */
-import { defineSeamGraph } from '@godcreator/docfirst-explainer/seam-graph';
+import { defineSeamGraph } from '@godcreator/docsite-explainer/seam-graph';
 
 export const trajectoryGraph = defineSeamGraph({
   id: 'trajectory',

@@ -19,7 +19,6 @@
   },
   "dependencies": {
     "@fumadocs/base-ui": "16.17.1",
-    "@godcreator/docfirst-explainer": "workspace:*",
     "@godcreator/docfirst-site": "workspace:*",
     "@godcreator/docfirst-workflow": "workspace:*",
     "@godcreator/docsite-comments": "workspace:*",

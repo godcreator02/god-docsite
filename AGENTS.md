@@ -16,7 +16,7 @@ gwb-docfirst-workflow 插件、docs-site 文档站）。2026-10-12 前 docfirst 
 | `packages/code-pin/`、`packages/trajectory-disk/` | 通用包：钉码核心、星轨盘。不认识 docfirst，谁都能单独使用 |
 | `packages/docfirst-workflow/` | docfirst 本身：命令行、项目装配与格式，接到 fumadocs 站上的部分在子入口 `./fumadocs` |
 | `packages/docfirst-site/` | 地基的功能包：remark 插件、Term 与文件树、星轨盘与卡页路由；`template/` 的起始物（docfirst.config.mjs、outputs 正本、两区起始页）从 docs-site 派生 |
-| `packages/docfirst-explainer/` | 讲解组件薄壳（冻结，等 `@godcreator/docsite-explainer` 发版后转发或删除） |
+| `packages/docfirst-explainer/` | 转发薄壳：`@godcreator/docsite-explainer` 的原出口名转发（正本已在本仓），装旧包名的站不用改代码 |
 | `plugins/docsite/` | gwb 基础插件 `@godcreator/gwb-docsite`：身份码、一步建站（建站器在插件里，骨架模板从自述站派生）、托管站点、评论命令、说明书 `docsite` |
 | `plugins/docfirst/` | gwb 插件 `@godcreator/gwb-docfirst-workflow`：`docfirst.create`（认站名、选端口、把 docfirst-site 交给 `gwbDocsite.init`）、说明书 `docs-site` / `docs-writing` / `trajectory` |
 | `site/` | 自述站：讲地基与能力包，是**骨架的正本**——`app/` 与根目录的配置手写在这里，docsite 插件构建时派生建站模板（`plugins/docsite/template/`，构建产物不进 git） |
