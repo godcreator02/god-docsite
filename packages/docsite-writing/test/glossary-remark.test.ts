@@ -3,8 +3,8 @@ import remarkMath from "remark-math";
 import remarkMdx from "remark-mdx";
 import remarkParse from "remark-parse";
 import { unified } from "unified";
-import { remarkGlossary } from "../../src/writing/glossary-remark.js";
-import type { TermEntry } from "../../src/writing/glossary.js";
+import { remarkGlossary } from "../src/glossary-remark.js";
+import type { TermEntry } from "../src/glossary.js";
 
 const terms: TermEntry[] = [
   { term: "命令总线", def: "组件间传命令的一条通道", href: "/docs/glossary-demo" },

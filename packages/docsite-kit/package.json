@@ -32,15 +32,6 @@
       "types": "./dist/ui/index.d.ts",
       "default": "./dist/ui/index.js"
     },
-    "./writing": {
-      "types": "./dist/writing/index.d.ts",
-      "default": "./dist/writing/index.js"
-    },
-    "./writing/compile": {
-      "types": "./dist/writing/compile.d.ts",
-      "default": "./dist/writing/compile.js"
-    },
-    "./writing.css": "./src/writing/term.css",
     "./feature": {
       "types": "./dist/feature.d.ts",
       "default": "./dist/feature.js"

@@ -8,10 +8,10 @@ import remarkMath from "remark-math";
 import { Fragment, jsx, jsxs } from "react/jsx-runtime";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
-import { remarkGlossary } from "../../src/writing/glossary-remark.js";
-import type { TermEntry } from "../../src/writing/glossary.js";
-import { Term } from "../../src/writing/term.js";
-import { Tex } from "../../src/writing/tex.js";
+import { remarkGlossary } from "../src/glossary-remark.js";
+import type { TermEntry } from "../src/glossary.js";
+import { Term } from "../src/term.js";
+import { Tex } from "../src/tex.js";
 
 const terms: TermEntry[] = [
   { term: "命令总线", def: "组件间传命令的一条通道", href: "/docs/glossary-demo" },

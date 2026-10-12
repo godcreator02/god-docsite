@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { buildTermIndex, findTerms } from "../../src/writing/glossary.js";
-import type { TermEntry } from "../../src/writing/glossary.js";
+import { buildTermIndex, findTerms } from "../src/glossary.js";
+import type { TermEntry } from "../src/glossary.js";
 
 const terms: TermEntry[] = [
   { term: "命令总线", def: "组件间传命令的一条通道" },
