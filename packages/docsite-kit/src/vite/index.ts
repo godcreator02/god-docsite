@@ -31,8 +31,8 @@ function processedWithSite(featurePackages: readonly string[]): Plugin {
 }
 
 /**
- * 不预打包的包，它们自己依赖的库照样要预打包：里面有 CommonJS 的（diff-match-patch、react-markdown 底下的几个），
- * 原样送进浏览器读不出 default；站点根目录下也解析不到它们（pnpm 不把间接依赖放到顶层），要写成「包 > 依赖」
+ * 不预打包的包，它们自己声明的依赖照样要预打包：这些依赖在站点根目录下解析不到（pnpm 不把间接依赖放到顶层），
+ * 要写成「包 > 依赖」的形式
  */
 function nestedDependenciesOf(root: string, packages: readonly string[]): string[] {
   return packages.flatMap((name) => {
@@ -57,7 +57,7 @@ function hasRootEntry(fromDir: string, name: string): boolean {
 
 /** 放页面与评论的目录、列出它们的模块，都相对站点根；项目骨架就是这样摆的 */
 const contentDirs = ['content', 'comments']
-const pageListFiles = ['app/lib/collections.ts', 'app/lib/source.ts']
+const pageListFiles = ['app/lib/collections.ts', 'app/lib/source.server.ts']
 
 /**
  * 改 TSX 页面时，让列出页面的模块重新生成，再让浏览器整页刷新。改别的文件不经过这里，照 Vite 与 React Router 的默认处理。

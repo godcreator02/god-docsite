@@ -13,8 +13,7 @@
     "skipLibCheck": true,
     "noEmit": true,
     "types": [
-      "node",
-      "vite/client"
+      "node"
     ]
   },
   "include": [
