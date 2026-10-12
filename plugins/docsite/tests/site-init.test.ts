@@ -11,7 +11,7 @@ let root: string
 let siteDir: string
 
 /** 假的依赖：记下调用顺序；addKit / install 照真 pnpm 的效果装包——基础包链到本仓的（模板是真的），别的包装成没有模板的空包 */
-function fakeDeps(options: { registered?: boolean; startFails?: boolean } = {}) {
+function fakeDeps(options: { registered?: boolean; startFails?: boolean; pageStatus?: number } = {}) {
   const events: string[] = []
   const installAs = (dir: string, name: string) => {
     const target = path.join(dir, 'node_modules', ...name.split('/'))
@@ -44,6 +44,10 @@ function fakeDeps(options: { registered?: boolean; startFails?: boolean } = {}) 
       events.push('stop')
       return { url: 'http://127.0.0.1:4560' }
     },
+    pageStatus: async () => {
+      events.push('page-status')
+      return options.pageStatus ?? 200
+    },
   }
   return { events, deps }
 }
@@ -65,7 +69,7 @@ describe('initSite：从零建站', () => {
     const { events, deps } = fakeDeps()
     const result = await initSite(siteDir, { port: 4560, title: '新站' }, deps)
     expect(result).toEqual({ created: true, features: [] })
-    expect(events).toEqual(['add-kit', 'install', 'start', 'stop'])
+    expect(events).toEqual(['add-kit', 'install', 'start', 'page-status', 'stop'])
     const manifest = manifestOf()
     expect(manifest['private']).toBe(true)
     expect(manifest['type']).toBe('module')
@@ -80,7 +84,7 @@ describe('initSite：从零建站', () => {
   it('登记着的站起服务检查后保持运行，不停', async () => {
     const { events, deps } = fakeDeps({ registered: true })
     await initSite(siteDir, { port: 4560, title: '新站' }, deps)
-    expect(events).toEqual(['add-kit', 'install', 'start'])
+    expect(events).toEqual(['add-kit', 'install', 'start', 'page-status'])
   })
 
   it('目录里只有 package.json：当新站，保留里面原有的字段', async () => {
@@ -97,7 +101,7 @@ describe('initSite：从零建站', () => {
     const manifest = manifestOf()
     expect(manifest.docsite).toEqual({ features: ['@probe/missing'] })
     expect(manifest.dependencies['@probe/missing']).toBe('^1.0.0')
-    expect(events).toEqual(['add-kit', 'install', 'install', 'start', 'stop'])
+    expect(events).toEqual(['add-kit', 'install', 'install', 'start', 'page-status', 'stop'])
   })
 
   it('目录里有别的文件、没给 port 或 title，都拒绝，什么也不做', async () => {
@@ -117,6 +121,13 @@ describe('initSite：从零建站', () => {
     await expect(initSite(siteDir, { port: 4560, title: '新站' }, deps)).rejects.toThrow('没有报出地址')
   })
 })
+
+  it('起服务检查探活首页：非 200 报错、站不再停掉', async () => {
+    const { events, deps } = fakeDeps({ pageStatus: 500 })
+    await expect(initSite(siteDir, { port: 4560, title: '新站' }, deps)).rejects.toThrow('首页（http://127.0.0.1:4560）返回 500')
+    expect(events).toContain('start')
+    expect(events).not.toContain('stop')
+  })
 
 describe('initSite：更新已有站点', () => {
   beforeEach(async () => {

@@ -88,6 +88,7 @@ export function apply(ctx: GwbContext): void {
         isRegistered: (siteDir) => sitesSetting.get().some((each) => siteKeyOf(each) === siteKeyOf(siteDir)),
         start: (siteDir) => host.start(siteDir),
         stop: (siteDir) => host.stop(siteDir),
+        pageStatus: async (url) => (await fetch(new URL('/', url))).status,
       })
     },
   }

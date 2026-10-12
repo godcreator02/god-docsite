@@ -34,7 +34,7 @@
     "@godcreator/docsite-comments": "^0.1.0",
     "@godcreator/docsite-writing": "^0.1.0",
     "@godcreator/docsite-page-sources": "^0.1.0",
-    "@godcreator/docsite-ui": "workspace:*",
+    "@godcreator/docsite-ui": "^0.1.0",
     "@godcreator/docsite-explainer": "workspace:*"
   },
   "devDependencies": {

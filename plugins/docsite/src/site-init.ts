@@ -22,7 +22,7 @@ export type SiteInitOptions = {
   title?: string
 }
 
-/** 测试里换成假的：跑 pnpm 的三样、起服务检查的两样、登记表查询 */
+/** 测试里换成假的：跑 pnpm 的三样、起服务检查的两样、首页探活、登记表查询 */
 export type SiteInitDeps = {
   addKit(dir: string): Promise<void>
   install(dir: string): Promise<void>
@@ -30,6 +30,8 @@ export type SiteInitDeps = {
   isRegistered(dir: string): boolean
   start(dir: string): Promise<SiteStarted>
   stop(dir: string): Promise<{ url: string }>
+  /** 起服务检查的探活：回首页的 HTTP 状态码。进程活着不等于站能用（缺依赖时 vite 起得来、页面 500） */
+  pageStatus(url: string): Promise<number>
 }
 
 export type SiteInitResult = { created: boolean; features: string[] }
@@ -157,7 +159,13 @@ export async function initSite(dir: string, options: SiteInitOptions, deps: Site
 
   const registered = deps.isRegistered(dir)
   if (created) {
-    await deps.start(dir)
+    const started = await deps.start(dir)
+    const status = await deps.pageStatus(started.url)
+    if (status !== 200) {
+      throw new DocsiteRejected(
+        `新站点起服务检查没过：首页（${started.url}）返回 ${status}。站点还开着，开发服务的报错在浏览器里看；多半是模板的依赖声明漏了包，修在基础包`,
+      )
+    }
     if (!registered) await deps.stop(dir)
   } else if (registered) {
     await deps.start(dir)

@@ -7,6 +7,11 @@
   },
   "dependencies": {
     "@fumadocs/base-ui": "16.17.1",
+    "@godcreator/docsite-comments": "^0.1.0",
+    "@godcreator/docsite-identity": "^0.1.0",
+    "@godcreator/docsite-page-sources": "^0.1.0",
+    "@godcreator/docsite-ui": "^0.1.0",
+    "@godcreator/docsite-writing": "^0.1.0",
     "@react-router/node": "^8.4.0",
     "@react-router/serve": "^8.4.0",
     "fumadocs-core": "16.17.1",
@@ -18,11 +23,7 @@
     "react-dom": "^19.3.0",
     "react-router": "^8.4.0",
     "rehype-katex": "^7.0.1",
-    "remark-math": "^6.0.0",
-    "@godcreator/docsite-identity": "^0.1.0",
-    "@godcreator/docsite-comments": "^0.1.0",
-    "@godcreator/docsite-writing": "^0.1.0",
-    "@godcreator/docsite-page-sources": "^0.1.0"
+    "remark-math": "^6.0.0"
   },
   "devDependencies": {
     "@react-router/dev": "^8.4.0",
