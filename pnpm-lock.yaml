@@ -19,7 +19,14 @@ importers:
         version: 7.0.2001
 
   packages/docsite-comments:
+    dependencies:
+      diff-match-patch:
+        specifier: 1.0.5
+        version: 1.0.5
     devDependencies:
+      '@types/diff-match-patch':
+        specifier: 1.0.36
+        version: 1.0.36
       '@types/node':
         specifier: ^26.6.2
         version: 26.6.4
@@ -299,26 +306,26 @@ importers:
         specifier: 16.17.1
         version: 16.17.1(@types/mdx@2.0.14)(@types/react@19.3.0)(fumadocs-core@16.17.1(@mdx-js/mdx@3.1.1)(@types/estree-jsx@1.0.5)(@types/hast@3.0.5)(@types/mdast@4.0.4)(@types/react@19.3.0)(lucide-react@1.54.0(@types/react@19.3.0)(react@19.3.0))(react-dom@19.3.0(react@19.3.0))(react-router@8.4.0(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(react@19.3.0)(zod@4.6.5))(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(tailwindcss@4.3.3)
       '@godcreator/docsite-comments':
-        specifier: ^0.1.0
-        version: 0.1.0(react-dom@19.3.0(react@19.3.0))(react-router@8.4.0(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(react@19.3.0)
+        specifier: workspace:*
+        version: link:../packages/docsite-comments
       '@godcreator/docsite-explainer':
         specifier: workspace:*
         version: link:../packages/docsite-explainer
       '@godcreator/docsite-identity':
-        specifier: ^0.1.0
-        version: 0.1.0(react@19.3.0)
+        specifier: workspace:*
+        version: link:../packages/docsite-identity
       '@godcreator/docsite-kit':
         specifier: workspace:*
         version: link:../packages/docsite-kit
       '@godcreator/docsite-page-sources':
-        specifier: ^0.1.0
-        version: 0.1.0(fumadocs-core@16.17.1(@mdx-js/mdx@3.1.1)(@types/estree-jsx@1.0.5)(@types/hast@3.0.5)(@types/mdast@4.0.4)(@types/react@19.3.0)(lucide-react@1.54.0(@types/react@19.3.0)(react@19.3.0))(react-dom@19.3.0(react@19.3.0))(react-router@8.4.0(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(react@19.3.0)(zod@4.6.5))(react@19.3.0)
+        specifier: workspace:*
+        version: link:../packages/docsite-page-sources
       '@godcreator/docsite-ui':
-        specifier: ^0.1.0
-        version: 0.1.0(@fumadocs/base-ui@16.17.1(@types/mdx@2.0.14)(@types/react@19.3.0)(fumadocs-core@16.17.1(@mdx-js/mdx@3.1.1)(@types/estree-jsx@1.0.5)(@types/hast@3.0.5)(@types/mdast@4.0.4)(@types/react@19.3.0)(lucide-react@1.54.0(@types/react@19.3.0)(react@19.3.0))(react-dom@19.3.0(react@19.3.0))(react-router@8.4.0(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(react@19.3.0)(zod@4.6.5))(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(tailwindcss@4.3.3))(@godcreator/docsite-identity@0.1.0(react@19.3.0))(fumadocs-core@16.17.1(@mdx-js/mdx@3.1.1)(@types/estree-jsx@1.0.5)(@types/hast@3.0.5)(@types/mdast@4.0.4)(@types/react@19.3.0)(lucide-react@1.54.0(@types/react@19.3.0)(react@19.3.0))(react-dom@19.3.0(react@19.3.0))(react-router@8.4.0(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(react@19.3.0)(zod@4.6.5))(react@19.3.0)
+        specifier: workspace:*
+        version: link:../packages/docsite-ui
       '@godcreator/docsite-writing':
-        specifier: ^0.1.0
-        version: 0.1.0(katex@0.16.47)(react@19.3.0)
+        specifier: workspace:*
+        version: link:../packages/docsite-writing
       '@react-router/node':
         specifier: ^8.4.0
         version: 8.4.0(react-router@8.4.0(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(typescript@6.0.3)
@@ -374,6 +381,9 @@ importers:
       '@types/react-dom':
         specifier: ^19.3.0
         version: 19.3.0(@types/react@19.3.0)
+      oxlint:
+        specifier: 1.76.0
+        version: 1.76.0(oxlint-tsgolint@7.0.2001)
       tailwindcss:
         specifier: ^4.3.3
         version: 4.3.3
@@ -766,38 +776,6 @@ packages:
 
   '@fumari/image-size@0.1.1':
     resolution: {integrity: sha512-iaiV2wyzJ4mW358NX4CX3yGit+WjKYzpaQ+rldK9BjL/5jFpeV6ruWnZVq7MEyMn3Gd0DLi8g/79NZAAQaGscw==}
-
-  '@godcreator/docsite-comments@0.1.0':
-    resolution: {integrity: sha512-oHlvItUhJ5+SE6vHnjN8LgXTLBhJroAtb2p5Tt27sMhgMDRieA/i0XR2l+H6T+pzphltDb06pr3SIM7eDdEGfw==, tarball: https://git.tianshen02.online:28377/api/packages/godcreator/npm/%40godcreator%2Fdocsite-comments/-/0.1.0/docsite-comments-0.1.0.tgz}
-    peerDependencies:
-      react: ^19.3.0
-      react-dom: ^19.3.0
-      react-router: ^8.4.0
-
-  '@godcreator/docsite-identity@0.1.0':
-    resolution: {integrity: sha512-/xS/PpGliHaCSZ2vnPIzNjWm9xiwP1yndt+HmbJsx+ah1XcCN5gz51QRVQXoXgc4RE/3kQ+v7xfU1JvUAr5hNw==, tarball: https://git.tianshen02.online:28377/api/packages/godcreator/npm/%40godcreator%2Fdocsite-identity/-/0.1.0/docsite-identity-0.1.0.tgz}
-    peerDependencies:
-      react: ^19.3.0
-
-  '@godcreator/docsite-page-sources@0.1.0':
-    resolution: {integrity: sha512-5koemtWmEGPdDr83K8hVHaOUx0LUxukOqtfIFUfnuJeXPmg4MnW5oP8oReaQKjrKtOM+zcG0kwDGcarqoNUTOQ==, tarball: https://git.tianshen02.online:28377/api/packages/godcreator/npm/%40godcreator%2Fdocsite-page-sources/-/0.1.0/docsite-page-sources-0.1.0.tgz}
-    peerDependencies:
-      fumadocs-core: 16.17.1
-      react: ^19.3.0
-
-  '@godcreator/docsite-ui@0.1.0':
-    resolution: {integrity: sha512-OZ3h8YgYe3OzUjggxbv5tcLGa8Hmgbhww2PcZbK6iifqHmtjoLpJC20RWCk/kmSCbAqlMLNpJUXarTAg9HYUFA==, tarball: https://git.tianshen02.online:28377/api/packages/godcreator/npm/%40godcreator%2Fdocsite-ui/-/0.1.0/docsite-ui-0.1.0.tgz}
-    peerDependencies:
-      '@fumadocs/base-ui': 16.17.1
-      '@godcreator/docsite-identity': ^0.1.0
-      fumadocs-core: 16.17.1
-      react: ^19.3.0
-
-  '@godcreator/docsite-writing@0.1.0':
-    resolution: {integrity: sha512-cYtvPmmFW51++HsOkFZ8d0Rgnto+4g1AG1/ml3X5VTLuQybyv7ct3H9F3KNtIYAeGQfh6wJadaZpDdGbUgZqTQ==, tarball: https://git.tianshen02.online:28377/api/packages/godcreator/npm/%40godcreator%2Fdocsite-writing/-/0.1.0/docsite-writing-0.1.0.tgz}
-    peerDependencies:
-      katex: ^0.16.47
-      react: ^19.3.0
 
   '@godcreator/gwb-commands@0.6.1':
     resolution: {integrity: sha512-4nsqJ2oUxZIcHM5wGu73pzmOTo0R4ixAoRgd+l+RNPf0wNmTt3cDsuIyX3kgWD7gTEs4CmNVemra3fDL+gA/dw==, tarball: https://git.tianshen02.online:28377/api/packages/godcreator/npm/%40godcreator%2Fgwb-commands/-/0.6.1/gwb-commands-0.6.1.tgz}
@@ -1297,6 +1275,9 @@ packages:
 
   '@types/deep-eql@4.0.2':
     resolution: {integrity: sha512-c9h9dVVMigMPc4bwTvC5dxqtqJZwQPePsWjPlpSOnojbor6pGqdk541lfA7AqFQr5pB1BRdq0juY9db81BwyFw==}
+
+  '@types/diff-match-patch@1.0.36':
+    resolution: {integrity: sha512-xFdR6tkm0MWvBfO8xXCSsinYxHcqkQUlcHeSpMC2ukzOb6lwQAfDmW+Qt0AvlGd8HpsS28qKsB+oPeJn9I39jg==}
 
   '@types/estree-jsx@1.0.5':
     resolution: {integrity: sha512-52CcUVNFyfb1A2ALocQw/Dd1BQFNmSdkuC3BkZ6iqhdMfQz7JWOFRuJFloOzjk+6WijU56m9oKXFAXc7o3Towg==}
@@ -1807,6 +1788,9 @@ packages:
 
   devlop@1.1.0:
     resolution: {integrity: sha512-RWmIqhcFf1lRYBvNmr7qTNuyCt/7/ns2jbpp1+PalgE/rDQcBT0fioSMUpJ93irlUhC5hrg4cYqe6U+0ImW0rA==}
+
+  diff-match-patch@1.0.5:
+    resolution: {integrity: sha512-IayShXAgj/QMXgB0IWmKx+rOPuGMhqm5w6jvFxmVenXKIzRqTAAsbBPT3kWQeGANj3jGgvcvv4yK6SxqYmikgw==}
 
   dunder-proto@1.0.1:
     resolution: {integrity: sha512-KIN/nDJBQRcXw0MLVhZE9iQHmG68qAVIBg9CqmUYjmQIhgij9U5MFvrqkUL5FbtyyzZuOeOt0zdeRe4UY7ct+A==}
@@ -3633,33 +3617,6 @@ snapshots:
 
   '@fumari/image-size@0.1.1': {}
 
-  '@godcreator/docsite-comments@0.1.0(react-dom@19.3.0(react@19.3.0))(react-router@8.4.0(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(react@19.3.0)':
-    dependencies:
-      react: 19.3.0
-      react-dom: 19.3.0(react@19.3.0)
-      react-router: 8.4.0(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
-
-  '@godcreator/docsite-identity@0.1.0(react@19.3.0)':
-    dependencies:
-      react: 19.3.0
-
-  '@godcreator/docsite-page-sources@0.1.0(fumadocs-core@16.17.1(@mdx-js/mdx@3.1.1)(@types/estree-jsx@1.0.5)(@types/hast@3.0.5)(@types/mdast@4.0.4)(@types/react@19.3.0)(lucide-react@1.54.0(@types/react@19.3.0)(react@19.3.0))(react-dom@19.3.0(react@19.3.0))(react-router@8.4.0(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(react@19.3.0)(zod@4.6.5))(react@19.3.0)':
-    dependencies:
-      fumadocs-core: 16.17.1(@mdx-js/mdx@3.1.1)(@types/estree-jsx@1.0.5)(@types/hast@3.0.5)(@types/mdast@4.0.4)(@types/react@19.3.0)(lucide-react@1.54.0(@types/react@19.3.0)(react@19.3.0))(react-dom@19.3.0(react@19.3.0))(react-router@8.4.0(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(react@19.3.0)(zod@4.6.5)
-      react: 19.3.0
-
-  '@godcreator/docsite-ui@0.1.0(@fumadocs/base-ui@16.17.1(@types/mdx@2.0.14)(@types/react@19.3.0)(fumadocs-core@16.17.1(@mdx-js/mdx@3.1.1)(@types/estree-jsx@1.0.5)(@types/hast@3.0.5)(@types/mdast@4.0.4)(@types/react@19.3.0)(lucide-react@1.54.0(@types/react@19.3.0)(react@19.3.0))(react-dom@19.3.0(react@19.3.0))(react-router@8.4.0(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(react@19.3.0)(zod@4.6.5))(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(tailwindcss@4.3.3))(@godcreator/docsite-identity@0.1.0(react@19.3.0))(fumadocs-core@16.17.1(@mdx-js/mdx@3.1.1)(@types/estree-jsx@1.0.5)(@types/hast@3.0.5)(@types/mdast@4.0.4)(@types/react@19.3.0)(lucide-react@1.54.0(@types/react@19.3.0)(react@19.3.0))(react-dom@19.3.0(react@19.3.0))(react-router@8.4.0(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(react@19.3.0)(zod@4.6.5))(react@19.3.0)':
-    dependencies:
-      '@fumadocs/base-ui': 16.17.1(@types/mdx@2.0.14)(@types/react@19.3.0)(fumadocs-core@16.17.1(@mdx-js/mdx@3.1.1)(@types/estree-jsx@1.0.5)(@types/hast@3.0.5)(@types/mdast@4.0.4)(@types/react@19.3.0)(lucide-react@1.54.0(@types/react@19.3.0)(react@19.3.0))(react-dom@19.3.0(react@19.3.0))(react-router@8.4.0(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(react@19.3.0)(zod@4.6.5))(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(tailwindcss@4.3.3)
-      '@godcreator/docsite-identity': 0.1.0(react@19.3.0)
-      fumadocs-core: 16.17.1(@mdx-js/mdx@3.1.1)(@types/estree-jsx@1.0.5)(@types/hast@3.0.5)(@types/mdast@4.0.4)(@types/react@19.3.0)(lucide-react@1.54.0(@types/react@19.3.0)(react@19.3.0))(react-dom@19.3.0(react@19.3.0))(react-router@8.4.0(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(react@19.3.0)(zod@4.6.5)
-      react: 19.3.0
-
-  '@godcreator/docsite-writing@0.1.0(katex@0.16.47)(react@19.3.0)':
-    dependencies:
-      katex: 0.16.47
-      react: 19.3.0
-
   '@godcreator/gwb-commands@0.6.1(@godcreator/gwb-kernel-desktop@0.10.1(cordis@4.0.0-rc.10))(cordis@4.0.0-rc.10)':
     dependencies:
       '@godcreator/gwb-kernel-desktop': 0.10.1(cordis@4.0.0-rc.10)
@@ -4048,6 +4005,8 @@ snapshots:
 
   '@types/deep-eql@4.0.2': {}
 
+  '@types/diff-match-patch@1.0.36': {}
+
   '@types/estree-jsx@1.0.5':
     dependencies:
       '@types/estree': 1.0.9
@@ -4434,6 +4393,8 @@ snapshots:
   devlop@1.1.0:
     dependencies:
       dequal: 2.0.3
+
+  diff-match-patch@1.0.5: {}
 
   dunder-proto@1.0.1:
     dependencies:
