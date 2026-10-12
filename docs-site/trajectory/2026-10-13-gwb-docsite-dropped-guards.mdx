@@ -1,0 +1,28 @@
+---
+born-at: 2026-10-13T01:40
+type: choice
+parent: [2026-09-03-god-live-doc]
+label: gwb-docsite 重写删掉自动重启、启动前检查与 whileStopped 这些防护
+---
+
+## 背景
+
+gwb-docsite 重写为「能力包的组合层与契约持有者」（设计正本原在自述站 design/gwb-plugin，并入本站时把历史决策收进这张卡）。
+写入经站点 action、读取经能力包函数后，一批启动前的防护没了存在理由。
+
+## 选了
+
+| 删掉 | 理由 |
+| --- | --- |
+| 意外退出自动重启 | 工作台是交互环境：崩了标 failed、记下原因，人或 agent 看到再 start，比无声重启掩盖问题好 |
+| 5 分钟 3 次失败上限 | 它是自动重启的护栏，重启删了它没存在理由 |
+| 启动前的人员/评论文件检查 | 写入经站点 action、读取经能力包函数，校验在使用时发生 |
+| 同站操作排队 | 操作幂等，重复 spawn 被端口占用自然挡住 |
+| whileStopped | 退化为 stop → 做事 → start，init 内部自己做 |
+| 推送的补投队列 | 没运行就明确报错（错了就报错的原则）；协作站真需要时序保证再加 |
+
+保留：站点目录路径归一、spawn 带超时、子进程随插件卸载清理。删掉的 `keep`/`forget`/`open` 服务与 add/remove、VS Code 插件归并。
+
+## 代价
+
+站点崩了不会自己起来，需要人或 agent 看 `docsite.site.list` 的 failed 再 start。

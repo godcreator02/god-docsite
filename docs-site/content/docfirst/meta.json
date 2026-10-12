@@ -1,0 +1,5 @@
+{
+  "title": "docfirst",
+  "root": true,
+  "pages": ["index", "workflow", "pin", "trajectory", "site", "fumadocs", "explainer"]
+}
