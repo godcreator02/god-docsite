@@ -42,11 +42,15 @@ gwb-collab 插件）。docfirst 2026-10-12 自 gwb-docfirst 仓并入（选型�
   地基升级骨架时对照 `site/` 改过去
 * 日常只用开发服务，`pnpm build` 只作提交前的检查
 * 插件打包时带进各包的构建产物：改了包要先构建；在隔离 home 里验插件用 `devkit.dev`（说明书 gwb-devkit）
-* 提交前的检查，每处都过才提交：仓根 `pnpm check`（根 tests 的类型检查 + 逐包 check）、`pnpm test`、`pnpm build`；
+* 测试按节奏跑，不是每次全量：改代码过程中 `pnpm exec vitest run --changed`（或点名文件）；提交前跑**改到的包**全量；
+  仓根 `pnpm check`（逐包 check，plugins/collab 的 `pnpm test` 默认排除 `tests/verified/`）、`pnpm test`、`pnpm build`；
   `docs-site/` 里 `pnpm docfirst check`、`pnpm test`、`pnpm typecheck`、`pnpm build`；改了被钉的代码，本仓未提交改动引起的黄灯算红，
   照 `docs-site` 说明书处理后放进同一个提交
+* `plugins/collab` 的 `tests/verified/` 是**已验证的行为假设**（整组织克隆、ahead/behind 语义、文件监视事件）：断言对着 git 与
+  watcher 本体，日常不跑。四种信号下跑 `pnpm test:verified`：升 git 或关键依赖、动了 `src/organization/setup/` 或
+  `src/other-repos/fetch/`、发版前、用户或 agent 明确要求
 * 发版只用 `devkit.release`，包按依赖序排：能力包 → 组合包 → 插件；docfirst 侧各发各的；协作站按
-  collab-model → collab-merge-check → collab-site → plugins/collab 的顺序。升版本号前先读 skill「gwb-release」
+  collab-model → collab-merge-check → collab-site → plugins/collab 的顺序，发前跑一遍 `pnpm test:verified`。升版本号前先读 skill「gwb-release」
 
 ## 规矩
 

@@ -24,8 +24,9 @@
     "build": "node build.ts && tailwindcss -i src/pane/browser/styles.css -o dist/style.css",
     "typecheck": "tsc --noEmit -p tsconfig.json && tsc --noEmit -p src/pane/browser/tsconfig.json",
     "lint": "oxlint . --deny-warnings",
-    "test": "vitest run",
-    "check": "pnpm run typecheck && pnpm run lint && pnpm run test"
+    "test": "vitest run && node -e \"console.log('跳过 tests/verified/ 的已验证行为批（升 git/动对应模块/发版前/用户指定时要跑 pnpm test:verified）')\"",
+    "check": "pnpm run typecheck && pnpm run lint && pnpm run test",
+    "test:verified": "vitest run --config vitest.verified.config.ts"
   },
   "peerDependencies": {
     "@godcreator/gwb-data": "^0.1.12",

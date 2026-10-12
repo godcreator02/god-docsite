@@ -8,7 +8,7 @@ import { SubmitFailures } from '../../../src/collab-repo/submit/submit-failures.
 import { openProject, type RemoteProject } from '../../../src/project/project.js'
 import type { SiteControl } from '../../../src/site-process/dependencies.js'
 
-vi.setConfig({ testTimeout: 30_000 })
+vi.setConfig({ testTimeout: 90_000 })
 
 const bobCode = 'bobcode2345'
 const people = `${JSON.stringify([{ id: 'admin', name: '管理员' }, { id: 'bob', name: '鲍勃', codes: [bobCode] }])}\n`

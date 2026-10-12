@@ -57,17 +57,20 @@ function writeThread(id: string, head: CommentEntry & { page?: string; status?: 
   })
 }
 
-beforeEach(async () => {
+beforeEach(() => {
   const repo = mkdtempSync(path.join(tmpdir(), 'gwb-collab-inbox-'))
-  git(repo, 'init', '-q', '-b', 'main')
-  git(repo, 'config', 'core.autocrlf', 'false')
-  mkdirSync(path.join(repo, 'collab'))
-  mkdirSync(path.join(repo, 'site'))
+  mkdirSync(path.join(repo, 'collab'), { recursive: true })
+  mkdirSync(path.join(repo, 'site'), { recursive: true })
   writeFileSync(path.join(repo, 'site', 'people.json'), people)
-  bob = await openProject(repo, bobCode)
+  bob = { repo, collabDir: path.join(repo, 'collab'), siteDir: path.join(repo, 'site'), person: 'bob' }
 })
 
 describe('认人', () => {
+  // 这三条走真的 openProject（认人、报错与 join 是产品入口行为），要仓是 git 仓；其余用例手拼 Project 就够
+  beforeEach(() => {
+    git(bob.repo, 'init', '-q', '-b', 'main')
+  })
+
   it('身份是本 home 的身份码在 site/people.json 里对应的那个人', async () => {
     expect(bob.person).toBe('bob')
     expect((await openProject(bob.repo, adminCode)).person).toBe('admin')
@@ -129,7 +132,7 @@ describe('collab.inbox', () => {
 describe('collab.task.create', () => {
   it('写成规范的新文件：status 是 todo，作者是本机身份', async () => {
     const { repo, fields } = taskCreateArgsOf({ repo: bob.repo, title: '核算纹波', owner: 'carol', due: '2026-10-01' })
-    const { id, file } = await createTask(await openProject(repo, bobCode), fields)
+    const { id, file } = await createTask(bob, fields)
     expect(file).toBe(`collab/records/${id}.json`)
     expect(readRecordFile(id)).toBe(encodeRecordFile({ id, type: 'task', author: 'bob', status: 'todo', title: '核算纹波', owner: 'carol', due: '2026-10-01' }))
   })
@@ -146,7 +149,7 @@ describe('collab.task.create', () => {
     const rack = moduleRecord('20260926080000-mmmmmma', 'admin')
     writeRecord(rack)
     const { repo, fields } = taskCreateArgsOf({ repo: bob.repo, title: '核算纹波', module: rack.id })
-    const { id } = await createTask(await openProject(repo, bobCode), fields)
+    const { id } = await createTask(bob, fields)
     expect(readRecordFile(id)).toBe(encodeRecordFile({ id, type: 'task', author: 'bob', status: 'todo', title: '核算纹波', module: rack.id }))
   })
 
@@ -199,7 +202,7 @@ describe('collab.task.update', () => {
 describe('collab.module.create', () => {
   it('写成规范的新文件：作者是本机身份', async () => {
     const { repo, fields } = moduleCreateArgsOf({ repo: bob.repo, title: '机柜', due: '2026-10-31', owner: 'carol', detail: '先定尺寸' })
-    const { id, file } = await createModule(await openProject(repo, bobCode), fields)
+    const { id, file } = await createModule(bob, fields)
     expect(file).toBe(`collab/records/${id}.json`)
     expect(readRecordFile(id)).toBe(encodeRecordFile({ id, type: 'module', author: 'bob', title: '机柜', due: '2026-10-31', owner: 'carol', detail: '先定尺寸' }))
   })
@@ -258,11 +261,11 @@ describe('collab.task.delete', () => {
     writeRecord(carols)
   })
 
-  const asAdmin = () => openProject(bob.repo, adminCode)
+  const asAdmin = () => ({ ...bob, person: 'admin' })
 
   it('删自己的任务：删掉工作区里的记录文件，回执的 files 相对仓根', async () => {
     const { repo, ids } = taskDeleteArgsOf({ repo: bob.repo, ids: [mine.id] })
-    expect(await deleteTasks(await openProject(repo, bobCode), ids, projectLeads)).toEqual({ ids: [mine.id], files: [`collab/records/${mine.id}.json`] })
+    expect(await deleteTasks(bob, ids, projectLeads)).toEqual({ ids: [mine.id], files: [`collab/records/${mine.id}.json`] })
     expect(recordFiles()).toEqual([`${carols.id}.json`])
   })
 
@@ -310,7 +313,7 @@ describe('collab.module.delete', () => {
     writeRecord(cabinet)
     await updateTask(bob, inRack.id, { module: cabinet.id })
     const { repo, ids } = moduleDeleteArgsOf({ repo: bob.repo, ids: [rack.id] })
-    expect(await deleteModules(await openProject(repo, bobCode), ids, projectLeads)).toEqual({ ids: [rack.id], files: [`collab/records/${rack.id}.json`] })
+    expect(await deleteModules(bob, ids, projectLeads)).toEqual({ ids: [rack.id], files: [`collab/records/${rack.id}.json`] })
     expect(recordFiles()).toEqual([`${cabinet.id}.json`, `${inRack.id}.json`].sort())
   })
 
