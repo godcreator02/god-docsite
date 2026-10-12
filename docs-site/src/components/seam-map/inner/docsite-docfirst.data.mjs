@@ -1,12 +1,12 @@
 /**
- * 站的功能包 docfirst-site 的内部接缝图：模块页 <SeamMap module="docfirst-site" /> 画的就是它。
+ * 站的功能包 docsite-docfirst 的内部接缝图：模块页 <SeamMap module="docsite-docfirst" /> 画的就是它。
  * 框是包里的文件（组件与它用的辅助文件合成一个框：site.tsx 与 term.tsx、card.tsx 与 card-fields.ts）；
- * 灰色实线框是包外的文档站基础包、workflow、星轨盘包、fumadocs 本体与站点目录。坐标在 docfirst-site.layout.ts。
+ * 灰色实线框是包外的文档站基础包、workflow、星轨盘包、fumadocs 本体与站点目录。坐标在 docsite-docfirst.layout.ts。
  */
 import { defineSeamGraph } from '@godcreator/docsite-explainer/seam-graph';
 
 export const docfirstSiteGraph = defineSeamGraph({
-  id: 'docfirst-site',
+  id: 'docsite-docfirst',
   title: '站的功能包内部的文件与接缝',
   intro:
     '站的功能包内部接缝图：虚线框是包里的文件，框里的方块是它对外给的出口、函数、组件或样式，灰色实线框是包外的文档站基础包、workflow、星轨盘包、fumadocs 本体与站点目录。基础包在最上面，它按约定读功能包的出口；功能包往下用 workflow 与星轨盘、fumadocs 的组件。',
@@ -213,7 +213,7 @@ export const docfirstSiteGraph = defineSeamGraph({
       name: '样式表',
       a: ['css-site'],
       b: ['kit-site'],
-      iface: "app/site/styles.css：@import '@godcreator/docfirst-site/styles.css'",
+      iface: "app/site/styles.css：@import '@godcreator/docsite-docfirst/styles.css'",
       convention: false,
       via: 'code',
       text: '初始化按 docsite.features 在骨架的样式表里引入每个功能包的 ./styles.css，站点不用自己引。',

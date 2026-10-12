@@ -1,6 +1,6 @@
 /**
  * 建站时交给 gwbDocsite.init 的功能包，一律精确号（不带 `^` / `~` / `>=`）：
- * `@godcreator/docfirst-site` 带进站的路由、remark 链与起始物（docfirst.config.mjs、outputs 正本、
+ * `@godcreator/docsite-docfirst` 带进站的路由、remark 链与起始物（docfirst.config.mjs、outputs 正本、
  * 轨迹与未来区起始页），docfirst 系脚本与 `@godcreator/docfirst-workflow` 的依赖范围经它模板里的
  * `template/skeleton/package.json` 写进新站。
  *
@@ -14,5 +14,5 @@
  * 「表是精确号、跟工作区各包的版本对得上」检查——**包升了版本号，这张表跟着改，那条测试红了就是忘了改**。
  */
 export const DOCFIRST_SITE_FEATURE: Record<string, string> = {
-  '@godcreator/docfirst-site': '0.2.1',
+  '@godcreator/docsite-docfirst': '0.3.0',
 }

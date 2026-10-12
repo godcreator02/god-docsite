@@ -8,8 +8,8 @@ const ROOT = path.join(path.dirname(fileURLToPath(import.meta.url)), '../../..')
 
 /** deps.ts 那张表：精确号、跟工作区各包的版本对得上——包升了版本号忘改表，这条红 */
 describe('DOCFIRST_SITE_FEATURE', () => {
-  it('是精确号，跟工作区 docfirst-site 的版本一致', () => {
-    expect(Object.keys(DOCFIRST_SITE_FEATURE)).toEqual(['@godcreator/docfirst-site'])
+  it('是精确号，跟工作区 docsite-docfirst 的版本一致', () => {
+    expect(Object.keys(DOCFIRST_SITE_FEATURE)).toEqual(['@godcreator/docsite-docfirst'])
     for (const [name, version] of Object.entries(DOCFIRST_SITE_FEATURE)) {
       expect(version, `${name} 要写精确号`).toMatch(/^\d+\.\d+\.\d+$/)
       const manifest = JSON.parse(readFileSync(path.join(ROOT, 'packages', name.replace('@godcreator/', ''), 'package.json'), 'utf8')) as { version: string }

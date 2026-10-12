@@ -9,7 +9,7 @@ import { PinGlance } from '../../src/components/pin-glance/glance';
 import { SeamMap } from '../../src/components/seam-map/seam-map';
 
 钉码核心与星轨盘不读文件、不认文件格式、不认站点框架，要的东西全从接缝上传进来；命令行与项目、fumadocs 适配（同在 `docfirst-workflow` 包里）把它们接到
-磁盘、git 和 fumadocs 上；站的功能包 `docfirst-site` 再把这些接到文档站基础包的站点骨架上；工作台插件只管建 Next 站、托管它和给 agent 注册说明书。
+磁盘、git 和 fumadocs 上；站的功能包 `docsite-docfirst` 再把这些接到文档站基础包的站点骨架上；工作台插件只管建 Next 站、托管它和给 agent 注册说明书。
 外面进来的入口：git hook 与 CI 运行命令行，站点构建与开发服务编译页面，agent 经 MCP 调插件。鼠标停在编号上看每条接缝交换什么，点击固定高亮它连着谁：
 
 <SeamMap />
@@ -22,7 +22,7 @@ import { SeamMap } from '../../src/components/seam-map/seam-map';
 | 名字 | 是什么 | 装在哪 | 什么时候运行 |
 | --- | --- | --- | --- |
 | `@godcreator/docfirst-workflow` | 这套做法的实现：核对、确认、渲染生成物、卡格式、命令行 `docfirst`，以及接到 fumadocs 上的 `./fumadocs` | 每个站的 `node_modules` | 站建好以后的每一次：在站里运行 `docfirst`、git hook、CI、站点构建 |
-| `@godcreator/docfirst-site` | 文档站基础包 `@godcreator/docsite-kit` 的功能包：构建页面时的 remark 插件、侧栏入口与 MDX 组件、星轨盘与卡页两条路由、轨迹卡集合模板、样式 | 建在文档站基础包上的站的 `node_modules`，站点 `package.json` 的 `docsite.features` 声明它 | 站点构建与开发服务编译页面时 |
+| `@godcreator/docsite-docfirst` | 文档站基础包 `@godcreator/docsite-kit` 的功能包：构建页面时的 remark 插件、侧栏入口与 MDX 组件、星轨盘与卡页两条路由、轨迹卡集合模板、样式 | 建在文档站基础包上的站的 `node_modules`，站点 `package.json` 的 `docsite.features` 声明它 | 站点构建与开发服务编译页面时 |
 | `@godcreator/gwb-docfirst-workflow` | 工作台插件：建站命令 `docfirst.create` 与 `docfirst.create-plain`，托管站点的命令 `docfirst.site.*` 与窗格「文档站」，加上给 agent 读的说明书 | gwb 的 home | 建站那一次；托管的站在工作台开着时一直开着；说明书在 agent 写文档、改代码时随时读 |
 
 插件建的是 Next 站：它运行官方脚手架、套上本机约定与 docfirst 的分区、把 `docfirst-workflow` 的精确版本写进新站的依赖，托管时由工作台运行登记过的站的 `pnpm start`，

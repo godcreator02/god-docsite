@@ -17,7 +17,7 @@ export const fumadocsGraph = defineSeamGraph({
     {
       id: 'feature',
       name: '站的功能包',
-      pkg: '@godcreator/docfirst-site',
+      pkg: '@godcreator/docsite-docfirst',
       role: null,
       outside: true,
       blurb:

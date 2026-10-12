@@ -9,7 +9,7 @@ description: 对文档站执行命令时读：建站（docfirst.create）、托�
 黄灯以后正文怎么改，看同一个插件的说明书 `docs-writing`；轨迹卡看 `trajectory`。
 
 站约定放在 `<仓>/docs-site/`，是一个独立的 pnpm 项目，下面的命令都在这个目录里运行。docfirst 站建在文档站基础包
-`@godcreator/docsite-kit`（fumadocs + React Router + Vite）上，`package.json` 里有 `"docsite": { "features": ["@godcreator/docfirst-site"] }`；
+`@godcreator/docsite-kit`（fumadocs + React Router + Vite）上，`package.json` 里有 `"docsite": { "features": ["@godcreator/docsite-docfirst"] }`；
 活的例子是 docfirst 自己的文档站 `D:\unitfolders\oz47p-docsite-kit\docsite-kit\docs-site`。
 
 **核对、确认、渲染都在站目录里自己运行 `pnpm docfirst …`**：它们要在仓里反复运行（git hook、CI、构建页面时也在运行它们），
@@ -25,7 +25,7 @@ docfirst.create        {"dir":"<仓>/docs-site"}    接好 docfirst 的站：现
 - `title`：站名，不给就依次用仓根 `package.json` 的 `title`、包名去掉 scope、仓的目录名
 - `port`：不给就在站目录的祖父目录里找没被别的站脚本占用的，从 4310 起选
 
-命令经 gwb-docsite 的建站服务一步建成：装功能包 `@godcreator/docfirst-site`（插件 `src/deps.ts` 的精确版本表）、
+命令经 gwb-docsite 的建站服务一步建成：装功能包 `@godcreator/docsite-docfirst`（插件 `src/deps.ts` 的精确版本表）、
 写地基骨架与功能包起始物（`docfirst.config.mjs`、README / AGENTS / CLAUDE 的 outputs 正本、轨迹与未来两区的起始页、
 轨迹卡集合 `app/lib/trajectory.ts`、docfirst 系脚本）、装全部依赖、起服务探活。**骨架写完就归站点**：`app/` 与根目录的
 配置从此随便改，没有照新模板重写它们的命令。
@@ -77,7 +77,7 @@ Markdown 图片 `![说明](/p2/x.png)` 不用登记：图片放在页面旁边�
   ```
 
   - 端口从站 `package.json` 的 `dev` 脚本读，脚本里要写死 `--port`；启动前插件查一遍站点（装没装依赖、`people.json` 对不对），不过就把每条问题写在 `error` 里
-  - **改了构建页面时 remark 插件会调用到的包代码**（功能包 `docfirst-site`，`docfirst-workflow` 的 `./fumadocs` 及它调用的别的出口，`code-pin`）：
+  - **改了构建页面时 remark 插件会调用到的包代码**（功能包 `docsite-docfirst`，`docfirst-workflow` 的 `./fumadocs` 及它调用的别的出口，`code-pin`）：
     在改过的包里 `pnpm build`，再 `docsite.site.stop`、`docsite.site.start` 重启开发服务——remark 插件在开发服务启动后第一次编译页面时装配，之后不重读
   - 给人看就在 VS Code 的内置浏览器里打开 `docsite.site.list` 回的地址（读说明书 `vscode`）
 - **只是自己验证**：已托管的站直接看；没托管的 `docsite.site.start {"dir":…,"open":false}` 启动，验完 `docsite.site.stop`

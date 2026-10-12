@@ -10,7 +10,7 @@
  * CLAUDE.md 第一行固定是 `@AGENTS.md`，只给 Claude 的指令写在它后面。
  * 组件名册：先展开 fumadocsRoster（fumadocs 自带的 Files / Folder / File 与 Note 的机读规则，纯数据，命令行也能加载），
  * 再加站里自己定义的组件和它们转成机读文本的规则。站内组件的 React 实现在 src/components/ 下，页面里 import；
- * Term 与 Files / Folder / File 由功能包 @godcreator/docfirst-site 提供，页面里不用 import。
+ * Term 与 Files / Folder / File 由功能包 @godcreator/docsite-docfirst 提供，页面里不用 import。
  * 星轨盘不在名册里：它是功能包的整页路由 /trajectory，不在 mdx 里用。
  * trajectory：轨迹卡放在站点根下的 trajectory/（功能包的卡集合读这个目录）。
  * glossary：术语表在 src/glossary.mjs，构建页面时功能包的 remark 插件按它标注术语；skip 里的页不标。

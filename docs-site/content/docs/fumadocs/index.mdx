@@ -1,6 +1,6 @@
 ---
 title: fumadocs 适配
-description: docfirst-workflow 的子入口 ./fumadocs：fumadocs-mdx 编译页面时调的 remark 插件（钉码投影、术语标注、轨迹卡链接改写）、名册规则与三份样式表；站的功能包 docfirst-site 只用其中的 remark 插件与样式表，集合选项、meta 白名单、状态点组件、机读版回调、卡集合 schema 与读卡这些出口给还没迁到文档站基础包的 Next 站
+description: docfirst-workflow 的子入口 ./fumadocs：fumadocs-mdx 编译页面时调的 remark 插件（钉码投影、术语标注、轨迹卡链接改写）、名册规则与三份样式表；站的功能包 docsite-docfirst 只用其中的 remark 插件与样式表，集合选项、meta 白名单、状态点组件、机读版回调、卡集合 schema 与读卡这些出口给还没迁到文档站基础包的 Next 站
 full: true
 ---
 
@@ -74,13 +74,13 @@ import { SeamMap } from '../../../src/components/seam-map/seam-map';
 
 [站的功能包](/docs/site)按文件所在的区调用上面三个插件，现状区先术语标注再钉码投影，轨迹卡目录用卡链接改写：
 
-{/* ref file="../packages/docfirst-site/src/content.ts" lines="14-14" hash="604fe22e1a32" blob="c197951793e7" */}
+{/* ref file="../packages/docsite-docfirst/src/content.ts" lines="14-14" hash="604fe22e1a32" blob="c197951793e7" */}
 
-{/* ref file="../packages/docfirst-site/src/content.ts" lines="39-47" hash="354a72318161" blob="c197951793e7" */}
+{/* ref file="../packages/docsite-docfirst/src/content.ts" lines="39-47" hash="354a72318161" blob="c197951793e7" */}
 
 它的样式表引入三份样式表；代码块的状态点由它自己的样式画，不用 `light.css` 给 `DocfirstPre` 的那一半：
 
-{/* ref file="../packages/docfirst-site/styles/site.css" lines="3-6" hash="dd921659be86" blob="2d1a912f5818" */}
+{/* ref file="../packages/docsite-docfirst/styles/site.css" lines="3-6" hash="dd921659be86" blob="2d1a912f5818" */}
 
 别的出口它都不用：Term 组件、星轨盘页与卡页、轨迹卡集合都是它自己的，读卡目录直接调 `./cards` 的 `scanCardDir`。
 
@@ -144,10 +144,10 @@ import { SeamMap } from '../../../src/components/seam-map/seam-map';
 - **不分区**：哪篇是现状区、哪篇是轨迹卡由调用方判断，站的功能包按项目的内容根与轨迹卡目录分。
 - **不把宿主、本仓别的包与本包的命令行代码打包进产物**：只按包名 import；`./fumadocs/pre` 的 `"use client"` 在产物第一行，别的出口不带：
 
-{/* ref file="../tests/boundary.test.ts" lines="539-564" hash="d79252940b87" blob="03e2140e3c08" */}
+{/* ref file="../tests/boundary.test.ts" lines="541-566" hash="d79252940b87" blob="da1acdb8b833" */}
 
 - **不被命令行加载**（`./fumadocs/roster` 除外）：workflow 别的目录不许引用这个目录，这个目录也只按包名用 `.`、`./mdx`、`./cards`；`./fumadocs/roster` 的产物不许 import 宿主：
 
-{/* ref file="../tests/boundary.test.ts" lines="478-492" hash="6cf7852c8dc4" blob="03e2140e3c08" */}
+{/* ref file="../tests/boundary.test.ts" lines="480-494" hash="6cf7852c8dc4" blob="da1acdb8b833" */}
 
-{/* ref file="../tests/boundary.test.ts" lines="566-573" hash="1dfc84292866" blob="03e2140e3c08" */}
+{/* ref file="../tests/boundary.test.ts" lines="568-575" hash="1dfc84292866" blob="da1acdb8b833" */}

@@ -19,7 +19,7 @@
 export const nodes = [
   { id: 'plugin', name: '工作台插件', short: '插件', ident: 'plugins/docfirst', role: 'cyan', parent: null },
   { id: 'site', name: '文档站', short: 'docs-site', ident: 'docs-site', role: null, parent: null },
-  { id: 'feature', name: '站的功能包', short: 'docfirst-site', ident: 'docfirst-site', role: 'rose', parent: null },
+  { id: 'feature', name: '站的功能包', short: 'docsite-docfirst', ident: 'docsite-docfirst', role: 'rose', parent: null },
   { id: 'explain', name: '讲解组件包', short: 'docfirst-explainer', ident: 'docfirst-explainer', role: 'slate', parent: null },
   { id: 'fumadocs', name: 'fumadocs 适配', short: 'fumadocs/', ident: 'docfirst-workflow/fumadocs', role: 'amber', parent: null },
   { id: 'workflow', name: '命令行与项目', short: 'workflow', ident: 'docfirst-workflow', role: 'emerald', parent: null },
@@ -90,7 +90,7 @@ export const allowedEdges = [
  * @typedef {{ id: string, label: string, text: string, allowed: string[], forbidden: Forbidden[], tests: GuardTest[] }} BoundaryRule
  * @type {BoundaryRule[]}
  */
-/* ref file="../tests/boundary.test.ts" hash="ec0d15f971d1" blob="03e2140e3c08" */
+/* ref file="../tests/boundary.test.ts" hash="bb635c72e831" blob="da1acdb8b833" */
 export const rules = [
   {
     id: 'packages',
@@ -112,7 +112,7 @@ export const rules = [
       },
       {
         edges: ['feature~pin', 'feature~explain', 'workflow>feature:back', 'trajectory>feature:back'],
-        what: '功能包 docfirst-site 是建在文档站基础包上的 docfirst 站的功能包：经 workflow 用钉码，不直接依赖 code-pin；自己用星轨盘的组件；讲解组件归站自己用，它不依赖讲解组件包。谁都不许依赖它：workflow、两个通用包、讲解组件包都不认识它。',
+        what: '功能包 docsite-docfirst 是建在文档站基础包上的 docfirst 站的功能包：经 workflow 用钉码，不直接依赖 code-pin；自己用星轨盘的组件；讲解组件归站自己用，它不依赖讲解组件包。谁都不许依赖它：workflow、两个通用包、讲解组件包都不认识它。',
       },
     ],
     tests: [
@@ -209,7 +209,7 @@ export const rules = [
   {
     id: 'plugin',
     label: '包不认识插件',
-    text: '插件跟包在同一个工作区。包一旦认识插件，哪怕只是一条 devDependency，这几个包就不能再发布了：装它们的人不该连带装上整个桌面工作台生态。反方向（插件不许依赖本仓 packages/ 下的任何一个包，包名从各包清单现读）不在这个文件里，由插件自己的 tests/artifact.test.ts 检查，两边互不认识。说明书与建站模板也随插件发：包只发 dist 与样式，包里不许有 skills/、template/；唯一的例外是 docfirst-site 的 template/，那是文档站基础包初始化时写进站点的功能包文件（轨迹卡的集合定义只能写在站点里），不是建站模板。',
+    text: '插件跟包在同一个工作区。包一旦认识插件，哪怕只是一条 devDependency，这几个包就不能再发布了：装它们的人不该连带装上整个桌面工作台生态。反方向（插件不许依赖本仓 packages/ 下的任何一个包，包名从各包清单现读）不在这个文件里，由插件自己的 tests/artifact.test.ts 检查，两边互不认识。说明书与建站模板也随插件发：包只发 dist 与样式，包里不许有 skills/、template/；唯一的例外是 docsite-docfirst 的 template/，那是文档站基础包初始化时写进站点的功能包文件（轨迹卡的集合定义只能写在站点里），不是建站模板。',
     allowed: [],
     forbidden: [
       {

@@ -16,11 +16,11 @@
 pnpm add -D @godcreator/docfirst-workflow
 ```
 
-`@godcreator/docfirst-workflow` 是命令行、项目装配与 mdx 格式，子入口 `./fumadocs` 是 fumadocs 适配（功能包 `docfirst-site` 用其中的 remark 插件）；通用包钉码核心 `@godcreator/code-pin`（把文字钉在代码上）与星轨盘 `@godcreator/trajectory-disk`（把轨迹卡画成项目方向演变的圆盘）随它装上。通用包不认识 docfirst，也能单独使用。`fumadocs` 与 `react` 是可选的 **peer**，只有 `./fumadocs` 用，用你项目里装的那份；只运行命令行的仓不用装它们。
+`@godcreator/docfirst-workflow` 是命令行、项目装配与 mdx 格式，子入口 `./fumadocs` 是 fumadocs 适配（功能包 `docsite-docfirst` 用其中的 remark 插件）；通用包钉码核心 `@godcreator/code-pin`（把文字钉在代码上）与星轨盘 `@godcreator/trajectory-disk`（把轨迹卡画成项目方向演变的圆盘）随它装上。通用包不认识 docfirst，也能单独使用。`fumadocs` 与 `react` 是可选的 **peer**，只有 `./fumadocs` 用，用你项目里装的那份；只运行命令行的仓不用装它们。
 
 站另装的两个包：
 
-- `@godcreator/docfirst-site`：地基的功能包，在站 `package.json` 的 `"docsite": { "features": [...] }` 里声明。它给构建页面时的 remark 插件（钉码投影成带状态点的代码块与文件树、术语标注、轨迹卡里的链接）、页面里不用 import 的 `Term` 与文件树组件、星轨盘 `/trajectory` 与卡页 `/trajectory/<卡身份>` 两条路由、侧栏入口「轨迹」与样式
+- `@godcreator/docsite-docfirst`：地基的功能包，在站 `package.json` 的 `"docsite": { "features": [...] }` 里声明。它给构建页面时的 remark 插件（钉码投影成带状态点的代码块与文件树、术语标注、轨迹卡里的链接）、页面里不用 import 的 `Term` 与文件树组件、星轨盘 `/trajectory` 与卡页 `/trajectory/<卡身份>` 两条路由、侧栏入口「轨迹」与样式
 - `@godcreator/docsite-explainer`：讲解组件，把一段讲解拆成配说明的帧来播放、画系统接缝图；地基能力包，站要用时自己装（旧名 `@godcreator/docfirst-explainer` 0.2.0 起是转发薄壳）
 
 **建站与托管由工作台插件做，命令行不管这两步**。装了 gwb 工作台的机器上，`docfirst.create {"dir":"<仓>/docs-site"}` 一步建好接了三个区（现状、轨迹、未来）的 docfirst 站：地基骨架与功能包起始物（`docfirst.config.mjs`、README 系生成物的正本、两区起始页、docfirst 系脚本）一次写全，装依赖、起服务探活。骨架写完就归站点，随便改。`docsite.site.add {"dir":…}` 托管开发服务，站的进程归工作台、跟哪个会话都无关。建站只由 agent 执行一次，所以不在包里——包留的是要在**仓**里反复发生的那几条。
@@ -91,5 +91,5 @@ pnpm build          # react-router build
 ```
 
 两个站的开发服务都由 gwb-docsite 托管（`docsite.site.add`），不在会话里自己 `pnpm dev`；`pnpm build` 只作提交前的检查。
-改了构建页面时 remark 插件会调用到的包代码（`packages/docfirst-site`，`packages/docfirst-workflow/src/fumadocs/` 连同它调用的 workflow 别的出口与 code-pin），
+改了构建页面时 remark 插件会调用到的包代码（`packages/docsite-docfirst`，`packages/docfirst-workflow/src/fumadocs/` 连同它调用的 workflow 别的出口与 code-pin），
 先在改过的包里 `pnpm build`，再 `docsite.site.stop`、`docsite.site.start` 重启开发服务。

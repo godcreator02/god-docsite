@@ -3,7 +3,7 @@
 本文件有两份：Claude Code 读 `CLAUDE.md`（它是本仓 docs-site 的生成物），zcode 等客户端读 `AGENTS.md`（手写的正本），改这份同步那份的内容。
 
 仓根是 pnpm 包工作区，住着两族东西：**地基**（文档站基础包与它的能力包、gwb-docsite 插件、自述站）与
-**docfirst 文档工作流**（钉码 code-pin、星轨盘 trajectory-disk、命令行 docfirst-workflow、功能包 docfirst-site、
+**docfirst 文档工作流**（钉码 code-pin、星轨盘 trajectory-disk、命令行 docfirst-workflow、功能包 docsite-docfirst、
 gwb-docfirst-workflow 插件、docs-site 文档站）。2026-10-12 前 docfirst 住在独立的 gwb-docfirst 仓，选型见
 `docs-site/trajectory/2026-10-12-merge-into-docsite-kit.mdx`。
 
@@ -15,10 +15,10 @@ gwb-docfirst-workflow 插件、docs-site 文档站）。2026-10-12 前 docfirst 
 | `packages/docsite-identity/` 等 | 地基能力包：identity（人员与身份）、comments（评论）、page-sources（三种页面来源）、writing（术语与公式）、ui（界面外壳）、feed（推送通道）、explainer（讲解组件，自 gwb-docfirst 搬入，那边 0.1.1 冻结待切薄壳） |
 | `packages/code-pin/`、`packages/trajectory-disk/` | 通用包：钉码核心、星轨盘。不认识 docfirst，谁都能单独使用 |
 | `packages/docfirst-workflow/` | docfirst 本身：命令行、项目装配与格式，接到 fumadocs 站上的部分在子入口 `./fumadocs` |
-| `packages/docfirst-site/` | 地基的功能包：remark 插件、Term 与文件树、星轨盘与卡页路由；`template/` 的起始物（docfirst.config.mjs、outputs 正本、两区起始页）从 docs-site 派生 |
+| `packages/docsite-docfirst/` | 地基的功能包：remark 插件、Term 与文件树、星轨盘与卡页路由；`template/` 的起始物（docfirst.config.mjs、outputs 正本、两区起始页）从 docs-site 派生 |
 | `packages/docfirst-explainer/` | 转发薄壳：`@godcreator/docsite-explainer` 的原出口名转发（正本已在本仓），装旧包名的站不用改代码 |
 | `plugins/docsite/` | gwb 基础插件 `@godcreator/gwb-docsite`：身份码、一步建站（建站器在插件里，骨架模板从自述站派生）、托管站点、评论命令、说明书 `docsite` |
-| `plugins/docfirst/` | gwb 插件 `@godcreator/gwb-docfirst-workflow`：`docfirst.create`（认站名、选端口、把 docfirst-site 交给 `gwbDocsite.init`）、说明书 `docs-site` / `docs-writing` / `trajectory` |
+| `plugins/docfirst/` | gwb 插件 `@godcreator/gwb-docfirst-workflow`：`docfirst.create`（认站名、选端口、把 docsite-docfirst 交给 `gwbDocsite.init`）、说明书 `docs-site` / `docs-writing` / `trajectory` |
 | `site/` | 自述站：讲地基与能力包，是**骨架的正本**——`app/` 与根目录的配置手写在这里，docsite 插件构建时派生建站模板（`plugins/docsite/template/`，构建产物不进 git） |
 | `docs-site/` | docfirst 文档站：讲钉码/核对/轨迹卡，是 **docfirst 站的正本与示例**，骨架与自述站同代、手写 |
 | `tests/` | 工作区级测试：`boundary.test.ts`（全仓边界守卫——地基不认识 docfirst、docfirst 单向用 docsite-kit）、`template-versions.test.ts`（模板版本盯守） |
@@ -48,9 +48,9 @@ gwb-docfirst-workflow 插件、docs-site 文档站）。2026-10-12 前 docfirst 
 ## 规矩
 
 * 包的方向由 `tests/boundary.test.ts` 唯一守卫：地基（docsite-\*）不认识 docfirst 任何包；通用包互不认识；
-  docfirst 只有 docfirst-site 经 peer 用组合包 docsite-kit。改方向先改那张表并写明为什么
+  docfirst 只有 docsite-docfirst 经 peer 用组合包 docsite-kit。改方向先改那张表并写明为什么
 * `plugins/docfirst/src/deps.ts` 是写进新站的功能包版本表（精确号），`plugins/docfirst/tests/create.test.ts` 盯着它与
-  工作区版本一致；`docfirst-site` 模板里 docfirst-workflow 的范围由根 `tests/template-versions.test.ts` 盯守
+  工作区版本一致；`docsite-docfirst` 模板里 docfirst-workflow 的范围由根 `tests/template-versions.test.ts` 盯守
 * 改了基础包或插件的行为、导出、命令，同一个提交里改对应站的说明页（插件还有随包的 SKILL.md，正本在 `docs-site/content/`，
   `pnpm docfirst render` 生成）；地基侧的说明页正本在 `site/content/`
 * 仓根的 README.md 与 CLAUDE.md 是 `docs-site` outputs 的生成物（正本在 `docs-site/content/docs/outputs/`）；AGENTS.md 手写（本文件）

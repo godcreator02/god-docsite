@@ -28,11 +28,11 @@ export const trajectoryGraph = defineSeamGraph({
     {
       id: 'fumadocs',
       name: '站的一侧',
-      pkg: 'docfirst-site · docfirst-workflow/fumadocs',
+      pkg: 'docsite-docfirst · docfirst-workflow/fumadocs',
       role: null,
       outside: true,
       blurb:
-        '站的功能包 docfirst-site 的星轨盘页按包名从 ./disk 取 StarDisk，把卡格式 scanCardDir 交回的中性输入原样交给它；fumadocs 适配的 ./fumadocs/trajectory.css 引入 star.css，功能包的样式表再引入它。./fumadocs/trajectory 另外按包名再导出 StarDisk，给还没迁到文档站基础包的 Next 站。',
+        '站的功能包 docsite-docfirst 的星轨盘页按包名从 ./disk 取 StarDisk，把卡格式 scanCardDir 交回的中性输入原样交给它；fumadocs 适配的 ./fumadocs/trajectory.css 引入 star.css，功能包的样式表再引入它。./fumadocs/trajectory 另外按包名再导出 StarDisk，给还没迁到文档站基础包的 Next 站。',
       caps: [
         { id: 'css', name: '盘的样式', ident: './fumadocs/trajectory.css' },
         { id: 'reexport', name: '星轨盘页与再导出', ident: 'StarDisk' },

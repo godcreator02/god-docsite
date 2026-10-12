@@ -8,7 +8,7 @@ import { feedDevServer } from '@godcreator/docsite-feed'
 
 /** 基础包自己的包名：要和站点自己的代码一样经 Vite 处理 */
 const ownPackageName = '@godcreator/docsite-kit'
-/** 骨架直接引用的能力包：与基础包同因要经 Vite 处理——workspace 内 pnpm 链接让 fumadocs 侥幸单例，从 registry 安装的站会解析出多份实例 */
+/** 骨架或功能包会带进站的能力包：与基础包同因要经 Vite 处理——workspace 内 pnpm 链接让 fumadocs 侥幸单例，从 registry 安装的站会解析出多份实例 */
 const capabilityPackages = [
   '@godcreator/docsite-identity',
   '@godcreator/docsite-comments',
@@ -17,6 +17,7 @@ const capabilityPackages = [
   '@godcreator/docsite-writing',
   '@godcreator/docsite-feed',
   '@godcreator/docsite-explainer',
+  '@godcreator/docsite-docfirst',
 ]
 
 /**

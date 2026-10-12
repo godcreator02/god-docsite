@@ -13,7 +13,7 @@ export const workflowGraph = defineSeamGraph({
   id: 'workflow',
   title: '命令行与项目内部的目录与接缝',
   intro:
-    '命令行与项目内部接缝图：虚线框是包里的目录，project 目录按做的事分成项目装配、生成物两个框，读文件与 git 那个框是 node/ 目录；框里的方块是它对外给的函数或类型，灰色实线框是命令行那一侧以外的调用方（站的一侧：同一个包里的 src/fumadocs/ 与站的功能包 docfirst-site，都只按包名调用）、依赖与使用方的仓。mdx 格式与组件格式实现同一个格式接口，都连记号写法、不连钉码编排与 project；记号写法与引用类型只连钉码核心，钉码编排按文件选格式、连两个格式与钉码核心；卡格式读卡目录、校验卡、换成星轨盘的中性输入，只连记号写法、读文件与 git、星轨盘；命令行连其余各处。',
+    '命令行与项目内部接缝图：虚线框是包里的目录，project 目录按做的事分成项目装配、生成物两个框，读文件与 git 那个框是 node/ 目录；框里的方块是它对外给的函数或类型，灰色实线框是命令行那一侧以外的调用方（站的一侧：同一个包里的 src/fumadocs/ 与站的功能包 docsite-docfirst，都只按包名调用）、依赖与使用方的仓。mdx 格式与组件格式实现同一个格式接口，都连记号写法、不连钉码编排与 project；记号写法与引用类型只连钉码核心，钉码编排按文件选格式、连两个格式与钉码核心；卡格式读卡目录、校验卡、换成星轨盘的中性输入，只连记号写法、读文件与 git、星轨盘；命令行连其余各处。',
   frameLabel: '目录',
   modules: [
     {
@@ -33,7 +33,7 @@ export const workflowGraph = defineSeamGraph({
     {
       id: 'fumadocs',
       name: '站的一侧',
-      pkg: 'docfirst-workflow/fumadocs · docfirst-site',
+      pkg: 'docfirst-workflow/fumadocs · docsite-docfirst',
       role: null,
       outside: true,
       blurb:

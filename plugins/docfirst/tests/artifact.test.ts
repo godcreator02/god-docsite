@@ -116,7 +116,7 @@ describe('必须同时改的几处', () => {
     }
     // 写进新站的功能包表不算依赖：它是字符串，插件不 import；建出来的站要跑 docfirst、要渲染，站当然要装这个包
     const depsSource = fs.readFileSync(path.join(root, 'src', 'deps.ts'), 'utf8')
-    expect(depsSource).toContain('@godcreator/docfirst-site')
+    expect(depsSource).toContain('@godcreator/docsite-docfirst')
   })
 
   it('没有任何文件启动子进程，不转发 docfirst 命令行：建站经 gwbDocsite 服务，装依赖与探活归 gwb-docsite', () => {

@@ -10,9 +10,9 @@ import { defineSeamGraph } from '@godcreator/docsite-explainer/seam-graph';
 /** @type {import('@godcreator/docsite-explainer/seam-graph').SeamModule[]} */
 const modules = [
   {
-    id: 'docfirst-site',
+    id: 'docsite-docfirst',
     name: '站的功能包',
-    pkg: '@godcreator/docfirst-site',
+    pkg: '@godcreator/docsite-docfirst',
     role: 'rose',
     outside: false,
     blurb:

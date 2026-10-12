@@ -4,7 +4,7 @@
  * 仓里住着地基与工作流两族包。**地基**（`docsite-*`）是文档站基础包的能力包与组合包：地基不许认识 docfirst——
  * 一旦哪天地基依赖了工作流，协作站、论文站这些只用地基的站就被拖着装上整套 docfirst。
  * **docfirst 的包**用单向的地基依赖：`docfirst-workflow` 用通用包拼出 docfirst（命令行、项目装配与格式，
- * 接到 fumadocs 站上的部分在它的 `src/fumadocs/`，经子入口 `./fumadocs` 发出去）；`docfirst-site` 是建在
+ * 接到 fumadocs 站上的部分在它的 `src/fumadocs/`，经子入口 `./fumadocs` 发出去）；`docsite-docfirst` 是建在
  * 文档站基础包上的 docfirst 站的功能包，peer 依赖组合包 `docsite-kit`；讲解组件包 `docfirst-explainer`
  * 是 docfirst 站上用的组件，只有站用，workflow 与工作台插件都不依赖它。
  * **通用包**不认识 docfirst，谁都能单独使用：钉码 `code-pin`（把文字钉在代码上）、
@@ -69,7 +69,7 @@ const NPM_PACKAGES: Record<string, string> = {
   "trajectory-disk": "@godcreator/trajectory-disk",
   "docfirst-workflow": "@godcreator/docfirst-workflow",
   "docfirst-explainer": "@godcreator/docfirst-explainer",
-  "docfirst-site": "@godcreator/docfirst-site",
+  "docsite-docfirst": "@godcreator/docsite-docfirst",
   "docsite-kit": "@godcreator/docsite-kit",
   "docsite-identity": "@godcreator/docsite-identity",
   "docsite-comments": "@godcreator/docsite-comments",
@@ -143,23 +143,24 @@ function distClosureSpecs(dir: string, file: string): string[] {
 
 /**
  * 每个包不许依赖哪几个兄弟包。**列的是禁止的，不是允许的**——理由跟下面目录那张表一样。
- * 两族单向：地基（docsite-*）不认识 docfirst 任何包；docfirst 只有 docfirst-site 经 peer 用组合包 docsite-kit。
+ * 依赖单向：地基纯能力包互不相识；docsite-docfirst 是地基的 docfirst 能力包，站在纯能力包之上、
+ * 经 peer 用组合包 docsite-kit、用 docfirst-workflow 与星轨盘；纯地基不认识 docfirst 任何东西。
  *   地基能力包        零 @godcreator 依赖，互不相识（唯一例外：docsite-ui 用 docsite-identity 的人员类型）
  *   docsite-kit      组合包：只依赖 page-sources、ui、feed 三件做接线
+ *   docsite-docfirst 地基的 docfirst 能力包（顶层的功能包）：经 workflow 用钉码，自己用星轨盘的组件，peer 用 docsite-kit；谁都不认识它
  *   code-pin          通用包。判代码变没变只要读取器、旧内容来源两样传进来的东西，谁都不认识
  *   trajectory-disk   通用包。只收盘心加一组卡的中性输入，怎么建模、怎么画；docfirst 卡格式与读卡目录在 workflow
- *   docfirst-explainer docfirst 站上用的讲解组件。只有站用，workflow 不用它；它也不认识本仓别的包
- *   docfirst-workflow docfirst 本身：认识钉码与星轨盘，除了站与 docfirst-site 谁都不认识它，也不认识地基
- *   docfirst-site     建在文档站基础包上的站的功能包：经 workflow 用钉码，自己用星轨盘的组件，peer 用 docsite-kit；谁都不认识它
+ *   docfirst-explainer 转发薄壳。正本是地基能力包 docsite-explainer；装旧包名的站不用改代码
+ *   docfirst-workflow docfirst 本身：认识钉码与星轨盘，除了站与 docsite-docfirst 谁都不认识它，也不认识地基
  */
-const DOCFIRST_PACKAGES = ["code-pin", "trajectory-disk", "docfirst-workflow", "docfirst-explainer", "docfirst-site"];
-const KIT_PACKAGES = ["docsite-kit", "docsite-identity", "docsite-comments", "docsite-page-sources", "docsite-writing", "docsite-ui", "docsite-feed", "docsite-explainer"];
+const DOCFIRST_PACKAGES = ["code-pin", "trajectory-disk", "docfirst-workflow", "docfirst-explainer"];
+const KIT_PACKAGES = ["docsite-kit", "docsite-identity", "docsite-comments", "docsite-page-sources", "docsite-writing", "docsite-ui", "docsite-feed", "docsite-explainer", "docsite-docfirst"];
 // collab 三包是另一场搬入（提交 2b70e91）带进来的，接线提交会调整它们的边界——这里的条目按它们当时的真实依赖写
 const COLLAB_PACKAGES = ["collab-model", "collab-site", "collab-merge-check"];
 const ALL_SIBLINGS = [...DOCFIRST_PACKAGES, ...KIT_PACKAGES, ...COLLAB_PACKAGES];
 const without = (self: string, allowed: string[]): string[] => ALL_SIBLINGS.filter((each) => each !== self && !allowed.includes(each));
 const PACKAGE_FORBIDDEN: Record<string, string[]> = {
-  // 地基：不认识 docfirst 任何包
+  // 地基：纯能力包互不相识，也不认识 docfirst 任何包
   "docsite-kit": without("docsite-kit", ["docsite-page-sources", "docsite-ui", "docsite-feed"]),
   "docsite-identity": without("docsite-identity", []),
   "docsite-comments": without("docsite-comments", []),
@@ -168,12 +169,13 @@ const PACKAGE_FORBIDDEN: Record<string, string[]> = {
   "docsite-ui": without("docsite-ui", ["docsite-identity"]),
   "docsite-feed": without("docsite-feed", []),
   "docsite-explainer": without("docsite-explainer", []),
+  // 地基的 docfirst 能力包：站在纯能力包之上，谁都不认识它
+  "docsite-docfirst": without("docsite-docfirst", ["docsite-kit", "docfirst-workflow", "trajectory-disk"]),
   // docfirst 与通用包
   "code-pin": without("code-pin", []),
   "trajectory-disk": without("trajectory-disk", []),
   "docfirst-workflow": without("docfirst-workflow", ["code-pin", "trajectory-disk"]),
   "docfirst-explainer": without("docfirst-explainer", ["docsite-explainer"]),
-  "docfirst-site": without("docfirst-site", ["docsite-kit", "docfirst-workflow", "trajectory-disk"]),
   // collab：model 只用组合包，site 再用 model，merge-check 只用 model
   "collab-model": without("collab-model", ["docsite-kit"]),
   "collab-site": without("collab-site", ["docsite-kit", "collab-model"]),
@@ -584,7 +586,7 @@ test("包只发 dist 与样式：skills 与建站模板跟着插件走了，包�
     "docfirst-workflow": ["dist", "styles"],
     "docfirst-explainer": ["dist", "styles"],
     // 这里的 template/ 不是建站模板：是文档站基础包初始化时写进站点的功能包文件（轨迹卡的集合定义只能写在站点里）
-    "docfirst-site": ["dist", "styles", "template"],
+    "docsite-docfirst": ["dist", "styles", "template"],
   };
   for (const [dir, files] of Object.entries(FILES)) {
     assert.deepEqual(manifestOf(dir).files, files, `${dir} 的 files`);

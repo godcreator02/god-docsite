@@ -12,7 +12,7 @@ import { siteTitle } from './values.js'
 /**
  * docfirst 插件：一条建站命令 `docfirst.create`，加 `skills/` 下的说明书。
  * 建站经 gwb-docsite 的服务 gwbDocsite：地基骨架、装依赖、探活都是它的，这条命令只做 docfirst 特有的两件事——
- * 认站名与选端口（4310 起、容器根里查重），再把功能包 `@godcreator/docfirst-site`（版本表在 `src/deps.ts`）
+ * 认站名与选端口（4310 起、容器根里查重），再把功能包 `@godcreator/docsite-docfirst`（版本表在 `src/deps.ts`）
  * 作为 features 交给它。起始物（docfirst.config.mjs、outputs 正本、轨迹与未来区起始页）由功能包的模板带进站。
  *
  * 核对、确认、渲染在仓里发生，归 `@godcreator/docfirst-*` 各包，agent 在站目录运行 `pnpm doc`；
@@ -56,7 +56,7 @@ export function apply(ctx: GwbContext): void {
           'dir 是站目录的绝对路径，约定是 <仓>/docs-site：它必须还不存在（或只有 package.json），上一级（仓目录）必须已经存在。' +
           'title 是显示名，不给就依次用仓根 package.json 的 title、包名去掉 scope、仓目录名。' +
           'port 不给就在站目录的祖父目录里找没被别的站脚本占用的，从 4310 起选。' +
-          '建站经 gwbDocsite.init：装功能包 @godcreator/docfirst-site 的精确版本（版本表在插件 src/deps.ts）、写骨架与起始物、装依赖、起服务探活。' +
+          '建站经 gwbDocsite.init：装功能包 @godcreator/docsite-docfirst 的精确版本（版本表在插件 src/deps.ts）、写骨架与起始物、装依赖、起服务探活。' +
           '仓根已有 README.md / AGENTS.md / CLAUDE.md 时第一次 pnpm doc:render 会覆盖它们，回执 warn 里点名。' +
           '回 { dir, port, title, warn? }',
         plugin: PLUGIN,

@@ -17,8 +17,8 @@ import { workflowGraph } from './inner/workflow.data.mjs';
 import { workflowLayout } from './inner/workflow.layout';
 import { fumadocsGraph } from './inner/fumadocs.data.mjs';
 import { fumadocsLayout } from './inner/fumadocs.layout';
-import { docfirstSiteGraph } from './inner/docfirst-site.data.mjs';
-import { docfirstSiteLayout } from './inner/docfirst-site.layout';
+import { docfirstSiteGraph } from './inner/docsite-docfirst.data.mjs';
+import { docfirstSiteLayout } from './inner/docsite-docfirst.layout';
 import { docfirstExplainerGraph } from './inner/docfirst-explainer.data.mjs';
 import { docfirstExplainerLayout } from './inner/docfirst-explainer.layout';
 import { pluginGraph } from './inner/plugin.data.mjs';
@@ -30,7 +30,7 @@ const INNER: Record<string, { graph: SeamGraph; layout: SeamLayout }> = {
   trajectory: { graph: trajectoryGraph, layout: trajectoryLayout },
   workflow: { graph: workflowGraph, layout: workflowLayout },
   fumadocs: { graph: fumadocsGraph, layout: fumadocsLayout },
-  'docfirst-site': { graph: docfirstSiteGraph, layout: docfirstSiteLayout },
+  'docsite-docfirst': { graph: docfirstSiteGraph, layout: docfirstSiteLayout },
   'docfirst-explainer': { graph: docfirstExplainerGraph, layout: docfirstExplainerLayout },
   plugin: { graph: pluginGraph, layout: pluginLayout },
 };

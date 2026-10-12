@@ -1,0 +1,11 @@
+{
+  "scripts": {
+    "docfirst": "docfirst",
+    "doc": "docfirst check",
+    "doc:confirm": "docfirst confirm --write",
+    "doc:render": "docfirst render"
+  },
+  "devDependencies": {
+    "@godcreator/docfirst-workflow": "^0.5.7"
+  }
+}

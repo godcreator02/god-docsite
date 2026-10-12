@@ -53,7 +53,7 @@ export const systemLayout: SeamLayout = {
     'fumadocs-core': null,
     'docsite-kit': null,
     plugin: { x: 700, y: 50, w: 380, h: 94 },
-    'docfirst-site': { x: 180, y: 190, w: 900, h: 94 },
+    'docsite-docfirst': { x: 180, y: 190, w: 900, h: 94 },
     fumadocs: { x: 180, y: 340, w: 810, h: 94 },
     workflow: { x: 180, y: 490, w: 720, h: 94 },
     pin: { x: 180, y: 640, w: 480, h: 94 },
@@ -86,7 +86,7 @@ export const systemLayout: SeamLayout = {
     human: { box: { x: 30, y: 522, w: 130, h: 48 }, arrow: [160, 546, 194, 546] },
   },
   moduleIcons: {
-    'docfirst-site': Package,
+    'docsite-docfirst': Package,
     fumadocs: Plug,
     workflow: Workflow,
     pin: Pin,

@@ -15,7 +15,7 @@ import { TrajectoryFlow } from '../../../src/components/trajectory-flow/trajecto
 同一棵树（或同一领域的孤星）在同一天有好几张卡时，那一天的环带按张数加宽，这几张按角度从当天的环往内排成一斜排，不叠在同一个环上。
 角度按领域分扇区，一圈装得下就整体放大铺满整圈，只在 12 点方向留一道缝放日期与里程碑的名字；装不下才让同一领域里时间不重叠的树共用一段角度。
 从卡文件到站上的盘分几段：读卡目录、解析、校验、换成中性输入在 `docfirst-workflow` 的卡格式；建模、布局、画盘在通用包
-星轨盘 `trajectory-disk`，组件在浏览器里建模；站上的路由在功能包 `docfirst-site`，只负责读卡目录、把结果交给组件：
+星轨盘 `trajectory-disk`，组件在浏览器里建模；站上的路由在功能包 `docsite-docfirst`，只负责读卡目录、把结果交给组件：
 
 <TrajectoryFlow />
 
@@ -71,37 +71,37 @@ import { TrajectoryFlow } from '../../../src/components/trajectory-flow/trajecto
 
 ## 站上怎么渲染
 
-星轨盘 `/trajectory` 与卡页 `/trajectory/<卡身份>` 是功能包 `docfirst-site` 的两条路由：星轨盘占满整个窗口，放在整站布局外面；卡页在整站布局里：
+星轨盘 `/trajectory` 与卡页 `/trajectory/<卡身份>` 是功能包 `docsite-docfirst` 的两条路由：星轨盘占满整个窗口，放在整站布局外面；卡页在整站布局里：
 
-{/* ref file="../packages/docfirst-site/src/routes.ts" hash="c3a77595db13" blob="1a50868d9271" */}
+{/* ref file="../packages/docsite-docfirst/src/routes.ts" hash="c3a77595db13" blob="1a50868d9271" */}
 
 星轨盘的 loader 在服务端用 `loadProject` 找到配置的轨迹卡目录，交给卡格式的 `scanCardDir`，交回中性输入与病卡清单；
 星轨盘组件 `StarDisk` 直接从 `@godcreator/trajectory-disk/disk` 取：
 
-{/* ref file="../packages/docfirst-site/src/routes/disk.tsx" lines="10-12" hash="a6fd0a297788" blob="4333c2115175" */}
+{/* ref file="../packages/docsite-docfirst/src/routes/disk.tsx" lines="10-12" hash="a6fd0a297788" blob="4333c2115175" */}
 
-{/* ref file="../packages/docfirst-site/src/routes/disk.tsx" lines="23-26" hash="c35cfccef10d" blob="4333c2115175" */}
+{/* ref file="../packages/docsite-docfirst/src/routes/disk.tsx" lines="23-26" hash="c35cfccef10d" blob="4333c2115175" */}
 
 每张卡（含根卡）的正文来自站点里的轨迹卡集合，按卡身份交给盘，点到哪张才加载哪张；点节点在盘右侧栏里看这张卡，
 栏里指向别的卡的链接也在栏里切换，地址栏记着 `?card=<卡身份>`，Ctrl/Cmd+点才开卡页：
 
-{/* ref file="../packages/docfirst-site/src/routes/disk.tsx" lines="28-43" hash="8d70aae68d69" blob="4333c2115175" */}
+{/* ref file="../packages/docsite-docfirst/src/routes/disk.tsx" lines="28-43" hash="8d70aae68d69" blob="4333c2115175" */}
 
-{/* ref file="../packages/docfirst-site/src/routes/disk.tsx" lines="62-62" hash="92272822ac7c" blob="4333c2115175" */}
+{/* ref file="../packages/docsite-docfirst/src/routes/disk.tsx" lines="62-62" hash="92272822ac7c" blob="4333c2115175" */}
 
 轨迹卡集合的定义只能写在站点里，所以它在功能包的模板里，初始化站点时写成站点的 `app/lib/trajectory.ts`，两条路由经别名 `@site/lib/trajectory` 读它。
 集合的目录要和配置的 `trajectory` 一致：
 
-{/* ref file="../packages/docfirst-site/template/skeleton/app/lib/trajectory.ts" lines="9-14" hash="884d048bd494" blob="b734a5e07074" */}
+{/* ref file="../packages/docsite-docfirst/template/skeleton/app/lib/trajectory.ts" lines="9-14" hash="884d048bd494" blob="b734a5e07074" */}
 
 卡页的标题依次取 frontmatter 的 `label`、`title`，都没有就用卡身份：
 
-{/* ref file="../packages/docfirst-site/src/card-fields.ts" lines="26-26" hash="0de0baa6d3cc" blob="c9e3273f9b79" */}
+{/* ref file="../packages/docsite-docfirst/src/card-fields.ts" lines="26-26" hash="0de0baa6d3cc" blob="c9e3273f9b79" */}
 
 卡正文里指向卡的链接，由功能包的 remark 插件在构建时改写成卡页地址（盘右侧栏靠 `/trajectory/` 这个前缀认出卡链接）。
 轨迹卡目录里的文件只经过 `remarkTrajectoryLinks`，不做钉码投影与术语标注：
 
-{/* ref file="../packages/docfirst-site/src/content.ts" lines="52-57" hash="83c7d3f9596e" blob="c197951793e7" */}
+{/* ref file="../packages/docsite-docfirst/src/content.ts" lines="52-57" hash="83c7d3f9596e" blob="c197951793e7" */}
 
 ## 卡里为什么不许钉码
 

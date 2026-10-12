@@ -1,0 +1,25 @@
+---
+born-at: 2026-10-13T00:10
+type: choice
+parent: [2026-09-03-god-live-doc]
+label: docfirst-site 上收为地基能力包 docsite-docfirst；./fumadocs 查明本就是纯适配无 Next 可删
+---
+
+## 背景
+
+「钉码、导出正本应该写成原生适配机制」：docfirst 的站点能力该归地基族。查证 `docfirst-workflow` 的 `src/fumadocs/`：一行 `import next` 都没有（迁移到基础包时 Next 适配层已经没了），它本来就是纯 fumadocs 适配——钉码 remark 是自足出口，任何 fumadocs 站可直接挂，不存在要删的 Next 专用部分。
+
+## 选了
+
+- `docfirst-site` 改名 `@godcreator/docsite-docfirst`（0.3.0，对齐地基线）：地基的 docfirst 能力包，站在纯能力包之上——peer 用组合包 docsite-kit、用 docfirst-workflow 与星轨盘；边界守卫里移入地基族（纯地基不认识它）
+- 地基 vite 插件的能力包名单加它（registry 安装的站同样要经 Vite 同管道处理，防多份 fumadocs 实例）
+- docs-site、插件 deps 表、文档正本与 seam-map 数据全量跟名
+
+## 否掉的候选
+
+- 把钉码 remark 拆成独立的裸能力包给协作站用：remark 链依赖 docfirst 项目装配（loadProject、config、git），裸拆不成立；「任何站可用」由 `docfirst-workflow/fumadocs` 自足出口承担
+- outputs 导出搬进地基：render 依赖钉码核心与项目装配，它就是 docfirst 工作流的一部分；机制上 outputs 映射已是站配置里的声明式键
+
+## 代价
+
+- 外部装的旧名 `@godcreator/docfirst-site` 停在 0.2.1：新名是等价包+升级，站里改一行依赖即可

@@ -1,5 +1,5 @@
 /**
- * 页面那一侧：功能包 @godcreator/docfirst-site 的 remark 插件把每条引用投影成带状态点的元素，页面里用到的组件都有来处。
+ * 页面那一侧：功能包 @godcreator/docsite-docfirst 的 remark 插件把每条引用投影成带状态点的元素，页面里用到的组件都有来处。
  * 不启动站点：用 @mdx-js/mdx 编译现状区的每一篇，remark 插件就是站点构建页面时用的那一份（功能包的 ./content 出口），
  * 编译时取下插件前后的语法树来核对。状态与命令行算的是同一个钉码编排（project.pinning），这里只看投影对不对得上清单。
  */
@@ -7,7 +7,7 @@ import { test } from "vitest";
 import assert from "node:assert/strict";
 import { join } from "node:path";
 import { compile } from "@mdx-js/mdx";
-import content from "@godcreator/docfirst-site/content";
+import content from "@godcreator/docsite-docfirst/content";
 import { loadProject } from "@godcreator/docfirst-workflow";
 import { DOT_COLOR, whereOf } from "@godcreator/docfirst-workflow/fumadocs";
 

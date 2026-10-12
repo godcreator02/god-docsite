@@ -3,7 +3,7 @@
  * 例子跟钉码页是同一个仓：content/docs/a.mdx 引用 src/greet.ts，src/ 下有 greet.test.ts、greet.ts、index.ts。
  * 记号写法照 docfirst-workflow 的 marker/index.ts；比什么照 code-pin 的 compare.ts；命令行那一行照 docfirst-workflow 的 cli/text.ts
  * 与 code-pin types.ts 里的 REASON_TEXT；站上投影成什么块照 docfirst-workflow 的 src/fumadocs/blocks.ts，
- * 代码块的状态点由功能包 docfirst-site 的 src/pin-frame.ts 包上的外层与它的样式画出。
+ * 代码块的状态点由功能包 docsite-docfirst 的 src/pin-frame.ts 包上的外层与它的样式画出。
  * hash 与 blob 是用 code-pin 的 span.ts 对这版 greet.ts 与这张名字表真算出来的。
  *
  * @typedef {'fresh' | 'changed' | 'missing' | 'unconfirmed'} Status

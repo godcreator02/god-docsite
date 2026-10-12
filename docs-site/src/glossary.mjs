@@ -1,6 +1,6 @@
 /**
  * 这个站的术语表——**正本就是这份数据**：页面上标出来的词、鼠标移上去看到的那句定义，
- * 全从这儿来。docfirst.config.mjs 的 glossary 指向这个文件，构建页面时功能包 docfirst-site 的 remark 插件按它标注；改词改这里。
+ * 全从这儿来。docfirst.config.mjs 的 glossary 指向这个文件，构建页面时功能包 docsite-docfirst 的 remark 插件按它标注；改词改这里。
  *
  * 收词的判据（正本是随工作台插件发的 skill「docs-writing」，这儿只记结论）：
  *   收 这个项目自己造的词、通用词在这里有特定含义的、外来框架里读者最容易卡住的词

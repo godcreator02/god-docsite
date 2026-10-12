@@ -15,18 +15,18 @@ import { Tabs, Tab } from '../../src/components/tabs/tabs';
 两个插件：`plugins/docsite/` 是 `@godcreator/gwb-docsite`（身份码、一步建站、托管站点），`plugins/docfirst/` 是
 `@godcreator/gwb-docfirst-workflow`（[docfirst 建站命令](/docs/plugin)与说明书）。`packages/` 下每个目录一个 npm 包：
 
-{/* tree dir="../packages" depth="1" hash="a75a5ae59872" */}
+{/* tree dir="../packages" depth="1" hash="409ee0a2b4ff" */}
 
 **地基**（`docsite-*`）是文档站基础包的能力包与组合包，互不相识（唯一的组合在 `docsite-kit`），谁都不认识 docfirst。
 docfirst 侧：通用包不认识 docfirst，谁都能单独使用：[钉码核心](/docs/pin) `code-pin`、[星轨盘](/docs/trajectory) `trajectory-disk`；
 docfirst 自己的包有三个：`docfirst-workflow` 是[命令行与项目](/docs/workflow)，接到 fumadocs 站上的部分在它的子入口 `./fumadocs`；
-`docfirst-site` 是文档站基础包 `@godcreator/docsite-kit` 的功能包，构建页面时用 `./fumadocs` 里的 remark 插件，另给 `Term` 与文件树组件、
+`docsite-docfirst` 是文档站基础包 `@godcreator/docsite-kit` 的功能包，构建页面时用 `./fumadocs` 里的 remark 插件，另给 `Term` 与文件树组件、
 星轨盘与卡页两条路由（两样见[站点接入](/docs/fumadocs)）；[讲解组件包](/docs/docfirst-explainer) `docfirst-explainer` 是 docfirst 站上用的讲解组件，只有站用。
 谁能依赖谁见[测试与边界](/maintain/testing)，搬进本仓的选型见轨迹卡 [gwb-docfirst 并入 docsite-kit](/trajectory/2026-10-12-merge-into-docsite-kit)。
 
 两个站都是工作区成员，用 `workspace:*` 装工作区里的包，钉的都是工作区里的实际源码，所以仓里不另留示例项目：
 `site/` 讲地基与能力包，是**骨架的正本**（地基插件建站的模板从它派生）；本站讲 docfirst 工作流，是 **docfirst 站的正本**
-（要建 docfirst 站的照它看，`docfirst-site` 的模板起始物以它为参照）。
+（要建 docfirst 站的照它看，`docsite-docfirst` 的模板起始物以它为参照）。
 
 站的 `app/`、`vite.config.ts`、`react-router.config.ts`、`source.config.ts`、`tsconfig.json`、`.gitignore` 与自述站的骨架同代（评论、
 三种页面来源都是当前这一版），是手写的正本——地基升级骨架时对照 `site/` 改过来；站自己维护的还有 `content/`、`trajectory/`（轨迹卡）、
@@ -62,11 +62,11 @@ docfirst 自己的包有三个：`docfirst-workflow` 是[命令行与项目](/do
 {/* ref file="package.json" lines="12-19" hash="948087fbb2a5" blob="32c606e8d42e" */}
 
 站的开发服务（上面 `dev` 脚本里的端口）交给 gwb-docsite 托管：`docsite.site.add {"dir":"<仓>/docs-site"}` 登记后常驻，改了页面自己刷新，
-不在会话里自己 `pnpm dev`；`pnpm build` 只作提交前的检查。改了构建页面时 remark 插件会调用到的包代码（`docfirst-site`，
+不在会话里自己 `pnpm dev`；`pnpm build` 只作提交前的检查。改了构建页面时 remark 插件会调用到的包代码（`docsite-docfirst`，
 `docfirst-workflow/src/fumadocs/` 及它调用的 workflow 别的出口、code-pin），先在改过的包里 `pnpm build`，再 `docsite.site.stop`、`docsite.site.start` 重启开发服务：
 功能包的 remark 插件在一个进程里只装配一次项目，之后编译每一页都用这一份：
 
-{/* ref file="../packages/docfirst-site/src/content.ts" lines="59-66" hash="862e50aee640" blob="c197951793e7" */}
+{/* ref file="../packages/docsite-docfirst/src/content.ts" lines="59-66" hash="862e50aee640" blob="c197951793e7" */}
 
 ## 提交规矩
 
@@ -85,7 +85,7 @@ docfirst 自己的包有三个：`docfirst-workflow` 是[命令行与项目](/do
 
 包与插件各发各的，没有先后：插件对 `packages/` 下的包零依赖，由插件的 `tests/artifact.test.ts` 检查。
 唯一的联系是 `plugins/docfirst/src/deps.ts` 那张表：建站时交给地基建站器的功能包版本取自它，表里写精确号。
-`docfirst-site` 升了版本号就同时改表，忘了改这条测试当场失败：
+`docsite-docfirst` 升了版本号就同时改表，忘了改这条测试当场失败：
 
 {/* ref file="../plugins/docfirst/tests/create.test.ts" lines="19-19" hash="2c58b0f2b094" blob="37af8cc95b86" */}
 

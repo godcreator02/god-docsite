@@ -98,7 +98,7 @@ docfirst 站就钉码引用那段代码，普通站就删掉。
 - **机读规则只给放进生成正本的组件写**：站上不出每页的机读版，组件要用在 README、AGENTS、SKILL.md 的正本里，才写一份 `*.ai.mjs`，
   交回的就是它在生成物里的样子，读同一份 `*.data.mjs`；规则登记进 `docfirst.config.mjs` 的组件名册 `components`
 - **页面用到站内组件就在开头 `import`**（基础包上的站）：路径相对页面，如 `import { SeamMap } from '../../src/components/seam-map/seam-map';`。
-  `Term` 与文件树 `Files` / `Folder` / `File` 由功能包 `@godcreator/docfirst-site` 提供，不用 import
+  `Term` 与文件树 `Files` / `Folder` / `File` 由功能包 `@godcreator/docsite-docfirst` 提供，不用 import
 - **组件自己 `import` 样式**：`./xx.css`，用了讲解组件包的再 import `@godcreator/docsite-explainer/styles.css`，不靠全局样式
 - 浏览器 API 放进 `useEffect`：页面先在服务端渲染一遍
 - 组件最外层加 `not-prose`，宽窄屏用容器查询（外层 `@container`，里面 `@2xl:` 这类前缀）

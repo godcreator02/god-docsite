@@ -11,13 +11,13 @@ const MARKER = '{/* ref file="../packages/docfirst-workflow/src/cards/parse.ts" 
 export const files = {
   dir: 'trajectory',
   cwd: '~/repo/docs-site',
-  page: 'docfirst-site/src/routes/disk.tsx',
+  page: 'docsite-docfirst/src/routes/disk.tsx',
   collection: 'app/lib/trajectory.ts',
 };
 
 /**
  * 流水线的六段，第 i 步点亮第 i 段。role 是这段代码所在的包在整页里的颜色：
- * 卡文件 amber、docfirst-workflow 的卡格式 blue、trajectory-disk violet、功能包 docfirst-site 的路由 cyan；站点里的轨迹卡集合只在第 6 步的画面里出现，用 emerald。
+ * 卡文件 amber、docfirst-workflow 的卡格式 blue、trajectory-disk violet、功能包 docsite-docfirst 的路由 cyan；站点里的轨迹卡集合只在第 6 步的画面里出现，用 emerald。
  * @typedef {'files' | 'read' | 'parse' | 'model' | 'layout' | 'page'} StageId
  * @typedef {{ id: StageId, name: string, pkg: string, exports: string, role: 'amber' | 'blue' | 'violet' | 'cyan' }} Stage
  * @type {Stage[]}
@@ -28,7 +28,7 @@ export const stages = [
   { id: 'parse', name: '解析与校验', pkg: 'docfirst-workflow/cards', exports: 'scanCards → parseCardFile', role: 'blue' },
   { id: 'model', name: '建树、选主干', pkg: 'trajectory-disk', exports: 'buildModel', role: 'violet' },
   { id: 'layout', name: '布局', pkg: 'trajectory-disk', exports: 'RingsLayout', role: 'violet' },
-  { id: 'page', name: '站上渲染', pkg: 'docfirst-site /trajectory', exports: 'loader → StarDisk', role: 'cyan' },
+  { id: 'page', name: '站上渲染', pkg: 'docsite-docfirst /trajectory', exports: 'loader → StarDisk', role: 'cyan' },
 ];
 
 /** 卡字段，顺序照卡格式 parse.ts 的 CARD_KEYS */
@@ -235,7 +235,7 @@ export const layout = {
 };
 
 /** 功能包的星轨盘路由 disk.tsx 里读卡目录、交给 StarDisk 的几行（原文，start 是行号） */
-/* ref file="../packages/docfirst-site/src/routes/disk.tsx" hash="86c5627e0f29" blob="2c55388396bb" */
+/* ref file="../packages/docsite-docfirst/src/routes/disk.tsx" hash="86c5627e0f29" blob="2c55388396bb" */
 export const pageLines = [
   {
     start: 10,
@@ -266,7 +266,7 @@ export const clicks = [
 ];
 
 /** 站点里的轨迹卡集合 app/lib/trajectory.ts（由功能包的模板写进站点，原文，start 是行号） */
-/* ref file="../packages/docfirst-site/template/skeleton/app/lib/trajectory.ts" lines="9-14" hash="884d048bd494" blob="b734a5e07074" */
+/* ref file="../packages/docsite-docfirst/template/skeleton/app/lib/trajectory.ts" lines="9-14" hash="884d048bd494" blob="b734a5e07074" */
 export const collectionLines = {
   start: 7,
   lines: ["export const trajectoryCards = defineCollections({ type: 'doc', dir: 'trajectory', async: true })"],
@@ -352,7 +352,7 @@ export const steps = [
     id: 'page',
     title: '站上渲染：/trajectory 整页',
     text:
-      '星轨盘 /trajectory 是功能包 @godcreator/docfirst-site 的路由（src/routes/disk.tsx），放在整站布局外面，盘占满顶栏以下的整个窗口。' +
+      '星轨盘 /trajectory 是功能包 @godcreator/docsite-docfirst 的路由（src/routes/disk.tsx），放在整站布局外面，盘占满顶栏以下的整个窗口。' +
       'loader 在服务端用 loadProject 找到配置的轨迹卡目录，交给 scanCardDir 读出中性输入与 sick；每张卡（含根卡）的正文来自站点里的轨迹卡集合 trajectoryCards' +
       '（app/lib/trajectory.ts，集合定义只能写在站点里，由功能包的模板在初始化时写进去），点到哪张才加载哪张。' +
       '两样一起交给星轨盘组件 StarDisk（直接从 @godcreator/trajectory-disk/disk 取，hrefBase 是 /trajectory），点节点在盘右侧栏里看卡，不跳页。顶栏的「报病」数是 sick 里的文件数。' +

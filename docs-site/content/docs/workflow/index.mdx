@@ -17,7 +17,7 @@ import { SeamMap } from '../../../src/components/seam-map/seam-map';
 
 目录之间的依赖方向见上图。这些目录在同一个包里，编译器不拦跨目录 import，方向由边界测试的禁止表检查：
 
-{/* ref file="../tests/boundary.test.ts" lines="373-400" hash="c1818fae7078" blob="03e2140e3c08" */}
+{/* ref file="../tests/boundary.test.ts" lines="375-402" hash="c1818fae7078" blob="da1acdb8b833" */}
 
 ### 项目装配 project
 
@@ -258,16 +258,16 @@ fumadocs 适配只从这里取卡格式，从 `.` 取会把命令行与配置加
 - **命令行那一侧不认识任何站的宿主**：除了 `src/fumadocs/`，fumadocs、react、next 在源码与产物里都不出现，清单里它们只是可选 peer。
   命令行运行在 git hook 与 CI 里，那些环境不一定装了站的依赖：
 
-{/* ref file="../tests/boundary.test.ts" lines="494-506" hash="8ddaab08f765" blob="03e2140e3c08" */}
+{/* ref file="../tests/boundary.test.ts" lines="496-508" hash="8ddaab08f765" blob="da1acdb8b833" */}
 
 - **命令行那一侧不认识 fumadocs 适配**：别的目录不许引用 `src/fumadocs/`，`src/fumadocs/` 也只按包名用 `.`、`./mdx`、`./cards`：
 
-{/* ref file="../tests/boundary.test.ts" lines="478-492" hash="6cf7852c8dc4" blob="03e2140e3c08" */}
+{/* ref file="../tests/boundary.test.ts" lines="480-494" hash="6cf7852c8dc4" blob="da1acdb8b833" */}
 
 - **`node/` 以外不碰磁盘与子进程**：别的目录不 import `node:fs`、`node:child_process`、`node:os`；`process` 只有 `node/` 与命令行用。
   记号、格式、钉码编排、卡的解析因此都能直接用文本测试：
 
-{/* ref file="../tests/boundary.test.ts" lines="515-526" hash="7430135f6d42" blob="03e2140e3c08" */}
+{/* ref file="../tests/boundary.test.ts" lines="517-528" hash="7430135f6d42" blob="da1acdb8b833" */}
 
 - **不判状态**：绿黄白红由[钉码核心](/docs/pin)算，这个包把磁盘、git、配置交给它，再把结果打印出来。
 - **不给盘建模、不画盘**：关系怎么连成树、主干怎么选、盘怎么画归[星轨盘](/docs/trajectory)；这个包只把卡文件换成它要的中性输入。

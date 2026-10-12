@@ -1,6 +1,6 @@
 ---
 title: 工作台插件 gwb-docfirst-workflow
-description: 一条建站命令 docfirst.create——认站名、选端口，把功能包 @godcreator/docfirst-site 交给 gwb-docsite 的建站服务一步建成；随插件发布的说明书；对本仓 packages/ 下的 npm 包零依赖
+description: 一条建站命令 docfirst.create——认站名、选端口，把功能包 @godcreator/docsite-docfirst 交给 gwb-docsite 的建站服务一步建成；随插件发布的说明书；对本仓 packages/ 下的 npm 包零依赖
 full: true
 ---
 
@@ -20,7 +20,7 @@ full: true
 **建站一条命令。** `docfirst.create {"dir":"<仓>/docs-site"}`：站名不给就依次用仓根 `package.json` 的 `title`、包名去掉
 scope、仓目录名；端口不给就在站目录的祖父目录里查重、从 4310 起选；然后把功能包交给 `gwbDocsite.init`：
 
-{/* ref file="../plugins/docfirst/src/index.ts" lines="44-63" hash="b323c1404ebc" blob="e68cbea35282" */}
+{/* ref file="../plugins/docfirst/src/index.ts" lines="44-63" hash="3bfa2358ac10" blob="cc917c8f172d" */}
 
 交给哪个版本写在 `src/deps.ts` 那张表里（精确号，`tests/create.test.ts` 盯着它与工作区版本一致）；起始物
 （`docfirst.config.mjs`、README / AGENTS / CLAUDE 的 outputs 正本、轨迹与未来两区起始页、docfirst 系脚本）由功能包的
