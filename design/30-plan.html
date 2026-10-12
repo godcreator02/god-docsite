@@ -77,6 +77,14 @@
   <tr><td>身份校验与评论写入</td><td><strong>不进包</strong>：站点路由 action 组合（身份码 → people → Origin → as → 调模型写文件）</td><td>N 线已验证的形态</td></tr>
   <tr><td>悬浮层等 UI 增强</td><td>正文外批注悬浮（O 线）、写作组件（R 线）按功能小段收进 kit UI</td><td>probe 内待收编</td></tr>
 </table>
+
+<h3>4.1 组合点可复数（2026-10-12 补，用户确认）</h3>
+<ul>
+  <li>大包的解体形态不是「摊平成小包组合」，而是<strong>删掉重复的正本、拆走纯库、把组合点做薄</strong>。终态三层：能力小包（identity、comments、writing、page-sources、feed，无站点形态）→ 组合包（各有各的站点形态）→ 具体站点与 gwb 插件托管。</li>
+  <li><strong>组合点可复数。</strong>docsite-kit 是「通用文档站形态」的组合包；docfirst 与协作站以后各自另立方案时，可以组合同一批能力小包做<strong>自己的组合包</strong>，而不是往 docsite-kit 里加站系专用配置。判据：组合包里开始长出「为某个站系服务的开关」时，就是那个站系分出去自己组合的时候。</li>
+  <li>三条分寸：① 组合包之间互不依赖，两边都要的东西必须下沉成能力小包或留在通用组合层；② 大多数站直接用 docsite-kit，不为差异小的站系建组合包；③ 现行功能包（挂在别人组合点上的功能，featureRoutes / ./content 约定）升级成自己的组合包，以「挂载式约定表达不下它的接线」为准，不提前升级。</li>
+  <li>清理顺序的依赖：删本体旧评论/身份实现，必须以自述站（及模板）不再引用旧出口为前置——迁移先行或同笔完成，先删会把自述站砸红。</li>
+</ul>
 </section>
 
 <section id="cleanup">
@@ -113,6 +121,7 @@
   <li><span class="verdict-no">评论包依赖身份包</span>（K 线）：身份校验在站点 action 组合，模型包零身份概念。</li>
   <li><span class="verdict-no">手工对抗 HMR</span>（强刷、自建失效链、mtime 触碰、删除过滤器）：vite 缺陷已修，原生链路可用。</li>
   <li><span class="verdict-no">「先写探针/验证站，再收编正式代码」的开发顺序</span>：直接写正式代码，探针只判上游未知行为。</li>
+  <li><span class="verdict-no">把 docsite-kit 摊平成纯小包、不留组合包</span>（2026-10-12 定）：骨架的职责就是组合——布局、组件表、集合接线、action 组合要有一个正本持有者；摊平后每个站拼七八个包、版本矩阵无人兜底。解体见 4.1：删重复正本、拆纯库、组合点做薄但保留。</li>
 </ul>
 </section>
 
