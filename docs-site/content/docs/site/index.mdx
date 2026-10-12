@@ -92,7 +92,7 @@ import { SeamMap } from '../../../src/components/seam-map/seam-map';
 
 集合定义只能写在项目里，所以放在 `template/` 下，由基础包的初始化复制进站点；两条路由经别名 `@site/lib/trajectory` 读它，`async: true` 让正文按需加载：
 
-{/* ref file="../packages/docfirst-site/template/skeleton/app/lib/trajectory.ts" lines="1-7" hash="d857ba3c3e6a" blob="55562eb102dd" */}
+{/* ref file="../packages/docfirst-site/template/skeleton/app/lib/trajectory.ts" lines="1-14" hash="700c7c633507" blob="b734a5e07074" */}
 
 路由模块在包里构建，这个模块的类型由包自己声明：
 
@@ -114,17 +114,17 @@ import { SeamMap } from '../../../src/components/seam-map/seam-map';
 
 骨架的 `source.config.ts` 把功能包的 remark 插件接在 fumadocs 默认插件后面，这个文件由初始化写出、不手改：
 
-{/* ref file="source.config.ts" lines="8-10" hash="6822d62ff0a2" blob="19ed57bb3244" */}
+{/* ref file="source.config.ts" lines="14-29" hash="2c1c97979fab" blob="c504dc4df3a6" */}
 
 `docfirst.config.mjs` 里两项给它用：`trajectory` 指轨迹卡目录（相对项目根，要跟模板里集合的目录一致），`glossary` 指术语表模块与不标注的文档：
 
-{/* ref file="docfirst.config.mjs" lines="71-73" hash="50ba4ed36064" blob="57d64b6b2e69" */}
+{/* ref file="docfirst.config.mjs" lines="70-72" hash="50ba4ed36064" blob="34102b13773c" */}
 
 ## 接口
 
 五个出口，加上要复制进站点的 `template/`：
 
-{/* ref file="../packages/docfirst-site/package.json" lines="7-30" hash="08dec1345b18" blob="8c4aa7b069d5" */}
+{/* ref file="../packages/docfirst-site/package.json" lines="9-32" hash="08dec1345b18" blob="1862bd7a39e3" */}
 
 用 tsdown 构建，两条路由模块也单独出一份产物，路由表里写的就是它们的路径；React、fumadocs、基础包、本仓的兄弟包与骨架里的模块都按包名留在产物里：
 
@@ -139,17 +139,17 @@ import { SeamMap } from '../../../src/components/seam-map/seam-map';
 | 文档站基础包 `@godcreator/docsite-kit`（peer） | 功能包出口的类型，骨架里经别名 `@site` 给路由模块的站名、页面列表、MDX 组件表 |
 | `@fumadocs/base-ui`、react、react-router、lucide-react（peer） | 文件树、文档页与深浅色切换的组件，路由的 loader，侧栏入口的图标；都用站点装的那份 |
 
-{/* ref file="../packages/docfirst-site/package.json" lines="36-46" hash="663d83cf0607" blob="8c4aa7b069d5" */}
+{/* ref file="../packages/docfirst-site/package.json" lines="38-48" hash="2487b2b25841" blob="fae6a334355f" */}
 
 ## 不做的事
 
 - **不认识钉码核心与讲解组件包**：钉码经 workflow 用；讲解组件归站自己的组件用。谁都不依赖它：
 
-{/* ref file="../tests/boundary.test.ts" lines="135-149" hash="f5aed8e4b2c5" blob="f1a4307dac6e" */}
+{/* ref file="../tests/boundary.test.ts" lines="144-173" hash="87257bfcf303" blob="e8a07d24ed10" */}
 
 - **不写建站模板**：`template/` 下只有基础包初始化时写进站点的轨迹卡集合定义，建一个新站是基础包与 gwb-docsite 的事：
 
-{/* ref file="../tests/boundary.test.ts" lines="539-558" hash="7ae344d3476d" blob="f1a4307dac6e" */}
+{/* ref file="../tests/boundary.test.ts" lines="573-592" hash="7ae344d3476d" blob="e8a07d24ed10" */}
 
 - **不出每页的机读版**：基础包没有 llms 路由与复制 Markdown 的按钮，功能包也不接 workflow 的机读版回调；机读文字只出现在 `docfirst render` 渲染的生成物里。
 - **不画状态点组件**：代码块就是 fumadocs 自己的，功能包只包一层 div、由样式画点，不替换 `pre`。

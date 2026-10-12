@@ -64,7 +64,7 @@ import { SeamMap } from '../../../src/components/seam-map/seam-map';
 
 **谁在用它**：本仓的 `docs-site/` 在 `package.json` 里依赖它：
 
-{/* ref file="package.json" lines="21-21" hash="3fd371020ab4" blob="32c606e8d42e" */}
+{/* ref file="package.json" lines="22-22" hash="3fd371020ab4" blob="f726f1b2411e" */}
 
 主入口不带样式，站里每个用到外壳或零件的组件在自己的 `.tsx` 开头 import 一次 `styles.css`（有自己画面样式的再 import 那一份），打包时只放进一份。接缝图组件的那一行：
 
@@ -72,7 +72,7 @@ import { SeamMap } from '../../../src/components/seam-map/seam-map';
 
 建站命令不把它写进新站的依赖，站要用时自己加：
 
-{/* ref file="../plugins/docfirst/src/deps.ts" lines="17-19" hash="61977d4ce79d" blob="d9d318f1216f" */}
+{/* ref file="../plugins/docfirst/src/deps.ts" lines="16-18" hash="1692c4f8f1d6" blob="3a5a963bc49b" */}
 
 ## 接口
 
@@ -82,13 +82,13 @@ import { SeamMap } from '../../../src/components/seam-map/seam-map';
 
 四个出口：
 
-{/* ref file="../packages/docfirst-explainer/package.json" lines="7-21" hash="06005b5b0775" blob="5199565aa6ab" */}
+{/* ref file="../packages/docfirst-explainer/package.json" lines="9-23" hash="06005b5b0775" blob="3de652bf4164" */}
 
 ## 依赖
 
 没有 `dependencies`，react 是必需的 peer，用站自己装的那份：
 
-{/* ref file="../packages/docfirst-explainer/package.json" lines="31-33" hash="b0cacd73d38e" blob="5199565aa6ab" */}
+{/* ref file="../packages/docfirst-explainer/package.json" lines="33-35" hash="b0cacd73d38e" blob="3de652bf4164" */}
 
 样式只读 fumadocs 主题的 CSS 变量，没有这些变量时用自带的颜色。
 
@@ -97,26 +97,26 @@ import { SeamMap } from '../../../src/components/seam-map/seam-map';
 **不依赖本仓别的包。** 它跟钉码核心、星轨盘一样自成一体：清单里没有任何 `@godcreator/` 包，源码与产物不 import 它们，
 源码的相对 import 不出自己的 `src/`，各站单独装它、单独升它：
 
-{/* ref file="../tests/boundary.test.ts" lines="207-231" hash="f2d7e0bf9e96" blob="f1a4307dac6e" */}
+{/* ref file="../tests/boundary.test.ts" lines="241-265" hash="f2d7e0bf9e96" blob="e8a07d24ed10" */}
 
 它名字里带 docfirst，不在通用包那张表里，「一个 docfirst 字样都没有」那条不查它；为什么挪到 docfirst 一侧见轨迹卡
 [讲解组件包改名 docfirst-explainer](/trajectory/2026-09-28-explainer-renamed-docfirst-explainer)。
 
 **也不被 docfirst 的命令行与插件认识。** `docfirst-workflow` 与工作台插件都不依赖它，只有站用它；清单里没有 `dependencies`，react 只作必需 peer：
 
-{/* ref file="../tests/boundary.test.ts" lines="588-596" hash="4e7d750f9b61" blob="f1a4307dac6e" */}
+{/* ref file="../tests/boundary.test.ts" lines="622-630" hash="4e7d750f9b61" blob="e8a07d24ed10" */}
 
 **不把 react 打进产物。** `.` 的产物第一行是 `"use client"`，只许 import react：
 
-{/* ref file="../tests/boundary.test.ts" lines="598-608" hash="ad0f4086af94" blob="f1a4307dac6e" */}
+{/* ref file="../tests/boundary.test.ts" lines="632-642" hash="ad0f4086af94" blob="e8a07d24ed10" */}
 
 **`./text` 不 import 任何东西。** 命令行在 Node 里渲染生成物时加载它（本仓是 `docfirst.config.mjs`），所以它不带客户端指令、源码和产物都零 import：
 
-{/* ref file="../tests/boundary.test.ts" lines="610-615" hash="d4e46c6a72f8" blob="f1a4307dac6e" */}
+{/* ref file="../tests/boundary.test.ts" lines="644-649" hash="d4e46c6a72f8" blob="e8a07d24ed10" */}
 
 **`./seam-graph` 只 import 类型。** 接缝图的数据文件既被画面 import，又被机读规则在 Node 里加载，所以它的产物零 import、不带客户端指令：
 
-{/* ref file="../tests/boundary.test.ts" lines="617-625" hash="59e3f4669642" blob="f1a4307dac6e" */}
+{/* ref file="../tests/boundary.test.ts" lines="651-659" hash="59e3f4669642" blob="e8a07d24ed10" */}
 
 **不画题目的画面。** 画面里画什么、每一帧的讲解数据、机读规则都写在各站自己的组件里；这个包只给外壳与零件。
 接缝图也一样：一个站有几张图、每张图的内容与坐标、按什么名字挑图，都在站里。

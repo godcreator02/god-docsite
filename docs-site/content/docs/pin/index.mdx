@@ -72,22 +72,22 @@ import { SeamMap } from '../../../src/components/seam-map/seam-map';
 
 **不读写磁盘，不启动子进程，不知道 git 存在。** 边界测试只许源码 import 包内文件和 `node:crypto`，清单里不许有依赖：
 
-{/* ref file="../tests/boundary.test.ts" lines="247-256" hash="e28789728621" blob="0d3a5dcc329f" */}
+{/* ref file="../tests/boundary.test.ts" lines="285-294" hash="e28789728621" blob="e8a07d24ed10" */}
 
 **不认识别的包，也不认识 docfirst。** 它是通用包，也自成一体：清单里没有任何 `@godcreator/` 包，源码与产物不 import 它们，
 源码的相对 import 不出自己的 `src/`：
 
-{/* ref file="../tests/boundary.test.ts" lines="213-237" hash="ce004dadbbe6" blob="0d3a5dcc329f" */}
+{/* ref file="../tests/boundary.test.ts" lines="251-275" hash="94b742a6ba47" blob="e8a07d24ed10" */}
 
 包目录里（源码、产物、构建配置、清单）一个 docfirst 字样都没有（清单里指向本仓的仓地址除外）；docfirst 怎么用它，写在 docfirst 的包与这个站里：
 
-{/* ref file="../tests/boundary.test.ts" lines="229-245" hash="488ad8a3f185" blob="0d3a5dcc329f" */}
+{/* ref file="../tests/boundary.test.ts" lines="267-283" hash="a88dde7bd571" blob="e8a07d24ed10" */}
 
 **不接触文档文本。** 记号写成什么样、在文件第几行、写回时怎么改那一行、这个文件是 mdx 页面还是讲解组件的源码，
 都归使用方；在 docfirst 里归 workflow 的记号写法、两个格式与钉码编排。
 边界测试查源码与产物里有没有文档文本那一侧的名字：
 
-{/* ref file="../tests/boundary.test.ts" lines="258-271" hash="ecb19e47f9f2" blob="0d3a5dcc329f" */}
+{/* ref file="../tests/boundary.test.ts" lines="296-309" hash="ecb19e47f9f2" blob="e8a07d24ed10" */}
 
 **不渲染，不知道项目根、配置文件和生成物放哪。** 在 docfirst 里，装配、渲染与摆放在 workflow。
 

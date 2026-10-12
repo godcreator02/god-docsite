@@ -19,7 +19,7 @@ description: 这个仓里反复出现的词各指什么、正本在哪、怎么�
 正文里命中术语表的词，站构建页面时自动加一层标注，鼠标移上去显示定义——源文件里干净，没有手写的标签。
 标注由功能包 `docfirst-site` 的 remark 插件做：术语表模块是配置 `glossary` 指的那个文件，`skip` 里的页不标：
 
-{/* ref file="docfirst.config.mjs" lines="72-73" hash="7bd985bedb25" blob="57d64b6b2e69" */}
+{/* ref file="docfirst.config.mjs" lines="71-72" hash="7bd985bedb25" blob="34102b13773c" */}
 
 插件加载这个模块、取出它导出的 `terms` 交给 workflow 的术语标注，`skip` 按文档身份比对：
 

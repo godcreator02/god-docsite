@@ -1,176 +1,34 @@
 ---
 title: 工作台插件 gwb-docfirst-workflow
-description: 两条建站命令 docfirst.create 与 docfirst.create-plain（官方脚手架、本机约定、端口、写入文件），四条托管站点的命令 docfirst.site.*（工作台持有站的进程，每次开 12 小时，restart 重新构建并重启）与只显示的窗格「文档站」，加随插件发布的说明书；对本仓 packages/ 下的 npm 包零依赖
+description: 一条建站命令 docfirst.create——认站名、选端口，把功能包 @godcreator/docfirst-site 交给 gwb-docsite 的建站服务一步建成；随插件发布的说明书；对本仓 packages/ 下的 npm 包零依赖
 full: true
 ---
 
-import { SeamMap } from '../../../src/components/seam-map/seam-map';
+包 `@godcreator/gwb-docfirst-workflow`，在 `plugins/docfirst/`，源码在 `src/`，入口 `src/index.ts`，说明书在 `skills/`。
+它是 god 工作台（gwb）的插件，不发成 npm 库。
 
-包 `@godcreator/gwb-docfirst-workflow`，在 `plugins/docfirst/`，源码在 `src/`，入口 `src/index.ts`；说明书在 `skills/`，
-建站模板在 `template/`。它是 god 工作台（gwb）的插件，不发成 npm 库。
-
-它建与托管的是 Next 站，站接的是 workflow 的 [fumadocs 适配](/docs/fumadocs)。建在文档站基础包上的站（本仓的文档站就是）不经这个插件：
-初始化、更新骨架与托管归工作台的 gwb-docsite 插件，docfirst 经[站的功能包](/docs/site)接进去。
-
-<SeamMap module="plugin" />
+建站经 gwb-docsite 的服务 `gwbDocsite`：地基骨架、功能包起始物、装依赖、探活都归它，这个插件只做 docfirst 特有的两件事——
+认站名与选端口，再把功能包交出去。站的托管（`docsite.site.*`）也归 gwb-docsite。docfirst 经[站的功能包](/docs/site)接进站。
 
 ## 功能
 
-**包的使用者是仓，插件的使用者是 agent。** 要在仓里发生的核对、确认、渲染归 npm 包，agent `cd` 到站目录里运行站装的 `docfirst` 命令行；
-只在 agent 手上发生一次的建站与读说明书归插件，跟会话无关、要一直开着的站也由插件托管。判据的来历见[包给仓、插件给人](/trajectory/2026-09-10-package-serves-repo-plugin-serves-agent)：
+**包的使用者是仓，插件的使用者是 agent。** 要在仓里发生的核对、确认、渲染归 npm 包，agent `cd` 到站目录里运行站装的
+`docfirst` 命令行；只在 agent 手上发生一次的建站归插件。判据的来历见[包给仓、插件给人](/trajectory/2026-09-10-package-serves-repo-plugin-serves-agent)：
 
-{/* ref file="../plugins/docfirst/src/index.ts" lines="18-27" hash="56af1b6b6895" blob="ec068c28d71e" */}
+{/* ref file="../plugins/docfirst/src/index.ts" lines="18-30" hash="3f574db6cba6" blob="e68cbea35282" */}
 
-**建站从官方脚手架出发。** 两条命令共用 `createSite`，`docfirst.create-plain` 只要官方输出加本机约定：
+**建站一条命令。** `docfirst.create {"dir":"<仓>/docs-site"}`：站名不给就依次用仓根 `package.json` 的 `title`、包名去掉
+scope、仓目录名；端口不给就在站目录的祖父目录里查重、从 4310 起选；然后把功能包交给 `gwbDocsite.init`：
 
-{/* ref file="../plugins/docfirst/src/scaffold.ts" lines="10-33" hash="af8d6dc9a21a" blob="c63747b8e10f" */}
+{/* ref file="../plugins/docfirst/src/index.ts" lines="44-63" hash="b323c1404ebc" blob="e68cbea35282" */}
 
-{/* ref file="../plugins/docfirst/src/scaffold.ts" lines="35-41" hash="145e4396603e" blob="3cb0f4a6ee6a" */}
+交给哪个版本写在 `src/deps.ts` 那张表里（精确号，`tests/create.test.ts` 盯着它与工作区版本一致）；起始物
+（`docfirst.config.mjs`、README / AGENTS / CLAUDE 的 outputs 正本、轨迹与未来两区起始页、docfirst 系脚本）由功能包的
+模板带进站。骨架写完就归站点，没有照新模板重写它的命令。
 
-本机约定是精确文本替换，原文对不上就报错：
+插件没有任何文件启动子进程：装依赖与探活在建站服务里发生，插件不转发 `docfirst` 命令行（`tests/artifact.test.ts` 检查）。
 
-{/* ref file="../plugins/docfirst/src/scaffold.ts" lines="183-188" hash="4fa12ba781fd" blob="c63747b8e10f" */}
+## 零依赖
 
-新增、替换、删除、改四个清单一次查完再动手：
-
-{/* ref file="../plugins/docfirst/src/scaffold.ts" lines="294-298" hash="186f132e409d" blob="c63747b8e10f" */}
-
-写入文件途中失败就删掉整个目标目录：
-
-{/* ref file="../plugins/docfirst/src/scaffold.ts" lines="383-400" hash="460179de2867" blob="c63747b8e10f" */}
-
-**`docfirst.create` 在官方输出上多改几份文件**，模板分新增与替换两个目录，另加 doc 脚本：
-
-{/* ref file="../plugins/docfirst/src/template.ts" lines="1-8" hash="24fa9ba9f089" blob="80056932433a" */}
-
-{/* ref file="../plugins/docfirst/src/create.ts" lines="15-22" hash="38db1def4857" blob="ba7789e519b3" */}
-
-**建出的站不出每页的机读版**：删掉官方模板里 llms 的三个路由与 proxy，去掉页面上复制与查看 markdown 的按钮，机读文字只给生成物：
-
-{/* ref file="../plugins/docfirst/tests/create.test.ts" lines="165-172" hash="5e20c74775b1" blob="a48282005ff2" */}
-
-**端口从 4310 起选第一个空闲的**，调用方给了端口就用给的：
-
-{/* ref file="../plugins/docfirst/src/ports.ts" lines="95-106" hash="b91169faf764" blob="706e2a36ab77" */}
-
-**别的站占用了哪些端口，按 `package.json` 脚本里的端口参数认**，next 的 `-p` 与 vite 的 `--port` 都认，不管启动的是什么程序：
-
-{/* ref file="../plugins/docfirst/src/ports.ts" lines="28-37" hash="f957083d2979" blob="706e2a36ab77" */}
-
-扫描深四层，`<容器根>/<单元>/<仓>/<子目录>/<站>` 这样多套一层的站也扫得到：
-
-{/* ref file="../plugins/docfirst/src/ports.ts" lines="43-48" hash="964f45a835b0" blob="706e2a36ab77" */}
-
-查重范围看站在不在容器根里：
-
-{/* ref file="../plugins/docfirst/src/scaffold.ts" lines="340-344" hash="250edd16bd50" blob="c63747b8e10f" */}
-
-**说明书**在 `skills/` 下，正本是本站 `content/docs/outputs/skills/` 下的 mdx，由 `docfirst.config.mjs` 的 `outputs` 映射生成：
-
-{/* tree dir="../plugins/docfirst/skills" depth="1" hash="06178d5d952d" */}
-
-**托管站点：站的进程归工作台，不归会话。** 登记过的站在插件加载时启动，每次启动开 12 小时、到点自动停；改完文档调 `docfirst.site.restart`，
-停掉、`pnpm build`、再启动，同时重新计时。理由见[文档站改由工作台托管](/trajectory/2026-10-09-workbench-hosts-sites)：
-
-{/* ref file="../plugins/docfirst/src/site-host.ts" lines="58-62" hash="95805ec7ac1f" blob="ba088cf3c4af" */}
-
-插件加载时只读进登记表就返回，各站在自己的队列里启动、不构建；端口被别的进程占着、还没构建过，都只记进这个站的 `error`，
-不挡别的站。意外退出也只记原因、不自动重启：
-
-{/* ref file="../plugins/docfirst/src/site-host.ts" lines="213-250" hash="f28e5e36eb6b" blob="ba088cf3c4af" */}
-
-`restart` 先停再构建，构建期间站打不开；构建失败时站保持停着，原因写进回执：
-
-{/* ref file="../plugins/docfirst/src/site-host.ts" lines="145-164" hash="f6f354cf0a1f" blob="ba088cf3c4af" */}
-
-{/* ref file="../plugins/docfirst/tests/site-host.test.ts" lines="149-158" hash="3c8beb47df39" blob="407ea235fa83" */}
-
-到期是每次启动各排一个计时，被 `restart` 换掉的那一次不算；到点停掉的状态是 `expired`：
-
-{/* ref file="../plugins/docfirst/src/site-host.ts" lines="201-211" hash="cfdfad42258d" blob="ba088cf3c4af" */}
-
-{/* ref file="../plugins/docfirst/tests/site-host.test.ts" lines="194-210" hash="a3ae12321890" blob="407ea235fa83" */}
-
-端口从站 `package.json` 的 start 脚本读，跟人手动 `pnpm start` 一致；登记表只记目录：
-
-{/* ref file="../plugins/docfirst/src/hosted-sites.ts" lines="30-41" hash="12690e818418" blob="378ba5c9446c" */}
-
-子进程在站目录里运行 `pnpm build` 与 `pnpm start`，都带超时；停的时候连同整棵进程树一起停，只停最外层会留下占着端口的 next：
-
-{/* ref file="../plugins/docfirst/src/site-process.ts" lines="9-14" hash="0ff558a94ad8" blob="06fdb79d0556" */}
-
-{/* ref file="../plugins/docfirst/src/site-process.ts" lines="59-73" hash="e3217b1810b5" blob="06fdb79d0556" */}
-
-**窗格「文档站」只显示**：托管着哪些站、开着没有、地址、还剩多久到期、最近一次失败的原因。窗格没有按钮，每 5 秒调一次 `docfirst.site.list`，
-倒计时按秒走；开关、重启都由 agent 调命令。外壳是局部注入，没装外壳的 home 里命令照常：
-
-{/* ref file="../plugins/docfirst/src/index.ts" lines="300-311" hash="70e119ed4a9a" blob="79e92070bd06" */}
-
-{/* ref file="../plugins/docfirst/src/client/site-rows.ts" lines="40-48" hash="74c20fa674e7" blob="1a52a75b9bfb" */}
-
-## 接口
-
-**命令总线上的六条命令与一个窗格**。插件的身份是插件名、命令名、窗格 id 与唯一一条必需注入：
-
-{/* ref file="../plugins/docfirst/src/index.ts" lines="28-38" hash="62b593590304" blob="79e92070bd06" */}
-
-两条建站命令的参数都是 `{ dir, title?, port? }`；托管命令的参数是 `{}`、`{ dir }` 或 `{ dir, build? }`，由 `site-args.ts` 校验，同样多给一个键就报错。
-
-参数是外部输入，两条建站命令用同一个函数校验，多给一个键直接报错；`dir` 必须是绝对路径，上一级（仓目录）必须已经存在，
-站目录必须还不存在：
-
-{/* ref file="../plugins/docfirst/src/args.ts" lines="18-35" hash="4c0a4cb58fd4" blob="8e734a4aa910" */}
-
-登记时的 `description` 与 `usage` 是 agent 唯一看得见的说明，回执各字段的意思写在 `usage` 里：
-
-{/* ref file="../plugins/docfirst/src/index.ts" lines="131-145" hash="a979ddaf8994" blob="79e92070bd06" */}
-
-命令名是公共接口，改名就破坏兼容；产物检查确认这六条都在总线上：
-
-{/* ref file="../plugins/docfirst/tests/artifact.test.ts" lines="76-91" hash="87d312c4a424" blob="1edd315ad5d3" */}
-
-## 依赖
-
-| 服务 / 通道 | 对方 | 怎么接 | 缺了会怎样 |
-| --- | --- | --- | --- |
-| `gwbCommands` | `@godcreator/gwb-commands` | 必需注入，peer `^0.6.0` | 插件不加载 |
-| `gwbSkills` | `@godcreator/gwb-skills` | 局部注入，peer `^0.4.5` 且 `optional` | 命令照常可用，读不到说明书 |
-| `gwbUnitFolder` | `@godcreator/gwb-unit-folder` | 局部注入，peer `^0.7.22` 且 `optional`；建站时调 `unitsRoot()` 现读容器根 | 端口只在站目录的祖父目录里查重，原因写进回执 |
-| `gwbData` | `@godcreator/gwb-data` | 局部注入，peer `^0.1.12` 且 `optional`；托管登记表是一份文档 `hosted-sites` | 四条托管命令不出现，建站照常 |
-| `gwbShell` | `@godcreator/gwb-shell` | 局部注入，peer `^0.15.11` 且 `optional`；登记窗格「文档站」 | 没有窗格，命令照常 |
-
-{/* ref file="../plugins/docfirst/src/index.ts" lines="225-233" hash="cc50db3154a2" blob="79e92070bd06" */}
-
-{/* ref file="../plugins/docfirst/src/index.ts" lines="38-38" hash="397a91e60cb0" blob="79e92070bd06" */}
-
-{/* ref file="../plugins/docfirst/src/index.ts" lines="313-316" hash="eb0b315868cd" blob="79e92070bd06" */}
-
-{/* ref file="../plugins/docfirst/src/index.ts" lines="82-96" hash="8e0849ddd0ca" blob="79e92070bd06" */}
-
-**写进新站的依赖是一张手写的精确版本表**，只有 `docfirst-workflow` 一个包。包名是写进别人 `package.json` 的字符串，
-不算插件的依赖；这个包发版时这张表跟着改，模板能引用哪些出口由接缝 12 那条测试检查：
-
-{/* ref file="../plugins/docfirst/src/deps.ts" hash="c378d95f7278" blob="d9d318f1216f" */}
-
-## 不做的事
-
-**不依赖本仓 `packages/` 下的包**，通用包与 docfirst 自己的包都算。包名从 `packages/` 下的清单现读，三类依赖都不写、源码不 import，不启动它们的命令行：
-
-{/* ref file="../plugins/docfirst/tests/artifact.test.ts" lines="123-145" hash="d4668b255389" blob="1edd315ad5d3" */}
-
-**不转发命令行，不读核对结果。** 子进程只在两处启动：`scaffold.ts` 运行官方脚手架，`site-process.ts` 运行托管的站自己的 `build` 与 `start`，都带超时：
-
-{/* ref file="../plugins/docfirst/tests/artifact.test.ts" lines="151-171" hash="a26e1047dca0" blob="1edd315ad5d3" */}
-
-**不经别的插件建站。** 依赖表、源码、注入与命令调用里都没有站点插件 `@godcreator/gwb-docs-site`，理由见
-[站点插件并入](/trajectory/2026-09-26-site-plugin-merges-into-docfirst)：
-
-{/* ref file="../plugins/docfirst/tests/artifact.test.ts" lines="184-196" hash="70d1ca67ed97" blob="1edd315ad5d3" */}
-
-**不给已有的站接入 docfirst，不改仓根。** 站目录必须还不存在；仓根已有、第一次 render 会覆盖的 README / AGENTS / CLAUDE 只写进回执。
-
-**托管不找站、不自动重启，窗格不放按钮。** 只托管登记过的站，不扫描容器根；意外退出只记原因；窗格只读 `docfirst.site.list`，开关都由 agent 调命令：
-
-{/* ref file="../plugins/docfirst/tests/artifact.test.ts" lines="198-209" hash="fe9d858e6c29" blob="1edd315ad5d3" */}
-
-**不装依赖、不渲染、不核对。** 只写文件，接着要在站目录里运行的命令写进回执的 `next`。
+插件对本仓 `packages/` 下的包零依赖——三档依赖都没有，源码里也不 import（同一条测试检查）。`deps.ts` 里出现包名只是
+「写进别人 package.json 的字符串」：装出来的站要跑 docfirst、要渲染，站当然该装这个包。

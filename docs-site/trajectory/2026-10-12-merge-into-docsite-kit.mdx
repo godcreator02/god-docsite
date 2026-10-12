@@ -1,0 +1,40 @@
+---
+born-at: 2026-10-12T22:31
+type: choice
+parent: [2026-09-03-god-live-doc]
+label: gwb-docfirst 并入 docsite-kit 仓：workspace 合一、插件两个、npm 包独立不变
+---
+
+## 背景
+
+地基（docsite-kit 仓）发 0.3.0 把初始化重做成「原型派生」（骨架正本是自述站、模板随插件派生、一步建站、脚手架退场）。
+docfirst 侧要适配：`docfirst-site` 升 peer、模板补起始物、docs-site 骨架对齐、插件建站命令切地基的建站服务。
+这些「同生共死」的改动跨两个仓，每一步都有等发版、开 issue、worktree 发版的仪式；而钉码、outputs 导出这些能力
+本质是「文档站」的通用能力，不该锁在 docfirst 一个生态里。
+
+## 选了
+
+- **workspace 合一**：gwb-docfirst 仓整体并入 docsite-kit 仓（merge --allow-unrelated-histories 保历史），四个包进 `packages/`、
+  插件进 `plugins/docfirst/`、`docs-site/` 与根 `tests/` 原样搬入；gwb-docfirst 仓归档，各包 `repository.url` 改指 docsite-kit.git
+- **插件还是两个**：gwb-docsite（身份、一步建站、托管）与 gwb-docfirst-workflow（docfirst 建站：认站名、选端口、
+  把 `docfirst-site` 交给 `gwbDocsite.init`）各管各的；地基不添任何 docfirst 知识
+- **npm 包独立不变**：名字、发版、依赖方向全不动；边界守卫扩成全仓矩阵——地基（docsite-\*）不认识 docfirst 任何包，
+  docfirst 只有 docfirst-site 经 peer 用组合包
+- **两个站对等**：`site/` 是基础站的示例与骨架正本，`docs-site/` 是 docfirst 站的示例与正本（骨架手写、与自述站同代；
+  `docfirst-site` 的模板起始物以它为参照）
+- 同批完成适配：docfirst-site 0.2.0（peer 收紧 + 模板起始物）、插件 0.11.0（建站切 gwbDocsite、删 Next 脚手架路线与
+  `docfirst.site.*` 托管、deps.ts 换成 docfirst-site 精确版本表）
+
+## 否掉的候选
+
+- 只搬 docfirst-site 一个包进地基仓：它 import docfirst-workflow/fumadocs，会造成地基仓依赖 docfirst 仓的循环
+- 搬家后把包改名上收（docsite-docfirst 之类）、把钉码/outputs 升格为地基原生能力：与「搬家」是两个变量，留作搬完后的独立批
+- 先在旧仓小批适配、再合并：docfirst-site 的 peer 这轮升一次合并批不用再动，分步没有省下工作，只多一次发版仪式
+- 「发版面变大」的担忧不成立：发版面跟包走不跟仓走，docfirst-workflow 还是独立发包，只影响装它的站
+
+## 代价
+
+- 基础骨架从此有两份手写副本（自述站与 docs-site，将来协作站原型是第三份）：地基动骨架要同步改多处——脚手架退场的既定代价
+- 大仓 `pnpm-workspace.yaml` 并入了 docfirst 侧需要的 `zod` 单版本 override 与 `autoInstallPeers: false`
+  （后者要求每个插件的 gwb peer 在 devDependencies 里显式写全）
+- 大仓根的 README 与 CLAUDE.md 归 docs-site 的 outputs 生成，AGENTS.md 手写：三份根文件的出处不再一处

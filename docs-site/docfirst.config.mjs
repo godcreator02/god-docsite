@@ -41,7 +41,6 @@ const skill = (name) => ({ to: `../plugins/docfirst/skills/${name}/SKILL.md`, fr
 export default {
   outputs: {
     "content/docs/outputs/readme.mdx": ["../README.md"],
-    "content/maintain/agents.mdx": ["../AGENTS.md"],
     "content/docs/outputs/claude.mdx": ["../CLAUDE.md"],
     "content/docs/outputs/skills/docs-site.mdx": [skill("docs-site")],
     "content/docs/outputs/skills/docs-writing.mdx": [skill("docs-writing")],

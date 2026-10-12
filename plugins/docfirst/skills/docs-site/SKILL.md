@@ -1,6 +1,6 @@
 ---
 name: docs-site
-description: 对文档站执行命令时读：建站、托管与重启（基础包上的站用 docsite.site.*，Next 站用 docfirst.site.*）、加分区、登记组件、构建、安装或构建失败；docfirst 站的核对、确认、生成，改了被钉的代码怎么提交，给别的仓写反馈。页面内容怎么写看 docs-writing。
+description: 对文档站执行命令时读：建站（docfirst.create）、托管与重启（docsite.site.*）、加分区、登记组件、构建、安装或构建失败；docfirst 站的核对、确认、生成，改了被钉的代码怎么提交，给别的仓写反馈。页面内容怎么写看 docs-writing。
 ---
 
 # 文档站的操作
@@ -8,63 +8,29 @@ description: 对文档站执行命令时读：建站、托管与重启（基础�
 这份只讲**对站执行什么命令**：建站、改站的结构、构建与查看、核对与确认、出错了怎么办。页面内容怎么写、钉码钉哪种话、
 黄灯以后正文怎么改，看同一个插件的说明书 `docs-writing`；轨迹卡看 `trajectory`。
 
-站约定放在 `<仓>/docs-site/`，是一个独立的 pnpm 项目，下面的命令都在这个目录里运行。docfirst 站有两种，先看站目录认出是哪种：
+站约定放在 `<仓>/docs-site/`，是一个独立的 pnpm 项目，下面的命令都在这个目录里运行。docfirst 站建在文档站基础包
+`@godcreator/docsite-kit`（fumadocs + React Router + Vite）上，`package.json` 里有 `"docsite": { "features": ["@godcreator/docfirst-site"] }`；
+活的例子是 docfirst 自己的文档站 `D:\unitfolders\oz47p-docsite-kit\docsite-kit\docs-site`。
 
-| | 建在文档站基础包上的站 | Next 站 |
-| --- | --- | --- |
-| 认法 | `package.json` 里有 `"docsite": { "features": [...] }`，站目录有 `react-router.config.ts` | 站目录有 `next.config.mjs` |
-| 框架 | 基础包 `@godcreator/docsite-kit`（fumadocs + React Router + Vite）加功能包 `@godcreator/docfirst-site` | Next + fumadocs，接入用 `@godcreator/docfirst-workflow/fumadocs` |
-| 骨架与托管 | 工作台插件 gwb-docsite：`docsite.site.init` 写骨架，`docsite.site.add` 托管开发服务 | 本插件：`docfirst.create` 建站，`docfirst.site.*` 托管 `build` + `start` |
-| 例子 | docfirst 自己的文档站 `D:\unitfolders\oz47p-docsite-kit\gwb-docfirst\docs-site` | 还没迁到基础包上的各仓文档站 |
-
-**核对、确认、渲染两种站一样**，都在站目录里自己运行 `pnpm docfirst …`：它们要在仓里反复运行（git hook、CI、构建页面时也在运行它们），
+**核对、确认、渲染都在站目录里自己运行 `pnpm docfirst …`**：它们要在仓里反复运行（git hook、CI、构建页面时也在运行它们），
 归站里装的包，插件不转发命令行。基础包本身怎么用（身份码、评论、`people.json`、写页面）看 gwb-docsite 的说明书 `docsite`。
 
 ## 建站
 
-### 建在基础包上的站
-
-还没有一步建好的命令。照 docfirst 自己的文档站做：
-
-1. `docsite.site.init {"dir":"<仓>/docs-site","port":<开发端口>,"title":"<站名>","features":{"@godcreator/docfirst-site":"<版本范围>"}}`
-   写出骨架：`app/`、`vite.config.ts`、`react-router.config.ts`、`source.config.ts`、`tsconfig.json`、`.gitignore`，连同功能包带的轨迹卡集合 `app/lib/trajectory.ts`。
-   这些文件不手改，基础包或功能包升级后再运行一次 `docsite.site.init {"dir":…}` 照新模板更新
-2. 站自己写的：`content/`（各组一个目录，`meta.json` 写 `"root": true`）、站点根下的 `trajectory/`、`src/components/`、`docfirst.config.mjs`
-   （`trajectory: "trajectory"`；要术语标注再写 `glossary`）、`people.json`，`package.json` 里加依赖 `@godcreator/docfirst-workflow` 与脚本 `"docfirst": "docfirst"`
-3. `pnpm install`、`pnpm docfirst render`、`pnpm docfirst check`、`pnpm build`
-
-### Next 站
-
 ```
-docfirst.create        {"dir":"<仓>/docs-site"}    接好 docfirst 的 Next 站：现状、轨迹、未来三个区，钉码与生成物
-docfirst.create-plain  {"dir":"<仓>/docs-site"}    普通 fumadocs 的 Next 站，没有 docfirst
+docfirst.create        {"dir":"<仓>/docs-site"}    接好 docfirst 的站：现状、轨迹、未来三个区，钉码与生成物
 ```
 
-参数两条相同，多给别的键直接报错：
-
-- `dir`：站目录的绝对路径。**必须还不存在**，上一级（仓目录）必须已经存在。已经有站的仓不能用这两条命令，给已经在用的站加 docfirst 要手动接入
+- `dir`：站目录的绝对路径，约定是 `<仓>/docs-site`。**必须还不存在（或只有 package.json）**，上一级（仓目录）必须已经存在
 - `title`：站名，不给就依次用仓根 `package.json` 的 `title`、包名去掉 scope、仓的目录名
-- `port`：不给就在单元文件夹插件的设置 `unit-folder.units-root` 指的目录里找没被别的站脚本占用的，从 4310 起选；
-  读不了的目录或 `package.json` 列在回执的 `portScanIncomplete` 里
+- `port`：不给就在站目录的祖父目录里找没被别的站脚本占用的，从 4310 起选
 
-两条都先运行官方脚手架 `create-fumadocs-app`（版本写死在插件里，要联网），再应用本机约定：允许 esbuild 运行构建脚本、
-`dev` / `start` 写端口并只监听 127.0.0.1、字体 Sarasa Mono SC、页面语言 zh-CN、站名、去掉 GitHub 链接与分享图、`/` 跳到 `/docs`、
-`.gitignore` 排除 `next dev` 在站根生成的 `AGENTS.md` 与 `CLAUDE.md`、每页 md 的 `Content-Type` 带 `charset=utf-8`。
-普通站里自带搜索、`/llms.txt` 与每页的 markdown 版本（网址后加 `.md`）。`docfirst.create` 建的站只留搜索，删掉每页的机读版
-（llms 路由、`.md` 地址、页面上复制与查看 markdown 的按钮）：机读文字只给生成物。它另外写进三个内容集合、各区的路由与侧栏、
-整页星轨盘 `/trajectory`、`docfirst.config.mjs`、组件名册与名册核对脚本、起始页，以及 `doc` / `doc:confirm` / `doc:render` / `verify:roster` 几条脚本。
+命令经 gwb-docsite 的建站服务一步建成：装功能包 `@godcreator/docfirst-site`（插件 `src/deps.ts` 的精确版本表）、
+写地基骨架与功能包起始物（`docfirst.config.mjs`、README / AGENTS / CLAUDE 的 outputs 正本、轨迹与未来两区的起始页、
+轨迹卡集合 `app/lib/trajectory.ts`、docfirst 系脚本）、装全部依赖、起服务探活。**骨架写完就归站点**：`app/` 与根目录的
+配置从此随便改，没有照新模板重写它们的命令。
 
-**只写文件**，不运行 install。回执里的 `next` 就是接着要运行的：
-
-```
-cd <站目录>
-pnpm install
-pnpm doc:render     # 只有 docfirst 站：生成仓根 README.md / AGENTS.md / CLAUDE.md
-pnpm doc            # 只有 docfirst 站：核对
-pnpm build
-```
-
-仓根已经有 `README.md` / `AGENTS.md` / `CLAUDE.md` 时回执多一条 `warn`：第一次 `doc:render` 会**覆盖**它们。
+仓根已经有 `README.md` / `AGENTS.md` / `CLAUDE.md` 时第一次 `pnpm doc:render` 会**覆盖**它们：
 先把原有内容移进 `content/docs/outputs/` 下对应的 mdx 正本，再 render。
 
 建站报错：
@@ -90,50 +56,15 @@ fumadocs 自带的组件从 `@fumadocs/base-ui/components/<名>` 在页面开头
 给它一条机读规则：放在组件旁边、不依赖 React 的 `.ai.mjs` 文件里，交回的文字就是它在生成物里的样子；普通页面上的组件不写规则。
 生成正本里用了名册外的组件，`pnpm docfirst check` 报红、`render` 拒绝渲染；页面里用了却没 import 的组件，页面渲染时报组件未定义。
 
-**接数学公式**归基础包的骨架：站里不另外接，`source.config.ts`、`app/` 都由初始化写出、改了也会被覆盖。
-站点骨架的 `source.config.ts` 里没有 `remark-math` 时，这个站还写不了公式：等基础包接上以后升级基础包，再运行一次 `docsite.site.init {"dir":…}`。
+**接数学公式**归基础包的骨架：站里不另外接，`source.config.ts`、`app/` 手写在站点里（骨架正本可以照 docfirst 自己的文档站抄）。
+站点骨架的 `source.config.ts` 里没有 `remark-math` 时，这个站还写不了公式：把正本站 `source.config.ts` 的公式两行抄过来。
 
-### Next 站
+### 站里的组件与依赖
 
-**加一个分区**（`content/notes/` → `/notes`）改四处：`src/lib/source.ts` 里用 `fumadocs-mdx/macro` 的 `defineDocs` 加集合、
-再加一条 `loader`；`src/app/notes/[[...slug]]/page.tsx` 照 docs 的写；侧栏在 `src/app/docs/layout.tsx` 里把各 loader 的
-`getPageTree()` 拼成一棵树、每个分区一个 `root: true` 的文件夹节点；新分区的 `layout.tsx` 写 `export { default } from '../docs/layout'`。
-集合写了 `mdxOptions` 会去掉缺省处理，用 `applyMdxPreset(...)` 加回来。docfirst 站里 `content/` 下新建的目录自动算现状区，不用登记。
-侧栏顺序同上，写在 `meta.json`。
-
-**登记一个组件**：写在 `src/components/`，登记进 `src/components/mdx.tsx` 的组件表，mdx 里才能写 `<名字 />`。
-fumadocs 自带的组件从 `fumadocs-ui/components/<名>` 导入，默认组件表里只有 `Card`、`Callout`、代码块与标题几样。docfirst 站还要：
-
-1. `src/components/registry.ts` 的名单加上组件名
-2. **只有组件要放进生成正本时**，在 `docfirst.config.mjs` 的 `components` 给它一条机读规则（写法同上）。普通页面上的组件不写规则
-
-然后 `node scripts/verify-roster.mjs` 核对机读规则表里的组件都在名单里。生成正本里用了名册外的组件，`pnpm doc` 直接报错。
-
-用讲解组件包 `@godcreator/docfirst-explainer` 要在全局样式里引入它的 `styles.css`。
-
-**接数学公式**照 fumadocs 官方做法，不另写组件：站里装 `remark-math`、`rehype-katex`、`katex`；现状区集合的 `mdxOptions` 里
-`remarkPlugins` 加上 `remarkMath`、`rehypePlugins` 写 `(v) => [rehypeKatex, ...v]`（排在代码高亮之前）；全局样式引入 `katex/dist/katex.css`。
-docfirst 站的集合已经用 `docfirstMdxOptions` 给了 `remarkPlugins`，在它外面再包一层：
-
-```ts
-const base = docfirstMdxOptions({ root: process.cwd() });
-mdxOptions: applyMdxPreset({
-  ...base,
-  remarkPlugins: (v) => base.remarkPlugins([remarkMath, ...v]),
-  rehypePlugins: (v) => [rehypeKatex, ...v],
-}),
-```
-
-`docfirst-workflow` 0.5.4 起核对、确认与渲染也按 remark-math 解析，公式里的花括号不会被当成 mdx 表达式。
-
-### 两种站都一样
-
-Markdown 图片 `![说明](/p2/x.png)` 不用登记：图片放在站的 `public/` 下或页面旁边，页面上由 fumadocs 默认的图片组件显示。
-在 mdx 里手写的 `<img>` 才算组件，照上面各自的组件写法处理。站用到的包（讲解组件包，`motion`、`next-themes` 这类 fumadocs 间接带进来的包）都写进站自己的 `package.json`。
+Markdown 图片 `![说明](/p2/x.png)` 不用登记：图片放在页面旁边，页面上由 fumadocs 默认的图片组件显示。
+在 mdx 里手写的 `<img>` 才算组件，照上面的组件写法处理。站用到的包（讲解组件包，`motion` 这类 fumadocs 间接带进来的包）都写进站自己的 `package.json`。
 
 ## 构建与查看
-
-### 建在基础包上的站
 
 - **开发服务由 gwb-docsite 托管，不在会话里自己 `pnpm dev`**：改了页面，开发服务自己刷新
 
@@ -155,34 +86,15 @@ Markdown 图片 `![说明](/p2/x.png)` 不用登记：图片放在站的 `public
 
 ### Next 站
 
-- **不用 `pnpm dev`**：它重新编译时内存一路上涨，出现过涨到约 16 GB 退出。看页面一律先 `pnpm build` 再 `pnpm start`，
-  改了内容重新 build、重启 start。改完一批再 build，不改一页 build 一次；改的是站构建时会调用到的包代码，先删 `.next` 再 build
-- **用户要看的站交给工作台托管，不由会话自己启动**：会话自己开的服务归那个会话，会话一停、一结束站就掉，几个会话还会抢同一个端口
-  （理由见站上的轨迹卡「文档站改由工作台托管」）：
-
-  ```
-  docfirst.site.add      {"dir":"<仓>/docs-site"}               登记并启动 pnpm start；没构建过的先 build
-  docfirst.site.restart  {"dir":"<仓>/docs-site"}               改完文档调它：停掉 → pnpm build → 启动，重新计时 12 小时
-  docfirst.site.restart  {"dir":"<仓>/docs-site","build":false}  只重启不构建（到期了再开）
-  docfirst.site.list     {}                                      托管着哪些站、各自状态、到期时刻、最近一次失败的原因
-  docfirst.site.remove   {"dir":"<仓>/docs-site"}               停掉并不再托管
-  ```
-
-  - 端口从站 `package.json` 的 start 脚本读，脚本里要写死一个 `-p <端口>`
-  - 每次启动开 12 小时，到点自动停，状态变成 `expired`；人在工作台的窗格「文档站」里看开着哪些站、还剩多久，窗格没有按钮，开关都由 agent 调命令
-  - 端口已经被别的进程占着（多半是会话自己开的 `next start`）就不启动，`error` 里写明：停掉那个进程再 `restart`
-  - 构建期间站打不开；构建或启动失败时站保持停着，回执的 `error` 带输出的最后几行，照它修好再 `restart`
-  - 给人看就在 VS Code 的内置浏览器里打开地址（读说明书 `vscode`）。用户没说要看，build 通过就结束，不登记
-- **只是自己验证、用户没说要看**：在站目录 `pnpm build` 再 `pnpm start`（Claude Code 桌面版写进 `.claude/launch.json` 用 `preview_start`，
-  经到点自动停止的超时脚本启动），验完停掉。这个站已经由工作台托管的，直接 `restart`，不另开一个端口
-- **agent 读 mdx 正本，不解析 HTML**：docfirst 站不出每页的机读版，直接读仓里 `content/` 下的 mdx；普通站可以先读 `/llms.txt` 找页，再取那几页的 `.md`
+最后一批 Next 站已随「初始化模式重做」退役（2026-10）：Next 站的托管命令 `docfirst.site.*` 已删，遇到还没迁的老站，
+照 `docsite-kit` 仓 `docs-site/trajectory/` 的迁移卡处理。
 
 ### 验收一页
 
 - 每个按钮点一下、每种情况都试一遍，深浅主题各看一次，把窗口拉窄看一次
 - 预览面板被隐藏时页面宽度是 0、逐帧回调不运行，动画停在中途：先给页面设一个尺寸，连续截几张图让它往前走再看最终画面；
   预览把窗口缩放过时按坐标点会点偏，改用元素引用
-- docfirst 站再运行 `pnpm docfirst check`（Next 站另加 `node scripts/verify-roster.mjs`）；页面是生成正本的，看一眼生成物里组件变成的文字读得懂
+- docfirst 站再运行 `pnpm docfirst check`；页面是生成正本的，看一眼生成物里组件变成的文字读得懂
 
 ## docfirst 站：核对、确认、生成
 
@@ -195,7 +107,7 @@ pnpm docfirst render                                      只重新生成生成�
 pnpm docfirst trajectory                                  列出轨迹卡在星轨盘上的树与主干
 ```
 
-各仓脚本名不完全一样，以站的 `package.json` 为准（`docfirst.create` 建的 Next 站另有 `pnpm doc`、`pnpm doc:confirm`、`pnpm doc:render` 几条简写）。
+各仓脚本名不完全一样，以站的 `package.json` 为准（功能包模板带的 `doc`、`doc:confirm`、`doc:render` 是 `docfirst check` 等的简写）。
 
 **读 `--json` 报告**：`docs[].items[]` 里 `status` 是 `changed`（内容变了）或 `missing`（目标不在了）的就是待处理；
 `line` 是记号在文档里第几行，`lines` 是被引的那段今天在源文件里的位置，`diff` 是变了的那几行。`unconfirmed` 不算对不上。

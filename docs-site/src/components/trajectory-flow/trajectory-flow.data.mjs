@@ -235,7 +235,7 @@ export const layout = {
 };
 
 /** 功能包的星轨盘路由 disk.tsx 里读卡目录、交给 StarDisk 的几行（原文，start 是行号） */
-/* ref file="../packages/docfirst-site/src/routes/disk.tsx" hash="6143d1c6a7ec" blob="4333c2115175" */
+/* ref file="../packages/docfirst-site/src/routes/disk.tsx" hash="86c5627e0f29" blob="2c55388396bb" */
 export const pageLines = [
   {
     start: 10,
@@ -266,7 +266,7 @@ export const clicks = [
 ];
 
 /** 站点里的轨迹卡集合 app/lib/trajectory.ts（由功能包的模板写进站点，原文，start 是行号） */
-/* ref file="../packages/docfirst-site/template/skeleton/app/lib/trajectory.ts" lines="7-7" hash="b541f74038da" blob="55562eb102dd" */
+/* ref file="../packages/docfirst-site/template/skeleton/app/lib/trajectory.ts" lines="9-14" hash="884d048bd494" blob="b734a5e07074" */
 export const collectionLines = {
   start: 7,
   lines: ["export const trajectoryCards = defineCollections({ type: 'doc', dir: 'trajectory', async: true })"],

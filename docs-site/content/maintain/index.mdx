@@ -7,28 +7,29 @@ import { Tabs, Tab } from '../../src/components/tabs/tabs';
 
 ## 仓布局
 
-仓根 `gwb-docfirst/` 是 git 仓，同时是 pnpm 包工作区；上一级的单元目录只有一张出生证 `unit.json`，不在 git 里。
-工作区照 devkit 的 workspace 仓布局：插件在 `plugins/`，不是插件的包在 `packages/`，再加上 `docs-site/` 这个站。
+仓根 `docsite-kit/` 是 git 仓，同时是 pnpm 包工作区，住着地基与 docfirst 工作流两族包；上一级的单元目录只有一张出生证 `unit.json`，不在 git 里。
+布局照 devkit 的 workspace 仓：插件在 `plugins/`，不是插件的包在 `packages/`，再加上 `site/`（基础包自述站）与 `docs-site/`（docfirst 文档站，本站）。
 
-{/* ref file="../pnpm-workspace.yaml" lines="3-6" hash="9cdc5208b7e9" blob="efc915f8e1de" */}
+{/* ref file="../pnpm-workspace.yaml" lines="3-7" hash="2e977effc234" blob="1adc5d16d2cb" */}
 
-`plugins/docfirst/` 是[工作台插件](/docs/plugin) `@godcreator/gwb-docfirst-workflow`：建站命令与说明书。
-`packages/` 下每个目录一个 npm 包：
+两个插件：`plugins/docsite/` 是 `@godcreator/gwb-docsite`（身份码、一步建站、托管站点），`plugins/docfirst/` 是
+`@godcreator/gwb-docfirst-workflow`（[docfirst 建站命令](/docs/plugin)与说明书）。`packages/` 下每个目录一个 npm 包：
 
-{/* tree dir="../packages" depth="1" hash="73efed32eb31" */}
+{/* tree dir="../packages" depth="1" hash="a75a5ae59872" */}
 
-通用包不认识 docfirst，谁都能单独使用：[钉码核心](/docs/pin) `code-pin`、[星轨盘](/docs/trajectory) `trajectory-disk`。
-docfirst 自己的包有三个：`docfirst-workflow` 是[命令行与项目](/docs/workflow)，
-接到 fumadocs 站上的部分在它的子入口 `./fumadocs`；`docfirst-site` 是文档站基础包 `@godcreator/docsite-kit` 的功能包，
-构建页面时用 `./fumadocs` 里的 remark 插件，另给 `Term` 与文件树组件、星轨盘与卡页两条路由（两样见[站点接入](/docs/fumadocs)）；
-[讲解组件包](/docs/docfirst-explainer) `docfirst-explainer` 是 docfirst 站上用的讲解组件，只有站用。谁能依赖谁见[测试与边界](/maintain/testing)。
+**地基**（`docsite-*`）是文档站基础包的能力包与组合包，互不相识（唯一的组合在 `docsite-kit`），谁都不认识 docfirst。
+docfirst 侧：通用包不认识 docfirst，谁都能单独使用：[钉码核心](/docs/pin) `code-pin`、[星轨盘](/docs/trajectory) `trajectory-disk`；
+docfirst 自己的包有三个：`docfirst-workflow` 是[命令行与项目](/docs/workflow)，接到 fumadocs 站上的部分在它的子入口 `./fumadocs`；
+`docfirst-site` 是文档站基础包 `@godcreator/docsite-kit` 的功能包，构建页面时用 `./fumadocs` 里的 remark 插件，另给 `Term` 与文件树组件、
+星轨盘与卡页两条路由（两样见[站点接入](/docs/fumadocs)）；[讲解组件包](/docs/docfirst-explainer) `docfirst-explainer` 是 docfirst 站上用的讲解组件，只有站用。
+谁能依赖谁见[测试与边界](/maintain/testing)，搬进本仓的选型见轨迹卡 [gwb-docfirst 并入 docsite-kit](/trajectory/2026-10-12-merge-into-docsite-kit)。
 
-站也是工作区成员：它用 `workspace:*` 装工作区里的包，钉的是工作区里的实际源码，所以仓里不另留示例项目。
-devkit 的建仓模板不收文档站，这是本仓有意的例外，理由见轨迹卡
-[插件挪到 plugins/docfirst](/trajectory/2026-09-25-plugin-to-plugins-dir)。
+两个站都是工作区成员，用 `workspace:*` 装工作区里的包，钉的都是工作区里的实际源码，所以仓里不另留示例项目：
+`site/` 讲地基与能力包，是**骨架的正本**（地基插件建站的模板从它派生）；本站讲 docfirst 工作流，是 **docfirst 站的正本**
+（要建 docfirst 站的照它看，`docfirst-site` 的模板起始物以它为参照）。
 
-站建在基础包上。站目录里的 `app/`、`vite.config.ts`、`react-router.config.ts`、`source.config.ts`、`tsconfig.json`、`.gitignore`
-由 gwb-docsite 的 `docsite.site.init` 照基础包与功能包的模板写出，不手改；站自己维护的是 `content/`、`trajectory/`（轨迹卡）、
+站的 `app/`、`vite.config.ts`、`react-router.config.ts`、`source.config.ts`、`tsconfig.json`、`.gitignore` 与自述站的骨架同代（评论、
+三种页面来源都是当前这一版），是手写的正本——地基升级骨架时对照 `site/` 改过来；站自己维护的还有 `content/`、`trajectory/`（轨迹卡）、
 `src/components/`（站内组件）、`src/glossary.mjs`（术语表）、`docfirst.config.mjs`、`people.json`（评论署名用的人员列表）、`tests/` 与 `package.json`。
 
 站的内容在 `docs-site/content/` 下，`meta.json` 写站名，每个目录是侧栏下拉框里的一组：`future/` 是未来区，其余目录都是现状区，
@@ -37,7 +38,7 @@ devkit 的建仓模板不收文档站，这是本仓有意的例外，理由见�
 
 {/* tree dir="content" depth="1" hash="8980573388af" */}
 
-仓根的 `tests/` 是工作区级测试，星轨盘测试用的卡片 fixture 在 `tests/fixtures/trajectory/`。
+仓根的 `tests/` 是工作区级测试（边界守卫与模板版本盯守）。
 
 ## 提交前要通过的检查
 
@@ -45,25 +46,20 @@ devkit 的建仓模板不收文档站，这是本仓有意的例外，理由见�
 
 <Tabs>
   <Tab title="仓根">
-    `pnpm test`、`pnpm typecheck`、`pnpm build`。`build` 与 `typecheck` 按 `./plugins/*` 与 `./packages/*` 过滤，插件在其中；
-    `test` 先构建，再用仓根的 vitest 配置只运行 `tests/` 下的测试，不包括插件自己的测试。
+    `pnpm check`、`pnpm test`、`pnpm build`。`check` 先对 `tsconfig.tests.json` 做类型检查，再逐包跑各自的 check；
+    `test` 只运行 `tests/` 下的测试；`build` 按依赖序构建全部包、两个插件与两个站。
   </Tab>
   <Tab title="docs-site/">
     `pnpm docfirst check`、`pnpm test`、`pnpm typecheck`、`pnpm build`。`test` 用功能包的 remark 插件编译现状区每一页（见[测试与边界](/maintain/testing)），
     `typecheck` 先生成 React Router 的路由类型再 `tsc`，`build` 是 `react-router build`。
   </Tab>
-  <Tab title="plugins/docfirst/">
-    `pnpm check`、`pnpm build`。`check` 依次运行 typecheck、oxlint、vitest；`test` 跳过打了 `slow` 标签的测试，`test:all` 不跳。
-  </Tab>
 </Tabs>
 
-三处的脚本，依次是仓根、站、插件：
+两处的脚本，依次是仓根与站：
 
-{/* ref file="../package.json" lines="7-12" hash="c46eead39bdb" blob="893a99e31694" */}
+{/* ref file="../package.json" lines="6-14" hash="5ff1f2147634" blob="0173e32b867d" */}
 
 {/* ref file="package.json" lines="12-19" hash="948087fbb2a5" blob="32c606e8d42e" */}
-
-{/* ref file="../plugins/docfirst/package.json" lines="26-33" hash="296371d8b9dc" blob="3c024252c035" */}
 
 站的开发服务（上面 `dev` 脚本里的端口）交给 gwb-docsite 托管：`docsite.site.add {"dir":"<仓>/docs-site"}` 登记后常驻，改了页面自己刷新，
 不在会话里自己 `pnpm dev`；`pnpm build` 只作提交前的检查。改了构建页面时 remark 插件会调用到的包代码（`docfirst-site`，
@@ -79,27 +75,24 @@ devkit 的建仓模板不收文档站，这是本仓有意的例外，理由见�
 - **代码、文档、轨迹卡放进同一个提交**。改了被钉的代码，本仓未提交改动引起的黄灯 `docfirst check` 算红
   （见[门禁](/docs/pin/gate)）：`docfirst confirm` 做机械写回，剩下的黄灯逐条复核，论断还成立就
   `docfirst confirm <页…> --accept` 点名确认。步骤照说明书 [docs-site](/docs/outputs/skills/docs-site)。
-- 改生成物的正本（README、AGENTS、CLAUDE、插件里的 SKILL.md）后 `pnpm docfirst render`，正本与生成物同一个提交。
+- 改生成物的正本（仓根 README、CLAUDE，插件里的 SKILL.md）后 `pnpm docfirst render`，正本与生成物同一个提交。
 
 ## 发布
 
-`packages/` 下的包与插件都用工作台命令 `devkit.release` 发布。升哪一位、发版的每一步、发完怎么升级 default，
+`packages/` 下的包与两个插件都用工作台命令 `devkit.release` 发布。升哪一位、发版的每一步、发完怎么升级 default，
 每次都先读说明书「gwb-release」（经 gwb MCP 入口 `run skill.read {"name":"gwb-release"}`），这里不复述。
 发到哪个源由各自 `package.json` 的 `publishConfig.registry` 决定。
 
 包与插件各发各的，没有先后：插件对 `packages/` 下的包零依赖，由插件的 `tests/artifact.test.ts` 检查。
-唯一的联系是 `plugins/docfirst/src/deps.ts` 那张表：建站时写进新站的依赖版本取自它，表里写精确号。
-`docfirst-workflow` 升了版本号就同时改表，忘了改这条测试当场失败：
+唯一的联系是 `plugins/docfirst/src/deps.ts` 那张表：建站时交给地基建站器的功能包版本取自它，表里写精确号。
+`docfirst-site` 升了版本号就同时改表，忘了改这条测试当场失败：
 
-{/* ref file="../plugins/docfirst/tests/create.test.ts" lines="380-388" hash="aea19349e525" blob="a48282005ff2" */}
+{/* ref file="../plugins/docfirst/tests/create.test.ts" lines="19-19" hash="2c58b0f2b094" blob="37af8cc95b86" */}
 
 表改了之后插件要再发一版，之后新建的站才装到新包。
 
-插件发布前，在隔离 home 里用 `docfirst.create` 与 `docfirst.create-plain` 各建一个站验证一遍（步骤在说明书「gwb-devkit」）。
-改了托管，在隔离 home 里用一个假站（build 脚本写 `.next/BUILD_ID`、start 脚本起一个监听写死端口的 node 服务）把 `add`、`restart`、插件重新加载、杀掉进程、`remove` 各走一遍，
-看端口与进程有没有残留，再打开窗格「文档站」截图。
-改了官方脚手架的版本或本机约定，先在 `plugins/docfirst/` 里运行 `pnpm test:all`：多出的那条实际运行官方脚手架、
-跟存下的样本逐份比较，要联网。
+插件发布前，在隔离 home 里用 `docfirst.create` 建一个站验证一遍（步骤在说明书「gwb-devkit」）：站要能探活通过、
+`docfirst.config.mjs` 与起始页齐全、`pnpm doc` 能跑。
 
 ## 只读参考
 
@@ -108,4 +101,4 @@ devkit 的建仓模板不收文档站，这是本仓有意的例外，理由见�
 - 实验室 `D:\dshfiles\260901lab`（`step7-packages` / `step7-site` / `step7-mini`）：架构定案的出处，教学代码，要用其中的逻辑就复制过来。
 - 老仓 `D:\dshfiles\26082711aju\god-live-doc`：用 git 取旧内容这项功能的出处。功能已对齐，不再参考，代码只看这个仓。
 
-agent 在这个仓干活的全部规矩见 [AGENTS.md 的正本](/maintain/agents)。
+agent 在这个仓干活的全部规矩在仓根手写的 `AGENTS.md`（README 与 CLAUDE.md 是本站 outputs 的生成物）。
