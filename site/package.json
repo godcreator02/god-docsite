@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "private": true,
   "type": "module",
-  "description": "文档站基础包的自述站：用基础包搭，内容是基础包自己的说明；app/ 与根目录的配置由 pnpm site:skeleton 照基础包的模板生成",
+  "description": "文档站基础包的自述站：用基础包搭，内容是基础包自己的说明；它是站点骨架的正本，gwb-docsite 插件建站用的模板从这里的 app/ 与根目录配置派生",
   "docsite": {
     "features": []
   },
@@ -17,13 +17,11 @@
   },
   "dependencies": {
     "@fumadocs/base-ui": "16.17.1",
-    "@godcreator/docsite-comments": "^0.1.0",
-    "@godcreator/docsite-explainer": "workspace:*",
-    "@godcreator/docsite-identity": "^0.1.0",
-    "@godcreator/docsite-kit": "workspace:*",
-    "@godcreator/docsite-page-sources": "^0.1.0",
-    "@godcreator/docsite-ui": "^0.1.0",
-    "@godcreator/docsite-writing": "^0.1.0",
+    "@godcreator/docsite-comments": "workspace:*",
+    "@godcreator/docsite-identity": "workspace:*",
+    "@godcreator/docsite-page-sources": "workspace:*",
+    "@godcreator/docsite-ui": "workspace:*",
+    "@godcreator/docsite-writing": "workspace:*",
     "@react-router/node": "^8.4.0",
     "@react-router/serve": "^8.4.0",
     "fumadocs-core": "16.17.1",
@@ -35,7 +33,9 @@
     "react-dom": "^19.3.0",
     "react-router": "^8.4.0",
     "rehype-katex": "^7.0.1",
-    "remark-math": "^6.0.0"
+    "remark-math": "^6.0.0",
+    "@godcreator/docsite-explainer": "workspace:*",
+    "@godcreator/docsite-kit": "workspace:*"
   },
   "devDependencies": {
     "@react-router/dev": "^8.4.0",
@@ -44,6 +44,7 @@
     "@types/node": "^26.6.2",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
+    "oxlint": "1.76.0",
     "tailwindcss": "^4.3.3",
     "typescript": "^6.0.3",
     "vite": "^8.3.0"

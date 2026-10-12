@@ -4,7 +4,7 @@ import type { SidebarRouteLink, SiteLinkKind } from '@godcreator/docsite-ui'
 
 /**
  * 功能包（如协作站的 @godcreator/collab-site）往基础骨架上添加的东西。站点 package.json 的 docsite.features 列出用到的功能包，
- * 初始化（./init 的 writeSiteSkeleton）照它生成 app/site/ 下的几个文件，骨架只读那几个文件。
+ * 建站器（gwb-docsite 插件）照它生成 app/site/ 下的几个文件，骨架只读那几个文件。
  * 每个功能包都要有这几个出口：./routes（FeatureRoutes）、./site（FeatureSite）、./site-server（FeatureSiteServer）、./styles.css；
  * ./content（FeatureContent）可以没有。
  * 包根下的 template/ 是要复制进站点的文件（集合定义只能写在项目里），没有就不复制

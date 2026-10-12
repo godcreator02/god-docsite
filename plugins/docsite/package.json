@@ -1,7 +1,7 @@
 {
   "name": "@godcreator/gwb-docsite",
   "version": "0.2.2",
-  "description": "文档站的基础插件：本 home 的身份码，一条命令从零建站或更新骨架，托管站点的开发服务，往站点推数据，agent 读写站点评论的命令；别的插件注入服务 gwbDocsite 初始化、托管自己的站点",
+  "description": "文档站的基础插件：本 home 的身份码，一条命令从空目录建站（骨架模板从自述站派生、随插件发布），托管站点的开发服务，往站点推数据，agent 读写站点评论的命令；别的插件注入服务 gwbDocsite 建站、托管自己的站点",
   "type": "module",
   "exports": {
     ".": {
@@ -11,7 +11,8 @@
   },
   "files": [
     "dist",
-    "skills"
+    "skills",
+    "template"
   ],
   "keywords": [
     "gwb-plugin"
@@ -24,7 +25,7 @@
     "registry": "https://git.tianshen02.online:28377/api/packages/godcreator/npm/"
   },
   "scripts": {
-    "build": "node build.ts && tsc -p tsconfig.build.json",
+    "build": "node scripts/sync-template.mjs && node build.ts && tsc -p tsconfig.build.json",
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "lint": "oxlint . --deny-warnings",
     "test": "vitest run",

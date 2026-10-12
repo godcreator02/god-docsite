@@ -18,8 +18,8 @@ icon: Plug2
 | 地址 | 站点 `scripts.dev` 写死 `--port`，只绑本机 | 站点 `package.json` |
 | 人员列表 | `people.json` 的读写与校验只经 identity 包的函数 | `@godcreator/docsite-identity` |
 | 评论目录 | `comments/` 的读写只经 comments 包的函数；写入经站点 action（站点自己校验） | `@godcreator/docsite-comments` |
-| 功能包列表 | `package.json` 的 `docsite.features`，见[功能包](/features) | `@godcreator/docsite-kit/init` |
-| 版本核对 | 启动站点前读站点装的 `@godcreator/docsite-kit` 版本，低于插件支持的最低版就拒绝并写明要升到哪版 | 插件里的常量 `MIN_KIT_VERSION`（当前 0.1.7，契约 v1 对应的最低版本） |
+| 功能包列表 | `package.json` 的 `docsite.features`，见[功能包](/features) | gwb-docsite 的建站器（校验）与 `@godcreator/docsite-kit/feature`（类型） |
+| 版本核对 | 启动站点前读站点装的 `@godcreator/docsite-kit` 版本，低于插件支持的最低版就拒绝并写明要升到哪版 | 插件里的常量 `MIN_KIT_VERSION`（当前 0.2.0，契约 v1 对应的最低版本） |
 
 ## 托管的站点
 
@@ -38,7 +38,7 @@ icon: Plug2
 | 命令 | 做什么 |
 | --- | --- |
 | `docsite.identity` | 本 home 的身份码 |
-| `docsite.site.init` | 一条命令从零建站（给目录、端口、站名：装基础包 → 照模板写骨架 → 装全部依赖 → 启动一遍检查能运行）；已有站点再做一次是照新模板更新骨架，见[初始化与更新](/skeleton#初始化与更新) |
+| `docsite.site.init` | 一条命令从空目录建站（给目录、端口、站名：组装骨架与功能包模板 → 一次写盘 → 一次装依赖 → 启动一遍检查能运行）；骨架建完归站点，已有站点再调就拒绝，见[建站](/skeleton#建站) |
 | `docsite.site.add` / `remove` | 登记进设置 `sites` 并启动（remove 从设置里去掉，在运行就停掉） |
 | `docsite.site.start` / `stop` | 启动 / 停掉站点的开发服务；start 只做版本核对与目录有效性，已在运行就回现状 |
 | `docsite.site.list` | 托管着的站点与状态：每个站 `{ dir, state, url, expectedUrl, error }` |
@@ -60,7 +60,7 @@ icon: Plug2
 | `onStatus(listener)` | 某个站的状态变了（启动、停止、出错）时调用 |
 | `push(dir, channel, data)` | 往站点的[推送通道](/dev-plugin#收-gwb-插件推来的数据)推一份数据；站点没运行就报错 |
 | `join(dir, person)` | 把本 home 的码加进 `people.json` |
-| `init(dir, { features?, port?, title? })` | 和命令 `docsite.site.init` 一样，多了给功能包与版本范围的 `features`（协作站的 gwb-collab 用它把 `@godcreator/collab-site` 装进站点） |
+| `init(dir, { features?, port, title })` | 和命令 `docsite.site.init` 一样，多了给功能包与版本范围的 `features`（协作站的 gwb-collab 用它把 `@godcreator/collab-site` 装进站点，docfirst 的建站命令用它装 `@godcreator/docfirst-site`） |
 
 ## 不做的事
 

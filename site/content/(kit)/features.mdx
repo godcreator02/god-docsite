@@ -11,7 +11,7 @@ icon: Blocks
 "docsite": { "features": ["@godcreator/collab-site"] }
 ```
 
-初始化照它生成 `app/site/` 下的几个文件，骨架只读这几个文件，所以功能包不改骨架里任何一个文件（见[项目骨架](/skeleton)）。
+建站器照它生成 `app/site/` 下的几个文件，骨架只读这几个文件，所以功能包不改骨架里任何一个文件（见[项目骨架](/skeleton)）。
 
 ## 功能包要提供的
 
@@ -44,15 +44,15 @@ const site: FeatureSite = {
 ## remark 插件接在 source.config.ts 里
 
 骨架的 `source.config.ts` 用 Config API 定义集合，只在构建页面时在 Node 里加载，浏览器不解析这个文件。
-有 `./content` 出口的功能包由初始化收集进 `app/site/content.ts`（`featureContents`），它们的 remark 插件与术语、公式一样
+有 `./content` 出口的功能包由建站器收集进 `app/site/content.ts`（`featureContents`），它们的 remark 插件与术语、公式一样
 接在 `docs` 集合的 `mdxOptions` 上，插件用到的 Node 模块不会进浏览器端。评论集合不加这些插件：评论数量多，编译要快。
 
-包根下的 `template/` 是要复制进站点的文件，和基础包的模板一样分 `skeleton/`（每次覆盖）与 `initial/`（没有时才写）。
-和基础包模板里同名的文件、写在 `app/site/` 下的文件都会报错：功能包只能添加文件。
+包根下的 `template/` 是要复制进站点的文件，分 `skeleton/`（建站时复制，只能添加文件）与 `initial/`（起始物，写完归站点）。
+模板的正本是各仓自己的原型站（docfirst 的是 gwb-docfirst 仓的 docs-site），发版时从原型派生。和骨架模板里同名的文件、写在 `app/site/` 下的文件都会报错。
 
 ## 路由模块留在包里
 
-路由模块不复制进站点，路由表直接指向装在 `node_modules` 里的文件。`app/routes.ts` 调用 `featureRouteFilesOf`（出口 `./init`）
+路由模块不复制进站点，路由表直接指向装在 `node_modules` 里的文件。`app/routes.ts` 调用 `featureRouteFilesOf`（出口 `./routes`）
 把 `file` 换成相对 `app/` 的**真实路径**：pnpm 的 `node_modules/<包>` 是符号链接，写链接路径时 `react-router build` 找不到打包出的文件，
 也认不出它是路由模块，`loader` 引用的服务端代码会留在浏览器端。
 

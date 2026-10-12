@@ -8,7 +8,8 @@ import { launchDevServer } from './dev-server.js'
 import { messageOf } from './errors.js'
 import { isIdentityCode, joinPeople, newIdentityCode } from './people-file.js'
 import { DocsiteService, type GwbDocsiteApi } from './service.js'
-import { initSite, pnpmAddKit, pnpmInstall } from './site-init.js'
+import { fetchFeatureTemplate } from './scaffold/fetch-template.js'
+import { initSite, pnpmInstall } from './site-init.js'
 import { SiteHost, siteKeyOf } from './site-host.js'
 
 /** 写在包入口：devkit.release 只读类型入口 dist/index.d.ts 认服务由谁提供 */
@@ -80,10 +81,8 @@ export function apply(ctx: GwbContext): void {
     join: (dir, person) => joinPeople(dir, identityCode(), person),
     onStatus: (listener) => host.onStatus(listener),
     init: async (dir, options) => {
-      // 骨架更新要整份重写 app/，在运行的先停
-      if (host.statusOf(dir).state === 'running') await host.stop(dir)
       return initSite(dir, options, {
-        addKit: pnpmAddKit,
+        fetchFeatureTemplate,
         install: pnpmInstall,
         isRegistered: (siteDir) => sitesSetting.get().some((each) => siteKeyOf(each) === siteKeyOf(siteDir)),
         start: (siteDir) => host.start(siteDir),

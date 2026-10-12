@@ -23,9 +23,9 @@ export interface GwbDocsiteApi {
   /** 某个站的状态变了（启动、停止、出错）时调用；返回撤掉的函数 */
   onStatus(listener: (dir: string) => void): () => void
   /**
-   * 从零建站，或更新已有站点的骨架（照装好的基础包与功能包的模板写 app/ 与配置，装依赖）；
-   * 新站点装基础包、写最少的 package.json 等几样，起服务检查后没登记的停掉。content/、comments/、people.json 不动。
-   * 调用方负责先停在运行的站点
+   * 从零建站：拉功能包模板、在内存里组装整棵站点树（骨架模板从自述站派生、随插件发布）、一次写盘、
+   * 一次 pnpm install、起服务检查首页（content/、comments/、people.json 是新站的起始物）。
+   * 骨架写完就归站点，没有更新已有站点骨架的通道；已有站点再调就拒绝
    */
   init(dir: string, options: SiteInitOptions): Promise<SiteInitResult>
 }

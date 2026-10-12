@@ -18,7 +18,7 @@ icon: BookOpen
 | --- | --- | --- |
 | `./vite` | `vite.config.ts` | 开发服务插件 `docsite()`，见[开发服务插件](/dev-plugin) |
 | `./feature` | 功能包 | 功能包要提供的几个出口的类型约定，见[功能包](/features) |
-| `./init` | gwb 插件、骨架的 `app/routes.ts` | 照装好的基础包与功能包的模板写站点骨架（`writeSiteSkeleton`）、功能包的路由文件换成相对 `app/` 的真实路径（`featureRouteFilesOf`），见[项目骨架](/skeleton#初始化与更新) |
+| `./routes` | 骨架的 `app/routes.ts` | 功能包的路由文件换成相对 `app/` 的真实路径（`featureRouteFilesOf`），见[功能包](/features#路由模块留在包里) |
 | `./site-modules` | 功能包 | 功能包的路由模块经别名 `@site` 读骨架模块的类型声明，见[功能包](/features#路由模块留在包里) |
 
 功能在各能力包里：

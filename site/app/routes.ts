@@ -1,5 +1,5 @@
 import { index, layout, route, type RouteConfig } from '@react-router/dev/routes'
-import { featureRouteFilesOf } from '@godcreator/docsite-kit/init'
+import { featureRouteFilesOf } from '@godcreator/docsite-kit/routes'
 import { featureRoutes } from './site/routes'
 
 /** 功能包的路由：路由模块在功能包里，路径已换成相对 app/ 的真实路径 */

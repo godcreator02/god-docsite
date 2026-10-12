@@ -6,8 +6,7 @@
   "scripts": {
     "dev": "pnpm --filter docsite-kit-site dev",
     "build": "pnpm --filter @godcreator/docsite-identity build && pnpm --filter @godcreator/docsite-comments build && pnpm --filter @godcreator/docsite-writing build && pnpm --filter @godcreator/docsite-page-sources build && pnpm --filter @godcreator/docsite-feed build && pnpm --filter @godcreator/docsite-ui build && pnpm --filter @godcreator/docsite-explainer build && pnpm --filter @godcreator/docsite-kit build && pnpm --filter @godcreator/gwb-docsite build && pnpm --filter docsite-kit-site build",
-    "check": "pnpm -r --no-bail check",
-    "site:skeleton": "pnpm --filter @godcreator/docsite-identity build && pnpm --filter @godcreator/docsite-comments build && pnpm --filter @godcreator/docsite-writing build && pnpm --filter @godcreator/docsite-page-sources build && pnpm --filter @godcreator/docsite-feed build && pnpm --filter @godcreator/docsite-ui build && pnpm --filter @godcreator/docsite-explainer build && pnpm --filter @godcreator/docsite-kit build && node scripts/write-site-skeleton.mjs"
+    "check": "pnpm -r --no-bail check"
   },
   "engines": {
     "node": ">=24"

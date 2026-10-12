@@ -1,6 +1,6 @@
 ---
 title: 项目骨架
-description: 站点目录里那套文件从哪来、各自做什么，怎么初始化与更新
+description: 站点目录里那套文件从哪来、各自做什么，怎么从空目录建站
 icon: FolderTree
 ---
 
@@ -8,29 +8,28 @@ icon: FolderTree
 原因是有几样东西只能写在项目里：集合定义（`defineDocs`、`defineCollections`）与 `import.meta.glob` 的参数要能在构建时直接读出来，
 路由的 `loader` 也要写在项目的路由文件里。功能都在包里，骨架只负责引入并组合它们。
 
-骨架的正本是基础包里的 `template/`，随包发布。站点目录里的那一份由初始化照它写出，不手改。
+骨架的正本就是这个仓的自述站：`app/` 与根目录的配置手写在 `site/` 里，gwb-docsite 插件构建时照它派生出建站用的模板（`plugins/docsite/scripts/sync-template.mjs`，模板随插件发布）。
+改骨架先改自述站，跑得通再发插件。
 
-## 初始化与更新
+## 建站
 
-gwb-docsite 的命令 `docsite.site.init`（别的插件调服务 `gwbDocsite.init`，见 [gwb 基础插件](/gwb-plugin)）做这几步：
+gwb-docsite 的命令 `docsite.site.init`（别的插件调服务 `gwbDocsite.init`，见 [gwb 基础插件](/gwb-plugin)）从空目录一步建站：
 
-1. 新站点先写最少的几样：`package.json`（带端口的 `dev` 脚本、基础包与功能包的依赖、`docsite.features`）、`pnpm-workspace.yaml`、`content/meta.json`（站名）
-2. 装依赖
-3. 基础包的 `writeSiteSkeleton`（出口 `./init`）照站点**装好的**基础包与各功能包的 `template/` 写骨架，生成 `app/site/`
-4. 模板带来了新依赖就再装一次
+1. 从 registry 拉各功能包的 tarball，解出模板（骨架模板插件自带，不用拉）
+2. 在内存里组装整棵站点树：骨架模板 + 功能包模板 + 按 `docsite.features` 生成的 `app/site/` + `package.json`（骨架模板里 `workspace:*` 的 `@godcreator` 依赖替换成插件配套的精确版本，功能包写解析出的精确版本）
+3. 一次写盘（中途失败回滚，一个字节不覆盖预存在的文件），一次 `pnpm install`
+4. 起服务检查首页，通过后没登记托管的站停掉
 
-更新已有站点也用这个命令：包升级以后再运行一次，骨架就和装上的那一版对上。
-
-每份模板分两部分：
+功能包的 `template/` 分两部分：
 
 | 目录 | 写进站点时 |
 | --- | --- |
-| `template/skeleton/` | 每次整份覆盖，`app/` 先整个删掉再写。`package.json` 不整份覆盖：脚本与依赖合并进站点的，同名的照模板，`dev` 保留站点自己的端口。`gitignore` 写成 `.gitignore`：发布到源上的包不带 `.gitignore` |
-| `template/initial/` | 顶层的文件或目录在站点里还没有时才写：基础包的 `people.json` 与 `glossary.terms.ts`。`comments/` 不预先建，写第一条评论时建出来 |
+| `template/skeleton/` | 建站时复制进站点。只能添加文件：和骨架模板同文件名、或写在 `app/site/` 下，建站就报错。`package.json` 不复制：脚本与依赖合并进站点的，脚本只能新增（骨架的 `dev`、`build` 归骨架），依赖同名照骨架的 |
+| `template/initial/` | 起始物（如 docfirst 的 `docfirst.config.mjs`、起始页），建站时写；之后归站点自己维护 |
 
-`content/`、`comments/`、`people.json`、`glossary.terms.ts` 由站点自己维护，初始化不碰已有的。`app/` 里不放自己的文件：下次初始化会删掉。
+起始物还有骨架自带的两个：`people.json`（空列表）与 `glossary.terms.ts`（空词表）。`comments/` 不预先建，写第一条评论时建出来。
 
-这个仓的自述站也照模板生成：改了 `packages/docsite-kit/template/` 之后在仓根运行 `pnpm site:skeleton`，基础包的测试检查 `site/app/` 和模板一致。
+**骨架建完就归站点**：`app/` 与根目录的配置从此是站点的文件，随便改；没有照新模板重写它们的命令，要重建删掉目录再来。基础包改了骨架，已建的站对照自述站自己改。
 
 ## 文件
 
@@ -55,7 +54,7 @@ gwb-docsite 的命令 `docsite.site.init`（别的插件调服务 `gwbDocsite.in
 | `app/routes/search.ts` | 搜索接口，交给 `app/lib/source.server.ts` 建的 `searchServer`，三种页面一起搜 |
 | `app/routes/content-file.ts` | 调用 `contentFileResponse`，dev 下读 `content/` 源目录把文件原样送出；build 后同一批文件已是静态资产、优先命中，落到这里的路径按快照语义 404 |
 | `app/routes/markdown.ts` | `/api/markdown?path=<页面地址>` 返回那一页的 Markdown：MDX 页面走集合的 `getText('processed')`，TSX 与 HTML 页面用来源里算好的 `data.markdown`，三种页面一个约定 |
-| `app/site/` | 初始化照 `package.json` 的 `docsite.features` 生成：`features.ts` 是包名列表，`routes.ts`、`ui.ts`、`data.server.ts`、`content.ts` 分别引入各功能包的 `./routes`、`./site`、`./site-server`、`./content`（有这个出口的那几个），`styles.css` 引入各功能包的样式。没有功能包时也有，列表是空的 |
+| `app/site/` | 建站时按 `package.json` 的 `docsite.features` 生成：`features.ts` 是包名列表，`routes.ts`、`ui.ts`、`data.server.ts`、`content.ts` 分别引入各功能包的 `./routes`、`./site`、`./site-server`、`./content`（有这个出口的那几个），`styles.css` 引入各功能包的样式。没有功能包时也有，列表是空的 |
 | `content/` | 页面放在这里，每个文件夹的 `meta.json` 写标题和页面顺序；写了 `"root": true` 的文件夹是侧栏里切换下拉框的一项 |
 | `comments/` | 评论放在这里，一个评论串一个文件夹，见[评论](/commenting) |
 | `people.json` | 这个站的人员列表：评论署名用的 `id`、显示的名字、各人的身份码，agent 也在里面，见[评论](/commenting#谁在写评论) |

@@ -147,20 +147,18 @@ export function registerCommands({ commands, docsite, sitesSetting, list }: Comm
     commands,
     {
       name: 'docsite.site.init',
-      description: '一条命令从零建站，或照装好的基础包与功能包的新模板更新已有站点的骨架（app/ 与根目录的配置）',
+      description: '一条命令从空目录建站：组装骨架与功能包模板、一次写盘、装依赖、起服务检查，骨架写完归站点',
       usage:
-        '{ dir, port, title }：dir 是站点目录的绝对路径。新站点（目录是空的，或里面只有 package.json）要给 port（开发端口）与 title（站名，写进 content/meta.json），插件装基础包（registry 里已发布的版本）→ 照模板写骨架 → 装全部依赖 → 起服务检查，检查通过后登记进设置 sites 的站保持运行、没登记的停掉。已有站点（package.json 有 docsite.features）不能给 port 与 title，再运行一次就是照新模板更新骨架，不重装基础包，模板带来新依赖就装一次。content/、comments/、people.json 已有的不动。只写文件、不碰 git。回 { created, features }',
+        '{ dir, port, title }：dir 是站点目录的绝对路径，要空目录（或只有 package.json，name 会留下）；port（开发端口）与 title（站名，写进 content/meta.json）必给。骨架模板是插件自带的（正本是 docsite-kit 仓的自述站），依赖里的 workspace 引用替换成插件配套的精确版本，写盘后一次 pnpm install，起服务检查首页，通过后登记进设置 sites 的站保持运行、没登记的停掉。已有站点（package.json 有 docsite.features）拒绝：骨架建完就归站点，要重建删目录再来（content/、comments/、people.json 想留先拷走）。功能包（docsite.features）不经命令面给，走服务面 gwbDocsite.init 的 features（协作站、docfirst 的建站命令用它）。回 { created: true, features }',
       effect: 'write',
     },
     async (args) => {
       const parsed = argsOf(args, ['dir', 'port', 'title'])
       const port = parsed['port']
-      if (port !== undefined && !(Number.isInteger(port) && (port as number) > 0 && (port as number) < 65536)) throw new DocsiteRejected('port 要是 1 到 65535 的整数')
+      if (port === undefined || !(Number.isInteger(port) && (port as number) > 0 && (port as number) < 65536)) throw new DocsiteRejected('port 要是 1 到 65535 的整数')
       const title = optionalString(parsed, 'title')
-      return docsite.init(dirOf(parsed), {
-        ...(port !== undefined ? { port: port as number } : {}),
-        ...(title !== undefined ? { title } : {}),
-      })
+      if (title === undefined) throw new DocsiteRejected('缺少 title（站名），要是非空字符串')
+      return docsite.init(dirOf(parsed), { port: port as number, title })
     },
   )
 
