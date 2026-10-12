@@ -1,0 +1,52 @@
+---
+born-at: 2026-10-12T12:50
+type: choice
+parent: [2026-09-03-god-live-doc]
+label: 目标文件树落位：模板与自述站迁新机制、本体旧评论身份实现删除、能力小包格局成型
+domain: 骨架
+---
+
+## 背景
+
+用户确认 4.1 的三层包格局（能力小包 / 组合包 / 站点）与目标文件树后，要求整树落位出干净一版。
+本轮把 docsite-kit 仓改到目标形态。
+
+## 做了
+
+- 能力小包补齐：新立 `@godcreator/docsite-page-sources`（Q 线收编：TSX/HTML StaticSource、
+  中文搜索服务、content 资产 dev 读盘 + build 复制同一份快照、TsxPageBody/HtmlPageBody）、
+  `@godcreator/docsite-writing`（从基础包 ./writing 拆出，kit 出口撤销）。
+- 模板 `template/skeleton` 整体迁新机制：Config API 定义 docs（术语插件 + 公式进集合 mdxOptions）
+  与 comments 两个 async 集合；`.source/server` + `.source/browser` 双端入口；内容页路由带
+  loader（本页评论元数据）与 action（authorizeWrite → comments 包写函数）＝身份×评论的组合点
+  落在骨架；搜索 / markdown / content 三个 API 路由转调 page-sources 包；全站评论页按新模型重写；
+  功能包挂载约定（app/site 生成、featureRoutes）保留。initial 新增站点根的 glossary.terms.ts
+  （术语表正本；不进 content/ 是因为 initial 的顶层条目只在缺时写，会与站点自己的 content 目录撞名）。
+- 自述站重生成并迁数据：18 串旧格式评论经 `scripts/migrate-comments-to-threads.mjs` 转成串文件夹
+  格式（文字锚点 quote/range/openers/snapshot.txt 无新机制对应物，丢弃；附件与回复保留；
+  两条不挂页面的站级评论挂保留键 `_site.mdx`，等无页面评论功能设计后接）。
+- 本体删除：comments/people/comment-ranges/page-text-rules、server/{comments,comment-files,
+  page-text,site-people,search}、ui/{comments,all-comments,comment-cards,comment-anchors,
+  page-bodies}、page-sources.ts 与对应出口（./comments、./page-sources）及九个旧测试。
+  files 出口瘦身：sitePeople 转 identity、siteProblems 改为评论包磁盘读取的校验、siteMdxProblems 保留。
+- 插件 gwb-docsite 切新出口：身份函数从 docsite-identity、评论读写从 docsite-comments；
+  评论命令按新模型适配——create 必给 page（URL）、anchor 批页面元素，resolve/reopen 与
+  status 筛选明确报「评论模型还没收编 resolved 状态」，不悄悄降级。
+- ui 外壳适配：themeSwitchWithIdentity 用 identity 包 IdentityBadge 重写；commentLinkTargetsOf
+  改收新模型的串摘要。
+
+## 未收编与欠账
+
+- 文字级评论定位（快照 diff 映射、comment-anchors 浏览器算法）没有新机制对应物——待拆借，
+  正本在快照提交 07704c2。
+- 评论编辑、@ 提及写入路径、无页面评论（站级）、resolved 状态：模型还没有，插件命令先明确拒绝。
+- site/content 说明页还写着旧机制（评论、骨架、页面来源各页），要按新现状翻新，随下一笔提交补。
+- 插件随包说明书 SKILL.md 的命令用法（quote → anchor 等）未同步，同上。
+- create-docsite 与 init.writeSiteSkeleton 两份写骨架逻辑仍未合一（init 复用 createSite）。
+- 旧评论数据迁移是一次性脚本，协作站/docfirst 迁移时各自的评论数据要再跑或另写。
+
+## 验收
+
+全仓 `pnpm -r check` 绿（identity 24、page-sources 20、writing 30、comments 42、kit 21、
+插件与自述站 typecheck）；自述站 dev 实测：内容页带评论侧栏、全站评论页列出迁移后的 10 张卡、
+/api/search 中文命中、/api/markdown 出 processed 正文、features 页术语标注渲染。

@@ -1,0 +1,22 @@
+---
+born-at: 2026-10-03T14:40
+type: choice
+parent: [2026-09-03-god-live-doc]
+label: 新消息交给 AI 处理放进 gwb-collab，不另起监听进程
+domain: 协作流程
+---
+
+pivots-from:: [删掉定时检查，只靠实时推送](2026-10-02-push-only-no-polling.md)
+
+## 背景
+
+用户要协作站一来消息就自动交给 AI 处理。先做的是一个独立的 Node 进程（单元 `sdoen-collab-watch`）：最早是 Claude Code 的 channel 服务器，只能由 Claude Code 自己启动，
+所以单独一个进程；后来改成在 ZCode 或 pwsh 终端里开新会话，进程仍是独立的。它自己订阅同样的 ntfy 主题、等 15 秒猜插件同步完、经 MCP 调回 `collab.inbox` 比出新消息，
+还要人一直开着它。用户问：「协作站监听功能为什么不塞进gwb-collab啊？？干嘛独立一下」，并说那个单元「直接删了吧」。
+
+## 结论与边界
+
+放进 gwb-collab：检查里比出新消息、弹通知之后，自动同步之后，把这一轮的新消息交给 AI，用的就是弹通知的那一批，不另订推送、不另算新消息、不用猜同步什么时候做完，
+工作台开着就在运行。设置 `ai-handling` 默认 `off`，`zcode` 按名字调 gwb-zcode 的 `zcode.open`、`zcode.create`，`claude-terminal` 开 pwsh 窗口运行 Claude Code。
+插件是全组用的，默认关闭；ZCode 完全访问处理别人写的消息这一点写进设置说明，开不开由各人定。gwb-zcode 不写 peer，没装时只有选了 `zcode` 的人会在检查错误里看到。
+加设置、不改已有契约，版本升 y 到 0.15.4。单元 `sdoen-collab-watch` 删掉。

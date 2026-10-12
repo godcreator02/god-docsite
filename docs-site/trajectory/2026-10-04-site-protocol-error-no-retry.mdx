@@ -1,0 +1,25 @@
+---
+born-at: 2026-10-04T16:56
+type: choice
+parent: [2026-09-03-god-live-doc]
+label: 站点协议号对不上不重试，抛专门的错误类
+domain: 站点进程
+---
+
+## 背景
+
+文档（gwb-collab 页「站点常驻」）一直写的是：`site/` 里装的框架包和插件打包的那一版站点协议号不一样，这类启动前就知道的失败只记下原因、不重试。但代码里 `launchSite` 对协议号对不上抛的是普通的 `SiteLaunchError`，插件把它一律转成 `CollabRejected` 后交给 `SiteProcesses.launchCountingFailures`，与「先退出、超时」一样计入失败次数：5 分钟内重试 3 次才停。协议号对不上要人改 `site/package.json` 或升级插件，重试三次每次都一样失败，白等十几秒才把原因留在窗格里。
+
+## 结论与边界
+
+- 框架包的启动出口导出专门的错误类 `SiteProtocolError`（继承 `SiteLaunchError`）：`requireSameSiteProtocol` 里没装框架包、装的那版比插件新、协议号不一样三种情况都抛它，消息写明该升哪一边
+- 插件的 `launchDevServer` 把一般的 `SiteLaunchError` 转成 `CollabRejected`，`SiteProtocolError` 原样穿透；`SiteProcesses.launchCountingFailures` 认出它，按启动前就失败处理：记下原因（窗格那一行显示）、不计失败次数、不安排重试。人为启动的 `collab.site.start` 失败时同样把原因留给窗格
+- 其他启动失败（先退出、超时、`package.json` 读不出）照旧计数重试：那些可能是装了一半、端口被占这类重试会好的
+
+## 代价
+
+错误分类多一层：框架包加错误类、插件两处 `instanceof` 判断；以后启动出口再分出「重试也不会好」的失败，走同一条路加进来。
+
+## 依据
+
+无证据：行为由 `plugins/collab/tests/site-keeper.test.ts`「站点协议号对不上（SiteProtocolError）」与 `packages/collab-site/test/launch.test.ts` 的 `SiteProtocolError` 断言钉住。

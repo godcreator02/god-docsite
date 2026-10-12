@@ -1,0 +1,39 @@
+---
+born-at: 2026-10-08T11:46
+type: evidence
+parent: [2026-09-03-god-live-doc]
+label: 重构后实测
+domain: 协作流程
+---
+
+pivots-from:: [协作仓只走 AGit](2026-10-08-collab-repo-agit-only.md)
+
+pivots-from:: [webhook 加订审阅与合并请求评论](2026-10-08-webhook-reviews-and-pull-comments.md)
+
+## 背景
+
+数据模型包、只带事实的通知、插件按两种仓分目录这一轮重构发版以后（提交 64735f1：数据模型包 0.1.0、合并检查包 0.1.1、网站包 0.23.0、gwb-collab 0.25.0），本机测试全过，但有几件只能在真 Gitea 上看：协作仓 main 关掉推送以后 AGit 推送会不会被拦、执行器还能不能合并（[协作仓只走 AGit](2026-10-08-collab-repo-agit-only.md) 留下的两件），组织 webhook 新订的两种事件 Gitea 认不认、经 ntfy 推来插件认不认，以及站点迁到新出口以后能不能照常启动。2026-10-08 在 `hybrid-mmc` 上实测，负责人是 default home（godcreator），成员是隔离 home carol（carol-test），两个 home 都升到 gwb-collab 0.25.0。以前给 QQ 机器人 B 用的 home qqbotb 不再使用，机器人 B 归 carol 这个测试 home。
+
+## 结论与边界
+
+| 测试 | 结果 |
+| --- | --- |
+| 组织管理员调 `collab.org.setup` | `hybrid-mmc` 的组织 webhook 改成 8 个事件，从 Gitea 读回来含 `pull_request_review`、`pull_request_comment`：照源码定的事件名是对的 |
+| 协作仓管理员调 `collab.repo.setup` | `hybrid-mmc/collab` 的 main 配成 `enable_push` 为假、合并许可只有团队 `bots`；之后 `webhook-setup` 与协作仓的 `repo-setup` 两条通知消失 |
+| 迁移站点并提交审核 | `site/package.json` 去掉 `collab-records`、`collab-site` 改成 `^0.23.0`，`vite.config.ts` 引用 `./dev-server`，6 个页面文件引用 `./page-components`；`collab.submit` 经 AGit 开出 `hybrid-mmc/collab` #111，由 `collab-bot` 合并（改动提交 5fe449f，合并提交 76b7de9）。AGit 推送没被 main 的保护拦下，关掉推送以后执行器照样能合并 |
+| carol-test 在 `hybrid-mmc/datasheets` 开 #4 | 负责人 godcreator 十几秒内收到 `pull-to-review`，经 ntfy 推来，没有手动刷新 |
+| godcreator 对 #4 提交要求修改的审阅 | 不到 10 秒，carol 的提示栏出现「godcreator 要你改 datasheets #4「…」（你开的合并请求）」：审阅事件经 ntfy 推到、插件认得出 |
+| 交给 AI | ZCode 收到 7 件事，逐条整理、没有改文件 |
+| QQ 私聊 | 升级后第一次完整刷新，每个项目把此刻已有的通知当成新的发了一条汇总（记录换成了新的数据文档，只这一次）；11:31 收到「datasheets #4 … 等你审阅（carol 开的）」，#4 消失以后没有再发 |
+| 站点协议号核对 | 两个方向都给了能照做的提示：站点旧，提示把 `site/package.json` 改到 `^0.23.0`；插件旧，提示升级 gwb-collab |
+| 换依赖后第一次打开站点 | Vite 报一次 504 `Outdated Optimize Dep`，刷新以后正常，是 Vite 预构建依赖换了以后的正常行为 |
+
+边界：只在 `hybrid-mmc` 一个组织上测，只有负责人与一个成员两个账号；合并请求上的评论（`pull_request_comment`）这次只确认了 Gitea 读回的事件里有它，没有专门发一条评论看通知；要求修改的审阅只测了一次，批准、撤销审阅没测。「十几秒」「不到 10 秒」是看着提示栏与 QQ 记下的，没有存原始输出。
+
+## 依据
+
+合并请求 `hybrid-mmc/collab` #111 与它的执行器记录、合并提交 76b7de9 在 Gitea 上可查；`hybrid-mmc/datasheets` #4 已关掉，审阅记录还在那条合并请求上；两个 home 的 `gwb.log` 里有通知与推送消息的记录。被测的代码是提交 64735f1 发出的四个包。
+
+## 代价与遗留
+
+测完关掉了 `hybrid-mmc/datasheets` #4、删掉了测试分支。QQ 升级后那一次汇总是 [重构时先删后补](2026-10-08-refactor-delete-first.md) 里写明的代价（旧的发送记录不读、不迁），每个 home 只出现一次。

@@ -1,0 +1,137 @@
+---
+title: fumadocs-core 页面来源导读
+docfirst: none
+description: fumadocs-core 16.17.1：页面来源的约定、loader 内部五步、页面树怎么建、loader 插件与 framework 适配层
+---
+
+fumadocs-core 16.17.1 里除搜索以外的部分。核心是一个和内容格式无关的「内存文件系统 + 索引 + 页面树构建器」：谁能给出虚拟文件，谁就能成为页面来源。源码在 `packages/core/src`。
+
+## 页面来源的约定
+
+类型在 [source/source.ts:15-120](https://github.com/fuma-nama/fumadocs/blob/fumadocs%4016.17.1/packages/core/src/source/source.ts#L15-L120)：
+
+```ts
+type VirtualFile =
+  | { type: 'page'; path: string; absolutePath?: string; slugs?: string[]; data: PageData }
+  | { type: 'meta'; path: string; absolutePath?: string; data: MetaData }
+
+interface PageData { title?; description?; icon?; structuredData?: 值 | () => Promise<值> }
+interface MetaData { title?; pages?; pagesIndex?; root?; defaultOpen?; collapsible?; icon?; description? }
+
+interface StaticSource  { files: VirtualFile[]; baseDir?; configureStatic?({ loader }) }
+interface DynamicSource { files: () => VirtualFile[] | Promise<…>; cache: 'memory' | 'custom'; staleTime?; invalidate? }
+```
+
+- `path` 是虚拟的相对路径，比如 `guide/intro.mdx`，以 `./` 或 `../` 开头直接报错。
+- **loader 只读 `title`、`description`、`icon`、`structuredData`**，正文和目录它不管。`data` 里放什么别的都行（fumadocs-mdx 放 `body`、`toc`；运行时来源放 `load()`），由路由自己取出来渲染。
+- `configureStatic({ loader })` 在 loader 建好后回调，来源可以拿到 loader 做交叉链接（graphql 就这样用）。
+- `DynamicSource` 给运行时来源用，由 `dynamicLoader` 读：同一请求内只算一次；只有新的文件列表和上次「逐个元素比引用」不同时才重建 loader（[source/dynamic.ts:97-108](https://github.com/fuma-nama/fumadocs/blob/fumadocs%4016.17.1/packages/core/src/source/dynamic.ts#L97-L108)）。所以**来源必须让没变的文件保持同一个对象**，否则每个请求都重建页面树和搜索索引。
+
+## loader() 内部五步
+
+入口 [source/loader.ts:304-509](https://github.com/fuma-nama/fumadocs/blob/fumadocs%4016.17.1/packages/core/src/source/loader.ts#L304-L509)。
+
+1. **整理配置。**算出 `url(slugs, locale)` 函数；拼插件列表：`icon` 选项生成的图标插件 → 站点的 `plugins` → 最后的 slugs 插件，再按 `enforce: 'pre' | 'post'` 排序；依次调用每个插件的 `config()`。
+   （[loader.ts:511-588](https://github.com/fuma-nama/fumadocs/blob/fumadocs%4016.17.1/packages/core/src/source/loader.ts#L511-L588)）
+2. **写进内存文件系统。**每个虚拟文件加上 `baseDir`、规范化路径，按语言分组，每种语言一个 `FileSystem`（就两个 Map：路径 → 文件、目录 → 子项）；写完对这个存储调用所有插件的 `transformStorage`。
+   （[storage/content.ts:50-175](https://github.com/fuma-nama/fumadocs/blob/fumadocs%4016.17.1/packages/core/src/source/storage/content.ts#L50-L175)、[storage/file-system.ts:6-89](https://github.com/fuma-nama/fumadocs/blob/fumadocs%4016.17.1/packages/core/src/source/storage/file-system.ts#L6-L89)）
+3. **算 slug。**slugs 插件在 `transformStorage` 里给没有 `slugs` 的页面算：目录段做 URI 编码，`(分组)` 段跳过，文件名 `index` 省略，**只去掉最后一个扩展名**（所以 `x.page.tsx` 得到 `x.page`）。自动算出的 slug 重复就报 `Duplicated slugs`；来源自己给的 slug 不检查。
+   （[plugins/slugs.ts:43-125](https://github.com/fuma-nama/fumadocs/blob/fumadocs%4016.17.1/packages/core/src/source/plugins/slugs.ts#L43-L125)）
+4. **建索引。**四张 Map：slug、页面路径、meta 路径、url；`page.url` 在这一步算出。
+   （[loader.ts:195-261](https://github.com/fuma-nama/fumadocs/blob/fumadocs%4016.17.1/packages/core/src/source/loader.ts#L195-L261)）
+5. **页面树延迟构建。**`pageTree` 是 getter，第一次读时构建并缓存，也能整棵替换。构建时依次跑：`pageTree.transformers` → 各插件的 `transformPageTree` → 构建器自己的 fallback 处理。最后回调各来源的 `configureStatic`。
+   （[loader.ts:333-372](https://github.com/fuma-nama/fumadocs/blob/fumadocs%4016.17.1/packages/core/src/source/loader.ts#L333-L372)）
+
+常用查询：`getPage(slugs, lang)` 按 slug 查（编码与否都能命中）；`getPageByHref` / `resolveHref` 处理 `./x.mdx#a` 这类相对文件链接；`getNodePage(node)` 靠树节点上的内部引用反查页面；`serializePageTree` 把节点里的 React 名称和图标转成 HTML 字符串，好从服务端传给浏览器。
+
+## 多个来源合并
+
+> **正确写法：给 loader 传一个对象**，每个键是一种来源，`page.type` 就是键名，路由里按它分别渲染。
+>
+> ```ts
+> const source = loader({ docs: docs.toFumadocsSource(), html: htmlPages.staticSource({ baseDir: 'html' }) }, { baseUrl: '/' })
+> // 路由里：page.type === 'html' ? <HtmlBody … /> : <MdxBody … />
+> ```
+
+- `multiple()` 已废弃，而且会丢掉 `baseDir` 和 `configureStatic`（[source.ts:122-144](https://github.com/fuma-nama/fumadocs/blob/fumadocs%4016.17.1/packages/core/src/source/source.ts#L122-L144)）。
+- 两个来源路径相同，后写的静默覆盖前面的（[file-system.ts:36-44](https://github.com/fuma-nama/fumadocs/blob/fumadocs%4016.17.1/packages/core/src/source/storage/file-system.ts#L36-L44)），所以每个来源用自己的 `baseDir` 隔开。
+- 运行时来源和构建时来源可以混合：`dynamicLoader({ docs: 静态, html: 动态 })`，还能单独让某一个来源失效。
+
+## 页面树怎么建
+
+构建器 [page-tree/builder.ts](https://github.com/fuma-nama/fumadocs/blob/fumadocs%4016.17.1/packages/core/src/source/page-tree/builder.ts)。每个文件夹找同目录的 `meta.*`，按 `pages` 一项一项解析（[builder.ts:280-339](https://github.com/fuma-nama/fumadocs/blob/fumadocs%4016.17.1/packages/core/src/source/page-tree/builder.ts#L280-L339)）：
+
+| `pages` 里的写法 | 效果 |
+| --- | --- |
+| `"..."` / `"z..."` | 其余没列出的项按正序 / 倒序放在这里 |
+| `"---标题---"`、`"---[图标]标题---"` | 分隔线节点 |
+| `"[名称](url)"`、`"external:[名称](url)"` | 链接节点 |
+| `"!名字"` | 从 `...` 里排除 |
+| `"...子文件夹"` | 把子文件夹的内容摊平到当前层 |
+| `"名字"` | 先当文件夹找，找不到当页面 |
+
+- **同一个节点被几个文件夹引用**时按优先级归属：`pagesIndex` 指定 3，显式列出 2，自动展开 0；优先级高的把节点从原文件夹挪走（[builder.ts:158-184](https://github.com/fuma-nama/fumadocs/blob/fumadocs%4016.17.1/packages/core/src/source/page-tree/builder.ts#L158-L184)）。
+- **文件夹的 index 页**：非 root 文件夹自动把 `index.*` 当作文件夹自己的页面；root 文件夹的 index 只当普通子项排在最前（[builder.ts:387-395](https://github.com/fuma-nama/fumadocs/blob/fumadocs%4016.17.1/packages/core/src/source/page-tree/builder.ts#L387-L395)）。
+- **没被任何 meta 列到的文件**不会丢：建一棵 `root.fallback` 子树放它们，侧栏和上下页都会查这棵树（[transformer-fallback.ts:5-46](https://github.com/fuma-nama/fumadocs/blob/fumadocs%4016.17.1/packages/core/src/source/page-tree/transformer-fallback.ts#L5-L46)）。
+- **侧栏切换（root 文件夹）在界面层实现**：所有 `root: true` 的文件夹收集成标签；当前侧栏显示的是**当前路径上最后一个 root 文件夹**（[radix-ui/src/contexts/tree.tsx:32-41](https://github.com/fuma-nama/fumadocs/blob/fumadocs%4016.17.1/packages/radix-ui/src/contexts/tree.tsx#L32-L41)）。所以打开一个不在页面树里的页面时，侧栏会回到最外层——这正是我们自写「停在上一组」的原因，官方没有对应机制。
+- transformers 四个钩子：`file(node, filePath)`、`folder(node, folderPath, metaPath)`、`separator(node)`、`root(node)`，`this` 里有 `storage`，可以 `this.storage.read(filePath)` 读到原始数据（比如 frontmatter）。
+
+## loader 插件
+
+```ts
+interface LoaderPlugin {
+  name?: string
+  enforce?: 'pre' | 'post'
+  config?(config): config | void          // 最早调用，可整份替换配置
+  transformStorage?({ storage }): void     // 每种语言的存储建好后调用一次
+  transformPageTree?: PageTreeTransformer  // 并进 transformers，排在站点的之后
+}
+```
+
+[loader.ts:538-562](https://github.com/fuma-nama/fumadocs/blob/fumadocs%4016.17.1/packages/core/src/source/loader.ts#L538-L562)。插件 = 页面树 transformers + 能改配置和存储。多语言时继承来的文件对象是共享的，`transformStorage` 要做到重复调用没有副作用。
+
+官方自带：`lucideIconsPlugin`（按名字查 lucide 图标）、`statusBadgesPlugin`（读 frontmatter 的 `status` 给节点加徽标，就是用 `this.storage.read`）、slugs 插件。fumadocs-openapi 的 `openapiPlugin()` 也是这样给页面树节点加请求方法徽标。
+
+## framework 适配层
+
+界面层不直接依赖任何框架，只依赖 `fumadocs-core/framework`（[framework/index.tsx:24-108](https://github.com/fuma-nama/fumadocs/blob/fumadocs%4016.17.1/packages/core/src/framework/index.tsx#L24-L108)）：
+
+```tsx
+interface Framework { usePathname(); useParams(); useRouter(): { push; refresh }; Link?; Image? }
+<FrameworkProvider …>  // 各框架适配器把自己的实现放进 context；没包 Provider 时直接报错
+```
+
+React Router 适配器：pathname 取自 `useLocation`，`refresh` 用 `useRevalidator`，预取映射成 `'intent'`。没注入 `Link` / `Image` 时退回原生 `<a>`、`<img>`。我们的库组件要跳转、取当前路径时，也应该用这一层，而不是直接用 react-router。
+
+## headless 组件
+
+- **目录滚动高亮**（[toc.tsx:66-306](https://github.com/fuma-nama/fumadocs/blob/fumadocs%4016.17.1/packages/core/src/toc.tsx#L66-L306)）：`IntersectionObserver` 观察每个标题，在视口里的算激活，一个都没有时取离顶部最近的那个；状态经 `useSyncExternalStore` 给组件。**只观察开始观察那一刻已经在页面里的标题**，后来插入的不跟踪——TSX、HTML 页面晚出现的标题要注意这一点。
+- **目录数据三条来源**：MDX 编译时 `rehypeToc` 导出 `toc`（标题是 JSX）；`remarkHeading` 写进 `file.data.toc`；运行时 `getTableOfContents(content)`。
+- 面包屑 `getBreadcrumbItemsFromPath`、`Link`（外链自动加 `target=_blank`）、`DynamicLink`。
+
+## core 自带的 MDX 插件
+
+fumadocs-mdx、local-md、obsidian 都复用这一套，汇总在 `fumadocs-core/mdx-plugins`：
+
+| 插件 | 做什么 | 产出给谁 |
+| --- | --- | --- |
+| `remarkHeading` | 给标题生成 id（支持 `[#自定义]`） | DOM 的 id、目录 |
+| `remarkStructure` | 切出搜索记录：标题一条、每段正文一条，表格按行；节点的 `data.structuredData` 可以覆盖默认提取 | 搜索索引 |
+| `rehypeCode` | Shiki 高亮，`title`、行号、复制按钮；transformer 可扩展 | 代码块 |
+| `rehypeToc` | 导出 `toc`；支持 `[toc]` / `[!toc]` | DocsPage 的目录 |
+| `remarkImage` | 本地图片改成 import，交给打包器；远程图片探测尺寸 | 图片 |
+| `remarkCodeTab`、`remarkNpm`、`remarkSteps`、`remarkMdxFiles`、`remarkMdxMermaid`、`remarkDirectiveAdmonition` | 代码块标签页、包管理器标签页、步骤、文件树、Mermaid、`:::` 提示框 | 对应组件 |
+| `remarkLLMs`、`stringifier.replaceSource` | 生成给 llms 的 Markdown；让插件改写搜索文本或 llms 输出 | llms.txt、搜索 |
+
+预设顺序见 [content/mdx/preset-bundler.ts:38-86](https://github.com/fuma-nama/fumadocs/blob/fumadocs%4016.17.1/packages/core/src/content/mdx/preset-bundler.ts#L38-L86)。
+
+## 公开的扩展点
+
+1. 页面来源：`StaticSource`、`DynamicSource`、`VirtualFile`、`configureStatic`、`update()`。
+2. loader 选项：`baseUrl`、`url`、`slugs`、`i18n`、`icon`、`pageTree{ transformers, sort, noRef, … }`、`plugins`。
+3. `LoaderPlugin` 与页面树 transformers；`this.storage.read()`。
+4. loader 输出的全部方法；`dynamicLoader`；`llms()`；页面树工具 `findNeighbour`、`findPath`、`flattenTree` 等。
+5. `FrameworkProvider`；headless 的目录、面包屑、链接。
+6. MDX 插件的选项；`replaceSource`；`createRehypeCode`；vfile 的 `toc`、`structuredData`。
+
+**不该依赖的：**树节点上的 `$ref`（用 `getNodePage`）、`_Internal` 类型、索引键格式、`searchPath`、下划线开头的钩子、已废弃的 `multiple`。

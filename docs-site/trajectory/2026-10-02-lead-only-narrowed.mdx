@@ -1,0 +1,54 @@
+---
+born-at: 2026-10-02T21:06
+type: choice
+parent: [2026-09-03-god-live-doc]
+label: 负责人才能改的收窄
+domain: 协作流程
+---
+
+pivots-from:: [页面也走提交审核、按路径自动合并](2026-10-01-pages-auto-merge.md)
+
+pivots-from:: [执行器当场定论，打回就退回工作区](2026-10-02-runner-decides-at-once.md)
+
+## 背景
+
+按路径分的规则是：`collab/` 下的记录（`people.json` 除外）和 `site/pages/`、`site/shared/`、`site/public/` 谁都能改，其余一律只有负责人能改。执行器当场定论以后，成员改到这些文件就被直接打回，只能交给负责人提交。
+
+于是成员连给页面加一个库（改 `site/package.json` 与锁文件）、在 `site/` 下新建一个 `components/` 目录都会被打回。写页面应该是自由的，加库被打回、再去找负责人太麻烦。真正需要拦的只是会出问题的那几处。
+
+## 结论与边界
+
+只有负责人能改的范围收窄到确实会出问题的两类：会在每个人电脑上执行代码的，会改变规则的。实现是框架包的 `records/merge/lead-only.ts`（`leadOnlyChangesBetween`、`leadOnlyProblems`），旧导出 `filesNeedingReview` 删掉，框架包升 0.19.0。
+
+仍只有负责人能改：
+
+- `.gitea/`、`.github/`：执行器工作流，改了能绕过检查、拿到组织密钥；Gitea 两个目录都认
+- `collab/people.json`：角色
+- `site/.npmrc`、`site/pnpm-workspace.yaml`：从哪个源装 `@godcreator` 的包、只许 esbuild 运行安装脚本、不满一天的新版本不装
+- `site/` 根目录下 Node 会执行的配置文件：`*.config.js` / `.ts` / `.mjs` / `.cjs` / `.mts` / `.cts` 与 `.postcssrc*`
+- `site/package.json` 里依赖两段以外的键（`scripts` 等，插件在每个人电脑上运行 `pnpm dev`）、`@godcreator/collab-site` 那一项（执行器做合并检查用它的版本）、写成网址 / git / 本地路径 / 别名的依赖（只能写普通版本号范围，判据是不含 `:` `/` `#` `\`）；这个文件新建、删掉或不是合法 JSON 时整个算
+
+放开：加库、升级库、删库（依赖两段里的普通版本号），`site/pnpm-lock.yaml`、`index.html`、`tsconfig.json`，`site/` 下任何新目录，仓根的 `README.md`、`.gitignore`、`.gitattributes` 等。提交的人在 base 的人员名单里是负责人就全部放行。
+
+合并检查的原话改成逐处列出：「改了只有负责人能改的内容：……；这类改动交给负责人提交」，结论名仍是 `needs-review`。
+
+`collab.submit` 推送前在本机做同一项检查（同一份代码，base 是推送时的 `origin/main`，head 是 `HEAD`，提交人填自己），查到就不推送、本地 main 退回、改动回到工作区，报「没有推送，改动留在工作区（没提交）：」加同一句原话。成员改到这些内容不再推上去等执行器打回。
+
+站点检查遇到 `site/package.json` 不是合法 JSON 时报站点问题「package.json 不是合法的 JSON：……」，不再抛错。
+
+两人同时加库会让锁文件冲突：冲突出在提交审核时本机把 main 合进来那一步，不推送；处理办法是用 main 那份锁文件、在 `site/` 里重新运行一次 `pnpm install`，再提交审核，写进了说明书 collab。
+
+## 依据
+
+无实测，没有在真的协作仓上跑过。行为在 `packages/collab-site/test/merge.test.ts`（「成员加库、升级库，改 tsconfig、index.html、锁文件，在站点里新建目录：都放行」「成员改了工作流、人员名单、装包设置、Node 会执行的配置、scripts、框架包版本、写成网址的依赖：只有负责人能改，逐处写明」「site/package.json 写坏了：看不出改了哪几处，整个文件算只有负责人能改」等）和 `plugins/collab/tests/git-flow.test.ts`（「成员加一个库：依赖与锁文件一起提交，放行」「成员改了 scripts：本机就拦下，不推送，改动留在工作区」）里测。
+
+## 否掉的候选
+
+- **保持整个文件只有负责人能改**：太死，成员加个库都要找负责人
+- **锁文件也校验**：要让执行器重算一遍锁文件才知道里面的下载地址对不对，成本高；课题组内部互信，不管
+
+## 代价
+
+- 有人手改锁文件、让 esbuild 从别的地址下载，查不出来
+- 两人同时加库时锁文件必然冲突，后提交的人要重新运行一次 `pnpm install`
+- 协作仓 `site/package.json` 的框架包还低于 0.19.0 时，执行器按旧规则检查：插件在本机放行的加库到了执行器照样被打回，要负责人先把框架包升到 `^0.19.0`

@@ -1,0 +1,32 @@
+---
+born-at: 2026-10-11T14:10
+type: choice
+parent: [2026-09-03-god-live-doc]
+label: 功能包的 remark 插件经出口 ./content 写进 fumadocs-mdx 的全局设置 source.config.ts，评论正文也经过它们
+domain: 骨架
+---
+
+## 背景
+
+docfirst 文档站要建在基础包上，它的术语高亮、钉码块的状态点都是 remark 插件，插件里用到 Node 模块（读项目配置、读 git）。
+功能包原有的四个出口都管不到 MDX 的编译。
+
+## 选了
+
+- 功能包可以多一个出口 `./content`，默认导出 `FeatureContent = { remarkPlugins? }`；`package.json` 的 `exports` 里有这个键，初始化才把它写进生成的 `app/site/content.ts`，没有功能包或都没有这个出口时列表为空
+- 骨架加 `source.config.ts`：`fumadocs-mdx` 的全局设置，`mdxOptions.remarkPlugins` 在默认的后面接上各功能包的。这个文件只在构建页面时在 Node 里执行
+
+## 否掉的候选
+
+- 写在 `collections.ts` 里内容集合的 `mdxOptions` 上，只作用于页面、不碰评论：
+  - 静态 `import`：`collections.ts` 浏览器端也用，`fumadocs-mdx` 在浏览器端只换掉 `defineDocs` 调用、留着文件顶上的 `import`，插件和它用到的 Node 模块会进浏览器端
+  - `mdxOptions` 函数里动态 `import`：构建时报 `Vite module runner has been closed`，`fumadocs-mdx` 执行完 `collections.ts` 就关掉加载器，函数在那之后才被调用
+  - 在调用参数里先发出动态 `import`、函数里再等它：报 `transport was disconnected`，加载还没完成加载器就关了
+- 让 `./content` 成为每个功能包都必须有的出口：协作站没有 remark 插件，也得补一个空出口，等于改了功能包的约定
+
+## 代价
+
+- 全局设置对所有集合生效，评论正文也经过功能包的 remark 插件；插件要区分页面与评论，就看 vfile 的路径
+- 骨架多一个根目录下的文件，站点 `tsconfig.json` 的 `include` 跟着加上它
+
+试验：自述站的 `app/site/content.ts` 临时换成一个往正文开头插一段字、并用到 `node:fs` 的插件，`react-router build` 与开发服务下页面和评论都出现那段字，`build/client` 与 `build/server` 里都没有插件源码。

@@ -1,0 +1,165 @@
+---
+title: 30-refactor-plan.html 的接口面复核
+docfirst: none
+description: 逐项检查 47 条 K/P/D/C 改动接的接口是不是 Fumadocs 公开且稳定的：分类、公开接口证据表与修正建议（2026-10-11）
+---
+
+日期：2026-10-11。范围：逐项检查计划的 47 条 K/P/D/C 改动、源头机制及第 1、2 节接线，重点核对来源、MDX 配置、UI、搜索和评论定位的公开契约。只读核对，没有修改计划、源代码、依赖，也没有运行 HMR/Markdown 实验。
+
+## 结论
+
+现有计划不能表述为“只依赖 Fumadocs 对外且稳定的接口”。绝大部分主接点是官方文档说明、包 exports 导出的公开 API；但 D-05/D-08 依赖未获公开文档承诺的编译器载体，K-12 保留渲染 DOM 耦合，K-09 的旧 E-6 实验仍解析反序列化 React 元素的内部形状。K-04 涉及 Vite Environment/ModuleRunner API，其成熟度不能由 Fumadocs 的公开导出证明。
+
+“公开导出”“官方文档说明”“未标弃用/内部/实验”“明确的兼容承诺”分别取证。公开 API 不表示跨大版本不变，也不表示其每个输出对象的运行时表示都是公共契约。
+
+取证基准是实验目录的 `_upstream`：HEAD 与 `fumadocs@16.17.1^{}` 相同，为 `d6cfc48d62aa9ea413f0fc5033617c0c923681ec`；core/base-ui 为 16.17.1，MDX 为 15.4.7。滚动官网仅辅助，发生冲突时以固定 tag 的源码、exports、类型、对应文档为准。例：固定 tag 的 Remark Structure 文档已经有 `node.data.structuredData` 注入说明；不要从旧网页上的 removed `stringify` 选项倒推当前接口。
+
+## 分类
+
+- **A 文档公开**：正式文档展示，且对应模块被包 exports 导出；本次未发现 internal/deprecated/experimental 标识。可作为正常集成入口，但未找到逐项永久稳定承诺。
+- **B 导出公开、文档较薄**：公开模块/导出类型中存在，未标 internal 等；应锁版本并做针对性升级检查。
+- **C 实现耦合/未文档化载体**：依赖实现字段、对象形状或 DOM 类名；不以“源码能调用”作为稳定承诺。
+- **D 已弃用公开**：能够导入但明确标为 deprecated；采用推荐替代。
+- **E 其他框架/浏览器 API**：不是 Fumadocs 的接口；成熟度与兼容性由所属平台决定。
+- **O 自有逻辑**：文件协议、身份、迁移、路由安排、模板、包出口及业务策略；不能归入 Fumadocs 稳定 API。
+
+## 公开接口证据表
+
+| 计划接点 / 条目 | 接口与出处 | 分类 | 风险与修正建议 |
+| --- | --- | --- | --- |
+| M2；第 1 节 vite.config.ts；K-03 | `fumadocsMdx()`，`fumadocs-mdx/vite`；[MDX Vite 固定文档][mdx-vite]，[MDX exports][mdx-pkg] | A | 正常官方入口。不要将“Vite 编译 TSX/图片”写成“MDX 集合直接编译所有文件”；TSX、图片是 Vite 模块/资产，doc 集合主要是 md/mdx。 |
+| 第 1 节 source.ts；K-03、D-07、D-09、C-03、C-08 | `defineDocs/defineCollections`，`fumadocs-mdx/macro`；[Macro 文档][macro-doc]、[Macro 类型][macro-src] | A | 宏应为顶层 const，dir/files/async 要静态可分析，不可通过基础包重新导出宏。集合 schema/mdxOptions 可以含动态逻辑。 |
+| 0.1；第 2 节集合配置；K-03、D-05、D-07 | `applyMdxPreset` 从 `fumadocs-mdx/config` 导出；[preset 文档][preset-doc]、[preset 实现][preset-src] | A；准确默认顺序由锁定版本证据支持 | 每集合配置会替换默认 options/plugins；显式 applyMdxPreset 正确。15.4.7 的数组插入点在 gfm/heading/image/codeTab/npm 之后、remarkStructure 之前。官方提供函数形式控制顺序；不要以“永远固定默认链”作保证。 |
+| 第 2 节 replaceSource；D-05 | `fumadocs-core/mdx-plugins/stringifier`；[exports][core-pkg]、[stringifier][stringifier-src] | A | 是对作者节点的源码替换，节点需 position；新建无位置节点不能直接替代“原标签的源码范围”。Markdown 代理另外验证输出。 |
+| 第 2 节 data.structuredData；D-05、Q3 | MDAST `node.data.structuredData.contents`；[Structure 固定文档][structure-doc]、[显式类型扩展与消费][structure-src] | A | 有正式插件注入说明，不是猜测私有字段。每条记录是 `{ heading: string \| undefined, content: string }`；省略语义由默认 heading 补齐。文件路径/标题筛选是自有策略。 |
+| 第 2 节 _compiler；D-05、D-08、E-2 | `vfile.data._compiler.addDependency`；[build-default][build-default]、[CompilerOptions][mdx-build] | C | 源码为该载体声明类型，但未在官方用户文档中找到稳定扩展点。与明确“do not use user land”的 `_getProcessor` 不同，不能仅凭下划线断言同样禁用；仍不可归为文档公开稳定契约。必须封装、锁定版本，或替换为已验证的自有 Vite watcher，避免依赖编译器私有存储/cache形状。 |
+| 第 2 节 includeProcessedMarkdown；D-02、D-11、D-13 | `postprocess.includeProcessedMarkdown`，`_markdown`；[PostprocessOptions][postprocess]、[CompiledMDXProperties][mdx-build] | A/B | `_markdown` 虽带下划线但有显式消费说明，不能按命名判私有。函数输出仍要通过对应版本生成器与组件表验证。 |
+| M4；D-02、D-11、D-16 | `renderToMarkdown/asMarkdown`，`fumadocs-core/server`；[条件 exports][core-pkg]、[server][server-src] | A/B；严格缺失报错为 O | 两者导出公开。server 注释明确未 opt-in 的组件保留 JSX，缺组件由 stub 保留 JSX；默认不会满足“缺 Markdown 形式就报错”的要求。需要自有严格检查，不能调用内部 walker/store 获取判定。 |
+| K-08、C-05、C-08；第 2 节 meta | `defineCollections({type:'meta'})`；[Macro 类型][macro-src]、[集合文档][collections-doc] | A | 元数据编译/schema 是公开 API；文件变更后 loader/client 立即更新是运行链效果，需 E-7/E-9 实验，不能由定义类型单独推出。 |
+| 第 1、2 节多来源；K-11、D-07 | `loader({source:{mdx,tsx,html}})` / `loader(record, options)`；[Source 文档][source-doc]、[loader 重载][loader-src] | A | 支持多来源，source key 是返回页面的 `page.type`，不是自行写进 `page.data.type`。来源路径是虚拟相对路径，重复路径/slug 的自有冲突策略需验证。 |
+| K-11 保留的 tsxPageSource/htmlPageSource | `StaticSource/VirtualFile/PageData`；[Source 类型][source-src]；当前自有 `src/page-sources.ts:1,16` 使用 `Source` | A + D | 文件适配形状公开；`Source` 类型和 `multiple()` 明确 deprecated。迁到 `StaticSource`，直接传来源 record；不要保留弃用 API 当“稳定层”。 |
+| 第 1 节 mdx-components；D-05、D-06 | `@fumadocs/base-ui/mdx`、`components/files`；[base-ui exports][ui-pkg] | A | 组件映射是公开方式，Files/Folder/File 公开；包自身 Pin/Term/RecordLink 等为 O。代码节点正常进入 Shiki/Rehype 是编译约定，应按锁定插件链验证。 |
+| 第 2 节 DocsPage/DocsBody；K-06 | `@fumadocs/base-ui/layouts/docs/page`；[page 实现与类型][page-src]、[官方 Page 文档](https://www.fumadocs.dev/docs/ui/layouts/page) | A + E | 包裹 children、使用 ComponentProps div 和自有 data-comment-scope 是公共组合。Range/CSS Highlight 是浏览器 API；不要依据 DocsBody 内部类名识别范围。 |
+| K-09、E-6；第 1、2 节复制布局 | CLI `customise`，别名 `customize`；[CLI 注册][cli-src]、[自定义 UI 固定文档][custom-doc] | A + O | 复制后源码归站点维护，升级不再自动接收 UI 修复。CLI 默认用滚动官网 registry；固定 CLI 版本不足以固定生成源码，需固定 registry 或保存 tag 对应源与生成物，并按本地复制版类型 import。 |
+| K-09、E-6 的复制部件导入 | `@fumadocs/base-ui/contexts/tree` 的 TreeContextProvider/useTreeContext/useTreePath/useTabsGroups；[exports][ui-pkg]、[tree context][tree-src] | B | 模块列 exports、函数明确 export，未标 internal/deprecated/experimental。不能因为目录叫 contexts 就判私有。细节文档较薄，锁 core/UI 同版本并校验升级。 |
+| K-09 的“侧栏停在原组”旧实验 | `PageTree.Folder.name: ReactNode` 与序列化恢复；[PageTree 类型][tree-defs]、[source/client 实现][source-client] | 公开 name 类型 A；解析 JSX 表示 C | 旧 E-6 的 `site/app/components/docs-sidebar/page-tree.tsx:135–142` 读取 `props.dangerouslySetInnerHTML.__html` 比较根名，是上游实现耦合。用自有稳定 key/URL，或仅在当前树生命周期使用公开 $id 并处理树重建；不要取明确 @internal 的 $ref 替代。 |
+| 第 2 节搜索 | `createFromSource`，`fumadocs-core/search/server`；[公开 re-export][search-server]、[实现与注释][search-create] | A | 搜索支持 PageData.structuredData。缓存按 LoaderOutput 实例；动态场景可传 loader 返回函数，实例不变而内容变不会凭空重建索引。不应直接访问搜索 server 的私有 cache。 |
+| 第 1、2 节 RootProvider i18n | `@fumadocs/base-ui/provider/react-router`；[RootProvider][root-provider]、[base props][base-provider]、[i18n props][i18n-src]、[exports][ui-pkg] | A | i18n.translations 是 `Partial<Record<string,string>>`；中文表属 O。优先公开 i18n/翻译 key 层，不修改内部 TranslationProvider/context。 |
+| K-12 | 跳过 `.sr-only`；标题输出见 [Heading][heading-src]；自有 `src/page-text-rules.ts:18–20` | C + O | 渲染出来的类名存在不等于评论取字的稳定协议。即使回归通过，仍是持续承担的 DOM 适配。可复制受控 Heading 或包自己的标识层，把跳过规则变成自有协议。 |
+| K-12 | `.katex` 作为一个原子字；[KaTeX options](https://katex.org/docs/options.html) | E/C + O | 这是 KaTeX 渲染细节，不是 Fumadocs 接口。KaTeX 正式 output 选项涉及 HTML/MathML，两份输出需防重复计字；应将公式边界变成自有组件/rehype 标记协议。升级测试应同时覆盖 KaTeX/rehype-katex。 |
+| K-04 | Vite `hotUpdate/server.environments/runner.evaluatedModules`；自有 `src/vite/index.ts:79–121`；[Environment runtime 官方指南](https://vite.dev/guide/api-environment-runtimes.html) | E；成熟度需单独审计 | 无 Fumadocs 私有 import 不表示全部稳定。Environment API 为 RC，部分具体接口仍 experimental；现存“遍历 importers 失效”的行为不能由 API 导出自行保证。与 HMR 实验结论合并后再决定保留。 |
+| D-02 的站点加载 | Vite createServer/ssrLoadModule；[SSR 官方指南](https://vite.dev/guide/ssr.html) | E | 官方公开低层入口，不能仅因低层而判私有。CLI生命周期、关闭 server、loader 执行语义是自有实现。 |
+
+## 47 条改动逐项归类
+
+下表保留全部计划编号。没有 Fumadocs 接点的条目直接归 O/E；删除旧机制不是对 Fumadocs 接口稳定性的证据。
+
+| 条目 | 计划行为 / 外部接点 | 分类与判定 |
+| --- | --- | --- |
+| K-01 | 删除功能包与自动生成机制 | O；自有出口/协议修改。 |
+| K-02 | 模板只复制一次 | O；生成后的站点维护策略。 |
+| K-03 | 集合并 source.ts，各集合 mdxOptions | A；macro/preset。若浏览器导入 source.ts，其中有 server-only 来源，应允许拆 collections.ts；官方 macro 文档明确警告整模块在浏览器执行。 |
+| K-04 | 精简 Vite 插件，保留上下文去重与列表失效 | E + O；需将 Vite RC/runner 接口成熟度与 E-4/E-5 效果分开。 |
+| K-05 | 本页评论 frontmatter，正文按需 load() | A + O；需 async:true 才具惰性加载语义，load/preload/body 为公开宏运行时接口。评论 TSX/图片走 Vite import。 |
+| K-06 | 覆盖层与 Range；CSS Custom Highlight | A（DocsBody）+ E（浏览器）+ O（定位规则）；DOM 类名风险另外在 K-12。 |
+| K-07 | 删除 DEV 判断，Origin核对 | E + O；HTTP/身份策略，不是 Fumadocs。 |
+| K-08 | feeds JSON meta 集合，删除推送中间件 | A + O；meta 类型公开，自动更新仍是需验证的整链效果。 |
+| K-09 | CLI 复制布局；宽屏/侧栏记忆/搜索位置 | A + B + C；复制入口公开，但现实验解析 ReactNode 内部形状；需修正并固定 registry snapshot。 |
+| K-10 | 迁移术语插件和 Term | O + A（remark/preset 接入）；原文保留需源码位置正确，不能笼统推断所有插件生成组件会还原原词。 |
+| K-11 | 整理自有导出；保留来源适配器 | O + A/D；来源适配器迁 Source→StaticSource。 |
+| K-12 | 页面文字回归 | C + O；能发现变化，不能把 DOM 依赖变成 Fumadocs 稳定契约。 |
+| K-13 | 固定 core/base-ui 16.17.1、mdx15.4.7 | O；锁版本与 API 分级不同。此审计不执行抬版本。 |
+| K-14 | 自述站重建、删除同步模板测试 | O；部署/生成维护策略。 |
+| P-01 | 初始化命令换成只新建一次 | O；gwb/站点自有命令协议。 |
+| P-02 | 注入身份码与 localhost bind | E + O；进程/网络/身份策略。 |
+| P-03 | build/start 快照且无身份码 | E + O；框架运行方式与自有写入权限。 |
+| P-04 | feeds 文件写入 | O；复用 K-08 的 A 接点。 |
+| P-05 | 站点协议号变更 | O；协议迁移。 |
+| P-06 | 合并说明书 | O；文档。 |
+| D-01 | Pin/PinTree新标签与confirm写回 | O；MDX JSX AST格式为其他开源生态公开结构，核心识别与校验归自有。 |
+| D-02 | 生成正本 | A/B（Markdown API）+ E（Vite）+ O（落点/严格校验）；默认 API 不保证未知组件抛错。 |
+| D-03 | 删除 renderAi等旧转换 | O；删除不等于新路径语义满足，受 D-02 验证约束。 |
+| D-04 | 删除 Next 专用适配器 | O；当前计划未新依赖 Next 私有接口。 |
+| D-05 | Pin插件、搜索记录、源码替换、依赖登记 | A（preset/replaceSource/structuredData/Files）+ C（_compiler载体）+ O（Pin状态）；不能整体归“稳定公开”。 |
+| D-06 | PinBlock/PinTreeBlock与增删行高亮 | O + E（Shiki公开机制）；删 CSS定位减少既有内部 DOM耦合。 |
+| D-07 | 多集合各自插件，loader合树 | A；采用非弃用来源 record。 |
+| D-08 | 目录新增/删除触发重编 | C/E + O；依赖登记对象和 watcher需另审计，E-2成功仅证明当前版本。 |
+| D-09 | schema/frontend轨迹数据统一集合 | A + O；schema与frontmatter读取公开，轨迹算法自有。 |
+| D-10 | 删除库路由，站点调导出函数 | E（React Router路由）+ O；自有模块边界。 |
+| D-11 | docs-site重建，讲解组件 asMarkdown | A/B + O；缺opt-in报错应由自有严格策略实现。 |
+| D-12 | workflow删所有站点依赖 | O；模块职责。 |
+| D-13 | 删除图片机器文字；remarkImage替换 | A + O；默认 image插件公开，但输出等价需E-1，不能仅从 API 可导入证明。 |
+| D-14 | 移走术语 | O；接点同 K-10。 |
+| D-15 | 精简 docfirst.config | O；自有配置契约。 |
+| D-16 | 名册检查改成生成时缺组件检查 | O；Fumadocs默认允许保留 JSX，需补可验证的严格机制。 |
+| D-17 | card-refs检查新标记 | O；自有解析规则。 |
+| D-18 | 一次性迁移命令 | O；迁移范围/源码保护。 |
+| D-19 | 插件只留说明书 | O；gwb自有命令与包维护。 |
+| C-01 | 协作功能包改普通库 | O；CollabProvider是自有，不能混淆Fumadocs Context。 |
+| C-02 | 协作路由与日志集合模板 | A（macro）+ E（React Router）+ O（路由表）。 |
+| C-03 | 日历和进展从集合取 | A + O；集合访问公开，业务映射自有。 |
+| C-04 | Origin核对与repo-links进程 | E + O；HTTP/本地进程安全策略。 |
+| C-05 | feeds/collab.json | A + O；与 K-08共享meta公开接点和更新验证要求。 |
+| C-06 | gwb-collab新建/托管/提交前编译 | O + E；基础包自身MDX导出契约需按实际实现验证。 |
+| C-07 | 各项目站点重建 | O；迁移与发布安排。 |
+| C-08 | JSON任务记录meta集合，action写文件 | A + E + O；schema公开，不重启更新需E-9；不能直接推断客户端revalidation或搜索索引刷新。 |
+
+## 对源头机制和交付表述的修正建议
+
+1. M2 的“只有一个编译器”应理解为“统一通过站点的 Vite 内容构建链”。Fumadocs doc/meta、Vite TSX与资源加载是不同处理阶段；`loader()` 的官方说明是 server-side API，使用内存数据，不是构建魔法或自动文件 watcher。
+2. M4 和 0.2 的“组件没给 Markdown 形式就报错”是自有强契约。应给它单独验收，说明使用公开路径如何检测；不要依赖 Fumadocs内部 optIn/store/NOT_OPTED_IN。默认保留 JSX可导致“没有报错但正本仍带组件”。
+3. K-09 不只删 `#nd-*` CSS：应同时删除/改写旧 E-6 实验的 `nameTextOf`。记忆最近 root的状态归站点/React生命周期，不能把进程级变量当正式共享策略；同名根、刷新、新树实例也须覆盖。
+4. K-12 的回归价值成立，但其表述应承认“版本锁定的 DOM适配”而不是“公开稳定 API”。若要求严格只用公共契约，应主动提供可控标识，由自有组件/编译标记管理读屏文字与公式边界。
+5. 公共 `PageTree.name` 是 ReactNode；`$ref` 在类型里明确 @internal。`$id` 虽公开，只保证树内/语言间唯一，不保证跨HMR或重新生成生命周期不变。
+6. “默认 public API且当前可运行”与“更新文件后的路由/浏览器/search全部刷新”分开验收。尤其 createFromSource cache按loader实例，不能拿前端页面更新当搜索索引更新的证据。
+7. 如最终目标是“零私有依赖”，D-05/D-08需替换或明确承认 `_compiler` 例外；K-09的JSX解包与K-12的DOM约定需清除或列成受控例外。仅补升级测试不改变接口类别。
+
+## 同轮实验回报的边界
+
+以下是主会话转来的其他复核代理实测，不是本文件作者另行运行的实验，最终以各代理原始记录为准。
+
+- HMR 复核已用公开 `source.config.ts` / Config API 按集合分别 `defineDocs` + `mdxOptions`；`.source/server` 经 `.server.ts` 仅进入 loader，`.source/browser` 经公开 `createClientLoader/useContent` 加载浏览器正文。服务端与浏览器正文均为集合 A 执行 `node:fs` 插件、B 不执行，hydration 按钮能从 0 加到 1。因此“15.4.7 不支持按集合挑插件”的概括应撤回；已经发现的问题限于旧 macro 与客户端共享模块的具体写法。K-03/D-07 可改为这条公开配置路线，完整项目迁移仍需另验。
+- Markdown 复核回报 31 页新旧输出一致，但正则缺失组件检查漏行内 JSX、误报 fenced code；它不能满足 D-02/D-16 的严格报错要求。Pin 搜索早期实现会收整段代码；已实测的候选修正是：对原作者节点调用 `replaceSource`，新展示节点不携带作者 position，同时以 `node.data.structuredData` 只加入路径和标题。该修正使用公开 stringifier/Structure 契约，不能因此推导 `_compiler` 稳定。
+- CSS 选择器不能一概判私有：固定 tag 的 Customize UI 文档明确允许选择提供的 `id` / `data-`，并说明它们可以有各自版本生命周期；其警告针对侵入结构与具体嵌套 DOM 假设。K-09 删除这些覆盖可降低维护成本，而 K-12 的 `.sr-only`/`.katex` 与解析 ReactNode 形状是另外的实现耦合。
+
+- E-7 的 server-only `import.meta.glob` 修改和删除已有 feed 时，实际浏览器数据更新，计数器、未保存输入、window 标记和 timeOrigin 保留；删除后重新新增文件，SSR 已出现新值，浏览器却仍停留在缺失值。因此仅能确认已验证的修改/删除场景，不能把它当作独立 meta 宏或 E-9 新任务记录更新的验收。
+- E-5 原版新增 MDX/评论清单不更新、删除后 500 的问题已复现。调用公开 `server.restart()` 的局部实验能恢复服务端清单，但浏览器删除后仍可能保留旧侧栏项；重启加立即 full-reload 的时序尚未形成可靠闭环。这不是已经完成的生产修复，也不能把低层缓存操作直接宣称为必要或稳定。
+- Markdown 复核独立副本有 31/31 页基线一致，25 个针对性样本中 24 个正常、1 个预期抛错，12 组结果断言通过。生成函数已包装组件表，本组合中调用 `getText` 无需再显式包装 `jsxComponents`。Term 按现有无 position 子节点形态保留原词；真实 PNG、MDX/TS include、npm 块输出已补验，但没有把新素材与旧 renderAi 逐字节比较。
+
+独立复核文件：`probes/2610111941_api-audit-markdown/README.md`、`probes/2610111940_api-audit-hmr/README.md`（仓里的文件，不在站上）。本轮三个复核代理均按用户指定使用 GPT-6.1-sol、high。主会话检查了 Markdown 脚本与输出、接口条目覆盖（47/47，无遗漏），并汇总上述实测边界。原改造计划和原实验记录未在本轮改写。
+
+## 固定官方来源
+
+所有 GitHub链接以已核对的 commit 固定。滚动官方链接用于补充公共入口，不作为固定版本全部行为的证明。
+
+[core-pkg]: https://github.com/fuma-nama/fumadocs/blob/d6cfc48d62aa9ea413f0fc5033617c0c923681ec/packages/core/package.json
+[mdx-pkg]: https://github.com/fuma-nama/fumadocs/blob/d6cfc48d62aa9ea413f0fc5033617c0c923681ec/packages/mdx/package.json
+[ui-pkg]: https://github.com/fuma-nama/fumadocs/blob/d6cfc48d62aa9ea413f0fc5033617c0c923681ec/packages/base-ui/package.json
+[mdx-vite]: https://github.com/fuma-nama/fumadocs/blob/d6cfc48d62aa9ea413f0fc5033617c0c923681ec/apps/docs/content/docs/mdx/%28integrations%29/vite.mdx
+[macro-doc]: https://github.com/fuma-nama/fumadocs/blob/d6cfc48d62aa9ea413f0fc5033617c0c923681ec/apps/docs/content/docs/mdx/macro.mdx
+[macro-src]: https://github.com/fuma-nama/fumadocs/blob/d6cfc48d62aa9ea413f0fc5033617c0c923681ec/packages/mdx/src/macro/index.ts
+[preset-doc]: https://github.com/fuma-nama/fumadocs/blob/d6cfc48d62aa9ea413f0fc5033617c0c923681ec/apps/docs/content/docs/mdx/mdx.mdx
+[preset-src]: https://github.com/fuma-nama/fumadocs/blob/d6cfc48d62aa9ea413f0fc5033617c0c923681ec/packages/mdx/src/config/preset.ts#L50
+[stringifier-src]: https://github.com/fuma-nama/fumadocs/blob/d6cfc48d62aa9ea413f0fc5033617c0c923681ec/packages/core/src/mdx-plugins/stringifier.ts#L57
+[structure-doc]: https://github.com/fuma-nama/fumadocs/blob/d6cfc48d62aa9ea413f0fc5033617c0c923681ec/apps/docs/content/docs/headless/mdx/structure.mdx
+[structure-src]: https://github.com/fuma-nama/fumadocs/blob/d6cfc48d62aa9ea413f0fc5033617c0c923681ec/packages/core/src/mdx-plugins/remark-structure.ts#L74
+[build-default]: https://github.com/fuma-nama/fumadocs/blob/d6cfc48d62aa9ea413f0fc5033617c0c923681ec/packages/mdx/src/loaders/mdx/build-default.ts#L13
+[mdx-build]: https://github.com/fuma-nama/fumadocs/blob/d6cfc48d62aa9ea413f0fc5033617c0c923681ec/packages/mdx/src/loaders/mdx/build.ts#L22
+[postprocess]: https://github.com/fuma-nama/fumadocs/blob/d6cfc48d62aa9ea413f0fc5033617c0c923681ec/packages/mdx/src/loaders/mdx/remark-postprocess.ts#L14
+[server-src]: https://github.com/fuma-nama/fumadocs/blob/d6cfc48d62aa9ea413f0fc5033617c0c923681ec/packages/core/src/server.ts#L5
+[collections-doc]: https://github.com/fuma-nama/fumadocs/blob/d6cfc48d62aa9ea413f0fc5033617c0c923681ec/apps/docs/content/docs/mdx/collections.mdx
+[source-doc]: https://github.com/fuma-nama/fumadocs/blob/d6cfc48d62aa9ea413f0fc5033617c0c923681ec/apps/docs/content/docs/headless/source-api/source.mdx
+[source-src]: https://github.com/fuma-nama/fumadocs/blob/d6cfc48d62aa9ea413f0fc5033617c0c923681ec/packages/core/src/source/source.ts#L10
+[loader-src]: https://github.com/fuma-nama/fumadocs/blob/d6cfc48d62aa9ea413f0fc5033617c0c923681ec/packages/core/src/source/loader.ts#L283
+[page-src]: https://github.com/fuma-nama/fumadocs/blob/d6cfc48d62aa9ea413f0fc5033617c0c923681ec/packages/base-ui/src/layouts/docs/page/index.tsx#L30
+[cli-src]: https://github.com/fuma-nama/fumadocs/blob/d6cfc48d62aa9ea413f0fc5033617c0c923681ec/packages/cli/src/index.ts#L27
+[custom-doc]: https://github.com/fuma-nama/fumadocs/blob/d6cfc48d62aa9ea413f0fc5033617c0c923681ec/apps/docs/content/docs/%28framework%29/guides/customize-ui.mdx
+[tree-src]: https://github.com/fuma-nama/fumadocs/blob/d6cfc48d62aa9ea413f0fc5033617c0c923681ec/packages/base-ui/src/contexts/tree.tsx#L50
+[tree-defs]: https://github.com/fuma-nama/fumadocs/blob/d6cfc48d62aa9ea413f0fc5033617c0c923681ec/packages/core/src/page-tree/definitions.ts
+[source-client]: https://github.com/fuma-nama/fumadocs/blob/d6cfc48d62aa9ea413f0fc5033617c0c923681ec/packages/core/src/source/client/index.tsx#L16
+[search-server]: https://github.com/fuma-nama/fumadocs/blob/d6cfc48d62aa9ea413f0fc5033617c0c923681ec/packages/core/src/search/server.ts
+[search-create]: https://github.com/fuma-nama/fumadocs/blob/d6cfc48d62aa9ea413f0fc5033617c0c923681ec/packages/core/src/search/zbsearch/create-server.ts#L325
+[root-provider]: https://github.com/fuma-nama/fumadocs/blob/d6cfc48d62aa9ea413f0fc5033617c0c923681ec/packages/base-ui/src/provider/react-router.tsx
+[base-provider]: https://github.com/fuma-nama/fumadocs/blob/d6cfc48d62aa9ea413f0fc5033617c0c923681ec/packages/base-ui/src/provider/base.tsx
+[i18n-src]: https://github.com/fuma-nama/fumadocs/blob/d6cfc48d62aa9ea413f0fc5033617c0c923681ec/packages/base-ui/src/contexts/i18n.tsx#L28
+[heading-src]: https://github.com/fuma-nama/fumadocs/blob/d6cfc48d62aa9ea413f0fc5033617c0c923681ec/packages/base-ui/src/components/heading.tsx#L47

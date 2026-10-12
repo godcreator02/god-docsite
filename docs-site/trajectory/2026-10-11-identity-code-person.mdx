@@ -1,0 +1,34 @@
+---
+born-at: 2026-10-11T03:40
+type: choice
+parent: [2026-09-03-god-live-doc]
+label: 身份码认人
+domain: 身份
+---
+
+## 背景
+
+身份原来记在协作仓的 `git config collab.person` 里，克隆时由插件设成令牌的 Gitea 账号，站点启动时由插件把它交给开发服务。
+搬到文档站基础包以后，基础包按本 home 的身份码在站点 `people.json` 里认人（gwb-docsite 的设置 `identity-code`）。用户的原话：
+
+「身份改成docsite初始化时给这个机器配置一串什么码吧，然后站点里只要记录码和在该站点内显示的名字就可以了。还是把身份绑定到设置上。然后隔离home可以配置不同身份。」
+
+## 结论与边界
+
+- gwb-collab 的身份就是本 home 的身份码在协作仓 `site/people.json` 里对应的那个人，`id` 就是 Gitea 用户名；`git config collab.person` 不再读也不再写
+- 码由 `collab.project.join` 加进 `site/people.json` 里令牌账号那一项的 `codes`（克隆时自动做一次），这一行改动照常提交审核；
+  一个人有几台电脑、几个 home 就有几个码。账号不在列表里就拒绝，加人只有负责人能做
+- 联网的命令照旧要求令牌的账号就是这个身份；对不上就拒绝，写明两边各是谁
+- `site/people.json` 只有负责人能改，例外是每个人只改自己那一项（`gitea` 等于提交人）的 `codes`：执行器与本机推送前的检查都放行这一种，
+  条目数、顺序、别的字段一样都不许动
+
+被否掉的做法：照旧用 `git config` 记身份、启动时交给开发服务。那样站点（基础包）与插件各有一份「我是谁」，换电脑、隔离 home 要分别改两处。
+
+## 代价
+
+新成员第一次加入要多提交一次自己的身份码；换电脑、换 home 也要再提交一次。
+
+## 依据
+
+无证据：行为由 `plugins/collab/tests/collab-repo/records/records.test.ts`「认人」、`plugins/collab/tests/collab-repo/submit/submit.test.ts`
+「成员把自己这台电脑的身份码加进 site/people.json 里自己那一项」与 `packages/collab-merge-check/test/check.test.ts` 钉住。

@@ -1,0 +1,83 @@
+---
+title: 三种页面
+docfirst: none
+description: MDX、TSX、HTML 三种文件都能当页面，进同一个侧栏、同一个搜索
+---
+
+`content/` 里三种文件都是页面。fumadocs 本身只认 MDX，TSX 页面和 HTML 页面由基础包的
+`tsxPageSource`、`htmlPageSource` 做成 fumadocs 的页面来源，和 MDX 一起传给 `loader()`。
+
+| 类型 | 文件名 | 标题从哪来 | 搜索收什么 | 适合写什么 |
+| --- | --- | --- | --- | --- |
+| MDX | `名字.mdx` 或 `名字/index.mdx` | frontmatter 的 `title` | 全文 | 大部分说明文字 |
+| TSX | `名字.page.tsx` | 导出的 `meta.title` | 标题和 `meta.description` | 要交互的页面 |
+| HTML | `名字.html` | `<head>` 里的 `<title>` | 正文的纯文字 | 现成的 HTML 文件 |
+
+这一组里的另外两页就是 [TSX 页面](/docsite/page-types/tsx-page)和 [HTML 页面](/docsite/page-types/html-page)的例子。
+
+## 在 meta.json 里写名字
+
+`meta.json` 的 `pages` 里写文件名去掉扩展名的部分，TSX 页面还要去掉 `.page`：
+`tsx-page.page.tsx` 写成 `tsx-page`，`html-page.html` 写成 `html-page`。
+
+## TSX 页面
+
+文件导出两样东西：
+
+```tsx
+export const meta = { title: '波形', description: '拖动滑块调占空比' }
+
+export default function Page() {
+  return <p>……</p>
+}
+```
+
+没导出 `meta`、`meta.title` 是空的，开发服务直接报错，写明是哪个文件。
+TSX 页面要运行组件才知道正文，所以搜索只收标题和 `meta.description`。
+本页目录在浏览器里画出正文后再找：正文里的 `<h2>`、`<h3>` 进目录，没写 `id` 的按文字给一个；组件后来又画出新内容时重新找。
+
+## 一页要用几个 TSX 组件
+
+侧栏按 `content/` 的文件夹分层：一个文件夹就是侧栏里一个能展开的组，组名取文件夹的 `meta.json` 或里面的 `index.mdx`。
+不是页面的文件（组件的 `.tsx`、图片）不进侧栏；只放了这类文件的文件夹也不进侧栏。
+
+所以一页要用几个组件时，组件放进和页面同名的文件夹，页面本身放在文件夹外面：
+
+```text
+content/notes/
+├── waveform.mdx          ← 页面，地址 /notes/waveform
+└── waveform/             ← 只放组件，不进侧栏
+    ├── duty-slider.tsx
+    └── spectrum.tsx
+```
+
+```mdx title="content/notes/waveform.mdx"
+import { DutySlider } from './waveform/duty-slider'
+import { Spectrum } from './waveform/spectrum'
+
+<DutySlider />
+
+<Spectrum />
+```
+
+TSX 页面也一样：`waveform.page.tsx` 放在外面，从 `./waveform/` 引用组件。
+
+不要把页面写成 `waveform/index.mdx` 再把组件放在旁边：那样 `waveform/` 成了侧栏里的一个组，
+带一个展开箭头，点开却是空的。组件文件名不要以 `.page.tsx` 结尾，否则会被当成一个页面。
+
+## HTML 页面
+
+整个文件放进 iframe 显示，由 `/api/content/` 原样送出，所以文件里相对路径的图片、样式、脚本照常能用。
+iframe 的高度跟着里面的内容走，不出现第二条滚动条。没有 `<title>` 时开发服务直接报错。
+文件里的 `<h2>`、`<h3>` 也进本页目录：外层页面找不到 iframe 里的标题，所以在 iframe 上面对准每个标题放一个看不见的定位点，
+目录点了跳到那里、读到哪一节就高亮哪一条；iframe 高度变了重新对准。
+
+iframe 里的页面跟着站点右上角的主题切换深浅色：iframe 从站点继承 `color-scheme`，
+里面的 `prefers-color-scheme` 看到的就是站点当前的主题，切换时当场跟着变。
+文件里要写 `:root { color-scheme: light dark; }`，配色写成随 `prefers-color-scheme` 变或用系统默认色。
+不写的话，站点是深色时 iframe 里仍是白底，和站点不一致；如果文件又按 `prefers-color-scheme` 改了文字颜色，白底上的浅色字会看不清。
+
+## 保留地址
+
+站点自己的路由占用的第一段地址（现在只有 `api`）不能当页面名。
+`app/lib/source.ts` 调用 `assertNoReservedSlugs` 检查，占用了就报错，一次列出全部冲突的文件。

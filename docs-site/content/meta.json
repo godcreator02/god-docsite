@@ -1,9 +1,4 @@
 {
-  "title": "docfirst",
-  "pages": [
-    "index",
-    "docs",
-    "maintain",
-    "future"
-  ]
+  "title": "docsite-kit",
+  "pages": ["docs", "docsite", "docfirst", "collab", "gitea", "maintain", "future"]
 }

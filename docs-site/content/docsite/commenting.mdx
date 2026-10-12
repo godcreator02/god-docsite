@@ -1,0 +1,269 @@
+---
+title: 评论
+docfirst: none
+description: 评论是 fumadocs-mdx 集合里的文件：一个评论串一个文件夹；右下角浮标唤起评论栏，批注模式里点元素批它、选中几个字批这段字，正文改了按文字差异找回位置
+icon: MessageSquare
+---
+
+评论是 `comments/` 集合里的 MDX 文件，和页面走同一条编译链：一个评论串一个文件夹，串头是 `index.mdx`，回复各一个 `.mdx`，
+图片、TSX 组件这类附件放同一个文件夹。页面的源文件一个字都不改。
+
+[写一页说明](/docsite/writing)、[fumadocs 组件](/docsite/docsite/writing-components)、[TSX 页面](/docsite/page-types/tsx-page)和[文档站基础包](/docsite)几页上有示例评论，可以对照着看。
+
+## 在页面上看评论
+
+页面右下角是评论浮标（`@godcreator/docsite-comments/react` 的 `CommentsDock`）：按钮写着这一页的评论串数，
+点开唤出右侧评论栏，再点 ✕ 收起；开着还是收着记在浏览器的 localStorage 里，刷新后照旧。
+评论栏固定盖在目录那一列上（同宽同位），开着时目录让位（换成正文上方的下拉条），正文不动；窄屏上评论栏盖住正文的一部分。
+
+评论栏里的每一行是一串评论的预览：锚点状态注记一行（批的是什么、原文找不到了还是看不见，见[锚点](#锚点)）、
+头像（名字第一个字、底色由 id 算出）加名字加相对时间（「3 小时前」，停上去看完整时间）、正文开头几行。
+点一行跳到正文里被批的位置并亮起（没有落点的——整页评论、原文找不到了——点行展开看回复）；
+悬停一行时右侧露出「回复」「删除」。有多条回复的行带「展开 N 条回复」，展开后回复平铺、底部一个回复框；
+没有回复的行点「回复」同样展开。正文里点被批元素的描边或高亮的字，评论栏里对应的行亮起并滚到可见。
+
+批注在正文上的标记有两样：批的元素（图片、代码块、表格这些）画描边，划的字加高亮
+（CSS Custom Highlight API，样式在 `@godcreator/docsite-ui/styles.css` 的 `::highlight(docsite-comment)` 那组）。
+点描边的元素或高亮的字，评论栏打开、对应的卡亮起并滚到可见；反过来点卡上的 ⚲，正文滚到被批的元素或那段字。
+
+开发服务里刚写入的评论，浏览器还没拿到它的新编译入口，正文位置先显示「这条评论刚写入，等浏览器拿到编译入口后显示（刷新页面）」；
+Vite 重新生成入口后整页刷新即恢复。
+
+## 写评论
+
+只在本机的开发服务（`pnpm dev`）里能写，写请求 POST 到这一页自己的路由（它的 `action`）。
+发布出去的站只读：能看评论，评论栏顶部写着站点只读的原因。
+
+| 想做什么 | 怎么做 |
+| --- | --- |
+| 批整页 | 评论栏顶部「＋ 评论整页」展开表单 |
+| 批页面上一个元素 | 浮标或评论栏里的「批注」进批注模式：正文鼠标变十字，点要批的元素，见[可批元素](#可批元素) |
+| 批一段字 | 批注模式里选中一段字，松开点「批这段字」，见[锚点](#锚点) |
+| 回复 | 悬停那一行，点「回复」展开回复框 |
+| 删一条回复 / 删整串 | 悬停对应的行或回复，点「删除」 |
+| 退出批注模式 | 点「批注中」按钮或按 Esc |
+
+批注模式里选中元素或一段字后，被批的位置旁边弹出草稿表单（写着批的是什么），写正文、发评论；Esc 或「取消」放弃。
+
+输入框里写的是 MDX：纯文字、Markdown（`**加粗**`、`` `代码` ``）都行，也能写组件。fumadocs 默认的组件直接写，如 `<Callout>`；
+要画个图、做个小控件，就在评论里现写一个组件再用：
+
+```mdx
+export const Dot = ({ color }) => <svg width="12" height="12"><circle cx="6" cy="6" r="6" fill={color} /></svg>
+
+两种状态用 <Dot color="green" /> 和 <Dot color="red" /> 区分，比文字醒目。
+```
+
+所以要写字面的 `<` 或 `{`，写成 `\<`、`\{`，或者放进反引号里。写进文件后集合重新编译，编不过的在页面上看到报错原话；
+提交前在站点目录跑一次 `pnpm build`，页面与评论走同一编译链，编不过的带文件名报错。
+
+## 可批元素
+
+批注模式里点正文，拾取离点击处最近的一个候选元素（往上找，找不到就点不中）。候选在浏览器里由评论包逐个标注
+（`data-comment-target` 属性；只加属性，不产生文字，不影响评论的定位）：标题、段落、列表项、代码块、引用块、表格、
+图片、figure、公式（`.katex`）、SVG，再加上任何元素显式声明的 `data-comment-target`——组件包想让整个组件可批就这么写。
+布局用的 div 不是候选。
+
+没有 id 的候选按内容指纹分配稳定 id（`dc-` 前缀：标签加图片地址或文字的哈希），内容不变它就不变；标题沿用正文编译时
+已有的 id（目录链接靠它）。同页内容相同的元素按出现次序加 `-2`、`-3` 后缀——在它前面插入一份相同内容会让后缀错位，
+这是协议已知的边界。批元素的评论，anchor 存的就是这个 id。
+
+## 谁在写评论
+
+每个站自己配人员，不取机器上的信息（git 的 `user.name` 常常不是本人，也和别人对不上）。
+站点目录里的 `people.json`（进 git）列出参与的人；「我是谁」由本机的**身份码**认出：
+
+- 每个 gwb home 的设置里有一串身份码（`docsite` 分区的 `identity-code`），基础插件 gwb-docsite 第一次加载时生成。隔离 home 各有各的码，所以各是一个人；换电脑时把旧的码填进新电脑的设置
+- gwb-docsite 启动开发服务时把码放进环境变量 `DOCSITE_IDENTITY_CODE`，站点按码在 `people.json` 里找到人
+- 把自己加进一个站：`docsite.people.join`，把本 home 的码加进人员列表里自己那一项的 `codes`
+
+| 字段 | 写什么 |
+| --- | --- |
+| `id` | 评论的 `author` 记的名字：字母、数字、`_`、`-` |
+| `name` | 页面上显示的名字 |
+| `codes` | 这个人用过的身份码；同一个码只能是一个人的 |
+| `gitea` | Gitea 账号，协作站核对权限用；普通站点不写 |
+| `agent` | `true` 是 agent：没有码，经接口写评论时用 `as` 说明自己是谁 |
+
+```json title="people.json"
+[
+  { "id": "zhou", "name": "小周", "codes": ["k3v9q2x7m1ab"] },
+  { "id": "claude", "name": "Claude", "agent": true }
+]
+```
+
+码不是秘密：它进 git，挡不住组里的人冒用别人的码。
+
+评论文件的 `author` 存 `id`，页面上显示 `name` 和由 id 算出底色的头像：改名只改 `people.json`，旧评论跟着变。
+不是经 gwb-docsite 启动的开发服务、码不在 `people.json` 里时站点只读，浮标上没有「批注」，评论栏顶部写着只读的原因。
+
+开发服务直接报错、写明怎么改的几种情况：没有 `people.json` 或写错了（码重复、agent 写了码等）；
+评论的 `author` 不在 `people.json` 里。`people.json` 每次都重新读，改了不用重启开发服务。
+
+写请求还核对来源：请求的 `Origin` 头要和站点配置的可信 origin 完全一样（`@godcreator/docsite-identity/server` 的 `authorizeWrite`），
+不一样就是 403。开发与 start 端口不同时，经 `DOCSITE_ORIGIN` 环境变量给对的那一个。
+`as` 只给 agent 用，写了人的 `id` 时拒绝，人的身份只按本机的身份码认。
+
+### agent 写评论
+
+agent 不开浏览器，用 gwb-docsite 的 `docsite.comment.*` 命令写（命令经运行中的开发服务的页面接口，和网页同一套规则）：
+
+```text
+docsite.comment.create {"dir":"<站点目录>","body":"评论正文","page":"writing/collapse-test.mdx","anchor":"标题的 id","as":"claude"}
+docsite.comment.reply  {"dir":"<站点目录>","thread":"20261012t153000-ab12","body":"回复正文","as":"claude"}
+```
+
+`create` 要给 `page`（页面在 docs 集合里的路径，与网页表单、`docsite.comments` 的筛选用同一写法）；`anchor` 给了批页面上带这个
+id 的元素（批整页不给）。划字评论的 anchor 是一段 JSON（见[锚点](#锚点)），agent 不开浏览器拿不到页面文字，一般不这么用。
+`as` 是 `people.json` 里 `agent: true` 的人的 id，不给就署本 home 身份码对应的人。署名只出现在这一条命令路径上：网页界面里没有署名选择，写评论的人就是本机身份码认出的人。
+`docsite.comment.resolve` 与 `docsite.comment.reopen` 还不支持：评论模型还没有已解决状态，调了会直接报错。
+
+## 全部评论页
+
+评论栏打开前的浮标时代入口不变：侧栏那一排的「评论」（`/comments`）是全站评论页：全站的评论串按页分组列出，每页一组、组头是页面标题。
+这一页只读，写评论去对应页面的评论栏。
+
+## @ 某人
+
+评论正文里写 `@<id>`（`people.json` 里的 id），`docsite.comments` 命令按它筛「和谁有关」（`about` 参数）；
+`@` 一个不在人员列表里的 id 没有效果。
+
+## 文件
+
+一个评论串一个文件夹，文件夹名是这串评论的 id：`日期t时分秒-随机字母数字`，如 `20261012t153000-ab12`：
+
+```text
+comments/
+└── 20261012t153000-ab12/
+    ├── index.mdx                  ← 发起的那条（串头）
+    ├── 20261012t153500-cd34.mdx   ← 一条回复
+    ├── toc-sketch.svg             ← 评论里的图片
+    └── indent-preview.tsx         ← 评论里的组件
+```
+
+评论文件一律是 `.mdx`。组件比较大、要单独一个文件时，放进评论串的文件夹，评论里 import 它：
+
+```mdx title="comments/20261012t153000-ab12/20261012t153500-cd34.mdx"
+---
+author: "claude"
+createdAt: "2026-10-12T15:35:00.000Z"
+---
+
+import { IndentPreview } from './indent-preview'
+
+可以试试不同的缩进，拖动看效果：
+
+<IndentPreview />
+```
+
+`index.mdx` 是发起的那条，frontmatter 写它批的是哪一页、锚定哪个目标：
+
+```mdx title="comments/20261012t153000-ab12/index.mdx"
+---
+author: "zhou"
+createdAt: "2026-10-12T15:30:00.000Z"
+page: "writing/collapse-test.mdx"
+anchor: "收起内容试验"
+---
+
+「收起内容试验」这一节里的列表，缩进和别的页对不上，是故意的吗？
+
+![本页目录只缩一层的草图](./toc-sketch.svg)
+```
+
+| 字段 | 写什么 |
+| --- | --- |
+| `author` | 谁写的：`people.json` 里的 `id` |
+| `createdAt` | 什么时候写的，如 `2026-10-12T15:30:00.000Z` |
+| `page` | 批的页面在 docs 集合里的路径，如 `writing/collapse-test.mdx`；每串都有 |
+| `anchor` | 锚定目标，三种写法见[锚点](#锚点)；不写就是批整页 |
+
+frontmatter 的值一律写成 JSON 字符串（带双引号）。同一文件夹里其余的 `.mdx` 每个是一条回复，frontmatter 只写 `author` 与 `createdAt`。
+
+## 锚点
+
+`anchor` 字段有三种写法，评论包按它把评论放回正文（`parseCommentAnchor`）：
+
+| 写法 | 批的是什么 | 怎么找回 |
+| --- | --- | --- |
+| 不写 | 整页 | 不定位 |
+| 纯字符串（不以 `{` 开头） | 页面元素 | 按元素 id 在正文容器里找；id 不在了算「锚定的元素不在这一页上」 |
+| JSON 对象 | 一段字 | 见下 |
+
+划字评论存的是：
+
+```json
+{"quote":"选中的原文","start":29,"end":47,"snapshot":"发起那一刻的整页文字"}
+```
+
+`start`/`end` 是「页面文字」里的偏移。页面文字把正文容器（`data-comment-scope`）里的文字节点顺序拼成一个字符串：
+图片、SVG、公式这类整体元素各记成一个原子字，只给读屏软件看的字不算。正文改了以后，评论包按 `snapshot` 与当前页面文字的
+逐字差异（diff-match-patch，按词句整理）把 `start`/`end` 推算过来：首尾两个字都落在没改动的文字里就找得回——前面的段落在
+后面加字、删字都不影响；被批的那段自己的字改了也找得回，卡上标「原文改过」；整段删了，推算不出，卡上如实标
+「原文找不到了」并附当时的原文。批的字在收起的折叠块里看不见时，标「批的内容现在看不见」。
+
+找回的这段字用 CSS Custom Highlight API 高亮（`::highlight(docsite-comment)`），不改正文的 DOM。
+
+## 写错了会怎样
+
+数据形状不对时直接报错，点名是哪个条目：
+
+- 评论条目不在串文件夹里（期望 `<threadId>/<文件>.mdx`），或文件夹名不是合法 id
+- 串头缺 `page`、`author`，或一个文件夹里有两个串头
+- 回复所在的文件夹没有串头 `index.mdx`
+- `author` 不在 `people.json` 里：页面报错，`docsite.comments` 命令拒绝列出
+- `people.json` 写错（码重复、agent 写了码等）：gwb-docsite 启动站点前的检查拒绝启动，原因写在状态里
+- `anchor` 以 `{` 开头但不是合法的划字 JSON：按「锚点数据认不出」标注，不挂掉整页
+
+MDX 编译错（组件没定义、公式写错这类）由编译链报：提交前在站点目录跑一次 `pnpm build`，
+每个编不过的文件回一句「路径 第几行第几列：原话」；要几秒，只在提交前查。
+
+## 在骨架里接上
+
+评论集合定义在 `source.config.ts`（Config API，与 docs 集合同一处）：frontmatter 不写 schema，
+形状由评论包的模型在运行时校验：
+
+```ts title="source.config.ts"
+export const comments = defineCollections({ type: 'doc', dir: 'comments', async: true })
+```
+
+`app/lib/source.server.ts` 把集合交给骨架：`export const commentCollection = comments`。
+`app/lib/comments.server.ts` 在路由 loader 里逐请求分组，把 `authorId` 解析成可信的 `{id, name}`（模型不认识人员表）：
+
+```ts title="app/lib/comments.server.ts"
+/** 本页评论：page 是页面在 docs 集合里的路径，如 "writing/collapse-test.mdx" */
+export function pageThreads(page: string): PageThreadView[] {
+  return threadsForPage(commentEntries(), page).map(withAuthors)
+}
+
+/** 全站评论按页分组：全站评论页与站内评论链接卡片用 */
+export function allPageThreads(): Map<string, PageThreadView[]> { … }
+```
+
+评论正文在浏览器按需加载：`app/lib/client-content.tsx` 用集合生成的 browser 入口建 client loader
+（`commentContent = browserCollections.comments.createClientLoader({ id: 'comments', … })`），
+与页面正文的 `docsContent` 并排；页面正文自己的 `DocsBody` 要带评论的范围属性
+（`<DocsBody {...commentScopeProps}>`，批注与划字定位都在它里面找）。
+
+`app/routes/page.tsx` 把这几样接起来：
+
+- `loader`：`pageThreads(page.path)` 取本页评论，`siteIdentity()` 取本机身份（可写的人、只读原因）
+- `action`：`authorizeCommentWrite(request, form)`（`@godcreator/docsite-identity/server` 的 `authorizeWrite`）核对来源与身份后，
+  按表单里的 `intent` 调 `@godcreator/docsite-comments/server` 的写函数：`create-thread`（`createThread`）、`reply`（`createReply`）、
+  `delete-reply`、`delete-thread`；anchor 字段原样透传（元素 id 或划字 JSON 都是一个字符串）
+- 页面：正文之外放 `CommentsDock`（浮标、唤起式评论栏、批注模式、划字高亮都在它里面），评论正文组件与头像组件包好传给它：
+
+```tsx title="app/routes/page.tsx"
+const commentAvatar: CommentAvatar = ({ id, name, size }) => <Avatar person={{ id, name }} size={size} />
+
+<CommentsDock
+  pagePath={pageKey}
+  threads={threads}
+  access={writable && writer ? { kind: 'writable', writer } : { kind: 'readonly', reasonCode: 'readonly', reasonText: readOnlyReason ?? '站点只读' }}
+  BodyComponent={CommentBody}
+  AvatarComponent={commentAvatar}
+/>
+```
+
+`app/routes/all-comments.tsx` 是全站评论页（`/comments`），用 `allPageThreads()` 按页分组列出，只读。
+评论文件在 `comments/` 集合里、随站点一起构建，发布出去的站把它们一起带出去（只读）。

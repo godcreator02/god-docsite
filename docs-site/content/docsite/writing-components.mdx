@@ -1,0 +1,120 @@
+---
+title: fumadocs 组件
+docfirst: none
+description: MDX 里能直接用的 fumadocs 组件：提示框、卡片、标签页、步骤、折叠、文件树、参数表
+icon: Blocks
+---
+
+这一页的组件都不用 import：`Callout`、`Card`、`Cards`，`Tabs`/`Tab`、`Steps`/`Step`、`Accordions`/`Accordion`、`Files`/`Folder`/`File`、`TypeTable`，还有 `Banner`、`InlineTOC`。
+图片自动换成点了能放大的 `ImageZoom`。
+
+## 提示框
+
+<Callout title="提示">
+  `Callout` 默认是蓝色的提示，`title` 可以不写。
+</Callout>
+
+<Callout type="warn" title="要小心">
+  `type="warn"` 用在会踩坑的地方，比如改了开发服务插件要先构建基础包。
+</Callout>
+
+<Callout type="error" title="不能这样做">
+  `type="error"` 用在一定会出错的写法上。
+</Callout>
+
+<Callout type="success" title="做完了">
+  `type="success"` 用在检查通过、步骤完成之后。
+</Callout>
+
+## 卡片
+
+一组去处用卡片排开，`href` 写站内地址：
+
+<Cards>
+  <Card title="项目骨架" description="站点目录里放的那套文件，各自做什么" href="/docsite/skeleton" />
+  <Card title="三种页面" description="MDX、TSX、HTML 都能当页面" href="/docsite/page-types" />
+  <Card title="开发服务插件" description="docsite() 做的两件事" href="/docsite/dev-plugin" />
+  <Card title="写一页说明" description="标题、正文、代码与图片怎么写" href="/docsite/writing" />
+</Cards>
+
+## 标签页
+
+同一件事的几种写法放进标签页，一次只看一种：
+
+<Tabs items={['pnpm', 'npm']}>
+  <Tab value="pnpm">
+    ```bash
+    pnpm add @godcreator/docsite-kit
+    ```
+  </Tab>
+  <Tab value="npm">
+    ```bash
+    npm install @godcreator/docsite-kit
+    ```
+  </Tab>
+</Tabs>
+
+## 步骤
+
+<Steps>
+  <Step>
+    ### 摆好骨架
+
+    照[项目骨架](/docsite/skeleton)把文件放进站点目录。
+  </Step>
+  <Step>
+    ### 写页面
+
+    在 `content/` 里写 MDX、TSX 或 HTML 页面。
+  </Step>
+  <Step>
+    ### 启动开发服务
+
+    在站点目录里运行 `pnpm dev`，改了页面马上看到。
+  </Step>
+</Steps>
+
+## 折叠
+
+不常看的内容收进折叠，点开才显示：
+
+<Accordions>
+  <Accordion title="为什么骨架放在项目里">
+    `defineDocs` 与 `import.meta.glob` 的参数要能在构建时直接读出来，只能写在项目里。
+  </Accordion>
+  <Accordion title="为什么首页另写一条路由">
+    React Router 里 `*` 不匹配根地址 `/`，首页用一条 `index` 路由交给同一个页面文件。
+  </Accordion>
+</Accordions>
+
+## 文件树
+
+<Files>
+  <Folder name="site" defaultOpen>
+    <Folder name="app" defaultOpen>
+      <File name="root.tsx" />
+      <File name="routes.ts" />
+    </Folder>
+    <Folder name="content" defaultOpen>
+      <Folder name="(kit)" />
+      <Folder name="writing" defaultOpen>
+        <File name="meta.json" />
+        <File name="index.mdx" />
+        <File name="components.mdx" />
+      </Folder>
+    </Folder>
+  </Folder>
+</Files>
+
+## 参数表
+
+函数的参数用参数表写：
+
+<TypeTable
+  type={{
+    relativePath: { type: 'string', description: '/api/content/ 后面那一段，如 design/topology.html', required: true },
+    contentDir: { type: 'string', description: '内容目录的绝对路径', default: "path.resolve(process.cwd(), 'content')" },
+  }}
+/>
+
+上面是 `contentFileResponse(relativePath, contentDir)` 的两个参数。

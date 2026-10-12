@@ -1,0 +1,159 @@
+---
+title: fumadocs-mdx 源码导读
+docfirst: none
+description: fumadocs-mdx 15.4.7：定义内容集合、在打包器里编译 MDX、在运行时把集合交给 core 的 loader
+---
+
+fumadocs-mdx 15.4.7（含内部包 @fumadocs/vite）。它做三件事：定义内容集合、在打包器里编译 MDX、在运行时把集合交给 core 的 loader。源码在 `packages/mdx`。
+
+## 两种定义集合的方式
+
+| | 配置式 | 宏式（新，官方示例都用它） |
+| --- | --- | --- |
+| 集合写在哪 | 项目根的 `source.config.ts`，导出名就是集合名 | 任意应用模块里 `import { defineDocs } from 'fumadocs-mdx/macro'`，必须是顶层 `const` |
+| 怎么变成代码 | 插件生成 `.source/server.ts`、`browser.ts`、`dynamic.ts`，页面经别名 `collections/*` 导入 | 插件就地改写这一行，变成 `import.meta.glob`，不生成文件 |
+| schema、mdxOptions 这类函数怎么拿到 | 用 Vite 的 `runnerImport` 执行 `source.config.ts` | 编译某个 MDX 时，再执行一次声明宏的模块，只保留宏调用和它依赖的语句，结果登记到 `globalThis` |
+| 源码 | [config/build.ts:112-153](https://github.com/fuma-nama/fumadocs/blob/fumadocs%4016.17.1/packages/mdx/src/config/build.ts#L112-L153) | [macro/transform.ts:213-345](https://github.com/fuma-nama/fumadocs/blob/fumadocs%4016.17.1/packages/mdx/src/macro/transform.ts#L213-L345)、[macro/eval.ts:237-285](https://github.com/fuma-nama/fumadocs/blob/fumadocs%4016.17.1/packages/mdx/src/macro/eval.ts#L237-L285) |
+
+`defineDocs`、`defineCollections`、`defineConfig` 本身什么都不做，只把参数原样返回（[config/define.ts:124-167](https://github.com/fuma-nama/fumadocs/blob/fumadocs%4016.17.1/packages/mdx/src/config/define.ts#L124-L167)）。`defineDocs` 拆成 `doc`（mdx）和 `meta`（json/yaml）两个子集合，schema 默认用 core 的 `pageSchema` / `metaSchema`。两种方式共用同一个编译器和同一套插件钩子，区别只在入口。
+
+宏式改写后的样子（官方测试夹具）：
+
+```ts
+const docs = await __fdm.docs({
+  dir: "content/docs",
+  doc: import.meta.glob("./**/*.{mdx,md}", { base: "./../content/docs", query: "?macro_id=app/lib/source.ts#docs", eager: true }),
+  meta: import.meta.glob("./**/*.{json,yaml}", { base: "...", query: "?macro_id=...", import: "default", eager: true }),
+})
+```
+
+按 [test/fixtures/macro-vite.output.ts](https://github.com/fuma-nama/fumadocs/blob/fumadocs%4016.17.1/packages/mdx/test/fixtures/macro-vite.output.ts#L1-L31) 简写。宏要求 `dir`、`files`、`async` 都是字面量，因为改写时要静态读出它们。
+
+## 编译一个 MDX 文件
+
+Vite 插件 `fumadocsMdx()` 实际返回 4 个插件：主插件、宏改写、MDX 编译、meta 处理；后三个的 transform 都是 `order: 'pre'`（[vite/index.ts:101-212](https://github.com/fuma-nama/fumadocs/blob/fumadocs%4016.17.1/packages/mdx/src/vite/index.ts#L101-L212)）。一个 `.mdx` 进来以后：
+
+1. **解析 frontmatter**，按集合的 schema（Standard Schema，可以是 `(ctx) => schema`）校验，再依次跑 fumadocs-mdx 插件的 `doc.frontmatter` 钩子。校验失败抛 `ValidationError`，在终端里显示成带颜色的错误。没有集合参数的 MDX（直接 import 的文件）不校验。
+   （[core.ts:167-183](https://github.com/fuma-nama/fumadocs/blob/fumadocs%4016.17.1/packages/mdx/src/core.ts#L167-L183)、[core.ts:344-359](https://github.com/fuma-nama/fumadocs/blob/fumadocs%4016.17.1/packages/mdx/src/core.ts#L344-L359)）
+2. **建 unified 处理器**：`@mdx-js/mdx` 的 `createProcessor`，输出格式 `program`，处理器按「集合 + 格式」缓存。
+   （[loaders/mdx/build-default.ts:40-97](https://github.com/fuma-nama/fumadocs/blob/fumadocs%4016.17.1/packages/mdx/src/loaders/mdx/build-default.ts#L40-L97)）
+3. **插件顺序**。fumadocs-mdx 自己只加两个：最前面的 `remarkInclude`（`<include>` 引入其他文件或代码片段），最后面的 `remarkPostprocess`。中间是 core 的默认预设：
+
+   ```text
+   remark: gfm → heading(generateToc:false) → image(useImport) → codeTab → npm → 【站点插件】 → structure(exportAs:'structuredData')
+   rehype: code(Shiki) → 【站点插件】 → toc(导出 toc)
+   ```
+
+   站点插件写成数组就插在固定位置；写成函数 `(defaults) => list` 可以自己排；`preset: 'minimal'` 去掉全部默认插件。**集合级 `mdxOptions` 会整个替换预设**，不是追加。
+   （[config/preset.ts:50-131](https://github.com/fuma-nama/fumadocs/blob/fumadocs%4016.17.1/packages/mdx/src/config/preset.ts#L50-L131)、[build-default.ts:119-121](https://github.com/fuma-nama/fumadocs/blob/fumadocs%4016.17.1/packages/mdx/src/loaders/mdx/build-default.ts#L119-L121)）
+4. **remarkPostprocess 收尾**：frontmatter 没 `title` 就取第一个一级标题；把 `file.data['mdx-export']` 里每一项变成 `export let 名字 = 值` 插回语法树；按 `postprocess` 选项输出 `_markdown`（给 llms）、`_mdast`、链接引用。
+   （[loaders/mdx/remark-postprocess.ts:45-122](https://github.com/fuma-nama/fumadocs/blob/fumadocs%4016.17.1/packages/mdx/src/loaders/mdx/remark-postprocess.ts#L45-L122)）
+
+> **`mdx-export` 是 remark 插件「多导出一个值」的正式通道。**插件往 `file.data['mdx-export']` 推 `{ name, value }`，编译结果里就多一个导出，运行时出现在页面条目上。站点插件本来就排在 remarkPostprocess 前面，所以直接能用。类型声明在 [build-default.ts:13-38](https://github.com/fuma-nama/fumadocs/blob/fumadocs%4016.17.1/packages/mdx/src/loaders/mdx/build-default.ts#L13-L38)。
+
+`lastModified` 用 `git log` 取时间，结果存在模块级变量里，进程不退就不清（[last-modified.ts:13-70](https://github.com/fuma-nama/fumadocs/blob/fumadocs%4016.17.1/packages/mdx/src/loaders/mdx/last-modified.ts#L13-L70)），开发中提交后不会刷新。
+
+## 查询参数：同一个文件的几种模块
+
+fumadocs-mdx 用查询参数告诉自己的 transform「这个文件属于哪个集合、要编译成什么」（[loaders/mdx/index.ts:10-15](https://github.com/fuma-nama/fumadocs/blob/fumadocs%4016.17.1/packages/mdx/src/loaders/mdx/index.ts#L10-L15)）。查询参数不同，Vite 就当成不同模块，所以「只有 frontmatter」和「完整正文」可以分开打包。
+
+| 参数 | 作用 |
+| --- | --- |
+| `collection=docs` | 配置式：属于哪个集合，按它的 schema 和 mdxOptions 编译 |
+| `macro_id=路径#变量名` | 宏式：同上，用来找到宏声明 |
+| `only=frontmatter` | 只返回 `export const frontmatter = {...}`，不编译正文 |
+| `workspace=…` | 切换到子工作区的配置 |
+
+meta 文件只有带 `collection` 或 `macro_id` 时才由 fumadocs-mdx 处理，普通 JSON 导入照旧交给 Vite（[loaders/meta.ts:36-41](https://github.com/fuma-nama/fumadocs/blob/fumadocs%4016.17.1/packages/mdx/src/loaders/meta.ts#L36-L41)）。这套参数没有写进文档，属于内部约定。
+
+## 服务端、浏览器与按需加载
+
+- 编译出的 MDX 模块在服务端和浏览器**完全一样**，loader 只看是不是开发模式（[loaders/adapter.ts:113](https://github.com/fuma-nama/fumadocs/blob/fumadocs%4016.17.1/packages/mdx/src/loaders/adapter.ts#L113)）。
+- 区别在入口：配置式的 `server.ts` 用同步 glob、文档和 meta 都有；`browser.ts` 用懒加载 glob、只有文档（[index-file.ts:329-364](https://github.com/fuma-nama/fumadocs/blob/fumadocs%4016.17.1/packages/mdx/src/plugins/index-file.ts#L329-L364)）。宏式两端共用一个模块，由 `async` 决定怎么打包。
+- **async 模式**生成两组 glob：frontmatter 同步、正文懒加载。条目上直接展开 frontmatter，`load()` 时才去拿正文（[runtime/server.ts:125-154](https://github.com/fuma-nama/fumadocs/blob/fumadocs%4016.17.1/packages/mdx/src/runtime/server.ts#L125-L154)）。宏式还记住每个 promise 的状态，已加载的正文同步渲染，没加载的在 `use()` 处挂起（[runtime/macro.ts:154-202](https://github.com/fuma-nama/fumadocs/blob/fumadocs%4016.17.1/packages/mdx/src/runtime/macro.ts#L154-L202)）。
+- **dynamic 模式**不同：运行时读文件、编译，再用 `new AsyncFunction` 执行（[runtime/dynamic.ts:29-98](https://github.com/fuma-nama/fumadocs/blob/fumadocs%4016.17.1/packages/mdx/src/runtime/dynamic.ts#L29-L98)）。宏式不支持。
+
+## 开发时热更新
+
+> **fumadocs-mdx 自己没有任何热更新代码**：Vite 插件里没有 `handleHotUpdate`，也不发 full-reload。全部靠 Vite 的模块图和 `import.meta.glob`。
+
+| 改了什么 | 怎么更新 | 源码 |
+| --- | --- | --- |
+| MDX 正文 | Vite 重新 transform，沿模块图让导入它的模块失效 | [vite/index.ts:130-141](https://github.com/fuma-nama/fumadocs/blob/fumadocs%4016.17.1/packages/mdx/src/vite/index.ts#L130-L141) |
+| 增删 MDX / meta 文件 | `import.meta.glob` 由 Vite 自己跟踪匹配到的文件，导入它的模块失效；生成入口的插件明确跳过重新生成 | [index-file.ts:107-123](https://github.com/fuma-nama/fumadocs/blob/fumadocs%4016.17.1/packages/mdx/src/plugins/index-file.ts#L107-L123) |
+| meta.json | 带集合参数的 JSON 模块重新 transform | [vite/index.ts:142-149](https://github.com/fuma-nama/fumadocs/blob/fumadocs%4016.17.1/packages/mdx/src/vite/index.ts#L142-L149) |
+| `source.config.ts` | 重新加载配置；每个内容模块都把配置文件登记成依赖，配置一改全部重编。只看这一个文件，它导入的别的文件改了不触发 | [vite/index.ts:197-206](https://github.com/fuma-nama/fumadocs/blob/fumadocs%4016.17.1/packages/mdx/src/vite/index.ts#L197-L206) |
+| 宏所在的模块 | 按依赖文件的修改时间判断过期，跟踪整棵依赖树 | [macro/eval.ts:187-235](https://github.com/fuma-nama/fumadocs/blob/fumadocs%4016.17.1/packages/mdx/src/macro/eval.ts#L187-L235) |
+
+增删文件后，被导入的集合模块会更新；`loader()` 只有在 `lib/source.ts` 重新执行时才重算。页面最终是局部更新还是整页刷新，取决于 React Router 在哪里接住这次更新，这一点没有核实，要做实验。
+
+## fumadocs-mdx 自己的插件接口
+
+和 Vite 插件是两回事，接口在 [core.ts:39-81](https://github.com/fuma-nama/fumadocs/blob/fumadocs%4016.17.1/packages/mdx/src/core.ts#L39-L81)：
+
+```ts
+interface Plugin {
+  name?: string
+  config?(config: LoadedConfig): void | LoadedConfig      // 配置加载后改写
+  emit?(): EmitEntry[]                                     // 往输出目录写文件
+  configureServer?(server: { watcher?: FSWatcher }): void  // 拿到 Vite 的文件监视器
+  meta?: { transform?(data) }
+  doc?: { frontmatter?(data); vfile?(file: VFile) }        // 编译前改 frontmatter / VFile
+  'index-file'?: { generateTypeConfig?(): string }         // 往生成的类型里加字段
+}
+```
+
+- 注册在 `defineConfig({ plugins })`。宏式项目要用插件，也可以只为插件留一个 `source.config.ts`。
+- 内置插件：`index-file`（生成入口）、`json-schema`（把 schema 输出成 JSON Schema，新建 meta 时自动写 `$schema`）、`last-modified`。
+- **坑：**`fumadocsMdx({ plugins })` 在 Vite 下会被悄悄忽略，类型里有这个字段，但没有传进核心（[vite/index.ts:286-301](https://github.com/fuma-nama/fumadocs/blob/fumadocs%4016.17.1/packages/mdx/src/vite/index.ts#L286-L301)）。要用 `defineConfig({ plugins })` 或 `globalOptions.plugins`。
+
+## 在 React Router 里怎么写
+
+```tsx
+// vite.config.ts
+plugins: [fumadocsMdx(), tailwindcss(), reactRouter()]
+
+// app/lib/source.ts
+import { defineDocs } from 'fumadocs-mdx/macro'
+import { loader } from 'fumadocs-core/source'
+export const docs = defineDocs({ dir: 'content/docs', docs: { async: true } })
+export const source = loader({ source: docs.toFumadocsSource(), baseUrl: '/docs' })
+
+// app/routes/docs.tsx（简写）
+export async function loader({ params }) {
+  const page = source.getPage(params['*'].split('/'))
+  if (!page) throw new Response('Not found', { status: 404 })
+  await page.data.load?.()                       // 预加载，避免渲染时挂起
+  return { path: page.path, tree: await source.serializePageTree(source.getPageTree()) }
+}
+export default function Page({ loaderData }) {
+  const { tree } = useFumadocsLoader(loaderData)
+  const page = docs.getPage(loaderData.path)     // 浏览器里也能直接用宏集合
+  const { body: Body, toc } = use(page.load())
+  return <DocsLayout tree={tree}><DocsPage toc={toc}><DocsBody><Body components={mdxComponents} /></DocsBody></DocsPage></DocsLayout>
+}
+```
+
+按 [examples/react-router/vite.config.ts](https://github.com/fuma-nama/fumadocs/blob/fumadocs%4016.17.1/examples/react-router/vite.config.ts#L7)、[examples/react-router-min/app/routes/docs.tsx](https://github.com/fuma-nama/fumadocs/blob/fumadocs%4016.17.1/examples/react-router-min/app/routes/docs.tsx#L10-L51) 简写，细节以示例为准。另有 SPA 预渲染（`react-router-spa`）和 RSC（`react-router-rsc`）两个示例。
+
+## 限制
+
+- **宏集合不能写在 `node_modules` 里的包中**：`node_modules` 永远排除，改不了（[macro/options.ts:31-55](https://github.com/fuma-nama/fumadocs/blob/fumadocs%4016.17.1/packages/mdx/src/macro/options.ts#L31-L55)）；`macro_id` 指向项目外也报错；`dir` 永远相对项目根。
+- **配置式**只认项目根的 `source.config.ts`。但 `defineDocs` 只返回普通对象，所以**集合定义可以由包里的工厂函数产出**，再由站点的配置文件导出。
+- **node_modules 里的 `.mdx`**：transform 只看扩展名，只要 Vite 处理到就会编译（按全局预设、不校验）；前提是这个包没被 SSR 外置、没被预打包。
+- **第三方包要经 Vite 处理**：fumadocs-mdx 扫描依赖树，只把名字以 `fumadocs-` 或 `@fumadocs/` 开头的包加进 `ssr.noExternal` 和 `optimizeDeps.exclude`（[packages/vite/src/index.ts:13-47](https://github.com/fuma-nama/fumadocs/blob/fumadocs%4016.17.1/packages/vite/src/index.ts#L13-L47)）。理由是这些包以源码形式发布，预打包会让 React context 出现两份。**别的名字的包要站点自己配。**
+- Windows 路径：大部分地方统一成正斜杠；有两三处可能有问题（例如 `hasFile` 的 picomatch 没传 `windows`），没有核实。
+
+## 哪些是公开的扩展点
+
+| 入口 | 内容 |
+| --- | --- |
+| `fumadocs-mdx/config` | `defineDocs`、`defineCollections`、`defineConfig`、`applyMdxPreset`、`remarkInclude`、`PostprocessOptions` |
+| `fumadocs-mdx/macro` | 宏版 `defineDocs`、`defineCollections` |
+| `fumadocs-mdx/vite` | `fumadocsMdx(options)`：`configPath`、`outDir`、`macro`、`updateViteConfig`、`globalOptions`、`forcedConfig` |
+| `fumadocs-mdx`（类型） | `Plugin`、`CompilationContext`、`EmitEntry` 等 |
+| 运行时 | `runtime/server` 的 `toFumadocsSource`；`runtime/browser` 的 `createClientLoader`；`runtime/dynamic` |
+| 插件 | `plugins/json-schema`、`plugins/last-modified`、上面的 Plugin 钩子 |
+| VFile 约定 | `file.data.frontmatter`、`file.data['mdx-export']` |
+
+**不该依赖的：**下划线开头的成员、`core.cache`、`loaders/*`、生成代码、查询参数协议、`@fumadocs/vite`（私有包）、`runtime/macro` 的函数签名（给生成代码调用的）。

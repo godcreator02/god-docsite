@@ -1,0 +1,76 @@
+---
+title: 合并检查包 collab-merge-check
+description: 协作仓合并请求的安全检查：和 main 有没有冲突、有没有改只有负责人能改的内容。NAS 上的执行器运行它的命令行决定合不合并，gwb-collab 推送前在本机查同一个函数；工作流模板随包发布
+full: true
+---
+
+import { SeamMap } from '../../src/components/seam-map-flow/seam-map'
+
+包 `@godcreator/collab-merge-check`，源码在 `packages/collab-merge-check/src/`。它只回答一件事：协作仓的一个合并请求能不能直接合进 main。
+只运行 git、只看改了哪些路径、`site/package.json` 的键和 `site/people.json` 里各项的字段，不读记录内容。别的包只引用数据模型包的 `project-model`（`collab/`、`site/` 两个路径），由测试检查；数据模型包对文档站基础包是可选的 peer 依赖，项目布局又不用它，所以执行器只装合并检查包和数据模型包：
+
+{/* ref file="../packages/collab-merge-check/test/boundary.test.ts" lines="5-10" hash="4f2ddf0a01a6" blob="1fec8a176893" */}
+
+| 使用方 | 用哪部分 | 用的是哪一版 |
+| --- | --- | --- |
+| NAS 上的执行器 | 命令行 `collab-merge-check`：决定合并还是打回 | 协作仓 main 上工作流文件里 `MERGE_CHECK_RANGE` 写的那一版 |
+| gwb-collab | `leadOnlyProblems`、`changedFilesBetween`：推送前在本机先查一遍，`author` 是本机身份 | 插件发版时打包的那一版 |
+
+鼠标停在编号上看每条接缝交换什么，点击固定高亮它连着谁：
+
+<SeamMap module="collab-merge-check" />
+
+## 两条检查
+
+检查的是**合进 main 之后**的结果：在内存里算出合并后的树，不动工作区和分支。
+
+1. **和 main 没有冲突**。有冲突就只报冲突的文件，第二条不再查
+2. **没改只有负责人能改的内容**（见下表），或者提交人就是项目负责人（协作仓在 Gitea 上的协作者，工作流读出来经 `--leads` 交进来）
+
+{/* ref file="../packages/collab-merge-check/src/check.ts" lines="152-162" hash="e5bbfde9d77a" blob="c0f8c11da687" */}
+
+记录格式与站点会不会打不开不在这里查，由成员的插件提交前在本机查（合 main 之前、之后各一次），见 [提交审核与同步](/collab/collab-repo)。
+
+## 只有负责人能改的内容
+
+只拦会在每个人电脑上执行代码的、会改变合并规则的这几处，其余谁都能改：
+
+| 只有负责人能改 | 为什么 |
+| --- | --- |
+| `.gitea/`、`.github/` 下的文件 | 执行器工作流：改了能绕过检查、拿到组织密钥 |
+| 人员列表 `site/people.json`（例外见下） | 决定谁能在网站上写、哪台电脑的身份码认作谁 |
+| `collab/people.json` | 还没迁移的协作仓的人员列表：执行器按工作流里的版本范围装新版检查，这些仓照样要挡住成员改它 |
+| `site/.npmrc`、`site/pnpm-workspace.yaml` | 装包设置：从哪个源装、谁能运行安装脚本 |
+| `site/` 根目录下的 `*.config.*` 与 `.postcssrc*` | 每个人的电脑上运行站点时 Node 会执行它们 |
+| `site/package.json` 里依赖两段以外的键 | `scripts` 这类也在每个人的电脑上运行 |
+| `site/package.json` 里 `@godcreator/collab-site` 那一项 | 决定每个人运行的网站代码 |
+| `site/package.json` 里写成网址、git 地址、本地路径的依赖 | 装包不走源 |
+
+{/* ref file="../packages/collab-merge-check/src/check.ts" lines="54-66" hash="3c9728724728" blob="c0f8c11da687" */}
+{/* ref file="../packages/collab-merge-check/src/check.ts" lines="87-108" hash="744ca06b5689" blob="c0f8c11da687" */}
+
+页面、组件、静态文件、评论、加库升级库与锁文件谁都能改。gwb-collab 推送前在本机调同一个 `leadOnlyProblems`，所以这类改动一般推不上来。
+
+### 人员列表的例外：只给自己那一项改身份码
+
+成员在一台电脑上第一次用协作站时，gwb-collab（`collab.project.clone` 或 `collab.project.join`）把这个 gwb home 的身份码加进人员列表里他自己那一项的 `codes`，这一行改动要他自己提交审核，别人的站点才认得这台电脑。
+所以 `site/people.json` 的改动只要满足下面几条就放行：项数与先后不变，别人的项一字不变，改了的项 `gitea` 等于提交人、改前改后除 `codes` 外的字段都一样。改了名字、给别人加码、加一项、读不懂，都算只有负责人能改。
+提交人由 `author` 交进来（命令行的 `--author`，gwb-collab 推送前是本机身份）；没给 `author` 时整个文件算只有负责人能改：
+
+{/* ref file="../packages/collab-merge-check/src/check.ts" lines="122-150" hash="f3a872fd83a7" blob="c0f8c11da687" */}
+{/* ref file="../packages/collab-merge-check/test/lead-only.test.ts" lines="27-44" hash="3f27d5dcfb15" blob="c25f63928a2e" */}
+
+## 命令行
+
+参数四个都必填；`--author` 既拿来和 `--leads` 比、算出提交人是不是负责人，也原样交给人员列表的例外判断。退出码 0 能合并、1 不能合并、2 参数不对或检查自己出错：
+
+{/* ref file="../packages/collab-merge-check/src/cli.ts" hash="b35b7d90a65e" blob="f33a0736a3d1" */}
+
+执行器怎样运行它、合并或打回，见 [执行器与自动合并](/gitea/push)。工作流模板在包里的 `templates/collab-auto-merge.yaml`，负责人建项目时照它放进协作仓的 `.gitea/workflows/`。
+
+## 不做的事
+
+- **不查记录格式与站点**：它们要装站点依赖、读任务模型和文档站基础包的人员列表与评论格式，放在执行器上会让执行器装整个功能包；成员提交前在本机查，合 main 之后再查一次
+- **不查谁改了谁的记录、有没有删记录**：这两条只在数据模型包的写入规则里判断
+- **不读 Gitea、不合并**：负责人名单由工作流读出来交给命令行，合并与留言是工作流的事
+- **只依赖数据模型包的项目布局**：执行器只装它和数据模型包，版本写在工作流文件里，和站点用的功能包版本无关

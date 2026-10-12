@@ -1,0 +1,205 @@
+---
+title: 钉码核心 code-pin
+description: 通用包，把文字钉在代码上：只认目标（行段、整个文件、目录树）与记录，核对出代码变没变、确认出新记录；读取器、旧内容来源从构造参数传进来，自己不读盘、不启动子进程
+full: true
+---
+
+import { SeamMap } from '../../../src/components/seam-map/seam-map';
+
+包 `@godcreator/code-pin`，源码在 `packages/code-pin/src/`，出口只有 `.`（`src/index.ts`）。
+
+它是通用包，做一件事：把文字钉在代码上。它只认目标（行段、整个文件、目录树）与记录，核对出代码变没变、确认出新记录；
+不读文件，不认识文档文本、记号写法与文档格式。它不认识 docfirst，谁都能单独使用；docfirst 的 workflow 是它的一个使用者，
+下面讲到「钉码编排」「项目装配」的地方，说的都是 workflow 怎么用它。
+
+<SeamMap module="pin" />
+
+## 功能
+
+**核对与确认**是唯一算状态的地方。`check` 只收目标与记录（还没确认的记录是 null）、交回每处的判定；`confirm` 在核对的结果上逐处决定要不要重新记、记成什么，
+改文件归 workflow 的钉码编排。结果与传入的顺序一一对应，一处钉不住只是那一处不动：
+
+{/* ref file="../packages/code-pin/src/pinner.ts" lines="1-9" hash="5888e052f3c2" blob="89c8a0c744fd" */}
+
+确认对每一处的结果只有六种。`recorded` 与 `moved` 是机械重记；黄的只在带 `accept` 时才按今天的内容重新记：
+
+{/* ref file="../packages/code-pin/src/pinner.ts" lines="16-25" hash="b775aac011bd" blob="89c8a0c744fd" */}
+
+**比较器** `compare.ts` 是纯函数：每种目标各自怎么判新鲜、确认时记什么。行段按什么顺序判、取不到旧内容时怎么降级，
+见[钉码状态](/docfirst/pin/judge)；每种目标各钉哪种话，见[引用的种类](/docfirst/pin/targets)；旧内容与 hunk 表怎么从 git 来，
+见[行段跟随](/docfirst/pin/git)。
+
+**归一化**只做三件事：换行统一成 LF、去每行行尾空白、去掉末尾空行。展示和算 `hash` 用同一个函数，记号上的 hash 取前 12 位：
+
+{/* ref file="../packages/code-pin/src/span.ts" lines="1-10" hash="4bd7647c3a83" blob="349017fffa50" */}
+
+## 接口
+
+`index.ts` 的导出表就是这个包对外的全部：
+
+{/* ref file="../packages/code-pin/src/index.ts" hash="1698141d99cd" blob="967e65f83dce" */}
+
+**`createPinner`**：创建时传入的读取器与旧内容来源就是它的全部依赖，交回 `check` 与 `confirm` 两个动作；
+命令行、生成物摆放与站构建都经 workflow 的钉码编排调它：
+
+{/* ref file="../packages/code-pin/src/pinner.ts" lines="36-49" hash="a74c53da60b6" blob="89c8a0c744fd" */}
+
+**目标**有行段、整文件、目录树。这几个类型的形状是对外契约：
+
+{/* ref file="../packages/code-pin/src/types.ts" lines="15-37" hash="d423c75859e0" blob="32a0167e8d8f" */}
+
+**判定**是一处钉核对完的全部信息：当前内容、状态、这段今天在哪、缺失与变动的细分理由、diff 和确认时那段。
+调用方只读它，不自己判定：
+
+{/* ref file="../packages/code-pin/src/types.ts" lines="90-103" hash="7e6e87f2f6d3" blob="32a0167e8d8f" */}
+
+**细分理由**只有固定几个取值，中文说法跟它放在同一处。命令行打印黄灯与红灯、按原文渲染拒绝缺失的引用，都从这张表取，
+`changed` 之外每个取值都有说法：
+
+{/* ref file="../packages/code-pin/src/types.ts" lines="69-85" hash="33b0708b92da" blob="32a0167e8d8f" */}
+
+## 依赖
+
+源码只 import 包内文件和 `node:crypto`（算段 hash 与 blob 名），`package.json` 里没有运行时依赖和 peer。
+其余两样在创建时传进来，docfirst 用的实现都在 [workflow](/docfirst/workflow)。
+
+**读取器 `Reader`** 与**旧内容来源 `History`**：行段、整文件读文件的行，目录树要 `list`，
+读取器没提供它时目录树一律判缺失；`oldText` 给 `null` 时比较器改为滑窗查找，少的只是 diff：
+
+{/* ref file="../packages/code-pin/src/types.ts" lines="105-123" hash="4a2e73523351" blob="32a0167e8d8f" */}
+
+## 不做的事
+
+**不读写磁盘，不启动子进程，不知道 git 存在。** 边界测试只许源码 import 包内文件和 `node:crypto`，清单里不许有依赖：
+
+{/* ref file="../tests/boundary.test.ts" lines="294-303" hash="e28789728621" blob="da1acdb8b833" */}
+
+**不认识别的包，也不认识 docfirst。** 它是通用包，也自成一体：清单里没有任何 `@godcreator/` 包，源码与产物不 import 它们，
+源码的相对 import 不出自己的 `src/`：
+
+{/* ref file="../tests/boundary.test.ts" lines="260-284" hash="94b742a6ba47" blob="da1acdb8b833" */}
+
+包目录里（源码、产物、构建配置、清单）一个 docfirst 字样都没有（清单里指向本仓的仓地址除外）；docfirst 怎么用它，写在 docfirst 的包与这个站里：
+
+{/* ref file="../tests/boundary.test.ts" lines="276-292" hash="a88dde7bd571" blob="da1acdb8b833" */}
+
+**不接触文档文本。** 记号写成什么样、在文件第几行、写回时怎么改那一行、这个文件是 mdx 页面还是讲解组件的源码，
+都归使用方；在 docfirst 里归 workflow 的记号写法、两个格式与钉码编排。
+边界测试查源码与产物里有没有文档文本那一侧的名字：
+
+{/* ref file="../tests/boundary.test.ts" lines="305-318" hash="ecb19e47f9f2" blob="da1acdb8b833" */}
+
+**不渲染，不知道项目根、配置文件和生成物放哪。** 在 docfirst 里，装配、渲染与摆放在 workflow。
+
+**不存旧内容。** 记号上只有 `hash` 与 `blob`；目录树只记名字表的 hash，变了只能报黄、给出当前的名字表。
+理由见[记录进记号](/trajectory/2026-09-25-records-live-in-markers)。
+
+**不决定黄灯拦不拦提交。** 这个包只给状态，哪些黄算红由 docfirst 的 `check` 决定，见[门禁](/docfirst/pin/gate)。
+
+import { PinStory } from '../../../src/components/pin/story';
+
+文档里钉一处码，是在一句话下面单独写一行记号，指向源码里的几行。新写的记号只带目标，`confirm` 在同一行记号上写下两个值：`hash` 是被钉那几行（去掉行尾空白）的
+sha256 前 12 位，`blob` 是整个文件当时的 git blob 名前 12 位。之后每次 `check` 都拿今天的代码去比，给出一种[状态](/docfirst/pin/judge)。
+
+记号是 docfirst 的写法，由 workflow 认出、写回；钉码核心不认识记号，只收从记号里取出的目标与记录。
+
+记录只写在记号自己身上，没有另外的记录文件。同一篇里两处记号指向同一段，也各带各的记录、各自写回；
+一处是红，只是那一处不动，别的照写。删掉记号，它的记录也就没了。
+
+{/* ref file="../packages/docfirst-workflow/src/reference/index.ts" lines="11-25" hash="c14662ebadbb" blob="ff70f29c64ee" */}
+
+## mdx 页面与讲解组件
+
+讲解组件里也有照源码抄来的东西：手抄的源码片段、逐字照抄的测试名、命令行的输出格式。组件的源码里也能写引用，
+被钉的代码变了，组件文件在 `check` 里跟页面一样变黄，本仓未提交的改动引起的黄照样拦提交。两种文件用同一套记号，只有外壳不同：
+
+| | mdx 页面 | 讲解组件 |
+| --- | --- | --- |
+| 哪些文件 | 内容根下 `trajectory/`、`future/` 之外的 `.mdx` | 站的 `src/components/` 下的 `.ts`、`.tsx`、`.mjs` |
+| 外壳 | 单独一行的 `{/* … */}` | 单独一行的 `/* … */` |
+| 新写（未确认） | `{/* ref file="src/a.ts" lines="2-3" */}` | `/* ref file="src/a.ts" lines="2-3" */` |
+| `confirm` 之后 | `{/* ref file="src/a.ts" lines="2-3" hash="…" blob="…" */}` | `/* ref file="src/a.ts" lines="2-3" hash="…" blob="…" */` |
+| 另外能做 | 名册检查、按原文渲染生成物、站上换成带状态点的代码块 | 只核对与写回，站上不显示 |
+
+组件里的记号必须单独占一行，放在它钉住的那段数据正上方：组件的源码不经语法树，按行认，一行里除了这个注释还有别的代码就不是记号。
+一个组件文件里任何一处变黄，就是这个组件要复核。两种外壳里面的内容（记号的载荷）由记号写法一处定义，各种引用怎么写见[引用的种类](/docfirst/pin/targets)。
+
+## 一条引用从写下到删掉
+
+同一个文件 `src/greet.ts` 走七步，每一步只变一件事：
+
+<PinStory />
+
+`confirm` 对每一处做什么只看它此刻的状态：未确认的记上记录；绿的行段挪了位置就写回新行号；黄的只有带 `--accept`
+才按今天的内容重新记；红的不动。前两件不需要人判断；`--accept` 表示人读过那句话、确认它还成立。
+
+{/* ref file="../packages/code-pin/src/pinner.ts" lines="105-121" hash="8275915330ca" blob="bd68ca1002f3" */}
+
+import { RefKinds } from '../../../src/components/ref-kinds/ref-kinds';
+
+文档对代码说的话，说的是一个文件里的内容，或者一个目录下有哪些东西。引用分这几种：
+
+| 引用 | 说的是 | 记号上记什么 |
+| --- | --- | --- |
+| 行段 `ref 文件:起-止` | 「这几行代码是这样写的」 | 这几行的 `hash`，加确认时整个文件的 `blob` 名 |
+| 整文件 `ref 文件` | 「这个文件就这些，不多不少」 | 整个文件的 `hash` 与 `blob` 名 |
+| 目录树 `tree 目录` | 「这个目录下就这些」 | 名字表的 `hash` |
+
+每种目标写成记号各带哪些属性，路径相对项目根：新写的只带目标属性，`confirm` 再添上记录属性。mdx 页面与讲解组件的源码里是同一套属性，
+只有外面的注释不同（见[记号的写法](/docfirst/pin/markers)）：
+
+{/* ref file="../packages/docfirst-workflow/src/marker/index.ts" lines="19-43" hash="bcbf7190d60a" blob="fe3bfa339e50" */}
+
+选一种引用，再选一种代码变化，看记号上记了什么、`check` 拿今天的什么去比、命令行打出哪一行、站上那一处变成什么样：
+
+<RefKinds />
+
+每种都会黄。行段和整文件记的是内容的 `hash`；目录树只记名字表的 `hash`，旧名字表不存，所以只知道「变了」、说不出多了哪个：
+
+{/* ref file="../packages/code-pin/src/compare.ts" lines="16-16" hash="7a8d243aa010" blob="f5272b0530fa" */}
+
+## 一句话该用哪一种
+
+| 你想说的话 | 用哪一种 | 为什么不用别的 |
+| --- | --- | --- |
+| 「这段代码做了什么」「这条测试守着什么」「配置里这个值是多少」 | 行段 | 只在这几行真改了时黄；整文件别处一改就黄 |
+| 「整个文件就这些」（几十行以内的小配置、小脚本） | 整文件 | 行段钉满全文件时，文件开头或末尾新加的行不会报 |
+| 「这个目录下就这些」 | 目录树 | 行段与整文件钉不住目录 |
+
+几条容易挑错的：
+
+- **没有只认名字的引用**：只看一个字面量在不在，永远不会变黄。旧版的 `has` 记号 `check` 直接报错，报错里给出改成行段的写法，
+  理由见轨迹卡[删掉名字引用](/trajectory/2026-09-27-drop-has-refs)。
+- **钉测试，钉整条测试**：从 `test(` / `it(` 那行钉到它结束的那行。只钉测试名那一行，断言删了、条件放宽了照样是绿。
+- **钉配置里的值，钉那一行**：值一变就黄，回来看正文那句话还成不成立。
+- **整文件只钉短文件**：大文件里任何一处改动都黄，这种黄多了，人会不读就直接 `--accept`。要说大文件里的几件事，分别钉那几段。
+- **整文件别钉随发版变的文件**：`package.json` 带着 `version`，每发一次版就黄一次，跟文档那句话毫无关系。
+- **目录树按 `.gitignore` 过滤**：`dist/`、`node_modules/` 不进名字表，也不往里走。`glob` 只认 `*` 和 `?`，匹配的是名字不是路径。
+
+{/* ref file="../packages/docfirst-workflow/src/node/fs-reader.ts" lines="4-5" hash="95d4a8b65f51" blob="5b1604322176" */}
+
+- **跑出来的数不钉**：「几条测试」「几个路由」是命令的输出，不是哪个文件里写着的，不写进正文。
+
+import { PinJudge } from '../../../src/components/pin/judge';
+
+每次 `check` 都拿今天的代码跟[记号](/docfirst/pin/markers)上的记录比，给每一处四种状态之一：
+
+{/* ref file="../packages/code-pin/src/types.ts" lines="66-67" hash="d2a2e323f0a3" blob="32a0167e8d8f" */}
+
+| 状态点 | 状态 | 什么意思 | `check` 算不算红 |
+| --- | --- | --- | --- |
+| 绿 | 新鲜 | 被钉的内容跟确认时一样，位置变了也算 | 不算 |
+| 黄 | 有变动 | 内容变了，等人读一遍那句话再确认 | 不算；本仓未提交的改动引起的算，见[提交门禁](/docfirst/pin/gate) |
+| 红 | 缺失 | 被钉的东西不在了 | 算 |
+| 空心 | 未确认 | 记号上还没有确认时写的记录 | 不算 |
+
+## 核对一处行段引用：五道检查
+
+行段在文件里插了几行还是绿、整段删掉变红，背后是同一套检查，从上往下，前一道能下结论就不往下走。选一种情况，看它走了哪几道、停在哪：
+
+<PinJudge />
+
+{/* ref file="../packages/code-pin/src/compare.ts" lines="6-14" hash="a033f65b0f3e" blob="29bf0bfed8b4" */}
+
+第三、四道要的旧文件和 hunk 表不是钉码核心自己取的，由使用方传进来；docfirst 的项目装配从 git 取，见[行段跟随](/docfirst/pin/git)。
+行段以外的几种引用各比什么，见[引用的种类](/docfirst/pin/targets)。

@@ -1,0 +1,110 @@
+---
+title: fumadocs 内容来源导读
+docfirst: none
+description: local-md、local-html 与自己写一种来源：看懂官方的运行时来源，就知道 TSX、HTML、评论该怎么做
+---
+
+fumadocs-mdx 只是来源之一。官方还有一批「运行时来源」：不经打包器，运行时读文件、编译、渲染。看懂它们，就知道我们的 TSX 页面、HTML 页面、评论这类东西该怎么做成来源。
+
+## 来源要交出什么
+
+loader 只认 `title`、`description`、`icon`、`structuredData`（见[上一页](/design/fumadocs/core-source)）。正文和目录由路由自己取。官方几个运行时来源都遵守同一个写法：
+
+```ts
+data: {
+  title, description, icon,
+  structuredData: () => Promise<StructuredData>,     // 搜索要的时候才编译
+  load: () => Promise<Renderer>,                     // 用 ??= 缓存，最多编译一次
+}
+Renderer = { render(components) => { body, toc }, structuredData, serialize?() }
+```
+
+[local-md/src/index.ts:64-76](https://github.com/fuma-nama/fumadocs/blob/fumadocs%4016.17.1/packages/local-md/src/index.ts#L64-L76)、[local-html/src/index.ts:47-57](https://github.com/fuma-nama/fumadocs/blob/fumadocs%4016.17.1/packages/local-html/src/index.ts#L47-L57)
+
+> **标题 id 要三处一致**：页面 DOM 里的 id、目录项的 `url`（`#id`）、`structuredData.headings[].id`。搜索结果跳转靠它。
+
+## 两类来源
+
+| | 构建时来源 | 运行时来源 |
+| --- | --- | --- |
+| 例子 | fumadocs-mdx、content-collections、fuma-content | local-md、local-html、obsidian、python |
+| 谁编译 | 打包器（Vite transform） | 站点服务端，请求时编译 |
+| 交给 loader 的 | `StaticSource`，`structuredData` 是现成的值，`body` 是组件 | `DynamicSource`，`load()` 懒编译，`structuredData` 是函数 |
+| 能不能执行代码 | 能，页面就是模块（可以 import 组件） | 不能直接执行；local-md 的 MDX 用 `new AsyncFunction` 执行编译结果 |
+| 开发时更新 | 打包器的模块图 | 自己监视文件、让缓存失效、通知浏览器刷新 |
+
+适配器的共同模式：外部系统负责扫描和编译，适配器只做「条目 → 虚拟文件」的映射，slug、url、页面树交给 loader。
+
+## local-content：运行时来源的公共部分
+
+`@fumadocs/local-content` 0.2.2 是给运行时来源复用的。写一个新来源只需要实现一个接口（[integration.ts:19-29](https://github.com/fuma-nama/fumadocs/blob/fumadocs%4016.17.1/packages/local-content/src/integration.ts#L19-L29)）：
+
+```ts
+interface ContentIntegration {
+  include: string[]                                   // 例如 ['**/*.{md,mdx}', '**/meta.json']
+  parse(file: { path; absolutePath; read() }):        // 返回 undefined 表示跳过
+    { type: 'page' | 'meta'; data } | undefined
+}
+```
+
+- **扫描与缓存**：每次取文件列表都重新匹配（所以增删文件自然被发现）；按绝对路径复用已解析结果；100 个并发；解析出错只打印、跳过这个文件（[storage.ts:28-65](https://github.com/fuma-nama/fumadocs/blob/fumadocs%4016.17.1/packages/local-content/src/storage.ts#L28-L65)）。
+- **对象引用稳定**：用 `WeakMap<解析结果, 虚拟文件>` 保证没变的文件始终是同一个对象，正好配合 `dynamicLoader` 的「比引用」（[source.ts:49-98](https://github.com/fuma-nama/fumadocs/blob/fumadocs%4016.17.1/packages/local-content/src/source.ts#L49-L98)）。
+- **改内容**要调 `invalidateFile` 丢掉缓存，之后生成新对象，loader 随之重建。
+- **Vite 监视器** `localContentPlugin()`：把内容目录加进 Vite 的监视器，收到增删改就失效对应文件，再发 `full-reload` 让浏览器整页刷新。Vite 插件和来源在两份模块实例里，所以用 `globalThis[Symbol.for(…)]` 放进程级登记表（[dev/vite/index.ts:16-79](https://github.com/fuma-nama/fumadocs/blob/fumadocs%4016.17.1/packages/local-content/src/dev/vite/index.ts#L16-L79)）。
+- Next 这类多进程框架用独立的监视服务（WebSocket）加浏览器端 `<DevClient/>`。
+
+## local-md
+
+- `parse` 按扩展名分：`.json` 当 meta，`.md/.mdx` 当页面；frontmatter 用 schema 校验，不过就抛错（[index.ts:121-173](https://github.com/fuma-nama/fumadocs/blob/fumadocs%4016.17.1/packages/local-md/src/index.ts#L121-L173)）。
+- `.md`：remark → hast，用 core 的 `remarkHeading`、`remarkStructure`、`rehypeCode`、`rehypeToc`；再用 `hast-util-to-jsx-runtime` 生成 React 元素，Markdown 里的表达式交给一个虚拟 JS 引擎求值，不用 `eval`。
+- `.mdx`：`@mdx-js/mdx` 编译成函数体，`new AsyncFunction` 执行。
+- 不支持 RSC 的框架：服务端 `serialize()`，浏览器从 `@fumadocs/local-md/client` 还原。
+
+## local-html：HTML 怎么显示
+
+> **解析成 React，不是原样插入，也不是 iframe。**（[html/compiler.ts:126-220](https://github.com/fuma-nama/fumadocs/blob/fumadocs%4016.17.1/packages/local-html/src/html/compiler.ts#L126-L220)）
+>
+> 1. 正文范围：自定义 `selectContent`，否则依次找唯一的 `<main>`、唯一的 `<article>`、`<body>`。
+> 2. 删掉 `script`、`style`、`iframe`、`object`、`embed`、`form`；没有 main/article 时再删 `header`、`footer`、`nav`、`aside`。
+> 3. 删 `on*` 事件属性和 `javascript:` 链接；默认删 `style`、`class`，保留 `language-*` 给代码高亮。
+> 4. 标题用已有 id，没有就生成；同时写进目录和 `structuredData`；段落、列表项、表格单元格按所属标题写进搜索数据。
+> 5. `toJsxRuntime` 生成 React 元素，代码块懒加载 `rehypeCode` 高亮。
+>
+> 标题优先级：`<meta name="fumadocs:title">` > `<title>` > 文件名。
+
+这和我们现在「iframe 原样显示、页面里的脚本照常运行、目录靠在 iframe 里找标题」是两种取舍：官方得到的是和 MDX 一样的排版、目录、搜索和评论定位，失去的是 HTML 自己的样式和脚本。
+
+## 站点里怎么接
+
+```ts
+// app/lib/source.ts
+const html = localHtml({ dir: 'content' })
+const l = dynamicLoader({ docs: docs.toFumadocsSource(), html: html.dynamicSource({ baseDir: 'html' }) }, { baseUrl: '/' })
+export const getSource = () => l.get()
+
+// vite.config.ts（开发时）
+plugins: [localContentPlugin(), fumadocsMdx(), reactRouter()]
+
+// 路由
+const page = (await getSource()).getPage(slugs)
+if (page.type === 'html') { const { body, toc } = (await page.data.load()).render(mdxComponents) }
+// 搜索：createFromSource(getSource) —— 接受函数，按需调用每页的 structuredData()
+```
+
+按 `apps/docs/content/docs/(framework)/integrations/content/local-html.mdx` 与 `local-md.mdx` 改写。和 fumadocs-mdx 并进同一棵页面树，用对象形式，不用 `multiple()`。
+
+## 其他适配器与 story、preview
+
+- **mdx-remote** 不是来源，只是一个运行时 MDX 编译器，页面列表要自己写。
+- **content-collections**、**fuma-content**：编译在它们自己的构建阶段完成，适配器只把条目映射成虚拟文件。
+- **@fumadocs/story** 不产生页面，只在 MDX 里嵌入组件演示：Vite 插件在转换 `.story.*` 文件时用 TypeScript 编译器从组件 props 类型生成控件描述，注入到 `defineStory` 的参数里。这是「打包器转换阶段做静态分析」的例子。
+- **fumadocs-preview** 是独立的 Waku 应用（`fumadocs-preview <目录>`），自己把 local-content 的模式又写了一遍，热更新走 WebSocket + `router.reload()`。
+
+## 自己写一种来源的正确做法
+
+| 要做的来源 | 做法 |
+| --- | --- |
+| 目录里的数据文件渲染成页面（JSON、YAML…） | 实现 `ContentIntegration`，交给 local-content 的 `createLocalSource`，缓存、引用稳定、失效、Vite 监视器全都现成。编译渲染部分自己组合 core 的 `remarkHeading`、`remarkStructure`、`rehypeToc({ exportToc: { as: 'data' } })`（照 python 来源的写法），local-md / local-html 的编译器不对外导出 |
+| React 组件文件直接当页面（`*.page.tsx`） | 不适合 local-content（运行时读文本，TSX 必须进打包器才能执行）。用 `import.meta.glob` 产出一个 `StaticSource`，页面模块导出 `meta`；热更新交给打包器。官方没有现成实现 |
+| 注意 slug | slug 和 `meta.json` 匹配都只去掉一个扩展名：`foo.page.tsx` → `foo.page`，`index.page.tsx` 不会成为文件夹首页。来源自己给出 `slugs`，或者在 `path` 里去掉 `.page` |
+| 并进站点 | `loader({ docs, mine: mySource })`，路由按 `page.type` 分别渲染；`structuredData` 给对了，搜索不用另外写 |

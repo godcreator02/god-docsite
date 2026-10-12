@@ -1,0 +1,30 @@
+/*
+ * 「实时推送」（PushFlow）讲解动画自己的画面：五个地点、地点之间的线、沿线走的点与气泡。
+ * 外壳、控制条与颜色变量（--dx-*）由 @godcreator/docsite-explainer 提供；颜色只取那套变量，经 data-role 给出的 --dx-c 调淡，深浅主题跟着切换。
+ */
+.pf-svg { display: block; width: 100%; height: auto; font-family: inherit; }
+
+.pf-node rect { fill: color-mix(in srgb, var(--dx-c) 7%, var(--dx-surface)); stroke: color-mix(in srgb, var(--dx-c) 45%, transparent); stroke-width: 1; transition: stroke .25s, stroke-width .25s; }
+.pf-node[data-active] rect { stroke: var(--dx-c); stroke-width: 2; }
+.pf-title { font-size: 13px; font-weight: 600; fill: var(--dx-c); }
+.pf-sub { font-size: 10.5px; fill: var(--dx-dim); font-family: var(--dx-mono); }
+.pf-line { font-size: 11.5px; fill: var(--dx-fg); }
+
+.pf-edge line { stroke: var(--dx-line); stroke-width: 1.5; transition: stroke .25s, stroke-width .25s; }
+.pf-edge[data-dashed] line { stroke-dasharray: 5 4; }
+.pf-edge[data-active] line { stroke: var(--dx-c); stroke-width: 2.5; }
+.pf-edge text { font-size: 10.5px; fill: var(--dx-dim); }
+.pf-edge[data-active] text { fill: var(--dx-c); }
+.pf-edge[data-label-hidden] text { opacity: 0; }
+
+.pf-dot { fill: var(--dx-c); }
+.pf-msg rect { fill: var(--dx-surface); stroke: var(--dx-c); stroke-width: 1.2; }
+.pf-msg text { font-size: 11px; font-family: var(--dx-mono); fill: var(--dx-c); }
+
+.pf-site-box { fill: var(--dx-surface); stroke: var(--dx-line); }
+.pf-site-title { font-size: 10px; fill: var(--dx-dim); font-family: var(--dx-mono); }
+.pf-site-line { font-size: 11px; fill: var(--dx-fg); }
+.pf-site-new { fill: color-mix(in srgb, var(--dx-c) 14%, transparent); }
+.pf-site-added { fill: var(--dx-c); }
+
+.pf-clock { font-size: 11.5px; font-family: var(--dx-mono); fill: var(--dx-dim); }

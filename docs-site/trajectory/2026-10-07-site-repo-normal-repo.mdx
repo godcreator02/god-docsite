@@ -1,0 +1,33 @@
+---
+born-at: 2026-10-07T19:40
+type: choice
+parent: [2026-09-03-god-live-doc]
+label: gwb-collab 按对哪种仓做事分目录：collab-site-repo/ 与 collab-normal-repo/ 平级，project/ 只管整个项目
+domain: 形态
+---
+
+## 背景
+
+用户问 track、git、gitea、repo 是不是有重合。查下来 `git/`、`gitea/` 只是运行 git、调 Gitea 接口的封装，和 `track/` 不重合；真正放乱的是和「仓」有关的几处：
+- `collab-repo/repo-update.ts` 快进的是项目里别的仓，却放在协作仓目录里，`project/repo-setup.ts` 还反过来从它借函数
+- 提交前检查放在 `project/project.ts`，只给提交审核用
+- 别的仓散在三处：取回在 `track/repos.ts`，快进在 `collab-repo/`，建仓在 `project/`
+
+第一版方案把别的仓归进 `project/`，用户说：「项目里的仓应该和collab-repo/齐平，而且应该叫 collab-site-repo 和 collab-normal-repo这样区分开」。
+
+pivots-from:: [gwb-collab 的命令登记搬回各块的 commands.ts，交给 AI 并进 notify/](2026-10-07-commands-into-blocks.md)
+
+## 结论与边界
+
+- `collab-site-repo/` 是协作仓：取回 `fetch.ts`、自动同步 `sync.ts`、装站点依赖 `dependencies.ts`、提交审核 `submit.ts`、提交前检查 `submit-checks.ts`、读某个提交里的文件 `revision-files.ts`（原在 `git/`）、命令 `collab.submit`
+- `collab-normal-repo/` 是项目里别的仓：取回 `fetch.ts`（原 `track/repos.ts`）、快进 `update.ts`、建仓 `create.ts`、命令 `collab.repos.update`、`collab.repo.create`
+- `project/` 只管整个项目：打开项目与身份、克隆整个组织（`organizationSourceOf` 从 `track/` 搬进 `clone.ts`）、配仓 `repo-setup.ts`（两种仓都用，所以留在项目这一层）、组织 webhook，命令里多了 `collab.repo.setup`、`collab.org.setup`
+- `track/` 只决定什么时候取、取哪一处，自己不再运行 git 取回；`git-status.ts` 改名 `local-state.ts`，免得和 `git/status.ts` 混
+- 发 `leads changed` 的 `noticeLeadsChanged` 与参数解析 `repoAndNameOf` 建仓、配仓两边都用，放在 `src/commands.ts`
+- 只移动文件和函数、改 import；测试只改 import 路径，前后都是 300 个通过
+- 插件内部接缝图跟着改：「协作仓」框就是 `collab-site-repo/`（提交前校验挪进来），「别的仓」框就是 `collab-normal-repo/`，配仓与 webhook 归到「项目」框；图加宽 100
+
+## 否掉的候选
+
+- **别的仓归进 `project/`**：协作仓有自己的目录，别的仓却挂在项目下面，两种仓不对称，找别的仓的代码还得先想到它在项目里
+- **配仓 `repo-setup.ts` 放进 `collab-normal-repo/`**：协作仓也用它配负责人与 main 的保护，放进别的仓目录又会是协作仓反过来借别的仓的代码

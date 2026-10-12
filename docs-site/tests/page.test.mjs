@@ -7,6 +7,7 @@ import { test } from "vitest";
 import assert from "node:assert/strict";
 import { join } from "node:path";
 import { compile } from "@mdx-js/mdx";
+import remarkMath from "remark-math";
 import content from "@godcreator/docsite-docfirst/content";
 import { loadProject } from "@godcreator/docfirst-workflow";
 import { DOT_COLOR, whereOf } from "@godcreator/docfirst-workflow/fumadocs";
@@ -16,7 +17,9 @@ const project = await loadProject(process.cwd());
 const DOCS = project.docs().filter((doc) => doc.endsWith(".mdx"));
 const COMPONENT_FILES = project.docs().filter((doc) => !doc.endsWith(".mdx"));
 /** 功能包的 mdxComponents：页面里不用 import 就能写 */
-const FEATURE_COMPONENTS = new Set(["Term", "Files", "Folder", "File"]);
+import { mdxComponents } from "../app/lib/mdx-components";
+/** 不用 import 就能写的组件：fumadocs 默认组件表（Callout、Card 这些）与功能包给的（Term 与文件树） */
+const FEATURE_COMPONENTS = new Set(Object.keys(mdxComponents));
 
 /** 深度优先列出树上的节点 */
 function nodesOf(tree) {
@@ -37,7 +40,7 @@ async function treesOf(doc) {
   const capture = (key) => () => (tree) => {
     trees[key] = structuredClone(tree);
   };
-  await compile({ value: project.read(doc), path: join(project.root, doc) }, { remarkPlugins: [capture("written"), ...content.remarkPlugins, capture("built")] });
+  await compile({ value: project.read(doc), path: join(project.root, doc) }, { remarkPlugins: [remarkMath, capture("written"), ...content.remarkPlugins, capture("built")] });
   return trees;
 }
 

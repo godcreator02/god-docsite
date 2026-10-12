@@ -1,0 +1,43 @@
+---
+title: 编译 .mdx 的工序（组件版）
+docfirst: none
+description: 「编译 .mdx 的工序」用 @godcreator/docsite-explainer 的组件重做的试验页：不进 iframe，动画、说明与代码都是站内原生
+---
+
+import { CompileFlow } from './mdx-compile-explainer/compile-flow'
+import { OutputsPaths } from './mdx-compile-explainer/outputs-paths'
+
+[HTML 原版](/design/fumadocs/mdx-compile)的组件重做试验：整页是普通 MDX，动画用 `@godcreator/docsite-explainer` 的外壳与零件画出来。
+和 iframe 版的差别：页面进同一棵页面树、文字进搜索、标题进本页目录，主题切换照常跟随，评论也能定位到页里的任意一节。
+
+## 十七道工序
+
+跟着 `install.mdx` 从原文走到 JS 模块：左栏是原文（高亮当前工序碰的行），中栏是工序链（当前这道是谁的），右栏是语法树怎么一步步被改、最后导出了什么。
+
+<CompileFlow />
+
+## 同一正本的两条出路
+
+第 9 道工序后面，钉码插件用 `replaceSource` 登记了 `<Pin>` 的 Markdown 形式。同一份正本，站点与命令行各读一次：
+
+<OutputsPaths />
+
+## 两个要点
+
+**必须用 `applyMdxPreset` 包一层。**集合上直接写 `mdxOptions: { remarkPlugins: [x] }` 时，fumadocs-mdx 拿来就用、不再套默认工序：标题没了 id、没有搜索记录、没有本页目录、代码不高亮。写成函数时插件接在所有默认工序之后（现在的 docfirst 站就是这样，所以排在 structure 后面）：
+
+```ts
+// 集合设置：数组形式插在默认工序中间、structure 之前
+applyMdxPreset({ remarkPlugins: [remarkDocfirst()] })
+
+// 直接写（错了）：默认工序全部消失
+{ remarkPlugins: [remarkDocfirst()] }
+```
+
+**改被钉的代码要让页面跟着变，靠登记依赖。**插件读别的文件时调 `addDependency`，fumadocs-mdx 把它转成 Vite 的 `addWatchFile`，Vite 就让这一页失效重编。现在的 docfirst 没登记依赖：dev 下改了被钉的代码，页面不会变，要再存一下 .mdx 或重启。
+
+```ts
+// 钉码插件里（示意）
+const code = readLines('src/setup.ts', 3, 9)
+compiler.addDependency('src/setup.ts')   // ← Vite 从此盯住这个文件
+```

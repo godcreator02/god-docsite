@@ -1,11 +1,12 @@
-# 文档站地基与 docfirst 工作流
+# 文档站地基、docfirst 工作流与协作站
 
 本文件有两份：Claude Code 读 `CLAUDE.md`（它是本仓 docs-site 的生成物），zcode 等客户端读 `AGENTS.md`（手写的正本），改这份同步那份的内容。
 
-仓根是 pnpm 包工作区，住着两族东西：**地基**（文档站基础包与它的能力包、gwb-docsite 插件、自述站）与
+仓根是 pnpm 包工作区，住着三族东西：**地基**（文档站基础包与它的能力包、gwb-docsite 插件、自述站）、
 **docfirst 文档工作流**（钉码 code-pin、星轨盘 trajectory-disk、命令行 docfirst-workflow、功能包 docsite-docfirst、
-gwb-docfirst-workflow 插件、docs-site 文档站）。2026-10-12 前 docfirst 住在独立的 gwb-docfirst 仓，选型见
-`docs-site/trajectory/2026-10-12-merge-into-docsite-kit.mdx`。
+gwb-docfirst-workflow 插件）与**协作站**（数据模型包 collab-model、功能包 collab-site、合并检查包 collab-merge-check、
+gwb-collab 插件）。docfirst 2026-10-12 自 gwb-docfirst 仓并入（选型卡 `docs-site/trajectory/2026-10-12-merge-into-docsite-kit.mdx`），
+协作站 2026-10-13 自 collab-site 仓并入（旧仓在 gitea 上归档）。`docs-site/` 是全仓唯一的文档站：三族的说明、原理与 Gitea 部署都在它里面。
 
 ## 仓里有什么
 
@@ -17,20 +18,21 @@ gwb-docfirst-workflow 插件、docs-site 文档站）。2026-10-12 前 docfirst 
 | `packages/docfirst-workflow/` | docfirst 本身：命令行、项目装配与格式，接到 fumadocs 站上的部分在子入口 `./fumadocs` |
 | `packages/docsite-docfirst/` | 地基的功能包：remark 插件、Term 与文件树、星轨盘与卡页路由；`template/` 的起始物（docfirst.config.mjs、outputs 正本、两区起始页）从 docs-site 派生 |
 | `packages/docfirst-explainer/` | 转发薄壳：`@godcreator/docsite-explainer` 的原出口名转发（正本已在本仓），装旧包名的站不用改代码 |
+| `packages/collab-model/` 等 | 协作站三包：model（数据模型：仓布局、任务与模块格式、通知）、collab-site（功能包：任务页、日历与日志、通知栏）、merge-check（合并检查）。对基础包的依赖暂钉 `^0.1.x`，跟 0.3.0 的适配是 gitea 上 collab-site 仓的 issue #4 |
 | `plugins/docsite/` | gwb 基础插件 `@godcreator/gwb-docsite`：身份码、一步建站（建站器在插件里，骨架模板从自述站派生）、托管站点、评论命令、说明书 `docsite` |
 | `plugins/docfirst/` | gwb 插件 `@godcreator/gwb-docfirst-workflow`：`docfirst.create`（认站名、选端口、把 docsite-docfirst 交给 `gwbDocsite.init`）、说明书 `docs-site` / `docs-writing` / `trajectory` |
-| `site/` | 自述站：讲地基与能力包，是**骨架的正本**——`app/` 与根目录的配置手写在这里，docsite 插件构建时派生建站模板（`plugins/docsite/template/`，构建产物不进 git） |
-| `docs-site/` | docfirst 文档站：讲钉码/核对/轨迹卡，是 **docfirst 站的正本与示例**，骨架与自述站同代、手写 |
+| `plugins/collab/` | gwb 插件 `@godcreator/gwb-collab`：协作仓与别的仓两套操作、通知交给站点/窗格/QQ/AI、项目与任务命令，站点交给 gwb-docsite |
+| `site/` | 自述站：**骨架的正本**——`app/` 与根目录的配置手写在这里，docsite 插件构建时派生建站模板（`plugins/docsite/template/`，构建产物不进 git）；内容只剩最小示例与评论定位回归页 |
+| `docs-site/` | 全仓文档站：三族的说明、fumadocs 原理、维护者手册与随插件发布的说明书正本（outputs），骨架与自述站同代、手写；轨迹卡三族并在站点根 `trajectory/` |
 | `tests/` | 工作区级测试：`boundary.test.ts`（全仓边界守卫——地基不认识 docfirst、docfirst 单向用 docsite-kit）、`template-versions.test.ts`（模板版本盯守） |
-| `trajectory/` | 地基侧轨迹卡，只增不改；docfirst 的轨迹卡在 `docs-site/trajectory/` |
 | `probes/` | 实验材料，一个实验一个目录，照目录里 README 第一行就能重新运行 |
 
-基础包的用法、项目骨架每个文件做什么，写在自述站 `site/content/` 里；docfirst 工作流的原理与操作写在 `docs-site/content/`，
-动手前先看两站的首页与全局接缝图。
+全部说明都在 `docs-site/content/` 的六个分区里（总览与原理、docsite、docfirst、collab、gitea、维护者手册），
+动手前先看总览页的体系地图。
 
 ## 怎么跑
 
-* `pnpm install` 之后 `pnpm build` 按依赖序构建全部包、两个插件与两个站；站点只用各包的构建产物
+* `pnpm install` 之后 `pnpm build` 按依赖序构建全部包、三个插件与两个站；站点只用各包的构建产物
 * `vite` 挂着 8.3.4 的补丁（`patches/vite@8.3.4.patch`，登记在仓根 `pnpm-workspace.yaml`）：Windows 上 Vite 对
   `import.meta.glob` 相对 base 的处理有缺陷，成因与验证见 `probes/2610121018_vite-add-discovery`。升级 vite 前先跑该 probe 的测试看上游修了没有
 * 两个站的开发服务都交给 gwb-docsite 托管（`docsite.site.add`），不在会话里自己 `pnpm dev`；自述站在 4430、docs-site 在 4340。
@@ -43,7 +45,8 @@ gwb-docfirst-workflow 插件、docs-site 文档站）。2026-10-12 前 docfirst 
 * 提交前的检查，每处都过才提交：仓根 `pnpm check`（根 tests 的类型检查 + 逐包 check）、`pnpm test`、`pnpm build`；
   `docs-site/` 里 `pnpm docfirst check`、`pnpm test`、`pnpm typecheck`、`pnpm build`；改了被钉的代码，本仓未提交改动引起的黄灯算红，
   照 `docs-site` 说明书处理后放进同一个提交
-* 发版只用 `devkit.release`，包按依赖序排：能力包 → 组合包 → 插件；docfirst 侧的包与插件各发各的。升版本号前先读 skill「gwb-release」
+* 发版只用 `devkit.release`，包按依赖序排：能力包 → 组合包 → 插件；docfirst 侧各发各的；协作站按
+  collab-model → collab-merge-check → collab-site → plugins/collab 的顺序。升版本号前先读 skill「gwb-release」
 
 ## 规矩
 
@@ -51,10 +54,10 @@ gwb-docfirst-workflow 插件、docs-site 文档站）。2026-10-12 前 docfirst 
   docfirst 只有 docsite-docfirst 经 peer 用组合包 docsite-kit。改方向先改那张表并写明为什么
 * `plugins/docfirst/src/deps.ts` 是写进新站的功能包版本表（精确号），`plugins/docfirst/tests/create.test.ts` 盯着它与
   工作区版本一致；`docsite-docfirst` 模板里 docfirst-workflow 的范围由根 `tests/template-versions.test.ts` 盯守
-* 改了基础包或插件的行为、导出、命令，同一个提交里改对应站的说明页（插件还有随包的 SKILL.md，正本在 `docs-site/content/`，
-  `pnpm docfirst render` 生成）；地基侧的说明页正本在 `site/content/`
+* 改了基础包或插件的行为、导出、命令，同一个提交里改 `docs-site/content/` 对应分区的说明页（插件还有随包的 SKILL.md，
+  正本在 `docs-site/content/docs/outputs/skills/`，`pnpm docfirst render` 生成）
 * 仓根的 README.md 与 CLAUDE.md 是 `docs-site` outputs 的生成物（正本在 `docs-site/content/docs/outputs/`）；AGENTS.md 手写（本文件）
-* 某条路走不通、做了选型、实验有了结论，当场写一张轨迹卡（地基侧 `trajectory/`、docfirst 侧 `docs-site/trajectory/`），只增不改
+* 某条路走不通、做了选型、实验有了结论，当场写一张轨迹卡（三族统一放 `docs-site/trajectory/`），只增不改
 * 评论定位的回归页是自述站写作示例里的「收起内容试验」（`site/content/writing/collapse-test.mdx`）：改了评论定位，在它上面过一遍
 
 ## 只读参考

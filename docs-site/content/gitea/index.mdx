@@ -1,0 +1,39 @@
+---
+title: Gitea 与 NAS
+description: 协作站里不属于哪个包的那一侧：NAS 上的 Gitea、执行器与 ntfy 各做什么、和哪个包打交道，一个项目在 Gitea 上是什么样子。这个分区写的是在 Gitea 与 NAS 上要配的东西、由哪条命令配；调 Gitea 接口的代码在插件与合并检查包的工作流模板里，写在各自的分区
+---
+
+协作站没有站点服务器，Gitea 是唯一的远端。NAS 上和协作站有关的就是下面三样。组织、团队、组织密钥、工作流文件由人在 Gitea 网页上配；各仓的负责人、main 的保护、合并方式与组织的 webhook 由 gwb-collab 的命令照插件里写好的规矩写进去，人不在网页上手改：
+
+| NAS 上的 | 做什么 | 谁调它 | 要配的写在 |
+| --- | --- | --- | --- |
+| Gitea | 存项目的全部仓；收下成员的推送、开合并请求；按团队、协作者与 main 的保护决定谁能改 main；也是 `@godcreator` 包的 npm 源 | gwb-collab 经 gwb-gitea 的令牌克隆、取回、推送、读协作者、读合并请求与它的审阅、读 issue 与评论、建仓、配仓、配组织的 webhook；执行器以 `collab-bot` 读协作仓的协作者、合并或打回 | [权限怎么配](/gitea/permissions) |
+| 执行器 `gitea-runner` | 只管协作仓：按协作仓 main 上的工作流检查每个合并请求，以 `collab-bot` 合并或打回 | Gitea Actions 派任务；它运行合并检查包的命令行 `collab-merge-check` | [执行器与自动合并](/gitea/push) |
+| ntfy | 把组织的 webhook 转成实时推送，告诉每个成员的插件哪个仓出了什么事，插件再去 Gitea 取那一处 | Gitea 的组织 webhook 发进来（由组织管理员用 `collab.org.setup` 配）；`collab.repo.setup`、`collab.repo.create` 配好负责人后也往里发 `leads changed`；gwb-collab 订阅 | [实时推送的部署](/gitea/push) |
+
+在全局接缝图（[系统组成](/collab)）里，这一侧画在框外：协作仓那一行经过接缝 4 提交审核、5 自动合并、7 取回 main、9 负责人，别的仓那一行经过 10 取回别的仓、12 等我处理的，组织的 webhook 与 ntfy 是 13 仓里出了事、14 位置消息。
+
+## 插件里和这一侧打交道的几处
+
+| 这一侧的东西 | 插件里谁写、谁核对 |
+| --- | --- |
+| 协作仓的协作者、main 的保护、合并方式 | 协作仓那一套的 `collab-repo/rules.ts`：main 谁都不能直接推，合并只许团队 `bots` |
+| 别的仓的协作者、main 的保护、合并方式 | 别的仓那一套的 `other-repos/rules.ts`：main 的推送与合并只许负责人，不写团队 |
+| 两种仓共用的核对与配置步骤 | `gitea-api/repo-rules.ts`，推送与合并许可各给谁由上面两处当参数传进来 |
+| 组织的 webhook | `organization/events/webhook.ts`：期望配置、核对、`collab.org.setup` |
+| 订阅 ntfy、把消息分给两边 | `organization/events/` 里 `ntfy-subscription.ts` 管连接，其余的认消息、按仓分给协作仓那一套或别的仓那一套 |
+
+两套规矩各自调共用的那一份，差在 main 的推送与合并许可：
+
+{/* ref file="../plugins/collab/src/collab-repo/rules.ts" lines="5-6" hash="0388cffaba4b" blob="635892e2fc80" */}
+{/* ref file="../plugins/collab/src/other-repos/rules.ts" lines="6-7" hash="959a02972c7e" blob="a7aa977c2e96" */}
+
+## 一个项目在 Gitea 上
+
+一个项目是 Gitea 上的一个私有组织，以 hybrid-mmc 为例：
+
+- **组织里的仓**：带 `collab/` 与 `site/people.json` 的那个是协作仓，成员在网站上写的任务、模块、评论和页面都在它里面，合并请求由执行器合并；其余是别的仓（资料库、代码仓），合并请求由各仓的负责人审、负责人同意后合并。两种仓在插件里各走一套，见 [协作仓那一套与别的仓那一套](/collab/other-repos)
+- **人**：全部成员在团队 `members` 里；每个仓的负责人就是这个仓的协作者，项目负责人就是协作仓的协作者；机器人账号 `collab-bot` 只在团队 `bots` 里、只对协作仓有写权限
+- **令牌**：每个成员一个，填在自己的 gwb-gitea 里，插件联网都用它；`collab-bot` 的存成组织密钥，只给执行器用
+
+新建项目、加人、换负责人时按什么顺序改哪几处，见 [建项目与人员变动](/gitea/setup)。NAS 上的容器怎么部署不在这个站里，写在 NAS 配置仓的 teamhub 篇。

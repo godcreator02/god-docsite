@@ -1,3 +1,5 @@
+import rehypeKatex from 'rehype-katex'
+import remarkMath from 'remark-math'
 import { applyMdxPreset, defineCollections, defineDocs } from 'fumadocs-mdx/config'
 import { featureContents } from './app/site/content.ts'
 
@@ -9,7 +11,7 @@ import { featureContents } from './app/site/content.ts'
  * - trajectory：轨迹卡集合（docsite-docfirst 模板复制件里的定义在 app/lib/trajectory.ts：fumadocs-mdx 跳过
  *   node_modules，集合定义必须写在项目里），它自己挂功能包的 remark（卡里的链接要改写）
  *
- * 自述站（骨架的正本）的这份配置挂的是术语与公式；docfirst 站的术语走功能包自己的 remark 链，不挂那两样
+ * 公式与术语都挂：remarkMath 在最前（先让 $…$ 变 math 节点，术语标注与钉码投影碰不到公式）；术语走功能包自己的 remark 链
  */
 export const docs = defineDocs({
   dir: 'content',
@@ -17,7 +19,9 @@ export const docs = defineDocs({
     async: true,
     postprocess: { includeProcessedMarkdown: { output: 'function', headingIds: false } },
     mdxOptions: applyMdxPreset({
-      remarkPlugins: (defaults) => [...defaults, ...featureContents.flatMap((feature) => feature.remarkPlugins ?? [])],
+      remarkPlugins: (defaults) => [remarkMath, ...defaults, ...featureContents.flatMap((feature) => feature.remarkPlugins ?? [])],
+
+      rehypePlugins: (list) => [rehypeKatex, ...list],
     }),
   },
 })

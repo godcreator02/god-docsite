@@ -1,0 +1,78 @@
+---
+title: 文档站基础包
+docfirst: none
+description: 基于 fumadocs 的文档站基础包，协作站、docfirst 文档站与论文阅读站都用它搭
+icon: BookOpen
+---
+
+`@godcreator/docsite-kit` 是一个 npm 组合包，只做接线；站点功能在各能力包里。项目里的站点目录放一套固定的骨架文件（见[项目骨架](/docsite/skeleton)），
+骨架引用这些包，就得到一个 fumadocs 文档站。
+
+站点用 React Router 的框架模式加 Vite：本机开发时运行 `pnpm dev`，改了页面立刻看到；
+发布时 `pnpm build` 之后用 `react-router-serve` 开服务，发布出去的站只读。
+
+## 包里有什么
+
+组合包 `@godcreator/docsite-kit` 本身没有站点功能，只做接线：
+
+| 导出 | 用在哪 | 内容 |
+| --- | --- | --- |
+| `./vite` | `vite.config.ts` | 开发服务插件 `docsite()`，见[开发服务插件](/docsite/dev-plugin) |
+| `./feature` | 功能包 | 功能包要提供的几个出口的类型约定，见[功能包](/docsite/features) |
+| `./routes` | 骨架的 `app/routes.ts` | 功能包的路由文件换成相对 `app/` 的真实路径（`featureRouteFilesOf`），见[功能包](/docsite/features#路由模块留在包里) |
+| `./site-modules` | 功能包 | 功能包的路由模块经别名 `@site` 读骨架模块的类型声明，见[功能包](/docsite/features#路由模块留在包里) |
+
+功能在各能力包里：
+
+| 能力包 | 管什么 |
+| --- | --- |
+| `@godcreator/docsite-identity` | 人员与身份：`people.json` 的读取与校验、本机身份码认人、写入请求的身份与来源核对（`./server` 的 `authorizeWrite`）、@ 提及、头像与身份标识组件（`./react`） |
+| `@godcreator/docsite-comments` | 评论：评论串模型与文件读写（评论是 fumadocs-mdx 集合里的文件，与页面同一编译链；模型纯函数在 `.`、Node 读写与读目录在 `./server`）、页面旁的评论界面（`./react`）、正文外的批注覆盖层（`./overlay`），见[评论](/docsite/commenting) |
+| `@godcreator/docsite-page-sources` | 页面来源：TSX/HTML 页面做成 fumadocs 的来源、进同一棵页面树与搜索索引，中文搜索服务（`./server` 的 `searchServerOf`）、`content/` 资产的开发服务读取与 build 快照（`./server`）、TSX/HTML 正文组件（`./ui`），见[三种页面](/docsite/page-types) |
+| `@godcreator/docsite-ui` | UI 外壳：侧栏分组 `groupKeepingSidebar`、侧栏入口横排 `SidebarRouteLinks`、站内链接卡片 `siteLinkComponent`、全宽切换、主题切换与身份标识 `themeSwitchWithIdentity`、中文界面文字 `zhTranslations`。出口 `.`、`./styles.css` |
+| `@godcreator/docsite-writing` | 写作组件：术语 `Term`（组件在 `.`，remark 标注插件在 `./compile`）、TSX 页面里的公式 `Tex`，见[写一页说明](/docsite/writing#公式) |
+| `@godcreator/docsite-feed` | 推送通道：协议、进程内存储 `feedStore`、开发服务收发端点 `feedDevServer`、浏览器 hook `useSiteFeed`，见[开发服务插件](/docsite/dev-plugin#收-gwb-插件推来的数据) |
+
+gwb 插件不经开发服务读站点目录时用的是能力包的出口：人员 `sitePeople`（`docsite-identity/server`）、评论 `readCommentThreads`（`docsite-comments/server`）；
+站点检查与站名的读取是插件自己的实现，见[gwb 基础插件](/docsite/gwb-plugin)。
+
+布局用 fumadocs 的 docs 布局：左侧侧栏里从上到下是站名、切换下拉框、搜索与入口那一横排、当前这一组的页面，侧栏底部那一栏左边是写评论的人（本机开发时才有）、右边是主题切换；本页目录在正文右边。
+
+宽屏时布局铺满窗口：左侧栏贴左边，本页目录那一列贴右边、宽 340px，正文在中间那一列里居中、最宽 900px；
+fumadocs 默认在窗口比 97rem 宽时把整个布局居中，左右各空出一截，铺满的样式在 `@godcreator/docsite-ui` 的 `styles.css` 里。
+评论侧栏也是正文右边固定宽度的一列，宽屏时和正文并排、不占目录的位置，窄屏时排在正文下面。
+
+每页标题右边有「全宽」按钮（`PageTitleWithWideToggle`，各页面路由用它代替 `DocsTitle`）：点了正文不限最大宽度，宽屏时目录那一列也让给正文、目录改成上方的下拉条；
+评论侧栏照常在正文右边。开关记在浏览器里，全站的页面一起变；`root.tsx` 的 `<head>` 里放了 `widePageScript`，
+页面画出来之前就按记下的开关打上标记，打开页面时不会先窄后宽地跳一下。
+
+骨架直接用 fumadocs 的 `DocsLayout`，`@godcreator/docsite-ui` 的组件换掉其中的侧栏（`slots.sidebar` 用 `groupKeepingSidebar`）
+和侧栏里的搜索框（`slots.searchTrigger` 用 `routeLinksSearchTrigger`）。
+
+## 侧栏
+
+`meta.json` 写了 `"root": true` 的文件夹是一组，是侧栏里切换下拉框的一项，切换后侧栏只列那一组的页面。
+这个站有「基础包」和「写作示例」两组。
+
+全部评论页这类站点自己的页面不在页面树里，不属于哪一组。fumadocs 自己的侧栏在这种页面上找不到当前组，会收起下拉框、列出整棵页面树；
+`groupKeepingSidebar`（`@godcreator/docsite-ui`）让侧栏停在最近看过的那一组：下拉框和页面列表都不变，还没看过哪一组时停在第一组，刷新后从第一组开始。
+它只改侧栏：正文上方的面包屑、页尾的上一页下一页仍按真实的页面树，这种页面上照旧没有。
+
+搜索和站点自己的页面的入口用 `SidebarRouteLinks` 排成一横排，放在下拉框下面（`DocsLayout` 的 `sidebar.banner`）。
+最左边是只有图标的搜索按钮，鼠标停在上面提示「搜索（Ctrl K）」，Ctrl K 照样能打开搜索；`slots.searchTrigger` 用 `routeLinksSearchTrigger`，
+侧栏里就不再有整行的搜索框，窄屏顶栏的搜索按钮照旧。后面每个入口是图标加短名字，当前地址就是这个入口、或在它下面（`/tasks/…` 算「任务」）时高亮。搜索和各入口等宽，中间用竖线隔开。
+这个站的入口只有一项「评论」，写法见 `app/routes/layout.tsx`。
+
+## 搜索
+
+骨架的 `app/lib/source.server.ts` 用 `searchServerOf(() => source)`（`@godcreator/docsite-page-sources/server`）建搜索服务：fumadocs 搜索接口加上适合中文的两项设置，三种页面一起搜。
+fumadocs 默认按 Unicode 规则切词，中文能切开；但它还默认允许一个字的出入（搜「滑块」会命中「模块」），
+而且只要切出的词有一个出现就算命中（搜「页面树」时含「页面」的页全都返回）。这两项都关掉了：每个词都要原样出现。
+传函数而不是 loader 实例：开发模式下内容增删让来源模块重新执行、得到新 loader 时，搜索索引跟着重建。
+
+代码块里的文字不进搜索，这是 fumadocs 的做法。
+
+## 这个站
+
+你正在看的站就是用这个包搭的，站点目录是仓里的 `site/`，内容是这个包自己的说明。
+开发基础包时也在这个站上看效果：站点用包的构建产物，改了包要先构建、再重启开发服务。

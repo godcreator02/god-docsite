@@ -1,0 +1,27 @@
+---
+born-at: 2026-09-25T16:25
+type: evidence
+parent: [2026-09-03-god-live-doc]
+label: AGit 实测
+domain: 协作流程
+---
+
+## 背景
+
+用户提出「可以用fork+pr模型，让项目负责人彻底管控，避免把仓库改烂了」。讨论后倾向 AGit：成员只有读权限，推送到 `refs/for/main` 由 Gitea 自动建合并请求，不用复刻；批注这类只改协作记录的合并请求由负责人写规则、机器人自动合并。用户问「你可以拿现在的gitea实验下不？」，并同意在自建 Gitea 上建测试仓，用已有的测试账号 bob-test、carol-test 扮演两个成员。
+
+## 经过
+
+克隆了三份（负责人 godcreator 与两个只读成员），测试仓 `godcreator/agit-probe` 只给两名成员读权限，main 的推送与合并只允许 godcreator。依次做了：成员直接推 main、成员用 AGit 建合并请求、同一主题再推、两人改同一行后先合并一个、另一人变基并强制推送同一主题、成员把提交作者伪造成另一人再建合并请求；负责人与「机器人」的动作都走 Gitea API。
+
+## 结论与边界
+
+AGit 在 Gitea 1.27.1 上可以直接用，不需要打开任何仓库开关。只读成员推 main 被拒；推 `refs/for/main` 能建合并请求，同一主题再推是更新而不是新建；先合并一个以后另一个会被标成不可合并，提交者变基后带 `force-push=true` 推同一主题即可恢复；合并请求的发起人按推送时的登录凭据记录，改提交作者骗不过去，所以机器人比对记录里的 `author` 与发起人就能拒绝冒名。机器人需要的发起人、改动文件及状态、按提交号读文件内容、合并与关闭，API 都提供。
+
+要注意两点：推送输出对新建的合并请求也写「Visit the existing pull request」，不能靠它判断新建还是更新；通过 API 合并时 `merged_by` 为空。
+
+没覆盖：Gitea Actions 对 AGit 合并请求的触发；成员在网页上直接改文件；两人同时推同一主题。
+
+## 依据
+
+实验记录在 `probes/2609251618_agit-two-person/`：`README.md` 与 `runs/00-setup.txt` 到 `runs/07-api-observations.txt`。测试仓 `godcreator/agit-probe` 上的合并请求 #1（合并）、#2（冲突后合并）、#3（冒名，已按规则关闭）。

@@ -1,0 +1,27 @@
+---
+born-at: 2026-09-25T17:10
+type: choice
+parent: [2026-09-03-god-live-doc]
+label: TSX 页与 Vite
+domain: 形态
+---
+
+## 背景
+
+[TSX 页样板](2026-09-25-vite-react-pages-sample.md) 搬进 SST 仓后，用户看过认为「这效果感觉还不错」，随后问用到 fumadocs、Next 没有；得知只借了 fumadocs 的外壳，决定「外壳我们都自己做呗」「不做手机端，不需要参考fumadocs，重新设计一个外壳就行了」。之后用户又问「Vite + React Router 为什么不直接next？」，讨论后同意 Vite。
+
+## 结论与边界
+
+每一页是一个 React 组件（`.tsx`），文字为主的页面以后也可以用 MDX；底座是 Vite 加 React Router，页面全部在浏览器里运行；外壳自己做（三栏、批注模式、复制给 AI、主题切换），不用 fumadocs，不做手机端。框架做成 npm 包 `@godcreator/collab-site`，以 Vite 插件的形式把外壳整个带进项目，项目仓只放页面、项目自己的组件与一行 `vite.config`。
+
+不用 Next 的理由：页面没有服务端数据，Next 的服务端组件用不上，反而要求有交互的页面写 `'use client'`；批注数据就地更新靠的是 Vite 插件的热更新通道，Next 没有现成的；构建 20 到 30 秒对 0.3 秒；框架整个放进包里，Next 只能做到薄骨架。代价是 gwb 的 docs-site 插件起不了这种站、docfirst 钉码对 TSX 页不起作用，站点改由 gwb 的协作插件启动。
+
+supersedes:: [薄骨架包](2026-09-25-package-with-thin-skeleton.md)
+
+## 否掉的候选
+
+继续 Next 加 fumadocs、页面写 MDX：MDX 里的 HTML 标签其实是 JSX，原样的 HTML 放不进去，交互也要绕。
+
+纯 HTML 页加注入脚本：用户认为「这个感觉也太简陋了」。
+
+Astro：要换一整套技术栈，钉码与 docs-site 插件同样用不上。

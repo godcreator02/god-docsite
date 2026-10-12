@@ -3,9 +3,10 @@
  *
  * 项目根是这个站目录，引用的代码在工作区的 packages/ 与 plugins/ 下，所以引用里写 `../packages/…` 或 `../plugins/…`。
  * 分区按约定：content/ 下 future/ 是未来区，其余目录都是现状区、都进 check；
- * 本站的现状区是 content/docs（原理）与 content/maintain（维护这个仓），外加 src/components/ 下讲解组件的源码。
- * outputs：仓根 README.md / AGENTS.md / CLAUDE.md 和插件里的几份 SKILL.md 是生成物，正本是下面映射左边的 mdx
- * （AGENTS 的正本在 content/maintain/agents.mdx，其余在 content/docs/outputs/）——
+ * 本站的现状区按能力分：content/docs（总览与原理）、content/docsite（地基）、content/docfirst（docfirst 的包与插件）、
+ * content/collab（协作站的包与插件）、content/gitea（在 Gitea 与 NAS 上配的部分）、content/maintain（维护这个仓），外加 src/components/ 下讲解组件的源码。
+ * outputs：仓根 README.md / CLAUDE.md 与两个插件里的几份 SKILL.md 是生成物，正本是下面映射左边的 mdx
+ * （都在 content/docs/outputs/）；AGENTS.md 是手写的正本，不在 outputs 里——
  * 改 mdx 源要运行 `pnpm docfirst render`（`confirm` 也会顺带做），两份一起提交，check 检查生成物跟源是否一致。
  * CLAUDE.md 第一行固定是 `@AGENTS.md`，只给 Claude 的指令写在它后面。
  * 组件名册：先展开 fumadocsRoster（fumadocs 自带的 Files / Folder / File 与 Note 的机读规则，纯数据，命令行也能加载），
@@ -26,6 +27,14 @@ import * as spanFollow from "./src/components/span-follow/span-follow.ai.mjs";
 import * as commitGate from "./src/components/commit-gate/commit-gate.ai.mjs";
 import * as trajectoryFlow from "./src/components/trajectory-flow/trajectory-flow.ai.mjs";
 import * as boundaryRules from "./src/components/boundary-rules/boundary-rules.ai.mjs";
+// 协作站迁入的讲解组件：FlowSeamMap 是数据流画法的接缝图（协作站的全局图），SeamMap 仍是模块框画法
+import * as seamMapFlow from "./src/components/seam-map-flow/seam-map.ai.mjs";
+import * as submitScenarios from "./src/components/submit-scenarios/submit-scenarios.ai.mjs";
+import * as recordMerge from "./src/components/record-merge/record-merge.ai.mjs";
+import * as writeRule from "./src/components/write-rule/write-rule.ai.mjs";
+import * as autoMerge from "./src/components/auto-merge/auto-merge.ai.mjs";
+import * as pushFlow from "./src/components/push-flow/push-flow.ai.mjs";
+import * as repoModes from "./src/components/repo-modes/repo-modes.ai.mjs";
 
 /**
  * 一份 skill 的生成位置：正本是 `content/docs/outputs/skills/<名>.mdx`，生成到**插件**里那份 SKILL.md。
@@ -45,6 +54,13 @@ export default {
     "content/docs/outputs/skills/docs-site.mdx": [skill("docs-site")],
     "content/docs/outputs/skills/docs-writing.mdx": [skill("docs-writing")],
     "content/docs/outputs/skills/trajectory.mdx": [skill("trajectory")],
+    // gwb-collab 随包发布的说明书：主文件与三份附件，正本自协作站文档站迁入
+    "content/docs/outputs/skills/collab/index.mdx": [
+      { to: "../plugins/collab/skills/collab/SKILL.md", frontmatter: ["name", "description"] },
+    ],
+    "content/docs/outputs/skills/collab/collab-repo.mdx": ["../plugins/collab/skills/collab/references/collab-repo.md"],
+    "content/docs/outputs/skills/collab/other-repos.mdx": ["../plugins/collab/skills/collab/references/other-repos.md"],
+    "content/docs/outputs/skills/collab/organization.mdx": ["../plugins/collab/skills/collab/references/organization.md"],
   },
   components: {
     ...fumadocsRoster,
@@ -60,6 +76,13 @@ export default {
     PinStory: pin.PinStory,
     PinJudge: pin.PinJudge,
     SeamMap: seamMap.SeamMap,
+    FlowSeamMap: seamMapFlow.SeamMap,
+    SubmitScenarios: submitScenarios.SubmitScenarios,
+    RecordMerge: recordMerge.RecordMerge,
+    WriteRule: writeRule.WriteRule,
+    AutoMergeRun: autoMerge.AutoMergeRun,
+    PushFlow: pushFlow.PushFlow,
+    RepoModes: repoModes.RepoModes,
     RenderFlow: renderFlow.RenderFlow,
     RefKinds: refKinds.RefKinds,
     SpanFollow: spanFollow.SpanFollow,

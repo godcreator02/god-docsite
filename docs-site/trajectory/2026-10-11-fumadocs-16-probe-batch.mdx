@@ -1,0 +1,67 @@
+---
+born-at: 2026-10-11T19:40
+type: evidence
+parent: [2026-09-03-god-live-doc]
+label: 基础包改造前的五个探针：页面清单增删、评论 tsx、feeds 写文件、库共用上下文、复制布局
+domain: 骨架
+---
+
+## 背景
+
+文档站基础包与 docfirst 要照 `design/30-refactor-plan.html` 重做（fumadocs 升 16.17.1、fumadocs-mdx 15.4.7，
+机制 M1–M5），第 1 批（K-01 到 K-14）动工前有五个点从源码推不出结论：E-3 评论文件夹里的 `.tsx`、
+E-4 构建好的库与站点共用 React 上下文要不要 `ssr.noExternal`、E-5 增删内容文件页面清单会不会自动更新、
+E-6 `customise` 复制布局后宽屏与侧栏停组能不能做、E-7 `feeds/` 写文件当集合读的更新方式。
+全部在 fumadocs 官方 react-router 示例搭的探针站上做，不加基础包、不加自写 Vite 插件（E-4/E-6/E-7 各自的改动除外）。
+
+## 结论与边界
+
+**E-5 增删内容文件：fumadocs-mdx 自己处理不了（K-04 的「文件增删后让模块失效」要保留）**。新建 mdx
+不触发任何重编译，侧栏与页面树不变、新地址 404，等 22 秒也不出现，要重启 dev 才进清单；改已有文件的标题
+1 秒内生效，但方式是整页刷新（mdx 模块不能 Fast Refresh）；删除已有文件更糟——侧栏清掉了该页，集合的
+虚拟模块却仍引用它，SSR 报 `Failed to load url … only=frontmatter`，整站 500 不自愈，重启才恢复。
+失效时机要在集合虚拟模块重新解析之前，否则就是删除后看到的 500。
+
+**E-3 评论里的 `.tsx`：成立，条件是新增评论文件夹要重启（K-05 照此设计）**。评论集合（`type: 'doc'`、
+`async: true`）里 `index.mdx` import 同文件夹的动画组件，dev 下整页渲染、组件进 SSR HTML、改它整页刷新生效；
+build + start 下同样正常。dev 运行时复制出的新评论文件夹 15 秒内不出现，与 E-5 新建文件同根。
+无 schema 时条目把 frontmatter 字段摊平在 `entry` 顶层，没有 `entry.data`。
+
+**E-7 feeds 写文件：第一轮不成立，补做（server-only 写法）后成立——K-08 按补做写法实现**。
+第一轮把读 feeds 的代码放在 `app/lib/source.ts`（浏览器端也加载它）：写 `feeds/demo.json` 后同一秒
+客户端与服务端同时 page reload，SSR 输出 277 ms 更新，但页面上的计数器归零、`window` 标记丢失——
+整页刷新，未保存的交互状态（评论草稿一类）会丢。**当晚补做**：读 feeds 的代码挪进
+`app/lib/feeds.server.ts`（`.server.ts` 后缀不进客户端 bundle），只在路由 loader 里 import、
+浏览器端代码不碰它——文件一变 292 ms SSR 出新值，页面上数据更新、计数器保持原值、`window` 标记
+保留（没有整页刷新），dev 日志客户端侧只有 hmr update（SSR 程序重载对浏览器透明），两轮稳定；
+「写完马上看到」与「不打断页面」都成立。另发现 fumadocs-mdx 15.4.7 的 bug：
+`defineCollections({ type: 'meta' })` 单独使用直接 500，宏展开生成的参数名（`meta`）与运行时读的
+（`entries`）对不上，`defineDocs` 内置的 meta 集合不受影响；最小复现与英文 issue 草稿在
+`probes/2610111754_fumadocs-16-17-1/repro-meta-collection/`（打开即 500），待报给上游。
+
+**补做 E-7 时发现并修复：站点插件静态 import 进 source.ts 会弄死整站 hydration**。E-2 把
+Node-only 的 remark 插件（node:fs）静态 import 在 `app/lib/source.ts` 顶层，而这个文件浏览器端
+也加载——客户端模块图带进 node:fs，加载失败，**浏览器端整站无 React**（SSR 正常所以页面看着是好的；
+计数器点不动、点链接整页跳转才暴露）。mdxOptions 改异步函数内动态 import 则让 fumadocs-mdx 的
+宏求值报 `Vite module runner has been closed`。可行写法是插件放全局 `source.config.ts`（只构建期在
+Node 加载），插件顺序不变、编译输出逐字节不变；代价是 15.4.7 下不能按集合挑插件。K-03 的
+「集合 mdxOptions 写明接哪些插件」要按这条修正。
+
+**E-4 库共用上下文：`ssr.noExternal` 仍然必须（K-04 保留点名 noExternal 的部分）**。构建好的 ESM 库
+（对 `fumadocs-ui/contexts/tree` 保持外部 import）不加 noExternal 时 dev 直接 500（Context 双实例，
+"You must wrap this component under <DocsLayout />"）、build 在 prerender 就红；加了以后 dev、build + start、
+浏览器 hydration 全部正常。
+
+**E-6 复制布局：成立（K-09 照此做）**。`@fumadocs/cli@1.7.5 customise` 把布局写进 `app/layouts/` 等
+并自动改写路由的 import，直接可用。全宽用 `DocsPage` 自带的 `full` prop（右侧目录自动不渲染）加
+container 里 full 分支改 `max-w-none`，一个按钮切换；侧栏停组改复制出的 `page-tree.tsx`：当前地址不在
+页面树里时按缓存的根组名找回那个 root folder 渲染（根组 name 是 revive 出的 React 元素，文字在
+`dangerouslySetInnerHTML.__html` 里）。全程没覆盖 `#nd-*`、没动 `--fd-*`、没塞假页面项。边界：侧栏顶部的
+组下拉不跟随（它的 active 判断基于当前路径，空路径时没有 active 组，下拉不显示）。
+
+## 依据
+
+全部材料在 `probes/2610111754_fumadocs-16-17-1/`（README 有每个实验的运行方法与逐项证据）：
+观察记录 `runs/05-e5-e3-notes.md`、`runs/11-e7-notes.md`、`runs/19-e4-notes.md`、`runs/25-e6-notes.md`
+（含 customise 交互记录与三张验收截图 `out/e6/`）、补做记录 `runs/39-e7-redo-notes.md`
+（E-7 server-only 写法与 hydration 修复，日志 36–38），原始日志同目录 `.log` 文件。

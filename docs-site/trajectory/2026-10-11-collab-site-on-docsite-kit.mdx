@@ -1,0 +1,56 @@
+---
+born-at: 2026-10-11T03:30
+type: choice
+parent: [2026-09-03-god-live-doc]
+label: 搬到文档站基础包
+domain: 形态
+---
+
+## 背景
+
+协作站一直是自己的一套 Vite + react-router 站：页面目录规则（一页一个文件夹、`pages/` 根下只放分组文件夹、`_folder.json`）、自己的批注层与评论记录、
+自己启动开发服务、自己开 Chrome 应用窗口、提交前按装的网站包版本切换站点检查。文档站基础包 `@godcreator/docsite-kit`（单元 `oz47p-docsite-kit`）
+做出来以后，页面、评论、身份、推送通道、托管开发服务这些都由它与基础插件 gwb-docsite 提供，协作站和它是两套重复的东西。
+
+用户定下这一轮的范围与口径：
+
+「docfirst这一轮不加入，不做docfirst相关内容。」
+
+「旧形态项目不管，不能用就不能用。」
+
+「然后就是内容要按照基础站的写法来写，如果某些内容格式适配不上允许修改文件内容，不要乱加修正规则进去，越简单机制越少越好」
+
+（上下文：迁移测试原定拿 MMC 项目做，后来改成「更换目标，拿sst做迁移测试，mmc留着不动」。）
+
+## 结论与边界
+
+- 网站包 `@godcreator/collab-site` 0.30.0 改成接在基础包上的功能包：只做任务页、任务与模块各自那一页、日历与日志页、顶部通知栏、`RecordLink`、
+  写任务与模块的接口、站点检查里日志页文件名那一条；站点骨架放在包里的 `template/`。页面、侧栏、搜索、评论、全部评论页、身份都用基础包的
+- 评论整个交给基础包：评论存在站点 `comments/` 下一串一个文件夹，数据模型包里的评论记录（comment、reply）去掉；gwb-collab 的 `collab.comments` 去掉，
+  agent 读写评论用 gwb-docsite 的 `docsite.comments`、`docsite.comment.*`；「找我的」改读基础包的评论串
+- 站点由 gwb-docsite 托管：gwb-collab 只在托管前查站点协议号与站点检查，通知与项目负责人经推送通道的频道 `collab` 推过去；开 Chrome 应用窗口、
+  设置 `site-window` 归 gwb-docsite
+- 提交前的站点检查只剩基础包的人员列表、评论检查加日志页文件名，页面能不能编译交给站点的类型检查；按装的网站包版本切换检查那套去掉，
+  因为页面目录规则已经没有了
+- 旧形态的协作仓不兼容：站点协议号从 7 升到 8，旧站点不托管、报错写明升级。迁移用仓里的 `scripts/migrate-site.mjs` 一次搬完，
+  搬不过来的内容格式（自己画标题的页面、`$` 公式、服务端渲染时碰 `window` 的页面）改页面文件，不往基础包或功能包里加兼容规则
+
+被否掉的做法：在功能包里保留旧的页面目录规则与 `_folder.json`，靠一层转换喂给基础包的页面来源。那样两套页面规则要一直同步，
+正是用户说的「乱加修正规则」。
+
+supersedes:: [一页一个文件夹](2026-10-01-page-folders.md)
+supersedes:: [pages/ 根下只放分组文件夹](2026-10-08-top-level-groups.md)
+supersedes:: [目录规则进站点检查](2026-10-02-page-tree-in-site-check.md)
+supersedes:: [站点检查跟着装的网站包](2026-10-08-site-check-follows-installed-framework.md)
+supersedes:: [页面组件引入 fumadocs 排版组件](2026-10-10-page-components-from-fumadocs.md)
+supersedes:: [每个站点只用一个 Chrome 应用窗口](2026-10-07-one-site-window.md)
+
+## 代价
+
+所有协作仓都要迁移一次，迁移时有几页要手改内容；没迁移的仓在新插件下打不开站点。站点的页面写法、评论格式从此跟着基础包的版本走，
+协作站自己不再决定。
+
+## 依据
+
+迁移试验在 SST 项目的副本上做（工作树 `.migration-test/chb-dab-sst/collab`，分支 `site-migration-test`），隔离 home 里全部页面能打开、任务状态能从网页写回文件、
+接口按 200、422、400 回；内容上要手改的几页写在单元里的 `.migration-test/sst-content-fixes.mjs`。

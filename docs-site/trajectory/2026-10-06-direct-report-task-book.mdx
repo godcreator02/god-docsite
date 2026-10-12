@@ -1,0 +1,28 @@
+---
+born-at: 2026-10-06T22:22
+type: choice
+parent: [2026-09-03-god-live-doc]
+label: 派单回报改为执行端直报协作站，任务簿与 QQ 通知拆开
+domain: 协作流程
+---
+
+pivots-from:: [新消息交给 AI 处理放进 gwb-collab，不另起监听进程](2026-10-03-ai-handling-in-plugin.md)
+
+## 背景
+
+回报原来经 gwb-zcode 中转：`zcode.create` 带可选 `report` 参数，ZCode 里的会话调 `zcode.report` 交回，插件启动时 `zcode.report.replay` 补交。gwb-zcode 0.3.0 把这三样全删了
+（派单架构改造，正本在 gwb-seams 仓的 dispatch-refactor 方案），并加了 workspace 占用语义：同工作区上一轮没结束时 `create` 报错，错误以「workspace 已被会话 … 占用」开头。
+协作站这边 `QqNotifications` 混着两件事——注意力通知（observe）与 AI 回报账本（prepareAi / receive / results），而且 prepareAi 看通知开关：QQ 通知关着，回报通道整个不存在。
+
+## 结论与边界
+
+拆成两块，回报不再与通知捆绑、不再经底层插件中转：
+
+- **任务簿 `site/ai-task-book.ts`**：派单前用 `randomBytes(32)` 自签 64 位十六进制票据，账本（`ai-task-book` 数据文档）只存 sha256 哈希、不存原文；直报约定拼在提示词尾部
+  （server 来自设置 `report-mcp-server`、命令 `collab.receive-report`、本轮 ticket、state 三枚举、text 上限 16000、超时同票同结果重试、写明 zcode.report 已不存在禁止调用），
+  执行端做完经 MCP run 直调 `collab.receive-report` 交 `{ticket,state,text}`。receive 按票据哈希核销：同票同结果回 `duplicate`，同票不同结果拒绝覆盖；落账不看任何通知开关。
+  直报协议与 gwb-qq-bot 的 `direct-report.ts` 保持一致，本地各一份实现，改动两边同步（曾打算共用 `@godcreator/gwb-report-contract` 协议包，决定撤销，各自实现）
+- **QQ 通知 `site/qq-notifications.ts`**：只管注意力通知（observe）；任务簿落账后经 `notifyOutcome` 把摘要发主人，发不发由 `qq-notifications` 开关定，发不出去只记日志、回报已落账不受影响
+- **occupied**：`zcode.create` 的错误以「workspace 已被会话 … 占用」开头（gwb-zcode 0.3.0 措辞，跨插件约定、改动与 gwb-agents 仓同步）时，接口回 409「上一单还在跑（会话 …），等它完成后再交」；
+  `zcode.open` 的失败照旧
+- receive 载荷与账本格式都变了，破坏性升 x：0.21.7 → 0.22.0。旧 `qq-notifications` 文档里的 results 账本作废（旧票据是 UUID、对不上直报通道，永远收不到回报），observations 照常继续用

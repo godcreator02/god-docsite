@@ -18,8 +18,8 @@ docfirst: none
 | 要写的东西 | 照着看 |
 | --- | --- |
 | 站的入口页：全局接缝图、几个名字各管哪段、核心机制一段讲清、分区表 | `content/docs/index.mdx` |
-| 一个包的首页：包内接缝图，再按功能、接口、依赖、不做的事四段逐条钉码 | `content/docs/pin/index.mdx` |
-| 讲一条原理的页：一个选情况组件承担主要解释，文字只引出和收尾 | `content/docs/pin/judge.mdx`（组件 `<PinJudge />`） |
+| 一个包的首页：包内接缝图，再按功能、接口、依赖、不做的事四段逐条钉码 | `content/docfirst/pin/index.mdx` |
+| 讲一条原理的页：一个选情况组件承担主要解释，文字只引出和收尾 | `content/docfirst/pin/judge.mdx`（组件 `<PinJudge />`） |
 | 接缝图的内容与坐标 | `src/components/seam-map/`：每张图一份 `*.data.mjs` 与 `*.layout.ts`，`seam-map.tsx` 按 `module` 挑图 |
 | 自包含的讲解组件：讲解数据与画面各一个文件，放进生成正本的再加一个机读规则 | `src/components/pin/`：`judge.data.mjs`、`judge.tsx`、`pin.ai.mjs` |
 | 组件数据里照抄源码的地方钉码 | `src/components/commit-gate/commit-gate.data.mjs` |

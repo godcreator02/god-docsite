@@ -12,6 +12,11 @@ import { fumadocsGraph } from './inner/fumadocs.data.mjs';
 import { docfirstSiteGraph } from './inner/docsite-docfirst.data.mjs';
 import { docfirstExplainerGraph } from './inner/docfirst-explainer.data.mjs';
 import { pluginGraph } from './inner/plugin.data.mjs';
+// 协作站的四个内部图：数据在 seam-map-flow（渲染器在那边），机读只吃 graph
+import { gwbCollabGraph } from '../seam-map-flow/inner/gwb-collab.data.mjs';
+import { collabSiteGraph } from '../seam-map-flow/inner/collab-site.data.mjs';
+import { collabMergeCheckGraph } from '../seam-map-flow/inner/collab-merge-check.data.mjs';
+import { autoMergeGraph } from '../seam-map-flow/inner/auto-merge.data.mjs';
 
 const INNER = {
   pin: pinGraph,
@@ -21,6 +26,10 @@ const INNER = {
   'docsite-docfirst': docfirstSiteGraph,
   'docfirst-explainer': docfirstExplainerGraph,
   plugin: pluginGraph,
+  'gwb-collab': gwbCollabGraph,
+  'collab-site': collabSiteGraph,
+  'collab-merge-check': collabMergeCheckGraph,
+  'auto-merge': autoMergeGraph,
 };
 
 export function SeamMap(node, { paragraph, attr }) {

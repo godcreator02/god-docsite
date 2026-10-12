@@ -1,0 +1,59 @@
+---
+title: 提交门禁
+description: check 把哪几类问题计入红；本仓未提交的改动引起的黄为什么按红算、怎么认出来；退出码 0、1、2 各是什么；这个仓的门禁怎么落实
+---
+
+import { CommitGate } from '../../../src/components/commit-gate/commit-gate';
+
+`check` 只读不写，退出码只看红的总数：有红时退出码是 1，门禁不通过。下面还是 `src/greet.ts` 那个例子，改了被钉的两行之后，
+依次演示被拦下、复核、通过，再看另外几种情况：
+
+<CommitGate />
+
+## 红从哪来
+
+- **缺失的引用**：被钉的行段、文件、目录不在了。提没提交都算。讲解组件源码里的引用跟页面里的一样算，下一条也是。
+- **拦提交的黄**：状态是「有变动」，而且是本仓未提交的改动引起的（下一节）。
+- **名册外组件**：生成正本（`outputs` 里有映射的页）里用了 `docfirst.config.mjs` 的 `components` 里没有规则的组件。普通页面上的组件不查：机读文字只给生成物。
+- **不新鲜的生成物**：`outputs` 里有映射的落点还不存在、跟正本重新渲染的结果不一致，或者正本渲染不了，见[生成物怎么渲染](/docfirst/workflow/rendering)。
+- **轨迹卡的病**：`content/trajectory/` 下的卡缺必填字段或格式不对。
+
+绿、未确认、不拦提交的黄只打印，不计入。加 `--json` 时整份报告打印成一行，退出码的算法不变。
+
+{/* ref file="../packages/docfirst-workflow/src/cli/commands.ts" lines="158-175" hash="eaefaa288e12" blob="0c73c55ad647" */}
+
+{/* ref file="../packages/docfirst-workflow/src/cli/commands.ts" lines="89-97" hash="87e007751793" blob="937001d7a349" */}
+
+## 本仓未提交的改动引起的黄，按红算
+
+一处黄灯，`check` 再问两件事：被钉的文件和这篇文档往上找到的是不是同一个 `.git`；
+那个仓的 `git status` 里有没有这个文件（目录树是这个目录下的任何一个路径）。两个都是，这个黄就是这次改动引起的，显示成 🔴、计入红。
+
+{/* ref file="../packages/docfirst-workflow/src/node/git.ts" lines="144-181" hash="5dfb3dd243a4" blob="ac7c0022dac9" */}
+
+{/* ref file="../packages/docfirst-workflow/src/node/uncommitted.ts" lines="26-35" hash="8fc6d81a0264" blob="ed53157b1c06" */}
+
+「未提交」包括工作区改了、已经暂存、还没跟踪的新文件，改名前后的路径都算。每个仓一次 `check` 只运行一次 `git status`，
+带 `--no-optional-locks`，不跟同时在这个仓里工作的人抢索引锁。
+
+被钉文件在别的仓里，或者改动已经提交，这个黄只报告、退出码是 0：改代码的提交和改文档的提交已经不可能是同一个了。
+为什么要在同一个提交里复核，见轨迹卡[同提交复核](/trajectory/2026-09-25-drift-handled-in-same-commit)。
+
+## 退出码
+
+| 退出码 | 什么时候 |
+| --- | --- |
+| 0 | 没有红；`--help` |
+| 1 | `check` 有红；`confirm` 碰到红、有引用确认不了或生成物摆放失败；`render` 有正本渲染不了 |
+| 2 | 用法错，什么都没动：不认识的命令或开关；`confirm` 以外的命令带了文档路径；`--accept` 没点名页；点名的不是这个项目里的文档；`trajectory` 时还没有轨迹卡目录 |
+
+{/* ref file="../packages/docfirst-workflow/src/cli/run.ts" lines="37-52" hash="122c339e1c4f" blob="bd1e29a8b8d5" */}
+
+{/* ref file="../packages/docfirst-workflow/src/cli/commands.ts" lines="25-37" hash="4547c8e2d0b3" blob="2732fec328d4" */}
+
+`--accept` 必须点名页：它接受的是黄灯，同一个仓里别人的黄灯引用还等着他自己复核。
+
+## 这个仓的门禁
+
+docfirst 不装 git hook，接进哪一步由各仓自己定。这个仓没有 git hook，也没有 CI（仓根下没有 `.github` 目录）：「`docs-site` 里 `pnpm docfirst check`
+通过才提交」是[仓的 AGENTS 正本](/maintain/agents)门禁里的一条规矩，由提交的人照做。

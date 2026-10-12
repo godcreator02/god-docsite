@@ -1,0 +1,5 @@
+{
+  "title": "Gitea 与 NAS",
+  "root": true,
+  "pages": ["index", "setup", "permissions", "push"]
+}

@@ -1,5 +1,0 @@
-{
-  "title": "fumadocs 原理",
-  "description": "先看图解走一遍全流程与编译工序，再按层读源码导读",
-  "pages": ["full-flow", "mdx-compile", "mdx-compile-explainer", "base-vite-rr", "three-pieces", "overview", "mdx", "core-source", "ui", "sources", "integrations"]
-}
