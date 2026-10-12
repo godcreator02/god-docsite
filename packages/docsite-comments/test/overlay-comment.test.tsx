@@ -239,7 +239,8 @@ describe('CommentOverlay：无定位上报与重测', () => {
       onUnplacedChange,
     })
     expect(overlay.querySelectorAll('[data-comment-overlay-badge]')).toHaveLength(1)
-    const reports = onUnplacedChange.mock.calls.map(([report]) => report)
+    const calls = onUnplacedChange.mock.calls as unknown as Array<[{ missing: string[]; hidden: string[] }]>
+    const reports = calls.map(([report]) => report)
     expect(reports.at(-1)).toEqual({ missing: ['gone'], hidden: ['folded'] })
   })
 

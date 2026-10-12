@@ -9,7 +9,14 @@ patchedDependencies:
 
 importers:
 
-  .: {}
+  .:
+    devDependencies:
+      oxlint:
+        specifier: 1.76.0
+        version: 1.76.0(oxlint-tsgolint@7.0.2001)
+      oxlint-tsgolint:
+        specifier: 7.0.2001
+        version: 7.0.2001
 
   packages/docsite-comments:
     devDependencies:
@@ -254,9 +261,6 @@ importers:
       '@godcreator/docsite-identity':
         specifier: workspace:*
         version: link:../../packages/docsite-identity
-      '@godcreator/docsite-ui':
-        specifier: workspace:*
-        version: link:../../packages/docsite-ui
       '@godcreator/gwb-commands':
         specifier: ^0.6.1
         version: 0.6.1(@godcreator/gwb-kernel-desktop@0.10.1(cordis@4.0.0-rc.10))(cordis@4.0.0-rc.10)
@@ -303,6 +307,9 @@ importers:
       '@godcreator/docsite-comments':
         specifier: workspace:*
         version: link:../packages/docsite-comments
+      '@godcreator/docsite-explainer':
+        specifier: workspace:*
+        version: link:../packages/docsite-explainer
       '@godcreator/docsite-identity':
         specifier: workspace:*
         version: link:../packages/docsite-identity

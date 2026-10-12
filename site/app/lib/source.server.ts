@@ -4,7 +4,6 @@ import { htmlPageSource, tsxPageSource } from '@godcreator/docsite-page-sources'
 import { searchServerOf } from '@godcreator/docsite-page-sources/server'
 import { comments, docs } from '../../.source/server'
 import { htmlPageText, tsxPageMeta } from './collections'
-import { featureRoutes } from '../site/routes'
 
 /**
  * 三种格式的页面进同一棵页面树、同一个搜索索引；page.type 是来源的名字（mdx / tsx / html）。

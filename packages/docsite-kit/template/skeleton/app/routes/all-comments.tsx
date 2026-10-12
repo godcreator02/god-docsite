@@ -1,7 +1,6 @@
-import type { ComponentType } from 'react'
 import { Link } from 'react-router'
 import { DocsPage } from '@fumadocs/base-ui/layouts/docs/page'
-import { CommentsSidebar, type PageThreadSummary } from '@godcreator/docsite-comments/react'
+import type { PageThreadSummary } from '@godcreator/docsite-comments/react'
 import { allPageThreads } from '../lib/comments.server'
 import { commentContent } from '../lib/client-content'
 import { source } from '../lib/source.server'

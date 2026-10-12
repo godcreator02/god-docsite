@@ -38,7 +38,7 @@ export function siteFeaturesOf(manifest: unknown, manifestFile: string): string[
   if (!Array.isArray(features) || !features.every((each) => typeof each === 'string' && each !== '')) {
     throw new Error(`${manifestFile} 要有 docsite.features：站点用到的功能包的包名列表，没有功能包写 []`)
   }
-  return features
+  return features as string[]
 }
 
 const devPortPattern = /(--port(?:=|\s+))(\d+)/

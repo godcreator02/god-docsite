@@ -20,8 +20,9 @@ export function parsePeople(value: unknown): StoredPerson[] {
   value.forEach((item, index) => {
     const where = `${peopleFile} 第 ${index + 1} 项`
     if (typeof item !== 'object' || item === null || Array.isArray(item)) return problems.push(`${where} 要是 { "id": …, "name": … }`)
-    const { id, name, codes, gitea, agent } = item as Record<string, unknown>
-    for (const key of Object.keys(item)) if (!personKeys.includes(key)) problems.push(`${where}：认不出 ${key}，能写的只有 ${personKeys.join('、')}`)
+    const record = item as Record<string, unknown>
+    const { id, name, codes, gitea, agent } = record
+    for (const key of Object.keys(record)) if (!personKeys.includes(key)) problems.push(`${where}：认不出 ${key}，能写的只有 ${personKeys.join('、')}`)
     if (typeof id !== 'string' || !personIdPattern.test(id)) problems.push(`${where}：id 要是字母、数字、_、- 组成的字符串`)
     else if (seenIds.has(id)) problems.push(`${where}：id ${id} 和前面的重复了`)
     else seenIds.add(id)

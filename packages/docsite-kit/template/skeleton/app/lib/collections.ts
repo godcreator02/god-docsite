@@ -1,5 +1,5 @@
 import type { ComponentType } from 'react'
-import { tsxPageSource, type TsxPageMeta } from '@godcreator/docsite-page-sources'
+import type { TsxPageMeta } from '@godcreator/docsite-page-sources'
 
 /**
  * TSX/HTML 页面的文件清单：glob 参数要能静态分析，只能写在站点模块里（MDX 集合不经这里——

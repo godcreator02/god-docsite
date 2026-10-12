@@ -12,7 +12,8 @@
     "build": "react-router build",
     "start": "react-router-serve ./build/server/index.js",
     "typecheck": "react-router typegen && tsc --noEmit",
-    "check": "react-router typegen && tsc --noEmit"
+    "check": "react-router typegen && tsc --noEmit && pnpm lint",
+    "lint": "oxlint . --deny-warnings"
   },
   "dependencies": {
     "@fumadocs/base-ui": "16.17.1",
@@ -33,7 +34,8 @@
     "@godcreator/docsite-comments": "workspace:*",
     "@godcreator/docsite-writing": "workspace:*",
     "@godcreator/docsite-page-sources": "workspace:*",
-    "@godcreator/docsite-ui": "workspace:*"
+    "@godcreator/docsite-ui": "workspace:*",
+    "@godcreator/docsite-explainer": "workspace:*"
   },
   "devDependencies": {
     "@react-router/dev": "^8.4.0",

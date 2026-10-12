@@ -20,7 +20,7 @@ function writeFiles(dir: string, files: Record<string, string>) {
 }
 
 const readText = (relative: string) => readFileSync(path.join(siteDir, relative), 'utf8')
-const readManifest = () => JSON.parse(readText('package.json'))
+const readManifest = () => JSON.parse(readText('package.json')) as { scripts: Record<string, string>; dependencies: Record<string, string>; docsite?: unknown }
 
 /** 站点的 node_modules 里放基础包与假功能包：和 pnpm 一样是链接，真实目录在别处 */
 beforeEach(() => {

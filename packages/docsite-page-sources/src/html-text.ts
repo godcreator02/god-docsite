@@ -1,5 +1,3 @@
-import type { StructuredData } from 'fumadocs-core/mdx-plugins/remark-structure'
-
 /**
  * HTML 页面正文的静态提取：标题、描述、目录锚点、搜索分段与 Markdown 形式都在这里从 HTML 文本派生。
  * 只做文本层面的提取，不解析成组件、不在运行时编译——展示仍由浏览器原样渲染 HTML 文件本身。
