@@ -26,7 +26,7 @@
     "styles"
   ],
   "scripts": {
-    "build": "tsdown",
+    "build": "tsdown && node ensure-directive.mjs",
     "typecheck": "tsc -p tsconfig.json",
     "prepublishOnly": "pnpm run build"
   },
