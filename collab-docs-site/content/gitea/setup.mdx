@@ -1,0 +1,36 @@
+---
+title: 建项目与人员变动
+description: 写给项目负责人的清单：新建一个项目（Gitea 组织）要在 Gitea 上配哪几样、按什么顺序、哪几样由命令配；加一个成员、换负责人、有人离开时各改哪几处。每一项为什么这么配，见同一分区的权限、执行器、实时推送三页
+---
+
+执行器与 ntfy 是 NAS 上全站共用的，新项目不用再装；要配的都在 Gitea 组织和协作仓里。下面各步的权限为什么这么给，见 [权限怎么配](/gitea/permissions)。
+
+## 新建一个项目
+
+1. **建组织与团队**：建私有组织，建团队 `members` 和 `bots`，权限照 [权限怎么配](/gitea/permissions) 的「团队」那张表。`bots` 只含协作仓，代码、工单、合并请求三项写入，其余无访问权限，把 `collab-bot` 加进去
+2. **组织密钥**：组织设置 → Actions → 密钥，加 `COLLAB_BOT_TOKEN`，值是 `collab-bot` 的令牌（仓库、工单两项读写）。几个组织用同一个令牌
+3. **工作流与站点**：协作仓克隆到本机后，先把合并检查包的 `templates/collab-auto-merge.yaml` 放进 `.gitea/workflows/`；再调 `collab.site.init {repo, port, title}` 建出站点：`port` 是开发端口，`title` 是站名，gwb-docsite 照基础包与功能包的模板写出 `site/`、装好依赖，`site/package.json` 里功能包 `@godcreator/collab-site` 的范围写成 gwb-collab 打包时带的那一版（见 [站点](/gwb-collab/site) 的「初始化站点与更新骨架」）。两样在同一个提交里推到 main。
+   这一步要在下一步之前：协作仓的 main 配好保护以后谁都不能直接推，改动只能经执行器合并，而执行器要先有 main 上的工作流。执行器按工作流文件里的 `MERGE_CHECK_RANGE` 装合并检查包，见 [执行器与自动合并](/gitea/runner)；gwb-collab 把站点交给 gwb-docsite 托管之前核对 `site/` 装的功能包的站点协议号，对不上不托管，报错里让人把范围改成 `^` 加下面这一版：
+
+{/* ref file="../packages/collab-model/src/notification-model/site-feed.ts" lines="18-26" hash="3e556a7423a3" blob="c7ccb3bb298c" */}
+
+4. **配协作仓**：协作仓克隆下来以后对它调 `collab.repo.setup`，`name` 写协作仓的文件夹名，`leads` 写项目负责人。它照协作仓的规矩设好合并方式、协作者与 main 的保护：关掉推送，合并只许团队 `bots`，负责人也不在推送与合并许可里；每一步做什么见 [权限怎么配](/gitea/permissions) 的「一条命令设好后三层」。之后协作仓的改动，负责人的也一样，都经 `collab.submit` 由执行器合并
+
+5. **实时推送**：组织管理员在协作仓上调 `collab.org.setup {repo}`，它照插件里写好的期望配置给组织建一个 webhook，发到 `http://ntfy/collab-<组织>`；地址、消息模板与事件见 [实时推送的部署](/gitea/push)。不在 Gitea 网页上手配。成员那边什么都不用配。插件期望的事件变了，组织管理员的提示栏里出现「webhook 没按插件要的配」，再调一次 `collab.org.setup`
+6. **人员列表**：项目负责人在协作仓的 `site/people.json` 里给每个成员加一项 `{ "id": "<Gitea 用户名>", "name": "<显示名>", "gitea": "<Gitea 用户名>" }`，用 `collab.submit` 提交。身份码 `codes` 不用负责人填，成员加入项目时由自己的插件写进去（见下一节第 3 步）
+
+项目里别的仓（资料库、代码仓）由 AI 调 `collab.repo.create` 在组织里建：建好就照别的仓的规矩配好、负责人是建仓的人，克隆进项目文件夹，再发一条 `leads changed`，见 [权限怎么配](/gitea/permissions) 的「一条命令设好后三层」。在 Gitea 网页上直接建的仓，各成员的插件收到建仓的消息会克隆进来，但协作者与 main 的保护要负责人再调一次 `collab.repo.setup` 补上。
+
+## 加一个成员
+
+1. Gitea 上把他加进组织的 `members` 团队
+2. 项目负责人在协作仓的 `site/people.json` 里给他加一项（写法同上一节第 6 步），用 `collab.submit` 提交（这个文件只有项目负责人能改）
+3. 他自己生成令牌（全部权限都勾读写，见 [权限怎么配](/gitea/permissions) 的「令牌」）、填进 gwb-gitea，在 gwb 里克隆项目（见说明书 collab 的附件 [organization](/docs/outputs/skills/collab/organization) 的「加入项目」）。克隆时插件把这个 gwb home 的身份码加进他自己那一项的 `codes`，这一行改动由他自己提交审核：合并检查只放行「提交人只改自己那一项的 `codes`」这一种人员列表改动，见 [合并检查包](/collab-merge-check)。换电脑、新开一个 gwb home 也是这样再加一个身份码
+
+## 换负责人或加一个负责人
+
+这个仓的负责人（或组织管理员）对它调 `collab.repo.setup`，`leads` 写换完以后的全部负责人；协作者与 main 的保护一起改好，再发一条 `leads changed` 让别的成员的插件重读负责人。换项目负责人就是对协作仓这样做。不在 Gitea 网页上直接改协作者：那样没有这条消息，别人要等下一次完整刷新才看到。
+
+## 有人离开课题组
+
+把他移出 `members`；他是负责人的仓，由另一位负责人或组织管理员调 `collab.repo.setup` 换掉他。

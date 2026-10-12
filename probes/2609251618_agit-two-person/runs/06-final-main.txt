@@ -1,0 +1,45 @@
+# 负责人拉取最终 main  2026-09-25T16:22:05
+
+## [lead] git pull
+From https://git.tianshen02.online:28377/godcreator/agit-probe
+   be1ced4..8f6fa50  main       -> origin/main
+Updating be1ced4..8f6fa50
+Fast-forward
+ plan.md | 5 ++++-
+ 1 file changed, 4 insertions(+), 1 deletion(-)
+exit 0
+
+## [lead] git log --oneline --graph -8
+*   8f6fa50 Merge pull request 'carol：10 月先做 F28377D' (#2) from carol-test/october-tests into main
+|\  
+| * 3080c6d 10 月：先做 F28377D
+|/  
+*   de56eb9 Merge pull request 'bob：10 月选型定为 F28P65' (#1) from bob-test/edit-october into main
+|\  
+| * 93d9592 补上 12 月安排
+| * 0686cff 10 月选型定为 F28P65
+|/  
+* be1ced4 负责人：放入开发计划 plan.md
+* 74ed634 Initial commit
+exit 0
+
+## [lead] Get-Content plan.md
+# 开发计划
+
+## 9 月
+学习张帆老师团队的方案
+
+## 10 月
+控制硬件选型：定为 F28P65（ADC 通道更多）；F28377D 的开发板先拿来练手
+
+## 11 月
+调试方案与仿真验证
+
+## 12 月
+子模块到货后开始调试
+exit 0
+
+## [lead] git ls-files
+README.md
+plan.md
+exit 0

@@ -1,0 +1,29 @@
+---
+born-at: 2026-09-30T13:15
+type: evidence
+parent: [2026-09-25-collab-site]
+label: 自动发的令牌合并不了 AGit 合并请求
+domain: 协作流程
+---
+
+## 背景
+
+协作记录改由 NAS 上的 Gitea Actions 执行器自动合并（方案页 `future/spec/auto-merge`）。原计划要一个机器人账号的令牌存成组织密钥；用户希望不建账号、不填令牌，于是试 Gitea 每次运行自动发给任务的 `GITEA_TOKEN`。
+Gitea 1.27.1 文档说默认是「宽松」模式（任务所属仓的读写权限），只有从派生仓库来的合并请求固定只读。
+
+## 结论与边界
+
+在 MMC 协作仓 `hybrid-mmc/collab` 上实测：组织的工作流令牌设置是「宽松」、没有收紧最大权限，工作流里用 `permissions:` 要了代码、合并请求、工单三项的写权限。
+AGit 推送开的合并请求 #23 触发 `pull_request_target`，任务里的 `GITEA_TOKEN` 以 `gitea-actions` 身份：`GET /repos/hybrid-mmc/collab` 回 200，取代码也行；
+`GET /pulls/23`、`GET /issues/23/comments`、`POST /pulls/23/merge`、`POST /issues/23/comments` 全部回 404。和文档里「从派生仓库来的合并请求只有只读权限」一样，AGit 合并请求被按这一类对待。
+
+所以自动合并要用一个真实账号的令牌（组织密钥 `COLLAB_BOT_TOKEN`），建账号与填令牌由人做。
+
+## 依据
+
+MMC 协作仓的提交 `703ce6d` 在工作流里临时加了一步，用这个令牌依次调上面几个接口并打印状态码；任务日志在 NAS 上 `teamhub/gitea/data/gitea/actions_log/hybrid-mmc/collab/` 下第 3 次运行。提交 `36599b5` 去掉了这一步。
+
+## 否掉的候选
+
+- 把协作仓 main 的分支保护改成「有写权限就能合并」：没用，令牌连合并请求都读不到，挡住它的不是分支保护
+- 改用 `pull_request` 触发：同样是合并请求触发，同一条只读规则

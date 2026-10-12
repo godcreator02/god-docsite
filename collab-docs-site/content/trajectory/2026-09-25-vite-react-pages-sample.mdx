@@ -1,0 +1,27 @@
+---
+born-at: 2026-09-25T13:40
+type: evidence
+parent: [2026-09-25-collab-site]
+label: TSX 页样板
+domain: 形态
+---
+
+## 背景
+
+[薄骨架包](2026-09-25-package-with-thin-skeleton.md) 定下之后，页面内容该怎么写又反复了几轮：MDX 里写的 HTML 标签其实是 JSX，大段样式、字符串 `style`、`<script>` 都不能原样放进去，交互也要绕；纯 HTML 加注入脚本被认为太简陋；Astro 要换一整套技术栈。用户问「那我用react框架从零搭建一个符合我需求的内容可行吗」，讨论后认为真正要定的是页面格式：每一页就是一个 React 组件。用户说「直接做个样板出来看看」。
+
+## 经过
+
+在 `probes/2609251500_vite-react-pages/site/` 用 Vite 8 加 React Router 8 搭了一个站，外观用 fumadocs-ui 的布局与侧栏，框架部分放在 `collab/`（按目录生成侧栏、批注层、任务组件、开发服务上写 JSON 的接口），内容放在 `pages/`。两个子代理并行把两份现有 HTML 改写成 TSX 页面，批注与任务写进页面旁边的 `.collab.json`。
+
+## 结论与边界
+
+可行。两页改写后内容完整；页内样式限定在页面类名之下，离开页面后随组件移除；3D 视图在站内来回跳三轮，每轮离开后排队的动画帧请求都归零，没有累积；code-inspector-plugin 给每个元素加上源码位置；在网页上添加批注能写回 JSON，带着被点元素的文字和源码位置。生产构建通过。
+
+改写要改的地方不少（两页合计 `class` 改 `className` 约 345 处、`style` 改对象约 42 处，另有 SVG 属性与 three 新版 API），但这些都由 AI 完成、构建时有类型检查兜底。
+
+没覆盖到的：3D 画面本身没有截图确认；页面没有按需加载，打包文件 1.1 MB；框架部分还没拆成 npm 包；Claude Code 自己的网页批注功能没有试。形态是否改为「每页一个 TSX 组件」，等用户看过样板再定。
+
+## 依据
+
+`probes/2609251500_vite-react-pages/README.md`，构建记录 `probes/2609251500_vite-react-pages/runs/01-build.txt`，浏览器检查 `probes/2609251500_vite-react-pages/runs/02-browser-checks.txt`。

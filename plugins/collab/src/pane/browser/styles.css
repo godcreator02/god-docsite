@@ -1,0 +1,16 @@
+/*
+ * 协作窗格的样式入口。样式靠类名前缀隔离：类名从源头就是 `collab:flex` 这种，全页有效，但只可能匹配到
+ * 本插件画出来的元素（浮层挂到别处也一样）。下面四行照外壳说明书 gwb-shell「用令牌配颜色与布局」，
+ * 少一行对应的那批类就编不出规则，而且不报错。
+ */
+
+@import 'tailwindcss/theme.css' theme(reference) prefix(collab);
+@import '@godcreator/gwb-shell/theme.reference.css' theme(reference);
+@import 'tailwindcss/utilities.css' layer(utilities) source(none);
+@import './tokens.css';
+@source "./";
+
+/* 正常状态的绿色，值在 tokens.css */
+@theme inline {
+  --color-success: var(--collab-success);
+}

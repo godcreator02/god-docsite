@@ -1,0 +1,23 @@
+$ next build
+▲ Next.js 16.3.0 (Turbopack)
+[MDX] generated files in 11.5608000000002ms
+✓ Running next.config.mjs took 1666ms
+
+  Creating an optimized production build ...
+✓ Compiled successfully in 1905ms
+  Running TypeScript ...
+  Finished TypeScript in 3.5s ...
+  Collecting page data using 4 workers ...
+  Generating static pages using 4 workers (0/3) ...
+✓ Generating static pages using 4 workers (3/3) in 1100ms
+  Finalizing page optimization ...
+
+Route (app)
+┌ ○ /_not-found
+└   /[[...slug]]
+  └ ● /
+
+
+○  (Static)  prerendered as static content
+●  (SSG)     prerendered as static HTML (uses generateStaticParams)
+

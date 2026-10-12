@@ -1,0 +1,34 @@
+被测代码：提交 05b9965（records.ts 先取启动数据、再登记收推送；断开时页面不做任何事）
+页面：Chrome 标签页 http://127.0.0.1:4391/tasks，由 Claude in Chrome 打开，整次实验 document.visibilityState 都是 hidden
+时间是 UTC；「页面」一行是在页面里运行 README 里那段探测得到的
+
+-- 不重启，推一份新的：页面跟着变
+2026-10-08T11:23:51.378Z push "2" 200 {"ok":true}
+页面: bar=协作仓 2 件事  marker=before-restart（没有重新加载）
+
+-- 页面在后台时重启开发服务，起来后马上推 3 条
+2026-10-08T11:24:00.375Z kill 38472 SUCCESS
+2026-10-08T11:24:02.568Z started 33676
+2026-10-08T11:24:02.618Z push "3" 200 {"ok":true}
+3 秒后 页面: bar=协作仓 2 件事  marker=before-restart  visibility=hidden
+控制台: [vite] server connection lost. Polling for restart...（之后没有别的）
+在页面里自己连 ws://127.0.0.1:4391/（子协议 vite-ping）: open —— 开发服务早就起来了
+再过 3 秒、截一次图（截图不改变 visibilityState）: 仍是 2 件事，仍是 hidden，没有重新加载
+
+-- 把页面伪装成在前台：覆盖 document.visibilityState 为 visible 并派发 visibilitychange
+3 秒后 页面: bar=协作仓 3 件事  timeOrigin 变了（整页重新加载过）
+
+-- 页面一直伪装成在前台时重启，起来后推 4 条
+2026-10-08T11:25:09.208Z kill 33676 SUCCESS
+2026-10-08T11:25:10.843Z started 24064
+2026-10-08T11:25:10.889Z push "4" 200 {"ok":true}
+2 秒后 页面: bar=协作仓 4 件事  timeOrigin 变了（自动整页重新加载，拿到最新）
+
+-- 再回到后台（重新加载后伪装失效，visibilityState 又是 hidden），重启后推 5 条
+2026-10-08T11:27:07.173Z kill 24064 SUCCESS
+2026-10-08T11:27:08.678Z started 27528
+2026-10-08T11:27:08.725Z push "5" 200 {"ok":true}
+4 秒后 页面: bar=协作仓 4 件事  visibility=hidden  hasFocus=false  没有重新加载
+
+结论：Vite 8.3.0 的客户端断开后不在原页面重连，只在页面在前台时轮询开发服务、连上后整页重新加载；
+页面在后台时一直不动，断开期间推来的全部收不到，提示栏停在断开前、也没有任何提示。

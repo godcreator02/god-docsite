@@ -1,0 +1,52 @@
+---
+title: AGENTS
+description: 仓根 AGENTS.md 的正本，由 pnpm doc:render 生成；只写这个仓特有的规矩
+---
+
+# collab-site
+
+**本页回答**：在这个仓干活的 agent 先看什么、怎么运行、提交前要跑哪些检查、有哪些不能做的事。
+
+通用的写法与流程不在这里，正本是随 `@godcreator/gwb-docfirst-workflow` 插件发布的两份说明书：文档站的现状、轨迹、未来三个区怎么分、
+文档怎么写读「docs-writing」；核对、确认、生成（`pnpm doc`、`pnpm doc:render`）读「docs-site」。这一页只写这个仓特有的，控制在 60 行以内。
+
+## 先读
+
+`collab-docs-site/content/docs/index.mdx`（系统组成）→ 要改的那一块的模块页 → `collab-docs-site/content/trajectory/` 里的卡。
+正在做的活在 `collab-docs-site/content/future/spec/`，别的仓投来的反馈是 gitea 上本仓的 issue。
+
+## 怎么运行
+
+仓是一个 pnpm workspace：`packages/` 下是数据模型包 `collab-model`、功能包 `collab-site`（路由模块在 `src/routes/`，交给基础包骨架的出口在 `src/feature/`）、合并检查包 `collab-merge-check`，gwb 插件在 `plugins/<短名>/`。
+文档站基础包 `@godcreator/docsite-kit` 与基础插件 gwb-docsite 不在这个仓，在单元 `oz47p-docsite-kit` 的 `docsite-kit` 仓里，这里按版本号从源安装。在仓根：
+
+```bash
+pnpm install
+pnpm build
+pnpm check
+```
+
+`pnpm check` 在每个包里运行类型检查与测试。
+
+## 提交前的检查
+
+都要通过：
+
+```bash
+pnpm build && pnpm check
+cd collab-docs-site && pnpm doc && pnpm build
+```
+
+## 不能做的事
+
+- 改了 `content/docs/outputs/` 下的 mdx 要运行 `pnpm doc:render` 重新生成，生成物和正本放进同一个提交
+- 这份 AGENTS.md 是生成物，正本是 `collab-docs-site/content/docs/outputs/agents.mdx`，改那边
+- 轨迹卡只增不改
+- `probes/` 下的实验目录不进包，也不改动已有实验的记录
+- 三个包各管一件事，依赖方向只许：数据模型包只引用基础包的 `@godcreator/docsite-kit/comments`（可选的 peer 依赖），合并检查包只依赖数据模型包，功能包依赖数据模型包、以 peer 依赖接基础包，插件依赖三个包；数据模型包的 `test/boundaries.test.ts` 守着它目录与文件之间的方向
+- `collab/` 的文件格式只有数据模型包这一份实现，网站、插件都调用它，不自己拼记录文件；人员列表与评论是基础包的格式，不在这个仓里另写一份
+- 插件只用功能包的 `./site-check` 出口（构建时打包进插件），站点骨架与开发服务交给 gwb-docsite，插件不自己写骨架、不自己启动站点
+- 功能包不改基础包骨架里的文件：路由模块放 `src/routes/`，经 `./routes`、`./site`、`./site-server` 交出；`template/` 只放只能写在项目里的文件（现在只有日志页集合 `app/lib/journal.ts`）
+- 推给网站的数据（数据模型包 `notification-model/site-feed.ts` 与通知的字段）一改、记录格式有破坏性改动，都加站点协议号：数据模型包的 `siteProtocol` 与功能包 `package.json` 的 `collabSiteProtocol` 一起改，没有测试守着两处相等
+- 插件里协作仓那一套（`src/collab-repo/`）与别的仓那一套（`src/other-repos/`）不互相引用，都要用的只放 `project/` 与底层目录
+- 发版只用 `devkit.release`，被依赖的包排在前面：`{"packages":["packages/collab-model","packages/collab-merge-check","packages/collab-site","plugins/<短名>"]}`；要用基础包的新版本，先在它自己的仓里发

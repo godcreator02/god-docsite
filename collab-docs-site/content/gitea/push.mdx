@@ -1,0 +1,87 @@
+---
+title: 实时推送的部署
+description: Gitea 上一有事件，怎样经同一台 NAS 上的 ntfy 推到每个成员的工作台：组织级 webhook 的期望配置（地址、消息模板、事件）写在插件里、由组织管理员用 collab.org.setup 写进组织，ntfy 怎么开，成员要不要配，插件收到消息怎样分给协作仓那一套或别的仓那一套，以及 Gitea 不发 webhook 的事要等多久才看到
+---
+
+别人在 Gitea 上做的事，靠实时推送让每个成员的插件知道：
+
+1. Gitea 组织级的 webhook 把事件发到 NAS 上 ntfy 的 topic `collab-<组织>`
+2. 每个成员的插件对列表里全部项目的 topic 开着一条长连接（`organization/events/ntfy-subscription.ts`），断了隔一会儿重连，每次连上都对全部项目做一次完整刷新，补上没连着时的事
+3. 插件的 `organization/events/` 认出消息说的是哪个仓、什么事，按仓分给协作仓那一套或别的仓那一套，只去 Gitea 取那一处
+
+`collab.repo.setup`、`collab.repo.create` 配好负责人后，由调命令的人的插件往同一个 topic 直接发一条 `leads changed`，不经 webhook。插件那一侧各步做什么，见 [检查与实时推送](/gwb-collab/checks)。
+
+## 消息只带位置
+
+每条消息只说哪个仓出了什么事：标题是 `<组织>/<仓>`，正文是种类、动作、编号或分支，没有提交说明、作者、评论原文（ntfy 的 topic 校内谁都能读）。事实都由插件自己去 Gitea 取，所以 ntfy 不设令牌：消息被人伪造，只会让每台电脑多取一次，或者多做一次完整刷新，同一个项目最快每 10 秒一次。插件认得的就是这几种：
+
+{/* ref file="../plugins/collab/src/organization/events/messages.ts" lines="13-36" hash="86a4a48072e9" blob="1b71ff896128" */}
+
+## webhook 的期望配置
+
+每个协作组织一个组织级 webhook。它该是什么样写在插件里（`plugins/collab/src/organization/events/webhook.ts`）：组织管理员调 `collab.org.setup {repo}` 照它写进组织，组织管理员的插件每次完整刷新也照同一份核对，不对就在提示栏「协作仓」组里列「组织 `<组织>` 的 webhook 没按插件要的配」。不是组织管理员的插件读不到组织的 webhook（Gitea 回 403），不核对。不在 Gitea 网页上手配。
+
+| 部分 | 期望值 |
+| --- | --- |
+| 类型、请求体 | `gitea`，`POST`，请求体 JSON（ntfy 的消息模板只认 JSON） |
+| 地址 | `http://ntfy/collab-<组织>?template=yes&t=<标题模板>&m=<正文模板>`（两个模板经 URL 编码）：NAS 上 Gitea 和 ntfy 在同一个 compose 里，Gitea 按服务名 `ntfy` 访问它 |
+| 标题模板 | `{{.repository.full_name}}`，也就是 `<组织>/<仓>` |
+| 正文模板 | 依次判断：有 `.ref` 写 `push <ref>`；有 `.comment` 写 `comment <动作> #<编号>`；有 `.pull_request` 写 `pr <动作> #<编号>`；有 `.issue` 写 `issue <动作> #<编号>`；都没有写 `repo <动作>`。评论的请求体里也有 `.issue`，合并请求上的评论还带着 `.pull_request`，所以最先认评论；审阅的请求体里有 `.pull_request`、没有 `.comment`，写成 `pr reviewed #<编号>` |
+| 事件（写入时的名字） | `push`、`pull_request_only`、`pull_request_sync`、`pull_request_review`、`pull_request_comment`、`issues_only`、`issue_comment`、`repository` |
+| 事件（读回来的名字） | `push`、`pull_request`、`pull_request_sync`、`pull_request_review`、`pull_request_comment`、`issues`、`issue_comment`、`repository` |
+| 其余 | 启用，分支过滤 `*` |
+
+{/* ref file="../plugins/collab/src/organization/events/webhook.ts" lines="6-42" hash="978071d53746" blob="6b3eec721a00" */}
+
+写入时的事件名带 `_only` 的只订那一个事件：合并请求的打开、关闭、重新打开、编辑，issue 的打开、关闭、重新打开、编辑；不带 `_only` 会把指派、标签、里程碑这些一起订上。`pull_request_review` 一个名字订上审阅的批准、要求修改、评论三种；`pull_request_comment` 是合并请求上的评论，`issue_comment` 只管 issue 上的评论。这几个名字和 Gitea 1.27 的源码对过：写入时的名字在 `routers/api/v1/utils/hook.go` 的 `updateHookEvents`，读回来的名字是 `modules/webhook/type.go` 里的事件类型。Gitea 写好以后读回来每个事件各列一个名字，核对时比的是读回来的那一组：
+
+{/* ref file="../plugins/collab/src/organization/events/webhook.ts" lines="50-66" hash="2b83bf16f991" blob="06121d100850" */}
+
+`collab.org.setup` 写的时候地址与事件一起写：Gitea 只改地址会把事件重置成只剩 push。发到这个 topic 的 webhook 有好几个时它拒绝、列出编号，由人在 Gitea 网页上删到只剩一个；已经对了就不动；写完读回来再核对一次，还不对就报错。读写组织的 webhook 只有组织管理员能做，成员令牌勾了全部权限，范围够用，账号要是组织管理员：
+
+{/* ref file="../plugins/collab/src/organization/events/webhook.ts" lines="106-125" hash="08936df54eab" blob="06121d100850" */}
+
+push、合并请求、issue、issue 评论、仓库的建删这几种消息在 NAS 的 ntfy 上实测过，渲染成上面的样子；审阅与合并请求上的评论两种还没在 NAS 上实测，只在插件的测试里照 Gitea 的请求体算过模板。
+
+## leads changed
+
+Gitea 换协作者不发 webhook，所以 `collab.repo.setup`、`collab.repo.create` 配好负责人后自己发一条：地址是 gwb-gitea 的设置 `push-url` 加上组织的 topic，标题 `<组织>/<仓>`，正文 `leads changed`。发不出去不算命令失败，回执的 `leadsChanged` 写明原因，别的成员要等下一次完整刷新才看到新负责人：
+
+{/* ref file="../plugins/collab/src/organization/events/leads-changed.ts" lines="9-25" hash="0900a9c7fc7e" blob="7eed7f476b82" */}
+
+## 收到消息以后
+
+全部项目共用一条订阅；一个组织的消息交给订了这个 topic 的项目。认不出的消息记一行警告，对那个组织的项目做一次完整刷新；认得出的先等 2 秒合成一批，再按仓分给两边：
+
+{/* ref file="../plugins/collab/src/organization/events/project-topics-subscription.ts" lines="94-98" hash="9b6e1f8a20e2" blob="b7acd81b9b42" */}
+{/* ref file="../plugins/collab/src/organization/events/scheduler.ts" lines="3-6" hash="796fde5bfaf3" blob="bb0e2607c8ec" */}
+
+| 消息 | 说的是协作仓 | 说的是别的仓 |
+| --- | --- | --- |
+| `push` | 取回协作仓，能快进就自动同步 | 只取回那个仓 |
+| `pr`（含审阅）、`issue`、`comment` | 不处理：协作仓的合并请求由执行器定论，提交审核自己等结论 | 重读那个仓的合并请求与 issue |
+| `leads changed` | 重读项目负责人，再核对协作仓的规矩 | 重读那个仓，再核对它的规矩 |
+| `repo created` | 组织里新建了仓：克隆进项目文件夹，读一遍、核对一遍 | 同左 |
+| `repo` 的其他动作（删仓等） | 只记一行，本机的目录不动 | 同左 |
+
+别的仓的消息说的仓不在项目文件夹里，只记一行：
+
+{/* ref file="../plugins/collab/src/organization/events/project-events.ts" lines="125-138" hash="fc270c3ab371" blob="a8f822b897cb" */}
+{/* ref file="../plugins/collab/src/collab-repo/events.ts" lines="33-42" hash="d679f2f79d3e" blob="2f7d37c4b1e8" */}
+{/* ref file="../plugins/collab/src/other-repos/events.ts" lines="52-72" hash="4c24e5cdba0c" blob="98c55e68e190" */}
+
+别的仓的合并请求被审阅（批准、要求修改、评论）、合并请求上有了新评论，都推过来一条消息，插件重读那个仓：「要你改」「评论了」这两种通知收到消息就出现、就消失，不等下一次完整刷新。
+
+### Gitea 不发 webhook 的事要等多久
+
+审阅被撤销 Gitea 不发 webhook（1.27 的 `services/webhook/notifier.go` 只对批准、要求修改、评论三种审阅发），要等**那个仓下一次有别的消息**、或**下一次完整刷新**才重读：撤销了那条要求修改的审阅以后，「要你改」这条通知要等到那时才消失。完整刷新在插件连上推送、加项目、调 `collab.check`、收到认不出的消息时做。
+
+## 要配的几处
+
+- **Gitea 的 webhook**：每个协作组织由组织管理员调一次 `collab.org.setup`。插件期望的事件是上面表里那八个（读回来的名字）；组织里的 webhook 和它不一样时——比如换了一版期望多订事件的插件，组织里的 webhook 还少订审阅与合并请求上的评论——组织管理员的插件完整刷新时核对出来，在提示栏「协作仓」组出一条 `webhook-setup` 通知「组织 `<组织>` 的 webhook 没按插件要的配」，原因里写明少订了哪些事件；组织管理员再调一次 `collab.org.setup` 配好。Gitea 要放行内网地址（`ALLOWED_HOST_LIST`），这一项写在 NAS 配置仓的 teamhub 篇
+- **ntfy**：NAS 上 teamhub 里和 Gitea 放在一起的服务，和 Gitea 一起启动、停止，经 Lucky 的 `ntfy.tianshen02.online:28377` 对外，访问范围和 Gitea 一样，在校园网里。只开 `collab-*` 这类 topic 的读写，不设令牌；消息模板在 webhook 的地址里，ntfy 这边不用另配。部署和配置写在 NAS 配置仓的 teamhub 篇
+- **成员**：什么都不用配。插件订的地址是 gwb-gitea 的设置 `push-url`（和 `base-url` 存在一处，默认就是这一台），topic 按协作仓 `origin` 的主人算出来：
+
+{/* ref file="../plugins/collab/src/organization/events/project-topics-subscription.ts" lines="25-29" hash="0cd20eceb7a9" blob="b7acd81b9b42" */}
+
+新建一个协作组织时，webhook 是 [建项目与人员变动](/gitea/setup) 里的一步。这一步不做，Gitea 上的事件推不出来，成员的插件只在连上推送、加项目或调 `collab.check` 时才做完整刷新；webhook 配得不对，插件认不出推来的消息，每条都只能做一次完整刷新。

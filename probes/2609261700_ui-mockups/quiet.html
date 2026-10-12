@@ -1,0 +1,611 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>10kW 样机机架 · 混合型 MMC 样机</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.css">
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.js"></script>
+<style>
+:root {
+  --bg: #ffffff;
+  --nav-bg: #fafafa;
+  --fg: #18181b;
+  --muted: #71717a;
+  --faint: #a1a1aa;
+  --line: #e4e4e7;
+  --hover: rgba(24, 24, 27, .045);
+  --active: rgba(24, 24, 27, .08);
+  --primary: #18181b;
+  --on-primary: #fafafa;
+  --mark: #fef3c7;
+  --mark-strong: #fcd34d;
+  --mark-done: #f4f4f5;
+  --st-open: #d97706;
+  --st-doing: #2563eb;
+  --st-done: #16a34a;
+  --shadow-pop: 0 10px 30px -8px rgba(24, 24, 27, .18), 0 2px 6px rgba(24, 24, 27, .06);
+  --nav-w: 272px;
+  --rail-gap: 80px;
+  --drop-w: 380px;
+  --font: "Microsoft YaHei UI", "Microsoft YaHei", "PingFang SC", sans-serif;
+  --mono: "Sarasa Mono SC", Consolas, monospace;
+}
+* { box-sizing: border-box; }
+html, body { height: 100%; margin: 0; }
+body { background: var(--bg); color: var(--fg); font: 14px/1.6 var(--font); -webkit-font-smoothing: antialiased; }
+button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; }
+button:focus-visible, a:focus-visible, textarea:focus-visible { outline: 2px solid var(--fg); outline-offset: 1px; border-radius: 6px; }
+svg.i { width: 16px; height: 16px; flex: none; fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+kbd, code, .mono { font-family: var(--mono); }
+kbd { font-size: 11px; padding: 0 4px; border: 1px solid var(--line); border-radius: 4px; color: var(--muted); background: var(--bg); }
+.katex { font-size: 1.05em; }
+.katex .cjk_fallback, .katex .text, .katex .textrm { font-family: KaTeX_Main, var(--font); }
+
+/* ---------- 外壳 ---------- */
+/* 左右两侧同一套做法：边上一列按钮卡，旁边一张浮卡，都盖在正文上，不挤正文 */
+.app { height: 100%; position: relative; --left-open: var(--nav-w); }
+body.nav-closed .app { --left-open: 0px; }
+.main { position: relative; height: 100%; overflow: hidden; }
+.scroll { position: absolute; inset: 0; overflow-y: auto; scrollbar-width: thin; }
+
+/* ---------- 左侧浮卡：文件树 ---------- */
+.nav { position: absolute; z-index: 6; top: 12px; bottom: 12px; left: var(--rail-gap); width: var(--nav-w); background: var(--bg); border: 1px solid var(--line); border-radius: 12px; box-shadow: var(--shadow-pop); overflow: hidden; display: flex; flex-direction: column; }
+body.nav-closed .nav { display: none; }
+.nav-inner { flex: 1; display: flex; flex-direction: column; min-height: 0; }
+.project { padding: 16px 16px 12px; font-weight: 700; font-size: 14px; }
+.tree { flex: 1; overflow-y: auto; padding: 0 8px 12px; display: grid; align-content: start; gap: 1px; }
+.row { display: flex; align-items: center; gap: 8px; height: 28px; padding: 0 8px; border-radius: 6px; color: var(--fg); text-decoration: none; font-size: 13.5px; white-space: nowrap; }
+.row:hover { background: var(--hover); }
+.row.here { background: var(--active); font-weight: 700; }
+.row .i { color: var(--muted); }
+.row .count { margin-left: auto; font-size: 12px; color: var(--muted); }
+.row.folder { color: var(--muted); }
+.indent { padding-left: 16px; display: grid; gap: 1px; }
+.gap { height: 12px; }
+.people { border-top: 1px solid var(--line); padding: 10px 8px; display: grid; gap: 2px; }
+.person { display: flex; align-items: center; gap: 8px; min-height: 32px; padding: 0 8px; border-radius: 6px; font-size: 13px; white-space: nowrap; }
+.person .label { color: var(--muted); font-size: 12px; }
+.person .name { font-weight: 700; }
+.person.me { min-height: 44px; }
+.person.me .av { width: 28px; height: 28px; font-size: 13px; }
+.person .who { display: grid; line-height: 1.35; min-width: 0; }
+.person .role { color: var(--muted); font-size: 12px; }
+.person .theme { margin-left: auto; width: 28px; height: 28px; display: grid; place-items: center; border-radius: 6px; color: var(--muted); }
+.person .theme:hover { background: var(--hover); color: var(--fg); }
+.av { width: 20px; height: 20px; border-radius: 50%; display: grid; place-items: center; font-size: 11px; font-weight: 700; color: #fff; flex: none; }
+.av.g { background: #52525b; } .av.b { background: #0e7490; } .av.c { background: #9d174d; }
+
+/* ---------- 悬浮按钮 ---------- */
+/* 悬浮按钮收在一张白色小卡里：有边线和浮层阴影，按钮带文字，从正文上一眼就能看到 */
+.dock { position: absolute; z-index: 5; background: var(--bg); border: 1px solid var(--line); border-radius: 12px; box-shadow: var(--shadow-pop); padding: 4px; display: grid; gap: 2px; }
+.dock.nav-dock { top: 12px; left: 12px; }
+.dock.nav-bottom { bottom: 12px; left: 12px; }
+.dock.rail { top: 12px; right: 20px; }
+.dock.rail-bottom { bottom: 12px; right: 20px; }
+.fab { position: relative; width: 48px; min-height: 48px; border-radius: 8px; display: grid; place-items: center; align-content: center; gap: 2px; color: var(--fg); }
+a.fab { text-decoration: none; }
+.fab .i { width: 18px; height: 18px; }
+.fab .lbl { font-size: 11px; line-height: 1; color: var(--muted); }
+.fab:hover { background: var(--hover); }
+.fab.on { background: var(--primary); color: var(--on-primary); }
+.fab.on .lbl { color: var(--on-primary); }
+.fab.small { min-height: 32px; width: 48px; }
+.badge { position: absolute; right: 3px; top: 3px; min-width: 16px; height: 16px; padding: 0 4px; border-radius: 8px; background: var(--st-open); color: #fff; font-size: 10.5px; line-height: 16px; text-align: center; font-weight: 700; box-shadow: 0 0 0 2px var(--bg); }
+.badge.neutral { background: var(--primary); }
+.fab.on .badge { box-shadow: 0 0 0 2px var(--primary); }
+.dock .sep { height: 1px; background: var(--line); margin: 2px 6px; }
+body.annotating .fab-annotate { background: var(--primary); color: var(--on-primary); }
+body.annotating .fab-annotate .lbl { color: var(--on-primary); }
+
+.toc { display: grid; padding: 4px 0; }
+.toc a { display: block; padding: 6px 12px; border-radius: 6px; color: var(--muted); text-decoration: none; font-size: 13.5px; }
+.toc a:hover { background: var(--hover); color: var(--fg); }
+.toc a.on { color: var(--fg); font-weight: 700; background: var(--hover); }
+.toc a .n { display: inline-block; min-width: 32px; color: var(--faint); font-weight: 400; }
+.toc a .cnt { float: right; color: var(--st-open); font-size: 12px; font-weight: 400; }
+
+/* ---------- 正文 ---------- */
+.col { max-width: 760px; margin: 0 auto; padding: 56px 32px 160px; font-size: 16px; line-height: 1.7; }
+.col h1 { font-size: 22px; line-height: 1.4; margin: 0 0 12px; text-wrap: balance; }
+.col h2 { font-size: 17px; margin: 40px 0 8px; line-height: 1.5; }
+.col p { margin: 0 0 12px; }
+.col ul { margin: 0 0 12px; padding-left: 20px; }
+.col li { margin: 0 0 6px; }
+.col strong { font-weight: 700; }
+.col .kicker { color: var(--muted); font-size: 13px; margin: 0 0 4px; }
+.col .skip { color: var(--faint); font-size: 13px; margin: 28px 0 0; }
+.table-wrap { overflow-x: auto; margin: 4px 0 12px; }
+table { border-collapse: collapse; width: 100%; font-size: 14px; line-height: 1.6; }
+th, td { border: 1px solid var(--line); padding: 6px 10px; text-align: left; vertical-align: middle; }
+th { background: var(--nav-bg); font-weight: 700; white-space: nowrap; }
+td.num { white-space: nowrap; font-variant-numeric: tabular-nums; }
+table.params th, table.params td { text-align: center; white-space: nowrap; }
+.caption { color: var(--muted); font-size: 13px; margin-top: -4px; }
+
+/* 被批注的字 */
+.mk { background: var(--mark); border-radius: 2px; cursor: pointer; box-shadow: 0 0 0 1px transparent; transition: background .12s; }
+.mk:hover, .mk.hot { background: #fde68a; }
+.mk.sel { background: var(--mark-strong); }
+.mk.done { background: var(--mark-done); }
+.mk.done.sel { background: #e4e4e7; }
+body.hide-marks .mk { background: none; }
+body.annotating .col { cursor: text; }
+.draft-mark { background: #e0e7ff; border-radius: 2px; }
+
+/* ---------- 右侧浮卡 ---------- */
+.drop { position: absolute; z-index: 6; top: 12px; bottom: 12px; right: calc(var(--rail-gap) + 8px); width: var(--drop-w); max-width: calc(100% - 2 * var(--rail-gap) - 8px - var(--left-open) - 12px); background: var(--bg); border: 1px solid var(--line); border-radius: 12px; box-shadow: var(--shadow-pop); display: flex; flex-direction: column; overflow: hidden; }
+.drop[hidden] { display: none; }
+.drop .grip { position: absolute; left: 0; top: 0; bottom: 0; width: 6px; cursor: ew-resize; }
+.drop .grip:hover, .drop.dragging .grip { background: var(--active); }
+.drop-head { height: 44px; flex: none; display: flex; align-items: center; gap: 8px; padding: 0 8px 0 16px; border-bottom: 1px solid var(--line); }
+.drop-head h3 { margin: 0; font-size: 14px; }
+.drop-head .x { margin-left: auto; width: 28px; height: 28px; display: grid; place-items: center; border-radius: 6px; color: var(--muted); }
+.drop-head .x:hover { background: var(--hover); color: var(--fg); }
+.seg { display: inline-flex; padding: 2px; border-radius: 6px; background: var(--hover); margin-left: 8px; }
+.seg button { height: 24px; padding: 0 8px; border-radius: 4px; font-size: 12px; color: var(--muted); }
+.seg button.on { background: var(--bg); color: var(--fg); box-shadow: 0 1px 2px rgba(24,24,27,.08); }
+.drop-body { flex: 1; overflow-y: auto; padding: 8px; }
+.drop-foot { flex: none; border-top: 1px solid var(--line); padding: 8px 16px; color: var(--muted); font-size: 12px; display: flex; gap: 12px; }
+
+.c { border-radius: 8px; padding: 10px 10px 10px 12px; cursor: pointer; border: 1px solid transparent; }
+.c + .c { margin-top: 2px; }
+.c:hover, .c.hot { background: var(--hover); }
+.c.sel { border-color: var(--line); background: var(--bg); box-shadow: 0 1px 3px rgba(24,24,27,.06); }
+.c-head { display: flex; align-items: center; gap: 8px; font-size: 13px; }
+.c-head .who { font-weight: 700; }
+.c-head .when { color: var(--faint); font-size: 12px; }
+.c-head .state { margin-left: auto; font-size: 12px; display: inline-flex; align-items: center; gap: 4px; }
+.state.open { color: var(--st-open); }
+.state.done { color: var(--muted); }
+.dot { width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+.c-quote { color: var(--muted); font-size: 12.5px; margin: 4px 0 0 28px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.c-text { margin: 2px 0 0 28px; font-size: 13.5px; }
+.reply { margin: 8px 0 0 28px; padding-left: 10px; border-left: 1px solid var(--line); }
+.reply .c-text, .reply .c-quote { margin-left: 28px; }
+.c-actions { display: none; margin: 8px 0 0 28px; gap: 4px; align-items: center; }
+.c.sel .c-actions { display: flex; }
+.btn { height: 28px; padding: 0 10px; border-radius: 6px; font-size: 12.5px; border: 1px solid var(--line); background: var(--bg); display: inline-flex; align-items: center; gap: 6px; }
+.btn:hover { background: var(--hover); }
+.btn.primary { background: var(--primary); color: var(--on-primary); border-color: var(--primary); }
+.c-actions .id { margin-left: auto; color: var(--faint); font-size: 11px; }
+.c.collapsed .c-text, .c.collapsed .c-quote, .c.collapsed .reply { display: none; }
+.c.collapsed .c-head .who::after { content: attr(data-line); font-weight: 400; color: var(--muted); margin-left: 8px; }
+.empty { color: var(--muted); font-size: 13px; padding: 24px 12px; text-align: center; }
+
+.t { display: flex; align-items: flex-start; gap: 10px; padding: 10px 12px; border-radius: 8px; }
+.t:hover { background: var(--hover); }
+.t .box { width: 16px; height: 16px; margin-top: 3px; border-radius: 4px; border: 1.5px solid var(--faint); display: grid; place-items: center; flex: none; }
+.t .box svg { width: 12px; height: 12px; stroke-width: 2.4; }
+.t[data-state="doing"] .box { border-color: var(--st-doing); background: linear-gradient(90deg, var(--st-doing) 50%, transparent 50%); }
+.t[data-state="done"] .box { border-color: var(--st-done); background: var(--st-done); color: #fff; }
+.t[data-state="done"] .t-title { color: var(--muted); text-decoration: line-through; }
+.t-body { flex: 1; min-width: 0; }
+.t-title { font-size: 13.5px; }
+.t-meta { display: flex; align-items: center; gap: 6px; margin-top: 4px; font-size: 12px; color: var(--muted); }
+.t-meta .st { margin-left: auto; }
+.t-meta .st.doing { color: var(--st-doing); }
+.t-meta .st.done { color: var(--st-done); }
+
+/* ---------- 批注模式 ---------- */
+.hint { position: absolute; z-index: 7; left: 50%; bottom: 20px; transform: translateX(-50%); background: var(--primary); color: var(--on-primary); border-radius: 8px; padding: 8px 12px; font-size: 13px; display: none; align-items: center; gap: 10px; box-shadow: var(--shadow-pop); white-space: nowrap; }
+.hint kbd { background: transparent; color: var(--on-primary); border-color: rgba(250,250,250,.3); }
+body.annotating .hint { display: flex; }
+.composer { position: absolute; z-index: 8; width: 320px; background: var(--bg); border: 1px solid var(--line); border-radius: 10px; box-shadow: var(--shadow-pop); padding: 12px; display: grid; gap: 8px; }
+.composer[hidden] { display: none; }
+.composer .quote { color: var(--muted); font-size: 12.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.composer textarea { width: 100%; min-height: 72px; resize: vertical; border: 1px solid var(--line); border-radius: 6px; padding: 8px; font: 13.5px/1.6 var(--font); color: var(--fg); }
+.composer .acts { display: flex; justify-content: flex-end; gap: 8px; align-items: center; }
+.composer .acts .tip { margin-right: auto; color: var(--faint); font-size: 12px; }
+.composer .err { color: var(--st-open); font-size: 12.5px; }
+
+@media (prefers-reduced-motion: reduce) { .app { transition: none; } }
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-panel" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M9 4v16"/></symbol>
+  <symbol id="i-msg" viewBox="0 0 24 24"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/></symbol>
+  <symbol id="i-tasks" viewBox="0 0 24 24"><path d="M9 6h11M9 12h11M9 18h11"/><path d="m3.5 6 1 1 2-2M3.5 12l1 1 2-2M3.5 18l1 1 2-2"/></symbol>
+  <symbol id="i-pen" viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></symbol>
+  <symbol id="i-up" viewBox="0 0 24 24"><path d="M12 19V5M5 12l7-7 7 7"/></symbol>
+  <symbol id="i-down" viewBox="0 0 24 24"><path d="M12 5v14M19 12l-7 7-7-7"/></symbol>
+  <symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></symbol>
+  <symbol id="i-file" viewBox="0 0 24 24"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6"/></symbol>
+  <symbol id="i-folder" viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></symbol>
+  <symbol id="i-home" viewBox="0 0 24 24"><path d="m3 11 9-7 9 7"/><path d="M5 10v10h14V10"/></symbol>
+  <symbol id="i-inbox" viewBox="0 0 24 24"><path d="M22 12h-6l-2 3h-4l-2-3H2"/><path d="M5.5 5h13L22 12v6a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-6z"/></symbol>
+  <symbol id="i-board" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M9 4v16M15 4v16"/></symbol>
+  <symbol id="i-moon" viewBox="0 0 24 24"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></symbol>
+  <symbol id="i-list" viewBox="0 0 24 24"><path d="M4 6h16M4 12h10M4 18h13"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12 5 5 9-10"/></symbol>
+</svg>
+
+<div class="app">
+  <aside class="nav" aria-label="导航">
+    <div class="nav-inner">
+      <div class="project">10kW 混合型 MMC 样机</div>
+      <nav class="tree">
+        <a class="row" href="#"><svg class="i"><use href="#i-home"/></svg>首页</a>
+        <div class="row folder"><svg class="i"><use href="#i-folder"/></svg>样机</div>
+        <div class="indent">
+          <a class="row here" href="#" aria-current="page"><svg class="i"><use href="#i-file"/></svg>10kW 样机机架<span class="count" id="navCount">2</span></a>
+          <a class="row" href="#"><svg class="i"><use href="#i-file"/></svg>子模块板设计<span class="count">1</span></a>
+          <a class="row" href="#"><svg class="i"><use href="#i-file"/></svg>控制与采样系统</a>
+        </div>
+      </nav>
+      <div class="people">
+        <div class="person" title="有事找负责人"><span class="label">负责人</span><span class="av g">G</span><span class="name">godcreator</span></div>
+        <div class="person me"><span class="av b">B</span><span class="who"><span class="name">bob-test</span><span class="role">测试成员 · 我</span></span></div>
+      </div>
+    </div>
+  </aside>
+
+  <main class="main" id="main">
+    <div class="dock nav-dock">
+      <button class="fab on" id="navToggle" type="button" title="收起文件树" aria-label="收起文件树"><svg class="i"><use href="#i-folder"/></svg><span class="lbl">文件</span></button>
+      <a class="fab" href="#" title="我的待办" aria-label="我的待办"><svg class="i"><use href="#i-inbox"/></svg><span class="lbl">待办</span><span class="badge">1</span></a>
+      <a class="fab" href="#" title="任务总览" aria-label="任务总览"><svg class="i"><use href="#i-board"/></svg><span class="lbl">总览</span></a>
+    </div>
+    <div class="dock nav-bottom">
+      <button class="fab small" type="button" title="切换深色" aria-label="切换深色"><svg class="i"><use href="#i-moon"/></svg></button>
+    </div>
+
+    <div class="scroll" id="scroll">
+      <article class="col" id="col">
+        <p class="kicker">半桥 / 全桥混合型 MMC · 实验室样机</p>
+        <h1>10kW 混合型 MMC 样机架</h1>
+        <p>三相 10 kW，交流 380 V（相电压 220 V），直流 <strong>700 V</strong>。<span class="mk" data-c="1">每个桥臂 10 个子模块</span>，装一个 3U 桥臂机箱。两台 ITECH 电源有 800 mm 深，机架按 1000 mm 深、前后两面装：前面放要操作和接线的低压设备（控制插箱、子模块低压电源、六个桥臂机箱、急停），后面放高压接线（开关板、直流母排、电抗器），两台 ITECH 电源整深放在最下面。一个 37U 开放机架，总高约 1.8 m；整套按星形 PE 接地，控制信号地和子模块低压 0 V 各自单点接地，高压侧经高阻接地。</p>
+        <div class="table-wrap">
+          <table class="params">
+            <thead><tr><th data-tex="P"></th><th data-tex="U_\text{dc}"></th><th data-tex="U_\text{ac}"></th><th data-tex="N"></th><th>SM 合计</th><th data-tex="U_\text{c}"></th><th>光纤</th></tr></thead>
+            <tbody><tr><td>10 kW</td><td><strong>700 V</strong></td><td>380 V 线 / 220 V 相</td><td>10 SM / 桥臂</td><td>60</td><td>≈ 70 V</td><td>240 根</td></tr></tbody>
+          </table>
+        </div>
+
+        <h2 id="param">01 参数估算</h2>
+        <p><strong>先说一个假设：</strong>「220 V 交流」按三相相电压 220 V、线电压 380 V 理解。如果指的是线电压 220 V，调制比会降到 0.51 左右，电流会变大，下表要重算。</p>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>项目</th><th>数值</th><th>怎么算的</th><th>说明</th></tr></thead>
+            <tbody>
+              <tr><td>调制比 <span data-tex="m"></span></td><td class="num">0.89</td><td data-tex="\dfrac{2 \times 220\sqrt{2}}{700}"></td><td>半桥也能正常出电压，全桥部分留作过调制和直流故障阻断</td></tr>
+              <tr><td>交流相电流</td><td class="num">15.2 A rms</td><td data-tex="\dfrac{10\,\text{kW}}{\sqrt{3} \times 380\,\text{V}}"></td><td>峰值约 21.5 A</td></tr>
+              <tr><td>直流电流</td><td class="num">14.3 A</td><td data-tex="\dfrac{10\,\text{kW}}{700\,\text{V}}"></td><td>—</td></tr>
+              <tr><td>桥臂电流</td><td class="num">≈ 15.5 A 峰值</td><td data-tex="\dfrac{I_\text{dc}}{3} + \dfrac{I_\text{ac,峰}}{2}"></td><td>器件、电感、分流电阻按这个峰值选；测量用桥臂机箱里的桥臂电流板，见第 05 节</td></tr>
+              <tr><td>子模块电容电压</td><td class="num">≈ 70 V</td><td data-tex="\dfrac{700\,\text{V}}{10}"></td><td>每臂 1 个冗余时约 78 V；器件按 150 V 级选，电容按 ≥ 120 V 选</td></tr>
+              <tr><td>子模块电容</td><td class="num">≈ 2.2–2.7 mF</td><td>每 kVA 储能 30–40 J，分到 60 个 SM</td><td>纹波按 ±10% 左右，最终用 PLECS 仿真定</td></tr>
+              <tr><td>桥臂电感</td><td class="num"><span class="mk" data-c="2">≈ 5 mH / 20 A</span></td><td>基值电感 46 mH 的 10%</td><td>要求 20 A 峰值不饱和，环流抑制效果用仿真确认</td></tr>
+              <tr><td>损耗与散热</td><td class="num"><span class="mk done" data-c="3">≈ 200 W</span></td><td>按效率 98% 估</td><td>每个 SM 只有几瓦，机箱顶部小风扇就够</td></tr>
+              <tr><td>光纤数量</td><td class="num">240 根</td><td data-tex="60\,\text{SM} \times 4\,\text{根}"></td><td>每个 SM：1 对 UART + 2 根开关码，每相 80 根，和 6U 控制插箱的相控板对得上</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="caption">以上是方案阶段的估算，给机架和器件定尺寸用。电容、电感和器件电流以后续仿真和手册核算为准。</p>
+
+        <h2 id="sld">02 主电路</h2>
+        <p class="skip">主电路图，效果图里略去。</p>
+        <h2 id="view">03 3D 机架</h2>
+        <p class="skip">3D 机架视图，效果图里略去。</p>
+
+        <h2 id="cab">04 机架布置</h2>
+        <p>ITECH 电源有 800 mm 深，机架就得 1000 mm 深；控制插箱和桥臂机箱只有 300 mm 深，所以前后两面都装。前面对着人，放要看、要插拔、要接低压线的东西；后面放高压接线，正好对着桥臂机箱后面的接线柱。</p>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>U 位</th><th>前面（深 300–450 mm）</th><th>中间</th><th>后面（深 300–400 mm）</th></tr></thead>
+            <tbody>
+              <tr><td class="num">35–37</td><td>空（放示波器、万用表）</td><td></td><td></td></tr>
+              <tr><td class="num">34</td><td>急停面板（急停 + 指示灯）</td><td></td><td>1U 机架插线板（220 V）</td></tr>
+              <tr><td class="num">28–33</td><td>控制插箱 6U</td><td></td><td>空</td></tr>
+              <tr><td class="num">25–27</td><td>空（低压线从这里横到左前立柱）</td><td></td><td>3U 托盘：子模块低压侧台式 ITECH 电源，横放，前面板朝右侧</td></tr>
+              <tr><td class="num">22–24</td><td>A 上桥臂</td><td rowspan="6">直流母排 P / N（竖直铜排，U7–24）</td><td rowspan="3">开关板 9U（U16–24）：上排开关和接触器，中排交流 / 直流采样板，下排继电器、24 V 电源、直流接触器、预充电电阻、端子</td></tr>
+              <tr><td class="num">19–21</td><td>A 下桥臂</td></tr>
+              <tr><td class="num">16–18</td><td>B 上桥臂</td></tr>
+              <tr><td class="num">13–15</td><td>B 下桥臂</td><td>空</td></tr>
+              <tr><td class="num">10–12</td><td>C 上桥臂</td><td rowspan="2">电抗器托板（U7–11）：6 个 5 mH / 20 A 电抗器</td></tr>
+              <tr><td class="num">7–9</td><td>C 下桥臂</td></tr>
+              <tr><td class="num">4–6</td><td colspan="3">ITECH 电网模拟器（参考型号 IT7912-350-90），整深 800 mm</td></tr>
+              <tr><td class="num">1–3</td><td colspan="3">ITECH 双向直流电源（参考型号 IT6012C-800-50），整深 800 mm，约 30 kg</td></tr>
+              <tr><td class="num">底部</td><td colspan="3">PE 主接地排（后面最下面的横梁上）</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p><strong>子模块低压侧电源：</strong>台式 ITECH 电源放在机架后面 U25–27 的 3U 托盘上，横过来放，前面板朝机架右侧，人站在侧面就能看表、调电压、插拔输出线。输出沿机架右侧往前，从前面 U25–27 的空位横到左前立柱，再往下接每个桥臂机箱前面的低压分线排，最后用短线串到子模块前面板的低压插座。电源的 220 V 进线插后面 U34 的插线板。电压和功率按 60 个子模块的总功耗定，型号以实物为准。</p>
+        <p><strong>整体尺寸：</strong>宽 600 mm × 深 1000 mm × 高约 1.8 m（37U 机架约 1645 mm，加底座、脚轮和顶框）。顶上 U35–37 空着，可以放示波器；不需要的话，可以换成 34U 左右的机架，高度约 1.65 m。</p>
+        <p class="caption">前面：光纤沿右前立柱，低压线沿左前立柱；后面：直流、交流功率线；中间：直流母排。调试时站在前面，碰不到高压线。</p>
+
+        <h2 id="ctrlboards">04a 控制插箱板卡</h2>
+        <p class="skip">效果图里略去。</p>
+        <h2 id="wiring">04b 接线清单</h2>
+        <p class="skip">效果图里略去。</p>
+        <h2 id="arm">05 桥臂机箱</h2>
+        <p class="skip">效果图里略去。</p>
+        <h2 id="sm">06 子模块板</h2>
+        <p class="skip">效果图里略去。</p>
+        <h2 id="sampling">06b 采样点与采样 PCB</h2>
+        <p class="skip">效果图里略去。</p>
+        <h2 id="switchgear">06d 开关板选型</h2>
+        <p class="skip">效果图里略去。</p>
+        <h2 id="acboard">06c 交流采样板细节</h2>
+        <p class="skip">效果图里略去。</p>
+        <h2 id="ground">06a 接地设计</h2>
+        <p class="skip">效果图里略去。</p>
+
+        <h2 id="safe">07 安全与待确认</h2>
+        <p>实验室做不用上工业那一套，但 700 V 直流和子模块电容的储能还是要当回事。下面几条是最低限度。</p>
+        <ul>
+          <li><strong>急停：</strong>一个急停按钮装在开关板上，按下断交流接触器和直流侧。ITECH 电源自带的保护也打开。</li>
+          <li><strong>子模块电容会带电：</strong>每个 SM 并泄放电阻，再加一个电压指示灯，灯灭了再动手。</li>
+          <li><strong>防护：</strong>通电时机架前面挡一块亚克力板，调试时用隔离探头或差分探头。</li>
+          <li><strong>交流电压的定义：</strong>本页按相电压 220 V、线电压 380 V 算。如果是线电压 220 V，需要重算调制比、电流和子模块数量。</li>
+          <li><strong>和控制插箱对得上：</strong>60 个 SM × 4 根 = 240 根光纤，每相 80 根，正好对应控制插箱三块相控板各 80 个口。</li>
+        </ul>
+        <p class="caption">10kW 混合型 MMC 样机架 · 方案 v0.9（实验室版，双面机架） · 参数为估算值，器件与尺寸以仿真、手册和实物为准</p>
+      </article>
+    </div>
+
+    <div class="dock rail">
+      <button class="fab" id="btnToc" type="button" title="本页目录" aria-label="本页目录"><svg class="i"><use href="#i-list"/></svg><span class="lbl">目录</span></button>
+      <button class="fab" id="btnComments" type="button" title="批注" aria-label="批注"><svg class="i"><use href="#i-msg"/></svg><span class="lbl">批注</span><span class="badge" id="badgeComments">2</span></button>
+      <button class="fab" id="btnTasks" type="button" title="本页任务" aria-label="本页任务"><svg class="i"><use href="#i-tasks"/></svg><span class="lbl">任务</span><span class="badge neutral" id="badgeTasks">2</span></button>
+      <div class="sep"></div>
+      <button class="fab fab-annotate" id="btnAnnotate" type="button" title="批注模式（快捷键 C）" aria-label="批注模式"><svg class="i"><use href="#i-pen"/></svg><span class="lbl">批注模式</span></button>
+    </div>
+    <div class="dock rail-bottom">
+      <button class="fab small" id="btnTop" type="button" title="回到顶部" aria-label="回到顶部"><svg class="i"><use href="#i-up"/></svg></button>
+      <button class="fab small" id="btnBottom" type="button" title="到页底" aria-label="到页底"><svg class="i"><use href="#i-down"/></svg></button>
+    </div>
+
+    <section class="drop" id="drop" hidden aria-label="侧边栏">
+      <div class="grip" id="grip" title="拖动改宽度，双击复原"></div>
+      <div class="drop-head">
+        <h3 id="dropTitle">批注</h3>
+        <div class="seg" id="filter">
+          <button type="button" data-f="all">全部</button>
+          <button type="button" data-f="open" class="on">未解决</button>
+          <button type="button" data-f="done">已解决</button>
+        </div>
+        <button class="x" id="dropClose" type="button" title="关闭（Esc）" aria-label="关闭"><svg class="i"><use href="#i-x"/></svg></button>
+      </div>
+      <div class="drop-body" id="dropBody"></div>
+      <div class="drop-foot" id="dropFoot"></div>
+    </section>
+
+    <div class="hint" id="hint"><svg class="i"><use href="#i-pen"/></svg>批注模式：选中正文里的字，写下批注<kbd>Esc</kbd>退出</div>
+
+    <div class="composer" id="composer" hidden>
+      <div class="quote" id="composerQuote"></div>
+      <textarea id="composerText" placeholder="写批注…"></textarea>
+      <div class="err" id="composerErr" hidden></div>
+      <div class="acts"><span class="tip"><kbd>Ctrl</kbd> <kbd>Enter</kbd> 保存</span><button class="btn" id="composerCancel" type="button">取消</button><button class="btn primary" id="composerSave" type="button">保存</button></div>
+    </div>
+  </main>
+</div>
+
+<script>
+const people = {
+  godcreator: { initial: 'G', cls: 'g', role: '负责人' },
+  'bob-test': { initial: 'B', cls: 'b', role: '测试成员' },
+  'carol-test': { initial: 'C', cls: 'c', role: '测试成员二' },
+};
+const me = 'bob-test';
+const comments = [
+  { id: '20260926001000-bob0001', n: 1, who: 'bob-test', when: '09-25 20:41', status: 'open', quote: '每个桥臂 10 个子模块', where: '页头',
+    text: '冗余子模块放在哪一块板上？',
+    replies: [{ who: 'godcreator', when: '09-26 09:12', text: '10 块里留 1 块做冗余，程序里切换，60 块板都一样。' }] },
+  { id: '20260926100500-car0002', n: 2, who: 'carol-test', when: '09-26 10:05', status: 'open', quote: '≈ 5 mH / 20 A', where: '01 参数估算',
+    text: '20 A 不饱和要看磁芯型号，先别下单。', replies: [] },
+  { id: '20260925173000-bob0003', n: 3, who: 'bob-test', when: '09-25 17:30', status: 'done', quote: '≈ 200 W', where: '01 参数估算',
+    text: '风扇要不要单独供电？', replies: [] },
+];
+const tasks = [
+  { title: '核算子模块电容纹波', owner: 'bob-test', state: 'done' },
+  { title: '确认 ITECH 电源输出有没有对地参考', owner: 'carol-test', state: 'doing' },
+  { title: '开关板 9U 安装板出图', owner: 'godcreator', state: 'todo' },
+];
+const stateLabel = { todo: '待开始', doing: '进行中', done: '已完成' };
+const nextState = { todo: 'doing', doing: 'done', done: 'todo' };
+
+const $ = s => document.querySelector(s);
+const scroll = $('#scroll'), col = $('#col'), main = $('#main'), drop = $('#drop');
+let panel = null, filter = 'open', selected = null, dropWidth = 380;
+
+document.querySelectorAll('[data-tex]').forEach(el => katex.render(el.dataset.tex, el, { throwOnError: true }));
+
+function avatar(who) { const p = people[who]; return `<span class="av ${p.cls}">${p.initial}</span>`; }
+
+function renderComments() {
+  const list = comments.filter(c => filter === 'all' || c.status === filter);
+  $('#dropBody').innerHTML = list.length ? list.map(c => `
+    <div class="c ${c.n === selected ? 'sel' : ''} ${c.status === 'done' && c.n !== selected ? 'collapsed' : ''}" data-n="${c.n}">
+      <div class="c-head">${avatar(c.who)}<span class="who" data-line="${c.text}">${c.who}</span><span class="when">${c.when}</span>
+        <span class="state ${c.status}"><span class="dot"></span>${c.status === 'open' ? '未解决' : '已解决'}</span></div>
+      <div class="c-quote">${c.where} ·「${c.quote}」</div>
+      <div class="c-text">${c.text}</div>
+      ${c.replies.map(r => `<div class="reply"><div class="c-head">${avatar(r.who)}<span class="who">${r.who}</span><span class="when">${r.when}</span></div><div class="c-text">${r.text}</div></div>`).join('')}
+      <div class="c-actions"><button class="btn" type="button" data-act="reply">回复</button><button class="btn" type="button" data-act="toggle">${c.status === 'open' ? '标为已解决' : '重新打开'}</button><span class="id mono">${c.id}</span></div>
+    </div>`).join('') : `<div class="empty">${filter === 'open' ? '没有未解决的批注' : '没有批注'}</div>`;
+  $('#dropFoot').innerHTML = '<span><kbd>[</kbd> <kbd>]</kbd> 上一条 / 下一条</span><span><kbd>C</kbd> 批注模式</span>';
+  updateCounts();
+}
+
+function renderTasks() {
+  $('#dropBody').innerHTML = tasks.map((t, i) => `
+    <div class="t" data-state="${t.state}" data-i="${i}">
+      <button class="box" type="button" title="改成${stateLabel[nextState[t.state]]}" aria-label="改成${stateLabel[nextState[t.state]]}">${t.state === 'done' ? '<svg class="i"><use href="#i-check"/></svg>' : ''}</button>
+      <div class="t-body"><div class="t-title">${t.title}</div>
+        <div class="t-meta">${avatar(t.owner)}${t.owner}<span class="st ${t.state}">${stateLabel[t.state]}</span></div></div>
+    </div>`).join('');
+  $('#dropFoot').innerHTML = '<span>点方框改状态</span><span>全部任务在左栏「任务总览」</span>';
+  updateCounts();
+}
+
+function updateCounts() {
+  const open = comments.filter(c => c.status === 'open').length;
+  $('#badgeComments').textContent = open; $('#badgeComments').hidden = !open;
+  $('#navCount').textContent = open; $('#navCount').hidden = !open;
+  const unfinished = tasks.filter(t => t.state !== 'done').length;
+  $('#badgeTasks').textContent = unfinished; $('#badgeTasks').hidden = !unfinished;
+  document.querySelectorAll('.mk[data-c]').forEach(m => {
+    const c = comments.find(x => x.n === +m.dataset.c);
+    m.classList.toggle('done', c.status === 'done');
+    m.classList.toggle('sel', c.n === selected);
+  });
+}
+
+const heads = [...col.querySelectorAll('h2[id]')];
+function renderToc() {
+  $('#dropBody').innerHTML = '<nav class="toc">' + heads.map(h => {
+    const [n, ...rest] = h.textContent.split(' ');
+    const open = [...document.querySelectorAll('.mk[data-c]')].filter(m => sectionOf(m) === h && comments.find(c => c.n === +m.dataset.c).status === 'open').length;
+    return `<a href="#${h.id}"><span class="n">${n}</span>${rest.join(' ')}${open ? `<span class="cnt">${open} 条未解决</span>` : ''}</a>`;
+  }).join('') + '</nav>';
+  $('#dropFoot').innerHTML = '<span>点一节跳过去</span>';
+  spy();
+}
+function sectionOf(el) {
+  let cur = null;
+  for (const h of heads) if (h.compareDocumentPosition(el) & Node.DOCUMENT_POSITION_FOLLOWING) cur = h;
+  return cur;
+}
+
+function openPanel(name) {
+  panel = name;
+  drop.hidden = !name;
+  $('#btnToc').classList.toggle('on', name === 'toc');
+  $('#btnComments').classList.toggle('on', name === 'comments');
+  $('#btnTasks').classList.toggle('on', name === 'tasks');
+  $('#filter').hidden = name !== 'comments';
+  if (name === 'toc') { $('#dropTitle').textContent = '本页目录'; renderToc(); }
+  if (name === 'comments') { $('#dropTitle').textContent = '批注'; renderComments(); }
+  if (name === 'tasks') { $('#dropTitle').textContent = '本页任务'; renderTasks(); }
+  if (name !== 'comments') { selected = null; updateCounts(); }
+}
+
+function select(n, scrollTo) {
+  selected = n;
+  if (filter !== 'all' && comments.find(c => c.n === n).status !== filter) filter = 'all';
+  syncFilter();
+  renderComments();
+  if (scrollTo) {
+    const m = document.querySelector(`.mk[data-c="${n}"]`);
+    const r = m.getBoundingClientRect(), s = scroll.getBoundingClientRect();
+    scroll.scrollTo({ top: scroll.scrollTop + r.top - s.top - s.height / 2 + r.height / 2, behavior: 'smooth' });
+  }
+}
+function syncFilter() { document.querySelectorAll('#filter button').forEach(b => b.classList.toggle('on', b.dataset.f === filter)); }
+
+$('#btnToc').onclick = () => openPanel(panel === 'toc' ? null : 'toc');
+$('#btnComments').onclick = () => openPanel(panel === 'comments' ? null : 'comments');
+$('#btnTasks').onclick = () => openPanel(panel === 'tasks' ? null : 'tasks');
+$('#dropClose').onclick = () => openPanel(null);
+$('#filter').onclick = e => { const f = e.target.dataset.f; if (!f) return; filter = f; syncFilter(); renderComments(); };
+$('#dropBody').onclick = e => {
+  if (panel === 'toc') {
+    const a = e.target.closest('a'); if (!a) return;
+    e.preventDefault();
+    const h = document.querySelector(a.getAttribute('href'));
+    scroll.scrollTo({ top: scroll.scrollTop + h.getBoundingClientRect().top - scroll.getBoundingClientRect().top - 24, behavior: 'smooth' });
+    return;
+  }
+  if (panel === 'tasks') {
+    const box = e.target.closest('.box'); if (!box) return;
+    const t = tasks[+box.closest('.t').dataset.i]; t.state = nextState[t.state]; renderTasks(); return;
+  }
+  const card = e.target.closest('.c'); if (!card) return;
+  const n = +card.dataset.n, act = e.target.closest('[data-act]')?.dataset.act;
+  if (act === 'toggle') { const c = comments.find(x => x.n === n); c.status = c.status === 'open' ? 'done' : 'open'; renderComments(); return; }
+  if (act === 'reply') return;
+  select(n, true);
+};
+col.addEventListener('click', e => {
+  const m = e.target.closest('.mk[data-c]'); if (!m || document.body.classList.contains('annotating')) return;
+  if (panel !== 'comments') openPanel('comments');
+  select(+m.dataset.c, false);
+});
+col.addEventListener('mouseover', e => { const m = e.target.closest('.mk[data-c]'); document.querySelectorAll(`.c[data-n]`).forEach(c => c.classList.toggle('hot', m && c.dataset.n === m.dataset.c)); });
+
+$('#navToggle').onclick = () => {
+  document.body.classList.toggle('nav-closed');
+  const closed = document.body.classList.contains('nav-closed');
+  $('#navToggle').classList.toggle('on', !closed);
+  $('#navToggle').title = closed ? '展开文件树' : '收起文件树';
+  $('#navToggle').setAttribute('aria-label', $('#navToggle').title);
+};
+$('#btnTop').onclick = () => scroll.scrollTo({ top: 0, behavior: 'smooth' });
+$('#btnBottom').onclick = () => scroll.scrollTo({ top: scroll.scrollHeight, behavior: 'smooth' });
+
+// 拖动浮卡左沿改宽度
+$('#grip').addEventListener('pointerdown', e => {
+  const startX = e.clientX, startW = dropWidth;
+  drop.classList.add('dragging'); e.target.setPointerCapture(e.pointerId);
+  const move = ev => { dropWidth = Math.min(640, Math.max(300, startW + startX - ev.clientX)); document.documentElement.style.setProperty('--drop-w', dropWidth + 'px'); };
+  const up = () => { drop.classList.remove('dragging'); e.target.removeEventListener('pointermove', move); };
+  e.target.addEventListener('pointermove', move); e.target.addEventListener('pointerup', up, { once: true });
+});
+$('#grip').ondblclick = () => { dropWidth = 380; document.documentElement.style.setProperty('--drop-w', '380px'); };
+
+// 目录打开时跟着滚动高亮当前一节
+function spy() {
+  if (panel !== 'toc') return;
+  const top = scroll.getBoundingClientRect().top + 80;
+  let cur = heads[0];
+  for (const h of heads) if (h.getBoundingClientRect().top <= top) cur = h;
+  document.querySelectorAll('.toc a').forEach(a => a.classList.toggle('on', a.getAttribute('href') === '#' + cur.id));
+}
+scroll.addEventListener('scroll', spy);
+
+// 批注模式
+const composer = $('#composer');
+let draftRange = null;
+function setAnnotating(on) {
+  document.body.classList.toggle('annotating', on);
+  if (!on) closeComposer();
+}
+function closeComposer() { composer.hidden = true; draftRange = null; $('#composerErr').hidden = true; }
+$('#btnAnnotate').onclick = () => setAnnotating(!document.body.classList.contains('annotating'));
+col.addEventListener('mouseup', () => {
+  if (!document.body.classList.contains('annotating')) return;
+  const sel = getSelection();
+  if (!sel.rangeCount || sel.isCollapsed) return;
+  draftRange = sel.getRangeAt(0).cloneRange();
+  const r = draftRange.getBoundingClientRect(), m = main.getBoundingClientRect();
+  composer.style.left = Math.min(r.left - m.left, m.width - 340) + 'px';
+  composer.style.top = (r.bottom - m.top + 8) + 'px';
+  $('#composerQuote').textContent = '「' + sel.toString().trim() + '」';
+  $('#composerText').value = ''; $('#composerErr').hidden = true;
+  composer.hidden = false; $('#composerText').focus();
+});
+function saveDraft() {
+  const text = $('#composerText').value.trim();
+  if (!text) { $('#composerErr').textContent = '批注内容不能为空。'; $('#composerErr').hidden = false; return; }
+  const mark = document.createElement('span');
+  try { draftRange.surroundContents(mark); }
+  catch { $('#composerErr').textContent = '选中的字跨了段落或表格格子，请只选同一处里的字。'; $('#composerErr').hidden = false; return; }
+  const n = comments.length + 1;
+  mark.className = 'mk'; mark.dataset.c = n;
+  comments.push({ id: '（未提交）', n, who: me, when: '刚刚', status: 'open', quote: mark.textContent, where: '本页', text, replies: [] });
+  closeComposer(); getSelection().removeAllRanges();
+  filter = 'open'; openPanel('comments'); select(n, false);
+}
+$('#composerSave').onclick = saveDraft;
+$('#composerCancel').onclick = closeComposer;
+$('#composerText').addEventListener('keydown', e => { if (e.key === 'Enter' && e.ctrlKey) saveDraft(); });
+
+document.addEventListener('keydown', e => {
+  if (e.target.matches('textarea, input')) { if (e.key === 'Escape') closeComposer(); return; }
+  if (e.key === 'Escape') { if (document.body.classList.contains('annotating')) setAnnotating(false); else if (panel) openPanel(null); return; }
+  if (e.key === 'c' || e.key === 'C') { setAnnotating(!document.body.classList.contains('annotating')); return; }
+  if ((e.key === '[' || e.key === ']') && panel === 'comments') {
+    const list = comments.filter(c => filter === 'all' || c.status === filter);
+    if (!list.length) return;
+    const i = list.findIndex(c => c.n === selected);
+    const next = e.key === ']' ? list[(i + 1) % list.length] : list[(i - 1 + list.length) % list.length];
+    select(next.n, true);
+  }
+});
+
+updateCounts();
+</script>
+</body>
+</html>

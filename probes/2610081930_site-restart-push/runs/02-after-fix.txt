@@ -1,0 +1,20 @@
+被测代码：工作区改动（site-ui/page-data.ts：先登记收推送再取启动数据、收 vite:ws:disconnect；提示栏断开后换成断开提示），网站包已 pnpm build
+页面同 01：Chrome 后台标签页，visibilityState 是 hidden
+
+-- 用新代码重启一次、页面手动重新加载
+2026-10-08T11:32:45.144Z started 32920
+2026-10-08T11:32:45.186Z push "6" 200 {"ok":true}
+页面: bar=协作仓 6 件事  status=null
+
+-- 页面在后台时重启，起来后推 7 条
+2026-10-08T11:33:07.561Z kill 32920 SUCCESS
+2026-10-08T11:33:09.366Z started 20948
+2026-10-08T11:33:09.414Z push "7" 200 {"ok":true}
+2 秒后 页面: bar=null  status=和开发服务断开了，通知不再更新；站点重新启动后，页面在前台时会自动重新加载  visibility=hidden
+
+-- 伪装成在前台
+3 秒后 页面: bar=协作仓 7 件事  status=null  timeOrigin 变了（整页重新加载过）
+
+-- 重新加载后再推 8 条
+2026-10-08T11:33:35.307Z push "8" 200 {"ok":true}
+页面: bar=协作仓 8 件事（没有重新加载，推送照常收到）

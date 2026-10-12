@@ -1,0 +1,79 @@
+---
+title: 术语表
+description: 这个仓里的词各指什么、定义在哪
+---
+
+这个仓里反复出现的词各指什么，一个词一行，指向定义它的那处代码或那一页。
+
+| 术语 | 一句话 | 定义在哪 |
+| --- | --- | --- |
+| 协作仓 | 项目组织里放站点与记录的那一个仓：`site/` 是项目站点，`collab/` 是任务与模块的记录；仓根下同时有 `collab/` 与 `site/people.json` 的就是它。只用 main，改动用 AGit 推成合并请求，由执行器检查后合并 | [系统组成](/docs) |
+| 别的仓 | 项目组织里协作仓以外的仓（代码、资料），按普通代码仓由人自己管：成员推自己的分支、开合并请求，负责人审过后合并，执行器不管 | [系统组成](/docs) |
+| 协作仓那一套、别的仓那一套 | gwb-collab 里各只管一种仓的两组目录：协作仓那一套提交审核、自动同步、读负责人、读写任务与待办；别的仓那一套取回与快进、找等我处理的。两边不互相引用，各自把此刻的状态交给通知 | [gwb-collab](/gwb-collab) |
+| 数据模型包 | npm 包 `@godcreator/collab-model`：项目仓的布局与项目负责人、`collab/` 里任务与模块的格式与写入规则、待办筛选、通知与推给网站的数据；功能包、gwb-collab 与合并检查包都用它，`collab/` 的格式只有这一份实现 | [数据模型包](/collab-model) |
+| 功能包 | npm 包 `@godcreator/collab-site`：接在基础包上的协作站功能，任务页、日历与日志页、通知栏，照基础包的功能包约定交给站点骨架的路由、侧栏入口与布局数据，以及给 gwb-collab 的站点检查；项目协作仓的 `site/` 依赖它 | [功能包](/collab-site) |
+| 基础包 | 文档站基础包 `@godcreator/docsite-kit`，在另一个单元里：站点骨架的模板、页面、开发服务、评论、人员列表、推送通道。功能包接在它上面，协作站的评论与人员列表都是它的格式 | [系统组成](/docs) |
+| 站点骨架 | 协作仓 `site/` 里照基础包与功能包的模板写出的 `app/` 与配置文件；由 gwb-docsite 初始化时写，不手改，`app/` 每次初始化整个重写 | [功能包](/collab-site#交给基础包的东西) |
+| gwb-docsite | 和基础包同一个仓的 gwb 基础插件：照模板初始化站点、托管站点的开发服务、往站点推数据、保管本 home 的身份码；gwb-collab 注入它的服务，不自己运行站点 | [站点](/gwb-collab/site) |
+| 合并检查包 | npm 包 `@godcreator/collab-merge-check`：协作仓合并请求的安全检查，执行器运行它的命令行，gwb-collab 推送前也调它 | [合并检查包](/collab-merge-check) |
+| 身份码 | 每个 gwb home 一串，由 gwb-docsite 生成和保管；写在人员列表里哪一项的 `codes` 里，本 home 就是那个人。一个人可以有几个码（几台电脑），码不是秘密 | [加入项目](/gwb-collab/project) |
+| 人员列表 | 协作仓的 `site/people.json`，基础包的格式：每项是一个人的 `id`（就是 Gitea 用户名）、显示名、身份码与 Gitea 账号。不记谁是负责人；只有项目负责人能改，例外是每个人给自己那一项加减身份码 | [加入项目](/gwb-collab/project) |
+| 身份 | 本 home 的身份码在人员列表里认出的那个人，值是他的 `id`；插件与站点认出的是同一个人。令牌的 Gitea 账号要和它一样，联网的命令才做 | [加入项目](/gwb-collab/project) |
+| 通知 | 一件要人处理的事，只带事实：哪一种（`kind`）和这一种的字段，人只写 Gitea 用户名。句子、点了去哪、分在哪组都按种类算，网站提示栏、协作窗格、QQ 私聊、交给 AI 用同一份；按此刻的状态算，解决了就不再出现，同一件事前后 `id` 不变 | 数据模型包 `src/notification-model/notifications.ts`，[数据模型包](/collab-model) |
+| 找我的 | 通知的三组之一：指派给我的任务、在评论或回复里 @我的、回复我的；另两组是协作仓、别的仓 | [数据模型包](/collab-model) |
+| 提示栏 | 网站顶部正中的一栏，按协作仓、别的仓、找我的三组列出插件推送的通知，收起时只写各组几条 | 功能包 `src/ui/notification-bar.tsx`，[功能包](/collab-site) |
+| 推给网站的数据 | gwb-collab 推给站点的全部数据：通知列表与项目负责人，一起推，`SiteFeed`；经 gwb-docsite 推到站点推送通道的频道 `collab` | 数据模型包 `src/notification-model/site-feed.ts`，[站点](/gwb-collab/site) |
+| 站点协议号 | 插件与站点之间那份约定（推给网站的数据的形状与频道名）的编号，记录格式有破坏性改动时也加一；gwb-collab 打包的数据模型包和 `site/` 里装的功能包对不上，站点就不交给 gwb-docsite 托管 | 数据模型包 `src/notification-model/site-feed.ts` 的 `siteProtocol`，[功能包](/collab-site#站点协议号) |
+| 站点检查 | 查工作区里整个 `site/`：基础包查人员列表、评论文件的格式与作者、评论快照，功能包再查日志页的文件名；不查页面能不能编译（那是类型检查的事）。gwb-collab 托管站点前、提交审核时合 main 之前与之后都查；执行器不查 | 功能包 `src/site-check.ts`，[功能包](/collab-site) |
+| 可替换的接口 | gwb-collab 开的两处，接哪个实现由设置选、换了不动别的目录：A 交给 AI（ZCode、Claude Code）、B 发通知（QQ 私聊）；接缝图上画成框边的半圆缺口 | [系统组成](/docs)、[gwb-collab](/gwb-collab) |
+| 格式约定 | 接缝图上不送东西、但定了几条线上送的东西长什么样的模块（数据模型包、功能包里服务端与界面之间的约定），画成引出点线、接到那几条线上 | [系统组成](/docs)、[功能包](/collab-site) |
+| 记录 | 一条任务或一个模块；任务的状态是其中的 `status` 字段 | 数据模型包 `src/task-model/records.ts`，[数据模型包](/collab-model) |
+| 评论 | 基础包的评论：在网页上批一段文字、一个元素或整页，也可以不属于任何页面；一串评论一个文件夹 `site/comments/<评论串>/`，发起的那条是 `index.mdx`，每条回复一个文件，状态是未解决或已解决。正文里 `@<id>` 是 @ 某人 | [系统组成](/docs) |
+| 全部评论 | 站点的 `/comments` 页：列出整个项目的评论串，按状态、按页面、按和我的关系筛，能写不属于任何页面的新评论 | [功能包](/collab-site) |
+| 模块 | 一块大的工作，只有截止日、没有开始日，任务页的甘特图上在截止日画一个记号；任务用 `module` 字段归进来，模块自己不存状态，进度由它的任务算出 | 数据模型包 `src/task-model/records.ts`，[数据模型包](/collab-model) |
+| 日志页 | 某一天的项目日志：`site/journal/<YYYY-MM-DD>.mdx`，全项目一天一篇，由 AI 写、提交审核；从日历 `/calendar` 进，地址是 `/calendar/<日期>` | 功能包 `src/journal-files.ts`，[功能包](/collab-site) |
+| 日志里的进展 | 每条任务、每个模块那一页最下面一节：哪几天的日志页用 `RecordLink` 引用了它，每天列出引用它的那一段 | 功能包 `src/journal.ts`，[功能包](/collab-site) |
+| 记录文件 | `collab/records/<记录 id>.json`，一个文件放一条记录，作者写在文件里的 `author`；别人可以改其中的几个字段 | 数据模型包 `src/task-model/records.ts`，[数据模型包](/collab-model) |
+| 快照 | 一份 `collab/` 的全部内容（各记录文件原文，加上人员列表原文），类型 `CollabSnapshot`；评论另有基础包的「评论快照」，是发起评论那一刻整页的文字，两者不是一回事 | 数据模型包 `src/task-model/state.ts` |
+| 问题 | `collab/` 里读不出的文件、冲突标记、重复 id、指向不存在的模块等，带出问题的文件，类型 `CollabProblem`；只报不修 | 数据模型包 `src/task-model/state.ts` |
+| 写入计划 | 一次写入要写哪些文件、删哪些文件，`WritePlan`；数据模型包的写入规则只算它或者拒绝，写磁盘的是 `./task-model/node` | 数据模型包 `src/task-model/write.ts`，[数据模型包](/collab-model) |
+| 本地 main | 成员克隆的协作仓里的 `main`，协作仓只用这一条分支、不建别的分支：网站写的、显示的、AI 改的页面都在它的工作区里，任务、评论与页面改动在它上面提交、推成合并请求；提交审核要么合进 main、要么把改动退回工作区，所以它平时没有 main 里没有的提交，取回后的自动同步只把它快进到 `origin/main` | [gwb-collab](/gwb-collab) |
+| 推送消息 | Gitea 组织 webhook 经 ntfy 推给插件的一条消息，插件自己发的 `leads changed` 也是：标题是 `<组织>/<仓>`，正文只说出了什么事（`push <ref>`、`pr <动作> #<编号>` 等），只当位置用，不当数据用。不要和推给网站的数据混淆 | `plugins/collab/src/organization/events/messages.ts` 的 `pushEventOf`，[gwb-collab](/gwb-collab) |
+| 按消息取 | 插件收到推送消息后只去取消息说的那个仓，协作仓的交给协作仓那一套、别的仓的交给别的仓那一套 | `plugins/collab/src/organization/events/project-events.ts`，[gwb-collab](/gwb-collab) |
+| 完整刷新 | 把一个项目从头读一遍：协作仓那一套与别的仓那一套各刷新一次，再核对组织 webhook；推送连上、加项目、调 `collab.check`、收到认不出的消息时做 | `plugins/collab/src/organization/events/project-events.ts` 的 `refresh`，[组织事件](/gwb-collab/checks) |
+| 合并检查 | 判断一个合并请求能不能合进 main：没有冲突、没改只有负责人能改的内容（项目负责人提交的放行）；执行器运行它决定合不合并，成员推送前在本机用其中的第二条。记录格式与站点不在这里查 | 合并检查包 `src/check.ts`，[合并检查包](/collab-merge-check) |
+| 只有负责人能改的内容 | 合并检查第二条拦下的改动：会在每个人电脑上执行代码的（站点的配置文件、`scripts`、装包设置、不走源的依赖）和会改变合并规则的（执行器工作流、人员列表、功能包版本）；不是项目负责人的提交时本机就拦下、不推送，项目负责人提交的放行。加库、页面、组件、评论这些都不算，每个人只给自己那一项加减身份码也不算 | 合并检查包 `src/check.ts`，[合并检查包](/collab-merge-check) |
+| 执行器 | NAS 上全站共用的 Gitea Actions 执行器：按协作仓 main 上的工作流对每个合并请求运行合并检查，以机器人账号 `collab-bot` 合并或打回 | [执行器与自动合并](/gitea/runner) |
+| 打回 | 执行器检查不过时在合并请求上留言写明原因、再关掉它；提交人的 `collab.submit` 随即把改动退回工作区、报出这条留言 | [执行器与自动合并](/gitea/runner) |
+| 负责人 | 一个仓的负责人就是 Gitea 上这个仓的协作者（权限「管理」），所有仓一样；main 的推送只许负责人，别的成员推自己的分支、开合并请求 | [Gitea 权限怎么配](/gitea/permissions) |
+| 项目负责人 | 协作仓的负责人，也就是协作仓在 Gitea 上的协作者；改了只有负责人能改的内容，只有他提交才合并；能删别人的任务与模块。人员列表不记谁是负责人 | [Gitea 权限怎么配](/gitea/permissions)、[合并检查包](/collab-merge-check) |
+| 我的待办 | 现在该某个人处理的任务、@他的评论与回复、他发起或回复过的评论串里别人后来写的回复，`inboxOf`；网站上在提示栏「找我的」组里，gwb-collab 里是 `collab.inbox`，也写成「找我的」通知 | 数据模型包 `src/task-model/inbox.ts`，[数据模型包](/collab-model) |
+| 本机状态 | 协作仓里还没提交审核的文件（`collab/`、`site/` 分开）、冲突文件、当前分支；gwb-collab 监视协作仓算出，写成通知推给站点，网站只显示 | `plugins/collab/src/collab-repo/sync/state.ts`，[gwb-collab](/gwb-collab) |
+| 项目文件夹 | 协作仓的上一级，以项目在 Gitea 上的组织命名：那个组织的仓都克隆在这里，里面的文件夹名就是仓名；协作仓不这样放，gwb-collab 加项目、联网时都拒绝 | 数据模型包 `src/project-model/project-layout.ts` |
+| 接缝 | 两个模块之间约定好的交换内容：连着哪两端、送的是什么；接缝图上跨过模块框的带编号的线 | [系统组成](/docs)、各包首页 |
+| 验收站 | 用来验收功能包与插件的项目协作仓，现在是 MMC 项目的协作仓（Gitea `hybrid-mmc/collab`） | [协作站](/trajectory/2026-09-25-collab-site) |
+
+一个词收进这张表的条件：在两页以上出现，或者读者第一次见会问「这是什么」。名字定了就不再改；改名是历史，记一张轨迹卡。
+
+## 不再使用的词
+
+| 旧词 | 现在叫 |
+| --- | --- |
+| 记录模块、模型包、记录包（`collab-records`） | 数据模型包（`collab-model`） |
+| 框架包、网站包 | 功能包 |
+| 任务评论模型（`task-comment-model`） | 任务模型（`task-model`）：评论不再是 `collab/` 里的记录，归基础包 |
+| 批注（只指一条评论；基础包界面上进入写评论模式的按钮仍叫「批注」） | 评论（基础包的评论，可以批文字、元素或整页） |
+| 协作仓规则 | 拆开了：`collab/` 的格式与写入规则是数据模型包，站点检查在功能包，合并检查是合并检查包 |
+| 插件对接、启动出口（网站包的 `./site-launch`） | 不再有：站点由 gwb-docsite 托管，gwb-collab 经它推数据 |
+| 站点进程 | 站点（gwb-collab 的 `site-process/`，只在托管前查站点、推数据） |
+| `collab.person`（协作仓的 git 配置） | 身份：本 home 的身份码在人员列表里认出的人 |
+| 人员名单（`collab/people.json`） | 人员列表（`site/people.json`） |
+| 页面 id、页面文件夹、分组文件夹、页面目录规则 | 不再有：页面照基础包写在 `site/content/`，地址就是路径 |
+| 按钮卡、浮卡、分组按钮、正文区、根元素、锚点、`insp` | 不再有：站点用基础包的文档布局与评论 |
+| 提示栏条目、要人处理的问题（`AttentionItem`、`attention`） | 通知 |
+| 「仓库」浮卡、「仓库」面板 | 不再有：别的仓和服务器不一样是通知，打开项目文件夹在 gwb 的协作窗格里点 |
+| git 状态追踪（插件的 `track/`） | 拆到协作仓那一套与别的仓那一套，各自监视自己那种仓 |
+| 插件的 `notify/` | 插件的 `notifications/`：算通知，QQ 私聊在其中的 `qq-private-chat.ts` |
+| 完整检查、插件的检查 | 完整刷新（`collab.check` 立即做一次）；通知的短句「gwb 检查项目出错」照旧 |
+| 普通仓 | 别的仓 |
+| 方卡、「文件」按钮 | 不再有，同按钮卡 |

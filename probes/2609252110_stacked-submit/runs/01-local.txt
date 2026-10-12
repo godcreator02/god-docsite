@@ -1,0 +1,118 @@
+临时目录：C:\Users\godamericatb14\AppData\Local\Temp\stacked-submit-07308248
+git 版本：git version 2.53.0.windows.2
+
+==================== 情况 1：两个平行的合并请求都从 main 切出去，都在文件末尾加一行 ====================
+$ git merge --no-ff bob-1 -m "合并 #7"
+  Merge made by the 'ort' strategy.
+   collab/bob.jsonl | 1 +
+   1 file changed, 1 insertion(+)
+$ git merge --no-ff bob-2 -m "合并 #8"
+  Auto-merging collab/bob.jsonl
+  CONFLICT (content): Merge conflict in collab/bob.jsonl
+  Automatic merge failed; fix conflicts and then commit the result.
+$ Get-Content collab/bob.jsonl
+  {"id":"h","status":"open"}
+  <<<<<<< HEAD
+  {"id":"c9","status":"open"}
+  =======
+  {"id":"c10","status":"open"}
+  >>>>>>> bob-2
+
+==================== 情况 2：第二次提交接在第一次后面（每人一条工作分支） ====================
+（机器人先合并第一次推上去的那个提交，也就是合并请求 #7 当时的内容）
+$ git merge --no-ff ffe251dc5b51c34cf0dcebf8548e5030dedde07c -m "合并 #7"
+  Merge made by the 'ort' strategy.
+   collab/bob.jsonl | 1 +
+   1 file changed, 1 insertion(+)
+（再合并第二次推上去的，也就是 bob 分支的最新提交）
+$ git merge --no-ff bob -m "合并 #8"
+  Merge made by the 'ort' strategy.
+   collab/bob.jsonl | 1 +
+   1 file changed, 1 insertion(+)
+$ Get-Content collab/bob.jsonl
+  {"id":"h","status":"open"}
+  {"id":"c9","status":"open"}
+  {"id":"c10","status":"open"}
+（bob 同步：把 main 合进自己的工作分支）
+$ git merge main -m "同步 main"
+  Updating 247b613..16ddb82
+  Fast-forward (no commit created; -m option ignored)
+$ git log --graph --oneline --all
+  *   16ddb82 合并 #8
+  |\  
+  | * 247b613 bob：c10
+  * | 3c31c6e 合并 #7
+  |\| 
+  | * ffe251d bob：c9
+  |/  
+  * 593bd65 起点
+
+==================== 情况 3：两人改的行中间隔着一行没动过的 ====================
+$ git merge --no-ff admin -m "合并 admin"
+  Merge made by the 'ort' strategy.
+   collab/bob.jsonl | 2 +-
+   1 file changed, 1 insertion(+), 1 deletion(-)
+$ git merge --no-ff bob -m "合并 bob"
+  Auto-merging collab/bob.jsonl
+  Merge made by the 'ort' strategy.
+   collab/bob.jsonl | 2 +-
+   1 file changed, 1 insertion(+), 1 deletion(-)
+$ Get-Content collab/bob.jsonl
+  {"id":"c1","status":"resolved"}
+  {"id":"c2","status":"open"}
+  {"id":"c3","status":"resolved"}
+
+==================== 情况 4：两人改的是相邻两行 ====================
+$ git merge --no-ff admin -m "合并 admin"
+  Merge made by the 'ort' strategy.
+   collab/bob.jsonl | 2 +-
+   1 file changed, 1 insertion(+), 1 deletion(-)
+$ git merge --no-ff bob -m "合并 bob"
+  Auto-merging collab/bob.jsonl
+  CONFLICT (content): Merge conflict in collab/bob.jsonl
+  Automatic merge failed; fix conflicts and then commit the result.
+$ Get-Content collab/bob.jsonl
+  <<<<<<< HEAD
+  {"id":"c1","status":"resolved"}
+  {"id":"c2","status":"open"}
+  =======
+  {"id":"c1","status":"open"}
+  {"id":"c2","status":"resolved"}
+  >>>>>>> bob
+  {"id":"c3","status":"open"}
+
+==================== 情况 5：bob 在末尾追加新记录，同时 admin 把 bob 的最后一条标为已解决 ====================
+$ git merge --no-ff admin -m "合并 admin"
+  Merge made by the 'ort' strategy.
+   collab/bob.jsonl | 2 +-
+   1 file changed, 1 insertion(+), 1 deletion(-)
+$ git merge --no-ff bob -m "合并 bob"
+  Auto-merging collab/bob.jsonl
+  CONFLICT (content): Merge conflict in collab/bob.jsonl
+  Automatic merge failed; fix conflicts and then commit the result.
+$ Get-Content collab/bob.jsonl
+  {"id":"c8","status":"open"}
+  <<<<<<< HEAD
+  {"id":"c9","status":"resolved"}
+  =======
+  {"id":"c9","status":"open"}
+  {"id":"c10","status":"open"}
+  >>>>>>> bob
+
+==================== 情况 6：两人把同一条改成了不同的值（真冲突） ====================
+$ git merge --no-ff admin -m "合并 admin"
+  Merge made by the 'ort' strategy.
+   collab/bob.jsonl | 2 +-
+   1 file changed, 1 insertion(+), 1 deletion(-)
+$ git merge --no-ff bob -m "合并 bob"
+  Auto-merging collab/bob.jsonl
+  CONFLICT (content): Merge conflict in collab/bob.jsonl
+  Automatic merge failed; fix conflicts and then commit the result.
+$ Get-Content collab/bob.jsonl
+  {"id":"c1","status":"open"}
+  <<<<<<< HEAD
+  {"id":"t1","status":"doing"}
+  =======
+  {"id":"t1","status":"done"}
+  >>>>>>> bob
+  {"id":"c3","status":"open"}

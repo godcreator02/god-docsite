@@ -1,0 +1,40 @@
+{
+  "name": "@godcreator/collab-merge-check",
+  "version": "0.1.2",
+  "description": "协作仓合并请求的安全检查：和 main 有没有冲突、有没有改只有负责人能改的内容（执行器工作流、人员列表、在每个人电脑上执行的配置与脚本）。NAS 上的执行器运行命令行 collab-merge-check，gwb-collab 推送前在本机也查同一份；自动合并工作流模板随包发布",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/check.d.ts",
+      "default": "./dist/check.js"
+    }
+  },
+  "bin": {
+    "collab-merge-check": "./dist/bin.js"
+  },
+  "files": [
+    "dist",
+    "templates"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://git.tianshen02.online:28377/godcreator/docsite-kit.git"
+  },
+  "publishConfig": {
+    "registry": "https://git.tianshen02.online:28377/api/packages/godcreator/npm/"
+  },
+  "scripts": {
+    "build": "node -e \"require('node:fs').rmSync('dist',{recursive:true,force:true})\" && tsc -p tsconfig.build.json",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "check": "tsc --noEmit && vitest run"
+  },
+  "dependencies": {
+    "@godcreator/collab-model": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.2",
+    "typescript": "^6.0.3",
+    "vitest": "^5.0.1"
+  }
+}

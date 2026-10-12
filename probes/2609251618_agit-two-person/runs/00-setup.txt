@@ -1,0 +1,13 @@
+# 准备：克隆三份并设身份  2026-09-25T16:19:33
+
+## lead：git clone https://git.tianshen02.online:28377/godcreator/agit-probe.git
+Cloning into 'lead'...
+exit 0
+
+## bob：git clone https://bob-test@git.tianshen02.online:28377/godcreator/agit-probe.git
+Cloning into 'bob'...
+exit 0
+
+## carol：git clone https://carol-test@git.tianshen02.online:28377/godcreator/agit-probe.git
+Cloning into 'carol'...
+exit 0

@@ -1,0 +1,39 @@
+# carol-test（只读）复刻 → 推到自己的复刻 → 向原仓提合并请求 → 负责人合并  2026-09-28T13:22–13:24
+# 之后的 git 命令都带这组环境变量，凭据助手只读不删（避免再像 01 那样删掉凭据）：
+#   GIT_CONFIG_COUNT=2
+#   GIT_CONFIG_KEY_0=credential.helper   GIT_CONFIG_VALUE_0=（空，清掉原有的助手）
+#   GIT_CONFIG_KEY_1=credential.helper   GIT_CONFIG_VALUE_1=!f() { test "$1" = get && git credential-manager get; }; f
+
+## POST /repos/godcreator/lfs-probe/forks?sudo=carol-test {}
+status 202，carol-test/lfs-probe（fork: true，id 1104）
+
+## git clone https://carol-test@git.tianshen02.online:28377/carol-test/lfs-probe.git carol
+Cloning into 'carol'...
+
+## 写 200000 字节随机内容到 manual-b.pdf（Random 种子 7）
+SHA256 1F182F60189012627C0C4EB5A14776A27229500F7BCC08C1EDA8E3C1AFBD1553
+## git commit --only manual-b.pdf -m "加手册 B（复刻）"；git switch -c add-manual-b
+## git push origin add-manual-b
+Locking support detected on remote "origin". Consider enabling it with:
+  $ git config lfs.https://carol-test@git.tianshen02.online:28377/carol-test/lfs-probe.git/info/lfs.locksverify true
+Uploading LFS objects: 100% (1/1), 200 KB | 0 B/s, done.
+remote: Create a new pull request for 'add-manual-b':
+remote:   https://git.tianshen02.online:28377/carol-test/lfs-probe/pulls/new/add-manual-b
+To https://git.tianshen02.online:28377/carol-test/lfs-probe.git
+ * [new branch]      add-manual-b -> add-manual-b
+exit=0
+
+## POST /repos/godcreator/lfs-probe/pulls?sudo=carol-test {"head":"carol-test:add-manual-b","base":"main","title":"加手册 B（复刻）"}
+status 201，#1，发起人 carol-test，mergeable: true
+
+## POST /repos/godcreator/lfs-probe/pulls/1/merge {"Do":"merge"}（godcreator）
+status 200
+
+## 负责人重新克隆：git clone https://git.tianshen02.online:28377/godcreator/lfs-probe.git lead
+8bd8cd9 Merge pull request '加手册 B（复刻）' (#1) from carol-test/lfs-probe:add-manual-b into main
+24185cf 加手册 B（复刻）
+dbdc13f PDF 走 LFS
+git lfs ls-files：1f182f6018 * manual-b.pdf
+SHA256 1F182F60189012627C0C4EB5A14776A27229500F7BCC08C1EDA8E3C1AFBD1553
+大小 200000
+（与 carol 上传的一致：LFS 文件随合并请求进了原仓）

@@ -1,0 +1,33 @@
+以 godcreator（管理员令牌，经 gwb 的 gitea.http）调用 Gitea 1.27.1 API 的观察，按时间顺序。
+
+准备
+- POST /user/repos 建私有仓 godcreator/agit-probe（auto_init，默认分支 main）→ 201
+- PUT /repos/godcreator/agit-probe/collaborators/bob-test {"permission":"read"} → 204
+- PUT /repos/godcreator/agit-probe/collaborators/carol-test {"permission":"read"} → 204
+- POST /repos/godcreator/agit-probe/branch_protections：rule_name main，enable_push + push_whitelist_usernames [godcreator]，enable_merge_whitelist + merge_whitelist_usernames [godcreator] → 201
+- 仓库设置里没有找过、也没有打开任何 AGit 开关：只读成员的 refs/for 推送直接可用。
+
+#1（bob-test，推送后）
+- GET /pulls/1：user.login = bob-test；head.ref = refs/pull/1/head；mergeable = true；merge_base = be1ced4
+- GET /pulls/1/files：plan.md，status changed，+1 -1
+- bob 往同一 topic 再推一个提交后，推送输出为 0686cff..93d9592 HEAD -> refs/pull/1/head，没有新建合并请求
+
+合并 #1
+- POST /pulls/1/merge {"Do":"merge"} → 200，merge_commit_sha = de56eb9
+- 随后 GET /pulls?state=all：#2（carol-test）mergeable = false
+
+#2 解决冲突后
+- carol rebase 后带 -o force-push=true 推同一 topic：输出 + 4368459...3080c6d HEAD -> refs/pull/2/head (forced update)
+- GET /pulls?state=open：#2 mergeable = true
+- POST /pulls/2/merge {"Do":"merge"} → 200，main 前进到 8f6fa50
+
+#3（bob-test 把提交作者写成 carol-test）
+- git log -1：提交作者 = carol-test <carol-test@probe.local>
+- GET /pulls?state=open：#3 user.login = bob-test（发起人按推送时的登录凭据记，不按提交作者）
+- GET /pulls/3/files：collab/comments/260925-1622-carol-test-zz01.md，status added
+- GET /raw/collab/comments/260925-1622-carol-test-zz01.md?ref=f5d5d8b：能读到文件头里的 author: carol-test
+- 模拟机器人：POST /issues/3/comments 写拒绝理由 → 201；PATCH /pulls/3 {"state":"closed"} → 201，state = closed，merged = false
+
+注意
+- GET /pulls/{n} 与列表接口每条都带完整的仓库对象，单条几 KB；机器人轮询时应只取需要的字段。
+- 合并后的 merged_by 字段为 null（通过 API 合并时 Gitea 没有填），机器人不能靠它判断是谁合并的。

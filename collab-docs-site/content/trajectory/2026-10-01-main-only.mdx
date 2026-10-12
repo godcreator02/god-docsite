@@ -1,0 +1,40 @@
+---
+born-at: 2026-10-01T20:50
+type: choice
+parent: [2026-09-25-collab-site]
+label: 协作仓只用 main
+domain: 协作流程
+---
+
+supersedes:: [gwb-collab 第一批命令的做法](2026-09-25-gwb-collab-commands.md)
+pivots-from:: [连续提交实测](2026-09-25-stacked-submit-probe.md)
+
+## 背景
+
+每人一条工作分支 `<身份>/记录`：网站写的、显示的都在它的工作区里，提交审核在它上面提交，定时检查把 origin/main 合进它，本地 main 没人用。
+用户在 VS Code 的提交图里看到本地 main 落后十个提交，又发现一条 AI 会话另开的分支 `research/comm-sync` 和它推出去的合并请求 #30 卡了半天没人管，问工作分支和 main 有什么区别，指出这是冗余的机制：本地 main 应该一直跟着服务器前进，只在要提交合并请求的时候才建分支。
+
+## 结论与边界
+
+协作仓在本机只用 main 一条分支，连提交合并请求时也不建分支：Gitea 的 AGit 推的是 `HEAD:refs/for/main`，本来就不需要分支。
+
+- 提交审核在本地 main 上提交、推 `HEAD:refs/for/main`，主题固定是身份；还没合进去的提交一个接一个排在本地 main 上
+- 同步与定时检查把 origin/main 合进本地 main，没有待合并的提交时就是快进，本地 main 和服务器一致；合并请求合进去以后下一次同步也是快进
+- 撤回把本地 main 退回 origin/main，撤掉的改动留在工作区
+- 提交审核、同步、撤回只在 main 上做，在别的分支上拒绝
+- 已有的仓不用人动：提交审核、同步、撤回或定时检查时，还停在旧工作分支上的仓把 main 指到它、切过去、删掉旧分支；本地 main 上有旧分支没有的提交就不换、列出那些提交
+- main 以外的本地分支和另外挂着的工作树，窗格里标黄列出来，分支带上还没进 main 的提交数
+
+工作分支要的那条性质——同一个人的提交排在同一条线上，连续提交不会自己撞自己——直接排在本地 main 上照样成立，和分支叫什么无关。
+
+gwb-collab 升 0.11.0：提交审核、同步的回执去掉了 branch、branchStep，加了 leftOldBranch，命令行为也变了。
+
+## 否掉的候选
+
+- 本地 main 跟着服务器走，要提交时才从 main 建分支、合进去后删掉：上一个合并请求还没合进去时再从 main 建一条，两次提交就成了平行的两条，改到相邻的记录会冲突（连续提交实测那张卡测过）；分支建了要删，忘了删就残留，`research/comm-sync` 就是这样留下的
+- 保留工作分支、只让定时检查顺带快进本地 main：两条分支内容一样，冗余还在，多出来的分支照样没人管
+
+## 依据
+
+- 插件测试 `plugins/collab/tests/autosync.test.ts`、`git-flow.test.ts`：同步后本地 main 与 origin/main 是同一个提交；旧工作分支换到 main 时提交与没提交的改动都在
+- 当天 hybrid-mmc 的本地 main 落后 origin/main 十个提交、合并请求 #30 从 15:51 开着到 20:00 以后，均在 Gitea 与本机 `git branch -vv` 上看到；无存档

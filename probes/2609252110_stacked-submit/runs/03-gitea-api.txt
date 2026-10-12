@@ -1,0 +1,30 @@
+以 godcreator（管理员令牌，经 gwb 的 gitea.http）调用 Gitea 1.27.1 API 的观察，与 02-gitea-bob.txt 的步骤穿插进行，按时间顺序。
+
+准备
+- GET /repos/godcreator/agit-probe/collaborators/bob-test/permission → 200，permission = read（上次实验留下的测试仓，没有重建）
+- GET /repos/godcreator/agit-probe/pulls?state=all：#1–#3 都已关闭，没有开着的合并请求
+
+B1 之后（bob 第一次推 topic=bob-stack）
+- 新建了 #4
+
+B2 之后（bob 在同一条分支上再提交一次，推同一个主题）
+- 推送输出 9136557..ba0f8d3 HEAD -> refs/pull/4/head：更新 #4，没有新建
+- GET /pulls/4/commits：两个提交，ba0f8d3（bob：c10，上一个是 9136557）与 9136557（bob：c9，上一个是 main 的 8f6fa50）
+
+合并 #4
+- POST /pulls/4/merge {"Do":"merge"} → 200；main 前进到合并提交 c8ff566
+
+B3 之后（#4 已合并，bob 没同步，再提交一次推同一个主题）
+- 推送输出 * [new reference] HEAD -> refs/pull/5/head：新建了 #5，不是更新已合并的 #4
+- GET /pulls/5/files：collab/bob.jsonl，status changed，+1 -0
+- GET /pulls/5.diff：相对 main 只加了 c11 一行；c9、c10 已经在 main 里，没有重复出现
+- #5 的标题没给 -o title，Gitea 取了提交说明「bob：c11」
+
+关闭 #5
+- POST /issues/5/comments {"body":"c11 说得不对，改一下再提"} → 201
+- PATCH /pulls/5 {"state":"closed"} → 201，state = closed，merged = false
+
+B5 之后（#5 被关闭，bob 改了 c11 再推同一个主题）
+- 推送输出 * [new reference] HEAD -> refs/pull/6/head：新建了 #6，没有重新打开 #5
+- GET /pulls/6.diff：相对 main 只有改过的 c11 一行
+- 实验结束，PATCH /pulls/6 {"state":"closed"} 关掉，测试仓不留开着的合并请求

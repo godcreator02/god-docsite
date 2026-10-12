@@ -1,0 +1,54 @@
+/*
+ * 数据流接缝图 FlowSeamDiagram（flow-seam-diagram.tsx）。框、能力方块、编号、入口、浮层沿用讲解组件包 .seam-map 的样式，
+ * 这里只加箭头、线旁写的送什么、可替换接口的缺口与凸起和它们的线。凸起、缺口的弧线跟所在框同色；字母用开这个接口的模块的颜色。
+ */
+/* 包外的框在这张图里要接凸起，边线调亮一点才看得清 */
+.seam-map-flow .sm-module[data-outside='true'] .sm-frame { stroke: color-mix(in srgb, var(--dx-fg) 28%, transparent); }
+.seam-map-flow .sm-module[data-standby='true'] .sm-frame { stroke-dasharray: 4 3; }
+.seam-map-flow .sf-adapter-name { fill: var(--dx-fg); font-weight: 600; font-size: 12px; }
+
+/* 背景区域：把几个框圈成一组的浅底与标签 */
+.seam-map-flow .sf-region rect { fill: color-mix(in srgb, var(--dx-fg) 3%, transparent); stroke: color-mix(in srgb, var(--dx-fg) 12%, transparent); stroke-width: 1; }
+.seam-map-flow .sf-region text { fill: var(--dx-dim); font-size: 11.5px; font-weight: 600; }
+
+/* 箭头与线旁写的送什么 */
+.seam-map-flow .sf-arrowhead { fill: color-mix(in srgb, var(--dx-fg) 55%, transparent); }
+.seam-map-flow .sf-payload rect { fill: var(--dx-surface); }
+.seam-map-flow .sf-payload text { fill: var(--dx-fg); font-size: 11.5px; }
+
+/* 缺口与凸起：弧线是框自己的颜色、实线，两端带一小段直边接回框线 */
+.seam-map-flow .sf-port { transition: opacity .25s; }
+.seam-map-flow .sf-rim { fill: none; stroke: color-mix(in srgb, var(--dx-c) 75%, transparent); stroke-width: 1.3; }
+.seam-map-flow .sm-module[data-outside='true'] .sf-rim { stroke: color-mix(in srgb, var(--dx-fg) 45%, transparent); }
+.seam-map-flow .sf-port[data-kind='knob'][data-active='false'] .sf-rim { stroke-dasharray: 3 2.5; }
+.seam-map-flow .sf-disc { stroke: none; transition: fill .25s; }
+.seam-map-flow .sf-port[data-kind='notch'] .sf-disc { fill: transparent; }
+.seam-map-flow .sf-port[data-kind='knob'] .sf-disc { fill: color-mix(in srgb, var(--dx-fg) 8%, var(--dx-surface)); }
+.seam-map-flow .sf-port:hover .sf-disc,
+.seam-map-flow .sf-port[data-on='true'] .sf-disc { fill: color-mix(in srgb, var(--dx-rose) 18%, var(--dx-surface)); }
+.seam-map-flow .sf-port[data-on='false'] { opacity: .3; }
+.seam-map-flow .sf-port:focus-visible .sf-rim { stroke: var(--dx-accent); stroke-width: 2; }
+.seam-map-flow .sf-letter { fill: var(--dx-c); font-family: var(--dx-mono); font-size: 11px; font-weight: 700; pointer-events: none; }
+.seam-map-flow .sf-port-name { fill: var(--dx-c); font-size: 11.5px; font-weight: 600; pointer-events: none; }
+
+/* 可替换接口的线：当前接的实线，可以换成的虚线；高亮时跟接缝一样用 rose */
+.seam-map-flow .sf-port-wires { transition: opacity .25s; }
+.seam-map-flow .sf-port-wire { fill: none; stroke: color-mix(in srgb, var(--dx-fg) 45%, transparent); stroke-width: 1.3; }
+.seam-map-flow .sf-port-wire[data-active='false'] { stroke-dasharray: 3 4; stroke: color-mix(in srgb, var(--dx-fg) 30%, transparent); }
+.seam-map-flow .sf-port-wires[data-on='true'] .sf-port-wire { stroke: var(--dx-rose); stroke-width: 2; }
+.seam-map-flow .sf-port-wires[data-on='false'] { opacity: .3; }
+
+/* 格式约定：从定格式的模块引出的淡点线，用它自己的颜色；点这个模块时加深，别的时候退淡 */
+.seam-map-flow .sf-contract { transition: opacity .25s; }
+.seam-map-flow .sf-contract path { fill: none; stroke: color-mix(in srgb, var(--dx-c) 60%, transparent); stroke-width: 1.3; stroke-dasharray: 1.5 3.5; stroke-linecap: round; }
+.seam-map-flow .sf-contract[data-on='true'] path { stroke: var(--dx-c); stroke-width: 1.9; }
+.seam-map-flow .sf-contract[data-on='false'] { opacity: .25; }
+.seam-map-flow .sf-contract .sf-contract-dot { fill: var(--dx-c); stroke: none; }
+.seam-map-flow .sf-contract-label rect { fill: var(--dx-surface); }
+.seam-map-flow .sf-contract-label text { fill: var(--dx-c); font-size: 11px; font-weight: 600; }
+.seam-map-flow .sf-lg-contract { stroke: var(--dx-violet); stroke-width: 1.4; stroke-dasharray: 1.5 3.5; stroke-linecap: round; }
+
+/* 图例里的箭头、缺口、凸起 */
+.seam-map-flow .sf-lg-head { fill: var(--dx-fg); }
+.seam-map-flow .sf-lg-notch { fill: none; stroke: var(--dx-dim); stroke-width: 1.2; }
+.seam-map-flow .sf-lg-knob { fill: color-mix(in srgb, var(--dx-dim) 16%, transparent); stroke: var(--dx-dim); stroke-width: 1.2; }

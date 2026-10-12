@@ -1,0 +1,26 @@
+站点：pnpm build 之后由 gwb 的 docs-site.start 以 next start 启动，Claude 桌面版内置浏览器打开首页，执行下面这段脚本。
+
+脚本：
+const btn = document.querySelector('[data-probe="tree"]'); const before = btn?.textContent; btn?.click();
+await new Promise(r => setTimeout(r, 300)); const box = document.querySelector('[data-probe="local"]');
+({ treeButtonBefore: before, treeButtonAfter: btn?.textContent, buttonBg: btn && getComputedStyle(btn).backgroundColor,
+   localBorder: box && getComputedStyle(box).borderTopWidth + ' ' + getComputedStyle(box).borderTopColor,
+   dataSrc: [...document.querySelectorAll('[data-src]')].map(e => e.tagName + ' ' + e.getAttribute('data-src')),
+   hasSidebar: !!document.querySelector('aside, #nd-sidebar') })
+
+输出：
+{
+  "buttonBg": "lab(55.0481 -49.9246 15.93)",
+  "dataSrc": [
+    "P content/docs/index.mdx:5",
+    "H2 content/docs/index.mdx:7",
+    "LI content/docs/index.mdx:9",
+    "LI content/docs/index.mdx:10"
+  ],
+  "hasSidebar": true,
+  "localBorder": "4px lab(56.101 79.4329 31.4532)",
+  "treeButtonAfter": "tree:Docs clicks:1",
+  "treeButtonBefore": "tree:Docs clicks:0"
+}
+
+控制台错误：无。

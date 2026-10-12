@@ -1,0 +1,27 @@
+开发服务：pnpm dev（vite 8.3.0，端口 4398），Claude 桌面版内置浏览器。浏览器面板在检查时处于隐藏状态（document.visibilityState = hidden），动画帧不执行，所以 3D 画面没有截图，清理检查改为统计排队中的动画帧请求。
+
+一、开发计划页 /sst/control-plan
+页面正常渲染；侧栏列出 首页 / SST 样机 / SST 控制系统开发计划 / 任务总览。
+原 HTML 的「批注 1」从 control-plan.collab.json 读出，右侧批注栏显示 1 条，页面上 1 个标记框。
+带 data-insp-path 的元素 341 个，例：probes/2609251500_vite-react-pages/site/pages/sst/control-plan.tsx:98:23:li
+
+二、在网页上添加批注
+点「＋ 添加批注」→ 点页面上的「CHB + DAB 子模块」→ 填名字「样板测试」和内容 → 保存。
+control-plan.collab.json 新增一条：
+  { "id": "c2", "anchor": { "quote": "CHB + DAB 子模块", "tag": "span",
+    "insp": "probes/2609251500_vite-react-pages/site/pages/sst/control-plan.tsx:24:68:span" },
+    "author": "样板测试", "createdAt": "2026-09-25", "status": "open", "text": "这是在网页上直接加的一条测试批注。", "replies": [] }
+页面随即更新为 2 条批注、2 个标记。
+
+三、3D 页 /sst/comm-test
+canvas 存在，WebGL 初始化成功（没有出现失败提示），框图 svg 存在，器件按钮 23 个，TaskList 显示 25 条任务。
+
+四、站内跳转后的清理（先跳到 /tasks，再给 requestAnimationFrame / cancelAnimationFrame 包一层记录排队中的请求，然后在 /sst/comm-test 与 /tasks 之间用侧栏链接来回跳三轮）
+第 1 轮：在 3D 页 排队 1、canvas 1；离开后 排队 0、canvas 0
+第 2 轮：在 3D 页 排队 1、canvas 1；离开后 排队 0、canvas 0
+第 3 轮：在 3D 页 排队 1、canvas 1；离开后 排队 0、canvas 0
+
+五、页面样式是否残留
+在 /tasks 页，内容含 .pg-comm-test 的 style 元素 0 个；跳回 /sst/comm-test 后 1 个。
+
+控制台：除 fumadocs 主题脚本的一条「Encountered a script tag while rendering React component」提示外无错误。

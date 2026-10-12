@@ -1,0 +1,22 @@
+---
+born-at: 2026-09-28T16:30
+type: choice
+parent: [2026-09-25-collab-site]
+label: 文档站跟到 docfirst 0.5
+domain: 文档
+---
+
+## 背景
+
+文档站还停在 `@godcreator/docfirst-workflow` 0.2.2：确认记录存在 `.ledger.json`，内容分现状、轨迹、交接、未来、生成正本、反馈六个区，接缝页用 `has` 记号钉命令名。docfirst 投来两条反馈（0.3 与 0.5 两次破坏性版本），新写法的讲解组件与接缝图也只在 0.5 的站结构上用得了。
+
+## 结论与边界
+
+- 先装 0.3.1 运行 `migrate-ledger`，把记录写进各记号、删掉 `.ledger.json`，再升到 0.5.2；接线文件照 `docfirst.create` 新建的站替换
+- 内容三个区：交接的第一阶段规格挪到 `future/spec/`，生成正本挪到 `docs/outputs/`；反馈区只有用法说明和一条示例，没有真实条目，连同交接区的导读页一起删掉
+- 接缝页的 36 个 `has` 记号按原文所在的行改成行段记号；`dialog.showOpenDialog(` 在插件里出现两次（添加项目、克隆项目），两行各钉一个
+- 32 张卡的 `parent` 原来指向上一张卡，新写法只许写根卡：`parent` 改成根卡，原来的上一张卡写成正文开头的 `pivots-from::` 关系行（已有指向它的关系行就不再加），前后关系没有丢
+
+## 依据
+
+迁移前后 `pnpm doc` 都是绿的，`pnpm build` 通过。

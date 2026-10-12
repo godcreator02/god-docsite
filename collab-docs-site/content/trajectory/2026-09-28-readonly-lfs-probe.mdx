@@ -1,0 +1,31 @@
+---
+born-at: 2026-09-28T13:45
+type: evidence
+parent: [2026-09-25-collab-site]
+label: 只读成员与 LFS 实测
+domain: 协作流程
+---
+
+## 背景
+
+用户要组织 `hybrid-mmc` 的成员只能提合并请求、不能直接改：「管理员可以读写，协作者只能提pr，不能直接改啊」。成员对所有仓只读的话，普通改动走 AGit 就行，但资料库 `datasheets` 的手册原件走 Git LFS，上传 LFS 文件可能要写权限。用户问「发pr上来管理员合并不就好了？」，于是在自建 Gitea 上实测，只读成员用测试账号 bob-test、carol-test 扮演。
+
+## 经过
+
+建私有测试仓 `godcreator/lfs-probe`，PDF 走 LFS，两个测试账号设为只读协作者，main 的推送与合并只允许 godcreator。先让只读成员用 AGit 推一个含 LFS 文件的提交，再用 `GIT_TRACE` 看是哪个接口拒绝；然后让只读成员复刻、推到自己的复刻、向原仓提合并请求，由负责人合并后重新克隆核对文件；最后让只读成员关掉自己开的一个合并请求。
+
+## 结论与边界
+
+只读成员用 AGit 提交不了 LFS 文件。git-lfs 推送前先调锁校验接口，只读用户拿到 401 `You must have push access to verify locks`；关掉锁校验后，上传接口 `objects/batch` 仍回 401。git-lfs 中止推送，合并请求建不出来。
+
+Gitea 对只读用户回的是 401 而不是 403，git-lfs 当成账号密码错了，调用 `git credential reject`，把 Windows 凭据管理器里存的这个账号的凭据删掉。第一次实测就这样删掉了 bob-test 的凭据。成员碰上时的样子是推送失败，之后一直弹窗要求登录。
+
+复刻加合并请求走得通：成员对自己的复刻有写权限，LFS 文件能传上去；负责人合并后重新克隆原仓，PDF 的 SHA256 与大小都和成员上传的一致。
+
+只读的发起人能关掉自己的合并请求，所以 `collab.retract` 不需要写权限。协作仓的 `.gitattributes` 里只有 `collab/** text eol=lf`，不用 LFS，协作仓的成员只读没有问题。
+
+没测：从复刻提交时，复刻缺少原仓后来新加的 LFS 文件，git-lfs 会不会把它们重传一遍；成员在网页上上传 LFS 文件。
+
+## 依据
+
+实验记录在 `probes/2609281321_readonly-lfs/`：`README.md` 与 `runs/00-setup.txt` 到 `runs/05-readonly-close-own-pr.txt`。401 的原文在 `runs/03`（锁校验）和 `runs/04`（上传接口），凭据被删在 `runs/01`，复刻合并后的哈希核对在 `runs/02`。测试仓 `godcreator/lfs-probe` 上的合并请求 #1（复刻提交，已合并）、#2（只读发起人自己关闭）。

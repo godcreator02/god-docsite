@@ -1,0 +1,50 @@
+---
+born-at: 2026-10-10T15:30
+type: choice
+parent: [2026-09-25-collab-site]
+label: 页面组件引入 fumadocs 排版组件、prism 代码块与讲解组件包，全站用更纱等宽黑体
+domain: 形态
+---
+
+## 背景
+
+用户在 SST 站上重画一页讲 PLECS 仿真算法的教学页，要示意图与动画做得像 docfirst 文档站那样，并要求：全站字体换成 Sarasa Mono SC，
+公式都用 KaTeX，代码用代码块；又问 fumadocs 里能装进来的组件（Callout 这类）能不能多装一些。协作站是 Vite + react-router 的站，
+不是 fumadocs 站，原来页面能用的只有 `Tex`、`RecordLink`、`PageLink`，代码块是没有着色的纯文本。
+
+## 结论与边界
+
+- 代码块着色用 `prism-react-renderer`，在浏览器里渲染时着色；外框用 fumadocs 的 `CodeBlock`（复制按钮、可选标题栏）。MDX 的 ``` 代码块自动换成它，
+  TSX 页面用 `Code`，可以高亮指定行。语言写错在原位置显示红框并列出能写的语言，不当纯文本显示
+- fumadocs-ui 里只依赖 React、图标与 Tailwind 类名的排版组件都装进来：`Callout`、`Tabs`/`Tab`、`Steps`/`Step`、`Accordions`/`Accordion`、
+  `Cards`/`Card`、`Files`/`Folder`/`File`、`TypeTable`、`Banner`、`InlineTOC`。MDX 页面不用 import，TSX 页面从 `page-components` 引用。
+  颜色变量 `--color-fd-*` 对到协作站的颜色上，不引入 fumadocs 的整套预设样式；它用到的几个工具类（`prose-no-margin`、`fd-steps` 等）照它的写法在
+  `styles.css` 里补上；界面文字经它的翻译机制换成中文
+- 讲解组件包 `@godcreator/docfirst-explainer` 经 `page-components` 整个导出，`.dx` 的底色、边框、文字、强调色对到协作站；动画库 `motion`
+  由要用的项目站点自己装，网站包不带
+- 新增 `SvgTex`：SVG 图里的标注用 KaTeX 排在 `foreignObject` 里
+- 全站正文字体是 Sarasa Mono SC，没装的电脑退回微软雅黑；字体文件不随站点发
+- 正文区的默认样式跟着改了三处，fumadocs 组件才显示得对：边框不写颜色时用分隔线颜色；默认链接样式只给没写类名的链接；
+  标题的默认样式跳过带 `not-prose` 的元素
+- 网站包 0.29.0 → 0.29.1：只加组件与样式，没有改名或删掉页面能用的东西
+
+## 否掉的候选
+
+- shiki：着色准，但语法文件太大，用户否掉；而且站点检查会被打包进 gwb-collab，放进 MDX 编译流程就要把 shiki 一起打进插件
+- fumadocs 自带的 react-router 适配 `fumadocs-core/framework/react-router`：在开发服务的依赖预打包里会带进另一份 react-router，
+  卡片渲染时读不到路由上下文。改用 `FrameworkProvider`，链接与路由钩子用网站包自己的 react-router
+- 引入 fumadocs 的 `preset.css`：带 typography 插件和整套布局样式，和协作站正文区的默认样式冲突
+- `DynamicCodeBlock`（要 shiki）、`ImageZoom`（协作站已有图片放大）、`Heading`（协作站有自己的标题）、搜索与侧栏：不装
+- fumadocs 16.17.1：发布不满一天，项目站点按「发布不满一天不装」拒装，写成确切版本 16.16.2
+
+## 依据
+
+`probes/2610101530_fumadocs-components/`：把打包出来的网站包按项目的装法装进一个站点，在浏览器里逐个看；前三版各暴露一个只在这里看得到的问题，
+README 写了每一版的现象与改法。
+
+## 代价
+
+- 装 `@fumadocs/base-ui` 时它的依赖清单会把 shiki 也装进 `node_modules`，占磁盘，但页面不引用，不进网页
+- 开发服务的依赖预打包要逐个列出用到的 fumadocs 组件，加组件时漏列整页打不开；`test/prebundled-dependencies.test.ts` 守着这份清单
+- 以后升 fumadocs，要把 `@fumadocs/base-ui` 与 `fumadocs-core` 一起改成同一个确切版本，并重新跑一次上面的实验
+- 写了类名的链接不再自动是强调色加下划线，要自己写类名

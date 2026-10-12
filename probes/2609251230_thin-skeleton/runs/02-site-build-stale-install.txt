@@ -1,0 +1,17 @@
+$ next build
+▲ Next.js 16.3.0 (Turbopack)
+[MDX] generated files in 7.14409999999998ms
+✓ Running next.config.mjs took 806ms
+
+  Creating an optimized production build ...
+✓ Compiled successfully in 1241ms
+  Running TypeScript ...
+src/app/[[...slug]]/page.tsx(5,27): error TS2322: Type 'LoaderOutput<{ meta: Meta<undefined, MetaData> | Meta<string, MetaData>; page: Page<undefined, PageData> | Page<string, PageData>; i18n: undefined; }>' is not assignable to type 'PageSource'.
+  The types returned by 'getPage(...)' are incompatible between these types.
+    Type 'Page<undefined, PageData> | Page<string, PageData> | undefined' is not assignable to type '{ data: PageData; } | undefined'.
+      Type 'Page<undefined, PageData>' is not assignable to type '{ data: PageData; }'.
+        Types of property 'data' are incompatible.
+          Type 'PageData' is missing the following properties from type 'PageData': toc, body
+Failed to type check.
+
+[ELIFECYCLE] Command failed with exit code 1.

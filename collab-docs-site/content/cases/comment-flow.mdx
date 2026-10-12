@@ -1,0 +1,46 @@
+---
+title: 一条评论从 bob 到 carol
+description: 两个成员 bob 和 carol 在同一个项目里：bob 在站点上写下一条 @carol 的评论，七步之后出现在 carol 的网页上、进了她的「找我的」。每一步是谁做的、经手的是什么文件与通知
+---
+
+两个成员 bob 和 carol 在同一个项目的协作仓里，合并由 NAS 上的执行器做。评论怎么写、怎么存、怎么在页面上找回位置都是文档站基础包的事（看基础包自述站的「评论」页）；
+一条评论在这套工具里就是协作仓 `site/comments/` 下的几个文件，和任务、页面一样经提交审核、合并、自动同步到别人的电脑上。
+
+bob 在站点的一页上选中一段文字，写下「@carol 这里的 PR 参数要跟仿真对一下」：
+
+| 步 | 谁做 | 做了什么 | 经手的东西 |
+| --- | --- | --- | --- |
+| 1 写评论 | 基础包（bob 的开发服务） | 评论接口按本机身份码认出 bob，写一个新的评论串文件夹 | `site/comments/<日期-随机>/` 下的 `index.mdx`（`author: bob`、`page` 是那一页的地址）与 `snapshot.txt` |
+| 2 提醒提交 | gwb-collab（bob 的电脑） | 看出 `site/` 里有没提交审核的文件，推一条通知给站点 | 通知 `unsubmitted`，`siteFiles` 里是那个评论文件；通知栏「协作仓」一组 |
+| 3 提交审核 | bob 的 AI 调 `collab.submit` | 先查站点（评论的格式、作者在不在 `people.json` 里）与站点的类型检查，过了才提交 `collab/` 与 `site/`、用 AGit 推上去 | 一个合并请求 |
+| 4 检查与合并 | NAS 上的执行器 | 评论文件不是只有负责人能改的文件，没冲突就合进 main | main 上多了这个评论串 |
+| 5 自动同步 | gwb-collab（carol 的电脑） | 把 main 快进进 carol 的工作区；`site/` 有改动，再查一遍站点，过了接着托管 | carol 工作区里的同一个文件 |
+| 6 显示 | 基础包（carol 的开发服务） | 看到 `comments/` 里多了文件，整页刷新，原文上标出这条评论 | 页面上的标黄与评论数 |
+| 7 找我的 | gwb-collab（carol 的电脑） | 读工作区里的评论串，没解决、别人写的、正文 @ 了 carol 的算一条，推给站点 | 通知 `mention`，`comment` 是「评论串/index.mdx」，点了去那一页并打开这串 |
+
+第 2 步：没提交审核的文件分成 `collab/` 与 `site/` 两类，都算进同一条通知：
+
+{/* ref file="../plugins/collab/src/collab-repo/sync/state.ts" lines="15-23" hash="93f854205837" blob="3ab4352a66da" */}
+
+第 3 步：`site/` 有改动时，提交前先查站点再跑类型检查，不过就不提交：
+
+{/* ref file="../plugins/collab/src/collab-repo/submit/submit.ts" lines="56-61" hash="869f4ceed6ed" blob="92a88843de16" */}
+
+第 4 步：执行器只拦只有负责人能改的文件，评论不在其中：
+
+{/* ref file="../packages/collab-merge-check/src/check.ts" lines="54-66" hash="3c9728724728" blob="c0f8c11da687" */}
+
+第 5 步：自动同步进来的提交改了 `site/`，再查一遍才接着托管：
+
+{/* ref file="../plugins/collab/src/site-process/collab-sites.ts" lines="91-101" hash="0b99a76ffab9" blob="cb30a59e92cd" */}
+
+第 7 步：「找我的」由数据模型包从评论串算出，插件把它写成通知；没有「已读」，评论串解决了就不再列出：
+
+{/* ref file="../packages/collab-model/src/task-model/inbox.ts" lines="54-62" hash="a0605cefe822" blob="bea13220d047" */}
+
+{/* ref file="../plugins/collab/src/notifications/notifications-of.ts" lines="71-76" hash="ca73afc7f2bc" blob="4c751e3d4bb5" */}
+
+carol 回复这条评论，回复是同一个评论串文件夹里的一个新文件，沿同一条路反过来走一遍，到 bob 那边成了一条「回复我的」。标为已解决改的是发起那条的 frontmatter，也一样经提交审核传过去。
+agent 不开网页，读写评论用 gwb-docsite 的 `docsite.comments`、`docsite.comment.*` 命令，写下的是同样的文件。
+
+几个环节各自的细节：提交审核与自动同步见 [提交审核与自动同步](/gwb-collab/submit)，执行器怎么检查见 [执行器与自动合并](/gitea/runner)，通知栏怎么显示见 [网站内部](/collab-site/site) 的「通知栏」，通知怎么算见 [通知、QQ 私聊与交给 AI](/gwb-collab/notices)。

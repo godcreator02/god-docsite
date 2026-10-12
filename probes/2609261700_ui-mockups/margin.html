@@ -1,0 +1,803 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>审阅页边 · 10kW 样机机架</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.css">
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.js"></script>
+<style>
+:root {
+  --bg: #ffffff;
+  --bg-subtle: #f7f8fa;
+  --bg-hover: #f0f2f5;
+  --text: #1f2328;
+  --text-2: #464e57;
+  --muted: #6e7781;
+  --faint: #9ba3ad;
+  --line: #e3e6ea;
+  --line-soft: #eff1f4;
+  --leader: #c6ccd4;
+  --leader-res: #dde1e6;
+
+  --accent: #3858d6;
+  --accent-soft: #edf1fd;
+
+  --st-open: #b7791f;
+  --hl-open: #fcf0c8;
+  --hl-open-hot: #f8e199;
+  --st-done: #2f8a57;
+  --st-res: #8f98a3;
+  --hl-res: #eef0f3;
+  --hl-res-hot: #e1e5ea;
+  --hv: #cf3a22;
+  --hv-soft: #fdeeeb;
+
+  --shadow-pop: 0 8px 24px rgba(20, 28, 40, .12), 0 1px 3px rgba(20, 28, 40, .06);
+  --radius: 6px;
+  --radius-sm: 3px;
+
+  --f-ui: "Microsoft YaHei UI", "Microsoft YaHei", "PingFang SC", sans-serif;
+  --f-mono: "Sarasa Mono SC", Consolas, monospace;
+
+  --rail-w: 48px;
+  --bar-h: 40px;
+}
+
+* { box-sizing: border-box; }
+html, body { height: 100%; margin: 0; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--f-ui);
+  font-size: 14px;
+  -webkit-font-smoothing: antialiased;
+}
+button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; }
+a { color: inherit; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; border-radius: var(--radius-sm); }
+svg.i { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; flex: none; }
+kbd, code { font-family: var(--f-mono); }
+/* KaTeX：行内字号跟周围文字对齐；\text{} 里的中文落到微软雅黑，不落到宋体 */
+.katex { font-size: 1.05em; font-family: KaTeX_Main, "Times New Roman", "Microsoft YaHei UI", "Microsoft YaHei", serif; }
+
+/* ---------- 外壳 ---------- */
+.app {
+  height: 100%;
+  display: grid;
+  grid-template-columns: var(--rail-w) minmax(0, 1fr);
+  grid-template-rows: var(--bar-h) minmax(0, 1fr);
+}
+
+/* 顶栏 */
+.topbar {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding-right: 12px;
+  background: var(--bg-subtle);
+  border-bottom: 1px solid var(--line);
+  font-size: 13px;
+  color: var(--text-2);
+  position: relative;
+  z-index: 40;
+}
+.brand {
+  width: var(--rail-w); height: 100%;
+  display: grid; place-items: center;
+  border-right: 1px solid var(--line);
+  color: var(--text);
+}
+.crumbs { display: flex; align-items: center; gap: 8px; white-space: nowrap; min-width: 0; }
+.crumbs a { text-decoration: none; color: var(--muted); }
+.crumbs a:hover { color: var(--text); }
+.crumbs .sep { color: var(--faint); }
+.crumbs b { color: var(--text); font-weight: 700; }
+.crumbs code { font-size: 12px; color: var(--faint); margin-left: 4px; }
+
+.btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  height: 28px; padding: 0 8px; border-radius: var(--radius);
+  color: var(--text-2);
+}
+.btn:hover { background: var(--bg-hover); color: var(--text); }
+
+.toc-dd { position: relative; }
+.toc-dd summary { list-style: none; }
+.toc-dd summary::-webkit-details-marker { display: none; }
+.toc-dd[open] summary { background: var(--bg-hover); color: var(--text); }
+.toc-dd ol {
+  position: absolute; top: calc(100% + 4px); left: 0; margin: 0; padding: 4px;
+  list-style: none; width: 272px; background: var(--bg); border: 1px solid var(--line);
+  box-shadow: var(--shadow-pop); border-radius: var(--radius);
+}
+.toc-dd li a {
+  display: grid; grid-template-columns: 36px 1fr auto; align-items: center;
+  height: 28px; padding: 0 8px; border-radius: var(--radius); text-decoration: none; color: var(--text-2);
+}
+.toc-dd li a:hover { background: var(--bg-hover); color: var(--text); }
+.toc-dd .no { font-size: 12px; font-variant-numeric: tabular-nums; color: var(--faint); }
+.toc-dd .cnt { font-size: 12px; color: var(--st-open); }
+.toc-dd .cnt .grey { color: var(--st-res); }
+.toc-dd li.skip a { color: var(--faint); }
+
+.tb-right { margin-left: auto; display: flex; align-items: center; gap: 4px; }
+.cmode kbd {
+  font-size: 11px; line-height: 16px; color: var(--muted);
+  border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 0 4px; background: var(--bg);
+}
+body.commenting .cmode { background: var(--accent-soft); color: var(--accent); }
+body.commenting .cmode kbd { color: var(--accent); border-color: currentColor; }
+.theme { width: 28px; padding: 0; justify-content: center; color: var(--muted); }
+.me { display: flex; align-items: center; gap: 8px; padding-left: 12px; margin-left: 4px; border-left: 1px solid var(--line); white-space: nowrap; }
+.me .role { color: var(--muted); }
+
+/* 左侧导航：平时 48px，一条图标 + 竖排的当前位置 */
+.rail { grid-row: 2; grid-column: 1; position: relative; z-index: 30; }
+.rail-panel {
+  position: absolute; top: 0; bottom: 0; left: 0;
+  width: var(--rail-w);
+  background: var(--bg-subtle);
+  border-right: 1px solid var(--line);
+  overflow: hidden;
+  transition: width .16s ease, box-shadow .16s ease;
+  display: flex; flex-direction: column;
+  padding: 8px 0 0;
+}
+.rail:hover .rail-panel, .rail.open .rail-panel { width: 252px; box-shadow: var(--shadow-pop); }
+.r-proj { display: flex; align-items: center; height: 32px; white-space: nowrap; font-weight: 700; color: var(--text); font-size: 13px; }
+.r-item {
+  display: flex; align-items: center; height: 32px; margin: 0 4px 4px; border-radius: var(--radius);
+  white-space: nowrap; text-decoration: none; color: var(--text-2); font-size: 13px; position: relative;
+}
+.r-item:hover { background: var(--bg-hover); color: var(--text); }
+.r-ico { flex: 0 0 40px; display: grid; place-items: center; position: relative; }
+.r-proj .r-ico { flex-basis: 48px; }
+.r-label { opacity: 0; transition: opacity .1s; display: flex; align-items: center; gap: 8px; flex: 1; padding-right: 8px; }
+.rail:hover .r-label, .rail.open .r-label { opacity: 1; }
+.badge {
+  font-size: 11px; line-height: 16px; font-variant-numeric: tabular-nums; font-weight: 700;
+  min-width: 16px; height: 16px; padding: 0 4px; border-radius: 8px; text-align: center;
+  background: var(--accent); color: #fff; margin-left: auto;
+}
+.r-ico .dot { position: absolute; top: 4px; right: 8px; width: 6px; height: 6px; border-radius: 50%; background: var(--accent); }
+.rail:hover .r-ico .dot, .rail.open .r-ico .dot { display: none; }
+.r-children { display: none; padding: 0 0 4px; }
+.rail:hover .r-children, .rail.open .r-children { display: block; }
+.r-child {
+  display: flex; align-items: center; height: 28px; margin: 0 4px 2px 4px; padding-left: 40px; border-radius: var(--radius);
+  white-space: nowrap; text-decoration: none; color: var(--text-2); font-size: 13px;
+}
+.r-child:hover { background: var(--bg-hover); color: var(--text); }
+.r-child.here { color: var(--accent); font-weight: 700; background: var(--accent-soft); }
+.r-here {
+  writing-mode: vertical-rl;
+  margin: 12px auto 0; width: var(--rail-w);
+  display: flex; align-items: center; gap: 8px;
+  font-size: 12px; color: var(--accent); letter-spacing: .08em; white-space: nowrap;
+}
+.r-here span { color: var(--faint); }
+.rail:hover .r-here, .rail.open .r-here { display: none; }
+.r-foot { margin-top: auto; border-top: 1px solid var(--line); padding-top: 4px; }
+.r-foot .r-item { color: var(--muted); font-size: 12px; width: calc(100% - 8px); }
+.rail.open .pin-label::after { content: "取消固定"; }
+.rail:not(.open) .pin-label::after { content: "固定展开"; }
+
+/* ---------- 正文 + 页边 ---------- */
+.scroll { grid-row: 2; grid-column: 2; overflow-y: auto; overflow-x: hidden; position: relative; }
+.sheet {
+  position: relative;
+  font-size: 15px;
+  display: grid;
+  grid-template-columns: minmax(0, 58em) 300px;
+  column-gap: 48px;
+  justify-content: center;
+  padding: 32px 24px 112px 40px;
+}
+.leaders { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; overflow: visible; z-index: 2; }
+.leaders .ld { fill: none; stroke: var(--leader); stroke-width: 1; }
+.leaders .ld.res { stroke: var(--leader-res); }
+.leaders .ld.hot { stroke: var(--accent); }
+
+.text { line-height: 1.8; color: var(--text); min-width: 0; position: relative; }
+body.commenting .text { cursor: text; }
+.text ::selection { background: var(--accent-soft); }
+.margin { position: relative; min-width: 0; }
+
+/* ---------- 页头 ---------- */
+.kicker { font-size: 12px; letter-spacing: .08em; color: var(--muted); }
+h1 { font-size: 28px; line-height: 1.3; font-weight: 700; margin: 4px 0 12px; }
+
+.tasks { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-bottom: 20px; position: relative; line-height: 1; }
+.tasks-label { font-size: 12px; color: var(--muted); margin-right: 4px; }
+.pill {
+  display: inline-flex; align-items: center; gap: 8px;
+  height: 28px; padding: 0 4px 0 8px;
+  border: 1px solid var(--line); border-radius: var(--radius);
+  font-size: 13px; color: var(--text-2); background: var(--bg);
+}
+.pill:hover { background: var(--bg-subtle); border-color: var(--faint); color: var(--text); }
+.pill[aria-expanded="true"] { border-color: var(--accent); background: var(--accent-soft); color: var(--text); }
+.pill.done .pt { color: var(--muted); }
+.pill .who {
+  width: 20px; height: 20px; border-radius: 50%; display: grid; place-items: center;
+  font-size: 11px; font-weight: 700; background: var(--bg-hover); color: var(--text-2);
+}
+.pill .who.me { background: var(--accent); color: #fff; }
+.st { width: 14px; height: 14px; flex: none; }
+
+.task-pop {
+  position: absolute; top: 36px; z-index: 20;
+  width: 360px; background: var(--bg); border: 1px solid var(--line); border-radius: var(--radius);
+  box-shadow: var(--shadow-pop); padding: 12px 16px; font-size: 13px; line-height: 1.6; color: var(--text-2);
+}
+.task-pop h4 { margin: 0 0 8px; font-size: 14px; color: var(--text); font-weight: 700; }
+.task-pop dl { display: grid; grid-template-columns: 64px 1fr; gap: 4px 12px; margin: 0 0 12px; }
+.task-pop dt { color: var(--muted); }
+.task-pop dd { margin: 0; }
+.task-pop .acts { display: flex; gap: 8px; border-top: 1px solid var(--line-soft); padding-top: 8px; }
+.task-pop .acts button { height: 28px; padding: 0 8px; border-radius: var(--radius); color: var(--accent); }
+.task-pop .acts button:hover { background: var(--accent-soft); }
+.st-word.done { color: var(--st-done); }
+.st-word.doing { color: var(--accent); }
+.st-word.todo { color: var(--muted); }
+
+.lead { font-size: 15px; color: var(--text-2); margin: 0 0 24px; }
+
+/* 七个参数 */
+.kpis { display: flex; flex-wrap: wrap; align-items: stretch; gap: 12px 32px; margin: 0 0 20px; }
+.kpi { display: grid; align-content: start; gap: 0; }
+.kpi .kl { font-size: 12px; color: var(--muted); line-height: 20px; }
+.kpi .kl.tex { font-size: 14px; color: var(--text-2); }
+.kpi .kv { font-size: 20px; line-height: 28px; font-variant-numeric: tabular-nums; color: var(--text); white-space: nowrap; }
+.kpi .kv small { font-size: 13px; color: var(--muted); }
+.kpi.hv {
+  border: 1px solid var(--hv); background: var(--hv-soft);
+  padding: 4px 12px 4px 8px; margin: -5px 0 -5px -9px;
+}
+.kpi.hv .kv { color: var(--hv); font-weight: 700; }
+.kpi.hv .kl { color: var(--hv); }
+.hv-tag { display: inline-flex; align-items: center; gap: 4px; font-family: var(--f-ui); font-size: 11px; font-weight: 700; color: var(--hv); margin-left: 4px; vertical-align: 1px; }
+.hv-tag svg { width: 12px; height: 12px; }
+.kpi .ok { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; color: var(--st-done); margin-left: 4px; }
+
+.hv-inline { color: var(--hv); font-weight: 700; white-space: nowrap; }
+.hv-inline svg { width: 12px; height: 12px; vertical-align: -1px; margin-right: 2px; }
+
+.toc { display: flex; flex-wrap: wrap; gap: 4px 20px; margin: 0; padding: 12px 0 0; border-top: 1px solid var(--line); font-size: 13px; }
+.toc a { text-decoration: none; color: var(--text-2); }
+.toc a:hover { color: var(--accent); }
+.toc a .c { font-size: 11px; color: var(--st-open); vertical-align: super; margin-left: 2px; }
+
+/* ---------- 节 ---------- */
+section { margin-top: 48px; }
+.sec-h { display: flex; align-items: baseline; gap: 12px; margin: 0 0 16px; }
+.sec-h .no { font-size: 14px; font-weight: 700; font-variant-numeric: tabular-nums; color: var(--faint); }
+.sec-h h2 { font-size: 20px; line-height: 1.3; font-weight: 700; margin: 0; }
+p { margin: 0 0 16px; }
+
+.assume { background: var(--bg-subtle); padding: 12px 16px; margin: 0 0 20px; font-size: 14px; color: var(--text-2); }
+.assume b { color: var(--text); font-weight: 700; }
+
+table { width: 100%; border-collapse: collapse; font-size: 13.5px; line-height: 1.6; margin: 0 0 8px; }
+thead th {
+  text-align: left; font-size: 12px; color: var(--muted); font-weight: 400;
+  padding: 8px 12px 8px 0; border-bottom: 1px solid var(--line);
+}
+tbody td { padding: 8px 12px 8px 0; border-bottom: 1px solid var(--line-soft); vertical-align: top; }
+td.num { font-variant-numeric: tabular-nums; white-space: nowrap; color: var(--text); }
+td.item { font-weight: 700; }
+td.calc { color: var(--text-2); }
+td.calc .katex { font-size: 1.1em; }
+td.say { color: var(--text-2); }
+td.mid { color: var(--text-2); border-left: 1px solid var(--line-soft); border-right: 1px solid var(--line-soft); padding-left: 12px; }
+td.full { color: var(--text-2); }
+.u-col { width: 104px; }
+.ug {
+  display: block; width: 72px; height: 4px; margin-top: 4px;
+  background: linear-gradient(to right, transparent calc((var(--lo) - 1) / 37 * 100%), var(--text-2) 0 calc(var(--hi) / 37 * 100%), transparent 0), var(--line);
+}
+th .side { display: inline-flex; align-items: center; gap: 4px; margin-left: 8px; font-size: 11px; font-weight: 700; color: var(--hv); }
+th .side svg { width: 12px; height: 12px; }
+th .side.low { color: var(--st-done); }
+
+.caption { font-size: 12px; line-height: 1.7; color: var(--muted); margin: 8px 0 0; }
+
+.skipped {
+  margin: 48px 0 0; padding: 8px 0; border-top: 1px solid var(--line-soft); border-bottom: 1px solid var(--line-soft);
+  font-size: 12px; color: var(--faint); display: flex; flex-wrap: wrap; gap: 4px 16px;
+}
+.skipped span b { font-weight: 700; margin-right: 4px; }
+
+.points { list-style: none; margin: 0; padding: 0; }
+.points li { display: grid; grid-template-columns: 24px 1fr; padding: 8px 0; border-bottom: 1px solid var(--line-soft); }
+.points li:last-child { border-bottom: 0; }
+.points .mk-p { width: 14px; height: 14px; margin-top: 6px; }
+.points b { font-weight: 700; margin-right: 8px; }
+
+footer.foot { margin-top: 56px; padding-top: 12px; border-top: 1px solid var(--line); font-size: 12px; color: var(--muted); }
+
+/* ---------- 被批的字：浅色底高亮 ---------- */
+mark.mk {
+  color: inherit;
+  background: var(--hl-open);
+  border-radius: var(--radius-sm);
+  padding: 1px 2px;
+  margin: 0 -2px;
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+  cursor: pointer;
+}
+mark.mk.hot { background: var(--hl-open-hot); }
+mark.mk.res { background: var(--hl-res); }
+mark.mk.res.hot { background: var(--hl-res-hot); }
+sup.ref { font-size: 10px; font-weight: 700; color: var(--st-open); margin-left: 4px; vertical-align: .6em; line-height: 0; }
+sup.ref.res { color: var(--st-res); }
+
+/* ---------- 页边批注 ---------- */
+.margin-head { padding-top: 0; }
+.mh-title { font-size: 12px; color: var(--muted); }
+.mh-count { font-size: 13px; color: var(--text-2); margin-top: 4px; }
+.mh-count b { font-weight: 700; color: var(--st-open); }
+.mh-count .g, .mh-count .g b { color: var(--st-res); }
+.mh-how { font-size: 12px; color: var(--faint); margin-top: 4px; }
+.mh-how kbd { font-size: 11px; border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 0 4px; color: var(--muted); }
+
+.note { position: absolute; left: 0; right: 0; font-size: 13px; z-index: 3; transition: top .12s ease; }
+.n-head { display: flex; align-items: center; gap: 8px; line-height: 20px; white-space: nowrap; }
+.av {
+  width: 20px; height: 20px; border-radius: 50%; flex: none;
+  display: grid; place-items: center;
+  font-size: 11px; line-height: 1; font-weight: 700;
+  background: var(--bg-hover); color: var(--text-2);
+}
+.av.me { background: var(--accent); color: #fff; }
+.n-name { font-weight: 700; color: var(--text); }
+.n-time { font-size: 12px; font-variant-numeric: tabular-nums; color: var(--faint); }
+.n-no { margin-left: auto; font-size: 11px; font-weight: 700; color: var(--st-open); }
+.n-check {
+  width: 16px; height: 16px; border: 1px solid var(--st-open); border-radius: var(--radius-sm); flex: none;
+  display: grid; place-items: center; color: transparent;
+}
+.n-check:hover { background: var(--hl-open); color: var(--st-open); }
+.n-check svg { width: 12px; height: 12px; }
+.n-body { font-size: 13.5px; line-height: 1.6; color: var(--text); margin: 4px 0 0 28px; }
+.reply { margin: 8px 0 0 28px; }
+.reply .n-body { margin-left: 28px; color: var(--text-2); }
+.n-acts { margin: 4px 0 0 20px; display: flex; gap: 0; font-size: 12px; color: var(--muted); }
+.n-acts button { height: 24px; padding: 0 8px; border-radius: var(--radius); }
+.n-acts button:hover { background: var(--bg-hover); color: var(--text); }
+.note.hot .n-name { color: var(--accent); }
+
+/* 已解决：灰、打勾、收成一行 */
+.note.res .av { color: var(--st-res); }
+.note.res .n-name, .note.res .n-body { color: var(--st-res); }
+.tick {
+  width: 16px; height: 16px; border-radius: var(--radius-sm); background: var(--st-res); color: #fff;
+  display: grid; place-items: center; flex: none;
+}
+.tick svg { width: 12px; height: 12px; }
+.fold-line {
+  display: flex; align-items: center; gap: 8px; width: calc(100% + 8px); height: 28px; margin: -4px -4px; padding: 0 4px;
+  border-radius: var(--radius); color: var(--st-res); text-align: left; white-space: nowrap;
+}
+.fold-line:hover { background: var(--bg-hover); }
+.fold-line .ft { overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+.fold-line .n-name { color: var(--st-res); }
+.fold-line .fs { margin-left: auto; font-size: 12px; flex: none; color: var(--faint); }
+.fold-line:hover .fs { color: var(--text-2); }
+.note.res .full { display: none; }
+.note.res.open .full { display: block; }
+.note.res.open .fold-line { display: none; }
+.res-by { margin: 4px 0 0 28px; font-size: 12px; color: var(--st-res); display: flex; align-items: center; gap: 4px; }
+.res-by button { height: 24px; padding: 0 8px; border-radius: var(--radius); color: var(--muted); }
+.res-by button:hover { background: var(--bg-hover); color: var(--text); }
+
+/* 批注模式提示 */
+.mode-bar {
+  display: none; position: sticky; top: 0; z-index: 25;
+  background: var(--accent-soft); color: var(--accent); font-size: 13px;
+  padding: 8px 40px; border-bottom: 1px solid var(--line);
+}
+.mode-bar kbd { font-size: 11px; border: 1px solid currentColor; border-radius: var(--radius-sm); padding: 0 4px; }
+body.commenting .mode-bar { display: block; }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- 顶栏：面包屑、本页目录、批注模式、深浅色、身份 -->
+  <header class="topbar">
+    <div class="brand" title="课题组协作站">
+      <svg class="i" viewBox="0 0 16 16"><rect x="3" y="1.5" width="10" height="13" rx="1"/><path d="M3 5h10M3 8h10M3 11h10"/></svg>
+    </div>
+    <nav class="crumbs" aria-label="当前位置">
+      <a href="#">10kW 混合型 MMC 样机</a><span class="sep">/</span>
+      <a href="#">样机</a><span class="sep">/</span>
+      <b>10kW 样机机架</b><code>prototype/rack</code>
+    </nav>
+    <details class="toc-dd">
+      <summary class="btn">本页目录<svg class="i" viewBox="0 0 16 16"><path d="m4 6 4 4 4-4"/></svg></summary>
+      <ol>
+        <li><a href="#top"><span class="no">—</span>页头<span class="cnt">1 未解决</span></a></li>
+        <li><a href="#param"><span class="no">01</span>参数估算<span class="cnt">1 未解决 · <span class="grey">1 已解决</span></span></a></li>
+        <li class="skip"><a href="#sld"><span class="no">02</span>主电路<span></span></a></li>
+        <li class="skip"><a href="#view"><span class="no">03</span>3D 机架<span></span></a></li>
+        <li><a href="#cab"><span class="no">04</span>机架布置<span></span></a></li>
+        <li class="skip"><a href="#ctrlboards"><span class="no">04a</span>控制板卡<span></span></a></li>
+        <li class="skip"><a href="#wiring"><span class="no">04b</span>接线清单<span></span></a></li>
+        <li class="skip"><a href="#arm"><span class="no">05</span>桥臂机箱<span></span></a></li>
+        <li class="skip"><a href="#sm"><span class="no">06</span>子模块板<span></span></a></li>
+        <li class="skip"><a href="#sampling"><span class="no">06b</span>采样点<span></span></a></li>
+        <li class="skip"><a href="#switchgear"><span class="no">06d</span>开关板选型<span></span></a></li>
+        <li class="skip"><a href="#acboard"><span class="no">06c</span>交流采样板<span></span></a></li>
+        <li class="skip"><a href="#ground"><span class="no">06a</span>接地<span></span></a></li>
+        <li><a href="#safe"><span class="no">07</span>安全与待确认<span></span></a></li>
+      </ol>
+    </details>
+    <div class="tb-right">
+      <button class="btn cmode" id="cmode" title="进入批注模式：选中正文里的字，页边出现输入框（快捷键 C，Esc 退出）">
+        <svg class="i" viewBox="0 0 16 16"><path d="M10.8 2.2 13.8 5.2 5.8 13.2H2.8v-3z"/><path d="m9 4 3 3"/></svg>
+        批注模式<kbd>C</kbd>
+      </button>
+      <button class="btn theme" title="切到深色（效果图只做了浅色）" aria-label="切到深色">
+        <svg class="i" viewBox="0 0 16 16"><path d="M13.2 10.4A5.6 5.6 0 0 1 5.6 2.8a5.6 5.6 0 1 0 7.6 7.6z"/></svg>
+      </button>
+      <div class="me" title="用 Gitea 账号 godcreator 署名；改动经 git 提交审核后合进 main">
+        <span class="av me">G</span><span>godcreator</span><span class="role">· 负责人</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- 左侧导航：收起时只有图标和竖排的当前位置，鼠标移上去或点「固定展开」才展开成树 -->
+  <nav class="rail" id="rail" aria-label="站内导航">
+    <div class="rail-panel">
+      <div class="r-proj"><span class="r-ico"><svg class="i" viewBox="0 0 16 16"><path d="M2 3h12v10H2z"/><path d="M6 3v10M10 3v10"/></svg></span><span class="r-label">10kW 混合型 MMC 样机</span></div>
+      <a class="r-item" href="#"><span class="r-ico"><svg class="i" viewBox="0 0 16 16"><path d="M2.5 8 8 3l5.5 5v5.5h-3.5v-4h-4v4H2.5z"/></svg></span><span class="r-label">首页</span></a>
+      <a class="r-item" href="#" title="样机"><span class="r-ico"><svg class="i" viewBox="0 0 16 16"><path d="M2 4.5a1 1 0 0 1 1-1h3.2l1.3 1.5H13a1 1 0 0 1 1 1V12a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1z"/></svg><span class="dot"></span></span><span class="r-label">样机</span></a>
+      <div class="r-children">
+        <a class="r-child here" href="#" aria-current="page">10kW 样机机架</a>
+        <a class="r-child" href="#">子模块板设计</a>
+        <a class="r-child" href="#">控制与采样系统</a>
+      </div>
+      <a class="r-item" href="#" title="我的待办：2 条"><span class="r-ico"><svg class="i" viewBox="0 0 16 16"><rect x="2.5" y="2.5" width="11" height="11" rx="2"/><path d="m5.5 8 1.8 1.8 3.4-3.6"/></svg></span><span class="r-label">我的待办<span class="badge">2</span></span></a>
+      <a class="r-item" href="#"><span class="r-ico"><svg class="i" viewBox="0 0 16 16"><path d="M2.5 4h11M2.5 8h11M2.5 12h7"/></svg></span><span class="r-label">任务总览</span></a>
+      <div class="r-here" aria-hidden="true"><span>样机</span>10kW 样机机架</div>
+      <div class="r-foot">
+        <button class="r-item" id="pin"><span class="r-ico"><svg class="i" viewBox="0 0 16 16"><path d="M5.5 2h5l-.8 4 2.5 2.5H3.8L6.3 6z"/><path d="M8 8.5V14"/></svg></span><span class="r-label pin-label"></span></button>
+      </div>
+    </div>
+  </nav>
+
+  <main class="scroll" id="scroll">
+    <div class="mode-bar">批注模式：在正文里选中要批的字，页边同一高度出现输入框，写完按 <kbd>Ctrl+Enter</kbd> 存进这一页的批注。按 <kbd>Esc</kbd> 或 <kbd>C</kbd> 退出。</div>
+    <div class="sheet" id="sheet">
+      <svg class="leaders" id="leaders" aria-hidden="true"></svg>
+
+      <article class="text" id="text">
+        <header id="top">
+          <div class="kicker">半桥 / 全桥混合型 MMC · 实验室样机</div>
+          <h1>10kW 混合型 MMC 样机架</h1>
+
+          <div class="tasks" id="tasks">
+            <span class="tasks-label">本页任务</span>
+            <button class="pill done" data-task="t1" aria-expanded="false" title="已完成 · 点开看详情">
+              <svg class="st" viewBox="0 0 14 14"><circle cx="7" cy="7" r="6.5" fill="var(--st-done)"/><path d="m4 7.2 2 2 4-4.2" fill="none" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              <span class="pt">核算子模块电容纹波</span><span class="who" title="bob-test">B</span>
+            </button>
+            <button class="pill doing" data-task="t2" aria-expanded="false" title="进行中 · 点开看详情">
+              <svg class="st" viewBox="0 0 14 14"><circle cx="7" cy="7" r="6" fill="none" stroke="var(--accent)" stroke-width="1.5"/><path d="M7 3a4 4 0 0 1 0 8z" fill="var(--accent)"/></svg>
+              <span class="pt">确认 ITECH 电源输出有没有对地参考</span><span class="who" title="carol-test">C</span>
+            </button>
+            <button class="pill todo" data-task="t3" aria-expanded="false" title="待开始 · 点开看详情">
+              <svg class="st" viewBox="0 0 14 14"><circle cx="7" cy="7" r="6" fill="none" stroke="var(--faint)" stroke-width="1.5" stroke-dasharray="2.4 1.8"/></svg>
+              <span class="pt">开关板 9U 安装板出图</span><span class="who me" title="godcreator（你）">G</span>
+            </button>
+            <div class="task-pop" id="task-pop" hidden></div>
+          </div>
+
+          <p class="lead">三相 10 kW，交流 380 V（相电压 220 V），直流 <span class="hv-inline" title="高压：直流母线 700 V"><svg viewBox="0 0 16 16"><path d="M8 1.6 15 14.2H1z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M8.7 5.6 6.4 9.6h2l-.9 3 2.6-4.3h-2z" fill="currentColor"/></svg>700 V</span>。<mark class="mk" id="m1" data-note="n1">每个桥臂 10 个子模块</mark><sup class="ref">1</sup>，装一个 3U 桥臂机箱。两台 ITECH 电源有 800 mm 深，机架按 1000 mm 深、前后两面装：前面放要操作和接线的低压设备（控制插箱、子模块低压电源、六个桥臂机箱、急停），后面放高压接线（开关板、直流母排、电抗器），两台 ITECH 电源整深放在最下面。一个 37U 开放机架，总高约 1.8 m；整套按星形 PE 接地，控制信号地和子模块低压 0 V 各自单点接地，高压侧经高阻接地。</p>
+
+          <div class="kpis">
+            <div class="kpi"><span class="kl tex" data-tex="P">P</span><span class="kv">10 kW</span></div>
+            <div class="kpi hv" title="高压：直流母线 700 V，P/N 对地各约 ±350 V">
+              <span class="kl tex"><span data-tex="U_\text{dc}">Udc</span><span class="hv-tag"><svg viewBox="0 0 16 16"><path d="M8 1.6 15 14.2H1z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M8.7 5.6 6.4 9.6h2l-.9 3 2.6-4.3h-2z" fill="currentColor"/></svg>高压</span></span>
+              <span class="kv">700 V</span>
+            </div>
+            <div class="kpi"><span class="kl tex" data-tex="U_\text{ac}">Uac</span><span class="kv">380 V <small>线</small> / 220 V <small>相</small></span></div>
+            <div class="kpi"><span class="kl tex" data-tex="N">N</span><span class="kv">10 SM <small>/ 桥臂</small></span></div>
+            <div class="kpi"><span class="kl">SM 合计</span><span class="kv">60</span></div>
+            <div class="kpi"><span class="kl tex" data-tex="U_\text{c}">Uc</span><span class="kv">≈ 70 V</span></div>
+            <div class="kpi" title="60 SM × 4 根 = 240 根，每相 80 根，对上三块相控板各 80 个口">
+              <span class="kl">光纤<span class="ok"><svg viewBox="0 0 14 14" width="11" height="11"><path d="m3 7.4 2.5 2.5L11 4.4" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>= 3 × 80 口</span></span>
+              <span class="kv">240 根</span>
+            </div>
+          </div>
+
+          <nav class="toc" aria-label="目录">
+            <a href="#param">参数估算<span class="c">2</span></a>
+            <a href="#sld">主电路</a>
+            <a href="#view">3D 机架</a>
+            <a href="#cab">机架布置</a>
+            <a href="#ctrlboards">控制板卡</a>
+            <a href="#wiring">接线清单</a>
+            <a href="#arm">桥臂机箱</a>
+            <a href="#sm">子模块板</a>
+            <a href="#sampling">采样点</a>
+            <a href="#switchgear">开关板选型</a>
+            <a href="#acboard">交流采样板</a>
+            <a href="#ground">接地</a>
+            <a href="#safe">安全与待确认</a>
+          </nav>
+        </header>
+
+        <!-- 01 参数估算 -->
+        <section id="param">
+          <div class="sec-h"><span class="no">01</span><h2>参数估算</h2></div>
+          <div class="assume"><b>先说一个假设：</b>「220 V 交流」按三相相电压 220 V、线电压 380 V 理解。如果指的是线电压 220 V，调制比会降到 0.51 左右，电流会变大，下表要重算。</div>
+          <table>
+            <colgroup><col style="width:17%"><col style="width:18%"><col style="width:27%"><col></colgroup>
+            <thead><tr><th>项目</th><th>数值</th><th>怎么算的</th><th>说明</th></tr></thead>
+            <tbody>
+              <tr><td class="item">调制比 <span data-tex="m">m</span></td><td class="num">0.89</td><td class="calc" data-tex="m = \dfrac{2 \times 220\sqrt{2}}{700}">2 × 220√2 / 700</td><td class="say">半桥也能正常出电压，全桥部分留作过调制和直流故障阻断</td></tr>
+              <tr><td class="item">交流相电流</td><td class="num">15.2 A rms</td><td class="calc" data-tex="\dfrac{10\,\text{kW}}{\sqrt{3} \times 380\,\text{V}}">10 kW / (√3 × 380 V)</td><td class="say">峰值约 21.5 A</td></tr>
+              <tr><td class="item">直流电流</td><td class="num">14.3 A</td><td class="calc" data-tex="\dfrac{10\,\text{kW}}{700\,\text{V}}">10 kW / 700 V</td><td class="say">—</td></tr>
+              <tr><td class="item">桥臂电流</td><td class="num">≈ 15.5 A 峰值</td><td class="calc" data-tex="\dfrac{I_\text{dc}}{3} + \dfrac{I_\text{ac,峰}}{2}">Idc / 3 + Iac,峰 / 2</td><td class="say">器件、电感、分流电阻按这个峰值选；测量用桥臂机箱里的桥臂电流板，见第 05 节</td></tr>
+              <tr><td class="item">子模块电容电压</td><td class="num">≈ 70 V</td><td class="calc" data-tex="\dfrac{700\,\text{V}}{10}">700 V / 10</td><td class="say">每臂 1 个冗余时约 78 V；器件按 150 V 级选，电容按 ≥ 120 V 选</td></tr>
+              <tr><td class="item">子模块电容</td><td class="num">≈ 2.2–2.7 mF</td><td class="calc">每 kVA 储能 30–40 J，分到 60 个 SM</td><td class="say">纹波按 ±10% 左右，最终用 PLECS 仿真定</td></tr>
+              <tr><td class="item">桥臂电感</td><td class="num"><mark class="mk" id="m2" data-note="n2">≈ 5 mH / 20 A</mark><sup class="ref">2</sup></td><td class="calc">基值电感 46 mH 的 10%</td><td class="say">要求 20 A 峰值不饱和，环流抑制效果用仿真确认</td></tr>
+              <tr><td class="item">损耗与散热</td><td class="num"><mark class="mk res" id="m3" data-note="n3">≈ 200 W</mark><sup class="ref res">3</sup></td><td class="calc">按效率 98% 估</td><td class="say">每个 SM 只有几瓦，机箱顶部小风扇就够</td></tr>
+              <tr><td class="item">光纤数量</td><td class="num">240 根</td><td class="calc" data-tex="60\,\text{SM} \times 4\,\text{根}">60 SM × 4 根</td><td class="say">每个 SM：1 对 UART + 2 根开关码，每相 80 根，和 6U 控制插箱的相控板对得上</td></tr>
+            </tbody>
+          </table>
+          <p class="caption">以上是方案阶段的估算，给机架和器件定尺寸用。电容、电感和器件电流以后续仿真和手册核算为准。</p>
+        </section>
+
+        <div class="skipped" id="sld"><span><b>02</b>主电路</span><span id="view"><b>03</b>3D 机架</span><span>效果图里略去这两节</span></div>
+
+        <!-- 04 机架布置 -->
+        <section id="cab">
+          <div class="sec-h"><span class="no">04</span><h2>机架布置</h2></div>
+          <p>ITECH 电源有 800 mm 深，机架就得 1000 mm 深；控制插箱和桥臂机箱只有 300 mm 深，所以前后两面都装。前面对着人，放要看、要插拔、要接低压线的东西；后面放高压接线，正好对着桥臂机箱后面的接线柱。</p>
+          <table>
+            <colgroup><col class="u-col"><col style="width:29%"><col style="width:20%"><col></colgroup>
+            <thead><tr>
+              <th>U 位</th>
+              <th>前面（深 300–450 mm）<span class="side low">低压侧</span></th>
+              <th>中间</th>
+              <th>后面（深 300–400 mm）<span class="side"><svg viewBox="0 0 16 16"><path d="M8 1.6 15 14.2H1z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M8.7 5.6 6.4 9.6h2l-.9 3 2.6-4.3h-2z" fill="currentColor"/></svg>高压侧</span></th>
+            </tr></thead>
+            <tbody>
+              <tr><td class="num">35–37<span class="ug" style="--lo:35;--hi:37"></span></td><td>空（放示波器、万用表）</td><td class="mid"></td><td></td></tr>
+              <tr><td class="num">34<span class="ug" style="--lo:34;--hi:34"></span></td><td>急停面板（急停 + 指示灯）</td><td class="mid"></td><td>1U 机架插线板（220 V）</td></tr>
+              <tr><td class="num">28–33<span class="ug" style="--lo:28;--hi:33"></span></td><td>控制插箱 6U</td><td class="mid"></td><td>空</td></tr>
+              <tr><td class="num">25–27<span class="ug" style="--lo:25;--hi:27"></span></td><td>空（低压线从这里横到左前立柱）</td><td class="mid"></td><td>3U 托盘：子模块低压侧台式 ITECH 电源，横放，前面板朝右侧</td></tr>
+              <tr><td class="num">22–24<span class="ug" style="--lo:22;--hi:24"></span></td><td>A 上桥臂</td><td class="mid" rowspan="6">直流母排 P / N（竖直铜排，U7–24）</td><td rowspan="3">开关板 9U（U16–24）：上排开关和接触器，中排交流 / 直流采样板，下排继电器、24 V 电源、直流接触器、预充电电阻、端子</td></tr>
+              <tr><td class="num">19–21<span class="ug" style="--lo:19;--hi:21"></span></td><td>A 下桥臂</td></tr>
+              <tr><td class="num">16–18<span class="ug" style="--lo:16;--hi:18"></span></td><td>B 上桥臂</td></tr>
+              <tr><td class="num">13–15<span class="ug" style="--lo:13;--hi:15"></span></td><td>B 下桥臂</td><td>空</td></tr>
+              <tr><td class="num">10–12<span class="ug" style="--lo:10;--hi:12"></span></td><td>C 上桥臂</td><td rowspan="2">电抗器托板（U7–11）：6 个 5 mH / 20 A 电抗器</td></tr>
+              <tr><td class="num">7–9<span class="ug" style="--lo:7;--hi:9"></span></td><td>C 下桥臂</td></tr>
+              <tr><td class="num">4–6<span class="ug" style="--lo:4;--hi:6"></span></td><td class="full" colspan="3">ITECH 电网模拟器（参考型号 IT7912-350-90），整深 800 mm</td></tr>
+              <tr><td class="num">1–3<span class="ug" style="--lo:1;--hi:3"></span></td><td class="full" colspan="3">ITECH 双向直流电源（参考型号 IT6012C-800-50），整深 800 mm，约 30 kg</td></tr>
+              <tr><td class="num">底部</td><td class="full" colspan="3">PE 主接地排（后面最下面的横梁上）</td></tr>
+            </tbody>
+          </table>
+          <p class="caption">前面：光纤沿右前立柱，低压线沿左前立柱；后面：直流、交流功率线；中间：直流母排。调试时站在前面，碰不到高压线。</p>
+        </section>
+
+        <div class="skipped"><span id="ctrlboards"><b>04a</b>控制插箱板卡</span><span id="wiring"><b>04b</b>接线清单</span><span id="arm"><b>05</b>桥臂机箱</span><span id="sm"><b>06</b>子模块板</span><span id="sampling"><b>06b</b>采样点</span><span id="switchgear"><b>06d</b>开关板</span><span id="acboard"><b>06c</b>交流采样板</span><span id="ground"><b>06a</b>接地</span><span>效果图里略去</span></div>
+
+        <!-- 07 安全与待确认 -->
+        <section id="safe">
+          <div class="sec-h"><span class="no">07</span><h2>安全与待确认</h2></div>
+          <p>实验室做不用上工业那一套，但 <span class="hv-inline"><svg viewBox="0 0 16 16"><path d="M8 1.6 15 14.2H1z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M8.7 5.6 6.4 9.6h2l-.9 3 2.6-4.3h-2z" fill="currentColor"/></svg>700 V</span> 直流和子模块电容的储能还是要当回事。下面几条是最低限度。</p>
+          <ul class="points">
+            <li><svg class="mk-p" viewBox="0 0 14 14" aria-label="要做到"><path d="M7 1.5 13 12.3H1z" fill="none" stroke="var(--text-2)" stroke-width="1.5" stroke-linejoin="round"/><path d="M7 5.4v3.2" stroke="var(--text-2)" stroke-width="1.5" stroke-linecap="round"/><circle cx="7" cy="10.4" r=".75" fill="var(--text-2)"/></svg><div><b>急停</b>一个急停按钮装在开关板上，按下断交流接触器和直流侧。ITECH 电源自带的保护也打开。</div></li>
+            <li><svg class="mk-p" viewBox="0 0 14 14" aria-label="要做到"><path d="M7 1.5 13 12.3H1z" fill="none" stroke="var(--text-2)" stroke-width="1.5" stroke-linejoin="round"/><path d="M7 5.4v3.2" stroke="var(--text-2)" stroke-width="1.5" stroke-linecap="round"/><circle cx="7" cy="10.4" r=".75" fill="var(--text-2)"/></svg><div><b>子模块电容会带电</b>每个 SM 并泄放电阻，再加一个电压指示灯，灯灭了再动手。</div></li>
+            <li><svg class="mk-p" viewBox="0 0 14 14" aria-label="要做到"><path d="M7 1.5 13 12.3H1z" fill="none" stroke="var(--text-2)" stroke-width="1.5" stroke-linejoin="round"/><path d="M7 5.4v3.2" stroke="var(--text-2)" stroke-width="1.5" stroke-linecap="round"/><circle cx="7" cy="10.4" r=".75" fill="var(--text-2)"/></svg><div><b>交流电压的定义</b>本页按相电压 220 V、线电压 380 V 算。如果是线电压 220 V，需要重算调制比、电流和子模块数量。</div></li>
+            <li><svg class="mk-p" viewBox="0 0 14 14" aria-label="已核对"><circle cx="7" cy="7" r="6.3" fill="var(--st-done)"/><path d="m4 7.2 2 2 4-4.2" fill="none" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg><div><b>和控制插箱对得上</b>60 个 SM × 4 根 = 240 根光纤，每相 80 根，正好对应控制插箱三块相控板各 80 个口。</div></li>
+          </ul>
+        </section>
+
+        <footer class="foot">10kW 混合型 MMC 样机架 · 方案 v0.9（实验室版，双面机架） · 参数为估算值，器件与尺寸以仿真、手册和实物为准</footer>
+      </article>
+
+      <!-- 页边：批注按它批的字的高度排，靠得太近就往下错开 -->
+      <aside class="margin" id="margin" aria-label="页边批注">
+        <div class="margin-head" id="margin-head">
+          <div class="mh-title">页边批注</div>
+          <div class="mh-count"><b>2</b> 条未解决 <span class="g">· <b>1</b> 条已解决</span></div>
+          <div class="mh-how">按 <kbd>C</kbd> 进入批注模式，选中正文就能批</div>
+        </div>
+
+        <div class="note" id="n1" data-for="m1">
+          <div class="n-head">
+            <span class="av lead-av">B</span><span class="n-name">bob-test</span><span class="n-time">09-25 20:41</span>
+            <span class="n-no">1</span>
+            <button class="n-check" title="勾掉：标为已解决"><svg viewBox="0 0 14 14"><path d="m3 7.4 2.5 2.5L11 4.4" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+          </div>
+          <div class="n-body">冗余子模块放在哪一块板上？</div>
+          <div class="reply">
+            <div class="n-head"><span class="av me">G</span><span class="n-name">godcreator</span><span class="n-time">09-26 09:12</span></div>
+            <div class="n-body">10 块里留 1 块做冗余，程序里切换，60 块板都一样。</div>
+          </div>
+          <div class="n-acts"><button>回复</button><button>标为已解决</button></div>
+        </div>
+
+        <div class="note" id="n2" data-for="m2">
+          <div class="n-head">
+            <span class="av lead-av">C</span><span class="n-name">carol-test</span><span class="n-time">09-26 10:05</span>
+            <span class="n-no">2</span>
+            <button class="n-check" title="勾掉：标为已解决"><svg viewBox="0 0 14 14"><path d="m3 7.4 2.5 2.5L11 4.4" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+          </div>
+          <div class="n-body">20 A 不饱和要看磁芯型号，先别下单。</div>
+          <div class="n-acts"><button>回复</button><button>标为已解决</button></div>
+        </div>
+
+        <div class="note res" id="n3" data-for="m3">
+          <button class="fold-line" title="展开这条已解决的批注">
+            <span class="tick"><svg viewBox="0 0 14 14"><path d="m3 7.4 2.5 2.5L11 4.4" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+            <span class="av lead-av">B</span><span class="n-name">bob-test</span><span class="ft">风扇要不要单独供电？</span><span class="fs">展开</span>
+          </button>
+          <div class="full">
+            <div class="n-head">
+              <span class="tick"><svg viewBox="0 0 14 14"><path d="m3 7.4 2.5 2.5L11 4.4" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+              <span class="av lead-av">B</span><span class="n-name">bob-test</span><span class="n-time">09-24 15:30</span><span class="n-no" style="color:var(--st-res)">3</span>
+            </div>
+            <div class="n-body">风扇要不要单独供电？</div>
+            <div class="res-by">godcreator 于 09-25 标为已解决<button class="refold">收起</button><button>重新打开</button></div>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </main>
+</div>
+
+<script>
+(() => {
+  // 先排公式：分式会把表格行撑高，页边批注的位置要在这之后才算得准
+  document.querySelectorAll('[data-tex]').forEach(el => katex.render(el.dataset.tex, el, { throwOnError: true }));
+
+  const sheet = document.getElementById('sheet');
+  const text = document.getElementById('text');
+  const margin = document.getElementById('margin');
+  const marginHead = document.getElementById('margin-head');
+  const leaders = document.getElementById('leaders');
+  const notes = [...margin.querySelectorAll('.note')];
+  const NOTE_GAP = 16;
+
+  const visibleLeadAvatar = note => [...note.querySelectorAll('.lead-av')].find(el => el.offsetParent !== null);
+  const crisp = value => Math.round(value) + 0.5;
+
+  // 每条批注的头像中线对准被批的字的第一行中线；和上一条重叠就往下错开
+  function layoutMargin() {
+    const sheetBox = sheet.getBoundingClientRect();
+    const marginBox = margin.getBoundingClientRect();
+    const textRight = text.getBoundingClientRect().right - sheetBox.left;
+    let lowestFreeTop = marginHead.offsetTop + marginHead.offsetHeight + 24;
+
+    const anchoredNotes = notes.map(note => {
+      const mark = document.getElementById(note.dataset.for);
+      const lineRects = mark.getClientRects();
+      const avatar = visibleLeadAvatar(note);
+      const avatarCenterInNote = avatar.offsetTop + avatar.offsetHeight / 2;
+      const firstLine = lineRects[0];
+      const wantedTop = firstLine.top + firstLine.height / 2 - marginBox.top - avatarCenterInNote;
+      return { note, mark, lastLine: lineRects[lineRects.length - 1], wantedTop };
+    }).sort((a, b) => a.wantedTop - b.wantedTop);
+
+    let svg = '';
+    for (const item of anchoredNotes) {
+      const top = Math.round(Math.max(item.wantedTop, lowestFreeTop));
+      item.note.style.top = top + 'px';
+      lowestFreeTop = top + item.note.offsetHeight + NOTE_GAP;
+      svg += leaderPath(item, sheetBox, textRight);
+    }
+    leaders.innerHTML = svg;
+  }
+
+  // 引线：从高亮末端沿行下方（表格里沿这一行的下框线）走到正文右边，再接到批注头像
+  function leaderPath(item, sheetBox, textRight) {
+    const avatarBox = visibleLeadAvatar(item.note).getBoundingClientRect();
+    const endX = crisp(avatarBox.left - sheetBox.left - 4);
+    const endY = crisp(avatarBox.top + avatarBox.height / 2 - sheetBox.top);
+    const startX = crisp(item.lastLine.right - sheetBox.left);
+    const markBottom = item.lastLine.bottom - sheetBox.top;
+    const row = item.mark.closest('tr');
+    const runY = crisp(row ? row.getBoundingClientRect().bottom - sheetBox.top - 1 : markBottom + 1);
+    const bendX = crisp(textRight + 12);
+    const d = (row ? `M${startX} ${crisp(markBottom)} V${runY}` : `M${startX} ${runY}`) + ` H${bendX} L${endX} ${endY}`;
+    const cls = item.note.classList.contains('res') ? 'ld res' : 'ld';
+    return `<path class="${cls}" data-note="${item.note.id}" d="${d}"/>`;
+  }
+
+  function setHot(noteId, on) {
+    const note = document.getElementById(noteId);
+    note.classList.toggle('hot', on);
+    document.getElementById(note.dataset.for).classList.toggle('hot', on);
+    const path = leaders.querySelector(`path[data-note="${noteId}"]`);
+    if (path) path.classList.toggle('hot', on);
+  }
+
+  notes.forEach(note => {
+    note.addEventListener('mouseenter', () => setHot(note.id, true));
+    note.addEventListener('mouseleave', () => setHot(note.id, false));
+    const mark = document.getElementById(note.dataset.for);
+    mark.addEventListener('mouseenter', () => setHot(note.id, true));
+    mark.addEventListener('mouseleave', () => setHot(note.id, false));
+    mark.addEventListener('click', () => {
+      if (note.classList.contains('res') && !note.classList.contains('open')) toggleResolved(note);
+    });
+  });
+
+  function toggleResolved(note) {
+    note.classList.toggle('open');
+    layoutMargin();
+    setHot(note.id, note.matches(':hover'));
+  }
+  margin.querySelectorAll('.fold-line, .refold').forEach(btn =>
+    btn.addEventListener('click', () => toggleResolved(btn.closest('.note'))));
+
+  new ResizeObserver(layoutMargin).observe(text);
+  window.addEventListener('resize', layoutMargin);
+  document.fonts.ready.then(layoutMargin);
+  layoutMargin();
+
+  // 本页任务：点胶囊看详情
+  const taskDetails = {
+    t1: { title: '核算子模块电容纹波', state: ['done', '已完成'], owner: 'bob-test（测试成员）',
+          link: '第 01 节表格「子模块电容」一行：纹波按 ±10% 左右，最终用 PLECS 仿真定', when: '09-24 完成',
+          acts: ['重新打开', '去任务总览'] },
+    t2: { title: '确认 ITECH 电源输出有没有对地参考', state: ['doing', '进行中'], owner: 'carol-test（测试成员二）',
+          link: '第 06a 节「先查 ITECH 电源的输出接法」：已有对地参考就不再加高阻接地', when: '09-25 开始',
+          acts: ['标为已完成', '去任务总览'] },
+    t3: { title: '开关板 9U 安装板出图', state: ['todo', '待开始'], owner: 'godcreator（你）',
+          link: '第 04 节 U16–24 后面的开关板；第 06d 节开关板选型', when: '还没开始',
+          acts: ['开始做（改成进行中）', '去任务总览'] },
+  };
+  const tasks = document.getElementById('tasks');
+  const pop = document.getElementById('task-pop');
+  let openPill = null;
+
+  function closeTaskPop() {
+    pop.hidden = true;
+    if (openPill) openPill.setAttribute('aria-expanded', 'false');
+    openPill = null;
+  }
+  tasks.querySelectorAll('.pill').forEach(pill => pill.addEventListener('click', event => {
+    event.stopPropagation();
+    if (openPill === pill) { closeTaskPop(); return; }
+    closeTaskPop();
+    const t = taskDetails[pill.dataset.task];
+    pop.innerHTML = `<h4>${t.title}</h4><dl>
+      <dt>状态</dt><dd class="st-word ${t.state[0]}">${t.state[1]} · ${t.when}</dd>
+      <dt>负责</dt><dd>${t.owner}</dd>
+      <dt>关联正文</dt><dd>${t.link}</dd></dl>
+      <div class="acts">${t.acts.map(a => `<button>${a}</button>`).join('')}</div>`;
+    const left = Math.min(pill.offsetLeft, tasks.clientWidth - 360);
+    pop.style.left = Math.max(0, left) + 'px';
+    pop.hidden = false;
+    pill.setAttribute('aria-expanded', 'true');
+    openPill = pill;
+  }));
+  pop.addEventListener('click', event => event.stopPropagation());
+  document.addEventListener('click', closeTaskPop);
+
+  // 批注模式：C 进出，Esc 退出
+  const toggleCommenting = force => document.body.classList.toggle('commenting', force);
+  document.getElementById('cmode').addEventListener('click', () => toggleCommenting());
+  document.addEventListener('keydown', event => {
+    if (event.target.closest('input, textarea, [contenteditable]')) return;
+    if (event.key === 'Escape') { toggleCommenting(false); closeTaskPop(); return; }
+    if ((event.key === 'c' || event.key === 'C') && !event.ctrlKey && !event.metaKey && !event.altKey) toggleCommenting();
+  });
+
+  // 左侧导航固定展开
+  const rail = document.getElementById('rail');
+  document.getElementById('pin').addEventListener('click', () => rail.classList.toggle('open'));
+})();
+</script>
+</body>
+</html>

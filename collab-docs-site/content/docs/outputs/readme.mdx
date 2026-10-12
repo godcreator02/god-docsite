@@ -1,0 +1,24 @@
+---
+title: README
+description: 仓根 README.md 的正本，由 pnpm doc:render 生成
+---
+
+# 协作站
+
+**本页回答**：`collab-site` 是什么、文档在哪。
+
+## 是什么
+
+课题组协作站。一个项目是 Gitea 上的一个私有组织，组织里的协作仓 `site/` 是项目的站点，在每个成员自己的电脑上运行；成员在网页上写评论、看任务，任务与模块存在协作仓的 `collab/` 目录里，评论存在 `site/comments/` 里，都经 git 同步；组织里别的仓由人自己管，插件只取回并提醒。
+站点接在文档站基础包 `@godcreator/docsite-kit` 上，站点骨架、页面、评论、人员列表都是基础包的；站点由基础插件 gwb-docsite 初始化、运行开发服务。这两样在单元 `oz47p-docsite-kit` 的仓里，不在这里。
+仓里四个包：
+
+- 数据模型包 `@godcreator/collab-model`（`packages/collab-model/`）：全部数据模型，项目仓的布局与项目负责人、`collab/` 里任务与模块的文件格式、读出状态、写入规则与校验、我的待办，要人处理的事写成的通知与推给网站的数据
+- 功能包 `@godcreator/collab-site`（`packages/collab-site/`）：接在基础包上的协作站功能，任务页、任务与模块各自那一页、日历与日志页、顶部的提示栏、页面里引用任务的 `RecordLink`、路由调用的服务端函数和提交前的站点检查；照基础包的功能包约定交出路由、侧栏入口、布局数据与样式，站点骨架由基础包的模板写
+- 合并检查包 `@godcreator/collab-merge-check`（`packages/collab-merge-check/`）：协作仓合并请求的安全检查，执行器运行它的命令行 `collab-merge-check`
+- gwb 插件 `@godcreator/gwb-collab`（`plugins/collab/`）：协作仓的提交审核与自动同步，别的仓的取回与快进，Gitea 一有事件就经实时推送得知并去取那一处；站点交给 gwb-docsite 初始化，查过之后交给它运行；把两种仓要处理的事写成通知，推给网站顶部的提示栏，也交给协作窗格与 QQ 私聊，协作窗格里点「交给 AI 处理」时交给 ZCode 或 Claude Code
+
+## 文档
+
+`collab-docs-site/` 是文档站：`cd collab-docs-site && pnpm install && pnpm build && pnpm start`，打开 `http://127.0.0.1:4332`。
+这份 README 是生成物，正本是 `collab-docs-site/content/docs/outputs/readme.mdx`。

@@ -1,0 +1,30 @@
+---
+born-at: 2026-10-04T16:56
+type: choice
+parent: [2026-09-25-collab-site]
+label: git 状态追踪失败显示在窗格那一行，下一次检查重试
+domain: 站点状态
+---
+
+## 背景
+
+`ProjectFeeds.startTracking` 开始追踪失败（项目文件夹读不了，`fs.watch` 抛错）时只写一行日志就返回：不进 `tracked`、之后没人再调它，`feedOf` 永远回 null。由于站点状态 `SiteFeed` 的 `gitStatus` 还是 null 时整份都不交，网站收不到任何状态（连 attention 也一起没有），也没人看得见这件事——窗格每 15 秒现算一次 git 状态，一切显得正常。
+
+## 结论与边界
+
+- 失败原因记在 `ProjectFeeds`（`trackingErrorOf`），`collab.projects` 的回执每个项目多一项 `trackError`，窗格那一行的消息标签显示「没能追踪 git 状态」标红、悬停看原因——放进窗格而不是网站的提示栏
+- 下一次检查（`ProjectChecks.checkOne`）先调一次 `startTracking`：它对已经在追踪的项目不做任何事，失败过的就重试，重试成功清掉原因、开始交状态
+- 项目移出列表时忘掉原因
+
+## 否掉的候选
+
+- **交给网站的 attention（加一个键）**：`Attention` 的形状一动就要升站点协议号，所有已装 `site/` 的框架包跟着不匹配；而且 git 状态为 null 时整份 `SiteFeed` 都不交，把原因塞进 attention 也送不到网站上，还得改「git 状态没算出来先不交」的契约
+- **复用 `ProjectRow.error`（「打不开」那个标签）**：项目打得开、摘要算得出来，标签写「打不开」不对
+
+## 代价
+
+`collab.projects` 的回执多一个字段，窗格 client 与文档跟着改；实时推送一直没连上的项目没有「下一次检查」，追踪失败的原因只在窗格里看得见、不会自己恢复。
+
+## 依据
+
+无证据：行为由 `plugins/collab/tests/watch.test.ts`「git 状态追踪开始失败」与 `plugins/collab/tests/pane-headline.test.ts` 的「没能追踪 git 状态」标签钉住。

@@ -1,0 +1,27 @@
+# bob-test（只读）用 AGit 推含 LFS 文件的提交  2026-09-28T13:22
+# 环境：GCM_INTERACTIVE=never、GIT_TERMINAL_PROMPT=0，凭据助手是默认的 Git Credential Manager
+
+## git clone https://bob-test@git.tianshen02.online:28377/godcreator/lfs-probe.git bob
+Cloning into 'bob'...
+（成功：同一份凭据能读仓）
+
+## 写 200000 字节随机内容到 manual-a.pdf，git add，git commit --only manual-a.pdf -m "加手册 A（AGit）"
+## git lfs ls-files
+197da2d19c * manual-a.pdf
+
+## git push origin HEAD:refs/for/main -o topic=lfs-agit
+fatal: Cannot prompt because user interactivity has been disabled.
+fatal: could not read Password for 'https://bob-test@git.tianshen02.online:28377': terminal prompts disabled
+Remote "origin" does not support the Git LFS locking API. Consider disabling it with:
+  $ git config lfs.https://bob-test@git.tianshen02.online:28377/godcreator/lfs-probe.git/info/lfs.locksverify false
+fatal: Cannot prompt because user interactivity has been disabled.
+fatal: could not read Password for 'https://bob-test@git.tianshen02.online:28377': terminal prompts disabled
+Uploading LFS objects:   0% (0/1), 0 B | 0 B/s, done.
+batch response: Git credentials for https://bob-test@git.tianshen02.online:28377/godcreator/lfs-probe.git not found.
+error: failed to push some refs to 'https://git.tianshen02.online:28377/godcreator/lfs-probe.git'
+exit=1
+
+## cmdkey /list（推送之后）
+git:https://bob-test@git.tianshen02.online:28377 这一条不见了；carol-test 与 godcreator 的还在。
+LFS 接口对 bob 的凭据回 401，git-lfs 调 git credential reject，把凭据管理器里的这一条删掉了，
+再要凭据时交互被关掉，于是报 could not read Password。回 401 的是哪个接口见 03、04。

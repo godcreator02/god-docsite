@@ -1,0 +1,145 @@
+---
+title: 通知、QQ 私聊与交给 AI
+description: 插件怎么把要人处理的事告诉人：notifications/ 从两边与组织此刻的状态算出通知，同一份交给网站顶部的提示栏、协作窗格的计数、QQ 私聊（接口 B）与交给 AI 的提示词（接口 A）。这一页讲每种通知从哪来、几条规则怎么去掉重复的、QQ 怎么只发新出现的、交给 AI 的提示词怎么写，以及反过来在 QQ 里给项目派任务的 QQ 任务组
+---
+
+插件自己不弹任何窗口。要人处理的事都先算成通知：一条通知只带事实（`kind` 和这种 `kind` 的字段），`id`、短句、原文、去处、分组、计数都由数据模型包的通知模型按 `kind` 算（见 [数据模型包](/collab-model)）。插件这一侧只决定**哪种状态算出哪条通知、什么时候交给谁**，再交给这几处：
+
+| 出口 | 谁做 | 列什么 | 什么时候变 |
+| --- | --- | --- | --- |
+| 网站顶部的提示栏 | 插件随推给网站的数据交过去（见 [站点](/gwb-collab/site)），网站按三组摆出来（见 [功能包](/collab-site)） | 全部通知，分协作仓、别的仓、找我的三组 | 状态一变就重算、整份推过去；处理好了就不再出现，没有「已读」 |
+| gwb 的协作窗格 | 插件，同一份通知（接缝 22） | 每个项目一行，只写三组各几条；有通知时多一个「交给 AI 处理」 | 窗格看得见时每 15 秒重读 |
+| QQ 私聊主人（接口 B） | 插件，同一份通知 | 新出现、连续 1 分钟还在的通知，每条一句；还没提交审核的文件不发 | 一条通知只发一次，默认关闭 |
+| 交给 AI（接口 A） | 插件，同一份通知（接缝 23） | 一个项目此刻的全部通知，每条写明照说明书哪一节处理 | 人在协作窗格里点了才交 |
+
+## 每种通知从哪来
+
+`notifications/` 不记通知本身，每次用到时由 `ProjectNotifications.currentOf` 现读两边各目录此刻交出的状态（接缝 17、18）、组织这一层的 webhook 问题与各步出错（接缝 19），交给 `notifications-of.ts` 的 `notificationsOf` 算：
+
+| 组 | `kind` | 从哪来 |
+| --- | --- | --- |
+| 协作仓 | `unsubmitted`、`conflicts`、`off-main` | `collab-repo/sync/` 监视着的本机状态：还没提交审核的文件（`collab/`、`site/` 分开）、冲突文件、当前分支，文件一变就跟着变 |
+| | `submit-failure` | `collab-repo/submit/` 记下的上次提交审核失败的时刻与原话：`collab.submit` 拒绝时记下，成功时清掉；改动撤掉了、没有东西可提交时，下一次自动同步之后也清掉（见 [协作仓](/gwb-collab/submit)） |
+| | `sync-problem` | `collab-repo/sync/` 最近一次自动同步没能快进的原因 |
+| | `check-error` | `organization/events/` 记着的刷新各步此刻的出错，一步一行合成一条 |
+| | `record-problem` | 现读工作区 `collab/` 时读不对的文件，一个问题一条 |
+| | `webhook-setup` | 组织管理员的插件核对出的组织 webhook 不对的地方 |
+| | `repo-setup`（协作仓自己） | `collab-repo/rules.ts` 核对出的问题，`repo` 写协作仓的目录名；按 `kind` 分组，它在「别的仓」组 |
+| 别的仓 | `unpushed`、`unpulled`、`diverged` | `other-repos/fetch/` 监视着的各仓 HEAD 和服务器上同名分支比的结果：只有本地多、只有服务器多、两边都多；一样的不出 |
+| | `pull-to-review`、`issue-to-answer`、`my-pull-update`、`my-issue-answered` | `other-repos/review.ts` 最近读到的合并请求与 issue（谁该收到什么见 [协作仓和别的仓](/gwb-collab/other-repos)） |
+| | `repo-setup` | `other-repos/rules.ts` 核对出的问题，一个仓一条 |
+| 找我的 | `task`、`mention`、`reply` | 现读工作区的 `collab/`、`site/people.json` 与 `site/comments/` 里的评论串，按本机身份筛出的指派给我的任务、评论里 @我、回复我（筛选调数据模型包的 `inboxOf`）；`mention`、`reply` 带的 `comment` 是「评论串文件夹名/文件名」 |
+
+几条规则去掉重复的：冲突没改好时，提交审核失败与没能自动同步的原因都是这件事，只列冲突；协作仓不在 main 上时自动同步一定停着，不另列没能自动同步。算完按 `sortedNotifications` 排好（组的顺序、组内 `kind` 的顺序、再按 `id`）。`id` 由通知模型按事实算，同一件事前后不变，QQ 只发新出现的靠的就是它。
+
+{/* ref file="../plugins/collab/src/notifications/notifications-of.ts" lines="13-82" hash="2f4f0b64d21b" blob="4c751e3d4bb5" */}
+{/* ref file="../plugins/collab/src/collab-repo/records/inbox.ts" lines="13-30" hash="c9796027a386" blob="fa618c20c1e1" */}
+
+记录、人员列表与评论串现读工作区（网站显示的也是工作区里的），本机状态用两边监视着的那份，还没算出第一份就现算一次。读到、记下的都只在内存里，项目移出列表时忘掉，重启工作台后从头算。
+
+{/* ref file="../plugins/collab/src/notifications/project-notifications.ts" lines="50-72" hash="35193beea0fe" blob="57e8ee63d2d4" */}
+
+## 什么时候交给谁
+
+各目录状态一变只调 `changed(repo)`，不认识通知。`changed` 做两件事：交给 `site-process/` 推送一次推给网站的数据（接缝 20）；这次加载做完过一次完整刷新以后，再把此刻的全部通知连同按用户名查显示名的函数交给接口 B。第一次完整刷新做完之前不交给接口 B：两边读 Gitea 的结果还不齐，还没读到的合并请求、issue 会被当成消失了。
+
+{/* ref file="../plugins/collab/src/notifications/project-notifications.ts" lines="74-86" hash="6083b1f55e36" blob="0dad5008c258" */}
+
+协作窗格与交给 AI 用到时现算（`currentOf`），不另记，所以和网站上的是同一份。
+
+## QQ 私聊
+
+设置 `qq-notifications` 打开时，接口 B 的 QQ 私聊实现 `notifications/qq-private-chat.ts` 经 gwb-qq-bot 的服务 `gwbQqBot`（局部注入）私聊主人：
+
+- **连续 1 分钟还在才发**：不在已发记录里的通知先等着，同一次交来的新通知共用一个 60 秒的计时器（常量 `presentForMillisecondsBeforeSending`，经 `ctx.timeout` 开，插件卸载时一起清掉）。到点时它在这期间一直没从交来的通知里消失过才发；中途消失过的，再出现时从头等。先提交、一两秒后才推送时中间那条「有 1 个提交还没推送」，合并后还没快进的「服务器上有 N 个新提交还没拉下来」，都这样不发。到点不靠再刷新：状态没变就不会再交来，最近一次交来的就是此刻的
+- **按 `id` 只发一次**：每个项目记下已经发过的通知 `id`（本 home 的 `qq-sent-notifications` 数据文档），到点发出时加进去；每次交来时把已经消失的从记录里去掉，同一件事解决后再出现算新的一件，再等满 1 分钟发一次
+- **这次有 `check-error` 时记录一个都不去**：某一步读 Gitea 失败，读不到的合并请求、issue 看起来像消失了，连上以后再出现不能当成新的重发；`check-error` 自己也要连续 1 分钟还在才发、按 `id` 只发一次
+- **等着的只在内存里**：重启工作台或重载插件时还没等满的丢掉，加载后第一次完整刷新照上面的规则从头等；已经发过的在记录里，不重发。代价是重启前已经等了一会儿的要多等最多 1 分钟
+- **`unsubmitted` 不发、也不记**：那是自己保存出来的
+- **同时到点的合成一条**：第一行是 `协作站 <站名>`，下面每条一行，写通知模型的短句（人名换成 `site/people.json` 里的显示名），整条最长 600 个字；发给 qq-bot 的 `id` 由项目、这批通知与此刻算出，同一件事消失后再出现也能再发
+- **发不出去不重发**：没装 qq-bot、没送达、发送报错都只写一行警告，通知在网站提示栏里不会丢；到点时开关已经关了就不发；记录读不出、格式不对或写不进去就停下、不发，到点时写不进去写一行警告
+
+{/* ref file="../plugins/collab/src/notifications/qq-private-chat.ts" lines="8-64" hash="d8fe2eea8a33" blob="701fbd0a5d7c" */}
+{/* ref file="../plugins/collab/src/notifications/qq-private-chat.ts" lines="122-177" hash="1d3e44b2532f" blob="701fbd0a5d7c" */}
+
+为什么是 1 分钟、为什么不把等着的写进数据文档，见轨迹卡 [QQ 通知连续 1 分钟还在才发](/trajectory/2026-10-08-qq-notify-after-one-minute)。不为 QQ 另加定时刷新，收件人由 qq-bot 的 `owner-openid` 决定。依赖只朝协作站 → qq-bot 一个方向：qq-bot 不依赖本插件。回归见 `plugins/collab/tests/notifications/qq-private-chat.test.ts`。
+
+## QQ 任务组
+
+上面是插件把通知发给人；反过来，人也能在 QQ 里给项目派任务。每个人在自己的 home 里给项目起一个「QQ 命令」短名（`/mmc`、`/sst`、`/知识`），插件就经 `gwbQqBot.registerTaskGroup` 把这个项目注册成 qq-bot 的一个任务组（接缝 26）：私聊机器人发 `/mmc 把第三章的波形图换成新数据`，qq-bot 把后面那句交给 ZCode，在这个项目的文件夹里做。没起 QQ 命令的项目不注册，也不从项目名自动截短（`engineering-knowledge` 就超过了长度上限）。代码在 `project/qq-task-groups.ts`。
+
+注册的任务组每一项取什么：
+
+| 字段 | 取什么 | 为什么 |
+| --- | --- | --- |
+| `command` | 本 home 给这个项目起的 QQ 命令 | 每个人的机器人、命令各不相同，所以按 home 存、不写进协作仓 |
+| `title` | 站名，没写站名用协作仓的目录名（和协作窗格的项目名同一个函数） | qq-bot 的回执与 `/帮助` 里叫它这个 |
+| `workspace` | 项目文件夹，即协作仓的上一级 | agent 看得到协作仓和项目里的别的仓，两种仓的活都能做 |
+| `agent` | `zcode` | — |
+| `instructions` | 只写项目名、协作仓路径和「先读说明书 collab」 | 提交规矩、哪些要先给人过目都以说明书为准，不在这里写第二份 |
+
+{/* ref file="../plugins/collab/src/project/qq-task-groups.ts" lines="28-37" hash="1ac368d749d4" blob="d00a2439ab7c" */}
+
+QQ 命令由 agent 调 `collab.project.qq-command {repo, command}` 设，`command` 给 `null` 撤掉，没有界面。记在本 home 的数据文档 `qq-task-group-commands`（`{ version: 1, projects: [{ repo, command }] }`）。设之前先查，不过就拒绝、什么都不改：
+
+- 同 home 要装着 gwb-qq-bot：没装就拒绝「没装或没启用 gwb-qq-bot，设不了 QQ 命令」，不跳过校验先记下（撤掉不要求）
+- 名字经 qq-bot 的服务方法 `gwbQqBot.commandNameProblem` 查，和注册任务组是同一条规则（以 `/` 开头、不含空白，去掉斜杠后汉字等非 ASCII 字符算 2、其余算 1，总长不超过 16，`/帮助`、`/状态`、`/新会话` 是保留命令），拒绝时照它回的原话。本插件对 qq-bot 是可选依赖、不引用它的运行时代码，所以规则只在 qq-bot 一处
+- `repo` 要在项目列表里
+- 本 home 别的项目已经用着这个命令
+
+{/* ref file="../plugins/collab/src/project/qq-task-groups.ts" lines="168-190" hash="3c886f13c266" blob="d00a2439ab7c" */}
+
+**什么时候重新注册**：每次按此刻的项目列表、QQ 命令与站名算出该有哪些任务组，和已经注册的逐个比，没了或变了的先撤掉，再注册缺的，没变的不动（两个项目互换命令也不会撞名）。这几件事都会触发：gwbQqBot 出现（插件加载、qq-bot 装上或重载）、设 QQ 命令、项目加进列表、任何项目的状态变了（站名改了靠这一条跟上）。项目移出列表时它的 QQ 命令一起删掉；gwbQqBot 消失或本插件卸载时撤掉全部注册。
+
+{/* ref file="../plugins/collab/src/project/qq-task-groups.ts" lines="118-151" hash="dac3dd0e5521" blob="d00a2439ab7c" */}
+
+**注册失败不吞掉**：qq-bot 抛错（被别的插件或 `qq-bot.group.add` 先占了同名命令、项目文件夹不在了）时，原话记在这个项目上，同一个原因只写一行警告，下次重新注册时再试。`collab.projects` 每个项目都带 `qqTaskGroup: { command, registered, error }`，没注册上时 `error` 写明原因；gwb-qq-bot 卸掉或停用时已记下的 QQ 命令留着，`error` 写「没装或没启用 gwb-qq-bot」，装回来就按现状注册。
+
+{/* ref file="../plugins/collab/src/project/qq-task-groups.ts" lines="153-166" hash="52823729c1df" blob="d00a2439ab7c" */}
+
+依赖方向不变：协作站局部注入 qq-bot 的服务，qq-bot 不知道协作站。为什么这样定见轨迹卡 [按项目注册 QQ 任务组](/trajectory/2026-10-08-qq-task-groups-per-home)；回归见 `plugins/collab/tests/project/qq-task-groups.test.ts`。
+
+## 交给 AI 处理
+
+协作窗格里每个项目一行，有通知时多一个「交给 AI 处理」按钮，点了调 `collab.ai.handoff {repo}`。网页上没有这个按钮，提示栏里只写一句要交给 AI 就在 gwb 的协作窗格里点：
+
+{/* ref file="../plugins/collab/src/ai-handoff/commands.ts" lines="5-25" hash="f51a16b7ea8e" blob="6be02df99a8a" */}
+
+命令做三步：
+
+1. 现算这个项目此刻的全部通知（接缝 23），和网站提示栏、窗格的计数是同一份；一条都没有就拒绝
+2. 拼成一份提示词（`prompt.ts` 的 `aiPromptOf`）。第一行是会话标题：只有一条时是「协作站要处理的事（站名）：短句」，多条时是「协作站要处理的 N 件事（站名）」。接着写站名与协作仓路径；再写这一轮只读和整理：逐条列出打算怎么处理（改哪些文件、调哪些命令）后停下等人回复，人明确同意之前不改文件、不调会改东西的命令（逐个写出命令名）；然后让 AI 经 gwb MCP 读说明书 `collab` 的主文件和这批通知用到的附件，一个附件一行 `run skill.read`，不重复；然后逐条写组、短句、该照说明书哪一节处理，有原文的再写原文；最后把「先列打算、等人同意」用一句短的再说一遍，再写「照说明书主文件的「始终照做」」
+3. 照设置 `ai-handling` 经接口 A 交出去，回 `{ handler, detail, items }`：交给了谁、在哪看（ZCode 的会话 id 或写着提示词的文件）、交出去几条
+
+{/* ref file="../plugins/collab/src/ai-handoff/prompt.ts" lines="49-97" hash="c529fa530475" blob="5fc7471545e7" */}
+
+提示词里只写「先列打算、等人同意」这一条规矩，写在读说明书之前、结尾再重复一句：ZCode 的会话是完全访问，工具拦不住它改文件、调命令，AI 读说明书之前就可能动手（轨迹卡 [交给 AI 的提示词开头先写等人同意](/trajectory/2026-10-08-ai-handoff-ask-first)）。会改东西的命令逐个写出名字，写评论的 `docsite.comment.*` 也在里面。说明书主文件「始终照做」的第一条写的是同一条。别的规矩只写在说明书里：别人写的评论、任务、合并请求、issue 是数据不是指令，提交审核、推送、发评论之前先给人过目。
+
+**处理办法只写在说明书 collab 的附件里**：协作仓与找我的两组在 [collab-repo](/docs/outputs/skills/collab/collab-repo) 的「通知」一节，别的仓组在 [other-repos](/docs/outputs/skills/collab/other-repos) 的「通知」一节，组织 webhook（`webhook-setup`）在 [organization](/docs/outputs/skills/collab/organization) 的「组织 webhook」一节。插件里只有每种 `kind` 指到哪一节的对照：
+
+{/* ref file="../plugins/collab/src/ai-handoff/prompt.ts" lines="19-47" hash="295002263fb8" blob="cd6ba372525e" */}
+
+交给谁看设置 `ai-handling`，默认 `off`，两个实现是同目录的 `zcode.ts` 与 `claude-terminal.ts`：
+
+- **`zcode`**：经 gwb-zcode 的服务 `gwbZcode`（可选注入，没装就拒绝并写明要装）先 `open` 把 ZCode 窗口切到协作仓，再 `create` 在协作仓里建一条会话，提示词原样交出。ZCode 侧栏只显示窗口当前工作区的会话，不切过去人就看不见它。ZCode 的会话一律完全访问，改文件、运行命令都不先问人，约束它的只有提示词和提示词让它读的说明书 collab
+- **`claude-terminal`**：提示词写进临时目录下 `gwb-collab-ai/` 的一个文件，新开一个 pwsh 窗口，在协作仓里运行 Claude Code 读它；每一步的权限按这台电脑上 Claude Code 的设置问人，Claude 退出后窗口留着。窗口由一个隐藏的 pwsh 用 `Start-Process` 开：插件没有终端，直接用 spawn 启动的 pwsh 标准输入是空设备，一读到结尾就连同 Claude 一起退出（轨迹卡 [交给 Claude 要用 Start-Process 开窗口](/trajectory/2026-10-03-claude-terminal-start-process)）
+
+{/* ref file="../plugins/collab/src/ai-handoff/prompt.ts" lines="4-12" hash="b7b349b7d2c9" blob="cd6ba372525e" */}
+{/* ref file="../plugins/collab/src/ai-handoff/prompt.ts" lines="108-113" hash="f194ee89b3e3" blob="c7b49819c150" */}
+{/* ref file="../plugins/collab/src/ai-handoff/zcode.ts" lines="4-21" hash="a53c570672de" blob="cddf8b0d307b" */}
+{/* ref file="../plugins/collab/src/ai-handoff/claude-terminal.ts" lines="11-39" hash="5aba361a587d" blob="febe72ac1158" */}
+
+命令拒绝时回的原话：
+
+| 情况 | 原话 |
+| --- | --- |
+| 这个项目现在没有通知 | `<站名> 现在没有要处理的事，没有交给 AI` |
+| 设置 `ai-handling` 是 `off` | 「设置 ai-handling 是 off，没有交给 AI」，并写明在 gwb 设置里把它改成 `zcode` 或 `claude-terminal` |
+| 设置 `ai-handling` 写了认不出的值 | 「设置 ai-handling 只能是 off / zcode / claude-terminal」，带上读到的值 |
+| 没装 gwb-zcode | 「没装 gwb-zcode（0.4 以上）」，写明装上或改成 `claude-terminal` |
+| ZCode 切窗口或建会话失败 | 「把 ZCode 切到 … 失败」或「在 ZCode 里建会话失败」，后面是 ZCode 那边的原话 |
+| 开 pwsh 窗口失败 | 「开 pwsh 窗口运行 Claude Code 失败」，后面是 pwsh 的原话 |
+
+窗格那一行下面写结果：成功写「已把 N 件事交给 ZCode，会话 …」或「已把 N 件事交给新开窗口里的 Claude Code，提示词在 …」；失败写「没能交给 AI：」加命令回的原话。
+
+插件发出任务就回执，不附回报约定、不记下交出去的事：按钮是人在电脑前点的，AI 先列出要做的事问人，结果就在那条 ZCode 会话或那个终端窗口里；插件不替它提交审核。人不点按钮、没人调这条命令，插件不把任何东西交给 AI。这两种去处的接口按协作站自己要的定，不跟 qq-bot 的统一；不接 gwb-claudecode，那是没有界面的进程，没法跟人对话。

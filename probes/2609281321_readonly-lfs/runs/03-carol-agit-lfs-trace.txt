@@ -1,0 +1,64 @@
+# carol-test（只读）用 AGit 推含 LFS 文件的提交，GIT_TRACE=1，凭据助手只读不删
+# 命令：git push origin HEAD:refs/for/main -o topic=lfs-agit-c
+# 只截到第一次重试；之后是同样的 401 → reject → fill 循环，约 3 分钟后手动停掉，退出前没有新的内容
+
+13:23:49.854282 exec-cmd.c:266          trace: resolved executable dir: C:/Program Files/Git/mingw64/bin
+13:23:49.866058 git.c:502               trace: built-in: git push origin HEAD:refs/for/main -o topic=lfs-agit-c
+13:23:49.869064 run-command.c:674       trace: run_command: GIT_DIR=.git git remote-https origin https://carol-test@git.tianshen02.online:28377/godcreator/lfs-probe.git
+13:23:49.869064 run-command.c:935       trace: start_command: git remote-https origin https://carol-test@git.tianshen02.online:28377/godcreator/lfs-probe.git
+13:23:49.882436 exec-cmd.c:266          trace: resolved executable dir: C:/Program Files/Git/mingw64/libexec/git-core
+13:23:49.887351 git.c:809               trace: exec: git-remote-https origin https://carol-test@git.tianshen02.online:28377/godcreator/lfs-probe.git
+13:23:49.887351 run-command.c:674       trace: run_command: git-remote-https origin https://carol-test@git.tianshen02.online:28377/godcreator/lfs-probe.git
+13:23:49.887351 run-command.c:935       trace: start_command: git-remote-https origin https://carol-test@git.tianshen02.online:28377/godcreator/lfs-probe.git
+13:23:49.903390 exec-cmd.c:266          trace: resolved executable dir: C:/Program Files/Git/mingw64/libexec/git-core
+13:23:49.986925 run-command.c:674       trace: run_command: 'f() { test "$1" = get && git credential-manager get; }; f get'
+13:23:49.987449 run-command.c:935       trace: start_command: 'C:/Program Files/Git/usr/bin/sh.exe' -c 'f() { test "$1" = get && git credential-manager get; }; f get' 'f() { test "$1" = get && git credential-manager get; }; f get'
+13:23:50.078523 exec-cmd.c:266          trace: resolved executable dir: C:/Program Files/Git/mingw64/libexec/git-core
+13:23:50.086316 git.c:809               trace: exec: git-credential-manager get
+13:23:50.086316 run-command.c:674       trace: run_command: git-credential-manager get
+13:23:50.086316 run-command.c:935       trace: start_command: git-credential-manager get
+13:23:50.199615 exec-cmd.c:266          trace: resolved executable dir: C:/Program Files/Git/mingw64/libexec/git-core
+13:23:50.205154 git.c:502               trace: built-in: git config --null --list
+13:23:50.363908 run-command.c:674       trace: run_command: 'f() { test "$1" = get && git credential-manager get; }; f store'
+13:23:50.365413 run-command.c:935       trace: start_command: 'C:/Program Files/Git/usr/bin/sh.exe' -c 'f() { test "$1" = get && git credential-manager get; }; f store' 'f() { test "$1" = get && git credential-manager get; }; f store'
+13:23:50.401282 run-command.c:674       trace: run_command: .git/hooks/pre-push origin https://carol-test@git.tianshen02.online:28377/godcreator/lfs-probe.git
+13:23:50.401282 run-command.c:935       trace: start_command: .git/hooks/pre-push origin https://carol-test@git.tianshen02.online:28377/godcreator/lfs-probe.git
+13:23:50.479554 exec-cmd.c:266          trace: resolved executable dir: C:/Program Files/Git/mingw64/libexec/git-core
+13:23:50.485899 git.c:809               trace: exec: git-lfs pre-push origin https://carol-test@git.tianshen02.online:28377/godcreator/lfs-probe.git
+13:23:50.485899 run-command.c:674       trace: run_command: git-lfs pre-push origin https://carol-test@git.tianshen02.online:28377/godcreator/lfs-probe.git
+13:23:50.485899 run-command.c:935       trace: start_command: git-lfs pre-push origin https://carol-test@git.tianshen02.online:28377/godcreator/lfs-probe.git
+13:23:50.642520 trace git-lfs: exec: git '-c' 'filter.lfs.smudge=' '-c' 'filter.lfs.clean=' '-c' 'filter.lfs.process=' '-c' 'filter.lfs.required=false' 'remote' '-v'
+13:23:50.669097 trace git-lfs: exec: git '-c' 'filter.lfs.smudge=' '-c' 'filter.lfs.clean=' '-c' 'filter.lfs.process=' '-c' 'filter.lfs.required=false' 'remote'
+13:23:50.693359 trace git-lfs: exec: git '-c' 'filter.lfs.smudge=' '-c' 'filter.lfs.clean=' '-c' 'filter.lfs.process=' '-c' 'filter.lfs.required=false' 'rev-parse' 'HEAD' '--symbolic-full-name' 'HEAD'
+13:23:50.722755 trace git-lfs: exec: git '-c' 'filter.lfs.smudge=' '-c' 'filter.lfs.clean=' '-c' 'filter.lfs.process=' '-c' 'filter.lfs.required=false' 'rev-parse' '--git-dir' '--show-toplevel'
+13:23:50.747432 trace git-lfs: exec: git 'config' '--includes' '-l'
+13:23:50.777691 trace git-lfs: exec: git 'rev-parse' '--is-bare-repository'
+13:23:50.806136 trace git-lfs: exec: git 'config' '--includes' '-l' '--blob' ':.lfsconfig'
+13:23:50.837528 trace git-lfs: exec: git 'config' '--includes' '-l' '--blob' 'HEAD:.lfsconfig'
+13:23:50.867893 trace git-lfs: exec: git '-c' 'filter.lfs.smudge=' '-c' 'filter.lfs.clean=' '-c' 'filter.lfs.process=' '-c' 'filter.lfs.required=false' 'rev-parse' '--git-dir'
+13:23:50.889894 trace git-lfs: exec: git '-c' 'filter.lfs.smudge=' '-c' 'filter.lfs.clean=' '-c' 'filter.lfs.process=' '-c' 'filter.lfs.required=false' 'remote'
+13:23:50.913631 trace git-lfs: pre-push: HEAD 4259c33bdc9e4f2215bebdf5b34b5cfa11f6ac76 refs/for/main 0000000000000000000000000000000000000000
+13:23:50.914148 trace git-lfs: exec: git '-c' 'filter.lfs.smudge=' '-c' 'filter.lfs.clean=' '-c' 'filter.lfs.process=' '-c' 'filter.lfs.required=false' 'show-ref'
+13:23:50.941625 trace git-lfs: exec: git '-c' 'filter.lfs.smudge=' '-c' 'filter.lfs.clean=' '-c' 'filter.lfs.process=' '-c' 'filter.lfs.required=false' 'ls-remote' '--heads' '-q' 'origin'
+13:23:51.450751 trace git-lfs: creds: git credential fill ("https", "git.tianshen02.online:28377", "")
+13:23:51.451313 trace git-lfs: exec: git 'credential' 'fill'
+13:23:51.763144 trace git-lfs: Filled credentials for https://carol-test@git.tianshen02.online:28377/godcreator/lfs-probe.git
+13:23:51.763144 trace git-lfs: HTTP: POST https://carol-test@git.tianshen02.online:28377/godcreator/lfs-probe.git/info/lfs/locks/verify
+13:23:51.828905 trace git-lfs: HTTP: 401
+13:23:51.828905 trace git-lfs: HTTP: {"message":"You must have push access to verify locks"}
+13:23:51.829929 trace git-lfs: exec: git 'credential' 'reject'
+13:23:51.888264 trace git-lfs: api: http response indicates "basic" authentication. Resubmitting...
+13:23:51.888264 trace git-lfs: creds: git credential fill ("https", "git.tianshen02.online:28377", "")
+13:23:51.888776 trace git-lfs: exec: git 'credential' 'fill'
+13:23:52.209914 trace git-lfs: Filled credentials for https://carol-test@git.tianshen02.online:28377/godcreator/lfs-probe.git
+13:23:52.209914 trace git-lfs: HTTP: POST https://carol-test@git.tianshen02.online:28377/godcreator/lfs-probe.git/info/lfs/locks/verify
+13:23:52.220741 trace git-lfs: HTTP: 401
+13:23:52.220741 trace git-lfs: HTTP: {"message":"You must have push access to verify locks"}
+13:23:52.221404 trace git-lfs: exec: git 'credential' 'reject'
+13:23:52.275406 trace git-lfs: api: http response indicates "basic" authentication. Resubmitting...
+13:23:52.275406 trace git-lfs: creds: git credential fill ("https", "git.tianshen02.online:28377", "")
+13:23:52.275406 trace git-lfs: exec: git 'credential' 'fill'
+13:23:52.627244 trace git-lfs: Filled credentials for https://carol-test@git.tianshen02.online:28377/godcreator/lfs-probe.git
+13:23:52.627244 trace git-lfs: HTTP: POST https://carol-test@git.tianshen02.online:28377/godcreator/lfs-probe.git/info/lfs/locks/verify
+13:23:52.639936 trace git-lfs: HTTP: 401
+13:23:52.639936 trace git-lfs: HTTP: {"message":"You must have push access to verify locks"}

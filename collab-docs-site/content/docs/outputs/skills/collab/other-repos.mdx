@@ -1,0 +1,34 @@
+---
+title: 附件：别的仓（other-repos）
+description: 说明书 collab 的附件 references/other-repos.md 的正本：项目里协作仓以外的仓怎么提合并请求、更新、审阅与合并、回 issue，配仓（两种仓的规矩），以及「别的仓」组通知怎么处理
+---
+
+# 别的仓
+
+## 约定
+
+- **按普通 git 仓管理**：插件只取回、监视 HEAD；更新、合并由你调命令做。在这些仓里推送用 Windows 凭据管理器里的登录
+- **负责人**是这个仓在 Gitea 上的协作者（`gitea.http` 读 `GET /repos/<主人>/<仓>/collaborators`）。`main` 只有负责人能推、能合并：负责人改自己的仓直接推 `main`，别人推分支、开合并请求
+- **提合并请求**：在 `main` 上 `git pull --ff-only`，开一条分支改，提交后 `git push -u origin <分支>`，再经 `gitea.http` `POST /repos/<主人>/<仓>/pulls`（`{"head":"<分支>","base":"main","title":"<标题>"}`）。推送前先过目；合并以后切回 `main` 再 `git pull --ff-only`，问人删不删那条分支
+- **更新**：`collab.repos.update {repo, name}` 只做快进；它拒绝时（不在 `main`、本地有没推上去的提交、改动和新改动碰到同一个文件）把原话报给人
+- **配仓**：`collab.repo.setup {repo, name, leads?}`，协作仓也用它（`name` 写协作仓的文件夹名）。别的仓 `main` 的推送与合并只许负责人；协作仓 `main` 谁都不能直接推、只许团队 `bots` 合并；都不许强制推送，合并方式只留「合并提交」与「仅快进」。先过目，要这个仓的管理员来调。换负责人也用它，`leads` 写配完以后的全部负责人
+- **建仓**：`collab.repo.create {repo, name, description?}`，建好照上面的规矩配好、克隆进项目文件夹
+
+## 通知
+
+| 通知 | 怎么做 | 什么时候消失 |
+| --- | --- | --- |
+| X 有 N 个提交还没推送 | 在那个仓里 `git log` 查清是哪些，报给人：要不要推、推成合并请求没有 | 推上去以后 |
+| X 服务器上有 N 个新提交还没拉下来 | 在 `main` 上就 `collab.repos.update`；在别的分支上报给人 | 快进以后 |
+| X 和服务器分叉了 | 报给人两边各是哪些提交，问人怎么合 | 合好推上去以后 |
+| X #N「…」等你审阅 | 读改动整理给人，问合不合并；人同意后经 `gitea.http` `POST /repos/<主人>/<仓>/pulls/<N>/merge`（`{"Do":"merge"}`），再在那个仓更新 | 合并或关闭以后 |
+| X 的 issue #N「…」等负责人回 | 读 issue 与评论整理给人；回复先过目，人确认原文后经 `gitea.http` `POST …/issues/<N>/comments` 发出 | 任何一位负责人回复以后 |
+| Y 要你改 X #N（你开的合并请求） | 读审阅与评论（`GET …/pulls/<N>/reviews`、`…/issues/<N>/comments`），整理要改什么；在那条分支上改，先过目再推 | 审阅人改成批准以后，你回复不算 |
+| Y 评论了 X #N（你开的合并请求） | 读评论整理给人；回复先过目再发 | 你回复以后 |
+| Y 回了 X 的 issue #N（你提的） | 把回复整理给人；要回就先过目再发；关不关由人定 | 你回复以后 |
+| X 没按规矩配好 | 把原因报给人，问这个仓的负责人是谁，再 `collab.repo.setup` | 配好以后 |
+
+## 容易踩的坑
+
+- 审阅被撤销、在 Gitea 网页上直接改协作者，这两样 Gitea 不推送：人说做过了就调 `collab.check`。换负责人一律用 `collab.repo.setup`，它会通知别人的插件
+- 建仓报 Gitea 回 403、缺 `write:organization`：令牌没勾全权限，见 `references/organization.md` 的「加入项目」

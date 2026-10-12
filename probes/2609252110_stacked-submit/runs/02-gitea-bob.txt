@@ -1,0 +1,88 @@
+== B1：bob 克隆，在自己的工作分支上写 c9，提交并推到固定主题 bob-stack ==
+$ git clone -q https://bob-test@git.tianshen02.online:28377/godcreator/agit-probe.git bob
+$ git switch -c bob/记录
+  Switched to a new branch 'bob/记录'
+$ git add collab/bob.jsonl
+$ git commit -m "bob：c9"
+  [bob/记录 9136557] bob：c9
+   1 file changed, 1 insertion(+)
+   create mode 100644 collab/bob.jsonl
+$ git push origin HEAD:refs/for/main -o topic=bob-stack -o title="bob 的批注"
+  remote: 
+  remote: Visit the existing pull request:        
+  remote:   https://git.tianshen02.online:28377/godcreator/agit-probe/pulls/4        
+  remote: 
+  To https://git.tianshen02.online:28377/godcreator/agit-probe.git
+   * [new reference]   HEAD -> refs/pull/4/head
+$ git log --oneline -3
+  9136557 bob：c9
+  8f6fa50 Merge pull request 'carol：10 月先做 F28377D' (#2) from carol-test/october-tests into main
+  3080c6d 10 月：先做 F28377D
+
+== B2：#4 还没合并，bob 接着写 c10，提交在同一条分支上，推同一个主题 ==
+$ git commit -am "bob：c10"
+  [bob/记录 ba0f8d3] bob：c10
+   1 file changed, 1 insertion(+)
+$ git push origin HEAD:refs/for/main -o topic=bob-stack
+  remote: 
+  remote: Visit the existing pull request:        
+  remote:   https://git.tianshen02.online:28377/godcreator/agit-probe/pulls/4        
+  remote: 
+  To https://git.tianshen02.online:28377/godcreator/agit-probe.git
+     9136557..ba0f8d3  HEAD -> refs/pull/4/head
+
+==（机器人经 API 合并 #4：POST /pulls/4/merge {Do: merge} → 200）==
+
+== B3：#4 已合并，bob 没同步，接着写 c11，推同一个主题 bob-stack ==
+$ git commit -am "bob：c11"
+  [bob/记录 8b56430] bob：c11
+   1 file changed, 1 insertion(+)
+$ git push origin HEAD:refs/for/main -o topic=bob-stack
+  remote: 
+  remote: Visit the existing pull request:        
+  remote:   https://git.tianshen02.online:28377/godcreator/agit-probe/pulls/5        
+  remote: 
+  To https://git.tianshen02.online:28377/godcreator/agit-probe.git
+   * [new reference]   HEAD -> refs/pull/5/head
+
+==（Gitea 新建了 #5；GET /pulls/5.diff：相对 main 只加了 c11 一行）==
+
+== B4：bob 同步：把 main 合进自己的工作分支 ==
+$ git fetch -q origin
+$ git merge origin/main -m "同步 main"
+  Merge made by the 'ort' strategy.
+$ git log --graph --oneline -8
+  *   aa6cbf2 同步 main
+  |\  
+  | *   c8ff566 Merge pull request 'bob 的批注' (#4) from bob-test/bob-stack into main
+  | |\  
+  * | | 8b56430 bob：c11
+  | |/  
+  |/|   
+  * | ba0f8d3 bob：c10
+  * | 9136557 bob：c9
+  |/  
+  *   8f6fa50 Merge pull request 'carol：10 月先做 F28377D' (#2) from carol-test/october-tests into main
+  |\  
+  | * 3080c6d 10 月：先做 F28377D
+  |/  
+  *   de56eb9 Merge pull request 'bob：10 月选型定为 F28P65' (#1) from bob-test/edit-october into main
+  |\  
+$ Get-Content collab/bob.jsonl
+  {"id":"c9","status":"open"}
+  {"id":"c10","status":"open"}
+  {"id":"c11","status":"open"}
+
+==（admin 在 #5 上留言「c11 说得不对，改一下再提」，PATCH /pulls/5 {state: closed} → 关闭）==
+
+== B5：#5 被关闭，bob 改了 c11 再推同一个主题 bob-stack ==
+$ git commit -am "bob：改 c11"
+  [bob/记录 345b425] bob：改 c11
+   1 file changed, 1 insertion(+), 1 deletion(-)
+$ git push origin HEAD:refs/for/main -o topic=bob-stack
+  remote: 
+  remote: Visit the existing pull request:        
+  remote:   https://git.tianshen02.online:28377/godcreator/agit-probe/pulls/6        
+  remote: 
+  To https://git.tianshen02.online:28377/godcreator/agit-probe.git
+   * [new reference]   HEAD -> refs/pull/6/head

@@ -1,0 +1,20 @@
+---
+title: 同一周在两个仓里干活
+description: bob 同一周里做两件事：照评论改协作站的一页（协作仓），再给 fpga-hil 改一处配置、等负责人审（别的仓）。两个仓并排往前走，看两种仓的管法与提示栏里的通知差在哪
+---
+
+一个项目里的协作仓和别的仓管法不一样（为什么这么分见 [协作仓和别的仓](/gwb-collab/other-repos)）。bob 在同一周里做两件事：照一条评论改协作站的一页，再给 `fpga-hil` 改一处 PLL 配置、等它的负责人 carol 审。点下面的步骤看两个仓并排往前走，比上一步变了的那一格会标出来：
+
+<RepoModes />
+
+几处要注意的：
+
+- 协作仓那边，从提交到本地 main 跟上服务器，全程不用 bob 管；`fpga-hil` 这边每一步都是 bob 自己（或让 AI）运行 git
+- 等 carol 审的那几天，bob 的 main 一直是干净的，别人合进去的修复不会和他的改动混在一起；要再做另一件事，就从 `origin/main` 再开一条分支、另开一个合并请求
+- 别的仓比的是当前分支和服务器上的同名分支：本地多出提交是「还没推送」，服务器上多出提交是「还没拉下来」，两边都有是「分叉了」。fix-pll 推上去以后就算一样，等审阅那几天 main 往前走也不提醒；切回 main 时 main 落后了，才出现在提示栏里
+- 自己开的合并请求有人评论，提示栏里出现一条，自己回复以后消失
+- `collab.repos.update` 只快进 main：当前在别的分支上时会被拒绝、写明原因，不会替人切分支
+
+{/* ref file="../plugins/collab/src/git/status.ts" lines="48-57" hash="04919f35c114" blob="6b8e9eee9ade" */}
+{/* ref file="../plugins/collab/src/notifications/notifications-of.ts" lines="50-56" hash="f4ce15c3fa36" blob="8e58bfa05efb" */}
+{/* ref file="../plugins/collab/src/other-repos/fetch/update.ts" lines="9-18" hash="d8c5ee45138d" blob="3494c4580797" */}

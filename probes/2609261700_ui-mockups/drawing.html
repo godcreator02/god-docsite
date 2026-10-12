@@ -1,0 +1,780 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>10kW 样机机架 · HMMC-PR-01</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.css">
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.js"></script>
+<style>
+:root{
+  --bar-h:44px;
+  --r:6px;
+  --desk:#EEF0F2;
+  --paper:#FFFFFF;
+  --hover:#F5F6F8;
+  --ink:#1B1E23;
+  --ink-2:#5C646D;
+  --ink-3:#8D949C;
+  --line:#E4E7EB;
+  --line-2:#CDD2D8;
+  --accent:#3F5FD9;
+  --accent-soft:#EDF0FC;
+  --st-open:#D23B30;
+  --st-doing:#B7791F;
+  --st-done:#1F8A4F;
+  --st-hv:#C2410C;
+  --f-ui:"Microsoft YaHei UI","Microsoft YaHei","PingFang SC",sans-serif;
+  --f-code:"Sarasa Mono SC",Consolas,monospace;
+}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{background:var(--desk);color:var(--ink);font:400 14px/1.7 var(--f-ui);font-variant-numeric:tabular-nums;overflow:hidden}
+button{font:inherit;color:inherit}
+a{color:inherit;text-decoration:none}
+b,strong,th{font-weight:700}
+.code{font-family:var(--f-code)}
+.katex{font-size:1.05em;font-family:KaTeX_Main,var(--f-ui)}
+.katex .textrm,.katex .text{font-family:KaTeX_Main,var(--f-ui)}
+.ic{width:16px;height:16px;flex:none;fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+.ic.s{width:14px;height:14px}
+:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+
+/* ───────── 外壳 ───────── */
+.app{height:100%;display:flex;flex-direction:column}
+.bar{height:var(--bar-h);flex:none;display:flex;align-items:center;gap:12px;padding:0 16px 0 12px;
+  background:var(--paper);border-bottom:1px solid var(--line);font-size:13px;white-space:nowrap}
+.crumb{display:flex;align-items:center;gap:4px;min-width:0;overflow:hidden;color:var(--ink-2)}
+.crumb a{padding:4px 6px;border-radius:var(--r)}
+.crumb a:hover{background:var(--hover);color:var(--ink)}
+.crumb .ic{color:var(--ink-3);width:14px;height:14px}
+.crumb .here{color:var(--ink);font-weight:700;padding:4px 6px}
+.crumb .path{font:12px var(--f-code);color:var(--ink-3);margin-left:8px}
+.bar .spacer{flex:1}
+.btn{height:28px;display:inline-flex;align-items:center;gap:8px;padding:0 12px;background:var(--paper);
+  border:1px solid var(--line-2);border-radius:var(--r);cursor:pointer;font-size:13px}
+.btn:hover{background:var(--hover)}
+.btn kbd{font:11px/18px var(--f-code);padding:0 4px;border:1px solid var(--line-2);border-radius:var(--r);color:var(--ink-2)}
+.btn[aria-pressed="true"]{background:var(--accent-soft);border-color:var(--accent);color:var(--accent)}
+.btn[aria-pressed="true"] kbd{border-color:var(--accent);color:var(--accent)}
+.seg{display:inline-flex;height:28px;padding:2px;border:1px solid var(--line-2);border-radius:var(--r);gap:2px}
+.seg button{width:28px;height:22px;display:grid;place-items:center;border:0;background:transparent;border-radius:4px;cursor:pointer;color:var(--ink-2)}
+.seg button:hover{background:var(--hover);color:var(--ink)}
+.seg button[aria-pressed="true"]{background:var(--accent-soft);color:var(--accent)}
+.who{display:flex;align-items:center;gap:8px;padding-left:4px}
+.avatar{width:24px;height:24px;border-radius:50%;background:var(--ink);color:var(--paper);display:grid;place-items:center;font-size:11px;font-weight:700}
+.who .role{color:var(--ink-3)}
+
+.main{flex:1;min-height:0;display:flex}
+
+/* ───────── 图纸目录 ───────── */
+.dir{width:240px;flex:none;background:var(--paper);border-right:1px solid var(--line);overflow:auto;
+  padding:16px 12px;display:flex;flex-direction:column;gap:16px}
+.dir-h{padding:0 4px}
+.dir-h h2{margin:0;font-size:15px;line-height:1.4}
+.dir-h p{margin:0;font-size:12px;color:var(--ink-3)}
+.dir-t{width:100%;border-collapse:collapse;font-size:13px;line-height:1.4}
+.dir-t th{font-size:12px;font-weight:400;color:var(--ink-3);text-align:left;padding:4px 8px;border-bottom:1px solid var(--line)}
+.dir-t td{padding:0;border-bottom:1px solid var(--line)}
+.dir-t a,.dir-t .cell{display:flex;align-items:center;gap:8px;min-height:32px;padding:4px 8px}
+.dir-t td.no a{font:11.5px var(--f-code);color:var(--ink-3);white-space:nowrap}
+.dir-t tr.grp td{color:var(--ink-3);font-size:12px}
+.dir-t tr.grp .cell{min-height:28px}
+.dir-t tr.link:hover td{background:var(--hover)}
+.dir-t tr.cur td{background:var(--accent-soft)}
+.dir-t tr.cur a{color:var(--accent);font-weight:700}
+.dir-t tr.cur td.no a{color:var(--accent)}
+.dir-t .ic{color:var(--ink-3)}
+.dir-t tr.cur .ic{color:var(--accent)}
+.count{margin-left:auto;font-size:12px;color:var(--ink-2);font-weight:400}
+.count.open{color:var(--st-open);display:inline-flex;align-items:center;gap:4px}
+.legend{margin-top:auto;border-top:1px solid var(--line);padding:12px 4px 0;font-size:12px;line-height:1.5;color:var(--ink-2);display:grid;gap:8px}
+.legend h3{margin:0;font-size:12px;color:var(--ink-3);font-weight:400}
+.legend div{display:flex;align-items:center;gap:8px}
+.lg-box{width:24px;height:14px;flex:none;border:1px solid var(--accent)}
+.lg-num{width:18px;height:18px;flex:none;border-radius:50%;border:1px solid var(--accent);color:var(--accent);display:grid;place-items:center;font:11px var(--f-code)}
+.legend .zc{font-family:var(--f-code);color:var(--ink)}
+
+/* ───────── 桌面与图纸 ───────── */
+.desk{flex:1;min-width:0;overflow:auto;padding:24px 24px 48px;background:var(--desk)}
+.sheet{max-width:1500px;margin:0 auto;background:var(--paper);border:1px solid var(--line-2);padding:24px 24px 24px 40px}
+.frame{position:relative;border:1px solid var(--line-2);display:grid;grid-template-columns:minmax(0,1fr) 56px 400px}
+.zones{position:absolute;display:flex;font:11px var(--f-code);color:var(--ink-3);pointer-events:none}
+.zones span{flex:1;display:grid;place-items:center;position:relative}
+.zones.top{left:-1px;right:-1px;bottom:100%;height:24px;margin-bottom:1px}
+.zones.bottom{left:-1px;right:-1px;top:100%;height:24px;margin-top:1px}
+.zones.left{top:-1px;bottom:-1px;right:100%;width:40px;margin-right:1px;flex-direction:column}
+.zones.right{top:-1px;bottom:-1px;left:100%;width:24px;margin-left:1px;flex-direction:column}
+.zones.top span+span::before{content:"";position:absolute;left:0;bottom:0;height:8px;border-left:1px solid var(--line-2)}
+.zones.bottom span+span::before{content:"";position:absolute;left:0;top:0;height:8px;border-left:1px solid var(--line-2)}
+.zones.left span+span::before{content:"";position:absolute;top:0;right:0;width:8px;border-top:1px solid var(--line-2)}
+.zones.right span+span::before{content:"";position:absolute;top:0;left:0;width:8px;border-top:1px solid var(--line-2)}
+
+/* 正文 */
+.content{min-width:0;padding:32px 32px 40px}
+.gutter{min-width:0}
+.mode-tip{display:none;position:sticky;top:0;z-index:5;margin:-32px -32px 24px;padding:8px 32px;
+  background:var(--accent-soft);border-bottom:1px solid var(--accent);color:var(--accent);font-size:13px;align-items:center;gap:8px}
+.mode-tip kbd{font:11px/18px var(--f-code);padding:0 4px;border:1px solid var(--accent);border-radius:var(--r)}
+body.markup-on .mode-tip{display:flex}
+body.markup-on .content{cursor:crosshair}
+body.markup-on .content :is(p,td,li):hover{outline:1px dashed var(--accent);outline-offset:2px}
+
+.doc-head{display:grid;gap:16px;padding-bottom:28px;border-bottom:1px solid var(--line)}
+.kicker{font-size:13px;color:var(--ink-2);display:flex;gap:12px;align-items:center}
+.kicker .code{font-size:12px;color:var(--ink-3)}
+.doc-title{margin:0;font-size:30px;line-height:1.3;font-weight:700;letter-spacing:.01em}
+.lead{margin:0;max-width:60em;font-size:15px;line-height:1.85;color:#2E333A}
+
+/* 技术参数 */
+.params{display:flex;flex-wrap:wrap;gap:1px;background:var(--line);border:1px solid var(--line);width:100%}
+.params>div{flex:1 1 auto;padding:8px 12px;background:var(--paper)}
+.params .k{font-size:12px;color:var(--ink-3);height:24px;display:flex;align-items:center}
+.params .v{font-size:16px;font-weight:700;white-space:nowrap}
+.hv-mark{display:inline-flex;align-items:center;gap:2px;font-size:12px;font-weight:700;color:var(--st-hv);margin-left:8px;vertical-align:1px}
+.hv-mark .ic{width:14px;height:14px}
+.check{margin:0;display:flex;flex-wrap:wrap;align-items:center;gap:4px 20px;font-size:13px;color:var(--ink-2)}
+.check .t{color:var(--ink-3);font-size:12px}
+.check .ok{display:inline-flex;align-items:center;gap:4px;color:var(--st-done)}
+
+.toc{display:grid;grid-template-columns:auto 1fr;gap:12px;align-items:start;font-size:13px}
+.toc-t{font-size:12px;color:var(--ink-3);padding-top:4px}
+.toc ol{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(128px,1fr));gap:0 8px}
+.toc a{display:flex;gap:8px;align-items:center;padding:4px 8px;border-radius:var(--r)}
+.toc a:hover{background:var(--hover)}
+.toc .n{font-size:12px;color:var(--ink-3);min-width:24px}
+.toc a.omit{color:var(--ink-3)}
+
+/* 节 */
+.sec{margin-top:48px;scroll-margin-top:48px}
+.sec-h{display:flex;align-items:baseline;gap:12px;margin:0 0 16px;font-size:20px;line-height:1.4}
+.sec-no{font-size:14px;color:var(--ink-3);font-weight:400}
+.sec p.para{margin:0 0 12px;max-width:60em}
+.note{background:var(--hover);border:1px solid var(--line);padding:12px 16px;margin:0 0 16px;font-size:13.5px;line-height:1.75;max-width:60em}
+.note b{margin-right:4px}
+.caption{margin:8px 0 0;font-size:12.5px;color:var(--ink-2);line-height:1.7;max-width:62em}
+.caption .tag{color:var(--ink-3);margin-right:8px}
+
+table.bom{width:100%;border-collapse:collapse;border:1px solid var(--line);font-size:13.5px;line-height:1.6}
+.bom th{font-size:12.5px;color:var(--ink-2);text-align:left;padding:8px 12px;border-bottom:1px solid var(--line-2);background:var(--hover);white-space:nowrap}
+.bom td{border-top:1px solid var(--line);border-left:1px solid var(--line);padding:8px 12px;vertical-align:top;overflow-wrap:anywhere}
+.bom td:first-child{border-left:0}
+.bom td.num{white-space:nowrap}
+.bom td.fx{vertical-align:middle;color:var(--ink)}
+.bom td.fx.prose{color:var(--ink-2);font-size:13px}
+.bom td.mid{vertical-align:middle;color:var(--ink-2)}
+.bom td.blank{background:var(--hover)}
+.bom.u td.num{width:64px}
+.bom tbody tr:hover td{background:#FAFBFC}
+.bom tbody tr:hover td.blank{background:var(--hover)}
+
+.rl{white-space:nowrap;outline:1px solid var(--accent);outline-offset:2px;transition:background-color .3s}
+.rl[data-state="resolved"]{outline-color:var(--line-2)}
+.rl.is-flash{background:var(--accent-soft)}
+
+.cab-top{display:grid;grid-template-columns:minmax(0,1fr) 264px;gap:24px;align-items:start;margin-bottom:20px}
+.elev{margin:0;border:1px solid var(--line);padding:8px 8px 4px}
+.elev svg{display:block;width:100%;height:auto}
+.elev figcaption{font-size:12px;color:var(--ink-3);text-align:center;padding-top:4px}
+.ev-post{stroke:var(--ink-2);stroke-width:1.5;fill:none}
+.ev-box{stroke:var(--ink-3);stroke-width:1;fill:var(--paper)}
+.ev-box.dash{stroke-dasharray:3 2;stroke:var(--line-2)}
+.ev-box.fill{fill:var(--hover)}
+.ev-hvz{fill:none;stroke:var(--st-hv);stroke-width:1;stroke-dasharray:4 3}
+.ev-bus{stroke:var(--ink-2);stroke-width:2.5}
+.ev-pe{fill:var(--ink-2)}
+.ev-dim{stroke:var(--ink-3);stroke-width:.8;fill:none}
+.ev-ext{stroke:var(--line-2);stroke-width:.8}
+.ev-arrow{fill:var(--ink-3)}
+.ev-t{font:400 9px var(--f-ui);fill:var(--ink);text-anchor:middle}
+.ev-t.s{font-size:8px;fill:var(--ink-2)}
+.ev-t.d{fill:var(--ink-2)}
+.ev-t.l{text-anchor:start}
+.ev-t.r{text-anchor:end}
+.ev-t.hv{fill:var(--st-hv);font-weight:700}
+.ev-ic{fill:none;stroke:var(--st-hv);stroke-width:1.2;stroke-linejoin:round}
+.ev-floor{stroke:var(--line-2);stroke-width:.8}
+
+.omit-row{margin:40px 0 0;display:flex;align-items:center;gap:12px;font-size:12px;color:var(--ink-3)}
+.omit-row::before,.omit-row::after{content:"";flex:1;border-top:1px dashed var(--line-2)}
+
+ol.req{list-style:none;margin:0;padding:0;display:grid;gap:8px;max-width:60em}
+ol.req li{display:grid;grid-template-columns:24px minmax(0,1fr);gap:8px;align-items:start}
+.req .k{font-size:12px;color:var(--ink-3);padding-top:2px}
+.req b{margin-right:8px}
+.req .ok{display:inline-flex;align-items:center;gap:4px;font-size:12px;color:var(--st-done);margin-left:8px;white-space:nowrap;vertical-align:-2px}
+
+.sheet-foot{margin-top:48px;padding-top:12px;border-top:1px solid var(--line);font-size:12px;color:var(--ink-3)}
+
+/* 批注引出线与序号 */
+.markup{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:2;overflow:visible}
+.markup .leader{fill:none;stroke:var(--accent);stroke-width:1}
+.markup .is-resolved .leader{stroke:var(--line-2)}
+.balloon{position:absolute;z-index:4;width:20px;height:20px;transform:translate(-50%,-50%);border-radius:50%;
+  border:1px solid var(--accent);background:var(--paper);color:var(--accent);font:11px/1 var(--f-code);
+  display:grid;place-items:center;padding:0;cursor:pointer}
+.balloon:hover{background:var(--accent-soft)}
+.balloon .z{position:absolute;top:100%;left:50%;transform:translateX(-50%);margin-top:4px;font:10.5px var(--f-code);color:var(--ink-3)}
+.balloon.is-resolved{border-color:var(--line-2);color:var(--ink-3)}
+.balloon.is-sel{background:var(--accent);border-color:var(--accent);color:var(--paper)}
+
+/* 修改记录表与标题栏 */
+.records{position:sticky;top:0;align-self:start;z-index:3;height:calc(100vh - var(--bar-h) - 56px);min-height:520px;
+  display:flex;flex-direction:column;background:var(--paper);border-left:1px solid var(--line-2)}
+.rec-head{flex:none;display:flex;align-items:center;justify-content:space-between;height:44px;padding:0 16px;border-bottom:1px solid var(--line)}
+.rec-head h2{margin:0;font-size:14px}
+.rec-head .code{font-size:11.5px;color:var(--ink-3)}
+.rec-body{flex:1;min-height:0;overflow:auto}
+table.rec{width:100%;border-collapse:collapse;font-size:13px;line-height:1.55;table-layout:fixed}
+.rec th{font-size:12px;font-weight:400;color:var(--ink-3);padding:8px 8px;border-bottom:1px solid var(--line);text-align:left;
+  position:sticky;top:0;background:var(--paper);z-index:1}
+.rec td{border-bottom:1px solid var(--line);padding:8px 8px;vertical-align:top;overflow-wrap:anywhere}
+.rec td.z{font:11.5px var(--f-code);color:var(--ink-2)}
+.rec td.who{font-size:12.5px;color:var(--ink-2);white-space:nowrap}
+.rec tr.grp td{font-size:12px;padding:12px 8px 4px;color:var(--ink-3);border-bottom:1px solid var(--line)}
+.rec tr.grp b{color:var(--ink);margin-right:8px;font-size:12.5px}
+.rec tr.r{cursor:pointer}
+.rec tr.r:hover td{background:var(--hover)}
+.rec tr.is-sel td{background:var(--accent-soft)}
+.rec tr.reply td{font-size:12.5px;color:var(--ink-2);padding-top:0}
+.rec tr.reply .who{display:flex;align-items:flex-start;gap:4px}
+.rec tr.reply .who .ic{color:var(--ink-3);margin-top:2px;width:14px;height:14px}
+.rec tr.has-reply td{border-bottom:0}
+.rec .q{display:block;font-size:12px;color:var(--ink-3)}
+.rec tr[data-state="resolved"] .txt,.rec tr[data-state="done"] .txt{text-decoration:line-through;color:var(--ink-3)}
+.num-badge{display:inline-grid;place-items:center;width:20px;height:20px;border-radius:50%;border:1px solid var(--accent);color:var(--accent);font:11px/1 var(--f-code)}
+tr[data-state="resolved"] .num-badge{border-color:var(--line-2);color:var(--ink-3)}
+.task-id{font:11.5px var(--f-code);color:var(--ink-3);line-height:20px}
+.st{white-space:nowrap}
+.status{display:inline-flex;align-items:center;gap:4px;font-size:12.5px}
+.status.open{color:var(--st-open)}
+.status.doing{color:var(--st-doing)}
+.status.done{color:var(--st-done)}
+.status.todo{color:var(--ink-3)}
+.rec-act{flex:none;border-top:1px solid var(--line);padding:8px 12px;font-size:12.5px;color:var(--ink-2);display:flex;flex-wrap:wrap;gap:8px;align-items:center;min-height:48px}
+.rec-act .lbl{flex:1 1 100%}
+.rec-act .lbl b{color:var(--ink)}
+.rec-act .btn{height:28px;font-size:12.5px;padding:0 10px}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--paper)}
+.btn.primary:hover{background:#3552C4}
+
+.tb{flex:none;display:grid;grid-template-columns:36px 76px 60px repeat(4,24px) minmax(0,1fr);grid-template-rows:repeat(5,28px);
+  gap:1px;background:var(--line);border-top:1px solid var(--line-2);font-size:12px;line-height:1.3}
+.tb>div{background:var(--paper);display:flex;align-items:center;justify-content:center;padding:0 4px;min-width:0;overflow:hidden;white-space:nowrap}
+.tb .lab{color:var(--ink-3);font-size:11.5px}
+.tb .dim{color:var(--ink-3)}
+.tb .audit{white-space:normal;text-align:center;flex-direction:column;gap:2px}
+.tb .audit .status{font-size:12px}
+.tb .stage{font-weight:700}
+.tb .unit{font-size:11px;color:var(--ink-2)}
+.tb .name{white-space:normal;text-align:center;font-size:15px;font-weight:700;line-height:1.35;padding:0 8px}
+.tb .code{font-size:11.5px}
+.tb .code.big{font-size:13px;font-weight:700}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-open" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6"/><circle cx="8" cy="8" r="1.8" fill="currentColor" stroke="none"/></symbol>
+  <symbol id="i-check-circle" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6"/><path d="M5.4 8.2 7.2 10 10.7 6.3"/></symbol>
+  <symbol id="i-todo" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6" stroke-dasharray="2.4 2.1"/></symbol>
+  <symbol id="i-doing" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6"/><path d="M8 4.2a3.8 3.8 0 0 1 0 7.6Z" fill="currentColor" stroke="none"/></symbol>
+  <symbol id="i-reply" viewBox="0 0 16 16"><path d="M6.5 4 3 7.5 6.5 11"/><path d="M3.5 7.5H9a4 4 0 0 1 4 4v.5"/></symbol>
+  <symbol id="i-bolt" viewBox="0 0 16 16"><path d="M9 1.8 3.8 9h4l-1 5.2L12.2 7h-4z"/></symbol>
+  <symbol id="i-pen" viewBox="0 0 16 16"><path d="M10.5 2.8 13.2 5.5 5.8 12.9 2.6 13.4 3.1 10.2Z"/><path d="M9.2 4.1 11.9 6.8"/></symbol>
+  <symbol id="i-sun" viewBox="0 0 16 16"><circle cx="8" cy="8" r="2.8"/><path d="M8 1.5v1.6M8 12.9v1.6M1.5 8h1.6M12.9 8h1.6M3.4 3.4l1.1 1.1M11.5 11.5l1.1 1.1M3.4 12.6l1.1-1.1M11.5 4.5l1.1-1.1"/></symbol>
+  <symbol id="i-moon" viewBox="0 0 16 16"><path d="M13 9.6A5.5 5.5 0 1 1 6.4 3a4.3 4.3 0 0 0 6.6 6.6Z"/></symbol>
+  <symbol id="i-chevron" viewBox="0 0 16 16"><path d="M6 3.5 10.5 8 6 12.5"/></symbol>
+  <symbol id="i-file" viewBox="0 0 16 16"><path d="M4 1.8h5.2L12 4.6v9.6H4Z"/><path d="M9 1.8v3h3"/></symbol>
+  <symbol id="i-folder" viewBox="0 0 16 16"><path d="M1.8 4h4.3l1.4 1.6h6.7v7.6H1.8Z"/></symbol>
+  <symbol id="i-home" viewBox="0 0 16 16"><path d="M2.5 7.2 8 2.8l5.5 4.4"/><path d="M4 6.2v7h8v-7"/></symbol>
+  <symbol id="i-inbox" viewBox="0 0 16 16"><path d="M2 9.5h3.5l1 1.8h3l1-1.8H14"/><path d="M3.8 3h8.4L14 9.5v3.7H2V9.5Z"/></symbol>
+  <symbol id="i-list" viewBox="0 0 16 16"><path d="M6 4h7.5M6 8h7.5M6 12h7.5M2.8 4h.01M2.8 8h.01M2.8 12h.01"/></symbol>
+</svg>
+<div class="app">
+
+  <header class="bar">
+    <nav class="crumb" aria-label="面包屑">
+      <a href="#">10kW 混合型 MMC 样机</a>
+      <svg class="ic"><use href="#i-chevron"/></svg>
+      <a href="#">样机</a>
+      <svg class="ic"><use href="#i-chevron"/></svg>
+      <span class="here">10kW 样机机架</span>
+      <span class="path">prototype/rack</span>
+    </nav>
+    <span class="spacer"></span>
+    <button class="btn" id="markupBtn" aria-pressed="false" title="进入批注模式：在正文里选中文字就能批，被批的字加蓝框并编号，记录写进右侧修改记录表">
+      <svg class="ic"><use href="#i-pen"/></svg>批注<kbd>C</kbd>
+    </button>
+    <div class="seg" role="group" aria-label="浅色 / 深色">
+      <button aria-pressed="true" title="浅色（当前）"><svg class="ic"><use href="#i-sun"/></svg></button>
+      <button aria-pressed="false" title="换成深色（这张效果图只做了浅色）"><svg class="ic"><use href="#i-moon"/></svg></button>
+    </div>
+    <div class="who" title="以 Gitea 账号 godcreator 署名">
+      <span class="avatar">G</span>
+      <span>godcreator</span><span class="role">负责人</span>
+    </div>
+  </header>
+
+  <div class="main">
+
+    <aside class="dir" aria-label="站内导航">
+      <div class="dir-h"><h2>图纸目录</h2><p>10kW 混合型 MMC 样机</p></div>
+      <table class="dir-t">
+        <thead><tr><th>图号</th><th>图名</th></tr></thead>
+        <tbody>
+          <tr class="link"><td class="no"><a href="#">HMMC-00</a></td><td><a href="#"><svg class="ic"><use href="#i-home"/></svg>首页</a></td></tr>
+          <tr class="grp"><td colspan="2"><span class="cell"><svg class="ic"><use href="#i-folder"/></svg>样机<span class="count">3 张</span></span></td></tr>
+          <tr class="cur"><td class="no"><a href="#top">HMMC-PR-01</a></td><td><a href="#top" aria-current="page"><svg class="ic"><use href="#i-file"/></svg>10kW 样机机架<span class="count open" id="dirBadge" title="本页未解决的批注"><svg class="ic s"><use href="#i-open"/></svg><span id="dirBadgeN">2</span></span></a></td></tr>
+          <tr class="link"><td class="no"><a href="#">HMMC-PR-02</a></td><td><a href="#"><svg class="ic"><use href="#i-file"/></svg>子模块板设计</a></td></tr>
+          <tr class="link"><td class="no"><a href="#">HMMC-PR-03</a></td><td><a href="#"><svg class="ic"><use href="#i-file"/></svg>控制与采样系统</a></td></tr>
+        </tbody>
+      </table>
+      <table class="dir-t">
+        <thead><tr><th>工作</th></tr></thead>
+        <tbody>
+          <tr class="link"><td><a href="#"><svg class="ic"><use href="#i-inbox"/></svg>我的待办<span class="count" title="指给你、还没做完的两项">2</span></a></td></tr>
+          <tr class="link"><td><a href="#"><svg class="ic"><use href="#i-list"/></svg>任务总览</a></td></tr>
+        </tbody>
+      </table>
+      <div class="legend">
+        <h3>图例</h3>
+        <div><span class="lg-box"></span>被批注的字</div>
+        <div><span class="lg-num">1</span>批注序号，下面是所在分区</div>
+        <div><span class="status open"><svg class="ic s"><use href="#i-open"/></svg>未解决</span><span class="status done"><svg class="ic s"><use href="#i-check-circle"/></svg>已处理</span></div>
+        <div><span class="status todo"><svg class="ic s"><use href="#i-todo"/></svg>待开始</span><span class="status doing"><svg class="ic s"><use href="#i-doing"/></svg>进行中</span></div>
+        <div><span class="hv-mark" style="margin-left:0"><svg class="ic"><use href="#i-bolt"/></svg>高压</span>高压参数</div>
+        <div style="display:block">分区 <span class="zc">C3</span>：字母是行（A–F，上到下），数字是列（1–8，左到右），看图框四边。</div>
+      </div>
+    </aside>
+
+    <div class="desk" id="desk">
+      <article class="sheet">
+        <div class="frame" id="frame">
+          <div class="zones top" aria-hidden="true"><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span></div>
+          <div class="zones bottom" aria-hidden="true"><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span></div>
+          <div class="zones left" aria-hidden="true"><span>A</span><span>B</span><span>C</span><span>D</span><span>E</span><span>F</span></div>
+          <div class="zones right" aria-hidden="true"><span>A</span><span>B</span><span>C</span><span>D</span><span>E</span><span>F</span></div>
+
+          <div class="content" id="content">
+            <div class="mode-tip" role="status" id="modeTip"><svg class="ic"><use href="#i-pen"/></svg><span id="modeTipText">批注模式：在正文里拖选要批的字，松开后记录表新增一行，分区按位置自动填。</span>按 <kbd>C</kbd> 或 <kbd>Esc</kbd> 退出</div>
+
+            <header class="doc-head" id="top">
+              <div class="kicker"><span class="code">HMMC-PR-01</span><span>半桥 / 全桥混合型 MMC · 实验室样机</span></div>
+              <h1 class="doc-title">10kW 混合型 MMC 样机架</h1>
+              <p class="lead">三相 10 kW，交流 380 V（相电压 220 V），直流 700 V。<span class="rl" data-n="1" data-state="open">每个桥臂 10 个子模块</span>，装一个 3U 桥臂机箱。两台 ITECH 电源有 800 mm 深，机架按 1000 mm 深、前后两面装：前面放要操作和接线的低压设备（控制插箱、子模块低压电源、六个桥臂机箱、急停），后面放高压接线（开关板、直流母排、电抗器），两台 ITECH 电源整深放在最下面。一个 37U 开放机架，总高约 1.8 m；整套按星形 PE 接地，控制信号地和子模块低压 0 V 各自单点接地，高压侧经高阻接地。</p>
+
+              <div class="params" aria-label="技术参数">
+                <div><div class="k"><span data-tex="P">P</span></div><div class="v">10 kW</div></div>
+                <div title="直流母线 700 V，P/N 对地各约 ±350 V"><div class="k"><span data-tex="U_\text{dc}">Udc</span></div><div class="v">700 V<span class="hv-mark"><svg class="ic"><use href="#i-bolt"/></svg>高压</span></div></div>
+                <div><div class="k"><span data-tex="U_\text{ac}">Uac</span></div><div class="v">380 V 线 / 220 V 相</div></div>
+                <div><div class="k"><span data-tex="N">N</span></div><div class="v">10 SM / 桥臂</div></div>
+                <div><div class="k">SM 合计</div><div class="v">60</div></div>
+                <div><div class="k"><span data-tex="U_\text{c}">Uc</span></div><div class="v">≈ 70 V</div></div>
+                <div><div class="k">光纤</div><div class="v">240 根</div></div>
+              </div>
+              <p class="check">
+                <span class="t">参数校核</span>
+                <span data-tex="10\,\text{SM} \times 6\ \text{桥臂} = 60">10 SM × 6 桥臂 = 60</span>
+                <span data-tex="700\,\text{V} \div 10 = 70\,\text{V}">700 V ÷ 10 = 70 V</span>
+                <span data-tex="60\,\text{SM} \times 4\,\text{根} = 240\,\text{根} = 3\ \text{相} \times 80\ \text{口}">60 SM × 4 根 = 240 根 = 3 相 × 80 口</span>
+                <span class="ok"><svg class="ic s"><use href="#i-check-circle"/></svg>三处都对得上</span>
+              </p>
+
+              <nav class="toc" aria-label="目录">
+                <span class="toc-t">目录</span>
+                <ol>
+                  <li><a href="#param"><span class="n">01</span><span>参数估算</span></a></li>
+                  <li><a class="omit" href="#omit-a" title="效果图从略"><span class="n">02</span><span>主电路</span></a></li>
+                  <li><a class="omit" href="#omit-a" title="效果图从略"><span class="n">03</span><span>3D 机架</span></a></li>
+                  <li><a href="#cab"><span class="n">04</span><span>机架布置</span></a></li>
+                  <li><a class="omit" href="#omit-b" title="效果图从略"><span class="n">04a</span><span>控制板卡</span></a></li>
+                  <li><a class="omit" href="#omit-b" title="效果图从略"><span class="n">04b</span><span>接线清单</span></a></li>
+                  <li><a class="omit" href="#omit-b" title="效果图从略"><span class="n">05</span><span>桥臂机箱</span></a></li>
+                  <li><a class="omit" href="#omit-b" title="效果图从略"><span class="n">06</span><span>子模块板</span></a></li>
+                  <li><a class="omit" href="#omit-b" title="效果图从略"><span class="n">06b</span><span>采样点</span></a></li>
+                  <li><a class="omit" href="#omit-b" title="效果图从略"><span class="n">06d</span><span>开关板选型</span></a></li>
+                  <li><a class="omit" href="#omit-b" title="效果图从略"><span class="n">06c</span><span>交流采样板</span></a></li>
+                  <li><a class="omit" href="#omit-b" title="效果图从略"><span class="n">06a</span><span>接地</span></a></li>
+                  <li><a href="#safe"><span class="n">07</span><span>安全与待确认</span></a></li>
+                </ol>
+              </nav>
+            </header>
+
+            <section class="sec" id="param">
+              <h2 class="sec-h"><span class="sec-no">01</span>参数估算</h2>
+              <div class="note"><b>先说一个假设：</b>「220 V 交流」按三相相电压 220 V、线电压 380 V 理解。如果指的是线电压 220 V，调制比会降到 0.51 左右，电流会变大，下表要重算。</div>
+              <table class="bom">
+                <thead><tr><th>项目</th><th>数值</th><th>怎么算的</th><th>说明</th></tr></thead>
+                <tbody>
+                  <tr><td>调制比 <span data-tex="m">m</span></td><td class="num">0.89</td><td class="fx"><span data-tex="m = \dfrac{2 \times 220\sqrt{2}}{700}">2 × 220√2 / 700</span></td><td>半桥也能正常出电压，全桥部分留作过调制和直流故障阻断</td></tr>
+                  <tr><td>交流相电流</td><td class="num">15.2 A rms</td><td class="fx"><span data-tex="\dfrac{10\,\text{kW}}{\sqrt{3} \times 380\,\text{V}}">10 kW / (√3 × 380 V)</span></td><td>峰值约 21.5 A</td></tr>
+                  <tr><td>直流电流</td><td class="num">14.3 A</td><td class="fx"><span data-tex="\dfrac{10\,\text{kW}}{700\,\text{V}}">10 kW / 700 V</span></td><td>—</td></tr>
+                  <tr><td>桥臂电流</td><td class="num">≈ 15.5 A 峰值</td><td class="fx"><span data-tex="\dfrac{I_\text{dc}}{3} + \dfrac{I_\text{ac,峰}}{2}">Idc / 3 + Iac,峰 / 2</span></td><td>器件、电感、分流电阻按这个峰值选；测量用桥臂机箱里的桥臂电流板，见第 05 节</td></tr>
+                  <tr><td>子模块电容电压</td><td class="num">≈ 70 V</td><td class="fx"><span data-tex="\dfrac{700\,\text{V}}{10}">700 V / 10</span></td><td>每臂 1 个冗余时约 78 V；器件按 150 V 级选，电容按 ≥ 120 V 选</td></tr>
+                  <tr><td>子模块电容</td><td class="num">≈ 2.2–2.7 mF</td><td class="fx prose">每 kVA 储能 30–40 J，分到 60 个 SM</td><td>纹波按 ±10% 左右，最终用 PLECS 仿真定</td></tr>
+                  <tr><td>桥臂电感</td><td class="num"><span class="rl" data-n="2" data-state="open">≈ 5 mH / 20 A</span></td><td class="fx"><span data-tex="10\% \times L_\text{基值} = 10\% \times 46\,\text{mH}">基值电感 46 mH 的 10%</span></td><td>要求 20 A 峰值不饱和，环流抑制效果用仿真确认</td></tr>
+                  <tr><td>损耗与散热</td><td class="num"><span class="rl" data-n="3" data-state="resolved">≈ 200 W</span></td><td class="fx prose">按效率 98% 估</td><td>每个 SM 只有几瓦，机箱顶部小风扇就够</td></tr>
+                  <tr><td>光纤数量</td><td class="num">240 根</td><td class="fx"><span data-tex="60\,\text{SM} \times 4\,\text{根}">60 SM × 4 根</span></td><td>每个 SM：1 对 UART + 2 根开关码，每相 80 根，和 6U 控制插箱的相控板对得上</td></tr>
+                </tbody>
+              </table>
+              <p class="caption"><span class="tag">表注</span>以上是方案阶段的估算，给机架和器件定尺寸用。电容、电感和器件电流以后续仿真和手册核算为准。</p>
+            </section>
+
+            <p class="omit-row" id="omit-a">02 主电路 · 03 3D 机架　效果图从略</p>
+
+            <section class="sec" id="cab">
+              <h2 class="sec-h"><span class="sec-no">04</span>机架布置</h2>
+              <div class="cab-top">
+                <div>
+                  <p class="para">ITECH 电源有 800 mm 深，机架就得 1000 mm 深；控制插箱和桥臂机箱只有 300 mm 深，所以前后两面都装。前面对着人，放要看、要插拔、要接低压线的东西；后面放高压接线，正好对着桥臂机箱后面的接线柱。</p>
+                  <div class="note"><b>整体尺寸：</b>宽 600 mm × 深 1000 mm × 高约 1.8 m（37U 机架约 1645 mm，加底座、脚轮和顶框）。顶上 U35–37 空着，可以放示波器；不需要的话，可以换成 34U 左右的机架，高度约 1.65 m。</div>
+                </div>
+                <figure class="elev">
+                  <svg viewBox="0 0 250 376" role="img" aria-label="机架侧视示意：左为前面，放控制插箱和六个桥臂机箱；右为后面，放开关板、电抗器和中间的直流母排；最下面两台 ITECH 电源整深">
+                    <defs>
+                      <marker id="arw" viewBox="0 0 8 8" refX="7.5" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="ev-arrow" d="M0 1.2 8 4 0 6.8Z"/></marker>
+                    </defs>
+                    <rect class="ev-hvz" x="104" y="142" width="100" height="144"/>
+                    <line class="ev-ext" x1="44" y1="36" x2="44" y2="14"/>
+                    <line class="ev-ext" x1="204" y1="36" x2="204" y2="14"/>
+                    <line class="ev-dim" x1="45" y1="19" x2="203" y2="19" marker-start="url(#arw)" marker-end="url(#arw)"/>
+                    <text class="ev-t d" x="124" y="15">1000</text>
+                    <line class="ev-ext" x1="42" y1="38" x2="14" y2="38"/>
+                    <line class="ev-ext" x1="42" y1="334" x2="14" y2="334"/>
+                    <line class="ev-dim" x1="19" y1="39" x2="19" y2="333" marker-start="url(#arw)" marker-end="url(#arw)"/>
+                    <text class="ev-t d" transform="translate(14 186) rotate(-90)">1645（37U）</text>
+                    <line class="ev-post" x1="44" y1="38" x2="44" y2="334"/>
+                    <line class="ev-post" x1="204" y1="38" x2="204" y2="334"/>
+                    <line class="ev-post" x1="44" y1="38" x2="204" y2="38"/>
+                    <rect class="ev-box dash" x="44" y="38" width="48" height="24"/><text class="ev-t s" x="68" y="53">空</text>
+                    <rect class="ev-box fill" x="44" y="63" width="12" height="6"/><text class="ev-t s l" x="59" y="69">急停</text>
+                    <rect class="ev-box" x="44" y="70" width="48" height="48"/><text class="ev-t" x="68" y="91">控制插箱</text><text class="ev-t d" x="68" y="103">6U</text>
+                    <rect class="ev-box dash" x="44" y="118" width="48" height="24"/><text class="ev-t s" x="68" y="133">空</text>
+                    <rect class="ev-box" x="44" y="142" width="48" height="24"/><text class="ev-t" x="68" y="157">A 上</text>
+                    <rect class="ev-box" x="44" y="166" width="48" height="24"/><text class="ev-t" x="68" y="181">A 下</text>
+                    <rect class="ev-box" x="44" y="190" width="48" height="24"/><text class="ev-t" x="68" y="205">B 上</text>
+                    <rect class="ev-box" x="44" y="214" width="48" height="24"/><text class="ev-t" x="68" y="229">B 下</text>
+                    <rect class="ev-box" x="44" y="238" width="48" height="24"/><text class="ev-t" x="68" y="253">C 上</text>
+                    <rect class="ev-box" x="44" y="262" width="48" height="24"/><text class="ev-t" x="68" y="277">C 下</text>
+                    <rect class="ev-box" x="192" y="62" width="12" height="8"/><text class="ev-t s r" x="188" y="69">插线板</text>
+                    <rect class="ev-box" x="140" y="118" width="64" height="24"/><text class="ev-t s" x="172" y="133">低压电源托盘</text>
+                    <rect class="ev-box" x="156" y="142" width="48" height="72"/><text class="ev-t" x="180" y="174">开关板</text><text class="ev-t d" x="180" y="187">9U</text>
+                    <rect class="ev-box" x="156" y="246" width="48" height="40"/><text class="ev-t" x="180" y="263">电抗器</text><text class="ev-t s" x="180" y="276">6 × 5 mH</text>
+                    <line class="ev-bus" x1="119" y1="142" x2="119" y2="286"/>
+                    <line class="ev-bus" x1="127" y1="142" x2="127" y2="286"/>
+                    <text class="ev-t d" x="119" y="138">P</text><text class="ev-t d" x="127" y="138">N</text>
+                    <path class="ev-ic" d="M166.5 225.5 162.6 231h3l-.8 4 4-5.6h-3z"/>
+                    <text class="ev-t hv l" x="171" y="234">高压侧</text>
+                    <rect class="ev-box fill" x="44" y="286" width="128" height="24"/><text class="ev-t" x="108" y="301">ITECH 电网模拟器</text>
+                    <rect class="ev-box fill" x="44" y="310" width="128" height="24"/><text class="ev-t" x="108" y="325">ITECH 直流电源</text>
+                    <text class="ev-t s" x="188" y="313">800 深</text>
+                    <rect class="ev-box" x="40" y="334" width="168" height="9"/>
+                    <rect class="ev-pe" x="182" y="335" width="21" height="7"/>
+                    <text class="ev-t s r" x="179" y="341">PE 排</text>
+                    <circle class="ev-box" cx="54" cy="348" r="4.5"/><circle class="ev-box" cx="194" cy="348" r="4.5"/>
+                    <line class="ev-floor" x1="34" y1="353" x2="214" y2="353"/>
+                    <text class="ev-t s l" x="40" y="368">← 前面（人站这边）</text>
+                    <text class="ev-t s r" x="208" y="368">后面 →</text>
+                  </svg>
+                  <figcaption>侧视 · 左为前面 · 不按比例</figcaption>
+                </figure>
+              </div>
+
+              <table class="bom u">
+                <thead><tr><th>U 位</th><th>前面（深 300–450 mm）</th><th>中间</th><th>后面（深 300–400 mm）</th></tr></thead>
+                <tbody>
+                  <tr><td class="num">35–37</td><td>空（放示波器、万用表）</td><td class="blank"></td><td class="blank"></td></tr>
+                  <tr><td class="num">34</td><td>急停面板（急停 + 指示灯）</td><td class="blank"></td><td>1U 机架插线板（220 V）</td></tr>
+                  <tr><td class="num">28–33</td><td>控制插箱 6U</td><td class="blank"></td><td>空</td></tr>
+                  <tr><td class="num">25–27</td><td>空（低压线从这里横到左前立柱）</td><td class="blank"></td><td>3U 托盘：子模块低压侧台式 ITECH 电源，横放，前面板朝右侧</td></tr>
+                  <tr><td class="num">22–24</td><td>A 上桥臂</td><td class="mid" rowspan="6">直流母排 P / N（竖直铜排，U7–24）</td><td rowspan="3">开关板 9U（U16–24）：上排开关和接触器，中排交流 / 直流采样板，下排继电器、24 V 电源、直流接触器、预充电电阻、端子</td></tr>
+                  <tr><td class="num">19–21</td><td>A 下桥臂</td></tr>
+                  <tr><td class="num">16–18</td><td>B 上桥臂</td></tr>
+                  <tr><td class="num">13–15</td><td>B 下桥臂</td><td>空</td></tr>
+                  <tr><td class="num">10–12</td><td>C 上桥臂</td><td rowspan="2">电抗器托板（U7–11）：6 个 5 mH / 20 A 电抗器</td></tr>
+                  <tr><td class="num">7–9</td><td>C 下桥臂</td></tr>
+                  <tr><td class="num">4–6</td><td colspan="3">ITECH 电网模拟器（参考型号 IT7912-350-90），整深 800 mm</td></tr>
+                  <tr><td class="num">1–3</td><td colspan="3">ITECH 双向直流电源（参考型号 IT6012C-800-50），整深 800 mm，约 30 kg</td></tr>
+                  <tr><td class="num">底部</td><td colspan="3">PE 主接地排（后面最下面的横梁上）</td></tr>
+                </tbody>
+              </table>
+              <p class="caption"><span class="tag">表注</span>前面：光纤沿右前立柱，低压线沿左前立柱；后面：直流、交流功率线；中间：直流母排。调试时站在前面，碰不到高压线。</p>
+            </section>
+
+            <p class="omit-row" id="omit-b">04a 控制板卡 至 06a 接地，共 8 节　效果图从略</p>
+
+            <section class="sec" id="safe">
+              <h2 class="sec-h"><span class="sec-no">07</span>安全与待确认</h2>
+              <p class="para">实验室做不用上工业那一套，但 700 V 直流和子模块电容的储能还是要当回事。下面几条是最低限度。</p>
+              <ol class="req">
+                <li><span class="k">1</span><div><b>急停</b>一个急停按钮装在开关板上，按下断交流接触器和直流侧。ITECH 电源自带的保护也打开。</div></li>
+                <li><span class="k">2</span><div><b>子模块电容会带电</b>每个 SM 并泄放电阻，再加一个电压指示灯，灯灭了再动手。</div></li>
+                <li><span class="k">3</span><div><b>防护</b>通电时机架前面挡一块亚克力板，调试时用隔离探头或差分探头。</div></li>
+                <li><span class="k">4</span><div><b>交流电压的定义</b>本页按相电压 220 V、线电压 380 V 算。如果是线电压 220 V，需要重算调制比、电流和子模块数量。</div></li>
+                <li><span class="k">5</span><div><b>和控制插箱对得上</b>60 个 SM × 4 根 = 240 根光纤，每相 80 根，正好对应控制插箱三块相控板各 80 个口。<span class="ok"><svg class="ic s"><use href="#i-check-circle"/></svg>已核对</span></div></li>
+              </ol>
+            </section>
+
+            <p class="sheet-foot">10kW 混合型 MMC 样机架 · 方案 v0.9（实验室版，双面机架） · 参数为估算值，器件与尺寸以仿真、手册和实物为准</p>
+          </div>
+
+          <div class="gutter" id="gutter" aria-hidden="true"></div>
+
+          <aside class="records" aria-label="修改记录表与标题栏">
+            <div class="rec-head"><h2>修改记录表</h2><span class="code">HMMC-PR-01 · v0.9</span></div>
+            <div class="rec-body">
+              <table class="rec" id="recTable">
+                <colgroup><col style="width:40px"><col style="width:40px"><col style="width:100px"><col><col style="width:72px"></colgroup>
+                <thead><tr><th>序号</th><th>分区</th><th>人</th><th>内容</th><th>状态</th></tr></thead>
+                <tbody>
+                  <tr class="grp"><td colspan="5"><b>批注</b><span id="cntNotes">未解决 2 / 3</span></td></tr>
+                  <tr class="r has-reply" data-id="1" data-kind="note" data-state="open" data-who="bob-test">
+                    <td><span class="num-badge">1</span></td><td class="z" data-zone-for="1">A2</td><td class="who" title="测试成员">bob-test</td>
+                    <td><span class="q">「每个桥臂 10 个子模块」</span><span class="txt">冗余子模块放在哪一块板上？</span></td>
+                    <td class="st"><span class="status open"><svg class="ic s"><use href="#i-open"/></svg>未解决</span></td>
+                  </tr>
+                  <tr class="reply" data-parent="1">
+                    <td></td><td></td><td class="who" title="负责人"><svg class="ic"><use href="#i-reply"/></svg>godcreator</td>
+                    <td colspan="2">10 块里留 1 块做冗余，程序里切换，60 块板都一样。</td>
+                  </tr>
+                  <tr class="r" data-id="2" data-kind="note" data-state="open" data-who="carol-test">
+                    <td><span class="num-badge">2</span></td><td class="z" data-zone-for="2">B2</td><td class="who" title="测试成员二">carol-test</td>
+                    <td><span class="q">「≈ 5 mH / 20 A」</span><span class="txt">20 A 不饱和要看磁芯型号，先别下单。</span></td>
+                    <td class="st"><span class="status open"><svg class="ic s"><use href="#i-open"/></svg>未解决</span></td>
+                  </tr>
+                  <tr class="r" data-id="3" data-kind="note" data-state="resolved" data-who="bob-test">
+                    <td><span class="num-badge">3</span></td><td class="z" data-zone-for="3">B2</td><td class="who" title="测试成员">bob-test</td>
+                    <td><span class="q">「≈ 200 W」</span><span class="txt">风扇要不要单独供电？</span></td>
+                    <td class="st"><span class="status done"><svg class="ic s"><use href="#i-check-circle"/></svg>已解决</span></td>
+                  </tr>
+                  <tr class="grp"><td colspan="5"><b>本页任务</b><span id="cntTasks">完成 1 / 3</span></td></tr>
+                  <tr class="r" data-id="T1" data-kind="task" data-state="done" data-who="bob-test">
+                    <td><span class="task-id">T1</span></td><td class="z">—</td><td class="who" title="测试成员">bob-test</td>
+                    <td><span class="txt">核算子模块电容纹波</span></td>
+                    <td class="st"><span class="status done"><svg class="ic s"><use href="#i-check-circle"/></svg>已完成</span></td>
+                  </tr>
+                  <tr class="r" data-id="T2" data-kind="task" data-state="doing" data-who="carol-test">
+                    <td><span class="task-id">T2</span></td><td class="z">—</td><td class="who" title="测试成员二">carol-test</td>
+                    <td><span class="txt">确认 ITECH 电源输出有没有对地参考</span></td>
+                    <td class="st"><span class="status doing"><svg class="ic s"><use href="#i-doing"/></svg>进行中</span></td>
+                  </tr>
+                  <tr class="r" data-id="T3" data-kind="task" data-state="todo" data-who="godcreator">
+                    <td><span class="task-id">T3</span></td><td class="z">—</td><td class="who" title="负责人">godcreator</td>
+                    <td><span class="txt">开关板 9U 安装板出图</span></td>
+                    <td class="st"><span class="status todo"><svg class="ic s"><use href="#i-todo"/></svg>待开始</span></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="rec-act" id="recAct">
+              <span class="lbl" id="actLabel">点一行记录，或点图上的序号，图纸会滚到被批的字。</span>
+              <span id="actBtns" style="display:flex;gap:8px"></span>
+            </div>
+
+            <div class="tb" aria-label="标题栏">
+              <div class="lab" style="grid-area:1/1">设计</div>
+              <div style="grid-area:1/2">godcreator</div>
+              <div style="grid-area:1/3">26.09.26</div>
+              <div class="lab" style="grid-area:1/4/2/8">阶段标记</div>
+              <div class="unit" style="grid-area:1/8">SST 与 MMC 样机课题组</div>
+
+              <div class="lab" style="grid-area:2/1">校对</div>
+              <div class="dim" style="grid-area:2/2/3/4">待签</div>
+              <div class="stage" style="grid-area:2/4" title="S：样机试制阶段">S</div>
+              <div style="grid-area:2/5"></div>
+              <div style="grid-area:2/6"></div>
+              <div style="grid-area:2/7"></div>
+              <div class="name" style="grid-area:2/8/5/9">10kW 混合型 MMC 样机架</div>
+
+              <div class="lab" style="grid-area:3/1/5/2">审核</div>
+              <div class="audit" id="audit" style="grid-area:3/2/5/4" title="由修改记录表算出：未解决的批注数 · 已完成任务 / 任务总数"></div>
+              <div style="grid-area:3/4/4/8">版本 v0.9</div>
+              <div style="grid-area:4/4/5/8">共 3 张 第 1 张</div>
+
+              <div class="lab" style="grid-area:5/1">批准</div>
+              <div style="grid-area:5/2/6/4"></div>
+              <div class="code dim" style="grid-area:5/4/6/8">prototype/rack</div>
+              <div class="code big" style="grid-area:5/8">HMMC-PR-01</div>
+            </div>
+          </aside>
+
+          <svg class="markup" id="markup" aria-hidden="true"></svg>
+        </div>
+      </article>
+    </div>
+  </div>
+</div>
+
+<script>
+for (const el of document.querySelectorAll('[data-tex]')) {
+  katex.render(el.dataset.tex, el, { throwOnError: true });
+}
+</script>
+<script>
+(() => {
+  const $ = (s, r = document) => r.querySelector(s);
+  const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+  const SVG_NS = 'http://www.w3.org/2000/svg';
+  const frame = $('#frame'), markup = $('#markup'), gutter = $('#gutter');
+  const ZONE_ROWS = 'ABCDEF', ZONE_COLS = 8;
+  let selectedId = null;
+
+  function zoneAt(x, y) {
+    const col = Math.min(ZONE_COLS, Math.max(1, Math.floor(x / frame.clientWidth * ZONE_COLS) + 1));
+    const row = ZONE_ROWS[Math.min(5, Math.max(0, Math.floor(y / frame.clientHeight * 6)))];
+    return row + col;
+  }
+
+  function drawLeaders() {
+    const fr = frame.getBoundingClientRect();
+    const ox = fr.left + frame.clientLeft, oy = fr.top + frame.clientTop;
+    const gr = gutter.getBoundingClientRect();
+    const balloonX = gr.left - ox + gr.width / 2;
+    markup.setAttribute('viewBox', `0 0 ${frame.clientWidth} ${frame.clientHeight}`);
+    markup.replaceChildren();
+    $$('.balloon', frame).forEach(b => b.remove());
+
+    const anchors = $$('.rl').map(el => {
+      const r = el.getBoundingClientRect(), outlineOffset = 3;
+      const x = r.left - ox - outlineOffset, y = r.top - oy - outlineOffset;
+      const w = r.width + outlineOffset * 2, h = r.height + outlineOffset * 2;
+      return { id: el.dataset.n, x, y, w, h, zone: zoneAt(x + w / 2, y + h / 2), resolved: el.dataset.state === 'resolved' };
+    }).sort((a, b) => a.y - b.y);
+
+    let previousBalloonY = -Infinity;
+    for (const a of anchors) {
+      a.balloonY = Math.max(a.y, previousBalloonY + 36);
+      previousBalloonY = a.balloonY;
+
+      const group = document.createElementNS(SVG_NS, 'g');
+      group.setAttribute('class', a.resolved ? 'is-resolved' : '');
+      const leader = document.createElementNS(SVG_NS, 'path');
+      leader.setAttribute('class', 'leader');
+      leader.setAttribute('d', `M${a.x + a.w},${a.y} H${balloonX - 24} L${balloonX - 10},${a.balloonY}`);
+      group.append(leader);
+      markup.append(group);
+
+      const balloon = document.createElement('button');
+      balloon.className = 'balloon' + (a.resolved ? ' is-resolved' : '') + (selectedId === a.id ? ' is-sel' : '');
+      balloon.dataset.n = a.id;
+      balloon.style.left = balloonX + 'px';
+      balloon.style.top = a.balloonY + 'px';
+      balloon.title = `批注 ${a.id}，分区 ${a.zone}：点一下在修改记录表里选中它`;
+      balloon.innerHTML = `${a.id}<span class="z">${a.zone}</span>`;
+      balloon.addEventListener('click', () => selectRecord(a.id, false));
+      frame.append(balloon);
+
+      $$(`[data-zone-for="${a.id}"]`).forEach(cell => { cell.textContent = a.zone; });
+    }
+  }
+
+  const icon = id => `<svg class="ic s"><use href="#${id}"/></svg>`;
+  const STATUS_HTML = {
+    open: `<span class="status open">${icon('i-open')}未解决</span>`,
+    resolved: `<span class="status done">${icon('i-check-circle')}已解决</span>`,
+    todo: `<span class="status todo">${icon('i-todo')}待开始</span>`,
+    doing: `<span class="status doing">${icon('i-doing')}进行中</span>`,
+    done: `<span class="status done">${icon('i-check-circle')}已完成</span>`,
+  };
+  const TASK_NEXT = { todo: 'doing', doing: 'done', done: 'todo' };
+  const TASK_LABEL = { todo: '待开始', doing: '进行中', done: '已完成' };
+
+  function summarize() {
+    const notes = $$('tr.r[data-kind="note"]');
+    const tasks = $$('tr.r[data-kind="task"]');
+    const openNotes = notes.filter(t => t.dataset.state === 'open').length;
+    const doneTasks = tasks.filter(t => t.dataset.state === 'done').length;
+    $('#audit').innerHTML = (openNotes
+      ? `<span class="status open">${icon('i-open')}批注 ${openNotes} 未解决</span>`
+      : `<span class="status done">${icon('i-check-circle')}批注已清</span>`)
+      + `<span>任务 ${doneTasks}/${tasks.length}</span>`;
+    $('#cntNotes').textContent = `未解决 ${openNotes} / ${notes.length}`;
+    $('#cntTasks').textContent = `完成 ${doneTasks} / ${tasks.length}`;
+    $('#dirBadgeN').textContent = openNotes;
+    $('#dirBadge').style.visibility = openNotes ? 'visible' : 'hidden';
+  }
+
+  function setRecordState(row, state) {
+    row.dataset.state = state;
+    $('.st', row).innerHTML = STATUS_HTML[state];
+    if (row.dataset.kind === 'note') {
+      $(`.rl[data-n="${row.dataset.id}"]`).dataset.state = state;
+      drawLeaders();
+    }
+    summarize();
+    renderActions(row);
+  }
+
+  function renderActions(row) {
+    const label = $('#actLabel'), btns = $('#actBtns');
+    btns.replaceChildren();
+    const button = (text, cls, title, onClick) => {
+      const b = document.createElement('button');
+      b.className = 'btn ' + cls; b.textContent = text; b.title = title; b.addEventListener('click', onClick);
+      btns.append(b);
+    };
+    const who = row.dataset.who;
+    if (row.dataset.kind === 'note') {
+      const id = row.dataset.id;
+      label.innerHTML = `批注 <b>${id}</b> · ${who} · 分区 <span class="code">${$('.z', row).textContent}</span>`;
+      button('写回复', '', '在这条批注下面接一条回复，署名 godcreator', () => {
+        label.innerHTML = `回复框会在批注 <b>${id}</b> 下面展开（效果图不做输入）`;
+      });
+      if (row.dataset.state === 'open') {
+        button('标为已解决', 'primary', '这条批注记为已解决：蓝框变灰，记录标「已解决」，随下次提交进审核', () => setRecordState(row, 'resolved'));
+      } else {
+        button('重新打开', '', '这条批注改回未解决，框线恢复蓝色', () => setRecordState(row, 'open'));
+      }
+    } else {
+      const next = TASK_NEXT[row.dataset.state];
+      label.innerHTML = `任务 <span class="code">${row.dataset.id}</span> · 负责 ${who} · 现在「${TASK_LABEL[row.dataset.state]}」`;
+      button(`改成「${TASK_LABEL[next]}」`, next === 'done' ? 'primary' : '', `把这条任务改成${TASK_LABEL[next]}，标题栏审核格跟着重算`, () => setRecordState(row, next));
+    }
+  }
+
+  function selectRecord(id, scrollToAnchor) {
+    selectedId = id;
+    $$('tr.r').forEach(tr => tr.classList.toggle('is-sel', tr.dataset.id === id));
+    $$('.balloon').forEach(b => b.classList.toggle('is-sel', b.dataset.n === id));
+    const row = $(`tr.r[data-id="${id}"]`);
+    row.scrollIntoView({ block: 'nearest' });
+    renderActions(row);
+    if (row.dataset.kind !== 'note') return;
+    const anchor = $(`.rl[data-n="${id}"]`);
+    if (scrollToAnchor) anchor.scrollIntoView({ block: 'center', behavior: 'smooth' });
+    anchor.classList.add('is-flash');
+    setTimeout(() => anchor.classList.remove('is-flash'), 1200);
+  }
+
+  $$('tr.r').forEach(tr => tr.addEventListener('click', () => selectRecord(tr.dataset.id, true)));
+
+  const markupBtn = $('#markupBtn');
+  const modeTipText = $('#modeTipText');
+  const modeTipDefault = modeTipText.textContent;
+  function setMarkupMode(on) {
+    document.body.classList.toggle('markup-on', on);
+    markupBtn.setAttribute('aria-pressed', String(on));
+    if (!on) modeTipText.textContent = modeTipDefault;
+  }
+  markupBtn.addEventListener('click', () => setMarkupMode(!document.body.classList.contains('markup-on')));
+  document.addEventListener('keydown', e => {
+    if (e.target instanceof Element && e.target.closest('input,textarea,[contenteditable]')) return;
+    if (e.ctrlKey || e.metaKey || e.altKey) return;
+    if (e.key === 'c' || e.key === 'C') setMarkupMode(!document.body.classList.contains('markup-on'));
+    else if (e.key === 'Escape') setMarkupMode(false);
+  });
+  $('#content').addEventListener('mouseup', () => {
+    if (!document.body.classList.contains('markup-on')) return;
+    const picked = String(getSelection()).trim();
+    if (!picked) return;
+    const shown = picked.length > 18 ? picked.slice(0, 18) + '…' : picked;
+    modeTipText.textContent = `已选「${shown}」，记录表会新增第 4 条（效果图不保存）。`;
+  });
+
+  new ResizeObserver(() => requestAnimationFrame(drawLeaders)).observe(frame);
+  document.fonts.ready.then(drawLeaders);
+  summarize();
+})();
+</script>
+</body>
+</html>

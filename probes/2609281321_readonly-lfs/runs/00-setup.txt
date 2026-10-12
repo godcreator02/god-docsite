@@ -1,0 +1,23 @@
+# 准备：负责人 godcreator 经 gitea.http（管理员令牌）建测试仓  2026-09-28T13:21
+
+## POST /user/repos {"name":"lfs-probe","private":true,"auto_init":true,"default_branch":"main"}
+status 201，godcreator/lfs-probe，id 1103
+
+## PUT /repos/godcreator/lfs-probe/collaborators/bob-test {"permission":"read"}
+status 204
+
+## POST /repos/godcreator/lfs-probe/branch_protections
+{"rule_name":"main","enable_push":true,"enable_push_whitelist":true,"push_whitelist_usernames":["godcreator"],
+ "enable_merge_whitelist":true,"merge_whitelist_usernames":["godcreator"]}
+status 201
+
+## POST /repos/godcreator/lfs-probe/contents/.gitattributes
+内容：*.pdf filter=lfs diff=lfs merge=lfs -text
+status 201，提交 dbdc13f「PDF 走 LFS」
+
+## PUT /repos/godcreator/lfs-probe/collaborators/carol-test {"permission":"read"}（第 01 步之后才加）
+status 204
+
+## 本机
+git-lfs/3.7.1 (GitHub; windows amd64; go 1.25.1; git b84b3384)
+Windows 凭据管理器里存着 git:https://bob-test@…、git:https://carol-test@…、git:https://git.tianshen02.online:28377（godcreator）

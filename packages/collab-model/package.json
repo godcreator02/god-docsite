@@ -1,0 +1,54 @@
+{
+  "name": "@godcreator/collab-model",
+  "version": "0.5.0",
+  "description": "协作站的全部数据模型：项目（仓的布局、项目负责人）、任务（collab/ 里任务与模块记录的文件格式、读出当前状态、校验与写入规则、我的待办）、通知（gwb-collab 推给站点的数据的形状、校验与站点协议号）。人员列表与评论用基础包 @godcreator/docsite-kit 的格式。不用 React、不用 Vite，不运行 git",
+  "type": "module",
+  "exports": {
+    "./project-model": {
+      "types": "./dist/project-model/index.d.ts",
+      "default": "./dist/project-model/index.js"
+    },
+    "./task-model": {
+      "types": "./dist/task-model/index.d.ts",
+      "default": "./dist/task-model/index.js"
+    },
+    "./task-model/node": {
+      "types": "./dist/task-model/node.d.ts",
+      "default": "./dist/task-model/node.js"
+    },
+    "./notification-model": {
+      "types": "./dist/notification-model/index.d.ts",
+      "default": "./dist/notification-model/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://git.tianshen02.online:28377/godcreator/docsite-kit.git"
+  },
+  "publishConfig": {
+    "registry": "https://git.tianshen02.online:28377/api/packages/godcreator/npm/"
+  },
+  "scripts": {
+    "build": "node -e \"require('node:fs').rmSync('dist',{recursive:true,force:true})\" && tsc -p tsconfig.build.json",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "check": "tsc --noEmit && vitest run"
+  },
+  "peerDependencies": {
+    "@godcreator/docsite-kit": "workspace:*"
+  },
+  "peerDependenciesMeta": {
+    "@godcreator/docsite-kit": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@godcreator/docsite-kit": "workspace:*",
+    "@types/node": "^26.6.2",
+    "typescript": "^6.0.3",
+    "vitest": "^5.0.1"
+  }
+}

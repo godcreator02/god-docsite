@@ -1,0 +1,11 @@
+allowBuilds:
+  esbuild: true
+  node-pty: false
+onlyBuiltDependencies:
+  - esbuild
+# 团队的包刚发就要用：@godcreator 的包不受「发布不满一天不装」的限制
+minimumReleaseAgeExclude:
+  - '@godcreator/*'
+  - '@fumadocs/base-ui@16.17.1'
+  - '@fumadocs/tailwind@0.1.3'
+  - fumadocs-core@16.17.1

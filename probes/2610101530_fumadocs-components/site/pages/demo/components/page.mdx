@@ -1,0 +1,74 @@
+import { Explainer, Diagram } from './Demo'
+
+export const meta = { title: '排版组件实验' }
+
+# 排版组件实验
+
+正文字体应是更纱等宽黑体：0123456789 iL Lσ。行内公式 $L_\sigma \dot i_L = s_1 V_1 - s_2 v_{C2}$。
+
+<Callout type="info" title="提示">Callout 信息框。</Callout>
+
+<Callout type="warning">没有标题的警告框。</Callout>
+
+<Callout type="error" title="出错">错误框。</Callout>
+
+<Callout type="success" title="通过">成功框。</Callout>
+
+```python
+# 积分循环
+def integrate(x, t, h):
+    for j in range(7):
+        k[j] = derivative(t + c[j] * h, x)
+    return x + h * sum(b[j] * k[j] for j in range(7))
+```
+
+```c
+int main(void) { return 0; } // C 语言
+```
+
+```
+没有写语言的代码块
+```
+
+```pseudo
+写错语言
+```
+
+<Tabs items={['离线', '实时']}>
+  <Tab value="离线">变步长求解器。</Tab>
+  <Tab value="实时">固定步长。</Tab>
+</Tabs>
+
+<Steps>
+  <Step>
+    ### 算输出
+
+    按顺序执行所有块。
+  </Step>
+  <Step>
+    ### 算更新
+
+    离散状态的下一步。
+  </Step>
+</Steps>
+
+<Accordions>
+  <Accordion title="为什么不用 Memory 断代数环">Memory 是离散块。</Accordion>
+</Accordions>
+
+<Cards>
+  <Card title="站内链接" href="/demo/components" description="走路由" />
+  <Card title="站外链接" href="https://docs.plexim.com" description="新标签页" />
+</Cards>
+
+<Files>
+  <Folder name="site" defaultOpen>
+    <File name="package.json" />
+  </Folder>
+</Files>
+
+<TypeTable type={{ h: { type: 'number', description: '步长', default: '1e-6' } }} />
+
+<Explainer />
+
+<Diagram />

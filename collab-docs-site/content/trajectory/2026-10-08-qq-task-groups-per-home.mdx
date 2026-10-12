@@ -1,0 +1,27 @@
+---
+born-at: 2026-10-08T15:30
+type: choice
+parent: [2026-09-25-collab-site]
+label: 按项目注册 QQ 任务组
+domain: 协作流程
+---
+
+pivots-from:: [交给 AI 不要回报，ZCode 与 QQ 改注入服务](2026-10-07-handoff-without-report.md)
+
+## 背景
+
+gwb-qq-bot 0.7 把 QQ 私聊派任务按斜杠命令分成任务组，服务 `gwbQqBot` 新加 `registerTaskGroup`，交回撤掉注册的函数（qq-bot 仓提交 6591280，那边的轨迹卡 `docs-site/content/trajectory/2026-10-08-collab-registers-project-groups.mdx`）。gitea 上 godcreator/collab-site 的 issue #2 第 2 项要协作站按项目注册：私聊机器人发「/mmc 任务」，就交给 agent 在这个项目里做。要定的是命令名存在哪、agent 在哪个目录里干活、任务组要求里写什么、什么时候重新注册。
+
+## 结论与边界
+
+每个人在自己的 home 里给项目起「QQ 命令」，由 agent 调新命令 `collab.project.qq-command {repo, command}` 设（`null` 撤掉），存在本 home 的 gwb-data 文档 `qq-task-group-commands`，不写进协作仓；起了的项目注册一个任务组，没起的不注册，不从项目名自动截短。任务组的工作区是项目文件夹（协作仓的上一级），执行端 ZCode，名字是站名，要求只写项目名、协作仓路径和「先读说明书 collab，协作仓和项目里其余仓的改动照它提交」。项目列表、QQ 命令、站名变了，或 gwbQqBot 出现、消失，都撤掉旧的注册、按现状重新注册；项目移出列表时它的 QQ 命令一起删。设 QQ 命令时要同 home 装着 qq-bot，命令名经 qq-bot 0.7.1 新加的服务方法 `gwbQqBot.commandNameProblem` 先查一遍（和注册同一条规则，qq-bot 仓提交 bd09885），运行时 qq-bot 抛的错（比如被别的来源先占了同名命令）原话写进 `collab.projects` 的 `qqTaskGroup.error`。这些取舍由用户在 issue #2 与这次的任务说明里定下，代码在 gwb-collab 0.25.3。
+
+边界：本机测试（`plugins/collab/tests/project/qq-task-groups.test.ts`，插件测试 337 条变 350 条）与隔离 home 里的参数校验验过；没有连着真机器人在 QQ 里派过任务，也没在 default 里设过任何项目的 QQ 命令。
+
+## 否掉的候选
+
+QQ 命令写进协作仓（项目配置或 `people.json`）：每个人的机器人、命令各不相同，写进协作仓就要所有人共用一个名字，还会让别人的提交改到自己的命令。从项目名自动截短：`engineering-knowledge` 超过 qq-bot 的 16 个单位上限，截出来的名字人记不住，两个项目也可能撞名。工作区用协作仓：agent 只看得到 `collab/` 与 `site/`，项目里资料库、代码仓的活做不了。任务组要求里写提交规矩：说明书 collab 一改提示词就要跟着改，成了两份说法；交给 AI 的提示词已经是只指向说明书的写法。只在设命令时注册一次：站名、项目列表一变就对不上，qq-bot 重装后注册也会丢。设的时候不查、等 qq-bot 注册时抛错：没装 qq-bot 时根本不会报，错误要等下次注册才看得到。在协作站里照抄一份命令名规则（这批改动的第一版就是这样写的）：协作站对 qq-bot 是可选依赖、不能引用它的运行时代码，抄出来的规则 qq-bot 一改就对不上，改成由 qq-bot 把同一个函数做成服务方法交出来；没装 qq-bot 时也就不再「先记下、不校验」，直接拒绝。
+
+## 代价与遗留
+
+没装 qq-bot 时设不了 QQ 命令，得先装上。和别的插件或 `qq-bot.group.add` 登记的组重名只能在注册时发现。每次项目状态变了都会重对一遍注册，顺带读一遍各项目的站名文件。

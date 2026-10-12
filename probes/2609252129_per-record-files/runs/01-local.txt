@@ -1,0 +1,208 @@
+临时目录：C:\Users\godamericatb14\AppData\Local\Temp\per-record-files-a7b24447
+git 版本：git version 2.53.0.windows.2
+
+==================== 情况 A：两人改的是相邻的两条（原来的第 7 种） ====================
+$ git merge --no-ff admin -m "合并 admin"
+  Merge made by the 'ort' strategy.
+   collab/admin/c1.json | 2 +-
+   1 file changed, 1 insertion(+), 1 deletion(-)
+$ git merge --no-ff bob -m "合并 bob"
+  Merge made by the 'ort' strategy.
+   collab/admin/c2.json | 2 +-
+   1 file changed, 1 insertion(+), 1 deletion(-)
+$ Get-Content collab/admin/c1.json, collab/admin/c2.json
+  {"id":"c1","status":"resolved","text":"拓扑再核一下"}
+  {"id":"c2","status":"resolved","text":"电容取多大"}
+
+==================== 情况 B：bob 写新记录的同时，admin 改了 bob 最新的那条（原来的第 8 种） ====================
+$ git merge --no-ff admin -m "合并 admin"
+  Merge made by the 'ort' strategy.
+   collab/bob/c9.json | 2 +-
+   1 file changed, 1 insertion(+), 1 deletion(-)
+$ git merge --no-ff bob -m "合并 bob"
+  Merge made by the 'ort' strategy.
+   collab/bob/c10.json | 1 +
+   1 file changed, 1 insertion(+)
+   create mode 100644 collab/bob/c10.json
+$ Get-ChildItem -Name collab/bob
+  c10.json
+  c9.json
+
+==================== 情况 C：同一个人两个平行的合并请求，各写一条新记录 ====================
+$ git merge --no-ff bob-1 -m "合并 #7"
+  Merge made by the 'ort' strategy.
+   collab/bob/c9.json | 1 +
+   1 file changed, 1 insertion(+)
+   create mode 100644 collab/bob/c9.json
+$ git merge --no-ff bob-2 -m "合并 #8"
+  Merge made by the 'ort' strategy.
+   collab/bob/c10.json | 1 +
+   1 file changed, 1 insertion(+)
+   create mode 100644 collab/bob/c10.json
+$ Get-ChildItem -Name collab/bob
+  c10.json
+  c9.json
+
+==================== 情况 D：两人同时回复同一条批注（回复各是一条新记录） ====================
+$ git merge --no-ff admin -m "合并 admin"
+  Merge made by the 'ort' strategy.
+   collab/admin/r1.json | 1 +
+   1 file changed, 1 insertion(+)
+   create mode 100644 collab/admin/r1.json
+$ git merge --no-ff bob -m "合并 bob"
+  Merge made by the 'ort' strategy.
+   collab/bob/r2.json | 1 +
+   1 file changed, 1 insertion(+)
+   create mode 100644 collab/bob/r2.json
+
+==================== 情况 E：两人改了同一条的不同字段（admin 改负责人，bob 改状态） ====================
+$ git merge --no-ff admin -m "合并 admin"
+  Merge made by the 'ort' strategy.
+   collab/admin/t1.json | 2 +-
+   1 file changed, 1 insertion(+), 1 deletion(-)
+$ git merge --no-ff bob -m "合并 bob"
+  Auto-merging collab/admin/t1.json
+  CONFLICT (content): Merge conflict in collab/admin/t1.json
+  Automatic merge failed; fix conflicts and then commit the result.
+$ Get-Content collab/admin/t1.json
+  <<<<<<< HEAD
+  {"id":"t1","status":"todo","owner":"carol","title":"核算纹波"}
+  =======
+  {"id":"t1","status":"doing","owner":"bob","title":"核算纹波"}
+  >>>>>>> bob
+
+==================== 情况 F：两人把同一条的同一个字段改成了不同的值（真冲突） ====================
+$ git merge --no-ff admin -m "合并 admin"
+  Merge made by the 'ort' strategy.
+   collab/admin/t1.json | 2 +-
+   1 file changed, 1 insertion(+), 1 deletion(-)
+$ git merge --no-ff bob -m "合并 bob"
+  Auto-merging collab/admin/t1.json
+  CONFLICT (content): Merge conflict in collab/admin/t1.json
+  Automatic merge failed; fix conflicts and then commit the result.
+$ Get-Content collab/admin/t1.json
+  <<<<<<< HEAD
+  {"id":"t1","status":"doing","owner":"bob","title":"核算纹波"}
+  =======
+  {"id":"t1","status":"done","owner":"bob","title":"核算纹波"}
+  >>>>>>> bob
+
+==================== 情况 G：pretty JSON（一个字段一行），两人改的字段中间隔着一行没动过的 ====================
+$ git merge --no-ff admin -m "合并 admin"
+  Merge made by the 'ort' strategy.
+   collab/admin/t1.json | 2 +-
+   1 file changed, 1 insertion(+), 1 deletion(-)
+$ git merge --no-ff bob -m "合并 bob"
+  Auto-merging collab/admin/t1.json
+  Merge made by the 'ort' strategy.
+   collab/admin/t1.json | 2 +-
+   1 file changed, 1 insertion(+), 1 deletion(-)
+$ Get-Content collab/admin/t1.json
+  {
+    "id": "t1",
+    "status": "doing",
+    "title": "核算纹波",
+    "owner": "carol"
+  }
+
+==================== 情况 H：pretty JSON，两人改的字段是上下相邻的两行 ====================
+$ git merge --no-ff admin -m "合并 admin"
+  Merge made by the 'ort' strategy.
+   collab/admin/t1.json | 2 +-
+   1 file changed, 1 insertion(+), 1 deletion(-)
+$ git merge --no-ff bob -m "合并 bob"
+  Auto-merging collab/admin/t1.json
+  CONFLICT (content): Merge conflict in collab/admin/t1.json
+  Automatic merge failed; fix conflicts and then commit the result.
+$ Get-Content collab/admin/t1.json
+  {
+    "id": "t1",
+  <<<<<<< HEAD
+    "status": "todo",
+    "title": "核算纹波与损耗",
+  =======
+    "status": "doing",
+    "title": "核算纹波",
+  >>>>>>> bob
+    "owner": "bob"
+  }
+
+==================== 情况 I：字段之间空一行、所有字段都写出来，两人改原来相邻的两个字段 ====================
+$ git merge --no-ff admin -m "合并 admin"
+  Merge made by the 'ort' strategy.
+   collab/admin/t1.json | 2 +-
+   1 file changed, 1 insertion(+), 1 deletion(-)
+$ git merge --no-ff bob -m "合并 bob"
+  Auto-merging collab/admin/t1.json
+  Merge made by the 'ort' strategy.
+   collab/admin/t1.json | 2 +-
+   1 file changed, 1 insertion(+), 1 deletion(-)
+$ Get-Content collab/admin/t1.json
+  {
+    "id": "t1",
+  
+    "status": "doing",
+  
+    "title": "核算纹波与损耗",
+  
+    "owner": "bob",
+  
+    "due": null
+  }
+$ node -e "console.log(JSON.parse(require('fs').readFileSync('collab/admin/t1.json','utf8')))"
+  {
+    id: 't1',
+    status: 'doing',
+    title: '核算纹波与损耗',
+    owner: 'bob',
+    due: null
+  }
+
+==================== 情况 J：字段之间空一行，一个人给原来是 null 的截止日期填值，另一个人改最后一个字段前面的状态 ====================
+$ git merge --no-ff admin -m "合并 admin"
+  Merge made by the 'ort' strategy.
+   collab/admin/t1.json | 2 +-
+   1 file changed, 1 insertion(+), 1 deletion(-)
+$ git merge --no-ff bob -m "合并 bob"
+  Auto-merging collab/admin/t1.json
+  Merge made by the 'ort' strategy.
+   collab/admin/t1.json | 2 +-
+   1 file changed, 1 insertion(+), 1 deletion(-)
+$ Get-Content collab/admin/t1.json
+  {
+    "id": "t1",
+  
+    "status": "todo",
+  
+    "title": "核算纹波",
+  
+    "owner": "carol",
+  
+    "due": "2026-10-10"
+  }
+
+==================== 情况 K：字段之间空一行，两人把同一个字段改成不同的值（真冲突） ====================
+$ git merge --no-ff admin -m "合并 admin"
+  Merge made by the 'ort' strategy.
+   collab/admin/t1.json | 2 +-
+   1 file changed, 1 insertion(+), 1 deletion(-)
+$ git merge --no-ff bob -m "合并 bob"
+  Auto-merging collab/admin/t1.json
+  CONFLICT (content): Merge conflict in collab/admin/t1.json
+  Automatic merge failed; fix conflicts and then commit the result.
+$ Get-Content collab/admin/t1.json
+  {
+    "id": "t1",
+  
+  <<<<<<< HEAD
+    "status": "doing",
+  =======
+    "status": "done",
+  >>>>>>> bob
+  
+    "title": "核算纹波",
+  
+    "owner": "bob",
+  
+    "due": null
+  }

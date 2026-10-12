@@ -1,0 +1,157 @@
+---
+title: 协作仓和别的仓
+description: 一个项目里的仓分两种：协作仓按协作站设计的流程走，只用 main、由插件提交审核与自动同步、执行器十几秒内合并或打回；资料库、代码仓这些别的仓按普通代码仓管理，分支由各人定、负责人审阅合并请求，插件只取回、只提醒。这一页讲两种仓差在哪、为什么这么分，other-repos/ 对别的仓做什么，以及两种仓的规矩与建仓、配仓
+---
+
+一个项目是 Gitea 上的一个组织，组织里每套东西一个仓。拿 `hybrid-mmc` 来说，项目文件夹里有协作仓 `collab`，还有资料库 `datasheets` 和 `fpga-hil`、`fpga-basic-modules` 这些代码仓。两种仓的管法不一样：
+
+- **协作仓**放协作站的页面、评论与任务这些记录，按协作站设计的流程走：只用 main 一条分支，提交由 AI 调插件的命令做，跟上 main 由插件取回后自动做，NAS 上的执行器十几秒内就合并或打回
+- **别的仓**（资料库、代码仓）按普通代码仓管理，像开源项目那样：负责人直接推 main，别人推自己的分支、开合并请求，由负责人审阅、同意后由 AI 合并；开不开分支、什么时候拉取由各人自己定，插件只取回、只提醒，不改它们的分支和文件
+
+插件里两种仓各是一套目录，互不引用：协作仓那一套在 `collab-repo/`（见 [协作仓](/gwb-collab/submit)），别的仓那一套在 `other-repos/`（这一页）。两种仓都有负责人，就是 Gitea 上这个仓的协作者（见 [Gitea 权限怎么配](/gitea/permissions)）。别的仓的 main 只有负责人能推、能合并；协作仓的负责人就是项目负责人，但协作仓的 main 谁都不能直接推，负责人的改动也经 `collab.submit` 推成合并请求，只由执行器合并。
+分开的根本原因是**等结论要多久**。协作仓一次提交十几秒就有结论，改动也小（一条记录一个文件、一页一个文件夹），插件可以替人把整个过程做完。别的仓的合并请求要等负责人看，常常要几天；这几天里还会接着做别的事，这时候就需要分支，也需要人自己决定什么时候更新。
+
+## 两种仓的对照
+
+| | 协作仓 `collab` | 别的仓（资料库、代码仓） |
+| --- | --- | --- |
+| 分支 | 只用 main，不开别的分支 | 由各人定：小改动直接在 main 上，要等审阅或同时做几件事的从 main 开本地分支 |
+| 谁动手 | AI 调 `collab.submit`，跟上 main 由插件自动做，不手写 git 命令 | 人或 AI 在终端里运行 git |
+| 怎么提交改动 | `collab.submit`：提交 `collab/` 与 `site/`，合进最新的 main，用 AGit 推成合并请求，主题固定是自己的身份；负责人也一样 | 负责人直接推自己仓的 main；别人推自己的分支，再开合到 main 的合并请求 |
+| 谁合并、多久 | 只有 NAS 上的执行器，通常十几秒；负责人在 Gitea 网页上也合并不了 | 那个仓的负责人审阅，同意后由 AI 经 `gitea.http` 以合并提交合并，看人什么时候审 |
+| 被打回或要求重改 | 插件把本地 main 退回服务器的位置，改动回到工作区，提示栏写明原因 | 在原来的分支上接着改、提交，再推这条分支，合并请求跟着更新 |
+| 本地 main 怎么跟上服务器 | 推来它有新提交时插件取回，能快进就自动快进，十秒左右 | 自己 `git pull --ff-only`，或者在 main 上时让 AI 调 `collab.repos.update` |
+| 插件替它做什么 | 推来它有新提交、完整刷新时取回，接着自动同步 | 推来它有新提交、完整刷新时只取回，不切分支、不快进、不改工作区 |
+| 网站上看到什么 | 顶部提示栏的「协作仓」组：没提交审核的文件、冲突、被打回、没能自动同步、不在 main | 顶部提示栏的「别的仓」组：未推送、未拉取、分叉，等我审阅的合并请求、轮到负责人回的 issue，我开的合并请求被要求修改或有了新评论，我提的 issue 负责人回了，我管理的仓没按规矩配好 |
+
+协作仓这一列每一步怎么做，见 [协作仓](/gwb-collab/submit)；出了各种情况几个人各看到什么，见案例 [各种情况下怎么协作](/cases/situations)；同一周在两种仓里各做一件事的完整过程，见案例 [同一周在两个仓里干活](/cases/two-repos)。
+
+## 为什么别的仓不照协作仓那样只用 main
+
+协作仓只用 main 行得通，是因为改动留在本地 main 上、还没合并的那段时间只有十几秒，被打回时插件又会自动退回。换到要审几天的别的仓，这段时间一长，问题就出来了：
+
+1. **等审阅期间本地一直落后**：在 main 上提交、推了合并请求，本地 main 上就多了一个服务器上没有的提交。审阅期间别人合进去的改动，只能用合并或变基拉进来，本地历史和服务器越来越不一样
+2. **后一件事带上前一件事**：等审阅时又在 main 上做另一件事、再推成合并请求，推的是整个 `HEAD`，第二个合并请求里连带着第一个还没合的提交，负责人没法只合后一个
+3. **重改要手工处理**：被要求改的时候，得自己把 main 退回服务器的位置，或者改写提交再强推；协作仓里这一步由 `collab.submit` 自动做，别的仓里全靠手工
+
+每件事一条本地分支，这三样都没了：main 一直和服务器一样，几件事各走各的合并请求，要重改就在那条分支上改。
+插件取回别的仓以后也不替人快进：别的仓落后是常态，什么时候更新、在哪条分支上工作，都该由人决定。取舍见轨迹卡 [别的仓按普通代码仓管理](/trajectory/2026-10-04-other-repos-hands-off)。
+
+## 别的仓日常怎么做
+
+**负责人改自己的仓**：改好、提交，直接推 main。
+
+**给别人的仓提改动**：从 main 开一条分支改，推这条分支，再开合到 main 的合并请求（AI 经 `gitea.http` 调 `POST /repos/<主人>/<仓>/pulls`，请求体写 `head`、`base`、`title`）：
+
+```bash
+git switch main
+git pull --ff-only
+git switch -c fix-pll
+git commit -am "PLL 改成 125 MHz"
+git push -u origin fix-pll
+```
+
+main 推不上去，所以小改动也开分支。再推这条分支就是更新原来的合并请求；改写过已经推上去的提交，用 `git push --force-with-lease`。
+推送用的是 Windows 凭据管理器里存的 Gitea 登录，不是 gwb-gitea 的令牌。别的成员都在 `members` 团队里有写权限，推分支、传 LFS 文件都不用负责人同意。
+
+**合并以后**：
+
+```bash
+git switch main
+git pull --ff-only
+git branch -d fix-pll
+```
+
+建仓、配仓时插件把合并方式只留「合并提交」与「仅快进」，提交原样进 main，所以合并以后拉取一定是快进，不会在本地多出合并提交：
+
+{/* ref file="../plugins/collab/src/gitea-api/gitea.ts" lines="273-283" hash="37d4cfbad50a" blob="0b981198b2e7" */}
+
+**审阅**：我是负责人的仓里别人开的合并请求，出现在我网站顶部的提示栏里，点标题打开 Gitea 看改动。在协作窗格那个项目的一行上点「交给 AI 处理」，AI 读改动、整理摘要问我合不合并（合并接口的完整调用写在交给它的提示词里）；我同意后，它经 `gitea.http` 调 `POST /repos/<主人>/<仓>/pulls/<编号>/merge`（请求体 `{"Do":"merge"}`）以合并提交合进 main，不评论、不关闭。
+
+**issue**：轮到负责人回的 issue 出现在我网站顶部的提示栏里，点标题打开 Gitea 上那条 issue。交给 AI 时，AI 读 issue 与评论，整理给我：在问什么、要不要改代码；回复由我来写，或者我确认后再发，AI 不替我回、不关闭。任何一位负责人回复以后，这一条在每位负责人那里都消失。
+
+**我提的改动有了回应**：我开的合并请求被要求修改或有了别人的评论、我提的 issue 有负责人回了，都出现在我网站的提示栏里。交给 AI 时，AI 读审阅与评论整理给我，要改代码就在我开合并请求的那条分支上改，回复由我确认原文后再发。被要求修改的那条要等审阅人改成批准才消失，我回复不会让它消失；有了评论的那条，我回复以后消失。
+
+## 取回与和服务器比：`other-repos/fetch/`
+
+完整刷新时项目文件夹里每个别的仓 `git fetch origin` 一次，推来某个仓有新提交时只取回那一个（接缝 13）；只更新 `origin/*`，不动这些仓的分支与工作区，一个仓取回失败只记成那个仓那一步的出错，不影响别的。组织里新加的仓，项目文件夹里还没有的，用令牌克隆进来（`repo created` 消息到时、完整刷新时），克隆了哪些写进日志。
+
+{/* ref file="../plugins/collab/src/other-repos/fetch/state.ts" lines="10-14" hash="d245af553a79" blob="da4954e3b1d1" */}
+{/* ref file="../plugins/collab/src/other-repos/fetch/clone-new-repos.ts" lines="24-47" hash="87265825eec2" blob="54f4a771f1b6" */}
+
+插件一直监视项目文件夹里每个别的仓 `.git` 里的 HEAD 与引用（接缝 16）：提交、切分支、取回以后，停 300 毫秒没有新变化就只重算那一个仓；项目文件夹里多了、少了仓，停一会儿再重新列。工作区里的文件不监视。
+
+{/* ref file="../plugins/collab/src/other-repos/fetch/watch.ts" lines="9-30" hash="ddb84cc8b4a1" blob="0bb4a229296b" */}
+
+比的是当前分支和服务器上的同名分支（`origin/<分支>`，上次取回的）：服务器上没有这个分支、或在分离的 HEAD 上时，领先是哪个 `origin` 分支都没有的提交，落后算 0。分支推上去以后就和服务器一样，等审阅时 main 往前走不算。只有领先是未推送 `unpushed`，只有落后是未拉取 `unpulled`，两边都有是分叉 `diverged`，一样的不出通知；工作区里没提交的文件不算，那是正常工作的状态。
+
+{/* ref file="../plugins/collab/src/other-repos/fetch/state.ts" lines="16-24" hash="f190aa9d956d" blob="da4954e3b1d1" */}
+{/* ref file="../plugins/collab/src/git/status.ts" lines="48-57" hash="04919f35c114" blob="6b8e9eee9ade" */}
+{/* ref file="../plugins/collab/src/notifications/notifications-of.ts" lines="50-56" hash="f4ce15c3fa36" blob="8e58bfa05efb" */}
+
+理由见轨迹卡 [别的仓按普通代码仓管理](/trajectory/2026-10-04-other-repos-hands-off)、[别的仓和服务器不一样也进提示栏](/trajectory/2026-10-04-other-repos-in-notice-bar) 与 [和服务器上的同名分支比，只说不一样](/trajectory/2026-10-04-differs-from-own-branch)。
+
+人要更新时，让 AI 调 `collab.repos.update {repo, name}` 把一个仓的 `main` 快进到 `origin/main`：先用令牌取回那一个仓，再 `git merge --ff-only`（带令牌的请求头，LFS 文件检出时要下载），工作区里没提交的改动照留。不能快进就什么都不动、拒绝并写明原因。`name` 要是项目文件夹里协作仓以外的 git 仓。
+
+{/* ref file="../plugins/collab/src/other-repos/fetch/commands.ts" lines="4-26" hash="f396aded2147" blob="316ee51f568a" */}
+{/* ref file="../plugins/collab/src/other-repos/fetch/update.ts" lines="9-36" hash="9de0c487512f" blob="6f759149920f" */}
+{/* ref file="../plugins/collab/src/project/project.ts" lines="37-44" hash="60471bf92dbf" blob="5507995a33f1" */}
+
+## 等我处理的：`other-repos/review.ts`
+
+完整刷新时每个别的仓读一遍，收到某个仓的合并请求（含审阅）、issue、评论、`leads changed` 消息时只重读那一个仓（接缝 14）。读一个仓先读它的协作者（就是负责人）与有没有 `main`，再按本机身份筛出四种：
+
+| 通知 | 列给谁 | 条件 |
+| --- | --- | --- |
+| `pull-to-review` 等我审阅 | 本机身份是这个仓的负责人 | 合到 `main`、开着、不是本机身份开的合并请求；还没有 `main` 的空仓没有 |
+| `issue-to-answer` 轮到负责人回 | 本机身份是这个仓的负责人，每位负责人都列 | 开着的 issue，最后发言的人（没有评论时是提出人）不是这个仓的负责人 |
+| `my-pull-update` 我开的有了回应 | 开合并请求的人 | 我开的、合到 `main`、开着的合并请求：最新的有效审阅（批准或要求修改、没被撤销、不是我自己）是要求修改，或者最后一条评论不是我；从「有了新评论」变成「被要求修改」算另一条 |
+| `my-issue-answered` 我提的有人回了 | 提 issue 的人 | 我提的、开着的 issue，最后发言的是这个仓的负责人、又不是我 |
+
+{/* ref file="../plugins/collab/src/other-repos/review.ts" lines="6-77" hash="f931e2798ae3" blob="d490674f6ea7" */}
+
+负责人只看协作者，不看 Gitea 回的「能不能合并」：组织管理员在每个仓都能合并，照那个算，管理员会收到所有仓的合并请求。只推了分支、没开合并请求的，不提醒。各仓读到的按仓记（`project/per-repo-store.ts`），按消息只换掉那一个仓的，完整刷新去掉已经不在项目文件夹里的；某个仓这次读失败，留着它上一次的。
+
+{/* ref file="../plugins/collab/src/other-repos/review.ts" lines="79-111" hash="ade060c6f1b7" blob="d490674f6ea7" */}
+
+## 两种仓的规矩
+
+两种仓的规矩分在两边：协作仓的在 `collab-repo/rules.ts`（接缝 7），别的仓的在 `other-repos/rules.ts`（接缝 15），都调 `gitea-api/repo-rules.ts` 里共用的那一份，各自给一条 `MainRule` 写明 main 的推送与合并许可给谁：协作仓谁都不能直接推、合并只许执行器的机器人所在的团队 `bots`，负责人也不在许可里；别的仓推送与合并都只许负责人，不写任何团队。
+
+{/* ref file="../plugins/collab/src/collab-repo/rules.ts" lines="5-11" hash="c3d6ab6d8c1c" blob="635892e2fc80" */}
+{/* ref file="../plugins/collab/src/other-repos/rules.ts" lines="6-19" hash="9b2aeed362f9" blob="a7aa977c2e96" */}
+
+共用的规矩：负责人就是协作者（权限「管理」）；不许强制推送；推送与合并许可照这个仓的 `MainRule` 写。核对时按这个仓的 `MainRule` 比，每个问题一句：没有协作者（没有负责人）、main 没有分支保护、推送或合并没有限定人、允许强制推送；别的仓另有许可里的人和负责人对不上、许可里写了团队；协作仓另有推送许可里有人或团队、合并许可里写了人或 `bots` 以外的团队、合并许可里没有 `bots`，负责人出现在协作仓的许可里也算。只有本机身份是这个仓的管理员、仓里已有 `main` 时才核对（分支保护只有管理员读得到），合并方式不核对。
+
+{/* ref file="../plugins/collab/src/gitea-api/repo-rules.ts" lines="4-86" hash="34bc08b9caf7" blob="631b1b85c24d" */}
+
+完整刷新时两边各核对一遍，收到某个仓的 `leads changed` 时只核对那一个，组织里建了仓时核对克隆下来的。有问题的仓成为 `repo-setup`「`<仓>` 没按规矩配好」，协作仓的 `repo` 写协作仓的目录名，都在「别的仓」组。
+
+## 建仓与配仓
+
+`collab.repo.setup {repo, name, leads?}` 照规矩配好项目文件夹里的一个仓：`name` 是协作仓自己的目录名（大小写不论）就交给协作仓的规矩，不然交给别的仓的规矩。依次：
+
+1. 合并方式只留「合并提交」与「仅快进」：成员推上去的提交原样进 `main`，提的人之后 `git pull` 或调 `collab.repos.update` 都是快进
+2. 把 `leads` 逐个加成协作者，权限「管理」（已经是协作者的改成「管理」）
+3. 保护 `main`：已有保护就改、没有就建；别的仓推送许可与合并许可都只写 `leads`，协作仓关掉推送、合并许可只写团队 `bots`；都禁止强制推送
+4. 删掉不在 `leads` 里的协作者：放在最后，调用者自己不在 `leads` 里时，删了自己就没有管理权限，后面的就改不了
+
+`leads` 不给就照现有协作者重配，现有也没有就拒绝、写明要给 `leads`。还没有 main 的空仓、本机身份不是这个仓的管理员，都先拒绝、什么都不改。某一步失败，报错写明前面做到哪一步，不回退；每一步都可以重做，照报错改好再调一次。补齐设置、换负责人、提示栏里「没按规矩配好」那一条，都用它。
+
+{/* ref file="../plugins/collab/src/organization/setup/commands.ts" lines="24-29" hash="4d3086e35c12" blob="b94517f00141" */}
+{/* ref file="../plugins/collab/src/organization/setup/commands.ts" lines="179-207" hash="171ed52efd36" blob="ec7da9d915b4" */}
+{/* ref file="../plugins/collab/src/gitea-api/repo-rules.ts" lines="100-152" hash="3194c12408af" blob="631b1b85c24d" */}
+
+配好以后往这个组织的推送 topic 发一条 `leads changed`（接缝 25，标题 `<组织>/<仓>`）：Gitea 换协作者不发 webhook，各成员的插件靠这一条重读这个仓、再核对规矩，新负责人随即开始收到这个仓的合并请求与 issue（见 [组织事件](/gwb-collab/checks)）。在 Gitea 网页上直接改协作者不会发这条消息，别人要等下一次完整刷新才看到，所以换负责人一律用这条命令。回执里 `leadsChanged` 是 `sent`，或 `{ failed }` 写明没发出去的原因，这时配置已经改好、命令不算失败。
+
+`collab.repo.create {repo, name, description?}` 在协作仓 `origin` 所在的组织里建一个仓（接缝 24），依次：
+
+1. `POST /orgs/{org}/repos`：私有、默认分支 `main`、带一个初始提交。令牌要有组织写权限，缺了 Gitea 回 403，原话原样报出
+2. 照别的仓的规矩配好，负责人是建仓的人：由这里显式加成协作者，组织管理员建仓时 Gitea 不会自动加
+3. 用令牌把它克隆进项目文件夹，和刷新时克隆组织里新加的仓是同一个函数
+4. 和 `collab.repo.setup` 一样发一条 `leads changed`：Gitea 建仓时推来的 `repo created` 比配负责人早，别人的插件读到的还是没有负责人的仓
+
+名字不合 Gitea 的仓名规则、项目文件夹里已有同名的就先拒绝；建出来以后某一步失败，报错写明前面做到哪一步，不回退，调 `collab.repo.setup` 补齐。
+
+{/* ref file="../plugins/collab/src/organization/setup/commands.ts" lines="153-177" hash="7ae85ea1f1d1" blob="ec7da9d915b4" */}
+{/* ref file="../plugins/collab/src/organization/setup/create.ts" lines="14-34" hash="6f205f12981a" blob="2f8dfb0521f9" */}

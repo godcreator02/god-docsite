@@ -1,0 +1,42 @@
+# bob 用 carol 的名字做提交作者，推 AGit  2026-09-25T16:21:18
+
+## [bob] git switch main
+Switched to branch 'main'
+Your branch is up to date with 'origin/main'.
+exit 0
+
+## [bob] git pull
+From https://git.tianshen02.online:28377/godcreator/agit-probe
+   be1ced4..de56eb9  main       -> origin/main
+Updating be1ced4..de56eb9
+Fast-forward
+ plan.md | 5 ++++-
+ 1 file changed, 4 insertions(+), 1 deletion(-)
+exit 0
+
+## [bob] git switch -c spoof-author
+Switched to a new branch 'spoof-author'
+exit 0
+
+## [bob] git add collab
+warning: in the working copy of 'collab/comments/260925-1622-carol-test-zz01.md', CRLF will be replaced by LF the next time Git touches it
+exit 0
+
+## [bob] git -c user.name=carol-test -c user.email=carol-test@probe.local commit -m "冒充 carol 写一条批注"
+[spoof-author f5d5d8b] 冒充 carol 写一条批注
+ 1 file changed, 5 insertions(+)
+ create mode 100644 collab/comments/260925-1622-carol-test-zz01.md
+exit 0
+
+## [bob] git log -1 --format="提交作者=%an <%ae>"
+提交作者=carol-test <carol-test@probe.local>
+exit 0
+
+## [bob] git push origin HEAD:refs/for/main -o topic=spoof-author -o title="冒名测试"
+remote: 
+remote: Visit the existing pull request:        
+remote:   https://git.tianshen02.online:28377/godcreator/agit-probe/pulls/3        
+remote: 
+To https://git.tianshen02.online:28377/godcreator/agit-probe.git
+ * [new reference]   HEAD -> refs/pull/3/head
+exit 0

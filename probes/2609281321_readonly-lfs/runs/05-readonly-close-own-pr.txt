@@ -1,0 +1,11 @@
+# 只读成员能不能关掉自己开的合并请求（collab.retract 要做这件事）  2026-09-28T13:43
+
+## POST /repos/carol-test/lfs-probe/contents/note.txt?sudo=carol-test {"content":"dGVzdAo=","new_branch":"close-test", …}
+status 201，复刻上的分支 close-test，提交 e7b3106
+
+## POST /repos/godcreator/lfs-probe/pulls?sudo=carol-test {"head":"carol-test:close-test","base":"main", …}
+status 201，#2，发起人 carol-test，原仓对 carol 的权限 {"admin":false,"push":false,"pull":true}
+
+## PATCH /repos/godcreator/lfs-probe/pulls/2?sudo=carol-test {"state":"closed"}
+status 201，state: closed，closed_at 2026-09-28T13:43:41+08:00
+（只读的发起人能关自己的合并请求）

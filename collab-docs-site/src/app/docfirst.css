@@ -1,0 +1,25 @@
+/* docfirst 的样式：src/app/docs/layout.tsx 引入，三个区的页都用得到。global.css 由建站时的本机约定改过（追加字体），不在这里改 */
+@import '@godcreator/docfirst-workflow/fumadocs/light.css';
+/* 讲解组件的外壳与零件（分步、动画、选情况的控制条，面板、终端、胶囊、代码行），以及接缝图 SeamMap */
+@import '@godcreator/docfirst-explainer/styles.css';
+/* 数据模型包页的 RecordMerge、WriteRule */
+@import '../components/record-merge/record-merge.css';
+@import '../components/write-rule/write-rule.css';
+/* 「各种情况下怎么协作」页的 SubmitScenarios */
+@import '../components/submit-scenarios/submit-scenarios.css';
+/* 自动合并页的 AutoMergeRun、AutoMergeCases */
+@import '../components/auto-merge/auto-merge.css';
+/* 实时推送页的 PushFlow */
+@import '../components/push-flow/push-flow.css';
+/* 案例「同一周在两个仓里干活」的 RepoModes */
+@import '../components/repo-modes/repo-modes.css';
+@import '../components/seam-map/flow-seam-diagram.css';
+
+.note {
+  border: 1px solid rgba(86, 182, 232, 0.4);
+  border-left: 3px solid rgba(86, 182, 232, 0.7);
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin: 18px 0;
+  font-size: 14px;
+}
