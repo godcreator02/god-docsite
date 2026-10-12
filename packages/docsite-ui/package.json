@@ -1,6 +1,6 @@
 {
   "name": "@godcreator/docsite-ui",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "文档站 UI 外壳（能力小包）：侧栏分组、站内链接卡片、全宽切换、主题切换与身份标识、中文界面文字、推送通道浏览器 hook。组合点在骨架模板",
   "type": "module",
   "exports": {
