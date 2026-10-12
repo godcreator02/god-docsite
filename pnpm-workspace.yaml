@@ -1,9 +1,10 @@
-# 仓根是不发布的 private 包：基础包在 packages/，gwb 插件在 plugins/，自述站在 site/
+# 仓根是不发布的 private 包：地基与能力包在 packages/，两个 gwb 插件在 plugins/，自述站在 site/，docfirst 文档站在 docs-site/
 
 packages:
   - packages/*
   - plugins/*
   - site
+  - docs-site
 
 # vite 8.3.4 补丁：Windows 上 import.meta.glob 相对 base 的热更新失效（运行中新增文件
 # 不进 glob 集合），成因与验证见 probes/2610121018_vite-add-discovery，上游修掉即撤
@@ -15,3 +16,11 @@ allowBuilds:
   esbuild: true
 onlyBuiltDependencies:
   - esbuild
+
+# format-fumadocs 把 fumadocs 声明成 peer，用的是消费方项目装的那份：这里别自动装一份进来
+autoInstallPeers: false
+
+# fumadocs-core 的可选 peer zod 在站与 docfirst-site 两处解析成不同版本时，会装出两份 @fumadocs/base-ui，
+# 卡页里功能包用的 DocsPage 找不到站点 DocsLayout 的上下文。只留一个版本
+overrides:
+  zod: 4.6.5

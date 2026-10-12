@@ -1,7 +1,9 @@
 {
   "name": "@godcreator/code-pin",
   "version": "0.1.0",
-  "author": {"name": "godcreator"},
+  "author": {
+    "name": "godcreator"
+  },
   "type": "module",
   "description": "把文字钉在代码上：只认目标（行段、整个文件、目录树）与记录，核对出代码变没变、确认出新记录；不读文件，不认识文档文本、记号写法与文档格式。零依赖，只用 node:crypto。",
   "exports": {
@@ -24,7 +26,9 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://git.tianshen02.online:28377/godcreator/gwb-docfirst.git"
+    "url": "https://git.tianshen02.online:28377/godcreator/docsite-kit.git"
   },
-  "keywords": ["gwb"]
+  "keywords": [
+    "gwb"
+  ]
 }

@@ -1,7 +1,9 @@
 {
   "name": "@godcreator/docfirst-site",
   "version": "0.1.0",
-  "author": {"name": "godcreator"},
+  "author": {
+    "name": "godcreator"
+  },
   "type": "module",
   "description": "docfirst 站的功能包，建在文档站基础包 @godcreator/docsite-kit 上：构建页面时的 remark 插件（钉码投影成带状态点的代码块、目录树、术语标注、轨迹卡里的链接），MDX 组件 Term 与文件树，星轨盘 /trajectory 与卡页 /trajectory/<卡身份> 两条路由，侧栏入口「轨迹」与样式；template/ 是轨迹卡的集合",
   "exports": {
@@ -61,6 +63,6 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://git.tianshen02.online:28377/godcreator/gwb-docfirst.git"
+    "url": "https://git.tianshen02.online:28377/godcreator/docsite-kit.git"
   }
 }

@@ -1,7 +1,9 @@
 {
   "name": "@godcreator/docfirst-workflow",
   "version": "0.5.6",
-  "author": {"name": "godcreator"},
+  "author": {
+    "name": "godcreator"
+  },
   "type": "module",
   "description": "docfirst 文档工作流：命令行（核对、确认、渲染、轨迹）、项目装配、mdx 格式与卡格式，外加接到 fumadocs 站上的子入口 ./fumadocs（remark 接入、状态点与术语组件、轨迹卡集合与星轨盘、样式），随 docfirst 线发。",
   "bin": {
@@ -71,9 +73,15 @@
     "react": ">=19"
   },
   "peerDependenciesMeta": {
-    "fumadocs-core": {"optional": true},
-    "fumadocs-ui": {"optional": true},
-    "react": {"optional": true}
+    "fumadocs-core": {
+      "optional": true
+    },
+    "fumadocs-ui": {
+      "optional": true
+    },
+    "react": {
+      "optional": true
+    }
   },
   "devDependencies": {
     "@standard-schema/spec": "^1.1.0",
@@ -89,7 +97,9 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://git.tianshen02.online:28377/godcreator/gwb-docfirst.git"
+    "url": "https://git.tianshen02.online:28377/godcreator/docsite-kit.git"
   },
-  "keywords": ["gwb"]
+  "keywords": [
+    "gwb"
+  ]
 }

@@ -1,13 +1,14 @@
 /**
  * # 边界守卫：`packages/` 下各包之间、workflow 包里面**唯一**的边界检查
  *
- * 包分两类。**通用包**不认识 docfirst，谁都能单独使用：钉码 `code-pin`（把文字钉在代码上）、
+ * 仓里住着地基与工作流两族包。**地基**（`docsite-*`）是文档站基础包的能力包与组合包：地基不许认识 docfirst——
+ * 一旦哪天地基依赖了工作流，协作站、论文站这些只用地基的站就被拖着装上整套 docfirst。
+ * **docfirst 的包**用单向的地基依赖：`docfirst-workflow` 用通用包拼出 docfirst（命令行、项目装配与格式，
+ * 接到 fumadocs 站上的部分在它的 `src/fumadocs/`，经子入口 `./fumadocs` 发出去）；`docfirst-site` 是建在
+ * 文档站基础包上的 docfirst 站的功能包，peer 依赖组合包 `docsite-kit`；讲解组件包 `docfirst-explainer`
+ * 是 docfirst 站上用的组件，只有站用，workflow 与工作台插件都不依赖它。
+ * **通用包**不认识 docfirst，谁都能单独使用：钉码 `code-pin`（把文字钉在代码上）、
  * 星轨盘 `trajectory-disk`（把一组卡画成项目方向演变的圆盘）。
- * **docfirst 的包**有三个：`docfirst-workflow` 用上面的通用包拼出 docfirst：命令行、项目装配与格式，
- * 接到 fumadocs 站上的部分在它的 `src/fumadocs/`，经子入口 `./fumadocs` 发出去；`docfirst-site` 是建在文档站基础包上的
- * docfirst 站的功能包，用 workflow 与星轨盘；讲解组件包 `docfirst-explainer`
- * 是 docfirst 站上用的组件（把讲解拆成配说明的帧来播放，外加画接缝图），只有站用，workflow 与工作台插件都不依赖它。
- * 它名字里带 docfirst，但跟两个通用包一样**自成一体**：不依赖任何 `@godcreator/` 包。
  * 包与包之间的方向，pnpm 严格的 node_modules 能拦住一半——没写进依赖的包 import 不到——但「该不该写进依赖」
  * 没人检查；workflow 包里各目录之间更是谁都能 import 谁，`mdx/` 里写一句 `import "../project/load.ts"`，
  * 编译器不会报错，mdx 格式从此就跟读盘、git 绑在一起。**这个文件补上的就是这两项检查。**
@@ -21,7 +22,7 @@
  * 源码与产物不 import 它们、相对 import 不出自己的目录。通用包（`GENERIC_PACKAGES`，是前一张表的一部分）另外要求
  * 源码、产物、样式与包的说明里一个 docfirst 字样都没有：docfirst 的名字一旦写进通用包，哪怕只是一行注释，
  * 下一个人就会顺着它把 docfirst 的规矩搬进来。唯一放行的是清单里 `repository.url`
- * 指向本仓的那一行（`REPOSITORY_URL_LINE`）：仓名是 gwb-docfirst，那一行说的是包放在哪，不是包认识 docfirst。另外各包自己的几条：
+ * 指向本仓的那一行（`REPOSITORY_URL_LINE`）：仓名是 docsite-kit，那一行说的是包放在哪，不是包认识 docfirst。另外各包自己的几条：
  * code-pin 只许 `node:crypto`、不认识文档文本；trajectory-disk 的 `.` 入口零 import、整个包不认识卡文件的写法。
  *
  * 为什么分成两张表：讲解组件包的使用方全是 docfirst 站，`./text` 为 docfirst 的机读版生成文字，用法写在 docfirst 插件的说明书里，
@@ -62,13 +63,21 @@ interface Pkg {
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const PACKAGES = join(ROOT, "packages");
 
-/** npm 包在 packages/ 下的目录名 → 包名。工作台插件在 plugins/docfirst/，同一个工作区，但不在这几个包的依赖关系里 */
+/** npm 包在 packages/ 下的目录名 → 包名。工作台插件在 plugins/ 下，同一个工作区，但不在这几个包的依赖关系里 */
 const NPM_PACKAGES: Record<string, string> = {
   "code-pin": "@godcreator/code-pin",
   "trajectory-disk": "@godcreator/trajectory-disk",
   "docfirst-workflow": "@godcreator/docfirst-workflow",
   "docfirst-explainer": "@godcreator/docfirst-explainer",
   "docfirst-site": "@godcreator/docfirst-site",
+  "docsite-kit": "@godcreator/docsite-kit",
+  "docsite-identity": "@godcreator/docsite-identity",
+  "docsite-comments": "@godcreator/docsite-comments",
+  "docsite-page-sources": "@godcreator/docsite-page-sources",
+  "docsite-writing": "@godcreator/docsite-writing",
+  "docsite-ui": "@godcreator/docsite-ui",
+  "docsite-feed": "@godcreator/docsite-feed",
+  "docsite-explainer": "@godcreator/docsite-explainer",
 };
 const PLUGIN_MANIFEST = join(ROOT, "plugins", "docfirst", "package.json");
 
@@ -134,18 +143,33 @@ function distClosureSpecs(dir: string, file: string): string[] {
 
 /**
  * 每个包不许依赖哪几个兄弟包。**列的是禁止的，不是允许的**——理由跟下面目录那张表一样。
+ * 两族单向：地基（docsite-*）不认识 docfirst 任何包；docfirst 只有 docfirst-site 经 peer 用组合包 docsite-kit。
+ *   地基能力包        零 @godcreator 依赖，互不相识（唯一例外：docsite-ui 用 docsite-identity 的人员类型）
+ *   docsite-kit      组合包：只依赖 page-sources、ui、feed 三件做接线
  *   code-pin          通用包。判代码变没变只要读取器、旧内容来源两样传进来的东西，谁都不认识
  *   trajectory-disk   通用包。只收盘心加一组卡的中性输入，怎么建模、怎么画；docfirst 卡格式与读卡目录在 workflow
  *   docfirst-explainer docfirst 站上用的讲解组件。只有站用，workflow 不用它；它也不认识本仓别的包
- *   docfirst-workflow docfirst 本身：认识钉码与星轨盘，除了站与 docfirst-site 谁都不认识它
- *   docfirst-site     建在文档站基础包上的站的功能包：经 workflow 用钉码，自己用星轨盘的组件；谁都不认识它，讲解组件归站自己用
+ *   docfirst-workflow docfirst 本身：认识钉码与星轨盘，除了站与 docfirst-site 谁都不认识它，也不认识地基
+ *   docfirst-site     建在文档站基础包上的站的功能包：经 workflow 用钉码，自己用星轨盘的组件，peer 用 docsite-kit；谁都不认识它
  */
+const DOCFIRST_PACKAGES = ["code-pin", "trajectory-disk", "docfirst-workflow", "docfirst-explainer", "docfirst-site"];
+const KIT_PACKAGES = ["docsite-kit", "docsite-identity", "docsite-comments", "docsite-page-sources", "docsite-writing", "docsite-ui", "docsite-feed", "docsite-explainer"];
 const PACKAGE_FORBIDDEN: Record<string, string[]> = {
-  "code-pin": ["trajectory-disk", "docfirst-workflow", "docfirst-explainer", "docfirst-site"],
-  "trajectory-disk": ["code-pin", "docfirst-workflow", "docfirst-explainer", "docfirst-site"],
-  "docfirst-workflow": ["docfirst-explainer", "docfirst-site"],
-  "docfirst-explainer": ["code-pin", "trajectory-disk", "docfirst-workflow", "docfirst-site"],
-  "docfirst-site": ["code-pin", "docfirst-explainer"],
+  // 地基：不认识 docfirst 任何包
+  "docsite-kit": ["docsite-identity", "docsite-comments", "docsite-writing", "docsite-explainer", ...DOCFIRST_PACKAGES],
+  "docsite-identity": [...KIT_PACKAGES.filter((each) => each !== "docsite-identity"), ...DOCFIRST_PACKAGES],
+  "docsite-comments": [...KIT_PACKAGES.filter((each) => each !== "docsite-comments"), ...DOCFIRST_PACKAGES],
+  "docsite-page-sources": [...KIT_PACKAGES.filter((each) => each !== "docsite-page-sources"), ...DOCFIRST_PACKAGES],
+  "docsite-writing": [...KIT_PACKAGES.filter((each) => each !== "docsite-writing"), ...DOCFIRST_PACKAGES],
+  "docsite-ui": [...KIT_PACKAGES.filter((each) => each !== "docsite-identity" && each !== "docsite-ui"), ...DOCFIRST_PACKAGES],
+  "docsite-feed": [...KIT_PACKAGES.filter((each) => each !== "docsite-feed"), ...DOCFIRST_PACKAGES],
+  "docsite-explainer": [...KIT_PACKAGES.filter((each) => each !== "docsite-explainer"), ...DOCFIRST_PACKAGES],
+  // docfirst 与通用包
+  "code-pin": ["trajectory-disk", "docfirst-workflow", "docfirst-explainer", "docfirst-site", ...KIT_PACKAGES],
+  "trajectory-disk": ["code-pin", "docfirst-workflow", "docfirst-explainer", "docfirst-site", ...KIT_PACKAGES],
+  "docfirst-workflow": ["docfirst-explainer", "docfirst-site", ...KIT_PACKAGES],
+  "docfirst-explainer": ["code-pin", "trajectory-disk", "docfirst-workflow", "docfirst-site", ...KIT_PACKAGES],
+  "docfirst-site": ["code-pin", "docfirst-explainer", ...KIT_PACKAGES.filter((each) => each !== "docsite-kit")],
 };
 
 test("包的方向：清单三类依赖字段里不许出现禁止的兄弟包", () => {
@@ -181,7 +205,17 @@ test("packages/ 下的包一个不多一个不少——加了新包得先想清�
 // ── 二、自成一体的包与通用包 ──────────────────────────────────────────────────
 
 /** 自成一体的包：不依赖本仓任何别的包，各自单独安装、单独升版。加一个这样的包就加进这张表，下面两条自动管上它 */
-const SELF_CONTAINED_PACKAGES = ["code-pin", "trajectory-disk", "docfirst-explainer"];
+const SELF_CONTAINED_PACKAGES = [
+  "code-pin",
+  "trajectory-disk",
+  "docfirst-explainer",
+  "docsite-identity",
+  "docsite-comments",
+  "docsite-page-sources",
+  "docsite-writing",
+  "docsite-feed",
+  "docsite-explainer",
+];
 
 /** 通用包：自成一体之外还不认识 docfirst，谁都能单独使用。加一个通用包就加进这张表与上一张表 */
 const GENERIC_PACKAGES = ["code-pin", "trajectory-disk"];
@@ -231,7 +265,7 @@ test("自成一体的包：源码与产物不 import 任何 @godcreator/ 包，�
 });
 
 /** 清单里指向本仓的那一行：仓名带 docfirst，这一行只说包放在哪 */
-const REPOSITORY_URL_LINE = '"url": "https://git.tianshen02.online:28377/godcreator/gwb-docfirst.git"';
+const REPOSITORY_URL_LINE = '"url": "https://git.tianshen02.online:28377/godcreator/docsite-kit.git"';
 
 test("通用包不认识 docfirst：源码、产物、样式、构建配置与清单里一个 docfirst 字样都没有（清单里指向本仓的地址除外）", () => {
   const bad: string[] = [];
