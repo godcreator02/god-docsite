@@ -6,6 +6,6 @@
     "doc:render": "docfirst render"
   },
   "devDependencies": {
-    "@godcreator/docfirst-workflow": "^0.5.6"
+    "@godcreator/docfirst-workflow": "^0.5.7"
   }
 }
