@@ -11,7 +11,7 @@ import { StarDisk } from "@godcreator/trajectory-disk/disk";
 import { loadProject } from "@godcreator/docfirst-workflow";
 import { scanCardDir } from "@godcreator/docfirst-workflow/cards";
 import { mdxComponents } from "@site/lib/mdx-components";
-import { siteName, sitePageRefs } from "@site/lib/source";
+import { siteName, sitePageRefs } from "@site/lib/source.server";
 import { trajectoryCards } from "@site/lib/trajectory";
 import { cardIdOf, trajectoryHrefBase } from "../trajectory-href.ts";
 

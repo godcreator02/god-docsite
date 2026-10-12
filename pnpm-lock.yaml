@@ -63,8 +63,8 @@ importers:
   docs-site:
     dependencies:
       '@fumadocs/base-ui':
-        specifier: 16.16.2
-        version: 16.16.2(@types/mdx@2.0.14)(@types/react@19.3.0)(fumadocs-core@16.16.2(@mdx-js/mdx@3.1.1)(@types/estree-jsx@1.0.5)(@types/hast@3.0.5)(@types/mdast@4.0.4)(@types/react@19.3.0)(lucide-react@1.54.0(@types/react@19.3.0)(react@19.3.0))(react-dom@19.3.0(react@19.3.0))(react-router@8.4.0(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(react@19.3.0)(zod@4.6.5))(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(tailwindcss@4.3.3)
+        specifier: 16.17.1
+        version: 16.17.1(@types/mdx@2.0.14)(@types/react@19.3.0)(fumadocs-core@16.17.1(@mdx-js/mdx@3.1.1)(@types/estree-jsx@1.0.5)(@types/hast@3.0.5)(@types/mdast@4.0.4)(@types/react@19.3.0)(lucide-react@1.54.0(@types/react@19.3.0)(react@19.3.0))(react-dom@19.3.0(react@19.3.0))(react-router@8.4.0(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(react@19.3.0)(zod@4.6.5))(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(tailwindcss@4.3.3)
       '@godcreator/docfirst-explainer':
         specifier: workspace:*
         version: link:../packages/docfirst-explainer
@@ -74,9 +74,24 @@ importers:
       '@godcreator/docfirst-workflow':
         specifier: workspace:*
         version: link:../packages/docfirst-workflow
+      '@godcreator/docsite-comments':
+        specifier: workspace:*
+        version: link:../packages/docsite-comments
+      '@godcreator/docsite-explainer':
+        specifier: workspace:*
+        version: link:../packages/docsite-explainer
+      '@godcreator/docsite-identity':
+        specifier: workspace:*
+        version: link:../packages/docsite-identity
       '@godcreator/docsite-kit':
-        specifier: ^0.1.7
-        version: 0.1.9(@fumadocs/base-ui@16.16.2(@types/mdx@2.0.14)(@types/react@19.3.0)(fumadocs-core@16.16.2(@mdx-js/mdx@3.1.1)(@types/estree-jsx@1.0.5)(@types/hast@3.0.5)(@types/mdast@4.0.4)(@types/react@19.3.0)(lucide-react@1.54.0(@types/react@19.3.0)(react@19.3.0))(react-dom@19.3.0(react@19.3.0))(react-router@8.4.0(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(react@19.3.0)(zod@4.6.5))(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(tailwindcss@4.3.3))(@types/react@19.3.0)(fumadocs-core@16.16.2(@mdx-js/mdx@3.1.1)(@types/estree-jsx@1.0.5)(@types/hast@3.0.5)(@types/mdast@4.0.4)(@types/react@19.3.0)(lucide-react@1.54.0(@types/react@19.3.0)(react@19.3.0))(react-dom@19.3.0(react@19.3.0))(react-router@8.4.0(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(react@19.3.0)(zod@4.6.5))(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(vite@8.3.4(patch_hash=71051b570cd126a84b4a427f5a23158b617cf5a07b451901ea0cab096dc377d8)(@types/node@26.6.4)(esbuild@0.28.2)(jiti@2.7.0)(yaml@2.9.1))
+        specifier: ^0.3.0
+        version: 0.3.0(@fumadocs/base-ui@16.17.1(@types/mdx@2.0.14)(@types/react@19.3.0)(fumadocs-core@16.17.1(@mdx-js/mdx@3.1.1)(@types/estree-jsx@1.0.5)(@types/hast@3.0.5)(@types/mdast@4.0.4)(@types/react@19.3.0)(lucide-react@1.54.0(@types/react@19.3.0)(react@19.3.0))(react-dom@19.3.0(react@19.3.0))(react-router@8.4.0(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(react@19.3.0)(zod@4.6.5))(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(tailwindcss@4.3.3))(@godcreator/docsite-identity@packages+docsite-identity)(fumadocs-core@16.17.1(@mdx-js/mdx@3.1.1)(@types/estree-jsx@1.0.5)(@types/hast@3.0.5)(@types/mdast@4.0.4)(@types/react@19.3.0)(lucide-react@1.54.0(@types/react@19.3.0)(react@19.3.0))(react-dom@19.3.0(react@19.3.0))(react-router@8.4.0(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(react@19.3.0)(zod@4.6.5))(react@19.3.0)(vite@8.3.4(patch_hash=71051b570cd126a84b4a427f5a23158b617cf5a07b451901ea0cab096dc377d8)(@types/node@26.6.4)(esbuild@0.28.2)(jiti@2.7.0)(yaml@2.9.1))
+      '@godcreator/docsite-page-sources':
+        specifier: workspace:*
+        version: link:../packages/docsite-page-sources
+      '@godcreator/docsite-ui':
+        specifier: workspace:*
+        version: link:../packages/docsite-ui
       '@react-router/node':
         specifier: ^8.4.0
         version: 8.4.0(react-router@8.4.0(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(typescript@6.0.3)
@@ -84,11 +99,11 @@ importers:
         specifier: ^8.4.0
         version: 8.4.0(react-router@8.4.0(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(typescript@6.0.3)
       fumadocs-core:
-        specifier: 16.16.2
-        version: 16.16.2(@mdx-js/mdx@3.1.1)(@types/estree-jsx@1.0.5)(@types/hast@3.0.5)(@types/mdast@4.0.4)(@types/react@19.3.0)(lucide-react@1.54.0(@types/react@19.3.0)(react@19.3.0))(react-dom@19.3.0(react@19.3.0))(react-router@8.4.0(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(react@19.3.0)(zod@4.6.5)
+        specifier: 16.17.1
+        version: 16.17.1(@mdx-js/mdx@3.1.1)(@types/estree-jsx@1.0.5)(@types/hast@3.0.5)(@types/mdast@4.0.4)(@types/react@19.3.0)(lucide-react@1.54.0(@types/react@19.3.0)(react@19.3.0))(react-dom@19.3.0(react@19.3.0))(react-router@8.4.0(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(react@19.3.0)(zod@4.6.5)
       fumadocs-mdx:
-        specifier: 15.4.4
-        version: 15.4.4(@types/mdast@4.0.4)(@types/mdx@2.0.14)(@types/react@19.3.0)(fumadocs-core@16.16.2(@mdx-js/mdx@3.1.1)(@types/estree-jsx@1.0.5)(@types/hast@3.0.5)(@types/mdast@4.0.4)(@types/react@19.3.0)(lucide-react@1.54.0(@types/react@19.3.0)(react@19.3.0))(react-dom@19.3.0(react@19.3.0))(react-router@8.4.0(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(react@19.3.0)(zod@4.6.5))(react@19.3.0)(rolldown@1.2.13)(vite@8.3.4(patch_hash=71051b570cd126a84b4a427f5a23158b617cf5a07b451901ea0cab096dc377d8)(@types/node@26.6.4)(esbuild@0.28.2)(jiti@2.7.0)(yaml@2.9.1))
+        specifier: 15.4.7
+        version: 15.4.7(@types/mdast@4.0.4)(@types/mdx@2.0.14)(@types/react@19.3.0)(fumadocs-core@16.17.1(@mdx-js/mdx@3.1.1)(@types/estree-jsx@1.0.5)(@types/hast@3.0.5)(@types/mdast@4.0.4)(@types/react@19.3.0)(lucide-react@1.54.0(@types/react@19.3.0)(react@19.3.0))(react-dom@19.3.0(react@19.3.0))(react-router@8.4.0(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(react@19.3.0)(zod@4.6.5))(react@19.3.0)(rolldown@1.2.13)(vite@8.3.4(patch_hash=71051b570cd126a84b4a427f5a23158b617cf5a07b451901ea0cab096dc377d8)(@types/node@26.6.4)(esbuild@0.28.2)(jiti@2.7.0)(yaml@2.9.1))
       isbot:
         specifier: ^5.2.2
         version: 5.2.2
@@ -141,6 +156,95 @@ importers:
 
   packages/code-pin: {}
 
+  packages/collab-merge-check:
+    dependencies:
+      '@godcreator/collab-model':
+        specifier: workspace:*
+        version: link:../collab-model
+    devDependencies:
+      '@types/node':
+        specifier: ^26.6.2
+        version: 26.6.4
+      typescript:
+        specifier: ^6.0.3
+        version: 6.0.3
+      vitest:
+        specifier: ^5.0.1
+        version: 5.0.3(@types/node@26.6.4)(jsdom@30.1.2)(vite@8.3.4(patch_hash=71051b570cd126a84b4a427f5a23158b617cf5a07b451901ea0cab096dc377d8)(@types/node@26.6.4)(esbuild@0.28.2)(jiti@2.7.0)(yaml@2.9.1))
+
+  packages/collab-model:
+    devDependencies:
+      '@godcreator/docsite-kit':
+        specifier: workspace:*
+        version: link:../docsite-kit
+      '@types/node':
+        specifier: ^26.6.2
+        version: 26.6.4
+      typescript:
+        specifier: ^6.0.3
+        version: 6.0.3
+      vitest:
+        specifier: ^5.0.1
+        version: 5.0.3(@types/node@26.6.4)(jsdom@30.1.2)(vite@8.3.4(patch_hash=71051b570cd126a84b4a427f5a23158b617cf5a07b451901ea0cab096dc377d8)(@types/node@26.6.4)(esbuild@0.28.2)(jiti@2.7.0)(yaml@2.9.1))
+
+  packages/collab-site:
+    dependencies:
+      '@godcreator/collab-model':
+        specifier: workspace:*
+        version: link:../collab-model
+      react-markdown:
+        specifier: ^10.1.0
+        version: 10.1.0(@types/react@19.3.0)(react@19.3.0)
+      remark-gfm:
+        specifier: ^4.0.1
+        version: 4.0.1
+    devDependencies:
+      '@fumadocs/base-ui':
+        specifier: 16.16.2
+        version: 16.16.2(@types/mdx@2.0.14)(@types/react@19.3.0)(fumadocs-core@16.16.2(@mdx-js/mdx@3.1.1)(@types/estree-jsx@1.0.5)(@types/hast@3.0.5)(@types/mdast@4.0.4)(@types/react@19.3.0)(lucide-react@1.54.0(@types/react@19.3.0)(react@19.3.0))(react-dom@19.3.0(react@19.3.0))(react-router@8.4.0(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(react@19.3.0)(zod@4.6.5))(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(tailwindcss@4.3.3)
+      '@godcreator/docsite-kit':
+        specifier: workspace:*
+        version: link:../docsite-kit
+      '@testing-library/react':
+        specifier: ^16.3.3
+        version: 16.3.3(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
+      '@types/node':
+        specifier: ^26.6.2
+        version: 26.6.4
+      '@types/react':
+        specifier: ^19.3.0
+        version: 19.3.0
+      '@types/react-dom':
+        specifier: ^19.3.0
+        version: 19.3.0(@types/react@19.3.0)
+      fumadocs-core:
+        specifier: 16.16.2
+        version: 16.16.2(@mdx-js/mdx@3.1.1)(@types/estree-jsx@1.0.5)(@types/hast@3.0.5)(@types/mdast@4.0.4)(@types/react@19.3.0)(lucide-react@1.54.0(@types/react@19.3.0)(react@19.3.0))(react-dom@19.3.0(react@19.3.0))(react-router@8.4.0(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(react@19.3.0)(zod@4.6.5)
+      jsdom:
+        specifier: ^30.1.1
+        version: 30.1.2
+      lucide-react:
+        specifier: 1.54.0
+        version: 1.54.0(@types/react@19.3.0)(react@19.3.0)
+      react:
+        specifier: ^19.3.0
+        version: 19.3.0
+      react-dom:
+        specifier: ^19.3.0
+        version: 19.3.0(react@19.3.0)
+      react-router:
+        specifier: ^8.4.0
+        version: 8.4.0(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
+      typescript:
+        specifier: ^6.0.3
+        version: 6.0.3
+      vite:
+        specifier: ^8.3.0
+        version: 8.3.4(patch_hash=71051b570cd126a84b4a427f5a23158b617cf5a07b451901ea0cab096dc377d8)(@types/node@26.6.4)(esbuild@0.28.2)(jiti@2.7.0)(yaml@2.9.1)
+      vitest:
+        specifier: ^5.0.1
+        version: 5.0.3(@types/node@26.6.4)(jsdom@30.1.2)(vite@8.3.4(patch_hash=71051b570cd126a84b4a427f5a23158b617cf5a07b451901ea0cab096dc377d8)(@types/node@26.6.4)(esbuild@0.28.2)(jiti@2.7.0)(yaml@2.9.1))
+
   packages/docfirst-explainer:
     devDependencies:
       '@types/react':
@@ -160,11 +264,11 @@ importers:
         version: link:../trajectory-disk
     devDependencies:
       '@fumadocs/base-ui':
-        specifier: 16.16.2
-        version: 16.16.2(@types/mdx@2.0.14)(@types/react@19.3.0)(fumadocs-core@16.16.2(@mdx-js/mdx@3.1.1)(@types/estree-jsx@1.0.5)(@types/hast@3.0.5)(@types/mdast@4.0.4)(@types/react@19.3.0)(lucide-react@1.54.0(@types/react@19.3.0)(react@19.3.0))(react-dom@19.3.0(react@19.3.0))(react-router@8.4.0(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(react@19.3.0)(zod@4.6.5))(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(tailwindcss@4.3.3)
+        specifier: 16.17.1
+        version: 16.17.1(@types/mdx@2.0.14)(@types/react@19.3.0)(fumadocs-core@16.17.1(@mdx-js/mdx@3.1.1)(@types/estree-jsx@1.0.5)(@types/hast@3.0.5)(@types/mdast@4.0.4)(@types/react@19.3.0)(lucide-react@1.54.0(@types/react@19.3.0)(react@19.3.0))(react-dom@19.3.0(react@19.3.0))(react-router@8.4.0(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(react@19.3.0)(zod@4.6.5))(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(tailwindcss@4.3.3)
       '@godcreator/docsite-kit':
-        specifier: ^0.1.7
-        version: 0.1.9(@fumadocs/base-ui@16.16.2(@types/mdx@2.0.14)(@types/react@19.3.0)(fumadocs-core@16.16.2(@mdx-js/mdx@3.1.1)(@types/estree-jsx@1.0.5)(@types/hast@3.0.5)(@types/mdast@4.0.4)(@types/react@19.3.0)(lucide-react@1.54.0(@types/react@19.3.0)(react@19.3.0))(react-dom@19.3.0(react@19.3.0))(react-router@8.4.0(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(react@19.3.0)(zod@4.6.5))(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(tailwindcss@4.3.3))(@types/react@19.3.0)(fumadocs-core@16.16.2(@mdx-js/mdx@3.1.1)(@types/estree-jsx@1.0.5)(@types/hast@3.0.5)(@types/mdast@4.0.4)(@types/react@19.3.0)(lucide-react@1.54.0(@types/react@19.3.0)(react@19.3.0))(react-dom@19.3.0(react@19.3.0))(react-router@8.4.0(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(react@19.3.0)(zod@4.6.5))(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(vite@8.3.4(patch_hash=71051b570cd126a84b4a427f5a23158b617cf5a07b451901ea0cab096dc377d8)(@types/node@26.6.4)(esbuild@0.28.2)(jiti@2.7.0)(yaml@2.9.1))
+        specifier: ^0.3.0
+        version: 0.3.0(@fumadocs/base-ui@16.17.1(@types/mdx@2.0.14)(@types/react@19.3.0)(fumadocs-core@16.17.1(@mdx-js/mdx@3.1.1)(@types/estree-jsx@1.0.5)(@types/hast@3.0.5)(@types/mdast@4.0.4)(@types/react@19.3.0)(lucide-react@1.54.0(@types/react@19.3.0)(react@19.3.0))(react-dom@19.3.0(react@19.3.0))(react-router@8.4.0(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(react@19.3.0)(zod@4.6.5))(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(tailwindcss@4.3.3))(@godcreator/docsite-identity@0.1.0(react@19.3.0))(fumadocs-core@16.17.1(@mdx-js/mdx@3.1.1)(@types/estree-jsx@1.0.5)(@types/hast@3.0.5)(@types/mdast@4.0.4)(@types/react@19.3.0)(lucide-react@1.54.0(@types/react@19.3.0)(react@19.3.0))(react-dom@19.3.0(react@19.3.0))(react-router@8.4.0(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(react@19.3.0)(zod@4.6.5))(react@19.3.0)(vite@8.3.4(patch_hash=71051b570cd126a84b4a427f5a23158b617cf5a07b451901ea0cab096dc377d8)(@types/node@26.6.4)(esbuild@0.28.2)(jiti@2.7.0)(yaml@2.9.1))
       '@types/mdx':
         specifier: ^2.0.14
         version: 2.0.14
@@ -175,8 +279,8 @@ importers:
         specifier: ^19.3.0
         version: 19.3.0
       fumadocs-core:
-        specifier: 16.16.2
-        version: 16.16.2(@mdx-js/mdx@3.1.1)(@types/estree-jsx@1.0.5)(@types/hast@3.0.5)(@types/mdast@4.0.4)(@types/react@19.3.0)(lucide-react@1.54.0(@types/react@19.3.0)(react@19.3.0))(react-dom@19.3.0(react@19.3.0))(react-router@8.4.0(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(react@19.3.0)(zod@4.6.5)
+        specifier: 16.17.1
+        version: 16.17.1(@mdx-js/mdx@3.1.1)(@types/estree-jsx@1.0.5)(@types/hast@3.0.5)(@types/mdast@4.0.4)(@types/react@19.3.0)(lucide-react@1.54.0(@types/react@19.3.0)(react@19.3.0))(react-dom@19.3.0(react@19.3.0))(react-router@8.4.0(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(react@19.3.0)(zod@4.6.5)
       lucide-react:
         specifier: 1.54.0
         version: 1.54.0(@types/react@19.3.0)(react@19.3.0)
@@ -487,6 +591,84 @@ importers:
         specifier: ^19.3.0
         version: 19.3.0
 
+  plugins/collab:
+    devDependencies:
+      '@godcreator/collab-merge-check':
+        specifier: workspace:*
+        version: link:../../packages/collab-merge-check
+      '@godcreator/collab-model':
+        specifier: workspace:*
+        version: link:../../packages/collab-model
+      '@godcreator/collab-site':
+        specifier: workspace:*
+        version: link:../../packages/collab-site
+      '@godcreator/docsite-kit':
+        specifier: workspace:*
+        version: link:../../packages/docsite-kit
+      '@godcreator/gwb-docsite':
+        specifier: workspace:*
+        version: link:../docsite
+      '@godcreator/gwb-gitea':
+        specifier: ^0.1.17
+        version: 0.1.17(@godcreator/gwb-commands@0.6.1(@godcreator/gwb-kernel-desktop@0.10.1(cordis@4.0.0-rc.10))(cordis@4.0.0-rc.10))(@godcreator/gwb-kernel-desktop@0.10.1(cordis@4.0.0-rc.10))(@godcreator/gwb-settings@0.4.0(@godcreator/gwb-commands@0.6.1(@godcreator/gwb-kernel-desktop@0.10.1(cordis@4.0.0-rc.10))(cordis@4.0.0-rc.10))(@godcreator/gwb-kernel-desktop@0.10.1(cordis@4.0.0-rc.10))(@godcreator/gwb-skills@0.4.13(@godcreator/gwb-commands@0.6.1(@godcreator/gwb-kernel-desktop@0.10.1(cordis@4.0.0-rc.10))(cordis@4.0.0-rc.10))(@godcreator/gwb-kernel-desktop@0.10.1(cordis@4.0.0-rc.10))(cordis@4.0.0-rc.10))(cordis@4.0.0-rc.10))(@godcreator/gwb-skills@0.4.13(@godcreator/gwb-commands@0.6.1(@godcreator/gwb-kernel-desktop@0.10.1(cordis@4.0.0-rc.10))(cordis@4.0.0-rc.10))(@godcreator/gwb-kernel-desktop@0.10.1(cordis@4.0.0-rc.10))(cordis@4.0.0-rc.10))(cordis@4.0.0-rc.10)
+      '@godcreator/gwb-qq-bot':
+        specifier: ^0.7.1
+        version: 0.7.7(8bd9e652e3d273105efee9a3d9ab0ede)
+      '@godcreator/gwb-skills':
+        specifier: ^0.4.12
+        version: 0.4.13(@godcreator/gwb-commands@0.6.1(@godcreator/gwb-kernel-desktop@0.10.1(cordis@4.0.0-rc.10))(cordis@4.0.0-rc.10))(@godcreator/gwb-kernel-desktop@0.10.1(cordis@4.0.0-rc.10))(cordis@4.0.0-rc.10)
+      '@godcreator/gwb-zcode':
+        specifier: ^0.4.0
+        version: 0.4.1(@godcreator/gwb-commands@0.6.1(@godcreator/gwb-kernel-desktop@0.10.1(cordis@4.0.0-rc.10))(cordis@4.0.0-rc.10))(@godcreator/gwb-kernel-desktop@0.10.1(cordis@4.0.0-rc.10))(@godcreator/gwb-skills@0.4.13(@godcreator/gwb-commands@0.6.1(@godcreator/gwb-kernel-desktop@0.10.1(cordis@4.0.0-rc.10))(cordis@4.0.0-rc.10))(@godcreator/gwb-kernel-desktop@0.10.1(cordis@4.0.0-rc.10))(cordis@4.0.0-rc.10))(cordis@4.0.0-rc.10)
+      '@tailwindcss/cli':
+        specifier: ^4.3.3
+        version: 4.3.3
+      '@types/node':
+        specifier: ^24.0.0
+        version: 24.19.1
+      '@types/react':
+        specifier: 19.2.18
+        version: 19.2.18
+      '@types/react-dom':
+        specifier: 19.2.5
+        version: 19.2.5(@types/react@19.2.18)
+      class-variance-authority:
+        specifier: ^0.7.1
+        version: 0.7.1
+      cn:
+        specifier: ^0.2.5
+        version: 0.2.6
+      cordis:
+        specifier: 4.0.0-rc.10
+        version: 4.0.0-rc.10(@cordisjs/plugin-include@1.1.0)(@cordisjs/plugin-loader@1.0.0-rc.7)
+      esbuild:
+        specifier: ^0.28.2
+        version: 0.28.2
+      lucide-react:
+        specifier: ^1.41.0
+        version: 1.54.0(@types/react@19.2.18)(react@19.2.8)
+      oxlint:
+        specifier: 1.76.0
+        version: 1.76.0(oxlint-tsgolint@7.0.2001)
+      oxlint-tsgolint:
+        specifier: 7.0.2001
+        version: 7.0.2001
+      react:
+        specifier: 19.2.8
+        version: 19.2.8
+      react-dom:
+        specifier: 19.2.8
+        version: 19.2.8(react@19.2.8)
+      tailwindcss:
+        specifier: ^4.3.3
+        version: 4.3.3
+      typescript:
+        specifier: ^7.0.2
+        version: 7.0.2
+      vitest:
+        specifier: ^4.1.10
+        version: 4.1.11(@types/node@24.19.1)(esbuild@0.28.2)(jiti@2.7.0)(jsdom@30.1.2)(yaml@2.9.1)
+
   plugins/docfirst:
     devDependencies:
       '@godcreator/gwb-commands':
@@ -750,6 +932,10 @@ packages:
     resolution: {integrity: sha512-CjXrNHTnvqBVqHgdBysY3vk2T8tpJHb5/RMeHJBTyVa9xgugCB0CJTx/3oO8RV2QRQP391RWpB7D6hLjm8V9uA==}
     engines: {node: '>=6.0.0'}
     hasBin: true
+
+  '@babel/runtime@7.29.10':
+    resolution: {integrity: sha512-NpugTzbKgGrNe45Ui32cN8vCFFMxVtP/9rtfwv0nP5FRDAjvYBxJcLVpYA9mr1jxP6cnIT7x9LUzuDTbWYYNRA==}
+    engines: {node: '>=6.9.0'}
 
   '@babel/runtime@8.0.7':
     resolution: {integrity: sha512-k0hagDDq/6w4v+0Sp4wFvIz/yswH5O7Va6aRTnD7N62Tnborp4X+YB+H3XUcWVSR4aE47WPEXiIIZchBs0GmYg==}
@@ -1273,14 +1459,36 @@ packages:
   '@fumari/image-size@0.1.1':
     resolution: {integrity: sha512-iaiV2wyzJ4mW358NX4CX3yGit+WjKYzpaQ+rldK9BjL/5jFpeV6ruWnZVq7MEyMn3Gd0DLi8g/79NZAAQaGscw==}
 
-  '@godcreator/docsite-kit@0.1.9':
-    resolution: {integrity: sha512-1cG9Im1Zvjv8tJu5eX6IuhpW83n/35tmwULFK+8OYhGDkpTetIU8o7wRIB91wjubrNOdATbJUefYtZVhYCxZQw==, tarball: https://git.tianshen02.online:28377/api/packages/godcreator/npm/%40godcreator%2Fdocsite-kit/-/0.1.9/docsite-kit-0.1.9.tgz}
+  '@godcreator/docsite-feed@0.1.0':
+    resolution: {integrity: sha512-3cNxFRLeV4mCyqjVET+n9gTpuIUEv3uxwlrE5GPQa9sIhMJPFieZmy7KARTewMG0qsTXxMGr1P6O/ImBqrwK5w==, tarball: https://git.tianshen02.online:28377/api/packages/godcreator/npm/%40godcreator%2Fdocsite-feed/-/0.1.0/docsite-feed-0.1.0.tgz}
     peerDependencies:
-      '@fumadocs/base-ui': 16.16.2
-      fumadocs-core: 16.16.2
       react: ^19.3.0
-      react-dom: ^19.3.0
       vite: ^8.3.0
+
+  '@godcreator/docsite-identity@0.1.0':
+    resolution: {integrity: sha512-/xS/PpGliHaCSZ2vnPIzNjWm9xiwP1yndt+HmbJsx+ah1XcCN5gz51QRVQXoXgc4RE/3kQ+v7xfU1JvUAr5hNw==, tarball: https://git.tianshen02.online:28377/api/packages/godcreator/npm/%40godcreator%2Fdocsite-identity/-/0.1.0/docsite-identity-0.1.0.tgz}
+    peerDependencies:
+      react: ^19.3.0
+
+  '@godcreator/docsite-kit@0.3.0':
+    resolution: {integrity: sha512-fgi4CVB5oxI7/YZ8hIAHCjA6p0HGCPuT+et6ArbOfmGraqYrMvYdVb93iR1gRnR/KrzdAuTlTgPJInFV/90xkw==, tarball: https://git.tianshen02.online:28377/api/packages/godcreator/npm/%40godcreator%2Fdocsite-kit/-/0.3.0/docsite-kit-0.3.0.tgz}
+    peerDependencies:
+      react: ^19.3.0
+      vite: ^8.3.0
+
+  '@godcreator/docsite-page-sources@0.1.0':
+    resolution: {integrity: sha512-5koemtWmEGPdDr83K8hVHaOUx0LUxukOqtfIFUfnuJeXPmg4MnW5oP8oReaQKjrKtOM+zcG0kwDGcarqoNUTOQ==, tarball: https://git.tianshen02.online:28377/api/packages/godcreator/npm/%40godcreator%2Fdocsite-page-sources/-/0.1.0/docsite-page-sources-0.1.0.tgz}
+    peerDependencies:
+      fumadocs-core: 16.17.1
+      react: ^19.3.0
+
+  '@godcreator/docsite-ui@0.1.0':
+    resolution: {integrity: sha512-OZ3h8YgYe3OzUjggxbv5tcLGa8Hmgbhww2PcZbK6iifqHmtjoLpJC20RWCk/kmSCbAqlMLNpJUXarTAg9HYUFA==, tarball: https://git.tianshen02.online:28377/api/packages/godcreator/npm/%40godcreator%2Fdocsite-ui/-/0.1.0/docsite-ui-0.1.0.tgz}
+    peerDependencies:
+      '@fumadocs/base-ui': 16.17.1
+      '@godcreator/docsite-identity': ^0.1.0
+      fumadocs-core: 16.17.1
+      react: ^19.3.0
 
   '@godcreator/gwb-commands@0.6.1':
     resolution: {integrity: sha512-4nsqJ2oUxZIcHM5wGu73pzmOTo0R4ixAoRgd+l+RNPf0wNmTt3cDsuIyX3kgWD7gTEs4CmNVemra3fDL+gA/dw==, tarball: https://git.tianshen02.online:28377/api/packages/godcreator/npm/%40godcreator%2Fgwb-commands/-/0.6.1/gwb-commands-0.6.1.tgz}
@@ -1294,10 +1502,41 @@ packages:
       '@godcreator/gwb-kernel-desktop': ^0.10.0
       cordis: ^4.0.0-rc.10
 
+  '@godcreator/gwb-gitea@0.1.17':
+    resolution: {integrity: sha512-McgoCr0nlLqckFyq0k32Y9KGcwhUHnMfY0WrbXtwBkkIoDYB/F5afeIxqbpN7ngSMspB2ed5u6o3t/4YPCsyUQ==, tarball: https://git.tianshen02.online:28377/api/packages/godcreator/npm/%40godcreator%2Fgwb-gitea/-/0.1.17/gwb-gitea-0.1.17.tgz}
+    peerDependencies:
+      '@godcreator/gwb-commands': ^0.6.0
+      '@godcreator/gwb-kernel-desktop': ^0.10.0
+      '@godcreator/gwb-settings': ^0.4.0
+      '@godcreator/gwb-skills': ^0.4.7
+      cordis: ^4.0.0-rc.10
+    peerDependenciesMeta:
+      '@godcreator/gwb-skills':
+        optional: true
+
   '@godcreator/gwb-kernel-desktop@0.10.1':
     resolution: {integrity: sha512-lddE5zAiIgQ4w/XDX2aP3zm4tnBPYRU6RcRrbM67MHus5jztCWAd0C/3gXDs3sE1J0ld9mGmRhKZJpCbfy9lqA==, tarball: https://git.tianshen02.online:28377/api/packages/godcreator/npm/%40godcreator%2Fgwb-kernel-desktop/-/0.10.1/gwb-kernel-desktop-0.10.1.tgz}
     peerDependencies:
       cordis: 4.0.0-rc.10
+
+  '@godcreator/gwb-qq-bot@0.7.7':
+    resolution: {integrity: sha512-J6rTUgLvSohi8dSHAx1myddVmvZAgLY4gbt6DYAbQ/m9t1I0IJpFYkf/sGdbYRrSwAvwpko/DWdKQ8SYa35kZA==, tarball: https://git.tianshen02.online:28377/api/packages/godcreator/npm/%40godcreator%2Fgwb-qq-bot/-/0.7.7/gwb-qq-bot-0.7.7.tgz}
+    peerDependencies:
+      '@godcreator/gwb-claudecode': ^0.4.0
+      '@godcreator/gwb-commands': ^0.6.0
+      '@godcreator/gwb-data': ^0.1.12
+      '@godcreator/gwb-kernel-desktop': ^0.10.1
+      '@godcreator/gwb-settings': ^0.4.0
+      '@godcreator/gwb-skills': ^0.4.13
+      '@godcreator/gwb-zcode': ^0.4.0
+      cordis: ^4.0.0-rc.10
+    peerDependenciesMeta:
+      '@godcreator/gwb-claudecode':
+        optional: true
+      '@godcreator/gwb-skills':
+        optional: true
+      '@godcreator/gwb-zcode':
+        optional: true
 
   '@godcreator/gwb-settings@0.4.0':
     resolution: {integrity: sha512-+K2dhJ3r0g6vmYXSvl1YHMPS+h6nESmHEXp4L6oWKqxQjt0I69wonKMlh1QRpQDsx0JTa2OiHrSE6kLHZbwhQA==, tarball: https://git.tianshen02.online:28377/api/packages/godcreator/npm/%40godcreator%2Fgwb-settings/-/0.4.0/gwb-settings-0.4.0.tgz}
@@ -1346,6 +1585,17 @@ packages:
         optional: true
       '@godcreator/gwb-settings':
         optional: true
+      '@godcreator/gwb-skills':
+        optional: true
+
+  '@godcreator/gwb-zcode@0.4.1':
+    resolution: {integrity: sha512-gxvQSbDN5BFfAhHQxwu6EROBdhGnwmzRJRqN9VPnWb09ViPPCKDNrwavYrfQ16932YcwOEQ+x16WEAlYc+jbSQ==, tarball: https://git.tianshen02.online:28377/api/packages/godcreator/npm/%40godcreator%2Fgwb-zcode/-/0.4.1/gwb-zcode-0.4.1.tgz}
+    peerDependencies:
+      '@godcreator/gwb-commands': ^0.6.0
+      '@godcreator/gwb-kernel-desktop': ^0.10.1
+      '@godcreator/gwb-skills': ^0.4.7
+      cordis: ^4.0.0-rc.10
+    peerDependenciesMeta:
       '@godcreator/gwb-skills':
         optional: true
 
@@ -1903,6 +2153,21 @@ packages:
     peerDependencies:
       vite: ^5.2.0 || ^6 || ^7 || ^8
 
+  '@testing-library/react@16.3.3':
+    resolution: {integrity: sha512-Uo193NgQbPMz6lrrhtRQQFcMC6Re/ELLFbbuVL30WDlZxlpZf9/lMHTAVxPRLw1q1iu9OJmR1c2BLiENRstdBg==}
+    engines: {node: '>=18'}
+    peerDependencies:
+      '@testing-library/dom': ^10.0.0
+      '@types/react': ^18.0.0 || ^19.0.0
+      '@types/react-dom': ^18.0.0 || ^19.0.0
+      react: ^18.0.0 || ^19.0.0
+      react-dom: ^18.0.0 || ^19.0.0
+    peerDependenciesMeta:
+      '@types/react':
+        optional: true
+      '@types/react-dom':
+        optional: true
+
   '@types/chai@5.2.3':
     resolution: {integrity: sha512-Mw558oeA9fFbv65/y4mHtXDs9bPnFMZAL/jxdPFUpOHHIXX91mcgEHbS5Lahr+pwZFR8A7GQleRWeI6cGFC2UA==}
 
@@ -2130,72 +2395,6 @@ packages:
   '@vitest/utils@4.1.11':
     resolution: {integrity: sha512-zTCVGpyFsGWBhllOyKlTw/vnr6D9qxsfSDyfbyZmTyjHw5N/VuvzHpHoQjm2ZJzn4RJgx5w4r7V0er69CmLgPQ==}
 
-  '@yuku-analyzer/binding-android-arm64@0.10.2':
-    resolution: {integrity: sha512-xt4Vy3RTBw1NfszBlf4A0Rr6ZjA/th2Pj9XlWFLQHW9A1qOCtxNCoIWSzn/INtnZLMB4jO2gWdEtSaHUtK73wA==}
-    cpu: [arm64]
-    os: [android]
-
-  '@yuku-analyzer/binding-darwin-arm64@0.10.2':
-    resolution: {integrity: sha512-ftokSqvYXZxfmA/bfIbp8c1BJ8QxNax371kUOQNFyvR5hmtKqQyTqSKtMk+WaixHM3w4tKj/JdyY+ud1bGamXA==}
-    cpu: [arm64]
-    os: [darwin]
-
-  '@yuku-analyzer/binding-darwin-x64@0.10.2':
-    resolution: {integrity: sha512-yUrmmhmF5R4Xmbfo8gUxJKr3YbvbLcE2JvLhDLzFJkMN29/fGm6K3dZX6YpNecfgBDnQ+VywGp8K9xjRaBFZ3Q==}
-    cpu: [x64]
-    os: [darwin]
-
-  '@yuku-analyzer/binding-freebsd-x64@0.10.2':
-    resolution: {integrity: sha512-cy9+KvVoK5Xad3Vs5pLwAeZf3JC/1y0XJElgv1q6g7W7g/n52FRjedpYmQiJeMZdnhJiAshq7Vz/Xj3jC5Ns2Q==}
-    cpu: [x64]
-    os: [freebsd]
-
-  '@yuku-analyzer/binding-linux-arm-gnu@0.10.2':
-    resolution: {integrity: sha512-AgVZ6VCV2XP4yHCwyv78KLV76gcu2neiEF2+RBTPQN7sqYY+bLvMxphGPmfG+9qk5Uf1PJAhZYIUnMGVbbRCZw==}
-    cpu: [arm]
-    os: [linux]
-    libc: [glibc]
-
-  '@yuku-analyzer/binding-linux-arm-musl@0.10.2':
-    resolution: {integrity: sha512-5qAj2GjoSN6+HuH75+g5r40CFhWmMvH0K8VKWmPfQyOgA/LonoDMr5H5O5feJwzdnfdCytPDAh1RAf7/SSg7dg==}
-    cpu: [arm]
-    os: [linux]
-    libc: [musl]
-
-  '@yuku-analyzer/binding-linux-arm64-gnu@0.10.2':
-    resolution: {integrity: sha512-eJvQ4Ja5oPf/HOjmBkCLYyhOHUkL7U+iMAN8sX44x8exBBpPRyqnhEgTsuU73HzxPLrGPdRhybFnAE63Omib/Q==}
-    cpu: [arm64]
-    os: [linux]
-    libc: [glibc]
-
-  '@yuku-analyzer/binding-linux-arm64-musl@0.10.2':
-    resolution: {integrity: sha512-TppF2j194mOQ/kBXvNr9u5TYO+eR9r8ieg4lTIEyJIVYHAR9GWeB0oFHLcJiLXVa3qUJGzE4bmzSntCW5ylA7A==}
-    cpu: [arm64]
-    os: [linux]
-    libc: [musl]
-
-  '@yuku-analyzer/binding-linux-x64-gnu@0.10.2':
-    resolution: {integrity: sha512-03xu6ocJuwhm1a/JKmrHiaJUO1Oj86rABsm4FAl8AvfewfW/9idIUmPiFxZfb6RfiIONegebsTGJhFx0NbBNpA==}
-    cpu: [x64]
-    os: [linux]
-    libc: [glibc]
-
-  '@yuku-analyzer/binding-linux-x64-musl@0.10.2':
-    resolution: {integrity: sha512-f7W2sAWWQN8x8YB0RRxIche7mLImH7lDgzUy9+B69cM2I6VFJ4a5+0pgAuMLROPOqimaxFPdXqLdDE/vpgGltg==}
-    cpu: [x64]
-    os: [linux]
-    libc: [musl]
-
-  '@yuku-analyzer/binding-win32-arm64@0.10.2':
-    resolution: {integrity: sha512-f534qNc5YaJI29e1oryxEnxPkp7WCYJ1j7ChSec8pQNlYqTm8Tao7hij7NxRF+9BuxzeZCZ+WsbaAfLlklR0Eg==}
-    cpu: [arm64]
-    os: [win32]
-
-  '@yuku-analyzer/binding-win32-x64@0.10.2':
-    resolution: {integrity: sha512-sKHkmLK8BsindMfyIThoN0bWC5uqSJEVNaLRD/ifA99mtb0UDin1ZCg4WYSVQAmM4k2iOTl4UZx/p3zcBiBgYw==}
-    cpu: [x64]
-    os: [win32]
-
   '@yuku-codegen/binding-android-arm64@0.8.7':
     resolution: {integrity: sha512-C/0zV5IhgVdYhGJTwrY0v8dknxlhiKwtVJkMUaexu9/QvRmzlV4vfU3hZlUSgqc2BxQHntL1mCVbDq8j0FRFDw==}
     cpu: [arm64]
@@ -2394,9 +2593,6 @@ packages:
     cpu: [x64]
     os: [win32]
 
-  '@yuku-toolchain/types@0.10.2':
-    resolution: {integrity: sha512-sSeo4SSSToiS+sSD+bwn/s94EEcaLJ7tG5LCp8gFYC1G5VzxzX7fqB6m9RU1yMD8KTpu6zdU/I1NlQf8hVBJ9Q==}
-
   '@yuku-toolchain/types@0.17.0':
     resolution: {integrity: sha512-3T4eKUuFAtuwbyRc2OIpanxPTl4CZdbmOvg1HB9UmRrPb3bsF3fFfbLSyIFYtZrE9/cNqLyEq/7g3Hm6nHIekA==}
 
@@ -2514,6 +2710,11 @@ packages:
   clsx@2.1.1:
     resolution: {integrity: sha512-eYm0QWBtUrBWZWG0d386OGAw16Z995PiOVo2B7bjWSbHedGl5e0ZWaq65kOGgUSNesEIDkB9ISbTg/JK9dhCZA==}
     engines: {node: '>=6'}
+
+  cn@0.2.6:
+    resolution: {integrity: sha512-+i4L0zUGgRcEnhsxueVrP7iBGxBx5iD0WOTYg1MwFEu2ZyCmH5Ov2V1cul2Ht5UchRQQgftCf4be/RxspuW6QQ==}
+    engines: {node: '>=20'}
+    hasBin: true
 
   cn@0.3.3:
     resolution: {integrity: sha512-OEiyJkSpYm2kOuNOKQ+c2wmzZRG8orrb9fnObtHTbCGNx/E9KLnGcmcocItOzREKk5KzQN5I2e3BUCj563KEpw==}
@@ -3043,43 +3244,6 @@ packages:
       zod:
         optional: true
 
-  fumadocs-mdx@15.4.4:
-    resolution: {integrity: sha512-aSk5T8yB67YDDnTctlP0qq1U7jaAtoq5jVgiYALUd3BcJ+nkIAFcdeq0gGwJku02CZ+KJ4T4xdVr+s6x1n81MA==}
-    hasBin: true
-    peerDependencies:
-      '@fumadocs/satteri': 0.x.x
-      '@types/mdast': '*'
-      '@types/mdx': '*'
-      '@types/react': '*'
-      fumadocs-core: ^16.15.3
-      mdast-util-directive: '*'
-      next: ^15.3.0 || ^16.0.0
-      react: ^19.2.0
-      rolldown: '*'
-      satteri: ^0.10.5
-      vite: 7.x.x || 8.x.x
-    peerDependenciesMeta:
-      '@fumadocs/satteri':
-        optional: true
-      '@types/mdast':
-        optional: true
-      '@types/mdx':
-        optional: true
-      '@types/react':
-        optional: true
-      mdast-util-directive:
-        optional: true
-      next:
-        optional: true
-      react:
-        optional: true
-      rolldown:
-        optional: true
-      satteri:
-        optional: true
-      vite:
-        optional: true
-
   fumadocs-mdx@15.4.7:
     resolution: {integrity: sha512-54lE+dIlIkebSxcN1Lqe0yn5lkKI4zm/Fxl+Se+IqSGyANsBVoa7XaDFFUSLfklxfkSM1NKkrbw0yzvRWVb9rw==}
     hasBin: true
@@ -3206,6 +3370,9 @@ packages:
   html-encoding-sniffer@7.0.0:
     resolution: {integrity: sha512-UikN5yr7xsCDAq87Or5or0PAlD3HJJOKVzM05az588WnpDJ4Ux7a2A53Qi6gofGg2/EtvF/H4hCi/TXfCW4Y6w==}
     engines: {node: ^22.13.0 || >=24.0.0}
+
+  html-url-attributes@3.0.1:
+    resolution: {integrity: sha512-ol6UPyBWqsrO6EJySPz2O7ZSr856WDrEzM5zMqp+FJJLGMW35cLYmmZnl0vztAZxRUoNZJFTCohfjuIJ8I4QBQ==}
 
   html-void-elements@3.0.0:
     resolution: {integrity: sha512-bEqo66MRXsUGxWHV5IP0PUiAWwoEjba4VCzg0LjFJBpchPaTfyfCKTG6bc5F8ucKec3q5y6qOdGyYTSBEvhCrg==}
@@ -3879,6 +4046,12 @@ packages:
     peerDependencies:
       react: ^19.3.0
 
+  react-markdown@10.1.0:
+    resolution: {integrity: sha512-qKxVopLT/TyA6BX3Ue5NwabOsAzm0Q7kAPwq6L+wWDwisYs7R8vZ0nRXqq6rkueboxpkjvLGU9fWifiX/ZZFxQ==}
+    peerDependencies:
+      '@types/react': '>=18'
+      react: '>=18'
+
   react-refresh@0.18.0:
     resolution: {integrity: sha512-QgT5//D3jfjJb6Gsjxv0Slpj23ip+HtOpnNgnb2S5zU3CB26G/IDPGoy4RJB42wzFE46DRsstbW6tKHoKbhAxw==}
     engines: {node: '>=0.10.0'}
@@ -4515,15 +4688,9 @@ packages:
     engines: {node: '>= 14.6'}
     hasBin: true
 
-  yuku-analyzer@0.10.2:
-    resolution: {integrity: sha512-UBRcDcZtIn14g88loZUZ123d6MOkc2hMTawUle5MkuWboowM90KbWHN3Zz+HfuS06sw935ygecBpcJlXHB/pOA==}
-
   yuku-analyzer@0.17.0:
     resolution: {integrity: sha512-MJWtt5HvXVR51mGOR2uMXQ45t1X1oMkmx4vaP/Li1HNC69OFG/qYmxf++aVazkXH5pdxTYTHYRUPl67b7NYxjA==}
     engines: {node: '>=14.18.0'}
-
-  yuku-ast@0.10.2:
-    resolution: {integrity: sha512-UnG9mA6giglCvSErft2/40TVFX750Sj1xgwddPLpG7J7rlr/P1wPADg9G2RK+d/1tNLtRVoLdMMOMVBB9561TQ==}
 
   yuku-ast@0.17.0:
     resolution: {integrity: sha512-htIzp3bLNdBtOSh8L8pJ7nkTft2kw/C3ghTToSg3FKtzi0YGkvAdEUUza9c744tnbeXtKUMEupFOYHuVNXn1yQ==}
@@ -4645,6 +4812,8 @@ snapshots:
   '@babel/parser@7.29.9':
     dependencies:
       '@babel/types': 7.29.8
+
+  '@babel/runtime@7.29.10': {}
 
   '@babel/runtime@8.0.7': {}
 
@@ -5004,24 +5173,57 @@ snapshots:
 
   '@fumari/image-size@0.1.1': {}
 
-  '@godcreator/docsite-kit@0.1.9(@fumadocs/base-ui@16.16.2(@types/mdx@2.0.14)(@types/react@19.3.0)(fumadocs-core@16.16.2(@mdx-js/mdx@3.1.1)(@types/estree-jsx@1.0.5)(@types/hast@3.0.5)(@types/mdast@4.0.4)(@types/react@19.3.0)(lucide-react@1.54.0(@types/react@19.3.0)(react@19.3.0))(react-dom@19.3.0(react@19.3.0))(react-router@8.4.0(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(react@19.3.0)(zod@4.6.5))(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(tailwindcss@4.3.3))(@types/react@19.3.0)(fumadocs-core@16.16.2(@mdx-js/mdx@3.1.1)(@types/estree-jsx@1.0.5)(@types/hast@3.0.5)(@types/mdast@4.0.4)(@types/react@19.3.0)(lucide-react@1.54.0(@types/react@19.3.0)(react@19.3.0))(react-dom@19.3.0(react@19.3.0))(react-router@8.4.0(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(react@19.3.0)(zod@4.6.5))(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(vite@8.3.4(patch_hash=71051b570cd126a84b4a427f5a23158b617cf5a07b451901ea0cab096dc377d8)(@types/node@26.6.4)(esbuild@0.28.2)(jiti@2.7.0)(yaml@2.9.1))':
+  '@godcreator/docsite-feed@0.1.0(react@19.3.0)(vite@8.3.4(patch_hash=71051b570cd126a84b4a427f5a23158b617cf5a07b451901ea0cab096dc377d8)(@types/node@26.6.4)(esbuild@0.28.2)(jiti@2.7.0)(yaml@2.9.1))':
     dependencies:
-      '@fumadocs/base-ui': 16.16.2(@types/mdx@2.0.14)(@types/react@19.3.0)(fumadocs-core@16.16.2(@mdx-js/mdx@3.1.1)(@types/estree-jsx@1.0.5)(@types/hast@3.0.5)(@types/mdast@4.0.4)(@types/react@19.3.0)(lucide-react@1.54.0(@types/react@19.3.0)(react@19.3.0))(react-dom@19.3.0(react@19.3.0))(react-router@8.4.0(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(react@19.3.0)(zod@4.6.5))(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(tailwindcss@4.3.3)
-      '@mdx-js/mdx': 3.1.1
-      diff-match-patch: 1.0.5
-      fumadocs-core: 16.16.2(@mdx-js/mdx@3.1.1)(@types/estree-jsx@1.0.5)(@types/hast@3.0.5)(@types/mdast@4.0.4)(@types/react@19.3.0)(lucide-react@1.54.0(@types/react@19.3.0)(react@19.3.0))(react-dom@19.3.0(react@19.3.0))(react-router@8.4.0(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(react@19.3.0)(zod@4.6.5)
-      katex: 0.16.47
-      lucide-react: 1.54.0(@types/react@19.3.0)(react@19.3.0)
-      parse5: 7.3.0
       react: 19.3.0
-      react-dom: 19.3.0(react@19.3.0)
-      rehype-katex: 7.0.1
-      remark-math: 6.0.0
       vite: 8.3.4(patch_hash=71051b570cd126a84b4a427f5a23158b617cf5a07b451901ea0cab096dc377d8)(@types/node@26.6.4)(esbuild@0.28.2)(jiti@2.7.0)(yaml@2.9.1)
-      yaml: 2.9.1
+
+  '@godcreator/docsite-identity@0.1.0(react@19.3.0)':
+    dependencies:
+      react: 19.3.0
+
+  '@godcreator/docsite-kit@0.3.0(@fumadocs/base-ui@16.17.1(@types/mdx@2.0.14)(@types/react@19.3.0)(fumadocs-core@16.17.1(@mdx-js/mdx@3.1.1)(@types/estree-jsx@1.0.5)(@types/hast@3.0.5)(@types/mdast@4.0.4)(@types/react@19.3.0)(lucide-react@1.54.0(@types/react@19.3.0)(react@19.3.0))(react-dom@19.3.0(react@19.3.0))(react-router@8.4.0(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(react@19.3.0)(zod@4.6.5))(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(tailwindcss@4.3.3))(@godcreator/docsite-identity@0.1.0(react@19.3.0))(fumadocs-core@16.17.1(@mdx-js/mdx@3.1.1)(@types/estree-jsx@1.0.5)(@types/hast@3.0.5)(@types/mdast@4.0.4)(@types/react@19.3.0)(lucide-react@1.54.0(@types/react@19.3.0)(react@19.3.0))(react-dom@19.3.0(react@19.3.0))(react-router@8.4.0(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(react@19.3.0)(zod@4.6.5))(react@19.3.0)(vite@8.3.4(patch_hash=71051b570cd126a84b4a427f5a23158b617cf5a07b451901ea0cab096dc377d8)(@types/node@26.6.4)(esbuild@0.28.2)(jiti@2.7.0)(yaml@2.9.1))':
+    dependencies:
+      '@godcreator/docsite-feed': 0.1.0(react@19.3.0)(vite@8.3.4(patch_hash=71051b570cd126a84b4a427f5a23158b617cf5a07b451901ea0cab096dc377d8)(@types/node@26.6.4)(esbuild@0.28.2)(jiti@2.7.0)(yaml@2.9.1))
+      '@godcreator/docsite-page-sources': 0.1.0(fumadocs-core@16.17.1(@mdx-js/mdx@3.1.1)(@types/estree-jsx@1.0.5)(@types/hast@3.0.5)(@types/mdast@4.0.4)(@types/react@19.3.0)(lucide-react@1.54.0(@types/react@19.3.0)(react@19.3.0))(react-dom@19.3.0(react@19.3.0))(react-router@8.4.0(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(react@19.3.0)(zod@4.6.5))(react@19.3.0)
+      '@godcreator/docsite-ui': 0.1.0(@fumadocs/base-ui@16.17.1(@types/mdx@2.0.14)(@types/react@19.3.0)(fumadocs-core@16.17.1(@mdx-js/mdx@3.1.1)(@types/estree-jsx@1.0.5)(@types/hast@3.0.5)(@types/mdast@4.0.4)(@types/react@19.3.0)(lucide-react@1.54.0(@types/react@19.3.0)(react@19.3.0))(react-dom@19.3.0(react@19.3.0))(react-router@8.4.0(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(react@19.3.0)(zod@4.6.5))(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(tailwindcss@4.3.3))(@godcreator/docsite-identity@0.1.0(react@19.3.0))(fumadocs-core@16.17.1(@mdx-js/mdx@3.1.1)(@types/estree-jsx@1.0.5)(@types/hast@3.0.5)(@types/mdast@4.0.4)(@types/react@19.3.0)(lucide-react@1.54.0(@types/react@19.3.0)(react@19.3.0))(react-dom@19.3.0(react@19.3.0))(react-router@8.4.0(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(react@19.3.0)(zod@4.6.5))(react@19.3.0)
+      react: 19.3.0
+      vite: 8.3.4(patch_hash=71051b570cd126a84b4a427f5a23158b617cf5a07b451901ea0cab096dc377d8)(@types/node@26.6.4)(esbuild@0.28.2)(jiti@2.7.0)(yaml@2.9.1)
     transitivePeerDependencies:
-      - '@types/react'
-      - supports-color
+      - '@fumadocs/base-ui'
+      - '@godcreator/docsite-identity'
+      - fumadocs-core
+
+  '@godcreator/docsite-kit@0.3.0(@fumadocs/base-ui@16.17.1(@types/mdx@2.0.14)(@types/react@19.3.0)(fumadocs-core@16.17.1(@mdx-js/mdx@3.1.1)(@types/estree-jsx@1.0.5)(@types/hast@3.0.5)(@types/mdast@4.0.4)(@types/react@19.3.0)(lucide-react@1.54.0(@types/react@19.3.0)(react@19.3.0))(react-dom@19.3.0(react@19.3.0))(react-router@8.4.0(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(react@19.3.0)(zod@4.6.5))(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(tailwindcss@4.3.3))(@godcreator/docsite-identity@packages+docsite-identity)(fumadocs-core@16.17.1(@mdx-js/mdx@3.1.1)(@types/estree-jsx@1.0.5)(@types/hast@3.0.5)(@types/mdast@4.0.4)(@types/react@19.3.0)(lucide-react@1.54.0(@types/react@19.3.0)(react@19.3.0))(react-dom@19.3.0(react@19.3.0))(react-router@8.4.0(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(react@19.3.0)(zod@4.6.5))(react@19.3.0)(vite@8.3.4(patch_hash=71051b570cd126a84b4a427f5a23158b617cf5a07b451901ea0cab096dc377d8)(@types/node@26.6.4)(esbuild@0.28.2)(jiti@2.7.0)(yaml@2.9.1))':
+    dependencies:
+      '@godcreator/docsite-feed': 0.1.0(react@19.3.0)(vite@8.3.4(patch_hash=71051b570cd126a84b4a427f5a23158b617cf5a07b451901ea0cab096dc377d8)(@types/node@26.6.4)(esbuild@0.28.2)(jiti@2.7.0)(yaml@2.9.1))
+      '@godcreator/docsite-page-sources': 0.1.0(fumadocs-core@16.17.1(@mdx-js/mdx@3.1.1)(@types/estree-jsx@1.0.5)(@types/hast@3.0.5)(@types/mdast@4.0.4)(@types/react@19.3.0)(lucide-react@1.54.0(@types/react@19.3.0)(react@19.3.0))(react-dom@19.3.0(react@19.3.0))(react-router@8.4.0(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(react@19.3.0)(zod@4.6.5))(react@19.3.0)
+      '@godcreator/docsite-ui': 0.1.0(@fumadocs/base-ui@16.17.1(@types/mdx@2.0.14)(@types/react@19.3.0)(fumadocs-core@16.17.1(@mdx-js/mdx@3.1.1)(@types/estree-jsx@1.0.5)(@types/hast@3.0.5)(@types/mdast@4.0.4)(@types/react@19.3.0)(lucide-react@1.54.0(@types/react@19.3.0)(react@19.3.0))(react-dom@19.3.0(react@19.3.0))(react-router@8.4.0(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(react@19.3.0)(zod@4.6.5))(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(tailwindcss@4.3.3))(@godcreator/docsite-identity@packages+docsite-identity)(fumadocs-core@16.17.1(@mdx-js/mdx@3.1.1)(@types/estree-jsx@1.0.5)(@types/hast@3.0.5)(@types/mdast@4.0.4)(@types/react@19.3.0)(lucide-react@1.54.0(@types/react@19.3.0)(react@19.3.0))(react-dom@19.3.0(react@19.3.0))(react-router@8.4.0(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(react@19.3.0)(zod@4.6.5))(react@19.3.0)
+      react: 19.3.0
+      vite: 8.3.4(patch_hash=71051b570cd126a84b4a427f5a23158b617cf5a07b451901ea0cab096dc377d8)(@types/node@26.6.4)(esbuild@0.28.2)(jiti@2.7.0)(yaml@2.9.1)
+    transitivePeerDependencies:
+      - '@fumadocs/base-ui'
+      - '@godcreator/docsite-identity'
+      - fumadocs-core
+
+  '@godcreator/docsite-page-sources@0.1.0(fumadocs-core@16.17.1(@mdx-js/mdx@3.1.1)(@types/estree-jsx@1.0.5)(@types/hast@3.0.5)(@types/mdast@4.0.4)(@types/react@19.3.0)(lucide-react@1.54.0(@types/react@19.3.0)(react@19.3.0))(react-dom@19.3.0(react@19.3.0))(react-router@8.4.0(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(react@19.3.0)(zod@4.6.5))(react@19.3.0)':
+    dependencies:
+      fumadocs-core: 16.17.1(@mdx-js/mdx@3.1.1)(@types/estree-jsx@1.0.5)(@types/hast@3.0.5)(@types/mdast@4.0.4)(@types/react@19.3.0)(lucide-react@1.54.0(@types/react@19.3.0)(react@19.3.0))(react-dom@19.3.0(react@19.3.0))(react-router@8.4.0(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(react@19.3.0)(zod@4.6.5)
+      react: 19.3.0
+
+  '@godcreator/docsite-ui@0.1.0(@fumadocs/base-ui@16.17.1(@types/mdx@2.0.14)(@types/react@19.3.0)(fumadocs-core@16.17.1(@mdx-js/mdx@3.1.1)(@types/estree-jsx@1.0.5)(@types/hast@3.0.5)(@types/mdast@4.0.4)(@types/react@19.3.0)(lucide-react@1.54.0(@types/react@19.3.0)(react@19.3.0))(react-dom@19.3.0(react@19.3.0))(react-router@8.4.0(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(react@19.3.0)(zod@4.6.5))(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(tailwindcss@4.3.3))(@godcreator/docsite-identity@0.1.0(react@19.3.0))(fumadocs-core@16.17.1(@mdx-js/mdx@3.1.1)(@types/estree-jsx@1.0.5)(@types/hast@3.0.5)(@types/mdast@4.0.4)(@types/react@19.3.0)(lucide-react@1.54.0(@types/react@19.3.0)(react@19.3.0))(react-dom@19.3.0(react@19.3.0))(react-router@8.4.0(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(react@19.3.0)(zod@4.6.5))(react@19.3.0)':
+    dependencies:
+      '@fumadocs/base-ui': 16.17.1(@types/mdx@2.0.14)(@types/react@19.3.0)(fumadocs-core@16.17.1(@mdx-js/mdx@3.1.1)(@types/estree-jsx@1.0.5)(@types/hast@3.0.5)(@types/mdast@4.0.4)(@types/react@19.3.0)(lucide-react@1.54.0(@types/react@19.3.0)(react@19.3.0))(react-dom@19.3.0(react@19.3.0))(react-router@8.4.0(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(react@19.3.0)(zod@4.6.5))(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(tailwindcss@4.3.3)
+      '@godcreator/docsite-identity': 0.1.0(react@19.3.0)
+      fumadocs-core: 16.17.1(@mdx-js/mdx@3.1.1)(@types/estree-jsx@1.0.5)(@types/hast@3.0.5)(@types/mdast@4.0.4)(@types/react@19.3.0)(lucide-react@1.54.0(@types/react@19.3.0)(react@19.3.0))(react-dom@19.3.0(react@19.3.0))(react-router@8.4.0(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(react@19.3.0)(zod@4.6.5)
+      react: 19.3.0
+
+  '@godcreator/docsite-ui@0.1.0(@fumadocs/base-ui@16.17.1(@types/mdx@2.0.14)(@types/react@19.3.0)(fumadocs-core@16.17.1(@mdx-js/mdx@3.1.1)(@types/estree-jsx@1.0.5)(@types/hast@3.0.5)(@types/mdast@4.0.4)(@types/react@19.3.0)(lucide-react@1.54.0(@types/react@19.3.0)(react@19.3.0))(react-dom@19.3.0(react@19.3.0))(react-router@8.4.0(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(react@19.3.0)(zod@4.6.5))(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(tailwindcss@4.3.3))(@godcreator/docsite-identity@packages+docsite-identity)(fumadocs-core@16.17.1(@mdx-js/mdx@3.1.1)(@types/estree-jsx@1.0.5)(@types/hast@3.0.5)(@types/mdast@4.0.4)(@types/react@19.3.0)(lucide-react@1.54.0(@types/react@19.3.0)(react@19.3.0))(react-dom@19.3.0(react@19.3.0))(react-router@8.4.0(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(react@19.3.0)(zod@4.6.5))(react@19.3.0)':
+    dependencies:
+      '@fumadocs/base-ui': 16.17.1(@types/mdx@2.0.14)(@types/react@19.3.0)(fumadocs-core@16.17.1(@mdx-js/mdx@3.1.1)(@types/estree-jsx@1.0.5)(@types/hast@3.0.5)(@types/mdast@4.0.4)(@types/react@19.3.0)(lucide-react@1.54.0(@types/react@19.3.0)(react@19.3.0))(react-dom@19.3.0(react@19.3.0))(react-router@8.4.0(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(react@19.3.0)(zod@4.6.5))(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(tailwindcss@4.3.3)
+      '@godcreator/docsite-identity': link:packages/docsite-identity
+      fumadocs-core: 16.17.1(@mdx-js/mdx@3.1.1)(@types/estree-jsx@1.0.5)(@types/hast@3.0.5)(@types/mdast@4.0.4)(@types/react@19.3.0)(lucide-react@1.54.0(@types/react@19.3.0)(react@19.3.0))(react-dom@19.3.0(react@19.3.0))(react-router@8.4.0(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(react@19.3.0)(zod@4.6.5)
+      react: 19.3.0
 
   '@godcreator/gwb-commands@0.6.1(@godcreator/gwb-kernel-desktop@0.10.1(cordis@4.0.0-rc.10))(cordis@4.0.0-rc.10)':
     dependencies:
@@ -5033,6 +5235,15 @@ snapshots:
       '@godcreator/gwb-kernel-desktop': 0.10.1(cordis@4.0.0-rc.10)
       cordis: 4.0.0-rc.10(@cordisjs/plugin-include@1.1.0)(@cordisjs/plugin-loader@1.0.0-rc.7)
 
+  '@godcreator/gwb-gitea@0.1.17(@godcreator/gwb-commands@0.6.1(@godcreator/gwb-kernel-desktop@0.10.1(cordis@4.0.0-rc.10))(cordis@4.0.0-rc.10))(@godcreator/gwb-kernel-desktop@0.10.1(cordis@4.0.0-rc.10))(@godcreator/gwb-settings@0.4.0(@godcreator/gwb-commands@0.6.1(@godcreator/gwb-kernel-desktop@0.10.1(cordis@4.0.0-rc.10))(cordis@4.0.0-rc.10))(@godcreator/gwb-kernel-desktop@0.10.1(cordis@4.0.0-rc.10))(@godcreator/gwb-skills@0.4.13(@godcreator/gwb-commands@0.6.1(@godcreator/gwb-kernel-desktop@0.10.1(cordis@4.0.0-rc.10))(cordis@4.0.0-rc.10))(@godcreator/gwb-kernel-desktop@0.10.1(cordis@4.0.0-rc.10))(cordis@4.0.0-rc.10))(cordis@4.0.0-rc.10))(@godcreator/gwb-skills@0.4.13(@godcreator/gwb-commands@0.6.1(@godcreator/gwb-kernel-desktop@0.10.1(cordis@4.0.0-rc.10))(cordis@4.0.0-rc.10))(@godcreator/gwb-kernel-desktop@0.10.1(cordis@4.0.0-rc.10))(cordis@4.0.0-rc.10))(cordis@4.0.0-rc.10)':
+    dependencies:
+      '@godcreator/gwb-commands': 0.6.1(@godcreator/gwb-kernel-desktop@0.10.1(cordis@4.0.0-rc.10))(cordis@4.0.0-rc.10)
+      '@godcreator/gwb-kernel-desktop': 0.10.1(cordis@4.0.0-rc.10)
+      '@godcreator/gwb-settings': 0.4.0(@godcreator/gwb-commands@0.6.1(@godcreator/gwb-kernel-desktop@0.10.1(cordis@4.0.0-rc.10))(cordis@4.0.0-rc.10))(@godcreator/gwb-kernel-desktop@0.10.1(cordis@4.0.0-rc.10))(@godcreator/gwb-skills@0.4.13(@godcreator/gwb-commands@0.6.1(@godcreator/gwb-kernel-desktop@0.10.1(cordis@4.0.0-rc.10))(cordis@4.0.0-rc.10))(@godcreator/gwb-kernel-desktop@0.10.1(cordis@4.0.0-rc.10))(cordis@4.0.0-rc.10))(cordis@4.0.0-rc.10)
+      cordis: 4.0.0-rc.10(@cordisjs/plugin-include@1.1.0)(@cordisjs/plugin-loader@1.0.0-rc.7)
+    optionalDependencies:
+      '@godcreator/gwb-skills': 0.4.13(@godcreator/gwb-commands@0.6.1(@godcreator/gwb-kernel-desktop@0.10.1(cordis@4.0.0-rc.10))(cordis@4.0.0-rc.10))(@godcreator/gwb-kernel-desktop@0.10.1(cordis@4.0.0-rc.10))(cordis@4.0.0-rc.10)
+
   '@godcreator/gwb-kernel-desktop@0.10.1(cordis@4.0.0-rc.10)':
     dependencies:
       '@cordisjs/plugin-include': 1.1.0(@cordisjs/plugin-loader@1.0.0-rc.7)(cordis@4.0.0-rc.10)
@@ -5040,6 +5251,17 @@ snapshots:
       cordis: 4.0.0-rc.10(@cordisjs/plugin-include@1.1.0)(@cordisjs/plugin-loader@1.0.0-rc.7)
     transitivePeerDependencies:
       - node-addon-require-builtin
+
+  '@godcreator/gwb-qq-bot@0.7.7(8bd9e652e3d273105efee9a3d9ab0ede)':
+    dependencies:
+      '@godcreator/gwb-commands': 0.6.1(@godcreator/gwb-kernel-desktop@0.10.1(cordis@4.0.0-rc.10))(cordis@4.0.0-rc.10)
+      '@godcreator/gwb-data': 0.1.12(@godcreator/gwb-kernel-desktop@0.10.1(cordis@4.0.0-rc.10))(cordis@4.0.0-rc.10)
+      '@godcreator/gwb-kernel-desktop': 0.10.1(cordis@4.0.0-rc.10)
+      '@godcreator/gwb-settings': 0.4.0(@godcreator/gwb-commands@0.6.1(@godcreator/gwb-kernel-desktop@0.10.1(cordis@4.0.0-rc.10))(cordis@4.0.0-rc.10))(@godcreator/gwb-kernel-desktop@0.10.1(cordis@4.0.0-rc.10))(@godcreator/gwb-skills@0.4.13(@godcreator/gwb-commands@0.6.1(@godcreator/gwb-kernel-desktop@0.10.1(cordis@4.0.0-rc.10))(cordis@4.0.0-rc.10))(@godcreator/gwb-kernel-desktop@0.10.1(cordis@4.0.0-rc.10))(cordis@4.0.0-rc.10))(cordis@4.0.0-rc.10)
+      cordis: 4.0.0-rc.10(@cordisjs/plugin-include@1.1.0)(@cordisjs/plugin-loader@1.0.0-rc.7)
+    optionalDependencies:
+      '@godcreator/gwb-skills': 0.4.13(@godcreator/gwb-commands@0.6.1(@godcreator/gwb-kernel-desktop@0.10.1(cordis@4.0.0-rc.10))(cordis@4.0.0-rc.10))(@godcreator/gwb-kernel-desktop@0.10.1(cordis@4.0.0-rc.10))(cordis@4.0.0-rc.10)
+      '@godcreator/gwb-zcode': 0.4.1(@godcreator/gwb-commands@0.6.1(@godcreator/gwb-kernel-desktop@0.10.1(cordis@4.0.0-rc.10))(cordis@4.0.0-rc.10))(@godcreator/gwb-kernel-desktop@0.10.1(cordis@4.0.0-rc.10))(@godcreator/gwb-skills@0.4.13(@godcreator/gwb-commands@0.6.1(@godcreator/gwb-kernel-desktop@0.10.1(cordis@4.0.0-rc.10))(cordis@4.0.0-rc.10))(@godcreator/gwb-kernel-desktop@0.10.1(cordis@4.0.0-rc.10))(cordis@4.0.0-rc.10))(cordis@4.0.0-rc.10)
 
   '@godcreator/gwb-settings@0.4.0(@godcreator/gwb-commands@0.6.1(@godcreator/gwb-kernel-desktop@0.10.1(cordis@4.0.0-rc.10))(cordis@4.0.0-rc.10))(@godcreator/gwb-kernel-desktop@0.10.1(cordis@4.0.0-rc.10))(@godcreator/gwb-skills@0.4.13(@godcreator/gwb-commands@0.6.1(@godcreator/gwb-kernel-desktop@0.10.1(cordis@4.0.0-rc.10))(cordis@4.0.0-rc.10))(@godcreator/gwb-kernel-desktop@0.10.1(cordis@4.0.0-rc.10))(cordis@4.0.0-rc.10))(cordis@4.0.0-rc.10)':
     dependencies:
@@ -5073,6 +5295,14 @@ snapshots:
     optionalDependencies:
       '@godcreator/gwb-data': 0.1.12(@godcreator/gwb-kernel-desktop@0.10.1(cordis@4.0.0-rc.10))(cordis@4.0.0-rc.10)
       '@godcreator/gwb-settings': 0.4.0(@godcreator/gwb-commands@0.6.1(@godcreator/gwb-kernel-desktop@0.10.1(cordis@4.0.0-rc.10))(cordis@4.0.0-rc.10))(@godcreator/gwb-kernel-desktop@0.10.1(cordis@4.0.0-rc.10))(@godcreator/gwb-skills@0.4.13(@godcreator/gwb-commands@0.6.1(@godcreator/gwb-kernel-desktop@0.10.1(cordis@4.0.0-rc.10))(cordis@4.0.0-rc.10))(@godcreator/gwb-kernel-desktop@0.10.1(cordis@4.0.0-rc.10))(cordis@4.0.0-rc.10))(cordis@4.0.0-rc.10)
+      '@godcreator/gwb-skills': 0.4.13(@godcreator/gwb-commands@0.6.1(@godcreator/gwb-kernel-desktop@0.10.1(cordis@4.0.0-rc.10))(cordis@4.0.0-rc.10))(@godcreator/gwb-kernel-desktop@0.10.1(cordis@4.0.0-rc.10))(cordis@4.0.0-rc.10)
+
+  '@godcreator/gwb-zcode@0.4.1(@godcreator/gwb-commands@0.6.1(@godcreator/gwb-kernel-desktop@0.10.1(cordis@4.0.0-rc.10))(cordis@4.0.0-rc.10))(@godcreator/gwb-kernel-desktop@0.10.1(cordis@4.0.0-rc.10))(@godcreator/gwb-skills@0.4.13(@godcreator/gwb-commands@0.6.1(@godcreator/gwb-kernel-desktop@0.10.1(cordis@4.0.0-rc.10))(cordis@4.0.0-rc.10))(@godcreator/gwb-kernel-desktop@0.10.1(cordis@4.0.0-rc.10))(cordis@4.0.0-rc.10))(cordis@4.0.0-rc.10)':
+    dependencies:
+      '@godcreator/gwb-commands': 0.6.1(@godcreator/gwb-kernel-desktop@0.10.1(cordis@4.0.0-rc.10))(cordis@4.0.0-rc.10)
+      '@godcreator/gwb-kernel-desktop': 0.10.1(cordis@4.0.0-rc.10)
+      cordis: 4.0.0-rc.10(@cordisjs/plugin-include@1.1.0)(@cordisjs/plugin-loader@1.0.0-rc.7)
+    optionalDependencies:
       '@godcreator/gwb-skills': 0.4.13(@godcreator/gwb-commands@0.6.1(@godcreator/gwb-kernel-desktop@0.10.1(cordis@4.0.0-rc.10))(cordis@4.0.0-rc.10))(@godcreator/gwb-kernel-desktop@0.10.1(cordis@4.0.0-rc.10))(cordis@4.0.0-rc.10)
 
   '@jridgewell/gen-mapping@0.3.13':
@@ -5499,6 +5729,15 @@ snapshots:
       tailwindcss: 4.3.3
       vite: 8.3.4(patch_hash=71051b570cd126a84b4a427f5a23158b617cf5a07b451901ea0cab096dc377d8)(@types/node@26.6.4)(esbuild@0.28.2)(jiti@2.7.0)(yaml@2.9.1)
 
+  '@testing-library/react@16.3.3(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)':
+    dependencies:
+      '@babel/runtime': 7.29.10
+      react: 19.3.0
+      react-dom: 19.3.0(react@19.3.0)
+    optionalDependencies:
+      '@types/react': 19.3.0
+      '@types/react-dom': 19.3.0(@types/react@19.3.0)
+
   '@types/chai@5.2.3':
     dependencies:
       '@types/deep-eql': 4.0.2
@@ -5690,42 +5929,6 @@ snapshots:
       convert-source-map: 2.0.0
       tinyrainbow: 3.2.0
 
-  '@yuku-analyzer/binding-android-arm64@0.10.2':
-    optional: true
-
-  '@yuku-analyzer/binding-darwin-arm64@0.10.2':
-    optional: true
-
-  '@yuku-analyzer/binding-darwin-x64@0.10.2':
-    optional: true
-
-  '@yuku-analyzer/binding-freebsd-x64@0.10.2':
-    optional: true
-
-  '@yuku-analyzer/binding-linux-arm-gnu@0.10.2':
-    optional: true
-
-  '@yuku-analyzer/binding-linux-arm-musl@0.10.2':
-    optional: true
-
-  '@yuku-analyzer/binding-linux-arm64-gnu@0.10.2':
-    optional: true
-
-  '@yuku-analyzer/binding-linux-arm64-musl@0.10.2':
-    optional: true
-
-  '@yuku-analyzer/binding-linux-x64-gnu@0.10.2':
-    optional: true
-
-  '@yuku-analyzer/binding-linux-x64-musl@0.10.2':
-    optional: true
-
-  '@yuku-analyzer/binding-win32-arm64@0.10.2':
-    optional: true
-
-  '@yuku-analyzer/binding-win32-x64@0.10.2':
-    optional: true
-
   '@yuku-codegen/binding-android-arm64@0.8.7':
     optional: true
 
@@ -5833,8 +6036,6 @@ snapshots:
 
   '@yuku-parser/binding-win32-x64@0.8.7':
     optional: true
-
-  '@yuku-toolchain/types@0.10.2': {}
 
   '@yuku-toolchain/types@0.17.0': {}
 
@@ -5945,6 +6146,8 @@ snapshots:
       clsx: 2.1.1
 
   clsx@2.1.1: {}
+
+  cn@0.2.6: {}
 
   cn@0.3.3: {}
 
@@ -6400,38 +6603,6 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  fumadocs-mdx@15.4.4(@types/mdast@4.0.4)(@types/mdx@2.0.14)(@types/react@19.3.0)(fumadocs-core@16.16.2(@mdx-js/mdx@3.1.1)(@types/estree-jsx@1.0.5)(@types/hast@3.0.5)(@types/mdast@4.0.4)(@types/react@19.3.0)(lucide-react@1.54.0(@types/react@19.3.0)(react@19.3.0))(react-dom@19.3.0(react@19.3.0))(react-router@8.4.0(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(react@19.3.0)(zod@4.6.5))(react@19.3.0)(rolldown@1.2.13)(vite@8.3.4(patch_hash=71051b570cd126a84b4a427f5a23158b617cf5a07b451901ea0cab096dc377d8)(@types/node@26.6.4)(esbuild@0.28.2)(jiti@2.7.0)(yaml@2.9.1)):
-    dependencies:
-      '@mdx-js/mdx': 3.1.1
-      '@standard-schema/spec': 1.1.0
-      chokidar: 5.0.0
-      esbuild: 0.28.2
-      estree-util-value-to-estree: 3.5.0
-      fumadocs-core: 16.16.2(@mdx-js/mdx@3.1.1)(@types/estree-jsx@1.0.5)(@types/hast@3.0.5)(@types/mdast@4.0.4)(@types/react@19.3.0)(lucide-react@1.54.0(@types/react@19.3.0)(react@19.3.0))(react-dom@19.3.0(react@19.3.0))(react-router@8.4.0(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(react@19.3.0)(zod@4.6.5)
-      github-slugger: 2.0.0
-      magic-string: 1.4.3
-      mdast-util-mdx: 3.0.0
-      picocolors: 1.1.1
-      picomatch: 4.0.7
-      tinyexec: 1.3.1
-      tinyglobby: 0.2.17
-      unified: 11.0.5
-      unist-util-remove-position: 5.0.0
-      unist-util-visit: 5.1.0
-      vfile: 6.0.3
-      yaml: 2.9.1
-      yuku-analyzer: 0.10.2
-      zod: 4.6.5
-    optionalDependencies:
-      '@types/mdast': 4.0.4
-      '@types/mdx': 2.0.14
-      '@types/react': 19.3.0
-      react: 19.3.0
-      rolldown: 1.2.13
-      vite: 8.3.4(patch_hash=71051b570cd126a84b4a427f5a23158b617cf5a07b451901ea0cab096dc377d8)(@types/node@26.6.4)(esbuild@0.28.2)(jiti@2.7.0)(yaml@2.9.1)
-    transitivePeerDependencies:
-      - supports-color
-
   fumadocs-mdx@15.4.7(@types/mdast@4.0.4)(@types/mdx@2.0.14)(@types/react@19.3.0)(fumadocs-core@16.17.1(@mdx-js/mdx@3.1.1)(@types/estree-jsx@1.0.5)(@types/hast@3.0.5)(@types/mdast@4.0.4)(@types/react@19.3.0)(lucide-react@1.54.0(@types/react@19.3.0)(react@19.3.0))(react-dom@19.3.0(react@19.3.0))(react-router@8.4.0(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(react@19.3.0)(zod@4.6.5))(react@19.3.0)(rolldown@1.2.13)(vite@8.3.4(patch_hash=71051b570cd126a84b4a427f5a23158b617cf5a07b451901ea0cab096dc377d8)(@types/node@26.6.4)(esbuild@0.28.2)(jiti@2.7.0)(yaml@2.9.1)):
     dependencies:
       '@mdx-js/mdx': 3.1.1
@@ -6652,6 +6823,8 @@ snapshots:
     transitivePeerDependencies:
       - '@noble/hashes'
 
+  html-url-attributes@3.0.1: {}
+
   html-void-elements@3.0.0: {}
 
   http-errors@2.0.1:
@@ -6849,6 +7022,12 @@ snapshots:
   lru-cache@5.1.1:
     dependencies:
       yallist: 3.1.1
+
+  lucide-react@1.54.0(@types/react@19.2.18)(react@19.2.8):
+    dependencies:
+      react: 19.2.8
+    optionalDependencies:
+      '@types/react': 19.2.18
 
   lucide-react@1.54.0(@types/react@19.3.0)(react@19.3.0):
     dependencies:
@@ -7557,6 +7736,24 @@ snapshots:
     dependencies:
       react: 19.3.0
       scheduler: 0.28.0
+
+  react-markdown@10.1.0(@types/react@19.3.0)(react@19.3.0):
+    dependencies:
+      '@types/hast': 3.0.5
+      '@types/mdast': 4.0.4
+      '@types/react': 19.3.0
+      devlop: 1.1.0
+      hast-util-to-jsx-runtime: 2.3.6
+      html-url-attributes: 3.0.1
+      mdast-util-to-hast: 13.2.1
+      react: 19.3.0
+      remark-parse: 11.0.0
+      remark-rehype: 11.1.2
+      unified: 11.0.5
+      unist-util-visit: 5.1.0
+      vfile: 6.0.3
+    transitivePeerDependencies:
+      - supports-color
 
   react-refresh@0.18.0: {}
 
@@ -8332,33 +8529,11 @@ snapshots:
 
   yaml@2.9.1: {}
 
-  yuku-analyzer@0.10.2:
-    dependencies:
-      '@yuku-toolchain/types': 0.10.2
-      yuku-ast: 0.10.2
-    optionalDependencies:
-      '@yuku-analyzer/binding-android-arm64': 0.10.2
-      '@yuku-analyzer/binding-darwin-arm64': 0.10.2
-      '@yuku-analyzer/binding-darwin-x64': 0.10.2
-      '@yuku-analyzer/binding-freebsd-x64': 0.10.2
-      '@yuku-analyzer/binding-linux-arm-gnu': 0.10.2
-      '@yuku-analyzer/binding-linux-arm-musl': 0.10.2
-      '@yuku-analyzer/binding-linux-arm64-gnu': 0.10.2
-      '@yuku-analyzer/binding-linux-arm64-musl': 0.10.2
-      '@yuku-analyzer/binding-linux-x64-gnu': 0.10.2
-      '@yuku-analyzer/binding-linux-x64-musl': 0.10.2
-      '@yuku-analyzer/binding-win32-arm64': 0.10.2
-      '@yuku-analyzer/binding-win32-x64': 0.10.2
-
   yuku-analyzer@0.17.0:
     dependencies:
       '@yuku-toolchain/types': 0.17.0
       yuku-ast: 0.17.0
       yuku-core: 0.17.0
-
-  yuku-ast@0.10.2:
-    dependencies:
-      '@yuku-toolchain/types': 0.10.2
 
   yuku-ast@0.17.0:
     dependencies:

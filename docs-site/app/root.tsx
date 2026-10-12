@@ -1,8 +1,10 @@
 import type { ReactNode } from 'react'
 import { isRouteErrorResponse, Links, Meta, Outlet, Scripts, ScrollRestoration } from 'react-router'
 import { RootProvider } from '@fumadocs/base-ui/provider/react-router'
-import { zhTranslations } from '@godcreator/docsite-kit/ui'
+import { widePageScript, zhTranslations } from '@godcreator/docsite-ui'
 import type { Route } from './+types/root'
+import '@godcreator/docsite-identity/styles.css'
+import '@godcreator/docsite-comments/styles.css'
 import './app.css'
 
 export function Layout({ children }: { children: ReactNode }) {
@@ -13,6 +15,7 @@ export function Layout({ children }: { children: ReactNode }) {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <Meta />
         <Links />
+        <script dangerouslySetInnerHTML={{ __html: widePageScript }} />
       </head>
       <body className="flex min-h-screen flex-col">
         <RootProvider i18n={{ translations: zhTranslations }}>{children}</RootProvider>

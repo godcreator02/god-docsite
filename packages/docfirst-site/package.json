@@ -40,19 +40,19 @@
     "@godcreator/trajectory-disk": "workspace:*"
   },
   "peerDependencies": {
-    "@fumadocs/base-ui": "16.16.2",
-    "@godcreator/docsite-kit": "^0.1.7",
+    "@fumadocs/base-ui": "16.17.1",
+    "@godcreator/docsite-kit": "^0.3.0",
     "lucide-react": "^1.54.0",
     "react": "^19.3.0",
     "react-router": "^8.4.0"
   },
   "devDependencies": {
-    "@fumadocs/base-ui": "16.16.2",
-    "@godcreator/docsite-kit": "^0.1.7",
+    "@fumadocs/base-ui": "16.17.1",
+    "@godcreator/docsite-kit": "^0.3.0",
     "@types/mdx": "^2.0.14",
     "@types/node": "^26.2.0",
     "@types/react": "^19.3.0",
-    "fumadocs-core": "16.16.2",
+    "fumadocs-core": "16.17.1",
     "lucide-react": "1.54.0",
     "react": "^19.3.0",
     "react-router": "^8.4.0"

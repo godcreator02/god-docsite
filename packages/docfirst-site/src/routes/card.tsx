@@ -6,7 +6,7 @@ import { use } from "react";
 import { useLoaderData, type LoaderFunctionArgs } from "react-router";
 import { DocsBody, DocsPage, DocsTitle } from "@fumadocs/base-ui/layouts/docs/page";
 import { mdxComponents } from "@site/lib/mdx-components";
-import { siteName } from "@site/lib/source";
+import { siteName } from "@site/lib/source.server";
 import { trajectoryCards, type TrajectoryCardEntry } from "@site/lib/trajectory";
 import { cardFieldsOf, type CardFields } from "../card-fields.ts";
 import { cardIdOf, trajectoryHrefBase } from "../trajectory-href.ts";

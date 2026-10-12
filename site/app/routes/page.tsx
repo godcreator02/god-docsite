@@ -38,8 +38,8 @@ export async function loader({ params }: Route.LoaderArgs) {
     readOnlyReason: identity.person ? null : identity.reason,
   }
   if (page.type === 'mdx') return { type: 'mdx' as const, ...shared, path: page.path }
-  if (page.type === 'tsx') return { type: 'tsx' as const, ...shared, file: page.data.file }
-  return { type: 'html' as const, ...shared, src: contentFileUrlOf(page.data.file), headings: page.data.headings }
+  if (page.type === 'tsx') return { type: 'tsx' as const, ...shared, file: page.data.file! }
+  return { type: 'html' as const, ...shared, src: contentFileUrlOf(page.data.file!), headings: page.data.headings }
 }
 
 export async function action({ request }: Route.ActionArgs) {

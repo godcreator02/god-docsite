@@ -1,6 +1,21 @@
 @import 'tailwindcss';
 @import '@fumadocs/base-ui/css/neutral.css';
 @import '@fumadocs/base-ui/css/preset.css';
-@import '@godcreator/docsite-kit/styles.css';
+@import '@godcreator/docsite-ui/styles.css';
 /* 各功能包的样式，初始化按 package.json 的 docsite.features 生成 */
 @import './site/styles.css';
+
+/* 评论侧栏与评论卡（docsite-comments 包的样式表给组件样式，这里给页面布局侧的摆位） */
+[data-comments-sidebar] {
+  font-size: 14px;
+  width: 100%;
+}
+@media (min-width: 1024px) {
+  [data-comments-sidebar] {
+    width: 20rem;
+    flex-shrink: 0;
+  }
+}
+[data-comment-body] :is(p) {
+  margin: 4px 0;
+}
