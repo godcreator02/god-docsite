@@ -4,7 +4,8 @@ export { commentScopeAttribute, commentScopeProps, PageComments, themeSwitchWith
 export { AllComments, commentLinkOf, type AllCommentsProps } from './all-comments.js'
 export { Avatar } from './comment-cards.js'
 export { useSiteFeed } from './site-feed.js'
-export { Tex } from './tex.js'
+// Tex 的正本在 ./writing（写作组件）：这里保留导出，老 import 不破
+export { Tex } from '../writing/tex.js'
 export { PageTitleWithWideToggle, WidePageToggle, widePageScript } from './wide-page.js'
 export {
   commentLinkTargetsOf,
