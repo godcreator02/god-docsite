@@ -22,7 +22,7 @@ docsite({ featurePackages: ['@godcreator/collab-site'] })
 ```
 
 这些包自己依赖的库照样预打包，插件读它们 `package.json` 的 `dependencies`，写成 `包 > 依赖` 交给 Vite：
-里面有 CommonJS 的库（基础包的 `diff-match-patch`），原样送进浏览器会报「没有 default 导出」。
+里面有 CommonJS 的库时，原样送进浏览器会报「没有 default 导出」。
 只有子路径出口、没有根出口的依赖（如 `@godcreator/collab-model`）跳过，用到哪个子路径 Vite 就处理哪个。
 
 ## 别名 @site
@@ -31,8 +31,8 @@ docsite({ featurePackages: ['@godcreator/collab-site'] })
 
 ## 增删页面后刷新页面清单
 
-`content/` 与 `comments/` 里新增、删除文件（改名就是删一个再增一个），以及改了 TSX 页面时，插件让列出页面与评论的两个模块
-（`app/lib/collections.ts`、`app/lib/source.ts`）在浏览器和服务端都重新加载，再让浏览器整页刷新。
+`content/` 与 `comments/` 里新增、删除文件（改名就是删一个再增一个），以及改了 TSX 页面时，插件让列出页面的两个模块
+（`app/lib/collections.ts`、`app/lib/source.server.ts`）在浏览器和服务端都重新加载，再让浏览器整页刷新。
 
 | 改动 | 结果 |
 | --- | --- |
@@ -60,8 +60,9 @@ gwb 插件往站点推数据走这里，比如协作站的通知与项目负责�
 | gwb-docsite 启动开发服务时 | 环境变量 `DOCSITE_FEED_TOKEN` 给一个随机口令 |
 | 推数据 | `POST /__docsite/feed/<频道>`，请求头 `x-docsite-token` 带口令，正文是 JSON；口令不对回 403 |
 | 开发服务 | 存下这一份，经 Vite 的 WebSocket 发事件 `docsite:feed` 给浏览器 |
-| 浏览器里 | `useSiteFeed(频道)`（`./ui`）：先取一次，之后推来新的就跟着变；发布出去的站一直是 `undefined` |
-| 路由的 `loader`、`action` | `siteFeedOf(频道)`（`./server`） |
+| 浏览器里 | `useSiteFeed(频道)`（`@godcreator/docsite-feed`）：先取一次，之后推来新的就跟着变；发布出去的站一直是 `undefined` |
+| 路由的 `loader`、`action` | `feedStore()`（`@godcreator/docsite-feed`）：进程里按频道存取最新一份 |
 
+协议、存储、开发服务端点与浏览器 hook 都在 `@godcreator/docsite-feed` 里；`docsite()` 接上它的 `feedDevServer`。
 频道名只用字母、数字、`_`、`-`。`GET /__docsite/feed/<频道>` 回最新的一份，还没推过是 `null`。
 gwb-docsite 记着每个站每个频道的最新一份，站点重启后补推。

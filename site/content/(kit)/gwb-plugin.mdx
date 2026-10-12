@@ -15,10 +15,10 @@ icon: Plug2
 | 身份码 | 设置 `identity-code`，第一次加载时生成；启动开发服务时放进环境变量 `DOCSITE_IDENTITY_CODE`，站点按它在 `people.json` 里认人，见[评论](/commenting#谁在写评论) |
 | 初始化与更新站点 | 新站点写最少的几样，装依赖，照装好的基础包与功能包的模板写骨架，见[项目骨架](/skeleton#初始化与更新)；站点的基础包依赖写成 `^插件打包时带的那一版`，装上的一定带模板。站点在运行就先停、做完再启动 |
 | 托管站点 | 在站点目录里运行 `pnpm dev`（端口写死在 `scripts.dev` 的 `--port` 里），常驻：意外退出就重启，5 分钟内失败 3 次就停下、记下原因 |
-| 启动前检查 | 有 `package.json`、装了依赖，基础包的 `siteProblems` 查人员列表与评论文件；不过就不启动，原因写在状态里 |
+| 启动前检查 | 有 `package.json`、装了依赖，插件自己的站点检查（`siteProblems`，实现在插件里）查人员列表与评论文件；不过就不启动，原因写在状态里 |
 | 推数据 | 启动时给开发服务一个口令，之后经[推送通道](/dev-plugin#收-gwb-插件推来的数据)推；每个频道记着最新的一份，站点重启后补推 |
-| 打开 | 设置 `site-window`：`chrome-app` 用 Chrome 的应用窗口，一个站一个窗口，开着就切到前台（按窗口标题里的站名认，站名是基础包 `siteTitleOf` 读出的 `content/meta.json` 的 `title`，所以页面标题写成「页面名 · 站名」）；Windows 不让切到前台时窗口留在原处、任务栏按钮闪烁，不算失败；`default-browser` 在默认浏览器里开 |
-| 评论 | 读：直接读 `comments/` 里的文件；写：经运行中的开发服务的评论接口，和网页同一套规则 |
+| 打开 | 设置 `site-window`：`chrome-app` 用 Chrome 的应用窗口，一个站一个窗口，开着就切到前台（按窗口标题里的站名认，站名是插件自己读 `content/meta.json` 的 `title` 得到的，所以页面标题写成「页面名 · 站名」）；Windows 不让切到前台时窗口留在原处、任务栏按钮闪烁，不算失败；`default-browser` 在默认浏览器里开 |
+| 评论 | 读：直接读 `comments/` 里的文件；写：经运行中的开发服务的页面接口，和网页同一套规则 |
 
 ## 命令
 
@@ -28,8 +28,8 @@ icon: Plug2
 | `docsite.site.init` | 初始化一个站点（新站点给端口与站名），或照新模板更新已有站点的骨架；可给功能包与版本范围 |
 | `docsite.site.list` / `add` / `remove` / `start` / `stop` | 托管着的站点与状态；登记进设置 `sites`、去掉；启动并打开；停掉 |
 | `docsite.people.join` | 把本 home 的码加进站点的 `people.json` |
-| `docsite.comments` | 列出评论，可按页面、状态、和谁有关筛 |
-| `docsite.comment.create` / `reply` / `resolve` / `reopen` | 写评论；agent 以自己的名义写时给 `as` |
+| `docsite.comments` | 列出评论，可按页面、和谁有关筛 |
+| `docsite.comment.create` / `reply` | 写评论（`create` 给页面与可选的元素锚点）；agent 以自己的名义写时给 `as`。`resolve` / `reopen` 还不支持 |
 
 每条命令的参数与回执写在它的 usage 里（MCP 入口 `search {"prefix":"docsite."}`），agent 怎么用写在随包发布的说明书 `docsite` 里。
 

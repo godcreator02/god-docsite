@@ -27,7 +27,7 @@ icon: Blocks
 
 ## 链接种类
 
-正文与评论里的链接由骨架的 `a` 组件（`siteLinkComponent`，出口 `./ui`）显示：站里的页面、评论、侧栏入口、`content/` 里的文件显示成带图标的小卡片，
+正文与评论里的链接由骨架的 `a` 组件（`siteLinkComponent`，`@godcreator/docsite-ui`）显示：站里的页面、评论、侧栏入口、`content/` 里的文件显示成带图标的小卡片，
 找不到的页面标红（写法与样子见[写一页说明](/writing#链接)）。功能包自己的路由（比如协作站的任务页）站点不认得，会被当成找不到的页面，
 所以功能包在 `linkKinds` 里登记：
 
@@ -41,18 +41,11 @@ const site: FeatureSite = {
 各功能包登记的种类按 `docsite.features` 的顺序排在站点自己的种类前面，第一个认得的显示。
 `Chip` 用 `linkChipClassName`、`linkChipIconClassName` 画卡片和图标，和站里其余的链接一个样子。
 
-## remark 插件放在 fumadocs-mdx 的全局设置里
+## remark 插件接在 source.config.ts 里
 
-骨架的 `source.config.ts` 引入 `app/site/content.ts`，把各功能包的 remark 插件写进 `fumadocs-mdx` 的全局设置 `mdxOptions`。
-这个文件只在构建页面时在 Node 里执行，remark 插件用到的 Node 模块不会进浏览器端。
-
-写在 `app/lib/collections.ts` 里 `defineDocs` 的 `mdxOptions` 上不行：
-
-- `collections.ts` 浏览器端也用。`fumadocs-mdx` 在浏览器端的代码里只把 `defineDocs` 调用换掉，文件顶上的 `import` 留着，静态引入 `content.ts` 会把插件带进浏览器端
-- 构建页面时 `fumadocs-mdx` 用 Vite 的模块加载器执行 `collections.ts`，执行完就关掉加载器。`mdxOptions` 函数在那之后才被调用，里面的动态 `import` 报 `Vite module runner has been closed`；
-  在调用参数里先发出动态 `import` 也一样，加载还没完成加载器就关了
-
-全局设置对所有集合生效，所以评论正文也经过这些插件。
+骨架的 `source.config.ts` 用 Config API 定义集合，只在构建页面时在 Node 里加载，浏览器不解析这个文件。
+有 `./content` 出口的功能包由初始化收集进 `app/site/content.ts`（`featureContents`），它们的 remark 插件与术语、公式一样
+接在 `docs` 集合的 `mdxOptions` 上，插件用到的 Node 模块不会进浏览器端。评论集合不加这些插件：评论数量多，编译要快。
 
 包根下的 `template/` 是要复制进站点的文件，和基础包的模板一样分 `skeleton/`（每次覆盖）与 `initial/`（没有时才写）。
 和基础包模板里同名的文件、写在 `app/site/` 下的文件都会报错：功能包只能添加文件。
@@ -67,21 +60,16 @@ const site: FeatureSite = {
 
 | 模块 | 有什么 |
 | --- | --- |
-| `@site/lib/source` | `siteName()`、`sitePageRefs()` |
+| `@site/lib/source.server` | `siteName()`、`sitePageRefs()` |
 | `@site/lib/mdx-components` | `mdxComponents` |
-| `@site/lib/comment-threads` | `allThreads`、`threadsOfPage`、`renderCommentBody` |
-| `@site/lib/commenter.server` | `pageCommentData`（只在 `loader` 里用） |
 
 类型声明在 `@godcreator/docsite-kit/site-modules`，功能包在源码里写 `/// <reference types="@godcreator/docsite-kit/site-modules" />`。
 React Router 只给项目里的路由文件生成 `+types`，包里路由模块的 `loader` 参数与返回值的类型由功能包自己写。
 
 ## 功能包页面上的评论
 
-路由写了 `comments: true`，评论接口收批这条路由下页面的评论，启动时检查评论批的页面也认这些地址（`tasks/:recordId` 认 `/tasks/` 后面跟一段的地址）。
-只认地址的样子，不查那条记录还在不在：删了任务，批它那一页的评论照样留着。
-
-页面上的评论由路由模块自己放，写法和骨架的 `app/routes/page.tsx` 一样：`loader` 用 `pageCommentData` 取人员列表与快照、`siteCommenter()` 取写评论的人，
-页面用 `PageComments` 包住正文，正文的 `DocsBody` 加 `commentScopeProps`。
+路由写了 `comments: true`，这条路由下的页面能批评论。评论界面由路由模块自己放，接法照骨架的 `app/routes/page.tsx`：
+`loader` 给这一页的评论与本机身份，`action` 核对后调评论包的写函数，页面放 `CommentsSidebar`（见[评论](/commenting#在骨架里接上)）。
 
 ## 集合定义只能在项目里
 

@@ -5,7 +5,7 @@ icon: FolderTree
 ---
 
 骨架照 fumadocs 官方的 React Router 模板排布，放在每个站点自己的目录里。
-原因是有几样东西只能写在项目里：`defineDocs` 与 `import.meta.glob` 的参数要能在构建时直接读出来，
+原因是有几样东西只能写在项目里：集合定义（`defineDocs`、`defineCollections`）与 `import.meta.glob` 的参数要能在构建时直接读出来，
 路由的 `loader` 也要写在项目的路由文件里。功能都在包里，骨架只负责引入并组合它们。
 
 骨架的正本是基础包里的 `template/`，随包发布。站点目录里的那一份由初始化照它写出，不手改。
@@ -26,9 +26,9 @@ gwb-docsite 的命令 `docsite.site.init`（别的插件调服务 `gwbDocsite.in
 | 目录 | 写进站点时 |
 | --- | --- |
 | `template/skeleton/` | 每次整份覆盖，`app/` 先整个删掉再写。`package.json` 不整份覆盖：脚本与依赖合并进站点的，同名的照模板，`dev` 保留站点自己的端口。`gitignore` 写成 `.gitignore`：发布到源上的包不带 `.gitignore` |
-| `template/initial/` | 顶层的文件或目录在站点里还没有时才写：基础包的只有 `people.json`。`comments/` 不预先建，写第一条评论时建出来 |
+| `template/initial/` | 顶层的文件或目录在站点里还没有时才写：基础包的 `people.json` 与 `glossary.terms.ts`。`comments/` 不预先建，写第一条评论时建出来 |
 
-`content/`、`comments/`、`people.json` 由站点自己维护，初始化不碰已有的。`app/` 里不放自己的文件：下次初始化会删掉。
+`content/`、`comments/`、`people.json`、`glossary.terms.ts` 由站点自己维护，初始化不碰已有的。`app/` 里不放自己的文件：下次初始化会删掉。
 
 这个仓的自述站也照模板生成：改了 `packages/docsite-kit/template/` 之后在仓根运行 `pnpm site:skeleton`，基础包的测试检查 `site/app/` 和模板一致。
 
@@ -36,31 +36,33 @@ gwb-docsite 的命令 `docsite.site.init`（别的插件调服务 `gwbDocsite.in
 
 | 文件 | 做什么 |
 | --- | --- |
-| `vite.config.ts` | 插件依次是 `docsite()`、`fumadocsMdx()`、`tailwindcss()`、`reactRouter()`；`docsite()` 的 `featurePackages` 取 `app/site/features.ts` |
-| `source.config.ts` | `fumadocs-mdx` 的全局设置：MDX 的 remark 插件在默认的后面加上公式的 `remark-math` 和各功能包 `./content` 给的（`app/site/content.ts`），见[功能包](/features#remark-插件放在-fumadocs-mdx-的全局设置里)；rehype 插件最前面是排公式的 `rehype-katex`，写法见[写一页说明](/writing#公式) |
+| `vite.config.ts` | 插件依次是 `docsite()`、`fumadocsMdx()`、`tailwindcss()`、`copyContentAssets()`、`reactRouter()`；`docsite()` 的 `featurePackages` 取 `app/site/features.ts`。`copyContentAssets` 是站点自己写的一个小插件：build 收尾时把 `content/` 里可被 `/api/content/` 服务的文件（HTML 页面与页面引用的图片、字体等资产）复制成客户端静态资产（`@godcreator/docsite-page-sources/server` 的 `copyContentAssetsToBuild`） |
+| `source.config.ts` | 用 fumadocs-mdx 的 Config API 定义两个集合：`docs`（`content/`，async 让正文按需加载，`mdxOptions` 接上公式的 `remark-math`/`rehype-katex` 与术语标注 `remarkGlossary`，词表取 `glossary.terms.ts`）、`comments`（`comments/`，async，frontmatter 不写 schema，形状由评论包的模型校验，见[评论](/commenting)）。术语与公式只加在 `docs` 集合，评论集合不加，编译更快 |
+| `glossary.terms.ts` | 站点自己的术语词表，给 `source.config.ts` 里术语标注插件用（initial 文件，站点自己维护） |
 | `react-router.config.ts` | `ssr: true`：页面在服务端渲染，发布时用 `react-router-serve` 开服务 |
-| `app/root.tsx` | 整个 HTML 外框；`RootProvider` 传入中文界面文字 `zhTranslations`；引入公式的样式 `katex/dist/katex.css`；出错时显示原话 |
-| `app/app.css` | 依次引入 Tailwind、fumadocs 的配色与 preset（docs 布局的样式在 preset 里）、基础包的 `styles.css`，最后是各功能包的样式 `app/site/styles.css` |
-| `app/routes.ts` | 路由表：`api/search` 搜索，`api/content/*` 送内容文件，`api/comments` 写评论，`comments` 全部评论页，其余地址交给内容页；功能包的路由插在中间（见[功能包](/features)）。`*` 不匹配 `/`，首页另写一条 `index` 路由：功能包给了首页就用它的，不然交给内容页 |
-| `app/lib/collections.ts` | 列出页面文件与评论文件：MDX 页面用 `defineDocs`，TSX 页面用 `import.meta.glob` 按需加载组件，评论用 `defineCollections` |
-| `app/lib/source.ts` | 把三种页面交给 fumadocs 的 `loader()`，进同一棵页面树；`lucideIconsPlugin()` 把 `icon` 里写的 lucide 图标名换成图标；检查页面有没有占用 `api`、`comments` 与功能包各条路由的第一段地址，评论批的页面在不在；`sitePageRefs()` 交出每一页的地址与标题，`siteName()` 是站名 |
-| `app/lib/mdx-components.ts` | MDX 页面与评论正文不用 `import` 就能写的组件：fumadocs 的排版组件，加上标签页、步骤、折叠、文件树、参数表、横幅、正文内目录，图片换成能放大的 `ImageZoom`，链接 `a` 换成 `siteLinkComponent` 显示的小卡片（各功能包的 `linkKinds` 排在前面），再并上各功能包的 |
-| `app/lib/comment-threads.tsx` | 全站的评论串、按页面分组的评论串、渲染一条评论正文的 `renderCommentBody`：内容页与全部评论页共用 |
-| `app/lib/commenter.server.ts` | 读人员列表、核对评论作者都在里面，读这一页各评论串的页面文字快照（`snapshot.txt`），交给内容页 |
-| `app/routes/layout.tsx` | 整站布局：docs 的 `DocsLayout`，左侧是页面树，侧栏里的下拉框切换 `"root": true` 的文件夹；`slots.sidebar` 用 `groupKeepingSidebar`，在站点自己的页面上侧栏停在最近看过的那一组；`sidebar.banner` 放 `SidebarRouteLinks` 那一排（搜索、各功能包的入口、「评论」），`slots.searchTrigger` 用 `routeLinksSearchTrigger`；`slots.themeSwitch` 用 `themeSwitchWithIdentity`，侧栏底部显示本机身份（`siteIdentity()`，只读时写「只读」和原因）。`loader` 多读各功能包的 `layoutData` 和全站页面的标题，`SiteLinksProvider` 把页面标题、那一排入口、评论串交给正文里的链接；功能包的 `Provider` 包住整个布局，`PageTop` 放在每一页正文上面 |
-| `app/routes/all-comments.tsx` | 全部评论页 `/comments`，见[评论](/commenting#全部评论页) |
-| `app/routes/page.tsx` | 内容页：用 docs 的页面组件，按页面类型渲染 MDX 正文、TSX 组件或放 HTML 的 iframe；正文外面套 `PageComments` 显示和写评论 |
-| `app/routes/comments.ts` | 评论接口：POST 调用 `commentRequestResponse` 写 `comments/` 里的文件，GET 调用 `commentSourceResponse` 取一条评论的原文给编辑用 |
-| `app/routes/search.ts` | 搜索接口，调用 `siteSearchServer`，三种页面一起搜 |
-| `app/routes/content-file.ts` | 调用 `contentFileResponse`，把 `content/` 里的文件原样送出 |
-| `app/site/` | 初始化照 `package.json` 的 `docsite.features` 生成：`features.ts` 是包名列表，`routes.ts`、`ui.ts`、`data.server.ts`、`styles.css` 分别引入各功能包的 `./routes`、`./site`、`./site-server`、`./styles.css`，`content.ts` 引入有 `./content` 出口的那几个。没有功能包时也有，列表是空的 |
+| `app/root.tsx` | 整个 HTML 外框；`RootProvider` 传入中文界面文字 `zhTranslations`（`@godcreator/docsite-ui`）；`<head>` 里放全宽开关的 `widePageScript`；引入公式的样式与 `@godcreator/docsite-writing`、`@godcreator/docsite-identity`、`@godcreator/docsite-comments` 三个包的 `styles.css`；出错时显示原话 |
+| `app/app.css` | 依次引入 Tailwind、fumadocs 的配色与 preset（docs 布局的样式在 preset 里）、`@godcreator/docsite-ui` 的 `styles.css`，最后是各功能包的样式 `app/site/styles.css`；再写评论侧栏的摆位 |
+| `app/routes.ts` | 路由表：`api/search` 搜索，`api/markdown` 取一页的 Markdown，`api/content/*` 送内容文件；整站布局路由包住首页（功能包给了首页就用它的，不然交给内容页）、`comments` 全站评论页、功能包的路由（见[功能包](/features)）、其余地址交给内容页。`*` 不匹配 `/`，首页另写一条 `index` 路由 |
+| `app/lib/collections.ts` | TSX 与 HTML 页面的文件清单（`import.meta.glob`）：页面组件按需加载、meta 与 HTML 文本急切加载。MDX 集合不经这里——集合定义在 `source.config.ts`，入口由 fumadocs-mdx 生成的 `.source/server` 与 `.source/browser` 给。两个 glob 都用根路径模式，Vite 按项目根解析 |
+| `app/lib/source.server.ts` | 把三种页面交给 fumadocs 的 `loader()`，进同一棵页面树；`lucideIconsPlugin()` 把 `icon` 里写的 lucide 图标名换成图标；`searchServerOf` 建中文搜索服务（见[文档站基础包](/)）；`sitePageRefs()` 交出每一页的地址与标题，`siteName()` 是站名；`commentCollection` 把评论集合交给评论分组（`app/lib/comments.server.ts`）。`.server` 文件不进浏览器包 |
+| `app/lib/comments.server.ts` | 本页评论 `pageThreads(页面在 docs 集合里的路径)`（评论包的 `threadsForPage` 分组，作者解析成可信的 `{id, name}`）与全站按页分组的 `allPageThreads()`，逐请求执行，见[评论](/commenting#在骨架里接上) |
+| `app/lib/identity.server.ts` | 身份与写入边界：`siteIdentity()` 按环境变量的身份码认人（`DOCSITE_IDENTITY_CODE`）、`sitePeople()` 读 `people.json`、`authorizeCommentWrite()` 核对一次写入请求（Origin、身份、`as`）、`siteOrigin` 是这个站的可信 origin |
+| `app/lib/mdx-components.ts` | MDX 页面与评论正文不用 `import` 就能写的组件：fumadocs 的排版组件（标签页、步骤、折叠、文件树、参数表、横幅、正文内目录），图片换成能放大的 `ImageZoom`，写作包的 `Term`，链接 `a` 换成 `siteLinkComponent` 显示的小卡片（各功能包的 `linkKinds` 排在前面），再并上各功能包的 |
+| `app/lib/client-content.tsx` | 浏览器一侧的按需正文入口：`docsContent`（页面正文）与 `commentContent`（评论正文）两个 client loader，服务端 loader 只传路径，正文组件在浏览器按路径异步加载 |
+| `app/routes/layout.tsx` | 整站布局：docs 的 `DocsLayout`，左侧是页面树，侧栏里的下拉框切换 `"root": true` 的文件夹；`slots.sidebar` 用 `groupKeepingSidebar`，在站点自己的页面上侧栏停在最近看过的那一组；`sidebar.banner` 放 `SidebarRouteLinks` 那一排（搜索、各功能包的入口、「评论」，评论入口指向全站评论页），`slots.searchTrigger` 用 `routeLinksSearchTrigger`；`slots.themeSwitch` 用 `themeSwitchWithIdentity`，侧栏底部显示本机身份（`siteIdentity()`，只读时写「只读」和原因）。`SiteLinksProvider` 把页面标题、那一排入口、评论链接卡片要的数据交给正文里的链接；`loader` 多读各功能包的 `layoutData` 和全站页面的标题；功能包的 `Provider` 包住整个布局，`PageTop` 放在每一页正文上面 |
+| `app/routes/all-comments.tsx` | 全站评论页 `/comments`：`allPageThreads()` 按页分组列出，只读，见[评论](/commenting#全部评论页) |
+| `app/routes/page.tsx` | 内容页：按页面类型渲染 MDX 正文（client loader 按需取）、TSX 组件或放 HTML 的 iframe；`loader` 给本页评论与本机身份，`action` 承接写评论；正文右边是 `CommentsSidebar`，见[评论](/commenting#在骨架里接上) |
+| `app/routes/search.ts` | 搜索接口，交给 `app/lib/source.server.ts` 建的 `searchServer`，三种页面一起搜 |
+| `app/routes/content-file.ts` | 调用 `contentFileResponse`，dev 下读 `content/` 源目录把文件原样送出；build 后同一批文件已是静态资产、优先命中，落到这里的路径按快照语义 404 |
+| `app/routes/markdown.ts` | `/api/markdown?path=<页面地址>` 返回那一页的 Markdown：MDX 页面走集合的 `getText('processed')`，TSX 与 HTML 页面用来源里算好的 `data.markdown`，三种页面一个约定 |
+| `app/site/` | 初始化照 `package.json` 的 `docsite.features` 生成：`features.ts` 是包名列表，`routes.ts`、`ui.ts`、`data.server.ts`、`content.ts` 分别引入各功能包的 `./routes`、`./site`、`./site-server`、`./content`（有这个出口的那几个），`styles.css` 引入各功能包的样式。没有功能包时也有，列表是空的 |
 | `content/` | 页面放在这里，每个文件夹的 `meta.json` 写标题和页面顺序；写了 `"root": true` 的文件夹是侧栏里切换下拉框的一项 |
 | `comments/` | 评论放在这里，一个评论串一个文件夹，见[评论](/commenting) |
 | `people.json` | 这个站的人员列表：评论署名用的 `id`、显示的名字、各人的身份码，agent 也在里面，见[评论](/commenting#谁在写评论) |
 
-## 站点用的是基础包的构建产物
+## 站点用的是各包的构建产物
 
-`exports` 里每个出口都只指向 `dist/`，开发服务、类型检查与 `pnpm build` 都用它。
+基础包与各能力包 `exports` 里的每个出口都只指向 `dist/`，开发服务、类型检查与 `pnpm build` 都用它。
 `react-router dev` 总是以 `--conditions=development` 重新启动 Node，出口若按 `development` 指向 `src/` 下的 `.ts`，
 装在 `node_modules` 里的站点一启动就报「不能剥离 node_modules 里文件的类型」，所以不设这个条件。
-在这个仓里改了基础包，先在包里运行 `pnpm build`，再重启自述站的开发服务。
+在这个仓里改了基础包或能力包，先在包里运行 `pnpm build`，再重启自述站的开发服务。

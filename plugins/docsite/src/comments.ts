@@ -50,7 +50,8 @@ export type CommentWrite =
 
 /**
  * 表单字段：和网页同一个评论接口（页面路由的 action），所以要站点在运行。
- * page 是页面的 URL（如 "/writing/collapse-test"）；anchor 是页面元素的 id，可省
+ * page 是页面在 docs 集合里的路径（如 writing/collapse-test.mdx），和网页表单、docsite.comments 的筛选用同一写法；
+ * anchor 是页面元素的 id，可省
  */
 export function commentFormOf(write: CommentWrite): FormData {
   const form = new FormData()
@@ -68,10 +69,9 @@ export function commentFormOf(write: CommentWrite): FormData {
   return form
 }
 
-/** 经运行中的开发服务写评论（POST 到页面的 action）；接口拒绝时把它的原话报出来 */
+/** 经运行中的开发服务写评论（POST 到站点根那条页面路由的 action，action 不依赖 POST 路径）；接口拒绝时把它的原话报出来 */
 export async function writeComment(siteUrl: string, write: CommentWrite): Promise<{ thread: string }> {
-  const target = write.op === 'create' ? new URL(write.page, siteUrl) : new URL('/', siteUrl)
-  const response = await fetch(target, { method: 'POST', body: commentFormOf(write) })
+  const response = await fetch(new URL('/', siteUrl), { method: 'POST', body: commentFormOf(write) })
   if (!response.ok) throw new DocsiteRejected(`站点的评论接口拒绝了（${response.status}）：${await response.text()}`)
   const result = (await response.json()) as { threadId?: string }
   if (typeof result.threadId !== 'string') throw new DocsiteRejected(`站点的评论接口没有回 threadId：${JSON.stringify(result)}`)

@@ -192,7 +192,7 @@ export function registerCommands({ commands, docsite, sitesSetting, list }: Comm
       name: 'docsite.comments',
       description: '列出站点上的评论（只读，读文件，不要站点在运行）',
       usage:
-        "{ dir, page?, status?, about? }：page 是页面地址（如 /writing），给了只列批那一页的；status 是 open / resolved；about 是人员 id，给了只列和他有关的（他发起的、回复过的、正文里 @ 了他的）。回 { threads }：每串 { id, author, createdAt, page?, status, quote?, element?, range?, openers?, resolvedBy?, resolvedAt?, file, body, mentions, replies }，page 没有的是不挂在页面上的评论；body 是 MDX 原文；replies 每条 { file, author, createdAt, body, mentions }，按时间排；文件在站点目录的 comments/<id>/ 里",
+        '{ dir, page?, about? }：page 是页面在 docs 集合里的路径（如 writing/collapse-test.mdx），给了只列批那一页的；about 是人员 id，给了只列和他有关的（他发起的、正文或回复里 @ 了他的）。回 { threads }：每串 { id, page, anchor?, author, createdAt, body, mentions, replies }，anchor 是锚定的页面元素 id，页面级评论没有；author 是 people.json 里的 id；body 是 MDX 原文；mentions 是正文与回复里 @ 了的人员 id，去重；replies 每条 { author, createdAt, body, mentions }，按时间排。文件在站点目录的 comments/<id>/ 里：index.mdx 是发起的那条，回复各一个 .mdx',
       effect: 'read',
     },
     async (args) => {
@@ -213,7 +213,7 @@ export function registerCommands({ commands, docsite, sitesSetting, list }: Comm
     {
       name: 'docsite.comment.create',
       description: '在站点上发起一串评论：批整页或批页面上的一个元素',
-      usage: `{ dir, body, page, anchor?, as? }：page 是页面的 URL（如 /writing/collapse-test）；anchor 是页面元素的 id，给了就批那个元素，不给批整页。${commentWriteUsage}。回 { thread }`,
+      usage: `{ dir, body, page, anchor?, as? }：page 是页面在 docs 集合里的路径（如 writing/collapse-test.mdx），与 docsite.comments 的 page 同一写法；anchor 是页面元素的 id，给了就批那个元素，不给批整页。${commentWriteUsage}。回 { thread }`,
       effect: 'write',
     },
     async (args) => {

@@ -51,13 +51,13 @@ docsite.people.join {"dir":"<站点目录>","id":"<字母数字>","name":"<显�
 
 ## 评论
 
-- 读：`docsite.comments {"dir":…, "page"?: "/页面地址", "status"?: "open"|"resolved", "about"?: "<人员 id>"}`，读文件，不要站点在运行。
-  `page` 没有的是不挂在页面上的评论；`body` 是 MDX 原文
-- 写：`docsite.comment.create`（给 `page` 与 `quote` 批那一页第 `occurrence` 处的字；只给 `page` 批整页；都不给是不挂在页面上的）、
-  `docsite.comment.reply`、`docsite.comment.resolve`、`docsite.comment.reopen`。要站点在运行。
-  agent 以自己的名义写时给 `as`（`people.json` 里 `"agent": true` 的 id），不给就署本 home 的人
+- 读：`docsite.comments {"dir":…, "page"?: "<页面在 docs 集合里的路径>", "about"?: "<人员 id>"}`，读文件，不要站点在运行。
+  `page` 如 `"writing/collapse-test.mdx"`；`about` 给了只列和他有关的（他发起的、正文或回复里 @ 了他的）
+- 写：`docsite.comment.create`（给 `page`（页面在 docs 集合里的路径，与 `docsite.comments` 的 `page` 同一写法）与 `body`；给 `anchor` 批页面上带这个 id 的元素，不给批整页）、
+  `docsite.comment.reply`。要站点在运行。agent 以自己的名义写时给 `as`（`people.json` 里 `"agent": true` 的 id），不给就署本 home 的人
+- `docsite.comment.resolve`、`docsite.comment.reopen` 还不支持（评论模型还没有已解决状态），调了会直接报错
 - 正文是 MDX：字面的 `<`、`{` 写成 `\<`、`\{` 或放进反引号；`@<id>` 是 @ 某人
-- 人让你照某条评论改页面时：先 `docsite.comments` 找到它，改完页面再 `docsite.comment.reply` 说明改了什么；要不要标已解决问人
+- 人让你照某条评论改页面时：先 `docsite.comments` 找到它，改完页面再 `docsite.comment.reply` 说明改了什么
 
 ## 写页面
 
