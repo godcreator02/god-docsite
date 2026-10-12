@@ -1,1 +1,0 @@
-任务L方向纠正：本轮templateDir是单一普通文件树，不要恢复旧skeleton/initial双目录协议。用户已同意的新建器明确合并成一个template目录，旧init仅作保留现有文件行为的参考。保留规则按目标路径content/、comments/、people.json与既有材料处理；不存在时填默认，已存在不覆盖。核心API与CLI继续按原派单，src与真实IO测试照写；不创建package.json、不碰K。当前你仍在前置阅读，直接按单树实现，不需要另写一轮方案。

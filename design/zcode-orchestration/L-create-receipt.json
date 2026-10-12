@@ -1,8 +1,0 @@
-{
-  "content": [
-    {
-      "type": "text",
-      "text": "{\n  \"ok\": true,\n  \"data\": {\n    \"taskId\": \"sess_5141b86c-64f7-4857-8ece-2fe0882facef\",\n    \"title\": \"任务L：实现create-docsite的一次性建站文件生成核心（与K评论集成独立并行）。用户刚明确授权增加一个可...\",\n    \"status\": \"running\",\n    \"mode\": \"yolo\",\n    \"roundStarted\": true\n  }\n}"
-    }
-  ]
-}

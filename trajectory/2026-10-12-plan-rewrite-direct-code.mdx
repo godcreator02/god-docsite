@@ -1,0 +1,29 @@
+---
+born-at: 2026-10-12T12:10
+type: choice
+parent: [2026-10-11-refactor-in-five-steps]
+label: 方案推倒重写：直接写正式代码，探针只判上游未知行为；范围收缩为 docsite 自身
+domain: 骨架
+---
+
+## 背景
+
+旧方案（分步改造计划 + ZCode 编排台账）把「本来就该是正式代码」的功能先做成探针与验证站，
+多出两段搬运，最后 packages/ 里三套并存（一体化本体、K 形态分包、probes 里的原生重写正本）。
+用户 2026-10-12 定方向：直接写正式代码，遇到不知道上游行为的问题才写探针；先把 docsite 自己
+做好，docfirst 与协作站以后另立方案。
+
+## 定下的做法
+
+删除旧计划页（30-refactor-plan、31-zcode-orchestration）与编排台账（design/zcode-orchestration/），
+保留 fumadocs 调研讲解页；先做全量快照提交（07704c2）再删，历史可回溯。新方案在
+`design/30-plan.html`：工作流程规矩、技术底座（vite 补丁 + 版本基线 + fumadocs 原生能力清单）、
+包格局（评论模型以 N 线为正本收编、身份校验在站点 action 组合）、清理清单（K 形态
+docsite-comments 删、本体旧实现删、pageListRefresh 强刷半截删、双源 MDX 校验收敛）、七步推进。
+已否决：运行时 MDX 编译器、评论包依赖身份包、手工对抗 HMR、「先探针后收编」的顺序。
+
+## 接续入口
+
+新方案正本 `design/30-plan.html`，导航在 `design/index.html`。旧方案的完整内容在 git 历史
+（快照提交 07704c2）里。probes/ 的实验材料全部保留（vite 补丁的证据链在
+probes/2610121018_vite-add-discovery，AGENTS.md 引用了它）。

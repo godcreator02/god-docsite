@@ -1,8 +1,0 @@
-{
-  "content": [
-    {
-      "type": "text",
-      "text": "{\n  \"ok\": true,\n  \"data\": {\n    \"taskId\": \"sess_84419751-86fe-40bb-9adf-6487c47c731d\",\n    \"title\": \"并行改写契约下站点评论小段交付\",\n    \"status\": \"running\",\n    \"mode\": \"yolo\",\n    \"roundStarted\": true\n  }\n}"
-    }
-  ]
-}

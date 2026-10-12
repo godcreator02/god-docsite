@@ -1,8 +1,0 @@
-{
-  "content": [
-    {
-      "type": "text",
-      "text": "{\n  \"ok\": true,\n  \"data\": {\n    \"taskId\": \"sess_110a54a9-72a1-400a-a5d5-68fb15c22fde\",\n    \"title\": \"任务M：将gwb-zcode的status单次等待上限由240秒改为900秒。用户已明确说“ZCode 单次等待参...\",\n    \"status\": \"running\",\n    \"mode\": \"yolo\",\n    \"roundStarted\": true\n  }\n}"
-    }
-  ]
-}
