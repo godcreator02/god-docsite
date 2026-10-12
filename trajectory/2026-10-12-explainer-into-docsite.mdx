@@ -1,0 +1,35 @@
+---
+born-at: 2026-10-12T14:25
+type: choice
+parent: [2026-10-12-feed-its-own-package]
+label: 讲解组件正本搬进本仓成 @godcreator/docsite-explainer（gwb-docfirst 侧冻结待切薄壳）
+domain: 骨架
+---
+
+## 背景
+
+讲解组件归基础包是设计文档早写过的方向（`design/01-principles.html` 待定清单：「术语标注、讲解组件（不含跟名册绑定的那部分）
+……推荐归基础包」）。正本一直住在 gwb-docfirst 仓的 `docfirst-explainer`（0.1.1）：名字与位置都以「使用方全是 docfirst 站」为前提。
+本仓三层包格局（能力小包 / 组合包 / 站点）落地后，自述站与后续普通站要用讲解组件就得跨仓依赖 docfirst 的包，方向不对。
+
+## 做了
+
+- 整包搬进 `packages/docsite-explainer`（`@godcreator/docsite-explainer`，0.1.0 起、尚未发版）：源码一字未改，
+  四个出口不变（`.` 客户端组件带 "use client"、`./text` 与 `./seam-graph` 供 Node 生成机读文字、`./styles.css`），
+  样式类名前缀 `dx-`/`sm-` 不变。
+- 构建从源仓的 tsdown 换成本仓能力包的 tsc 形态：逐文件 emit、不打包，三个入口天然独立，`./text`、`./seam-graph`
+  不沾 react 从「构建配置保证」退化成「产物结构天然成立」。源码里带 `.tsx` 扩展名的 re-export（tsdown 风格）由
+  `rewriteRelativeImportExtensions` 在产物里重写成 `.js`（typecheck 侧用 `allowImportingTsExtensions`）。
+- 测试搬进包内 `test/`：`explainer.test.ts`（组件与机读文字）＋ `entries.test.ts`（源仓 boundary 测试第六节
+  「三个入口」的检查：清单零 dependencies、peer 只有 react、产物特征）。
+
+## 边界
+
+- gwb-docfirst 的 `docfirst-explainer` 0.1.1 冻结，不改（那边轨迹卡 `2026-10-12-explainer-moved-to-docsite`）；
+  等本包发版后那边改为依赖本包的薄壳转发（升 y 发一版），机器上六个使用方不破，各站随后自己换依赖。
+- 到发版为止正本两份并存，改动一律落在本仓这份。
+- 本包在仓内暂无消费者（测试除外）；第一批使用者是自述站将来的讲解页重做与 docfirst 站迁移。
+
+## 已否决
+
+留在 gwb-docfirst、本仓站点跨仓依赖它：docfirst 向新格局的迁移还没发生，普通站依赖 docfirst 的包与三层格局的方向相反。
