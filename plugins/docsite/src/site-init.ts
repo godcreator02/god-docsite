@@ -144,6 +144,10 @@ export async function initSite(dir: string, options: SiteInitOptions, deps: Site
     })
     mkdirSync(path.join(dir, 'content'), { recursive: true })
     writeJson(path.join(dir, 'content', 'meta.json'), { title: options.title, pages: [] })
+    writeFileSync(
+      path.join(dir, 'content', 'index.mdx'),
+      `---\ntitle: ${options.title}\ndescription: 用 docsite.site.init 建的站，从这页开始写\n---\n\n这一页是建站时写的起始页，改掉它或删掉它都行。\n`,
+    )
     // 写骨架要读各功能包的 template/：有功能包就先装上（没有时基础包已在 addKit 装好，直接写骨架）
     if (Object.keys(features ?? {}).length > 0) await deps.install(dir)
     written = writeSiteSkeleton(dir)
