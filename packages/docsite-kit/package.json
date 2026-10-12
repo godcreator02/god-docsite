@@ -12,17 +12,9 @@
       "types": "./dist/server/index.d.ts",
       "default": "./dist/server/index.js"
     },
-    "./files": {
-      "types": "./dist/server/files.d.ts",
-      "default": "./dist/server/files.js"
-    },
     "./site-feed": {
       "types": "./dist/site-feed.d.ts",
       "default": "./dist/site-feed.js"
-    },
-    "./ui": {
-      "types": "./dist/ui/index.d.ts",
-      "default": "./dist/ui/index.js"
     },
     "./feature": {
       "types": "./dist/feature.d.ts",
@@ -34,8 +26,7 @@
     },
     "./site-modules": {
       "types": "./site-modules.d.ts"
-    },
-    "./styles.css": "./styles.css"
+    }
   },
   "files": [
     "dist",
@@ -85,11 +76,10 @@
   "dependencies": {
     "@mdx-js/mdx": "3.1.1",
     "katex": "^0.16.47",
-    "lucide-react": "1.54.0",
     "rehype-katex": "^7.0.1",
     "remark-math": "^6.0.0",
-    "@godcreator/docsite-identity": "workspace:*",
     "@godcreator/docsite-page-sources": "workspace:*",
-    "@godcreator/docsite-comments": "workspace:*"
+    "@godcreator/docsite-comments": "workspace:*",
+    "@godcreator/docsite-ui": "workspace:*"
   }
 }

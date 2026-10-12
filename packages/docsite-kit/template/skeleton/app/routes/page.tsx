@@ -8,7 +8,7 @@ import { contentFileUrlOf, type HtmlHeadingAnchor } from '@godcreator/docsite-pa
 import { HtmlPageBody, TsxPageBody } from '@godcreator/docsite-page-sources/ui'
 import { createReply, createThread, deleteReply, deleteThread } from '@godcreator/docsite-comments/server'
 import { CommentsSidebar, type PageThreadSummary } from '@godcreator/docsite-comments/react'
-import { PageTitleWithWideToggle } from '@godcreator/docsite-kit/ui'
+import { PageTitleWithWideToggle } from '@godcreator/docsite-ui'
 import { allPageThreads, pageThreads } from '../lib/comments.server'
 import { authorizeCommentWrite, siteIdentity, sitePeople, writeAccessResponse } from '../lib/identity.server'
 import { siteName, source } from '../lib/source.server'

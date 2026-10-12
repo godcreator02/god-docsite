@@ -37,7 +37,8 @@
     "@godcreator/gwb-skills": "^0.4.12",
     "cordis": "^4.0.0-rc.10",
     "@godcreator/docsite-identity": "workspace:*",
-    "@godcreator/docsite-comments": "workspace:*"
+    "@godcreator/docsite-comments": "workspace:*",
+    "@godcreator/docsite-ui": "workspace:*"
   },
   "peerDependenciesMeta": {
     "@godcreator/gwb-skills": {

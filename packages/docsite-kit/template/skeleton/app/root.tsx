@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react'
 import { isRouteErrorResponse, Links, Meta, Outlet, Scripts, ScrollRestoration } from 'react-router'
 import { RootProvider } from '@fumadocs/base-ui/provider/react-router'
-import { widePageScript, zhTranslations } from '@godcreator/docsite-kit/ui'
+import { widePageScript, zhTranslations } from '@godcreator/docsite-ui'
 import type { Route } from './+types/root'
 import 'katex/dist/katex.css'
 import '@godcreator/docsite-writing/styles.css'

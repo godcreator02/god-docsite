@@ -5,7 +5,8 @@ import { isRunnableDevEnvironment, normalizePath, type Plugin, type PluginOption
 import type { EvaluatedModuleNode, EvaluatedModules } from 'vite/module-runner'
 import { manifestFileOf, readManifest } from '../package-dirs.js'
 import { tsxPageSuffix } from '@godcreator/docsite-page-sources'
-import { feedEndpointPrefix, feedEvent, feedStore, feedTokenEnvName, feedTokenHeader, isFeedChannel, type FeedMessage } from '../site-feed.js'
+import { feedStore } from '../site-feed.js'
+import { feedEndpointPrefix, feedEvent, feedTokenEnvName, feedTokenHeader, isFeedChannel, type FeedMessage } from '@godcreator/docsite-ui'
 
 /** 基础包自己的包名：要和站点自己的代码一样经 Vite 处理 */
 const ownPackageName = '@godcreator/docsite-kit'

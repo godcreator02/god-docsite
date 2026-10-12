@@ -64,21 +64,18 @@ importers:
       '@godcreator/docsite-comments':
         specifier: workspace:*
         version: link:../docsite-comments
-      '@godcreator/docsite-identity':
-        specifier: workspace:*
-        version: link:../docsite-identity
       '@godcreator/docsite-page-sources':
         specifier: workspace:*
         version: link:../docsite-page-sources
+      '@godcreator/docsite-ui':
+        specifier: workspace:*
+        version: link:../docsite-ui
       '@mdx-js/mdx':
         specifier: 3.1.1
         version: 3.1.1
       katex:
         specifier: ^0.16.47
         version: 0.16.47
-      lucide-react:
-        specifier: 1.54.0
-        version: 1.54.0(@types/react@19.3.0)(react@19.3.0)
       rehype-katex:
         specifier: ^7.0.1
         version: 7.0.1
@@ -156,6 +153,48 @@ importers:
         specifier: ^5.0.1
         version: 5.0.3(@types/node@26.6.4)(jsdom@30.1.2)(vite@8.3.4(patch_hash=71051b570cd126a84b4a427f5a23158b617cf5a07b451901ea0cab096dc377d8)(@types/node@26.6.4)(esbuild@0.28.2)(jiti@2.7.0)(yaml@2.9.1))
 
+  packages/docsite-ui:
+    devDependencies:
+      '@fumadocs/base-ui':
+        specifier: 16.17.1
+        version: 16.17.1(@types/mdx@2.0.14)(@types/react@19.3.0)(fumadocs-core@16.17.1(@mdx-js/mdx@3.1.1)(@types/estree-jsx@1.0.5)(@types/hast@3.0.5)(@types/mdast@4.0.4)(@types/react@19.3.0)(lucide-react@1.54.0(@types/react@19.3.0)(react@19.3.0))(react-dom@19.3.0(react@19.3.0))(react-router@8.4.0(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(react@19.3.0)(zod@4.6.5))(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(tailwindcss@4.3.3)
+      '@godcreator/docsite-identity':
+        specifier: workspace:*
+        version: link:../docsite-identity
+      '@types/node':
+        specifier: ^26.6.2
+        version: 26.6.4
+      '@types/react':
+        specifier: ^19.3.0
+        version: 19.3.0
+      '@types/react-dom':
+        specifier: ^19.3.0
+        version: 19.3.0(@types/react@19.3.0)
+      fumadocs-core:
+        specifier: 16.17.1
+        version: 16.17.1(@mdx-js/mdx@3.1.1)(@types/estree-jsx@1.0.5)(@types/hast@3.0.5)(@types/mdast@4.0.4)(@types/react@19.3.0)(lucide-react@1.54.0(@types/react@19.3.0)(react@19.3.0))(react-dom@19.3.0(react@19.3.0))(react-router@8.4.0(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(react@19.3.0)(zod@4.6.5)
+      lucide-react:
+        specifier: 1.54.0
+        version: 1.54.0(@types/react@19.3.0)(react@19.3.0)
+      react:
+        specifier: ^19.3.0
+        version: 19.3.0
+      react-dom:
+        specifier: ^19.3.0
+        version: 19.3.0(react@19.3.0)
+      react-router:
+        specifier: 8.4.0
+        version: 8.4.0(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
+      typescript:
+        specifier: ^6.0.3
+        version: 6.0.3
+      vite:
+        specifier: ^8.3.0
+        version: 8.3.4(patch_hash=71051b570cd126a84b4a427f5a23158b617cf5a07b451901ea0cab096dc377d8)(@types/node@26.6.4)(esbuild@0.28.2)(jiti@2.7.0)(yaml@2.9.1)
+      vitest:
+        specifier: ^5.0.1
+        version: 5.0.3(@types/node@26.6.4)(jsdom@30.1.2)(vite@8.3.4(patch_hash=71051b570cd126a84b4a427f5a23158b617cf5a07b451901ea0cab096dc377d8)(@types/node@26.6.4)(esbuild@0.28.2)(jiti@2.7.0)(yaml@2.9.1))
+
   packages/docsite-writing:
     devDependencies:
       '@mdx-js/mdx':
@@ -215,6 +254,9 @@ importers:
       '@godcreator/docsite-identity':
         specifier: workspace:*
         version: link:../../packages/docsite-identity
+      '@godcreator/docsite-ui':
+        specifier: workspace:*
+        version: link:../../packages/docsite-ui
       '@godcreator/gwb-commands':
         specifier: ^0.6.1
         version: 0.6.1(@godcreator/gwb-kernel-desktop@0.10.1(cordis@4.0.0-rc.10))(cordis@4.0.0-rc.10)
@@ -270,6 +312,9 @@ importers:
       '@godcreator/docsite-page-sources':
         specifier: workspace:*
         version: link:../packages/docsite-page-sources
+      '@godcreator/docsite-ui':
+        specifier: workspace:*
+        version: link:../packages/docsite-ui
       '@godcreator/docsite-writing':
         specifier: workspace:*
         version: link:../packages/docsite-writing

@@ -8,7 +8,7 @@ import { Step, Steps } from '@fumadocs/base-ui/components/steps'
 import { Tab, Tabs } from '@fumadocs/base-ui/components/tabs'
 import { TypeTable } from '@fumadocs/base-ui/components/type-table'
 import { Term } from '@godcreator/docsite-writing'
-import { siteLinkComponent } from '@godcreator/docsite-kit/ui'
+import { siteLinkComponent } from '@godcreator/docsite-ui'
 import { featureSites } from '../site/ui'
 
 /** fumadocs 的排版组件不用 import 就能写；术语是写作包的 Term，图片换成点了能放大的 ImageZoom */

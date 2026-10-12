@@ -32,7 +32,8 @@
     "@godcreator/docsite-identity": "workspace:*",
     "@godcreator/docsite-comments": "workspace:*",
     "@godcreator/docsite-writing": "workspace:*",
-    "@godcreator/docsite-page-sources": "workspace:*"
+    "@godcreator/docsite-page-sources": "workspace:*",
+    "@godcreator/docsite-ui": "workspace:*"
   },
   "devDependencies": {
     "@react-router/dev": "^8.4.0",

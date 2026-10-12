@@ -3,7 +3,7 @@ import { randomUUID } from 'node:crypto'
 import { existsSync, readFileSync } from 'node:fs'
 import path from 'node:path'
 import { identityCodeEnvName } from '@godcreator/docsite-identity/server'
-import { feedEndpointPrefix, feedTokenEnvName, feedTokenHeader } from '@godcreator/docsite-kit/site-feed'
+import { feedEndpointPrefix, feedTokenEnvName, feedTokenHeader } from '@godcreator/docsite-ui'
 import { DocsiteRejected } from './errors.js'
 
 const ansiEscapePattern = /\x1b\[[0-9;]*[A-Za-z]/g

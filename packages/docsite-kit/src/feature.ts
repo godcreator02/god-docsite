@@ -1,7 +1,6 @@
 import type { ProcessorOptions } from '@mdx-js/mdx'
 import type { ComponentType, ReactNode } from 'react'
-import type { SidebarRouteLink } from './ui/sidebar.js'
-import type { SiteLinkKind } from './ui/site-links.js'
+import type { SidebarRouteLink, SiteLinkKind } from '@godcreator/docsite-ui'
 
 /**
  * 功能包（如协作站的 @godcreator/collab-site）往基础骨架上添加的东西。站点 package.json 的 docsite.features 列出用到的功能包，
