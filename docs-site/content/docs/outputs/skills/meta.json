@@ -1,0 +1,5 @@
+{
+  "title": "skill",
+  "description": "随插件发的 SKILL.md 的正本：render 生成到插件包内 skills/<名>/SKILL.md",
+  "pages": ["docs-site", "docs-writing", "trajectory"]
+}

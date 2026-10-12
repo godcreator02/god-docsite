@@ -1,0 +1,50 @@
+---
+born-at: 2026-09-27T12:02
+type: choice
+parent: [2026-09-03-god-live-doc]
+label: 通用包按功能起名
+domain: 模块边界
+---
+
+## 背景
+
+按接缝拆包、钉码与星轨盘先后收了中性输入之后，钉码、星轨盘、讲解组件三个包都不再认识 docfirst，
+名字却还是 `docfirst-pin`、`docfirst-trajectory`、`docs-explain`：前两个说它们属于 docfirst，第三个只说「给文档讲解用」，
+三个都没说出自己做什么。边界测试里对它们的要求也是零散的：钉码、星轨盘各查各的零依赖，
+星轨盘不认识卡格式只查了建模目录与 `.` 的产物，没有哪条要求它们不提 docfirst，插件那边按 `@godcreator/docfirst-` 前缀认包。
+
+pivots-from:: [按接缝拆四包](2026-09-26-split-by-seams-into-four-packages.mdx)
+
+## 结论与边界
+
+**三个通用包按功能起名**：`@godcreator/code-pin`（把文字钉在代码上）、`@godcreator/trajectory-disk`
+（把一组卡画成项目方向演变的圆盘）、`@godcreator/explainer-player`（把讲解拆成配说明的帧，用控制条播放和切换）。
+docfirst 自己的两个包 `docfirst-workflow`、`docfirst-fumadocs` 名字不变，五个包仍在本仓一起发。
+
+**独立性由边界测试守**：`tests/boundary.test.ts` 里一张 `GENERIC_PACKAGES` 表，三条检查对表里每个包一样——
+清单里没有任何 `@godcreator/` 包；源码与产物不 import 它们，源码的相对 import 不出自己的 `src/`；
+包目录里一个 docfirst 字样都没有，注释也算。星轨盘不认识卡格式那条扩到整个包。插件不依赖包的检查改成
+从 `packages/` 下的清单现读包名，不再按前缀认。三条都先放进违规确认会失败，再撤掉。
+
+星轨盘在浏览器里存设置的两个键 `live-doc-trajectory.settings`、`.side-width` 不改名：改了每个人存过的设置都会回到默认。
+
+## 否掉的候选
+
+**星轨盘叫 `star-disk`**：只说了长相，没说功能；组件名 `StarDisk` 照样说长相，包名说功能。
+
+**讲解播放器叫 `explainer-kit`、`explainer-shells`、`walkthrough`、`narrated-frames`**：kit 只说明「一套东西」；
+shells 漏了零件与机读版文字；walkthrough 包含不了「选情况」；narrated-frames 看不出有控制条、也看不出是拿来讲解的。
+
+**钉码叫 `span-pin` 或 `pin`**：整个文件、目录树两种目标都不是行段；光一个 pin 看不出钉的是什么。
+
+**`docfirst-workflow` 顺便改成 `docfirst`**：源上已经发过 0.3.1，每个下游站都得换包名，这一轮不动。
+
+**通用包拆到单独的仓**：现在只有 docfirst 一个使用者，拆仓只是给以后留口子。
+
+## 代价与遗留
+
+源上的 `docfirst-trajectory` 0.1.1 留在旧名字下，本机十八个站的旧模板直接依赖它；迁到新结构时它们本来就要换成
+`docfirst-fumadocs`，改名不给下游多加一步，发版时再定旧名字要不要标废弃。
+
+星轨盘的测试还离不开 workflow 的卡格式：`tests/trajectory-helpers.ts` 用卡格式把卡换成中性输入，
+一部分测试读 `tests/fixtures/trajectory/` 下的卡文件。包是通用的，它的测试还不是。

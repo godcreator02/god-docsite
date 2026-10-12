@@ -1,0 +1,21 @@
+== 1-core-16.15.14_to-markdown-2.1.3
+fumadocs-core 16.15.14，它用的 mdast-util-to-markdown 2.1.3
+  粗体后跟全角冒号：失败 RangeError: Maximum call stack size exceeded
+  粗体在句中：失败 RangeError: Maximum call stack size exceeded
+  整行粗体：失败 RangeError: Maximum call stack size exceeded
+  斜体：失败 RangeError: Maximum call stack size exceeded
+  没有强调：通过 "没有粗体"
+== 2-core-16.15.14_to-markdown-2.1.2
+fumadocs-core 16.15.14，它用的 mdast-util-to-markdown 2.1.2
+  粗体后跟全角冒号：通过 "**本页回答**：这个项目里反复出现的词各指什么。"
+  粗体在句中：通过 "前面 **粗体** 后面"
+  整行粗体：通过 "**粗体**"
+  斜体：通过 "前面 *斜体* 后面"
+  没有强调：通过 "没有粗体"
+== 3-core-16.15.17_to-markdown-2.1.3
+fumadocs-core 16.15.17，它用的 mdast-util-to-markdown 2.1.3
+  粗体后跟全角冒号：通过 "**本页回答**：这个项目里反复出现的词各指什么。"
+  粗体在句中：通过 "前面 **粗体** 后面"
+  整行粗体：通过 "**粗体**"
+  斜体：通过 "前面 *斜体* 后面"
+  没有强调：通过 "没有粗体"

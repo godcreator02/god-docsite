@@ -1,0 +1,45 @@
+---
+born-at: 2026-09-28T10:09
+type: choice
+parent: [2026-09-03-god-live-doc]
+label: 讲解组件包改名 docfirst-explainer
+domain: 模块边界
+---
+
+## 背景
+
+讲解组件包按「通用包」起名为 `@godcreator/explainer-player`，边界测试把它跟钉码、星轨盘放在同一张 `GENERIC_PACKAGES` 表里，
+要求包目录里一个 docfirst 字样都没有。实际用法跟这个定位对不上：
+
+- 机器上依赖它的站一共六个——本仓的文档站，外加内核站 `gwb-kernel`、界面插件站 `gwb-ui-plugins`、块笔记站 `gwb-block-note`、
+  `academic-deck` 站、`plecs-studio` 站——六个站的 `docs-site/` 下都有 `docfirst.config.mjs`，全是 docfirst 站，没有一个普通站在用
+- `./text` 入口是给 docfirst 的机读版生成文字用的，站在 `docfirst.config.mjs` 的组件名册里调用它
+- 怎么用它写在 docfirst 插件的说明书 `docs-site` 里
+
+名字里不带 docfirst、页面上写「普通 fumadocs 站也能单独装它」，读的人会以为它有 docfirst 以外的使用方。
+
+pivots-from:: [通用包按功能起名](2026-09-27-generic-packages-named-by-function.mdx)
+
+那张卡的结论对钉码 `code-pin` 与星轨盘 `trajectory-disk` 照旧成立：它们只收中性输入、不认识 docfirst 的任何格式，名字说功能、不带 docfirst。
+只有讲解组件包这一个从通用包里挪出来。
+
+## 结论与边界
+
+**改名 `@godcreator/docfirst-explainer`，挪到 docfirst 一侧**，作为新包从 0.1.0 开始发，目录 `packages/docfirst-explainer/`，
+样式类名前缀 `dx-`、`sm-` 不改。它仍是独立的一个包，各站单独装、单独升。
+
+**边界测试分成两张表**：`SELF_CONTAINED_PACKAGES`（code-pin、trajectory-disk、docfirst-explainer）查清单里没有任何 `@godcreator/` 包、
+源码与产物不 import 它们、相对 import 不出 `src/`；`GENERIC_PACKAGES` 只剩 code-pin、trajectory-disk，另外查一个 docfirst 字样都没有。
+包的方向表不变：钉码、星轨盘不认识它，`docfirst-workflow` 不依赖它，它不认识任何兄弟包；工作台插件也不依赖它。
+
+## 否掉的候选
+
+**并进 `docfirst-workflow`，做成它的一个子入口**：发版节奏就绑死了，改一个组件的样式也要发整个命令行；workflow 里 react 是可选 peer
+（只用命令行的项目不装它），讲解组件里 react 是必需的，两种要求放不进同一份清单；只想用讲解组件的站也得装上整个命令行。
+
+**保留旧名字，只把说法改成「docfirst 站用的」**：名字本身仍在说它是通用的，下一个读清单的人还会照着名字把它当通用包。
+
+## 代价与遗留
+
+五个外部站要从旧包切到新包，旧包 `@godcreator/explainer-player` 要在 gitea 上删掉；两个仓（gwb-dsh、gwb-unit-folder）
+站里投来的反馈写的是旧包名，要改过来。这几项在 spec「讲解组件包改名 docfirst-explainer」里跟进。

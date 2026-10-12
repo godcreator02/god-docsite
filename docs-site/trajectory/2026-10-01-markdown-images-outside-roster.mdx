@@ -1,0 +1,43 @@
+---
+born-at: 2026-10-01T20:56
+type: choice
+parent: [2026-09-03-god-live-doc]
+label: 图片不进名册
+domain: 模块边界
+---
+
+## 背景
+
+2026-10-01 在 `D:\unitfolders\shjop-c2000-control-lab\f28p65x-buck-hil\docs-site`（fumadocs-core 16.15.17、fumadocs-mdx 15.4.5、docfirst-workflow 0.5.2）
+写 `![说明](/p2/x.png)` 后 `pnpm build` 报 `第 1 行：名册外组件 <img>`。fumadocs 预设里的 `remarkImage` 排在 docfirst 的 remark 插件之前，
+它把 Markdown 图片换成没有位置的 `<img alt src={__img0} />`、在文件开头注入 `import __img0 from "<相对页面的路径>"`；`stamp` 把树上每个 JSX 元素都当成作者写的组件，
+在名册里找不到 `img` 就报错。命令行的 `docfirst check` 读的是原文，那里图片还是 Markdown 节点，所以只有构建失败。
+
+## 结论与边界
+
+**docfirst-workflow 自己认出 `remarkImage` 生成的 `<img>`，不经过站的名册。** `remarkDocfirstHost` 在交给 `remarkDocfirst` 之前，
+给没有位置、src 指向一条默认 import 的 `<img>` 挂上机读文字 `![说明](原地址)`，`stamp` 见到已有机读文字就跳过。原地址从 import 路径还原：
+落在站的 `public/` 下写成 `/p2/x.png`，跟页面放在一起的写 import 路径。站里什么都不用改，页面上仍由 fumadocs 默认的图片组件显示。
+随 docfirst-workflow 0.5.3 发出。
+
+作者在 mdx 里手写的 `<img>` 带位置，不在这个范围里，照旧按名册外组件报错，要登记才能用。
+
+## 依据
+
+用 `docfirst.create` 在临时目录新建一个站，放一张 `public/p2/x.png` 与一张跟页面放在一起的 `wave.png`：装发布版 0.5.2 时 `pnpm build` 报同样的错；
+换成本地打包的 0.5.3 后 `pnpm doc`、`verify-roster`、`pnpm types:check`（站里没有 tsbuildinfo）、`pnpm build` 都通过，
+机读版里是 `![降压电路](/p2/x.png "主电路")` 与 `![输出波形](./wave.png)`，跟原文一致。验证站没有留下；单元测试在 `tests/fumadocs.test.ts` 的「Markdown 图片」两条与「作者手写的 `<img>`」一条。
+
+## 否掉的候选
+
+**把 `img` 加进名册。** buck-hil 那个站先这样修好的（那个仓的 de8fe63）：新加 `image.ai.mjs` 给 `img` 一条机读规则、登记进 `docfirst.config.mjs`，
+`registry.ts` 的名单加 `'img'`。名册要求机读规则与 React 表两边一致，`img` 进了名单，React 表就得给它一项；写成 `img: defaultMdxComponents.img`
+会让 next build 的类型检查在各个 `page.tsx` 的 `<MDX components={…}>` 报 img 的类型不兼容，只好把 React 表的类型改成 `Exclude<ComponentName, 'img'>`、
+再给 `getMDXComponents` 写明返回类型。最初打算把这套做进 `fumadocsRoster` 与建站模板，用户问「fumadocs 自己没有图片显示的方法吗？还要搞个这个?」，
+查下来 React 一侧本来不缺东西，`<img>` 是 fumadocs 处理 Markdown 时生成的、不是作者写的组件，放进名册是归错了类；而且那样每个已有站都要跟着改
+`registry.ts` 与 `mdx.tsx`。
+
+## 代价与遗留
+
+**依赖 `remarkImage` 产物的形状**：没有位置、src 是默认 import 的变量。fumadocs 改了这个形状，图片会重新报名册外组件，构建失败、看得见，
+不会悄悄出错。public 目录按 `remarkImage` 的缺省值 `<root>/public` 算，站改了 `remarkImageOptions.publicDir` 时机读版里写的是 import 路径。

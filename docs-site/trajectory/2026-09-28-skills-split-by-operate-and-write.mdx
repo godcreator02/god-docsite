@@ -1,0 +1,41 @@
+---
+title: 说明书按「执行命令 / 写内容」分成两份
+born-at: 2026-09-28T16:00
+type: choice
+parent: [2026-09-03-god-live-doc]
+label: 说明书收成三份
+domain: 分发
+---
+
+## 背景
+
+插件带五份说明书：`docfirst`（两条建站命令、核对命令、跨仓反馈）、`docfirst-docs`（docfirst 站的分区、钉码、开发循环）、
+`docs-site`（页面写成讲原理的网页、组件、建站与构建）、`docs-governance`（文档与注释治理）、`trajectory`。
+它们是按「docfirst 站 / 普通站」切的，可两种站的页面写法大部分相同，于是同一件事写了好几遍：建站命令三遍，
+「改了代码 → check → confirm → --accept」四遍，跨仓反馈两遍；`docs-governance` 的前半部分跟全局 `~/.claude/CLAUDE.md`
+的「写代码」「写文档不说黑话」两节基本重复。`docfirst` 那份剩下的主要是命令用法与一张说明书清单。
+
+## 结论与边界
+
+**按读者要做的事切成两份，加上轨迹卡一份：**
+
+- `docs-site`：对站执行命令——建站、加分区、登记组件、构建与查看、核对与确认、生成物、跨仓反馈、安装与构建失败
+- `docs-writing`：写出来的内容——页面怎么写成讲清原理的网页、接缝图、讲解组件、docfirst 站的分区与钉码、黄灯以后改正文、
+  生成物正本的写法、文档与注释治理。参考案例指向本仓自己的文档站，按「要写的东西 → 照着看哪个文件」列一张表
+- `trajectory` 不变，只把指路改到 `docs-writing`
+
+两份的交界只有黄灯：执行哪几条命令在 `docs-site`，论断还成不成立、正文怎么改在 `docs-writing`，两边互相指一句。
+`docfirst`、`docfirst-docs`、`docs-governance` 三份删掉。治理里注释去留、命名、拆函数、去黑话的判据改为指向全局规矩，
+只留移到哪一页、历史清出现状页、每仓只写自己的、整仓以上的治理循环。
+
+## 否掉的候选
+
+**保留 `docfirst-docs` 这个名字给写作那份。** 各仓 AGENTS 里「动文档前读 docfirst-docs」引用最多，留名字改动最少；
+但合并后它同时管普通站，名字里带 docfirst 会让人以为普通站不用读。
+
+**按 docfirst 站 / 普通站继续分，只删重复段落。** 两种站写页面的规矩大半相同，这样分下去重复会一再出现。
+
+## 代价与遗留
+
+删说明书、改名字，已经写进别的仓 AGENTS、全局 `~/.claude/CLAUDE.md`、`~/.zcode/AGENTS.md` 与总控台 AGENTS 的
+`docfirst-docs` / `docs-governance` / `docfirst` 引用在发版后会指向不存在的说明书，要在发版的同时改掉。

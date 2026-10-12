@@ -1,0 +1,26 @@
+=== D:\unitfolders\s28bv-gwbbase\gwb-devkit\docs-site  输出行 445
+== 总 3703ms；子进程 13 次共 1400ms ==
+    6 次     754ms  git cat-file --batch
+    6 次     541ms  git diff --no-index -U0
+    1 次     105ms  git check-ignore --stdin
+=== D:\unitfolders\s28bv-gwbbase\god-live-doc\docs-site  输出行 357
+== 总 7106ms；子进程 40 次共 4988ms ==
+   24 次    3270ms  git check-ignore --stdin
+    8 次     923ms  git cat-file --batch
+    8 次     794ms  git diff --no-index -U0
+=== D:\unitfolders\s28bv-gwbbase\gwb-base-plugins\docs-site  输出行 216
+== 总 2341ms；子进程 8 次共 797ms ==
+    4 次     495ms  git diff --no-index -U0
+    4 次     302ms  git cat-file --batch
+=== D:\unitfolders\s28bv-gwbbase\gwb-ui-plugins\docs-site  输出行 81
+== 总 2269ms；子进程 4 次共 308ms ==
+    2 次     162ms  git diff --no-index -U0
+    2 次     146ms  git cat-file --batch
+=== D:\unitfolders\igldu-gwbkernel\gwb-kernel\docs-site  输出行 93
+== 总 2623ms；子进程 10 次共 833ms ==
+    5 次     433ms  git diff --no-index -U0
+    5 次     400ms  git cat-file --batch
+=== D:\unitfolders\evew5-gwbapps\gwb-block-note\docs-site  输出行 43
+== 总 2422ms；子进程 6 次共 658ms ==
+    3 次     430ms  git cat-file --batch
+    3 次     227ms  git diff --no-index -U0

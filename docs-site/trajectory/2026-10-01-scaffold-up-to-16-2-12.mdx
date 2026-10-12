@@ -1,0 +1,52 @@
+---
+born-at: 2026-10-01T19:03
+type: choice
+parent: [2026-09-03-god-live-doc]
+label: 脚手架升到 16.2.12
+domain: 分发
+---
+
+## 背景
+
+2026-10-01 用 `docfirst.create` 新建的站（`D:\unitfolders\shjop-c2000-control-lab\f28p65x-dual-template\docs-site`）`pnpm build` 失败：
+凡是含粗体的 mdx 页面都报 `RangeError: Maximum call stack size exceeded`，栈在 fumadocs-core 的 `dist/mdx-plugins/stringifier.js`
+与 mdast-util-to-markdown 的 `lib/handle/strong.js` 之间来回。插件写死的脚手架 `create-fumadocs-app@16.2.8` 让站用 fumadocs-core 16.15.14，
+而站的锁文件解析到了 2026-09-27 发布的 mdast-util-to-markdown 2.1.3。
+
+pivots-from:: [脚手架回退到 16.2.8](2026-09-25-scaffold-back-to-16-2-8.md)
+
+## 结论与边界
+
+**插件写死的脚手架升到 `create-fumadocs-app@16.2.12`**，它让新站用 fumadocs-core 16.15.17、fumadocs-ui 16.15.17、fumadocs-mdx 15.4.5，
+16.15.17 的 stringifier 已经修好这个问题。16.2.12 的输出与 16.2.8 只差 `package.json` 里这三个版本号和模板自己的 version，
+本机约定的替换不用改；插件测试的样本目录换成 `create-fumadocs-app-16.2.12`，真正运行脚手架的慢测试与样本逐份一致。
+验证的是 stringifier 单独运行与 f28p65x 那个站的构建；本仓自己的站仍是 fumadocs-core 16.15.14，锁文件里是 mdast-util-to-markdown 2.1.2，不受影响，
+没有跟着升级。修法由用户在两个候选里选定。
+
+## 经过
+
+`probes/2610011858_bold-stringify-recursion/` 在三个版本组合里各装一次、用 fumadocs-core 的 `defaultStringifier` 序列化几段 markdown
+（`runs/01-three-combinations.txt`）：fumadocs-core 16.15.14 配 mdast-util-to-markdown 2.1.3 时粗体和斜体都失败，没有强调的段落通过；
+16.15.14 配 2.1.2、16.15.17 配 2.1.3 全部通过。
+
+本机各仓锁文件里 mdast-util-to-markdown 是 2.1.3 的有三处：两个 collab 站没装 fumadocs，用不到 stringifier；
+另一个是 docfirst 站 `chb-dab-sst/codedoc_fpga_customperiph/docssite`（fumadocs-core 16.15.14），给它写了反馈。
+
+## 依据
+
+mdast-util-to-markdown 2.1.3 把粗体、斜体改成由 `containerPhrasing` 按处理函数上的 `attention` 属性处理，`strong()` 本身只调用
+`containerPhrasing({type: 'root', children: [node]})`。fumadocs-core 16.15.14 的 stringifier 把每个处理函数包一层新函数，`attention` 没带过去，
+`containerPhrasing` 找不到它，又调回包过的 `strong`。16.15.17 包完之后 `Object.assign(wrapped, handler)` 把属性复制回去。
+
+## 否掉的候选
+
+**脚手架不动，在建站写的 `pnpm-workspace.yaml` 里用 `overrides` 把 mdast-util-to-markdown 固定在 2.1.2。** 改动最小，
+f28p65x 那个站一开始就是这样临时修好的，之后也改成把 fumadocs 升到 16.15.17、去掉这条（那个仓的 fd28a6d）；
+固定旧版本的话，新站会一直停在旧版本上，以后升级 fumadocs 时还得记得删掉这条。用户的意见是「升级吧，不要往回降」。
+
+## 代价与遗留
+
+**fumadocs-mdx 15.4.5 跟着升上来。** 回退到 16.2.8 那张卡的理由是它当时发布不满一天，现在已经过了这个期限，不再拦安装。
+
+**本仓站的 fumadocs 没有升级。** 仓根锁文件哪天重新解析到 mdast-util-to-markdown 2.1.3，本仓站会以同样的方式构建失败，
+那时把站的 fumadocs-core、fumadocs-ui 升到 16.15.17 或更新。

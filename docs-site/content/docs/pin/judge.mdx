@@ -1,0 +1,28 @@
+---
+title: 钉码状态
+description: 一处引用的四种状态、各算不算红；核对一处行段引用时依次做哪几道检查、停在哪一道
+---
+
+import { PinJudge } from '../../../src/components/pin/judge';
+
+每次 `check` 都拿今天的代码跟[记号](/docs/pin/markers)上的记录比，给每一处四种状态之一：
+
+{/* ref file="../packages/code-pin/src/types.ts" lines="66-67" hash="d2a2e323f0a3" blob="32a0167e8d8f" */}
+
+| 状态点 | 状态 | 什么意思 | `check` 算不算红 |
+| --- | --- | --- | --- |
+| 绿 | 新鲜 | 被钉的内容跟确认时一样，位置变了也算 | 不算 |
+| 黄 | 有变动 | 内容变了，等人读一遍那句话再确认 | 不算；本仓未提交的改动引起的算，见[提交门禁](/docs/pin/gate) |
+| 红 | 缺失 | 被钉的东西不在了 | 算 |
+| 空心 | 未确认 | 记号上还没有确认时写的记录 | 不算 |
+
+## 核对一处行段引用：五道检查
+
+行段在文件里插了几行还是绿、整段删掉变红，背后是同一套检查，从上往下，前一道能下结论就不往下走。选一种情况，看它走了哪几道、停在哪：
+
+<PinJudge />
+
+{/* ref file="../packages/code-pin/src/compare.ts" lines="6-14" hash="a033f65b0f3e" blob="29bf0bfed8b4" */}
+
+第三、四道要的旧文件和 hunk 表不是钉码核心自己取的，由使用方传进来；docfirst 的项目装配从 git 取，见[行段跟随](/docs/pin/git)。
+行段以外的几种引用各比什么，见[引用的种类](/docs/pin/targets)。

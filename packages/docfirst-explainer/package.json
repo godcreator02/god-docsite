@@ -1,0 +1,47 @@
+{
+  "name": "@godcreator/docfirst-explainer",
+  "version": "0.1.1",
+  "author": {"name": "godcreator"},
+  "type": "module",
+  "description": "docfirst 站的讲解组件，只给接了 docfirst 的文档站用：把一段讲解拆成若干帧、每帧配一句说明，用固定的控制条播放和切换。分步、动画、选情况三种外壳，面板、终端、胶囊、代码行等画帧用的零件，还有画系统接缝图的 SeamDiagram，共用一套样式。`.` 是客户端组件，`./text` 把各帧的说明转成机读版的文字，`./seam-graph` 定义接缝图并把它写成机读文字。",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.mts",
+      "default": "./dist/index.mjs"
+    },
+    "./text": {
+      "types": "./dist/text.d.mts",
+      "default": "./dist/text.mjs"
+    },
+    "./seam-graph": {
+      "types": "./dist/seam-graph.d.mts",
+      "default": "./dist/seam-graph.mjs"
+    },
+    "./styles.css": "./styles/explain.css"
+  },
+  "files": [
+    "dist",
+    "styles"
+  ],
+  "scripts": {
+    "build": "tsdown",
+    "typecheck": "tsc -p tsconfig.json",
+    "prepublishOnly": "pnpm run build"
+  },
+  "peerDependencies": {
+    "react": ">=19"
+  },
+  "devDependencies": {
+    "@types/react": "^19.3.0",
+    "react": "^19.3.0"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://git.tianshen02.online:28377/api/packages/godcreator/npm/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://git.tianshen02.online:28377/godcreator/gwb-docfirst.git"
+  },
+  "keywords": ["gwb"]
+}

@@ -1,0 +1,32 @@
+---
+born-at: 2026-10-02T18:00
+type: choice
+parent: [2026-09-03-god-live-doc]
+label: 解析认公式
+domain: 模块边界
+---
+
+## 背景
+
+2026-10-02 在 `D:\unitfolders\b2o8l-sst-mmc-2026\hybrid-mmc\fpga-hil\docs-site`（docfirst-workflow 0.5.3）给解算器原理页写数学公式。fumadocs 没有公式组件，官方做法是站里接 remark-math 与 rehype-katex，行内写 `$…$`、行间写 `$$…$$` 或 `math` 代码块。站本身照这样接上就能构建，但 `pnpm doc` 用的 `parseTree` 只有 remark-parse、remark-frontmatter、remark-mdx：公式里的花括号被当成 mdx 表达式，`$x^{\mathsf T}$`、`$\Delta_{(+,-)}$` 报 `Could not parse expression with acorn`；`$\frac{T}{L}$` 不报错，只是因为 `{T}` 碰巧是一段合法的 JS。用户的要求：「用官方的，去改 docfirst」。
+
+## 结论与边界
+
+**`parseTree` 固定加上 remark-math**，核对、确认、名册检查与按原文渲染都按公式解析，公式里的花括号不再是 mdx 表达式；按原文渲染时公式逐字节不动。随 docfirst-workflow 0.5.4 发出。
+
+站上显示公式仍由站自己照 fumadocs 官方做法接 remark-math、rehype-katex 与 katex 样式，docfirst-workflow 不带 rehype-katex、不改 `docfirstMdxOptions`。没接公式的站里，一对 `$` 夹着的正文在核对时按公式读，只会比原来少报错，不影响站的构建与渲染。
+
+## 依据
+
+单元测试 `tests/fumadocs.test.ts` 的「公式按 remark-math 解析」一条：上面两个会报错的写法与 `$$…$$` 行间公式解析出 `inlineMath`、`math`，没有一处 mdx 节点，按原文渲染逐字节不变。仓根 `pnpm test` 321 条全过。fpga-hil 那个站把 56 处行内公式改成 `$…$` 后，站里装的 0.5.3 运行 `pnpm doc` 报 `solver-principle.mdx` 第 25 行 `Could not parse expression with acorn`；
+同一个站用本仓刚构建的 `packages/docfirst-workflow/dist/cli.mjs check` 核对，没有红、黄与未确认。
+
+## 否掉的候选
+
+**行内公式写成组件 `<M tex="…" />`。** fpga-hil 那个站先这样做的，照 plecs-studio 站的写法：TeX 放进字符串属性，花括号不会被解析；行间公式用 `math` 代码块。能用，但每个要写公式的站都要自带一个组件、登记进名册、写一条机读规则，写法也跟 fumadocs 官方不一样。用户问「fumadocs 没有官方的公式组件吗」之后决定改解析器。
+
+**给 `docfirstMdxOptions` 加一个开公式的选项，连 rehype-katex 一起接好。** docfirst-workflow 就得依赖 katex 一族，站也少了照官方文档自己接的自由；接公式只是站里加两个插件与一行样式，写进说明书 `docs-site` 就够了。
+
+## 代价与遗留
+
+没接公式的站里，正文里成对出现的 `$` 在核对时被当成公式，站上照旧是普通文字，两边读法不同；只影响 mdx 表达式会不会被认出来，没有别的后果。plecs-studio 站的 `<M>` 组件这次没动。

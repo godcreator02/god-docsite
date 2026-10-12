@@ -1,0 +1,61 @@
+---
+born-at: 2026-09-26T16:40
+type: choice
+parent: [2026-09-03-god-live-doc]
+label: 按接缝拆四包
+domain: 模块边界
+---
+
+## 背景
+
+主包 `docfirst-workflow` 装着判定、读盘与 git、命令行、mdx 格式、fumadocs 站接线、术语标注，轨迹包装着卡片规则、读盘和
+约 7000 行的星轨盘画布。判定、环境、命令行三层早就不引用 fumadocs，也有边界测试守着，但问题出在另外三处：
+
+- mdx 格式和 fumadocs 站接线挤在同一个 `src/fumadocs/` 里，出口叫 `./fumadocs`，格式名叫 `fumadocs-mdx`。
+  17 个站的 `docfirst.config.mjs` 都写 `formats: [fumadocs]`，命令行一读配置就把站接线代码一起加载进来
+- 同一个目录装了三种变化原因：mdx 语法、fumadocs 接线、术语标注
+- 轨迹包的卡片规则（命令行 check 要用）和星轨盘画布（只有站用）在一起，读卡还自己扫盘
+
+pivots-from:: [包给仓件给人](2026-09-10-package-serves-repo-plugin-serves-agent.mdx)
+
+## 结论与边界
+
+**按接缝拆成四个包，两个核心、两个适配。** 两个核心不读盘、不认文件格式、不认站点框架，要的东西全从接缝上传进来：
+
+- `docfirst-pin`：钉码核心。收记号格式、现在的文件内容、确认时的旧内容，交出核对结果。`Format` 只剩认记号与写回，
+  生成物渲染与组件名册检查不是钉码的事，移到 workflow
+- `docfirst-trajectory`：轨迹核心。收卡片文件（文件名、正文、修改时间），交出轨迹模型与病卡清单；星轨盘画布是它的
+  `./disk` 出口
+- `docfirst-workflow`：命令行与项目。项目装配、mdx 格式、读盘与 git、磁盘读卡、生成物写入、命令行，外加「卡里不许
+  钉码」这条同时要认记号、又要知道卡在哪个目录的规则
+- `docfirst-fumadocs`：fumadocs 适配。remark 插件、机读版、状态点与术语组件、卡集合的 schema 与关系链接、星轨盘的
+  服务端组件；fumadocs 与 react 两个 peer 只出现在这里
+
+**两个适配包的分界看调用链从哪里开始**：从 `docfirst` 命令开始的归 workflow，由 fumadocs 或 Next 调用的归 fumadocs
+（mdx 加载器编译页面时调的插件、集合的 schema 与回调、页面渲染时的组件、路由页）。两边都要的（`loadProject`、mdx
+语法树上认记号）按依赖方向归 workflow，fumadocs 依赖 workflow，反过来不行。名册里 fumadocs 组件那几条规则归
+fumadocs 包，但出口 `./roster` 只放数据与纯函数，因为命令行读 `docfirst.config.mjs` 时会加载它。
+
+工作台插件不在这条链上：四个包是目标项目开发与构建用的库，插件只在建站那一次和给 agent 送说明书时用到，对四个包
+零依赖。插件的模板写进站里的 import 路径是一条只靠约定的接缝，包改出口时模板要在同一个提交里跟着改。
+
+## 否掉的候选
+
+**只把 mdx 格式挪出 `src/fumadocs/`，包不拆。** 只解决了配置加载站接线那一处，判定、读盘、站接线仍在一个包里，
+「谁能依赖谁」继续只靠边界测试挡，fumadocs 与 react 两个 peer 继续挂在命令行包上。
+
+**适配合成一个包。** 命令行跑在 git hook 与 CI 里，那些仓不一定装 fumadocs；fumadocs 适配又带着客户端组件和
+`serverExternalPackages` 必须留空那条限制。两种运行场景与依赖合进一个包，就又是一个装了太多东西的包。
+
+**按核心分适配（钉码一个适配包、轨迹一个适配包）。** fumadocs 的 peer 与客户端组件限制会同时出现在两个适配包里，
+而且每个适配包都要同时进 CI 和站点构建。
+
+## 代价与遗留
+
+**破坏性改动**：`@godcreator/docfirst-workflow/fumadocs` 及其侧出口、`@godcreator/docfirst-trajectory/server` 与
+`./react` 都不在了，17 个站的 `docfirst.config.mjs`、`source.config.ts`、`mdx.tsx` 与样式 import 要逐个改，插件的模板
+与 `deps.ts` 跟着改。两个已有包升哪一位、怎么通知下游，发版时照 gwb-release 定。
+
+留给逐个模块重新设计的：站上读卡改走 fumadocs 集合（现在仍是扫磁盘，卡片记录这条接缝只有一个实现）；把站里的
+接线收窄成调用 fumadocs 包导出的部件（集合定义、侧栏、路由页），需要先扫一遍 17 个站确认它们没有自定义；给模板
+加一道把渲染出的站接上本仓四个包跑一次 `next build` 的慢测试；`migrate-ledger` 等 17 个站都迁完就删。

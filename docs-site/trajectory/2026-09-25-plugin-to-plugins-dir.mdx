@@ -1,0 +1,48 @@
+---
+born-at: 2026-09-25T23:58
+type: choice
+parent: [2026-09-03-god-live-doc]
+label: 插件挪到 plugins/docfirst
+domain: 仓形
+---
+
+## 背景
+
+工作台插件 `@godcreator/gwb-docfirst-workflow` 原来放在 `packages/gwb-docfirst-workflow/`，跟两个 npm 包同在
+`packages/` 下。devkit 只认一种仓：workspace 布局，仓根是不发布的 private 包，插件放在 `plugins/<短名>/`，
+不是插件的包放在 `packages/`。`devkit.scaffold.plugin` 只往 `pnpm-workspace.yaml` 的 `packages` 里有 `plugins/*`
+的仓里加插件，别的一概拒；devkit 的文档写明它不替仓迁移，不是 workspace 布局的仓要先照建仓模板迁。
+
+插件仍在这个工作区里，只换目录：
+pivots-from:: [件合仓](2026-09-09-plugin-joins-the-workspace.md)
+
+## 结论与边界
+
+**插件挪到 `plugins/docfirst/`，两个 npm 包留在 `packages/`。** 包名、版本号都不变（插件 0.8.0、主包 0.3.1）。
+`pnpm-workspace.yaml` 的 `packages` 加上 `plugins/*`；仓根 `build` 与 `typecheck` 按 `./plugins/*` 与 `./packages/*`
+两个过滤器递归，跟建仓模板「有 `packages/` 时两个过滤器都写」一致。插件与两个包互不认识的两条检查照旧：
+仓根 `tests/boundary.test.ts` 管包那一侧，插件自己的 `tests/artifact.test.ts` 管插件那一侧。
+
+**文档站仍是工作区成员，这是有意的例外。** 建仓模板不收文档站：装了 docfirst 的站一般自带 `pnpm-workspace.yaml`、
+自己装依赖，收进来就成了工作区里套工作区。本仓的站不一样——它是两个包唯一的使用方，用 `workspace:*` 装工作区里的
+主包与轨迹包、钉的是工作区里的真源码；移出工作区就得改装发布版，站上的状态点就说明不了本仓未发布的源码。
+所以 `docs-site` 留在 `packages` 列表里，站目录下没有自己的 `pnpm-workspace.yaml` 与锁文件，锁文件只有仓根一份。
+
+插件的开发依赖 `@godcreator/gwb-docs-site` 仍用 `link:` 指向站点插件的仓；那个仓同时迁到了同一种布局，
+路径跟着改成 `link:../../../gwb-docs-site/plugins/docs-site`。
+
+## 否掉的候选
+
+**插件目录沿用包名 `plugins/gwb-docfirst-workflow/`。** 模板的约定是 `plugins/<短名>/`，`devkit.scaffold.plugin`
+新建的插件也是短名目录；同一个仓里两种命名，加第二个插件时说不清该照哪一种。
+
+**把文档站移出工作区，照模板只收 `plugins/*` 与 `packages/*`。** 站得改装发布版的包，改了代码要先发版才能在站上
+看到效果，钉码也就钉不到未发布的源码上。
+
+## 代价与遗留
+
+**站的依赖都在仓根锁文件里。** 站的某个依赖发布不满一天时，仓根的 `pnpm install` 与 devkit 在仓根的构建都会被
+pnpm 的发布期限拦下，受影响的不只是站。
+
+**旧路径留在历史记录里。** 现状页里指向插件的引用全部改成 `../plugins/docfirst/…`；已有轨迹卡与未来区收到的
+反馈里写的 `packages/gwb-docfirst-workflow/` 不改。

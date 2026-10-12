@@ -1,0 +1,24 @@
+docfirst check，16 个站，同一时刻各跑三次：0.2.3、改动后（hunk 缓存冷）、改动后（缓存热）。输出逐行比较。2026-09-25 12:0x
+开始前缓存目录里 6 个文件（测试临时仓留下的），结束后 40 个。
+
+igldu-gwbkernel\gwb-kernel         0.2.3   2.8s  新·冷   2.2s  新·热   1.9s  退出码 0/0  输出差异 0
+s28bv-gwbbase\gwb-unit-folder      0.2.3   2.1s  新·冷   1.8s  新·热   1.6s  退出码 0/0  输出差异 0
+s28bv-gwbbase\gwb-devkit           0.2.3   3.0s  新·冷   2.6s  新·热   2.1s  退出码 0/0  输出差异 0
+s28bv-gwbbase\gwb-ui-plugins       0.2.3   3.5s  新·冷   2.0s  新·热   2.1s  退出码 0/0  输出差异 0
+s28bv-gwbbase\gwb-base-plugins     0.2.3   2.3s  新·冷   2.1s  新·热   1.7s  退出码 0/0  输出差异 0
+s28bv-gwbbase\gwb-gitea            0.2.3   1.8s  新·冷   1.5s  新·热   1.4s  退出码 0/0  输出差异 0
+s28bv-gwbbase\gwb-docs-site        0.2.3   2.4s  新·冷   1.8s  新·热   1.6s  退出码 0/0  输出差异 0
+evew5-gwbapps\gwb-windows-backup   0.2.3   1.7s  新·冷   1.4s  新·热   1.3s  退出码 0/0  输出差异 0
+evew5-gwbapps\gwb-nas-suite        0.2.3   1.9s  新·冷   1.5s  新·热   1.4s  退出码 0/0  输出差异 0
+evew5-gwbapps\gwb-paper-fetch      0.2.3   1.8s  新·冷   1.4s  新·热   1.6s  退出码 0/0  输出差异 0
+evew5-gwbapps\gwb-mineru           0.2.3   1.7s  新·冷   1.4s  新·热   1.4s  退出码 0/0  输出差异 0
+evew5-gwbapps\gwb-dsh              0.2.3   1.6s  新·冷   1.3s  新·热   1.3s  退出码 0/0  输出差异 0
+evew5-gwbapps\gwb-block-note       0.2.3   2.4s  新·冷   2.1s  新·热   1.9s  退出码 0/0  输出差异 0
+p0cd1-cgm-alert\gwb-cgm-alert      0.2.3   1.5s  新·冷   1.3s  新·热   1.2s  退出码 0/0  输出差异 0
+4urgv-gwb-test\gwb-pomodoro        0.2.3   1.7s  新·冷   1.5s  新·热   1.3s  退出码 0/0  输出差异 0
+s28bv-gwbbase\god-live-doc         0.2.3   4.7s  新·冷   4.1s  新·热   3.8s  退出码 0/0  输出差异 0
+
+god-live-doc 热跑时剩下的 git：
+== 墙钟 3736ms
+   19 次 1412ms  git --no-optional-locks status      （目录树：15 个树引用，几个被多篇文档重复引用，每篇各问一次）
+   7 次 673ms  git cat-file --batch                  （漂移文件的旧 blob：有意每次现取，见卡）

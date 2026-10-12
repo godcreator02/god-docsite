@@ -1,0 +1,32 @@
+---
+title: 讲解组件包改名 docfirst-explainer
+description: 把 @godcreator/explainer-player 改名为 @godcreator/docfirst-explainer，挪到 docfirst 一侧，各使用方跟着切过去
+---
+
+## 验收清单
+
+1. **本仓**
+   - [x] 改名：包目录与包名改成 `packages/docfirst-explainer` / `@godcreator/docfirst-explainer`，从 0.1.0 开始；
+     全仓引用、边界测试、讲它的页、插件说明书跟着改，插件升 0.9.10
+   - [x] 发版：`@godcreator/docfirst-explainer` 0.1.0 与插件 0.9.10 已发
+2. **使用方切到新包**
+   - [x] 内核站、界面插件站、块笔记站
+   - [x] academic-deck 站、plecs-studio 站：按用户要求已在工作区里换好、检查全过，但引用它的文件都是别的会话还没提交的改动，
+     所以没有提交；两站的反馈 `content/future/inbox/2026-09-28-gwb-docfirst-explainer-renamed.mdx` 请对方随自己的改动一起提交
+3. [x] **两条反馈改包名**：gwb-dsh 与 gwb-unit-folder 站里 `…seam-map-in-player.mdx` 两条反馈，指的包名已改成新名字
+4. [x] **default 升级 docfirst 插件**：default 已是 0.9.10
+5. [ ] **旧包下架**：第 2 项全部做完后，用户在 gitea 上删掉 `@godcreator/explainer-player`；提前删，还写旧名的站装不上依赖
+
+## 为什么改
+
+这个包实际只给 docfirst 站用：六个使用方全是 docfirst 站，`./text` 入口是给 docfirst 的机读版生成文字用的，
+用法写在 docfirst 插件的说明书 `docs-site` 里。叫它通用包、名字里不带 docfirst，读的人会以为普通站也在用它。
+
+## 改成什么样
+
+- 包名 `@godcreator/docfirst-explainer`，独立发版，版本号从 0.1.0 开始；样式类名前缀 `dx-`、`sm-` 不改
+- 它归 docfirst 一侧，但仍然**自成一体**：清单里没有任何 `@godcreator/` 包，源码与产物不 import 它们；
+  `docfirst-workflow` 与工作台插件都不依赖它，只有站用
+- 边界测试分两张表：「自成一体的包」（code-pin、trajectory-disk、docfirst-explainer）查不依赖兄弟包；
+  「通用包」（code-pin、trajectory-disk）另外查不认识 docfirst
+- 决定写成一张轨迹卡，这一页做完删掉

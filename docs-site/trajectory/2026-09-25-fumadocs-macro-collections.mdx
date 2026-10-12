@@ -1,0 +1,66 @@
+---
+born-at: 2026-09-25T23:40
+type: choice
+parent: [2026-09-03-god-live-doc]
+label: 集合移到 macro
+domain: 分发
+---
+
+## 背景
+
+站点插件改成先跑官方脚手架 `create-fumadocs-app@16.2.9`，再套本机约定。新版官方模板没有 `source.config.ts`：
+集合用 `fumadocs-mdx/macro` 的 `defineDocs` 写在 `src/lib/source.ts` 里，同一个文件里接着建 loader。docfirst 原来的接线
+有两处跟它对不上。一是 docfirst 的插件挂在 `defineConfig` 的全局 `mdxOptions` 上，macro 没有全局配置，只能按集合写；
+二是 docfirst 原来带一整套路由、布局与 `global.css`，放到官方输出上就是整份覆盖官方的文件，而 `global.css`、根 layout
+这几份归站点插件的本机约定管，不许调用方再换。
+
+主会话先在一个临时站上做了实验：官方输出上只改几份文件，构建通过，状态点 `data-dot="green"` 渲染出来，机读版由
+docfirst 的回调接管，`docfirst check` / `confirm` 正常，中文搜索可用。实验里交给 `applyMdxPreset` 的
+`docfirstMdxOptions(...)` 要写 `as never` 才过类型检查，截图里页面标题出现了两遍。
+
+## 结论与边界
+
+**集合写在 `src/lib/source.ts`，按集合接 docfirst。** 现状集合写 `mdxOptions: applyMdxPreset(docfirstMdxOptions({ root }))`
+与 `postprocess.includeProcessedMarkdown: docfirstMarkdownOptions()`；轨迹集合照旧 `cardSchema` 加 `remarkTrajectoryLinks`；
+未来集合不写配置。集合级 `mdxOptions` 会去掉 fumadocs 的全部默认插件（标题 id、gfm、代码高亮……），所以写了它的集合
+一律经 `applyMdxPreset` 加回来。官方的 `source`、`docsLlms` 两个导出与图标插件原样留着，搜索与 llms 路由靠它们。
+
+**`docfirstMdxOptions` 的返回类型写成跟 `applyMdxPreset` 的参数结构对得上**：remark 插件表用 unified 的 `Pluggable`，
+代码高亮选项里带上 fumadocs 的默认主题（它的类型要求主题必填，运行时先铺默认再盖这一份，结果不变）。主包仍然不 import
+fumadocs 的类型，站里不用任何强转。
+
+**在官方输出上只改几份文件。** 替换 `src/lib/source.ts`、`src/components/mdx.tsx`、`src/app/docs/layout.tsx` 与入口页，
+删掉示例页 `content/docs/test.mdx`，其余都是新增。官方的 docs 页面不替换：它本来就从 `@/components/mdx` 取组件，
+换掉组件表里的 `pre`，状态点就接上了。docfirst 的样式放进新增的 `src/app/docfirst.css`，由 docs 的 layout 引入，
+不碰 `global.css`。轨迹与未来两个区的 layout 直接用 docs 那一份，三个区共用一棵侧栏树。
+
+**起始页正文不写一级标题。** 官方页面已经用 frontmatter 的 `title` 渲染标题，正文再写一个 `# 标题` 就出现两遍。
+README、AGENTS 两份生成正本例外：render 去掉 frontmatter，它们的一级标题要进生成物。
+
+**本仓自己的站迁到同一形式**：fumadocs、next 的版本跟脚手架一致，删掉 `source.config.ts`，补上官方的搜索、llms 与
+markdown 协商路由，去掉 GitHub 链接与分享图路由，`/` 跳到 `/docs`。站自己特有的留着：Tabs 与术语标注组件、名册、
+星轨整页（它在另一个路由组里，不套 docs 的侧栏）、站测试。站测试不起 Next，用 fumadocs-mdx 的 Node loader 加载页面，
+集合改用 macro 之后，导入时的查询参数从 `?collection=docs` 换成 `?macro_id=src/lib/source.ts#docs`。
+
+pivots-from:: [建站交给站点插件](2026-09-25-site-plugin-builds-docfirst-supplies-structure.md)
+
+## 否掉的候选
+
+**继续写 `source.config.ts`，替换官方的 `source.ts`。** fumadocs-mdx 15.4.5 仍然认 `source.config.ts`，但新模板的
+`source.ts` 已经是 macro 写法，要么两套并存，要么把官方的整份换掉——换掉之后官方输出的别的文件（llms、搜索）引用的
+导出名就要靠 docfirst 自己保持一致，改的比留的还多。
+
+**把 docfirst 的样式追加进 `global.css`。** 那份归站点插件的本机约定，调用方不许替换；新增一份 css 由 docs 的 layout 引入，
+两边互不碰。
+
+**`docfirstMdxOptions` 里 import fumadocs 的类型。** 主包对 fumadocs 只能是 peer，边界守卫不许打进产物，也不该为了类型
+多一条开发期依赖；按结构对上就够了。
+
+## 代价与遗留
+
+**默认主题写了第二份。** fumadocs 哪天换了默认的代码高亮主题，docfirst 这份不会跟着变，现状区的代码块会跟别的集合不一样。
+
+**未来区不再挂 docfirst 的插件与术语标注。** 原来全局配置对没写 `mdxOptions` 的集合都生效，未来区的页顺带有术语标注；
+按集合写之后只有现状区有。
+
+**模板跟着脚手架版本走。** 被替换的几份是在 16.2.9 的输出上改的，站点插件升脚手架时要重新对一遍。

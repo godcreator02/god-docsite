@@ -1,0 +1,31 @@
+---
+born-at: 2026-10-01T19:18
+type: choice
+parent: [2026-09-03-god-live-doc]
+label: 本仓站升 fumadocs
+domain: 分发
+---
+
+## 背景
+
+建站脚手架升到 16.2.12 时，本仓自己的站还是 fumadocs-core 16.15.14，靠仓根锁文件里的 mdast-util-to-markdown 2.1.2 才没有出现粗体、斜体构建时无限递归。
+锁文件哪天重新解析到 2.1.3，本仓站就会构建失败。用户的意见：
+
+```text
+升级吧，gwb-docfirst 的站也升到 16.15.17
+```
+
+pivots-from:: [脚手架升到 16.2.12](2026-10-01-scaffold-up-to-16-2-12.md)
+
+## 结论与边界
+
+**本仓站与 docfirst-workflow 包的开发依赖都升到 fumadocs-core / fumadocs-ui 16.15.17，站的 fumadocs-mdx 升到 15.4.5，仓根锁文件里的
+mdast-util-to-markdown 升到 2.1.3，不再停在旧版本上。** 仓根 `pnpm test`、`pnpm typecheck`、`pnpm build`，站的 `pnpm docfirst check`、`pnpm test`、
+名册核对、`pnpm build`（116 页），插件的 `pnpm check`、`pnpm build` 都通过。docfirst-workflow 包对使用方声明的 peer 仍是 `>=16`，
+开发依赖不随包发出去，所以不发版。
+
+## 经过
+
+改两份 `package.json` 后 `pnpm install` 只换了 fumadocs 三个包，mdast-util-to-markdown 仍锁在 2.1.2。pnpm 12 的 `update` 没有升间接依赖的参数，
+于是只从仓根锁文件里删掉 mdast-util-to-markdown 的两个条目，再 `pnpm install --fix-lockfile` 让它重新解析成 2.1.3。
+锁文件里别的变化只有 2.1.3 自己新带的 micromark-util-character、micromark-util-html-tag-name，以及 fumadocs-mdx 15.4.5 带来的 tinyexec 1.3.1。

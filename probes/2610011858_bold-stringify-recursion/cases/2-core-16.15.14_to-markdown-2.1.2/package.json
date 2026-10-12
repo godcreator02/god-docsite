@@ -1,0 +1,8 @@
+{
+  "name": "2-core-16.15.14_to-markdown-2.1.2",
+  "private": true,
+  "dependencies": {
+    "fumadocs-core": "16.15.14",
+    "mdast-util-from-markdown": "2.0.2"
+  }
+}

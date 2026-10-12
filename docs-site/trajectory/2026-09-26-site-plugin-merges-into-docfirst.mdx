@@ -1,0 +1,52 @@
+---
+born-at: 2026-09-26T21:30
+type: choice
+parent: [2026-09-03-god-live-doc]
+label: 站点插件并入
+domain: 分发
+---
+
+## 背景
+
+站点插件 `@godcreator/gwb-docs-site` 0.6.0 起删掉了启动、停止站和窗格，只剩一条命令 `docs-site.create`：运行版本写死的
+官方脚手架 create-fumadocs-app，做八处本机约定的精确替换，按调用方给的新增、替换、删除三个清单改文件，再挑一个端口。
+它唯一的调用方是 docfirst 插件的 `docfirst.create`。两个插件之间为此多了一条命令契约、一个存在标记服务
+`gwbDocsSite`、一个必需的 peer，三个清单也只是为了在两个插件之间传文件。当初把站点插件单独拆出来的理由
+（gwb-docs-site 仓的轨迹卡「站点生命周期从 livedoc 拆出」）是它还管站的运行，这一条已经不存在。
+
+supersedes:: [一步建站](2026-09-25-site-plugin-builds-docfirst-supplies-structure.mdx)
+
+## 结论与边界
+
+**站点插件的建站代码并进 docfirst 插件，提供两条命令：**
+
+- `docfirst.create {dir, title?, port?}`：建接好 docfirst 的站，参数与回执不变
+- `docfirst.create-plain {dir, title?, port?}`：建不接 docfirst 的普通 fumadocs 站，就是原来 `docs-site.create` 做的事
+
+「只需要一个文档站的仓不该带上钉码」这一条在合并后照样成立：普通站自己的 `package.json` 里没有 docfirst。
+
+**分两条命令，不给一条命令加 `mode` 参数。** 两种站的回执不同（docfirst 站要告诉调用方第一次 render 会覆盖仓根哪些
+文件、接着要跑 `doc:render`），合成一条命令，回执的形状就得看参数；`mode` 若有默认值，agent 想建普通站却漏写它，拿到的站会
+装上 docfirst，而且不报错。两条命令共用同一套内部函数，只是在命令总线上多登记一条。
+
+**对外参数只留 `dir`、`title`、`port`。** 三个文件清单与依赖、脚本、描述变成内部函数的入参；`neighborhood`（本次调用换一个
+端口查重范围）与 `dryRun`（只算不写）删掉：没有调用方用，查重范围由单元文件夹插件的 `units-root` 设置决定，建错了删掉目录
+重建即可。插件自己的 `units-root` 设置也删掉，只读单元文件夹插件那一项。
+
+**端口仍按「扫描别的站脚本里写死的端口，从 4310 起挑第一个空闲的」挑。** 端口写进站的 `dev` / `start` 脚本就是长期占用，
+建站那一刻检查有没有进程在监听保证不了以后不冲突。扫描遇到读不动的目录、坏的 `package.json` 不再静默跳过，列进回执、说明
+查重不完整。
+
+## 否掉的候选
+
+**一条命令加 `mode` 参数（`docfirst` | `plain`，不写就是 docfirst）。** 理由见上：回执形状随参数变，默认值会让漏写参数的调用
+悄悄建错站。
+
+**站里不写死端口，启动时现找空闲端口。** VS Code 扩展就是这么启动站的，但手动跑 `pnpm dev` 的人与 agent、Claude Code 的
+`.claude/launch.json` 都要一个固定地址。
+
+## 代价与遗留
+
+插件名仍是 docfirst，却提供一条不带 docfirst 的命令，`docfirst.create-plain` 这个名字把这一点摆在了明处；要消除就得给插件改名，
+那是牵动所有安装的破坏性改动，这次不做。发版并装进 default 后，站点插件从 default 卸载、gwb-docs-site 单元标退役、单元文件夹
+说明书里提到 `docs-site.create` 的那一句改成 `docfirst.create-plain`，由站点插件那边的会话或用户处理。

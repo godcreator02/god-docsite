@@ -1,0 +1,94 @@
+/*
+ * 边界规则图（BoundaryRules）的样式。颜色全部取讲解组件包 .dx 根元素上的变量，深浅两套由讲解组件包切换：
+ * 每个包的角色色经 data-role 给出 --dx-c，框与图标从它调淡；包外的东西用细灰框。
+ * 平时的允许边是淡灰细线，这一类守着的允许边是前景色实线，禁止边是 --dx-bad 虚线加叉。1px 细线、圆角，没有辉光与渐变。
+ */
+.boundary-rules .br-scroll {
+  overflow-x: auto;
+  border: 1px solid var(--dx-line);
+  border-radius: 12px;
+  background: var(--dx-surface);
+  padding: 6px;
+}
+.boundary-rules .br-svg { display: block; width: 100%; min-width: 760px; height: auto; font-size: 12px; user-select: none; }
+
+/* 节点：包是角色色细框，包外的东西是灰色细框 */
+.boundary-rules .br-node, .boundary-rules .br-group, .boundary-rules .br-dir { transition: opacity .25s; }
+.boundary-rules .br-node > rect {
+  fill: color-mix(in srgb, var(--dx-c) 6%, var(--dx-surface));
+  stroke: color-mix(in srgb, var(--dx-c) 45%, transparent);
+  stroke-width: 1;
+  transition: fill .25s, stroke .25s;
+}
+.boundary-rules .br-node[data-outside='true'] > rect { fill: var(--dx-surface); stroke: var(--dx-line); }
+.boundary-rules .br-node[data-lit='true'] > rect { stroke: var(--dx-c); fill: color-mix(in srgb, var(--dx-c) 12%, var(--dx-surface)); }
+.boundary-rules .br-node[data-outside='true'][data-lit='true'] > rect { stroke: color-mix(in srgb, var(--dx-fg) 45%, transparent); fill: var(--dx-surface); }
+.boundary-rules .br-node[data-lit='false'], .boundary-rules .br-group[data-lit='false'] { opacity: .45; }
+.boundary-rules .br-node-name { fill: var(--dx-fg); font-weight: 600; font-size: 12.5px; }
+.boundary-rules .br-node-ident { fill: var(--dx-dim); font-family: var(--dx-mono); font-size: 10.5px; }
+.boundary-rules .br-icon { color: var(--dx-c); fill: none; pointer-events: none; }
+.boundary-rules .br-node[data-outside='true'] .br-icon { color: var(--dx-dim); }
+
+/* workflow 包：虚线框，里面的目录是小方块 */
+.boundary-rules .br-frame {
+  fill: color-mix(in srgb, var(--dx-c) 4%, transparent);
+  stroke: color-mix(in srgb, var(--dx-c) 55%, transparent);
+  stroke-width: 1;
+  stroke-dasharray: 5 4;
+  transition: fill .25s, stroke .25s;
+}
+.boundary-rules .br-group[data-lit='true'] .br-frame { stroke: var(--dx-c); fill: color-mix(in srgb, var(--dx-c) 7%, transparent); }
+.boundary-rules .br-dir > rect {
+  fill: var(--dx-surface);
+  stroke: color-mix(in srgb, var(--dx-c) 40%, transparent);
+  stroke-width: 1;
+  transition: fill .25s, stroke .25s;
+}
+.boundary-rules .br-dir[data-lit='true'] > rect { stroke: var(--dx-c); fill: color-mix(in srgb, var(--dx-c) 12%, var(--dx-surface)); }
+.boundary-rules .br-group[data-lit='true'] .br-dir[data-lit='false'] { opacity: .45; }
+.boundary-rules .br-dir-name { fill: var(--dx-fg); font-family: var(--dx-mono); font-weight: 600; font-size: 11.5px; }
+.boundary-rules .br-dir-ident { fill: var(--dx-dim); font-size: 10.5px; }
+
+/* 边：平时淡灰，守着的实线，禁止的虚线加叉 */
+.boundary-rules .br-edge { transition: opacity .25s; }
+.boundary-rules .br-edge path { fill: none; stroke-linejoin: round; transition: stroke .25s, stroke-width .25s; }
+.boundary-rules .br-edge > path { stroke: color-mix(in srgb, var(--dx-fg) 22%, transparent); stroke-width: 1.2; }
+.boundary-rules .br-edge > polygon { fill: color-mix(in srgb, var(--dx-fg) 22%, transparent); transition: fill .25s; }
+.boundary-rules .br-edge[data-state='guarded'] > path { stroke: var(--dx-fg); stroke-width: 1.8; }
+.boundary-rules .br-edge[data-state='guarded'] > polygon { fill: var(--dx-fg); }
+.boundary-rules .br-edge[data-state='forbidden'] > path { stroke: var(--dx-bad); stroke-width: 1.6; stroke-dasharray: 5 4; }
+.boundary-rules .br-edge[data-state='forbidden'] > polygon { fill: var(--dx-bad); }
+.boundary-rules .br-cross circle { fill: var(--dx-surface); stroke: var(--dx-bad); stroke-width: 1.2; }
+.boundary-rules .br-cross path { stroke: var(--dx-bad); stroke-width: 1.6; stroke-linecap: round; }
+
+/* 图例 */
+.boundary-rules .br-legend { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 12px; color: var(--dx-dim); }
+.boundary-rules .br-legend-item { display: inline-flex; align-items: center; gap: 5px; }
+.boundary-rules .br-lg-idle { stroke: color-mix(in srgb, var(--dx-fg) 30%, transparent); stroke-width: 1.4; }
+.boundary-rules .br-lg-guarded { stroke: var(--dx-fg); stroke-width: 1.8; }
+.boundary-rules .br-lg-forbidden { stroke: var(--dx-bad); stroke-width: 1.6; stroke-dasharray: 4 3; }
+.boundary-rules .br-lg-cross { fill: var(--dx-surface); stroke: var(--dx-bad); }
+.boundary-rules .br-lg-frame { fill: none; stroke: var(--dx-dim); stroke-dasharray: 3 2; }
+
+/* 图下面两张卡：宽时并排，窄时上下 */
+.boundary-rules .br-details { display: grid; gap: 12px; }
+@container (min-width: 720px) {
+  .boundary-rules .br-details { grid-template-columns: 1fr 1fr; }
+}
+.boundary-rules .br-row { display: grid; gap: 4px; }
+.boundary-rules .br-row + .br-row { padding-top: 8px; border-top: 1px solid color-mix(in srgb, var(--dx-line) 70%, transparent); }
+.boundary-rules .br-row-label { font-size: 12px; color: var(--dx-dim); }
+.boundary-rules .br-chips { display: flex; flex-wrap: wrap; gap: 4px; }
+.boundary-rules .br-chip {
+  font-family: var(--dx-mono); font-size: 11.5px; line-height: 18px; padding: 0 7px; border-radius: 6px; white-space: nowrap;
+  border: 1px solid color-mix(in srgb, var(--dx-fg) 25%, transparent); color: var(--dx-fg);
+}
+.boundary-rules .br-chip[data-forbidden='true'] {
+  border: 1px dashed color-mix(in srgb, var(--dx-bad) 55%, transparent);
+  background: color-mix(in srgb, var(--dx-bad) 6%, transparent); color: var(--dx-bad);
+}
+.boundary-rules .br-what { font-size: 13px; }
+.boundary-rules .br-tests { margin: 0; padding: 0; list-style: none; display: grid; gap: 8px; }
+.boundary-rules .br-tests li { display: grid; gap: 2px; }
+.boundary-rules .br-test-name { font-family: var(--dx-mono); font-size: 12px; overflow-wrap: anywhere; }
+.boundary-rules .br-test-checks { font-size: 12px; color: var(--dx-dim); }

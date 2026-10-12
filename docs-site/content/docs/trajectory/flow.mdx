@@ -1,0 +1,122 @@
+---
+title: 轨迹卡怎么变成星轨盘
+description: 轨迹卡目录下的卡怎么被读出、校验、换成星轨盘的中性输入、建成一张盘、在每棵树里选出主干，再画到站的 /trajectory 上；以及卡里为什么不许钉码
+---
+
+import { TrajectoryFlow } from '../../../src/components/trajectory-flow/trajectory-flow';
+
+轨迹卡是轨迹卡目录下一卡一文件的 mdx，一张卡记一次取舍的结论，只增不改。目录由 `docfirst.config.mjs` 的 `trajectory` 指定，
+本站是站点根下的 `trajectory/`；不写时是内容根下的 `trajectory/`：
+
+{/* ref file="../packages/docfirst-workflow/src/project/config.ts" lines="91-94" hash="f65934fb954b" blob="d259f3e1b09d" */}
+
+星轨盘是这些卡的图：
+一个站只有一张根卡、一张盘，根卡画在盘心，其余的卡按日期排在同心环上，半径表示时间、内旧外新。
+同一棵树（或同一领域的孤星）在同一天有好几张卡时，那一天的环带按张数加宽，这几张按角度从当天的环往内排成一斜排，不叠在同一个环上。
+角度按领域分扇区，一圈装得下就整体放大铺满整圈，只在 12 点方向留一道缝放日期与里程碑的名字；装不下才让同一领域里时间不重叠的树共用一段角度。
+从卡文件到站上的盘分几段：读卡目录、解析、校验、换成中性输入在 `docfirst-workflow` 的卡格式；建模、布局、画盘在通用包
+星轨盘 `trajectory-disk`，组件在浏览器里建模；站上的路由在功能包 `docfirst-site`，只负责读卡目录、把结果交给组件：
+
+<TrajectoryFlow />
+
+## 卡的格式与校验
+
+卡的身份是文件名去掉 `.mdx` / `.md`，`parent` 与正文里的关系都用身份指向别的卡。frontmatter 里下面这些
+字段至少写了一个才算卡，一个都没写的文件整份跳过、不报问题：
+
+{/* ref file="../packages/docfirst-workflow/src/cards/parse.ts" lines="15-17" hash="041cf9a65875" blob="050de2f99d5a" */}
+
+卡与卡之间的两种关系写在正文里，一行一条：`supersedes::`（取代）或 `pivots-from::`（转向）后面跟一条指向卡身份的标准 md 链接，wikilink 与包在 `<>` 里的目标都不认。
+行首是这两个词、整行却不合格式的，记成问题：
+
+{/* ref file="../packages/docfirst-workflow/src/cards/parse.ts" lines="22-26" hash="7cf7d2fc3fc7" blob="3e529313faaa" */}
+
+解析一张卡时把问题逐条记下，不在第一条停：字段的形状（该写单个值的写成了列表、`parent` 写成了单个值，报出来、按没写处理，不替它转换）、必填字段、`born-at` 的格式，再加格式不对的关系行；根卡另查里程碑区块里写坏的行：
+
+{/* ref file="../packages/docfirst-workflow/src/cards/card.ts" lines="44-91" hash="375d796e6e71" blob="4c1848dfec6c" */}
+
+`docfirst check` 把每条问题记一次红：
+
+{/* ref file="../packages/docfirst-workflow/src/cli/commands.ts" lines="89-90" hash="6a87fa27d832" blob="937001d7a349" */}
+
+## 一张根卡、换成中性输入
+
+`type: root` 的卡是根卡。**一个卡目录只有一张根卡，整个目录只画一张盘。**`scanCards` 逐张解析完，再对整个目录查根卡，
+问题记在对应的卡上，跟单卡的问题进同一份清单：
+
+- 根卡多于一张，每张根卡各记一条（字段 `type`）；这时先不查其余卡的 `parent`，没有唯一的根卡可比
+- 根卡不写 `parent`
+- 其余的卡 `parent` 必填，只能写那张根卡的身份；目录里没有根卡时，写了 `parent` 的卡都记一条
+- 关系只能指向盘上的卡：指向根卡、指向不存在的卡、指向 `born-at` 写坏没上盘的卡，各记一条
+- 同一身份 `.md` 与 `.mdx` 两个文件都在，只认 `.mdx`，在它上面记一条
+
+{/* ref file="../packages/docfirst-workflow/src/cards/scan.ts" lines="75-139" hash="64d1e877dde3" blob="84851160ced5" */}
+
+然后换成星轨盘的中性输入：根卡恰好一张时它是盘心；其余 `born-at` 合格的卡都上盘，别的问题不挡上盘，`parent` 与 `domain`
+不决定卡在不在盘上。`born-at` 不合格的卡算不出半径，不进输入：
+
+{/* ref file="../packages/docfirst-workflow/src/cards/scan.ts" lines="46-73" hash="ea1b3b8a9e0a" blob="84851160ced5" */}
+
+## 建树、选主干
+
+关系在建模时求解，目标不在盘上的记进 `broken`。用取代与转向连在一起的卡组成一棵树。树的**主干**在取代关系上选：
+几条取代链先比终点的时刻谁更晚，再比长短，最后按身份排；整棵树一条取代都没有，才在转向链上用同一个比法选。
+不在主干上的卡按连通分成**支线**；两种关系都没有的卡是**孤星**：
+
+{/* ref file="../packages/trajectory-disk/src/model/build.ts" lines="177-204" hash="3efa5ab62617" blob="fafdd715830c" */}
+
+建模在浏览器里做：组件 `StarDisk` 收到中性输入，自己建模；盘的布局（`RingsLayout`）也由画布按当前设置算，调设置不用再请求服务端：
+
+{/* ref file="../packages/trajectory-disk/src/disk.tsx" lines="158-159" hash="f3f44d34895f" blob="3ecaca179c38" */}
+
+## 站上怎么渲染
+
+星轨盘 `/trajectory` 与卡页 `/trajectory/<卡身份>` 是功能包 `docfirst-site` 的两条路由：星轨盘占满整个窗口，放在整站布局外面；卡页在整站布局里：
+
+{/* ref file="../packages/docfirst-site/src/routes.ts" hash="c3a77595db13" blob="1a50868d9271" */}
+
+星轨盘的 loader 在服务端用 `loadProject` 找到配置的轨迹卡目录，交给卡格式的 `scanCardDir`，交回中性输入与病卡清单；
+星轨盘组件 `StarDisk` 直接从 `@godcreator/trajectory-disk/disk` 取：
+
+{/* ref file="../packages/docfirst-site/src/routes/disk.tsx" lines="10-12" hash="a6fd0a297788" blob="4333c2115175" */}
+
+{/* ref file="../packages/docfirst-site/src/routes/disk.tsx" lines="23-26" hash="c35cfccef10d" blob="4333c2115175" */}
+
+每张卡（含根卡）的正文来自站点里的轨迹卡集合，按卡身份交给盘，点到哪张才加载哪张；点节点在盘右侧栏里看这张卡，
+栏里指向别的卡的链接也在栏里切换，地址栏记着 `?card=<卡身份>`，Ctrl/Cmd+点才开卡页：
+
+{/* ref file="../packages/docfirst-site/src/routes/disk.tsx" lines="28-43" hash="8d70aae68d69" blob="4333c2115175" */}
+
+{/* ref file="../packages/docfirst-site/src/routes/disk.tsx" lines="62-62" hash="92272822ac7c" blob="4333c2115175" */}
+
+轨迹卡集合的定义只能写在站点里，所以它在功能包的模板里，初始化站点时写成站点的 `app/lib/trajectory.ts`，两条路由经别名 `@site/lib/trajectory` 读它。
+集合的目录要和配置的 `trajectory` 一致：
+
+{/* ref file="../packages/docfirst-site/template/skeleton/app/lib/trajectory.ts" lines="7-7" hash="b541f74038da" blob="55562eb102dd" */}
+
+卡页的标题依次取 frontmatter 的 `label`、`title`，都没有就用卡身份：
+
+{/* ref file="../packages/docfirst-site/src/card-fields.ts" lines="26-26" hash="0de0baa6d3cc" blob="c9e3273f9b79" */}
+
+卡正文里指向卡的链接，由功能包的 remark 插件在构建时改写成卡页地址（盘右侧栏靠 `/trajectory/` 这个前缀认出卡链接）。
+轨迹卡目录里的文件只经过 `remarkTrajectoryLinks`，不做钉码投影与术语标注：
+
+{/* ref file="../packages/docfirst-site/src/content.ts" lines="52-57" hash="83c7d3f9596e" blob="c197951793e7" */}
+
+## 卡里为什么不许钉码
+
+钉一处码是在说「这句话跟着这段代码走，代码变了要回来复核」。卡记的是当时的结论，代码后来怎么变都不该改它；
+卡里钉了码，代码一改卡就变黄，它就成了一份要维护的现状文档。所以两处把卡挡在钉码之外。
+
+一是 `check`、`confirm`、`render` 只遍历现状区：内容根下的 `trajectory/` 与 `future/` 不进；轨迹卡目录配在内容根外面时（本站就是这样），
+它本来就不在内容根里。卡上的记号不会被核对，也不会被确认：
+
+{/* ref file="../packages/docfirst-workflow/src/project/load.ts" lines="70-71" hash="e60f111d117a" blob="69a379c0beab" */}
+
+二是卡格式扫卡时逐行查每张卡的正文，正式记号、以 `@@docfirst` 开头的一行（已经删掉的草稿写法）出现任何一种，都记成一条问题：
+
+{/* ref file="../packages/docfirst-workflow/src/cards/card-refs.ts" lines="15-37" hash="b15c02e922ef" blob="57bbf681b44f" */}
+
+这一条要认识钉码的记号，所以在 workflow 的卡格式里查，病并进同一份清单；星轨盘本身连卡文件的写法都不认识：
+
+{/* ref file="../packages/docfirst-workflow/src/cards/scan.ts" lines="35-38" hash="88009f5bb4eb" blob="5a458f2ae3b8" */}

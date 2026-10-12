@@ -1,0 +1,27 @@
+---
+born-at: 2026-09-26T16:47
+type: choice
+parent: [2026-09-03-god-live-doc]
+label: 卡目录由站拼成绝对路径
+domain: 模块边界
+---
+
+## 背景
+
+站构建时 Turbopack 报一条警告：`loadTrajectory` 里 `resolve(process.cwd(), dir)` 用变量拼出要读的目录，
+它看不出只读哪个目录，就把整个项目打进服务端产物。这条警告在删多盘之前就有，那行代码没动过。
+
+## 结论与边界
+
+**`loadTrajectory(dir)` 只收绝对路径，不是绝对路径直接报错。** 站的盘页写
+`loadTrajectory(join(process.cwd(), 'content', 'trajectory'))`，目录名写死在站里，Turbopack 看得出只读这一个目录，
+警告消失。建站模板的盘页同样这么写。
+
+## 否掉的候选
+
+**包里保留相对路径，在 `resolve` 调用里加 `turbopackIgnore` 注释。** 注释要经过包的打包工具原样留进产物才起作用，
+一旦被去掉警告就回来，而且没有测试能发现；目录本来就是站自己的约定，由站写明更直接。
+
+## 代价与遗留
+
+给 `loadTrajectory` 传相对路径的站升级后会直接报错，要改成上面的写法；和删多盘是同一个破坏性版本。

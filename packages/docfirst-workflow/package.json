@@ -1,0 +1,95 @@
+{
+  "name": "@godcreator/docfirst-workflow",
+  "version": "0.5.6",
+  "author": {"name": "godcreator"},
+  "type": "module",
+  "description": "docfirst 文档工作流：命令行（核对、确认、渲染、轨迹）、项目装配、mdx 格式与卡格式，外加接到 fumadocs 站上的子入口 ./fumadocs（remark 接入、状态点与术语组件、轨迹卡集合与星轨盘、样式），随 docfirst 线发。",
+  "bin": {
+    "docfirst": "./dist/cli.mjs"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.mts",
+      "default": "./dist/index.mjs"
+    },
+    "./mdx": {
+      "types": "./dist/mdx.d.mts",
+      "default": "./dist/mdx.mjs"
+    },
+    "./cards": {
+      "types": "./dist/cards.d.mts",
+      "default": "./dist/cards.mjs"
+    },
+    "./fumadocs": {
+      "types": "./dist/fumadocs.d.mts",
+      "default": "./dist/fumadocs.mjs"
+    },
+    "./fumadocs/roster": {
+      "types": "./dist/fumadocs-roster.d.mts",
+      "default": "./dist/fumadocs-roster.mjs"
+    },
+    "./fumadocs/pre": {
+      "types": "./dist/fumadocs-pre.d.mts",
+      "default": "./dist/fumadocs-pre.mjs"
+    },
+    "./fumadocs/term": {
+      "types": "./dist/fumadocs-term.d.mts",
+      "default": "./dist/fumadocs-term.mjs"
+    },
+    "./fumadocs/trajectory": {
+      "types": "./dist/fumadocs-trajectory.d.mts",
+      "default": "./dist/fumadocs-trajectory.mjs"
+    },
+    "./fumadocs/light.css": "./styles/light.css",
+    "./fumadocs/term.css": "./styles/term.css",
+    "./fumadocs/trajectory.css": "./styles/trajectory.css"
+  },
+  "files": [
+    "dist",
+    "styles"
+  ],
+  "scripts": {
+    "build": "tsdown",
+    "typecheck": "tsc -p tsconfig.json",
+    "prepublishOnly": "pnpm run build"
+  },
+  "dependencies": {
+    "@godcreator/code-pin": "workspace:*",
+    "@godcreator/trajectory-disk": "workspace:*",
+    "mdast-util-math": "^3.0.0",
+    "mdast-util-to-markdown": "^2.1.2",
+    "remark-frontmatter": "^5.0.0",
+    "remark-math": "^6.0.0",
+    "remark-mdx": "^3.0.0",
+    "remark-parse": "^11.0.0",
+    "unified": "^11.0.0",
+    "unist-util-visit": "^5.0.0"
+  },
+  "peerDependencies": {
+    "fumadocs-core": ">=16",
+    "fumadocs-ui": ">=16",
+    "react": ">=19"
+  },
+  "peerDependenciesMeta": {
+    "fumadocs-core": {"optional": true},
+    "fumadocs-ui": {"optional": true},
+    "react": {"optional": true}
+  },
+  "devDependencies": {
+    "@standard-schema/spec": "^1.1.0",
+    "@types/mdast": "^4.0.4",
+    "@types/react": "^19.3.0",
+    "fumadocs-core": "16.15.17",
+    "fumadocs-ui": "npm:@fumadocs/base-ui@16.15.17",
+    "react": "^19.3.0"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://git.tianshen02.online:28377/api/packages/godcreator/npm/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://git.tianshen02.online:28377/godcreator/gwb-docfirst.git"
+  },
+  "keywords": ["gwb"]
+}

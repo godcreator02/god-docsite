@@ -1,0 +1,62 @@
+/*
+ * RefKinds 这一页自己的画面：文档卡片里的记号、比什么的对照行、结果按钮、站上显示的几种样子。
+ * 外壳、卡片、终端、胶囊、代码行与颜色变量（--dx-*）由 @godcreator/docfirst-explainer 提供，这些都画在它的 .dx 根元素里；
+ * 颜色只从 data-tone / data-role 给出的 --dx-c 调淡。
+ */
+
+.rk-label { font-size: 12px; color: var(--dx-dim); }
+.rk-note { font-size: 12.5px; color: var(--dx-dim); }
+
+/* 记号一行：等宽、细边框，confirm 写上的记录属性加粗 */
+.rk-marker {
+  display: block; font-family: var(--dx-mono); font-size: 12px; line-height: 1.55;
+  border: 1px solid var(--dx-line); border-radius: 8px; padding: 6px 9px; overflow-wrap: anywhere;
+}
+.rk-marker b { color: var(--dx-accent); font-weight: 600; }
+
+/* 比什么：属性名 · 记号上的值 · 今天拿什么算 */
+.rk-compare { display: grid; gap: 6px; }
+.rk-compare-row { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 8px; }
+.rk-compare-value { font-family: var(--dx-mono); font-size: 12px; font-weight: 600; }
+.rk-compare-today { flex: 1 1 14em; min-width: 0; font-size: 13px; color: var(--dx-dim); }
+
+/* 结果按钮：一行一种结果，选中的那行用自己的状态色调淡 */
+.rk-outcomes { display: grid; gap: 4px; }
+.rk-outcome {
+  display: grid; grid-template-columns: auto auto 1fr; align-items: baseline; gap: 8px;
+  text-align: left; padding: 5px 10px; border-radius: 8px; color: var(--dx-fg);
+  border: 1px solid var(--dx-line); background: transparent;
+  transition: background-color .2s, border-color .2s;
+}
+.rk-outcome > .dx-dot { align-self: center; }
+.rk-outcome:hover:not([aria-pressed='true']) { border-color: color-mix(in srgb, var(--dx-c) 30%, transparent); }
+.rk-outcome[aria-pressed='true'] {
+  border-color: color-mix(in srgb, var(--dx-c) 40%, transparent);
+  background: color-mix(in srgb, var(--dx-c) 8%, transparent);
+}
+.rk-outcome-name { font-size: 12.5px; font-weight: 600; color: var(--dx-c); white-space: nowrap; }
+.rk-outcome-when { font-size: 13px; min-width: 0; }
+
+/* 站上的代码块：标题栏写来源，右端状态点 */
+.rk-block { min-width: 0; border: 1px solid var(--dx-line); border-radius: 10px; overflow: hidden; }
+.rk-block-bar {
+  display: flex; align-items: center; gap: 8px; padding: 5px 10px; font-family: var(--dx-mono); font-size: 12px;
+  color: var(--dx-dim); border-bottom: 1px solid var(--dx-line);
+}
+.rk-block-title { flex: 1 1 auto; min-width: 0; overflow-wrap: anywhere; }
+.rk-block > .dx-code { border: 0; border-radius: 0; }
+.rk-plain { overflow-x: auto; padding: 6px 0; font-family: var(--dx-mono); font-size: 12px; }
+.rk-plain-line { padding: 0 12px; line-height: 20px; white-space: pre; width: max-content; min-width: 100%; }
+.rk-plain-line[data-side='old'] { background: color-mix(in srgb, var(--dx-bad) 10%, transparent); }
+.rk-plain-line[data-side='now'] { background: color-mix(in srgb, var(--dx-good) 10%, transparent); }
+
+/* 站上的文件树：根文件夹展开，状态点在右上角；目录不在时根文件夹调淡 */
+.rk-tree {
+  position: relative; min-width: 0; padding: 8px 10px; font-size: 13px;
+  border: 1px solid var(--dx-line); border-radius: 10px;
+}
+.rk-tree-dot { position: absolute; top: 10px; right: 10px; display: flex; }
+.rk-tree-row { display: flex; align-items: center; gap: 6px; line-height: 24px; overflow-wrap: anywhere; }
+.rk-tree-row[data-disabled] { opacity: .5; }
+.rk-tree-kids { margin-left: 6px; padding-left: 12px; border-left: 1px solid var(--dx-line); }
+.rk-icon { flex: none; color: var(--dx-dim); }
