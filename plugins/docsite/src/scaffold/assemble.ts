@@ -1,4 +1,4 @@
-import { readdirSync, readFileSync, statSync } from 'node:fs'
+import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs'
 import path from 'node:path'
 import { DocsiteRejected } from '../errors.js'
 
@@ -180,7 +180,11 @@ export function assembleSite(input: AssembleInput): PlannedFile[] {
   let dependencies = resolvedDependencies(kitManifest.dependencies, input.versions)
   let devDependencies = resolvedDependencies(kitManifest.devDependencies, input.versions)
   for (const feature of input.features) {
-    const featureManifest = readJson(path.join(feature.dir, 'package.json'))
+    // 并进新站的脚本与依赖来自模板的 skeleton/package.json（包根清单是功能包自己的，不进站）；
+    // 模板没带这份文件的功能包（如骨架自带的 people.json 那种纯起始物）就没有可合并的
+    const skeletonManifestFile = path.join(feature.dir, 'template', 'skeleton', 'package.json')
+    if (!existsSync(skeletonManifestFile)) continue
+    const featureManifest = readJson(skeletonManifestFile)
     // 功能包的脚本只能新增：骨架的 dev/build 这类同名脚本归骨架，功能包覆盖它们没有正当场景
     for (const [name, script] of Object.entries(featureManifest.scripts ?? {})) if (!(name in scripts)) scripts[name] = script
     dependencies = { ...resolvedDependencies(featureManifest.dependencies, input.versions), ...dependencies }

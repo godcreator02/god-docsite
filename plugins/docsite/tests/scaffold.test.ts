@@ -68,9 +68,11 @@ describe('assembleSite', () => {
   })
 
   it('功能包模板的脚本与依赖合并进 package.json：dev 换新站的端口，依赖同名照骨架的，workspace 依赖换成版本表的精确版本', () => {
-    const feature = featureTemplate('@probe/a', {}, {
-      scripts: { docfirst: 'docfirst check', dev: 'react-router dev --port 1' },
-      dependencies: { '@probe/tool': '^2.0.0', react: '0.0.0-canary' },
+    const feature = featureTemplate('@probe/a', {
+      'template/skeleton/package.json': JSON.stringify({
+        scripts: { docfirst: 'docfirst check', dev: 'react-router dev --port 1' },
+        dependencies: { '@probe/tool': '^2.0.0', react: '0.0.0-canary' },
+      }),
     })
     const manifest = JSON.parse(plannedOf(assembleSite(assembleInput([feature]))).get('package.json')!) as {
       scripts: Record<string, string>
@@ -93,6 +95,13 @@ describe('assembleSite', () => {
 
   it('版本表缺了骨架模板的 workspace 依赖就报错', () => {
     expect(() => assembleSite({ ...assembleInput(), versions: {} })).toThrow('版本表里没有它')
+  })
+
+  it('功能包模板没带 skeleton/package.json 就不并任何脚本与依赖（起始物型的功能包）', () => {
+    const planned = plannedOf(assembleSite(assembleInput([featureTemplate('@probe/plain', {})])))
+    const manifest = JSON.parse(planned.get('package.json')!) as { scripts: Record<string, string> }
+    expect(manifest.scripts['docfirst']).toBeUndefined()
+    expect(planned.has('package.json')).toBe(true)
   })
 })
 
