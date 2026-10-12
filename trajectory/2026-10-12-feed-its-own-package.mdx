@@ -25,3 +25,11 @@ kit，feed 必须完整住在能力包层。用户拍板：feed 显然也该是�
 能力小包七个：identity、comments、writing、page-sources、ui、feed、create-docsite；
 kit 剩 6 个源文件（template/init、feature、vite 插件、mdx-problems、package-dirs）。
 全仓 pnpm -r check 绿（feed 包自带协议与存储测试），自述站重生成后 dev 冒烟过。
+
+## 附记（同日稍后）：mdx-problems 删除
+
+用户指出检查器多余：build 一次就报全部 MDX 错。成立——它的历史理由（旧机制评论运行时编译、
+build 不碰 comments/）随 M2 消失，新机制下 build 编译全部页面与评论，单源；检查器自己那份
+编译配置反而成了清理清单 #4 说的双源负担。删除 kit 的 server/mdx-problems 与插件侧
+siteMdxProblems，提交前 MDX 检查＝在站点目录跑一次 pnpm build（说明页两处提及随改）。
+kit 至此剩 4 个源文件：feature、init、package-dirs、vite。

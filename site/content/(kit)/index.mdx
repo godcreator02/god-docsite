@@ -20,7 +20,7 @@ icon: BookOpen
 | `./server` | 布局与页面路由、`app/routes/search.ts`、`app/routes/content-file.ts`、`app/routes/comments.ts`、`app/lib/commenter.server.ts` | 中文站点用的搜索接口 `siteSearchServer`；把 `content/` 里的文件原样送给浏览器；读人员列表 `sitePeople`、本机身份 `siteIdentity`、评论接口、读评论快照、从 HTML 算页面文字、不经开发服务读评论 `readCommentThreads`、站点检查 `siteProblems`（见[评论](/commenting)）；推送通道 `siteFeedOf`（见[开发服务插件](/dev-plugin#收-gwb-插件推来的数据)） |
 | `./ui` | `app/root.tsx`、布局与页面路由 | TSX 页面与 HTML 页面的正文组件、TSX 页面里的公式 `Tex`、全宽按钮 `PageTitleWithWideToggle` 与 `widePageScript`、正文里的链接卡片 `siteLinkComponent` 与 `SiteLinksProvider`、页面上的评论、全部评论页 `AllComments`、侧栏底部的身份、侧栏 `groupKeepingSidebar`、搜索与入口横排 `SidebarRouteLinks` 和配套的 `routeLinksSearchTrigger`、推送通道 `useSiteFeed`、fumadocs 界面文字的中文 |
 | `./site-feed` | gwb 插件 | 推送通道的环境变量名、地址、请求头这几个常量 |
-| `./files` | gwb 插件 | 不经开发服务读站点目录里的文件：`readCommentThreads`、`siteProblems`、`sitePeople`、站名 `siteTitleOf`；提交前编译 MDX 的 `siteMdxProblems`（编译器从站点装的基础包里加载，插件打包时不带它） |
+| 站点目录的读取（插件用） | gwb 插件不经开发服务直接读：评论串 `readCommentThreads`、`siteProblems`、`sitePeople`、站名 `siteTitleOf`；MDX 检查＝提交前跑一次站点 build |
 | `./styles.css` | `app/app.css` | 让 Tailwind 扫到包里组件用的类名；宽屏布局；评论的高亮与画框；藏起侧栏塞进分组的页面项 |
 
 布局用 fumadocs 的 docs 布局：左侧侧栏里从上到下是站名、切换下拉框、搜索与入口那一横排、当前这一组的页面，侧栏底部那一栏左边是写评论的人（本机开发时才有）、右边是主题切换；本页目录在正文右边。
