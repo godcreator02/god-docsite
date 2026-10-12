@@ -33,7 +33,7 @@ description: 插件怎么把要人处理的事告诉人：notifications/ 从两�
 几条规则去掉重复的：冲突没改好时，提交审核失败与没能自动同步的原因都是这件事，只列冲突；协作仓不在 main 上时自动同步一定停着，不另列没能自动同步。算完按 `sortedNotifications` 排好（组的顺序、组内 `kind` 的顺序、再按 `id`）。`id` 由通知模型按事实算，同一件事前后不变，QQ 只发新出现的靠的就是它。
 
 {/* ref file="../plugins/collab/src/notifications/notifications-of.ts" lines="13-82" hash="2f4f0b64d21b" blob="4c751e3d4bb5" */}
-{/* ref file="../plugins/collab/src/collab-repo/records/inbox.ts" lines="13-30" hash="c9796027a386" blob="fa618c20c1e1" */}
+{/* ref file="../plugins/collab/src/collab-repo/records/inbox.ts" lines="14-42" hash="e4f64f7cdea8" blob="f33e0dcad506" */}
 
 记录、人员列表与评论串现读工作区（网站显示的也是工作区里的），本机状态用两边监视着的那份，还没算出第一份就现算一次。读到、记下的都只在内存里，项目移出列表时忘掉，重启工作台后从头算。
 
@@ -144,78 +144,52 @@ QQ 命令由 agent 调 `collab.project.qq-command {repo, command}` 设，`comman
 
 插件发出任务就回执，不附回报约定、不记下交出去的事：按钮是人在电脑前点的，AI 先列出要做的事问人，结果就在那条 ZCode 会话或那个终端窗口里；插件不替它提交审核。人不点按钮、没人调这条命令，插件不把任何东西交给 AI。这两种去处的接口按协作站自己要的定，不跟 qq-bot 的统一；不接 gwb-claudecode，那是没有界面的进程，没法跟人对话。
 
-## 站点（原「站点」页）
+## 站点
 
-站点的骨架与开发服务都不由本插件写、不由本插件运行：照模板初始化站点、常驻、意外退出后重启、打开窗口、往站点推数据、本 home 的身份码，都是 gwb 基础插件 gwb-docsite 做的，本插件注入它的服务 `gwbDocsite` 来用（方法与行为见基础包仓 `oz47p-docsite-kit/docsite-kit` 的自述站「gwb 基础插件」一页）。
-`site-process/` 不认识两种仓，也不算通知：`collab-sites.ts` 的 `CollabSites` 在调 gwb-docsite 之前查一遍站点，从通知那里拿推给网站的数据（接缝 20），把站点在不在运行告诉协作窗格（接缝 21）；`site-files.ts` 是查站点的函数（站名由基础包 `@godcreator/docsite-kit/files` 的 `siteTitleOf` 读，站点没运行时的预期地址由 gwb-docsite 的 `status(dir).expectedUrl` 给）；`dependencies.ts` 在 `site/` 里运行 pnpm。
+站点的骨架与开发服务都不由本插件写、不由本插件运行：从空目录建站、启动与停止站点的进程、状态、往站点推数据、本 home 的身份码，都是 gwb 基础插件 gwb-docsite 做的，本插件注入它的服务 `gwbDocsite` 来用（方法与行为见基础包仓 `oz47p-docsite-kit/docsite-kit` 的自述站「gwb 基础插件」一页）。
+`site-process/` 不认识两种仓，也不算通知：`collab-sites.ts` 的 `CollabSites` 在插件加载、项目加进列表等时点确保站点在运行（`gwbDocsite.start` 幂等，起不来的原因留在 gwb-docsite 的 `status` 里，与地基自己的站一样不自动重启），从通知那里拿推给网站的数据（接缝 20），把站点在不在运行告诉协作窗格（接缝 21）；`dependencies.ts` 在 `site/` 里运行 pnpm。
 
-{/* ref file="../plugins/collab/src/site-process/collab-sites.ts" lines="9-22" hash="2dea005ec01a" blob="cb30a59e92cd" */}
-{/* ref file="../plugins/collab/src/index.ts" lines="129-132" hash="7226ab45afc9" blob="23cf8898bf72" */}
+{/* ref file="../plugins/collab/src/site-process/collab-sites.ts" lines="26-31" hash="8cf4a8c3c262" blob="9c89664fae82" */}
+{/* ref file="../plugins/collab/src/index.ts" lines="129-132" hash="8ae3470b7ae6" blob="afcf0a62693d" */}
 
-## 初始化站点与更新骨架
+## 建站
 
-`collab.site.init {repo, port?, title?}` 交给 `gwbDocsite.init(<仓根>/site, …)`，骨架怎么写由 gwb-docsite 与基础包定（见 [功能包](/collab/collab-site) 的「交给基础包的东西」），本插件只多给一样：功能包 `@godcreator/collab-site` 的范围写成 `^` 加本插件打包时带的那一版。
-这一版在构建插件时由 `build.ts` 从 `node_modules` 里的功能包读出、写进常量 `__COLLAB_SITE_VERSION__`，所以写进站点的功能包和插件打包的数据模型包是同一个站点协议号。
+`collab.site.init {repo, port, title}` 交给 `gwbDocsite.init(<仓根>/site, …)` 一步从空目录建站：拉功能包模板、组装骨架、一次写盘、一次 `pnpm install`、起服务检查首页（骨架怎么写由 gwb-docsite 与基础包定，见 [功能包](/collab/collab-site) 的「交给基础包的东西」）。本插件只多给一样：功能包 `@godcreator/collab-site` 的范围写成 `^` 加本插件打包时带的那一版。
+这一版在构建插件时由 `build.ts` 从 `node_modules` 里的功能包读出、写进常量 `__COLLAB_SITE_VERSION__`，所以建出的站点装的功能包和插件打包的数据模型包对得上。
 
-- `site/` 还没有 `package.json` 是新站点，要给 `port`（开发端口）与 `title`（站名）；已有站点不能给这两样
-- gwb-docsite 先装依赖，再照装好的基础包与功能包的模板整个重写 `site/app/`、覆盖 `site/` 根下的配置文件，模板带来新依赖就再装一次；`content/`、`comments/`、`people.json`、`journal/` 已有的不动。站点在运行就先停、做完再启动
-- `repo` 不要求在项目列表里：新建项目时协作仓还没加进列表。在列表里的，做完再查一遍（下面「托管之前查什么」），通过了交给 gwb-docsite 托管
+- `port`（开发端口）与 `title`（站名）都必给；已有站点（`package.json` 有 `docsite.features`）直接拒绝：骨架建完就归站点，要重建删掉 `site/` 再来（`content/`、`comments/`、`people.json`、`journal/` 想留先拷走）
+- `repo` 不要求在项目列表里：新建项目时协作仓还没加进列表。在列表里的，建完启动站点并推一次数据
 - 只写文件、不提交：用 `collab.submit` 提交审核；`site/package.json` 里 `dependencies`、`devDependencies` 两段以外的键、`site/` 根下的配置文件只有项目负责人能改
 
-用在三处：新建项目时建出站点（见 [建项目与人员变动](/gitea/setup)）；旧形态的协作仓由仓里的 `scripts/migrate-site.mjs` 迁完页面与评论以后写骨架、装依赖；基础包或功能包升级以后，让骨架和装上的那一版对上。
+用在新建项目时建出站点（见 [建项目与人员变动](/gitea/setup)）。旧协作仓的骨架升级不在它的职责里：重写版不考虑任何已存在的站点。
 
-{/* ref file="../plugins/collab/src/site-process/commands.ts" lines="9-30" hash="3af9913564f9" blob="1820bf292242" */}
-{/* ref file="../plugins/collab/src/site-process/collab-sites.ts" lines="80-89" hash="d1b31246bb86" blob="cb30a59e92cd" */}
+{/* ref file="../plugins/collab/src/site-process/commands.ts" lines="9-31" hash="5bbfeb9f8cd8" blob="a181bbba764e" */}
+{/* ref file="../plugins/collab/src/site-process/collab-sites.ts" lines="63-73" hash="90630af871a6" blob="9c89664fae82" */}
 {/* ref file="../plugins/collab/build.ts" lines="28-40" hash="781a3e587cfe" blob="fa8767d10e09" */}
-{/* ref file="../plugins/collab/tests/site-process/collab-sites.test.ts" lines="102-109" hash="dab0727b86d0" blob="1428fd4a578b" */}
 
-## 交给 gwb-docsite 托管
+## 站点进程
 
-插件加载后、项目加进列表后，组织这一层对每个项目调 `CollabSites.keep(repo)`：查过（下一节）就交给 `gwbDocsite.keep(<仓根>/site)` 常驻，再推一次数据；查不过不交，只把原因按仓根记下。
+插件加载后、项目加进列表后，组织这一层对每个项目调 `CollabSites.keep(repo)`：交给 `gwbDocsite.start(<仓根>/site)`（幂等：已在运行或正在启动就复用），再推一次数据。进程退出了 gwb-docsite 只标 `failed`、记下原因、不自动重启（与地基自己的站一样）；`collab.site.start` 用来重启，下一次检查、下一次事件也会再 start。
 
-{/* ref file="../plugins/collab/src/site-process/collab-sites.ts" lines="45-66" hash="3d1baaf445cb" blob="cb30a59e92cd" */}
+{/* ref file="../plugins/collab/src/site-process/collab-sites.ts" lines="40-48" hash="2ed987745bb2" blob="9c89664fae82" */}
 {/* ref file="../plugins/collab/src/organization/events/project-events.ts" lines="84-93" hash="e87ad1b8e898" blob="a8f822b897cb" */}
 {/* ref file="../plugins/collab/src/organization/events/project-events.ts" lines="162-170" hash="9a4ac9f83b5f" blob="a8f822b897cb" */}
 
-gwb-docsite 托管以后，常驻失败停下（5 分钟内失败 3 次）、没装依赖、它自己的启动前检查不过，原因都在它的 `status(dir).error` 里。窗格读 `stateOf(repo)`：地址在运行时取 gwb-docsite 的 `status(dir).url`，没运行时取预期地址 `status(dir).expectedUrl`，原因先取本插件记下的、没有再取 gwb-docsite 的（接缝 21）。原因不为空时窗格那一行标红「站点没能启动」、端口是红点、原话写在那一行下面，`collab.projects` 的 `site.error` 就是这句原话。
+起不来（没装依赖、gwb-docsite 的版本核对不过、进程退出）的原因在 gwb-docsite 的 `status(dir).error` 里。窗格读 `stateOf(repo)`：地址在运行时取 gwb-docsite 的 `status(dir).url`，没运行时取预期地址 `status(dir).expectedUrl`（按 `package.json` 的 dev 脚本里的 `--port` 算），原因照 gwb-docsite 的（接缝 21）。原因不为空时窗格那一行标红「站点没能启动」、端口是红点、原话写在那一行下面，`collab.projects` 的 `site.error` 就是这句原话。
 
-{/* ref file="../plugins/collab/src/site-process/collab-sites.ts" lines="40-43" hash="3f87d7ed5689" blob="cb30a59e92cd" */}
+{/* ref file="../plugins/collab/src/site-process/collab-sites.ts" lines="33-38" hash="c541e879f003" blob="9c89664fae82" */}
 
-项目移出列表时调 `forget`：gwb-docsite 停掉它、忘掉它的推送，这里忘掉检查的原因；插件卸载时对交给过 gwb-docsite 的全部项目做同样的事。
+自动同步快进进来改了 `site/` 的提交之后调 `recheck`（确保在运行、推一次数据）；项目移出列表时调 `forget`（停掉在运行的站点、忘掉排着的推送）；插件卸载时对启动过的全部项目做同样的事。
 
-{/* ref file="../plugins/collab/src/site-process/collab-sites.ts" lines="135-148" hash="4c02789cadb7" blob="cb30a59e92cd" */}
-
-## 托管之前查什么
-
-`site-files.ts` 的 `requireCollabSitePasses(siteDir)` 查两样，不过就抛 `CollabRejected`，原话写明每条问题和怎么改：
-
-1. **站点协议号**：读 `site/node_modules/@godcreator/collab-site/package.json` 的 `collabSiteProtocol`，和插件打包的数据模型包的 `siteProtocol` 比。没装功能包就让人在 `site/` 里 `pnpm install`；`site/` 装的更新，让人升级 gwb-collab；更旧或没写，让人把 `site/package.json` 里功能包的范围改成 `^<siteProtocolSince>`、重装、锁文件一起提交审核
-2. **站点检查**：插件打包的功能包 `./site-check` 的 `collabSiteProblems(siteDir)`：基础包查人员列表、评论文件的格式与作者、评论快照，功能包再查 `journal/` 里日志页的文件名（见 [功能包](/collab/collab-site)）
-
-{/* ref file="../plugins/collab/src/site-process/site-files.ts" lines="35-62" hash="ed5c7112b51a" blob="023aa2266b55" */}
-
-只查这两样，因为 gwb-docsite 启动前自己还会查有没有 `package.json`、装没装依赖、基础包那部分站点检查；协议号与日志页是协作站自己的约定，它不知道。
-
-查的时机：
-
-| 什么时候 | 调哪个方法 | 不过时 |
-| --- | --- | --- |
-| 插件加载、项目加进列表 | `keep` | 不托管，只记下原因 |
-| `collab.site.init` 做完、项目在列表里 | `init` 里调 `keep` | 同上 |
-| `collab.site.start` | `start` | 命令拒绝，原话就是原因 |
-| 自动同步快进进来的提交改了 `site/`、依赖没变 | `recheck` | 让 gwb-docsite 停掉、不再托管，原因留给窗格；通过了就重新 `keep`，之前因为检查不过停着的，修好的版本同步进来就托管上 |
-| 装完依赖（协议号可能跟着变了） | `whileStopped` | 同上 |
-
-{/* ref file="../plugins/collab/src/site-process/collab-sites.ts" lines="68-113" hash="8e7cfbb3bc2b" blob="cb30a59e92cd" */}
-{/* ref file="../plugins/collab/src/collab-repo/sync/sync.ts" lines="46-52" hash="3ecd73911d0a" blob="b434a84b1ae2" */}
+{/* ref file="../plugins/collab/src/site-process/collab-sites.ts" lines="111-123" hash="44a8af122b02" blob="9c89664fae82" */}
 
 ## 打开与停止
 
-`collab.site.start` 先查一遍，再交给 `gwbDocsite.open`：没在运行就启动，清掉人为停止与连续失败的记录，照 gwb-docsite 的设置 `site-window` 打开（默认 Chrome 的应用窗口）。`collab.site.stop` 交给 `gwbDocsite.stop`，这次加载期间不再自动启动，直到 `collab.site.start` 或插件重新加载。协作窗格里点站点端口或通知标签都调 `collab.site.start`。
+`collab.site.start` 交给 `gwbDocsite.start`（幂等），回站点的地址；要看页面把地址交给 VS Code 的浏览器打开（gwb-collab 不自己开窗口）。`collab.site.stop` 交给 `gwbDocsite.stop`。协作窗格里点站点端口或通知标签都调 `collab.site.start`。
 
-{/* ref file="../plugins/collab/src/site-process/commands.ts" lines="32-55" hash="c526def4954d" blob="1820bf292242" */}
+{/* ref file="../plugins/collab/src/site-process/commands.ts" lines="32-45" hash="415d610d8e31" blob="a181bbba764e" */}
 
-用什么窗口打开、窗口怎么认、身份码怎么交给开发服务，都在 gwb-docsite 里，本插件没有这方面的设置。
+身份码怎么交给开发服务在 gwb-docsite 里，本插件没有这方面的设置。
 
 ## 推给网站的数据
 
@@ -226,8 +200,8 @@ gwb-docsite 托管以后，常驻失败停下（5 分钟内失败 3 次）、没
 推是排队一个一个推的，轮到时才读最新的一份，接连变化时后推的一定是新的；推不上写一行警告，同样的原因只写一次。
 
 {/* ref file="../plugins/collab/src/notifications/project-notifications.ts" lines="74-86" hash="6083b1f55e36" blob="57e8ee63d2d4" */}
-{/* ref file="../plugins/collab/src/site-process/collab-sites.ts" lines="115-133" hash="34e1477c0f2f" blob="cb30a59e92cd" */}
-{/* ref file="../packages/collab-model/src/notification-model/site-feed.ts" lines="12-16" hash="eefe49d6a6ae" blob="c7ccb3bb298c" */}
+{/* ref file="../plugins/collab/src/site-process/collab-sites.ts" lines="94-110" hash="e1f968c177d2" blob="9c89664fae82" */}
+{/* ref file="../packages/collab-model/src/notification-model/site-feed.ts" lines="8-16" hash="a587ae44fc66" blob="5de60fc61d81" */}
 
 网站这一侧怎么从频道 `collab` 读出这份数据、交给页面，见 [功能包](/collab/collab-site)。
 
@@ -235,7 +209,7 @@ gwb-docsite 托管以后，常驻失败停下（5 分钟内失败 3 次）、没
 
 `site-process/dependencies.ts` 在 `site/` 里运行 `pnpm install` 与 `pnpm run typecheck`，退出码不是 0 就把 pnpm 输出的最后 40 行报出来。
 
-- **装依赖**由「克隆项目」与自动同步（快进进来的改动动了 `site/package.json` 或 `site/pnpm-lock.yaml`）调，经 `CollabSites.whileStopped` 交给 `gwbDocsite.whileStopped`：站点先停，装完按常驻的规矩启动；装失败时站点保持停着，报错写明装好后用 `collab.site.start` 再启动
+- **装依赖**由「克隆项目」与自动同步（快进进来的改动动了 `site/package.json` 或 `site/pnpm-lock.yaml`）调，经 `CollabSites.whileStopped`：站点先停（本来就没运行就不停），装完再启动、推一次数据；装失败时站点保持停着，报错写明装好后用 `collab.site.start` 再启动
 - **类型检查**由提交审核调，站点的 `package.json` 没写 `typecheck` 脚本就不运行，回 `no-script`
 
 {/* ref file="../plugins/collab/src/site-process/dependencies.ts" lines="41-72" hash="87df8c822639" blob="ec1851de7ac4" */}

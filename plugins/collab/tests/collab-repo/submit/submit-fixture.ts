@@ -1,5 +1,5 @@
 import { execFileSync } from 'node:child_process'
-import { appendFileSync, mkdirSync, mkdtempSync, realpathSync, symlinkSync, writeFileSync } from 'node:fs'
+import { mkdirSync, mkdtempSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import path from 'node:path'
 import { encodeRecordFile, recordFileOf, type CollabRecord, type TaskRecord } from '@godcreator/collab-model/task-model'
@@ -58,21 +58,9 @@ export function writeSite(repo: string, files: Record<string, string>) {
 /** 站点 comments/ 里一串评论的发起文件 */
 export const threadFile = (author: string) => `---\nauthor: ${author}\ncreatedAt: 2026-10-10T09:00:00.000Z\nstatus: open\n---\n\n${author} 的评论\n`
 
-/**
- * 站点检查用站点自己装的基础包编译 MDX：site/node_modules 链到插件装的基础包在 pnpm 仓库里的那一层（基础包和它的依赖都在那一层），
- * 和真的协作仓一样不进 git
- */
-function installKitInto(repo: string) {
-  const installedKit = realpathSync(path.resolve(import.meta.dirname, '../../../node_modules/@godcreator/docsite-kit'))
-  mkdirSync(path.join(repo, 'site'), { recursive: true })
-  symlinkSync(path.resolve(installedKit, '../..'), path.join(repo, 'site', 'node_modules'), 'junction')
-  appendFileSync(path.join(repo, '.git', 'info', 'exclude'), 'node_modules/\n')
-}
-
 function cloneAs(root: string, originUrl: string, person: string): string {
   const repo = path.join(root, person)
   git(root, 'clone', '-q', '-c', `user.name=${person}`, '-c', `user.email=${person}@local`, '-c', 'core.autocrlf=false', originUrl, repo)
-  installKitInto(repo)
   return repo
 }
 

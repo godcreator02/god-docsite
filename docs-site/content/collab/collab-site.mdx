@@ -1,6 +1,6 @@
 ---
 title: 功能包 collab-site
-description: 接在文档站基础包上的协作站功能：任务页、任务与模块各自那一页、日历与日志页、顶部通知栏、引用任务的 RecordLink、写任务与模块的接口、站点检查，以及照基础包的功能包约定交给站点骨架的路由、侧栏入口、布局数据与日志页集合。数据长什么样在数据模型包，合并检查在合并检查包
+description: 接在文档站基础包上的协作站功能：任务页、任务与模块各自那一页、日历与日志页、顶部通知栏、引用任务的 RecordLink、写任务与模块的接口，以及照基础包的功能包约定交给站点骨架的路由、侧栏入口、布局数据与日志页集合。数据长什么样在数据模型包，合并检查在合并检查包
 full: true
 ---
 
@@ -19,102 +19,72 @@ import { SeamMap } from '../../src/components/seam-map-flow/seam-map'
 
 | 接缝 | 两端 | 送什么 | 改了会让哪边出问题 |
 | --- | --- | --- | --- |
-| 1 推数据、2 服务端读、3 界面收推送 | gwb-collab → 基础包的推送通道 → 服务端函数与界面 | 频道 `collab` 上整份 `SiteFeed`：通知列表与项目负责人 | 形状由数据模型包定，一改就加站点协议号（见下面「站点协议号」）；频道名两边都从数据模型包的 `siteFeedChannel` 取 |
-| 2 身份与人员 | 基础包 → 服务端函数 | 本机身份码在 `site/people.json` 里认出的人、人员列表 | 不是 gwb-docsite 启动的站、码不在人员列表里，只读：写任务回 403 |
+| 1 推数据、2 服务端读、3 界面收推送 | gwb-collab → 基础包的推送通道 → 服务端函数与界面 | 频道 `collab` 上整份 `SiteFeed`：通知列表与项目负责人 | 形状由数据模型包定；插件与功能包同仓发版、按依赖序先发模型包，版本对齐由发版顺序保证；频道名两边都从数据模型包的 `siteFeedChannel` 取 |
+| 2 身份与人员 | 身份包 `@godcreator/docsite-identity` → 服务端函数 | 本机身份码在 `site/people.json` 里认出的人、人员列表 | 不是 gwb-docsite 启动的站、码不在人员列表里，只读：写任务与评论回 403 |
 | 4 读写记录 | 服务端函数 ↔ `collab/records/` | 记录文件，经数据模型包的写入规则 | 格式只有数据模型包这一份实现，网站与插件写下的是同样的文件 |
-| 5 日志页文件、6 读日志页 | `site/journal/` → 日志页 → 服务端函数；模板里的 `journal` 集合也读同一批文件 | 有日志的日子、每天的原文、引用某条记录的段落 | 文件名规矩改了，站点检查（14）跟着改 |
-| 7 交给路由、8 交给界面 | 服务端函数 → 布局数据 `./site-server` 与路由模块 `src/routes/` → 界面 | `CollabSiteData`、日志里的进展 | 形状在 `site-data.ts`，只在这个包里用，改了不用加站点协议号；路由模块与路由表都在包里，不复制进协作仓 |
+| 5 日志页文件、6 读日志页 | `site/journal/` → 日志页 → 服务端函数；模板里的 `journal` 集合也读同一批文件 | 有日志的日子、每天的原文、引用某条记录的段落 | 文件名规矩在数据模型包的 project-model（journal-files.ts），改了提交审核前的检查跟着改 |
+| 7 交给路由、8 交给界面 | 服务端函数 → 布局数据 `./site-server` 与路由模块 `src/routes/` → 界面 | `CollabSiteData`、日志里的进展 | 形状在 `site-data.ts`，只在这个包里用；路由模块与路由表都在包里，不复制进协作仓 |
 | 9 写任务、10 交给服务端写 | 界面 → `POST /api/collab` → 服务端函数 | `{ action, record }`，回成功的结果或带原话的错误 | 同上，地址与 action 在 `site-data.ts` |
 | 11 MDX 组件 | 界面 → `./site` 的 `mdxComponents` → 基础包骨架的 MDX 组件表 | `{ RecordLink }` | 加了组件，MDX 页面、日志页、评论正文里就能直接写 |
-| 12 查站点、13、14 | 站点检查 → gwb-collab；基础包的检查与日志页文件名检查 → 站点检查 | 每条一句给人看的话 | gwb-collab 托管前、提交审核前都调它，查漏了的问题会让站点打不开 |
 
-站点只收不发：浏览器与服务端函数都不向插件发请求；gwb-collab 也只调这个包的站点检查，推数据、托管站点经 gwb-docsite。
+站点只收不发：浏览器与服务端函数都不向插件发请求；gwb-collab 推数据、托管站点都经 gwb-docsite。
 
 ## 出口
 
 | 出口 | 在哪 | 谁用 |
 | --- | --- | --- |
-| `@godcreator/collab-site/routes` | `src/feature/routes.ts` | 基础包骨架的路由表，见下一节 |
-| `@godcreator/collab-site` | `src/feature/site.tsx` | 基础包骨架的整站布局与 MDX 组件表，见下一节 |
-| `@godcreator/collab-site-server` | `src/feature/site-server.ts` | 基础包骨架的整站布局的 loader，见下一节 |
-| `@godcreator/collab-site/server` | `src/server/index.ts` | 布局数据与路由模块的 loader、写任务的 action 调的服务端函数；包里的 `src/feature/`、`src/routes/` 按相对路径引用同一份 |
-| `@godcreator/collab-site/ui` | `src/ui/index.ts` | `CollabDataProvider`、各页的组件、通知栏、给 MDX 的组件；包里按相对路径引用，协作仓的 TSX 页面要用 `RecordLink` 时从这里引入 |
-| `@godcreator/collab-site-check` | `src/site-check.ts` | gwb-collab：托管前、提交审核前查站点 |
-| `@godcreator/collab-site/styles.css` | `styles.css` | 基础包骨架的 `app/app.css` 经 `app/site/styles.css` 最后引入：让 Tailwind 扫到包里的类名，定义状态色与模块色 |
+| `@godcreator/collab-site/routes` | `src/routes.ts` | 基础包骨架的路由表，见下一节 |
+| `@godcreator/collab-site/site` | `src/site.tsx` | 基础包骨架的整站布局与 MDX 组件表，见下一节 |
+| `@godcreator/collab-site/site-server` | `src/site-server.ts` | 基础包骨架的整站布局的 loader，见下一节 |
+| `@godcreator/collab-site/styles.css` | `styles/site.css` | 基础包骨架的 `app/app.css` 经 `app/site/styles.css` 最后引入：让 Tailwind 扫到包里的类名，定义状态色与模块色 |
 
-{/* ref file="../packages/collab-site/package.json" lines="7-33" hash="dc254b98d9ef" blob="6f56e39c81e4" */}
+服务端函数（`src/server/`）与界面（`src/ui/`）不对外出口：路由模块与布局数据按相对路径引用它们，测试从源码引入。
+
+{/* ref file="../packages/collab-site/package.json" lines="6-16" hash="221b39df57f8" blob="c82e378b0a69" */}
 
 脚本出口都只指向 `dist/` 的构建产物，原因和基础包一样：站点从 `node_modules` 加载，不能直接加载 `.ts`（见基础包自述站的「项目骨架」页）。
 
 ## 交给基础包的东西
 
-协作仓 `site/` 的骨架（`app/` 与 `site/` 根下的配置文件）由基础包的模板写：gwb-collab 的 `collab.site.init` 交给 gwb-docsite 初始化新站点、或照装好的新版模板重写已有站点的骨架（见 [站点](/collab/notices-site)）。
-`site/package.json` 的 `docsite.features` 列着这个包，初始化照它生成 `app/site/`，骨架只经那几个文件引入功能包，这个包不改骨架里任何一个文件。
-`app/` 每次初始化整个重写，不放自己的文件；页面放在 `content/`、评论放在 `comments/`、人员列表是 `people.json`，这些照基础包，初始化不碰已有的；协作站多的是 `journal/`（日志页，见 [网站内部](/collab/collab/collab-site) 的「日历与日志」）。
+协作仓 `site/` 的骨架（`app/` 与 `site/` 根下的配置文件）由 gwb-docsite 的一步建站从空目录写出：gwb-collab 的 `collab.site.init` 交给它的服务面 `gwbDocsite.init`（见 [站点](/collab/notices-site)）。
+`site/package.json` 的 `docsite.features` 列着这个包，建站照它生成 `app/site/`，骨架只经那几个文件引入功能包，这个包不改骨架里任何一个文件。
+骨架建完就归站点；页面放在 `content/`、评论放在 `comments/`、人员列表是 `people.json`，这些照基础包，协作站多的是 `journal/`（日志页，见下面「日历与日志」）。
 基础包这边的约定见它自述站的「项目骨架」「功能包」两页。
 
 | 出口 | 交出什么 |
 | --- | --- |
 | `./routes` | 路由表：`api/collab` 写任务与模块、`api/repo-links` 与 `api/project-file/*` 检查与打开 `repo:` 链接，都放在整站布局外面；`tasks`、`tasks/:recordId`、`calendar`、`calendar/:date`，除了日历都能写评论；首页 `/` 跳到 `/tasks`。路由模块在 `src/routes/`，不复制进协作仓，路由表指向包里构建出的 `dist/routes/` |
-| `./site` | 侧栏那一排的「任务」「日历」，排在基础包的「评论」前面；MDX 组件 `RecordLink`；链接种类 `linkKinds`（任务、日志、`repo:` 链接的卡片）；包住整个布局的 `CollabDataProvider`；每一页正文上面的 `NotificationBar` |
+| `./site` | 侧栏那一排的「任务」「日历」，排在基础包的「评论」前面；MDX 组件 `RecordLink`；链接种类 `linkKinds`（任务、日志、`repo:` 链接的卡片）；包住整个布局的 `CollabDataProvider`；每一页正文上面的 `NotificationBar`（挂在功能包约定的 `PageTop` 上） |
 | `./site-server` | 整站布局的 loader 调的 `layoutData`：拿基础包交来的站里每一页调 `collabSiteData`，读出的协作数据交给 `CollabDataProvider` |
 
-{/* ref file="../packages/collab-site/src/feature/routes.ts" hash="95bef00f28dd" blob="20c0c4f0aeb1" */}
+{/* ref file="../packages/collab-site/src/routes.ts" hash="95bef00f28dd" blob="20c0c4f0aeb1" */}
 
-{/* ref file="../packages/collab-site/src/feature/site.tsx" lines="9-24" hash="243156ad2f3e" blob="9c3272e60f96" */}
+{/* ref file="../packages/collab-site/src/site.tsx" hash="1719b0bea23a" blob="6c553c81495b" */}
 
-{/* ref file="../packages/collab-site/src/feature/site-server.ts" hash="69a2026155ac" blob="01369d4f3b2b" */}
+{/* ref file="../packages/collab-site/src/site-server.ts" hash="69d4517fca55" blob="eb1cd9b165f0" */}
 
-{/* ref file="../packages/collab-site/test/feature.test.ts" lines="17-20" hash="0c56cb6539bd" blob="d2976cd343e6" */}
+{/* ref file="../packages/collab-site/test/feature.test.ts" lines="17-20" hash="0c56cb6539bd" blob="b17b26c8b9fd" */}
 
 页面不能占用的地址由基础包骨架算：`api`、`comments` 加上各功能包路由的第一段，协作站这边是 `api`、`tasks`、`calendar`（见 [页面怎么写](/collab/collab/collab-site)）。
 
-`src/routes/` 里的路由模块只把请求转给服务端函数、把数据交给界面组件。它们经别名 `@site`（站点的 `app/`）读骨架里的模块：`@site/lib/source` 的 `siteName()`、`@site/lib/mdx-components` 的 `mdxComponents`，以及模板写进去的 `@site/lib/journal`。
-`@site/lib/journal` 的类型由这个包在 `src/site-modules.d.ts` 里自己声明；React Router 只给项目里的路由文件生成类型，包里路由模块的 loader 参数与返回值类型也由这个包自己写。
+`src/routes/` 里的路由模块只把请求转给服务端函数、把数据交给界面组件。它们经别名 `@site`（站点的 `app/`）读骨架里的模块：`@site/lib/source.server` 的 `siteName()`、`@site/lib/mdx-components` 的 `mdxComponents`、`@site/lib/comments.server` 的 `pageThreads`、`@site/lib/client-content` 的 `commentContent`，以及模板写进去的 `@site/lib/journal`。
+这些模块的类型由这个包在 `src/site-modules.d.ts` 里自己声明（地基声明了前两个）；React Router 只给项目里的路由文件生成类型，包里路由模块的 loader 参数与返回值类型也由这个包自己写。
 
-{/* ref file="../packages/collab-site/src/site-modules.d.ts" hash="4eefd6a86bad" blob="8db0d504bdb0" */}
+{/* ref file="../packages/collab-site/src/site-modules.d.ts" hash="1b539276a326" blob="0f28856aaefc" */}
 
-模板 `template/` 里只有日志页的集合 `app/lib/journal.ts`，放在 `skeleton/` 下，每次初始化覆盖：`fumadocs-mdx` 只处理项目里的集合定义，这一个文件只能复制进站点。
+模板 `template/` 里只有日志页的集合 `app/lib/journal.ts`，放在 `skeleton/` 下，建站时复制进站点：`fumadocs-mdx` 只处理项目里的集合定义，这一个文件只能复制进站点。
 
 {/* tree dir="../packages/collab-site/template" depth="4" hash="e29911c08351" */}
 
 {/* ref file="../packages/collab-site/template/skeleton/app/lib/journal.ts" hash="3afc581cbc38" blob="d87a31d6e36e" */}
 
-## 站点协议号
-
-插件推给站点的数据由插件这一边生成，站点由协作仓 `site/package.json` 装的那一版功能包读。两边版本不一样、对推来的数据理解不同时，站点照样能打开，只是通知与负责人对不上。
-所以数据模型包的 `siteProtocol` 编了一个号，这个包 `package.json` 的 `collabSiteProtocol` 写同一个数：
-
-{/* ref file="../packages/collab-site/package.json" lines="4-4" hash="86a9e4b9e2c0" blob="2cd9ee786e9a" */}
-
-{/* ref file="../packages/collab-model/src/notification-model/site-feed.ts" lines="18-26" hash="3e556a7423a3" blob="c7ccb3bb298c" */}
-
-gwb-collab 交给 gwb-docsite 托管之前，读 `site/node_modules` 里装的那一版的这个数，和自己的比；对不上就不托管，报错写明是升插件、还是把 `site/package.json` 的范围改成 `^` 加 `siteProtocolSince`：
-
-{/* ref file="../plugins/collab/src/site-process/site-files.ts" lines="39-49" hash="121be19d515e" blob="023aa2266b55" */}
-
-这个号一加，每个项目都要负责人改一次 `site/package.json`，插件也要一起发版。所以只有推给站点的数据（`site-feed.ts` 与通知的字段）改了、记录格式有破坏性改动时才加；
-`site-data.ts`（服务端函数与界面之间的约定，只在这个包里）改了不用加。
-
-## 站点检查
-
-`collabSiteProblems(siteDir)` 是基础包的 `siteProblems`（人员列表、评论文件的格式与作者、评论快照）加上日志页的文件名，每条一句给人看的话。
-只查文件，很快，gwb-collab 托管站点前也调它。`collabSiteMdxProblems(siteDir)` 用站点自己装的基础包编译 `content/`、`comments/`、`journal/` 里的 MDX，写错的公式也算；
-要几秒，只在提交审核前调。
-
-{/* ref file="../packages/collab-site/src/site-check.ts" hash="f0574affe47c" blob="906fa5d486fe" */}
-
-{/* ref file="../packages/collab-site/test/journal.test.ts" lines="68-72" hash="1b5dcec08175" blob="ecea6abad472" */}
-
-gwb-collab 在三处调它：交给 gwb-docsite 托管之前、提交审核之前、把 main 合进本地以后 `site/` 有改动时。哪一处、不过时怎么办见 [gwb-collab](/collab/plugin)。
-
 ## 依赖
 
 数据模型包 `@godcreator/collab-model` 是普通依赖，随功能包一起装；任务与模块的内容按 Markdown 显示，另依赖 `react-markdown` 与 `remark-gfm`。
-基础包、fumadocs 的界面包 `@fumadocs/base-ui`、React、React Router、图标库 `lucide-react` 由站点装（peer）：功能包和基础包、站点要用同一份 React、React Router 与 fumadocs，上下文才对得上。
+基础包组合包、身份、评论、界面外壳、推送通道几个能力包与 `@fumadocs/base-ui`、React、React Router、图标库 `lucide-react` 由站点装（peer）：功能包和基础包、站点要用同一份 React、React Router 与 fumadocs，上下文才对得上。
 不依赖合并检查包；gwb-collab 反过来依赖它。
 
-{/* ref file="../packages/collab-site/package.json" lines="53-65" hash="274db0d188e1" blob="3acf2b1981c5" */}
+{/* ref file="../packages/collab-site/package.json" lines="39-52" hash="9a257deff7e6" blob="c82e378b0a69" */}
 
 ## 不做的事
 
@@ -136,22 +106,21 @@ gwb-collab 在三处调它：交给 gwb-docsite 托管之前、提交审核之�
 `tasks`、`calendar`、`comments`、`api` 是站点自己的路由，`content/` 下第一层不能用这几个名字，占用了开发服务直接报错，一次列出全部冲突的文件。
 `comments`、`api` 是基础包骨架留下的，`tasks`、`calendar` 是协作站路由的第一段：骨架把各功能包路由的第一段都算进去。
 
-{/* ref file="../packages/collab-site/src/feature/routes.ts" lines="5-16" hash="4bffcd805cda" blob="20c0c4f0aeb1" */}
+{/* ref file="../packages/collab-site/src/routes.ts" lines="5-16" hash="4bffcd805cda" blob="20c0c4f0aeb1" */}
 
 首页 `/` 是协作站的路由，固定跳到任务页，所以 `content/` 根下不放 `index.mdx`（放了也打不开）：
 
-{/* ref file="../packages/collab-site/src/feature/routes.ts" lines="9-9" hash="3a85c145a037" blob="20c0c4f0aeb1" */}
+{/* ref file="../packages/collab-site/src/routes.ts" lines="9-9" hash="3a85c145a037" blob="20c0c4f0aeb1" */}
 
 {/* ref file="../packages/collab-site/src/routes/home.ts" lines="3-6" hash="2873e2faf5be" blob="0a98a4734159" */}
 
 站名是 `content/meta.json` 的 `title`：侧栏顶上显示它，窗口标题写成「页面名 · 站名」，gwb-collab 也拿它当项目名（没写时用仓的目录名）：
 
-{/* ref file="../plugins/collab/src/project/project.ts" lines="66-69" hash="c4a4536e39b3" blob="5507995a33f1" */}
+{/* ref file="../plugins/collab/src/project/project.ts" lines="75-78" hash="c4a4536e39b3" blob="94fe4a33425f" */}
 
 ## 引用任务
 
-MDX 页面、日志页、评论正文里不用 `import`，直接写 `<RecordLink id="记录 id" />` 引用一条任务或一个模块，显示它当前的标题与状态。
-TSX 页面要用就从 `@godcreator/collab-site/ui` 引入，页面要放在站点里（`CollabDataProvider` 下面）才取得到数据。显示什么、删了以后怎样见 [网站内部](/collab/collab/collab-site) 的「RecordLink 与日志里的进展」。
+MDX 页面、日志页、评论正文里不用 `import`，直接写 `<RecordLink id="记录 id" />` 引用一条任务或一个模块，显示它当前的标题与状态。显示什么、删了以后怎样见下面「RecordLink 与日志里的进展」。
 
 ## 正文里的链接
 
@@ -174,11 +143,11 @@ TSX 页面要用就从 `@godcreator/collab-site/ui` 引入，页面要放在站�
 - **评论**：评论串的 `page` 要改成新地址，不然开发服务直接报错，整个站点打不开（基础包的规矩）
 - **任务链接的页面**：任务的 `page` 字段不改，任务那一页上显示「找不到的页面」，不报错；能改这个字段的人在任务那一页上重新选一页。能选的页面是基础包骨架交给布局数据的站里每一页
 
-{/* ref file="../packages/collab-site/src/feature/site-server.ts" lines="4-7" hash="df4a9f5b8b56" blob="01369d4f3b2b" */}
+{/* ref file="../packages/collab-site/src/site-server.ts" hash="69d4517fca55" blob="eb1cd9b165f0" */}
 
 {/* ref file="../packages/collab-site/src/ui/page-ref.tsx" lines="5-14" hash="14b705a45ca0" blob="f2754538081e" */}
 
-## 网站内部（原「网站内部」）
+## 网站内部
 
 功能包分两侧：服务端函数（`src/server/`，在站点的服务端运行，由布局数据 `./site-server` 与 `src/routes/` 里路由模块的 loader、action 调）和界面（`src/ui/`，在浏览器里运行）。
 两侧没有 import 关系，只靠根上的 `site-data.ts` 对上：布局交给界面的 `CollabSiteData`、写任务的地址与 action（接缝图上的 7 到 10，见 [功能包](/collab/collab-site)）。
@@ -190,34 +159,32 @@ TSX 页面要用就从 `@godcreator/collab-site/ui` 引入，页面要放在站�
 基础包骨架里整站布局的 loader 每次都调功能包 `./site-server` 的 `layoutData`，读一份协作数据：从 `collab/records/` 算出任务与模块，加上人员列表、本机身份、gwb-collab 推来的通知与项目负责人、有日志的日子，
 以及骨架交进来的站里每一页（任务链接页面时从里面选）。`./site` 的 `Provider` 用 `CollabDataProvider` 包住整个布局，把它交给下面所有页面，任务页、日历、通知栏、`RecordLink` 都经 `useCollabData` 取同一份：
 
-{/* ref file="../packages/collab-site/src/feature/site-server.ts" lines="4-7" hash="df4a9f5b8b56" blob="01369d4f3b2b" */}
-
-{/* ref file="../packages/collab-site/src/server/index.ts" lines="26-42" hash="9f76ec3c5a99" blob="dedd98507f38" */}
+{/* ref file="../packages/collab-site/src/server/index.ts" lines="27-43" hash="9f76ec3c5a99" blob="c92ed3baa954" */}
 
 gwb-collab 不往站点发请求，它把通知与项目负责人推进基础包推送通道的频道 `collab`（推送通道怎么工作见基础包自述站的「开发服务插件」页）。
 浏览器里推来新的一份，`CollabDataProvider` 先用上它的通知与负责人，再让布局的 loader 重新读一遍。gwb-collab 每次检查完协作仓就推一次，
 所以 AI 直接改的、自动同步进来的任务与模块，也在这时出现在页面上：
 
-{/* ref file="../packages/collab-site/src/ui/collab-data.tsx" lines="10-22" hash="f27a56d9d902" blob="1f1f384c53dc" */}
+{/* ref file="../packages/collab-site/src/ui/collab-data.tsx" lines="10-22" hash="f27a56d9d902" blob="0385210fa4fc" */}
 
 还没推来时通知与负责人为 `null`：通知栏不出现，谁的头像都不标负责人，删任务与模块的请求按「没有负责人」处理。不是 gwb-docsite 启动的站一直是这样。
 
 ## 写任务与模块
 
 网页上新建、修改、删除任务与模块，都发 `POST /api/collab`，请求体是 `{ action, record }`。功能包的路由模块 `src/routes/collab.ts` 原样交给 `collabRecordResponse`，
-它带上本机身份交给数据模型包的写入规则，通过了才写 `collab/records/` 里的文件，不运行 git：
+它先照骨架评论写入的同一套核对（Origin 是这个站的可信 origin、本机身份码在 `people.json` 里），再交给数据模型包的写入规则，通过了才写 `collab/records/` 里的文件，不运行 git：
 
-{/* ref file="../packages/collab-site/src/server/index.ts" lines="64-91" hash="2a8b55bdad0a" blob="dedd98507f38" */}
+{/* ref file="../packages/collab-site/src/server/index.ts" lines="64-95" hash="ef45e601ddbb" blob="c92ed3baa954" */}
 
 | 回什么 | 什么时候 |
 | --- | --- |
 | 200 | 写好了；新建回新记录的 id，删除回删掉的文件 |
 | 400 | 请求体不是 JSON、`action` 认不出、多了字段 |
-| 403 | 只读：站点不是 gwb-docsite 启动的，或本机身份码不在 `people.json` 里；正文是基础包给的原因 |
+| 403 | Origin 不对（写入只接受来自本站的请求），或本机身份码不在 `people.json` 里；正文是身份包给的原因 |
 | 405 | 不是 POST |
 | 422 | 写入规则拒绝，正文是它的原话（比如改了别人任务里不许改的字段、模块下还有任务时删模块） |
 
-{/* ref file="../packages/collab-site/test/server.test.ts" lines="68-86" hash="8d1edcf8c447" blob="76b5b01be85d" */}
+{/* ref file="../packages/collab-site/test/server.test.ts" lines="68-87" hash="e4e4d37ac859" blob="41df1ea5053c" */}
 
 界面这边由 `useCollabWriter` 发请求：被拒时把原话抛给表单显示，写好了等布局的 loader 重新读完才返回，所以接着跳到新建的那一页时它已经在了。
 页面上显示的永远是 loader 读出的文件，不是网页自己记的改动。
@@ -231,9 +198,9 @@ gwb-collab 不往站点发请求，它把通知与项目负责人推进基础包
 
 每条任务、每个模块另有自己那一页 `/tasks/<记录 id>`。能改哪些字段和写入规则一致：作者都能改，别人只能改 `fieldsAnyoneMayChange` 里列的；删除按钮只有作者和项目负责人看得到：
 
-{/* ref file="../packages/collab-site/src/ui/record-page.tsx" lines="15-19" hash="c5d3c46a20bd" blob="18c339ec3263" */}
+{/* ref file="../packages/collab-site/src/ui/record-page.tsx" lines="15-19" hash="c5d3c46a20bd" blob="a13f29da6ea7" */}
 
-{/* ref file="../packages/collab-site/src/ui/record-page.tsx" lines="313-321" hash="776a5434d819" blob="18c339ec3263" */}
+{/* ref file="../packages/collab-site/src/ui/record-page.tsx" lines="313-321" hash="776a5434d819" blob="a13f29da6ea7" */}
 
 任务与模块的内容按 Markdown 排版，但不执行其中的 HTML：内容是网页上写的，不能当代码运行，所以不用 MDX：
 
@@ -252,16 +219,16 @@ gwb-collab 不往站点发请求，它把通知与项目负责人推进基础包
 功能包模板复制进站点的 `journal` 集合把它编译成页面，路由模块 `src/routes/journal.tsx` 显示它，顶上一条 `JournalDayBar`：回到那一月的日历、前后有日志的日子、当天截止的模块。那一天没有日志时显示「这一天还没有日志」，今天以后的日子写「还没到这一天」。
 日志页和别的 MDX 页一样能写 fumadocs 的组件与 `RecordLink`，但不进侧栏的页面树。
 
-`journal/` 里只能放 `<真实日期>.mdx`，不合规矩的文件站点检查报错，布局的 loader 读有日志的日子时也直接报错：
+`journal/` 里只能放 `<真实日期>.mdx`，不合规矩的文件布局的 loader 读有日志的日子时直接报错、提交审核前也拦下（规则在数据模型包的 project-model）：
 
-{/* ref file="../packages/collab-site/src/journal-files.ts" lines="8-31" hash="483eab3d1f9a" blob="e2fd9853a7ad" */}
+{/* ref file="../packages/collab-model/src/project-model/journal-files.ts" lines="8-31" hash="c165c692dfed" blob="0da0c6852c9d" */}
 
 ### RecordLink 与日志里的进展
 
 MDX 页面（内容页、日志页、评论正文）不用 `import` 就能写 `<RecordLink id="记录 id" />` 引用一条任务或一个模块：显示记录当前的标题，任务带状态、模块带截止日的记号，点了进它那一页。
 指向的记录后来删了写「已删除的记录」，不报错，以前的日志照样打得开：
 
-{/* ref file="../packages/collab-site/src/ui/record-link.tsx" lines="20-96" hash="69cb8a24544d" blob="edf0b6e2a1a2" */}
+{/* ref file="../packages/collab-site/src/ui/record-link.tsx" lines="20-96" hash="69cb8a24544d" blob="634bc52f024d" */}
 
 每条任务、每个模块那一页的最下面是「日志里的进展」，就是日志引用它的反向链接。记录页的 loader 读全部日志页的原文，`journalMentionsOf` 按空行分段，
 找出写了这条记录的 `RecordLink` 的段，段里的引用换成记录当前的标题、去掉别的标记，新的日子在前。只算日志页，内容页里的 `RecordLink` 不算：
@@ -271,7 +238,9 @@ MDX 页面（内容页、日志页、评论正文）不用 `import` 就能写 `<
 ## 页面上的评论
 
 任务页、任务与模块各自那一页、日志页能和内容页一样写评论：路由表里这几条标了 `comments: true`，基础包的评论接口与启动检查就认这些地址。
-路由的 loader 用 `routeCommentData` 取评论数据，页面用 `RouteComments` 包住正文。只认地址的样子，删了任务，批它那一页的评论照样留着。
+接法照骨架的内容页：loader 用 `routeCommentData` 取这一页的评论串（骨架的 `pageThreads` 按页面地址过滤，作者解析成可信的 `{id, name}`）与本机身份，action 交给 `routeCommentsAction`（同一套 Origin 与身份核对，再调评论包的写函数），页面放 `RouteComments`：正文带评论的范围属性，旁边是评论包的 `CommentsDock`（右下角浮标唤起的评论栏，能批整页、批一段文字或一个元素）。评论归属键用页面地址（如 `/tasks/<记录 id>`），只认地址的样子，删了任务，批它那一页的评论照样留着。
+
+{/* ref file="../packages/collab-site/src/server/comments.ts" lines="30-45" hash="7ea4d45ee63a" blob="ae32aa26f1c6" */}
 
 ## repo: 链接
 

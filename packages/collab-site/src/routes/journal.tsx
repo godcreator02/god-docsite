@@ -1,22 +1,25 @@
 import { use } from 'react'
-import { useLoaderData, type LoaderFunctionArgs } from 'react-router'
+import { useLoaderData, type ActionFunctionArgs, type LoaderFunctionArgs } from 'react-router'
 import { DocsBody, DocsPage } from '@fumadocs/base-ui/layouts/docs/page'
-import { PageTitleWithWideToggle } from '@godcreator/docsite-kit/ui'
 import { journal } from '@site/lib/journal'
 import { mdxComponents } from '@site/lib/mdx-components'
-import { siteName } from '@site/lib/source'
+import { siteName } from '@site/lib/source.server'
 import { isRealDate, journalUrlOf } from '../site-data.js'
-import { EmptyJournalDay, JournalDayBar } from '../ui/calendar-page.js'
-import { routeCommentData } from './comment-data.server.js'
-import { RouteComments } from './route-comments.js'
+import { routeCommentData, routeCommentsAction } from '../server/comments.js'
+import { EmptyJournalDay, JournalDayBar, PageTitleWithWideToggle } from '../ui/calendar-page.js'
+import { RouteComments } from '../ui/route-comments.js'
 
 type JournalEntry = (typeof journal.entries)[number]
 
 /** /calendar/<日期>：那一天的日志页 journal/<日期>.mdx；还没有日志的日子也能打开，提示让 AI 写 */
-export async function loader({ params }: LoaderFunctionArgs) {
+export function loader({ params }: LoaderFunctionArgs) {
   const date = params['date']!
   if (!isRealDate(date)) throw new Response(`地址里的日期「${date}」不是 YYYY-MM-DD 的真实日期`, { status: 404 })
-  return { date, siteName: siteName(), comments: await routeCommentData(journalUrlOf(date)) }
+  return { date, siteName: siteName(), comments: routeCommentData(journalUrlOf(date)) }
+}
+
+export function action({ request }: ActionFunctionArgs) {
+  return routeCommentsAction(request)
 }
 
 const entryOf = (date: string) => journal.entries.find((entry) => entry.info.path === `${date}.mdx`)

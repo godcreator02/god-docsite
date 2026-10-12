@@ -1,10 +1,10 @@
 import type { ReactNode } from 'react'
 import { CalendarDays, ListTodo } from 'lucide-react'
 import type { FeatureSite } from '@godcreator/docsite-kit/feature'
-import type { CollabSiteData } from '../site-data.js'
-import { CollabDataProvider } from '../ui/collab-data.js'
-import { NotificationBar } from '../ui/notification-bar.js'
-import { collabLinkKinds, collabMdxComponents } from '../ui/record-link.js'
+import type { CollabSiteData } from './site-data.js'
+import { CollabDataProvider } from './ui/collab-data.js'
+import { NotificationBar } from './ui/notification-bar.js'
+import { collabLinkKinds, collabMdxComponents } from './ui/record-link.js'
 
 /** data 是 ./site-server 的 layoutData 读出的协作数据 */
 function CollabProvider({ data, children }: { data: unknown; children: ReactNode }) {

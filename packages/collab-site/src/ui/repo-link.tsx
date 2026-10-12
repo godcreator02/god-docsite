@@ -1,6 +1,6 @@
 import { useEffect, useState, type MouseEvent, type ReactNode } from 'react'
 import { FileCode2, TriangleAlert } from 'lucide-react'
-import { linkChipClassName, linkChipIconClassName } from '@godcreator/docsite-kit/ui'
+import { linkChipClassName, linkChipIconClassName } from '@godcreator/docsite-ui'
 import { repoLinkPrefix, repoLinksApiUrl, type RepoLinkCheck } from '../repo-link-api.js'
 
 async function postRepoLinks<Result>(body: unknown): Promise<Result> {

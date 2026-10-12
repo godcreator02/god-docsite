@@ -1,7 +1,7 @@
 {
   "name": "@godcreator/collab-model",
   "version": "0.5.0",
-  "description": "协作站的全部数据模型：项目（仓的布局、项目负责人）、任务（collab/ 里任务与模块记录的文件格式、读出当前状态、校验与写入规则、我的待办）、通知（gwb-collab 推给站点的数据的形状、校验与站点协议号）。人员列表与评论用基础包 @godcreator/docsite-kit 的格式。不用 React、不用 Vite，不运行 git",
+  "description": "协作站的全部数据模型：项目（仓的布局、项目负责人）、任务（collab/ 里任务与模块记录的文件格式、读出当前状态、校验与写入规则、我的待办）、通知（gwb-collab 推给站点的数据的形状与校验）。人员列表的格式用 @godcreator/docsite-identity 的。不用 React、不用 Vite，不运行 git",
   "type": "module",
   "exports": {
     "./project-model": {
@@ -38,15 +38,15 @@
     "check": "tsc --noEmit && vitest run"
   },
   "peerDependencies": {
-    "@godcreator/docsite-kit": "^0.1.0"
+    "@godcreator/docsite-identity": "^0.1.0"
   },
   "peerDependenciesMeta": {
-    "@godcreator/docsite-kit": {
+    "@godcreator/docsite-identity": {
       "optional": true
     }
   },
   "devDependencies": {
-    "@godcreator/docsite-kit": "^0.1.0",
+    "@godcreator/docsite-identity": "workspace:*",
     "@types/node": "^26.6.2",
     "typescript": "^6.0.3",
     "vitest": "^5.0.1"

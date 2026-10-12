@@ -1,0 +1,53 @@
+---
+born-at: 2026-10-13T04:55
+type: choice
+parent: [2026-09-03-god-live-doc]
+label: 协作站按 0.3 地基原生重写：零兼容、站点协议号与站点检查机制删除
+---
+
+## 背景
+
+协作站三包一插件并入 docsite-kit 仓后整体钉在旧地基 `^0.1.x` 上（出口还是 `./comments`、`./server`、`./ui`、`./files` 的转发时代），
+从未在 0.3.0（出口重排成 vite/feature/routes/site-modules、`gwbDocsite` 服务面收缩为 start/stop/status/push/join/init、
+建站一步式）上跑过。用户定调：按 fumadocs 最原生的方式重写、不做兼容层，重写版不考虑任何已存在的站点，
+唯一正确性标准是本仓 docsite 体系内部正确。
+
+## 选了
+
+- **collab-site 整包重写**：出口收缩为功能包约定的四个（`./routes`、`./site`、`./site-server`、`./styles.css`），
+  路由模块照骨架内容页的原生模式（loader/action、`@site` 别名读骨架模块）、评论接 `CommentsDock` 与 `pageThreads`、
+  推送读 `feedStore`、写入核对走身份包的 `authorizeWrite`（任务写入补上与评论一致的 Origin 核对）
+- **collab-model 直连能力包**：人员与 @ 认人用 `@godcreator/docsite-identity`（`Person` 即 `StoredPerson`），
+  依赖里不再有组合包；`journal/` 文件名规则从功能包挪进 project-model（提交审核前的检查与站点 loader 用同一份，
+  浏览器侧的功能包留同一份纯函数并注明两处同改）
+- **站点协议号机制删除**：插件与功能包同仓发版、按依赖序先发模型包，版本对齐由发版顺序保证；
+  `siteProtocol`、`collabSiteProtocol`、`site-check` 出口、`requireCollabSitePasses` 全部撤掉
+- **站点检查对齐地基**：`siteProblems`/MDX 全量编译检查没有 0.3 等价物；提交前只查 journal 文件名
+  （布局 loader 会因它整站打不开），其余站点问题由 gwb-docsite 启动检查（版本核对、探活）与站点 typecheck 兜住
+- **托管语义对齐地基**：`gwbDocsite.keep/forget/open/whileStopped` 在 0.3 没了，CollabSites 改为
+  start 幂等（插件加载、项目事件时确保在运行）、failed 不自动重启（与地基自己的站一致）、装依赖用 stop→work→start 包裹
+- **插件读评论**改 `@godcreator/docsite-comments/server` 的 `readCommentThreads`（评论模型没有已解决状态：
+  待办与通知按所有评论串算）；站名自己读 `site/content/meta.json`
+- 测试协作仓 `collab-test/` 进主仓（workspace 直连、内容进 git、不 init git、端口 4450），作为任务页与日历的开发台；
+  上 Gitea 的运行实例从它导出
+
+## 否掉的候选
+
+- 兼容层（旧出口转发到新出口）：与「最原生、零兼容」定调相悖，转发层会把 0.1 的形状带进 0.3
+- 给 gwb-docsite 服务面补 keep/forget 的常驻方法：地基 0.3 的哲学是 failed 记原因不自动重启，
+  协作站不自作主张另起一套常驻
+- 提交前保留 MDX 全量编译检查：0.3 无等价物，重造一份代价高；journal 文件名是唯一会让整站打不开的文件级错误，先只查它
+
+## 顺手修的地基问题
+
+重写中踩到 docsite-ui 的真 bug：`siteLinkComponent` 的 routeLink 分支用 `[&_svg]:size-full` 约束功能包交来的裸图标，
+这条任意变体类在 dev 服务里不一定被站点扫到（@source 对符号链接的解析不稳），裸 svg 又被 fumadocs preflight 的
+`display: block` 拉伸到整行——正文里链到侧栏入口（`[](/tasks)`）时图标 592px 撑爆版面。修法：`[data-link-chip-icon]`
+改用真实 CSS 约束（`packages/docsite-ui/styles.css`），零扫描依赖。
+
+## 依据
+
+- 三包一插件测试：collab-model 156 条、collab-site 31 条、plugins/collab 298 条全绿
+- 测试协作仓 `collab-test/`（开发台）逐页验收：任务页三块、日历、日志页、记录页、内容页深浅两主题视觉验收通过；
+  写入接口的增改删、跨作者字段权限、Origin 拦截实测（`collab-test-plan.md` 的状态区）
+- 图标 bug 的实测：about 页 `a[title="任务"]` 内 svg 计算尺寸 592.667px（= 段落内容宽，viewBox 1:1），修复后 16px

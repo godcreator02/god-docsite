@@ -193,8 +193,8 @@ const notificationSentences = {
 };
 
 /* ref file="../plugins/collab/src/collab-repo/submit/submit.ts" lines="56-61" hash="869f4ceed6ed" blob="92a88843de16" */
-/* ref file="../plugins/collab/src/collab-repo/submit/submit-checks.ts" lines="25-29" hash="50b1deefe8fe" blob="0ba0d2de239f" */
-/* ref file="../packages/collab-site/src/journal-files.ts" lines="9-20" hash="d1fd8ca9c9a1" blob="e2fd9853a7ad" */
+/* ref file="../plugins/collab/src/collab-repo/submit/submit-checks.ts" lines="24-30" hash="d04097728c65" blob="e82d8104d592" */
+/* ref file="../packages/collab-model/src/project-model/journal-files.ts" lines="18-29" hash="d1fd8ca9c9a1" blob="0da0c6852c9d" */
 /** 站点检查查到日志页的文件名不是真实存在的日期时，collab.submit 回的失败 */
 const siteRejected = 'site/ 的站点检查不过，没有提交：\nsite/  journal/2026-09-31.mdx：2026-09-31 不是真实存在的日期';
 

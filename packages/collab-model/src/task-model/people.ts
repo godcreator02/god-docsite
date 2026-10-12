@@ -1,7 +1,8 @@
-import { parsePeople as parsePeopleValue, type Person } from '@godcreator/docsite-kit/comments'
+import { parsePeople as parsePeopleValue, type StoredPerson } from '@godcreator/docsite-identity/server'
 import { CollabFormatError } from './records.js'
 
-export type { Person }
+/** 人员列表里的人：身份包的 StoredPerson（id、name、身份码 codes、可选的 gitea 与 agent 标记） */
+export type Person = StoredPerson
 
 /**
  * 解析站点的 site/people.json：基础包的人员列表格式，每项 { id, name, codes?, gitea?, agent? }。

@@ -1,0 +1,10 @@
+{
+  "id": "20261012091002-calpage",
+  "type": "task",
+  "author": "carol",
+  "status": "done",
+  "title": "日历与日志页验收",
+  "owner": "carol",
+  "module": "20261012090000-rewrite",
+  "detail": "月历切换、截止日记号、日志页与前后日跳转、无日志的虚线日。"
+}

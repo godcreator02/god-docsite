@@ -2,9 +2,10 @@ import path from 'node:path'
 import { siteFeedChannel, siteFeedOf as checkedSiteFeedOf, type SiteFeed } from '@godcreator/collab-model/notification-model'
 import { collabState, isPlainObject } from '@godcreator/collab-model/task-model'
 import { createRecord, deleteRecords, readCollabSnapshot, updateRecord, WriteRejected } from '@godcreator/collab-model/task-model/node'
-import { siteFeedOf, siteIdentity, sitePeople } from '@godcreator/docsite-kit/server'
+import { feedStore } from '@godcreator/docsite-feed'
+import { authorizeWrite, siteIdentity, sitePeople, WriteAccessError } from '@godcreator/docsite-identity/server'
 import { journalMentionsOf, type JournalMention } from '../journal.js'
-import { journalDatesOf, journalSourcesOf } from '../journal-files.js'
+import { journalDatesOf, journalSourcesOf } from '@godcreator/collab-model/project-model'
 import { collabWriteActions, type CollabSiteData, type CollabWriteAction, type SitePageRef } from '../site-data.js'
 
 export type { CollabSiteData, JournalMention, SitePageRef }
@@ -19,7 +20,7 @@ const repoOf = (siteDir: string) => path.dirname(siteDir)
 
 /** gwb-collab 经推送通道交来的最新一份；还没交来为 null。推来的是外部输入，形状不对就报错 */
 function collabFeed(): SiteFeed | null {
-  const pushed = siteFeedOf<unknown>(siteFeedChannel)
+  const pushed = feedStore().get(siteFeedChannel)
   return pushed === undefined ? null : checkedSiteFeedOf(pushed)
 }
 
@@ -61,14 +62,23 @@ function parseWriteRequest(value: unknown): { action: CollabWriteAction; record:
   return { action: action as CollabWriteAction, record }
 }
 
+/** 这个站的可信 origin：写请求的 Origin 头要和它完全一样。开发与 start 端口不同时，启动方经 DOCSITE_ORIGIN 给对的那一个 */
+export const siteOrigin = process.env.DOCSITE_ORIGIN ?? `http://127.0.0.1:${process.env.PORT ?? 4450}`
+
 /**
  * 写任务与模块的接口（POST /api/collab，{ action, record }）：create 新建、update 改字段、delete 删掉，
- * 写的人是本机身份；被写入规则拒绝回 422 和原话，只读时回 403。只改 collab/records/ 里的文件，不跑 git
+ * 写的人是本机身份（Origin 核对照骨架的评论写入）；被写入规则拒绝回 422 和原话，只读或 Origin 不对回 403。只改 collab/records/ 里的文件，不跑 git
  */
 export async function collabRecordResponse(request: Request): Promise<Response> {
   if (request.method !== 'POST') return errorResponse(405, `只接受 POST，收到 ${request.method}`)
-  const identity = siteIdentity(siteDirOf())
-  if (!identity.person) return errorResponse(403, identity.reason)
+  const siteDir = siteDirOf()
+  let person: string
+  try {
+    person = authorizeWrite(request, { identity: siteIdentity(siteDir), people: sitePeople(siteDir), origin: siteOrigin }).id
+  } catch (error) {
+    if (error instanceof WriteAccessError) return errorResponse(error.status, error.message)
+    throw error
+  }
   let body: unknown
   try {
     body = await request.json()
@@ -78,8 +88,7 @@ export async function collabRecordResponse(request: Request): Promise<Response> 
   }
   const parsed = parseWriteRequest(body)
   if (typeof parsed === 'string') return errorResponse(400, parsed)
-  const repo = repoOf(siteDirOf())
-  const person = identity.person.id
+  const repo = repoOf(siteDir)
   try {
     if (parsed.action === 'create') return Response.json(await createRecord({ repo, person, body: parsed.record }))
     if (parsed.action === 'update') return Response.json(await updateRecord({ repo, person, body: parsed.record }))

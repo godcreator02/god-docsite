@@ -17,7 +17,7 @@ import { SeamMap as FlowSeamMap } from '../../src/components/seam-map-flow/seam-
 | 包 | 是什么 | 装在哪 | 什么时候运行 |
 | --- | --- | --- | --- |
 | [`@godcreator/collab-model`](/collab/collab-model) | 数据模型包：项目仓的布局与项目负责人、`collab/` 里任务与模块的格式与写入规则、待办筛选、通知与推给网站的数据。不送东西，定了几条线上送的东西长什么样（图上的紫色点线） | 功能包与合并检查包的普通依赖，随它们装；插件发版时打包进去 | 被调用时：网站读写记录、插件算通知与提交前检查 |
-| [`@godcreator/collab-site`](/collab/collab-site) | 功能包：接在基础包上的任务页、任务与模块那一页、日历与日志页、通知栏，照基础包的功能包约定交给站点骨架的路由、侧栏入口与布局数据，以及站点检查 `./site-check` | 每个项目协作仓 `site/` 的依赖，写在 `site/package.json` 的 `docsite.features` 里；插件发版时打包 `./site-check` | 成员的站点开着的时候 |
+| [`@godcreator/collab-site`](/collab/collab-site) | 功能包：接在基础包上的任务页、任务与模块那一页、日历与日志页、通知栏，照基础包的功能包约定交给站点骨架的路由、侧栏入口与布局数据 | 每个项目协作仓 `site/` 的依赖，写在 `site/package.json` 的 `docsite.features` 里 | 成员的站点开着的时候 |
 | [`@godcreator/collab-merge-check`](/collab/collab-merge-check) | 合并检查包：协作仓的合并请求有没有冲突、有没有改只有负责人能改的内容；命令行 `collab-merge-check`，另带自动合并工作流模板 | 执行器按工作流文件写的版本装；插件发版时打包进去 | 执行器检查合并请求的时候；插件推送前 |
 | [`@godcreator/gwb-collab`](/collab/plugin) | gwb 插件：协作仓那一套（提交审核、自动同步、读负责人、任务与待办命令）、别的仓那一套（取回与快进、等我处理的）、组织级的（收位置消息、建项目），把两边的状态写成通知交给站点、协作窗格、QQ 与 AI | 每个成员的 gwb 工作台 | 工作台开着就在：连着 NAS 上的推送服务，Gitea 一有事就去取那一处 |
 | `@godcreator/docsite-kit`（单元 `oz47p-docsite-kit`） | 文档站基础包：站点骨架的模板、页面、开发服务、评论、人员列表、推送通道。不在这个仓里 | 协作仓 `site/` 的依赖；功能包、数据模型包写成 peer 依赖；插件打包它的 `./files` | 成员的站点开着的时候；插件读评论串、查站点时 |
@@ -25,7 +25,7 @@ import { SeamMap as FlowSeamMap } from '../../src/components/seam-map-flow/seam-
 
 依赖方向只有一种：数据模型包不依赖这个仓里别的包，只引用基础包里人员列表与评论的格式（可选的 peer 依赖）；合并检查包只依赖数据模型包里项目仓的布局；功能包依赖数据模型包与基础包；插件依赖三个包，另注入 gwb-docsite 的服务。数据模型包有一份边界测试守着自己目录之间的方向，见它的首页。
 
-{/* ref file="../packages/collab-model/test/boundaries.test.ts" lines="20-31" hash="cf63792c399e" blob="870d6921836b" */}
+{/* ref file="../packages/collab-model/test/boundaries.test.ts" lines="20-31" hash="ebb5fc0a1eb3" blob="f44137a8bab0" */}
 
 ## 要人处理的事都是通知
 

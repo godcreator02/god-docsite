@@ -1,9 +1,18 @@
 import { existsSync, readdirSync, readFileSync } from 'node:fs'
 import path from 'node:path'
-import { isRealDate, journalFilePattern } from './site-data.js'
 
 /** 站点目录下放日志页的文件夹 */
 export const journalDirName = 'journal'
+
+/** 日志页的文件：journal/<日期>.mdx。功能包 @godcreator/collab-site 的 site-data.ts（浏览器侧）有同一份，改时两处一起 */
+export const journalFilePattern = /^(\d{4}-\d{2}-\d{2})\.mdx$/
+
+/** YYYY-MM-DD 是不是真实存在的日期 */
+export function isRealDate(date: string): boolean {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return false
+  const day = new Date(`${date}T00:00:00Z`)
+  return !Number.isNaN(day.getTime()) && day.toISOString().slice(0, 10) === date
+}
 
 /** journal/ 里不合规矩的文件：只能是 <真实日期>.mdx，不放子文件夹与别的文件 */
 export function journalProblemsOf(siteDir: string): string[] {

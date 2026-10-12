@@ -12,8 +12,8 @@ import { SeamMap } from '../../src/components/seam-map-flow/seam-map'
 
 入口 `index.ts` 只做装配：定义设置，从工作台拿到命令总线、设置、数据文档、gwb-docsite 的服务与计时器，局部注入 gwb-gitea、gwb-zcode、gwb-qq-bot，按依赖顺序建好各目录，把每个目录「状态变了」的回调都接到通知的 `changed(repo)` 与 QQ 任务组的重新注册上，再交给各目录自己的 `commands.ts` 登记命令（登记函数、按本 home 的身份码打开项目、几段共用的参数说明在 `src/commands.ts`），最后登记窗格与说明书。别的文件只收入口交给它们的参数，不自己取工作台服务。
 
-{/* ref file="../plugins/collab/src/index.ts" lines="129-147" hash="1c016aa7eb70" blob="23cf8898bf72" */}
-{/* ref file="../plugins/collab/src/index.ts" lines="249-262" hash="048fd4e2f558" blob="23cf8898bf72" */}
+{/* ref file="../plugins/collab/src/index.ts" lines="128-146" hash="fa9ff57bcf18" blob="afcf0a62693d" */}
+{/* ref file="../plugins/collab/src/index.ts" lines="248-261" hash="048fd4e2f558" blob="afcf0a62693d" */}
 
 ## 接缝图
 
@@ -36,7 +36,7 @@ import { SeamMap } from '../../src/components/seam-map-flow/seam-map'
 | 9 负责人 | `collab-repo/leads.ts` → `collab-repo/records/` | 删任务与模块时现读的 `ProjectLeads`，当参数传给写入规则 | 写入规则的参数名在数据模型包 | [加入项目](/collab/other-repos) |
 | 10 在 main 上提交 | `collab-repo/submit/` → 本机协作仓 | `git add --all -- collab site`、`git commit`、`git merge --no-edit origin/main`；推不出去或被打回时 `git reset --mixed` 退回 | 只提交 `collab/` 与 `site/`，暂存区别的文件不带 | [协作仓](/collab/collab-repo) |
 | 11 快进与本机状态 | `collab-repo/sync/` ↔ 本机协作仓 | `git merge --ff-only origin/main`；监视文件，停 300 毫秒没有新变化就重算还没提交审核的文件、冲突、当前分支 | 本机状态的形状在 `collab-repo/sync/state.ts`，通知按它写 | [协作仓](/collab/collab-repo) |
-| 12 记录与评论 | `collab-repo/records/` ↔ `collab/`、`site/people.json`、`site/comments/` | 任务与模块调数据模型包的读写函数，只改工作区、不提交；待办另读人员列表与评论串（基础包的 `readCommentThreads`），只读 | 记录格式与写入规则只在数据模型包，评论格式只在基础包 | 下面「命令」 |
+| 12 记录与评论 | `collab-repo/records/` ↔ `collab/`、`site/people.json`、`site/comments/` | 任务与模块调数据模型包的读写函数，只改工作区、不提交；待办另读人员列表与评论串（评论包的 `readCommentThreads`），只读 | 记录格式与写入规则只在数据模型包，评论格式只在评论包 | 下面「命令」 |
 | 13 取回别的仓 | 别的仓的分支、组织里的仓 → `other-repos/fetch/` | 逐个 `git fetch origin`；组织里新加的仓 `git clone` 进项目文件夹 | — | [协作仓和别的仓](/collab/other-repos) |
 | 14 PR 与 issue | 别的仓 → `other-repos/review.ts` | 读协作者、开着的合并请求与审阅、开着的 issue 与最后一条评论 | 谁是负责人每次现读协作者 | [协作仓和别的仓](/collab/other-repos) |
 | 15 别的仓的规矩 | `other-repos/rules.ts` ↔ 别的仓的分支保护 | 同 7，但推送与合并都只许负责人，不写任何团队 | 同 7 | [协作仓和别的仓](/collab/other-repos) |
@@ -44,7 +44,7 @@ import { SeamMap } from '../../src/components/seam-map-flow/seam-map'
 | 17 协作仓的状态 | `collab-repo/` 各目录 → `notifications/` | 本机状态、同步问题、提交失败、规矩问题、项目负责人、记录读不对与找我的 | 各目录不认识通知，状态变了只调 `changed(repo)`，通知回头现读 | [通知](/collab/notices-site) |
 | 18 别的仓的状态 | `other-repos/` 各目录 → `notifications/` | 各仓的 HEAD 比较、读到的合并请求与 issue、规矩问题 | 同 17 | [通知](/collab/notices-site) |
 | 19 webhook 与出错 | `organization/events/` → `notifications/` | 组织 webhook 的问题、刷新各步此刻的出错、做完过一次完整刷新没有 | 第一次完整刷新做完之前不交给接口 B | [通知](/collab/notices-site) |
-| 20 推给网站的数据 | `notifications/` → `site-process/` | 状态一变排进队列，轮到时现算那一刻的 `SiteFeed` 整份交过去 | 形状在数据模型包，一改就加站点协议号 | [站点](/collab/notices-site) |
+| 20 推给网站的数据 | `notifications/` → `site-process/` | 状态一变排进队列，轮到时现算那一刻的 `SiteFeed` 整份交过去 | 形状在数据模型包；插件与功能包同仓发版，版本对齐由发版顺序保证 | [站点](/collab/notices-site) |
 | 21 站点在不在运行 | `site-process/` → `pane/` | `sites.stateOf(repo)`：在运行的地址、没托管或常驻失败停下的原因 | — | [站点](/collab/notices-site) |
 | 22 计数 | `notifications/` → `pane/` | 此刻的通知用 `notificationCountsOf` 数三组各几条 | 和网站提示栏收起时同一个函数 | [加入项目](/collab/other-repos) |
 | 23 此刻的通知 | `notifications/` → `ai-handoff/` | `currentOf(repo)`：项目、此刻的通知、按用户名查显示名的函数 | — | [通知](/collab/notices-site) |
@@ -80,7 +80,7 @@ import { SeamMap } from '../../src/components/seam-map-flow/seam-map'
 | `organization/events/` | 项目列表的加减与完整刷新、按仓把事情分给两边（`project-events.ts`）；各步的出错、同一个项目同时只做一件（`project-step-runner.ts`）；全部项目的 topic 合成一条订阅（`project-topics-subscription.ts`，长连接与重连在 `ntfy-subscription.ts`）；组织 webhook 的核对与 `collab.org.setup`、发 `leads changed`；命令 `collab.check`、`collab.org.setup` | [组织事件](/collab/collab-repo) |
 | `organization/setup/` | 人要求时才做的：`collab.project.open`、`collab.project.clone`、`collab.project.join`、`collab.project.add`、`collab.project.remove`、`collab.project.qq-command`、`collab.repo.create`、`collab.repo.setup` | [加入项目](/collab/other-repos)、[协作仓和别的仓](/collab/other-repos)、[通知、QQ 私聊与交给 AI](/collab/notices-site) |
 | `notifications/` | 从两边与组织此刻的状态算出通知，连同项目负责人组成推给网站的数据；做完过一次完整刷新后交给接口 B；接口 B 的 QQ 私聊实现 `qq-private-chat.ts` 按通知 `id` 只发新出现、连续 1 分钟还在的 | [通知](/collab/notices-site) |
-| `site-process/` | 交给 gwb-docsite 初始化站点；托管前查站点协议号与站点检查，查过才交给 gwb-docsite 托管；把推给网站的数据经 gwb-docsite 推到频道 `collab`；装依赖与类型检查；命令 `collab.site.init`、`collab.site.start`、`collab.site.stop` | [站点](/collab/notices-site) |
+| `site-process/` | 交给 gwb-docsite 一步建站；在插件加载、项目加进列表等时点确保站点在运行（start 幂等，起不来不自动重启）；把推给网站的数据经 gwb-docsite 推到频道 `collab`；装依赖与类型检查；命令 `collab.site.init`、`collab.site.start`、`collab.site.stop` | [站点](/collab/notices-site) |
 | `ai-handoff/` | 把通知写成提示词（`prompt.ts`，每种通知指到说明书里讲怎么处理的那一节）；命令 `collab.ai.handoff`；接口 A 的两个实现 `zcode.ts`、`claude-terminal.ts`（新开窗口的 Claude Code） | [通知](/collab/notices-site) |
 | `pane/` | 协作窗格：node 侧的命令 `collab.projects` 与一行的摘要，`pane/browser/` 是外壳里的界面 | [加入项目](/collab/other-repos) |
 | `project/` | 打开项目并按身份码认人、把身份码加进人员列表、项目列表、令牌核对与拼成 git 的请求头、按仓记结果的小工具 `PerRepoStore`；每个项目在本 home 的 QQ 命令与按它注册的 QQ 任务组（`qq-task-groups.ts`，接缝 26） | [加入项目](/collab/other-repos)、[通知、QQ 私聊与交给 AI](/collab/notices-site) |
@@ -134,8 +134,8 @@ import { SeamMap } from '../../src/components/seam-map-flow/seam-map'
 {/* ref file="../plugins/collab/src/collab-repo/records/commands.ts" lines="86-86" hash="b5414add939e" blob="792a7e101444" */}
 {/* ref file="../plugins/collab/src/collab-repo/records/commands.ts" lines="100-100" hash="d1246c983de8" blob="792a7e101444" */}
 {/* ref file="../plugins/collab/src/site-process/commands.ts" lines="12-12" hash="c0eb4329850c" blob="1820bf292242" */}
-{/* ref file="../plugins/collab/src/site-process/commands.ts" lines="35-35" hash="4ba3973588d1" blob="1820bf292242" */}
-{/* ref file="../plugins/collab/src/site-process/commands.ts" lines="49-49" hash="9d0a2047e36a" blob="1820bf292242" */}
+{/* ref file="../plugins/collab/src/site-process/commands.ts" lines="34-34" hash="4ba3973588d1" blob="a181bbba764e" */}
+{/* ref file="../plugins/collab/src/site-process/commands.ts" lines="47-47" hash="9d0a2047e36a" blob="a181bbba764e" */}
 {/* ref file="../plugins/collab/src/ai-handoff/commands.ts" lines="10-10" hash="e24544dd2653" blob="e3abd5de4237" */}
 {/* ref file="../plugins/collab/src/pane/commands.ts" lines="31-31" hash="6b8cec12c618" blob="61a621e0db6e" */}
 {/* ref file="../plugins/collab/src/organization/setup/commands.ts" lines="37-37" hash="79859b47a649" blob="ec7da9d915b4" */}
@@ -160,19 +160,19 @@ import { SeamMap } from '../../src/components/seam-map-flow/seam-map'
 {/* ref file="../plugins/collab/src/collab-repo/records/commands.ts" lines="69-95" hash="2260f0eebf20" blob="792a7e101444" */}
 {/* ref file="../plugins/collab/src/collab-repo/records/commands.ts" lines="97-110" hash="a74239b86127" blob="792a7e101444" */}
 
-`collab.inbox` 现读工作区里的 `collab/`、`site/people.json` 与 `site/comments/`（评论串用基础包的 `readCommentThreads` 读，读不对就拒绝），交给数据模型包的 `inboxOf`。回执里的四项：
+`collab.inbox` 现读工作区里的 `collab/`、`site/people.json` 与 `site/comments/`（评论串用评论包的 `readCommentThreads` 读，还没有 `comments/` 就是还没有评论，读不对就拒绝），交给数据模型包的 `inboxOf`。回执里的四项：
 
 | 键 | 是什么 | 每条的形状 |
 | --- | --- | --- |
 | `tasks` | 负责人是我、`status` 不是 `done` 的任务 | 任务记录去掉 `type` |
-| `mentions` | 还没解决的评论串里，别人写的、正文 @了我（`@<id>`）的那一条，发起的或回复都算 | `{ in: 'comment' \| 'reply', comment, author, text, page }` |
-| `repliesToMe` | 还没解决的评论串里，我发起或回复过之后别人写的回复 | `{ comment, author, text, threadId, page }` |
+| `mentions` | 评论串里，别人写的、正文 @了我（`@<id>`）的那一条，发起的或回复都算 | `{ in: 'comment' \| 'reply', comment, author, text, page }` |
+| `repliesToMe` | 我发起或回复过之后别人写的回复 | `{ comment, author, text, threadId, page }` |
 | `problems` | 读出记录时的问题，原样带上 | `{ file, message }` |
 
 `comment` 是「评论串文件夹名/文件名」（`site/comments/` 下），`threadId` 是评论串文件夹名；`page` 是点到它时去的地址：属于某一页的是 `<那一页>?comment=<评论串>`，不属于任何页面的是 `/comments?comment=<评论串>`。读评论原文、回复评论用 gwb-docsite 的 `docsite.comments`、`docsite.comment.reply`，本插件没有写评论的命令。
 
-{/* ref file="../plugins/collab/src/collab-repo/records/inbox.ts" lines="13-36" hash="7d068953a729" blob="fa618c20c1e1" */}
-{/* ref file="../packages/collab-model/src/task-model/inbox.ts" lines="16-33" hash="b30c629ad7cc" blob="bea13220d047" */}
+{/* ref file="../plugins/collab/src/collab-repo/records/inbox.ts" lines="14-48" hash="4c2c23ea3f1e" blob="f33e0dcad506" */}
+{/* ref file="../packages/collab-model/src/task-model/inbox.ts" lines="20-37" hash="94b44d8c6cba" blob="8ad903d933fc" */}
 
 同一份待办也写成「找我的」通知（见 [通知](/collab/notices-site)）。改、删记录时 `id` 是别的种类就整次拒绝；别人的记录能改哪几个字段、谁能删由写入规则定，插件不另判：
 
@@ -186,7 +186,7 @@ import { SeamMap } from '../../src/components/seam-map-flow/seam-map'
 | 窗格 | `projects`（标题「协作站」） | 协作窗格，装了外壳才登记 |
 | 说明书 | `collab` | 给 AI 读的协作站用法：主文件 `skills/collab/SKILL.md`，附件 `references/collab-repo.md`（协作仓）、`other-repos.md`（项目里别的仓）、`organization.md`（组织与项目），每种通知怎么处理写在附件里，装了说明书服务才登记；正本见 [说明书正本](/docs/outputs/skills/collab)。页面怎么写、评论怎么读写在 gwb-docsite 带的说明书 `docsite` 里 |
 
-{/* ref file="../plugins/collab/src/index.ts" lines="264-278" hash="5e5992257ef0" blob="23cf8898bf72" */}
+{/* ref file="../plugins/collab/src/index.ts" lines="263-277" hash="5e5992257ef0" blob="afcf0a62693d" */}
 
 ### 设置
 
@@ -196,7 +196,7 @@ import { SeamMap } from '../../src/components/seam-map-flow/seam-map'
 | `projects` | 路径列表 | 空 | 要管理的协作仓根；写错了刷新、站点、实时推送都不开始，窗格顶上显示原因（`collab.projects` 的 `watchError`），改好了原因就不再显示 |
 | `ai-handling` | 文字，`off` / `zcode` / `claude-terminal` | `off` | 协作窗格里点「交给 AI 处理」（命令 `collab.ai.handoff`）时交给谁；`off` 或写了别的值，命令拒绝，窗格那一行写出原因和去哪里改 |
 
-{/* ref file="../plugins/collab/src/index.ts" lines="64-83" hash="6d3b09914c69" blob="23cf8898bf72" */}
+{/* ref file="../plugins/collab/src/index.ts" lines="63-82" hash="6d3b09914c69" blob="afcf0a62693d" */}
 
 身份码（`identity-code`）与打开站点用什么窗口（`site-window`）是 gwb-docsite 的设置，不在这里。
 
@@ -221,10 +221,10 @@ import { SeamMap } from '../../src/components/seam-map-flow/seam-map'
 
 peer 的版本范围以 `package.json` 为准：
 
-{/* ref file="../plugins/collab/src/index.ts" lines="48-52" hash="fe3b42ce04cf" blob="23cf8898bf72" */}
-{/* ref file="../plugins/collab/src/index.ts" lines="100-112" hash="eb56cebcd011" blob="23cf8898bf72" */}
-{/* ref file="../plugins/collab/src/index.ts" lines="238-247" hash="afd5442a58ea" blob="23cf8898bf72" */}
-{/* ref file="../plugins/collab/package.json" lines="30-56" hash="f2c04b8f754d" blob="c276b18eb8c1" */}
+{/* ref file="../plugins/collab/src/index.ts" lines="47-51" hash="fe3b42ce04cf" blob="afcf0a62693d" */}
+{/* ref file="../plugins/collab/src/index.ts" lines="99-111" hash="eb56cebcd011" blob="afcf0a62693d" */}
+{/* ref file="../plugins/collab/src/index.ts" lines="237-246" hash="afd5442a58ea" blob="afcf0a62693d" */}
+{/* ref file="../plugins/collab/package.json" lines="30-56" hash="70f7bef433b9" blob="1067270915d3" */}
 
 ### 按名字调用与约定通道
 
@@ -238,7 +238,7 @@ peer 的版本范围以 `package.json` 为准：
 | 子进程 | 本机 git | `git` | 算协作仓的本机状态与别的仓的 HEAD 比较、提交、合 main、推送、退回、取回、快进、克隆 |
 | 子进程环境变量 | 本机 git | `GIT_CONFIG_COUNT`、`GIT_CONFIG_KEY_<n>`、`GIT_CONFIG_VALUE_<n>` | 联网的 git 调用带上令牌的请求头（只对 gwb-gitea 配的那台 Gitea）、清空 `credential.helper`，不经 Windows 凭据管理器 |
 | 子进程 | 本机 pnpm | `pnpm install`、`pnpm run typecheck` | 克隆项目后、自动同步快进进来的改动动了依赖时装站点依赖；提交审核带了 `site/` 的改动、站点写了 `typecheck` 脚本时运行类型检查 |
-| 文件 | `site/` 里装的功能包 | `site/node_modules/@godcreator/collab-site/package.json` 的 `collabSiteProtocol` | 托管前核对站点协议号 |
+
 | 文件监视 | 项目文件夹里的各仓 | Node 的 `fs.watch` | 协作仓的文件与 git 状态（接缝 11）；别的仓 `.git` 里的 HEAD 与引用，项目文件夹里多了、少了仓（接缝 16） |
 | Electron | 宿主 | `shell.openExternal` | `collab.project.open` 交 `vscode://` 地址给系统 |
 | 子进程 | 本机 pwsh 与 Claude Code | 隐藏的 `pwsh.exe -Command "Start-Process pwsh.exe …"` | `ai-handling` 为 `claude-terminal` 时新开窗口运行 Claude Code |
@@ -251,9 +251,9 @@ peer 的版本范围以 `package.json` 为准：
 
 | 依赖 | 用来做什么 | 缺了会怎样 |
 | --- | --- | --- |
-| 数据模型包 `@godcreator/collab-model` 的 `/project-model`、`/task-model`、`/task-model/node`、`/notification-model` | 项目仓的布局；读写 `collab/`、读出状态、人员列表与按身份码认人、待办筛选、写入规则、提交前的格式检查 `newFormatProblems`；通知的形状、`id`、排序、计数、短句与原文，推给网站的数据 `SiteFeed`、频道名与站点协议号 | 构建时打包进插件，不会缺 |
-| 功能包 `@godcreator/collab-site` 的 `./site-check` | 托管前与提交前的站点检查 `collabSiteProblems` | 构建时打包进插件；功能包的别的部分不打包 |
-| 基础包 `@godcreator/docsite-kit` 的 `./files` | `collab.inbox` 与找我的通知读评论串 `readCommentThreads`；站点检查里基础包那部分 | 构建时打包进插件 |
+| 数据模型包 `@godcreator/collab-model` 的 `/project-model`、`/task-model`、`/task-model/node`、`/notification-model` | 项目仓的布局与 `journal/` 的文件名规则；读写 `collab/`、读出状态、人员列表与按身份码认人、待办筛选、写入规则、提交前的格式检查 `newFormatProblems`；通知的形状、`id`、排序、计数、短句与原文，推给网站的数据 `SiteFeed` 与频道名 | 构建时打包进插件，不会缺 |
+| 功能包 `@godcreator/collab-site` | 建站时 `gwbDocsite.init` 的 features 里写它的范围（`__COLLAB_SITE_VERSION__`，构建时从 `node_modules` 里读那一版）；功能包不打包进插件 | — |
+| 评论包 `@godcreator/docsite-comments` 的 `./server` | `collab.inbox` 与找我的通知读评论串 `readCommentThreads` | 构建时打包进插件 |
 | 合并检查包 `@godcreator/collab-merge-check` | 推送前查只有负责人能改的内容：`leadOnlyProblems`、`changedFilesBetween`，和执行器用的是同一个函数 | 构建时打包进插件 |
 | 本机的 `git`（2.31 起，要认 `GIT_CONFIG_COUNT`）、Git LFS 与 `pnpm` | 提交、推送、取回、快进、克隆（用 LFS 存文件的仓要 Git LFS）；装依赖、类型检查 | 命令报错，写明是哪条命令没能运行 |
 | 开着的 ZCode 桌面端 | `ai-handling` 为 `zcode` 时 | 命令拒绝，后面是 ZCode 那边的原话 |

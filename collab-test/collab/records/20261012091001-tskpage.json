@@ -1,0 +1,11 @@
+{
+  "id": "20261012091001-tskpage",
+  "type": "task",
+  "author": "godcreator",
+  "status": "doing",
+  "title": "任务页三块与两层筛选验收",
+  "owner": "godcreator",
+  "due": "2026-10-14",
+  "module": "20261012090000-rewrite",
+  "detail": "任务页三块（人员卡片、甘特图、看板）与两层筛选在测试站上验收。"
+}

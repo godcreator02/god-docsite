@@ -1,6 +1,6 @@
 ---
 title: 数据模型包 collab-model
-description: 协作站的全部数据模型：项目仓的布局与项目负责人；collab/ 里任务与模块的格式、读出状态、写入规则，以及按站点的人员列表认本机身份、按评论串算我的待办；要人处理的事写成的通知，以及 gwb-collab 推给站点的数据、推送频道与站点协议号。功能包、gwb-collab、合并检查包都用它，它不用 React、不用 Vite、不运行 git
+description: 协作站的全部数据模型：项目仓的布局（含 journal/ 日志页的文件名规则）与项目负责人；collab/ 里任务与模块的格式、读出状态、写入规则，以及按站点的人员列表认本机身份、按评论串算我的待办；要人处理的事写成的通知，以及 gwb-collab 推给站点的数据与推送频道。功能包、gwb-collab、合并检查包都用它，它不用 React、不用 Vite、不运行 git
 full: true
 ---
 
@@ -14,19 +14,19 @@ import { WriteRule } from '../../src/components/write-rule/write-rule'
 | 使用方 | 用哪部分 | 用的是哪一版 |
 | --- | --- | --- |
 | 功能包 | 服务端读 `collab/` 算出任务与模块、照写入规则写任务与模块、按形状查 gwb-collab 推来的数据；界面用任务与模块的页面地址、人名、通知的短句、去处与计数 | 功能包把它写成普通依赖，随项目 `site/` 装的功能包一起装 |
-| gwb-collab | 按身份码认出本机身份、任务与模块命令、我的待办、提交前的格式检查、把两种仓的状态写成通知、QQ 与交给 AI 用的短句、协作窗格的计数、推送频道与站点协议号、项目仓的布局 | 插件发版时打包进去的那一版 |
+| gwb-collab | 按身份码认出本机身份、任务与模块命令、我的待办、提交前的格式检查、把两种仓的状态写成通知、QQ 与交给 AI 用的短句、协作窗格的计数、推送频道、项目仓的布局与 `journal/` 的文件名规则 | 插件发版时打包进去的那一版 |
 | 合并检查包 | 只用 `project-model/` 里 `collab/`、`site/` 两个路径 | NAS 上的执行器装合并检查包时一起装 |
 
 ## 三个目录
 
-{/* tree dir="../packages/collab-model/src" depth="2" hash="fe382d32db58" */}
+{/* tree dir="../packages/collab-model/src" depth="2" hash="981877b17e1e" */}
 
 | 目录 | 装的是什么 | 出口 |
 | --- | --- | --- |
 | `project-model/` | 项目长什么样：项目仓里 `collab/`、`site/` 与人员列表 `site/people.json` 的位置，项目文件夹是协作仓的上一级；项目负责人的类型 | `./project-model` |
 | `task-model/` | 任务与模块的记录格式，解析人员列表、按身份码认人，读出状态与校验，我的待办，写入规则 | `./task-model` |
 | `task-model/node.ts` | 读磁盘上的 `collab/` 与人员列表、照写入规则算出的计划写文件、删文件 | `./task-model/node` |
-| `notification-model/` | 每种通知的字段、`id`、分组、短句、原文、去处、排序与计数；推给站点的数据的形状、校验、推送频道与站点协议号 | `./notification-model` |
+| `notification-model/` | 每种通知的字段、`id`、分组、短句、原文、去处、排序与计数；推给站点的数据的形状、校验与推送频道 | `./notification-model` |
 
 `src/` 根下只有 `plain-object.ts` 一个小工具（判断是不是普通对象），任务模型与通知模型的校验都用它。
 
@@ -34,11 +34,11 @@ import { WriteRule } from '../../src/components/write-rule/write-rule'
 
 基础包是可选的 peer 依赖：只有 `task-model/` 里解析人员列表的 `people.ts` 与算待办的 `inbox.ts` 引用它（出口 `@godcreator/docsite-kit/comments`），项目布局与通知模型不用。合并检查包只用项目布局，所以执行器不装基础包。
 
-{/* ref file="../packages/collab-model/package.json" lines="40-47" hash="4649f7df9c2d" blob="a6d8b56f68ad" */}
+{/* ref file="../packages/collab-model/package.json" lines="40-47" hash="d4999939756a" blob="3a8997eb26d7" */}
 
 整个包只引用自己的文件、node 内置模块和基础包的人员与评论格式，不认识网站、合并检查与别的包；没有文件运行 git：
 
-{/* ref file="../packages/collab-model/test/boundaries.test.ts" lines="24-35" hash="d1362bf19329" blob="870d6921836b" */}
+{/* ref file="../packages/collab-model/test/boundaries.test.ts" lines="24-35" hash="e5722ef6c1a8" blob="f44137a8bab0" */}
 
 目录之间的方向：`project-model/` 不引用别的目录；`task-model/` 只引用小工具与项目布局；`notification-model/` 只引用 `project-model/` 与小工具。任务模型和通知模型互不引用：
 找我的待办由任务模型算，把它写成「找我的」通知是 gwb-collab 的事；通知短句要显示名时，调用方把按人员 id 查显示名的函数当参数传进来。
@@ -47,11 +47,11 @@ import { WriteRule } from '../../src/components/write-rule/write-rule'
 
 `./task-model` 与 `./notification-model` 要在浏览器里用，所以用 node 内置模块的只有 `task-model/node.ts` 与项目布局，别的文件不引用它们：
 
-{/* ref file="../packages/collab-model/test/boundaries.test.ts" lines="37-45" hash="77f9100963b9" blob="870d6921836b" */}
+{/* ref file="../packages/collab-model/test/boundaries.test.ts" lines="37-45" hash="d5528b1ca92d" blob="f44137a8bab0" */}
 
 `task-model/` 里文件之间只许往下引用：`records.ts` 谁也不引用，`people.ts` 只引用它，`state.ts`、`write.ts`、`inbox.ts` 往这几个方向引用，只有 `node.ts` 碰文件系统：
 
-{/* ref file="../packages/collab-model/test/boundaries.test.ts" lines="64-82" hash="a361333a249c" blob="870d6921836b" */}
+{/* ref file="../packages/collab-model/test/boundaries.test.ts" lines="64-82" hash="39a93aa8f05f" blob="f44137a8bab0" */}
 
 ## 项目模型
 
@@ -86,7 +86,7 @@ gwb-collab、合并检查包和这个包自己的 `node.ts` 都从这里取这�
 人员列表是基础包的格式，存在站点的 `site/people.json`，每项 `{ id, name, codes?, gitea?, agent? }`。协作站里 `id` 就是这个人的 Gitea 用户名，记录的 `author`、`owner` 写它；`codes` 是这个人各个 gwb home 的身份码，一个人可以有几个。
 本机身份由 `personOfCode` 认：本 home 的身份码（gwb-docsite 的设置 `identity-code`）在哪一项的 `codes` 里，就是那个人，不在任何一项里为 `null`。`parsePeople` 调基础包的同名函数，报错换成本包的 `CollabFormatError`；`peopleLookupOf` 把人员 id 换成显示名，通知短句的 `nameOf` 就是它：
 
-{/* ref file="../packages/collab-model/src/task-model/people.ts" hash="c1aaaac8f083" blob="ed2eee56f8f5" */}
+{/* ref file="../packages/collab-model/src/task-model/people.ts" hash="147103c99b3d" blob="26092130c6e9" */}
 
 ### 读出状态与校验
 
@@ -106,15 +106,15 @@ gwb-collab、合并检查包和这个包自己的 `node.ts` 都从这里取这�
 
 ### 我的待办
 
-我的待办（`inboxOf`）从任务与站点的评论串里挑出三类：负责人是我、没做完的任务；还没解决的评论串里，别人写的、正文 @ 了我的（发起的那条与回复都算）；我发起或回复过的评论串里，别人在那之后的回复。没有「已读」，处理完（任务做完、评论串解决）就不再列出。
-评论串由调用方读好交进来：gwb-collab 用基础包的 `readCommentThreads` 读 `site/comments/`，这里只用到下面几项，浏览器里也能构造。@ 谁按基础包的 `mentionsOf` 从正文里认：
+我的待办（`inboxOf`）从任务与站点的评论串里挑出三类：负责人是我、没做完的任务；评论串里别人写的、正文 @ 了我的（发起的那条与回复都算）；我发起或回复过的评论串里，别人在那之后的回复。没有「已读」，任务做完就不再列出（评论模型没有已解决状态）。
+评论串由调用方读好交进来：gwb-collab 用评论包的 `readCommentThreads` 读 `site/comments/`，这里只用到下面几项，浏览器里也能构造。@ 谁按身份包的 `mentionsOf` 从正文里认：
 
-{/* ref file="../packages/collab-model/src/task-model/inbox.ts" lines="4-9" hash="c32d9f873c70" blob="bea13220d047" */}
-{/* ref file="../packages/collab-model/src/task-model/inbox.ts" lines="54-62" hash="a0605cefe822" blob="bea13220d047" */}
+{/* ref file="../packages/collab-model/src/task-model/inbox.ts" lines="5-13" hash="4ceee57404f8" blob="8ad903d933fc" */}
+{/* ref file="../packages/collab-model/src/task-model/inbox.ts" lines="58-65" hash="27a8b9f153a4" blob="8ad903d933fc" */}
 
 每条 @ 与回复带着 `comment`（评论串文件夹名 / 文件名，如 `2026-10-10-3f9a2c/index.mdx`）和点了去的地址 `page`：评论串挂在页面上的去那一页，不挂的去全部评论页 `/comments`，都带上 `?comment=<评论串>`：
 
-{/* ref file="../packages/collab-model/test/inbox.test.ts" lines="47-50" hash="4be64118f8e0" blob="3e4f7ec15d43" */}
+{/* ref file="../packages/collab-model/test/inbox.test.ts" lines="46-49" hash="4be64118f8e0" blob="e37395409990" */}
 
 gwb-collab 的 `collab.inbox` 调这一个，再把它写成「找我的」通知推给站点。
 
@@ -182,25 +182,191 @@ gwb-collab 的 `collab.inbox` 调这一个，再把它写成「找我的」通�
 ## 推给站点的数据
 
 站点由 gwb-docsite 托管。gwb-collab 交给站点的只有两样：通知列表（已按 `sortedNotifications` 排好）与项目负责人（还没从 Gitea 读到为 `null`），合成一份 `SiteFeed`，一变就经 gwb-docsite 的服务 `gwbDocsite.push` 整份推到站点推送通道的频道 `siteFeedChannel`（值是 `'collab'`）。
-站点只收不发：网站服务端用基础包的 `siteFeedOf` 取这个频道最新的一份，界面用基础包的 `useSiteFeed` 收推送。频道名、形状与站点收下时的检查都在 `notification-model/site-feed.ts`：
+站点只收不发：网站服务端用推送通道的 `feedStore` 取这个频道最新的一份，界面用推送通道包的 `useSiteFeed` 收推送。频道名、形状与站点收下时的检查都在 `notification-model/site-feed.ts`：
 
 {/* ref file="../packages/collab-model/src/notification-model/site-feed.ts" lines="12-16" hash="eefe49d6a6ae" blob="c7ccb3bb298c" */}
-{/* ref file="../packages/collab-model/src/notification-model/site-feed.ts" lines="28-41" hash="2c49833c41ab" blob="c7ccb3bb298c" */}
+{/* ref file="../packages/collab-model/src/notification-model/site-feed.ts" lines="18-31" hash="2c49833c41ab" blob="5de60fc61d81" */}
 
 推来的是外部输入，网站服务端拿到后先交给本包的 `siteFeedOf` 逐项查：通知逐条按 `kind` 查字段，`kind` 认不出、字段多了少了、类型不对都抛 `InvalidSiteFeed`，写明是第几条的哪个字段：
 
 {/* ref file="../packages/collab-model/src/notification-model/notification-validation.ts" lines="51-55" hash="4da764a8aba8" blob="f189a146b5da" */}
 
-站点协议号 `siteProtocol` 是这份约定的编号：`site-feed.ts` 里的名字与形状、通知的字段任何一项变了就加一；记录格式有破坏性改动（比如删掉一个字段）时也加一，免得没升插件的人打开升过级的站点，只看到「记录读不对」、看不出该升哪一边。
-功能包 `package.json` 的 `collabSiteProtocol` 写同一个数；`siteProtocolSince` 是带这个协议号的第一版功能包：
 
-{/* ref file="../packages/collab-model/src/notification-model/site-feed.ts" lines="18-26" hash="3e556a7423a3" blob="c7ccb3bb298c" */}
+## 三个目录
 
-gwb-collab 把站点交给 gwb-docsite 托管之前，拿打包进插件的 `siteProtocol` 比 `site/` 里装的功能包的 `collabSiteProtocol`：对不上就不托管，`site/` 的旧了，报错里让人把范围改成 `^` 加 `siteProtocolSince`；插件旧了，让人升级插件：
+{/* tree dir="../packages/collab-model/src" depth="2" hash="981877b17e1e" */}
 
-{/* ref file="../plugins/collab/src/site-process/site-files.ts" lines="35-49" hash="75e547f329cb" blob="023aa2266b55" */}
+| 目录 | 装的是什么 | 出口 |
+| --- | --- | --- |
+| `project-model/` | 项目长什么样：项目仓里 `collab/`、`site/` 与人员列表 `site/people.json` 的位置，项目文件夹是协作仓的上一级；项目负责人的类型 | `./project-model` |
+| `task-model/` | 任务与模块的记录格式，解析人员列表、按身份码认人，读出状态与校验，我的待办，写入规则 | `./task-model` |
+| `task-model/node.ts` | 读磁盘上的 `collab/` 与人员列表、照写入规则算出的计划写文件、删文件 | `./task-model/node` |
+| `notification-model/` | 每种通知的字段、`id`、分组、短句、原文、去处、排序与计数；推给站点的数据的形状、校验与推送频道 | `./notification-model` |
 
-托管的其余步骤见 [站点进程与推给网站的数据](/collab/notices-site)。
+`src/` 根下只有 `plain-object.ts` 一个小工具（判断是不是普通对象），任务模型与通知模型的校验都用它。
+
+{/* ref file="../packages/collab-model/package.json" lines="6-23" hash="915fd7927ded" blob="a6d8b56f68ad" */}
+
+基础包是可选的 peer 依赖：只有 `task-model/` 里解析人员列表的 `people.ts` 与算待办的 `inbox.ts` 引用它（出口 `@godcreator/docsite-kit/comments`），项目布局与通知模型不用。合并检查包只用项目布局，所以执行器不装基础包。
+
+{/* ref file="../packages/collab-model/package.json" lines="40-47" hash="d4999939756a" blob="3a8997eb26d7" */}
+
+整个包只引用自己的文件、node 内置模块和基础包的人员与评论格式，不认识网站、合并检查与别的包；没有文件运行 git：
+
+{/* ref file="../packages/collab-model/test/boundaries.test.ts" lines="24-35" hash="e5722ef6c1a8" blob="f44137a8bab0" */}
+
+目录之间的方向：`project-model/` 不引用别的目录；`task-model/` 只引用小工具与项目布局；`notification-model/` 只引用 `project-model/` 与小工具。任务模型和通知模型互不引用：
+找我的待办由任务模型算，把它写成「找我的」通知是 gwb-collab 的事；通知短句要显示名时，调用方把按人员 id 查显示名的函数当参数传进来。
+
+{/* ref file="../packages/collab-model/test/boundaries.test.ts" lines="47-62" hash="fde8b6fbb300" blob="870d6921836b" */}
+
+`./task-model` 与 `./notification-model` 要在浏览器里用，所以用 node 内置模块的只有 `task-model/node.ts` 与项目布局，别的文件不引用它们：
+
+{/* ref file="../packages/collab-model/test/boundaries.test.ts" lines="37-45" hash="d5528b1ca92d" blob="f44137a8bab0" */}
+
+`task-model/` 里文件之间只许往下引用：`records.ts` 谁也不引用，`people.ts` 只引用它，`state.ts`、`write.ts`、`inbox.ts` 往这几个方向引用，只有 `node.ts` 碰文件系统：
+
+{/* ref file="../packages/collab-model/test/boundaries.test.ts" lines="64-82" hash="39a93aa8f05f" blob="f44137a8bab0" */}
+
+## 项目模型
+
+项目仓的布局是固定的：任务与模块的记录在仓根的 `collab/`，站点在仓根的 `site/`，人员列表是站点里的 `site/people.json`；项目文件夹是协作仓的上一级，以组织命名，项目里的仓都克隆在这里。
+gwb-collab、合并检查包和这个包自己的 `node.ts` 都从这里取这几个路径，不各写一份：
+
+{/* ref file="../packages/collab-model/src/project-model/project-layout.ts" hash="a4d74843a86a" blob="27e70dd2b830" */}
+
+项目负责人是协作仓在 Gitea 上的协作者，一组 Gitea 用户名。数据模型包不连 Gitea：gwb-collab 从 Gitea 读来，当参数传给写入规则（删别人的任务与模块），也随推给站点的数据交给站点。人员列表不记谁是负责人。
+
+{/* ref file="../packages/collab-model/src/project-model/project-leads.ts" hash="2bcab01321bd" blob="1a7b9b1d5590" */}
+
+## 任务模型
+
+### 记录：一条记录一个文件
+
+记录有两种：任务与模块，每条写成 `collab/records/<记录 id>.json`，作者写在文件里的 `author`。
+每种记录有哪些字段、哪些必填、别人能改哪几个，全在这一张表里。模块只有截止日 `due`、没有开始日，也不存状态，进度由归进它的任务算出；项目日志与评论不是记录，是站点里的文件：
+
+{/* ref file="../packages/collab-model/src/task-model/records.ts" lines="40-58" hash="f7f9204e1e19" blob="e77a18193cd2" */}
+
+写出的格式固定（键序照上表、一个字段一行、没有的字段不写），读的时候认不出的字段、缺必填、冲突标记都报成问题，不猜、不修：
+
+{/* ref file="../packages/collab-model/src/task-model/records.ts" lines="144-163" hash="22c11b85693b" blob="e77a18193cd2" */}
+
+一条记录一个文件、一个字段一行，是为了多人同时写时少冲突：改的不是同一条记录就是不同的文件，git 自动合并；改的是同一条，要看改的两行挨不挨着。选一种情况看：
+
+<RecordMerge />
+
+### 人员列表与本机身份
+
+人员列表是基础包的格式，存在站点的 `site/people.json`，每项 `{ id, name, codes?, gitea?, agent? }`。协作站里 `id` 就是这个人的 Gitea 用户名，记录的 `author`、`owner` 写它；`codes` 是这个人各个 gwb home 的身份码，一个人可以有几个。
+本机身份由 `personOfCode` 认：本 home 的身份码（gwb-docsite 的设置 `identity-code`）在哪一项的 `codes` 里，就是那个人，不在任何一项里为 `null`。`parsePeople` 调基础包的同名函数，报错换成本包的 `CollabFormatError`；`peopleLookupOf` 把人员 id 换成显示名，通知短句的 `nameOf` 就是它：
+
+{/* ref file="../packages/collab-model/src/task-model/people.ts" hash="147103c99b3d" blob="26092130c6e9" */}
+
+### 读出状态与校验
+
+输入是协作仓的一份内容（`CollabSnapshot`：人员列表的原文加 `collab/` 下每个文件的原文），不认识 git 与站点；`node.ts` 的 `readCollabSnapshot` 从磁盘读出这一份，gwb-collab 提交前还从某个提交上读出同样的一份。
+读出当前状态（`collabState`）就是把记录文件解码、分成任务与模块；不在 `records/<id>.json` 的文件、读不出的文件、重复的 id、任务所属的模块不存在都列进 `problems`：
+
+{/* ref file="../packages/collab-model/src/task-model/state.ts" lines="98-103" hash="3d72904b99f4" blob="08832c762a74" */}
+
+校验（`validateCollab`）另查换行符、规范写法、文件名等于 id、作者与负责人都在人员列表里。gwb-collab 提交前与写入规则都只拦新多出来的问题：参照版本上原本就有的问题不挡这次改动：
+
+{/* ref file="../packages/collab-model/src/task-model/state.ts" lines="115-120" hash="5567b4f9b139" blob="08832c762a74" */}
+{/* ref file="../packages/collab-model/src/task-model/state.ts" lines="155-173" hash="8aae79cd1124" blob="08832c762a74" */}
+
+任务与模块在网站上各有一页 `/tasks/<记录 id>`，地址由 `recordPageUrlOf` 算，网站的任务页、日历、通知栏都调它：
+
+{/* ref file="../packages/collab-model/src/task-model/state.ts" lines="48-53" hash="dff04fc5096a" blob="08832c762a74" */}
+
+### 我的待办
+
+我的待办（`inboxOf`）从任务与站点的评论串里挑出三类：负责人是我、没做完的任务；评论串里别人写的、正文 @ 了我的（发起的那条与回复都算）；我发起或回复过的评论串里，别人在那之后的回复。没有「已读」，任务做完就不再列出（评论模型没有已解决状态）。
+评论串由调用方读好交进来：gwb-collab 用评论包的 `readCommentThreads` 读 `site/comments/`，这里只用到下面几项，浏览器里也能构造。@ 谁按身份包的 `mentionsOf` 从正文里认：
+
+{/* ref file="../packages/collab-model/src/task-model/inbox.ts" lines="5-13" hash="4ceee57404f8" blob="8ad903d933fc" */}
+{/* ref file="../packages/collab-model/src/task-model/inbox.ts" lines="58-65" hash="27a8b9f153a4" blob="8ad903d933fc" */}
+
+每条 @ 与回复带着 `comment`（评论串文件夹名 / 文件名，如 `2026-10-10-3f9a2c/index.mdx`）和点了去的地址 `page`：评论串挂在页面上的去那一页，不挂的去全部评论页 `/comments`，都带上 `?comment=<评论串>`：
+
+{/* ref file="../packages/collab-model/test/inbox.test.ts" lines="46-49" hash="4be64118f8e0" blob="e37395409990" */}
+
+gwb-collab 的 `collab.inbox` 调这一个，再把它写成「找我的」通知推给站点。
+
+### 写入规则
+
+写入分两步：`write.ts` 的 `planCreate`、`planUpdate`、`planDelete` 只算「要写哪些文件、删哪些文件」或者拒绝，是纯函数；`node.ts` 的 `createRecord`、`updateRecord`、`deleteRecords` 先读一份协作仓、交给它们算，再照计划写文件、删文件。网站服务端的写入接口 `POST /api/collab` 和 gwb-collab 的任务与模块命令都调 `node.ts` 这三个：
+
+- 身份必须有、并且在人员列表里；新建时 `id`、`author` 由这里补上，页面不能指定
+- 作者能改自己记录里的任何字段，别人只能改上表列出的几个
+- 只有作者和项目负责人能删，项目负责人由调用方传进来；要删的模块下还有没一起删的任务就拒绝，不替人决定任务归到哪里
+- 写入后多出的格式问题才拦，`collab/` 里原本就有的问题不影响这次写入
+
+被拒绝时抛 `WriteRejected`，消息直接给人看，文件不变。同一个请求在不同情况下走到哪一步：
+
+<WriteRule />
+
+{/* ref file="../packages/collab-model/src/task-model/write.ts" lines="33-37" hash="709a0ceb1c0a" blob="42c7ed460b69" */}
+
+删除要的项目负责人是 `deleteRecords` 的参数：
+
+{/* ref file="../packages/collab-model/src/task-model/node.ts" lines="51-56" hash="233b4de99033" blob="e4533083836e" */}
+
+合并检查不查谁改了谁的记录、有没有删记录，这两条只在写入规则里判断：绕过写入接口直接改文件，提交审核和执行器都拦不住。
+
+## 通知模型
+
+要人处理的事写成通知：一条通知只带事实，`id`、`kind` 和这种 `kind` 的字段，人只写人员 id（就是 Gitea 用户名），不带写好的句子。19 种 `kind` 分三组：
+
+{/* ref file="../packages/collab-model/src/notification-model/notifications.ts" lines="9-32" hash="d2fd2688b67c" blob="feb99d6138df" */}
+
+| 组 | kind | 什么事 |
+| --- | --- | --- |
+| 协作仓 `collab-repo` | `unsubmitted`、`conflicts`、`submit-failure`、`sync-problem`、`check-error`、`off-main`、`record-problem`、`webhook-setup` | 还没提交审核的文件、合 main 的冲突、提交审核失败、没能自动同步、检查出错、协作仓不在 main、记录读不对、组织 webhook 没配好 |
+| 别的仓 `other-repos` | `unpushed`、`unpulled`、`diverged`、`pull-to-review`、`issue-to-answer`、`my-pull-update`、`my-issue-answered`、`repo-setup` | 本地 HEAD 和服务器同名分支比：没推送、没拉取、分叉；等我审阅的合并请求、等负责人回的 issue、我开的合并请求被要求修改或有了新评论、我提的 issue 有负责人回了、仓没按规矩配好 |
+| 找我的 `for-me` | `task`、`mention`、`reply` | 指派给我的任务、在评论串里 @我的、回复我的 |
+
+组织 webhook 是整个项目的事，放在协作仓组；某个仓没按规矩配好放在别的仓组，协作仓自己没配好时 `repo` 写协作仓的名字，也放在这一组。分组是一张表：
+
+{/* ref file="../packages/collab-model/src/notification-model/notifications.ts" lines="67-91" hash="86eb579194ec" blob="feb99d6138df" */}
+
+**`id` 按事实算**：同一件事在状态更新前后算出同一个 `id`，调用方只给事实、用 `notificationOf` 造通知，不自己拼 `id`。gwb-collab 发 QQ 私聊时按 `id` 只发新出现的，靠的就是这一条：
+
+{/* ref file="../packages/collab-model/src/notification-model/notifications.ts" lines="93-131" hash="b3dbcfc08dcc" blob="feb99d6138df" */}
+
+{/* ref file="../packages/collab-model/test/notifications.test.ts" lines="30-35" hash="ecb87b4583da" blob="ed6578c8d192" */}
+
+**短句、原文、去处、排序、计数**都按 `kind` 从字段算，网站通知栏、协作窗格、QQ 私聊、交给 AI 用同一份，各处不自己拼句子：
+
+| 函数 | 算什么 | 谁用 |
+| --- | --- | --- |
+| `notificationSentenceOf(notification, nameOf)` | 一句话说清是什么事；人名经 `nameOf` 从人员 id 换成显示名 | 网站通知栏、QQ 私聊、交给 AI |
+| `notificationOriginalTextOf` | 原文：文件清单、报错原话、评论或任务正文、规矩不对的几条；没有为 `null` | 网站通知栏、交给 AI |
+| `notificationTargetOf` | 点了去哪：`{ record }` 一条任务或模块、`{ page }` 站内一页、`{ url }` 外部网址；没有去处为 `null`（只显示，如还没提交审核的那一条） | 网站通知栏 |
+| `sortedNotifications` | 按组的顺序排，组内按 `kind` 的顺序、再按 `id` | gwb-collab 推给站点之前 |
+| `notificationGroupOf`、`notificationCountsOf` | 分在哪组、各组几条 | 网站通知栏收起时、协作窗格 |
+
+{/* ref file="../packages/collab-model/src/notification-model/notification-text.ts" lines="13-14" hash="88ed820bcf68" blob="db1dda751140" */}
+
+{/* ref file="../packages/collab-model/src/notification-model/notifications.ts" lines="133-162" hash="e83ae2a0b9ce" blob="feb99d6138df" */}
+
+{/* ref file="../packages/collab-model/src/notification-model/notifications.ts" lines="168-180" hash="e4fbacad5116" blob="feb99d6138df" */}
+
+任务通知只写记录 id，网站用任务模型的 `recordPageUrlOf` 换成那一页的地址，通知模型不知道网站的页面地址。@ 与回复的通知写 `comment`（评论串 / 文件名）与 `page`（点了去的站内地址，带 `?comment=`），`id` 按 `comment` 算。每种通知怎么处理也不在这里：写在说明书 collab 的附件里，gwb-collab 交给 AI 的提示词按 `kind` 写明照哪一节处理。
+
+## 推给站点的数据
+
+站点由 gwb-docsite 托管。gwb-collab 交给站点的只有两样：通知列表（已按 `sortedNotifications` 排好）与项目负责人（还没从 Gitea 读到为 `null`），合成一份 `SiteFeed`，一变就经 gwb-docsite 的服务 `gwbDocsite.push` 整份推到站点推送通道的频道 `siteFeedChannel`（值是 `'collab'`）。
+站点只收不发：网站服务端用推送通道的 `feedStore` 取这个频道最新的一份，界面用推送通道包的 `useSiteFeed` 收推送。频道名、形状与站点收下时的检查都在 `notification-model/site-feed.ts`：
+
+{/* ref file="../packages/collab-model/src/notification-model/site-feed.ts" lines="12-16" hash="eefe49d6a6ae" blob="c7ccb3bb298c" */}
+{/* ref file="../packages/collab-model/src/notification-model/site-feed.ts" lines="18-31" hash="2c49833c41ab" blob="5de60fc61d81" */}
+
+推来的是外部输入，网站服务端拿到后先交给本包的 `siteFeedOf` 逐项查：通知逐条按 `kind` 查字段，`kind` 认不出、字段多了少了、类型不对都抛 `InvalidSiteFeed`，写明是第几条的哪个字段：
+
+{/* ref file="../packages/collab-model/src/notification-model/notification-validation.ts" lines="51-55" hash="4da764a8aba8" blob="f189a146b5da" */}
+
+托管的其余步骤见 [站点进程与推给网站的数据](/collab/notices-site)。托管的其余步骤见 [站点进程与推给网站的数据](/collab/notices-site)。
 
 ## 不做的事
 

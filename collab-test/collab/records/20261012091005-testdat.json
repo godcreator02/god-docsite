@@ -1,0 +1,9 @@
+{
+  "id": "20261012091005-testdat",
+  "type": "task",
+  "author": "bob",
+  "status": "doing",
+  "title": "写测试协作站的测试数据",
+  "owner": "bob",
+  "detail": "这条不挂模块：看板里独立任务的样式；作者是 bob，别人只能改 status、owner、due、title、module。"
+}

@@ -2,7 +2,7 @@ import { existsSync } from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { describe, expect, it } from 'vitest'
-import featureRoutes from '../src/feature/routes.js'
+import featureRoutes from '../src/routes.js'
 
 const packageDir = path.join(path.dirname(fileURLToPath(import.meta.url)), '..')
 

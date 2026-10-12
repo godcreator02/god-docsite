@@ -95,7 +95,7 @@ git branch -d fix-pll
 
 {/* ref file="../plugins/collab/src/other-repos/fetch/commands.ts" lines="4-26" hash="f396aded2147" blob="316ee51f568a" */}
 {/* ref file="../plugins/collab/src/other-repos/fetch/update.ts" lines="9-36" hash="9de0c487512f" blob="6f759149920f" */}
-{/* ref file="../plugins/collab/src/project/project.ts" lines="37-44" hash="60471bf92dbf" blob="5507995a33f1" */}
+{/* ref file="../plugins/collab/src/project/project.ts" lines="36-43" hash="60471bf92dbf" blob="94fe4a33425f" */}
 
 ## 等我处理的：`other-repos/review.ts`
 
@@ -166,8 +166,8 @@ git branch -d fix-pll
 
 打开项目（`openProject`）每次都现读：先查清 `repo` 是仓根、是协作仓，再用数据模型包的 `personOfCode` 认人；码不在列表里就拒绝，写明运行 `collab.project.join`。
 
-{/* ref file="../plugins/collab/src/project/project.ts" lines="51-64" hash="52b461922518" blob="5507995a33f1" */}
-{/* ref file="../plugins/collab/src/project/project.ts" lines="89-103" hash="b30a63715385" blob="5507995a33f1" */}
+{/* ref file="../plugins/collab/src/project/project.ts" lines="50-63" hash="52b461922518" blob="94fe4a33425f" */}
+{/* ref file="../plugins/collab/src/project/project.ts" lines="98-112" hash="b30a63715385" blob="94fe4a33425f" */}
 {/* ref file="../plugins/collab/src/commands.ts" lines="71-74" hash="50e54ec3bb9d" blob="1d14d662c45e" */}
 
 **协作仓怎么认**：仓根下同时有 `collab/` 与 `site/people.json` 的仓就是协作仓（`isCollabRepo`）。打开项目、克隆组织时挑协作仓、`collab.project.join` 都按这一条认。
@@ -203,7 +203,7 @@ git branch -d fix-pll
 - 项目文件夹：协作仓的上一级要是以 `origin` 的主人（组织）命名的项目文件夹，不是就拒绝，写明用 `collab.project.clone` 把组织整个克隆一遍。`origin` 在这一步只读一次，主人与仓名记在打开的项目里，之后取回别的仓、读合并请求、克隆新仓都直接用这个项目文件夹
 
 {/* ref file="../plugins/collab/src/project/account.ts" lines="26-64" hash="fc5078bfe574" blob="62ff1b38908b" */}
-{/* ref file="../plugins/collab/src/project/project.ts" lines="21-30" hash="762a42555d5f" blob="5507995a33f1" */}
+{/* ref file="../plugins/collab/src/project/project.ts" lines="20-29" hash="762a42555d5f" blob="94fe4a33425f" */}
 
 只读本机的命令（`collab.inbox`、建改任务与模块、站点、`collab.projects`）不需要令牌；删任务与模块要读协作仓的协作者，`collab.project.join` 要读令牌的账号，都要令牌。一个 home 只有一个 Gitea 账号、一个身份码：同一台电脑上要扮演几个人（比如测试账号），各开一个隔离 home。
 
@@ -226,7 +226,7 @@ git branch -d fix-pll
 
 `collab.project.join {repo}` 把本 home 的身份码加进协作仓 `site/people.json` 里令牌账号那一项：经 gwb-gitea 读令牌的账号，在工作区的人员列表里找 `id` 是这个账号的那一项，交给 `gwbDocsite.join` 把码加进它的 `codes`（接缝 28）；码已经在里面就不改文件，回执 `changed` 为 `false`。账号不在列表里就拒绝：加人只有项目负责人能做。只写工作区，改了要 `collab.submit` 提交审核；合并检查允许每个人只改自己那一项（`gitea` 是自己）的 `codes`，所以不是负责人也合得进去（见 [合并检查包](/collab/collab-merge-check)）。换了电脑、换了身份码、自己克隆的仓都用它。
 
-{/* ref file="../plugins/collab/src/project/project.ts" lines="105-119" hash="3d7a68e82a50" blob="5507995a33f1" */}
+{/* ref file="../plugins/collab/src/project/project.ts" lines="114-128" hash="3d7a68e82a50" blob="94fe4a33425f" */}
 {/* ref file="../plugins/collab/src/organization/setup/commands.ts" lines="92-108" hash="15e87547fe18" blob="ec7da9d915b4" */}
 
 项目文件夹里只放仓，不放工作区文件：在 VS Code 里直接打开整个项目文件夹就是整个项目。

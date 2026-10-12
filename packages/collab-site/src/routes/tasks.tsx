@@ -1,13 +1,17 @@
-import { useLoaderData } from 'react-router'
+import { useLoaderData, type ActionFunctionArgs } from 'react-router'
 import { DocsPage } from '@fumadocs/base-ui/layouts/docs/page'
 import { tasksPageUrl } from '@godcreator/collab-model/task-model'
-import { siteName } from '@site/lib/source'
+import { siteName } from '@site/lib/source.server'
+import { routeCommentData, routeCommentsAction } from '../server/comments.js'
 import { TasksPage } from '../ui/tasks-page.js'
-import { routeCommentData } from './comment-data.server.js'
-import { RouteComments } from './route-comments.js'
+import { RouteComments } from '../ui/route-comments.js'
 
-export async function loader() {
-  return { siteName: siteName(), comments: await routeCommentData(tasksPageUrl) }
+export function loader() {
+  return { siteName: siteName(), comments: routeCommentData(tasksPageUrl) }
+}
+
+export function action({ request }: ActionFunctionArgs) {
+  return routeCommentsAction(request)
 }
 
 export default function Tasks() {

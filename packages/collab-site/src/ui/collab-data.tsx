@@ -2,7 +2,7 @@ import { createContext, useContext, useEffect, useMemo, type ReactNode } from 'r
 import { useRevalidator } from 'react-router'
 import { siteFeedChannel, type SiteFeed } from '@godcreator/collab-model/notification-model'
 import { peopleLookupOf } from '@godcreator/collab-model/task-model'
-import { useSiteFeed } from '@godcreator/docsite-kit/ui'
+import { useSiteFeed } from '@godcreator/docsite-feed'
 import type { CollabSiteData } from '../site-data.js'
 
 const CollabDataContext = createContext<CollabSiteData | null>(null)

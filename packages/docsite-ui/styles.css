@@ -2,6 +2,26 @@
 @source './src';
 
 /*
+ * 侧栏入口链接卡片里的图标：功能包交来的 icon 是任意节点（裸的 lucide svg），尺寸约束不能用 Tailwind 的
+ * 任意值类——dev 服务里站点不一定扫到本包的源码（@source 对符号链接的解析不稳），裸 svg 又会被 fumadocs
+ * 的 preflight 设成 display: block 拉伸到整行。这里用真实 CSS 管住它，不依赖扫描
+ */
+[data-link-chip-icon] {
+  display: inline-block;
+  width: 1em;
+  height: 1em;
+  vertical-align: -0.15em;
+  margin-inline-end: 0.25rem;
+  color: var(--color-fd-muted-foreground);
+}
+
+[data-link-chip-icon] svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/*
  * 宽屏布局：fumadocs 的 docs 布局在窗口比 97rem 宽时整体居中，左侧栏左边、目录右边各空出一截。
  * 这里让布局铺满窗口：左侧栏贴左边，本页目录那一列贴右边、宽度固定，正文在中间那一列里居中。
  * 评论栏（@godcreator/docsite-comments 的 CommentsDock）fixed 盖在目录那一列上（同宽同位），

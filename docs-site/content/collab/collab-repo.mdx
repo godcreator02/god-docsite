@@ -35,7 +35,7 @@ import { PushFlow } from '../../src/components/push-flow/push-flow'
 
 1. **确认在 main 上**：不在 main 上（或者是分离的 HEAD）就直接拒绝，写明当前在哪
 2. **取回远端并校验 `collab/`**：`git fetch origin`（`git/git.ts` 的 `fetchOrigin`，自动同步取回用的也是它），再只报这次改动带来的格式问题，参照是本地 main 与 `origin/main` 的分叉点（`git merge-base HEAD origin/main`）：那时就有的问题不算我的，不查谁改了谁的记录。用的是数据模型包的 `newFormatProblems`。我的改动和别人后来合进 main 的记录凑在一起才出的问题（比如我的任务归进的模块被别人删了），这里查不到，第 6 步把 main 合进来之后再查
-3. **`site/` 有改动时校验站点**：两样，有一样不过就不提交、报出原话。一是站点检查：插件打包的功能包 `./site-check` 的 `collabSiteProblems` 查工作区里整个 `site/`，基础包那部分查人员列表 `site/people.json`、`site/comments/` 里评论的格式与作者、评论快照，功能包再查 `site/journal/` 里日志页的文件名，最后用站点自己装的基础包编译内容页、评论、日志页的 MDX，写错的公式也报出来（见 [功能包](/collab/collab-site)）；查的是整个站点，不只看这次改的文件。二是类型检查：`site/package.json` 写了 `typecheck` 脚本，就在 `site/` 里运行 `pnpm run typecheck`，退出码不是 0 就把输出报出来；页面、组件能不能编译由它管
+3. **`site/` 有改动时校验站点**：两样，有一样不过就不提交、报出原话。一是日志页的文件名：数据模型包 project-model 的 `journalProblemsOf` 查 `site/journal/` 里只能放 `<真实日期>.mdx`——站点布局的 loader 也按它读，不合规矩整站打不开；站点的其余问题（依赖装没装、页面起不起得来）由 gwb-docsite 启动时查。二是类型检查：`site/package.json` 写了 `typecheck` 脚本，就在 `site/` 里运行 `pnpm run typecheck`，退出码不是 0 就把输出报出来；页面、组件能不能编译由它管
 4. **在本地 main 上一起提交 `collab/` 与 `site/`**（接缝 10）：`git add --all -- collab site`，暂存区里别的文件不带上。提交说明按带了什么写：只有 `collab/` 的记录是「`<身份>` 的协作记录」，只有 `site/` 的改动（页面、评论、人员列表）是「`<身份>` 的页面改动」，都有是「`<身份>` 的协作记录与页面改动」。上次提交审核把 main 合进来出了冲突、冲突已经改好时，这一步完成那次合并
 5. **把 main 合进来**：本地 main 上没有 `origin/main` 里还没有的提交就拒绝，说没有要提交的；本地 main 落后 `origin/main` 就 `git merge --no-edit origin/main`，推上去的就是和最新 main 合好的结果。有冲突就让这次合并停在没做完的状态、不推送：冲突标记留在文件里，回失败、列出冲突的文件，网站顶部的提示栏也列出这些文件（`conflicts` 通知），冲突标记所在的记录文件网站还会报出第几行；在协作窗格那个项目的一行上点「交给 AI 处理」，把它们连同别的通知一起交给 AI。AI 按两边的意思改好后再运行 `collab.submit`，第 4 步完成这次合并。两人同时加了库、`site/pnpm-lock.yaml` 冲突时，锁文件不手改：用 main 那份，在 `site/` 里重新运行一次 `pnpm install`，再提交审核
 6. **合进 main 之后再查一遍**：记下这时的 `origin/main`，合并后的 `collab/` 比它多出的格式问题；合并后的 `site/` 比它有改动时，再做一遍站点检查（这时工作区里的 `site/` 就是合并的结果）。两个人各自没问题、凑在一起才出的问题（别人删了我回复的那串评论这类）只有这一步能发现，执行器不查记录格式与站点。有问题就不推送：本地 main 退回记下的 `origin/main`（`git reset --mixed`），改动回到工作区，逐条写明文件
@@ -43,8 +43,8 @@ import { PushFlow } from '../../src/components/push-flow/push-flow'
 8. **推送**（接缝 5）：`git push origin HEAD:refs/for/main -o topic=<身份> -o title=<标题>`。标题按推上去的改动比 main 多了记录、页面还是两样都有，和提交说明同一套写法：不给标题的话 Gitea 取最后一个提交的说明，先合了 main 时就成了「Merge remote-tracking branch」。推送失败就把本地 main 退回记下的 `origin/main`，改动回到工作区，报出 git 的原话
 9. **等执行器的结论**：从推送的输出里认出合并请求的地址与编号，经 gwb-gitea 每 2 秒查一次，直到它关闭，最多等 3 分钟（执行器通常十几秒）。结论怎么处理见下一节
 
-{/* ref file="../plugins/collab/src/collab-repo/submit/submit-checks.ts" lines="10-42" hash="137b41160b79" blob="0ba0d2de239f" */}
-{/* ref file="../packages/collab-site/src/site-check.ts" hash="f0574affe47c" blob="906fa5d486fe" */}
+{/* ref file="../plugins/collab/src/collab-repo/submit/submit-checks.ts" lines="9-43" hash="69689b440eb2" blob="e82d8104d592" */}
+{/* ref file="../packages/collab-model/src/project-model/journal-files.ts" lines="9-20" hash="7eaac12ea424" blob="0da0c6852c9d" */}
 {/* ref file="../plugins/collab/src/collab-repo/submit/submit.ts" lines="35-54" hash="c49a9450a025" blob="92a88843de16" */}
 {/* ref file="../plugins/collab/src/site-process/dependencies.ts" lines="47-59" hash="9f0b9141f97f" blob="ec1851de7ac4" */}
 {/* ref file="../plugins/collab/src/collab-repo/submit/submit.ts" lines="56-110" hash="7f7c62d5f8fa" blob="92a88843de16" */}
@@ -110,11 +110,11 @@ import { PushFlow } from '../../src/components/push-flow/push-flow'
 自动同步没有跳过（快进了或本来就一样新，说明在 main 上、没有没做完的合并、本地 main 不领先 `origin/main`）时，插件接着重新算一次本机状态（不用监视着的那份，它可能还在等 300 毫秒）：`collab/`、`site/` 都没有改动、也没有冲突，就是没有东西可提交了，调 `onNothingToSubmit`，由插件入口交给 `SubmitFailures` 清掉上次提交审核的失败。只在自动同步之后看，不在每次文件变化时看：判断本地 main 领不领先要多运行一次 git，自动同步已经算过它。
 
 {/* ref file="../plugins/collab/src/collab-repo/sync/state.ts" lines="25-28" hash="849bc390dcee" blob="3ab4352a66da" */}
-{/* ref file="../plugins/collab/src/index.ts" lines="135-144" hash="cdbbe5874bbc" blob="23cf8898bf72" */}
+{/* ref file="../plugins/collab/src/index.ts" lines="134-143" hash="cdbbe5874bbc" blob="afcf0a62693d" */}
 
 自动同步是协作仓跟上 main 的唯一途径，没有单独的同步命令；要立即同步，让 AI 调 `collab.check` 立即完整刷新一次。
 
-快进进来的改动动了 `site/package.json` 或 `site/pnpm-lock.yaml` 时，插件接着在 `site/` 里 `pnpm install`：经 gwb-docsite 先停站点，装完按常驻的规矩启动，装完再查一遍站点协议号与站点检查，不过就停掉。只动了 `site/` 别的文件时，插件让站点再过一遍托管前的检查：不过就停掉、不再托管，窗格标红；通过了就交给 gwb-docsite 托管（见 [站点](/collab/notices-site)）。
+快进进来的改动动了 `site/package.json` 或 `site/pnpm-lock.yaml` 时，插件接着在 `site/` 里 `pnpm install`：站点先停，装完再启动、推一次数据。只动了 `site/` 别的文件时，插件确保站点在运行并推一次数据（见 [站点](/collab/notices-site)）。
 
 ## 组织事件与检查（原「组织事件」页）
 

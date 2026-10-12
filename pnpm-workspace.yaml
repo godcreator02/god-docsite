@@ -1,10 +1,11 @@
-# 仓根是不发布的 private 包：地基与能力包在 packages/，两个 gwb 插件在 plugins/，自述站在 site/，docfirst 文档站在 docs-site/
+# 仓根是不发布的 private 包：地基与能力包在 packages/，两个 gwb 插件在 plugins/，自述站在 site/，docfirst 文档站在 docs-site/，测试协作仓在 collab-test/site/
 
 packages:
   - packages/*
   - plugins/*
   - site
   - docs-site
+  - collab-test/site
 
 # vite 8.3.4 补丁：Windows 上 import.meta.glob 相对 base 的热更新失效（运行中新增文件
 # 不进 glob 集合），成因与验证见 probes/2610121018_vite-add-discovery，上游修掉即撤

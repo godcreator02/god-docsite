@@ -17,14 +17,14 @@ const importedFilesOf = (name: string) =>
 /** 文件属于哪一块：三个模型目录各算一块，src 根下的文件算 root */
 const blockOf = (name: string) => (name.includes('/') ? name.split('/')[0]! : 'root')
 
-/** 能在浏览器里用的基础包出口：人员列表与评论的格式 */
-const docsiteKitBrowserEntry = '@godcreator/docsite-kit/comments'
+/** 能在浏览器里用的人员列表格式 */
+const browserEntries = ['@godcreator/docsite-identity', '@godcreator/docsite-identity/server']
 
 describe('数据模型包的边界', () => {
-  it('只引用自己的文件、node 内置模块与基础包的人员与评论格式：不认识网站、合并检查与别的包', () => {
+  it('只引用自己的文件、node 内置模块与人员、评论两个能力包的格式：不认识网站、合并检查与别的包', () => {
     const outside = sources.flatMap((name) =>
       importsOf(name)
-        .filter((spec) => !spec.startsWith('.') && !spec.startsWith('node:') && spec !== docsiteKitBrowserEntry)
+        .filter((spec) => !spec.startsWith('.') && !spec.startsWith('node:') && !browserEntries.includes(spec))
         .map((spec) => `${name} → ${spec}`),
     )
     expect(outside).toEqual([])
@@ -34,10 +34,10 @@ describe('数据模型包的边界', () => {
     expect(sources.filter((name) => importsOf(name).includes('node:child_process'))).toEqual([])
   })
 
-  it('出口 ./task-model 与 ./notification-model 能在浏览器里用：引用 node 内置模块的只有 task-model/node.ts 与项目布局 project-model/project-layout.ts，别的文件不引用它们', () => {
+  it('出口 ./task-model 与 ./notification-model 能在浏览器里用：引用 node 内置模块的只有 task-model/node.ts 与 project-model 的两个文件（布局与日志页文件），别的文件不引用它们', () => {
     const usingNode = sources.filter((name) => importsOf(name).some((spec) => spec.startsWith('node:')))
-    expect(usingNode.sort()).toEqual(['project-model/project-layout.ts', 'task-model/node.ts'])
-    const nodeOnly = ['task-model/node.ts', 'project-model/project-layout.ts']
+    expect(usingNode.sort()).toEqual(['project-model/journal-files.ts', 'project-model/project-layout.ts', 'task-model/node.ts'])
+    const nodeOnly = ['task-model/node.ts', 'project-model/project-layout.ts', 'project-model/journal-files.ts']
     const reachingNode = sources
       .filter((name) => blockOf(name) !== 'project-model' && !nodeOnly.includes(name))
       .flatMap((name) => importedFilesOf(name).filter((file) => nodeOnly.includes(file)).map((file) => `${name} → ${file}`))
@@ -67,7 +67,7 @@ describe('数据模型包的边界', () => {
       'people.ts': ['./records.js'],
       'state.ts': ['./records.js', './people.js'],
       'write.ts': ['./records.js', './people.js', './state.js'],
-      'inbox.ts': ['./state.js'],
+      'inbox.ts': ['./state.js', './people.js'],
       'node.ts': ['./records.js', './people.js', './state.js', './write.js'],
       'index.ts': ['./records.js', './people.js', './state.js', './write.js', './inbox.js'],
     }

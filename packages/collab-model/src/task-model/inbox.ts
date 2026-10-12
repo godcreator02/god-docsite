@@ -1,11 +1,15 @@
-import { mentionsOf, type CommentReplyFrontmatter, type CommentThreadFrontmatter, type Person } from '@godcreator/docsite-kit/comments'
+import { mentionsOf } from '@godcreator/docsite-identity'
 import type { CollabState, TaskState } from './state.js'
+import type { Person } from './people.js'
 
-/** 一串评论读出来的样子：基础包 readCommentThreads 的结果（只用到这几项），浏览器里也能构造 */
+/**
+ * 一串评论读出来的样子：评论包 readCommentThreads 的结果（只用到这几项），浏览器里也能构造。
+ * 评论模型没有已解决状态：每串都算
+ */
 export type CommentThreadOnFile = {
   id: string
-  head: Pick<CommentThreadFrontmatter, 'author' | 'page' | 'status'> & { file: string; body: string }
-  replies: Array<Pick<CommentReplyFrontmatter, 'author'> & { file: string; body: string }>
+  head: { authorId: string; page?: string; file: string; body: string }
+  replies: Array<{ authorId: string; file: string; body: string }>
 }
 
 /** 一条评论在哪：评论串文件夹名 / 文件名，如 2026-10-10-3f9a2c/index.mdx */
@@ -26,9 +30,9 @@ export type ReplyToMe = { comment: string; author: string; text: string; threadI
 export type InboxItems = {
   /** 负责人是我、还没做完的任务 */
   tasks: TaskState[]
-  /** 还没解决的评论串里，别人写的、正文 @ 了我的（@<id>） */
+  /** 别人写的、正文 @ 了我的（@<id>） */
   mentions: MentionOfMe[]
-  /** 还没解决的评论串里，别人在我发起或回复过之后写的回复 */
+  /** 别人在我发起或回复过之后写的回复 */
   repliesToMe: ReplyToMe[]
 }
 
@@ -36,27 +40,26 @@ function mentionsOfMe(thread: CommentThreadOnFile, person: string, people: reado
   const page = commentDestinationOf(thread)
   const entries = [{ ...thread.head, in: 'comment' as const }, ...thread.replies.map((reply) => ({ ...reply, in: 'reply' as const }))]
   return entries
-    .filter((entry) => entry.author !== person && mentionsOf(entry.body, people).includes(person))
-    .map((entry) => ({ in: entry.in, comment: commentRefOf(thread.id, entry.file), author: entry.author, text: entry.body, page }))
+    .filter((entry) => entry.authorId !== person && mentionsOf(entry.body, people).includes(person))
+    .map((entry) => ({ in: entry.in, comment: commentRefOf(thread.id, entry.file), author: entry.authorId, text: entry.body, page }))
 }
 
 function repliesToMeIn(thread: CommentThreadOnFile, person: string): ReplyToMe[] {
   const page = commentDestinationOf(thread)
-  let joined = thread.head.author === person
+  let joined = thread.head.authorId === person
   const replies: ReplyToMe[] = []
   for (const reply of thread.replies) {
-    if (reply.author === person) joined = true
-    else if (joined) replies.push({ comment: commentRefOf(thread.id, reply.file), author: reply.author, text: reply.body, threadId: thread.id, page })
+    if (reply.authorId === person) joined = true
+    else if (joined) replies.push({ comment: commentRefOf(thread.id, reply.file), author: reply.authorId, text: reply.body, threadId: thread.id, page })
   }
   return replies
 }
 
-/** 现在该这个人处理的：没有「已读」，处理完（任务做完、评论串解决）就不再列出 */
+/** 现在该这个人处理的：没有「已读」，任务做完就不再列出 */
 export function inboxOf(state: Pick<CollabState, 'tasks'>, threads: readonly CommentThreadOnFile[], person: string, people: readonly Person[]): InboxItems {
-  const openThreads = threads.filter((thread) => thread.head.status === 'open')
   return {
     tasks: state.tasks.filter((task) => task.owner === person && task.status !== 'done'),
-    mentions: openThreads.flatMap((thread) => mentionsOfMe(thread, person, people)),
-    repliesToMe: openThreads.flatMap((thread) => repliesToMeIn(thread, person)),
+    mentions: threads.flatMap((thread) => mentionsOfMe(thread, person, people)),
+    repliesToMe: threads.flatMap((thread) => repliesToMeIn(thread, person)),
   }
 }

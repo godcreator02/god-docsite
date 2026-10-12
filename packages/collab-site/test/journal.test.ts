@@ -1,12 +1,11 @@
-import { mkdirSync, mkdtempSync, realpathSync, symlinkSync, writeFileSync } from 'node:fs'
+import { mkdirSync, mkdtempSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import path from 'node:path'
 import { describe, expect, it } from 'vitest'
-import { journalDatesOf, journalProblemsOf, journalSourcesOf } from '../src/journal-files.js'
+import { journalDatesOf, journalProblemsOf, journalSourcesOf } from '@godcreator/collab-model/project-model'
 import { journalMentionsOf } from '../src/journal.js'
 import { plainLinesOf } from '../src/plain-lines.js'
 import { isRealDate, journalUrlOf } from '../src/site-data.js'
-import { collabSiteMdxProblems, collabSiteProblems } from '../src/site-check.js'
 
 function siteWith(files: Record<string, string>): string {
   const siteDir = mkdtempSync(path.join(tmpdir(), 'collab-site-'))
@@ -16,19 +15,6 @@ function siteWith(files: Record<string, string>): string {
   }
   return siteDir
 }
-
-/**
- * 站点检查用站点自己装的基础包编译 MDX：站点的 node_modules 链到功能包装的基础包在 pnpm 仓库里的那一层，
- * 基础包和它的依赖都在那一层里。vitest 按链接的路径找依赖、不换成真实路径，只链基础包一个找不到它的依赖
- */
-function installedSiteWith(files: Record<string, string>): string {
-  const siteDir = siteWith(files)
-  const installedKit = realpathSync(path.resolve(import.meta.dirname, '../node_modules/@godcreator/docsite-kit'))
-  symlinkSync(path.resolve(installedKit, '../..'), path.join(siteDir, 'node_modules'), 'junction')
-  return siteDir
-}
-
-const people = `${JSON.stringify([{ id: 'bob', name: '鲍勃' }])}\n`
 
 describe('日期与日志页的地址', () => {
   it('只认真实存在的 YYYY-MM-DD', () => {
@@ -63,20 +49,6 @@ describe('journal/ 里的文件', () => {
       ['2026-10-09', '九日\n'],
       ['2026-10-11', '十一日\n'],
     ])
-  })
-
-  it('站点检查：基础包查的人员列表与评论，加上日志页的文件名', async () => {
-    expect(await collabSiteProblems(siteWith({ 'people.json': people, 'journal/2026-10-11.mdx': '' }))).toEqual([])
-    const problems = await collabSiteProblems(siteWith({ 'people.json': people, 'journal/oops.mdx': '', 'comments/2026-10-11-a/index.mdx': '---\nauthor: dave\ncreatedAt: 2026-10-11T09:00:00.000Z\nstatus: open\n---\n\n问一下\n' }))
-    expect(problems).toEqual(['2026-10-11-a/index.mdx 的 author dave 不在 people.json 里', 'journal/oops.mdx：日志页的文件名要是 YYYY-MM-DD.mdx'])
-  })
-
-  it('提交前的编译检查：内容页、评论、日志页里编不过的 MDX 与写错的公式报出文件', async () => {
-    const siteDir = installedSiteWith({ 'journal/2026-10-11.mdx': '电压 $\\frac{1}{$ 伏\n', 'content/index.mdx': '<Unclosed>\n', 'comments/2026-10-11-a/index.mdx': '---\nauthor: bob\n---\n\n好\n' })
-    const problems = await collabSiteMdxProblems(siteDir)
-    expect(problems).toHaveLength(2)
-    expect(problems.some((problem) => problem.includes('journal') && problem.includes('2026-10-11.mdx'))).toBe(true)
-    expect(problems.some((problem) => problem.includes('content') && problem.includes('index.mdx'))).toBe(true)
   })
 })
 

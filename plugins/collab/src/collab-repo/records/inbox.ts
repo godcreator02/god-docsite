@@ -1,7 +1,8 @@
 import path from 'node:path'
-import { collabState, inboxOf, type CollabProblem, type InboxItems, type Person } from '@godcreator/collab-model/task-model'
+import { existsSync } from 'node:fs'
+import { collabState, inboxOf, type CollabProblem, type CommentThreadOnFile, type InboxItems, type Person } from '@godcreator/collab-model/task-model'
 import { readCollabSnapshot } from '@godcreator/collab-model/task-model/node'
-import { readCommentThreads } from '@godcreator/docsite-kit/files'
+import { readCommentThreads } from '@godcreator/docsite-comments/server'
 import { CollabRejected, messageOf } from '../../errors.js'
 import { peopleOfRepo, type Project } from '../../project/project.js'
 
@@ -10,10 +11,21 @@ export type Inbox = InboxItems & {
   problems: CollabProblem[]
 }
 
-/** 站点 comments/ 里的评论串；格式不对时拒绝，原话是基础包列出的全部问题 */
-async function commentThreadsOf(project: Project) {
+/** 评论文件的路径是 <串 id>/<文件名>（相对 comments/）：两段各取其一 */
+const threadIdOf = (file: string) => file.split('/')[0]!
+const fileNameOf = (file: string) => file.split('/')[1]!
+
+/** 站点 comments/ 里的评论串；还没有 comments/ 就是还没有评论，格式不对时拒绝，原话是评论包列出的全部问题 */
+async function commentThreadsOf(project: Project): Promise<CommentThreadOnFile[]> {
+  const commentsDir = path.join(project.siteDir, 'comments')
+  if (!existsSync(commentsDir)) return []
   try {
-    return await readCommentThreads(path.join(project.siteDir, 'comments'))
+    const threads = await readCommentThreads(commentsDir)
+    return threads.map(({ head, replies }) => ({
+      id: threadIdOf(head.path),
+      head: { authorId: head.authorId, ...(head.page !== undefined ? { page: head.page } : {}), file: fileNameOf(head.path), body: head.body },
+      replies: replies.map((reply) => ({ authorId: reply.authorId, file: fileNameOf(reply.path), body: reply.body })),
+    }))
   } catch (error) {
     throw new CollabRejected(`site/comments/ 里的评论读不对：\n${messageOf(error)}`)
   }

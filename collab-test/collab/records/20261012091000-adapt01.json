@@ -1,0 +1,11 @@
+{
+  "id": "20261012091000-adapt01",
+  "type": "task",
+  "author": "godcreator",
+  "status": "doing",
+  "title": "协作站三包依赖换到 0.3 地基",
+  "owner": "godcreator",
+  "due": "2026-10-15",
+  "detail": "collab-model 只依赖 identity；collab-site 走功能包四出口；插件对 gwb-docsite 0.3 服务面。",
+  "module": "20261012090000-rewrite"
+}

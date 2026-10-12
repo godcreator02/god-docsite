@@ -5,7 +5,7 @@ import path from 'node:path'
 import { Readable } from 'node:stream'
 import { isPlainObject } from '@godcreator/collab-model/task-model'
 import { projectDirOfSite } from '@godcreator/collab-model/project-model'
-import { siteIdentity } from '@godcreator/docsite-kit/server'
+import { siteIdentity } from '@godcreator/docsite-identity/server'
 import { projectFileApiUrl, repoLinkPrefix, type RepoLinkCheck, type RepoLinkOpen } from '../repo-link-api.js'
 
 /** 交给浏览器看的文件：浏览器自己能显示，PDF 还能按 #page=N 跳页 */

@@ -1,6 +1,6 @@
 /**
  * gwb-collab 与站点之间的约定：推给站点的数据的名字与形状，以及站点收下时按形状逐项检查的 siteFeedOf。
- * 名字与形状任何一项变了，siteProtocol 加一
+ * 插件与功能包同仓发版，版本对齐由发版顺序保证
  */
 import type { ProjectLeads } from '../project-model/project-leads.js'
 import type { Notification } from './notifications.js'
@@ -14,16 +14,6 @@ export { InvalidSiteFeed } from './shape-checks.js'
  * 每当通知或项目负责人变了就再推一次。站点只收不发：不向插件发任何请求，网站自己不跑 git
  */
 export const siteFeedChannel = 'collab'
-
-/**
- * 插件与站点之间的协议号：推给站点的数据的名字与形状一变就加一；记录格式有破坏性改动时也加一，
- * 免得没升插件的人打开升过级的站点，只看到「记录读不对」。
- * 功能包 package.json 的 collabSiteProtocol 写同一个数；gwb-collab 拿它比 site/ 里装的那一版，对不上就不托管这个站点
- */
-export const siteProtocol = 8
-
-/** 带这个协议号的第一版功能包：协议号对不上时，报错里让人把 site/ 的功能包升到这条线 */
-export const siteProtocolSince = '0.30.0'
 
 /**
  * gwb-collab 交给站点的全部数据，一起交、一起推给页面。

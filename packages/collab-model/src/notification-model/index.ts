@@ -1,4 +1,4 @@
-export { InvalidSiteFeed, siteFeedChannel, siteFeedOf, siteProtocol, siteProtocolSince } from './site-feed.js'
+export { InvalidSiteFeed, siteFeedChannel, siteFeedOf } from './site-feed.js'
 export type { SiteFeed } from './site-feed.js'
 export {
   mentionPlaces,

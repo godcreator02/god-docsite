@@ -18,11 +18,12 @@ gwb-collab 插件）。docfirst 2026-10-12 自 gwb-docfirst 仓并入（选型�
 | `packages/docfirst-workflow/` | docfirst 本身：命令行、项目装配与格式，接到 fumadocs 站上的部分在子入口 `./fumadocs` |
 | `packages/docsite-docfirst/` | 地基的功能包：remark 插件、Term 与文件树、星轨盘与卡页路由；`template/` 的起始物（docfirst.config.mjs、outputs 正本、两区起始页）从 docs-site 派生 |
 | `packages/docfirst-explainer/` | 转发薄壳：`@godcreator/docsite-explainer` 的原出口名转发（正本已在本仓），装旧包名的站不用改代码 |
-| `packages/collab-model/` 等 | 协作站三包：model（数据模型：仓布局、任务与模块格式、通知）、collab-site（功能包：任务页、日历与日志、通知栏）、merge-check（合并检查）。对基础包的依赖暂钉 `^0.1.x`，跟 0.3.0 的适配是 gitea 上 collab-site 仓的 issue #4 |
+| `packages/collab-model/` 等 | 协作站三包：model（数据模型：仓布局与 `journal/` 文件名规则、任务与模块格式、通知）、collab-site（功能包：任务页、日历与日志、通知栏，照 0.3 地基的功能包约定四出口）、merge-check（合并检查）。依赖直连各能力包（identity、comments），不再经组合包转发 |
 | `plugins/docsite/` | gwb 基础插件 `@godcreator/gwb-docsite`：身份码、一步建站（建站器在插件里，骨架模板从自述站派生）、托管站点、评论命令、说明书 `docsite` |
 | `plugins/docfirst/` | gwb 插件 `@godcreator/gwb-docfirst-workflow`：`docfirst.create`（认站名、选端口、把 docsite-docfirst 交给 `gwbDocsite.init`）、说明书 `docs-site` / `docs-writing` / `trajectory` |
 | `plugins/collab/` | gwb 插件 `@godcreator/gwb-collab`：协作仓与别的仓两套操作、通知交给站点/窗格/QQ/AI、项目与任务命令，站点交给 gwb-docsite |
 | `site/` | 自述站：**骨架的正本**——`app/` 与根目录的配置手写在这里，docsite 插件构建时派生建站模板（`plugins/docsite/template/`，构建产物不进 git）；内容只剩最小示例与评论定位回归页 |
+| `collab-test/` | 协作站测试仓（开发台）：协作仓形态（`collab/records/` 测试数据 + `site/` 挂 collab-site 功能包），依赖 `workspace:*` 直连本仓的包、内容进主仓 git、不 init git；gwb-docsite 托管（端口 4450），是任务页与日历的正本测试场。上 Gitea 的运行实例从它导出（见 docs-site 的 collab 分区） |
 | `docs-site/` | 全仓文档站：三族的说明、fumadocs 原理、维护者手册与随插件发布的说明书正本（outputs），骨架与自述站同代、手写；轨迹卡三族并在站点根 `trajectory/` |
 | `tests/` | 工作区级测试：`boundary.test.ts`（全仓边界守卫——地基不认识 docfirst、docfirst 单向用 docsite-kit）、`template-versions.test.ts`（模板版本盯守） |
 | `probes/` | 实验材料，一个实验一个目录，照目录里 README 第一行就能重新运行 |

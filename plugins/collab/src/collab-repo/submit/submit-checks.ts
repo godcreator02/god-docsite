@@ -1,7 +1,6 @@
 import { newFormatProblems, type CollabProblem } from '@godcreator/collab-model/task-model'
 import { readCollabSnapshot } from '@godcreator/collab-model/task-model/node'
-import { collabPathInRepo, sitePathInRepo } from '@godcreator/collab-model/project-model'
-import { collabSiteMdxProblems, collabSiteProblems } from '@godcreator/collab-site/site-check'
+import { collabPathInRepo, journalProblemsOf, sitePathInRepo } from '@godcreator/collab-model/project-model'
 import { git } from '../../git/git.js'
 import { upstream } from '../../git/status.js'
 import type { Project } from '../../project/project.js'
@@ -22,10 +21,12 @@ async function forkPointOf(repo: string): Promise<string> {
   return (await git(repo, ['merge-base', 'HEAD', upstream])).trim()
 }
 
-/** 提交前的站点检查：查工作区里的 site/（人员列表、评论、日志页的文件名），再编译 MDX，一条一句话，前面带上 site/ */
+/**
+ * 提交前的站点检查：查工作区里 site/journal/ 的文件名（站点布局的 loader 也按它读，不合规矩整站打不开），一条一句话，前面带上 site/。
+ * 其余的站点问题（依赖装没装、基础包版本、页面起不起得来）由 gwb-docsite 启动时查；类型由 site/ 的 typecheck 脚本查
+ */
 export async function siteProblemsOf(project: Project): Promise<string[]> {
-  const problems = [...(await collabSiteProblems(project.siteDir)), ...(await collabSiteMdxProblems(project.siteDir))]
-  return problems.map((problem) => `${sitePathInRepo}/  ${problem}`)
+  return journalProblemsOf(project.siteDir).map((problem) => `${sitePathInRepo}/  ${problem}`)
 }
 
 /**

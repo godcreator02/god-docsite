@@ -3,7 +3,7 @@ import path from 'node:path'
 import { describe, expect, it } from 'vitest'
 import { CollabRejected } from '../../../src/errors.js'
 import { submitCollab } from '../../../src/collab-repo/submit/submit.js'
-import { admin, bob, bobCode, executor, forMain, git, merges, origin, peopleEntries, peopleText, t2, task, threadFile, writeRecord, writeSite } from './submit-fixture.js'
+import { bob, bobCode, executor, forMain, git, merges, origin, peopleEntries, peopleText, t2, task, threadFile, writeRecord, writeSite } from './submit-fixture.js'
 
 /*
  * 只有负责人能改的内容，规则本体（哪些字段算、怎么核对）在合并检查包 lead-only 的测试里；
@@ -68,25 +68,11 @@ describe('collab.submit 带上 site/ 的改动', () => {
     expect(ran).toEqual([])
   })
 
-  it('别人在 main 上把 carol 移出了人员列表，我同时转来 carol 写的评论：合 main 之后站点有新问题，不推送，改动留在工作区', async () => {
-    writeSite(admin, { 'people.json': peopleText(peopleEntries.filter((entry) => entry.id !== 'carol')) })
-    git(admin, 'add', '.')
-    git(admin, 'commit', '-q', '-m', 'admin 移出 carol')
-    git(admin, 'push', '-q', 'origin', 'main')
-    writeSite(bob.repo, { 'comments/2026-10-10-carol/index.mdx': threadFile('carol') })
-    await expect(submitCollab(bob, merges(), fakeTypecheck('passed').typecheck)).rejects.toThrow(
-      '把 main 合进来之后有新问题，没有推送，改动留在工作区（没提交）：\nsite/  2026-10-10-carol/index.mdx 的 author carol 不在 people.json 里',
-    )
-    expect(() => git(origin, 'rev-parse', '--verify', '-q', 'refs/for/main')).toThrow()
-    expect(git(bob.repo, 'rev-list', '--count', 'origin/main..HEAD')).toBe('0')
-    expect(git(bob.repo, 'status', '--porcelain')).toBe('?? site/comments/')
-  })
-
   it('站点检查与类型检查不过：不提交、不推送，逐条写明', async () => {
     writeSite(bob.repo, { 'comments/2026-10-10-dave/index.mdx': threadFile('dave'), 'journal/2026-02-30.mdx': '# 不存在的一天\n' })
     const { typecheck, ran } = fakeTypecheck('passed')
     await expect(submitCollab(bob, merges(), typecheck)).rejects.toThrow(
-      'site/ 的站点检查不过，没有提交：\nsite/  2026-10-10-dave/index.mdx 的 author dave 不在 people.json 里\nsite/  journal/2026-02-30.mdx：2026-02-30 不是真实存在的日期',
+      'site/ 的站点检查不过，没有提交：\nsite/  journal/2026-02-30.mdx：2026-02-30 不是真实存在的日期',
     )
     expect(ran).toEqual([])
     expect(git(bob.repo, 'rev-list', '--count', 'HEAD')).toBe('1')

@@ -1,40 +1,27 @@
 {
   "name": "@godcreator/collab-site",
-  "version": "0.30.3",
-  "collabSiteProtocol": 8,
-  "description": "课题组协作站的功能包，接在文档站基础包 @godcreator/docsite-kit 上：任务页（人员、模块甘特图、看板）、任务与模块各自那一页、项目日历与每天一篇的日志页、顶部的通知栏、页面里引用任务的 RecordLink，以及提交前的站点检查。照基础包的功能包约定交出路由、侧栏入口、布局数据与样式，template/ 只有日志页的集合；数据模型在 @godcreator/collab-model",
+  "version": "0.31.0",
+  "description": "课题组协作站的功能包，接在文档站基础包 @godcreator/docsite-kit 上：任务页（人员、模块甘特图、看板）、任务与模块各自那一页、项目日历与每天一篇的日志页、顶部的通知栏、页面里引用任务的 RecordLink。照基础包的功能包约定交出路由、侧栏入口、布局数据与样式，template/ 只有日志页的集合；数据模型在 @godcreator/collab-model",
   "type": "module",
   "exports": {
     "./routes": {
-      "types": "./dist/feature/routes.d.ts",
-      "default": "./dist/feature/routes.js"
+      "types": "./dist/routes.d.ts",
+      "default": "./dist/routes.js"
     },
     "./site": {
-      "types": "./dist/feature/site.d.ts",
-      "default": "./dist/feature/site.js"
+      "types": "./dist/site.d.ts",
+      "default": "./dist/site.js"
     },
     "./site-server": {
-      "types": "./dist/feature/site-server.d.ts",
-      "default": "./dist/feature/site-server.js"
+      "types": "./dist/site-server.d.ts",
+      "default": "./dist/site-server.js"
     },
-    "./server": {
-      "types": "./dist/server/index.d.ts",
-      "default": "./dist/server/index.js"
-    },
-    "./ui": {
-      "types": "./dist/ui/index.d.ts",
-      "default": "./dist/ui/index.js"
-    },
-    "./site-check": {
-      "types": "./dist/site-check.d.ts",
-      "default": "./dist/site-check.js"
-    },
-    "./styles.css": "./styles.css"
+    "./styles.css": "./styles/site.css"
   },
   "files": [
     "dist",
     "src",
-    "styles.css",
+    "styles",
     "template"
   ],
   "repository": {
@@ -51,8 +38,12 @@
     "check": "tsc --noEmit && vitest run"
   },
   "peerDependencies": {
-    "@fumadocs/base-ui": "16.16.2",
-    "@godcreator/docsite-kit": "^0.1.9",
+    "@fumadocs/base-ui": "16.17.1",
+    "@godcreator/docsite-comments": "^0.2.0",
+    "@godcreator/docsite-feed": "^0.1.0",
+    "@godcreator/docsite-identity": "^0.1.0",
+    "@godcreator/docsite-kit": "^0.3.0",
+    "@godcreator/docsite-ui": "^0.2.0",
     "lucide-react": "^1.54.0",
     "react": "^19.3.0",
     "react-dom": "^19.3.0",
@@ -64,13 +55,17 @@
     "remark-gfm": "^4.0.1"
   },
   "devDependencies": {
-    "@fumadocs/base-ui": "16.16.2",
-    "@godcreator/docsite-kit": "^0.1.9",
+    "@fumadocs/base-ui": "16.17.1",
+    "@godcreator/docsite-comments": "workspace:*",
+    "@godcreator/docsite-feed": "workspace:*",
+    "@godcreator/docsite-identity": "workspace:*",
+    "@godcreator/docsite-kit": "workspace:*",
+    "@godcreator/docsite-ui": "workspace:*",
     "@testing-library/react": "^16.3.3",
     "@types/node": "^26.6.2",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
-    "fumadocs-core": "16.16.2",
+    "fumadocs-core": "16.17.1",
     "jsdom": "^30.1.1",
     "lucide-react": "1.54.0",
     "react": "^19.3.0",

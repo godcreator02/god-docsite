@@ -1,0 +1,15 @@
+---
+title: 这个测试站是什么
+description: 协作站功能包 @godcreator/collab-site 的开发台：任务页与日历页的正本测试场，数据是假的三人项目
+---
+
+这个站挂在 docsite-kit 仓的 `collab-test/` 下，用来开发与验收协作站功能包：
+任务页（[任务](/tasks)）、[日历](/calendar)与日志页、正文里引用任务与模块的写法都在这里验。
+
+- 人员列表在 `site/people.json`：站长（godcreator）、卡罗尔（carol）、鲍勃（bob）
+- 任务与模块的记录在上一级 `collab/records/`，每条一个 JSON 文件
+- 日志页在 `site/journal/<日期>.mdx`，一天一篇
+
+正文里引用一条任务不用 import，直接写 <RecordLink id="20261012091000-adapt01" />；
+也可以写成链接 [](/tasks/20261012091000-adapt01)，或指到某一天的日志 [](/calendar/2026-10-12)。
+别的仓里的文件写成 `repo:` 链接（这个测试项目没有别的仓，链接会是灰的）：[示例](repo:some-repo/README.md)。

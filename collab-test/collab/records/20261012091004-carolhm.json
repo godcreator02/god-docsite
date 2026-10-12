@@ -1,0 +1,11 @@
+{
+  "id": "20261012091004-carolhm",
+  "type": "task",
+  "author": "carol",
+  "status": "todo",
+  "title": "重建 carol 的隔离 home",
+  "owner": "carol",
+  "due": "2026-10-18",
+  "module": "20261012090001-regtest",
+  "detail": "devkit.home.new 开 home、装插件、配 gitea 令牌与机器人，克隆测试项目。"
+}

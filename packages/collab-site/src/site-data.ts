@@ -34,7 +34,7 @@ export function journalUrlOf(date: string): string {
   return `${calendarUrl}/${date}`
 }
 
-/** 日志页的文件：journal/<日期>.mdx */
+/** 日志页的文件名与日期规则：collab-model 的 project-model/journal-files.ts（Node 侧）有同一份，改时两处一起 */
 export const journalFilePattern = /^(\d{4}-\d{2}-\d{2})\.mdx$/
 
 /** YYYY-MM-DD 是不是真实存在的日期 */

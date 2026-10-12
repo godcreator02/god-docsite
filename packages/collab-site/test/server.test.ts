@@ -34,7 +34,7 @@ afterEach(() => {
   vi.unstubAllEnvs()
 })
 
-const post = (body: unknown) => new Request('http://site/api/collab', { method: 'POST', body: typeof body === 'string' ? body : JSON.stringify(body) })
+const post = (body: unknown) => new Request('http://site/api/collab', { method: 'POST', headers: { origin: process.env.DOCSITE_ORIGIN ?? 'http://127.0.0.1:4450' }, body: typeof body === 'string' ? body : JSON.stringify(body) })
 
 describe('布局的协作数据', () => {
   it('任务、模块、人员、本机身份、有日志的日子；gwb-collab 还没推数据时通知与负责人为 null', async () => {
@@ -78,10 +78,13 @@ describe('写任务与模块的接口', () => {
     expect(await statusOf({ action: 'create', record: {}, extra: 1 })).toBe(400)
   })
 
-  it('不是 POST 回 405；只读时回 403，不写文件', async () => {
+  it('不是 POST 回 405；只读或 Origin 不对回 403，不写文件', async () => {
     expect((await collabRecordResponse(new Request('http://site/api/collab'))).status).toBe(405)
     vi.stubEnv('DOCSITE_IDENTITY_CODE', 'nobodycode99')
     expect((await collabRecordResponse(post({ action: 'create', record: { type: 'task', status: 'todo', title: '调 PLL' } }))).status).toBe(403)
+    vi.unstubAllEnvs()
+    const foreign = new Request('http://site/api/collab', { method: 'POST', headers: { origin: 'http://elsewhere' }, body: '{}' })
+    expect((await collabRecordResponse(foreign)).status).toBe(403)
     expect(recordFiles()).toEqual([`${task.id}.json`])
   })
 })

@@ -1,7 +1,7 @@
 import { useId, type ButtonHTMLAttributes, type KeyboardEvent, type ReactNode } from 'react'
 import { TriangleAlert, X } from 'lucide-react'
 import type { TaskStatus } from '@godcreator/collab-model/task-model'
-import { Avatar } from '@godcreator/docsite-kit/ui'
+import { Avatar } from '@godcreator/docsite-identity/react'
 import { useCollabData, useIsLead, useNameOf } from './collab-data.js'
 
 export const statusLabel: Record<TaskStatus, string> = { todo: '未开始', doing: '进行中', done: '已完成' }

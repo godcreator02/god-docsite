@@ -167,9 +167,9 @@ const entries = [
 
 /** @type {import('@godcreator/docsite-explainer/seam-graph').SeamInput[]} */
 const seams = [
-  /* ref file="../plugins/collab/src/site-process/collab-sites.ts" lines="61-66" hash="25b342ed694f" blob="cb30a59e92cd" */
-  /* ref file="../plugins/collab/src/site-process/collab-sites.ts" lines="119-133" hash="53302ab06f11" blob="cb30a59e92cd" */
-  /* ref file="../plugins/collab/src/site-process/collab-sites.ts" lines="80-89" hash="d1b31246bb86" blob="cb30a59e92cd" */
+  /* ref file="../plugins/collab/src/site-process/collab-sites.ts" lines="46-48" hash="daafd3c0ea7c" blob="9c89664fae82" */
+  /* ref file="../plugins/collab/src/site-process/collab-sites.ts" lines="94-108" hash="a1a8e51d3c73" blob="9c89664fae82" */
+  /* ref file="../plugins/collab/src/site-process/collab-sites.ts" lines="61-70" hash="177a8a322910" blob="9c89664fae82" */
   {
     n: 1,
     name: '初始化、托管与推数据',
@@ -201,7 +201,7 @@ const seams = [
     via: 'code',
     text: 'gwb-docsite 在协作仓的 site/ 里运行 pnpm dev，意外退出就重启；身份码交给开发服务，站点按它认人。推来的数据经推送通道交给开发服务，站点没在运行时先记着。',
   },
-  /* ref file="../packages/collab-site/src/server/index.ts" lines="20-42" hash="a101bc6c52d6" blob="dedd98507f38" */
+  /* ref file="../packages/collab-site/src/server/index.ts" lines="21-43" hash="f1723afb4018" blob="c92ed3baa954" */
   {
     n: 4,
     name: '推来的数据',

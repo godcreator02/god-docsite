@@ -2,7 +2,6 @@ import { existsSync, readFileSync, realpathSync } from 'node:fs'
 import path from 'node:path'
 import { collabPathInRepo, peoplePathInRepo, projectDirOfCollabRepo, sitePathInRepo } from '@godcreator/collab-model/project-model'
 import { CollabFormatError, parsePeople, personOfCode, type Person } from '@godcreator/collab-model/task-model'
-import { siteTitleOf } from '@godcreator/docsite-kit/files'
 import type { JoiningPerson } from '@godcreator/gwb-docsite'
 import { CollabRejected } from '../errors.js'
 import { isGiteaName, ownerAndRepoOf, type GiteaLocation } from '../gitea-api/gitea.js'
@@ -60,6 +59,16 @@ export function peopleOfRepo(repo: string): Person[] {
   } catch (error) {
     if (error instanceof CollabFormatError) throw new CollabRejected(error.message)
     throw error
+  }
+}
+
+/** 站名：site/content/meta.json 的 title，读不出（没写或文件不在）回 null */
+function siteTitleOf(siteDir: string): string | null {
+  try {
+    const meta = JSON.parse(readFileSync(path.join(siteDir, 'content', 'meta.json'), 'utf8')) as { title?: unknown }
+    return typeof meta.title === 'string' && meta.title.trim() !== '' ? meta.title : null
+  } catch {
+    return null
   }
 }
 

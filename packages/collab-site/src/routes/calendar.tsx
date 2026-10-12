@@ -1,6 +1,6 @@
 import { useLoaderData } from 'react-router'
 import { DocsPage } from '@fumadocs/base-ui/layouts/docs/page'
-import { siteName } from '@site/lib/source'
+import { siteName } from '@site/lib/source.server'
 import { CalendarPage } from '../ui/calendar-page.js'
 
 export function loader() {

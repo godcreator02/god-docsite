@@ -1,0 +1,9 @@
+{
+  "id": "20261012090000-rewrite",
+  "type": "module",
+  "author": "godcreator",
+  "title": "协作站重写收尾",
+  "owner": "godcreator",
+  "due": "2026-10-20",
+  "detail": "从旧仓搬来的协作站按 fumadocs 最原生的方式重写：任务页、日历、通知栏在新地基上跑起来，配上测试协作站与 Gitea 测试项目。"
+}

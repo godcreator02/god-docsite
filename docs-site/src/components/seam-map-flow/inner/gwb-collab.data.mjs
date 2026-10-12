@@ -74,7 +74,7 @@ const modules = [
     blurb: '把协作仓那一套、别的仓那一套、组织 webhook 与刷新出错此刻的状态写成一条条通知（字段与短句在数据模型包的通知模型），连同项目负责人组成推给网站的整份数据。哪个目录的状态变了就调 changed(repo)：交给站点进程推一次；做完过一次完整刷新后，把此刻的全部通知交给接口 B。协作窗格与交给 AI 要用时现算。',
     caps: [{ id: 'compute', name: '算通知', ident: 'notificationsOf' }],
   },
-  /* ref file="../plugins/collab/src/site-process/collab-sites.ts" lines="26-38" hash="7edd71eab0aa" blob="cb30a59e92cd" */
+  /* ref file="../plugins/collab/src/site-process/collab-sites.ts" lines="24-35" hash="772401143edf" blob="9c89664fae82" */
   {
     id: 'site-process',
     name: '站点',
@@ -163,7 +163,7 @@ const seams = [
   { n: 8, name: '协作者', a: ['collaborators'], b: ['leads'], iface: 'GET /repos/<组织>/<协作仓>/collaborators', convention: false, via: 'code', text: '协作仓的协作者就是项目负责人。' },
   { n: 9, name: '负责人', a: ['leads'], b: ['records'], iface: 'projectLeadsOf(gitea, project) → ProjectLeads', convention: false, via: 'code', text: '删任务与模块时经 Gitea 现读项目负责人，当 projectLeads 参数传给数据模型包的写入规则。' },
   { n: 10, name: '在 main 上提交', a: ['submit'], b: ['worktree'], iface: 'git add --all · git commit -- collab site · git merge --no-edit origin/main · 失败时 git reset --mixed', convention: false, via: 'disk', text: '提交 collab/ 与 site/ 的改动，再把 origin/main 合进来。合 main 有冲突就停在半路、冲突标记留在文件里；推送前拦下、推送失败、被打回或超时，就退回推送时的 origin/main，改动回到工作区。' },
-  /* ref file="../plugins/collab/src/index.ts" lines="61-62" hash="df45d6673e59" blob="23cf8898bf72" */
+  /* ref file="../plugins/collab/src/index.ts" lines="60-61" hash="df45d6673e59" blob="afcf0a62693d" */
   { n: 11, name: '快进与本机状态', a: ['sync'], b: ['worktree'], iface: 'git merge --ff-only origin/main · git status --porcelain · 监视文件', convention: false, via: 'disk', text: '能快进就快进；文件一变（停下 300 毫秒）就重算还没提交审核的文件、冲突、在不在 main 上。' },
   { n: 12, name: '记录与评论', a: ['records'], b: ['collabdir'], iface: 'readCollabSnapshot · createRecord / updateRecord / deleteRecords · readCommentThreads(site/comments)', convention: false, via: 'disk', text: '任务与模块的命令只读写工作区，不提交，写完由人或 AI 调提交审核；待办另读人员列表与评论串，只读。' },
   { n: 13, name: '取回别的仓', a: ['otherbranches', 'orgrepos'], b: ['fetch'], iface: 'git fetch origin（每个别的仓）· GET /orgs/{org}/repos → git clone（组织里新加的仓）', convention: false, via: 'code', text: '逐个取回别的仓；组织里新加的仓克隆进项目文件夹。' },
@@ -174,7 +174,7 @@ const seams = [
   { n: 18, name: '别的仓的状态', a: otherSide, b: ['compute'], iface: 'otherFetch.headsOf · otherReview.reviewsOf · otherRules.problemsOf', convention: false, via: 'code', text: '别的仓那一套交出未推送、未拉取、分叉，等我审的合并请求、轮到负责人回的 issue、我开的合并请求与我提的 issue 有了回应，规矩不对。' },
   { n: 19, name: 'webhook 与出错', a: ['events'], b: ['compute'], iface: 'webhooks.problemOf · events.errorsOf · events.refreshedOnce', convention: false, via: 'code', text: '组织 webhook 配得不对、刷新各步的出错（成为 check-error 通知），以及第一次完整刷新做完没有：没做完之前不交给接口 B。推送订阅断了不进通知，只在窗格里显示。' },
   { n: 20, name: '推给网站的数据', a: ['compute'], b: ['keep'], iface: 'sites.feedChanged(repo) → notifications.feedOf(repo) → SiteFeed', convention: false, via: 'code', text: '通知或项目负责人一变就排一条队，轮到时现算那一刻最新的整份交过去，由站点这一块经 gwb-docsite 推出去（27）。' },
-  /* ref file="../plugins/collab/src/site-process/collab-sites.ts" lines="12-13" hash="9609441c20a9" blob="cb30a59e92cd" */
+  /* ref file="../plugins/collab/src/site-process/collab-sites.ts" lines="12-13" hash="ed0bbc1cc822" blob="9c89664fae82" */
   { n: 21, name: '站点在不在运行', a: ['keep'], b: ['pane'], iface: 'sites.stateOf(repo) → { url, running, error }', convention: false, via: 'code', text: '窗格一行里的站点链接、在不在运行（没运行时链接是 gwb-docsite 按 site/package.json 的 dev 脚本里写的端口预期的地址），以及原因：托管前检查不过（协议号对不上、站点检查不过），或 gwb-docsite 报的（没装依赖、常驻失败停下）。' },
   { n: 22, name: '计数', a: ['compute'], b: ['pane'], iface: 'notificationCountsOf(notifications.currentOf(repo).notifications)', convention: false, via: 'code', text: '窗格一行里通知各组几条，和网站提示栏收起时用同一个函数。' },
   { n: 23, name: '此刻的通知', a: ['compute'], b: ['handoff'], iface: 'notifications.currentOf(repo) → { project, notifications, nameOf }', convention: false, via: 'code', text: '交给 AI 时取这个项目此刻的全部通知，连同按用户名查显示名的函数。' },
@@ -182,10 +182,10 @@ const seams = [
   { n: 25, name: 'leads changed', a: ['setup'], b: ['ntfytopic'], iface: 'POST <push-url>/collab-<组织>（Title <组织>/<仓>）leads changed', convention: false, via: 'code', text: '新建仓、照规矩配好一个仓之后，往组织的 topic 发一条 leads changed：各成员的插件收到就重读那个仓的负责人、核对规矩。' },
   /* ref file="../plugins/collab/src/project/qq-task-groups.ts" lines="28-37" hash="1ac368d749d4" blob="d00a2439ab7c" */
   { n: 26, name: '任务组', a: ['project'], b: ['qqgroups'], iface: 'gwbQqBot.registerTaskGroup({ command, title, workspace, agent: "zcode", instructions }) → 撤掉注册的函数', convention: false, via: 'code', text: '起了 QQ 命令的项目各注册一个任务组：命令是本 home 起的 QQ 命令，名字是站名，工作区是项目文件夹，要求只写项目名、协作仓路径和先读说明书 collab。变了就撤掉旧的再注册，qq-bot 抛错的原话记在 collab.projects 的 qqTaskGroup 里。' },
-  /* ref file="../plugins/collab/src/site-process/collab-sites.ts" lines="9-10" hash="621f6ea7f475" blob="cb30a59e92cd" */
-  /* ref file="../plugins/collab/src/site-process/collab-sites.ts" lines="80-89" hash="d1b31246bb86" blob="cb30a59e92cd" */
+  /* ref file="../plugins/collab/src/site-process/collab-sites.ts" lines="9-10" hash="733aefc11c14" blob="9c89664fae82" */
+  /* ref file="../plugins/collab/src/site-process/collab-sites.ts" lines="61-70" hash="177a8a322910" blob="9c89664fae82" */
   { n: 27, name: '初始化、托管与推送', a: ['keep'], b: ['hosting'], iface: "gwbDocsite.init(<仓根>/site, { features }) · gwbDocsite.keep / forget / open / stop / status / whileStopped(<仓根>/site) · gwbDocsite.push(<仓根>/site, 'collab', feed)", convention: false, via: 'code', text: 'collab.site.init 交给 gwb-docsite 照模板写出站点或重写骨架，功能包范围写成插件打包时带的那一版；查过的站点交给 gwb-docsite 常驻；collab.site.start、collab.site.stop、装依赖时经它启动、停止；推给网站的数据推到站点推送通道的频道 collab，站点没在运行时它记着最新的一份，启动后补推。' },
-  /* ref file="../plugins/collab/src/project/project.ts" lines="89-119" hash="3f314c7e2600" blob="5507995a33f1" */
+  /* ref file="../plugins/collab/src/project/project.ts" lines="98-128" hash="3f314c7e2600" blob="94fe4a33425f" */
   { n: 28, name: '身份码', a: ['project'], b: ['identity'], iface: 'gwbDocsite.identityCode() → personOfCode(site/people.json) · gwbDocsite.join(<仓根>/site, { id, name, gitea })', convention: false, via: 'code', text: '打开项目时取本 home 的身份码，在 site/people.json 里认出身份（就是 Gitea 用户名），不在里面就拒绝；collab.project.join 与克隆项目时经 gwb-docsite 把身份码加进令牌账号那一项。' },
 ];
 

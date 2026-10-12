@@ -13,7 +13,7 @@ const modules = [
     pkg: '插件',
     role: null,
     outside: true,
-    blurb: '插件只用这个包的站点检查：托管站点之前、提交审核之前各查一遍，不过就不托管、不提交。通知与项目负责人经基础插件 gwb-docsite 推给站点，不调这个包。',
+    blurb: '插件不直接调这个包：通知与项目负责人经基础插件 gwb-docsite 推给站点，建站时经 gwbDocsite.init 把它的范围写进新站。',
     caps: [
       { id: 'hosting', name: '站点托管', ident: 'CollabSites' },
       { id: 'submit', name: '提交审核', ident: 'submit-checks.ts' },
@@ -25,11 +25,10 @@ const modules = [
     pkg: '@godcreator/docsite-kit',
     role: null,
     outside: true,
-    blurb: '文档站基础包与基础插件 gwb-docsite：站点骨架的模板与初始化（骨架经初始化生成的 app/site/ 引入这个包的 ./routes、./site、./site-server），推送通道（插件推、站点收）、按本 home 的身份码在 people.json 里认人、站点检查里人员列表与评论那部分。功能包把基础包写成 peer 依赖，由站点自己装。',
+    blurb: '文档站基础包与基础插件 gwb-docsite：站点骨架的模板与初始化（骨架经初始化生成的 app/site/ 引入这个包的 ./routes、./site、./site-server），推送通道（插件推、站点收）、按本 home 的身份码在 people.json 里认人。功能包把基础包与各能力包写成 peer 依赖，由站点自己装。',
     caps: [
       { id: 'feed', name: '推送通道', ident: 'siteFeedOf · useSiteFeed' },
       { id: 'identity', name: '身份与人员', ident: 'siteIdentity · sitePeople' },
-      { id: 'kitcheck', name: '站点检查', ident: 'siteProblems' },
     ],
   },
   {
@@ -48,7 +47,7 @@ const modules = [
   {
     id: 'feature',
     name: '交给基础包',
-    pkg: 'src/feature/ · src/routes/',
+    pkg: 'src/ · src/routes/',
     role: 'amber',
     outside: false,
     blurb: '照基础包的功能包约定交给站点骨架的东西：./routes 的路由表指向包里的路由模块 src/routes/，./site 给侧栏的「任务」「日历」、MDX 组件、包住整个布局的 Provider 与正文上面的通知栏，./site-server 给整站布局的 loader 读协作数据；template/ 里只有日志页的集合，初始化时复制进站点。路由模块只把请求转给服务端函数、把数据交给界面组件，自己不写逻辑；骨架本身由基础包的模板写，不在这个包里。',
@@ -88,15 +87,6 @@ const modules = [
     ],
   },
   {
-    id: 'sitecheck',
-    name: '站点检查',
-    pkg: 'site-check.ts',
-    role: 'cyan',
-    outside: false,
-    blurb: '出口 ./site-check：基础包的站点检查加上日志页的文件名，每条一句给人看的话。只查文件，页面能不能编译由站点的类型检查与开发服务管。',
-    caps: [{ id: 'sitecheckfn', name: '站点检查', ident: 'collabSiteProblems' }],
-  },
-  {
     id: 'collab-model',
     name: '数据模型包',
     pkg: '@godcreator/collab-model',
@@ -111,7 +101,7 @@ const modules = [
     pkg: 'site-data.ts',
     role: 'blue',
     outside: false,
-    blurb: '不送东西，定了服务端与界面之间送的东西长什么样：布局交给界面的 CollabSiteData、写任务的接口地址与 action。服务端函数照着返回，界面照着读；只在这个包里用，改了不用加站点协议号。',
+    blurb: '不送东西，定了服务端与界面之间送的东西长什么样：布局交给界面的 CollabSiteData、写任务的接口地址与 action。服务端函数照着返回，界面照着读；只在这个包里用。',
     caps: [{ id: 'contract', name: '协作数据 · 写入请求', ident: '定 ⑦⑧⑨⑩ 的格式' }],
   },
   {
@@ -133,7 +123,7 @@ const entries = [{ id: 'member', name: '成员 · 浏览器', to: 'ui' }];
 
 /** @type {import('@godcreator/docsite-explainer/seam-graph').SeamInput[]} */
 const seams = [
-  /* ref file="../plugins/collab/src/site-process/collab-sites.ts" lines="119-133" hash="53302ab06f11" blob="cb30a59e92cd" */
+  /* ref file="../plugins/collab/src/site-process/collab-sites.ts" lines="94-108" hash="a1a8e51d3c73" blob="9c89664fae82" */
   {
     n: 1,
     name: '推数据',
@@ -144,7 +134,7 @@ const seams = [
     via: 'code',
     text: '通知或项目负责人一变，gwb-collab 就把整份交给 gwb-docsite，推进站点推送通道的频道 collab；站点没在运行就先记着，启动后补推。',
   },
-  /* ref file="../packages/collab-site/src/server/index.ts" lines="20-42" hash="a101bc6c52d6" blob="dedd98507f38" */
+  /* ref file="../packages/collab-site/src/server/index.ts" lines="20-42" hash="a268f706dc56" blob="c92ed3baa954" */
   {
     n: 2,
     name: '服务端读推来的数据与身份',
@@ -166,8 +156,8 @@ const seams = [
     via: 'code',
     text: '浏览器里推来新的一份，CollabDataProvider 先用上它的通知与负责人，再让布局的 loader 重新读一遍，别人合进 main 的任务这样也会出现。',
   },
-  /* ref file="../packages/collab-site/src/server/index.ts" lines="1-4" hash="fd48c10a435d" blob="dedd98507f38" */
-  /* ref file="../packages/collab-site/src/server/index.ts" lines="81-90" hash="c9516690b97f" blob="dedd98507f38" */
+  /* ref file="../packages/collab-site/src/server/index.ts" lines="1-4" hash="fd48c10a435d" blob="c92ed3baa954" */
+  /* ref file="../packages/collab-site/src/server/index.ts" lines="81-90" hash="1c30dd45fa51" blob="c92ed3baa954" */
   {
     n: 4,
     name: '读写记录',
@@ -178,7 +168,7 @@ const seams = [
     via: 'disk',
     text: '读：整份 collab/ 交给 collabState 算出任务与模块的当前状态。写：带上本机身份交给写入规则，删除时再带上项目负责人，通过了才写文件，拒绝回 422 与原话。',
   },
-  /* ref file="../packages/collab-site/src/journal-files.ts" lines="5-6" hash="ff9321bde47a" blob="e2fd9853a7ad" */
+  /* ref file="../packages/collab-model/src/project-model/journal-files.ts" lines="5-6" hash="0ea152a2999b" blob="0da0c6852c9d" */
   /* ref file="../packages/collab-site/template/skeleton/app/lib/journal.ts" lines="3-4" hash="6f0253e17dc0" blob="d87a31d6e36e" */
   {
     n: 5,
@@ -190,7 +180,7 @@ const seams = [
     via: 'disk',
     text: '一天一篇的日志页。功能包读原文算日子与反向链接；模板复制进站点的 journal 集合把同一批文件编译成页面，路由模块 journal.tsx 在 /calendar/<日期> 显示。',
   },
-  /* ref file="../packages/collab-site/src/server/index.ts" lines="44-50" hash="fc84c2db5ade" blob="dedd98507f38" */
+  /* ref file="../packages/collab-site/src/server/index.ts" lines="45-51" hash="fc84c2db5ade" blob="c92ed3baa954" */
   {
     n: 6,
     name: '读日志页',
@@ -201,8 +191,8 @@ const seams = [
     via: 'code',
     text: '协作数据里带上有日志的日子；一条任务或一个模块那一页要「日志里的进展」时，按原文找出引用它的段落，段里引用的记录换成当前的标题。',
   },
-  /* ref file="../packages/collab-site/src/feature/site-server.ts" lines="4-7" hash="df4a9f5b8b56" blob="01369d4f3b2b" */
-  /* ref file="../packages/collab-site/src/routes/record.tsx" lines="10-14" hash="4855c9c600f3" blob="e56e862c2d78" */
+  /* ref file="../packages/collab-site/src/site-server.ts" lines="4-7" hash="df4a9f5b8b56" blob="eb1cd9b165f0" */
+  /* ref file="../packages/collab-site/src/routes/record.tsx" lines="10-18" hash="c530ec71d4d0" blob="007ac2e2e4d4" */
   {
     n: 7,
     name: '交给路由',
@@ -213,7 +203,7 @@ const seams = [
     via: 'code',
     text: '基础包骨架里整站布局的 loader 每次都调 layoutData 读一份协作数据（站里的页面清单由骨架交进来，任务链接页面时从里面选）；任务与模块那一页的路由模块 record.tsx 的 loader 另读日志里的进展。',
   },
-  /* ref file="../packages/collab-site/src/feature/site.tsx" lines="9-24" hash="243156ad2f3e" blob="9c3272e60f96" */
+  /* ref file="../packages/collab-site/src/site.tsx" lines="9-24" hash="243156ad2f3e" blob="6c553c81495b" */
   {
     n: 8,
     name: '交给界面',
@@ -247,7 +237,7 @@ const seams = [
     text: '路由模块 src/routes/collab.ts 的 action 原样转交请求，回成 200、400、403、405、422 由服务端函数定。这条路由放在整站布局外面，不出页面。',
   },
   /* ref file="../packages/collab-site/src/ui/record-link.tsx" lines="95-96" hash="ce7b80764105" blob="edf0b6e2a1a2" */
-  /* ref file="../packages/collab-site/src/feature/site.tsx" lines="20-20" hash="450df78c09ce" blob="63390da0c914" */
+  /* ref file="../packages/collab-site/src/site.tsx" lines="20-20" hash="450df78c09ce" blob="6c553c81495b" */
   {
     n: 11,
     name: 'MDX 组件',
@@ -258,38 +248,16 @@ const seams = [
     via: 'code',
     text: '经 ./site 的 mdxComponents 交给基础包骨架，并进 fumadocs 的 MDX 组件，内容页、日志页、评论正文里不用 import 就能写 <RecordLink id="…" />。',
   },
-  /* ref file="../plugins/collab/src/site-process/site-files.ts" lines="51-62" hash="5d431faf22dd" blob="023aa2266b55" */
-  /* ref file="../plugins/collab/src/collab-repo/submit/submit-checks.ts" lines="25-29" hash="50b1deefe8fe" blob="0ba0d2de239f" */
+  /* ref file="../packages/collab-model/src/project-model/journal-files.ts" lines="9-20" hash="7eaac12ea424" blob="0da0c6852c9d" */
   {
     n: 12,
-    name: '查站点',
-    a: ['sitecheckfn'],
-    b: ['hosting', 'submit'],
-    iface: 'collabSiteProblems(siteDir) → string[]',
-    convention: false,
-    via: 'code',
-    text: 'gwb-collab 托管站点前、提交审核前、把 main 合进来以后各查一遍工作区里的 site/；有问题就不托管、不提交，原话列给人。NAS 上的执行器不查站点。',
-  },
-  /* ref file="../packages/collab-site/src/site-check.ts" lines="4-10" hash="d8a7b743f9f4" blob="906fa5d486fe" */
-  {
-    n: 13,
-    name: '基础包的检查',
-    a: ['kitcheck'],
-    b: ['sitecheckfn'],
-    iface: 'siteProblems(siteDir) → string[]',
-    convention: false,
-    via: 'code',
-    text: '人员列表、评论文件的格式与作者、评论快照，规则在基础包。',
-  },
-  {
-    n: 14,
     name: '日志页的文件名',
     a: ['journalcheck'],
-    b: ['sitecheckfn'],
+    b: ['submit'],
     iface: 'journalProblemsOf(siteDir) → string[]',
     convention: false,
     via: 'code',
-    text: 'journal/ 里只能是 <真实日期>.mdx，不放子文件夹与别的文件。',
+    text: 'journal/ 里只能是 <真实日期>.mdx，不放子文件夹与别的文件：布局的 loader 读有日志的日子时按它报错，不合规矩整站打不开。提交审核前 gwb-collab 查它，有问题就不提交；站点的其余问题由 gwb-docsite 启动时查。',
   },
 ];
 
@@ -297,7 +265,7 @@ export const collabSiteGraph = defineSeamGraph({
   id: 'collab-site',
   title: '功能包内部的接缝图',
   intro:
-    '功能包 @godcreator/collab-site 里谁把什么交给谁。左边是 gwb-collab 插件与基础包，中间是服务端函数与交给基础包骨架的出口、路由模块、日志页集合，右边浅底里是在浏览器里运行的界面；下面是日志页、站点检查与本机协作仓。虚线框是包里的目录或文件，实线框是包外的东西；线带方向，线旁写送的是什么。数据模型包与 site-data.ts 不送东西，它们引出的点线接到自己定了格式的那几条线上。',
+    '功能包 @godcreator/collab-site 里谁把什么交给谁。左边是 gwb-collab 插件与基础包，中间是服务端函数与交给基础包骨架的出口、路由模块、日志页集合，右边浅底里是在浏览器里运行的界面；下面是日志页与本机协作仓。虚线框是包里的目录或文件，实线框是包外的东西；线带方向，线旁写送的是什么。数据模型包与 site-data.ts 不送东西，它们引出的点线接到自己定了格式的那几条线上。',
   frameLabel: '目录',
   modules,
   entries,

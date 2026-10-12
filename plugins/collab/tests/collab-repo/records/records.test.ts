@@ -101,19 +101,22 @@ describe('collab.inbox', () => {
     writeRecord(task(ids.myDone, 'admin', { owner: 'bob', status: 'done' }))
     writeRecord(task(ids.carolsTask, 'admin', { owner: 'carol' }))
 
-    writeThread('2026-10-10-mention', { author: 'carol', page: '/plan', body: '@bob 看看拓扑' })
-    writeThread('2026-10-10-resolved', { author: 'carol', page: '/plan', status: 'resolved', body: '@bob 已经解决了' })
-    writeThread('2026-10-10-mine', { author: 'bob', body: '我的问题' }, [{ author: 'carol', body: '我来答' }])
+    writeThread('20261010t090000-mention', { author: 'carol', page: '/plan', body: '@bob 看看拓扑' })
+    writeThread('20261010t090001-resolved', { author: 'carol', page: '/plan', status: 'resolved', body: '@bob 已经解决了' })
+    writeThread('20261010t090002-mine', { author: 'bob', body: '我的问题' }, [{ author: 'carol', body: '我来答' }])
   })
 
   it('任务：负责人是我、还没做完的；做完的和别人的不列', async () => {
     expect((await collabInbox(bob)).tasks.map((entry) => entry.id)).toEqual([ids.myTodo])
   })
 
-  it('@我与回复我的：读站点 comments/ 里没解决的评论串，去处带上评论串', async () => {
+  it('@我与回复我的：读站点 comments/ 里的评论串，去处带上评论串', async () => {
     const inbox = await collabInbox(bob)
-    expect(inbox.mentions).toEqual([{ in: 'comment', comment: '2026-10-10-mention/index.mdx', author: 'carol', text: '@bob 看看拓扑', page: '/plan?comment=2026-10-10-mention' }])
-    expect(inbox.repliesToMe).toEqual([{ comment: '2026-10-10-mine/r1.mdx', author: 'carol', text: '我来答', threadId: '2026-10-10-mine', page: '/comments?comment=2026-10-10-mine' }])
+    expect(inbox.mentions).toEqual([
+      { in: 'comment', comment: '20261010t090000-mention/index.mdx', author: 'carol', text: '@bob 看看拓扑', page: '/plan?comment=20261010t090000-mention' },
+      { in: 'comment', comment: '20261010t090001-resolved/index.mdx', author: 'carol', text: '@bob 已经解决了', page: '/plan?comment=20261010t090001-resolved' },
+    ])
+    expect(inbox.repliesToMe).toEqual([{ comment: '20261010t090002-mine/r1.mdx', author: 'carol', text: '我来答', threadId: '20261010t090002-mine', page: '/comments?comment=20261010t090002-mine' }])
   })
 
   it('读出记录时的问题原样带上', async () => {
@@ -124,14 +127,15 @@ describe('collab.inbox', () => {
   })
 
   it('评论文件格式不对：拒绝，写明是 site/comments/ 的问题', async () => {
-    writeFileSync(path.join(bob.siteDir, 'comments', 'loose.mdx'), '放错地方\n')
-    await expect(collabInbox(bob)).rejects.toThrow(/site\/comments\/ 里的评论读不对：\nloose\.mdx 要放在评论串自己的文件夹里/)
+    writeThread('20261010t090003-broken', { author: 'carol', page: '/plan', body: '' })
+    writeFileSync(path.join(bob.siteDir, 'comments', '20261010t090003-broken', 'index.mdx'), '没有 frontmatter 的正文\n')
+    await expect(collabInbox(bob)).rejects.toThrow(/site\/comments\/ 里的评论读不对：\n[\s\S]*没有 frontmatter/)
   })
 })
 
 describe('collab.task.create', () => {
   it('写成规范的新文件：status 是 todo，作者是本机身份', async () => {
-    const { repo, fields } = taskCreateArgsOf({ repo: bob.repo, title: '核算纹波', owner: 'carol', due: '2026-10-01' })
+    const { fields } = taskCreateArgsOf({ repo: bob.repo, title: '核算纹波', owner: 'carol', due: '2026-10-01' })
     const { id, file } = await createTask(bob, fields)
     expect(file).toBe(`collab/records/${id}.json`)
     expect(readRecordFile(id)).toBe(encodeRecordFile({ id, type: 'task', author: 'bob', status: 'todo', title: '核算纹波', owner: 'carol', due: '2026-10-01' }))
@@ -148,7 +152,7 @@ describe('collab.task.create', () => {
   it('带 module：归进那个模块', async () => {
     const rack = moduleRecord('20260926080000-mmmmmma', 'admin')
     writeRecord(rack)
-    const { repo, fields } = taskCreateArgsOf({ repo: bob.repo, title: '核算纹波', module: rack.id })
+    const { fields } = taskCreateArgsOf({ repo: bob.repo, title: '核算纹波', module: rack.id })
     const { id } = await createTask(bob, fields)
     expect(readRecordFile(id)).toBe(encodeRecordFile({ id, type: 'task', author: 'bob', status: 'todo', title: '核算纹波', module: rack.id }))
   })
@@ -201,7 +205,7 @@ describe('collab.task.update', () => {
 
 describe('collab.module.create', () => {
   it('写成规范的新文件：作者是本机身份', async () => {
-    const { repo, fields } = moduleCreateArgsOf({ repo: bob.repo, title: '机柜', due: '2026-10-31', owner: 'carol', detail: '先定尺寸' })
+    const { fields } = moduleCreateArgsOf({ repo: bob.repo, title: '机柜', due: '2026-10-31', owner: 'carol', detail: '先定尺寸' })
     const { id, file } = await createModule(bob, fields)
     expect(file).toBe(`collab/records/${id}.json`)
     expect(readRecordFile(id)).toBe(encodeRecordFile({ id, type: 'module', author: 'bob', title: '机柜', due: '2026-10-31', owner: 'carol', detail: '先定尺寸' }))
@@ -264,13 +268,13 @@ describe('collab.task.delete', () => {
   const asAdmin = () => ({ ...bob, person: 'admin' })
 
   it('删自己的任务：删掉工作区里的记录文件，回执的 files 相对仓根', async () => {
-    const { repo, ids } = taskDeleteArgsOf({ repo: bob.repo, ids: [mine.id] })
+    const { ids } = taskDeleteArgsOf({ repo: bob.repo, ids: [mine.id] })
     expect(await deleteTasks(bob, ids, projectLeads)).toEqual({ ids: [mine.id], files: [`collab/records/${mine.id}.json`] })
     expect(recordFiles()).toEqual([`${carols.id}.json`])
   })
 
   it('负责人一次删掉别人的几条任务，做完的也能删', async () => {
-    await deleteTasks(await asAdmin(), [mine.id, carols.id], projectLeads)
+    await deleteTasks(asAdmin(), [mine.id, carols.id], projectLeads)
     expect(existsSync(path.join(bob.collabDir, recordFileOf(mine.id)))).toBe(false)
     expect(recordFiles()).toEqual([])
   })
@@ -312,7 +316,7 @@ describe('collab.module.delete', () => {
     const cabinet = moduleRecord('20260926080100-mmmmmmb', 'carol')
     writeRecord(cabinet)
     await updateTask(bob, inRack.id, { module: cabinet.id })
-    const { repo, ids } = moduleDeleteArgsOf({ repo: bob.repo, ids: [rack.id] })
+    const { ids } = moduleDeleteArgsOf({ repo: bob.repo, ids: [rack.id] })
     expect(await deleteModules(bob, ids, projectLeads)).toEqual({ ids: [rack.id], files: [`collab/records/${rack.id}.json`] })
     expect(recordFiles()).toEqual([`${cabinet.id}.json`, `${inRack.id}.json`].sort())
   })

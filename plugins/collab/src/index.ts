@@ -41,7 +41,6 @@ import { QqTaskGroups, qqCommandsDocKey } from './project/qq-task-groups.js'
 import { CollabSites } from './site-process/collab-sites.js'
 import { registerSiteCommands } from './site-process/commands.js'
 import { pnpmInstall } from './site-process/dependencies.js'
-import { requireCollabSitePasses } from './site-process/site-files.js'
 
 export const name = 'gwb-collab'
 
@@ -128,7 +127,7 @@ export function apply(ctx: GwbContext): void {
 
   const docsite = ctx.gwbDocsite
   const openProject = (repo: string) => openProjectAt({ docsite }, repo)
-  const sites: CollabSites = new CollabSites({ docsite, checkSite: requireCollabSitePasses, feedOf: (repo) => notifications.feedOf(repo), log })
+  const sites: CollabSites = new CollabSites({ docsite, feedOf: (repo) => notifications.feedOf(repo), log })
   ctx.effect(() => () => sites.forgetAll())
 
   // 协作仓那一套

@@ -104,7 +104,7 @@ function SiteTargetChip({ href, path, hash, commentThread, children }: { href: s
   const routeLink = routeLinks.find((link) => link.url === path)
   if (routeLink) {
     return (
-      <SiteChip href={href} title={routeLink.text} icon={<span className={`${linkChipIconClassName} [&_svg]:size-full`}>{routeLink.icon}</span>}>
+      <SiteChip href={href} title={routeLink.text} icon={<span data-link-chip-icon="">{routeLink.icon}</span>}>
         {written ? children : routeLink.text}
       </SiteChip>
     )

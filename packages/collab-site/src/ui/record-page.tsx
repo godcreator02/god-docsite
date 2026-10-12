@@ -1,7 +1,7 @@
 import { useState, type KeyboardEvent, type ReactNode } from 'react'
 import { Link, useNavigate } from 'react-router'
 import { ArrowLeft, ExternalLink, Pencil, Trash2 } from 'lucide-react'
-import { WidePageToggle } from '@godcreator/docsite-kit/ui'
+import { WidePageToggle } from '@godcreator/docsite-ui'
 import { fieldsAnyoneMayChange, recordPageUrlOf, taskStatuses, tasksPageUrl, type ModuleState, type RecordType, type TaskState, type TaskStatus } from '@godcreator/collab-model/task-model'
 import type { JournalMention } from '../journal.js'
 import { journalUrlOf } from '../site-data.js'

@@ -1,6 +1,6 @@
 import { Link, useSearchParams } from 'react-router'
 import { ArrowLeft, ChevronLeft, ChevronRight } from 'lucide-react'
-import { WidePageToggle } from '@godcreator/docsite-kit/ui'
+import { WidePageToggle } from '@godcreator/docsite-ui'
 import { recordPageUrlOf, type ModuleState } from '@godcreator/collab-model/task-model'
 import { calendarUrl, isRealDate, journalUrlOf } from '../site-data.js'
 import { dayMs, isoDateOf, todayDay } from '../timeline.js'
@@ -9,6 +9,16 @@ import { DueMark, dueStateOf, moduleColorsOf } from './module-marks.js'
 
 /** 月份写成 YYYY-MM；日期取前 7 位就是它所在的月 */
 const monthOf = (date: string) => date.slice(0, 7)
+
+/** 页面标题带全宽开关：日志页那一行的标题 */
+export function PageTitleWithWideToggle({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="flex items-center justify-between gap-4">
+      <h1 className="text-2xl font-semibold tracking-tight">{children}</h1>
+      <WidePageToggle />
+    </div>
+  )
+}
 
 /** 某个月往前、往后挪几个月 */
 function shiftedMonth(month: string, by: number): string {
