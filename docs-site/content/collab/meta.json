@@ -1,0 +1,5 @@
+{
+  "title": "协作站",
+  "root": true,
+  "pages": ["index", "using", "scenarios", "collab-model", "collab-site", "collab-merge-check", "plugin", "collab-repo", "other-repos", "notices-site", "regression"]
+}
