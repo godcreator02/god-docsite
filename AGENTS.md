@@ -14,7 +14,8 @@
 | `packages/create-docsite/` | 一次性建站包：给定目录与选项，生成站点文件 |
 | `packages/docsite-page-sources/` | 页面来源包：TSX/HTML 页面做成 StaticSource 进同一棵页面树与搜索、中文搜索服务、content 资产的 dev/build 快照、TSX/HTML 正文组件 |
 | `packages/docsite-writing/` | 写作包：Term 术语组件与 remark 标注插件、TSX 公式 Tex |
-| `packages/docsite-ui/` | UI 外壳包：侧栏分组、站内链接卡片、全宽切换、主题切换与身份标识、中文界面文字、推送通道浏览器 hook 与协议 |
+| `packages/docsite-ui/` | UI 外壳包：侧栏分组、站内链接卡片、全宽切换、主题切换与身份标识、中文界面文字 |
+| `packages/docsite-feed/` | 推送通道包：gwb 插件按频道往开发服务推数据（只留最新一份）——协议、进程内存储、开发服务收发端点、浏览器 hook 三面都在包里 |
 | `plugins/docsite/` | gwb 基础插件 `@godcreator/gwb-docsite`：身份码、初始化站点、托管站点、推数据、评论命令、说明书 `docsite` |
 | `site/` | 自述站：用基础包搭，内容是基础包自己的说明，也是开发基础包时看效果的地方；`app/` 与根目录的配置照模板生成 |
 | `site/people.json` | 自述站的人员列表，评论署名用；「我是谁」按 gwb 设置里的身份码认 |

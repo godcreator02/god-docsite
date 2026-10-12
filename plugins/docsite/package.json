@@ -38,7 +38,8 @@
     "cordis": "^4.0.0-rc.10",
     "@godcreator/docsite-identity": "workspace:*",
     "@godcreator/docsite-comments": "workspace:*",
-    "@godcreator/docsite-ui": "workspace:*"
+    "@godcreator/docsite-ui": "workspace:*",
+    "@godcreator/docsite-feed": "workspace:*"
   },
   "peerDependenciesMeta": {
     "@godcreator/gwb-skills": {

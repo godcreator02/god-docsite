@@ -1,0 +1,27 @@
+---
+born-at: 2026-10-12T13:10
+type: choice
+parent: [2026-10-12-kit-pure-composition]
+label: feed 三面归一成独立能力包（协议/存储/端点/hook 都在 docsite-feed）
+domain: 骨架
+---
+
+## 背景
+
+拆 ui 包时把 feed 的协议与浏览器 hook 放进了 ui、存储留在 kit 的 vite 插件里——按频道推数据
+本是一个完整能力域，被劈在两处是将就；且协作站（feed 的重度用户）组自己的组合包时不能依赖
+kit，feed 必须完整住在能力包层。用户拍板：feed 显然也该是个包。
+
+## 做了
+
+新立 `@godcreator/docsite-feed`：feed-protocol（频道规则、事件名、口令头、类型）、feed-store
+（globalThis 单例存储）、feed-dev-server（POST 存最新一份 + WebSocket 广播、GET 回读的 vite
+中间件）、use-site-feed（浏览器 hook）全在包里。kit 的 vite 插件改为接 `feedDevServer()`，
+`./server` 出口（siteFeedOf，已无消费者）删；ui 包删 feed 件；插件 dev-server 的协议常量
+改从 feed 包取。
+
+## 结果
+
+能力小包七个：identity、comments、writing、page-sources、ui、feed、create-docsite；
+kit 剩 6 个源文件（template/init、feature、vite 插件、mdx-problems、package-dirs）。
+全仓 pnpm -r check 绿（feed 包自带协议与存储测试），自述站重生成后 dev 冒烟过。

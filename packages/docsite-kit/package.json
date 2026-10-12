@@ -8,10 +8,6 @@
       "types": "./dist/vite/index.d.ts",
       "default": "./dist/vite/index.js"
     },
-    "./server": {
-      "types": "./dist/server/index.d.ts",
-      "default": "./dist/server/index.js"
-    },
     "./site-feed": {
       "types": "./dist/site-feed.d.ts",
       "default": "./dist/site-feed.js"
@@ -80,6 +76,7 @@
     "remark-math": "^6.0.0",
     "@godcreator/docsite-page-sources": "workspace:*",
     "@godcreator/docsite-comments": "workspace:*",
-    "@godcreator/docsite-ui": "workspace:*"
+    "@godcreator/docsite-ui": "workspace:*",
+    "@godcreator/docsite-feed": "workspace:*"
   }
 }

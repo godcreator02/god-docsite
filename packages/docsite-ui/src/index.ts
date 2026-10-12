@@ -16,5 +16,3 @@ export {
 export { PageTitleWithWideToggle, WidePageToggle, widePageScript } from './wide-page.js'
 export { themeSwitchWithIdentity } from './theme-switch.js'
 export { zhTranslations } from './translations.js'
-export { useSiteFeed } from './site-feed-hook.js'
-export { feedEndpointPrefix, feedEvent, feedTokenEnvName, feedTokenHeader, isFeedChannel, type FeedMessage } from './feed-protocol.js'
