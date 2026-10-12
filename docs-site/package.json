@@ -25,7 +25,7 @@
     "@godcreator/docsite-comments": "workspace:*",
     "@godcreator/docsite-explainer": "workspace:*",
     "@godcreator/docsite-identity": "workspace:*",
-    "@godcreator/docsite-kit": "^0.3.0",
+    "@godcreator/docsite-kit": "workspace:*",
     "@godcreator/docsite-page-sources": "workspace:*",
     "@godcreator/docsite-ui": "workspace:*",
     "@react-router/node": "^8.4.0",

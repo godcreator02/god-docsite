@@ -14,5 +14,5 @@
  * 「表是精确号、跟工作区各包的版本对得上」检查——**包升了版本号，这张表跟着改，那条测试红了就是忘了改**。
  */
 export const DOCFIRST_SITE_FEATURE: Record<string, string> = {
-  '@godcreator/docfirst-site': '0.2.0',
+  '@godcreator/docfirst-site': '0.2.1',
 }

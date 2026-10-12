@@ -1,6 +1,6 @@
 {
   "name": "@godcreator/docfirst-site",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "author": {
     "name": "godcreator"
   },
@@ -48,7 +48,7 @@
   },
   "devDependencies": {
     "@fumadocs/base-ui": "16.17.1",
-    "@godcreator/docsite-kit": "^0.3.0",
+    "@godcreator/docsite-kit": "workspace:*",
     "@types/mdx": "^2.0.14",
     "@types/node": "^26.2.0",
     "@types/react": "^19.3.0",
