@@ -13,6 +13,9 @@ description: MDX、TSX、HTML 三种文件都能当页面，进同一个侧栏�
 | TSX | `名字.page.tsx` | 导出的 `meta.title` | 标题和 `meta.description` | 要交互的页面 |
 | HTML | `名字.html` | `<head>` 里的 `<title>` | 正文的纯文字 | 现成的 HTML 文件 |
 
+三种页面都不写自己的大标题（h1）：页头标题由框架按上表的来源渲染，正文里再写一个 h1 会在页头下面显示第二个标题。
+眉题、导语、徽章这类页头元素照常写在正文开头。
+
 这一组里的另外两页就是 [TSX 页面](/docsite/page-types/tsx-page)和 [HTML 页面](/docsite/page-types/html-page)的例子。
 
 ## 在 meta.json 里写名字
