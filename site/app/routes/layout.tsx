@@ -3,6 +3,7 @@ import { Outlet } from 'react-router'
 import { MessageSquare } from 'lucide-react'
 import { useFumadocsLoader } from 'fumadocs-core/source/client'
 import { DocsLayout } from '@fumadocs/base-ui/layouts/docs'
+import { getSidebarTabs } from '@fumadocs/base-ui/components/sidebar/tabs'
 import { commentLinkTargetsOf, groupKeepingSidebar, routeLinksSearchTrigger, SidebarRouteLinks, SiteLinksProvider, themeSwitchWithIdentity } from '@godcreator/docsite-ui'
 import { siteIdentity } from '../lib/identity.server'
 import { allPageThreads } from '../lib/comments.server'
@@ -34,9 +35,11 @@ export default function Layout({ loaderData }: Route.ComponentProps) {
   const { identity, featureData, pageTitles, comments } = loaderData
   const themeSwitch = useMemo(() => themeSwitchWithIdentity(identity), [identity.person?.id, identity.reason])
   const siteLinks = useMemo(() => ({ pageTitles, routeLinks: routeLinkList, comments }), [pageTitles, comments])
+  // 侧栏左上角的目录切换按钮：树里 meta.json 写 root: true 的文件夹多于一组时出现；单根站得到空数组，按钮不渲染
+  const sidebarTabs = useMemo(() => getSidebarTabs(pageTree), [pageTree])
   const docsLayout = (
     <SiteLinksProvider value={siteLinks}>
-      <DocsLayout tree={pageTree} nav={{ title: pageTree.name }} sidebar={{ banner: routeLinks }} slots={{ themeSwitch, sidebar: groupKeepingSidebar, searchTrigger: routeLinksSearchTrigger }}>
+      <DocsLayout tree={pageTree} nav={{ title: pageTree.name }} sidebar={{ banner: routeLinks }} tabs={sidebarTabs} slots={{ themeSwitch, sidebar: groupKeepingSidebar, searchTrigger: routeLinksSearchTrigger }}>
         {featureSites.map(({ name, PageTop }) => PageTop && <PageTop key={name} />)}
         <Outlet />
       </DocsLayout>

@@ -23,6 +23,9 @@ description: MDX、TSX、HTML 三种文件都能当页面，进同一个侧栏�
 `meta.json` 的 `pages` 里写文件名去掉扩展名的部分，TSX 页面还要去掉 `.page`：
 `tsx-page.page.tsx` 写成 `tsx-page`，`html-page.html` 写成 `html-page`。
 
+顶层 `meta.json` 不写 `root`；哪个分区的 `meta.json` 写了 `"root": true`，那个分区就是一个独立的根。
+根多于一组时侧栏左上角出现目录切换按钮（点击在几组之间跳，侧栏只显示当前组的内容），单根的站没有这个按钮。
+
 ## TSX 页面
 
 文件导出两样东西：
