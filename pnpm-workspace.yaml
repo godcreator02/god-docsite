@@ -11,6 +11,7 @@ packages:
 # 不进 glob 集合），成因与验证见 probes/2610121018_vite-add-discovery，上游修掉即撤
 patchedDependencies:
   vite@8.3.4: patches/vite@8.3.4.patch
+  '@react-router/dev@8.4.0': patches/@react-router__dev@8.4.0.patch
 
 allowBuilds:
   '@parcel/watcher': false
