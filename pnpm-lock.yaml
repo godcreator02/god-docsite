@@ -8,6 +8,7 @@ overrides:
   zod: 4.6.5
 
 patchedDependencies:
+  '@react-router/dev@8.4.0': 55b199e602562b6c53037e4e780ac811ee23711c3a6a491f609f9c0a72212a3b
   vite@8.3.4: 71051b570cd126a84b4a427f5a23158b617cf5a07b451901ea0cab096dc377d8
 
 importers:
@@ -125,7 +126,7 @@ importers:
     devDependencies:
       '@react-router/dev':
         specifier: ^8.4.0
-        version: 8.4.0(@react-router/serve@8.4.0(react-router@8.4.0(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(typescript@6.0.3))(react-router@8.4.0(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(typescript@6.0.3)(vite@8.3.4(patch_hash=71051b570cd126a84b4a427f5a23158b617cf5a07b451901ea0cab096dc377d8)(@types/node@26.6.4)(esbuild@0.28.2)(jiti@2.7.0)(yaml@2.9.1))
+        version: 8.4.0(patch_hash=55b199e602562b6c53037e4e780ac811ee23711c3a6a491f609f9c0a72212a3b)(@react-router/serve@8.4.0(react-router@8.4.0(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(typescript@6.0.3))(react-router@8.4.0(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(typescript@6.0.3)(vite@8.3.4(patch_hash=71051b570cd126a84b4a427f5a23158b617cf5a07b451901ea0cab096dc377d8)(@types/node@26.6.4)(esbuild@0.28.2)(jiti@2.7.0)(yaml@2.9.1))
       '@tailwindcss/vite':
         specifier: ^4.3.3
         version: 4.3.3(vite@8.3.4(patch_hash=71051b570cd126a84b4a427f5a23158b617cf5a07b451901ea0cab096dc377d8)(@types/node@26.6.4)(esbuild@0.28.2)(jiti@2.7.0)(yaml@2.9.1))
@@ -225,7 +226,7 @@ importers:
         version: 3.1.1
       '@react-router/dev':
         specifier: ^8.4.0
-        version: 8.4.0(@react-router/serve@8.4.0(react-router@8.4.0(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(typescript@6.0.3))(react-router@8.4.0(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(typescript@6.0.3)(vite@8.3.4(patch_hash=71051b570cd126a84b4a427f5a23158b617cf5a07b451901ea0cab096dc377d8)(@types/node@26.6.4)(esbuild@0.28.2)(jiti@2.7.0)(yaml@2.9.1))
+        version: 8.4.0(patch_hash=55b199e602562b6c53037e4e780ac811ee23711c3a6a491f609f9c0a72212a3b)(@react-router/serve@8.4.0(react-router@8.4.0(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(typescript@6.0.3))(react-router@8.4.0(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(typescript@6.0.3)(vite@8.3.4(patch_hash=71051b570cd126a84b4a427f5a23158b617cf5a07b451901ea0cab096dc377d8)(@types/node@26.6.4)(esbuild@0.28.2)(jiti@2.7.0)(yaml@2.9.1))
       '@tailwindcss/vite':
         specifier: ^4.3.3
         version: 4.3.3(vite@8.3.4(patch_hash=71051b570cd126a84b4a427f5a23158b617cf5a07b451901ea0cab096dc377d8)(@types/node@26.6.4)(esbuild@0.28.2)(jiti@2.7.0)(yaml@2.9.1))
@@ -952,7 +953,7 @@ importers:
     devDependencies:
       '@react-router/dev':
         specifier: ^8.4.0
-        version: 8.4.0(@react-router/serve@8.4.0(react-router@8.4.0(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(typescript@6.0.3))(react-router@8.4.0(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(typescript@6.0.3)(vite@8.3.4(patch_hash=71051b570cd126a84b4a427f5a23158b617cf5a07b451901ea0cab096dc377d8)(@types/node@26.6.4)(esbuild@0.28.2)(jiti@2.7.0)(yaml@2.9.1))
+        version: 8.4.0(patch_hash=55b199e602562b6c53037e4e780ac811ee23711c3a6a491f609f9c0a72212a3b)(@react-router/serve@8.4.0(react-router@8.4.0(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(typescript@6.0.3))(react-router@8.4.0(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(typescript@6.0.3)(vite@8.3.4(patch_hash=71051b570cd126a84b4a427f5a23158b617cf5a07b451901ea0cab096dc377d8)(@types/node@26.6.4)(esbuild@0.28.2)(jiti@2.7.0)(yaml@2.9.1))
       '@tailwindcss/vite':
         specifier: ^4.3.3
         version: 4.3.3(vite@8.3.4(patch_hash=71051b570cd126a84b4a427f5a23158b617cf5a07b451901ea0cab096dc377d8)(@types/node@26.6.4)(esbuild@0.28.2)(jiti@2.7.0)(yaml@2.9.1))
@@ -2738,8 +2739,8 @@ packages:
     resolution: {integrity: sha512-/Nf7TyzTx6S3yRJObOAV7956r8cr2+Oj8AC5dt8wSP3BQAoeX58NoHyCU8P8zGkNXStjTSi6fzO6F0pBdcYbEg==}
     engines: {node: '>= 0.8'}
 
-  cac@7.0.1:
-    resolution: {integrity: sha512-86diuUyeeWM8CrqhpGCaDafrzjS1s++7sWy2AbAPoFNz/xKv7ID57CR4pZsMuGCh60PtsnEx4z68b+Vgt07VPw==}
+  cac@7.1.0:
+    resolution: {integrity: sha512-LMDU/U2yA4IPIY8KT0NsNPWEYZvAMkbgyspxJ6btJaYV+WMDOHAZCmB0lsTObiHaRS1V/ztKAl7+TSkTqXyeoA==}
     engines: {node: '>=20.19.0'}
 
   call-bind-apply-helpers@1.0.2:
@@ -5430,7 +5431,7 @@ snapshots:
     dependencies:
       quansync: 1.0.0
 
-  '@react-router/dev@8.4.0(@react-router/serve@8.4.0(react-router@8.4.0(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(typescript@6.0.3))(react-router@8.4.0(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(typescript@6.0.3)(vite@8.3.4(patch_hash=71051b570cd126a84b4a427f5a23158b617cf5a07b451901ea0cab096dc377d8)(@types/node@26.6.4)(esbuild@0.28.2)(jiti@2.7.0)(yaml@2.9.1))':
+  '@react-router/dev@8.4.0(patch_hash=55b199e602562b6c53037e4e780ac811ee23711c3a6a491f609f9c0a72212a3b)(@react-router/serve@8.4.0(react-router@8.4.0(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(typescript@6.0.3))(react-router@8.4.0(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(typescript@6.0.3)(vite@8.3.4(patch_hash=71051b570cd126a84b4a427f5a23158b617cf5a07b451901ea0cab096dc377d8)(@types/node@26.6.4)(esbuild@0.28.2)(jiti@2.7.0)(yaml@2.9.1))':
     dependencies:
       '@babel/core': 7.29.7
       '@babel/generator': 7.29.8
@@ -6046,7 +6047,7 @@ snapshots:
 
   bytes@3.1.2: {}
 
-  cac@7.0.1: {}
+  cac@7.1.0: {}
 
   call-bind-apply-helpers@1.0.2:
     dependencies:
@@ -8048,7 +8049,7 @@ snapshots:
   tsdown@0.22.14(typescript@6.0.3):
     dependencies:
       ansis: 4.4.0
-      cac: 7.0.1
+      cac: 7.1.0
       defu: 6.1.7
       empathic: 2.1.0
       hookable: 6.1.2

@@ -7,6 +7,39 @@ import { DocsiteRejected } from '../errors.js'
  * 交 writeSiteFiles 一次写盘。纯函数，不碰磁盘上的站点目录
  */
 
+/**
+ * 写进每个新站的 @react-router/dev 补丁（正本在仓根 patches/@react-router__dev@8.4.0.patch，升级 react-router 时两处一起改）：
+ * 功能包路由文件在 node_modules 里，客户端懒加载时 URL 带 vite 的 ?v= 版本查询，react-router 认路由的两处
+ * （dot-server 的 isRoute、route-exports 的 transform）都按精确路径匹配、认不出功能包的路由模块——loader 不剥、
+ * .server 的 import 被无条件拒，站内一点导航整页被报错层盖住（直开页面没事，首屏路由模块是注入的）。
+ * 两处匹配前先剥掉查询参数。上游修掉即撤
+ */
+const reactRouterDevPatch = [
+  'diff --git a/dist/vite.js b/dist/vite.js',
+  'index cd9bc980219bf76c38ec05778841b403c83639a4..05b76a122323d7a8f4bce60b2d823dacb9367648 100644',
+  '--- a/dist/vite.js',
+  '+++ b/dist/vite.js',
+  '@@ -1913,7 +1913,7 @@ const reactRouterVitePlugin = () => {',
+  ' \t\t\t\tif (!importer) return;',
+  ' \t\t\t\tif (viteCommand !== "build" && importer.endsWith(".html")) return;',
+  ' \t\t\t\tlet importerShort = getVite().normalizePath(path$2.relative(ctx.rootDirectory, importer));',
+  '-\t\t\t\tif (isRoute(ctx.reactRouterConfig, importer)) {',
+  '+\t\t\t\tif (isRoute(ctx.reactRouterConfig, importer.split("?")[0])) {',
+  ' \t\t\t\t\tlet serverOnlyExports = SERVER_ONLY_ROUTE_EXPORTS.map((xport) => `\\`${xport}\\``).join(", ");',
+  ' \t\t\t\t\tthrow Error([',
+  ' \t\t\t\t\t\tcolors.red(`Server-only module referenced by client`),',
+  '@@ -1952,7 +1952,7 @@ const reactRouterVitePlugin = () => {',
+  ' \t\t{',
+  ' \t\t\tname: "react-router:route-exports",',
+  ' \t\t\tasync transform(code, id, options) {',
+  '-\t\t\t\tif (isRouteChunkModuleId(id)) id = id.split("?")[0];',
+  '+\t\t\t\tid = id.split("?")[0];',
+  ' \t\t\t\tlet route = getRoute(ctx.reactRouterConfig, id);',
+  ' \t\t\t\tif (!route) return;',
+  ' \t\t\t\tif (!options?.ssr && isSpaModeEnabled(ctx.reactRouterConfig)) {',
+  '',
+].join('\n')
+
 /** 派生好的骨架模板目录（插件自带的 template/，布局与站点根一致：app/、根目录的配置、gitignore、package.json、initial/） */
 export type KitTemplateDir = string
 
@@ -171,8 +204,10 @@ export function assembleSite(input: AssembleInput): PlannedFile[] {
   })
   files.push({
     relativePath: 'pnpm-workspace.yaml',
-    content: "allowBuilds:\n  esbuild: true\nonlyBuiltDependencies:\n  - esbuild\n# 团队的包刚发就要用：@godcreator 的包不受「发布不满一天不装」的限制\nminimumReleaseAgeExclude:\n  - '@godcreator/*'\n",
+    content:
+      "allowBuilds:\n  esbuild: true\nonlyBuiltDependencies:\n  - esbuild\n# 团队的包刚发就要用：@godcreator 的包不受「发布不满一天不装」的限制\nminimumReleaseAgeExclude:\n  - '@godcreator/*'\n# react-router 认路由的两处都按精确路径匹配，功能包路由文件带 vite 的 ?v= 查询就被认不出，\n# loader 不剥、.server 的 import 被拒，站内导航整页被报错层盖住；补丁让两处先剥掉查询参数\npatchedDependencies:\n  '@react-router/dev@8.4.0': patches/@react-router__dev@8.4.0.patch\n",
   })
+  files.push({ relativePath: 'patches/@react-router__dev@8.4.0.patch', content: reactRouterDevPatch })
 
   // package.json：骨架模板的依赖（workspace:* 换精确版本）打底，功能包模板的脚本与依赖合并进来（依赖同名照骨架的），功能包自身写精确版本
   const manifest: Manifest = { name: input.siteName, private: true, type: 'module' }

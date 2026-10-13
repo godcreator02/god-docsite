@@ -192,7 +192,7 @@ const seams = [
     text: '协作数据里带上有日志的日子；一条任务或一个模块那一页要「日志里的进展」时，按原文找出引用它的段落，段里引用的记录换成当前的标题。',
   },
   /* ref file="../packages/collab-site/src/site-server.ts" lines="4-7" hash="df4a9f5b8b56" blob="eb1cd9b165f0" */
-  /* ref file="../packages/collab-site/src/routes/record.tsx" lines="10-18" hash="c530ec71d4d0" blob="007ac2e2e4d4" */
+  /* ref file="../packages/collab-site/src/routes/record.tsx" lines="7-22" hash="109be55f108e" blob="4757d0e747fe" */
   {
     n: 7,
     name: '交给路由',
@@ -225,7 +225,7 @@ const seams = [
     via: 'code',
     text: '任务页与记录页写任务、模块时发这个请求；被拒时抛出原话显示在表单下面。写完等布局的 loader 重新读完才返回。',
   },
-  /* ref file="../packages/collab-site/src/routes/collab.ts" lines="4-7" hash="7d16251579bf" blob="4529c18d3522" */
+  /* ref file="../packages/collab-site/src/routes/collab.ts" lines="3-8" hash="9b6072b77dfa" blob="62b4eb4d3943" */
   {
     n: 10,
     name: '交给服务端写',

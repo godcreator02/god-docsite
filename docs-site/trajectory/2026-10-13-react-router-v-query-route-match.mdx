@@ -1,0 +1,30 @@
+---
+born-at: 2026-10-13T13:30
+type: evidence
+parent: [2026-09-03-god-live-doc]
+label: 站内导航整页被 Vite 报错层盖住：react-router 按 ?v= 查询参数认不出功能包路由，loader 剥离失效
+---
+
+## 背景
+
+上一张水合卡（2026-10-13-collab-hydration-origin-comments）修完后三个站「水合正常」，但用户在 sst 站里仍报「啥按钮也点不了」。复现发现不是水合问题：页面被 `<vite-error-overlay>` 整页盖住——`Server-only module referenced by client`。
+
+## 根因链
+
+1. **触发条件是站内导航，不是直开**：直开页面时当前路由模块由 SSR 首屏注入（页面活着）；侧栏点到别的路由时 React Router 懒加载该路由模块，走 vite 客户端编译——`collab-site` 的路由文件（calendar、tasks、record、journal、collab、project-file、repo-links）顶层 import 了 `.server` 文件。
+2. **react-router 认路由靠精确路径匹配**，两处：dot-server 插件（拦截 `.server` import）与 route-exports 插件（把 loader/action 从客户端版剥掉）。功能包路由文件在 node_modules 里，浏览器请求的 URL 带 vite 的 `?v=<哈希>` 版本查询——匹配不上，两处都把它当「非路由模块」：loader 不剥、`.server` 的 import 无条件拒绝。
+3. 骨架自己的路由（app/routes/*.tsx 是源码、不带 `?v=`）两处都认得——所以 layout.tsx 同样顶层 import source.server 却安然无恙，掩盖了问题。
+
+## 修复
+
+- **@react-router/dev 8.4.0 打补丁**（正本在仓根 `patches/@react-router__dev@8.4.0.patch`）：两处匹配前先 `split("?")[0]` 剥掉查询参数。上游修掉即撤；升级 react-router 版本时补丁与版本号一起改。
+- **collab-site 0.31.2**：七个路由文件的服务端依赖改成 loader/action 函数体内动态 `import()`（不依赖剔除逻辑的写法，双保险）。
+- **铺开**：docsite-kit 仓 workspace（自述站、docs-site、开发台测试站 4450）、collab-test 运行实例（4451，PR #11）、sst 站（4331，PR #34）；建站器 assemble 从 0.3.5 起给每个新站写 patches/ 与 patchedDependencies。
+
+## 验证
+
+三个站在浏览器里连续真点侧栏导航（日历 → 任务 → 评论 → 内容页 → 反向）全部无报错层、documentElement 的 React 键在、到达页面后交互正常（FPGA 表筛选 62→31 行）。功能包路由模块的客户端请求 200。
+
+## 教训
+
+「直开页面 + 页面内按钮」验不出路由懒加载问题——**侧栏导航也要真点**。上一轮验收正是只点了页面内交互、没点跨页跳转，这颗雷从协作站重写起就埋着，三个站都有。
