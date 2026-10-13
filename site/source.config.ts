@@ -1,8 +1,20 @@
 import rehypeKatex from 'rehype-katex'
 import remarkMath from 'remark-math'
-import { applyMdxPreset, defineCollections, defineDocs } from 'fumadocs-mdx/config'
+import { applyMdxPreset, defineCollections, defineConfig, defineDocs } from 'fumadocs-mdx/config'
 import { remarkGlossary } from '@godcreator/docsite-writing/compile'
 import { terms } from './glossary.terms'
+
+/**
+ * 全局 mdxOptions 管集合外文件的编译（页面 mdx import 进来的正文，如系统设计报告的 _report.mdx）：
+ * 公式插件与 docs 集合保持一致，否则 $…$ 里的 { 被当 MDX 表达式，acorn 报错。
+ * 全局选项的类型不接受带参函数，插件直接给数组
+ */
+export default defineConfig({
+  mdxOptions: {
+    remarkPlugins: [remarkMath],
+    rehypePlugins: [rehypeKatex],
+  },
+})
 
 /**
  * 集合用 Config API 定义（只在构建期由 Node 加载，浏览器不解析这个文件）：
@@ -18,6 +30,11 @@ export const docs = defineDocs({
   dir: 'content',
   docs: {
     async: true,
+    // 只收文件名不以下划线开头的 .mdx：下划线开头的是被页面 import 的正文（不是独立页面），
+    // 资料性 .md 也不是页面，都不进集合、不校验 frontmatter。
+    // 模式要同时过两套匹配器：fumadocs-mdx 构建期用 picomatch，vite 的 import.meta.glob 用
+    // tinyglobby 且 extglob 关着——实测 [^_] 字符类两边语义一致，extglob !(…) 与数组否定都不可用
+    files: ['**/[^_]*.mdx'],
     postprocess: { includeProcessedMarkdown: { output: 'function', headingIds: false } },
     mdxOptions: applyMdxPreset({
       remarkPlugins: [remarkMath, remarkGlossary({ terms })],

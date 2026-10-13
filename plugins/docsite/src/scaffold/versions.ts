@@ -4,10 +4,10 @@
  */
 export const scaffoldKitVersions: Record<string, string> = {
   '@godcreator/docsite-kit': '0.3.0',
-  '@godcreator/docsite-comments': '0.2.0',
+  '@godcreator/docsite-comments': '0.2.1',
   '@godcreator/docsite-explainer': '0.1.0',
-  '@godcreator/docsite-identity': '0.1.0',
+  '@godcreator/docsite-identity': '0.1.1',
   '@godcreator/docsite-page-sources': '0.1.0',
-  '@godcreator/docsite-ui': '0.2.0',
+  '@godcreator/docsite-ui': '0.2.1',
   '@godcreator/docsite-writing': '0.1.0',
 }
