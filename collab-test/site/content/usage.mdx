@@ -1,0 +1,39 @@
+---
+title: 用法示例
+description: 正文页能写什么——引用任务的 RecordLink、站内链接、指向别的仓的链接、公式、fumadocs 的组件；批注就批在这一页
+---
+
+## 引用任务与模块
+
+正文里不用 import，直接写 <RecordLink id="20261012091000-adapt01" />；
+模块是 <RecordLink id="20261012090000-rewrite" />，过期的那个是
+<RecordLink id="20261012090001-regtest" />。也可以写成链接：
+[](/tasks/20261012091001-tskpage)、某一天的日志 [](/calendar/2026-10-12)。
+
+## 链接到别的仓
+
+项目文件夹里别的仓的文件写成 `repo:` 链接（这个测试项目只有协作仓，链接会是灰的）：
+[示例](repo:some-repo/README.md)、带行号的 [示例](repo:some-repo/src/main.ts#L10)。
+
+## 公式
+
+占空比的传递函数写成公式（写作包接了 remark-math）：
+
+$$D = \frac{V_{out}}{V_{in}} \cdot \frac{1}{\eta}$$
+
+行内的：纹波电流 $\Delta I_L = \frac{V_{in} - V_{out}}{L} \cdot D T_s$。
+
+## fumadocs 的组件
+
+<Tabs items={['看板', '甘特图']}>
+  <Tab title="看板">
+    小任务分「未开始 / 进行中 / 已完成」三列，点人员卡片或模块行筛选。
+  </Tab>
+  <Tab title="甘特图">
+    一个模块一行，只在截止日画记号：没做完实心菱形、全做完换勾、过期加红框。
+  </Tab>
+</Tabs>
+
+<Callout type="info">
+  批注就批在这一页：右下角「批注」选中页面元素，或划选一段文字。
+</Callout>

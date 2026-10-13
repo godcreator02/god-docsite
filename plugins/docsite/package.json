@@ -1,6 +1,6 @@
 {
   "name": "@godcreator/gwb-docsite",
-  "version": "0.3.2",
+  "version": "0.3.3",
   "description": "文档站的基础插件：本 home 的身份码，一条命令从空目录建站（骨架模板从自述站派生、随插件发布），托管站点的开发服务，往站点推数据，agent 读写站点评论的命令；别的插件注入服务 gwbDocsite 建站、托管自己的站点",
   "type": "module",
   "exports": {

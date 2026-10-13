@@ -8,8 +8,23 @@
     "skipLibCheck": true,
     "noEmit": true,
     "allowImportingTsExtensions": true,
-    "types": ["vite/client", "node", "@react-router/node"],
-    "rootDirs": [".", "./.react-router/types"]
+    "types": [
+      "vite/client",
+      "node",
+      "@react-router/node"
+    ],
+    "rootDirs": [
+      ".",
+      "./.react-router/types"
+    ]
   },
-  "include": ["app", "content", "comments","react-router.config.ts", "vite.config.ts", "source.config.ts", ".react-router/types/**/*"]
+  "include": [
+    "app",
+    "content",
+    "comments",
+    "react-router.config.ts",
+    "vite.config.ts",
+    "source.config.ts",
+    ".react-router/types/**/*"
+  ]
 }

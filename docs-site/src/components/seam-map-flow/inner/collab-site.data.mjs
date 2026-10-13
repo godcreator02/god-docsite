@@ -134,7 +134,7 @@ const seams = [
     via: 'code',
     text: '通知或项目负责人一变，gwb-collab 就把整份交给 gwb-docsite，推进站点推送通道的频道 collab；站点没在运行就先记着，启动后补推。',
   },
-  /* ref file="../packages/collab-site/src/server/index.ts" lines="20-42" hash="a268f706dc56" blob="c92ed3baa954" */
+  /* ref file="../packages/collab-site/src/server/index.server.ts" lines="20-42" hash="a268f706dc56" blob="c92ed3baa954" */
   {
     n: 2,
     name: '服务端读推来的数据与身份',
@@ -156,8 +156,8 @@ const seams = [
     via: 'code',
     text: '浏览器里推来新的一份，CollabDataProvider 先用上它的通知与负责人，再让布局的 loader 重新读一遍，别人合进 main 的任务这样也会出现。',
   },
-  /* ref file="../packages/collab-site/src/server/index.ts" lines="1-4" hash="fd48c10a435d" blob="c92ed3baa954" */
-  /* ref file="../packages/collab-site/src/server/index.ts" lines="81-90" hash="1c30dd45fa51" blob="c92ed3baa954" */
+  /* ref file="../packages/collab-site/src/server/index.server.ts" lines="1-4" hash="fd48c10a435d" blob="c92ed3baa954" */
+  /* ref file="../packages/collab-site/src/server/index.server.ts" lines="81-90" hash="1c30dd45fa51" blob="c92ed3baa954" */
   {
     n: 4,
     name: '读写记录',
@@ -180,7 +180,7 @@ const seams = [
     via: 'disk',
     text: '一天一篇的日志页。功能包读原文算日子与反向链接；模板复制进站点的 journal 集合把同一批文件编译成页面，路由模块 journal.tsx 在 /calendar/<日期> 显示。',
   },
-  /* ref file="../packages/collab-site/src/server/index.ts" lines="45-51" hash="fc84c2db5ade" blob="c92ed3baa954" */
+  /* ref file="../packages/collab-site/src/server/index.server.ts" lines="45-51" hash="fc84c2db5ade" blob="c92ed3baa954" */
   {
     n: 6,
     name: '读日志页',

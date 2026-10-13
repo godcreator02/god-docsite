@@ -2,7 +2,7 @@ import { mkdirSync, mkdtempSync, readdirSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import path from 'node:path'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { collabRecordResponse, collabSiteData, recordJournalMentions } from '../src/server/index.js'
+import { collabRecordResponse, collabSiteData, recordJournalMentions } from '../src/server/index.server.js'
 
 const bobCode = 'bobcode2345'
 const people = `${JSON.stringify([

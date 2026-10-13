@@ -61,7 +61,7 @@ import { SeamMap } from '../../src/components/seam-map-flow/seam-map'
 
 {/* ref file="../packages/collab-site/src/site.tsx" hash="1719b0bea23a" blob="6c553c81495b" */}
 
-{/* ref file="../packages/collab-site/src/site-server.ts" hash="69d4517fca55" blob="eb1cd9b165f0" */}
+{/* ref file="../packages/collab-site/src/site-server.ts" hash="1a6f0a386549" blob="c541c66f9ee8" */}
 
 {/* ref file="../packages/collab-site/test/feature.test.ts" lines="17-20" hash="0c56cb6539bd" blob="b17b26c8b9fd" */}
 
@@ -143,7 +143,7 @@ MDX 页面、日志页、评论正文里不用 `import`，直接写 `<RecordLink
 - **评论**：评论串的 `page` 要改成新地址，不然开发服务直接报错，整个站点打不开（基础包的规矩）
 - **任务链接的页面**：任务的 `page` 字段不改，任务那一页上显示「找不到的页面」，不报错；能改这个字段的人在任务那一页上重新选一页。能选的页面是基础包骨架交给布局数据的站里每一页
 
-{/* ref file="../packages/collab-site/src/site-server.ts" hash="69d4517fca55" blob="eb1cd9b165f0" */}
+{/* ref file="../packages/collab-site/src/site-server.ts" hash="1a6f0a386549" blob="c541c66f9ee8" */}
 
 {/* ref file="../packages/collab-site/src/ui/page-ref.tsx" lines="5-14" hash="14b705a45ca0" blob="f2754538081e" */}
 
@@ -159,7 +159,7 @@ MDX 页面、日志页、评论正文里不用 `import`，直接写 `<RecordLink
 基础包骨架里整站布局的 loader 每次都调功能包 `./site-server` 的 `layoutData`，读一份协作数据：从 `collab/records/` 算出任务与模块，加上人员列表、本机身份、gwb-collab 推来的通知与项目负责人、有日志的日子，
 以及骨架交进来的站里每一页（任务链接页面时从里面选）。`./site` 的 `Provider` 用 `CollabDataProvider` 包住整个布局，把它交给下面所有页面，任务页、日历、通知栏、`RecordLink` 都经 `useCollabData` 取同一份：
 
-{/* ref file="../packages/collab-site/src/server/index.ts" lines="27-43" hash="9f76ec3c5a99" blob="c92ed3baa954" */}
+{/* ref file="../packages/collab-site/src/server/index.server.ts" lines="27-43" hash="9f76ec3c5a99" blob="c92ed3baa954" */}
 
 gwb-collab 不往站点发请求，它把通知与项目负责人推进基础包推送通道的频道 `collab`（推送通道怎么工作见基础包自述站的「开发服务插件」页）。
 浏览器里推来新的一份，`CollabDataProvider` 先用上它的通知与负责人，再让布局的 loader 重新读一遍。gwb-collab 每次检查完协作仓就推一次，
@@ -174,7 +174,7 @@ gwb-collab 不往站点发请求，它把通知与项目负责人推进基础包
 网页上新建、修改、删除任务与模块，都发 `POST /api/collab`，请求体是 `{ action, record }`。功能包的路由模块 `src/routes/collab.ts` 原样交给 `collabRecordResponse`，
 它先照骨架评论写入的同一套核对（Origin 是这个站的可信 origin、本机身份码在 `people.json` 里），再交给数据模型包的写入规则，通过了才写 `collab/records/` 里的文件，不运行 git：
 
-{/* ref file="../packages/collab-site/src/server/index.ts" lines="64-95" hash="ef45e601ddbb" blob="c92ed3baa954" */}
+{/* ref file="../packages/collab-site/src/server/index.server.ts" lines="64-95" hash="ef45e601ddbb" blob="c92ed3baa954" */}
 
 | 回什么 | 什么时候 |
 | --- | --- |
@@ -240,7 +240,7 @@ MDX 页面（内容页、日志页、评论正文）不用 `import` 就能写 `<
 任务页、任务与模块各自那一页、日志页能和内容页一样写评论：路由表里这几条标了 `comments: true`，基础包的评论接口与启动检查就认这些地址。
 接法照骨架的内容页：loader 用 `routeCommentData` 取这一页的评论串（骨架的 `pageThreads` 按页面地址过滤，作者解析成可信的 `{id, name}`）与本机身份，action 交给 `routeCommentsAction`（同一套 Origin 与身份核对，再调评论包的写函数），页面放 `RouteComments`：正文带评论的范围属性，旁边是评论包的 `CommentsDock`（右下角浮标唤起的评论栏，能批整页、批一段文字或一个元素）。评论归属键用页面地址（如 `/tasks/<记录 id>`），只认地址的样子，删了任务，批它那一页的评论照样留着。
 
-{/* ref file="../packages/collab-site/src/server/comments.ts" lines="30-45" hash="7ea4d45ee63a" blob="ae32aa26f1c6" */}
+{/* ref file="../packages/collab-site/src/server/comments.server.ts" lines="30-45" hash="7ea4d45ee63a" blob="ae32aa26f1c6" */}
 
 ## repo: 链接
 

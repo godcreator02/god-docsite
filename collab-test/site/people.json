@@ -1,6 +1,25 @@
 [
-  { "id": "godcreator", "name": "站长", "codes": ["y893nabqixve"], "gitea": "godcreator" },
-  { "id": "carol", "name": "卡罗尔", "gitea": "carol-test" },
-  { "id": "bob", "name": "鲍勃", "gitea": "bob-test" },
-  { "id": "collab-agent", "name": "项目助手", "agent": true }
+  {
+    "id": "godcreator",
+    "name": "站长",
+    "codes": [
+      "y893nabqixve"
+    ],
+    "gitea": "godcreator"
+  },
+  {
+    "id": "carol-test",
+    "name": "卡罗尔",
+    "gitea": "carol-test"
+  },
+  {
+    "id": "bob",
+    "name": "鲍勃",
+    "gitea": "bob-test"
+  },
+  {
+    "id": "collab-agent",
+    "name": "项目助手",
+    "agent": true
+  }
 ]

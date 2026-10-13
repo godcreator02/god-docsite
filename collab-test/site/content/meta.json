@@ -1,7 +1,5 @@
 {
   "title": "协作站测试",
   "root": true,
-  "pages": [
-    "about"
-  ]
+  "pages": ["about", "plan", "usage", "regression"]
 }

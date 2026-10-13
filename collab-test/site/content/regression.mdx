@@ -1,0 +1,14 @@
+---
+title: 回归记录
+description: 测试项目自己的流水账：每个合并请求验了什么
+---
+
+## 2026-10-13
+
+| PR | 内容 | 验了什么 |
+| --- | --- | --- |
+| #1 | 端口 4451 | default 侧第一次 collab.submit：AGit 推送、执行器（collab-bot）合并、自动快进 |
+| #2 | 人员 id 修正（carol → carol-test） | 记录格式校验拦下 CRLF 与键序，修完过 |
+| #3 | site/pnpm-workspace.yaml | 手工导出协作仓容易漏这个文件（建站器会写），症状是克隆后 pnpm install 报 IGNORED_BUILDS |
+| #4 | 卡罗尔的身份码 | 完整成员加入流程：project.join 写自己那一项 → submit → 合并检查放行「只改自己 codes」 |
+| #5 | 指派任务 | QQ 私聊通知送达（连续 1 分钟规则）、任务组 /测试 注册 |

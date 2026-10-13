@@ -54,7 +54,7 @@ const carolTaskLines = (status) => [
 
 const ANYONE_MAY_CHANGE_TASK = 'status、owner、due、title、module';
 
-/* ref file="../packages/collab-site/src/server/index.ts" lines="68-100" hash="1541a0c69dae" blob="c92ed3baa954" */
+/* ref file="../packages/collab-site/src/server/index.server.ts" lines="68-100" hash="1541a0c69dae" blob="c92ed3baa954" */
 /* ref file="../packages/collab-model/src/task-model/write.ts" lines="16-22" hash="d3ed6583ef64" blob="42c7ed460b69" */
 /* ref file="../packages/collab-model/src/task-model/write.ts" lines="33-37" hash="709a0ceb1c0a" blob="42c7ed460b69" */
 /* ref file="../packages/collab-model/src/task-model/write.ts" lines="44-51" hash="9ee96d52a371" blob="42c7ed460b69" */

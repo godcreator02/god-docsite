@@ -2,7 +2,7 @@ import { useLoaderData, type ActionFunctionArgs } from 'react-router'
 import { DocsPage } from '@fumadocs/base-ui/layouts/docs/page'
 import { tasksPageUrl } from '@godcreator/collab-model/task-model'
 import { siteName } from '@site/lib/source.server'
-import { routeCommentData, routeCommentsAction } from '../server/comments.js'
+import { routeCommentData, routeCommentsAction } from '../server/comments.server.js'
 import { TasksPage } from '../ui/tasks-page.js'
 import { RouteComments } from '../ui/route-comments.js'
 

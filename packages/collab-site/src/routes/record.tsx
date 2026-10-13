@@ -2,8 +2,8 @@ import { useLoaderData, type ActionFunctionArgs, type LoaderFunctionArgs } from 
 import { DocsPage } from '@fumadocs/base-ui/layouts/docs/page'
 import { recordPageUrlOf } from '@godcreator/collab-model/task-model'
 import { siteName } from '@site/lib/source.server'
-import { recordJournalMentions } from '../server/index.js'
-import { routeCommentData, routeCommentsAction } from '../server/comments.js'
+import { recordJournalMentions } from '../server/index.server.js'
+import { routeCommentData, routeCommentsAction } from '../server/comments.server.js'
 import { RecordPage, useRecordTitle } from '../ui/record-page.js'
 import { RouteComments } from '../ui/route-comments.js'
 

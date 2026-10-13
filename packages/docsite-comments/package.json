@@ -1,6 +1,6 @@
 {
   "name": "@godcreator/docsite-comments",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "文档站评论（fumadocs 原生机制）：评论串模型与文件读写（评论是集合文件，与页面同一编译链）、正文外批注覆盖层、评论界面。身份与授权在 @godcreator/docsite-identity，站点组合两者；本包不依赖它",
   "type": "module",
   "exports": {

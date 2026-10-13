@@ -201,7 +201,7 @@ const seams = [
     via: 'code',
     text: 'gwb-docsite 在协作仓的 site/ 里运行 pnpm dev，意外退出就重启；身份码交给开发服务，站点按它认人。推来的数据经推送通道交给开发服务，站点没在运行时先记着。',
   },
-  /* ref file="../packages/collab-site/src/server/index.ts" lines="21-43" hash="f1723afb4018" blob="c92ed3baa954" */
+  /* ref file="../packages/collab-site/src/server/index.server.ts" lines="21-43" hash="f1723afb4018" blob="c92ed3baa954" */
   {
     n: 4,
     name: '推来的数据',

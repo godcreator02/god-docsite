@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs'
 import { authorizeWrite, identityCodeEnvName, identityOf, sitePeople, writeAccessResponse, type Person } from '@godcreator/docsite-identity/server'
 
 export { sitePeople }
@@ -5,9 +6,18 @@ export { sitePeople }
 /**
  * 身份与写入边界：身份码由启动方（gwb-docsite）经环境变量注入；没有码或码不在 people.json 里就是只读。
  * origin 是这个站的可信 origin（宿主配置），写请求的 Origin 头要和它完全一样；不从 request.url 推导。
+ * 缺省端口从本站 dev 脚本的 --port 读（每个站不一样，写死会把别的站的写请求全拒了）；
  * 开发与 start 端口不同时，经 DOCSITE_ORIGIN 环境变量给对的那一个
  */
-export const siteOrigin = process.env.DOCSITE_ORIGIN ?? `http://127.0.0.1:${process.env.PORT ?? 4430}`
+const devPort = () => {
+  try {
+    const scripts = JSON.parse(readFileSync('package.json', 'utf8')).scripts as Record<string, string>
+    return /--port[= ](\d+)/.exec(scripts.dev ?? '')?.[1]
+  } catch {
+    return undefined
+  }
+}
+export const siteOrigin = process.env.DOCSITE_ORIGIN ?? `http://127.0.0.1:${devPort() ?? 4430}`
 
 export function siteIdentity() {
   return identityOf(sitePeople(), process.env[identityCodeEnvName])

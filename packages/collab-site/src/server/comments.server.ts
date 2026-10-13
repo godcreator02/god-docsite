@@ -4,7 +4,7 @@ import { data } from 'react-router'
 import { createReply, createThread, deleteReply, deleteThread } from '@godcreator/docsite-comments/server'
 import { authorizeWrite, identityCodeEnvName, identityOf, sitePeople, writeAccessResponse } from '@godcreator/docsite-identity/server'
 import { pageThreads } from '@site/lib/comments.server'
-import { siteOrigin } from './index.js'
+import { siteOrigin } from './index.server.js'
 
 /*
  * 协作站页面（任务页、任务与模块各自那一页、日志页）上的评论，接法照骨架的内容页：loader 读这一页的评论与本机身份，

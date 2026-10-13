@@ -1,0 +1,29 @@
+---
+born-at: 2026-10-13T11:20
+type: evidence
+parent: [2026-09-03-god-live-doc]
+label: 协作站交互全链路首验暴露的三个地基 bug：水合静默死、origin 写死 4430、首条评论建目录失败
+---
+
+## 背景
+
+重写后的测试协作仓第一次在浏览器里真点（此前验收只截了图、写入走了 curl）。「按钮点了没反应」一句话引出三个叠着的地基 bug——症状互相掩护，逐层剥开：
+
+## 现象与根因
+
+1. **页面零水合、零报错**：所有站点点不动、documentElement 上没有任何 React 键，console 干净。
+   根因：功能包路由模块（客户端也加载）顶层 import 了 `src/server/`（含 node:fs）——vite 报「node:fs externalized」只进 console.error 的 error 事件，SSR 页面照常渲染，水合链静默死。
+   修：服务端文件带 `.server` 后缀（骨架的约定），客户端链不再引用——collab-site 0.31.1。
+   连带：collab-model 的 `people.ts` import `@godcreator/docsite-identity/server`（sitePeople 用 fs），被 task-model 主出口（浏览器用）链进客户端——把纯的 `parsePeople` 加进 identity 主出口（docsite-identity 0.1.1），模型包改引主出口（collab-model 0.6.1）。
+2. **网页写评论一律 403**：内容页的评论 action 是骨架的 `identity.server.ts`，可信 origin 缺省写死 `http://127.0.0.1:4430`（自述站端口）——任何别的端口的站、任何人的写请求全被拒。
+   修：缺省端口从本站 `package.json` dev 脚本的 `--port` 读（自述站正本、docs-site、测试站、两处运行实例同款改法；建站器模板随自述站派生，gwb-docsite 0.3.3 带上）。
+3. **第一条评论 500**：`createThread` 的 `mkdir(dir, { recursive: false })`——`comments/` 不存在时连父目录都不建（此前各站都有存量评论目录，没踩到）。
+   修：`recursive: true`（docsite-comments 0.2.1）。
+
+## 验证
+
+批注全链路在测试协作仓上走通：批注模式选「公式」标题写带 @ 的批注、整页评论、方案页元素批注各一条，经提交审核进 main（PR #8、#9），carol 自动同步后「找我的」3→5，两条「站长 在评论里 @了我」经 QQ 送达（发送记录 ok）。评论正文里不能写 `$…$` 公式（评论集合不挂 remark-math，`{` 被 MDX 当表达式，编译失败表现为正文一直显示「刚写入」占位）——评论里写公式要当规矩记着。
+
+## 教训
+
+「视觉验收 + curl 接口」验不出水合与交互——**按钮必须真点**。SSR 正常 + console 干净不代表客户端活着，判断水合看根元素上的 React 键最快。

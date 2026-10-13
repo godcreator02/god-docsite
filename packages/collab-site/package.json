@@ -1,6 +1,6 @@
 {
   "name": "@godcreator/collab-site",
-  "version": "0.31.0",
+  "version": "0.31.1",
   "description": "课题组协作站的功能包，接在文档站基础包 @godcreator/docsite-kit 上：任务页（人员、模块甘特图、看板）、任务与模块各自那一页、项目日历与每天一篇的日志页、顶部的通知栏、页面里引用任务的 RecordLink。照基础包的功能包约定交出路由、侧栏入口、布局数据与样式，template/ 只有日志页的集合；数据模型在 @godcreator/collab-model",
   "type": "module",
   "exports": {

@@ -1,9 +1,9 @@
 {
   "id": "20261012090001-regtest",
   "type": "module",
-  "author": "carol",
+  "author": "carol-test",
   "title": "集成回归准备",
-  "owner": "carol",
   "due": "2026-10-11",
+  "owner": "carol-test",
   "detail": "准备 carol 隔离 home 与 QQ 通道的集成测试场。截止日已过：用来验收甘特图与日历上的过期记号。"
 }

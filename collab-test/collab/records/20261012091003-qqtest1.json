@@ -1,10 +1,10 @@
 {
   "id": "20261012091003-qqtest1",
   "type": "task",
-  "author": "carol",
+  "author": "carol-test",
   "status": "todo",
   "title": "QQ 消息通道集成测试",
-  "owner": "carol",
+  "owner": "carol-test",
   "due": "2026-10-12",
   "detail": "carol home 连测试机器人（AppID 1905731977），验私聊通知与 /命令 派活。过期的任务：验收过期样式用。",
   "module": "20261012090001-regtest"

@@ -2,7 +2,7 @@ import type { ReactNode } from 'react'
 import { CommentsDock, commentScopeProps, type CommentAvatar } from '@godcreator/docsite-comments/react'
 import { Avatar } from '@godcreator/docsite-identity/react'
 import { commentContent } from '@site/lib/client-content'
-import type { RouteCommentData } from '../server/comments.js'
+import type { RouteCommentData } from '../server/comments.server.js'
 
 /** 评论正文：骨架把评论集合的 client loader 包成的组件，评论包的侧栏按路径取它 */
 function CommentBody({ path }: { path: string }) {

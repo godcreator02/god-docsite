@@ -38,7 +38,8 @@ export async function createThread(
   if (body.trim().length === 0) throw new Error('新建评论串缺少正文');
   const id = newCommentId(now);
   const dir = threadDir(commentsDir, id);
-  await mkdir(dir, { recursive: false });
+  // 第一条评论时 comments/ 还不存在：连父目录一起建
+  await mkdir(dir, { recursive: true });
   const fields: Record<string, string> = { page, author: authorId, createdAt: now.toISOString() };
   if (anchor !== undefined && anchor !== '') fields.anchor = anchor;
   const content = serializeCommentFile(fields, body);

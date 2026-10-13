@@ -1,6 +1,6 @@
 {
   "name": "@godcreator/collab-model",
-  "version": "0.6.0",
+  "version": "0.6.1",
   "description": "协作站的全部数据模型：项目（仓的布局、项目负责人）、任务（collab/ 里任务与模块记录的文件格式、读出当前状态、校验与写入规则、我的待办）、通知（gwb-collab 推给站点的数据的形状与校验）。人员列表的格式用 @godcreator/docsite-identity 的。不用 React、不用 Vite，不运行 git",
   "type": "module",
   "exports": {

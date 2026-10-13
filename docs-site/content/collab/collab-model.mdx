@@ -86,7 +86,7 @@ gwb-collab、合并检查包和这个包自己的 `node.ts` 都从这里取这�
 人员列表是基础包的格式，存在站点的 `site/people.json`，每项 `{ id, name, codes?, gitea?, agent? }`。协作站里 `id` 就是这个人的 Gitea 用户名，记录的 `author`、`owner` 写它；`codes` 是这个人各个 gwb home 的身份码，一个人可以有几个。
 本机身份由 `personOfCode` 认：本 home 的身份码（gwb-docsite 的设置 `identity-code`）在哪一项的 `codes` 里，就是那个人，不在任何一项里为 `null`。`parsePeople` 调基础包的同名函数，报错换成本包的 `CollabFormatError`；`peopleLookupOf` 把人员 id 换成显示名，通知短句的 `nameOf` 就是它：
 
-{/* ref file="../packages/collab-model/src/task-model/people.ts" hash="147103c99b3d" blob="26092130c6e9" */}
+{/* ref file="../packages/collab-model/src/task-model/people.ts" hash="45013402fabd" blob="56abec41d997" */}
 
 ### 读出状态与校验
 
@@ -261,7 +261,7 @@ gwb-collab、合并检查包和这个包自己的 `node.ts` 都从这里取这�
 人员列表是基础包的格式，存在站点的 `site/people.json`，每项 `{ id, name, codes?, gitea?, agent? }`。协作站里 `id` 就是这个人的 Gitea 用户名，记录的 `author`、`owner` 写它；`codes` 是这个人各个 gwb home 的身份码，一个人可以有几个。
 本机身份由 `personOfCode` 认：本 home 的身份码（gwb-docsite 的设置 `identity-code`）在哪一项的 `codes` 里，就是那个人，不在任何一项里为 `null`。`parsePeople` 调基础包的同名函数，报错换成本包的 `CollabFormatError`；`peopleLookupOf` 把人员 id 换成显示名，通知短句的 `nameOf` 就是它：
 
-{/* ref file="../packages/collab-model/src/task-model/people.ts" hash="147103c99b3d" blob="26092130c6e9" */}
+{/* ref file="../packages/collab-model/src/task-model/people.ts" hash="45013402fabd" blob="56abec41d997" */}
 
 ### 读出状态与校验
 

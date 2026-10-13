@@ -5,7 +5,7 @@ import { journal } from '@site/lib/journal'
 import { mdxComponents } from '@site/lib/mdx-components'
 import { siteName } from '@site/lib/source.server'
 import { isRealDate, journalUrlOf } from '../site-data.js'
-import { routeCommentData, routeCommentsAction } from '../server/comments.js'
+import { routeCommentData, routeCommentsAction } from '../server/comments.server.js'
 import { EmptyJournalDay, JournalDayBar, PageTitleWithWideToggle } from '../ui/calendar-page.js'
 import { RouteComments } from '../ui/route-comments.js'
 
