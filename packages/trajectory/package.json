@@ -1,0 +1,68 @@
+{
+  "name": "@godcreator/trajectory",
+  "version": "0.0.0",
+  "author": {
+    "name": "godcreator"
+  },
+  "type": "module",
+  "description": "轨迹卡：卡格式与校验、卡之间的关系、星轨盘的数据模型（.）；读卡目录（./node）；卡集合、卡页、星轨盘页与星轨盘画布（./site）。",
+  "exports": {
+    ".": {
+      "types": "./dist/core.d.mts",
+      "default": "./dist/core.mjs"
+    },
+    "./node": {
+      "types": "./dist/node.d.mts",
+      "default": "./dist/node.mjs"
+    },
+    "./site": {
+      "types": "./dist/site.d.mts",
+      "default": "./dist/site.mjs"
+    },
+    "./star.css": "./styles/star.css"
+  },
+  "files": [
+    "dist",
+    "styles"
+  ],
+  "scripts": {
+    "build": "tsdown",
+    "typecheck": "tsc -p tsconfig.json",
+    "test": "vitest run",
+    "prepublishOnly": "pnpm run build"
+  },
+  "dependencies": {
+    "unist-util-visit": "catalog:"
+  },
+  "peerDependencies": {
+    "react": ">=19"
+  },
+  "peerDependenciesMeta": {
+    "react": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@standard-schema/spec": "catalog:",
+    "@types/mdast": "catalog:",
+    "@types/node": "catalog:",
+    "@types/react": "catalog:",
+    "@types/react-dom": "catalog:",
+    "react": "catalog:",
+    "react-dom": "catalog:",
+    "tsdown": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://git.tianshen02.online:28377/api/packages/godcreator/npm/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://git.tianshen02.online:28377/godcreator/docsite-kit.git"
+  },
+  "keywords": [
+    "gwb"
+  ]
+}
