@@ -135,6 +135,9 @@ catalogs:
     mdast-util-math:
       specifier: ^3.0.0
       version: 3.0.0
+    mdast-util-mdx:
+      specifier: ^3.0.0
+      version: 3.0.0
     mdast-util-mdx-jsx:
       specifier: ^3.2.0
       version: 3.2.0
@@ -474,9 +477,33 @@ importers:
       '@noble/hashes':
         specifier: 'catalog:'
         version: 2.4.0
+      '@types/mdast':
+        specifier: 'catalog:'
+        version: 4.0.4
       diff:
         specifier: 'catalog:'
         version: 9.0.0
+      mdast-util-mdx:
+        specifier: 'catalog:'
+        version: 3.0.0(supports-color@7.2.0)
+      remark-frontmatter:
+        specifier: 'catalog:'
+        version: 5.0.0(supports-color@7.2.0)
+      remark-math:
+        specifier: 'catalog:'
+        version: 6.0.0(supports-color@7.2.0)
+      remark-mdx:
+        specifier: 'catalog:'
+        version: 3.1.1(supports-color@7.2.0)
+      remark-parse:
+        specifier: 'catalog:'
+        version: 11.0.0(supports-color@7.2.0)
+      unified:
+        specifier: 'catalog:'
+        version: 11.0.5
+      unist-util-visit:
+        specifier: 'catalog:'
+        version: 5.1.0
     devDependencies:
       '@types/node':
         specifier: 'catalog:'

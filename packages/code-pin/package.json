@@ -24,7 +24,15 @@
   },
   "dependencies": {
     "@noble/hashes": "catalog:",
-    "diff": "catalog:"
+    "@types/mdast": "catalog:",
+    "diff": "catalog:",
+    "mdast-util-mdx": "catalog:",
+    "remark-frontmatter": "catalog:",
+    "remark-math": "catalog:",
+    "remark-mdx": "catalog:",
+    "remark-parse": "catalog:",
+    "unified": "catalog:",
+    "unist-util-visit": "catalog:"
   },
   "devDependencies": {
     "@types/node": "catalog:",
