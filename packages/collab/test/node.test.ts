@@ -2,7 +2,7 @@ import { mkdtempSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import path from 'node:path'
 import { describe, expect, it } from 'vitest'
-import { readCollabSnapshot } from '../src/task-model/node.js'
+import { readCollabSnapshot } from '../src/node/index.js'
 import { cleanSnapshot, peopleText } from './fixtures.js'
 import { repoOnDisk } from './repo-on-disk.js'
 

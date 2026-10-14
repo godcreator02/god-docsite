@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { CollabFormatError, isRecordId, newRecordId, parsePeople, peopleLookupOf, personOfCode, recordTime } from '../src/task-model/index.js'
+import { CollabFormatError, isRecordId, newRecordId, parsePeople, peopleLookupOf, personOfCode, recordTime } from '../src/core/index.js'
 import { peopleText } from './fixtures.js'
 
 describe('记录 id', () => {

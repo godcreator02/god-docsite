@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { validateCollab } from '../src/task-model/index.js'
+import { validateCollab } from '../src/core/index.js'
 import { cleanSnapshot, fileOf, filesOf, moduleRecord, snapshotOf, task, textOf } from './fixtures.js'
 
 const messagesOf = (issues: ReturnType<typeof validateCollab>) => issues.map((issue) => `${issue.file} ${issue.message}`)

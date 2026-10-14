@@ -183,6 +183,7 @@ const PACKAGE_FORBIDDEN: Record<string, string[]> = {
   // 重构中的新功能包：功能包之间的边由 pnpm depcheck（.dependency-cruiser.cjs）管，这里只禁止它们依赖旧包
   identity: without("identity", []),
   comments: without("comments", []),
+  collab: without("collab", []),
 };
 
 test("包的方向：清单三类依赖字段里不许出现禁止的兄弟包", () => {

@@ -1,4 +1,4 @@
-import type { NotificationFacts, NotificationGroup, NotificationTarget } from '../src/notification-model/notifications.js'
+import type { NotificationFacts, NotificationGroup, NotificationTarget } from '../src/core/notifications/notifications.js'
 
 const displayNames: Record<string, string> = { chenhao: '陈浩', carol: '小王', godcreator: '老张' }
 export function nameOf(personId: string): string {

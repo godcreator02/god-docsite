@@ -1,7 +1,7 @@
 import { rmSync } from 'node:fs'
 import path from 'node:path'
 import { describe, expect, it } from 'vitest'
-import { aliceTaskId, bobTaskId, check, commit, git, laterTaskId, repo, write, writeTask } from './repo.js'
+import { aliceTaskId, bobTaskId, check, commit, git, laterTaskId, repo, write, writeTask } from './merge-check-repo.js'
 
 describe('合并检查：和 main 有没有冲突', () => {
   it('新加一条记录，能合并', async () => {

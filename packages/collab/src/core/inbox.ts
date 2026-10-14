@@ -1,4 +1,4 @@
-import { mentionsOf } from '@godcreator/docsite-identity'
+import { mentionsOf } from '@godcreator/identity'
 import type { CollabState, TaskState } from './state.js'
 import type { Person } from './people.js'
 

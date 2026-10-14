@@ -3,8 +3,8 @@ import { mkdirSync, mkdtempSync, realpathSync, symlinkSync, writeFileSync } from
 import { tmpdir } from 'node:os'
 import path from 'node:path'
 import { describe, expect, it, vi } from 'vitest'
-import { projectDirOfSite } from '@godcreator/collab-model/project-model'
-import { checkRepoLink, locallyOpenedOf, projectFileOf, vscodeCommandOf } from '../src/server/repo-links.server.js'
+import { projectDirOfSite } from '../src/node/project-dir.js'
+import { checkRepoLink, locallyOpenedOf, projectFileOf, vscodeCommandOf } from '../src/node/repo-links.js'
 
 // 每条测试都新建三个 git 仓，仓根 pnpm check 与插件的测试并行时，Windows 上启动 git 进程慢，5 秒不够
 vi.setConfig({ testTimeout: 20_000 })

@@ -1,4 +1,4 @@
-import type { CollabRecord, CollabSnapshot, ModuleRecord, TaskRecord } from '../src/task-model/index.js'
+import type { CollabRecord, CollabSnapshot, ModuleRecord, TaskRecord } from '../src/core/index.js'
 
 /** site/people.json：基础包的人员列表格式，协作站里 id 就是 Gitea 用户名 */
 export const peopleText = `${JSON.stringify([

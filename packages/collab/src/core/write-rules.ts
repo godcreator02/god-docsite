@@ -1,5 +1,5 @@
 import { parsePeople } from './people.js'
-import { isPlainObject } from '../plain-object.js'
+import { isPlainObject } from './plain-object.js'
 import { CollabFormatError, encodeRecordFile, fieldsAnyoneMayChange, newRecordId, type CollabRecord } from './records.js'
 import { newFormatProblems, readRecords, recordFileOf, type CollabSnapshot, type LocatedRecord } from './state.js'
 
@@ -108,9 +108,10 @@ function parseDeleteBody(body: Record<string, unknown>): string[] {
   if (!Array.isArray(ids) || ids.length === 0 || ids.some((id) => typeof id !== 'string')) {
     throw new WriteRejected('删除请求的 ids 要是一个至少含一个记录 id 的字符串数组')
   }
-  const repeated = ids.find((id, index) => ids.indexOf(id) !== index)
+  const recordIds = ids as string[]
+  const repeated = recordIds.find((id, index) => recordIds.indexOf(id) !== index)
   if (repeated !== undefined) throw new WriteRejected(`ids 里 ${repeated} 写了不止一次`)
-  return ids as string[]
+  return recordIds
 }
 
 function rejectUndeletable({ record }: LocatedRecord, actor: string, actorIsLead: boolean) {

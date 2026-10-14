@@ -2,10 +2,10 @@ import { mkdirSync, mkdtempSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import path from 'node:path'
 import { describe, expect, it } from 'vitest'
-import { journalDatesOf, journalProblemsOf, journalSourcesOf } from '@godcreator/collab-model/project-model'
-import { journalMentionsOf } from '../src/journal.js'
-import { plainLinesOf } from '../src/plain-lines.js'
-import { isRealDate, journalUrlOf } from '../src/site-data.js'
+import { journalDatesOf, journalProblemsOf, journalSourcesOf } from '../src/node/journal-files.js'
+import { isRealDate, journalMentionsOf } from '../src/core/journal.js'
+import { plainLinesOf } from '../src/core/plain-lines.js'
+import { journalUrlOf } from '../src/core/layout.js'
 
 function siteWith(files: Record<string, string>): string {
   const siteDir = mkdtempSync(path.join(tmpdir(), 'collab-site-'))

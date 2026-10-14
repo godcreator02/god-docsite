@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { dayMs, dayOf, isLaterThanModule, isoDateOf, moduleProgressOf, timelineAxisOf } from '../src/timeline.js'
+import { dayMs, dayOf, isLaterThanModule, isoDateOf, moduleProgressOf, timelineAxisOf } from '../src/core/timeline.js'
 
 describe('甘特图的时间轴', () => {
   it('日期与 UTC 零点的毫秒数互换', () => {

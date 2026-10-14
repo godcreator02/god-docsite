@@ -1,4 +1,4 @@
-import { parsePeople as parsePeopleValue, type StoredPerson } from '@godcreator/docsite-identity'
+import { parsePeople as parsePeopleValue, type StoredPerson } from '@godcreator/identity'
 import { CollabFormatError } from './records.js'
 
 /** 人员列表里的人：身份包的 StoredPerson（id、name、身份码 codes、可选的 gitea 与 agent 标记） */

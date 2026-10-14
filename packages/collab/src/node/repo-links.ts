@@ -1,13 +1,8 @@
 import { spawn } from 'node:child_process'
-import { createReadStream, existsSync } from 'node:fs'
+import { existsSync } from 'node:fs'
 import { open, stat } from 'node:fs/promises'
 import path from 'node:path'
-import { Readable } from 'node:stream'
-import { isPlainObject } from '@godcreator/collab-model/task-model'
-import { projectDirOfSite } from '@godcreator/collab-model/project-model'
-import { siteIdentity } from '@godcreator/docsite-identity/server'
-import { projectFileApiUrl, repoLinkPrefix, type RepoLinkCheck, type RepoLinkOpen } from '../repo-link-api.js'
-
+import { projectFileApiUrl, repoLinkPrefix, type RepoLinkCheck, type RepoLinkOpen } from '../core/repo-links.js'
 /** 交给浏览器看的文件：浏览器自己能显示，PDF 还能按 #page=N 跳页 */
 const browserContentTypes: Record<string, string> = {
   '.pdf': 'application/pdf',
@@ -23,7 +18,7 @@ const browserContentTypes: Record<string, string> = {
   '.webm': 'video/webm',
 }
 
-function browserContentTypeOf(file: string) {
+export function browserContentTypeOf(file: string) {
   return browserContentTypes[path.extname(file).toLowerCase()] ?? null
 }
 
@@ -33,11 +28,11 @@ function isGitRepo(dir: string) {
 }
 
 class LinkProblem extends Error {
-  constructor(
-    readonly state: 'no-repo' | 'no-file' | 'invalid',
-    message: string,
-  ) {
+  readonly state: 'no-repo' | 'no-file' | 'invalid'
+
+  constructor(state: 'no-repo' | 'no-file' | 'invalid', message: string) {
     super(message)
+    this.state = state
   }
 }
 
@@ -189,84 +184,9 @@ function openInVsCode(projectDir: string, target: VsCodeFile): Promise<void> {
   })
 }
 
-const siteDirOf = () => process.cwd()
-const errorResponse = (status: number, error: string) => Response.json({ error }, { status })
-
-/** 只读的站点（没有本机身份）不碰项目文件夹：发布出去的站点上，别的仓不该经它交出去 */
-function readOnlyReason() {
-  const identity = siteIdentity(siteDirOf())
-  return identity.person ? null : `只读的站点打不开 repo: 链接（${identity.reason}），在本机的协作站里打开`
-}
-
-type RepoLinksRequest = { op: 'check'; targets: string[] } | { op: 'open'; target: string }
-
-function parseRepoLinksRequest(value: unknown): RepoLinksRequest | string {
-  if (!isPlainObject(value)) return '请求体要是 { op: "check", targets } 或 { op: "open", target }'
-  if (value['op'] === 'check') {
-    const unknownKey = Object.keys(value).find((key) => key !== 'op' && key !== 'targets')
-    if (unknownKey !== undefined) return `check 请求里认不出的字段 ${unknownKey}`
-    const targets = value['targets']
-    if (!Array.isArray(targets) || !targets.every((target) => typeof target === 'string')) return 'targets 要是字符串数组'
-    return { op: 'check', targets }
-  }
-  if (value['op'] === 'open') {
-    const unknownKey = Object.keys(value).find((key) => key !== 'op' && key !== 'target')
-    if (unknownKey !== undefined) return `open 请求里认不出的字段 ${unknownKey}`
-    const target = value['target']
-    if (typeof target !== 'string') return 'target 要是字符串'
-    return { op: 'open', target }
-  }
-  return `op 只能是 check 或 open，收到 ${JSON.stringify(value['op'])}`
-}
-
-/**
- * repo: 链接的接口（POST /api/repo-links）：check 检查一批链接，open 在本机用 VS Code 或系统默认程序打开一条。
- * 只读的站点 check 一律回 read-only、open 回 403
- */
-export async function repoLinksResponse(request: Request): Promise<Response> {
-  if (request.method !== 'POST') return errorResponse(405, `只接受 POST，收到 ${request.method}`)
-  let body: unknown
-  try {
-    body = await request.json()
-  } catch (error) {
-    if (!(error instanceof SyntaxError)) throw error
-    return errorResponse(400, `请求体不是合法 JSON：${error.message}`)
-  }
-  const parsed = parseRepoLinksRequest(body)
-  if (typeof parsed === 'string') return errorResponse(400, parsed)
-  const readOnly = readOnlyReason()
-  const projectDir = projectDirOfSite(siteDirOf())
-  if (parsed.op === 'check') {
-    if (readOnly) return Response.json(parsed.targets.map((target): RepoLinkCheck => ({ target, state: 'read-only', problem: readOnly })))
-    return Response.json(await Promise.all(parsed.targets.map((target) => checkRepoLink(projectDir, target))))
-  }
-  if (readOnly) return errorResponse(403, readOnly)
-  const check = await checkRepoLink(projectDir, parsed.target)
-  if (check.state !== 'ok') return errorResponse(422, `${parsed.target}：${check.problem}`)
-  if (check.open.how === 'browser') return errorResponse(422, `${parsed.target} 由页面在浏览器里打开，不经站点服务`)
-  const opened = await locallyOpenedOf(projectDir, parsed.target)
-  if (opened.open.how === 'system') {
-    openWithSystem(opened.file)
-    return Response.json({})
-  }
-  try {
-    await openInVsCode(projectDir, opened)
-  } catch (error) {
-    return errorResponse(500, (error as Error).message)
-  }
-  return Response.json({})
-}
-
-/** 交文件的接口（GET /api/project-file/<仓>/<路径>）：PDF、图片、网页、视频交给浏览器；只读的站点回 403 */
-export function projectFileResponse(urlPath: string): Response {
-  const readOnly = readOnlyReason()
-  if (readOnly) return new Response(readOnly, { status: 403 })
-  let file: string
-  try {
-    file = projectFileOf(projectDirOfSite(siteDirOf()), urlPath)
-  } catch (error) {
-    return new Response((error as Error).message, { status: 404 })
-  }
-  if (!existsSync(file)) return new Response(`没有 ${urlPath}`, { status: 404 })
-  return new Response(Readable.toWeb(createReadStream(file)) as ReadableStream, { headers: { 'content-type': browserContentTypeOf(file)! } })
+/** 在本机打开一条 repo: 链接：文本文件进开着项目文件夹的 VS Code 窗口，二进制文件用系统默认程序；打不开、或该由页面在浏览器里打开的抛错 */
+export async function openRepoLinkLocally(projectDir: string, target: string): Promise<void> {
+  const opened = await locallyOpenedOf(projectDir, target)
+  if (opened.open.how === 'system') openWithSystem(opened.file)
+  else await openInVsCode(projectDir, opened)
 }

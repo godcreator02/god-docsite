@@ -1,7 +1,8 @@
 import { readdirSync, readFileSync } from 'node:fs'
 import path from 'node:path'
 import { beforeEach, describe, expect, it } from 'vitest'
-import { createRecord, deleteRecords, updateRecord, WriteRejected } from '../src/task-model/node.js'
+import { WriteRejected } from '../src/core/index.js'
+import { createRecord, deleteRecords, updateRecord } from '../src/node/index.js'
 import { fileOf, filesOf, moduleRecord, peopleText, task, taskId, textOf } from './fixtures.js'
 import { repoOnDisk, writeCollabFile } from './repo-on-disk.js'
 

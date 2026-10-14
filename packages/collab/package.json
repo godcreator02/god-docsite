@@ -1,0 +1,46 @@
+{
+  "name": "@godcreator/collab",
+  "version": "0.0.0",
+  "description": "项目协作：协作仓里的任务与模块（格式、状态、写入规则）、日志与日历、通知、我的待办、合并检查（命令行 collab-merge-check）、记录链接与 repo: 链接，以及接到 fumadocs 站上的页面与 loader / action",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/core/index.d.mts",
+      "default": "./dist/core/index.mjs"
+    },
+    "./node": {
+      "types": "./dist/node/index.d.mts",
+      "default": "./dist/node/index.mjs"
+    }
+  },
+  "bin": {
+    "collab-merge-check": "./dist/cli/bin.mjs"
+  },
+  "files": [
+    "dist",
+    "templates"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://git.tianshen02.online:28377/godcreator/docsite-kit.git"
+  },
+  "publishConfig": {
+    "registry": "https://git.tianshen02.online:28377/api/packages/godcreator/npm/"
+  },
+  "scripts": {
+    "build": "tsdown",
+    "typecheck": "tsc -p tsconfig.json",
+    "test": "vitest run",
+    "check": "tsc -p tsconfig.json && vitest run && pnpm lint",
+    "lint": "oxlint . --deny-warnings"
+  },
+  "dependencies": {
+    "@godcreator/identity": "workspace:^"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "tsdown": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  }
+}

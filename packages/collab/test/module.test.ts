@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from 'vitest'
-import { collabState, decodeRecordFile, encodeRecordFile, validateCollab, type CollabProblem } from '../src/task-model/index.js'
-import { updateRecord } from '../src/task-model/node.js'
+import { collabState, decodeRecordFile, encodeRecordFile, validateCollab, type CollabProblem } from '../src/core/index.js'
+import { updateRecord } from '../src/node/index.js'
 import { fileOf, filesOf, moduleId, moduleRecord, peopleText, snapshotOf, task, taskId, textOf } from './fixtures.js'
 import { repoOnDisk } from './repo-on-disk.js'
 
@@ -9,8 +9,8 @@ const messagesOf = (problems: CollabProblem[]) => problems.map((problem) => `${p
 describe('模块记录', () => {
   it('键序是 id、type、author、title、due、owner、detail，没有的字段不写', () => {
     const text = encodeRecordFile({ ...moduleRecord, detail: '14 路 ΣΔ 采样' })
-    expect(Object.keys(JSON.parse(text))).toEqual(['id', 'type', 'author', 'title', 'due', 'owner', 'detail'])
-    expect(Object.keys(JSON.parse(encodeRecordFile(moduleRecord)))).toEqual(['id', 'type', 'author', 'title', 'due', 'owner'])
+    expect(Object.keys(JSON.parse(text) as object)).toEqual(['id', 'type', 'author', 'title', 'due', 'owner', 'detail'])
+    expect(Object.keys(JSON.parse(encodeRecordFile(moduleRecord)) as object)).toEqual(['id', 'type', 'author', 'title', 'due', 'owner'])
   })
 
   it('标题、截止日必填，日期是 YYYY-MM-DD', () => {

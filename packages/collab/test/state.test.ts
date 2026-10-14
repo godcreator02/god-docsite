@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { collabState } from '../src/task-model/index.js'
+import { collabState } from '../src/core/index.js'
 import { cleanSnapshot, fileOf, filesOf, moduleId, moduleRecord, snapshotOf, task, taskId, textOf } from './fixtures.js'
 
 describe('读出当前状态', () => {
@@ -36,14 +36,14 @@ describe('读出当前状态', () => {
   it('不在 records/ 下的文件不当记录读，列成认不出的文件', () => {
     const state = collabState(snapshotOf({ ...filesOf(task), 'people.json': '[]\n' }))
     expect(state.tasks).toHaveLength(1)
-    expect(state.problems).toEqual([{ file: 'people.json', message: expect.stringMatching(/^认不出的文件/) }])
+    expect(state.problems).toEqual([{ file: 'people.json', message: expect.stringMatching(/^认不出的文件/) as string }])
   })
 
   it('没解决完的 git 冲突：那个文件列成问题，其余文件照常读出；指向它的任务不再报模块不存在', () => {
     const conflicted = textOf(moduleRecord).replace('  "title": "采样板",\n', '<<<<<<< HEAD\n  "title": "采样板 A",\n=======\n  "title": "采样板 B",\n>>>>>>> 1a2b3c4\n')
     const inModule = { ...task, module: moduleId }
     const state = collabState(snapshotOf({ ...filesOf(inModule), [fileOf(moduleRecord)]: conflicted }))
-    expect(state.problems).toEqual([{ file: fileOf(moduleRecord), message: expect.stringMatching(/冲突/) }])
+    expect(state.problems).toEqual([{ file: fileOf(moduleRecord), message: expect.stringMatching(/冲突/) as string }])
     expect(state.tasks).toHaveLength(1)
   })
 })

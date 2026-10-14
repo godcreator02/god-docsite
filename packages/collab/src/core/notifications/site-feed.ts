@@ -2,7 +2,7 @@
  * gwb-collab 与站点之间的约定：推给站点的数据的名字与形状，以及站点收下时按形状逐项检查的 siteFeedOf。
  * 插件与功能包同仓发版，版本对齐由发版顺序保证
  */
-import type { ProjectLeads } from '../project-model/project-leads.js'
+import type { ProjectLeads } from '../leads.js'
 import type { Notification } from './notifications.js'
 import { checkedNotificationsOf } from './notification-validation.js'
 import { fieldsOf, textsOf } from './shape-checks.js'

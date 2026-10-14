@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { check, commit, git, people, write, writePeople } from './repo.js'
+import { check, commit, git, people, write, writePeople } from './merge-check-repo.js'
 
 describe('合并检查：只有负责人能改的内容', () => {
   it('成员改了工作流、人员列表、装包设置、Node 会执行的配置、scripts、框架包版本、写成网址的依赖：只有负责人能改，逐处写明', async () => {
@@ -43,7 +43,7 @@ describe('合并检查：只有负责人能改的内容', () => {
       expect((await check('topic', false, author)).problems, message).toEqual([expect.stringContaining('site/people.json')])
     }
     git('checkout', '-q', '-B', 'topic', 'main')
-    write('site/people.json', `${JSON.stringify([...JSON.parse(people), { id: 'bob2', name: '乙二', gitea: 'bob' }], null, 2)}\n`)
+    write('site/people.json', `${JSON.stringify([...(JSON.parse(people) as unknown[]), { id: 'bob2', name: '乙二', gitea: 'bob' }], null, 2)}\n`)
     commit('加一项')
     expect((await check('topic')).verdict).toBe('needs-review')
   })

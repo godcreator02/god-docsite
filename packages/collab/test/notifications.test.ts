@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { notificationOriginalTextOf, notificationSentenceOf } from '../src/notification-model/notification-text.js'
+import { notificationOriginalTextOf, notificationSentenceOf } from '../src/core/notifications/notification-text.js'
 import {
   notificationCountsOf,
   notificationGroupOf,
@@ -9,7 +9,7 @@ import {
   notificationTargetOf,
   sortedNotifications,
   type NotificationFacts,
-} from '../src/notification-model/notifications.js'
+} from '../src/core/notifications/notifications.js'
 import { expectations, nameOf, pullUrl } from './notification-examples.js'
 
 describe('通知模型：每种通知', () => {

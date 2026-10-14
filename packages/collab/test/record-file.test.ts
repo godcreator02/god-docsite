@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { CollabFormatError, decodeRecordFile, encodeRecordFile } from '../src/task-model/index.js'
+import { CollabFormatError, decodeRecordFile, encodeRecordFile } from '../src/core/index.js'
 import { moduleRecord, task, textOf } from './fixtures.js'
 
 describe('记录文件的编码与解码', () => {

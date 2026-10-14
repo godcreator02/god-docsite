@@ -45,13 +45,6 @@ export type TaskState = Omit<TaskRecord, 'type'>
 export type ModuleState = Omit<ModuleRecord, 'type'>
 export type CollabState = { tasks: TaskState[]; modules: ModuleState[]; problems: CollabProblem[] }
 
-/** 网站自带的任务页的地址：任务与模块自己那一页是 /tasks/<记录 id> */
-export const tasksPageUrl = '/tasks'
-
-export function recordPageUrlOf(recordId: string): string {
-  return `${tasksPageUrl}/${recordId}`
-}
-
 function withoutType<T extends { type: string }>({ type: _type, ...rest }: T): Omit<T, 'type'> {
   return rest
 }

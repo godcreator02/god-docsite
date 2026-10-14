@@ -3,7 +3,7 @@ import { appendFileSync, mkdirSync, mkdtempSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import path from 'node:path'
 import { beforeEach } from 'vitest'
-import { checkMerge } from '../src/check.js'
+import { checkMerge } from '../src/node/merge-check.js'
 
 /** 各主题测试文件共用的建仓夹具（原 check.test.ts 的 beforeEach 与辅助，原样搬来）；repo 经 ESM live binding 在 beforeEach 赋值后对各文件生效 */
 

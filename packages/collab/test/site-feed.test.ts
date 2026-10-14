@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import { notificationOf, sortedNotifications } from '../src/notification-model/notifications.js'
-import { InvalidSiteFeed, siteFeedOf } from '../src/notification-model/site-feed.js'
+import { notificationOf, sortedNotifications } from '../src/core/notifications/notifications.js'
+import { InvalidSiteFeed, siteFeedOf } from '../src/core/notifications/site-feed.js'
 
 const notifications = sortedNotifications([
   notificationOf({ kind: 'task', recordId: '20260926120000-abc1234', title: '画机柜', due: '2026-10-20', detail: '先画草图' }),

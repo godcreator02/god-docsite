@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { collabState, commentDestinationOf, inboxOf, parsePeople, type CommentThreadOnFile } from '../src/task-model/index.js'
+import { collabState, commentDestinationOf, inboxOf, parsePeople, type CommentThreadOnFile } from '../src/core/index.js'
 import { cleanSnapshot, peopleText, task } from './fixtures.js'
 
 const people = parsePeople(peopleText)

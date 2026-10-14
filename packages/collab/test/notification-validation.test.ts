@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
-import { checkedNotificationsOf } from '../src/notification-model/notification-validation.js'
-import { InvalidSiteFeed } from '../src/notification-model/shape-checks.js'
-import { notificationOf } from '../src/notification-model/notifications.js'
+import { checkedNotificationsOf } from '../src/core/notifications/notification-validation.js'
+import { InvalidSiteFeed } from '../src/core/notifications/shape-checks.js'
+import { notificationOf } from '../src/core/notifications/notifications.js'
 import { expectations } from './notification-examples.js'
 
 const everyKind = expectations.map(({ facts }) => notificationOf(facts))

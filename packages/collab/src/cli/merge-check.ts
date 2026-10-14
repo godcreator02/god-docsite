@@ -1,5 +1,5 @@
-import { collabPathInRepo, sitePathInRepo } from '@godcreator/collab-model/project-model'
-import { checkMerge, git } from './check.js'
+import { collabPathInRepo, sitePathInRepo } from '../core/layout.js'
+import { checkMerge, git } from '../node/merge-check.js'
 
 export type CliResult = { exitCode: 0 | 1 | 2; output: string }
 

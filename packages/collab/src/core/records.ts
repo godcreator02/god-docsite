@@ -1,4 +1,4 @@
-import { isPlainObject } from '../plain-object.js'
+import { isPlainObject } from './plain-object.js'
 
 /** 协作记录（记录文件、人员列表）格式不对时抛出；消息写明错在哪，给人和 AI 直接看 */
 export class CollabFormatError extends Error {

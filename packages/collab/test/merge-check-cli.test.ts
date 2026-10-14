@@ -2,8 +2,8 @@ import { mkdtempSync, rmSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import path from 'node:path'
 import { describe, expect, it } from 'vitest'
-import { runMergeCheckCli } from '../src/cli.js'
-import { bobTaskId, commit, repo, write, writeTask } from './repo.js'
+import { runMergeCheckCli } from '../src/cli/merge-check.js'
+import { bobTaskId, commit, repo, write, writeTask } from './merge-check-repo.js'
 
 describe('命令行 collab-merge-check', () => {
   it('能合并时退出码 0', async () => {
