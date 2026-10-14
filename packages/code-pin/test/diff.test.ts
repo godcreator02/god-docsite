@@ -7,8 +7,8 @@ import { execFileSync } from "node:child_process";
 import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { diffLines, diffText, hunksOf, mapRange, mappedSpan } from "../src/index.ts";
-import type { Hunk } from "../src/index.ts";
+import { diffLines, diffText, hunksOf, mapRange, mappedSpan } from "../src/core/index.ts";
+import type { Hunk } from "../src/core/index.ts";
 
 /** git 给的 hunk 表：两份内容写成临时文件跑 `git diff --no-index -U0` */
 function gitHunks(oldText: string, newText: string): Hunk[] {

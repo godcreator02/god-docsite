@@ -4,8 +4,8 @@
  */
 import { test } from "vitest";
 import assert from "node:assert/strict";
-import { blobOf, createPinner, diffText, hashNames, hashSpan, normalizeLines, sliceSpan } from "../src/index.ts";
-import type { History, Pin, PinCheck, Pinner, Reader, Target } from "../src/index.ts";
+import { blobOf, createPinner, diffText, hashNames, hashSpan, normalizeLines, sliceSpan } from "../src/core/index.ts";
+import type { History, Pin, PinCheck, Pinner, Reader, Target } from "../src/core/index.ts";
 
 const CODE = ["// greet", "export function greet(name: string): string {", "  return `hello ${name}`;", "}", ""];
 
