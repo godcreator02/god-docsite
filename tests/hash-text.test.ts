@@ -9,7 +9,7 @@ import { strict as assert } from "node:assert";
 import { execFileSync } from "node:child_process";
 import { tmpdir } from "node:os";
 import { test } from "vitest";
-import { hashText } from "../packages/code-pin/src/index.ts";
+import { hashText } from "../packages/docfirst-workflow/src/legacy-code-pin/index.ts";
 
 /** git 自己怎么算。跑在临时目录里：算哈希不需要仓，也不往任何对象库写东西 */
 function gitHashObject(text: string): string {

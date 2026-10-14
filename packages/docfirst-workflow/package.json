@@ -56,7 +56,6 @@
     "prepublishOnly": "pnpm run build"
   },
   "dependencies": {
-    "@godcreator/code-pin": "workspace:^",
     "@godcreator/trajectory-disk": "workspace:^",
     "mdast-util-math": "catalog:",
     "mdast-util-to-markdown": "catalog:",

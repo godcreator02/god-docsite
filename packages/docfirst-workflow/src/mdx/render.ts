@@ -14,7 +14,7 @@ import remarkMdx from "remark-mdx";
 import type { Root } from "mdast";
 import { mathToMarkdown } from "mdast-util-math";
 import { toMarkdown } from "mdast-util-to-markdown";
-import { fileOf, REASON_TEXT } from "@godcreator/code-pin";
+import { fileOf, REASON_TEXT } from "../legacy-code-pin/index.ts";
 import type { Item, Listing } from "../reference/index.ts";
 import { langOf } from "./lang.ts";
 import { markerOf } from "./recognize.ts";

@@ -9,7 +9,7 @@ import { test } from "vitest";
 import assert from "node:assert/strict";
 import { mkdirSync, symlinkSync } from "node:fs";
 import { join } from "node:path";
-import type { Target } from "../packages/code-pin/src/index.ts";
+import type { Target } from "../packages/docfirst-workflow/src/legacy-code-pin/index.ts";
 import { CODE, refLine, run, setupRepo } from "./repo.ts";
 
 const DOC = "docs/a.mdx";

@@ -6,7 +6,7 @@
  *
  * 这个目录只认识 `../marker/` 与 `../reference/`，不认识 mdx、钉码编排、project 与 cli（由 `tests/boundary.test.ts` 检查）。
  */
-import type { MemoRecord, Target } from "@godcreator/code-pin";
+import type { MemoRecord, Target } from "../legacy-code-pin/index.ts";
 import type { Format, Reference, WrittenReference } from "../reference/index.ts";
 import { formalOf, markerErrors, parseFormal } from "../marker/index.ts";
 

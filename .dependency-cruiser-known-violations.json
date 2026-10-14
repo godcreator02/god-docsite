@@ -1,8 +1,8 @@
 [
   {
     "type": "cycle",
-    "from": "packages/code-pin/src/diff.ts",
-    "to": "packages/code-pin/src/types.ts",
+    "from": "packages/docfirst-workflow/src/legacy-code-pin/diff.ts",
+    "to": "packages/docfirst-workflow/src/legacy-code-pin/types.ts",
     "unresolvedTo": "./types.ts",
     "dependencyTypes": [
       "local",
@@ -15,7 +15,7 @@
     },
     "cycle": [
       {
-        "name": "packages/code-pin/src/types.ts",
+        "name": "packages/docfirst-workflow/src/legacy-code-pin/types.ts",
         "dependencyTypes": [
           "local",
           "type-only",
@@ -23,7 +23,7 @@
         ]
       },
       {
-        "name": "packages/code-pin/src/diff.ts",
+        "name": "packages/docfirst-workflow/src/legacy-code-pin/diff.ts",
         "dependencyTypes": [
           "local",
           "type-only",

@@ -4,7 +4,7 @@
  *   hunks     两份内容写成临时文件跑 `git diff --no-index -U0`，hunk 表按内容寻址缓存在内存与系统临时目录
  * 取不到旧内容（文件不在任何仓里、blob 没进对象库、缩写有歧义）给 null，比较器退回滑窗。
  */
-import type { History } from "@godcreator/code-pin";
+import type { History } from "../legacy-code-pin/index.ts";
 import { diffHunks, locate, readBlob } from "./git.ts";
 
 export function createGitHistory(root: string): History {

@@ -4,8 +4,8 @@
  */
 import { test } from "vitest";
 import assert from "node:assert/strict";
-import { blobOf, createPinner, hashNames, hashSpan, normalizeLines, sliceSpan } from "../packages/code-pin/src/index.ts";
-import type { History, MemoRecord, Pin, Pinner, Reader, Target, Verdict } from "../packages/code-pin/src/index.ts";
+import { blobOf, createPinner, hashNames, hashSpan, normalizeLines, sliceSpan } from "../packages/docfirst-workflow/src/legacy-code-pin/index.ts";
+import type { History, MemoRecord, Pin, Pinner, Reader, Target, Verdict } from "../packages/docfirst-workflow/src/legacy-code-pin/index.ts";
 import { NO_HISTORY } from "./repo.ts";
 
 const CODE = ["// greet", "export function greet(name: string): string {", "  return `hello ${name}`;", "}", ""];

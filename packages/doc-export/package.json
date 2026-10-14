@@ -1,0 +1,60 @@
+{
+  "name": "@godcreator/doc-export",
+  "version": "0.1.0",
+  "author": {
+    "name": "godcreator"
+  },
+  "type": "module",
+  "description": "从 mdx 正本生成 AGENTS.md / README.md / SKILL.md 这类 Markdown 生成物，并核对生成物与正本一致：钉码标记写成代码块，名册里的组件写成它的机读文字。",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.mts",
+      "default": "./dist/index.mjs"
+    },
+    "./node": {
+      "types": "./dist/node.d.mts",
+      "default": "./dist/node.mjs"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsdown",
+    "typecheck": "tsc -p tsconfig.json",
+    "test": "vitest run",
+    "check": "tsc -p tsconfig.json && vitest run",
+    "prepublishOnly": "pnpm run build"
+  },
+  "dependencies": {
+    "@godcreator/code-pin": "workspace:^",
+    "@types/mdast": "catalog:",
+    "mdast-util-mdx": "catalog:",
+    "mdast-util-to-markdown": "catalog:",
+    "remark-frontmatter": "catalog:",
+    "remark-gfm": "catalog:",
+    "remark-math": "catalog:",
+    "remark-mdx": "catalog:",
+    "remark-parse": "catalog:",
+    "remark-stringify": "catalog:",
+    "unified": "catalog:",
+    "unist-util-visit": "catalog:",
+    "yaml": "catalog:"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://git.tianshen02.online:28377/api/packages/godcreator/npm/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://git.tianshen02.online:28377/godcreator/docsite-kit.git"
+  },
+  "keywords": [
+    "gwb"
+  ]
+}

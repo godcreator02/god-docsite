@@ -6,7 +6,7 @@
  *
  * 这个目录只认识 `@godcreator/code-pin`，不认识 workflow 里别的目录（由 `tests/boundary.test.ts` 检查）。
  */
-import type { MemoRecord, Reason, Span, Status, Target } from "@godcreator/code-pin";
+import type { MemoRecord, Reason, Span, Status, Target } from "../legacy-code-pin/index.ts";
 
 /** 文档里的一处引用 */
 export interface Reference {

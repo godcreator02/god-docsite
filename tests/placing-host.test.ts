@@ -7,7 +7,7 @@
  */
 import { test } from "vitest";
 import assert from "node:assert/strict";
-import { createPinner } from "../packages/code-pin/src/index.ts";
+import { createPinner } from "../packages/docfirst-workflow/src/legacy-code-pin/index.ts";
 import type { Roster } from "../packages/docfirst-workflow/src/mdx/index.ts";
 import type { Listing } from "../packages/docfirst-workflow/src/reference/index.ts";
 import { createPinning } from "../packages/docfirst-workflow/src/pinning/index.ts";
