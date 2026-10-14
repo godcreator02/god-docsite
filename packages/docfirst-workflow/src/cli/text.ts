@@ -1,7 +1,7 @@
 /**
  * 命令行打印的文字：状态符号、状态的中文说法，以及每种结果打印成哪一行。只拼字符串，不打印、不读写文件。
  */
-import { REASON_TEXT } from "@godcreator/code-pin";
+import { REASON_TEXT } from "../legacy-code-pin/index.ts";
 import type { Item } from "../reference/index.ts";
 import { targetKey } from "../marker/index.ts";
 import type { ConfirmStep } from "../pinning/index.ts";

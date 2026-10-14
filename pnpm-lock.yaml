@@ -581,9 +581,6 @@ importers:
 
   packages/docfirst-workflow:
     dependencies:
-      '@godcreator/code-pin':
-        specifier: workspace:^
-        version: link:../code-pin
       '@godcreator/trajectory-disk':
         specifier: workspace:^
         version: link:../trajectory-disk

@@ -14,8 +14,7 @@
  *
  * 状态点长什么样、怎么渲染，全归站点侧的 pre 组件和样式表；这一层只把颜色写进 meta / 属性。
  */
-import type { Status } from "@godcreator/code-pin";
-import type { Item } from "@godcreator/docfirst-workflow";
+import type { Item, Status } from "@godcreator/docfirst-workflow";
 import { langOf } from "@godcreator/docfirst-workflow/mdx";
 import type { JsxAttribute, TreeNode } from "@godcreator/docfirst-workflow/mdx";
 

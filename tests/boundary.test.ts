@@ -23,7 +23,7 @@
  * 源码、产物、样式与包的说明里一个 docfirst 字样都没有：docfirst 的名字一旦写进通用包，哪怕只是一行注释，
  * 下一个人就会顺着它把 docfirst 的规矩搬进来。唯一放行的是清单里 `repository.url`
  * 指向本仓的那一行（`REPOSITORY_URL_LINE`）：仓名是 docsite-kit，那一行说的是包放在哪，不是包认识 docfirst。另外各包自己的几条：
- * code-pin 只许 `node:crypto`、不认识文档文本；trajectory-disk 的 `.` 入口零 import、整个包不认识卡文件的写法。
+ * workflow 里复制进来的旧钉码核心（`src/legacy-code-pin/`）只许 `node:crypto`、不认识文档文本；trajectory-disk 的 `.` 入口零 import、整个包不认识卡文件的写法。
  *
  * 为什么分成两张表：讲解组件包的使用方全是 docfirst 站，`./text` 为 docfirst 的机读版生成文字，用法写在 docfirst 插件的说明书里，
  * 所以它挪到 docfirst 一侧、名字里带上 docfirst，不再受「不认识 docfirst」那条约束；但它仍然不依赖本仓别的包，
@@ -291,13 +291,13 @@ test("通用包不认识 docfirst：源码、产物、样式、构建配置与�
   assert.deepEqual(bad, [], "通用包里写了 docfirst。讲 docfirst 怎么用它，写进 docfirst-workflow 或文档站，不写进通用包");
 });
 
-test("pin 零依赖：清单里没有 dependencies / peerDependencies，源码只 import 自己和 node:crypto", () => {
-  const pkg = manifestOf("code-pin");
-  assert.deepEqual(Object.keys(pkg.dependencies ?? {}), [], "pin 的 dependencies 得是空的");
-  assert.deepEqual(Object.keys(pkg.peerDependencies ?? {}), [], "pin 的 peerDependencies 得是空的");
-  for (const file of sourcesIn(srcOf("code-pin"))) {
+/** 改造前的钉码核心：code-pin 按功能包分层改造期间，docfirst-workflow 用的是它原样复制进来的这一份 */
+const LEGACY_PIN_SRC = join(srcOf("docfirst-workflow"), "legacy-code-pin");
+
+test("workflow 里的旧钉码核心零依赖：源码只 import 自己和 node:crypto", () => {
+  for (const file of sourcesIn(LEGACY_PIN_SRC)) {
     for (const spec of importSpecsOf(readFileSync(file, "utf8"))) {
-      assert.ok(spec.startsWith("./") || spec === "node:crypto", `pin/${rel(srcOf("code-pin"), file)} import 了 ${spec}`);
+      assert.ok(spec.startsWith("./") || spec === "node:crypto", `legacy-code-pin/${rel(LEGACY_PIN_SRC, file)} import 了 ${spec}`);
     }
   }
 });
@@ -305,15 +305,10 @@ test("pin 零依赖：清单里没有 dependencies / peerDependencies，源码�
 /** 文档文本那一侧的名字：mdx、记号写法、格式接口、带文档位置的引用与清单。钉码核心只认目标与记录，一个都不该有 */
 const DOC_SIDE_WORDS = /\bmdx\b|[Mm]arker|[Dd]raft|formalOf|parseFormal|targetKey|@@docfirst|\bFormat\b|\bReference\b|\bListing\b/;
 
-test("钉码核心不接触文档文本：源码与产物里没有 mdx、记号写法、格式接口、引用与清单", () => {
-  const dir = srcOf("code-pin");
-  for (const file of sourcesIn(dir)) {
+test("workflow 里的旧钉码核心不接触文档文本：源码里没有 mdx、记号写法、格式接口、引用与清单", () => {
+  for (const file of sourcesIn(LEGACY_PIN_SRC)) {
     const hit = DOC_SIDE_WORDS.exec(readFileSync(file, "utf8"));
-    assert.equal(hit, null, `pin/src/${rel(dir, file)} 里出现了「${hit?.[0]}」`);
-  }
-  for (const file of ["index.mjs", "index.d.mts"]) {
-    const hit = DOC_SIDE_WORDS.exec(distOf("code-pin", file));
-    assert.equal(hit, null, `pin 的产物 ${file} 里出现了「${hit?.[0]}」`);
+    assert.equal(hit, null, `legacy-code-pin/${rel(LEGACY_PIN_SRC, file)} 里出现了「${hit?.[0]}」`);
   }
 });
 
@@ -387,8 +382,10 @@ const WORKFLOW_SRC = srcOf("docfirst-workflow");
  *   cli      命令行入口：认识以上全部，谁都不认识它
  *   fumadocs 站那一侧：不用相对路径进任何目录，只按包名用本包的 `.`、`./mdx`、`./cards`（下面单独一条查）；谁都不认识它
  *   node     Node 实现：读写文件、git、加载模块，不认识 docfirst 的任何格式，所以包里谁都不认识；project、cards、cli 用它
+ *   legacy-code-pin 改造前的钉码核心原样复制进来的一份，只收目标与记录，谁都不认识；别的目录用它代替 @godcreator/code-pin
  */
 const WORKFLOW_DIRS: Record<string, string[]> = {
+  "legacy-code-pin": ["marker", "reference", "mdx", "code", "pinning", "project", "cards", "cli", "fumadocs", "node"],
   marker: ["reference", "mdx", "code", "pinning", "project", "cards", "cli", "fumadocs", "node"],
   reference: ["marker", "mdx", "code", "pinning", "project", "cards", "cli", "fumadocs", "node"],
   mdx: ["code", "pinning", "project", "cards", "cli", "fumadocs", "node"],
@@ -424,21 +421,23 @@ test("workflow 目录方向：marker 与 reference 谁都不认识，mdx 不认�
   assert.deepEqual(bad, [], "方向反了。改的是 WORKFLOW_DIRS 那张表加一段为什么，不是把这条断言删掉");
 });
 
-test("workflow 目录方向：reference 只认识 @godcreator/code-pin", () => {
+/** 旧钉码核心在 workflow 里的入口，别的目录按这条相对路径用它 */
+const LEGACY_PIN = "../legacy-code-pin/index.ts";
+
+test("workflow 目录方向：reference 只认识旧钉码核心", () => {
   for (const file of sourcesIn(join(WORKFLOW_SRC, "reference"))) {
     for (const spec of importSpecsOf(readFileSync(file, "utf8"))) {
-      assert.ok(spec.startsWith("./") || spec === "@godcreator/code-pin", `reference/${rel(join(WORKFLOW_SRC, "reference"), file)} import 了 ${spec}`);
+      assert.ok(spec.startsWith("./") || spec === LEGACY_PIN, `reference/${rel(join(WORKFLOW_SRC, "reference"), file)} import 了 ${spec}`);
     }
   }
 });
 
-test("workflow 目录方向：code 只认识 marker、reference 与 @godcreator/code-pin", () => {
+test("workflow 目录方向：code 只认识 marker、reference 与旧钉码核心", () => {
   const dir = join(WORKFLOW_SRC, "code");
   for (const file of sourcesIn(dir)) {
     for (const spec of importSpecsOf(readFileSync(file, "utf8"))) {
-      if (spec === "@godcreator/code-pin") continue;
       const landed = spec.startsWith(".") ? (dirOf(file, spec) ?? "") : "";
-      assert.ok(["code", "marker", "reference"].includes(landed), `code/${rel(dir, file)} import 了 ${spec}`);
+      assert.ok(["code", "marker", "reference", "legacy-code-pin"].includes(landed), `code/${rel(dir, file)} import 了 ${spec}`);
     }
   }
 });
@@ -448,14 +447,14 @@ function importStatementsOf(src: string): Array<{ line: string; spec: string }> 
   return [...src.matchAll(/^(?:import|export)\b[^\n]*?\bfrom\s*["']([^"']+)["']/gm)].map((m) => ({ line: m[0], spec: m[1]! }));
 }
 
-test("workflow 目录方向：marker 只从 @godcreator/code-pin import 类型，别的只许是目录里的相对路径", () => {
+test("workflow 目录方向：marker 只从旧钉码核心 import 类型，别的只许是目录里的相对路径", () => {
   const dir = join(WORKFLOW_SRC, "marker");
   for (const file of sourcesIn(dir)) {
     const src = readFileSync(file, "utf8");
     const statements = importStatementsOf(src);
     assert.equal(statements.length, importSpecsOf(src).length, `marker/${rel(dir, file)} 有认不出整行的 import（副作用导入、动态导入或跨行花括号）`);
     for (const { line, spec } of statements) {
-      if (spec === "@godcreator/code-pin") {
+      if (spec === LEGACY_PIN) {
         assert.match(line, /^(?:import|export)\s+type\b/, `marker/${rel(dir, file)} 从钉码核心 import 了值：${line}`);
         continue;
       }

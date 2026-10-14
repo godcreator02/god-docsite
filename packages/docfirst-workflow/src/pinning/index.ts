@@ -6,7 +6,7 @@
  * 这个目录认识 `../reference/`、`../mdx/`、`../code/` 与 `@godcreator/code-pin`，不认识记号属性怎么写，
  * 也不认识 project 与 cli（由 `tests/boundary.test.ts` 检查）。
  */
-import type { ConfirmAction, ConfirmOptions, Pin, Pinner, Step, Verdict } from "@godcreator/code-pin";
+import type { ConfirmAction, ConfirmOptions, Pin, Pinner, Step, Verdict } from "../legacy-code-pin/index.ts";
 import type { Format, Item, Listing, Reference, WrittenReference } from "../reference/index.ts";
 import { mdxFormat } from "../mdx/index.ts";
 import { codeFormat } from "../code/index.ts";

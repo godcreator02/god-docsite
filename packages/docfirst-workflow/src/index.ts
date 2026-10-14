@@ -19,3 +19,4 @@ export { loadProject } from "./project/index.ts";
 export type { GlossaryConfig, Project, ProjectConfig } from "./project/index.ts";
 export type { Format, Item, Listing, Reference } from "./reference/index.ts";
 export type { ConfirmResult, ConfirmStep, Pinning } from "./pinning/index.ts";
+export type { Status } from "./legacy-code-pin/index.ts";

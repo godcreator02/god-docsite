@@ -7,7 +7,7 @@
  */
 import { readdirSync, readFileSync, statSync } from "node:fs";
 import { join, resolve } from "node:path";
-import type { Reader } from "@godcreator/code-pin";
+import type { Reader } from "../legacy-code-pin/index.ts";
 import { git, locateDir, statusEntries } from "./git.ts";
 
 /** glob 只认 * 和 ?；匹配的是名字，不是路径 */

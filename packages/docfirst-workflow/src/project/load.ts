@@ -9,7 +9,7 @@
  * 项目根下 `src/components/` 里有格式认领的代码文件（讲解组件的源码）也是现状区。配置怎么读、怎么校验在 config.ts。
  */
 import { isAbsolute, join, relative, resolve, sep } from "node:path";
-import { createPinner } from "@godcreator/code-pin";
+import { createPinner } from "../legacy-code-pin/index.ts";
 import type { Roster } from "../mdx/index.ts";
 import { codeFormat, COMPONENTS_DIR } from "../code/index.ts";
 import { createPinning } from "../pinning/index.ts";

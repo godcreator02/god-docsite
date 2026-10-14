@@ -13,7 +13,7 @@ import * as fumadocs from "../packages/docfirst-workflow/src/fumadocs/index.ts";
 import { DOT_COLOR, applyListing, docfirstMarkdownOptions, parseMetaString, whereOf } from "../packages/docfirst-workflow/src/fumadocs/index.ts";
 import { fumadocsRoster } from "../packages/docfirst-workflow/src/fumadocs/roster.ts";
 import { markMarkdownImages } from "../packages/docfirst-workflow/src/fumadocs/image.ts";
-import type { MemoRecord, Target } from "../packages/code-pin/src/index.ts";
+import type { MemoRecord, Target } from "../packages/docfirst-workflow/src/legacy-code-pin/index.ts";
 import type { Item, Listing, Reference } from "../packages/docfirst-workflow/src/reference/index.ts";
 
 const T: Target = { kind: "span", file: "src/greet.ts", a: 2, b: 3 };

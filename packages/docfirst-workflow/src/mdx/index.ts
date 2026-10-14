@@ -9,7 +9,7 @@
  *
  * 这个目录不认识钉码编排、project 与 cli，也不认识任何站的宿主（由 `tests/boundary.test.ts` 检查）。
  */
-import type { MemoRecord, Target } from "@godcreator/code-pin";
+import type { MemoRecord, Target } from "../legacy-code-pin/index.ts";
 import type { Format, Reference, WrittenReference } from "../reference/index.ts";
 import { formalOf } from "../marker/index.ts";
 import { braceComment, recognize } from "./recognize.ts";

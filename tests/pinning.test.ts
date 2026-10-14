@@ -4,8 +4,8 @@
  */
 import { test } from "vitest";
 import assert from "node:assert/strict";
-import { blobOf, createPinner, hashSpan } from "../packages/code-pin/src/index.ts";
-import type { Target } from "../packages/code-pin/src/index.ts";
+import { blobOf, createPinner, hashSpan } from "../packages/docfirst-workflow/src/legacy-code-pin/index.ts";
+import type { Target } from "../packages/docfirst-workflow/src/legacy-code-pin/index.ts";
 import { createPinning } from "../packages/docfirst-workflow/src/pinning/index.ts";
 import { NO_HISTORY, refLine } from "./repo.ts";
 

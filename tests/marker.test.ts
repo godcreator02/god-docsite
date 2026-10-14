@@ -9,7 +9,7 @@
 import { test } from "vitest";
 import assert from "node:assert/strict";
 import * as mdx from "../packages/docfirst-workflow/src/mdx/index.ts";
-import type { MemoRecord, Target } from "../packages/code-pin/src/index.ts";
+import type { MemoRecord, Target } from "../packages/docfirst-workflow/src/legacy-code-pin/index.ts";
 import type { WrittenReference } from "../packages/docfirst-workflow/src/reference/index.ts";
 import { isRemovedDraftLine, parseFormal } from "../packages/docfirst-workflow/src/marker/index.ts";
 

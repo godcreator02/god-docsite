@@ -32,7 +32,7 @@
  *
  * 「待重写页」= items 里有 changed / missing 的、或 outputs 里 `fresh` 为假的文档；「漂移的钉」= 那些 item。
  */
-import type { Reason, Status, Target } from "@godcreator/code-pin";
+import type { Reason, Status, Target } from "../legacy-code-pin/index.ts";
 import type { PlacedCheck } from "../project/index.ts";
 
 /** 一个摆放落点的新鲜度。**形状由 project 的摆放模块定**，这儿只是给报告用的别名——
