@@ -3,7 +3,7 @@ import remarkMath from "remark-math";
 import remarkMdx from "remark-mdx";
 import remarkParse from "remark-parse";
 import { unified } from "unified";
-import { remarkGlossary } from "../src/mdx/remark-glossary.js";
+import { remarkGlossaryOfTerms } from "../src/mdx/remark-glossary.js";
 import type { TermEntry } from "../src/core/glossary.js";
 
 const terms: TermEntry[] = [
@@ -30,9 +30,9 @@ function allText(node: AnyNode): string {
 }
 
 const countTerms = (root: AnyNode): number => termsOf(root).length;
-const markAll = remarkGlossary({ terms })();
+const markAll = remarkGlossaryOfTerms({ terms })();
 /** 集合分发：只在集合 A（content/docs/）里标，集合 B 与别处不标——站点 skipFile 的样本形态 */
-const onlyCollectionA = remarkGlossary({ terms, skipFile: (path) => !path.replaceAll("\\", "/").includes("/content/docs/") })();
+const onlyCollectionA = remarkGlossaryOfTerms({ terms, skipFile: (path) => !path.replaceAll("\\", "/").includes("/content/docs/") })();
 
 const asTree = (tree: unknown) => tree as unknown as AnyNode;
 

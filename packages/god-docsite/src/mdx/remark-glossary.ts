@@ -1,6 +1,6 @@
 /**
  * 术语自动标注的 remark 插件：把正文里命中的词包成 `<Term def href>词</Term>`。
- * 只在构建期由 Node 走（站点的集合配置引入 `./compile` 出口），浏览器端的组件表只用 `Term` 组件本身。
+ * 只在构建期由 Node 走（站点的 source.config.ts 引入 `./mdx` 出口），浏览器端的组件表只用 `Term` 组件本身。
  *
  * 匹配规矩在 `glossary.ts`（纯逻辑），这里只管「在树上哪些地方能标、换节点怎么换」。
  *
@@ -18,10 +18,11 @@ import type { MdxJsxFlowElement, MdxJsxTextElement } from "mdast-util-mdx-jsx";
 import type { Node, Parent } from "unist";
 import { buildTermIndex, findTerms } from "../core/glossary.js";
 import type { TermEntry, TermIndex } from "../core/glossary.js";
+import { glossaryIndexOfFile } from "../node/glossary-file.js";
 
 export interface GlossaryOptions {
-  /** 术语表。正本是站里那份数据文件，这儿只收结果 */
-  terms: readonly TermEntry[];
+  /** 术语表文件（JSON 数组，每项 { term, def, aliases?, href? }）的路径；相对路径按站点目录（进程的工作目录）算 */
+  file: string;
   /** 哪些文件不标：术语页自己要跳过（否则自我循环）；集合分发由集合配置负责，不用这个 */
   skipFile?: (path: string) => boolean;
 }
@@ -110,15 +111,27 @@ function splitText(value: string, index: TermIndex, name: string, taken: Set<str
 /** remark 插件拿到的文件：路径从 vfile 来，只用得到这一个字段 */
 type PluginFile = { path?: string };
 
-/**
- * 建插件（unified 插件形态：直接放集合 mdxOptions 的 remarkPlugins 数组里）。索引只建一次——
- * 站构建时 loader 并发调，每篇重建一遍词表纯属浪费。对同一棵树跑两遍也安全：已经是 `<Term>` 的节点跳过，不会嵌出第二层。
- */
-export function remarkGlossary(options: GlossaryOptions): () => (tree: Node, file: PluginFile) => void {
-  const index = buildTermIndex(options.terms);
+type GlossaryTransformer = (tree: Node, file: PluginFile) => void;
 
-  return () => (tree, file) => {
-    if (file.path !== undefined && options.skipFile?.(file.path) === true) return;
+/**
+ * 建插件（unified 插件形态：直接放集合 mdxOptions 的 remarkPlugins 数组里）。每编译一篇看一眼术语表文件的修改时间，
+ * 没改就用建好的索引，改了重建——dev 下改术语表，之后编译的页面就用新表。
+ * 对同一棵树跑两遍也安全：已经是 `<Term>` 的节点跳过，不会嵌出第二层
+ */
+export function remarkGlossary({ file, skipFile }: GlossaryOptions): () => GlossaryTransformer {
+  return () => glossaryTransformer(() => glossaryIndexOfFile(file), skipFile);
+}
+
+/** 直接给术语表的版本：测试与不读文件的调用方用 */
+export function remarkGlossaryOfTerms({ terms, skipFile }: { terms: readonly TermEntry[]; skipFile?: (path: string) => boolean }): () => GlossaryTransformer {
+  const index = buildTermIndex(terms);
+  return () => glossaryTransformer(() => index, skipFile);
+}
+
+function glossaryTransformer(indexNow: () => TermIndex, skipFile: ((path: string) => boolean) | undefined): GlossaryTransformer {
+  return (tree, file) => {
+    if (file.path !== undefined && skipFile?.(file.path) === true) return;
+    const index = indexNow();
     const taken = new Set<string>();
 
     walkTree(tree, (node, i, parent) => {

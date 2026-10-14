@@ -11,9 +11,9 @@ describe('siteLinkTargetOf', () => {
     expect(siteLinkTargetOf('mailto:someone@example.com', '/guide')).toEqual({ kind: 'external', opensNewTab: false })
   })
 
-  it('站里的地址解码、去掉末尾的斜杠，带上标题与评论串', () => {
-    expect(siteLinkTargetOf('/写作/排版/?comment=abc#%E5%85%AC%E5%BC%8F', '/guide')).toEqual({ kind: 'site', path: '/写作/排版', hash: '公式', commentThread: 'abc' })
-    expect(siteLinkTargetOf('/%E5%86%99%E4%BD%9C', '/guide')).toEqual({ kind: 'site', path: '/写作', hash: '', commentThread: undefined })
+  it('站里的地址解码、去掉末尾的斜杠与查询，带上标题', () => {
+    expect(siteLinkTargetOf('/写作/排版/?comment=abc#%E5%85%AC%E5%BC%8F', '/guide')).toEqual({ kind: 'site', path: '/写作/排版', hash: '公式' })
+    expect(siteLinkTargetOf('/%E5%86%99%E4%BD%9C', '/guide')).toEqual({ kind: 'site', path: '/写作', hash: '' })
   })
 
   it('相对地址按当前页面的地址解析', () => {

@@ -1,11 +1,8 @@
-/** 正文里一个链接指向哪：本页的标题、站外、站里的一个地址（带着评论串时是那串评论） */
+/** 正文里一个链接指向哪：本页的标题、站外、站里的一个地址 */
 export type SiteLinkTarget =
   | { kind: 'in-page' }
   | { kind: 'external'; opensNewTab: boolean }
-  | { kind: 'site'; path: string; hash: string; commentThread: string | undefined }
-
-/** 去一串评论批的那一页：地址带上 ?comment=<评论串>，那一页找好位置后打开它 */
-export const linkedCommentParam = 'comment'
+  | { kind: 'site'; path: string; hash: string }
 
 const schemePattern = /^[a-z][a-z\d+.-]*:/i
 const anyOrigin = 'http://site.invalid'
@@ -21,10 +18,5 @@ export function siteLinkTargetOf(href: string, currentPath: string): SiteLinkTar
   if (href.startsWith('#')) return { kind: 'in-page' }
   if (schemePattern.test(href)) return { kind: 'external', opensNewTab: /^https?:/i.test(href) }
   const url = new URL(href, `${anyOrigin}${currentPath}`)
-  return {
-    kind: 'site',
-    path: sitePathOf(url.pathname),
-    hash: decodeURIComponent(url.hash.slice(1)),
-    commentThread: url.searchParams.get(linkedCommentParam) ?? undefined,
-  }
+  return { kind: 'site', path: sitePathOf(url.pathname), hash: decodeURIComponent(url.hash.slice(1)) }
 }

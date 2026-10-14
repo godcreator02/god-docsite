@@ -1,4 +1,4 @@
-import type { StaticSource, VirtualFile } from 'fumadocs-core/source'
+import type { MetaData, StaticSource, VirtualFile } from 'fumadocs-core/source'
 import type { StructuredData } from 'fumadocs-core/mdx-plugins/remark-structure'
 import { extractHtmlPage, type HtmlHeadingAnchor } from '../core/html-text.js'
 
@@ -32,7 +32,7 @@ export type FilePageData = {
   headings: HtmlHeadingAnchor[]
 }
 
-export type FilePageSource = StaticSource<{ pageData: FilePageData; metaData: never }>
+export type FilePageSource = StaticSource<{ pageData: FilePageData; metaData: MetaData }>
 
 export const tsxPageSuffix = '.page.tsx'
 export const htmlPageSuffix = '.html'
@@ -66,7 +66,7 @@ function markdownOfTsxMeta(meta: TsxPageMeta) {
  * 搜索只收 meta 里明确给出的文字
  */
 export function tsxPageSource(metaOf: Record<string, unknown>, contentDir = '/content'): FilePageSource {
-  const files: VirtualFile<{ pageData: FilePageData; metaData: never }>[] = Object.entries(metaOf).map(([file, meta]) => {
+  const files: VirtualFile<{ pageData: FilePageData; metaData: MetaData }>[] = Object.entries(metaOf).map(([file, meta]) => {
     const checked = checkedTsxMeta(file, meta)
     const searchTexts = [checked.description, checked.searchText].filter((text): text is string => text !== undefined)
     return {
@@ -92,7 +92,7 @@ export function tsxPageSource(metaOf: Record<string, unknown>, contentDir = '/co
  * 正文展示由浏览器原样渲染 HTML 文件（如经 /api/content/ 送出），这里不做任何编译
  */
 export function htmlPageSource(sourceOf: Record<string, string>, contentDir = '/content'): FilePageSource {
-  const files: VirtualFile<{ pageData: FilePageData; metaData: never }>[] = Object.entries(sourceOf).map(([file, html]) => {
+  const files: VirtualFile<{ pageData: FilePageData; metaData: MetaData }>[] = Object.entries(sourceOf).map(([file, html]) => {
     const extracted = extractHtmlPage(file, html)
     return {
       type: 'page',

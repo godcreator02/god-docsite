@@ -1,0 +1,36 @@
+import { createHash } from 'node:crypto'
+import type * as PageTree from 'fumadocs-core/page-tree'
+import type { SerializedPageTree } from 'fumadocs-core/source/client'
+import type { DocsiteContext, SiteLayoutData } from './site-context.js'
+
+/**
+ * 序列化后的页面树，根的 $id 换成内容摘要。
+ * 不变式：@fumadocs/base-ui 的 TreeContextProvider 按根 $id 缓存整棵树，根 $id 不变时新增页面、改标题后侧栏不更新
+ */
+export function withContentDigestId(serialized: SerializedPageTree): SerializedPageTree {
+  const digest = createHash('sha256').update(JSON.stringify(serialized.data)).digest('hex').slice(0, 16)
+  return { ...serialized, data: { ...serialized.data, $id: `site-tree-${digest}` } }
+}
+
+/** 页面树里名字是纯文字的链接项：页面树插件加的入口（全站评论、功能包页面）也算站内地址 */
+function treeLinkTitlesOf(nodes: readonly PageTree.Node[]): Array<[string, string]> {
+  return nodes.flatMap((node): Array<[string, string]> => {
+    if (node.type === 'page') return typeof node.name === 'string' && !node.external ? [[node.url, node.name]] : []
+    if (node.type === 'folder') return [...(node.index ? treeLinkTitlesOf([node.index]) : []), ...treeLinkTitlesOf(node.children)]
+    return []
+  })
+}
+
+/** 布局路由 loader 的平台部分：页面树（根 $id 是内容摘要）、站名（内容目录 meta.json 的 title）、站内地址到标题 */
+export async function siteLayoutData({ source }: Pick<DocsiteContext, 'source'>): Promise<SiteLayoutData> {
+  const tree = source.getPageTree()
+  const pageTitles = Object.fromEntries([
+    ...treeLinkTitlesOf(tree.children),
+    ...source.getPages().map((page): [string, string] => [page.url, page.data.title ?? page.url]),
+  ])
+  return {
+    pageTree: withContentDigestId(await source.serializePageTree(tree)),
+    siteName: typeof tree.name === 'string' ? tree.name : '',
+    pageTitles,
+  }
+}

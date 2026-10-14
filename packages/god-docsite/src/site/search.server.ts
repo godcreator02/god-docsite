@@ -1,5 +1,7 @@
 import { createFromSource, type SearchAPI } from 'fumadocs-core/search/server'
 import type { LoaderConfig, LoaderOutput } from 'fumadocs-core/source'
+import type { LoaderFunctionArgs } from 'react-router'
+import type { DocsiteContext } from './site-context.js'
 
 /**
  * 中文站点的搜索服务：站点路由用它包装自己的 loader，代替直接调 fumadocs 的 createFromSource。
@@ -12,4 +14,14 @@ import type { LoaderConfig, LoaderOutput } from 'fumadocs-core/source'
  */
 export function searchServerOf<C extends LoaderConfig>(getSource: () => LoaderOutput<C>): SearchAPI {
   return createFromSource(getSource, { search: { tolerance: 0, threshold: 0 } })
+}
+
+let latestSiteSource: DocsiteContext['source'] | undefined
+// SiteSource 只声明了平台用到的几样，运行时就是站点 loader() 的结果；createFromSource 要完整的 LoaderOutput 类型
+const siteSearchServer = searchServerOf(() => latestSiteSource as unknown as LoaderOutput)
+
+/** 资源路由 api/search 的 loader：每次请求带上站点现在的 loader，内容增删后索引跟着重建 */
+export async function searchLoader({ request }: LoaderFunctionArgs, { source }: Pick<DocsiteContext, 'source'>): Promise<Response> {
+  latestSiteSource = source
+  return siteSearchServer.GET(request)
 }

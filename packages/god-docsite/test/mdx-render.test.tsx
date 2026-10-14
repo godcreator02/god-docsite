@@ -8,7 +8,7 @@ import remarkMath from "remark-math";
 import { Fragment, jsx, jsxs } from "react/jsx-runtime";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
-import { remarkGlossary } from "../src/mdx/remark-glossary.js";
+import { remarkGlossaryOfTerms } from "../src/mdx/remark-glossary.js";
 import type { TermEntry } from "../src/core/glossary.js";
 import { Term } from "../src/site/term.js";
 import { Tex } from "../src/site/tex.js";
@@ -23,7 +23,7 @@ async function renderMdx(source: string): Promise<string> {
     jsx,
     jsxs,
     Fragment,
-    remarkPlugins: [remarkMath, remarkGlossary({ terms })],
+    remarkPlugins: [remarkMath, remarkGlossaryOfTerms({ terms })],
   });
   return renderToStaticMarkup(<Content components={{ Term, Tex }} />);
 }

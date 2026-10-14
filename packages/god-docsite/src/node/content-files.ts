@@ -1,21 +1,12 @@
 import { cp, mkdir, readdir, readFile } from 'node:fs/promises'
 import { dirname, extname, join, resolve, sep } from 'node:path'
+import { contentFileUrlPrefix } from '../core/content-file-url.js'
 
 /**
- * HTML 页面与它引用的同目录资源在网页上的地址规则：HTML 原样展示，浏览器把文档地址当作解析相对引用的基准，
- * 所以只要文件按原路径送出（/api/content/ 前缀 + content 里的相对路径），页面里的相对图片、样式地址不用改写。
- * dev 时由 /api/content/* 服务端路由读 content 源目录（contentFileResponse）；
+ * dev 时由 /api/content/* 服务端路由读内容目录（contentFileResponse）；
  * build 时由 copyContentAssetsToBuild 把同一批文件复制成客户端静态资产，start 只读产物——
  * 两边覆盖的扩展名是同一张 contentTypes 表，HTML 正文与构建时的标题/搜索索引来自同一份快照
  */
-
-export const contentFileUrlPrefix = '/api/content/'
-
-/** glob 给的路径（/content/guide/waveform.html）在网页上的地址（/api/content/guide/waveform.html） */
-export function contentFileUrlOf(file: string, contentDir = '/content') {
-  if (!file.startsWith(`${contentDir}/`)) throw new Error(`${file} 不在 ${contentDir} 下`)
-  return `${contentFileUrlPrefix}${file.slice(contentDir.length + 1)}`
-}
 
 const contentTypes: Record<string, string> = {
   '.html': 'text/html; charset=utf-8',
@@ -45,12 +36,19 @@ export async function contentFileResponse(urlPath: string, contentDir: string): 
   const absolute = resolve(contentDir, urlPath.replaceAll('\\', '/'))
   const contentRoot = resolve(contentDir)
   if (absolute !== contentRoot && !absolute.startsWith(contentRoot + sep)) return new Response('Not found', { status: 404 })
+  let body: Buffer
   try {
-    const body = await readFile(absolute)
-    return new Response(body, { headers: { 'content-type': contentTypes[extname(absolute).toLowerCase()] ?? 'application/octet-stream' } })
-  } catch {
-    return new Response('Not found', { status: 404 })
+    body = await readFile(absolute)
+  } catch (error) {
+    if (isMissingFileError(error)) return new Response('Not found', { status: 404 })
+    throw error
   }
+  return new Response(new Uint8Array(body), { headers: { 'content-type': contentTypes[extname(absolute).toLowerCase()] ?? 'application/octet-stream' } })
+}
+
+function isMissingFileError(error: unknown) {
+  const code = (error as NodeJS.ErrnoException).code
+  return code === 'ENOENT' || code === 'EISDIR' || code === 'ENOTDIR'
 }
 
 /**
