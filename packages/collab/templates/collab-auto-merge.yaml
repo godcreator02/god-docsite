@@ -1,0 +1,131 @@
+# 协作仓的合并请求当场定论：没有冲突、没改只有负责人能改的内容（工作流、人员列表、站点的装包设置与 Node 会执行的配置、
+# site/package.json 里依赖以外的部分与功能包 @godcreator/collab 的版本；协作仓的负责人，也就是 Gitea 上协作仓的协作者提交的放行），
+# 就按「合并提交」方式合进 main；否则在合并请求上留言写明原因，再关掉它。记录格式、站点会不会打不开由成员提交前在本机查，这里不查。
+# 提交审核的 gwb-collab 一直等到合并请求关闭，被打回就把改动退回提交人的工作区，所以这里不留开着等人的合并请求。
+# 放在协作仓的 .gitea/workflows/ 下。用 pull_request_target：跑的永远是 main 上这一份，合并请求里改了它也不生效。
+# 要一个组织级 Actions 密钥 COLLAB_BOT_TOKEN：一个真实账号的令牌（仓库、工单两项读写），这个账号能合并进 main。
+# 不用 Gitea 每次运行自动发的 GITEA_TOKEN：AGit 开的合并请求触发时它只有代码的只读权限，读不到合并请求、也合并不了。
+name: 协作仓自动合并
+
+on:
+  pull_request_target:
+    types: [opened, synchronize, reopened]
+
+# 检查用的 @godcreator/collab 版本写在这里（命令 collab-merge-check 在这个包里）；这个文件只有负责人能改，升版本就是改这一行
+env:
+  MERGE_CHECK_RANGE: '^0.1.0'
+
+jobs:
+  merge:
+    if: github.event.pull_request.base.ref == 'main'
+    runs-on: nas
+    steps:
+      - name: 装 Node（执行器容器重建后第一次要装）
+        run: command -v node >/dev/null || apk add --no-cache nodejs npm
+
+      - name: 核对令牌
+        env:
+          BOT_TOKEN: ${{ secrets.COLLAB_BOT_TOKEN }}
+          SERVER: ${{ github.server_url }}
+          REPO: ${{ github.repository }}
+        run: |
+          node --input-type=module <<'SCRIPT'
+          const { SERVER, REPO, BOT_TOKEN } = process.env
+          if (!BOT_TOKEN) throw new Error('组织密钥 COLLAB_BOT_TOKEN 没配或是空的')
+          if (BOT_TOKEN !== BOT_TOKEN.trim()) throw new Error(`COLLAB_BOT_TOKEN 前后带了空白（长度 ${BOT_TOKEN.length}），重新粘贴一次`)
+          const get = (path) => fetch(`${SERVER}/api/v1${path}`, { headers: { Authorization: `token ${BOT_TOKEN}` } })
+          const user = await get('/user')
+          if (!user.ok) throw new Error(`COLLAB_BOT_TOKEN 无效：GET /user 回 ${user.status}（令牌被删了，或粘贴的不是令牌）`)
+          const { login } = await user.json()
+          const repo = await get(`/repos/${REPO}`)
+          if (!repo.ok) throw new Error(`COLLAB_BOT_TOKEN 是 ${login} 的，但看不到 ${REPO}：GET /repos/${REPO} 回 ${repo.status}（令牌没给 repository 权限，或访问范围选了「仅公开」）`)
+          console.log(`令牌是 ${login} 的，看得到 ${REPO}`)
+          SCRIPT
+
+      - name: 检查并合并
+        shell: bash
+        env:
+          BOT_TOKEN: ${{ secrets.COLLAB_BOT_TOKEN }}
+          SERVER: ${{ github.server_url }}
+          REPO: ${{ github.repository }}
+          PULL: ${{ github.event.pull_request.number }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          AUTHOR: ${{ github.event.pull_request.user.login }}
+        run: |
+          set -euo pipefail
+          workdir=$(mktemp -d)
+          # 当前分支不叫 main：main 取回到本地同名分支，检查结果里写的就是「main」
+          git init -q -b collab-check "$workdir/repo"
+          cd "$workdir/repo"
+          git -c "http.extraHeader=Authorization: token $BOT_TOKEN" fetch -q --no-tags "$SERVER/$REPO.git" \
+            "+refs/heads/main:refs/heads/main" "+refs/pull/$PULL/head:refs/collab/pull"
+          if [ "$(git rev-parse refs/collab/pull)" != "$HEAD_SHA" ]; then
+            echo "合并请求在检查前又推了新提交，交给新提交触发的那次运行"
+            exit 0
+          fi
+
+          # 只装协作包 @godcreator/collab：npm 连带装上它依赖的本仓包，站点页面要的 react 等是可选 peer、不装；按版本范围缓存在执行器里
+          tooldir="$HOME/.cache/collab-merge-check/tool-$(printf '%s' "$MERGE_CHECK_RANGE" | tr -c 'A-Za-z0-9.' '_')"
+          mkdir -p "$tooldir"
+          printf '@godcreator:registry=%s/api/packages/godcreator/npm/\n' "$SERVER" > "$tooldir/.npmrc"
+          [ -f "$tooldir/package.json" ] || echo '{"private":true}' > "$tooldir/package.json"
+          (cd "$tooldir" && npm install --silent --no-audit --no-fund "@godcreator/collab@$MERGE_CHECK_RANGE")
+
+          # 协作仓的负责人就是 Gitea 上协作仓的协作者
+          leads=$(node --input-type=module <<'SCRIPT'
+          const { SERVER, REPO, BOT_TOKEN } = process.env
+          const logins = []
+          for (let page = 1; ; page++) {
+            const response = await fetch(`${SERVER}/api/v1/repos/${REPO}/collaborators?page=${page}&limit=50`, { headers: { Authorization: `token ${BOT_TOKEN}` } })
+            if (!response.ok) throw new Error(`GET /repos/${REPO}/collaborators 回 ${response.status}：${await response.text()}`)
+            const users = await response.json()
+            logins.push(...users.map((user) => user.login))
+            if (users.length < 50) break
+          }
+          if (logins.length === 0) throw new Error(`${REPO} 没有协作者，也就没有负责人：让负责人的 AI 调 collab.repo.setup 补上`)
+          console.log(logins.join(','))
+          SCRIPT
+          )
+
+          set +e
+          report=$("$tooldir/node_modules/.bin/collab-merge-check" --base main --head refs/collab/pull --author "$AUTHOR" --leads "$leads" 2>&1)
+          code=$?
+          set -e
+          echo "$report"
+          if [ "$code" -ne 0 ] && [ "$code" -ne 1 ]; then exit "$code"; fi
+
+          CODE=$code REPORT=$report node --input-type=module <<'SCRIPT'
+          const { SERVER, REPO, PULL, HEAD_SHA, BOT_TOKEN, CODE, REPORT } = process.env
+          const api = async (method, path, body) => {
+            const response = await fetch(`${SERVER}/api/v1/repos/${REPO}${path}`, {
+              method,
+              headers: { Authorization: `token ${BOT_TOKEN}`, 'Content-Type': 'application/json' },
+              body: JSON.stringify(body),
+            })
+            if (!response.ok) throw new Error(`${method} ${path} 回 ${response.status}：${await response.text()}`)
+          }
+          const pull = await fetch(`${SERVER}/api/v1/repos/${REPO}/pulls/${PULL}`, { headers: { Authorization: `token ${BOT_TOKEN}` } })
+          if (!pull.ok) throw new Error(`GET /pulls/${PULL} 回 ${pull.status}：${await pull.text()}`)
+          if ((await pull.json()).state !== 'open') {
+            console.log(`#${PULL} 已经关了（提交人那边等结论超时会关掉它），不再处理`)
+            process.exit(0)
+          }
+          // 打回：留言写明原因再关掉；提交人那边的 collab.submit 把这条留言报给人，改动退回工作区
+          const reject = async (lines) => {
+            await api('POST', `/issues/${PULL}/comments`, { body: [...lines, '', '这个合并请求已关闭，改动已退回提交人的工作区；改好后重新提交审核。'].join('\n') })
+            await api('PATCH', `/pulls/${PULL}`, { state: 'closed' })
+            console.log(`已打回 #${PULL}`)
+          }
+          if (CODE === '0') {
+            try {
+              await api('POST', `/pulls/${PULL}/merge`, { Do: 'merge', head_commit_id: HEAD_SHA })
+              console.log(`已合并 #${PULL}（${HEAD_SHA}）`)
+            } catch (error) {
+              console.error(error.message)
+              await reject([`检查通过，但合并时 Gitea 拒绝了（检查的是提交 ${HEAD_SHA}）：`, '', error.message])
+              process.exit(1)
+            }
+          } else {
+            await reject([`没有合并（检查的是提交 ${HEAD_SHA}）：`, '', REPORT])
+          }
+          SCRIPT

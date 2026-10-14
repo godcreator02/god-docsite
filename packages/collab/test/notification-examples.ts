@@ -1,0 +1,217 @@
+import type { NotificationFacts, NotificationGroup, NotificationTarget } from '../src/core/notifications/notifications.js'
+
+const displayNames: Record<string, string> = { chenhao: '陈浩', carol: '小王', godcreator: '老张' }
+export function nameOf(personId: string): string {
+  const name = displayNames[personId]
+  if (name === undefined) throw new Error(`测试的人员列表里没有 ${personId}`)
+  return name
+}
+
+export type Expected = { facts: NotificationFacts; id: string; group: NotificationGroup; sentence: string; original: string | null; target: NotificationTarget }
+
+export const pullUrl = 'https://git.example/hybrid-mmc/datasheets/pulls/4'
+export const issueUrl = 'https://git.example/hybrid-mmc/datasheets/issues/7'
+
+/** 每种 kind 至少一条：造出来的 id、组、短句、原文、去处 */
+export const expectations: Expected[] = [
+  {
+    facts: { kind: 'unsubmitted', records: ['records/a.json'], siteFiles: ['content/plan.mdx', 'comments/2026-10-10-3f9a2c/index.mdx'] },
+    id: 'unsubmitted',
+    group: 'collab-repo',
+    sentence: '本机有 3 个文件还没提交审核（记录 1 个，站点文件 2 个）',
+    original: 'collab/records/a.json\nsite/content/plan.mdx\nsite/comments/2026-10-10-3f9a2c/index.mdx',
+    target: null,
+  },
+  {
+    facts: { kind: 'unsubmitted', records: ['records/a.json', 'records/b.json'], siteFiles: [] },
+    id: 'unsubmitted',
+    group: 'collab-repo',
+    sentence: '本机有 2 个文件还没提交审核（记录 2 个）',
+    original: 'collab/records/a.json\ncollab/records/b.json',
+    target: null,
+  },
+  {
+    facts: { kind: 'conflicts', files: ['collab/records/a.json', 'site/content/plan.mdx'] },
+    id: 'conflicts',
+    group: 'collab-repo',
+    sentence: '提交审核合 main 出了冲突，2 个文件还没改好',
+    original: 'collab/records/a.json\nsite/content/plan.mdx',
+    target: null,
+  },
+  {
+    facts: { kind: 'submit-failure', message: '执行器打回：改了别人的任务', at: '2026-10-08T09:00:00Z' },
+    id: 'submit-failure',
+    group: 'collab-repo',
+    sentence: '上次提交审核没成功',
+    original: '执行器打回：改了别人的任务',
+    target: null,
+  },
+  {
+    facts: { kind: 'sync-problem', reason: '工作区的改动和 main 上的新改动碰到了同一个文件' },
+    id: 'sync-problem',
+    group: 'collab-repo',
+    sentence: '没能自动同步 main 上的新改动',
+    original: '工作区的改动和 main 上的新改动碰到了同一个文件',
+    target: null,
+  },
+  {
+    facts: { kind: 'check-error', message: '连不上 Gitea' },
+    id: 'check-error',
+    group: 'collab-repo',
+    sentence: 'gwb 检查项目出错',
+    original: '连不上 Gitea',
+    target: null,
+  },
+  {
+    facts: { kind: 'off-main', branch: 'draft' },
+    id: 'off-main',
+    group: 'collab-repo',
+    sentence: '协作仓在分支 draft 上，不在 main',
+    original: null,
+    target: null,
+  },
+  {
+    facts: { kind: 'off-main', branch: null },
+    id: 'off-main',
+    group: 'collab-repo',
+    sentence: '协作仓在分离的 HEAD 上，不在 main',
+    original: null,
+    target: null,
+  },
+  {
+    facts: { kind: 'record-problem', file: 'records/a.json', message: '缺字段 title' },
+    id: 'record-problem:records/a.json:缺字段 title',
+    group: 'collab-repo',
+    sentence: 'collab/records/a.json 读不对',
+    original: '缺字段 title',
+    target: null,
+  },
+  {
+    facts: { kind: 'webhook-setup', organization: 'hybrid-mmc', problems: ['没有 webhook', '密钥不对'] },
+    id: 'webhook-setup:hybrid-mmc',
+    group: 'collab-repo',
+    sentence: '组织 hybrid-mmc 的 webhook 没按插件要的配',
+    original: '没有 webhook\n密钥不对',
+    target: null,
+  },
+  {
+    facts: { kind: 'unpushed', repo: 'datasheets', count: 2 },
+    id: 'unpushed:datasheets',
+    group: 'other-repos',
+    sentence: 'datasheets 有 2 个提交还没推送',
+    original: null,
+    target: null,
+  },
+  {
+    facts: { kind: 'unpulled', repo: 'datasheets', count: 3 },
+    id: 'unpulled:datasheets',
+    group: 'other-repos',
+    sentence: 'datasheets 服务器上有 3 个新提交还没拉下来',
+    original: null,
+    target: null,
+  },
+  {
+    facts: { kind: 'diverged', repo: 'firmware', ahead: 1, behind: 4 },
+    id: 'diverged:firmware',
+    group: 'other-repos',
+    sentence: 'firmware 和服务器分叉了：本地有 1 个提交没推送，服务器上有 4 个没拉下来',
+    original: null,
+    target: null,
+  },
+  {
+    facts: { kind: 'pull-to-review', repo: 'datasheets', number: 4, title: '补器件表', poster: 'chenhao', url: pullUrl },
+    id: 'pull-to-review:datasheets#4',
+    group: 'other-repos',
+    sentence: 'datasheets #4「补器件表」等你审阅（陈浩 开的）',
+    original: null,
+    target: { url: pullUrl },
+  },
+  {
+    facts: { kind: 'issue-to-answer', repo: 'datasheets', number: 7, title: '器件表缺封装', poster: 'carol', lastSpeaker: 'carol', url: issueUrl },
+    id: 'issue-to-answer:datasheets#7',
+    group: 'other-repos',
+    sentence: 'datasheets 的 issue #7「器件表缺封装」等负责人回（小王 提的）',
+    original: null,
+    target: { url: issueUrl },
+  },
+  {
+    facts: { kind: 'issue-to-answer', repo: 'datasheets', number: 7, title: '器件表缺封装', poster: 'carol', lastSpeaker: 'chenhao', url: issueUrl },
+    id: 'issue-to-answer:datasheets#7',
+    group: 'other-repos',
+    sentence: 'datasheets 的 issue #7「器件表缺封装」等负责人回（陈浩 刚回复）',
+    original: null,
+    target: { url: issueUrl },
+  },
+  {
+    facts: { kind: 'my-pull-update', repo: 'datasheets', number: 4, title: '补器件表', change: 'changes-requested', by: 'godcreator', url: pullUrl },
+    id: 'my-pull-update:datasheets#4:changes-requested',
+    group: 'other-repos',
+    sentence: '老张 要你改 datasheets #4「补器件表」（你开的合并请求）',
+    original: null,
+    target: { url: pullUrl },
+  },
+  {
+    facts: { kind: 'my-pull-update', repo: 'datasheets', number: 4, title: '补器件表', change: 'new-comment', by: 'godcreator', url: pullUrl },
+    id: 'my-pull-update:datasheets#4:new-comment',
+    group: 'other-repos',
+    sentence: '老张 评论了 datasheets #4「补器件表」（你开的合并请求）',
+    original: null,
+    target: { url: pullUrl },
+  },
+  {
+    facts: { kind: 'my-issue-answered', repo: 'datasheets', number: 7, title: '器件表缺封装', by: 'chenhao', url: issueUrl },
+    id: 'my-issue-answered:datasheets#7',
+    group: 'other-repos',
+    sentence: '陈浩 回了 datasheets 的 issue #7「器件表缺封装」（你提的）',
+    original: null,
+    target: { url: issueUrl },
+  },
+  {
+    facts: { kind: 'repo-setup', repo: 'firmware', problems: ['main 没有保护', '允许强制推送'] },
+    id: 'repo-setup:firmware',
+    group: 'other-repos',
+    sentence: 'firmware 没按规矩配好',
+    original: 'main 没有保护\n允许强制推送',
+    target: null,
+  },
+  {
+    facts: { kind: 'task', recordId: '20260926120000-abc1234', title: '画机柜', due: '2026-10-20', detail: '先画草图' },
+    id: 'task:20260926120000-abc1234',
+    group: 'for-me',
+    sentence: '指派给我的任务：画机柜',
+    original: '先画草图',
+    target: { record: '20260926120000-abc1234' },
+  },
+  {
+    facts: { kind: 'task', recordId: '20260926120000-def5678', title: '选风扇', due: null, detail: null },
+    id: 'task:20260926120000-def5678',
+    group: 'for-me',
+    sentence: '指派给我的任务：选风扇',
+    original: null,
+    target: { record: '20260926120000-def5678' },
+  },
+  {
+    facts: { kind: 'mention', comment: '2026-10-10-3f9a2c/index.mdx', author: 'carol', page: '/plan/control-plan?comment=2026-10-10-3f9a2c', text: '@chenhao 看看', in: 'comment' },
+    id: 'mention:2026-10-10-3f9a2c/index.mdx',
+    group: 'for-me',
+    sentence: '小王 在评论里 @了我',
+    original: '@chenhao 看看',
+    target: { page: '/plan/control-plan?comment=2026-10-10-3f9a2c' },
+  },
+  {
+    facts: { kind: 'mention', comment: '2026-10-10-3f9a2c/2026-10-10-1a2b3c.mdx', author: 'godcreator', page: '/plan/control-plan?comment=2026-10-10-3f9a2c', text: '@chenhao 同意', in: 'reply' },
+    id: 'mention:2026-10-10-3f9a2c/2026-10-10-1a2b3c.mdx',
+    group: 'for-me',
+    sentence: '老张 在回复里 @了我',
+    original: '@chenhao 同意',
+    target: { page: '/plan/control-plan?comment=2026-10-10-3f9a2c' },
+  },
+  {
+    facts: { kind: 'reply', comment: '2026-10-10-3f9a2c/2026-10-10-4d5e6f.mdx', author: 'carol', page: '/comments?comment=2026-10-10-3f9a2c', text: '改好了', threadId: '2026-10-10-3f9a2c' },
+    id: 'reply:2026-10-10-3f9a2c/2026-10-10-4d5e6f.mdx',
+    group: 'for-me',
+    sentence: '小王 回复了我',
+    original: '改好了',
+    target: { page: '/comments?comment=2026-10-10-3f9a2c' },
+  },
+]

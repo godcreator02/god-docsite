@@ -1,0 +1,90 @@
+{
+  "name": "@godcreator/collab",
+  "version": "0.0.0",
+  "description": "项目协作：协作仓里的任务与模块（格式、状态、写入规则）、日志与日历、通知、我的待办、合并检查（命令行 collab-merge-check）、记录链接与 repo: 链接，以及接到 fumadocs 站上的页面与 loader / action",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/core/index.d.mts",
+      "default": "./dist/core/index.mjs"
+    },
+    "./node": {
+      "types": "./dist/node/index.d.mts",
+      "default": "./dist/node/index.mjs"
+    },
+    "./site": {
+      "types": "./dist/site/index.d.mts",
+      "default": "./dist/site/index.mjs"
+    },
+    "./site/server": {
+      "types": "./dist/site/server.d.mts",
+      "default": "./dist/site/server.mjs"
+    },
+    "./styles.css": "./styles.css"
+  },
+  "bin": {
+    "collab-merge-check": "./dist/cli/bin.mjs"
+  },
+  "files": [
+    "dist",
+    "styles.css",
+    "templates"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://git.tianshen02.online:28377/godcreator/docsite-kit.git"
+  },
+  "publishConfig": {
+    "registry": "https://git.tianshen02.online:28377/api/packages/godcreator/npm/"
+  },
+  "scripts": {
+    "build": "tsdown",
+    "typecheck": "tsc -p tsconfig.json",
+    "test": "vitest run",
+    "check": "tsc -p tsconfig.json && vitest run && pnpm lint",
+    "lint": "oxlint . --deny-warnings"
+  },
+  "dependencies": {
+    "@godcreator/comments": "workspace:^",
+    "@godcreator/identity": "workspace:^",
+    "lucide-react": "catalog:",
+    "react-markdown": "catalog:",
+    "remark-gfm": "catalog:",
+    "remark-mdx": "catalog:",
+    "remark-parse": "catalog:",
+    "unified": "catalog:"
+  },
+  "peerDependencies": {
+    "@fumadocs/base-ui": "^16.17.1",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0",
+    "react-router": "^8.4.0"
+  },
+  "peerDependenciesMeta": {
+    "@fumadocs/base-ui": {
+      "optional": true
+    },
+    "react": {
+      "optional": true
+    },
+    "react-dom": {
+      "optional": true
+    },
+    "react-router": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@fumadocs/base-ui": "catalog:",
+    "@types/node": "catalog:",
+    "@types/react": "catalog:",
+    "@types/react-dom": "catalog:",
+    "jsdom": "catalog:",
+    "react": "catalog:",
+    "react-dom": "catalog:",
+    "react-router": "catalog:",
+    "tsdown": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  }
+}

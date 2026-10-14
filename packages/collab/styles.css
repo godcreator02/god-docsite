@@ -1,0 +1,71 @@
+/* 站点的 app.css 引入这一份：让 Tailwind 扫到协作页组件里用的类名（构建产物里的类名与源码相同），定义状态色与模块色 */
+@source './dist';
+
+/* 状态色只用来表示状态：未解决、进行中、已完成、出错；模块色按甘特图上的顺序轮流分（module-marks.tsx） */
+:root {
+  --collab-open: #b7791f;
+  --collab-open-soft: #fbf1df;
+  --collab-info: #2f62c8;
+  --collab-info-soft: #e7eefb;
+  --collab-done: #2f7d4f;
+  --collab-done-soft: #e3f2e8;
+  --collab-danger: #c2413b;
+  --collab-danger-soft: #fbe9e7;
+  --collab-module-0: #2f62c8;
+  --collab-module-0-soft: #e7eefb;
+  --collab-module-1: #7c4dcc;
+  --collab-module-1-soft: #efe8fb;
+  --collab-module-2: #0f8a80;
+  --collab-module-2-soft: #dff3f1;
+  --collab-module-3: #b7791f;
+  --collab-module-3-soft: #fbf1df;
+  --collab-module-4: #c23d7e;
+  --collab-module-4-soft: #fbe6f0;
+  --collab-module-5: #4d8a22;
+  --collab-module-5-soft: #e8f2df;
+  --collab-module-6: #c4561c;
+  --collab-module-6-soft: #fbe9df;
+  --collab-module-7: #1d6a86;
+  --collab-module-7-soft: #e2eff4;
+}
+
+.dark {
+  --collab-open: #e2a94f;
+  --collab-open-soft: #342815;
+  --collab-info: #7ea4f0;
+  --collab-info-soft: #1b2540;
+  --collab-done: #6cc28e;
+  --collab-done-soft: #16301f;
+  --collab-danger: #f07b72;
+  --collab-danger-soft: #3a1a18;
+  --collab-module-0: #7ea4f0;
+  --collab-module-0-soft: #1b2540;
+  --collab-module-1: #b69af0;
+  --collab-module-1-soft: #2a2140;
+  --collab-module-2: #5fcfc4;
+  --collab-module-2-soft: #143230;
+  --collab-module-3: #e2a94f;
+  --collab-module-3-soft: #342815;
+  --collab-module-4: #f08bbd;
+  --collab-module-4-soft: #3a1a2a;
+  --collab-module-5: #9fd07c;
+  --collab-module-5-soft: #1d3016;
+  --collab-module-6: #f29a64;
+  --collab-module-6-soft: #3a2214;
+  --collab-module-7: #5fb3d3;
+  --collab-module-7-soft: #16303b;
+}
+
+@theme inline {
+  --color-open: var(--collab-open);
+  --color-open-soft: var(--collab-open-soft);
+  --color-info: var(--collab-info);
+  --color-info-soft: var(--collab-info-soft);
+  --color-done: var(--collab-done);
+  --color-done-soft: var(--collab-done-soft);
+  --color-danger: var(--collab-danger);
+  --color-danger-soft: var(--collab-danger-soft);
+  /* 元素上写 moduleColorsOf 给的 --module、--module-soft，里面的 bg-module、text-module 就是那个模块的颜色 */
+  --color-module: var(--module);
+  --color-module-soft: var(--module-soft);
+}
