@@ -1,4 +1,4 @@
-import { notificationOf, type Notification } from '@godcreator/collab-model/notification-model'
+import { notificationOf, type Notification } from '@godcreator/collab'
 import type { GwbQqBotApi } from '@godcreator/gwb-qq-bot'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { presentForMillisecondsBeforeSending, QqPrivateChat, type QqPrivateChatDeps } from '../../src/notifications/qq-private-chat.js'

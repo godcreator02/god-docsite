@@ -1,5 +1,5 @@
 import path from 'node:path'
-import { projectDirOfCollabRepo } from '@godcreator/collab-model/project-model'
+import { projectDirOfCollabRepo } from '@godcreator/collab/node'
 import { CollabRejected } from '../../errors.js'
 import { gitMessageOf, runGit } from '../../git/git.js'
 import { currentBranch, serverCountsOf } from '../../git/status.js'

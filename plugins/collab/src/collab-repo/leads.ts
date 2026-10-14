@@ -1,4 +1,4 @@
-import type { ProjectLeads } from '@godcreator/collab-model/project-model'
+import type { ProjectLeads } from '@godcreator/collab'
 import type { GiteaAccess } from '../gitea-api/access.js'
 import { giteaRepo, type GiteaHttp } from '../gitea-api/gitea.js'
 import { repoKeyOf, type RemoteProject } from '../project/project.js'

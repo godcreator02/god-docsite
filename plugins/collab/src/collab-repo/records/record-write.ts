@@ -1,7 +1,6 @@
-import { readRecords, recordFileOf, type RecordType } from '@godcreator/collab-model/task-model'
-import { createRecord, deleteRecords, readCollabSnapshot, updateRecord } from '@godcreator/collab-model/task-model/node'
+import { collabPathInRepo, readRecords, recordFileOf, type RecordType } from '@godcreator/collab'
+import { createRecord, deleteRecords, readCollabSnapshot, updateRecord } from '@godcreator/collab/node'
 import { CollabRejected, rethrowAsCollabRejected } from '../../errors.js'
-import { collabPathInRepo } from '@godcreator/collab-model/project-model'
 import type { Project } from '../../project/project.js'
 import { argsOf, repoOf } from '../../commands.js'
 

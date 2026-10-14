@@ -1,6 +1,5 @@
 import path from 'node:path'
-import { siteFeedChannel, type SiteFeed } from '@godcreator/collab-model/notification-model'
-import { sitePathInRepo } from '@godcreator/collab-model/project-model'
+import { siteFeedChannel, sitePathInRepo, type SiteFeed } from '@godcreator/collab'
 import type { GwbDocsiteApi, SiteInitResult, SiteStarted } from '@godcreator/gwb-docsite'
 import { messageOf } from '../errors.js'
 import { repoKeyOf, type Project } from '../project/project.js'

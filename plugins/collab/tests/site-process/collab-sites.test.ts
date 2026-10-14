@@ -1,5 +1,5 @@
 import path from 'node:path'
-import type { SiteFeed } from '@godcreator/collab-model/notification-model'
+import type { SiteFeed } from '@godcreator/collab'
 import { describe, expect, it, vi } from 'vitest'
 import type { Project } from '../../src/project/project.js'
 import { CollabSites, type DocsiteHosting } from '../../src/site-process/collab-sites.js'
@@ -91,10 +91,10 @@ describe('项目站点交给 gwb-docsite', () => {
   it('collab.site.init：交给 gwb-docsite 从零建站，功能包写成给的范围；项目在列表里就启动并推数据，不在就不启动', async () => {
     const { docsite, calls } = fakeDocsite()
     const { sites } = sitesWith(docsite)
-    expect(await sites.init(repo, { featureRange: '^0.31.0', port: 4400, title: '新项目', listed: false })).toEqual({ created: false, features: ['@godcreator/collab-site'] })
-    expect(calls).toEqual([`init ${siteDir} {"features":{"@godcreator/collab-site":"^0.31.0"},"port":4400,"title":"新项目"}`])
+    expect(await sites.init(repo, { featureRange: '^0.31.0', port: 4400, title: '新项目', listed: false })).toEqual({ created: false, features: ['@godcreator/collab'] })
+    expect(calls).toEqual([`init ${siteDir} {"features":{"@godcreator/collab":"^0.31.0"},"port":4400,"title":"新项目"}`])
     await sites.init(repo, { featureRange: '^0.31.0', port: 4400, title: '新项目', listed: true })
-    expect(calls.slice(1, 3)).toEqual([`init ${siteDir} {"features":{"@godcreator/collab-site":"^0.31.0"},"port":4400,"title":"新项目"}`, `start ${siteDir}`])
+    expect(calls.slice(1, 3)).toEqual([`init ${siteDir} {"features":{"@godcreator/collab":"^0.31.0"},"port":4400,"title":"新项目"}`, `start ${siteDir}`])
   })
 
   it('项目移出列表：停掉在运行的站点，排着的推送不再发；插件卸载：启动过的都停掉', async () => {

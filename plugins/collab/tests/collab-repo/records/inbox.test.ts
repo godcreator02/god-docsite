@@ -1,7 +1,7 @@
 import { mkdirSync, mkdtempSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import path from 'node:path'
-import { encodeRecordFile, recordFileOf, type CollabRecord } from '@godcreator/collab-model/task-model'
+import { encodeRecordFile, recordFileOf, type CollabRecord } from '@godcreator/collab'
 import { describe, expect, it } from 'vitest'
 import { collabRecordsStateOf } from '../../../src/collab-repo/records/inbox.js'
 import type { Project } from '../../../src/project/project.js'

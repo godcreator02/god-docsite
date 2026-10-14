@@ -3,8 +3,7 @@
  * 记录是一条一个文件：逐个 git show 每个文件都要起一次 git，所以先 ls-tree 列出文件，再一次 cat-file 读完
  */
 import { spawn } from 'node:child_process'
-import { collabPathInRepo, peoplePathInRepo } from '@godcreator/collab-model/project-model'
-import type { CollabSnapshot } from '@godcreator/collab-model/task-model'
+import { collabPathInRepo, peoplePathInRepo, type CollabSnapshot } from '@godcreator/collab'
 import { git } from '../../git/git.js'
 
 /**

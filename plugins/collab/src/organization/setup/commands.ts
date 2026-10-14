@@ -1,6 +1,6 @@
 import path from 'node:path'
 import { pathToFileURL } from 'node:url'
-import { projectDirOfCollabRepo } from '@godcreator/collab-model/project-model'
+import { projectDirOfCollabRepo } from '@godcreator/collab/node'
 import { CollabRejected } from '../../errors.js'
 import { gitRemoteOf, requireOnGitea } from '../../project/account.js'
 import { joinProject, sameRepo, type RemoteProject } from '../../project/project.js'

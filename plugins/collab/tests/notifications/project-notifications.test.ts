@@ -1,4 +1,4 @@
-import type { Notification } from '@godcreator/collab-model/notification-model'
+import type { Notification } from '@godcreator/collab'
 import { describe, expect, it, vi } from 'vitest'
 import { ProjectNotifications, type NotificationReaders } from '../../src/notifications/project-notifications.js'
 import type { Project } from '../../src/project/project.js'

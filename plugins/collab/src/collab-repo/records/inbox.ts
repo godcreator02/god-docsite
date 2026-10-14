@@ -1,8 +1,8 @@
 import path from 'node:path'
 import { existsSync } from 'node:fs'
-import { collabState, inboxOf, type CollabProblem, type CommentThreadOnFile, type InboxItems, type Person } from '@godcreator/collab-model/task-model'
-import { readCollabSnapshot } from '@godcreator/collab-model/task-model/node'
-import { readCommentThreads } from '@godcreator/docsite-comments/server'
+import { collabState, inboxOf, type CollabProblem, type CommentThreadOnFile, type InboxItems, type Person } from '@godcreator/collab'
+import { readCollabSnapshot } from '@godcreator/collab/node'
+import { readCommentThreads } from '@godcreator/comments/node'
 import { CollabRejected, messageOf } from '../../errors.js'
 import { peopleOfRepo, type Project } from '../../project/project.js'
 

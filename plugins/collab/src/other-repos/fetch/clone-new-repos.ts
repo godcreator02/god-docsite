@@ -1,6 +1,6 @@
 import { existsSync } from 'node:fs'
 import path from 'node:path'
-import { projectDirOfCollabRepo } from '@godcreator/collab-model/project-model'
+import { projectDirOfCollabRepo } from '@godcreator/collab/node'
 import { CollabRejected } from '../../errors.js'
 import { gitMessageOf, runGit } from '../../git/git.js'
 import { organizationRepoNames, type GiteaHttp } from '../../gitea-api/gitea.js'

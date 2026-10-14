@@ -4,7 +4,7 @@ import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { build } from 'esbuild'
 
-/** node 侧与浏览器侧各打成一个文件，外置名单之外的依赖（包括同仓的功能包 @godcreator/collab-site、数据模型包 @godcreator/collab-model、合并检查包 @godcreator/collab-merge-check 与文档站基础包 @godcreator/docsite-kit）全部打包进去；样式表由 build 脚本里紧接着的 tailwindcss 输出 */
+/** node 侧与浏览器侧各打成一个文件，外置名单之外的依赖（包括同仓的功能包 @godcreator/collab、@godcreator/comments、@godcreator/identity）全部打包进去；样式表由 build 脚本里紧接着的 tailwindcss 输出 */
 const here = path.dirname(fileURLToPath(import.meta.url))
 
 /**
@@ -26,10 +26,10 @@ fs.rmSync(path.join(here, 'dist'), { recursive: true, force: true })
 fs.mkdirSync(path.join(here, 'dist'), { recursive: true })
 
 /** 打包进来的那一版功能包：初始化站点时写进 site/package.json */
-function bundledCollabSiteVersion(): string {
-  const manifest: unknown = JSON.parse(fs.readFileSync(path.join(here, 'node_modules/@godcreator/collab-site/package.json'), 'utf8'))
+function bundledCollabVersion(): string {
+  const manifest: unknown = JSON.parse(fs.readFileSync(path.join(here, 'node_modules/@godcreator/collab/package.json'), 'utf8'))
   const version = isRecord(manifest) ? manifest['version'] : undefined
-  if (typeof version !== 'string') throw new Error('读不出 node_modules/@godcreator/collab-site/package.json 的 version')
+  if (typeof version !== 'string') throw new Error('读不出 node_modules/@godcreator/collab/package.json 的 version')
   return version
 }
 
@@ -37,7 +37,7 @@ await build({
   entryPoints: ['src/index.ts'],
   outfile: 'dist/index.js',
   external: nodeSideExternals(),
-  define: { __COLLAB_SITE_VERSION__: JSON.stringify(bundledCollabSiteVersion()) },
+  define: { __COLLAB_VERSION__: JSON.stringify(bundledCollabVersion()) },
   // 打包进来的 CommonJS 依赖会 require node 内置模块；ESM 产物里没有 require，
   // esbuild 的 __require 执行到就抛「Dynamic require ... is not supported」。在产物开头用 createRequire 造一个
   banner: { js: 'import { createRequire as __createRequire } from "node:module";\nconst require = __createRequire(import.meta.url);' },

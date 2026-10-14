@@ -1,5 +1,5 @@
 /** 协作站功能包的包名：建站时写进 site/package.json 的 docsite.features */
-export const featurePackage = '@godcreator/collab-site'
+export const featurePackage = '@godcreator/collab'
 
 const ansiEscapePattern = /\u001b\[[0-9;]*m/g
 

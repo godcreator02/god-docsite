@@ -1,4 +1,4 @@
-import type { PullUpdateChange } from '@godcreator/collab-model/notification-model'
+import type { PullUpdateChange } from '@godcreator/collab'
 import { giteaRepo, type GiteaHttp, type GiteaLocation, type GiteaRepo, type Issue, type PullReview } from '../gitea-api/gitea.js'
 import { PerRepoStore } from '../project/per-repo-store.js'
 import { giteaLocationOfRepoIn, type RemoteProject } from '../project/project.js'

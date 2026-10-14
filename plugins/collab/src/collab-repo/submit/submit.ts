@@ -1,12 +1,12 @@
 import { existsSync } from 'node:fs'
 import path from 'node:path'
-import { changedFilesBetween, leadOnlyProblems } from '@godcreator/collab-merge-check'
+import { collabPathInRepo, sitePathInRepo } from '@godcreator/collab'
+import { changedFilesBetween, leadOnlyProblems } from '@godcreator/collab/node'
 import { pnpmTypecheck, type SiteTypecheck, type TypecheckSite } from '../../site-process/dependencies.js'
 import { CollabRejected } from '../../errors.js'
 import type { GiteaRepo } from '../../gitea-api/gitea.js'
 import { fetchOrigin, git, gitMessageOf, runGit } from '../../git/git.js'
 import { aheadBehind, conflictedFilesOf, currentBranch, filesUnder, isMerging, localBranch, statusEntriesOf, upstream, whereYouAre } from '../../git/status.js'
-import { collabPathInRepo, sitePathInRepo } from '@godcreator/collab-model/project-model'
 import type { Project, RemoteProject } from '../../project/project.js'
 import { collabProblems, problemsAfterMainMergedIn, siteProblemsOf } from './submit-checks.js'
 
@@ -140,8 +140,6 @@ export async function submitCollab(project: RemoteProject, gitea: GiteaRepo, typ
     repo: project.repo,
     base,
     head: 'HEAD',
-    collabPathInRepo,
-    sitePathInRepo,
     authorIsLead,
     author: project.person,
     changedFiles: await changedFilesBetween(project.repo, base, 'HEAD'),
