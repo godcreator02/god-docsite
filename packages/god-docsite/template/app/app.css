@@ -1,0 +1,45 @@
+@import 'tailwindcss';
+@import '@fumadocs/base-ui/css/neutral.css';
+@import '@fumadocs/base-ui/css/preset.css';
+@import 'katex/dist/katex.css';
+@import '@godcreator/god-docsite/styles.css';
+@import '@godcreator/identity/styles.css';
+@import '@godcreator/comments/styles.css';
+/* 功能包的样式加在这里 */
+
+/* 站点里会被写入的文件不进 Tailwind 的源码扫描：扫描到的文件一变，Tailwind 在 dev 下让整页刷新，推送连接与页面状态都断掉 */
+@source not '../comments';
+@source not '../people.json';
+@source not '../glossary.json';
+
+/*
+ * 评论在正文上的标记（CommentsDock 注册高亮、给被批的元素加属性）：划的字走 CSS Custom Highlight API，注册名 docsite-comment；
+ * 批的元素描边；批注模式打开时正文鼠标换成十字
+ */
+::highlight(docsite-comment) {
+  background-color: color-mix(in oklab, #f5b301 25%, transparent);
+  text-decoration: underline 2px color-mix(in oklab, #f5b301 80%, transparent);
+  text-underline-offset: 3px;
+}
+
+::highlight(docsite-comment-active) {
+  background-color: color-mix(in oklab, #f5b301 55%, transparent);
+}
+
+[data-commented-element] {
+  outline: 2px solid color-mix(in oklab, #f5b301 55%, transparent);
+  outline-offset: 4px;
+  border-radius: 4px;
+}
+
+[data-commented-element='active'] {
+  outline-color: #f5b301;
+}
+
+html[data-comment-picking] [data-comment-scope] {
+  cursor: crosshair;
+}
+
+[data-comment-body] :is(p) {
+  margin: 4px 0;
+}

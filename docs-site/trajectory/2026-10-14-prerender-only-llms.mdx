@@ -1,0 +1,33 @@
+---
+born-at: 2026-10-14T19:50
+type: choice
+parent: [2026-09-03-god-live-doc]
+label: 只预渲染 llms
+domain: 骨架
+---
+
+## 背景
+
+[功能包原生接入](2026-10-14-functional-packages-native-wiring.md) 的实验定了「预渲染只收站点自己的静态页与内容页」。
+到 god-docsite 模板时，内容页的布局 loader 返回本机身份（启动方经环境变量 `DOCSITE_IDENTITY_CODE` 给的码认出的人）
+与 `people.json` 里公开的人员，页面 loader 返回这一页的评论串与写评论的权限。
+
+pivots-from:: [功能包原生接入](2026-10-14-functional-packages-native-wiring.md)
+
+## 结论与边界
+
+模板的 `react-router.config.ts` 只预渲染 `/llms.txt` 与 `/llms-full.txt`，首页与内容页都在请求时渲染。
+预渲染会把 loader 数据写成构建时的静态文件：身份按构建时的环境变量定下来（构建时一般没有身份码，站就永远只读），
+`people.json` 改了也不变，直接打开与站内导航拿到的都是构建时的数据。
+边界：start 下评论正文本来就是构建时编译的（新评论写进文件，重新构建后才显示），这条不因预渲染而变；
+将来内容页的 loader 不再带身份与评论，可以重新考虑预渲染内容页。
+
+## 依据
+
+数据页被预渲染后直接打开与站内导航都显示构建时的数据，见那张卡的依据（`probes/2610141800_functional-packages/`）。
+`pnpm e2e` 在 start 下的首页、内容页、写评论、全站评论页各项通过，说明不预渲染时 react-router-serve 照常在请求时渲染。
+
+## 否掉的候选
+
+照实验预渲染首页与内容页：否在身份与人员冻结在构建时。预渲染但让 loader 在客户端再取一次：多一套取数路径，
+而 build + start 的站是本机看的，请求时渲染的开销可以接受。
