@@ -35,7 +35,10 @@
     "lint": "oxlint . --deny-warnings"
   },
   "dependencies": {
-    "@godcreator/identity": "workspace:^"
+    "@godcreator/identity": "workspace:^",
+    "remark-mdx": "catalog:",
+    "remark-parse": "catalog:",
+    "unified": "catalog:"
   },
   "devDependencies": {
     "@types/node": "catalog:",

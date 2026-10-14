@@ -77,6 +77,37 @@ describe('日志里的进展', () => {
   })
 })
 
+describe('日志里的进展按 MDX 语法树找', () => {
+  const titleOf = (id: string) => (id === '20261001090000-aaaaaaa' ? '画采样板' : '已删除的记录')
+
+  it('列表里的一项、组件里的段落、单独一行的 RecordLink 各算一段；代码块与花括号表达式里的不算', () => {
+    const source = [
+      '- 上午 <RecordLink id="20261001090000-aaaaaaa" /> 布线',
+      '- 下午开会',
+      '',
+      '<Callout>',
+      '注意 {1 + 1} 处 <RecordLink id="20261001090000-aaaaaaa" />',
+      '</Callout>',
+      '',
+      '<RecordLink id="20261001090000-aaaaaaa" />',
+      '',
+      '```mdx',
+      '<RecordLink id="20261001090000-aaaaaaa" />',
+      '```',
+      '',
+    ].join('\n')
+    expect(journalMentionsOf('20261001090000-aaaaaaa', new Map([['2026-10-12', source]]), titleOf)).toEqual([
+      { date: '2026-10-12', text: '上午 画采样板 布线' },
+      { date: '2026-10-12', text: '注意 处 画采样板' },
+      { date: '2026-10-12', text: '画采样板' },
+    ])
+  })
+
+  it('日志页不是合法的 MDX：报错点名那一天的文件', () => {
+    expect(() => journalMentionsOf('20261001090000-aaaaaaa', new Map([['2026-10-12', '<RecordLink id="x"\n']]), titleOf)).toThrow(/journal\/2026-10-12\.mdx 不是合法的 MDX/)
+  })
+})
+
 describe('Markdown 换成纯文字', () => {
   it('去掉标题、引用、列表、链接、强调、表格竖线与代码块围栏', () => {
     expect(plainLinesOf('# 标题\n\n> 引用\n- [x] **做完**\n1. [链接](/a) ![图](/b.png)\n```ts\n|a|b|\n|---|---|\n```\n')).toEqual(['标题', '引用', '做完', '链接 图', 'a|b'])

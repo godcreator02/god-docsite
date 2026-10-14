@@ -470,6 +470,15 @@ importers:
       '@godcreator/identity':
         specifier: workspace:^
         version: link:../identity
+      remark-mdx:
+        specifier: 'catalog:'
+        version: 3.1.1(supports-color@7.2.0)
+      remark-parse:
+        specifier: 'catalog:'
+        version: 11.0.0(supports-color@7.2.0)
+      unified:
+        specifier: 'catalog:'
+        version: 11.0.5
     devDependencies:
       '@types/node':
         specifier: 'catalog:'

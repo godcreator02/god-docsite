@@ -1,4 +1,6 @@
-import { plainLinesOf } from './plain-lines.js'
+import remarkMdx from 'remark-mdx'
+import remarkParse from 'remark-parse'
+import { unified } from 'unified'
 
 /** 站点目录下放日志页的文件夹 */
 export const journalDirName = 'journal'
@@ -23,31 +25,79 @@ export function journalEntryProblemOf(entry: { name: string; isFile: boolean }):
   return null
 }
 
-/** 日志里引用一条任务或一个模块的写法：<RecordLink id="…" />，id 用双引号或单引号 */
-const recordLinkPattern = /<RecordLink\s+id=(["'])([^"'\n]+)\1\s*\/>/g
-
-/** 别的 JSX 标签（组件、HTML）：换成纯文字时去掉，只留标签之间的文字 */
-const otherTagPattern = /<\/?[A-Za-z][^<>]*>/g
 
 /** 「日志里的进展」的一条：哪一天的日志里，引用了这条记录的那一段（纯文字） */
 export type JournalMention = { date: string; text: string }
 
-/** 按空行分段；import、export 开头的行是 MDX 的代码，不算正文 */
-function paragraphsOf(source: string): string[] {
-  return source
-    .split(/\r?\n[ \t]*\r?\n/)
-    .map((paragraph) => paragraph.split(/\r?\n/).filter((line) => !/^(import|export)\s/.test(line)).join('\n'))
-    .filter((paragraph) => paragraph.trim() !== '')
+/** remark-mdx 解析出的 mdast 节点里这里要读的几项 */
+type MdxNode = {
+  type: string
+  value?: string
+  alt?: string | null
+  name?: string | null
+  attributes?: ReadonlyArray<{ type: string; name?: string; value?: unknown }>
+  children?: MdxNode[]
 }
 
-function referencedIdsOf(paragraph: string): string[] {
-  return [...paragraph.matchAll(recordLinkPattern)].map((match) => match[2]!)
+/** 日志里引用一条任务或一个模块的写法：<RecordLink id="…" /> */
+const recordLinkName = 'RecordLink'
+
+/** 一段话的单位：段落与标题；列表项、引用、组件里的文字也落在它们里面 */
+const phrasingContainerTypes = new Set(['paragraph', 'heading', 'tableCell'])
+
+/** MDX 里的代码（import / export、花括号表达式）不是正文 */
+const codeNodeTypes = new Set(['mdxjsEsm', 'mdxFlowExpression', 'mdxTextExpression'])
+
+function isRecordLink(node: MdxNode): boolean {
+  return (node.type === 'mdxJsxTextElement' || node.type === 'mdxJsxFlowElement') && node.name === recordLinkName
 }
 
-/** 一段 MDX 换成纯文字：RecordLink 换成记录当前的标题，别的标签去掉，Markdown 记号去掉，几行连成一行 */
-function plainTextOf(paragraph: string, recordTitleOf: (recordId: string) => string): string {
-  const withTitles = paragraph.replace(recordLinkPattern, (_match, _quote, recordId: string) => recordTitleOf(recordId)).replace(otherTagPattern, '')
-  return plainLinesOf(withTitles).join(' ')
+/** RecordLink 的 id：要写成字符串 id="…"；没写或写成表达式时为 null，这一处不算引用 */
+function recordLinkIdOf(node: MdxNode): string | null {
+  const id = node.attributes?.find((attribute) => attribute.type === 'mdxJsxAttribute' && attribute.name === 'id')?.value
+  return typeof id === 'string' ? id : null
+}
+
+function referencedIdsIn(node: MdxNode): string[] {
+  if (isRecordLink(node)) {
+    const id = recordLinkIdOf(node)
+    return id === null ? [] : [id]
+  }
+  return (node.children ?? []).flatMap(referencedIdsIn)
+}
+
+/** 节点里的文字：RecordLink 换成记录当前的标题，别的组件只留里面的文字，图片取替代文字，MDX 代码去掉 */
+function textOf(node: MdxNode, recordTitleOf: (recordId: string) => string): string {
+  if (codeNodeTypes.has(node.type)) return ''
+  if (isRecordLink(node)) {
+    const id = recordLinkIdOf(node)
+    return id === null ? '' : recordTitleOf(id)
+  }
+  if (node.type === 'text' || node.type === 'inlineCode') return node.value ?? ''
+  if (node.type === 'image') return node.alt ?? ''
+  if (node.type === 'break') return '\n'
+  return (node.children ?? []).map((child) => textOf(child, recordTitleOf)).join('')
+}
+
+/** 几行连成一行，连着的空白并成一个空格 */
+function oneLine(text: string): string {
+  return text.replace(/\s+/g, ' ').trim()
+}
+
+/** 引用了 recordId 的那几段的纯文字：段落、标题各算一段，单独成行的 RecordLink 自成一段 */
+function mentionTextsIn(node: MdxNode, recordId: string, recordTitleOf: (recordId: string) => string): string[] {
+  if (phrasingContainerTypes.has(node.type) || isRecordLink(node)) {
+    return referencedIdsIn(node).includes(recordId) ? [oneLine(textOf(node, recordTitleOf))] : []
+  }
+  return (node.children ?? []).flatMap((child) => mentionTextsIn(child, recordId, recordTitleOf))
+}
+
+function journalTreeOf(date: string, source: string): MdxNode {
+  try {
+    return unified().use(remarkParse).use(remarkMdx).parse(source) as unknown as MdxNode
+  } catch (error) {
+    throw new Error(`${journalDirName}/${date}.mdx 不是合法的 MDX：${error instanceof Error ? error.message : String(error)}`)
+  }
 }
 
 /**
@@ -57,9 +107,7 @@ function plainTextOf(paragraph: string, recordTitleOf: (recordId: string) => str
 export function journalMentionsOf(recordId: string, journalSourceOf: ReadonlyMap<string, string>, recordTitleOf: (recordId: string) => string): JournalMention[] {
   const mentions: JournalMention[] = []
   for (const [date, source] of journalSourceOf) {
-    for (const paragraph of paragraphsOf(source)) {
-      if (referencedIdsOf(paragraph).includes(recordId)) mentions.push({ date, text: plainTextOf(paragraph, recordTitleOf) })
-    }
+    for (const text of mentionTextsIn(journalTreeOf(date, source), recordId, recordTitleOf)) mentions.push({ date, text })
   }
   return mentions.sort((a, b) => b.date.localeCompare(a.date))
 }
