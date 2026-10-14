@@ -1,0 +1,76 @@
+{
+  "name": "@godcreator/god-docsite",
+  "version": "0.0.0",
+  "description": "文档站平台：fumadocs（React Router + Vite）站点的公共部分——三种页面来源、布局与侧栏、搜索、llms、推送、术语标注、vite 插件，以及唯一的站点模板",
+  "type": "module",
+  "sideEffects": [
+    "*.css"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/core/index.d.mts",
+      "default": "./dist/core/index.mjs"
+    },
+    "./mdx": {
+      "types": "./dist/mdx/index.d.mts",
+      "default": "./dist/mdx/index.mjs"
+    },
+    "./server": {
+      "types": "./dist/site/index.server.d.mts",
+      "default": "./dist/site/index.server.mjs"
+    },
+    "./react": {
+      "types": "./dist/site/index.d.mts",
+      "default": "./dist/site/index.mjs"
+    },
+    "./styles.css": "./styles.css"
+  },
+  "files": [
+    "dist",
+    "styles.css"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://git.tianshen02.online:28377/godcreator/docsite-kit.git"
+  },
+  "publishConfig": {
+    "registry": "https://git.tianshen02.online:28377/api/packages/godcreator/npm/"
+  },
+  "scripts": {
+    "build": "tsdown",
+    "typecheck": "tsc -p tsconfig.json",
+    "test": "vitest run",
+    "check": "tsc -p tsconfig.json && vitest run && pnpm lint",
+    "lint": "oxlint . --deny-warnings"
+  },
+  "peerDependencies": {
+    "@fumadocs/base-ui": "16.17.1",
+    "fumadocs-core": "16.17.1",
+    "katex": "^0.16.47",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0",
+    "react-router": "^8.4.0"
+  },
+  "devDependencies": {
+    "@fumadocs/base-ui": "catalog:",
+    "@mdx-js/mdx": "catalog:",
+    "@types/mdast": "catalog:",
+    "@types/node": "catalog:",
+    "@types/react": "catalog:",
+    "@types/react-dom": "catalog:",
+    "@types/unist": "catalog:",
+    "fumadocs-core": "catalog:",
+    "katex": "catalog:",
+    "mdast-util-mdx-jsx": "catalog:",
+    "react": "catalog:",
+    "react-dom": "catalog:",
+    "react-router": "catalog:",
+    "remark-math": "catalog:",
+    "remark-mdx": "catalog:",
+    "remark-parse": "catalog:",
+    "tsdown": "catalog:",
+    "typescript": "catalog:",
+    "unified": "catalog:",
+    "vitest": "catalog:"
+  }
+}
