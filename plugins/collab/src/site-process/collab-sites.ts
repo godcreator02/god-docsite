@@ -68,22 +68,22 @@ export class CollabSites {
     return result
   }
 
-  /** 自动同步快进进来改了 site/ 的提交之后：确保站点在运行，把最新的数据推过去 */
+  /** 自动同步快进进来改了 site/ 的提交之后：确保站点在运行（已在运行就不动、不重启），把最新的数据推过去 */
   async recheck(project: Project): Promise<void> {
     await this.keep(project.repo)
   }
 
   /**
    * 装依赖等要在站点停着时做的事：先停（本来就没运行就不停），做完 work，再启动并把数据推过去。
-   * wasRunning 是做之前站点在不在运行；起不来的原因在 gwb-docsite 的 status 里
+   * wasRunning 是做之前站点在不在运行；relaunched 是这一次启动了新的开发服务，启动时站点已被别处启动（alreadyRunning）为 false；起不来时报错
    */
   async whileStopped<T>(project: Project, work: (wasRunning: boolean) => Promise<T>): Promise<{ result: T; relaunched: boolean }> {
     const wasRunning = this.options.docsite.status(project.siteDir).state === 'running'
     if (wasRunning) await this.options.docsite.stop(project.siteDir)
     const result = await work(wasRunning)
-    await this.options.docsite.start(project.siteDir)
+    const started = await this.options.docsite.start(project.siteDir)
     this.feedChanged(project.repo)
-    return { result, relaunched: true }
+    return { result, relaunched: !started.alreadyRunning }
   }
 
   /**

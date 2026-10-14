@@ -88,6 +88,27 @@ describe('项目站点交给 gwb-docsite', () => {
     expect(stopped.calls).not.toContain(`stop ${siteDir}`)
   })
 
+  it('装依赖时站点已被别处启动（start 回 alreadyRunning）：relaunched 为 false，照样推一次数据', async () => {
+    const { docsite, pushed } = fakeDocsite('stopped')
+    const startedElsewhere: DocsiteHosting = { ...docsite, start: async () => ({ url: 'http://127.0.0.1:4331', pid: 2, alreadyRunning: true }) }
+    expect(await sitesWith(startedElsewhere).sites.whileStopped(project, async () => 'installed')).toEqual({ result: 'installed', relaunched: false })
+    await vi.waitFor(() => expect(pushed).toEqual([feed]))
+  })
+
+  it('自动同步改了 site/ 之后站点已在运行：不停、不重启，只把最新数据推过去', async () => {
+    const { docsite, calls, pushed } = fakeDocsite('running', 'http://127.0.0.1:4331/')
+    const running: DocsiteHosting = {
+      ...docsite,
+      start: async (dir) => {
+        calls.push(`start ${dir}`)
+        return { url: 'http://127.0.0.1:4331/', pid: 1, alreadyRunning: true }
+      },
+    }
+    await sitesWith(running).sites.recheck(project)
+    await vi.waitFor(() => expect(pushed).toEqual([feed]))
+    expect(calls).toEqual([`start ${siteDir}`, `push ${siteDir} collab`])
+  })
+
   it('collab.site.init：交给 gwb-docsite 从零建站，功能包写成给的范围；项目在列表里就启动并推数据，不在就不启动', async () => {
     const { docsite, calls } = fakeDocsite()
     const { sites } = sitesWith(docsite)
