@@ -1,0 +1,54 @@
+/* 卡页与星轨盘页的样式：站点的 app.css 引入它（星轨盘画布的样式在 star.css，一并引入） */
+@import './star.css';
+
+/* 卡页标题下那一行与「回到星轨盘」 */
+.trajectory-card-line {
+  margin: -8px 0 4px;
+  font-size: 13px;
+  opacity: 0.7;
+}
+
+.trajectory-card-back {
+  display: inline-block;
+  margin: 0 0 16px;
+  font-size: 13px;
+}
+
+/* 星轨盘页：顶栏一条，盘占满剩下的高度；整页带 star-surface，顶栏和盘同一块底色 */
+.trajectory-page {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+.trajectory-topbar {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  height: 44px;
+  padding: 0 14px;
+  font-size: 14px;
+  color: var(--t2);
+}
+
+.trajectory-topbar a:hover {
+  color: var(--t1);
+}
+
+.trajectory-topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.trajectory-sick {
+  font-size: 12px;
+  color: var(--t3);
+}
+
+.trajectory-stage {
+  flex: 1 1 auto;
+  min-height: 0;
+}

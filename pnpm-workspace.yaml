@@ -75,6 +75,7 @@ catalog:
   vite: ^8.3.0
   vitest: ^5.0.1
   yaml: ^2.9.1
+  zod: ^4.6.5
 
 catalogs:
   # gwb 插件跑在工作台里：Node 是工作台带的那一版（类型按 24），浏览器侧的 react / react-dom

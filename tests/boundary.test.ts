@@ -207,9 +207,12 @@ test("包的方向：源码里也不许 import 禁止的兄弟包", () => {
   assert.deepEqual(bad, []);
 });
 
+/** 按功能切的新包：边界由 .dependency-cruiser.cjs（pnpm depcheck）检查，不进这个文件的几张表 */
+const FUNCTIONAL_PACKAGES = new Set(["trajectory"]);
+
 test("packages/ 下的包一个不多一个不少——加了新包得先想清楚它能认识谁", () => {
   const dirs = readdirSync(PACKAGES, { withFileTypes: true })
-    .filter((e) => e.isDirectory())
+    .filter((e) => e.isDirectory() && !FUNCTIONAL_PACKAGES.has(e.name))
     .map((e) => e.name)
     .sort();
   assert.deepEqual(dirs, Object.keys(PACKAGE_FORBIDDEN).sort());

@@ -117,6 +117,20 @@ module.exports = {
       to: { dependencyTypes: ['core'] },
     },
     {
+      name: 'trajectory-disk-self-contained',
+      comment: '星轨盘画布 trajectory/src/site/disk/ 零依赖：只 import 自己目录里的文件、星轨盘数据模型 src/core/model/ 与 react',
+      severity: 'error',
+      from: { path: '^packages/trajectory/src/site/disk/' },
+      to: { pathNot: ['^packages/trajectory/src/(site/disk|core/model)/', externalPackagePath('react')] },
+    },
+    {
+      name: 'trajectory-model-self-contained',
+      comment: '星轨盘数据模型 trajectory/src/core/model/ 只 import 自己目录里的文件：画布依赖它，它也得零依赖',
+      severity: 'error',
+      from: { path: '^packages/trajectory/src/core/model/' },
+      to: { pathNot: '^packages/trajectory/src/core/model/' },
+    },
+    {
       name: 'cli-no-ui',
       comment: 'src/cli/ 不 import react 系与 fumadocs 系',
       severity: 'error',
