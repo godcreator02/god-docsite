@@ -11,13 +11,23 @@
     "./node": {
       "types": "./dist/node/index.d.mts",
       "default": "./dist/node/index.mjs"
-    }
+    },
+    "./site": {
+      "types": "./dist/site/index.d.mts",
+      "default": "./dist/site/index.mjs"
+    },
+    "./site/server": {
+      "types": "./dist/site/server.d.mts",
+      "default": "./dist/site/server.mjs"
+    },
+    "./styles.css": "./styles.css"
   },
   "bin": {
     "collab-merge-check": "./dist/cli/bin.mjs"
   },
   "files": [
     "dist",
+    "styles.css",
     "templates"
   ],
   "repository": {
@@ -35,13 +45,44 @@
     "lint": "oxlint . --deny-warnings"
   },
   "dependencies": {
+    "@godcreator/comments": "workspace:^",
     "@godcreator/identity": "workspace:^",
+    "lucide-react": "catalog:",
+    "react-markdown": "catalog:",
+    "remark-gfm": "catalog:",
     "remark-mdx": "catalog:",
     "remark-parse": "catalog:",
     "unified": "catalog:"
   },
+  "peerDependencies": {
+    "@fumadocs/base-ui": "^16.17.1",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0",
+    "react-router": "^8.4.0"
+  },
+  "peerDependenciesMeta": {
+    "@fumadocs/base-ui": {
+      "optional": true
+    },
+    "react": {
+      "optional": true
+    },
+    "react-dom": {
+      "optional": true
+    },
+    "react-router": {
+      "optional": true
+    }
+  },
   "devDependencies": {
+    "@fumadocs/base-ui": "catalog:",
     "@types/node": "catalog:",
+    "@types/react": "catalog:",
+    "@types/react-dom": "catalog:",
+    "jsdom": "catalog:",
+    "react": "catalog:",
+    "react-dom": "catalog:",
+    "react-router": "catalog:",
     "tsdown": "catalog:",
     "typescript": "catalog:",
     "vitest": "catalog:"

@@ -1,0 +1,213 @@
+import { Fragment, useMemo, useState, type ReactNode } from 'react'
+import { Link } from 'react-router'
+import { ArrowDownToLine, ChevronDown, FileWarning, GitBranch, ListTodo, Lock, MessageSquare, RotateCcw, TriangleAlert, Upload, type LucideIcon } from 'lucide-react'
+import type { PublicPerson } from '@godcreator/identity'
+import { recordPageUrlOf } from '../../core/layout.js'
+import { notificationOriginalTextOf, notificationSentenceOf } from '../../core/notifications/notification-text.js'
+import {
+  notificationCountsOf,
+  notificationGroupOf,
+  notificationGroups,
+  notificationTargetOf,
+  type Notification,
+  type NotificationGroup,
+  type NotificationKind,
+} from '../../core/notifications/notifications.js'
+import { peopleLookupOf } from '../../core/people.js'
+
+/*
+ * 顶部正中的提示栏：推送通道交来的通知（gwb-collab 算出）按协作仓、别的仓、找我的三组列在这里，有就一直显示，解决了自己消失。
+ * 句子、原文、去处都由通知模型按 kind 算，这里只摆出来；交给 AI 在 gwb 的协作窗格里
+ */
+
+/** 原文超过这么多字或这么多行就先折起来 */
+const longOriginalCharacters = 140
+const longOriginalLines = 3
+
+const kindIcon: Record<NotificationKind, LucideIcon> = {
+  unsubmitted: Upload,
+  conflicts: TriangleAlert,
+  'submit-failure': TriangleAlert,
+  'sync-problem': RotateCcw,
+  'check-error': TriangleAlert,
+  'off-main': GitBranch,
+  'record-problem': FileWarning,
+  'webhook-setup': Lock,
+  unpushed: Upload,
+  unpulled: ArrowDownToLine,
+  diverged: GitBranch,
+  'pull-to-review': GitBranch,
+  'issue-to-answer': MessageSquare,
+  'my-pull-update': GitBranch,
+  'my-issue-answered': MessageSquare,
+  'repo-setup': Lock,
+  task: ListTodo,
+  mention: MessageSquare,
+  reply: MessageSquare,
+}
+
+/** 三组各一种颜色：协作仓红，别的仓琥珀，找我的蓝 */
+const groupText: Record<NotificationGroup, string> = { 'collab-repo': 'text-danger', 'other-repos': 'text-open', 'for-me': 'text-info' }
+const groupTone: Record<NotificationGroup, string> = {
+  'collab-repo': 'bg-danger-soft ring-danger/40 hover:ring-danger',
+  'other-repos': 'bg-open-soft ring-open/40 hover:ring-open',
+  'for-me': 'bg-info-soft ring-info/40 hover:ring-info',
+}
+const groupTitle: Record<NotificationGroup, string> = { 'collab-repo': '协作仓', 'other-repos': '别的仓', 'for-me': '找我的' }
+const groupSummaryIcon: Record<NotificationGroup, LucideIcon> = { 'collab-repo': TriangleAlert, 'other-repos': GitBranch, 'for-me': MessageSquare }
+const groupSummaryOf: Record<NotificationGroup, (count: number) => string> = {
+  'collab-repo': (count) => `协作仓 ${count} 件事`,
+  'other-repos': (count) => `别的仓 ${count} 件事`,
+  'for-me': (count) => `${count} 条找我的`,
+}
+
+function OriginalText({ text }: { text: string }) {
+  const long = text.length > longOriginalCharacters || text.split('\n').length > longOriginalLines
+  const [open, setOpen] = useState(false)
+  return (
+    <div className="grid justify-items-start gap-0.5">
+      <p className={`m-0 text-[12px] break-words whitespace-pre-wrap text-fd-muted-foreground ${long && !open ? 'line-clamp-3' : ''}`}>{text}</p>
+      {long && (
+        <button type="button" onClick={() => setOpen(!open)} className="text-[11.5px] text-fd-muted-foreground hover:text-fd-foreground">
+          {open ? '收起' : '展开全部'}
+        </button>
+      )}
+    </div>
+  )
+}
+
+const sentenceClass = 'text-[13px] leading-snug break-words text-fd-foreground'
+
+type NavigationProps = { onNavigate: () => void; nameOf: (personId: string) => string }
+
+/** 短句；点了按 notificationTargetOf 去：一条任务或模块那一页、站内一页（评论带着 ?comment=）、外部网址，没有去处的只显示 */
+function Sentence({ notification, onNavigate, nameOf }: { notification: Notification } & NavigationProps) {
+  const sentence = notificationSentenceOf(notification, nameOf)
+  const target = notificationTargetOf(notification)
+  if (target === null) return <span className={sentenceClass}>{sentence}</span>
+  if ('url' in target) {
+    return (
+      <a href={target.url} target="_blank" rel="noreferrer" title={target.url} className={`${sentenceClass} no-underline hover:underline`}>
+        {sentence}
+      </a>
+    )
+  }
+  const to = 'record' in target ? recordPageUrlOf(target.record) : target.page
+  return (
+    <Link to={to} onClick={onNavigate} className={`${sentenceClass} no-underline hover:underline`}>
+      {sentence}
+    </Link>
+  )
+}
+
+function NotificationLine({ notification, ...navigation }: { notification: Notification } & NavigationProps) {
+  const original = notificationOriginalTextOf(notification)
+  const KindIcon = kindIcon[notification.kind]
+  return (
+    <div className="flex items-start gap-2">
+      <KindIcon size={15} className={`mt-0.5 shrink-0 ${groupText[notificationGroupOf(notification)]}`} />
+      <div className="grid min-w-0 flex-1 gap-1.5">
+        <Sentence notification={notification} {...navigation} />
+        {original !== null && <OriginalText text={original} />}
+      </div>
+    </div>
+  )
+}
+
+const rowClass = 'm-0 border-t border-fd-border px-3 py-2.5 first:border-t-0'
+
+function repoOf(notification: Notification): string {
+  if (!('repo' in notification)) throw new Error(`${notification.kind} 不属于「别的仓」组，没有仓名`)
+  return notification.repo
+}
+
+/** 「别的仓」组按仓归成一行一个仓，仓按名字排；行里各条照交来的顺序 */
+function notificationsByRepo(notifications: readonly Notification[]): [string, Notification[]][] {
+  const byRepo = new Map<string, Notification[]>()
+  for (const notification of notifications) {
+    const repo = repoOf(notification)
+    byRepo.set(repo, [...(byRepo.get(repo) ?? []), notification])
+  }
+  return [...byRepo].sort(([a], [b]) => a.localeCompare(b))
+}
+
+function GroupRows({ group, notifications, ...navigation }: { group: NotificationGroup; notifications: readonly Notification[] } & NavigationProps) {
+  if (group !== 'other-repos') {
+    return notifications.map((notification) => (
+      <li key={notification.id} className={rowClass}>
+        <NotificationLine notification={notification} {...navigation} />
+      </li>
+    ))
+  }
+  return notificationsByRepo(notifications).map(([repo, repoNotifications]) => (
+    <li key={repo} aria-label={repo} className={`grid gap-1.5 ${rowClass}`}>
+      <span className="font-mono text-[12.5px] font-semibold break-all text-fd-foreground">{repo}</span>
+      {repoNotifications.map((notification) => (
+        <NotificationLine key={notification.id} notification={notification} {...navigation} />
+      ))}
+    </li>
+  ))
+}
+
+function SummaryPart({ icon: SummaryIcon, className, children }: { icon: LucideIcon; className: string; children: ReactNode }) {
+  return (
+    <span className={`inline-flex min-w-0 items-center gap-1.5 font-semibold ${className}`}>
+      <SummaryIcon size={15} />
+      <span className="truncate">{children}</span>
+    </span>
+  )
+}
+
+/**
+ * 顶部正中的提示栏，放在站点布局的插槽里。notifications 是调用方交来的通知（推送通道的最新一份，还没交来为 null），
+ * people 是公开人员列表（人名从 id 换成显示名）；没有通知时不显示
+ */
+export function NotificationBar({ notifications, people }: { notifications: readonly Notification[] | null; people: readonly PublicPerson[] }) {
+  const [expanded, setExpanded] = useState(false)
+  const nameOf = useMemo(() => peopleLookupOf(people).nameOf, [people])
+  if (notifications === null || notifications.length === 0) return null
+  const counts = notificationCountsOf(notifications)
+  const shownGroups = notificationGroups.filter((group) => counts[group] > 0)
+  const navigation = { onNavigate: () => setExpanded(false), nameOf }
+  return (
+    <div className="pointer-events-none fixed inset-x-0 top-2.5 z-40 flex justify-center px-4">
+      <div className="flex w-[560px] max-w-full flex-col items-center">
+        <button
+          type="button"
+          aria-expanded={expanded}
+          onClick={() => setExpanded(!expanded)}
+          title={expanded ? '收起' : '点开看是哪些事'}
+          className={`pointer-events-auto flex max-w-full min-w-0 items-center gap-2 rounded-lg py-1.5 pr-2 pl-2.5 text-[13px] whitespace-nowrap text-fd-foreground shadow-lg ring-1 ${groupTone[shownGroups[0]!]}`}
+        >
+          {shownGroups.map((group, index) => (
+            <Fragment key={group}>
+              {index > 0 && <span className="text-fd-muted-foreground">{' · '}</span>}
+              <SummaryPart icon={groupSummaryIcon[group]} className={groupText[group]}>
+                {groupSummaryOf[group](counts[group])}
+              </SummaryPart>
+            </Fragment>
+          ))}
+          <ChevronDown size={15} className={`shrink-0 text-fd-muted-foreground transition-transform ${expanded ? 'rotate-180' : ''}`} />
+        </button>
+        {expanded && (
+          <section aria-label="要处理的事" className="pointer-events-auto mt-1.5 flex max-h-[min(70vh,640px)] w-full flex-col overflow-hidden rounded-xl border border-fd-border bg-fd-card shadow-lg">
+            <header className="flex flex-wrap items-baseline gap-2 border-b border-fd-border px-3 py-2">
+              <h2 className="m-0 text-[13px] font-semibold">要处理的事</h2>
+              <p className="m-0 ml-auto text-[12px] text-fd-muted-foreground">要交给 AI，在 gwb 的协作窗格里点「交给 AI 处理」</p>
+            </header>
+            <div className="min-h-0 overflow-y-auto">
+              {shownGroups.map((group) => (
+                <section key={group} aria-label={groupTitle[group]} className="border-t border-fd-border first:border-t-0">
+                  <h3 className={`m-0 px-3 pt-2 text-[12px] font-semibold ${groupText[group]}`}>{groupTitle[group]}</h3>
+                  <ul className="m-0 list-none p-0">
+                    <GroupRows group={group} notifications={notifications.filter((notification) => notificationGroupOf(notification) === group)} {...navigation} />
+                  </ul>
+                </section>
+              ))}
+            </div>
+          </section>
+        )}
+      </div>
+    </div>
+  )
+}

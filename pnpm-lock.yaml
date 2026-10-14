@@ -467,9 +467,21 @@ importers:
 
   packages/collab:
     dependencies:
+      '@godcreator/comments':
+        specifier: workspace:^
+        version: link:../comments
       '@godcreator/identity':
         specifier: workspace:^
         version: link:../identity
+      lucide-react:
+        specifier: 'catalog:'
+        version: 1.54.0(@types/react@19.3.0)(react@19.3.0)
+      react-markdown:
+        specifier: 'catalog:'
+        version: 10.1.0(@types/react@19.3.0)(react@19.3.0)(supports-color@7.2.0)
+      remark-gfm:
+        specifier: 'catalog:'
+        version: 4.0.1(supports-color@7.2.0)
       remark-mdx:
         specifier: 'catalog:'
         version: 3.1.1(supports-color@7.2.0)
@@ -480,9 +492,30 @@ importers:
         specifier: 'catalog:'
         version: 11.0.5
     devDependencies:
+      '@fumadocs/base-ui':
+        specifier: 'catalog:'
+        version: 16.17.1(@types/mdx@2.0.14)(@types/react@19.3.0)(fumadocs-core@16.17.1(@mdx-js/mdx@3.1.1(supports-color@7.2.0))(@types/estree-jsx@1.0.5)(@types/hast@3.0.5)(@types/mdast@4.0.4)(@types/react@19.3.0)(lucide-react@1.54.0(@types/react@19.3.0)(react@19.3.0))(react-dom@19.3.0(react@19.3.0))(react-router@8.4.0(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(react@19.3.0)(supports-color@7.2.0)(zod@4.6.5))(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(supports-color@7.2.0)(tailwindcss@4.3.3)
       '@types/node':
         specifier: 'catalog:'
         version: 26.6.4
+      '@types/react':
+        specifier: 'catalog:'
+        version: 19.3.0
+      '@types/react-dom':
+        specifier: 'catalog:'
+        version: 19.3.0(@types/react@19.3.0)
+      jsdom:
+        specifier: 'catalog:'
+        version: 30.1.2
+      react:
+        specifier: 'catalog:'
+        version: 19.3.0
+      react-dom:
+        specifier: 'catalog:'
+        version: 19.3.0(react@19.3.0)
+      react-router:
+        specifier: 'catalog:'
+        version: 8.4.0(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
       tsdown:
         specifier: 'catalog:'
         version: 0.22.14(typescript@6.0.3)

@@ -5,7 +5,7 @@
 
 export const repoLinkPrefix = 'repo:'
 
-/** POST { op: 'check', targets } 回 RepoLinkCheck[]（顺序与 targets 相同）；POST { op: 'open', target } 在本机打开 */
+/** 资源路由：GET ?target=<repo: 链接> 回 RepoLinkCheck；POST 表单 { target } 在本机打开 */
 export const repoLinksApiUrl = '/api/repo-links'
 
 /** GET <前缀><仓>/<路径>：把 PDF、图片、网页、视频交给浏览器 */

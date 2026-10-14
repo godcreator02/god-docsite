@@ -16,3 +16,6 @@ export const calendarUrl = '/calendar'
 export function journalUrlOf(date: string): string {
   return `${calendarUrl}/${date}`
 }
+
+/** 正文里的记录链接、日志链接取显示数据的资源路由：GET ?id=<记录 id>（可写多个） */
+export const recordLinksApiUrl = '/api/record-links'
