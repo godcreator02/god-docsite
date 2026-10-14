@@ -66,6 +66,7 @@ const PACKAGES = join(ROOT, "packages");
 /** npm 包在 packages/ 下的目录名 → 包名。工作台插件在 plugins/ 下，同一个工作区，但不在这几个包的依赖关系里 */
 const NPM_PACKAGES: Record<string, string> = {
   "code-pin": "@godcreator/code-pin",
+  "doc-export": "@godcreator/doc-export",
   "trajectory-disk": "@godcreator/trajectory-disk",
   "docfirst-workflow": "@godcreator/docfirst-workflow",
   "docfirst-explainer": "@godcreator/docfirst-explainer",
@@ -153,7 +154,7 @@ function distClosureSpecs(dir: string, file: string): string[] {
  *   docfirst-explainer 转发薄壳。正本是地基能力包 docsite-explainer；装旧包名的站不用改代码
  *   docfirst-workflow docfirst 本身：认识钉码与星轨盘，除了站与 docsite-docfirst 谁都不认识它，也不认识地基
  */
-const DOCFIRST_PACKAGES = ["code-pin", "trajectory-disk", "docfirst-workflow", "docfirst-explainer"];
+const DOCFIRST_PACKAGES = ["code-pin", "doc-export", "trajectory-disk", "docfirst-workflow", "docfirst-explainer"];
 const KIT_PACKAGES = ["docsite-kit", "docsite-identity", "docsite-comments", "docsite-page-sources", "docsite-writing", "docsite-ui", "docsite-feed", "docsite-explainer", "docsite-docfirst"];
 // collab 三包是另一场搬入（提交 2b70e91）带进来的，接线提交会调整它们的边界——这里的条目按它们当时的真实依赖写
 const COLLAB_PACKAGES = ["collab-model", "collab-site", "collab-merge-check"];
@@ -173,6 +174,8 @@ const PACKAGE_FORBIDDEN: Record<string, string[]> = {
   "docsite-docfirst": without("docsite-docfirst", ["docsite-kit", "docfirst-workflow", "trajectory-disk"]),
   // docfirst 与通用包
   "code-pin": without("code-pin", []),
+  // 生成物（按功能切的新包）：钉码标记在生成物里写成代码块要用钉码
+  "doc-export": without("doc-export", ["code-pin"]),
   "trajectory-disk": without("trajectory-disk", []),
   "docfirst-workflow": without("docfirst-workflow", ["code-pin", "trajectory-disk"]),
   "docfirst-explainer": without("docfirst-explainer", ["docsite-explainer"]),
