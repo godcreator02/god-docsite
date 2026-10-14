@@ -8,8 +8,12 @@
   "description": "把文字钉在代码上：只认目标（行段、整个文件、目录树）与记录，核对出代码变没变、确认出新记录；不读文件，读取器与旧内容来源由调用方传入。",
   "exports": {
     ".": {
-      "types": "./dist/index.d.ts",
-      "default": "./dist/index.js"
+      "types": "./dist/index.d.mts",
+      "default": "./dist/index.mjs"
+    },
+    "./node": {
+      "types": "./dist/node.d.mts",
+      "default": "./dist/node.mjs"
     }
   },
   "files": [
