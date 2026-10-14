@@ -1,9 +1,9 @@
 /**
- * 行级迷你 frontmatter 解析器 + 正文提取的用例。
+ * frontmatter 读法 + 正文提取的用例。
  *
- * 头号断言是「日级 born-at 留字符串」：`born-at: 2026-05-06` 是合法 YAML date，任何 YAML 库
- * 都会给出 Date 对象，String() 之后格式校验全灭、全部日级存量卡被判病挡在盘外——而且是
- * 静默的（盘照出，只是少了卡少了环）。这一条塌了，整个数据层跟着塌。
+ * 头号断言是「日级 born-at 留字符串」：`born-at: 2026-05-06` 在 YAML 的默认 schema 里是 date，
+ * 读成 Date 之后格式校验全灭、全部日级存量卡被判病挡在盘外——而且是静默的（盘照出，只是少了卡少了环）。
+ * 所以 YAML 按 failsafe schema 读，标量一律是字符串。这一条塌了，整个数据层跟着塌。
  */
 import { test } from "vitest";
 import assert from "node:assert/strict";

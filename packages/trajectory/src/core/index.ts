@@ -1,24 +1,19 @@
 /**
- * `@godcreator/trajectory` 的 `.` 出口：卡格式、校验、卡之间的关系与星轨盘的数据模型，纯逻辑。
+ * `@godcreator/trajectory` 的 `.` 出口：卡格式与校验、卡之间的关系、星轨盘的数据模型，纯逻辑。
  */
 
-export { parseCardFile, ID_DATE_PREFIX } from "./card.ts";
-export type { ParsedFile } from "./card.ts";
-export { checkDocfirstRefs } from "./card-refs.ts";
-export {
-  CARD_KEYS,
-  cardIdFromHref,
-  EDGE_HEAD,
-  extractMilestones,
-  extractRelations,
-  MILESTONE_HEADING,
-  parseFrontmatter,
-  splitLines,
-  stripFrontmatter,
-} from "./parse.ts";
-export type { ExtractedMilestones, ExtractedRelations, Frontmatter } from "./parse.ts";
-export { CARD_EXT, pickCardFiles, scanCards } from "./scan.ts";
-export type { CardFile, CardRecord, CardScan, Problem, SickFile } from "./types.ts";
+export { CARD_KEYS, cardFrontmatterSchema, ID_DATE_PREFIX, parseCardFile, readCardFile, titleOf } from "./card.ts";
+export type { CardFrontmatter } from "./card.ts";
+export { CARD_EXT, cardIdOfFile, pickCardFiles } from "./card-files.ts";
+export { assembleCardSet, scanCards } from "./card-set.ts";
+export { FrontmatterError, parseFrontmatter, stripFrontmatter } from "./frontmatter.ts";
+export { splitLines } from "./lines.ts";
+export { extractMilestones, MILESTONE_HEADING } from "./milestones.ts";
+export type { ExtractedMilestones } from "./milestones.ts";
+export { checkDocfirstRefs } from "./pin-marks.ts";
+export { cardIdFromHref, EDGE_HEAD, extractRelations } from "./refs.ts";
+export type { ExtractedRelations } from "./refs.ts";
+export type { CardFile, CardFileReading, CardRecord, CardScan, ParsedFile, Problem, SickFile } from "./types.ts";
 export { buildModel, validBornAt } from "./model/build.ts";
 export type {
   BrokenRel,

@@ -1,5 +1,3 @@
-"use client";
-
 /**
  * 客户端组件 StarDisk——星轨盘的 React 壳，只当编排者。
  *
@@ -39,9 +37,9 @@ export interface StarDiskProps {
 }
 
 /** localStorage 里手感参数的键。 */
-const SETTINGS_KEY = "live-doc-trajectory.settings";
+const SETTINGS_KEY = "trajectory.star-disk.settings";
 /** localStorage 里侧栏宽度的键。 */
-const SIDE_WIDTH_KEY = "live-doc-trajectory.side-width";
+const SIDE_WIDTH_KEY = "trajectory.star-disk.side-width";
 /** 侧栏默认宽与可拖范围（px）；上限另受整盘宽度的七成约束。 */
 const SIDE_WIDTH_DEFAULT = 460;
 const SIDE_WIDTH_MIN = 320;

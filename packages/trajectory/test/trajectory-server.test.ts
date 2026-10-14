@@ -1,68 +1,71 @@
 /**
- * `site/card-collection.ts` 里轨迹卡集合那两样东西的测试：`cardSchema`（合法 / 缺 label / 缺 born-at / Date 型
- * born-at 四种情形，只派生字段、不校验）与 `remarkTrajectoryLinks`（关系边段落转成带 data-kind 的 div、卡身份形状的 `.md`
- * 链接改写、带路径的 `.md` 不改写、wikilink 原样不动）。mdast 树直接手写——remarkTrajectoryLinks 本身就是个收 Root、
- * 返回 void 的函数，不需要实际运行 unified 的 parse/stringify 流程。
+ * 站点卡集合用的两样东西：`cardSchema`（从文件全文读出每一页的数据，不用 fumadocs 解析好的值、不校验）与
+ * `remarkTrajectoryLinks`（关系边段落转成带 data-kind 的 div、卡身份形状的 `.md` 链接改写、带路径的 `.md` 不改写、
+ * wikilink 原样不动）。mdast 树直接手写——remarkTrajectoryLinks 本身就是个收 Root、返回 void 的函数。
  */
 import { test } from "vitest";
 import assert from "node:assert/strict";
-import { cardSchema, remarkTrajectoryLinks } from "../src/site/card-collection.ts";
-import type { CardFrontmatter } from "../src/site/card-collection.ts";
-import type { Link, Paragraph, Root, Text } from "../src/site/card-collection.ts";
+import { cardSchema } from "../src/site/card-collection.ts";
+import type { CardEntryData } from "../src/site/card-collection.ts";
+import { remarkTrajectoryLinks } from "../src/site/remark-trajectory-links.ts";
+import type { Link, Paragraph, Root, Text } from "../src/site/remark-trajectory-links.ts";
 
 /* ================= cardSchema ================= */
 
-// cardSchema.validate() 的类型签名跟协议原文一样，Result 是 { value } / { issues } 二选一的
-// 判别联合，且允许同步或 Promise（我们自己的实现永远同步返回值）——测试只想两种结果都读到，
-// 不为了这份联合类型的精确性去逐条 narrow，转成宽松形状读。
-interface LooseResult {
-  value?: CardFrontmatter;
-  issues?: readonly { message: string }[];
+/** validate 的结果按协议是 { value } / { issues } 二选一、可同步可 Promise；测试只读 value */
+async function entryDataOf(path: string, source: string, fumadocsValue: unknown = {}): Promise<CardEntryData> {
+  const result = (await cardSchema({ path, source })["~standard"].validate(fumadocsValue)) as { value?: CardEntryData; issues?: unknown };
+  assert.equal(result.issues, undefined, "cardSchema 不校验，永远交回 value");
+  return result.value as CardEntryData;
 }
-const validate = async (
-  schema: ReturnType<typeof cardSchema>,
-  value: unknown,
-): Promise<LooseResult> => (await schema["~standard"].validate(value)) as LooseResult;
 
-test("cardSchema：合法 frontmatter 原样交回，label 就是 title", async () => {
-  const schema = cardSchema({ path: "docs/2026-05-06-my-card.md", source: "" });
-  const result = await validate(schema, {
-    label: "标题",
-    "born-at": "2026-05-06",
+const CARD = ["---", "label: 标题", "born-at: 2026-05-06", "type: choice", "domain: d1", "parent: [p1]", "---", "", "正文。", ""].join("\n");
+
+test("cardSchema：从文件全文读，日级 born-at 是字符串；fumadocs 交来的值（born-at 已是 Date）不用", async () => {
+  const data = await entryDataOf("D:/site/trajectory/2026-05-06-my-card.md", CARD, { "born-at": new Date("2026-05-06T00:00:00.000Z") });
+  assert.equal(data.title, "标题");
+  assert.equal(data.cardFile.name, "2026-05-06-my-card.md");
+  assert.deepEqual(data.cardFile.card, {
+    id: "2026-05-06-my-card",
+    path: "2026-05-06-my-card.md",
     type: "choice",
-    domain: "d1",
     parent: ["p1"],
-  });
-  assert.deepEqual(result.value, {
-    title: "标题",
+    domain: "d1",
     label: "标题",
-    type: "choice",
-    domain: "d1",
-    parent: ["p1"],
-    "born-at": "2026-05-06",
+    bornAt: "2026-05-06",
+    relations: [],
+    milestones: null,
   });
-  assert.equal(result.issues, undefined);
+  assert.equal("description" in data, false, "没写 description 就没有这个键");
 });
 
-test("cardSchema：缺 label 时 title 改用文件名（去掉日期前缀），不算 issues", async () => {
-  const schema = cardSchema({ path: "docs/2026-05-06-my-card.md", source: "" });
-  const result = await validate(schema, { "born-at": "2026-05-06" });
-  assert.equal(result.issues, undefined);
-  assert.equal(result.value?.title, "my-card");
-  assert.equal(result.value?.label, undefined);
+test("cardSchema：缺 label 时标题用卡身份去掉日期段，病跟着数据走、不算 issues", async () => {
+  const data = await entryDataOf("C:\\site\\trajectory\\2026-05-06-my-card.md", ["---", "born-at: 2026-05-06", "parent: [p1]", "---", ""].join("\n"));
+  assert.equal(data.title, "my-card");
+  assert.deepEqual(data.cardFile.problems.map((p) => p.reason), ["缺 label（全卡必填）"]);
 });
 
-test("cardSchema：born-at 被解析成 Date（fumadocs 自己的 YAML 解析会把只写到日的值转成 Date）时转回字符串", async () => {
-  const schema = cardSchema({ path: "docs/2026-05-06-my-card.md", source: "" });
-  const result = await validate(schema, { label: "标题", "born-at": new Date("2026-05-06T00:00:00.000Z") });
-  assert.equal(result.value?.["born-at"], "2026-05-06");
+test("cardSchema：一个卡字段都没有的页不是卡——标题取 frontmatter 的 title，缺了用文件名去掉日期段；description 原样带上", async () => {
+  const plain = await entryDataOf("/s/trajectory/index.mdx", "---\ntitle: 轨迹\ndescription: 只增不改\n---\n导读。\n");
+  assert.equal(plain.title, "轨迹");
+  assert.equal(plain.description, "只增不改");
+  assert.equal(plain.cardFile.card, null);
+  assert.equal((await entryDataOf("/s/trajectory/index.mdx", "导读。\n")).title, "index");
+  /* 有任何一个卡字段就是卡：标题取 label，不取 title */
+  assert.equal((await entryDataOf("/s/trajectory/x.mdx", "---\ntitle: 像页的卡\nlabel: 标题\n---\n")).title, "标题");
 });
 
-test("cardSchema：缺 born-at 不校验，照样生成页面——卡写得对不对由 docfirst check 报", async () => {
-  const schema = cardSchema({ path: "docs/2026-05-06-my-card.md", source: "" });
-  const result = await validate(schema, { label: "标题" });
-  assert.equal(result.issues, undefined);
-  assert.deepEqual(result.value, { title: "标题", label: "标题" });
+test("cardSchema：卡的 description 也原样带上", async () => {
+  const data = await entryDataOf("/s/trajectory/2026-05-06-my-card.mdx", "---\nlabel: 标题\nborn-at: 2026-05-06\ndescription: 一句\n---\n");
+  assert.equal(data.description, "一句");
+});
+
+test("cardSchema：frontmatter 读不出来时这一页不是卡，病记在这一页的数据里", async () => {
+  const data = await entryDataOf("/s/trajectory/2026-05-06-bad.md", "---\nlabel: [没收尾\n---\n");
+  assert.equal(data.title, "bad");
+  assert.equal(data.cardFile.card, null);
+  assert.equal(data.cardFile.problems[0]?.field, "file");
+  assert.match(data.cardFile.problems[0]?.reason ?? "", /^frontmatter 不是合法的 YAML/);
 });
 
 /* ================= remarkTrajectoryLinks ================= */
@@ -128,24 +131,6 @@ test("remarkTrajectoryLinks：wikilink 不是卡链接，原样留作文字", ()
   remarkTrajectoryLinks({ hrefBase: "/trajectory" })(tree);
   const p = tree.children[0] as Paragraph;
   assert.deepEqual(p.children, [text("参见 [[old-card|旧卡]] 与 [[other-card]]，完。")]);
-});
-
-test("cardSchema：一个卡字段都没有的页不是卡——当普通页处理，title 取 frontmatter、缺了用文件名；description 原样带上", async () => {
-  const schema = cardSchema({ path: "content/trajectory/index.mdx", source: "" });
-  const plain = await validate(schema, { title: "轨迹", description: "只增不改" });
-  assert.deepEqual(plain.value, { title: "轨迹", description: "只增不改" });
-  const bare = await validate(schema, {});
-  assert.deepEqual(bare.value, { title: "index" });
-  // 有任何一个卡字段就是卡：标题取 label，不取 frontmatter 的 title
-  const card = await validate(schema, { title: "像页的卡", label: "标题" });
-  assert.equal(card.value?.title, "标题");
-});
-
-test("cardSchema：卡的 description 也原样带上", async () => {
-  const schema = cardSchema({ path: "content/trajectory/2026-05-06-my-card.mdx", source: "" });
-  const result = await validate(schema, { label: "标题", "born-at": "2026-05-06", description: "一句" });
-  assert.equal(result.value?.description, "一句");
-  assert.equal(result.value?.title, "标题");
 });
 
 test("remarkTrajectoryLinks：.mdx 链接跟 .md 一样改写成卡页路由；带路径的 .mdx 同样不改写", () => {

@@ -5,7 +5,7 @@
     "name": "godcreator"
   },
   "type": "module",
-  "description": "轨迹卡：卡格式与校验、卡之间的关系、星轨盘的数据模型（.）；读卡目录（./node）；卡集合、卡页、星轨盘页与星轨盘画布（./site）。",
+  "description": "轨迹卡：卡格式与校验、卡之间的关系、星轨盘的数据模型（.）；读卡目录（./node）；卡页、星轨盘页与星轨盘画布（./site），两页的 loader（./site/server），站点声明卡集合用的 schema 与 mdx 选项（./site/collection）。",
   "exports": {
     ".": {
       "types": "./dist/core.d.mts",
@@ -19,6 +19,15 @@
       "types": "./dist/site.d.mts",
       "default": "./dist/site.mjs"
     },
+    "./site/server": {
+      "types": "./dist/site-server.d.mts",
+      "default": "./dist/site-server.mjs"
+    },
+    "./site/collection": {
+      "types": "./dist/site-collection.d.mts",
+      "default": "./dist/site-collection.mjs"
+    },
+    "./styles.css": "./styles/trajectory.css",
     "./star.css": "./styles/star.css"
   },
   "files": [
@@ -32,24 +41,43 @@
     "prepublishOnly": "pnpm run build"
   },
   "dependencies": {
-    "unist-util-visit": "catalog:"
+    "unist-util-visit": "catalog:",
+    "yaml": "catalog:",
+    "zod": "catalog:"
   },
   "peerDependencies": {
-    "react": ">=19"
+    "@fumadocs/base-ui": "^16.17.1",
+    "fumadocs-mdx": "^15.4.7",
+    "react": ">=19",
+    "react-router": "^8.4.0"
   },
   "peerDependenciesMeta": {
+    "@fumadocs/base-ui": {
+      "optional": true
+    },
+    "fumadocs-mdx": {
+      "optional": true
+    },
     "react": {
+      "optional": true
+    },
+    "react-router": {
       "optional": true
     }
   },
   "devDependencies": {
+    "@fumadocs/base-ui": "catalog:",
     "@standard-schema/spec": "catalog:",
     "@types/mdast": "catalog:",
+    "@types/mdx": "catalog:",
     "@types/node": "catalog:",
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:",
+    "fumadocs-core": "catalog:",
+    "fumadocs-mdx": "catalog:",
     "react": "catalog:",
     "react-dom": "catalog:",
+    "react-router": "catalog:",
     "tsdown": "catalog:",
     "typescript": "catalog:",
     "vitest": "catalog:"

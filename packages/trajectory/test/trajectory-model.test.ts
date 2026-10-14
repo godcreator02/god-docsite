@@ -2,7 +2,7 @@
  * 模型层的规则测试：树提取的择优规则、卡格式的四层校验（形状 / 存在性 / 一致性 / docfirst 引用记号，
  * docfirst 那一层在 trajectory-validate.test.ts 单独测；跨文件的三条交给 scanCards 测）、
  * 非根卡全部画到盘上（含未分道哨兵）、盘心认定（卡目录里恰好一张 type: root）、正文 inline 边求解、
- * 里程碑从根卡正文解析、卡目录不存在时扫描结果为空。卡经 workflow 的卡格式换成中性输入，再交给 buildModel。
+ * 里程碑从根卡正文解析、卡目录不存在时扫描结果为空。卡经 core 的卡格式换成中性输入，再交给 buildModel。
  */
 import { test } from "vitest";
 import assert from "node:assert/strict";

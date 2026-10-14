@@ -1,6 +1,6 @@
 /**
  * 卡里不许钉码：卡正文里出现 docfirst 正式记号、或以 @@docfirst 开头的一行（已经删掉的草稿写法）一律报病——
- * 轨迹分区冻结历史，不钉活代码。在 workflow 卡格式的 cards/card-refs.ts；
+ * 轨迹分区冻结历史，不钉活代码。在 core/pin-marks.ts；
  * 既测纯函数 checkDocfirstRefs，也测它接进 scanCards 之后 sick 自然带上报病，
  * 以及单卡解析 parseCardFile 不管它。
  */
@@ -10,7 +10,7 @@ import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import type { SickFile } from "../src/core/index.ts";
-import { checkDocfirstRefs } from "../src/core/card-refs.ts";
+import { checkDocfirstRefs } from "../src/core/pin-marks.ts";
 import { scanCardDir } from "../src/node/scan.ts";
 import { card, D, flatProblems, memSick, renderCard, root } from "./trajectory-helpers.ts";
 import type { CardSpec } from "./trajectory-helpers.ts";

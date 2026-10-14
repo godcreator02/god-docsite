@@ -1,108 +1,148 @@
 /**
- * 一张卡文件 → 一条记录，顺带跑单文件的校验（字段的形状、必填字段、born-at 形状、关系行与里程碑行）。
- * 跨文件的校验（根卡几张、parent 指不指向根卡、关系指不指向星轨盘上的卡、同一身份两个文件）在 scan.ts。
+ * 卡格式：frontmatter 的 schema（唯一的格式定义）、标题规则，与一个卡文件 → 一条记录加单文件的病。
+ * 跨文件的校验（根卡几张、parent 指不指向根卡、关系指不指向星轨盘上的卡、同一身份两个文件）在 card-set.ts。
  */
 
+import { z } from "zod";
+import { FrontmatterError, parseFrontmatter, stripFrontmatter } from "./frontmatter.ts";
+import { extractMilestones } from "./milestones.ts";
 import { validBornAt } from "./model/build.ts";
-import {
-  CARD_KEYS,
-  extractMilestones,
-  extractRelations,
-  type Frontmatter,
-  parseFrontmatter,
-  stripFrontmatter,
-} from "./parse.ts";
-import type { CardRecord, Problem } from "./types.ts";
+import { checkDocfirstRefs } from "./pin-marks.ts";
+import { cardIdOfFile } from "./card-files.ts";
+import { extractRelations } from "./refs.ts";
+import type { CardFileReading, CardRecord, ParsedFile, Problem } from "./types.ts";
 
-/** 卡身份的前置日期段：`<YYYY-MM-DD>-<slug>`，剥掉它剩下的就是 title。 */
+/** 卡体系字段：frontmatter 里一个都没有的文件不是卡，校验直接跳过。
+ * status 不在其列——它是可以随意写的字段，单凭一个 status 不足以认定这是张卡。 */
+export const CARD_KEYS = ["type", "born-at", "parent", "label", "domain"] as const;
+type CardKey = (typeof CARD_KEYS)[number];
+
+/** 卡身份的前置日期段：`<YYYY-MM-DD>-<slug>` */
 export const ID_DATE_PREFIX = /^\d{4}-\d{2}-\d{2}-/;
 
-/** 该写单个值的字段，与它报病时用的字段名 */
-const SCALAR_FIELDS = { "born-at": "born-at", type: "type", label: "label", domain: "domain" } as const;
-
-/** 身份去掉前置日期段就是 title（label 读不到时用它）；没有日期段的身份原样当 title。 */
-function titleOf(id: string): string {
-  return id.replace(ID_DATE_PREFIX, "");
+/**
+ * 标题规则，卡页、星轨盘、卡集合都用这一条：frontmatter 写了就用写的（卡是 label，卡集合里不是卡的页是 title），
+ * 没写就用卡身份去掉开头的日期段——日期在卡页标题下那一行、在星轨盘的半径上都已经显示了。
+ */
+export function titleOf(id: string, declared: unknown): string {
+  return (typeof declared === "string" ? declared.trim() : "") || id.replace(ID_DATE_PREFIX, "");
 }
 
-/** 一个文件解析出的卡与它自己的病。不是卡（卡体系字段一个都没有）时 card 为 null。 */
-export interface ParsedFile {
-  card: CardRecord | null;
-  problems: Problem[];
+const singleValue = (key: CardKey) =>
+  z
+    .string({ error: (issue) => (Array.isArray(issue.input) ? `${key} 须写成单个值，不是列表` : `${key} 须写成单个值`) })
+    .optional();
+
+/** 必填与 born-at 格式。字段写成别的形状时已经报过形状，这里不再报缺 */
+function checkRequiredFields(frontmatter: Record<string, unknown>, ctx: z.RefinementCtx): void {
+  const report = (key: CardKey, message: string, value: string): void => {
+    ctx.addIssue({ code: "custom", path: [key], message, params: { value } });
+  };
+  const bornAt = frontmatter["born-at"];
+  if (bornAt === undefined || bornAt === "") report("born-at", "缺 born-at（全卡必填）", "");
+  else if (typeof bornAt === "string" && !validBornAt(bornAt)) report("born-at", "born-at 格式须 YYYY-MM-DD 或 YYYY-MM-DDTHH:mm", bornAt);
+  const parent = frontmatter["parent"];
+  const parentMissing = parent === undefined || (Array.isArray(parent) && parentIdsOf(parent).length === 0);
+  if (frontmatter["type"] !== "root" && parentMissing) report("parent", "缺 parent（非根卡必填，写根卡的身份）", "");
+  const label = frontmatter["label"];
+  if (label === undefined || (typeof label === "string" && label.trim() === "")) {
+    report("label", "缺 label（全卡必填）", typeof label === "string" ? label : "");
+  }
 }
 
-/** 把一份卡文件的全文变成一条记录。卡体系字段（CARD_KEYS）一个都没有的文件不是卡：card 与 problems 都返回空。
- * 字段写成了别的形状（单个值写成列表、列表写成单个值）报病，按没写处理，不替它转换。 */
-export function parseCardFile(id: string, path: string, text: string): ParsedFile {
-  const fm: Frontmatter | null = parseFrontmatter(text);
-  if (!fm || !CARD_KEYS.some((k) => fm[k] !== undefined)) return { card: null, problems: [] };
+/**
+ * 卡的 frontmatter。形状先查（顺序 parent、born-at、type、domain、label），必填与格式后查（born-at、parent、label），
+ * 病按这个顺序报。根卡不写 parent、parent 只能写根卡的身份这类要看整批卡的规则在 card-set.ts。
+ * 别的字段（title、description、status……）随便写，不查。
+ */
+export const cardFrontmatterSchema = z
+  .looseObject({
+    parent: z
+      .array(z.string({ error: "parent 的每一项须是一个卡身份" }), { error: "parent 须写成列表：parent: [根卡身份]" })
+      .optional(),
+    "born-at": singleValue("born-at"),
+    type: singleValue("type"),
+    domain: singleValue("domain"),
+    label: singleValue("label"),
+  })
+  .superRefine(checkRequiredFields, { when: () => true });
 
+export type CardFrontmatter = z.output<typeof cardFrontmatterSchema>;
+
+function parentIdsOf(parent: readonly unknown[]): string[] {
+  return parent.filter((v): v is string => typeof v === "string").map((v) => v.trim()).filter((v) => v !== "");
+}
+
+function textOf(value: unknown): string {
+  if (typeof value === "string") return value;
+  if (Array.isArray(value)) return value.map(textOf).join(",");
+  return value === undefined ? "" : JSON.stringify(value);
+}
+
+function problemsOf(frontmatter: Record<string, unknown>): Problem[] {
+  const checked = cardFrontmatterSchema.safeParse(frontmatter, { reportInput: true });
+  if (checked.success) return [];
+  return checked.error.issues.map((issue) => ({
+    field: issue.path[0] as CardKey,
+    value: issue.code === "custom" ? String(issue.params?.["value"] ?? "") : textOf(issue.input),
+    reason: issue.message,
+  }));
+}
+
+/** 单个值的字段：写成别的形状的已经报病，按没写处理，不替它转换 */
+const singleValueOf = (value: unknown): string | null => (typeof value === "string" ? value : null);
+
+function recordOf(id: string, path: string, frontmatter: Record<string, unknown>, body: string): { card: CardRecord; problems: Problem[] } {
   const problems: Problem[] = [];
-  const bad = (field: Problem["field"], value: string, reason: string): void => {
-    problems.push({ field, value, reason });
-  };
-  const scalar = (key: keyof typeof SCALAR_FIELDS): string | null => {
-    const raw = fm[key];
-    if (raw === undefined) return null;
-    if (Array.isArray(raw)) {
-      bad(SCALAR_FIELDS[key], raw.join(","), `${key} 须写成单个值，不是列表`);
-      return null;
-    }
-    return raw;
-  };
-  const parentRaw = fm["parent"];
-  const parentIsScalar = typeof parentRaw === "string";
-  if (parentIsScalar) bad("parent", parentRaw, "parent 须写成列表：parent: [根卡身份]");
-
-  const title = titleOf(id);
-  const bornAt = scalar("born-at") ?? "";
-  const type = scalar("type");
-  const domain = scalar("domain");
-  const rawLabel = scalar("label");
-  const parent = Array.isArray(parentRaw) ? parentRaw.map((v) => v.trim()).filter((v) => v !== "") : [];
-  const isRoot = type === "root";
-
-  /* 存在性校验：born-at / label 全卡必填；parent 非根卡必填（根卡不写 parent 由 scan.ts 查）。
-   * 写成了别的形状的字段已经报过，不再报缺 */
-  if (fm["born-at"] === undefined || fm["born-at"] === "") bad("born-at", "", "缺 born-at（全卡必填）");
-  else if (bornAt !== "" && !validBornAt(bornAt)) {
-    bad("born-at", bornAt, "born-at 格式须 YYYY-MM-DD 或 YYYY-MM-DDTHH:mm");
-  }
-  if (!isRoot && !parentIsScalar && !parent.length) {
-    bad("parent", "", "缺 parent（非根卡必填，写根卡的身份）");
-  }
-  if (fm["label"] === undefined || (typeof fm["label"] === "string" && fm["label"].trim() === "")) {
-    bad("label", rawLabel ?? "", "缺 label（全卡必填）");
-  }
-
-  const body = stripFrontmatter(text);
+  const type = singleValueOf(frontmatter["type"]);
+  const parent = frontmatter["parent"];
   const { relations, broken } = extractRelations(body);
-  /* 行头是关系字段、整行格式却不对：文件级病，要报出来——以前出过这种行被静默丢掉的问题 */
   for (const b of broken) {
-    bad("relation", b.target, `${b.key}:: 后须是 [文字](卡身份.md) 形态的一行`);
+    problems.push({ field: "relation", value: b.target, reason: `${b.key}:: 后须是 [文字](卡身份.md) 形态的一行` });
   }
   let milestones = null;
-  if (isRoot) {
+  if (type === "root") {
     const extracted = extractMilestones(body);
     milestones = extracted.milestones;
     for (const line of extracted.broken) {
-      bad("milestone", line, "里程碑行须是「- 日期｜标题｜说明」，日期以 YYYY-MM-DD 开头");
+      problems.push({ field: "milestone", value: line, reason: "里程碑行须是「- 日期｜标题｜说明」，日期以 YYYY-MM-DD 开头" });
     }
   }
-
-  return {
-    card: {
-      id,
-      title,
-      path,
-      type,
-      parent,
-      domain,
-      label: rawLabel?.trim() || title,
-      bornAt,
-      relations,
-      milestones,
-    },
-    problems,
+  const card: CardRecord = {
+    id,
+    path,
+    type,
+    parent: Array.isArray(parent) ? parentIdsOf(parent) : [],
+    domain: singleValueOf(frontmatter["domain"]),
+    label: titleOf(id, singleValueOf(frontmatter["label"])),
+    bornAt: singleValueOf(frontmatter["born-at"]) ?? "",
+    relations,
+    milestones,
   };
+  return { card, problems };
+}
+
+/** 把一份卡文件的全文变成一条记录与单文件的病。不查正文里的钉码记号（见 readCardFile）。 */
+export function parseCardFile(id: string, path: string, text: string): ParsedFile {
+  let frontmatter: Record<string, unknown> | null;
+  try {
+    frontmatter = parseFrontmatter(text);
+  } catch (err) {
+    if (!(err instanceof FrontmatterError)) throw err;
+    return { title: titleOf(id, null), description: null, card: null, problems: [{ field: "file", value: "", reason: err.message }] };
+  }
+  const fields = frontmatter ?? {};
+  const description = singleValueOf(fields["description"]);
+  if (!CARD_KEYS.some((key) => fields[key] !== undefined)) {
+    return { title: titleOf(id, fields["title"]), description, card: null, problems: [] };
+  }
+  const { card, problems } = recordOf(id, path, fields, stripFrontmatter(text));
+  return { title: card.label, description, card, problems: [...problemsOf(fields), ...problems] };
+}
+
+/** 一个卡文件单独能查出的全部：解析结果，加上卡正文里的钉码记号病（不是卡的文件不查）。 */
+export function readCardFile(name: string, text: string): CardFileReading {
+  const parsed = parseCardFile(cardIdOfFile(name), name, text);
+  const pinMarkProblems = parsed.card === null ? [] : checkDocfirstRefs(stripFrontmatter(text));
+  return { name, ...parsed, pinMarkProblems };
 }
