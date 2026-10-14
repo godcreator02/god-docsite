@@ -1,0 +1,45 @@
+---
+born-at: 2026-10-14T19:45
+type: choice
+parent: [2026-09-03-god-live-doc]
+label: 推送走资源路由
+domain: 骨架
+---
+
+## 背景
+
+旧的推送通道在 `@godcreator/docsite-feed` 里，服务端是挂在 Vite dev 服务上的中间件（POST 存最新一份、WebSocket 广播），
+所以只有 dev 有推送，build + start 的站没有。新平台要求站点 = 官方模板 + 功能包，dev 与 build + start 都要能推送，
+且「每个频道只留最新一份、新订阅者先拿到现在的值」这条语义不变。
+
+supersedes:: [feed 独立能力包](2026-10-12-feed-its-own-package.md)
+
+## 结论与边界
+
+推送改成站点里的一个 React Router 资源路由 `__docsite/feed/:channel`，路由模块只转发平台包 `@godcreator/god-docsite/server` 的
+`feedLoader` 与 `feedAction`：
+
+- 订阅：loader 看到请求头 `Accept: text/event-stream`（浏览器的 `EventSource`）就回事件流，先发这个频道现在的值（推过才有），
+  之后每推一次发一次，浏览器断开时退订；不是事件流的 GET 回现在的值的 JSON，还没推过是 `null`
+- 推送：同一路由的 action，`POST` JSON，请求头 `x-docsite-token` 要等于站点进程的环境变量 `DOCSITE_FEED_TOKEN`；
+  进程没有令牌或令牌不对 403，正文不是 JSON 400，成功 204
+- 站点自己的 loader 用 `siteFeedValue(channel)` 读现在的值，服务端代码用 `publishSiteFeed(channel, data)` 推；浏览器用 `useSiteFeed(channel, initial)`
+- 频道表挂在 `globalThis` 上，dev 下站点模块随热更新重新执行时已连着的浏览器不断
+
+边界：订阅表在进程内存里，只验了单进程的 dev 与 react-router-serve，多进程部署收不到别的进程的推送；令牌由启动方生成并传给站点进程，
+平台不生成、不落盘。
+
+## 依据
+
+`pnpm e2e` 的「推送」一项在 dev 与 start、link 与 file 四种组合下都通过：一页经 action 推 204，另一页的 `EventSource` 收到；
+之后才连上的订阅者先收到 `{"note":"推送一"}`；GET 现在的值相同；令牌不对 403。检查写在 `e2e/combos/base.mjs`。
+
+## 否掉的候选
+
+保留 Vite 中间件：否在 build + start 没有 Vite 服务，推送只在 dev 有。WebSocket：资源路由回不了协议升级，
+而推送是单向的，SSE 用 `ReadableStream` 就能写，浏览器自带重连。推送入口用单独的端口或进程：否在要多管一个监听，
+启动方本来就知道站点地址，经同一个地址推更简单。
+
+## 代价与遗留
+
+启动方（gwb-docsite）要改成生成 `DOCSITE_FEED_TOKEN`、按新地址推送；在切换阶段改。

@@ -1,0 +1,104 @@
+import { createContext, use, type AnchorHTMLAttributes, type ComponentType, type ReactNode } from 'react'
+import Link from 'fumadocs-core/link'
+import { usePathname } from 'fumadocs-core/framework'
+import { ArrowUpRight, FileText, Paperclip, TriangleAlert } from 'lucide-react'
+import { siteLinkTargetOf } from '../core/site-link-targets.js'
+import { contentFileUrlPrefix } from '../core/content-file-url.js'
+
+/** 站内链接显示成的小卡片；功能包自己的链接种类也用它，和站里其余的链接一个样子 */
+export const linkChipClassName =
+  'mx-0.5 rounded-md border px-1 py-px font-normal no-underline box-decoration-clone transition-colors hover:bg-fd-accent'
+const plainChipClassName = `${linkChipClassName} border-fd-border bg-fd-muted/60 text-fd-foreground`
+const brokenChipClassName = `${linkChipClassName} border-red-500/40 bg-red-500/10 text-red-600 dark:text-red-400`
+/** 卡片里文字前面的图标 */
+export const linkChipIconClassName = 'me-1 inline size-[1em] align-[-0.15em] text-fd-muted-foreground'
+
+/**
+ * 功能包登记的链接种类：matches 认得这个地址，就由 Chip 显示，排在站点自己的种类前面。
+ * children 是正文里写的链接文字，没写时是空的，这时显示地址指向的东西现在的名字
+ */
+export type SiteLinkKind = {
+  matches: (href: string) => boolean
+  Chip: ComponentType<{ href: string; children?: ReactNode }>
+}
+
+const PageTitlesContext = createContext<Readonly<Record<string, string>> | null>(null)
+
+/** 包住整站布局：正文与评论里的链接从这里查站内地址的标题（布局 loader 的 pageTitles） */
+export function SiteLinksProvider({ pageTitles, children }: { pageTitles: Readonly<Record<string, string>>; children: ReactNode }) {
+  return <PageTitlesContext value={pageTitles}>{children}</PageTitlesContext>
+}
+
+function usePageTitles() {
+  const pageTitles = use(PageTitlesContext)
+  if (!pageTitles) throw new Error('站内链接要包在 SiteLinksProvider 里：SiteLayout 已经包了，正文要渲染在 SiteLayout 里面')
+  return pageTitles
+}
+
+function hasWrittenText(children: ReactNode) {
+  return !(children === undefined || children === null || children === '' || (Array.isArray(children) && children.length === 0))
+}
+
+function SiteChip({ href, icon, title, broken, children }: { href: string; icon: ReactNode; title: string; broken?: boolean; children: ReactNode }) {
+  return (
+    <Link href={href} title={title} className={broken ? brokenChipClassName : plainChipClassName}>
+      {icon}
+      {children}
+    </Link>
+  )
+}
+
+function ExternalLink({ href, opensNewTab, children, ...rest }: AnchorHTMLAttributes<HTMLAnchorElement> & { href: string; opensNewTab: boolean }) {
+  return (
+    <a {...rest} href={href} {...(opensNewTab ? { target: '_blank', rel: 'noreferrer noopener' } : {})}>
+      {hasWrittenText(children) ? children : href}
+      <ArrowUpRight aria-hidden className="ms-0.5 inline size-[0.9em] align-[-0.1em]" />
+    </a>
+  )
+}
+
+/** 站里的一个地址：页面（含页面树里的入口）、内容目录里的文件，都不是就是找不到 */
+function SiteTargetChip({ href, path, hash, children }: { href: string; path: string; hash: string; children: ReactNode }) {
+  const pageTitles = usePageTitles()
+  const written = hasWrittenText(children)
+  const pageTitle = pageTitles[path]
+  if (pageTitle !== undefined) {
+    const shown = hash === '' ? pageTitle : `${pageTitle} › ${hash}`
+    return (
+      <SiteChip href={href} title={shown} icon={<FileText className={linkChipIconClassName} />}>
+        {written ? children : shown}
+      </SiteChip>
+    )
+  }
+  if (path.startsWith(contentFileUrlPrefix)) {
+    const file = path.slice(contentFileUrlPrefix.length)
+    return (
+      <a href={href} target="_blank" rel="noreferrer noopener" title={file} className={plainChipClassName}>
+        <Paperclip className={linkChipIconClassName} />
+        {written ? children : file.split('/').at(-1)}
+      </a>
+    )
+  }
+  return (
+    <SiteChip href={href} broken title={`站里没有 ${path} 这一页`} icon={<TriangleAlert className={linkChipIconClassName} />}>
+      {written ? children : '找不到的页面'}
+    </SiteChip>
+  )
+}
+
+/**
+ * 正文与评论里的链接（MDX 的 a）：站里的页面与文件显示成带图标的小卡片，没写链接文字时显示它现在的名字，
+ * 页面不存在时标红；站外的链接后面带一个箭头，开新标签页；只跳到本页标题的照常显示
+ */
+export function siteLinkComponent(linkKinds: readonly SiteLinkKind[]) {
+  return function SiteLink({ href, children, ...rest }: AnchorHTMLAttributes<HTMLAnchorElement>) {
+    const pathname = usePathname()
+    if (href === undefined) return <a {...rest}>{children}</a>
+    const kind = linkKinds.find((each) => each.matches(href))
+    if (kind) return <kind.Chip href={href}>{children}</kind.Chip>
+    const target = siteLinkTargetOf(href, pathname)
+    if (target.kind === 'in-page') return <Link {...rest} href={href}>{children}</Link>
+    if (target.kind === 'external') return <ExternalLink {...rest} href={href} opensNewTab={target.opensNewTab}>{children}</ExternalLink>
+    return <SiteTargetChip href={href} path={target.path} hash={target.hash}>{children}</SiteTargetChip>
+  }
+}

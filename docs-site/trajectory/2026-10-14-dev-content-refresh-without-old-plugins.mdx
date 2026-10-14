@@ -1,0 +1,40 @@
+---
+born-at: 2026-10-14T19:40
+type: evidence
+parent: [2026-09-03-god-live-doc]
+label: dev 内容刷新不靠旧插件
+domain: 骨架
+---
+
+## 背景
+
+平台包 `@godcreator/god-docsite` 取代 docsite-kit 时，要决定旧 vite 插件里的两项搬不搬：一是「TSX 标题刷新」（改了 `.page.tsx` 的标题，
+侧栏跟着变），二是 dev 下新建内容文件后新地址能打开、已打开页面的侧栏出现它——旧站靠仓根给 vite 8.3.4 打的补丁
+（[vite 相对 base 补丁](2026-10-12-vite-relative-base-patch.md)）加 kit 插件里的失效逻辑。新平台的 `godDocsite()` 只做一件相关的事：
+在内容集合目录里新增或删除文件时，把含 `import.meta.glob` 的收集模块（从站点的集合配置推出目录，模块按 `id !== null` 筛）从模块图里作废。
+页面加载器不再序列化页面树，页面树只在布局的 loader 里给出，根节点的 `$id` 写成数据的内容摘要。
+
+## 结论与边界
+
+两项都不需要旧插件：TSX 标题刷新不搬，新建内容文件也不需要 vite 补丁。在 god-docsite 模板生成的站上（vite 8.3.4 从 registry 装、
+不打补丁），改 `.page.tsx` 的标题后 1 秒内侧栏与正文标题都换成新的，没有整页刷新；新建一个 `.mdx` 后新地址 1 秒内就能打开，
+已打开页面的侧栏随后出现新条目，没有整页刷新、没有报错层。
+边界：只在 Windows、Node 24、react-router 8.4、fumadocs-core 16.17.1、fumadocs-mdx 15.4.7 下验过；只验了新增，没验删除与改名；
+TSX 标题的刷新靠 React Router dev 在服务端模块变化后重新跑 loader，加上 `$id` 随数据变化让 fumadocs 的页面树缓存失效——
+两者任一改了行为，这项要重新验。
+
+## 经过
+
+在仓根运行 `pnpm e2e`（`e2e/run.mjs`）：从 `packages/god-docsite/template/` 生成站点到系统临时目录，按 `link:` 与 `file:`（`pnpm pack` 后安装）
+两种装法装上本仓的包，起 dev，Playwright 打开一页后往 `content/` 写新文件、改 `content/tsx-demo.page.tsx` 的标题导出，
+在已打开的页面里等侧栏变化，并在页面上记一个标记来判断有没有整页刷新。检查写在 `e2e/combos/base.mjs` 的「dev 新增内容文件」与「dev 改 TSX 页标题」两项。
+
+## 依据
+
+数字取自 2026-10-14 的全量运行（`pnpm e2e`，68 项全过；运行目录在系统临时目录下，不进仓）：file 装法新地址 107 ms 能打开、侧栏 210 ms 出现，
+TSX 标题 351 ms 后换新；link 装法新地址 958 ms、侧栏 989 ms，TSX 标题 848 ms。同日只跑 file 装法 dev 的两次分别是 136 ms / 236 ms / 845 ms
+与 136 ms / 238 ms / 847 ms。站点的 `node_modules/vite` 是 registry 上的 8.3.4，没有 `patches/` 也没有 `patchedDependencies`。
+
+## 代价与遗留
+
+仓根的 vite 补丁在旧站切到新平台之前还得留着；切完后可以连同 probe `probes/2610121018_vite-add-discovery` 的升级前检查一起去掉，那时再跑一次这两项确认。

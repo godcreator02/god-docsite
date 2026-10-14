@@ -1,0 +1,130 @@
+/*
+ * 术语标注的样式。展开全靠 :hover 与 :focus-within，没有一行 JS。
+ * 颜色一律走 fumadocs 的 CSS 变量，亮暗两套主题自动跟着走——写死颜色就会在另一套主题下扎眼。
+ */
+
+.docsite-term {
+  position: relative;
+  display: inline;
+}
+
+/* 点线下划线：它是个可选的旁注，不跟正文抢 */
+.docsite-term-word {
+  border-bottom: 1px dotted var(--color-fd-muted-foreground, currentColor);
+  cursor: help;
+}
+
+.docsite-term-word:focus-visible {
+  outline: 2px solid var(--color-fd-ring, currentColor);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+.docsite-term-pop {
+  position: absolute;
+  z-index: 30;
+  bottom: calc(100% + 6px);
+  left: 0;
+  display: none;
+  width: max-content;
+  max-width: min(22rem, 80vw);
+  padding: 0.5rem 0.625rem;
+  border: 1px solid var(--color-fd-border, #d4d4d8);
+  border-radius: 6px;
+  background: var(--color-fd-popover, #fff);
+  color: var(--color-fd-popover-foreground, #18181b);
+  box-shadow: 0 4px 16px rgb(0 0 0 / 12%);
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  text-align: left;
+  white-space: normal;
+}
+
+.docsite-term:hover > .docsite-term-pop,
+.docsite-term:focus-within > .docsite-term-pop {
+  display: block;
+}
+
+.docsite-term-def {
+  display: block;
+}
+
+.docsite-term-more {
+  display: inline-block;
+  margin-top: 0.25rem;
+  color: var(--color-fd-primary, #2563eb);
+  text-decoration: underline;
+}
+
+/* 窄屏铺满可用宽度，不做左右试探——CSS 判不出「这个词离右边缘还有多远」 */
+@media (max-width: 480px) {
+  .docsite-term-pop {
+    left: 0;
+    right: 0;
+    width: auto;
+    max-width: none;
+  }
+}
+
+
+/* 站点的 app.css 引入这一份：让 Tailwind 扫到平台组件（构建产物）里用的类名 */
+@source './dist';
+
+/*
+ * 宽屏布局：fumadocs 的 docs 布局在窗口比 97rem 宽时整体居中，左侧栏左边、目录右边各空出一截。
+ * 这里让布局铺满窗口：左侧栏贴左边，本页目录那一列贴右边、宽度固定，正文在中间那一列里居中。
+ * 评论栏（@godcreator/comments 的 CommentsDock）fixed 盖在目录那一列上（同宽同位），打开时在 <html> 上挂
+ * data-comments-sidebar-open；打开、关上都不改布局，正文不动，让位的规则在下面那组
+ */
+:root {
+  --docsite-side-column-width: 340px;
+  /* 短页面没有滚动条、长页面有，不留出它的位置时正文居中会差半个滚动条宽 */
+  scrollbar-gutter: stable;
+}
+
+@media (width >= 80rem) {
+  #nd-docs-layout {
+    --fd-layout-width: 100%;
+    --fd-toc-width: var(--docsite-side-column-width) !important;
+  }
+
+  #nd-page {
+    width: 100%;
+    max-width: calc(900px + 4rem);
+    margin-inline: auto;
+  }
+
+  /* 评论栏打开时，目录那一列被它盖住，不再响应鼠标 */
+  html[data-comments-sidebar-open] #nd-toc {
+    visibility: hidden;
+  }
+
+  /* 全宽时目录那一列让给正文；评论栏打开时照样空出那一列给它，不盖住正文 */
+  html[data-docsite-wide]:not([data-comments-sidebar-open]) #nd-docs-layout {
+    --fd-toc-width: 0px !important;
+  }
+
+  html[data-docsite-wide] #nd-toc {
+    display: none;
+  }
+
+  /*
+   * 评论栏打开时、全宽时，目录改成正文上方的下拉条（fumadocs 窄屏时用的那个）。它在网格里单独占一行，负的下边距把这一行抵成 0 高：
+   * 下拉条浮在标题上方那段空白里，正文不往下挪；往下滚时吸在顶上
+   */
+  html[data-comments-sidebar-open] [data-toc-popover],
+  html[data-docsite-wide] [data-toc-popover] {
+    display: block;
+    width: 100%;
+    max-width: calc(900px + 4rem);
+    height: 2.5rem;
+    margin-inline: auto;
+    margin-bottom: -2.5rem;
+  }
+}
+
+/* 全宽（侧栏底部的全宽按钮）：正文和目录下拉条不限最大宽度；宽屏时目录那一列也让出来（见上面） */
+html[data-docsite-wide] #nd-page,
+html[data-docsite-wide] [data-toc-popover] {
+  max-width: none;
+}

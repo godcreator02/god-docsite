@@ -1,0 +1,4 @@
+[
+  {"id":"tester","name":"测试员","codes":["e2etestcode01"]},
+  {"id":"claude","name":"Claude","agent":true}
+]
