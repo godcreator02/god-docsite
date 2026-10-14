@@ -2,10 +2,10 @@
   "name": "docsite-kit-workspace",
   "private": true,
   "type": "module",
-  "description": "文档站地基与 docfirst 文档工作流的 pnpm workspace：packages/ 是地基能力包、组合包 docsite-kit 与 docfirst 的包（钉码 code-pin、星轨盘 trajectory-disk、命令行 docfirst-workflow、功能包 docfirst-site、讲解组件薄壳 docfirst-explainer）；plugins/ 是两个 gwb 插件（docsite 基础插件与 docfirst 工作流插件）；site/ 是基础包自述站（骨架的正本），docs-site/ 是 docfirst 文档站（docfirst 站的正本）",
+  "description": "文档站地基与 docfirst 文档工作流的 pnpm workspace：packages/ 是地基能力包、组合包 docsite-kit 与 docfirst 的包（钉码 code-pin、星轨盘 trajectory-disk、命令行 docfirst-workflow、功能包 docsite-docfirst、讲解组件薄壳 docfirst-explainer）；plugins/ 是两个 gwb 插件（docsite 基础插件与 docfirst 工作流插件）；site/ 是基础包自述站（骨架的正本），docs-site/ 是 docfirst 文档站（docfirst 站的正本）",
   "scripts": {
     "dev": "pnpm --filter docsite-kit-site dev",
-    "build": "pnpm --filter @godcreator/docsite-identity build && pnpm --filter @godcreator/docsite-comments build && pnpm --filter @godcreator/docsite-writing build && pnpm --filter @godcreator/docsite-page-sources build && pnpm --filter @godcreator/docsite-feed build && pnpm --filter @godcreator/docsite-ui build && pnpm --filter @godcreator/docsite-explainer build && pnpm --filter @godcreator/docsite-kit build && pnpm --filter @godcreator/code-pin build && pnpm --filter @godcreator/trajectory-disk build && pnpm --filter @godcreator/docfirst-workflow build && pnpm --filter @godcreator/docfirst-site build && pnpm --filter @godcreator/docfirst-explainer build && pnpm --filter @godcreator/gwb-docsite build && pnpm --filter @godcreator/gwb-docfirst-workflow build && pnpm --filter @godcreator/collab-model build && pnpm --filter @godcreator/collab-merge-check build && pnpm --filter @godcreator/collab-site build && pnpm --filter @godcreator/gwb-collab build && pnpm --filter docsite-kit-site build && pnpm --filter docfirst-workflow-docs-site build",
+    "build": "pnpm -r build",
     "test": "vitest run",
     "check": "tsc -p tsconfig.tests.json && pnpm -r --no-bail check"
   },
