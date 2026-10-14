@@ -1,17 +1,15 @@
 /**
  * 评论界面：页面旁的评论列表与编辑器（新建整页评论、回复、删回复、删串）。
  *
- * 与宿主的分工：宿主路由的 loader 组装本页评论元数据（作者已解析成可信的 {id,name}），
- * action 承接写意图；这里的表单按约定字段 POST 到当前路由：
+ * 与宿主的分工：宿主路由的 loader 用 pageThreadsOf 读出本页评论（作者已解析成 {id,name}），
+ * 表单按下面的字段 POST 到 action 参数给的地址，那个地址的路由 action 调 handleCommentWrite（外部契约，两边同改）：
  *   intent=create-thread：page、body、anchor?（批整页不带）
  *   intent=reply：threadId、body
  *   intent=delete-reply：threadId、replyId
  *   intent=delete-thread：threadId
- * action 的返回约定 { ok: true, … } 或 { ok: false, error: 文案 }（失败随状态码）。
- * 身份与授权在 @godcreator/docsite-identity，本组件只接收结果（writable/只读文案），
- * 不认识身份码；头像也不依赖它——宿主把它包成 AvatarComponent 传进来（CommentsDock 同样往下传）。
- * 署名（as）只给 agent 经命令用，网页界面里不出现。
- * 评论正文由宿主编译（fumadocs-mdx 集合），经 BodyComponent 按路径渲染。
+ * 返回 { ok: true, … } 或 { ok: false, error: 文案 }（失败随状态码）。
+ * 本组件只接收可写或只读的结果（commentsAccessOf），不认识身份码；头像由宿主经 AvatarComponent 传进来。
+ * 署名（as）只给 agent 经命令用，网页界面里不出现。评论正文由宿主编译（fumadocs-mdx 集合），经 BodyComponent 按路径渲染。
  */
 import { Component, useEffect, useState, type ComponentType, type MouseEvent, type ReactNode } from 'react';
 import { useFetcher } from 'react-router';
@@ -33,6 +31,8 @@ export interface PageThreadReplySummary {
 export interface PageThreadSummary {
   id: string;
   headPath: string;
+  /** 评论挂的页面（页面在 docs 集合里的路径，或功能包页面的地址） */
+  page: string;
   /** 锚定的目标：元素 id、划字评论的 JSON（见模型 parseCommentAnchor）或缺省（批整页） */
   anchor?: string;
   /** 落点状态写给人看（「原文找不到了：……」）：由 CommentsDock 按正文实测补上 */
@@ -74,6 +74,8 @@ function relativeTime(iso: string) {
 
 export interface CommentsSidebarProps {
   pagePath: string;
+  /** 评论表单提交到的地址：这个地址的路由 action 调 handleCommentWrite */
+  action: string;
   threads: PageThreadSummary[];
   access: CommentsAccess;
   /** 宿主的评论正文组件：按集合内路径渲染（fumadocs 的 client loader），正文按需加载 */
@@ -90,6 +92,7 @@ export interface CommentsSidebarProps {
 
 export function CommentsSidebar({
   pagePath,
+  action,
   threads,
   access,
   BodyComponent,
@@ -106,7 +109,7 @@ export function CommentsSidebar({
         {headerSlot}
       </div>
       {access.kind === 'writable' ? (
-        <NewThreadForm pagePath={pagePath} />
+        <NewThreadForm pagePath={pagePath} action={action} />
       ) : (
         <p data-readonly-reason={access.reasonCode} className="docsite-readonly-reason">
           {access.reasonText}
@@ -116,6 +119,7 @@ export function CommentsSidebar({
         <ThreadRow
           key={thread.id}
           thread={thread}
+          action={action}
           writable={access.kind === 'writable'}
           BodyComponent={BodyComponent}
           AvatarComponent={AvatarComponent}
@@ -154,7 +158,7 @@ function CommentHeading({
 }
 
 /** 新建整页评论：平时收成一行按钮，点了展开表单；发出去了收起并清空 */
-function NewThreadForm({ pagePath }: { pagePath: string }) {
+function NewThreadForm({ pagePath, action }: { pagePath: string; action: string }) {
   const fetcher = useFetcher();
   const [writing, setWriting] = useState(false);
   const [body, setBody] = useState('');
@@ -174,7 +178,7 @@ function NewThreadForm({ pagePath }: { pagePath: string }) {
     );
   }
   return (
-    <fetcher.Form method="post" data-new-thread-form className="docsite-new-thread">
+    <fetcher.Form method="post" action={action} data-new-thread-form className="docsite-new-thread">
       <input type="hidden" name="intent" value="create-thread" />
       <input type="hidden" name="page" value={pagePath} />
       <textarea name="body" required rows={3} placeholder="写评论（支持 MDX）" value={body} onChange={(event) => setBody(event.target.value)} />
@@ -191,6 +195,7 @@ function NewThreadForm({ pagePath }: { pagePath: string }) {
 
 function ThreadRow({
   thread,
+  action,
   writable,
   BodyComponent,
   AvatarComponent,
@@ -198,6 +203,7 @@ function ThreadRow({
   onActivate,
 }: {
   thread: PageThreadSummary;
+  action: string;
   writable: boolean;
   BodyComponent: ComponentType<{ path: string }>;
   AvatarComponent?: CommentAvatar;
@@ -239,7 +245,7 @@ function ThreadRow({
               <button type="button" data-open-replies={thread.id} title="展开这一串，写回复" onClick={() => setExpanded(true)}>
                 回复
               </button>
-              <fetcher.Form method="post">
+              <fetcher.Form method="post" action={action}>
                 <input type="hidden" name="intent" value="delete-thread" />
                 <input type="hidden" name="threadId" value={thread.id} />
                 <button type="submit" data-delete-thread={thread.id} title="删除整串（含回复）">
@@ -269,7 +275,7 @@ function ThreadRow({
                 avatarSize={16}
                 actions={
                   writable ? (
-                    <fetcher.Form method="post">
+                    <fetcher.Form method="post" action={action}>
                       <input type="hidden" name="intent" value="delete-reply" />
                       <input type="hidden" name="threadId" value={thread.id} />
                       <input type="hidden" name="replyId" value={reply.id} />
@@ -284,7 +290,7 @@ function ThreadRow({
             </div>
           ))}
           {writable ? (
-            <fetcher.Form method="post" data-reply-form={thread.id} className="docsite-reply-form">
+            <fetcher.Form method="post" action={action} data-reply-form={thread.id} className="docsite-reply-form">
               <input type="hidden" name="intent" value="reply" />
               <input type="hidden" name="threadId" value={thread.id} />
               <textarea name="body" required rows={2} placeholder="写回复（支持 MDX）" value={replyBody} onChange={(event) => setReplyBody(event.target.value)} />
@@ -309,11 +315,11 @@ function ThreadRow({
  * 这里用每条评论一个错误边界兜住这个窗口，不改正文、不碰框架。
  */
 class CommentBodyBoundary extends Component<{ path: string; children: ReactNode }, { failed: boolean }> {
-  state = { failed: false };
+  override state = { failed: false };
   static getDerivedStateFromError() {
     return { failed: true };
   }
-  render() {
+  override render() {
     if (this.state.failed) {
       return (
         <p data-comment-pending className="docsite-comment-pending">

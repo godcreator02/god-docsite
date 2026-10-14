@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest'
-import { annotateCommentTargets, commentTargetAttribute, commentTargetLabelOf, commentTargetNear } from '../src/browser/annotate.js'
-import { offsetsOfRange, pageTextOf, rangeOfOffsets, readablePageText } from '../src/browser/page-text.js'
-import { targetOfThread } from '../src/browser/thread-target.js'
-import { createRangeMapper } from '../src/browser/range-mapping.js'
+import { annotateCommentTargets, commentTargetAttribute, commentTargetLabelOf, commentTargetNear } from '../src/site/browser/annotate.js'
+import { offsetsOfRange, pageTextOf, rangeOfOffsets, readablePageText } from '../src/site/browser/page-text.js'
+import { targetOfThread } from '../src/site/browser/thread-target.js'
+import { createRangeMapper } from '../src/site/browser/range-mapping.js'
 
 /** 一个正文容器的样例：标题带自己的 id，两段文字，一张图片（原子字） */
 function sampleScope() {
@@ -56,11 +56,11 @@ describe('可批元素标注走查（按块批注的认定协议）', () => {
     scope.innerHTML = '<p>一模一样的话</p><p>一模一样的话</p>'
     annotateCommentTargets(scope)
     const [a, b] = scope.querySelectorAll('p')
-    expect(a.id).toMatch(/^dc-/)
-    expect(b.id).toBe(`${a.id}-2`)
-    const before = a.id
+    expect(a!.id).toMatch(/^dc-/)
+    expect(b!.id).toBe(`${a!.id}-2`)
+    const before = a!.id
     annotateCommentTargets(scope)
-    expect(a.id).toBe(before)
+    expect(a!.id).toBe(before)
   })
 
   it('点正文拾取离点击处最近的候选元素', () => {

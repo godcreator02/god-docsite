@@ -10,11 +10,11 @@
  *   注册名 docsite-comment，样式在 docsite-ui 的 styles.css）；点标记在侧栏里亮对应评论，
  *   侧栏点 ⚲ 滚到正文里对应的位置；划的字原文改了按快照差异重新找，找不到如实标注
  *
- * 写入仍走宿主路由的 action（与 CommentsSidebar 同一约定）；列表与回复复用 CommentsSidebar。
+ * 写入提交到 action 参数给的地址（字段与 CommentsSidebar 同一约定）；列表与回复复用 CommentsSidebar。
  */
 import { useEffect, useLayoutEffect, useMemo, useRef, useState, type ComponentType } from 'react'
 import { useFetcher } from 'react-router'
-import { parseCommentAnchor, serializeTextAnchor, type TextAnchorFields } from '../model.js'
+import { parseCommentAnchor, serializeTextAnchor, type TextAnchorFields } from '../core/anchor.js'
 import {
   annotateCommentTargets,
   commentScopeAttribute,
@@ -26,7 +26,7 @@ import {
   readablePageText,
   targetOfThread,
   type ThreadTarget,
-} from '../browser/index.js'
+} from './browser/index.js'
 import { CommentsSidebar, errorOf, type CommentAvatar, type CommentsAccess, type PageThreadSummary } from './comments-sidebar.js'
 
 /** 侧栏开关存在 localStorage 的键 */
@@ -116,6 +116,8 @@ function quoteNote(quote: string, prefix: string) {
 
 export interface CommentsDockProps {
   pagePath: string
+  /** 评论表单提交到的地址：这个地址的路由 action 调 handleCommentWrite */
+  action: string
   threads: PageThreadSummary[]
   access: CommentsAccess
   /** 宿主的评论正文组件：按集合内路径渲染（fumadocs 的 client loader），正文按需加载 */
@@ -124,7 +126,7 @@ export interface CommentsDockProps {
   AvatarComponent?: CommentAvatar
 }
 
-export function CommentsDock({ pagePath, threads, access, BodyComponent, AvatarComponent }: CommentsDockProps) {
+export function CommentsDock({ pagePath, action, threads, access, BodyComponent, AvatarComponent }: CommentsDockProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [picking, setPicking] = useState(false)
   const [activeThreadId, setActiveThreadId] = useState<string | null>(null)
@@ -442,6 +444,7 @@ export function CommentsDock({ pagePath, threads, access, BodyComponent, AvatarC
           </div>
           <CommentsSidebar
             pagePath={pagePath}
+            action={action}
             threads={threadsWithNotes}
             access={access}
             BodyComponent={BodyComponent}
@@ -478,7 +481,7 @@ export function CommentsDock({ pagePath, threads, access, BodyComponent, AvatarC
           批这段字
         </button>
       )}
-      {draft && writable && <DraftForm draft={draft} pagePath={pagePath} onDone={draftSubmitted} onCancel={() => setDraft(null)} />}
+      {draft && writable && <DraftForm draft={draft} pagePath={pagePath} action={action} onDone={draftSubmitted} onCancel={() => setDraft(null)} />}
     </div>
   )
 }
@@ -486,11 +489,13 @@ export function CommentsDock({ pagePath, threads, access, BodyComponent, AvatarC
 function DraftForm({
   draft,
   pagePath,
+  action,
   onDone,
   onCancel,
 }: {
   draft: Draft
   pagePath: string
+  action: string
   onDone: (threadId: unknown) => void
   onCancel: () => void
 }) {
@@ -503,6 +508,7 @@ function DraftForm({
   return (
     <fetcher.Form
       method="post"
+      action={action}
       data-comment-draft=""
       className="docsite-comment-draft"
       style={{ position: 'fixed', top: draft.top, left: draft.left }}

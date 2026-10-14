@@ -3,7 +3,7 @@
  * 元素锚点按 id 找（./annotate 分配的稳定 id 或标题已有的 id）；
  * 划字锚点按快照差异推算位置（./range-mapping），推算不出就是原文找不到了
  */
-import type { CommentAnchor } from '../model.js'
+import type { CommentAnchor } from '../../core/anchor.js'
 import type { PageText } from './page-text.js'
 import { rangeOfOffsets } from './page-text.js'
 import type { RangeMapper } from './range-mapping.js'

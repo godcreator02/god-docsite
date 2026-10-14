@@ -6,8 +6,8 @@ import {
   newCommentId,
   serializeCommentFile,
   threadsForPage,
-} from '../src/index.js';
-import { createReply, createThread, deleteReply, deleteThread, readCommentThreads } from '../src/server.js';
+} from '../src/core/index.js';
+import { createReply, createThread, deleteReply, deleteThread, readCommentThreads } from '../src/node/index.js';
 
 const PROBE_ROOT = process.cwd();
 const tmpRoot = path.join(PROBE_ROOT, '.tmp-model');
@@ -96,7 +96,7 @@ describe('评论模型：真实文件写入与删除', () => {
     await expect(createThread(dir, { page: 'p', authorId: 'a', body: 'x' })).resolves.toBeDefined();
     const [threadId] = readdirSync(dir);
     await expect(createReply(dir, '../escape', { authorId: 'a', body: 'x' })).rejects.toThrow(/不是合法/);
-    await expect(deleteReply(dir, threadId, '../../evil')).rejects.toThrow(/不是合法/);
+    await expect(deleteReply(dir, threadId!, '../../evil')).rejects.toThrow(/不是合法/);
     await expect(deleteThread(dir, '..%2Fevil')).rejects.toThrow(/不是合法/);
   });
 

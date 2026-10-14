@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { parseCommentAnchor, serializeTextAnchor } from '../src/model.js'
+import { parseCommentAnchor, serializeTextAnchor } from '../src/core/index.js'
 
 describe('anchor 协议（parseCommentAnchor）', () => {
   it('缺省与空串是整页评论', () => {

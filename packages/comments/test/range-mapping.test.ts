@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { createRangeMapper, diffOfTexts, mapRangeThroughDiff } from '../src/browser/range-mapping.js'
+import { createRangeMapper, diffOfTexts, mapRangeThroughDiff } from '../src/site/browser/range-mapping.js'
 
 describe('快照差异重定位（拆自旧机制 comment-ranges）', () => {
   it('两版一样时原样返回且不算改过', () => {
