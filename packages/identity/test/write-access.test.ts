@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { authorizeWrite, identityOf, writeAccessResponse, WriteAccessError, type Person, type StoredPerson } from '../src/server/index.js'
+import { authorizeWrite, identityOf, writeAccessResponse, WriteAccessError, type Person, type StoredPerson } from '../src/core/index.js'
 
 const people: StoredPerson[] = [
   { id: 'zhou', name: '小周', codes: ['zhoucode0001'] },

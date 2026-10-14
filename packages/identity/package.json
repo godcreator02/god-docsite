@@ -1,0 +1,57 @@
+{
+  "name": "@godcreator/identity",
+  "version": "0.0.0",
+  "description": "文档站的人员与身份：people.json 的校验与读写、按本机身份码认人、给浏览器的公开投影、写入请求的来源与身份核对、站上的身份组件",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/core/index.d.mts",
+      "default": "./dist/core/index.mjs"
+    },
+    "./node": {
+      "types": "./dist/node/index.d.mts",
+      "default": "./dist/node/index.mjs"
+    },
+    "./site": {
+      "types": "./dist/site/index.d.mts",
+      "default": "./dist/site/index.mjs"
+    },
+    "./styles.css": "./styles.css"
+  },
+  "files": [
+    "dist",
+    "styles.css"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://git.tianshen02.online:28377/godcreator/docsite-kit.git"
+  },
+  "publishConfig": {
+    "registry": "https://git.tianshen02.online:28377/api/packages/godcreator/npm/"
+  },
+  "scripts": {
+    "build": "tsdown",
+    "typecheck": "tsc -p tsconfig.json",
+    "test": "vitest run",
+    "check": "tsc -p tsconfig.json && vitest run && pnpm lint",
+    "lint": "oxlint . --deny-warnings"
+  },
+  "peerDependencies": {
+    "react": "^19.3.0"
+  },
+  "peerDependenciesMeta": {
+    "react": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "@types/react": "catalog:",
+    "@types/react-dom": "catalog:",
+    "react": "catalog:",
+    "react-dom": "catalog:",
+    "tsdown": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  }
+}

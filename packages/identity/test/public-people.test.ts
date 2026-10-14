@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { mentionBeingTyped, mentionsOf, peopleMatching, peopleFile, personOf, publicPeopleOf, publicPersonOf, type Person } from '../src/index.js'
+import { mentionBeingTyped, mentionsOf, peopleMatching, peopleFile, personOf, publicPeopleOf, publicPersonOf, type Person } from '../src/core/index.js'
 
 const people: Person[] = [
   { id: 'zhou', name: '小周', gitea: 'zhou' },

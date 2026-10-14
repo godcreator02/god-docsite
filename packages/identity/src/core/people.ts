@@ -1,8 +1,15 @@
-import { peopleFile, type Person } from '../model.js'
+/** 人员列表：站点目录里的 people.json（进 git），列出参与这个站的人与 agent */
+export const peopleFile = 'people.json'
 
 /**
- * 人员列表里一个人的存放形状：Person 加上这个人用过的身份码（每个 gwb home 一个）。
- * 只在服务端用；出服务端的先经 publicPersonOf 投影
+ * 一个人的公共字段：存放形状 StoredPerson 与公开形状 PublicPerson 都满足它，只读这几项的函数收它。
+ * gitea 是 Gitea 账号（协作站核对权限用）；agent 为 true 的是 agent：没有身份码，写入时用 as 说明自己是谁
+ */
+export type Person = { id: string; name: string; gitea?: string; agent?: boolean }
+
+/**
+ * people.json 里一个人的存放形状：公共字段加上这个人用过的身份码（每个 gwb home 一个）。
+ * 只在服务端用；交给浏览器的一律先经 publicPersonOf 投影成 PublicPerson
  */
 export type StoredPerson = Person & { codes?: string[] }
 
@@ -17,7 +24,7 @@ export function parsePeople(value: unknown): StoredPerson[] {
   const problems: string[] = []
   const seenIds = new Set<string>()
   const ownerOfCode = new Map<string, string>()
-  value.forEach((item, index) => {
+  value.forEach((item: unknown, index) => {
     const where = `${peopleFile} 第 ${index + 1} 项`
     if (typeof item !== 'object' || item === null || Array.isArray(item)) return problems.push(`${where} 要是 { "id": …, "name": … }`)
     const record = item as Record<string, unknown>
@@ -32,7 +39,7 @@ export function parsePeople(value: unknown): StoredPerson[] {
     if (codes === undefined) return
     if (agent === true) return problems.push(`${where}：agent 没有身份码，去掉 codes`)
     if (!Array.isArray(codes) || codes.length === 0) return problems.push(`${where}：codes 要是身份码的数组，至少一个`)
-    for (const code of codes) {
+    for (const code of codes as unknown[]) {
       if (typeof code !== 'string' || !identityCodePattern.test(code)) problems.push(`${where}：身份码 ${String(code)} 要是 8 到 64 个小写字母或数字`)
       else if (ownerOfCode.has(code)) problems.push(`${where}：身份码 ${code} 已经写在 ${ownerOfCode.get(code)} 名下，一个码只能是一个人的`)
       else ownerOfCode.set(code, typeof id === 'string' ? id : `第 ${index + 1} 项`)
@@ -42,11 +49,21 @@ export function parsePeople(value: unknown): StoredPerson[] {
   return value as StoredPerson[]
 }
 
+/** 按 id 取人；评论文件里的作者已经核对过都在人员列表里，取不到是调用方传错了 */
+export function personOf<T extends Person>(people: readonly T[], id: string): T {
+  const person = people.find((candidate) => candidate.id === id)
+  if (!person) throw new Error(`${peopleFile} 里没有 ${id}`)
+  return person
+}
+
+/** 要加进人员列表的人：本机的身份码配上的那个 id、名字与可选的 Gitea 账号 */
+export type JoiningPerson = { id: string; name: string; gitea?: string }
+
 /**
  * 把本机的码加进人员列表：已有这个 id 就把码加进它的 codes（gitea 给了就核对或补上），没有就新加一项。
  * 码已经在别人名下、id 是 agent、gitea 和已写的不一样时报错
  */
-export function peopleWithJoined(people: readonly StoredPerson[], code: string, joining: { id: string; name: string; gitea?: string }): StoredPerson[] {
+export function peopleWithJoined(people: readonly StoredPerson[], code: string, joining: JoiningPerson): StoredPerson[] {
   const owner = people.find((candidate) => candidate.codes?.includes(code))
   if (owner && owner.id !== joining.id) throw new Error(`身份码 ${code} 已经写在 ${owner.id} 名下，一个码只能是一个人的`)
   const existing = people.find((candidate) => candidate.id === joining.id)

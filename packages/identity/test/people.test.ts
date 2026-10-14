@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { identityCodePattern, parsePeople, peopleWithJoined, type StoredPerson } from '../src/server/index.js'
+import { identityCodePattern, parsePeople, peopleWithJoined, type StoredPerson } from '../src/core/index.js'
 
 const people: StoredPerson[] = [
   { id: 'zhou', name: '小周', codes: ['zhoucode0001'], gitea: 'zhou' },

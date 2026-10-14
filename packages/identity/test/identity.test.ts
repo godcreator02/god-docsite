@@ -2,7 +2,8 @@ import { mkdtemp, rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import path from 'node:path'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
-import { identityCodeEnvName, identityOf, siteIdentity, sitePeople, type StoredPerson } from '../src/server/index.js'
+import { identityOf, type StoredPerson } from '../src/core/index.js'
+import { identityCodeEnvName, siteIdentity, sitePeople } from '../src/node/index.js'
 
 const people: StoredPerson[] = [
   { id: 'zhou', name: '小周', codes: ['zhoucode0001'], gitea: 'zhou' },
