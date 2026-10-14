@@ -1,6 +1,7 @@
 import { execFile } from 'node:child_process'
 import path from 'node:path'
 import { promisify } from 'node:util'
+import { peoplePathInRepo, sitePathInRepo } from '../core/layout.js'
 
 /** mergeable 能合并；conflict 和 base 有冲突；needs-review 改了只有负责人能改的内容、提交的人又不是负责人 */
 export type MergeVerdict = 'mergeable' | 'conflict' | 'needs-review'
@@ -9,11 +10,11 @@ export type MergeVerdict = 'mergeable' | 'conflict' | 'needs-review'
 export type MergeCheck = { verdict: MergeVerdict; problems: string[] }
 
 /**
- * collabPathInRepo、sitePathInRepo 是 collab/ 与站点目录相对仓根的路径，用 / 分隔。
+ * 仓的布局按 core/layout 固定：站点在 site/，人员列表是 site/people.json。
  * authorIsLead：提交合并请求的人是不是协作仓的负责人（Gitea 上协作仓的协作者），是就放行只有负责人能改的内容。
  * author：提交合并请求的人的 Gitea 用户名；给了就放行他只给人员列表里自己那一项（gitea 是他）加减身份码
  */
-export type MergeCheckRequest = { repo: string; base: string; head: string; collabPathInRepo: string; sitePathInRepo: string; authorIsLead: boolean; author?: string }
+export type MergeCheckRequest = { repo: string; base: string; head: string; authorIsLead: boolean; author?: string }
 
 const execFileAsync = promisify(execFile)
 
@@ -56,9 +57,8 @@ const isVersionRange = (spec: unknown) => typeof spec === 'string' && spec.trim(
  * 站点的装包设置（从哪个源装 @godcreator 的包、哪些包能运行安装脚本）、站点根目录下 Node 会执行的配置文件。
  * 人员列表 site/people.json 另由 peopleChangeIsOwnCodesOnly 判断
  */
-function isLeadOnlyFile(file: string, collabPathInRepo: string, sitePathInRepo: string): boolean {
+function isLeadOnlyFile(file: string): boolean {
   if (file.startsWith('.gitea/') || file.startsWith('.github/')) return true
-  if (file === `${collabPathInRepo}/people.json`) return true
   if (file === `${sitePathInRepo}/.npmrc` || file === `${sitePathInRepo}/pnpm-workspace.yaml`) return true
   if (path.posix.dirname(file) !== sitePathInRepo) return false
   const name = path.posix.basename(file)
@@ -138,13 +138,13 @@ async function peopleChangeIsOwnCodesOnly(repo: string, base: string, head: stri
 
 /** base 到 head（提交或树）之间只有负责人能改的改动，每条是给人看的一处；没有为空。changedFiles 是 base 与 head 之间改了的文件（相对仓根），调用方已算好 */
 async function leadOnlyChangesBetween(request: MergeCheckRequest & { changedFiles: readonly string[] }): Promise<string[]> {
-  const { repo, base, head, collabPathInRepo, sitePathInRepo, author, changedFiles } = request
+  const { repo, base, head, author, changedFiles } = request
   const changes: string[] = []
   for (const file of changedFiles) {
     if (file === `${sitePathInRepo}/package.json`) changes.push(...(await packageJsonChanges(repo, base, head, file)))
-    else if (file === `${sitePathInRepo}/people.json`) {
+    else if (file === peoplePathInRepo) {
       if (author === undefined || !(await peopleChangeIsOwnCodesOnly(repo, base, head, file, author))) changes.push(file)
-    } else if (isLeadOnlyFile(file, collabPathInRepo, sitePathInRepo)) changes.push(file)
+    } else if (isLeadOnlyFile(file)) changes.push(file)
   }
   return changes
 }

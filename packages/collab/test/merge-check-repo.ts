@@ -72,7 +72,7 @@ beforeEach(() => {
 
 /** author 为 null 时不说提交的人是谁 */
 export const check = (head = 'topic', authorIsLead = false, author: string | null = 'bob') =>
-  checkMerge({ repo, base: 'main', head, collabPathInRepo: 'collab', sitePathInRepo: 'site', authorIsLead, ...(author === null ? {} : { author }) })
+  checkMerge({ repo, base: 'main', head, authorIsLead, ...(author === null ? {} : { author }) })
 
 /** 人员列表改一处：按 id 找到那一项，换成 change 算出的样子 */
 export function writePeople(change: (person: Record<string, unknown>) => Record<string, unknown>) {

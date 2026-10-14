@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest'
+import { peoplePathInRepo } from '../src/core/layout.js'
 import { check, commit, git, people, write, writePeople } from './merge-check-repo.js'
 
 describe('合并检查：只有负责人能改的内容', () => {
@@ -46,6 +47,17 @@ describe('合并检查：只有负责人能改的内容', () => {
     write('site/people.json', `${JSON.stringify([...(JSON.parse(people) as unknown[]), { id: 'bob2', name: '乙二', gitea: 'bob' }], null, 2)}\n`)
     commit('加一项')
     expect((await check('topic')).verdict).toBe('needs-review')
+  })
+
+  it('人员列表按布局在 site/people.json：改了别人那一项要负责人，写在 collab/ 下的 people.json 不是人员列表、不按它挡', async () => {
+    expect(peoplePathInRepo).toBe('site/people.json')
+    writePeople((person) => (person.gitea === 'alice' ? { ...person, name: '甲改名' } : person))
+    commit('乙改了甲的名字')
+    expect((await check('topic')).problems).toEqual([`改了只有负责人能改的内容：${peoplePathInRepo}；这类改动交给负责人（协作仓的协作者）提交`])
+    git('checkout', '-q', '-B', 'topic', 'main')
+    write('collab/people.json', people.replace('乙', '乙改名'))
+    commit('乙在 collab/ 下放了一份 people.json')
+    expect(await check('topic')).toEqual({ verdict: 'mergeable', problems: [] })
   })
 
   it('协作仓的负责人改了只有负责人能改的内容，直接放行', async () => {

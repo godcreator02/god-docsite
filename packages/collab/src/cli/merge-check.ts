@@ -1,4 +1,3 @@
-import { collabPathInRepo, sitePathInRepo } from '../core/layout.js'
 import { checkMerge, git } from '../node/merge-check.js'
 
 export type CliResult = { exitCode: 0 | 1 | 2; output: string }
@@ -41,7 +40,7 @@ export async function runMergeCheckCli(args: string[], cwd: string): Promise<Cli
   if (typeof parsed === 'string') return { exitCode: 2, output: `${parsed}\n${usage}` }
   try {
     const repo = (await git(cwd, ['rev-parse', '--show-toplevel'])).trim()
-    const { verdict, problems } = await checkMerge({ repo, ...parsed, collabPathInRepo, sitePathInRepo })
+    const { verdict, problems } = await checkMerge({ repo, ...parsed })
     if (verdict === 'mergeable') return { exitCode: 0, output: '可以合并：没有冲突，没改只有负责人能改的内容' }
     return { exitCode: 1, output: problems.map((problem) => `- ${problem}`).join('\n') }
   } catch (error) {
