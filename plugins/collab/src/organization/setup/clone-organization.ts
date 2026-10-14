@@ -3,7 +3,7 @@ import path from 'node:path'
 import { CollabRejected } from '../../errors.js'
 import { gitReposIn } from '../../git/status.js'
 import { isGiteaName } from '../../gitea-api/gitea.js'
-import { collabPathInRepo, peoplePathInRepo } from '@godcreator/collab-model/project-model'
+import { collabPathInRepo, peoplePathInRepo } from '@godcreator/collab'
 import { cloneReposInto, type OrganizationSource } from '../../other-repos/fetch/clone-new-repos.js'
 import { isCollabRepo, peopleOfRepo, type GitRemote } from '../../project/project.js'
 

@@ -1,6 +1,6 @@
 import { watch, type FSWatcher } from 'node:fs'
 import path from 'node:path'
-import { projectDirOfCollabRepo } from '@godcreator/collab-model/project-model'
+import { projectDirOfCollabRepo } from '@godcreator/collab/node'
 import { messageOf } from '../../errors.js'
 import { settlerOf } from '../../settle.js'
 import { otherRepoNamesOf } from '../../project/project.js'

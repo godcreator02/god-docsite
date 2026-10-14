@@ -1,6 +1,6 @@
 import { readFileSync, rmSync, writeFileSync } from 'node:fs'
 import path from 'node:path'
-import { recordFileOf } from '@godcreator/collab-model/task-model'
+import { recordFileOf } from '@godcreator/collab'
 import { describe, expect, it } from 'vitest'
 import { CollabRejected } from '../../../src/errors.js'
 import { pullOfPushOutput, submitCollab } from '../../../src/collab-repo/submit/submit.js'

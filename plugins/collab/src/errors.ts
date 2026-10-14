@@ -1,5 +1,4 @@
-import { CollabFormatError } from '@godcreator/collab-model/task-model'
-import { WriteRejected } from '@godcreator/collab-model/task-model/node'
+import { CollabFormatError, WriteRejected } from '@godcreator/collab'
 
 /** 命令拒绝执行，或 git 报了错：消息原样交给人和 AI，写明原因和该怎么做 */
 export class CollabRejected extends Error {

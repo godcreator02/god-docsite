@@ -2,7 +2,7 @@ import { execFileSync } from 'node:child_process'
 import { mkdirSync, mkdtempSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import path from 'node:path'
-import { encodeRecordFile, recordFileOf, type CollabRecord, type TaskRecord } from '@godcreator/collab-model/task-model'
+import { encodeRecordFile, recordFileOf, type CollabRecord, type TaskRecord } from '@godcreator/collab'
 import { beforeEach } from 'vitest'
 import { openProject, type RemoteProject } from '../../../src/project/project.js'
 

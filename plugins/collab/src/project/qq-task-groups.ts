@@ -1,5 +1,6 @@
 import path from 'node:path'
-import { projectDirOfCollabRepo, sitePathInRepo } from '@godcreator/collab-model/project-model'
+import { sitePathInRepo } from '@godcreator/collab'
+import { projectDirOfCollabRepo } from '@godcreator/collab/node'
 import type { GwbQqBotApi, TaskGroupDefinition } from '@godcreator/gwb-qq-bot'
 import { CollabRejected, messageOf } from '../errors.js'
 import { projectTitleOf, repoKeyOf, sameRepo } from './project.js'

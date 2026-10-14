@@ -1,5 +1,4 @@
-import { notificationOf, sortedNotifications, type Notification, type NotificationFacts } from '@godcreator/collab-model/notification-model'
-import type { CollabProblem, InboxItems } from '@godcreator/collab-model/task-model'
+import { notificationOf, sortedNotifications, type CollabProblem, type InboxItems, type Notification, type NotificationFacts } from '@godcreator/collab'
 import type { CollabRepoLocalState } from '../collab-repo/sync/state.js'
 import type { SubmitFailure } from '../collab-repo/submit/submit-failures.js'
 import type { OtherRepoHead } from '../other-repos/fetch/state.js'

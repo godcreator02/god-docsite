@@ -14,7 +14,7 @@ export function registerSiteCommands(services: PluginServices): void {
       description: '从空目录建出项目站点，交给 gwb-docsite 一步做（拉功能包模板、组装骨架、装依赖、起服务检查首页）',
       usage:
         `{ repo, port, title }：repo 是协作仓的仓根绝对路径，不要求在项目列表里；port 是开发端口、title 是站名（写进 content/meta.json），两样都必给。` +
-        `只对新站点（site/ 还没有建过）：功能包 ${featurePackage} 的范围写成 ^${__COLLAB_SITE_VERSION__}（本插件打包时带的那一版），基础包的范围由 gwb-docsite 写；骨架建完就归站点，已有站点直接拒绝（要重建删掉 site/ 再来，content/、comments/、people.json、journal/ 想留先拷走）。` +
+        `只对新站点（site/ 还没有建过）：功能包 ${featurePackage} 的范围写成 ^${__COLLAB_VERSION__}（本插件打包时带的那一版），基础包的范围由 gwb-docsite 写；骨架建完就归站点，已有站点直接拒绝（要重建删掉 site/ 再来，content/、comments/、people.json、journal/ 想留先拷走）。` +
         '项目在列表里就启动站点并把通知推过去。只写文件、不提交：用 collab.submit 提交审核（site/package.json 里依赖两段以外的键、site/ 根下的配置文件只有负责人能改）。回 { created, features }',
     },
     async (args) => {
@@ -24,7 +24,7 @@ export function registerSiteCommands(services: PluginServices): void {
       if (port === undefined || !(Number.isInteger(port) && (port as number) > 0 && (port as number) < 65536)) throw new CollabRejected('port 要是 1 到 65535 的整数')
       if (title === undefined || typeof title !== 'string' || title.trim() === '') throw new CollabRejected('title 要是非空字符串')
       const listed = events.listed().projects.some((each) => sameRepo(each, repo))
-      return sites.init(repo, { featureRange: `^${__COLLAB_SITE_VERSION__}`, port: port as number, title: title as string, listed })
+      return sites.init(repo, { featureRange: `^${__COLLAB_VERSION__}`, port: port as number, title: title as string, listed })
     },
   )
 

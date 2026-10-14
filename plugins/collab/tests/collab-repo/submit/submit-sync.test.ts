@@ -1,6 +1,6 @@
 import { readFileSync } from 'node:fs'
 import path from 'node:path'
-import { recordFileOf, type CollabRecord, type TaskRecord } from '@godcreator/collab-model/task-model'
+import { recordFileOf, type CollabRecord, type TaskRecord } from '@godcreator/collab'
 import { describe, expect, it } from 'vitest'
 import { submitCollab } from '../../../src/collab-repo/submit/submit.js'
 import { autoSyncCollab } from '../../../src/collab-repo/sync/sync.js'

@@ -56,11 +56,10 @@
     }
   },
   "devDependencies": {
-    "@godcreator/collab-merge-check": "workspace:^",
-    "@godcreator/collab-model": "workspace:^",
-    "@godcreator/collab-site": "workspace:^",
-    "@godcreator/docsite-comments": "workspace:^",
+    "@godcreator/collab": "workspace:^",
+    "@godcreator/comments": "workspace:^",
     "@godcreator/gwb-docsite": "workspace:^",
+    "@godcreator/identity": "workspace:^",
     "@godcreator/gwb-gitea": "catalog:",
     "@godcreator/gwb-qq-bot": "catalog:",
     "@godcreator/gwb-skills": "catalog:",

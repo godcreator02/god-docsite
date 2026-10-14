@@ -1,4 +1,4 @@
-import { notificationGroupOf, notificationOriginalTextOf, notificationSentenceOf, type Notification, type NotificationGroup, type NotificationKind } from '@godcreator/collab-model/notification-model'
+import { notificationGroupOf, notificationOriginalTextOf, notificationSentenceOf, type Notification, type NotificationGroup, type NotificationKind } from '@godcreator/collab'
 import { CollabRejected } from '../errors.js'
 
 /** 设置 ai-handling 的取值：off 不交给 AI；zcode 在 ZCode 桌面端开会话；claude-terminal 新开一个 pwsh 窗口运行 Claude Code */

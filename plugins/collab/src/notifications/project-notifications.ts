@@ -1,7 +1,5 @@
 import path from 'node:path'
-import type { Notification, SiteFeed } from '@godcreator/collab-model/notification-model'
-import type { ProjectLeads } from '@godcreator/collab-model/project-model'
-import { peopleLookupOf } from '@godcreator/collab-model/task-model'
+import { peopleLookupOf, type Notification, type ProjectLeads, type SiteFeed } from '@godcreator/collab'
 import type { CollabRecordsState } from '../collab-repo/records/inbox.js'
 import type { SubmitFailure } from '../collab-repo/submit/submit-failures.js'
 import type { CollabRepoLocalState } from '../collab-repo/sync/state.js'

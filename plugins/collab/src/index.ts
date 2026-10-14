@@ -38,6 +38,7 @@ import { OtherReposReview } from './other-repos/review.js'
 import { OtherReposRules } from './other-repos/rules.js'
 import { registerPaneCommands } from './pane/commands.js'
 import { QqTaskGroups, qqCommandsDocKey } from './project/qq-task-groups.js'
+import { RepoChangeRelay } from './project/repo-change-relay.js'
 import { CollabSites } from './site-process/collab-sites.js'
 import { registerSiteCommands } from './site-process/commands.js'
 import { pnpmInstall } from './site-process/dependencies.js'
@@ -110,11 +111,9 @@ export function apply(ctx: GwbContext): void {
     scoped.effect(() => { zcode = scoped.gwbZcode; return () => { zcode = null } })
   })
 
-  // 两边各目录的状态一变就交给通知，并重对一遍 QQ 任务组（站名可能变了）；通知与任务组在它们之后才建好，这里只在状态变了时才调到
-  const changed = (repo: string) => {
-    notifications.changed(repo)
-    resyncQqTaskGroups(qqTaskGroups.sync())
-  }
+  // 两边各目录的状态一变就交给通知，并重对一遍 QQ 任务组（站名可能变了）；通知建好后再接上
+  const repoChanges = new RepoChangeRelay()
+  const changed = repoChanges.changed
   const resyncQqTaskGroups = (synced: Promise<void>) => void synced.catch((error: unknown) => log.warn(`QQ 任务组没能按现状注册：${messageOf(error)}`))
 
   // 按项目注册的 QQ 任务组：项目列表、本 home 的 QQ 命令与站名一变就按现状重新注册；项目列表在组织事件建好之后才读
@@ -231,6 +230,10 @@ export function apply(ctx: GwbContext): void {
     channel: qqPrivateChat,
     onFeedChanged: (repo) => sites.feedChanged(repo),
     log,
+  })
+  repoChanges.connect((repo) => {
+    notifications.changed(repo)
+    resyncQqTaskGroups(qqTaskGroups.sync())
   })
   events.start()
 

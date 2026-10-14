@@ -1,5 +1,5 @@
 import { createHash } from 'node:crypto'
-import { notificationSentenceOf, type Notification } from '@godcreator/collab-model/notification-model'
+import { notificationSentenceOf, type Notification } from '@godcreator/collab'
 import type { GwbQqBotApi } from '@godcreator/gwb-qq-bot'
 import type { NotificationChannel } from './project-notifications.js'
 import { repoKeyOf } from '../project/project.js'

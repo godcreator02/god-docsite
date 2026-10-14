@@ -1,4 +1,4 @@
-import { sitePathInRepo } from '@godcreator/collab-model/project-model'
+import { sitePathInRepo } from '@godcreator/collab'
 import { installSiteDependencies, type InstallDependencies, type SiteControl } from '../../site-process/dependencies.js'
 import { CollabRejected } from '../../errors.js'
 import { git, gitMessageOf, runGit } from '../../git/git.js'

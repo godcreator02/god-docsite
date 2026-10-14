@@ -1,6 +1,6 @@
 import { writeFileSync } from 'node:fs'
 import path from 'node:path'
-import { recordFileOf } from '@godcreator/collab-model/task-model'
+import { recordFileOf } from '@godcreator/collab'
 import { describe, expect, it } from 'vitest'
 import { collabProblems } from '../../../src/collab-repo/submit/submit-checks.js'
 import { admin, bob, git, t1, t2, task, writeRecord } from './submit-fixture.js'

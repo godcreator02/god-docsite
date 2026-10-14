@@ -1,6 +1,5 @@
-import { newFormatProblems, type CollabProblem } from '@godcreator/collab-model/task-model'
-import { readCollabSnapshot } from '@godcreator/collab-model/task-model/node'
-import { collabPathInRepo, journalProblemsOf, sitePathInRepo } from '@godcreator/collab-model/project-model'
+import { collabPathInRepo, newFormatProblems, sitePathInRepo, type CollabProblem } from '@godcreator/collab'
+import { journalProblemsOf, readCollabSnapshot } from '@godcreator/collab/node'
 import { git } from '../../git/git.js'
 import { upstream } from '../../git/status.js'
 import type { Project } from '../../project/project.js'

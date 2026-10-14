@@ -1,4 +1,4 @@
-import { notificationKinds, notificationOf, type NotificationFacts, type NotificationKind } from '@godcreator/collab-model/notification-model'
+import { notificationKinds, notificationOf, type NotificationFacts, type NotificationKind } from '@godcreator/collab'
 import { describe, expect, it } from 'vitest'
 import { aiHandlingModeOf, aiPromptOf } from '../../src/ai-handoff/prompt.js'
 

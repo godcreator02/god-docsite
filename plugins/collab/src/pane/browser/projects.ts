@@ -1,4 +1,4 @@
-import type { NotificationGroup } from '@godcreator/collab-model/notification-model'
+import type { NotificationGroup } from '@godcreator/collab'
 
 /** collab.projects 的回执里窗格读的那几样，形状照 node 侧 src/pane/commands.ts 的 ProjectRow、src/pane/summary.ts 的 ProjectSummary */
 

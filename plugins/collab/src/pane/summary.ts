@@ -1,4 +1,4 @@
-import { notificationCountsOf, type NotificationGroup } from '@godcreator/collab-model/notification-model'
+import { notificationCountsOf, type NotificationGroup } from '@godcreator/collab'
 import { ownerAndRepoOf } from '../gitea-api/gitea.js'
 import { git } from '../git/git.js'
 import type { ProjectNotificationsNow } from '../notifications/project-notifications.js'

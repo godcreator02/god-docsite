@@ -14,9 +14,9 @@ export type InstallDependencies = (siteDir: string) => Promise<DependencyInstall
 
 /** 自动同步要停、要启动的站点；生产里是 CollabSites */
 export type SiteControl = {
-  /** 站点在运行就先停，做完 work 再按常驻的规矩启动；wasRunning 是装前在不在运行，relaunched 是做完启动了没有 */
+  /** 站点在运行就先停，做完 work 再按常驻的规矩启动；wasRunning 是装前在不在运行，relaunched 是做完由这一次启动了站点 */
   whileStopped<T>(project: Project, work: (wasRunning: boolean) => Promise<T>): Promise<{ result: T; relaunched: boolean }>
-  /** site/ 换了内容之后再过一遍启动前的检查：不过就停掉在运行的站点，通过了而站点停着就启动 */
+  /** site/ 换了内容之后：站点停着就启动（启动前的检查由 gwb-docsite 在启动时做），已在运行就不动，再把最新的数据推过去 */
   recheck(project: Project): Promise<void>
 }
 

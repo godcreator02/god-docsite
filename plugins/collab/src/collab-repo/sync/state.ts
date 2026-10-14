@@ -1,4 +1,4 @@
-import { collabPathInRepo, sitePathInRepo } from '@godcreator/collab-model/project-model'
+import { collabPathInRepo, sitePathInRepo } from '@godcreator/collab'
 import { fetchOrigin } from '../../git/git.js'
 import { conflictedFilesAmong, currentBranch, filesUnder, statusEntriesOf } from '../../git/status.js'
 import { repoKeyOf, type RemoteProject } from '../../project/project.js'
