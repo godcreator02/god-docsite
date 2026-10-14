@@ -5,11 +5,11 @@
     "name": "godcreator"
   },
   "type": "module",
-  "description": "把文字钉在代码上：只认目标（行段、整个文件、目录树）与记录，核对出代码变没变、确认出新记录；不读文件，不认识文档文本、记号写法与文档格式。零依赖，只用 node:crypto。",
+  "description": "把文字钉在代码上：只认目标（行段、整个文件、目录树）与记录，核对出代码变没变、确认出新记录；不读文件，读取器与旧内容来源由调用方传入。",
   "exports": {
     ".": {
-      "types": "./dist/index.d.mts",
-      "default": "./dist/index.mjs"
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
     }
   },
   "files": [
@@ -18,7 +18,18 @@
   "scripts": {
     "build": "tsdown",
     "typecheck": "tsc -p tsconfig.json",
+    "test": "vitest run",
+    "check": "tsc -p tsconfig.json && vitest run",
     "prepublishOnly": "pnpm run build"
+  },
+  "dependencies": {
+    "@noble/hashes": "catalog:",
+    "diff": "catalog:"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
   },
   "publishConfig": {
     "access": "public",

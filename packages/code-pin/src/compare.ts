@@ -1,35 +1,30 @@
 /**
- * 比较器：三种目标变没变怎么判、确认时记什么，全在这儿。纯函数，只看交进来的观察
- * （行段 / 整文件是文件的行，目录树是名字表；取不到是 null），
- * 行段与整文件要的旧内容和 hunk 表从 `History` 取——那是环境层注进来的唯一不纯的两样。
+ * 比较器：三种目标变没变怎么判、确认时记什么。纯函数，只看交进来的观察
+ * （行段 / 整文件是文件的行，目录树是名字表；取不到是 null），旧内容从 `History` 取。
  *
  * 行段的判定按这个顺序，前一步能下结论就不往下走：
  *   1. 记号上那几行的段哈希等于记录：绿，行号不动
  *   2. 当前整文件的 blob 名等于记录：内容没变，旧内容就是当前内容，不必去取
- *   3. 取得到旧内容：用 hunk 表把旧行段映到今天，段哈希对得上是绿（挪了位置），对不上是黄（带 diff 和旧段），
+ *   3. 取得到旧内容：用 hunk 表把旧行段映到今天，段哈希对得上是绿（挪了位置），对不上是黄（带对比和旧段），
  *      整段删光是红 vanished
  *   4. 取不到旧内容：按段哈希在整个文件里滑窗找，找到是绿，找不到是黄 unlocated
  *   文件不在是红 file-missing
  * 第 4 步是有意设计的降级：记录里的 blob 名是确认时在进程里算的，确认之后、提交之前又改了文件，
- * 或者仓按 CRLF 存，这个 blob 就不会进对象库——少的只是 diff，不是错。
+ * 或者仓按 CRLF 存，这个 blob 就不会进对象库——少的只是对比，不是错。
  *
  * 整文件只比整文件的段哈希；目录树只比名字表的哈希（旧表不存，变了是黄、给当前表）。
  */
 
-import { mapRange, mappedSpan, renderDiff } from "./diff.ts";
+import { diffLines, mapRange, mappedSpan } from "./diff.ts";
+import type { Hunk } from "./diff.ts";
 import { blobOf, fileText, hashNames, hashSpan, lineCount, normalizeLines, sliceSpan } from "./span.ts";
-import type {
-  ContentRecord,
-  FileTarget,
-  History,
-  Judgement,
-  MemoRecord,
-  Snapshot,
-  Span,
-  SpanTarget,
-  Target,
-  TreeRecord,
-} from "./types.ts";
+import type { ContentRecord, FileTarget, History, MemoRecord, PinCheck, Snapshot, Span, SpanTarget, Target, TreeRecord } from "./types.ts";
+
+/** 比较器下的结论：核对结果里除了钉本身与当前内容的那部分 */
+export type Judged = Omit<PinCheck, "pin" | "current">;
+
+/** 两份整文件文本之间的 hunk 表；核对时同一对内容只算一次，由调用方记住 */
+export type HunksOf = (oldText: string, newText: string) => Hunk[];
 
 /**
  * 在整文件里找哈希等于 hash、长度为 length 的窗口，交回离 near 最近的起始行；
@@ -62,7 +57,7 @@ function oldTextOf(file: string, record: ContentRecord, text: string[] | null, h
   return old === null ? null : { old, same: false };
 }
 
-function judgeSpan(target: SpanTarget, record: ContentRecord | null, text: string[] | null, history: History): Judgement {
+function judgeSpan(target: SpanTarget, record: ContentRecord | null, text: string[] | null, history: History, hunksOf: HunksOf): Judged {
   const want: Span = [target.a, target.b];
   if (text === null) {
     const was = record === null ? null : oldTextOf(target.file, record, null, history);
@@ -75,12 +70,12 @@ function judgeSpan(target: SpanTarget, record: ContentRecord | null, text: strin
   const was = oldTextOf(target.file, record, text, history);
   if (was !== null) {
     const old = sliceSpan(was.old.split("\n"), want) ?? [];
-    const hunks = was.same ? [] : history.hunks(was.old, fileText(text));
+    const hunks = was.same ? [] : hunksOf(was.old, fileText(text));
     const lines = mappedSpan(mapRange(hunks, target.a, target.b));
     const now = lines === null ? null : sliceSpan(text, lines);
     if (lines === null || now === null) return { status: "missing", lines: want, reason: "vanished", old };
     if (hashSpan(now) === record.hash) return { status: "fresh", lines };
-    return { status: "changed", lines, reason: "changed", diff: renderDiff(old, now), old };
+    return { status: "changed", lines, reason: "changed", diff: diffLines(old, now), old };
   }
 
   const length = target.b - target.a + 1;
@@ -90,7 +85,7 @@ function judgeSpan(target: SpanTarget, record: ContentRecord | null, text: strin
   return { status: "changed", lines: want, reason: "unlocated" };
 }
 
-function judgeFile(target: FileTarget, record: ContentRecord | null, text: string[] | null, history: History): Judgement {
+function judgeFile(target: FileTarget, record: ContentRecord | null, text: string[] | null, history: History): Judged {
   if (text === null) {
     const was = record === null ? null : oldTextOf(target.file, record, null, history);
     return { status: "missing", lines: [1, 1], reason: "file-missing", ...(was !== null ? { old: normalizeLines(was.old.split("\n")) } : {}) };
@@ -101,10 +96,10 @@ function judgeFile(target: FileTarget, record: ContentRecord | null, text: strin
   const was = oldTextOf(target.file, record, text, history);
   if (was === null) return { status: "changed", lines, reason: "changed" };
   const old = normalizeLines(was.old.split("\n"));
-  return { status: "changed", lines, reason: "changed", diff: renderDiff(old, normalizeLines(text)), old };
+  return { status: "changed", lines, reason: "changed", diff: diffLines(old, normalizeLines(text)), old };
 }
 
-function judgeTree(record: TreeRecord | null, names: string[] | null): Judgement {
+function judgeTree(record: TreeRecord | null, names: string[] | null): Judged {
   if (names === null) return { status: "missing", lines: [1, 1], reason: "dir-missing" };
   const lines: Span = [1, Math.max(1, names.length)];
   if (record === null) return { status: "unconfirmed", lines };
@@ -112,11 +107,11 @@ function judgeTree(record: TreeRecord | null, names: string[] | null): Judgement
   return { status: "changed", lines, reason: "changed" };
 }
 
-/** 核对一处引用：记录是记号上带的那份（null 是未确认），观察由调用方从读取器取好 */
-export function judge(target: Target, record: MemoRecord | null, seen: string[] | null, history: History): Judgement {
+/** 核对一处钉：记录是钉上带的那份（null 是未确认），观察由调用方从读取器取好 */
+export function judge(target: Target, record: MemoRecord | null, seen: string[] | null, history: History, hunksOf: HunksOf): Judged {
   switch (target.kind) {
     case "span":
-      return judgeSpan(target, record as ContentRecord | null, seen, history);
+      return judgeSpan(target, record as ContentRecord | null, seen, history, hunksOf);
     case "file":
       return judgeFile(target, record as ContentRecord | null, seen, history);
     case "tree":

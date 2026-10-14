@@ -1,12 +1,13 @@
 /**
- * 行段映射与展示。两样都是纯函数，没有 git：
- *   mapRange / parseHunks   吃 hunk 表（谁给的不管，环境层给的是 `git diff -U0` 的输出），把旧行段映到新文件
- *   renderDiff              朴素 LCS，把两段文本并排成 `- / +`，只给人看
+ * 逐行对比，一套算法两种用法，都出自 `diff` 库的 `diffArrays`：
+ *   hunksOf     整文件旧内容与当前内容之间的 hunk 表，mapRange 拿它把旧行段映到今天
+ *   diffLines   旧段与当前段的逐行对比，给人看
  */
 
-import type { Span } from "./types.ts";
+import { diffArrays } from "diff";
+import type { DiffLine, Span } from "./types.ts";
 
-/** 一个 hunk：旧文件第 oldStart 起 oldLen 行，对应新文件第 newStart 起 newLen 行 */
+/** 一个 hunk，写法同 `git diff -U0`：旧文件第 oldStart 起 oldLen 行，对应新文件第 newStart 起 newLen 行；长度是 0 的一侧，起点是它前面那一行 */
 export interface Hunk {
   oldStart: number;
   oldLen: number;
@@ -16,18 +17,54 @@ export interface Hunk {
 
 export type Mapped = { touched: boolean; start: number; end: number } | { touched: true; vanished: true };
 
-/** 解析 `@@ -a[,b] +c[,d] @@`；b / d 省略表示 1 */
-export function parseHunks(diffText: string): Hunk[] {
+/** 文件末换行切出来的那个空串不是一行：留着它会被当成一行空行去跟别处的空行对齐 */
+const withoutFinalNewline = (lines: string[]): string[] => (lines.length > 0 && lines[lines.length - 1] === "" ? lines.slice(0, -1) : lines);
+
+/** 两份按行切好的文本之间的 hunk 表：连在一起的删与增合成一个 hunk */
+export function hunksOf(oldLines: string[], newLines: string[]): Hunk[] {
   const hunks: Hunk[] = [];
-  for (const m of diffText.matchAll(/^@@ -(\d+)(?:,(\d+))? \+(\d+)(?:,(\d+))? @@/gm)) {
-    hunks.push({
-      oldStart: Number(m[1]),
-      oldLen: m[2] === undefined ? 1 : Number(m[2]),
-      newStart: Number(m[3]),
-      newLen: m[4] === undefined ? 1 : Number(m[4]),
-    });
+  let oldLine = 1;
+  let newLine = 1;
+  let open: Hunk | null = null;
+  for (const change of diffArrays(withoutFinalNewline(oldLines), withoutFinalNewline(newLines))) {
+    if (!change.added && !change.removed) {
+      open = null;
+      oldLine += change.count;
+      newLine += change.count;
+      continue;
+    }
+    if (open === null) {
+      open = { oldStart: oldLine, oldLen: 0, newStart: newLine, newLen: 0 };
+      hunks.push(open);
+    }
+    if (change.removed) {
+      open.oldLen += change.count;
+      oldLine += change.count;
+    } else {
+      open.newLen += change.count;
+      newLine += change.count;
+    }
+  }
+  for (const hunk of hunks) {
+    if (hunk.oldLen === 0) hunk.oldStart -= 1;
+    if (hunk.newLen === 0) hunk.newStart -= 1;
   }
   return hunks;
+}
+
+/** 旧段与当前段的逐行对比：同一处改动先列删掉的旧行，再列加上的新行 */
+export function diffLines(oldLines: string[], newLines: string[]): DiffLine[] {
+  return diffArrays(oldLines, newLines).flatMap((change) => {
+    const kind: DiffLine["kind"] = change.removed ? "removed" : change.added ? "added" : "same";
+    return change.value.map((text) => ({ kind, text }));
+  });
+}
+
+const DIFF_PREFIX: Record<DiffLine["kind"], string> = { same: "  ", removed: "- ", added: "+ " };
+
+/** 逐行对比写成 unified 风格的文本：`  ` 没动、`- ` 删、`+ ` 增 */
+export function diffText(lines: DiffLine[]): string {
+  return lines.map(({ kind, text }) => `${DIFF_PREFIX[kind]}${text}`).join("\n");
 }
 
 /**
@@ -48,7 +85,6 @@ export function mapRange(hunks: Hunk[], start: number, end: number): Mapped {
   for (const h of hunks) {
     const oldEnd = h.oldStart + h.oldLen - 1;
     if (h.oldLen === 0) {
-      // 纯插入：插在 oldStart 之后
       if (h.oldStart < start || h.oldStart >= end) {
         if (h.oldStart < start) offsetBefore += h.newLen;
         continue;
@@ -72,7 +108,6 @@ export function mapRange(hunks: Hunk[], start: number, end: number): Mapped {
 
   if (!touched) return { touched: false, start: start + offsetBefore, end: end + offsetBefore };
 
-  // 段内没被 hunk 覆盖的行照常平移——逐行算一遍最稳
   for (let line = start; line <= end; line += 1) {
     const mapped = mapLine(hunks, line);
     if (mapped !== null) {
@@ -106,35 +141,4 @@ function mapLine(hunks: Hunk[], line: number): number | null {
     break;
   }
   return line + offset;
-}
-
-/** 给人看的 unified 风格文本：` ` 不变、`-` 删、`+` 增。朴素 LCS，段几十行足够 */
-export function renderDiff(oldLines: string[], newLines: string[]): string {
-  const oldCount = oldLines.length;
-  const newCount = newLines.length;
-  const lcs: number[][] = Array.from({ length: oldCount + 1 }, () => Array.from({ length: newCount + 1 }, () => 0));
-  for (let i = oldCount - 1; i >= 0; i -= 1) {
-    for (let j = newCount - 1; j >= 0; j -= 1) {
-      lcs[i]![j] = oldLines[i] === newLines[j] ? lcs[i + 1]![j + 1]! + 1 : Math.max(lcs[i + 1]![j]!, lcs[i]![j + 1]!);
-    }
-  }
-  const out: string[] = [];
-  let i = 0;
-  let j = 0;
-  while (i < oldCount && j < newCount) {
-    if (oldLines[i] === newLines[j]) {
-      out.push(`  ${oldLines[i]}`);
-      i += 1;
-      j += 1;
-    } else if (lcs[i + 1]![j]! >= lcs[i]![j + 1]!) {
-      out.push(`- ${oldLines[i]}`);
-      i += 1;
-    } else {
-      out.push(`+ ${newLines[j]}`);
-      j += 1;
-    }
-  }
-  while (i < oldCount) out.push(`- ${oldLines[i++]}`);
-  while (j < newCount) out.push(`+ ${newLines[j++]}`);
-  return out.join("\n");
 }

@@ -1,17 +1,19 @@
 /**
- * 钉码核心对外的两个动作，只收目标与记录：
- *   check(pins)                     核对：每处交回状态、今天的位置、给人看的旧行新行，不写任何东西
- *   confirm(verdicts, { accept })   确认：按核对的结果逐处决定要不要重新记、记成什么
+ * 钉码核心对外的两个动作，只收钉（目标与记录）：
+ *   check(pins)                   核对：每处交回状态、今天的位置、给人看的旧行新行，不写任何东西
+ *   confirm(checks, { accept })   确认：按核对的结果逐处决定要不要重新记、记成什么
  *
- * 交回的结果与传入的顺序一一对应；这一处属于哪篇文档、在第几行，由调用方按顺序配回去。
+ * 结果带着传进来的那个钉对象（`PinCheck.pin`、`ConfirmStep.check`），调用方挂在钉上的东西原样带回。
  * 每处的记录各自独立：一处钉不住只是那一处不动。
- * 钉码核心不碰磁盘：每种目标要看的东西（观察）由读取器给，旧内容与 hunk 表由 History 给。
  */
 
 import { judge, snapshot } from "./compare.ts";
+import type { HunksOf } from "./compare.ts";
+import { hunksOf } from "./diff.ts";
+import type { Hunk } from "./diff.ts";
 import { sliceSpan } from "./span.ts";
 import { fileOf } from "./types.ts";
-import type { History, Pin, Reader, RecordedPin, Span, Target, Verdict } from "./types.ts";
+import type { History, Pin, PinCheck, Reader, RecordedPin, Span, Target } from "./types.ts";
 
 /**
  * 确认时对一处做什么：
@@ -24,12 +26,12 @@ import type { History, Pin, Reader, RecordedPin, Span, Target, Verdict } from ".
  */
 export type ConfirmAction = "recorded" | "moved" | "accepted" | "unchanged" | "needs-accept" | "refused";
 
-export interface Step {
-  verdict: Verdict;
+export interface ConfirmStep<P extends Pin = Pin> {
+  check: PinCheck<P>;
   action: ConfirmAction;
   /** recorded / moved / accepted：新的目标与记录 */
   written?: RecordedPin;
-  /** refused 且不是因为红（钉不住）时的原因；红的原因看 verdict.reason */
+  /** refused 且不是因为红（钉不住）时的原因；红的原因看 check.reason */
   problem?: string;
 }
 
@@ -39,14 +41,16 @@ export interface ConfirmOptions {
 }
 
 export interface Pinner {
-  check(pins: Pin[]): Verdict[];
-  confirm(verdicts: Verdict[], options: ConfirmOptions): Step[];
+  check<P extends Pin>(pins: readonly P[]): PinCheck<P>[];
+  confirm<P extends Pin>(checks: readonly PinCheck<P>[], options: ConfirmOptions): ConfirmStep<P>[];
 }
 
 export interface PinnerDeps {
   reader: Reader;
   history: History;
 }
+
+type Look = (target: Target) => string[] | null;
 
 /** 目标的观察：行段 / 整文件看文件的行，目录树看名字表 */
 function observe(reader: Reader, target: Target): string[] | null {
@@ -67,8 +71,26 @@ function currentOf(target: Target, text: string[] | null, lines: Span): string[]
 
 const sameSpan = (a: Span, b: Span): boolean => a[0] === b[0] && a[1] === b[1];
 
+/** 同一对整文件内容只算一次 hunk 表：几十处钉同一个文件是常态 */
+function rememberedHunks(): HunksOf {
+  const byOld = new Map<string, Map<string, Hunk[]>>();
+  return (oldText, newText) => {
+    let byNew = byOld.get(oldText);
+    if (byNew === undefined) {
+      byNew = new Map();
+      byOld.set(oldText, byNew);
+    }
+    let hunks = byNew.get(newText);
+    if (hunks === undefined) {
+      hunks = hunksOf(oldText.split("\n"), newText.split("\n"));
+      byNew.set(newText, hunks);
+    }
+    return hunks;
+  };
+}
+
 export function createPinner({ reader, history }: PinnerDeps): Pinner {
-  function observerCache(): (target: Target) => string[] | null {
+  function rememberedLook(): Look {
     const cache = new Map<string, string[] | null>();
     return (target) => {
       const key = observeKey(target);
@@ -77,57 +99,51 @@ export function createPinner({ reader, history }: PinnerDeps): Pinner {
     };
   }
 
-  function verdictOf(pin: Pin, look: (target: Target) => string[] | null): Verdict {
+  function checkOf<P extends Pin>(pin: P, look: Look, hunks: HunksOf): PinCheck<P> {
     const text = look(pin.target);
-    const judged = judge(pin.target, pin.record, text, history);
+    const judged = judge(pin.target, pin.record, text, history, hunks);
     const current = judged.status === "missing" ? null : currentOf(pin.target, text, judged.lines);
-    const verdict: Verdict = { pin, status: judged.status, lines: judged.lines, current };
-    if (judged.reason !== undefined) verdict.reason = judged.reason;
-    if (judged.diff !== undefined) verdict.diff = judged.diff;
-    if (judged.old !== undefined) verdict.old = judged.old;
     // 判定说「有内容」但这会儿切不出来（行段跟到文件外）：宁可报缺失，别拿空段冒充新鲜
-    if (verdict.current === null && verdict.status !== "missing") {
-      verdict.status = "missing";
-      verdict.reason = "vanished";
-    }
-    return verdict;
+    if (current === null && judged.status !== "missing") return { ...judged, pin, current, status: "missing", reason: "vanished" };
+    return { ...judged, pin, current };
   }
 
   /** 按今天的样子重新记一处：行段钉到判定跟到的位置 */
-  function rerecord(verdict: Verdict, look: (target: Target) => string[] | null): { written: RecordedPin } | { problem: string } {
-    const was = verdict.pin.target;
-    const target: Target = was.kind === "span" ? { kind: "span", file: was.file, a: verdict.lines[0], b: verdict.lines[1] } : was;
+  function rerecord(check: PinCheck, look: Look): { written: RecordedPin } | { problem: string } {
+    const was = check.pin.target;
+    const target: Target = was.kind === "span" ? { kind: "span", file: was.file, a: check.lines[0], b: check.lines[1] } : was;
     const taken = snapshot(target, look(target));
     if ("problem" in taken) return taken;
     return { written: { target, record: taken.record } };
   }
 
-  function stepOf(verdict: Verdict, accept: boolean, look: (target: Target) => string[] | null): Step {
-    const target = verdict.pin.target;
-    const redo = (action: ConfirmAction): Step => {
-      const done = rerecord(verdict, look);
-      return "problem" in done ? { verdict, action: "refused", problem: done.problem } : { verdict, action, written: done.written };
+  function stepOf<P extends Pin>(check: PinCheck<P>, accept: boolean, look: Look): ConfirmStep<P> {
+    const target = check.pin.target;
+    const redo = (action: ConfirmAction): ConfirmStep<P> => {
+      const done = rerecord(check, look);
+      return "problem" in done ? { check, action: "refused", problem: done.problem } : { check, action, written: done.written };
     };
-    switch (verdict.status) {
+    switch (check.status) {
       case "missing":
-        return { verdict, action: "refused" };
+        return { check, action: "refused" };
       case "unconfirmed":
         return redo("recorded");
       case "changed":
-        return accept ? redo("accepted") : { verdict, action: "needs-accept" };
+        return accept ? redo("accepted") : { check, action: "needs-accept" };
       case "fresh":
-        return target.kind === "span" && !sameSpan([target.a, target.b], verdict.lines) ? redo("moved") : { verdict, action: "unchanged" };
+        return target.kind === "span" && !sameSpan([target.a, target.b], check.lines) ? redo("moved") : { check, action: "unchanged" };
     }
   }
 
   return {
     check(pins) {
-      const look = observerCache();
-      return pins.map((pin) => verdictOf(pin, look));
+      const look = rememberedLook();
+      const hunks = rememberedHunks();
+      return pins.map((pin) => checkOf(pin, look, hunks));
     },
-    confirm(verdicts, { accept }) {
-      const look = observerCache();
-      return verdicts.map((verdict) => stepOf(verdict, accept, look));
+    confirm(checks, { accept }) {
+      const look = rememberedLook();
+      return checks.map((check) => stepOf(check, accept, look));
     },
   };
 }
