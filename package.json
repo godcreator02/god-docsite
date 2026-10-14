@@ -8,6 +8,7 @@
     "build": "pnpm -r build",
     "test": "vitest run",
     "check": "tsc -p tsconfig.tests.json && pnpm -r --no-bail check",
+    "e2e": "node e2e/run.mjs",
     "depcheck": "depcruise \"packages/*/src\" \"plugins/*/src\" --config .dependency-cruiser.cjs --ignore-known"
   },
   "engines": {
@@ -24,6 +25,7 @@
     "dependency-cruiser": "catalog:",
     "oxlint": "catalog:",
     "oxlint-tsgolint": "catalog:",
+    "playwright": "catalog:",
     "react": "catalog:",
     "react-dom": "catalog:",
     "tsdown": "catalog:",

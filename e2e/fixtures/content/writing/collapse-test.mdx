@@ -1,0 +1,69 @@
+---
+title: 收起内容试验
+description: 标签页、折叠块、文件树和自定义组件里的字收起来以后，评论怎么找回
+---
+
+import { AriaToggle, PlainToggle } from './collapse-test/toggles'
+
+改动 A：开头新插的一段，让后面所有文字整体往后挪。
+
+这一页专门用来试：被批的字收起来以后，评论还能不能找回。每个组件里各批一处，再收起来，看右侧栏怎么显示、点评论能不能自动打开。
+
+## 标签页
+
+<Tabs items={['bun', 'pnpm', 'npm 9', 'yarn']}>
+  <Tab value="bun">
+    改动 B：新加的 bun 这一页排在最前面，打开页面时默认显示它。
+  </Tab>
+  <Tab value="pnpm">
+    pnpm 这一页：在仓根运行 pnpm install，依赖装进 node_modules/.pnpm。
+  </Tab>
+  <Tab value="npm 9">
+    npm 这一页：在仓根运行 npm install，依赖都平铺在 node_modules 下。
+  </Tab>
+  <Tab value="yarn">
+    yarn 这一页：里面还套着一个自定义的展开块。
+
+    <AriaToggle title="yarn 的缓存目录放在哪">
+      yarn 的缓存默认放在用户目录下的 .yarn/berry/cache。
+    </AriaToggle>
+  </Tab>
+</Tabs>
+
+## 折叠块
+
+<Accordions>
+  <Accordion title="改动 F：新插的折叠块">
+    新插在前面的折叠块。
+  </Accordion>
+  <Accordion title="折叠块甲（改了标题）">
+    折叠块甲里的一句话：收起时这句话还在页面里，只是藏着。
+  </Accordion>
+</Accordions>
+
+## 文件树
+
+文件树的文件项是布局 div，批注协议认不出，要批的那一项按协议显式声明 `data-comment-target`：
+
+<Files>
+  <Folder name="my-site" defaultOpen>
+    <Folder name="app" defaultOpen>
+      <File name="root.tsx" />
+    </Folder>
+    <Folder name="content" defaultOpen>
+      <File name="first-page.mdx" data-comment-target />
+    </Folder>
+  </Folder>
+</Files>
+
+## 自定义组件：照 ARIA 写的
+
+<AriaToggle title="自定义展开块：写了 aria-expanded">
+  改动 H：自定义组件里新改的一句话：收起时这句话从页面上拿掉。
+</AriaToggle>
+
+## 自定义组件：没写 ARIA 的
+
+<PlainToggle title="自定义展开块：没写 ARIA">
+  没写 ARIA 的组件里的一句话：收起后认不出该点哪个按钮。
+</PlainToggle>
