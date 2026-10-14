@@ -1,0 +1,3 @@
+# 测量脚本自己的安装根（只装 playwright-core，用本机 Edge，不下载浏览器）；不并入 docsite-kit 的 workspace
+allowBuilds:
+  playwright-core: false

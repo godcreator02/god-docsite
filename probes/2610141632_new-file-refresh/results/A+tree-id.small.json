@@ -1,0 +1,711 @@
+{
+  "variant": "A+tree-id",
+  "size": "small",
+  "pages": 20,
+  "reps": 10,
+  "startupMs": 27132,
+  "measuredAt": "2026-10-14T09:37:50.557Z",
+  "records": {
+    "page": [
+      {
+        "id": "page-1-mv7x11x8",
+        "watcherAddMs": 7,
+        "hotSends": [
+          {
+            "ms": 10,
+            "environment": "client",
+            "type": "update"
+          },
+          {
+            "ms": 10,
+            "environment": "ssr",
+            "type": "full-reload"
+          }
+        ],
+        "hotUpdateModuleCounts": [
+          "client:1",
+          "ssr:2"
+        ],
+        "httpMs": 499,
+        "domMs": 845,
+        "showsAfterManualReload": null
+      },
+      {
+        "id": "page-2-mv7x149z",
+        "watcherAddMs": 7,
+        "hotSends": [
+          {
+            "ms": 7,
+            "environment": "client",
+            "type": "update"
+          },
+          {
+            "ms": 8,
+            "environment": "ssr",
+            "type": "full-reload"
+          }
+        ],
+        "hotUpdateModuleCounts": [
+          "client:1",
+          "ssr:2"
+        ],
+        "httpMs": 95,
+        "domMs": 114,
+        "showsAfterManualReload": null
+      },
+      {
+        "id": "page-3-mv7x161p",
+        "watcherAddMs": 9,
+        "hotSends": [
+          {
+            "ms": 10,
+            "environment": "client",
+            "type": "update"
+          },
+          {
+            "ms": 10,
+            "environment": "ssr",
+            "type": "full-reload"
+          }
+        ],
+        "hotUpdateModuleCounts": [
+          "client:1",
+          "ssr:2"
+        ],
+        "httpMs": 99,
+        "domMs": 110,
+        "showsAfterManualReload": null
+      },
+      {
+        "id": "page-4-mv7x17tb",
+        "watcherAddMs": 6,
+        "hotSends": [
+          {
+            "ms": 7,
+            "environment": "client",
+            "type": "update"
+          },
+          {
+            "ms": 7,
+            "environment": "ssr",
+            "type": "full-reload"
+          }
+        ],
+        "hotUpdateModuleCounts": [
+          "client:1",
+          "ssr:2"
+        ],
+        "httpMs": 72,
+        "domMs": 115,
+        "showsAfterManualReload": null
+      },
+      {
+        "id": "page-5-mv7x19iq",
+        "watcherAddMs": 9,
+        "hotSends": [
+          {
+            "ms": 10,
+            "environment": "client",
+            "type": "update"
+          },
+          {
+            "ms": 11,
+            "environment": "ssr",
+            "type": "full-reload"
+          }
+        ],
+        "hotUpdateModuleCounts": [
+          "client:1",
+          "ssr:2"
+        ],
+        "httpMs": 123,
+        "domMs": 117,
+        "showsAfterManualReload": null
+      },
+      {
+        "id": "page-6-mv7x1b9r",
+        "watcherAddMs": 8,
+        "hotSends": [
+          {
+            "ms": 9,
+            "environment": "client",
+            "type": "update"
+          },
+          {
+            "ms": 9,
+            "environment": "ssr",
+            "type": "full-reload"
+          }
+        ],
+        "hotUpdateModuleCounts": [
+          "client:1",
+          "ssr:2"
+        ],
+        "httpMs": 77,
+        "domMs": 114,
+        "showsAfterManualReload": null
+      },
+      {
+        "id": "page-7-mv7x1d0f",
+        "watcherAddMs": 9,
+        "hotSends": [
+          {
+            "ms": 10,
+            "environment": "client",
+            "type": "update"
+          },
+          {
+            "ms": 10,
+            "environment": "ssr",
+            "type": "full-reload"
+          }
+        ],
+        "hotUpdateModuleCounts": [
+          "client:1",
+          "ssr:2"
+        ],
+        "httpMs": 73,
+        "domMs": 117,
+        "showsAfterManualReload": null
+      },
+      {
+        "id": "page-8-mv7x1er6",
+        "watcherAddMs": 7,
+        "hotSends": [
+          {
+            "ms": 7,
+            "environment": "client",
+            "type": "update"
+          },
+          {
+            "ms": 8,
+            "environment": "ssr",
+            "type": "full-reload"
+          }
+        ],
+        "hotUpdateModuleCounts": [
+          "client:1",
+          "ssr:2"
+        ],
+        "httpMs": 64,
+        "domMs": 113,
+        "showsAfterManualReload": null
+      },
+      {
+        "id": "page-9-mv7x1gh2",
+        "watcherAddMs": 5,
+        "hotSends": [
+          {
+            "ms": 6,
+            "environment": "client",
+            "type": "update"
+          },
+          {
+            "ms": 7,
+            "environment": "ssr",
+            "type": "full-reload"
+          }
+        ],
+        "hotUpdateModuleCounts": [
+          "client:1",
+          "ssr:2"
+        ],
+        "httpMs": 59,
+        "domMs": 112,
+        "showsAfterManualReload": null
+      },
+      {
+        "id": "page-10-mv7x1i5y",
+        "watcherAddMs": 7,
+        "hotSends": [
+          {
+            "ms": 7,
+            "environment": "client",
+            "type": "update"
+          },
+          {
+            "ms": 8,
+            "environment": "ssr",
+            "type": "full-reload"
+          }
+        ],
+        "hotUpdateModuleCounts": [
+          "client:1",
+          "ssr:2"
+        ],
+        "httpMs": 69,
+        "domMs": 115,
+        "showsAfterManualReload": null
+      }
+    ],
+    "journal": [
+      {
+        "id": "journal-1-mv7x1jux",
+        "watcherAddMs": 11,
+        "hotSends": [
+          {
+            "ms": 13,
+            "environment": "client",
+            "type": "update"
+          },
+          {
+            "ms": 13,
+            "environment": "ssr",
+            "type": "full-reload"
+          }
+        ],
+        "hotUpdateModuleCounts": [
+          "client:1",
+          "ssr:1"
+        ],
+        "httpMs": 70,
+        "domMs": 116,
+        "showsAfterManualReload": null
+      },
+      {
+        "id": "journal-2-mv7x1ljs",
+        "watcherAddMs": 9,
+        "hotSends": [
+          {
+            "ms": 10,
+            "environment": "client",
+            "type": "update"
+          },
+          {
+            "ms": 10,
+            "environment": "ssr",
+            "type": "full-reload"
+          }
+        ],
+        "hotUpdateModuleCounts": [
+          "client:1",
+          "ssr:1"
+        ],
+        "httpMs": 51,
+        "domMs": 114,
+        "showsAfterManualReload": null
+      },
+      {
+        "id": "journal-3-mv7x1na7",
+        "watcherAddMs": 8,
+        "hotSends": [
+          {
+            "ms": 9,
+            "environment": "client",
+            "type": "update"
+          },
+          {
+            "ms": 9,
+            "environment": "ssr",
+            "type": "full-reload"
+          }
+        ],
+        "hotUpdateModuleCounts": [
+          "client:1",
+          "ssr:1"
+        ],
+        "httpMs": 51,
+        "domMs": 113,
+        "showsAfterManualReload": null
+      },
+      {
+        "id": "journal-4-mv7x1oxg",
+        "watcherAddMs": 8,
+        "hotSends": [
+          {
+            "ms": 9,
+            "environment": "client",
+            "type": "update"
+          },
+          {
+            "ms": 10,
+            "environment": "ssr",
+            "type": "full-reload"
+          }
+        ],
+        "hotUpdateModuleCounts": [
+          "client:1",
+          "ssr:1"
+        ],
+        "httpMs": 44,
+        "domMs": 112,
+        "showsAfterManualReload": null
+      },
+      {
+        "id": "journal-5-mv7x1qkv",
+        "watcherAddMs": 13,
+        "hotSends": [
+          {
+            "ms": 14,
+            "environment": "client",
+            "type": "update"
+          },
+          {
+            "ms": 14,
+            "environment": "ssr",
+            "type": "full-reload"
+          }
+        ],
+        "hotUpdateModuleCounts": [
+          "client:1",
+          "ssr:1"
+        ],
+        "httpMs": 76,
+        "domMs": 97,
+        "showsAfterManualReload": null
+      },
+      {
+        "id": "journal-6-mv7x1s97",
+        "watcherAddMs": 9,
+        "hotSends": [
+          {
+            "ms": 10,
+            "environment": "client",
+            "type": "update"
+          },
+          {
+            "ms": 10,
+            "environment": "ssr",
+            "type": "full-reload"
+          }
+        ],
+        "hotUpdateModuleCounts": [
+          "client:1",
+          "ssr:1"
+        ],
+        "httpMs": 49,
+        "domMs": 114,
+        "showsAfterManualReload": null
+      },
+      {
+        "id": "journal-7-mv7x1u4o",
+        "watcherAddMs": 9,
+        "hotSends": [
+          {
+            "ms": 11,
+            "environment": "client",
+            "type": "update"
+          },
+          {
+            "ms": 11,
+            "environment": "ssr",
+            "type": "full-reload"
+          }
+        ],
+        "hotUpdateModuleCounts": [
+          "client:1",
+          "ssr:1"
+        ],
+        "httpMs": 71,
+        "domMs": 114,
+        "showsAfterManualReload": null
+      },
+      {
+        "id": "journal-8-mv7x1vta",
+        "watcherAddMs": 15,
+        "hotSends": [
+          {
+            "ms": 17,
+            "environment": "client",
+            "type": "update"
+          },
+          {
+            "ms": 18,
+            "environment": "ssr",
+            "type": "full-reload"
+          }
+        ],
+        "hotUpdateModuleCounts": [
+          "client:1",
+          "ssr:1"
+        ],
+        "httpMs": 91,
+        "domMs": 117,
+        "showsAfterManualReload": null
+      },
+      {
+        "id": "journal-9-mv7x1xiq",
+        "watcherAddMs": 18,
+        "hotSends": [
+          {
+            "ms": 19,
+            "environment": "client",
+            "type": "update"
+          },
+          {
+            "ms": 20,
+            "environment": "ssr",
+            "type": "full-reload"
+          }
+        ],
+        "hotUpdateModuleCounts": [
+          "client:1",
+          "ssr:1"
+        ],
+        "httpMs": 84,
+        "domMs": 114,
+        "showsAfterManualReload": null
+      },
+      {
+        "id": "journal-10-mv7x1z73",
+        "watcherAddMs": 11,
+        "hotSends": [
+          {
+            "ms": 12,
+            "environment": "client",
+            "type": "update"
+          },
+          {
+            "ms": 12,
+            "environment": "ssr",
+            "type": "full-reload"
+          }
+        ],
+        "hotUpdateModuleCounts": [
+          "client:1",
+          "ssr:1"
+        ],
+        "httpMs": 55,
+        "domMs": 117,
+        "showsAfterManualReload": null
+      }
+    ],
+    "comment": [
+      {
+        "id": "comment-1-mv7x20vd",
+        "watcherAddMs": 14,
+        "hotSends": [
+          {
+            "ms": 15,
+            "environment": "client",
+            "type": "update"
+          },
+          {
+            "ms": 15,
+            "environment": "ssr",
+            "type": "full-reload"
+          }
+        ],
+        "hotUpdateModuleCounts": [
+          "client:1",
+          "ssr:2"
+        ],
+        "httpMs": 70,
+        "domMs": 120,
+        "showsAfterManualReload": null
+      },
+      {
+        "id": "comment-2-mv7x22m8",
+        "watcherAddMs": 11,
+        "hotSends": [
+          {
+            "ms": 13,
+            "environment": "client",
+            "type": "update"
+          },
+          {
+            "ms": 13,
+            "environment": "ssr",
+            "type": "full-reload"
+          }
+        ],
+        "hotUpdateModuleCounts": [
+          "client:1",
+          "ssr:2"
+        ],
+        "httpMs": 63,
+        "domMs": 118,
+        "showsAfterManualReload": null
+      },
+      {
+        "id": "comment-3-mv7x24gu",
+        "watcherAddMs": 14,
+        "hotSends": [
+          {
+            "ms": 16,
+            "environment": "client",
+            "type": "update"
+          },
+          {
+            "ms": 16,
+            "environment": "ssr",
+            "type": "full-reload"
+          }
+        ],
+        "hotUpdateModuleCounts": [
+          "client:1",
+          "ssr:2"
+        ],
+        "httpMs": 70,
+        "domMs": 210,
+        "showsAfterManualReload": null
+      },
+      {
+        "id": "comment-4-mv7x26ad",
+        "watcherAddMs": 15,
+        "hotSends": [
+          {
+            "ms": 20,
+            "environment": "client",
+            "type": "update"
+          },
+          {
+            "ms": 20,
+            "environment": "ssr",
+            "type": "full-reload"
+          },
+          {
+            "ms": 21,
+            "environment": "client",
+            "type": "custom:react-router:hmr"
+          }
+        ],
+        "hotUpdateModuleCounts": [
+          "client:1",
+          "ssr:2"
+        ],
+        "httpMs": 92,
+        "domMs": 240,
+        "showsAfterManualReload": null
+      },
+      {
+        "id": "comment-5-mv7x2851",
+        "watcherAddMs": 8,
+        "hotSends": [
+          {
+            "ms": 10,
+            "environment": "client",
+            "type": "update"
+          },
+          {
+            "ms": 10,
+            "environment": "ssr",
+            "type": "full-reload"
+          }
+        ],
+        "hotUpdateModuleCounts": [
+          "client:1",
+          "ssr:2"
+        ],
+        "httpMs": 56,
+        "domMs": 114,
+        "showsAfterManualReload": null
+      },
+      {
+        "id": "comment-6-mv7x29va",
+        "watcherAddMs": 10,
+        "hotSends": [
+          {
+            "ms": 11,
+            "environment": "client",
+            "type": "update"
+          },
+          {
+            "ms": 12,
+            "environment": "ssr",
+            "type": "full-reload"
+          }
+        ],
+        "hotUpdateModuleCounts": [
+          "client:1",
+          "ssr:2"
+        ],
+        "httpMs": 50,
+        "domMs": 114,
+        "showsAfterManualReload": null
+      },
+      {
+        "id": "comment-7-mv7x2bl4",
+        "watcherAddMs": 7,
+        "hotSends": [
+          {
+            "ms": 8,
+            "environment": "client",
+            "type": "update"
+          },
+          {
+            "ms": 8,
+            "environment": "ssr",
+            "type": "full-reload"
+          }
+        ],
+        "hotUpdateModuleCounts": [
+          "client:1",
+          "ssr:2"
+        ],
+        "httpMs": 46,
+        "domMs": 113,
+        "showsAfterManualReload": null
+      },
+      {
+        "id": "comment-8-mv7x2da1",
+        "watcherAddMs": 7,
+        "hotSends": [
+          {
+            "ms": 9,
+            "environment": "client",
+            "type": "update"
+          },
+          {
+            "ms": 9,
+            "environment": "ssr",
+            "type": "full-reload"
+          }
+        ],
+        "hotUpdateModuleCounts": [
+          "client:1",
+          "ssr:2"
+        ],
+        "httpMs": 46,
+        "domMs": 100,
+        "showsAfterManualReload": null
+      },
+      {
+        "id": "comment-9-mv7x2eyl",
+        "watcherAddMs": 6,
+        "hotSends": [
+          {
+            "ms": 7,
+            "environment": "client",
+            "type": "update"
+          },
+          {
+            "ms": 7,
+            "environment": "ssr",
+            "type": "full-reload"
+          }
+        ],
+        "hotUpdateModuleCounts": [
+          "client:1",
+          "ssr:2"
+        ],
+        "httpMs": 44,
+        "domMs": 114,
+        "showsAfterManualReload": null
+      },
+      {
+        "id": "comment-10-mv7x2gnl",
+        "watcherAddMs": 7,
+        "hotSends": [
+          {
+            "ms": 8,
+            "environment": "client",
+            "type": "update"
+          },
+          {
+            "ms": 8,
+            "environment": "ssr",
+            "type": "full-reload"
+          }
+        ],
+        "hotUpdateModuleCounts": [
+          "client:1",
+          "ssr:2"
+        ],
+        "httpMs": 47,
+        "domMs": 115,
+        "showsAfterManualReload": null
+      }
+    ]
+  }
+}
