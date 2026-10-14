@@ -1,0 +1,13 @@
+{
+  "name": "probe-2610141632-new-file-refresh",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "setup": "node scripts/setup.mjs",
+    "measure": "node scripts/measure.mjs",
+    "summarize": "node scripts/summarize.mjs"
+  },
+  "devDependencies": {
+    "playwright-core": "1.64.0"
+  }
+}

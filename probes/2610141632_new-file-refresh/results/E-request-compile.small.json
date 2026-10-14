@@ -1,0 +1,132 @@
+{
+  "variant": "E-request-compile",
+  "size": "small",
+  "pages": 20,
+  "reps": 10,
+  "startupMs": 40557,
+  "measuredAt": "2026-10-14T09:41:04.287Z",
+  "records": {
+    "page": [
+      {
+        "id": "page-1-mv7x424t",
+        "watcherAddMs": 9,
+        "hotSends": [],
+        "hotUpdateModuleCounts": [
+          "client:0",
+          "ssr:0"
+        ],
+        "httpMs": 557,
+        "domMs": null,
+        "showsAfterManualReload": true
+      },
+      {
+        "id": "page-2-mv7x4ble",
+        "watcherAddMs": 5,
+        "hotSends": [],
+        "hotUpdateModuleCounts": [
+          "client:0",
+          "ssr:0"
+        ],
+        "httpMs": 44,
+        "domMs": null,
+        "showsAfterManualReload": true
+      },
+      {
+        "id": "page-3-mv7x4l0k",
+        "watcherAddMs": 7,
+        "hotSends": [],
+        "hotUpdateModuleCounts": [
+          "client:0",
+          "ssr:0"
+        ],
+        "httpMs": 54,
+        "domMs": null,
+        "showsAfterManualReload": true
+      },
+      {
+        "id": "page-4-mv7x4uep",
+        "watcherAddMs": 4,
+        "hotSends": [],
+        "hotUpdateModuleCounts": [
+          "client:0",
+          "ssr:0"
+        ],
+        "httpMs": 35,
+        "domMs": null,
+        "showsAfterManualReload": true
+      },
+      {
+        "id": "page-5-mv7x53rl",
+        "watcherAddMs": 5,
+        "hotSends": [],
+        "hotUpdateModuleCounts": [
+          "client:0",
+          "ssr:0"
+        ],
+        "httpMs": 34,
+        "domMs": null,
+        "showsAfterManualReload": true
+      },
+      {
+        "id": "page-6-mv7x5d4y",
+        "watcherAddMs": 5,
+        "hotSends": [],
+        "hotUpdateModuleCounts": [
+          "client:0",
+          "ssr:0"
+        ],
+        "httpMs": 33,
+        "domMs": null,
+        "showsAfterManualReload": true
+      },
+      {
+        "id": "page-7-mv7x5mh2",
+        "watcherAddMs": 6,
+        "hotSends": [],
+        "hotUpdateModuleCounts": [
+          "client:0",
+          "ssr:0"
+        ],
+        "httpMs": 35,
+        "domMs": null,
+        "showsAfterManualReload": true
+      },
+      {
+        "id": "page-8-mv7x5vtb",
+        "watcherAddMs": 5,
+        "hotSends": [],
+        "hotUpdateModuleCounts": [
+          "client:0",
+          "ssr:0"
+        ],
+        "httpMs": 31,
+        "domMs": null,
+        "showsAfterManualReload": true
+      },
+      {
+        "id": "page-9-mv7x655t",
+        "watcherAddMs": 6,
+        "hotSends": [],
+        "hotUpdateModuleCounts": [
+          "client:0",
+          "ssr:0"
+        ],
+        "httpMs": 32,
+        "domMs": null,
+        "showsAfterManualReload": true
+      },
+      {
+        "id": "page-10-mv7x6eip",
+        "watcherAddMs": 6,
+        "hotSends": [],
+        "hotUpdateModuleCounts": [
+          "client:0",
+          "ssr:0"
+        ],
+        "httpMs": 31,
+        "domMs": null,
+        "showsAfterManualReload": true
+      }
+    ]
+  }
+}

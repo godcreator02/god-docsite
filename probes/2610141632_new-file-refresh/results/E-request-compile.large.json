@@ -1,0 +1,132 @@
+{
+  "variant": "E-request-compile",
+  "size": "large",
+  "pages": 300,
+  "reps": 10,
+  "startupMs": 26560,
+  "measuredAt": "2026-10-14T10:03:15.076Z",
+  "records": {
+    "page": [
+      {
+        "id": "page-1-mv7xwfbp",
+        "watcherAddMs": 7,
+        "hotSends": [],
+        "hotUpdateModuleCounts": [
+          "client:0",
+          "ssr:0"
+        ],
+        "httpMs": 529,
+        "domMs": null,
+        "showsAfterManualReload": true
+      },
+      {
+        "id": "page-2-mv7xwpc4",
+        "watcherAddMs": 6,
+        "hotSends": [],
+        "hotUpdateModuleCounts": [
+          "client:0",
+          "ssr:0"
+        ],
+        "httpMs": 129,
+        "domMs": null,
+        "showsAfterManualReload": true
+      },
+      {
+        "id": "page-3-mv7xwz9g",
+        "watcherAddMs": 6,
+        "hotSends": [],
+        "hotUpdateModuleCounts": [
+          "client:0",
+          "ssr:0"
+        ],
+        "httpMs": 117,
+        "domMs": null,
+        "showsAfterManualReload": true
+      },
+      {
+        "id": "page-4-mv7xx977",
+        "watcherAddMs": 7,
+        "hotSends": [],
+        "hotUpdateModuleCounts": [
+          "client:0",
+          "ssr:0"
+        ],
+        "httpMs": 175,
+        "domMs": null,
+        "showsAfterManualReload": true
+      },
+      {
+        "id": "page-5-mv7xxjb2",
+        "watcherAddMs": 6,
+        "hotSends": [],
+        "hotUpdateModuleCounts": [
+          "client:0",
+          "ssr:0"
+        ],
+        "httpMs": 160,
+        "domMs": null,
+        "showsAfterManualReload": true
+      },
+      {
+        "id": "page-6-mv7xxt94",
+        "watcherAddMs": 4,
+        "hotSends": [],
+        "hotUpdateModuleCounts": [
+          "client:0",
+          "ssr:0"
+        ],
+        "httpMs": 97,
+        "domMs": null,
+        "showsAfterManualReload": true
+      },
+      {
+        "id": "page-7-mv7xy391",
+        "watcherAddMs": 5,
+        "hotSends": [],
+        "hotUpdateModuleCounts": [
+          "client:0",
+          "ssr:0"
+        ],
+        "httpMs": 134,
+        "domMs": null,
+        "showsAfterManualReload": true
+      },
+      {
+        "id": "page-8-mv7xyd5p",
+        "watcherAddMs": 5,
+        "hotSends": [],
+        "hotUpdateModuleCounts": [
+          "client:0",
+          "ssr:0"
+        ],
+        "httpMs": 91,
+        "domMs": null,
+        "showsAfterManualReload": true
+      },
+      {
+        "id": "page-9-mv7xyn01",
+        "watcherAddMs": 4,
+        "hotSends": [],
+        "hotUpdateModuleCounts": [
+          "client:0",
+          "ssr:0"
+        ],
+        "httpMs": 93,
+        "domMs": null,
+        "showsAfterManualReload": true
+      },
+      {
+        "id": "page-10-mv7xywuw",
+        "watcherAddMs": 5,
+        "hotSends": [],
+        "hotUpdateModuleCounts": [
+          "client:0",
+          "ssr:0"
+        ],
+        "httpMs": 90,
+        "domMs": null,
+        "showsAfterManualReload": true
+      }
+    ]
+  }
+}

@@ -1,0 +1,124 @@
+{
+  "variant": "D1-process-restart",
+  "size": "large",
+  "pages": 300,
+  "reps": 3,
+  "startupMs": 38089,
+  "measuredAt": "2026-10-14T11:13:34.292Z",
+  "records": {
+    "page": [
+      {
+        "id": "page-1-mv7zro2u",
+        "watcherAddMs": 8,
+        "hotSends": [],
+        "hotUpdateModuleCounts": [
+          "client:0",
+          "ssr:0"
+        ],
+        "httpMs": 27026,
+        "domMs": 59810,
+        "showsAfterManualReload": null
+      },
+      {
+        "id": "page-2-mv7ztkow",
+        "watcherAddMs": 11,
+        "hotSends": [],
+        "hotUpdateModuleCounts": [
+          "client:0",
+          "ssr:0"
+        ],
+        "httpMs": 50894,
+        "domMs": null,
+        "showsAfterManualReload": true
+      },
+      {
+        "id": "page-3-mv7zwz3l",
+        "watcherAddMs": 9,
+        "hotSends": [],
+        "hotUpdateModuleCounts": [
+          "client:0",
+          "ssr:0"
+        ],
+        "httpMs": 34835,
+        "domMs": null,
+        "showsAfterManualReload": true
+      }
+    ],
+    "journal": [
+      {
+        "id": "journal-1-mv7zzu3f",
+        "watcherAddMs": 11,
+        "hotSends": [],
+        "hotUpdateModuleCounts": [
+          "client:0",
+          "ssr:0"
+        ],
+        "httpMs": 53179,
+        "domMs": null,
+        "showsAfterManualReload": true
+      },
+      {
+        "id": "journal-2-mv803c73",
+        "watcherAddMs": 7,
+        "hotSends": [],
+        "hotUpdateModuleCounts": [
+          "client:0",
+          "ssr:0"
+        ],
+        "httpMs": 26045,
+        "domMs": 47585,
+        "showsAfterManualReload": null
+      },
+      {
+        "id": "journal-3-mv805kwx",
+        "watcherAddMs": 11,
+        "hotSends": [],
+        "hotUpdateModuleCounts": [
+          "client:0",
+          "ssr:0"
+        ],
+        "httpMs": 26834,
+        "domMs": 52397,
+        "showsAfterManualReload": null
+      }
+    ],
+    "comment": [
+      {
+        "id": "comment-1-mv807rg9",
+        "watcherAddMs": 10,
+        "hotSends": [],
+        "hotUpdateModuleCounts": [
+          "client:0",
+          "ssr:0"
+        ],
+        "httpMs": 26776,
+        "domMs": 57598,
+        "showsAfterManualReload": null
+      },
+      {
+        "id": "comment-2-mv80a9zg",
+        "watcherAddMs": 10,
+        "hotSends": [],
+        "hotUpdateModuleCounts": [
+          "client:0",
+          "ssr:0"
+        ],
+        "httpMs": 34425,
+        "domMs": null,
+        "showsAfterManualReload": true
+      },
+      {
+        "id": "comment-3-mv80dj6i",
+        "watcherAddMs": 17,
+        "hotSends": [],
+        "hotUpdateModuleCounts": [
+          "client:0",
+          "ssr:0"
+        ],
+        "httpMs": 47075,
+        "domMs": null,
+        "showsAfterManualReload": true
+      }
+    ]
+  }
+}

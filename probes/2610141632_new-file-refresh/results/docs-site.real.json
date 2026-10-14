@@ -1,0 +1,134 @@
+{
+  "variant": "docs-site（仓里现状：vite 补丁 = 方案 A）",
+  "size": "real",
+  "pages": null,
+  "reps": 10,
+  "startupMs": 8153,
+  "measuredAt": "2026-10-14T11:37:35.015Z",
+  "records": {
+    "page": [
+      {
+        "id": "page-1-mv817wdh",
+        "httpMs": 140,
+        "domMs": null,
+        "showsAfterManualReload": true
+      },
+      {
+        "id": "page-2-mv8189yk",
+        "httpMs": 100,
+        "domMs": null,
+        "showsAfterManualReload": true
+      },
+      {
+        "id": "page-3-mv818ngw",
+        "httpMs": 92,
+        "domMs": null,
+        "showsAfterManualReload": true
+      },
+      {
+        "id": "page-4-mv81910o",
+        "httpMs": 101,
+        "domMs": null,
+        "showsAfterManualReload": true
+      },
+      {
+        "id": "page-5-mv819eiw",
+        "httpMs": 104,
+        "domMs": null,
+        "showsAfterManualReload": true
+      },
+      {
+        "id": "page-6-mv819s5g",
+        "httpMs": 120,
+        "domMs": null,
+        "showsAfterManualReload": true
+      },
+      {
+        "id": "page-7-mv81a5sf",
+        "httpMs": 117,
+        "domMs": null,
+        "showsAfterManualReload": true
+      },
+      {
+        "id": "page-8-mv81ajez",
+        "httpMs": 115,
+        "domMs": null,
+        "showsAfterManualReload": true
+      },
+      {
+        "id": "page-9-mv81ax5p",
+        "httpMs": 106,
+        "domMs": null,
+        "showsAfterManualReload": true
+      },
+      {
+        "id": "page-10-mv81basi",
+        "httpMs": 132,
+        "domMs": null,
+        "showsAfterManualReload": true
+      }
+    ],
+    "card": [
+      {
+        "id": "card-1-mv81bofv",
+        "httpMs": 784,
+        "domMs": null,
+        "showsAfterManualReload": null
+      },
+      {
+        "id": "card-2-mv81br92",
+        "httpMs": 598,
+        "domMs": null,
+        "showsAfterManualReload": null
+      },
+      {
+        "id": "card-3-mv81btrz",
+        "httpMs": 566,
+        "domMs": null,
+        "showsAfterManualReload": null
+      },
+      {
+        "id": "card-4-mv81bwa5",
+        "httpMs": 551,
+        "domMs": null,
+        "showsAfterManualReload": null
+      },
+      {
+        "id": "card-5-mv81bysw",
+        "httpMs": 559,
+        "domMs": null,
+        "showsAfterManualReload": null
+      },
+      {
+        "id": "card-6-mv81c18c",
+        "httpMs": 707,
+        "domMs": null,
+        "showsAfterManualReload": null
+      },
+      {
+        "id": "card-7-mv81c3z8",
+        "httpMs": 580,
+        "domMs": null,
+        "showsAfterManualReload": null
+      },
+      {
+        "id": "card-8-mv81c6x7",
+        "httpMs": 1065,
+        "domMs": null,
+        "showsAfterManualReload": null
+      },
+      {
+        "id": "card-9-mv81cahp",
+        "httpMs": 1220,
+        "domMs": null,
+        "showsAfterManualReload": null
+      },
+      {
+        "id": "card-10-mv81ce2p",
+        "httpMs": 1234,
+        "domMs": null,
+        "showsAfterManualReload": null
+      }
+    ]
+  }
+}

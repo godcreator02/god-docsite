@@ -1,0 +1,145 @@
+{
+  "variant": "D2-vite-restart",
+  "size": "small",
+  "pages": 20,
+  "reps": 1,
+  "startupMs": 34757,
+  "measuredAt": "2026-10-14T09:19:14.917Z",
+  "records": {
+    "page": [
+      {
+        "id": "page-1-mv7w5z4z",
+        "watcherAddMs": 9,
+        "hotSends": [
+          {
+            "ms": 162,
+            "environment": "client",
+            "type": "custom:react-router:hmr"
+          },
+          {
+            "ms": 163,
+            "environment": "client",
+            "type": "update"
+          },
+          {
+            "ms": 163,
+            "environment": "ssr",
+            "type": "update"
+          },
+          {
+            "ms": 164,
+            "environment": "client",
+            "type": "custom:react-router:hmr"
+          },
+          {
+            "ms": 164,
+            "environment": "client",
+            "type": "update"
+          },
+          {
+            "ms": 164,
+            "environment": "ssr",
+            "type": "update"
+          }
+        ],
+        "hotUpdateModuleCounts": [
+          "client:0",
+          "ssr:0"
+        ],
+        "httpMs": 40634,
+        "domMs": null,
+        "showsAfterManualReload": true
+      }
+    ],
+    "journal": [
+      {
+        "id": "journal-1-mv7w8732",
+        "watcherAddMs": 7,
+        "hotSends": [
+          {
+            "ms": 132,
+            "environment": "client",
+            "type": "custom:react-router:hmr"
+          },
+          {
+            "ms": 132,
+            "environment": "client",
+            "type": "update"
+          },
+          {
+            "ms": 132,
+            "environment": "ssr",
+            "type": "update"
+          },
+          {
+            "ms": 132,
+            "environment": "client",
+            "type": "custom:react-router:hmr"
+          },
+          {
+            "ms": 132,
+            "environment": "client",
+            "type": "update"
+          },
+          {
+            "ms": 133,
+            "environment": "ssr",
+            "type": "update"
+          }
+        ],
+        "hotUpdateModuleCounts": [
+          "client:0",
+          "ssr:0"
+        ],
+        "httpMs": 41957,
+        "domMs": null,
+        "showsAfterManualReload": true
+      }
+    ],
+    "comment": [
+      {
+        "id": "comment-1-mv7wbekm",
+        "watcherAddMs": 8,
+        "hotSends": [
+          {
+            "ms": 182,
+            "environment": "client",
+            "type": "custom:react-router:hmr"
+          },
+          {
+            "ms": 183,
+            "environment": "client",
+            "type": "update"
+          },
+          {
+            "ms": 183,
+            "environment": "ssr",
+            "type": "update"
+          },
+          {
+            "ms": 183,
+            "environment": "client",
+            "type": "custom:react-router:hmr"
+          },
+          {
+            "ms": 183,
+            "environment": "client",
+            "type": "update"
+          },
+          {
+            "ms": 183,
+            "environment": "ssr",
+            "type": "update"
+          }
+        ],
+        "hotUpdateModuleCounts": [
+          "client:0",
+          "ssr:0"
+        ],
+        "httpMs": 38854,
+        "domMs": null,
+        "showsAfterManualReload": true
+      }
+    ]
+  }
+}
