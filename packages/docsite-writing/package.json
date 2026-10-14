@@ -38,21 +38,21 @@
     "react": "^19.3.0"
   },
   "devDependencies": {
-    "@mdx-js/mdx": "3.1.1",
-    "@types/mdast": "^4.0.4",
-    "@types/node": "^26.6.2",
-    "@types/react": "^19.3.0",
-    "@types/react-dom": "^19.3.0",
-    "@types/unist": "^3.0.3",
-    "katex": "^0.16.47",
-    "mdast-util-mdx-jsx": "^3.2.0",
-    "react": "^19.3.0",
-    "react-dom": "^19.3.0",
-    "remark-math": "^6.0.0",
-    "remark-mdx": "^3.1.0",
-    "remark-parse": "^11.0.0",
-    "typescript": "^6.0.3",
-    "unified": "^11.0.5",
-    "vitest": "^5.0.1"
+    "@mdx-js/mdx": "catalog:",
+    "@types/mdast": "catalog:",
+    "@types/node": "catalog:",
+    "@types/react": "catalog:",
+    "@types/react-dom": "catalog:",
+    "@types/unist": "catalog:",
+    "katex": "catalog:",
+    "mdast-util-mdx-jsx": "catalog:",
+    "react": "catalog:",
+    "react-dom": "catalog:",
+    "remark-math": "catalog:",
+    "remark-mdx": "catalog:",
+    "remark-parse": "catalog:",
+    "typescript": "catalog:",
+    "unified": "catalog:",
+    "vitest": "catalog:"
   }
 }

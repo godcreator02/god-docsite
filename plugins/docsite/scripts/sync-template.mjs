@@ -1,12 +1,31 @@
 // 从自述站派生建站用的骨架模板：site/ 是正本（app/ 与根目录的配置手写），这里的 template/ 是构建产物、随插件发布。
 // 改骨架先改 site/，插件 build 会重新派生。起始物（people.json、glossary.terms.ts）是每个新站的第一份，写死在这里，不来自自述站。
-import { cpSync, mkdirSync, readdirSync, rmSync, writeFileSync } from 'node:fs'
+import { cpSync, mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { parse } from 'yaml'
 
 const pluginDir = path.dirname(path.dirname(fileURLToPath(import.meta.url)))
-const siteDir = path.join(pluginDir, '..', '..', 'site')
+const workspaceRoot = path.join(pluginDir, '..', '..')
+const siteDir = path.join(workspaceRoot, 'site')
 const templateDir = path.join(pluginDir, 'template')
+
+/** 自述站的 package.json 在工作区里写 catalog:，新站不在本仓工作区里，派生时换回 pnpm-workspace.yaml 里的范围 */
+function manifestWithCatalogRangesResolved() {
+  const workspace = parse(readFileSync(path.join(workspaceRoot, 'pnpm-workspace.yaml'), 'utf8'))
+  const manifest = JSON.parse(readFileSync(path.join(siteDir, 'package.json'), 'utf8'))
+  for (const field of ['dependencies', 'devDependencies']) {
+    for (const [name, range] of Object.entries(manifest[field] ?? {})) {
+      if (!range.startsWith('catalog:')) continue
+      const catalogName = range.slice('catalog:'.length)
+      const catalog = catalogName === '' || catalogName === 'default' ? workspace.catalog : workspace.catalogs?.[catalogName]
+      const resolved = catalog?.[name]
+      if (typeof resolved !== 'string') throw new Error(`site/package.json 的 ${field}.${name} 写着 ${range}，pnpm-workspace.yaml 的对应 catalog 里没有它`)
+      manifest[field][name] = resolved
+    }
+  }
+  return `${JSON.stringify(manifest, null, 2)}\n`
+}
 
 rmSync(templateDir, { recursive: true, force: true })
 mkdirSync(templateDir, { recursive: true })
@@ -14,7 +33,8 @@ mkdirSync(templateDir, { recursive: true })
 // 骨架：app/ 整棵与根目录的配置文件。app/site/ 由建站时按 docsite.features 现算，不进模板
 cpSync(path.join(siteDir, 'app'), path.join(templateDir, 'app'), { recursive: true })
 rmSync(path.join(templateDir, 'app', 'site'), { recursive: true, force: true })
-for (const file of ['package.json', 'vite.config.ts', 'source.config.ts', 'react-router.config.ts', 'tsconfig.json']) {
+writeFileSync(path.join(templateDir, 'package.json'), manifestWithCatalogRangesResolved())
+for (const file of ['vite.config.ts', 'source.config.ts', 'react-router.config.ts', 'tsconfig.json']) {
   cpSync(path.join(siteDir, file), path.join(templateDir, file))
 }
 // npm 发布不带点开头的文件，模板里写成 gitignore，写进站点时改回 .gitignore

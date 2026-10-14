@@ -34,7 +34,7 @@
   },
   "peerDependencies": {
     "@godcreator/gwb-commands": "^0.6.0",
-    "@godcreator/gwb-docsite": "^0.3.0",
+    "@godcreator/gwb-docsite": "workspace:^",
     "@godcreator/gwb-kernel-desktop": "^0.10.0",
     "@godcreator/gwb-skills": "^0.4.5",
     "@godcreator/gwb-unit-folder": "^0.7.22"
@@ -51,19 +51,19 @@
     }
   },
   "devDependencies": {
-    "@godcreator/gwb-commands": "^0.6.0",
-    "@godcreator/gwb-docsite": "workspace:*",
-    "@godcreator/gwb-kernel-desktop": "^0.10.0",
-    "@godcreator/gwb-shell": "^0.15.11",
-    "@godcreator/gwb-skills": "^0.4.5",
-    "@godcreator/gwb-unit-folder": "^0.7.22",
-    "@types/node": "^24.0.0",
-    "cordis": "4.0.0-rc.10",
-    "esbuild": "^0.27.7",
-    "oxlint": "1.76.0",
-    "oxlint-tsgolint": "7.0.2001",
-    "typescript": "^7.0.2",
-    "vitest": "^4.1.10"
+    "@godcreator/gwb-commands": "catalog:",
+    "@godcreator/gwb-docsite": "workspace:^",
+    "@godcreator/gwb-kernel-desktop": "catalog:",
+    "@godcreator/gwb-shell": "catalog:",
+    "@godcreator/gwb-skills": "catalog:",
+    "@godcreator/gwb-unit-folder": "catalog:",
+    "@types/node": "catalog:gwb-host",
+    "cordis": "catalog:",
+    "esbuild": "catalog:",
+    "oxlint": "catalog:",
+    "oxlint-tsgolint": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
   },
   "publishConfig": {
     "registry": "https://git.tianshen02.online:28377/api/packages/godcreator/npm/"

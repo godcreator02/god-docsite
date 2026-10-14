@@ -34,8 +34,8 @@
     "react": ">=19"
   },
   "devDependencies": {
-    "@types/react": "^19.3.0",
-    "react": "^19.3.0"
+    "@types/react": "catalog:",
+    "react": "catalog:"
   },
   "publishConfig": {
     "access": "public",
@@ -49,6 +49,6 @@
     "gwb"
   ],
   "dependencies": {
-    "@godcreator/docsite-explainer": "^0.1.0"
+    "@godcreator/docsite-explainer": "workspace:^"
   }
 }

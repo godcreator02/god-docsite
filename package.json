@@ -13,19 +13,19 @@
     "node": ">=24"
   },
   "devDependencies": {
-    "@godcreator/code-pin": "workspace:*",
-    "@godcreator/docfirst-workflow": "workspace:*",
-    "@godcreator/trajectory-disk": "workspace:*",
-    "@types/mdast": "^4.0.4",
-    "@types/node": "^26.2.0",
-    "@types/react": "^19.3.0",
-    "@types/react-dom": "^19.3.0",
-    "oxlint": "1.76.0",
-    "oxlint-tsgolint": "7.0.2001",
-    "react": "^19.3.0",
-    "react-dom": "^19.3.0",
-    "tsdown": "^0.22.14",
-    "typescript": "^6.0.3",
-    "vitest": "^4.1.11"
+    "@godcreator/code-pin": "workspace:^",
+    "@godcreator/docfirst-workflow": "workspace:^",
+    "@godcreator/trajectory-disk": "workspace:^",
+    "@types/mdast": "catalog:",
+    "@types/node": "catalog:",
+    "@types/react": "catalog:",
+    "@types/react-dom": "catalog:",
+    "oxlint": "catalog:",
+    "oxlint-tsgolint": "catalog:",
+    "react": "catalog:",
+    "react-dom": "catalog:",
+    "tsdown": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
   }
 }

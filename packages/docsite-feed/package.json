@@ -32,11 +32,11 @@
     "vite": "^8.3.0"
   },
   "devDependencies": {
-    "@types/node": "^26.6.2",
-    "@types/react": "^19.3.0",
-    "react": "^19.3.0",
-    "typescript": "^6.0.3",
-    "vite": "^8.3.0",
-    "vitest": "^5.0.1"
+    "@types/node": "catalog:",
+    "@types/react": "catalog:",
+    "react": "catalog:",
+    "typescript": "catalog:",
+    "vite": "catalog:",
+    "vitest": "catalog:"
   }
 }

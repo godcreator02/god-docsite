@@ -44,18 +44,19 @@
     }
   },
   "devDependencies": {
-    "@godcreator/docsite-comments": "workspace:*",
-    "@godcreator/docsite-feed": "workspace:*",
-    "@godcreator/docsite-identity": "workspace:*",
-    "@godcreator/docsite-kit": "workspace:*",
-    "@godcreator/gwb-commands": "^0.6.1",
-    "@godcreator/gwb-kernel-desktop": "^0.10.1",
-    "@godcreator/gwb-settings": "^0.4.0",
-    "@godcreator/gwb-skills": "^0.4.12",
-    "@types/node": "^24.0.0",
-    "cordis": "4.0.0-rc.10",
-    "esbuild": "^0.28.2",
-    "typescript": "^7.0.2",
-    "vitest": "^4.1.10"
+    "@godcreator/docsite-comments": "workspace:^",
+    "@godcreator/docsite-feed": "workspace:^",
+    "@godcreator/docsite-identity": "workspace:^",
+    "@godcreator/docsite-kit": "workspace:^",
+    "@godcreator/gwb-commands": "catalog:",
+    "@godcreator/gwb-kernel-desktop": "catalog:",
+    "@godcreator/gwb-settings": "catalog:",
+    "@godcreator/gwb-skills": "catalog:",
+    "@types/node": "catalog:gwb-host",
+    "cordis": "catalog:",
+    "esbuild": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:",
+    "yaml": "catalog:"
   }
 }

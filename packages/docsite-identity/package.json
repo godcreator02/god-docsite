@@ -41,10 +41,10 @@
     "react": "^19.3.0"
   },
   "devDependencies": {
-    "@types/node": "^26.6.2",
-    "@types/react": "^19.3.0",
-    "react": "^19.3.0",
-    "typescript": "^6.0.3",
-    "vitest": "^5.0.1"
+    "@types/node": "catalog:",
+    "@types/react": "catalog:",
+    "react": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
   }
 }

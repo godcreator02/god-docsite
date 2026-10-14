@@ -36,26 +36,26 @@
     "prepublishOnly": "pnpm run build"
   },
   "dependencies": {
-    "@godcreator/docfirst-workflow": "workspace:*",
-    "@godcreator/trajectory-disk": "workspace:*"
+    "@godcreator/docfirst-workflow": "workspace:^",
+    "@godcreator/trajectory-disk": "workspace:^"
   },
   "peerDependencies": {
     "@fumadocs/base-ui": "16.17.1",
-    "@godcreator/docsite-kit": "^0.3.0",
+    "@godcreator/docsite-kit": "workspace:^",
     "lucide-react": "^1.54.0",
     "react": "^19.3.0",
     "react-router": "^8.4.0"
   },
   "devDependencies": {
-    "@fumadocs/base-ui": "16.17.1",
-    "@godcreator/docsite-kit": "workspace:*",
-    "@types/mdx": "^2.0.14",
-    "@types/node": "^26.2.0",
-    "@types/react": "^19.3.0",
-    "fumadocs-core": "16.17.1",
-    "lucide-react": "1.54.0",
-    "react": "^19.3.0",
-    "react-router": "^8.4.0"
+    "@fumadocs/base-ui": "catalog:",
+    "@godcreator/docsite-kit": "workspace:^",
+    "@types/mdx": "catalog:",
+    "@types/node": "catalog:",
+    "@types/react": "catalog:",
+    "fumadocs-core": "catalog:",
+    "lucide-react": "catalog:",
+    "react": "catalog:",
+    "react-router": "catalog:"
   },
   "publishConfig": {
     "access": "public",
