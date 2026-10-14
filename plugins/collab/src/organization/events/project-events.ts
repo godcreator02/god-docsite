@@ -88,7 +88,7 @@ export class ProjectEvents {
     if (error !== null) this.deps.log.warn(`项目没能开始：${error}`)
     for (const repo of projects) {
       void this.steps.notifyWhenStepErrorsChange(repo, async () => this.startWatching(repo))
-      void this.deps.sites.keep(repo)
+      void this.keepSite(repo)
     }
   }
 
@@ -164,9 +164,16 @@ export class ProjectEvents {
     await this.list.add(repo)
     this.deps.onListChanged(repo, 'added')
     await this.steps.notifyWhenStepErrorsChange(repo, async () => this.startWatching(repo))
-    void this.deps.sites.keep(repo)
+    void this.keepSite(repo)
     this.scheduler.request(repo, 'full')
     return { repo }
+  }
+
+  /** 让站点常驻：起不来记成这个项目 site:keep 一步的出错（经通知显示）、出错变了就报变化，所以 sites.keep 的失败不会让返回的 Promise 被拒绝 */
+  private keepSite(repo: string): Promise<void> {
+    return this.steps.notifyWhenStepErrorsChange(repo, async () => {
+      await this.steps.step(repo, 'site:keep', [], () => this.deps.sites.keep(repo))
+    })
   }
 
   /** 移出列表：两边都忘掉它，停掉站点，再核对一次订阅 */

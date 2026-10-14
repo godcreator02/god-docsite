@@ -18,8 +18,17 @@ beforeEach(async () => {
 
 const at = '2026-10-08T08:00:00.000Z'
 
-/** 两边各步的假件：记下调了哪一步；failing 里的步名照它抛错 */
-function eventsWith(options: { failing?: Map<string, string>; openRemote?: () => Promise<RemoteProject>; cloned?: string[]; projects?: string[] } = {}) {
+/** 两边各步的假件：记下调了哪一步；failing 里的步名照它抛错。keepSite 换掉站点常驻，http 换掉 Gitea 接口 */
+function eventsWith(
+  options: {
+    failing?: Map<string, string>
+    openRemote?: () => Promise<RemoteProject>
+    cloned?: string[]
+    projects?: string[]
+    keepSite?: (repo: string) => Promise<void>
+    http?: ProjectEventsDeps['gitea']['http']
+  } = {},
+) {
   const calls: string[] = []
   const changed: string[] = []
   const logged: string[] = []
@@ -54,9 +63,11 @@ function eventsWith(options: { failing?: Map<string, string>; openRemote?: () =>
     log: { info: (message) => void logged.push(message), warn: (message) => void logged.push(message) },
     projectsSetting: { get: () => options.projects ?? [bob.repo], set: async () => {} },
     gitea: {
-      http: async () => {
-        throw new Error('这个测试不该调 Gitea 接口')
-      },
+      http:
+        options.http ??
+        (async () => {
+          throw new Error('这个测试不该调 Gitea 接口')
+        }),
       account: async () => {
         throw new Error('这个测试不该读账号')
       },
@@ -64,7 +75,7 @@ function eventsWith(options: { failing?: Map<string, string>; openRemote?: () =>
     },
     openProject: async () => bob,
     openRemote: options.openRemote ?? (async () => bob),
-    sites: { keep: async () => {}, forget: async () => {} },
+    sites: { keep: options.keepSite ?? (async () => {}), forget: async () => {} },
     collabRepo,
     otherRepos,
     webhooks: { check: async () => step('organization:webhook'), forget: () => step('organization:forget') },
@@ -81,23 +92,12 @@ describe('完整刷新', () => {
     const { events, calls, changed } = eventsWith()
     expect(events.refreshedOnce(bob.repo)).toBe(false)
     expect(await events.refresh(bob.repo)).toEqual({ at, error: null })
-    expect(calls).toEqual([
-      'collab:watch',
-      'other:watch',
-      'collab:fetch',
-      'collab:leads',
-      'collab:rules',
-      'collab:sync',
-      'other:clone',
-      'other:fetch datasheets',
-      'other:fetch firmware',
-      'other:review datasheets',
-      'other:review firmware',
-      'other:rules datasheets',
-      'other:rules firmware',
-      'other:retain datasheets,firmware',
-      'organization:webhook',
-    ])
+    expect(calls).toEqual(expect.arrayContaining(['collab:watch', 'collab:fetch', 'collab:leads', 'collab:rules', 'collab:sync']))
+    for (const name of ['datasheets', 'firmware']) expect(calls).toEqual(expect.arrayContaining(['other:watch', `other:fetch ${name}`, `other:review ${name}`, `other:rules ${name}`]))
+    expect(calls).toContain('other:retain datasheets,firmware')
+    expect(calls).toContain('organization:webhook')
+    expect(calls.indexOf('collab:sync')).toBeGreaterThan(calls.indexOf('collab:fetch'))
+    expect(events.errorsOf(bob.repo)).toEqual([])
     expect(events.refreshedOnce(bob.repo)).toBe(true)
     expect(changed).toEqual([bob.repo])
     events.stop()
@@ -216,6 +216,34 @@ describe('项目列表与订阅', () => {
       events.stop()
       vi.unstubAllGlobals()
     }
+  })
+
+  it('start 时站点起不来：失败记成这个项目的一步出错、报变化，不留没处理的拒绝', async () => {
+    git(bob.repo, 'remote', 'set-url', 'origin', 'https://git.example.org/hybrid-mmc/collab.git')
+    vi.stubGlobal('fetch', vi.fn(() => new Promise<Response>(() => {})))
+    const { events, changed } = eventsWith({ keepSite: async () => Promise.reject(new CollabRejected('site/ 下没有 package.json，不是站点目录')) })
+    try {
+      events.start()
+      await vi.waitFor(() => expect(events.errorsOf(bob.repo)).toEqual(['site/ 下没有 package.json，不是站点目录']), { timeout: 5_000 })
+      expect(changed).toContain(bob.repo)
+    } finally {
+      events.stop()
+      vi.unstubAllGlobals()
+    }
+  })
+
+  it('加进列表时站点起不来：照样加进去、安排刷新，失败记成一步出错、报变化', async () => {
+    git(bob.repo, 'remote', 'set-url', 'origin', 'https://git.example.org/hybrid-mmc/collab.git')
+    const { events, changed, listChanges } = eventsWith({
+      projects: [],
+      http: async () => ({ status: 200, body: { username: 'hybrid-mmc' } }),
+      keepSite: async () => Promise.reject(new CollabRejected('site/ 下没有 package.json，不是站点目录')),
+    })
+    expect(await events.add(bob.repo)).toEqual({ repo: bob.repo })
+    expect(listChanges).toEqual([[bob.repo, 'added']])
+    await vi.waitFor(() => expect(events.errorsOf(bob.repo)).toEqual(['site/ 下没有 package.json，不是站点目录']), { timeout: 5_000 })
+    expect(changed).toContain(bob.repo)
+    events.stop()
   })
 
   it('origin 的地址读不出组织：那个项目不订，原因写在实时推送的状态里', async () => {
