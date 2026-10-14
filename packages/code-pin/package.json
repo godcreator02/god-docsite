@@ -14,7 +14,12 @@
     "./node": {
       "types": "./dist/node.d.mts",
       "default": "./dist/node.mjs"
-    }
+    },
+    "./site": {
+      "types": "./dist/site.d.mts",
+      "default": "./dist/site.mjs"
+    },
+    "./site/pin.css": "./dist/pin.css"
   },
   "files": [
     "dist"
@@ -39,6 +44,7 @@
     "unist-util-visit": "catalog:"
   },
   "devDependencies": {
+    "@mdx-js/mdx": "catalog:",
     "@types/node": "catalog:",
     "typescript": "catalog:",
     "vitest": "catalog:"

@@ -1,0 +1,44 @@
+/*
+ * 钉码外框的状态点：remark 插件把每处钉包进 .code-pin，状态写在 data-pin-status。
+ * 点画在代码块标题栏右侧、复制按钮左边（目录树画在右上角），8px，不写字。
+ * 四种：新鲜绿、有变动实心黄、未确认空心黄、缺失红。换色覆盖 --code-pin-dot。
+ */
+.code-pin {
+  position: relative;
+}
+
+.code-pin::after {
+  content: '';
+  position: absolute;
+  top: 15px;
+  right: 44px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--code-pin-dot, #a1a1aa);
+  pointer-events: none;
+}
+
+.code-pin[data-pin-kind='tree']::after {
+  top: 12px;
+  right: 12px;
+}
+
+.code-pin[data-pin-status='fresh'] {
+  --code-pin-dot: #22c55e;
+}
+
+.code-pin[data-pin-status='changed'],
+.code-pin[data-pin-status='unconfirmed'] {
+  --code-pin-dot: #eab308;
+}
+
+.code-pin[data-pin-status='missing'] {
+  --code-pin-dot: #ef4444;
+}
+
+/* 未确认：空心圈——黄，但跟「改过了」是两回事 */
+.code-pin[data-pin-status='unconfirmed']::after {
+  background: transparent;
+  box-shadow: inset 0 0 0 2px var(--code-pin-dot);
+}
