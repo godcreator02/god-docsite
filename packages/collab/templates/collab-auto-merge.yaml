@@ -1,5 +1,5 @@
 # 协作仓的合并请求当场定论：没有冲突、没改只有负责人能改的内容（工作流、人员列表、站点的装包设置与 Node 会执行的配置、
-# site/package.json 里依赖以外的部分与功能包 @godcreator/collab-site 的版本；协作仓的负责人，也就是 Gitea 上协作仓的协作者提交的放行），
+# site/package.json 里依赖以外的部分与功能包 @godcreator/collab 的版本；协作仓的负责人，也就是 Gitea 上协作仓的协作者提交的放行），
 # 就按「合并提交」方式合进 main；否则在合并请求上留言写明原因，再关掉它。记录格式、站点会不会打不开由成员提交前在本机查，这里不查。
 # 提交审核的 gwb-collab 一直等到合并请求关闭，被打回就把改动退回提交人的工作区，所以这里不留开着等人的合并请求。
 # 放在协作仓的 .gitea/workflows/ 下。用 pull_request_target：跑的永远是 main 上这一份，合并请求里改了它也不生效。
@@ -11,7 +11,7 @@ on:
   pull_request_target:
     types: [opened, synchronize, reopened]
 
-# 检查用的 @godcreator/collab-merge-check 版本写在这里；这个文件只有负责人能改，升版本就是改这一行
+# 检查用的 @godcreator/collab 版本写在这里（命令 collab-merge-check 在这个包里）；这个文件只有负责人能改，升版本就是改这一行
 env:
   MERGE_CHECK_RANGE: '^0.1.0'
 
@@ -64,12 +64,12 @@ jobs:
             exit 0
           fi
 
-          # 只装合并检查包：它只依赖数据模型包 @godcreator/collab-model，npm 一并装上；按版本范围缓存在执行器里
+          # 只装协作包 @godcreator/collab：npm 连带装上它依赖的本仓包，站点页面要的 react 等是可选 peer、不装；按版本范围缓存在执行器里
           tooldir="$HOME/.cache/collab-merge-check/tool-$(printf '%s' "$MERGE_CHECK_RANGE" | tr -c 'A-Za-z0-9.' '_')"
           mkdir -p "$tooldir"
           printf '@godcreator:registry=%s/api/packages/godcreator/npm/\n' "$SERVER" > "$tooldir/.npmrc"
           [ -f "$tooldir/package.json" ] || echo '{"private":true}' > "$tooldir/package.json"
-          (cd "$tooldir" && npm install --silent --no-audit --no-fund "@godcreator/collab-merge-check@$MERGE_CHECK_RANGE")
+          (cd "$tooldir" && npm install --silent --no-audit --no-fund "@godcreator/collab@$MERGE_CHECK_RANGE")
 
           # 协作仓的负责人就是 Gitea 上协作仓的协作者
           leads=$(node --input-type=module <<'SCRIPT'

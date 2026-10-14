@@ -6,7 +6,7 @@ describe('合并检查：只有负责人能改的内容', () => {
   it('成员改了工作流、人员列表、装包设置、Node 会执行的配置、scripts、框架包版本、写成网址的依赖：只有负责人能改，逐处写明', async () => {
     write(
       'site/package.json',
-      `${JSON.stringify({ scripts: { dev: 'vite' }, dependencies: { react: '^19.3.0', '@godcreator/collab-site': '^0.1.0', evil: 'https://example.org/evil.tgz' } }, null, 2)}\n`,
+      `${JSON.stringify({ scripts: { dev: 'vite' }, dependencies: { react: '^19.3.0', '@godcreator/collab': '^0.1.0', evil: 'https://example.org/evil.tgz' } }, null, 2)}\n`,
     )
     write('.gitea/workflows/collab-auto-merge.yaml', 'name: 改过\n')
     write('.github/workflows/steal.yaml', 'name: 新加\n')
@@ -20,7 +20,7 @@ describe('合并检查：只有负责人能改的内容', () => {
     expect(result.verdict).toBe('needs-review')
     expect(result.problems[0]).toBe(
       '改了只有负责人能改的内容：.gitea/workflows/collab-auto-merge.yaml、.github/workflows/steal.yaml、site/.npmrc、' +
-        'site/package.json 的 scripts、site/package.json 里 @godcreator/collab-site 的版本、site/package.json 里 evil 写成了 "https://example.org/evil.tgz"（只能写版本号范围）、' +
+        'site/package.json 的 scripts、site/package.json 里 @godcreator/collab 的版本、site/package.json 里 evil 写成了 "https://example.org/evil.tgz"（只能写版本号范围）、' +
         'site/people.json、site/pnpm-workspace.yaml、site/postcss.config.mjs、site/vite.config.ts；这类改动交给负责人（协作仓的协作者）提交',
     )
   })

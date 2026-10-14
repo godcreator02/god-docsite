@@ -43,7 +43,7 @@ export async function changedFilesBetween(repo: string, base: string, head: stri
 }
 
 /** 站点依赖里写着功能包的那一项：它决定每个人电脑上运行的网站代码，也决定站点协议号对不对得上插件 */
-const frameworkPackage = '@godcreator/collab-site'
+const frameworkPackage = '@godcreator/collab'
 
 const dependencySections = ['dependencies', 'devDependencies'] as const
 
