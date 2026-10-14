@@ -1,0 +1,78 @@
+---
+born-at: 2026-10-14T18:45
+type: choice
+parent: [2026-09-03-god-live-doc]
+label: 功能包原生接入
+domain: 骨架
+---
+
+## 背景
+
+重构方案定为「站点 = fumadocs 官方 React Router 模板 + 按功能切分的功能包」，功能包只经 fumadocs 与 React Router
+原生的扩展点接进站点，不再把路由模块放在包里、不再给 `@react-router/dev` 打补丁、不再用 `@site` 别名反向 import 站点代码。
+第 1 阶段要先在官方模板上把扩展点表每一行跑通，定下集合写法、页面树插件、Vite 识别功能包的办法与转发文件的写法。
+实验在 `probes/2610141800_functional-packages/`：官方模板快照加两个最小功能包（`demo-content` 正文类、`demo-pages` 页面类），
+两种装法（workspace 链接、`pnpm pack` 后按 `file:` 装进 node_modules）× dev 与 build + start，Playwright 脚本真点站内导航。
+
+## 结论与边界
+
+采用这套原生接法：集合用 Config API（`source.config.ts`），全站 remark 插件在每个集合的 `applyMdxPreset` 里再列一次；
+带数据的页面由站点 `app/features/<包>/` 里的转发文件声明（loader/action 写成带站点参数的箭头函数，页面组件一行 re-export，
+组件用 `useLoaderData` 取数据），`app/routes.ts` 用 `route()` 展开；侧栏入口用 `loader({ plugins })` 的
+`transformPageTree.root`；站点 vite 插件用 vitefu 的 `crawlFrameworkPkgs` 按「peerDependencies 里有 fumadocs-core 或
+@fumadocs/base-ui」识别功能包，并在 dev 下补查带 `?v=` 查询的 `.server` 模块；`app.css` 用 `@source not` 排除功能包写数据的目录；
+预渲染只收站点自己的静态页与内容页。推荐写法在两种装法、dev 与 build + start 下全部检查通过，没打 React Router 补丁。
+边界：验证环境是 Windows、Node 24.14.1、fumadocs-core / @fumadocs/base-ui 16.17.1、fumadocs-mdx 15.4.7、
+react-router 8.4.0、vite 8.3.4、vitefu 1.1.3、tailwindcss 4.3.3；只验了单进程的 react-router-serve，推送的订阅表在进程内存里，
+多进程部署没验；页面路由直接 re-export loader 只在 build 下验过；功能包是两个最小的假包，真实功能包的依赖面更大，没验。
+
+supersedes:: [功能包的路由模块留在包里](2026-10-11-feature-routes-from-package.md)
+pivots-from:: [站内导航认不出功能包路由](2026-10-13-react-router-v-query-route-match.md)
+
+## 经过
+
+在实验目录运行 `pnpm install && node scripts/run-all.mjs`：构建两个功能包，依次换两种装法，每种装法下对每种集合写法起
+dev 与 build + start，用 `scripts/browser-checks.mjs` 检查 remark 插件与全局公式插件生效、功能包样式进了 CSS、MDX 组件水合、
+侧栏入口、从侧栏与正文链接两条路站内导航到功能包页面、`useFetcher` 提交写回 JSON、另一页 action 触发的 SSE 推送，
+build 后搜 `build/client`；另外跑 `typegen` + `tsc`、`.server` 反例、不挂站点 vite 插件的对照、只挂全局插件的对照、
+功能包页面也预渲染的对照。每次运行的原始输出在 `probes/2610141800_functional-packages/runs/<运行时刻>/`。
+
+## 依据
+
+集合：fumadocs-mdx 的 `getMDXOptions` 在集合写了 `mdxOptions` 时完全不读全局 `mdxOptions`，两种写法都一样，对照组里公式原样留在正文
+（`probes/2610141800_functional-packages/runs/20261014-0954/linked-config-global-only-dev-docs.html`）。macro 只替换 `defineDocs(...)` 调用，`source.ts` 顶部的插件 import
+留在运行时代码里并随 `docs.tsx` 进浏览器：dev 下文档页水合失败（`node:url` 被换成浏览器空壳，出自 fumadocs-core 的 `remark-image`，
+`probes/2610141800_functional-packages/runs/20261014-0954/linked-macro-dev-dev-server.txt`），build 的客户端产物 1065.9 KB，Config API 是 839.4 KB；把插件改成
+`mdxOptions` 函数里动态 import，又因 macro 求值用的模块运行器已关闭而 500（`probes/2610141800_functional-packages/runs/20261014-0946/linked-macro-lazy-options-dev-dev-server.txt`）。
+
+转发文件：React Router 只给 `export default <表达式或函数>` 包 `withComponentProps`，re-export 的默认组件拿不到 `loaderData`
+（`probes/2610141800_functional-packages/runs/20261014-0941/linked-macro-dev-dev-server.txt` 的 `Cannot read properties of undefined (reading 'count')`），所以组件改用
+`useLoaderData`。路由模块在站点 `app/` 里，React Router 认得出它、先剥掉 loader/action 再解析 import，packed 装法下站内导航也没有报错层。
+
+`.server` 检查：React Router 拿解析结果整串匹配 `.server.js` 结尾，dev 下 Vite 给 node_modules 里不预构建的包加 `?v=`，
+packed 装法的反例在 dev 下没被拦，浏览器直接请求了 `demo.server.js?v=…`（`probes/2610141800_functional-packages/runs/inspect-packed-bad-forwarding/module.txt`）；
+build 两种装法都拦。站点插件里去掉查询再匹配一遍后 dev 也拦了。
+
+Vite：不挂站点插件时，packed 装法下功能包被 SSR 外置、由 Node 直接加载，拿到另一份 fumadocs-core，服务端渲染报
+`You need to wrap your application inside FrameworkProvider`，dev 500、build 预渲染失败；fumadocs-mdx 自己的识别只认
+`fumadocs-` 与 `@fumadocs/` 前缀，认不到功能包。
+
+dev 下写数据文件：`@tailwindcss/vite` 对扫描到的源文件变化发整页刷新，SSR 模块重载后 SSE 的订阅表换了实例，推送丢失
+（`probes/2610141800_functional-packages/runs/reload-cause-01-template-app-css/console.txt`）；`@source not '../data'` 后消失（`probes/2610141800_functional-packages/runs/reload-cause-02-source-not-data/console.txt`）。
+
+预渲染：官方模板预渲染 `getStaticPaths()`，SSE 路由让构建超时失败（`probes/2610141800_functional-packages/runs/20261014-0951/linked-config-start-build.txt`），
+数据页被预渲染后直接打开与站内导航都显示构建时的数据。
+
+## 否掉的候选
+
+macro 写集合：否在插件代码进浏览器（dev 水合失败、产物大 227 KB），动态 import 的变体否在模块运行器已关闭。
+功能包页面组件靠 props 取 `loaderData`：否在 re-export 的默认导出不被包 `withComponentProps`；转发文件写成
+`export default` 一个组件也能拿到 props，但多一层，组件用 hook 后转发文件只要一行。页面树退回 meta.json 链接项：
+`transformPageTree` 已能干净地加入口，不需要。照搬 fumadocs-mdx 的前缀判断或写死包名单：前缀判断认不到 `@godcreator/` 下的包，
+包名单每加一个功能包就要改。只靠 React Router 的 `.server` 检查：packed 装法的 dev 下漏检。
+
+## 代价与遗留
+
+站点插件里的 dev `.server` 补查是自己维护的约 15 行，React Router 将来若改成去掉查询再匹配，就可以删掉。
+每个写数据进站点目录的功能包都要在 `app.css` 加一条 `@source not`，建站器要负责写入。功能包的 `./site` 入口若同时导出 remark 插件与组件，
+dev 下浏览器会加载插件的依赖（build 时被摇掉），正式的包宜把构建期插件放到单独的子路径——本实验没改。

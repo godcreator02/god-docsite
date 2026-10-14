@@ -1,0 +1,52 @@
+{
+  "runName": "20261014-1008",
+  "startedAt": "2026-10-14T10:08:22.937Z",
+  "node": "v24.14.1",
+  "sections": [
+    {
+      "title": "环境",
+      "entries": [
+        "运行 20261014-1008，日志目录 runs\\20261014-1008",
+        "Node v24.14.1"
+      ]
+    },
+    {
+      "title": "装法 packed",
+      "entries": [
+        "demo-content → node_modules\\.pnpm\\demo-content@file+tarballs+_0f8cb0f0c1dfee4299f7cde0ed6fff4b\\node_modules\\demo-content",
+        "demo-pages → node_modules\\.pnpm\\demo-pages@file+tarballs+de_1e0175858bc0bfa980ed07996cdd8cae\\node_modules\\demo-pages"
+      ]
+    },
+    {
+      "title": "packed-config-dot-server",
+      "entries": [
+        {
+          "name": "4-dot-server-build",
+          "pass": true,
+          "detail": "页面组件引用 .server 模块时 build 失败，报 Server-only module referenced by client（runs\\20261014-1008\\packed-config-dot-server-build.txt）"
+        },
+        {
+          "name": "4-dot-server-dev",
+          "pass": true,
+          "detail": "站内导航时：dev 服务报 Server-only module referenced by client=true；路由模块请求 500 /app/features/demo/demo.tsx；浏览器请求的 .server 模块：无；控制台：（无）"
+        },
+        {
+          "name": "对照（关掉站点插件里的 dev 补查）4-dot-server-dev",
+          "pass": false,
+          "detail": "站内导航时：dev 服务报 Server-only module referenced by client=false；路由模块请求 无 5xx；浏览器请求的 .server 模块：…node_modules/demo-pages/dist/site/demo.server.js?v=c41c259c；控制台：（无）"
+        }
+      ]
+    },
+    {
+      "title": "packed-config-reexport-loader",
+      "entries": [
+        {
+          "name": "4-reexport-loader-in-page-route",
+          "pass": true,
+          "detail": "页面路由写 export { x as loader } from '…/site/server'：build exit 0；客户端产物里的服务端代码：无（runs\\20261014-1008\\packed-config-reexport-loader-build.txt）"
+        }
+      ]
+    }
+  ],
+  "finishedAt": "2026-10-14T10:09:02.093Z"
+}

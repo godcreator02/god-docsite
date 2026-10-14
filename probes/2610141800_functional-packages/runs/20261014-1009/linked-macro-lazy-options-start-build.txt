@@ -1,0 +1,80 @@
+$ C:\Program Files\nodejs\node.exe D:\unitfolders\oz47p-docsite-kit\god-docsite\probes\2610141800_functional-packages\site\node_modules\@react-router\dev\bin.cjs build
+(cwd D:\unitfolders\oz47p-docsite-kit\god-docsite\probes\2610141800_functional-packages\site)
+
+[feature-packages] {"optimizeDeps":{"include":["demo-content > ms","fumadocs-mdx > esbuild","fumadocs-mdx > github-slugger","fumadocs-mdx > picocolors","fumadocs-mdx > picomatch","fumadocs-mdx > yuku-analyzer"],"exclude":["@fumadocs/base-ui","demo-content","demo-pages","fumadocs-mdx"]},"ssr":{"noExternal":["@fumadocs/base-ui","demo-content","demo-pages","fumadocs-mdx"],"external":[]}}
+[feature-packages] {"optimizeDeps":{"include":["demo-content > ms","fumadocs-mdx > esbuild","fumadocs-mdx > github-slugger","fumadocs-mdx > picocolors","fumadocs-mdx > picomatch","fumadocs-mdx > yuku-analyzer"],"exclude":["@fumadocs/base-ui","demo-content","demo-pages","fumadocs-mdx"]},"ssr":{"noExternal":["@fumadocs/base-ui","demo-content","demo-pages","fumadocs-mdx"],"external":["@base-ui/react","@fuma-translate/react","@mdx-js/mdx","@standard-schema/spec","chokidar","class-variance-authority","cn","esbuild","estree-util-value-to-estree","github-slugger","hast-util-to-jsx-runtime","lucide-react","magic-string","mdast-util-mdx","motion","ms","next-themes","picocolors","picomatch","react-remove-scroll","scroll-into-view-if-needed","shiki","tinyexec","tinyglobby","unified","unist-util-remove-position","unist-util-visit","vfile","yaml","yuku-analyzer","zod"]}}
+Using Vite Environment API
+vite v8.3.4 building client environment for production...
+transforming...
+✓ 2595 modules transformed.
+
+--- stderr ---
+(!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
+  - import "./feature-packages.vite" without a file extension (vite.config.ts:5:33). Add the file extension
+Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.
+(!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
+  - import "./feature-packages.vite" without a file extension (vite.config.ts:5:33). Add the file extension
+Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.
+Found 2 warnings while optimizing generated CSS:
+
+Issue #1:
+[2m│     }[22m
+[2m│   }[22m
+[2m│[22m   .\[\&_\:\:highlight\(fd-search\)\]\:text-fd-primary ::highlight(fd-search) {
+[2m┆[22m                                                                   [33m[2m^--[22m 'highlight' is not recognized as a valid pseudo-element. Did you mean ':highlight' (pseudo-class) or is this a typo?[39m
+[2m┆[22m
+[2m│     color: var(--color-fd-primary);[22m
+[2m│   }[22m
+
+Issue #2:
+[2m│     color: var(--color-fd-primary);[22m
+[2m│   }[22m
+[2m│[22m   .\[\&_\:\:highlight\(fd-search\)\]\:underline ::highlight(fd-search) {
+[2m┆[22m                                                             [33m[2m^--[22m 'highlight' is not recognized as a valid pseudo-element. Did you mean ':highlight' (pseudo-class) or is this a typo?[39m
+[2m┆[22m
+[2m│     text-decoration-line: underline;[22m
+[2m│   }[22m
+
+[plugin rolldown:vite-resolve] Module "node:fs/promises" has been externalized for browser compatibility, imported by "D:/unitfolders/oz47p-docsite-kit/god-docsite/probes/2610141800_functional-packages/node_modules/.pnpm/fumadocs-mdx@15.4.7_@types+_db95712104c409f54b2e4e66b8351fcf/node_modules/fumadocs-mdx/dist/runtime/server.js". See https://vite.dev/guide/troubleshooting.html#module-externalized-for-browser-compatibility for more details.
+[plugin rolldown:vite-resolve] Module "node:fs/promises" has been externalized for browser compatibility, imported by "D:/unitfolders/oz47p-docsite-kit/god-docsite/probes/2610141800_functional-packages/node_modules/.pnpm/fumadocs-mdx@15.4.7_@types+_db95712104c409f54b2e4e66b8351fcf/node_modules/fumadocs-mdx/dist/runtime/server.js". See https://vite.dev/guide/troubleshooting.html#module-externalized-for-browser-compatibility for more details.
+✗ Build failed in 1.93s
+Build failed with 2 errors:
+
+[plugin fumadocs-mdx:mdx] D:/unitfolders/oz47p-docsite-kit/god-docsite/probes/2610141800_functional-packages/site/content/docs/index.mdx?macro_id=app%2Flib%2Fsource.ts%23docs
+Error: Vite module runner has been closed.
+    at ModuleRunner.getModuleInformation (file:///D:/unitfolders/oz47p-docsite-kit/god-docsite/probes/2610141800_functional-packages/node_modules/.pnpm/vite@8.3.4_patch_hash=71051_8cc5f27f1374563b1a7bdf9782a6037c/node_modules/vite/dist/node/module-runner.js:1223:26)
+    at ModuleRunner.cachedModule (file:///D:/unitfolders/oz47p-docsite-kit/god-docsite/probes/2610141800_functional-packages/node_modules/.pnpm/vite@8.3.4_patch_hash=71051_8cc5f27f1374563b1a7bdf9782a6037c/node_modules/vite/dist/node/module-runner.js:1205:18)
+    at request (file:///D:/unitfolders/oz47p-docsite-kit/god-docsite/probes/2610141800_functional-packages/node_modules/.pnpm/vite@8.3.4_patch_hash=71051_8cc5f27f1374563b1a7bdf9782a6037c/node_modules/vite/dist/node/module-runner.js:1245:94)
+    at dynamicRequest (file:///D:/unitfolders/oz47p-docsite-kit/god-docsite/probes/2610141800_functional-packages/node_modules/.pnpm/vite@8.3.4_patch_hash=71051_8cc5f27f1374563b1a7bdf9782a6037c/node_modules/vite/dist/node/module-runner.js:1247:122)
+    at mdxOptions (D:\unitfolders\oz47p-docsite-kit\god-docsite\probes\2610141800_functional-packages\site\app\lib\source.ts:17:9)
+    at getMDXOptions (file:///D:/unitfolders/oz47p-docsite-kit/god-docsite/probes/2610141800_functional-packages/node_modules/.pnpm/fumadocs-mdx@15.4.7_@types+_db95712104c409f54b2e4e66b8351fcf/node_modules/fumadocs-mdx/dist/build-default-CSiWktEh.js:164:46)
+    at buildJSMDX (file:///D:/unitfolders/oz47p-docsite-kit/god-docsite/probes/2610141800_functional-packages/node_modules/.pnpm/fumadocs-mdx@15.4.7_@types+_db95712104c409f54b2e4e66b8351fcf/node_modules/fumadocs-mdx/dist/build-default-CSiWktEh.js:97:27)
+    at buildMDX (file:///D:/unitfolders/oz47p-docsite-kit/god-docsite/probes/2610141800_functional-packages/node_modules/.pnpm/fumadocs-mdx@15.4.7_@types+_db95712104c409f54b2e4e66b8351fcf/node_modules/fumadocs-mdx/dist/build-H2VN-Hpm.js:10:9)
+    at async Object.load (file:///D:/unitfolders/oz47p-docsite-kit/god-docsite/probes/2610141800_functional-packages/node_modules/.pnpm/fumadocs-mdx@15.4.7_@types+_db95712104c409f54b2e4e66b8351fcf/node_modules/fumadocs-mdx/dist/mdx-D0Qtc99b.js:64:20)
+    at async TransformPluginContextImpl.transform (file:///D:/unitfolders/oz47p-docsite-kit/god-docsite/probes/2610141800_functional-packages/node_modules/.pnpm/fumadocs-mdx@15.4.7_@types+_db95712104c409f54b2e4e66b8351fcf/node_modules/fumadocs-mdx/dist/adapter-XBO81DIE.js:68:19)
+[plugin fumadocs-mdx:mdx] D:/unitfolders/oz47p-docsite-kit/god-docsite/probes/2610141800_functional-packages/site/content/docs/index.mdx?macro_id=app%2Flib%2Fsource.ts%23docs
+Error: Vite module runner has been closed.
+    at ModuleRunner.getModuleInformation (file:///D:/unitfolders/oz47p-docsite-kit/god-docsite/probes/2610141800_functional-packages/node_modules/.pnpm/vite@8.3.4_patch_hash=71051_8cc5f27f1374563b1a7bdf9782a6037c/node_modules/vite/dist/node/module-runner.js:1223:26)
+    at ModuleRunner.cachedModule (file:///D:/unitfolders/oz47p-docsite-kit/god-docsite/probes/2610141800_functional-packages/node_modules/.pnpm/vite@8.3.4_patch_hash=71051_8cc5f27f1374563b1a7bdf9782a6037c/node_modules/vite/dist/node/module-runner.js:1205:18)
+    at request (file:///D:/unitfolders/oz47p-docsite-kit/god-docsite/probes/2610141800_functional-packages/node_modules/.pnpm/vite@8.3.4_patch_hash=71051_8cc5f27f1374563b1a7bdf9782a6037c/node_modules/vite/dist/node/module-runner.js:1245:94)
+    at dynamicRequest (file:///D:/unitfolders/oz47p-docsite-kit/god-docsite/probes/2610141800_functional-packages/node_modules/.pnpm/vite@8.3.4_patch_hash=71051_8cc5f27f1374563b1a7bdf9782a6037c/node_modules/vite/dist/node/module-runner.js:1247:122)
+    at mdxOptions (D:\unitfolders\oz47p-docsite-kit\god-docsite\probes\2610141800_functional-packages\site\app\lib\source.ts:17:9)
+    at getMDXOptions (file:///D:/unitfolders/oz47p-docsite-kit/god-docsite/probes/2610141800_functional-packages/node_modules/.pnpm/fumadocs-mdx@15.4.7_@types+_db95712104c409f54b2e4e66b8351fcf/node_modules/fumadocs-mdx/dist/build-default-CSiWktEh.js:164:46)
+    at buildJSMDX (file:///D:/unitfolders/oz47p-docsite-kit/god-docsite/probes/2610141800_functional-packages/node_modules/.pnpm/fumadocs-mdx@15.4.7_@types+_db95712104c409f54b2e4e66b8351fcf/node_modules/fumadocs-mdx/dist/build-default-CSiWktEh.js:97:27)
+    at buildMDX (file:///D:/unitfolders/oz47p-docsite-kit/god-docsite/probes/2610141800_functional-packages/node_modules/.pnpm/fumadocs-mdx@15.4.7_@types+_db95712104c409f54b2e4e66b8351fcf/node_modules/fumadocs-mdx/dist/build-H2VN-Hpm.js:10:9)
+    at async Object.load (file:///D:/unitfolders/oz47p-docsite-kit/god-docsite/probes/2610141800_functional-packages/node_modules/.pnpm/fumadocs-mdx@15.4.7_@types+_db95712104c409f54b2e4e66b8351fcf/node_modules/fumadocs-mdx/dist/mdx-D0Qtc99b.js:64:20)
+    at async TransformPluginContextImpl.transform (file:///D:/unitfolders/oz47p-docsite-kit/god-docsite/probes/2610141800_functional-packages/node_modules/.pnpm/fumadocs-mdx@15.4.7_@types+_db95712104c409f54b2e4e66b8351fcf/node_modules/fumadocs-mdx/dist/adapter-XBO81DIE.js:68:19)
+    at aggregateBindingErrorsIntoJsError (file:///D:/unitfolders/oz47p-docsite-kit/god-docsite/probes/2610141800_functional-packages/node_modules/.pnpm/rolldown@1.2.13/node_modules/rolldown/dist/shared/error-Dsqzw0Oa.mjs:49:18)
+    at unwrapBindingResult (file:///D:/unitfolders/oz47p-docsite-kit/god-docsite/probes/2610141800_functional-packages/node_modules/.pnpm/rolldown@1.2.13/node_modules/rolldown/dist/shared/error-Dsqzw0Oa.mjs:19:128)
+    at #build (file:///D:/unitfolders/oz47p-docsite-kit/god-docsite/probes/2610141800_functional-packages/node_modules/.pnpm/rolldown@1.2.13/node_modules/rolldown/dist/shared/rolldown-D_vNlorD.mjs:133:34)
+    at async buildEnvironment (file:///D:/unitfolders/oz47p-docsite-kit/god-docsite/probes/2610141800_functional-packages/node_modules/.pnpm/vite@8.3.4_patch_hash=71051_8cc5f27f1374563b1a7bdf9782a6037c/node_modules/vite/dist/node/chunks/node.js:34716:66)
+    at async Object.build (file:///D:/unitfolders/oz47p-docsite-kit/god-docsite/probes/2610141800_functional-packages/node_modules/.pnpm/vite@8.3.4_patch_hash=71051_8cc5f27f1374563b1a7bdf9782a6037c/node_modules/vite/dist/node/chunks/node.js:35137:19)
+    at async buildApp (file:///D:/unitfolders/oz47p-docsite-kit/god-docsite/probes/2610141800_functional-packages/node_modules/.pnpm/@react-router+dev@8.4.0_@re_d57a0e4586dd309d68f4d3942da90af1/node_modules/@react-router/dev/dist/vite.js:1543:8)
+    at async buildApp (file:///D:/unitfolders/oz47p-docsite-kit/god-docsite/probes/2610141800_functional-packages/node_modules/.pnpm/@react-router+dev@8.4.0_@re_d57a0e4586dd309d68f4d3942da90af1/node_modules/@react-router/dev/dist/vite.js:800:6)
+    at async Object.buildApp (file:///D:/unitfolders/oz47p-docsite-kit/god-docsite/probes/2610141800_functional-packages/node_modules/.pnpm/@react-router+dev@8.4.0_@re_d57a0e4586dd309d68f4d3942da90af1/node_modules/@react-router/dev/dist/vite.js:2211:8)
+    at async Object.buildApp (file:///D:/unitfolders/oz47p-docsite-kit/god-docsite/probes/2610141800_functional-packages/node_modules/.pnpm/vite@8.3.4_patch_hash=71051_8cc5f27f1374563b1a7bdf9782a6037c/node_modules/vite/dist/node/chunks/node.js:35133:38)
+    at async build (file:///D:/unitfolders/oz47p-docsite-kit/god-docsite/probes/2610141800_functional-packages/node_modules/.pnpm/@react-router+dev@8.4.0_@re_d57a0e4586dd309d68f4d3942da90af1/node_modules/@react-router/dev/dist/build-CsJF5XUO.js:16:2) {
+  errors: [Getter/Setter]
+}
+
+--- exit 1 signal null error 

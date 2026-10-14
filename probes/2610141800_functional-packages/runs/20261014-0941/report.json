@@ -1,0 +1,103 @@
+{
+  "runName": "20261014-0941",
+  "startedAt": "2026-10-14T09:41:59.949Z",
+  "node": "v24.14.1",
+  "sections": [
+    {
+      "title": "环境",
+      "entries": [
+        "运行 20261014-0941，日志目录 logs\\20261014-0941",
+        "Node v24.14.1"
+      ]
+    },
+    {
+      "title": "装法 linked",
+      "entries": [
+        "demo-content → packages\\demo-content",
+        "demo-pages → packages\\demo-pages"
+      ]
+    },
+    {
+      "title": "linked-macro-dev",
+      "entries": [
+        {
+          "name": "1-docs-ssr",
+          "pass": true,
+          "detail": "GET /docs → 200"
+        },
+        {
+          "name": "1-remark-plugin",
+          "pass": true,
+          "detail": "[data-demo-remark] 个数 1"
+        },
+        {
+          "name": "1-global-math",
+          "pass": true,
+          "detail": ".katex 个数 1"
+        },
+        {
+          "name": "2-package-style",
+          "pass": true,
+          "detail": ".demo-mark 颜色 rgb(219, 39, 119)"
+        },
+        {
+          "name": "2-mdx-component-hydrated",
+          "pass": false,
+          "detail": "抛错：page.waitForFunction: Timeout 20000ms exceeded."
+        },
+        {
+          "name": "3-sidebar-entry",
+          "pass": true,
+          "detail": "侧栏 a[href=\"/demo\"]「演示」个数 1"
+        },
+        {
+          "name": "4-client-nav-sidebar",
+          "pass": false,
+          "detail": "抛错：page.waitForSelector: Timeout 20000ms exceeded."
+        },
+        {
+          "name": "6-sse-open",
+          "pass": false,
+          "detail": "抛错：page.waitForFunction: Timeout 20000ms exceeded."
+        },
+        {
+          "name": "4-direct-open",
+          "pass": false,
+          "detail": "抛错：page.waitForSelector: Timeout 20000ms exceeded."
+        },
+        {
+          "name": "4-fetcher-action",
+          "pass": false,
+          "detail": "抛错：page.waitForFunction: Timeout 20000ms exceeded."
+        },
+        {
+          "name": "6-sse-push-from-other-page",
+          "pass": false,
+          "detail": "抛错：page.waitForFunction: Timeout 20000ms exceeded."
+        },
+        {
+          "name": "4-fetcher-action-again",
+          "pass": false,
+          "detail": "抛错：page.click: Timeout 30000ms exceeded."
+        },
+        {
+          "name": "4-client-nav-mdx-link",
+          "pass": false,
+          "detail": "抛错：page.click: Timeout 30000ms exceeded."
+        },
+        {
+          "name": "5-single-fumadocs-instance",
+          "pass": true,
+          "detail": "FrameworkProvider 报错 0 条"
+        },
+        {
+          "name": "console-clean",
+          "pass": false,
+          "detail": "[A pageerror] Module \"node:url\" has been externalized for browser compatibility. Cannot access \"node:url.fileURLToPath\" in client code.  See https://vite.dev/guide/troubleshooting.html#module-externalized-for-browser-compatibility for more details.\n[A http 500] http://127.0.0.1:5691/demo\n[A console.error] Failed to load resource: the server responded with a status of 500 ()\n[B http 500] http://127.0.0.1:5691/demo\n[B console.error] Failed to load resource: the server responded with a status of 500 ()"
+        },
+        "vite 插件识别结果：[feature-packages] {\"optimizeDeps\":{\"include\":[\"demo-content > ms\",\"fumadocs-mdx > esbuild\",\"fumadocs-mdx > github-slugger\",\"fumadocs-mdx > picocolors\",\"fumadocs-mdx > picomatch\",\"fumadocs-mdx > yuku-analyzer\"],\"exclude\":[\"@fumadocs/base-ui\",\"demo-content\",\"demo-pages\",\"fumadocs-mdx\"]},\"ssr\":{\"noExternal\":[\"@fumadocs/base-ui\",\"demo-content\",\"demo-pages\",\"fumadocs-mdx\"],\"external\":[\"@base-ui/react\",\"@fuma-translate/react\",\"@mdx-js/mdx\",\"@standard-schema/spec\",\"chokidar\",\"class-variance-authority\",\"cn\",\"esbuild\",\"estree-util-value-to-estree\",\"github-slugger\",\"hast-util-to-jsx-runtime\",\"lucide-react\",\"magic-string\",\"mdast-util-mdx\",\"motion\",\"ms\",\"next-themes\",\"picocolors\",\"picomatch\",\"react-remove-scroll\",\"scroll-into-view-if-needed\",\"shiki\",\"tinyexec\",\"tinyglobby\",\"unified\",\"unist-util-remove-position\",\"unist-util-visit\",\"vfile\",\"yaml\",\"yuku-analyzer\",\"zod\"]}}"
+      ]
+    }
+  ],
+  "finishedAt": "2026-10-14T09:45:13.534Z"
+}

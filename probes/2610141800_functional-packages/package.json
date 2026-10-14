@@ -1,0 +1,12 @@
+{
+  "name": "probe-2610141800-functional-packages",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build:packages": "pnpm --filter ./packages/* build",
+    "verify": "node scripts/run-all.mjs"
+  },
+  "devDependencies": {
+    "playwright": "1.62.0"
+  }
+}

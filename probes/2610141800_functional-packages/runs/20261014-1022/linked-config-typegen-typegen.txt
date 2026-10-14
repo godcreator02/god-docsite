@@ -1,0 +1,14 @@
+$ C:\Program Files\nodejs\node.exe D:\unitfolders\oz47p-docsite-kit\god-docsite\probes\2610141800_functional-packages\site\node_modules\@react-router\dev\bin.cjs typegen
+(cwd D:\unitfolders\oz47p-docsite-kit\god-docsite\probes\2610141800_functional-packages\site)
+
+[MDX] generated files in 2.74369999999999ms
+
+--- stderr ---
+(!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
+  - import "./feature-packages.vite" without a file extension (vite.config.ts:5:33). Add the file extension
+Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.
+(!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
+  - import "./feature-packages.vite" without a file extension (vite.config.ts:5:33). Add the file extension
+Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.
+
+--- exit 0 signal null error 

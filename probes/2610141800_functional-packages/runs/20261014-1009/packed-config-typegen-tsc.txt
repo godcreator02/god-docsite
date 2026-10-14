@@ -1,0 +1,8 @@
+$ C:\Program Files\nodejs\node.exe D:\unitfolders\oz47p-docsite-kit\god-docsite\probes\2610141800_functional-packages\site\node_modules\typescript\bin\tsc --noEmit -p tsconfig.json
+(cwd D:\unitfolders\oz47p-docsite-kit\god-docsite\probes\2610141800_functional-packages\site)
+
+feature-packages.vite.ts(48,57): error TS2339: Property 'scan' does not exist on type '{ kind?: "dynamic-import" | "hot-accept" | "import-rule" | "import-statement" | "new-url" | "require-call" | "url-token" | undefined; custom?: CustomPluginOptions | undefined; ssr?: boolean | undefined; isEntry: boolean; }'.
+
+--- stderr ---
+
+--- exit 1 signal null error 

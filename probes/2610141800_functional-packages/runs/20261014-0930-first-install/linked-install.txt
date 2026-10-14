@@ -1,0 +1,27 @@
+Scope: all 4 workspace projects
+Packages are hard linked from the content-addressable store to the virtual store.
+  Content-addressable store is at: D:\.pnpm-store\v11
+  Virtual store is at:             node_modules/.pnpm
+Progress: resolved 0, reused 170, downloaded 1, added 0
+Progress: resolved 0, reused 170, downloaded 3, added 0
+Progress: resolved 0, reused 170, downloaded 4, added 0
+Progress: resolved 0, reused 170, downloaded 5, added 0
+Progress: resolved 0, reused 300, downloaded 5, added 0
+Progress: resolved 0, reused 312, downloaded 7, added 0
+Progress: resolved 0, reused 333, downloaded 7, added 0
+Progress: resolved 0, reused 377, downloaded 7, added 0
+Progress: resolved 0, reused 390, downloaded 9, added 0
+Progress: resolved 0, reused 390, downloaded 11, added 0
+Progress: resolved 58, reused 390, downloaded 11, added 43
+Progress: resolved 293, reused 390, downloaded 12, added 277
+Progress: resolved 401, reused 390, downloaded 12, added 396
+Progress: resolved 401, reused 390, downloaded 12, added 399
+Progress: resolved 401, reused 390, downloaded 12, added 400
+Packages: +402
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+Progress: resolved 402, reused 390, downloaded 12, added 402, done
+
+devDependencies:
++ playwright 1.62.0
+
+Done in 23.5s using pnpm v12.4.2

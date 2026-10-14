@@ -1,0 +1,5 @@
+[02-source-not-data] 改数据文件 5 秒后：页面标记=kept（kept 表示没整页刷新）
+[02-source-not-data] 这段时间 dev 服务输出：
+2026-10-14T09:51:42.624Z vite:hmr [file change] data/demo-counter.json
+2026-10-14T09:51:42.624Z vite:hmr (client) [no modules matched] data/demo-counter.json
+2026-10-14T09:51:42.625Z vite:hmr (ssr) [no modules matched] data/demo-counter.json

@@ -1,0 +1,78 @@
+$ node D:\unitfolders\oz47p-docsite-kit\god-docsite\probes\2610141800_functional-packages\site\node_modules\@react-router\dev\bin.cjs dev --port 5691 --host 127.0.0.1 --strictPort
+(cwd D:\unitfolders\oz47p-docsite-kit\god-docsite\probes\2610141800_functional-packages\site, port 5691)
+
+[restart] Relaunching with --conditions=development
+(!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
+  - import "./feature-packages.vite" without a file extension (vite.config.ts:5:33). Add the file extension
+Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.
+[feature-packages] {"optimizeDeps":{"include":["demo-content > ms","fumadocs-mdx > esbuild","fumadocs-mdx > github-slugger","fumadocs-mdx > picocolors","fumadocs-mdx > picomatch","fumadocs-mdx > yuku-analyzer"],"exclude":["@fumadocs/base-ui","demo-content","demo-pages","fumadocs-mdx"]},"ssr":{"noExternal":["@fumadocs/base-ui","demo-content","demo-pages","fumadocs-mdx"],"external":["@base-ui/react","@fuma-translate/react","@mdx-js/mdx","@standard-schema/spec","chokidar","class-variance-authority","cn","esbuild","estree-util-value-to-estree","github-slugger","hast-util-to-jsx-runtime","lucide-react","magic-string","mdast-util-mdx","motion","ms","next-themes","picocolors","picomatch","react-remove-scroll","scroll-into-view-if-needed","shiki","tinyexec","tinyglobby","unified","unist-util-remove-position","unist-util-visit","vfile","yaml","yuku-analyzer","zod"]}}
+(!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
+  - import "./feature-packages.vite" without a file extension (vite.config.ts:5:33). Add the file extension
+Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.
+[feature-packages] {"optimizeDeps":{"include":["demo-content > ms","fumadocs-mdx > esbuild","fumadocs-mdx > github-slugger","fumadocs-mdx > picocolors","fumadocs-mdx > picomatch","fumadocs-mdx > yuku-analyzer"],"exclude":["@fumadocs/base-ui","demo-content","demo-pages","fumadocs-mdx"]},"ssr":{"noExternal":["@fumadocs/base-ui","demo-content","demo-pages","fumadocs-mdx"],"external":["@base-ui/react","@fuma-translate/react","@mdx-js/mdx","@standard-schema/spec","chokidar","class-variance-authority","cn","esbuild","estree-util-value-to-estree","github-slugger","hast-util-to-jsx-runtime","lucide-react","magic-string","mdast-util-mdx","motion","ms","next-themes","picocolors","picomatch","react-remove-scroll","scroll-into-view-if-needed","shiki","tinyexec","tinyglobby","unified","unist-util-remove-position","unist-util-visit","vfile","yaml","yuku-analyzer","zod"]}}
+  ➜  Local:   http://127.0.0.1:5691/
+5:55:38 PM [vite] (ssr) connected.
+Error: Vite module runner has been closed.
+    at ModuleRunner.getModuleInformation (file:///D:/unitfolders/oz47p-docsite-kit/god-docsite/probes/2610141800_functional-packages/node_modules/.pnpm/vite@8.3.4_patch_hash=71051_8cc5f27f1374563b1a7bdf9782a6037c/node_modules/vite/dist/node/module-runner.js:1223:26)
+    at ModuleRunner.cachedModule (file:///D:/unitfolders/oz47p-docsite-kit/god-docsite/probes/2610141800_functional-packages/node_modules/.pnpm/vite@8.3.4_patch_hash=71051_8cc5f27f1374563b1a7bdf9782a6037c/node_modules/vite/dist/node/module-runner.js:1205:18)
+    at request (file:///D:/unitfolders/oz47p-docsite-kit/god-docsite/probes/2610141800_functional-packages/node_modules/.pnpm/vite@8.3.4_patch_hash=71051_8cc5f27f1374563b1a7bdf9782a6037c/node_modules/vite/dist/node/module-runner.js:1245:94)
+    at dynamicRequest (file:///D:/unitfolders/oz47p-docsite-kit/god-docsite/probes/2610141800_functional-packages/node_modules/.pnpm/vite@8.3.4_patch_hash=71051_8cc5f27f1374563b1a7bdf9782a6037c/node_modules/vite/dist/node/module-runner.js:1247:122)
+    at mdxOptions (D:\unitfolders\oz47p-docsite-kit\god-docsite\probes\2610141800_functional-packages\site\app\lib\source.ts:17:9)
+    at getMDXOptions (file:///D:/unitfolders/oz47p-docsite-kit/god-docsite/probes/2610141800_functional-packages/node_modules/.pnpm/fumadocs-mdx@15.4.7_@types+_db95712104c409f54b2e4e66b8351fcf/node_modules/fumadocs-mdx/dist/build-default-CSiWktEh.js:164:46)
+    at buildJSMDX (file:///D:/unitfolders/oz47p-docsite-kit/god-docsite/probes/2610141800_functional-packages/node_modules/.pnpm/fumadocs-mdx@15.4.7_@types+_db95712104c409f54b2e4e66b8351fcf/node_modules/fumadocs-mdx/dist/build-default-CSiWktEh.js:97:27)
+    at buildMDX (file:///D:/unitfolders/oz47p-docsite-kit/god-docsite/probes/2610141800_functional-packages/node_modules/.pnpm/fumadocs-mdx@15.4.7_@types+_db95712104c409f54b2e4e66b8351fcf/node_modules/fumadocs-mdx/dist/build-H2VN-Hpm.js:10:9)
+    at async Object.load (file:///D:/unitfolders/oz47p-docsite-kit/god-docsite/probes/2610141800_functional-packages/node_modules/.pnpm/fumadocs-mdx@15.4.7_@types+_db95712104c409f54b2e4e66b8351fcf/node_modules/fumadocs-mdx/dist/mdx-D0Qtc99b.js:64:20)
+    at async TransformPluginContext.transform (file:///D:/unitfolders/oz47p-docsite-kit/god-docsite/probes/2610141800_functional-packages/node_modules/.pnpm/fumadocs-mdx@15.4.7_@types+_db95712104c409f54b2e4e66b8351fcf/node_modules/fumadocs-mdx/dist/adapter-XBO81DIE.js:68:19) {
+  plugin: 'fumadocs-mdx:mdx',
+  id: 'D:/unitfolders/oz47p-docsite-kit/god-docsite/probes/2610141800_functional-packages/site/content/docs/index.mdx?macro_id=app%2Flib%2Fsource.ts%23docs',
+  pluginCode: '---\n' +
+    'title: Hello World\n' +
+    'description: |\n' +
+    '  Your first `document`\n' +
+    "  You'll love it!\n" +
+    '---\n' +
+    '\n' +
+    'Hey there! Fumadocs is the docs framework that also works on React Router!\n' +
+    '\n' +
+    '## 功能包试验\n' +
+    '\n' +
+    'remark 插件标记：[[demo]]\n' +
+    '\n' +
+    '全局公式插件：$E = mc^2$\n' +
+    '\n' +
+    'MDX 组件：\n' +
+    '\n' +
+    '<DemoCounter label="点我计数" />\n' +
+    '\n' +
+    '正文里的站内链接：[去演示页](/demo)\n' +
+    '\n' +
+    '## Heading\n' +
+    '\n' +
+    'Hello World\n' +
+    '\n' +
+    '<Cards>\n' +
+    '  <Card title="Learn more about React Router" href="https://reactrouter.com" />\n' +
+    '  <Card title="Learn more about Fumadocs" href="https://fumadocs.dev" />\n' +
+    '</Cards>\n' +
+    '\n' +
+    '```ts\n' +
+    "console.log('I love React!');\n" +
+    '```\n' +
+    '\n' +
+    '### Heading\n' +
+    '\n' +
+    '#### Heading\n' +
+    '\n' +
+    '| Head                            | Description                         |\n' +
+    '| ------------------------------- | ----------------------------------- |\n' +
+    '| `hello`                         | Hello World                         |\n' +
+    '| very **important**              | Hey                                 |\n' +
+    '| _Surprisingly_                  | Fumadocs                            |\n' +
+    '| very long text that looks weird | hello world hello world hello world |\n',
+  runnerError: Error: RunnerError
+      at reviveInvokeError (file:///D:/unitfolders/oz47p-docsite-kit/god-docsite/probes/2610141800_functional-packages/node_modules/.pnpm/vite@8.3.4_patch_hash=71051_8cc5f27f1374563b1a7bdf9782a6037c/node_modules/vite/dist/node/module-runner.js:557:64)
+      at Object.invoke (file:///D:/unitfolders/oz47p-docsite-kit/god-docsite/probes/2610141800_functional-packages/node_modules/.pnpm/vite@8.3.4_patch_hash=71051_8cc5f27f1374563b1a7bdf9782a6037c/node_modules/vite/dist/node/module-runner.js:630:11)
+      at async ModuleRunner.getModuleInformation (file:///D:/unitfolders/oz47p-docsite-kit/god-docsite/probes/2610141800_functional-packages/node_modules/.pnpm/vite@8.3.4_patch_hash=71051_8cc5f27f1374563b1a7bdf9782a6037c/node_modules/vite/dist/node/module-runner.js:1228:7)
+      at async request (file:///D:/unitfolders/oz47p-docsite-kit/god-docsite/probes/2610141800_functional-packages/node_modules/.pnpm/vite@8.3.4_patch_hash=71051_8cc5f27f1374563b1a7bdf9782a6037c/node_modules/vite/dist/node/module-runner.js:1245:83)
+      at async Object.load (D:\unitfolders\oz47p-docsite-kit\god-docsite\probes\2610141800_functional-packages\node_modules\.pnpm\fumadocs-mdx@15.4.7_@types+_db95712104c409f54b2e4e66b8351fcf\node_modules\fumadocs-mdx\dist\runtime\server.js:41:25)
+}

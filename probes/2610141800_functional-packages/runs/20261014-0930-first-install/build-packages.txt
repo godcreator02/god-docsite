@@ -1,0 +1,4 @@
+packages/demo-content build$ node -e "require('node:fs').rmSync('dist',{recursive:true,force:true})" && tsc -p tsconfig.json
+packages/demo-pages build$ node -e "require('node:fs').rmSync('dist',{recursive:true,force:true})" && tsc -p tsconfig.json
+packages/demo-content build: Done
+packages/demo-pages build: Done

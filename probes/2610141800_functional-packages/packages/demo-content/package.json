@@ -1,0 +1,48 @@
+{
+  "name": "demo-content",
+  "version": "0.0.0",
+  "description": "最小功能包（正文类）：一个 remark 插件、一个带客户端交互的 MDX 组件、一份样式",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/core/index.d.ts",
+      "default": "./dist/core/index.js"
+    },
+    "./site": {
+      "types": "./dist/site/index.d.ts",
+      "default": "./dist/site/index.js"
+    },
+    "./styles.css": "./src/site/styles.css"
+  },
+  "files": [
+    "dist",
+    "src"
+  ],
+  "scripts": {
+    "build": "node -e \"require('node:fs').rmSync('dist',{recursive:true,force:true})\" && tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "ms": "2.1.3",
+    "unist-util-visit": "5.0.0"
+  },
+  "peerDependencies": {
+    "fumadocs-core": "16.17.1",
+    "react": "^19.3.0"
+  },
+  "peerDependenciesMeta": {
+    "fumadocs-core": {
+      "optional": true
+    },
+    "react": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@types/mdast": "4.0.4",
+    "@types/ms": "2.1.0",
+    "@types/react": "19.3.0",
+    "fumadocs-core": "16.17.1",
+    "react": "19.3.0",
+    "typescript": "6.0.3"
+  }
+}

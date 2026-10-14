@@ -1,0 +1,33 @@
+$ pnpm pack --pack-destination D:\unitfolders\oz47p-docsite-kit\god-docsite\probes\2610141800_functional-packages\tarballs
+(cwd D:\unitfolders\oz47p-docsite-kit\god-docsite\probes\2610141800_functional-packages\packages\demo-pages)
+
+package: demo-pages@0.0.0
+Tarball Contents
+dist/core/index.d.ts
+dist/core/index.js
+dist/node/index.d.ts
+dist/node/index.js
+dist/site/demo-page.d.ts
+dist/site/demo-page.js
+dist/site/demo.server.d.ts
+dist/site/demo.server.js
+dist/site/index.d.ts
+dist/site/index.js
+dist/site/page-tree-plugin.d.ts
+dist/site/page-tree-plugin.js
+package.json
+src/core/index.ts
+src/node/index.ts
+src/site/demo-page.tsx
+src/site/demo.server.ts
+src/site/index.ts
+src/site/page-tree-plugin.ts
+template/demo.tsx
+template/events.ts
+template/routes.ts
+Tarball Details
+D:\unitfolders\oz47p-docsite-kit\god-docsite\probes\2610141800_functional-packages\tarballs\demo-pages-0.0.0.tgz
+
+--- stderr ---
+
+--- exit 0 signal null error 

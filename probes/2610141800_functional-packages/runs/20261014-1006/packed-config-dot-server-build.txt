@@ -1,0 +1,70 @@
+$ C:\Program Files\nodejs\node.exe D:\unitfolders\oz47p-docsite-kit\god-docsite\probes\2610141800_functional-packages\site\node_modules\@react-router\dev\bin.cjs build
+(cwd D:\unitfolders\oz47p-docsite-kit\god-docsite\probes\2610141800_functional-packages\site)
+
+[feature-packages] {"optimizeDeps":{"include":["demo-content > ms","fumadocs-mdx > esbuild","fumadocs-mdx > github-slugger","fumadocs-mdx > picocolors","fumadocs-mdx > picomatch","fumadocs-mdx > yuku-analyzer"],"exclude":["@fumadocs/base-ui","demo-content","demo-pages","fumadocs-mdx"]},"ssr":{"noExternal":["@fumadocs/base-ui","demo-content","demo-pages","fumadocs-mdx"],"external":[]}}
+[feature-packages] {"optimizeDeps":{"include":["demo-content > ms","fumadocs-mdx > esbuild","fumadocs-mdx > github-slugger","fumadocs-mdx > picocolors","fumadocs-mdx > picomatch","fumadocs-mdx > yuku-analyzer"],"exclude":["@fumadocs/base-ui","demo-content","demo-pages","fumadocs-mdx"]},"ssr":{"noExternal":["@fumadocs/base-ui","demo-content","demo-pages","fumadocs-mdx"],"external":["@base-ui/react","@fuma-translate/react","@mdx-js/mdx","@standard-schema/spec","chokidar","class-variance-authority","cn","esbuild","estree-util-value-to-estree","github-slugger","hast-util-to-jsx-runtime","lucide-react","magic-string","mdast-util-mdx","motion","ms","next-themes","picocolors","picomatch","react-remove-scroll","scroll-into-view-if-needed","shiki","tinyexec","tinyglobby","unified","unist-util-remove-position","unist-util-visit","vfile","yaml","yuku-analyzer","zod"]}}
+[MDX] generated files in 2.7450000000001182ms
+Using Vite Environment API
+vite v8.3.4 building client environment for production...
+[MDX] generated files in 1.7912999999998647ms
+transforming...
+✓ 2588 modules transformed.
+
+--- stderr ---
+(!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
+  - import "./feature-packages.vite" without a file extension (vite.config.ts:5:33). Add the file extension
+Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.
+(!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
+  - import "./feature-packages.vite" without a file extension (vite.config.ts:5:33). Add the file extension
+Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.
+Found 2 warnings while optimizing generated CSS:
+
+Issue #1:
+[2m│     }[22m
+[2m│   }[22m
+[2m│[22m   .\[\&_\:\:highlight\(fd-search\)\]\:text-fd-primary ::highlight(fd-search) {
+[2m┆[22m                                                                   [33m[2m^--[22m 'highlight' is not recognized as a valid pseudo-element. Did you mean ':highlight' (pseudo-class) or is this a typo?[39m
+[2m┆[22m
+[2m│     color: var(--color-fd-primary);[22m
+[2m│   }[22m
+
+Issue #2:
+[2m│     color: var(--color-fd-primary);[22m
+[2m│   }[22m
+[2m│[22m   .\[\&_\:\:highlight\(fd-search\)\]\:underline ::highlight(fd-search) {
+[2m┆[22m                                                             [33m[2m^--[22m 'highlight' is not recognized as a valid pseudo-element. Did you mean ':highlight' (pseudo-class) or is this a typo?[39m
+[2m┆[22m
+[2m│     text-decoration-line: underline;[22m
+[2m│   }[22m
+
+✗ Build failed in 1.76s
+Build failed with 1 error:
+
+[plugin react-router:dot-server]
+Error: Server-only module referenced by client
+
+    'demo-pages/site/server' imported by route 'app/features/demo/demo.tsx'
+
+  React Router automatically removes server-code from these exports:
+    `loader`, `action`, `middleware`, `headers`
+
+  But other route exports in 'app/features/demo/demo.tsx' depend on 'demo-pages/site/server'.
+
+  See https://reactrouter.com/explanation/code-splitting#removal-of-server-code
+    at PluginContextImpl.resolveId (file:///D:/unitfolders/oz47p-docsite-kit/god-docsite/probes/2610141800_functional-packages/node_modules/.pnpm/@react-router+dev@8.4.0_@re_d57a0e4586dd309d68f4d3942da90af1/node_modules/@react-router/dev/dist/vite.js:1918:12)
+    at async plugin (file:///D:/unitfolders/oz47p-docsite-kit/god-docsite/probes/2610141800_functional-packages/node_modules/.pnpm/rolldown@1.2.13/node_modules/rolldown/dist/shared/bindingify-input-options-C0gEvtnB.mjs:1646:16)
+    at async plugin.<computed> (file:///D:/unitfolders/oz47p-docsite-kit/god-docsite/probes/2610141800_functional-packages/node_modules/.pnpm/rolldown@1.2.13/node_modules/rolldown/dist/shared/bindingify-input-options-C0gEvtnB.mjs:2316:12)
+    at aggregateBindingErrorsIntoJsError (file:///D:/unitfolders/oz47p-docsite-kit/god-docsite/probes/2610141800_functional-packages/node_modules/.pnpm/rolldown@1.2.13/node_modules/rolldown/dist/shared/error-Dsqzw0Oa.mjs:49:18)
+    at unwrapBindingResult (file:///D:/unitfolders/oz47p-docsite-kit/god-docsite/probes/2610141800_functional-packages/node_modules/.pnpm/rolldown@1.2.13/node_modules/rolldown/dist/shared/error-Dsqzw0Oa.mjs:19:128)
+    at #build (file:///D:/unitfolders/oz47p-docsite-kit/god-docsite/probes/2610141800_functional-packages/node_modules/.pnpm/rolldown@1.2.13/node_modules/rolldown/dist/shared/rolldown-D_vNlorD.mjs:133:34)
+    at async buildEnvironment (file:///D:/unitfolders/oz47p-docsite-kit/god-docsite/probes/2610141800_functional-packages/node_modules/.pnpm/vite@8.3.4_patch_hash=71051_8cc5f27f1374563b1a7bdf9782a6037c/node_modules/vite/dist/node/chunks/node.js:34716:66)
+    at async Object.build (file:///D:/unitfolders/oz47p-docsite-kit/god-docsite/probes/2610141800_functional-packages/node_modules/.pnpm/vite@8.3.4_patch_hash=71051_8cc5f27f1374563b1a7bdf9782a6037c/node_modules/vite/dist/node/chunks/node.js:35137:19)
+    at async buildApp (file:///D:/unitfolders/oz47p-docsite-kit/god-docsite/probes/2610141800_functional-packages/node_modules/.pnpm/@react-router+dev@8.4.0_@re_d57a0e4586dd309d68f4d3942da90af1/node_modules/@react-router/dev/dist/vite.js:1543:8)
+    at async buildApp (file:///D:/unitfolders/oz47p-docsite-kit/god-docsite/probes/2610141800_functional-packages/node_modules/.pnpm/@react-router+dev@8.4.0_@re_d57a0e4586dd309d68f4d3942da90af1/node_modules/@react-router/dev/dist/vite.js:800:6)
+    at async Object.buildApp (file:///D:/unitfolders/oz47p-docsite-kit/god-docsite/probes/2610141800_functional-packages/node_modules/.pnpm/@react-router+dev@8.4.0_@re_d57a0e4586dd309d68f4d3942da90af1/node_modules/@react-router/dev/dist/vite.js:2211:8)
+    at async Object.buildApp (file:///D:/unitfolders/oz47p-docsite-kit/god-docsite/probes/2610141800_functional-packages/node_modules/.pnpm/vite@8.3.4_patch_hash=71051_8cc5f27f1374563b1a7bdf9782a6037c/node_modules/vite/dist/node/chunks/node.js:35133:38)
+    at async build (file:///D:/unitfolders/oz47p-docsite-kit/god-docsite/probes/2610141800_functional-packages/node_modules/.pnpm/@react-router+dev@8.4.0_@re_d57a0e4586dd309d68f4d3942da90af1/node_modules/@react-router/dev/dist/build-CsJF5XUO.js:16:2) {
+  errors: [Getter/Setter]
+}
+
+--- exit 1 signal null error 

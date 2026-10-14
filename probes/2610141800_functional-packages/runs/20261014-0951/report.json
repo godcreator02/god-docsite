@@ -1,0 +1,113 @@
+{
+  "runName": "20261014-0951",
+  "startedAt": "2026-10-14T09:51:53.958Z",
+  "node": "v24.14.1",
+  "sections": [
+    {
+      "title": "环境",
+      "entries": [
+        "运行 20261014-0951，日志目录 logs\\20261014-0951",
+        "Node v24.14.1"
+      ]
+    },
+    {
+      "title": "装法 linked",
+      "entries": [
+        "demo-content → packages\\demo-content",
+        "demo-pages → packages\\demo-pages"
+      ]
+    },
+    {
+      "title": "linked-config-dev",
+      "entries": [
+        {
+          "name": "1-docs-ssr",
+          "pass": true,
+          "detail": "GET /docs → 200"
+        },
+        {
+          "name": "1-remark-plugin",
+          "pass": true,
+          "detail": "[data-demo-remark] 个数 1"
+        },
+        {
+          "name": "1-global-math",
+          "pass": true,
+          "detail": ".katex 个数 1"
+        },
+        {
+          "name": "2-package-style",
+          "pass": true,
+          "detail": ".demo-mark 颜色 rgb(219, 39, 119)"
+        },
+        {
+          "name": "2-mdx-component-hydrated",
+          "pass": true,
+          "detail": "点两下后为 2；usePathname=/docs；ms(1500)=2s"
+        },
+        {
+          "name": "3-sidebar-entry",
+          "pass": true,
+          "detail": "侧栏 a[href=\"/demo\"]「演示」个数 1"
+        },
+        {
+          "name": "4-client-nav-sidebar",
+          "pass": true,
+          "detail": "站内导航后 marker=kept（kept 说明没整页刷新）；报错层=false；计数=0；usePathname=/demo"
+        },
+        {
+          "name": "6-sse-open",
+          "pass": true,
+          "detail": "EventSource 已 open"
+        },
+        {
+          "name": "4-direct-open",
+          "pass": true,
+          "detail": "GET /demo → 200，计数=0"
+        },
+        {
+          "name": "4-fetcher-action",
+          "pass": true,
+          "detail": "B 页 useFetcher 提交后页面计数 1，文件里 count=1"
+        },
+        {
+          "name": "6-sse-push-from-other-page",
+          "pass": true,
+          "detail": "A 页经 EventSource 收到 B 页 action 触发的推送 count=1"
+        },
+        {
+          "name": "4-fetcher-action-again",
+          "pass": true,
+          "detail": "A 页再提交：页面计数 2、推送 2、文件 count=2"
+        },
+        {
+          "name": "4-client-nav-mdx-link",
+          "pass": true,
+          "detail": "演示页→文档→正文链接→演示页：marker=kept；报错层=false；计数=2"
+        },
+        {
+          "name": "5-single-fumadocs-instance",
+          "pass": true,
+          "detail": "FrameworkProvider 报错 0 条"
+        },
+        {
+          "name": "console-clean",
+          "pass": true,
+          "detail": "无控制台报错、无页面异常、无 4xx/5xx"
+        },
+        "vite 插件识别结果：[feature-packages] {\"optimizeDeps\":{\"include\":[\"demo-content > ms\",\"fumadocs-mdx > esbuild\",\"fumadocs-mdx > github-slugger\",\"fumadocs-mdx > picocolors\",\"fumadocs-mdx > picomatch\",\"fumadocs-mdx > yuku-analyzer\"],\"exclude\":[\"@fumadocs/base-ui\",\"demo-content\",\"demo-pages\",\"fumadocs-mdx\"]},\"ssr\":{\"noExternal\":[\"@fumadocs/base-ui\",\"demo-content\",\"demo-pages\",\"fumadocs-mdx\"],\"external\":[\"@base-ui/react\",\"@fuma-translate/react\",\"@mdx-js/mdx\",\"@standard-schema/spec\",\"chokidar\",\"class-variance-authority\",\"cn\",\"esbuild\",\"estree-util-value-to-estree\",\"github-slugger\",\"hast-util-to-jsx-runtime\",\"lucide-react\",\"magic-string\",\"mdast-util-mdx\",\"motion\",\"ms\",\"next-themes\",\"picocolors\",\"picomatch\",\"react-remove-scroll\",\"scroll-into-view-if-needed\",\"shiki\",\"tinyexec\",\"tinyglobby\",\"unified\",\"unist-util-remove-position\",\"unist-util-visit\",\"vfile\",\"yaml\",\"yuku-analyzer\",\"zod\"]}}"
+      ]
+    },
+    {
+      "title": "linked-config-start",
+      "entries": [
+        {
+          "name": "build",
+          "pass": false,
+          "detail": "构建失败（exit 1），见 logs\\20261014-0951\\linked-config-start-build.log"
+        }
+      ]
+    }
+  ],
+  "finishedAt": "2026-10-14T09:52:19.225Z"
+}

@@ -1,0 +1,25 @@
+$ pnpm pack --pack-destination D:\unitfolders\oz47p-docsite-kit\god-docsite\probes\2610141800_functional-packages\tarballs
+(cwd D:\unitfolders\oz47p-docsite-kit\god-docsite\probes\2610141800_functional-packages\packages\demo-content)
+
+package: demo-content@0.0.0
+Tarball Contents
+dist/core/index.d.ts
+dist/core/index.js
+dist/site/demo-counter.d.ts
+dist/site/demo-counter.js
+dist/site/index.d.ts
+dist/site/index.js
+dist/site/remark-demo-mark.d.ts
+dist/site/remark-demo-mark.js
+package.json
+src/core/index.ts
+src/site/demo-counter.tsx
+src/site/index.ts
+src/site/remark-demo-mark.ts
+src/site/styles.css
+Tarball Details
+D:\unitfolders\oz47p-docsite-kit\god-docsite\probes\2610141800_functional-packages\tarballs\demo-content-0.0.0.tgz
+
+--- stderr ---
+
+--- exit 0 signal null error 

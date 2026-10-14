@@ -1,0 +1,11 @@
+$ pnpm --filter ./packages/* build
+(cwd D:\unitfolders\oz47p-docsite-kit\god-docsite\probes\2610141800_functional-packages)
+
+packages/demo-content build$ node -e "require('node:fs').rmSync('dist',{recursive:true,force:true})" && tsc -p tsconfig.json
+packages/demo-pages build$ node -e "require('node:fs').rmSync('dist',{recursive:true,force:true})" && tsc -p tsconfig.json
+packages/demo-content build: Done
+packages/demo-pages build: Done
+
+--- stderr ---
+
+--- exit 0 signal null error 

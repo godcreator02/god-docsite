@@ -1,0 +1,18 @@
+$ node D:\unitfolders\oz47p-docsite-kit\god-docsite\probes\2610141800_functional-packages\site\node_modules\@react-router\dev\bin.cjs dev --port 5691 --host 127.0.0.1 --strictPort
+(cwd D:\unitfolders\oz47p-docsite-kit\god-docsite\probes\2610141800_functional-packages\site, port 5691)
+
+[restart] Relaunching with --conditions=development
+(!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
+  - import "./feature-packages.vite" without a file extension (vite.config.ts:5:33). Add the file extension
+Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.
+[feature-packages] {"optimizeDeps":{"include":["demo-content > ms","fumadocs-mdx > esbuild","fumadocs-mdx > github-slugger","fumadocs-mdx > picocolors","fumadocs-mdx > picomatch","fumadocs-mdx > yuku-analyzer"],"exclude":["@fumadocs/base-ui","demo-content","demo-pages","fumadocs-mdx"]},"ssr":{"noExternal":["@fumadocs/base-ui","demo-content","demo-pages","fumadocs-mdx"],"external":["@base-ui/react","@fuma-translate/react","@mdx-js/mdx","@standard-schema/spec","chokidar","class-variance-authority","cn","esbuild","estree-util-value-to-estree","github-slugger","hast-util-to-jsx-runtime","lucide-react","magic-string","mdast-util-mdx","motion","ms","next-themes","picocolors","picomatch","react-remove-scroll","scroll-into-view-if-needed","shiki","tinyexec","tinyglobby","unified","unist-util-remove-position","unist-util-visit","vfile","yaml","yuku-analyzer","zod"]}}
+(!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
+  - import "./feature-packages.vite" without a file extension (vite.config.ts:5:33). Add the file extension
+Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.
+[feature-packages] {"optimizeDeps":{"include":["demo-content > ms","fumadocs-mdx > esbuild","fumadocs-mdx > github-slugger","fumadocs-mdx > picocolors","fumadocs-mdx > picomatch","fumadocs-mdx > yuku-analyzer"],"exclude":["@fumadocs/base-ui","demo-content","demo-pages","fumadocs-mdx"]},"ssr":{"noExternal":["@fumadocs/base-ui","demo-content","demo-pages","fumadocs-mdx"],"external":["@base-ui/react","@fuma-translate/react","@mdx-js/mdx","@standard-schema/spec","chokidar","class-variance-authority","cn","esbuild","estree-util-value-to-estree","github-slugger","hast-util-to-jsx-runtime","lucide-react","magic-string","mdast-util-mdx","motion","ms","next-themes","picocolors","picomatch","react-remove-scroll","scroll-into-view-if-needed","shiki","tinyexec","tinyglobby","unified","unist-util-remove-position","unist-util-visit","vfile","yaml","yuku-analyzer","zod"]}}
+[MDX] generated files in 7.4202000000000226ms
+[MDX] generated files in 20.540899999999965ms
+6:06:12 PM [vite] (client) Re-optimizing dependencies because vite config has changed
+  ➜  Local:   http://127.0.0.1:5691/
+6:06:12 PM [vite] (ssr) connected.
+6:06:16 PM [vite] (client) dependencies optimized: cn, lucide-react

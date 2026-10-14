@@ -1,0 +1,16 @@
+$ node D:\unitfolders\oz47p-docsite-kit\god-docsite\probes\2610141800_functional-packages\site\node_modules\@react-router\serve\bin.cjs ./build/server/index.js
+(cwd D:\unitfolders\oz47p-docsite-kit\god-docsite\probes\2610141800_functional-packages\site, port 5692)
+
+[react-router-serve] http://localhost:5692 (http://127.0.0.1:5692)
+GET /__manifest?paths=%2F%2C%2Fdemo%2C%2Fdocs%2C%2Fdocs%2Ftest&version=6cdc465c 200 - - 8.078 ms
+GET /demo.data 200 - - 5.721 ms
+GET /demo 200 - - 26.103 ms
+GET /__manifest?paths=%2Fdemo%2C%2Fdocs&version=6cdc465c 200 - - 0.708 ms
+POST /demo.data 200 - - 5.979 ms
+GET /demo.data 200 - - 2.391 ms
+POST /demo.data 200 - - 3.473 ms
+GET /demo.data 200 - - 1.868 ms
+GET /demo/events 200 - - 1.334 ms
+GET /demo.data 200 - - 3.304 ms
+GET /demo/events 200 - - 0.859 ms
+GET /demo/events 200 - - 0.503 ms

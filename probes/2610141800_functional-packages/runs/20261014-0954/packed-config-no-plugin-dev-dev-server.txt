@@ -1,0 +1,107 @@
+$ node D:\unitfolders\oz47p-docsite-kit\god-docsite\probes\2610141800_functional-packages\site\node_modules\@react-router\dev\bin.cjs dev --port 5691 --host 127.0.0.1 --strictPort
+(cwd D:\unitfolders\oz47p-docsite-kit\god-docsite\probes\2610141800_functional-packages\site, port 5691)
+
+[restart] Relaunching with --conditions=development
+(!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
+  - import "./feature-packages.vite" without a file extension (vite.config.ts:5:33). Add the file extension
+Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.
+(!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
+  - import "./feature-packages.vite" without a file extension (vite.config.ts:5:33). Add the file extension
+Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.
+[MDX] generated files in 8.922599999999875ms
+[MDX] generated files in 15.319700000000012ms
+6:01:23 PM [vite] (client) Re-optimizing dependencies because vite config has changed
+  ➜  Local:   http://127.0.0.1:5691/
+6:01:23 PM [vite] (ssr) connected.
+Error: You need to wrap your application inside `FrameworkProvider`.
+    at Object.notImplemented (file:///D:/unitfolders/oz47p-docsite-kit/god-docsite/probes/2610141800_functional-packages/node_modules/.pnpm/fumadocs-core@16.17.1_@mdx-_4383906efa3d5146025f133b099a141f/node_modules/fumadocs-core/dist/framework/index.js:6:8)
+    at usePathname (D:\unitfolders\oz47p-docsite-kit\god-docsite\probes\2610141800_functional-packages\node_modules\.pnpm\fumadocs-core@16.17.1_@mdx-_4383906efa3d5146025f133b099a141f\node_modules\fumadocs-core\dist\framework\index.js:22:14)
+    at DemoCounter (file:///D:/unitfolders/oz47p-docsite-kit/god-docsite/probes/2610141800_functional-packages/node_modules/.pnpm/demo-content@file+tarballs+_0f8cb0f0c1dfee4299f7cde0ed6fff4b/node_modules/demo-content/dist/site/demo-counter.js:9:22)
+    at Object.react_stack_bottom_frame (D:\unitfolders\oz47p-docsite-kit\god-docsite\probes\2610141800_functional-packages\node_modules\.pnpm\react-dom@19.3.0_react@19.3.0\node_modules\react-dom\cjs\react-dom-server.node.development.js:10940:18)
+    at renderWithHooks (D:\unitfolders\oz47p-docsite-kit\god-docsite\probes\2610141800_functional-packages\node_modules\.pnpm\react-dom@19.3.0_react@19.3.0\node_modules\react-dom\cjs\react-dom-server.node.development.js:5622:19)
+    at renderElement (D:\unitfolders\oz47p-docsite-kit\god-docsite\probes\2610141800_functional-packages\node_modules\.pnpm\react-dom@19.3.0_react@19.3.0\node_modules\react-dom\cjs\react-dom-server.node.development.js:6057:23)
+    at retryNode (D:\unitfolders\oz47p-docsite-kit\god-docsite\probes\2610141800_functional-packages\node_modules\.pnpm\react-dom@19.3.0_react@19.3.0\node_modules\react-dom\cjs\react-dom-server.node.development.js:7088:31)
+    at renderNodeDestructive (D:\unitfolders\oz47p-docsite-kit\god-docsite\probes\2610141800_functional-packages\node_modules\.pnpm\react-dom@19.3.0_react@19.3.0\node_modules\react-dom\cjs\react-dom-server.node.development.js:7033:11)
+    at renderNode (D:\unitfolders\oz47p-docsite-kit\god-docsite\probes\2610141800_functional-packages\node_modules\.pnpm\react-dom@19.3.0_react@19.3.0\node_modules\react-dom\cjs\react-dom-server.node.development.js:7584:18)
+    at renderChildrenArray (D:\unitfolders\oz47p-docsite-kit\god-docsite\probes\2610141800_functional-packages\node_modules\.pnpm\react-dom@19.3.0_react@19.3.0\node_modules\react-dom\cjs\react-dom-server.node.development.js:7345:11)
+6:01:27 PM [vite] (client) dependencies optimized: cn, demo-content/site, demo-pages/site, lucide-react
+6:01:27 PM [vite] (client) optimized dependencies changed. reloading
+Error: You need to wrap your application inside `FrameworkProvider`.
+    at Object.notImplemented (file:///D:/unitfolders/oz47p-docsite-kit/god-docsite/probes/2610141800_functional-packages/node_modules/.pnpm/fumadocs-core@16.17.1_@mdx-_4383906efa3d5146025f133b099a141f/node_modules/fumadocs-core/dist/framework/index.js:6:8)
+    at usePathname (D:\unitfolders\oz47p-docsite-kit\god-docsite\probes\2610141800_functional-packages\node_modules\.pnpm\fumadocs-core@16.17.1_@mdx-_4383906efa3d5146025f133b099a141f\node_modules\fumadocs-core\dist\framework\index.js:22:14)
+    at DemoPage (file:///D:/unitfolders/oz47p-docsite-kit/god-docsite/probes/2610141800_functional-packages/node_modules/.pnpm/demo-pages@file+tarballs+de_1e0175858bc0bfa980ed07996cdd8cae/node_modules/demo-pages/dist/site/demo-page.js:10:22)
+    at Object.react_stack_bottom_frame (D:\unitfolders\oz47p-docsite-kit\god-docsite\probes\2610141800_functional-packages\node_modules\.pnpm\react-dom@19.3.0_react@19.3.0\node_modules\react-dom\cjs\react-dom-server.node.development.js:10940:18)
+    at renderWithHooks (D:\unitfolders\oz47p-docsite-kit\god-docsite\probes\2610141800_functional-packages\node_modules\.pnpm\react-dom@19.3.0_react@19.3.0\node_modules\react-dom\cjs\react-dom-server.node.development.js:5622:19)
+    at renderElement (D:\unitfolders\oz47p-docsite-kit\god-docsite\probes\2610141800_functional-packages\node_modules\.pnpm\react-dom@19.3.0_react@19.3.0\node_modules\react-dom\cjs\react-dom-server.node.development.js:6057:23)
+    at retryNode (D:\unitfolders\oz47p-docsite-kit\god-docsite\probes\2610141800_functional-packages\node_modules\.pnpm\react-dom@19.3.0_react@19.3.0\node_modules\react-dom\cjs\react-dom-server.node.development.js:7088:31)
+    at renderNodeDestructive (D:\unitfolders\oz47p-docsite-kit\god-docsite\probes\2610141800_functional-packages\node_modules\.pnpm\react-dom@19.3.0_react@19.3.0\node_modules\react-dom\cjs\react-dom-server.node.development.js:7033:11)
+    at renderElement (D:\unitfolders\oz47p-docsite-kit\god-docsite\probes\2610141800_functional-packages\node_modules\.pnpm\react-dom@19.3.0_react@19.3.0\node_modules\react-dom\cjs\react-dom-server.node.development.js:6700:15)
+    ... collapsed 6 duplicate lines matching above 3 lines 2 times...
+    at retryNode (D:\unitfolders\oz47p-docsite-kit\god-docsite\probes\2610141800_functional-packages\node_modules\.pnpm\react-dom@19.3.0_react@19.3.0\node_modules\react-dom\cjs\react-dom-server.node.development.js:7088:31)
+    at renderNodeDestructive (D:\unitfolders\oz47p-docsite-kit\god-docsite\probes\2610141800_functional-packages\node_modules\.pnpm\react-dom@19.3.0_react@19.3.0\node_modules\react-dom\cjs\react-dom-server.node.development.js:7033:11)
+    at finishFunctionComponent (D:\unitfolders\oz47p-docsite-kit\god-docsite\probes\2610141800_functional-packages\node_modules\.pnpm\react-dom@19.3.0_react@19.3.0\node_modules\react-dom\cjs\react-dom-server.node.development.js:5666:13)
+    at renderElement (D:\unitfolders\oz47p-docsite-kit\god-docsite\probes\2610141800_functional-packages\node_modules\.pnpm\react-dom@19.3.0_react@19.3.0\node_modules\react-dom\cjs\react-dom-server.node.development.js:6112:11)
+    at retryNode (D:\unitfolders\oz47p-docsite-kit\god-docsite\probes\2610141800_functional-packages\node_modules\.pnpm\react-dom@19.3.0_react@19.3.0\node_modules\react-dom\cjs\react-dom-server.node.development.js:7088:31)
+    at renderNodeDestructive (D:\unitfolders\oz47p-docsite-kit\god-docsite\probes\2610141800_functional-packages\node_modules\.pnpm\react-dom@19.3.0_react@19.3.0\node_modules\react-dom\cjs\react-dom-server.node.development.js:7033:11)
+    at renderElement (D:\unitfolders\oz47p-docsite-kit\god-docsite\probes\2610141800_functional-packages\node_modules\.pnpm\react-dom@19.3.0_react@19.3.0\node_modules\react-dom\cjs\react-dom-server.node.development.js:6700:15)
+    at retryNode (D:\unitfolders\oz47p-docsite-kit\god-docsite\probes\2610141800_functional-packages\node_modules\.pnpm\react-dom@19.3.0_react@19.3.0\node_modules\react-dom\cjs\react-dom-server.node.development.js:7088:31)
+    at renderNodeDestructive (D:\unitfolders\oz47p-docsite-kit\god-docsite\probes\2610141800_functional-packages\node_modules\.pnpm\react-dom@19.3.0_react@19.3.0\node_modules\react-dom\cjs\react-dom-server.node.development.js:7033:11)
+    at finishFunctionComponent (D:\unitfolders\oz47p-docsite-kit\god-docsite\probes\2610141800_functional-packages\node_modules\.pnpm\react-dom@19.3.0_react@19.3.0\node_modules\react-dom\cjs\react-dom-server.node.development.js:5666:13)
+    at renderElement (D:\unitfolders\oz47p-docsite-kit\god-docsite\probes\2610141800_functional-packages\node_modules\.pnpm\react-dom@19.3.0_react@19.3.0\node_modules\react-dom\cjs\react-dom-server.node.development.js:6112:11)
+    ... collapsed 8 duplicate lines matching above 4 lines 2 times...
+    at retryNode (D:\unitfolders\oz47p-docsite-kit\god-docsite\probes\2610141800_functional-packages\node_modules\.pnpm\react-dom@19.3.0_react@19.3.0\node_modules\react-dom\cjs\react-dom-server.node.development.js:7088:31)
+    at renderNodeDestructive (D:\unitfolders\oz47p-docsite-kit\god-docsite\probes\2610141800_functional-packages\node_modules\.pnpm\react-dom@19.3.0_react@19.3.0\node_modules\react-dom\cjs\react-dom-server.node.development.js:7033:11)
+    at renderNode (D:\unitfolders\oz47p-docsite-kit\god-docsite\probes\2610141800_functional-packages\node_modules\.pnpm\react-dom@19.3.0_react@19.3.0\node_modules\react-dom\cjs\react-dom-server.node.development.js:7584:18)
+    at renderChildrenArray (D:\unitfolders\oz47p-docsite-kit\god-docsite\probes\2610141800_functional-packages\node_modules\.pnpm\react-dom@19.3.0_react@19.3.0\node_modules\react-dom\cjs\react-dom-server.node.development.js:7345:11)
+    at retryNode (D:\unitfolders\oz47p-docsite-kit\god-docsite\probes\2610141800_functional-packages\node_modules\.pnpm\react-dom@19.3.0_react@19.3.0\node_modules\react-dom\cjs\react-dom-server.node.development.js:7112:13)
+    at renderNodeDestructive (D:\unitfolders\oz47p-docsite-kit\god-docsite\probes\2610141800_functional-packages\node_modules\.pnpm\react-dom@19.3.0_react@19.3.0\node_modules\react-dom\cjs\react-dom-server.node.development.js:7033:11)
+    at renderElement (D:\unitfolders\oz47p-docsite-kit\god-docsite\probes\2610141800_functional-packages\node_modules\.pnpm\react-dom@19.3.0_react@19.3.0\node_modules\react-dom\cjs\react-dom-server.node.development.js:6700:15)
+    at retryNode (D:\unitfolders\oz47p-docsite-kit\god-docsite\probes\2610141800_functional-packages\node_modules\.pnpm\react-dom@19.3.0_react@19.3.0\node_modules\react-dom\cjs\react-dom-server.node.development.js:7088:31)
+    at renderNodeDestructive (D:\unitfolders\oz47p-docsite-kit\god-docsite\probes\2610141800_functional-packages\node_modules\.pnpm\react-dom@19.3.0_react@19.3.0\node_modules\react-dom\cjs\react-dom-server.node.development.js:7033:11)
+    at finishFunctionComponent (D:\unitfolders\oz47p-docsite-kit\god-docsite\probes\2610141800_functional-packages\node_modules\.pnpm\react-dom@19.3.0_react@19.3.0\node_modules\react-dom\cjs\react-dom-server.node.development.js:5666:13)
+    at renderElement (D:\unitfolders\oz47p-docsite-kit\god-docsite\probes\2610141800_functional-packages\node_modules\.pnpm\react-dom@19.3.0_react@19.3.0\node_modules\react-dom\cjs\react-dom-server.node.development.js:6112:11)
+    at retryNode (D:\unitfolders\oz47p-docsite-kit\god-docsite\probes\2610141800_functional-packages\node_modules\.pnpm\react-dom@19.3.0_react@19.3.0\node_modules\react-dom\cjs\react-dom-server.node.development.js:7088:31)
+    at renderNodeDestructive (D:\unitfolders\oz47p-docsite-kit\god-docsite\probes\2610141800_functional-packages\node_modules\.pnpm\react-dom@19.3.0_react@19.3.0\node_modules\react-dom\cjs\react-dom-server.node.development.js:7033:11)
+    at renderNode (D:\unitfolders\oz47p-docsite-kit\god-docsite\probes\2610141800_functional-packages\node_modules\.pnpm\react-dom@19.3.0_react@19.3.0\node_modules\react-dom\cjs\react-dom-server.node.development.js:7584:18)
+    at renderChildrenArray (D:\unitfolders\oz47p-docsite-kit\god-docsite\probes\2610141800_functional-packages\node_modules\.pnpm\react-dom@19.3.0_react@19.3.0\node_modules\react-dom\cjs\react-dom-server.node.development.js:7345:11)
+    at retryNode (D:\unitfolders\oz47p-docsite-kit\god-docsite\probes\2610141800_functional-packages\node_modules\.pnpm\react-dom@19.3.0_react@19.3.0\node_modules\react-dom\cjs\react-dom-server.node.development.js:7112:13)
+Error: You need to wrap your application inside `FrameworkProvider`.
+    at Object.notImplemented (file:///D:/unitfolders/oz47p-docsite-kit/god-docsite/probes/2610141800_functional-packages/node_modules/.pnpm/fumadocs-core@16.17.1_@mdx-_4383906efa3d5146025f133b099a141f/node_modules/fumadocs-core/dist/framework/index.js:6:8)
+    at usePathname (D:\unitfolders\oz47p-docsite-kit\god-docsite\probes\2610141800_functional-packages\node_modules\.pnpm\fumadocs-core@16.17.1_@mdx-_4383906efa3d5146025f133b099a141f\node_modules\fumadocs-core\dist\framework\index.js:22:14)
+    at DemoPage (file:///D:/unitfolders/oz47p-docsite-kit/god-docsite/probes/2610141800_functional-packages/node_modules/.pnpm/demo-pages@file+tarballs+de_1e0175858bc0bfa980ed07996cdd8cae/node_modules/demo-pages/dist/site/demo-page.js:10:22)
+    at Object.react_stack_bottom_frame (D:\unitfolders\oz47p-docsite-kit\god-docsite\probes\2610141800_functional-packages\node_modules\.pnpm\react-dom@19.3.0_react@19.3.0\node_modules\react-dom\cjs\react-dom-server.node.development.js:10940:18)
+    at renderWithHooks (D:\unitfolders\oz47p-docsite-kit\god-docsite\probes\2610141800_functional-packages\node_modules\.pnpm\react-dom@19.3.0_react@19.3.0\node_modules\react-dom\cjs\react-dom-server.node.development.js:5622:19)
+    at renderElement (D:\unitfolders\oz47p-docsite-kit\god-docsite\probes\2610141800_functional-packages\node_modules\.pnpm\react-dom@19.3.0_react@19.3.0\node_modules\react-dom\cjs\react-dom-server.node.development.js:6057:23)
+    at retryNode (D:\unitfolders\oz47p-docsite-kit\god-docsite\probes\2610141800_functional-packages\node_modules\.pnpm\react-dom@19.3.0_react@19.3.0\node_modules\react-dom\cjs\react-dom-server.node.development.js:7088:31)
+    at renderNodeDestructive (D:\unitfolders\oz47p-docsite-kit\god-docsite\probes\2610141800_functional-packages\node_modules\.pnpm\react-dom@19.3.0_react@19.3.0\node_modules\react-dom\cjs\react-dom-server.node.development.js:7033:11)
+    at renderElement (D:\unitfolders\oz47p-docsite-kit\god-docsite\probes\2610141800_functional-packages\node_modules\.pnpm\react-dom@19.3.0_react@19.3.0\node_modules\react-dom\cjs\react-dom-server.node.development.js:6700:15)
+    ... collapsed 6 duplicate lines matching above 3 lines 2 times...
+    at retryNode (D:\unitfolders\oz47p-docsite-kit\god-docsite\probes\2610141800_functional-packages\node_modules\.pnpm\react-dom@19.3.0_react@19.3.0\node_modules\react-dom\cjs\react-dom-server.node.development.js:7088:31)
+    at renderNodeDestructive (D:\unitfolders\oz47p-docsite-kit\god-docsite\probes\2610141800_functional-packages\node_modules\.pnpm\react-dom@19.3.0_react@19.3.0\node_modules\react-dom\cjs\react-dom-server.node.development.js:7033:11)
+    at finishFunctionComponent (D:\unitfolders\oz47p-docsite-kit\god-docsite\probes\2610141800_functional-packages\node_modules\.pnpm\react-dom@19.3.0_react@19.3.0\node_modules\react-dom\cjs\react-dom-server.node.development.js:5666:13)
+    at renderElement (D:\unitfolders\oz47p-docsite-kit\god-docsite\probes\2610141800_functional-packages\node_modules\.pnpm\react-dom@19.3.0_react@19.3.0\node_modules\react-dom\cjs\react-dom-server.node.development.js:6112:11)
+    at retryNode (D:\unitfolders\oz47p-docsite-kit\god-docsite\probes\2610141800_functional-packages\node_modules\.pnpm\react-dom@19.3.0_react@19.3.0\node_modules\react-dom\cjs\react-dom-server.node.development.js:7088:31)
+    at renderNodeDestructive (D:\unitfolders\oz47p-docsite-kit\god-docsite\probes\2610141800_functional-packages\node_modules\.pnpm\react-dom@19.3.0_react@19.3.0\node_modules\react-dom\cjs\react-dom-server.node.development.js:7033:11)
+    at renderElement (D:\unitfolders\oz47p-docsite-kit\god-docsite\probes\2610141800_functional-packages\node_modules\.pnpm\react-dom@19.3.0_react@19.3.0\node_modules\react-dom\cjs\react-dom-server.node.development.js:6700:15)
+    at retryNode (D:\unitfolders\oz47p-docsite-kit\god-docsite\probes\2610141800_functional-packages\node_modules\.pnpm\react-dom@19.3.0_react@19.3.0\node_modules\react-dom\cjs\react-dom-server.node.development.js:7088:31)
+    at renderNodeDestructive (D:\unitfolders\oz47p-docsite-kit\god-docsite\probes\2610141800_functional-packages\node_modules\.pnpm\react-dom@19.3.0_react@19.3.0\node_modules\react-dom\cjs\react-dom-server.node.development.js:7033:11)
+    at finishFunctionComponent (D:\unitfolders\oz47p-docsite-kit\god-docsite\probes\2610141800_functional-packages\node_modules\.pnpm\react-dom@19.3.0_react@19.3.0\node_modules\react-dom\cjs\react-dom-server.node.development.js:5666:13)
+    at renderElement (D:\unitfolders\oz47p-docsite-kit\god-docsite\probes\2610141800_functional-packages\node_modules\.pnpm\react-dom@19.3.0_react@19.3.0\node_modules\react-dom\cjs\react-dom-server.node.development.js:6112:11)
+    ... collapsed 8 duplicate lines matching above 4 lines 2 times...
+    at retryNode (D:\unitfolders\oz47p-docsite-kit\god-docsite\probes\2610141800_functional-packages\node_modules\.pnpm\react-dom@19.3.0_react@19.3.0\node_modules\react-dom\cjs\react-dom-server.node.development.js:7088:31)
+    at renderNodeDestructive (D:\unitfolders\oz47p-docsite-kit\god-docsite\probes\2610141800_functional-packages\node_modules\.pnpm\react-dom@19.3.0_react@19.3.0\node_modules\react-dom\cjs\react-dom-server.node.development.js:7033:11)
+    at renderNode (D:\unitfolders\oz47p-docsite-kit\god-docsite\probes\2610141800_functional-packages\node_modules\.pnpm\react-dom@19.3.0_react@19.3.0\node_modules\react-dom\cjs\react-dom-server.node.development.js:7584:18)
+    at renderChildrenArray (D:\unitfolders\oz47p-docsite-kit\god-docsite\probes\2610141800_functional-packages\node_modules\.pnpm\react-dom@19.3.0_react@19.3.0\node_modules\react-dom\cjs\react-dom-server.node.development.js:7345:11)
+    at retryNode (D:\unitfolders\oz47p-docsite-kit\god-docsite\probes\2610141800_functional-packages\node_modules\.pnpm\react-dom@19.3.0_react@19.3.0\node_modules\react-dom\cjs\react-dom-server.node.development.js:7112:13)
+    at renderNodeDestructive (D:\unitfolders\oz47p-docsite-kit\god-docsite\probes\2610141800_functional-packages\node_modules\.pnpm\react-dom@19.3.0_react@19.3.0\node_modules\react-dom\cjs\react-dom-server.node.development.js:7033:11)
+    at renderElement (D:\unitfolders\oz47p-docsite-kit\god-docsite\probes\2610141800_functional-packages\node_modules\.pnpm\react-dom@19.3.0_react@19.3.0\node_modules\react-dom\cjs\react-dom-server.node.development.js:6700:15)
+    at retryNode (D:\unitfolders\oz47p-docsite-kit\god-docsite\probes\2610141800_functional-packages\node_modules\.pnpm\react-dom@19.3.0_react@19.3.0\node_modules\react-dom\cjs\react-dom-server.node.development.js:7088:31)
+    at renderNodeDestructive (D:\unitfolders\oz47p-docsite-kit\god-docsite\probes\2610141800_functional-packages\node_modules\.pnpm\react-dom@19.3.0_react@19.3.0\node_modules\react-dom\cjs\react-dom-server.node.development.js:7033:11)
+    at finishFunctionComponent (D:\unitfolders\oz47p-docsite-kit\god-docsite\probes\2610141800_functional-packages\node_modules\.pnpm\react-dom@19.3.0_react@19.3.0\node_modules\react-dom\cjs\react-dom-server.node.development.js:5666:13)
+    at renderElement (D:\unitfolders\oz47p-docsite-kit\god-docsite\probes\2610141800_functional-packages\node_modules\.pnpm\react-dom@19.3.0_react@19.3.0\node_modules\react-dom\cjs\react-dom-server.node.development.js:6112:11)
+    at retryNode (D:\unitfolders\oz47p-docsite-kit\god-docsite\probes\2610141800_functional-packages\node_modules\.pnpm\react-dom@19.3.0_react@19.3.0\node_modules\react-dom\cjs\react-dom-server.node.development.js:7088:31)
+    at renderNodeDestructive (D:\unitfolders\oz47p-docsite-kit\god-docsite\probes\2610141800_functional-packages\node_modules\.pnpm\react-dom@19.3.0_react@19.3.0\node_modules\react-dom\cjs\react-dom-server.node.development.js:7033:11)
+    at renderNode (D:\unitfolders\oz47p-docsite-kit\god-docsite\probes\2610141800_functional-packages\node_modules\.pnpm\react-dom@19.3.0_react@19.3.0\node_modules\react-dom\cjs\react-dom-server.node.development.js:7584:18)
+    at renderChildrenArray (D:\unitfolders\oz47p-docsite-kit\god-docsite\probes\2610141800_functional-packages\node_modules\.pnpm\react-dom@19.3.0_react@19.3.0\node_modules\react-dom\cjs\react-dom-server.node.development.js:7345:11)
+    at retryNode (D:\unitfolders\oz47p-docsite-kit\god-docsite\probes\2610141800_functional-packages\node_modules\.pnpm\react-dom@19.3.0_react@19.3.0\node_modules\react-dom\cjs\react-dom-server.node.development.js:7112:13)
+6:03:10 PM [vite] (client) dependency optimized: demo-pages/site/server

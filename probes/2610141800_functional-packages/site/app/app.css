@@ -1,0 +1,17 @@
+@import 'tailwindcss';
+@import '@fumadocs/base-ui/css/neutral.css';
+@import '@fumadocs/base-ui/css/preset.css';
+@import 'katex/dist/katex.css';
+@import 'demo-content/styles.css';
+
+/* 功能包在站点目录里写的数据文件不进 Tailwind 的源码扫描：扫描到的文件一变，Tailwind 在 dev 下发整页刷新 */
+@source not '../data';
+
+html {
+  scrollbar-gutter: stable;
+}
+
+html > body[data-scroll-locked] {
+  margin-right: 0px !important;
+  --removed-body-scroll-bar-size: 0px !important;
+}

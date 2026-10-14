@@ -1,0 +1,463 @@
+$ C:\Program Files\nodejs\node.exe D:\unitfolders\oz47p-docsite-kit\god-docsite\probes\2610141800_functional-packages\site\node_modules\@react-router\dev\bin.cjs build
+(cwd D:\unitfolders\oz47p-docsite-kit\god-docsite\probes\2610141800_functional-packages\site)
+
+[MDX] generated files in 3.0471000000002277ms
+Using Vite Environment API
+vite v8.3.4 building client environment for production...
+[MDX] generated files in 2.265600000000177ms
+transforming...
+✓ 2591 modules transformed.
+rendering chunks...
+computing gzip size...
+build/client/assets/KaTeX_Size3-Regular-CTq5MqoE.woff           4.42 kB
+build/client/assets/KaTeX_Size4-Regular-Dl5lxZxV.woff2          4.92 kB
+build/client/assets/KaTeX_Size2-Regular-Dy4dx90m.woff2          5.20 kB
+build/client/assets/KaTeX_Size1-Regular-mCD8mA8B.woff2          5.46 kB
+build/client/assets/KaTeX_Size4-Regular-BF-4gkZK.woff           5.98 kB
+build/client/assets/KaTeX_Size2-Regular-oD1tc_U0.woff           6.18 kB
+build/client/assets/KaTeX_Size1-Regular-C195tn64.woff           6.49 kB
+build/client/assets/KaTeX_Caligraphic-Regular-Di6jR-x-.woff2    6.90 kB
+build/client/assets/KaTeX_Caligraphic-Bold-Dq_IR9rO.woff2       6.91 kB
+build/client/assets/KaTeX_Size3-Regular-DgpXs0kz.ttf            7.58 kB
+build/client/assets/KaTeX_Caligraphic-Regular-CTRA-rTL.woff     7.65 kB
+build/client/assets/KaTeX_Caligraphic-Bold-BEiXGLvX.woff        7.71 kB
+build/client/assets/KaTeX_Script-Regular-D3wIWfF6.woff2         9.64 kB
+build/client/assets/KaTeX_SansSerif-Regular-DDBCnlJ7.woff2     10.34 kB
+build/client/assets/KaTeX_Size4-Regular-DWFBv043.ttf           10.36 kB
+build/client/assets/KaTeX_Script-Regular-D5yQViql.woff         10.58 kB
+build/client/assets/KaTeX_Fraktur-Regular-CTYiF6lA.woff2       11.31 kB
+build/client/assets/KaTeX_Fraktur-Bold-CL6g_b3V.woff2          11.34 kB
+build/client/assets/KaTeX_Size2-Regular-B7gKUWhC.ttf           11.50 kB
+build/client/assets/KaTeX_SansSerif-Italic-C3H0VqGB.woff2      12.02 kB
+build/client/assets/KaTeX_SansSerif-Bold-D1sUS0GD.woff2        12.21 kB
+build/client/assets/KaTeX_Size1-Regular-Dbsnue_I.ttf           12.22 kB
+build/client/assets/KaTeX_SansSerif-Regular-CS6fqUqJ.woff      12.31 kB
+build/client/assets/KaTeX_Caligraphic-Regular-wX97UBjC.ttf     12.34 kB
+build/client/assets/KaTeX_Caligraphic-Bold-ATXxdsX0.ttf        12.36 kB
+build/client/assets/KaTeX_Fraktur-Regular-Dxdc4cR9.woff        13.20 kB
+build/client/assets/KaTeX_Fraktur-Bold-BsDP51OF.woff           13.29 kB
+build/client/assets/KaTeX_Typewriter-Regular-CO6r4hn1.woff2    13.56 kB
+build/client/assets/KaTeX_SansSerif-Italic-DN2j7dab.woff       14.11 kB
+build/client/assets/KaTeX_SansSerif-Bold-DbIhKOiC.woff         14.40 kB
+build/client/assets/KaTeX_Typewriter-Regular-C0xS9mPB.woff     16.02 kB
+build/client/assets/KaTeX_Math-BoldItalic-CZnvNsCZ.woff2       16.40 kB
+build/client/assets/KaTeX_Math-Italic-t53AETM-.woff2           16.44 kB
+build/client/assets/KaTeX_Script-Regular-C5JkGWo-.ttf          16.64 kB
+build/client/assets/KaTeX_Main-BoldItalic-DxDJ3AOS.woff2       16.78 kB
+build/client/assets/KaTeX_Main-Italic-NWA7e6Wa.woff2           16.98 kB
+build/client/assets/KaTeX_Math-BoldItalic-iY-2wyZ7.woff        18.66 kB
+build/client/assets/KaTeX_Math-Italic-DA0__PXp.woff            18.74 kB
+build/client/assets/KaTeX_Main-BoldItalic-SpSLRI95.woff        19.41 kB
+build/client/assets/KaTeX_SansSerif-Regular-BNo7hRIc.ttf       19.43 kB
+build/client/assets/KaTeX_Fraktur-Regular-CB_wures.ttf         19.57 kB
+build/client/assets/KaTeX_Fraktur-Bold-BdnERNNW.ttf            19.58 kB
+build/client/assets/KaTeX_Main-Italic-BMLOBm91.woff            19.67 kB
+build/client/assets/KaTeX_SansSerif-Italic-YYjJ1zSn.ttf        22.36 kB
+build/client/assets/KaTeX_SansSerif-Bold-CFMepnvq.ttf          24.50 kB
+build/client/assets/KaTeX_Main-Bold-Cx986IdX.woff2             25.32 kB
+build/client/assets/KaTeX_Main-Regular-B22Nviop.woff2          26.27 kB
+build/client/assets/KaTeX_Typewriter-Regular-D3Ib7_Hf.ttf      27.55 kB
+build/client/assets/KaTeX_AMS-Regular-BQhdFMY1.woff2           28.07 kB
+build/client/assets/KaTeX_Main-Bold-Jm3AIy58.woff              29.91 kB
+build/client/.vite/manifest.json                               30.55 kB │ gzip:  2.91 kB
+build/client/assets/KaTeX_Main-Regular-Dr94JaBh.woff           30.77 kB
+build/client/assets/KaTeX_Math-BoldItalic-B3XSjfu4.ttf         31.19 kB
+build/client/assets/KaTeX_Math-Italic-flOr_0UB.ttf             31.30 kB
+build/client/assets/KaTeX_Main-BoldItalic-DzxPMmG6.ttf         32.96 kB
+build/client/assets/KaTeX_AMS-Regular-DMm9YOAa.woff            33.51 kB
+build/client/assets/KaTeX_Main-Italic-3WenGoN9.ttf             33.58 kB
+build/client/assets/KaTeX_Main-Bold-waoOVXN0.ttf               51.33 kB
+build/client/assets/KaTeX_Main-Regular-ypZvNtVU.ttf            53.58 kB
+build/client/assets/KaTeX_AMS-Regular-DRggAlZN.ttf             63.63 kB
+build/client/assets/root-DNAIOib_.css                         115.80 kB │ gzip: 22.78 kB
+build/client/assets/events-BvRk9kiK.js                          0.00 kB │ gzip:  0.02 kB
+build/client/assets/full-BvRk9kiK.js                            0.00 kB │ gzip:  0.02 kB
+build/client/assets/index-BvRk9kiK.js                           0.00 kB │ gzip:  0.02 kB
+build/client/assets/mdx-BvRk9kiK.js                             0.00 kB │ gzip:  0.02 kB
+build/client/assets/og.docs-BvRk9kiK.js                         0.00 kB │ gzip:  0.02 kB
+build/client/assets/search-BvRk9kiK.js                          0.00 kB │ gzip:  0.02 kB
+build/client/assets/fetch-DW6di_je.js                           0.05 kB │ gzip:  0.07 kB
+build/client/assets/not-found-BxlRqmP7.js                       0.06 kB │ gzip:  0.07 kB
+build/client/assets/remove-undefined-CzMSKybq-CP3jfHCp.js       0.33 kB │ gzip:  0.22 kB
+build/client/assets/algolia-ArbBbJP0.js                         0.74 kB │ gzip:  0.47 kB
+build/client/assets/home-Mar3_pP8.js                            0.85 kB │ gzip:  0.47 kB
+build/client/assets/framework-CVyaAgCv.js                       0.89 kB │ gzip:  0.45 kB
+build/client/assets/orama-cloud-legacy-DJHupeqc.js              1.12 kB │ gzip:  0.61 kB
+build/client/assets/orama-cloud-BNymVk1p.js                     1.18 kB │ gzip:  0.63 kB
+build/client/assets/not-found-3zgbid8X.js                       1.27 kB │ gzip:  0.71 kB
+build/client/assets/demo-B5gUTvk8.js                            1.48 kB │ gzip:  0.78 kB
+build/client/assets/mixedbread-DPsc5_Iv.js                      1.68 kB │ gzip:  0.88 kB
+build/client/assets/root-CbE9tfSr.js                            3.00 kB │ gzip:  1.46 kB
+build/client/assets/react-dom-CLTQIl_a.js                       3.86 kB │ gzip:  1.40 kB
+build/client/assets/test-M-cS9seF.js                            3.88 kB │ gzip:  1.66 kB
+build/client/assets/dist-b1ZIvcbe.js                            4.32 kB │ gzip:  1.95 kB
+build/client/assets/docs-CTsxOMmx.js                            9.36 kB │ gzip:  2.93 kB
+build/client/assets/lib-BD6fd8RT.js                            10.74 kB │ gzip:  4.28 kB
+build/client/assets/home-ChDiwMhu.js                           28.26 kB │ gzip:  9.80 kB
+build/client/assets/errorBoundaries-Uu-O7uZp.js                32.14 kB │ gzip: 11.32 kB
+build/client/assets/search-default-CLIH_bG2.js                 49.32 kB │ gzip: 17.75 kB
+build/client/assets/parse-BU3fTLtO-BprhLbrU.js                 65.08 kB │ gzip: 18.95 kB
+build/client/assets/orama-static-DwkeUseB.js                   74.93 kB │ gzip: 26.12 kB
+build/client/assets/docs-cGezIzkD.js                           89.05 kB │ gzip: 29.41 kB
+build/client/assets/jsx-runtime-CxjVG9Fd.js                    89.14 kB │ gzip: 29.59 kB
+build/client/assets/layout.shared-yTHYdy3k.js                 170.92 kB │ gzip: 62.10 kB
+build/client/assets/entry.client-CW2ZeGYd.js                  210.97 kB │ gzip: 66.30 kB
+
+✓ built in 2.49s
+vite v8.3.4 building ssr environment for production...
+[MDX] generated files in 2.458400000000438ms
+transforming...
+✓ 593 modules transformed.
+rendering chunks...
+
+✓ 60 assets cleaned from React Router server build.
+build\client\assets\KaTeX_AMS-Regular-BQhdFMY1.woff2
+build\client\assets\KaTeX_AMS-Regular-DMm9YOAa.woff
+build\client\assets\KaTeX_AMS-Regular-DRggAlZN.ttf
+build\client\assets\KaTeX_Caligraphic-Bold-Dq_IR9rO.woff2
+build\client\assets\KaTeX_Caligraphic-Bold-BEiXGLvX.woff
+build\client\assets\KaTeX_Caligraphic-Bold-ATXxdsX0.ttf
+build\client\assets\KaTeX_Caligraphic-Regular-Di6jR-x-.woff2
+build\client\assets\KaTeX_Caligraphic-Regular-CTRA-rTL.woff
+build\client\assets\KaTeX_Caligraphic-Regular-wX97UBjC.ttf
+build\client\assets\KaTeX_Fraktur-Bold-CL6g_b3V.woff2
+build\client\assets\KaTeX_Fraktur-Bold-BsDP51OF.woff
+build\client\assets\KaTeX_Fraktur-Bold-BdnERNNW.ttf
+build\client\assets\KaTeX_Fraktur-Regular-CTYiF6lA.woff2
+build\client\assets\KaTeX_Fraktur-Regular-Dxdc4cR9.woff
+build\client\assets\KaTeX_Fraktur-Regular-CB_wures.ttf
+build\client\assets\KaTeX_Main-Bold-Cx986IdX.woff2
+build\client\assets\KaTeX_Main-Bold-Jm3AIy58.woff
+build\client\assets\KaTeX_Main-Bold-waoOVXN0.ttf
+build\client\assets\KaTeX_Main-BoldItalic-DxDJ3AOS.woff2
+build\client\assets\KaTeX_Main-BoldItalic-SpSLRI95.woff
+build\client\assets\KaTeX_Main-BoldItalic-DzxPMmG6.ttf
+build\client\assets\KaTeX_Main-Italic-NWA7e6Wa.woff2
+build\client\assets\KaTeX_Main-Italic-BMLOBm91.woff
+build\client\assets\KaTeX_Main-Italic-3WenGoN9.ttf
+build\client\assets\KaTeX_Main-Regular-B22Nviop.woff2
+build\client\assets\KaTeX_Main-Regular-Dr94JaBh.woff
+build\client\assets\KaTeX_Main-Regular-ypZvNtVU.ttf
+build\client\assets\KaTeX_Math-BoldItalic-CZnvNsCZ.woff2
+build\client\assets\KaTeX_Math-BoldItalic-iY-2wyZ7.woff
+build\client\assets\KaTeX_Math-BoldItalic-B3XSjfu4.ttf
+build\client\assets\KaTeX_Math-Italic-t53AETM-.woff2
+build\client\assets\KaTeX_Math-Italic-DA0__PXp.woff
+build\client\assets\KaTeX_Math-Italic-flOr_0UB.ttf
+build\client\assets\KaTeX_SansSerif-Bold-D1sUS0GD.woff2
+build\client\assets\KaTeX_SansSerif-Bold-DbIhKOiC.woff
+build\client\assets\KaTeX_SansSerif-Bold-CFMepnvq.ttf
+build\client\assets\KaTeX_SansSerif-Italic-C3H0VqGB.woff2
+build\client\assets\KaTeX_SansSerif-Italic-DN2j7dab.woff
+build\client\assets\KaTeX_SansSerif-Italic-YYjJ1zSn.ttf
+build\client\assets\KaTeX_SansSerif-Regular-DDBCnlJ7.woff2
+build\client\assets\KaTeX_SansSerif-Regular-CS6fqUqJ.woff
+build\client\assets\KaTeX_SansSerif-Regular-BNo7hRIc.ttf
+build\client\assets\KaTeX_Script-Regular-D3wIWfF6.woff2
+build\client\assets\KaTeX_Script-Regular-D5yQViql.woff
+build\client\assets\KaTeX_Script-Regular-C5JkGWo-.ttf
+build\client\assets\KaTeX_Size1-Regular-mCD8mA8B.woff2
+build\client\assets\KaTeX_Size1-Regular-C195tn64.woff
+build\client\assets\KaTeX_Size1-Regular-Dbsnue_I.ttf
+build\client\assets\KaTeX_Size2-Regular-Dy4dx90m.woff2
+build\client\assets\KaTeX_Size2-Regular-oD1tc_U0.woff
+build\client\assets\KaTeX_Size2-Regular-B7gKUWhC.ttf
+build\client\assets\KaTeX_Size3-Regular-CTq5MqoE.woff
+build\client\assets\KaTeX_Size3-Regular-DgpXs0kz.ttf
+build\client\assets\KaTeX_Size4-Regular-Dl5lxZxV.woff2
+build\client\assets\KaTeX_Size4-Regular-BF-4gkZK.woff
+build\client\assets\KaTeX_Size4-Regular-DWFBv043.ttf
+build\client\assets\KaTeX_Typewriter-Regular-CO6r4hn1.woff2
+build\client\assets\KaTeX_Typewriter-Regular-C0xS9mPB.woff
+build\client\assets\KaTeX_Typewriter-Regular-D3Ib7_Hf.ttf
+build\server\assets\server-build-DNAIOib_.css
+
+computing gzip size...
+build/server/assets/KaTeX_Size3-Regular-CTq5MqoE.woff           4.42 kB
+build/server/assets/KaTeX_Size4-Regular-Dl5lxZxV.woff2          4.92 kB
+build/server/assets/KaTeX_Size2-Regular-Dy4dx90m.woff2          5.20 kB
+build/server/assets/KaTeX_Size1-Regular-mCD8mA8B.woff2          5.46 kB
+build/server/assets/KaTeX_Size4-Regular-BF-4gkZK.woff           5.98 kB
+build/server/assets/KaTeX_Size2-Regular-oD1tc_U0.woff           6.18 kB
+build/server/assets/KaTeX_Size1-Regular-C195tn64.woff           6.49 kB
+build/server/assets/KaTeX_Caligraphic-Regular-Di6jR-x-.woff2    6.90 kB
+build/server/assets/KaTeX_Caligraphic-Bold-Dq_IR9rO.woff2       6.91 kB
+build/server/assets/KaTeX_Size3-Regular-DgpXs0kz.ttf            7.58 kB
+build/server/assets/KaTeX_Caligraphic-Regular-CTRA-rTL.woff     7.65 kB
+build/server/assets/KaTeX_Caligraphic-Bold-BEiXGLvX.woff        7.71 kB
+build/server/assets/KaTeX_Script-Regular-D3wIWfF6.woff2         9.64 kB
+build/server/assets/KaTeX_SansSerif-Regular-DDBCnlJ7.woff2     10.34 kB
+build/server/assets/KaTeX_Size4-Regular-DWFBv043.ttf           10.36 kB
+build/server/assets/KaTeX_Script-Regular-D5yQViql.woff         10.58 kB
+build/server/assets/KaTeX_Fraktur-Regular-CTYiF6lA.woff2       11.31 kB
+build/server/assets/KaTeX_Fraktur-Bold-CL6g_b3V.woff2          11.34 kB
+build/server/assets/KaTeX_Size2-Regular-B7gKUWhC.ttf           11.50 kB
+build/server/assets/KaTeX_SansSerif-Italic-C3H0VqGB.woff2      12.02 kB
+build/server/assets/KaTeX_SansSerif-Bold-D1sUS0GD.woff2        12.21 kB
+build/server/assets/KaTeX_Size1-Regular-Dbsnue_I.ttf           12.22 kB
+build/server/assets/KaTeX_SansSerif-Regular-CS6fqUqJ.woff      12.31 kB
+build/server/assets/KaTeX_Caligraphic-Regular-wX97UBjC.ttf     12.34 kB
+build/server/assets/KaTeX_Caligraphic-Bold-ATXxdsX0.ttf        12.36 kB
+build/server/assets/KaTeX_Fraktur-Regular-Dxdc4cR9.woff        13.20 kB
+build/server/assets/KaTeX_Fraktur-Bold-BsDP51OF.woff           13.29 kB
+build/server/assets/KaTeX_Typewriter-Regular-CO6r4hn1.woff2    13.56 kB
+build/server/assets/KaTeX_SansSerif-Italic-DN2j7dab.woff       14.11 kB
+build/server/assets/KaTeX_SansSerif-Bold-DbIhKOiC.woff         14.40 kB
+build/server/assets/KaTeX_Typewriter-Regular-C0xS9mPB.woff     16.02 kB
+build/server/assets/KaTeX_Math-BoldItalic-CZnvNsCZ.woff2       16.40 kB
+build/server/assets/KaTeX_Math-Italic-t53AETM-.woff2           16.44 kB
+build/server/assets/KaTeX_Script-Regular-C5JkGWo-.ttf          16.64 kB
+build/server/assets/KaTeX_Main-BoldItalic-DxDJ3AOS.woff2       16.78 kB
+build/server/assets/KaTeX_Main-Italic-NWA7e6Wa.woff2           16.98 kB
+build/server/assets/KaTeX_Math-BoldItalic-iY-2wyZ7.woff        18.66 kB
+build/server/assets/KaTeX_Math-Italic-DA0__PXp.woff            18.74 kB
+build/server/assets/KaTeX_Main-BoldItalic-SpSLRI95.woff        19.41 kB
+build/server/assets/KaTeX_SansSerif-Regular-BNo7hRIc.ttf       19.43 kB
+build/server/assets/KaTeX_Fraktur-Regular-CB_wures.ttf         19.57 kB
+build/server/assets/KaTeX_Fraktur-Bold-BdnERNNW.ttf            19.58 kB
+build/server/assets/KaTeX_Main-Italic-BMLOBm91.woff            19.67 kB
+build/server/assets/KaTeX_SansSerif-Italic-YYjJ1zSn.ttf        22.36 kB
+build/server/assets/KaTeX_SansSerif-Bold-CFMepnvq.ttf          24.50 kB
+build/server/assets/KaTeX_Main-Bold-Cx986IdX.woff2             25.32 kB
+build/server/assets/KaTeX_Main-Regular-B22Nviop.woff2          26.27 kB
+build/server/.vite/manifest.json                               26.77 kB │ gzip:   2.52 kB
+build/server/assets/KaTeX_Typewriter-Regular-D3Ib7_Hf.ttf      27.55 kB
+build/server/assets/KaTeX_AMS-Regular-BQhdFMY1.woff2           28.07 kB
+build/server/assets/KaTeX_Main-Bold-Jm3AIy58.woff              29.91 kB
+build/server/assets/KaTeX_Main-Regular-Dr94JaBh.woff           30.77 kB
+build/server/assets/KaTeX_Math-BoldItalic-B3XSjfu4.ttf         31.19 kB
+build/server/assets/KaTeX_Math-Italic-flOr_0UB.ttf             31.30 kB
+build/server/assets/KaTeX_Main-BoldItalic-DzxPMmG6.ttf         32.96 kB
+build/server/assets/KaTeX_AMS-Regular-DMm9YOAa.woff            33.51 kB
+build/server/assets/KaTeX_Main-Italic-3WenGoN9.ttf             33.58 kB
+build/server/assets/KaTeX_Main-Bold-waoOVXN0.ttf               51.33 kB
+build/server/assets/KaTeX_Main-Regular-ypZvNtVU.ttf            53.58 kB
+build/server/assets/KaTeX_AMS-Regular-DRggAlZN.ttf             63.63 kB
+build/server/assets/server-build-DNAIOib_.css                 115.80 kB │ gzip:  22.78 kB
+build/server/assets/fetch-CjoCApdj.js                           0.05 kB │ gzip:   0.07 kB
+build/server/assets/url-BVHvi3_K-BBvhtU5H.js                    0.74 kB │ gzip:   0.45 kB
+build/server/assets/remove-undefined-CzMSKybq-DVc6_aUu.js       0.85 kB │ gzip:   0.43 kB
+build/server/assets/endpoint-MyoBU5IC-DtaK28sh.js               0.95 kB │ gzip:   0.49 kB
+build/server/assets/fetch-BAtDE39V.js                           1.05 kB │ gzip:   0.60 kB
+build/server/assets/algolia-n3sHrnPI.js                         1.36 kB │ gzip:   0.69 kB
+build/server/assets/rolldown-runtime-B4iAMlE-.js                1.58 kB │ gzip:   0.74 kB
+build/server/assets/orama-cloud-legacy-BewgbzLN.js              2.10 kB │ gzip:   0.90 kB
+build/server/assets/orama-cloud-BD54vueK.js                     2.14 kB │ gzip:   0.91 kB
+build/server/assets/mixedbread-BqEiPAcJ.js                      2.82 kB │ gzip:   1.23 kB
+build/server/assets/orama-static-9P2DZ5bQ.js                    2.91 kB │ gzip:   1.33 kB
+build/server/assets/use-search-Dy8lBrbN-DbyDtXeJ.js             3.25 kB │ gzip:   1.46 kB
+build/server/assets/test-D41aQDZ8.js                            5.14 kB │ gzip:   1.89 kB
+build/server/assets/docs-DsiP6AVI.js                           12.29 kB │ gzip:   3.31 kB
+build/server/assets/server-BIpnHLcl.js                         13.59 kB │ gzip:   4.71 kB
+build/server/assets/space-separated-tokens-BkTuTTG2.js         33.71 kB │ gzip:   8.61 kB
+build/server/assets/search-default-BlUSY8Us.js                 71.35 kB │ gzip:  19.35 kB
+build/server/assets/advanced-cJMxLDd5-DM1osI2T.js             154.01 kB │ gzip:  37.10 kB
+build/server/assets/dist-DkA6Cs0b.js                          203.20 kB │ gzip:  49.99 kB
+build/server/assets/parse-BU3fTLtO-B8jowY7I.js                275.62 kB │ gzip:  61.27 kB
+build/server/index.js                                         561.61 kB │ gzip: 131.48 kB
+
+✓ built in 676ms
+[MDX] generated files in 6.430100000000493ms
+Prerender (html): / -> build\client\index.html
+Prerender (data): /llms.txt -> build\client\llms.txt.data
+Prerender (resource): /llms.txt -> build\client\llms.txt
+Prerender (data): /llms-full.txt -> build\client\llms-full.txt.data
+Prerender (resource): /llms-full.txt -> build\client\llms-full.txt
+Prerender (data): /docs -> build\client\docs.data
+
+--- stderr ---
+(!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
+  - import "./feature-packages.vite" without a file extension (vite.config.ts:5:33). Add the file extension
+Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.
+(!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
+  - import "./feature-packages.vite" without a file extension (vite.config.ts:5:33). Add the file extension
+Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.
+Found 2 warnings while optimizing generated CSS:
+
+Issue #1:
+[2m│     }[22m
+[2m│   }[22m
+[2m│[22m   .\[\&_\:\:highlight\(fd-search\)\]\:text-fd-primary ::highlight(fd-search) {
+[2m┆[22m                                                                   [33m[2m^--[22m 'highlight' is not recognized as a valid pseudo-element. Did you mean ':highlight' (pseudo-class) or is this a typo?[39m
+[2m┆[22m
+[2m│     color: var(--color-fd-primary);[22m
+[2m│   }[22m
+
+Issue #2:
+[2m│     color: var(--color-fd-primary);[22m
+[2m│   }[22m
+[2m│[22m   .\[\&_\:\:highlight\(fd-search\)\]\:underline ::highlight(fd-search) {
+[2m┆[22m                                                             [33m[2m^--[22m 'highlight' is not recognized as a valid pseudo-element. Did you mean ':highlight' (pseudo-class) or is this a typo?[39m
+[2m┆[22m
+[2m│     text-decoration-line: underline;[22m
+[2m│   }[22m
+
+Found 2 warnings while optimizing generated CSS:
+
+Issue #1:
+[2m│     }[22m
+[2m│   }[22m
+[2m│[22m   .\[\&_\:\:highlight\(fd-search\)\]\:text-fd-primary ::highlight(fd-search) {
+[2m┆[22m                                                                   [33m[2m^--[22m 'highlight' is not recognized as a valid pseudo-element. Did you mean ':highlight' (pseudo-class) or is this a typo?[39m
+[2m┆[22m
+[2m│     color: var(--color-fd-primary);[22m
+[2m│   }[22m
+
+Issue #2:
+[2m│     color: var(--color-fd-primary);[22m
+[2m│   }[22m
+[2m│[22m   .\[\&_\:\:highlight\(fd-search\)\]\:underline ::highlight(fd-search) {
+[2m┆[22m                                                             [33m[2m^--[22m 'highlight' is not recognized as a valid pseudo-element. Did you mean ':highlight' (pseudo-class) or is this a typo?[39m
+[2m┆[22m
+[2m│     text-decoration-line: underline;[22m
+[2m│   }[22m
+
+(!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
+  - import "./feature-packages.vite" without a file extension (vite.config.ts:5:33). Add the file extension
+Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.
+Error: You need to wrap your application inside `FrameworkProvider`.
+    at Object.notImplemented (file:///D:/unitfolders/oz47p-docsite-kit/god-docsite/probes/2610141800_functional-packages/node_modules/.pnpm/fumadocs-core@16.17.1_@mdx-_4383906efa3d5146025f133b099a141f/node_modules/fumadocs-core/dist/framework/index.js:6:8)
+    at usePathname (file:///D:/unitfolders/oz47p-docsite-kit/god-docsite/probes/2610141800_functional-packages/node_modules/.pnpm/fumadocs-core@16.17.1_@mdx-_4383906efa3d5146025f133b099a141f/node_modules/fumadocs-core/dist/framework/index.js:33:31)
+    at DemoCounter (file:///D:/unitfolders/oz47p-docsite-kit/god-docsite/probes/2610141800_functional-packages/node_modules/.pnpm/demo-content@file+tarballs+_0f8cb0f0c1dfee4299f7cde0ed6fff4b/node_modules/demo-content/dist/site/demo-counter.js:9:22)
+    at renderWithHooks (D:\unitfolders\oz47p-docsite-kit\god-docsite\probes\2610141800_functional-packages\node_modules\.pnpm\react-dom@19.3.0_react@19.3.0\node_modules\react-dom\cjs\react-dom-server.node.production.js:4836:18)
+    at renderElement (D:\unitfolders\oz47p-docsite-kit\god-docsite\probes\2610141800_functional-packages\node_modules\.pnpm\react-dom@19.3.0_react@19.3.0\node_modules\react-dom\cjs\react-dom-server.node.production.js:5003:19)
+    at retryNode (D:\unitfolders\oz47p-docsite-kit\god-docsite\probes\2610141800_functional-packages\node_modules\.pnpm\react-dom@19.3.0_react@19.3.0\node_modules\react-dom\cjs\react-dom-server.node.production.js:5831:16)
+    at renderNodeDestructive (D:\unitfolders\oz47p-docsite-kit\god-docsite\probes\2610141800_functional-packages\node_modules\.pnpm\react-dom@19.3.0_react@19.3.0\node_modules\react-dom\cjs\react-dom-server.node.production.js:5621:7)
+    at renderNode (D:\unitfolders\oz47p-docsite-kit\god-docsite\probes\2610141800_functional-packages\node_modules\.pnpm\react-dom@19.3.0_react@19.3.0\node_modules\react-dom\cjs\react-dom-server.node.production.js:6201:14)
+    at renderChildrenArray (D:\unitfolders\oz47p-docsite-kit\god-docsite\probes\2610141800_functional-packages\node_modules\.pnpm\react-dom@19.3.0_react@19.3.0\node_modules\react-dom\cjs\react-dom-server.node.production.js:5975:7)
+    at retryNode (D:\unitfolders\oz47p-docsite-kit\god-docsite\probes\2610141800_functional-packages\node_modules\.pnpm\react-dom@19.3.0_react@19.3.0\node_modules\react-dom\cjs\react-dom-server.node.production.js:5845:9)
+Error: Prerender: Request failed for /docs/: Prerender (html): Received a 500 status code from `entry.server.tsx` while prerendering the `/docs/` path.
+<!DOCTYPE html><html lang="en"><head><meta charSet="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/><link rel="preconnect" href="https://fonts.googleapis.com"/><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous"/><link rel="modulepreload" href="/assets/entry.client-CW2ZeGYd.js"/><link rel="modulepreload" href="/assets/jsx-runtime-CxjVG9Fd.js"/><link rel="modulepreload" href="/assets/react-dom-CLTQIl_a.js"/><link rel="modulepreload" href="/assets/errorBoundaries-Uu-O7uZp.js"/><link rel="modulepreload" href="/assets/root-CbE9tfSr.js"/><link rel="modulepreload" href="/assets/lib-BD6fd8RT.js"/><link rel="modulepreload" href="/assets/framework-CVyaAgCv.js"/><link rel="modulepreload" href="/assets/layout.shared-yTHYdy3k.js"/><link rel="modulepreload" href="/assets/not-found-3zgbid8X.js"/><link rel="modulepreload" href="/assets/home-ChDiwMhu.js"/><link rel="modulepreload" href="/assets/docs-cGezIzkD.js"/><link rel="modulepreload" href="/assets/dist-b1ZIvcbe.js"/><link rel="stylesheet" href="/assets/root-DNAIOib_.css"/><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&amp;display=swap"/></head><body class="flex flex-col min-h-screen"><script>((e, i, s, u, m, a, l, h) => {
+	let d = document.documentElement, w = ["light", "dark"];
+	function p(n) {
+		(Array.isArray(e) ? e : [e]).forEach((y) => {
+			let k = y === "class", S = k && a ? m.map((f) => a[f] || f) : m;
+			k ? (d.classList.remove(...S), d.classList.add(a && a[n] ? a[n] : n)) : d.setAttribute(y, n);
+		}), R(n);
+	}
+	function R(n) {
+		h && w.includes(n) && (d.style.colorScheme = n);
+	}
+	function c() {
+		return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+	}
+	if (u) p(u);
+	else try {
+		let n = localStorage.getItem(i) || s;
+		p(l && n === "system" ? c() : n);
+	} catch (n) {}
+})("class","theme","system",null,["light","dark"],null,true,true)</script><!--$--><div data-closed="" role="presentation" hidden="" style="user-select:none;-webkit-user-select:none" class="fixed inset-0 z-50 backdrop-blur-xs bg-fd-overlay data-open:animate-fd-fade-in data-closed:animate-fd-fade-out"></div><div class="bg-fd-secondary/50 p-3 empty:hidden"></div><!--/$--><main class="pt-16 p-4 w-full max-w-[1400px] mx-auto"><h1>Oops!</h1><p>An unexpected error occurred.</p></main><script>((storageKey, restoreKey) => {
+		if (!window.history.state || !window.history.state.key) {
+			let key = Math.random().toString(32).slice(2);
+			window.history.replaceState({ key }, "");
+		}
+		try {
+			let storedY = JSON.parse(sessionStorage.getItem(storageKey) || "{}")[restoreKey || window.history.state.key];
+			if (typeof storedY === "number") window.scrollTo(0, storedY);
+		} catch (error) {
+			console.error(error);
+			sessionStorage.removeItem(storageKey);
+		}
+	})("react-router-scroll-positions", null)</script><script>window.__reactRouterContext = {"basename":"/","future":{"unstable_enableNodeReadableStream":false,"unstable_optimizeDeps":false},"routeDiscovery":{"mode":"lazy","manifestPath":"/__manifest"},"ssr":true,"isSpaMode":false};window.__reactRouterContext.stream = new ReadableStream({start(controller){window.__reactRouterContext.streamController = controller;}}).pipeThrough(new TextEncoderStream());</script><script type="module" async="">;
+import * as route0 from "/assets/root-CbE9tfSr.js";
+import * as route1 from "/assets/docs-cGezIzkD.js";
+  window.__reactRouterManifest = {
+  "entry": {
+    "module": "/assets/entry.client-CW2ZeGYd.js",
+    "imports": [
+      "/assets/jsx-runtime-CxjVG9Fd.js",
+      "/assets/react-dom-CLTQIl_a.js",
+      "/assets/errorBoundaries-Uu-O7uZp.js"
+    ],
+    "css": []
+  },
+  "routes": {
+    "root": {
+      "id": "root",
+      "path": "",
+      "hasAction": false,
+      "hasLoader": false,
+      "hasClientAction": false,
+      "hasClientLoader": false,
+      "hasClientMiddleware": false,
+      "hasDefaultExport": true,
+      "hasErrorBoundary": true,
+      "module": "/assets/root-CbE9tfSr.js",
+      "imports": [
+        "/assets/jsx-runtime-CxjVG9Fd.js",
+        "/assets/react-dom-CLTQIl_a.js",
+        "/assets/errorBoundaries-Uu-O7uZp.js",
+        "/assets/lib-BD6fd8RT.js",
+        "/assets/framework-CVyaAgCv.js",
+        "/assets/layout.shared-yTHYdy3k.js",
+        "/assets/not-found-3zgbid8X.js",
+        "/assets/home-ChDiwMhu.js"
+      ],
+      "css": [
+        "/assets/root-DNAIOib_.css"
+      ]
+    },
+    "routes/docs": {
+      "id": "routes/docs",
+      "parentId": "root",
+      "path": "docs/*",
+      "hasAction": false,
+      "hasLoader": true,
+      "hasClientAction": false,
+      "hasClientLoader": false,
+      "hasClientMiddleware": false,
+      "hasDefaultExport": true,
+      "hasErrorBoundary": false,
+      "module": "/assets/docs-cGezIzkD.js",
+      "imports": [
+        "/assets/jsx-runtime-CxjVG9Fd.js",
+        "/assets/react-dom-CLTQIl_a.js",
+        "/assets/framework-CVyaAgCv.js",
+        "/assets/layout.shared-yTHYdy3k.js",
+        "/assets/dist-b1ZIvcbe.js"
+      ],
+      "css": []
+    },
+    "routes/home": {
+      "id": "routes/home",
+      "parentId": "root",
+      "index": true,
+      "hasAction": false,
+      "hasLoader": false,
+      "hasClientAction": false,
+      "hasClientLoader": false,
+      "hasClientMiddleware": false,
+      "hasDefaultExport": true,
+      "hasErrorBoundary": false,
+      "module": "/assets/home-Mar3_pP8.js",
+      "imports": [
+        "/assets/jsx-runtime-CxjVG9Fd.js",
+        "/assets/lib-BD6fd8RT.js",
+        "/assets/layout.shared-yTHYdy3k.js",
+        "/assets/home-ChDiwMhu.js",
+        "/assets/errorBoundaries-Uu-O7uZp.js",
+        "/assets/react-dom-CLTQIl_a.js",
+        "/assets/framework-CVyaAgCv.js"
+      ],
+      "css": []
+    }
+  },
+  "url": "/assets/manifest-6cdc465c.js",
+  "version": "6cdc465c"
+};
+  window.__reactRouterRouteModules = {"root":route0,"routes/docs":route1};
+
+import("/assets/entry.client-CW2ZeGYd.js");</script><!--$?--><template id="B:0"></template><!--/$--><script id="_R_">requestAnimationFrame(function(){$RT=performance.now()});</script><div hidden id="S:0"><script>window.__reactRouterContext.streamController.enqueue("[{\"_1\":2,\"_3\":-5,\"_4\":5},\"loaderData\",{\"_10\":11},\"actionData\",\"errors\",{\"_6\":7},\"root\",[\"SanitizedError\",8,9,-7],\"Error\",\"Unexpected Server Error\",\"routes/docs\",{\"_12\":13,\"_14\":15,\"_16\":17,\"_18\":19},\"path\",\"index.mdx\",\"markdownUrl\",\"/llms.mdx/docs/content.md\",\"pageTree\",{\"_20\":21,\"_22\":23},\"imagePath\",\"/og/docs/image.webp\",\"$fumadocs_loader\",\"page-tree\",\"data\",{\"_24\":6,\"_25\":26,\"_27\":6,\"_28\":29,\"_30\":-7,\"_31\":32},\"type\",\"$ref\",{\"_71\":72,\"_73\":74},\"$id\",\"name\",{\"_41\":42,\"_24\":43,\"_44\":-5,\"_45\":-5,\"_46\":68},\"description\",\"children\",[33,34,35],{\"_27\":13,\"_24\":36,\"_28\":62,\"_30\":63,\"_57\":-7,\"_38\":64,\"_25\":13},{\"_27\":54,\"_24\":36,\"_28\":55,\"_30\":56,\"_57\":-7,\"_38\":58,\"_25\":54},{\"_24\":36,\"_28\":37,\"_38\":39,\"_27\":40},\"page\",{\"_41\":42,\"_24\":43,\"_44\":-5,\"_45\":-5,\"_46\":47},\"url\",\"/demo\",\"demo-pages:sidebar-entry\",\"$$typeof\",[\"Y\",\"react.transitional.element\"],\"span\",\"key\",\"ref\",\"props\",{\"_48\":49,\"_50\":51},\"className\",\"fd-page-tree-item-name\",\"dangerouslySetInnerHTML\",{\"_52\":53},\"__html\",\"演示\",\"test.mdx\",{\"_41\":42,\"_24\":43,\"_44\":-5,\"_45\":-5,\"_46\":59},\"A document to test Fumadocs\",\"icon\",\"/docs/test\",{\"_48\":49,\"_50\":60},{\"_52\":61},\"Test\",{\"_41\":42,\"_24\":43,\"_44\":-5,\"_45\":-5,\"_46\":65},\"Your first `document`\\nYou'll love it!\\n\",\"/docs\",{\"_48\":49,\"_50\":66},{\"_52\":67},\"Hello World\",{\"_48\":49,\"_50\":69},{\"_52\":70},\"Docs\",\"folder\",\"\",\"meta\",\"meta.json\"]\n");</script><!--$?--><template id="B:1"></template><!--/$--></div><script>$RB=[];$RV=function(a){$RT=performance.now();for(var b=0;b<a.length;b+=2){var c=a[b],e=a[b+1];null!==e.parentNode&&e.parentNode.removeChild(e);var f=c.parentNode;if(f){var g=c.previousSibling,h=0;do{if(c&&8===c.nodeType){var d=c.data;if("/$"===d||"/&"===d)if(0===h)break;else h--;else"$"!==d&&"$?"!==d&&"$~"!==d&&"$!"!==d&&"&"!==d||h++}d=c.nextSibling;f.removeChild(c);c=d}while(c);for(;e.firstChild;)f.insertBefore(e.firstChild,c);g.data="$";g._reactRetry&&requestAnimationFrame(g._reactRetry)}}a.length=0};
+$RC=function(a,b){if(b=document.getElementById(b))(a=document.getElementById(a))?(a.previousSibling.data="$~",$RB.push(a,b),2===$RB.length&&("number"!==typeof $RT?requestAnimationFrame($RV.bind(null,$RB)):(a=performance.now(),setTimeout($RV.bind(null,$RB),2300>a&&2E3<a?2300-a:$RT+300-a)))):b.parentNode.removeChild(b)};$RC("B:0","S:0")</script><div hidden id="S:1"><script>window.__reactRouterContext.streamController.close();</script></div><script>$RC("B:1","S:1")</script></body></html>
+    at defaultHandleError (file:///D:/unitfolders/oz47p-docsite-kit/god-docsite/probes/2610141800_functional-packages/node_modules/.pnpm/@react-router+dev@8.4.0_@re_d57a0e4586dd309d68f4d3942da90af1/node_modules/@react-router/dev/dist/vite.js:893:8)
+    at attempt (file:///D:/unitfolders/oz47p-docsite-kit/god-docsite/probes/2610141800_functional-packages/node_modules/.pnpm/@react-router+dev@8.4.0_@re_d57a0e4586dd309d68f4d3942da90af1/node_modules/@react-router/dev/dist/vite.js:841:11)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async prerender (file:///D:/unitfolders/oz47p-docsite-kit/god-docsite/probes/2610141800_functional-packages/node_modules/.pnpm/@react-router+dev@8.4.0_@re_d57a0e4586dd309d68f4d3942da90af1/node_modules/@react-router/dev/dist/vite.js:848:64)
+    at async prerender (file:///D:/unitfolders/oz47p-docsite-kit/god-docsite/probes/2610141800_functional-packages/node_modules/.pnpm/@react-router+dev@8.4.0_@re_d57a0e4586dd309d68f4d3942da90af1/node_modules/@react-router/dev/dist/vite.js:852:10)
+    at async default.concurrency.concurrency (file:///D:/unitfolders/oz47p-docsite-kit/god-docsite/probes/2610141800_functional-packages/node_modules/.pnpm/@react-router+dev@8.4.0_@re_d57a0e4586dd309d68f4d3942da90af1/node_modules/@react-router/dev/dist/vite.js:865:9)
+    at async file:///D:/unitfolders/oz47p-docsite-kit/god-docsite/probes/2610141800_functional-packages/node_modules/.pnpm/p-map@7.1.1/node_modules/p-map/index.js:209:20
+    at async buildApp (file:///D:/unitfolders/oz47p-docsite-kit/god-docsite/probes/2610141800_functional-packages/node_modules/.pnpm/@react-router+dev@8.4.0_@re_d57a0e4586dd309d68f4d3942da90af1/node_modules/@react-router/dev/dist/vite.js:864:8)
+    at async Object.buildApp (file:///D:/unitfolders/oz47p-docsite-kit/god-docsite/probes/2610141800_functional-packages/node_modules/.pnpm/@react-router+dev@8.4.0_@re_d57a0e4586dd309d68f4d3942da90af1/node_modules/@react-router/dev/dist/vite.js:2211:8)
+    at async Object.buildApp (file:///D:/unitfolders/oz47p-docsite-kit/god-docsite/probes/2610141800_functional-packages/node_modules/.pnpm/vite@8.3.4_patch_hash=71051_8cc5f27f1374563b1a7bdf9782a6037c/node_modules/vite/dist/node/chunks/node.js:35133:38)
+
+--- exit 1 signal null error 

@@ -1,0 +1,13 @@
+$ pnpm install
+(cwd D:\unitfolders\oz47p-docsite-kit\god-docsite\probes\2610141800_functional-packages)
+
+Scope: all 4 workspace projects
+✓ Lockfile passes supply-chain policies (verified 7m ago)
+Packages: +2
+++
+Progress: resolved 2, reused 196, downloaded 0, added 2, done
+Done in 793ms using pnpm v12.4.2
+
+--- stderr ---
+
+--- exit 0 signal null error 

@@ -1,0 +1,40 @@
+$ node D:\unitfolders\oz47p-docsite-kit\god-docsite\probes\2610141800_functional-packages\site\node_modules\@react-router\dev\bin.cjs dev --port 5691 --host 127.0.0.1 --strictPort
+(cwd D:\unitfolders\oz47p-docsite-kit\god-docsite\probes\2610141800_functional-packages\site, port 5691)
+
+[restart] Relaunching with --conditions=development
+(!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
+  - import "./feature-packages.vite" without a file extension (vite.config.ts:5:33). Add the file extension
+Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.
+[feature-packages] {"optimizeDeps":{"include":["demo-content > ms","fumadocs-mdx > esbuild","fumadocs-mdx > github-slugger","fumadocs-mdx > picocolors","fumadocs-mdx > picomatch","fumadocs-mdx > yuku-analyzer"],"exclude":["@fumadocs/base-ui","demo-content","demo-pages","fumadocs-mdx"]},"ssr":{"noExternal":["@fumadocs/base-ui","demo-content","demo-pages","fumadocs-mdx"],"external":["@base-ui/react","@fuma-translate/react","@mdx-js/mdx","@standard-schema/spec","chokidar","class-variance-authority","cn","esbuild","estree-util-value-to-estree","github-slugger","hast-util-to-jsx-runtime","lucide-react","magic-string","mdast-util-mdx","motion","ms","next-themes","picocolors","picomatch","react-remove-scroll","scroll-into-view-if-needed","shiki","tinyexec","tinyglobby","unified","unist-util-remove-position","unist-util-visit","vfile","yaml","yuku-analyzer","zod"]}}
+(!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
+  - import "./feature-packages.vite" without a file extension (vite.config.ts:5:33). Add the file extension
+Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.
+[feature-packages] {"optimizeDeps":{"include":["demo-content > ms","fumadocs-mdx > esbuild","fumadocs-mdx > github-slugger","fumadocs-mdx > picocolors","fumadocs-mdx > picomatch","fumadocs-mdx > yuku-analyzer"],"exclude":["@fumadocs/base-ui","demo-content","demo-pages","fumadocs-mdx"]},"ssr":{"noExternal":["@fumadocs/base-ui","demo-content","demo-pages","fumadocs-mdx"],"external":["@base-ui/react","@fuma-translate/react","@mdx-js/mdx","@standard-schema/spec","chokidar","class-variance-authority","cn","esbuild","estree-util-value-to-estree","github-slugger","hast-util-to-jsx-runtime","lucide-react","magic-string","mdast-util-mdx","motion","ms","next-themes","picocolors","picomatch","react-remove-scroll","scroll-into-view-if-needed","shiki","tinyexec","tinyglobby","unified","unist-util-remove-position","unist-util-visit","vfile","yaml","yuku-analyzer","zod"]}}
+  ➜  Local:   http://127.0.0.1:5691/
+6:09:39 PM [vite] (ssr) connected.
+Error: Server-only module referenced by client
+
+    '/@fs/D:/unitfolders/oz47p-docsite-kit/god-docsite/probes/2610141800_functional-packages/node_modules/.pnpm/@fumadocs+base-ui@16.17.1_@_f8cbc0416fe6af900384935d4bb2c0fc/node_modules/@fumadocs/base-ui/dist/mdx.server.js' imported by 'index.html'
+
+    at ResolveIdContext.resolveId (file:///D:/unitfolders/oz47p-docsite-kit/god-docsite/probes/2610141800_functional-packages/site/node_modules/.vite-temp/vite.config.ts.timestamp-1791972578452-2821fa5bbada08.mjs:52:10)
+    at async EnvironmentPluginContainer.resolveId (file:///D:/unitfolders/oz47p-docsite-kit/god-docsite/probes/2610141800_functional-packages/node_modules/.pnpm/vite@8.3.4_patch_hash=71051_8cc5f27f1374563b1a7bdf9782a6037c/node_modules/vite/dist/node/chunks/node.js:8461:19)
+    at async EnvironmentModuleGraph._resolveUrl (file:///D:/unitfolders/oz47p-docsite-kit/god-docsite/probes/2610141800_functional-packages/node_modules/.pnpm/vite@8.3.4_patch_hash=71051_8cc5f27f1374563b1a7bdf9782a6037c/node_modules/vite/dist/node/chunks/node.js:36838:39)
+    at async EnvironmentModuleGraph.getModuleByUrl (file:///D:/unitfolders/oz47p-docsite-kit/god-docsite/probes/2610141800_functional-packages/node_modules/.pnpm/vite@8.3.4_patch_hash=71051_8cc5f27f1374563b1a7bdf9782a6037c/node_modules/vite/dist/node/chunks/node.js:36646:17)
+    at async Promise.all (index 0)
+    at async ModuleGraph.getModuleByUrl (file:///D:/unitfolders/oz47p-docsite-kit/god-docsite/probes/2610141800_functional-packages/node_modules/.pnpm/vite@8.3.4_patch_hash=71051_8cc5f27f1374563b1a7bdf9782a6037c/node_modules/vite/dist/node/chunks/node.js:20708:37)
+    at async addFromUrl (file:///D:/unitfolders/oz47p-docsite-kit/god-docsite/probes/2610141800_functional-packages/node_modules/.pnpm/@react-router+dev@8.4.0_@re_d57a0e4586dd309d68f4d3942da90af1/node_modules/@react-router/dev/dist/vite.js:117:14)
+    at async Promise.all (index 0)
+    at async findDeps (file:///D:/unitfolders/oz47p-docsite-kit/god-docsite/probes/2610141800_functional-packages/node_modules/.pnpm/@react-router+dev@8.4.0_@re_d57a0e4586dd309d68f4d3942da90af1/node_modules/@react-router/dev/dist/vite.js:123:2)
+    at async addFromNode (file:///D:/unitfolders/oz47p-docsite-kit/god-docsite/probes/2610141800_functional-packages/node_modules/.pnpm/@react-router+dev@8.4.0_@re_d57a0e4586dd309d68f4d3942da90af1/node_modules/@react-router/dev/dist/vite.js:113:4)
+    at async addFromUrl (file:///D:/unitfolders/oz47p-docsite-kit/god-docsite/probes/2610141800_functional-packages/node_modules/.pnpm/@react-router+dev@8.4.0_@re_d57a0e4586dd309d68f4d3942da90af1/node_modules/@react-router/dev/dist/vite.js:118:13)
+    at async Promise.all (index 6)
+    at async findDeps (file:///D:/unitfolders/oz47p-docsite-kit/god-docsite/probes/2610141800_functional-packages/node_modules/.pnpm/@react-router+dev@8.4.0_@re_d57a0e4586dd309d68f4d3942da90af1/node_modules/@react-router/dev/dist/vite.js:123:2)
+    at async getStylesForFiles (file:///D:/unitfolders/oz47p-docsite-kit/god-docsite/probes/2610141800_functional-packages/node_modules/.pnpm/@react-router+dev@8.4.0_@re_d57a0e4586dd309d68f4d3942da90af1/node_modules/@react-router/dev/dist/vite.js:96:4)
+    at async getStylesForPathname (file:///D:/unitfolders/oz47p-docsite-kit/god-docsite/probes/2610141800_functional-packages/node_modules/.pnpm/@react-router+dev@8.4.0_@re_d57a0e4586dd309d68f4d3942da90af1/node_modules/@react-router/dev/dist/vite.js:150:9)
+    at async file:///D:/unitfolders/oz47p-docsite-kit/god-docsite/probes/2610141800_functional-packages/node_modules/.pnpm/@react-router+dev@8.4.0_@re_d57a0e4586dd309d68f4d3942da90af1/node_modules/@react-router/dev/dist/vite.js:1642:17
+6:09:43 PM [vite] (client) dependencies optimized: rehype-katex, remark-math
+6:09:43 PM [vite] (client) optimized dependencies changed. reloading
+6:10:09 PM [vite] (client) [console.error] Error loading route module `/app/routes/docs.tsx`, reloading page...
+6:10:09 PM [vite] (client) [console.error] Error: Module "node:url" has been externalized for browser compatibility. Cannot access "node:url.fileURLToPath" in client code.  See https://vite.dev/guide/troubleshooting.html#module-externalized-for-browser-compatibility for more details.
+    at Object.get (http://127.0.0.1:5691/@id/__vite-browser-external:node:url:3:11)
+    at http://127.0.0.1:5691/@fs/D:/unitfolders/oz47p-docsite-kit/god-docsite/probes/2610141800_functional-packages/node_modules/.pnpm/fumadocs-core@16.17.1_@mdx-_4383906efa3d5146025f133b099a141f/node_modules/fumadocs-core/dist/mdx-plugins/remark-image.js?v=70e3dc7b:1:50

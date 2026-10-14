@@ -1,0 +1,7 @@
+$ C:\Program Files\nodejs\node.exe D:\unitfolders\oz47p-docsite-kit\god-docsite\probes\2610141800_functional-packages\site\node_modules\typescript\bin\tsc --noEmit -p tsconfig.json
+(cwd D:\unitfolders\oz47p-docsite-kit\god-docsite\probes\2610141800_functional-packages\site)
+
+
+--- stderr ---
+
+--- exit 0 signal null error 

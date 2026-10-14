@@ -1,0 +1,33 @@
+GET /app/features/demo/demo.tsx → 200
+
+import { createHotContext as __vite__createHotContext } from "/@vite/client";import.meta.hot = __vite__createHotContext("/app/features/demo/demo.tsx");const _jsxDEV = __vite__cjsImport4_react_jsxDevRuntime["jsxDEV"];import RefreshRuntime from "/@id/__x00__virtual:react-router/hmr-runtime";const inWebWorker = typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope;let prevRefreshReg;let prevRefreshSig;if (import.meta.hot && !inWebWorker) {  if (!window.__vite_plugin_react_preamble_installed__) {    throw new Error(      "React Router Vite plugin can't detect preamble. Something is wrong."    );  }  prevRefreshReg = window.$RefreshReg$;  prevRefreshSig = window.$RefreshSig$;  window.$RefreshReg$ = (type, id) => {    RefreshRuntime.register(type, "D:/unitfolders/oz47p-docsite-kit/god-docsite/probes/2610141800_functional-packages/site/app/features/demo/demo.tsx" + " " + id)  };  window.$RefreshSig$ = RefreshRuntime.createSignatureFunctionForTransform;}import { UNSAFE_withComponentProps as _UNSAFE_withComponentProps } from "/node_modules/.vite/deps/react-router.js?v=2531f911";
+import { demoLoader } from "/@fs/D:/unitfolders/oz47p-docsite-kit/god-docsite/probes/2610141800_functional-packages/node_modules/.pnpm/demo-pages@file+tarballs+de_1e0175858bc0bfa980ed07996cdd8cae/node_modules/demo-pages/dist/site/demo.server.js?v=2531f911";
+var _jsxFileName = "D:/unitfolders/oz47p-docsite-kit/god-docsite/probes/2610141800_functional-packages/site/app/features/demo/demo.tsx";
+import __vite__cjsImport4_react_jsxDevRuntime from "/node_modules/.vite/deps/react_jsx-dev-runtime.js?v=2531f911";
+export default _c2 = _UNSAFE_withComponentProps(_c = function BadDemoPage() {
+  return /* @__PURE__ */_jsxDEV("p", {
+    "data-bad-demo": "",
+    children: demoLoader.name
+  }, void 0, false, {
+    fileName: _jsxFileName,
+    lineNumber: 9,
+    columnNumber: 10
+  }, this);
+});
+var _c, _c2;
+$RefreshReg$(_c, "%default%$_UNSAFE_withComponentProps");
+$RefreshReg$(_c2, "%default%");
+if (import.meta.hot && !inWebWorker) {
+  window.$RefreshReg$ = prevRefreshReg;
+  window.$RefreshSig$ = prevRefreshSig;
+  RefreshRuntime.__hmr_import(import.meta.url).then((currentExports) => {
+    RefreshRuntime.registerExportsForReactRefresh("D:/unitfolders/oz47p-docsite-kit/god-docsite/probes/2610141800_functional-packages/site/app/features/demo/demo.tsx", currentExports);
+    import.meta.hot.accept((nextExports) => {
+      if (!nextExports) return;
+      "D:/unitfolders/oz47p-docsite-kit/god-docsite/probes/2610141800_functional-packages/site/app/features/demo/demo" && window.__reactRouterRouteModuleUpdates.set("D:/unitfolders/oz47p-docsite-kit/god-docsite/probes/2610141800_functional-packages/site/app/features/demo/demo", nextExports);
+      const invalidateMessage = RefreshRuntime.validateRefreshBoundaryAndEnqueueUpdate(currentExports, nextExports, ["clientAction","clientLoader","clientMiddleware","handle","meta","links","shouldRevalidate"]);
+      if (invalidateMessage) import.meta.hot.invalidate(invalidateMessage);
+    });
+  });
+}
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJtYXBwaW5ncyI6IjtBQUNBLFNBQXFCQSxVQUFBLFFBQWtCOzs7QUFNdkMsZUFBQUMsR0FBQSxHQUFBQywwQkFBQSxDQUFBQyxFQUFBLFlBQXdCQyxjQUFjO0VBQ3BDLE9BQU8sZUFBQUMsT0FBQSxDQUFDLEtBQUQ7SUFBRyxpQkFBYztjQUFJTCxVQUFBLENBQVdNO0VBQVE7Ozs7O0FBQ2pEO0FBQUEsSUFBQUgsRUFBQSxFQUFBRixHQUFBO0FBQUFNLFlBQUEsQ0FBQUosRUFBQTtBQUFBSSxZQUFBLENBQUFOLEdBQUEiLCJuYW1lcyI6WyJkZW1vTG9hZGVyIiwiX2MyIiwiX1VOU0FGRV93aXRoQ29tcG9uZW50UHJvcHMiLCJfYyIsIkJhZERlbW9QYWdlIiwiX2pzeERFViIsIm5hbWUiLCIkUmVmcmVzaFJlZyQiXSwiaWdub3JlTGlzdCI6W10sInNvdXJjZXMiOlsiZGVtby50c3giXSwic291cmNlc0NvbnRlbnQiOlsiaW1wb3J0IHR5cGUgeyBSb3V0ZSB9IGZyb20gJy4vK3R5cGVzL2RlbW8nO1xuaW1wb3J0IHsgZGVtb0FjdGlvbiwgZGVtb0xvYWRlciB9IGZyb20gJ2RlbW8tcGFnZXMvc2l0ZS9zZXJ2ZXInO1xuaW1wb3J0IHsgc2l0ZSB9IGZyb20gJ0AvbGliL3NpdGUuc2VydmVyJztcblxuZXhwb3J0IGNvbnN0IGxvYWRlciA9IChhcmdzOiBSb3V0ZS5Mb2FkZXJBcmdzKSA9PiBkZW1vTG9hZGVyKGFyZ3MsIHNpdGUpO1xuZXhwb3J0IGNvbnN0IGFjdGlvbiA9IChhcmdzOiBSb3V0ZS5BY3Rpb25BcmdzKSA9PiBkZW1vQWN0aW9uKGFyZ3MsIHNpdGUpO1xuXG5leHBvcnQgZGVmYXVsdCBmdW5jdGlvbiBCYWREZW1vUGFnZSgpIHtcbiAgcmV0dXJuIDxwIGRhdGEtYmFkLWRlbW89XCJcIj57ZGVtb0xvYWRlci5uYW1lfTwvcD47XG59XHJcbiJdLCJmaWxlIjoiRDovdW5pdGZvbGRlcnMvb3o0N3AtZG9jc2l0ZS1raXQvZ29kLWRvY3NpdGUvcHJvYmVzLzI2MTAxNDE4MDBfZnVuY3Rpb25hbC1wYWNrYWdlcy9zaXRlL2FwcC9mZWF0dXJlcy9kZW1vL2RlbW8udHN4In0=

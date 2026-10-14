@@ -1,0 +1,1141 @@
+{
+  "runName": "20261014-1009",
+  "startedAt": "2026-10-14T10:09:13.700Z",
+  "node": "v24.14.1",
+  "sections": [
+    {
+      "title": "环境",
+      "entries": [
+        "运行 20261014-1009，日志目录 runs\\20261014-1009",
+        "Node v24.14.1"
+      ]
+    },
+    {
+      "title": "装法 linked",
+      "entries": [
+        "demo-content → packages\\demo-content",
+        "demo-pages → packages\\demo-pages"
+      ]
+    },
+    {
+      "title": "linked-config-dev",
+      "entries": [
+        {
+          "name": "1-docs-ssr",
+          "pass": true,
+          "detail": "GET /docs → 200"
+        },
+        {
+          "name": "1-remark-plugin",
+          "pass": true,
+          "detail": "[data-demo-remark] 个数 1"
+        },
+        {
+          "name": "1-global-math",
+          "pass": true,
+          "detail": ".katex 个数 1"
+        },
+        {
+          "name": "2-package-style",
+          "pass": true,
+          "detail": ".demo-mark 颜色 rgb(219, 39, 119)"
+        },
+        {
+          "name": "2-mdx-component-hydrated",
+          "pass": true,
+          "detail": "点两下后为 2；usePathname=/docs；ms(1500)=2s"
+        },
+        {
+          "name": "3-sidebar-entry",
+          "pass": true,
+          "detail": "侧栏 a[href=\"/demo\"]「演示」个数 1"
+        },
+        {
+          "name": "4-client-nav-sidebar",
+          "pass": true,
+          "detail": "站内导航后 marker=kept（kept 说明没整页刷新）；报错层=false；计数=0；usePathname=/demo"
+        },
+        {
+          "name": "6-sse-open",
+          "pass": true,
+          "detail": "EventSource 已 open"
+        },
+        {
+          "name": "4-direct-open",
+          "pass": true,
+          "detail": "GET /demo → 200，计数=0"
+        },
+        {
+          "name": "4-fetcher-action",
+          "pass": true,
+          "detail": "B 页 useFetcher 提交后页面计数 1，文件里 count=1"
+        },
+        {
+          "name": "6-sse-push-from-other-page",
+          "pass": true,
+          "detail": "A 页经 EventSource 收到 B 页 action 触发的推送 count=1"
+        },
+        {
+          "name": "4-fetcher-action-again",
+          "pass": true,
+          "detail": "A 页再提交：页面计数 2、推送 2、文件 count=2"
+        },
+        {
+          "name": "4-client-nav-mdx-link",
+          "pass": true,
+          "detail": "演示页→文档→正文链接→演示页：marker=kept；报错层=false；计数=2"
+        },
+        {
+          "name": "5-single-fumadocs-instance",
+          "pass": true,
+          "detail": "FrameworkProvider 报错 0 条"
+        },
+        {
+          "name": "console-clean",
+          "pass": true,
+          "detail": "无控制台报错、无页面异常、无 4xx/5xx"
+        },
+        {
+          "name": "5-single-fumadocs-instance-ssr",
+          "pass": true,
+          "detail": "服务日志里 FrameworkProvider 报错 0 行"
+        },
+        "vite 插件识别结果：[feature-packages] {\"optimizeDeps\":{\"include\":[\"demo-content > ms\",\"fumadocs-mdx > esbuild\",\"fumadocs-mdx > github-slugger\",\"fumadocs-mdx > picocolors\",\"fumadocs-mdx > picomatch\",\"fumadocs-mdx > yuku-analyzer\"],\"exclude\":[\"@fumadocs/base-ui\",\"demo-content\",\"demo-pages\",\"fumadocs-mdx\"]},\"ssr\":{\"noExternal\":[\"@fumadocs/base-ui\",\"demo-content\",\"demo-pages\",\"fumadocs-mdx\"],\"external\":[\"@base-ui/react\",\"@fuma-translate/react\",\"@mdx-js/mdx\",\"@standard-schema/spec\",\"chokidar\",\"class-variance-authority\",\"cn\",\"esbuild\",\"estree-util-value-to-estree\",\"github-slugger\",\"hast-util-to-jsx-runtime\",\"lucide-react\",\"magic-string\",\"mdast-util-mdx\",\"motion\",\"ms\",\"next-themes\",\"picocolors\",\"picomatch\",\"react-remove-scroll\",\"scroll-into-view-if-needed\",\"shiki\",\"tinyexec\",\"tinyglobby\",\"unified\",\"unist-util-remove-position\",\"unist-util-visit\",\"vfile\",\"yaml\",\"yuku-analyzer\",\"zod\"]}}"
+      ]
+    },
+    {
+      "title": "linked-config-start",
+      "entries": [
+        {
+          "name": "1-docs-ssr",
+          "pass": true,
+          "detail": "GET /docs → 200"
+        },
+        {
+          "name": "1-remark-plugin",
+          "pass": true,
+          "detail": "[data-demo-remark] 个数 1"
+        },
+        {
+          "name": "1-global-math",
+          "pass": true,
+          "detail": ".katex 个数 1"
+        },
+        {
+          "name": "2-package-style",
+          "pass": true,
+          "detail": ".demo-mark 颜色 rgb(219, 39, 119)"
+        },
+        {
+          "name": "2-mdx-component-hydrated",
+          "pass": true,
+          "detail": "点两下后为 2；usePathname=/docs/；ms(1500)=2s"
+        },
+        {
+          "name": "3-sidebar-entry",
+          "pass": true,
+          "detail": "侧栏 a[href=\"/demo\"]「演示」个数 1"
+        },
+        {
+          "name": "4-client-nav-sidebar",
+          "pass": true,
+          "detail": "站内导航后 marker=kept（kept 说明没整页刷新）；报错层=false；计数=0；usePathname=/demo"
+        },
+        {
+          "name": "6-sse-open",
+          "pass": true,
+          "detail": "EventSource 已 open"
+        },
+        {
+          "name": "4-direct-open",
+          "pass": true,
+          "detail": "GET /demo → 200，计数=0"
+        },
+        {
+          "name": "4-fetcher-action",
+          "pass": true,
+          "detail": "B 页 useFetcher 提交后页面计数 1，文件里 count=1"
+        },
+        {
+          "name": "6-sse-push-from-other-page",
+          "pass": true,
+          "detail": "A 页经 EventSource 收到 B 页 action 触发的推送 count=1"
+        },
+        {
+          "name": "4-fetcher-action-again",
+          "pass": true,
+          "detail": "A 页再提交：页面计数 2、推送 2、文件 count=2"
+        },
+        {
+          "name": "4-client-nav-mdx-link",
+          "pass": true,
+          "detail": "演示页→文档→正文链接→演示页：marker=kept；报错层=false；计数=2"
+        },
+        {
+          "name": "5-single-fumadocs-instance",
+          "pass": true,
+          "detail": "FrameworkProvider 报错 0 条"
+        },
+        {
+          "name": "console-clean",
+          "pass": true,
+          "detail": "无控制台报错、无页面异常、无 4xx/5xx"
+        },
+        {
+          "name": "5-single-fumadocs-instance-ssr",
+          "pass": true,
+          "detail": "服务日志里 FrameworkProvider 报错 0 行"
+        },
+        {
+          "name": "4-no-server-code-in-client",
+          "pass": true,
+          "detail": "build/client 的 33 个 js 里没有 node:fs、服务端标记、数据文件名"
+        },
+        "build/client：33 个 js，共 839.4 KB",
+        "搜「node:fs」（服务端的 node:fs）：无",
+        "搜「__vite-browser-external」（被 Vite 换成浏览器空壳的 Node 内置模块）：无",
+        "搜「demo-pages-server-only-marker」（demo.server.ts 里的标记字符串）：无",
+        "搜「demo-counter.json」（数据文件名（只在 node/ 层出现））：无",
+        "搜「inlineMath」（remark-math 的代码（构建期插件进了浏览器））：无",
+        "搜「mdx-export」（fumadocs-mdx/config 的 applyMdxPreset 代码）：无",
+        "vite 插件识别结果：[feature-packages] {\"optimizeDeps\":{\"include\":[\"demo-content > ms\",\"fumadocs-mdx > esbuild\",\"fumadocs-mdx > github-slugger\",\"fumadocs-mdx > picocolors\",\"fumadocs-mdx > picomatch\",\"fumadocs-mdx > yuku-analyzer\"],\"exclude\":[\"@fumadocs/base-ui\",\"demo-content\",\"demo-pages\",\"fumadocs-mdx\"]},\"ssr\":{\"noExternal\":[\"@fumadocs/base-ui\",\"demo-content\",\"demo-pages\",\"fumadocs-mdx\"],\"external\":[]}}"
+      ]
+    },
+    {
+      "title": "linked-macro-dev",
+      "entries": [
+        {
+          "name": "对照（macro）1-docs-ssr",
+          "pass": true,
+          "detail": "GET /docs → 200"
+        },
+        {
+          "name": "对照（macro）1-remark-plugin",
+          "pass": true,
+          "detail": "[data-demo-remark] 个数 1"
+        },
+        {
+          "name": "对照（macro）1-global-math",
+          "pass": true,
+          "detail": ".katex 个数 1"
+        },
+        {
+          "name": "对照（macro）2-package-style",
+          "pass": true,
+          "detail": ".demo-mark 颜色 rgb(219, 39, 119)"
+        },
+        {
+          "name": "对照（macro）2-mdx-component-hydrated",
+          "pass": false,
+          "detail": "抛错：page.waitForFunction: Timeout 20000ms exceeded."
+        },
+        {
+          "name": "对照（macro）3-sidebar-entry",
+          "pass": true,
+          "detail": "侧栏 a[href=\"/demo\"]「演示」个数 1"
+        },
+        {
+          "name": "对照（macro）4-client-nav-sidebar",
+          "pass": false,
+          "detail": "站内导航后 marker=undefined（kept 说明没整页刷新）；报错层=false；计数=0；usePathname=/demo"
+        },
+        {
+          "name": "对照（macro）6-sse-open",
+          "pass": true,
+          "detail": "EventSource 已 open"
+        },
+        {
+          "name": "对照（macro）4-direct-open",
+          "pass": true,
+          "detail": "GET /demo → 200，计数=0"
+        },
+        {
+          "name": "对照（macro）4-fetcher-action",
+          "pass": true,
+          "detail": "B 页 useFetcher 提交后页面计数 1，文件里 count=1"
+        },
+        {
+          "name": "对照（macro）6-sse-push-from-other-page",
+          "pass": true,
+          "detail": "A 页经 EventSource 收到 B 页 action 触发的推送 count=1"
+        },
+        {
+          "name": "对照（macro）4-fetcher-action-again",
+          "pass": true,
+          "detail": "A 页再提交：页面计数 2、推送 2、文件 count=2"
+        },
+        {
+          "name": "对照（macro）4-client-nav-mdx-link",
+          "pass": false,
+          "detail": "抛错：page.waitForURL: Timeout 20000ms exceeded."
+        },
+        {
+          "name": "对照（macro）5-single-fumadocs-instance",
+          "pass": true,
+          "detail": "FrameworkProvider 报错 0 条"
+        },
+        {
+          "name": "对照（macro）console-clean",
+          "pass": false,
+          "detail": "[A http 504] http://127.0.0.1:5691/node_modules/.vite/deps/react-router.js?v=4a7f263b\n[A console.error] Failed to load resource: the server responded with a status of 504 (Outdated Optimize Dep)\n[A http 504] http://127.0.0.1:5691/node_modules/.vite/deps/react_jsx-dev-runtime.js?v=4a7f263b\n[A console.error] Failed to load resource: the server responded with a status of 504 (Outdated Optimize Dep)\n[A http 504] http://127.0.0.1:5691/node_modules/.vite/deps/react.js?v=4a7f263b\n[A console.error] Failed to load resource: the server responded with a status of 504 (Outdated Optimize Dep)\n[A console.error] Error loading route module `/app/routes/docs.tsx`, reloading page...\n[A console.error] Error: Module \"node:url\" has been externalized for browser compatibility. Cannot access \"node:url.fileURLToPath\" in client code.  See https://vite.dev/guide/troubleshooting.html#module-externalized-for-browser-compatibility for more details.\n    at Object.get (http://127.0.0.1:5691/@id/__vite-browser-external:node:url:3:11)\n    at http://127.0.0.1:5691/@fs/D:/unitfolders/oz47p-docsite-kit/god-docsite/probes/2610141800_functional-packages/node_modules/.pnpm/fumadocs-core@16.17.1_@mdx-_4383906efa3d5146025f133b099a141f/node_modules/fumadocs-core/dist/mdx-plugins/remark-image.js?v=70e3dc7b:1:50"
+        },
+        {
+          "name": "对照（macro）5-single-fumadocs-instance-ssr",
+          "pass": true,
+          "detail": "服务日志里 FrameworkProvider 报错 0 行"
+        },
+        "vite 插件识别结果：[feature-packages] {\"optimizeDeps\":{\"include\":[\"demo-content > ms\",\"fumadocs-mdx > esbuild\",\"fumadocs-mdx > github-slugger\",\"fumadocs-mdx > picocolors\",\"fumadocs-mdx > picomatch\",\"fumadocs-mdx > yuku-analyzer\"],\"exclude\":[\"@fumadocs/base-ui\",\"demo-content\",\"demo-pages\",\"fumadocs-mdx\"]},\"ssr\":{\"noExternal\":[\"@fumadocs/base-ui\",\"demo-content\",\"demo-pages\",\"fumadocs-mdx\"],\"external\":[\"@base-ui/react\",\"@fuma-translate/react\",\"@mdx-js/mdx\",\"@standard-schema/spec\",\"chokidar\",\"class-variance-authority\",\"cn\",\"esbuild\",\"estree-util-value-to-estree\",\"github-slugger\",\"hast-util-to-jsx-runtime\",\"lucide-react\",\"magic-string\",\"mdast-util-mdx\",\"motion\",\"ms\",\"next-themes\",\"picocolors\",\"picomatch\",\"react-remove-scroll\",\"scroll-into-view-if-needed\",\"shiki\",\"tinyexec\",\"tinyglobby\",\"unified\",\"unist-util-remove-position\",\"unist-util-visit\",\"vfile\",\"yaml\",\"yuku-analyzer\",\"zod\"]}}"
+      ]
+    },
+    {
+      "title": "linked-macro-start",
+      "entries": [
+        {
+          "name": "对照（macro）1-docs-ssr",
+          "pass": true,
+          "detail": "GET /docs → 200"
+        },
+        {
+          "name": "对照（macro）1-remark-plugin",
+          "pass": true,
+          "detail": "[data-demo-remark] 个数 1"
+        },
+        {
+          "name": "对照（macro）1-global-math",
+          "pass": true,
+          "detail": ".katex 个数 1"
+        },
+        {
+          "name": "对照（macro）2-package-style",
+          "pass": true,
+          "detail": ".demo-mark 颜色 rgb(219, 39, 119)"
+        },
+        {
+          "name": "对照（macro）2-mdx-component-hydrated",
+          "pass": true,
+          "detail": "点两下后为 2；usePathname=/docs/；ms(1500)=2s"
+        },
+        {
+          "name": "对照（macro）3-sidebar-entry",
+          "pass": true,
+          "detail": "侧栏 a[href=\"/demo\"]「演示」个数 1"
+        },
+        {
+          "name": "对照（macro）4-client-nav-sidebar",
+          "pass": true,
+          "detail": "站内导航后 marker=kept（kept 说明没整页刷新）；报错层=false；计数=0；usePathname=/demo"
+        },
+        {
+          "name": "对照（macro）6-sse-open",
+          "pass": true,
+          "detail": "EventSource 已 open"
+        },
+        {
+          "name": "对照（macro）4-direct-open",
+          "pass": true,
+          "detail": "GET /demo → 200，计数=0"
+        },
+        {
+          "name": "对照（macro）4-fetcher-action",
+          "pass": true,
+          "detail": "B 页 useFetcher 提交后页面计数 1，文件里 count=1"
+        },
+        {
+          "name": "对照（macro）6-sse-push-from-other-page",
+          "pass": true,
+          "detail": "A 页经 EventSource 收到 B 页 action 触发的推送 count=1"
+        },
+        {
+          "name": "对照（macro）4-fetcher-action-again",
+          "pass": true,
+          "detail": "A 页再提交：页面计数 2、推送 2、文件 count=2"
+        },
+        {
+          "name": "对照（macro）4-client-nav-mdx-link",
+          "pass": true,
+          "detail": "演示页→文档→正文链接→演示页：marker=kept；报错层=false；计数=2"
+        },
+        {
+          "name": "对照（macro）5-single-fumadocs-instance",
+          "pass": true,
+          "detail": "FrameworkProvider 报错 0 条"
+        },
+        {
+          "name": "对照（macro）console-clean",
+          "pass": true,
+          "detail": "无控制台报错、无页面异常、无 4xx/5xx"
+        },
+        {
+          "name": "对照（macro）5-single-fumadocs-instance-ssr",
+          "pass": true,
+          "detail": "服务日志里 FrameworkProvider 报错 0 行"
+        },
+        {
+          "name": "4-no-server-code-in-client",
+          "pass": true,
+          "detail": "build/client 的 46 个 js 里没有 node:fs、服务端标记、数据文件名"
+        },
+        "build/client：46 个 js，共 1065.9 KB",
+        "搜「node:fs」（服务端的 node:fs）：无",
+        "搜「__vite-browser-external」（被 Vite 换成浏览器空壳的 Node 内置模块）：assets/docs-C8bJzbiz.js",
+        "搜「demo-pages-server-only-marker」（demo.server.ts 里的标记字符串）：无",
+        "搜「demo-counter.json」（数据文件名（只在 node/ 层出现））：无",
+        "搜「inlineMath」（remark-math 的代码（构建期插件进了浏览器））：无",
+        "搜「mdx-export」（fumadocs-mdx/config 的 applyMdxPreset 代码）：无",
+        "vite 插件识别结果：[feature-packages] {\"optimizeDeps\":{\"include\":[\"demo-content > ms\",\"fumadocs-mdx > esbuild\",\"fumadocs-mdx > github-slugger\",\"fumadocs-mdx > picocolors\",\"fumadocs-mdx > picomatch\",\"fumadocs-mdx > yuku-analyzer\"],\"exclude\":[\"@fumadocs/base-ui\",\"demo-content\",\"demo-pages\",\"fumadocs-mdx\"]},\"ssr\":{\"noExternal\":[\"@fumadocs/base-ui\",\"demo-content\",\"demo-pages\",\"fumadocs-mdx\"],\"external\":[]}}"
+      ]
+    },
+    {
+      "title": "linked-macro-lazy-options-dev",
+      "entries": [
+        {
+          "name": "对照（macro-lazy-options）1-docs-ssr",
+          "pass": false,
+          "detail": "GET /docs → 500"
+        },
+        {
+          "name": "对照（macro-lazy-options）1-remark-plugin",
+          "pass": false,
+          "detail": "[data-demo-remark] 个数 0"
+        },
+        {
+          "name": "对照（macro-lazy-options）1-global-math",
+          "pass": false,
+          "detail": ".katex 个数 0"
+        },
+        {
+          "name": "对照（macro-lazy-options）2-package-style",
+          "pass": false,
+          "detail": "抛错：locator.evaluate: Timeout 30000ms exceeded."
+        },
+        {
+          "name": "对照（macro-lazy-options）2-mdx-component-hydrated",
+          "pass": false,
+          "detail": "抛错：page.waitForFunction: Timeout 20000ms exceeded."
+        },
+        {
+          "name": "对照（macro-lazy-options）3-sidebar-entry",
+          "pass": false,
+          "detail": "侧栏 a[href=\"/demo\"]「演示」个数 0"
+        },
+        {
+          "name": "对照（macro-lazy-options）4-client-nav-sidebar",
+          "pass": false,
+          "detail": "抛错：locator.click: Timeout 30000ms exceeded."
+        },
+        {
+          "name": "对照（macro-lazy-options）6-sse-open",
+          "pass": false,
+          "detail": "抛错：page.waitForFunction: Timeout 20000ms exceeded."
+        },
+        {
+          "name": "对照（macro-lazy-options）4-direct-open",
+          "pass": true,
+          "detail": "GET /demo → 200，计数=0"
+        },
+        {
+          "name": "对照（macro-lazy-options）4-fetcher-action",
+          "pass": true,
+          "detail": "B 页 useFetcher 提交后页面计数 1，文件里 count=1"
+        },
+        {
+          "name": "对照（macro-lazy-options）6-sse-push-from-other-page",
+          "pass": false,
+          "detail": "抛错：page.waitForFunction: Timeout 20000ms exceeded."
+        },
+        {
+          "name": "对照（macro-lazy-options）4-fetcher-action-again",
+          "pass": false,
+          "detail": "抛错：page.click: Timeout 30000ms exceeded."
+        },
+        {
+          "name": "对照（macro-lazy-options）4-client-nav-mdx-link",
+          "pass": false,
+          "detail": "抛错：page.click: Timeout 30000ms exceeded."
+        },
+        {
+          "name": "对照（macro-lazy-options）5-single-fumadocs-instance",
+          "pass": true,
+          "detail": "FrameworkProvider 报错 0 条"
+        },
+        {
+          "name": "对照（macro-lazy-options）console-clean",
+          "pass": false,
+          "detail": "[A http 500] http://127.0.0.1:5691/docs\n[A console.error] Failed to load resource: the server responded with a status of 500 ()"
+        },
+        {
+          "name": "对照（macro-lazy-options）5-single-fumadocs-instance-ssr",
+          "pass": true,
+          "detail": "服务日志里 FrameworkProvider 报错 0 行"
+        },
+        "vite 插件识别结果：[feature-packages] {\"optimizeDeps\":{\"include\":[\"demo-content > ms\",\"fumadocs-mdx > esbuild\",\"fumadocs-mdx > github-slugger\",\"fumadocs-mdx > picocolors\",\"fumadocs-mdx > picomatch\",\"fumadocs-mdx > yuku-analyzer\"],\"exclude\":[\"@fumadocs/base-ui\",\"demo-content\",\"demo-pages\",\"fumadocs-mdx\"]},\"ssr\":{\"noExternal\":[\"@fumadocs/base-ui\",\"demo-content\",\"demo-pages\",\"fumadocs-mdx\"],\"external\":[\"@base-ui/react\",\"@fuma-translate/react\",\"@mdx-js/mdx\",\"@standard-schema/spec\",\"chokidar\",\"class-variance-authority\",\"cn\",\"esbuild\",\"estree-util-value-to-estree\",\"github-slugger\",\"hast-util-to-jsx-runtime\",\"lucide-react\",\"magic-string\",\"mdast-util-mdx\",\"motion\",\"ms\",\"next-themes\",\"picocolors\",\"picomatch\",\"react-remove-scroll\",\"scroll-into-view-if-needed\",\"shiki\",\"tinyexec\",\"tinyglobby\",\"unified\",\"unist-util-remove-position\",\"unist-util-visit\",\"vfile\",\"yaml\",\"yuku-analyzer\",\"zod\"]}}"
+      ]
+    },
+    {
+      "title": "linked-macro-lazy-options-start",
+      "entries": [
+        {
+          "name": "对照（macro-lazy-options）build",
+          "pass": false,
+          "detail": "构建失败（exit 1），见 runs\\20261014-1009\\linked-macro-lazy-options-start-build.txt"
+        }
+      ]
+    },
+    {
+      "title": "linked-config-typegen",
+      "entries": [
+        {
+          "name": "4-typegen-forwarding-file",
+          "pass": true,
+          "detail": "typegen exit 0；.react-router\\types\\app\\features\\demo\\+types\\demo.ts 已生成"
+        },
+        {
+          "name": "4-tsc",
+          "pass": false,
+          "detail": "tsc 失败，见 runs\\20261014-1009\\linked-config-typegen-tsc.txt：feature-packages.vite.ts(48,57): error TS2339: Property 'scan' does not exist on type '{ kind?: \"dynamic-import\" | \"hot-accept\" | \"import-rule\" | \"import-statement\" | \"new-url\" | \"require-call\" | \"url-token\" | undefined; custom?: CustomPluginOptions | undefined; ssr?: boolean | undefined; isEntry: boolean; }'."
+        }
+      ]
+    },
+    {
+      "title": "linked-config-dot-server",
+      "entries": [
+        {
+          "name": "4-dot-server-build",
+          "pass": true,
+          "detail": "页面组件引用 .server 模块时 build 失败，报 Server-only module referenced by client（runs\\20261014-1009\\linked-config-dot-server-build.txt）"
+        },
+        {
+          "name": "4-dot-server-dev",
+          "pass": true,
+          "detail": "站内导航时：dev 服务报 Server-only module referenced by client=true；路由模块请求 500 /app/features/demo/demo.tsx；浏览器请求的 .server 模块：无；控制台：（无）"
+        },
+        {
+          "name": "对照（关掉站点插件里的 dev 补查）4-dot-server-dev",
+          "pass": true,
+          "detail": "站内导航时：dev 服务报 Server-only module referenced by client=true；路由模块请求 500 /app/features/demo/demo.tsx；浏览器请求的 .server 模块：无；控制台：（无）"
+        }
+      ]
+    },
+    {
+      "title": "linked-config-reexport-loader",
+      "entries": [
+        {
+          "name": "4-reexport-loader-in-page-route",
+          "pass": true,
+          "detail": "页面路由写 export { x as loader } from '…/site/server'：build exit 0；客户端产物里的服务端代码：无（runs\\20261014-1009\\linked-config-reexport-loader-build.txt）"
+        }
+      ]
+    },
+    {
+      "title": "linked-config-no-plugin-dev",
+      "entries": [
+        {
+          "name": "对照（不挂 vite 插件）1-docs-ssr",
+          "pass": true,
+          "detail": "GET /docs → 200"
+        },
+        {
+          "name": "对照（不挂 vite 插件）1-remark-plugin",
+          "pass": true,
+          "detail": "[data-demo-remark] 个数 1"
+        },
+        {
+          "name": "对照（不挂 vite 插件）1-global-math",
+          "pass": true,
+          "detail": ".katex 个数 1"
+        },
+        {
+          "name": "对照（不挂 vite 插件）2-package-style",
+          "pass": true,
+          "detail": ".demo-mark 颜色 rgb(219, 39, 119)"
+        },
+        {
+          "name": "对照（不挂 vite 插件）2-mdx-component-hydrated",
+          "pass": false,
+          "detail": "抛错：page.waitForFunction: Timeout 20000ms exceeded."
+        },
+        {
+          "name": "对照（不挂 vite 插件）3-sidebar-entry",
+          "pass": true,
+          "detail": "侧栏 a[href=\"/demo\"]「演示」个数 1"
+        },
+        {
+          "name": "对照（不挂 vite 插件）4-client-nav-sidebar",
+          "pass": false,
+          "detail": "站内导航后 marker=undefined（kept 说明没整页刷新）；报错层=false；计数=0；usePathname=/demo"
+        },
+        {
+          "name": "对照（不挂 vite 插件）6-sse-open",
+          "pass": true,
+          "detail": "EventSource 已 open"
+        },
+        {
+          "name": "对照（不挂 vite 插件）4-direct-open",
+          "pass": true,
+          "detail": "GET /demo → 200，计数=0"
+        },
+        {
+          "name": "对照（不挂 vite 插件）4-fetcher-action",
+          "pass": true,
+          "detail": "B 页 useFetcher 提交后页面计数 1，文件里 count=1"
+        },
+        {
+          "name": "对照（不挂 vite 插件）6-sse-push-from-other-page",
+          "pass": true,
+          "detail": "A 页经 EventSource 收到 B 页 action 触发的推送 count=1"
+        },
+        {
+          "name": "对照（不挂 vite 插件）4-fetcher-action-again",
+          "pass": true,
+          "detail": "A 页再提交：页面计数 2、推送 2、文件 count=2"
+        },
+        {
+          "name": "对照（不挂 vite 插件）4-client-nav-mdx-link",
+          "pass": false,
+          "detail": "演示页→文档→正文链接→演示页：marker=undefined；报错层=false；计数=2"
+        },
+        {
+          "name": "对照（不挂 vite 插件）5-single-fumadocs-instance",
+          "pass": true,
+          "detail": "FrameworkProvider 报错 0 条"
+        },
+        {
+          "name": "对照（不挂 vite 插件）console-clean",
+          "pass": false,
+          "detail": "[A http 504] http://127.0.0.1:5691/node_modules/.vite/deps/react-router.js?v=a0f5d815\n[A console.error] Failed to load resource: the server responded with a status of 504 (Outdated Optimize Dep)\n[A http 504] http://127.0.0.1:5691/node_modules/.vite/deps/react_jsx-dev-runtime.js?v=a0f5d815\n[A console.error] Failed to load resource: the server responded with a status of 504 (Outdated Optimize Dep)"
+        },
+        {
+          "name": "对照（不挂 vite 插件）5-single-fumadocs-instance-ssr",
+          "pass": true,
+          "detail": "服务日志里 FrameworkProvider 报错 0 行"
+        }
+      ]
+    },
+    {
+      "title": "linked-config-no-plugin-start",
+      "entries": [
+        {
+          "name": "对照（不挂 vite 插件）1-docs-ssr",
+          "pass": true,
+          "detail": "GET /docs → 200"
+        },
+        {
+          "name": "对照（不挂 vite 插件）1-remark-plugin",
+          "pass": true,
+          "detail": "[data-demo-remark] 个数 1"
+        },
+        {
+          "name": "对照（不挂 vite 插件）1-global-math",
+          "pass": true,
+          "detail": ".katex 个数 1"
+        },
+        {
+          "name": "对照（不挂 vite 插件）2-package-style",
+          "pass": true,
+          "detail": ".demo-mark 颜色 rgb(219, 39, 119)"
+        },
+        {
+          "name": "对照（不挂 vite 插件）2-mdx-component-hydrated",
+          "pass": true,
+          "detail": "点两下后为 2；usePathname=/docs/；ms(1500)=2s"
+        },
+        {
+          "name": "对照（不挂 vite 插件）3-sidebar-entry",
+          "pass": true,
+          "detail": "侧栏 a[href=\"/demo\"]「演示」个数 1"
+        },
+        {
+          "name": "对照（不挂 vite 插件）4-client-nav-sidebar",
+          "pass": true,
+          "detail": "站内导航后 marker=kept（kept 说明没整页刷新）；报错层=false；计数=0；usePathname=/demo"
+        },
+        {
+          "name": "对照（不挂 vite 插件）6-sse-open",
+          "pass": true,
+          "detail": "EventSource 已 open"
+        },
+        {
+          "name": "对照（不挂 vite 插件）4-direct-open",
+          "pass": true,
+          "detail": "GET /demo → 200，计数=0"
+        },
+        {
+          "name": "对照（不挂 vite 插件）4-fetcher-action",
+          "pass": true,
+          "detail": "B 页 useFetcher 提交后页面计数 1，文件里 count=1"
+        },
+        {
+          "name": "对照（不挂 vite 插件）6-sse-push-from-other-page",
+          "pass": true,
+          "detail": "A 页经 EventSource 收到 B 页 action 触发的推送 count=1"
+        },
+        {
+          "name": "对照（不挂 vite 插件）4-fetcher-action-again",
+          "pass": true,
+          "detail": "A 页再提交：页面计数 2、推送 2、文件 count=2"
+        },
+        {
+          "name": "对照（不挂 vite 插件）4-client-nav-mdx-link",
+          "pass": true,
+          "detail": "演示页→文档→正文链接→演示页：marker=kept；报错层=false；计数=2"
+        },
+        {
+          "name": "对照（不挂 vite 插件）5-single-fumadocs-instance",
+          "pass": true,
+          "detail": "FrameworkProvider 报错 0 条"
+        },
+        {
+          "name": "对照（不挂 vite 插件）console-clean",
+          "pass": true,
+          "detail": "无控制台报错、无页面异常、无 4xx/5xx"
+        },
+        {
+          "name": "对照（不挂 vite 插件）5-single-fumadocs-instance-ssr",
+          "pass": true,
+          "detail": "服务日志里 FrameworkProvider 报错 0 行"
+        },
+        {
+          "name": "4-no-server-code-in-client",
+          "pass": true,
+          "detail": "build/client 的 33 个 js 里没有 node:fs、服务端标记、数据文件名"
+        },
+        "build/client：33 个 js，共 839.4 KB",
+        "搜「node:fs」（服务端的 node:fs）：无",
+        "搜「__vite-browser-external」（被 Vite 换成浏览器空壳的 Node 内置模块）：无",
+        "搜「demo-pages-server-only-marker」（demo.server.ts 里的标记字符串）：无",
+        "搜「demo-counter.json」（数据文件名（只在 node/ 层出现））：无",
+        "搜「inlineMath」（remark-math 的代码（构建期插件进了浏览器））：无",
+        "搜「mdx-export」（fumadocs-mdx/config 的 applyMdxPreset 代码）：无"
+      ]
+    },
+    {
+      "title": "linked-macro-global-only-dev",
+      "entries": [
+        "集合只挂功能包插件、公式插件只挂全局：remark 插件生效=true；公式渲染（含 class=\"katex\"）=false；原样 $E = mc^2$ 留在正文=true"
+      ]
+    },
+    {
+      "title": "linked-config-global-only-dev",
+      "entries": [
+        "集合只挂功能包插件、公式插件只挂全局：remark 插件生效=true；公式渲染（含 class=\"katex\"）=false；原样 $E = mc^2$ 留在正文=true"
+      ]
+    },
+    {
+      "title": "linked-config-prerender-feature-page-start",
+      "entries": [
+        {
+          "name": "对照（/demo 也预渲染，构建时文件 count=7）1-docs-ssr",
+          "pass": true,
+          "detail": "GET /docs → 200"
+        },
+        {
+          "name": "对照（/demo 也预渲染，构建时文件 count=7）1-remark-plugin",
+          "pass": true,
+          "detail": "[data-demo-remark] 个数 1"
+        },
+        {
+          "name": "对照（/demo 也预渲染，构建时文件 count=7）1-global-math",
+          "pass": true,
+          "detail": ".katex 个数 1"
+        },
+        {
+          "name": "对照（/demo 也预渲染，构建时文件 count=7）2-package-style",
+          "pass": true,
+          "detail": ".demo-mark 颜色 rgb(219, 39, 119)"
+        },
+        {
+          "name": "对照（/demo 也预渲染，构建时文件 count=7）2-mdx-component-hydrated",
+          "pass": true,
+          "detail": "点两下后为 2；usePathname=/docs/；ms(1500)=2s"
+        },
+        {
+          "name": "对照（/demo 也预渲染，构建时文件 count=7）3-sidebar-entry",
+          "pass": true,
+          "detail": "侧栏 a[href=\"/demo\"]「演示」个数 1"
+        },
+        {
+          "name": "对照（/demo 也预渲染，构建时文件 count=7）4-client-nav-sidebar",
+          "pass": false,
+          "detail": "站内导航后 marker=kept（kept 说明没整页刷新）；报错层=false；计数=7；usePathname=/demo"
+        },
+        {
+          "name": "对照（/demo 也预渲染，构建时文件 count=7）6-sse-open",
+          "pass": true,
+          "detail": "EventSource 已 open"
+        },
+        {
+          "name": "对照（/demo 也预渲染，构建时文件 count=7）4-direct-open",
+          "pass": false,
+          "detail": "GET /demo → 200，计数=7"
+        },
+        {
+          "name": "对照（/demo 也预渲染，构建时文件 count=7）4-fetcher-action",
+          "pass": true,
+          "detail": "B 页 useFetcher 提交后页面计数 1，文件里 count=1"
+        },
+        {
+          "name": "对照（/demo 也预渲染，构建时文件 count=7）6-sse-push-from-other-page",
+          "pass": true,
+          "detail": "A 页经 EventSource 收到 B 页 action 触发的推送 count=1"
+        },
+        {
+          "name": "对照（/demo 也预渲染，构建时文件 count=7）4-fetcher-action-again",
+          "pass": false,
+          "detail": "抛错：page.waitForFunction: Timeout 20000ms exceeded."
+        },
+        {
+          "name": "对照（/demo 也预渲染，构建时文件 count=7）4-client-nav-mdx-link",
+          "pass": false,
+          "detail": "演示页→文档→正文链接→演示页：marker=kept；报错层=false；计数=7"
+        },
+        {
+          "name": "对照（/demo 也预渲染，构建时文件 count=7）5-single-fumadocs-instance",
+          "pass": true,
+          "detail": "FrameworkProvider 报错 0 条"
+        },
+        {
+          "name": "对照（/demo 也预渲染，构建时文件 count=7）console-clean",
+          "pass": true,
+          "detail": "无控制台报错、无页面异常、无 4xx/5xx"
+        },
+        {
+          "name": "对照（/demo 也预渲染，构建时文件 count=7）5-single-fumadocs-instance-ssr",
+          "pass": true,
+          "detail": "服务日志里 FrameworkProvider 报错 0 行"
+        }
+      ]
+    },
+    {
+      "title": "装法 packed",
+      "entries": [
+        "demo-content → node_modules\\.pnpm\\demo-content@file+tarballs+_0f8cb0f0c1dfee4299f7cde0ed6fff4b\\node_modules\\demo-content",
+        "demo-pages → node_modules\\.pnpm\\demo-pages@file+tarballs+de_1e0175858bc0bfa980ed07996cdd8cae\\node_modules\\demo-pages"
+      ]
+    },
+    {
+      "title": "packed-config-dev",
+      "entries": [
+        {
+          "name": "1-docs-ssr",
+          "pass": true,
+          "detail": "GET /docs → 200"
+        },
+        {
+          "name": "1-remark-plugin",
+          "pass": true,
+          "detail": "[data-demo-remark] 个数 1"
+        },
+        {
+          "name": "1-global-math",
+          "pass": true,
+          "detail": ".katex 个数 1"
+        },
+        {
+          "name": "2-package-style",
+          "pass": true,
+          "detail": ".demo-mark 颜色 rgb(219, 39, 119)"
+        },
+        {
+          "name": "2-mdx-component-hydrated",
+          "pass": true,
+          "detail": "点两下后为 2；usePathname=/docs；ms(1500)=2s"
+        },
+        {
+          "name": "3-sidebar-entry",
+          "pass": true,
+          "detail": "侧栏 a[href=\"/demo\"]「演示」个数 1"
+        },
+        {
+          "name": "4-client-nav-sidebar",
+          "pass": true,
+          "detail": "站内导航后 marker=kept（kept 说明没整页刷新）；报错层=false；计数=0；usePathname=/demo"
+        },
+        {
+          "name": "6-sse-open",
+          "pass": true,
+          "detail": "EventSource 已 open"
+        },
+        {
+          "name": "4-direct-open",
+          "pass": true,
+          "detail": "GET /demo → 200，计数=0"
+        },
+        {
+          "name": "4-fetcher-action",
+          "pass": true,
+          "detail": "B 页 useFetcher 提交后页面计数 1，文件里 count=1"
+        },
+        {
+          "name": "6-sse-push-from-other-page",
+          "pass": true,
+          "detail": "A 页经 EventSource 收到 B 页 action 触发的推送 count=1"
+        },
+        {
+          "name": "4-fetcher-action-again",
+          "pass": true,
+          "detail": "A 页再提交：页面计数 2、推送 2、文件 count=2"
+        },
+        {
+          "name": "4-client-nav-mdx-link",
+          "pass": true,
+          "detail": "演示页→文档→正文链接→演示页：marker=kept；报错层=false；计数=2"
+        },
+        {
+          "name": "5-single-fumadocs-instance",
+          "pass": true,
+          "detail": "FrameworkProvider 报错 0 条"
+        },
+        {
+          "name": "console-clean",
+          "pass": true,
+          "detail": "无控制台报错、无页面异常、无 4xx/5xx"
+        },
+        {
+          "name": "5-single-fumadocs-instance-ssr",
+          "pass": true,
+          "detail": "服务日志里 FrameworkProvider 报错 0 行"
+        },
+        "vite 插件识别结果：[feature-packages] {\"optimizeDeps\":{\"include\":[\"demo-content > ms\",\"fumadocs-mdx > esbuild\",\"fumadocs-mdx > github-slugger\",\"fumadocs-mdx > picocolors\",\"fumadocs-mdx > picomatch\",\"fumadocs-mdx > yuku-analyzer\"],\"exclude\":[\"@fumadocs/base-ui\",\"demo-content\",\"demo-pages\",\"fumadocs-mdx\"]},\"ssr\":{\"noExternal\":[\"@fumadocs/base-ui\",\"demo-content\",\"demo-pages\",\"fumadocs-mdx\"],\"external\":[\"@base-ui/react\",\"@fuma-translate/react\",\"@mdx-js/mdx\",\"@standard-schema/spec\",\"chokidar\",\"class-variance-authority\",\"cn\",\"esbuild\",\"estree-util-value-to-estree\",\"github-slugger\",\"hast-util-to-jsx-runtime\",\"lucide-react\",\"magic-string\",\"mdast-util-mdx\",\"motion\",\"ms\",\"next-themes\",\"picocolors\",\"picomatch\",\"react-remove-scroll\",\"scroll-into-view-if-needed\",\"shiki\",\"tinyexec\",\"tinyglobby\",\"unified\",\"unist-util-remove-position\",\"unist-util-visit\",\"vfile\",\"yaml\",\"yuku-analyzer\",\"zod\"]}}"
+      ]
+    },
+    {
+      "title": "packed-config-start",
+      "entries": [
+        {
+          "name": "1-docs-ssr",
+          "pass": true,
+          "detail": "GET /docs → 200"
+        },
+        {
+          "name": "1-remark-plugin",
+          "pass": true,
+          "detail": "[data-demo-remark] 个数 1"
+        },
+        {
+          "name": "1-global-math",
+          "pass": true,
+          "detail": ".katex 个数 1"
+        },
+        {
+          "name": "2-package-style",
+          "pass": true,
+          "detail": ".demo-mark 颜色 rgb(219, 39, 119)"
+        },
+        {
+          "name": "2-mdx-component-hydrated",
+          "pass": true,
+          "detail": "点两下后为 2；usePathname=/docs/；ms(1500)=2s"
+        },
+        {
+          "name": "3-sidebar-entry",
+          "pass": true,
+          "detail": "侧栏 a[href=\"/demo\"]「演示」个数 1"
+        },
+        {
+          "name": "4-client-nav-sidebar",
+          "pass": true,
+          "detail": "站内导航后 marker=kept（kept 说明没整页刷新）；报错层=false；计数=0；usePathname=/demo"
+        },
+        {
+          "name": "6-sse-open",
+          "pass": true,
+          "detail": "EventSource 已 open"
+        },
+        {
+          "name": "4-direct-open",
+          "pass": true,
+          "detail": "GET /demo → 200，计数=0"
+        },
+        {
+          "name": "4-fetcher-action",
+          "pass": true,
+          "detail": "B 页 useFetcher 提交后页面计数 1，文件里 count=1"
+        },
+        {
+          "name": "6-sse-push-from-other-page",
+          "pass": true,
+          "detail": "A 页经 EventSource 收到 B 页 action 触发的推送 count=1"
+        },
+        {
+          "name": "4-fetcher-action-again",
+          "pass": true,
+          "detail": "A 页再提交：页面计数 2、推送 2、文件 count=2"
+        },
+        {
+          "name": "4-client-nav-mdx-link",
+          "pass": true,
+          "detail": "演示页→文档→正文链接→演示页：marker=kept；报错层=false；计数=2"
+        },
+        {
+          "name": "5-single-fumadocs-instance",
+          "pass": true,
+          "detail": "FrameworkProvider 报错 0 条"
+        },
+        {
+          "name": "console-clean",
+          "pass": true,
+          "detail": "无控制台报错、无页面异常、无 4xx/5xx"
+        },
+        {
+          "name": "5-single-fumadocs-instance-ssr",
+          "pass": true,
+          "detail": "服务日志里 FrameworkProvider 报错 0 行"
+        },
+        {
+          "name": "4-no-server-code-in-client",
+          "pass": true,
+          "detail": "build/client 的 33 个 js 里没有 node:fs、服务端标记、数据文件名"
+        },
+        "build/client：33 个 js，共 839.4 KB",
+        "搜「node:fs」（服务端的 node:fs）：无",
+        "搜「__vite-browser-external」（被 Vite 换成浏览器空壳的 Node 内置模块）：无",
+        "搜「demo-pages-server-only-marker」（demo.server.ts 里的标记字符串）：无",
+        "搜「demo-counter.json」（数据文件名（只在 node/ 层出现））：无",
+        "搜「inlineMath」（remark-math 的代码（构建期插件进了浏览器））：无",
+        "搜「mdx-export」（fumadocs-mdx/config 的 applyMdxPreset 代码）：无",
+        "vite 插件识别结果：[feature-packages] {\"optimizeDeps\":{\"include\":[\"demo-content > ms\",\"fumadocs-mdx > esbuild\",\"fumadocs-mdx > github-slugger\",\"fumadocs-mdx > picocolors\",\"fumadocs-mdx > picomatch\",\"fumadocs-mdx > yuku-analyzer\"],\"exclude\":[\"@fumadocs/base-ui\",\"demo-content\",\"demo-pages\",\"fumadocs-mdx\"]},\"ssr\":{\"noExternal\":[\"@fumadocs/base-ui\",\"demo-content\",\"demo-pages\",\"fumadocs-mdx\"],\"external\":[]}}"
+      ]
+    },
+    {
+      "title": "packed-config-typegen",
+      "entries": [
+        {
+          "name": "4-typegen-forwarding-file",
+          "pass": true,
+          "detail": "typegen exit 0；.react-router\\types\\app\\features\\demo\\+types\\demo.ts 已生成"
+        },
+        {
+          "name": "4-tsc",
+          "pass": false,
+          "detail": "tsc 失败，见 runs\\20261014-1009\\packed-config-typegen-tsc.txt：feature-packages.vite.ts(48,57): error TS2339: Property 'scan' does not exist on type '{ kind?: \"dynamic-import\" | \"hot-accept\" | \"import-rule\" | \"import-statement\" | \"new-url\" | \"require-call\" | \"url-token\" | undefined; custom?: CustomPluginOptions | undefined; ssr?: boolean | undefined; isEntry: boolean; }'."
+        }
+      ]
+    },
+    {
+      "title": "packed-config-dot-server",
+      "entries": [
+        {
+          "name": "4-dot-server-build",
+          "pass": true,
+          "detail": "页面组件引用 .server 模块时 build 失败，报 Server-only module referenced by client（runs\\20261014-1009\\packed-config-dot-server-build.txt）"
+        },
+        {
+          "name": "4-dot-server-dev",
+          "pass": true,
+          "detail": "站内导航时：dev 服务报 Server-only module referenced by client=true；路由模块请求 500 /app/features/demo/demo.tsx；浏览器请求的 .server 模块：无；控制台：（无）"
+        },
+        {
+          "name": "对照（关掉站点插件里的 dev 补查）4-dot-server-dev",
+          "pass": false,
+          "detail": "站内导航时：dev 服务报 Server-only module referenced by client=false；路由模块请求 无 5xx；浏览器请求的 .server 模块：…node_modules/demo-pages/dist/site/demo.server.js?v=c41c259c；控制台：（无）"
+        }
+      ]
+    },
+    {
+      "title": "packed-config-reexport-loader",
+      "entries": [
+        {
+          "name": "4-reexport-loader-in-page-route",
+          "pass": true,
+          "detail": "页面路由写 export { x as loader } from '…/site/server'：build exit 0；客户端产物里的服务端代码：无（runs\\20261014-1009\\packed-config-reexport-loader-build.txt）"
+        }
+      ]
+    },
+    {
+      "title": "packed-config-no-plugin-dev",
+      "entries": [
+        {
+          "name": "对照（不挂 vite 插件）1-docs-ssr",
+          "pass": false,
+          "detail": "GET /docs → 500"
+        },
+        {
+          "name": "对照（不挂 vite 插件）1-remark-plugin",
+          "pass": false,
+          "detail": "[data-demo-remark] 个数 0"
+        },
+        {
+          "name": "对照（不挂 vite 插件）1-global-math",
+          "pass": false,
+          "detail": ".katex 个数 0"
+        },
+        {
+          "name": "对照（不挂 vite 插件）2-package-style",
+          "pass": false,
+          "detail": "抛错：locator.evaluate: Timeout 30000ms exceeded."
+        },
+        {
+          "name": "对照（不挂 vite 插件）2-mdx-component-hydrated",
+          "pass": false,
+          "detail": "抛错：page.waitForFunction: Timeout 20000ms exceeded."
+        },
+        {
+          "name": "对照（不挂 vite 插件）3-sidebar-entry",
+          "pass": false,
+          "detail": "侧栏 a[href=\"/demo\"]「演示」个数 0"
+        },
+        {
+          "name": "对照（不挂 vite 插件）4-client-nav-sidebar",
+          "pass": false,
+          "detail": "抛错：locator.click: Timeout 30000ms exceeded."
+        },
+        {
+          "name": "对照（不挂 vite 插件）6-sse-open",
+          "pass": false,
+          "detail": "抛错：page.waitForFunction: Timeout 20000ms exceeded."
+        },
+        {
+          "name": "对照（不挂 vite 插件）4-direct-open",
+          "pass": false,
+          "detail": "抛错：page.waitForSelector: Timeout 20000ms exceeded."
+        },
+        {
+          "name": "对照（不挂 vite 插件）4-fetcher-action",
+          "pass": false,
+          "detail": "抛错：page.waitForFunction: Timeout 20000ms exceeded."
+        },
+        {
+          "name": "对照（不挂 vite 插件）6-sse-push-from-other-page",
+          "pass": false,
+          "detail": "抛错：page.waitForFunction: Timeout 20000ms exceeded."
+        },
+        {
+          "name": "对照（不挂 vite 插件）4-fetcher-action-again",
+          "pass": false,
+          "detail": "抛错：page.click: Timeout 30000ms exceeded."
+        },
+        {
+          "name": "对照（不挂 vite 插件）4-client-nav-mdx-link",
+          "pass": false,
+          "detail": "抛错：page.click: Timeout 30000ms exceeded."
+        },
+        {
+          "name": "对照（不挂 vite 插件）5-single-fumadocs-instance",
+          "pass": true,
+          "detail": "FrameworkProvider 报错 0 条"
+        },
+        {
+          "name": "对照（不挂 vite 插件）console-clean",
+          "pass": false,
+          "detail": "[A http 500] http://127.0.0.1:5691/docs\n[A console.error] Failed to load resource: the server responded with a status of 500 ()\n[A http 504] http://127.0.0.1:5691/node_modules/.vite/deps/react-router.js?v=d04a863c\n[A console.error] Failed to load resource: the server responded with a status of 504 (Outdated Optimize Dep)\n[A http 504] http://127.0.0.1:5691/node_modules/.vite/deps/react_jsx-dev-runtime.js?v=d04a863c\n[A console.error] Failed to load resource: the server responded with a status of 504 (Outdated Optimize Dep)\n[B http 500] http://127.0.0.1:5691/demo\n[B console.error] Failed to load resource: the server responded with a status of 500 ()\n[B http 500] http://127.0.0.1:5691/demo\n[B console.error] Failed to load resource: the server responded with a status of 500 ()"
+        },
+        {
+          "name": "对照（不挂 vite 插件）5-single-fumadocs-instance-ssr",
+          "pass": false,
+          "detail": "服务日志里 FrameworkProvider 报错 3 行"
+        }
+      ]
+    },
+    {
+      "title": "packed-config-no-plugin-start",
+      "entries": [
+        {
+          "name": "对照（不挂 vite 插件）build",
+          "pass": false,
+          "detail": "构建失败（exit 1），见 runs\\20261014-1009\\packed-config-no-plugin-start-build.txt"
+        }
+      ]
+    }
+  ],
+  "finishedAt": "2026-10-14T10:21:15.641Z"
+}

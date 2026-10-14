@@ -1,0 +1,7 @@
+[01-template-app-css] 改数据文件 5 秒后：页面标记=undefined（kept 表示没整页刷新）
+[01-template-app-css] 这段时间 dev 服务输出：
+2026-10-14T09:51:07.715Z vite:hmr [file change] data/demo-counter.json
+5:51:07 PM [vite] (ssr) program reload
+2026-10-14T09:51:07.720Z vite:hmr (client) [no modules matched] data/demo-counter.json
+2026-10-14T09:51:07.720Z vite:hmr (ssr) [no modules matched] data/demo-counter.json
+2026-10-14T09:51:07.928Z vite:hmr [self-accepts] app/app.css
