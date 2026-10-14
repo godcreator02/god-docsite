@@ -1,0 +1,96 @@
+/**
+ * 一个项目 = 项目根 + 校验过的配置。装配时定下现状区有哪些文件，备好钉码与生成物两个功能包要的对象。
+ *
+ * 分区按约定：内容根下 `trajectory/` 与 `future/` 两个名字固定、不进核对；内容根下别的 .mdx 都是现状区，
+ * 再加上项目根下 `src/components/` 里组件格式认领的代码文件（讲解组件的源码）。
+ */
+import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
+import { isAbsolute, join, relative, sep } from "node:path";
+import { codeFormat, COMPONENTS_DIR } from "@godcreator/code-pin";
+import { createPinWorkspace } from "@godcreator/code-pin/node";
+import type { PinWorkspace } from "@godcreator/code-pin/node";
+import { assertOutputTurf } from "@godcreator/doc-export/node";
+import type { OutputProject } from "@godcreator/doc-export/node";
+import type { DocfirstConfig } from "./config.ts";
+
+export interface Project {
+  root: string;
+  config: DocfirstConfig;
+  /** 钉码：读工作区、旧内容从 git 取 */
+  pins: PinWorkspace;
+  /** 生成物：落点、名册、和 pins 同一个钉码核心 */
+  outputs: OutputProject;
+  /** 现状区里的文件：相对项目根、正斜杠、排过序 */
+  docs: string[];
+  /** 这篇是不是生成正本（outputs 里有它） */
+  isOutputSource(doc: string): boolean;
+  docIdOf(path: string): string;
+  read(doc: string): string;
+}
+
+/** 文档身份：相对项目根、正斜杠。绝对路径按项目根算；相对路径原样收，`./` 前缀与反斜杠一并归一 */
+export function docIdOf(root: string, path: string): string {
+  const rel = isAbsolute(path) ? relative(root, path) : path;
+  return rel.split(sep).join("/").replace(/\\/g, "/").replace(/^\.\//, "");
+}
+
+const NOT_STATUS_AREAS = new Set(["trajectory", "future"]);
+const isPage = (name: string): boolean => name.endsWith(".mdx");
+
+/** 目录下的全部文件（递归），绝对路径；指向目录的软链接会跟进去 */
+function filesUnderFollowingLinks(dir: string): string[] {
+  return readdirSync(dir).flatMap((name) => {
+    const path = join(dir, name);
+    return statSync(path).isDirectory() ? filesUnderFollowingLinks(path) : [path];
+  });
+}
+
+function statusPages(root: string, contentAbs: string): string[] {
+  return readdirSync(contentAbs).flatMap((name) => {
+    const path = join(contentAbs, name);
+    if (statSync(path).isDirectory()) return NOT_STATUS_AREAS.has(name) ? [] : filesUnderFollowingLinks(path).filter(isPage).map((file) => docIdOf(root, file));
+    return isPage(name) ? [docIdOf(root, path)] : [];
+  });
+}
+
+/** 目录下的全部文件（递归），绝对路径；按目录项自己的类型判断，指向目录的软链接当成文件 */
+function filesUnder(dir: string): string[] {
+  return readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
+    const path = join(dir, entry.name);
+    return entry.isDirectory() ? filesUnder(path) : [path];
+  });
+}
+
+function componentSources(root: string): string[] {
+  const dir = join(root, COMPONENTS_DIR);
+  if (!existsSync(dir)) return [];
+  return filesUnder(dir).map((path) => docIdOf(root, path)).filter(codeFormat.claims);
+}
+
+/** outputs 里的正本得是现状区里的 mdx 页面：写错路径的映射不会被核对，也不会被生成 */
+function assertOutputSourcesAreStatusPages(outputs: DocfirstConfig["outputs"], docs: readonly string[]): void {
+  const pages = new Set(docs.filter(isPage));
+  const strays = Object.keys(outputs).filter((doc) => !pages.has(doc));
+  if (strays.length > 0) throw new Error(`outputs 里的正本不是现状区的 mdx 页面：${strays.join("、")}——正本要写相对项目根的路径，放在内容根下（trajectory/、future/ 之外）`);
+}
+
+export function assembleProject(root: string, config: DocfirstConfig): Project {
+  const contentAbs = join(root, config.contentDir);
+  if (!existsSync(contentAbs) || !statSync(contentAbs).isDirectory()) {
+    throw new Error(`内容根 ${config.contentDir} 不是项目根下的目录——配置的 content 写错了，或者还没建`);
+  }
+  assertOutputTurf(root, [config.contentDir], config.outputs);
+  const docs = [...statusPages(root, contentAbs), ...componentSources(root)].sort();
+  assertOutputSourcesAreStatusPages(config.outputs, docs);
+  const pins = createPinWorkspace(root);
+  return {
+    root,
+    config,
+    pins,
+    outputs: { root, outputs: config.outputs, roster: config.roster, pinner: pins.pinner },
+    docs,
+    isOutputSource: (doc) => config.outputs[doc] !== undefined,
+    docIdOf: (path) => docIdOf(root, path),
+    read: (doc) => readFileSync(join(root, doc), "utf8"),
+  };
+}

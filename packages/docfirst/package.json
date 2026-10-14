@@ -1,0 +1,50 @@
+{
+  "name": "@godcreator/docfirst",
+  "version": "0.0.0",
+  "author": {
+    "name": "godcreator"
+  },
+  "type": "module",
+  "description": "docfirst 命令行：读项目根的 docfirst.config.mjs，把 check / confirm / render / trajectory 分派给钉码（code-pin）、生成物（doc-export）、轨迹卡（trajectory）三个功能包，汇总结果、给出退出码。",
+  "bin": {
+    "docfirst": "./dist/bin.mjs"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.mts",
+      "default": "./dist/index.mjs"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsdown",
+    "typecheck": "tsc -p tsconfig.json",
+    "test": "vitest run",
+    "check": "tsc -p tsconfig.json && vitest run",
+    "prepublishOnly": "pnpm run build"
+  },
+  "dependencies": {
+    "@godcreator/code-pin": "workspace:^",
+    "@godcreator/doc-export": "workspace:^",
+    "@godcreator/trajectory": "workspace:^"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "tsdown": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://git.tianshen02.online:28377/api/packages/godcreator/npm/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://git.tianshen02.online:28377/godcreator/docsite-kit.git"
+  },
+  "keywords": [
+    "gwb"
+  ]
+}
