@@ -1,0 +1,128 @@
+[
+  {
+    "type": "cycle",
+    "from": "packages/code-pin/src/diff.ts",
+    "to": "packages/code-pin/src/types.ts",
+    "unresolvedTo": "./types.ts",
+    "dependencyTypes": [
+      "local",
+      "type-only",
+      "import"
+    ],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "packages/code-pin/src/types.ts",
+        "dependencyTypes": [
+          "local",
+          "type-only",
+          "import"
+        ]
+      },
+      {
+        "name": "packages/code-pin/src/diff.ts",
+        "dependencyTypes": [
+          "local",
+          "type-only",
+          "import"
+        ]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "packages/docfirst-workflow/src/project/config.ts",
+    "to": "packages/docfirst-workflow/src/project/placement.ts",
+    "unresolvedTo": "./placement.ts",
+    "dependencyTypes": [
+      "local",
+      "type-only",
+      "import"
+    ],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "packages/docfirst-workflow/src/project/placement.ts",
+        "dependencyTypes": [
+          "local",
+          "type-only",
+          "import"
+        ]
+      },
+      {
+        "name": "packages/docfirst-workflow/src/project/config.ts",
+        "dependencyTypes": [
+          "local",
+          "type-only",
+          "import"
+        ]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "plugins/collab/src/collab-repo/sync/state.ts",
+    "to": "plugins/collab/src/collab-repo/sync/watch.ts",
+    "unresolvedTo": "./watch.js",
+    "dependencyTypes": [
+      "local",
+      "import"
+    ],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "plugins/collab/src/collab-repo/sync/watch.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "plugins/collab/src/collab-repo/sync/state.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "plugins/collab/src/other-repos/fetch/state.ts",
+    "to": "plugins/collab/src/other-repos/fetch/watch.ts",
+    "unresolvedTo": "./watch.js",
+    "dependencyTypes": [
+      "local",
+      "import"
+    ],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "plugins/collab/src/other-repos/fetch/watch.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "plugins/collab/src/other-repos/fetch/state.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      }
+    ]
+  }
+]

@@ -7,7 +7,8 @@
     "dev": "pnpm --filter docsite-kit-site dev",
     "build": "pnpm -r build",
     "test": "vitest run",
-    "check": "tsc -p tsconfig.tests.json && pnpm -r --no-bail check"
+    "check": "tsc -p tsconfig.tests.json && pnpm -r --no-bail check",
+    "depcheck": "depcruise \"packages/*/src\" \"plugins/*/src\" --config .dependency-cruiser.cjs --ignore-known"
   },
   "engines": {
     "node": ">=24"
@@ -20,6 +21,7 @@
     "@types/node": "catalog:",
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:",
+    "dependency-cruiser": "catalog:",
     "oxlint": "catalog:",
     "oxlint-tsgolint": "catalog:",
     "react": "catalog:",
