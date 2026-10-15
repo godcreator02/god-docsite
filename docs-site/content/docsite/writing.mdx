@@ -10,7 +10,7 @@ icon: FileText
 ## 文件放在哪
 
 一页说明是 `content/` 里的一个 `.mdx` 文件。文件夹里的 `meta.json` 决定侧栏里的标题和顺序；
-`meta.json` 写了 `"root": true` 的文件夹，是侧栏里切换下拉框的一项。站里有这样的文件夹时，不在任何一个里的页面收成以站名命名的一项，排在下拉框最前面。
+`meta.json` 写了 `"root": true` 的文件夹，是侧栏里切换下拉框的一项。站里有这样的文件夹时，不在任何一个里的页面归进以站名命名的一项，排在下拉框最前面。
 
 首页 `/` 不在 `content/` 里：它是 `app/routes/home.tsx`，用 fumadocs 的 `HomeLayout`，顶上一条导航栏，没有侧栏，下面整页由站点自己写。
 建站时模板给一份最简单的，之后归站点自己改。`content/` 根上不能放 `index` 页，它的地址也是 `/`，打开首页会报错。
@@ -21,17 +21,61 @@ icon: FileText
 
 | 文件 | 地址 |
 | --- | --- |
-| `content/docsite/writing/index.mdx` | `/docsite/writing` |
-| `content/docsite/docsite/writing-components.mdx` | `/docsite/docsite/writing-components` |
+| `content/docsite/writing.mdx` | `/docsite/writing` |
+| `content/gitea/index.mdx` | `/gitea` |
 | `content/(kit)/docsite/skeleton.mdx` | `/docsite/skeleton` |
 
 文件夹名写在括号里（如 `(kit)`）时，它只用来分组，不进地址。
+
+### 页面用到的文件
+
+组件、数据、样式、图片按用到它的范围放，这个站自己就是这样放的：
+
+<Files>
+  <Folder name="content" defaultOpen>
+    <Folder name="gitea" defaultOpen>
+      <File name="meta.json" />
+      <File name="index.mdx" />
+      <File name="push.mdx" />
+      <Folder name="push" defaultOpen>
+        <File name="auto-merge.tsx" />
+        <File name="auto-merge.data.mjs" />
+        <File name="auto-merge.css" />
+      </Folder>
+    </Folder>
+    <Folder name="docsite" defaultOpen>
+      <File name="writing.mdx" />
+      <Folder name="writing" defaultOpen>
+        <File name="figure.svg" />
+      </Folder>
+    </Folder>
+    <Folder name="docs" defaultOpen>
+      <Folder name="fumadocs" defaultOpen>
+        <File name="overview.html" />
+        <File name="full-flow.html" />
+        <Folder name="_shared" defaultOpen>
+          <File name="fig.js" />
+          <File name="style.css" />
+        </Folder>
+      </Folder>
+    </Folder>
+  </Folder>
+</Files>
+
+- **只给一页用的**放进和页面同名的文件夹：`push.mdx` 的组件在 `push/`，开头写 `import { AutoMergeRun } from './push/auto-merge'`；
+  这一页的图在 `writing/`。TSX 页面 `名字.page.tsx`、HTML 页面 `名字.html` 一样配 `名字/`。被页面 import 的正文写成 `_` 开头的 `.mdx`，也放在这里
+- **同一组里几页共用的**放进组里 `_` 开头的文件夹：fumadocs 图解的几个 HTML 页共用 `_shared/` 里的脚本和样式
+- **几组都要用的**放站点的 `app/components/`。这种情况很少，放之前先问人
+- **有子页面的页**写成文件夹加 `index.mdx`：`gitea/index.mdx` 是 `/gitea`，它要用组件就放 `gitea/index/`
+
+`meta.json` 的 `pages` 只写页面名，不写这些文件夹。同名文件夹与 `_` 开头的文件夹里不放页面（不以 `_` 开头的 `.mdx`、`.page.tsx`、`.html`）和 `meta.json`：
+fumadocs 解析 `pages` 里的名字时先找文件夹，同名文件夹一旦有页面就被认成一组，同名的那一页从侧栏消失。组文件夹里也不散放组件和图片，只放页面、`meta.json` 与上面这几种文件夹。
 
 ### frontmatter
 
 文件开头的 frontmatter 写这一页的元数据：
 
-```mdx title="content/docsite/writing/index.mdx"
+```mdx title="content/docsite/writing.mdx"
 ---
 title: 写一页说明
 description: 在 content/ 里写一页 MDX 说明
@@ -136,9 +180,9 @@ $$
 
 ## 图片
 
-图片放在页面旁边，用相对路径引用，构建时一起打包：
+图片放进页面的同名文件夹（这一页是 `writing.mdx`，图在 `writing/`），用相对路径引用，构建时一起打包：
 
-![三种页面进同一棵页面树](./figure.svg)
+![三种页面进同一棵页面树](./writing/figure.svg)
 
 点图片可以放大看。
 
@@ -151,7 +195,7 @@ $$
 [](/docsite/writing-components#折叠)
 [](/docsite/writing?comment=20261012t153000-ab12)
 [](/comments)
-[](/api/content/docsite/figure.svg)
+[](/api/content/docsite/writing/figure.svg)
 [](/no-such-page)
 [fumadocs](https://fumadocs.dev)
 ```
@@ -164,7 +208,7 @@ $$
 
 [](/comments)
 
-[](/api/content/docsite/figure.svg)
+[](/api/content/docsite/writing/figure.svg)
 
 [](/no-such-page)
 

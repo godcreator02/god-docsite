@@ -58,7 +58,7 @@ icon: Blocks
 
 <Steps>
   <Step>
-    ### 摆好骨架
+    ### 建站
 
     用平台包的站点模板建站（gwb 里是 `docsite.site.init`）。
   </Step>
@@ -79,7 +79,7 @@ icon: Blocks
 不常看的内容收进折叠，点开才显示：
 
 <Accordions>
-  <Accordion title="为什么骨架放在项目里">
+  <Accordion title="为什么站点模板的文件复制进项目，不留在包里">
     `defineDocs` 与 `import.meta.glob` 的参数要能在构建时直接读出来，只能写在项目里。
   </Accordion>
   <Accordion title="为什么首页另写一条路由">
@@ -97,10 +97,13 @@ icon: Blocks
     </Folder>
     <Folder name="content" defaultOpen>
       <Folder name="(kit)" />
-      <Folder name="writing" defaultOpen>
+      <Folder name="docsite" defaultOpen>
         <File name="meta.json" />
-        <File name="index.mdx" />
-        <File name="components.mdx" />
+        <File name="writing.mdx" />
+        <Folder name="writing">
+          <File name="figure.svg" />
+        </Folder>
+        <File name="writing-components.mdx" />
       </Folder>
     </Folder>
   </Folder>
