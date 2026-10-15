@@ -1,7 +1,8 @@
 {
   "name": "@godcreator/identity",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "文档站的人员与身份：people.json 的校验与读写、按本机身份码认人、给浏览器的公开投影、写入请求的来源与身份核对、站上的身份组件",
+  "license": "MIT",
   "type": "module",
   "exports": {
     ".": {
@@ -20,14 +21,17 @@
   },
   "files": [
     "dist",
-    "styles.css"
+    "styles.css",
+    "LICENSE"
   ],
   "repository": {
     "type": "git",
-    "url": "https://git.tianshen02.online:28377/godcreator/docsite-kit.git"
+    "url": "https://github.com/godcreator02/god-docsite.git",
+    "directory": "packages/identity"
   },
   "publishConfig": {
-    "registry": "https://git.tianshen02.online:28377/api/packages/godcreator/npm/"
+    "registry": "https://registry.npmjs.org/",
+    "access": "public"
   },
   "scripts": {
     "build": "tsdown",

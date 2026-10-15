@@ -1,0 +1,28 @@
+---
+born-at: 2026-10-16T15:40
+type: choice
+parent: [2026-09-03-god-live-doc]
+label: 仓推到 GitHub 公开、包改发 npmjs：GitHub Actions 经 trusted publishing 发，过渡期同时发 Gitea
+domain: 平台
+---
+
+## 背景
+
+gwb 生态的插件陆续迁到 GitHub、改发 npmjs（gwb-gitea、gwb-qq-bot、内核等），`devkit.release` 也改成：发布目标是 npmjs 的包不在本机发，
+在已推上 GitHub 的 HEAD 上建 release、挂上本机打好的包文件，由仓里的 `.github/workflows/publish.yml` 经 trusted publishing 发出去。
+本仓的 12 个包（十个包与两个插件）还发在 Gitea 上，其中十个包从没正式发过，`gwb-docsite`、`gwb-collab` 在 Gitea 上各有一串版本。用户要本仓照别的插件的做法迁过去。
+
+## 结论与边界
+
+- 照 gwb-gitea 的改法：仓根与每个包目录放一份 MIT `LICENSE`，`files` 收进它，`license` 写 `MIT`；`repository` 指向 `https://github.com/godcreator02/god-docsite.git`（带 `directory`），
+  `publishConfig` 改成 `registry.npmjs.org`、`access: public`；`.github/workflows/publish.yml` 照 devkit 的模板原样复制
+- 仓公开：推送前先把真实项目的内容从全部历史里删掉，见轨迹卡 [演示站改成本地验收站](/trajectory/2026-10-16-demo-local-only)
+- 版本号：十个包首个正式版是 `0.1.0`；`code-pin` 在 Gitea 上已有 0.1.0，同号会被 Gitea 拒，从 `0.2.0` 起。`gwb-docsite` 升到 0.4.0（建站命令去掉 `port`、站点状态去掉 `expectedUrl`、并入 docfirst.create），
+  `gwb-collab` 升到 0.31.0（去掉 `collab.site.start` / `stop`、`collab.ai.handoff` 改名 `collab.ai.prompt`），都破坏了命令契约，按破坏升 x
+- 各 home 的 `@godcreator` 范围行还指向 Gitea，过渡期 `devkit.release` 加 `alsoPublishTo` Gitea；协作仓自动合并的工作流也还从 Gitea 装 collab 包，等 Gitea 不再收包时一起改
+- npmjs 上每个包先由人在本机发一个 `0.0.0-stage` 占位版（浏览器里批准），再登记 trusted publisher，登记后两天内要正式发一次
+
+## 否掉的候选
+
+- 本机直接发 npmjs：每个包每次都要人在浏览器里过两步验证，也不符合生态里统一的发版方式
+- 只发 npmjs、不再发 Gitea：各 home 的范围行还没改，升级时装不到新版

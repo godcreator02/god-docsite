@@ -1,11 +1,12 @@
 {
   "name": "@godcreator/docfirst",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "author": {
     "name": "godcreator"
   },
   "type": "module",
   "description": "docfirst 命令行：读项目根的 docfirst.config.mjs，把 check / confirm / render / trajectory 分派给钉码（code-pin）、生成物（doc-export）、轨迹卡（trajectory）三个功能包，汇总结果、给出退出码。template/ 是文档维护的起始物（配置、生成物正本、起始页、第一张轨迹卡），建站后叠在站点根上。",
+  "license": "MIT",
   "bin": {
     "docfirst": "./dist/bin.mjs"
   },
@@ -17,7 +18,8 @@
   },
   "files": [
     "dist",
-    "template"
+    "template",
+    "LICENSE"
   ],
   "scripts": {
     "build": "tsdown",
@@ -39,12 +41,13 @@
     "vitest": "catalog:"
   },
   "publishConfig": {
-    "access": "public",
-    "registry": "https://git.tianshen02.online:28377/api/packages/godcreator/npm/"
+    "registry": "https://registry.npmjs.org/",
+    "access": "public"
   },
   "repository": {
     "type": "git",
-    "url": "https://git.tianshen02.online:28377/godcreator/docsite-kit.git"
+    "url": "https://github.com/godcreator02/god-docsite.git",
+    "directory": "packages/docfirst"
   },
   "keywords": [
     "gwb"

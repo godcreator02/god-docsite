@@ -68,9 +68,17 @@ description: 改这个仓时怎么跑、按什么节奏检查、提交怎么写�
 
 只用工作台命令 `devkit.release`。升哪一位、发版的每一步，每次都先读说明书 gwb-release。包按依赖序发：
 
-1. 第 0 层：`god-docsite`、`identity`、`explainer`、`code-pin`、`trajectory`
+1. 第 0 层：`god-docsite`、`identity`、`explainer`、`code-pin`、`trajectory`、`word-report`
 2. 第 1 层：`comments`、`doc-export`
 3. 第 2 层：`collab`、`docfirst`
-4. 三个插件
+4. 两个插件：`gwb-docsite`、`gwb-collab`
 
 发版前还要在 `plugins/collab` 里跑一遍 `pnpm test:verified`。
+
+包发到 npmjs，本机不直接发：仓在 GitHub 上（`godcreator02/god-docsite`，公开），`devkit.release` 在本机构建、检查、打好包文件，在已经推上去的 HEAD 上建一个 GitHub release 挂上包文件，
+仓里的工作流 `.github/workflows/publish.yml` 由 release 公开触发，用 trusted publishing 按序号逐个发到 npmjs，不存 token。各包的 `publishConfig` 指向 npmjs、`repository` 指向这个仓，`files` 收进 MIT 的 `LICENSE`。
+
+- **过渡期同时发 Gitea**：各 home 还从 Gitea 装 `@godcreator` 的包，`devkit.release` 加 `alsoPublishTo` Gitea 的源
+- **新加一个包**：npmjs 上要先有这个包才能登记谁能发它。先在本机发一个 `0.0.0-stage` 占位版（`npm publish --auth-type=web`，在浏览器里批准），
+  再 `npm trust github <包名> --repo godcreator02/god-docsite --file publish.yml --yes` 登记；登记后两天内要正式发一次，不然登记作废
+- 演示站 `demo/` 不进仓（见轨迹卡 [演示站改成本地验收站](/trajectory/2026-10-16-demo-local-only)），公开仓里只有测试站与本站

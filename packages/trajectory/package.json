@@ -1,11 +1,12 @@
 {
   "name": "@godcreator/trajectory",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "author": {
     "name": "godcreator"
   },
   "type": "module",
   "description": "轨迹卡：卡格式与校验、卡之间的关系、星轨盘的数据模型（.）；读卡目录（./node）；卡页、星轨盘页与星轨盘画布（./site），两页的 loader（./site/server），站点声明卡集合用的 schema 与 mdx 选项（./site/collection）；template/ 是建站器复制进站点 app/features/trajectory/ 的接线文件（两条路由、卡集合、侧栏入口、样式）。",
+  "license": "MIT",
   "exports": {
     ".": {
       "types": "./dist/core.d.mts",
@@ -38,7 +39,8 @@
   "files": [
     "dist",
     "styles",
-    "template"
+    "template",
+    "LICENSE"
   ],
   "scripts": {
     "build": "tsdown",
@@ -91,12 +93,13 @@
     "vitest": "catalog:"
   },
   "publishConfig": {
-    "access": "public",
-    "registry": "https://git.tianshen02.online:28377/api/packages/godcreator/npm/"
+    "registry": "https://registry.npmjs.org/",
+    "access": "public"
   },
   "repository": {
     "type": "git",
-    "url": "https://git.tianshen02.online:28377/godcreator/docsite-kit.git"
+    "url": "https://github.com/godcreator02/god-docsite.git",
+    "directory": "packages/trajectory"
   },
   "keywords": [
     "gwb"

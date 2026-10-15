@@ -6,6 +6,7 @@
   },
   "type": "module",
   "description": "从 mdx 正本生成 AGENTS.md / README.md / SKILL.md 这类 Markdown 生成物，并核对生成物与正本一致：钉码标记写成代码块，名册里的组件写成它的机读文字。",
+  "license": "MIT",
   "exports": {
     ".": {
       "types": "./dist/index.d.mts",
@@ -17,7 +18,8 @@
     }
   },
   "files": [
-    "dist"
+    "dist",
+    "LICENSE"
   ],
   "scripts": {
     "build": "tsdown",
@@ -47,12 +49,13 @@
     "vitest": "catalog:"
   },
   "publishConfig": {
-    "access": "public",
-    "registry": "https://git.tianshen02.online:28377/api/packages/godcreator/npm/"
+    "registry": "https://registry.npmjs.org/",
+    "access": "public"
   },
   "repository": {
     "type": "git",
-    "url": "https://git.tianshen02.online:28377/godcreator/docsite-kit.git"
+    "url": "https://github.com/godcreator02/god-docsite.git",
+    "directory": "packages/doc-export"
   },
   "keywords": [
     "gwb"

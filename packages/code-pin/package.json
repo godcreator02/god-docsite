@@ -1,11 +1,12 @@
 {
   "name": "@godcreator/code-pin",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "author": {
     "name": "godcreator"
   },
   "type": "module",
   "description": "把文字钉在代码上：只认目标（行段、整个文件、目录树）与记录，核对出代码变没变、确认出新记录；不读文件，读取器与旧内容来源由调用方传入。template/ 是建站器复制进站点 app/features/code-pin/ 的接线文件（remark 插件与样式）。",
+  "license": "MIT",
   "exports": {
     ".": {
       "types": "./dist/index.d.mts",
@@ -23,7 +24,8 @@
   },
   "files": [
     "dist",
-    "template"
+    "template",
+    "LICENSE"
   ],
   "scripts": {
     "build": "tsdown",
@@ -52,12 +54,13 @@
     "vitest": "catalog:"
   },
   "publishConfig": {
-    "access": "public",
-    "registry": "https://git.tianshen02.online:28377/api/packages/godcreator/npm/"
+    "registry": "https://registry.npmjs.org/",
+    "access": "public"
   },
   "repository": {
     "type": "git",
-    "url": "https://git.tianshen02.online:28377/godcreator/docsite-kit.git"
+    "url": "https://github.com/godcreator02/god-docsite.git",
+    "directory": "packages/code-pin"
   },
   "keywords": [
     "gwb"

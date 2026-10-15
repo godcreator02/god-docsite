@@ -1,11 +1,12 @@
 {
   "name": "@godcreator/word-report",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "author": {
     "name": "godcreator"
   },
   "type": "module",
   "description": "报告：JSON 报告文档的格式、校验与分章组装（.）；读报告目录、检查、导出 Word 的命令行 report-docx（./node）；报告页与报告列表（./site），两页与图片的 loader（./site/server）；engine/ 是驱动本机 Word 的 Python 导出引擎与 .dotx 模板；template/ 是建站器复制进站点 app/features/word-report/ 的接线文件（两条页面路由、图片路由、侧栏入口、样式）。",
+  "license": "MIT",
   "exports": {
     ".": {
       "types": "./dist/core.d.mts",
@@ -37,7 +38,8 @@
     "engine/README.md",
     "engine/src/docreport/*.py",
     "engine/schemas",
-    "engine/templates"
+    "engine/templates",
+    "LICENSE"
   ],
   "scripts": {
     "build": "tsdown",
@@ -85,12 +87,13 @@
     "vitest": "catalog:"
   },
   "publishConfig": {
-    "access": "public",
-    "registry": "https://git.tianshen02.online:28377/api/packages/godcreator/npm/"
+    "registry": "https://registry.npmjs.org/",
+    "access": "public"
   },
   "repository": {
     "type": "git",
-    "url": "https://git.tianshen02.online:28377/godcreator/docsite-kit.git"
+    "url": "https://github.com/godcreator02/god-docsite.git",
+    "directory": "packages/word-report"
   },
   "keywords": [
     "gwb"

@@ -74,6 +74,10 @@
   `src/other-repos/fetch/`、发版前、用户或 agent 明确要求
 * 发版只用 `devkit.release`，包按依赖序排：第 0 层（god-docsite、identity、explainer、code-pin、trajectory、word-report）→ 第 1 层（comments、doc-export）→
   第 2 层（collab、docfirst）→ 插件；发前跑 `pnpm verify` 与 `pnpm test:pack`，再在 `plugins/collab` 里跑一遍 `pnpm test:verified`。升版本号前先读 skill「gwb-release」
+* 包发到 npmjs，由 GitHub 仓 `godcreator02/god-docsite` 的 `.github/workflows/publish.yml` 经 trusted publishing 发：`devkit.release` 要求 HEAD 已经推到 GitHub，
+  在 HEAD 上建 release、挂上本机打好的包文件，工作流按序号逐个发。各包 `publishConfig` 指向 npmjs、`repository` 指向这个仓、`files` 收进 MIT 的 `LICENSE`。
+  各 home 还从 Gitea 装 `@godcreator` 的包，过渡期发版加 `alsoPublishTo` Gitea 的源（`https://git.tianshen02.online:28377/api/packages/godcreator/npm/`）；
+  新加一个包，先在本机发一个 `0.0.0-stage` 占位版（`npm publish --auth-type=web`，在浏览器里批准），再 `npm trust github <包名> --repo godcreator02/god-docsite --file publish.yml --yes` 登记，登记后两天内要正式发一次
 
 ## 规矩
 
