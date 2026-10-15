@@ -49,14 +49,12 @@ icon: FileText
         <File name="figure.svg" />
       </Folder>
     </Folder>
-    <Folder name="docs" defaultOpen>
-      <Folder name="fumadocs" defaultOpen>
-        <File name="overview.html" />
-        <File name="full-flow.html" />
-        <Folder name="_shared" defaultOpen>
-          <File name="fig.js" />
-          <File name="style.css" />
-        </Folder>
+    <Folder name="background" defaultOpen>
+      <File name="overview.html" />
+      <File name="full-flow.html" />
+      <Folder name="_shared" defaultOpen>
+        <File name="fig.js" />
+        <File name="style.css" />
       </Folder>
     </Folder>
   </Folder>
@@ -147,16 +145,18 @@ icon: FileText
 
 代码块写上语言，fumadocs 按语言着色；`title` 写文件名。用注释 `// [!code highlight]` 标出要看的那一行：
 
-```ts title="app/lib/source.server.ts"
-import { searchServerOf } from '@godcreator/god-docsite/server'
-
-export const searchServer = searchServerOf(() => source) // [!code highlight]
+```ts title="app/lib/source.ts"
+export const source = loader({
+  source: { mdx: docs.toFumadocsSource(), tsx: tsxPageSource(tsxPageMeta), html: htmlPageSource(htmlPageText) }, // [!code highlight]
+  baseUrl: '/',
+  plugins: [lucideIconsPlugin(), ...featureRuntime.pageTreePlugins],
+})
 ```
 
 命令行写成 `bash`：
 
 ```bash
-pnpm dev
+pnpm doc
 ```
 
 ## 公式
