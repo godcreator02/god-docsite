@@ -4,7 +4,7 @@
   "author": {
     "name": "godcreator"
   },
-  "description": "docfirst 插件：一条建站命令 docfirst.create——建接好 docfirst 的文档站（现状、轨迹、未来三个区），认站名、选端口（4310 起、祖父目录查重），把功能包 @godcreator/docfirst-site（精确版本表在 src/deps.ts）交给 gwb-docsite 的建站服务 gwbDocsite.init：地基骨架、起始物、装依赖、探活都归它；注册 3 份说明书（对文档站执行命令的 docs-site、页面与钉码怎么写的 docs-writing、轨迹卡的 trajectory）；对本仓 packages/ 下的 npm 包零依赖，核对、确认与渲染在站目录里运行。服务无；skill 3 份；命令 1 条。",
+  "description": "docfirst 插件：一条建站命令 docfirst.create——建接好 docfirst 的文档站（现状、轨迹、未来三个区）：认站名、选端口（4310 起、祖父目录查重），经 gwb-docsite 的服务 gwbDocsite 建基础站、加功能包 code-pin / trajectory / explainer，把 @godcreator/docfirst 的起始物叠到站点根、写 doc 系列脚本；那几个包是 dependencies，只按路径读版本与起始物、不 import；注册 3 份说明书（对文档站执行命令的 docs-site、页面与钉码怎么写的 docs-writing、轨迹卡的 trajectory）；核对、确认与渲染在站目录里运行。服务无；skill 3 份；命令 1 条。",
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -74,5 +74,11 @@
   },
   "keywords": [
     "gwb-plugin"
-  ]
+  ],
+  "dependencies": {
+    "@godcreator/code-pin": "workspace:^",
+    "@godcreator/docfirst": "workspace:^",
+    "@godcreator/explainer": "workspace:^",
+    "@godcreator/trajectory": "workspace:^"
+  }
 }
