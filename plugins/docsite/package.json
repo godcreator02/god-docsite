@@ -51,8 +51,7 @@
     "cordis": "catalog:",
     "esbuild": "catalog:",
     "typescript": "catalog:",
-    "vitest": "catalog:",
-    "yaml": "catalog:"
+    "vitest": "catalog:"
   },
   "dependencies": {
     "@godcreator/comments": "workspace:^",
