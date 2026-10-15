@@ -1,0 +1,34 @@
+/*
+ * FeatureIndexSteps 自己的画面：上调用行、中两栏（左功能目录、右五份汇总文件）、下图例。
+ * 卡片、胶囊与代码行（--dx-* 变量）由 @godcreator/explainer 提供，颜色只取那套变量。
+ */
+.fi-stage { container-type: inline-size; display: grid; gap: 12px; }
+
+.fi-top { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.fi-returns { font-size: 12.5px; color: var(--dx-dim); }
+
+.fi-mid { display: grid; gap: 12px; }
+@container (min-width: 720px) { .fi-mid { grid-template-columns: minmax(0, 2fr) minmax(0, 3fr); align-items: start; } }
+
+.fi-index { display: grid; gap: 10px; }
+
+.fi-dirs { display: grid; gap: 10px; }
+/* 这一步新出现的目录：整行左边一道竖线（建站器那端的玫瑰色） */
+.fi-dir[data-new] { border-left: 3px solid var(--dx-rose); padding-left: 9px; }
+.fi-dir-line { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 6px; }
+.fi-dir-name { font-family: var(--dx-mono); font-size: 12.5px; }
+
+/* 目录里固定四种文件的格子：有的是胶囊，没有的画调淡的灰格子 */
+.fi-cells { display: inline-flex; flex-wrap: wrap; gap: 4px; }
+.fi-cell {
+  font-family: var(--dx-mono);
+  font-size: 11px;
+  padding: 1px 7px;
+  border: 1px solid var(--dx-line);
+  border-radius: 999px;
+  opacity: .35;
+}
+
+.fi-note { margin-top: 4px; font-size: 12px; color: var(--dx-dim); }
+
+.fi-legend { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; font-size: 12px; color: var(--dx-dim); }

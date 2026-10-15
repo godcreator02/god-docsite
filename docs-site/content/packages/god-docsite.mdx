@@ -1,0 +1,158 @@
+---
+title: god-docsite：平台包
+description: 站点的公共部分：模板与建站器写出站点，按功能目录现算五份汇总文件；运行时把 MDX、TSX、HTML 三种页面合进一棵页面树，提供布局与侧栏、搜索、llms、推送通道与术语标注；vite 插件管端口、可信来源与内容目录。功能包经站点 app/features/ 里的文件接入，平台包不依赖任何功能包
+icon: LayoutTemplate
+---
+
+import { PlatformSeams } from './god-docsite/platform-seams'
+import { FeatureIndexSteps } from './god-docsite/feature-index-steps'
+
+平台包 `@godcreator/god-docsite` 是每个站点的公共部分，别的包都不依赖它。它有两半：
+
+- **模板与建站器**：`template/` 是唯一的站点模板，`./scaffold` 是建站器（`createSite` 建站、`addFeature` 加功能、`regenerateFeatureIndex` 重写汇总文件），负责把站点写出来
+- **运行时出口**：`./server`、`./react`、`./vite`、`./mdx` 等，由模板写出的站点文件调用，管页面树、布局与侧栏、搜索、推送与术语标注
+
+本站的 `app/features/` 就是建站器建出来的样子：`code-pin`、`comments`、`explainer`、`trajectory` 四个功能目录，和「`createSite` → `addBaseFeatures` → 依次 `addFeature` code-pin、trajectory、explainer」得到的一字不差——`pnpm test:scaffold` 就是这么比对的。这一页的例子从头到尾都是本站自己。
+
+## 接缝图
+
+<PlatformSeams />
+
+1. **建站与加功能**：gwb-docsite 的 `docsite.site.init` 依次调 `createSite`、`addBaseFeatures`，`docsite.feature.add` 调 `addFeature`。建站器按自己模块所在的位置找平台包的 `template/`，所以插件从装好的平台包目录加载 `./scaffold`，不把它打包进插件。
+2. **写出站点**：`createSite` 复制模板，写 `package.json`、`people.json`、`pnpm-workspace.yaml`；`addFeature` 把功能包的 `template/` 补进功能目录，已有的文件不覆盖；`regenerateFeatureIndex` 每次重写五份汇总文件。
+3. **读功能包**：功能包要先装进站点的 `node_modules`；`addFeature` 读它的 `template/`，重写汇总文件时去站点依赖里找功能名对得上的那个包，读集合名单 `godDocsite.collections`。
+4. **合并功能**：`runtime.generated.ts` 把各功能的 `feature.tsx` 交给 `siteFeatureRuntime`，合成一份 `featureRuntime`，布局路由、`source.ts`、`mdx-components` 各取所需；两个功能导出同名 MDX 组件时报错。
+5. **路由调 loader**：站点的路由文件只有几行——调平台的 loader，把站点上下文 `site`（满足 `BaseSiteContext`）当参数传进去；平台与功能包都不 import 站点代码。
+6. **构建配置**：`vite.config.ts` 把 `source.config.ts` 的全部导出交给 `godDocsite()`，插件从中认出内容目录；`app/lib/mdx-plugins.ts` 把术语标注排在全站 remark 插件的最后。
+7. **推送**：gwb-docsite 启动开发服务时经环境变量 `DOCSITE_FEED_TOKEN` 给站点进程一个令牌，之后带同一个令牌 POST JSON；协议的常量两边都从平台包的 `.` 出口取。
+8. **端口与可信来源**：开发服务开始监听时 vite 插件把地址写进 `DOCSITE_DEV_ORIGIN`，发布版由 `docsite-serve` 设 `PORT`；`siteOrigin` 按它们算出写入请求要对上的 Origin。
+
+平台包对外的出口全在这些地方：
+
+| 出口 | 在哪一层 | 谁 import |
+| --- | --- | --- |
+| `.` | `src/core/` 纯逻辑：术语匹配、HTML 提取、站内链接解析、推送协议的常量 | gwb-docsite（推送协议常量）、本包其余各层 |
+| `./scaffold` | `src/node/scaffold/` 建站器，纯 Node | gwb-docsite |
+| `./vite` | `src/vite/` vite 插件 | 站点 `vite.config.ts` |
+| `./mdx` | `src/mdx/` 术语标注的 remark 插件 | 站点 `app/lib/mdx-plugins.ts` |
+| `./server` | `src/site/*.server.ts` 等服务端部分 | 站点路由文件、功能包模板 |
+| `./react` | `src/site/` 浏览器端组件 | 站点路由文件、功能包模板 |
+| `./tex` | TSX 页面里写公式的 `Tex` | 站点的 TSX 页面 |
+| `./styles.css` | 平台样式 | 站点 `app/app.css` |
+| `docsite-serve`（bin） | `src/cli/serve.ts` 发布版启动命令 | 站点 `package.json` 的 `scripts.start` |
+
+{/* ref file="../packages/god-docsite/package.json" lines="7-43" hash="c92d340e240e" blob="4da5c09c43b4" */}
+
+## 站点里的三类文件
+
+平台包的 `template/` 是唯一的站点模板。站点里的文件分三类，谁写、之后归谁不一样：
+
+| 文件 | 谁写 | 之后 |
+| --- | --- | --- |
+| 模板写出的文件：`app/routes.ts`、`app/root.tsx`、`app/routes/*`、`app/lib/*`、`vite.config.ts`、`source.config.ts`、`react-router.config.ts` 等 | `createSite` 从 `template/` 复制 | 建站后归站点，建站器不再写（`app/routes/home.tsx` 就是站点自己改的首页） |
+| 功能目录 `app/features/<功能>/` | `addFeature` 从功能包的 `template/` 补 | 已有的文件不覆盖，只补缺的 |
+| 汇总文件 `app/features/*.generated.ts`、`styles.generated.css` | `regenerateFeatureIndex` | 每次重写，不手改 |
+
+站点路由表 `app/routes.ts` 里：平台自己的六个资源路由——搜索 `api/search`、Markdown `api/markdown`、内容文件 `api/content/*`、两份 llms 文本、推送 `__docsite/feed/:channel`；首页在整站布局之外；功能的 `standaloneRoutes` 也在布局之外；功能的默认路由嵌在布局里、排在通配的 `*` 前面。布局路由的 id 固定是 `routes/layout`，这是外部契约——功能的 `LayoutTop` 用 `useRouteLoaderData('routes/layout')` 取自己那份布局数据。
+
+{/* ref file="../packages/god-docsite/template/app/routes.ts" lines="4-18" hash="ce6e863ba835" blob="68a61b6a0cdc" */}
+
+## 建站器：从功能目录现算汇总文件
+
+`createSite` 往空目录里复制模板，把模板 `package.json` 里的 `{{version}}` 换成依赖写法——registry（发版后从 registry 装，写 `^<版本>`）、link（直接用仓里的包）、file（`pnpm pack` 的 tarball）三种——再写站名、`people.json`、`pnpm-workspace.yaml`，最后写出空的汇总文件。它不装依赖、不起服务。
+
+{/* ref file="../packages/god-docsite/src/node/scaffold/create-site.ts" lines="112-132" hash="78906872439f" blob="c32d8e1255e1" */}
+
+装好依赖之后 `addBaseFeatures` 补基础功能：模板 `package.json` 里写成 `{{version}}` 的包（平台包自己除外）里带 `template/` 的才算功能——基础站就是 comments；identity 没有 `template/`，跳过。`addFeature` 加一个功能：功能包要先装进站点的 `node_modules`，它把功能包的 `template/` 补进 `app/features/<包名去掉作用域>/`，已有的文件不覆盖，再重写汇总文件；对同一站点重复运行只补缺的。
+
+{/* ref file="../packages/god-docsite/src/node/scaffold/add-feature.ts" lines="25-66" hash="dbd4cb465912" blob="99d25946e005" */}
+
+功能目录固定在 `app/features/`；建站器只认目录里的四种文件——`routes.ts`、`feature.tsx`、`mdx.ts`、`styles.css`，含其中任一个的子目录才算功能；五份汇总文件是 `routes.generated.ts`、`runtime.generated.ts`、`mdx.generated.ts`、`collections.generated.ts`、`styles.generated.css`，都在 `app/features/` 下。
+
+{/* ref file="../packages/god-docsite/src/node/scaffold/feature-index.ts" lines="7-20" hash="a9cdf57d595c" blob="778f5b87a5f7" */}
+
+`regenerateFeatureIndex` 是核心：扫 `app/features/` 下的子目录，含四种文件之一的才算功能，按名字排序；有 `mdx.ts` 的去站点依赖里找功能名对得上的那个包，读它 `package.json` 的 `godDocsite.collections`；集合名要全站唯一，与 `source.config.ts` 自己的集合也不能重名；然后重写五份汇总文件。汇总文件每次都按目录现算，所以加一个功能不用改模板，平台包也不用知道有哪些功能包。下面把本站建出来的六步走一遍：
+
+<FeatureIndexSteps />
+
+{/* ref file="../packages/god-docsite/src/node/scaffold/feature-index.ts" lines="53-121" hash="79d409a1487e" blob="778f5b87a5f7" */}
+
+{/* ref file="../packages/god-docsite/src/node/scaffold/feature-index.ts" lines="197-215" hash="7aeec0bff430" blob="778f5b87a5f7" */}
+
+## 功能目录里的四种文件
+
+这一节写给功能包作者。四种文件各能导出什么、平台怎么用：
+
+| 文件 | 能导出 | 进哪份汇总文件 | 站点里谁用 |
+| --- | --- | --- | --- |
+| `routes.ts` | 默认导出（嵌在整站布局里的路由）、`standaloneRoutes`（布局之外、占满窗口） | `routes.generated.ts` | `app/routes.ts` |
+| `feature.tsx` | `FeatureRuntimeModule` 的六样，都可选：`mdxComponents`、`pageTreePlugins`、`linkKinds`、`sidebarLinks`、`layoutData`、`LayoutTop` | `runtime.generated.ts` → `siteFeatureRuntime` | 布局路由、`app/lib/source.ts`、`app/lib/mdx-components.tsx` |
+| `mdx.ts` | `remarkPlugins`、`rehypePlugins`、`collections`（集合工厂，名单写在包的 `package.json` 的 `godDocsite.collections`） | `mdx.generated.ts`；有集合的再进 `collections.generated.ts` | `source.config.ts`、`app/lib/mdx-plugins.ts` |
+| `styles.css` | 样式 | `styles.generated.css` | `app/app.css` |
+
+{/* ref file="../packages/god-docsite/src/node/scaffold/feature-index.ts" lines="123-182" hash="0005b519c4d9" blob="778f5b87a5f7" */}
+
+合并规则三条：
+
+- `feature.tsx` 会进浏览器：不能 import `.server` 模块或 Node 内置模块，`layoutData` 要的服务端数据只能经第二个参数 `base`（站点上下文）取；它的返回值以功能名为键并进布局数据。
+- 两个功能导出同名 MDX 组件时报错；侧栏入口按 `order` 排，同样大的按功能名。
+- 集合工厂收一份全站插件 `sitePlugins` 并进自己的选项；`source.config.ts` 用 `export *` 再导出 `collections.generated.ts`，因为 fumadocs-mdx 要求那份文件只导出集合。
+
+{/* ref file="../packages/god-docsite/src/site/features.ts" lines="11-74" hash="7b8a790bf59f" blob="a9887c39aed8" */}
+
+## 三种页面进一棵页面树
+
+站点的 `app/lib/source.ts` 把三种页面来源交给同一个 fumadocs `loader`，键是 `mdx`、`tsx`、`html`——这个键就是每一页的 `type`，所以三种页面在同一棵页面树、同一个搜索索引里。`import.meta.glob` 的参数要能静态分析，只能写在站点模块里；平台的 `tsxPageSource`、`htmlPageSource` 只把 glob 的结果换成虚拟文件。
+
+{/* ref file="../packages/god-docsite/template/app/lib/source.ts" lines="11-16" hash="35db1285d9d4" blob="eea12044bb68" */}
+
+页面路由的 loader（`sitePageData`）按 `type` 给浏览器不同的东西：MDX 给路径（正文由 fumadocs-mdx 的 client loader 在浏览器加载）、TSX 给文件（按需加载页面模块）、HTML 给 `/api/content/` 下的地址（iframe 原样展示）。页面树不在这里给，只由布局路由给。
+
+{/* ref file="../packages/god-docsite/src/site/page.server.ts" lines="15-32" hash="6c0dabd9f88e" blob="8d10a15cc344" */}
+
+## 站点上下文
+
+站点的 `app/lib/site.server.ts` 造一个 `site`，平台与功能包的 loader、action 都经参数拿到它，自己不 import 站点代码。字段：站点目录、`mode`（`dev` / `start`）、loader 结果 `source`（平台只用到它的四个方法：`getPage`、`getPages`、`getPageTree`、`serializePageTree`，页面是三种来源之一）、内容目录、评论目录与评论条目，以及每次调用都现读的四个函数——人员列表、本机身份（start 一律只读）、可信来源、推送通道某频道现在的值。功能包模板里的 `site.server.ts` 从它组装本功能要的上下文。
+
+{/* ref file="../packages/god-docsite/src/site/site-context.ts" lines="6-66" hash="7172c6ce4439" blob="d46a41fec05d" */}
+
+## 推送通道
+
+这是和 gwb-docsite 之间的外部契约。启动方经环境变量 `DOCSITE_FEED_TOKEN` 给站点进程一个令牌；推的一方 POST JSON 到 `/__docsite/feed/<频道>`，请求头 `x-docsite-token` 带同一个令牌；每个频道只留最新一份。同一地址 GET 可以拿现在的值，或者订阅事件流（连上先收到现在的值）。浏览器端用 `useSiteFeed(频道, 初始值)`，初始值由 loader 经站点上下文的 `feedValue` 读。
+
+{/* ref file="../packages/god-docsite/src/core/feed.ts" lines="1-7" hash="996597c39f34" blob="fcb5c0377071" */}
+
+## vite 插件、端口与可信来源
+
+站点 `vite.config.ts` 里 `godDocsite({ collections })` 排在 `fumadocsMdx()`、`tailwindcss()` 之后、`reactRouter()` 之前；参数是 `source.config.ts` 的全部导出，插件从中认出内容目录。它由六个插件组成：
+
+| 插件 | 做什么 | 何时生效 |
+| --- | --- | --- |
+| `devPort` | 开发服务没给端口就随机挑一个，并把地址告诉站点 | dev |
+| `frameworkPackages` | 认出平台与功能包（peer 里有 fumadocs 或导出 `./site` 的包）让它们经 Vite 处理 | dev 与 build |
+| `devDotServerGuard` | 补查 dev 下带查询的 `.server` 模块被浏览器端 import | dev |
+| `invalidateContentCollectors` | 内容目录增删文件时让收集内容的模块重新转换 | dev |
+| `checkContentLayout` | 检查内容目录的文件放对了没有 | build 与 dev 启动 |
+| `copyContentAssets` | 把内容目录里的文件复制进客户端产物 | build |
+
+{/* ref file="../packages/god-docsite/src/vite/index.ts" lines="19-27" hash="36bdf15f538a" blob="e519c0e5039c" */}
+
+可信来源 `siteOrigin`：写入请求的 Origin 头要和它完全一样。设了 `DOCSITE_ORIGIN` 就只认它；dev 取 vite 插件写的 `DOCSITE_DEV_ORIGIN`（没有就是开发服务没经 `godDocsite()` 启动，报错）；start 取 `HOST`（缺省 localhost）与 `PORT`（没设报错——发布版用 `docsite-serve` 启动，它挑端口、设 `PORT`）。
+
+{/* ref file="../packages/god-docsite/src/site/origin.server.ts" lines="19-36" hash="fa5abe38e24b" blob="47bff7857623" */}
+
+## 其余能力
+
+- **布局与侧栏**：整站布局是 fumadocs 的 `DocsLayout`；目录切换按钮按 `meta.json` 写了 `"root": true` 的文件夹生成，组外的页面收成以站名命名的一组；在任务、全站评论这类不在页面树里的功能页面上，侧栏停在最近看过的那一组。站名下一横排是搜索按钮与各功能的侧栏入口。
+- **首页**：`app/routes/home.tsx` 在整站布局之外、占着 `/`，内容目录根上不能再写 index 页；「文档」链接指向第一组的第一页。
+- **TSX 与 HTML 页面**：TSX 页的标题、描述、搜索文字来自它导出的 `meta`；HTML 页的标题取 `<title>`，只有写了 `id` 的标题才进目录与搜索锚点。
+- **内容目录的放法**：组文件夹只放页面、`meta.json`、页面的同名文件夹、下划线开头的文件夹与子组，同名文件夹里不放页面；vite 插件在 build 与 dev 启动时检查，放错了停下。
+- **搜索**：中文站点把 fumadocs 搜索的容错与命中阈值都设成 0，每个词都要原样出现。
+- **Markdown 与 llms**：每一页都有 Markdown 形式（MDX 走 `getText('processed')`，TSX、HTML 页在来源数据里），`/api/markdown`、`llms.txt`、`llms-full.txt` 用它；构建时只预渲染两份 llms 文本。
+- **术语标注**：站点根的 `glossary.json` 列术语；构建时长词优先、西文要词边界、一篇只标第一次，代码、公式、标题、链接里不标，所以排在 `remark-math` 之后。
+
+## 谁在用它
+
+- **gwb-docsite**：`./scaffold` 的 `createSite`、`addBaseFeatures`、`addFeature`、`isPortFree`（`docsite.site.init`、`docsite.feature.add`）；`.` 的 `feedTokenEnvName`、`feedTokenHeader`、`feedUrlOf`（托管开发服务、往推送通道推数据）
+- **功能包的 `template/`**（写进站点后才 import 平台包，包本身不依赖它）：comments 的全站评论页调 `sitePageRefs`；trajectory 调 `routeLinkKind`、`SiteLinksProvider`、`sitePageTitles`；collab 调 `useSiteFeed`、`sitePageRefs`，它的首页模板 `templates/home.tsx` 调 `siteHomeData`、`SiteHomeLayout`
+- **站点**：上面各节的模板文件

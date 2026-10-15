@@ -1,0 +1,171 @@
+---
+title: trajectory：轨迹卡与星轨盘
+description: 轨迹卡的格式与校验、一批卡汇总成星轨盘的输入（命令行与站点走同一个汇总）、关系连成树并挑出主干、按日期定半径按扇区定角度把卡排上盘；站点上的卡页、星轨盘页与卡链接
+icon: Orbit
+---
+
+import { DiskPlacement } from './trajectory/disk-placement'
+
+轨迹卡目录里一个 `.md` / `.mdx` 文件是一张卡。trajectory 这个包读卡、校验卡，把一个站的全部卡画成星轨盘（`/trajectory`），每张卡另有卡页（`/trajectory/<卡身份>`）。卡怎么写、什么时候建卡，看[说明书 `trajectory`](/docs/outputs/skills/trajectory)；这一页讲包怎么处理卡。
+
+全页用一个贯穿的例子：一个小项目的 `trajectory/` 目录，里面 11 个文件。名字与内容是为讲解编的，处理它们的规则照源码：
+
+| 编号 | born-at | domain | 关系 | label |
+| --- | --- | --- | --- | --- |
+| 盘心 | 2026-03-01 | — | — | 起步 |
+| ① | 2026-03-02 | 存储 | — | 记录存成 JSON 文件 |
+| ② | 2026-03-06 | 存储 | `supersedes::` ① | 改用 SQLite |
+| ③ | 2026-03-09 | 存储 | `supersedes::` ② | 开 WAL 模式 |
+| ④ | 2026-03-12 | 存储 | `supersedes::` ③ | 网络盘上 WAL 不可用 |
+| ⑤ | 2026-03-15 | 存储 | `pivots-from::` ④ | 改用锁文件 |
+| ⑥ | 2026-04-20 | 存储 | `supersedes::` ② | 一条记录一个文件 |
+| ⑦ | 2026-03-06 | 界面 | — | 深色主题跟系统 |
+| ⑧ | 2026-03-06 | 界面 | — | 侧栏用文件树 |
+| ⑨ | 2026-04-21 | 界面 | — | 搜索框放顶栏 |
+| ✗ | 三月十八号 | 存储 | — | 加一层缓存 |
+
+盘心是根卡（文件 `2026-03-01-start.md`），其余十张的 frontmatter 都写 `parent: [2026-03-01-start]`。下文各处的数都是把这 11 个文件交给 `scanCards` → `buildModel` → `RingsLayout`（全景态，手感参数全取默认值）跑出来的。
+
+## 一张卡：frontmatter 加正文里的两种行
+
+卡身份是文件名去掉 `.md` / `.mdx`。frontmatter 里 `type`、`born-at`、`parent`、`label`、`domain` 五个字段一个都没有的文件不是卡（比如卡目录里的导读页），整个不校验。`status` 不算——它是可以随意写的字段，单凭一个 `status` 不足以认定是卡。
+
+格式的正本是一个 zod schema：先查形状（该写单个值的写成了列表、`parent` 没写成列表），再查必填——`born-at`、`label` 全卡必填，`born-at` 只认 `YYYY-MM-DD` 与 `YYYY-MM-DDTHH:mm`；非根卡必填 `parent`。别的字段随便写、不查。`type` 只有 `root` 被读出含义，其余取值只决定盘上的形状。
+
+{/* ref file="../packages/trajectory/src/core/card.ts" lines="36-68" hash="0e7154652bce" blob="5c75a339d919" */}
+
+正文里认两种行。**关系行**：整行是 `supersedes::` 或 `pivots-from::` 加一条指向卡文件的链接，链接目标去掉 `./`、`#` 锚与后缀就是卡身份。**里程碑行**：根卡 `## 里程碑` 区块里的 `- 日期｜标题｜说明`（全角竖线）。行头是关系字段、整行格式却不对的行报成病，不静默丢掉——以前 CRLF 行尾的关系行就这样全部丢过，报出来至少看得见。
+
+{/* ref file="../packages/trajectory/src/core/refs.ts" lines="10-14" hash="7cf7d2fc3fc7" blob="5b545fbfebee" */}
+
+卡正文里不许钉码：出现 `{/* ref …`、`{/* tree …` 这类记号，或以 `@@docfirst` 开头的行，报病。卡记的是当时的结论，代码后来怎么变都不该动它。
+
+⑥「一条记录一个文件」整张卡长这样（示例，不是钉码）：
+
+```mdx
+---
+type: choice
+born-at: 2026-04-20
+domain: 存储
+label: 一条记录一个文件
+parent: [2026-03-01-start]
+---
+
+supersedes:: [改用 SQLite](2026-03-06-sqlite.md)
+```
+
+根卡（盘心）的正文末尾另有一个区块：
+
+```md
+## 里程碑
+
+- 2026-04-20｜换存储｜一条记录一个文件
+```
+
+## 一批卡：谁是盘心、谁上盘、谁是病卡
+
+`assembleCardSet` 收一批已经单独读过的卡文件，交回 `CardScan`：盘心 `center`、画上星轨盘的卡 `cards`、病卡清单 `sick`。卡按身份排序、病卡按路径排序，同一批文件汇总两次，产物逐位相等。
+
+{/* ref file="../packages/trajectory/src/core/card-set.ts" lines="44-71" hash="3e8ecd4dee34" blob="fe5cfe9cbea0" */}
+
+上盘的门槛只有一条：born-at 写得对——算不出半径的卡画不出来。根卡恰好一张时它是盘心；非根卡只要 born-at 合格就上盘，parent 写错、关系指错这些病不挡。例子里 ✗「加一层缓存」的 born-at 写成了「三月十八号」，不进 `cards`、进 `sick`，理由是「born-at 格式须 YYYY-MM-DD 或 YYYY-MM-DDTHH:mm」；其余 9 张全部上盘。
+
+还有些病单个文件看不出来，要看整批：
+
+- 根卡多于一张（这时不再查非根卡的 parent，先把根卡减到一张）；根卡写了 parent；非根卡的 parent 不是根卡的身份
+- 关系指向根卡（根卡代表整个项目，关系要指向具体的卡），或指向不在盘上的卡
+- 同一身份 `.md` 与 `.mdx` 都在（只认 `.mdx`，病记在 `.mdx` 上）
+
+{/* ref file="../packages/trajectory/src/core/card-set.ts" lines="73-131" hash="cf2a8af81fc6" blob="fe5cfe9cbea0" */}
+
+每条病在 `docfirst check` 里算一个红，怎么计红、退出码是什么看 [docfirst 页](/packages/docfirst)。
+
+## 两条路读卡，同一个汇总
+
+读卡有两条路，最后都交给 `assembleCardSet`：
+
+- **命令行**：`scanCardDir(dir)`（`/node` 出口）列卡目录下一层、读全文交给 `scanCards`。目录不存在交回空结果，不建目录
+- **站点**：卡集合的 schema 在构建期对每个文件调 `readCardFile`，把结果存进这一页的数据（`cardFile`）；星轨盘页的 loader 把全部页的 `cardFile` 交给 `assembleCardSet`，不再读磁盘
+
+所以 `docfirst check` 报的病卡，和星轨盘页上数出来的卡，两边逐位相同。站点读 frontmatter 用的是本包自己那一种读法，不用 fumadocs 解析好的值——fumadocs 会把只写到日的 `born-at` 读成 `Date`，两边就对不上了。
+
+## 建模：关系连成树，挑出主干
+
+盘的输入是中性的 `DiskInput`：盘心加一组卡，每张卡只有身份、时刻、短名、领域、种类、关系。盘不知道卡文件怎么写，校验归上游；输入不合格（身份重复、时刻写坏、关系种类不认识）`buildModel` 直接抛错——走到这里说明上游有 bug。
+
+{/* ref file="../packages/trajectory/src/core/model/types.ts" lines="23-53" hash="d21e32de3093" blob="1c5858ea0197" */}
+
+关系边：`from` 是被取代的旧卡或转向的起点，`to` 是写着这条关系的卡；指向盘外的进 `broken`，不画。
+
+**树**：取代与转向两种边一起求连通分量，同一件事的卡在盘上占同一块扇区；一条关系都没有的卡是**孤星**。例子里 ①②③④⑤⑥ 连成一棵树（⑤ 是靠转向连进来的），⑦⑧⑨ 是孤星。
+
+**主干**只在取代边上选（整棵树只有转向边时才退到转向链）：从每个没有取代入边的卡出发，每一步挑「终点更晚」的那条，终点一样晚再比长、再按身份。例子里从 ① 出发有两条候选：①→②→③→④（4 张，终点 03-12）与 ①→②→⑥（3 张，终点 04-20）。⑥ 更晚，主干是 ①②⑥，③④⑤ 是一条支线。比终点不比长度的理由：一条反复微调的支线步数多，按长度选会压过只转折几次的主线。
+
+{/* ref file="../packages/trajectory/src/core/model/types.ts" lines="79-112" hash="66969de41545" blob="1c5858ea0197" */}
+
+{/* ref file="../packages/trajectory/src/core/model/build.ts" lines="152-227" hash="e093c6d7a835" blob="fafdd715830c" */}
+
+有取代出边的卡（被别的卡取代了）盘上淡出，例子里是 ①②③。领域的先后按卡的 born-at 顺序首次出现定（例子里是存储、界面），没写 domain 的归「未分道」、排最后。扇区的先后就靠这个顺序——换成按卡数或字母排，盘画得不一样、还不报错。
+
+{/* ref file="../packages/trajectory/src/core/model/build.ts" lines="258-270" hash="341542fab23d" blob="fafdd715830c" */}
+
+## 上盘：半径由日期定，角度由扇区定
+
+建模交出去的模型进排盘引擎 `RingsLayout`，一组卡怎么排到星轨盘上，五步看完：
+
+<DiskPlacement />
+
+组件之外，三件事各用两三句收尾：
+
+- **半径**：日期先换成有效天数，再线性铺进固定的 960 个单位，最早一天在 190、最晚一天在 1150：
+
+$$r(d) = 190 + 960 \cdot \frac{e(d)}{e(d_{\max})}$$
+
+$e(d)$ 是有效天数，只讲两层意思：**长空档折叠**——相邻两个有卡的日子隔超过 14 天，两头各留 7 天照原样，中间那段压成几个有效天，越长压得越狠；**卡多的日子加宽**——有卡那天与前一天之间，那天最挤的一组每多一张卡加宽 1.5 个有效天。
+
+{/* ref file="../packages/trajectory/src/site/disk/layout.ts" lines="373-426" hash="d12ec5e36c1e" blob="ccb3c5bcc225" */}
+
+- **角度**：树和孤星带各算出需要的角宽（槽宽 56、孤星槽宽 48、两侧内边距 18，都是弧长，按半径范围的几何平均换成角度），按领域聚在一起排；同领域之间留 3°，换领域多留 9°。一圈装得下就整体放大铺满一圈，首尾那道缝跨在 12 点方向（日期标签挂在那里）；装不下才从 9 点方向起按顺序顺时针排，同领域里时间不重叠的两块共用一段角度。
+
+{/* ref file="../packages/trajectory/src/site/disk/layout.ts" lines="144-209" hash="79e78a0b7ab0" blob="ccb3c5bcc225" */}
+
+{/* ref file="../packages/trajectory/src/site/disk/layout.ts" lines="700-715" hash="dbfaf98bd9e7" blob="ccb3c5bcc225" */}
+
+- **槽**：主干占槽 0，支线按时间不重叠分进后面的槽（隔开超过 2 天的两条支线共用一槽）；孤星带里按日期分槽。同组同一天的卡按角度从小到大排成斜排，第一张留在当天的环上，后面的依次往内退一级，最里一张不越过前一天的环。
+
+{/* ref file="../packages/trajectory/src/site/disk/layout.ts" lines="620-635" hash="4925ddf60f49" blob="ccb3c5bcc225" */}
+
+{/* ref file="../packages/trajectory/src/site/disk/layout.ts" lines="740-766" hash="a69295e99502" blob="ccb3c5bcc225" */}
+
+滚轮聚焦某一天时，显示半径按一条解析式把以那一天为中心、共 7 天的一段放大，里外两头压缩——只改显示，不改上面算出的位置。
+
+## 站点上：两个页面与卡链接
+
+建站器把 `template/` 写进站点的 `app/features/trajectory/`。卡集合在 `mdx.ts` 里声明：读站点根下 `trajectory/` 的 `*.{md,mdx}`，正文按需加载，schema 是 `cardSchema`；这个目录要和 `docfirst.config.mjs` 的 `trajectory` 一致，两处各读各的目录。
+
+{/* ref file="../packages/trajectory/template/mdx.ts" hash="6ea94aed95c1" blob="1faf4fd087fc" */}
+
+两条路由：星轨盘页 `/trajectory` 占满窗口、不在整站布局里；卡页 `/trajectory/<卡身份>` 在整站布局里。两页的 loader 都只从卡集合取数据，不另读磁盘。侧栏横排里加一个「轨迹」入口；正文里指向卡页的链接，卡集合里有这张卡就显示成卡片，没有就标红。
+
+卡集合的 remark 插件做两件事：关系行整段改成 `<div class="trajectory-edge" data-kind=…>`；主干像卡身份的 `.md` / `.mdx` 链接改写成卡页地址，带路径的 `.md`（引的是材料，比如 `../probes/x/README.md`）原样不动。
+
+{/* ref file="../packages/trajectory/src/site/remark-trajectory-links.ts" lines="30-57" hash="1e6c4bfdea47" blob="8feaa96a0caf" */}
+
+## 分层与出口
+
+| 出口 | 有什么 | 谁用 |
+| --- | --- | --- |
+| `@godcreator/trajectory` | 卡格式与校验、一批卡的汇总（`scanCards`、`assembleCardSet`）、建模（`buildModel`），纯逻辑不碰磁盘 | docfirst 的 trajectory 命令、站点 |
+| `/node` | 读卡目录 `scanCardDir` | docfirst 的 check 与 trajectory 命令 |
+| `/site` | 卡页 `CardPage`、星轨盘页 `DiskPage`、画布 `StarDisk` | 接线文件 `card.tsx`、`disk.tsx`、`feature.tsx` |
+| `/site/server` | 两页的 loader | 接线文件 `card.tsx`、`disk.tsx`、`site.server.ts` |
+| `/site/collection` | `cardSchema`、`cardMdxOptions`、`remarkTrajectoryLinks`，只在构建期由 fumadocs-mdx 加载 | 接线文件 `mdx.ts` |
+| `./styles.css`（它再引入 `./star.css`） | 卡页与星轨盘页的样式、星轨盘画布的样式 | 接线文件 `styles.css` 只引入 `./styles.css` |
+
+建模在 `core/`（命令行也用），排盘（`RingsLayout`）在 `site/disk/`，只在浏览器里跑；trajectory 不依赖任何别的功能包（dependency-cruiser 的规则检查）。
+
+## 谁在用它
+
+- **docfirst**：`check` 调 `scanCardDir` 取病卡，每条病算一个红；`trajectory` 命令调 `scanCardDir` 再 `buildModel`，打印盘心、卡数、每棵树的主干。看 [docfirst 页](/packages/docfirst)
+- **gwb-docsite**：`docfirst.create` 建站时把 trajectory 当功能包加进站点，写入上面那几份接线文件
+- **站点**：上一节的接线文件

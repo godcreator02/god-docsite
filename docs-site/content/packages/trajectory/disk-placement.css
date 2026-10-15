@@ -1,0 +1,88 @@
+/*
+ * DiskPlacement 自己的画面：五步的盘、时间轴与右侧表格。
+ * 卡片、胶囊与颜色变量（--dx-*）由 @godcreator/explainer 提供，颜色只取那套变量；
+ * 角色固定：存储蓝、界面紫、取代线金黄实线、转向线青虚线、病卡玫红、被取代的卡领域色混灰。
+ */
+
+.dp-stage { display: grid; gap: 14px; align-items: start; }
+@container (min-width: 680px) { .dp-stage { grid-template-columns: minmax(0, 520px) minmax(0, 1fr); } }
+
+/* ── 盘：SVG 画图形，文字标签用 HTML 绝对定位叠上去（375 宽也看得清） ── */
+.dp-disk { position: relative; min-width: 0; }
+.dp-disk > svg { display: block; width: 100%; max-width: 520px; aspect-ratio: 1; margin: 0 auto; }
+.dp-disk-tags { position: absolute; inset: 0; pointer-events: none; }
+.dp-tag {
+  position: absolute; transform: translate(-50%, -50%); white-space: nowrap;
+  font-size: 11px; line-height: 1.3; color: var(--dx-dim);
+}
+.dp-tag-date { font-family: var(--dx-mono); }
+.dp-tag-card { font-weight: 600; color: var(--dx-fg); }
+.dp-tag-note {
+  padding: 0 4px; border-radius: 4px;
+  background: color-mix(in srgb, var(--dx-surface) 78%, transparent);
+}
+
+/* 盘里的图形 */
+.dp-hub { fill: var(--dx-surface); stroke: var(--dx-slate); stroke-width: 1.5; vector-effect: non-scaling-stroke; }
+.dp-hub-dim { stroke: color-mix(in srgb, var(--dx-slate) 45%, transparent); }
+.dp-ring { fill: none; stroke: var(--dx-line); stroke-width: 1; vector-effect: non-scaling-stroke; }
+.dp-tick { stroke: var(--dx-slate); stroke-width: 1; vector-effect: non-scaling-stroke; }
+.dp-band { fill: none; }
+.dp-band-fold { stroke: color-mix(in srgb, var(--dx-slate) 17%, transparent); }
+.dp-band-widen { stroke: color-mix(in srgb, var(--dx-blue) 12%, transparent); }
+
+.dp-annulus { stroke-width: 1.5; vector-effect: non-scaling-stroke; }
+.dp-annulus-blue { fill: color-mix(in srgb, var(--dx-blue) 16%, transparent); stroke: color-mix(in srgb, var(--dx-blue) 55%, transparent); }
+.dp-annulus-violet { fill: color-mix(in srgb, var(--dx-violet) 14%, transparent); stroke: color-mix(in srgb, var(--dx-violet) 55%, transparent); }
+.dp-annulus-faint.dp-annulus-blue { fill: color-mix(in srgb, var(--dx-blue) 8%, transparent); }
+.dp-annulus-faint.dp-annulus-violet { fill: color-mix(in srgb, var(--dx-violet) 7%, transparent); }
+.dp-seam-arc { fill: none; stroke: var(--dx-slate); stroke-width: 1.5; stroke-dasharray: 16 12; vector-effect: non-scaling-stroke; }
+
+/* 卡记号：被取代的卡领域色混灰（盘上是混灰 0.6，这里取更淡的一档做示意） */
+.dp-mark { stroke: var(--dx-surface); stroke-width: 1.5; vector-effect: non-scaling-stroke; }
+.dp-mark-blue { fill: var(--dx-blue); }
+.dp-mark-violet { fill: var(--dx-violet); }
+.dp-mark-dead.dp-mark-blue { fill: color-mix(in srgb, var(--dx-blue) 40%, var(--dx-slate)); }
+.dp-mark-dead.dp-mark-violet { fill: color-mix(in srgb, var(--dx-violet) 40%, var(--dx-slate)); }
+
+/* 关系线：取代金黄实线、转向青虚线、说明灰 */
+.dp-edge { fill: none; stroke-width: 1.8; vector-effect: non-scaling-stroke; }
+.dp-edge-supersede { stroke: var(--dx-amber); }
+.dp-edge-pivot { stroke: var(--dx-cyan); stroke-dasharray: 14 10; }
+.dp-edge-note { stroke: var(--dx-slate); stroke-width: 1.2; }
+.dp-arrow-supersede { fill: var(--dx-amber); }
+.dp-arrow-pivot { fill: var(--dx-cyan); }
+.dp-arrow-note { fill: var(--dx-slate); }
+
+/* ── 第 2 步的时间轴示意：文字是 SVG text，随图一起缩放 ── */
+.dp-timeline { min-width: 0; }
+.dp-timeline > svg { display: block; width: 100%; max-width: 560px; margin: 0 auto; }
+.dp-tl-rule { stroke: var(--dx-line); stroke-width: 1; }
+.dp-tl-axis { stroke: var(--dx-dim); stroke-width: 1; }
+.dp-tl-tick { font-family: var(--dx-mono); font-size: 22px; fill: var(--dx-dim); }
+.dp-tl-row { font-size: 22px; fill: var(--dx-dim); }
+.dp-tl-note { font-size: 19px; fill: var(--dx-dim); font-style: italic; }
+.dp-tl-mark { font-size: 22px; font-weight: 600; fill: var(--dx-fg); }
+.dp-tl-mark-dead { fill: color-mix(in srgb, var(--dx-blue) 40%, var(--dx-slate)); }
+.dp-tl-node { stroke: var(--dx-surface); stroke-width: 1.5; }
+.dp-tl-node-blue { fill: var(--dx-blue); }
+.dp-tl-node-violet { fill: var(--dx-violet); }
+.dp-tl-chosen-ring { fill: none; stroke: var(--dx-amber); stroke-width: 3; }
+
+/* ── 右栏的表格与清单 ── */
+.dp-table-wrap { overflow-x: auto; }
+.dp-table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+.dp-table th, .dp-table td { padding: 3px 7px; text-align: left; white-space: nowrap; border-bottom: 1px solid var(--dx-line); }
+.dp-table th { color: var(--dx-dim); font-weight: 500; }
+.dp-num { font-family: var(--dx-mono); }
+
+.dp-files { list-style: none; margin: 0; padding: 0; display: grid; gap: 3px; }
+.dp-file { display: flex; align-items: center; gap: 8px; font-size: 12.5px; }
+.dp-file-mark { flex: none; width: 2.4em; font-weight: 600; }
+.dp-file-name {
+  flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  font-family: var(--dx-mono); font-size: 11.5px;
+}
+
+.dp-candidates { display: grid; gap: 8px; }
+.dp-note { margin: 8px 0 0; font-size: 12.5px; color: var(--dx-dim); }
