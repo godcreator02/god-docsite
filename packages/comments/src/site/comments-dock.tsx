@@ -6,8 +6,9 @@
  *   盖在后面的正文上、不挤动正文；再点同一处、点正文别处或 Esc 收起。批整页、找不到原文的串浮在正文顶上
  * - 批注模式（可写时）：正文鼠标变十字（站点样式 data-comment-picking），点候选元素批它（anchor 存元素的稳定 id，见 ./browser/annotate 的协议）；
  *   可写时划一段字随时浮出「评论」按钮批这段字（anchor 存 JSON：quote/start/end/snapshot，见模型 parseCommentAnchor）。草稿同样浮在那一块下面
- * - 被批的元素带 data-commented-element，划的字高亮（CSS Custom Highlight API，注册名 docsite-comment，样式在本包 template/styles.css，
- *   建站后在站点的 app/features/comments/）；划的字原文改了按快照差异重新找，找不到如实标注
+ * - 被批的元素带 data-commented-element，正文栏左边外侧画一道和它上下对齐的竖黄条（./comment-margin-bars），元素本身不铺底色；
+ *   划的字高亮（CSS Custom Highlight API，注册名 docsite-comment，样式在本包 template/styles.css，建站后在站点的 app/features/comments/）；
+ *   划的字原文改了按快照差异重新找，找不到如实标注
  *
  * 浮窗与草稿经 portal 挂在 body 上、按文档坐标定位（带 data-comments-layer），不受正文容器的定位影响。
  * 写入提交到 action 参数给的地址（字段约定见 ./comment-model）
@@ -27,6 +28,7 @@ import {
   targetOfThread,
   type ThreadTarget,
 } from './browser/index.js'
+import { CommentMarginBars, type CommentedElement } from './comment-margin-bars.js'
 import type { CommentAvatar, CommentBodyComponent, CommentsAccess, PageThreadSummary } from './comment-model.js'
 import { CommentIcon, Composer, ThreadQuote, type ThreadPlace } from './comment-parts.js'
 import { CommentThread } from './comment-thread.js'
@@ -245,6 +247,9 @@ export function CommentsDock({ pagePath, action, threads, access, BodyComponent,
   const [hovered, setHovered] = useState<{ box: Box; label: string } | null>(null)
   const [targets, setTargets] = useState<Map<string, ThreadTarget>>(() => new Map())
   const [scope, setScope] = useState<Element | null>(null)
+  /** 正文里的标记每重画一轮加一：被批元素可能挪了位置，黄条跟着重新量 */
+  const [layoutVersion, setLayoutVersion] = useState(0)
+  const [hoveredThreadId, setHoveredThreadId] = useState<string | null>(null)
   const [mapRange] = useState(createRangeMapper)
   /** 落点的实时引用：document 级点击监听里用，不跟着 React 状态走 */
   const targetsRef = useRef(targets)
@@ -305,6 +310,7 @@ export function CommentsDock({ pagePath, action, threads, access, BodyComponent,
         setAttributeIfDifferent(target.element, commentedThreadAttribute, id)
         markedElements.push(target.element)
       }
+      setLayoutVersion((version) => version + 1)
     }
     const scheduleMeasure = () => {
       cancelAnimationFrame(frame)
@@ -435,9 +441,11 @@ export function CommentsDock({ pagePath, action, threads, access, BodyComponent,
     return () => document.removeEventListener('keydown', onKey)
   }, [])
 
+  /** 点正文里的标记或黄条：打开那一串，再点同一处收起（只用 setOpenThread 的函数式更新，事件监听里用首次渲染的这一份也对） */
+  const toggleThread = (threadId: string) => setOpenThread((current) => (current?.id === threadId ? null : { id: threadId, reveal: 'nearest' }))
+
   // 点正文里的标记（被批元素、高亮的字）→ 打开那一串，再点同一处收起；点正文别处收起浮窗
   useEffect(() => {
-    const toggleThread = (threadId: string) => setOpenThread((current) => (current?.id === threadId ? null : { id: threadId, reveal: 'nearest' }))
     const onClick = (event: MouseEvent) => {
       if (!(event.target instanceof Element) || isOwnInterface(event.target)) return
       if (event.target.closest('a, button, input, textarea, select, summary, label')) return
@@ -455,6 +463,22 @@ export function CommentsDock({ pagePath, action, threads, access, BodyComponent,
     document.addEventListener('click', onClick)
     return () => document.removeEventListener('click', onClick)
   }, [])
+
+  // 鼠标停在被批元素上：对应的黄条加深
+  useEffect(() => {
+    const onOver = (event: MouseEvent) => {
+      const marked = event.target instanceof Element ? event.target.closest(`[${commentedElementAttribute}]`) : null
+      const threadId = marked?.getAttribute(commentedThreadAttribute) ?? null
+      setHoveredThreadId((current) => (current === threadId ? current : threadId))
+    }
+    document.addEventListener('mouseover', onOver)
+    return () => document.removeEventListener('mouseover', onOver)
+  }, [])
+
+  const commented = useMemo<CommentedElement[]>(
+    () => [...targets].flatMap(([threadId, target]) => (target.kind === 'element' ? [{ threadId, element: target.element }] : [])),
+    [targets],
+  )
 
   const items = useMemo<InboxItem[]>(
     () =>
@@ -570,6 +594,16 @@ export function CommentsDock({ pagePath, action, threads, access, BodyComponent,
           <CommentIcon name="message" />
           评论
         </button>
+      ) : null}
+      {scope && commented.length > 0 ? (
+        <CommentMarginBars
+          commented={commented}
+          scope={scope}
+          layoutVersion={layoutVersion}
+          openThreadId={openThreadId}
+          hoveredThreadId={hoveredThreadId}
+          onToggleThread={toggleThread}
+        />
       ) : null}
       {openItem && openAnchor && scope ? (
         <FloatingLayer key={openItem.thread.id} anchor={openAnchor} scope={scope} reveal={openThread?.reveal ?? 'nearest'} tone="thread">

@@ -216,7 +216,7 @@ export async function runBaseChecks({ browser, baseUrl, mode, siteDir, feedToken
         return { pass, detail: `未解决时按钮写「${openLabel}」，标了以后写「${resolvedLabel}」、串头 status 行 ${resolvedText.match(/^status: .*$/m)?.[0]}；重新打开后 ${reopenedText.match(/^status: .*$/m)?.[0]}，还有 resolvedBy/At：${/^resolved(By|At):/m.test(reopenedText)}` }
       })
 
-      await check('批注一块（dev）：草稿与这一串浮在那一块正下方、不挤动正文；再点那一块收起浮窗，收件箱不跟着收', async () => {
+      await check('批注一块（dev）：草稿与这一串浮在那一块正下方、不挤动正文；正文栏左边外侧有一道和那一块上下对齐的黄条，打开时加粗；再点那一块收起浮窗，收件箱不跟着收', async () => {
         const commentText = `e2e 批一块 ${runTag}`
         await page.goto(`${baseUrl}/writing/collapse-test`, { waitUntil: 'load' })
         await page.waitForLoadState('networkidle')
@@ -232,16 +232,30 @@ export async function runBaseChecks({ browser, baseUrl, mode, siteDir, feedToken
         const card = page.locator('[data-comments-layer] [data-comment-card]', { hasText: commentText })
         await card.waitFor({ timeout: stepTimeoutMs })
         const blockBottom = await block.evaluate((element) => element.getBoundingClientRect().bottom + window.scrollY)
-        const layerTop = await page.locator('[data-comments-layer]').evaluate((element) => element.getBoundingClientRect().top + window.scrollY)
+        const layerTop = await card.evaluate((element) => element.closest('[data-comments-layer]').getBoundingClientRect().top + window.scrollY)
         const nextTopAfter = await documentTopOf(paragraphs.nth(1))
         const marked = await block.getAttribute('data-commented-element')
+        const threadId = await block.getAttribute('data-comment-thread')
+        const bar = page.locator(`[data-comment-margin-bar="${threadId}"]`)
+        const barFit = await bar.evaluate((element) => {
+          const barRect = element.getBoundingClientRect()
+          const blockRect = document.querySelector(`[data-comment-thread="${element.getAttribute('data-comment-margin-bar')}"]`).getBoundingClientRect()
+          const scopeLeft = document.querySelector('[data-comment-scope]').getBoundingClientRect().left
+          return { topGap: Math.abs(barRect.top - blockRect.top), heightGap: Math.abs(barRect.height - blockRect.height), outside: barRect.right <= scopeLeft, width: barRect.width, active: element.hasAttribute('data-active') }
+        })
+        const blockBackground = await block.evaluate((element) => getComputedStyle(element).backgroundColor)
         await block.click()
         await card.waitFor({ state: 'detached', timeout: stepTimeoutMs })
+        const barActiveAfterClose = await bar.evaluate((element) => element.hasAttribute('data-active'))
         const inboxes = await page.locator('[data-comments-inbox]').count()
         const below = layerTop > blockBottom && layerTop - blockBottom < 24
+        const barAligned = barFit.topGap < 1 && barFit.heightGap < 1 && barFit.outside && barFit.active && !barActiveAfterClose
+        const noFill = blockBackground === 'rgba(0, 0, 0, 0)' || blockBackground === 'transparent'
         return {
-          pass: below && nextTopAfter === nextTopBefore && marked === 'active' && inboxes === 1,
-          detail: `浮窗顶边比那一块底边低 ${Math.round(layerTop - blockBottom)}px；下一段的位置 ${nextTopBefore} → ${nextTopAfter}；那一块标成 ${marked}；再点一下浮窗收起，收件箱 ${inboxes} 个`,
+          pass: below && nextTopAfter === nextTopBefore && marked === 'active' && barAligned && noFill && inboxes === 1,
+          detail:
+            `浮窗顶边比那一块底边低 ${Math.round(layerTop - blockBottom)}px；下一段的位置 ${nextTopBefore} → ${nextTopAfter}；那一块标成 ${marked}、底色 ${blockBackground}；` +
+            `黄条和那一块顶边差 ${barFit.topGap.toFixed(1)}px、高度差 ${barFit.heightGap.toFixed(1)}px、在正文栏外 ${barFit.outside}、宽 ${barFit.width}px、打开时加粗 ${barFit.active}、收起后 ${barActiveAfterClose ? '还加粗' : '变回'}；再点一下浮窗收起，收件箱 ${inboxes} 个`,
         }
       })
     } else {
