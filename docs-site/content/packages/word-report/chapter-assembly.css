@@ -1,0 +1,29 @@
+/*
+ * ChapterAssembly 自己的画面：三张文件卡片一行（容器窄于 680 上下排）、组装结果的两列小表、编号表里的章色小圆点。
+ * 卡片、胶囊、代码行与颜色变量（--dx-*）由 @godcreator/explainer 提供，颜色只取那套变量。
+ */
+.ca-stage { container-type: inline-size; display: grid; gap: 12px; }
+
+.ca-files { display: grid; gap: 12px; }
+@container (min-width: 680px) { .ca-files { grid-template-columns: repeat(3, minmax(0, 1fr)); align-items: start; } }
+
+/* 第 5 步单独组装 b：不读的两张卡片照样画着对照，但调淡 */
+.ca-file[data-dim='dim'] { opacity: .45; }
+
+/* 组装结果卡片里的两列小表 */
+.ca-group + .ca-group { margin-top: 10px; }
+.ca-group-title { font-size: 12px; color: var(--dx-dim); margin-bottom: 2px; }
+.ca-rows { border-collapse: collapse; width: 100%; font-size: 12.5px; }
+.ca-rows td { text-align: left; padding: 4px 10px 4px 0; border-top: 1px solid var(--dx-line); vertical-align: baseline; }
+.ca-rows tr:first-child td { border-top: none; }
+.ca-key { font-family: var(--dx-mono); font-size: 12px; white-space: nowrap; }
+.ca-value { color: var(--dx-fg); word-break: break-word; }
+.ca-rows tr[data-strong='strong'] { font-weight: 600; }
+
+/* 编号表里 id 前的小圆点按章色（a 蓝、b 紫）：data-role 给出 --dx-c */
+.ca-chapter-dot { display: inline-block; width: 8px; height: 8px; border-radius: 9999px; background: var(--dx-c); margin-right: 6px; }
+
+/* 第 5 步的提示原文（灰字）与报错原话（等宽） */
+.ca-note { display: flex; flex-wrap: wrap; align-items: baseline; gap: 8px; margin-top: 10px; }
+.ca-note-text { font-size: 12.5px; color: var(--dx-dim); }
+.ca-note-code { font-family: var(--dx-mono); font-size: 12px; color: var(--dx-dim); word-break: break-all; }

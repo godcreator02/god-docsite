@@ -1,0 +1,116 @@
+---
+title: word-report：报告
+description: JSON 报告文档（docreport 格式）的分章组装：网页、检查、导出三处共用同一个 assembleDocument，整份组装与单独组装一章只差在跨章引用；导出把组装好的数据固定成快照交给本机 Word 引擎，TS 与 Python 两边各验一遍格式
+icon: FileText
+---
+
+import { ChapterAssembly } from './word-report/chapter-assembly'
+
+站点里一份报告是 `reports/<报告 id>/` 下的一组 JSON 文件，网页上整份一页，也能用本机的 Word 导出成 docx 和 pdf，两边读同一份数据。怎么放文件、怎么敲命令在用法页 [写报告](/docsite/reports)；这一页讲包里怎么把几章接成一份、导出时交给 Word 的是什么。三个旧包怎么并成这一个、为什么导出不进 gwb，见轨迹卡[「报告改写成功能包 word-report」](/trajectory/2026-10-15-word-report-package)。
+
+## 报告文档：一棵带 id 的块树
+
+一份文档是 `format: "docreport"`、`schemaVersion: 1` 的 JSON：`metadata`（标题、语言、作者、日期、版本、封面字段），`blocks`（节、段落、列表、图、公式、表格、代码、参考文献标记、摘要、`include`），以及文档级的 `notes`（脚注）与 `references`（参考文献）。凡是带 `id` 的东西 id 在整份报告里唯一；引用、脚注、文献引用都写目标的 id，不写编号；`include` 只能出现在文档的顶层 `blocks` 里。
+
+{/* ref file="../packages/word-report/src/core/types.ts" lines="1-32" hash="ae0ae539e02c" blob="78141a63d830" */}
+
+读 JSON 用包里自己写的解析器，为的是抓重复的键——`JSON.parse` 会悄悄留下后一个。
+
+## 分章组装
+
+`assembleDocument(entry, files, { mode })` 收入口路径与「路径 → 原文或已解析的文档」的表，不碰磁盘；交回组装好的文档，以及编号表 `index`、每个 id 出自哪个文件哪个位置 `sources`、图片的新旧路径 `assets`、读到的文件 `dependencies`、提示 `warnings`。一步一步看例子怎么组装：
+
+<ChapterAssembly />
+
+`include` 的路径相对引入它的那个文件；同一个文件被引入两次、绕回自己、文件不在表里都直接报错；只取入口的 `metadata`，各章的标题与封面字段不进来。
+
+{/* ref file="../packages/word-report/src/core/assemble.ts" lines="37-73" hash="cc676245174b" blob="29a0438670ad" */}
+
+每个带 `id` 的东西登记一次、记下出处，重名就报错；图片路径改成 `assets/<那一章的文档 id>/<文件名>`，两章各有一张 `assets/image.png` 不会撞，只差大小写的名字在 Windows 上会撞、报错。
+
+{/* ref file="../packages/word-report/src/core/assemble.ts" lines="17-35" hash="41a0cd8c1df0" blob="29a0438670ad" */}
+
+编号规则：顶层编号的节依次是 1、2、…，附录是 A、B、…（附录之后不能再有正文章），子节是「上一级.n」；图与编号表格全报告连续编；编号公式按顶层章各自从 1 编，写成「章号-n」。
+
+{/* ref file="../packages/word-report/src/core/assemble.ts" lines="120-154" hash="a39d958827e1" blob="29a0438670ad" */}
+
+解引用：整份组装（`complete`）时目标不在就报错；单独组装（`standalone`）时目标不在、又写了 `externalLabel`，才换成那段文字并记一条提示，没写还是报错；输出里不留 `externalLabel`。
+
+{/* ref file="../packages/word-report/src/core/assemble.ts" lines="175-197" hash="40ef78ce065a" blob="29a0438670ad" */}
+
+## 组装里的另外几条规则
+
+- **参考文献**：各章的 `references` 合成一份，同一个 id 两章写得不一样就报错；参考文献标记只认入口里的那一个，各章里的被收走；入口里没有、又有文献时在末尾自动加一个
+- **脚注与文献的编号**：每条脚注必须正好被引用一次，脚注里不能再套脚注；脚注按第一次引用的先后编号；文献按正文阅读顺序里第一次被引用的先后编号，没被引用的排在最后
+- **公式**：要交给 MathType，LaTeX 只能是非空 ASCII，不带 `$`、`\(`、`\[` 这类定界符，不写 `\tag`、`\label`；`aligned` 只收两列
+- **摘要与表格**：摘要至多一个、必须是第一个顶层块；表格的合并单元格要正好铺满网格、不跨表头
+
+## 三处调用、两种模式
+
+三处都调 `assembleDocument`，差在模式与读文件的方式：
+
+| 调用方 | 读文件 | 模式 | 结果怎么用 |
+| --- | --- | --- | --- |
+| 网页（`/reports` 与 `/reports/<报告 id>`） | 只读 JSON，不读图片 | `complete` | 列表里读不对的报告照样列出、带原话；报告页读不对直接报错 |
+| `report-docx check` | 还解码图片、核对快照 | 每个 `content.json` 都 `standalone` 组装一次；有 `include` 的再 `complete` 组装一次 | 例子里检查 3 份文档、组装 4 次：入口两次，a、b 各一次；b 单独组装记一条提示 |
+| `report-docx export` | 同 check | `complete` | 组装结果写进快照，交给 Word 引擎 |
+
+`check` 把站点 `reports/` 下每一个 `content.json`（报告与各章）都当一份文档查，所以每一章自己也要能单独组装：这就是「单独组装一章时，指向别章的引用要写 `externalLabel`」的来历。
+
+{/* ref file="../packages/word-report/src/node/check.ts" lines="45-59" hash="ae0b44bcbcf7" blob="4f89b57d9c32" */}
+
+## 读文件：网页现读，检查与导出取快照
+
+网页每次打开都从文件现读、现组装，不读图片，只挡住跑出站点目录的路径。检查与导出用 `readReport`：读完所有 JSON 与图片后，每张图真解码一遍（扩展名与编码要对上），每个文件记下 sha256；最后把每个文件再读一遍，哈希不同就报错让人重试，导出过程中改了文件不会混进这一次。整份快照的哈希就是这份报告内容的指纹。
+
+{/* ref file="../packages/word-report/src/node/read-report.ts" lines="57-84" hash="da40c0e9ef2f" blob="1283dd859c85" */}
+
+## 导出：交给 Word 的只有组装好的数据
+
+包里的 `reportExport` 不要网站、不要 gwb 也能用：`action: "start"` 开始一次导出，`action: "status"` 只看状态不启动 Word；命令行 `report-docx export` 开始后不断问状态，等同一个任务做完才退出。
+
+{/* ref file="../packages/word-report/src/node/export.ts" lines="11-33" hash="0e9f40c27dd0" blob="ab2479c83f5b" */}
+
+一次导出：
+
+1. 组装并取快照，读报告目录旁的 `layout.json`（只给 Word 用的版式）
+2. 算指纹：快照指纹、引擎文件与本包构建产物的哈希、`layout.json`、模式，任何一样变了旧结果就算过期（`status` 里 `stale: true`）
+3. 拿锁：引擎目录 `out/.web-export.lock`，一个引擎同一时间只导出一份，几个站点、几个开发服务共用这一把；锁在而进程已退出时不自动清，报错让人确认 Word 实例已结束后再删
+4. 写快照目录 `out/<任务 id>/`：`input/content.json` 是组装好的文档，`input/assets/` 是改过名的图片，另存原始 JSON 与文件哈希；启动 Python 前再核一次引擎指纹
+5. 启动 `.venv/Scripts/python.exe -m docreport.web_runner … --data-only`：Python 先把锁从「starting」接过来改成「rendering」并记下自己的进程号，跑完自己释放；`--data-only` 时只认组装好的数据，不执行报告目录里的 `report.py`
+6. 收尾：引擎写出的核对记录状态是 `passed_automation_visual_review_pending`、docx 与 pdf 的哈希和记录对得上，才把任务标成 `ready`；逐页显示还要人看
+
+{/* ref file="../packages/word-report/src/node/export.ts" lines="156-174" hash="5ac53c8f9b56" blob="ab2479c83f5b" */}
+{/* ref file="../packages/word-report/src/node/export.ts" lines="176-212" hash="986edd3d15b9" blob="ab2479c83f5b" */}
+{/* ref file="../packages/word-report/engine/src/docreport/web_runner.py" lines="15-41" hash="08389797c252" blob="6a2778d6822b" */}
+
+**已知约束：两份 Schema 靠人工保持一致**。TS 那份是 `src/core/schema.ts`，引擎那份是 `engine/schemas/report-content.schema.json`；TS 那份只多两项：顶层块可以是 `include`、引用可以带 `externalLabel`，组装之后这两项都不在了，所以没组装的文档过不了引擎的校验。仓里没有测试比对两份，改报告格式时两份一起改，并保持「只差这两项」。引擎在 Python 里还把重复 id、引用、脚注、文献、公式、表格网格、节的编号层级、图片路径再查一遍，这些规则也要和 `assemble.ts` 一起改。
+
+{/* ref file="../packages/word-report/engine/src/docreport/content.py" lines="77-83" hash="6c98768ded6d" blob="a4478c548365" */}
+{/* ref file="../packages/word-report/src/core/schema.ts" lines="27-37" hash="4b3eed8b1d03" blob="dbd05f87d4bc" */}
+{/* ref file="../packages/word-report/src/core/schema.ts" lines="177-179" hash="7363160e81bd" blob="dbd05f87d4bc" */}
+
+结果放在引擎目录的 `out/` 下，不放进站点。
+
+## 站点上
+
+建站器把 `template/` 下的接线文件写进站点的 `app/features/word-report/`：三条路由 `/reports`（列表）、`/reports/:report`（整份一页）、`/reports/:report/assets/*`（图片）；另有每次请求现组装站点信息的 `site.server.ts` 与侧栏横排的「报告」入口。
+
+{/* ref file="../packages/word-report/template/routes.ts" hash="5f1543b1a98b" blob="65e784d32088" */}
+
+图片只交这份报告组装结果里有的：地址是组装后的路径 `assets/<文档 id>/<文件名>`，不是任意文件。每个块的 id 原样写到页面元素上，留给评论按元素 id 定位。
+
+## 分层
+
+| 层 | 导出 | 做什么 |
+| --- | --- | --- |
+| `core/` | `@godcreator/word-report` | 报告文档的类型、Schema 与校验、严格 JSON 解析、分章组装；不碰磁盘、不 import React |
+| `node/` | `@godcreator/word-report/node`，命令行 `report-docx` | 读报告目录、取快照、检查、导出（指纹、锁、启动引擎）、命令行 |
+| `site/` | `@godcreator/word-report/site`、`@godcreator/word-report/site/server` | 报告列表页与报告页、报告的显示组件；服务端的三个 loader |
+| `engine/` | 随包发出的文件（不是 JS 出口） | 驱动本机 Word 与 MathType 的 Python 引擎、`.dotx` 模板、引擎那份 Schema |
+
+## 谁在用它
+
+- 站点：`template/` 下的接线文件与三个路由文件（调 `ReportListPage`、`ReportDocumentPage` 与三个 loader）；由 gwb-docsite 的 `docsite.feature.add` 经建站器装进站点，协作站建站时不默认带
+- 测试站 `full-test/site` 装着它，e2e 的 report 组在它上面查列表、整份一页、目录、公式、图片与 404
+- 两个 gwb 插件都不 import 这个包；导出只走命令行
