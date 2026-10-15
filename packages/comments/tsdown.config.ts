@@ -1,12 +1,13 @@
 import { defineConfig } from "tsdown";
 
-// 四个入口对应 package.json 的四个出口：site 进浏览器，只从 core 取东西；node/ 只经 site/server 与 node 出口出去
+// 四个入口对应 package.json 的四个出口：site 进浏览器，只从 core 取东西；node/ 只经 site/server 与 node 出口出去。
+// 服务端入口的产物名以 .server.mjs 结尾，React Router 的 .server 检查才认得出它
 export default defineConfig({
   entry: {
     "core/index": "src/core/index.ts",
     "node/index": "src/node/index.ts",
     "site/index": "src/site/index.ts",
-    "site/server": "src/site/index.server.ts",
+    "site/index.server": "src/site/index.server.ts",
   },
   format: ["esm"],
   platform: "node",
