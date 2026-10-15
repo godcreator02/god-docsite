@@ -41,6 +41,13 @@ export type SiteHostOptions = {
   ports: SitePortMemory
 }
 
+/** 启动前的核对：是站点目录、建在平台包上、dev 脚本没写死端口；不过就抛出原因 */
+function checkSiteBeforeLaunch(dir: string): void {
+  if (!existsSync(path.join(dir, 'package.json'))) throw new DocsiteRejected(`${dir} 下没有 package.json，不是站点目录`)
+  checkPlatformInstalled(dir)
+  checkDevScript(dir)
+}
+
 /**
  * 托管着的站点开发服务，按站点目录记。start / stop 幂等：已在运行就回现状，重复的 start 复用正在启动的那一次；
  * 进程退出了只标 failed、记下原因，不自动重启。开发服务是 gwb 的子进程，插件卸载时全部停掉
@@ -96,9 +103,13 @@ export class SiteHost {
 
   private async launch(site: HostedSite): Promise<SiteStarted> {
     if (this.disposed) throw new DocsiteRejected('插件正在卸载，没有启动站点')
-    if (!existsSync(path.join(site.dir, 'package.json'))) throw new DocsiteRejected(`${site.dir} 下没有 package.json，不是站点目录`)
-    checkPlatformInstalled(site.dir)
-    checkDevScript(site.dir)
+    try {
+      checkSiteBeforeLaunch(site.dir)
+    } catch (error) {
+      site.error = messageOf(error)
+      this.changed(site)
+      throw error
+    }
     site.error = null
     let server: DevServer
     try {

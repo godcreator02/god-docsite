@@ -13,7 +13,7 @@ description: 说明书 collab 的附件 references/collab-repo.md 的正本：�
 - **任务与模块**：用 `collab.task.*`、`collab.module.*` 写，模块只有截止日、没有开始日；任务的 `page` 写相关页面的地址，如 `/plan/control-plan`。删任务、模块前把标题给人先过目
 - **评论**：`docsite.comments {"dir":"<协作仓>/site"}` 找，属于某一页的看 `page` 与 `quote`，在页面源文件里搜 `quote`；没有 `quote` 的说的是整页，没有 `page` 的不属于任何页面。要回答的写好答复给人先过目，同意了再 `docsite.comment.reply`（要站点在运行）。事情办完了，问人要不要 `docsite.comment.resolve` 把这串标为已解决
 - **项目负责人改文件不受限**：身份是项目负责人（Gitea 上协作仓的协作者）时，`collab/`、`site/` 下的任何文件都可以直接改，别人的记录也一样，改完照常 `collab.submit`；改之前把改哪些记录、怎么改给人先过目
-- **只有项目负责人能改的**：`.gitea/`、`site/people.json`（每个人只改自己那一项的 `codes` 不算）、`site/` 根下的配置文件、`site/package.json` 里 `@godcreator/` 下的包（加、删、改版本都算）、`scripts` 这类不是依赖的字段和写成网址或路径的依赖。不是负责人的提交被拦下时，把这几处报给人，交给项目负责人
+- **只有项目负责人能改的**：`.gitea/` 与 `.github/` 下的工作流、`site/people.json`（每个人只改自己那一项的 `codes` 不算）、`site/` 根下的 `*.config.*`、`.postcssrc*`、`.npmrc` 与 `pnpm-workspace.yaml`、`site/package.json` 里 `@godcreator/` 下的包（加、删、改版本都算）、`scripts` 这类不是依赖的字段和写成网址或路径的依赖。不是负责人的提交被拦下时，把这几处报给人，交给项目负责人
 - **站点**：由 gwb-docsite 托管（项目加进列表时登记，移出时撤掉），停了用 `docsite.site.start {"dir":"<协作仓>/site"}` 启动。本 home 的身份码在 `site/people.json` 里才有身份、能写评论；没能启动时看 `collab.projects` 那一项的 `site.error`。`site/app/` 与 `site/` 根下的配置文件是 `collab.site.init` 建站时照平台与功能包的模板写出的，平时不改，升级站点时才对照模板改（见 `references/organization.md` 的「升级站点」），`app/` 里不放自己的文件；首页 `site/app/routes/home.tsx` 是协作包的项目首页，也是建站时写出的
 
 ## 写日志

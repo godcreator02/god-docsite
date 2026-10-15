@@ -29,7 +29,7 @@ export const refusalMessages = [
  * 五步各走成什么样（state：pass 过了往下走，stop 在这一步结束，skip 没走到；stopTone 区分回现状与拒绝或失败）、
  * 第 ④ 步走到时启动的命令（command）、交回（result 的 error 为 true 是抛错）、之后 docsite.site.list 里这个站的样子（after）。
  */
-/* ref file="../plugins/docsite/tests/site-host.test.ts" lines="182-196" hash="ea0825f3caab" blob="811d1530d81d" */
+/* ref file="../plugins/docsite/tests/site-host.test.ts" lines="186-200" hash="ea0825f3caab" blob="708e0d04e205" */
 export const cases = [
   {
     id: 'first',
@@ -100,13 +100,13 @@ export const cases = [
     result: { error: false, value: '{ url: "http://127.0.0.1:14001", pid: 1, alreadyRunning: true }' },
     after: [{ state: 'running', url: 'http://127.0.0.1:14001', error: null, note: '只启动过一次' }],
   },
-  /* ref file="../plugins/docsite/tests/site-host.test.ts" lines="149-158" hash="c97dd84d015e" blob="811d1530d81d" */
-  /* ref file="../plugins/docsite/tests/site-host.test.ts" lines="198-204" hash="fc57662a4188" blob="811d1530d81d" */
+  /* ref file="../plugins/docsite/tests/site-host.test.ts" lines="149-162" hash="31cb59cb7d19" blob="708e0d04e205" */
+  /* ref file="../plugins/docsite/tests/site-host.test.ts" lines="202-211" hash="0bed967545fc" blob="708e0d04e205" */
   /* ref file="../plugins/docsite/src/site-contract.ts" hash="02d02ff9f5cd" blob="f728727e9c4f" */
   {
     id: 'refused',
     label: '启动前核对不过',
-    text: '不是站点目录、没装平台包、建在旧包 docsite-kit 上、dev 脚本写死了 --port，都在启动之前拒绝，不启动进程。这种拒绝不改状态，站点照旧是 stopped。',
+    text: '不是站点目录、没装平台包、建在旧包 docsite-kit 上、dev 脚本写死了 --port，都在启动之前拒绝，不启动进程。状态转成 failed，error 记下拒绝的原话，docsite.site.list 里看得到为什么没起来。',
     portsBefore: { port: null, occupancy: 'none' },
     portsAfter: { port: null, note: '没记过' },
     steps: [
@@ -119,7 +119,7 @@ export const cases = [
     command: null,
     refusals: refusalMessages,
     result: { error: true, value: '四种拒绝各抛一条原话' },
-    after: [{ state: 'stopped', url: null, error: null }],
+    after: [{ state: 'failed', url: null, error: '拒绝的那条原话' }],
   },
   /* ref file="../plugins/docsite/tests/site-host.test.ts" lines="140-147" hash="2ffe71740b6f" blob="811d1530d81d" */
   {

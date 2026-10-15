@@ -146,14 +146,18 @@ describe('站点状态机', () => {
     expect(host.statusOf(siteDir)).toMatchObject({ state: 'failed', error: '开发服务 60 秒内没有报出地址，已停掉' })
   })
 
-  it('不是站点目录、没装平台包、建在旧地基上，start 直接拒绝且不 spawn', async () => {
+  it('不是站点目录、没装平台包、建在旧地基上，start 直接拒绝且不 spawn；拒绝的原因记成 failed', async () => {
     const { launched, launch } = fakeServers()
     const { host } = hostWith(launch)
     await expect(host.start(siteDir)).rejects.toThrow('不是站点目录')
+    expect(host.statusOf(siteDir).state).toBe('failed')
+    expect(host.statusOf(siteDir).error).toContain('不是站点目录')
     await writeFile(path.join(siteDir, 'package.json'), '{"scripts":{"dev":"react-router dev --host 127.0.0.1 --strictPort"}}')
     await expect(host.start(siteDir)).rejects.toThrow('node_modules 里没有 @godcreator/god-docsite')
     await installPackage('@godcreator/docsite-kit', '0.3.0')
     await expect(host.start(siteDir)).rejects.toThrow('建在旧地基 @godcreator/docsite-kit 上')
+    expect(host.statusOf(siteDir)).toMatchObject({ state: 'failed', url: null })
+    expect(host.statusOf(siteDir).error).toContain('建在旧地基 @godcreator/docsite-kit 上')
     expect(launched).toEqual([])
   })
 
@@ -199,7 +203,10 @@ describe('站点状态机', () => {
     await siteWithSupportedKit()
     await writeFile(path.join(siteDir, 'package.json'), '{"scripts":{"dev":"react-router dev --port 4430"}}')
     const { launched, launch } = fakeServers()
-    await expect(hostWith(launch).host.start(siteDir)).rejects.toThrow('scripts.dev 写死了 --port')
+    const { host } = hostWith(launch)
+    await expect(host.start(siteDir)).rejects.toThrow('scripts.dev 写死了 --port')
+    expect(host.statusOf(siteDir).state).toBe('failed')
+    expect(host.statusOf(siteDir).error).toContain('scripts.dev 写死了 --port')
     expect(launched).toEqual([])
   })
 

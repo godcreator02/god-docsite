@@ -94,9 +94,9 @@ gwb-docsite 是 gwb 工作台和[平台包](/packages/god-docsite) `@godcreator/
 
 <StartCases />
 
-启动前核对不过时直接抛错，不改状态：这个站照旧是 `stopped`，`error` 不记原因；只有开发服务没能启动或启动后退出才是 `failed`。`start` 的复用、核对、定端口、启动、记端口、退出转 failed，完整算法在一段里：
+启动前核对不过时不启动进程、直接抛错，状态转成 `failed`，`error` 记下拒绝的原话；开发服务没能启动、启动后退出也是 `failed`。`start` 的复用、核对、定端口、启动、记端口、退出转 failed，完整算法在一段里：
 
-{/* ref file="../plugins/docsite/src/site-host.ts" lines="85-130" hash="2addf797f83b" blob="455a3efb4dce" */}
+{/* ref file="../plugins/docsite/src/site-host.ts" lines="92-140" hash="e0ac8f2d3340" blob="3ce275675480" */}
 
 ## 推送与评论：经运行中的站点
 
