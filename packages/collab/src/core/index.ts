@@ -44,3 +44,4 @@ export type {
 } from './notifications/notifications.js'
 export { notificationOriginalTextOf, notificationSentenceOf } from './notifications/notification-text.js'
 export { checkedNotificationsOf } from './notifications/notification-validation.js'
+export { mergeWorkflowPathInRepo, renderMergeWorkflow } from './merge-workflow.js'

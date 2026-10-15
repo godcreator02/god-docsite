@@ -1,7 +1,7 @@
-import { existsSync, mkdtempSync, rmSync } from 'node:fs'
+import { existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import path from 'node:path'
-import type { SiteFeed } from '@godcreator/collab'
+import { renderMergeWorkflow, type SiteFeed } from '@godcreator/collab'
 import { describe, expect, it, vi } from 'vitest'
 import type { Project } from '../../src/project/project.js'
 import { CollabSites, type DocsiteHosting } from '../../src/site-process/collab-sites.js'
@@ -10,6 +10,8 @@ const repo = path.resolve('/projects/hybrid-mmc/collab')
 const siteDir = path.join(repo, 'site')
 const project: Project = { repo, collabDir: path.join(repo, 'collab'), siteDir, person: 'bob' }
 const feed: SiteFeed = { notifications: [], projectLeads: ['admin'] }
+/** collab.site.init 交给 sites.init 的那份工作流：打包时带进来的模板写成本插件的版本 */
+const mergeWorkflow = renderMergeWorkflow(__COLLAB_MERGE_WORKFLOW_TEMPLATE__, __COLLAB_VERSION__)
 
 /** 假的 gwb-docsite：记下每次调用，状态照给定的回 */
 function fakeDocsite(state: 'running' | 'stopped' | 'failed' = 'stopped', url: string | null = null, expectedUrl: string | null = 'http://127.0.0.1:4331') {
@@ -121,17 +123,41 @@ describe('项目站点交给 gwb-docsite', () => {
     try {
       const { docsite, calls } = fakeDocsite()
       const { sites } = sitesWith(docsite)
-      expect(await sites.init(newRepo, { featureRange: '^0.31.0', port: 4400, title: '新项目', listed: false })).toEqual({
+      expect(await sites.init(newRepo, { featureRange: '^0.31.0', mergeWorkflow, port: 4400, title: '新项目', listed: false })).toEqual({
         dir: newSiteDir,
         platformDependencies: { '@godcreator/god-docsite': '^0.1.0' },
         feature: { feature: 'collab', specifier: '^0.31.0', addedFiles: ['routes.ts'], keptFiles: [], features: ['collab'] },
+        mergeWorkflow: { path: '.gitea/workflows/collab-auto-merge.yaml', written: true },
       })
       expect(calls).toEqual([`init ${newSiteDir} {"port":4400,"title":"新项目"}`, `addFeature ${newSiteDir} @godcreator/collab@^0.31.0`])
-      await sites.init(newRepo, { featureRange: '^0.31.0', port: 4400, title: '新项目', listed: true })
+      await sites.init(newRepo, { featureRange: '^0.31.0', mergeWorkflow, port: 4400, title: '新项目', listed: true })
       expect(calls.slice(2, 5)).toEqual([`init ${newSiteDir} {"port":4400,"title":"新项目"}`, `addFeature ${newSiteDir} @godcreator/collab@^0.31.0`, `start ${newSiteDir}`])
     } finally {
       rmSync(newRepo, { recursive: true, force: true })
     }
+  })
+
+  it('collab.site.init：仓里没有自动合并工作流就写进 .gitea/workflows/，已有的不覆盖', async () => {
+    const newRepo = mkdtempSync(path.join(tmpdir(), 'collab-site-init-'))
+    const workflowFile = path.join(newRepo, '.gitea', 'workflows', 'collab-auto-merge.yaml')
+    try {
+      const { docsite } = fakeDocsite()
+      const { sites } = sitesWith(docsite)
+      const first = await sites.init(newRepo, { featureRange: '^0.31.0', mergeWorkflow, port: 4400, title: '新项目', listed: false })
+      expect(first.mergeWorkflow).toEqual({ path: '.gitea/workflows/collab-auto-merge.yaml', written: true })
+      expect(readFileSync(workflowFile, 'utf8')).toBe(mergeWorkflow)
+      writeFileSync(workflowFile, "env:\n  MERGE_CHECK_RANGE: '^0.29.0'\n")
+      const second = await sites.init(newRepo, { featureRange: '^0.31.0', mergeWorkflow, port: 4400, title: '新项目', listed: false })
+      expect(second.mergeWorkflow).toEqual({ path: '.gitea/workflows/collab-auto-merge.yaml', written: false })
+      expect(readFileSync(workflowFile, 'utf8')).toBe("env:\n  MERGE_CHECK_RANGE: '^0.29.0'\n")
+    } finally {
+      rmSync(newRepo, { recursive: true, force: true })
+    }
+  })
+
+  it('打包时带进来的工作流模板写成本插件那一版的范围', () => {
+    expect(mergeWorkflow).toContain("MERGE_CHECK_RANGE: '^0.0.0-test'")
+    expect(mergeWorkflow).not.toContain('{{version}}')
   })
 
   it('collab.site.init：加协作功能（gwb-docsite 会起服务）之前，仓根的 collab/ 与站点的 journal/ 已经建好', async () => {
@@ -146,7 +172,7 @@ describe('项目站点交给 gwb-docsite', () => {
           return docsite.addFeature(dir, options)
         },
       }
-      await sitesWith(checking).sites.init(newRepo, { featureRange: '^0.31.0', port: 4400, title: '新项目', listed: false })
+      await sitesWith(checking).sites.init(newRepo, { featureRange: '^0.31.0', mergeWorkflow, port: 4400, title: '新项目', listed: false })
       expect(existedWhenAdding).toEqual([true, true])
     } finally {
       rmSync(newRepo, { recursive: true, force: true })

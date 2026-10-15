@@ -1,0 +1,32 @@
+---
+born-at: 2026-10-15T18:00
+type: choice
+parent: [2026-09-03-god-live-doc]
+label: collab.site.init 顺带写出自动合并工作流
+domain: 协作流程
+---
+
+## 背景
+
+自动合并工作流模板 `templates/collab-auto-merge.yaml` 的 `MERGE_CHECK_RANGE` 写成占位 `{{version}}`，却没有代码替换它：
+建项目的清单要负责人手动把模板放进 `.gitea/workflows/`、手动换成版本范围，漏换了执行器就装不上检查工具。
+
+pivots-from:: [执行器合并，插件自动同步](2026-09-30-runner-merges-plugin-auto-syncs.md)
+
+## 结论与边界
+
+`collab.site.init` 建完基础站后，仓里还没有 `.gitea/workflows/collab-auto-merge.yaml` 就写出来，`{{version}}` 换成
+`^<gwb-collab 打包时带的 @godcreator/collab 版本>`，和 `site/package.json` 里功能包的范围同一版；仓里已经有就不动，回执 `mergeWorkflow.written` 为 `false`。
+替换由 collab 包的 `renderMergeWorkflow` 做：模板里没有 `{{version}}`、换完还剩前面不带 `$` 的 `{{…}}`，都报错。
+模板原文和版本一样在 gwb-collab 打包时经 esbuild 的 `define` 带进产物（`__COLLAB_MERGE_WORKFLOW_TEMPLATE__`），collab 包整个打包进插件，`templates/` 不随插件发出去。
+之后升检查工具的版本仍是负责人改工作流里那一行。
+
+## 依据
+
+collab 包的测试用真模板渲染：`MERGE_CHECK_RANGE` 成了 `'^1.2.3'`，`${{ secrets.COLLAB_BOT_TOKEN }}` 原样留着，行数不变；缺占位、多出认不出的占位都报错。
+gwb-collab 的测试：`sites.init` 在仓里没有工作流时写出、已有时不覆盖；用打包常量渲染出的工作流是 `'^0.0.0-test'`。`pnpm build` 后产物里带着模板原文。
+
+## 否掉的候选
+
+- 发版时把模板里的占位换掉：模板跟着 collab 包发版，换成的是 collab 包自己的版本，和插件写进站点的那一版可能不同；本仓里的模板也就不再是模板
+- 已有工作流时拒绝建站：先放了工作流、再建站点的协作仓会被挡住，而工作流本来就是负责人管的文件，覆盖它反而会改掉负责人选的版本

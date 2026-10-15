@@ -38,7 +38,7 @@
 
 项目负责人是协作仓在 Gitea 上的协作者，改协作仓也走提交审核，执行器查到作者是负责人就放行。
 
-- **建站点**：新建项目时协作仓里还没有 `site/`，问人站名与开发端口，调 `collab.site.init {repo, port, title}`：gwb-docsite 照平台模板建出 `site/`、装依赖，再加协作功能包 `@godcreator/collab`（范围是 gwb-collab 打包时带的那一版）。`site/` 要不存在或是空目录，已有站点直接拒绝。它只写文件，和工作流文件 `.gitea/workflows/collab-auto-merge.yaml`（照 `@godcreator/collab` 包的 `templates/collab-auto-merge.yaml` 放，把 `MERGE_CHECK_RANGE` 的 `{{version}}` 换成要用的版本范围）在同一个提交里推到 main（这时 main 还没配保护）
+- **建站点**：新建项目时协作仓里还没有 `site/`，问人站名与开发端口，调 `collab.site.init {repo, port, title}`：gwb-docsite 照平台模板建出 `site/`、装依赖，再加协作功能包 `@godcreator/collab`（范围是 gwb-collab 打包时带的那一版）；仓里还没有 `.gitea/workflows/collab-auto-merge.yaml` 就照 `@godcreator/collab` 的模板写出来，`MERGE_CHECK_RANGE` 写成同一版的范围，已有的不动。`site/` 要不存在或是空目录，已有站点直接拒绝。它只写文件，站点与工作流在同一个提交里推到 main（这时 main 还没配保护）
 - **加人**：加进 `members` 团队，再在 `site/people.json` 里加一项（见「加入项目」第 1 步），提交审核
 - **换负责人、加共同负责人**：`collab.repo.setup`，见 `references/other-repos.md` 的「配仓」
 - **升级站点**：没有升级命令，`collab.site.init` 只建新站。先看协作仓工作区里有没有别人还没提交审核的改动，问人升到哪一版，`collab.site.stop {repo}` 后：
