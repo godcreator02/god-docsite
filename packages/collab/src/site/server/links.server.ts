@@ -1,7 +1,6 @@
 import { createReadStream, existsSync } from 'node:fs'
 import { Readable } from 'node:stream'
 import { authorizeWrite, WriteAccessError } from '@godcreator/identity'
-import { sitePeople } from '@godcreator/identity/node'
 import { data } from 'react-router'
 import { dueStateOf, moduleColorSlotsOf } from '../../core/modules.js'
 import type { RepoLinkCheck } from '../../core/repo-links.js'
@@ -79,7 +78,7 @@ async function openableTarget(projectDir: string, target: string): Promise<void>
  */
 export async function repoLinkAction({ request }: CollabRouteArgs, site: CollabSite) {
   try {
-    authorizeWrite(request, { identity: site.identity(), people: sitePeople(site.siteDir), origin: site.trustedOrigin })
+    authorizeWrite(request, { identity: site.identity(), people: site.people(), origin: site.trustedOrigin })
     const target = targetOf(await request.formData())
     const projectDir = projectDirOfSite(site.siteDir)
     await openableTarget(projectDir, target)

@@ -12,13 +12,17 @@
       "types": "./dist/node/index.d.mts",
       "default": "./dist/node/index.mjs"
     },
+    "./mdx": {
+      "types": "./dist/mdx/index.d.mts",
+      "default": "./dist/mdx/index.mjs"
+    },
     "./site": {
       "types": "./dist/site/index.d.mts",
       "default": "./dist/site/index.mjs"
     },
     "./site/server": {
-      "types": "./dist/site/server.d.mts",
-      "default": "./dist/site/server.mjs"
+      "types": "./dist/site/index.server.d.mts",
+      "default": "./dist/site/index.server.mjs"
     },
     "./styles.css": "./styles.css"
   },
@@ -28,6 +32,7 @@
   "files": [
     "dist",
     "styles.css",
+    "template",
     "templates"
   ],
   "repository": {
@@ -39,9 +44,9 @@
   },
   "scripts": {
     "build": "tsdown",
-    "typecheck": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json && tsc -p test/template-site/tsconfig.json",
     "test": "vitest run",
-    "check": "tsc -p tsconfig.json && vitest run && pnpm lint",
+    "check": "pnpm typecheck && vitest run && pnpm lint",
     "lint": "oxlint . --deny-warnings"
   },
   "dependencies": {
@@ -76,9 +81,14 @@
   },
   "devDependencies": {
     "@fumadocs/base-ui": "catalog:",
+    "@godcreator/god-docsite": "workspace:^",
+    "@react-router/dev": "catalog:",
+    "@types/mdx": "catalog:",
     "@types/node": "catalog:",
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:",
+    "fumadocs-core": "catalog:",
+    "fumadocs-mdx": "catalog:",
     "jsdom": "catalog:",
     "react": "catalog:",
     "react-dom": "catalog:",

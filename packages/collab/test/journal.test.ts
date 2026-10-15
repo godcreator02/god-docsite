@@ -3,7 +3,7 @@ import { tmpdir } from 'node:os'
 import path from 'node:path'
 import { describe, expect, it } from 'vitest'
 import { journalDatesOf, journalProblemsOf, journalSourcesOf } from '../src/node/journal-files.js'
-import { isRealDate } from '../src/core/journal.js'
+import { isRealDate, journalFileGlob, journalFilePattern } from '../src/core/journal.js'
 import { journalMentionsOf } from '../src/core/journal-mentions.js'
 import { plainLinesOf } from '../src/core/plain-lines.js'
 import { journalUrlOf } from '../src/core/layout.js'
@@ -24,6 +24,12 @@ describe('日期与日志页的地址', () => {
     expect(isRealDate('2026-02-29')).toBe(false)
     expect(isRealDate('2026-13-01')).toBe(false)
     expect(isRealDate('2026-1-1')).toBe(false)
+  })
+
+  it('日志文件的 glob 与正则收的是同一批文件名：只收 journal/ 顶层的 YYYY-MM-DD.mdx', () => {
+    const names = ['2026-10-11.mdx', '2026-10-11.md', 'notes.mdx', '2026-1-1.mdx', 'sub/2026-10-11.mdx', '_2026-10-11.mdx']
+    expect(names.filter((name) => path.posix.matchesGlob(name, journalFileGlob))).toEqual(names.filter((name) => journalFilePattern.test(name)))
+    expect(names.filter((name) => path.posix.matchesGlob(name, journalFileGlob))).toEqual(['2026-10-11.mdx'])
   })
 
   it('某一天的日志页在日历下面', () => {

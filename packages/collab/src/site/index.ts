@@ -13,6 +13,7 @@ export type {
   WriteResult,
 } from './page-data.js'
 export { recordIntents, type RecordIntent } from './record-intents.js'
+export { collabLayoutData, type CollabLayoutSite } from './layout-data.js'
 export { TasksPage, TasksView } from './tasks/tasks-page.js'
 export { RecordPage, RecordView } from './record/record-page.js'
 export { CalendarPage, CalendarView } from './calendar/calendar-page.js'
@@ -22,5 +23,4 @@ export { CollabViewerProvider } from './shared/viewer.js'
 export type { CommentBodyComponent } from './shared/page-comments.js'
 export { JournalLink, RecordLink } from './links/record-link.js'
 export { RepoLink } from './links/repo-link.js'
-export { remarkCollabLinks } from './links/remark-collab-links.js'
 export { collabMdxComponents } from './links/mdx-components.js'

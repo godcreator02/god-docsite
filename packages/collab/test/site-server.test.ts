@@ -7,9 +7,9 @@ import { beforeEach, describe, expect, it } from 'vitest'
 import { notificationOf } from '../src/core/notifications/notifications.js'
 import type { SiteFeed } from '../src/core/notifications/site-feed.js'
 import type { CollabSite } from '../src/site/collab-site.js'
+import { collabLayoutData } from '../src/site/layout-data.js'
 import {
   calendarLoader,
-  collabLayoutData,
   commentAction,
   journalLoader,
   recordAction,
@@ -43,13 +43,15 @@ const recordFiles = () => readdirSync(path.join(repo, 'collab', 'records')).sort
 
 function siteAs(code: string | undefined, overrides: Partial<CollabSite> = {}): CollabSite {
   const siteDir = path.join(repo, 'site')
+  const people = () => parsePeople(JSON.parse(readFileSync(path.join(siteDir, 'people.json'), 'utf8')))
   return {
     siteName: '测试站',
     siteDir,
     repoDir: repo,
     commentsDir: path.join(repo, 'elsewhere', 'site-comments'),
     trustedOrigin,
-    identity: () => identityOf(parsePeople(JSON.parse(readFileSync(path.join(siteDir, 'people.json'), 'utf8'))), code),
+    people,
+    identity: () => identityOf(people(), code),
     pages: () => [{ url: '/notes', title: '笔记' }],
     feed: () => feed,
     ...overrides,

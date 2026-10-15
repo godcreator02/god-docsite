@@ -2,7 +2,7 @@ import remarkMdx from 'remark-mdx'
 import remarkParse from 'remark-parse'
 import { unified } from 'unified'
 import { describe, expect, it } from 'vitest'
-import { remarkCollabLinks } from '../src/site/links/remark-collab-links.js'
+import { remarkCollabLinks } from '../src/mdx/remark-collab-links.js'
 
 type Node = { type: string; name?: string; url?: string; value?: string; attributes?: Array<{ name: string; value: string }>; children?: Node[] }
 

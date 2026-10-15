@@ -42,8 +42,8 @@ export async function changedFilesBetween(repo: string, base: string, head: stri
   return (await git(repo, ['diff', '--name-only', '-z', base, head])).split('\0').filter((file) => file !== '')
 }
 
-/** 站点依赖里写着功能包的那一项：它决定每个人电脑上运行的网站代码，也决定站点协议号对不对得上插件 */
-const frameworkPackage = '@godcreator/collab'
+/** 站点依赖里本仓发的包（平台、身份、评论、协作等）：它们决定每个人电脑上运行的网站代码，也决定站点和插件之间的约定对不对得上 */
+const isOwnPackage = (name: string) => name.startsWith('@godcreator/')
 
 const dependencySections = ['dependencies', 'devDependencies'] as const
 
@@ -86,7 +86,7 @@ function sectionOf(packageJson: Record<string, unknown>, section: string): Recor
 
 /**
  * site/package.json 里只有负责人能改的那几处：依赖两段以外的键（scripts 等，插件在每个人电脑上运行 pnpm dev）、
- * 功能包那一项、写成网址或本地路径的依赖。加库、升级库、删库放开。文件新建、删掉或读不懂时整个算
+ * @godcreator/ 下的包（加、删、改版本都算）、写成网址或本地路径的依赖。别的库加、升级、删放开。文件新建、删掉或读不懂时整个算
  */
 async function packageJsonChanges(repo: string, base: string, head: string, file: string): Promise<string[]> {
   const [before, after] = await Promise.all([packageJsonAt(repo, base, file), packageJsonAt(repo, head, file)])
@@ -99,7 +99,10 @@ async function packageJsonChanges(repo: string, base: string, head: string, file
   }
   for (const section of dependencySections) {
     const [old, now] = [sectionOf(before, section), sectionOf(after, section)]
-    if (old[frameworkPackage] !== now[frameworkPackage]) changes.push(`${file} 里 ${frameworkPackage} 的版本`)
+    const ownPackages = [...new Set([...Object.keys(old), ...Object.keys(now)])].filter(isOwnPackage).sort()
+    for (const name of ownPackages) {
+      if (old[name] !== now[name]) changes.push(`${file} 里 ${name} 的版本`)
+    }
     for (const [name, spec] of Object.entries(now)) {
       if (old[name] !== spec && !isVersionRange(spec)) changes.push(`${file} 里 ${name} 写成了 ${JSON.stringify(spec)}（只能写版本号范围）`)
     }

@@ -1,6 +1,5 @@
 import { commentIntents } from '@godcreator/comments/site/server'
 import { authorizeWrite, WriteAccessError } from '@godcreator/identity'
-import { sitePeople } from '@godcreator/identity/node'
 import { data, redirect } from 'react-router'
 import { recordPageUrlOf, tasksPageUrl } from '../../core/layout.js'
 import { WriteRejected } from '../../core/write-rules.js'
@@ -92,7 +91,7 @@ export async function recordAction({ request }: CollabRouteArgs, site: CollabSit
     const intent = await intentOf(request)
     if ((commentIntents as readonly (string | null)[]).includes(intent)) return await writeComment(request, site)
     if (!isRecordIntent(intent)) throw new RecordFormRejected(`认不出 intent ${JSON.stringify(intent)}，能写的只有 ${[...commentIntents, ...recordIntents].join('、')}`)
-    const actor = authorizeWrite(request, { identity: site.identity(), people: sitePeople(site.siteDir), origin: site.trustedOrigin }).id
+    const actor = authorizeWrite(request, { identity: site.identity(), people: site.people(), origin: site.trustedOrigin }).id
     return await performRecordWrite(textFieldsOf(await formOf(request)), intent, actor, site)
   } catch (error) {
     return rejectionOf(error)
