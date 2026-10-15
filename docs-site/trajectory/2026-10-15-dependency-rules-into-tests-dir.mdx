@@ -1,0 +1,33 @@
+---
+born-at: 2026-10-15T16:00
+type: choice
+parent: [2026-09-03-god-live-doc]
+label: 依赖规则并入 tests/、去掉豁免清单
+domain: 检查
+---
+
+## 背景
+
+[全仓检查并入 tests/](2026-10-15-repo-checks-into-tests-dir.md) 之后，依赖规则还在仓根：规则文件 `.dependency-cruiser.cjs`，
+命令 `pnpm depcheck`，带 `--ignore-known` 读豁免清单 `.dependency-cruiser-known-violations.json`。清单里只剩 gwb-collab 的两个环：
+`collab-repo/sync/` 与 `other-repos/fetch/` 两处都是 `state.ts` 的类调 `watch.ts` 开始监视，`watch.ts` 又要用 `state.ts` 里算一次状态的函数
+（`collabRepoLocalStateOf`、`otherRepoHeadOf`）重算，两个文件互相 import。有豁免清单，新出的环只要被登记进去就不再报。
+
+pivots-from:: [全仓检查并入 tests/](2026-10-15-repo-checks-into-tests-dir.md)
+
+## 结论与边界
+
+先拆环：算一次状态的类型与函数各自挪进 `local-state.ts`、`head.ts`，`state.ts` 与 `watch.ts` 都依赖它们，依赖只朝一个方向；
+`state.ts` 原样再导出这两个名字，使用方与测试的 import 不用改。没有改成把函数作参数传给 `watch.ts`：那会改 `watchCollabRepo`、
+`watchOtherRepoHeads` 的参数，测试要跟着改，就不再是只调结构。
+
+拆完豁免清单为空，删掉它：规则文件移到 `tests/dependency-rules.cjs`，命令改名 `pnpm test:deps`（不带 `--ignore-known`），`pnpm verify` 跟着改。
+从此报出来的每一条都算违规，出了环或越界的 import 就拆掉，不再登记成已知违规。检查范围不变，仍是 `packages/*/src` 与 `plugins/*/src`，
+规则里的路径相对仓根，从仓根运行。
+
+边界：规则表 `allowedFeatureDependencies` 本身没动，这次只改了位置、命令名和豁免清单。
+
+## 依据
+
+分支 `wave11/dependency-rules`：拆环在提交 990fb17e，改前改后 `plugins/collab` 的 `pnpm check`（308 个测试）与 `pnpm test:verified`（24 个）都通过，
+测试文件没有改；移动与改名在提交 5f9c9818，`pnpm build` 之后 `pnpm test:deps` 加载 27 条规则、扫 439 个模块，没有违规。

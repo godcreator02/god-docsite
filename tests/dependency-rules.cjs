@@ -1,7 +1,8 @@
 /**
- * 依赖规则：`pnpm depcheck` 跑 dependency-cruiser，扫 packages/*\/src 与 plugins/*\/src，是包之间方向的唯一守卫。
- * 规则有三类：没有环、包不依赖 gwb 插件、gwb 插件不碰包的站点层；功能包之间允许的边（allowedFeatureDependencies）；
+ * 依赖规则：仓根 `pnpm test:deps` 用它跑 dependency-cruiser，扫 packages/*\/src 与 plugins/*\/src，包之间的方向只由它检查。
+ * 规则有三类：没有环、包不依赖 gwb 插件、gwb 插件不 import 包的站点层；功能包之间允许的边（allowedFeatureDependencies）；
  * 包内 src/core|node|site|cli 的分层。方向与分层的来历见 refactor-plan.html 的「功能包」「依赖方向」两节。
+ * 没有豁免清单，报出来的每一条都算违规。规则里的路径都相对仓根，从仓根运行。
  * 本仓包之间按包名 import 时解析到对方的 dist/，所以要先 pnpm build 再跑。
  */
 
@@ -54,7 +55,7 @@ module.exports = {
     },
     {
       name: 'workspace-package-resolvable',
-      comment: '本仓包按包名 import 时解析到对方的 dist/：解析不到就看不见这条边，先 pnpm build 再跑 depcheck',
+      comment: '本仓包按包名 import 时解析到对方的 dist/：解析不到就看不见这条边，先 pnpm build 再跑 test:deps',
       severity: 'error',
       from: {},
       to: { couldNotResolve: true, path: '^@godcreator/' },
@@ -75,7 +76,7 @@ module.exports = {
     },
     {
       name: 'gwb-plugin-no-site-layer',
-      comment: 'gwb 插件跑在工作台的 Node 里，只用包的 . 与 ./node（平台包的 ./scaffold 也在 node 层），不碰站点层',
+      comment: 'gwb 插件跑在工作台的 Node 里，只用包的 . 与 ./node（平台包的 ./scaffold 也在 node 层），不 import 站点层',
       severity: 'error',
       from: { path: '^plugins/[^/]+/src/' },
       to: { path: siteLayerPaths },
@@ -167,7 +168,7 @@ module.exports = {
     },
   ],
   options: {
-    // 本仓包之间按包名 import，经 pnpm 的链接解析到对方的 dist/：dist/ 要留在图里当终点（不能 exclude），只是不往里走
+    // 本仓包之间按包名 import，经 pnpm 的链接解析到对方的 dist/：dist/ 要留在依赖图里当终点（不能 exclude），只是不再解析它里面的 import
     doNotFollow: { path: ['(^|/)node_modules/', '^(packages|plugins)/[^/]+/dist/'] },
     tsPreCompilationDeps: true,
     combinedDependencies: false,

@@ -57,8 +57,8 @@ pnpm doc:render                                # 只重新生成生成物
 pnpm install
 pnpm build          # 按依赖序构建全部包、三个插件与两个站
 pnpm check          # 逐个包跑 check（typecheck、test，有 lint 的再 lint）
-pnpm depcheck       # 包之间的依赖方向（要先 pnpm build）
-pnpm verify         # 合并分支前、发版前：build → check → depcheck → test:scaffold → test:e2e
+pnpm test:deps      # 包之间的依赖方向、包内分层、模块之间不许有环（规则在 tests/dependency-rules.cjs，要先 pnpm build）
+pnpm verify         # 合并分支前、发版前：build → check → test:deps → test:scaffold → test:e2e
 pnpm test:pack      # 发版前再跑：把包打成 tarball 装进测试站的副本，跑同样的端到端检查
 
 cd docs-site

@@ -11,7 +11,7 @@ icon: Map
 ## 站点怎么组成
 
 任何站点都是「fumadocs 官方 React Router 模板 + 挑选的功能包」。平台包 `god-docsite` 带唯一的站点模板与建站器；
-功能包按功能切，名字不带站点类型，各自经 fumadocs 与 React Router 原生的扩展点接进站点。站点 `app/features/<功能>/` 里的接线文件由建站器写入，
+功能包按功能划分，名字不带站点类型，各自经 fumadocs 与 React Router 原生的扩展点接入站点。站点 `app/features/<功能>/` 里的接线文件由建站器写入，
 站点骨架只改平台包的 `template/`，功能的接线文件只改各功能包的 `template/`。
 
 ## 包
@@ -41,8 +41,8 @@ icon: Map
 | `collab` | `identity`、`comments` |
 | `docfirst` | `code-pin`、`doc-export`、`trajectory` |
 
-`god-docsite` 不依赖任何功能包，功能包也不依赖 `god-docsite`；表里没有的边一律不许有。方向由仓根的 `.dependency-cruiser.cjs` 检查（`pnpm depcheck`），
-包内 `core/`、`node/`、`site/`、`cli/` 的分层也在那里。
+`god-docsite` 不依赖任何功能包，功能包也不依赖 `god-docsite`；表里没有的边一律不许有。方向由 `tests/dependency-rules.cjs` 检查（仓根 `pnpm test:deps`，要先 `pnpm build`），
+包内 `core/`、`node/`、`site/`、`cli/` 的分层与模块之间不许有环也在那里；没有豁免清单，报出来的都要改掉。
 
 ## 三个 gwb 插件
 
@@ -53,7 +53,7 @@ icon: Map
 | 目录 | 插件 | 做什么 |
 | --- | --- | --- |
 | `docsite` | `@godcreator/gwb-docsite` | 本 home 的身份码、建站与加功能（调平台包的建站器）、托管站点的开发服务、读写评论的命令；给别的插件的服务 `gwbDocsite` |
-| `docfirst` | `@godcreator/gwb-docfirst-workflow` | `docfirst.create`：经 `gwbDocsite` 建站、加 code-pin / trajectory / explainer、叠 `docfirst` 包的起始物；随插件发说明书 `docs-site`、`docs-writing`、`trajectory` |
+| `docfirst` | `@godcreator/gwb-docfirst-workflow` | `docfirst.create`：经 `gwbDocsite` 建站、加 code-pin / trajectory / explainer、把 `docfirst` 包的起始物复制到站点根上；随插件发说明书 `docs-site`、`docs-writing`、`trajectory` |
 | `collab` | `@godcreator/gwb-collab` | 项目协作：协作仓与别的仓两套操作、通知交给站点 / 协作窗格 / QQ / AI、项目与任务命令；站点交给 gwb-docsite 建与托管 |
 
 ## 这个站

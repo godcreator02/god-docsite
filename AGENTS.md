@@ -21,7 +21,7 @@
 | `plugins/collab/` | gwb 插件 `@godcreator/gwb-collab`：协作仓与别的仓两套操作、通知交给站点/窗格/QQ/AI、项目与任务命令，站点交给 gwb-docsite；`collab.site.init` 在加协作功能、启动服务之前建好仓根 `collab/` 与 `site/journal/`（站点运行时写入它们），仓里还没有自动合并工作流时照 collab 包的模板写出 `.gitea/workflows/collab-auto-merge.yaml`（版本范围填打包时的 collab 版本） |
 | `collab-test/` | 本仓的测试站：协作仓形态（`collab/records/` 测试数据 + `site/`），`site/` 是基础站装上全部功能（collab、code-pin、trajectory、explainer），依赖 `workspace:^` 直连本仓的包、不 init git；e2e 用的页面（评论定位回归页、TSX 页、HTML 页、术语与公式、钉码页与被钉的 `src/greet.ts`、轨迹卡）都在它里面；gwb-docsite 托管（端口 4450） |
 | `docs-site/` | 全仓文档站：说明、原理、维护者手册与随插件发布的说明书正本（outputs）；轨迹卡在站点根 `trajectory/` |
-| `tests/` | 全仓级的检查（各包自己的测试在各包里）。`e2e/` 是端到端检查：`run.mjs` 直接在 `collab-test/site` 上启动 dev 与 build + start，各跑一轮浏览器检查（`checks/` 下 base、collab、docs、all-features 四组）；`pack.mjs` 是发版前的打包检查：各包 `pnpm pack`、测试站复制到系统临时目录按 `file:` 装好，跑同样的检查。`scaffold-check.mjs` 用建站器把 collab-test 与 docs-site 生成到临时目录，和仓里比对建站器负责的文件 |
+| `tests/` | 全仓级的检查（各包自己的测试在各包里）。`e2e/` 是端到端检查：`run.mjs` 直接在 `collab-test/site` 上启动 dev 与 build + start，各跑一轮浏览器检查（`checks/` 下 base、collab、docs、all-features 四组）；`pack.mjs` 是发版前的打包检查：各包 `pnpm pack`、测试站复制到系统临时目录按 `file:` 装好，跑同样的检查。`scaffold-check.mjs` 用建站器把 collab-test 与 docs-site 生成到临时目录，和仓里比对建站器负责的文件。`dependency-rules.cjs` 是 dependency-cruiser 的规则：包之间的方向、包内分层、模块之间不许有环（`pnpm test:deps`） |
 | `scripts/` | `migrate-comments-to-threads.mjs`：把旧格式的评论文件迁成评论串文件夹的一次性数据迁移工具 |
 | `probes/` | 实验材料，一个实验一个目录，照目录里 README 第一行就能重新运行；引用的旧包名保持原样 |
 
@@ -37,9 +37,10 @@
 * 插件打包时带进各包的构建产物：改了包要先构建；在隔离 home 里验插件用 `devkit.dev`（说明书 gwb-devkit）
 * 每个包都有 `build`、`typecheck`、`test`、`check`（`check` 先 typecheck 再 test，有 `lint` 的再 lint）；仓根 `pnpm check` 逐个包跑 check
   （`--workspace-concurrency=1`：几个包的测试大量调 git，并行时超时；docs-site 没有 check，它的检查见下），
-  `pnpm test` 是 `pnpm -r test`，`pnpm depcheck` 跑 dependency-cruiser（要先 `pnpm build`，包之间按包名 import 时解析到对方的 `dist/`）
+  `pnpm test` 是 `pnpm -r test`，`pnpm test:deps` 按 `tests/dependency-rules.cjs` 跑 dependency-cruiser（要先 `pnpm build`，包之间按包名 import 时解析到对方的 `dist/`；
+  没有豁免清单，报出来的每一条都要改掉）
 * 测试按节奏跑，不是每次全量：改代码过程中只跑改到的包（`pnpm --filter <包> check`），e2e 可以只跑一轮（`pnpm test:e2e --server=dev`）；
-  **合并分支前跑 `pnpm verify`**：`pnpm build` → `pnpm check` → `pnpm depcheck` → `pnpm test:scaffold` → `pnpm test:e2e`（`--skip-build`，不再重复构建）。
+  **合并分支前跑 `pnpm verify`**：`pnpm build` → `pnpm check` → `pnpm test:deps` → `pnpm test:scaffold` → `pnpm test:e2e`（`--skip-build`，不再重复构建）。
   `pnpm test:e2e` 不建站、不装依赖，直接测 collab-test，一分钟左右；它在站里新建的评论、任务、临时内容页都带本次运行编号，每轮跑完删掉，
   最后一项检查 `git status collab-test` 和跑之前一样（多出、少了的路径会列出来）。日志与 `report.json` 在 `%TEMP%/god-docsite-e2e/repo-<运行时刻>/`。
   `docs-site/` 里 `pnpm docfirst check`、`pnpm typecheck`、`pnpm build`；
@@ -47,17 +48,18 @@
 * **发版前再跑 `pnpm test:pack`**：查只有装成 tarball 才会露出来的问题（包的 `files` 漏了文件、`exports` 指错、依赖没写进 `dependencies`、类型对不上）。
   它把测试站依赖的包 `pnpm pack`、collab-test 复制到 `%TEMP%/god-docsite-e2e/pack-<运行时刻>/`、依赖换成 `file:<tarball>` 装好、typegen + tsc，
   再跑和 `pnpm test:e2e` 完全相同的检查；装依赖要一两分钟，日常不跑
-* `plugins/collab` 的 `tests/verified/` 是**已验证的行为假设**（整组织克隆、ahead/behind 语义、文件监视事件）：断言对着 git 与
-  watcher 本体，日常不跑。四种信号下跑 `pnpm test:verified`：升 git 或关键依赖、动了 `src/organization/setup/` 或
+* `plugins/collab` 的 `tests/verified/` 是**已验证的行为假设**（整组织克隆、ahead/behind 语义、文件监视事件）：断言直接针对 git 与
+  watcher 本身，日常不跑。四种信号下跑 `pnpm test:verified`：升 git 或关键依赖、动了 `src/organization/setup/` 或
   `src/other-repos/fetch/`、发版前、用户或 agent 明确要求
 * 发版只用 `devkit.release`，包按依赖序排：第 0 层（god-docsite、identity、explainer、code-pin、trajectory）→ 第 1 层（comments、doc-export）→
-  第 2 层（collab、docfirst）→ 插件；发前跑 `pnpm verify` 与 `pnpm test:pack`，协作侧再跑一遍 `pnpm test:verified`。升版本号前先读 skill「gwb-release」
+  第 2 层（collab、docfirst）→ 插件；发前跑 `pnpm verify` 与 `pnpm test:pack`，再在 `plugins/collab` 里跑一遍 `pnpm test:verified`。升版本号前先读 skill「gwb-release」
 
 ## 规矩
 
-* 包的方向由 dependency-cruiser（`.dependency-cruiser.cjs`，`pnpm depcheck`）唯一负责检查：comments → identity；doc-export → code-pin；
+* 包的方向只由 dependency-cruiser（规则 `tests/dependency-rules.cjs`，`pnpm test:deps`）检查：comments → identity；doc-export → code-pin；
   collab → identity、comments；docfirst → code-pin、doc-export、trajectory；report → comments；god-docsite 不依赖任何功能包，
-  功能包也不依赖 god-docsite；除此之外功能包互不依赖；包内 `core/`、`node/`、`site/`、`cli/` 的分层也在那里。改方向先改那张表并写明为什么
+  功能包也不依赖 god-docsite；除此之外功能包互不依赖；包内 `core/`、`node/`、`site/`、`cli/` 的分层与模块之间不许有环也在那里。
+  改方向先改规则文件里的 `allowedFeatureDependencies` 并写明为什么。没有豁免清单：出了环或越界的 import 就拆掉，不登记成已知违规
 * 改了基础包或插件的行为、导出、命令，同一个提交里改 `docs-site/content/` 对应分区的说明页（插件还有随包的 SKILL.md，
   正本在 `docs-site/content/docs/outputs/skills/`，`pnpm docfirst render` 生成）
 * 仓根的 README.md 与 CLAUDE.md 是 `docs-site` outputs 的生成物（正本在 `docs-site/content/docs/outputs/`）；AGENTS.md 手写（本文件）
