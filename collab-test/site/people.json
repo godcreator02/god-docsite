@@ -18,6 +18,13 @@
     "gitea": "bob-test"
   },
   {
+    "id": "tester",
+    "name": "测试员",
+    "codes": [
+      "e2etestcode01"
+    ]
+  },
+  {
     "id": "collab-agent",
     "name": "项目助手",
     "agent": true
