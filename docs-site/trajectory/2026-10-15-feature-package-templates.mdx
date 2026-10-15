@@ -1,0 +1,47 @@
+---
+born-at: 2026-10-15T11:30
+type: choice
+parent: [2026-09-03-god-live-doc]
+label: 功能包的站点模板
+domain: 骨架
+---
+
+## 背景
+
+[功能包原生接入](2026-10-14-functional-packages-native-wiring.md) 定下功能包只经 fumadocs 与 React Router 原生的扩展点接进站点，
+站点 `app/features/<功能名>/` 里的转发文件由建站器从功能包的 `template/` 复制。要给 trajectory、code-pin、explainer 写这份模板，
+给 docfirst 写叠在站点根上的起始物。trajectory 原有的卡页、星轨盘页组件按旧的 macro 写法收「带正文的卡集合条目」，
+而 Config API 下服务端集合（`.source/server`）和浏览器端集合（`.source/browser`）是两份，浏览器端只有按文件路径加载正文的表。
+
+pivots-from:: [功能包原生接入](2026-10-14-functional-packages-native-wiring.md)
+
+## 结论与边界
+
+- 卡集合由模板 `mdx.ts` 导出的集合工厂建：工厂收站点的全站 remark / rehype 插件，经 `cardMdxOptions` 的 `remarkPlugins`、`rehypePlugins`
+  并进卡集合的 mdx 选项（remark 接在默认预设之后、卡链接改写之前，rehype 排在默认预设前面）；集合名单登记在 trajectory 的
+  package.json `godDocsite.collections`
+- 卡页、星轨盘页组件用 `useLoaderData` 取 loader 数据，正文从站点传入的浏览器端加载表（`.source/browser` 里卡集合的 raw）按卡身份取，
+  同一身份 .md 与 .mdx 都在取 .mdx；转发文件里的页面组件是一行包装，把加载表和站点的 MDX 组件表传进去
+- 被 Vite 配置加载器读到的模板文件（`mdx.ts`、`routes.ts`）里的相对 import 写后缀：不写后缀时 Vite 提示将来的原生配置加载器不支持
+- docfirst 的模板叠在站点根上（配置、`content/docs/`、`content/future/`、`trajectory/`），与站点模板的 `content/index.mdx`、`content/meta.json` 不重叠；
+  配置用新字段表（`content`、`outputs`、`fumadocsRoster`、`components`、`trajectory`），术语表归站点根的 glossary.json
+
+边界：只在 Windows、file 装法、build + start 下验过，dev 没跑；侧栏入口暂时在 `feature.tsx` 里自己写页面树插件，
+平台把 `pageTreeLinksPlugin` 挪到浏览器也能 import 的出口后换成它。星轨盘页现在随功能路由展开在整站布局里面，页面本应占满窗口、不带侧栏。
+
+## 依据
+
+在系统临时目录用 god-docsite 模板加四份模板生成一个站，手写建站器将来生成的几行接线（集合工厂调用、页面树插件、路由展开、样式），
+六个包按 `pnpm pack` 后 `file:` 装上：`react-router typegen && tsc` 与 `react-router build` 都通过；`react-router-serve` 下
+`/trajectory`、`/trajectory/<卡>`、带钉码的正文页都回 200，侧栏有星轨盘入口，卡页里公式渲染成 KaTeX、指向别的卡的链接改写成卡页地址，
+钉码标记换成 `data-pin-status="unconfirmed"` 的外框。第一次 typecheck 报 fumadocs-mdx 编译出的正文 `default` 返回 `ReactNode | Promise<ReactNode>`，
+与 `mdx/types` 的 `MDXContent` 不兼容，正文模块的类型因此放宽成 `FC`。
+
+## 否掉的候选
+
+页面组件继续收「带正文的集合条目」：Config API 下浏览器端没有卡的 frontmatter，只能在转发文件里拼假条目。
+模板 `mdx.ts` 里自己再列一遍全站插件：站点改了全站插件，卡集合不会跟着变。
+
+## 代价与遗留
+
+建站器生成的布局要能让星轨盘页不带侧栏（路由展开在布局外，或者给它单独的布局），第二部分重建 docs-site 时处理。
