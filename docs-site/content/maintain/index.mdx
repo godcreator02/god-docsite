@@ -12,8 +12,8 @@ description: 改这个仓时怎么跑、按什么节奏检查、提交怎么写�
 仓根是 pnpm 包工作区：`packages/` 是平台包与功能包，`plugins/` 是三个 gwb 插件，`docs-site/` 是本站，`full-test/` 是全功能测试仓，`demo/` 是演示协作仓（内容是一个真实项目的快照，看实际用起来的样子），`tests/` 是全仓级的检查（端到端检查在 `tests/e2e/`，建站器比对是 `tests/scaffold-check.mjs`，依赖方向与分层的规则是 `tests/dependency-rules.cjs`；各包自己的测试在各包里）。
 
 - `pnpm install` 之后 `pnpm build` 按依赖序构建全部包、插件与站；站点与插件用的都是各包的构建产物，改了包要先构建
-- 站点的开发服务交给 gwb-docsite 托管（`docsite.site.add {"dir":"<站点目录>"}`），不在会话里自己 `pnpm dev`；本站在 4340 端口，full-test 在 4450
-- 站点骨架只改 `packages/god-docsite/template/`，功能的接线文件只改各功能包的 `template/`；本站与 full-test 的 `app/` 由建站器写出
+- 站点的开发服务交给 gwb-docsite 托管（`docsite.site.add {"dir":"<站点目录>"}`），不在会话里自己 `pnpm dev`；端口不写在站里，启动时挑，地址看 `docsite.site.list` 的 `url`
+- 平台模板写出的站点文件只改 `packages/god-docsite/template/`，功能的接线文件只改各功能包的 `template/`；本站与 full-test 的 `app/` 由建站器写出
 
 仓根的脚本：
 
@@ -31,7 +31,7 @@ description: 改这个仓时怎么跑、按什么节奏检查、提交怎么写�
 | 全仓·慢 | `pnpm test:e2e`、`pnpm test:pack` | 显式命令 |
 | 行为假设 | `plugins/collab` 的 `tests/verified/` | `pnpm test:verified`：升 git 或关键依赖、动了被测的模块、发版前、有人明确要求时才跑 |
 
-慢的标准：真建站、装依赖、构建、起服务的；或者单独运行这个文件时，vitest 报告里它的耗时（不含启动与 import）超过 2 秒，多是每条测试都建临时 git 仓、调几十次 git 的。
+慢的标准：真建站、装依赖、构建、启动服务的；或者单独运行这个文件时，vitest 报告里它的耗时（不含启动与 import）超过 2 秒，多是每条测试都建临时 git 仓、调几十次 git 的。
 慢的文件名写成 `*.slow.test.ts`：包里的 `vitest.config.ts` 排除它们，`vitest.slow.config.ts` 只收它们，`test:slow` 用的就是后者。
 现在有慢测试的包是 code-pin、collab、docfirst、gwb-docsite、gwb-collab；给别的包加第一个慢测试时，同时加 `vitest.slow.config.ts` 与 `test:slow`。
 
@@ -46,14 +46,14 @@ description: 改这个仓时怎么跑、按什么节奏检查、提交怎么写�
 | 改了上游包的类型或导出 | 先构建上游，再跑受影响的下游包 |
 | 改了包之间或包内 `core/`、`node/`、`site/`、`cli/` 之间的 import | 先 `pnpm build`，再仓根 `pnpm test:deps`：按 `tests/dependency-rules.cjs` 查依赖方向、分层与环，没有豁免清单，报出来的都要改掉 |
 | 改了本站的页面或被钉的代码 | 在 `docs-site/` 里 `pnpm doc`（就是 `docfirst check`），按说明书 [docs-site](/docs/outputs/skills/docs-site) 处理黄灯 |
-| 改了站点骨架或功能包的模板 | `pnpm test:scaffold`：比对测试站、本站和建站器生成的是否一致，几秒钟 |
+| 改了平台模板或功能包的模板 | `pnpm test:scaffold`：比对测试站、本站和建站器生成的是否一致，几秒钟 |
 | 合并分支 | 不跑全量，各分支改到的包已经查过 |
 | 最终交付之前（推送、交给人验收） | 仓根 `pnpm verify`：`pnpm build` → `pnpm check` → `pnpm test:slow` → `pnpm test:deps` → `pnpm test:scaffold` → `pnpm test:e2e`，五六分钟，整批改动只跑这一次 |
 | 发版前 | `pnpm verify` 之后再跑 `pnpm test:pack`：把包打成 tarball 装进测试站的副本，查漏打包的文件、写错的出口 |
 
 本站自己的检查在 `docs-site/` 里跑：`pnpm doc`、`pnpm typecheck`、`pnpm test`、`pnpm build`。
 
-{/* ref file="package.json" lines="7-17" hash="5f75778a7b17" blob="e0920196005b" */}
+{/* ref file="package.json" lines="7-17" hash="2d16f75be686" blob="eb06433d6c9a" */}
 
 端到端检查 `pnpm test:e2e` 直接在测试站 `full-test/site` 上启动 dev 与 build + start 各跑一轮浏览器检查，一分钟左右。dev 一轮写评论、任务和页面，只写本次运行新建的，跑完删掉；start 跑的是只读的发布版，那一轮核对写不进去。最后核对测试站的 `git status` 和跑之前一样。
 

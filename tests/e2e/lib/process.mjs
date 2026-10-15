@@ -2,22 +2,16 @@ import { spawn, spawnSync } from 'node:child_process'
 import { createWriteStream, writeFileSync } from 'node:fs'
 import { createServer } from 'node:net'
 
-/** 这几个端口上跑着 gwb-docsite 托管的站（docs-site 4340、full-test 4450 等），e2e 不碰 */
-const reservedPorts = new Set([4340, 4430, 4450, 4451])
-
-/** 向系统要一个空闲端口（绑 0 再放掉），避开托管站的端口 */
-export async function freePort() {
-  for (;;) {
-    const port = await new Promise((resolve, reject) => {
-      const probe = createServer()
-      probe.once('error', reject)
-      probe.listen(0, '127.0.0.1', () => {
-        const { port: assigned } = probe.address()
-        probe.close(() => resolve(assigned))
-      })
+/** 向系统要一个空闲端口（绑 0 再放掉）：系统给的在临时端口段（49152 起），碰不到托管站随机挑的 10000–49151 */
+export function freePort() {
+  return new Promise((resolve, reject) => {
+    const probe = createServer()
+    probe.once('error', reject)
+    probe.listen(0, '127.0.0.1', () => {
+      const { port: assigned } = probe.address()
+      probe.close(() => resolve(assigned))
     })
-    if (!reservedPorts.has(port)) return port
-  }
+  })
 }
 
 const shellOf = (command) => process.platform === 'win32' && command !== process.execPath

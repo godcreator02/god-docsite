@@ -1,7 +1,5 @@
 import { spawn, type ChildProcess } from 'node:child_process'
 import { randomUUID } from 'node:crypto'
-import { existsSync, readFileSync } from 'node:fs'
-import path from 'node:path'
 import { feedTokenEnvName, feedTokenHeader, feedUrlOf } from '@godcreator/god-docsite'
 import { identityCodeEnvName } from '@godcreator/identity/node'
 import { DocsiteRejected } from './errors.js'
@@ -13,12 +11,6 @@ export function localUrlOf(output: string): string | null {
   return /Local:\s+(https?:\/\/\S+)/.exec(output.replace(ansiEscapePattern, ''))?.[1] ?? null
 }
 
-/** dev 脚本里写的 --port；没写为 null */
-export function devPortOf(devScript: string): number | null {
-  const match = /(?:^|\s)--port(?:=|\s+)(\d+)(?=\s|$)/.exec(devScript)
-  return match === null ? null : Number(match[1])
-}
-
 /** 输出的最后几行，去掉颜色控制符与空行 */
 export function lastLinesOf(output: string, lineCount = 10): string {
   return output
@@ -28,33 +20,6 @@ export function lastLinesOf(output: string, lineCount = 10): string {
     .filter((line) => line !== '')
     .slice(-lineCount)
     .join('\n')
-}
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === 'object' && value !== null && !Array.isArray(value)
-}
-
-function readJsonFile(file: string): unknown {
-  try {
-    return JSON.parse(readFileSync(file, 'utf8'))
-  } catch (error) {
-    throw new DocsiteRejected(`${file} 读不出 JSON：${error instanceof Error ? error.message : String(error)}`)
-  }
-}
-
-/** 站点 package.json 的 scripts.dev 里写的端口；没有这个文件、没有 dev 脚本或没写端口时为 null */
-export function devPortOfSite(siteDir: string): number | null {
-  const file = path.join(siteDir, 'package.json')
-  if (!existsSync(file)) return null
-  const manifest = readJsonFile(file)
-  const dev = isRecord(manifest) && isRecord(manifest['scripts']) ? manifest['scripts']['dev'] : undefined
-  return typeof dev === 'string' ? devPortOf(dev) : null
-}
-
-/** 站点没在运行时预期的地址：dev 脚本里写的端口；没写为 null */
-export function expectedSiteUrlOf(siteDir: string): string | null {
-  const port = devPortOfSite(siteDir)
-  return port === null ? null : `http://127.0.0.1:${port}`
 }
 
 /** 一个在运行的开发服务 */
@@ -69,8 +34,8 @@ export type DevServer = {
   push(channel: string, data: unknown): Promise<void>
 }
 
-/** 启动开发服务、交给它身份码，等它报出地址；先退出或超时就抛 DocsiteRejected，写明开发服务的输出。测试里换成假的 */
-export type LaunchDevServer = (siteDir: string, identityCode: string) => Promise<DevServer>
+/** 启动开发服务、交给它身份码，等它报出地址；port 是想用的端口，null 是让站点自己随机挑。先退出或超时就抛 DocsiteRejected，写明开发服务的输出。测试里换成假的 */
+export type LaunchDevServer = (siteDir: string, identityCode: string, port: number | null) => Promise<DevServer>
 
 /** 等开发服务报出地址的时间：pnpm 启动加上 Vite 第一次预构建依赖 */
 const startTimeoutMilliseconds = 60_000
@@ -125,14 +90,12 @@ export async function postFeed(siteUrl: string, token: string, channel: string, 
 
 /**
  * 在站点目录里运行 pnpm dev，环境变量交给它身份码与这次启动生成的推送令牌，等它在输出里报出地址。
- * 端口取 dev 脚本里写的 --port：站点按它算可信 origin，没写就拒绝；报出的地址端口不同也拒绝。
+ * 给了 port 就带上 --port（平台的 vite 插件加 strictPort，被占就起不来），没给由平台的 vite 插件随机挑；报出的地址端口和给的不同就拒绝。
  * 先退出或超时都抛 DocsiteRejected，写明开发服务的输出
  */
-export const launchDevServer: LaunchDevServer = (siteDir, identityCode) => {
-  const port = devPortOfSite(siteDir)
-  if (port === null) return Promise.reject(new DocsiteRejected(`${siteDir}/package.json 的 scripts.dev 要写 --port <端口>：站点按它算写入请求的可信 origin`))
+export const launchDevServer: LaunchDevServer = (siteDir, identityCode, port) => {
   const token = randomUUID()
-  const child = spawn('pnpm', ['dev'], {
+  const child = spawn('pnpm', port === null ? ['dev'] : ['dev', '--port', String(port)], {
     cwd: siteDir,
     shell: true,
     windowsHide: true,
@@ -160,10 +123,10 @@ export const launchDevServer: LaunchDevServer = (siteDir, identityCode) => {
       reportedUrl = true
       clearTimeout(timer)
       child.off('exit', onEarlyExit)
-      if (new URL(url).port !== String(port)) {
+      if (port !== null && new URL(url).port !== String(port)) {
         stopProcessTree(child).then(
-          () => reject(new DocsiteRejected(`开发服务报出的地址 ${url} 不是 dev 脚本写的端口 ${port}，已停掉`)),
-          (error: unknown) => reject(new DocsiteRejected(`开发服务报出的地址 ${url} 不是 dev 脚本写的端口 ${port}，停掉时又出错（${String(error)}）`)),
+          () => reject(new DocsiteRejected(`开发服务报出的地址 ${url} 不是要的端口 ${port}，已停掉`)),
+          (error: unknown) => reject(new DocsiteRejected(`开发服务报出的地址 ${url} 不是要的端口 ${port}，停掉时又出错（${String(error)}）`)),
         )
         return
       }

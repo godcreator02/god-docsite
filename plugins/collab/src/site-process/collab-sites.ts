@@ -15,7 +15,7 @@ export type CollabSiteInitResult = SiteInitResult & { feature: SiteFeatureAdded;
 /** 站点的首页文件（平台模板的 index 路由），相对站点目录 */
 const homePageInSite = 'app/routes/home.tsx'
 
-/** 窗格要的：dir 是站点目录；url 在运行时是实际地址，没运行时是 gwb-docsite 按 site/package.json 的 dev 脚本预期的地址；起不来时的原因 */
+/** 窗格要的：dir 是站点目录；url 只在运行时有（端口启动时才挑）；起不来时的原因 */
 export type SiteState = { dir: string; url: string | null; running: boolean; error: string | null }
 
 export type CollabSitesOptions = {
@@ -60,7 +60,7 @@ export class CollabSites {
 
   stateOf(repo: string): SiteState {
     const status = this.options.docsite.status(siteDirOf(repo))
-    return { dir: status.dir, url: status.url ?? status.expectedUrl, running: status.state === 'running', error: status.error }
+    return { dir: status.dir, url: status.url, running: status.state === 'running', error: status.error }
   }
 
   /**
@@ -84,9 +84,9 @@ export class CollabSites {
   /**
    * collab.site.init：交给 gwb-docsite 从零建基础站，建好站点运行时会写入的目录，仓里没有自动合并工作流就写进去，再加协作功能（功能包写成给的范围；
    * 加功能时 gwb-docsite 会起服务检查首页），最后把平台模板的首页换成协作功能的项目首页（homePage 是它的原文）；
-   * port 与 title 是新站的开发端口与站名；项目在列表里就交给 gwb-docsite 常驻
+   * title 是新站的站名；项目在列表里就交给 gwb-docsite 常驻
    */
-  async init(repo: string, options: { featureRange: string; mergeWorkflow: string; homePage: string; port: number; title: string; listed: boolean }): Promise<CollabSiteInitResult> {
+  async init(repo: string, options: { featureRange: string; mergeWorkflow: string; homePage: string; title: string; listed: boolean }): Promise<CollabSiteInitResult> {
     const { featureRange, mergeWorkflow, homePage, listed, ...newSite } = options
     const siteDir = siteDirOf(repo)
     const created = await this.options.docsite.init(siteDir, newSite)

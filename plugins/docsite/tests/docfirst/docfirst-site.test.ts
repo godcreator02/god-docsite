@@ -24,7 +24,7 @@ afterEach(() => {
 /** 基础站建好后的样子：只要 package.json 与模板自己的 content/ 起始页 */
 function writeBaseSite(): void {
   mkdirSync(path.join(siteDir, 'content'), { recursive: true })
-  writeFileSync(path.join(siteDir, 'package.json'), JSON.stringify({ name: 'docsite', scripts: { dev: 'react-router dev --port 4310' }, dependencies: {}, devDependencies: { vite: '^8.3.4' } }))
+  writeFileSync(path.join(siteDir, 'package.json'), JSON.stringify({ name: 'docsite', scripts: { dev: 'react-router dev' }, dependencies: {}, devDependencies: { vite: '^8.3.4' } }))
   writeFileSync(path.join(siteDir, 'content', 'start.mdx'), '# 开始\n')
 }
 
@@ -52,7 +52,7 @@ describe('叠 docfirst 起始物', () => {
     writeBaseSite()
     addDocfirstScripts(siteDir, '^1.2.3')
     const manifest = JSON.parse(readFileSync(path.join(siteDir, 'package.json'), 'utf8')) as { scripts: Record<string, string>; devDependencies: Record<string, string> }
-    expect(manifest.scripts).toEqual({ dev: 'react-router dev --port 4310', doc: 'docfirst check', 'doc:confirm': 'docfirst confirm', 'doc:render': 'docfirst render' })
+    expect(manifest.scripts).toEqual({ dev: 'react-router dev', doc: 'docfirst check', 'doc:confirm': 'docfirst confirm', 'doc:render': 'docfirst render' })
     expect(manifest.devDependencies).toEqual({ vite: '^8.3.4', [DOCFIRST_PACKAGE]: '^1.2.3' })
     expect(() => addDocfirstScripts(siteDir, '^1.2.3')).toThrow('已经有脚本 doc、doc:confirm、doc:render')
   })
@@ -75,9 +75,9 @@ describe('createDocfirstSite', () => {
         return { feature: added.at(-1)!, specifier: options.specifier!, addedFiles: [], keptFiles: [], features: added.sort() }
       },
     }
-    const result = await createDocfirstSite(siteDir, { port: 4310, title: '文档站' }, { docsite, packagesFrom: pluginDir })
+    const result = await createDocfirstSite(siteDir, { title: '文档站' }, { docsite, packagesFrom: pluginDir })
     expect(calls).toEqual([
-      'init {"port":4310,"title":"文档站"}',
+      'init {"title":"文档站"}',
       `addFeature @godcreator/code-pin@^${versionOf('code-pin')}`,
       `addFeature @godcreator/trajectory@^${versionOf('trajectory')}`,
       `addFeature @godcreator/explainer@^${versionOf('explainer')}`,
@@ -98,7 +98,7 @@ describe('createDocfirstSite', () => {
         throw new Error('不该走到这里')
       },
     }
-    await expect(createDocfirstSite(siteDir, { port: 4310, title: '文档站' }, { docsite, packagesFrom: pluginDir })).rejects.toThrow('首页返回 500')
+    await expect(createDocfirstSite(siteDir, { title: '文档站' }, { docsite, packagesFrom: pluginDir })).rejects.toThrow('首页返回 500')
     expect(calls).toEqual([])
     expect(existsSync(siteDir)).toBe(false)
   })

@@ -31,7 +31,7 @@ function readJson(file: string): Record<string, unknown> {
 
 function newSite(packageSource: PackageSource = { kind: 'link', repoDir }): string {
   const dir = path.join(tempDir(), 'site')
-  createSite({ dir, siteName: '测试站', port: 4123, people, packageSource })
+  createSite({ dir, siteName: '测试站', people, packageSource })
   return dir
 }
 
@@ -81,11 +81,11 @@ describe('scanExports', () => {
 })
 
 describe('createSite', () => {
-  it('link 装法：复制模板、换掉 {{version}}、写端口站名 people 与空的汇总文件', () => {
+  it('link 装法：复制模板、换掉 {{version}}、写站名 people 与空的汇总文件，dev 脚本不写端口', () => {
     const dir = newSite()
     const manifest = readJson(path.join(dir, 'package.json')) as { dependencies: Record<string, string>; scripts: Record<string, string> }
     for (const name of platformPackageNames) expect(manifest.dependencies[name]).toBe(`link:${path.join(repoDir, 'packages', name.split('/')[1]!).replaceAll('\\', '/')}`)
-    expect(manifest.scripts['dev']).toMatch(/ --port 4123$/)
+    expect(manifest.scripts['dev']).not.toContain('--port')
     expect(readJson(path.join(dir, 'content', 'meta.json'))['title']).toBe('测试站')
     expect(JSON.parse(readFileSync(path.join(dir, 'people.json'), 'utf8'))).toEqual(people)
     expect(readFileSync(path.join(dir, '.gitignore'), 'utf8')).toContain('node_modules/')
@@ -124,11 +124,10 @@ describe('createSite', () => {
     expect(() => newSite({ kind: 'file', tarballs: withoutIdentity })).toThrow(/没给 @godcreator\/identity 的 tarball/)
   })
 
-  it('目录非空、端口不对时报错', () => {
+  it('目录非空时报错', () => {
     const dir = tempDir()
     writeFileSync(path.join(dir, 'x.txt'), '')
-    expect(() => createSite({ dir, siteName: '站', port: 4123, people, packageSource: { kind: 'link', repoDir } })).toThrow(/不是空目录/)
-    expect(() => createSite({ dir: path.join(tempDir(), 'site'), siteName: '站', port: 0, people, packageSource: { kind: 'link', repoDir } })).toThrow(/port/)
+    expect(() => createSite({ dir, siteName: '站', people, packageSource: { kind: 'link', repoDir } })).toThrow(/不是空目录/)
   })
 })
 

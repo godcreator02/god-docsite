@@ -14,7 +14,7 @@ export function registerSiteCommands(services: PluginServices): void {
       effect: 'write',
       description: '从空目录建出项目站点：交给 gwb-docsite 建基础站（平台模板、装依赖、起服务检查首页），写好自动合并工作流，再加协作功能',
       usage:
-        `{ repo, port, title }：repo 是协作仓的仓根绝对路径，不要求在项目列表里；port 是开发端口、title 是站名（写进 content/meta.json），两样都必给。` +
+        `{ repo, title }：repo 是协作仓的仓根绝对路径，不要求在项目列表里；title 是站名（写进 content/meta.json），必给；端口不写进站点，启动时由 gwb-docsite 挑。` +
         `只对新站点：site/ 要不存在或是空目录，已有站点直接拒绝；升级已有站点没有命令，由 agent 对照平台包与功能包的 template/ 判断要改哪些文件（说明书 collab 的 references/organization.md「升级站点」）。` +
         `先经 gwbDocsite.init 建基础站（平台包的范围由 gwb-docsite 写），再建好仓根的 collab/ 与 site/journal/（站点运行时写入它们，服务启动前就在，写入时才不整页刷新）；` +
         `仓里还没有 ${mergeWorkflowPathInRepo} 就照 ${featurePackage} 的工作流模板写进去，MERGE_CHECK_RANGE 写成 ^${__COLLAB_VERSION__}，已有的不动；` +
@@ -25,14 +25,13 @@ export function registerSiteCommands(services: PluginServices): void {
         '回 { dir, platformDependencies, feature, mergeWorkflow, homePage }：feature 是 gwbDocsite.addFeature 的回执；mergeWorkflow 是 { path, written }，written 为 false 是仓里已经有、没动；homePage 是写出的首页文件（相对仓根）',
     },
     async (args) => {
-      const parsed = argsOf(args, ['repo', 'port', 'title'])
+      const parsed = argsOf(args, ['repo', 'title'])
       const repo = repoOf(parsed)
-      const { port, title } = parsed
-      if (port === undefined || !(Number.isInteger(port) && (port as number) > 0 && (port as number) < 65536)) throw new CollabRejected('port 要是 1 到 65535 的整数')
+      const { title } = parsed
       if (title === undefined || typeof title !== 'string' || title.trim() === '') throw new CollabRejected('title 要是非空字符串')
       const listed = events.listed().projects.some((each) => sameRepo(each, repo))
       const mergeWorkflow = renderMergeWorkflow(__COLLAB_MERGE_WORKFLOW_TEMPLATE__, __COLLAB_VERSION__)
-      return sites.init(repo, { featureRange: `^${__COLLAB_VERSION__}`, mergeWorkflow, homePage: __COLLAB_HOME_TEMPLATE__, port: port as number, title: title as string, listed })
+      return sites.init(repo, { featureRange: `^${__COLLAB_VERSION__}`, mergeWorkflow, homePage: __COLLAB_HOME_TEMPLATE__, title: title as string, listed })
     },
   )
 }

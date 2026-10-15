@@ -23,8 +23,6 @@ export interface CreateSiteOptions {
   dir: string
   /** 站名：侧栏标题，写进 content/meta.json 的 title */
   siteName: string
-  /** 开发端口：写进 scripts.dev 的 --port */
-  port: number
   /** 写进 people.json */
   people: readonly SitePeopleEntry[]
   packageSource: PackageSource
@@ -40,10 +38,9 @@ export const versionPlaceholder = '{{version}}'
 /** npm 发布时不带 .gitignore：模板里存成 gitignore，写进站点时改回来 */
 const gitignoreInTemplate = 'gitignore'
 
-function assertCreateSiteOptions({ dir, siteName, port, people }: CreateSiteOptions): void {
+function assertCreateSiteOptions({ dir, siteName, people }: CreateSiteOptions): void {
   if (!path.isAbsolute(dir)) throw new Error(`站点目录要是绝对路径，收到 ${dir}`)
   if (siteName.trim() === '') throw new Error('siteName（站名）不能是空的')
-  if (!Number.isInteger(port) || port < 1 || port > 65_535) throw new Error(`port 要是 1–65535 的整数，收到 ${port}`)
   people.forEach((person, index) => {
     if (!isRecord(person) || typeof person.id !== 'string' || typeof person.name !== 'string') throw new Error(`people 第 ${index + 1} 项要有字符串的 id 与 name`)
   })
@@ -79,8 +76,8 @@ function siteManifestOf(templateManifestFile: string): SiteManifest {
   return manifest as SiteManifest
 }
 
-/** 模板 package.json：{{version}} 换成依赖说明，dev 脚本带上端口 */
-function writeSiteManifest(dir: string, port: number, source: PackageSource): Record<string, string> {
+/** 模板 package.json：{{version}} 换成依赖说明 */
+function writeSiteManifest(dir: string, source: PackageSource): Record<string, string> {
   const file = path.join(dir, 'package.json')
   const manifest = siteManifestOf(file)
   const platformDependencies: Record<string, string> = {}
@@ -91,8 +88,7 @@ function writeSiteManifest(dir: string, port: number, source: PackageSource): Re
   }
   if (JSON.stringify(manifest).includes('{{')) throw new Error(`模板 package.json 里还有 ${versionPlaceholder} 以外没换掉的占位`)
   const dev = manifest.scripts['dev']
-  if (dev === undefined || dev.includes('--port')) throw new Error('模板 package.json 的 scripts.dev 要有、且不写 --port（端口由建站时给）')
-  manifest.scripts['dev'] = `${dev} --port ${port}`
+  if (dev === undefined || dev.includes('--port')) throw new Error('模板 package.json 的 scripts.dev 要有、且不写 --port（端口在启动时挑）')
   writeFileSync(file, `${JSON.stringify(manifest, null, 2)}\n`)
   return platformDependencies
 }
@@ -114,20 +110,20 @@ function writeSiteName(dir: string, siteName: string): void {
 }
 
 /**
- * 从平台包的 template/ 建一个新站：复制模板，{{version}} 换成 packageSource 给的依赖说明，写 dev 端口、站名、people.json、
+ * 从平台包的 template/ 建一个新站：复制模板，{{version}} 换成 packageSource 给的依赖说明，写站名、people.json、
  * pnpm-workspace.yaml 与 .gitignore，再写空的功能汇总文件。不装依赖、不起服务；之后 pnpm install、addBaseFeatures（补上评论这类基础功能），
  * 要别的功能就装上功能包再 addFeature
  */
 export function createSite(options: CreateSiteOptions): CreatedSite {
   assertCreateSiteOptions(options)
-  const { dir, siteName, port, people, packageSource } = options
+  const { dir, siteName, people, packageSource } = options
   const templateDir = path.join(platformPackageDir(), 'template')
   for (const relative of filesUnder(templateDir)) {
     const target = path.join(dir, relative === gitignoreInTemplate ? '.gitignore' : relative)
     mkdirSync(path.dirname(target), { recursive: true })
     copyFileSync(path.join(templateDir, relative), target)
   }
-  const platformDependencies = writeSiteManifest(dir, port, packageSource)
+  const platformDependencies = writeSiteManifest(dir, packageSource)
   writeSiteName(dir, siteName)
   writeFileSync(path.join(dir, 'people.json'), `${JSON.stringify(people, null, 2)}\n`)
   writeFileSync(path.join(dir, 'pnpm-workspace.yaml'), workspaceYamlOf(packageSource, platformDependencies))

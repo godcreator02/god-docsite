@@ -4,7 +4,7 @@ import path from 'node:path'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { parseCreateArgs } from '../../src/docfirst/args.js'
 
-/** 两条建站命令的参数 `{ dir, title?, port? }` 是外部输入：形状不对、不认识的键都直接报错 */
+/** docfirst.create 的参数 `{ dir, title? }` 是外部输入：形状不对、不认识的键都直接报错 */
 
 let repo: string
 beforeEach(() => {
@@ -20,9 +20,9 @@ describe('parseCreateArgs', () => {
     expect(parseCreateArgs('x.create', { dir })).toEqual({ ok: true, args: { siteDir: dir, repoDir: repo } })
   })
 
-  it('title 去掉首尾空白，port 照收', () => {
+  it('title 去掉首尾空白', () => {
     const dir = path.join(repo, 'docs-site')
-    expect(parseCreateArgs('x.create', { dir, title: ' 站 ', port: 4320 })).toEqual({ ok: true, args: { siteDir: dir, repoDir: repo, title: '站', port: 4320 } })
+    expect(parseCreateArgs('x.create', { dir, title: ' 站 ' })).toEqual({ ok: true, args: { siteDir: dir, repoDir: repo, title: '站' } })
   })
 
   it('错误里带命令名，说清错在哪', () => {
@@ -38,7 +38,6 @@ describe('parseCreateArgs', () => {
     expect(errorOf({ dir: 'docs-site' })).toMatch(/dir 要是绝对路径/)
     expect(errorOf({ dir: path.join(repo, 'nope', 'docs-site') })).toMatch(/上一级要是已经存在的仓目录/)
     expect(errorOf({ dir, title: '  ' })).toMatch(/title/)
-    expect(errorOf({ dir, port: '4310' })).toMatch(/port/)
-    expect(errorOf({ dir, port: 70000 })).toMatch(/1 到 65535/)
+    expect(errorOf({ dir, port: 4310 })).toMatch(/不认识的参数：port/)
   })
 })

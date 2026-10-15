@@ -37,7 +37,7 @@ export function registerPaneCommands({ commands, gitea, notifications, sites, ev
         'push 是实时推送 { state, url, topics, error }：全部项目共用一条订阅，地址是 gwb-gitea 的设置 push-url（和 Gitea 同一台机器上的 ntfy），topics 是各项目组织的 collab-<组织>；state 是 connected / connecting / waiting（断开了、稍后重连，原因在 error）/ off（列表是空的，或者没能开始，原因在 error）；有项目没订上时原因也写在 error；' +
         'projects 每项 { repo, summary, error, site, qqTaskGroup }：打不开的项目 summary 为 null、原因在 error；' +
         'qqTaskGroup 是 { command, registered, error }：command 是本 home 给这个项目起的 QQ 命令（collab.project.qq-command 设，没设为 null），registered 是此刻有没有注册成 QQ 任务组，没注册上时 error 写明原因；' +
-        'site 是 { dir, url, running, error }：dir 是站点目录（gwb-docsite 托管它，启停用 docsite.site.start / docsite.site.stop {dir}）；url 在运行时是实际地址，没运行时是按 site/package.json 的 scripts.dev 里的 --port 预期的 http://127.0.0.1:<端口>，读不到端口为 null；error 是 gwb-docsite 记下的开发服务没能启动或退出了的原因，没有为 null；自动同步快进进来改了 site/ 的提交后，站点停着就启动、已在运行就不动；' +
+        'site 是 { dir, url, running, error }：dir 是站点目录（gwb-docsite 托管它，启停用 docsite.site.start / docsite.site.stop {dir}）；url 只在运行时有，是开发服务的实际地址（端口启动时由 gwb-docsite 挑，先试上次用的），没运行时为 null；error 是 gwb-docsite 记下的开发服务没能启动或退出了的原因，没有为 null；自动同步快进进来改了 site/ 的提交后，站点停着就启动、已在运行就不动；' +
         "summary 是 { repo, title, person, name, counts, giteaUrl }：title 是站名，person 是本 home 的身份（身份码在 site/people.json 里认出的那个人）、name 是它的显示名；counts 是通知各组几条 { 'collab-repo', 'other-repos', 'for-me' }，和网站顶部提示栏是同一份通知；giteaUrl 是 Gitea 上协作仓所在组织的网页。" +
         '要看每一条通知、写成给 AI 的提示词调 collab.ai.prompt；要看待办调 collab.inbox',
     },

@@ -10,7 +10,7 @@
 
 | 目录 | 内容 |
 | --- | --- |
-| `packages/god-docsite/` | 平台包：三种页面来源、布局与侧栏、搜索、llms、推送（SSE）、术语标注、vite 插件 `godDocsite()`；`template/` 是唯一的站点模板，`./scaffold` 是建站器（建站、加功能、重写功能汇总文件）；react、fumadocs、vite 等 peer 全标可选，只用建站器的 Node 使用方（gwb-docsite）不连带装它们 |
+| `packages/god-docsite/` | 平台包：三种页面来源、布局与侧栏、搜索、llms、推送（SSE）、术语标注、vite 插件 `godDocsite()`（开发服务没给端口就随机挑、把地址告诉站点）、发布版启动命令 `docsite-serve`；`template/` 是唯一的站点模板，`./scaffold` 是建站器（建站、加功能、重写功能汇总文件）；react、fumadocs、vite 等 peer 全标可选，只用建站器的 Node 使用方（gwb-docsite）不连带装它们 |
 | `packages/identity/`、`packages/comments/` | 身份（people.json、身份码、给浏览器的公开投影）与评论（评论文件、唯一一份写入 action、右下角的本页评论收件箱、正文下方的评论浮窗与正文定位、全站评论表格）；基础站默认装这两个。comments 的 `template/` 是全站评论页（也是评论写入的 `/comments` action）、侧栏入口、样式与正文高亮，建站、装完依赖后由建站器 `addBaseFeatures` 补进站点 `app/features/comments/` |
 | `packages/explainer/` | 讲解组件与它们给生成物用的机读文字 |
 | `packages/code-pin/`、`packages/doc-export/`、`packages/trajectory/` | 钉码、生成物（mdx 正本生成 AGENTS.md / README / SKILL.md）、轨迹卡与星轨盘 |
@@ -19,8 +19,8 @@
 | `packages/word-report/` | 报告：JSON 报告文档（`docreport` 格式）的校验与分章组装、站点 `reports/` 下的报告列表 `/reports` 与报告页 `/reports/<报告 id>`（整份一页）、命令行 `report-docx`（`check`、`export`、`status`）；`engine/` 是驱动本机 Word 与 MathType 的 Python 导出引擎与 `.dotx` 模板 |
 | `plugins/docsite/` | gwb 插件 `@godcreator/gwb-docsite`：身份码、建站与加功能（调平台包的建站器）、`docfirst.create`（建基础站、加 code-pin / trajectory / explainer、把 docfirst 起始物复制到站点根上）、托管站点（常驻的站只登记在设置 `sites` 里，协作站由 gwb-collab 经服务登记）、评论命令、服务 `gwbDocsite`；说明书 `docsite` / `docs-site` / `docs-writing` / `trajectory` |
 | `plugins/collab/` | gwb 插件 `@godcreator/gwb-collab`：协作仓与别的仓两套操作、通知交给站点/窗格/QQ、复制给 AI 的提示词、项目与任务命令，站点交给 gwb-docsite 建与常驻（项目加进列表时登记、移出时撤销）；`collab.site.init` 在加协作功能、启动服务之前建好仓根 `collab/` 与 `site/journal/`（站点运行时写入它们），加完协作功能后把站点首页 `app/routes/home.tsx` 换成 collab 包 `templates/home.tsx`（打包时带进插件），仓里还没有自动合并工作流时照 collab 包的模板写出 `.gitea/workflows/collab-auto-merge.yaml`（版本范围填打包时的 collab 版本） |
-| `full-test/` | 本仓的测试站：协作仓形态（`collab/records/` 测试数据 + `site/`），`site/` 是基础站装上全部功能（collab、code-pin、trajectory、explainer、word-report），依赖 `workspace:^` 直连本仓的包、不 init git；e2e 用的页面（评论定位回归页、TSX 页、HTML 页、术语与公式、钉码页与被钉的 `src/greet.ts`、轨迹卡）都在它里面；gwb-docsite 托管（端口 4450） |
-| `demo/` | 本仓的演示站：协作仓形态（`collab/records/` + `site/`），内容是 `chb-dab-sst` 协作仓 2026-10-15 的快照（页面、日志、任务与模块、人员），装上和测试站一样的全部功能，看真实内容用起来的样子；不跑 e2e，`pnpm test:scaffold` 比对它的 `app/`，依赖 `workspace:^`、不 init git；开发端口 4460。原仓的 `content/reports/` 改名 `content/long-reports/`（`/reports` 归 word-report 的报告列表），旧报告导出流程留下的 docx、脚本与导出链接没带进来 |
+| `full-test/` | 本仓的测试站：协作仓形态（`collab/records/` 测试数据 + `site/`），`site/` 是基础站装上全部功能（collab、code-pin、trajectory、explainer、word-report），依赖 `workspace:^` 直连本仓的包、不 init git；e2e 用的页面（评论定位回归页、TSX 页、HTML 页、术语与公式、钉码页与被钉的 `src/greet.ts`、轨迹卡）都在它里面；gwb-docsite 托管 |
+| `demo/` | 本仓的演示站：协作仓形态（`collab/records/` + `site/`），内容是 `chb-dab-sst` 协作仓 2026-10-15 的快照（页面、日志、任务与模块、人员），装上和测试站一样的全部功能，看真实内容用起来的样子；不跑 e2e，`pnpm test:scaffold` 比对它的 `app/`，依赖 `workspace:^`、不 init git。原仓的 `content/reports/` 改名 `content/long-reports/`（`/reports` 归 word-report 的报告列表），旧报告导出流程留下的 docx、脚本与导出链接没带进来 |
 | `docs-site/` | 全仓文档站：说明、原理、维护者手册与随插件发布的说明书正本（outputs）；轨迹卡在站点根 `trajectory/` |
 | `tests/` | 全仓级的检查（各包自己的测试在各包里）。`e2e/` 是端到端检查：`run.mjs` 直接在 `full-test/site` 上启动 dev 与 build + start，各跑一轮浏览器检查（`checks/` 下 base、collab、docs、report、all-features 五组）；`pack.mjs` 是发版前的打包检查：各包 `pnpm pack`、测试站复制到系统临时目录按 `file:` 装好，跑同样的检查。`scaffold-check.mjs` 用建站器把 full-test 与 docs-site 生成到临时目录，和仓里比对建站器负责的文件。`dependency-rules.cjs` 是 dependency-cruiser 的规则：包之间的方向、包内分层、模块之间不许有环（`pnpm test:deps`） |
 | `scripts/` | `migrate-comments-to-threads.mjs`：把旧格式的评论文件迁成评论串文件夹的一次性数据迁移工具 |
@@ -31,7 +31,7 @@
 * `pnpm install` 之后 `pnpm build` 按依赖序构建全部包、两个插件与各站；站点只用各包的构建产物
 * 依赖不打补丁：dev 下新增内容文件的即时出现由平台包的 vite 插件负责（不再靠 vite 补丁），功能包路由经站点 `app/features/` 的接线文件登记
   （不再靠 React Router 补丁），为什么能删见轨迹卡 `docs-site/trajectory/2026-10-15-drop-dependency-patches.mdx`
-* 站点的开发服务都交给 gwb-docsite 托管（`docsite.site.add`），不在会话里自己 `pnpm dev`；docs-site 在 4340、full-test 在 4450。
+* 站点的开发服务都交给 gwb-docsite 托管（`docsite.site.add`），不在会话里自己 `pnpm dev`。端口不写在站里：启动时先试上次用的，被占了在 10000–49151 里随机挑，地址看 `docsite.site.list` 的 `url`
   要写评论，开发服务的环境变量 `DOCSITE_IDENTITY_CODE` 要是站里 `people.json` 某人的码（经 gwb-docsite 启动时它自己给）。
   只有 dev 能写：build + start 跑的是发布版，全面只读（身份包的 `siteIdentity(dir, 'start')` 不看身份码）。协作是各人在本机的 dev 里改、经 git 同步，
   不做多人共用一个网站写入，选型见轨迹卡 `docs-site/trajectory/2026-10-15-published-site-readonly.mdx`

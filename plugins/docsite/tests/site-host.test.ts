@@ -3,9 +3,10 @@ import { tmpdir } from 'node:os'
 import path from 'node:path'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { commentFormOf, decodeFlatTurboStream } from '../src/comments.js'
-import { devPortOf, launchDevServer, localUrlOf, type DevServer } from '../src/dev-server.js'
+import { localUrlOf, type DevServer } from '../src/dev-server.js'
 import { isIdentityCode, joinPeople, newIdentityCode } from '../src/people-file.js'
-import { SiteHost } from '../src/site-host.js'
+import { devScriptHasFixedPort } from '../src/site-contract.js'
+import { SiteHost, type SitePortMemory } from '../src/site-host.js'
 
 let siteDir: string
 
@@ -19,7 +20,7 @@ afterEach(async () => {
 
 /** 站点目录里放上 package.json 与平台包：start 前的核对能过 */
 async function siteWithSupportedKit(): Promise<void> {
-  await writeFile(path.join(siteDir, 'package.json'), '{"scripts":{"dev":"react-router dev --port 4430"}}')
+  await writeFile(path.join(siteDir, 'package.json'), '{"scripts":{"dev":"react-router dev --host 127.0.0.1 --strictPort"}}')
   await installPackage('@godcreator/god-docsite', '0.1.0')
 }
 
@@ -31,12 +32,12 @@ async function installPackage(name: string, version: string): Promise<void> {
 
 /** 假的开发服务：记下推来的数据，能让它退出 */
 function fakeServers() {
-  const launched: Array<{ code: string; pushed: Array<[string, unknown]>; exit: (reason: string) => void; stopped: boolean }> = []
-  const launch = async (_dir: string, code: string): Promise<DevServer> => {
-    const record = { code, pushed: [] as Array<[string, unknown]>, exit: (_reason: string) => {}, stopped: false }
+  const launched: Array<{ code: string; port: number | null; pushed: Array<[string, unknown]>; exit: (reason: string) => void; stopped: boolean }> = []
+  const launch = async (_dir: string, code: string, port: number | null): Promise<DevServer> => {
+    const record = { code, port, pushed: [] as Array<[string, unknown]>, exit: (_reason: string) => {}, stopped: false }
     launched.push(record)
     return {
-      url: `http://127.0.0.1:${4000 + launched.length}`,
+      url: `http://127.0.0.1:${port ?? 14000 + launched.length}`,
       pid: launched.length,
       onExit: (listener) => (record.exit = listener),
       stop: async () => {
@@ -50,12 +51,26 @@ function fakeServers() {
   return { launched, launch }
 }
 
-function hostWith(launch: (dir: string, code: string) => Promise<DevServer>) {
+/** 假的端口记录：记过的端口照 free 判断空不空，记下的都留在 remembered 里 */
+function fakePorts(free = true): SitePortMemory & { remembered: Map<string, number> } {
+  const remembered = new Map<string, number>()
+  return {
+    remembered,
+    preferredPortOf: async (dir) => {
+      const port = remembered.get(path.resolve(dir).toLowerCase())
+      return port !== undefined && free ? port : null
+    },
+    remember: async (dir, port) => void remembered.set(path.resolve(dir).toLowerCase(), port),
+  }
+}
+
+function hostWith(launch: (dir: string, code: string, port: number | null) => Promise<DevServer>, ports: SitePortMemory = fakePorts()) {
   const logs: string[] = []
   const host = new SiteHost({
     log: { info: (message) => logs.push(message), warn: (message) => logs.push(message) },
     launchDevServer: launch,
     identityCode: () => 'mycode000001',
+    ports,
   })
   return { host, logs }
 }
@@ -65,9 +80,9 @@ describe('站点状态机', () => {
     await siteWithSupportedKit()
     const { launched, launch } = fakeServers()
     const { host } = hostWith(launch)
-    expect(await host.start(siteDir)).toEqual({ url: 'http://127.0.0.1:4001', pid: 1, alreadyRunning: false })
+    expect(await host.start(siteDir)).toEqual({ url: 'http://127.0.0.1:14001', pid: 1, alreadyRunning: false })
     expect(launched[0]!.code).toBe('mycode000001')
-    expect(host.statusOf(siteDir)).toMatchObject({ state: 'running', url: 'http://127.0.0.1:4001', expectedUrl: 'http://127.0.0.1:4430', error: null })
+    expect(host.statusOf(siteDir)).toEqual({ dir: path.resolve(siteDir), state: 'running', url: 'http://127.0.0.1:14001', error: null })
   })
 
   it('已在运行再 start 回现状、不重复启动；正在启动的并发 start 复用同一次', async () => {
@@ -83,8 +98,8 @@ describe('站点状态机', () => {
     let release: (() => void) | undefined
     const gate = new Promise<void>((resolve) => (release = resolve))
     const hanging = fakeServers()
-    const hangingLaunch = async (dir: string, code: string): Promise<DevServer> => {
-      const server = await hanging.launch(dir, code)
+    const hangingLaunch = async (dir: string, code: string, port: number | null): Promise<DevServer> => {
+      const server = await hanging.launch(dir, code, port)
       await gate
       return server
     }
@@ -135,7 +150,7 @@ describe('站点状态机', () => {
     const { launched, launch } = fakeServers()
     const { host } = hostWith(launch)
     await expect(host.start(siteDir)).rejects.toThrow('不是站点目录')
-    await writeFile(path.join(siteDir, 'package.json'), '{"scripts":{"dev":"react-router dev --port 4430"}}')
+    await writeFile(path.join(siteDir, 'package.json'), '{"scripts":{"dev":"react-router dev --host 127.0.0.1 --strictPort"}}')
     await expect(host.start(siteDir)).rejects.toThrow('node_modules 里没有 @godcreator/god-docsite')
     await installPackage('@godcreator/docsite-kit', '0.3.0')
     await expect(host.start(siteDir)).rejects.toThrow('建在旧地基 @godcreator/docsite-kit 上')
@@ -162,6 +177,30 @@ describe('站点状态机', () => {
     await host.start(siteDir)
     await host.push(siteDir, 'collab', { n: 1 })
     expect(launched[0]!.pushed).toEqual([['collab', { n: 1 }]])
+  })
+
+  it('第一次不给端口、站点自己挑，记下来；下次先试上次的端口，被占了再让站点挑', async () => {
+    await siteWithSupportedKit()
+    const { launched, launch } = fakeServers()
+    const ports = fakePorts()
+    const { host } = hostWith(launch, ports)
+    await host.start(siteDir)
+    expect(launched[0]!.port).toBeNull()
+    expect([...ports.remembered.values()]).toEqual([14001])
+    await host.stop(siteDir)
+    await host.start(siteDir)
+    expect(launched[1]!.port).toBe(14001)
+    const taken = hostWith(launch, { ...fakePorts(false), preferredPortOf: async () => null })
+    await taken.host.start(siteDir)
+    expect(launched[2]!.port).toBeNull()
+  })
+
+  it('dev 脚本写死了 --port：不启动，直接拒绝', async () => {
+    await siteWithSupportedKit()
+    await writeFile(path.join(siteDir, 'package.json'), '{"scripts":{"dev":"react-router dev --port 4430"}}')
+    const { launched, launch } = fakeServers()
+    await expect(hostWith(launch).host.start(siteDir)).rejects.toThrow('scripts.dev 写死了 --port')
+    expect(launched).toEqual([])
   })
 
   it('stopAll 停掉全部（插件卸载）', async () => {
@@ -197,7 +236,6 @@ describe('开发服务的输出与评论表单', () => {
   it('读出地址与端口', () => {
     expect(localUrlOf('  ➜  \x1b[32mLocal\x1b[39m:   http://127.0.0.1:4430/\n')).toBe('http://127.0.0.1:4430/')
     expect(localUrlOf('starting')).toBeNull()
-    expect(devPortOf('react-router dev --port 4430 --host 127.0.0.1')).toBe(4430)
   })
 
   it('批整页、批页面元素，表单字段和网页的 action 一样', () => {
@@ -221,8 +259,9 @@ describe('开发服务的输出与评论表单', () => {
     expect(() => decodeFlatTurboStream('<!DOCTYPE html>')).toThrow()
   })
 
-  it('dev 脚本没写 --port：不启动，直接拒绝', async () => {
-    await writeFile(path.join(siteDir, 'package.json'), '{"scripts":{"dev":"react-router dev"}}')
-    await expect(launchDevServer(siteDir, 'mycode000001')).rejects.toThrow('scripts.dev 要写 --port <端口>')
+  it('认出 dev 脚本里写死的 --port', () => {
+    expect(devScriptHasFixedPort('react-router dev --port 4430 --host 127.0.0.1')).toBe(true)
+    expect(devScriptHasFixedPort('react-router dev --port=4430')).toBe(true)
+    expect(devScriptHasFixedPort('react-router dev --host 127.0.0.1 --strictPort')).toBe(false)
   })
 })

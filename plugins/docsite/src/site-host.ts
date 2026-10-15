@@ -1,17 +1,14 @@
 import { existsSync } from 'node:fs'
 import path from 'node:path'
-import { expectedSiteUrlOf, type DevServer, type LaunchDevServer } from './dev-server.js'
+import type { DevServer, LaunchDevServer } from './dev-server.js'
 import { DocsiteRejected, messageOf } from './errors.js'
-import { checkPlatformInstalled } from './site-contract.js'
+import { checkDevScript, checkPlatformInstalled } from './site-contract.js'
 
 /** 站点的三种状态：running 进程在；stopped 没有进程；failed 进程退出了或没能启动（error 记原因） */
 export type SiteState = 'running' | 'stopped' | 'failed'
 
-/**
- * 一个站此刻的样子：url 在 running 时是实际地址；expectedUrl 是按 package.json 的 scripts.dev 里的 --port
- * 预期的地址（没写端口为 null），没运行时给人看站点在哪；error 只在 failed 时有
- */
-export type SiteStatus = { dir: string; state: SiteState; url: string | null; expectedUrl: string | null; error: string | null }
+/** 一个站此刻的样子：url 只在 running 时有，是开发服务报出的实际地址；error 只在 failed 时有 */
+export type SiteStatus = { dir: string; state: SiteState; url: string | null; error: string | null }
 
 export type SiteStarted = { url: string; pid: number; alreadyRunning: boolean }
 
@@ -29,11 +26,19 @@ type HostedSite = {
   starting: Promise<SiteStarted> | null
 }
 
+/** 每个站上次用的端口：下次启动先试它，被占了才让站点重新随机挑；书签与开着的页面在重启后还能用 */
+export type SitePortMemory = {
+  /** 上次的端口此刻还空着就回它，没记过或被占了回 null */
+  preferredPortOf(dir: string): Promise<number | null>
+  remember(dir: string, port: number): Promise<void>
+}
+
 export type SiteHostOptions = {
   log: { info: (message: string) => void; warn: (message: string) => void }
   launchDevServer: LaunchDevServer
   /** 本 home 的身份码，启动时交给开发服务 */
   identityCode: () => string
+  ports: SitePortMemory
 }
 
 /**
@@ -70,14 +75,14 @@ export class SiteHost {
     const site = this.sites.get(siteKeyOf(dir))
     const running = site?.running ?? null
     const state: SiteState = running !== null ? 'running' : site?.error != null ? 'failed' : 'stopped'
-    return { dir: site?.dir ?? path.resolve(dir), state, url: running?.url ?? null, expectedUrl: expectedSiteUrlOf(dir), error: site?.error ?? null }
+    return { dir: site?.dir ?? path.resolve(dir), state, url: running?.url ?? null, error: site?.error ?? null }
   }
 
   list(): SiteStatus[] {
     return [...this.sites.values()].map((site) => this.statusOf(site.dir))
   }
 
-  /** 启动站点的开发服务：先核对站点建在平台包上、目录有效，起不来就把原因记成 failed。已在运行或正在启动就复用，不重复 spawn */
+  /** 启动站点的开发服务：先核对站点建在平台包上、目录有效、dev 脚本没写死端口，起不来就把原因记成 failed。已在运行或正在启动就复用，不重复 spawn */
   start(dir: string): Promise<SiteStarted> {
     const site = this.siteOf(dir)
     if (site.running !== null) return Promise.resolve({ url: site.running.url, pid: site.running.pid, alreadyRunning: true })
@@ -93,10 +98,11 @@ export class SiteHost {
     if (this.disposed) throw new DocsiteRejected('插件正在卸载，没有启动站点')
     if (!existsSync(path.join(site.dir, 'package.json'))) throw new DocsiteRejected(`${site.dir} 下没有 package.json，不是站点目录`)
     checkPlatformInstalled(site.dir)
+    checkDevScript(site.dir)
     site.error = null
     let server: DevServer
     try {
-      server = await this.options.launchDevServer(site.dir, this.options.identityCode())
+      server = await this.options.launchDevServer(site.dir, this.options.identityCode(), await this.options.ports.preferredPortOf(site.dir))
     } catch (error) {
       site.error = messageOf(error)
       this.changed(site)
@@ -117,6 +123,8 @@ export class SiteHost {
       this.changed(site)
     })
     this.options.log.info(`${site.dir} 的开发服务已启动：${server.url}`)
+    // 记端口只为下次沿用：记不下来照样运行，下次重新随机挑
+    await this.options.ports.remember(site.dir, Number(new URL(server.url).port)).catch((error: unknown) => this.options.log.warn(`${site.dir} 这次的端口没记下来，下次启动会重新挑：${messageOf(error)}`))
     this.changed(site)
     return { url: server.url, pid: server.pid, alreadyRunning: false }
   }

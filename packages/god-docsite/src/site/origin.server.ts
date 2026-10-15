@@ -1,52 +1,36 @@
+import { browserHostOf, devOriginEnvName } from '../core/site-origin.js'
 import type { DocsiteContext } from './site-context.js'
 
 /** 启动方可以直接给出可信 origin（如经反向代理访问时），给了就只认它 */
 export const siteOriginEnvName = 'DOCSITE_ORIGIN'
 
-/** 命令行里某个选项的值：--port 4000 与 --port=4000 都认；没写是 undefined，写了不带值是 '' */
-export function optionValueOf(argv: readonly string[], name: string): string | undefined {
-  for (const [index, arg] of argv.entries()) {
-    if (arg.startsWith(`${name}=`)) return arg.slice(name.length + 1)
-    if (arg !== name) continue
-    const next = argv[index + 1]
-    return next === undefined || next.startsWith('-') ? '' : next
-  }
-  return undefined
-}
-
-function checkedOrigin(value: string): string {
+function checkedOrigin(value: string, envName: string): string {
   let url: URL
   try {
     url = new URL(value)
   } catch (error) {
-    if (error instanceof TypeError) throw new Error(`${siteOriginEnvName} 不是网址：${value}`)
+    if (error instanceof TypeError) throw new Error(`${envName} 不是网址：${value}`)
     throw error
   }
-  if (url.origin !== value) throw new Error(`${siteOriginEnvName} 只写 origin（协议、主机、端口），不带路径和末尾的斜杠：收到 ${value}，应写 ${url.origin}`)
+  if (url.origin !== value) throw new Error(`${envName} 只写 origin（协议、主机、端口），不带路径和末尾的斜杠：收到 ${value}，应写 ${url.origin}`)
   return value
-}
-
-/** 监听所有网卡或没写主机时，本机打开的地址是 localhost */
-function browserHostOf(host: string | undefined): string {
-  return host === undefined || host === '' || host === '0.0.0.0' || host === '::' ? 'localhost' : host
 }
 
 /**
  * 站点的可信 origin：写入请求的 Origin 头要和它完全一样。规则：
  * - 设了 DOCSITE_ORIGIN 就是它；
- * - dev（react-router dev）：端口取启动参数 --port，主机取 --host（没写或监听全部网卡时是 localhost）；没写 --port 报错，
- *   因为 Vite 会在端口被占时换一个，猜不出来；
- * - start（react-router-serve）：端口取环境变量 PORT，主机取 HOST（没写是 localhost）；没设 PORT 报错，因为它会自己挑空闲端口
+ * - dev（react-router dev）：平台的 vite 插件定下端口后写的 DOCSITE_DEV_ORIGIN；没有就是开发服务没经 godDocsite() 启动，报错；
+ * - start（docsite-serve 或 react-router-serve）：端口取环境变量 PORT，主机取 HOST（没写是 localhost）；没设 PORT 报错，因为 react-router-serve 会自己挑空闲端口
  */
-export function siteOrigin(mode: DocsiteContext['mode'], { argv = process.argv, env = process.env }: { argv?: readonly string[]; env?: NodeJS.ProcessEnv } = {}): string {
+export function siteOrigin(mode: DocsiteContext['mode'], { env = process.env }: { env?: NodeJS.ProcessEnv } = {}): string {
   const configured = env[siteOriginEnvName]
-  if (configured !== undefined) return checkedOrigin(configured)
+  if (configured !== undefined) return checkedOrigin(configured, siteOriginEnvName)
   if (mode === 'dev') {
-    const port = optionValueOf(argv, '--port')
-    if (port === undefined || port === '') throw new Error(`算不出可信 origin：dev 脚本要写 react-router dev --port <端口>，或者设 ${siteOriginEnvName}`)
-    return `http://${browserHostOf(optionValueOf(argv, '--host'))}:${port}`
+    const devOrigin = env[devOriginEnvName]
+    if (devOrigin === undefined) throw new Error(`算不出可信 origin：开发服务没经平台的 vite 插件 godDocsite() 启动（它定下端口后写 ${devOriginEnvName}），或者设 ${siteOriginEnvName}`)
+    return checkedOrigin(devOrigin, devOriginEnvName)
   }
   const port = env['PORT']
-  if (port === undefined || port === '') throw new Error(`算不出可信 origin：react-router-serve 要设环境变量 PORT，或者设 ${siteOriginEnvName}`)
+  if (port === undefined || port === '') throw new Error(`算不出可信 origin：发布版用 docsite-serve 启动（它挑端口、设 PORT），或者设环境变量 PORT 或 ${siteOriginEnvName}`)
   return `http://${browserHostOf(env['HOST'])}:${port}`
 }

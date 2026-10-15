@@ -4,8 +4,6 @@ import { checkHomePage, type HomePageCheckDeps } from './home-page-check.js'
 import type { PackageSource, PlatformScaffold } from './platform.js'
 
 export type SiteInitOptions = {
-  /** 开发端口，写进 scripts.dev 的 --port */
-  port: number
   /** 站名，写进 content/meta.json 的 title */
   title: string
 }
@@ -27,14 +25,14 @@ export type CreateDocsiteDeps = HomePageCheckDeps & {
 const initialPeople = [{ id: 'claude', name: 'Claude', agent: true }]
 
 /**
- * 从空目录建站：平台建站器复制模板、写端口与站名 → pnpm install → 补上基础功能（评论的全站评论页与样式）→
- * 起服务检查首页（通过后登记着的站保持运行，没登记的停掉）。骨架写完就归站点；要功能再对它 addFeature
+ * 从空目录建站：平台建站器复制模板、写站名 → pnpm install → 补上基础功能（评论的全站评论页与样式）→
+ * 起服务检查首页（通过后登记着的站保持运行，没登记的停掉）。平台模板写出的文件写完就归站点；要功能再对它 addFeature
  */
-export async function createDocsite(dir: string, { port, title }: SiteInitOptions, deps: CreateDocsiteDeps): Promise<SiteInitResult> {
+export async function createDocsite(dir: string, { title }: SiteInitOptions, deps: CreateDocsiteDeps): Promise<SiteInitResult> {
   const { createSite, addBaseFeatures } = await deps.scaffold()
   let platformDependencies: Record<string, string>
   try {
-    ;({ platformDependencies } = createSite({ dir, siteName: title, port, people: initialPeople, packageSource: deps.packageSource }))
+    ;({ platformDependencies } = createSite({ dir, siteName: title, people: initialPeople, packageSource: deps.packageSource }))
   } catch (error) {
     throw new DocsiteRejected(`没建成站点：${messageOf(error)}`)
   }

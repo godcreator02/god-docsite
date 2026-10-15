@@ -46,7 +46,7 @@ pnpm doc:render                                # 只重新生成生成物
 
 ## 文档在哪
 
-`docs-site/` 是全仓唯一的文档站（4340 端口）：总览、fumadocs 原理、写页面、Gitea 与 NAS、维护。轨迹卡在 `docs-site/trajectory/`。
+`docs-site/` 是全仓唯一的文档站：总览、fumadocs 原理、写页面、Gitea 与 NAS、维护。轨迹卡在 `docs-site/trajectory/`。
 随插件发布的说明书正本在 `docs-site/content/docs/outputs/skills/`，生成到 `plugins/docsite/skills/` 与 `plugins/collab/skills/`。
 
 **这份 README 与仓根 `CLAUDE.md` 是生成物**（正本在 `docs-site/content/docs/outputs/`），`AGENTS.md` 手写；改 mdx 正本再在 `docs-site/` 里 `pnpm doc:render`。

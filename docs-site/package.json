@@ -5,9 +5,9 @@
   "type": "module",
   "description": "全仓文档站：god-docsite 模板 + code-pin、trajectory、explainer 三个功能，用这套机制写自己的文档，引用的是本仓源码里的真实行段；文档维护用命令行 docfirst",
   "scripts": {
-    "dev": "react-router dev --host 127.0.0.1 --strictPort --port 4340",
+    "dev": "react-router dev --host 127.0.0.1 --strictPort",
     "build": "react-router build",
-    "start": "react-router-serve ./build/server/index.js",
+    "start": "docsite-serve ./build/server/index.js",
     "typecheck": "react-router typegen && tsc --noEmit",
     "test": "vitest run",
     "docfirst": "docfirst",

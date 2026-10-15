@@ -25,11 +25,11 @@ function depsWith(events: string[], options: { registered?: boolean; status?: nu
 describe('createDocsite：从空目录建站', () => {
   it('复制平台模板、写端口与站名、pnpm install、补上评论这个基础功能、起服务检查后停掉没登记的站', async () => {
     const events: string[] = []
-    const result = await createDocsite(siteDir, { port: 4560, title: '新站' }, depsWith(events))
+    const result = await createDocsite(siteDir, { title: '新站' }, depsWith(events))
     expect(events).toEqual(['pnpm install', 'start', 'page-status', 'stop'])
     expect(Object.keys(result.platformDependencies).sort()).toEqual(['@godcreator/comments', '@godcreator/god-docsite', '@godcreator/identity'])
     const manifest = readJson(path.join(siteDir, 'package.json')) as { scripts: Record<string, string>; dependencies: Record<string, string> }
-    expect(manifest.scripts['dev']).toMatch(/--port 4560$/)
+    expect(manifest.scripts['dev']).not.toContain('--port')
     expect(manifest.dependencies['@godcreator/god-docsite']).toBe(`link:${path.join(repoDir, 'packages', 'god-docsite').replaceAll('\\', '/')}`)
     expect(readJson(path.join(siteDir, 'content', 'meta.json'))['title']).toBe('新站')
     expect(JSON.parse(readFileSync(path.join(siteDir, 'people.json'), 'utf8'))).toEqual([{ id: 'claude', name: 'Claude', agent: true }])
@@ -40,7 +40,7 @@ describe('createDocsite：从空目录建站', () => {
 
   it('登记着的站起服务检查后保持运行', async () => {
     const events: string[] = []
-    await createDocsite(siteDir, { port: 4560, title: '新站' }, depsWith(events, { registered: true }))
+    await createDocsite(siteDir, { title: '新站' }, depsWith(events, { registered: true }))
     expect(events).toEqual(['pnpm install', 'start', 'page-status'])
   })
 
@@ -48,13 +48,13 @@ describe('createDocsite：从空目录建站', () => {
     mkdirSync(siteDir, { recursive: true })
     writeFileSync(path.join(siteDir, 'package.json'), '{"name":"my-docs"}')
     const events: string[] = []
-    await expect(createDocsite(siteDir, { port: 4560, title: '新站' }, depsWith(events))).rejects.toThrow('没建成站点：')
+    await expect(createDocsite(siteDir, { title: '新站' }, depsWith(events))).rejects.toThrow('没建成站点：')
     expect(events).toEqual([])
   })
 
   it('首页不是 200：报错、站点不停', async () => {
     const events: string[] = []
-    await expect(createDocsite(siteDir, { port: 4560, title: '新站' }, depsWith(events, { status: 500 }))).rejects.toThrow('首页（http://127.0.0.1:4560）返回 500')
+    await expect(createDocsite(siteDir, { title: '新站' }, depsWith(events, { status: 500 }))).rejects.toThrow('首页（http://127.0.0.1:4560）返回 500')
     expect(events).not.toContain('stop')
   })
 })

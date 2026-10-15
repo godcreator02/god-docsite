@@ -21,7 +21,6 @@ docfirst.create  {"dir":"<仓>/docs-site"}    接好 docfirst 的站：现状、
 
 - `dir`：站目录的绝对路径，**要不存在或是空目录**，上一级（仓目录）必须已经存在
 - `title`：站名，不给就依次用仓根 `package.json` 的 `title`、包名去掉 scope、仓的目录名
-- `port`：不给就在仓目录里找没被别的站脚本占用的，从 4310 起选
 - 只认这三个参数，多给一个就拒绝
 
 它先建基础站（同 `docsite.site.init`：复制平台模板、装依赖、启动服务检查），再把 `@godcreator/docfirst` 的起始物（`docfirst.config.mjs`、`content/docs/outputs/` 下
@@ -33,7 +32,7 @@ README / AGENTS / CLAUDE 的正本、未来区起始页、第一张轨迹卡）�
 不要 docfirst 的站直接用这两条命令：
 
 ```
-docsite.site.init    {"dir":…,"port":4310,"title":"站名"}                     dir 要不存在或是空目录；port、title 必给
+docsite.site.init    {"dir":…,"title":"站名"}                                 dir 要不存在或是空目录；title 必给
 docsite.feature.add  {"dir":…,"package":"@godcreator/trajectory","version":"^0.1.0"}   加一个功能包
 ```
 
@@ -62,11 +61,11 @@ docsite.feature.add  {"dir":…,"package":"@godcreator/trajectory","version":"^0
 docsite.site.add     {"dir":…}    登记进设置 sites 并启动（工作台每次启动时也会启动登记着的站）
 docsite.site.start   {"dir":…}    启动；人为停了、起不来修好之后也用它
 docsite.site.stop    {"dir":…}    停掉
-docsite.site.list    {}           各站的 state（running / stopped / failed）、url、expectedUrl、error
+docsite.site.list    {}           各站的 state（running / stopped / failed）、url（只在运行时有）、error
 docsite.site.remove  {"dir":…}    停掉并不再托管
 ```
 
-- 端口从站 `package.json` 的 `scripts.dev` 里的 `--port` 读；启动前核对站点的 `node_modules` 里装着 `@godcreator/god-docsite`
+- 端口不写在站里（`scripts.dev` 写了 `--port` 就拒绝启动）：先试这个站上次用的，被占了由平台的 vite 插件在 10000–49151 里随机挑；地址以 `docsite.site.list` 的 `url` 为准。启动前核对站点的 `node_modules` 里装着 `@godcreator/god-docsite`
 - **改了构建页面时 remark 插件会调用到的包**（code-pin、trajectory、god-docsite 的术语标注）：在改过的包里 `pnpm build`，再 `docsite.site.stop`、`docsite.site.start`
 - 给人看就在 VS Code 的内置浏览器里打开 `docsite.site.list` 回的地址（读说明书 `vscode`）；只是自己验证，没托管的站 `docsite.site.start`，验完 `docsite.site.stop`
 - `pnpm build` 是 `react-router build`，只作提交前的检查；agent 读 `content/` 下的 mdx 正本，不解析 HTML

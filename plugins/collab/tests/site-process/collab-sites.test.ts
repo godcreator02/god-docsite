@@ -21,7 +21,7 @@ const platformHomePage = 'export default function Home() {}\n'
  * 假的 gwb-docsite：记下每次调用；add、start 转成运行，remove、stop 转成停止，转换时通知 onStatus 的监听者。
  * 初始状态照给定的；failed 时 error 是固定的原因
  */
-function fakeDocsite(initial: 'running' | 'stopped' | 'failed' = 'stopped', url: string | null = null, expectedUrl: string | null = 'http://127.0.0.1:4331') {
+function fakeDocsite(initial: 'running' | 'stopped' | 'failed' = 'stopped', url: string | null = null) {
   const calls: string[] = []
   const pushed: unknown[] = []
   const listeners = new Set<(dir: string) => void>()
@@ -51,7 +51,7 @@ function fakeDocsite(initial: 'running' | 'stopped' | 'failed' = 'stopped', url:
       become(dir, 'stopped')
       return { url: 'http://127.0.0.1:4331' }
     },
-    status: (dir) => ({ dir, state, url, expectedUrl, error: state === 'failed' ? 'gwb-docsite 的原因' : null }),
+    status: (dir) => ({ dir, state, url, error: state === 'failed' ? 'gwb-docsite 的原因' : null }),
     onStatus: (listener) => {
       listeners.add(listener)
       return () => listeners.delete(listener)
@@ -136,9 +136,9 @@ describe('项目站点交给 gwb-docsite', () => {
     unwatch()
   })
 
-  it('窗格的状态：地址在运行时是实际地址，没运行时是 gwb-docsite 预期的那个，起不来的原因照 gwb-docsite 的报', () => {
+  it('窗格的状态：地址只在运行时有，起不来的原因照 gwb-docsite 的报', () => {
     const { docsite } = fakeDocsite('failed')
-    expect(sitesWith(docsite).sites.stateOf(repo)).toEqual({ dir: siteDir, url: 'http://127.0.0.1:4331', running: false, error: 'gwb-docsite 的原因' })
+    expect(sitesWith(docsite).sites.stateOf(repo)).toEqual({ dir: siteDir, url: null, running: false, error: 'gwb-docsite 的原因' })
     const running = fakeDocsite('running', 'http://127.0.0.1:4331/')
     expect(sitesWith(running.docsite).sites.stateOf(repo)).toEqual({ dir: siteDir, url: 'http://127.0.0.1:4331/', running: true, error: null })
   })
@@ -188,16 +188,16 @@ describe('项目站点交给 gwb-docsite', () => {
     try {
       const { docsite, calls } = fakeDocsite()
       const { sites } = sitesWith(docsite)
-      expect(await sites.init(newRepo, { featureRange: '^0.31.0', mergeWorkflow, port: 4400, title: '新项目', homePage, listed: false })).toEqual({
+      expect(await sites.init(newRepo, { featureRange: '^0.31.0', mergeWorkflow, title: '新项目', homePage, listed: false })).toEqual({
         dir: newSiteDir,
         platformDependencies: { '@godcreator/god-docsite': '^0.1.0' },
         feature: { feature: 'collab', specifier: '^0.31.0', addedFiles: ['routes.ts'], keptFiles: [], features: ['collab'] },
         mergeWorkflow: { path: '.gitea/workflows/collab-auto-merge.yaml', written: true },
         homePage: 'site/app/routes/home.tsx',
       })
-      expect(calls).toEqual([`init ${newSiteDir} {"port":4400,"title":"新项目"}`, `addFeature ${newSiteDir} @godcreator/collab@^0.31.0`])
-      await sites.init(newRepo, { featureRange: '^0.31.0', mergeWorkflow, port: 4400, title: '新项目', homePage, listed: true })
-      expect(calls.slice(2, 5)).toEqual([`init ${newSiteDir} {"port":4400,"title":"新项目"}`, `addFeature ${newSiteDir} @godcreator/collab@^0.31.0`, `add ${newSiteDir}`])
+      expect(calls).toEqual([`init ${newSiteDir} {"title":"新项目"}`, `addFeature ${newSiteDir} @godcreator/collab@^0.31.0`])
+      await sites.init(newRepo, { featureRange: '^0.31.0', mergeWorkflow, title: '新项目', homePage, listed: true })
+      expect(calls.slice(2, 5)).toEqual([`init ${newSiteDir} {"title":"新项目"}`, `addFeature ${newSiteDir} @godcreator/collab@^0.31.0`, `add ${newSiteDir}`])
     } finally {
       rmSync(newRepo, { recursive: true, force: true })
     }
@@ -209,11 +209,11 @@ describe('项目站点交给 gwb-docsite', () => {
     try {
       const { docsite } = fakeDocsite()
       const { sites } = sitesWith(docsite)
-      const first = await sites.init(newRepo, { featureRange: '^0.31.0', mergeWorkflow, port: 4400, title: '新项目', homePage, listed: false })
+      const first = await sites.init(newRepo, { featureRange: '^0.31.0', mergeWorkflow, title: '新项目', homePage, listed: false })
       expect(first.mergeWorkflow).toEqual({ path: '.gitea/workflows/collab-auto-merge.yaml', written: true })
       expect(readFileSync(workflowFile, 'utf8')).toBe(mergeWorkflow)
       writeFileSync(workflowFile, "env:\n  MERGE_CHECK_RANGE: '^0.29.0'\n")
-      const second = await sites.init(newRepo, { featureRange: '^0.31.0', mergeWorkflow, port: 4400, title: '新项目', homePage, listed: false })
+      const second = await sites.init(newRepo, { featureRange: '^0.31.0', mergeWorkflow, title: '新项目', homePage, listed: false })
       expect(second.mergeWorkflow).toEqual({ path: '.gitea/workflows/collab-auto-merge.yaml', written: false })
       expect(readFileSync(workflowFile, 'utf8')).toBe("env:\n  MERGE_CHECK_RANGE: '^0.29.0'\n")
     } finally {
@@ -234,7 +234,7 @@ describe('项目站点交给 gwb-docsite', () => {
           return docsite.addFeature(dir, options)
         },
       }
-      await sitesWith(checking).sites.init(newRepo, { featureRange: '^0.31.0', mergeWorkflow, port: 4400, title: '新项目', homePage, listed: false })
+      await sitesWith(checking).sites.init(newRepo, { featureRange: '^0.31.0', mergeWorkflow, title: '新项目', homePage, listed: false })
       expect(homeWhenAdding).toEqual([platformHomePage])
       expect(readFileSync(homeFile, 'utf8')).toBe(homePage)
       expect(homePage).toContain('ProjectHome')
@@ -260,7 +260,7 @@ describe('项目站点交给 gwb-docsite', () => {
           return docsite.addFeature(dir, options)
         },
       }
-      await sitesWith(checking).sites.init(newRepo, { featureRange: '^0.31.0', mergeWorkflow, port: 4400, title: '新项目', homePage, listed: false })
+      await sitesWith(checking).sites.init(newRepo, { featureRange: '^0.31.0', mergeWorkflow, title: '新项目', homePage, listed: false })
       expect(existedWhenAdding).toEqual([true, true])
     } finally {
       rmSync(newRepo, { recursive: true, force: true })

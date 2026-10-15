@@ -3,3 +3,4 @@ export { decodeHtmlEntities, extractHtmlPage, type HtmlHeadingAnchor, type HtmlP
 export { siteLinkTargetOf, sitePathOf, type SiteLinkTarget } from './site-link-targets.js'
 export { contentFileUrlOf, contentFileUrlPrefix } from './content-file-url.js'
 export { feedEndpointPrefix, feedTokenEnvName, feedTokenHeader, feedUrlOf, isFeedChannel } from './feed.js'
+export { browserHostOf, devOriginEnvName } from './site-origin.js'

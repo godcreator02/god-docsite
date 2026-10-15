@@ -59,7 +59,7 @@ export interface BaseSiteContext<Person extends SitePerson = SitePerson, Viewer 
   people(): readonly Person[]
   /** 本机身份：dev 下是启动方经环境变量 DOCSITE_IDENTITY_CODE 给的码在 people.json 里认出的人；start（发布版）一律只读 */
   identity(): Viewer
-  /** 写入请求的 Origin 头要等于它：DOCSITE_ORIGIN，否则 dev 取 --host/--port、start 取 HOST/PORT */
+  /** 写入请求的 Origin 头要等于它：DOCSITE_ORIGIN，否则 dev 取平台 vite 插件写的 DOCSITE_DEV_ORIGIN、start 取 HOST/PORT */
   trustedOrigin(): string
   /** 推送通道这个频道现在的值，没推过是 undefined；功能的 layoutData 只能经它读（feature.tsx 进浏览器，不能 import 平台的 ./server） */
   feedValue(channel: string): unknown

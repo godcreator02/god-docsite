@@ -1,6 +1,7 @@
 import type { GwbContext } from '@godcreator/gwb-kernel-desktop'
 // 空的类型 import 只为让这几个包的 `declare module 'cordis'` 生效，ctx 上才有各服务的类型
 import type {} from '@godcreator/gwb-commands'
+import type {} from '@godcreator/gwb-data'
 import type {} from '@godcreator/gwb-settings'
 import type {} from '@godcreator/gwb-skills'
 import { registerCommands } from './commands.js'
@@ -15,6 +16,7 @@ import type { HomePageCheckDeps } from './scaffold/home-page-check.js'
 import { loadPlatformScaffold, pluginDir } from './scaffold/platform.js'
 import { DocsiteService, type GwbDocsiteApi } from './service.js'
 import { SiteHost } from './site-host.js'
+import { SitePorts } from './site-ports.js'
 
 /** 写在包入口：devkit.release 只读类型入口 dist/index.d.ts 认服务由谁提供 */
 declare module 'cordis' {
@@ -31,7 +33,7 @@ export type { SiteFeatureAdded, SiteFeatureOptions } from './scaffold/add-featur
 
 export const name = 'gwb-docsite'
 
-export const inject = ['gwbCommands', 'gwbSettings']
+export const inject = ['gwbCommands', 'gwbSettings', 'gwbData']
 
 /** 产物在 dist/index.js，说明书目录是它上一级的 skills/ */
 const skillsDir = new URL('../skills/', import.meta.url)
@@ -53,7 +55,7 @@ function stringList(value: unknown): string[] {
   return value
 }
 
-/** 装配：身份码、托管站点、服务 gwbDocsite、命令（含建 docfirst 站的 docfirst.create）与说明书 */
+/** 装配：身份码、托管站点（每个站上次的端口记在 gwb-data 里）、服务 gwbDocsite、命令（含建 docfirst 站的 docfirst.create）与说明书 */
 export function apply(ctx: GwbContext): void {
   const log = ctx.logger(name)
   const commands = ctx.gwbCommands
@@ -72,7 +74,8 @@ export function apply(ctx: GwbContext): void {
     return code
   }
 
-  const host = new SiteHost({ log, launchDevServer, identityCode })
+  const ports = new SitePorts({ readDoc: (doc) => ctx.gwbData.readDoc(doc), writeDoc: (doc, value) => ctx.gwbData.writeDoc(doc, value) }, async (port) => (await loadPlatformScaffold()).isPortFree(port))
+  const host = new SiteHost({ log, launchDevServer, identityCode, ports })
   ctx.effect(() => () => void host.stopAll())
 
   const hosted = new HostedSites({ get: () => stringList(settings.get('sites')), set: (dirs: string[]) => settings.set('sites', dirs) }, host)

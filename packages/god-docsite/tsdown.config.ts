@@ -11,6 +11,7 @@ export default defineConfig({
     "site/index.server": "src/site/index.server.ts",
     "site/tex": "src/site/tex-entry.ts",
     "node/scaffold": "src/node/scaffold/index.ts",
+    "cli/serve": "src/cli/serve.ts",
   },
   format: ["esm"],
   platform: "node",

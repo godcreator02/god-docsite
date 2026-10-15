@@ -33,6 +33,7 @@
   },
   "peerDependencies": {
     "@godcreator/gwb-commands": "^0.6.1",
+    "@godcreator/gwb-data": "^0.1.12",
     "@godcreator/gwb-kernel-desktop": "^0.10.1",
     "@godcreator/gwb-settings": "^0.4.0",
     "@godcreator/gwb-skills": "^0.4.12",
@@ -45,6 +46,7 @@
   },
   "devDependencies": {
     "@godcreator/gwb-commands": "catalog:",
+    "@godcreator/gwb-data": "catalog:",
     "@godcreator/gwb-kernel-desktop": "catalog:",
     "@godcreator/gwb-settings": "catalog:",
     "@godcreator/gwb-skills": "catalog:",

@@ -268,22 +268,14 @@ function ProjectLine({ row, openSite, openFolder, promptForAi }: { row: ProjectR
   )
 }
 
-/** 只显示端口，完整地址与运行状态放在悬停提示里；点击照常启动并打开站点 */
+/** 在运行时只显示端口，完整地址放在悬停提示里；没运行时没有地址（端口启动时才挑），写「启动并打开」。点击都是启动并打开站点 */
 function SiteLink({ site, onOpen }: { site: SiteRow; onOpen: () => void }): ReactElement {
   const state = siteStateOf(site)
-  if (site.url === null) {
-    return (
-      <span className="collab:inline-flex collab:items-center collab:gap-1 collab:text-xs collab:text-muted-foreground">
-        <Dot tone={state.tone} />
-        端口未知
-      </span>
-    )
-  }
   return (
     <span className="collab:inline-flex collab:items-center collab:gap-1 collab:text-xs">
       <Dot tone={state.tone} />
-      <Button type="button" variant="ghost" size="xs" onClick={onOpen} title={`协作站${state.label} · ${site.url}`}>
-        端口 {new URL(site.url).port || (new URL(site.url).protocol === 'https:' ? '443' : '80')}
+      <Button type="button" variant="ghost" size="xs" onClick={onOpen} title={site.url === null ? `协作站${state.label}` : `协作站${state.label} · ${site.url}`}>
+        {site.url === null ? '启动并打开' : `端口 ${new URL(site.url).port}`}
       </Button>
     </span>
   )

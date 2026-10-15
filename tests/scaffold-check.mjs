@@ -87,7 +87,7 @@ function basePackagesOf(generatedDir) {
 
 /** 照装好依赖的站点那样补功能：功能包写进依赖、node_modules 里能找到，再 addBaseFeatures 与逐个 addFeature */
 function generateExpectedSite({ scaffold, generatedDir, features }) {
-  scaffold.createSite({ dir: generatedDir, siteName: '比对用', port: 4000, people: [], packageSource: { kind: 'link', repoDir } })
+  scaffold.createSite({ dir: generatedDir, siteName: '比对用', people: [], packageSource: { kind: 'link', repoDir } })
   const manifestFile = path.join(generatedDir, 'package.json')
   const manifest = JSON.parse(readFileSync(manifestFile, 'utf8'))
   for (const name of features) manifest.dependencies[name] = `link:${path.join(repoDir, 'packages', name.slice(name.indexOf('/') + 1)).replaceAll('\\', '/')}`

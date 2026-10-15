@@ -19,11 +19,11 @@ description: 平台包 @godcreator/god-docsite 建的站（协作站、docfirst 
 ## 建站与加功能
 
 ```text
-docsite.site.init    {"dir":…,"port":4310,"title":"站名"}
+docsite.site.init    {"dir":…,"title":"站名"}
 docsite.feature.add  {"dir":…,"package":"@godcreator/trajectory","version":"^0.1.0"}
 ```
 
-- `docsite.site.init`：`dir` 要不存在或是空目录，`port`（写进 `scripts.dev` 的 `--port`）与 `title`（写进 `content/meta.json`）必给。
+- `docsite.site.init`：`dir` 要不存在或是空目录，`title`（写进 `content/meta.json`）必给；端口不写进站点，启动时挑。
   复制平台包的 `template/`，平台包、身份、评论三个包写成插件旁边装着的那一版的 `^<版本>`，`pnpm install`，补上评论功能的接线文件，再启动服务检查首页。
   `people.json` 里只有 agent `claude`，人用 `docsite.people.join` 把自己加进来
 - `docsite.feature.add`：在站点里 `pnpm add <package>@<version>`，把功能包 `template/` 里站点还没有的文件补进 `app/features/<功能名>/`（已有的不覆盖），
@@ -47,11 +47,11 @@ docsite.feature.add  {"dir":…,"package":"@godcreator/trajectory","version":"^0
 docsite.site.add     {"dir":…}   登记进设置 sites 并启动；工作台每次启动时也启动登记着的站
 docsite.site.start   {"dir":…}   启动；已在运行或正在启动就回现状
 docsite.site.stop    {"dir":…}   停掉；没在运行就拒绝
-docsite.site.list    {}          每个站 { dir, state, url, expectedUrl, error }，state 是 running / stopped / failed
+docsite.site.list    {}          每个站 { dir, state, url, error }，state 是 running / stopped / failed，url 只在运行时有
 docsite.site.remove  {"dir":…}   从设置 sites 里去掉，在运行就停掉；没登记过就拒绝
 ```
 
-- 启动前核对站点的 `node_modules` 里装着 `@godcreator/god-docsite`（建在旧包 `@godcreator/docsite-kit` 上的站拒绝），`scripts.dev` 写了 `--port`
+- 启动前核对站点的 `node_modules` 里装着 `@godcreator/god-docsite`（建在旧包 `@godcreator/docsite-kit` 上的站拒绝），`scripts.dev` 没写 `--port`（写了就拒绝，照报错去掉）
 - 启动时经环境变量交给站点本 home 的身份码 `DOCSITE_IDENTITY_CODE` 与这次的推送令牌 `DOCSITE_FEED_TOKEN`
 - `failed` 时 `error` 写着退出码与最后几行输出；进程退出了不自动重启，修好后 `docsite.site.start`
 - 常驻的站只记在设置 `sites` 里。协作站也在里面：gwb-collab 在项目加进列表时登记、移出列表时去掉，启停照样用 `docsite.site.start` / `docsite.site.stop`；
@@ -136,7 +136,7 @@ docsite.people.join {"dir":…,"id":"<字母数字_->","name":"<显示名>","git
 
 | 方法 | 做什么 |
 | --- | --- |
-| `init(dir, { port, title })` | 同 `docsite.site.init`，回 `{ dir, platformDependencies }` |
+| `init(dir, { title })` | 同 `docsite.site.init`，回 `{ dir, platformDependencies }` |
 | `addFeature(dir, { packageName, specifier? })` | 同 `docsite.feature.add`；`specifier` 还可以写 `link:` / `file:` 加绝对路径 |
 | `add(dir)` / `remove(dir)` | 同 `docsite.site.add` / `docsite.site.remove`：登记进设置 `sites` 再启动（回这个站此刻的状态，起不来报错、登记照留）；去掉登记、在运行就停掉（回 `{ registered }`，`false` 是本来就没登记） |
 | `start(dir)` / `stop(dir)` / `status(dir)` | 启停与此刻的状态，形状同 `docsite.site.*`；不改设置 `sites` |

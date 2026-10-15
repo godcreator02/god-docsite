@@ -10,7 +10,7 @@ function hostedWith(initial: string[], options: { startFails?: string } = {}) {
   let dirs = [...initial]
   const running = new Set<string>()
   const calls: string[] = []
-  const status = (dir: string): SiteStatus => ({ dir, state: running.has(path.resolve(dir).toLowerCase()) ? 'running' : 'stopped', url: null, expectedUrl: null, error: null })
+  const status = (dir: string): SiteStatus => ({ dir, state: running.has(path.resolve(dir).toLowerCase()) ? 'running' : 'stopped', url: null, error: null })
   const hosted = new HostedSites(
     {
       get: () => dirs,

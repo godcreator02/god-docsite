@@ -1161,6 +1161,9 @@ importers:
       '@godcreator/gwb-commands':
         specifier: 'catalog:'
         version: 0.6.1(@godcreator/gwb-kernel-desktop@0.10.1(cordis@4.0.0-rc.10))(cordis@4.0.0-rc.10)
+      '@godcreator/gwb-data':
+        specifier: 'catalog:'
+        version: 0.1.12(@godcreator/gwb-kernel-desktop@0.10.1(cordis@4.0.0-rc.10))(cordis@4.0.0-rc.10)
       '@godcreator/gwb-kernel-desktop':
         specifier: 'catalog:'
         version: 0.10.1(cordis@4.0.0-rc.10)
