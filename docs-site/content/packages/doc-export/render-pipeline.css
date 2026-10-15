@@ -1,0 +1,37 @@
+/*
+ * RenderPipeline 自己的画面：左右两块（容器窄于 480 上下排）、左块分段与标注、检查清单、落点小卡、状态小表。
+ * 卡片、胶囊、代码行与颜色变量（--dx-*）由 @godcreator/explainer 提供，颜色只取那套变量。
+ */
+.rp-stage { container-type: inline-size; display: grid; gap: 8px; }
+.rp-legend { margin: 0; font-size: 12px; color: var(--dx-dim); }
+
+.rp-panes { display: grid; gap: 12px; align-items: start; }
+@container (min-width: 480px) { .rp-panes { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } }
+
+.rp-source-seg { display: grid; gap: 4px; }
+.rp-source-seg + .rp-source-seg { margin-top: 6px; }
+.rp-seg-note { justify-self: start; font-size: 12px; }
+
+/* 第 1 步：解析出的节点 */
+.rp-nodes { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; font-family: var(--dx-mono); font-size: 13px; }
+.rp-nodes li::before { content: '· '; color: var(--dx-dim); }
+
+/* 第 3 步：五种检查与两句反例 */
+.rp-checks { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; font-size: 13px; }
+.rp-checks li { display: flex; align-items: baseline; gap: 8px; }
+.rp-check-name { white-space: nowrap; }
+.rp-check-result { color: var(--dx-dim); }
+.rp-divider { border: none; border-top: 1px solid var(--dx-line); margin: 10px 0; }
+.rp-examples { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; font-size: 12.5px; color: var(--dx-dim); }
+.rp-examples li { display: flex; align-items: baseline; gap: 8px; }
+
+/* 第 5 步：三个落点小卡一律上下排、各占满右块——右块自身宽度不定且不宽，并排放不下标题 */
+.rp-files { display: grid; gap: 10px; align-items: start; }
+.rp-file-body { display: grid; gap: 6px; }
+.rp-more { font-size: 12px; color: var(--dx-dim); }
+
+/* 第 6 步：写出与核对的状态小表 */
+.rp-disk { border-collapse: collapse; width: 100%; font-size: 12.5px; }
+.rp-disk th { text-align: left; font-weight: 600; color: var(--dx-dim); padding: 2px 10px 6px 0; }
+.rp-disk td { text-align: left; padding: 4px 10px 4px 0; border-top: 1px solid var(--dx-line); }
+.rp-disk-to { font-family: var(--dx-mono); font-size: 12px; }
