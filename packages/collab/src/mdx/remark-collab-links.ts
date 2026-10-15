@@ -1,6 +1,6 @@
-import { isRealDate } from '../../core/journal.js'
-import { calendarUrl, tasksPageUrl } from '../../core/layout.js'
-import { repoLinkPrefix } from '../../core/repo-links.js'
+import { isRealDate } from '../core/journal.js'
+import { calendarUrl, tasksPageUrl } from '../core/layout.js'
+import { repoLinkPrefix } from '../core/repo-links.js'
 
 /** mdast 里这里要读写的几项：链接节点与换上去的 MDX JSX 行内元素 */
 type MdastNode = { type: string; url?: string; children?: MdastNode[] }
