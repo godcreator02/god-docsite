@@ -1,11 +1,12 @@
 import { createContext, use, useMemo, type ReactNode } from 'react'
 import { useFumadocsLoader } from 'fumadocs-core/source/client'
 import { DocsLayout } from '@fumadocs/base-ui/layouts/docs'
+import { getLayoutTabs } from '@fumadocs/base-ui/layouts/shared'
 import { ThemeSwitch, type ThemeSwitchProps } from '@fumadocs/base-ui/layouts/shared/slots/theme-switch'
 import type { SiteLayoutData } from './site-context.js'
 import type { SidebarLink } from './sidebar-links.js'
 import { groupKeepingSidebar, rowSearchTrigger, SidebarLinksRow } from './sidebar.js'
-import { withLoosePagesGrouped } from './sidebar-tree.js'
+import { withGroupLandingPages, withLoosePagesGrouped } from './sidebar-tree.js'
 import { SiteLinksProvider } from './site-links.js'
 import { WidePageToggle } from './wide-page.js'
 
@@ -40,19 +41,20 @@ export interface SiteLayoutProps {
 
 /**
  * 整站布局：fumadocs 的 DocsLayout，站名作标题；站名下是搜索按钮与功能入口的一横排，在功能页面上侧栏停在最近看过的那一组；
- * 侧栏底部加全宽切换。不传 tabs：DocsLayout 按 meta.json 写了 root: true 的文件夹自动生成侧栏的目录切换按钮；
- * 交给它的页面树先把组外的页面收成以站名命名的一组（withLoosePagesGrouped），每一页都有目录切换按钮
+ * 侧栏底部加全宽切换。目录切换按钮按 meta.json 写了 root: true 的文件夹生成：页面树先把组外的页面收成以站名命名的一组
+ * （withLoosePagesGrouped），每一页都有按钮；按钮列表由 fumadocs 的 getLayoutTabs 算，只有子文件夹的组先补上首页（withGroupLandingPages）
  */
 export function SiteLayout({ data, sidebarLinks, sidebarFooterStart, top, children }: SiteLayoutProps) {
   const { pageTree } = useFumadocsLoader(data)
   const tree = useMemo(() => withLoosePagesGrouped(pageTree), [pageTree])
+  const tabs = useMemo(() => getLayoutTabs(withGroupLandingPages(tree)), [tree])
   const nav = useMemo(() => ({ title: data.siteName }), [data.siteName])
   const sidebar = useMemo(() => ({ banner: <SidebarLinksRow links={sidebarLinks} /> }), [sidebarLinks])
   return (
     <SiteLinksProvider pageTitles={data.pageTitles}>
       {top}
       <SidebarFooterStartContext value={sidebarFooterStart}>
-        <DocsLayout tree={tree} nav={nav} sidebar={sidebar} slots={siteSlots}>
+        <DocsLayout tree={tree} tabs={tabs} nav={nav} sidebar={sidebar} slots={siteSlots}>
           {children}
         </DocsLayout>
       </SidebarFooterStartContext>

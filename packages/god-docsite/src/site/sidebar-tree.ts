@@ -40,6 +40,33 @@ export function withLoosePagesGrouped(tree: PageTree.Root): PageTree.Root {
   return { ...tree, children: [looseGroup, ...groups] }
 }
 
+/** 按侧栏的先后找到的第一页：文件夹先看它的首页，再往里找 */
+function firstPageOf(nodes: PageTree.Node[]): PageTree.Item | undefined {
+  for (const node of nodes) {
+    if (node.type === 'page') return node
+    if (node.type !== 'folder') continue
+    const found = node.index ?? firstPageOf(node.children)
+    if (found) return found
+  }
+}
+
+/**
+ * 交给 fumadocs getLayoutTabs 算目录切换按钮的页面树：它只拿分组的首页、或组里直接放着的第一页作这一组的链接，
+ * 组里只有子文件夹（如 experiments/comm-test/index.page.tsx）时这一组就不出现在按钮里，每组都这样时整个按钮都没有。
+ * 这里给没有首页、也没有直接放着页面的分组补上组里第一页作首页；只用来算按钮，侧栏照旧用原来的页面树
+ */
+export function withGroupLandingPages(tree: PageTree.Root): PageTree.Root {
+  const visit = (nodes: PageTree.Node[]): PageTree.Node[] =>
+    nodes.map((node) => {
+      if (node.type !== 'folder') return node
+      const children = visit(node.children)
+      const lacksLanding = isSidebarGroup(node) && node.index === undefined && !children.some((child) => child.type === 'page')
+      const landing = lacksLanding ? firstPageOf(children) : undefined
+      return landing ? { ...node, children, index: landing } : { ...node, children }
+    })
+  return { ...tree, children: visit(tree.children) }
+}
+
 function withPageInGroup(nodes: PageTree.Node[], groupId: string, page: PageTree.Item): PageTree.Node[] {
   return nodes.map((node) => {
     if (node.type !== 'folder') return node

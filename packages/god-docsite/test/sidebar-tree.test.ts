@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import type * as PageTree from 'fumadocs-core/page-tree'
-import { looseGroupId, sidebarTreeOf, withLoosePagesGrouped } from '../src/site/sidebar-tree.js'
+import { getLayoutTabs } from '@fumadocs/base-ui/layouts/shared'
+import { looseGroupId, sidebarTreeOf, withGroupLandingPages, withLoosePagesGrouped } from '../src/site/sidebar-tree.js'
 
 const page = (url: string): PageTree.Item => ({ type: 'page', name: url, url })
 const group = (id: string, children: PageTree.Node[]): PageTree.Folder => ({ type: 'folder', $id: id, name: id, root: true, children })
@@ -85,5 +86,37 @@ describe('组外的页面收成一组', () => {
     expect(sidebarTreeOf(grouped, '/about', undefined, hiddenPage).groupId).toBe(looseGroupId)
     expect(sidebarTreeOf(grouped, '/comments', 'guide', hiddenPage).groupId).toBe('guide')
     expect(sidebarTreeOf(grouped, '/comments', undefined, hiddenPage).groupId).toBe(looseGroupId)
+  })
+})
+
+describe('目录切换按钮里每一组都有', () => {
+  const folderWithIndex = (url: string, children: PageTree.Node[] = []): PageTree.Folder => ({ type: 'folder', name: url, index: page(url), children })
+
+  it('组里只有带首页的子文件夹：fumadocs 原样算不出这一组；补上组里第一页作首页以后每组都有，链接是组里第一页', () => {
+    const tree: PageTree.Root = {
+      $id: 'root',
+      name: '站',
+      children: [
+        group('experiments', [folderWithIndex('/experiments/comm-test'), folderWithIndex('/experiments/fpga-lab')]),
+        group('research', [{ type: 'folder', name: '空的', children: [] }, { type: 'folder', name: '深', children: [folderWithIndex('/research/deep/a')] }]),
+        group('guide', [page('/guide/a')]),
+      ],
+    }
+    expect(getLayoutTabs(tree).map((tab) => tab.url)).toEqual(['/guide/a'])
+    expect(getLayoutTabs(withGroupLandingPages(tree)).map((tab) => [tab.$folder?.$id, tab.url])).toEqual([
+      ['experiments', '/experiments/comm-test'],
+      ['research', '/research/deep/a'],
+      ['guide', '/guide/a'],
+    ])
+  })
+
+  it('已经有首页、或组里直接放着页面的组不动；一页都没有的组照旧不出现', () => {
+    const withIndex: PageTree.Folder = { ...group('a', [folderWithIndex('/a/x')]), index: page('/a') }
+    const empty = group('empty', [{ type: 'folder', name: '空的', children: [] }])
+    const tree: PageTree.Root = { $id: 'root', name: '站', children: [withIndex, group('b', [page('/b/1')]), empty] }
+    const prepared = withGroupLandingPages(tree)
+    expect(prepared.children[0]).toEqual(withIndex)
+    expect(prepared.children[1]).toEqual(tree.children[1])
+    expect(getLayoutTabs(prepared).map((tab) => tab.url)).toEqual(['/a', '/b/1'])
   })
 })

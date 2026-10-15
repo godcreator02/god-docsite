@@ -1,0 +1,28 @@
+---
+born-at: 2026-10-16T02:30
+type: discovery
+parent: [2026-09-03-god-live-doc]
+label: 分组里只有子文件夹时目录切换按钮整个消失：补上组里第一页作这一组的链接
+domain: 页面
+---
+
+## 背景
+
+演示站 `demo/` 的侧栏顶上没有目录切换按钮。它的五个分组（实验、计划、样机方案、调研、长期报告）都写了 `"root": true`，
+但每组下面都只有带首页的子文件夹，如 `experiments/comm-test/index.page.tsx`，没有直接放着的页面。
+
+fumadocs 的 `getLayoutTabs`（`@fumadocs/base-ui/layouts/shared`）给每一组找链接时只看这一组的首页、或组里直接放着的第一页
+（`node.index?.url ?? node.children.find((node) => node.type === "page")?.url`），找不到就不把这一组放进按钮。五组都找不到，按钮就没有了。
+全功能测试站的分组里都直接放着页面，所以一直没暴露。
+
+## 结论与边界
+
+- 平台包 `sidebar-tree.ts` 加 `withGroupLandingPages`：给没有首页、也没有直接放着页面的分组补上组里第一页（按侧栏先后，文件夹先看首页再往里找）作首页。
+- `SiteLayout` 不再让 `DocsLayout` 自己算按钮，改传 `tabs={getLayoutTabs(withGroupLandingPages(tree))}`：仍是 fumadocs 自己的算法（图标、当前组按 `$folder` 的 `$id` 认），只是喂给它的树补过首页；侧栏照旧用原来的页面树。
+- 一页都没有的分组照旧不出现在按钮里。
+- 演示站根目录 `meta.json` 的 `pages` 里还写着改名前的 `reports`，一并改成 `long-reports`。
+
+## 否掉的候选
+
+- 要求内容作者给每个分组写首页：真实项目常这样按子文件夹组织，按钮消失也不报错，作者看不出原因。
+- 自己写一份按钮列表的算法：图标的包法、当前组的判断都要跟着 fumadocs 走，复制一份容易和它走偏。
