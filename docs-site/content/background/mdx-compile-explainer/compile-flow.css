@@ -1,0 +1,22 @@
+/*
+ * 三栏怎么排按组件自己的宽度来：正文栏只有约 600px 宽，比浏览器窗口窄，
+ * 不能用 Tailwind 的视口断点（md:），要用容器查询（容器是外壳的 .dx，inline-size）。
+ * 容器不小于 900px 三栏并排；不到 900px 原文与工序两栏在上、语法树（第三个 Pane）占满下一行；不到 560px 三栏竖排。
+ */
+.cf-stage {
+  display: grid;
+  gap: 8px;
+  grid-template-columns: 1fr 1.1fr 1.3fr;
+}
+@container (max-width: 899px) {
+  .cf-stage { grid-template-columns: 1fr 1.1fr; }
+  .cf-stage > :nth-child(3) { grid-column: 1 / -1; }
+}
+@container (max-width: 559px) {
+  .cf-stage { grid-template-columns: 1fr; }
+}
+
+/* 标题一行写完（不让 anywhere 折行把中文排成一列）；来源链接放不下时整个换到标题下面一行 */
+.cf-stage .dx-pane-bar { flex-wrap: wrap; }
+.cf-stage .dx-pane-title { white-space: nowrap; overflow-wrap: normal; }
+.cf-stage .dx-pane-extra { white-space: nowrap; }

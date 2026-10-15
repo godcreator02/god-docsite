@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import type { JSX, ReactNode } from 'react'
 import { CodeLines, Pane, Stepper } from '@godcreator/explainer/site'
-import '@godcreator/explainer/styles.css'
+import './compile-flow.css'
 
 /** 一道工序是谁的：给色点、右栏 Pane 配色 */
 type Who = 'vite' | 'mdx' | 'core' | 'mdxjs' | 'ours'
@@ -58,8 +58,8 @@ const SOURCE = [
   '先装依赖，再写配置：',
   '```ts  export default {}  ```',
   '<include>./env.mdx</include>',
-  '<Pin file="src/setup.ts" lines="3-9" … />',
-  '<PinTree dir="src" depth="1" … />',
+  '{/* ref file="src/setup.ts" lines="3-9" */}',
+  '{/* tree dir="src" depth="1" */}',
   '![架构](./arch.png)',
 ]
 
@@ -70,19 +70,18 @@ const MDAST = [
   'paragraph：先装依赖，再写配置：',
   'code（ts）：export default {}',
   '<include>：./env.mdx',
-  '<Pin file="src/setup.ts" lines="3-9" />',
-  '<PinTree dir="src" depth="1" />',
+  'mdxFlowExpression：{/* ref … */}',
+  'mdxFlowExpression：{/* tree … */}',
   'image：./arch.png',
 ]
 const mdastWith = (row: number, text: string): string[] => MDAST.map((line, i) => (i === row - 1 ? text : line))
 
-/** 第 9 步（钉码）的树：Pin 与 PinTree 换成块，底下挂登记表 */
+/** 第 9 步（钉码）的树：标记换成 codePin 外框 */
 const PINNED = [
   ...MDAST.slice(0, 5),
-  'PinBlock（状态=绿）> code（setup.ts 3-9 行）',
-  'PinTreeBlock > Files > Folder…',
+  'codePin（状态=fresh）> code（setup.ts 3-9 行）',
+  'codePin（目录树）> Files > Folder…',
   MDAST[7]!,
-  'replaceSource 登记表：<Pin> → 一块代码',
 ]
 
 /** hast 的 8 行（第 12 步整棵换掉） */
@@ -92,15 +91,15 @@ const HAST = [
   'p',
   'pre > code（ts）',
   'p（env.mdx 的内容）',
-  'PinBlock（组件标签保留）> pre > code',
-  'PinTreeBlock > Files > Folder…（都保留）',
+  'div.code-pin（状态=fresh）> pre > code',
+  'div.code-pin（目录树）> Files > Folder…',
   'img src={arch.png}',
 ]
 const hastWith = (row: number, text: string): string[] => HAST.map((line, i) => (i === row - 1 ? text : line))
 
 /** 第 13 步：两处代码块高亮后 */
 const SHIKI = hastWith(4, 'pre（Shiki 已高亮，每个词带颜色）')
-SHIKI[5] = 'PinBlock > pre（Shiki 已高亮）'
+SHIKI[5] = 'div.code-pin > pre（Shiki 已高亮）'
 
 /** 第 16 步右栏换成的导出清单 */
 const EXPORTS = [
@@ -144,7 +143,7 @@ const STAGES: readonly Stage[] = [
     srcHl: null,
     srcTone: 'info',
     srcRef: at('mdx/src/loaders/adapter.ts', 98, 119),
-    text: 'Vite 加载 install.mdx?macro_id=…，transform 这一步轮到 fumadocs-mdx 的编译插件，它拿到这个文件的原文。注意这里顺手交出一个 addDependency 通道：之后谁调用它，就等于让 Vite 盯住那个文件——钉码的「改被钉代码页面跟着变」靠的就是它。',
+    text: 'Vite 加载 install.mdx?macro_id=…，transform 这一步轮到 fumadocs-mdx 的编译插件，它拿到这个文件的原文。注意这里顺手交出一个 addDependency 通道：之后哪道工序调用它，就等于让 Vite 盯住那个文件，remarkInclude 就用它。',
   }),
   stage({
     title: '找集合设置',
@@ -152,10 +151,10 @@ const STAGES: readonly Stage[] = [
     srcHl: null,
     srcTone: 'info',
     srcRef: at('mdx/src/loaders/mdx/index.ts', 71, 77),
-    tree: ['app/lib/source.ts 执行一遍，取出 docs.mdxOptions：', '  applyMdxPreset({', '    remarkPlugins: [remarkCodePin()]   ← 钉码从这来', '  })'],
+    tree: ['source.config.ts 执行一遍，取出 docs.mdxOptions：', '  applyMdxPreset({', '    remarkPlugins: sitePlugins.remarkPlugins', '  })', '（sitePlugins 由 app/lib/mdx-plugins.ts', '　汇总各功能的接线文件）'],
     treeTitle: '设置从哪来',
-    treeAdded: [1, 2, 3, 4],
-    text: '先弄清按谁的设置编译：凭网址后面的 macro_id 找到 lib/source.ts 里的 docs 集合，把那个文件执行一遍，取出 mdxOptions 和 schema——我们的钉码插件就是这样被带进来的。lib/source.ts 也被登记成依赖：改了它，所有页面都重新编译。',
+    treeAdded: [1, 2, 3, 4, 5, 6],
+    text: '先弄清按谁的设置编译：凭网址后面的 macro_id 找到定义集合的文件，把那个文件执行一遍，取出 mdxOptions 和 schema。本站定义集合的文件是 source.config.ts：docs 集合用 applyMdxPreset 接上 sitePlugins——app/lib/mdx-plugins.ts 汇总数学公式、术语标注与 app/features/mdx.generated.ts 里各功能的插件，钉码插件就在其中。定义集合的文件也被登记成依赖：改了它，所有页面都重新编译。',
   }),
   stage({
     title: '拆 frontmatter、校验',
@@ -188,7 +187,7 @@ const STAGES: readonly Stage[] = [
     tree: mdastWith(5, 'paragraph：（env.mdx 的内容）'),
     treeTitle: 'Markdown 语法树（mdast）',
     treeChanged: [5],
-    text: 'remarkInclude 找到 <include>，读出 env.mdx，把它的内容换进这个位置，再调 addDependency 登记依赖。引的是代码文件时，它还能只取其中一段（按 #region 标记）——这就是钉码要的「读别的文件、嵌进来、文件改了重新编译」的现成样板。',
+    text: 'remarkInclude 找到 <include>，读出 env.mdx，把它的内容换进这个位置，再调 addDependency 登记依赖——文件改了，页面跟着重新编译。引的是代码文件时，它还能只取其中一段（按 #region 标记）。',
   }),
   stage({
     title: 'remarkGfm',
@@ -240,9 +239,8 @@ const STAGES: readonly Stage[] = [
     srcTone: 'warn',
     tree: PINNED,
     treeTitle: 'Markdown 语法树（mdast）',
-    treeAdded: [9],
     treeChanged: [6, 7],
-    text: '站点用 applyMdxPreset({ remarkPlugins: [remarkCodePin()] }) 挂的插件，排在默认工序之后、structure 之前。它做三件事：① 找到 <Pin file lines hash blob />，读 src/setup.ts 第 3-9 行，和标签上的 hash、blob 比对算出绿黄红，把 <Pin> 换成 PinBlock（状态点、标题、黄灯时的增删行）包着一个普通的 code 节点——后面照常交给 Shiki 高亮；② <PinTree> 换成 PinTreeBlock 包 fumadocs 的文件树；③ 读过的文件都登记依赖，并用 replaceSource 登记它写成 Markdown 是什么样（给搜索与生成正本用）。源码窗口是站点自己写的 lib/source.ts。',
+    text: '站点的钉码插件，排在默认工序中间、structure 之前：接线文件 app/features/code-pin/mdx.ts（建站器写进站点）导出 remarkPlugins = [() => remarkCodePin({ pinner })]，pinner 是 createDiskPinner(站点目录)；汇总进 mdx.generated.ts 后，平台模板的 source.config.ts 用 applyMdxPreset 接上。这道工序认出原文里的 {/* ref */}、{/* tree */} 标记（树上是 mdxFlowExpression 节点），一次核对完，每处换成一个 codePin 节点：里面是普通的 code 节点（目录树是 fumadocs 的 Files > Folder…），状态写在节点转成 HTML 的属性上（一个 div，class="code-pin"、data-pin-status）。它不登记被钉文件的依赖，见后面的要点二。',
   }),
   stage({
     title: 'remarkStructure',
@@ -253,7 +251,7 @@ const STAGES: readonly Stage[] = [
     tree: [...MDAST, 'import arch.png', 'export structuredData'],
     treeTitle: 'Markdown 语法树（mdast）',
     treeAdded: [10],
-    text: '把标题和正文切成搜索记录，作为 export structuredData 挂到树上，后面的搜索接口用它。注意它只收标题、段落、引用、表格，以及没有子节点的组件标签——PinBlock 里包着一个 code 子节点，默认不算一条记录，钉进来的代码默认搜不到；口子是节点上的 data.structuredData：钉码插件在 PinBlock 节点上挂它（比如文件路径、函数名），这些内容就进搜索记录。',
+    text: '把标题和正文切成搜索记录，作为 export structuredData 挂到树上，后面的搜索接口用它。注意它只收标题、段落、引用、表格，以及没有子节点的组件标签——codePin 外框里包着一个 code 子节点，默认不算一条记录，钉进来的代码默认搜不到。节点上的 data.structuredData 是 fumadocs 留的入口，钉码插件没挂它。',
   }),
   stage({
     title: 'remarkPostprocess',
@@ -264,7 +262,7 @@ const STAGES: readonly Stage[] = [
     tree: [...MDAST, 'import arch.png', 'export structuredData', 'export _markdown（开了才有）', 'export frontmatter'],
     treeTitle: 'Markdown 语法树（mdast）',
     treeAdded: [11, 12],
-    text: 'fumadocs-mdx 收尾：frontmatter 没 title 就拿一级标题补上；mdx-export 里的值在这里写成 export。集合开了 includeProcessedMarkdown 时，remarkLLMs 也在这步读登记表，从原文切出整页 Markdown（<Pin> 换成那块代码、import/export 去掉），导出成 _markdown——llms.txt、每页 .md、页面上的「复制 Markdown」按钮都靠它。没开就没有这一行。',
+    text: 'fumadocs-mdx 收尾：frontmatter 没 title 就拿一级标题补上；mdx-export 里的值在这里写成 export。集合开了 includeProcessedMarkdown 时，remarkLLMs 也在这步从原文切出整页 Markdown（import/export 去掉），导出成 _markdown——llms.txt、每页 .md、页面上的「复制 Markdown」按钮都靠它。没开就没有这一行。',
   }),
   stage({
     title: '转成 HTML 语法树',
@@ -274,7 +272,7 @@ const STAGES: readonly Stage[] = [
     tree: HAST,
     treeTitle: 'HTML 语法树（hast）',
     treeAdded: [1, 2, 3, 4, 5, 6, 7, 8],
-    text: 'MDX 编译器把 Markdown 语法树转成 HTML 语法树：heading 变 h2，paragraph 变 p，code 变 pre。<PinBlock>、<Files> 这类组件标签原样保留，等渲染时再换成真正的组件；PinBlock 里面那个 code 节点也变成了 pre。这一步在 @mdx-js/mdx 内部（remark-rehype），fumadocs 没有代码。',
+    text: 'MDX 编译器把 Markdown 语法树转成 HTML 语法树：heading 变 h2，paragraph 变 p，code 变 pre。<Files> 这类组件标签原样保留，等渲染时再换成真正的组件；codePin 外框转成一个 div（class="code-pin"、data-pin-status），里面那个 code 节点也变成了 pre。这一步在 @mdx-js/mdx 内部（remark-rehype），fumadocs 没有代码。',
   }),
   stage({
     title: 'rehypeCode',
@@ -285,7 +283,7 @@ const STAGES: readonly Stage[] = [
     tree: SHIKI,
     treeTitle: 'HTML 语法树（hast）',
     treeChanged: [4, 6],
-    text: '代码块用 Shiki 高亮，结果直接写进树里，浏览器不用再跑高亮。钉码代码块里的代码也在这一步被高亮——这就是让钉码产出普通 code 节点、而不是自己渲染代码的好处：高亮、复制按钮都复用 fumadocs 现成的。',
+    text: '代码块用 Shiki 高亮，结果直接写进树里，浏览器不用再跑高亮。钉码外框里的代码也在这一步被高亮——这就是让钉码工序产出普通 code 节点、而不是自己渲染代码的好处：高亮、复制按钮都复用 fumadocs 现成的。',
   }),
   stage({
     title: '站点的 rehype 插件',
@@ -295,7 +293,7 @@ const STAGES: readonly Stage[] = [
     srcRef: at('mdx/src/config/preset.ts', 116, 123),
     tree: HAST,
     treeTitle: 'HTML 语法树（hast）',
-    text: '站点挂的 rehype 插件排在这里（applyMdxPreset({ rehypePlugins: [...] })）。remark 改的是「稿子」：标题、段落、代码块；rehype 改的是「排好版的网页」：h2、pre、带颜色的 span。只有要改的东西在 Markdown 里没有、只在最终 HTML 里才出现时才需要写 rehype 插件。钉码放在 remark，我们目前用不到这个位置。',
+    text: '站点挂的 rehype 插件排在这里（applyMdxPreset({ rehypePlugins: [...] })）。remark 改的是「稿子」：标题、段落、代码块；rehype 改的是「排好版的网页」：h2、pre、带颜色的 span。只有要改的东西在 Markdown 里没有、只在最终 HTML 里才出现时才需要写 rehype 插件。钉码放在 remark：它把标记换成 codePin 外框包着普通 code 节点，高亮就由上一步的 rehypeCode 自动完成。',
   }),
   stage({
     title: 'rehypeToc',
@@ -317,7 +315,7 @@ const STAGES: readonly Stage[] = [
     treeTitle: '最后交给 Vite 的 JS 模块',
     treeAdded: [],
     treeChanged: [],
-    text: '树变成 JS 交回 Vite。每个标签都写成 _components.xxx，渲染时先查站点传进来的组件映射表：fumadocs 的组件、我们的 PinBlock 就是这样接上的。映射表里少了哪个，渲染时直接报错；站点没装钉码插件、<Pin> 原样留到这里，也会报「Pin 没有定义」，不会静默显示空白。',
+    text: '树变成 JS 交回 Vite。组件标签写成 _components.xxx，渲染时先查站点传进来的组件映射表：fumadocs 的组件、文件树钉里的 Files、Folder、File（由平台登记在这里）就是这样接上的；映射表里少了哪个，渲染时直接报错，不会静默显示空白。钉码外框转成 HTML 是普通的 div，不经组件映射表。',
   }),
 ]
 
@@ -370,7 +368,7 @@ export function CompileFlow(): JSX.Element {
   return (
     <Stepper steps={STAGES} interval={6000} label="编译一个 .mdx 的十七道工序">
       {(stageAt, index) => (
-        <div className="grid gap-2 md:grid-cols-[1fr_1.1fr_1.3fr]">
+        <div className="cf-stage">
           <Pane
             title="install.mdx（原文）"
             icon="file"

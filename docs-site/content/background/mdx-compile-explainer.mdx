@@ -1,13 +1,12 @@
 ---
 title: 编译 .mdx 的工序（组件版）
 docfirst: none
-description: 「编译 .mdx 的工序」用 @godcreator/explainer 的组件重做的试验页：不进 iframe，动画、说明与代码都是站内原生
+description: 「编译 .mdx 的工序」用 @godcreator/explainer 的讲解组件重画的一版：不进 iframe，动画、说明与代码都是站内原生
 ---
 
 import { CompileFlow } from './mdx-compile-explainer/compile-flow'
-import { OutputsPaths } from './mdx-compile-explainer/outputs-paths'
 
-[HTML 原版](/background/mdx-compile)的组件重做试验：整页是普通 MDX，动画用 `@godcreator/explainer` 的外壳与零件画出来。
+这一页是 [HTML 版](/background/mdx-compile) 用 `@godcreator/explainer` 的讲解组件重画的一版：整页是普通 MDX，动画用外壳与零件画出来。
 和 iframe 版的差别：页面进同一棵页面树、文字进搜索、标题进本页目录，主题切换照常跟随，评论也能定位到页里的任意一节。
 
 ## 十七道工序
@@ -16,28 +15,18 @@ import { OutputsPaths } from './mdx-compile-explainer/outputs-paths'
 
 <CompileFlow />
 
-## 同一正本的两条出路
-
-第 9 道工序后面，钉码插件用 `replaceSource` 登记了 `<Pin>` 的 Markdown 形式。同一份正本，站点与命令行各读一次：
-
-<OutputsPaths />
+站点的编译与生成正本是两条独立的路：站点这条就是上面的十七道工序；仓根的 README、AGENTS.md、SKILL.md 这些生成物走另一条路，由 doc-export 在命令行里渲染，有自己的组件名册与写出规则，见 [doc-export](/packages/doc-export)。
 
 ## 两个要点
 
-**必须用 `applyMdxPreset` 包一层**。集合上直接写 `mdxOptions: { remarkPlugins: [x] }` 时，fumadocs-mdx 拿来就用、不再套默认工序：标题没了 id、没有搜索记录、没有本页目录、代码不高亮。写成函数时插件接在所有默认工序之后，排在 structure 后面：
+**必须用 `applyMdxPreset` 包一层**。集合上直接写 `mdxOptions: { remarkPlugins: [x] }` 时，fumadocs-mdx 拿来就用、不再套默认工序：标题没了 id、没有搜索记录、没有本页目录、代码不高亮。写成数组时插件插在默认工序中间、structure 之前。本站 `source.config.ts` 的 docs 集合就这么写，插件来自 `sitePlugins`（`app/lib/mdx-plugins.ts` 汇总各功能的接线文件）：
 
 ```ts
 // 集合设置：数组形式插在默认工序中间、structure 之前
-applyMdxPreset({ remarkPlugins: [remarkCodePin()] })
+applyMdxPreset({ remarkPlugins: sitePlugins.remarkPlugins })
 
 // 直接写（错了）：默认工序全部消失
-{ remarkPlugins: [remarkCodePin()] }
+{ remarkPlugins: sitePlugins.remarkPlugins }
 ```
 
-**改被钉的代码要让页面跟着变，靠登记依赖**。插件读别的文件时调 `addDependency`，fumadocs-mdx 把它转成 Vite 的 `addWatchFile`，Vite 就让这一页失效重编。现在的钉码插件（code-pin）没登记依赖：dev 下改了被钉的代码，页面不会变，要再存一下 .mdx 或重启。
-
-```ts
-// 钉码插件里（示意）
-const code = readLines('src/setup.ts', 3, 9)
-compiler.addDependency('src/setup.ts')   // ← Vite 从此盯住这个文件
-```
+**dev 下改被钉的代码，页面不会跟着变**。fumadocs-mdx 给 remark 插件留了 `addDependency`（remarkInclude 就用它），remarkCodePin 没用它，所以 dev 下改了被钉的代码，页面不会变，要再存一下这一页的 .mdx 或重启开发服务。

@@ -41,7 +41,7 @@
 <p class="crumbs">fumadocs 原理</p>
 <h1>一张图走完 fumadocs 的全流程</h1>
 <p class="lead">从运行 <code>react-router dev</code> 开始，到页面显示、接管、切页、改文件，再到 build + start 下有什么不同，全在下面这一张图里。每一步只亮起正在干活的那几块，右边同步显示正在执行的那段代码。</p>
-<p class="meta">左边是浏览器；中间是服务器进程，从上到下是 Vite、React Router、执行后留在内存里的模块；底下是磁盘上的文件。说明前面的色块表示这一步用的是谁的机制。代码按官方示例 <code>examples/react-router</code> 简化。打开「加上我们的功能」，橙色的部分是评论和钉码要加的东西，包名和导出名都是暂定的。</p>
+<p class="meta">左边是浏览器；中间是服务器进程，从上到下是 Vite、React Router、执行后留在内存里的模块；底下是磁盘上的文件。说明前面的色块表示这一步用的是谁的机制。代码按官方示例 <code>examples/react-router</code> 简化。打开「加上我们的功能」，橙色的部分是本仓的功能包接进站点后的样子：comments 的评论、code-pin 的钉码，接线文件由建站器写进站点。</p>
 
 <div class="toolbar"><button id="ours-toggle">加上我们的功能（评论、钉码）</button></div>
 <div class="toolbar" id="phases"></div>
@@ -81,16 +81,16 @@ const SOURCE_TS_BASE = [
   '',
   "export const docs = defineDocs({ dir: 'content/docs' })",
   "export const source = loader({ source: docs.toFumadocsSource(), baseUrl: '/docs' })"];
-const SOURCE_TS_OURS = [
-  "import { loader } from 'fumadocs-core/source'",
-  "import { defineDocs } from 'fumadocs-mdx/macro'",
-  "import { applyMdxPreset } from 'fumadocs-mdx/config'",
-  "import { remarkCodePin } from '@godcreator/code-pin/site'",
+const SOURCE_CONFIG_OURS = [
+  "import { applyMdxPreset, defineDocs } from 'fumadocs-mdx/config'",
+  "import { sitePlugins } from './app/lib/mdx-plugins'",
+  '',
   'export const docs = defineDocs({',
-  "  dir: 'content/docs',",
-  '  docs: { mdxOptions: applyMdxPreset({ remarkPlugins: [remarkCodePin()] }) },',
-  '})',
-  "export const source = loader({ source: docs.toFumadocsSource(), baseUrl: '/docs' })"];
+  "  dir: 'content',",
+  '  docs: { mdxOptions: applyMdxPreset({',
+  '    remarkPlugins: sitePlugins.remarkPlugins,',
+  '  }) },',
+  '})'];
 const ROOT_TSX = ['<html lang="zh-CN">', '  <head><Meta /><Links /></head>', '  <body>', '    <RootProvider>{children}</RootProvider>', '    <Scripts />', '  </body>', '</html>'];
 const CODE = {
   viteConfig: { file: 'vite.config.ts', hl: 4, lines: [
@@ -100,35 +100,34 @@ const CODE = {
     'export default defineConfig({',
     '  plugins: [fumadocsMdx(), tailwindcss(), reactRouter()],',
     '})'] },
-  viteConfigOurs: { file: 'vite.config.ts', hl: 4, ours: [5], lines: [
+  viteConfigOurs: { file: 'vite.config.ts', hl: 5, ours: [3, 5], lines: [
     "import { reactRouter } from '@react-router/dev/vite'",
     "import { fumadocsMdx } from 'fumadocs-mdx/vite'",
     "import tailwindcss from '@tailwindcss/vite'",
+    "import { godDocsite } from '@godcreator/god-docsite/vite'",
     'export default defineConfig({',
-    '  plugins: [fumadocsMdx(), tailwindcss(), reactRouter()],',
-    "  ssr: { noExternal: ['@godcreator/god-docsite'] },   // 我们的包名不以 fumadocs- 开头",
+    '  plugins: [fumadocsMdx(), tailwindcss(), godDocsite({ collections }), reactRouter()],',
     '})'] },
   routes: { file: 'app/routes.ts', hl: 2, lines: [
     'export default [', "  index('routes/home.tsx'),", "  route('docs/*', 'routes/docs.tsx'),", "  route('api/search', 'routes/search.ts'),", ']'] },
   routesOurs: { file: 'app/routes.ts', hl: 2, ours: [4], lines: [
-    'export default [', "  index('routes/home.tsx'),", "  route('docs/*', 'routes/docs.tsx'),", "  route('api/search', 'routes/search.ts'),", "  route('api/comments', 'routes/comments.ts'),", ']'] },
+    'export default [', "  index('routes/home.tsx'),", "  route('docs/*', 'routes/docs.tsx'),", "  route('api/search', 'routes/search.ts'),", "  route('comments', 'features/comments/comments'),", ']'] },
   docsImports: { file: 'app/routes/docs.tsx', hl: 2, lines: [
     "import { DocsLayout } from 'fumadocs-ui/layouts/docs'",
     "import { DocsPage, DocsBody } from 'fumadocs-ui/layouts/docs/page'",
     "import { docs, source } from '@/lib/source'",
     '…'] },
-  docsImportsOurs: { file: 'app/routes/docs.tsx', hl: 2, ours: [3], lines: [
-    "import { DocsLayout } from 'fumadocs-ui/layouts/docs'",
-    "import { DocsPage, DocsBody } from 'fumadocs-ui/layouts/docs/page'",
-    "import { docs, source } from '@/lib/source'",
-    "import { readComments, CommentsPanel } from '@godcreator/comments/site'",
+  docsImportsOurs: { file: 'app/routes/page.tsx', hl: 1, ours: [1, 2], lines: [
+    "import { pageThreadsOf } from '@godcreator/comments/site/server'",
+    "import { CommentsDock, commentsAccessOf } from '@godcreator/comments/site'",
+    "import { site } from '@/lib/site.server'",
     '…'] },
   sourceMacro: { file: 'app/lib/source.ts', hl: 3, lines: SOURCE_TS_BASE },
-  sourceMacroOurs: { file: 'app/lib/source.ts', hl: 6, ours: [2, 3, 6], lines: SOURCE_TS_OURS },
+  sourceMacroOurs: { file: 'source.config.ts', hl: 5, ours: [1, 5, 6], lines: SOURCE_CONFIG_OURS },
   installMdx: { file: 'content/docs/install.mdx', hl: 3, lines: ['---', 'title: 安装', '---', '## 用 pnpm 安装', '先装依赖……'] },
-  installMdxOurs: { file: 'content/docs/install.mdx', hl: 5, ours: [5, 6], lines: ['---', 'title: 安装', '---', '## 用 pnpm 安装', '先装依赖……', '<Pin file="src/setup.ts" lines="3-9" hash="…" blob="…" />', '<PinTree dir="src" depth="1" hash="…" />'] },
+  installMdxOurs: { file: 'content/docs/install.mdx', hl: 5, ours: [5, 6], lines: ['---', 'title: 安装', '---', '## 用 pnpm 安装', '先装依赖……', '{/* ref file="src/setup.ts" lines="3-9" hash="…" blob="…" */}', '{/* tree dir="src" depth="1" hash="…" */}'] },
   sourceLoader: { file: 'app/lib/source.ts', hl: 4, lines: SOURCE_TS_BASE },
-  sourceLoaderOurs: { file: 'app/lib/source.ts', hl: 8, ours: [2, 3, 6], lines: SOURCE_TS_OURS },
+  sourceLoaderOurs: { file: 'source.config.ts', hl: 4, ours: [1, 5, 6], lines: SOURCE_CONFIG_OURS },
   docsLoader: { file: 'app/routes/docs.tsx', hl: 1, lines: [
     'export async function loader({ params }) {',
     "  const page = source.getPage(params['*'].split('/'))",
@@ -137,13 +136,13 @@ const CODE = {
     '    pageTree: await source.serializePageTree(source.getPageTree()),',
     '  }',
     '}'] },
-  docsLoaderOurs: { file: 'app/routes/docs.tsx', hl: 5, ours: [5], lines: [
-    'export async function loader({ params }) {',
-    "  const page = source.getPage(params['*'].split('/'))",
+  docsLoaderOurs: { file: 'app/routes/page.tsx', hl: 3, ours: [3, 4], lines: [
+    'export async function loader(args) {',
+    '  const page = sitePageData(args, site)',
     '  return {',
-    '    path: page.path,',
-    '    pageTree: await source.serializePageTree(source.getPageTree()),',
-    '    comments: await readComments(page.path),   // 每次请求现读',
+    '    page,',
+    "    threads: pageThreadsOf({ entries: site.commentEntries, people: site.people(), page: page.key }),",
+    '    access: commentsAccessOf(site.identity()),',
     '  }',
     '}'] },
   docsComponent: { file: 'app/routes/docs.tsx（简化）', hl: 4, lines: [
@@ -158,26 +157,27 @@ const CODE = {
     '    </DocsLayout>',
     '  )',
     '}'] },
-  docsComponentOurs: { file: 'app/routes/docs.tsx（简化；评论面板放哪个位置待定）', hl: 7, ours: [7], lines: [
-    'export default function Page({ loaderData }) {',
-    '  const page = docs.getPage(loaderData.path)',
-    '  const Mdx = page.body',
+  docsComponentOurs: { file: 'app/routes/page.tsx（简化）', hl: 6, ours: [6, 7], lines: [
+    'export default function Page() {',
+    '  const { page, threads, access } = useLoaderData()',
     '  return (',
-    '    <DocsLayout tree={loaderData.pageTree}>',
-    '      <DocsPage toc={page.toc}>',
-    '        <DocsBody><Mdx components={getMDXComponents()} /></DocsBody>',
-    '        <CommentsPanel comments={loaderData.comments} />',
-    '      </DocsPage>',
-    '    </DocsLayout>',
+    '    <>',
+    '      <SitePage page={page} />',
+    '      <CommentsDock pagePath={page.key} action="/comments"',
+    '        threads={threads} access={access} … />',
+    '    </>',
     '  )',
     '}'] },
-  mdxComponentsOurs: { file: 'app/components/mdx.tsx（组件名暂定）', hl: 5, ours: [1, 2, 5], lines: [
-    "import defaultMdxComponents from 'fumadocs-ui/mdx'",
-    "import { Files, Folder, File } from 'fumadocs-ui/components/files'",
-    "import { PinBlock, PinTreeBlock } from '@godcreator/code-pin/site'",
+  mdxComponentsOurs: { file: 'app/lib/mdx-components.tsx', hl: 5, ours: [2, 3], lines: [
+    "import defaultMdxComponents from '@fumadocs/base-ui/mdx'",
+    "import { siteMdxComponents } from '@godcreator/god-docsite/react'",
+    "import { featureRuntime } from '../features/runtime.generated.ts'",
     '',
-    'export function getMDXComponents(components) {',
-    '  return { ...defaultMdxComponents, Files, Folder, File, PinBlock, PinTreeBlock, ...components }',
+    'export const mdxComponents = {',
+    '  ...defaultMdxComponents,',
+    '  ...siteMdxComponents,',
+    '  ...featureRuntime.mdxComponents,',
+    '  a: siteLinkComponent(featureRuntime.linkKinds),',
     '}'] },
   rootShell: { file: 'app/root.tsx（简化）', hl: 3, lines: ROOT_TSX },
   rootScripts: { file: 'app/root.tsx（简化）', hl: 4, lines: ROOT_TSX },
@@ -188,12 +188,13 @@ const CODE = {
     "    return <Link to={href} prefetch={prefetch ? 'intent' : 'none'} {...props} />",
     '  },',
     '}'] },
-  commentsAction: { file: 'app/routes/comments.ts（站点新加的路由）', hl: 4, ours: [0, 2, 3, 4, 5], lines: [
-    "import { writeComment } from '@godcreator/comments/site/server'",
+  commentsAction: { file: 'app/features/comments/comments.tsx（comments 包的接线文件，建站器写进站点）', hl: 4, ours: [0, 2, 3, 4, 5], lines: [
+    "import { handleCommentWrite, threadsByPageOf } from '@godcreator/comments/site/server'",
     '',
+    '/** 评论写入：各页的评论都提交到 /comments */',
     'export async function action({ request }) {',
-    '  // 在这里核对身份',
-    '  return writeComment(request)',
+    '  return handleCommentWrite({ request, commentsDir: site.commentsDir,',
+    '    people: site.people(), identity: site.identity(), trustedOrigin: site.trustedOrigin() })',
     '}'] },
 };
 const NO_CODE = text => ({ empty: text });
@@ -212,71 +213,71 @@ const STEP_DEFS = [
     at: { procTitle: { t: 'Node 进程：react-router dev（Vite 在里面）' }, dViteConfig: { hl: true },
       chipMdx: { o: 1 }, chipRR: { o: 1 }, chipTw: { o: 1 }, chipVite: { o: 1 } },
     cap: '运行 <code>react-router dev</code>，启动一个 Node 进程，Vite 就在这个进程里。Vite 读站点的 <code>vite.config.ts</code>，把里面列的插件装上流水线。这时一个文件都还没编译。',
-    oursCap: '我们的包名不以 fumadocs- 开头，站点要在这里自己把它加进 <code>ssr.noExternal</code>，让 Vite 处理它。' },
+    oursCap: '站点多挂一个平台包的 vite 插件 <code>godDocsite()</code>：它认出平台与功能包，让它们经 Vite 处理；开发服务的端口与内容目录也归它管。' },
 
   { phase: '第一次打开', who: ['rr', 'site'], code: CODE.routes, oursCode: CODE.routesOurs,
     at: { addr: { t: 'localhost/docs/install' }, req: { x: 215, y: 272, o: 1 }, rRoutes: { hl: true }, chipRR: { hl: true }, dRoutes: { hl: true } },
     cap: '浏览器请求 <code>/docs/install</code>。React Router 的插件接住这个请求，按站点 <code>routes.ts</code> 里的 <code>docs/*</code> 找到 <code>routes/docs.tsx</code>。',
-    oursCap: '站点的 routes.ts 里多了一条 <code>api/comments</code>，指向写评论用的 <code>routes/comments.ts</code>，后面「发一条评论」会用到。' },
+    oursCap: '站点的路由表里多了一条 <code>comments</code>，指向建站器从 comments 包写进站点的全站评论页 <code>/comments</code>：它兼做评论写入的 action，后面「发一条评论」会用到。' },
   { who: ['vite'], code: CODE.docsImports, oursCode: CODE.docsImportsOurs,
     at: { pkDocs: { x: 425, y: 128, o: 1 }, chipVite: { hl: true }, dDocs: { hl: true } },
     cap: '要运行 docs.tsx，先请 Vite 编译它：读出文件，过插件流水线，Vite 自带的那部分把 TSX 变成 JS。它开头 import 了 <code>lib/source.ts</code>，于是 Vite 接着去编译那个文件。',
-    oursCap: 'docs.tsx 还 import 了我们的包（readComments、CommentsPanel），Vite 也会去编译它，就像编译 fumadocs-ui 一样。' },
+    oursCap: '页面路由还 import 了 comments 包：loader 用的 <code>pageThreadsOf</code>、界面用的 <code>CommentsDock</code>（右下角的评论收件箱与正文下方的浮窗）。接线文件由建站器写进站点，Vite 去编译它们，就像编译 fumadocs-ui 一样。' },
   { who: ['vite', 'mdx'], code: CODE.sourceMacro, oursCode: CODE.sourceMacroOurs,
     at: { pkDocs: { o: 0 }, pkSource: { x: 425, y: 128, o: 1 }, chipMdx: { hl: true }, dSource: { hl: true } },
-    oursAt: { pinTag: { o: 1, hl: true }, pinRing: { o: 1 } },
+    oursAt: { pinTag: { o: 1, hl: true }, pinRing: { o: 1 }, dSource: { t: 'source.config.ts' } },
     cap: 'lib/source.ts 进流水线。fumadocs-mdx 认出 <code>defineDocs</code>，把它改写成 Vite 的 <code>import.meta.glob</code>，意思是「把 content/docs 里的文件全部导入」。',
-    oursCap: '集合设置里挂了我们的钉码插件 <code>remarkCodePin()</code>：它不是 Vite 插件，而是 fumadocs-mdx 编译 .mdx 时的一道工序，所以画成挂在 fumadocs-mdx 上。这道工序具体排在哪、做什么，见<a href="/background/mdx-compile">编译 .mdx 那一页</a>。' },
+    oursCap: '本站定义集合的文件是 <code>source.config.ts</code>：docs 集合用 <code>applyMdxPreset</code> 接上汇总来的各功能插件——<code>app/lib/mdx-plugins.ts</code> 汇总数学公式、术语标注与 <code>app/features/mdx.generated.ts</code> 里各功能的接线文件，code-pin 的接线文件就在其中。钉码插件 remarkCodePin 不是 Vite 插件，而是 fumadocs-mdx 编译 .mdx 时的一道工序，所以画成挂在 fumadocs-mdx 上；具体排在哪、做什么，见<a href="/background/mdx-compile">编译 .mdx 那一页</a>。' },
   { who: ['vite', 'mdx'], oursWho: ['vite', 'mdx', 'ours'], code: CODE.installMdx, oursCode: CODE.installMdxOurs,
     at: { pkSource: { o: 0 }, pkIntro: { x: 300, y: 128, o: 1 }, pkInstall: { x: 425, y: 128, o: 1 }, chipMdx: { hl: true }, dIntro: { hl: true }, dInstall: { hl: true } },
     oursAt: { pinTag: { hl: true }, dPinned: { hl: true } },
     cap: 'Vite 展开 glob，把每个 .mdx 也送进流水线。fumadocs-mdx 把它们编译成 JS：正文变成一个 React 组件，另外抽出标题和本页目录。',
-    oursCap: '编到 install.mdx 里的 <code>&lt;Pin&gt;</code> 时，钉码插件读被钉的 <code>src/setup.ts</code> 第 3–9 行，和标签上的 hash、blob 比对算出状态，换成钉码代码块（外层 <code>&lt;PinBlock&gt;</code>，里面是普通代码块，照常被 Shiki 高亮）；<code>&lt;PinTree&gt;</code> 换成 <code>&lt;PinTreeBlock&gt;</code> 包着 fumadocs-ui 的文件树。读过的文件都登记依赖。' },
+    oursCap: '编到 install.mdx 里的 <code>{/* ref */}</code> 标记时，钉码插件读被钉的 <code>src/setup.ts</code> 第 3–9 行，核对算出状态，换成一个 codePin 外框：里面是普通代码块，照常被 Shiki 高亮；<code>{/* tree */}</code> 标记换成 codePin 外框包 fumadocs 的文件树。插件不登记被钉文件的依赖——「改被钉的代码」那一步讲这意味着什么。' },
   { who: ['core', 'site'], code: CODE.sourceLoader, oursCode: CODE.sourceLoaderOurs,
     at: { pkIntro: { x: 635, y: 436, o: 0 }, pkInstall: { x: 635, y: 458, o: 0 }, gMdxMods: { o: 1 }, modIntro: { o: 1 }, modInstall: { o: 1 },
       mSource: { o: 1, hl: true }, gCore: { o: 1 }, coreRow0: { o: 1 }, coreRow1: { o: 1 }, coreRow2: { o: 1 }, coreTree: { o: 1 } },
     oursAt: { gOurs: { o: 1 } },
     cap: '编译好的模块开始执行，结果留在内存里。lib/source.ts 执行到 <code>loader()</code>：fumadocs-core 收下所有页面，建好「网址 → 页面」的表和侧栏树。',
-    oursCap: '我们的包也作为普通模块加载进来。它只是一组函数和组件，没有自己的流程，等站点来调用。' },
+    oursCap: 'comments、code-pin 也作为普通模块加载进来：接线文件由建站器写进站点（<code>app/features/</code>），它们只是一组函数和组件，没有自己的流程，等站点来调用。' },
   { who: ['rr', 'core'], oursWho: ['rr', 'core', 'ours'], code: CODE.docsLoader, oursCode: CODE.docsLoaderOurs,
     at: { req: { x: 388, y: 272 }, rLoader: { hl: true }, aLookup: { o: 1 }, coreRow1: { hl: true } },
     oursAt: { aReadComments: { o: 1 }, dComments: { hl: true } },
     cap: 'React Router 运行 docs.tsx 的 <b>loader</b>（只在服务器跑）。它调 <code>source.getPage()</code> 查表拿到本页，再把目录树一起交出去。',
-    oursCap: '站点在同一个 loader 里多调一个我们的 <code>readComments()</code>：从磁盘的 <code>comments/</code> 现读这一页的评论，一起返回。评论不经过 Vite，也不进 fumadocs-core 的表。' },
+    oursCap: '页面路由的 loader 还调 comments 包的 <code>pageThreadsOf()</code>：从评论集合取这一页的评论串（评论是 fumadocs-mdx 的一个集合，条目从磁盘的 <code>comments/</code> 来），一起返回。评论不进 fumadocs-core 的表。' },
   { who: ['rr', 'ui', 'mdx'], oursWho: ['rr', 'ui', 'mdx', 'ours'], code: CODE.docsComponent, oursCode: CODE.docsComponentOurs,
     at: { req: { o: 0 }, rComp: { hl: true }, aCompUi: { o: 1 }, gUi: { o: 1 } },
     cap: 'React Router 拿 loader 的结果运行 docs.tsx 的<b>组件</b>：fumadocs-ui 的 DocsLayout、DocsPage 搭出侧栏和本页目录，中间放 install.mdx 编译出来的正文组件，在服务器上渲染成 HTML。',
-    oursCap: '站点把我们的 <code>CommentsPanel</code> 放进 DocsPage，传入 loader 读到的评论；正文里的 <code>&lt;PinBlock&gt;</code>、<code>&lt;PinTreeBlock&gt;</code>、<code>&lt;Files&gt;</code> 按组件映射表（<code>components/mdx.tsx</code>）换成真正的组件。' },
+    oursCap: '页面路由把 comments 包的 <code>CommentsDock</code> 挂在正文外（右下角的本页评论收件箱、正文下方的浮窗），loader 读到的评论串传给它。正文里没有钉码组件——钉码外框转成 HTML 是普通 div；文件树钉里的 <code>&lt;Files&gt;</code>、<code>&lt;Folder&gt;</code>、<code>&lt;File&gt;</code> 是组件，按组件映射表换成真正的组件。' },
   { who: ['rr', 'ui'], code: CODE.rootShell, oursCode: CODE.mdxComponentsOurs,
     at: { pkHtml: { x: 25, y: 300, o: 1 }, pageMock: { o: 1 }, pmActive: { o: 1 }, pmTitle: { o: 1 }, bStatus: { o: 1 } },
     oursAt: { pmPin: { o: 1 }, pmComments: { o: 1 } },
     cap: 'HTML 套上 root.tsx 的外壳（RootProvider 来自 fumadocs-ui）回到浏览器，页面马上显示出来。但这时只是静态的 HTML，侧栏点了没反应。',
-    oursCap: '页面里已经有钉码代码块、文件树和评论面板（右边是组件映射表里加上它们的那几行；少一个，渲染时直接报错）。' },
+    oursCap: '页面里已经有钉码外框、文件树和评论收件箱（右边是组件映射表怎么合出来的：fumadocs 默认的、平台的、各功能 feature.tsx 导出的合在一起；少了哪个，渲染时直接报错）。钉码外框不经它——那是普通 div。' },
 
   { phase: '接管', who: ['vite', 'rr'], code: CODE.rootScripts,
     at: { pkHtml: { o: 0 }, pkJs: { x: 25, y: 340, o: 1 }, chipRR: { hl: true }, bStatus: { t: '已接管', t2: '可以点了', hl: true } },
     cap: '浏览器按 <code>&lt;Scripts /&gt;</code> 再要这一页的 JS，也由 Vite 现场编译。React Router 的插件给浏览器的那份 docs.tsx 删掉了 loader：服务器专用的代码不进浏览器。JS 跑起来，把页面接管下来。',
-    oursCap: 'readComments 只在 loader 里用，跟着 loader 一起被删掉，不进浏览器；CommentsPanel 是组件，会进浏览器，接管后评论面板就能填写了。' },
+    oursCap: 'pageThreadsOf 只在 loader 里用，跟着 loader 一起被删掉，不进浏览器；CommentsDock 是组件，会进浏览器，接管后收件箱就能填写了。' },
 
   { phase: '站内跳转', who: ['ui', 'core', 'rr'], code: CODE.adapterLink,
     at: { pkJs: { o: 0 }, addr: { t: 'localhost/docs/config' }, pkData: { x: 388, y: 272, o: 1 }, rLoader: { hl: true }, coreRow2: { hl: true } },
     cap: '点侧栏的「配置」。fumadocs-ui 的链接经过框架适配层，其实就是 React Router 的 Link：不要整页，只请求 <code>/docs/config.data</code>。服务器只跑 loader，查表拿到 config 这一页。',
-    oursCap: 'loader 里的 readComments 也跟着跑，读的是 config 这一页的评论。' },
+    oursCap: 'loader 里的 pageThreadsOf 也跟着跑，读的是 config 这一页的评论。' },
   { who: ['rr', 'ui'], code: CODE.docsComponent, oursCode: CODE.docsComponentOurs,
     at: { pkData: { o: 0 }, pkReply: { x: 25, y: 340, o: 1 }, pmTitle: { t: '配置' }, pmActive: { y: 141, t: '配置', hl: true }, bStatus: { t: '只换了正文', t2: '侧栏没重建' } },
     oursAt: { pmComments: { t: '评论（0）', hl: true }, pmPin: { o: 0.25 } },
     cap: 'loader 只回「本页是谁 + 目录树」。React Router 在浏览器里重新运行组件；树没变，fumadocs-ui 不重建侧栏，只换正文和本页目录。config 的正文 JS 用到才下载，整页没刷新。',
-    oursCap: '评论面板换成 config 这一页的评论；这一页没有钉码，钉码块消失。' },
+    oursCap: '收件箱与浮窗换成 config 这一页的评论；这一页没有钉码，钉码外框消失。' },
 
   { phase: '发一条评论', oursOnly: true, who: ['ours', 'rr'], code: CODE.commentsAction,
     at: { pkReply: { o: 0 }, pkComment: { x: 590, y: 272, o: 1 }, rAction: { hl: true }, pmComments: { hl: true } },
-    cap: '在评论面板里写一条评论、提交。评论面板是一个表单，React Router 把它发给 <code>routes/comments.ts</code> 的 <b>action</b>：处理提交和写入的函数，和 loader 一样只在服务器跑。' },
+    cap: '在收件箱里写一条评论、提交。收件箱是一个表单，React Router 把它发给 <code>/comments</code> 的 <b>action</b>：处理提交和写入的函数，和 loader 一样只在服务器跑。这个路由是 comments 包的全站评论页，写入的 action 就挂在它身上。' },
   { oursOnly: true, who: ['ours'], code: CODE.commentsAction,
     at: { pkComment: { o: 0 }, pkWrite: { x: 522, y: 625, o: 1 }, dComments: { t: 'comments/（多了一条）', hl: true } },
-    cap: 'action 里先核对身份，再调我们的 <code>writeComment()</code>，把评论写进磁盘的 <code>comments/</code>。这一步不经过 Vite，也不重新编译任何东西。' },
+    cap: 'action 先核对来源与身份，再调 comments 包的 <code>handleCommentWrite</code>，把评论写进磁盘的 <code>comments/</code>。写评论不重新编译页面：评论是 fumadocs-mdx 集合里的文件，dev 下集合自己的文件监视会重新生成集合入口。' },
   { oursOnly: true, who: ['rr', 'ours'], code: CODE.docsLoaderOurs,
     at: { pkWrite: { o: 0 }, rLoader: { hl: true }, aReadComments: { o: 1 }, pkReply2: { x: 25, y: 340, o: 1 }, pmComments: { t: '评论（1）', hl: true } },
-    cap: 'action 一结束，React Router 自动重新跑当前页的 loader：readComments 读到刚写的评论，面板直接更新，页面不刷新。' },
+    cap: 'action 一结束，React Router 自动重新跑当前页的 loader：pageThreadsOf 读到刚写的评论，收件箱直接更新，页面不刷新。' },
 
   { phase: '改文件', who: ['vite', 'mdx'], code: NO_CODE('作者在编辑器里改了 content/docs/intro.mdx，存盘。'),
     at: { pkReply: { o: 0 }, dIntro: { t: 'intro.mdx（改了）', hl: true }, pkHmr: { x: 25, y: 380, o: 1 }, chipMdx: { hl: true }, modIntro: { t: 'intro 的 JS 模块（新）' } },
@@ -285,8 +286,8 @@ const STEP_DEFS = [
 
   { phase: '改被钉的代码', oursOnly: true, who: ['vite', 'mdx', 'ours'], code: NO_CODE('作者改了被钉的 src/setup.ts，存盘。'),
     at: { pkHmr: { o: 0 }, dIntro: { t: 'intro.mdx' }, dPinned: { t: 'src/setup.ts（改了）', hl: true }, pinTag: { hl: true },
-      pkPinHmr: { x: 25, y: 380, o: 1 }, modInstall: { t: 'install 的 JS 模块（新）' } },
-    cap: '改了被钉的 <code>src/setup.ts</code>。编译 install.mdx 时钉码插件登记过依赖，Vite 知道它被 install.mdx 引用，就重新编译 install.mdx，钉住的代码和状态点跟着更新、热更新到浏览器。<b>现在的钉码插件（code-pin）没登记依赖，这一步要新补上。</b>钉的代码过没过期的黄灯检查是 docfirst 的命令行，直接读文件，不在这张图里。' },
+      pmPin: { o: 1, t: '钉住的代码（旧）' }, noUpdate: { o: 1, t: 'Vite 不知道' } },
+    cap: '改了被钉的 <code>src/setup.ts</code>。编译 install.mdx 时钉码插件没向 Vite 登记依赖，Vite 不知道这个文件和 install.mdx 有关系，install.mdx 不重新编译，页面上的钉码外框还是旧的；要再存一下这一页或重启开发服务，才会重新核对。钉的代码过没过期的黄灯检查是 docfirst 的命令行，直接读文件，不在这张图里。' },
 
   { phase: 'build', who: ['vite', 'mdx'], code: NO_CODE('运行 react-router build。'),
     at: { phaseBox: { t: 'build + start' }, procTitle: { t: 'Node 进程：react-router build（跑一次就退出）' },
@@ -295,9 +296,9 @@ const STEP_DEFS = [
       mSource: { o: 0 }, gCore: { o: 0 }, coreRow0: { o: 0 }, coreRow1: { o: 0 }, coreRow2: { o: 0 }, coreTree: { o: 0 },
       gMdxMods: { o: 0 }, modIntro: { o: 0, t: 'intro 的 JS 模块' }, modInstall: { o: 0, t: 'install 的 JS 模块' }, gUi: { o: 0 }, aLookup: { o: 0 }, aCompUi: { o: 0 },
       pkAll: { x: 425, y: 128, o: 1 }, chipMdx: { hl: true }, chipVite: { hl: true } },
-    oursAt: { pkPinHmr: { o: 0 }, dPinned: { t: 'src/setup.ts' }, gOurs: { o: 0 }, aReadComments: { o: 0 }, pmPin: { o: 0.2 }, pmComments: { o: 0.2 }, pinTag: { hl: true } },
+    oursAt: { dPinned: { t: 'src/setup.ts' }, gOurs: { o: 0 }, aReadComments: { o: 0 }, pmPin: { o: 0.2, t: '钉住的代码' }, pmComments: { o: 0.2 }, pinTag: { hl: true }, noUpdate: { o: 0, t: '进程不知道' } },
     cap: 'build：Vite 把<b>所有</b>文件都过一遍流水线，不管有没有人要。插件全在这时被调用：fumadocs-mdx 把每个 .mdx 都编译好。',
-    oursCap: '钉码插件也在这时把被钉的代码嵌进页面、算好状态。评论不参与 build：它们不是要编译的内容。' },
+    oursCap: '钉码插件也在这时把被钉的代码嵌进页面、算好状态。评论不进页面产物：它们是运行时读写的数据。' },
   { who: ['vite'], code: NO_CODE('build 进程写完 build/ 就退出。'),
     at: { pkAll: { x: 560, y: 600, o: 0 }, gBuild: { o: 1 } },
     cap: '结果打包写进 <code>build/</code>：<code>build/server</code> 给服务器用，<code>build/client</code> 给浏览器用。然后 build 进程退出。' },
@@ -309,16 +310,16 @@ const STEP_DEFS = [
       gMdxMods: { o: 1 }, modIntro: { o: 1 }, modInstall: { o: 1 }, gUi: { o: 1 } },
     oursAt: { pinTag: { o: 0.12 }, pinRing: { o: 0.12 }, gOurs: { o: 1 } },
     cap: 'start：起一个新的 Node 进程，里面<b>没有 Vite，也没有插件</b>。它直接导入 build/server 里的成品；lib/source.ts 一执行就建好表，一直用到进程结束。',
-    oursCap: '钉码插件也不在了，钉住的代码已经在 build 时嵌进页面；我们包里的函数和组件照常加载。' },
+    oursCap: '钉码插件也不在了，钉住的代码已经在 build 时嵌进页面；comments、code-pin 这些功能包的模块照常加载。' },
   { who: ['rr', 'core', 'ui'], oursWho: ['rr', 'core', 'ui', 'ours'], code: CODE.docsLoader, oursCode: CODE.docsLoaderOurs,
     at: { addr: { t: 'localhost/docs/install' }, pageMock: { o: 1 }, pmActive: { o: 1, y: 123, t: '安装' }, pmTitle: { o: 1, t: '安装' },
       req2: { x: 388, y: 272, o: 1 }, rLoader: { hl: true }, coreRow1: { hl: true }, aLookup: { o: 1 }, aCompUi: { o: 1 }, pkHtml2: { x: 25, y: 340, o: 1 } },
     oursAt: { aReadComments: { o: 1 }, dComments: { hl: true }, pmPin: { o: 1 }, pmComments: { o: 1, t: '评论（2）' } },
     cap: '请求的走法和 dev 一样：routes.ts → loader 查表 → 组件渲染 → HTML 回浏览器，React Router 这部分没变。区别只是不再编译任何东西，浏览器要的 JS 也直接从 build/client 读。',
-    oursCap: 'readComments 照样每次现读 comments/，所以 start 下看到的评论也是最新的。' },
+    oursCap: '评论照样每次请求现读（loader 从评论集合取串），所以 start 下看到的评论也是最新的。' },
   { oursOnly: true, who: ['ours', 'rr'], code: CODE.commentsAction,
-    at: { req2: { o: 0 }, pkHtml2: { o: 0 }, pkComment: { x: 590, y: 272, o: 1 }, rAction: { hl: true }, dComments: { t: 'comments/（又多一条）', hl: true }, pmComments: { t: '评论（3）', hl: true } },
-    cap: 'start 下发评论照样有效：action 写文件、loader 现读，都发生在请求的时候，和 Vite 在不在无关。<b>这就是评论必须放在请求时、不能放在编译时的原因。</b>' },
+    at: { req2: { o: 0 }, pkHtml2: { o: 0 }, pmComments: { t: '评论（只读）', hl: true } },
+    cap: 'start 下收件箱没有写入口：发布版是只读的，写入前要核对身份，start 下身份这一层一律只读，评论的增改删都回到 dev 里做（协作是各人在本机的 dev 里改、经 git 同步）。页面上的评论还是 loader 每次请求现读的。' },
   { who: ['site'], code: NO_CODE('作者又改了 content/docs/intro.mdx。'),
     at: { req2: { o: 0 }, pkHtml2: { o: 0 }, dIntro: { t: 'intro.mdx（改了）', hl: true }, noUpdate: { o: 1, hl: true } },
     oursAt: { pkComment: { o: 0 } },
@@ -392,15 +393,15 @@ function draw(s, { box, group, arrowHead }) {
   box('rLoader', { w: 190, h: 40, color: C.rr, t: 'docs.tsx · loader', t2: '只在服务器跑', fs: 12 });
   box('rComp', { w: 290, h: 40, color: C.rr, t: 'docs.tsx · 组件', t2: '渲染成 HTML', fs: 12 });
   arrow(s, 'M325,242 H341', arrowHead); arrow(s, 'M535,242 H551', arrowHead);
-  box('rAction', { w: 130, h: 28, color: C.ours, t: 'comments.ts · action', fs: 11 });
+  box('rAction', { w: 130, h: 28, color: C.ours, t: '/comments · action', fs: 11 });
 
   panel(s, 200, 324, 660, 176, C.node, '执行后留在内存里的模块', { size: 12 });
   box('mSource', { w: 150, h: 40, color: C.site, t: 'lib/source.ts', t2: '三个包在这里接上', fs: 12 });
   const gOurs = group('gOurs');
-  panel(gOurs, 205, 408, 170, 84, C.ours, '我们的包（普通库）', { size: 11.5 });
+  panel(gOurs, 205, 408, 170, 84, C.ours, '功能包（普通库）', { size: 11.5 });
   label(gOurs, 215, 446, 'remarkCodePin：钉码工序', { size: 10.5 });
-  label(gOurs, 215, 464, 'readComments、writeComment', { size: 10.5 });
-  label(gOurs, 215, 482, 'CommentsPanel、PinBlock 等', { size: 10.5 });
+  label(gOurs, 215, 464, 'CommentsDock、CommentThread', { size: 10.5 });
+  label(gOurs, 215, 482, 'handleCommentWrite 等', { size: 10.5 });
   const gCore = group('gCore');
   panel(gCore, 385, 350, 220, 140, C.core, 'fumadocs-core 的表和树', { size: 12 });
   ['/docs/intro → intro', '/docs/install → install', '/docs/config → config'].forEach((t, i) => box('coreRow' + i, { w: 200, h: 20, color: C.core, t, fs: 11, align: 'start', weight: 500 }));
@@ -453,10 +454,9 @@ function draw(s, { box, group, arrowHead }) {
   box('pkData', { ...PACKET, color: C.rr, t: 'config.data' });
   box('pkReply', { ...PACKET, color: C.rr, t: '{ 本页, 目录树 }' });
   box('pkComment', { ...PACKET, color: C.ours, t: '提交一条评论' });
-  box('pkWrite', { ...PACKET, color: C.ours, t: 'writeComment()' });
+  box('pkWrite', { ...PACKET, color: C.ours, t: '写入评论文件' });
   box('pkReply2', { ...PACKET, color: C.rr, t: '{ …, 评论 }' });
   box('pkHmr', { ...PACKET, color: C.vite, t: '热更新 intro' });
-  box('pkPinHmr', { ...PACKET, color: C.vite, t: '热更新 install' });
   box('pkAll', { ...PACKET, color: C.site, t: '所有文件' });
   box('req2', { ...PACKET, color: C.rr, t: 'GET /docs/install' });
   box('pkHtml2', { ...PACKET, color: C.rr, t: 'HTML' });
@@ -483,7 +483,7 @@ function buildInit(withOurs) {
     pkIntro: { x: 365, y: 550, o: 0 }, pkInstall: { x: 365, y: 576, o: 0 },
     pkHtml: { x: 555, y: 272, o: 0 }, pkJs: { x: 425, y: 128, o: 0 }, pkData: { x: 25, y: 300, o: 0 }, pkReply: { x: 388, y: 272, o: 0 },
     pkComment: { x: 25, y: 300, o: 0 }, pkWrite: { x: 590, y: 272, o: 0 }, pkReply2: { x: 388, y: 272, o: 0 },
-    pkHmr: { x: 425, y: 128, o: 0 }, pkPinHmr: { x: 425, y: 128, o: 0 }, pkAll: { x: 290, y: 590, o: 0 },
+    pkHmr: { x: 425, y: 128, o: 0 }, pkAll: { x: 290, y: 590, o: 0 },
     req2: { x: 25, y: 300, o: 0 }, pkHtml2: { x: 555, y: 272, o: 0 },
   };
 }
