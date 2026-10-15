@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "private": true,
   "type": "module",
-  "description": "本仓的测试站（协作仓形态）：god-docsite 建站器建的基础站装上全部功能（collab、code-pin、trajectory、explainer），pnpm e2e 直接在它上面跑；协作的测试数据在上一级 collab/records/，本仓的包用 workspace 直连",
+  "description": "本仓的测试站（协作仓形态）：god-docsite 建站器建的基础站装上全部功能（collab、code-pin、trajectory、explainer），仓根 pnpm test:e2e 直接在它上面跑；协作的测试数据在上一级 collab/records/，本仓的包用 workspace 直连",
   "scripts": {
     "dev": "react-router dev --host 127.0.0.1 --strictPort --port 4450",
     "build": "react-router build",
