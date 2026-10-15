@@ -18,7 +18,7 @@ export interface FeatureRuntimeModule {
   pageTreePlugins?: readonly LoaderPlugin[]
   /** 正文链接里本功能路由的地址怎么显示（如 routeLinkKind），站点 mdx-components 的 siteLinkComponent 收下，排在平台认地址的办法前面 */
   linkKinds?: readonly SiteLinkKind[]
-  /** 侧栏入口：整站布局把它们放在侧栏页面树上方，按地址前缀高亮；布局 loader 把它们的名字并进站内地址到标题 */
+  /** 侧栏入口：整站布局把它们放在侧栏站名下的一横排里（按 order 排先后），按地址前缀高亮；布局 loader 把它们的名字并进站内地址到标题 */
   sidebarLinks?: readonly SidebarLink[]
   /** 布局 loader 调用；返回值以功能名为键并进布局数据。写成方法：功能可以把 base 声明成更具体的站点类型 */
   layoutData?(args: LoaderFunctionArgs, base: BaseSiteContext): unknown
@@ -68,5 +68,7 @@ export function siteFeatureRuntime(features: Readonly<Record<string, FeatureRunt
     if (layoutData !== undefined) runtime.layoutData.push({ feature, load: (args, base) => layoutData.call(featureModule, args, base) })
     if (LayoutTop !== undefined) runtime.layoutTops.push({ feature, Component: LayoutTop })
   }
+  // 稳定排序：order 一样大的保持按功能名的先后
+  runtime.sidebarLinks.sort((a, b) => a.order - b.order)
   return runtime
 }

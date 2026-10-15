@@ -12,8 +12,8 @@ export const mdxComponents = collabMdxComponents
 
 /** 侧栏横排里的「任务」「日历」入口：任务页下的记录页、日历下的日志页上也高亮 */
 export const sidebarLinks = [
-  { name: '任务', url: tasksPageUrl, icon: <ListTodo /> },
-  { name: '日历', url: calendarUrl, icon: <CalendarDays /> },
+  { name: '任务', url: tasksPageUrl, icon: <ListTodo />, order: 10 },
+  { name: '日历', url: calendarUrl, icon: <CalendarDays />, order: 20 },
 ]
 
 /** 布局 loader 调用，结果进布局数据的 collab 键：公开人员、本机身份、推送来的通知 */

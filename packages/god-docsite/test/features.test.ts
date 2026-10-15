@@ -14,19 +14,28 @@ describe('siteFeatureRuntime', () => {
     const plugin = { name: 'demo' }
     const linkKind = { matches: () => false, Chip: Badge }
     const runtime = siteFeatureRuntime({
-      demo: { mdxComponents: { Badge }, pageTreePlugins: [plugin], linkKinds: [linkKind], sidebarLinks: [{ name: '演示', url: '/demo', icon: null }], layoutData: (_args, site) => ({ dir: site.dir }), LayoutTop: Top },
-      other: { sidebarLinks: [{ name: '其他', url: '/other', icon: null }] },
+      demo: { mdxComponents: { Badge }, pageTreePlugins: [plugin], linkKinds: [linkKind], sidebarLinks: [{ name: '演示', url: '/demo', icon: null, order: 50 }], layoutData: (_args, site) => ({ dir: site.dir }), LayoutTop: Top },
+      other: { sidebarLinks: [{ name: '其他', url: '/other', icon: null, order: 10 }] },
       empty: {},
     })
     expect(runtime.mdxComponents).toEqual({ Badge })
     expect(runtime.pageTreePlugins).toEqual([plugin])
     expect(runtime.linkKinds).toEqual([linkKind])
     expect(runtime.sidebarLinks).toEqual([
-      { name: '演示', url: '/demo', icon: null },
-      { name: '其他', url: '/other', icon: null },
+      { name: '其他', url: '/other', icon: null, order: 10 },
+      { name: '演示', url: '/demo', icon: null, order: 50 },
     ])
     expect(runtime.layoutTops).toEqual([{ feature: 'demo', Component: Top }])
     expect(await withFeatureLayoutData({ siteName: '站' }, { loaders: runtime.layoutData, args, base })).toEqual({ siteName: '站', demo: { dir: '/site' } })
+  })
+
+  it('侧栏入口按 order 排，一样大时保持功能名的先后', () => {
+    const { sidebarLinks } = siteFeatureRuntime({
+      alpha: { sidebarLinks: [{ name: '甲', url: '/a', icon: null, order: 90 }] },
+      beta: { sidebarLinks: [{ name: '乙', url: '/b', icon: null, order: 20 }] },
+      gamma: { sidebarLinks: [{ name: '丙', url: '/c', icon: null, order: 20 }] },
+    })
+    expect(sidebarLinks.map((link) => link.url)).toEqual(['/b', '/c', '/a'])
   })
 
   it('没有功能时都是空的', () => {

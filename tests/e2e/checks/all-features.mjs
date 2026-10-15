@@ -7,8 +7,8 @@ import { checkRunner, problemResults, waitForHydrated, watchPage } from '../lib/
  * 单个功能自己的行为在 base、collab、docs 三组里查
  */
 
-/** 侧栏横排里功能的入口，按功能名排序后各功能 sidebarLinks 的先后（collab、comments、trajectory） */
-const featureSidebarEntries = ['/tasks', '/calendar', '/comments', '/trajectory']
+/** 侧栏横排里功能的入口，按各入口的 order 排（任务 10、日历 20、轨迹 50、评论 90） */
+const featureSidebarEntries = ['/tasks', '/calendar', '/trajectory', '/comments']
 
 /** 侧栏站名下的一横排：搜索按钮与功能入口（god-docsite 的 SidebarLinksRow） */
 const sidebarRow = '#nd-sidebar [data-docsite-sidebar-row]'

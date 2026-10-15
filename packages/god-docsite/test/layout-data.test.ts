@@ -11,7 +11,7 @@ function sourceWith(pages: Record<string, { title: string }>): SiteSource {
   }) as unknown as SiteSource
 }
 
-const sidebarLinks = [{ name: '评论', url: '/comments', icon: null }]
+const sidebarLinks = [{ name: '评论', url: '/comments', icon: null, order: 90 }]
 
 describe('siteLayoutData', () => {
   it('根 $id 是内容摘要：同样的内容同一个 id，加一页或改标题就换', async () => {

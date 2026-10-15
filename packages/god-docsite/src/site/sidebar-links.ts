@@ -8,4 +8,6 @@ export interface SidebarLink {
   name: string
   url: string
   icon: ReactNode
+  /** 横排与首页顶栏里的先后，小的在前；一样大时按功能名。现用：任务 10、日历 20、轨迹 50、评论 90（排在最后） */
+  order: number
 }
