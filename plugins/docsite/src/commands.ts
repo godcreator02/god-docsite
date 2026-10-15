@@ -3,7 +3,7 @@ import type { GwbContext } from '@godcreator/gwb-kernel-desktop'
 import { listComments, writeComment, type CommentFilter, type CommentWrite } from './comments.js'
 import { DocsiteRejected, messageOf } from './errors.js'
 import type { GwbDocsiteApi } from './service.js'
-import { siteKeyOf, type SiteStatus } from './site-host.js'
+import type { SiteStatus } from './site-host.js'
 
 type Args = Record<string, unknown>
 
@@ -42,8 +42,8 @@ type GwbCommandsApi = NonNullable<GwbContext['gwbCommands']>
 export type CommandServices = {
   commands: GwbCommandsApi
   docsite: GwbDocsiteApi
-  /** 设置 sites：docsite.site.add 登记的站点目录 */
-  sitesSetting: { get(): string[]; set(dirs: string[]): Promise<void> }
+  /** 站点目录在不在设置 sites 里 */
+  isRegistered(dir: string): boolean
   list(): SiteStatus[]
 }
 
@@ -64,7 +64,7 @@ const siteShape =
 const commentWriteUsage =
   '要站点在运行（POST 到站点的评论写入路由 /comments，和网页评论面板同一套规则与字段）；署名是本 home 的身份码在 people.json 里对应的人，agent 写时给 as（people.json 里 agent 为 true 的 id）'
 
-export function registerCommands({ commands, docsite, sitesSetting, list }: CommandServices): void {
+export function registerCommands({ commands, docsite, isRegistered, list }: CommandServices): void {
   const urlOfRunning = (dir: string) => {
     const status = docsite.status(dir)
     if (status.state !== 'running' || status.url === null) throw new DocsiteRejected(`${dir} 的站点没在运行：先 docsite.site.start`)
@@ -94,27 +94,24 @@ export function registerCommands({ commands, docsite, sitesSetting, list }: Comm
     {
       name: 'docsite.site.add',
       description: '托管一个站点：登记进设置 sites 并启动（工作台每次启动时也会启动登记着的站）',
-      usage: `{ dir }：站点目录的绝对路径，要有 package.json（scripts.dev 写死 --port）、装好依赖、建在平台包 @godcreator/god-docsite 上。已经登记过的只回它此刻的样子。别的插件（如 gwb-collab）托管的站点不经这里。回这个站。${siteShape}`,
+      usage: `{ dir }：站点目录的绝对路径，要有 package.json（scripts.dev 写死 --port）、装好依赖、建在平台包 @godcreator/god-docsite 上。已经登记过的只确保它在运行。协作站由 gwb-collab 在项目加进列表时登记，不用另外加。回这个站。${siteShape}`,
       effect: 'write',
     },
-    async (args) => {
-      const dir = dirOf(argsOf(args, ['dir']))
-      const listed = sitesSetting.get()
-      if (!listed.some((each) => siteKeyOf(each) === siteKeyOf(dir))) await sitesSetting.set([...listed, dir])
-      await docsite.start(dir)
-      return docsite.status(dir)
-    },
+    async (args) => docsite.add(dirOf(argsOf(args, ['dir']))),
   )
 
   register(
     commands,
-    { name: 'docsite.site.remove', description: '不再托管一个站点：从设置 sites 里去掉，在运行就停掉', usage: '{ dir }：docsite.site.add 登记过的站点目录，没登记过就拒绝。回 { dir, removed: true }', effect: 'write' },
+    {
+      name: 'docsite.site.remove',
+      description: '不再托管一个站点：从设置 sites 里去掉，在运行就停掉',
+      usage: '{ dir }：设置 sites 里登记着的站点目录，没登记过就拒绝。协作站要移出项目列表（collab.project.remove），不然 gwb-collab 下次加载又登记回来。回 { dir, removed: true }',
+      effect: 'write',
+    },
     async (args) => {
       const dir = dirOf(argsOf(args, ['dir']))
-      const listed = sitesSetting.get()
-      if (!listed.some((each) => siteKeyOf(each) === siteKeyOf(dir))) throw new DocsiteRejected(`${dir} 不在设置 sites 里：别的插件托管的站点由那个插件管`)
-      await sitesSetting.set(listed.filter((each) => siteKeyOf(each) !== siteKeyOf(dir)))
-      if (docsite.status(dir).state === 'running') await docsite.stop(dir)
+      if (!isRegistered(dir)) throw new DocsiteRejected(`${dir} 不在设置 sites 里`)
+      await docsite.remove(dir)
       return { dir, removed: true }
     },
   )

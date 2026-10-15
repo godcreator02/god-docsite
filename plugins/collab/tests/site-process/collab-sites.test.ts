@@ -17,20 +17,45 @@ const homePage = __COLLAB_HOME_TEMPLATE__
 /** 平台模板建站时写的首页 */
 const platformHomePage = 'export default function Home() {}\n'
 
-/** 假的 gwb-docsite：记下每次调用，状态照给定的回 */
-function fakeDocsite(state: 'running' | 'stopped' | 'failed' = 'stopped', url: string | null = null, expectedUrl: string | null = 'http://127.0.0.1:4331') {
+/**
+ * 假的 gwb-docsite：记下每次调用；add、start 转成运行，remove、stop 转成停止，转换时通知 onStatus 的监听者。
+ * 初始状态照给定的；failed 时 error 是固定的原因
+ */
+function fakeDocsite(initial: 'running' | 'stopped' | 'failed' = 'stopped', url: string | null = null, expectedUrl: string | null = 'http://127.0.0.1:4331') {
   const calls: string[] = []
   const pushed: unknown[] = []
+  const listeners = new Set<(dir: string) => void>()
+  let state = initial
+  const become = (dir: string, next: typeof state) => {
+    state = next
+    for (const listener of listeners) listener(dir)
+  }
   const docsite: DocsiteHosting = {
+    add: async (dir) => {
+      calls.push(`add ${dir}`)
+      if (state !== 'running') become(dir, 'running')
+      return docsite.status(dir)
+    },
+    remove: async (dir) => {
+      calls.push(`remove ${dir}`)
+      if (state === 'running') become(dir, 'stopped')
+      return { registered: true }
+    },
     start: async (dir) => {
       calls.push(`start ${dir}`)
+      become(dir, 'running')
       return { url: 'http://127.0.0.1:4331', pid: 1, alreadyRunning: false }
     },
     stop: async (dir) => {
       calls.push(`stop ${dir}`)
+      become(dir, 'stopped')
       return { url: 'http://127.0.0.1:4331' }
     },
     status: (dir) => ({ dir, state, url, expectedUrl, error: state === 'failed' ? 'gwb-docsite 的原因' : null }),
+    onStatus: (listener) => {
+      listeners.add(listener)
+      return () => listeners.delete(listener)
+    },
     push: async (dir, channel, data) => {
       calls.push(`push ${dir} ${channel}`)
       pushed.push(data)
@@ -39,6 +64,7 @@ function fakeDocsite(state: 'running' | 'stopped' | 'failed' = 'stopped', url: s
       calls.push(`init ${dir} ${JSON.stringify(options)}`)
       mkdirSync(path.join(dir, 'app', 'routes'), { recursive: true })
       writeFileSync(path.join(dir, 'app', 'routes', 'home.tsx'), platformHomePage)
+      writeFileSync(path.join(dir, 'package.json'), '{}')
       return { dir, platformDependencies: { '@godcreator/god-docsite': '^0.1.0' } }
     },
     addFeature: async (dir, options) => {
@@ -49,45 +75,82 @@ function fakeDocsite(state: 'running' | 'stopped' | 'failed' = 'stopped', url: s
   return { docsite, calls, pushed }
 }
 
-function sitesWith(docsite: DocsiteHosting) {
+function sitesWith(docsite: DocsiteHosting, listed: string[] = [repo]) {
   const warned: string[] = []
-  const sites = new CollabSites({ docsite, feedOf: async () => feed, log: { warn: (message) => void warned.push(message) } })
+  const sites = new CollabSites({ docsite, feedOf: async () => feed, listedProjects: () => listed, log: { warn: (message) => void warned.push(message) } })
   return { sites, warned }
 }
 
+/** 建一个带 site/package.json 的临时协作仓，跑完删掉 */
+async function withBuiltSite(run: (builtRepo: string, builtSiteDir: string) => Promise<void>): Promise<void> {
+  const builtRepo = mkdtempSync(path.join(tmpdir(), 'collab-site-host-'))
+  const builtSiteDir = path.join(builtRepo, 'site')
+  mkdirSync(builtSiteDir)
+  writeFileSync(path.join(builtSiteDir, 'package.json'), '{}')
+  try {
+    await run(builtRepo, builtSiteDir)
+  } finally {
+    rmSync(builtRepo, { recursive: true, force: true })
+  }
+}
+
 describe('项目站点交给 gwb-docsite', () => {
-  it('确保在运行：启动 site/（幂等），再把通知与项目负责人推到频道 collab', async () => {
+  it('交给 gwb-docsite 常驻：登记 site/，站点转成运行时把通知、提示词与项目负责人推到频道 collab', async () => {
+    await withBuiltSite(async (builtRepo, builtSiteDir) => {
+      const { docsite, calls, pushed } = fakeDocsite()
+      const { sites } = sitesWith(docsite, [builtRepo])
+      const unwatch = sites.watchStatus()
+      await sites.host(builtRepo)
+      await vi.waitFor(() => expect(pushed).toEqual([feed, feed]))
+      expect(calls).toEqual([`add ${builtSiteDir}`, `push ${builtSiteDir} collab`, `push ${builtSiteDir} collab`])
+      unwatch()
+    })
+  })
+
+  it('site/ 还没建：报错、不登记', async () => {
+    const { docsite, calls } = fakeDocsite()
+    await expect(sitesWith(docsite).sites.host(repo)).rejects.toThrow('collab.site.init')
+    expect(calls).toEqual([])
+  })
+
+  it('站点没在运行时通知变了：不推，等它启动时 onStatus 补推', async () => {
     const { docsite, calls, pushed } = fakeDocsite()
-    await sitesWith(docsite).sites.keep(repo)
+    const { sites, warned } = sitesWith(docsite)
+    const unwatch = sites.watchStatus()
+    sites.feedChanged(repo)
+    await new Promise((resolve) => setTimeout(resolve, 0))
+    expect(pushed).toEqual([])
+    await docsite.start(siteDir)
     await vi.waitFor(() => expect(pushed).toEqual([feed]))
     expect(calls).toEqual([`start ${siteDir}`, `push ${siteDir} collab`])
+    expect(warned).toEqual([])
+    unwatch()
+  })
+
+  it('不在项目列表里的站转成运行：不推', async () => {
+    const { docsite, pushed } = fakeDocsite()
+    const unwatch = sitesWith(docsite, []).sites.watchStatus()
+    await docsite.start(siteDir)
+    await new Promise((resolve) => setTimeout(resolve, 0))
+    expect(pushed).toEqual([])
+    unwatch()
   })
 
   it('窗格的状态：地址在运行时是实际地址，没运行时是 gwb-docsite 预期的那个，起不来的原因照 gwb-docsite 的报', () => {
     const { docsite } = fakeDocsite('failed')
-    expect(sitesWith(docsite).sites.stateOf(repo)).toEqual({ url: 'http://127.0.0.1:4331', running: false, error: 'gwb-docsite 的原因' })
+    expect(sitesWith(docsite).sites.stateOf(repo)).toEqual({ dir: siteDir, url: 'http://127.0.0.1:4331', running: false, error: 'gwb-docsite 的原因' })
     const running = fakeDocsite('running', 'http://127.0.0.1:4331/')
-    expect(sitesWith(running.docsite).sites.stateOf(repo)).toEqual({ url: 'http://127.0.0.1:4331/', running: true, error: null })
+    expect(sitesWith(running.docsite).sites.stateOf(repo)).toEqual({ dir: siteDir, url: 'http://127.0.0.1:4331/', running: true, error: null })
   })
 
-  it('collab.site.start：交给 gwb-docsite 启动，回地址与进程号', async () => {
-    const { docsite, calls, pushed } = fakeDocsite()
-    expect(await sitesWith(docsite).sites.start(project)).toEqual({ url: 'http://127.0.0.1:4331', pid: 1, alreadyRunning: false })
-    expect(calls[0]).toBe(`start ${siteDir}`)
-    await vi.waitFor(() => expect(pushed).toEqual([feed]))
-  })
-
-  it('collab.site.stop：交给 gwb-docsite 停掉', async () => {
-    const { docsite, calls } = fakeDocsite()
-    await sitesWith(docsite).sites.stop(repo)
-    expect(calls).toEqual([`stop ${siteDir}`])
-  })
-
-  it('自动同步改了 site/ 之后：确保站点在运行，再推一次数据', async () => {
-    const { docsite, calls, pushed } = fakeDocsite()
-    await sitesWith(docsite).sites.recheck(project)
-    await vi.waitFor(() => expect(pushed).toEqual([feed]))
-    expect(calls).toEqual([`start ${siteDir}`, `push ${siteDir} collab`])
+  it('自动同步改了 site/ 之后：确保站点登记着、在运行，再推一次数据', async () => {
+    await withBuiltSite(async (builtRepo, builtSiteDir) => {
+      const { docsite, calls, pushed } = fakeDocsite('running', 'http://127.0.0.1:4331/')
+      const builtProject: Project = { repo: builtRepo, collabDir: path.join(builtRepo, 'collab'), siteDir: builtSiteDir, person: 'bob' }
+      await sitesWith(docsite, [builtRepo]).sites.recheck(builtProject)
+      await vi.waitFor(() => expect(pushed).toEqual([feed]))
+      expect(calls).toEqual([`add ${builtSiteDir}`, `push ${builtSiteDir} collab`])
+    })
   })
 
   it('装依赖：先停（本来就没运行就不停），做完 work 再启动；work 拿到之前在不在运行', async () => {
@@ -102,28 +165,24 @@ describe('项目站点交给 gwb-docsite', () => {
     expect(stopped.calls).not.toContain(`stop ${siteDir}`)
   })
 
-  it('装依赖时站点已被别处启动（start 回 alreadyRunning）：relaunched 为 false，照样推一次数据', async () => {
-    const { docsite, pushed } = fakeDocsite('stopped')
+  it('装依赖时站点已被别处启动（start 回 alreadyRunning）：relaunched 为 false', async () => {
+    const { docsite } = fakeDocsite('stopped')
     const startedElsewhere: DocsiteHosting = { ...docsite, start: async () => ({ url: 'http://127.0.0.1:4331', pid: 2, alreadyRunning: true }) }
     expect(await sitesWith(startedElsewhere).sites.whileStopped(project, async () => 'installed')).toEqual({ result: 'installed', relaunched: false })
-    await vi.waitFor(() => expect(pushed).toEqual([feed]))
   })
 
-  it('自动同步改了 site/ 之后站点已在运行：不停、不重启，只把最新数据推过去', async () => {
-    const { docsite, calls, pushed } = fakeDocsite('running', 'http://127.0.0.1:4331/')
-    const running: DocsiteHosting = {
-      ...docsite,
-      start: async (dir) => {
-        calls.push(`start ${dir}`)
-        return { url: 'http://127.0.0.1:4331/', pid: 1, alreadyRunning: true }
-      },
-    }
-    await sitesWith(running).sites.recheck(project)
+  it('装完依赖重新启动：推送由 onStatus 做，只推一次', async () => {
+    const { docsite, pushed } = fakeDocsite('running', 'http://127.0.0.1:4331/')
+    const { sites } = sitesWith(docsite)
+    const unwatch = sites.watchStatus()
+    await sites.whileStopped(project, async () => 'installed')
     await vi.waitFor(() => expect(pushed).toEqual([feed]))
-    expect(calls).toEqual([`start ${siteDir}`, `push ${siteDir} collab`])
+    await new Promise((resolve) => setTimeout(resolve, 0))
+    expect(pushed).toEqual([feed])
+    unwatch()
   })
 
-  it('collab.site.init：交给 gwb-docsite 建基础站、再加协作功能（写成给的范围）；项目在列表里就启动并推数据，不在就不启动', async () => {
+  it('collab.site.init：交给 gwb-docsite 建基础站、再加协作功能（写成给的范围）；项目在列表里就交给它常驻，不在就不登记', async () => {
     const newRepo = mkdtempSync(path.join(tmpdir(), 'collab-site-init-'))
     const newSiteDir = path.join(newRepo, 'site')
     try {
@@ -138,7 +197,7 @@ describe('项目站点交给 gwb-docsite', () => {
       })
       expect(calls).toEqual([`init ${newSiteDir} {"port":4400,"title":"新项目"}`, `addFeature ${newSiteDir} @godcreator/collab@^0.31.0`])
       await sites.init(newRepo, { featureRange: '^0.31.0', mergeWorkflow, port: 4400, title: '新项目', homePage, listed: true })
-      expect(calls.slice(2, 5)).toEqual([`init ${newSiteDir} {"port":4400,"title":"新项目"}`, `addFeature ${newSiteDir} @godcreator/collab@^0.31.0`, `start ${newSiteDir}`])
+      expect(calls.slice(2, 5)).toEqual([`init ${newSiteDir} {"port":4400,"title":"新项目"}`, `addFeature ${newSiteDir} @godcreator/collab@^0.31.0`, `add ${newSiteDir}`])
     } finally {
       rmSync(newRepo, { recursive: true, force: true })
     }
@@ -208,16 +267,10 @@ describe('项目站点交给 gwb-docsite', () => {
     }
   })
 
-  it('项目移出列表：停掉在运行的站点，排着的推送不再发；插件卸载：启动过的都停掉', async () => {
+  it('项目移出列表：撤销 gwb-docsite 的登记（它停掉在运行的站点）', async () => {
     const { docsite, calls } = fakeDocsite('running', 'http://127.0.0.1:4331/')
-    const { sites } = sitesWith(docsite)
-    await sites.keep(repo)
-    await sites.forget(repo)
-    expect(calls.some((call) => call === `stop ${siteDir}`)).toBe(true)
-    const second = fakeDocsite('running', 'http://127.0.0.1:4331/')
-    const secondSites = sitesWith(second.docsite).sites
-    await secondSites.keep(repo)
-    await secondSites.forgetAll()
-    expect(second.calls.some((call) => call === `stop ${siteDir}`)).toBe(true)
+    await sitesWith(docsite).sites.unhost(repo)
+    expect(calls).toEqual([`remove ${siteDir}`])
+    expect(docsite.status(siteDir).state).toBe('stopped')
   })
 })

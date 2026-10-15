@@ -108,8 +108,8 @@ export function apply(ctx: GwbContext): void {
 
   const docsite = ctx.gwbDocsite
   const openProject = (repo: string) => openProjectAt({ docsite }, repo)
-  const sites: CollabSites = new CollabSites({ docsite, feedOf: (repo) => notifications.feedOf(repo), log })
-  ctx.effect(() => () => sites.forgetAll())
+  const sites: CollabSites = new CollabSites({ docsite, feedOf: (repo) => notifications.feedOf(repo), listedProjects: () => events.current(), log })
+  ctx.effect(() => sites.watchStatus())
 
   // 协作仓那一套
   const submitFailures = new SubmitFailures(changed)

@@ -16,7 +16,7 @@ export type InstallDependencies = (siteDir: string) => Promise<DependencyInstall
 export type SiteControl = {
   /** 站点在运行就先停，做完 work 再按常驻的规矩启动；wasRunning 是装前在不在运行，relaunched 是做完由这一次启动了站点 */
   whileStopped<T>(project: Project, work: (wasRunning: boolean) => Promise<T>): Promise<{ result: T; relaunched: boolean }>
-  /** site/ 换了内容之后：站点停着就启动（启动前的检查由 gwb-docsite 在启动时做），已在运行就不动，再把最新的数据推过去 */
+  /** site/ 换了内容之后：确保站点登记在 gwb-docsite、停着就启动（启动前的检查由 gwb-docsite 在启动时做），已在运行就不动，再把最新的数据推过去 */
   recheck(project: Project): Promise<void>
 }
 
@@ -65,7 +65,7 @@ export async function installSiteDependencies(project: Project, sites: Pick<Site
       return await install(project.siteDir)
     } catch (error) {
       if (!wasRunning || !(error instanceof CollabRejected)) throw error
-      throw new CollabRejected(`${error.message}\n站点已经停了，没有重新启动：依赖装好后用 collab.site.start 再启动`)
+      throw new CollabRejected(`${error.message}\n站点已经停了，没有重新启动：依赖装好后用 docsite.site.start {"dir":"${project.siteDir}"} 再启动`)
     }
   })
   return { outputTail: result.outputTail, siteRestarted: relaunched }

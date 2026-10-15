@@ -5,12 +5,16 @@ import type { SiteInitOptions, SiteInitResult } from './scaffold/create.js'
 import type { SiteStarted, SiteStatus } from './site-host.js'
 
 /**
- * 别的插件注入的服务 gwbDocsite：建站与加功能、托管站点的开发服务、往站点推数据、本 home 的身份码。
+ * 别的插件注入的服务 gwbDocsite：建站与加功能、托管站点的开发服务（常驻的站只记在设置 sites 里，别的插件的站也经 add 登记）、往站点推数据、本 home 的身份码。
  * 站点都建在平台包 @godcreator/god-docsite 上。站点目录都写绝对路径；同一个站点目录大小写、斜杠不同的写法算同一个
  */
 export interface GwbDocsiteApi {
   /** 本 home 的身份码（设置 identity-code），开发服务按它在站点的 people.json 里认人 */
   identityCode(): string
+  /** 托管一个站点：登记进设置 sites（已登记的不重复写）再启动，之后工作台每次启动都启动它。启动不了抛 Error，登记照留 */
+  add(dir: string): Promise<SiteStatus>
+  /** 不再托管：从设置 sites 里去掉，在运行就停掉。registered 为 false 是本来就没登记 */
+  remove(dir: string): Promise<{ registered: boolean }>
   /** 启动站点的开发服务：已在运行或正在启动就复用，不重复启动。启动不了抛 Error，消息写明原因 */
   start(dir: string): Promise<SiteStarted>
   /** 停掉站点的开发服务；没在运行就抛 Error */
@@ -45,6 +49,12 @@ export class DocsiteService extends Service implements GwbDocsiteApi {
   }
   identityCode() {
     return this.api.identityCode()
+  }
+  add(dir: string) {
+    return this.api.add(dir)
+  }
+  remove(dir: string) {
+    return this.api.remove(dir)
   }
   start(dir: string) {
     return this.api.start(dir)

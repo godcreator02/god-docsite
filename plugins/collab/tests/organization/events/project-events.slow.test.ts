@@ -18,14 +18,14 @@ beforeEach(async () => {
 
 const at = '2026-10-08T08:00:00.000Z'
 
-/** 两边各步的假件：记下调了哪一步；failing 里的步名照它抛错。keepSite 换掉站点常驻，http 换掉 Gitea 接口 */
+/** 两边各步的假件：记下调了哪一步；failing 里的步名照它抛错。hostSite 换掉站点交给 gwb-docsite 常驻，http 换掉 Gitea 接口 */
 function eventsWith(
   options: {
     failing?: Map<string, string>
     openRemote?: () => Promise<RemoteProject>
     cloned?: string[]
     projects?: string[]
-    keepSite?: (repo: string) => Promise<void>
+    hostSite?: (repo: string) => Promise<void>
     http?: ProjectEventsDeps['gitea']['http']
   } = {},
 ) {
@@ -75,7 +75,7 @@ function eventsWith(
     },
     openProject: async () => bob,
     openRemote: options.openRemote ?? (async () => bob),
-    sites: { keep: options.keepSite ?? (async () => {}), forget: async () => {} },
+    sites: { host: options.hostSite ?? (async () => {}), unhost: async () => {} },
     collabRepo,
     otherRepos,
     webhooks: { check: async () => step('organization:webhook'), forget: () => step('organization:forget') },
@@ -221,7 +221,7 @@ describe('项目列表与订阅', () => {
   it('start 时站点起不来：失败记成这个项目的一步出错、报变化，不留没处理的拒绝', async () => {
     git(bob.repo, 'remote', 'set-url', 'origin', 'https://git.example.org/hybrid-mmc/collab.git')
     vi.stubGlobal('fetch', vi.fn(() => new Promise<Response>(() => {})))
-    const { events, changed } = eventsWith({ keepSite: async () => Promise.reject(new CollabRejected('site/ 下没有 package.json，不是站点目录')) })
+    const { events, changed } = eventsWith({ hostSite: async () => Promise.reject(new CollabRejected('site/ 下没有 package.json，不是站点目录')) })
     try {
       events.start()
       await vi.waitFor(() => expect(events.errorsOf(bob.repo)).toEqual(['site/ 下没有 package.json，不是站点目录']), { timeout: 5_000 })
@@ -237,7 +237,7 @@ describe('项目列表与订阅', () => {
     const { events, changed, listChanges } = eventsWith({
       projects: [],
       http: async () => ({ status: 200, body: { username: 'hybrid-mmc' } }),
-      keepSite: async () => Promise.reject(new CollabRejected('site/ 下没有 package.json，不是站点目录')),
+      hostSite: async () => Promise.reject(new CollabRejected('site/ 下没有 package.json，不是站点目录')),
     })
     expect(await events.add(bob.repo)).toEqual({ repo: bob.repo })
     expect(listChanges).toEqual([[bob.repo, 'added']])

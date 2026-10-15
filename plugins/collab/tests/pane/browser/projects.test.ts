@@ -10,7 +10,7 @@ const summary: ProjectSummary = {
   giteaUrl: 'https://git.example.org/hybrid-mmc',
 }
 
-const runningSite: SiteRow = { url: 'http://127.0.0.1:4330/', running: true, error: null }
+const runningSite: SiteRow = { dir: 'D:\\p\\a\\site', url: 'http://127.0.0.1:4330/', running: true, error: null }
 
 /** 打得开的项目：summary 必在、error 必空 */
 const openedRow = (counts: Partial<ProjectSummary['counts']> = {}, site: Partial<SiteRow> = {}): ProjectRow => ({

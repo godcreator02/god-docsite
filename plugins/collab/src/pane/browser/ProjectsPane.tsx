@@ -22,7 +22,7 @@ import {
 /** 窗格看得见时多久重读一次列表：只读本机，很快；取回远端由 node 侧的检查做 */
 const refreshMilliseconds = 15_000
 
-/** 窗格只显示状态：读 collab.projects，点站点链接调 collab.site.start；克隆、提交这些操作都由人让自己的 AI 调命令 */
+/** 窗格只显示状态：读 collab.projects，点站点链接调 docsite.site.start；克隆、提交这些操作都由人让自己的 AI 调命令 */
 function useProjectList(host: HostBridge, shell: ShellBridge): { list: Receipt<ProjectList> | undefined; refresh: () => Promise<void> } {
   const [list, setList] = useState<Receipt<ProjectList> | undefined>(undefined)
   const mounted = useRef(true)
@@ -52,8 +52,11 @@ function useProjectList(host: HostBridge, shell: ShellBridge): { list: Receipt<P
   return { list, refresh }
 }
 
-/** 点站点链接：经 collab.site.start 打开（窗口照 gwb-docsite 的设置 site-window），没在运行就先启动；失败的原话交给那一行显示 */
-type OpenSite = (repo: string) => Promise<string | null>
+/** 点站点链接：经 docsite.site.start 确保站点在运行（没在运行就启动），再把地址交给系统浏览器打开；失败的原话交给那一行显示 */
+type OpenSite = (site: SiteRow) => Promise<string | null>
+
+/** 用 VS Code 打开项目文件夹；失败的原话交给那一行显示 */
+type OpenFolder = (repo: string) => Promise<string | null>
 
 /** 点「复制给 AI」：经 collab.ai.prompt 把这个项目的全部通知写成提示词，交回原文 */
 type PromptForAi = (repo: string) => Promise<Receipt<AiPromptResult>>
@@ -61,15 +64,17 @@ type PromptForAi = (repo: string) => Promise<Receipt<AiPromptResult>>
 export function ProjectsPane({ host, shell }: { host: HostBridge; shell: ShellBridge }): ReactElement {
   const { list, refresh } = useProjectList(host, shell)
   const openSite = useCallback<OpenSite>(
-    async (repo) => {
-      const reply = receiptOf<unknown>(await host.call('collab.site.start', { repo }))
+    async (site) => {
+      const reply = receiptOf<{ url: string }>(await host.call('docsite.site.start', { dir: site.dir }))
       await refresh()
-      return reply.ok ? null : reply.error
+      if (!reply.ok) return reply.error
+      window.open(reply.data.url, '_blank', 'noopener,noreferrer')
+      return null
     },
     [host, refresh],
   )
   const [helpOpen, setHelpOpen] = useState(false)
-  const openFolder = useCallback<OpenSite>(async (repo) => {
+  const openFolder = useCallback<OpenFolder>(async (repo) => {
     const reply = receiptOf<unknown>(await host.call('collab.project.open', { repo }))
     return reply.ok ? null : reply.error
   }, [host])
@@ -129,7 +134,7 @@ function Help(): ReactElement {
   return (
     <div className="collab:flex collab:flex-col collab:gap-2 collab:rounded-md collab:border collab:border-border collab:bg-muted/40 collab:p-3 collab:text-xs collab:text-foreground">
       <p className="collab:m-0">
-        列表里每个项目的协作站由插件在后台自动运行。每个项目一行，写着三组通知各有几条：协作仓（没提交审核的文件、冲突、同步不了等）、别的仓（和服务器不一样、等你审阅的合并请求与 issue 等），和找你的任务、@我、回复。点通知或地址打开协作站，网页顶部的提示栏里有每一条；点这一行的「复制给 AI」，把这个项目的通知全部写成一份提示词复制下来，粘贴给你用的 AI（网页提示栏里也有同样的按钮）。
+        列表里每个项目的协作站由 gwb-docsite 在后台运行（项目加进列表时交给它，移出时撤掉）。每个项目一行，写着三组通知各有几条：协作仓（没提交审核的文件、冲突、同步不了等）、别的仓（和服务器不一样、等你审阅的合并请求与 issue 等），和找你的任务、@我、回复。点通知或地址打开协作站，网页顶部的提示栏里有每一条；点这一行的「复制给 AI」，把这个项目的通知全部写成一份提示词复制下来，粘贴给你用的 AI（网页提示栏里也有同样的按钮）。
       </p>
       <p className="collab:m-0">
         插件和 NAS 上的推送服务连着，Gitea 一有推送或合并请求的事件，几秒内就取回一次，别人合进 main 的改动快进进来。提交审核时，NAS 上的执行器十几秒内当场定论：合并，或者留言写明原因并打回。
@@ -187,7 +192,7 @@ function Notice({ text }: { text: string }): ReactElement {
   )
 }
 
-/** 打开协作站的按钮，长得和链接一样；打开要经插件，不能用新窗口链接交给系统浏览器 */
+/** 打开协作站的按钮，长得和链接一样：站点可能没在运行，要先经 gwb-docsite 启动再打开，不能直接用新窗口链接 */
 function SiteButton({ onOpen, className, title, children }: { onOpen: () => void; className?: string; title?: string; children: ReactNode }): ReactElement {
   return (
     <button type="button" className={`collab:cursor-pointer collab:border-0 collab:[font-family:inherit] ${className ?? ''}`} title={title} onClick={onOpen}>
@@ -202,14 +207,14 @@ type CopyState = { state: 'idle' } | { state: 'copying' } | { state: 'copied'; t
  * 一个项目一行：项目名、身份、通知各组几条的标签（站点在运行时点它打开协作站）、有通知时的「复制给 AI」，站点地址与 Gitea；
  * 项目打不开、站点没能启动、没能打开或没能复制时原因写在下面，复制成功时写复制了几件事
  */
-function ProjectLine({ row, openSite, openFolder, promptForAi }: { row: ProjectRow; openSite: OpenSite; openFolder: OpenSite; promptForAi: PromptForAi }): ReactElement {
+function ProjectLine({ row, openSite, openFolder, promptForAi }: { row: ProjectRow; openSite: OpenSite; openFolder: OpenFolder; promptForAi: PromptForAi }): ReactElement {
   const summary = row.summary
   const chip = notificationsChipOf(row)
   const [openError, setOpenError] = useState<string | null>(null)
   const [openingFolder, setOpeningFolder] = useState(false)
   const [copy, setCopy] = useState<CopyState>({ state: 'idle' })
   const failed = (error: unknown) => setOpenError(error instanceof Error ? error.message : String(error))
-  const open = () => void openSite(row.repo).then(setOpenError).catch(failed)
+  const open = () => void openSite(row.site).then(setOpenError).catch(failed)
   const openInCode = () => {
     setOpeningFolder(true)
     void openFolder(row.repo).then(setOpenError).catch(failed).finally(() => setOpeningFolder(false))

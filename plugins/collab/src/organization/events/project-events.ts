@@ -22,7 +22,7 @@ export type ProjectEventsDeps = {
   openProject(repo: string): Promise<Project>
   /** 打开要联网的项目：核对 origin 与令牌的账号 */
   openRemote(repo: string): Promise<RemoteProject>
-  sites: { keep(repo: string): Promise<void>; forget(repo: string): Promise<void> }
+  sites: { host(repo: string): Promise<void>; unhost(repo: string): Promise<void> }
   collabRepo: CollabRepoHandlers
   otherRepos: OtherReposHandlers
   webhooks: { check(repo: string, organization: string): Promise<void>; forget(repo: string): void }
@@ -36,7 +36,7 @@ export type ProjectEventsDeps = {
 
 /**
  * 刚连上推送与 collab.check 时对项目做完整刷新，收到消息按仓分给协作仓那一套或别的仓那一套，两边各自决定做哪几步；
- * 认不出的消息对那个组织的项目做一次完整刷新。加进列表就开始监视、启动站点、刷新一次。
+ * 认不出的消息对那个组织的项目做一次完整刷新。加进列表就开始监视、把站点交给 gwb-docsite 常驻、刷新一次。
  * 订阅在 ProjectTopicsSubscription，各步出错的记录与同一项目同时只做一件在 ProjectStepRunner
  */
 export class ProjectEvents {
@@ -81,14 +81,14 @@ export class ProjectEvents {
     return this.refreshed.has(repoKeyOf(repo))
   }
 
-  /** 插件加载时：列表里每个项目开始监视两边的仓、让站点常驻，开始订阅（连上就完整刷新全部项目一次） */
+  /** 插件加载时：列表里每个项目开始监视两边的仓、核对站点登记着（gwb-docsite 已在拉起的不重复启动），开始订阅（连上就完整刷新全部项目一次） */
   start(): void {
     void this.subscription.sync()
     const { projects, error } = this.listed()
     if (error !== null) this.deps.log.warn(`项目没能开始：${error}`)
     for (const repo of projects) {
       void this.steps.notifyWhenStepErrorsChange(repo, async () => this.startWatching(repo))
-      void this.keepSite(repo)
+      void this.hostSite(repo)
     }
   }
 
@@ -159,24 +159,24 @@ export class ProjectEvents {
     return work()
   }
 
-  /** 加进项目列表（核对见 ProjectList.add），之后开始监视两边的仓、启动站点、刷新一次，刷新完把它的组织加进订阅 */
+  /** 加进项目列表（核对见 ProjectList.add），之后开始监视两边的仓、把站点交给 gwb-docsite 常驻、刷新一次，刷新完把它的组织加进订阅 */
   async add(repo: string): Promise<{ repo: string }> {
     await this.list.add(repo)
     this.deps.onListChanged(repo, 'added')
     await this.steps.notifyWhenStepErrorsChange(repo, async () => this.startWatching(repo))
-    void this.keepSite(repo)
+    void this.hostSite(repo)
     this.scheduler.request(repo, 'full')
     return { repo }
   }
 
-  /** 让站点常驻：起不来记成这个项目 site:keep 一步的出错（经通知显示）、出错变了就报变化，所以 sites.keep 的失败不会让返回的 Promise 被拒绝 */
-  private keepSite(repo: string): Promise<void> {
+  /** 站点交给 gwb-docsite 常驻：登记不了、起不来记成这个项目 site:host 一步的出错（经通知显示）、出错变了就报变化，所以 sites.host 的失败不会让返回的 Promise 被拒绝 */
+  private hostSite(repo: string): Promise<void> {
     return this.steps.notifyWhenStepErrorsChange(repo, async () => {
-      await this.steps.step(repo, 'site:keep', [], () => this.deps.sites.keep(repo))
+      await this.steps.step(repo, 'site:host', [], () => this.deps.sites.host(repo))
     })
   }
 
-  /** 移出列表：两边都忘掉它，停掉站点，再核对一次订阅 */
+  /** 移出列表：两边都忘掉它，撤销站点的常驻登记并停掉，再核对一次订阅 */
   async remove(repo: string): Promise<{ repo: string }> {
     await this.list.remove(repo)
     this.deps.onListChanged(repo, 'removed')
@@ -186,7 +186,7 @@ export class ProjectEvents {
     this.deps.webhooks.forget(repo)
     this.steps.forget(repo)
     this.refreshed.delete(key)
-    await this.deps.sites.forget(repo)
+    await this.deps.sites.unhost(repo)
     await this.subscription.sync()
     return { repo }
   }

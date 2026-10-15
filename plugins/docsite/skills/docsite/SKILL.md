@@ -34,7 +34,7 @@ docsite.feature.add  {"dir":…,"package":"@godcreator/trajectory","version":"^0
 
 ## 升级已有站点
 
-没有升级命令：骨架写完就归站点，`docsite.site.init` 只建新站，`docsite.feature.add` 不覆盖已有文件。要跟上新版的平台包或功能包时：
+没有升级命令：平台模板写出的文件写完就归站点，`docsite.site.init` 只建新站，`docsite.feature.add` 不覆盖已有文件。要跟上新版的平台包或功能包时：
 
 1. 站点停着时在站点目录里把包升到要的版本（`pnpm add <包>@^<版本>`；功能包也可以 `docsite.feature.add` 带 `version`，顺带补上新加的接线文件）
 2. 由 agent 对照平台包与功能包的 `template/` 逐个判断要改哪些文件：平台包的 `node_modules/@godcreator/god-docsite/template/` 对站点根，
@@ -54,7 +54,8 @@ docsite.site.remove  {"dir":…}   从设置 sites 里去掉，在运行就停�
 - 启动前核对站点的 `node_modules` 里装着 `@godcreator/god-docsite`（建在旧包 `@godcreator/docsite-kit` 上的站拒绝），`scripts.dev` 写了 `--port`
 - 启动时经环境变量交给站点本 home 的身份码 `DOCSITE_IDENTITY_CODE` 与这次的推送令牌 `DOCSITE_FEED_TOKEN`
 - `failed` 时 `error` 写着退出码与最后几行输出；进程退出了不自动重启，修好后 `docsite.site.start`
-- 别的插件托管的站（如协作站）不在设置 `sites` 里，由那个插件启停
+- 常驻的站只记在设置 `sites` 里。协作站也在里面：gwb-collab 在项目加进列表时登记、移出列表时去掉，启停照样用 `docsite.site.start` / `docsite.site.stop`；
+  不想要某个协作站就移出项目列表（`collab.project.remove`），单 `docsite.site.remove` 的话 gwb-collab 下次加载又登记回来
 
 ## 我是谁
 
@@ -137,7 +138,8 @@ docsite.people.join {"dir":…,"id":"<字母数字_->","name":"<显示名>","git
 | --- | --- |
 | `init(dir, { port, title })` | 同 `docsite.site.init`，回 `{ dir, platformDependencies }` |
 | `addFeature(dir, { packageName, specifier? })` | 同 `docsite.feature.add`；`specifier` 还可以写 `link:` / `file:` 加绝对路径 |
-| `start(dir)` / `stop(dir)` / `status(dir)` | 启停与此刻的状态，形状同 `docsite.site.*`；托管与否由调用方自己记，不写设置 `sites` |
+| `add(dir)` / `remove(dir)` | 同 `docsite.site.add` / `docsite.site.remove`：登记进设置 `sites` 再启动（回这个站此刻的状态，起不来报错、登记照留）；去掉登记、在运行就停掉（回 `{ registered }`，`false` 是本来就没登记） |
+| `start(dir)` / `stop(dir)` / `status(dir)` | 启停与此刻的状态，形状同 `docsite.site.*`；不改设置 `sites` |
 | `onStatus(listener)` | 某个站启动、停止、出错时调用 `listener(dir)`，返回撤掉的函数 |
 | `push(dir, channel, data)` | 往站点的推送通道推一份 JSON（频道只用字母、数字、`_`、`-`）；站点没在运行就报错 |
 | `join(dir, { id, name, gitea? })` | 同 `docsite.people.join`，回 `{ changed }` |

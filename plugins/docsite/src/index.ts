@@ -5,7 +5,7 @@ import type {} from '@godcreator/gwb-settings'
 import type {} from '@godcreator/gwb-skills'
 import { registerCommands } from './commands.js'
 import { launchDevServer } from './dev-server.js'
-import { messageOf } from './errors.js'
+import { HostedSites } from './hosted-sites.js'
 import { isIdentityCode, joinPeople, newIdentityCode } from './people-file.js'
 import { runPnpm } from './pnpm.js'
 import { addSiteFeature } from './scaffold/add-feature.js'
@@ -13,7 +13,7 @@ import { createDocsite } from './scaffold/create.js'
 import type { HomePageCheckDeps } from './scaffold/home-page-check.js'
 import { loadPlatformScaffold, pluginDir } from './scaffold/platform.js'
 import { DocsiteService, type GwbDocsiteApi } from './service.js'
-import { SiteHost, siteKeyOf } from './site-host.js'
+import { SiteHost } from './site-host.js'
 
 /** 写在包入口：devkit.release 只读类型入口 dist/index.d.ts 认服务由谁提供 */
 declare module 'cordis' {
@@ -44,7 +44,7 @@ const settingDefinitions = [
       '本 home 的身份码：站点的 people.json 里按它认出「我是谁」。插件第一次加载时生成 12 个小写字母与数字；换电脑时把旧电脑的码填到这里（8 到 64 个小写字母或数字），改了以后新启动的开发服务才用新的码',
     default: '',
   },
-  { key: 'sites', type: 'string-list', title: '托管的站点', description: 'docsite.site.add 登记的站点目录，一行一个绝对路径；插件每次加载时启动它们。别的插件（如 gwb-collab）托管的站点不在这里', default: [] },
+  { key: 'sites', type: 'string-list', title: '托管的站点', description: '常驻的站点目录，一行一个绝对路径；插件每次加载时启动它们。docsite.site.add 登记的，和别的插件经服务登记的（如 gwb-collab 的项目站点，加进项目列表时登记、移出时去掉）都在这里', default: [] },
 ] as const
 
 function stringList(value: unknown): string[] {
@@ -74,10 +74,10 @@ export function apply(ctx: GwbContext): void {
   const host = new SiteHost({ log, launchDevServer, identityCode })
   ctx.effect(() => () => void host.stopAll())
 
-  const sitesSetting = { get: () => stringList(settings.get('sites')), set: (dirs: string[]) => settings.set('sites', dirs) }
+  const hosted = new HostedSites({ get: () => stringList(settings.get('sites')), set: (dirs: string[]) => settings.set('sites', dirs) }, host)
 
   const homePageCheck: HomePageCheckDeps = {
-    isRegistered: (siteDir) => sitesSetting.get().some((each) => siteKeyOf(each) === siteKeyOf(siteDir)),
+    isRegistered: (siteDir) => hosted.isRegistered(siteDir),
     start: (siteDir) => host.start(siteDir),
     stop: (siteDir) => host.stop(siteDir),
     pageStatus: async (url) => (await fetch(new URL('/', url))).status,
@@ -86,6 +86,8 @@ export function apply(ctx: GwbContext): void {
 
   const api: GwbDocsiteApi = {
     identityCode,
+    add: (dir) => hosted.add(dir),
+    remove: (dir) => hosted.remove(dir),
     start: (dir) => host.start(dir),
     stop: (dir) => host.stop(dir),
     status: (dir) => host.statusOf(dir),
@@ -98,12 +100,9 @@ export function apply(ctx: GwbContext): void {
   }
   new DocsiteService(ctx, api)
 
-  // 工作台启动：对登记表逐个 start，异步、不阻塞加载；起不来的标 failed，原因在状态里
-  for (const dir of sitesSetting.get()) {
-    host.start(dir).catch((error) => log.warn(`${dir} 的站点没有启动：${messageOf(error)}`))
-  }
+  hosted.startAll((message) => log.warn(message))
 
-  registerCommands({ commands, docsite: api, sitesSetting, list: () => host.list() })
+  registerCommands({ commands, docsite: api, isRegistered: (dir) => hosted.isRegistered(dir), list: () => host.list() })
 
   ctx.inject(['gwbSkills'], (scoped) => {
     scoped.effect(() => scoped.gwbSkills.register(skillsDir))

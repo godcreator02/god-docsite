@@ -1,0 +1,31 @@
+---
+born-at: 2026-10-16T10:30
+type: choice
+parent: [2026-09-03-god-live-doc]
+label: 协作站的常驻交给 gwb-docsite：设置 sites 是常驻站点唯一的表，gwb-collab 只在项目加进、移出列表时登记与撤销，删掉 collab.site.start / stop
+domain: 协作
+---
+
+## 背景
+
+协作站的开发服务早就由 gwb-docsite 启停，但「哪些站要常驻」有两张表：gwb-docsite 的设置 `sites`，和 gwb-collab 自己的项目列表。
+gwb-collab 在插件加载、项目加进列表时逐个 `start`，插件卸载时把自己启动过的全停掉，另有 `collab.site.start` / `collab.site.stop` 两条命令。
+结果是同一个站点有两套启停命令，人和 AI 不知道该用哪套；gwb-docsite 的 `docsite.site.list` 看得到协作站，`docsite.site.remove` 却拒绝说「别的插件托管的站点由那个插件管」。
+旧版 default home 的设置 `sites` 里又已经手工登记了几个协作站，两边重复。用户决定协作站的托管完全交给 gwb-docsite。
+
+## 结论与边界
+
+- gwb-docsite 的服务 `gwbDocsite` 加 `add(dir)` / `remove(dir)`：登记进设置 `sites` 再启动；去掉登记、在运行就停掉。`docsite.site.add` / `remove` 两条命令改成调它们。
+  常驻的站只有设置 `sites` 这一张表，工作台启动时 gwb-docsite 逐个拉起
+- gwb-collab：项目加进列表（`collab.project.add`、`clone`）与插件加载时 `add` 它的 `site/`（已登记、已在运行就不动），移出列表时 `remove`；
+  `site/` 还没建就记成这个项目「site:host」一步的出错、不登记，等项目负责人 `collab.site.init`（项目在列表里时它建完就登记）
+- 删掉 `collab.site.start` / `collab.site.stop`，插件卸载时也不再停站点：站点归 gwb-docsite，gwb-collab 重新加载不该让协作站断掉。启停一律用 `docsite.site.start` / `stop`；
+  协作窗格点站点地址改成调 `docsite.site.start` 再打开那个地址
+- 推送：站点一转成运行，gwb-docsite 的 `onStatus` 通知 gwb-collab，它把整份数据推过去；通知变化时站点没在运行就不推（以前会推失败、打一行警告）
+- 装依赖时先停、装完再启动（`whileStopped`）照留，仍直接调 `stop` / `start`，站点的登记不动
+- 移出列表要经 gwb-collab：只 `docsite.site.remove` 一个协作站，gwb-collab 下次加载会因为项目还在列表里把它登记回来
+
+## 否掉的候选
+
+- gwb-collab 继续自己记哪些站常驻，只把命令合并：两张表的问题还在，`docsite.site.list` 与协作窗格看到的仍可能对不上
+- 设置 `sites` 里给每个站记上「是谁登记的」，`docsite.site.remove` 拒绝删别的插件登记的：多一个字段只为挡一条命令，移出项目列表这条正路已经够用

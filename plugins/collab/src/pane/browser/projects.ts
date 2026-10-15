@@ -10,7 +10,7 @@ export type ProjectSummary = {
   giteaUrl: string
 }
 
-export type SiteRow = { url: string | null; running: boolean; error: string | null }
+export type SiteRow = { dir: string; url: string | null; running: boolean; error: string | null }
 
 /** 一个项目按打不打得开分两种：打得开的 summary 必在、error 必空；打不开的只在 error 里写原因 */
 export type ProjectRow = { repo: string; summary: ProjectSummary; error: null; site: SiteRow } | { repo: string; summary: null; error: string; site: SiteRow }
