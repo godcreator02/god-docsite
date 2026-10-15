@@ -85,3 +85,24 @@ describe('评论表单的提交地址由调用方给', () => {
     expect(container.querySelector('[data-readonly-reason]')?.textContent).toContain('只读：这是发布版')
   })
 })
+
+describe('一串评论的状态按钮', () => {
+  const intentOfToggle = () => container.querySelector('[data-thread-status-toggle]')!.closest('form')!.querySelector<HTMLInputElement>('input[name="intent"]')!.value
+
+  it('未解决的串是「标为已解决」，已解决的是「重新打开」；只读时没有按钮', async () => {
+    await renderAt('/tasks', () => <CommentThread thread={thread} action="/comments" writer={writer} BodyComponent={Body} place="page" />)
+    expect(container.querySelector('[data-comment-card]')!.getAttribute('data-thread-status')).toBe('open')
+    expect(container.querySelector('[data-thread-status-toggle]')!.getAttribute('aria-label')).toBe('标为已解决')
+    expect(intentOfToggle()).toBe('resolve-thread')
+    expect(pathnameOf('[data-thread-status-toggle]')).toBe('/comments')
+
+    const resolved: PageThreadSummary = { ...thread, resolved: { by: writer, at: '2026-10-15T08:00:00.000Z' } }
+    await renderAt('/tasks', () => <CommentThread thread={resolved} action="/comments" writer={writer} BodyComponent={Body} place="page" />)
+    expect(container.querySelector('[data-comment-card]')!.getAttribute('data-thread-status')).toBe('resolved')
+    expect(container.querySelector('[data-thread-status-toggle]')!.getAttribute('aria-label')).toBe('重新打开')
+    expect(intentOfToggle()).toBe('reopen-thread')
+
+    await renderAt('/tasks', () => <CommentThread thread={thread} action="/comments" BodyComponent={Body} place="page" />)
+    expect(container.querySelector('[data-thread-status-toggle]')).toBeNull()
+  })
+})

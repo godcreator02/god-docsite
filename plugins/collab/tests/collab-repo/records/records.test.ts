@@ -51,7 +51,8 @@ function writeThread(id: string, head: CommentEntry & { page?: string; status?: 
   const dir = path.join(bob.siteDir, 'comments', id)
   mkdirSync(dir, { recursive: true })
   const pageLine = head.page === undefined ? '' : `page: ${head.page}\n`
-  writeFileSync(path.join(dir, 'index.mdx'), `---\nauthor: ${head.author}\ncreatedAt: 2026-10-10T09:00:00.000Z\n${pageLine}status: ${head.status ?? 'open'}\n---\n\n${head.body}\n`)
+  const statusLines = head.status === 'resolved' ? 'status: resolved\nresolvedBy: bob\nresolvedAt: 2026-10-11T09:00:00.000Z\n' : 'status: open\n'
+  writeFileSync(path.join(dir, 'index.mdx'), `---\nauthor: ${head.author}\ncreatedAt: 2026-10-10T09:00:00.000Z\n${pageLine}${statusLines}---\n\n${head.body}\n`)
   replies.forEach((reply, index) => {
     writeFileSync(path.join(dir, `r${index + 1}.mdx`), `---\nauthor: ${reply.author}\ncreatedAt: 2026-10-10T09:0${index + 1}:00.000Z\n---\n\n${reply.body}\n`)
   })
@@ -110,11 +111,10 @@ describe('collab.inbox', () => {
     expect((await collabInbox(bob)).tasks.map((entry) => entry.id)).toEqual([ids.myTodo])
   })
 
-  it('@我与回复我的：读站点 comments/ 里的评论串，去处带上评论串', async () => {
+  it('@我与回复我的：读站点 comments/ 里的评论串，去处带上评论串；已解决的串不列', async () => {
     const inbox = await collabInbox(bob)
     expect(inbox.mentions).toEqual([
       { in: 'comment', comment: '20261010t090000-mention/index.mdx', author: 'carol', text: '@bob 看看拓扑', page: '/plan?comment=20261010t090000-mention' },
-      { in: 'comment', comment: '20261010t090001-resolved/index.mdx', author: 'carol', text: '@bob 已经解决了', page: '/plan?comment=20261010t090001-resolved' },
     ])
     expect(inbox.repliesToMe).toEqual([{ comment: '20261010t090002-mine/r1.mdx', author: 'carol', text: '我来答', threadId: '20261010t090002-mine', page: '/comments?comment=20261010t090002-mine' }])
   })

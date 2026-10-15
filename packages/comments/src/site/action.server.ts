@@ -1,9 +1,9 @@
 import { authorizeWrite, WriteAccessError, type Person, type SiteIdentity } from '@godcreator/identity'
 import { data } from 'react-router'
 import { CommentWriteRejected } from '../core/comment-file.js'
-import { createReply, createThread, deleteReply, deleteThread } from '../node/store.js'
+import { createReply, createThread, deleteReply, deleteThread, setThreadStatus } from '../node/store.js'
 
-export const commentIntents = ['create-thread', 'reply', 'delete-reply', 'delete-thread'] as const
+export const commentIntents = ['create-thread', 'reply', 'delete-reply', 'delete-thread', 'resolve-thread', 'reopen-thread'] as const
 export type CommentIntent = (typeof commentIntents)[number]
 
 /** 写入结果：评论界面按 ok 判断成败，失败时显示 error（外部契约，见 comment-model.ts 的字段约定） */
@@ -29,6 +29,8 @@ const fieldsOfIntent: Record<CommentIntent, readonly string[]> = {
   reply: ['threadId', 'body'],
   'delete-reply': ['threadId', 'replyId'],
   'delete-thread': ['threadId'],
+  'resolve-thread': ['threadId'],
+  'reopen-thread': ['threadId'],
 }
 
 function isCommentIntent(value: string): value is CommentIntent {
@@ -91,11 +93,21 @@ async function performCommentWrite(form: FormData, commentsDir: string, author: 
     case 'delete-thread':
       await deleteThread(commentsDir, textField(form, 'threadId'))
       return { ok: true, intent }
+    case 'resolve-thread': {
+      const threadId = textField(form, 'threadId')
+      await setThreadStatus(commentsDir, threadId, 'resolved', { by: author.id })
+      return { ok: true, intent, threadId }
+    }
+    case 'reopen-thread': {
+      const threadId = textField(form, 'threadId')
+      await setThreadStatus(commentsDir, threadId, 'open')
+      return { ok: true, intent, threadId }
+    }
   }
 }
 
 /**
- * 评论写入的路由 action：核对 Origin 与身份（as 只给 agent，表单里的空 as 当没写），再按 intent 建串、回复、删除。
+ * 评论写入的路由 action：核对 Origin 与身份（as 只给 agent，表单里的空 as 当没写），再按 intent 建串、回复、删除、标为已解决、重新打开。
  * 返回值路由 action 直接 return：成功 { ok: true, intent, threadId?, replyId? }；
  * 来源或身份不对、请求字段不对、目标评论不存在时 { ok: false, error } 并带上 4xx 状态码；别的错原样抛出
  */

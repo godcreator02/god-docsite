@@ -7,6 +7,7 @@
  *   intent=reply：threadId、body
  *   intent=delete-reply：threadId、replyId
  *   intent=delete-thread：threadId
+ *   intent=resolve-thread、reopen-thread：threadId
  * 返回 { ok: true, … } 或 { ok: false, error: 文案 }（失败随状态码）。
  * 界面只接收可写或只读的结果（commentsAccessOf），不认识身份码；头像由宿主经 AvatarComponent 传进来。
  * 署名（as）只给 agent 经命令用，网页界面里不出现。评论正文由宿主编译（fumadocs-mdx 集合），经 BodyComponent 按路径渲染。
@@ -36,6 +37,8 @@ export interface PageThreadSummary {
   anchor?: string
   author: CommentWriter
   createdAt: string
+  /** 标为已解决的人与时刻；没有就是未解决 */
+  resolved?: { by: CommentWriter; at: string }
   replies: PageThreadReplySummary[]
 }
 

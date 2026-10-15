@@ -2,13 +2,10 @@ import { mentionsOf } from '@godcreator/identity'
 import type { CollabState, TaskState } from './state.js'
 import type { Person } from './people.js'
 
-/**
- * 一串评论读出来的样子：评论包 readCommentThreads 的结果（只用到这几项），浏览器里也能构造。
- * 评论模型没有已解决状态：每串都算
- */
+/** 一串评论读出来的样子：评论包 readCommentThreads 的结果（只用到这几项），浏览器里也能构造。resolved 为真是已解决 */
 export type CommentThreadOnFile = {
   id: string
-  head: { authorId: string; page?: string; file: string; body: string }
+  head: { authorId: string; page?: string; file: string; body: string; resolved: boolean }
   replies: Array<{ authorId: string; file: string; body: string }>
 }
 
@@ -55,11 +52,12 @@ function repliesToMeIn(thread: CommentThreadOnFile, person: string): ReplyToMe[]
   return replies
 }
 
-/** 现在该这个人处理的：没有「已读」，任务做完就不再列出 */
+/** 现在该这个人处理的：任务做完就不再列出；评论串标为已解决，它带来的 @ 与回复就不再列出，重新打开又列出来 */
 export function inboxOf(state: Pick<CollabState, 'tasks'>, threads: readonly CommentThreadOnFile[], person: string, people: readonly Person[]): InboxItems {
+  const openThreads = threads.filter((thread) => !thread.head.resolved)
   return {
     tasks: state.tasks.filter((task) => task.owner === person && task.status !== 'done'),
-    mentions: threads.flatMap((thread) => mentionsOfMe(thread, person, people)),
-    repliesToMe: threads.flatMap((thread) => repliesToMeIn(thread, person)),
+    mentions: openThreads.flatMap((thread) => mentionsOfMe(thread, person, people)),
+    repliesToMe: openThreads.flatMap((thread) => repliesToMeIn(thread, person)),
   }
 }

@@ -6,7 +6,9 @@ export {
   parseCommentFile,
   serializeCommentFile,
   THREAD_HEAD_FILE,
+  threadResolutionOf,
   type CommentFileOnDisk,
+  type ThreadResolution,
 } from './comment-file.js'
 export { parseCommentAnchor, serializeTextAnchor, type CommentAnchor, type TextAnchorFields } from './anchor.js'
 export { threadsByPage, threadsForPage, threadsOf, type CommentEntryLike, type ReplySummary, type ThreadSummary } from './threads.js'

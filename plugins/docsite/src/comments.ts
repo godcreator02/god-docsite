@@ -9,7 +9,19 @@ export type CommentFilter = { page?: string; about?: string }
 
 type ListedComment = { author: string; createdAt: string; body: string; mentions: string[] }
 
-export type ListedThread = { id: string; page: string; anchor?: string; author: string; createdAt: string; body: string; mentions: string[]; replies: ListedComment[] }
+export type ListedThread = {
+  id: string
+  page: string
+  anchor?: string
+  author: string
+  createdAt: string
+  status: 'open' | 'resolved'
+  resolvedBy?: string
+  resolvedAt?: string
+  body: string
+  mentions: string[]
+  replies: ListedComment[]
+}
 
 function listedOf(entry: CommentFileOnDisk, people: readonly Person[]): ListedComment {
   return { author: entry.authorId, createdAt: entry.createdAt, body: entry.body, mentions: mentionsOf(entry.body, people) }
@@ -37,6 +49,9 @@ export async function listComments(siteDir: string, filter: CommentFilter): Prom
         ...(thread.head.anchor !== undefined ? { anchor: thread.head.anchor } : {}),
         author: thread.head.authorId,
         createdAt: thread.head.createdAt,
+        ...(thread.head.resolved !== undefined
+          ? { status: 'resolved' as const, resolvedBy: thread.head.resolved.by, resolvedAt: thread.head.resolved.at }
+          : { status: 'open' as const }),
         body: thread.head.body,
         mentions: [...new Set(mentions)],
         replies: thread.replies.map((reply) => listedOf(reply, people)),
@@ -48,6 +63,9 @@ export async function listComments(siteDir: string, filter: CommentFilter): Prom
 export type CommentWrite =
   | { op: 'create'; page: string; body: string; as?: string; anchor?: string }
   | { op: 'reply'; thread: string; body: string; as?: string }
+  | { op: 'resolve' | 'reopen'; thread: string; as?: string }
+
+const intentOfStatusOp = { resolve: 'resolve-thread', reopen: 'reopen-thread' } as const
 
 /**
  * 表单字段：和网页评论面板同一套（comments 包的 handleCommentWrite 认的字段），所以要站点在运行。
@@ -60,10 +78,13 @@ export function commentFormOf(write: CommentWrite): FormData {
     form.set('page', write.page)
     form.set('body', write.body)
     if (write.anchor !== undefined) form.set('anchor', write.anchor)
-  } else {
+  } else if (write.op === 'reply') {
     form.set('intent', 'reply')
     form.set('threadId', write.thread)
     form.set('body', write.body)
+  } else {
+    form.set('intent', intentOfStatusOp[write.op])
+    form.set('threadId', write.thread)
   }
   if (write.as !== undefined) form.set('as', write.as)
   return form
@@ -119,6 +140,7 @@ export async function writeComment(siteUrl: string, write: CommentWrite): Promis
   const response = await fetch(new URL(commentWriteDataPath, siteUrl), { method: 'POST', body: commentFormOf(write), headers: { origin } })
   const result = commentWriteResultOf(response.status, await response.text())
   if (!result.ok) throw new DocsiteRejected(`站点的评论接口拒绝了（${response.status}）：${result.error}`)
+  if (write.op === 'resolve' || write.op === 'reopen') return { thread: write.thread }
   if (write.op === 'reply') {
     if (typeof result.replyId !== 'string') throw new DocsiteRejected(`站点的评论接口没有回 replyId：${JSON.stringify(result)}`)
     return { thread: write.thread, reply: result.replyId }

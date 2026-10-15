@@ -58,7 +58,12 @@ describe('真的在临时目录建站', () => {
     expect(existsSync(path.join(siteDir, 'comments', created.thread, `${replied.reply}.mdx`))).toBe(true)
     await expect(writeComment(url, { op: 'reply', thread: created.thread, body: 'x', as: 'nobody' })).rejects.toThrow('people.json 里没有 nobody')
     const [thread] = await listComments(siteDir, { page: 'start.mdx' })
-    expect(thread).toMatchObject({ id: created.thread, author: 'tester', body: '真站上的评论', replies: [{ author: 'claude', body: 'agent 的回复' }] })
+    expect(thread).toMatchObject({ id: created.thread, author: 'tester', status: 'open', body: '真站上的评论', replies: [{ author: 'claude', body: 'agent 的回复' }] })
+    expect(await writeComment(url, { op: 'resolve', thread: created.thread, as: 'claude' })).toEqual({ thread: created.thread })
+    expect((await listComments(siteDir, { page: 'start.mdx' }))[0]).toMatchObject({ status: 'resolved', resolvedBy: 'claude' })
+    await expect(writeComment(url, { op: 'resolve', thread: created.thread })).rejects.toThrow('已经是已解决')
+    await writeComment(url, { op: 'reopen', thread: created.thread })
+    expect((await listComments(siteDir, { page: 'start.mdx' }))[0]!.status).toBe('open')
 
     await host.push(siteDir, 'probe', { note: '推送一' })
     expect(await (await fetch(new URL('/__docsite/feed/probe', url))).json()).toEqual({ note: '推送一' })

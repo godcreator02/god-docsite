@@ -6,9 +6,13 @@ import {
   CommentWriteRejected,
   newCommentId,
   parseCommentFile,
+  parseCommentFileForRewrite,
   serializeCommentFile,
   THREAD_HEAD_FILE,
+  threadResolutionOf,
+  withThreadResolution,
   type CommentFileOnDisk,
+  type ThreadResolution,
 } from '../core/comment-file.js'
 
 /*
@@ -53,7 +57,7 @@ export async function createThread(commentsDir: string, input: CreateThreadInput
   const threadDir = threadDirOf(commentsDir, id)
   // 站点的第一条评论时评论目录还不存在
   await mkdir(threadDir, { recursive: true })
-  const fields: Record<string, string> = { page, author: authorId, createdAt: now.toISOString() }
+  const fields: Record<string, string> = { page, author: authorId, createdAt: now.toISOString(), status: 'open' }
   if (anchor !== undefined && anchor !== '') fields.anchor = anchor
   await writeFile(path.join(threadDir, THREAD_HEAD_FILE), serializeCommentFile(fields, body), 'utf-8')
   return { id, headPath: `${id}/${THREAD_HEAD_FILE}` }
@@ -74,6 +78,39 @@ export async function createReply(commentsDir: string, threadId: string, input: 
   const id = newCommentId(now)
   await writeFile(path.join(threadDir, `${id}.mdx`), serializeCommentFile({ author: authorId, createdAt: now.toISOString() }, body), 'utf-8')
   return { id, path: `${threadId}/${id}.mdx` }
+}
+
+export interface SetThreadStatusInput {
+  /** 标为已解决的人（人员 id）；重新打开不需要 */
+  by?: string
+  now?: Date
+}
+
+/**
+ * 标一串评论为已解决（status 给 resolved，by 必填）或重新打开（open）：只改串头 frontmatter 里的 status、resolvedBy、resolvedAt，
+ * 别的字段与正文原样写回。已经是这个状态就拒绝（409），写明是谁在什么时候标的
+ */
+export async function setThreadStatus(commentsDir: string, threadId: string, status: 'open' | 'resolved', input: SetThreadStatusInput = {}): Promise<{ resolved?: ThreadResolution }> {
+  const headFile = path.join(threadDirOf(commentsDir, threadId), THREAD_HEAD_FILE)
+  const headPath = `${threadId}/${THREAD_HEAD_FILE}`
+  let text: string
+  try {
+    text = await readFile(headFile, 'utf-8')
+  } catch (error) {
+    if (isMissingFileError(error)) throw new CommentWriteRejected(404, `评论串不存在：${threadId}`)
+    throw error
+  }
+  const { fields, body } = parseCommentFileForRewrite(headPath, text)
+  const current = threadResolutionOf(headPath, fields)
+  if (status === 'resolved' && current !== undefined) throw new CommentWriteRejected(409, `评论串 ${threadId} 已经是已解决（${current.by} 在 ${current.at} 标的）`)
+  if (status === 'open' && current === undefined) throw new CommentWriteRejected(409, `评论串 ${threadId} 本来就是未解决`)
+  let resolved: ThreadResolution | undefined
+  if (status === 'resolved') {
+    if (input.by === undefined || input.by.length === 0) throw new CommentWriteRejected(400, '标为已解决缺少标的人（by）')
+    resolved = { by: input.by, at: (input.now ?? new Date()).toISOString() }
+  }
+  await writeFile(headFile, serializeCommentFile(withThreadResolution(fields, resolved), body), 'utf-8')
+  return resolved === undefined ? {} : { resolved }
 }
 
 /** 删一条回复，返回它相对评论目录的路径 */

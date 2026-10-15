@@ -1,12 +1,13 @@
-import { COMMENT_ID_PATTERN, THREAD_HEAD_FILE } from './comment-file.js'
+import { COMMENT_ID_PATTERN, THREAD_HEAD_FILE, type ThreadResolution } from './comment-file.js'
 
-/** 整理评论串要的一条评论：path 相对评论目录（如 `20261012t080000-seed1/index.mdx`），page 与 anchor 只有串头有 */
+/** 整理评论串要的一条评论：path 相对评论目录（如 `20261012t080000-seed1/index.mdx`），page、anchor 与 resolved 只有串头有 */
 export interface CommentEntryLike {
   path: string
   authorId: string
   createdAt: string
   page?: string
   anchor?: string
+  resolved?: ThreadResolution
 }
 
 export interface ReplySummary {
@@ -23,6 +24,8 @@ export interface ThreadSummary {
   authorId: string
   createdAt: string
   anchor?: string
+  /** 标为已解决的记录；没有就是未解决 */
+  resolved?: ThreadResolution
   replies: ReplySummary[]
 }
 
@@ -48,6 +51,7 @@ export function threadsOf(entries: readonly CommentEntryLike[]): ThreadSummary[]
   for (const entry of entries) {
     const [threadId, fileName] = threadIdAndFileOf(entry)
     if (fileName !== THREAD_HEAD_FILE) {
+      if (entry.resolved !== undefined) throw new Error(`回复不能带已解决状态，状态只写在串头 ${THREAD_HEAD_FILE} 里：${entry.path}`)
       replyEntries.push({ threadId, fileName, entry })
       continue
     }
@@ -61,6 +65,7 @@ export function threadsOf(entries: readonly CommentEntryLike[]): ThreadSummary[]
       authorId: entry.authorId,
       createdAt: entry.createdAt,
       ...(entry.anchor !== undefined && entry.anchor !== '' ? { anchor: entry.anchor } : {}),
+      ...(entry.resolved !== undefined ? { resolved: entry.resolved } : {}),
       replies: [],
     })
   }

@@ -18,7 +18,7 @@ export function registerRecordCommands(services: PluginServices): void {
         "回 { tasks, mentions, repliesToMe, problems }：tasks 是负责人是我、status 不是 done 的任务；mentions 是还没解决的评论串里别人写的、正文 @了我（@<id>）的 { in: 'comment' | 'reply', comment, author, text, page }；" +
         'repliesToMe 是还没解决的评论串里，我发起或回复过之后别人写的回复 { comment, author, text, threadId, page }；comment 是「评论串文件夹名/文件名」（site/comments/ 下），threadId 是评论串文件夹名；' +
         'page 是点到它时去的地址：挂在页面上的是「那一页?comment=<评论串>」，不挂在页面上的是「/comments?comment=<评论串>」；problems 是读出记录时的问题 { file, message }。' +
-        '没有「已读」：任务做完、评论串解决之后就不再列出。读评论原文、回复评论用 gwb-docsite 的 docsite.comments、docsite.comment.reply（dir 是 site/ 的绝对路径）',
+        '没有「已读」：任务做完、评论串标为已解决（docsite.comment.resolve）之后就不再列出。读评论原文、回复评论用 gwb-docsite 的 docsite.comments、docsite.comment.reply（dir 是 site/ 的绝对路径）',
     },
     async (args) => collabInbox(await openProjectAt(services, repoOfArgs(args))),
   )

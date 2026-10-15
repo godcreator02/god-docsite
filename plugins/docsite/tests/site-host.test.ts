@@ -205,6 +205,8 @@ describe('开发服务的输出与评论表单', () => {
     expect(fields(commentFormOf({ op: 'create', page: '/a', anchor: 'some-heading', body: 'x', as: 'claude' }))).toEqual({ intent: 'create-thread', as: 'claude', body: 'x', page: '/a', anchor: 'some-heading' })
     expect(fields(commentFormOf({ op: 'create', page: '/a', body: 'x' }))).toEqual({ intent: 'create-thread', body: 'x', page: '/a' })
     expect(fields(commentFormOf({ op: 'reply', thread: 't', body: 'x' }))).toEqual({ intent: 'reply', threadId: 't', body: 'x' })
+    expect(fields(commentFormOf({ op: 'resolve', thread: 't', as: 'claude' }))).toEqual({ intent: 'resolve-thread', threadId: 't', as: 'claude' })
+    expect(fields(commentFormOf({ op: 'reopen', thread: 't' }))).toEqual({ intent: 'reopen-thread', threadId: 't' })
   })
 
   it('评论写入路由回的单次请求数据：扁平对象解成原样，数组与带类型标记的值报错', () => {

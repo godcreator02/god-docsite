@@ -23,7 +23,7 @@ async function commentThreadsOf(project: Project): Promise<CommentThreadOnFile[]
     const threads = await readCommentThreads(commentsDir)
     return threads.map(({ head, replies }) => ({
       id: threadIdOf(head.path),
-      head: { authorId: head.authorId, ...(head.page !== undefined ? { page: head.page } : {}), file: fileNameOf(head.path), body: head.body },
+      head: { authorId: head.authorId, ...(head.page !== undefined ? { page: head.page } : {}), file: fileNameOf(head.path), body: head.body, resolved: head.resolved !== undefined },
       replies: replies.map((reply) => ({ authorId: reply.authorId, file: fileNameOf(reply.path), body: reply.body })),
     }))
   } catch (error) {

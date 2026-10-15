@@ -206,7 +206,7 @@ export function registerCommands({ commands, docsite, sitesSetting, list }: Comm
       name: 'docsite.comments',
       description: '列出站点上的评论（只读，读文件，不要站点在运行）',
       usage:
-        '{ dir, page?, about? }：page 是页面在内容目录 content/ 里的路径（如 writing/collapse-test.mdx），给了只列批那一页的；about 是人员 id，给了只列和他有关的（他发起的、正文或回复里 @ 了他的）。回 { threads }：每串 { id, page, anchor?, author, createdAt, body, mentions, replies }，anchor 是锚定的页面元素 id，页面级评论没有；author 是 people.json 里的 id；body 是 MDX 原文；mentions 是正文与回复里 @ 了的人员 id，去重；replies 每条 { author, createdAt, body, mentions }，按时间排。文件在站点目录的 comments/<id>/ 里：index.mdx 是发起的那条，回复各一个 .mdx',
+        '{ dir, page?, about? }：page 是页面在内容目录 content/ 里的路径（如 writing/collapse-test.mdx），给了只列批那一页的；about 是人员 id，给了只列和他有关的（他发起的、正文或回复里 @ 了他的）。回 { threads }：每串 { id, page, anchor?, author, createdAt, status, resolvedBy?, resolvedAt?, body, mentions, replies }，anchor 是锚定的页面元素 id，页面级评论没有；author 是 people.json 里的 id；status 是 open 或 resolved，resolved 时带 resolvedBy（人员 id）与 resolvedAt；body 是 MDX 原文；mentions 是正文与回复里 @ 了的人员 id，去重；replies 每条 { author, createdAt, body, mentions }，按时间排。文件在站点目录的 comments/<id>/ 里：index.mdx 是发起的那条，回复各一个 .mdx',
       effect: 'read',
     },
     async (args) => {
@@ -255,11 +255,19 @@ export function registerCommands({ commands, docsite, sitesSetting, list }: Comm
       {
         name: `docsite.comment.${op}`,
         description: op === 'resolve' ? '把站点上的一串评论标为已解决' : '把站点上一串已解决的评论重新打开',
-        usage: '{ dir, thread, as? }：评论模型还没收编 resolved 状态，这个命令先不可用',
+        usage:
+          `{ dir, thread, as? }：thread 是评论串的文件夹名（docsite.comments 回的 id）。` +
+          (op === 'resolve'
+            ? '串头 index.mdx 写上 status: resolved 与 resolvedBy（写的人）、resolvedAt；已经是已解决就拒绝。标了以后这串带来的 @ 与回复不再算待办'
+            : '串头 index.mdx 改回 status: open、去掉 resolvedBy 与 resolvedAt；本来就是未解决就拒绝') +
+          `。${commentWriteUsage}。回 { thread }`,
         effect: 'write',
       },
-      async () => {
-        throw new DocsiteRejected('评论模型还没收编 resolved 状态，docsite.comment.resolve / reopen 先不可用')
+      async (args) => {
+        const parsed = argsOf(args, ['dir', 'thread', 'as'])
+        const as = optionalString(parsed, 'as')
+        const dir = dirOf(parsed)
+        return writeComment(urlOfRunning(dir), { op, thread: requiredString(parsed, 'thread'), ...(as ? { as } : {}) })
       },
     )
   }

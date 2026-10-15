@@ -78,7 +78,9 @@ docsite.people.join {"dir":…,"id":"<字母数字_->","name":"<显示名>","git
   `docsite.comment.reply {"dir":…,"thread":…,"body":…,"as"?:…}`，`thread` 是 `docsite.comments` 回的 `id`。两条都要站点在运行。
   agent 以自己的名义写时给 `as`（`people.json` 里 `"agent": true` 的 id），不给就署本 home 的人
 - 正文是 MDX：字面的 `<`、`{` 写成 `\<`、`\{` 或放进反引号；`@<id>` 是 @ 某人
-- 评论没有「已解决」状态：`docsite.comment.resolve` / `reopen` 调了直接报错
+- 每串评论有状态：`index.mdx` 的 `status` 是 `open` 或 `resolved`，`resolved` 时还有 `resolvedBy`（谁标的）与 `resolvedAt`；`docsite.comments` 每串带着它们。
+  `docsite.comment.resolve {"dir":…,"thread":…,"as"?:…}` 标为已解决，`docsite.comment.reopen` 重新打开，要站点在运行；已经是那个状态就拒绝。网页上点开一串评论、鼠标移到发起的那条上，有同样的按钮（对勾是标为已解决，回转箭头是重新打开），发布版没有。
+  标了以后这串带来的 @ 与回复不再算待办；替人标之前先问人
 - 人让你照某条评论改页面时：先 `docsite.comments` 找到它，改完页面再 `docsite.comment.reply` 说明改了什么
 
 ## 写页面

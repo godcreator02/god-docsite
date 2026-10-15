@@ -24,6 +24,46 @@ async function writeThreadAndReply(page, { threadText, replyText }) {
   return threadId
 }
 
+/** 在收件箱里点开一串，等它浮在正文上；返回那一串的 locator */
+async function openThreadFromInbox(page, threadId) {
+  await openCommentsInbox(page)
+  await page.click(`[data-comment-row="${threadId}"]`)
+  const card = page.locator(`[data-comments-layer] [data-comment-card="${threadId}"]`)
+  await card.waitFor({ timeout: stepTimeoutMs })
+  return card
+}
+
+/** 悬停串头露出状态按钮再点；返回点之前按钮的名字 */
+async function clickThreadStatusToggle(card, threadId) {
+  await card.locator('.docsite-comment').first().hover()
+  const toggle = card.locator(`[data-thread-status-toggle="${threadId}"]`)
+  const label = (await toggle.getAttribute('aria-label')) ?? ''
+  await toggle.click()
+  return label
+}
+
+/**
+ * 等串头文件写上 status 行，再等浮着的这一串显示同样的 data-thread-status。
+ * dev 下改已有的串头文件，Vite 热更新不了它、整页刷新，浮着的这一串随之收起（收件箱记着开着），就从收件箱再点开
+ */
+async function waitForThreadStatus(page, { threadId, headFile, status }) {
+  const deadline = Date.now() + stepTimeoutMs
+  const statusLine = `status: "${status}"`
+  while (!readFileSync(headFile, 'utf8').split(/\r?\n/).includes(statusLine)) {
+    if (Date.now() > deadline) throw new Error(`${headFile} 等不到「${statusLine}」`)
+    await new Promise((resolve) => setTimeout(resolve, 200))
+  }
+  const shown = page.locator(`[data-comments-layer] [data-comment-card="${threadId}"][data-thread-status="${status}"]`)
+  while (Date.now() < deadline) {
+    if (await shown.count()) return shown
+    const stillOpen = await page.locator(`[data-comments-layer] [data-comment-card="${threadId}"]`).count()
+    const rowShown = await page.locator(`[data-comment-row="${threadId}"]`).count()
+    if (!stillOpen && rowShown) await page.click(`[data-comment-row="${threadId}"]`).catch(() => {})
+    await new Promise((resolve) => setTimeout(resolve, 300))
+  }
+  throw new Error(`串 ${threadId} 在页面上等不到 data-thread-status="${status}"`)
+}
+
 /**
  * 基础站（god-docsite + identity + comments）的检查。mode 是 dev 或 start；
  * dev 下写评论，并多做内容文件增改的几项（改的是本次运行新建的临时页）；start 是只读的发布版，核对写不进去，并多搜构建产物。
@@ -156,6 +196,26 @@ export async function runBaseChecks({ browser, baseUrl, mode, siteDir, feedToken
         return { pass: pending === 0, detail: `串 ${threadId} 与回复都显示出来，等编译入口的占位 ${pending} 个` }
       })
 
+      await check('标为已解决、重新打开（dev）：在收件箱点开这一串，悬停串头点状态按钮，按钮跟着变，串头写上 status、resolvedBy、resolvedAt，重新打开后去掉', async () => {
+        await page.goto(`${baseUrl}/writing/collapse-test`, { waitUntil: 'load' })
+        await page.waitForLoadState('networkidle')
+        await openCommentsInbox(page)
+        const row = page.locator('[data-comment-row]', { hasText: `e2e 评论 ${runTag}` })
+        await row.waitFor({ timeout: stepTimeoutMs })
+        const threadId = await row.getAttribute('data-comment-row')
+        const headFile = path.join(commentsDir, threadId, 'index.mdx')
+        const openLabel = await clickThreadStatusToggle(await openThreadFromInbox(page, threadId), threadId)
+        const resolvedCard = await waitForThreadStatus(page, { threadId, headFile, status: 'resolved' })
+        const resolvedText = readFileSync(headFile, 'utf8')
+        const resolvedLabel = await clickThreadStatusToggle(resolvedCard, threadId)
+        await waitForThreadStatus(page, { threadId, headFile, status: 'open' })
+        const reopenedText = readFileSync(headFile, 'utf8')
+        const resolvedWritten = /^status: "resolved"$/m.test(resolvedText) && /^resolvedBy: "[^"]+"$/m.test(resolvedText) && /^resolvedAt: "[^"]+"$/m.test(resolvedText)
+        const reopenedWritten = /^status: "open"$/m.test(reopenedText) && !/^resolved(By|At):/m.test(reopenedText)
+        const pass = resolvedWritten && openLabel === '标为已解决' && resolvedLabel === '重新打开' && reopenedWritten
+        return { pass, detail: `未解决时按钮写「${openLabel}」，标了以后写「${resolvedLabel}」、串头 status 行 ${resolvedText.match(/^status: .*$/m)?.[0]}；重新打开后 ${reopenedText.match(/^status: .*$/m)?.[0]}，还有 resolvedBy/At：${/^resolved(By|At):/m.test(reopenedText)}` }
+      })
+
       await check('批注一块（dev）：草稿与这一串浮在那一块正下方、不挤动正文；再点那一块收起浮窗，收件箱不跟着收', async () => {
         const commentText = `e2e 批一块 ${runTag}`
         await page.goto(`${baseUrl}/writing/collapse-test`, { waitUntil: 'load' })
@@ -197,6 +257,19 @@ export async function runBaseChecks({ browser, baseUrl, mode, siteDir, feedToken
         const after = filesUnder(commentsDir).length
         const pass = reasonText.includes('发布版') && writeForms === 0 && rejected.status === 403 && rejected.text.includes('发布版') && after === before
         return { pass, detail: `收件箱写着「${reasonText}」，批整页的输入框与批注按钮 ${writeForms} 个；直接提交 → ${rejected.status}，评论目录文件 ${before} → ${after}` }
+      })
+
+      await check('start 只读：在收件箱点开预置的那串，没有「标为已解决」按钮，直接提交 resolve-thread 被拒、串头不变', async () => {
+        const presetHead = filesUnder(commentsDir).find((file) => path.basename(file) === 'index.mdx' && readFileSync(file, 'utf8').includes('e2e 预置评论'))
+        if (presetHead === undefined) throw new Error(`${commentsDir} 里找不到正文是「e2e 预置评论」的串头`)
+        const threadId = path.basename(path.dirname(presetHead))
+        const before = readFileSync(presetHead, 'utf8')
+        await page.goto(`${baseUrl}/writing/collapse-test`, { waitUntil: 'load' })
+        const card = await openThreadFromInbox(page, threadId)
+        const statusToggles = await card.locator('[data-thread-status-toggle]').count()
+        const rejected = await postFormToAction(baseUrl, '/comments.data', { intent: 'resolve-thread', threadId })
+        const unchanged = readFileSync(presetHead, 'utf8') === before
+        return { pass: statusToggles === 0 && rejected.status === 403 && unchanged, detail: `点开的那串里状态按钮 ${statusToggles} 个；直接提交 → ${rejected.status}；预置串 ${threadId} 的串头${unchanged ? '没变' : '变了'}` }
       })
     }
 

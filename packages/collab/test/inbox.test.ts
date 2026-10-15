@@ -6,7 +6,7 @@ const people = parsePeople(peopleText)
 
 const thread = (id: string, head: Partial<CommentThreadOnFile['head']>, replies: CommentThreadOnFile['replies'] = []): CommentThreadOnFile => ({
   id,
-  head: { authorId: 'bob-test', file: 'index.mdx', body: '', ...head },
+  head: { authorId: 'bob-test', file: 'index.mdx', body: '', resolved: false, ...head },
   replies,
 })
 
@@ -41,6 +41,17 @@ describe('找我的', () => {
       { comment: 'mine/r1.mdx', author: 'bob-test', text: '收到', threadId: 'mine', page: '/comments?comment=mine' },
       { comment: 'joined/r3.mdx', author: 'bob-test', text: '谢谢', threadId: 'joined', page: '/plan?comment=joined' },
     ])
+  })
+
+  it('已解决的评论串：它带来的 @ 我与回复我都不列；未解决的照常列', () => {
+    const replies = [
+      { authorId: 'carol-test', file: 'r1.mdx', body: '我来' },
+      { authorId: 'godcreator', file: 'r2.mdx', body: '@carol-test 好了' },
+    ]
+    const threads = [thread('done', { page: '/plan', body: '@carol-test 看看', resolved: true }, replies), thread('open', { page: '/plan', body: '@carol-test 看看' }, replies)]
+    const inbox = inboxOf({ tasks: [] }, threads, 'carol-test', people)
+    expect(inbox.mentions.map((entry) => entry.comment)).toEqual(['open/index.mdx', 'open/r2.mdx'])
+    expect(inbox.repliesToMe.map((entry) => entry.comment)).toEqual(['open/r2.mdx'])
   })
 
   it('点一串评论去哪：挂在页面上的去那一页，不挂的去全部评论页，都带上评论串', () => {

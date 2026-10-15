@@ -19,6 +19,7 @@ function entriesOf(threads: readonly CommentThreadOnDisk[]): CommentCollectionEn
       createdAt: file.createdAt,
       ...(file.page !== undefined ? { page: file.page } : {}),
       ...(file.anchor !== undefined ? { anchor: file.anchor } : {}),
+      ...(file.resolved !== undefined ? { status: 'resolved', resolvedBy: file.resolved.by, resolvedAt: file.resolved.at } : {}),
     }))
 }
 
