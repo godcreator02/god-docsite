@@ -1,5 +1,5 @@
 {
   "title": "包",
   "root": true,
-  "pages": ["god-docsite", "identity", "comments", "explainer", "code-pin", "doc-export", "trajectory", "collab", "word-report"]
+  "pages": ["god-docsite", "identity", "comments", "explainer", "code-pin", "doc-export", "trajectory", "docfirst", "collab", "word-report"]
 }

@@ -1,0 +1,145 @@
+---
+title: docfirst：命令行
+description: 在站目录运行的命令行 docfirst：读 docfirst.config.mjs，定下哪些文件归它管，把核对、确认、生成、列轨迹分派给 code-pin、doc-export、trajectory 三个功能包，汇成一个红的个数、一份机读报告和退出码
+icon: Terminal
+---
+
+import { DocfirstSeams } from './docfirst/seams'
+
+`docfirst` 是在站目录运行的命令行：站点 `package.json` 里的 `doc`、`doc:confirm`、`doc:render` 三条脚本就是 `docfirst check`、`docfirst confirm`、`docfirst render`（这三条脚本是 gwb-docsite 建站时写进站点 `package.json` 的）。项目根是当前目录，那里要有 `docfirst.config.mjs`。
+
+这一页从头到尾用同一个例子：一个刚由 `docfirst.create` 建好的站。站目录里是 `docfirst.config.mjs`（docfirst 包 `template/` 里那份起始配置）、`content/docs/outputs/` 下 README / AGENTS / CLAUDE 三份生成正本、`content/future/overview.mdx`、`trajectory/2026-01-01-site-born.md`，仓根还没有 README.md、AGENTS.md、CLAUDE.md。刚建好的站第一次 `pnpm doc` 就红，因为三份生成物还没生成；`render` 之后全绿：
+
+```
+$ pnpm doc
+🔴 content/docs/outputs/agents.mdx → ../AGENTS.md  生成物还不存在——运行 render 生成
+🔴 content/docs/outputs/claude.mdx → ../CLAUDE.md  生成物还不存在——运行 render 生成
+🔴 content/docs/outputs/readme.mdx → ../README.md  生成物还不存在——运行 render 生成
+
+$ pnpm doc:render
+→  content/docs/outputs/agents.mdx  摆放到 ../AGENTS.md
+→  content/docs/outputs/claude.mdx  摆放到 ../CLAUDE.md
+→  content/docs/outputs/readme.mdx  摆放到 ../README.md
+
+$ pnpm doc
+🟢 content/docs/outputs/agents.mdx → ../AGENTS.md  生成物跟 mdx 源一致
+🟢 content/docs/outputs/claude.mdx → ../CLAUDE.md  生成物跟 mdx 源一致
+🟢 content/docs/outputs/readme.mdx → ../README.md  生成物跟 mdx 源一致
+
+$ pnpm exec docfirst trajectory
+盘 起始（2026-01-01-site-born）  0 张卡
+  支线 0 条，孤星 0 张
+
+$ pnpm doc --dry-run
+check 不认识开关 --dry-run（check 只认 --json），什么都没动。用法看 docfirst --help
+```
+
+## 三个功能包各管一摊：接缝图
+
+`pnpm doc` 的背后不止一个包。docfirst 自己什么都不判：它只认命令、读配置、定下哪些文件归它管，把每篇交给三个功能包，再把结论汇成一个红的个数与退出码。判断全在三个功能包里，读写磁盘也大多由它们自己做，这个分工就是图上那几条线：
+
+<DocfirstSeams />
+
+按接缝编号逐条讲：
+
+- **1、2 配置读进来**：由 Node 原生 import 配置模块、按五个键校验；落点表与名册的形状交给 doc-export 归一（`placementsOf`、`fumadocsRoster`）。
+- **3、4、5 装配项目**：按目录约定定下现状区，建一个钉码工作区，生成物项目共用这个工作区的 `pinner`——生成时把记号换成代码块要用同一套钉码核心。
+- **6、9 钉的核对与确认**：交给 code-pin。code-pin 自己读被钉的代码、从 git 取旧内容、确认时改写标记那一行。
+- **7、10 生成物**：核对、生成与名册检查交给 doc-export，落点由 doc-export 自己写。
+- **8、11 轨迹卡**：交给 trajectory，它自己读卡目录。
+
+docfirst 只依赖这三个功能包，这条方向由 dependency-cruiser 的规则检查：
+
+{/* ref file="../tests/dependency-rules.cjs" lines="20-20" hash="22b510be08b6" blob="f75367612755" */}
+
+## 配置：docfirst.config.mjs
+
+只认五个键：`content`（内容根，不写是 `content`）、`trajectory`（轨迹卡目录，不写是内容根下的 `trajectory/`）、`outputs`（生成正本 → 落点数组）、`components`（组件名 → 机读规则）、`fumadocsRoster`（`true` 时先放进 fumadocs 自带组件的规则，`components` 里同名的盖过它）。目录都相对项目根，默认值与名册的覆盖顺序写在字段注释里，字段表的正本：
+
+{/* ref file="../packages/docfirst/src/config.ts" lines="11-23" hash="f7b9e28da76f" blob="be7ae97fddc1" */}
+
+不认识的键报错；`glossary` 这类属于站点构建的旧键也报错，并说清它移到了哪。要改的地方一次列全报错，不是碰见第一个就停。
+
+起始配置把 `trajectory` 写成站点根下的 `trajectory`（不是默认的内容根下），因为站点的卡集合读的是同一个目录（见 [trajectory 页](/packages/trajectory)的「站点上」一节）。落点写法、名册规则怎么写看 [doc-export 页](/packages/doc-export)。
+
+## 哪些文件归 docfirst 管
+
+现状区由约定定，不登记：
+
+{/* ref file="../packages/docfirst/src/project.ts" lines="37-55" hash="a0b18670a436" blob="f6eb46f4a4d7" */}
+
+内容根下除 `trajectory/`、`future/` 外的目录里的文件都算：其中 `.mdx` 是页面，`.ts`、`.tsx`、`.mjs` 这类由 code-pin 的组件格式认领——讲解组件的源码也算文档（怎么认看 [code-pin 页](/packages/code-pin)的「两种文档格式」），站点 `app/components/` 下被认领的也算。
+
+站点根下还有 `src/components/` 且里面有文件时，装配直接报错——讲解组件以前放在那里，留着的话里面的钉码没人核对。`outputs` 里写的正本必须是现状区里的 `.mdx` 页面，写错路径的映射直接报错：不然它既不会被核对，也不会被生成。落点不许落进内容根、一个落点只许一篇正本写，由 doc-export 的 `assertOutputTurf` 检查。
+
+装配时只建一个钉码工作区：核对、确认用它，生成物项目也拿它的 `pinner`：
+
+{/* ref file="../packages/docfirst/src/project.ts" lines="93-114" hash="9d7bed6a3562" blob="f6eb46f4a4d7" */}
+
+## 命令与开关
+
+{/* ref file="../packages/docfirst/src/cli.ts" lines="27-41" hash="47f7bb5f0b88" blob="e1fbc20516c3" */}
+
+认参数的规则：不写命令就是 `check`；不认识的命令或开关报错、什么都不动——开关若被静默忽略，`confirm --dry-run` 就成了不带页名的全部页确认。只有 `confirm` 收页名。四条命令怎么分派：
+
+{/* ref file="../packages/docfirst/src/cli.ts" lines="65-82" hash="b4cc6f702add" blob="e1fbc20516c3" */}
+
+`trajectory` 命令只读配置、不装配项目（它不遍历文档），另外三条先装配项目再分派。退出码只讲意思：没有红正常结束；有红以非零退出；用法写错以另一个非零退出码结束，什么都不动。配置写错、现状区约定不满足时直接抛错，报错写明要改哪里。
+
+## check：五种红，汇成一个数
+
+逐篇核对（现状区文件按文档身份——相对项目根、正斜杠的路径——排序）：每处钉交给 code-pin；黄灯本身不红，被钉的文件和文档在同一个仓、又有未提交的改动时这个黄算红（算红的黄，报告里标 `blocking: true`）；是生成正本的，再查名册外组件、核对每个落点。之后扫一遍轨迹卡目录，每条病一个红；卡目录还没建不算红。
+
+| 红的来源 | 谁判 | 调用 |
+| --- | --- | --- |
+| 缺失的钉 | code-pin | `pins.pinning.checkDoc` |
+| 本仓未提交改动引起的黄 | code-pin | `createUncommittedProbe` |
+| 生成正本里的名册外组件 | doc-export | `unknownComponents` |
+| 不新鲜的生成物（还不存在、跟正本不一致、正本缺 frontmatter 字段、正本渲染不了） | doc-export | `verifyOutputs` |
+| 病卡的每条病 | trajectory | `scanCardDir` |
+
+{/* ref file="../packages/docfirst/src/commands/check.ts" lines="36-80" hash="7fae70611318" blob="59332b62cb08" */}
+
+未确认的钉不算红。人读模式一处一行（钉、名册外组件、生成物按文档顺序，病卡在最后），`--json` 打印整份报告；两种模式先算同一份报告再决定怎么输出，红的口径对得上。算红的黄在人读模式里打印成红，并直接写出下一步该运行的 `confirm … --accept`。
+
+拿 [code-pin 页](/packages/code-pin)开头那处钉接着说：文档钉在 `src/greet.ts` 第 3–5 行，改了 greet、还没提交时，`pnpm doc` 里那一行变成
+
+```
+🔴 <页>  ../src/greet.ts:3-5  有变动，是本仓还没提交的改动引起的——在同一个提交里复核，再 docfirst confirm <页> --accept
+```
+
+## 机读报告：check --json
+
+整份一行 JSON 打到标准输出，退出码跟人读模式一样。形状是契约：读它的是别的程序（门禁、编辑器、列出待改页的 agent），加字段可以，改名、删字段只随破坏性版本发。报告的类型：
+
+{/* ref file="../packages/docfirst/src/report.ts" lines="38-76" hash="e89be000f195" blob="33c3dfd4aed3" */}
+
+字段要点：`docs[]` 每个现状区文件一条；`items[]` 每处钉一条，`line` 是记号在文档里第几行，`lines` 是被引的那段今天在源文件里的位置，`blocking: true` 只出现在算红的黄上；`outputs[]` 只有生成正本才有；病卡在顶层 `trajectory[]`。开头那个站全绿时：
+
+```json
+{"ok":true,"red":0,"docs":[{"doc":"content/docs/outputs/agents.mdx","red":0,"items":[],"components":[],"outputs":[{"to":"../AGENTS.md","status":"fresh","fresh":true}]},{"doc":"content/docs/outputs/claude.mdx","red":0,"items":[],"components":[],"outputs":[{"to":"../CLAUDE.md","status":"fresh","fresh":true}]},{"doc":"content/docs/outputs/readme.mdx","red":0,"items":[],"components":[],"outputs":[{"to":"../README.md","status":"fresh","fresh":true}]}],"trajectory":[]}
+```
+
+## confirm：按页限定，--accept 必须点名
+
+{/* ref file="../packages/docfirst/src/commands/confirm.ts" lines="35-54" hash="968e1b367ff3" blob="21b2dc364719" */}
+
+不带页名是全部现状区文件，带页名只动点名的那几篇——同一个仓里别人的黄灯还等着他复核，一并确认就是替别人做了复核。页名三种写法都收（相对项目根、绝对路径、带 `./`），有一个对不上现状区就报错、什么都不动。`--accept` 确认的就是黄灯，必须点名页，不点名就报错。
+
+每处钉的结果打印一行（写上记录、挪了位置写回新行号、按今天内容重新记、等复核、钉不住），原地没动的不打印；每处写回什么看 [code-pin 页](/packages/code-pin)的「确认」一节。最后把全部生成正本重新生成一遍，不按页限定——生成物要不要跟着更新按内容判断，内容变了才写。钉不住的处数加上没生成成功的落点数大于 0，就以非零退出。
+
+## render：只生成
+
+现状区里的生成正本按 `outputs` 生成到落点，内容变了才写；正本缺映射里点名的 frontmatter 字段、或有渲染不了的东西，这个落点不写、算一个红。整条命令几十行：把正本交给 doc-export 的 `renderOutputs`、打印结果。记号换成什么、组件换成什么看 [doc-export 页](/packages/doc-export)。
+
+## trajectory：列出树与主干
+
+只读配置找到卡目录（不装配项目），目录不存在就报错；扫卡（`scanCardDir`）、建模（`buildModel`），打印盘心、卡数、每棵树的主干、支线与孤星的个数，`--json` 打印盘的输入（盘心、卡、病卡）加上树。开头那个站跑出来的就是上面那两行（`盘 起始（2026-01-01-site-born）  0 张卡`、`支线 0 条，孤星 0 张`）。主干怎么挑、病卡怎么判看 [trajectory 页](/packages/trajectory)。
+
+## 起始物：template/
+
+包的 `template/` 是文档维护的起始物：配置、三份生成物正本（CLAUDE 那份第一行固定 `@AGENTS.md`）、未来区起始页、第一张轨迹卡——根卡「起始」，born-at 2026-01-01，等人把它改成这个站的第一张真卡。`docfirst.create` 建站时把这些文件复制到站点根上，站点已有的文件不覆盖。
+
+## 给别的程序用：包的导出
+
+包的 `.` 出口导出 `main(argv, root)`：交回退出码、不调 `process.exit`，测试与别的程序直接调它；可执行文件只是把当前目录当项目根、转发参数与退出码。另外还导出读配置、装配项目的函数与报告的类型。
