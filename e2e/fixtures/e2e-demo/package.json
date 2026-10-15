@@ -1,0 +1,37 @@
+{
+  "name": "e2e-demo",
+  "version": "0.0.0",
+  "private": true,
+  "description": "只给 e2e 用的演示功能包：按功能包模板约定把每一项都用上（带 loader / action 的页面、MDX 组件、页面树插件、layoutData 与 LayoutTop、remark 插件、集合、样式）。不构建，直接是 JS 与手写的类型声明",
+  "type": "module",
+  "exports": {
+    "./site": {
+      "types": "./site/index.d.ts",
+      "default": "./site/index.js"
+    },
+    "./site/server": {
+      "types": "./site/demo.server.d.ts",
+      "default": "./site/demo.server.js"
+    },
+    "./mdx": {
+      "types": "./mdx/index.d.ts",
+      "default": "./mdx/index.js"
+    },
+    "./styles.css": "./styles.css"
+  },
+  "files": [
+    "site",
+    "mdx",
+    "styles.css",
+    "template"
+  ],
+  "godDocsite": {
+    "collections": [
+      "e2eDemoNotes"
+    ]
+  },
+  "peerDependencies": {
+    "react": "^19.3.0",
+    "react-router": "^8.4.0"
+  }
+}

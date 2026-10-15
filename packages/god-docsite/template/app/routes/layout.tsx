@@ -1,19 +1,28 @@
+import type { Route } from './+types/layout'
 import { Outlet, useLoaderData } from 'react-router'
-import { siteLayoutData } from '@godcreator/god-docsite/server'
+import { siteLayoutData, withFeatureLayoutData } from '@godcreator/god-docsite/server'
 import { SiteLayout } from '@godcreator/god-docsite/react'
 import { publicPeopleOf } from '@godcreator/identity'
 import { IdentityBadge, IdentityProvider } from '@godcreator/identity/site'
 import { site } from '@/lib/site.server'
+import { featureRuntime } from '@/features/runtime.generated'
 
-export async function loader() {
-  return { ...(await siteLayoutData(site)), identity: site.identity(), people: publicPeopleOf(site.people()) }
+/**
+ * 布局数据：平台的页面树与站名、本机身份与公开的人员，再并上各功能 layoutData 的结果（键是功能名）。
+ * 外部契约：这个路由的 id 固定为 routes/layout（app/routes.ts 里写明），功能的 LayoutTop 用 useRouteLoaderData('routes/layout') 取自己那份
+ */
+export async function loader(args: Route.LoaderArgs) {
+  const siteData = { ...(await siteLayoutData(site)), identity: site.identity(), people: publicPeopleOf(site.people()) }
+  return withFeatureLayoutData(siteData, { loaders: featureRuntime.layoutData, args, base: site })
 }
+
+const featureLayoutTops = featureRuntime.layoutTops.map(({ feature, Component }) => <Component key={feature} />)
 
 export default function Layout() {
   const data = useLoaderData<typeof loader>()
   return (
     <IdentityProvider identity={data.identity} people={data.people}>
-      <SiteLayout data={data} sidebarFooterStart={<IdentityBadge identity={data.identity} />}>
+      <SiteLayout data={data} top={featureLayoutTops} sidebarFooterStart={<IdentityBadge identity={data.identity} />}>
         <Outlet />
       </SiteLayout>
     </IdentityProvider>

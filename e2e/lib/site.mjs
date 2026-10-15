@@ -1,11 +1,12 @@
-import { cpSync, existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs'
+import { cpSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs'
 import path from 'node:path'
-import { fileURLToPath } from 'node:url'
+import { fileURLToPath, pathToFileURL } from 'node:url'
 import { runLogged } from './process.mjs'
 
 export const repoDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..')
-export const templateDir = path.join(repoDir, 'packages', 'god-docsite', 'template')
 const fixturesDir = path.join(repoDir, 'e2e', 'fixtures')
+const baseSiteFixturesDir = path.join(fixturesDir, 'base-site')
+const demoSiteFixturesDir = path.join(fixturesDir, 'demo-site')
 
 /** 模板里写成 {{version}} 的本仓包与它们在仓里的目录；comments 依赖 identity */
 export const platformPackages = {
@@ -13,6 +14,12 @@ export const platformPackages = {
   '@godcreator/identity': 'packages/identity',
   '@godcreator/comments': 'packages/comments',
 }
+
+/** 只给 e2e 用的演示功能包：不在 pnpm workspace 里，不用构建 */
+export const demoFeaturePackage = { name: 'e2e-demo', dir: path.join(fixturesDir, 'e2e-demo') }
+
+/** 组合：base 是基础站（平台 + identity + comments），demo 是基础站加上演示功能 */
+export const combos = ['base', 'demo']
 
 /** 夹具里 people.json 那个人的身份码：服务带着它启动，站点认出「测试员」，可以写评论 */
 export const testerIdentityCode = 'e2etestcode01'
@@ -22,18 +29,24 @@ export function buildPlatformPackages(logDir) {
   runLogged('pnpm', [...filters, 'build'], { cwd: repoDir, logFile: path.join(logDir, 'build-packages.txt'), timeoutMs: 600_000 })
 }
 
-/** pnpm pack 出 tarball：装进站点后包的真实路径在 node_modules/.pnpm 下，和从 registry 装一样 */
-function packPlatformPackages(tarballDir, logDir) {
+/** 建站器在平台包的构建产物里：仓根不依赖平台包，按文件路径加载 */
+export async function loadScaffold() {
+  return import(pathToFileURL(path.join(repoDir, 'packages', 'god-docsite', 'dist', 'node', 'scaffold.mjs')).href)
+}
+
+function packPackage(name, packageDir, tarballDir, logDir) {
+  const before = new Set(readdirSync(tarballDir))
+  runLogged('pnpm', ['pack', '--pack-destination', tarballDir], { cwd: packageDir, logFile: path.join(logDir, `pack-${name.replace('@', '').replace('/', '-')}.txt`), timeoutMs: 120_000 })
+  const created = readdirSync(tarballDir).filter((file) => !before.has(file) && file.endsWith('.tgz'))
+  if (created.length !== 1) throw new Error(`pnpm pack ${name} 之后 ${tarballDir} 里多出的 tarball 不是一个：${created.join(', ')}`)
+  return path.join(tarballDir, created[0])
+}
+
+/** pnpm pack 出平台包与演示功能包的 tarball：装进站点后包的真实路径在 node_modules/.pnpm 下，和从 registry 装一样 */
+export function packPackages(tarballDir, logDir) {
   mkdirSync(tarballDir, { recursive: true })
-  const tarballs = {}
-  for (const [name, dir] of Object.entries(platformPackages)) {
-    const before = new Set(readdirSync(tarballDir))
-    runLogged('pnpm', ['pack', '--pack-destination', tarballDir], { cwd: path.join(repoDir, dir), logFile: path.join(logDir, `pack-${name.split('/')[1]}.txt`), timeoutMs: 120_000 })
-    const created = readdirSync(tarballDir).filter((file) => !before.has(file) && file.endsWith('.tgz'))
-    if (created.length !== 1) throw new Error(`pnpm pack ${name} 之后 ${tarballDir} 里多出的 tarball 不是一个：${created.join(', ')}`)
-    tarballs[name] = path.join(tarballDir, created[0])
-  }
-  return tarballs
+  const platform = Object.fromEntries(Object.entries(platformPackages).map(([name, dir]) => [name, packPackage(name, path.join(repoDir, dir), tarballDir, logDir)]))
+  return { platform, demo: packPackage(demoFeaturePackage.name, demoFeaturePackage.dir, tarballDir, logDir) }
 }
 
 function toPosix(file) {
@@ -41,41 +54,24 @@ function toPosix(file) {
 }
 
 /**
- * 从模板生成一个站点到 siteDir，再叠上夹具（评论定位回归页、TSX 与 HTML 页、术语表、带身份码的 people.json）。
- * installMode：link 把 {{version}} 换成 link:<仓里的包目录>；file 换成 file:<pnpm pack 的 tarball>，
- * 并用 overrides 让包之间的依赖（comments → identity）也指向 tarball
+ * 用平台包的 createSite 建站，再叠夹具：基础站叠评论定位回归页、TSX 与 HTML 页、术语表、预置评论；
+ * demo 组合叠演示功能的内容页与集合，并把演示功能包写进依赖（link 或 file，和 createSite 的装法一致）。
+ * scriptPort 只写进 package.json 的 dev 脚本，e2e 起 dev 时自己带 --port
  */
-export function generateSite({ siteDir, installMode, logDir }) {
-  if (existsSync(siteDir)) throw new Error(`${siteDir} 已经存在：每次运行用新目录`)
-  cpSync(templateDir, siteDir, { recursive: true, filter: (source) => !/[\\/](node_modules|build|\.react-router|\.source)([\\/]|$)/.test(path.relative(templateDir, source)) })
-  cpSync(fixturesDir, siteDir, { recursive: true })
-
-  let specifiers
-  if (installMode === 'link') {
-    specifiers = Object.fromEntries(Object.entries(platformPackages).map(([name, dir]) => [name, `link:${toPosix(path.join(repoDir, dir))}`]))
-  } else if (installMode === 'file') {
-    const tarballs = packPlatformPackages(path.join(path.dirname(siteDir), `${path.basename(siteDir)}-tarballs`), logDir)
-    specifiers = Object.fromEntries(Object.entries(tarballs).map(([name, file]) => [name, `file:${toPosix(file)}`]))
-  } else {
-    throw new Error(`没有装法 ${installMode}，可选：link、file`)
+export async function generateSite({ siteDir, installMode, combo, tarballs, scriptPort }) {
+  const { createSite } = await loadScaffold()
+  const people = JSON.parse(readFileSync(path.join(baseSiteFixturesDir, 'people.json'), 'utf8'))
+  const packageSource = installMode === 'link' ? { kind: 'link', repoDir } : { kind: 'file', tarballs: tarballs.platform }
+  createSite({ dir: siteDir, siteName: 'e2e 站', port: scriptPort, people, packageSource })
+  if (combo === 'base') {
+    cpSync(baseSiteFixturesDir, siteDir, { recursive: true, filter: (source) => path.basename(source) !== 'people.json' })
+    return
   }
-
+  cpSync(demoSiteFixturesDir, siteDir, { recursive: true })
   const packageJsonFile = path.join(siteDir, 'package.json')
-  const packageJsonText = readFileSync(packageJsonFile, 'utf8')
-  const packageJson = JSON.parse(packageJsonText)
-  for (const [name, version] of Object.entries(packageJson.dependencies)) {
-    if (version !== '{{version}}') continue
-    if (!(name in specifiers)) throw new Error(`模板 package.json 里 ${name} 写着 {{version}}，e2e 不认识这个包`)
-    packageJson.dependencies[name] = specifiers[name]
-  }
-  if (JSON.stringify(packageJson).includes('{{')) throw new Error('模板 package.json 里还有没换掉的占位')
+  const packageJson = JSON.parse(readFileSync(packageJsonFile, 'utf8'))
+  packageJson.dependencies[demoFeaturePackage.name] = installMode === 'link' ? `link:${toPosix(demoFeaturePackage.dir)}` : `file:${toPosix(tarballs.demo)}`
   writeFileSync(packageJsonFile, `${JSON.stringify(packageJson, null, 2)}\n`)
-
-  const overrides = installMode === 'file' ? Object.entries(specifiers).map(([name, specifier]) => `  '${name}': '${specifier}'`).join('\n') : ''
-  writeFileSync(
-    path.join(siteDir, 'pnpm-workspace.yaml'),
-    `allowBuilds:\n  esbuild: true\n${overrides ? `overrides:\n${overrides}\n` : ''}`,
-  )
 }
 
 export function installSite(siteDir, logDir) {

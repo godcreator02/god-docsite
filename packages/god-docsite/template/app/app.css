@@ -5,7 +5,8 @@
 @import '@godcreator/god-docsite/styles.css';
 @import '@godcreator/identity/styles.css';
 @import '@godcreator/comments/styles.css';
-/* 功能包的样式加在这里 */
+/* 各功能目录的 styles.css；功能把写数据的目录用 @source not 排除写在自己的 styles.css 里 */
+@import './features/styles.generated.css';
 
 /* 站点里会被写入的文件不进 Tailwind 的源码扫描：扫描到的文件一变，Tailwind 在 dev 下让整页刷新，推送连接与页面状态都断掉 */
 @source not '../comments';

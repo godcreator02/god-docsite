@@ -28,6 +28,8 @@ export interface SiteLayoutProps {
   data: SiteLayoutData
   /** 侧栏底部左边放的东西，如 identity 包的 IdentityBadge */
   sidebarFooterStart?: ReactNode
+  /** 整站布局上方的一栏，如各功能的 LayoutTop；随页面滚走，不占 DocsLayout 的网格 */
+  top?: ReactNode
   children: ReactNode
 }
 
@@ -35,11 +37,12 @@ export interface SiteLayoutProps {
  * 整站布局：fumadocs 的 DocsLayout，站名作标题，侧栏底部加全宽切换。
  * 不传 tabs：DocsLayout 按 meta.json 写了 root: true 的文件夹自动生成侧栏的目录切换按钮
  */
-export function SiteLayout({ data, sidebarFooterStart, children }: SiteLayoutProps) {
+export function SiteLayout({ data, sidebarFooterStart, top, children }: SiteLayoutProps) {
   const { pageTree } = useFumadocsLoader(data)
   const nav = useMemo(() => ({ title: data.siteName }), [data.siteName])
   return (
     <SiteLinksProvider pageTitles={data.pageTitles}>
+      {top}
       <SidebarFooterStartContext value={sidebarFooterStart}>
         <DocsLayout tree={pageTree} nav={nav} slots={siteSlots}>
           {children}

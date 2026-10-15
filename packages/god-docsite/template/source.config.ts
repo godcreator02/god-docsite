@@ -1,15 +1,17 @@
 import rehypeKatex from 'rehype-katex'
 import remarkMath from 'remark-math'
 import { applyMdxPreset, defineCollections, defineConfig, defineDocs } from 'fumadocs-mdx/config'
-import { remarkGlossary } from '@godcreator/god-docsite/mdx'
+import { featureRehypePlugins, featureRemarkPlugins } from './app/features/mdx.generated.ts'
+import { sitePlugins } from './app/lib/mdx-plugins.ts'
 
-// 全局的 mdxOptions 只管集合外被 import 的 mdx；集合写了自己的 mdxOptions，全局的对它就不生效，全站插件要在集合里再列一次
+// 各功能的集合（功能包 mdx.ts 的集合工厂按 package.json 的 godDocsite.collections 生成）；fumadocs-mdx 要求这份文件只导出集合
+export * from './app/features/collections.generated.ts'
+
+// 全局的 mdxOptions 管没写自己 mdxOptions 的集合（评论）与集合外被 import 的 mdx；
+// 集合写了自己的 mdxOptions，全局的对它就不生效，全站插件要在集合里再列一次
 export default defineConfig({
-  mdxOptions: { remarkPlugins: [remarkMath], rehypePlugins: [rehypeKatex] },
+  mdxOptions: { remarkPlugins: [remarkMath, ...featureRemarkPlugins], rehypePlugins: [rehypeKatex, ...featureRehypePlugins] },
 })
-
-// remark-math 排在术语标注前面：先让 $…$ 变成公式节点，标注才碰不到公式。功能包的 remark 插件加在这一列里
-const pageRemarkPlugins = [remarkMath, remarkGlossary({ file: 'glossary.json' })]
 
 export const docs = defineDocs({
   dir: 'content',
@@ -19,8 +21,8 @@ export const docs = defineDocs({
     files: ['**/[^_]*.mdx'],
     postprocess: { includeProcessedMarkdown: true },
     mdxOptions: applyMdxPreset({
-      remarkPlugins: pageRemarkPlugins,
-      rehypePlugins: (list) => [rehypeKatex, ...list],
+      remarkPlugins: sitePlugins.remarkPlugins,
+      rehypePlugins: (list) => [...sitePlugins.rehypePlugins, ...list],
     }),
   },
 })
