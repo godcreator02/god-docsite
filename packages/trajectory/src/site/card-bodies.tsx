@@ -3,14 +3,14 @@
  * 键是相对卡目录的文件路径（带 `./` 前缀），值加载出编译好的正文模块。
  */
 
-import { use, type ComponentProps, type ReactNode } from "react";
-import type { MDXComponents, MDXContent } from "mdx/types";
+import { use, type ComponentProps, type FC, type ReactNode } from "react";
+import type { MDXComponents } from "mdx/types";
 import type { DocsPage } from "@fumadocs/base-ui/layouts/docs/page";
 import { cardIdOfFile, pickCardFiles } from "../core/card-files.ts";
 
-/** 一张卡编译好的正文模块里卡页、星轨盘页用到的部分 */
+/** 一张卡编译好的正文模块里卡页、星轨盘页用到的部分（fumadocs-mdx 编译出的 default 是返回 ReactNode 的组件，比 mdx/types 的 MDXContent 宽） */
 export interface CardBodyModule {
-  default: MDXContent;
+  default: FC<{ components?: MDXComponents }>;
   toc?: ComponentProps<typeof DocsPage>["toc"];
 }
 
