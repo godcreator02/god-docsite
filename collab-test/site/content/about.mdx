@@ -1,12 +1,19 @@
 ---
 title: 这个测试站是什么
-description: 协作站功能包 @godcreator/collab-site 的开发台：任务页与日历页的正本测试场，数据是假的三人项目
+description: god-docsite 仓的测试站：基础站装上 collab、code-pin、trajectory、explainer 四个功能包，数据是一个假的三人项目
 ---
 
-这个站挂在 docsite-kit 仓的 `collab-test/` 下，用来开发与验收协作站功能包：
-任务页（[任务](/tasks)）、[日历](/calendar)与日志页、正文里引用任务与模块的写法都在这里验。
+这个站在 god-docsite 仓的 `collab-test/` 下，是协作仓的形态：上一级 `collab/records/` 放任务与模块，`site/` 是站点。
+站点由平台包 `@godcreator/god-docsite` 的建站器建成基础站（带评论与身份），再装上四个功能包，依赖都直连本仓的包：
 
-- 人员列表在 `site/people.json`：站长（godcreator）、卡罗尔（carol）、鲍勃（bob）
+- `@godcreator/collab`：[任务](/tasks)、[日历](/calendar)与日志页、正文里引用任务与模块的写法
+- `@godcreator/code-pin`：[钉码页](/pinned)上的钉码外框
+- `@godcreator/trajectory`：站点根 `trajectory/` 里的轨迹卡与[星轨盘](/trajectory)
+- `@godcreator/explainer`：钉码页上的讲解组件
+
+仓根 `pnpm e2e` 直接在这个站上起服务、跑浏览器检查。测试数据：
+
+- 人员列表在 `site/people.json`：站长（godcreator）、卡罗尔（carol-test）、鲍勃（bob），e2e 用的测试员（tester），还有一个 agent「项目助手」
 - 任务与模块的记录在上一级 `collab/records/`，每条一个 JSON 文件
 - 日志页在 `site/journal/<日期>.mdx`，一天一篇
 
