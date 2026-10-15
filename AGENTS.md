@@ -18,7 +18,7 @@
 | `packages/collab/` | 项目协作：任务与模块、日志与日历、通知、合并检查（命令行 `collab-merge-check`）、记录链接 |
 | `plugins/docsite/` | gwb 插件 `@godcreator/gwb-docsite`：身份码、建站与加功能（调平台包的建站器）、托管站点、评论命令、服务 `gwbDocsite` |
 | `plugins/docfirst/` | gwb 插件 `@godcreator/gwb-docfirst-workflow`：`docfirst.create`（经 `gwbDocsite` 建站、加 code-pin / trajectory / explainer、叠 docfirst 起始物）、说明书 `docs-site` / `docs-writing` / `trajectory` |
-| `plugins/collab/` | gwb 插件 `@godcreator/gwb-collab`：协作仓与别的仓两套操作、通知交给站点/窗格/QQ/AI、项目与任务命令，站点交给 gwb-docsite |
+| `plugins/collab/` | gwb 插件 `@godcreator/gwb-collab`：协作仓与别的仓两套操作、通知交给站点/窗格/QQ/AI、项目与任务命令，站点交给 gwb-docsite；`collab.site.init` 在加协作功能、起服务之前建好仓根 `collab/` 与 `site/journal/`（站点运行时写入它们） |
 | `collab-test/` | 协作站测试仓：协作仓形态（`collab/records/` 测试数据 + `site/` 装 collab 功能包），依赖 `workspace:*` 直连本仓的包、不 init git；gwb-docsite 托管（端口 4450） |
 | `docs-site/` | 全仓文档站：说明、原理、维护者手册与随插件发布的说明书正本（outputs）；轨迹卡在站点根 `trajectory/` |
 | `e2e/` | 端到端检查：用建站器把各组合（base、demo、collab、docs）建到系统临时目录，两种装法 × dev、build + start 各跑一遍浏览器检查 |

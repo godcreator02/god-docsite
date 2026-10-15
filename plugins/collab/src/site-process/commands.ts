@@ -15,8 +15,10 @@ export function registerSiteCommands(services: PluginServices): void {
       usage:
         `{ repo, port, title }：repo 是协作仓的仓根绝对路径，不要求在项目列表里；port 是开发端口、title 是站名（写进 content/meta.json），两样都必给。` +
         `只对新站点：site/ 要不存在或是空目录，已有站点直接拒绝（要重建删掉 site/ 再来，content/、comments/、people.json、journal/ 想留先拷走）。` +
-        `先经 gwbDocsite.init 建基础站（平台包的范围由 gwb-docsite 写），再经 gwbDocsite.addFeature 加功能包 ${featurePackage}，范围写成 ^${__COLLAB_VERSION__}（本插件打包时带的那一版），补进 site/app/features/collab/ 并起服务检查首页。` +
-        '项目在列表里就启动站点并把通知推过去。只写文件、不提交：用 collab.submit 提交审核（site/package.json 里依赖两段以外的键、site/ 根下的配置文件只有负责人能改）。回 { dir, platformDependencies, feature }：feature 是 gwbDocsite.addFeature 的回执',
+        `先经 gwbDocsite.init 建基础站（平台包的范围由 gwb-docsite 写），再建好仓根的 collab/ 与 site/journal/（站点运行时写入它们，服务启动前就在，写入时才不整页刷新），` +
+        `再经 gwbDocsite.addFeature 加功能包 ${featurePackage}，范围写成 ^${__COLLAB_VERSION__}（本插件打包时带的那一版），补进 site/app/features/collab/ 并起服务检查首页。` +
+        '项目在列表里就启动站点并把通知推过去。只写文件、不提交：用 collab.submit 提交审核。合并检查里只有负责人能改的：site/package.json 里 @godcreator/ 下的包（加、删、改版本都算）、' +
+        'scripts 这类不是依赖的字段、写成网址或本地路径的依赖，以及 site/ 根下的配置文件。新建的站点这几样都是新的，要负责人提交。回 { dir, platformDependencies, feature }：feature 是 gwbDocsite.addFeature 的回执',
     },
     async (args) => {
       const parsed = argsOf(args, ['repo', 'port', 'title'])

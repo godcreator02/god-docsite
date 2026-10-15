@@ -1,5 +1,6 @@
+import { mkdirSync } from 'node:fs'
 import path from 'node:path'
-import { siteFeedChannel, sitePathInRepo, type SiteFeed } from '@godcreator/collab'
+import { collabPathInRepo, journalDirName, siteFeedChannel, sitePathInRepo, type SiteFeed } from '@godcreator/collab'
 import type { GwbDocsiteApi, SiteFeatureAdded, SiteInitResult, SiteStarted } from '@godcreator/gwb-docsite'
 import { messageOf } from '../errors.js'
 import { repoKeyOf, type Project } from '../project/project.js'
@@ -22,6 +23,15 @@ export type CollabSitesOptions = {
 }
 
 const siteDirOf = (repo: string) => path.join(repo, sitePathInRepo)
+
+/**
+ * 站点运行时会被写入的两个目录：仓根的 collab/（任务与模块）与站点的 journal/（日志）。协作功能的 styles.css 用 @source not
+ * 把它们排除出 Tailwind 的扫描，目录要在开发服务启动前就存在才生效；否则一写入就整页刷新、推送连接断掉
+ */
+function createDirsWrittenWhileRunning(repo: string): void {
+  mkdirSync(path.join(repo, collabPathInRepo), { recursive: true })
+  mkdirSync(path.join(siteDirOf(repo), journalDirName), { recursive: true })
+}
 
 /**
  * 项目站点交给 gwb-docsite（进程的启动与停止、状态、起不来的原因都是它做的）。
@@ -61,13 +71,14 @@ export class CollabSites {
   }
 
   /**
-   * collab.site.init：交给 gwb-docsite 从零建基础站，再加协作功能（功能包写成给的范围），port 与 title 是新站的开发端口与站名；
-   * 项目在列表里就启动并推一次数据
+   * collab.site.init：交给 gwb-docsite 从零建基础站，建好站点运行时会写入的目录，再加协作功能（功能包写成给的范围；
+   * 加功能时 gwb-docsite 会起服务检查首页），port 与 title 是新站的开发端口与站名；项目在列表里就启动并推一次数据
    */
   async init(repo: string, options: { featureRange: string; port: number; title: string; listed: boolean }): Promise<CollabSiteInitResult> {
     const { featureRange, listed, ...newSite } = options
     const siteDir = siteDirOf(repo)
     const created = await this.options.docsite.init(siteDir, newSite)
+    createDirsWrittenWhileRunning(repo)
     const feature = await this.options.docsite.addFeature(siteDir, { packageName: featurePackage, specifier: featureRange })
     if (listed) await this.keep(repo)
     return { ...created, feature }
