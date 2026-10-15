@@ -10,17 +10,28 @@
  * id 的稳定口径：内容指纹（标签 + 图片地址或文字）随内容变，内容不变它就不变；
  * 同页内容相同的元素按出现次序加 -2、-3 后缀——在它前面插入一份相同内容会让后缀错位，
  * 这是协议里已知的边界。布局用的 div 不是候选，点它批不到。
+ *
+ * 不在任何候选块里的可点元素与媒体（导航小标签这类单放的链接、按钮、展开标题、表单控件、canvas、视频、嵌入内容）
+ * 也能批，批的是它本身；段落里的链接照旧批整段。它们的 id 用单独的指纹口径（前缀 dc-s-、单独计序号），
+ * 不改变候选元素已经分到的 id，已有评论的落点不受影响。
  */
 
 /** 候选块级元素带这个属性；组件想让自己整个可批也直接声明它 */
 export const commentTargetAttribute = 'data-comment-target'
 
 const candidateSelector = 'h1,h2,h3,h4,h5,h6,p,li,pre,blockquote,table,img,figure,figcaption,svg,.katex,[data-comment-target]'
+const standaloneSelector = 'a,button,[role="button"],summary,input,select,textarea,canvas,video,iframe'
 
-/** 批注模式里点正文，拾取的是离点击处最近的一个候选元素（往上找，找不到就没有目标） */
+/** 不在任何候选块里的可点元素或媒体：往上找到的第一个；在候选块里就不算 */
+function standaloneTargetOf(element: Element): HTMLElement | null {
+  const standalone = element.closest<HTMLElement>(standaloneSelector)
+  return standalone && standalone.closest(candidateSelector) === null ? standalone : null
+}
+
+/** 批注模式里点正文，拾取的是离点击处最近的一个候选元素（往上找）；没有候选块就是单放的可点元素或媒体本身，都没有就没有目标 */
 export function commentTargetNear(node: Node, scope: Element): HTMLElement | null {
   const element = node instanceof Element ? node : node.parentElement
-  const target = element?.closest<HTMLElement>(candidateSelector)
+  const target = element ? (element.closest<HTMLElement>(candidateSelector) ?? standaloneTargetOf(element)) : null
   if (!target || !scope.contains(target)) return null
   return target
 }
@@ -56,6 +67,28 @@ export function annotateCommentTargets(scope: Element): void {
     seen.set(base, occurrence)
     if (element.id === '') element.id = occurrence === 1 ? base : `${base}-${occurrence}`
     if (!element.hasAttribute(commentTargetAttribute)) element.setAttribute(commentTargetAttribute, '')
+  }
+  annotateStandaloneTargets(scope)
+}
+
+/** 单放的可点元素与媒体的指纹：标签加地址或文字；canvas 这类没有文字的只有标签，同页几个按次序加后缀 */
+function standaloneSignatureOf(element: HTMLElement): string {
+  const source = element.getAttribute('src') ?? element.getAttribute('href') ?? ''
+  return `${element.tagName.toLowerCase()}:${source}:${(element.textContent ?? '').trim()}`
+}
+
+/**
+ * 给单放的可点元素与媒体补 id（不标 data-comment-target：标了就成了候选，下一轮候选走查的序号会被它们打乱）。
+ * 已有 id 的不改
+ */
+function annotateStandaloneTargets(scope: Element): void {
+  const seen = new Map<string, number>()
+  for (const element of scope.querySelectorAll<HTMLElement>(standaloneSelector)) {
+    if (element.closest(candidateSelector) !== null) continue
+    const base = `dc-s-${fingerprint(standaloneSignatureOf(element))}`
+    const occurrence = (seen.get(base) ?? 0) + 1
+    seen.set(base, occurrence)
+    if (element.id === '') element.id = occurrence === 1 ? base : `${base}-${occurrence}`
   }
 }
 

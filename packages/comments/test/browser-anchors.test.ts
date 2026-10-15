@@ -72,6 +72,27 @@ describe('可批元素标注走查（按块批注的认定协议）', () => {
     expect(commentTargetNear(scope, scope)).toBeNull()
   })
 
+  it('单放的链接、按钮、canvas 批的是它本身；段落里的链接照旧批整段；它们分到的 id 不改变候选元素的 id', () => {
+    const plain = document.createElement('div')
+    plain.innerHTML = '<p>板卡分工</p><p>另一段，<a href="/x">段里的链接</a></p>'
+    annotateCommentTargets(plain)
+    const idsWithoutStandalone = [...plain.querySelectorAll('p')].map((p) => p.id)
+
+    const scope = document.createElement('div')
+    scope.innerHTML = '<nav><a href="#roles">板卡分工</a></nav><p>板卡分工</p><p>另一段，<a href="/x">段里的链接</a></p><div><button type="button">0</button><canvas></canvas><canvas></canvas></div>'
+    annotateCommentTargets(scope)
+    const [navLink, inlineLink] = scope.querySelectorAll('a')
+    const [first, second] = scope.querySelectorAll('canvas')
+    expect(commentTargetNear(navLink!.firstChild!, scope)).toBe(navLink)
+    expect(commentTargetNear(inlineLink!.firstChild!, scope)).toBe(scope.querySelectorAll('p')[1])
+    expect(commentTargetNear(scope.querySelector('button')!, scope)).toBe(scope.querySelector('button'))
+    expect(navLink!.id).toMatch(/^dc-s-/)
+    expect(inlineLink!.id).toBe('')
+    expect(second!.id).toBe(`${first!.id}-2`)
+    expect(navLink!.hasAttribute(commentTargetAttribute)).toBe(false)
+    expect([...scope.querySelectorAll('p')].map((p) => p.id)).toEqual(idsWithoutStandalone)
+  })
+
   it('元素写给人看的类别标签', () => {
     const scope = sampleScope()
     annotateCommentTargets(scope)

@@ -2,7 +2,7 @@
  * 评论交互台（右下角工具条 + 本页评论收件箱 + 正文下方的评论浮窗 + 批注模式）：
  * - 工具条：「批注」开关（可写时）与「评论」按钮。「评论」弹出收件箱（./comments-inbox），只有再点它或收件箱右上角的 × 才收起，
  *   点正文、Esc 都不收；开关记在 localStorage
- * - 点正文里的标记（被批的元素、划的字），或在收件箱里点一行：被批的那一块正下方浮出一个框，只放这一串（./comment-thread），
+ * - 点被批元素旁的黄条、划过的字，或在收件箱里点一行：被批的那一块正下方浮出一个框，只放这一串（./comment-thread），
  *   盖在后面的正文上、不挤动正文；再点同一处、点正文别处或 Esc 收起。批整页、找不到原文的串浮在正文顶上
  * - 批注模式（可写时）：正文鼠标变十字（站点样式 data-comment-picking），点候选元素批它（anchor 存元素的稳定 id，见 ./browser/annotate 的协议）；
  *   可写时划一段字随时浮出「评论」按钮批这段字（anchor 存 JSON：quote/start/end/snapshot，见模型 parseCommentAnchor）。草稿同样浮在那一块下面
@@ -363,13 +363,14 @@ export function CommentsDock({ pagePath, action, threads, access, BodyComponent,
       if (isOwnInterface(event.target)) return
       const found = scopeOf()
       if (!found || !(event.target instanceof Element) || !found.contains(event.target)) return
+      // 批注模式里正文上的点击都归批注：链接不跳、按钮不按，点到批不了的地方也一样吞掉
+      event.preventDefault()
+      event.stopPropagation()
       // 拖选了文字就是批那段字，交给选中那一路（mouseup 后弹按钮）
       const selection = document.getSelection()
       if (selection && !selection.isCollapsed) return
       const element = commentTargetNear(event.target, found)
       if (!element || element.id === '') return
-      event.preventDefault()
-      event.stopPropagation()
       setOpenThread(null)
       setDraft({ kind: 'element', anchorValue: element.id, element })
     }
@@ -441,19 +442,17 @@ export function CommentsDock({ pagePath, action, threads, access, BodyComponent,
     return () => document.removeEventListener('keydown', onKey)
   }, [])
 
-  /** 点正文里的标记或黄条：打开那一串，再点同一处收起（只用 setOpenThread 的函数式更新，事件监听里用首次渲染的这一份也对） */
+  /** 点高亮的字或黄条：打开那一串，再点同一处收起（只用 setOpenThread 的函数式更新，事件监听里用首次渲染的这一份也对） */
   const toggleThread = (threadId: string) => setOpenThread((current) => (current?.id === threadId ? null : { id: threadId, reveal: 'nearest' }))
 
-  // 点正文里的标记（被批元素、高亮的字）→ 打开那一串，再点同一处收起；点正文别处收起浮窗
+  // 点高亮的字 → 打开那一串，再点同一处收起；点正文别处收起浮窗。被批的元素本身点了不打开，打开它的那一串点它旁边的黄条（CommentMarginBars），
+  // 这样元素里划过的字照样点得开自己那一串
   useEffect(() => {
     const onClick = (event: MouseEvent) => {
       if (!(event.target instanceof Element) || isOwnInterface(event.target)) return
       if (event.target.closest('a, button, input, textarea, select, summary, label')) return
       const selection = document.getSelection()
       if (selection && !selection.isCollapsed) return
-      const marked = event.target.closest(`[${commentedElementAttribute}]`)
-      const markedThreadId = marked?.getAttribute(commentedThreadAttribute)
-      if (markedThreadId) return toggleThread(markedThreadId)
       for (const [threadId, target] of targetsRef.current) {
         if (target.kind !== 'text') continue
         if ([...target.range.getClientRects()].some((rect) => containsPoint(rect, event.clientX, event.clientY))) return toggleThread(threadId)

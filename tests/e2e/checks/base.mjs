@@ -134,6 +134,23 @@ export async function runBaseChecks({ browser, baseUrl, mode, siteDir, feedToken
       return { pass: katex >= 1 && heading?.startsWith('TSX 演示页'), detail: `h1=${heading}，.katex ${katex} 个，点一下计数为 1` }
     })
 
+    if (mode === 'dev') {
+      await check('批注模式下点单放的按钮（dev）：批的是这个按钮，按钮不被按下；退出批注后照常能按', async () => {
+        await page.goto(`${baseUrl}/tsx-demo`, { waitUntil: 'load' })
+        await waitForHydrated(page, '[data-tsx-counter]')
+        const counter = page.locator('[data-tsx-counter]')
+        await page.click('[data-comment-picking-toggle]')
+        await counter.click()
+        await page.locator('[data-comment-draft-form]').waitFor({ timeout: stepTimeoutMs })
+        const draftOnCounter = await counter.evaluate((element) => element.hasAttribute('data-comment-draft-target'))
+        const countWhilePicking = await counter.textContent()
+        await page.keyboard.press('Escape')
+        await counter.click()
+        await page.waitForFunction(() => document.querySelector('[data-tsx-counter]')?.textContent === '1', null, { timeout: stepTimeoutMs })
+        return { pass: draftOnCounter && countWhilePicking === '0', detail: `草稿批在按钮上 ${draftOnCounter}，批注时计数 ${countWhilePicking}，退出后点一下变 1` }
+      })
+    }
+
     await check('HTML 页（iframe 与内容文件路由）', async () => {
       await page.goto(`${baseUrl}/html-demo`, { waitUntil: 'load' })
       const src = await page.locator('iframe[data-html-page]').getAttribute('src', { timeout: stepTimeoutMs })
@@ -216,7 +233,7 @@ export async function runBaseChecks({ browser, baseUrl, mode, siteDir, feedToken
         return { pass, detail: `未解决时按钮写「${openLabel}」，标了以后写「${resolvedLabel}」、串头 status 行 ${resolvedText.match(/^status: .*$/m)?.[0]}；重新打开后 ${reopenedText.match(/^status: .*$/m)?.[0]}，还有 resolvedBy/At：${/^resolved(By|At):/m.test(reopenedText)}` }
       })
 
-      await check('批注一块（dev）：草稿与这一串浮在那一块正下方、不挤动正文；写草稿时正文栏外是蓝条，发出以后是一道和那一块上下对齐的黄条，打开时加粗，那一块始终不铺底色；再点那一块收起浮窗，收件箱不跟着收', async () => {
+      await check('批注一块（dev）：草稿与这一串浮在那一块正下方、不挤动正文；写草稿时正文栏外是蓝条，发出以后是一道和那一块上下对齐的黄条，打开时加粗，那一块始终不铺底色；点那一块收起浮窗、不打开评论，点黄条才打开，收件箱不跟着收', async () => {
         const commentText = `e2e 批一块 ${runTag}`
         await page.goto(`${baseUrl}/writing/collapse-test`, { waitUntil: 'load' })
         await page.waitForLoadState('networkidle')
@@ -252,6 +269,13 @@ export async function runBaseChecks({ browser, baseUrl, mode, siteDir, feedToken
         await block.click()
         await card.waitFor({ state: 'detached', timeout: stepTimeoutMs })
         const barActiveAfterClose = await bar.evaluate((element) => element.hasAttribute('data-active'))
+        await block.click()
+        await page.waitForTimeout(300)
+        const openedByBlock = await card.count()
+        await bar.click()
+        await card.waitFor({ timeout: stepTimeoutMs })
+        await bar.click()
+        await card.waitFor({ state: 'detached', timeout: stepTimeoutMs })
         const inboxes = await page.locator('[data-comments-inbox]').count()
         const below = layerTop > blockBottom && layerTop - blockBottom < 24
         const barAligned = barFit.topGap < 1 && barFit.heightGap < 1 && barFit.outside && barFit.active && !barActiveAfterClose
@@ -259,10 +283,10 @@ export async function runBaseChecks({ browser, baseUrl, mode, siteDir, feedToken
         const noFill = transparent(blockBackground) && transparent(draftBackground)
         const draftBarAligned = draftBar.topGap < 1 && draftBar.outside
         return {
-          pass: below && nextTopAfter === nextTopBefore && marked === 'active' && barAligned && draftBarAligned && noFill && inboxes === 1,
+          pass: below && nextTopAfter === nextTopBefore && marked === 'active' && barAligned && draftBarAligned && noFill && openedByBlock === 0 && inboxes === 1,
           detail:
             `写草稿时那一块底色 ${draftBackground}、蓝条和它顶边差 ${draftBar.topGap.toFixed(1)}px、在正文栏外 ${draftBar.outside}；浮窗顶边比那一块底边低 ${Math.round(layerTop - blockBottom)}px；下一段的位置 ${nextTopBefore} → ${nextTopAfter}；那一块标成 ${marked}、底色 ${blockBackground}；` +
-            `黄条和那一块顶边差 ${barFit.topGap.toFixed(1)}px、高度差 ${barFit.heightGap.toFixed(1)}px、在正文栏外 ${barFit.outside}、宽 ${barFit.width}px、打开时加粗 ${barFit.active}、收起后 ${barActiveAfterClose ? '还加粗' : '变回'}；再点一下浮窗收起，收件箱 ${inboxes} 个`,
+            `黄条和那一块顶边差 ${barFit.topGap.toFixed(1)}px、高度差 ${barFit.heightGap.toFixed(1)}px、在正文栏外 ${barFit.outside}、宽 ${barFit.width}px、打开时加粗 ${barFit.active}、收起后 ${barActiveAfterClose ? '还加粗' : '变回'}；点那一块收起浮窗，再点那一块打开了 ${openedByBlock} 串，点黄条打开、再点收起；收件箱 ${inboxes} 个`,
         }
       })
     } else {
