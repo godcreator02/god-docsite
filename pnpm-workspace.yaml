@@ -1,4 +1,5 @@
-# 仓根是不发布的 private 包：平台包与功能包在 packages/，三个 gwb 插件在 plugins/，全仓文档站在 docs-site/，测试协作仓在 full-test/site/，演示协作仓在 demo/site/
+# 仓根是不发布的 private 包：平台包与功能包在 packages/，两个 gwb 插件在 plugins/，全仓文档站在 docs-site/，测试协作仓在 full-test/site/，
+# 演示协作仓在 demo/site/（本地验收站，不进仓；克隆下来的仓里没有这个目录，pnpm 跳过它）
 
 packages:
   - packages/*

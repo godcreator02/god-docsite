@@ -13,6 +13,7 @@ cd site; pnpm install; pnpm dev
 打开 `http://127.0.0.1:4398`。生产构建：`pnpm build`（先 `tsc --noEmit` 再 `vite build`）。
 
 目录：`site/collab/` 是框架部分（以后拆成 npm 包的那一块），通过别名 `@collab` 引用；`site/pages/` 是内容，`index.tsx`、`tasks.tsx` 与 `sst/` 下两页，每页旁边同名的 `.collab.json` 存批注和任务，`_folder.json` 给侧栏里的目录起名。`sst/comm-test.tsx` 与 `sst/control-plan.tsx` 由 AI 从 `SST 总控通信实验.html`、`SST控制系统开发计划-批注.html` 改写而来。
+`sst/` 下这两页是真实项目的内容，仓根 `.gitignore` 忽略它们、不进公开仓，只在原来做实验的那台电脑上有；没有它们就复现不了 `runs/02-browser-checks.txt` 里这两页的检查。
 
 ## 结论
 

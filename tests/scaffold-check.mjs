@@ -1,5 +1,5 @@
 /**
- * 建站器比对检查（pnpm test:scaffold）：用平台包的建站器把仓里两个站「应该长的样子」生成到系统临时目录，
+ * 建站器比对检查（pnpm test:scaffold）：用平台包的建站器把仓里各个站「应该长的样子」生成到系统临时目录，
  * 和仓里的站点逐个比对建站器负责的文件（模板骨架、app/features/ 下各功能的接线文件与汇总文件），不一致就失败并列出差异文件。
  * 改了站点模板或功能包的 template/ 却没用建站器重新生成站点，这项检查就失败。
  *
@@ -14,7 +14,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url'
 const repoDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 const scaffoldModule = path.join(repoDir, 'packages', 'god-docsite', 'dist', 'node', 'scaffold.mjs')
 
-/** 两个站都由站点自己维护、建站器只在建站时写一次的文件：内容、人员、依赖清单、站名、术语、评论 */
+/** 每个站都由站点自己维护、建站器只在建站时写一次的文件：内容、人员、依赖清单、站名、术语、评论 */
 const siteOwnedInEverySite = [
   { path: 'content/', reason: '站点的内容页（模板只给一张起始页与 meta.json）' },
   { path: 'app/routes/home.tsx', reason: '站点的首页（模板只给一份最简单的）' },
@@ -40,6 +40,8 @@ const sites = [
     features: ['@godcreator/collab', '@godcreator/code-pin', '@godcreator/trajectory', '@godcreator/explainer', '@godcreator/word-report'],
     siteOwned: [],
     homePageFrom: path.join(repoDir, 'packages', 'collab', 'templates', 'home.tsx'),
+    // 本地验收站：内容是真实项目的快照，.gitignore 忽略、不进公开仓，克隆下来的仓里没有它
+    localOnly: true,
   },
   {
     name: 'docs-site',
@@ -125,8 +127,10 @@ async function main() {
   const workDir = path.join(realpathSync.native(tmpdir()), 'god-docsite-scaffold-check', String(process.pid))
   rmSync(workDir, { recursive: true, force: true })
   let failed = 0
+  const presentSites = sites.filter((site) => site.localOnly !== true || existsSync(site.dir))
+  for (const site of sites.filter((site) => !presentSites.includes(site))) console.log(`跳过 ${site.name}：本地验收站，这份仓里没有 ${path.relative(repoDir, site.dir)}`)
   try {
-    for (const site of sites) {
+    for (const site of presentSites) {
       const generatedDir = path.join(workDir, site.name)
       generateExpectedSite({ scaffold, generatedDir, features: site.features })
       const siteOwned = [...siteOwnedInEverySite, ...site.siteOwned]
@@ -146,7 +150,7 @@ async function main() {
     // 递归删除遇到目录联接只删联接本身（lstat 认作符号链接），不进到工作区的包目录里
     rmSync(workDir, { recursive: true, force: true })
   }
-  console.log(`${sites.length - failed}/${sites.length} 个站一致，用时 ${((Date.now() - startedAt) / 1000).toFixed(1)} 秒`)
+  console.log(`${presentSites.length - failed}/${presentSites.length} 个站一致，用时 ${((Date.now() - startedAt) / 1000).toFixed(1)} 秒`)
   process.exitCode = failed === 0 ? 0 : 1
 }
 
