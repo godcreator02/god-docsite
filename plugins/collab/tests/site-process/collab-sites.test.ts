@@ -203,6 +203,36 @@ describe('项目站点交给 gwb-docsite', () => {
     }
   })
 
+  it('collab.site.init：站点目录已登记、建站后站点保持运行时，先停掉再加协作功能，最后交给 gwb-docsite 常驻', async () => {
+    const newRepo = mkdtempSync(path.join(tmpdir(), 'collab-site-init-'))
+    const newSiteDir = path.join(newRepo, 'site')
+    try {
+      const { docsite, calls } = fakeDocsite()
+      const registeredSite: DocsiteHosting = {
+        ...docsite,
+        init: async (dir, options) => {
+          const created = await docsite.init(dir, options)
+          await docsite.start(dir)
+          return created
+        },
+        addFeature: async (dir, options) => {
+          if (docsite.status(dir).state === 'running') throw new Error(`${dir} 的站点在运行`)
+          return docsite.addFeature(dir, options)
+        },
+      }
+      await sitesWith(registeredSite, [newRepo]).sites.init(newRepo, { featureRange: '^0.31.0', mergeWorkflow, title: '新项目', homePage, listed: true })
+      expect(calls.slice(0, 5)).toEqual([
+        `init ${newSiteDir} {"title":"新项目"}`,
+        `start ${newSiteDir}`,
+        `stop ${newSiteDir}`,
+        `addFeature ${newSiteDir} @godcreator/collab@^0.31.0`,
+        `add ${newSiteDir}`,
+      ])
+    } finally {
+      rmSync(newRepo, { recursive: true, force: true })
+    }
+  })
+
   it('collab.site.init：仓里没有自动合并工作流就写进 .gitea/workflows/，已有的不覆盖', async () => {
     const newRepo = mkdtempSync(path.join(tmpdir(), 'collab-site-init-'))
     const workflowFile = path.join(newRepo, '.gitea', 'workflows', 'collab-auto-merge.yaml')

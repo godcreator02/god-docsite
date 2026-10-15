@@ -92,6 +92,8 @@ export class CollabSites {
     const created = await this.options.docsite.init(siteDir, newSite)
     createDirsWrittenWhileRunning(repo)
     const mergeWorkflowWritten = writeMergeWorkflowIfMissing(repo, mergeWorkflow)
+    // 站点目录已登记在 gwb-docsite 的设置 sites 里时（项目在列表里、重建站点），建站检查完首页它保持运行；加功能要站点停着
+    if (this.options.docsite.status(siteDir).state === 'running') await this.options.docsite.stop(siteDir)
     const feature = await this.options.docsite.addFeature(siteDir, { packageName: featurePackage, specifier: featureRange })
     // 项目首页 import 协作功能的接线文件（app/features/collab/），要等加完功能再写
     writeFileSync(path.join(siteDir, homePageInSite), homePage)
