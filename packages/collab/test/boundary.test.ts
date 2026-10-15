@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { importsOf, reachableFrom, sources } from './source-imports.js'
 
-describe('协作包的边界（分层规则由仓根 pnpm depcheck 管，这里只守两条使用方看得见的）', () => {
+describe('协作包的边界（分层规则由仓根 pnpm test:deps 管，这里只守两条使用方看得见的）', () => {
   it('Gitea 执行器只装这个包跑 collab-merge-check：命令行走到的文件不碰 react、react-router、fumadocs，也不碰站点层', () => {
     const reached = [...reachableFrom('cli/bin.ts')]
     expect(reached.filter((name) => name.startsWith('site/'))).toEqual([])
