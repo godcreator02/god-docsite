@@ -3,6 +3,6 @@
  */
 
 export { cardEntryDataOf, cardMdxOptions, cardSchema } from "./card-collection.ts";
-export type { CardEntryData, CardMdxOptions, CardSchemaContext } from "./card-collection.ts";
+export type { CardEntryData, CardMdxOptions, CardSchemaContext, MdxPluginList } from "./card-collection.ts";
 export { remarkTrajectoryLinks } from "./remark-trajectory-links.ts";
 export type { Link, Paragraph, PhrasingContent, RemarkTrajectoryLinksOptions, Root, Text } from "./remark-trajectory-links.ts";
