@@ -52,7 +52,7 @@ function firstPageOf(nodes: PageTree.Node[]): PageTree.Item | undefined {
 
 /**
  * 交给 fumadocs getLayoutTabs 算目录切换按钮的页面树：它只拿分组的首页、或组里直接放着的第一页作这一组的链接，
- * 组里只有子文件夹（如 experiments/comm-test/index.page.tsx）时这一组就不出现在按钮里，每组都这样时整个按钮都没有。
+ * 组里只有子文件夹（如 guide/setup/index.mdx）时这一组就不出现在按钮里，每组都这样时整个按钮都没有。
  * 这里给没有首页、也没有直接放着页面的分组补上组里第一页作首页；只用来算按钮，侧栏照旧用原来的页面树
  */
 export function withGroupLandingPages(tree: PageTree.Root): PageTree.Root {

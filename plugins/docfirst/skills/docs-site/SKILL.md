@@ -44,7 +44,7 @@ docsite.feature.add  {"dir":…,"package":"@godcreator/trajectory","version":"^0
 - **侧栏顺序**写在各目录的 `meta.json`：`{ "pages": ["index", "...", "glossary"] }`，`"..."` 是其余按文件名排
 - **`app/` 由建站器写出**：`app/features/` 下文件名带 `generated` 的汇总文件每次加功能都重写，不手改
 - **页面用到的文件放哪**：只给一页用的组件、数据、样式、图片放进和页面同名的文件夹（`push.mdx` 配 `push/`），页面开头按相对路径 `import`（`./push/auto-merge`）；
-  同一组里几页共用的放进组里 `_` 开头的文件夹；跨组共用的放站点 `app/components/`，**放之前先问人**。这些文件夹里不放页面与 `meta.json`，组文件夹里只放页面、`meta.json` 与这几种文件夹。
+  同一组里几页共用的放进组里 `_` 开头的文件夹；跨组共用的放站点 `app/components/`，**放之前先问人**。这些文件夹里不放页面与 `meta.json`，组文件夹里只放页面、`meta.json` 与这几种文件夹，放错了开发服务与构建直接报错。
   写法与例子看 gwb-docsite 的说明书 `docsite`「写页面」
 - **用组件**：fumadocs 自带的组件（`Callout`、`Cards`、`Tabs`、`Steps`、`Files` 等）与平台的 `Term` 不用 import。
   生成正本里用到的组件才要在 `docfirst.config.mjs` 的 `components` 给一条机读规则，名册外的组件 `pnpm doc` 报红、render 拒绝渲染

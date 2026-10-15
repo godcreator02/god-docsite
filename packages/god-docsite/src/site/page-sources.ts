@@ -1,6 +1,7 @@
 import type { MetaData, StaticSource, VirtualFile } from 'fumadocs-core/source'
 import type { StructuredData } from 'fumadocs-core/mdx-plugins/remark-structure'
 import { extractHtmlPage, type HtmlHeadingAnchor } from '../core/html-text.js'
+import { htmlPageSuffix, tsxPageSuffix } from '../core/page-files.js'
 
 /**
  * TSX 页面与 HTML 页面做成 fumadocs 的 StaticSource，与 MDX 集合合进同一个 loader 的页面树与搜索。
@@ -34,8 +35,7 @@ export type FilePageData = {
 
 export type FilePageSource = StaticSource<{ pageData: FilePageData; metaData: MetaData }>
 
-export const tsxPageSuffix = '.page.tsx'
-export const htmlPageSuffix = '.html'
+export { htmlPageSuffix, tsxPageSuffix }
 
 /** /content/guide/demo.page.tsx → guide/demo.tsx；.page 去掉后，slug 与 meta.json 里写的名字一致 */
 function virtualPathOf(file: string, contentDir: string, suffix: string, extension: string) {
