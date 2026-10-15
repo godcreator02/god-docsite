@@ -1,5 +1,5 @@
 {
   "title": "包",
   "root": true,
-  "pages": ["identity", "comments", "explainer", "code-pin", "doc-export"]
+  "pages": ["identity", "comments", "explainer", "code-pin", "doc-export", "collab"]
 }

@@ -1,0 +1,36 @@
+/*
+ * MergeCases 自己的画面：改动清单、两条检查、结论一行。
+ * 卡片、胶囊、状态点、新旧行对照与颜色变量（--dx-*）由 @godcreator/explainer 提供，颜色只取那套变量。
+ */
+.mc-case { display: grid; gap: 12px; }
+
+/* conflict 分「topic 上」「main 上」两组；每组里每个文件一个小标题 */
+.mc-group { display: grid; gap: 6px; }
+.mc-side { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; }
+.mc-side .dx-pill { font-size: 11px; font-weight: 500; }
+.mc-file { display: grid; gap: 3px; }
+.mc-path { font-family: var(--dx-mono); font-size: 12px; color: var(--dx-dim); overflow-wrap: anywhere; }
+
+.mc-checks { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.mc-checks > li { display: grid; gap: 4px; }
+.mc-checks > li[data-state='skipped'] { color: var(--dx-dim); opacity: .55; }
+.mc-check-line { display: grid; grid-template-columns: auto auto minmax(0, 1fr); align-items: baseline; gap: 8px; font-size: 13px; }
+.mc-checks > li[data-state='fail'] .mc-check-name { font-weight: 600; }
+.mc-check-name { white-space: nowrap; }
+.mc-check-note { font-size: 12px; color: var(--dx-dim); }
+.mc-checks > li[data-state='fail'] .mc-check-note { color: var(--dx-fg); }
+
+/* 第 2 条分两种 authorIsLead 时的小行 */
+.mc-variants { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
+.mc-variants li { display: grid; grid-template-columns: auto auto minmax(0, 1fr); align-items: baseline; gap: 8px; font-size: 12.5px; }
+.mc-variants li[data-state='pass'] .mc-check-note { color: var(--dx-fg); }
+.mc-variant-label { font-family: var(--dx-mono); font-size: 11.5px; color: var(--dx-dim); white-space: nowrap; }
+
+/* 检查请求（卡片标题栏右端） */
+.mc-request { font-family: var(--dx-mono); font-size: 11px; opacity: .8; }
+
+/* 结论一行：结论胶囊、退出码胶囊，problems 原话换行摆下面 */
+.mc-verdict { display: grid; gap: 8px; }
+.mc-verdict-row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.mc-verdict-label { font-family: var(--dx-mono); font-size: 12px; color: var(--dx-dim); }
+.mc-problems { flex-basis: 100%; font-size: 12.5px; color: var(--dx-dim); overflow-wrap: anywhere; }
