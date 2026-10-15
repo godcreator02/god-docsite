@@ -173,7 +173,7 @@ export function registerCommands({ commands, docsite, sitesSetting, list }: Comm
       description: '给平台建的站点加一个功能包（轨迹卡、钉码、讲解组件、协作等）：装上它、把它的站点模板补进 app/features/、起服务检查',
       usage:
         '{ dir, package, version? }：dir 是站点目录的绝对路径（docsite.site.init 建的站）；package 是功能包的包名，如 @godcreator/trajectory；' +
-        'version 是装哪一版，写版本范围（^0.3.1、0.3.1、~0.3.1），不给就用 gwb-docsite 旁边装着的那一版，没装就拒绝。' +
+        'version 是装哪一版，写版本范围（^0.3.1、0.3.1、~0.3.1），或 link: / file: 加绝对路径（路径里不能有空白与引号），不给就用 gwb-docsite 旁边装着的那一版，没装就拒绝。' +
         '在站点目录里 pnpm add <package>@<version>，再把功能包 template/ 里站点还没有的文件补进 app/features/<功能名>/（已有的不覆盖，站点改过的文件留着）、重写 app/features/ 下的汇总文件，最后起服务检查首页（登记着的站保持运行，没登记的停掉）。' +
         '可以对同一站点重复运行，只补缺的；站点在运行时拒绝，先 docsite.site.stop。回 { feature, specifier, addedFiles, keptFiles, features }',
       effect: 'write',
@@ -210,9 +210,7 @@ export function registerCommands({ commands, docsite, sitesSetting, list }: Comm
       effect: 'read',
     },
     async (args) => {
-      const parsed = argsOf(args, ['dir', 'page', 'status', 'about'])
-      const status = parsed['status']
-      if (status !== undefined) throw new DocsiteRejected('评论模型还没收编 resolved 状态，status 筛选先不支持')
+      const parsed = argsOf(args, ['dir', 'page', 'about'])
       const filter: CommentFilter = {}
       const page = optionalString(parsed, 'page')
       const about = optionalString(parsed, 'about')
