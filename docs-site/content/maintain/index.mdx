@@ -9,7 +9,7 @@ description: 改这个仓时怎么跑、按什么节奏检查、提交怎么写�
 
 ## 怎么跑
 
-仓根是 pnpm 包工作区：`packages/` 是平台包与功能包，`plugins/` 是三个 gwb 插件，`docs-site/` 是本站，`collab-test/` 是协作站测试仓，`e2e/` 是端到端检查。
+仓根是 pnpm 包工作区：`packages/` 是平台包与功能包，`plugins/` 是三个 gwb 插件，`docs-site/` 是本站，`collab-test/` 是协作站测试仓，`tests/` 是全仓级的检查（端到端检查在 `tests/e2e/`，建站器比对是 `tests/scaffold-check.mjs`；各包自己的测试在各包里）。
 
 - `pnpm install` 之后 `pnpm build` 按依赖序构建全部包、插件与站；站点与插件用的都是各包的构建产物，改了包要先构建
 - 站点的开发服务交给 gwb-docsite 托管（`docsite.site.add {"dir":"<站点目录>"}`），不在会话里自己 `pnpm dev`；本站在 4340 端口，collab-test 在 4450
@@ -17,7 +17,7 @@ description: 改这个仓时怎么跑、按什么节奏检查、提交怎么写�
 
 仓根的脚本：
 
-{/* ref file="../package.json" lines="6-15" hash="8daa074f61f0" blob="aa7cc7b16a86" */}
+{/* ref file="../package.json" lines="6-15" hash="8a5597ef41fd" blob="1fb3907e3103" */}
 
 ## 检查节奏
 
@@ -28,15 +28,15 @@ description: 改这个仓时怎么跑、按什么节奏检查、提交怎么写�
 | 改代码的过程中 | 只跑改到的包：`pnpm --filter <包> check`（先 typecheck 再 test，有 lint 的再 lint） |
 | 改了上游包的类型或导出 | 先构建上游，再跑受影响的下游包 |
 | 改了本站的页面或被钉的代码 | 在 `docs-site/` 里 `pnpm doc`（就是 `docfirst check`），按说明书 [docs-site](/docs/outputs/skills/docs-site) 处理黄灯 |
-| 改了站点骨架或功能包的模板 | `pnpm scaffold:check`：比对测试站、本站和建站器生成的是否一致，几秒钟 |
-| 合并分支前 | 仓根 `pnpm verify`：`pnpm build` → `pnpm check` → `pnpm depcheck` → `pnpm scaffold:check` → `pnpm e2e` |
-| 发版前 | `pnpm verify` 之后再跑 `pnpm e2e:pack`：把包打成 tarball 装进测试站的副本，查漏打包的文件、写错的出口 |
+| 改了站点骨架或功能包的模板 | `pnpm test:scaffold`：比对测试站、本站和建站器生成的是否一致，几秒钟 |
+| 合并分支前 | 仓根 `pnpm verify`：`pnpm build` → `pnpm check` → `pnpm depcheck` → `pnpm test:scaffold` → `pnpm test:e2e` |
+| 发版前 | `pnpm verify` 之后再跑 `pnpm test:pack`：把包打成 tarball 装进测试站的副本，查漏打包的文件、写错的出口 |
 
 本站自己的检查在 `docs-site/` 里跑：`pnpm doc`、`pnpm typecheck`、`pnpm test`、`pnpm build`。
 
 {/* ref file="package.json" lines="7-17" hash="5f75778a7b17" blob="e0920196005b" */}
 
-端到端检查 `pnpm e2e` 直接在测试站 `collab-test/site` 上起 dev 与 build + start 各跑一轮浏览器检查，一分钟左右。它只写本次运行新建的评论、任务和页面，跑完删掉，最后核对测试站的 `git status` 和跑之前一样。
+端到端检查 `pnpm test:e2e` 直接在测试站 `collab-test/site` 上启动 dev 与 build + start 各跑一轮浏览器检查，一分钟左右。它只写本次运行新建的评论、任务和页面，跑完删掉，最后核对测试站的 `git status` 和跑之前一样。
 
 ## 提交
 

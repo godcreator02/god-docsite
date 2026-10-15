@@ -2,15 +2,15 @@
   "name": "god-docsite-workspace",
   "private": true,
   "type": "module",
-  "description": "god-docsite 的 pnpm workspace：packages/ 是平台包 god-docsite 与各功能包（identity、comments、explainer、code-pin、doc-export、trajectory、docfirst、collab）；plugins/ 是三个 gwb 插件（gwb-docsite、gwb-docfirst-workflow、gwb-collab）；docs-site/ 是全仓文档站，collab-test/ 是协作站测试仓，e2e/ 是在测试站上跑的端到端检查",
+  "description": "god-docsite 的 pnpm workspace：packages/ 是平台包 god-docsite 与各功能包（identity、comments、explainer、code-pin、doc-export、trajectory、docfirst、collab）；plugins/ 是三个 gwb 插件（gwb-docsite、gwb-docfirst-workflow、gwb-collab）；docs-site/ 是全仓文档站，collab-test/ 是协作站测试仓，tests/ 是全仓级的检查（e2e/ 下是在测试站上跑的端到端检查，scaffold-check.mjs 比对建站器的输出）",
   "scripts": {
     "build": "pnpm -r build",
     "test": "pnpm -r test",
     "check": "pnpm -r --workspace-concurrency=1 check",
-    "e2e": "node e2e/run.mjs",
-    "e2e:pack": "node e2e/pack.mjs",
-    "scaffold:check": "node scripts/scaffold-check.mjs",
-    "verify": "pnpm build && pnpm check && pnpm depcheck && pnpm scaffold:check && pnpm e2e --skip-build",
+    "test:e2e": "node tests/e2e/run.mjs",
+    "test:pack": "node tests/e2e/pack.mjs",
+    "test:scaffold": "node tests/scaffold-check.mjs",
+    "verify": "pnpm build && pnpm check && pnpm depcheck && pnpm test:scaffold && pnpm test:e2e --skip-build",
     "depcheck": "depcruise \"packages/*/src\" \"plugins/*/src\" --config .dependency-cruiser.cjs --ignore-known"
   },
   "engines": {

@@ -1,11 +1,11 @@
 /**
  * 发版前的打包检查：把测试站依赖的本仓包 pnpm pack，测试站连同协作数据复制到系统临时目录，依赖换成 file:<tarball> 装好
- * （包的真实路径在 node_modules/.pnpm 下，和从 registry 装一样），typegen + tsc 之后跑和 pnpm e2e 完全相同的检查。
+ * （包的真实路径在 node_modules/.pnpm 下，和从 registry 装一样），typegen + tsc 之后跑和 pnpm test:e2e 完全相同的检查。
  * 查的是只有装成 tarball 才会露出来的问题：包的 files 漏了文件、exports 指错、依赖没写进 dependencies、类型对不上。
  *
- *   pnpm e2e:pack                   先构建测试站依赖的本仓包，dev、start 两轮都跑
- *   pnpm e2e:pack --server=dev      只跑一部分
- *   pnpm e2e:pack --skip-build      不构建本仓的包：只在调用方刚构建过时用
+ *   pnpm test:pack                   先构建测试站依赖的本仓包，dev、start 两轮都跑
+ *   pnpm test:pack --server=dev      只跑一部分
+ *   pnpm test:pack --skip-build      不构建本仓的包：只在调用方刚构建过时用
  *
  * 日志、tarball、临时站点与 report.json 在 %TEMP%/god-docsite-e2e/pack-<运行时刻>/；全部通过时临时站点删掉，只留日志、tarball 与结果
  */

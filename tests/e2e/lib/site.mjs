@@ -2,7 +2,7 @@ import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { runLogged, runLoggedAsync } from './process.mjs'
 
-export const repoDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..')
+export const repoDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..', '..')
 
 /** 仓里的测试站：协作仓形态，站点在 site/，任务与模块在 collab/records/ */
 export const collabTestDir = path.join(repoDir, 'collab-test')
