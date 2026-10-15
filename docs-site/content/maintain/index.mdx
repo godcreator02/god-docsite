@@ -1,111 +1,55 @@
 ---
-title: 维护者手册
-description: 改这个仓的代码时，东西放在哪、提交前要通过哪些检查、提交怎么写、怎么发布、哪些目录只读
+title: 维护
+description: 改这个仓时怎么跑、按什么节奏检查、提交怎么写、发版按什么顺序
 ---
 
-import { Tabs, Tab } from '../../src/components/tabs/tabs';
+<Callout type="warn" title="重构进行中">
+  这一页只写现在的做法，细节与例外以仓根 `AGENTS.md` 为准。
+</Callout>
 
-## 仓布局
+## 怎么跑
 
-仓根 `docsite-kit/` 是 git 仓，同时是 pnpm 包工作区，住着地基、docfirst 工作流、协作站三族包；上一级的单元目录只有一张出生证 `unit.json`，不在 git 里。
-布局照 devkit 的 workspace 仓：插件在 `plugins/`，不是插件的包在 `packages/`，再加上 `site/`（地基自述站，已收成骨架正本加最小示例）与 `docs-site/`（全仓文档站，本站）。
+仓根是 pnpm 包工作区：`packages/` 是平台包与功能包，`plugins/` 是三个 gwb 插件，`docs-site/` 是本站，`collab-test/` 是协作站测试仓，`e2e/` 是端到端检查。
 
-{/* ref file="../pnpm-workspace.yaml" lines="3-7" hash="2e977effc234" blob="1adc5d16d2cb" */}
+- `pnpm install` 之后 `pnpm build` 按依赖序构建全部包、插件与站；站点与插件用的都是各包的构建产物，改了包要先构建
+- 站点的开发服务交给 gwb-docsite 托管（`docsite.site.add {"dir":"<站点目录>"}`），不在会话里自己 `pnpm dev`；本站在 4340 端口，collab-test 在 4450
+- 站点骨架只改 `packages/god-docsite/template/`，功能的接线文件只改各功能包的 `template/`；本站与 collab-test 的 `app/` 由建站器写出
 
-三个插件：`plugins/docsite/` 是 `@godcreator/gwb-docsite`（身份码、一步建站、托管站点），`plugins/docfirst/` 是
-`@godcreator/gwb-docfirst-workflow`（[docfirst 建站命令](/docfirst)与说明书），`plugins/collab/` 是 `@godcreator/gwb-collab`
-（协作站的提交审核、通知、任务命令，规矩见 [collab 分区](/collab/plugin)）。协作站的三个包 `collab-model`、`collab-site`、
-`collab-merge-check` 对基础包的依赖暂钉在 `^0.1.x`（组合包 0.3.0 出口重排，适配是 gitea 上 collab-site 仓的 issue #4），
-适配完成前从源装旧版。`packages/` 下每个目录一个 npm 包：
+仓根的脚本：
 
-{/* tree dir="../packages" depth="1" hash="409ee0a2b4ff" */}
+{/* ref file="../package.json" lines="6-13" hash="1b190e01f8e1" blob="a853c2dd5849" */}
 
-**地基**（`docsite-*`）是文档站基础包的能力包与组合包，互不相识（唯一的组合在 `docsite-kit`），谁都不认识 docfirst。
-docfirst 侧：通用包不认识 docfirst，谁都能单独使用：[钉码核心](/docfirst/pin) `code-pin`、[星轨盘](/docfirst/trajectory) `trajectory-disk`；
-docfirst 自己的包有三个：`docfirst-workflow` 是[命令行与项目](/docfirst/workflow)，接到 fumadocs 站上的部分在它的子入口 `./fumadocs`；
-`docsite-docfirst` 是文档站基础包 `@godcreator/docsite-kit` 的功能包，构建页面时用 `./fumadocs` 里的 remark 插件，另给 `Term` 与文件树组件、
-星轨盘与卡页两条路由（两样见[站点接入](/docfirst/fumadocs)）；[讲解组件包](/docfirst/explainer) `docfirst-explainer` 是 docfirst 站上用的讲解组件，只有站用。
-谁能依赖谁见[测试与边界](/maintain/testing)，搬进本仓的选型见轨迹卡 [gwb-docfirst 并入 docsite-kit](/trajectory/2026-10-12-merge-into-docsite-kit)。
+## 检查节奏
 
-两个站都是工作区成员，用 `workspace:*` 装工作区里的包，钉的都是工作区里的实际源码，所以仓里不另留示例项目：
-`site/` 是**骨架的正本**（地基插件建站的模板从它派生，内容只剩最小示例与评论定位回归页）；本站是**全仓的文档站**——
-地基、docfirst、协作站三族与 Gitea 部署都在这里讲（2026-10-13 自述站的说明与协作站的文档站并入，协作站的 Next 站已删），
-要建 docfirst 站的照它看，`docsite-docfirst` 的模板起始物以它为参照。
+不是每次都全量跑，改到哪查到哪：
 
-站的 `app/`、`vite.config.ts`、`react-router.config.ts`、`source.config.ts`、`tsconfig.json`、`.gitignore` 与自述站的骨架同代（评论、
-三种页面来源都是当前这一版），是手写的正本——地基升级骨架时对照 `site/` 改过来；站自己维护的还有 `content/`、`trajectory/`（轨迹卡）、
-`src/components/`（站内组件）、`src/glossary.mjs`（术语表）、`docfirst.config.mjs`、`people.json`（评论署名用的人员列表）、`tests/` 与 `package.json`。
+| 什么时候 | 跑什么 |
+| --- | --- |
+| 改代码的过程中 | 只跑改到的包：`pnpm --filter <包> check`（先 typecheck 再 test，有 lint 的再 lint） |
+| 改了上游包的类型或导出 | 先构建上游，再跑受影响的下游包 |
+| 改了本站的页面或被钉的代码 | 在 `docs-site/` 里 `pnpm doc`（就是 `docfirst check`），按说明书 [docs-site](/docs/outputs/skills/docs-site) 处理黄灯 |
+| 合并分支前、发版前 | 仓根 `pnpm verify`：`pnpm build` → `pnpm check` → `pnpm depcheck` → 全量 e2e |
 
-站的内容在 `docs-site/content/` 下，`meta.json` 写站名，每个目录是侧栏下拉框里的一组：`future/` 是未来区，其余目录都是现状区，
-按能力分成 `docs/`（总览与原理）、`docsite/`（地基）、`docfirst/`（docfirst 的包与插件）、`collab/`（协作站的包与插件）、
-`gitea/`（部署侧）与 `maintain/`（就是这一区，给改这个仓的人看）。轨迹卡不在 `content/` 里，在 `docfirst.config.mjs` 的
-`trajectory` 指的站点根下 `trajectory/`——三族的卡并在一处。
-站的 `src/components/` 下讲解组件的源码也算现状区，组件里照源码抄来的数据由引用钉在源码上，跟页面一起由 `docfirst check` 核对。
+本站自己的检查在 `docs-site/` 里跑：`pnpm doc`、`pnpm typecheck`、`pnpm test`、`pnpm build`。
 
-{/* tree dir="content" depth="1" hash="054c05af3d84" */}
+{/* ref file="package.json" lines="7-17" hash="5f75778a7b17" blob="e0920196005b" */}
 
-仓根的 `tests/` 是工作区级测试（边界守卫与模板版本盯守）。
+端到端检查正在重做，用法以 `e2e/` 与 `AGENTS.md` 为准。
 
-## 提交前要通过的检查
+## 提交
 
-每处都有自己的命令，全部通过才提交：
+- 一个提交一件事，提交信息用中文
+- 同一个仓常有别的会话在改：新文件用 `git add <自己的路径…>`，提交一律 `git commit --only <自己的路径…>`
+- 代码、文档、轨迹卡放进同一个提交；改了被钉的代码，同一个提交里处理它引起的黄灯
+- 改了生成物的正本（`content/docs/outputs/` 下）就在 `docs-site/` 里 `pnpm doc:render`，正本与生成物放进同一个提交
 
-<Tabs>
-  <Tab title="仓根">
-    `pnpm check`、`pnpm test`、`pnpm build`。`check` 先对 `tsconfig.tests.json` 做类型检查，再逐包跑各自的 check；
-    `test` 只运行 `tests/` 下的测试；`build` 按依赖序构建全部包、两个插件与两个站。
-  </Tab>
-  <Tab title="docs-site/">
-    `pnpm docfirst check`、`pnpm test`、`pnpm typecheck`、`pnpm build`。`test` 用功能包的 remark 插件编译现状区每一页（见[测试与边界](/maintain/testing)），
-    `typecheck` 先生成 React Router 的路由类型再 `tsc`，`build` 是 `react-router build`。
-  </Tab>
-</Tabs>
+## 发版
 
-两处的脚本，依次是仓根与站：
+只用工作台命令 `devkit.release`。升哪一位、发版的每一步，每次都先读说明书 gwb-release。包按依赖序发：
 
-{/* ref file="../package.json" lines="6-14" hash="c2bdc51dd303" blob="7df3ef1ad6e9" */}
+1. 第 0 层：`god-docsite`、`identity`、`explainer`、`code-pin`、`trajectory`
+2. 第 1 层：`comments`、`doc-export`
+3. 第 2 层：`collab`、`docfirst`
+4. 三个插件
 
-{/* ref file="package.json" lines="12-19" hash="948087fbb2a5" blob="32c606e8d42e" */}
-
-站的开发服务（上面 `dev` 脚本里的端口）交给 gwb-docsite 托管：`docsite.site.add {"dir":"<仓>/docs-site"}` 登记后常驻，改了页面自己刷新，
-不在会话里自己 `pnpm dev`；`pnpm build` 只作提交前的检查。改了构建页面时 remark 插件会调用到的包代码（`docsite-docfirst`，
-`docfirst-workflow/src/fumadocs/` 及它调用的 workflow 别的出口、code-pin），先在改过的包里 `pnpm build`，再 `docsite.site.stop`、`docsite.site.start` 重启开发服务：
-功能包的 remark 插件在一个进程里只装配一次项目，之后编译每一页都用这一份：
-
-{/* ref file="../packages/docsite-docfirst/src/content.ts" lines="59-66" hash="862e50aee640" blob="c197951793e7" */}
-
-## 提交规矩
-
-- 一个提交一件事。提交信息用中文。
-- 同一个仓常有别的会话在改：新文件用 `git add <自己的路径…>`，提交一律 `git commit --only <自己的路径…>`。
-- **代码、文档、轨迹卡放进同一个提交**。改了被钉的代码，本仓未提交改动引起的黄灯 `docfirst check` 算红
-  （见[门禁](/docfirst/pin/gate)）：`docfirst confirm` 做机械写回，剩下的黄灯逐条复核，论断还成立就
-  `docfirst confirm <页…> --accept` 点名确认。步骤照说明书 [docs-site](/docs/outputs/skills/docs-site)。
-- 改生成物的正本（仓根 README、CLAUDE，插件里的 SKILL.md）后 `pnpm docfirst render`，正本与生成物同一个提交。
-
-## 发布
-
-`packages/` 下的包与两个插件都用工作台命令 `devkit.release` 发布。升哪一位、发版的每一步、发完怎么升级 default，
-每次都先读说明书「gwb-release」（经 gwb MCP 入口 `run skill.read {"name":"gwb-release"}`），这里不复述。
-发到哪个源由各自 `package.json` 的 `publishConfig.registry` 决定。
-
-包与插件各发各的，没有先后：插件对 `packages/` 下的包零依赖，由插件的 `tests/artifact.test.ts` 检查。
-协作站那一族按依赖序发：`collab-model` → `collab-merge-check` → `collab-site` → `plugins/collab`。
-唯一的联系是 `plugins/docfirst/src/deps.ts` 那张表：建站时交给地基建站器的功能包版本取自它，表里写精确号。
-`docsite-docfirst` 升了版本号就同时改表，忘了改这条测试当场失败：
-
-{/* ref file="../plugins/docfirst/tests/create.test.ts" lines="19-19" hash="2c58b0f2b094" blob="37af8cc95b86" */}
-
-表改了之后插件要再发一版，之后新建的站才装到新包。
-
-插件发布前，在隔离 home 里用 `docfirst.create` 建一个站验证一遍（步骤在说明书「gwb-devkit」）：站要能探活通过、
-`docfirst.config.mjs` 与起始页齐全、`pnpm doc` 能跑。
-
-## 只读参考
-
-两处都在 `D:\dshfiles`（DSH 时代的归档区），只读，不 `import`：
-
-- 实验室 `D:\dshfiles\260901lab`（`step7-packages` / `step7-site` / `step7-mini`）：架构定案的出处，教学代码，要用其中的逻辑就复制过来。
-- 老仓 `D:\dshfiles\26082711aju\god-live-doc`：用 git 取旧内容这项功能的出处。功能已对齐，不再参考，代码只看这个仓。
-
-agent 在这个仓干活的全部规矩在仓根手写的 `AGENTS.md`（README 与 CLAUDE.md 是本站 outputs 的生成物）。
+协作那一侧发版前在 `plugins/collab` 里跑一遍 `pnpm test:verified`。
