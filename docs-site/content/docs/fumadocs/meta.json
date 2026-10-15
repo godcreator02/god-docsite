@@ -1,4 +1,0 @@
-{
-  "title": "fumadocs 原理",
-  "pages": ["overview", "three-pieces", "base-vite-rr", "full-flow", "mdx-compile", "mdx-compile-explainer", "core-source", "mdx", "sources", "ui", "integrations", "research"]
-}

@@ -27,7 +27,7 @@ export default function Home() {
         </section>
         <Cards>
           <Card icon={<BookOpen />} title="总览" description="有哪些包、依赖方向、三个插件各做什么" href="/docs" />
-          <Card icon={<Cpu />} title="fumadocs 原理" description="站点底下的 fumadocs、Vite 与 React Router 怎么工作" href="/docs/fumadocs/overview" />
+          <Card icon={<Cpu />} title="fumadocs 原理" description="站点底下的 fumadocs、Vite 与 React Router 怎么工作" href="/background/overview" />
           <Card icon={<LayoutTemplate />} title="写页面" description="一页说明怎么写、能用哪些组件" href="/docsite/writing" />
           <Card icon={<Server />} title="Gitea 与 NAS" description="NAS 上的 Gitea、执行器与 ntfy 各做什么、怎么配" href="/gitea" />
           <Card icon={<Wrench />} title="维护" description="怎么跑、检查节奏、发版顺序" href="/maintain" />

@@ -75,11 +75,11 @@
   {
     "term": "remark",
     "def": "把 markdown 解析成语法树、允许插件改这棵树的那套工具链。这套机制接入站，就是往它的插件链上加插件。",
-    "href": "/docs/fumadocs/mdx-compile"
+    "href": "/background/mdx-compile"
   },
   {
     "term": "fumadocs",
     "def": "这个站用的文档框架，经文档站基础包用它的 React Router 版本。它管导航、搜索、页面排版，docfirst 只往它编译页面的过程里加 remark 插件。",
-    "href": "/docs/fumadocs/overview"
+    "href": "/background/overview"
   }
 ]

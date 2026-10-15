@@ -53,7 +53,7 @@
   </aside>
 </div>
 
-<div class="pager"><span class="meta">放大看：<a href="/docs/fumadocs/mdx-compile">编译 .mdx 的工序</a> · 各段细节：<a href="/docs/fumadocs/base-vite-rr">底座</a> · <a href="/docs/fumadocs/three-pieces">三大件</a></span></div>
+<div class="pager"><span class="meta">放大看：<a href="/background/mdx-compile">编译 .mdx 的工序</a> · 各段细节：<a href="/background/base-vite-rr">底座</a> · <a href="/background/three-pieces">三大件</a></span></div>
 </main>
 
 <script>
@@ -226,7 +226,7 @@ const STEP_DEFS = [
     at: { pkDocs: { o: 0 }, pkSource: { x: 425, y: 128, o: 1 }, chipMdx: { hl: true }, dSource: { hl: true } },
     oursAt: { pinTag: { o: 1, hl: true }, pinRing: { o: 1 } },
     cap: 'lib/source.ts 进流水线。fumadocs-mdx 认出 <code>defineDocs</code>，把它改写成 Vite 的 <code>import.meta.glob</code>，意思是「把 content/docs 里的文件全部导入」。',
-    oursCap: '集合设置里挂了我们的钉码插件 <code>remarkCodePin()</code>：它不是 Vite 插件，而是 fumadocs-mdx 编译 .mdx 时的一道工序，所以画成挂在 fumadocs-mdx 上。这道工序具体排在哪、做什么，见<a href="/docs/fumadocs/mdx-compile">编译 .mdx 那一页</a>。' },
+    oursCap: '集合设置里挂了我们的钉码插件 <code>remarkCodePin()</code>：它不是 Vite 插件，而是 fumadocs-mdx 编译 .mdx 时的一道工序，所以画成挂在 fumadocs-mdx 上。这道工序具体排在哪、做什么，见<a href="/background/mdx-compile">编译 .mdx 那一页</a>。' },
   { who: ['vite', 'mdx'], oursWho: ['vite', 'mdx', 'ours'], code: CODE.installMdx, oursCode: CODE.installMdxOurs,
     at: { pkSource: { o: 0 }, pkIntro: { x: 300, y: 128, o: 1 }, pkInstall: { x: 425, y: 128, o: 1 }, chipMdx: { hl: true }, dIntro: { hl: true }, dInstall: { hl: true } },
     oursAt: { pinTag: { hl: true }, dPinned: { hl: true } },
