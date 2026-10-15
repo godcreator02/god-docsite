@@ -8,7 +8,7 @@ import { featureRuntime } from '../features/runtime.generated.ts'
 const tsxPageMeta = import.meta.glob('/content/**/*.page.tsx', { eager: true, import: 'meta' })
 const htmlPageText = import.meta.glob<string>('/content/**/*.html', { eager: true, query: '?raw', import: 'default' })
 
-/** 三种页面进同一棵页面树、同一个搜索索引；只在服务端用（经 site.server.ts）。侧栏根部的入口（全站评论、各功能的页面）由各功能的页面树插件加，按功能名排 */
+/** 三种页面进同一棵页面树、同一个搜索索引；只在服务端用（经 site.server.ts）。功能的侧栏入口不进页面树，在侧栏站名下的一横排里 */
 export const source = loader({
   source: { mdx: docs.toFumadocsSource(), tsx: tsxPageSource(tsxPageMeta), html: htmlPageSource(htmlPageText) },
   baseUrl: '/',

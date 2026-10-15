@@ -14,16 +14,16 @@ describe('siteFeatureRuntime', () => {
     const plugin = { name: 'demo' }
     const linkKind = { matches: () => false, Chip: Badge }
     const runtime = siteFeatureRuntime({
-      demo: { mdxComponents: { Badge }, pageTreePlugins: [plugin], linkKinds: [linkKind], sidebarLinks: [{ name: '演示', url: '/demo' }], layoutData: (_args, site) => ({ dir: site.dir }), LayoutTop: Top },
-      other: { sidebarLinks: [{ name: '其他', url: '/other' }] },
+      demo: { mdxComponents: { Badge }, pageTreePlugins: [plugin], linkKinds: [linkKind], sidebarLinks: [{ name: '演示', url: '/demo', icon: null }], layoutData: (_args, site) => ({ dir: site.dir }), LayoutTop: Top },
+      other: { sidebarLinks: [{ name: '其他', url: '/other', icon: null }] },
       empty: {},
     })
     expect(runtime.mdxComponents).toEqual({ Badge })
     expect(runtime.pageTreePlugins).toEqual([plugin])
     expect(runtime.linkKinds).toEqual([linkKind])
     expect(runtime.sidebarLinks).toEqual([
-      { name: '演示', url: '/demo' },
-      { name: '其他', url: '/other' },
+      { name: '演示', url: '/demo', icon: null },
+      { name: '其他', url: '/other', icon: null },
     ])
     expect(runtime.layoutTops).toEqual([{ feature: 'demo', Component: Top }])
     expect(await withFeatureLayoutData({ siteName: '站' }, { loaders: runtime.layoutData, args, base })).toEqual({ siteName: '站', demo: { dir: '/site' } })

@@ -73,7 +73,7 @@ export async function runDocsChecks({ browser, baseUrl, mode, siteDir }) {
       return { pass: kept, detail: `到起始卡，没有整页刷新=${kept}` }
     })
 
-    await check('侧栏星轨盘入口站内导航到星轨盘页（独立页面，不带侧栏）', async () => {
+    await check('侧栏横排的「轨迹」入口站内导航到星轨盘页（独立页面，不带侧栏）', async () => {
       await page.goto(`${baseUrl}/pinned`, { waitUntil: 'load' })
       await waitForHydrated(page, '#nd-sidebar a[href="/trajectory"]')
       await markNoReload(page)
@@ -82,7 +82,7 @@ export async function runDocsChecks({ browser, baseUrl, mode, siteDir }) {
       await page.locator('.star-disk').waitFor({ timeout: stepTimeoutMs })
       const sidebars = await page.locator('#nd-sidebar').count()
       const kept = await stillNoReload(page)
-      return { pass: kept && sidebars === 0, detail: `点侧栏「星轨盘」，没有整页刷新=${kept}，侧栏 ${sidebars} 个` }
+      return { pass: kept && sidebars === 0, detail: `点横排里的「轨迹」，没有整页刷新=${kept}，侧栏 ${sidebars} 个` }
     })
 
     await check('星轨盘页直接打开：盘画出来、两张卡都在、顶栏回文档', async () => {

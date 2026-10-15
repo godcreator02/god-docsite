@@ -97,12 +97,13 @@ describe('feature.tsx（运行时，浏览器侧也加载）', () => {
     expect(serverOnly).toEqual([])
   })
 
-  it('侧栏入口是「任务」「日历」两个站内地址', async () => {
+  it('侧栏入口是「任务」「日历」两个站内地址，都带图标', async () => {
     const { sidebarLinks } = await import('../template/feature.tsx')
-    expect(sidebarLinks).toEqual([
+    expect(sidebarLinks.map(({ name, url }) => ({ name, url }))).toEqual([
       { name: '任务', url: tasksPageUrl },
       { name: '日历', url: calendarUrl },
     ])
+    expect(sidebarLinks.every(({ icon }) => icon !== null && icon !== undefined)).toBe(true)
   })
 
   it('layoutData：公开人员（不带身份码）、本机身份、推送通道交来的通知；还没推过为 null，推来的形状不对就报错', async () => {

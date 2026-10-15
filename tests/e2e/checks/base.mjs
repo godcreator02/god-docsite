@@ -3,6 +3,9 @@ import path from 'node:path'
 import { checkRunner, filesUnder, hasViteErrorOverlay, headingOf, markNoReload, postFormToAction, problemResults, serverCodeInClientBuild, stepTimeoutMs, stillNoReload, waitForHydrated, watchPage } from '../lib/checks.mjs'
 import { addedPageOf, titlePageOf } from '../lib/run-scratch.mjs'
 
+/** 侧栏站名下的一横排：搜索按钮与功能入口（god-docsite 的 SidebarLinksRow） */
+const sidebarRow = '#nd-sidebar [data-docsite-sidebar-row]'
+
 /** 写一条评论并回复：评论面板打开、整页评论、展开回复写回复；返回串 id */
 async function writeThreadAndReply(page, { threadText, replyText }) {
   await waitForHydrated(page, '[data-comment-dock-open]')
@@ -160,13 +163,52 @@ export async function runBaseChecks({ browser, baseUrl, mode, siteDir, feedToken
       return { pass: seen.every((count) => count === 1), detail: threadsToSee.map(({ threadText }, index) => `「${threadText}」回复 ${seen[index]} 条`).join('，') }
     })
 
-    await check('侧栏的全站评论入口（comments 的 sidebarLinks）', async () => {
+    await check('侧栏横排的「评论」入口（comments 的 sidebarLinks）', async () => {
       await page.goto(`${baseUrl}/`, { waitUntil: 'load' })
-      await waitForHydrated(page, '#nd-sidebar a[href="/comments"]')
+      await waitForHydrated(page, `${sidebarRow} a[href="/comments"]`)
       await markNoReload(page)
-      await page.click('#nd-sidebar a[href="/comments"]')
+      await page.click(`${sidebarRow} a[href="/comments"]`)
       await page.locator('h1', { hasText: '全站评论' }).waitFor({ timeout: stepTimeoutMs })
-      return { pass: await stillNoReload(page), detail: '点侧栏入口站内导航到 /comments' }
+      return { pass: await stillNoReload(page), detail: '点横排里的「评论」站内导航到 /comments' }
+    })
+
+    await check('侧栏站名下是一横排：最左是只有图标的搜索按钮，后面的入口都带图标；侧栏里没有整行的搜索框', async () => {
+      await page.goto(`${baseUrl}/about`, { waitUntil: 'load' })
+      await waitForHydrated(page, `${sidebarRow} a[href="/comments"]`)
+      const cells = await page.locator(`${sidebarRow} > span`).evaluateAll((spans) =>
+        spans.map((span) => {
+          const control = span.querySelector('a, button')
+          return { tag: control?.tagName.toLowerCase(), href: control?.getAttribute('href') ?? null, text: control?.textContent?.trim() ?? '', icon: control?.querySelector('svg') !== null }
+        }),
+      )
+      const [search, ...links] = cells
+      const searchOk = search?.tag === 'button' && search.text === '' && search.icon
+      const linksOk = links.length > 0 && links.every((cell) => cell.tag === 'a' && cell.icon && cell.text !== '')
+      const fullSearchBars = await page.locator('#nd-sidebar button', { has: page.locator('kbd') }).count()
+      // dev 下搜索框的代码按需加载：没加载完就点，fumadocs 记成已打开却画不出来，之后 Ctrl K 也打不开（main 上整行搜索框一样）
+      await page.waitForLoadState('networkidle')
+      await page.click(`${sidebarRow} > span:first-child button`)
+      const dialog = await page.locator('input[data-fd-search-dialog-input]').waitFor({ timeout: stepTimeoutMs }).then(() => true, () => false)
+      await page.keyboard.press('Escape')
+      return {
+        pass: searchOk && linksOk && fullSearchBars === 0 && dialog,
+        detail: `横排 ${cells.map((cell) => (cell.href ?? '搜索') + (cell.icon ? '(图标)' : '')).join('、')}；入口都有字=${linksOk}；侧栏里带快捷键的整行搜索框 ${fullSearchBars} 个；点搜索按钮弹出搜索框=${dialog}`,
+      }
+    })
+
+    await check('在功能页面上侧栏停在最近看过的那一组（目录切换按钮与组里的页面不变）', async () => {
+      await page.goto(`${baseUrl}/guide`, { waitUntil: 'load' })
+      await waitForHydrated(page, `${sidebarRow} a[href="/comments"]`)
+      const before = await page.locator('#nd-sidebar button', { hasText: '指南' }).count()
+      await page.click(`${sidebarRow} a[href="/comments"]`)
+      await page.locator('h1', { hasText: '全站评论' }).waitFor({ timeout: stepTimeoutMs })
+      const dropdown = await page.locator('#nd-sidebar button', { hasText: '指南' }).count()
+      const guidePage = await page.locator('#nd-sidebar a[href="/guide"]:visible').count()
+      const hiddenShown = await page.locator('#nd-sidebar a:has([data-docsite-sidebar-hidden-page]):visible').count()
+      return {
+        pass: before >= 1 && dropdown >= 1 && guidePage >= 1 && hiddenShown === 0,
+        detail: `/guide 上「指南」切换按钮 ${before} 个；到 /comments 后 ${dropdown} 个，组里的 /guide 显示 ${guidePage} 个，占位项显示 ${hiddenShown} 个`,
+      }
     })
 
     await check('推送：一页 action 触发、另一页 EventSource 收到', async () => {

@@ -1,5 +1,6 @@
 import { useMemo } from 'react'
 import { useRouteLoaderData, type LoaderFunctionArgs } from 'react-router'
+import { CalendarDays, ListTodo } from 'lucide-react'
 import type { SiteIdentity, StoredPerson } from '@godcreator/identity'
 import { useSiteFeed, type BaseSiteContext } from '@godcreator/god-docsite/react'
 import { calendarUrl, pushedSiteFeedOf, siteFeedChannel, siteFeedOf, tasksPageUrl } from '@godcreator/collab'
@@ -9,10 +10,10 @@ import { collabLayoutData, collabMdxComponents, NotificationBar, type CollabLayo
 
 export const mdxComponents = collabMdxComponents
 
-/** 侧栏的「任务」「日历」入口：任务页下的记录页、日历下的日志页上也高亮 */
+/** 侧栏横排里的「任务」「日历」入口：任务页下的记录页、日历下的日志页上也高亮 */
 export const sidebarLinks = [
-  { name: '任务', url: tasksPageUrl },
-  { name: '日历', url: calendarUrl },
+  { name: '任务', url: tasksPageUrl, icon: <ListTodo /> },
+  { name: '日历', url: calendarUrl, icon: <CalendarDays /> },
 ]
 
 /** 布局 loader 调用，结果进布局数据的 collab 键：公开人员、本机身份、推送来的通知 */

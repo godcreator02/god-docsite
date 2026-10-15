@@ -1,10 +1,11 @@
+import { Orbit } from 'lucide-react'
 import { routeLinkKind } from '@godcreator/god-docsite/react'
 import { cardBodyLoadersById } from '@godcreator/trajectory/site'
 import browserCollections from '../../../.source/browser'
 import { trajectoryHrefBase } from './href'
 
-/** 侧栏的「星轨盘」入口：卡页（地址在它下面）上也高亮 */
-export const sidebarLinks = [{ name: '星轨盘', url: trajectoryHrefBase }]
+/** 侧栏横排里的「轨迹」入口：进星轨盘，卡页（地址在它下面）上也高亮 */
+export const sidebarLinks = [{ name: '轨迹', url: trajectoryHrefBase, icon: <Orbit /> }]
 
 const cardIds = new Set(cardBodyLoadersById(browserCollections.trajectory.raw).keys())
 

@@ -67,6 +67,11 @@
 }
 
 
+/* 侧栏停在最近那一组时塞进组里的页面项（src/site/sidebar.tsx）：只让 fumadocs 认出当前组，不显示 */
+a:has([data-docsite-sidebar-hidden-page]) {
+  display: none;
+}
+
 /* 站点的 app.css 引入这一份：让 Tailwind 扫到平台组件（构建产物）里用的类名 */
 @source './dist';
 

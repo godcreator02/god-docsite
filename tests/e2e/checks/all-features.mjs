@@ -7,8 +7,11 @@ import { checkRunner, problemResults, waitForHydrated, watchPage } from '../lib/
  * 单个功能自己的行为在 base、collab、docs 三组里查
  */
 
-/** 侧栏里功能的入口，按功能名排序后各功能 sidebarLinks 的先后（collab、comments、trajectory） */
+/** 侧栏横排里功能的入口，按功能名排序后各功能 sidebarLinks 的先后（collab、comments、trajectory） */
 const featureSidebarEntries = ['/tasks', '/calendar', '/comments', '/trajectory']
+
+/** 侧栏站名下的一横排：搜索按钮与功能入口（god-docsite 的 SidebarLinksRow） */
+const sidebarRow = '#nd-sidebar [data-docsite-sidebar-row]'
 
 /** 功能的下级页面与侧栏上应当高亮的入口：入口按地址前缀高亮 */
 const highlightedEntryOf = [
@@ -68,9 +71,9 @@ export async function runRouteTableChecks({ siteDir }) {
   return results
 }
 
-async function sidebarLinks(page) {
-  await waitForHydrated(page, '#nd-sidebar a[href="/trajectory"]')
-  return page.locator('#nd-sidebar a').evaluateAll((links) => links.map((link) => link.getAttribute('href')))
+async function sidebarRowLinks(page) {
+  await waitForHydrated(page, `${sidebarRow} a[href="/trajectory"]`)
+  return page.locator(`${sidebarRow} a`).evaluateAll((links) => links.map((link) => link.getAttribute('href')))
 }
 
 /** 页面上全部样式表里的选择器（含 @media、@layer 里的） */
@@ -97,22 +100,26 @@ export async function runAllFeaturesChecks({ browser, baseUrl }) {
     const page = await context.newPage()
     watchPage(page, 'all-features', problems)
 
-    await check('侧栏的各功能入口都在、先后固定（刷新后不变）', async () => {
+    await check('侧栏横排里各功能入口都在、先后固定（刷新后不变），入口不进页面树', async () => {
       await page.goto(`${baseUrl}/`, { waitUntil: 'load' })
-      const first = await sidebarLinks(page)
+      const first = await sidebarRowLinks(page)
       await page.reload({ waitUntil: 'load' })
-      const second = await sidebarLinks(page)
-      const entries = first.filter((href) => featureSidebarEntries.includes(href))
+      const second = await sidebarRowLinks(page)
+      const inTree = await page.locator('#nd-sidebar a').evaluateAll(
+        (links, entries) => links.filter((link) => !link.closest('[data-docsite-sidebar-row]') && entries.includes(link.getAttribute('href'))).map((link) => link.getAttribute('href')),
+        featureSidebarEntries,
+      )
       const stable = JSON.stringify(first) === JSON.stringify(second)
-      const pass = entries.join() === featureSidebarEntries.join() && stable
-      return { pass, detail: `功能入口 ${entries.join('、')}（应为 ${featureSidebarEntries.join('、')}）；刷新前后侧栏 ${first.length} 个链接一样=${stable}` }
+      const pass = first.join() === featureSidebarEntries.join() && stable && inTree.length === 0
+      return { pass, detail: `横排入口 ${first.join('、')}（应为 ${featureSidebarEntries.join('、')}）；刷新前后一样=${stable}；横排之外的入口链接 ${inTree.join('、') || '无'}` }
     })
 
-    await check('功能的下级页面上，侧栏对应的入口高亮、别的功能入口不高亮', async () => {
+    await check('功能的下级页面上，横排里对应的入口高亮、别的功能入口不高亮', async () => {
       const outcomes = []
       for (const { url, entry } of highlightedEntryOf) {
         await page.goto(`${baseUrl}${url}`, { waitUntil: 'load' })
-        const active = await page.locator('#nd-sidebar a[data-active="true"]').evaluateAll((links) => links.map((link) => link.getAttribute('href')))
+        await waitForHydrated(page, `${sidebarRow} a[href="${entry}"]`)
+        const active = await page.locator(`${sidebarRow} a[data-active="true"]`).evaluateAll((links) => links.map((link) => link.getAttribute('href')))
         outcomes.push({ url, entry, active, ok: active.length === 1 && active[0] === entry })
       }
       const wrong = outcomes.filter(({ ok }) => !ok)

@@ -605,6 +605,9 @@ importers:
       jsdom:
         specifier: 'catalog:'
         version: 30.1.2(@noble/hashes@2.4.0)
+      lucide-react:
+        specifier: 'catalog:'
+        version: 1.54.0(@types/react@19.3.0)(react@19.3.0)
       react:
         specifier: 'catalog:'
         version: 19.3.0
