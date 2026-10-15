@@ -79,6 +79,10 @@ description: 改这个仓时怎么跑、按什么节奏检查、提交怎么写�
 仓里的工作流 `.github/workflows/publish.yml` 由 release 公开触发，用 trusted publishing 按序号逐个发到 npmjs，不存 token。各包的 `publishConfig` 指向 npmjs、`repository` 指向这个仓，`files` 收进 MIT 的 `LICENSE`。
 
 - **过渡期同时发 Gitea**：各 home 还从 Gitea 装 `@godcreator` 的包，`devkit.release` 加 `alsoPublishTo` Gitea 的源
-- **新加一个包**：npmjs 上要先有这个包才能登记谁能发它。先在本机发一个 `0.0.0-stage` 占位版（`npm publish --auth-type=web`，在浏览器里批准），
-  再 `npm trust github <包名> --repo godcreator02/god-docsite --file publish.yml --yes` 登记；登记后两天内要正式发一次，不然登记作废
+- **新加一个包**：npmjs 上要先有这个包才能登记谁能发它，命令要在有终端的地方运行（npm 在那里才给出网页批准链接并等着）：
+  - 发一个 `0.0.1-stage` 占位版（npmjs 不收 `0.0.0-stage`）：`npm publish <目录> --auth-type=web --access public --tag stage --registry https://registry.npmjs.org/ --@godcreator:registry=https://registry.npmjs.org/`，在浏览器里批准。
+    `~/.npmrc` 里 `@godcreator` 的范围行指向 Gitea，它比 `--registry` 优先，不带最后那个参数就发到 Gitea 去了
+  - 登记：`npx npm@12 trust github <包名> --repository=godcreator02/god-docsite --file=publish.yml --allow-publish --yes --registry=https://registry.npmjs.org/`。npm 11 发的登记请求 npmjs 回 400，`--allow-publish` 是 npm 12 要求的权限参数
+  - 批准页勾上「5 分钟内不再验证」，一批包只验证一次；登记后两天内要正式发一次，不然登记作废
+- **工作区不干净时发版**：`devkit.release` 只从干净的工作区发。别的会话有没提交的改动时，用 `git worktree add --detach <仓外目录> <已推送的提交>` 检出一份、`pnpm install --frozen-lockfile`，从那里发，发完删掉
 - 演示站 `demo/` 不进仓（见轨迹卡 [演示站改成本地验收站](/trajectory/2026-10-16-demo-local-only)），公开仓里只有测试站与本站

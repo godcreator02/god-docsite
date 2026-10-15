@@ -77,7 +77,9 @@
 * 包发到 npmjs，由 GitHub 仓 `godcreator02/god-docsite` 的 `.github/workflows/publish.yml` 经 trusted publishing 发：`devkit.release` 要求 HEAD 已经推到 GitHub，
   在 HEAD 上建 release、挂上本机打好的包文件，工作流按序号逐个发。各包 `publishConfig` 指向 npmjs、`repository` 指向这个仓、`files` 收进 MIT 的 `LICENSE`。
   各 home 还从 Gitea 装 `@godcreator` 的包，过渡期发版加 `alsoPublishTo` Gitea 的源（`https://git.tianshen02.online:28377/api/packages/godcreator/npm/`）；
-  新加一个包，先在本机发一个 `0.0.0-stage` 占位版（`npm publish --auth-type=web`，在浏览器里批准），再 `npm trust github <包名> --repo godcreator02/god-docsite --file publish.yml --yes` 登记，登记后两天内要正式发一次
+  新加一个包，先在有终端的地方发一个 `0.0.1-stage` 占位版（npmjs 不收 `0.0.0-stage`）：`npm publish <目录> --auth-type=web --access public --tag stage --registry https://registry.npmjs.org/ --@godcreator:registry=https://registry.npmjs.org/`，
+  在浏览器里批准（范围行优先于 `--registry`，不带后一个参数会发到 Gitea）；再 `npx npm@12 trust github <包名> --repository=godcreator02/god-docsite --file=publish.yml --allow-publish --yes --registry=https://registry.npmjs.org/` 登记
+  （npm 11 的登记请求 npmjs 回 400），登记后两天内要正式发一次
 
 ## 规矩
 

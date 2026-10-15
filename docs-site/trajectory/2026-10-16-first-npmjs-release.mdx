@@ -1,0 +1,21 @@
+---
+born-at: 2026-10-16T18:00
+type: experiment
+parent: [2026-09-03-god-live-doc]
+label: 第一次发 npmjs：占位版要用 0.0.1-stage、登记要 npm 12 加 --allow-publish、devkit 补上 catalog 依赖的改写
+domain: 平台
+---
+
+## 背景
+
+照 [仓推到 GitHub 公开、包改发 npmjs](/trajectory/2026-10-16-publish-to-npmjs) 第一次把 12 个包发到 npmjs。生态里别的仓留下的做法（devkit 的发版页与说明书）写的是 `0.0.0-stage` 占位版与 `npx npm@latest trust github … --repo … --file …`。
+
+## 结论与边界
+
+- 本机 `~/.npmrc` 里 `@godcreator` 的范围行指向 Gitea，比命令行的 `--registry` 优先：只带 `--registry` 的 `npm publish` 把 9 个占位版发到了 Gitea（只打了 `stage` 标签，不影响装包），`npm view` 也去问 Gitea。要再带 `--@godcreator:registry=https://registry.npmjs.org/`
+- `npm publish --auth-type=web` 在没有终端的后台进程里直接报 `EOTP`、链接被打码；要在终端面板里运行，npm 才给出批准链接并等着。账号的两步验证是安全密钥，每次批准由人在浏览器里完成，勾上「5 分钟内不再验证」一批只验一次
+- npmjs 回 `403 You cannot publish using the version: 0.0.0-stage`，同一账号前一天 gwb-gitea 还发过这个号；改成 `0.0.1-stage` 就收了
+- `npm trust github`：npm 11.11 把 `--repo` 的值当成位置参数；写成 `--repository=…`、`--file=…` 后请求发得出去，npmjs 回 400。npm 12 要求权限参数 `--allow-publish`，加上后登记成功（npm 12.2 提示不支持 Node 24.14.1，照样能用）
+- devkit 在临时目录组装发布内容时只改写 `workspace:`，不认 `catalog:`，第一次 `devkit.release` 在打包第一个包时报 `ERR_PNPM_CATALOG_ENTRY_NOT_FOUND_FOR_SPEC`，什么都没发。devkit 0.26.13 补上了按仓根 `pnpm-workspace.yaml` 改写 `catalog:`（gwb-lifecycle-plugins 的轨迹卡 2026-10-16-staged-manifest-resolves-catalog）。同一次还查出 word-report 的 `files` 里有通配 `engine/src/docreport/*.py`，devkit 按字面复制、不认通配，改成目录
+- 第二次 `devkit.release` 发完 Gitea 后建 GitHub release 时 `fetch failed`，release 没建出来；再带 `alsoPublishTo` 会因同号已在 Gitea 上被拒，不带它重发只走 npmjs 那一段。那时工作区里有别的会话没提交的改动，`devkit.release` 拒发，改从 `git worktree` 检出的已推送提交发，顺带确认了没有 `demo/` 的克隆 `pnpm install --frozen-lockfile` 能装
+- 结果：12 个包在 npmjs 与 Gitea 上都是 god-docsite、identity、comments、explainer、trajectory、word-report、doc-export、collab、docfirst 0.1.0，code-pin 0.2.0，gwb-docsite 0.4.0，gwb-collab 0.31.0；发布用的提交是 `96358f26`
