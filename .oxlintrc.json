@@ -17,7 +17,8 @@
     "**/*.config.ts",
     "dist/**",
     "probes/**",
-    "**/template/**"
+    "**/template/**",
+    "**/templates/**"
   ],
   "overrides": [
     {

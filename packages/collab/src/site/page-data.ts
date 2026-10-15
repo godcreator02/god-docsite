@@ -49,6 +49,9 @@ export type RecordPageData = CollabViewer & {
 
 export type CalendarPageData = { siteName: string; tasks: TaskState[]; modules: ModuleState[]; journalDates: string[] }
 
+/** 项目首页：全部任务与模块（没做完的、快到期的由页面挑）、最近有日志的几天（新的在前） */
+export type ProjectHomeData = CollabViewer & { tasks: TaskState[]; modules: ModuleState[]; recentJournalDates: string[] }
+
 export type JournalPageData = {
   siteName: string
   date: string

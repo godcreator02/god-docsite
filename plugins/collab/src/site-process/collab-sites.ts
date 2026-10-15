@@ -9,8 +9,11 @@ import { featurePackage } from './site-files.js'
 /** 用到的 gwb-docsite 服务方法：站点进程的启动与停止、状态、推数据、从零建站、加功能 */
 export type DocsiteHosting = Pick<GwbDocsiteApi, 'start' | 'stop' | 'status' | 'push' | 'init' | 'addFeature'>
 
-/** collab.site.init 的结果：gwb-docsite 建的基础站、加上的协作功能、自动合并工作流（written 为 false 是仓里已经有、没动） */
-export type CollabSiteInitResult = SiteInitResult & { feature: SiteFeatureAdded; mergeWorkflow: { path: string; written: boolean } }
+/** collab.site.init 的结果：gwb-docsite 建的基础站、加上的协作功能、自动合并工作流（written 为 false 是仓里已经有、没动）、写成项目首页的文件 */
+export type CollabSiteInitResult = SiteInitResult & { feature: SiteFeatureAdded; mergeWorkflow: { path: string; written: boolean }; homePage: string }
+
+/** 站点的首页文件（平台模板的 index 路由），相对站点目录 */
+const homePageInSite = 'app/routes/home.tsx'
 
 /** 窗格要的：url 在运行时是实际地址，没运行时是 gwb-docsite 按 site/package.json 的 dev 脚本预期的地址；起不来时的原因 */
 export type SiteState = { url: string | null; running: boolean; error: string | null }
@@ -81,17 +84,20 @@ export class CollabSites {
 
   /**
    * collab.site.init：交给 gwb-docsite 从零建基础站，建好站点运行时会写入的目录，仓里没有自动合并工作流就写进去，再加协作功能（功能包写成给的范围；
-   * 加功能时 gwb-docsite 会起服务检查首页），port 与 title 是新站的开发端口与站名；项目在列表里就启动并推一次数据
+   * 加功能时 gwb-docsite 会起服务检查首页），最后把平台模板的首页换成协作功能的项目首页（homePage 是它的原文）；
+   * port 与 title 是新站的开发端口与站名；项目在列表里就启动并推一次数据
    */
-  async init(repo: string, options: { featureRange: string; mergeWorkflow: string; port: number; title: string; listed: boolean }): Promise<CollabSiteInitResult> {
-    const { featureRange, mergeWorkflow, listed, ...newSite } = options
+  async init(repo: string, options: { featureRange: string; mergeWorkflow: string; homePage: string; port: number; title: string; listed: boolean }): Promise<CollabSiteInitResult> {
+    const { featureRange, mergeWorkflow, homePage, listed, ...newSite } = options
     const siteDir = siteDirOf(repo)
     const created = await this.options.docsite.init(siteDir, newSite)
     createDirsWrittenWhileRunning(repo)
     const mergeWorkflowWritten = writeMergeWorkflowIfMissing(repo, mergeWorkflow)
     const feature = await this.options.docsite.addFeature(siteDir, { packageName: featurePackage, specifier: featureRange })
+    // 项目首页 import 协作功能的接线文件（app/features/collab/），要等加完功能再写
+    writeFileSync(path.join(siteDir, homePageInSite), homePage)
     if (listed) await this.keep(repo)
-    return { ...created, feature, mergeWorkflow: { path: mergeWorkflowPathInRepo, written: mergeWorkflowWritten } }
+    return { ...created, feature, mergeWorkflow: { path: mergeWorkflowPathInRepo, written: mergeWorkflowWritten }, homePage: `${sitePathInRepo}/${homePageInSite}` }
   }
 
   /** 自动同步快进进来改了 site/ 的提交之后：确保站点在运行（已在运行就不动、不重启），把最新的数据推过去 */

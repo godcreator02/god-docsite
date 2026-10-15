@@ -31,6 +31,8 @@ const sites = [
     dir: path.join(repoDir, 'collab-test', 'site'),
     features: ['@godcreator/collab', '@godcreator/code-pin', '@godcreator/trajectory', '@godcreator/explainer'],
     siteOwned: [],
+    // 协作站的首页由 collab.site.init 照协作功能的模板写出，测试站的要和它一样
+    homePageFrom: path.join(repoDir, 'packages', 'collab', 'templates', 'home.tsx'),
   },
   {
     name: 'docs-site',
@@ -122,6 +124,9 @@ async function main() {
       generateExpectedSite({ scaffold, generatedDir, features: site.features })
       const siteOwned = [...siteOwnedInEverySite, ...site.siteOwned]
       const { compared, differences } = differencesOf({ generatedDir, siteDir: site.dir, siteOwned })
+      if (site.homePageFrom !== undefined && textOf(path.join(site.dir, 'app', 'routes', 'home.tsx')) !== textOf(site.homePageFrom)) {
+        differences.push(`app/routes/home.tsx：和 ${path.relative(repoDir, site.homePageFrom)} 不一样`)
+      }
       if (differences.length === 0) {
         console.log(`通过 ${site.name}：建站器负责的 ${compared} 个文件与仓里一致（站点自己维护的不比：${siteOwned.map((entry) => entry.path).join('、')}）`)
         continue

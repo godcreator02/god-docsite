@@ -37,17 +37,20 @@ export async function runBaseChecks({ browser, baseUrl, mode, siteDir, feedToken
     const page = await context.newPage()
     watchPage(page, 'base', problems)
 
-    await check('首页打开：HomeLayout，没有侧栏；顶栏有「文档」与功能入口，正文有功能页面的卡片', async () => {
+    await check('首页打开：HomeLayout，没有侧栏；顶栏有「文档」与功能入口；正文是协作的项目首页（任务、模块、日志、成员四栏）', async () => {
       const response = await page.goto(`${baseUrl}/`, { waitUntil: 'load' })
       const heading = await headingOf(page)
       const sidebars = await page.locator('#nd-sidebar').count()
       const navLinks = await page.locator('header a[href]').evaluateAll((links) => links.map((link) => `${link.getAttribute('href')} ${link.textContent?.trim()}`))
-      const bodyLinks = await page.locator('main a[href]').evaluateAll((links) => links.map((link) => link.getAttribute('href')))
-      const missingNav = ['/about 文档', '/tasks 任务', '/calendar 日历', '/comments 评论', '/trajectory 轨迹'].filter((entry) => !navLinks.includes(entry))
-      const missingCards = ['/tasks', '/calendar', '/comments', '/trajectory'].filter((href) => !bodyLinks.includes(href))
+      const missingNav = ['/about 文档', '/tasks 任务', '/calendar 日历', '/trajectory 轨迹', '/comments 评论'].filter((entry) => !navLinks.includes(entry))
+      const sections = await page.locator('main section h2').allTextContents()
+      // dev 下有本机身份，只列我的任务；start 是只读的发布版，列全部
+      const taskSection = mode === 'dev' ? '我没做完的任务' : '没做完的任务'
+      const missingSections = [taskSection, '快到期的模块', '最近的日志', '成员'].filter((title) => !sections.includes(title))
+      const recordLinks = await page.locator('main section a[href^="/tasks/"]').count()
       return {
-        pass: response?.status() === 200 && heading === '协作站测试' && sidebars === 0 && missingNav.length === 0 && missingCards.length === 0,
-        detail: `GET / → ${response?.status()}，h1=${heading}，侧栏 ${sidebars} 个；顶栏缺 ${missingNav.join('、') || '无'}；正文缺的卡片 ${missingCards.join('、') || '无'}`,
+        pass: response?.status() === 200 && heading === '协作站测试' && sidebars === 0 && missingNav.length === 0 && missingSections.length === 0 && recordLinks > 0,
+        detail: `GET / → ${response?.status()}，h1=${heading}，侧栏 ${sidebars} 个；顶栏缺 ${missingNav.join('、') || '无'}；缺的栏 ${missingSections.join('、') || '无'}；指向任务或模块的链接 ${recordLinks} 个`,
       }
     })
 

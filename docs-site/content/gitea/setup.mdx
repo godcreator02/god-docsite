@@ -11,7 +11,7 @@ description: 写给项目负责人的清单：新建一个项目（Gitea 组织�
 1. **建组织与团队**：建私有组织，建团队 `members` 和 `bots`，权限照 [权限怎么配](/gitea/permissions) 的「团队」那张表。`bots` 只含协作仓，代码、工单、合并请求三项写入，其余无访问权限，把 `collab-bot` 加进去
 2. **组织密钥**：组织设置 → Actions → 密钥，加 `COLLAB_BOT_TOKEN`，值是 `collab-bot` 的令牌（仓库、工单两项读写）。几个组织用同一个令牌
 3. **工作流与站点**：协作仓克隆到本机后调 `collab.site.init {repo, port, title}`：`port` 是开发端口，`title` 是站名。gwb-docsite 照平台包与功能包的模板写出 `site/`、装好依赖；
-   gwb-collab 照 collab 包的 `templates/collab-auto-merge.yaml` 写出 `.gitea/workflows/collab-auto-merge.yaml`（仓里已经有就不动）。`site/package.json` 里协作功能包 `@godcreator/collab` 的范围
+   gwb-collab 把首页 `site/app/routes/home.tsx` 换成 collab 包 `templates/home.tsx` 那份项目首页，再照 collab 包的 `templates/collab-auto-merge.yaml` 写出 `.gitea/workflows/collab-auto-merge.yaml`（仓里已经有就不动）。`site/package.json` 里协作功能包 `@godcreator/collab` 的范围
    和工作流里的 `MERGE_CHECK_RANGE` 都写成 gwb-collab 打包时带的那一版的 `^<版本>`。两样在同一个提交里推到 main。
    这一步要在下一步之前：协作仓的 main 配好保护以后谁都不能直接推，改动只能经执行器合并，而执行器要先有 main 上的工作流。执行器按工作流文件里的 `MERGE_CHECK_RANGE` 装 collab 包，见 [实时推送与执行器](/gitea/push)。
 

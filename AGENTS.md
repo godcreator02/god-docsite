@@ -15,10 +15,10 @@
 | `packages/explainer/` | 讲解组件与它们给生成物用的机读文字 |
 | `packages/code-pin/`、`packages/doc-export/`、`packages/trajectory/` | 钉码、生成物（mdx 正本生成 AGENTS.md / README / SKILL.md）、轨迹卡与星轨盘 |
 | `packages/docfirst/` | 命令行 `docfirst`：读 `docfirst.config.mjs`，把 check / render / confirm 分派给上面三个功能包；`template/` 是文档维护的起始物 |
-| `packages/collab/` | 项目协作：任务与模块、日志与日历、通知、合并检查（命令行 `collab-merge-check`）、记录链接 |
+| `packages/collab/` | 项目协作：任务与模块、日志与日历、通知、合并检查（命令行 `collab-merge-check`）、记录链接、项目首页（`templates/home.tsx` 是协作站的 `app/routes/home.tsx`） |
 | `plugins/docsite/` | gwb 插件 `@godcreator/gwb-docsite`：身份码、建站与加功能（调平台包的建站器）、托管站点、评论命令、服务 `gwbDocsite` |
 | `plugins/docfirst/` | gwb 插件 `@godcreator/gwb-docfirst-workflow`：`docfirst.create`（经 `gwbDocsite` 建站、加 code-pin / trajectory / explainer、把 docfirst 起始物复制到站点根上）、说明书 `docs-site` / `docs-writing` / `trajectory` |
-| `plugins/collab/` | gwb 插件 `@godcreator/gwb-collab`：协作仓与别的仓两套操作、通知交给站点/窗格/QQ/AI、项目与任务命令，站点交给 gwb-docsite；`collab.site.init` 在加协作功能、启动服务之前建好仓根 `collab/` 与 `site/journal/`（站点运行时写入它们），仓里还没有自动合并工作流时照 collab 包的模板写出 `.gitea/workflows/collab-auto-merge.yaml`（版本范围填打包时的 collab 版本） |
+| `plugins/collab/` | gwb 插件 `@godcreator/gwb-collab`：协作仓与别的仓两套操作、通知交给站点/窗格/QQ/AI、项目与任务命令，站点交给 gwb-docsite；`collab.site.init` 在加协作功能、启动服务之前建好仓根 `collab/` 与 `site/journal/`（站点运行时写入它们），加完协作功能后把站点首页 `app/routes/home.tsx` 换成 collab 包 `templates/home.tsx`（打包时带进插件），仓里还没有自动合并工作流时照 collab 包的模板写出 `.gitea/workflows/collab-auto-merge.yaml`（版本范围填打包时的 collab 版本） |
 | `collab-test/` | 本仓的测试站：协作仓形态（`collab/records/` 测试数据 + `site/`），`site/` 是基础站装上全部功能（collab、code-pin、trajectory、explainer），依赖 `workspace:^` 直连本仓的包、不 init git；e2e 用的页面（评论定位回归页、TSX 页、HTML 页、术语与公式、钉码页与被钉的 `src/greet.ts`、轨迹卡）都在它里面；gwb-docsite 托管（端口 4450） |
 | `docs-site/` | 全仓文档站：说明、原理、维护者手册与随插件发布的说明书正本（outputs）；轨迹卡在站点根 `trajectory/` |
 | `tests/` | 全仓级的检查（各包自己的测试在各包里）。`e2e/` 是端到端检查：`run.mjs` 直接在 `collab-test/site` 上启动 dev 与 build + start，各跑一轮浏览器检查（`checks/` 下 base、collab、docs、all-features 四组）；`pack.mjs` 是发版前的打包检查：各包 `pnpm pack`、测试站复制到系统临时目录按 `file:` 装好，跑同样的检查。`scaffold-check.mjs` 用建站器把 collab-test 与 docs-site 生成到临时目录，和仓里比对建站器负责的文件。`dependency-rules.cjs` 是 dependency-cruiser 的规则：包之间的方向、包内分层、模块之间不许有环（`pnpm test:deps`） |

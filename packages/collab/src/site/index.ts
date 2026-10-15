@@ -4,6 +4,7 @@ export type {
   CollabViewer,
   JournalPageData,
   PageComments,
+  ProjectHomeData,
   RecordLinkSummary,
   RecordLinkTargets,
   RecordPageData,
@@ -17,6 +18,7 @@ export { collabLayoutData, type CollabLayoutSite } from './layout-data.js'
 export { TasksPage, TasksView } from './tasks/tasks-page.js'
 export { RecordPage, RecordView } from './record/record-page.js'
 export { CalendarPage, CalendarView } from './calendar/calendar-page.js'
+export { ProjectHome } from './home/project-home.js'
 export { JournalPage, type JournalBodyComponent } from './journal/journal-page.js'
 export { NotificationBar } from './notices/notification-bar.js'
 export { CollabViewerProvider } from './shared/viewer.js'

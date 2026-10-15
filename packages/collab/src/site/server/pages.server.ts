@@ -7,7 +7,7 @@ import { collabState, type ModuleState, type TaskState } from '../../core/state.
 import { journalDatesOf, journalSourcesOf } from '../../node/journal-files.js'
 import { readCollabSnapshot } from '../../node/snapshot.js'
 import type { CollabRouteArgs, CollabSite } from '../collab-site.js'
-import type { CalendarPageData, JournalPageData, RecordPageData, ShownRecord, TasksPageData } from '../page-data.js'
+import type { CalendarPageData, JournalPageData, ProjectHomeData, RecordPageData, ShownRecord, TasksPageData } from '../page-data.js'
 import { pageCommentsOf } from './comments.server.js'
 import { viewerOf } from './viewer.server.js'
 
@@ -63,6 +63,16 @@ export async function recordLoader({ params }: CollabRouteArgs, site: CollabSite
 export async function calendarLoader(_args: CollabRouteArgs, site: CollabSite): Promise<CalendarPageData> {
   const { tasks, modules } = await collabStateOf(site)
   return { siteName: site.siteName, tasks, modules, journalDates: journalDatesOf(site.siteDir) }
+}
+
+/** 项目首页最多列几天的日志 */
+const recentJournalDayCount = 5
+
+/** /（项目首页）：人员与本机身份、全部任务与模块、最近有日志的几天 */
+export async function projectHomeLoader(_args: CollabRouteArgs, site: CollabSite): Promise<ProjectHomeData> {
+  const { tasks, modules } = await collabStateOf(site)
+  const recentJournalDates = [...journalDatesOf(site.siteDir)].sort().reverse().slice(0, recentJournalDayCount)
+  return { ...viewerOf(site), tasks, modules, recentJournalDates }
 }
 
 /** /calendar/:date：那一天有没有日志、前后有日志的日子、模块（当天截止的要配色）、这一页的评论；日期不是真实的 YYYY-MM-DD 时抛 404 */
