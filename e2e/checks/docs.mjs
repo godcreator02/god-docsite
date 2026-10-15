@@ -1,69 +1,17 @@
-import { cpSync, readdirSync, readFileSync, writeFileSync } from 'node:fs'
-import path from 'node:path'
-import { chromium } from 'playwright'
-import { checkRunner, filesUnder, headingOf, markNoReload, problemResults, stepTimeoutMs, stillNoReload, waitForHydrated, watchPage } from '../lib/checks.mjs'
-
-/** 文档维护组合：基础站 + 这三个功能包（包名 → 仓里的目录），命令行 docfirst 的起始物叠在站点根上 */
-export const docsFeaturePackages = {
-  '@godcreator/code-pin': 'packages/code-pin',
-  '@godcreator/trajectory': 'packages/trajectory',
-  '@godcreator/explainer': 'packages/explainer',
-}
-
-const toPosix = (file) => file.replaceAll('\\', '/')
-
-/**
- * createSite 之后：叠上 docfirst 的模板（配置、生成物正本、起始页、根卡）与本组合的夹具（钉码页、第二张卡、被钉的代码），
- * 三个功能包写进依赖。specifiers 是包名 → link: / file: 依赖说明，和 createSite 的装法一致
- */
-export function prepareDocsSite({ siteDir, repoDir, specifiers }) {
-  cpSync(path.join(repoDir, 'packages', 'docfirst', 'template'), siteDir, { recursive: true })
-  cpSync(path.join(repoDir, 'e2e', 'fixtures', 'docs-site'), siteDir, { recursive: true })
-  const packageJsonFile = path.join(siteDir, 'package.json')
-  const packageJson = JSON.parse(readFileSync(packageJsonFile, 'utf8'))
-  for (const name of Object.keys(docsFeaturePackages)) {
-    const specifier = specifiers[name]
-    if (specifier === undefined) throw new Error(`没给 ${name} 的依赖说明`)
-    packageJson.dependencies[name] = toPosix(specifier)
-  }
-  writeFileSync(packageJsonFile, `${JSON.stringify(packageJson, null, 2)}\n`)
-}
-
-/** 装完依赖后对三个功能包各运行一次 addFeature */
-export async function addDocsFeaturesWithChecks({ siteDir, addFeature }) {
-  const results = []
-  const check = checkRunner(results)
-  await check('addFeature：code-pin、trajectory、explainer 补进功能目录', async () => {
-    const added = Object.keys(docsFeaturePackages).map((packageName) => addFeature({ siteDir, packageName }))
-    const featuresDir = path.join(siteDir, 'app', 'features')
-    const dirs = readdirSync(featuresDir, { withFileTypes: true }).filter((entry) => entry.isDirectory()).map((entry) => entry.name).sort()
-    const routesIndex = readFileSync(path.join(featuresDir, 'routes.generated.ts'), 'utf8')
-    const collectionsIndex = readFileSync(path.join(featuresDir, 'collections.generated.ts'), 'utf8')
-    const stylesIndex = readFileSync(path.join(featuresDir, 'styles.generated.css'), 'utf8')
-    const pass =
-      dirs.join() === 'code-pin,comments,explainer,trajectory' &&
-      added.at(-1).features.join() === 'code-pin,comments,explainer,trajectory' &&
-      routesIndex.includes('./trajectory/routes.ts') &&
-      collectionsIndex.includes('export const trajectory =') &&
-      stylesIndex.includes("@import './explainer/styles.css';")
-    return { pass, detail: `功能目录 ${dirs.join('、')}；汇总认出的功能 ${added.at(-1).features.join('、')}` }
-  })
-  return results
-}
+import { checkRunner, headingOf, markNoReload, problemResults, serverCodeInClientBuild, stepTimeoutMs, stillNoReload, waitForHydrated, watchPage } from '../lib/checks.mjs'
 
 /** 页面上一处钉码外框：状态与里面代码块的文字 */
 async function pinFramesOf(page) {
   return page.locator('.code-pin').evaluateAll((frames) => frames.map((frame) => ({ status: frame.getAttribute('data-pin-status'), dot: getComputedStyle(frame).getPropertyValue('--code-pin-dot').trim(), text: frame.textContent ?? '' })))
 }
 
-/** 文档维护组合的检查：钉码外框、讲解组件、卡页、星轨盘页、侧栏入口与站内导航 */
-export async function runDocsChecks({ baseUrl, mode, siteDir }) {
+/** 文档维护三个功能（code-pin、explainer、trajectory）的检查：钉码外框、讲解组件、卡页、星轨盘页、侧栏入口与站内导航 */
+export async function runDocsChecks({ browser, baseUrl, mode, siteDir }) {
   const results = []
   const problems = []
   const check = checkRunner(results)
-  const browser = await chromium.launch({ headless: true })
+  const context = await browser.newContext({ viewport: { width: 1400, height: 900 } })
   try {
-    const context = await browser.newContext({ viewport: { width: 1400, height: 900 } })
     const page = await context.newPage()
     watchPage(page, 'docs', problems)
 
@@ -141,18 +89,10 @@ export async function runDocsChecks({ baseUrl, mode, siteDir }) {
     })
 
     if (mode === 'start') {
-      await check('浏览器产物里没有钉码与卡集合的服务端代码', async () => {
-        const clientFiles = filesUnder(path.join(siteDir, 'build', 'client')).filter((file) => file.endsWith('.js'))
-        const serverOnlyMarkers = ['node:child_process', 'createDiskPinner', 'cardSchema']
-        const hits = clientFiles.flatMap((file) => {
-          const text = readFileSync(file, 'utf8')
-          return serverOnlyMarkers.filter((marker) => text.includes(marker)).map((marker) => `${path.relative(siteDir, file)}: ${marker}`)
-        })
-        return { pass: hits.length === 0, detail: hits.length === 0 ? `${clientFiles.length} 个 js 里搜不到 ${serverOnlyMarkers.join('、')}` : hits.slice(0, 8).join('；') }
-      })
+      await check('浏览器产物里没有钉码与卡集合的服务端代码', async () => serverCodeInClientBuild(siteDir, ['node:child_process', 'createDiskPinner', 'cardSchema']))
     }
   } finally {
-    await browser.close()
+    await context.close()
   }
   results.push(...problemResults(problems))
   return results

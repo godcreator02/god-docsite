@@ -1,4 +1,4 @@
-import { readdirSync, statSync } from 'node:fs'
+import { readdirSync, readFileSync, statSync } from 'node:fs'
 import path from 'node:path'
 
 export const stepTimeoutMs = 30_000
@@ -27,7 +27,7 @@ export function watchPage(page, label, problems) {
   })
 }
 
-/** 每轮检查最后的两项：只有一份 fumadocs、控制台无报错 */
+/** 每组检查最后的两项：只有一份 fumadocs、控制台无报错 */
 export function problemResults(problems) {
   const frameworkProviderErrors = problems.filter((line) => line.includes('FrameworkProvider'))
   return [
@@ -71,4 +71,14 @@ export function filesUnder(dir) {
     const full = path.join(dir, name)
     return statSync(full).isDirectory() ? filesUnder(full) : [full]
   })
+}
+
+/** 浏览器产物（build/client 下的 js）里搜服务端才有的字样：搜到就说明服务端代码进了浏览器包 */
+export function serverCodeInClientBuild(siteDir, serverOnlyMarkers) {
+  const clientFiles = filesUnder(path.join(siteDir, 'build', 'client')).filter((file) => file.endsWith('.js'))
+  const hits = clientFiles.flatMap((file) => {
+    const text = readFileSync(file, 'utf8')
+    return serverOnlyMarkers.filter((marker) => text.includes(marker)).map((marker) => `${path.relative(siteDir, file)}: ${marker}`)
+  })
+  return { pass: hits.length === 0, detail: hits.length === 0 ? `${clientFiles.length} 个 js 里搜不到 ${serverOnlyMarkers.join('、')}` : hits.slice(0, 8).join('；') }
 }

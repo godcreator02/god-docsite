@@ -1,0 +1,90 @@
+import { existsSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
+import path from 'node:path'
+
+/*
+ * e2e 在测试站里新建的东西都带本次运行编号 runTag，跑完按编号删掉：仓里的已跟踪文件一个都不改，
+ * 跑完 git status 和跑之前一样（run.mjs 最后一项检查）。别的会话可能同时在改这个仓，回退文件会误伤别人，所以只删自己建的
+ */
+
+/** 协作仓布局：站点在仓根的 site/，任务与模块在仓根的 collab/records/ */
+export const recordsDirOf = (siteDir) => path.join(path.dirname(siteDir), 'collab', 'records')
+
+/** dev 下「新增内容文件」那一项在检查里新建的页 */
+export function addedPageOf(siteDir, runTag) {
+  const slug = `e2e-added-${runTag}`
+  return { slug, file: path.join(siteDir, 'content', `${slug}.mdx`), text: `---\ntitle: 新增的页 ${runTag}\n---\n\n新增文件的正文。\n` }
+}
+
+/** dev 下「改 TSX 页标题」那一项要改的页：起 dev 之前建好，检查里改它的标题 */
+export function titlePageOf(siteDir, runTag) {
+  const slug = `e2e-title-${runTag}`
+  const text = [
+    "import { useState } from 'react'",
+    '',
+    `export const meta = { title: 'TSX 改标题页 ${runTag}', description: 'e2e 改标题用的临时页' }`,
+    '',
+    'export default function TitleScratchPage() {',
+    '  const [count, setCount] = useState(0)',
+    '  return (',
+    '    <button type="button" data-title-scratch-counter="" onClick={() => setCount(count + 1)}>',
+    '      {count}',
+    '    </button>',
+    '  )',
+    '}',
+    '',
+  ].join('\n')
+  return { slug, file: path.join(siteDir, 'content', `${slug}.page.tsx`), text }
+}
+
+export function writeTitlePage(siteDir, runTag) {
+  const { file, text } = titlePageOf(siteDir, runTag)
+  writeFileSync(file, text)
+}
+
+function removeTempPages(siteDir, runTag) {
+  return [addedPageOf(siteDir, runTag).file, titlePageOf(siteDir, runTag).file].filter((file) => {
+    if (!existsSync(file)) return false
+    rmSync(file)
+    return true
+  })
+}
+
+/** 评论：串头正文带 runTag 的整串删掉；别的串里带 runTag 的回复单独删 */
+function removeRunComments(siteDir, runTag) {
+  const commentsDir = path.join(siteDir, 'comments')
+  const removed = []
+  for (const thread of readdirSync(commentsDir, { withFileTypes: true }).filter((entry) => entry.isDirectory())) {
+    const threadDir = path.join(commentsDir, thread.name)
+    const headFile = path.join(threadDir, 'index.mdx')
+    if (existsSync(headFile) && readFileSync(headFile, 'utf8').includes(runTag)) {
+      rmSync(threadDir, { recursive: true })
+      removed.push(threadDir)
+      continue
+    }
+    for (const reply of readdirSync(threadDir).filter((name) => name !== 'index.mdx')) {
+      const replyFile = path.join(threadDir, reply)
+      if (!readFileSync(replyFile, 'utf8').includes(runTag)) continue
+      rmSync(replyFile)
+      removed.push(replyFile)
+    }
+  }
+  return removed
+}
+
+/** 任务与模块：标题带 runTag 的记录文件 */
+function removeRunRecords(siteDir, runTag) {
+  const recordsDir = recordsDirOf(siteDir)
+  return readdirSync(recordsDir)
+    .filter((name) => name.endsWith('.json'))
+    .map((name) => path.join(recordsDir, name))
+    .filter((file) => {
+      if (!String(JSON.parse(readFileSync(file, 'utf8')).title ?? '').includes(runTag)) return false
+      rmSync(file)
+      return true
+    })
+}
+
+/** 删掉本次运行在站点里建的全部东西，返回删了哪些路径 */
+export function removeRunLeftovers(siteDir, runTag) {
+  return [...removeTempPages(siteDir, runTag), ...removeRunComments(siteDir, runTag), ...removeRunRecords(siteDir, runTag)]
+}

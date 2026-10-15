@@ -1,7 +1,7 @@
 import { readFileSync, writeFileSync } from 'node:fs'
 import path from 'node:path'
-import { chromium } from 'playwright'
-import { checkRunner, filesUnder, hasViteErrorOverlay, headingOf, markNoReload, problemResults, stepTimeoutMs, stillNoReload, waitForHydrated, watchPage } from '../lib/checks.mjs'
+import { checkRunner, filesUnder, hasViteErrorOverlay, headingOf, markNoReload, problemResults, serverCodeInClientBuild, stepTimeoutMs, stillNoReload, waitForHydrated, watchPage } from '../lib/checks.mjs'
+import { addedPageOf, titlePageOf } from '../lib/run-scratch.mjs'
 
 /** 写一条评论并回复：评论面板打开、整页评论、展开回复写回复；返回串 id */
 async function writeThreadAndReply(page, { threadText, replyText }) {
@@ -21,23 +21,22 @@ async function writeThreadAndReply(page, { threadText, replyText }) {
 }
 
 /**
- * 基础站组合（god-docsite + identity + comments）的检查。mode 是 dev 或 start；
- * dev 下多做内容文件增改的几项，start 下多搜构建产物
+ * 基础站（god-docsite + identity + comments）的检查。mode 是 dev 或 start；
+ * dev 下多做内容文件增改的几项（改的是本次运行新建的临时页），start 下多搜构建产物。评论只写在「收起内容试验」这一页，正文带 runTag，跑完删掉
  */
-export async function runBaseChecks({ baseUrl, mode, siteDir, feedToken, runTag }) {
+export async function runBaseChecks({ browser, baseUrl, mode, siteDir, feedToken, runTag }) {
   const results = []
   const problems = []
   const check = checkRunner(results)
-  const browser = await chromium.launch({ headless: true })
+  const context = await browser.newContext({ viewport: { width: 1400, height: 900 } })
   try {
-    const context = await browser.newContext({ viewport: { width: 1400, height: 900 } })
     const page = await context.newPage()
-    watchPage(page, 'A', problems)
+    watchPage(page, 'base', problems)
 
     await check('首页打开', async () => {
       const response = await page.goto(`${baseUrl}/`, { waitUntil: 'load' })
       const heading = await headingOf(page)
-      return { pass: response?.status() === 200 && heading === '首页', detail: `GET / → ${response?.status()}，h1=${heading}` }
+      return { pass: response?.status() === 200 && heading === '协作站测试', detail: `GET / → ${response?.status()}，h1=${heading}` }
     })
 
     await check('侧栏站内导航', async () => {
@@ -157,8 +156,9 @@ export async function runBaseChecks({ baseUrl, mode, siteDir, feedToken, runTag 
     })
 
     await check('推送：一页 action 触发、另一页 EventSource 收到', async () => {
+      const channelUrl = `/__docsite/feed/e2e-${mode}`
       const subscriber = await context.newPage()
-      watchPage(subscriber, 'feed-A', problems)
+      watchPage(subscriber, 'base feed-A', problems)
       await subscriber.goto(`${baseUrl}/`, { waitUntil: 'load' })
       await subscriber.evaluate(
         (url) =>
@@ -168,18 +168,18 @@ export async function runBaseChecks({ baseUrl, mode, siteDir, feedToken, runTag 
             source.addEventListener('message', (event) => window.__feedMessages.push(JSON.parse(event.data)))
             source.addEventListener('open', () => resolve())
           }),
-        `/__docsite/feed/e2e-${mode}`,
+        channelUrl,
       )
       const pusher = await context.newPage()
-      watchPage(pusher, 'feed-B', problems)
+      watchPage(pusher, 'base feed-B', problems)
       await pusher.goto(`${baseUrl}/glossary-demo`, { waitUntil: 'load' })
       const status = await pusher.evaluate(
         async ({ url, token }) => (await fetch(url, { method: 'POST', headers: { 'content-type': 'application/json', 'x-docsite-token': token }, body: JSON.stringify({ note: '推送一' }) })).status,
-        { url: `/__docsite/feed/e2e-${mode}`, token: feedToken },
+        { url: channelUrl, token: feedToken },
       )
       await subscriber.waitForFunction(() => window.__feedMessages.some((message) => message.note === '推送一'), null, { timeout: stepTimeoutMs })
       const latecomer = await context.newPage()
-      watchPage(latecomer, 'feed-C', problems)
+      watchPage(latecomer, 'base feed-C', problems)
       await latecomer.goto(`${baseUrl}/`, { waitUntil: 'load' })
       const first = await latecomer.evaluate(
         (url) =>
@@ -190,10 +190,10 @@ export async function runBaseChecks({ baseUrl, mode, siteDir, feedToken, runTag 
               resolve(JSON.parse(event.data))
             })
           }),
-        `/__docsite/feed/e2e-${mode}`,
+        channelUrl,
       )
-      const current = await (await fetch(`${baseUrl}/__docsite/feed/e2e-${mode}`)).json()
-      const wrongToken = await fetch(`${baseUrl}/__docsite/feed/e2e-${mode}`, { method: 'POST', headers: { 'content-type': 'application/json', 'x-docsite-token': 'wrong' }, body: '{}' })
+      const current = await (await fetch(`${baseUrl}${channelUrl}`)).json()
+      const wrongToken = await fetch(`${baseUrl}${channelUrl}`, { method: 'POST', headers: { 'content-type': 'application/json', 'x-docsite-token': 'wrong' }, body: '{}' })
       await Promise.all([subscriber.close(), pusher.close(), latecomer.close()])
       const pass = status === 204 && first.note === '推送一' && current.note === '推送一' && wrongToken.status === 403
       return { pass, detail: `推 ${status}；后来的订阅者先收到 ${JSON.stringify(first)}；GET 当前值 ${JSON.stringify(current)}；令牌不对 ${wrongToken.status}` }
@@ -204,20 +204,20 @@ export async function runBaseChecks({ baseUrl, mode, siteDir, feedToken, runTag 
         await page.goto(`${baseUrl}/glossary-demo`, { waitUntil: 'load' })
         await waitForHydrated(page, '#nd-sidebar a[href="/glossary-demo"]')
         await markNoReload(page)
-        const slug = `added-${runTag}`
+        const added = addedPageOf(siteDir, runTag)
         const addedAt = Date.now()
-        writeFileSync(path.join(siteDir, 'content', `${slug}.mdx`), `---\ntitle: 新增的页 ${runTag}\n---\n\n新增文件的正文。\n`)
+        writeFileSync(added.file, added.text)
         let status = 0
         let firstOkRequestMs = 0
         while (Date.now() - addedAt < stepTimeoutMs) {
           const requestStartedAt = Date.now()
-          status = (await fetch(`${baseUrl}/${slug}`)).status
+          status = (await fetch(`${baseUrl}/${added.slug}`)).status
           firstOkRequestMs = Date.now() - requestStartedAt
           if (status === 200) break
           await new Promise((resolve) => setTimeout(resolve, 500))
         }
         const openedAfterMs = Date.now() - addedAt
-        await page.locator(`#nd-sidebar a[href="/${slug}"]`).waitFor({ timeout: stepTimeoutMs })
+        await page.locator(`#nd-sidebar a[href="/${added.slug}"]`).waitFor({ timeout: stepTimeoutMs })
         const sidebarAfterMs = Date.now() - addedAt
         const kept = await stillNoReload(page)
         const overlay = await hasViteErrorOverlay(page)
@@ -228,32 +228,26 @@ export async function runBaseChecks({ baseUrl, mode, siteDir, feedToken, runTag 
       })
 
       await check('dev 改 TSX 页标题：侧栏与正文标题跟着变（不挂标题刷新插件）', async () => {
-        await page.goto(`${baseUrl}/tsx-demo`, { waitUntil: 'load' })
-        await waitForHydrated(page, '[data-tsx-counter]')
+        const titlePage = titlePageOf(siteDir, runTag)
+        await page.goto(`${baseUrl}/${titlePage.slug}`, { waitUntil: 'load' })
+        await waitForHydrated(page, '[data-title-scratch-counter]')
         await markNoReload(page)
-        const file = path.join(siteDir, 'content', 'tsx-demo.page.tsx')
-        const newTitle = `TSX 演示页改 ${runTag}`
-        writeFileSync(file, readFileSync(file, 'utf8').replace(/title: '[^']*'/, `title: '${newTitle}'`))
+        const newTitle = `TSX 改过的标题 ${runTag}`
+        writeFileSync(titlePage.file, readFileSync(titlePage.file, 'utf8').replace(/title: '[^']*'/, `title: '${newTitle}'`))
         const changedAt = Date.now()
-        await page.locator('#nd-sidebar a[href="/tsx-demo"]', { hasText: newTitle }).waitFor({ timeout: stepTimeoutMs })
+        await page.locator(`#nd-sidebar a[href="/${titlePage.slug}"]`, { hasText: newTitle }).waitFor({ timeout: stepTimeoutMs })
         const sidebarMs = Date.now() - changedAt
         await page.locator('h1', { hasText: newTitle }).waitFor({ timeout: stepTimeoutMs })
         const kept = await stillNoReload(page)
         return { pass: true, detail: `侧栏 ${sidebarMs} ms 后是新标题，正文标题也换了，没有整页刷新=${kept}` }
       })
     } else {
-      await check('浏览器产物里没有服务端代码', async () => {
-        const clientFiles = filesUnder(path.join(siteDir, 'build', 'client')).filter((file) => file.endsWith('.js'))
-        const serverOnlyMarkers = ['node:fs', 'node:path', 'node:crypto', 'DOCSITE_FEED_TOKEN', 'DOCSITE_IDENTITY_CODE', '算不出可信 origin']
-        const hits = clientFiles.flatMap((file) => {
-          const text = readFileSync(file, 'utf8')
-          return serverOnlyMarkers.filter((marker) => text.includes(marker)).map((marker) => `${path.relative(siteDir, file)}: ${marker}`)
-        })
-        return { pass: hits.length === 0, detail: hits.length === 0 ? `${clientFiles.length} 个 js 里搜不到 ${serverOnlyMarkers.join('、')}` : hits.slice(0, 8).join('；') }
-      })
+      await check('浏览器产物里没有服务端代码', async () =>
+        serverCodeInClientBuild(siteDir, ['node:fs', 'node:path', 'node:crypto', 'DOCSITE_FEED_TOKEN', 'DOCSITE_IDENTITY_CODE', '算不出可信 origin']),
+      )
     }
   } finally {
-    await browser.close()
+    await context.close()
   }
 
   results.push(...problemResults(problems))
