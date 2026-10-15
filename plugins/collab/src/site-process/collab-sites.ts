@@ -1,12 +1,15 @@
 import path from 'node:path'
 import { siteFeedChannel, sitePathInRepo, type SiteFeed } from '@godcreator/collab'
-import type { GwbDocsiteApi, SiteInitResult, SiteStarted } from '@godcreator/gwb-docsite'
+import type { GwbDocsiteApi, SiteFeatureAdded, SiteInitResult, SiteStarted } from '@godcreator/gwb-docsite'
 import { messageOf } from '../errors.js'
 import { repoKeyOf, type Project } from '../project/project.js'
 import { featurePackage } from './site-files.js'
 
-/** 用到的 gwb-docsite 服务方法：站点进程的启动与停止、状态、推数据、从零建站 */
-export type DocsiteHosting = Pick<GwbDocsiteApi, 'start' | 'stop' | 'status' | 'push' | 'init'>
+/** 用到的 gwb-docsite 服务方法：站点进程的启动与停止、状态、推数据、从零建站、加功能 */
+export type DocsiteHosting = Pick<GwbDocsiteApi, 'start' | 'stop' | 'status' | 'push' | 'init' | 'addFeature'>
+
+/** collab.site.init 的结果：gwb-docsite 建的基础站与加上的协作功能 */
+export type CollabSiteInitResult = SiteInitResult & { feature: SiteFeatureAdded }
 
 /** 窗格要的：url 在运行时是实际地址，没运行时是 gwb-docsite 按 site/package.json 的 dev 脚本预期的地址；起不来时的原因 */
 export type SiteState = { url: string | null; running: boolean; error: string | null }
@@ -58,14 +61,16 @@ export class CollabSites {
   }
 
   /**
-   * collab.site.init：交给 gwb-docsite 从零建站（功能包写成给的范围），port 与 title 是新站的开发端口与站名；
+   * collab.site.init：交给 gwb-docsite 从零建基础站，再加协作功能（功能包写成给的范围），port 与 title 是新站的开发端口与站名；
    * 项目在列表里就启动并推一次数据
    */
-  async init(repo: string, options: { featureRange: string; port: number; title: string; listed: boolean }): Promise<SiteInitResult> {
+  async init(repo: string, options: { featureRange: string; port: number; title: string; listed: boolean }): Promise<CollabSiteInitResult> {
     const { featureRange, listed, ...newSite } = options
-    const result = await this.options.docsite.init(siteDirOf(repo), { features: { [featurePackage]: featureRange }, ...newSite })
+    const siteDir = siteDirOf(repo)
+    const created = await this.options.docsite.init(siteDir, newSite)
+    const feature = await this.options.docsite.addFeature(siteDir, { packageName: featurePackage, specifier: featureRange })
     if (listed) await this.keep(repo)
-    return result
+    return { ...created, feature }
   }
 
   /** 自动同步快进进来改了 site/ 的提交之后：确保站点在运行（已在运行就不动、不重启），把最新的数据推过去 */
