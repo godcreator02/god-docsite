@@ -34,29 +34,50 @@ export const groupKeepingSidebar = { provider: SidebarProvider, root: GroupKeepi
 /** DocsLayout 的 slots.searchTrigger：侧栏里不放整行的搜索框（搜索按钮在 SidebarLinksRow 里），窄屏顶栏的搜索按钮照旧 */
 export const rowSearchTrigger = { sm: SearchTrigger, full: () => null }
 
-/** 一横排里的一格：各格等宽，格与格之间是 nav 的 divide-x 画的竖线 */
+/** 侧栏宽 268px，一格放图标加两个字，一行最多放下四格；多出来的换到下一行 */
+const cellsPerLine = 4
+
+/** 一格：同一行各格等宽，格与格之间是这一行 divide-x 画的竖线 */
 const rowCellClassName = 'flex min-w-0 flex-1 px-0.5'
 const rowLinkClassName =
   'flex w-full items-center justify-center gap-1 rounded-md px-0.5 py-1.5 text-nowrap text-fd-muted-foreground transition-colors hover:bg-fd-accent/50 hover:text-fd-accent-foreground/80 data-[active=true]:bg-fd-primary/10 data-[active=true]:text-fd-primary [&_svg]:size-4 [&_svg]:shrink-0'
 
+function linesOf<T>(cells: readonly T[]): T[][] {
+  const lines: T[][] = []
+  for (let start = 0; start < cells.length; start += cellsPerLine) lines.push(cells.slice(start, start + cellsPerLine))
+  return lines
+}
+
 /**
  * 侧栏站名下的一横排：最左是只有图标的搜索按钮（Ctrl K 照样能打开搜索），后面是功能的侧栏入口，
- * 当前地址就是入口地址或在它下面时高亮。放在 DocsLayout 的 sidebar.banner，slots.searchTrigger 用 rowSearchTrigger
+ * 当前地址就是入口地址或在它下面时高亮。超过四格时折成几行，各行按四格分宽，下一行的格子与上一行对齐。
+ * 放在 DocsLayout 的 sidebar.banner，slots.searchTrigger 用 rowSearchTrigger
  */
 export function SidebarLinksRow({ links }: { links: readonly SidebarLink[] }) {
   const pathname = usePathname()
-  return (
-    <nav data-docsite-sidebar-row="" className="flex divide-x divide-fd-border rounded-lg border bg-fd-secondary/50 py-0.5 text-sm">
-      <span title="搜索（Ctrl K）" className={rowCellClassName}>
-        <SearchTrigger hideIfDisabled className={`${rowLinkClassName} h-auto`} />
+  const cells = [
+    <span key="search" data-docsite-sidebar-cell="" title="搜索（Ctrl K）" className={rowCellClassName}>
+      <SearchTrigger hideIfDisabled className={`${rowLinkClassName} h-auto`} />
+    </span>,
+    ...links.map((link) => (
+      <span key={link.url} data-docsite-sidebar-cell="" className={rowCellClassName}>
+        <Link href={link.url} data-active={pathname === link.url || pathname.startsWith(`${link.url}/`)} className={rowLinkClassName}>
+          {link.icon}
+          {link.name}
+        </Link>
       </span>
-      {links.map((link) => (
-        <span key={link.url} className={rowCellClassName}>
-          <Link href={link.url} data-active={pathname === link.url || pathname.startsWith(`${link.url}/`)} className={rowLinkClassName}>
-            {link.icon}
-            {link.name}
-          </Link>
-        </span>
+    )),
+  ]
+  const lines = linesOf(cells)
+  const wraps = lines.length > 1
+  return (
+    <nav data-docsite-sidebar-row="" className="flex flex-col divide-y divide-fd-border rounded-lg border bg-fd-secondary/50 text-sm">
+      {lines.map((line, index) => (
+        <div key={index} data-docsite-sidebar-line="" className="flex divide-x divide-fd-border py-0.5">
+          {line}
+          {/* 折行时末行补上空格子，格子宽度与上一行一致 */}
+          {wraps && Array.from({ length: cellsPerLine - line.length }, (_, filler) => <span key={`filler-${filler}`} className={`${rowCellClassName} border-transparent!`} />)}
+        </div>
       ))}
     </nav>
   )

@@ -172,27 +172,36 @@ export async function runBaseChecks({ browser, baseUrl, mode, siteDir, feedToken
       return { pass: await stillNoReload(page), detail: '点横排里的「评论」站内导航到 /comments' }
     })
 
-    await check('侧栏站名下是一横排：最左是只有图标的搜索按钮，后面的入口都带图标；侧栏里没有整行的搜索框', async () => {
+    await check('侧栏站名下是一横排：最左是只有图标的搜索按钮，后面的入口都带图标；一行最多四格、字没被截掉；侧栏里没有整行的搜索框', async () => {
       await page.goto(`${baseUrl}/about`, { waitUntil: 'load' })
       await waitForHydrated(page, `${sidebarRow} a[href="/comments"]`)
-      const cells = await page.locator(`${sidebarRow} > span`).evaluateAll((spans) =>
+      const cells = await page.locator(`${sidebarRow} [data-docsite-sidebar-cell]`).evaluateAll((spans) =>
         spans.map((span) => {
           const control = span.querySelector('a, button')
-          return { tag: control?.tagName.toLowerCase(), href: control?.getAttribute('href') ?? null, text: control?.textContent?.trim() ?? '', icon: control?.querySelector('svg') !== null }
+          return {
+            tag: control?.tagName.toLowerCase(),
+            href: control?.getAttribute('href') ?? null,
+            text: control?.textContent?.trim() ?? '',
+            icon: control?.querySelector('svg') !== null,
+            clipped: control !== null && control.scrollWidth > control.clientWidth,
+          }
         }),
       )
+      const cellsPerLine = await page.locator(`${sidebarRow} [data-docsite-sidebar-line]`).evaluateAll((lines) => lines.map((line) => line.querySelectorAll('[data-docsite-sidebar-cell]').length))
       const [search, ...links] = cells
       const searchOk = search?.tag === 'button' && search.text === '' && search.icon
       const linksOk = links.length > 0 && links.every((cell) => cell.tag === 'a' && cell.icon && cell.text !== '')
+      const clipped = cells.filter((cell) => cell.clipped).map((cell) => cell.href ?? '搜索')
+      const linesOk = cellsPerLine.every((count) => count <= 4) && cellsPerLine.reduce((sum, count) => sum + count, 0) === cells.length
       const fullSearchBars = await page.locator('#nd-sidebar button', { has: page.locator('kbd') }).count()
       // dev 下搜索框的代码按需加载：没加载完就点，fumadocs 记成已打开却画不出来，之后 Ctrl K 也打不开（main 上整行搜索框一样）
       await page.waitForLoadState('networkidle')
-      await page.click(`${sidebarRow} > span:first-child button`)
+      await page.click(`${sidebarRow} button[data-search]`)
       const dialog = await page.locator('input[data-fd-search-dialog-input]').waitFor({ timeout: stepTimeoutMs }).then(() => true, () => false)
       await page.keyboard.press('Escape')
       return {
-        pass: searchOk && linksOk && fullSearchBars === 0 && dialog,
-        detail: `横排 ${cells.map((cell) => (cell.href ?? '搜索') + (cell.icon ? '(图标)' : '')).join('、')}；入口都有字=${linksOk}；侧栏里带快捷键的整行搜索框 ${fullSearchBars} 个；点搜索按钮弹出搜索框=${dialog}`,
+        pass: searchOk && linksOk && clipped.length === 0 && linesOk && fullSearchBars === 0 && dialog,
+        detail: `横排 ${cells.map((cell) => (cell.href ?? '搜索') + (cell.icon ? '(图标)' : '')).join('、')}，每行 ${cellsPerLine.join(' + ')} 格；入口都有字=${linksOk}；字被截掉的 ${clipped.join('、') || '无'}；侧栏里带快捷键的整行搜索框 ${fullSearchBars} 个；点搜索按钮弹出搜索框=${dialog}`,
       }
     })
 
