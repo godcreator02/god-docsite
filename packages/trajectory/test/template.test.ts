@@ -8,7 +8,7 @@ import assert from "node:assert/strict";
 import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import routes from "../template/routes.ts";
+import routes, { standaloneRoutes } from "../template/routes.ts";
 
 const PKG_ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const TEMPLATE = join(PKG_ROOT, "template");
@@ -52,15 +52,10 @@ test("package.json 把 template 发出去：建站器从装好的包里复制它
   assert.ok(pkg.files.includes("template"));
 });
 
-test("routes.ts：星轨盘 /trajectory、卡页 /trajectory/*，文件都在模板目录里", () => {
-  assert.deepEqual(
-    routes.map((entry) => [entry.path, resolve(entry.file)]),
-    [
-      ["trajectory", join(TEMPLATE, "disk.tsx")],
-      ["trajectory/*", join(TEMPLATE, "card.tsx")],
-    ],
-  );
-  for (const entry of routes) assert.ok(existsSync(entry.file), entry.file);
+test("routes.ts：卡页 /trajectory/* 在整站布局里，星轨盘 /trajectory 是独立页面（standaloneRoutes），文件都在模板目录里", () => {
+  assert.deepEqual(routes.map((entry) => [entry.path, resolve(entry.file)]), [["trajectory/*", join(TEMPLATE, "card.tsx")]]);
+  assert.deepEqual(standaloneRoutes.map((entry) => [entry.path, resolve(entry.file)]), [["trajectory", join(TEMPLATE, "disk.tsx")]]);
+  for (const entry of [...routes, ...standaloneRoutes]) assert.ok(existsSync(entry.file), entry.file);
 });
 
 test("mdx.ts 不 import 界面：连同它引到的本目录文件、本包 ./site/collection 的源码", () => {
