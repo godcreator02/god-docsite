@@ -7,8 +7,8 @@ import { InvalidSiteFeed } from '../src/core/notifications/site-feed.js'
 import { remarkCollabLinks } from '../src/mdx/index.js'
 import { importsOf, importsOfFile, reachableFrom } from './source-imports.js'
 
-// 平台的浏览器出口连带加载 @fumadocs/base-ui 的样式文件，Node 里 import 不了；这里只测不渲染的导出，页面树插件换成记下入口的替身
-vi.mock('@godcreator/god-docsite/react', () => ({ useSiteFeed: () => undefined, pageTreeLinksPlugin: (links: unknown) => ({ name: 'page-tree-links', links }) }))
+// 平台的浏览器出口连带加载 @fumadocs/base-ui 的样式文件，Node 里 import 不了；这里只测不渲染的导出
+vi.mock('@godcreator/god-docsite/react', () => ({ useSiteFeed: () => undefined }))
 
 /*
  * 功能包模板：建站器把 template/ 原样复制到站点的 app/features/collab/。
@@ -97,16 +97,11 @@ describe('feature.tsx（运行时，浏览器侧也加载）', () => {
     expect(serverOnly).toEqual([])
   })
 
-  it('页面树插件用平台的 pageTreeLinksPlugin 在侧栏加「任务」「日历」两个站内入口', async () => {
-    const { pageTreePlugins } = await import('../template/feature.tsx')
-    expect(pageTreePlugins).toEqual([
-      {
-        name: 'page-tree-links',
-        links: [
-          { name: '任务', url: tasksPageUrl },
-          { name: '日历', url: calendarUrl },
-        ],
-      },
+  it('侧栏入口是「任务」「日历」两个站内地址', async () => {
+    const { sidebarLinks } = await import('../template/feature.tsx')
+    expect(sidebarLinks).toEqual([
+      { name: '任务', url: tasksPageUrl },
+      { name: '日历', url: calendarUrl },
     ])
   })
 

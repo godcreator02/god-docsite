@@ -1,4 +1,4 @@
-export { pageTreeLinksPlugin, type PageTreeLink } from './page-tree-links.js'
+export type { SidebarLink } from './sidebar-links.js'
 export { SiteLayout, type SiteLayoutProps } from './site-layout.js'
 export { createSitePage, type CompiledMdxPage, type DocsBrowserCollection, type SitePageOptions } from './site-page.js'
 export { siteMdxComponents } from './mdx-components.js'

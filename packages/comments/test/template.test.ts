@@ -24,8 +24,9 @@ test('routes.ts：/comments 在整站布局里，指向模板目录里的全站�
   expect(page).toContain('handleCommentWrite')
 })
 
-test('feature.tsx：侧栏根部的「全站评论」入口指向 /comments', () => {
-  expect(templateText('feature.tsx')).toContain("pageTreeLinksPlugin([{ name: '全站评论', url: '/comments' }])")
+test('feature.tsx：侧栏的「全站评论」入口指向 /comments', async () => {
+  const { sidebarLinks } = await import('../template/feature.tsx')
+  expect(sidebarLinks).toEqual([{ name: '全站评论', url: '/comments' }])
 })
 
 test('styles.css：引入本包样式，评论目录不进 Tailwind 的扫描（相对 app/features/comments/），带正文高亮', () => {

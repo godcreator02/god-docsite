@@ -10,22 +10,27 @@ const base = { dir: '/site' } as unknown as BaseSiteContext
 const args = {} as LoaderFunctionArgs
 
 describe('siteFeatureRuntime', () => {
-  it('合并各功能的 MDX 组件、页面树插件、链接种类、layoutData 与 LayoutTop', async () => {
+  it('合并各功能的 MDX 组件、页面树插件、链接种类、侧栏入口、layoutData 与 LayoutTop', async () => {
     const plugin = { name: 'demo' }
     const linkKind = { matches: () => false, Chip: Badge }
     const runtime = siteFeatureRuntime({
-      demo: { mdxComponents: { Badge }, pageTreePlugins: [plugin], linkKinds: [linkKind], layoutData: (_args, site) => ({ dir: site.dir }), LayoutTop: Top },
+      demo: { mdxComponents: { Badge }, pageTreePlugins: [plugin], linkKinds: [linkKind], sidebarLinks: [{ name: '演示', url: '/demo' }], layoutData: (_args, site) => ({ dir: site.dir }), LayoutTop: Top },
+      other: { sidebarLinks: [{ name: '其他', url: '/other' }] },
       empty: {},
     })
     expect(runtime.mdxComponents).toEqual({ Badge })
     expect(runtime.pageTreePlugins).toEqual([plugin])
     expect(runtime.linkKinds).toEqual([linkKind])
+    expect(runtime.sidebarLinks).toEqual([
+      { name: '演示', url: '/demo' },
+      { name: '其他', url: '/other' },
+    ])
     expect(runtime.layoutTops).toEqual([{ feature: 'demo', Component: Top }])
     expect(await withFeatureLayoutData({ siteName: '站' }, { loaders: runtime.layoutData, args, base })).toEqual({ siteName: '站', demo: { dir: '/site' } })
   })
 
   it('没有功能时都是空的', () => {
-    expect(siteFeatureRuntime({})).toEqual({ mdxComponents: {}, pageTreePlugins: [], linkKinds: [], layoutData: [], layoutTops: [] })
+    expect(siteFeatureRuntime({})).toEqual({ mdxComponents: {}, pageTreePlugins: [], linkKinds: [], sidebarLinks: [], layoutData: [], layoutTops: [] })
   })
 
   it('两个功能导出同名 MDX 组件时报错', () => {

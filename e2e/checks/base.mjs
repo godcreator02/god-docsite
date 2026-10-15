@@ -161,7 +161,7 @@ export async function runBaseChecks({ browser, baseUrl, mode, siteDir, feedToken
       return { pass: seen.every((count) => count === 1), detail: threadsToSee.map(({ threadText }, index) => `「${threadText}」回复 ${seen[index]} 条`).join('，') }
     })
 
-    await check('侧栏的全站评论入口（页面树插件）', async () => {
+    await check('侧栏的全站评论入口（comments 的 sidebarLinks）', async () => {
       await page.goto(`${baseUrl}/`, { waitUntil: 'load' })
       await waitForHydrated(page, '#nd-sidebar a[href="/comments"]')
       await markNoReload(page)

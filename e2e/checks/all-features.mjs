@@ -7,8 +7,16 @@ import { checkRunner, problemResults, waitForHydrated, watchPage } from '../lib/
  * 单个功能自己的行为在 base、collab、docs 三组里查
  */
 
-/** 侧栏根部末尾的功能入口，按功能名排序后各功能 pageTreePlugins 的先后（collab、comments、trajectory） */
+/** 侧栏里功能的入口，按功能名排序后各功能 sidebarLinks 的先后（collab、comments、trajectory） */
 const featureSidebarEntries = ['/tasks', '/calendar', '/comments', '/trajectory']
+
+/** 功能的下级页面与侧栏上应当高亮的入口：入口按地址前缀高亮 */
+const highlightedEntryOf = [
+  { url: '/calendar/2026-10-12', entry: '/calendar' },
+  { url: '/tasks/20261012091000-adapt01', entry: '/tasks' },
+  { url: '/trajectory/2026-01-02-second', entry: '/trajectory' },
+  { url: '/calendar', entry: '/calendar' },
+]
 
 /**
  * 各地址与只有接住它的那条路由才渲染得出的字样（服务端渲染的 HTML 里）：被内容页的 * 路由或别的功能的路由接住就看不到它。
@@ -98,6 +106,20 @@ export async function runAllFeaturesChecks({ browser, baseUrl }) {
       const stable = JSON.stringify(first) === JSON.stringify(second)
       const pass = entries.join() === featureSidebarEntries.join() && stable
       return { pass, detail: `功能入口 ${entries.join('、')}（应为 ${featureSidebarEntries.join('、')}）；刷新前后侧栏 ${first.length} 个链接一样=${stable}` }
+    })
+
+    await check('功能的下级页面上，侧栏对应的入口高亮、别的功能入口不高亮', async () => {
+      const outcomes = []
+      for (const { url, entry } of highlightedEntryOf) {
+        await page.goto(`${baseUrl}${url}`, { waitUntil: 'load' })
+        const active = await page.locator('#nd-sidebar a[data-active="true"]').evaluateAll((links) => links.map((link) => link.getAttribute('href')))
+        outcomes.push({ url, entry, active, ok: active.length === 1 && active[0] === entry })
+      }
+      const wrong = outcomes.filter(({ ok }) => !ok)
+      return {
+        pass: wrong.length === 0,
+        detail: outcomes.map(({ url, active }) => `${url} 高亮 ${active.join('、') || '无'}`).join('；'),
+      }
     })
 
     await check('各功能的地址由自己的路由接住（不被内容页或别的功能挡掉）', async () => {

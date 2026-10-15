@@ -1,0 +1,29 @@
+---
+born-at: 2026-10-15T16:10
+type: choice
+parent: [2026-09-03-god-live-doc]
+label: 功能的侧栏入口改用 DocsLayout 的 links，按地址前缀高亮
+domain: 页面
+---
+
+## 背景
+
+浏览器走查时，打开日志页 `/calendar/2026-10-12`，侧栏的「日历」不高亮；`/tasks/<记录>` 上的「任务」、卡页 `/trajectory/<卡>` 上的「星轨盘」也一样。
+这些入口原来由各功能 `feature.tsx` 导出的 `pageTreePlugins`（平台的 `pageTreeLinksPlugin`）加进页面树根部末尾。
+fumadocs 侧栏渲染页面树的项时只在地址完全相同时高亮（`@fumadocs/base-ui` 的 `components/sidebar/page-tree.js` 调 `isActive(node.url, pathname)`，不传 nested），
+页面树的项也没有改高亮规则的字段。
+
+## 结论与边界
+
+- 功能的侧栏入口改由 `feature.tsx` 导出 `sidebarLinks`（`{ name, url, icon? }`），平台把它们交给 `DocsLayout` 的 `links`，
+  每项写 `active: 'nested-url'`、`on: 'menu'`：这是 fumadocs 自带的按前缀高亮（`isLinkItemActive`），入口只进侧栏。
+- 入口的位置从页面树末尾移到页面树上方（fumadocs 把 `links` 排在页面树前面），几个功能之间的先后不变（按功能名，collab、comments、trajectory）。
+- 站内地址到标题的表不再从页面树里取这些入口：`siteLayoutData`、`sitePageTitles` 多收一个参数，站点传 `featureRuntime.sidebarLinks`。
+- 平台删掉 `pageTreeLinksPlugin`；`pageTreePlugins` 仍是功能接进 fumadocs loader 的通用入口。
+- e2e all-features 组「功能的下级页面上，侧栏对应的入口高亮」核对日志页、记录页、卡页与日历页。
+
+## 否掉的候选
+
+- `sidebar.components.Item` 换掉页面树每一项的渲染：带样式的 `SidebarItem` 不在 `@fumadocs/base-ui` 的公开出口里，只能照抄它的类名。
+- 把入口做成带 index 的页面树文件夹：文件夹的高亮看当前页在不在树里的路径上，日志页、记录页、卡页都不在页面树里，照样不亮，还多出一个展开箭头。
+- 在 `SiteLayout` 里把页面树插件加的项从树里摘出来再交给 `links`：入口先进页面树、平台再按标记把它们取出来，两处要认同一种标记，不如功能直接导出入口。
