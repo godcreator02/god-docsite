@@ -1,6 +1,6 @@
 import { notificationKinds, notificationOf, type NotificationFacts, type NotificationKind } from '@godcreator/collab'
 import { describe, expect, it } from 'vitest'
-import { aiPromptOf } from '../../src/ai-handoff/prompt.js'
+import { aiPromptOf } from '../../src/ai-prompt/prompt.js'
 
 const project = { title: '混合型 MMC', repo: 'D:/projects/hybrid-mmc/collab' }
 const nameOf = (personId: string) => ({ carol: '卡萝', admin: '管理员' })[personId] ?? personId

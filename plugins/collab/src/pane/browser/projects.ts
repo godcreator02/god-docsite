@@ -44,7 +44,7 @@ export function notificationsChipOf(row: ProjectRow): Chip {
   return { key: 'messages', label, tone: counts['collab-repo'] > 0 ? 'bad' : 'warn', title: '打开协作站，顶部的提示栏里有每一条；要交给 AI，点这一行的「复制给 AI」' }
 }
 
-/** collab.ai.prompt 的回执，形状照 node 侧 src/ai-handoff/commands.ts */
+/** collab.ai.prompt 的回执，形状照 node 侧 src/ai-prompt/commands.ts */
 export type AiPromptResult = { prompt: string; items: number }
 
 /** 复制以后那一行写的：复制了几件事、去哪里用 */

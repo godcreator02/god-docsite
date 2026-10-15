@@ -1,6 +1,6 @@
 import path from 'node:path'
 import { peopleLookupOf, type Notification, type ProjectLeads, type SiteFeed } from '@godcreator/collab'
-import { aiPromptOf } from '../ai-handoff/prompt.js'
+import { aiPromptOf } from '../ai-prompt/prompt.js'
 import type { CollabRecordsState } from '../collab-repo/records/inbox.js'
 import type { SubmitFailure } from '../collab-repo/submit/submit-failures.js'
 import type { CollabRepoLocalState } from '../collab-repo/sync/state.js'
