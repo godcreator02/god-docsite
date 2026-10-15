@@ -23,8 +23,8 @@ export type CollabViewer = { people: PublicPerson[]; person: string | null; proj
 /** 一页上的评论：这一页的评论串与能不能写 */
 export type PageComments = { threads: PageThreadSummary[]; access: CommentsAccess }
 
-/** 整站布局用的轻量数据：公开人员、本机身份、推送通道交来的通知（还没交来为 null）；不读 collab/ */
-export type CollabLayoutData = { people: PublicPerson[]; person: string | null; notifications: Notification[] | null }
+/** 整站布局用的轻量数据：公开人员、本机身份、推送通道交来的通知与交给 AI 的提示词（还没交来都为 null）；不读 collab/ */
+export type CollabLayoutData = { people: PublicPerson[]; person: string | null; notifications: Notification[] | null; aiPrompt: string | null }
 
 export type TasksPageData = CollabViewer & {
   siteName: string

@@ -1,6 +1,6 @@
 import { Fragment, useMemo, useState, type ReactNode } from 'react'
 import { Link } from 'react-router'
-import { ArrowDownToLine, ChevronDown, FileWarning, GitBranch, ListTodo, Lock, MessageSquare, RotateCcw, TriangleAlert, Upload, type LucideIcon } from 'lucide-react'
+import { ArrowDownToLine, ChevronDown, Copy, FileWarning, GitBranch, ListTodo, Lock, MessageSquare, RotateCcw, TriangleAlert, Upload, type LucideIcon } from 'lucide-react'
 import type { PublicPerson } from '@godcreator/identity'
 import { recordPageUrlOf } from '../../core/layout.js'
 import { notificationOriginalTextOf, notificationSentenceOf } from '../../core/notifications/notification-text.js'
@@ -17,7 +17,7 @@ import { peopleLookupOf } from '../../core/people.js'
 
 /*
  * 顶部正中的提示栏：推送通道交来的通知（gwb-collab 算出）按协作仓、别的仓、找我的三组列在这里，有就一直显示，解决了自己消失。
- * 句子、原文、去处都由通知模型按 kind 算，这里只摆出来；交给 AI 在 gwb 的协作窗格里
+ * 句子、原文、去处都由通知模型按 kind 算，这里只摆出来；「复制给 AI」复制 gwb-collab 写好的提示词，粘贴给哪个 AI 由人定
  */
 
 /** 原文超过这么多字或这么多行就先折起来 */
@@ -158,11 +158,43 @@ function SummaryPart({ icon: SummaryIcon, className, children }: { icon: LucideI
   )
 }
 
+/** 复制成功后提示停留的毫秒数 */
+const copiedNoticeMilliseconds = 3000
+
+/** 「复制给 AI」：把提示词写进剪贴板；写不进去（浏览器不让）把原因显示在按钮旁 */
+function CopyForAiButton({ prompt, items }: { prompt: string; items: number }) {
+  const [state, setState] = useState<{ kind: 'idle' } | { kind: 'copied' } | { kind: 'failed'; reason: string }>({ kind: 'idle' })
+  const copy = () => {
+    navigator.clipboard.writeText(prompt).then(
+      () => {
+        setState({ kind: 'copied' })
+        setTimeout(() => setState({ kind: 'idle' }), copiedNoticeMilliseconds)
+      },
+      (error: unknown) => setState({ kind: 'failed', reason: error instanceof Error ? error.message : String(error) }),
+    )
+  }
+  return (
+    <span className="ml-auto inline-flex items-baseline gap-2">
+      {state.kind === 'copied' && <span className="text-[12px] text-fd-muted-foreground">已复制 {items} 件事，粘贴给你的 AI</span>}
+      {state.kind === 'failed' && <span className="text-[12px] text-danger">没能复制：{state.reason}</span>}
+      <button
+        type="button"
+        onClick={copy}
+        title="把这些事写成一份提示词复制下来，粘贴给你用的 AI"
+        className="inline-flex items-center gap-1 rounded-md border border-fd-border px-2 py-0.5 text-[12px] text-fd-foreground hover:bg-fd-accent"
+      >
+        <Copy size={13} />
+        复制给 AI
+      </button>
+    </span>
+  )
+}
+
 /**
  * 顶部正中的提示栏，放在站点布局的插槽里。notifications 是调用方交来的通知（推送通道的最新一份，还没交来为 null），
- * people 是公开人员列表（人名从 id 换成显示名）；没有通知时不显示
+ * aiPrompt 是同一份通知写成的提示词（gwb-collab 写），people 是公开人员列表（人名从 id 换成显示名）；没有通知时不显示
  */
-export function NotificationBar({ notifications, people }: { notifications: readonly Notification[] | null; people: readonly PublicPerson[] }) {
+export function NotificationBar({ notifications, aiPrompt, people }: { notifications: readonly Notification[] | null; aiPrompt: string | null; people: readonly PublicPerson[] }) {
   const [expanded, setExpanded] = useState(false)
   const nameOf = useMemo(() => peopleLookupOf(people).nameOf, [people])
   if (notifications === null || notifications.length === 0) return null
@@ -193,7 +225,7 @@ export function NotificationBar({ notifications, people }: { notifications: read
           <section aria-label="要处理的事" className="pointer-events-auto mt-1.5 flex max-h-[min(70vh,640px)] w-full flex-col overflow-hidden rounded-xl border border-fd-border bg-fd-card shadow-lg">
             <header className="flex flex-wrap items-baseline gap-2 border-b border-fd-border px-3 py-2">
               <h2 className="m-0 text-[13px] font-semibold">要处理的事</h2>
-              <p className="m-0 ml-auto text-[12px] text-fd-muted-foreground">要交给 AI，在 gwb 的协作窗格里点「交给 AI 处理」</p>
+              {aiPrompt !== null && <CopyForAiButton prompt={aiPrompt} items={notifications.length} />}
             </header>
             <div className="min-h-0 overflow-y-auto">
               {shownGroups.map((group) => (

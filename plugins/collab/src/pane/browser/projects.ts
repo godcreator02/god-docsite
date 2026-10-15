@@ -41,16 +41,15 @@ export function notificationsChipOf(row: ProjectRow): Chip {
     .filter((group) => counts[group] > 0)
     .map((group) => `${groupLabels[group]} ${counts[group]} 条`)
     .join(' · ')
-  return { key: 'messages', label, tone: counts['collab-repo'] > 0 ? 'bad' : 'warn', title: '打开协作站，顶部的提示栏里有每一条；要交给 AI，点这一行的「交给 AI 处理」' }
+  return { key: 'messages', label, tone: counts['collab-repo'] > 0 ? 'bad' : 'warn', title: '打开协作站，顶部的提示栏里有每一条；要交给 AI，点这一行的「复制给 AI」' }
 }
 
-/** collab.ai.handoff 的回执，形状照 node 侧 src/ai-handoff/commands.ts */
-export type AiHandoffResult = { handler: 'zcode' | 'claude-terminal'; detail: string; items: number }
+/** collab.ai.prompt 的回执，形状照 node 侧 src/ai-handoff/commands.ts */
+export type AiPromptResult = { prompt: string; items: number }
 
-/** 交给 AI 之后那一行写的：交了几件事、交给了谁、在哪看 */
-export function aiHandoffTextOf({ handler, detail, items }: AiHandoffResult): string {
-  if (handler === 'zcode') return `已把 ${items} 件事交给 ZCode，会话 ${detail}`
-  return `已把 ${items} 件事交给新开窗口里的 Claude Code，提示词在 ${detail}`
+/** 复制以后那一行写的：复制了几件事、去哪里用 */
+export function aiPromptCopiedTextOf(items: number): string {
+  return `已把 ${items} 件事写成提示词复制下来，粘贴给你的 AI`
 }
 
 /** 有没有要交给 AI 的事：和通知标签数的是同一份通知 */

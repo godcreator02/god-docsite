@@ -1,16 +1,6 @@
 import { notificationKinds, notificationOf, type NotificationFacts, type NotificationKind } from '@godcreator/collab'
 import { describe, expect, it } from 'vitest'
-import { aiHandlingModeOf, aiPromptOf } from '../../src/ai-handoff/prompt.js'
-
-describe('aiHandlingModeOf', () => {
-  it('只认 off / zcode / claude-terminal，别的直接报错', () => {
-    expect(aiHandlingModeOf('off')).toBe('off')
-    expect(aiHandlingModeOf('zcode')).toBe('zcode')
-    expect(aiHandlingModeOf('claude-terminal')).toBe('claude-terminal')
-    expect(() => aiHandlingModeOf('ZCode')).toThrow('只能是 off / zcode / claude-terminal')
-    expect(() => aiHandlingModeOf(undefined)).toThrow('读到 undefined')
-  })
-})
+import { aiPromptOf } from '../../src/ai-handoff/prompt.js'
 
 const project = { title: '混合型 MMC', repo: 'D:/projects/hybrid-mmc/collab' }
 const nameOf = (personId: string) => ({ carol: '卡萝', admin: '管理员' })[personId] ?? personId
@@ -65,7 +55,7 @@ const readOf = (file: string) => `run skill.read {"name":"collab","file":"${file
 
 describe('交给 AI 的提示词', () => {
   it('没有通知就拒绝', () => {
-    expect(() => aiPromptOf(project, [], nameOf)).toThrow('混合型 MMC 现在没有要处理的事，没有交给 AI')
+    expect(() => aiPromptOf(project, [], nameOf)).toThrow('混合型 MMC 现在没有要处理的事，没有提示词可写')
   })
 
   it('一条通知：第一行就是那件事；写组、短句、该照哪一节处理与原文，只让读主文件和用到的那个附件', () => {

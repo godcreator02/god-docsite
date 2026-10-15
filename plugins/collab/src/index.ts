@@ -8,13 +8,9 @@ import type {} from '@godcreator/gwb-skills'
 import type {} from '@godcreator/gwb-data'
 import type { GwbGiteaApi } from '@godcreator/gwb-gitea'
 import type { GwbQqBotApi } from '@godcreator/gwb-qq-bot'
-import type { GwbZcodeApi } from '@godcreator/gwb-zcode'
 import type {} from '@godcreator/gwb-docsite'
 import { shell } from 'electron'
 import { registerAiCommands } from './ai-handoff/commands.js'
-import { aiHandlingModeOf, handOffAsSet } from './ai-handoff/prompt.js'
-import { claudeTerminalEffort, claudeTerminalModel, handOffToClaudeTerminal } from './ai-handoff/claude-terminal.js'
-import { handOffToZcode } from './ai-handoff/zcode.js'
 import { CollabRepoLeads } from './collab-repo/leads.js'
 import { registerRecordCommands } from './collab-repo/records/commands.js'
 import { collabRecordsStateOf } from './collab-repo/records/inbox.js'
@@ -70,19 +66,9 @@ const settingDefinitions = [
     default: false,
   },
   { key: 'projects', type: 'string-list', title: '项目', description: '要管理的项目仓根，一行一个绝对路径；collab.project.clone、collab.project.add 会写到这里', default: [] },
-  {
-    key: 'ai-handling',
-    type: 'string',
-    title: '协作窗格里点「交给 AI 处理」时交给谁',
-    description:
-      '协作窗格里点「交给 AI 处理」（命令 collab.ai.handoff）时，把这个项目要处理的事写成的提示词交给谁：off 不交，窗格里报出怎么改这项设置；zcode 把 ZCode 桌面端切到协作仓、新建一条完全访问的会话（要装 gwb-zcode 0.4 以上）；' +
-      `claude-terminal 把提示词写进临时文件，新开一个 pwsh 窗口，在协作仓里运行 Claude Code（${claudeTerminalModel}，effort ${claudeTerminalEffort}）读它。` +
-      '提示词可能带上别人写的评论与任务原文，ZCode 完全访问时改文件、运行命令都不问人，开之前想清楚',
-    default: 'off',
-  },
 ] as const
 
-/** 装配：Gitea、站点，协作仓与别的仓两套各目录、组织事件、通知与 QQ 私聊，再按领域登记命令（含交给 AI）、窗格与说明书 */
+/** 装配：Gitea、站点，协作仓与别的仓两套各目录、组织事件、通知与 QQ 私聊，再按领域登记命令（含交给 AI 的提示词）、窗格与说明书 */
 export function apply(ctx: GwbContext): void {
   const log = ctx.logger(name)
   const commands = ctx.gwbCommands
@@ -104,12 +90,8 @@ export function apply(ctx: GwbContext): void {
   })
   const gitea = giteaAccessOf(() => giteaService)
 
-  // 交给 AI、QQ 通知与 QQ 任务组用到的两个服务都是可有可无的：装了才有，卸了自动撤掉；gwbQqBot 在 QQ 任务组建好之后再注入
-  let zcode: GwbZcodeApi | null = null
+  // QQ 通知与 QQ 任务组用到的服务是可有可无的：装了才有，卸了自动撤掉；在 QQ 任务组建好之后再注入
   let qqBot: GwbQqBotApi | null = null
-  ctx.inject(['gwbZcode'], (scoped) => {
-    scoped.effect(() => { zcode = scoped.gwbZcode; return () => { zcode = null } })
-  })
 
   // 两边各目录的状态一变就交给通知，并重对一遍 QQ 任务组（站名可能变了）；通知建好后再接上
   const repoChanges = new RepoChangeRelay()
@@ -256,12 +238,7 @@ export function apply(ctx: GwbContext): void {
   registerOtherRepoCommands(services)
   registerSiteCommands(services)
   registerRecordCommands(services)
-  registerAiCommands(services, (repo, prompt) =>
-    handOffAsSet(aiHandlingModeOf(settings.get('ai-handling')), repo, prompt, {
-      zcode: (zcodeRepo, zcodePrompt) => handOffToZcode(zcode, zcodeRepo, zcodePrompt),
-      claudeTerminal: handOffToClaudeTerminal,
-    }),
-  )
+  registerAiCommands(services)
 
   ctx.inject(['gwbSkills'], (scoped) => {
     scoped.effect(() => scoped.gwbSkills.register(skillsDir))

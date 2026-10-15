@@ -93,10 +93,11 @@ async function statusOf(promise: Promise<unknown>): Promise<number> {
 }
 
 describe('布局的轻量数据', () => {
-  it('只有公开人员、本机身份与推送来的通知：人员不带身份码，不读任务', () => {
-    feed = { notifications: [notificationOf({ kind: 'task', recordId: task.id, title: task.title, due: null, detail: null })], projectLeads: ['admin'] }
+  it('只有公开人员、本机身份与推送来的通知和提示词：人员不带身份码，不读任务', () => {
+    feed = { notifications: [notificationOf({ kind: 'task', recordId: task.id, title: task.title, due: null, detail: null })], aiPrompt: '提示词', projectLeads: ['admin'] }
     const layout = collabLayoutData(args('http://collab.test:5173/'), site)
-    expect(Object.keys(layout).sort()).toEqual(['notifications', 'people', 'person'])
+    expect(Object.keys(layout).sort()).toEqual(['aiPrompt', 'notifications', 'people', 'person'])
+    expect(layout.aiPrompt).toBe('提示词')
     expect(layout.people).toEqual([
       { id: 'admin', name: '管理员' },
       { id: 'bob', name: '鲍勃' },
@@ -106,14 +107,16 @@ describe('布局的轻量数据', () => {
     expect(layout.notifications?.map((each) => each.kind)).toEqual(['task'])
   })
 
-  it('推送通道还没交来数据：通知为 null', () => {
-    expect(collabLayoutData(args('http://collab.test:5173/'), site).notifications).toBeNull()
+  it('推送通道还没交来数据：通知与提示词为 null', () => {
+    const layout = collabLayoutData(args('http://collab.test:5173/'), site)
+    expect(layout.notifications).toBeNull()
+    expect(layout.aiPrompt).toBeNull()
   })
 })
 
 describe('页面的 loader', () => {
   it('任务页：任务、模块、公开人员、页面、负责人取推送来的数据', async () => {
-    feed = { notifications: [], projectLeads: ['admin'] }
+    feed = { notifications: [], aiPrompt: null, projectLeads: ['admin'] }
     const data = await tasksLoader(args('http://collab.test:5173/tasks'), site)
     expect(data.tasks.map((each) => each.title)).toEqual(['画采样板'])
     expect(data.modules.map((each) => each.title)).toEqual(['采样板'])
@@ -181,7 +184,7 @@ describe('写任务与模块的 action', () => {
   it('删除：作者以外的人删不了；推送来的负责人能删，删完跳回任务页', async () => {
     const remove = post({ intent: 'delete-record', id: task.id })
     expect(outcomeOf(await recordAction(remove, site))).toMatchObject({ status: 422, result: { ok: false } })
-    feed = { notifications: [], projectLeads: ['bob'] }
+    feed = { notifications: [], aiPrompt: null, projectLeads: ['bob'] }
     expect(outcomeOf(await recordAction(post({ intent: 'delete-record', id: task.id }), site))).toEqual({ status: 302, location: '/tasks' })
     expect(recordFiles()).toEqual([`${moduleRecord.id}.json`])
   })

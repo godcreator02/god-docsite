@@ -1,5 +1,6 @@
 import path from 'node:path'
 import { peopleLookupOf, type Notification, type ProjectLeads, type SiteFeed } from '@godcreator/collab'
+import { aiPromptOf } from '../ai-handoff/prompt.js'
 import type { CollabRecordsState } from '../collab-repo/records/inbox.js'
 import type { SubmitFailure } from '../collab-repo/submit/submit-failures.js'
 import type { CollabRepoLocalState } from '../collab-repo/sync/state.js'
@@ -69,9 +70,11 @@ export class ProjectNotifications {
     return { project, notifications, nameOf: peopleLookupOf(records.people).nameOf }
   }
 
-  /** 交给站点的整份数据：通知已按组排好，连同上次读到的项目负责人 */
+  /** 交给站点的整份数据：通知已按组排好，连同把它们交给 AI 的提示词（没有通知为 null）与上次读到的项目负责人 */
   async feedOf(repo: string): Promise<SiteFeed> {
-    return { notifications: (await this.currentOf(repo)).notifications, projectLeads: this.deps.readers.projectLeadsOf(repo) }
+    const { project, notifications, nameOf } = await this.currentOf(repo)
+    const aiPrompt = notifications.length === 0 ? null : aiPromptOf({ title: projectTitleOf(project), repo: project.repo }, notifications, nameOf)
+    return { notifications, aiPrompt, projectLeads: this.deps.readers.projectLeadsOf(repo) }
   }
 
   /** 某个项目的哪样状态变了：交给站点；做完过一次完整刷新就把此刻的通知交给接口 B */

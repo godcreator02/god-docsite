@@ -117,9 +117,10 @@ describe('feature.tsx（运行时，浏览器侧也加载）', () => {
       feedValue: (channel: string) => (channel === 'collab' ? pushed : undefined),
     } as unknown as Parameters<typeof layoutData>[1]
     const args = { request: new Request('http://collab.test/'), params: {}, context: {} } as Parameters<typeof layoutData>[0]
-    expect(layoutData(args, base)).toEqual({ people: [{ id: 'bob', name: '鲍勃' }], person: 'bob', notifications: null })
-    pushed = JSON.parse(JSON.stringify({ notifications: [notification], projectLeads: null }))
+    expect(layoutData(args, base)).toEqual({ people: [{ id: 'bob', name: '鲍勃' }], person: 'bob', notifications: null, aiPrompt: null })
+    pushed = JSON.parse(JSON.stringify({ notifications: [notification], aiPrompt: '提示词', projectLeads: null }))
     expect(layoutData(args, base).notifications).toEqual([notification])
+    expect(layoutData(args, base).aiPrompt).toBe('提示词')
     pushed = { notifications: 'none' }
     expect(() => layoutData(args, base)).toThrow(InvalidSiteFeed)
   })

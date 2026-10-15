@@ -156,13 +156,27 @@ describe('任务看板的两层筛选', () => {
 describe('通知栏', () => {
   it('通知与人员都由调用方传入：人名换成显示名；没有通知时不显示', async () => {
     const mention = notificationOf({ kind: 'mention', comment: 't/index.mdx', author: 'admin', page: '/tasks?comment=t', text: '@bob 看看', in: 'comment' })
-    const Stub = createRoutesStub([{ path: '/', Component: () => <NotificationBar notifications={[mention]} people={people} /> }])
+    const Stub = createRoutesStub([{ path: '/', Component: () => <NotificationBar notifications={[mention]} aiPrompt={null} people={people} /> }])
     await act(async () => root.render(<Stub initialEntries={['/']} />))
     await act(async () => container.querySelector<HTMLButtonElement>('button[aria-expanded]')!.click())
     expect(container.textContent).toContain('管理员 在评论里 @了我')
-    const Empty = createRoutesStub([{ path: '/', Component: () => <NotificationBar notifications={null} people={people} /> }])
+    expect(container.textContent).not.toContain('复制给 AI')
+    const Empty = createRoutesStub([{ path: '/', Component: () => <NotificationBar notifications={null} aiPrompt={null} people={people} /> }])
     await act(async () => root.render(<Empty initialEntries={['/']} />))
     expect(container.textContent).toBe('')
+  })
+
+  it('有提示词时「复制给 AI」把它写进剪贴板，并写明复制了几件事', async () => {
+    const copied: string[] = []
+    Object.defineProperty(navigator, 'clipboard', { configurable: true, value: { writeText: async (text: string) => void copied.push(text) } })
+    const mention = notificationOf({ kind: 'mention', comment: 't/index.mdx', author: 'admin', page: '/tasks?comment=t', text: '@bob 看看', in: 'comment' })
+    const Stub = createRoutesStub([{ path: '/', Component: () => <NotificationBar notifications={[mention]} aiPrompt="交给 AI 的提示词" people={people} /> }])
+    await act(async () => root.render(<Stub initialEntries={['/']} />))
+    await act(async () => container.querySelector<HTMLButtonElement>('button[aria-expanded]')!.click())
+    const copyButton = [...container.querySelectorAll('button')].find((button) => button.textContent === '复制给 AI')!
+    await act(async () => copyButton.click())
+    expect(copied).toEqual(['交给 AI 的提示词'])
+    expect(container.textContent).toContain('已复制 1 件事，粘贴给你的 AI')
   })
 })
 

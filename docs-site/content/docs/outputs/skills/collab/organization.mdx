@@ -28,7 +28,7 @@ description: 说明书 collab 的附件 references/organization.md 的正本：�
 
 ## 设置与实时推送
 
-- `ai-handling`：协作窗格里点「交给 AI 处理」交给谁，`off` / `zcode` / `claude-terminal`。选 `zcode` 前告诉人「ZCode 完全访问时改文件、运行命令都不问人」
+- 协作窗格与网站提示栏的「复制给 AI」把一个项目此刻的全部通知写成提示词复制下来，人粘贴给你；插件不启动任何 AI。要提示词原文时调 `collab.ai.prompt {repo}`
 - `qq-notifications`：新出现、连续 1 分钟还在的通知私聊主人（只存在几秒的中间状态不发），要同 home 装好 gwb-qq-bot
 - QQ 命令：人想在 QQ 里给项目派任务时，问他起什么短名（如 `/mmc`），调 `collab.project.qq-command {repo, command}`，撤掉给 `null`；要同 home 装好 gwb-qq-bot。拒绝或回执 `taskGroup.error` 不为空，就把原话告诉人
 - 实时推送的地址是 gwb-gitea 的设置 `push-url`，状态看 `collab.projects` 顶上的 `push`。Gitea 上的事几秒内就到，一般不用调 `collab.check`
@@ -50,7 +50,7 @@ description: 说明书 collab 的附件 references/organization.md 的正本：�
 - **升级站点**：没有升级命令，`collab.site.init` 只建新站。先看协作仓工作区里有没有别人还没提交审核的改动，问人升到哪一版，`collab.site.stop {repo}` 后：
   - 升协作功能包用 `docsite.feature.add {"dir":"<协作仓>/site","package":"@godcreator/collab","version":"^<版本>"}`，它升版本、补上站点还没有的接线文件，不覆盖已有的
   - 平台包与别的功能包在 `site/` 里 `pnpm add <包>@^<版本>`
-  - 已有的骨架与接线文件由你对照平台包与功能包的 `template/` 逐个判断要改哪些文件（见说明书 `docsite` 的「升级已有站点」），站点自己改过的地方保留
+  - 平台模板写出的文件与接线文件由你对照平台包与功能包的 `template/` 逐个判断要改哪些文件（见说明书 `docsite` 的「升级已有站点」），站点自己改过的地方保留
 
   再 `collab.site.start {repo}`，改动给人过目后提交审核
 - **站点检查不过**：`collab.submit` 报「site/ 的站点检查不过，没有提交」时，照每条原话改 `site/` 里的文件（人员列表、评论文件、日志页的文件名），再提交审核

@@ -5,7 +5,7 @@
 import type { ProjectLeads } from '../leads.js'
 import type { Notification } from './notifications.js'
 import { checkedNotificationsOf } from './notification-validation.js'
-import { fieldsOf, textsOf } from './shape-checks.js'
+import { fieldsOf, textOrNullOf, textsOf } from './shape-checks.js'
 
 export { InvalidSiteFeed } from './shape-checks.js'
 
@@ -17,15 +17,17 @@ export const siteFeedChannel = 'collab'
 
 /**
  * gwb-collab 交给站点的全部数据，一起交、一起推给页面。
- * notifications 已按 sortedNotifications 排好；projectLeads 是上次检查从 Gitea 读的，这次加载后还没读到为 null
+ * notifications 已按 sortedNotifications 排好；aiPrompt 是把这些通知全部交给 AI 的提示词（gwb-collab 写，提示栏的「复制给 AI」复制它），没有通知为 null；
+ * projectLeads 是上次检查从 Gitea 读的，这次加载后还没读到为 null
  */
-export type SiteFeed = { notifications: Notification[]; projectLeads: ProjectLeads | null }
+export type SiteFeed = { notifications: Notification[]; aiPrompt: string | null; projectLeads: ProjectLeads | null }
 
 /** 推来的数据是外部输入：按 SiteFeed 的形状逐项查，不对、多了、少了字段就抛 InvalidSiteFeed，写明哪一项 */
 export function siteFeedOf(body: unknown): SiteFeed {
-  const feed = fieldsOf(body, '推来的数据', ['notifications', 'projectLeads'])
+  const feed = fieldsOf(body, '推来的数据', ['notifications', 'aiPrompt', 'projectLeads'])
   return {
     notifications: checkedNotificationsOf(feed['notifications']),
+    aiPrompt: textOrNullOf(feed['aiPrompt'], 'aiPrompt'),
     projectLeads: feed['projectLeads'] === null ? null : textsOf(feed['projectLeads'], 'projectLeads'),
   }
 }

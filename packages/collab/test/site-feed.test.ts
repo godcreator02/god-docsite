@@ -10,23 +10,25 @@ const notifications = sortedNotifications([
 ])
 const projectLeads = ['godcreator', 'chenhao']
 
-const valid = { notifications, projectLeads }
+const valid = { notifications, aiPrompt: '协作站要处理的 4 件事（样机）\n\n……', projectLeads }
 
 describe('gwb-collab 交来的站点状态', () => {
   it('形状对的原样收下', () => {
     expect(siteFeedOf(JSON.parse(JSON.stringify(valid)))).toEqual(valid)
   })
 
-  it('没有通知时是空数组；还没读到项目负责人时 projectLeads 为 null', () => {
-    expect(siteFeedOf({ notifications: [], projectLeads: null })).toEqual({ notifications: [], projectLeads: null })
+  it('没有通知时是空数组、提示词为 null；还没读到项目负责人时 projectLeads 为 null', () => {
+    expect(siteFeedOf({ notifications: [], aiPrompt: null, projectLeads: null })).toEqual({ notifications: [], aiPrompt: null, projectLeads: null })
   })
 
   it.each([
     ['不是对象', [], /^推来的数据 要是对象$/],
     ['多了认不出的字段', { ...valid, extra: 1 }, /^推来的数据 里认不出的字段 extra$/],
     ['还是旧的形状', { gitStatus: {}, attention: [], leads: null }, /^推来的数据 里认不出的字段 gitStatus$/],
-    ['少了通知', { projectLeads }, /^推来的数据 里缺字段 notifications$/],
-    ['少了项目负责人', { notifications }, /^推来的数据 里缺字段 projectLeads$/],
+    ['少了通知', { aiPrompt: null, projectLeads }, /^推来的数据 里缺字段 notifications$/],
+    ['少了提示词', { notifications, projectLeads }, /^推来的数据 里缺字段 aiPrompt$/],
+    ['提示词不是字符串', { ...valid, aiPrompt: 1 }, /^aiPrompt 要是字符串，收到 1$/],
+    ['少了项目负责人', { notifications, aiPrompt: null }, /^推来的数据 里缺字段 projectLeads$/],
     ['通知不是数组', { ...valid, notifications: {} }, /^notifications 要是数组$/],
     ['一条通知的字段不对', { ...valid, notifications: [notifications[0], { ...notifications[1], kind: 'repo-drift' }] }, /^notifications\[1\]\.kind 要是 unsubmitted \/ .* 之一，收到 "repo-drift"$/],
     ['项目负责人不是字符串数组', { ...valid, projectLeads: 'godcreator' }, /^projectLeads 要是字符串数组$/],

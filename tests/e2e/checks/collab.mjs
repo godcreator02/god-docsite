@@ -277,29 +277,37 @@ export async function runCollabChecks({ browser, baseUrl, mode, siteDir, feedTok
         return { pass: response.status() === 200 && after === before + 1 && written, detail: `POST ${new URL(response.url()).pathname} → ${response.status()}，评论目录文件 ${before} → ${after}，评论卡片显示出来` }
       })
 
-      await check('通知经推送通道到达通知栏（已打开的页面不刷新就出现，新打开的页面首屏就有）', async () => {
+      await check('通知经推送通道到达通知栏（已打开的页面不刷新就出现，新打开的页面首屏就有），「复制给 AI」复制推来的提示词', async () => {
         await page.goto(`${baseUrl}/tasks`, { waitUntil: 'load' })
         await waitForHydrated(page, 'button[title^="只看 "]')
         await markNoReload(page)
         const barBefore = await page.locator('button', { hasText: '条找我的' }).count()
         const { notificationOf } = await loadCollabCore()
         const notification = notificationOf({ kind: 'task', recordId: runRecords.task.id, title: runRecords.task.title, due: null, detail: null })
+        const aiPrompt = `e2e 提示词 ${runTag}`
         const pushed = await fetch(`${baseUrl}/__docsite/feed/collab`, {
           method: 'POST',
           headers: { 'content-type': 'application/json', 'x-docsite-token': feedToken },
-          body: JSON.stringify({ notifications: [notification], projectLeads: ['tester'] }),
+          body: JSON.stringify({ notifications: [notification], aiPrompt, projectLeads: ['tester'] }),
         })
         const bar = page.locator('button', { hasText: '1 条找我的' })
         await bar.waitFor({ timeout: stepTimeoutMs })
         await bar.click()
         await page.locator('section[aria-label="要处理的事"]', { hasText: `指派给我的任务：${runRecords.task.title}` }).waitFor({ timeout: stepTimeoutMs })
+        await context.grantPermissions(['clipboard-read', 'clipboard-write'], { origin: baseUrl })
+        await page.click('section[aria-label="要处理的事"] button:has-text("复制给 AI")')
+        await page.locator('section[aria-label="要处理的事"]', { hasText: '已复制 1 件事' }).waitFor({ timeout: stepTimeoutMs })
+        const copied = await page.evaluate(() => navigator.clipboard.readText())
         const kept = await stillNoReload(page)
         const fresh = await context.newPage()
         watchPage(fresh, 'collab-fresh', problems)
         await fresh.goto(`${baseUrl}/calendar`, { waitUntil: 'load' })
         const firstPaint = await fresh.locator('button', { hasText: '1 条找我的' }).count()
         await fresh.close()
-        return { pass: pushed.status === 204 && barBefore === 0 && kept && firstPaint === 1, detail: `推送 ${pushed.status}；推之前通知栏 ${barBefore} 个，推之后出现、展开看得到那条，没有整页刷新=${kept}；新打开日历页首屏通知栏 ${firstPaint} 个` }
+        return {
+          pass: pushed.status === 204 && barBefore === 0 && kept && firstPaint === 1 && copied === aiPrompt,
+          detail: `推送 ${pushed.status}；推之前通知栏 ${barBefore} 个，推之后出现、展开看得到那条，没有整页刷新=${kept}；复制给 AI 拿到推来的提示词=${copied === aiPrompt}；新打开日历页首屏通知栏 ${firstPaint} 个`,
+        }
       })
     }
 

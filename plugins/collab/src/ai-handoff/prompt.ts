@@ -1,16 +1,6 @@
 import { notificationGroupOf, notificationOriginalTextOf, notificationSentenceOf, type Notification, type NotificationGroup, type NotificationKind } from '@godcreator/collab'
 import { CollabRejected } from '../errors.js'
 
-/** 设置 ai-handling 的取值：off 不交给 AI；zcode 在 ZCode 桌面端开会话；claude-terminal 新开一个 pwsh 窗口运行 Claude Code */
-export const aiHandlingModes = ['off', 'zcode', 'claude-terminal'] as const
-export type AiHandlingMode = (typeof aiHandlingModes)[number]
-
-export function aiHandlingModeOf(value: unknown): AiHandlingMode {
-  const mode = aiHandlingModes.find((each) => each === value)
-  if (mode === undefined) throw new CollabRejected(`设置 ai-handling 只能是 ${aiHandlingModes.join(' / ')}，读到 ${JSON.stringify(value)}`)
-  return mode
-}
-
 /** 提示词开头写的项目：站名是 site/content/meta.json 的 title，repo 是协作仓根的绝对路径 */
 export type AiPromptProject = { title: string; repo: string }
 
@@ -55,7 +45,7 @@ function referenceFilesOf(notifications: Notification[]): string[] {
   return [...new Set(notifications.map((notification) => handlingSectionOfKind[notification.kind].file))]
 }
 
-/** ZCode 的会话是完全访问，工具层面拦不住改文件、调命令，只能靠提示词：写在读说明书之前，结尾再重复一句 */
+/** 粘贴给哪个 AI、它有什么权限都不由插件定，拦住它改文件、调命令只能靠提示词：写在读说明书之前，结尾再重复一句 */
 const listPlanAndWaitRule = [
   '这一轮只读和整理，不动手：',
   '- 读完下面的说明书和要处理的事，逐条列出打算怎么处理：改哪些文件、调哪些命令。',
@@ -79,9 +69,9 @@ function promptBlockOf(notification: Notification, index: number, nameOf: (perso
   return lines.join('\n')
 }
 
-/** 交给 AI 的完整提示词：一个项目的全部通知一起交，按通知的顺序。ZCode 拿第一行当会话标题，第一行不写 Markdown 标记 */
+/** 交给 AI 的完整提示词：一个项目的全部通知一起交，按通知的顺序。不少 AI 拿第一行当会话标题，第一行不写 Markdown 标记 */
 export function aiPromptOf(project: AiPromptProject, notifications: Notification[], nameOf: (personId: string) => string): string {
-  if (notifications.length === 0) throw new CollabRejected(`${project.title} 现在没有要处理的事，没有交给 AI`)
+  if (notifications.length === 0) throw new CollabRejected(`${project.title} 现在没有要处理的事，没有提示词可写`)
   const heading =
     notifications.length === 1 ? `协作站要处理的事（${project.title}）：${notificationSentenceOf(notifications[0]!, nameOf)}` : `协作站要处理的 ${notifications.length} 件事（${project.title}）`
   return (
@@ -94,20 +84,4 @@ export function aiPromptOf(project: AiPromptProject, notifications: Notification
       `${listPlanAndWaitReminder}\n照说明书主文件的「始终照做」。`,
     ].join('\n\n') + '\n'
   )
-}
-
-/** 交出去之后回的：交给了谁、在哪看（ZCode 的会话 id，或写着提示词的文件） */
-export type AiHandoffReceipt = { handler: 'zcode' | 'claude-terminal'; detail: string }
-
-/** 交出提示词的两种做法，回在哪看：ZCode 的会话 id，或写着提示词的文件 */
-export type AiHandoffs = {
-  zcode(repo: string, prompt: string): Promise<string>
-  claudeTerminal(repo: string, prompt: string): Promise<string>
-}
-
-/** 照设置 ai-handling 把提示词交出去；off 时拒绝，写明去哪里改 */
-export async function handOffAsSet(mode: AiHandlingMode, repo: string, prompt: string, handoffs: AiHandoffs): Promise<AiHandoffReceipt> {
-  if (mode === 'off') throw new CollabRejected('设置 ai-handling 是 off，没有交给 AI：在 gwb 设置里把 gwb-collab 的 ai-handling 改成 zcode 或 claude-terminal')
-  if (mode === 'zcode') return { handler: 'zcode', detail: await handoffs.zcode(repo, prompt) }
-  return { handler: 'claude-terminal', detail: await handoffs.claudeTerminal(repo, prompt) }
 }

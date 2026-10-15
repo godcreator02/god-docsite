@@ -1,16 +1,16 @@
 import type { HostBridge, ShellBridge } from '@godcreator/gwb-shell/pane'
-import { Bot, CircleHelp, GitFork } from 'lucide-react'
+import { CircleHelp, Copy, GitFork } from 'lucide-react'
 import { useCallback, useEffect, useRef, useState, type ReactElement, type ReactNode } from 'react'
 import { Button } from '@/components/ui/button'
 import {
-  aiHandoffTextOf,
+  aiPromptCopiedTextOf,
   hasNotifications,
   lastSegmentOf,
   notificationsChipOf,
   pushChipOf,
   receiptOf,
   siteStateOf,
-  type AiHandoffResult,
+  type AiPromptResult,
   type Chip as ChipData,
   type ProjectList,
   type ProjectRow,
@@ -55,8 +55,8 @@ function useProjectList(host: HostBridge, shell: ShellBridge): { list: Receipt<P
 /** 点站点链接：经 collab.site.start 打开（窗口照 gwb-docsite 的设置 site-window），没在运行就先启动；失败的原话交给那一行显示 */
 type OpenSite = (repo: string) => Promise<string | null>
 
-/** 点「交给 AI 处理」：经 collab.ai.handoff 把这个项目的全部通知交给设置 ai-handling 选的 AI */
-type HandOffToAi = (repo: string) => Promise<Receipt<AiHandoffResult>>
+/** 点「复制给 AI」：经 collab.ai.prompt 把这个项目的全部通知写成提示词，交回原文 */
+type PromptForAi = (repo: string) => Promise<Receipt<AiPromptResult>>
 
 export function ProjectsPane({ host, shell }: { host: HostBridge; shell: ShellBridge }): ReactElement {
   const { list, refresh } = useProjectList(host, shell)
@@ -73,7 +73,7 @@ export function ProjectsPane({ host, shell }: { host: HostBridge; shell: ShellBr
     const reply = receiptOf<unknown>(await host.call('collab.project.open', { repo }))
     return reply.ok ? null : reply.error
   }, [host])
-  const handOffToAi = useCallback<HandOffToAi>(async (repo) => receiptOf<AiHandoffResult>(await host.call('collab.ai.handoff', { repo })), [host])
+  const promptForAi = useCallback<PromptForAi>(async (repo) => receiptOf<AiPromptResult>(await host.call('collab.ai.prompt', { repo })), [host])
 
   if (list === undefined) return <p className="collab:m-0 collab:p-4 collab:text-sm collab:text-muted-foreground">正在读项目列表…</p>
   if (!list.ok) return <p className="collab:m-0 collab:p-4 collab:text-sm collab:text-destructive collab:whitespace-pre-wrap">{list.error}</p>
@@ -116,7 +116,7 @@ export function ProjectsPane({ host, shell }: { host: HostBridge; shell: ShellBr
       ) : (
         <ul className="collab:m-0 collab:flex collab:list-none collab:flex-col collab:gap-2 collab:p-0">
           {projects.map((row) => (
-            <ProjectLine key={row.repo} row={row} openSite={openSite} openFolder={openFolder} handOffToAi={handOffToAi} />
+            <ProjectLine key={row.repo} row={row} openSite={openSite} openFolder={openFolder} promptForAi={promptForAi} />
           ))}
         </ul>
       )}
@@ -129,7 +129,7 @@ function Help(): ReactElement {
   return (
     <div className="collab:flex collab:flex-col collab:gap-2 collab:rounded-md collab:border collab:border-border collab:bg-muted/40 collab:p-3 collab:text-xs collab:text-foreground">
       <p className="collab:m-0">
-        列表里每个项目的协作站由插件在后台自动运行。每个项目一行，写着三组通知各有几条：协作仓（没提交审核的文件、冲突、同步不了等）、别的仓（和服务器不一样、等你审阅的合并请求与 issue 等），和找你的任务、@我、回复。点通知或地址打开协作站，网页顶部的提示栏里有每一条；点这一行的「交给 AI 处理」，把这个项目的通知全部交给 AI（交给 ZCode 还是 Claude Code，在 gwb 设置里 gwb-collab 的 ai-handling 选）。
+        列表里每个项目的协作站由插件在后台自动运行。每个项目一行，写着三组通知各有几条：协作仓（没提交审核的文件、冲突、同步不了等）、别的仓（和服务器不一样、等你审阅的合并请求与 issue 等），和找你的任务、@我、回复。点通知或地址打开协作站，网页顶部的提示栏里有每一条；点这一行的「复制给 AI」，把这个项目的通知全部写成一份提示词复制下来，粘贴给你用的 AI（网页提示栏里也有同样的按钮）。
       </p>
       <p className="collab:m-0">
         插件和 NAS 上的推送服务连着，Gitea 一有推送或合并请求的事件，几秒内就取回一次，别人合进 main 的改动快进进来。提交审核时，NAS 上的执行器十几秒内当场定论：合并，或者留言写明原因并打回。
@@ -196,39 +196,36 @@ function SiteButton({ onOpen, className, title, children }: { onOpen: () => void
   )
 }
 
-type HandoffState = { state: 'idle' } | { state: 'sending' } | { state: 'sent'; text: string }
+type CopyState = { state: 'idle' } | { state: 'copying' } | { state: 'copied'; text: string }
 
 /**
- * 一个项目一行：项目名、身份、通知各组几条的标签（站点在运行时点它打开协作站）、有通知时的「交给 AI 处理」，站点地址与 Gitea；
- * 项目打不开、站点没能启动、没能打开或没能交给 AI 时原因写在下面，交给 AI 成功时写交给了谁
+ * 一个项目一行：项目名、身份、通知各组几条的标签（站点在运行时点它打开协作站）、有通知时的「复制给 AI」，站点地址与 Gitea；
+ * 项目打不开、站点没能启动、没能打开或没能复制时原因写在下面，复制成功时写复制了几件事
  */
-function ProjectLine({ row, openSite, openFolder, handOffToAi }: { row: ProjectRow; openSite: OpenSite; openFolder: OpenSite; handOffToAi: HandOffToAi }): ReactElement {
+function ProjectLine({ row, openSite, openFolder, promptForAi }: { row: ProjectRow; openSite: OpenSite; openFolder: OpenSite; promptForAi: PromptForAi }): ReactElement {
   const summary = row.summary
   const chip = notificationsChipOf(row)
   const [openError, setOpenError] = useState<string | null>(null)
   const [openingFolder, setOpeningFolder] = useState(false)
-  const [handoff, setHandoff] = useState<HandoffState>({ state: 'idle' })
+  const [copy, setCopy] = useState<CopyState>({ state: 'idle' })
   const failed = (error: unknown) => setOpenError(error instanceof Error ? error.message : String(error))
   const open = () => void openSite(row.repo).then(setOpenError).catch(failed)
   const openInCode = () => {
     setOpeningFolder(true)
     void openFolder(row.repo).then(setOpenError).catch(failed).finally(() => setOpeningFolder(false))
   }
-  const handOff = () => {
+  const copyForAi = async () => {
     setOpenError(null)
-    setHandoff({ state: 'sending' })
-    void handOffToAi(row.repo)
-      .then((reply) => {
-        if (reply.ok) setHandoff({ state: 'sent', text: aiHandoffTextOf(reply.data) })
-        else {
-          setHandoff({ state: 'idle' })
-          setOpenError(`没能交给 AI：${reply.error}`)
-        }
-      })
-      .catch((error: unknown) => {
-        setHandoff({ state: 'idle' })
-        failed(error)
-      })
+    setCopy({ state: 'copying' })
+    try {
+      const reply = await promptForAi(row.repo)
+      if (!reply.ok) throw new Error(`没能写出提示词：${reply.error}`)
+      await navigator.clipboard.writeText(reply.data.prompt)
+      setCopy({ state: 'copied', text: aiPromptCopiedTextOf(reply.data.items) })
+    } catch (error) {
+      setCopy({ state: 'idle' })
+      failed(error)
+    }
   }
   const reason = row.error ?? row.site.error ?? openError
   return (
@@ -245,9 +242,9 @@ function ProjectLine({ row, openSite, openFolder, handOffToAi }: { row: ProjectR
           <Chip chip={chip} />
         )}
         {hasNotifications(row) && (
-          <Button type="button" variant="outline" size="xs" title="把这个项目要处理的事全部交给 AI（交给谁看设置 ai-handling）" disabled={handoff.state === 'sending'} onClick={handOff}>
-            <Bot />
-            {handoff.state === 'sending' ? '正在交给 AI…' : '交给 AI 处理'}
+          <Button type="button" variant="outline" size="xs" title="把这个项目要处理的事全部写成一份提示词复制下来，粘贴给你用的 AI" disabled={copy.state === 'copying'} onClick={() => void copyForAi()}>
+            <Copy />
+            {copy.state === 'copying' ? '正在复制…' : '复制给 AI'}
           </Button>
         )}
         <span className="collab:ml-auto collab:flex collab:shrink-0 collab:items-center collab:gap-1">
@@ -261,7 +258,7 @@ function ProjectLine({ row, openSite, openFolder, handOffToAi }: { row: ProjectR
         </span>
       </div>
       {reason !== null && <Notice text={reason} />}
-      {handoff.state === 'sent' && <p className="collab:m-0 collab:text-xs collab:break-all collab:text-success">{handoff.text}</p>}
+      {copy.state === 'copied' && <p className="collab:m-0 collab:text-xs collab:break-all collab:text-success">{copy.text}</p>}
     </li>
   )
 }

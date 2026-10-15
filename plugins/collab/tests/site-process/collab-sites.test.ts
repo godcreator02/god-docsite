@@ -9,7 +9,7 @@ import { CollabSites, type DocsiteHosting } from '../../src/site-process/collab-
 const repo = path.resolve('/projects/hybrid-mmc/collab')
 const siteDir = path.join(repo, 'site')
 const project: Project = { repo, collabDir: path.join(repo, 'collab'), siteDir, person: 'bob' }
-const feed: SiteFeed = { notifications: [], projectLeads: ['admin'] }
+const feed: SiteFeed = { notifications: [], aiPrompt: null, projectLeads: ['admin'] }
 /** collab.site.init 交给 sites.init 的那份工作流：打包时带进来的模板写成本插件的版本 */
 const mergeWorkflow = renderMergeWorkflow(__COLLAB_MERGE_WORKFLOW_TEMPLATE__, __COLLAB_VERSION__)
 /** collab.site.init 交给 sites.init 的项目首页：打包时带进来的 templates/home.tsx */

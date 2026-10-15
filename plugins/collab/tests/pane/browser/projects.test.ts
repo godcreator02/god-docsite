@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { aiHandoffTextOf, hasNotifications, notificationsChipOf, pushChipOf, type ProjectRow, type ProjectSummary, type SiteRow } from '../../../src/pane/browser/projects.js'
+import { aiPromptCopiedTextOf, hasNotifications, notificationsChipOf, pushChipOf, type ProjectRow, type ProjectSummary, type SiteRow } from '../../../src/pane/browser/projects.js'
 
 const noCounts = { 'collab-repo': 0, 'other-repos': 0, 'for-me': 0 }
 
@@ -23,16 +23,15 @@ const openedRow = (counts: Partial<ProjectSummary['counts']> = {}, site: Partial
 /** 打不开的项目：只在 error 里写原因 */
 const closedRow = (error: string): ProjectRow => ({ repo: 'D:/p/collab', summary: null, error, site: runningSite })
 
-describe('项目那一行的「交给 AI 处理」', () => {
+describe('项目那一行的「复制给 AI」', () => {
   it('有通知才有按钮；打不开的项目没有', () => {
     expect(hasNotifications(openedRow())).toBe(false)
     expect(hasNotifications(openedRow({ 'other-repos': 1 }))).toBe(true)
     expect(hasNotifications(closedRow('不是协作仓'))).toBe(false)
   })
 
-  it('交出去之后写明交了几件事、交给了谁、在哪看', () => {
-    expect(aiHandoffTextOf({ handler: 'zcode', detail: 'task-42', items: 3 })).toBe('已把 3 件事交给 ZCode，会话 task-42')
-    expect(aiHandoffTextOf({ handler: 'claude-terminal', detail: 'C:\\Temp\\gwb-collab-ai\\a.md', items: 1 })).toBe('已把 1 件事交给新开窗口里的 Claude Code，提示词在 C:\\Temp\\gwb-collab-ai\\a.md')
+  it('复制以后写明复制了几件事、去哪里用', () => {
+    expect(aiPromptCopiedTextOf(3)).toBe('已把 3 件事写成提示词复制下来，粘贴给你的 AI')
   })
 })
 

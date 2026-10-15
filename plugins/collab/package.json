@@ -1,7 +1,7 @@
 {
   "name": "@godcreator/gwb-collab",
   "version": "0.30.0",
-  "description": "协作站的 gwb 插件：协作窗格里管理多个项目（站点交给 gwb-docsite 初始化、托管并推送通知、提交审核、自动同步），Gitea 一有事件就经实时推送取回，项目里别的仓只取回和提醒、在项目里建仓，协作仓与别的仓此刻的状态算成通知交给网站顶部的提示栏，协作窗格里点「交给 AI 处理」时交给 ZCode（经服务 gwbZcode）或新开 Claude Code 终端窗口，新出现的通知经 gwbQqBot 私聊主人，起了 QQ 命令的项目经 gwbQqBot 注册成 QQ 任务组；查看我的待办、建改任务与模块",
+  "description": "协作站的 gwb 插件：协作窗格里管理多个项目（站点交给 gwb-docsite 初始化、托管并推送通知、提交审核、自动同步），Gitea 一有事件就经实时推送取回，项目里别的仓只取回和提醒、在项目里建仓，协作仓与别的仓此刻的状态算成通知交给网站顶部的提示栏，协作窗格与网站提示栏的「复制给 AI」把这些通知写成提示词复制下来（插件不启动任何 AI），新出现的通知经 gwbQqBot 私聊主人，起了 QQ 命令的项目经 gwbQqBot 注册成 QQ 任务组；查看我的待办、建改任务与模块",
   "type": "module",
   "exports": {
     ".": "./dist/index.js"
@@ -39,14 +39,10 @@
     "@godcreator/gwb-qq-bot": "^0.7.1",
     "@godcreator/gwb-settings": "^0.4.0",
     "@godcreator/gwb-shell": "^0.15.1",
-    "@godcreator/gwb-skills": "^0.4.12",
-    "@godcreator/gwb-zcode": "^0.4.0"
+    "@godcreator/gwb-skills": "^0.4.12"
   },
   "peerDependenciesMeta": {
     "@godcreator/gwb-qq-bot": {
-      "optional": true
-    },
-    "@godcreator/gwb-zcode": {
       "optional": true
     },
     "@godcreator/gwb-shell": {
@@ -64,7 +60,6 @@
     "@godcreator/gwb-gitea": "catalog:",
     "@godcreator/gwb-qq-bot": "catalog:",
     "@godcreator/gwb-skills": "catalog:",
-    "@godcreator/gwb-zcode": "catalog:",
     "@tailwindcss/cli": "catalog:",
     "@types/node": "catalog:gwb-host",
     "@types/react": "catalog:gwb-host",
