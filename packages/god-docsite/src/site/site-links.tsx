@@ -24,14 +24,14 @@ export type SiteLinkKind = {
 
 const PageTitlesContext = createContext<Readonly<Record<string, string>> | null>(null)
 
-/** 包住整站布局：正文与评论里的链接从这里查站内地址的标题（布局 loader 的 pageTitles） */
+/** 包住整站布局（SiteLayout 里）与不在布局里的独立页面：正文与评论里的链接从这里查站内地址的标题（loader 里 sitePageTitles 的结果） */
 export function SiteLinksProvider({ pageTitles, children }: { pageTitles: Readonly<Record<string, string>>; children: ReactNode }) {
   return <PageTitlesContext value={pageTitles}>{children}</PageTitlesContext>
 }
 
 function usePageTitles() {
   const pageTitles = use(PageTitlesContext)
-  if (!pageTitles) throw new Error('站内链接要包在 SiteLinksProvider 里：SiteLayout 已经包了，正文要渲染在 SiteLayout 里面')
+  if (!pageTitles) throw new Error('站内链接要包在 SiteLinksProvider 里：整站布局 SiteLayout 已经包了；不在整站布局里的独立页面自己包一层，pageTitles 在 loader 里用 ./server 的 sitePageTitles 取')
   return pageTitles
 }
 
