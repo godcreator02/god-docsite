@@ -9,7 +9,7 @@
     "build": "react-router build",
     "start": "react-router-serve ./build/server/index.js",
     "typecheck": "react-router typegen && tsc --noEmit",
-    "check": "react-router typegen && tsc --noEmit"
+    "check": "pnpm typecheck"
   },
   "dependencies": {
     "@fumadocs/base-ui": "catalog:",

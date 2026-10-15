@@ -10,6 +10,7 @@
     "start": "react-router-serve ./build/server/index.js",
     "typecheck": "react-router typegen && tsc --noEmit",
     "test": "vitest run",
+    "check": "pnpm typecheck && pnpm test",
     "docfirst": "docfirst",
     "doc": "docfirst check",
     "doc:confirm": "docfirst confirm",
