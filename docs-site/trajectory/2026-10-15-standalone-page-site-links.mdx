@@ -1,0 +1,30 @@
+---
+born-at: 2026-10-15T15:30
+type: choice
+parent: [2026-09-03-god-live-doc]
+label: 独立页面自己提供站内链接的上下文
+domain: 页面
+---
+
+## 背景
+
+浏览器走查时，在星轨盘（`/trajectory`）上点一张卡，地址变成 `/trajectory?card=<卡身份>`，页面报错
+「站内链接要包在 SiteLinksProvider 里」。星轨盘是 trajectory 的独立页面（`standaloneRoutes`），在整站布局 `SiteLayout` 之外；
+盘右侧展开的卡正文用站点的 MDX 组件表渲染，表里的链接组件 `a` 要从 `SiteLinksProvider` 查站内地址的标题，这份上下文只有 `SiteLayout` 提供。
+
+同一次走查还发现卡页里指向另一张卡的有效链接显示成失效：站内地址到标题的表只收内容页和页面树里的入口，不收功能路由下的卡页。
+
+## 结论与边界
+
+- 不在整站布局里的独立页面自己包一层 `SiteLinksProvider`：平台从 `./server` 导出 `sitePageTitles`（布局 loader 用的同一份计算），
+  trajectory 模板的 `disk.tsx` 在 loader 里取一份、在页面外面包上。盘上的卡正文和卡页正文显示同一种链接卡片，失效的照样标红。
+- 功能路由下的地址由功能自己登记：`feature.tsx` 导出 `linkKinds`，平台给出 `routeLinkKind({ prefix, titleOf })`；
+  trajectory 按浏览器端卡集合的加载表认卡身份。这种链接种类不读 `SiteLinksProvider`，在独立页面上也能用。
+- 用测试站的第二张卡复现：正文里加一个指向内容页的链接，旧接线下点开就报错，新接线下两个链接都是正常卡片（e2e docs 组「星轨盘上点卡片」）。
+
+## 否掉的候选
+
+- 盘上的卡正文换一套不读上下文的组件表（`a` 用普通链接）：盘上与卡页上同一张卡的链接显示不一样，指到删掉的页面也看不出来。
+- 根路由加 loader 给全站提供标题表：每次跳页都要多跑一遍，布局路由已经给了，只为少数独立页面不划算。
+- 把卡页地址并进布局 loader 的标题表：布局 loader 在平台模板里，拿不到卡集合；功能的 `layoutData` 只拿到基础站点上下文，
+  也读不到服务端的卡集合。

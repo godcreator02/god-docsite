@@ -1,6 +1,7 @@
 import { createHash } from 'node:crypto'
 import type * as PageTree from 'fumadocs-core/page-tree'
 import type { SerializedPageTree } from 'fumadocs-core/source/client'
+import type { SidebarLink } from './sidebar-links.js'
 import type { DocsiteContext, SiteLayoutData } from './site-context.js'
 
 /**
@@ -12,7 +13,7 @@ export function withContentDigestId(serialized: SerializedPageTree): SerializedP
   return { ...serialized, data: { ...serialized.data, $id: `site-tree-${digest}` } }
 }
 
-/** 页面树里名字是纯文字的链接项：页面树插件加的入口（全站评论、功能包页面）也算站内地址 */
+/** 页面树里名字是纯文字的链接项：meta.json 里写的站内链接也算站内地址 */
 function treeLinkTitlesOf(nodes: readonly PageTree.Node[]): Array<[string, string]> {
   return nodes.flatMap((node): Array<[string, string]> => {
     if (node.type === 'page') return typeof node.name === 'string' && !node.external ? [[node.url, node.name]] : []
@@ -21,16 +22,24 @@ function treeLinkTitlesOf(nodes: readonly PageTree.Node[]): Array<[string, strin
   })
 }
 
-/** 布局路由 loader 的平台部分：页面树（根 $id 是内容摘要）、站名（内容目录 meta.json 的 title）、站内地址到标题 */
-export async function siteLayoutData({ source }: Pick<DocsiteContext, 'source'>): Promise<SiteLayoutData> {
-  const tree = source.getPageTree()
-  const pageTitles = Object.fromEntries([
-    ...treeLinkTitlesOf(tree.children),
+/**
+ * 站内地址到标题：页面树里的链接项、功能的侧栏入口（featureRuntime.sidebarLinks）与全部页面；
+ * 正文链接按它显示成带标题的卡片（交给 SiteLinksProvider）
+ */
+export function sitePageTitles({ source }: Pick<DocsiteContext, 'source'>, sidebarLinks: readonly SidebarLink[]): Record<string, string> {
+  return Object.fromEntries([
+    ...treeLinkTitlesOf(source.getPageTree().children),
+    ...sidebarLinks.map((link): [string, string] => [link.url, link.name]),
     ...source.getPages().map((page): [string, string] => [page.url, page.data.title ?? page.url]),
   ])
+}
+
+/** 布局路由 loader 的平台部分：页面树（根 $id 是内容摘要）、站名（内容目录 meta.json 的 title）、站内地址到标题（含功能的侧栏入口） */
+export async function siteLayoutData({ source }: Pick<DocsiteContext, 'source'>, sidebarLinks: readonly SidebarLink[]): Promise<SiteLayoutData> {
+  const tree = source.getPageTree()
   return {
     pageTree: withContentDigestId(await source.serializePageTree(tree)),
     siteName: typeof tree.name === 'string' ? tree.name : '',
-    pageTitles,
+    pageTitles: sitePageTitles({ source }, sidebarLinks),
   }
 }

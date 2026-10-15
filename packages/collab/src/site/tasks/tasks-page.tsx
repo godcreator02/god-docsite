@@ -8,7 +8,8 @@ import { moduleColorsOf } from '../shared/module-marks.js'
 import { PageComments, type CommentBodyComponent } from '../shared/page-comments.js'
 import { Dialog } from '../shared/parts.js'
 import { CollabViewerProvider, useCanWrite, useNameOf } from '../shared/viewer.js'
-import { Board, tasksOwnedBy, type BoardFilter } from './board.js'
+import type { ModuleState } from '../../core/state.js'
+import { Board, boardFilterLabel, tasksOwnedBy, type BoardFilter } from './board.js'
 import { Gantt } from './gantt.js'
 import { NewModuleForm, NewTaskForm } from './new-record-forms.js'
 import { PeopleCards } from './people-cards.js'
@@ -24,14 +25,31 @@ function HeaderButton({ label, onClick }: { label: string; onClick: () => void }
   )
 }
 
-function PersonFilterNote({ personId, onClear }: { personId: string; onClear: () => void }) {
-  const nameOf = useNameOf()
+/** 两层筛选合成一句：人员（卡片）与模块（甘特图或看板上的筛选） */
+function boardFilterSentence(personName: string | null, filter: BoardFilter, modules: readonly ModuleState[]) {
+  const moduleScope = filter.kind === 'module' ? `在模块「${boardFilterLabel(filter, modules)}」里的` : filter.kind === 'unassigned' ? '未归入模块的' : '的'
+  if (personName === null) return filter.kind === 'module' ? `只看模块「${boardFilterLabel(filter, modules)}」里的任务` : '只看未归入模块的任务'
+  return `只看 ${personName} ${moduleScope}任务`
+}
+
+function ClearFilterButton({ label, onClick }: { label: string; onClick: () => void }) {
   return (
-    <span className="inline-flex items-center gap-2 text-[13px] text-fd-muted-foreground">
-      只看 {nameOf(personId)} 的任务
-      <button type="button" onClick={onClear} className="inline-flex h-6 items-center rounded-md border border-fd-border px-2 text-[12px] text-fd-foreground hover:bg-fd-accent">
-        取消
-      </button>
+    <button type="button" onClick={onClick} className="inline-flex h-6 items-center rounded-md border border-fd-border px-2 text-[12px] text-fd-foreground hover:bg-fd-accent">
+      {label}
+    </button>
+  )
+}
+
+/** 看板标题旁的筛选说明：写出两层筛选，每一层一个取消按钮；都没选时不显示 */
+function BoardFilterNote({ personId, filter, modules, onClearPerson, onClearModule }: { personId: string | null; filter: BoardFilter; modules: readonly ModuleState[]; onClearPerson: () => void; onClearModule: () => void }) {
+  const nameOf = useNameOf()
+  if (personId === null && filter.kind === 'all') return null
+  const personName = personId === null ? null : nameOf(personId)
+  return (
+    <span data-board-filter-note className="inline-flex flex-wrap items-center gap-2 text-[13px] text-fd-muted-foreground">
+      {boardFilterSentence(personName, filter, modules)}
+      {personName !== null && <ClearFilterButton label={`取消「${personName}」`} onClick={onClearPerson} />}
+      {filter.kind !== 'all' && <ClearFilterButton label={`取消「${boardFilterLabel(filter, modules)}」`} onClick={onClearModule} />}
     </span>
   )
 }
@@ -78,7 +96,7 @@ export function TasksView({ data, action }: { data: TasksPageData; action: strin
       <section className="grid gap-3">
         <div className="flex flex-wrap items-center gap-3">
           <h2 className="m-0 text-lg font-semibold">任务看板</h2>
-          {selectedPersonId !== null && <PersonFilterNote personId={selectedPersonId} onClear={() => setSelectedPersonId(null)} />}
+          <BoardFilterNote personId={selectedPersonId} filter={filter} modules={modules} onClearPerson={() => setSelectedPersonId(null)} onClearModule={() => setFilter({ kind: 'all' })} />
         </div>
         {tasks.length === 0 ? (
           <p className="m-0 text-[13px] text-fd-muted-foreground">还没有任务</p>

@@ -56,6 +56,13 @@ export async function runDocsChecks({ browser, baseUrl, mode, siteDir }) {
       return { pass, detail: `→ ${response?.status()}，h1=${heading}，侧栏 ${sidebars} 个，公式 ${formulas} 处，指向起始卡的链接 ${cardLinks} 个` }
     })
 
+    await check('卡页里指向另一张卡的链接显示成正常卡片（trajectory 的 linkKinds），不是失效的红色样式', async () => {
+      const link = page.locator('.prose a[href="/trajectory/2026-01-01-site-born"]')
+      const shown = await link.evaluate((element) => ({ title: element.getAttribute('title'), color: getComputedStyle(element).color, broken: element.className.includes('text-red-600') }))
+      const pass = !shown.broken && shown.title === '2026-01-01-site-born'
+      return { pass, detail: `链接 title=${shown.title}，颜色 ${shown.color}，带失效样式=${shown.broken}` }
+    })
+
     await check('卡页站内导航：点卡链接到另一张卡', async () => {
       await waitForHydrated(page, '.prose a[href="/trajectory/2026-01-01-site-born"]')
       await markNoReload(page)
@@ -86,6 +93,19 @@ export async function runDocsChecks({ browser, baseUrl, mode, siteDir }) {
       const labels = await page.locator('.star-canvas').textContent()
       const pass = response?.status() === 200 && sidebars === 0 && back === 1 && labels?.includes('第二张卡')
       return { pass, detail: `→ ${response?.status()}，侧栏 ${sidebars} 个，「← 文档」${back} 个，盘上有「第二张卡」=${labels?.includes('第二张卡')}` }
+    })
+
+    await check('星轨盘上点卡片：右侧展开卡正文，正文里的卡链接与内容页链接都是正常卡片（独立页面自己提供站内链接的上下文）', async () => {
+      const errorsBefore = problems.length
+      await page.locator('.star-canvas g.nd', { hasText: '第二张卡' }).dispatchEvent('click')
+      await page.waitForURL(`${baseUrl}/trajectory?card=2026-01-02-second`, { timeout: stepTimeoutMs })
+      const body = page.locator('.star-side-body')
+      await body.locator('a[href="/pinned"]').waitFor({ timeout: stepTimeoutMs })
+      const links = await body.locator('a').evaluateAll((anchors) => anchors.map((anchor) => ({ href: anchor.getAttribute('href'), broken: anchor.className.includes('text-red-600') })))
+      const formulas = await body.locator('.katex').count()
+      const newErrors = problems.slice(errorsBefore)
+      const pass = links.length === 2 && links.every((link) => !link.broken) && formulas > 0 && newErrors.length === 0
+      return { pass, detail: `正文链接 ${links.map((link) => `${link.href}${link.broken ? '（失效样式）' : ''}`).join('、')}，公式 ${formulas} 处，点开后新报错 ${newErrors.length} 条` }
     })
 
     if (mode === 'start') {

@@ -101,6 +101,58 @@ describe('任务页新建任务', () => {
   })
 })
 
+describe('任务看板的两层筛选', () => {
+  const module = { id: '20261001080000-mmmmmmm', author: 'admin', title: '采样', due: '2026-12-01' }
+  const tasks = [
+    { id: '20261001090000-aaaaaaa', author: 'admin', status: 'todo' as const, title: '鲍勃在模块里', owner: 'bob', module: module.id },
+    { id: '20261001090001-bbbbbbb', author: 'admin', status: 'todo' as const, title: '鲍勃没归模块', owner: 'bob' },
+    { id: '20261001090002-ccccccc', author: 'admin', status: 'doing' as const, title: '管理员在模块里', owner: 'admin', module: module.id },
+  ]
+  const pageData: TasksPageData = { siteName: '站', ...viewer, tasks, modules: [module], pages: [], comments: noComments }
+
+  const boardTitles = () => [...container.querySelectorAll('section li a')].map((link) => link.textContent).sort()
+  const filterNote = () => container.querySelector('[data-board-filter-note]')?.textContent ?? ''
+  const activeChip = () => container.querySelector('[aria-label="看板显示哪些任务"] button[aria-pressed="true"]')?.textContent ?? ''
+  const click = (selector: string, text?: string) =>
+    act(async () => [...container.querySelectorAll<HTMLButtonElement>(selector)].find((button) => text === undefined || button.textContent?.includes(text))!.click())
+
+  async function renderTasks() {
+    const Stub = createRoutesStub([
+      {
+        path: '/tasks',
+        Component: () => (
+          <CollabViewerProvider viewer={pageData}>
+            <TasksView data={pageData} action="/tasks" />
+          </CollabViewerProvider>
+        ),
+      },
+    ])
+    await act(async () => root.render(<Stub initialEntries={['/tasks']} />))
+  }
+
+  it('先点人再点模块：说明写出人和模块，选中的那个筛选的计数等于看板上的张数', async () => {
+    await renderTasks()
+    await click('button[title="只看 鲍勃 的任务"]')
+    expect(filterNote()).toContain('只看 鲍勃 的任务')
+    expect(activeChip()).toBe('全部2')
+    await click('button[title="只看这个模块的任务"]', '采样')
+    expect(boardTitles()).toEqual(['鲍勃在模块里'])
+    expect(filterNote()).toContain('只看 鲍勃 在模块「采样」里的任务')
+    expect(activeChip()).toBe('采样1')
+  })
+
+  it('只点模块不点人：说明只写模块，计数按全部人算', async () => {
+    await renderTasks()
+    await click('button[title="只看这个模块的任务"]', '采样')
+    expect(boardTitles()).toEqual(['管理员在模块里', '鲍勃在模块里'])
+    expect(filterNote()).toContain('只看模块「采样」里的任务')
+    expect(activeChip()).toBe('采样2')
+    await click('[data-board-filter-note] button', '采样')
+    expect(filterNote()).toBe('')
+    expect(boardTitles()).toHaveLength(3)
+  })
+})
+
 describe('通知栏', () => {
   it('通知与人员都由调用方传入：人名换成显示名；没有通知时不显示', async () => {
     const mention = notificationOf({ kind: 'mention', comment: 't/index.mdx', author: 'admin', page: '/tasks?comment=t', text: '@bob 看看', in: 'comment' })
