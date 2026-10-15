@@ -27,8 +27,8 @@
 ## 怎么跑
 
 * `pnpm install` 之后 `pnpm build` 按依赖序构建全部包、三个插件与两个站；站点只用各包的构建产物
-* `vite` 挂着 8.3.4 的补丁（`patches/vite@8.3.4.patch`，登记在仓根 `pnpm-workspace.yaml`）：Windows 上 Vite 对
-  `import.meta.glob` 相对 base 的处理有缺陷，成因与验证见 `probes/2610121018_vite-add-discovery`
+* 依赖不打补丁：dev 下新增内容文件的即时出现由平台包的 vite 插件负责（不再靠 vite 补丁），功能包路由经站点 `app/features/` 的接线文件登记
+  （不再靠 React Router 补丁），为什么能删见轨迹卡 `docs-site/trajectory/2026-10-15-drop-dependency-patches.mdx`
 * 站点的开发服务都交给 gwb-docsite 托管（`docsite.site.add`），不在会话里自己 `pnpm dev`；docs-site 在 4340、collab-test 在 4450。
   要写评论，开发服务的环境变量 `DOCSITE_IDENTITY_CODE` 要是站里 `people.json` 某人的码（经 gwb-docsite 启动时它自己给）
 * **站点骨架只改 `packages/god-docsite/template/`**，功能包的接线文件只改各包的 `template/`；docs-site、collab-test/site 的 `app/` 由建站器写出，

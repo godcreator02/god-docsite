@@ -89,12 +89,6 @@ catalogs:
     react: 19.2.8
     react-dom: 19.2.8
 
-# vite 8.3.4 补丁：Windows 上 import.meta.glob 相对 base 的热更新失效（运行中新增文件
-# 不进 glob 集合），成因与验证见 probes/2610121018_vite-add-discovery，上游修掉后删除
-patchedDependencies:
-  vite@8.3.4: patches/vite@8.3.4.patch
-  '@react-router/dev@8.4.0': patches/@react-router__dev@8.4.0.patch
-
 allowBuilds:
   '@parcel/watcher': false
   esbuild: true

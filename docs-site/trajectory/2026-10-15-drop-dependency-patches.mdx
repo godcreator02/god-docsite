@@ -1,0 +1,36 @@
+---
+born-at: 2026-10-15T12:40
+type: evidence
+parent: [2026-09-03-god-live-doc]
+label: 仓根的 vite 与 React Router 补丁删掉
+domain: 骨架
+---
+
+## 背景
+
+仓根 `pnpm-workspace.yaml` 登记着两份补丁：vite 8.3.4 的（Windows 上 `import.meta.glob` 相对 base 时运行中新增的文件不进集合），
+@react-router/dev 8.4.0 的（功能包路由模块的地址带 `?v=` 查询，React Router 认不出它是路由、不剥 loader）。
+新平台上这两件事已经不靠补丁：新增内容文件由平台包的 vite 插件把收集模块作废，功能包的路由经站点 `app/features/` 里的接线文件登记。
+旧站全部切到新平台、旧包删掉之后，补丁只剩仓里的 docs-site 与 collab-test 还在用。
+
+pivots-from:: [dev 内容刷新不靠旧插件](2026-10-14-dev-content-refresh-without-old-plugins.md)
+pivots-from:: [功能包原生接入](2026-10-14-functional-packages-native-wiring.md)
+
+## 结论与边界
+
+两份补丁连同 `patches/` 目录与 `patchedDependencies` 登记一起删掉，本仓装的 vite 与 @react-router/dev 都是 registry 上的原版。
+边界：只在 Windows、vite 8.3.4、@react-router/dev 8.4.0 下验过；升级这两个包后，dev 下新增内容文件与功能页的站内导航由 e2e 的
+base、demo、collab 组合重新检查。
+
+## 依据
+
+- e2e 建的站在系统临时目录、不在本仓的 pnpm 工作区里，装的本来就是没打补丁的版本：删补丁前的全量运行
+  （`pnpm e2e`，运行时刻 20261015-040656）四个组合 224 项全过，其中有 dev 下新增内容文件、侧栏站内导航到功能页、
+  功能页 loader 不进浏览器产物这几项
+- 真实 docs-site 在去掉 vite 补丁后跑过 dev：新页约 0.4 秒能打开，已打开页面的侧栏约 0.55 秒出现新条目，没有整页刷新
+  （上一轮重构里的手工测量，没有留下运行记录）
+- 删补丁的提交里重装后，docs-site 与 collab-test/site 链接到的 `vite` 与 `@react-router/dev` 目录名里都没有 `patch_hash`
+
+## 代价与遗留
+
+`probes/2610121018_vite-add-discovery` 的「升级 vite 前先跑」不再是必做步骤；上游修没修那处缺陷只影响用 glob 相对 base 的别的项目。
