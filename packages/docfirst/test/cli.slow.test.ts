@@ -1,7 +1,7 @@
 /**
  * 命令行三个动作，在临时真 git 项目里跑一遍：check 报状态、confirm 机械写回、render 出产物。
- * 三类钉各自的报法、黄灯要点名页带 --accept、红的那几处不挡别的，也在这儿。
- * 台子在 cli-project.ts；生成物在 cli-outputs.test.ts，分区与报告在 cli-report.test.ts。
+ * 三类钉码各自的报法、黄灯要点名页带 --accept、红的那几处不影响别处的写回，也在这儿。
+ * 临时项目由 cli-project.ts 建；生成物在 cli-outputs.slow.test.ts，分区与报告在 cli-report.slow.test.ts。
  */
 import { test } from "vitest";
 import assert from "node:assert/strict";

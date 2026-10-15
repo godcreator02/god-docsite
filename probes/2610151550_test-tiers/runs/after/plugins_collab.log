@@ -1,0 +1,58 @@
+
+ RUN  v5.0.3 D:/unitfolders/oz47p-docsite-kit/w12-tiers/plugins/collab
+
+ ✓ tests/organization/events/leads-changed.test.ts (2 tests) 29ms
+ ✓ tests/notifications/qq-private-chat.test.ts (11 tests) 17ms
+ ✓ tests/organization/events/ntfy-subscription.test.ts (2 tests) 32ms
+ ✓ tests/collab-repo/records/inbox.test.ts (2 tests) 25ms
+ ✓ tests/collab-repo/rules.test.ts (5 tests) 12ms
+ ✓ tests/gitea-api/repo-rules.test.ts (13 tests) 16ms
+ ✓ tests/notifications/project-notifications.test.ts (2 tests) 90ms
+(node:54544) [DEP0190] DeprecationWarning: Passing args to a child process with shell option true can lead to security vulnerabilities, as the arguments are not escaped, only concatenated.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+ ✓ tests/pane/browser/projects.test.ts (7 tests) 15ms
+ ✓ tests/project/qq-task-groups.test.ts (12 tests) 307ms
+ ✓ tests/site-process/collab-sites.test.ts (13 tests) 273ms
+ ✓ tests/gitea-api/access.test.ts (6 tests) 11ms
+ ✓ tests/organization/events/scheduler.test.ts (6 tests) 7ms
+ ✓ tests/project/account.test.ts (4 tests) 581ms
+   ✓ Gitea 账号与仓的地址 (4)
+     ✓ 联网的 git 调用：请求头只配给这个 Gitea，凭据管理器清空；git 认这种经环境变量传的配置 574ms
+ ✓ tests/organization/events/webhook.test.ts (10 tests) 16ms
+ ✓ tests/ai-handoff/prompt.test.ts (25 tests) 12ms
+ ✓ tests/collab-repo/events.test.ts (4 tests) 4ms
+ ✓ tests/project/repo-change-relay.test.ts (3 tests) 7ms
+ ✓ tests/notifications/notifications-of.test.ts (5 tests) 12ms
+ ✓ tests/site-process/dependencies.test.ts (7 tests) 811ms
+   ✓ pnpm install (3)
+     ✓ 没有依赖的 package.json：装完回 pnpm 输出的最后几行 518ms
+ ✓ tests/organization/events/messages.test.ts (4 tests) 6ms
+ ✓ tests/ai-handoff/zcode.test.ts (3 tests) 11ms
+ ✓ tests/gitea-api/gitea.test.ts (11 tests) 17ms
+ ✓ tests/commands.test.ts (7 tests) 4ms
+ ✓ tests/organization/events/project-step-runner.test.ts (4 tests) 6ms
+ ✓ tests/collab-repo/leads.test.ts (1 test) 6ms
+ ✓ tests/collab-repo/submit/submit-failures.test.ts (1 test) 5ms
+ ✓ tests/pane/summary.test.ts (2 tests) 1319ms
+   ✓ 窗格里一个项目的一行 (2)
+     ✓ 项目名、身份与显示名、通知各组几条、Gitea 上组织的页面 615ms
+     ✓ site/content/meta.json 有 title 就用它作站名；origin 不是 Gitea 上仓的地址照实报错 703ms
+ ✓ tests/collab-repo/records/records.test.ts (51 tests) 1696ms
+   ✓ 认人 (3)
+     ✓ 身份是本 home 的身份码在 site/people.json 里对应的那个人 372ms
+     ✓ 身份码不在人员列表里：拒绝，写明用 collab.project.join 加进去 433ms
+ ✓ tests/collab-repo/sync/watch.test.ts (2 tests) 2409ms
+   ✓ 盯协作仓 (2)
+     ✓ 开始时算一次；保存了文件、提交了、切了分支都重算再交 2406ms
+ ✓ tests/collab-repo/submit/revision-files.test.ts (3 tests) 2704ms
+   ✓ 从 git 的某个版本读记录 (3)
+     ✓ 读出那个版本里的 collab/ 与 site/people.json，工作区后来的改动不算 1596ms
+     ✓ 那个版本里没有人员列表：people 为 null 749ms
+     ✓ 版本不存在就报错，并带上 git 的原话 358ms
+
+ Test Files  30 passed (30)
+      Tests  228 passed (228)
+   Start at  16:11:22
+   Duration  3.75s (import 54%, tests 35%, transform 10%, worker 1%)
+
+JSON report written to C:/Users/godamericatb14/AppData/Local/Temp/claude/D--unitfolders-oz47p-docsite-kit/2c209786-8905-4a30-905b-30324e0263c9/scratchpad/after/plugins_collab.json

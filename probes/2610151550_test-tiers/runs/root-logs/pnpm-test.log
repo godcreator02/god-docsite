@@ -1,0 +1,162 @@
+$ pnpm -r test
+Scope: 14 of 15 workspace projects
+packages/identity test$ vitest run
+packages/code-pin test$ vitest run
+packages/god-docsite test$ vitest run
+packages/explainer test$ vitest run
+packages/god-docsite test: 
+packages/god-docsite test:  RUN  v5.0.3 D:/unitfolders/oz47p-docsite-kit/w12-tiers/packages/god-docsite
+packages/god-docsite test: 
+packages/identity test: 
+packages/identity test:  RUN  v5.0.3 D:/unitfolders/oz47p-docsite-kit/w12-tiers/packages/identity
+packages/identity test: 
+packages/code-pin test: 
+packages/explainer test: 
+packages/code-pin test:  RUN  v5.0.3 D:/unitfolders/oz47p-docsite-kit/w12-tiers/packages/code-pin
+packages/code-pin test: 
+packages/explainer test:  RUN  v5.0.3 D:/unitfolders/oz47p-docsite-kit/w12-tiers/packages/explainer
+packages/explainer test: 
+packages/explainer test: 
+packages/explainer test:  Test Files  3 passed (3)
+packages/explainer test:       Tests  17 passed (17)
+packages/explainer test:    Start at  16:23:01
+packages/explainer test:    Duration  994ms (transform 65%, import 24%, tests 7%, worker 3%)
+packages/explainer test: 
+packages/identity test: 
+packages/identity test:  Test Files  6 passed (6)
+packages/identity test:       Tests  32 passed (32)
+packages/identity test:    Start at  16:23:01
+packages/identity test:    Duration  1.03s (tests 39%, transform 37%, import 21%, worker 3%)
+packages/identity test: 
+packages/explainer test: Done
+packages/trajectory test$ vitest run
+packages/identity test: Done
+packages/comments test$ vitest run
+packages/comments test: 
+packages/comments test:  RUN  v5.0.3 D:/unitfolders/oz47p-docsite-kit/w12-tiers/packages/comments
+packages/comments test: 
+packages/trajectory test: 
+packages/trajectory test:  RUN  v5.0.3 D:/unitfolders/oz47p-docsite-kit/w12-tiers/packages/trajectory
+packages/trajectory test: 
+packages/god-docsite test: 
+packages/god-docsite test:  Test Files  15 passed (15)
+packages/god-docsite test:       Tests  100 passed (100)
+packages/god-docsite test:    Start at  16:23:01
+packages/god-docsite test:    Duration  2.63s (import 59%, transform 21%, tests 19%, worker 1%)
+packages/god-docsite test: 
+packages/god-docsite test: Done
+packages/code-pin test: 
+packages/code-pin test:  Test Files  8 passed (8)
+packages/code-pin test:       Tests  81 passed (81)
+packages/code-pin test:    Start at  16:23:01
+packages/code-pin test:    Duration  3.91s (import 58%, tests 31%, transform 10%)
+packages/code-pin test: 
+packages/code-pin test: Done
+packages/doc-export test$ vitest run
+packages/trajectory test: 
+packages/trajectory test:  Test Files  12 passed (12)
+packages/trajectory test:       Tests  131 passed (131)
+packages/trajectory test:    Start at  16:23:03
+packages/trajectory test:    Duration  1.98s (import 51%, transform 27%, tests 21%, worker 1%)
+packages/trajectory test: 
+packages/trajectory test:   Transform  transforming modules took 2.42s · 27% of tracked time, re-done on every run
+packages/trajectory test:              persist transforms across runs with fsModuleCache: true
+packages/trajectory test:              learn more: https://vitest.dev/guide/improving-performance#caching-between-reruns
+packages/trajectory test: 
+packages/trajectory test: Done
+packages/doc-export test: 
+packages/doc-export test:  RUN  v5.0.3 D:/unitfolders/oz47p-docsite-kit/w12-tiers/packages/doc-export
+packages/doc-export test: 
+packages/comments test: 
+packages/comments test:  Test Files  9 passed (9)
+packages/comments test:       Tests  53 passed (53)
+packages/comments test:    Start at  16:23:03
+packages/comments test:    Duration  2.41s (environment 75%, import 10%, transform 7%, tests 7%)
+packages/comments test: 
+packages/comments test: Done
+plugins/docsite test$ vitest run
+packages/collab test$ vitest run
+packages/collab test: 
+packages/collab test:  RUN  v5.0.3 D:/unitfolders/oz47p-docsite-kit/w12-tiers/packages/collab
+packages/collab test: 
+plugins/docsite test: 
+plugins/docsite test:  RUN  v5.0.3 D:/unitfolders/oz47p-docsite-kit/w12-tiers/plugins/docsite
+plugins/docsite test: 
+packages/doc-export test: 
+packages/doc-export test:  Test Files  4 passed (4)
+packages/doc-export test:       Tests  31 passed (31)
+packages/doc-export test:    Start at  16:23:06
+packages/doc-export test:    Duration  1.23s (import 78%, tests 12%, transform 10%)
+packages/doc-export test: 
+packages/doc-export test: Done
+packages/docfirst test$ vitest run
+packages/docfirst test: 
+packages/docfirst test:  RUN  v5.0.3 D:/unitfolders/oz47p-docsite-kit/w12-tiers/packages/docfirst
+packages/docfirst test: 
+plugins/docsite test: 
+plugins/docsite test:  Test Files  3 passed (3)
+plugins/docsite test:       Tests  23 passed (23)
+plugins/docsite test:    Start at  16:23:06
+plugins/docsite test:    Duration  2.36s (tests 75%, transform 14%, import 10%, worker 1%)
+plugins/docsite test: 
+plugins/docsite test:     Isolate  3 workers spawned · ~241ms startup each (spawn + environment, per file)
+plugins/docsite test:              at least ~481ms faster with isolate: false — reuses workers across files instead of one per file
+plugins/docsite test: 
+plugins/docsite test: Done
+packages/docfirst test: 
+packages/docfirst test:  Test Files  2 passed (2)
+packages/docfirst test:       Tests  14 passed (14)
+packages/docfirst test:    Start at  16:23:08
+packages/docfirst test:    Duration  1.67s (import 61%, tests 26%, transform 13%)
+packages/docfirst test: 
+packages/docfirst test: Done
+plugins/docfirst test$ vitest run --passWithNoTests
+docs-site test$ vitest run
+docs-site test: 
+docs-site test:  RUN  v5.0.3 D:/unitfolders/oz47p-docsite-kit/w12-tiers/docs-site
+docs-site test: 
+plugins/docfirst test: 
+plugins/docfirst test:  RUN  v5.0.3 D:/unitfolders/oz47p-docsite-kit/w12-tiers/plugins/docfirst
+plugins/docfirst test: 
+packages/collab test: 
+packages/collab test:  Test Files  19 passed (19)
+packages/collab test:       Tests  207 passed (207)
+packages/collab test:    Start at  16:23:06
+packages/collab test:    Duration  4.23s (import 54%, tests 20%, transform 16%, environment 9%, worker 1%)
+packages/collab test: 
+packages/collab test: Done
+plugins/collab test$ vitest run && node -e "console.log('跳过慢的一级 *.slow.test.ts（pnpm test:slow）与 tests/verified/ 的已验证行为批（升 git/动对应模块/发版前/用户指定时要跑 pnpm test:verified）')"
+plugins/collab test: 
+plugins/collab test:  RUN  v5.0.3 D:/unitfolders/oz47p-docsite-kit/w12-tiers/plugins/collab
+plugins/collab test: 
+plugins/docfirst test: 
+plugins/docfirst test:  Test Files  5 passed (5)
+plugins/docfirst test:       Tests  33 passed (33)
+plugins/docfirst test:    Start at  16:23:10
+plugins/docfirst test:    Duration  1.35s (tests 44%, transform 27%, import 23%, worker 6%)
+plugins/docfirst test: 
+plugins/docfirst test:     Isolate  5 workers spawned · ~179ms startup each (spawn + environment, per file)
+plugins/docfirst test:              at least ~718ms faster with isolate: false — reuses workers across files instead of one per file
+plugins/docfirst test: 
+plugins/docfirst test: Done
+plugins/collab test: (node:56672) [DEP0190] DeprecationWarning: Passing args to a child process with shell option true can lead to security vulnerabilities, as the arguments are not escaped, only concatenated.
+plugins/collab test: (Use `node --trace-deprecation ...` to show where the warning was created)
+docs-site test: 
+docs-site test:  Test Files  1 passed (1)
+docs-site test:       Tests  5 passed (5)
+docs-site test:    Start at  16:23:10
+docs-site test:    Duration  4.77s (import 68%, transform 31%)
+docs-site test: 
+docs-site test: Done
+plugins/collab test: 
+plugins/collab test:  Test Files  30 passed (30)
+plugins/collab test:       Tests  228 passed (228)
+plugins/collab test:    Start at  16:23:11
+plugins/collab test:    Duration  4.15s (import 57%, tests 33%, transform 9%, worker 1%)
+plugins/collab test: 
+plugins/collab test:      Import  94 modules were evaluated 533 times · 18.06s total, 57% of tracked time
+plugins/collab test:              ~269ms faster with isolate: false — shared modules are evaluated once per worker instead of once per file
+plugins/collab test:              learn more: https://vitest.dev/guide/improving-performance#test-isolation
+plugins/collab test: 
+plugins/collab test: 跳过慢的一级 *.slow.test.ts（pnpm test:slow）与 tests/verified/ 的已验证行为批（升 git/动对应模块/发版前/用户指定时要跑 pnpm test:verified）
+plugins/collab test: Done

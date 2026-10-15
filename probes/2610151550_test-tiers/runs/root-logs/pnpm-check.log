@@ -1,0 +1,162 @@
+$ pnpm -r --workspace-concurrency=1 check
+$ pnpm typecheck && pnpm test
+$ tsc -p tsconfig.json
+$ vitest run
+
+ RUN  v5.0.3 D:/unitfolders/oz47p-docsite-kit/w12-tiers/packages/code-pin
+
+
+ Test Files  8 passed (8)
+      Tests  81 passed (81)
+   Start at  16:23:18
+   Duration  1.72s (import 68%, tests 22%, transform 10%, worker 1%)
+
+$ pnpm typecheck && pnpm test && pnpm lint
+$ tsc -p tsconfig.json
+$ vitest run
+
+ RUN  v5.0.3 D:/unitfolders/oz47p-docsite-kit/w12-tiers/packages/explainer
+
+
+ Test Files  3 passed (3)
+      Tests  17 passed (17)
+   Start at  16:23:21
+   Duration  344ms (transform 51%, import 35%, tests 10%, worker 4%)
+
+$ oxlint . --deny-warnings
+$ pnpm typecheck && pnpm test && pnpm lint
+$ tsc -p tsconfig.json
+$ vitest run
+
+ RUN  v5.0.3 D:/unitfolders/oz47p-docsite-kit/w12-tiers/packages/god-docsite
+
+
+ Test Files  15 passed (15)
+      Tests  100 passed (100)
+   Start at  16:23:26
+   Duration  1.36s (import 61%, tests 22%, transform 15%, worker 1%)
+
+$ oxlint . --deny-warnings
+$ pnpm typecheck && pnpm test && pnpm lint
+$ tsc -p tsconfig.json
+$ vitest run
+
+ RUN  v5.0.3 D:/unitfolders/oz47p-docsite-kit/w12-tiers/packages/identity
+
+
+ Test Files  6 passed (6)
+      Tests  32 passed (32)
+   Start at  16:23:29
+   Duration  418ms (transform 44%, import 35%, tests 17%, worker 4%)
+
+$ oxlint . --deny-warnings
+$ pnpm typecheck && pnpm test
+$ tsc -p tsconfig.json
+$ vitest run
+
+ RUN  v5.0.3 D:/unitfolders/oz47p-docsite-kit/w12-tiers/packages/trajectory
+
+
+ Test Files  12 passed (12)
+      Tests  131 passed (131)
+   Start at  16:23:33
+   Duration  1.47s (import 63%, tests 22%, transform 13%, worker 1%)
+
+$ pnpm typecheck && pnpm test
+$ tsc -p tsconfig.json
+$ vitest run
+
+ RUN  v5.0.3 D:/unitfolders/oz47p-docsite-kit/w12-tiers/packages/doc-export
+
+
+ Test Files  4 passed (4)
+      Tests  31 passed (31)
+   Start at  16:23:36
+   Duration  1.04s (import 81%, transform 9%, tests 9%, worker 1%)
+
+$ pnpm typecheck && pnpm test && pnpm lint
+$ tsc -p tsconfig.json
+$ vitest run
+
+ RUN  v5.0.3 D:/unitfolders/oz47p-docsite-kit/w12-tiers/packages/comments
+
+
+ Test Files  9 passed (9)
+      Tests  53 passed (53)
+   Start at  16:23:40
+   Duration  1.66s (environment 77%, import 11%, transform 7%, tests 5%, worker 1%)
+
+$ oxlint . --deny-warnings
+$ pnpm typecheck && pnpm test
+$ tsc -p tsconfig.json
+$ vitest run
+
+ RUN  v5.0.3 D:/unitfolders/oz47p-docsite-kit/w12-tiers/packages/docfirst
+
+
+ Test Files  2 passed (2)
+      Tests  14 passed (14)
+   Start at  16:23:43
+   Duration  1.30s (import 57%, tests 29%, transform 14%)
+
+$ pnpm typecheck && pnpm test && pnpm lint
+$ tsc -p tsconfig.json && tsc -p test/template-site/tsconfig.json
+$ vitest run
+
+ RUN  v5.0.3 D:/unitfolders/oz47p-docsite-kit/w12-tiers/packages/collab
+
+
+ Test Files  19 passed (19)
+      Tests  207 passed (207)
+   Start at  16:23:49
+   Duration  3.22s (import 54%, tests 19%, transform 17%, environment 8%, worker 1%)
+
+$ oxlint . --deny-warnings
+$ pnpm typecheck && pnpm test && pnpm lint
+$ tsc --noEmit -p tsconfig.json
+$ vitest run
+
+ RUN  v5.0.3 D:/unitfolders/oz47p-docsite-kit/w12-tiers/plugins/docsite
+
+
+ Test Files  3 passed (3)
+      Tests  23 passed (23)
+   Start at  16:23:55
+   Duration  1.23s (tests 68%, transform 17%, import 13%, worker 1%)
+
+$ oxlint . --deny-warnings
+$ pnpm typecheck
+$ react-router typegen && tsc --noEmit
+[MDX] generated files in 2.9674999999999727ms
+$ pnpm typecheck && pnpm test && pnpm lint
+$ tsc --noEmit -p tsconfig.json && tsc --noEmit -p src/pane/browser/tsconfig.json
+$ vitest run && node -e "console.log('跳过慢的一级 *.slow.test.ts（pnpm test:slow）与 tests/verified/ 的已验证行为批（升 git/动对应模块/发版前/用户指定时要跑 pnpm test:verified）')"
+
+ RUN  v5.0.3 D:/unitfolders/oz47p-docsite-kit/w12-tiers/plugins/collab
+
+(node:58968) [DEP0190] DeprecationWarning: Passing args to a child process with shell option true can lead to security vulnerabilities, as the arguments are not escaped, only concatenated.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+
+ Test Files  30 passed (30)
+      Tests  228 passed (228)
+   Start at  16:24:03
+   Duration  3.59s (import 57%, tests 34%, transform 8%, worker 1%)
+
+跳过慢的一级 *.slow.test.ts（pnpm test:slow）与 tests/verified/ 的已验证行为批（升 git/动对应模块/发版前/用户指定时要跑 pnpm test:verified）
+$ oxlint . --deny-warnings
+$ pnpm typecheck && pnpm test && pnpm lint
+$ tsc --noEmit -p tsconfig.json
+$ vitest run --passWithNoTests
+
+ RUN  v5.0.3 D:/unitfolders/oz47p-docsite-kit/w12-tiers/plugins/docfirst
+
+
+ Test Files  5 passed (5)
+      Tests  33 passed (33)
+   Start at  16:24:09
+   Duration  949ms (tests 41%, transform 29%, import 25%, worker 5%)
+
+    Isolate  5 workers spawned · ~125ms startup each (spawn + environment, per file)
+             at least ~498ms faster with isolate: false — reuses workers across files instead of one per file
+
+$ oxlint . --deny-warnings

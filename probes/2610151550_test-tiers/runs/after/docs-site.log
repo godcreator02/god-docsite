@@ -1,0 +1,49 @@
+
+ RUN  v5.0.3 D:/unitfolders/oz47p-docsite-kit/w12-tiers/docs-site
+
+ ❯ tests/page.test.mjs (5 tests | 1 failed) 19ms
+   ✓ 站里得有文档；每篇要么钉了源码，要么 frontmatter 明说 docfirst: none 或 draft 6ms
+   ✓ 每处钉码换成一个钉码外框：外框的状态跟核对结果一致、顺序一致 2ms
+   ✓ 页面里写的组件都有来处：站内组件在页面开头 import，其余在站点的 MDX 组件表里 2ms
+   × 这个站自己的文档全是绿的：写下的钉码跟源码没脱节 5ms
+   ✓ 讲解组件的源码也进现状区，里面写的钉码全是绿的 2ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/page.test.mjs > 这个站自己的文档全是绿的：写下的钉码跟源码没脱节
+AssertionError: content/maintain/index.mdx 有钉码不是新鲜的——运行 pnpm doc 看看
++ actual - expected
+
+  [
++   'changed',
+    'fresh',
+-   'fresh'
+  ]
+
+
+- Expected
++ Received
+
+  [
+-   "fresh",
++   "changed",
+    "fresh",
+  ]
+
+ ❯ tests/page.test.mjs:100:12
+     98| test("这个站自己的文档全是绿的：写下的钉码跟源码没脱节", () => {
+     99|   for (const [doc, page] of pages) {
+    100|     assert.deepEqual(
+       |            ^
+    101|       page.listing.checks.map((check) => check.status),
+    102|       page.listing.checks.map(() => "fresh"),
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 4 passed (5)
+   Start at  16:11:26
+   Duration  3.06s (import 70%, transform 29%, tests 1%)
+
+JSON report written to C:/Users/godamericatb14/AppData/Local/Temp/claude/D--unitfolders-oz47p-docsite-kit/2c209786-8905-4a30-905b-30324e0263c9/scratchpad/after/docs-site.json

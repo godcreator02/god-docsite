@@ -36,12 +36,28 @@
   改了模板用建站器重新生成它们。`pnpm test:scaffold`（几秒钟）比对两个站和建站器生成的是否一致，站点自己维护的文件名单写在 `tests/scaffold-check.mjs` 里
 * 插件打包时带进各包的构建产物：改了包要先构建；在隔离 home 里验插件用 `devkit.dev`（说明书 gwb-devkit）
 * 每个包都有 `build`、`typecheck`、`test`、`check`（`check` 先 typecheck 再 test，有 `lint` 的再 lint）；仓根 `pnpm check` 逐个包跑 check
-  （`--workspace-concurrency=1`：几个包的测试大量调 git，并行时超时；docs-site 没有 check，它的检查见下），
+  （`--workspace-concurrency=1`：几个包的测试调真实 git，并行时超时；docs-site 没有 check，它的检查见下），
   `pnpm test` 是 `pnpm -r test`，`pnpm test:deps` 按 `tests/dependency-rules.cjs` 跑 dependency-cruiser（要先 `pnpm build`，包之间按包名 import 时解析到对方的 `dist/`；
   没有豁免清单，报出来的每一条都要改掉）
-* 测试按节奏跑：改代码、交回、合并分支的过程中只跑改到的包（`pnpm --filter <包> check`），改了模板再跑 `pnpm test:scaffold`，不跑全量；
-  **全量 `pnpm verify` 只在最终交付之前跑一次**（发版前、推送前、交给人验收前）：`pnpm build` → `pnpm check` → `pnpm test:deps` → `pnpm test:scaffold` → `pnpm test:e2e`（`--skip-build`，不再重复构建），
-  要五六分钟，大头是各包的 check（gwb-docsite 有一条真建站的测试、gwb-collab 大量调 git）与构建。
+* **测试分级，慢的只有显式命令才跑**：
+
+  | 级别 | 内容 | 怎么跑 |
+  | --- | --- | --- |
+  | 快 | 各包的单元测试 | 默认：各包 `pnpm test` / `pnpm check`，仓根 `pnpm test` / `pnpm check`。仓根 `pnpm check` 一分钟左右，其中测试半分钟 |
+  | 慢 | 各包里的 `*.slow.test.ts` | 只有显式 `pnpm test:slow`：包里跑本包的，仓根逐个包跑（`--workspace-concurrency=1`），近三分钟 |
+  | 全仓·快 | `pnpm test:deps`、`pnpm test:scaffold` | 显式命令，各几秒钟 |
+  | 全仓·慢 | `pnpm test:e2e`、`pnpm test:pack` | 显式命令，见下 |
+  | 行为假设 | `plugins/collab` 的 `tests/verified/` | `pnpm test:verified`，只在下面写的四种信号下跑 |
+
+  慢的标准：真建站、装依赖、构建、起服务的；或者单独运行这个文件（`pnpm exec vitest run <文件>`）时，vitest 报告里这个文件的耗时（不含启动与 import）超过 2 秒——
+  多是每条测试都建临时 git 仓、调几十次 git 或起子进程的。慢的文件名写成 `*.slow.test.ts`：包里的 `vitest.config.ts` 在 `exclude` 里排除它们，
+  `vitest.slow.config.ts` 只收它们，`test:slow` 就是 `vitest run --config vitest.slow.config.ts`。一个文件里快慢混着、把慢的几条挪出去就能让剩下的进快的一级时，
+  把那几条挪进单独的 `.slow.test.ts`（只挪，不改断言）。现在有慢测试的包是 code-pin、collab、docfirst、gwb-docsite、gwb-collab；
+  给别的包加第一个慢测试时，同时加 `vitest.slow.config.ts` 与 `test:slow`（仓根 `pnpm test:slow` 跳过没有这条脚本的包）。新写的测试照这个标准量一次再定放哪一级
+* 测试按节奏跑：改代码、交回、合并分支的过程中只跑改到的包（`pnpm --filter <包> check`）；改动碰到了某个慢测试测的代码，交回前再跑那个包的
+  `pnpm --filter <包> test:slow`；改了模板再跑 `pnpm test:scaffold`，不跑全量。
+  **全量 `pnpm verify` 只在最终交付之前跑一次**（发版前、推送前、交给人验收前）：`pnpm build` → `pnpm check` → `pnpm test:slow` → `pnpm test:deps` → `pnpm test:scaffold` → `pnpm test:e2e`（`--skip-build`，不再重复构建），
+  要五六分钟，最耗时的是 `pnpm test:slow`（gwb-collab 一分多钟、gwb-docsite 那条真建站的四十秒）与构建。
   `pnpm test:e2e` 不建站、不装依赖，直接测 collab-test，一分钟左右；它在站里新建的评论、任务、临时内容页都带本次运行编号，每轮跑完删掉，
   最后一项检查 `git status collab-test` 和跑之前一样（多出、少了的路径会列出来）。日志与 `report.json` 在 `%TEMP%/god-docsite-e2e/repo-<运行时刻>/`。
   `docs-site/` 里 `pnpm docfirst check`、`pnpm typecheck`、`pnpm build`；

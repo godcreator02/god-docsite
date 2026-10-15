@@ -1,0 +1,27 @@
+[
+  {
+    "pkg": "packages/code-pin",
+    "exit": 0,
+    "secs": 13.3
+  },
+  {
+    "pkg": "packages/collab",
+    "exit": 0,
+    "secs": 14.7
+  },
+  {
+    "pkg": "packages/docfirst",
+    "exit": 0,
+    "secs": 9.3
+  },
+  {
+    "pkg": "plugins/docsite",
+    "exit": 0,
+    "secs": 40.7
+  },
+  {
+    "pkg": "plugins/collab",
+    "exit": 0,
+    "secs": 76.9
+  }
+]

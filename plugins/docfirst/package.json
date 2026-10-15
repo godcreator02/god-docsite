@@ -24,8 +24,7 @@
     "build": "node build.ts && tsc -p tsconfig.build.json",
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "lint": "oxlint . --deny-warnings",
-    "test": "vitest run --passWithNoTests --tags-filter=!slow",
-    "test:all": "vitest run --passWithNoTests",
+    "test": "vitest run --passWithNoTests",
     "check": "pnpm typecheck && pnpm test && pnpm lint",
     "prepublishOnly": "pnpm build"
   },

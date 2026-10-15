@@ -1,5 +1,5 @@
 import path from 'node:path'
-import { defineConfig } from 'vitest/config'
+import { configDefaults, defineConfig } from 'vitest/config'
 
 const src = (file: string) => path.resolve(import.meta.dirname, 'src', file)
 
@@ -15,5 +15,7 @@ export default defineConfig({
   },
   test: {
     include: ['test/**/*.test.{ts,tsx}'],
+    // *.slow.test.* 是慢的一级（大量调真实 git），默认不跑，只由 pnpm test:slow（vitest.slow.config.ts）跑
+    exclude: [...configDefaults.exclude, '**/*.slow.test.*'],
   },
 })

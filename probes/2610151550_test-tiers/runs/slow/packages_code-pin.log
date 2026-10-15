@@ -1,0 +1,37 @@
+
+ RUN  v5.0.3 D:/unitfolders/oz47p-docsite-kit/w12-tiers/packages/code-pin
+
+ ✓ test/workspace.slow.test.ts (4 tests) 3128ms
+   ✓ 工作区：check 只读不写；confirm 有改动才写回文档 395ms
+   ✓ 未提交改动探针：被钉文件改了没提交、只暂存了都算；提交之后不算 1133ms
+   ✓ 未提交改动探针：目录树里多了未跟踪的文件算；被钉文件在别的仓里不算 982ms
+   ✓ 未提交改动探针：一个探针里每个仓只问一次 git status 616ms
+ ✓ test/reader-tree.slow.test.ts (7 tests) 4835ms
+   ✓ 目录树：清单按 .gitignore 过滤，多文件黄、改文件内容不算变 984ms
+   ✓ 目录目标就是仓根：.gitignore 照样过滤——仓从目录自身起找，不先跳一级 602ms
+   ✓ 目录目标是仓根、往下走几层：嵌套层的忽略项同样过滤，忽略的目录不往里走 673ms
+   ✓ 目录本身没被忽略、里面全是被忽略的文件：目录照列，文件不列 613ms
+   ✓ 被忽略的目录里有强制加进来的已跟踪文件：目录与那个文件照列 794ms
+   ✓ 目录目标本身落在被忽略的目录里：整棵都算被忽略，清单是空的 571ms
+   ✓ 软链接按真实路径读：node_modules 里指向工作区目录的链接，读得到内容、钉得住 595ms
+ ✓ test/git-history.slow.test.ts (13 tests) 12149ms
+   ✓ 确认不要求先提交：改了没提交、未跟踪的文件都记得下，一次 git 都不起 377ms
+   ✓ 记下的 blob 名就是这份内容提交后的 blob 名（前 12 位） 433ms
+   ✓ 行段跟随：上面插几行，段按 hunk 跟到新位置；确认写回新行号 634ms
+   ✓ 有变动：黄，带给人看的对比和从 blob 取回的旧段 427ms
+   ✓ 整段删光：红 vanished，旧段还能从 blob 取回来；文件没了：红 file-missing，旧段照样取得回 414ms
+   ✓ 确认之后没提交又改了：记录里的 blob 不在对象库，退回滑窗——挪了位置照样绿，改了是位置不明的黄 552ms
+   ✓ 内容一字没变就不问对象库：记录里的 blob 被删掉了，照样判绿 356ms
+   ✓ 同一个 blob 只从对象库取一次：取过之后对象没了，旧段照样给得出来 404ms
+   ✓ 取旧内容：缩写不在对象库、缩写有歧义都给 null，不抛错 5537ms
+   ✓ 项目根是 git 的子目录：按文件自己的位置找仓，照样取得到旧内容 361ms
+   ✓ 整文件：末尾追加也黄，对比是整份对整份；行段版对同一改动是绿的 321ms
+   ✓ 仓按 autocrlf 存 LF、工作区是 CRLF：blob 名照样对得上，旧内容取得到 455ms
+   ✓ git 那份与取不到旧内容的：同一串改动下状态一致 1874ms
+
+ Test Files  3 passed (3)
+      Tests  24 passed (24)
+   Start at  16:11:30
+   Duration  12.86s (tests 93%, import 6%, transform 1%)
+
+JSON report written to C:/Users/godamericatb14/AppData/Local/Temp/claude/D--unitfolders-oz47p-docsite-kit/2c209786-8905-4a30-905b-30324e0263c9/scratchpad/slow/packages_code-pin.json

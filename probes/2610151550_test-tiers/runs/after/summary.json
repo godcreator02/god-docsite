@@ -1,0 +1,67 @@
+[
+  {
+    "pkg": "packages/god-docsite",
+    "exit": 0,
+    "secs": 2.3
+  },
+  {
+    "pkg": "packages/identity",
+    "exit": 0,
+    "secs": 0.9
+  },
+  {
+    "pkg": "packages/explainer",
+    "exit": 0,
+    "secs": 1.0
+  },
+  {
+    "pkg": "packages/code-pin",
+    "exit": 0,
+    "secs": 2.4
+  },
+  {
+    "pkg": "packages/trajectory",
+    "exit": 0,
+    "secs": 1.8
+  },
+  {
+    "pkg": "packages/comments",
+    "exit": 0,
+    "secs": 2.5
+  },
+  {
+    "pkg": "packages/doc-export",
+    "exit": 0,
+    "secs": 1.7
+  },
+  {
+    "pkg": "packages/collab",
+    "exit": 0,
+    "secs": 4.0
+  },
+  {
+    "pkg": "packages/docfirst",
+    "exit": 0,
+    "secs": 2.0
+  },
+  {
+    "pkg": "plugins/docsite",
+    "exit": 0,
+    "secs": 2.2
+  },
+  {
+    "pkg": "plugins/docfirst",
+    "exit": 0,
+    "secs": 1.6
+  },
+  {
+    "pkg": "plugins/collab",
+    "exit": 0,
+    "secs": 4.4
+  },
+  {
+    "pkg": "docs-site",
+    "exit": 1,
+    "secs": 3.6
+  }
+]

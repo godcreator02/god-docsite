@@ -1,0 +1,16 @@
+
+ RUN  v5.0.3 D:/unitfolders/oz47p-docsite-kit/w12-tiers/plugins/docsite
+
+ ✓ tests/scaffold-add-feature.test.ts (4 tests) 343ms
+ ✓ tests/scaffold-create.test.ts (4 tests) 207ms
+ ✓ tests/site-host.test.ts (15 tests) 127ms
+
+ Test Files  3 passed (3)
+      Tests  23 passed (23)
+   Start at  16:11:18
+   Duration  1.55s (tests 64%, transform 19%, import 15%, worker 1%)
+
+    Isolate  3 workers spawned · ~156ms startup each (spawn + environment, per file)
+             at least ~312ms faster with isolate: false — reuses workers across files instead of one per file
+
+JSON report written to C:/Users/godamericatb14/AppData/Local/Temp/claude/D--unitfolders-oz47p-docsite-kit/2c209786-8905-4a30-905b-30324e0263c9/scratchpad/after/plugins_docsite.json

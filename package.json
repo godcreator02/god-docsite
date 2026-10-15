@@ -7,11 +7,12 @@
     "build": "pnpm -r build",
     "test": "pnpm -r test",
     "check": "pnpm -r --workspace-concurrency=1 check",
+    "test:slow": "pnpm -r --workspace-concurrency=1 test:slow",
     "test:e2e": "node tests/e2e/run.mjs",
     "test:pack": "node tests/e2e/pack.mjs",
     "test:scaffold": "node tests/scaffold-check.mjs",
     "test:deps": "depcruise \"packages/*/src\" \"plugins/*/src\" --config tests/dependency-rules.cjs",
-    "verify": "pnpm build && pnpm check && pnpm test:deps && pnpm test:scaffold && pnpm test:e2e --skip-build"
+    "verify": "pnpm build && pnpm check && pnpm test:slow && pnpm test:deps && pnpm test:scaffold && pnpm test:e2e --skip-build"
   },
   "engines": {
     "node": ">=24"

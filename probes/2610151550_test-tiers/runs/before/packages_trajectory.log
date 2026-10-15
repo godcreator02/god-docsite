@@ -1,0 +1,23 @@
+
+ RUN  v5.0.3 D:/unitfolders/oz47p-docsite-kit/w12-tiers/packages/trajectory
+
+ ✓ test/trajectory-card-bodies.test.ts (3 tests) 13ms
+ ✓ test/trajectory-chains.test.ts (7 tests) 37ms
+ ✓ test/trajectory-model.test.ts (27 tests) 68ms
+ ✓ test/trajectory-scan.test.ts (4 tests) 86ms
+ ✓ test/trajectory-parse.test.ts (24 tests) 33ms
+ ✓ test/trajectory-layout.test.ts (18 tests) 26ms
+ ✓ test/trajectory-validate.test.ts (7 tests) 51ms
+ ✓ test/trajectory-canvas.test.ts (12 tests) 10ms
+ ✓ test/trajectory-react.test.ts (3 tests) 133ms
+ ✓ test/trajectory-server.test.ts (11 tests) 16ms
+ ✓ test/template.test.ts (6 tests) 810ms
+   ✓ mdx.ts 的集合工厂：名单跟 package.json 的 godDocsite.collections 一致，站点的全站插件并进卡集合的 mdx 选项 771ms
+ ✓ test/trajectory-site-data.test.ts (9 tests) 195ms
+
+ Test Files  12 passed (12)
+      Tests  131 passed (131)
+   Start at  15:54:23
+   Duration  1.42s (import 61%, tests 22%, transform 16%, worker 1%)
+
+JSON report written to C:/Users/godamericatb14/AppData/Local/Temp/claude/D--unitfolders-oz47p-docsite-kit/2c209786-8905-4a30-905b-30324e0263c9/scratchpad/before/packages_trajectory.json

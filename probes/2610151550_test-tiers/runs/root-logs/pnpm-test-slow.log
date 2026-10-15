@@ -1,0 +1,131 @@
+$ pnpm -r --workspace-concurrency=1 test:slow
+$ vitest run --config vitest.slow.config.ts
+
+ RUN  v5.0.3 D:/unitfolders/oz47p-docsite-kit/w12-tiers/packages/code-pin
+
+
+ Test Files  3 passed (3)
+      Tests  24 passed (24)
+   Start at  16:24:11
+   Duration  13.93s (tests 92%, import 7%, transform 2%)
+
+$ vitest run --config vitest.slow.config.ts
+
+ RUN  v5.0.3 D:/unitfolders/oz47p-docsite-kit/w12-tiers/packages/docfirst
+
+
+ Test Files  4 passed (4)
+      Tests  34 passed (34)
+   Start at  16:24:25
+   Duration  9.68s (tests 86%, import 11%, transform 2%)
+
+$ vitest run --config vitest.slow.config.ts
+
+ RUN  v5.0.3 D:/unitfolders/oz47p-docsite-kit/w12-tiers/packages/collab
+
+
+ Test Files  4 passed (4)
+      Tests  40 passed (40)
+   Start at  16:24:35
+   Duration  16.15s (tests 99%)
+
+$ vitest run --config vitest.slow.config.ts
+
+ RUN  v5.0.3 D:/unitfolders/oz47p-docsite-kit/w12-tiers/plugins/docsite
+
+(node:15308) [DEP0190] DeprecationWarning: Passing args to a child process with shell option true can lead to security vulnerabilities, as the arguments are not escaped, only concatenated.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+
+ Test Files  1 passed (1)
+      Tests  1 passed (1)
+   Start at  16:24:52
+   Duration  39.23s (tests 99%)
+
+$ vitest run --config vitest.slow.config.ts
+
+ RUN  v5.0.3 D:/unitfolders/oz47p-docsite-kit/w12-tiers/plugins/collab
+
+warning: You appear to have cloned an empty repository.
+warning: You appear to have cloned an empty repository.
+warning: You appear to have cloned an empty repository.
+warning: You appear to have cloned an empty repository.
+warning: You appear to have cloned an empty repository.
+warning: You appear to have cloned an empty repository.
+warning: You appear to have cloned an empty repository.
+warning: You appear to have cloned an empty repository.
+warning: You appear to have cloned an empty repository.
+warning: You appear to have cloned an empty repository.
+warning: You appear to have cloned an empty repository.
+warning: You appear to have cloned an empty repository.
+warning: You appear to have cloned an empty repository.
+remote: Visit the existing pull request:        
+remote:   https://git.example.org/hybrid-mmc/collab/pulls/7        
+remote: Visit the existing pull request:        
+remote:   https://git.example.org/hybrid-mmc/collab/pulls/7        
+remote: Visit the existing pull request:        
+remote:   https://git.example.org/hybrid-mmc/collab/pulls/7        
+remote: Visit the existing pull request:        
+remote:   https://git.example.org/hybrid-mmc/collab/pulls/7        
+warning: You appear to have cloned an empty repository.
+warning: You appear to have cloned an empty repository.
+remote: Visit the existing pull request:        
+remote:   https://git.example.org/hybrid-mmc/collab/pulls/7        
+warning: You appear to have cloned an empty repository.
+warning: You appear to have cloned an empty repository.
+warning: You appear to have cloned an empty repository.
+warning: You appear to have cloned an empty repository.
+warning: You appear to have cloned an empty repository.
+warning: You appear to have cloned an empty repository.
+warning: You appear to have cloned an empty repository.
+warning: You appear to have cloned an empty repository.
+warning: You appear to have cloned an empty repository.
+warning: You appear to have cloned an empty repository.
+warning: You appear to have cloned an empty repository.
+warning: You appear to have cloned an empty repository.
+remote: Visit the existing pull request:        
+remote:   https://git.example.org/hybrid-mmc/collab/pulls/7        
+remote: Visit the existing pull request:        
+remote:   https://git.example.org/hybrid-mmc/collab/pulls/7        
+warning: You appear to have cloned an empty repository.
+remote: Visit the existing pull request:        
+remote:   https://git.example.org/hybrid-mmc/collab/pulls/7        
+remote: Visit the existing pull request:        
+remote:   https://git.example.org/hybrid-mmc/collab/pulls/7        
+warning: You appear to have cloned an empty repository.
+warning: You appear to have cloned an empty repository.
+remote: Visit the existing pull request:        
+remote:   https://git.example.org/hybrid-mmc/collab/pulls/7        
+warning: You appear to have cloned an empty repository.
+warning: You appear to have cloned an empty repository.
+warning: You appear to have cloned an empty repository.
+warning: You appear to have cloned an empty repository.
+warning: You appear to have cloned an empty repository.
+remote: Visit the existing pull request:        
+remote:   https://git.example.org/hybrid-mmc/collab/pulls/7        
+remote: Visit the existing pull request:        
+remote:   https://git.example.org/hybrid-mmc/collab/pulls/7        
+warning: You appear to have cloned an empty repository.
+remote: Visit the existing pull request:        
+remote:   https://git.example.org/hybrid-mmc/collab/pulls/7        
+remote: Visit the existing pull request:        
+remote:   https://git.example.org/hybrid-mmc/collab/pulls/7        
+remote: Visit the existing pull request:        
+remote:   https://git.example.org/hybrid-mmc/collab/pulls/7        
+warning: You appear to have cloned an empty repository.
+warning: You appear to have cloned an empty repository.
+remote: Visit the existing pull request:        
+remote:   https://git.example.org/hybrid-mmc/collab/pulls/7        
+warning: You appear to have cloned an empty repository.
+remote: Visit the existing pull request:        
+remote:   https://git.example.org/hybrid-mmc/collab/pulls/7        
+remote: Visit the existing pull request:        
+remote:   https://git.example.org/hybrid-mmc/collab/pulls/7        
+warning: You appear to have cloned an empty repository.
+warning: You appear to have cloned an empty repository.
+warning: You appear to have cloned an empty repository.
+
+ Test Files  13 passed (13)
+      Tests  80 passed (80)
+   Start at  16:25:32
+   Duration  81.51s (tests 98%, import 1%)
+

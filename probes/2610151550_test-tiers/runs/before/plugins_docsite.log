@@ -1,0 +1,18 @@
+
+ RUN  v5.0.3 D:/unitfolders/oz47p-docsite-kit/w12-tiers/plugins/docsite
+
+ ✓ tests/site-host.test.ts (15 tests) 146ms
+ ✓ tests/scaffold-add-feature.test.ts (4 tests) 314ms
+(node:36876) [DEP0190] DeprecationWarning: Passing args to a child process with shell option true can lead to security vulnerabilities, as the arguments are not escaped, only concatenated.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+ ✓ tests/real-site.test.ts (1 test) 48893ms
+   ✓ 真的在临时目录建站 (1)
+     ✓ 建站 → 加入身份 → 写评论与回复 → 推送 → 加轨迹卡功能 → pnpm build 43339ms
+ ✓ tests/scaffold-create.test.ts (4 tests) 193ms
+
+ Test Files  4 passed (4)
+      Tests  24 passed (24)
+   Start at  15:54:57
+   Duration  50.54s (tests 99%)
+
+JSON report written to C:/Users/godamericatb14/AppData/Local/Temp/claude/D--unitfolders-oz47p-docsite-kit/2c209786-8905-4a30-905b-30324e0263c9/scratchpad/before/plugins_docsite.json

@@ -56,9 +56,10 @@ pnpm doc:render                                # 只重新生成生成物
 ```powershell
 pnpm install
 pnpm build          # 按依赖序构建全部包、三个插件与两个站
-pnpm check          # 逐个包跑 check（typecheck、test，有 lint 的再 lint）
+pnpm check          # 逐个包跑 check（typecheck、快的一级测试，有 lint 的再 lint），一分钟左右
+pnpm test:slow      # 慢的一级测试（各包的 *.slow.test.ts：真建站、大量调 git 的），只在显式要求时跑，近三分钟
 pnpm test:deps      # 包之间的依赖方向、包内分层、模块之间不许有环（规则在 tests/dependency-rules.cjs，要先 pnpm build）
-pnpm verify         # 合并分支前、发版前：build → check → test:deps → test:scaffold → test:e2e
+pnpm verify         # 最终交付之前（推送、交给人验收、发版前）：build → check → test:slow → test:deps → test:scaffold → test:e2e
 pnpm test:pack      # 发版前再跑：把包打成 tarball 装进测试站的副本，跑同样的端到端检查
 
 cd docs-site

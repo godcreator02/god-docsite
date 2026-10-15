@@ -1,0 +1,193 @@
+
+ RUN  v5.0.3 D:/unitfolders/oz47p-docsite-kit/w12-tiers/plugins/collab
+
+warning: You appear to have cloned an empty repository.
+warning: You appear to have cloned an empty repository.
+warning: You appear to have cloned an empty repository.
+warning: You appear to have cloned an empty repository.
+warning: You appear to have cloned an empty repository.
+warning: You appear to have cloned an empty repository.
+warning: You appear to have cloned an empty repository.
+warning: You appear to have cloned an empty repository.
+warning: You appear to have cloned an empty repository.
+warning: You appear to have cloned an empty repository.
+warning: You appear to have cloned an empty repository.
+warning: You appear to have cloned an empty repository.
+warning: You appear to have cloned an empty repository.
+remote: Visit the existing pull request:        
+remote:   https://git.example.org/hybrid-mmc/collab/pulls/7        
+remote: Visit the existing pull request:        
+remote:   https://git.example.org/hybrid-mmc/collab/pulls/7        
+remote: Visit the existing pull request:        
+remote:   https://git.example.org/hybrid-mmc/collab/pulls/7        
+warning: You appear to have cloned an empty repository.
+warning: You appear to have cloned an empty repository.
+remote: Visit the existing pull request:        
+remote:   https://git.example.org/hybrid-mmc/collab/pulls/7        
+warning: You appear to have cloned an empty repository.
+warning: You appear to have cloned an empty repository.
+warning: You appear to have cloned an empty repository.
+remote: Visit the existing pull request:        
+remote:   https://git.example.org/hybrid-mmc/collab/pulls/7        
+warning: You appear to have cloned an empty repository.
+warning: You appear to have cloned an empty repository.
+warning: You appear to have cloned an empty repository.
+warning: You appear to have cloned an empty repository.
+warning: You appear to have cloned an empty repository.
+warning: You appear to have cloned an empty repository.
+warning: You appear to have cloned an empty repository.
+warning: You appear to have cloned an empty repository.
+warning: You appear to have cloned an empty repository.
+warning: You appear to have cloned an empty repository.
+remote: Visit the existing pull request:        
+remote:   https://git.example.org/hybrid-mmc/collab/pulls/7        
+ ✓ tests/collab-repo/submit/submit-pre-checks.slow.test.ts (3 tests) 16731ms
+   ✓ 提交前校验 (3)
+     ✓ 刚克隆、没有改动：没有问题 6506ms
+     ✓ 只报这次改动带来的格式问题；替别人写记录、改别人的记录不算问题 2582ms
+     ✓ 分出来的那个提交上就有的问题不算：同步进来的 main 上的问题不是我的 7640ms
+remote: Visit the existing pull request:        
+remote:   https://git.example.org/hybrid-mmc/collab/pulls/7        
+ ✓ tests/other-repos/rules.slow.test.ts (3 tests) 17689ms
+   ✓ 别的仓的规矩 (3)
+     ✓ 合并许可不写团队：写了 bots 也算问题；配好的不列 7984ms
+     ✓ collab.repo.setup 配别的仓：按它的 origin 找到 Gitea 上的仓，推送许可与合并许可都只写负责人 5373ms
+     ✓ name 不是项目文件夹里的别的仓：拒绝，一个请求都不发 4331ms
+ ✓ tests/project/project.slow.test.ts (2 tests) 18252ms
+   ✓ 项目文件夹里的仓 (2)
+     ✓ 协作仓的上一级要以组织命名，大小写不论；不是就拒绝，写明怎么放 12731ms
+     ✓ 协作仓以外的仓按名字排；一个仓在 Gitea 上的位置从它的 origin 读 5514ms
+remote: Visit the existing pull request:        
+remote:   https://git.example.org/hybrid-mmc/collab/pulls/7        
+ ✓ tests/other-repos/review.slow.test.ts (8 tests) 20014ms
+   ✓ 各项目里别的仓读到的 (2)
+     ✓ 按目录名记，位置从仓的 origin 读；重读一个仓只换掉那一个，内容一样不报变化 14341ms
+     ✓ 完整刷新以后只留还在项目文件夹里的仓；忘掉以后什么都没有 5661ms
+warning: You appear to have cloned an empty repository.
+remote: Visit the existing pull request:        
+remote:   https://git.example.org/hybrid-mmc/collab/pulls/7        
+ ✓ tests/organization/setup/create.slow.test.ts (6 tests) 25762ms
+   ✓ collab.repo.create 建仓 (6)
+     ✓ 依次建仓、限定合并方式、把自己加成协作者（管理）、保护 main（只许自己），再克隆进项目文件夹 9718ms
+     ✓ 负责人只写建仓的人，不按 people.json：admin 建仓就只有 admin 4137ms
+     ✓ 仓名不合法、项目文件夹里已有同名的：拒绝，一个请求都不发 3102ms
+     ✓ 建仓被拒（令牌缺权限）：照 Gitea 的原话报，后面的不做 3088ms
+     ✓ 建出来以后保护 main 失败：写明已经建好仓、限定了合并方式、加了协作者，不回退，也不克隆 3227ms
+     ✓ 克隆失败：写明前面都做完了，附 git 的原话 2488ms
+warning: You appear to have cloned an empty repository.
+ ✓ tests/other-repos/events.slow.test.ts (5 tests) 28080ms
+   ✓ 完整刷新时别的仓这边 (2)
+     ✓ 先补克隆、再列目录，每个仓取回、读、核对，最后只留还在的 9568ms
+     ✓ 列不出目录：别的都不做，也不 retainOnly 6020ms
+   ✓ 收到别的仓与组织里建删仓的消息 (3)
+     ✓ 有新提交只取回；合并请求、issue、评论重读；负责人换了重读再核对；仓名大小写不论 5602ms
+     ✓ 项目文件夹里没有这个仓只记一行；列不出目录时连这一行也不记 3626ms
+     ✓ 组织里建了仓：补克隆，克隆下来的接着取回、读、核对；别的动作只记一行 3262ms
+warning: You appear to have cloned an empty repository.
+warning: You appear to have cloned an empty repository.
+warning: You appear to have cloned an empty repository.
+remote: Visit the existing pull request:        
+remote:   https://git.example.org/hybrid-mmc/collab/pulls/7        
+warning: You appear to have cloned an empty repository.
+ ✓ tests/collab-repo/submit/submit-sync.slow.test.ts (1 test) 35796ms
+   ✓ 提交审核与自动同步配合 (1)
+     ✓ 提交审核时同一条的同一个字段两边改得不一样：不推送，列出冲突的文件，自动同步不动；改好之后再提交审核完成这次合并 35794ms
+warning: You appear to have cloned an empty repository.
+remote: Visit the existing pull request:        
+remote:   https://git.example.org/hybrid-mmc/collab/pulls/7        
+ ✓ tests/collab-repo/sync/state.slow.test.ts (6 tests) 44401ms
+   ✓ 协作仓的本机状态 (1)
+     ✓ 没改动时是空的；未提交的 collab/、site/ 分开、仓里别处不算；冲突从状态码里读；不在 main 写分支名、分离头为 null 10241ms
+   ✓ 协作仓那一边的自动同步 (5)
+     ✓ 取回 origin、能快进就快进，记下结果；还没同步过为 null 10378ms
+     ✓ 不能快进：同步不了的原因留给通知，变了才报变化；能同步了就清掉 6924ms
+     ✓ 盯着协作仓：本机状态一变就报变化；还没算出来、没在盯时现算；忘掉以后不再记自动同步 3730ms
+     ✓ 自动同步以后没有东西可提交，上次提交审核的失败就清掉 (2)
+       ✓ 改动留着就保留：在工作区、提交在还没进的本地 main 上都保留 3484ms
+       ✓ 改动撤掉了就消失：下一次自动同步后清掉，撤掉时 main 上正好有新提交也一样 9642ms
+warning: You appear to have cloned an empty repository.
+remote: Visit the existing pull request:        
+remote:   https://git.example.org/hybrid-mmc/collab/pulls/7        
+remote: Visit the existing pull request:        
+remote:   https://git.example.org/hybrid-mmc/collab/pulls/7        
+warning: You appear to have cloned an empty repository.
+warning: You appear to have cloned an empty repository.
+remote: Visit the existing pull request:        
+remote:   https://git.example.org/hybrid-mmc/collab/pulls/7        
+remote: Visit the existing pull request:        
+remote:   https://git.example.org/hybrid-mmc/collab/pulls/7        
+remote: Visit the existing pull request:        
+remote:   https://git.example.org/hybrid-mmc/collab/pulls/7        
+ ✓ tests/organization/events/project-events.slow.test.ts (14 tests) 59160ms
+   ✓ 完整刷新 (4)
+     ✓ 两边各刷新一次：协作仓取回、读负责人、核对规矩、自动同步；别的仓补克隆后逐个取回、读、核对，只留还在的；再核对组织 webhook 14241ms
+     ✓ 一步出错不影响别的步：出错的原话一步一条记下、报变化；那一步下次做成了就清掉 4923ms
+     ✓ 项目打不开（令牌失效等）：记下原话，别的步都不做 3977ms
+     ✓ 同一个项目正在做别的：回 busy 3976ms
+   ✓ 按消息把事件分给两边 (4)
+     ✓ 协作仓有新提交：取回、自动同步；负责人换了：重读负责人、核对规矩；协作仓的合并请求、issue 与评论不处理 3577ms
+     ✓ 别的仓有新提交只取回它；合并请求、issue、评论有动静重读它；负责人换了重读、再核对规矩 2928ms
+     ✓ 别的仓的合并请求被审阅、合并请求上有新评论：都重读那个仓，「要你改」「评论了」不等下一次刷新 3791ms
+     ✓ 组织里建了仓：补克隆，克隆下来的接着取回、读、核对；删了仓、项目文件夹里没有的仓只记一行 3008ms
+   ✓ 项目列表与订阅 (6)
+     ✓ 移出列表：两边与组织 webhook 都忘掉它，出错与刷新过的记录也清掉 3406ms
+     ✓ 移出列表报给 onListChanged（QQ 任务组靠它撤掉注册）；不在列表里的拒绝、不报 2746ms
+     ✓ start 后列表里的项目就开始盯两边、订上它的组织，不用先手动刷新 3033ms
+     ✓ start 时站点起不来：失败记成这个项目的一步出错、报变化，不留没处理的拒绝 2937ms
+     ✓ 加进列表时站点起不来：照样加进去、安排刷新，失败记成一步出错、报变化 3139ms
+     ✓ origin 的地址读不出组织：那个项目不订，原因写在实时推送的状态里 3474ms
+warning: You appear to have cloned an empty repository.
+remote: Visit the existing pull request:        
+remote:   https://git.example.org/hybrid-mmc/collab/pulls/7        
+ ✓ tests/other-repos/fetch/update.slow.test.ts (9 tests) 62239ms
+   ✓ collab.repos.update 更新一个别的仓 (9)
+     ✓ 先取回再快进，回 { repo, outcome, commits }；已经一样新回 up-to-date 20158ms
+     ✓ 不在 main 上（别的分支、分离的 HEAD）：拒绝，写明在哪，不动 7909ms
+     ✓ 本地 main 上有服务器上没有的提交：拒绝，写明可能是合并请求还没合并或没推上去 8573ms
+     ✓ 没提交的改动和新改动碰到同一个文件：git 不快进，文件原样留着，附 git 的原话 5450ms
+     ✓ 没提交的改动不碰新改动的文件：照样快进，改动照留 5212ms
+     ✓ 有一次合并还没完成（MERGE_HEAD 还在）：拒绝 4287ms
+     ✓ 仓里没有 origin/main（服务器上还是空仓）：拒绝，写明原因 3950ms
+     ✓ 仓名不对就拒绝：不是合法仓名、是协作仓（大小写不论）、项目文件夹里没有、不是 git 仓 3234ms
+     ✓ 取回失败：拒绝，附 git 的原话 3464ms
+remote: Visit the existing pull request:        
+remote:   https://git.example.org/hybrid-mmc/collab/pulls/7        
+warning: You appear to have cloned an empty repository.
+ ✓ tests/collab-repo/submit/submit-site.slow.test.ts (3 tests) 64476ms
+   ✓ collab.submit 带上 site/ 的改动 (3)
+     ✓ 记录和页面一起提交，进同一个提交、同一个主题；提交前跑过站点的类型检查 18383ms
+     ✓ 只有负责人能改的内容接进了提交路径：成员拦下、不推送、改动留在工作区；负责人与例外放行；只改记录不跑类型检查 42827ms
+     ✓ 站点检查与类型检查不过：不提交、不推送，逐条写明 3265ms
+ ✓ tests/collab-repo/submit/submit-main.slow.test.ts (9 tests) 65203ms
+   ✓ collab.submit (9)
+     ✓ 在 main 上提交，不建分支；只提交 collab/，推到 refs/for/main，等到执行器合并 23055ms
+     ✓ 被执行器打回：本地 main 退回推送时的 origin/main，改动回到工作区，报出执行器的留言 10492ms
+     ✓ 执行器到时限还没结论：插件关掉合并请求，改动回到工作区 9006ms
+     ✓ 没有改动、也没有 main 里还没有的提交：拒绝 3845ms
+     ✓ 校验不过：不提交、不推送，原样列出问题 2110ms
+     ✓ 本地 main 落后 origin/main：先把 main 合进来再推，别人后来合进 main 的新记录、改动不算我删的、改的 7458ms
+     ✓ 落后 main 时删了分叉点上就有的记录：删记录不再拦，照样提交 6972ms
+     ✓ 在别的分支上：拒绝 1241ms
+     ✓ 从推送的输出里认出合并请求；认不出为 null 1022ms
+warning: You appear to have cloned an empty repository.
+warning: You appear to have cloned an empty repository.
+ ✓ tests/collab-repo/sync/sync.slow.test.ts (11 tests) 75314ms
+   ✓ 定时检查里的自动同步 (11)
+     ✓ 落后 origin/main、本地没有还没合进去的提交：本地 main 快进到和 origin/main 一样 11891ms
+     ✓ 我的提交被执行器合进 main：快进，本地 main 就是 origin/main，不生成合并提交 13502ms
+     ✓ 本地 main 上有还没进 main 的提交（提交审核正在等执行器）：不动，写明原因 7477ms
+     ✓ 只快进：工作区里没提交、不和新改动碰同一个文件的改动照留 7876ms
+     ✓ 快进进来的改动动了依赖、接着装依赖失败：报错写明已经快进了，附 pnpm 原话 7884ms
+     ✓ 已经和 main 一样新：什么都不做 4791ms
+     ✓ 在 main 以外的分支上：不动，写明原因 5388ms
+     ✓ 工作区里没提交的改动会被覆盖：git 不快进，文件原样留着 4997ms
+     ✓ 提交审核合 main 出的冲突还没改好：不动，冲突标记原样留着 3911ms
+     ✓ 合进来的改动只动了 site/ 的页面：不装依赖，让站点再过一遍启动前的检查；只动 collab/ 时不查 4674ms
+     ✓ 合进来的改动动了 site/ 的依赖：接着装依赖，站点照常驻的规矩重启 2920ms
+
+ Test Files  13 passed (13)
+      Tests  80 passed (80)
+   Start at  16:12:48
+   Duration  76.38s (tests 98%, import 2%)
+
+JSON report written to C:/Users/godamericatb14/AppData/Local/Temp/claude/D--unitfolders-oz47p-docsite-kit/2c209786-8905-4a30-905b-30324e0263c9/scratchpad/slow/plugins_collab.json

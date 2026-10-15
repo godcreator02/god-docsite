@@ -1,0 +1,18 @@
+
+ RUN  v5.0.3 D:/unitfolders/oz47p-docsite-kit/w12-tiers/plugins/docfirst
+
+ ✓ tests/docfirst-site.test.ts (5 tests) 56ms
+ ✓ tests/ports.test.ts (14 tests) 61ms
+ ✓ tests/artifact.test.ts (9 tests) 11ms
+ ✓ tests/args.test.ts (3 tests) 6ms
+ ✓ tests/plugin.test.ts (2 tests) 4ms
+
+ Test Files  5 passed (5)
+      Tests  33 passed (33)
+   Start at  16:11:20
+   Duration  1.10s (tests 38%, transform 29%, import 26%, worker 6%)
+
+    Isolate  5 workers spawned · ~141ms startup each (spawn + environment, per file)
+             at least ~562ms faster with isolate: false — reuses workers across files instead of one per file
+
+JSON report written to C:/Users/godamericatb14/AppData/Local/Temp/claude/D--unitfolders-oz47p-docsite-kit/2c209786-8905-4a30-905b-30324e0263c9/scratchpad/after/plugins_docfirst.json

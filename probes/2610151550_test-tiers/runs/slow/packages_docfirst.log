@@ -1,0 +1,80 @@
+
+ RUN  v5.0.3 D:/unitfolders/oz47p-docsite-kit/w12-tiers/packages/docfirst
+
+stderr | test/cli-report.slow.test.ts > 轨迹卡目录还没建：check 退出码 0、一条红都不打印；trajectory 子命令退出码 2
+这个项目还没有轨迹卡目录 docs/trajectory（相对项目根；位置由配置的 trajectory 定，不写是内容根下的 trajectory/）
+
+stderr | test/cli.slow.test.ts > 黄灯：confirm 原样不动并列出来；--accept 不点名页退 2；点名页带 --accept 才重新记
+--accept 要点名页：docfirst confirm <文档路径…> --accept——确认黄灯得说清是哪几页，什么都没动
+
+ ✓ test/cli-report.slow.test.ts (6 tests) 3095ms
+   ✓ 内容根下的 trajectory/：check 顺带做卡校验，有病卡时退出码 1 且输出含 🔴；卡本身不当文档核对 463ms
+   ✓ 轨迹卡目录还没建：check 退出码 0、一条红都不打印；trajectory 子命令退出码 2 379ms
+   ✓ 配置了 trajectory 目录：check 与 trajectory 都读那个目录；目录还没建时报错里写的是配置的目录 412ms
+   ✓ 合法根卡加子卡：trajectory --json 输出那一张盘的输入（盘心、卡、病卡）与树，不带 --json 打印根卡与卡数 377ms
+   ✓ 分区按约定：内容根下除 trajectory/、future/ 之外都是现状区，目录里的、根上的都检查，按文档身份排序 495ms
+   ✓ check --json：整份报告一行 JSON，退出码跟人读模式一样；四态、行号、生成物新鲜度、病卡都在 968ms
+ ✓ test/cli-uncommitted.slow.test.ts (4 tests) 4016ms
+   ✓ 被钉文件改了没提交：这个黄算红、退 1，提示同一个提交里 --accept；提交之后只报黄 1280ms
+   ✓ 目录树里多了未跟踪的文件：这个黄算红 1120ms
+   ✓ 被钉文件在别的仓里：改了没提交也只报黄，不拦这个仓的提交 825ms
+   ✓ 一次 check 里每个仓只问一次 git status 790ms
+ ✓ test/cli-outputs.slow.test.ts (6 tests) 5587ms
+   ✓ outputs：confirm 顺带重新生成、render 只写指定落点；check 核对生成物——手改了或删了都红，重新生成后恢复 557ms
+   ✓ outputs 的地盘规则：绝对路径、落进内容根、一个落点两篇正本写，装配时都报错 1132ms
+   ✓ outputs 落点落进内容根下的任何地方都报错，轨迹与未来区也算 1271ms
+   ✓ outputs 的正本得是现状区里的 mdx 页面：写错路径、放在未来区，装配时报错 1079ms
+   ✓ outputs 点名了源里没有的 frontmatter 字段：render 不写、退出码 1；check 红并说缺哪个 561ms
+   ✓ outputs 对象写法的形状：to 空、frontmatter 不是字符串数组、落点表空，读配置时报错 985ms
+stderr | test/cli.slow.test.ts > 不认识的开关、不收路径的命令带了路径，都退 2、什么都不动——confirm 不把开关当没写、跑成全部页
+confirm 不认识开关 --dry-run（confirm 只认 --accept），什么都没动。用法看 docfirst --help
+
+stderr | test/cli.slow.test.ts > 不认识的开关、不收路径的命令带了路径，都退 2、什么都不动——confirm 不把开关当没写、跑成全部页
+confirm 不认识开关 --json（confirm 只认 --accept），什么都没动。用法看 docfirst --help
+
+stderr | test/cli.slow.test.ts > 不认识的开关、不收路径的命令带了路径，都退 2、什么都不动——confirm 不把开关当没写、跑成全部页
+confirm 不认识开关 --acept（confirm 只认 --accept），什么都没动。用法看 docfirst --help
+
+stderr | test/cli.slow.test.ts > 不认识的开关、不收路径的命令带了路径，都退 2、什么都不动——confirm 不把开关当没写、跑成全部页
+render 不认识开关 --force（render 不收任何开关），什么都没动。用法看 docfirst --help
+
+stderr | test/cli.slow.test.ts > 不认识的开关、不收路径的命令带了路径，都退 2、什么都不动——confirm 不把开关当没写、跑成全部页
+check 不认识开关 --jsno（check 只认 --json），什么都没动。用法看 docfirst --help
+
+stderr | test/cli.slow.test.ts > 不认识的开关、不收路径的命令带了路径，都退 2、什么都不动——confirm 不把开关当没写、跑成全部页
+check 不认识开关 --accept（check 只认 --json），什么都没动。用法看 docfirst --help
+
+stderr | test/cli.slow.test.ts > 不认识的开关、不收路径的命令带了路径，都退 2、什么都不动——confirm 不把开关当没写、跑成全部页
+trajectory 不认识开关 -x（trajectory 只认 --json），什么都没动。用法看 docfirst --help
+
+stderr | test/cli.slow.test.ts > 不认识的开关、不收路径的命令带了路径，都退 2、什么都不动——confirm 不把开关当没写、跑成全部页
+check 不收文档路径（docs/a.mdx）——只有 confirm 能点名页，什么都没动。用法看 docfirst --help
+
+stderr | test/cli.slow.test.ts > 不认识的开关、不收路径的命令带了路径，都退 2、什么都不动——confirm 不把开关当没写、跑成全部页
+render 不收文档路径（docs/a.mdx）——只有 confirm 能点名页，什么都没动。用法看 docfirst --help
+
+stderr | test/cli.slow.test.ts > 不认识的命令退 2
+不认识的命令：嘿——有 check / confirm / render / trajectory，用法看 docfirst --help
+
+stderr | test/cli.slow.test.ts > confirm 点名的路径不是这个项目里的文档：退 2，什么都不动
+不是这个项目里的文档：docs/没这篇.mdx——什么都没动
+
+ ✓ test/cli.slow.test.ts (18 tests) 7759ms
+   ✓ check 报未确认；confirm 给不带记录的标记写上记录；再 check 全绿 491ms
+   ✓ 已提交的代码改了：check 报黄、退 0；文件没了：报红、退 1 723ms
+   ✓ confirm 不要求先提交：改了没提交的代码照样记得下 383ms
+   ✓ confirm 遇红：红的那处不动、别的照写，打印后退 1 495ms
+   ✓ 黄灯：confirm 原样不动并列出来；--accept 不点名页退 2；点名页带 --accept 才重新记 723ms
+   ✓ 绿灯挪了位置：confirm 机械写回新行号 632ms
+   ✓ render：只处理挂了 outputs 映射的文档，别的文档不渲染、什么都不写 362ms
+   ✓ render：正本里有渲染不了的东西，报红退 1、不写落点 386ms
+   ✓ 配置 fumadocsRoster: true 才认 fumadocs 自带的组件；components 里的规则跟它叠在一起 691ms
+   ✓ has 标记：check 报错到文档与行，说清动作词只有 ref / tree 337ms
+   ✓ 目录树与整文件一篇文档：两种标记各自认得回来；多了文件黄 590ms
+
+ Test Files  4 passed (4)
+      Tests  34 passed (34)
+   Start at  16:11:58
+   Duration  8.79s (tests 86%, import 12%, transform 3%)
+
+JSON report written to C:/Users/godamericatb14/AppData/Local/Temp/claude/D--unitfolders-oz47p-docsite-kit/2c209786-8905-4a30-905b-30324e0263c9/scratchpad/slow/packages_docfirst.json

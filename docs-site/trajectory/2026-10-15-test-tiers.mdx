@@ -1,0 +1,60 @@
+---
+born-at: 2026-10-15T16:40
+type: choice
+parent: [2026-09-03-god-live-doc]
+label: 测试分级，慢的只有显式命令才跑
+domain: 检查
+---
+
+## 背景
+
+全量 `pnpm verify` 要五六分钟，仓根 `pnpm check` 就要三分半左右。逐个包量下来，测试一共 181 秒，typecheck 与 lint 只有 30 秒；
+测试里 gwb-collab 73 秒、gwb-docsite 51 秒（几乎全是一条真建站的测试），collab 17 秒、code-pin 15 秒、docfirst 11 秒，其余八个包加起来十几秒。
+用户要求把所有测试分级，很慢的测试只有显式命令才跑。gwb-docfirst-workflow 里已经定义了一个 vitest 标签 `slow`（`pnpm test` 带 `--tags-filter=!slow`），
+但没有一条用例用它。
+
+pivots-from:: [全仓检查并入 tests/](2026-10-15-repo-checks-into-tests-dir.md)
+
+## 结论与边界
+
+测试分五级：
+
+| 级别 | 内容 | 怎么跑 |
+| --- | --- | --- |
+| 快 | 各包的单元测试 | 默认：各包 `pnpm test` / `pnpm check`，仓根 `pnpm test` / `pnpm check` |
+| 慢 | 各包里的 `*.slow.test.ts` | 只有显式 `pnpm test:slow`（各包一个，仓根逐个包跑） |
+| 全仓·快 | `test:deps`、`test:scaffold` | 显式命令 |
+| 全仓·慢 | `test:e2e`、`test:pack` | 显式命令 |
+| 行为假设 | gwb-collab 的 `tests/verified/` | `test:verified`，不变 |
+
+`pnpm verify` 的顺序是 build → check → test:slow → test:deps → test:scaffold → test:e2e，总时长没变。
+
+**慢的标准**：真建站、装依赖、构建、起服务的；或者单独运行这个文件时，vitest 报告里它的耗时（不含启动与 import）超过 2 秒。
+按单独运行的总耗时划不行：vitest 启动加 import 就要一到两秒，god-docsite 的 `scaffold.test.ts` 测试本身 0.9 秒、连启动 3.4 秒，会被误划成慢的。
+按文件耗时，慢的里最快的是 docfirst 的 `cli-report` 2.1 秒，快的里最慢的是 gwb-collab 的 `revision-files` 1.8 秒，2 秒落在两者之间。
+并行运行时的文件耗时也不能用：文件之间抢 CPU 与 git，gwb-collab 的 `sync.test.ts` 并行时 72 秒、单独 35 秒。
+
+按这个标准归为慢的有 25 个文件：gwb-docsite 那条真建站的；gwb-collab 13 个（每条测试先建本地组织的几个裸仓再克隆，调几十次 git）；
+collab 4 个（合并检查与 `repo:` 链接，都建临时 git 仓）；code-pin 3 个与 docfirst 4 个（建临时 git 仓、起命令行子进程）。
+
+**标法选文件名**：慢的文件写成 `*.slow.test.ts`，包里 `vitest.config.ts` 排除它们，`vitest.slow.config.ts` 只收它们，`test:slow` 指向后者——
+和 gwb-collab 已有的 `test:verified` 是同一种写法。否掉的两种：vitest 标签要在每条用例上写，而且不带过滤条件的 `vitest run` 照样跑全部；
+vitest 的 projects 也一样，不带 `--project` 时两个 project 都跑。gwb-docfirst-workflow 那个没人用的 `slow` 标签与 `test:all` 删掉，全仓只留一种标法。
+
+**没有拆文件**：慢的文件里每条测试都建 git 仓或起子进程，耗时分布平均。最不平均的是 code-pin 的 `git-history.test.ts`：两条 7 秒与 2 秒，
+其余 11 条各 0.4 到 0.6 秒，挪走那两条后剩下的单独运行仍约 5 秒、照样是慢的，所以整份归慢。
+
+结果：仓根 `pnpm check` 从约 3 分半降到 55 秒，其中测试 30 秒；仓根 `pnpm test` 15 秒；`pnpm test:slow` 163 秒。
+
+边界：
+
+- 快的一级里还留着少量调 git 的文件（gwb-collab 的 `revision-files`、`watch`、`records`，collab 的 `template`），各自不到 2 秒
+- 代价是改 code-pin 取旧内容、docfirst 命令行、collab 合并检查、gwb-collab 同步与提交审核的代码时，默认的 check 不再覆盖它们；
+  `AGENTS.md` 写明改动碰到慢测试测的代码时，交回前跑那个包的 `test:slow`
+- 2 秒是在这台 Windows 机器上量的，机器换了，按同样的方法（单独运行、看文件耗时）重新量
+
+## 依据
+
+`probes/2610151550_test-tiers/`：分级之前逐个包的耗时在 `runs/before.txt`，每个文件的耗时在 `runs/before-table.txt`，
+单独运行的在 `runs/isolated.txt` 与 `runs/isolated-table.txt`，分级之后的在 `runs/after-and-slow.txt` 与 `runs/root-timing.txt`。
+改名在提交 81436611；分级前后用例总数一致（1134 = 快的 955 + 慢的 179）。

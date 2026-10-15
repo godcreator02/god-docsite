@@ -28,6 +28,7 @@
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "lint": "oxlint . --deny-warnings",
     "test": "vitest run",
+    "test:slow": "vitest run --config vitest.slow.config.ts",
     "check": "pnpm typecheck && pnpm test && pnpm lint"
   },
   "peerDependencies": {

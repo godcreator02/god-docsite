@@ -1,0 +1,15 @@
+packages/god-docsite exit=0 secs=1.9
+packages/identity exit=0 secs=0.8
+packages/explainer exit=0 secs=0.8
+packages/code-pin exit=0 secs=15.1
+packages/trajectory exit=0 secs=1.9
+packages/comments exit=0 secs=2.4
+packages/doc-export exit=0 secs=1.5
+packages/collab exit=0 secs=17.2
+packages/docfirst exit=0 secs=11
+plugins/docsite exit=0 secs=51.1
+plugins/docfirst exit=0 secs=1.5
+plugins/collab exit=0 secs=73.3
+docs-site exit=0 secs=3.6
+
+[exited with code 0]

@@ -17,7 +17,23 @@ description: 改这个仓时怎么跑、按什么节奏检查、提交怎么写�
 
 仓根的脚本：
 
-{/* ref file="../package.json" lines="6-15" hash="9ba07f1be044" blob="0ca1f298840d" */}
+{/* ref file="../package.json" lines="6-17" hash="55c2536c1600" blob="cb11fdd10b70" */}
+
+## 测试分级
+
+慢的测试只有显式命令才跑，默认的 `pnpm test` / `pnpm check` 只跑快的一级：
+
+| 级别 | 内容 | 怎么跑 |
+| --- | --- | --- |
+| 快 | 各包的单元测试 | 默认：各包 `pnpm test` / `pnpm check`，仓根 `pnpm test` / `pnpm check`。仓根 `pnpm check` 一分钟左右，其中测试半分钟 |
+| 慢 | 各包里的 `*.slow.test.ts` | 只有显式 `pnpm test:slow`：包里跑本包的，仓根逐个包跑，近三分钟 |
+| 全仓·快 | `pnpm test:deps`、`pnpm test:scaffold` | 显式命令，各几秒钟 |
+| 全仓·慢 | `pnpm test:e2e`、`pnpm test:pack` | 显式命令 |
+| 行为假设 | `plugins/collab` 的 `tests/verified/` | `pnpm test:verified`：升 git 或关键依赖、动了被测的模块、发版前、有人明确要求时才跑 |
+
+慢的标准：真建站、装依赖、构建、起服务的；或者单独运行这个文件时，vitest 报告里它的耗时（不含启动与 import）超过 2 秒，多是每条测试都建临时 git 仓、调几十次 git 的。
+慢的文件名写成 `*.slow.test.ts`：包里的 `vitest.config.ts` 排除它们，`vitest.slow.config.ts` 只收它们，`test:slow` 用的就是后者。
+现在有慢测试的包是 code-pin、collab、docfirst、gwb-docsite、gwb-collab；给别的包加第一个慢测试时，同时加 `vitest.slow.config.ts` 与 `test:slow`。
 
 ## 检查节奏
 
@@ -26,12 +42,13 @@ description: 改这个仓时怎么跑、按什么节奏检查、提交怎么写�
 | 什么时候 | 跑什么 |
 | --- | --- |
 | 改代码的过程中 | 只跑改到的包：`pnpm --filter <包> check`（先 typecheck 再 test，有 lint 的再 lint） |
+| 改动碰到了慢测试测的代码 | 交回前再跑那个包的 `pnpm --filter <包> test:slow` |
 | 改了上游包的类型或导出 | 先构建上游，再跑受影响的下游包 |
 | 改了包之间或包内 `core/`、`node/`、`site/`、`cli/` 之间的 import | 先 `pnpm build`，再仓根 `pnpm test:deps`：按 `tests/dependency-rules.cjs` 查依赖方向、分层与环，没有豁免清单，报出来的都要改掉 |
 | 改了本站的页面或被钉的代码 | 在 `docs-site/` 里 `pnpm doc`（就是 `docfirst check`），按说明书 [docs-site](/docs/outputs/skills/docs-site) 处理黄灯 |
 | 改了站点骨架或功能包的模板 | `pnpm test:scaffold`：比对测试站、本站和建站器生成的是否一致，几秒钟 |
 | 合并分支 | 不跑全量，各分支改到的包已经查过 |
-| 最终交付之前（推送、交给人验收） | 仓根 `pnpm verify`：`pnpm build` → `pnpm check` → `pnpm test:deps` → `pnpm test:scaffold` → `pnpm test:e2e`，五六分钟，整批改动只跑这一次 |
+| 最终交付之前（推送、交给人验收） | 仓根 `pnpm verify`：`pnpm build` → `pnpm check` → `pnpm test:slow` → `pnpm test:deps` → `pnpm test:scaffold` → `pnpm test:e2e`，五六分钟，整批改动只跑这一次 |
 | 发版前 | `pnpm verify` 之后再跑 `pnpm test:pack`：把包打成 tarball 装进测试站的副本，查漏打包的文件、写错的出口 |
 
 本站自己的检查在 `docs-site/` 里跑：`pnpm doc`、`pnpm typecheck`、`pnpm test`、`pnpm build`。

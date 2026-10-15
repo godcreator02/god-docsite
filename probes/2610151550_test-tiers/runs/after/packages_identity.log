@@ -1,0 +1,16 @@
+
+ RUN  v5.0.3 D:/unitfolders/oz47p-docsite-kit/w12-tiers/packages/identity
+
+ ✓ test/public-people.test.ts (7 tests) 5ms
+ ✓ test/people.test.ts (3 tests) 7ms
+ ✓ test/people-file.test.ts (3 tests) 44ms
+ ✓ test/write-access.test.ts (10 tests) 28ms
+ ✓ test/identity.test.ts (4 tests) 23ms
+ ✓ test/site.test.tsx (5 tests) 11ms
+
+ Test Files  6 passed (6)
+      Tests  32 passed (32)
+   Start at  16:11:01
+   Duration  356ms (transform 43%, import 36%, tests 17%, worker 4%)
+
+JSON report written to C:/Users/godamericatb14/AppData/Local/Temp/claude/D--unitfolders-oz47p-docsite-kit/2c209786-8905-4a30-905b-30324e0263c9/scratchpad/after/packages_identity.json

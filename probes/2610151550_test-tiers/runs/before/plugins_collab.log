@@ -1,0 +1,241 @@
+
+ RUN  v5.0.3 D:/unitfolders/oz47p-docsite-kit/w12-tiers/plugins/collab
+
+ ✓ tests/gitea-api/gitea.test.ts (11 tests) 10ms
+ ✓ tests/notifications/qq-private-chat.test.ts (11 tests) 30ms
+ ✓ tests/organization/events/webhook.test.ts (10 tests) 13ms
+ ✓ tests/notifications/notifications-of.test.ts (5 tests) 10ms
+ ✓ tests/ai-handoff/prompt.test.ts (25 tests) 11ms
+ ✓ tests/gitea-api/repo-rules.test.ts (13 tests) 16ms
+ ✓ tests/site-process/collab-sites.test.ts (13 tests) 238ms
+ ✓ tests/pane/browser/projects.test.ts (7 tests) 9ms
+ ✓ tests/organization/events/scheduler.test.ts (6 tests) 9ms
+ ✓ tests/project/qq-task-groups.test.ts (12 tests) 289ms
+warning: You appear to have cloned an empty repository.
+warning: You appear to have cloned an empty repository.
+warning: You appear to have cloned an empty repository.
+(node:53180) [DEP0190] DeprecationWarning: Passing args to a child process with shell option true can lead to security vulnerabilities, as the arguments are not escaped, only concatenated.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+warning: You appear to have cloned an empty repository.
+warning: You appear to have cloned an empty repository.
+warning: You appear to have cloned an empty repository.
+ ✓ tests/collab-repo/rules.test.ts (5 tests) 22ms
+ ✓ tests/organization/events/ntfy-subscription.test.ts (2 tests) 24ms
+ ✓ tests/notifications/project-notifications.test.ts (2 tests) 99ms
+ ✓ tests/organization/events/messages.test.ts (4 tests) 6ms
+ ✓ tests/collab-repo/events.test.ts (4 tests) 7ms
+ ✓ tests/site-process/dependencies.test.ts (7 tests) 688ms
+   ✓ pnpm install (3)
+     ✓ 没有依赖的 package.json：装完回 pnpm 输出的最后几行 444ms
+warning: You appear to have cloned an empty repository.
+ ✓ tests/gitea-api/access.test.ts (6 tests) 15ms
+warning: You appear to have cloned an empty repository.
+warning: You appear to have cloned an empty repository.
+ ✓ tests/organization/events/project-step-runner.test.ts (4 tests) 8ms
+warning: You appear to have cloned an empty repository.
+ ✓ tests/collab-repo/records/records.test.ts (51 tests) 2459ms
+   ✓ 认人 (3)
+     ✓ 身份是本 home 的身份码在 site/people.json 里对应的那个人 537ms
+     ✓ 身份码不在人员列表里：拒绝，写明用 collab.project.join 加进去 499ms
+warning: You appear to have cloned an empty repository.
+ ✓ tests/project/account.test.ts (4 tests) 664ms
+   ✓ Gitea 账号与仓的地址 (4)
+     ✓ 联网的 git 调用：请求头只配给这个 Gitea，凭据管理器清空；git 认这种经环境变量传的配置 658ms
+ ✓ tests/ai-handoff/zcode.test.ts (3 tests) 10ms
+ ✓ tests/collab-repo/records/inbox.test.ts (2 tests) 41ms
+ ✓ tests/commands.test.ts (7 tests) 8ms
+remote: Visit the existing pull request:        
+remote:   https://git.example.org/hybrid-mmc/collab/pulls/7        
+remote: Visit the existing pull request:        
+remote:   https://git.example.org/hybrid-mmc/collab/pulls/7        
+ ✓ tests/pane/summary.test.ts (2 tests) 2635ms
+   ✓ 窗格里一个项目的一行 (2)
+     ✓ 项目名、身份与显示名、通知各组几条、Gitea 上组织的页面 1652ms
+     ✓ site/content/meta.json 有 title 就用它作站名；origin 不是 Gitea 上仓的地址照实报错 981ms
+ ✓ tests/collab-repo/sync/watch.test.ts (2 tests) 3190ms
+   ✓ 盯协作仓 (2)
+     ✓ 开始时算一次；保存了文件、提交了、切了分支都重算再交 3186ms
+warning: You appear to have cloned an empty repository.
+ ✓ tests/collab-repo/leads.test.ts (1 test) 6ms
+warning: You appear to have cloned an empty repository.
+remote: Visit the existing pull request:        
+remote:   https://git.example.org/hybrid-mmc/collab/pulls/7        
+ ✓ tests/organization/events/leads-changed.test.ts (2 tests) 31ms
+ ✓ tests/project/repo-change-relay.test.ts (3 tests) 7ms
+warning: You appear to have cloned an empty repository.
+ ✓ tests/collab-repo/submit/submit-failures.test.ts (1 test) 5ms
+warning: You appear to have cloned an empty repository.
+remote: Visit the existing pull request:        
+remote:   https://git.example.org/hybrid-mmc/collab/pulls/7        
+warning: You appear to have cloned an empty repository.
+remote: Visit the existing pull request:        
+remote:   https://git.example.org/hybrid-mmc/collab/pulls/7        
+warning: You appear to have cloned an empty repository.
+warning: You appear to have cloned an empty repository.
+warning: You appear to have cloned an empty repository.
+warning: You appear to have cloned an empty repository.
+warning: You appear to have cloned an empty repository.
+warning: You appear to have cloned an empty repository.
+warning: You appear to have cloned an empty repository.
+warning: You appear to have cloned an empty repository.
+warning: You appear to have cloned an empty repository.
+ ✓ tests/collab-repo/submit/revision-files.test.ts (3 tests) 8501ms
+   ✓ 从 git 的某个版本读记录 (3)
+     ✓ 读出那个版本里的 collab/ 与 site/people.json，工作区后来的改动不算 3407ms
+     ✓ 那个版本里没有人员列表：people 为 null 3302ms
+     ✓ 版本不存在就报错，并带上 git 的原话 1790ms
+warning: You appear to have cloned an empty repository.
+warning: You appear to have cloned an empty repository.
+warning: You appear to have cloned an empty repository.
+remote: Visit the existing pull request:        
+remote:   https://git.example.org/hybrid-mmc/collab/pulls/7        
+remote: Visit the existing pull request:        
+remote:   https://git.example.org/hybrid-mmc/collab/pulls/7        
+remote: Visit the existing pull request:        
+remote:   https://git.example.org/hybrid-mmc/collab/pulls/7        
+remote: Visit the existing pull request:        
+remote:   https://git.example.org/hybrid-mmc/collab/pulls/7        
+ ✓ tests/other-repos/rules.test.ts (3 tests) 17910ms
+   ✓ 别的仓的规矩 (3)
+     ✓ 合并许可不写团队：写了 bots 也算问题；配好的不列 9147ms
+     ✓ collab.repo.setup 配别的仓：按它的 origin 找到 Gitea 上的仓，推送许可与合并许可都只写负责人 4068ms
+     ✓ name 不是项目文件夹里的别的仓：拒绝，一个请求都不发 4693ms
+ ✓ tests/collab-repo/submit/submit-pre-checks.test.ts (3 tests) 13234ms
+   ✓ 提交前校验 (3)
+     ✓ 刚克隆、没有改动：没有问题 5824ms
+     ✓ 只报这次改动带来的格式问题；替别人写记录、改别人的记录不算问题 3109ms
+     ✓ 分出来的那个提交上就有的问题不算：同步进来的 main 上的问题不是我的 4299ms
+ ✓ tests/project/project.test.ts (2 tests) 14346ms
+   ✓ 项目文件夹里的仓 (2)
+     ✓ 协作仓的上一级要以组织命名，大小写不论；不是就拒绝，写明怎么放 10420ms
+     ✓ 协作仓以外的仓按名字排；一个仓在 Gitea 上的位置从它的 origin 读 3924ms
+ ✓ tests/other-repos/review.test.ts (8 tests) 20768ms
+   ✓ 各项目里别的仓读到的 (2)
+     ✓ 按目录名记，位置从仓的 origin 读；重读一个仓只换掉那一个，内容一样不报变化 15546ms
+     ✓ 完整刷新以后只留还在项目文件夹里的仓；忘掉以后什么都没有 5211ms
+warning: You appear to have cloned an empty repository.
+warning: You appear to have cloned an empty repository.
+ ✓ tests/organization/setup/create.test.ts (6 tests) 26855ms
+   ✓ collab.repo.create 建仓 (6)
+     ✓ 依次建仓、限定合并方式、把自己加成协作者（管理）、保护 main（只许自己），再克隆进项目文件夹 10552ms
+     ✓ 负责人只写建仓的人，不按 people.json：admin 建仓就只有 admin 4147ms
+     ✓ 仓名不合法、项目文件夹里已有同名的：拒绝，一个请求都不发 3041ms
+     ✓ 建仓被拒（令牌缺权限）：照 Gitea 的原话报，后面的不做 3033ms
+     ✓ 建出来以后保护 main 失败：写明已经建好仓、限定了合并方式、加了协作者，不回退，也不克隆 3004ms
+     ✓ 克隆失败：写明前面都做完了，附 git 的原话 3076ms
+ ✓ tests/other-repos/events.test.ts (5 tests) 26118ms
+   ✓ 完整刷新时别的仓这边 (2)
+     ✓ 先补克隆、再列目录，每个仓取回、读、核对，最后只留还在的 10530ms
+     ✓ 列不出目录：别的都不做，也不 retainOnly 3748ms
+   ✓ 收到别的仓与组织里建删仓的消息 (3)
+     ✓ 有新提交只取回；合并请求、issue、评论重读；负责人换了重读再核对；仓名大小写不论 4869ms
+     ✓ 项目文件夹里没有这个仓只记一行；列不出目录时连这一行也不记 3492ms
+     ✓ 组织里建了仓：补克隆，克隆下来的接着取回、读、核对；别的动作只记一行 3477ms
+remote: Visit the existing pull request:        
+remote:   https://git.example.org/hybrid-mmc/collab/pulls/7        
+warning: You appear to have cloned an empty repository.
+ ✓ tests/collab-repo/submit/submit-sync.test.ts (1 test) 26802ms
+   ✓ 提交审核与自动同步配合 (1)
+     ✓ 提交审核时同一条的同一个字段两边改得不一样：不推送，列出冲突的文件，自动同步不动；改好之后再提交审核完成这次合并 26800ms
+warning: You appear to have cloned an empty repository.
+warning: You appear to have cloned an empty repository.
+warning: You appear to have cloned an empty repository.
+warning: You appear to have cloned an empty repository.
+remote: Visit the existing pull request:        
+remote:   https://git.example.org/hybrid-mmc/collab/pulls/7        
+warning: You appear to have cloned an empty repository.
+remote: Visit the existing pull request:        
+remote:   https://git.example.org/hybrid-mmc/collab/pulls/7        
+warning: You appear to have cloned an empty repository.
+ ✓ tests/collab-repo/sync/state.test.ts (6 tests) 47455ms
+   ✓ 协作仓的本机状态 (1)
+     ✓ 没改动时是空的；未提交的 collab/、site/ 分开、仓里别处不算；冲突从状态码里读；不在 main 写分支名、分离头为 null 10153ms
+   ✓ 协作仓那一边的自动同步 (5)
+     ✓ 取回 origin、能快进就快进，记下结果；还没同步过为 null 11628ms
+     ✓ 不能快进：同步不了的原因留给通知，变了才报变化；能同步了就清掉 5887ms
+     ✓ 盯着协作仓：本机状态一变就报变化；还没算出来、没在盯时现算；忘掉以后不再记自动同步 5417ms
+     ✓ 自动同步以后没有东西可提交，上次提交审核的失败就清掉 (2)
+       ✓ 改动留着就保留：在工作区、提交在还没进的本地 main 上都保留 4361ms
+       ✓ 改动撤掉了就消失：下一次自动同步后清掉，撤掉时 main 上正好有新提交也一样 10005ms
+remote: Visit the existing pull request:        
+remote:   https://git.example.org/hybrid-mmc/collab/pulls/7        
+warning: You appear to have cloned an empty repository.
+remote: Visit the existing pull request:        
+remote:   https://git.example.org/hybrid-mmc/collab/pulls/7        
+warning: You appear to have cloned an empty repository.
+remote: Visit the existing pull request:        
+remote:   https://git.example.org/hybrid-mmc/collab/pulls/7        
+ ✓ tests/other-repos/fetch/update.test.ts (9 tests) 55412ms
+   ✓ collab.repos.update 更新一个别的仓 (9)
+     ✓ 先取回再快进，回 { repo, outcome, commits }；已经一样新回 up-to-date 17716ms
+     ✓ 不在 main 上（别的分支、分离的 HEAD）：拒绝，写明在哪，不动 6567ms
+     ✓ 本地 main 上有服务器上没有的提交：拒绝，写明可能是合并请求还没合并或没推上去 5320ms
+     ✓ 没提交的改动和新改动碰到同一个文件：git 不快进，文件原样留着，附 git 的原话 4510ms
+     ✓ 没提交的改动不碰新改动的文件：照样快进，改动照留 4835ms
+     ✓ 有一次合并还没完成（MERGE_HEAD 还在）：拒绝 4225ms
+     ✓ 仓里没有 origin/main（服务器上还是空仓）：拒绝，写明原因 5283ms
+     ✓ 仓名不对就拒绝：不是合法仓名、是协作仓（大小写不论）、项目文件夹里没有、不是 git 仓 3554ms
+     ✓ 取回失败：拒绝，附 git 的原话 3400ms
+ ✓ tests/organization/events/project-events.test.ts (14 tests) 56967ms
+   ✓ 完整刷新 (4)
+     ✓ 两边各刷新一次：协作仓取回、读负责人、核对规矩、自动同步；别的仓补克隆后逐个取回、读、核对，只留还在的；再核对组织 webhook 12843ms
+     ✓ 一步出错不影响别的步：出错的原话一步一条记下、报变化；那一步下次做成了就清掉 4795ms
+     ✓ 项目打不开（令牌失效等）：记下原话，别的步都不做 3758ms
+     ✓ 同一个项目正在做别的：回 busy 3542ms
+   ✓ 按消息把事件分给两边 (4)
+     ✓ 协作仓有新提交：取回、自动同步；负责人换了：重读负责人、核对规矩；协作仓的合并请求、issue 与评论不处理 3100ms
+     ✓ 别的仓有新提交只取回它；合并请求、issue、评论有动静重读它；负责人换了重读、再核对规矩 2958ms
+     ✓ 别的仓的合并请求被审阅、合并请求上有新评论：都重读那个仓，「要你改」「评论了」不等下一次刷新 2739ms
+     ✓ 组织里建了仓：补克隆，克隆下来的接着取回、读、核对；删了仓、项目文件夹里没有的仓只记一行 2736ms
+   ✓ 项目列表与订阅 (6)
+     ✓ 移出列表：两边与组织 webhook 都忘掉它，出错与刷新过的记录也清掉 3568ms
+     ✓ 移出列表报给 onListChanged（QQ 任务组靠它撤掉注册）；不在列表里的拒绝、不报 4024ms
+     ✓ start 后列表里的项目就开始盯两边、订上它的组织，不用先手动刷新 2851ms
+     ✓ start 时站点起不来：失败记成这个项目的一步出错、报变化，不留没处理的拒绝 3005ms
+     ✓ 加进列表时站点起不来：照样加进去、安排刷新，失败记成一步出错、报变化 3165ms
+     ✓ origin 的地址读不出组织：那个项目不订，原因写在实时推送的状态里 3878ms
+remote: Visit the existing pull request:        
+remote:   https://git.example.org/hybrid-mmc/collab/pulls/7        
+warning: You appear to have cloned an empty repository.
+remote: Visit the existing pull request:        
+remote:   https://git.example.org/hybrid-mmc/collab/pulls/7        
+ ✓ tests/collab-repo/submit/submit-main.test.ts (9 tests) 61015ms
+   ✓ collab.submit (9)
+     ✓ 在 main 上提交，不建分支；只提交 collab/，推到 refs/for/main，等到执行器合并 20129ms
+     ✓ 被执行器打回：本地 main 退回推送时的 origin/main，改动回到工作区，报出执行器的留言 8360ms
+     ✓ 执行器到时限还没结论：插件关掉合并请求，改动回到工作区 6884ms
+     ✓ 没有改动、也没有 main 里还没有的提交：拒绝 3985ms
+     ✓ 校验不过：不提交、不推送，原样列出问题 3060ms
+     ✓ 本地 main 落后 origin/main：先把 main 合进来再推，别人后来合进 main 的新记录、改动不算我删的、改的 9342ms
+     ✓ 落后 main 时删了分叉点上就有的记录：删记录不再拦，照样提交 7207ms
+     ✓ 在别的分支上：拒绝 1169ms
+     ✓ 从推送的输出里认出合并请求；认不出为 null 875ms
+warning: You appear to have cloned an empty repository.
+remote: Visit the existing pull request:        
+remote:   https://git.example.org/hybrid-mmc/collab/pulls/7        
+ ✓ tests/collab-repo/submit/submit-site.test.ts (3 tests) 66070ms
+   ✓ collab.submit 带上 site/ 的改动 (3)
+     ✓ 记录和页面一起提交，进同一个提交、同一个主题；提交前跑过站点的类型检查 15398ms
+     ✓ 只有负责人能改的内容接进了提交路径：成员拦下、不推送、改动留在工作区；负责人与例外放行；只改记录不跑类型检查 48075ms
+     ✓ 站点检查与类型检查不过：不提交、不推送，逐条写明 2595ms
+warning: You appear to have cloned an empty repository.
+ ✓ tests/collab-repo/sync/sync.test.ts (11 tests) 71877ms
+   ✓ 定时检查里的自动同步 (11)
+     ✓ 落后 origin/main、本地没有还没合进去的提交：本地 main 快进到和 origin/main 一样 12192ms
+     ✓ 我的提交被执行器合进 main：快进，本地 main 就是 origin/main，不生成合并提交 12950ms
+     ✓ 本地 main 上有还没进 main 的提交（提交审核正在等执行器）：不动，写明原因 5758ms
+     ✓ 只快进：工作区里没提交、不和新改动碰同一个文件的改动照留 6568ms
+     ✓ 快进进来的改动动了依赖、接着装依赖失败：报错写明已经快进了，附 pnpm 原话 5862ms
+     ✓ 已经和 main 一样新：什么都不做 6003ms
+     ✓ 在 main 以外的分支上：不动，写明原因 4802ms
+     ✓ 工作区里没提交的改动会被覆盖：git 不快进，文件原样留着 4726ms
+     ✓ 提交审核合 main 出的冲突还没改好：不动，冲突标记原样留着 4319ms
+     ✓ 合进来的改动只动了 site/ 的页面：不装依赖，让站点再过一遍启动前的检查；只动 collab/ 时不查 5626ms
+     ✓ 合进来的改动动了 site/ 的依赖：接着装依赖，站点照常驻的规矩重启 3069ms
+
+ Test Files  43 passed (43)
+      Tests  308 passed (308)
+   Start at  15:55:50
+   Duration  72.83s (tests 95%, import 4%, transform 1%)
+
+JSON report written to C:/Users/godamericatb14/AppData/Local/Temp/claude/D--unitfolders-oz47p-docsite-kit/2c209786-8905-4a30-905b-30324e0263c9/scratchpad/before/plugins_collab.json

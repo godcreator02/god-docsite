@@ -1,0 +1,6 @@
+pnpm-test exit=0 secs=15
+pnpm-check exit=0 secs=54.8
+pnpm-test-slow exit=0 secs=162.9
+collab-test-verified exit=0 secs=28.5
+
+[exited with code 0]

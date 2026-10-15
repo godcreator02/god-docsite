@@ -17,5 +17,6 @@ export default defineConfig({ define: buildConstants, test: {
     // tests/verified/ 是「已验证的行为假设」（整组织克隆、ahead/behind 语义、文件监视事件）：断言对着 git 与
     // watcher 本体，产品代码只是载体。默认不跑——只在四种信号下跑 pnpm test:verified：升 git 或关键依赖、
     // 动了它们的被测模块（src/organization/setup/、src/other-repos/fetch/）、发版前、用户或 agent 明确要求
-    exclude: ['**/node_modules/**', '**/dist/**', 'tests/verified/**'],
+    // *.slow.test.ts 是慢的一级（每条测试先建本地组织、调几十次 git），默认也不跑，只由 pnpm test:slow（vitest.slow.config.ts）跑
+    exclude: ['**/node_modules/**', '**/dist/**', 'tests/verified/**', '**/*.slow.test.*'],
   } })

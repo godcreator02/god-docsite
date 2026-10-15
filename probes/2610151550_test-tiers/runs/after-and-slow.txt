@@ -1,0 +1,21 @@
+packages/god-docsite exit=0 secs=2.3
+packages/identity exit=0 secs=0.9
+packages/explainer exit=0 secs=1
+packages/code-pin exit=0 secs=2.4
+packages/trajectory exit=0 secs=1.8
+packages/comments exit=0 secs=2.5
+packages/doc-export exit=0 secs=1.7
+packages/collab exit=0 secs=4
+packages/docfirst exit=0 secs=2
+plugins/docsite exit=0 secs=2.2
+plugins/docfirst exit=0 secs=1.6
+plugins/collab exit=0 secs=4.4
+docs-site exit=1 secs=3.6
+=== slow
+packages/code-pin exit=0 secs=13.3
+packages/collab exit=0 secs=14.7
+packages/docfirst exit=0 secs=9.3
+plugins/docsite exit=0 secs=40.7
+plugins/collab exit=0 secs=76.9
+
+[exited with code 0]

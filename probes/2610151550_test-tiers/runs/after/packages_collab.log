@@ -1,0 +1,33 @@
+
+ RUN  v5.0.3 D:/unitfolders/oz47p-docsite-kit/w12-tiers/packages/collab
+
+ ✓ test/boundary.test.ts (4 tests) 54ms
+ ✓ test/notifications.test.ts (30 tests) 8ms
+ ✓ test/notification-validation.test.ts (19 tests) 9ms
+ ✓ test/timeline.test.ts (4 tests) 10ms
+ ✓ test/site-feed.test.ts (12 tests) 12ms
+ ✓ test/node.test.ts (3 tests) 38ms
+ ✓ test/merge-workflow-template.test.ts (3 tests) 4ms
+ ✓ test/journal.test.ts (10 tests) 49ms
+ ✓ test/ids-people.test.ts (13 tests) 9ms
+ ✓ test/validate.test.ts (9 tests) 12ms
+ ✓ test/remark-collab-links.test.ts (2 tests) 16ms
+ ✓ test/record-file.test.ts (15 tests) 6ms
+ ✓ test/module.test.ts (10 tests) 52ms
+ ✓ test/inbox.test.ts (4 tests) 8ms
+ ✓ test/state.test.ts (6 tests) 11ms
+ ✓ test/write.test.ts (31 tests) 566ms
+ ✓ test/site-server.test.ts (16 tests) 292ms
+ ✓ test/template.test.ts (10 tests) 1888ms
+   ✓ mdx.ts（构建期，只经 source.config.ts 加载） (3)
+     ✓ 给站点集合的 remark 插件是记录链接；日志集合照本包的日志规则：journal/ 顶层的 <日期>.mdx，正文按需加载 398ms
+   ✓ feature.tsx（运行时，浏览器侧也加载） (3)
+     ✓ 侧栏入口是「任务」「日历」两个站内地址 1390ms
+ ✓ test/site-components.test.tsx (6 tests) 302ms
+
+ Test Files  19 passed (19)
+      Tests  207 passed (207)
+   Start at  16:11:12
+   Duration  3.52s (import 54%, tests 21%, transform 17%, environment 7%, worker 1%)
+
+JSON report written to C:/Users/godamericatb14/AppData/Local/Temp/claude/D--unitfolders-oz47p-docsite-kit/2c209786-8905-4a30-905b-30324e0263c9/scratchpad/after/packages_collab.json

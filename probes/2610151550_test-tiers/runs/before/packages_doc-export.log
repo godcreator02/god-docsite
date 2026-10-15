@@ -1,0 +1,14 @@
+
+ RUN  v5.0.3 D:/unitfolders/oz47p-docsite-kit/w12-tiers/packages/doc-export
+
+ ✓ test/fumadocs-roster.test.ts (4 tests) 28ms
+ ✓ test/outputs.test.ts (8 tests) 39ms
+ ✓ test/render.test.ts (14 tests) 52ms
+ ✓ test/node-outputs.test.ts (5 tests) 106ms
+
+ Test Files  4 passed (4)
+      Tests  31 passed (31)
+   Start at  15:54:27
+   Duration  986ms (import 81%, transform 11%, tests 8%, worker 1%)
+
+JSON report written to C:/Users/godamericatb14/AppData/Local/Temp/claude/D--unitfolders-oz47p-docsite-kit/2c209786-8905-4a30-905b-30324e0263c9/scratchpad/before/packages_doc-export.json

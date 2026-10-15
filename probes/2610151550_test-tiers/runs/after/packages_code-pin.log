@@ -1,0 +1,18 @@
+
+ RUN  v5.0.3 D:/unitfolders/oz47p-docsite-kit/w12-tiers/packages/code-pin
+
+ ✓ test/template.test.ts (4 tests) 20ms
+ ✓ test/core.test.ts (15 tests) 17ms
+ ✓ test/pin-node.test.ts (6 tests) 17ms
+ ✓ test/doc-pins.test.ts (11 tests) 37ms
+ ✓ test/marker.test.ts (13 tests) 48ms
+ ✓ test/site.test.ts (12 tests) 33ms
+ ✓ test/diff.test.ts (9 tests) 546ms
+ ✓ test/hash-text.test.ts (11 tests) 721ms
+
+ Test Files  8 passed (8)
+      Tests  81 passed (81)
+   Start at  16:11:03
+   Duration  1.84s (import 71%, tests 20%, transform 8%, worker 1%)
+
+JSON report written to C:/Users/godamericatb14/AppData/Local/Temp/claude/D--unitfolders-oz47p-docsite-kit/2c209786-8905-4a30-905b-30324e0263c9/scratchpad/after/packages_code-pin.json

@@ -1,0 +1,82 @@
+
+ RUN  v5.0.3 D:/unitfolders/oz47p-docsite-kit/w12-tiers/packages/collab
+
+ ✓ test/notifications.test.ts (30 tests) 10ms
+ ✓ test/notification-validation.test.ts (19 tests) 11ms
+ ✓ test/site-feed.test.ts (12 tests) 11ms
+ ✓ test/validate.test.ts (9 tests) 8ms
+ ✓ test/journal.test.ts (10 tests) 96ms
+ ✓ test/state.test.ts (6 tests) 7ms
+ ✓ test/record-file.test.ts (15 tests) 11ms
+ ✓ test/module.test.ts (10 tests) 76ms
+ ✓ test/inbox.test.ts (4 tests) 7ms
+ ✓ test/merge-workflow-template.test.ts (3 tests) 7ms
+ ✓ test/boundary.test.ts (4 tests) 373ms
+ ✓ test/timeline.test.ts (4 tests) 9ms
+ ✓ test/ids-people.test.ts (13 tests) 25ms
+ ✓ test/remark-collab-links.test.ts (2 tests) 26ms
+ ✓ test/node.test.ts (3 tests) 37ms
+ ✓ test/site-server.test.ts (16 tests) 550ms
+ ✓ test/write.test.ts (31 tests) 915ms
+ ✓ test/template.test.ts (10 tests) 2290ms
+   ✓ mdx.ts（构建期，只经 source.config.ts 加载） (3)
+     ✓ 给站点集合的 remark 插件是记录链接；日志集合照本包的日志规则：journal/ 顶层的 <日期>.mdx，正文按需加载 480ms
+   ✓ feature.tsx（运行时，浏览器侧也加载） (3)
+     ✓ 侧栏入口是「任务」「日历」两个站内地址 1588ms
+ ✓ test/site-components.test.tsx (6 tests) 392ms
+ ✓ test/merge-check-cli.test.ts (13 tests) 8525ms
+   ✓ 命令行 collab-merge-check (13)
+     ✓ 能合并时退出码 0 2072ms
+     ✓ 不能合并时退出码 1，逐条列出问题 1147ms
+     ✓ --author 在 --leads 里时，只有负责人能改的内容放行 1024ms
+     ✓ 参数不对时退出码 2：["--head","topic"] 408ms
+     ✓ 参数不对时退出码 2：["--base","main","--head","topic","--collab","docs/collab"] 396ms
+     ✓ 参数不对时退出码 2：["--base","main"] 419ms
+     ✓ 参数不对时退出码 2：["--base","main","--head"] 413ms
+     ✓ 参数不对时退出码 2：["--base","main","--head","topic","--as","bob"] 424ms
+     ✓ 参数不对时退出码 2：["--base","main","--head","topic","extra"] 418ms
+     ✓ 参数不对时退出码 2：["--base","main","--head","topic","--author","bob"] 404ms
+     ✓ 参数不对时退出码 2：["--base","main","--head","topic","--author","bob","--leads","alice,"] 376ms
+     ✓ 检查自己出错（不在 git 仓里运行）也是退出码 2，打印原话，和「不能合并」的退出码 1 分开 483ms
+     ✓ head 指向不存在的版本（merge-tree 退出码 1、没列冲突文件）：也算检查自己出错，退出码 2、带上 git 的原话，不列成「不能合并」 538ms
+ ✓ test/merge-check-conflicts.test.ts (8 tests) 9642ms
+   ✓ 合并检查：和 main 有没有冲突 (8)
+     ✓ 新加一条记录，能合并 1890ms
+     ✓ 两边改了同一条记录的同一行，是冲突 1394ms
+     ✓ 记录和页面、组件、静态文件一起改，能合并 1000ms
+     ✓ 成员加库、升级库，改 tsconfig、index.html、锁文件，在站点里新建目录：都放行 1035ms
+     ✓ 记录写坏了、页面引用了不存在的组件：不在这里查，照样能合并（成员提交前在本机查） 920ms
+     ✓ 改别人的记录、删记录都不挡：不查谁改了谁 1239ms
+     ✓ head 落后于 main：main 后来加的记录不算 head 删的 1325ms
+     ✓ head 可以是提交号 836ms
+ ✓ test/merge-check-lead-only.test.ts (8 tests) 13951ms
+   ✓ 合并检查：只有负责人能改的内容 (8)
+     ✓ 成员改了工作流、人员列表、装包设置、Node 会执行的配置、scripts、框架包版本、写成网址的依赖：只有负责人能改，逐处写明 2311ms
+     ✓ 成员给人员列表里自己那一项加身份码：放行 1079ms
+     ✓ 人员列表里给别人加码、顺手改自己的名字、加一项、不说提交的人是谁：都只有负责人能改 3271ms
+     ✓ 人员列表按布局在 site/people.json：改了别人那一项要负责人，写在 collab/ 下的 people.json 不是人员列表、不按它挡 1658ms
+     ✓ site/package.json 里 @godcreator/ 下的包都只有负责人能改：平台、身份、评论加进来逐个写明，两段依赖都看 943ms
+     ✓ 站点已经装着 @godcreator/ 的包：改其中一个的版本、删掉一个都要负责人；只升级别的库、加别的库放开 2875ms
+     ✓ 协作仓的负责人改了只有负责人能改的内容，直接放行 961ms
+     ✓ site/package.json 写坏了：看不出改了哪几处，整个文件算只有负责人能改 850ms
+ ✓ test/repo-links.test.ts (11 tests) 16346ms
+   ✓ 项目文件夹 (2)
+     ✓ 是站点所在协作仓的上一级；按固定的布局算，不问 git 2251ms
+     ✓ 链接到别处的仓（目录联接、符号链接）里的文件也能打开 2253ms
+   ✓ repo: 链接 (8)
+     ✓ 文本文件由站点服务在 VS Code 里打开，#L 行号取出来跳到那一行，行段取起始行 1612ms
+     ✓ 站点服务只在本机打开 VS Code 与系统默认程序那两种；浏览器能看的、打不开的都抛错 1595ms
+     ✓ 中文路径照写，百分号编码过的也认 1538ms
+     ✓ PDF 交给浏览器，经站点服务取文件，#page 原样带上 1288ms
+     ✓ 指向目录的链接算写错：VS Code 只打开具体的文件；二进制文件用系统默认程序打开 1225ms
+     ✓ 仓本机没有、目录不是 git 仓，是 no-repo；仓在文件不在，是 no-file 1270ms
+     ✓ 跑出项目文件夹、绝对路径、空路径、认不出的 # 都算写错 1334ms
+   ✓ 交给浏览器的文件 (1)
+     ✓ 只交项目文件夹里各仓里的 PDF、图片、网页 1977ms
+
+ Test Files  23 passed (23)
+      Tests  247 passed (247)
+   Start at  15:54:29
+   Duration  16.71s (tests 78%, import 15%, transform 4%, environment 2%)
+
+JSON report written to C:/Users/godamericatb14/AppData/Local/Temp/claude/D--unitfolders-oz47p-docsite-kit/2c209786-8905-4a30-905b-30324e0263c9/scratchpad/before/packages_collab.json

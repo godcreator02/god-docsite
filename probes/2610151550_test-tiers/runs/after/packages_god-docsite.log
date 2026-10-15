@@ -1,0 +1,25 @@
+
+ RUN  v5.0.3 D:/unitfolders/oz47p-docsite-kit/w12-tiers/packages/god-docsite
+
+ ✓ test/feed.test.ts (5 tests) 63ms
+ ✓ test/page-sources.test.ts (6 tests) 14ms
+ ✓ test/features.test.ts (4 tests) 7ms
+ ✓ test/html-text.test.ts (9 tests) 11ms
+ ✓ test/search.test.ts (5 tests) 110ms
+ ✓ test/origin.test.ts (4 tests) 4ms
+ ✓ test/site-link-targets.test.ts (5 tests) 5ms
+ ✓ test/glossary.test.ts (9 tests) 14ms
+ ✓ test/site-links.test.tsx (6 tests) 43ms
+ ✓ test/vite-plugin.test.ts (6 tests) 6ms
+ ✓ test/glossary-file.test.ts (3 tests) 31ms
+ ✓ test/remark-glossary.test.ts (15 tests) 24ms
+ ✓ test/mdx-render.test.tsx (6 tests) 129ms
+ ✓ test/layout-data.test.ts (3 tests) 33ms
+ ✓ test/scaffold.test.ts (14 tests) 1313ms
+
+ Test Files  15 passed (15)
+      Tests  100 passed (100)
+   Start at  16:10:59
+   Duration  1.77s (import 64%, tests 24%, transform 11%, worker 1%)
+
+JSON report written to C:/Users/godamericatb14/AppData/Local/Temp/claude/D--unitfolders-oz47p-docsite-kit/2c209786-8905-4a30-905b-30324e0263c9/scratchpad/after/packages_god-docsite.json

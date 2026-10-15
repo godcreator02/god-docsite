@@ -1,0 +1,13 @@
+
+ RUN  v5.0.3 D:/unitfolders/oz47p-docsite-kit/w12-tiers/packages/explainer
+
+ ✓ test/entries.test.ts (3 tests) 9ms
+ ✓ test/template.test.ts (3 tests) 7ms
+ ✓ test/explainer.test.ts (11 tests) 23ms
+
+ Test Files  3 passed (3)
+      Tests  17 passed (17)
+   Start at  16:11:02
+   Duration  465ms (transform 54%, import 34%, tests 9%, worker 3%)
+
+JSON report written to C:/Users/godamericatb14/AppData/Local/Temp/claude/D--unitfolders-oz47p-docsite-kit/2c209786-8905-4a30-905b-30324e0263c9/scratchpad/after/packages_explainer.json

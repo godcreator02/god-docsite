@@ -1,0 +1,23 @@
+
+$ tsc -p tsconfig.json
+$ oxlint . --deny-warnings
+$ tsc -p tsconfig.json
+$ oxlint . --deny-warnings
+$ tsc -p tsconfig.json
+$ oxlint . --deny-warnings
+$ tsc -p tsconfig.json
+$ tsc -p tsconfig.json
+$ tsc -p tsconfig.json
+$ oxlint . --deny-warnings
+$ tsc -p tsconfig.json
+$ tsc -p tsconfig.json && tsc -p test/template-site/tsconfig.json
+$ oxlint . --deny-warnings
+$ tsc -p tsconfig.json
+$ tsc --noEmit -p tsconfig.json
+$ oxlint . --deny-warnings
+$ tsc --noEmit -p tsconfig.json
+$ oxlint . --deny-warnings
+$ tsc --noEmit -p tsconfig.json && tsc --noEmit -p src/pane/browser/tsconfig.json
+$ oxlint . --deny-warnings
+$ react-router typegen && tsc --noEmit
+[MDX] generated files in 2.5502000000001317ms
