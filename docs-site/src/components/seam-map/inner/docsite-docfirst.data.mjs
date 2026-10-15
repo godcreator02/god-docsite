@@ -3,7 +3,7 @@
  * 框是包里的文件（组件与它用的辅助文件合成一个框：site.tsx 与 term.tsx、card.tsx 与 card-fields.ts）；
  * 灰色实线框是包外的文档站基础包、workflow、星轨盘包、fumadocs 本体与站点目录。坐标在 docsite-docfirst.layout.ts。
  */
-import { defineSeamGraph } from '@godcreator/docsite-explainer/seam-graph';
+import { defineSeamGraph } from '@godcreator/explainer';
 
 export const docfirstSiteGraph = defineSeamGraph({
   id: 'docsite-docfirst',

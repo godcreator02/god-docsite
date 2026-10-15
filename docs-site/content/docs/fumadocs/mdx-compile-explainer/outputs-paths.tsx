@@ -1,6 +1,6 @@
 import type { JSX, ReactNode } from 'react'
-import { CasePicker, Pane, Pill, Terminal } from '@godcreator/docsite-explainer'
-import type { Role } from '@godcreator/docsite-explainer'
+import { CasePicker, Pane, Pill, Terminal } from '@godcreator/explainer/site'
+import type { Role } from '@godcreator/explainer/site'
 
 /** 流程链里的一站：rose 是我们的包 */
 interface ChainStop {

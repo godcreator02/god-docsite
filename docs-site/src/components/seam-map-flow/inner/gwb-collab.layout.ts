@@ -6,7 +6,7 @@
  * 两边的目录方块对准它在 Gitea 上与本机上那一头，线都是竖直的；往下的线停在本机框的上边，不压框标题。两边交给通知的线从浅底的内侧边出来。
  */
 import { AppWindow, Bell, Bot, ClipboardList, FolderGit2, FolderTree, Globe, MessageCircle, Network, Plug, Server, ServerCog, Terminal } from 'lucide-react';
-import { cap } from '@godcreator/docsite-explainer';
+import { cap } from '@godcreator/explainer/site';
 import type { FlowSeamLayout } from '../flow-seam-diagram';
 
 /** 上面 Gitea 那一排、两边目录第一行与第二行、本机那一排、中间最后一行、最下一排（项目登记与 QQ 机器人里的任务组）的能力方块上边 */

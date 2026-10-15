@@ -1,22 +1,21 @@
 /**
- * 这个项目的 docfirst 配置：生成物写到哪、组件名册是什么。命令行和站读的是同一份。
+ * 这个项目的 docfirst 配置：命令行 docfirst（check / confirm / render / trajectory）读它，项目根是这个站目录。
  *
- * 项目根是这个站目录，引用的代码在工作区的 packages/ 与 plugins/ 下，所以引用里写 `../packages/…` 或 `../plugins/…`。
- * 分区按约定：content/ 下 future/ 是未来区，其余目录都是现状区、都进 check；
+ * 引用的代码在工作区的 packages/ 与 plugins/ 下，所以引用里写 `../packages/…` 或 `../plugins/…`。
+ * content：内容根。下面的 future/ 是未来区，其余目录都是现状区、都进 check；
  * 本站的现状区按能力分：content/docs（总览与原理）、content/docsite（地基）、content/docfirst（docfirst 的包与插件）、
  * content/collab（协作站的包与插件）、content/gitea（在 Gitea 与 NAS 上配的部分）、content/maintain（维护这个仓），外加 src/components/ 下讲解组件的源码。
- * outputs：仓根 README.md / CLAUDE.md 与两个插件里的几份 SKILL.md 是生成物，正本是下面映射左边的 mdx
+ * outputs：仓根 README.md / CLAUDE.md 与插件里的几份 SKILL.md 是生成物，正本是下面映射左边的 mdx
  * （都在 content/docs/outputs/）；AGENTS.md 是手写的正本，不在 outputs 里——
- * 改 mdx 源要运行 `pnpm docfirst render`（`confirm` 也会顺带做），两份一起提交，check 检查生成物跟源是否一致。
+ * 改 mdx 正本要运行 `pnpm doc:render`（`doc:confirm` 也会顺带做），两份放进同一个提交，`pnpm doc` 检查生成物跟正本是否一致。
  * CLAUDE.md 第一行固定是 `@AGENTS.md`，只给 Claude 的指令写在它后面。
- * 组件名册：先展开 fumadocsRoster（fumadocs 自带的 Files / Folder / File 与 Note 的机读规则，纯数据，命令行也能加载），
- * 再加站里自己定义的组件和它们转成机读文本的规则。站内组件的 React 实现在 src/components/ 下，页面里 import；
- * Term 与 Files / Folder / File 由功能包 @godcreator/docsite-docfirst 提供，页面里不用 import。
- * 星轨盘不在名册里：它是功能包的整页路由 /trajectory，不在 mdx 里用。
- * trajectory：轨迹卡放在站点根下的 trajectory/（功能包的卡集合读这个目录）。
- * glossary：术语表在 src/glossary.mjs，构建页面时功能包的 remark 插件按它标注术语；skip 里的页不标。
+ * fumadocsRoster 与 components：组件名册。fumadocsRoster 放进 fumadocs 自带的 Note、Files、Folder、File 的机读规则，
+ * components 再加站里自己定义的组件和它们转成机读文本的规则。站内组件的 React 实现在 src/components/ 下，页面里 import；
+ * 讲解组件的机读文字规则来自 @godcreator/explainer（各组件的 .ai.mjs 调它）。Term 与 Files / Folder / File 由平台登记，页面里不用 import。
+ * 星轨盘不在名册里：它是 trajectory 功能的整页路由 /trajectory，不在 mdx 里用。
+ * trajectory：轨迹卡放在站点根下的 trajectory/，站点的卡集合（app/features/trajectory/mdx.ts）读同一个目录。
+ * 术语表不在这里：它是站点根的 glossary.json，不标术语的页写在站点的 app/lib/mdx-plugins.ts。
  */
-import { fumadocsRoster } from "@godcreator/docfirst-workflow/fumadocs/roster";
 import * as tabs from "./src/components/tabs/tabs.ai.mjs";
 import * as pin from "./src/components/pin/pin.ai.mjs";
 import * as pinGlance from "./src/components/pin-glance/glance.ai.mjs";
@@ -48,6 +47,7 @@ import * as repoModes from "./src/components/repo-modes/repo-modes.ai.mjs";
 const skill = (name) => ({ to: `../plugins/docfirst/skills/${name}/SKILL.md`, frontmatter: ["name", "description"] });
 
 export default {
+  content: "content",
   outputs: {
     "content/docs/outputs/readme.mdx": ["../README.md"],
     "content/docs/outputs/claude.mdx": ["../CLAUDE.md"],
@@ -62,8 +62,8 @@ export default {
     "content/docs/outputs/skills/collab/other-repos.mdx": ["../plugins/collab/skills/collab/references/other-repos.md"],
     "content/docs/outputs/skills/collab/organization.mdx": ["../plugins/collab/skills/collab/references/organization.md"],
   },
+  fumadocsRoster: true,
   components: {
-    ...fumadocsRoster,
     Tabs: tabs.Tabs,
     Tab: tabs.Tab,
     // 术语标注：自动标出的术语是构建时生成的，不写进源文件，命令行看不到。这条规则管作者
@@ -91,6 +91,4 @@ export default {
     BoundaryRules: boundaryRules.BoundaryRules,
   },
   trajectory: "trajectory",
-  // 术语页规范那篇是人写的规范文本，里头的词按字面读，不标注
-  glossary: { terms: "src/glossary.mjs", skip: ["content/docs/human-write-spec-dont-change.mdx"] },
 };

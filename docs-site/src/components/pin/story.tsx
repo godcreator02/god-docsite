@@ -4,10 +4,10 @@
  * 讲解文字与每一步的数据都在 story.data.mjs，这里只负责画；步骤控制条、每一步的标题与说明由 Stepper 显示。
  * 生成物里的机读文字由 pin.ai.mjs 读同一份数据生成。
  */
-import { CodeLines, Diff, Dot, Pane, Pill, Stepper, Terminal } from '@godcreator/docsite-explainer';
+import { CodeLines, Diff, Dot, Pane, Pill, Stepper, Terminal } from '@godcreator/explainer/site';
 import { files, legend, steps } from './story.data.mjs';
 import { toneOfStatus } from './tone';
-import '@godcreator/docsite-explainer/styles.css';
+import '@godcreator/explainer/styles.css';
 import './pin.css';
 
 type Step = (typeof steps)[number];

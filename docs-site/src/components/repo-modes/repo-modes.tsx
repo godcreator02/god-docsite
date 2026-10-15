@@ -5,8 +5,8 @@
  * 讲解文字与每一步的数据都在 repo-modes.data.mjs，机读版由 repo-modes.ai.mjs 读同一份数据生成。
  */
 import type { JSX } from 'react';
-import { Pane, Pill, Stepper, Terminal } from '@godcreator/docsite-explainer';
-import type { Role } from '@godcreator/docsite-explainer';
+import { Pane, Pill, Stepper, Terminal } from '@godcreator/explainer/site';
+import type { Role } from '@godcreator/explainer/site';
 import { fields, lanes, steps } from './repo-modes.data.mjs';
 
 type Step = (typeof steps)[number];

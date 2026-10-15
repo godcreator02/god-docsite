@@ -5,7 +5,7 @@
  * 讲解文字与每种情况的数据都在 write-rule.data.mjs；机读版由 write-rule.ai.mjs 读同一份数据生成。
  */
 import type { JSX } from 'react';
-import { CasePicker, CodeLines, Dot, Pane, Pill } from '@godcreator/docsite-explainer';
+import { CasePicker, CodeLines, Dot, Pane, Pill } from '@godcreator/explainer/site';
 import { cases } from './write-rule.data.mjs';
 
 type WriteCase = (typeof cases)[number];

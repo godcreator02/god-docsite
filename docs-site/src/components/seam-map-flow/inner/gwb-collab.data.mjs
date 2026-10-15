@@ -4,7 +4,7 @@
  * 坐标、送什么、箭头方向在 gwb-collab.layout.ts。
  * 只封装外部系统的底层目录（git/、gitea-api/）与装配不送东西，不画；项目登记 project/ 只画它与 QQ 机器人、gwb-docsite 之间的两条。
  */
-import { defineSeamGraph } from '@godcreator/docsite-explainer/seam-graph';
+import { defineSeamGraph } from '@godcreator/explainer';
 
 /** 一个目录或文件在图里只画一块能力方块（不画外框）时用：名字是它管的事，ident 是目录或文件的路径 */
 const directory = (id, name, dir, role, blurb) => ({ id, name, pkg: dir, role, outside: false, blurb, caps: [{ id, name, ident: dir }] });

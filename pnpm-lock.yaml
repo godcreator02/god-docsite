@@ -392,30 +392,24 @@ importers:
       '@fumadocs/base-ui':
         specifier: 'catalog:'
         version: 16.17.1(@types/mdx@2.0.14)(@types/react@19.3.0)(fumadocs-core@16.17.1(@mdx-js/mdx@3.1.1(supports-color@7.2.0))(@types/estree-jsx@1.0.5)(@types/hast@3.0.5)(@types/mdast@4.0.4)(@types/react@19.3.0)(lucide-react@1.54.0(@types/react@19.3.0)(react@19.3.0))(react-dom@19.3.0(react@19.3.0))(react-router@8.4.0(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(react@19.3.0)(supports-color@7.2.0)(zod@4.6.5))(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(supports-color@7.2.0)(tailwindcss@4.3.3)
-      '@godcreator/docfirst-workflow':
+      '@godcreator/code-pin':
         specifier: workspace:^
-        version: link:../packages/docfirst-workflow
-      '@godcreator/docsite-comments':
+        version: link:../packages/code-pin
+      '@godcreator/comments':
         specifier: workspace:^
-        version: link:../packages/docsite-comments
-      '@godcreator/docsite-docfirst':
+        version: link:../packages/comments
+      '@godcreator/explainer':
         specifier: workspace:^
-        version: link:../packages/docsite-docfirst
-      '@godcreator/docsite-explainer':
+        version: link:../packages/explainer
+      '@godcreator/god-docsite':
         specifier: workspace:^
-        version: link:../packages/docsite-explainer
-      '@godcreator/docsite-identity':
+        version: link:../packages/god-docsite
+      '@godcreator/identity':
         specifier: workspace:^
-        version: link:../packages/docsite-identity
-      '@godcreator/docsite-kit':
+        version: link:../packages/identity
+      '@godcreator/trajectory':
         specifier: workspace:^
-        version: link:../packages/docsite-kit
-      '@godcreator/docsite-page-sources':
-        specifier: workspace:^
-        version: link:../packages/docsite-page-sources
-      '@godcreator/docsite-ui':
-        specifier: workspace:^
-        version: link:../packages/docsite-ui
+        version: link:../packages/trajectory
       '@react-router/node':
         specifier: 'catalog:'
         version: 8.4.0(react-router@8.4.0(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(typescript@6.0.3)
@@ -453,6 +447,9 @@ importers:
         specifier: 'catalog:'
         version: 6.0.0(supports-color@7.2.0)
     devDependencies:
+      '@godcreator/docfirst':
+        specifier: workspace:^
+        version: link:../packages/docfirst
       '@mdx-js/mdx':
         specifier: 'catalog:'
         version: 3.1.1(supports-color@7.2.0)

@@ -3,8 +3,8 @@
  * 最下是合并检查包。Gitea 里的能力按它们接到执行器的位置排：Actions 在最左，正对着左下的工作流；接缝之间不交叉。
  */
 import { Bot, FolderGit2, GitPullRequest, Package, Puzzle, Server } from 'lucide-react';
-import { cap } from '@godcreator/docsite-explainer';
-import type { SeamLayout } from '@godcreator/docsite-explainer';
+import { cap } from '@godcreator/explainer/site';
+import type { SeamLayout } from '@godcreator/explainer/site';
 
 export const autoMergeLayout: SeamLayout = {
   view: { w: 1100, h: 490 },

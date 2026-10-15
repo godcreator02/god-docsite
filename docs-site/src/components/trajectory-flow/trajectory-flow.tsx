@@ -6,8 +6,8 @@
  */
 import { useState } from 'react';
 import type { JSX } from 'react';
-import { CodeLines, Dot, Pane, Pill, Stepper, Terminal } from '@godcreator/docsite-explainer';
-import '@godcreator/docsite-explainer/styles.css';
+import { CodeLines, Dot, Pane, Pill, Stepper, Terminal } from '@godcreator/explainer/site';
+import '@godcreator/explainer/styles.css';
 import './trajectory-flow.css';
 import {
   cardKeys,

@@ -3,7 +3,7 @@
  * 和画面上 CasePicker 显示的是同一段话），再写它确认后与新写时的记号、check 比什么，以及每种结果的命令行输出与站上显示。
  * 这个文件不 import React，docfirst.config.mjs 引它，命令行也能运行。
  */
-import { casesText } from '@godcreator/docsite-explainer/text';
+import { casesText } from '@godcreator/explainer';
 import { files, kinds, outcomeName, siteSummary } from './ref-kinds.data.mjs';
 
 export function RefKinds(_node, { paragraph }) {

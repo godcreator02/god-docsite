@@ -5,10 +5,10 @@
  * 生成物里的机读文字由 commit-gate.ai.mjs 读同一份数据生成。
  */
 import type { JSX } from 'react';
-import { Diff, Dot, Pane, Pill, Stepper, Terminal } from '@godcreator/docsite-explainer';
-import type { TerminalLine, Tone } from '@godcreator/docsite-explainer';
+import { Diff, Dot, Pane, Pill, Stepper, Terminal } from '@godcreator/explainer/site';
+import type { TerminalLine, Tone } from '@godcreator/explainer/site';
 import { files, gateLabel, gateNote, notRed, redSources, steps } from './commit-gate.data.mjs';
-import '@godcreator/docsite-explainer/styles.css';
+import '@godcreator/explainer/styles.css';
 import './commit-gate.css';
 
 type Step = (typeof steps)[number];

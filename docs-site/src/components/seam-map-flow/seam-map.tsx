@@ -5,9 +5,9 @@
  * 每张图的内容在 *.data.mjs，坐标在 *.layout.ts；机读版由 seam-map.ai.mjs 读同一份内容生成。
  * FLOW 里的图用数据流画法（flow-seam-diagram.tsx），INNER 里的用讲解组件包的 SeamDiagram。
  */
-import { SeamDiagram } from '@godcreator/docsite-explainer';
-import type { SeamLayout } from '@godcreator/docsite-explainer';
-import type { SeamGraph } from '@godcreator/docsite-explainer/seam-graph';
+import { SeamDiagram } from '@godcreator/explainer/site';
+import type { SeamLayout } from '@godcreator/explainer/site';
+import type { SeamGraph } from '@godcreator/explainer';
 import { systemGraph } from './system.data.mjs';
 import { systemLayout } from './system.layout';
 import { collabSiteGraph } from './inner/collab-site.data.mjs';

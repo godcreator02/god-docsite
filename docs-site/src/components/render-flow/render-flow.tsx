@@ -5,9 +5,9 @@
  * 讲解文字与示例都在 render-flow.data.mjs，生成物里的机读文字由 render-flow.ai.mjs 读同一份数据生成。
  */
 import type { CSSProperties, JSX, ReactNode } from 'react';
-import { CodeLines, Diff, Pane, Pill, Terminal, Timeline } from '@godcreator/docsite-explainer';
-import type { Role, TerminalLine, TimelineFrame, Tone } from '@godcreator/docsite-explainer';
-import '@godcreator/docsite-explainer/styles.css';
+import { CodeLines, Diff, Pane, Pill, Terminal, Timeline } from '@godcreator/explainer/site';
+import type { Role, TerminalLine, TimelineFrame, Tone } from '@godcreator/explainer/site';
+import '@godcreator/explainer/styles.css';
 import {
   chapters,
   codeLines,

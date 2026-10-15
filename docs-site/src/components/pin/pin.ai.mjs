@@ -4,7 +4,7 @@
  * 这一页自己的内容（每一步的记号与命令行输出、每道检查、每种情况走过的路径）另写成段落。
  * 这个文件不 import React，docfirst.config.mjs 引它，命令行也能运行。
  */
-import { casesText, stepsText } from '@godcreator/docsite-explainer/text';
+import { casesText, stepsText } from '@godcreator/explainer';
 import { legend, steps } from './story.data.mjs';
 import { cases, checks } from './judge.data.mjs';
 

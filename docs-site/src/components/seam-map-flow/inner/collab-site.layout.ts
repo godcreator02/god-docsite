@@ -4,7 +4,7 @@
  * 下面一排：站点检查、日志页、本机协作仓。最上面是定格式的数据模型包与 site-data.ts。线的路径按送东西的方向写。
  */
 import { Blocks, BookOpen, Braces, CalendarDays, Database, FileCheck2, FolderGit2, Globe, LayoutGrid, PanelsTopLeft, Server } from 'lucide-react';
-import { cap } from '@godcreator/docsite-explainer';
+import { cap } from '@godcreator/explainer/site';
 import type { FlowSeamLayout } from '../flow-seam-diagram';
 
 /** 上面一排每一行能力方块的上边 */

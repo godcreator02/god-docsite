@@ -3,7 +3,7 @@
  * 线表示谁把什么交给谁；数据模型包与 site-data.ts 不送东西，画成格式约定。
  * 坐标、送什么、箭头方向在 collab-site.layout.ts。
  */
-import { defineSeamGraph } from '@godcreator/docsite-explainer/seam-graph';
+import { defineSeamGraph } from '@godcreator/explainer';
 
 /** @type {import('@godcreator/docsite-explainer/seam-graph').SeamModule[]} */
 const modules = [

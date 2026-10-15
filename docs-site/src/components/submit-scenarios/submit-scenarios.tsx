@@ -5,7 +5,7 @@
  * 讲解文字与每一步各台机器的变化都在 submit-scenarios.data.mjs；机读版由 submit-scenarios.ai.mjs 读同一份数据生成。
  */
 import type { CSSProperties, JSX } from 'react';
-import { CasePicker, CodeLines, Pane, Pill, Stepper } from '@godcreator/docsite-explainer';
+import { CasePicker, CodeLines, Pane, Pill, Stepper } from '@godcreator/explainer/site';
 import { actors, authorRoles, cases, machines, outcomes, pullTones, statesAt } from './submit-scenarios.data.mjs';
 
 type Case = (typeof cases)[number];

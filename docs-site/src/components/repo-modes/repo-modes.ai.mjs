@@ -3,7 +3,7 @@
  * 每一步先用讲解组件包的 stepsText 写出时刻、标题与说明，再各一段写两个仓这一刻的样子和运行的命令。
  * 这个文件不 import React，docfirst.config.mjs 引它，命令行也能运行。
  */
-import { stepsText } from '@godcreator/docsite-explainer/text';
+import { stepsText } from '@godcreator/explainer';
 import { fields, lanes, steps } from './repo-modes.data.mjs';
 
 function laneText(lane, state) {

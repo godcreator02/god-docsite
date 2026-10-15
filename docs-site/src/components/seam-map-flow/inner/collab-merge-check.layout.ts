@@ -3,8 +3,8 @@
  * check、cli、bin 与 templates/，执行器的调用从右往左一路传到 check；下一行是协作仓。7 从执行器穿过 bin 与 templates/ 之间的空隙下到工作流文件。
  */
 import { FileCog, FolderGit2, Puzzle, Server, ShieldCheck, SlidersHorizontal, SquareTerminal } from 'lucide-react';
-import { cap } from '@godcreator/docsite-explainer';
-import type { SeamLayout } from '@godcreator/docsite-explainer';
+import { cap } from '@godcreator/explainer/site';
+import type { SeamLayout } from '@godcreator/explainer/site';
 
 export const collabMergeCheckLayout: SeamLayout = {
   view: { w: 1130, h: 490 },

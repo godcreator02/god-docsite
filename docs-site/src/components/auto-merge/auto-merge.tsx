@@ -7,8 +7,8 @@
  * 讲解文字与数据都在 auto-merge.data.mjs，接缝的名字取自这一页的接缝图；机读版由 auto-merge.ai.mjs 读同一份数据生成。
  */
 import type { JSX } from 'react';
-import { CasePicker, CodeLines, Dot, Pane, Pill, Stepper, Terminal } from '@godcreator/docsite-explainer';
-import type { TerminalLine, Tone } from '@godcreator/docsite-explainer';
+import { CasePicker, CodeLines, Dot, Pane, Pill, Stepper, Terminal } from '@godcreator/explainer/site';
+import type { TerminalLine, Tone } from '@godcreator/explainer/site';
 import { cases, checkNames, columns, commentFrame, measuredCheckNames, places, runSteps } from './auto-merge.data.mjs';
 import { autoMergeGraph } from '../seam-map-flow/inner/auto-merge.data.mjs';
 

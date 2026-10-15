@@ -3,7 +3,7 @@
  * 框是包里的文件，方块是文件对外给的东西；灰色实线框是包外的站、站的配置、react 与 fumadocs。
  * 接缝图的三块（站的接缝图文件、定义图与机读文字、画接缝图）放在最右一列。坐标在 docfirst-explainer.layout.ts。
  */
-import { defineSeamGraph } from '@godcreator/docsite-explainer/seam-graph';
+import { defineSeamGraph } from '@godcreator/explainer';
 
 export const docfirstExplainerGraph = defineSeamGraph({
   id: 'docfirst-explainer',

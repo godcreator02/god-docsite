@@ -5,8 +5,8 @@
  * 讲解文字与每种情况的数据都在 record-merge.data.mjs；机读版由 record-merge.ai.mjs 读同一份数据生成。
  */
 import type { JSX } from 'react';
-import { CasePicker, CodeLines, Diff, Dot, Pane, Pill, Terminal } from '@godcreator/docsite-explainer';
-import type { Role, TerminalLine } from '@godcreator/docsite-explainer';
+import { CasePicker, CodeLines, Diff, Dot, Pane, Pill, Terminal } from '@godcreator/explainer/site';
+import type { Role, TerminalLine } from '@godcreator/explainer/site';
 import { cases } from './record-merge.data.mjs';
 
 type MergeCase = (typeof cases)[number];
