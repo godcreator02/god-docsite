@@ -1,0 +1,138 @@
+---
+title: gwb-docsite：文档站插件
+description: gwb 工作台插件这一层：运行时加载平台包的建站器来建站、加功能；托管站点的开发服务（常驻的站登记在设置 sites，端口先试上次的，启动时交给开发服务身份码与推送令牌）；给别的插件的服务 gwbDocsite；打包时带进哪些包、随包的四份说明书从哪生成
+icon: Plug
+---
+
+import { StartCases } from './gwb-docsite/start-cases'
+
+gwb-docsite 是 gwb 工作台和[平台包](/packages/god-docsite) `@godcreator/god-docsite` 之间的一层。站点模板、建站器、开发服务的端口挑法都在平台包里；插件做的是把它们接到工作台上：命令与服务 `gwbDocsite`、托管站点的开发服务、本 home 的身份码、随包的四份说明书。命令怎么用看说明书 [docsite](/docs/outputs/skills/docsite) 与 [docs-site](/docs/outputs/skills/docs-site)，这一页讲它的结构，给要改它的人看。
+
+## 插件接了哪些东西
+
+| 对方 | 怎么接 | 传什么 |
+| --- | --- | --- |
+| 工作台的命令服务 `gwbCommands` | inject，注册命令 | `docsite.*` 十四条与 `docfirst.create` |
+| 工作台的设置 `gwbSettings` | inject，定义两项设置 | `identity-code`、`sites` |
+| 工作台的数据 `gwbData` | inject，读写一份文档 | `site-ports`：每个站上次用的端口 |
+| 工作台的说明书 `gwbSkills` | 可选，有它才注册 | 包里的 `skills/` 目录 |
+| 平台包的建站器 `@godcreator/god-docsite/scaffold` | 运行时按路径加载，不打包 | `createSite`、`addBaseFeatures`、`addFeature`、`isPortFree` |
+| 平台包核心、identity、comments | 打包进插件 | 推送通道的常量、身份码的环境变量名与 `people.json` 读写、读评论文件 |
+| docfirst、code-pin、trajectory、explainer | 只按路径读 `package.json` 与 `template/` | 版本号、docfirst 起始物 |
+| 站点的开发服务 | 子进程 `pnpm dev`，再经 HTTP | 环境变量；`GET /` 查首页；推送；评论写入 |
+| 别的插件（gwb-collab） | inject `gwbDocsite` | `GwbDocsiteApi` |
+
+插件自己的状态只有两样：本 home 的身份码在 `identity-code`，常驻的站记在 `sites`：
+
+{/* ref file="../plugins/docsite/src/index.ts" lines="41-51" hash="cc0bf1462472" blob="4de40222eb79" */}
+
+`apply` 是全部接线：先定义设置、第一次加载时生成身份码，再依次造出端口记录 `SitePorts`、进程表 `SiteHost`、常驻表 `HostedSites`，拼成一份 `GwbDocsiteApi`，服务和命令都用这一份；最后把登记着的站逐个启动（不等），有 `gwbSkills` 时注册说明书。
+
+{/* ref file="../plugins/docsite/src/index.ts" lines="58-115" hash="838188dd4183" blob="4de40222eb79" */}
+
+身份码第一次加载时生成 12 个小写字母与数字（去掉容易看错的 l、o、0、1）；之后每次读都校验，设置里写错了就报错、不替人改。每次启动开发服务时现读，所以改了设置只影响之后启动的开发服务。
+
+## 建站与加功能：调平台包的建站器
+
+建站器不打包进插件：它按自己模块的位置找平台包的 `template/`，打包进来就找不到。插件从自己的包根用 Node 的解析规则找 `@godcreator/god-docsite/scaffold`，经 `import(变量)` 加载；地址是算出来的，发版检查才不会把它当成产物里 import 的包名（插件产物只许 import peer 里的包）。
+
+{/* ref file="../plugins/docsite/src/scaffold/platform.ts" lines="23-35" hash="242c7fc83e9c" blob="3fd3d79ed663" */}
+
+建站（`init`）四步：建站器复制模板、写站名与只有 agent `claude` 的 `people.json` → `pnpm install` → 补上评论这个基础功能的文件（评论的模板在装好的 comments 包里，所以要在装依赖之后）→ 起服务检查首页。平台包三个依赖（god-docsite、identity、comments）写成插件旁边装着的那一版的 `^<版本>`（托管时 `packageSource` 是 `registry`，从插件包根往上找；测试里换成 `link` 指向本仓）。
+
+{/* ref file="../plugins/docsite/src/scaffold/create.ts" lines="27-47" hash="017c2c0a4c4c" blob="1f85e5fdeecb" */}
+
+加功能（`addFeature`）：站点在运行就拒绝（Windows 上运行中的开发服务占着依赖里的文件）；依赖说明不给就取插件旁边装着的那一版写 `^<版本>`，插件没装这个包就拒绝；`pnpm add` → 建站器补 `app/features/<功能名>/` 里缺的文件、重写汇总文件 → 起服务检查首页。依赖说明只认版本范围或 `link:` / `file:` 加绝对路径，因为它经 shell 交给 pnpm。
+
+{/* ref file="../plugins/docsite/src/scaffold/add-feature.ts" lines="56-74" hash="382c636a8e71" blob="32c6853a5d5e" */}
+
+起服务检查：启动、`GET /` 看是不是 200。进程活着不等于站能用：缺依赖、功能模板有错时开发服务起得来、页面 500。通过后登记在 `sites` 里的站保持运行，没登记的停掉；没通过就报错，站点留着运行让人在浏览器里看报错。
+
+{/* ref file="../plugins/docsite/src/scaffold/home-page-check.ts" lines="13-24" hash="1e3d1a486f24" blob="ecfceefa4c17" */}
+
+例子（测试里的 pnpm 与起服务检查都是假的，建站器是真的）：建一个没登记的站，依次是 `pnpm install`、`start`、`page-status`、`stop`；登记着的站少了最后的 `stop`；加功能 trajectory 是 `pnpm add @godcreator/trajectory@link:…`、`start`、`page-status`、`stop`。
+
+## docfirst.create：在基础站上多做的几步
+
+`docfirst.create` 不另写建站逻辑，只调服务的 `init` 与 `addFeature`：建基础站 → 把 `@godcreator/docfirst` 的 `template/` 叠到站点根（已有的文件不覆盖）→ 往站点 `package.json` 写脚本 `doc`、`doc:confirm`、`doc:render` 与 devDependencies 里的 docfirst 命令行 → 逐个加 code-pin、trajectory、explainer。
+
+{/* ref file="../plugins/docsite/src/docfirst/docfirst-site.ts" lines="93-108" hash="699b1d815df6" blob="e8cc22e938c5" */}
+
+脚本与依赖写在加功能之前：第一次 `addFeature` 的 `pnpm add` 顺带把 docfirst 命令行装上，不用再装一次。docfirst 与三个功能包都是插件的 dependencies，但插件一行不 import 它们，只按路径读 `package.json` 的版本与 `template/`；版本都写插件旁边那一版的 `^<版本>`。中途失败时前面做完的不回退；站名不给就依次用仓根 `package.json` 的 `title`、包名去掉 scope、仓目录名。调用顺序是 `init {"title":"文档站"}`，再 `addFeature` code-pin、trajectory、explainer 各一次。
+
+## 托管开发服务
+
+### 常驻的站只记在设置 sites
+
+常驻的站只有一张表：设置 `sites`。`docsite.site.add` 与别的插件经服务 `add` 登记的都在这里；插件每次加载时逐个启动它们，不等，起不来的报一行警告。
+
+{/* ref file="../plugins/docsite/src/hosted-sites.ts" lines="13-48" hash="ff1aca0f11f6" blob="6b0bd7e4fb72" */}
+
+`add` 先登记再启动，启动不了照样报错、登记留着，下次加载再试；`remove` 去掉登记，在运行就停掉。服务的 `remove` 对没登记过的站回 `{ registered: false }`，命令 `docsite.site.remove` 对它直接拒绝。站点目录的比较键是解析成绝对路径再转小写：大小写、斜杠不同的写法算同一个站。进程的启停不在这张表里，归下面的 `SiteHost`；`docsite.site.list` 列的是 `SiteHost` 这次运行里见过的站，不是设置 `sites`。
+
+### 一个站的三种状态
+
+`SiteHost` 按站点目录记每个站：在跑的开发服务、上次没能运行的原因、正在启动的那一次。
+
+{/* ref file="../plugins/docsite/src/site-host.ts" lines="7-13" hash="df7ebb7f1f35" blob="455a3efb4dce" */}
+
+状态只有三种：`running` 进程在，`url` 是开发服务报出的实际地址；`stopped` 没有进程；`failed` 进程退出了或没能启动，`error` 记原因。人为 `stop` 不算失败。`start` 与 `stop` 幂等：已在运行就回现状；正在启动时再来的 `start` 复用同一次，不重复启动；`stop` 先等正在启动的那一次落定再判断，没在运行就报错。进程退出只标 `failed`，不自动重启；修好后再 `start`。插件卸载时全部停掉（Windows 上 pnpm 经 cmd 启动、底下还有 node，停的时候连同子进程一起停）。
+
+### 一次 start 怎么走
+
+启动前先核对：站点目录里有 `package.json`、`node_modules` 里装着平台包（建在旧包 `@godcreator/docsite-kit` 上的站拒绝）、`scripts.dev` 没写死 `--port`。写死了会和启动时带的 `--port` 同时出现，站点认错自己的地址。
+
+端口：gwb-data 的文档 `site-ports` 记着每个站上次用的端口。上次的端口此刻在 127.0.0.1 与 ::1 上都空着，就带 `--port <端口>` 启动（平台的 vite 插件加 strictPort，被占就起不来）；没记过或被占了就不带，由平台的 vite 插件在 10000–49151 里随机挑。报出的端口和给的不同就停掉并拒绝。好处是书签与开着的页面重启后还能用：真站测试里停了再启动，地址不变。
+
+{/* ref file="../plugins/docsite/src/site-ports.ts" lines="19-42" hash="ddcce823fbc9" blob="9e3102b38b0b" */}
+
+启动时经环境变量交给开发服务两样：本 home 的身份码 `DOCSITE_IDENTITY_CODE`（站点按它在 `people.json` 里认人，没有它站点只读），这次启动现生成的推送令牌 `DOCSITE_FEED_TOKEN`；然后等输出里出现 `Local:` 那一行的地址，60 秒内没等到就停掉、报错。
+
+{/* ref file="../plugins/docsite/src/dev-server.ts" lines="91-103" hash="54de2c8063e4" blob="f61c6d2b5065" */}
+
+跑起来以后记下这次的端口；几个站同时记时排队写，后写的不覆盖先写的。记不下来只报一行警告，照样运行，下次重新挑（有意设计的降级）。选一种情况看看：
+
+<StartCases />
+
+启动前核对不过时直接抛错，不改状态：这个站照旧是 `stopped`，`error` 不记原因；只有开发服务没能启动或启动后退出才是 `failed`。`start` 的复用、核对、定端口、启动、记端口、退出转 failed，完整算法在一段里：
+
+{/* ref file="../plugins/docsite/src/site-host.ts" lines="85-130" hash="2addf797f83b" blob="455a3efb4dce" */}
+
+## 推送与评论：经运行中的站点
+
+推送：`push(dir, 频道, 数据)` 把一份 JSON POST 到站点的 `/__docsite/feed/<频道>`，请求头 `x-docsite-token` 带这次启动的令牌；频道只用字母、数字、`_`、`-`。站点没在运行就报错。协议定在平台包，插件照它推。站点每个频道只留最新一份、重启就没了，所以用推送的插件要在站点转成 running 时重推一次——这就是服务里有 `onStatus` 的原因。
+
+评论：读评论（`docsite.comments`）直接读站点目录的评论文件，不要站点在运行；写评论（`docsite.comment.*`）不自己写文件，而是把表单 POST 到运行中站点的评论写入路由 `/comments.data`，`Origin` 头写站点地址，和网页评论面板走同一套规则。评论文件的格式与写入规则归 [comments](/packages/comments) 包的页，人员与身份码归 [identity](/packages/identity) 包的页。
+
+## 服务 gwbDocsite
+
+别的插件 `inject: ['gwbDocsite']` 后调用。接口分四组：建站（`init`、`addFeature`）、托管（`add`、`remove`、`start`、`stop`、`status`、`onStatus`）、推送（`push`）、身份（`join`、`identityCode`）。命令 `docsite.*` 是同一份实现外面包一层参数校验，所以命令与服务的行为不会分叉；每个方法的参数与回执表在说明书 `docsite` 的「服务 gwbDocsite」一节。
+
+{/* ref file="../plugins/docsite/src/service.ts" lines="7-40" hash="04223be9f212" blob="247aab9e7e61" */}
+
+服务对象只存闭包：cordis 读服务属性时会把属性里存的服务重新绑到调用方的上下文。`declare module 'cordis'` 写在包入口 `index.ts`：发版工具只读类型入口 `dist/index.d.ts` 认这个服务由谁提供。改方法签名就是改给别的插件 inject 的服务，要先问人、照 gwb-release 定版本号。
+
+谁在用它：
+
+- gwb-collab（`plugins/collab/src/site-process/collab-sites.ts`）：`collab.site.init` 依次调 `init`、站点在运行就 `stop`、`addFeature` 加协作功能；项目加进列表时 `add`、移出时 `remove`；`onStatus` 接到站点转成 running 就把整份数据 `push` 到频道 `collab`；`join`、`identityCode` 把本 home 加进项目的人员列表
+- 本插件自己的 `docfirst.create`：只用 `init` 与 `addFeature`
+
+## 打包与随包说明书
+
+打包：`build.ts` 用 esbuild 把 `src/index.ts` 打成一个 `dist/index.js`，外置名单只有 cordis 与 peer 里的工作台包，其余按值 import 的都打包进来——平台包核心（推送通道的常量）、identity（身份码的环境变量名、`people.json` 读写、@ 提取）、comments 的 node 层（读评论文件）。它们按包的 `exports` 解析到各包的 `dist/`，所以改了这几个包要先构建，再构建插件。类型入口由紧接着的 `tsc` 输出。
+
+{/* ref file="../plugins/docsite/build.ts" lines="6-20" hash="a2cb76349fcd" blob="5a2e20c1c9bc" */}
+
+不打包的：平台建站器（运行时加载，见上文）；docfirst、code-pin、trajectory、explainer（只读文件）。七个包都写在 `dependencies` 里，随插件装在旁边，版本号「插件旁边装着的那一版」说的就是它们。
+
+说明书：`skills/` 下四份 `SKILL.md`（docsite、docs-site、docs-writing、trajectory）是本站的生成物，正本在 `docs-site/content/docs/outputs/skills/<名>.mdx`，`pnpm doc:render` 生成，映射保留 `name` 与 `description` 两个 frontmatter 字段（工作台靠它们决定什么时候读）。trajectory 的两份附件 `skills/trajectory/references/*.md` 不在映射里，直接在插件目录里手写。`skills` 写在 `package.json` 的 `files` 里，测试 `tests/skills.test.ts` 查四份都在、frontmatter 开头是 `name`。
+
+{/* ref file="docfirst.config.mjs" lines="16-31" hash="21a41cb0dc22" blob="ce0b89f792c2" */}
+
+## 测试
+
+| 级别 | 文件 | 测什么 |
+| --- | --- | --- |
+| 快 | `tests/site-host.test.ts`、`hosted-sites.test.ts`、`site-ports.test.ts` | 状态机、常驻表、端口记录；开发服务、设置、gwb-data 都是假的 |
+| 快 | `tests/scaffold-create.test.ts`、`scaffold-add-feature.test.ts`、`docfirst/*.test.ts` | 真的平台建站器、假的 pnpm 与起服务检查（`tests/site-fixtures.ts`） |
+| 慢 | `tests/real-site.slow.test.ts` | 在临时目录真建站、装依赖、启动、写评论、推送、重启沿用端口、加功能、`pnpm build`；要先在仓根 `pnpm build` |

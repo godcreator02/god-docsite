@@ -1,0 +1,28 @@
+/*
+ * StartCases 自己的画面：端口记录两行、五步清单、结论区。
+ * 卡片、胶囊、终端、代码行与颜色变量（--dx-*）由 @godcreator/explainer 提供，颜色只取那套变量。
+ */
+.sc-case { container-type: inline-size; display: grid; gap: 12px; }
+
+.sc-ports { display: grid; gap: 6px; }
+.sc-ports-line { display: flex; align-items: center; gap: 8px; font-size: 13px; }
+.sc-ports-label { color: var(--dx-dim); flex: none; }
+.sc-ports-value { font-variant-numeric: tabular-nums; min-width: 3.5em; }
+.sc-ports-note { font-size: 12px; color: var(--dx-dim); }
+
+.sc-steps { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.sc-steps li { display: grid; grid-template-columns: auto auto minmax(0, 1fr); align-items: baseline; gap: 8px; font-size: 13px; }
+.sc-steps li[data-state='skip'] { color: var(--dx-dim); opacity: .55; }
+.sc-steps li[data-state='stop'] .sc-step-name { font-weight: 600; }
+.sc-step-name { white-space: nowrap; }
+.sc-step-note { font-size: 12px; color: var(--dx-dim); }
+.sc-steps li[data-state='stop'] .sc-step-note,
+.sc-steps li[data-state='pass'] .sc-step-note { color: var(--dx-fg); }
+.sc-step-extra { grid-column: 1 / -1; margin-top: 6px; max-width: 100%; }
+
+.sc-verdict { display: grid; gap: 6px; }
+.sc-result { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.sc-result-value { font-size: 12.5px; overflow-wrap: anywhere; white-space: pre-wrap; }
+.sc-after-line { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.sc-after-label { font-size: 12px; color: var(--dx-fg); }
+.sc-after-detail { font-size: 12px; color: var(--dx-dim); overflow-wrap: anywhere; white-space: pre-wrap; }
