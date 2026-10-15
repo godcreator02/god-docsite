@@ -4,7 +4,7 @@
  * 再一段请求、一段逐道检查、一段结果。
  * 这个文件不 import React，docfirst.config.mjs 引它，命令行也能运行。
  */
-import { casesText } from '@godcreator/docsite-explainer/text';
+import { casesText } from '@godcreator/explainer';
 import { cases, people, projectLeads } from './write-rule.data.mjs';
 
 const checkText = (check) => `${check.name}（${check.ok === null ? '没走到' : check.ok ? '过' : '拒绝'}）：${check.note}`;

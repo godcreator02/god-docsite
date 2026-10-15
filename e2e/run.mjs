@@ -2,7 +2,7 @@
  * 端到端检查：用平台包的建站器（@godcreator/god-docsite/scaffold 的 createSite、addFeature）建站到系统临时目录，
  * 装上本仓的包，分别起 dev 与 build + start，用 Playwright（headless Chromium）跑各组合的检查。
  *
- *   pnpm e2e                                              两种装法 × 两种组合 × dev、start 全跑
+ *   pnpm e2e                                              两种装法 × 三种组合 × dev、start 全跑
  *   pnpm e2e --install=file --combo=demo --server=dev     只跑一部分
  *   pnpm e2e --keep                                       跑完保留生成的站点目录
  *

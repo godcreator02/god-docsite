@@ -4,7 +4,7 @@
  * 后面跟实测那时的三条检查各自过没过、执行器合并了还是留了言。
  * 这个文件不 import React，docfirst.config.mjs 引它，命令行也能运行。
  */
-import { casesText, stepsText } from '@godcreator/docsite-explainer/text';
+import { casesText, stepsText } from '@godcreator/explainer';
 import { cases, commentFrame, measuredCheckNames, runSteps } from './auto-merge.data.mjs';
 
 const checkWord = { ok: '过', bad: '不过', skip: '没查' };

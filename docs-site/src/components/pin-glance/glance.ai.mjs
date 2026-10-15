@@ -3,7 +3,7 @@
  * 再每种情况一段（标题与说明用讲解组件包的 casesText，和画面上 CasePicker 显示的是同一段话）加上 check 的输出。
  * 这个文件不 import React，docfirst.config.mjs 引它，命令行也能运行。
  */
-import { casesText } from '@godcreator/docsite-explainer/text';
+import { casesText } from '@godcreator/explainer';
 import { cases, files, marker, statusName } from './glance.data.mjs';
 
 export function PinGlance(_node, { paragraph }) {

@@ -3,7 +3,7 @@
  * 和画面上 Timeline 显示的是同一段话），再把例子里的两版文件、记号、git 的输出、hunk 表、滑窗算出的 hash 逐项列出来。
  * 这个文件不 import React，docfirst.config.mjs 引它，命令行也能运行。
  */
-import { chaptersText } from '@godcreator/docsite-explainer/text';
+import { chaptersText } from '@godcreator/explainer';
 import {
   catFile,
   chapters,

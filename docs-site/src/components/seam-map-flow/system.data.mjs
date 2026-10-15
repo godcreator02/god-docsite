@@ -4,7 +4,7 @@
  * 协作仓与别的仓是两套各自独有的操作：Gitea 上、插件里、本机上各分两块，线只连同一种仓的两头。
  * 基础包与 gwb-docsite 不在这个仓里，画成框外的两块；共用代码（插件打包、功能包依赖数据模型包与基础包）不是送东西，不画成接缝。
  */
-import { defineSeamGraph } from '@godcreator/docsite-explainer/seam-graph';
+import { defineSeamGraph } from '@godcreator/explainer';
 
 /** @type {import('@godcreator/docsite-explainer/seam-graph').SeamModule[]} */
 const modules = [

@@ -6,7 +6,7 @@
  * 线的路径按送东西的方向写，arrows 为 both 时两头都有箭头。
  */
 import { AppWindow, Bell, Bot, Boxes, Database, FolderGit2, FolderTree, Globe, LayoutGrid, MessageCircle, PanelsTopLeft, Plug, Radio, Server, ServerCog, ShieldCheck, Terminal } from 'lucide-react';
-import { cap } from '@godcreator/docsite-explainer';
+import { cap } from '@godcreator/explainer/site';
 import type { FlowSeamLayout } from './flow-seam-diagram';
 
 /** 每一行能力方块的上边：TOP 是最上面一排（gwb-docsite 与基础包的第一行），R0 是插件第一行，R1–R3 是协作仓那一行，R4–R5 是别的仓那一行，R6 是插件最后一行 */

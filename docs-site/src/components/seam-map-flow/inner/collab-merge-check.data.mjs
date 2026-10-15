@@ -2,7 +2,7 @@
  * 合并检查包 @godcreator/collab-merge-check 的包内接缝图（合并检查包首页用）：虚线框是 src/ 下的 3 个文件与随包发布的 templates/，
  * 上面是两个使用方（gwb-collab、NAS 上的执行器），下面是 Gitea 上的协作仓。坐标在 collab-merge-check.layout.ts。
  */
-import { defineSeamGraph } from '@godcreator/docsite-explainer/seam-graph';
+import { defineSeamGraph } from '@godcreator/explainer';
 
 /** @type {import('@godcreator/docsite-explainer/seam-graph').SeamModule[]} */
 const modules = [

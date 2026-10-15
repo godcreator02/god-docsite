@@ -3,46 +3,42 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "gwb-docfirst 自己的文档站：建在文档站基础包上，用这套机制写自己的文档，引用的是本仓源码里的真实行段",
-  "docsite": {
-    "features": [
-      "@godcreator/docsite-docfirst"
-    ]
-  },
+  "description": "全仓文档站：god-docsite 模板 + code-pin、trajectory、explainer 三个功能，用这套机制写自己的文档，引用的是本仓源码里的真实行段；文档维护用命令行 docfirst",
   "scripts": {
-    "dev": "react-router dev --port 4340 --host 127.0.0.1 --strictPort",
-    "docfirst": "docfirst",
-    "test": "vitest run",
+    "dev": "react-router dev --host 127.0.0.1 --strictPort --port 4340",
     "build": "react-router build",
     "start": "react-router-serve ./build/server/index.js",
-    "typecheck": "react-router typegen && tsc --noEmit"
+    "typecheck": "react-router typegen && tsc --noEmit",
+    "test": "vitest run",
+    "docfirst": "docfirst",
+    "doc": "docfirst check",
+    "doc:confirm": "docfirst confirm",
+    "doc:render": "docfirst render"
   },
   "dependencies": {
     "@fumadocs/base-ui": "catalog:",
-    "@godcreator/docsite-docfirst": "workspace:^",
-    "@godcreator/docfirst-workflow": "workspace:^",
-    "@godcreator/docsite-comments": "workspace:^",
-    "@godcreator/docsite-explainer": "workspace:^",
-    "@godcreator/docsite-identity": "workspace:^",
-    "@godcreator/docsite-kit": "workspace:^",
-    "@godcreator/docsite-page-sources": "workspace:^",
-    "@godcreator/docsite-ui": "workspace:^",
+    "@godcreator/code-pin": "workspace:^",
+    "@godcreator/comments": "workspace:^",
+    "@godcreator/explainer": "workspace:^",
+    "@godcreator/god-docsite": "workspace:^",
+    "@godcreator/identity": "workspace:^",
+    "@godcreator/trajectory": "workspace:^",
     "@react-router/node": "catalog:",
     "@react-router/serve": "catalog:",
     "fumadocs-core": "catalog:",
     "fumadocs-mdx": "catalog:",
     "isbot": "catalog:",
+    "katex": "catalog:",
     "lucide-react": "catalog:",
     "react": "catalog:",
     "react-dom": "catalog:",
     "react-router": "catalog:",
-    "remark-math": "catalog:",
     "rehype-katex": "catalog:",
-    "katex": "catalog:"
+    "remark-math": "catalog:"
   },
   "devDependencies": {
+    "@godcreator/docfirst": "workspace:^",
     "@mdx-js/mdx": "catalog:",
-    "vitest": "catalog:",
     "@react-router/dev": "catalog:",
     "@tailwindcss/vite": "catalog:",
     "@types/mdx": "catalog:",
@@ -51,6 +47,7 @@
     "@types/react-dom": "catalog:",
     "tailwindcss": "catalog:",
     "typescript": "catalog:",
-    "vite": "catalog:"
+    "vite": "catalog:",
+    "vitest": "catalog:"
   }
 }

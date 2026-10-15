@@ -7,7 +7,7 @@ import { packageInNodeModules } from './installed-packages.js'
 /** 站点里放功能目录的地方，相对站点根 */
 export const featuresDirInSite = 'app/features'
 
-/** 功能目录里建站器认的文件：含前三个之一的子目录才算功能 */
+/** 功能目录里建站器认的文件：含其中任一个的子目录就算功能（只有 styles.css 的功能只进样式汇总） */
 const featureFiles = { routes: 'routes.ts', runtime: 'feature.tsx', mdx: 'mdx.ts', styles: 'styles.css' } as const
 
 /** 汇总文件，都在 app/features/ 下，每次重写；站点模板固定 import 它们 */
@@ -80,7 +80,7 @@ function collectionsOfFeature(siteDir: string, feature: string): string[] {
   return declaredCollectionsOf(path.join(installed.dir, 'package.json'))
 }
 
-/** app/features/ 下含 routes.ts、feature.tsx 或 mdx.ts 的子目录，按名字排序 */
+/** app/features/ 下含 routes.ts、feature.tsx、mdx.ts 或 styles.css 的子目录，按名字排序 */
 function siteFeaturesIn(siteDir: string): SiteFeature[] {
   const featuresDir = path.join(siteDir, featuresDirInSite)
   const features: SiteFeature[] = []
@@ -89,7 +89,7 @@ function siteFeaturesIn(siteDir: string): SiteFeature[] {
     const dir = path.join(featuresDir, name)
     if (!statSync(dir).isDirectory()) continue
     const has = (file: string) => existsSync(path.join(dir, file))
-    if (!has(featureFiles.routes) && !has(featureFiles.runtime) && !has(featureFiles.mdx)) continue
+    if (!Object.values(featureFiles).some(has)) continue
     assertFeatureName(name)
     const identifier = identifierOf(name)
     const clash = nameOfIdentifier.get(identifier)
@@ -120,7 +120,7 @@ function assertUniqueCollections(features: readonly SiteFeature[], siteCollectio
   }
 }
 
-const generatedNotice = '建站器生成，勿手改：addFeature / regenerateFeatureIndex 每次都重写。功能清单是 app/features/ 下含 routes.ts、feature.tsx 或 mdx.ts 的子目录'
+const generatedNotice = '建站器生成，勿手改：addFeature / regenerateFeatureIndex 每次都重写。功能清单是 app/features/ 下含 routes.ts、feature.tsx、mdx.ts 或 styles.css 的子目录'
 const tsHeader = `// ${generatedNotice}\n`
 
 function routesIndexOf(features: readonly SiteFeature[]): string {

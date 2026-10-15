@@ -2,7 +2,7 @@
  * 「执行器与自动合并」那一页的接缝图：一个合并请求从成员推送到进 main，经过 Gitea、NAS 上的执行器、合并检查包。
  * 执行器与合并检查包是这套工具的两块（有颜色），Gitea、协作仓 main、成员的插件在框外。坐标在 auto-merge.layout.ts。
  */
-import { defineSeamGraph } from '@godcreator/docsite-explainer/seam-graph';
+import { defineSeamGraph } from '@godcreator/explainer';
 
 /** @type {import('@godcreator/docsite-explainer/seam-graph').SeamModule[]} */
 const modules = [

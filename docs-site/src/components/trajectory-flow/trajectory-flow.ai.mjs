@@ -4,7 +4,7 @@
  * 流水线每一段在哪个包、例子的卡文件、校验结果、两段命令行输出、模型与树、布局落点、功能包星轨盘路由 disk.tsx 与站点里轨迹卡集合的原文另写成段落。
  * 这个文件不 import React，docfirst.config.mjs 引它，命令行也能运行。
  */
-import { stepsText } from '@godcreator/docsite-explainer/text';
+import { stepsText } from '@godcreator/explainer';
 import {
   cards,
   checks,

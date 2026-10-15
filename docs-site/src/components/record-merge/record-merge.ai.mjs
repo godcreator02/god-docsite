@@ -4,7 +4,7 @@
  * 后面跟两边的改动、合 main 时的终端、合并后的文件、数据模型包读出的东西。
  * 这个文件不 import React，docfirst.config.mjs 引它，命令行也能运行。
  */
-import { casesText } from '@godcreator/docsite-explainer/text';
+import { casesText } from '@godcreator/explainer';
 import { baseTask, cases } from './record-merge.data.mjs';
 
 /** 逐行列出，每行前面带行号与「│」：行首不会是 #、<<< 这类会被当成 markdown 结构的字符 */

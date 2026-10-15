@@ -5,9 +5,9 @@
  * 都由进度算出来，拖到哪一刻都画得出来。讲解文字与数据都在 span-follow.data.mjs，生成物里的机读文字由 span-follow.ai.mjs 读同一份数据生成。
  */
 import type { CSSProperties, JSX, ReactNode } from 'react';
-import { CodeLines, Dot, Pane, Pill, Terminal, Timeline } from '@godcreator/docsite-explainer';
-import type { Role, TerminalLine, TimelineFrame, Tone } from '@godcreator/docsite-explainer';
-import '@godcreator/docsite-explainer/styles.css';
+import { CodeLines, Dot, Pane, Pill, Terminal, Timeline } from '@godcreator/explainer/site';
+import type { Role, TerminalLine, TimelineFrame, Tone } from '@godcreator/explainer/site';
+import '@godcreator/explainer/styles.css';
 import './span-follow.css';
 import {
   catFile,

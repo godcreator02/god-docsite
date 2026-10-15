@@ -1,0 +1,32 @@
+---
+born-at: 2026-10-15T16:00
+type: choice
+parent: [2026-09-03-god-live-doc]
+label: 只有 styles.css 的功能目录也算功能
+domain: 骨架
+---
+
+## 背景
+
+[docs-site 从模板重建](2026-10-15-docs-site-rebuilt-from-template.md) 时发现：explainer 的模板只有 `styles.css`，
+`regenerateFeatureIndex` 只认含 `routes.ts`、`feature.tsx` 或 `mdx.ts` 的功能目录，`addFeature` 复制了样式，`styles.generated.css` 里却没有它，
+站点只能靠每个讲解组件自己 import 样式。
+
+pivots-from:: [建站器进平台包](2026-10-15-scaffold-feature-index.md)
+
+## 结论与边界
+
+功能目录含 `routes.ts`、`feature.tsx`、`mdx.ts`、`styles.css` 任一个就算功能；只有 `styles.css` 的功能只进样式汇总，
+路由、运行时、mdx 与集合汇总里都没有它。功能清单（`addFeature` / `regenerateFeatureIndex` 的返回值）因此多出这类功能，
+docs-site 现在认出 code-pin、explainer、trajectory 三个。
+
+## 依据
+
+god-docsite 的 scaffold 测试加了一条：模板只有 `styles.css` 的假功能包 `addFeature` 后在功能清单里，`styles.generated.css` 引入它，其余汇总不含它。
+e2e「文档维护」组合加了一项：钉码页正文只 import `Stepper`、不 import 样式，「下一步」按钮的高与圆角是 explainer `.dx-btn` 的 28px、8px，
+link / file × dev、build + start 都通过。docs-site 重新生成汇总后 `pnpm build`，根样式表 `root-*.css` 里有 `.dx-btn{`；
+`react-router-serve` 下打开 `/docfirst/trajectory/flow`，讲解组件按钮同样是 28px、8px。
+
+## 否掉的候选
+
+给 explainer 的模板补一个空的 `feature.tsx` 凑数：每个只有样式的功能包都得照做，约定里「目录里可以有 `styles.css`」也就名不副实。

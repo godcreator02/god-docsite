@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import type { JSX, ReactNode } from 'react'
-import { CodeLines, Pane, Stepper } from '@godcreator/docsite-explainer'
-import '@godcreator/docsite-explainer/styles.css'
+import { CodeLines, Pane, Stepper } from '@godcreator/explainer/site'
+import '@godcreator/explainer/styles.css'
 
 /** 一道工序是谁的：给色点、右栏 Pane 配色 */
 type Who = 'vite' | 'mdx' | 'core' | 'mdxjs' | 'ours'

@@ -5,8 +5,8 @@
  * 画面是 (段号, 本段进度) → 画面 的纯函数，拖到哪一刻都画得出来。讲解文字与数字都在 push-flow.data.mjs，机读版由 push-flow.ai.mjs 读同一份数据生成。
  */
 import type { JSX } from 'react';
-import { Timeline } from '@godcreator/docsite-explainer';
-import type { Role, TimelineFrame } from '@godcreator/docsite-explainer';
+import { Timeline } from '@godcreator/explainer/site';
+import type { Role, TimelineFrame } from '@godcreator/explainer/site';
 import { chapters, checkSteps, debounceSeconds, messages, siteComments } from './push-flow.data.mjs';
 
 type PushChapter = (typeof chapters)[number];

@@ -8,9 +8,9 @@
  */
 import { useState } from 'react';
 import type { CSSProperties, JSX, KeyboardEvent, ReactNode } from 'react';
-import { Pill } from '@godcreator/docsite-explainer';
-import type { Box, Icon } from '@godcreator/docsite-explainer';
-import type { Seam, SeamGraph, SeamModule } from '@godcreator/docsite-explainer/seam-graph';
+import { Pill } from '@godcreator/explainer/site';
+import type { Box, Icon } from '@godcreator/explainer/site';
+import type { Seam, SeamGraph, SeamModule } from '@godcreator/explainer';
 
 export type Side = 'top' | 'bottom';
 

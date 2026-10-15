@@ -4,8 +4,8 @@
  * 往下的线都从上一行两个框之间的空处穿过；读术语表的线走画布最左边，模板去轨迹卡目录的线走画布最右边。
  */
 import { CircleDot, FileText, FolderGit2, Layers, LayoutTemplate, Library, Link, Orbit, Paintbrush, PanelsTopLeft, Puzzle, Route, Telescope, Workflow } from 'lucide-react';
-import { cap } from '@godcreator/docsite-explainer';
-import type { SeamLayout } from '@godcreator/docsite-explainer';
+import { cap } from '@godcreator/explainer/site';
+import type { SeamLayout } from '@godcreator/explainer/site';
 
 export const docfirstSiteLayout: SeamLayout = {
   view: { w: 1100, h: 740 },
