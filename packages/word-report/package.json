@@ -36,7 +36,7 @@
     "engine/pyproject.toml",
     "engine/requirements.txt",
     "engine/README.md",
-    "engine/src/docreport/*.py",
+    "engine/src/docreport",
     "engine/schemas",
     "engine/templates",
     "LICENSE"

@@ -26,7 +26,9 @@ test('routes.ts：列表、报告页、图片三条路由都在整站布局里�
 
 test('package.json 把模板、样式与 Word 引擎发出去，命令行是 report-docx', () => {
   const pkg = JSON.parse(readFileSync(join(PKG_ROOT, 'package.json'), 'utf8')) as { files: string[]; bin: Record<string, string> }
-  for (const entry of ['template', 'styles', 'engine/templates', 'engine/src/docreport/*.py']) expect(pkg.files).toContain(entry)
+  for (const entry of ['template', 'styles', 'engine/templates', 'engine/src/docreport']) expect(pkg.files).toContain(entry)
+  // devkit.release 组装发布内容时按字面复制 files，不认通配与否定式
+  expect(pkg.files.filter((entry) => entry.startsWith('!') || /[*?]/.test(entry))).toEqual([])
   expect(pkg.bin).toEqual({ 'report-docx': './dist/cli.mjs' })
   expect(existsSync(join(PKG_ROOT, 'engine', 'templates', 'project-report.dotx'))).toBe(true)
 })
