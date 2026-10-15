@@ -1,7 +1,7 @@
 {
   "name": "@godcreator/explainer",
   "version": "0.0.0",
-  "description": "讲解组件：把一段讲解拆成若干帧、每帧配一句说明，用固定的控制条播放和切换。`.` 是机读文字规则（各帧说明、接缝图写成给 AI 读的文字，供站点的组件名册用，不 import react）与接缝图的定义；`./site` 是组件：分步、动画、选情况三种外壳，面板、终端、胶囊、代码行等画帧用的零件，画系统接缝图的 SeamDiagram，共用一套样式 `./styles.css`。",
+  "description": "讲解组件：把一段讲解拆成若干帧、每帧配一句说明，用固定的控制条播放和切换。`.` 是机读文字规则（各帧说明、接缝图写成给 AI 读的文字，供站点的组件名册用，不 import react）与接缝图的定义；`./site` 是组件：分步、动画、选情况三种外壳，面板、终端、胶囊、代码行等画帧用的零件，画系统接缝图的 SeamDiagram，共用一套样式 `./styles.css`。template/ 是建站器复制进站点 app/features/explainer/ 的样式接线。",
   "type": "module",
   "sideEffects": [
     "*.css"
@@ -19,7 +19,8 @@
   },
   "files": [
     "dist",
-    "styles"
+    "styles",
+    "template"
   ],
   "repository": {
     "type": "git",
