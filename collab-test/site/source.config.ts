@@ -1,31 +1,33 @@
 import rehypeKatex from 'rehype-katex'
 import remarkMath from 'remark-math'
-import { applyMdxPreset, defineCollections, defineDocs } from 'fumadocs-mdx/config'
-import { remarkGlossary } from '@godcreator/docsite-writing/compile'
-import { terms } from './glossary.terms'
+import { applyMdxPreset, defineCollections, defineConfig, defineDocs } from 'fumadocs-mdx/config'
+import { featureRehypePlugins, featureRemarkPlugins } from './app/features/mdx.generated.ts'
+import { sitePlugins } from './app/lib/mdx-plugins.ts'
 
-/**
- * 集合用 Config API 定义（只在构建期由 Node 加载，浏览器不解析这个文件）：
- * - docs：内容页集合，async 让正文按需加载（loader 只取路径，浏览器经 .source/browser 的
- *   createClientLoader 取正文）；术语插件与公式只加在这一集合——评论集合不加，编译更快
- * - comments：评论集合，一个评论串一个文件夹（index.mdx 串头 + 回复 mdx + 同目录 tsx/图片附件），
- *   与页面同一编译链；frontmatter 不写 schema，形状由评论包的模型校验（threadsForPage）
- *
- * 插件顺序：remarkMath 在术语标注之前（先让 $…$ 变 math 节点，标注碰不到公式）；
- * rehypeKatex 用函数形式拿到预设完整列表后排到代码高亮之前
- */
+// 各功能的集合（功能包 mdx.ts 的集合工厂按 package.json 的 godDocsite.collections 生成）；fumadocs-mdx 要求这份文件只导出集合
+export * from './app/features/collections.generated.ts'
+
+// 全局的 mdxOptions 管没写自己 mdxOptions 的集合（评论）与集合外被 import 的 mdx；
+// 集合写了自己的 mdxOptions，全局的对它就不生效，全站插件要在集合里再列一次
+export default defineConfig({
+  mdxOptions: { remarkPlugins: [remarkMath, ...featureRemarkPlugins], rehypePlugins: [rehypeKatex, ...featureRehypePlugins] },
+})
+
 export const docs = defineDocs({
   dir: 'content',
   docs: {
     async: true,
-    postprocess: { includeProcessedMarkdown: { output: 'function', headingIds: false } },
+    // 下划线开头的 .mdx 是被页面 import 的正文，不是独立页面
+    files: ['**/[^_]*.mdx'],
+    postprocess: { includeProcessedMarkdown: true },
     mdxOptions: applyMdxPreset({
-      remarkPlugins: [remarkMath, remarkGlossary({ terms })],
-      rehypePlugins: (list) => [rehypeKatex, ...list],
+      remarkPlugins: sitePlugins.remarkPlugins,
+      rehypePlugins: (list) => [...sitePlugins.rehypePlugins, ...list],
     }),
   },
 })
 
+// 评论：一串一个文件夹（index.mdx 是串头，回复各一个 mdx），frontmatter 由评论包校验
 export const comments = defineCollections({
   type: 'doc',
   dir: 'comments',
