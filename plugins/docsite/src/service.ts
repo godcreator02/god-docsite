@@ -1,11 +1,12 @@
 import { Service, type Context } from 'cordis'
-import type { JoiningPerson } from './people-file.js'
-import type { SiteInitOptions, SiteInitResult } from './site-init.js'
+import type { JoiningPerson } from '@godcreator/identity'
+import type { SiteFeatureAdded, SiteFeatureOptions } from './scaffold/add-feature.js'
+import type { SiteInitOptions, SiteInitResult } from './scaffold/create.js'
 import type { SiteStarted, SiteStatus } from './site-host.js'
 
 /**
- * 别的插件注入的服务 gwbDocsite：托管站点的开发服务、往站点推数据、本 home 的身份码。
- * 站点目录都写绝对路径；同一个站点目录大小写、斜杠不同的写法算同一个
+ * 别的插件注入的服务 gwbDocsite：建站与加功能、托管站点的开发服务、往站点推数据、本 home 的身份码。
+ * 站点都建在平台包 @godcreator/god-docsite 上。站点目录都写绝对路径；同一个站点目录大小写、斜杠不同的写法算同一个
  */
 export interface GwbDocsiteApi {
   /** 本 home 的身份码（设置 identity-code），开发服务按它在站点的 people.json 里认人 */
@@ -16,18 +17,22 @@ export interface GwbDocsiteApi {
   stop(dir: string): Promise<{ url: string }>
   /** 此刻的样子（running / stopped / failed） */
   status(dir: string): SiteStatus
-  /** 往站点的推送通道推一份数据（频道只用字母、数字、_、-）；站点没在运行就抛 Error */
+  /** 往站点的推送通道推一份数据（频道只用字母、数字、_、-）：POST 到站点的 __docsite/feed/<频道>，带这次启动的推送令牌；站点没在运行就抛 Error */
   push(dir: string, channel: string, data: unknown): Promise<void>
   /** 把本 home 的身份码加进站点的 people.json：已有这个 id 就加进它的 codes，没有就新加一项；changed 为 false 是本来就在 */
   join(dir: string, person: JoiningPerson): Promise<{ changed: boolean }>
   /** 某个站的状态变了（启动、停止、出错）时调用；返回撤掉的函数 */
   onStatus(listener: (dir: string) => void): () => void
   /**
-   * 从零建站：拉功能包模板、在内存里组装整棵站点树（骨架模板从自述站派生、随插件发布）、一次写盘、
-   * 一次 pnpm install、起服务检查首页（content/、comments/、people.json 是新站的起始物）。
-   * 骨架写完就归站点，没有更新已有站点骨架的通道；已有站点再调就拒绝
+   * 从空目录建站：平台建站器复制模板（平台包的版本取插件旁边装着的那几个）、pnpm install、起服务检查首页。
+   * 骨架写完就归站点；要功能再 addFeature
    */
   init(dir: string, options: SiteInitOptions): Promise<SiteInitResult>
+  /**
+   * 给已有站点加一个功能：pnpm add 功能包，平台建站器补 app/features/<功能名>/ 里缺的文件、重写功能汇总文件，再起服务检查首页。
+   * 重复运行只补缺的；站点在运行时拒绝
+   */
+  addFeature(dir: string, options: SiteFeatureOptions): Promise<SiteFeatureAdded>
 }
 
 /** 只存闭包：cordis 读服务属性时会把属性里存的服务重新绑到调用方上下文 */
@@ -61,5 +66,8 @@ export class DocsiteService extends Service implements GwbDocsiteApi {
   }
   init(dir: string, options: SiteInitOptions) {
     return this.api.init(dir, options)
+  }
+  addFeature(dir: string, options: SiteFeatureOptions) {
+    return this.api.addFeature(dir, options)
   }
 }

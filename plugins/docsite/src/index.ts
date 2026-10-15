@@ -7,9 +7,12 @@ import { registerCommands } from './commands.js'
 import { launchDevServer } from './dev-server.js'
 import { messageOf } from './errors.js'
 import { isIdentityCode, joinPeople, newIdentityCode } from './people-file.js'
+import { runPnpm } from './pnpm.js'
+import { addSiteFeature } from './scaffold/add-feature.js'
+import { createDocsite } from './scaffold/create.js'
+import type { HomePageCheckDeps } from './scaffold/home-page-check.js'
+import { loadPlatformScaffold, pluginDir } from './scaffold/platform.js'
 import { DocsiteService, type GwbDocsiteApi } from './service.js'
-import { fetchFeatureTemplate } from './scaffold/fetch-template.js'
-import { initSite, pnpmInstall } from './site-init.js'
 import { SiteHost, siteKeyOf } from './site-host.js'
 
 /** 写在包入口：devkit.release 只读类型入口 dist/index.d.ts 认服务由谁提供 */
@@ -21,8 +24,9 @@ declare module 'cordis' {
 
 export type { GwbDocsiteApi } from './service.js'
 export type { SiteStarted, SiteState, SiteStatus } from './site-host.js'
-export type { JoiningPerson } from './people-file.js'
-export type { SiteInitOptions, SiteInitResult } from './site-init.js'
+export type { JoiningPerson } from '@godcreator/identity'
+export type { SiteInitOptions, SiteInitResult } from './scaffold/create.js'
+export type { SiteFeatureAdded, SiteFeatureOptions } from './scaffold/add-feature.js'
 
 export const name = 'gwb-docsite'
 
@@ -72,6 +76,14 @@ export function apply(ctx: GwbContext): void {
 
   const sitesSetting = { get: () => stringList(settings.get('sites')), set: (dirs: string[]) => settings.set('sites', dirs) }
 
+  const homePageCheck: HomePageCheckDeps = {
+    isRegistered: (siteDir) => sitesSetting.get().some((each) => siteKeyOf(each) === siteKeyOf(siteDir)),
+    start: (siteDir) => host.start(siteDir),
+    stop: (siteDir) => host.stop(siteDir),
+    pageStatus: async (url) => (await fetch(new URL('/', url))).status,
+  }
+  const scaffold = () => loadPlatformScaffold()
+
   const api: GwbDocsiteApi = {
     identityCode,
     start: (dir) => host.start(dir),
@@ -80,16 +92,9 @@ export function apply(ctx: GwbContext): void {
     push: (dir, channel, data) => host.push(dir, channel, data),
     join: (dir, person) => joinPeople(dir, identityCode(), person),
     onStatus: (listener) => host.onStatus(listener),
-    init: async (dir, options) => {
-      return initSite(dir, options, {
-        fetchFeatureTemplate,
-        install: pnpmInstall,
-        isRegistered: (siteDir) => sitesSetting.get().some((each) => siteKeyOf(each) === siteKeyOf(siteDir)),
-        start: (siteDir) => host.start(siteDir),
-        stop: (siteDir) => host.stop(siteDir),
-        pageStatus: async (url) => (await fetch(new URL('/', url))).status,
-      })
-    },
+    init: (dir, options) => createDocsite(dir, options, { ...homePageCheck, scaffold, pnpm: runPnpm, packageSource: { kind: 'registry', resolveFrom: pluginDir } }),
+    addFeature: (dir, options) =>
+      addSiteFeature(dir, options, { ...homePageCheck, scaffold, pnpm: runPnpm, versionsFrom: pluginDir, isRunning: (siteDir) => host.statusOf(siteDir).state === 'running' }),
   }
   new DocsiteService(ctx, api)
 

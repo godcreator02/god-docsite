@@ -62,7 +62,7 @@ const siteShape =
   '每个站是 { dir, state, url, expectedUrl, error }：state 是 running（进程在，url 是实际地址）、stopped（没有进程）、failed（进程退出了或没能启动，error 记退出码与最后几行输出）；expectedUrl 是按 package.json 的 scripts.dev 里的 --port 预期的地址（没写端口为 null），没运行时给人看站点在哪'
 
 const commentWriteUsage =
-  '要站点在运行（经开发服务的评论接口写，和网页同一套规则：正文是 MDX，编译不过就拒绝）；署名是本 home 的身份码在 people.json 里对应的人，agent 写时给 as（people.json 里 agent 为 true 的 id）'
+  '要站点在运行（POST 到站点的评论写入路由 /comments，和网页评论面板同一套规则与字段）；署名是本 home 的身份码在 people.json 里对应的人，agent 写时给 as（people.json 里 agent 为 true 的 id）'
 
 export function registerCommands({ commands, docsite, sitesSetting, list }: CommandServices): void {
   const urlOfRunning = (dir: string) => {
@@ -94,7 +94,7 @@ export function registerCommands({ commands, docsite, sitesSetting, list }: Comm
     {
       name: 'docsite.site.add',
       description: '托管一个站点：登记进设置 sites 并启动（工作台每次启动时也会启动登记着的站）',
-      usage: `{ dir }：站点目录的绝对路径，要有 package.json（scripts.dev 写死 --port）、装好依赖、装着插件支持的最低版以上的 @godcreator/docsite-kit。已经登记过的只回它此刻的样子。别的插件（如 gwb-collab）托管的站点不经这里。回这个站。${siteShape}`,
+      usage: `{ dir }：站点目录的绝对路径，要有 package.json（scripts.dev 写死 --port）、装好依赖、建在平台包 @godcreator/god-docsite 上。已经登记过的只回它此刻的样子。别的插件（如 gwb-collab）托管的站点不经这里。回这个站。${siteShape}`,
       effect: 'write',
     },
     async (args) => {
@@ -124,7 +124,9 @@ export function registerCommands({ commands, docsite, sitesSetting, list }: Comm
     {
       name: 'docsite.site.start',
       description: '启动一个站点的开发服务（在站点目录里运行 pnpm dev，只绑本机）',
-      usage: '{ dir }：站点目录的绝对路径。启动前做版本核对（站点装的 @godcreator/docsite-kit 低于插件支持的最低版就拒绝、写明要升到哪版）与目录有效性，起不来把开发服务的输出报出来。已在运行或正在启动就回现状。回 { url, pid, alreadyRunning }。要看页面把 url 给 VS Code 插件打开',
+      usage:
+        '{ dir }：站点目录的绝对路径。启动前核对站点装着 @godcreator/god-docsite（旧地基 docsite-kit 的站拒绝）、scripts.dev 写了 --port，起不来把开发服务的输出报出来。' +
+        '启动时经环境变量交给站点本 home 的身份码（DOCSITE_IDENTITY_CODE）与这次生成的推送令牌（DOCSITE_FEED_TOKEN）。已在运行或正在启动就回现状。回 { url, pid, alreadyRunning }。要看页面把 url 给 VS Code 插件打开',
       effect: 'write',
     },
     async (args) => {
@@ -147,9 +149,11 @@ export function registerCommands({ commands, docsite, sitesSetting, list }: Comm
     commands,
     {
       name: 'docsite.site.init',
-      description: '一条命令从空目录建站：组装骨架与功能包模板、一次写盘、装依赖、起服务检查，骨架写完归站点',
+      description: '一条命令从空目录建站：平台包 god-docsite 的建站器复制站点模板、装依赖、起服务检查，骨架写完归站点',
       usage:
-        '{ dir, port, title }：dir 是站点目录的绝对路径，要空目录（或只有 package.json，name 会留下）；port（开发端口）与 title（站名，写进 content/meta.json）必给。骨架模板是插件自带的（正本是 docsite-kit 仓的自述站），依赖里的 workspace 引用替换成插件配套的精确版本，写盘后一次 pnpm install，起服务检查首页，通过后登记进设置 sites 的站保持运行、没登记的停掉。已有站点（package.json 有 docsite.features）拒绝：骨架建完就归站点，要重建删目录再来（content/、comments/、people.json 想留先拷走）。功能包（docsite.features）不经命令面给，走服务面 gwbDocsite.init 的 features（协作站、docfirst 的建站命令用它）。回 { created: true, features }',
+        '{ dir, port, title }：dir 是站点目录的绝对路径，要不存在或是空目录；port（开发端口，写进 scripts.dev 的 --port）与 title（站名，写进 content/meta.json）必给。' +
+        '站点模板是平台包 @godcreator/god-docsite 的 template/，平台包（god-docsite、identity、comments）的依赖写成插件旁边装着的那一版的 ^<版本>；写完 pnpm install，起服务检查首页，通过后登记进设置 sites 的站保持运行、没登记的停掉。' +
+        'people.json 里只有 agent claude，人用 docsite.people.join 把自己加进来。要功能（轨迹卡、钉码、协作等）建完再 docsite.feature.add。回 { dir, platformDependencies }',
       effect: 'write',
     },
     async (args) => {
@@ -159,6 +163,25 @@ export function registerCommands({ commands, docsite, sitesSetting, list }: Comm
       const title = optionalString(parsed, 'title')
       if (title === undefined) throw new DocsiteRejected('缺少 title（站名），要是非空字符串')
       return docsite.init(dirOf(parsed), { port: port as number, title })
+    },
+  )
+
+  register(
+    commands,
+    {
+      name: 'docsite.feature.add',
+      description: '给平台建的站点加一个功能包（轨迹卡、钉码、讲解组件、协作等）：装上它、把它的站点模板补进 app/features/、起服务检查',
+      usage:
+        '{ dir, package, version? }：dir 是站点目录的绝对路径（docsite.site.init 建的站）；package 是功能包的包名，如 @godcreator/trajectory；' +
+        'version 是装哪一版，写版本范围（^0.3.1、0.3.1、~0.3.1），不给就用 gwb-docsite 旁边装着的那一版，没装就拒绝。' +
+        '在站点目录里 pnpm add <package>@<version>，再把功能包 template/ 里站点还没有的文件补进 app/features/<功能名>/（已有的不覆盖，站点改过的文件留着）、重写 app/features/ 下的汇总文件，最后起服务检查首页（登记着的站保持运行，没登记的停掉）。' +
+        '可以对同一站点重复运行，只补缺的；站点在运行时拒绝，先 docsite.site.stop。回 { feature, specifier, addedFiles, keptFiles, features }',
+      effect: 'write',
+    },
+    async (args) => {
+      const parsed = argsOf(args, ['dir', 'package', 'version'])
+      const version = optionalString(parsed, 'version')
+      return docsite.addFeature(dirOf(parsed), { packageName: requiredString(parsed, 'package'), ...(version !== undefined ? { specifier: version } : {}) })
     },
   )
 
@@ -183,7 +206,7 @@ export function registerCommands({ commands, docsite, sitesSetting, list }: Comm
       name: 'docsite.comments',
       description: '列出站点上的评论（只读，读文件，不要站点在运行）',
       usage:
-        '{ dir, page?, about? }：page 是页面在 docs 集合里的路径（如 writing/collapse-test.mdx），给了只列批那一页的；about 是人员 id，给了只列和他有关的（他发起的、正文或回复里 @ 了他的）。回 { threads }：每串 { id, page, anchor?, author, createdAt, body, mentions, replies }，anchor 是锚定的页面元素 id，页面级评论没有；author 是 people.json 里的 id；body 是 MDX 原文；mentions 是正文与回复里 @ 了的人员 id，去重；replies 每条 { author, createdAt, body, mentions }，按时间排。文件在站点目录的 comments/<id>/ 里：index.mdx 是发起的那条，回复各一个 .mdx',
+        '{ dir, page?, about? }：page 是页面在内容目录 content/ 里的路径（如 writing/collapse-test.mdx），给了只列批那一页的；about 是人员 id，给了只列和他有关的（他发起的、正文或回复里 @ 了他的）。回 { threads }：每串 { id, page, anchor?, author, createdAt, body, mentions, replies }，anchor 是锚定的页面元素 id，页面级评论没有；author 是 people.json 里的 id；body 是 MDX 原文；mentions 是正文与回复里 @ 了的人员 id，去重；replies 每条 { author, createdAt, body, mentions }，按时间排。文件在站点目录的 comments/<id>/ 里：index.mdx 是发起的那条，回复各一个 .mdx',
       effect: 'read',
     },
     async (args) => {
@@ -204,7 +227,7 @@ export function registerCommands({ commands, docsite, sitesSetting, list }: Comm
     {
       name: 'docsite.comment.create',
       description: '在站点上发起一串评论：批整页或批页面上的一个元素',
-      usage: `{ dir, body, page, anchor?, as? }：page 是页面在 docs 集合里的路径（如 writing/collapse-test.mdx），与 docsite.comments 的 page 同一写法；anchor 是页面元素的 id，给了就批那个元素，不给批整页。${commentWriteUsage}。回 { thread }`,
+      usage: `{ dir, body, page, anchor?, as? }：page 是页面在内容目录 content/ 里的路径（如 writing/collapse-test.mdx），与 docsite.comments 的 page 同一写法；anchor 是页面元素的 id，给了就批那个元素，不给批整页。${commentWriteUsage}。回 { thread }`,
       effect: 'write',
     },
     async (args) => {
@@ -219,7 +242,7 @@ export function registerCommands({ commands, docsite, sitesSetting, list }: Comm
 
   register(
     commands,
-    { name: 'docsite.comment.reply', description: '回复站点上的一串评论', usage: `{ dir, thread, body, as? }：thread 是评论串的文件夹名（docsite.comments 回的 id）。${commentWriteUsage}。回 { thread, file }`, effect: 'write' },
+    { name: 'docsite.comment.reply', description: '回复站点上的一串评论', usage: `{ dir, thread, body, as? }：thread 是评论串的文件夹名（docsite.comments 回的 id）。${commentWriteUsage}。回 { thread, reply }：reply 是回复的 id（评论串文件夹里 <reply>.mdx）`, effect: 'write' },
     async (args) => {
       const parsed = argsOf(args, ['dir', 'thread', 'body', 'as'])
       const as = optionalString(parsed, 'as')
