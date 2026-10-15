@@ -1,10 +1,11 @@
-# 仓根是不发布的 private 包：平台包与功能包在 packages/，三个 gwb 插件在 plugins/，全仓文档站在 docs-site/，测试协作仓在 collab-test/site/
+# 仓根是不发布的 private 包：平台包与功能包在 packages/，三个 gwb 插件在 plugins/，全仓文档站在 docs-site/，测试协作仓在 collab-test/site/，演示协作仓在 demo/site/
 
 packages:
   - packages/*
   - plugins/*
   - docs-site
   - collab-test/site
+  - demo/site
 
 # 外部依赖的版本只写在这里，各 package.json 的 dependencies / devDependencies 写 catalog:；
 # peerDependencies 是对使用方的兼容范围，不是本仓装哪一版，照旧写字面范围。
@@ -36,6 +37,7 @@ catalog:
   '@types/node': ^26.6.2
   '@types/react': ^19.3.0
   '@types/react-dom': ^19.3.0
+  '@types/three': ^0.186.0
   '@types/unist': ^3.0.3
   class-variance-authority: ^0.7.1
   cn: ^0.2.5
@@ -70,6 +72,7 @@ catalog:
   remark-stringify: ^11.0.0
   sharp: ^0.35.5
   tailwindcss: ^4.3.3
+  three: ^0.186.0
   tsdown: ^0.22.14
   typescript: ^6.0.3
   unified: ^11.0.5

@@ -35,6 +35,13 @@ const sites = [
     homePageFrom: path.join(repoDir, 'packages', 'collab', 'templates', 'home.tsx'),
   },
   {
+    name: 'demo',
+    dir: path.join(repoDir, 'demo', 'site'),
+    features: ['@godcreator/collab', '@godcreator/code-pin', '@godcreator/trajectory', '@godcreator/explainer', '@godcreator/word-report'],
+    siteOwned: [],
+    homePageFrom: path.join(repoDir, 'packages', 'collab', 'templates', 'home.tsx'),
+  },
+  {
     name: 'docs-site',
     dir: path.join(repoDir, 'docs-site'),
     features: ['@godcreator/code-pin', '@godcreator/trajectory', '@godcreator/explainer'],

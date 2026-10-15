@@ -1,0 +1,27 @@
+---
+born-at: 2026-10-16T01:30
+type: choice
+parent: [2026-09-03-god-live-doc]
+label: 本仓加演示站 demo/：真实项目内容的快照，装上全部功能
+domain: 页面
+---
+
+## 背景
+
+用户要看改版后的站点在真实内容上的效果。仓里的两个站都不合适：测试站 `collab-test/site` 是 e2e 用的测试页与测试数据，看不出真实项目用起来的样子；`docs-site` 是说明文档，不是协作站。
+本机真实的协作站有 `chb-dab-sst/collab`（65 个内容文件、26 条记录、2 篇日志）与 `hybrid-mmc/collab`（页面目录是空的），都还装着重构前的旧包，是推到 Gitea、别人也在用的仓，新包也没发版，不能直接升级它们。
+
+先在仓外复制了一份（本仓的包打成 tarball 装），构建通过；用户问为什么不直接放进本仓当以后的演示站，就挪了进来。
+
+## 结论与边界
+
+- `demo/` 是协作仓形态：`demo/collab/records/` 与 `demo/site/`，内容是 `chb-dab-sst` 协作仓 2026-10-15 的快照（`content/`、`journal/`、`people.json`、任务与模块记录），不随原仓自动更新。
+- 骨架照测试站：装全部功能（collab、code-pin、trajectory、explainer、word-report），首页是协作包的项目首页；`pnpm test:scaffold` 比对它的 `app/`，模板改了跟着重新生成。依赖 `workspace:^` 与 `catalog:`，仓根 catalog 加了内容页用的 `three` 与 `@types/three`。
+- 原内容的改动：页面里 `@godcreator/docsite-writing` 的 `Tex` 换成 `@godcreator/god-docsite/tex`；`content/reports/` 改名 `content/long-reports/`，站内链接跟着改，因为 `/reports` 归 word-report 的报告列表；旧报告导出流程留下的两份 docx（各 1.4 MB）、导出脚本、导出记录与导出链接组件没带进来。别的页面原样能编译，不用改。
+- 不跑 e2e：它只用来看效果，检查仍在测试站上做。开发端口 4460。
+
+## 否掉的候选
+
+- 直接升级原仓：要先发版，还会推给项目里的其他人。
+- 放在仓外、按 tarball 装：每次看新改动都要重新打包安装，也没有检查盯着骨架跟上模板。
+- 把旧报告转成 word-report 的 JSON 格式：是正式的迁移活，演示站先不做，报告功能在测试站的样例报告里看。
