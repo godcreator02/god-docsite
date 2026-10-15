@@ -35,6 +35,36 @@ export interface DocsiteContext {
   contentDir: string
 }
 
+/** 人员列表里的一人：identity 包的 StoredPerson 满足它；带身份码，只在服务端用 */
+export type SitePerson = { id: string; name: string }
+
+/** 本机身份：identity 包的 SiteIdentity 满足它；person 为 null 时站点只读，reason 写明原因 */
+export type SiteViewer = { person: SitePerson | null; reason?: string | undefined }
+
+/** 评论集合（fumadocs-mdx 集合）里的一条：info.path 相对评论目录 */
+export type SiteCommentEntry = { info: { path: string } }
+
+/**
+ * 基础站点上下文：模板 app/lib/site.server.ts 导出的 site 满足它；source 用来取站名与页面列表。
+ * 功能包模板里的 site.server.ts 从它组装本功能要的上下文，布局 loader 把它作为第二个参数传给各功能的 layoutData。
+ * 函数字段每次调用都现读：people.json、身份码、可信地址改了不用重启
+ */
+export interface BaseSiteContext<Person extends SitePerson = SitePerson, Viewer extends SiteViewer = SiteViewer, CommentEntry extends SiteCommentEntry = SiteCommentEntry>
+  extends DocsiteContext {
+  /** 评论目录的绝对路径：评论写入 action 往这里写 */
+  commentsDir: string
+  /** 评论集合的全部条目（构建期编译；dev 下随文件增删更新） */
+  commentEntries: readonly CommentEntry[]
+  /** people.json 的人员列表 */
+  people(): readonly Person[]
+  /** 本机身份：启动方经环境变量 DOCSITE_IDENTITY_CODE 给的码在 people.json 里认出的人 */
+  identity(): Viewer
+  /** 写入请求的 Origin 头要等于它：DOCSITE_ORIGIN，否则 dev 取 --host/--port、start 取 HOST/PORT */
+  trustedOrigin(): string
+  /** 推送通道这个频道现在的值，没推过是 undefined；功能的 layoutData 只能经它读（feature.tsx 进浏览器，不能 import 平台的 ./server） */
+  feedValue(channel: string): unknown
+}
+
 type SitePageCommon = {
   /** 页面在内容目录里的路径（如 index.mdx）：评论等按它归属到页 */
   key: string
