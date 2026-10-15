@@ -60,6 +60,39 @@ describe('合并检查：只有负责人能改的内容', () => {
     expect(await check('topic')).toEqual({ verdict: 'mergeable', problems: [] })
   })
 
+  it('site/package.json 里 @godcreator/ 下的包都只有负责人能改：平台、身份、评论加进来逐个写明，两段依赖都看', async () => {
+    const dependencies = { react: '^19.3.0', '@godcreator/identity': '^0.1.0', '@godcreator/god-docsite': '^0.1.0' }
+    write('site/package.json', `${JSON.stringify({ dependencies, devDependencies: { '@godcreator/comments': '^0.1.0' } }, null, 2)}\n`)
+    commit('乙给站点加了平台与身份、评论包')
+    expect((await check('topic')).problems).toEqual([
+      '改了只有负责人能改的内容：site/package.json 里 @godcreator/god-docsite 的版本、site/package.json 里 @godcreator/identity 的版本、' +
+        'site/package.json 里 @godcreator/comments 的版本；这类改动交给负责人（协作仓的协作者）提交',
+    ])
+  })
+
+  it('站点已经装着 @godcreator/ 的包：改其中一个的版本、删掉一个都要负责人；只升级别的库、加别的库放开', async () => {
+    const siteDependencies = { react: '^19.3.0', '@godcreator/god-docsite': '^0.1.0', '@godcreator/identity': '^0.1.0', '@godcreator/comments': '^0.1.0', '@godcreator/collab': '^0.1.0' }
+    const writeSitePackage = (dependencies: Record<string, string>) => write('site/package.json', `${JSON.stringify({ dependencies }, null, 2)}\n`)
+    git('checkout', '-q', 'main')
+    writeSitePackage(siteDependencies)
+    commit('甲建站')
+    const attempts: Array<[string, Record<string, string>, string[]]> = [
+      ['升级评论包', { ...siteDependencies, '@godcreator/comments': '^0.2.0' }, ['site/package.json 里 @godcreator/comments 的版本']],
+      ['删掉身份包', Object.fromEntries(Object.entries(siteDependencies).filter(([name]) => name !== '@godcreator/identity')), ['site/package.json 里 @godcreator/identity 的版本']],
+      ['平台包写成本地路径', { ...siteDependencies, '@godcreator/god-docsite': 'file:../god-docsite' }, ['site/package.json 里 @godcreator/god-docsite 的版本', 'site/package.json 里 @godcreator/god-docsite 写成了 "file:../god-docsite"（只能写版本号范围）']],
+    ]
+    for (const [message, dependencies, changes] of attempts) {
+      git('checkout', '-q', '-B', 'topic', 'main')
+      writeSitePackage(dependencies)
+      commit(message)
+      expect((await check('topic')).problems, message).toEqual([`改了只有负责人能改的内容：${changes.join('、')}；这类改动交给负责人（协作仓的协作者）提交`])
+    }
+    git('checkout', '-q', '-B', 'topic', 'main')
+    writeSitePackage({ ...siteDependencies, react: '^19.4.0', three: '^0.186.0' })
+    commit('乙升级 react、加 three')
+    expect(await check('topic')).toEqual({ verdict: 'mergeable', problems: [] })
+  })
+
   it('协作仓的负责人改了只有负责人能改的内容，直接放行', async () => {
     write('site/package.json', `${JSON.stringify({ scripts: { dev: 'vite --port 4400' }, dependencies: { react: '^19.3.0' } }, null, 2)}\n`)
     commit('甲改了开发服务的端口')
