@@ -1,0 +1,25 @@
+// 功能包模板的类型检查：模板文件当作在站点的 app/features/collab/ 里，站点的 @/lib/* 与 react-router typegen 的 ./+types/* 换成这里的桩。
+// journal.tsx 与 journal-body.tsx 引用站点 fumadocs-mdx 生成的 .source/browser，只在生成出的站点里检查
+{
+  "extends": "../../../../tsconfig.base.json",
+  "compilerOptions": {
+    "lib": ["ES2023", "DOM", "DOM.Iterable"],
+    "jsx": "react-jsx",
+    "rootDirs": ["../../template", "./route-types"],
+    "paths": {
+      "@/*": ["./app/*"]
+    }
+  },
+  "files": [
+    "../../template/routes.ts",
+    "../../template/site.server.ts",
+    "../../template/feature.tsx",
+    "../../template/mdx.ts",
+    "../../template/tasks.tsx",
+    "../../template/record.tsx",
+    "../../template/calendar.tsx",
+    "../../template/record-links.ts",
+    "../../template/repo-links.ts",
+    "../../template/project-file.ts"
+  ]
+}

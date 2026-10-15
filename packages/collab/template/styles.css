@@ -1,0 +1,6 @@
+@import '@godcreator/collab/styles.css';
+
+/* 协作写入、AI 写入的数据不进 Tailwind 的源码扫描：扫描到的文件一变，dev 下整页刷新，推送连接与页面状态都断掉。
+   路径相对这个文件（站点的 app/features/collab/）：任务与模块在仓根的 collab/，日志在站点的 journal/ */
+@source not '../../../../collab';
+@source not '../../../journal';
