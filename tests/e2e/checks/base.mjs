@@ -37,10 +37,15 @@ export async function runBaseChecks({ browser, baseUrl, mode, siteDir, feedToken
     const page = await context.newPage()
     watchPage(page, 'base', problems)
 
-    await check('首页打开', async () => {
+    await check('主页打开：正文里有功能页面与各组目录的卡片', async () => {
       const response = await page.goto(`${baseUrl}/`, { waitUntil: 'load' })
       const heading = await headingOf(page)
-      return { pass: response?.status() === 200 && heading === '协作站测试', detail: `GET / → ${response?.status()}，h1=${heading}` }
+      const cardTargets = await page.locator('#nd-page a[href]').evaluateAll((links) => links.map((link) => link.getAttribute('href')))
+      const missing = ['/tasks', '/calendar', '/comments', '/trajectory', '/about', '/guide'].filter((href) => !cardTargets.includes(href))
+      return {
+        pass: response?.status() === 200 && heading === '协作站测试' && missing.length === 0,
+        detail: `GET / → ${response?.status()}，h1=${heading}；缺的卡片 ${missing.join('、') || '无'}`,
+      }
     })
 
     await check('侧栏站内导航', async () => {
@@ -203,6 +208,28 @@ export async function runBaseChecks({ browser, baseUrl, mode, siteDir, feedToken
       return {
         pass: searchOk && linksOk && clipped.length === 0 && linesOk && fullSearchBars === 0 && dialog,
         detail: `横排 ${cells.map((cell) => (cell.href ?? '搜索') + (cell.icon ? '(图标)' : '')).join('、')}，每行 ${cellsPerLine.join(' + ')} 格；入口都有字=${linksOk}；字被截掉的 ${clipped.join('、') || '无'}；侧栏里带快捷键的整行搜索框 ${fullSearchBars} 个；点搜索按钮弹出搜索框=${dialog}`,
+      }
+    })
+
+    await check('每一页侧栏都有目录切换按钮：组外的页面收在以站名命名的那一组里，主页与功能页面也有', async () => {
+      const outcomes = []
+      for (const { url, group } of [
+        { url: '/', group: '协作站测试' },
+        { url: '/about', group: '协作站测试' },
+        { url: '/writing/collapse-test', group: '协作站测试' },
+        { url: '/guide', group: '指南' },
+        { url: '/tasks', group: '协作站测试' },
+      ]) {
+        await page.goto(`${baseUrl}${url}`, { waitUntil: 'load' })
+        await waitForHydrated(page, `${sidebarRow} a[href="/comments"]`)
+        const toggles = await page.locator('#nd-sidebar button', { hasText: group }).count()
+        outcomes.push({ url, group, toggles })
+      }
+      // 主页不进页面树：侧栏里指向 / 的只有站名那一个链接
+      const homeLinks = await page.locator('#nd-sidebar a[href="/"]').count()
+      return {
+        pass: outcomes.every(({ toggles }) => toggles >= 1) && homeLinks === 1,
+        detail: `${outcomes.map(({ url, group, toggles }) => `${url}「${group}」${toggles} 个`).join('；')}；侧栏里指向主页的链接 ${homeLinks} 个（应只有站名）`,
       }
     })
 

@@ -24,6 +24,22 @@ function hasPageOutsideGroups(nodes: PageTree.Node[]): boolean {
   })
 }
 
+/** 把组外页面收成的那一组的 $id */
+export const looseGroupId = 'docsite-loose-pages'
+
+/**
+ * 页面树里有分组、也有不在任何分组里的页面时，把顶层所有不是分组的项（页面、普通文件夹、分隔线）按原来的先后收成一组，
+ * 名字是站名，排在各分组前面：fumadocs 只在当前页属于某个分组时显示目录切换按钮，收进来以后每一页都有。
+ * 没有分组或全部页面都在组里时原样返回
+ */
+export function withLoosePagesGrouped(tree: PageTree.Root): PageTree.Root {
+  if (firstSidebarGroupOf(tree.children) === undefined || !hasPageOutsideGroups(tree.children)) return tree
+  const loose = tree.children.filter((node) => !isSidebarGroup(node))
+  const groups = tree.children.filter(isSidebarGroup)
+  const looseGroup: PageTree.Folder = { type: 'folder', $id: looseGroupId, name: tree.name, root: true, children: loose }
+  return { ...tree, children: [looseGroup, ...groups] }
+}
+
 function withPageInGroup(nodes: PageTree.Node[], groupId: string, page: PageTree.Item): PageTree.Node[] {
   return nodes.map((node) => {
     if (node.type !== 'folder') return node

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import type * as PageTree from 'fumadocs-core/page-tree'
-import { sidebarTreeOf } from '../src/site/sidebar-tree.js'
+import { looseGroupId, sidebarTreeOf, withLoosePagesGrouped } from '../src/site/sidebar-tree.js'
 
 const page = (url: string): PageTree.Item => ({ type: 'page', name: url, url })
 const group = (id: string, children: PageTree.Node[]): PageTree.Folder => ({ type: 'folder', $id: id, name: id, root: true, children })
@@ -61,5 +61,29 @@ describe('侧栏停在哪一组', () => {
   it('页面树里没有分组：原样用页面树', () => {
     const flat: PageTree.Root = { $id: 'root', name: '站', children: [page('/a')] }
     expect(sidebarTreeOf(flat, '/comments', undefined, hiddenPage)).toEqual({ tree: flat, groupId: null })
+  })
+})
+
+describe('组外的页面收成一组', () => {
+  it('有分组也有组外的页面：顶层不是分组的项按原来的先后收成以站名命名的一组，排在各分组前面', () => {
+    const separator: PageTree.Separator = { type: 'separator', name: '分隔' }
+    const plainFolder: PageTree.Folder = { type: 'folder', name: '写作', children: [page('/writing/x')] }
+    const tree: PageTree.Root = { $id: 'root', name: '站', children: [page('/about'), group('guide', [page('/guide/a')]), separator, plainFolder] }
+    const grouped = withLoosePagesGrouped(tree)
+    expect(grouped.children.map((node) => (node.type === 'folder' ? node.$id ?? node.name : node.type))).toEqual([looseGroupId, 'guide'])
+    expect(grouped.children[0]).toEqual({ type: 'folder', $id: looseGroupId, name: '站', root: true, children: [page('/about'), separator, plainFolder] })
+  })
+
+  it('全部页面都在组里、或者一个分组都没有：原样返回', () => {
+    expect(withLoosePagesGrouped(allInGroups)).toBe(allInGroups)
+    const flat: PageTree.Root = { $id: 'root', name: '站', children: [page('/a')] }
+    expect(withLoosePagesGrouped(flat)).toBe(flat)
+  })
+
+  it('收完以后，功能页面上侧栏停在最近看过的那一组，还没看过就停在站名那一组', () => {
+    const grouped = withLoosePagesGrouped(mixed)
+    expect(sidebarTreeOf(grouped, '/about', undefined, hiddenPage).groupId).toBe(looseGroupId)
+    expect(sidebarTreeOf(grouped, '/comments', 'guide', hiddenPage).groupId).toBe('guide')
+    expect(sidebarTreeOf(grouped, '/comments', undefined, hiddenPage).groupId).toBe(looseGroupId)
   })
 })
