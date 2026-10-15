@@ -2,12 +2,13 @@
  * 端到端检查：用平台包的建站器（@godcreator/god-docsite/scaffold 的 createSite、addFeature）建站到系统临时目录，
  * 装上本仓的包，分别起 dev 与 build + start，用 Playwright（headless Chromium）跑各组合的检查。
  *
- *   pnpm e2e                                              两种装法 × 三种组合 × dev、start 全跑
+ *   pnpm e2e                                              两种装法 × 四种组合 × dev、start 全跑
  *   pnpm e2e --install=file --combo=demo --server=dev     只跑一部分
  *   pnpm e2e --keep                                       跑完保留生成的站点目录
  *
  * 装法：link 把包写成 link:<仓里的包目录>；file 先 pnpm pack，再按 file:<tarball> 装，包的真实路径在 node_modules/.pnpm 下，
- * 和从 registry 装一样。组合：base 是基础站，demo 是基础站加 e2e/fixtures/e2e-demo 演示功能包，collab 是基础站加协作功能（站点建在协作仓布局的 site/ 下）。
+ * 和从 registry 装一样。组合：base 是基础站，demo 是基础站加 e2e/fixtures/e2e-demo 演示功能包，collab 是基础站加协作功能（站点建在协作仓布局的 site/ 下），
+ * docs 是文档维护（基础站加 code-pin、trajectory、explainer）。
  * 每次运行的日志与结果在 %TEMP%/god-docsite-e2e/<运行时刻>/
  */
 import { mkdirSync, realpathSync, rmSync, writeFileSync } from 'node:fs'
@@ -17,6 +18,7 @@ import { randomUUID } from 'node:crypto'
 import { runBaseChecks } from './combos/base.mjs'
 import { addDemoFeatureWithChecks, runDemoChecks } from './combos/demo.mjs'
 import { addCollabFeatureWithChecks, buildCollabPackage, collabSiteDirOf, generateCollabSite, packCollabPackage, runCollabChecks } from './combos/collab.mjs'
+import { addDocsFeaturesWithChecks, runDocsChecks } from './combos/docs.mjs'
 import { freePort, startServer, waitForHttp } from './lib/process.mjs'
 import { buildPlatformPackages, buildSite, combos, generateSite, installSite, loadScaffold, packPackages, reactRouterBin, reactRouterServeBin, testerIdentityCode, typecheckSite } from './lib/site.mjs'
 
@@ -56,6 +58,7 @@ const checksOfCombo = {
   base: ({ baseUrl, mode, siteDir, feedToken, runTag }) => runBaseChecks({ baseUrl, mode, siteDir, feedToken, runTag }),
   demo: ({ baseUrl, mode, siteDir, feedToken }) => runDemoChecks({ baseUrl, mode, siteDir, feedToken }),
   collab: ({ baseUrl, mode, siteDir, feedToken, runTag }) => runCollabChecks({ baseUrl, mode, siteDir, feedToken, runTag }),
+  docs: ({ baseUrl, mode, siteDir }) => runDocsChecks({ baseUrl, mode, siteDir }),
 }
 
 /** 一种装法 × 一种组合：建站、安装（demo 再加功能）、dev 与 build + start 各跑一轮检查 */
@@ -76,6 +79,10 @@ async function runSite({ options, runDir, runTag, installMode, combo, tarballs, 
     if (combo === 'collab') {
       const { addFeature } = await loadScaffold()
       record('setup', await addCollabFeatureWithChecks({ siteDir, addFeature }))
+    }
+    if (combo === 'docs') {
+      const { addFeature } = await loadScaffold()
+      record('setup', await addDocsFeaturesWithChecks({ siteDir, addFeature }))
     }
     // link 装法下包的 .d.mts 从仓里解析 @types/react、vite，与站点自己装的是两份，类型必然对不上；类型只在 file 装法查
     if (installMode === 'file') typecheckSite(siteDir, logDir)
