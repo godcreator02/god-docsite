@@ -2,10 +2,11 @@ import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync
 import { tmpdir } from 'node:os'
 import path from 'node:path'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
-import type { GwbDocsiteApi } from '@godcreator/gwb-docsite'
-import { addDocfirstScripts, createDocfirstSite, DOCFIRST_FEATURES, DOCFIRST_PACKAGE, overlayDocfirstTemplate, packageNearby, PLUGIN_DIR } from '../src/docfirst-site.js'
+import type { GwbDocsiteApi } from '../../src/service.js'
+import { addDocfirstScripts, createDocfirstSite, DOCFIRST_FEATURES, DOCFIRST_PACKAGE, overlayDocfirstTemplate, packageNearby } from '../../src/docfirst/docfirst-site.js'
+import { pluginDir } from '../../src/scaffold/platform.js'
 
-const repoPackagesDir = path.resolve(PLUGIN_DIR, '..', '..', 'packages')
+const repoPackagesDir = path.resolve(pluginDir, '..', '..', 'packages')
 const versionOf = (unscoped: string) => (JSON.parse(readFileSync(path.join(repoPackagesDir, unscoped, 'package.json'), 'utf8')) as { version: string }).version
 
 let root: string
@@ -29,9 +30,9 @@ function writeBaseSite(): void {
 
 describe('插件旁边装着的包', () => {
   it('从插件包根往上的 node_modules 找到 docfirst 与三个功能包，版本是包自己的 version', () => {
-    expect(packageNearby(PLUGIN_DIR, DOCFIRST_PACKAGE).version).toBe(versionOf('docfirst'))
-    for (const name of DOCFIRST_FEATURES) expect(packageNearby(PLUGIN_DIR, name).version).toBe(versionOf(name.replace('@godcreator/', '')))
-    expect(() => packageNearby(PLUGIN_DIR, '@godcreator/not-here')).toThrow('找不到 @godcreator/not-here')
+    expect(packageNearby(pluginDir, DOCFIRST_PACKAGE).version).toBe(versionOf('docfirst'))
+    for (const name of DOCFIRST_FEATURES) expect(packageNearby(pluginDir, name).version).toBe(versionOf(name.replace('@godcreator/', '')))
+    expect(() => packageNearby(pluginDir, '@godcreator/not-here')).toThrow('找不到 @godcreator/not-here')
   })
 })
 
@@ -39,7 +40,7 @@ describe('叠 docfirst 起始物', () => {
   it('template/ 里站点没有的文件补进站点根，已有的不覆盖', () => {
     writeBaseSite()
     writeFileSync(path.join(siteDir, 'docfirst.config.mjs'), '// 站点自己的\n')
-    const { added, kept } = overlayDocfirstTemplate(siteDir, packageNearby(PLUGIN_DIR, DOCFIRST_PACKAGE).dir)
+    const { added, kept } = overlayDocfirstTemplate(siteDir, packageNearby(pluginDir, DOCFIRST_PACKAGE).dir)
     expect(kept).toEqual(['docfirst.config.mjs'])
     expect(added).toContain('content/docs/outputs/agents.mdx')
     expect(added).toContain('trajectory/2026-01-01-site-born.md')
@@ -74,7 +75,7 @@ describe('createDocfirstSite', () => {
         return { feature: added.at(-1)!, specifier: options.specifier!, addedFiles: [], keptFiles: [], features: added.sort() }
       },
     }
-    const result = await createDocfirstSite(siteDir, { port: 4310, title: '文档站' }, { docsite, packagesFrom: PLUGIN_DIR })
+    const result = await createDocfirstSite(siteDir, { port: 4310, title: '文档站' }, { docsite, packagesFrom: pluginDir })
     expect(calls).toEqual([
       'init {"port":4310,"title":"文档站"}',
       `addFeature @godcreator/code-pin@^${versionOf('code-pin')}`,
@@ -97,7 +98,7 @@ describe('createDocfirstSite', () => {
         throw new Error('不该走到这里')
       },
     }
-    await expect(createDocfirstSite(siteDir, { port: 4310, title: '文档站' }, { docsite, packagesFrom: PLUGIN_DIR })).rejects.toThrow('首页返回 500')
+    await expect(createDocfirstSite(siteDir, { port: 4310, title: '文档站' }, { docsite, packagesFrom: pluginDir })).rejects.toThrow('首页返回 500')
     expect(calls).toEqual([])
     expect(existsSync(siteDir)).toBe(false)
   })

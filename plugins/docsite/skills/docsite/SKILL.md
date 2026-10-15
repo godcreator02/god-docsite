@@ -30,7 +30,7 @@ docsite.feature.add  {"dir":…,"package":"@godcreator/trajectory","version":"^0
   重写 `app/features/` 下文件名带 `generated` 的汇总文件，再启动服务检查首页。`version` 不给就用 gwb-docsite 旁边装着的那一版，没装就拒绝。
   可以重复运行，只补缺的；站点在运行时拒绝，先 `docsite.site.stop`
 - 启动服务检查时看首页回不回 200：通过后登记在设置 `sites` 里的站保持运行，没登记的停掉；没通过就报错，站点留着运行，报错在浏览器里看，看完 `docsite.site.stop`
-- 协作站由 `collab.site.init` 建（说明书 `collab`），docfirst 站由 `docfirst.create` 建（说明书 `docs-site`），它们经下面的服务调这两步，不直接调这两条命令
+- 协作站由 `collab.site.init` 建（说明书 `collab`），docfirst 站由本插件的 `docfirst.create` 建（说明书 `docs-site`），它们自己做完建基础站、加功能这两步，不用再调这两条命令
 
 ## 升级已有站点
 

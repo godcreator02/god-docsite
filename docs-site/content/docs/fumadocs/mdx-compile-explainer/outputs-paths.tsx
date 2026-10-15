@@ -2,14 +2,14 @@ import type { JSX, ReactNode } from 'react'
 import { CasePicker, Pane, Pill, Terminal } from '@godcreator/explainer/site'
 import type { Role } from '@godcreator/explainer/site'
 
-/** 流程链里的一站：rose 是我们的包 */
+/** 流程里的一步：rose 是我们的包 */
 interface ChainStop {
   label: string
   note?: string
   role: Role
 }
 
-/** 一条竖着的流程链：每站一个胶囊加一句说明，站与站之间一道箭头 */
+/** 一条竖着的流程：每步一个圆角标签加一句说明，两步之间一道箭头 */
 function Chain({ stops }: { stops: ReadonlyArray<ChainStop> }): JSX.Element {
   return (
     <div className="flex flex-col items-stretch">
@@ -70,7 +70,7 @@ function CliPath(): JSX.Element {
         title="god-docsite"
         lines={[
           { text: 'pnpm docfirst render', kind: 'cmd' },
-          '写出 README.md、CLAUDE.md、plugins/docfirst/skills/docs-site/SKILL.md 等',
+          '写出 README.md、CLAUDE.md、plugins/docsite/skills/docs-site/SKILL.md 等',
           { text: 'pnpm docfirst check', kind: 'cmd' },
           { text: '一致，绿', kind: 'ok' },
         ]}

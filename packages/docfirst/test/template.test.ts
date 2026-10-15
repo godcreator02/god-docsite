@@ -69,7 +69,7 @@ test("叠在站点根上就能用：render 生成仓根三份生成物，之后 
   }
 });
 
-test("package.json 把 template 发出去：gwb-docfirst 建站后从装好的包里复制它", () => {
+test("package.json 把 template 发出去：gwb-docsite 的 docfirst.create 建站后从装好的包里复制它", () => {
   const pkg = JSON.parse(readFileSync(join(PKG_ROOT, "package.json"), "utf8")) as { files: string[] };
   assert.ok(pkg.files.includes("template"));
 });

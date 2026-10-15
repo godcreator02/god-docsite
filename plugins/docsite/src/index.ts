@@ -4,6 +4,7 @@ import type {} from '@godcreator/gwb-commands'
 import type {} from '@godcreator/gwb-settings'
 import type {} from '@godcreator/gwb-skills'
 import { registerCommands } from './commands.js'
+import { registerDocfirstCommands } from './docfirst/commands.js'
 import { launchDevServer } from './dev-server.js'
 import { HostedSites } from './hosted-sites.js'
 import { isIdentityCode, joinPeople, newIdentityCode } from './people-file.js'
@@ -52,7 +53,7 @@ function stringList(value: unknown): string[] {
   return value
 }
 
-/** 装配：身份码、托管站点、服务 gwbDocsite、命令与说明书 */
+/** 装配：身份码、托管站点、服务 gwbDocsite、命令（含建 docfirst 站的 docfirst.create）与说明书 */
 export function apply(ctx: GwbContext): void {
   const log = ctx.logger(name)
   const commands = ctx.gwbCommands
@@ -103,6 +104,7 @@ export function apply(ctx: GwbContext): void {
   hosted.startAll((message) => log.warn(message))
 
   registerCommands({ commands, docsite: api, isRegistered: (dir) => hosted.isRegistered(dir), list: () => host.list() })
+  registerDocfirstCommands({ commands, docsite: api, packagesFrom: pluginDir, log })
 
   ctx.inject(['gwbSkills'], (scoped) => {
     scoped.effect(() => scoped.gwbSkills.register(skillsDir))

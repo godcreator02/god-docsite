@@ -8,7 +8,7 @@ docfirst: none
 
 ## 是什么
 
-文档站平台、按功能划分的功能包，以及三个 gwb 工作台插件。任何站点都是「fumadocs 官方 React Router 模板 + 挑选的功能包」：
+文档站平台、按功能划分的功能包，以及两个 gwb 工作台插件。任何站点都是「fumadocs 官方 React Router 模板 + 挑选的功能包」：
 平台包 `@godcreator/god-docsite` 带唯一的站点模板与建站器，功能包各自经 fumadocs 与 React Router 原生的扩展点接入站点。
 仓正在重构，设计未定，以代码和 `AGENTS.md` 为准。
 
@@ -24,8 +24,7 @@ docfirst: none
 
 | 插件（`plugins/`） | 做什么 |
 | --- | --- |
-| `@godcreator/gwb-docsite` | 身份码、建站与加功能、托管站点的开发服务、评论命令 |
-| `@godcreator/gwb-docfirst-workflow` | `docfirst.create` 建 docfirst 站，带说明书 `docs-site`、`docs-writing`、`trajectory` |
+| `@godcreator/gwb-docsite` | 身份码、建站与加功能、`docfirst.create` 建 docfirst 站、托管站点的开发服务、评论命令，带说明书 `docsite`、`docs-site`、`docs-writing`、`trajectory` |
 | `@godcreator/gwb-collab` | 协作站的项目、提交审核、通知与任务命令 |
 
 ## 怎么用
@@ -54,7 +53,7 @@ pnpm doc:render                                # 只重新生成生成物
 ## 文档在哪
 
 `docs-site/` 是全仓唯一的文档站（4340 端口）：总览、fumadocs 原理、写页面、Gitea 与 NAS、维护。轨迹卡在 `docs-site/trajectory/`。
-随插件发布的说明书正本在 `docs-site/content/docs/outputs/skills/`，生成到 `plugins/docfirst/skills/` 与 `plugins/collab/skills/`。
+随插件发布的说明书正本在 `docs-site/content/docs/outputs/skills/`，生成到 `plugins/docsite/skills/` 与 `plugins/collab/skills/`。
 
 **这份 README 与仓根 `CLAUDE.md` 是生成物**（正本在 `docs-site/content/docs/outputs/`），`AGENTS.md` 手写；改 mdx 正本再在 `docs-site/` 里 `pnpm doc:render`。
 
@@ -62,7 +61,7 @@ pnpm doc:render                                # 只重新生成生成物
 
 ```powershell
 pnpm install
-pnpm build          # 按依赖序构建全部包、三个插件与两个站
+pnpm build          # 按依赖序构建全部包、两个插件与各站
 pnpm check          # 逐个包跑 check（typecheck、快的一级测试，有 lint 的再 lint），一分钟左右
 pnpm test:slow      # 慢的一级测试（各包的 *.slow.test.ts：真建站、大量调 git 的），只在显式要求时跑，近三分钟
 pnpm test:deps      # 包之间的依赖方向、包内分层、模块之间不许有环（规则在 tests/dependency-rules.cjs，要先 pnpm build）

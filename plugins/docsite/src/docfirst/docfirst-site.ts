@@ -4,8 +4,7 @@
  */
 import { copyFileSync, existsSync, mkdirSync, readdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
-import { fileURLToPath } from "node:url";
-import type { GwbDocsiteApi } from "@godcreator/gwb-docsite";
+import type { GwbDocsiteApi } from "../service.js";
 import { isRecord } from "./vocab.js";
 
 /** 命令行包：template/ 叠在站点根，站点 devDependencies 里装它，doc 系列脚本调它的 docfirst 命令 */
@@ -20,9 +19,6 @@ export const DOCFIRST_SCRIPTS: Readonly<Record<string, string>> = {
   "doc:confirm": "docfirst confirm",
   "doc:render": "docfirst render",
 };
-
-/** 插件包根：源码在 src/、产物在 dist/，都是包根下一层 */
-export const PLUGIN_DIR = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 
 export interface PackageNearby {
   dir: string;
@@ -40,7 +36,7 @@ export function packageNearby(fromDir: string, name: string): PackageNearby {
       if (typeof version !== "string" || version === "") throw new Error(`${manifestFile} 没写 version`);
       return { dir: packageDir, version };
     }
-    if (dirname(dir) === dir) throw new Error(`从 ${fromDir} 往上的 node_modules 里找不到 ${name}：它是 gwb-docfirst 的 dependencies，重装插件`);
+    if (dirname(dir) === dir) throw new Error(`从 ${fromDir} 往上的 node_modules 里找不到 ${name}：它是 gwb-docsite 的 dependencies，重装插件`);
   }
 }
 

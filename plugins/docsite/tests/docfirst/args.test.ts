@@ -2,7 +2,7 @@ import fs from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
-import { parseCreateArgs } from '../src/args.js'
+import { parseCreateArgs } from '../../src/docfirst/args.js'
 
 /** 两条建站命令的参数 `{ dir, title?, port? }` 是外部输入：形状不对、不认识的键都直接报错 */
 

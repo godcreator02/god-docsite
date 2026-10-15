@@ -1,0 +1,27 @@
+---
+born-at: 2026-10-16T11:30
+type: choice
+parent: [2026-09-03-god-live-doc]
+label: gwb-docfirst-workflow 并进 gwb-docsite：命令 docfirst.create 与说明书 docs-site / docs-writing / trajectory 照旧，插件只剩 gwb-docsite 与 gwb-collab 两个
+domain: 插件
+---
+
+## 背景
+
+`plugins/docfirst`（`@godcreator/gwb-docfirst-workflow`）只有一条命令 `docfirst.create` 与三份说明书。建站与加功能早已交给 gwb-docsite 的服务 `gwbDocsite`，
+它自己只剩认站名、选端口、叠 docfirst 的起始物、写 doc 脚本这几步；可它照样是一个要单独装、单独发版、单独在隔离 home 里验的插件，
+没装 gwb-docsite 时它还得报「要装 gwb-docsite」。用户决定把它并进 gwb-docsite，命令名与三份说明书的名字不变。
+
+## 结论与边界
+
+- 源码挪进 `plugins/docsite/src/docfirst/`（建站参数、端口查重、站名、起始物与脚本），`registerDocfirstCommands` 在 gwb-docsite 装配时注册 `docfirst.create`，直接调本插件的 `init` / `addFeature`，不再经服务注入
+- 测试挪进 `plugins/docsite/tests/docfirst/`；三份说明书挪进 `plugins/docsite/skills/`，`docfirst.config.mjs` 的映射改到那里，四份说明书用同一个 `skill()` 写法
+- `@godcreator/docfirst`、`code-pin`、`trajectory`、`explainer` 加进 gwb-docsite 的 dependencies：`docfirst.create` 照旧按路径读它们的版本与 `template/`，不 import；
+  `docsite.feature.add` 不给版本时用的「插件旁边装着的那一版」也就覆盖了这三个功能包
+- 一直没被用到的 `units-root.ts`（按容器根查端口的判断）与对 gwb-unit-folder 的可选 peer 没带过来；端口查重实际只扫仓目录，说明书照实写成「在仓目录里找」
+- 不升版本号：发版时照 gwb-release 定；装着旧 gwb-docfirst-workflow 的 home 要先卸掉它，再装新 gwb-docsite，否则 `docfirst.create` 重名
+
+## 否掉的候选
+
+- 留着 gwb-docfirst-workflow，只把说明书挪走：剩一条命令的插件仍要单独装、单独发版，用户要的是少一个插件
+- 把 `docfirst.create` 改名成 `docsite.docfirst.create`：命令名是写进各仓说明与用户习惯里的，改名要所有地方跟着改，换来的只是前缀整齐

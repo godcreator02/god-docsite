@@ -19,16 +19,16 @@ docfirst.create  {"dir":"<仓>/docs-site"}    接好 docfirst 的站：现状、
 
 - `dir`：站目录的绝对路径，**要不存在或是空目录**，上一级（仓目录）必须已经存在
 - `title`：站名，不给就依次用仓根 `package.json` 的 `title`、包名去掉 scope、仓的目录名
-- `port`：不给就在站目录的祖父目录里找没被别的站脚本占用的，从 4310 起选
-- 只认这三个参数，多给一个就拒绝；要装着 gwb-docsite，没装就拒绝
+- `port`：不给就在仓目录里找没被别的站脚本占用的，从 4310 起选
+- 只认这三个参数，多给一个就拒绝
 
-它先经 gwb-docsite 建基础站（复制平台模板、装依赖、启动服务检查），再把 `@godcreator/docfirst` 的起始物（`docfirst.config.mjs`、`content/docs/outputs/` 下
+它先建基础站（同 `docsite.site.init`：复制平台模板、装依赖、启动服务检查），再把 `@godcreator/docfirst` 的起始物（`docfirst.config.mjs`、`content/docs/outputs/` 下
 README / AGENTS / CLAUDE 的正本、未来区起始页、第一张轨迹卡）复制到站点根（已有的文件不覆盖），往 `package.json` 写脚本 `doc`、`doc:confirm`、`doc:render`，
 最后逐个加功能包 code-pin、trajectory、explainer。中途失败时前面做完的不回退，报错写明卡在哪一步。
 
 仓根已经有 `README.md` / `AGENTS.md` / `CLAUDE.md` 时，第一次 `pnpm doc:render` 会**覆盖**它们：先把原有内容移进 `content/docs/outputs/` 下对应的 mdx 正本，再 render。
 
-不要 docfirst 的站直接用 gwb-docsite 的两条命令：
+不要 docfirst 的站直接用这两条命令：
 
 ```
 docsite.site.init    {"dir":…,"port":4310,"title":"站名"}                     dir 要不存在或是空目录；port、title 必给
@@ -112,4 +112,4 @@ SKILL.md 要在映射里写对象形式 `{ to, frontmatter: ["name", "descriptio
 
 - 发布不满一天的包 pnpm 拒绝安装（`ERR_PNPM_MINIMUM_RELEASE_AGE_VIOLATION`）：把版本退回上一个；只在本机临时验证可以在当前终端设 `$env:pnpm_config_minimum_release_age='0'`
 - 安装设置写 `pnpm-workspace.yaml`，项目级 `.npmrc` 里的安装设置 pnpm 不读
-- 卡页报「DocsPage 要在 DocsLayout 下」：装出了两份 `@fumadocs/base-ui`，常见原因是 fumadocs-core 的可选 peer `zod` 解析成两个版本；在 `pnpm-workspace.yaml` 的 `overrides` 里把 `zod` 定成一个版本再装
+- 页面报「DocsPage 要在 DocsLayout 下」：装出了两份 `@fumadocs/base-ui`，常见原因是 fumadocs-core 的可选 peer `zod` 解析成两个版本；在 `pnpm-workspace.yaml` 的 `overrides` 里把 `zod` 定成一个版本再装

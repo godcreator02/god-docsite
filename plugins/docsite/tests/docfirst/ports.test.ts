@@ -2,7 +2,7 @@ import fs from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
-import { PORT_FROM, PORT_TO, pickPort, portsInScript, scanUsedPorts } from '../src/ports.js'
+import { PORT_FROM, PORT_TO, pickPort, portsInScript, scanUsedPorts } from '../../src/docfirst/ports.js'
 
 /**
  * 别的站占用了哪些端口、新站选哪个：传入一个临时目录看输出，不启动进程、不打开真端口。
