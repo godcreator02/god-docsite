@@ -70,12 +70,11 @@ function groupsWith(overrides: Partial<QqTaskGroupsDeps> = {}) {
 }
 
 describe('注册的任务组', () => {
-  it('命令是起的 QQ 命令，名字是站名，工作区是项目文件夹，交给 ZCode，要求只写项目名、协作仓与先读说明书 collab', () => {
+  it('命令是起的 QQ 命令，名字是站名，工作区是项目文件夹，不写执行端，要求只写项目名、协作仓与先读说明书 collab', () => {
     expect(taskGroupOf(mmc, '/mmc')).toEqual({
       command: '/mmc',
       title: '混合型 MMC 样机',
       workspace: path.join(root, 'hybrid-mmc'),
-      agent: 'zcode',
       instructions: `项目：混合型 MMC 样机\n协作仓：${mmc}\n先读 gwb 说明书 collab（经 gwb MCP 调 run skill.read {"name":"collab"}），协作仓和项目里其余仓的改动照它提交。`,
     })
   })

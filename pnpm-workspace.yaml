@@ -17,7 +17,7 @@ catalog:
   '@godcreator/gwb-data': ^0.1.12
   '@godcreator/gwb-gitea': ^0.1.17
   '@godcreator/gwb-kernel-desktop': ^0.10.1
-  '@godcreator/gwb-qq-bot': ^0.7.1
+  '@godcreator/gwb-qq-bot': ^0.8.1
   '@godcreator/gwb-settings': ^0.4.0
   '@godcreator/gwb-shell': ^0.15.11
   '@godcreator/gwb-skills': ^0.4.12

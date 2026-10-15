@@ -134,11 +134,11 @@ export function registerOrganizationSetupCommands(services: PluginServices, open
     {
       name: 'collab.project.qq-command',
       effect: 'write',
-      description: '给列表里的项目设本 home 的「QQ 命令」（如 /mmc）：设了就经 gwb-qq-bot 把这个项目注册成 QQ 任务组，私聊机器人发「/mmc 任务」就交给 ZCode 在项目文件夹里做；给 null 撤掉',
+      description: '给列表里的项目设本 home 的「QQ 命令」（如 /mmc）：设了就经 gwb-qq-bot 把这个项目注册成 QQ 任务组，私聊机器人发「/mmc 任务」就由 gwb-qq-bot 交给 claude-agent 在项目文件夹里做；给 null 撤掉',
       usage:
         '{ repo, command }：repo 是列表里的协作仓根的绝对路径，不在列表里就拒绝；command 是 QQ 命令或 null（撤掉）。设 QQ 命令要同 home 装着 gwb-qq-bot，没装就拒绝（撤掉不要求）；命令名经 gwb-qq-bot 的服务方法 commandNameProblem 查，和注册任务组同一条规则：以 / 开头、不含空白，去掉斜杠后汉字算 2、其余算 1，总长不超过 16，/帮助、/状态、/新会话 是保留命令；本 home 别的项目已经用着它也拒绝；不合就拒绝、什么都不改。' +
         `存在本 home 的数据文档 ${qqCommandsDocKey} 里，不写进协作仓（每个人的机器人、命令各不相同）。` +
-        '设了 QQ 命令的项目注册一个任务组：命令就是它，名字是站名，工作区是项目文件夹（协作仓的上一级），执行端 ZCode，任务组要求只写项目名、协作仓路径和先读说明书 collab；项目列表、QQ 命令或站名变了，gwb-qq-bot 装上或卸掉，都撤掉旧的、按现状重新注册。' +
+        '设了 QQ 命令的项目注册一个任务组：命令就是它，名字是站名，工作区是项目文件夹（协作仓的上一级），由 gwb-qq-bot 交给 claude-agent 做（模型是 claude-agent 的设置 default-model），任务组要求只写项目名、协作仓路径和先读说明书 collab；项目列表、QQ 命令或站名变了，gwb-qq-bot 装上或卸掉，都撤掉旧的、按现状重新注册。' +
         '回 { repo, taskGroup }：taskGroup 是 { command, registered, error }，registered 为 false 时 error 写明原因（没装 gwb-qq-bot、和别的插件或 qq-bot.group.add 登记的组重名等，原话照 qq-bot 的报错）；collab.projects 每个项目的 qqTaskGroup 也是这个形状',
     },
     async (args) => {

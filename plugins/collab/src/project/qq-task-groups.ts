@@ -31,10 +31,10 @@ export function taskGroupInstructionsOf(title: string, repo: string): string {
   return [`项目：${title}`, `协作仓：${repo}`, `先读 gwb 说明书 collab（经 gwb MCP 调 run skill.read ${JSON.stringify({ name: 'collab' })}），协作仓和项目里其余仓的改动照它提交。`].join('\n')
 }
 
-/** 一个项目注册成的任务组：工作区是项目文件夹（协作仓的上一级），名字是站名，交给 ZCode */
+/** 一个项目注册成的任务组：工作区是项目文件夹（协作仓的上一级），名字是站名；由 gwb-qq-bot 交给 claude-agent 做 */
 export function taskGroupOf(repo: string, command: string): TaskGroupDefinition {
   const title = projectTitleOf({ repo, siteDir: path.join(repo, sitePathInRepo) })
-  return { command, title, workspace: projectDirOfCollabRepo(repo), agent: 'zcode', instructions: taskGroupInstructionsOf(title, repo) }
+  return { command, title, workspace: projectDirOfCollabRepo(repo), instructions: taskGroupInstructionsOf(title, repo) }
 }
 
 /** 一个项目的任务组此刻怎样：command 是本 home 给它起的 QQ 命令（没起为 null），error 是没注册上的原因 */

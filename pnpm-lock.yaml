@@ -25,8 +25,8 @@ catalogs:
       specifier: ^0.10.1
       version: 0.10.1
     '@godcreator/gwb-qq-bot':
-      specifier: ^0.7.1
-      version: 0.7.7
+      specifier: ^0.8.1
+      version: 0.8.1
     '@godcreator/gwb-settings':
       specifier: ^0.4.0
       version: 0.4.0
@@ -1072,7 +1072,7 @@ importers:
         version: 0.10.1(cordis@4.0.0-rc.10)
       '@godcreator/gwb-qq-bot':
         specifier: 'catalog:'
-        version: 0.7.7(8bd9e652e3d273105efee9a3d9ab0ede)
+        version: 0.8.1(@godcreator/gwb-commands@0.6.1(@godcreator/gwb-kernel-desktop@0.10.1(cordis@4.0.0-rc.10))(cordis@4.0.0-rc.10))(@godcreator/gwb-data@0.1.12(@godcreator/gwb-kernel-desktop@0.10.1(cordis@4.0.0-rc.10))(cordis@4.0.0-rc.10))(@godcreator/gwb-kernel-desktop@0.10.1(cordis@4.0.0-rc.10))(@godcreator/gwb-settings@0.4.0(@godcreator/gwb-commands@0.6.1(@godcreator/gwb-kernel-desktop@0.10.1(cordis@4.0.0-rc.10))(cordis@4.0.0-rc.10))(@godcreator/gwb-kernel-desktop@0.10.1(cordis@4.0.0-rc.10))(@godcreator/gwb-skills@0.4.13(@godcreator/gwb-commands@0.6.1(@godcreator/gwb-kernel-desktop@0.10.1(cordis@4.0.0-rc.10))(cordis@4.0.0-rc.10))(@godcreator/gwb-kernel-desktop@0.10.1(cordis@4.0.0-rc.10))(cordis@4.0.0-rc.10))(cordis@4.0.0-rc.10))(@godcreator/gwb-skills@0.4.13(@godcreator/gwb-commands@0.6.1(@godcreator/gwb-kernel-desktop@0.10.1(cordis@4.0.0-rc.10))(cordis@4.0.0-rc.10))(@godcreator/gwb-kernel-desktop@0.10.1(cordis@4.0.0-rc.10))(cordis@4.0.0-rc.10))(cordis@4.0.0-rc.10)
       '@godcreator/gwb-settings':
         specifier: 'catalog:'
         version: 0.4.0(@godcreator/gwb-commands@0.6.1(@godcreator/gwb-kernel-desktop@0.10.1(cordis@4.0.0-rc.10))(cordis@4.0.0-rc.10))(@godcreator/gwb-kernel-desktop@0.10.1(cordis@4.0.0-rc.10))(@godcreator/gwb-skills@0.4.13(@godcreator/gwb-commands@0.6.1(@godcreator/gwb-kernel-desktop@0.10.1(cordis@4.0.0-rc.10))(cordis@4.0.0-rc.10))(@godcreator/gwb-kernel-desktop@0.10.1(cordis@4.0.0-rc.10))(cordis@4.0.0-rc.10))(cordis@4.0.0-rc.10)
@@ -1612,23 +1612,20 @@ packages:
     peerDependencies:
       cordis: 4.0.0-rc.10
 
-  '@godcreator/gwb-qq-bot@0.7.7':
-    resolution: {integrity: sha512-J6rTUgLvSohi8dSHAx1myddVmvZAgLY4gbt6DYAbQ/m9t1I0IJpFYkf/sGdbYRrSwAvwpko/DWdKQ8SYa35kZA==, tarball: https://git.tianshen02.online:28377/api/packages/godcreator/npm/%40godcreator%2Fgwb-qq-bot/-/0.7.7/gwb-qq-bot-0.7.7.tgz}
+  '@godcreator/gwb-qq-bot@0.8.1':
+    resolution: {integrity: sha512-WQHCo3aeyl8RaNE261W0VLp9xDI6v4Ua1vmk6Kr6XFQWcKQBfr9JtdmB/ruyLgY3fQ8ykXdXKs5KYvyJkPjBkw==, tarball: https://git.tianshen02.online:28377/api/packages/godcreator/npm/%40godcreator%2Fgwb-qq-bot/-/0.8.1/gwb-qq-bot-0.8.1.tgz}
     peerDependencies:
-      '@godcreator/gwb-claudecode': ^0.4.0
+      '@godcreator/gwb-claude-agent': ^0.1.2
       '@godcreator/gwb-commands': ^0.6.0
       '@godcreator/gwb-data': ^0.1.12
       '@godcreator/gwb-kernel-desktop': ^0.10.1
       '@godcreator/gwb-settings': ^0.4.0
       '@godcreator/gwb-skills': ^0.4.13
-      '@godcreator/gwb-zcode': ^0.4.0
       cordis: ^4.0.0-rc.10
     peerDependenciesMeta:
-      '@godcreator/gwb-claudecode':
+      '@godcreator/gwb-claude-agent':
         optional: true
       '@godcreator/gwb-skills':
-        optional: true
-      '@godcreator/gwb-zcode':
         optional: true
 
   '@godcreator/gwb-settings@0.4.0':
@@ -1662,17 +1659,6 @@ packages:
       '@godcreator/gwb-commands': ^0.6.0
       '@godcreator/gwb-kernel-desktop': ^0.10.0
       cordis: ^4.0.0-rc.10
-
-  '@godcreator/gwb-zcode@0.4.1':
-    resolution: {integrity: sha512-gxvQSbDN5BFfAhHQxwu6EROBdhGnwmzRJRqN9VPnWb09ViPPCKDNrwavYrfQ16932YcwOEQ+x16WEAlYc+jbSQ==, tarball: https://git.tianshen02.online:28377/api/packages/godcreator/npm/%40godcreator%2Fgwb-zcode/-/0.4.1/gwb-zcode-0.4.1.tgz}
-    peerDependencies:
-      '@godcreator/gwb-commands': ^0.6.0
-      '@godcreator/gwb-kernel-desktop': ^0.10.1
-      '@godcreator/gwb-skills': ^0.4.7
-      cordis: ^4.0.0-rc.10
-    peerDependenciesMeta:
-      '@godcreator/gwb-skills':
-        optional: true
 
   '@img/colour@1.1.0':
     resolution: {integrity: sha512-Td76q7j57o/tLVdgS746cYARfSyxk8iEfRxewL9h4OMzYhbW4TAcppl0mT4eyqXddh6L/jwoM75mo7ixa/pCeQ==}
@@ -5097,7 +5083,7 @@ snapshots:
     transitivePeerDependencies:
       - node-addon-require-builtin
 
-  '@godcreator/gwb-qq-bot@0.7.7(8bd9e652e3d273105efee9a3d9ab0ede)':
+  '@godcreator/gwb-qq-bot@0.8.1(@godcreator/gwb-commands@0.6.1(@godcreator/gwb-kernel-desktop@0.10.1(cordis@4.0.0-rc.10))(cordis@4.0.0-rc.10))(@godcreator/gwb-data@0.1.12(@godcreator/gwb-kernel-desktop@0.10.1(cordis@4.0.0-rc.10))(cordis@4.0.0-rc.10))(@godcreator/gwb-kernel-desktop@0.10.1(cordis@4.0.0-rc.10))(@godcreator/gwb-settings@0.4.0(@godcreator/gwb-commands@0.6.1(@godcreator/gwb-kernel-desktop@0.10.1(cordis@4.0.0-rc.10))(cordis@4.0.0-rc.10))(@godcreator/gwb-kernel-desktop@0.10.1(cordis@4.0.0-rc.10))(@godcreator/gwb-skills@0.4.13(@godcreator/gwb-commands@0.6.1(@godcreator/gwb-kernel-desktop@0.10.1(cordis@4.0.0-rc.10))(cordis@4.0.0-rc.10))(@godcreator/gwb-kernel-desktop@0.10.1(cordis@4.0.0-rc.10))(cordis@4.0.0-rc.10))(cordis@4.0.0-rc.10))(@godcreator/gwb-skills@0.4.13(@godcreator/gwb-commands@0.6.1(@godcreator/gwb-kernel-desktop@0.10.1(cordis@4.0.0-rc.10))(cordis@4.0.0-rc.10))(@godcreator/gwb-kernel-desktop@0.10.1(cordis@4.0.0-rc.10))(cordis@4.0.0-rc.10))(cordis@4.0.0-rc.10)':
     dependencies:
       '@godcreator/gwb-commands': 0.6.1(@godcreator/gwb-kernel-desktop@0.10.1(cordis@4.0.0-rc.10))(cordis@4.0.0-rc.10)
       '@godcreator/gwb-data': 0.1.12(@godcreator/gwb-kernel-desktop@0.10.1(cordis@4.0.0-rc.10))(cordis@4.0.0-rc.10)
@@ -5106,7 +5092,6 @@ snapshots:
       cordis: 4.0.0-rc.10(@cordisjs/plugin-include@1.1.0)(@cordisjs/plugin-loader@1.0.0-rc.7)
     optionalDependencies:
       '@godcreator/gwb-skills': 0.4.13(@godcreator/gwb-commands@0.6.1(@godcreator/gwb-kernel-desktop@0.10.1(cordis@4.0.0-rc.10))(cordis@4.0.0-rc.10))(@godcreator/gwb-kernel-desktop@0.10.1(cordis@4.0.0-rc.10))(cordis@4.0.0-rc.10)
-      '@godcreator/gwb-zcode': 0.4.1(@godcreator/gwb-commands@0.6.1(@godcreator/gwb-kernel-desktop@0.10.1(cordis@4.0.0-rc.10))(cordis@4.0.0-rc.10))(@godcreator/gwb-kernel-desktop@0.10.1(cordis@4.0.0-rc.10))(@godcreator/gwb-skills@0.4.13(@godcreator/gwb-commands@0.6.1(@godcreator/gwb-kernel-desktop@0.10.1(cordis@4.0.0-rc.10))(cordis@4.0.0-rc.10))(@godcreator/gwb-kernel-desktop@0.10.1(cordis@4.0.0-rc.10))(cordis@4.0.0-rc.10))(cordis@4.0.0-rc.10)
 
   '@godcreator/gwb-settings@0.4.0(@godcreator/gwb-commands@0.6.1(@godcreator/gwb-kernel-desktop@0.10.1(cordis@4.0.0-rc.10))(cordis@4.0.0-rc.10))(@godcreator/gwb-kernel-desktop@0.10.1(cordis@4.0.0-rc.10))(@godcreator/gwb-skills@0.4.13(@godcreator/gwb-commands@0.6.1(@godcreator/gwb-kernel-desktop@0.10.1(cordis@4.0.0-rc.10))(cordis@4.0.0-rc.10))(@godcreator/gwb-kernel-desktop@0.10.1(cordis@4.0.0-rc.10))(cordis@4.0.0-rc.10))(cordis@4.0.0-rc.10)':
     dependencies:
@@ -5130,15 +5115,6 @@ snapshots:
       '@godcreator/gwb-commands': 0.6.1(@godcreator/gwb-kernel-desktop@0.10.1(cordis@4.0.0-rc.10))(cordis@4.0.0-rc.10)
       '@godcreator/gwb-kernel-desktop': 0.10.1(cordis@4.0.0-rc.10)
       cordis: 4.0.0-rc.10(@cordisjs/plugin-include@1.1.0)(@cordisjs/plugin-loader@1.0.0-rc.7)
-
-  '@godcreator/gwb-zcode@0.4.1(@godcreator/gwb-commands@0.6.1(@godcreator/gwb-kernel-desktop@0.10.1(cordis@4.0.0-rc.10))(cordis@4.0.0-rc.10))(@godcreator/gwb-kernel-desktop@0.10.1(cordis@4.0.0-rc.10))(@godcreator/gwb-skills@0.4.13(@godcreator/gwb-commands@0.6.1(@godcreator/gwb-kernel-desktop@0.10.1(cordis@4.0.0-rc.10))(cordis@4.0.0-rc.10))(@godcreator/gwb-kernel-desktop@0.10.1(cordis@4.0.0-rc.10))(cordis@4.0.0-rc.10))(cordis@4.0.0-rc.10)':
-    dependencies:
-      '@godcreator/gwb-commands': 0.6.1(@godcreator/gwb-kernel-desktop@0.10.1(cordis@4.0.0-rc.10))(cordis@4.0.0-rc.10)
-      '@godcreator/gwb-kernel-desktop': 0.10.1(cordis@4.0.0-rc.10)
-      cordis: 4.0.0-rc.10(@cordisjs/plugin-include@1.1.0)(@cordisjs/plugin-loader@1.0.0-rc.7)
-    optionalDependencies:
-      '@godcreator/gwb-skills': 0.4.13(@godcreator/gwb-commands@0.6.1(@godcreator/gwb-kernel-desktop@0.10.1(cordis@4.0.0-rc.10))(cordis@4.0.0-rc.10))(@godcreator/gwb-kernel-desktop@0.10.1(cordis@4.0.0-rc.10))(cordis@4.0.0-rc.10)
-    optional: true
 
   '@img/colour@1.1.0': {}
 
