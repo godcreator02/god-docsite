@@ -1,0 +1,66 @@
+{
+  "format": "docreport",
+  "schemaVersion": 1,
+  "id": "doc_2ef4f2f035a54692ac73cc241b8fdb30",
+  "metadata": {
+    "title": "模块化控制器技术报告",
+    "shortTitle": "模块化控制器设计与验证",
+    "language": "zh-CN",
+    "authors": [
+      "编制单位  项目组"
+    ],
+    "revision": "版本  R0",
+    "date": "2026-10-10",
+    "fields": [
+      {
+        "id": "projectName",
+        "label": "项目名称",
+        "value": "模块化控制器设计与验证"
+      }
+    ]
+  },
+  "blocks": [
+    {
+      "type": "include",
+      "src": "chapters/overview/content.json"
+    },
+    {
+      "type": "include",
+      "src": "chapters/requirements/content.json"
+    },
+    {
+      "type": "include",
+      "src": "chapters/modeling/content.json"
+    },
+    {
+      "type": "include",
+      "src": "chapters/architecture/content.json"
+    },
+    {
+      "type": "include",
+      "src": "chapters/results/content.json"
+    },
+    {
+      "type": "include",
+      "src": "chapters/parameters/content.json"
+    },
+    {
+      "type": "include",
+      "src": "chapters/validation/content.json"
+    },
+    {
+      "type": "include",
+      "src": "chapters/interfaces/content.json"
+    },
+    {
+      "type": "include",
+      "src": "chapters/conclusion/content.json"
+    },
+    {
+      "type": "include",
+      "src": "chapters/revisions/content.json"
+    }
+  ],
+  "notes": [],
+  "references": []
+}

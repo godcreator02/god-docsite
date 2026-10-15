@@ -68,6 +68,7 @@ catalog:
   remark-mdx: ^3.1.0
   remark-parse: ^11.0.0
   remark-stringify: ^11.0.0
+  sharp: ^0.35.5
   tailwindcss: ^4.3.3
   tsdown: ^0.22.14
   typescript: ^6.0.3
@@ -93,6 +94,8 @@ allowBuilds:
   '@parcel/watcher': false
   esbuild: true
   node-pty: false
+  # 用预编译好的平台包（@img/sharp-*），不在安装时从源码编译
+  sharp: false
 onlyBuiltDependencies:
   - esbuild
 

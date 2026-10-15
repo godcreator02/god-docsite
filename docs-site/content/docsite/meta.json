@@ -1,5 +1,5 @@
 {
   "title": "写页面",
   "root": true,
-  "pages": ["writing", "writing-components"]
+  "pages": ["writing", "writing-components", "reports"]
 }

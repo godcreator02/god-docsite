@@ -16,12 +16,13 @@
 | `packages/code-pin/`、`packages/doc-export/`、`packages/trajectory/` | 钉码、生成物（mdx 正本生成 AGENTS.md / README / SKILL.md）、轨迹卡与星轨盘 |
 | `packages/docfirst/` | 命令行 `docfirst`：读 `docfirst.config.mjs`，把 check / render / confirm 分派给上面三个功能包；`template/` 是文档维护的起始物 |
 | `packages/collab/` | 项目协作：任务与模块、日志与日历、通知、合并检查（命令行 `collab-merge-check`）、记录链接、项目首页（`templates/home.tsx` 是协作站的 `app/routes/home.tsx`） |
+| `packages/word-report/` | 报告：JSON 报告文档（`docreport` 格式）的校验与分章组装、站点 `reports/` 下的报告列表 `/reports` 与报告页 `/reports/<报告 id>`（整份一页）、命令行 `report-docx`（`check`、`export`、`status`）；`engine/` 是驱动本机 Word 与 MathType 的 Python 导出引擎与 `.dotx` 模板 |
 | `plugins/docsite/` | gwb 插件 `@godcreator/gwb-docsite`：身份码、建站与加功能（调平台包的建站器）、托管站点、评论命令、服务 `gwbDocsite` |
 | `plugins/docfirst/` | gwb 插件 `@godcreator/gwb-docfirst-workflow`：`docfirst.create`（经 `gwbDocsite` 建站、加 code-pin / trajectory / explainer、把 docfirst 起始物复制到站点根上）、说明书 `docs-site` / `docs-writing` / `trajectory` |
 | `plugins/collab/` | gwb 插件 `@godcreator/gwb-collab`：协作仓与别的仓两套操作、通知交给站点/窗格/QQ/AI、项目与任务命令，站点交给 gwb-docsite；`collab.site.init` 在加协作功能、启动服务之前建好仓根 `collab/` 与 `site/journal/`（站点运行时写入它们），加完协作功能后把站点首页 `app/routes/home.tsx` 换成 collab 包 `templates/home.tsx`（打包时带进插件），仓里还没有自动合并工作流时照 collab 包的模板写出 `.gitea/workflows/collab-auto-merge.yaml`（版本范围填打包时的 collab 版本） |
-| `collab-test/` | 本仓的测试站：协作仓形态（`collab/records/` 测试数据 + `site/`），`site/` 是基础站装上全部功能（collab、code-pin、trajectory、explainer），依赖 `workspace:^` 直连本仓的包、不 init git；e2e 用的页面（评论定位回归页、TSX 页、HTML 页、术语与公式、钉码页与被钉的 `src/greet.ts`、轨迹卡）都在它里面；gwb-docsite 托管（端口 4450） |
+| `collab-test/` | 本仓的测试站：协作仓形态（`collab/records/` 测试数据 + `site/`），`site/` 是基础站装上全部功能（collab、code-pin、trajectory、explainer、word-report），依赖 `workspace:^` 直连本仓的包、不 init git；e2e 用的页面（评论定位回归页、TSX 页、HTML 页、术语与公式、钉码页与被钉的 `src/greet.ts`、轨迹卡）都在它里面；gwb-docsite 托管（端口 4450） |
 | `docs-site/` | 全仓文档站：说明、原理、维护者手册与随插件发布的说明书正本（outputs）；轨迹卡在站点根 `trajectory/` |
-| `tests/` | 全仓级的检查（各包自己的测试在各包里）。`e2e/` 是端到端检查：`run.mjs` 直接在 `collab-test/site` 上启动 dev 与 build + start，各跑一轮浏览器检查（`checks/` 下 base、collab、docs、all-features 四组）；`pack.mjs` 是发版前的打包检查：各包 `pnpm pack`、测试站复制到系统临时目录按 `file:` 装好，跑同样的检查。`scaffold-check.mjs` 用建站器把 collab-test 与 docs-site 生成到临时目录，和仓里比对建站器负责的文件。`dependency-rules.cjs` 是 dependency-cruiser 的规则：包之间的方向、包内分层、模块之间不许有环（`pnpm test:deps`） |
+| `tests/` | 全仓级的检查（各包自己的测试在各包里）。`e2e/` 是端到端检查：`run.mjs` 直接在 `collab-test/site` 上启动 dev 与 build + start，各跑一轮浏览器检查（`checks/` 下 base、collab、docs、report、all-features 五组）；`pack.mjs` 是发版前的打包检查：各包 `pnpm pack`、测试站复制到系统临时目录按 `file:` 装好，跑同样的检查。`scaffold-check.mjs` 用建站器把 collab-test 与 docs-site 生成到临时目录，和仓里比对建站器负责的文件。`dependency-rules.cjs` 是 dependency-cruiser 的规则：包之间的方向、包内分层、模块之间不许有环（`pnpm test:deps`） |
 | `scripts/` | `migrate-comments-to-threads.mjs`：把旧格式的评论文件迁成评论串文件夹的一次性数据迁移工具 |
 | `probes/` | 实验材料，一个实验一个目录，照目录里 README 第一行就能重新运行；引用的旧包名保持原样 |
 
@@ -71,13 +72,13 @@
 * `plugins/collab` 的 `tests/verified/` 是**已验证的行为假设**（整组织克隆、ahead/behind 语义、文件监视事件）：断言直接针对 git 与
   watcher 本身，日常不跑。四种信号下跑 `pnpm test:verified`：升 git 或关键依赖、动了 `src/organization/setup/` 或
   `src/other-repos/fetch/`、发版前、用户或 agent 明确要求
-* 发版只用 `devkit.release`，包按依赖序排：第 0 层（god-docsite、identity、explainer、code-pin、trajectory）→ 第 1 层（comments、doc-export）→
+* 发版只用 `devkit.release`，包按依赖序排：第 0 层（god-docsite、identity、explainer、code-pin、trajectory、word-report）→ 第 1 层（comments、doc-export）→
   第 2 层（collab、docfirst）→ 插件；发前跑 `pnpm verify` 与 `pnpm test:pack`，再在 `plugins/collab` 里跑一遍 `pnpm test:verified`。升版本号前先读 skill「gwb-release」
 
 ## 规矩
 
 * 包的方向只由 dependency-cruiser（规则 `tests/dependency-rules.cjs`，`pnpm test:deps`）检查：comments → identity；doc-export → code-pin；
-  collab → identity、comments；docfirst → code-pin、doc-export、trajectory；report → comments；god-docsite 不依赖任何功能包，
+  collab → identity、comments；docfirst → code-pin、doc-export、trajectory；word-report → comments；god-docsite 不依赖任何功能包，
   功能包也不依赖 god-docsite；除此之外功能包互不依赖；包内 `core/`、`node/`、`site/`、`cli/` 的分层与模块之间不许有环也在那里。
   改方向先改规则文件里的 `allowedFeatureDependencies` 并写明为什么。没有豁免清单：出了环或越界的 import 就拆掉，不登记成已知违规
 * 改了基础包或插件的行为、导出、命令，同一个提交里改 `docs-site/content/` 对应分区的说明页（插件还有随包的 SKILL.md，

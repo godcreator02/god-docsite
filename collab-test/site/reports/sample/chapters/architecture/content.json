@@ -1,0 +1,114 @@
+{
+  "format": "docreport",
+  "schemaVersion": 1,
+  "id": "doc_c55987d201284e579520841cda43d8bb",
+  "metadata": {
+    "title": "系统架构与接口",
+    "shortTitle": "系统架构与接口",
+    "language": "zh-CN",
+    "authors": [
+      "编制单位  项目组"
+    ],
+    "revision": "版本  R0",
+    "date": "2026-10-10",
+    "fields": [
+      {
+        "id": "projectName",
+        "label": "项目名称",
+        "value": "模块化控制器设计与验证"
+      }
+    ]
+  },
+  "blocks": [
+    {
+      "type": "section",
+      "id": "sec_e5dfb7729acf49e7ac90d4581696d649",
+      "title": "系统架构与接口",
+      "numbering": "decimal",
+      "children": [
+        {
+          "type": "paragraph",
+          "id": "p_d14ec2e26286481591127e83f4122433",
+          "content": [
+            {
+              "type": "text",
+              "text": "方案将输入适配、模型计算、输出管理和记录管理分成四个模块。输入适配负责统一原始数据，模型计算只接收已检查的值；输出管理按照状态选择是否提交结果，记录管理保存每一步的输入输出和版本信息。"
+            }
+          ]
+        },
+        {
+          "type": "figure",
+          "id": "fig_302d37dc8a2e4fc8a63bff5a23ac2f1d",
+          "src": "assets/architecture.png",
+          "caption": [
+            {
+              "type": "text",
+              "text": "模块关系与主要数据通路"
+            }
+          ],
+          "alt": "模块关系与主要数据通路"
+        },
+        {
+          "type": "paragraph",
+          "id": "p_db2423de8de4419591bc3bd5bf26e144",
+          "content": [
+            {
+              "type": "text",
+              "text": "图 "
+            },
+            {
+              "type": "ref",
+              "id": "n_b8a49fb921d34017ba57b8db40aa96b7",
+              "target": "fig_302d37dc8a2e4fc8a63bff5a23ac2f1d",
+              "display": "number"
+            },
+            {
+              "type": "text",
+              "text": " 中的箭头表示数据交付顺序。每一条通路都需要明确输入有效性、处理完成标志和失败返回方式。模块之间传递完整的数据记录，避免依赖另一个模块的临时内部状态。"
+            }
+          ]
+        },
+        {
+          "type": "section",
+          "id": "sec_cb13f4c96a9b4d47b817e0da4daa4831",
+          "title": "接口失败的处理",
+          "numbering": "decimal",
+          "children": [
+            {
+              "type": "paragraph",
+              "id": "p_cf7a3766f075419b8a59304508a08470",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "当输入超时或序号不连续时，输入适配模块记录异常并提供明确状态。模型计算可以按项目约定保持上一状态或停止本次更新，但具体策略必须写入需求。输出管理不应把未完成的计算当作正常结果提交。"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "id": "p_df1c9f06aaf44d62b87e533fa3749ec7",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "记录管理属于主流程的一部分。若记录缓冲接近容量限制，应先记录事件并进入规定的降级路径；是否继续输出由项目要求决定。该行为需要专门的压力用例，不能在异常发生时临时选择。"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "id": "p_bcf045c390a14c2b9baa7056ea7c70d6",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "模块联调按照接口顺序推进。每完成一个接口，保留一组正常输入和一组异常输入的记录作为回归样例。后续修改内部实现时，先检查这些样例是否仍满足原有协议，再扩大测试范围。"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "notes": [],
+  "references": []
+}

@@ -1,0 +1,123 @@
+{
+  "format": "docreport",
+  "schemaVersion": 1,
+  "id": "doc_ac1021a59ef948b7bf42806120b3965a",
+  "metadata": {
+    "title": "数学模型与符号约定",
+    "shortTitle": "数学模型与符号约定",
+    "language": "zh-CN",
+    "authors": [
+      "编制单位  项目组"
+    ],
+    "revision": "版本  R0",
+    "date": "2026-10-10",
+    "fields": [
+      {
+        "id": "projectName",
+        "label": "项目名称",
+        "value": "模块化控制器设计与验证"
+      }
+    ]
+  },
+  "blocks": [
+    {
+      "type": "section",
+      "id": "sec_1df9ccec538847a984fa9143b69ba621",
+      "title": "数学模型与符号约定",
+      "numbering": "decimal",
+      "children": [
+        {
+          "type": "paragraph",
+          "id": "p_425093eac66049f4bf67a6b8baa2aad3",
+          "content": [
+            {
+              "type": "text",
+              "text": "信号示例写为 "
+            },
+            {
+              "type": "math",
+              "id": "n_ac741458e69049169b0510fa38493a8b",
+              "latex": "i_L(t) = I_0 + \\Delta i\\sin(\\omega t)"
+            },
+            {
+              "type": "text",
+              "text": "，其中直流分量、纹波幅值与角频率应分别记录，避免只保存总波形而丢失生成条件。"
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "id": "p_4cd91b79791844a9bf4356ce2c564c1e",
+          "content": [
+            {
+              "type": "text",
+              "text": "下列模型用于覆盖滤波、能量累积、状态空间、分段输入和状态导数的常见写法。它们展示不同的数学表达结构，不构成某一实际装置的完整模型。变量的数值应由具体项目参数表给出。"
+            }
+          ]
+        },
+        {
+          "type": "equation",
+          "id": "eq_baa387d508d84562bce348ca5763918f",
+          "latex": "H(s)=\\frac{1}{LCs^2+RCs+1}",
+          "numbered": true
+        },
+        {
+          "type": "paragraph",
+          "id": "p_ce495f23c78241cea771e097baddd404",
+          "content": [
+            {
+              "type": "text",
+              "text": "式（"
+            },
+            {
+              "type": "ref",
+              "id": "n_6eae5585a90c4bc8a76a8288c1f92a55",
+              "target": "eq_baa387d508d84562bce348ca5763918f",
+              "display": "number"
+            },
+            {
+              "type": "text",
+              "text": "）描述二阶环节的形式。使用时应保持系数和自变量的量纲一致，并在比较结果前核对所采用的初始条件。"
+            }
+          ]
+        },
+        {
+          "type": "equation",
+          "id": "eq_3c7e92e8700249a690b06afd4b4cdf73",
+          "latex": "E=\\int_0^T v(t)i(t)\\,\\mathrm{d}t",
+          "numbered": true
+        },
+        {
+          "type": "equation",
+          "id": "eq_5b13e2fd1adb4f8fa4b3a0e38dba3947",
+          "latex": "\\mathbf{A}=\\begin{bmatrix}0&1\\\\-\\omega_0^2&-2\\zeta\\omega_0\\end{bmatrix}",
+          "numbered": true
+        },
+        {
+          "type": "equation",
+          "id": "eq_3ca3e23648494a9ca024774332d12b3c",
+          "latex": "u(t)=\\begin{cases}U_{\\mathrm{dc}},&t\\geq 0\\\\0,&t<0\\end{cases}",
+          "numbered": true
+        },
+        {
+          "type": "equation",
+          "id": "eq_050b7979d161427e87496de71e9bbd04",
+          "latex": "\\begin{aligned}v_L&=L\\frac{\\mathrm{d}i_L}{\\mathrm{d}t}\\\\i_C&=C\\frac{\\mathrm{d}v_C}{\\mathrm{d}t}\\end{aligned}",
+          "numbered": true
+        },
+        {
+          "type": "paragraph",
+          "id": "p_897c0e4db2ec4578ab7129c979f9c984",
+          "content": [
+            {
+              "type": "text",
+              "text": "矩阵中的 A 使用粗体直立字母；函数名称与微分符号采用明确的数学排版。参数更改后应先核对公式语义，再检查图表与结论，不能以排版相似代替数学等价。"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "notes": [],
+  "references": []
+}

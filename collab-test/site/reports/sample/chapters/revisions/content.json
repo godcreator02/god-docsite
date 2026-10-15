@@ -1,0 +1,333 @@
+{
+  "format": "docreport",
+  "schemaVersion": 1,
+  "id": "doc_32e4c4250e734e95bed7965b7fcf0520",
+  "metadata": {
+    "title": "修订记录",
+    "shortTitle": "修订记录",
+    "language": "zh-CN",
+    "authors": [
+      "编制单位  项目组"
+    ],
+    "revision": "版本  R0",
+    "date": "2026-10-10",
+    "fields": [
+      {
+        "id": "projectName",
+        "label": "项目名称",
+        "value": "模块化控制器设计与验证"
+      }
+    ]
+  },
+  "blocks": [
+    {
+      "type": "section",
+      "id": "sec_9f0f3778397646438580a1496592c127",
+      "title": "修订记录",
+      "numbering": "appendix",
+      "children": [
+        {
+          "type": "table",
+          "id": "tbl_0289a7a639154f83a7182e12ed71fb04",
+          "numbered": true,
+          "caption": [
+            {
+              "type": "text",
+              "text": "报告修订记录"
+            }
+          ],
+          "columns": [
+            {
+              "id": "n_fcb57f61c67247f1b1bac46d99d51eab"
+            },
+            {
+              "id": "n_0cd91fcf431a4597b7edebbddc9bc5d4"
+            },
+            {
+              "id": "n_613b14d6aff2484187f2885a482edb0a"
+            },
+            {
+              "id": "n_025644d66cb2470b9cd553dd75a6b311"
+            }
+          ],
+          "headerRows": 1,
+          "rows": [
+            {
+              "id": "n_dc6f025b065f4dfcb73b965267b0bde3",
+              "cells": [
+                {
+                  "id": "n_baae0c3855964b86b5127fc28ab65535",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_a0bf63e3094d447da0f5a0f203ffe840",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "版本"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_37acec02fda74b42b69bbed1f787f1e9",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_0045e5b37e344d6d870b748d16c51f1d",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "日期"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_3f2c8de29e3d4461afcad7049ff8ad81",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_33fa6b80d1e947e4a0ba0dee75ac48f7",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "修改内容"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_5c77497950854f03b2ef007f2d7c9f53",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_a27b9762956145f9bf4949628b6a37e9",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "状态"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "n_5d9b9726319446b291285bb5ebd21bfa",
+              "cells": [
+                {
+                  "id": "n_e2c4ece7626943f3ba89fc829266923f",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_f8b3fcbb5e2a48e3b0ac6cbe5b9be033",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "R0"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_b10ff7053cd441e8853940f774ab43b3",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_aa2356f760ef4ac0acccc52a094f057d",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "2026-10-10"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_0457e9a173654fe6ac2f90ff0d844932",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_872825dd497d4eb1a2e4dad8a800384c",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "建立设计与验证框架"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_e7cb0959b52b43fba986f4bf35d73705",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_6017238fbb764daa926e3ada622d8e8e",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "待项目复核"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "n_0743c14d07a743439a6ca58ac5459c43",
+              "cells": [
+                {
+                  "id": "n_34abed3327c34fd8bfd3f669495065d3",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_e0453db1820949be8876bbb7facbd05d",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "后续版本"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_9a7e35dcb0404760889bee8ef8d96d13",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_6930180ad85547e0845d7bf3d6979d9e",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "待确定"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_3222ea7f43954003b0f1b540b4ac83d8",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_d147709deb9b464f8780b4cc42fc5ad1",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "补充实际试验与问题处理"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_8c003712e5214c54b194dd9c9c4c2a80",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_3efc7a2254964deba4064d2f175e62ce",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "按证据更新"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "id": "p_ebbe069f2f0c43c499ace1162ef3dc29",
+          "content": [
+            {
+              "type": "text",
+              "text": "引用定位检查：计算模型见式（"
+            },
+            {
+              "type": "ref",
+              "id": "n_e35d67efbf4a4a04b2d5e55c511255c3",
+              "target": "eq_baa387d508d84562bce348ca5763918f",
+              "display": "number",
+              "externalLabel": "参见报告其他章节：H(s)=\\frac{1}{LCs^2+RCs+1}"
+            },
+            {
+              "type": "text",
+              "text": "），系统关系见图 "
+            },
+            {
+              "type": "ref",
+              "id": "n_f55f5f20605c4685b2044daa88878dfa",
+              "target": "fig_302d37dc8a2e4fc8a63bff5a23ac2f1d",
+              "display": "number",
+              "externalLabel": "参见报告其他章节：模块关系与主要数据通路"
+            },
+            {
+              "type": "text",
+              "text": "，参数定义见表 "
+            },
+            {
+              "type": "ref",
+              "id": "n_ef036ce96ff34c528de329bb3687399e",
+              "target": "tbl_97d7664b5bf149afb92d96fc7af9388e",
+              "display": "number",
+              "externalLabel": "参见报告其他章节：示例参数与记录要求"
+            },
+            {
+              "type": "text",
+              "text": "，完整用例见表 "
+            },
+            {
+              "type": "ref",
+              "id": "n_e8f19cedadf14694ac7cfea6405dca6a",
+              "target": "tbl_548778f9dd424ce6a399e58326f60bc3",
+              "display": "number",
+              "externalLabel": "参见报告其他章节：验证用例清单"
+            },
+            {
+              "type": "text",
+              "text": "。这些引用均随对象编号更新。"
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "id": "p_4e45daa72df74db7881f7d2f69d49a76",
+          "content": [
+            {
+              "type": "link",
+              "id": "n_e5c787159b9941f88960140f550e5476",
+              "text": "模板使用参考：Microsoft Word 模板说明",
+              "href": "https://support.microsoft.com/en-us/word/create-a-template"
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "id": "p_e6be878098f143598b609ac19dcbbdb5",
+          "content": [
+            {
+              "type": "text",
+              "text": "报告发布前复查封面信息、目录页码、图表题注与公式编号。保留评审批注和修订副本，交付正文应与确认的配置及结论保持一致。"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "notes": [],
+  "references": []
+}

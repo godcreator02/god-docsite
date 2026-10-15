@@ -1,0 +1,367 @@
+{
+  "format": "docreport",
+  "schemaVersion": 1,
+  "id": "doc_19af6264702146d98e6ffbfee653d946",
+  "metadata": {
+    "title": "项目概述",
+    "shortTitle": "项目概述",
+    "language": "zh-CN",
+    "authors": [
+      "编制单位  项目组"
+    ],
+    "revision": "版本  R0",
+    "date": "2026-10-10",
+    "fields": [
+      {
+        "id": "projectName",
+        "label": "项目名称",
+        "value": "模块化控制器设计与验证"
+      }
+    ]
+  },
+  "blocks": [
+    {
+      "type": "section",
+      "id": "sec_673f586878cb423eae1d0a329c54e27b",
+      "title": "项目概述",
+      "numbering": "decimal",
+      "children": [
+        {
+          "type": "paragraph",
+          "id": "p_bcb80892cffc46d7b44c47cb8bbb10b2",
+          "content": [
+            {
+              "type": "text",
+              "text": "本项目拟建立一套可分阶段验证的模块化控制器方案，将信号采集、模型计算、控制输出和试验记录分开组织。当前方案能够形成完整的需求与验证框架，下一步应以接口联调和异常工况试验补齐工程证据。本报告中的数值、曲线和用例均用于方案演示；曲线来自明确给定的计算模型，不代表已经完成硬件性能验收。"
+            }
+          ]
+        },
+        {
+          "type": "section",
+          "id": "sec_bfc4a075a9fe41738fefc40d832734e5",
+          "title": "目标与适用范围",
+          "numbering": "decimal",
+          "children": [
+            {
+              "type": "paragraph",
+              "id": "p_caeb7e057b1442658fbd104ece8511f2",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "报告面向项目评审人员和实施人员，重点回答模块怎样划分、数据怎样流动、哪些参数需要固定，以及后续如何判断试验通过。评价依据由需求、参数、用例和记录共同组成；仅有某次曲线平滑或某个单元运行成功，不能替代对完整流程的核对。"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "id": "p_91fda3773af5477bba662e0f2df8cb06",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "本阶段覆盖单通道信号输入、离散计算流程、参数版本管理和离线结果检查。功率执行机构、保护装置的安全认证以及现场长期运行不在本阶段范围内。后续扩展通道数量时，需要重新核对传输负载、同步边界和记录容量，不直接沿用本样例的演示参数。"
+                }
+              ]
+            },
+            {
+              "type": "table",
+              "id": "tbl_19e091ef2e474f9e892e71201e854464",
+              "numbered": true,
+              "caption": [
+                {
+                  "type": "text",
+                  "text": "阶段交付物"
+                }
+              ],
+              "columns": [
+                {
+                  "id": "n_157c2844a5684e3fa181f3b74b696929"
+                },
+                {
+                  "id": "n_7a31e8145d524ac7bad36524d770c895"
+                },
+                {
+                  "id": "n_4c4c49ee9d114625bf54fb76e8a9f951"
+                }
+              ],
+              "headerRows": 1,
+              "rows": [
+                {
+                  "id": "n_7ef51b4defec4a15b1b7f8ebbad98d61",
+                  "cells": [
+                    {
+                      "id": "n_6a271d77b65c4b77bba4cc4abe89f71f",
+                      "blocks": [
+                        {
+                          "type": "paragraph",
+                          "id": "p_b0862d9223084c979841a87ae5792c82",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "交付项"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "id": "n_d124734c14524d27a2c07cde26294b10",
+                      "blocks": [
+                        {
+                          "type": "paragraph",
+                          "id": "p_074de1114e914426b66126f5d7c511b2",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "主要内容"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "id": "n_78640fe97e344f2893fd6dc069699a9d",
+                      "blocks": [
+                        {
+                          "type": "paragraph",
+                          "id": "p_f0265d8b569f4c8ab3c21595d5042917",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "完成条件"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_52bb72dfbfbd4e008d1a95bf70b3106c",
+                  "cells": [
+                    {
+                      "id": "n_8ef70194728f43d58c0133f80ec70be9",
+                      "blocks": [
+                        {
+                          "type": "paragraph",
+                          "id": "p_1cc7f4ac41a947cd8b3e812c5e3084e3",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "需求基线"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "id": "n_e18bb340a01f455780f20f5fb71de65d",
+                      "blocks": [
+                        {
+                          "type": "paragraph",
+                          "id": "p_4873c6ec032b4595abd81a7719cfc0ee",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "指标、边界与异常处理"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "id": "n_5317d66ebe1a46ed975ee04db1bc51f3",
+                      "blocks": [
+                        {
+                          "type": "paragraph",
+                          "id": "p_489df12c5aac4b1d85e725fbb046e454",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "评审确认后冻结版本"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_c0c9be1ee1e6414987521e24556ac61e",
+                  "cells": [
+                    {
+                      "id": "n_49ada0b506c342e58715c52b7d502782",
+                      "blocks": [
+                        {
+                          "type": "paragraph",
+                          "id": "p_ae381fac1cc94ecb80d59757fdb371da",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "设计说明"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "id": "n_daf3d316c8574142852f140e4600231d",
+                      "blocks": [
+                        {
+                          "type": "paragraph",
+                          "id": "p_3bdd61887d814817af15a3296e63e9cf",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "模块关系和接口约定"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "id": "n_d50ed68deb2d42b3987f8fb77cd431f2",
+                      "blocks": [
+                        {
+                          "type": "paragraph",
+                          "id": "p_ea8db734914341fe9e0123995f7c8396",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "输入输出可以逐项追溯"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_096534f8eef345dc8d8190157b53ae5c",
+                  "cells": [
+                    {
+                      "id": "n_75d5f12284454e17ab3473af25126ffb",
+                      "blocks": [
+                        {
+                          "type": "paragraph",
+                          "id": "p_14e6ab0d6da440f99bbd7750795e7c8f",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "验证记录"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "id": "n_b92c571f2423496eba8b3d969e101b08",
+                      "blocks": [
+                        {
+                          "type": "paragraph",
+                          "id": "p_e9c2701080a743d680b684184a52e078",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "工况、原始记录和结论"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "id": "n_e0cb22bb17e84301b4bd046906ef4833",
+                      "blocks": [
+                        {
+                          "type": "paragraph",
+                          "id": "p_d5612c3c33054d3189f27e8ca6e26d7c",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "每项结论具有对应证据"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_46834bb9f3dd45d992d93b4d29f13b47",
+                  "cells": [
+                    {
+                      "id": "n_974f123bfff74e5a9a6cb12df566e5c1",
+                      "blocks": [
+                        {
+                          "type": "paragraph",
+                          "id": "p_21b2353e76dd4167b2a3ae7da271ee07",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "版本清单"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "id": "n_fcea6fdc371a4870b9e0ccc76b15dc20",
+                      "blocks": [
+                        {
+                          "type": "paragraph",
+                          "id": "p_765d9d1c9d1b4ccfbe473d6d5181b83e",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "程序、参数和文档版本"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "id": "n_99a0e144c70f4053b923613435c64fb7",
+                      "blocks": [
+                        {
+                          "type": "paragraph",
+                          "id": "p_048d4e55db9644c2a03e63c2e472a237",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "任一记录可定位运行配置"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "id": "p_a5fa529166e44c8ca960804e7ca39a87",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "实施时先完成可重复的离线演示，再接入真实采集与输出设备。每增加一个环节，都先验证输入是否完整、单位是否一致和异常是否可见。这样可以把问题定位到具体接口，避免在整机联调时同时处理模型、时序和记录三类不确定性。"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "id": "p_100cc9357633468092f3dbab2ae22f0b",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "本报告中的图表和公式采用自动编号，正文通过交叉引用指向对应对象。后续补充测试结果时，应更新目录和全部域，再检查引用对象是否仍与叙述一致。"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "notes": [],
+  "references": []
+}

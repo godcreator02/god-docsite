@@ -7,8 +7,8 @@ import { checkRunner, problemResults, waitForHydrated, watchPage } from '../lib/
  * 单个功能自己的行为在 base、collab、docs 三组里查
  */
 
-/** 侧栏横排里功能的入口，按各入口的 order 排（任务 10、日历 20、轨迹 50、评论 90） */
-const featureSidebarEntries = ['/tasks', '/calendar', '/trajectory', '/comments']
+/** 侧栏横排里功能的入口，按各入口的 order 排（任务 10、日历 20、报告 40、轨迹 50、评论 90） */
+const featureSidebarEntries = ['/tasks', '/calendar', '/reports', '/trajectory', '/comments']
 
 /** 侧栏站名下的一横排：搜索按钮与功能入口（god-docsite 的 SidebarLinksRow） */
 const sidebarRow = '#nd-sidebar [data-docsite-sidebar-row]'
@@ -19,6 +19,7 @@ const highlightedEntryOf = [
   { url: '/tasks/20261012091000-adapt01', entry: '/tasks' },
   { url: '/trajectory/2026-01-02-second', entry: '/trajectory' },
   { url: '/calendar', entry: '/calendar' },
+  { url: '/reports/sample', entry: '/reports' },
 ]
 
 /**
@@ -33,6 +34,8 @@ const routeMarkers = [
   { url: '/comments', marker: 'data-comment-row', owner: 'comments 全站评论页' },
   { url: '/trajectory', marker: 'star-disk', owner: 'trajectory 星轨盘页（独立页面）' },
   { url: '/trajectory/2026-01-02-second', marker: '第二张卡', owner: 'trajectory 卡页' },
+  { url: '/reports', marker: 'data-report-list', owner: 'word-report 报告列表' },
+  { url: '/reports/sample', marker: 'report-document', owner: 'word-report 报告页' },
   { url: '/pinned', marker: 'data-pin-status', owner: '内容页（code-pin 外框）' },
   { url: '/writing/collapse-test', marker: '改动 A：开头新插的一段', owner: '内容页' },
 ]
@@ -45,6 +48,7 @@ const featureStyleSelectors = [
   { feature: 'comments（接线文件里的正文高亮）', selector: '::highlight(docsite-comment)' },
   { feature: 'explainer', selector: '.dx-btn' },
   { feature: 'trajectory', selector: '.star-disk' },
+  { feature: 'word-report', selector: '.report-list' },
 ]
 
 /** 路由表展开成完整地址：参数名不同、位置相同的两条（tasks/:a 与 tasks/:b）也算重复 */

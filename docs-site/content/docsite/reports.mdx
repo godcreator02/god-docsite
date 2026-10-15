@@ -1,0 +1,80 @@
+---
+title: 写报告
+docfirst: none
+description: 站点里的报告：JSON 文件放在 reports/ 里，网页上一份报告一页，用命令行检查、导出 Word
+icon: FileSpreadsheet
+---
+
+报告是功能包 `@godcreator/word-report` 提供的。一份报告是一组 JSON 文件，网页上整份显示成一页，也能用本机的 Word 导出成 docx 和 pdf，两边读的是同一份数据。
+
+## 装上报告功能
+
+```text
+docsite.feature.add  {"dir":"<站点目录>","package":"@godcreator/word-report"}
+```
+
+装上以后，侧栏横排里多一个「报告」入口。任何站点都能装，协作站建站时不默认带。
+
+## 文件放在哪
+
+报告放在站点根下的 `reports/<报告 id>/`，不放进 `content/`，所以报告不出现在文档目录里。报告 id 是网址的一段，只用小写字母、数字和 `-`。
+
+| 文件 | 装什么 |
+| --- | --- |
+| `content.json` | 报告的入口：标题、版本、日期、作者、封面上的字段；正文按顺序用 `include` 引入各章 |
+| `chapters/<章>/content.json` | 一章，它本身也是一份完整的报告文档 |
+| `chapters/<章>/assets/` | 这一章的图片，只能是 png 或 jpg；正文里写 `assets/<文件名>` |
+| `layout.json` | 只给 Word 用的版式：按块的 id 写宽度、最小行高、分页、横版，网页不读它 |
+
+不分章的报告就只有一个 `content.json`，正文直接写在里面。
+
+### 文档格式
+
+每个 `content.json` 的 `format` 是 `docreport`。正文由块组成：节、段落、列表、图、公式、表格、代码、摘要、参考文献；段落里有文字、行内公式、交叉引用、链接、脚注和文献引用。
+每个块有一个随机的 id，交叉引用写目标的 id，图、表、公式和节的编号按它们在整份报告里的先后自动算。字段的完整说明在包里的 `engine/schemas/report-content.schema.json`，
+例子是同目录的 `report-content.example.json`。
+
+## 网页上怎么看
+
+| 地址 | 显示什么 |
+| --- | --- |
+| `/reports` | 报告列表：每份一行，写标题、版本、日期、作者、章数，以及检查的结果 |
+| `/reports/<报告 id>` | 整份报告一页：各章按 `include` 的顺序接在一起，编号连着排；右侧目录列出前两层的节 |
+
+- 每次打开都从文件现读：改了 JSON，刷新页面就能看到
+- 读不对的报告在列表里照样列出来，「检查」一栏写出错的原话；打开它的页面直接报错
+- 网页上没有导出按钮，导出只走下面的命令行
+
+## 检查
+
+在站点目录里运行：
+
+```bash
+pnpm exec report-docx check
+```
+
+它把每份报告整份组装一次，每一章再单独组装一次，核对格式、引用、编号和图片；有问题时把原话列出来，退出码不是 0。加 `--json` 按 JSON 打出结果。
+单独组装一章时，指向别的章的引用要写 `externalLabel`，否则报错。
+
+## 导出 Word
+
+导出驱动本机的 Word 和 MathType 排版，所以只能在装了这两样的 Windows 上做。版式由 Word 模板 `engine/templates/project-report.dotx` 里的样式决定。
+
+第一次用之前，在 Word 引擎目录里建好 Python 环境：
+
+```bash
+python -m venv .venv
+.venv\Scripts\pip install -r requirements.txt
+```
+
+引擎目录默认是包里自带的 `engine/`。装进站点的包在 `node_modules` 里，建议把 `engine/` 复制到一个固定的目录、在那里建 `.venv`，再用环境变量 `DOCREPORT_ENGINE_ROOT`（或参数 `--engine`）指过去。
+
+然后在站点目录里：
+
+```bash
+pnpm exec report-docx export <报告 id>
+pnpm exec report-docx status <报告 id>
+```
+
+`export` 等这次导出做完，把结果按 JSON 打出来，里面有 docx 和 pdf 的路径；`status` 只看状态，不启动 Word。导出结果放在引擎目录的 `out/` 下，附带自动核对的记录（页数等）；
+版式还要人看一遍。报告在导出前固定成一份快照，导出过程中改了文件不会混进这一次的结果。同一时间只能导出一份。

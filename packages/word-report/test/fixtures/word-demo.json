@@ -1,0 +1,5988 @@
+{
+  "format": "docreport",
+  "schemaVersion": 1,
+  "id": "demo-report",
+  "metadata": {
+    "title": "模块化控制器技术报告",
+    "shortTitle": "模块化控制器设计与验证",
+    "language": "zh-CN",
+    "authors": [
+      "编制单位  项目组"
+    ],
+    "revision": "版本  R0",
+    "date": "2026-10-10",
+    "fields": [
+      {
+        "id": "projectName",
+        "label": "项目名称",
+        "value": "模块化控制器设计与验证"
+      }
+    ]
+  },
+  "blocks": [
+    {
+      "type": "section",
+      "id": "overview",
+      "title": "项目概述",
+      "numbering": "decimal",
+      "children": [
+        {
+          "type": "paragraph",
+          "id": "p-1",
+          "content": [
+            {
+              "type": "text",
+              "text": "本项目拟建立一套可分阶段验证的模块化控制器方案，将信号采集、模型计算、控制输出和试验记录分开组织。当前方案能够形成完整的需求与验证框架，下一步应以接口联调和异常工况试验补齐工程证据。本报告中的数值、曲线和用例均用于方案演示；曲线来自明确给定的计算模型，不代表已经完成硬件性能验收。"
+            }
+          ]
+        },
+        {
+          "type": "section",
+          "id": "section-2",
+          "title": "目标与适用范围",
+          "numbering": "decimal",
+          "children": [
+            {
+              "type": "paragraph",
+              "id": "p-3",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "报告面向项目评审人员和实施人员，重点回答模块怎样划分、数据怎样流动、哪些参数需要固定，以及后续如何判断试验通过。评价依据由需求、参数、用例和记录共同组成；仅有某次曲线平滑或某个单元运行成功，不能替代对完整流程的核对。"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "id": "p-4",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "本阶段覆盖单通道信号输入、离散计算流程、参数版本管理和离线结果检查。功率执行机构、保护装置的安全认证以及现场长期运行不在本阶段范围内。后续扩展通道数量时，需要重新核对传输负载、同步边界和记录容量，不直接沿用本样例的演示参数。"
+                }
+              ]
+            },
+            {
+              "type": "table",
+              "id": "TblScope",
+              "numbered": true,
+              "caption": [
+                {
+                  "type": "text",
+                  "text": "阶段交付物"
+                }
+              ],
+              "columns": [
+                {
+                  "id": "col-40"
+                },
+                {
+                  "id": "col-41"
+                },
+                {
+                  "id": "col-42"
+                }
+              ],
+              "headerRows": 1,
+              "rows": [
+                {
+                  "id": "row-5",
+                  "cells": [
+                    {
+                      "id": "cell-6",
+                      "blocks": [
+                        {
+                          "type": "paragraph",
+                          "id": "p-7",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "交付项"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "id": "cell-8",
+                      "blocks": [
+                        {
+                          "type": "paragraph",
+                          "id": "p-9",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "主要内容"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "id": "cell-10",
+                      "blocks": [
+                        {
+                          "type": "paragraph",
+                          "id": "p-11",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "完成条件"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "row-12",
+                  "cells": [
+                    {
+                      "id": "cell-13",
+                      "blocks": [
+                        {
+                          "type": "paragraph",
+                          "id": "p-14",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "需求基线"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "id": "cell-15",
+                      "blocks": [
+                        {
+                          "type": "paragraph",
+                          "id": "p-16",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "指标、边界与异常处理"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "id": "cell-17",
+                      "blocks": [
+                        {
+                          "type": "paragraph",
+                          "id": "p-18",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "评审确认后冻结版本"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "row-19",
+                  "cells": [
+                    {
+                      "id": "cell-20",
+                      "blocks": [
+                        {
+                          "type": "paragraph",
+                          "id": "p-21",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "设计说明"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "id": "cell-22",
+                      "blocks": [
+                        {
+                          "type": "paragraph",
+                          "id": "p-23",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "模块关系和接口约定"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "id": "cell-24",
+                      "blocks": [
+                        {
+                          "type": "paragraph",
+                          "id": "p-25",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "输入输出可以逐项追溯"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "row-26",
+                  "cells": [
+                    {
+                      "id": "cell-27",
+                      "blocks": [
+                        {
+                          "type": "paragraph",
+                          "id": "p-28",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "验证记录"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "id": "cell-29",
+                      "blocks": [
+                        {
+                          "type": "paragraph",
+                          "id": "p-30",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "工况、原始记录和结论"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "id": "cell-31",
+                      "blocks": [
+                        {
+                          "type": "paragraph",
+                          "id": "p-32",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "每项结论具有对应证据"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "row-33",
+                  "cells": [
+                    {
+                      "id": "cell-34",
+                      "blocks": [
+                        {
+                          "type": "paragraph",
+                          "id": "p-35",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "版本清单"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "id": "cell-36",
+                      "blocks": [
+                        {
+                          "type": "paragraph",
+                          "id": "p-37",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "程序、参数和文档版本"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "id": "cell-38",
+                      "blocks": [
+                        {
+                          "type": "paragraph",
+                          "id": "p-39",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "任一记录可定位运行配置"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "id": "p-43",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "实施时先完成可重复的离线演示，再接入真实采集与输出设备。每增加一个环节，都先验证输入是否完整、单位是否一致和异常是否可见。这样可以把问题定位到具体接口，避免在整机联调时同时处理模型、时序和记录三类不确定性。"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "id": "p-44",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "本报告中的图表和公式采用自动编号，正文通过交叉引用指向对应对象。后续补充测试结果时，应更新目录和全部域，再检查引用对象是否仍与叙述一致。"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "requirements",
+      "title": "需求与设计约束",
+      "numbering": "decimal",
+      "children": [
+        {
+          "type": "section",
+          "id": "section-45",
+          "title": "指标与边界",
+          "numbering": "decimal",
+          "children": [
+            {
+              "type": "paragraph",
+              "id": "p-46",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "需求分成数据完整性、运行可观察性和可重复性三组。数据完整性要求输入具有来源、时间和单位；运行可观察性要求异常能够被记录并定位；可重复性要求同一输入与同一参数能够重新得到可比较的结果。这里的“可比较”应同时检查数值误差和事件顺序。"
+                }
+              ]
+            },
+            {
+              "type": "section",
+              "id": "section-47",
+              "title": "采样与记录约束",
+              "numbering": "decimal",
+              "children": [
+                {
+                  "type": "paragraph",
+                  "id": "p-48",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "所有模块使用同一份接口字段定义。采样序号用于检测丢帧和乱序，相对时间用于分析事件先后；两者不能互相替代。记录口径"
+                    },
+                    {
+                      "type": "note_ref",
+                      "id": "note-ref-49",
+                      "target": "note-time"
+                    },
+                    {
+                      "type": "text",
+                      "text": "应在试验开始前确定，运行中变更参数时保留变更前后的版本标识。"
+                    }
+                  ]
+                },
+                {
+                  "type": "list",
+                  "id": "list-51",
+                  "ordered": true,
+                  "items": [
+                    {
+                      "id": "item-52",
+                      "blocks": [
+                        {
+                          "type": "paragraph",
+                          "id": "p-53",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "检查输入帧的字段、单位和序号，再把有效数据交给模型计算。"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "id": "item-54",
+                      "blocks": [
+                        {
+                          "type": "paragraph",
+                          "id": "p-55",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "使用已冻结的参数执行计算；遇到无效值时产生明确的状态记录。"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "id": "item-56",
+                      "blocks": [
+                        {
+                          "type": "paragraph",
+                          "id": "p-57",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "将输出值、状态和所用版本一起写入记录，便于后续复查。"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "id": "p-58",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "以下约束用于减少联调中的歧义。它们属于设计约定，后续必须通过实际工况验证，不能只凭接口文件存在就标记为完成。"
+                    }
+                  ]
+                },
+                {
+                  "type": "list",
+                  "id": "list-59",
+                  "ordered": false,
+                  "items": [
+                    {
+                      "id": "item-60",
+                      "blocks": [
+                        {
+                          "type": "paragraph",
+                          "id": "p-61",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "接口中保留状态字段，区分有效输入、超时输入和替代值。"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "id": "item-62",
+                      "blocks": [
+                        {
+                          "type": "paragraph",
+                          "id": "p-63",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "参数统一记录量纲，避免把毫秒与秒、峰值与有效值混用。"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "id": "item-64",
+                      "blocks": [
+                        {
+                          "type": "paragraph",
+                          "id": "p-65",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "异常发生时保留原始输入，避免只有处理后的结果而无法追因。"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "id": "p-66",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "需要修改某一约束时，先记录修改理由、影响的模块和需要重跑的用例。对于与旧记录的比较，应标出参数差异，不能把配置变化引起的结果变化解释为性能改善。"
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "id": "p-67",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "验收前按照“需求条目—设计说明—验证用例—证据文件”的关系逐项核对。没有证据的条目保持待验证；同一条证据可以支持多个相关条目，但每个条目的通过判据应独立写清。"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "equations",
+      "title": "数学模型与符号约定",
+      "numbering": "decimal",
+      "children": [
+        {
+          "type": "paragraph",
+          "id": "p-68",
+          "content": [
+            {
+              "type": "text",
+              "text": "信号示例写为 "
+            },
+            {
+              "type": "math",
+              "id": "eq-inline",
+              "latex": "i_L(t) = I_0 + \\Delta i\\sin(\\omega t)"
+            },
+            {
+              "type": "text",
+              "text": "，其中直流分量、纹波幅值与角频率应分别记录，避免只保存总波形而丢失生成条件。"
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "id": "p-69",
+          "content": [
+            {
+              "type": "text",
+              "text": "下列模型用于覆盖滤波、能量累积、状态空间、分段输入和状态导数的常见写法。它们展示不同的数学表达结构，不构成某一实际装置的完整模型。变量的数值应由具体项目参数表给出。"
+            }
+          ]
+        },
+        {
+          "type": "equation",
+          "id": "eq-fraction",
+          "latex": "H(s)=\\frac{1}{LCs^2+RCs+1}",
+          "numbered": true
+        },
+        {
+          "type": "paragraph",
+          "id": "p-70",
+          "content": [
+            {
+              "type": "text",
+              "text": "式（"
+            },
+            {
+              "type": "ref",
+              "id": "ref-71",
+              "target": "eq-fraction",
+              "display": "number"
+            },
+            {
+              "type": "text",
+              "text": "）描述二阶环节的形式。使用时应保持系数和自变量的量纲一致，并在比较结果前核对所采用的初始条件。"
+            }
+          ]
+        },
+        {
+          "type": "equation",
+          "id": "eq-integral",
+          "latex": "E=\\int_0^T v(t)i(t)\\,\\mathrm{d}t",
+          "numbered": true
+        },
+        {
+          "type": "equation",
+          "id": "eq-matrix",
+          "latex": "\\mathbf{A}=\\begin{bmatrix}0&1\\\\-\\omega_0^2&-2\\zeta\\omega_0\\end{bmatrix}",
+          "numbered": true
+        },
+        {
+          "type": "equation",
+          "id": "eq-cases",
+          "latex": "u(t)=\\begin{cases}U_{\\mathrm{dc}},&t\\geq 0\\\\0,&t<0\\end{cases}",
+          "numbered": true
+        },
+        {
+          "type": "equation",
+          "id": "eq-aligned",
+          "latex": "\\begin{aligned}v_L&=L\\frac{\\mathrm{d}i_L}{\\mathrm{d}t}\\\\i_C&=C\\frac{\\mathrm{d}v_C}{\\mathrm{d}t}\\end{aligned}",
+          "numbered": true
+        },
+        {
+          "type": "paragraph",
+          "id": "p-72",
+          "content": [
+            {
+              "type": "text",
+              "text": "矩阵中的 A 使用粗体直立字母；函数名称与微分符号采用明确的数学排版。参数更改后应先核对公式语义，再检查图表与结论，不能以排版相似代替数学等价。"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "architecture",
+      "title": "系统架构与接口",
+      "numbering": "decimal",
+      "children": [
+        {
+          "type": "paragraph",
+          "id": "p-73",
+          "content": [
+            {
+              "type": "text",
+              "text": "方案将输入适配、模型计算、输出管理和记录管理分成四个模块。输入适配负责统一原始数据，模型计算只接收已检查的值；输出管理按照状态选择是否提交结果，记录管理保存每一步的输入输出和版本信息。"
+            }
+          ]
+        },
+        {
+          "type": "figure",
+          "id": "FigArchitecture",
+          "src": "assets/architecture.png",
+          "caption": [
+            {
+              "type": "text",
+              "text": "模块关系与主要数据通路"
+            }
+          ],
+          "alt": "模块关系与主要数据通路"
+        },
+        {
+          "type": "paragraph",
+          "id": "p-74",
+          "content": [
+            {
+              "type": "text",
+              "text": "图 "
+            },
+            {
+              "type": "ref",
+              "id": "ref-75",
+              "target": "FigArchitecture",
+              "display": "number"
+            },
+            {
+              "type": "text",
+              "text": " 中的箭头表示数据交付顺序。每一条通路都需要明确输入有效性、处理完成标志和失败返回方式。模块之间传递完整的数据记录，避免依赖另一个模块的临时内部状态。"
+            }
+          ]
+        },
+        {
+          "type": "section",
+          "id": "section-76",
+          "title": "接口失败的处理",
+          "numbering": "decimal",
+          "children": [
+            {
+              "type": "paragraph",
+              "id": "p-77",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "当输入超时或序号不连续时，输入适配模块记录异常并提供明确状态。模型计算可以按项目约定保持上一状态或停止本次更新，但具体策略必须写入需求。输出管理不应把未完成的计算当作正常结果提交。"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "id": "p-78",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "记录管理属于主流程的一部分。若记录缓冲接近容量限制，应先记录事件并进入规定的降级路径；是否继续输出由项目要求决定。该行为需要专门的压力用例，不能在异常发生时临时选择。"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "id": "p-79",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "模块联调按照接口顺序推进。每完成一个接口，保留一组正常输入和一组异常输入的记录作为回归样例。后续修改内部实现时，先检查这些样例是否仍满足原有协议，再扩大测试范围。"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "results",
+      "title": "计算结果与分析",
+      "numbering": "decimal",
+      "children": [
+        {
+          "type": "paragraph",
+          "id": "p-80",
+          "content": [
+            {
+              "type": "text",
+              "text": "为检查数据图和分析文字的组织方式，本节采用一阶指数响应作为离线计算样例。输入在 5 ms 时从 0 变为 0.8，时间常数取 4 ms，采样间隔取 0.5 ms。所有点均由给定模型计算，尚未与实物测量进行对照。"
+            }
+          ]
+        },
+        {
+          "type": "figure",
+          "id": "FigResponse",
+          "src": "assets/response.png",
+          "caption": [
+            {
+              "type": "text",
+              "text": "给定输入与离线计算响应"
+            }
+          ],
+          "alt": "给定输入与离线计算响应"
+        },
+        {
+          "type": "paragraph",
+          "id": "p-81",
+          "content": [
+            {
+              "type": "text",
+              "text": "图 "
+            },
+            {
+              "type": "ref",
+              "id": "ref-82",
+              "target": "FigResponse",
+              "display": "number"
+            },
+            {
+              "type": "text",
+              "text": " 中，输入变化后输出逐步接近给定值。这与所选一阶计算模型的性质一致，并不意味着实际控制系统必然具有相同的响应速度或无超调特性。硬件环节、采样延时和限幅都可能改变结果。"
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "id": "p-83",
+          "content": [
+            {
+              "type": "text",
+              "text": "分析实际数据时，应先对齐试验起点和参数版本，再比较变化趋势。若曲线出现差异，按输入一致性、时间对齐、模型参数和执行状态的顺序排查，避免只截取局部曲线进行判断。"
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "id": "p-84",
+          "content": [
+            {
+              "type": "text",
+              "text": "数值校核补充图中不容易精确读取的信息。图中的 35 ms 点约为 0.799558，给定值为 0.8；该差值仅是所给模型在有限时间内的剩余偏差，不是测量误差，也不是项目精度结论。"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "parameters",
+      "title": "参数与版本记录",
+      "numbering": "decimal",
+      "children": [
+        {
+          "type": "paragraph",
+          "id": "p-85",
+          "content": [
+            {
+              "type": "text",
+              "text": "参数表同时保存符号、数值、单位与使用说明。下表是文档和流程演示所用的示例参数；实际项目应由负责人确认参数来源、允许范围和生效时间。每次导出结果时，将参数表的版本与程序版本一并记录。"
+            }
+          ]
+        },
+        {
+          "type": "table",
+          "id": "TblParameters",
+          "numbered": true,
+          "caption": [
+            {
+              "type": "text",
+              "text": "示例参数与记录要求"
+            }
+          ],
+          "columns": [
+            {
+              "id": "col-197"
+            },
+            {
+              "id": "col-198"
+            },
+            {
+              "id": "col-199"
+            },
+            {
+              "id": "col-200"
+            }
+          ],
+          "headerRows": 2,
+          "rows": [
+            {
+              "id": "row-194",
+              "cells": [
+                {
+                  "id": "cell-195",
+                  "colSpan": 4,
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-196",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "离线演示参数与版本基线"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "row-86",
+              "cells": [
+                {
+                  "id": "cell-87",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-88",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "参数"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-89",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-90",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "符号"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-91",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-92",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "数值与单位"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-93",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-94",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "用途或说明"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "row-95",
+              "cells": [
+                {
+                  "id": "cell-96",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-97",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "电感"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-98",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-99",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "L"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-100",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-101",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "100 μH"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-102",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-103",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "二阶表达式的示例系数"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "row-104",
+              "cells": [
+                {
+                  "id": "cell-105",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-106",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "电容"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-107",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-108",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "C"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-109",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-110",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "47 μF"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-111",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-112",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "二阶表达式的示例系数"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "row-113",
+              "cells": [
+                {
+                  "id": "cell-114",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-115",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "电阻"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-116",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-117",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "R"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-118",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-119",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "0.2 Ω"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-120",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-121",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "二阶表达式的示例系数"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "row-122",
+              "cells": [
+                {
+                  "id": "cell-123",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-124",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "直流分量"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-125",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-126",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "I₀"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-127",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-128",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "1 A"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-129",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-130",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "行内公式的演示输入"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "row-131",
+              "cells": [
+                {
+                  "id": "cell-132",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-133",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "纹波幅值"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-134",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-135",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "Δi"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-136",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-137",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "0.1 A"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-138",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-139",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "行内公式的演示输入"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "row-140",
+              "cells": [
+                {
+                  "id": "cell-141",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-142",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "响应时间常数"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-143",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-144",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "τ"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-145",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-146",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "4 ms"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-147",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-148",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "离线曲线计算条件"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "row-149",
+              "cells": [
+                {
+                  "id": "cell-150",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-151",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "输入变化时刻"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-152",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-153",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "t₀"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-154",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-155",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "5 ms"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-156",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-157",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "离线曲线计算条件"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "row-158",
+              "cells": [
+                {
+                  "id": "cell-159",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-160",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "计算点间隔"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-161",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-162",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "Δt"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-163",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-164",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "0.5 ms"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-165",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-166",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "离线曲线采样间隔"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "row-167",
+              "cells": [
+                {
+                  "id": "cell-168",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-169",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "给定值"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-170",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-171",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "u"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-172",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-173",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "0.8"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-174",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-175",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "归一化无量纲值"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "row-176",
+              "cells": [
+                {
+                  "id": "cell-177",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-178",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "记录长度"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-179",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-180",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "N"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-181",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-182",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "81 点"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-183",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-184",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "覆盖 0 至 40 ms"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "row-185",
+              "cells": [
+                {
+                  "id": "cell-186",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-187",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "参数版本"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-188",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-189",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "—"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-190",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-191",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "R0"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-192",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-193",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "与报告版本对应"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "id": "p-201",
+          "content": [
+            {
+              "type": "text",
+              "text": "表 "
+            },
+            {
+              "type": "ref",
+              "id": "ref-202",
+              "target": "TblParameters",
+              "display": "number"
+            },
+            {
+              "type": "text",
+              "text": " 中的不同参数服务于不同的表达式，不能把示例参数自动组合成已经验证的硬件设计。对实际项目的每个量，应标出定义、来源和适用工况，并区分配置值、计算值和测量值。"
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "id": "p-203",
+          "content": [
+            {
+              "type": "text",
+              "text": "版本记录至少包含修改人、修改时间、修改原因和复核结论。若修改会影响历史数据比较，应保留旧版本，给出兼容关系，并注明哪些验证用例需要重新执行。"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "cases",
+      "title": "验证用例与覆盖",
+      "numbering": "decimal",
+      "children": [
+        {
+          "type": "paragraph",
+          "id": "p-204",
+          "content": [
+            {
+              "type": "text",
+              "text": "本节列出 40 条待执行的示例验证用例。用例按正常流程、边界输入、异常处理和版本回归分组，状态统一保持待实测。连续长表用于保持一份完整清单，跨页后重复表头，不把同一行拆到两页。"
+            }
+          ]
+        },
+        {
+          "type": "table",
+          "id": "TblCases",
+          "numbered": true,
+          "caption": [
+            {
+              "type": "text",
+              "text": "验证用例清单"
+            }
+          ],
+          "columns": [
+            {
+              "id": "col-574"
+            },
+            {
+              "id": "col-575"
+            },
+            {
+              "id": "col-576"
+            },
+            {
+              "id": "col-577"
+            }
+          ],
+          "headerRows": 1,
+          "rows": [
+            {
+              "id": "row-205",
+              "cells": [
+                {
+                  "id": "cell-206",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-207",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "编号"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-208",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-209",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "输入或工况"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-210",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-211",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "检查判据"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-212",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-213",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "状态"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "row-214",
+              "cells": [
+                {
+                  "id": "cell-215",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-216",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "T01"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-217",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-218",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "单帧正常输入"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-219",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-220",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "字段完整且单位一致"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-221",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-222",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "待实测"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "row-223",
+              "cells": [
+                {
+                  "id": "cell-224",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-225",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "T02"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-226",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-227",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "连续有效输入"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-228",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-229",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "输出顺序与输入一致"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-230",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-231",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "待实测"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "row-232",
+              "cells": [
+                {
+                  "id": "cell-233",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-234",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "T03"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-235",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-236",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "输入值为零"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-237",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-238",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "输出符合模型定义"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-239",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-240",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "待实测"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "row-241",
+              "cells": [
+                {
+                  "id": "cell-242",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-243",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "T04"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-244",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-245",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "输入接近上限"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-246",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-247",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "状态仍可准确记录"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-248",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-249",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "待实测"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "row-250",
+              "cells": [
+                {
+                  "id": "cell-251",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-252",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "T05"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-253",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-254",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "输入接近下限"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-255",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-256",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "符号和量纲正确"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-257",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-258",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "待实测"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "row-259",
+              "cells": [
+                {
+                  "id": "cell-260",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-261",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "T06"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-262",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-263",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "正常参数加载"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-264",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-265",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "配置版本可追溯"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-266",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-267",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "待实测"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "row-268",
+              "cells": [
+                {
+                  "id": "cell-269",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-270",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "T07"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-271",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-272",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "首次启动"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-273",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-274",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "初始状态符合约定"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-275",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-276",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "待实测"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "row-277",
+              "cells": [
+                {
+                  "id": "cell-278",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-279",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "T08"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-280",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-281",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "正常停止"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-282",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-283",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "末尾记录保持完整"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-284",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-285",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "待实测"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "row-286",
+              "cells": [
+                {
+                  "id": "cell-287",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-288",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "T09"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-289",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-290",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "重复执行"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-291",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-292",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "同配置结果可比较"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-293",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-294",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "待实测"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "row-295",
+              "cells": [
+                {
+                  "id": "cell-296",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-297",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "T10"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-298",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-299",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "报告重新导出"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-300",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-301",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "编号与数据一致"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-302",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-303",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "待实测"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "row-304",
+              "cells": [
+                {
+                  "id": "cell-305",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-306",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "T11"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-307",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-308",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "缺少输入字段"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-309",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-310",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "拒绝不完整记录"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-311",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-312",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "待实测"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "row-313",
+              "cells": [
+                {
+                  "id": "cell-314",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-315",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "T12"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-316",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-317",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "出现无效数值"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-318",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-319",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "保留原始值与状态"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-320",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-321",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "待实测"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "row-322",
+              "cells": [
+                {
+                  "id": "cell-323",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-324",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "T13"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-325",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-326",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "输入时间重复"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-327",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-328",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "明确处理重复事件"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-329",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-330",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "待实测"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "row-331",
+              "cells": [
+                {
+                  "id": "cell-332",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-333",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "T14"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-334",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-335",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "输入序号跳变"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-336",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-337",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "记录丢帧或乱序"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-338",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-339",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "待实测"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "row-340",
+              "cells": [
+                {
+                  "id": "cell-341",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-342",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "T15"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-343",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-344",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "单位不匹配"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-345",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-346",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "产生明确校验结果"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-347",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-348",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "待实测"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "row-349",
+              "cells": [
+                {
+                  "id": "cell-350",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-351",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "T16"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-352",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-353",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "空参数集"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-354",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-355",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "避免使用未知默认值"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-356",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-357",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "待实测"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "row-358",
+              "cells": [
+                {
+                  "id": "cell-359",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-360",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "T17"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-361",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-362",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "边界参数组合"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-363",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-364",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "检查结果有适用范围"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-365",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-366",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "待实测"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "row-367",
+              "cells": [
+                {
+                  "id": "cell-368",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-369",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "T18"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-370",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-371",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "缓冲达到阈值"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-372",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-373",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "触发约定的处置"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-374",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-375",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "待实测"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "row-376",
+              "cells": [
+                {
+                  "id": "cell-377",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-378",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "T19"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-379",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-380",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "最大长度记录"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-381",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-382",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "文件完整且可读取"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-383",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-384",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "待实测"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "row-385",
+              "cells": [
+                {
+                  "id": "cell-386",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-387",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "T20"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-388",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-389",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "最短长度记录"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-390",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-391",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "统计规则保持明确"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-392",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-393",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "待实测"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "row-394",
+              "cells": [
+                {
+                  "id": "cell-395",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-396",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "T21"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-397",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-398",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "输入中断"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-399",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-400",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "事件时间可定位"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-401",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-402",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "待实测"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "row-403",
+              "cells": [
+                {
+                  "id": "cell-404",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-405",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "T22"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-406",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-407",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "计算模块异常"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-408",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-409",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "状态不冒充正常结果"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-410",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-411",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "待实测"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "row-412",
+              "cells": [
+                {
+                  "id": "cell-413",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-414",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "T23"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-415",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-416",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "输出接口拒绝"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-417",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-418",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "保留失败原因"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-419",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-420",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "待实测"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "row-421",
+              "cells": [
+                {
+                  "id": "cell-422",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-423",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "T24"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-424",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-425",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "记录介质不可用"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-426",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-427",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "执行预定降级行为"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-428",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-429",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "待实测"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "row-430",
+              "cells": [
+                {
+                  "id": "cell-431",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-432",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "T25"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-433",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-434",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "恢复正常输入"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-435",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-436",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "状态转换过程可追溯"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-437",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-438",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "待实测"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "row-439",
+              "cells": [
+                {
+                  "id": "cell-440",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-441",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "T26"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-442",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-443",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "运行中改参数"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-444",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-445",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "新旧版本分界清楚"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-446",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-447",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "待实测"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "row-448",
+              "cells": [
+                {
+                  "id": "cell-449",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-450",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "T27"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-451",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-452",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "外部停止请求"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-453",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-454",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "按约定结束本次试验"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-455",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-456",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "待实测"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "row-457",
+              "cells": [
+                {
+                  "id": "cell-458",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-459",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "T28"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-460",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-461",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "重复停止请求"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-462",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-463",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "结束行为保持一致"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-464",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-465",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "待实测"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "row-466",
+              "cells": [
+                {
+                  "id": "cell-467",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-468",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "T29"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-469",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-470",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "重新连接接口"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-471",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-472",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "检查旧数据是否清除"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-473",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-474",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "待实测"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "row-475",
+              "cells": [
+                {
+                  "id": "cell-476",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-477",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "T30"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-478",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-479",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "错误后重新启动"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-480",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-481",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "初始状态重新确认"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-482",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-483",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "待实测"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "row-484",
+              "cells": [
+                {
+                  "id": "cell-485",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-486",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "T31"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-487",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-488",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "修改模型实现"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-489",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-490",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "原有输入输出可回归"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-491",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-492",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "待实测"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "row-493",
+              "cells": [
+                {
+                  "id": "cell-494",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-495",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "T32"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-496",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-497",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "修改字段顺序"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-498",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-499",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "协议变更被识别"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-500",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-501",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "待实测"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "row-502",
+              "cells": [
+                {
+                  "id": "cell-503",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-504",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "T33"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-505",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-506",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "增加可选字段"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-507",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-508",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "旧记录仍能正确读取"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-509",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-510",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "待实测"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "row-511",
+              "cells": [
+                {
+                  "id": "cell-512",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-513",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "T34"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-514",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-515",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "修改参数范围"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-516",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-517",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "关联用例重新执行"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-518",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-519",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "待实测"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "row-520",
+              "cells": [
+                {
+                  "id": "cell-521",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-522",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "T35"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-523",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-524",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "修改图表样式"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-525",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-526",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "原始数值保持不变"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-527",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-528",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "待实测"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "row-529",
+              "cells": [
+                {
+                  "id": "cell-530",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-531",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "T36"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-532",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-533",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "追加新用例"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-534",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-535",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "编号与引用自动更新"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-536",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-537",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "待实测"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "row-538",
+              "cells": [
+                {
+                  "id": "cell-539",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-540",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "T37"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-541",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-542",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "合并验证记录"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-543",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-544",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "来源和版本均保留"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-545",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-546",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "待实测"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "row-547",
+              "cells": [
+                {
+                  "id": "cell-548",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-549",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "T38"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-550",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-551",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "归档后重开"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-552",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-553",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "结果和证据可查阅"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-554",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-555",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "待实测"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "row-556",
+              "cells": [
+                {
+                  "id": "cell-557",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-558",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "T39"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-559",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-560",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "多人复核"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-561",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-562",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "批注与修订可追溯"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-563",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-564",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "待实测"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "row-565",
+              "cells": [
+                {
+                  "id": "cell-566",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-567",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "T40"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-568",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-569",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "最终交付检查"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-570",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-571",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "文档与运行配置一致"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-572",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-573",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "待实测"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "section",
+          "id": "section-578",
+          "title": "未完成项与复核安排",
+          "numbering": "decimal",
+          "children": [
+            {
+              "type": "paragraph",
+              "id": "p-579",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "用例通过必须同时满足约定的数值或状态判据，并保存能够复查的记录。对失败用例，应先写清触发条件、观察结果和复现方式；修复后沿用同一输入复跑，再补充邻近边界工况，避免只验证发生过的一个点。"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "id": "p-580",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "目前清单尚未执行硬件试验。后续负责人应逐条补充实际环境、输入文件、程序版本和证据路径。没有实际记录的条目继续保留待实测状态，不使用完成文档编写来替代完成项目验证。"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "wide",
+      "title": "接口时序与资源分配",
+      "numbering": "decimal",
+      "children": [
+        {
+          "type": "paragraph",
+          "id": "p-581",
+          "content": [
+            {
+              "type": "text",
+              "text": "宽表用于汇总跨模块的约定。表中的窗口和容量均为演示配置，先用于检查字段关系，再通过实测确认可行范围。时序结论应依据完整路径的时间记录，不能只根据单个模块的平均耗时推断。"
+            }
+          ]
+        },
+        {
+          "type": "table",
+          "id": "TblInterfaces",
+          "numbered": true,
+          "caption": [
+            {
+              "type": "text",
+              "text": "跨模块接口与记录分工"
+            }
+          ],
+          "columns": [
+            {
+              "id": "col-732"
+            },
+            {
+              "id": "col-733"
+            },
+            {
+              "id": "col-734"
+            },
+            {
+              "id": "col-735"
+            },
+            {
+              "id": "col-736"
+            },
+            {
+              "id": "col-737"
+            },
+            {
+              "id": "col-738"
+            }
+          ],
+          "headerRows": 1,
+          "rows": [
+            {
+              "id": "row-582",
+              "cells": [
+                {
+                  "id": "cell-583",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-584",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "接口"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-585",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-586",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "生产方"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-587",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-588",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "消费方"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-589",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-590",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "交付内容"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-591",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-592",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "异常状态"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-593",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-594",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "记录项目"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-595",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-596",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "验证重点"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "row-597",
+              "cells": [
+                {
+                  "id": "cell-598",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-599",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "输入数据"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-600",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-601",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "输入适配"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-602",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-603",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "模型计算"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-604",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-605",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "值、时间、序号"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-606",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-607",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "超时或校验失败"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-608",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-609",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "原始帧与状态"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-610",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-611",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "单位和序号一致性"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "row-612",
+              "cells": [
+                {
+                  "id": "cell-613",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-614",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "运行参数"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-615",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-616",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "参数管理"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-617",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-618",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "模型计算"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-619",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-620",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "参数与版本号"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-621",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-622",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "范围或版本错误"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-623",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-624",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "生效时刻"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-625",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-626",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "变更边界可追溯"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "row-627",
+              "cells": [
+                {
+                  "id": "cell-628",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-629",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "计算结果"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-630",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-631",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "模型计算"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-632",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-633",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "输出管理"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-634",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-635",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "结果与有效标志"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-636",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-637",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "计算未完成"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-638",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-639",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "开始结束时间"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-640",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-641",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "结果与状态配套"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "row-642",
+              "cells": [
+                {
+                  "id": "cell-643",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-644",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "输出回执"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-645",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-646",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "输出管理"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-647",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-648",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "记录管理"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-649",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-650",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "提交结果与原因"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-651",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-652",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "接口拒绝"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-653",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-654",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "失败返回值"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-655",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-656",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "失败不当成成功"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "row-657",
+              "cells": [
+                {
+                  "id": "cell-658",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-659",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "状态事件"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-660",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-661",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "各业务模块"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-662",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-663",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "记录管理"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-664",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-665",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "类型与事件时间"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-666",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-667",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "事件队列满"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-668",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-669",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "事件原始内容"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-670",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-671",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "事件先后关系"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "row-672",
+              "cells": [
+                {
+                  "id": "cell-673",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-674",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "停止请求"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-675",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-676",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "运行管理"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-677",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-678",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "各业务模块"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-679",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-680",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "请求标识与原因"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-681",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-682",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "重复请求"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-683",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-684",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "收到与完成时间"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-685",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-686",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "停止行为一致"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "row-687",
+              "cells": [
+                {
+                  "id": "cell-688",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-689",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "数据归档"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-690",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-691",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "记录管理"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-692",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-693",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "报告生成"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-694",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-695",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "数据集与版本"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-696",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-697",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "文件缺失"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-698",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-699",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "哈希与导出版本"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-700",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-701",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "结果可重新定位"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "row-702",
+              "cells": [
+                {
+                  "id": "cell-703",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-704",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "复核意见"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-705",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-706",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "项目复核"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-707",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-708",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "版本管理"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-709",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-710",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "问题与处理结果"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-711",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-712",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "意见未关闭"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-713",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-714",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "批注与变更记录"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-715",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-716",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "结论具有依据"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "row-717",
+              "cells": [
+                {
+                  "id": "cell-718",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-719",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "发布清单"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-720",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-721",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "版本管理"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-722",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-723",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "交付使用方"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-724",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-725",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "报告与配置清单"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-726",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-727",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "版本不一致"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-728",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-729",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "发布标识"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-730",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-731",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "交付版本完整"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "id": "p-739",
+          "content": [
+            {
+              "type": "text",
+              "text": "纵向正文转为横向页后，章节编号和正文页码继续递增。宽表结束后恢复纵向页面。新增接口时应补充生产方、消费方和失败返回规则，并同步更新关联用例，而不是只在表中增加一行名称。"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "conclusion",
+      "title": "结论与后续工作",
+      "numbering": "decimal",
+      "children": [
+        {
+          "type": "paragraph",
+          "id": "p-740",
+          "content": [
+            {
+              "type": "text",
+              "text": "本阶段形成了模块划分、接口约定、示例模型和待验证用例清单。离线计算样例能够说明数据如何组织与解释，但实际系统的动态性能、异常恢复和长期稳定性仍需要试验。后续推进应以可复现的证据逐步关闭未完成项。"
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "id": "p-741",
+          "content": [
+            {
+              "type": "text",
+              "text": "优先完成输入适配到模型计算的接口联调，确认字段、单位、初始条件和状态传递方式。随后接入输出管理与记录管理，核对一条完整运行路径；最后执行中断、无效输入和记录异常等工况。"
+            }
+          ]
+        },
+        {
+          "type": "list",
+          "id": "list-742",
+          "ordered": true,
+          "items": [
+            {
+              "id": "item-743",
+              "blocks": [
+                {
+                  "type": "paragraph",
+                  "id": "p-744",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "冻结本次需求和参数版本，明确每项待验证用例的负责人。"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "item-745",
+              "blocks": [
+                {
+                  "type": "paragraph",
+                  "id": "p-746",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "保存原始数据及配置，保证图、表和结论能够重新生成。"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "item-747",
+              "blocks": [
+                {
+                  "type": "paragraph",
+                  "id": "p-748",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "完成问题复核后再发布报告，确保版本说明覆盖所有实质变更。"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "section-749",
+      "title": "修订记录",
+      "numbering": "appendix",
+      "children": [
+        {
+          "type": "table",
+          "id": "TblRevision",
+          "numbered": true,
+          "caption": [
+            {
+              "type": "text",
+              "text": "报告修订记录"
+            }
+          ],
+          "columns": [
+            {
+              "id": "col-777"
+            },
+            {
+              "id": "col-778"
+            },
+            {
+              "id": "col-779"
+            },
+            {
+              "id": "col-780"
+            }
+          ],
+          "headerRows": 1,
+          "rows": [
+            {
+              "id": "row-750",
+              "cells": [
+                {
+                  "id": "cell-751",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-752",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "版本"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-753",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-754",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "日期"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-755",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-756",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "修改内容"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-757",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-758",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "状态"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "row-759",
+              "cells": [
+                {
+                  "id": "cell-760",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-761",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "R0"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-762",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-763",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "2026-10-10"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-764",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-765",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "建立设计与验证框架"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-766",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-767",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "待项目复核"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "row-768",
+              "cells": [
+                {
+                  "id": "cell-769",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-770",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "后续版本"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-771",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-772",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "待确定"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-773",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-774",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "补充实际试验与问题处理"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-775",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-776",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "按证据更新"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "id": "p-781",
+          "content": [
+            {
+              "type": "text",
+              "text": "引用定位检查：计算模型见式（"
+            },
+            {
+              "type": "ref",
+              "id": "ref-782",
+              "target": "eq-fraction",
+              "display": "number"
+            },
+            {
+              "type": "text",
+              "text": "），系统关系见图 "
+            },
+            {
+              "type": "ref",
+              "id": "ref-783",
+              "target": "FigArchitecture",
+              "display": "number"
+            },
+            {
+              "type": "text",
+              "text": "，参数定义见表 "
+            },
+            {
+              "type": "ref",
+              "id": "ref-784",
+              "target": "TblParameters",
+              "display": "number"
+            },
+            {
+              "type": "text",
+              "text": "，完整用例见表 "
+            },
+            {
+              "type": "ref",
+              "id": "ref-785",
+              "target": "TblCases",
+              "display": "number"
+            },
+            {
+              "type": "text",
+              "text": "。这些引用均随对象编号更新。"
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "id": "p-786",
+          "content": [
+            {
+              "type": "link",
+              "id": "link-787",
+              "text": "模板使用参考：Microsoft Word 模板说明",
+              "href": "https://support.microsoft.com/en-us/word/create-a-template"
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "id": "p-788",
+          "content": [
+            {
+              "type": "text",
+              "text": "报告发布前复查封面信息、目录页码、图表题注与公式编号。保留评审批注和修订副本，交付正文应与确认的配置及结论保持一致。"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "notes": [
+    {
+      "id": "note-time",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "id": "p-50",
+          "content": [
+            {
+              "type": "text",
+              "text": "本报告时间均为相对于单次试验起点的时间；表格中的量纲以单位列为准。"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

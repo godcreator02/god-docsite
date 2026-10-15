@@ -1,0 +1,971 @@
+{
+  "$schema": "./report-content.schema.json",
+  "format": "docreport",
+  "schemaVersion": 1,
+  "id": "report-demo",
+  "metadata": {
+    "title": "模块化控制器技术报告",
+    "shortTitle": "模块化控制器",
+    "language": "zh-CN",
+    "authors": [
+      "项目组"
+    ],
+    "date": "2026-10-10",
+    "revision": "R0",
+    "fields": [
+      {
+        "id": "projectName",
+        "label": "项目名称",
+        "value": "模块化控制器设计与验证"
+      }
+    ]
+  },
+  "blocks": [
+    {
+      "type": "abstract",
+      "id": "sec-summary",
+      "paragraphs": [
+        {
+          "type": "paragraph",
+          "id": "p-summary",
+          "content": [
+            {
+              "type": "text",
+              "text": "本例用于说明内容协议，工程结果为演示数据。"
+            },
+            {
+              "type": "note_ref",
+              "id": "note-call-1",
+              "target": "note-data"
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "id": "abstract-example-output",
+          "content": [
+            {
+              "type": "text",
+              "text": "数据经协议校验后，由本机 Word 与 MathType 生成可编辑的报告，并导出 PDF 供逐页核对。"
+            }
+          ]
+        }
+      ],
+      "keywords": [
+        "内容协议",
+        "Word",
+        "MathType"
+      ]
+    },
+    {
+      "type": "section",
+      "id": "sec-design",
+      "title": "设计与模型",
+      "numbering": "decimal",
+      "children": [
+        {
+          "type": "paragraph",
+          "id": "p-inline-text-notation",
+          "content": [
+            {
+              "type": "text",
+              "text": "变量 "
+            },
+            {
+              "type": "text",
+              "text": "B",
+              "marks": [
+                "em"
+              ]
+            },
+            {
+              "type": "text",
+              "text": "max",
+              "marks": [
+                "sub"
+              ]
+            },
+            {
+              "type": "text",
+              "text": " 用正文斜体与下标表达；面积单位 mm"
+            },
+            {
+              "type": "text",
+              "text": "2",
+              "marks": [
+                "sup"
+              ]
+            },
+            {
+              "type": "text",
+              "text": " 保持正体。需要结构化排版的公式使用 MathType。"
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "id": "p-intro",
+          "content": [
+            {
+              "type": "text",
+              "text": "系统结构见"
+            },
+            {
+              "type": "ref",
+              "id": "ref-architecture",
+              "target": "fig-architecture",
+              "display": "label"
+            },
+            {
+              "type": "text",
+              "text": "，模型见"
+            },
+            {
+              "type": "ref",
+              "id": "ref-model",
+              "target": "eq-model",
+              "display": "label"
+            },
+            {
+              "type": "text",
+              "text": "。"
+            }
+          ]
+        },
+        {
+          "type": "figure",
+          "id": "fig-architecture",
+          "src": "assets/architecture.png",
+          "caption": [
+            {
+              "type": "text",
+              "text": "系统总体结构"
+            }
+          ],
+          "alt": "输入、控制、驱动和采集模块依次连接。"
+        },
+        {
+          "type": "section",
+          "id": "sec-model",
+          "title": "模型定义",
+          "numbering": "decimal",
+          "children": [
+            {
+              "type": "paragraph",
+              "id": "p-mixed",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "电感电流 "
+                },
+                {
+                  "type": "math",
+                  "id": "math-current",
+                  "latex": "i_L(t)"
+                },
+                {
+                  "type": "text",
+                  "text": " 的扰动幅值为 "
+                },
+                {
+                  "type": "math",
+                  "id": "math-delta",
+                  "latex": "\\Delta i"
+                },
+                {
+                  "type": "text",
+                  "text": "。"
+                },
+                {
+                  "type": "break"
+                },
+                {
+                  "type": "text",
+                  "text": "这些符号可以与",
+                  "marks": [
+                    "strong"
+                  ]
+                },
+                {
+                  "type": "text",
+                  "text": "普通文字在同一段内编辑。"
+                }
+              ]
+            },
+            {
+              "type": "equation",
+              "id": "eq-model",
+              "latex": "H(s)=\\frac{1}{LCs^2+RCs+1}",
+              "numbered": true
+            },
+            {
+              "type": "equation",
+              "id": "eq-energy",
+              "latex": "E=\\int_0^T v(t)i(t)\\,\\mathrm{d}t",
+              "numbered": false
+            },
+            {
+              "type": "table",
+              "id": "tbl-parameters",
+              "caption": [
+                {
+                  "type": "text",
+                  "text": "模型参数"
+                }
+              ],
+              "columns": [
+                {
+                  "id": "col-symbol"
+                },
+                {
+                  "id": "col-value"
+                },
+                {
+                  "id": "col-unit"
+                }
+              ],
+              "headerRows": 2,
+              "rows": [
+                {
+                  "id": "row-group",
+                  "cells": [
+                    {
+                      "id": "cell-group",
+                      "colSpan": 3,
+                      "blocks": [
+                        {
+                          "type": "paragraph",
+                          "id": "p-cell-group",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "模型参数表"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "row-header",
+                  "cells": [
+                    {
+                      "id": "cell-symbol",
+                      "blocks": [
+                        {
+                          "type": "paragraph",
+                          "id": "p-cell-symbol",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "元件组"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "id": "cell-value",
+                      "blocks": [
+                        {
+                          "type": "paragraph",
+                          "id": "p-cell-value",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "值"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "id": "cell-unit",
+                      "blocks": [
+                        {
+                          "type": "paragraph",
+                          "id": "p-cell-unit",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "单位"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "row-L",
+                  "cells": [
+                    {
+                      "id": "cell-L",
+                      "blocks": [
+                        {
+                          "type": "paragraph",
+                          "id": "p-cell-L",
+                          "content": [
+                            {
+                              "type": "math",
+                              "id": "math-L",
+                              "latex": "L,C"
+                            }
+                          ]
+                        }
+                      ],
+                      "rowSpan": 2
+                    },
+                    {
+                      "id": "cell-L-value",
+                      "blocks": [
+                        {
+                          "type": "paragraph",
+                          "id": "p-cell-L-value",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "1.5"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "id": "cell-L-unit",
+                      "blocks": [
+                        {
+                          "type": "paragraph",
+                          "id": "p-cell-L-unit",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "mH"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "row-C",
+                  "cells": [
+                    {
+                      "id": "cell-C-value",
+                      "blocks": [
+                        {
+                          "type": "paragraph",
+                          "id": "p-cell-C-value",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "470"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "id": "cell-C-unit",
+                      "blocks": [
+                        {
+                          "type": "paragraph",
+                          "id": "p-cell-C-unit",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "μF"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ],
+              "numbered": true
+            },
+            {
+              "type": "list",
+              "id": "list-checks",
+              "ordered": true,
+              "start": 1,
+              "items": [
+                {
+                  "id": "item-input",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-input",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "核对输入和单位。"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "item-evidence",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-evidence",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "区分离线计算与实测。"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "list",
+                      "id": "list-evidence",
+                      "ordered": false,
+                      "items": [
+                        {
+                          "id": "item-archive",
+                          "blocks": [
+                            {
+                              "type": "paragraph",
+                              "id": "p-archive",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "保留原始图片和数据文件。"
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "sec-results",
+      "title": "结果与讨论",
+      "numbering": "decimal",
+      "children": [
+        {
+          "type": "figure",
+          "id": "fig-response",
+          "src": "assets/response.png",
+          "caption": [
+            {
+              "type": "text",
+              "text": "离线计算响应"
+            }
+          ],
+          "alt": "给定值在 5 ms 时阶跃到 0.8，响应按一阶模型逐步接近给定值。"
+        },
+        {
+          "type": "paragraph",
+          "id": "p-result",
+          "content": [
+            {
+              "type": "text",
+              "text": "图中数据为计算示例，"
+            },
+            {
+              "type": "text",
+              "text": "尚未实测",
+              "marks": [
+                "strong"
+              ]
+            },
+            {
+              "type": "text",
+              "text": "。模型关系仍引用"
+            },
+            {
+              "type": "ref",
+              "id": "ref-model-again",
+              "target": "eq-model",
+              "display": "label"
+            },
+            {
+              "type": "text",
+              "text": "，不会因移动图片而改变目标。"
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "id": "p-source",
+          "content": [
+            {
+              "type": "text",
+              "text": "JSON Schema 的字段定义参考"
+            },
+            {
+              "type": "cite",
+              "id": "cite-schema",
+              "targets": [
+                "source-schema"
+              ]
+            },
+            {
+              "type": "text",
+              "text": "；也可查看"
+            },
+            {
+              "type": "link",
+              "id": "link-schema",
+              "text": "官方规范",
+              "href": "https://json-schema.org/draft/2020-12"
+            },
+            {
+              "type": "text",
+              "text": "。"
+            }
+          ]
+        },
+        {
+          "type": "table",
+          "id": "tbl-nested-demo",
+          "numbered": true,
+          "caption": [
+            {
+              "type": "text",
+              "text": "复杂单元格结构示例"
+            }
+          ],
+          "columns": [
+            {
+              "id": "col-nested-module"
+            },
+            {
+              "id": "col-nested-detail"
+            }
+          ],
+          "headerRows": 1,
+          "rows": [
+            {
+              "id": "row-nested-head",
+              "cells": [
+                {
+                  "id": "cell-nested-module-head",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-cell-nested-module-head",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "模块"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-nested-detail-head",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-cell-nested-detail-head",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "内容"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "row-nested-body",
+              "cells": [
+                {
+                  "id": "cell-nested-module",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-cell-nested-module",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "采集模块"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-nested-detail",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p-nested-intro",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "这个单元格同时容纳多个段落、子表格、图片、公式、列表和代码。"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "table",
+                      "id": "tbl-channel-config",
+                      "numbered": false,
+                      "caption": [
+                        {
+                          "type": "text",
+                          "text": "通道明细"
+                        }
+                      ],
+                      "columns": [
+                        {
+                          "id": "col-channel"
+                        },
+                        {
+                          "id": "col-config"
+                        }
+                      ],
+                      "headerRows": 1,
+                      "rows": [
+                        {
+                          "id": "row-channel-head",
+                          "cells": [
+                            {
+                              "id": "cell-channel-head",
+                              "blocks": [
+                                {
+                                  "type": "paragraph",
+                                  "id": "p-cell-channel-head",
+                                  "content": [
+                                    {
+                                      "type": "text",
+                                      "text": "通道"
+                                    }
+                                  ]
+                                }
+                              ]
+                            },
+                            {
+                              "id": "cell-config-head",
+                              "blocks": [
+                                {
+                                  "type": "paragraph",
+                                  "id": "p-cell-config-head",
+                                  "content": [
+                                    {
+                                      "type": "text",
+                                      "text": "配置"
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "id": "row-channel-A",
+                          "cells": [
+                            {
+                              "id": "cell-channel-A",
+                              "blocks": [
+                                {
+                                  "type": "paragraph",
+                                  "id": "p-cell-channel-A",
+                                  "content": [
+                                    {
+                                      "type": "text",
+                                      "text": "模拟输入 A"
+                                    }
+                                  ]
+                                }
+                              ]
+                            },
+                            {
+                              "id": "cell-config-A",
+                              "blocks": [
+                                {
+                                  "type": "paragraph",
+                                  "id": "p-before-range",
+                                  "content": [
+                                    {
+                                      "type": "text",
+                                      "text": "量程设置如下。"
+                                    }
+                                  ]
+                                },
+                                {
+                                  "type": "table",
+                                  "id": "tbl-ranges",
+                                  "numbered": false,
+                                  "columns": [
+                                    {
+                                      "id": "col-range-name"
+                                    },
+                                    {
+                                      "id": "col-range-value"
+                                    }
+                                  ],
+                                  "headerRows": 0,
+                                  "rows": [
+                                    {
+                                      "id": "row-range",
+                                      "cells": [
+                                        {
+                                          "id": "cell-range-name",
+                                          "blocks": [
+                                            {
+                                              "type": "paragraph",
+                                              "id": "p-cell-range-name",
+                                              "content": [
+                                                {
+                                                  "type": "text",
+                                                  "text": "量程"
+                                                }
+                                              ]
+                                            }
+                                          ]
+                                        },
+                                        {
+                                          "id": "cell-range-value",
+                                          "blocks": [
+                                            {
+                                              "type": "paragraph",
+                                              "id": "p-cell-range-value",
+                                              "content": [
+                                                {
+                                                  "type": "text",
+                                                  "text": "±10 V"
+                                                }
+                                              ]
+                                            }
+                                          ]
+                                        }
+                                      ]
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "figure",
+                      "id": "fig-cell-response",
+                      "src": "assets/response.png",
+                      "caption": [
+                        {
+                          "type": "text",
+                          "text": "单元格中的离线响应示意"
+                        }
+                      ],
+                      "alt": "与正文响应图相同的计算曲线，用于协议结构演示。"
+                    },
+                    {
+                      "type": "equation",
+                      "id": "eq-cell-error",
+                      "latex": "e(t)=r(t)-y(t)",
+                      "numbered": true
+                    },
+                    {
+                      "type": "list",
+                      "id": "list-cell-checks",
+                      "ordered": false,
+                      "items": [
+                        {
+                          "id": "item-cell-unit",
+                          "blocks": [
+                            {
+                              "type": "paragraph",
+                              "id": "p-nested-cell-unit",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "核对通道名称与量程单位。"
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "code",
+                      "id": "code-cell-status",
+                      "language": "text",
+                      "text": "channel=A\nstatus=illustrative"
+                    },
+                    {
+                      "type": "paragraph",
+                      "id": "p-nested-end",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "以上内容用于演示复杂单元格的生成和验收。"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "id": "p-nested-refs",
+          "content": [
+            {
+              "type": "text",
+              "text": "整体结构见"
+            },
+            {
+              "type": "ref",
+              "id": "ref-nested-outer",
+              "target": "tbl-nested-demo",
+              "display": "label"
+            },
+            {
+              "type": "text",
+              "text": "，内部说明见“"
+            },
+            {
+              "type": "ref",
+              "id": "ref-nested-title",
+              "target": "tbl-channel-config",
+              "display": "title"
+            },
+            {
+              "type": "text",
+              "text": "”，单元格内公式见"
+            },
+            {
+              "type": "ref",
+              "id": "ref-cell-error",
+              "target": "eq-cell-error",
+              "display": "label"
+            },
+            {
+              "type": "text",
+              "text": "。"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "sec-references",
+      "title": "参考文献",
+      "numbering": "none",
+      "children": [
+        {
+          "type": "bibliography",
+          "id": "bibliography-main"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "sec-appendix",
+      "title": "复核记录",
+      "numbering": "appendix",
+      "children": [
+        {
+          "type": "code",
+          "id": "code-check",
+          "language": "text",
+          "text": "输入有效 → 计算完成 → 保存证据\n异常状态应单独记录。"
+        },
+        {
+          "type": "paragraph",
+          "id": "p-appendix",
+          "content": [
+            {
+              "type": "text",
+              "text": "附录公式按附录单独编号。"
+            }
+          ]
+        },
+        {
+          "type": "equation",
+          "id": "eq-appendix",
+          "latex": "\\varepsilon = y_{\\mathrm{ref}}-y",
+          "numbered": true
+        },
+        {
+          "type": "section",
+          "id": "sec-appendix-detail",
+          "title": "复核细节",
+          "numbering": "decimal",
+          "children": [
+            {
+              "type": "paragraph",
+              "id": "p-appendix-detail",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "附录子标题沿用字母章号。"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "notes": [
+    {
+      "id": "note-data",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "id": "p-note",
+          "content": [
+            {
+              "type": "text",
+              "text": "这里的数值和曲线只用于检验文档能力，不作为项目实测结论。"
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "id": "p-note-formula",
+          "content": [
+            {
+              "type": "text",
+              "text": "脚注中的公式为 "
+            },
+            {
+              "type": "math",
+              "id": "math-note",
+              "latex": "x"
+            },
+            {
+              "type": "text",
+              "text": "。"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "references": [
+    {
+      "id": "source-schema",
+      "text": "JSON Schema. Draft 2020-12.",
+      "url": "https://json-schema.org/draft/2020-12"
+    }
+  ]
+}

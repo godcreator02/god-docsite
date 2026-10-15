@@ -1,0 +1,903 @@
+{
+  "format": "docreport",
+  "schemaVersion": 1,
+  "id": "doc_22ed251504864df5aedfcd84b4beb1b2",
+  "metadata": {
+    "title": "参数与版本记录",
+    "shortTitle": "参数与版本记录",
+    "language": "zh-CN",
+    "authors": [
+      "编制单位  项目组"
+    ],
+    "revision": "版本  R0",
+    "date": "2026-10-10",
+    "fields": [
+      {
+        "id": "projectName",
+        "label": "项目名称",
+        "value": "模块化控制器设计与验证"
+      }
+    ]
+  },
+  "blocks": [
+    {
+      "type": "section",
+      "id": "sec_6576563cf6f0446993e32db0e756499a",
+      "title": "参数与版本记录",
+      "numbering": "decimal",
+      "children": [
+        {
+          "type": "paragraph",
+          "id": "p_cbb10355cba24b9899b7e86bd5321aae",
+          "content": [
+            {
+              "type": "text",
+              "text": "参数表同时保存符号、数值、单位与使用说明。下表是文档和流程演示所用的示例参数；实际项目应由负责人确认参数来源、允许范围和生效时间。每次导出结果时，将参数表的版本与程序版本一并记录。"
+            }
+          ]
+        },
+        {
+          "type": "table",
+          "id": "tbl_97d7664b5bf149afb92d96fc7af9388e",
+          "numbered": true,
+          "caption": [
+            {
+              "type": "text",
+              "text": "示例参数与记录要求"
+            }
+          ],
+          "columns": [
+            {
+              "id": "n_a870db19391c476babbfa67a3d11b8c5"
+            },
+            {
+              "id": "n_f7a6acdce4f64af89d382e4ce061813e"
+            },
+            {
+              "id": "n_bc46b8c626a14270a19e029b2187f3c7"
+            },
+            {
+              "id": "n_3997bf865ca84d1c90697e337b9e170b"
+            }
+          ],
+          "headerRows": 2,
+          "rows": [
+            {
+              "id": "n_0a02b004f0594fbab10914ae1b98575e",
+              "cells": [
+                {
+                  "id": "n_8359fe55fc764806afcd314bf76e3bcb",
+                  "colSpan": 4,
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_f470823cef8f46988b80409d27b1713f",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "离线演示参数与版本基线"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "n_4eda032316a04864baec6f5fdb2a3fc6",
+              "cells": [
+                {
+                  "id": "n_d04146f028f643a386f47b7a62fa4cb0",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_140c68050f294cce91f3de773bc7c040",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "参数"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_2617ee632aa14688810f6970f1be52c9",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_24ea4f7294b6442395e65c63ea93d48a",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "符号"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_37b28293b0384fdc9444444e24a9c8c4",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_cafc75a6631f437ea08ca58593437f37",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "数值与单位"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_e782a18308404e9a9308cd18d7a750b1",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_93b32b0ca6fb4df7b9e63c113a9435ad",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "用途或说明"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "n_807ff8c1da164a6a8b83201603304ce2",
+              "cells": [
+                {
+                  "id": "n_f9975960c2624331af7931f2a89bfeb1",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_770a4612e4ac421bbc64b02c85a93c69",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "电感"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_e9c1c77c14744ab69984badd1977654b",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_8fedeea2441b4678b474f6d3b2f4c94f",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "L"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_9517a1f3fb954225a9a3f8d024903c81",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_935cd5316abb488fb1f455d2b4ca5f33",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "100 μH"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_06c1a8f73b214777b9b9ed47fc973d79",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_d6b6a087c4f44e0cbc3c7eb5673a2cef",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "二阶表达式的示例系数"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "n_5f2cc7f1cad74904a6b86a7c0cf16aab",
+              "cells": [
+                {
+                  "id": "n_6912cc1ba5be4520ac86820328d47456",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_9b1cf40a77594bfe8027880c8fc11c07",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "电容"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_ec5f11891c904a7ea8d581745da975d6",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_0b2b9d6acd9c48edbaf77da0a566e3ac",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "C"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_d60dd026c1ba46958f60ae98553ce6f7",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_7d2685cfd91e4001ad20a82cf2be5735",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "47 μF"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_4d874fe5adcb46e793c3df8f2ee2d03a",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_295b089f826b4e8098787dd249e49cdd",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "二阶表达式的示例系数"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "n_02f27713a04544d4876113547f0df4c7",
+              "cells": [
+                {
+                  "id": "n_7fa50f5779034781b0ee0d2766da4763",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_9c42dd135dc34df6b03e98c27be21966",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "电阻"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_58a5d6b3f6144a84bfa451e6934277fc",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_6a68ab4c071b4fbca6886e33302a5f62",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "R"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_186c415f7fad49b489b588b7fa294969",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_67a1ee93c0d4422d82703201bcaa424d",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "0.2 Ω"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_e50a852336114198a875c90ddf662abf",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_249a2656d48e4a2eb04908390eac78b5",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "二阶表达式的示例系数"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "n_680c21aeb8c8470ab8412de42f8b33d1",
+              "cells": [
+                {
+                  "id": "n_240ee69e3e80437aa21eb5aa3ddd43dc",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_275de8a68d754742b84a9c74bf739574",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "直流分量"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_c800350893aa4159b83ddd5c492d31af",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_c440c94ef3e84928b791524125c257b5",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "I₀"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_89127c27c6ac46b5baf53d0367c0ad92",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_69aafe9352b247d7a99e8a721ba6d25c",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "1 A"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_a52461dff4d648238ef61330ad17d3d0",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_9b6bcbb637814f5cafc93f133447b0e7",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "行内公式的演示输入"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "n_314fc7ad7f4745d0975610acc8e7179b",
+              "cells": [
+                {
+                  "id": "n_93d89a0e703d4fa8bfbfeb8892271cde",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_a4bc6f78a11f42c8beeadcae0faa1246",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "纹波幅值"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_e53e90998d7e4510b83cb6a45b87bb2f",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_36cb3bd6032f473bb11af171ede56c40",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "Δi"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_fa2f388313914b05bb75ed37fbae8187",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_efb0d7e993bd4f949a43c861b0c21072",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "0.1 A"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_dffde74c30984816b413f6139b2c305c",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_db5f5a9a043442b586cedf4adf62e7b8",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "行内公式的演示输入"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "n_92f6740fce434bbcae9d7256c4a4c6a2",
+              "cells": [
+                {
+                  "id": "n_61f05c4b9c844948b5cf8754fec5f956",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_2933face4ea545e497086589bdbd49fa",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "响应时间常数"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_e0aa4a70d803491780f9c5b8185f1fcd",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_f951bf9539294c66bbb53073c5a21235",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "τ"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_5ead382f74c14be0b91b743c96978b91",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_b76388d446104986bc2f43934de8320b",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "4 ms"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_75a8596752984d50af04054b0c208e1e",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_074346da466745d189d7dfa341a26ab7",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "离线曲线计算条件"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "n_43fbbe869a4a4f29853f88fb4b26b1b6",
+              "cells": [
+                {
+                  "id": "n_ebe81499abca49e896ad7f080880b109",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_52c7937ac9fd487e8b8aa201c1527b5e",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "输入变化时刻"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_a765178b2a814b7baa315f361a5dafaf",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_28311f6619f1469393ced9188743a60f",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "t₀"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_ffc62e10f5ef41afa1501cd5fe431bd8",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_94ff11126ae34a60903b767e4aa3df42",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "5 ms"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_b5c73e883c1e4f5680fe8e3b72cb87d8",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_36e38a785068460394fcb2f85e5bdab3",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "离线曲线计算条件"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "n_33b5a172e9b649ed8b28d0551521533e",
+              "cells": [
+                {
+                  "id": "n_78ba62646c3542bd83be0faea6da18cc",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_bfb7187ea584464e948185949b620de9",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "计算点间隔"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_8d6e8f230e824ecfa1e5d90bf6c80e0f",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_d14bdda8c72d4b09b8666162e469e22b",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "Δt"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_216da3eaecbe4fe9aea1c21b84a203e4",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_cf174a22f55e47728fb1cfb9b824eb6f",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "0.5 ms"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_b7f4b860d47c4590a6f7d173d0dbfadb",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_43b9e6d1c9874b4eb9efa091f04120be",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "离线曲线采样间隔"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "n_9c7ea8f2cce2430aa5fa979d741ab184",
+              "cells": [
+                {
+                  "id": "n_bf36f0bec57341a69d072ab5de70860c",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_29d68f4dc1c045daa007b44fd72fa4aa",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "给定值"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_93529bc3867c4203b393d1b5b9012b0e",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_2e4d0663dc5043b68c2f20f33e4edddf",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "u"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_adca61b8116a4060aa46865fced58d8a",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_bb116802d5714919b8a79b9b03860d10",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "0.8"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_65a9fc923c054421b847f82703c23157",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_f23b9c8a96a24099ab2f2ddb72829f96",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "归一化无量纲值"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "n_338590e4865943de8cd896ce8e081579",
+              "cells": [
+                {
+                  "id": "n_e59bcf2ee5c54e199ca91fbba99006f2",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_ac221c5b475842679afa5e9931d62ddc",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "记录长度"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_2d7336b7a0a9451da26502139ebc75c1",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_87a662b709bd46019825fe62c3229a62",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "N"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_2042635888a84f6bb6ea6704e11175c3",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_58ea5286606949efa863c7cc971ed7d4",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "81 点"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_ab8d599a25db4c7db88155108c4b665e",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_3389dac03e4c44709cca697af8b2130a",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "覆盖 0 至 40 ms"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "n_b97a45dff74c4eb0ba76dbc0a6aa3d72",
+              "cells": [
+                {
+                  "id": "n_bec817db3c63401093ffadf8eae92b29",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_928281a4d4dc4913abedbe8b0030a410",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "参数版本"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_a7b37474af324962b5e2b6bf01ff73f5",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_ee6fc19cf50d4ba5be610d715a8381d6",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "—"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_40458e5797b74adaa1605cf2a5b1acef",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_04722e84a2e543059905706ddd97fb13",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "R0"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_4b26186e7ef748c6ab487fd9a7128504",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_f0b91de426ca45ee96eb6c98660854da",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "与报告版本对应"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "id": "p_2ac877502fac405b987b870d2053e528",
+          "content": [
+            {
+              "type": "text",
+              "text": "表 "
+            },
+            {
+              "type": "ref",
+              "id": "n_a2032c1bd7054c3cb0642510bd589443",
+              "target": "tbl_97d7664b5bf149afb92d96fc7af9388e",
+              "display": "number"
+            },
+            {
+              "type": "text",
+              "text": " 中的不同参数服务于不同的表达式，不能把示例参数自动组合成已经验证的硬件设计。对实际项目的每个量，应标出定义、来源和适用工况，并区分配置值、计算值和测量值。"
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "id": "p_dd33fcdd15d94837810dc42636ff2de3",
+          "content": [
+            {
+              "type": "text",
+              "text": "版本记录至少包含修改人、修改时间、修改原因和复核结论。若修改会影响历史数据比较，应保留旧版本，给出兼容关系，并注明哪些验证用例需要重新执行。"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "notes": [],
+  "references": []
+}

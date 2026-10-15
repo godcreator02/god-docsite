@@ -16,7 +16,7 @@ const allowedFeatureDependencies = {
   comments: ['identity'],
   'doc-export': ['code-pin'],
   collab: ['identity', 'comments'],
-  report: ['comments'],
+  'word-report': ['comments'],
   docfirst: ['code-pin', 'doc-export', 'trajectory'],
 }
 const featurePackages = Object.keys(allowedFeatureDependencies)

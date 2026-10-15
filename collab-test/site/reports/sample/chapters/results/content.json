@@ -1,0 +1,96 @@
+{
+  "format": "docreport",
+  "schemaVersion": 1,
+  "id": "doc_461a1716a9324bcbbb0c4612c45b866f",
+  "metadata": {
+    "title": "计算结果与分析",
+    "shortTitle": "计算结果与分析",
+    "language": "zh-CN",
+    "authors": [
+      "编制单位  项目组"
+    ],
+    "revision": "版本  R0",
+    "date": "2026-10-10",
+    "fields": [
+      {
+        "id": "projectName",
+        "label": "项目名称",
+        "value": "模块化控制器设计与验证"
+      }
+    ]
+  },
+  "blocks": [
+    {
+      "type": "section",
+      "id": "sec_d7b7f2943da448039731bfa4edcc9505",
+      "title": "计算结果与分析",
+      "numbering": "decimal",
+      "children": [
+        {
+          "type": "paragraph",
+          "id": "p_6ab43d6642214cba990fb02c033e5106",
+          "content": [
+            {
+              "type": "text",
+              "text": "为检查数据图和分析文字的组织方式，本节采用一阶指数响应作为离线计算样例。输入在 5 ms 时从 0 变为 0.8，时间常数取 4 ms，采样间隔取 0.5 ms。所有点均由给定模型计算，尚未与实物测量进行对照。"
+            }
+          ]
+        },
+        {
+          "type": "figure",
+          "id": "fig_21947f93b79a40cbb54a9d46ee7992e5",
+          "src": "assets/response.png",
+          "caption": [
+            {
+              "type": "text",
+              "text": "给定输入与离线计算响应"
+            }
+          ],
+          "alt": "给定输入与离线计算响应"
+        },
+        {
+          "type": "paragraph",
+          "id": "p_399ae4055091477294d7a4dd32cdc0c1",
+          "content": [
+            {
+              "type": "text",
+              "text": "图 "
+            },
+            {
+              "type": "ref",
+              "id": "n_2f169b6618a0403ba6e1918e8f40ccc2",
+              "target": "fig_21947f93b79a40cbb54a9d46ee7992e5",
+              "display": "number"
+            },
+            {
+              "type": "text",
+              "text": " 中，输入变化后输出逐步接近给定值。这与所选一阶计算模型的性质一致，并不意味着实际控制系统必然具有相同的响应速度或无超调特性。硬件环节、采样延时和限幅都可能改变结果。"
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "id": "p_2020022d358149dbbf75b3ea3033760e",
+          "content": [
+            {
+              "type": "text",
+              "text": "分析实际数据时，应先对齐试验起点和参数版本，再比较变化趋势。若曲线出现差异，按输入一致性、时间对齐、模型参数和执行状态的顺序排查，避免只截取局部曲线进行判断。"
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "id": "p_75de1e1ba2a141f6b80597ba4ef38f5d",
+          "content": [
+            {
+              "type": "text",
+              "text": "数值校核补充图中不容易精确读取的信息。图中的 35 ms 点约为 0.799558，给定值为 0.8；该差值仅是所给模型在有限时间内的剩余偏差，不是测量误差，也不是项目精度结论。"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "notes": [],
+  "references": []
+}

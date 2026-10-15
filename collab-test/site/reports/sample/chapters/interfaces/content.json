@@ -1,0 +1,1191 @@
+{
+  "format": "docreport",
+  "schemaVersion": 1,
+  "id": "doc_70252e1c24b94d5ab8d784eb873d7b45",
+  "metadata": {
+    "title": "接口时序与资源分配",
+    "shortTitle": "接口时序与资源分配",
+    "language": "zh-CN",
+    "authors": [
+      "编制单位  项目组"
+    ],
+    "revision": "版本  R0",
+    "date": "2026-10-10",
+    "fields": [
+      {
+        "id": "projectName",
+        "label": "项目名称",
+        "value": "模块化控制器设计与验证"
+      }
+    ]
+  },
+  "blocks": [
+    {
+      "type": "section",
+      "id": "sec_512fa30e0ba84783b98f254557dd4d0f",
+      "title": "接口时序与资源分配",
+      "numbering": "decimal",
+      "children": [
+        {
+          "type": "paragraph",
+          "id": "p_18f4bf42b30340939e7c6b712c1c1051",
+          "content": [
+            {
+              "type": "text",
+              "text": "宽表用于汇总跨模块的约定。表中的窗口和容量均为演示配置，先用于检查字段关系，再通过实测确认可行范围。时序结论应依据完整路径的时间记录，不能只根据单个模块的平均耗时推断。"
+            }
+          ]
+        },
+        {
+          "type": "table",
+          "id": "tbl_3533386ce6ae45a186240f56b9df8f59",
+          "numbered": true,
+          "caption": [
+            {
+              "type": "text",
+              "text": "跨模块接口与记录分工"
+            }
+          ],
+          "columns": [
+            {
+              "id": "n_dc20cb00d955452e98df4e876fa026f0"
+            },
+            {
+              "id": "n_e6d1f90bde604f59b49edb2a89ba2448"
+            },
+            {
+              "id": "n_bdfb5917129543ee91fe7cf693e4e972"
+            },
+            {
+              "id": "n_1a414c099df6464dafae35b387526ad7"
+            },
+            {
+              "id": "n_b024bd65934a41f8a1439c1346de8edb"
+            },
+            {
+              "id": "n_821612efa34241a284948eeac5b2ffc1"
+            },
+            {
+              "id": "n_19bdcd28fa204e60a31000fe1bc17049"
+            }
+          ],
+          "headerRows": 1,
+          "rows": [
+            {
+              "id": "n_53242362ec374f8ab86c459cae946a47",
+              "cells": [
+                {
+                  "id": "n_9c553d77778046488ce6cec8058fa51d",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_fe4425a8c5ca4ca588df6d1acc1ede33",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "接口"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_3aef91883f854ff0bf3783999800766b",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_63f5f248b5734569b5cdc86c941bb6fa",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "生产方"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_e461cb318f4c4492a42aeceb3e270c29",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_0a918501683942acbb23a31eebd8d3e5",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "消费方"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_c3d27e5396f34535828ea11135469e7c",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_a4af02711a46427c803bdb9cb5401951",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "交付内容"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_1cca5e45768b4749af49acd2031eec51",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_1d59843c5d25466da88881cf6c24cea4",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "异常状态"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_8549c1ce61d64b16a5aea33d3b17c8e6",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_d91babb96cb242b59dce4b623023b77a",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "记录项目"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_ed5dde16ee124e2bba0f9cf4b4713bd1",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_5563ed63c20d4a56825cc1644309b442",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "验证重点"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "n_38bde5fdf4b24dd6936f43ef0ab0f6ff",
+              "cells": [
+                {
+                  "id": "n_984c7be7e541486d93e7d2696c8b7d0a",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_f572380ee3dd4a3492fb5526138bb484",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "输入数据"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_43fad932674a4dbe915d5bc3e9493ffb",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_dcf27059ecb54a839229df0426b6b8cd",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "输入适配"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_1781da8f8ba24700a497a64bf05a5de9",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_646dfbde73a044ed8117053f7ef4ee26",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "模型计算"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_43fa35e7d3434d17a76a75d3b6638e0d",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_bd907ae2efc74336bda9a5f4472c9fed",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "值、时间、序号"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_5ba27eace1a24a1bb3925bab76003fd9",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_b30b20d549a64a1fb2f58b2c3259567c",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "超时或校验失败"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_9b74c25e3c4344dc8182f6210c9488b6",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_25533fec7f10439ca0211074ec11c271",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "原始帧与状态"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_ffa2c2bbee8748ff8ce581f4efbc2615",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_1a83c4e63f9e4d8ea9ac2c9d5c22dd13",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "单位和序号一致性"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "n_23f3c5e1a12e407598ab731cf45e78ed",
+              "cells": [
+                {
+                  "id": "n_7a0ff7b84c7140988e3244cc31aa7fd1",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_1c1ddba2fe934f938df4e2bfd9237a98",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "运行参数"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_372189038c424f27b6c5d14da6e9091f",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_8d86e13b85174b44984c2dc22ca13f53",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "参数管理"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_2f8beee005c7432492c8db9f30c23fa7",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_afd22fcf39124db1acedc52b4411ab28",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "模型计算"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_e7bbc4b8594d49b0bac4d23941c1d4b5",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_6b0a4dd2af3e4a4e975fc65ad88e2031",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "参数与版本号"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_ce87d37bd5aa48f6b8fac3e3bdc5be33",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_2401ee2379a644819a5c2067adcc2646",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "范围或版本错误"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_1752f80fb16f42cca662ac12ab709e9b",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_0de43efd223f4195ae4a6b5fe592d733",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "生效时刻"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_5292572d56c84aa9bf748148d61c3734",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_21bc9d9b2fd547499a4384fbc029cbfe",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "变更边界可追溯"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "n_456ce8783d7a4be49c8e79337a31363d",
+              "cells": [
+                {
+                  "id": "n_326ea32ad7bb4226a71ed1c47326f8b0",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_a6bae1f2e156444f8283c02e710cc884",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "计算结果"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_88182407f9884ccaa11b0ab90fb6ecac",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_17e8805f78484256905cbdcab3ab3d4b",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "模型计算"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_b50720ed0587433492a9512d5229697a",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_a3cf6e65c86740beaa8493cdd2d65bb5",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "输出管理"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_0e09aa31ab9d4894a589aeb0cf2fec4b",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_45520579fa2c442cbee91143d066cfb9",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "结果与有效标志"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_824cecb68ad0427e899ef58e608a2291",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_a3cc0389f505471787abb19a85940013",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "计算未完成"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_7e796ca1e6f64bdfa141e53a286679ce",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_1d416e554a884b51897e247777ba4766",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "开始结束时间"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_3d2fc135794f4338a3ab7900d79fbd63",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_b4a16a1e7160440798967de9fee359a0",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "结果与状态配套"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "n_72023daed68a4b50931796390055c65a",
+              "cells": [
+                {
+                  "id": "n_25751d24df3446caabaff8073a66149d",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_473349f5a7b945fba492d4215de0f238",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "输出回执"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_9e4ac8448e4f4b0697b2c5a66af9a0ce",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_66590469eca9473b929fb2e8cd13e9a2",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "输出管理"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_27485487e5c84b0abdbb01e4bb5fa7e3",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_e060abc6ce304b4a8e46e5bc3990a8c5",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "记录管理"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_439be7bc0e3a48a2a0a8925384925432",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_359dfc417702458fac57b7d9dd94988c",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "提交结果与原因"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_558d0c7a9b67411a9a2abd6d36a9da7b",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_f359ec1d268a40da930cf27623b5fbe1",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "接口拒绝"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_590ffbf89395469caad3b5256bb6651b",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_8d3f0ccf067147989df31f0239255e9b",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "失败返回值"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_ed32fe1d52b74762baf05fb910acc566",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_f5c43454a159482abc29bd3b1afbaa91",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "失败不当成成功"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "n_59f7532f9cb64123b789a23128eecd17",
+              "cells": [
+                {
+                  "id": "n_9a8e15ef75ce403e867c24ebd3762a42",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_96716139390d466ca4ac5391248741df",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "状态事件"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_b85473cdddf0465c81013ad4fb7a5e71",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_01c1ede588644dd4846fa53b6dd48e1c",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "各业务模块"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_1530ffa358f34a13bfb220353ac25a8f",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_caec0d4d5f594df58ef657537b295536",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "记录管理"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_7f4bf19b67a34ebfabbdd35419906fc0",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_1d388234dfe248ff85f2a80b4f29e623",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "类型与事件时间"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_1df42d107c454877a29cbc8949f1cf7d",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_336980b976694b5ba03ad76c37f7f99b",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "事件队列满"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_90597a0516604330950a4819e2ff7b9b",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_a5fe0aaef8234daeb5674ac7bcd0c98a",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "事件原始内容"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_85a8ad41d4ba483d9982ed40150b15f4",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_7b5a2f7cbc6d45cea3256fa6f7c8b783",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "事件先后关系"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "n_360683558abb4add8efe6b0c324e97e2",
+              "cells": [
+                {
+                  "id": "n_e0606e63e024467a926190958139d233",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_165baa8821684691a409a3268f30972f",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "停止请求"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_822d5c5fd2644332b2adac06b76847b6",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_754e9967fcca41deb5c0fba7dd26d622",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "运行管理"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_545b14e0f42449f884c6d6a8ee2752f7",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_dc68e198a6d34a9a8a6d6b1faa053609",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "各业务模块"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_15a414fd2f574349a1f095f2764db078",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_78cce941c04a48509282f41da275ccec",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "请求标识与原因"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_a6f9435ca1c24206b5a53b7102fbd4e7",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_5f2659eac25d4ea5b9dda20e381d8289",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "重复请求"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_08b4801287984448be4c7496fb1cd5db",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_48dbdffc282842d991fcef3bf0632d9e",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "收到与完成时间"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_765b39be80d747e2adb5426167b74f36",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_f6261a35959e499caef39e39ccfbef33",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "停止行为一致"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "n_73632a5f339c4f23bc71601adfd6c7ce",
+              "cells": [
+                {
+                  "id": "n_5f2d215eee7746b781ba0ecfce3c4ce1",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_0f7d7084ac64438e8c0c668309e5b068",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "数据归档"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_ecd4ff48c4bf432ea46589c04122d64b",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_5e2995c088b447b499ad9cd91dffde0a",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "记录管理"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_1f7ed39a464f49139a4a19b89620f294",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_063c22c6d930476d81527336a66d1dc7",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "报告生成"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_301d89d7928041ca9dce1b6e17d9cd75",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_b0ee256398d74e62b02fa1f5f3740fe7",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "数据集与版本"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_f2f8e80363194204b6489570501946a0",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_c8f47269e9de43daaa46851c34ee78c0",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "文件缺失"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_7640fd5ee9a64699af1c61ce5e6e2560",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_92ea49bbbc0746a2b6e264e158c74524",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "哈希与导出版本"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_e2f4601e96504b1d9a7fe7c859697432",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_113bb306ed0b4456bd71082abc45bfa0",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "结果可重新定位"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "n_d74a84b38a0f498a95b62c3deefb9783",
+              "cells": [
+                {
+                  "id": "n_7d5e48e47be645b9ab5d1b8b21da6d61",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_83d4ee2aee7545ca8627f902cd658ad2",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "复核意见"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_fb953bb660cc482ca05d74ca6be617ba",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_461c12775a2847358314862992d761b3",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "项目复核"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_54e1f59e09184f4eb48bcf7b371b09ce",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_3c1feb4f51ec4014b07de3bd8269c8a9",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "版本管理"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_14002d887d5d49c28bbaccdbf1cae424",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_8d658a4bdbde49d69a4184adde0346fb",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "问题与处理结果"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_b03010811b5846d0833fc4498bd7e462",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_983ea6a0ff2145318a8a6817f1cb28e1",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "意见未关闭"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_cf3295df21f3405f9c2e9c118ab55f14",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_f4e14aafcd5540c9806bcc2717d9dea3",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "批注与变更记录"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_e5a325a46ed04f259158adb02be33f4f",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_a4c03a36c564407c92102e410bb53f8a",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "结论具有依据"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "n_aeb0a49ae8b440e38f2e910365031a14",
+              "cells": [
+                {
+                  "id": "n_2df27050b67c4275b9e27a4509decb4b",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_7e04e53dbf0c4469917c0069ad679eae",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "发布清单"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_fff2d296e2a643278537bba7873441bf",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_88fa0ad9a41b4f3086f402ae157195b3",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "版本管理"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_6dc7cf75cf9149ae840de16819c82b2f",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_0214be10128046978ac7ca399bcb77f4",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "交付使用方"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_ef453760ccc74ef496898e99a72eb195",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_020c208bcf044686bf6861adbf172363",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "报告与配置清单"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_c825722b8c01401982b411c9f7826576",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_62504024b7524fe386e6f71f732e2c11",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "版本不一致"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_b929540a693b40e58a6b120e6990d4dd",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_f12dff8c2fee40a1b3d1406e013e1b0b",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "发布标识"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_10c156123f2a4ed4b18bdb7784adf752",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_b4b1a87c4a8c4e9a8cad3a4ffb546797",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "交付版本完整"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "id": "p_f0aa000263c04cfcb3146b81a886979a",
+          "content": [
+            {
+              "type": "text",
+              "text": "纵向正文转为横向页后，章节编号和正文页码继续递增。宽表结束后恢复纵向页面。新增接口时应补充生产方、消费方和失败返回规则，并同步更新关联用例，而不是只在表中增加一行名称。"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "notes": [],
+  "references": []
+}

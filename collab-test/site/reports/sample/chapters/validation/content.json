@@ -1,0 +1,2765 @@
+{
+  "format": "docreport",
+  "schemaVersion": 1,
+  "id": "doc_6dc01731d8a7408c8d2a5cbc3f7c6c30",
+  "metadata": {
+    "title": "验证用例与覆盖",
+    "shortTitle": "验证用例与覆盖",
+    "language": "zh-CN",
+    "authors": [
+      "编制单位  项目组"
+    ],
+    "revision": "版本  R0",
+    "date": "2026-10-10",
+    "fields": [
+      {
+        "id": "projectName",
+        "label": "项目名称",
+        "value": "模块化控制器设计与验证"
+      }
+    ]
+  },
+  "blocks": [
+    {
+      "type": "section",
+      "id": "sec_9d1fb291635c49f49b72847c6c579965",
+      "title": "验证用例与覆盖",
+      "numbering": "decimal",
+      "children": [
+        {
+          "type": "paragraph",
+          "id": "p_aaa205c3555a46a983e66ae8d756f3bb",
+          "content": [
+            {
+              "type": "text",
+              "text": "本节列出 40 条待执行的示例验证用例。用例按正常流程、边界输入、异常处理和版本回归分组，状态统一保持待实测。连续长表用于保持一份完整清单，跨页后重复表头，不把同一行拆到两页。"
+            }
+          ]
+        },
+        {
+          "type": "table",
+          "id": "tbl_548778f9dd424ce6a399e58326f60bc3",
+          "numbered": true,
+          "caption": [
+            {
+              "type": "text",
+              "text": "验证用例清单"
+            }
+          ],
+          "columns": [
+            {
+              "id": "n_85b5715c6da34ffc9ce4a82485aff6ba"
+            },
+            {
+              "id": "n_18db0cbee60d4c98ba1e48cf9dc1bcff"
+            },
+            {
+              "id": "n_b6c708e4b0bb455dae103fce653ad8c7"
+            },
+            {
+              "id": "n_f4e19228e54a430cb672e9e5157048f6"
+            }
+          ],
+          "headerRows": 1,
+          "rows": [
+            {
+              "id": "n_702d1d0e4bda40f0bf405d9d0667f7b6",
+              "cells": [
+                {
+                  "id": "n_a44999203d404144900cd106d58983ed",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_3fab332372e6460093d082670b26d2b6",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "编号"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_8cf5596a48f44586b8b51ae5bab9913a",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_e4717c0197c24597be5fb9c6dacf3c80",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "输入或工况"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_01495783bba84e2c9ed2ee86d19b4ba1",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_5fd34f396cb24cfe8d146b864f204493",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "检查判据"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_5547e6643bda4322bb46eade613c5f7a",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_53f944d247064ddda60f145e05b7a0c4",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "状态"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "n_60fa58d7d86f4014935f15bd63a1e3dd",
+              "cells": [
+                {
+                  "id": "n_8c153d8dff194966995f7164954f640a",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_10f1f5cd29404fa58a20940de3b27c69",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "T01"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_45d651cb1f624570909f2c812d6d39b2",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_f3169d700c28424c9696990a79b43a01",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "单帧正常输入"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_89bcadabdff6472591e23776bdfb13f5",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_da68aec7dd474cb3818c72531057a1ca",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "字段完整且单位一致"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_df442a7791b0464a8b5ad6ae59122270",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_9d83ed2e073c4384848832a5b6bbf4d2",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "待实测"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "n_702eae49166e4b0393c50f361e3599d8",
+              "cells": [
+                {
+                  "id": "n_f3d10ed91a8648359dc81de7139799d1",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_d65ce911b1854e0fac48cf03fa39920f",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "T02"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_a961b75ca6e344b68f4425f0d27b36a5",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_2bce9c60e5044d158641eb4d19626a2e",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "连续有效输入"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_c2b5f79abdc2455d837184a08d2e37d2",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_d1595fbc40df43faa2b14733c10704fe",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "输出顺序与输入一致"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_c680680772634934bdbc4eca045c46c6",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_b684b3bcc54b43caa06ddc0000d3732e",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "待实测"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "n_49303b3176054cb7b7c5348242ed8c4f",
+              "cells": [
+                {
+                  "id": "n_2e07e9893e704f7898bc2eddeebfb937",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_a87b03aa24954f0087b9feeacadcf463",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "T03"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_0d6ef0863c824edea7fc705b24ddafcc",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_5db69b09b01f49f9b85d017072b9a920",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "输入值为零"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_3006977c9a9a470295d1a12d2c95bee8",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_a28f73d4d47245018a1f22161870d304",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "输出符合模型定义"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_c19ee98ffadd4cdfba4cb6e0818a97a8",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_38114bc69cd9448bb97f8d28ff56fe69",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "待实测"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "n_81750b78834c43bc811ad9e69b33ff08",
+              "cells": [
+                {
+                  "id": "n_70126c598ce34a48bef3e4886033b406",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_488fbad771d54e4c80b601aef04956ab",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "T04"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_c6a679347a4b4938a5474c55e0eaea65",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_54b7f65405b84f9c81aaf046113d7fd3",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "输入接近上限"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_a33496f35af3400aae0cbeebccd64fad",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_5a6baddcf4f64578a99683b69e9e63cc",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "状态仍可准确记录"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_d3ba155fa5f64287beff076962c60d6c",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_36fb9c8f574844c3a8714d32150c7e0b",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "待实测"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "n_28a5696c2e864b77b325e48f6f71d0fa",
+              "cells": [
+                {
+                  "id": "n_a90fb0de073542d8ba2449df5ba5f49f",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_68cc60391332487d82610e8def638577",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "T05"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_0e7169d7a79a441785db04e9b0cc1746",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_58e5d63f94b640caa4adf022aef01c08",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "输入接近下限"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_65e4083c141a4da69ad330b9abe11166",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_563a3e98655748b6bac65c159e9a7ac3",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "符号和量纲正确"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_14d4b197447143a5915626423a1b8110",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_2973e0960b574e65a231495fba42aebb",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "待实测"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "n_c346771469d74a18b3e9ec0e6c5ee245",
+              "cells": [
+                {
+                  "id": "n_78ed1b8116f94bb18863ee4b21480ea9",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_0cd0c07849d14d2f8dd0414df7d28791",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "T06"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_d7623998b838402aa8b6a5f1c8222e72",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_a57c13d5e2814db9854860761d780abf",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "正常参数加载"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_27313b29cf21465e8677523e25b6d0e7",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_3b00b9b884434e5d891d547d99b07019",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "配置版本可追溯"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_9b7b2dc23bdf4cbcbacf58bac1767d05",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_fb9bc46be23a472884663ae95b48a8c0",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "待实测"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "n_3ff9fbd7c16c4de78ec57a13472a2b5b",
+              "cells": [
+                {
+                  "id": "n_0ddc246b2a224776adf7d9faabe3f66e",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_d8870eeb54c84249a047afa780fc80ca",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "T07"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_d2a66b74da9b40209bbd246b2da63789",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_ec4c2fd8762a48c393d8c84aa773bb79",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "首次启动"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_0929368eaa324aebac82c79adce7dccd",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_b64ea5639c4442cebfc353532aa60116",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "初始状态符合约定"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_ace426e7ab22461b9db48edfb4636e7f",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_c4abfabf6002476b8dc3380710545ca6",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "待实测"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "n_3b787cf00176465abc6c26a0474bee5c",
+              "cells": [
+                {
+                  "id": "n_dbe5744d746a4ccd9d02cbe57c75e208",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_8bae8df7ead3458e917cc717f3468e05",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "T08"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_42722189b5e84c578c9051b023323810",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_cee9e48911984edfa59c90ce8398ef77",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "正常停止"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_0892b21d7f5e491381e65ed75992e15d",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_a0a21490ab234c70ad6c4bffde703b4e",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "末尾记录保持完整"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_a84e6a2d1c6945d897b1215c457531f3",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_44b36d1cfd93484b8f1f13f72f12fedd",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "待实测"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "n_9927ae227f204f5cb3b4cf65cf1c45e0",
+              "cells": [
+                {
+                  "id": "n_ccd54558d3684ba69e7239f823bd30ca",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_c1eb4e82752d40b1b02441e545c62d70",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "T09"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_fc7cef66d5b74c25991ec013b6b4f85e",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_82e9ee78f9bf4fb5aba21410603cbcb7",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "重复执行"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_3d0d134f53834d0180b023cc68a193c2",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_f87d14c91811482d8f07478f6bb92de4",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "同配置结果可比较"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_2580a3f14b3345c8937c0645db89ac17",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_381f353a1c43404c962a31463f0c1045",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "待实测"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "n_1b9a519c0bfd4931a28f6de48d30d280",
+              "cells": [
+                {
+                  "id": "n_e982a4493a084570997fcf5e7313a9a7",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_2988d6462a7c4d9ebcd41a0edc7d1245",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "T10"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_5abf14cc754e4d669834b0820ab7c706",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_d75c7905565c47d2831ae76b7cf0f553",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "报告重新导出"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_8781eb4ca7354a6aaa7c738fbbcc86ee",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_528674c561aa4623817e6c4a6f2aaf38",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "编号与数据一致"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_ed953b2d874049f68352ccd2ce658aa3",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_b23c2572e20846058f86e897acf74ba3",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "待实测"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "n_9d55703be0c54562a2f10f3ef5cae3c8",
+              "cells": [
+                {
+                  "id": "n_ce597864e7bc4926a3fed67d05a4c9da",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_1d885144f21149d3a576c794cd85d24a",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "T11"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_0cf1a0f1ec0c4f848a2043cd11c2095c",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_d6c7de14319844528fe760b3201344ef",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "缺少输入字段"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_a9cb8ca19c314ae7b9d33611ea06422e",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_9bd93fff648e40e393ae2d9c7fd4cf9a",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "拒绝不完整记录"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_b07a5cbe021d4cd2b62c11e26ca114e4",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_4136e1ff4b394ecd9436cec2268a51fe",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "待实测"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "n_eb9f45af2c5a4150a2a8f6a6e016e011",
+              "cells": [
+                {
+                  "id": "n_99489674173f4cab845f8ee10be26986",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_7a13246caaa14680a431c7b4e0be0a91",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "T12"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_17515397690c4dfa867e81fd5dac8de4",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_d31a7ee1abcd4bbebec21f993d9c6bb5",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "出现无效数值"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_482f324670984fbdb557de723f1db9a3",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_3f8453cd39cd458380d64b559b27bacc",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "保留原始值与状态"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_dea900678ee44fc1b0b5bebdf3ec6070",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_775c795fba8247ee8b73d546fab15a7a",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "待实测"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "n_6a888e19e17c4c46856b9b1a52d636ad",
+              "cells": [
+                {
+                  "id": "n_6a0c73ee2a6440d0a0f30b15fb8f1568",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_68431a6f632b455eb8bf90b155d6a358",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "T13"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_8be87a50d4fa47d4a316fd0a082d6c3b",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_0c52d55b33714abfae3ae853ee7c860c",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "输入时间重复"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_50f92964f3d54f05ad218cb7a402fc11",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_727b277b0dd64333bb8444376f455c12",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "明确处理重复事件"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_d7a186fdff4d41a99c454a6d284ebd66",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_2e6c756b11bc441bbcd708f4c3b011a2",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "待实测"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "n_319bb5ca177f4327a66df87d0925882d",
+              "cells": [
+                {
+                  "id": "n_7372208b2faf43428e84bf15e2f0d601",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_2252a19bb8ca4edd8c62f0b567ab755e",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "T14"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_d33c3867938f415a9235e6b3fb51c7e9",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_6a20bbe8c94243a7bc1684262f68f55d",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "输入序号跳变"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_c823aa13afbf498e86f5ff078256f575",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_88c4a42750fa443baf73df3062f6c48d",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "记录丢帧或乱序"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_53918c36b6524c22abf7d42d6552e464",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_1f1a99eb87c64812b7f2e1f8cbb2a6c2",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "待实测"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "n_dcfd33af5641466f9010bdf9306b6e9c",
+              "cells": [
+                {
+                  "id": "n_e6b143a70c054d9ebfe1e02c21353285",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_90e1dd34c5824bc0869607bd7103da2e",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "T15"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_af5b7004df0e4c5fa6e8258a30381257",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_f9f57fd7e10b4d44b03f7cdea5215287",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "单位不匹配"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_a2dd2db456744fc2a8596b35fd1c6a2b",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_f41339cd8e3446eea0783b37d5961260",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "产生明确校验结果"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_19ca0b4c370f4eb1af142db0ec713732",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_5d6f6647f1914be288f800117b1cd7fd",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "待实测"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "n_0bc90e74992e4bf287191a65566bf974",
+              "cells": [
+                {
+                  "id": "n_3520fb979497428db5345a070f0efed9",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_1eaf84a87d4e4233bdce8e2e6f9d4a91",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "T16"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_12435c7ce486491bbca1343fa9627a96",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_6379ffcf6cf54622bfc2fba52d9dbb25",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "空参数集"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_4075d93382cc46e2964fd470e4532185",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_cfaf5aa48c794ecfa3fd6e171d082b8a",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "避免使用未知默认值"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_7d302b4637774318bdf5fac2ddb53c80",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_77af92423a99409eaeac009ac92c3ad3",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "待实测"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "n_53ee957978694edb8399f1ad79dcdcf4",
+              "cells": [
+                {
+                  "id": "n_ffbeac0a02064a5c9c2d05773c793c13",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_53f5354430e448e4b2f040aec6eef84e",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "T17"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_d77d78bf0ef44017bffc2718410c1e1b",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_aab6667ca792464e858d0441f92354ef",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "边界参数组合"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_622879d227e34f32bb1c286f43dd672b",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_9fdc9646c082404fbe587d5949d3d05c",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "检查结果有适用范围"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_0ed35bfdf8fc45b8abac9f3ce7d97aa6",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_31a9276a45f14ca1b93b843e8758d7f2",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "待实测"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "n_120908260cb74c68aca25dcc360b2fef",
+              "cells": [
+                {
+                  "id": "n_e8ba96cd97ba40b2ab62f3abcc49fb74",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_2169af21a57e46b6ae66574e5bbcb160",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "T18"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_9393c68c413b4dca9fe46895fa411b93",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_6b819680d1594bfd9de004e10dd411ee",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "缓冲达到阈值"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_14533e5346bb4830b8fd3b44807f2aa9",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_dc9d0b8aa63546789ab6a8e08183148d",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "触发约定的处置"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_eb689034b5a64734b0c70fcd9f5b8c48",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_f22d2bbcfe6c410b8013d9d76638acea",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "待实测"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "n_506fdbc1e8144c54bc2ebc15af361feb",
+              "cells": [
+                {
+                  "id": "n_f45c19e43fdf49769cba33d56693b096",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_0c7e034ae167462a80986d6bb27c11b1",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "T19"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_448b51418fe54caabf6f7a00daeb6e23",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_bbbf3259838c4734a1cb864d212a81c0",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "最大长度记录"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_99236c4ea31f4a61b432a0f16f57fd6a",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_2e28d094f6544391b4403d797509c992",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "文件完整且可读取"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_4f12388fdb484ccb823521eb96f15938",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_9d85b569eb8d4d14812fd923e900ce3f",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "待实测"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "n_5fb2d79873044e32a179f677f18ac453",
+              "cells": [
+                {
+                  "id": "n_20aa65e6345f4d32bd30eb9471b377b3",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_9f05ed1a555345a9a286ec1f96482d6d",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "T20"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_4d72dc7a4acd468f8d9036b4746687af",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_65e3a7546a99420aafdce209f019c294",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "最短长度记录"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_e98b12e651da4f0ba1a53ec7752c8d20",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_d412e3e7714a4019be802bc321c3d83b",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "统计规则保持明确"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_ec6eff4aaabf4b3b97ac40c00be9605f",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_10ca18d534a34b2a902b9ac75feafd77",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "待实测"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "n_fc9ceddf86e54393bcb179b5f3bda1a8",
+              "cells": [
+                {
+                  "id": "n_c76a39763ff94ec086e955002d1b3c6f",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_394d381661164deeac83081ac331bcdd",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "T21"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_867a7baec0f94e35b70cb8642c427068",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_17dd2fce056343d9a57b1d6802f1e5d6",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "输入中断"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_90fe8fa218f64e29ad5b2f0fc33528c9",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_1ca7aa6922244c9bb77edae3a3c5336e",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "事件时间可定位"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_52aa400653834c1a9af4316fe71a66a1",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_9caff2c42e19435fa6f8323a938dab64",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "待实测"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "n_061e48746caf42e98897fb3aafea8d3d",
+              "cells": [
+                {
+                  "id": "n_112c95567cd044b1858d530dbf94c44b",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_949e36f669b9459a9e1265ad8e1f61b4",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "T22"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_521ebd117a164fca936e1df139366817",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_a62ee550bd9d47648a5c671c9c56cd63",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "计算模块异常"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_4186dd6764064364a60479141f0c4f8e",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_419f3584cf984af2bbba381167c94885",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "状态不冒充正常结果"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_cfe9d5e10cc14b989e723145e9c63f5f",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_4181a1bb53344d779b08d8bd345032fa",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "待实测"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "n_b9bc70e5aeb74a0690249b1a6b743a9b",
+              "cells": [
+                {
+                  "id": "n_cc2a6ee649af4b69995b6a51e8d6fe03",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_9a1d9a32fb6b4a75b367ca00302bef94",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "T23"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_35fd2ea273ef4ab7b816ea13cc01042c",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_206c1fcdb5d64a5b93be10af2c1eb691",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "输出接口拒绝"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_21e2adcaf6ea48e1886b03f00ce9590e",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_5dbcc1d6ea5f439faeca0452f4d4e2b9",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "保留失败原因"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_b7656bbdfd4641d59aa2380471781cd4",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_55d0f7ec7b0b4c91babc829fa8e2ecad",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "待实测"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "n_8fa91a363991480bb21238c2239f038f",
+              "cells": [
+                {
+                  "id": "n_775c97c1e3524f1bbb976520af286a6e",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_de1c8d518e6a4de6bdbe4894918bd350",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "T24"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_76150d68143f4c19b32005a5b4de6701",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_9274177772ab4b3e9df11db825091c92",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "记录介质不可用"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_a3c8791ccf3a4002abb1a72ed5a3ae61",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_c2543a6b0dbf4120bc6d0d9f7f87a42b",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "执行预定降级行为"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_9bc529fc3229420bac8cf388f5962a2e",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_10b0e69715264e46b31d2954d357b36b",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "待实测"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "n_ced3e18e82264ceaa133dc9bb1231401",
+              "cells": [
+                {
+                  "id": "n_e7e6be4d635e4f4898481e111fff69e1",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_7fe37bf09c3e45349d950cce6c2befa0",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "T25"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_52b1e39a61524ed889e1eae02b097703",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_cad8aa6982344db59115c5951e22daf7",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "恢复正常输入"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_08d290a7b4554568a0bcaaddbcedbd1e",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_c703e12cb8214cf79fad0df687085de4",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "状态转换过程可追溯"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_d620180e75414ac1ad95ab0ba5be8440",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_ee1f58c7775b4b70ac381a58196e2bbb",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "待实测"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "n_89340c16ea9b463f91547bf5efe3197a",
+              "cells": [
+                {
+                  "id": "n_2328363bc50b4975816bd6054662a924",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_579c8827d3c342bb8564594cbdb34a26",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "T26"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_de3821db04c74bfcbe1ddcf9b80de2af",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_f4856d44bbbc4f369f88a0f164f17cad",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "运行中改参数"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_9e9ed76741a94d768aec42ee4e28a942",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_e808a09857614942b43febb081e71b93",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "新旧版本分界清楚"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_f67630450d08476f9f24995bd0e3dba4",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_217f57d35fc243aa98d240f3fe84b426",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "待实测"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "n_add4a1688393463695b475d2009b6438",
+              "cells": [
+                {
+                  "id": "n_8a91b34e775e4b1f9b20c71c4fc334b1",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_7a020320e61c4045a2fd5033210ba647",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "T27"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_b408d85ec6f842e7aa8220d255e6f833",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_2ee0b9b2f3d5438687eaceb0ff681ee7",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "外部停止请求"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_4e89840a7ffc4f2ca70e60cb678dc933",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_e4916324b4fd4428aa4d5f7eb9b61626",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "按约定结束本次试验"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_c9dc563a83a848479d08280fd6143b38",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_8925dc7331344c6b8e60739e9a0af108",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "待实测"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "n_ee537170595c4ba3830869eb08f0bfe3",
+              "cells": [
+                {
+                  "id": "n_b9797378ff6d41dfbde3f1618e43c315",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_bc3fc4c0db884a8e981de06192f5bee2",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "T28"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_341939b9d70c4fd4b686740aef14ece3",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_eee643a3dd444b4ab2e0d28d1cdb1483",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "重复停止请求"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_1fcd2ace783a453a96366b0dbc684344",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_61efe80cccf84f7183bc160241ab707f",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "结束行为保持一致"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_33712312d76040e8954db92868f25d8b",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_d51dcd43fd7548d1b490339a095c8138",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "待实测"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "n_ba568709a12f40b2a182cd2e29b3cee2",
+              "cells": [
+                {
+                  "id": "n_5a69985dfa304f7b8dba1f215447db78",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_e6eceb124fed420a86bebb656999d12b",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "T29"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_f5f58cea2b714f6ea7c3d389c063374d",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_cf11efb07fa1425e8b3f96468caa8899",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "重新连接接口"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_b87d19882fcc42ea858c8419f0d627c1",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_40f4cd45772f4b648f0770e45c650ce1",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "检查旧数据是否清除"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_747cad0e04f647dead4f2db12a00acc7",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_739f8ad04f434d07866ab3269ea5710f",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "待实测"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "n_4d7b4f3a765f410eb290c4d88294cb77",
+              "cells": [
+                {
+                  "id": "n_41f9aa89b2e34e7d9db3d2f456de85c7",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_2532d667400f4bb197c0518a04a62fa3",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "T30"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_5433d19fd64745f7b293f7c6aa6010ca",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_a48f044de126444e91a962bbbcdb2e19",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "错误后重新启动"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_b422fe3693b2456394197790f3a3ef4b",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_be7b6fbed4c2499d9ce1b6e5ea2be6c8",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "初始状态重新确认"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_3cef6641e5304b1c847755cb18df29dd",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_70ff3237538447aabde8d0dadd53870d",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "待实测"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "n_f8c68914f5fc419793e8c957d14e21e5",
+              "cells": [
+                {
+                  "id": "n_50e325808c794574826c789f29042cc2",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_18c35e7cf8ff4730adcef4ac5f5edee2",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "T31"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_6066009fbf4744b4a029409327bad2b7",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_90a4dff5ef044faa827f5b22a3b13d09",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "修改模型实现"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_9ad88948413645c9803e432d97067f7e",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_c2b11fb1c3c8446f9a14604039938e9f",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "原有输入输出可回归"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_c1551467e2414a12b98a159e8fd5a040",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_040c5a794ac345aeaf4f57c3bbeeaad1",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "待实测"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "n_abc2b4126870473ca0b1f4e19ab68499",
+              "cells": [
+                {
+                  "id": "n_b88392337fc84f8da8ebadc2fc4cf42b",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_a2b7d045f50d4b2ba39fb022369ae1b4",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "T32"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_2f285f21e0fb4e5fb2d3bb037435ac8e",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_29048e220057484c925e9683c74004f3",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "修改字段顺序"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_019283db9d84433eada0063ee78d0f6f",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_7ad30010fdb14352955bcc0ae4441266",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "协议变更被识别"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_62f1d7dd482141d8b02ffee2c2fdaba3",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_cde4773c613b4212b4c57742ce4420e0",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "待实测"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "n_a42838490c044d4ebcead6385940fb17",
+              "cells": [
+                {
+                  "id": "n_1c4eb030926b44c2817ccae50dc21c0d",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_e5a1a594a5804626b0964e7e0e0bcfa1",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "T33"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_5b589313744d489597d4c10872b03c12",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_83138e1666e74703ad46e2f269b252a3",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "增加可选字段"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_3fb60ce98d534f68903eabbdc5557ecd",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_2e42cc2c83ef43d09dd5087b856e8284",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "旧记录仍能正确读取"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_71c1e9ee663644c8b1ed78dccff3594e",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_822a82a74fac4835bef10792bf2178d4",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "待实测"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "n_b5c4c53ee59248e8b90c21a312605440",
+              "cells": [
+                {
+                  "id": "n_d2d544a1964b4eb3abf2923d34c0a1a7",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_7346bc54d45b49baad840e61212e40e7",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "T34"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_3276291cb41b4e5f9e6d0d6ac2fdd1de",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_a513f13b4011422a9d52f9d8b8ae4f94",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "修改参数范围"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_09711f62aa0b4f0e805d74c3593c40a5",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_6cef9c55506140fca794f86b2f3b9a83",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "关联用例重新执行"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_4c0ee238c8e948f18e3215d13f8f1fcd",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_408095267b524522bbe2abefc84b62fc",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "待实测"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "n_b5deec9ea5c34126bd42f07fb8700c61",
+              "cells": [
+                {
+                  "id": "n_c53873b8f3e14449bf44719e81b5c160",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_2dfaf2a66b044f9ca21a4cf86e5577d9",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "T35"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_4f22ee15f09c4a1fa67b0c86f89bc071",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_4049cf42a3914d2eb62fb443c7fb2e97",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "修改图表样式"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_0f19dcab25b4496abb666f9087e5a65a",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_b66b4eb7491a46b5966d7723d0e3a94d",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "原始数值保持不变"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_794dcf4d55624c209823419b2c5ab0c0",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_1f63cad466624cd8948de99a7d917458",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "待实测"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "n_4e84b30c9bd4481e9840fc60b351a067",
+              "cells": [
+                {
+                  "id": "n_25aebe1402c54ebbbe6200c21f5dac6b",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_f2330c6f88034b1d98d8f7898c8309a5",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "T36"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_9f73f195ed184744a1aa36282f7dae48",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_b1a412df25de409eb2ff28426aa4365a",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "追加新用例"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_b6d0fe1c7a6e48e691f9d676471eb5e5",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_99aefc9177e64258b27ea3fc082775e6",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "编号与引用自动更新"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_c6d0af92e6c542f290636b453f6b8d5b",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_42100798542e436294403a92278117ef",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "待实测"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "n_66872e3bc67045eb90744c227d61addb",
+              "cells": [
+                {
+                  "id": "n_f4825fea0fe546efad97d00e4d4defa3",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_d6fc0e9289674b00aacc565c65af0589",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "T37"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_522d71af64be48b1b86e5aa735d33b88",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_edb6254a3e80483783fd7780bc9bfc0e",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "合并验证记录"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_b979b5345d124c798ba76a1149a761d3",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_b33df8bd14bd47fc88766e6543c1617d",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "来源和版本均保留"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_e436fb3a7ae342568027a3afa431a7b0",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_df57718120fe48179a321eef645750e4",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "待实测"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "n_0a5e646292b14e9cbc8af00e9824a929",
+              "cells": [
+                {
+                  "id": "n_2ddbea89418243ab9b0d214885e75394",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_6d2d7a3a67ce4cb2bfaa017f47e3df9b",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "T38"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_bb0c28a8c47a41339860b962b7ef0bfe",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_38d715f16fb9458bbf11371d63dee599",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "归档后重开"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_48898ab2ee244d74995c8c13e55940a2",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_ea20ee7a710d4188a762a49cbdae9cd0",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "结果和证据可查阅"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_a27640fd35ba413b85d3819f6babdbf8",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_de26fdfb49b94450844ffa97ff86b104",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "待实测"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "n_45d004069fe54d0da615fe3381fe5e49",
+              "cells": [
+                {
+                  "id": "n_1306cfe9e2f74bc1bc77bf26b99fccfb",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_9c8f7cedcb61456bbef9775b1db7518e",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "T39"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_c422e1d476df45a98c8bd4c8f13db598",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_26be49f4d2474b378d01b4139ed0f829",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "多人复核"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_fdff7dd756114d8ea0e2c57469b872ae",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_9b7e9bf5132c40b788eacd1a2e81607a",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "批注与修订可追溯"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_39ecf5d399dc450fbafeac4394484ede",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_0b33d6bd6b4c4ee3916d30c9329e7824",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "待实测"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "n_63315dfd85cd43a38b5e4143c374b344",
+              "cells": [
+                {
+                  "id": "n_f9d4fe9b11b442a59e198d79a9aeac59",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_24df9ec840e24cf99925270b05f3b1f9",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "T40"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_4053b8dcfb40452a948b7e0dcf0ee61b",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_8a8bd7aee6064f788ebd556a6a44f7f0",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "最终交付检查"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_f21963b796d04c86ae8a87eb9f1476dd",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_905d9693481e43efa8cd6ae2e0f97e6e",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "文档与运行配置一致"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "n_67d652841f3f4feabe961c0165c5e971",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "p_dc1650075afe42ad9c16df586ebaaed0",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "待实测"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "section",
+          "id": "sec_452191d9a4194552ac3f4b7bbd4fb97d",
+          "title": "未完成项与复核安排",
+          "numbering": "decimal",
+          "children": [
+            {
+              "type": "paragraph",
+              "id": "p_4347e183b42f47909333b0cbb92e903f",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "用例通过必须同时满足约定的数值或状态判据，并保存能够复查的记录。对失败用例，应先写清触发条件、观察结果和复现方式；修复后沿用同一输入复跑，再补充邻近边界工况，避免只验证发生过的一个点。"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "id": "p_5e7d31f0359e46fe858fb372ff44cb78",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "目前清单尚未执行硬件试验。后续负责人应逐条补充实际环境、输入文件、程序版本和证据路径。没有实际记录的条目继续保留待实测状态，不使用完成文档编写来替代完成项目验证。"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "notes": [],
+  "references": []
+}

@@ -1,0 +1,229 @@
+{
+  "format": "docreport",
+  "schemaVersion": 1,
+  "id": "doc_994ea63ec6044c1183b33e38696dd0f0",
+  "metadata": {
+    "title": "需求与设计约束",
+    "shortTitle": "需求与设计约束",
+    "language": "zh-CN",
+    "authors": [
+      "编制单位  项目组"
+    ],
+    "revision": "版本  R0",
+    "date": "2026-10-10",
+    "fields": [
+      {
+        "id": "projectName",
+        "label": "项目名称",
+        "value": "模块化控制器设计与验证"
+      }
+    ]
+  },
+  "blocks": [
+    {
+      "type": "section",
+      "id": "sec_dfb910f02bdc42c79ad1b01187d021f1",
+      "title": "需求与设计约束",
+      "numbering": "decimal",
+      "children": [
+        {
+          "type": "section",
+          "id": "sec_98df861e1a7b40a0bc3ca09a3c3a9e0b",
+          "title": "指标与边界",
+          "numbering": "decimal",
+          "children": [
+            {
+              "type": "paragraph",
+              "id": "p_5b76d851894f481bbca7eeeb508facdf",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "需求分成数据完整性、运行可观察性和可重复性三组。数据完整性要求输入具有来源、时间和单位；运行可观察性要求异常能够被记录并定位；可重复性要求同一输入与同一参数能够重新得到可比较的结果。这里的“可比较”应同时检查数值误差和事件顺序。"
+                }
+              ]
+            },
+            {
+              "type": "section",
+              "id": "sec_20e45e3907634552860369624d69e3c5",
+              "title": "采样与记录约束",
+              "numbering": "decimal",
+              "children": [
+                {
+                  "type": "paragraph",
+                  "id": "p_1e8139075ddb48e492c9d388fc11c08c",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "所有模块使用同一份接口字段定义。采样序号用于检测丢帧和乱序，相对时间用于分析事件先后；两者不能互相替代。记录口径"
+                    },
+                    {
+                      "type": "note_ref",
+                      "id": "n_285fb1f8f5754b2c8803b8d8ecbdb57b",
+                      "target": "n_6c25a31b0e0043f5ba6ca56fe991ab26"
+                    },
+                    {
+                      "type": "text",
+                      "text": "应在试验开始前确定，运行中变更参数时保留变更前后的版本标识。"
+                    }
+                  ]
+                },
+                {
+                  "type": "list",
+                  "id": "n_76dcd622558544219759a0fef3a44686",
+                  "ordered": true,
+                  "items": [
+                    {
+                      "id": "n_4f48b8478872435c9fb90cc937c07fe9",
+                      "blocks": [
+                        {
+                          "type": "paragraph",
+                          "id": "p_5ff3e724fbc54c29930125aa65f87206",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "检查输入帧的字段、单位和序号，再把有效数据交给模型计算。"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "id": "n_879c6af7ef1b433c833ee8db8a276587",
+                      "blocks": [
+                        {
+                          "type": "paragraph",
+                          "id": "p_17270cd16e064e979f571fdf07d20613",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "使用已冻结的参数执行计算；遇到无效值时产生明确的状态记录。"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "id": "n_e97949514a614e9ba322704a3a3e7190",
+                      "blocks": [
+                        {
+                          "type": "paragraph",
+                          "id": "p_8139f52140984fa0bcbfa45651391c56",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "将输出值、状态和所用版本一起写入记录，便于后续复查。"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "id": "p_b503519d6a0b4439ad2040213a10f4d7",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "以下约束用于减少联调中的歧义。它们属于设计约定，后续必须通过实际工况验证，不能只凭接口文件存在就标记为完成。"
+                    }
+                  ]
+                },
+                {
+                  "type": "list",
+                  "id": "n_5a82dca4dadb4e02b0306a4ef4ee488c",
+                  "ordered": false,
+                  "items": [
+                    {
+                      "id": "n_4d7fb6fb4a01489689c619835d062910",
+                      "blocks": [
+                        {
+                          "type": "paragraph",
+                          "id": "p_9cefdaa283544f70b29f4badcc9f72ef",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "接口中保留状态字段，区分有效输入、超时输入和替代值。"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "id": "n_8277c53c37c3418e97a9f24515eef070",
+                      "blocks": [
+                        {
+                          "type": "paragraph",
+                          "id": "p_a7a4e6ade04c4bfcab30fa1aec6004d8",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "参数统一记录量纲，避免把毫秒与秒、峰值与有效值混用。"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "id": "n_20c618d17dba4c6fa020c14d57b2b71f",
+                      "blocks": [
+                        {
+                          "type": "paragraph",
+                          "id": "p_796f6410bf1b436a9e18e123e2f545bf",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "异常发生时保留原始输入，避免只有处理后的结果而无法追因。"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "id": "p_36063476689246b8b1433d5e75cb03e5",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "需要修改某一约束时，先记录修改理由、影响的模块和需要重跑的用例。对于与旧记录的比较，应标出参数差异，不能把配置变化引起的结果变化解释为性能改善。"
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "id": "p_dea3c22f76354694ba546a6468b19b8a",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "验收前按照“需求条目—设计说明—验证用例—证据文件”的关系逐项核对。没有证据的条目保持待验证；同一条证据可以支持多个相关条目，但每个条目的通过判据应独立写清。"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "notes": [
+    {
+      "id": "n_6c25a31b0e0043f5ba6ca56fe991ab26",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "id": "p_ecc68506c5cf41e8a8c3552f8d64ced4",
+          "content": [
+            {
+              "type": "text",
+              "text": "本报告时间均为相对于单次试验起点的时间；表格中的量纲以单位列为准。"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "references": []
+}

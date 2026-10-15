@@ -1,0 +1,4 @@
+@import '@godcreator/word-report/styles.css';
+
+/* 报告的 JSON 与图片不进 Tailwind 的源码扫描：改报告时 dev 下不整页刷新。路径相对这个文件（站点的 app/features/word-report/） */
+@source not '../../../reports';

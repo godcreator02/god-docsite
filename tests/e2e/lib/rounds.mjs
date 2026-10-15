@@ -5,6 +5,7 @@ import { runAllFeaturesChecks, runRouteTableChecks } from '../checks/all-feature
 import { runBaseChecks } from '../checks/base.mjs'
 import { runCollabChecks } from '../checks/collab.mjs'
 import { runDocsChecks } from '../checks/docs.mjs'
+import { runReportChecks } from '../checks/report.mjs'
 import { freePort, startServer, waitForHttp } from './process.mjs'
 import { removeRunLeftovers, writeTitlePage } from './run-scratch.mjs'
 import { buildSite, reactRouterBin, reactRouterServeBin, testerIdentityCode } from './site.mjs'
@@ -16,6 +17,7 @@ const checkGroups = [
   { name: 'base', run: runBaseChecks },
   { name: 'collab', run: runCollabChecks },
   { name: 'docs', run: runDocsChecks },
+  { name: 'report', run: runReportChecks },
   { name: 'all-features', run: runAllFeaturesChecks },
 ]
 

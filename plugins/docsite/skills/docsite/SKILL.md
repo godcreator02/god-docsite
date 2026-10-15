@@ -89,7 +89,18 @@ docsite.people.join {"dir":…,"id":"<字母数字_->","name":"<显示名>","git
 - 一页要用几个组件：页面放外面，组件放进同名文件夹，`content/notes/waveform.mdx` 从 `./waveform/` 引用；图片放在页面旁边，用相对路径
 - 文件夹的 `meta.json` 写 `title`、`pages`（顺序，写文件名去掉扩展名，TSX 页面也去掉 `.page`）、`icon`（lucide 图标名）；写了 `"root": true` 的是侧栏顶上切换下拉框的一项，不在任何一项里的页面收成以站名命名的一项
 - 首页 `/` 是站点的 `app/routes/home.tsx`（fumadocs 的 `HomeLayout`，没有侧栏），不在 `content/` 里：`content/` 根上不放 `index` 页，放了打开首页报错
-- 地址就是 `content/` 下的路径；`/api`、`/comments`、`/llms.txt` 与功能包的页面（如协作站的 `/tasks`、`/calendar`）留给站点自己。改了页面，开发服务自己刷新
+- 地址就是 `content/` 下的路径；`/api`、`/comments`、`/llms.txt` 与功能包的页面（如协作站的 `/tasks`、`/calendar`、装了报告功能的 `/reports`）留给站点自己。改了页面，开发服务自己刷新
+
+## 写报告
+
+装了功能包 `@godcreator/word-report` 的站才有报告（`docsite.feature.add` 加上）。
+
+- 报告放在站点根下 `reports/<报告 id>/`，不放进 `content/`：`content.json` 是入口（标题、版本、作者，正文按顺序 `include` 各章），每章在 `chapters/<章>/content.json`，图片在那一章的 `assets/`，只给 Word 用的版式在 `layout.json`。
+  报告 id 只用小写字母、数字和 `-`
+- 格式是 `docreport`：字段说明在包里的 `engine/schemas/report-content.schema.json`，例子是同目录的 `report-content.example.json`；每个块的 id 用随机码，交叉引用写目标的 id，编号自动算
+- 网页上 `/reports` 列出全部报告，`/reports/<报告 id>` 整份报告一页；改了 JSON 刷新就能看到
+- 改完在站点目录运行 `pnpm exec report-docx check`，有问题照原话改
+- 导出 Word 用 `pnpm exec report-docx export <报告 id>`：要本机装着 Word 与 MathType，引擎目录里要有 `.venv`（没有时命令会说怎么建）；人让导出时才导出
 
 ## 服务 gwbDocsite
 

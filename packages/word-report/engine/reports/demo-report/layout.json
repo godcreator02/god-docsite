@@ -1,0 +1,86 @@
+{
+  "TblScope": {
+    "widthsMm": [
+      35,
+      65,
+      60
+    ]
+  },
+  "requirements": {
+    "pageBreakBefore": true,
+    "orientation": "portrait"
+  },
+  "equations": {
+    "pageBreakBefore": true,
+    "orientation": "portrait"
+  },
+  "architecture": {
+    "pageBreakBefore": true,
+    "orientation": "portrait"
+  },
+  "FigArchitecture": {
+    "widthMm": 160
+  },
+  "results": {
+    "pageBreakBefore": true,
+    "orientation": "portrait"
+  },
+  "FigResponse": {
+    "widthMm": 160
+  },
+  "parameters": {
+    "pageBreakBefore": true,
+    "orientation": "portrait"
+  },
+  "TblParameters": {
+    "widthsMm": [
+      35,
+      20,
+      38,
+      67
+    ]
+  },
+  "cases": {
+    "pageBreakBefore": true,
+    "orientation": "portrait"
+  },
+  "TblCases": {
+    "widthsMm": [
+      18,
+      50,
+      66,
+      26
+    ],
+    "minRowHeightPt": 18
+  },
+  "wide": {
+    "pageBreakBefore": true,
+    "orientation": "landscape"
+  },
+  "TblInterfaces": {
+    "widthsMm": [
+      24,
+      30,
+      30,
+      46,
+      36,
+      36,
+      45
+    ]
+  },
+  "conclusion": {
+    "pageBreakBefore": true,
+    "orientation": "portrait"
+  },
+  "TblRevision": {
+    "widthsMm": [
+      20,
+      32,
+      80,
+      28
+    ]
+  },
+  "p-786": {
+    "style": "Report Note"
+  }
+}

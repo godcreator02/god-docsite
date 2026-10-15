@@ -18,7 +18,7 @@ icon: Map
 
 全部在 `packages/` 下，包名都是 `@godcreator/<目录名>`：
 
-{/* tree dir="../packages" depth="1" hash="6f49ea0c068a" */}
+{/* tree dir="../packages" depth="1" hash="15660022e4a0" */}
 
 | 包 | 做什么 |
 | --- | --- |
@@ -30,7 +30,8 @@ icon: Map
 | `doc-export` | 生成物：从 mdx 正本生成 README / AGENTS.md / SKILL.md，并核对两边一致 |
 | `trajectory` | 轨迹卡：卡格式与校验、卡页、星轨盘 |
 | `docfirst` | 命令行 `docfirst`：读 `docfirst.config.mjs`，把 check / confirm / render / trajectory 分派给 code-pin、doc-export、trajectory |
-| `collab` | 项目协作：任务与模块、日志与日历、通知、合并检查（命令行 `collab-merge-check`）、记录链接 |
+| `collab` | 项目协作：任务与模块、日志与日历、通知、合并检查（命令行 `collab-merge-check`）、记录链接、协作站的项目首页 |
+| `word-report` | 报告：JSON 报告文档的格式、校验与分章组装，站点 `reports/` 下的报告列表与报告页（整份一页），命令行 `report-docx`（检查、导出 Word），驱动本机 Word 的导出引擎 |
 
 ## 依赖方向
 
@@ -40,6 +41,7 @@ icon: Map
 | `doc-export` | `code-pin` |
 | `collab` | `identity`、`comments` |
 | `docfirst` | `code-pin`、`doc-export`、`trajectory` |
+| `word-report` | `comments`（留给报告页上的评论，还没接） |
 
 `god-docsite` 不依赖任何功能包，功能包也不依赖 `god-docsite`；表里没有的边一律不许有。方向由 `tests/dependency-rules.cjs` 检查（仓根 `pnpm test:deps`，要先 `pnpm build`），
 包内 `core/`、`node/`、`site/`、`cli/` 的分层与模块之间不许有环也在那里；没有豁免清单，报出来的都要改掉。

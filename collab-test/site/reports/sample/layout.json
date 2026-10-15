@@ -1,0 +1,86 @@
+{
+  "tbl_19e091ef2e474f9e892e71201e854464": {
+    "widthsMm": [
+      35,
+      65,
+      60
+    ]
+  },
+  "sec_dfb910f02bdc42c79ad1b01187d021f1": {
+    "pageBreakBefore": true,
+    "orientation": "portrait"
+  },
+  "sec_1df9ccec538847a984fa9143b69ba621": {
+    "pageBreakBefore": true,
+    "orientation": "portrait"
+  },
+  "sec_e5dfb7729acf49e7ac90d4581696d649": {
+    "pageBreakBefore": true,
+    "orientation": "portrait"
+  },
+  "fig_302d37dc8a2e4fc8a63bff5a23ac2f1d": {
+    "widthMm": 160
+  },
+  "sec_d7b7f2943da448039731bfa4edcc9505": {
+    "pageBreakBefore": true,
+    "orientation": "portrait"
+  },
+  "fig_21947f93b79a40cbb54a9d46ee7992e5": {
+    "widthMm": 160
+  },
+  "sec_6576563cf6f0446993e32db0e756499a": {
+    "pageBreakBefore": true,
+    "orientation": "portrait"
+  },
+  "tbl_97d7664b5bf149afb92d96fc7af9388e": {
+    "widthsMm": [
+      35,
+      20,
+      38,
+      67
+    ]
+  },
+  "sec_9d1fb291635c49f49b72847c6c579965": {
+    "pageBreakBefore": true,
+    "orientation": "portrait"
+  },
+  "tbl_548778f9dd424ce6a399e58326f60bc3": {
+    "widthsMm": [
+      18,
+      50,
+      66,
+      26
+    ],
+    "minRowHeightPt": 18
+  },
+  "sec_512fa30e0ba84783b98f254557dd4d0f": {
+    "pageBreakBefore": true,
+    "orientation": "landscape"
+  },
+  "tbl_3533386ce6ae45a186240f56b9df8f59": {
+    "widthsMm": [
+      24,
+      30,
+      30,
+      46,
+      36,
+      36,
+      45
+    ]
+  },
+  "sec_733bd8d07d174268b39418160acdc235": {
+    "pageBreakBefore": true,
+    "orientation": "portrait"
+  },
+  "tbl_0289a7a639154f83a7182e12ed71fb04": {
+    "widthsMm": [
+      20,
+      32,
+      80,
+      28
+    ]
+  },
+  "p_4e45daa72df74db7881f7d2f69d49a76": {
+    "style": "Report Note"
+  }
+}

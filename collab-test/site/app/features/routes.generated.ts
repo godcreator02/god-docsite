@@ -3,6 +3,7 @@ import type { RouteConfigEntry } from '@react-router/dev/routes'
 import * as collabRoutes from './collab/routes.ts'
 import * as commentsRoutes from './comments/routes.ts'
 import * as trajectoryRoutes from './trajectory/routes.ts'
+import * as wordReportRoutes from './word-report/routes.ts'
 
 /** 各功能 routes.ts 可以导出的：默认导出嵌在布局路由里，standaloneRoutes 在布局路由之外（占满窗口、不带侧栏） */
 interface FeatureRoutesModule {
@@ -10,7 +11,7 @@ interface FeatureRoutesModule {
   standaloneRoutes?: RouteConfigEntry[]
 }
 
-const featureRoutesModules: FeatureRoutesModule[] = [collabRoutes, commentsRoutes, trajectoryRoutes]
+const featureRoutesModules: FeatureRoutesModule[] = [collabRoutes, commentsRoutes, trajectoryRoutes, wordReportRoutes]
 
 export const featureRoutes: RouteConfigEntry[] = featureRoutesModules.flatMap((routes) => routes.default ?? [])
 export const featureStandaloneRoutes: RouteConfigEntry[] = featureRoutesModules.flatMap((routes) => routes.standaloneRoutes ?? [])
