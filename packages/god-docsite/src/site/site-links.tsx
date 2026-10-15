@@ -57,32 +57,40 @@ function ExternalLink({ href, opensNewTab, children, ...rest }: AnchorHTMLAttrib
   )
 }
 
-/** 站里的一个地址：页面（含页面树里的入口）、内容目录里的文件，都不是就是找不到 */
-function SiteTargetChip({ href, path, hash, children }: { href: string; path: string; hash: string; children: ReactNode }) {
-  const pageTitles = usePageTitles()
+/** 站里的一页：有标题时显示成带标题的卡片，pageTitle 是 undefined 时标红 */
+function PageChip({ href, path, hash, pageTitle, children }: { href: string; path: string; hash: string; pageTitle: string | undefined; children: ReactNode }) {
   const written = hasWrittenText(children)
-  const pageTitle = pageTitles[path]
-  if (pageTitle !== undefined) {
-    const shown = hash === '' ? pageTitle : `${pageTitle} › ${hash}`
+  if (pageTitle === undefined) {
     return (
-      <SiteChip href={href} title={shown} icon={<FileText className={linkChipIconClassName} />}>
-        {written ? children : shown}
+      <SiteChip href={href} broken title={`站里没有 ${path} 这一页`} icon={<TriangleAlert className={linkChipIconClassName} />}>
+        {written ? children : '找不到的页面'}
       </SiteChip>
     )
   }
-  if (path.startsWith(contentFileUrlPrefix)) {
+  const shown = hash === '' ? pageTitle : `${pageTitle} › ${hash}`
+  return (
+    <SiteChip href={href} title={shown} icon={<FileText className={linkChipIconClassName} />}>
+      {written ? children : shown}
+    </SiteChip>
+  )
+}
+
+/** 站里的一个地址：页面（含页面树里的入口）、内容目录里的文件，都不是就是找不到 */
+function SiteTargetChip({ href, path, hash, children }: { href: string; path: string; hash: string; children: ReactNode }) {
+  const pageTitle = usePageTitles()[path]
+  if (pageTitle === undefined && path.startsWith(contentFileUrlPrefix)) {
     const file = path.slice(contentFileUrlPrefix.length)
     return (
       <a href={href} target="_blank" rel="noreferrer noopener" title={file} className={plainChipClassName}>
         <Paperclip className={linkChipIconClassName} />
-        {written ? children : file.split('/').at(-1)}
+        {hasWrittenText(children) ? children : file.split('/').at(-1)}
       </a>
     )
   }
   return (
-    <SiteChip href={href} broken title={`站里没有 ${path} 这一页`} icon={<TriangleAlert className={linkChipIconClassName} />}>
-      {written ? children : '找不到的页面'}
-    </SiteChip>
+    <PageChip href={href} path={path} hash={hash} pageTitle={pageTitle}>
+      {children}
+    </PageChip>
   )
 }
 

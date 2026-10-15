@@ -13,10 +13,15 @@ export function sitePathOf(pathname: string) {
   return decoded.length > 1 ? decoded.replace(/\/+$/, '') : decoded
 }
 
+/** 站内链接指到的地址（统一写法）与锚点；相对地址按当前页面的地址解析，查询串不算进地址 */
+export function siteAddressOf(href: string, currentPath: string) {
+  const url = new URL(href, `${anyOrigin}${currentPath}`)
+  return { path: sitePathOf(url.pathname), hash: decodeURIComponent(url.hash.slice(1)) }
+}
+
 /** 相对地址按当前页面的地址解析；http、https 之外的协议（mailto 这类）也算站外，只是不开新标签页 */
 export function siteLinkTargetOf(href: string, currentPath: string): SiteLinkTarget {
   if (href.startsWith('#')) return { kind: 'in-page' }
   if (schemePattern.test(href)) return { kind: 'external', opensNewTab: /^https?:/i.test(href) }
-  const url = new URL(href, `${anyOrigin}${currentPath}`)
-  return { kind: 'site', path: sitePathOf(url.pathname), hash: decodeURIComponent(url.hash.slice(1)) }
+  return { kind: 'site', ...siteAddressOf(href, currentPath) }
 }
