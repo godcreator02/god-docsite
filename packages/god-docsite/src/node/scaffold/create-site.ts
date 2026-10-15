@@ -36,7 +36,7 @@ export interface CreatedSite {
   platformDependencies: Record<string, string>
 }
 
-const versionPlaceholder = '{{version}}'
+export const versionPlaceholder = '{{version}}'
 /** npm 发布时不带 .gitignore：模板里存成 gitignore，写进站点时改回来 */
 const gitignoreInTemplate = 'gitignore'
 
@@ -115,7 +115,8 @@ function writeSiteName(dir: string, siteName: string): void {
 
 /**
  * 从平台包的 template/ 建一个新站：复制模板，{{version}} 换成 packageSource 给的依赖说明，写 dev 端口、站名、people.json、
- * pnpm-workspace.yaml 与 .gitignore，再写空的功能汇总文件。不装依赖、不起服务；之后 pnpm install，要功能就装上功能包再 addFeature
+ * pnpm-workspace.yaml 与 .gitignore，再写空的功能汇总文件。不装依赖、不起服务；之后 pnpm install、addBaseFeatures（补上评论这类基础功能），
+ * 要别的功能就装上功能包再 addFeature
  */
 export function createSite(options: CreateSiteOptions): CreatedSite {
   assertCreateSiteOptions(options)

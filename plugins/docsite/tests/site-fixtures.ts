@@ -35,26 +35,35 @@ export function fakeHomePageCheck(events: string[], options: { registered?: bool
   }
 }
 
+/** 站点 node_modules 里的包链到 link: 指的目录（Windows 上用目录联接）；别的写法不装 */
+function linkPackage(dir: string, name: string, specifier: string): void {
+  if (!specifier.startsWith('link:')) return
+  const linkPath = path.join(dir, 'node_modules', ...name.split('/'))
+  if (existsSync(linkPath)) return
+  mkdirSync(path.dirname(linkPath), { recursive: true })
+  symlinkSync(specifier.slice('link:'.length), linkPath, 'junction')
+}
+
 /**
- * 假的 pnpm：记下参数；`add <包>@link:<目录>` 照 pnpm 的样子写进站点 package.json 的 dependencies，
- * 并把站点 node_modules 里的包链到那个目录（Windows 上用目录联接）
+ * 假的 pnpm：记下参数；`install` 把 dependencies 里写 link: 的包链进站点 node_modules；
+ * `add <包>@link:<目录>` 照 pnpm 的样子写进站点 package.json 的 dependencies 并链进 node_modules
  */
 export function fakePnpm(events: string[]) {
   return async (dir: string, args: readonly string[]) => {
     events.push(`pnpm ${args.join(' ')}`)
+    const manifestFile = path.join(dir, 'package.json')
+    const manifest = readJson(manifestFile) as { dependencies: Record<string, string> }
+    if (args[0] === 'install') {
+      for (const [name, specifier] of Object.entries(manifest.dependencies)) linkPackage(dir, name, specifier)
+      return
+    }
     if (args[0] !== 'add') return
     const spec = args[1]!
     const at = spec.indexOf('@', 1)
     const name = spec.slice(0, at)
     const specifier = spec.slice(at + 1)
-    const manifestFile = path.join(dir, 'package.json')
-    const manifest = readJson(manifestFile) as { dependencies: Record<string, string> }
     manifest.dependencies[name] = specifier
     writeFileSync(manifestFile, `${JSON.stringify(manifest, null, 2)}\n`)
-    if (!specifier.startsWith('link:')) return
-    const linkPath = path.join(dir, 'node_modules', ...name.split('/'))
-    if (existsSync(linkPath)) return
-    mkdirSync(path.dirname(linkPath), { recursive: true })
-    symlinkSync(specifier.slice('link:'.length), linkPath, 'junction')
+    linkPackage(dir, name, specifier)
   }
 }

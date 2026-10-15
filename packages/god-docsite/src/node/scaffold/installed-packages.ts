@@ -38,7 +38,7 @@ export function packageVisibleFrom(fromDir: string, name: string): InstalledPack
   }
 }
 
-const platformPackageName = '@godcreator/god-docsite'
+export const platformPackageName = '@godcreator/god-docsite'
 
 /** 平台包自己的根目录：从这个模块所在位置往上找 name 是 @godcreator/god-docsite 的 package.json（源码与构建产物的深度不同） */
 export function platformPackageDir(): string {

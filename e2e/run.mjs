@@ -1,6 +1,6 @@
 /**
- * 端到端检查：用平台包的建站器（@godcreator/god-docsite/scaffold 的 createSite、addFeature）建站到系统临时目录，
- * 装上本仓的包，分别起 dev 与 build + start，用 Playwright（headless Chromium）跑各组合的检查。
+ * 端到端检查：用平台包的建站器（@godcreator/god-docsite/scaffold 的 createSite、addBaseFeatures、addFeature）建站到系统临时目录，
+ * 装上本仓的包、补上评论这类基础功能，分别起 dev 与 build + start，用 Playwright（headless Chromium）跑各组合的检查。
  *
  *   pnpm e2e                                              两种装法 × 四种组合 × dev、start 全跑，同时跑 3 个站
  *   pnpm e2e --install=file --combo=demo --server=dev     只跑一部分
@@ -87,23 +87,16 @@ async function runSite({ options, runDir, runTag, installMode, combo, tarballs, 
     if (combo === 'collab') await generateCollabSite({ siteDir, installMode, tarballs, collabTarball: tarballs?.collab, scriptPort: await freePort() })
     else await generateSite({ siteDir, installMode, combo, tarballs, scriptPort: await freePort() })
     await installSite(siteDir, logDir)
-    if (combo === 'demo') {
-      const { addFeature } = await loadScaffold()
-      record('setup', await addDemoFeatureWithChecks({ siteDir, addFeature }))
-    }
-    if (combo === 'collab') {
-      const { addFeature } = await loadScaffold()
-      record('setup', await addCollabFeatureWithChecks({ siteDir, addFeature }))
-    }
-    if (combo === 'docs') {
-      const { addFeature } = await loadScaffold()
-      record('setup', await addDocsFeaturesWithChecks({ siteDir, addFeature }))
-    }
+    const { addBaseFeatures, addFeature } = await loadScaffold()
+    addBaseFeatures({ siteDir })
+    if (combo === 'demo') record('setup', await addDemoFeatureWithChecks({ siteDir, addFeature }))
+    if (combo === 'collab') record('setup', await addCollabFeatureWithChecks({ siteDir, addFeature }))
+    if (combo === 'docs') record('setup', await addDocsFeaturesWithChecks({ siteDir, addFeature }))
     // link 装法下包的 .d.mts 从仓里解析 @types/react、vite，与站点自己装的是两份，类型必然对不上；类型只在 file 装法查
     if (installMode === 'file') await typecheckSite(siteDir, logDir)
-    record('setup', [{ name: `建站、安装${installMode === 'file' ? '、typegen + tsc' : ''}`, pass: true, detail: siteDir }])
+    record('setup', [{ name: `建站、安装、补基础功能${installMode === 'file' ? '、typegen + tsc' : ''}`, pass: true, detail: siteDir }])
   } catch (error) {
-    record('setup', [{ name: '建站、安装', pass: false, detail: error.message }])
+    record('setup', [{ name: '建站、安装、补基础功能', pass: false, detail: error.message }])
     return
   }
 

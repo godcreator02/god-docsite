@@ -27,11 +27,11 @@ export type CreateDocsiteDeps = HomePageCheckDeps & {
 const initialPeople = [{ id: 'claude', name: 'Claude', agent: true }]
 
 /**
- * 从空目录建站：平台建站器复制模板、写端口与站名 → pnpm install → 起服务检查首页（通过后登记着的站保持运行，没登记的停掉）。
- * 骨架写完就归站点；要功能再对它 addFeature
+ * 从空目录建站：平台建站器复制模板、写端口与站名 → pnpm install → 补上基础功能（评论的全站评论页与样式）→
+ * 起服务检查首页（通过后登记着的站保持运行，没登记的停掉）。骨架写完就归站点；要功能再对它 addFeature
  */
 export async function createDocsite(dir: string, { port, title }: SiteInitOptions, deps: CreateDocsiteDeps): Promise<SiteInitResult> {
-  const { createSite } = await deps.scaffold()
+  const { createSite, addBaseFeatures } = await deps.scaffold()
   let platformDependencies: Record<string, string>
   try {
     ;({ platformDependencies } = createSite({ dir, siteName: title, port, people: initialPeople, packageSource: deps.packageSource }))
@@ -39,6 +39,11 @@ export async function createDocsite(dir: string, { port, title }: SiteInitOption
     throw new DocsiteRejected(`没建成站点：${messageOf(error)}`)
   }
   await deps.pnpm(dir, ['install'], `${dir} 里 pnpm install`)
+  try {
+    addBaseFeatures({ siteDir: dir })
+  } catch (error) {
+    throw new DocsiteRejected(`站点建好、依赖装好了，补基础功能时出错：${messageOf(error)}`)
+  }
   await checkHomePage(dir, '新站点建好、装好依赖', deps)
   return { dir, platformDependencies }
 }

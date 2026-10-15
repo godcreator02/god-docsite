@@ -23,7 +23,7 @@ function depsWith(events: string[], options: { registered?: boolean; status?: nu
 }
 
 describe('createDocsite：从空目录建站', () => {
-  it('复制平台模板、写端口与站名、pnpm install、起服务检查后停掉没登记的站', async () => {
+  it('复制平台模板、写端口与站名、pnpm install、补上评论这个基础功能、起服务检查后停掉没登记的站', async () => {
     const events: string[] = []
     const result = await createDocsite(siteDir, { port: 4560, title: '新站' }, depsWith(events))
     expect(events).toEqual(['pnpm install', 'start', 'page-status', 'stop'])
@@ -33,8 +33,9 @@ describe('createDocsite：从空目录建站', () => {
     expect(manifest.dependencies['@godcreator/god-docsite']).toBe(`link:${path.join(repoDir, 'packages', 'god-docsite').replaceAll('\\', '/')}`)
     expect(readJson(path.join(siteDir, 'content', 'meta.json'))['title']).toBe('新站')
     expect(JSON.parse(readFileSync(path.join(siteDir, 'people.json'), 'utf8'))).toEqual([{ id: 'claude', name: 'Claude', agent: true }])
-    expect(readFileSync(path.join(siteDir, 'app', 'routes.ts'), 'utf8')).toContain("route('comments', 'routes/comments.tsx')")
-    expect(existsSync(path.join(siteDir, 'app', 'features', 'routes.generated.ts'))).toBe(true)
+    expect(existsSync(path.join(siteDir, 'app', 'features', 'comments', 'comments.tsx'))).toBe(true)
+    expect(readFileSync(path.join(siteDir, 'app', 'features', 'routes.generated.ts'), 'utf8')).toContain("import * as commentsRoutes from './comments/routes.ts'")
+    expect(readFileSync(path.join(siteDir, 'app', 'features', 'styles.generated.css'), 'utf8')).toContain("@import './comments/styles.css';")
   })
 
   it('登记着的站起服务检查后保持运行', async () => {

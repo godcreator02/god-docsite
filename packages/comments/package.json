@@ -1,7 +1,7 @@
 {
   "name": "@godcreator/comments",
   "version": "0.0.0",
-  "description": "文档站评论：评论文件的格式与读写、评论串整理、唯一一份评论写入 action、给页面 loader 读本页评论、评论面板与正文里的定位",
+  "description": "文档站评论：评论文件的格式与读写、评论串整理、唯一一份评论写入 action、给页面 loader 读本页评论、评论面板与正文里的定位。template/ 是建站器复制进站点 app/features/comments/ 的接线文件（全站评论页兼评论写入的路由、侧栏入口、样式与正文高亮）",
   "type": "module",
   "exports": {
     ".": {
@@ -24,7 +24,8 @@
   },
   "files": [
     "dist",
-    "styles.css"
+    "styles.css",
+    "template"
   ],
   "repository": {
     "type": "git",

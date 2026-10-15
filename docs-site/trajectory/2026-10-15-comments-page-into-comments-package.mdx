@@ -1,0 +1,34 @@
+---
+born-at: 2026-10-15T14:30
+type: choice
+parent: [2026-09-03-god-live-doc]
+label: 全站评论页与正文高亮归 comments 包，基础站装完依赖后由建站器补进
+domain: 骨架
+---
+
+## 背景
+
+平台模板里还留着评论的两样东西：`app/routes/comments.tsx`（全站评论页，也是各页评论面板提交评论的 `/comments` action）、
+`app/app.css` 里的正文高亮与描边样式，外加 `source.ts` 里「全站评论」的侧栏入口。按「评论归 comments 包」，它们该是 comments 的
+`template/`，像别的功能一样复制进站点 `app/features/comments/`、经功能汇总文件接上。难点在时机：`addFeature` 从站点 `node_modules`
+里的包复制模板，`createSite` 时还没装依赖；平台包又不能依赖、也不该点名任何功能包。
+
+pivots-from:: [建站器进平台包](2026-10-15-scaffold-feature-index.md)
+
+## 定下的做法
+
+建站器加 `addBaseFeatures({ siteDir })`：读平台模板 `package.json` 里写成 `{{version}}` 的包（平台包自己除外，现在是 identity 与 comments），
+在站点里装好的那份带 `template/` 就 `addFeature`，没有的（identity）跳过；可以重复运行，只补缺的。调用方在 `pnpm install` 之后调它：
+gwb-docsite 的建站（`createDocsite`）、e2e 的建站。docs-site 与 collab-test/site 用它补上 `app/features/comments/` 并重写汇总文件。
+
+没选的两条：
+
+- 在每个调用方点名 `addFeature('@godcreator/comments')`：基础站带哪些包已经写在模板 `package.json` 里，再在调用方各写一遍会走样
+- 留在平台模板里：评论的页面与样式跟评论包一起改，留在模板里就又是平台认识一个功能包
+
+## 代价与遗留
+
+- 侧栏根部的入口按功能名排：协作站上「全站评论」排到协作功能的入口后面（原来固定在最前）
+- 站点的 `app.css` 不再直接引 `@godcreator/comments/styles.css`，评论样式、`@source not` 评论目录都经 `features/styles.generated.css` 接上；
+  已建好的站要照新模板改 `app.css`、`routes.ts`、`source.ts`，删掉 `app/routes/comments.tsx`，再跑一次 `addBaseFeatures`
+- 评论栏让目录列让位的布局规则仍在平台包 `styles.css` 里（跟着布局走）

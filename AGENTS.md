@@ -11,7 +11,7 @@
 | 目录 | 内容 |
 | --- | --- |
 | `packages/god-docsite/` | 平台包：三种页面来源、布局与侧栏、搜索、llms、推送（SSE）、术语标注、vite 插件 `godDocsite()`；`template/` 是唯一的站点模板，`./scaffold` 是建站器（建站、加功能、重写功能汇总文件）；react、fumadocs、vite 等 peer 全标可选，只用建站器的 Node 使用方（gwb-docsite）不连带装它们 |
-| `packages/identity/`、`packages/comments/` | 身份（people.json、身份码、给浏览器的公开投影）与评论（评论文件、唯一一份写入 action、评论面板与正文定位）；基础站默认装这两个 |
+| `packages/identity/`、`packages/comments/` | 身份（people.json、身份码、给浏览器的公开投影）与评论（评论文件、唯一一份写入 action、评论面板与正文定位）；基础站默认装这两个。comments 的 `template/` 是全站评论页（也是评论写入的 `/comments` action）、侧栏入口、样式与正文高亮，建站、装完依赖后由建站器 `addBaseFeatures` 补进站点 `app/features/comments/` |
 | `packages/explainer/` | 讲解组件与它们给生成物用的机读文字 |
 | `packages/code-pin/`、`packages/doc-export/`、`packages/trajectory/` | 钉码、生成物（mdx 正本生成 AGENTS.md / README / SKILL.md）、轨迹卡与星轨盘 |
 | `packages/docfirst/` | 命令行 `docfirst`：读 `docfirst.config.mjs`，把 check / render / confirm 分派给上面三个功能包；`template/` 是文档维护的起始物 |

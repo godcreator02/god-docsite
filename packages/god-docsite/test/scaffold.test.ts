@@ -3,7 +3,7 @@ import { tmpdir } from 'node:os'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { afterEach, describe, expect, it } from 'vitest'
-import { addFeature, createSite, regenerateFeatureIndex, type PackageSource } from '../src/node/scaffold/index.js'
+import { addBaseFeatures, addFeature, createSite, regenerateFeatureIndex, type PackageSource } from '../src/node/scaffold/index.js'
 import { scanExports } from '../src/node/scaffold/exported-names.js'
 
 const repoDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..', '..')
@@ -189,6 +189,21 @@ describe('addFeature', () => {
     writeFile(path.join(featuresDir, 'beta', 'styles.css'), '.beta {}\n')
     writeFile(path.join(featuresDir, 'notes', 'readme.md'), '不是功能\n')
     expect(regenerateFeatureIndex(siteDir).features).toEqual(['alpha', 'beta', 'zeta'])
+  })
+
+  it('addBaseFeatures：模板跟着装的包里带 template/ 的补进功能目录（comments），没有的跳过（identity），重复运行只补缺的；没装先报错', () => {
+    const siteDir = newSite()
+    expect(() => addBaseFeatures({ siteDir })).toThrow(/node_modules 里没有 @godcreator\/comments/)
+    const commentsTemplate = { 'routes.ts': 'export default []\n', 'styles.css': '.c {}\n' }
+    for (const [name, templateFiles] of [['@godcreator/comments', commentsTemplate], ['@godcreator/identity', {}]] as const) {
+      const dir = path.join(siteDir, 'node_modules', ...name.split('/'))
+      writeFile(path.join(dir, 'package.json'), JSON.stringify({ name, version: '1.0.0' }))
+      for (const [relative, text] of Object.entries(templateFiles)) writeFile(path.join(dir, 'template', relative), text)
+    }
+    const added = addBaseFeatures({ siteDir })
+    expect(added.map(({ feature, addedFiles }) => [feature, addedFiles])).toEqual([['comments', ['routes.ts', 'styles.css']]])
+    expect(readFileSync(path.join(siteDir, 'app', 'features', 'routes.generated.ts'), 'utf8')).toContain("import * as commentsRoutes from './comments/routes.ts'")
+    expect(addBaseFeatures({ siteDir }).map(({ addedFiles, keptFiles }) => [addedFiles, keptFiles])).toEqual([[[], ['routes.ts', 'styles.css']]])
   })
 
   it('模板只有 styles.css 的功能包：算作功能，只进样式汇总', () => {

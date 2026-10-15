@@ -1,6 +1,5 @@
-/* 评论界面（组件在 ./react）。覆盖层的徽章/卡片样式由组件按实例注入，不在这里 */
-/* 唤起式评论栏（CommentsDock）的浮标、侧栏面板、批注模式与草稿表单的样式也在这一份；
-   侧栏盖在目录列上、正文高亮（::highlight）与描边这些站点布局样式在 @godcreator/docsite-ui 的 styles.css */
+/* 评论界面（组件在 ./site）：唤起式评论栏（CommentsDock）的浮标、侧栏面板、批注模式与草稿表单，全站评论页的评论卡。
+   侧栏盖在目录列上的布局规则在平台包 god-docsite 的 styles.css；正文高亮（::highlight）与描边在本包 template/styles.css，建站后在站点的 app/features/comments/ */
 
 .docsite-comments-sidebar {
   font-size: 14px;
@@ -233,7 +232,7 @@
   background: #d99e00;
 }
 
-/* 唤起式评论栏：盖在目录那一列上（同宽同位，让位样式见 docsite-ui 的 styles.css）。
+/* 唤起式评论栏：盖在目录那一列上（同宽同位，让位的样式在平台包 god-docsite 的 styles.css）。
    面板自己滚但滚动条藏起来：右边正文的滚动条已经占着 gutter，面板再出一条就叠在一起 */
 .docsite-comments-panel {
   position: fixed;
