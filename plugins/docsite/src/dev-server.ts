@@ -2,8 +2,8 @@ import { spawn, type ChildProcess } from 'node:child_process'
 import { randomUUID } from 'node:crypto'
 import { existsSync, readFileSync } from 'node:fs'
 import path from 'node:path'
-import { identityCodeEnvName } from '@godcreator/docsite-identity/server'
-import { feedEndpointPrefix, feedTokenEnvName, feedTokenHeader } from '@godcreator/docsite-feed'
+import { feedTokenEnvName, feedTokenHeader, feedUrlOf } from '@godcreator/god-docsite'
+import { identityCodeEnvName } from '@godcreator/identity/node'
 import { DocsiteRejected } from './errors.js'
 
 const ansiEscapePattern = /\x1b\[[0-9;]*[A-Za-z]/g
@@ -42,14 +42,18 @@ function readJsonFile(file: string): unknown {
   }
 }
 
-/** 站点没在运行时预期的地址：package.json 的 scripts.dev 里写的端口；没有这个文件、没有 dev 脚本或没写端口时为 null */
-export function expectedSiteUrlOf(siteDir: string): string | null {
+/** 站点 package.json 的 scripts.dev 里写的端口；没有这个文件、没有 dev 脚本或没写端口时为 null */
+export function devPortOfSite(siteDir: string): number | null {
   const file = path.join(siteDir, 'package.json')
   if (!existsSync(file)) return null
   const manifest = readJsonFile(file)
   const dev = isRecord(manifest) && isRecord(manifest['scripts']) ? manifest['scripts']['dev'] : undefined
-  if (typeof dev !== 'string') return null
-  const port = devPortOf(dev)
+  return typeof dev === 'string' ? devPortOf(dev) : null
+}
+
+/** 站点没在运行时预期的地址：dev 脚本里写的端口；没写为 null */
+export function expectedSiteUrlOf(siteDir: string): string | null {
+  const port = devPortOfSite(siteDir)
   return port === null ? null : `http://127.0.0.1:${port}`
 }
 
@@ -103,20 +107,30 @@ export function stopProcessTree(child: ChildProcess): Promise<void> {
   })
 }
 
-async function postFeed(siteUrl: string, token: string, channel: string, data: unknown): Promise<void> {
-  const response = await fetch(new URL(`${feedEndpointPrefix}/${channel}`, siteUrl), {
+/** 推送：POST JSON 到站点的推送路由，请求头带这次启动交给站点进程的令牌；站点回的不是 2xx 就把它的原话报出来 */
+export async function postFeed(siteUrl: string, token: string, channel: string, data: unknown): Promise<void> {
+  let feedUrl: string
+  try {
+    feedUrl = feedUrlOf(channel)
+  } catch (error) {
+    throw new DocsiteRejected(error instanceof Error ? error.message : String(error))
+  }
+  const response = await fetch(new URL(feedUrl, siteUrl), {
     method: 'POST',
     headers: { 'content-type': 'application/json', [feedTokenHeader]: token },
     body: JSON.stringify(data),
   })
-  if (!response.ok) throw new Error(`开发服务回 ${response.status}：${await response.text()}`)
+  if (!response.ok) throw new DocsiteRejected(`站点的推送路由回 ${response.status}：${await response.text()}`)
 }
 
 /**
- * 在站点目录里运行 pnpm dev，环境变量交给它身份码与这次启动专用的推送口令，等它在输出里报出地址。
+ * 在站点目录里运行 pnpm dev，环境变量交给它身份码与这次启动生成的推送令牌，等它在输出里报出地址。
+ * 端口取 dev 脚本里写的 --port：站点按它算可信 origin，没写就拒绝；报出的地址端口不同也拒绝。
  * 先退出或超时都抛 DocsiteRejected，写明开发服务的输出
  */
 export const launchDevServer: LaunchDevServer = (siteDir, identityCode) => {
+  const port = devPortOfSite(siteDir)
+  if (port === null) return Promise.reject(new DocsiteRejected(`${siteDir}/package.json 的 scripts.dev 要写 --port <端口>：站点按它算写入请求的可信 origin`))
   const token = randomUUID()
   const child = spawn('pnpm', ['dev'], {
     cwd: siteDir,
@@ -146,6 +160,13 @@ export const launchDevServer: LaunchDevServer = (siteDir, identityCode) => {
       reportedUrl = true
       clearTimeout(timer)
       child.off('exit', onEarlyExit)
+      if (new URL(url).port !== String(port)) {
+        stopProcessTree(child).then(
+          () => reject(new DocsiteRejected(`开发服务报出的地址 ${url} 不是 dev 脚本写的端口 ${port}，已停掉`)),
+          (error: unknown) => reject(new DocsiteRejected(`开发服务报出的地址 ${url} 不是 dev 脚本写的端口 ${port}，停掉时又出错（${String(error)}）`)),
+        )
+        return
+      }
       resolve({
         url,
         pid: child.pid!,

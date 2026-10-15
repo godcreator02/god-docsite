@@ -35,7 +35,7 @@ describe('产物', () => {
   const nodeHalf = built ? fs.readdirSync(distDir).filter((f) => f.endsWith('.js')) : []
 
   it.skipIf(!built)('产物一层排开，没有浏览器侧（窗格随托管命令一起删了）', () => {
-    expect(nodeHalf.sort()).toEqual(['args.js', 'deps.js', 'index.js', 'ports.js', 'repo-root.js', 'units-root.js', 'values.js', 'vocab.js'])
+    expect(nodeHalf.sort()).toEqual(['args.js', 'docfirst-site.js', 'index.js', 'ports.js', 'repo-root.js', 'units-root.js', 'values.js', 'vocab.js'])
     expect(fs.existsSync(path.join(distDir, 'client.js'))).toBe(false)
     expect(fs.existsSync(path.join(distDir, 'style.css'))).toBe(false)
   })
@@ -87,11 +87,11 @@ describe('必须同时改的几处', () => {
   })
 
   /**
-   * 插件与包的分界：插件的使用者是 agent，包的使用者是仓，插件不许依赖本仓 `packages/` 下的任何一个包。
-   * 把包写进任何一档依赖，插件就会用 home 里解析出来的一条固定路径，包升级后照读旧文件、不报错，
-   * 所以三档都查：运行时、peer、开发期。包名从 `packages/` 下的清单现读：按名字前缀判的话，通用包不带 docfirst 前缀，查不到。
+   * 插件与包的分界：插件的使用者是 agent，包的使用者是仓。插件只按路径读几个包的 package.json 与 template/（写进新站的版本、
+   * 叠到站点根的起始物），所以它们只能出现在 dependencies 里，peer 与开发期都不许有，源码里也不许 import。
+   * 包名从 `packages/` 下的清单现读：按名字前缀判的话，通用包不带 docfirst 前缀，查不到。
    */
-  it('插件对本仓 packages/ 下的包零依赖：三档依赖都没有，源码里也不 import', () => {
+  it('本仓 packages/ 下的包只在 dependencies 里（docfirst 与三个功能包），源码里不 import', () => {
     const packagesDir = path.resolve(root, '..', '..', 'packages')
     const repoPackages = fs
       .readdirSync(packagesDir, { withFileTypes: true })
@@ -99,11 +99,8 @@ describe('必须同时改的几处', () => {
       .map((entry) => (JSON.parse(fs.readFileSync(path.join(packagesDir, entry.name, 'package.json'), 'utf8')) as { name: string }).name)
     expect(repoPackages.length, 'packages/ 下一个包都没读到').toBeGreaterThan(0)
     const isRepoPackage = (spec: string): boolean => repoPackages.includes(packageNameOf(spec))
-    for (const [table, deps] of Object.entries({
-      dependencies: manifest.dependencies,
-      peerDependencies: manifest.peerDependencies,
-      devDependencies: manifest.devDependencies,
-    })) {
+    expect(Object.keys(manifest.dependencies ?? {}).sort()).toEqual(['@godcreator/code-pin', '@godcreator/docfirst', '@godcreator/explainer', '@godcreator/trajectory'])
+    for (const [table, deps] of Object.entries({ peerDependencies: manifest.peerDependencies, devDependencies: manifest.devDependencies })) {
       for (const dep of Object.keys(deps ?? {})) {
         expect(isRepoPackage(dep), `${table} 里出现了 ${dep}：插件不许依赖包`).toBe(false)
       }
@@ -114,12 +111,8 @@ describe('必须同时改的几处', () => {
         expect(isRepoPackage(m[1]!), `src/${file} import 了 ${m[1]!}`).toBe(false)
       }
     }
-    // 写进新站的功能包表不算依赖：它是字符串，插件不 import；建出来的站要跑 docfirst、要渲染，站当然要装这个包
-    const depsSource = fs.readFileSync(path.join(root, 'src', 'deps.ts'), 'utf8')
-    expect(depsSource).toContain('@godcreator/docsite-docfirst')
   })
-
-  it('没有任何文件启动子进程，不转发 docfirst 命令行：建站经 gwbDocsite 服务，装依赖与探活归 gwb-docsite', () => {
+  it('没有任何文件启动子进程，不转发 docfirst 命令行：建站与加功能经 gwbDocsite 服务，装依赖与探活归 gwb-docsite', () => {
     for (const file of fs.readdirSync(path.join(root, 'src')).filter((f) => f.endsWith('.ts'))) {
       const src = fs.readFileSync(path.join(root, 'src', file), 'utf8')
       expect(src, `src/${file} 启动了子进程`).not.toMatch(/node:child_process/)

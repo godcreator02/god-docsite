@@ -2,8 +2,8 @@ import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import path from 'node:path'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
-import { commentFormOf } from '../src/comments.js'
-import { devPortOf, localUrlOf, type DevServer } from '../src/dev-server.js'
+import { commentFormOf, decodeFlatTurboStream } from '../src/comments.js'
+import { devPortOf, launchDevServer, localUrlOf, type DevServer } from '../src/dev-server.js'
 import { isIdentityCode, joinPeople, newIdentityCode } from '../src/people-file.js'
 import { SiteHost } from '../src/site-host.js'
 
@@ -17,12 +17,16 @@ afterEach(async () => {
   await rm(siteDir, { recursive: true })
 })
 
-/** 站点目录里放上 package.json 与一版够新的基础包：start 前的版本核对能过 */
+/** 站点目录里放上 package.json 与平台包：start 前的核对能过 */
 async function siteWithSupportedKit(): Promise<void> {
   await writeFile(path.join(siteDir, 'package.json'), '{"scripts":{"dev":"react-router dev --port 4430"}}')
-  const kitDir = path.join(siteDir, 'node_modules', '@godcreator', 'docsite-kit')
-  await mkdir(kitDir, { recursive: true })
-  await writeFile(path.join(kitDir, 'package.json'), '{"name":"@godcreator/docsite-kit","version":"0.2.1"}')
+  await installPackage('@godcreator/god-docsite', '0.1.0')
+}
+
+async function installPackage(name: string, version: string): Promise<void> {
+  const dir = path.join(siteDir, 'node_modules', ...name.split('/'))
+  await mkdir(dir, { recursive: true })
+  await writeFile(path.join(dir, 'package.json'), JSON.stringify({ name, version }))
 }
 
 /** 假的开发服务：记下推来的数据，能让它退出 */
@@ -127,16 +131,14 @@ describe('站点状态机', () => {
     expect(host.statusOf(siteDir)).toMatchObject({ state: 'failed', error: '开发服务 60 秒内没有报出地址，已停掉' })
   })
 
-  it('站点没装够版本的基础包、不是站点目录，start 直接拒绝且不 spawn', async () => {
+  it('不是站点目录、没装平台包、建在旧地基上，start 直接拒绝且不 spawn', async () => {
     const { launched, launch } = fakeServers()
     const { host } = hostWith(launch)
     await expect(host.start(siteDir)).rejects.toThrow('不是站点目录')
     await writeFile(path.join(siteDir, 'package.json'), '{"scripts":{"dev":"react-router dev --port 4430"}}')
-    await expect(host.start(siteDir)).rejects.toThrow('在站点目录里运行 pnpm install')
-    const kitDir = path.join(siteDir, 'node_modules', '@godcreator', 'docsite-kit')
-    await mkdir(kitDir, { recursive: true })
-    await writeFile(path.join(kitDir, 'package.json'), '{"name":"@godcreator/docsite-kit","version":"0.1.9"}')
-    await expect(host.start(siteDir)).rejects.toThrow('低于插件支持的最低版')
+    await expect(host.start(siteDir)).rejects.toThrow('node_modules 里没有 @godcreator/god-docsite')
+    await installPackage('@godcreator/docsite-kit', '0.3.0')
+    await expect(host.start(siteDir)).rejects.toThrow('建在旧地基 @godcreator/docsite-kit 上')
     expect(launched).toEqual([])
   })
 
@@ -203,5 +205,22 @@ describe('开发服务的输出与评论表单', () => {
     expect(fields(commentFormOf({ op: 'create', page: '/a', anchor: 'some-heading', body: 'x', as: 'claude' }))).toEqual({ intent: 'create-thread', as: 'claude', body: 'x', page: '/a', anchor: 'some-heading' })
     expect(fields(commentFormOf({ op: 'create', page: '/a', body: 'x' }))).toEqual({ intent: 'create-thread', body: 'x', page: '/a' })
     expect(fields(commentFormOf({ op: 'reply', thread: 't', body: 'x' }))).toEqual({ intent: 'reply', threadId: 't', body: 'x' })
+  })
+
+  it('评论写入路由回的单次请求数据：扁平对象解成原样，数组与带类型标记的值报错', () => {
+    expect(decodeFlatTurboStream('[{"_1":2},"data",{"_3":4,"_5":6,"_7":8},"ok",true,"intent","create-thread","threadId","20261015t110054-er8s"]\n')).toEqual({
+      data: { ok: true, intent: 'create-thread', threadId: '20261015t110054-er8s' },
+    })
+    expect(decodeFlatTurboStream('[{"_1":2},"data",{"_3":4,"_5":6},"ok",false,"error","写入只接受来自 http://127.0.0.1:4571 的请求"]')).toEqual({
+      data: { ok: false, error: '写入只接受来自 http://127.0.0.1:4571 的请求' },
+    })
+    expect(() => decodeFlatTurboStream('[{"_1":2},"data",["D",1]]')).toThrow('解不了数组')
+    expect(() => decodeFlatTurboStream('[{"_1":-5},"data"]')).toThrow('下标 -5 不在值表里')
+    expect(() => decodeFlatTurboStream('<!DOCTYPE html>')).toThrow()
+  })
+
+  it('dev 脚本没写 --port：不启动，直接拒绝', async () => {
+    await writeFile(path.join(siteDir, 'package.json'), '{"scripts":{"dev":"react-router dev"}}')
+    await expect(launchDevServer(siteDir, 'mycode000001')).rejects.toThrow('scripts.dev 要写 --port <端口>')
   })
 })

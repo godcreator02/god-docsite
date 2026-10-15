@@ -3,7 +3,10 @@ import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { build } from 'esbuild'
 
-/** node 侧用 esbuild 打成一个文件，外置名单之外的依赖（包括同仓的基础包 @godcreator/docsite-kit）全部打包进去；类型入口由紧接着的 tsc 输出 */
+/**
+ * node 侧用 esbuild 打成一个文件，外置名单之外的依赖全部打包进去；类型入口由紧接着的 tsc 输出。
+ * 平台建站器 @godcreator/god-docsite/scaffold 不打包：源码按算出的地址 import(变量) 加载，esbuild 不跟进
+ */
 const here = path.dirname(fileURLToPath(import.meta.url))
 
 /**

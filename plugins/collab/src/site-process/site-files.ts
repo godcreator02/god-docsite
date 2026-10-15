@@ -1,4 +1,4 @@
-/** 协作站功能包的包名：建站时写进 site/package.json 的 docsite.features */
+/** 协作站功能包的包名：建站后交给 gwbDocsite.addFeature */
 export const featurePackage = '@godcreator/collab'
 
 const ansiEscapePattern = /\u001b\[[0-9;]*m/g

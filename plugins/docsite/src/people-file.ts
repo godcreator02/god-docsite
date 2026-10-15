@@ -1,7 +1,6 @@
 import { randomInt } from 'node:crypto'
-import { readFile, writeFile } from 'node:fs/promises'
-import path from 'node:path'
-import { identityCodePattern, parsePeople, peopleFile, peopleWithJoined } from '@godcreator/docsite-identity/server'
+import { identityCodePattern, type JoiningPerson } from '@godcreator/identity'
+import { joinSitePeople } from '@godcreator/identity/node'
 import { DocsiteRejected } from './errors.js'
 
 const codeAlphabet = 'abcdefghijkmnpqrstuvwxyz23456789'
@@ -15,34 +14,14 @@ export function isIdentityCode(value: unknown): value is string {
   return typeof value === 'string' && identityCodePattern.test(value)
 }
 
-export type JoiningPerson = { id: string; name: string; gitea?: string }
-
 /**
- * 把本 home 的码加进站点的人员列表：已有这个 id 就加进它的 codes，没有就新加一项；码已经在里面就不改文件。
- * 写回时保持一项一行，git 里的改动只有这一行
+ * 把本 home 的码加进站点的 people.json（identity 包的 joinSitePeople：已有这个 id 就加进它的 codes，没有就新加一项；
+ * 码已经在里面就不改文件；一项一行写回）。文件读不出、码已在别人名下这类拒绝原样报出来
  */
 export async function joinPeople(siteDir: string, code: string, person: JoiningPerson): Promise<{ changed: boolean }> {
-  const file = path.join(siteDir, peopleFile)
-  let current: unknown
   try {
-    current = JSON.parse(await readFile(file, 'utf8'))
-  } catch (error) {
-    throw new DocsiteRejected(`${file} 读不出：${error instanceof Error ? error.message : String(error)}`)
-  }
-  let people
-  try {
-    people = parsePeople(current)
+    return await joinSitePeople(siteDir, code, person)
   } catch (error) {
     throw new DocsiteRejected(error instanceof Error ? error.message : String(error))
   }
-  const before = JSON.stringify(people)
-  let joined
-  try {
-    joined = peopleWithJoined(people, code, person)
-  } catch (error) {
-    throw new DocsiteRejected(error instanceof Error ? error.message : String(error))
-  }
-  if (JSON.stringify(joined) === before) return { changed: false }
-  await writeFile(file, `[\n${joined.map((each) => `  ${JSON.stringify(each)}`).join(',\n')}\n]\n`)
-  return { changed: true }
 }

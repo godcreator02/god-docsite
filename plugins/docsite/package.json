@@ -1,7 +1,7 @@
 {
   "name": "@godcreator/gwb-docsite",
   "version": "0.3.6",
-  "description": "文档站的基础插件：本 home 的身份码，一条命令从空目录建站（骨架模板从自述站派生、随插件发布），托管站点的开发服务，往站点推数据，agent 读写站点评论的命令；别的插件注入服务 gwbDocsite 建站、托管自己的站点",
+  "description": "文档站的基础插件：本 home 的身份码，一条命令从空目录建站、给站点加功能包（建站器与站点模板都在平台包 @godcreator/god-docsite 里，随插件的 dependencies 装在旁边），托管站点的开发服务，往站点推数据，agent 读写站点评论的命令；别的插件注入服务 gwbDocsite 建站、加功能、托管自己的站点",
   "type": "module",
   "exports": {
     ".": {
@@ -11,8 +11,7 @@
   },
   "files": [
     "dist",
-    "skills",
-    "template"
+    "skills"
   ],
   "keywords": [
     "gwb-plugin"
@@ -25,7 +24,7 @@
     "registry": "https://git.tianshen02.online:28377/api/packages/godcreator/npm/"
   },
   "scripts": {
-    "build": "node scripts/sync-template.mjs && node build.ts && tsc -p tsconfig.build.json",
+    "build": "node build.ts && tsc -p tsconfig.build.json",
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "lint": "oxlint . --deny-warnings",
     "test": "vitest run",
@@ -44,10 +43,6 @@
     }
   },
   "devDependencies": {
-    "@godcreator/docsite-comments": "workspace:^",
-    "@godcreator/docsite-feed": "workspace:^",
-    "@godcreator/docsite-identity": "workspace:^",
-    "@godcreator/docsite-kit": "workspace:^",
     "@godcreator/gwb-commands": "catalog:",
     "@godcreator/gwb-kernel-desktop": "catalog:",
     "@godcreator/gwb-settings": "catalog:",
@@ -56,7 +51,11 @@
     "cordis": "catalog:",
     "esbuild": "catalog:",
     "typescript": "catalog:",
-    "vitest": "catalog:",
-    "yaml": "catalog:"
+    "vitest": "catalog:"
+  },
+  "dependencies": {
+    "@godcreator/comments": "workspace:^",
+    "@godcreator/god-docsite": "workspace:^",
+    "@godcreator/identity": "workspace:^"
   }
 }
