@@ -1,0 +1,58 @@
+---
+born-at: 2026-10-15T14:30
+type: choice
+parent: [2026-09-03-god-live-doc]
+label: e2e 改测仓里的测试站，打包装法只在发版前查
+domain: 检查
+---
+
+## 背景
+
+`pnpm e2e` 原来用建站器在系统临时目录建 4 个组合（base、demo、collab、docs）× 2 种装法（link、file）= 8 个站，每个站装一遍依赖，
+dev 与 build + start 各跑一轮，共 224 项，同时跑 3 个站约 4 分钟，`pnpm verify` 约 500 秒。问题有四个：基础站被重复建了 4 遍；
+demo 组合（假功能包 e2e-demo）验的扩展点都已经有真功能在用；file 装法查的是打包问题，只在发版前要紧；
+而「全部功能装进同一个站」一次都没测过——docs-site 与 collab-test 各只装了一部分功能。
+
+pivots-from:: [建站器写功能汇总文件](2026-10-15-scaffold-feature-index.md)
+
+## 结论与边界
+
+日常 e2e 直接测仓里的 `collab-test/site`，打包装法只在发版前查，建站器的输出另做静态比对。具体是：
+
+- `collab-test/site` 改成基础站 + 全部功能（collab、code-pin、trajectory、explainer），原来各组合的夹具页搬进去。
+  `pnpm e2e` 不建站、不装依赖，在它上面启动 dev 与 build + start 各一轮，依次跑 base、collab、docs、all-features 四组检查。
+  all-features 组查只有全部功能同站才会出的问题：路由表里没有两条路由占同一个地址、各功能的地址由自己的路由接住、
+  侧栏的功能入口齐全且先后固定、各功能的样式都进了页面
+- 测试不改脏仓：检查只写本次运行新建、带运行编号的东西（评论正文、任务标题、临时内容页的文件名），每轮跑完按编号删掉；
+  最后一项检查 `git status collab-test` 和跑之前一样
+- `pnpm e2e:pack`（发版前）把各包 `pnpm pack`、collab-test 复制到临时目录、依赖换成 `file:<tarball>` 装好，跑和日常完全相同的检查
+- `pnpm scaffold:check` 用建站器把 collab-test 与 docs-site 生成到临时目录，和仓里比对建站器负责的文件，进 `pnpm verify`
+
+边界：日常 e2e 的站点经 pnpm 工作区直连各包，相当于原来的 link 装法。只在 file 装法下才出现的问题
+（比如 [站点包的 Vite 处理](2026-10-14-site-packages-vite-handling.md) 里 file 装法 dev 首次打开的 `504 (Outdated Optimize Dep)`）
+要到发版前跑 `e2e:pack` 才看得到。只在 Windows、Node 24、pnpm 12.4 下跑过。
+
+## 依据
+
+本卡数字为写卡时转述，运行日志在系统临时目录、不进仓，无原始输出可核对；代码在分支 `wave6/e2e-in-repo`：
+
+- 旧 `pnpm e2e`：224 项，约 240 秒；旧 `pnpm verify` 约 500 秒
+- 新 `pnpm e2e --skip-build`：95 项全过，46～56 秒（dev 一轮 46 项、start 一轮 47 项，外加路由表静态检查与 git status 检查）
+- `pnpm scaffold:check`：两个站各比对 54、39 个文件，0.3 秒
+- `pnpm e2e:pack --skip-build`：96 项全过，85 秒，其中打包、复制、装依赖与 typegen + tsc 约 40 秒
+- 新 `pnpm verify`：全过，373 秒，其中 e2e 56 秒
+
+## 否掉的候选
+
+- 保留临时目录建站，只把 8 个站减成 2 个（全部功能一个站 × 两种装法）：每次仍要装两遍依赖；而且测的站和仓里有人在用的 collab-test 是两份，
+  仓里的站坏了 e2e 看不到
+- 跑完用 `git checkout` 回退 collab-test：这个仓常有别的会话并行修改，会把别人还没提交的改动一起回退掉
+- 给评论目录加 `.gitignore` 让测试写的评论不进 git：评论按串分目录、目录名是时间加随机串，挡不住某一页的评论，只能挡全部，
+  人在测试站上写的评论也会被挡掉
+
+## 代价与遗留
+
+- demo 组合查过的一项没有真功能覆盖：功能的 `layoutData` 经 base 读页面列表（collab 的 layoutData 只读人员、身份与推送通道），
+  只剩平台包 `features.test.ts` 的单元测试查 layoutData 收到 base。addFeature 重复运行（改过的不动、删掉的补回、汇总文件重写）
+  由 `scaffold.test.ts` 的单元测试查
+- 被 Ctrl+C 打断的运行来不及删本次建的东西，`git status` 会看到它们，要手动删
