@@ -230,8 +230,12 @@ test("讲解组件的源码也是现状区：src/components/ 下的块注释标�
     const dir = join(p.root, "src", "components", "x");
     mkdirSync(dir, { recursive: true });
     writeFileSync(join(dir, "x.data.mjs"), '/* ref file="src/greet.ts" lines="2-3" */\nexport const code = "greet";\n');
+    writeFileSync(join(dir, "x.css"), '/* ref file="src/greet.ts" lines="2-3" */\n.x { color: red; }\n');
     const first = await p.cli("check");
     assert.match(first.out, /⚪ src\/components\/x\/x\.data\.mjs {2}src\/greet\.ts:2-3 {2}未确认/);
+    const report = JSON.parse((await p.cli("check", "--json")).out) as { docs: Array<{ doc: string }> };
+    assert.equal(report.docs.some((d) => d.doc === "src/components/x/x.data.mjs"), true);
+    assert.equal(report.docs.some((d) => d.doc === "src/components/x/x.css"), false,"没有哪种代码格式认领 .css：不进现状区");
     await p.cli("confirm", "src/components/x/x.data.mjs");
     assert.match(p.read("src/components/x/x.data.mjs"), /^\/\* ref file="src\/greet\.ts" lines="2-3" hash="[0-9a-f]{12}" blob="[0-9a-f]{12}" \*\/$/m);
   } finally {

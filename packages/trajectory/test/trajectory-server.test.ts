@@ -45,6 +45,13 @@ test("cardSchema：缺 label 时标题用卡身份去掉日期段，病跟着数
   assert.deepEqual(data.cardFile.problems.map((p) => p.reason), ["缺 label（全卡必填）"]);
 });
 
+test("cardSchema：缺 born-at 的卡照样交回数据、照样生成页面，病跟着数据走", async () => {
+  const data = await entryDataOf("/s/trajectory/2026-05-06-no-date.mdx", ["---", "label: 没写日期", "parent: [p1]", "---", "正文。", ""].join("\n"));
+  assert.equal(data.title, "没写日期");
+  assert.equal(data.cardFile.card?.bornAt, "");
+  assert.deepEqual(data.cardFile.problems.map((p) => p.reason), ["缺 born-at（全卡必填）"]);
+});
+
 test("cardSchema：一个卡字段都没有的页不是卡——标题取 frontmatter 的 title，缺了用文件名去掉日期段；description 原样带上", async () => {
   const plain = await entryDataOf("/s/trajectory/index.mdx", "---\ntitle: 轨迹\ndescription: 只增不改\n---\n导读。\n");
   assert.equal(plain.title, "轨迹");
