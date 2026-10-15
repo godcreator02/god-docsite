@@ -4,7 +4,7 @@ import { projectDirOfCollabRepo } from '@godcreator/collab/node'
 import { messageOf } from '../../errors.js'
 import { settlerOf } from '../../settle.js'
 import { otherRepoNamesOf } from '../../project/project.js'
-import { otherRepoHeadOf, type OtherRepoHead } from './state.js'
+import { otherRepoHeadOf, type OtherRepoHead } from './head.js'
 
 /** .git 里只有这几样变了 HEAD 才会和服务器比出不同：切分支、提交、取回、快进都改 HEAD 或引用 */
 function affectsHead(fileInGitDir: string): boolean {

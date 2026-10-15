@@ -2,7 +2,7 @@ import { watch } from 'node:fs'
 import path from 'node:path'
 import { messageOf } from '../../errors.js'
 import { settlerOf } from '../../settle.js'
-import { collabRepoLocalStateOf, type CollabRepoLocalState } from './state.js'
+import { collabRepoLocalStateOf, type CollabRepoLocalState } from './local-state.js'
 
 /** .git 里只有这几样变了才会改变本机状态：提交改 index 与分支，同步改分支，切分支改 HEAD */
 function affectsLocalState(fileInRepo: string): boolean {

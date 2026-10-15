@@ -2,25 +2,17 @@ import path from 'node:path'
 import { projectDirOfCollabRepo } from '@godcreator/collab/node'
 import { CollabRejected } from '../../errors.js'
 import { gitMessageOf, runGit } from '../../git/git.js'
-import { currentBranch, serverCountsOf } from '../../git/status.js'
 import { otherRepoNamesOf, repoKeyOf, type GitRemote, type RemoteProject } from '../../project/project.js'
 import { cloneMissingRepos, type OrganizationSource } from './clone-new-repos.js'
+import { otherRepoHeadOf, type OtherRepoHead } from './head.js'
 import { watchOtherRepoHeads, type OtherReposWatcher } from './watch.js'
+
+export { otherRepoHeadOf, type OtherRepoHead } from './head.js'
 
 /** 用令牌对项目文件夹里协作仓以外的一个仓 git fetch origin，只取回、不动它的分支与工作区；name 是项目文件夹里的目录名 */
 export async function fetchOtherRepo(collabRepo: string, name: string, remote: GitRemote): Promise<void> {
   const fetched = await runGit(path.join(projectDirOfCollabRepo(collabRepo), name), ['fetch', 'origin'], remote.env)
   if (fetched.code !== 0) throw new CollabRejected(`取回 ${name} 失败：${gitMessageOf(fetched)}`)
-}
-
-/**
- * 一个别的仓的 HEAD 和服务器上的同名分支（上次取回的 origin/<分支>）比：ahead 是本地多出来的提交，behind 是服务器上多出来的。
- * 只看 HEAD，工作区里没提交的文件不算，那是正常干活的状态。repo 是项目文件夹里的目录名
- */
-export type OtherRepoHead = { repo: string; ahead: number; behind: number }
-
-export async function otherRepoHeadOf(repoDir: string, repo: string): Promise<OtherRepoHead> {
-  return { repo, ...(await serverCountsOf(repoDir, await currentBranch(repoDir))) }
 }
 
 export type OtherReposFetchDeps = {
