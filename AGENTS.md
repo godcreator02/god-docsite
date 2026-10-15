@@ -36,7 +36,10 @@
 * 插件打包时带进各包的构建产物：改了包要先构建；在隔离 home 里验插件用 `devkit.dev`（说明书 gwb-devkit）
 * 每个包都有 `build`、`typecheck`、`test`、`check`（`check` 先 typecheck 再 test，有 `lint` 的再 lint）；仓根 `pnpm check` 是 `pnpm -r check`，
   `pnpm test` 是 `pnpm -r test`，`pnpm depcheck` 跑 dependency-cruiser（要先 `pnpm build`，包之间按包名 import 时解析到对方的 `dist/`）
-* 测试按节奏跑，不是每次全量：改代码过程中只跑改到的包（`pnpm --filter <包> check`）；`docs-site/` 里 `pnpm docfirst check`、`pnpm typecheck`、`pnpm build`；
+* 测试按节奏跑，不是每次全量：改代码过程中只跑改到的包（`pnpm --filter <包> check`），e2e 只跑改到的组合
+  （如 `pnpm e2e --combo=collab --install=link --server=dev`）；**合并分支前和发版前跑 `pnpm verify`**：`pnpm build` → `pnpm check` →
+  `pnpm depcheck` → 全量 e2e（`--skip-build`，不再重复构建）。e2e 默认同时跑 3 个站（`--jobs=N` 调，`--jobs=1` 一个一个跑），
+  日志与 `report.json` 在 `%TEMP%/god-docsite-e2e/<运行时刻>/`；`docs-site/` 里 `pnpm docfirst check`、`pnpm typecheck`、`pnpm build`；
   改了被钉的代码，本仓未提交改动引起的黄灯算红，照 `docs-site` 说明书处理后放进同一个提交
 * `plugins/collab` 的 `tests/verified/` 是**已验证的行为假设**（整组织克隆、ahead/behind 语义、文件监视事件）：断言对着 git 与
   watcher 本体，日常不跑。四种信号下跑 `pnpm test:verified`：升 git 或关键依赖、动了 `src/organization/setup/` 或

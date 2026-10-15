@@ -8,6 +8,7 @@
     "test": "pnpm -r test",
     "check": "pnpm -r check",
     "e2e": "node e2e/run.mjs",
+    "verify": "pnpm build && pnpm check && pnpm depcheck && pnpm e2e --skip-build",
     "depcheck": "depcruise \"packages/*/src\" \"plugins/*/src\" --config .dependency-cruiser.cjs --ignore-known"
   },
   "engines": {
