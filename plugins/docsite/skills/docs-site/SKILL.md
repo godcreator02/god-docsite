@@ -19,7 +19,7 @@ docfirst.create  {"dir":"<仓>/docs-site"}    接好 docfirst 的站：现状、
 
 - `dir`：站目录的绝对路径，**要不存在或是空目录**，上一级（仓目录）必须已经存在
 - `title`：站名，不给就依次用仓根 `package.json` 的 `title`、包名去掉 scope、仓的目录名
-- 只认这三个参数，多给一个就拒绝
+- 只认这两个参数，多给一个就拒绝
 
 它先建基础站（同 `docsite.site.init`：复制平台模板、装依赖、启动服务检查），再把 `@godcreator/docfirst` 的起始物（`docfirst.config.mjs`、`content/docs/outputs/` 下
 README / AGENTS / CLAUDE 的正本、未来区起始页、第一张轨迹卡）复制到站点根（已有的文件不覆盖），往 `package.json` 写脚本 `doc`、`doc:confirm`、`doc:render`，
@@ -56,7 +56,7 @@ docsite.feature.add  {"dir":…,"package":"@godcreator/trajectory","version":"^0
 开发服务由 gwb-docsite 托管，不在会话里自己 `pnpm dev`；改了页面，开发服务自己刷新。下面每条只收 `dir`（站点目录的绝对路径），`list` 不收参数：
 
 ```
-docsite.site.add     {"dir":…}    登记进设置 sites 并启动（工作台每次启动时也会启动登记着的站）
+docsite.site.add     {"dir":…}    登记进设置 sites 并启动（插件每次加载时也会启动登记着的站：工作台启动、插件升级都算）
 docsite.site.start   {"dir":…}    启动；人为停了、启动失败修好之后也用它
 docsite.site.stop    {"dir":…}    停掉
 docsite.site.list    {}           各站的 state（running / stopped / failed）、url（只在运行时有）、error

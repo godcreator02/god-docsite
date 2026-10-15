@@ -44,7 +44,7 @@ docsite.feature.add  {"dir":…,"package":"@godcreator/trajectory","version":"^0
 ## 托管与启停
 
 ```text
-docsite.site.add     {"dir":…}   登记进设置 sites 并启动；工作台每次启动时也启动登记着的站
+docsite.site.add     {"dir":…}   登记进设置 sites 并启动；插件每次加载时（工作台启动、插件升级）也启动登记着的站
 docsite.site.start   {"dir":…}   启动；已在运行或正在启动就回现状
 docsite.site.stop    {"dir":…}   停掉；没在运行就拒绝
 docsite.site.list    {}          每个站 { dir, state, url, error }，state 是 running / stopped / failed，url 只在运行时有
