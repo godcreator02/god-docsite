@@ -49,7 +49,7 @@ Vite 插件 `fumadocsMdx()` 实际返回 4 个插件：主插件、宏改写、M
 4. **remarkPostprocess 收尾**：frontmatter 没 `title` 就取第一个一级标题；把 `file.data['mdx-export']` 里每一项变成 `export let 名字 = 值` 插回语法树；按 `postprocess` 选项输出 `_markdown`（给 llms）、`_mdast`、链接引用。
    （[loaders/mdx/remark-postprocess.ts:45-122](https://github.com/fuma-nama/fumadocs/blob/fumadocs%4016.17.1/packages/mdx/src/loaders/mdx/remark-postprocess.ts#L45-L122)）
 
-> **`mdx-export` 是 remark 插件「多导出一个值」的正式通道。**插件往 `file.data['mdx-export']` 推 `{ name, value }`，编译结果里就多一个导出，运行时出现在页面条目上。站点插件本来就排在 remarkPostprocess 前面，所以直接能用。类型声明在 [build-default.ts:13-38](https://github.com/fuma-nama/fumadocs/blob/fumadocs%4016.17.1/packages/mdx/src/loaders/mdx/build-default.ts#L13-L38)。
+> **`mdx-export` 是 remark 插件「多导出一个值」的正式通道**。插件往 `file.data['mdx-export']` 推 `{ name, value }`，编译结果里就多一个导出，运行时出现在页面条目上。站点插件本来就排在 remarkPostprocess 前面，所以直接能用。类型声明在 [build-default.ts:13-38](https://github.com/fuma-nama/fumadocs/blob/fumadocs%4016.17.1/packages/mdx/src/loaders/mdx/build-default.ts#L13-L38)。
 
 `lastModified` 用 `git log` 取时间，结果存在模块级变量里，进程不退就不清（[last-modified.ts:13-70](https://github.com/fuma-nama/fumadocs/blob/fumadocs%4016.17.1/packages/mdx/src/loaders/mdx/last-modified.ts#L13-L70)），开发中提交后不会刷新。
 
@@ -105,7 +105,7 @@ interface Plugin {
 
 - 注册在 `defineConfig({ plugins })`。宏式项目要用插件，也可以只为插件留一个 `source.config.ts`。
 - 内置插件：`index-file`（生成入口）、`json-schema`（把 schema 输出成 JSON Schema，新建 meta 时自动写 `$schema`）、`last-modified`。
-- **坑：**`fumadocsMdx({ plugins })` 在 Vite 下会被悄悄忽略，类型里有这个字段，但没有传进核心（[vite/index.ts:286-301](https://github.com/fuma-nama/fumadocs/blob/fumadocs%4016.17.1/packages/mdx/src/vite/index.ts#L286-L301)）。要用 `defineConfig({ plugins })` 或 `globalOptions.plugins`。
+- **坑**：`fumadocsMdx({ plugins })` 在 Vite 下会被悄悄忽略，类型里有这个字段，但没有传进核心（[vite/index.ts:286-301](https://github.com/fuma-nama/fumadocs/blob/fumadocs%4016.17.1/packages/mdx/src/vite/index.ts#L286-L301)）。要用 `defineConfig({ plugins })` 或 `globalOptions.plugins`。
 
 ## 在 React Router 里怎么写
 
@@ -156,4 +156,4 @@ export default function Page({ loaderData }) {
 | 插件 | `plugins/json-schema`、`plugins/last-modified`、上面的 Plugin 钩子 |
 | VFile 约定 | `file.data.frontmatter`、`file.data['mdx-export']` |
 
-**不该依赖的：**下划线开头的成员、`core.cache`、`loaders/*`、生成代码、查询参数协议、`@fumadocs/vite`（私有包）、`runtime/macro` 的函数签名（给生成代码调用的）。
+**不该依赖的**：下划线开头的成员、`core.cache`、`loaders/*`、生成代码、查询参数协议、`@fumadocs/vite`（私有包）、`runtime/macro` 的函数签名（给生成代码调用的）。

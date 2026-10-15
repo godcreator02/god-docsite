@@ -226,7 +226,7 @@
   <div class="env" style="--c:var(--c-node)"><h4>服务器环境（ssr）</h4><ol><li>你的文件：按需编译，过插件流水线，在 Node 里执行</li><li class="lib" id="env-lib">第三方库：<strong>默认不经过 Vite</strong>，Node 直接从 node_modules 导入</li></ol></div>
 </div>
 <div class="caption" id="env-log">第三方库在服务器端默认不经过 Vite。库里如果有 <code>.mdx</code>、<code>.css</code> 要编译，或者库要和站点共用同一份 React context，就必须让 Vite 处理它。</div>
-<div class="why">fumadocs 只会自动把名字以 <code>fumadocs-</code>、<code>@fumadocs/</code> 开头的包加进这个名单；我们的 <code>@godcreator/…</code> 包要站点自己加。</div>
+<div class="why">fumadocs 只会自动把名字以 <code>fumadocs-</code>、<code>@fumadocs/</code> 开头的包加进这个名单；我们的 <code>@godcreator/…</code> 包要另外加，本仓由平台包的 <code>godDocsite()</code> 加。</div>
 
 <!-- ====================== React Router ====================== -->
 <h2 id="rr-mechanisms"><span class="part" style="background:var(--c-rr)">React Router</span>五个机制</h2>
@@ -291,7 +291,7 @@ export default [
   <tr><td>站内跳转只要数据</td><td>React Router</td><td>请求 <code>.data</code></td><td>跳页只传页面树和「是哪一页」</td></tr>
 </table></div>
 
-<div class="pager"><a href="/design/fumadocs/three-pieces">下一页：三大件各借了底座的哪个机制 →</a></div>
+<div class="pager"><a href="/docs/fumadocs/three-pieces">下一页：三大件各借了底座的哪个机制 →</a></div>
 </main>
 
 <script>

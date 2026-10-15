@@ -81,7 +81,7 @@ description: 界面层的布局、可替换部件、样式机制、搜索与 CLI
   var(--fd-toc-width) minmax(min-content,1fr)
 ```
 
-> **关键机制：**容器上的宽度变量默认都是 0；每个部件渲染时带一个 `layout:[--fd-x:…]` 类，CSS 借 `:has()` 把变量写到容器上（[css/lib/base.css:168-177](https://github.com/fuma-nama/fumadocs/blob/fumadocs%4016.17.1/packages/base-ui/css/lib/base.css#L168-L177)）。侧栏写 `md:layout:[--fd-sidebar-width:268px]`，目录写 `xl:layout:[--fd-toc-width:268px]`。部件不渲染，变量回到 0，那一列就消失。
+> **关键机制**：容器上的宽度变量默认都是 0；每个部件渲染时带一个 `layout:[--fd-x:…]` 类，CSS 借 `:has()` 把变量写到容器上（[css/lib/base.css:168-177](https://github.com/fuma-nama/fumadocs/blob/fumadocs%4016.17.1/packages/base-ui/css/lib/base.css#L168-L177)）。侧栏写 `md:layout:[--fd-sidebar-width:268px]`，目录写 `xl:layout:[--fd-toc-width:268px]`。部件不渲染，变量回到 0，那一列就消失。
 
 ```css
 @variant layout {
@@ -114,7 +114,7 @@ description: 界面层的布局、可替换部件、样式机制、搜索与 CLI
 
 ## CLI：把布局复制进站点
 
-> **这是官方对深度定制的回答。**`npx @fumadocs/cli customise` 先选布局（docs、notebook、flux、glass、home、spacious），再选范围：
+> **这是官方对深度定制的回答**。`npx @fumadocs/cli customise` 先选布局（docs、notebook、flux、glass、home、spacious），再选范围：
 >
 > - **整个布局**：复制 `layouts/docs` 下的源码进站点，并自动把路由文件里的 `fumadocs-ui/layouts/docs` 改成 `@/layouts/docs`。
 > - **从极简版重写**：复制一个最小的 `docs-min` 布局。

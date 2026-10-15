@@ -53,7 +53,7 @@
   </aside>
 </div>
 
-<div class="pager"><span class="meta">放大看：<a href="/design/fumadocs/mdx-compile">编译 .mdx 的工序</a> · 各段细节：<a href="/design/fumadocs/base-vite-rr">底座</a> · <a href="/design/fumadocs/three-pieces">三大件</a></span></div>
+<div class="pager"><span class="meta">放大看：<a href="/docs/fumadocs/mdx-compile">编译 .mdx 的工序</a> · 各段细节：<a href="/docs/fumadocs/base-vite-rr">底座</a> · <a href="/docs/fumadocs/three-pieces">三大件</a></span></div>
 </main>
 
 <script>
@@ -85,10 +85,10 @@ const SOURCE_TS_OURS = [
   "import { loader } from 'fumadocs-core/source'",
   "import { defineDocs } from 'fumadocs-mdx/macro'",
   "import { applyMdxPreset } from 'fumadocs-mdx/config'",
-  "import { remarkDocfirst } from '@godcreator/docfirst-site/mdx'",
+  "import { remarkCodePin } from '@godcreator/code-pin/site'",
   'export const docs = defineDocs({',
   "  dir: 'content/docs',",
-  '  docs: { mdxOptions: applyMdxPreset({ remarkPlugins: [remarkDocfirst()] }) },',
+  '  docs: { mdxOptions: applyMdxPreset({ remarkPlugins: [remarkCodePin()] }) },',
   '})',
   "export const source = loader({ source: docs.toFumadocsSource(), baseUrl: '/docs' })"];
 const ROOT_TSX = ['<html lang="zh-CN">', '  <head><Meta /><Links /></head>', '  <body>', '    <RootProvider>{children}</RootProvider>', '    <Scripts />', '  </body>', '</html>'];
@@ -106,7 +106,7 @@ const CODE = {
     "import tailwindcss from '@tailwindcss/vite'",
     'export default defineConfig({',
     '  plugins: [fumadocsMdx(), tailwindcss(), reactRouter()],',
-    "  ssr: { noExternal: ['@godcreator/docsite-kit'] },   // 我们的包名不以 fumadocs- 开头",
+    "  ssr: { noExternal: ['@godcreator/god-docsite'] },   // 我们的包名不以 fumadocs- 开头",
     '})'] },
   routes: { file: 'app/routes.ts', hl: 2, lines: [
     'export default [', "  index('routes/home.tsx'),", "  route('docs/*', 'routes/docs.tsx'),", "  route('api/search', 'routes/search.ts'),", ']'] },
@@ -121,7 +121,7 @@ const CODE = {
     "import { DocsLayout } from 'fumadocs-ui/layouts/docs'",
     "import { DocsPage, DocsBody } from 'fumadocs-ui/layouts/docs/page'",
     "import { docs, source } from '@/lib/source'",
-    "import { readComments, CommentsPanel } from '@godcreator/docsite-kit/comments'",
+    "import { readComments, CommentsPanel } from '@godcreator/comments/site'",
     '…'] },
   sourceMacro: { file: 'app/lib/source.ts', hl: 3, lines: SOURCE_TS_BASE },
   sourceMacroOurs: { file: 'app/lib/source.ts', hl: 6, ours: [2, 3, 6], lines: SOURCE_TS_OURS },
@@ -174,7 +174,7 @@ const CODE = {
   mdxComponentsOurs: { file: 'app/components/mdx.tsx（组件名暂定）', hl: 5, ours: [1, 2, 5], lines: [
     "import defaultMdxComponents from 'fumadocs-ui/mdx'",
     "import { Files, Folder, File } from 'fumadocs-ui/components/files'",
-    "import { PinBlock, PinTreeBlock } from '@godcreator/docfirst-site/ui'",
+    "import { PinBlock, PinTreeBlock } from '@godcreator/code-pin/site'",
     '',
     'export function getMDXComponents(components) {',
     '  return { ...defaultMdxComponents, Files, Folder, File, PinBlock, PinTreeBlock, ...components }',
@@ -189,7 +189,7 @@ const CODE = {
     '  },',
     '}'] },
   commentsAction: { file: 'app/routes/comments.ts（站点新加的路由）', hl: 4, ours: [0, 2, 3, 4, 5], lines: [
-    "import { writeComment } from '@godcreator/docsite-kit/comments'",
+    "import { writeComment } from '@godcreator/comments/site/server'",
     '',
     'export async function action({ request }) {',
     '  // 在这里核对身份',
@@ -226,7 +226,7 @@ const STEP_DEFS = [
     at: { pkDocs: { o: 0 }, pkSource: { x: 425, y: 128, o: 1 }, chipMdx: { hl: true }, dSource: { hl: true } },
     oursAt: { pinTag: { o: 1, hl: true }, pinRing: { o: 1 } },
     cap: 'lib/source.ts 进流水线。fumadocs-mdx 认出 <code>defineDocs</code>，把它改写成 Vite 的 <code>import.meta.glob</code>，意思是「把 content/docs 里的文件全部导入」。',
-    oursCap: '集合设置里挂了我们的钉码插件 <code>remarkDocfirst()</code>：它不是 Vite 插件，而是 fumadocs-mdx 编译 .mdx 时的一道工序，所以画成挂在 fumadocs-mdx 上。这道工序具体排在哪、做什么，见<a href="/design/fumadocs/mdx-compile">编译 .mdx 那一页</a>。' },
+    oursCap: '集合设置里挂了我们的钉码插件 <code>remarkCodePin()</code>：它不是 Vite 插件，而是 fumadocs-mdx 编译 .mdx 时的一道工序，所以画成挂在 fumadocs-mdx 上。这道工序具体排在哪、做什么，见<a href="/docs/fumadocs/mdx-compile">编译 .mdx 那一页</a>。' },
   { who: ['vite', 'mdx'], oursWho: ['vite', 'mdx', 'ours'], code: CODE.installMdx, oursCode: CODE.installMdxOurs,
     at: { pkSource: { o: 0 }, pkIntro: { x: 300, y: 128, o: 1 }, pkInstall: { x: 425, y: 128, o: 1 }, chipMdx: { hl: true }, dIntro: { hl: true }, dInstall: { hl: true } },
     oursAt: { pinTag: { hl: true }, dPinned: { hl: true } },
@@ -286,7 +286,7 @@ const STEP_DEFS = [
   { phase: '改被钉的代码', oursOnly: true, who: ['vite', 'mdx', 'ours'], code: NO_CODE('作者改了被钉的 src/setup.ts，存盘。'),
     at: { pkHmr: { o: 0 }, dIntro: { t: 'intro.mdx' }, dPinned: { t: 'src/setup.ts（改了）', hl: true }, pinTag: { hl: true },
       pkPinHmr: { x: 25, y: 380, o: 1 }, modInstall: { t: 'install 的 JS 模块（新）' } },
-    cap: '改了被钉的 <code>src/setup.ts</code>。编译 install.mdx 时钉码插件登记过依赖，Vite 知道它被 install.mdx 引用，就重新编译 install.mdx，钉住的代码和状态点跟着更新、热更新到浏览器。<b>现在的 docfirst 没登记依赖，这一步要新补上。</b>钉的代码过没过期的黄灯检查是 docfirst 的命令行，直接读文件，不在这张图里。' },
+    cap: '改了被钉的 <code>src/setup.ts</code>。编译 install.mdx 时钉码插件登记过依赖，Vite 知道它被 install.mdx 引用，就重新编译 install.mdx，钉住的代码和状态点跟着更新、热更新到浏览器。<b>现在的钉码插件（code-pin）没登记依赖，这一步要新补上。</b>钉的代码过没过期的黄灯检查是 docfirst 的命令行，直接读文件，不在这张图里。' },
 
   { phase: 'build', who: ['vite', 'mdx'], code: NO_CODE('运行 react-router build。'),
     at: { phaseBox: { t: 'build + start' }, procTitle: { t: 'Node 进程：react-router build（跑一次就退出）' },
@@ -398,7 +398,7 @@ function draw(s, { box, group, arrowHead }) {
   box('mSource', { w: 150, h: 40, color: C.site, t: 'lib/source.ts', t2: '三个包在这里接上', fs: 12 });
   const gOurs = group('gOurs');
   panel(gOurs, 205, 408, 170, 84, C.ours, '我们的包（普通库）', { size: 11.5 });
-  label(gOurs, 215, 446, 'remarkDocfirst：钉码工序', { size: 10.5 });
+  label(gOurs, 215, 446, 'remarkCodePin：钉码工序', { size: 10.5 });
   label(gOurs, 215, 464, 'readComments、writeComment', { size: 10.5 });
   label(gOurs, 215, 482, 'CommentsPanel、PinBlock 等', { size: 10.5 });
   const gCore = group('gCore');

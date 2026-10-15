@@ -36,7 +36,7 @@ function SitePath(): JSX.Element {
       <Chain
         stops={[
           { label: 'fumadocs 默认工序', note: 'gfm、标题 id、图片…', role: 'emerald' },
-          { label: 'remarkDocfirst', note: '换成 PinBlock 给网页显示，登记 Markdown 形式', role: 'rose' },
+          { label: 'remarkCodePin', note: '换成 PinBlock 给网页显示，登记 Markdown 形式', role: 'rose' },
           { label: 'remarkStructure', note: '读登记表，切搜索记录', role: 'emerald' },
           { label: 'remarkLLMs', note: '开了 includeProcessedMarkdown 才运行：读登记表，出整页 Markdown', role: 'emerald' },
         ]}
@@ -56,7 +56,7 @@ function CliPath(): JSX.Element {
       <Chain
         stops={[
           { label: '解析', note: 'remark-parse + mdx，不启动 Vite', role: 'slate' },
-          { label: 'remarkDocfirst', note: '同一个插件，生成正本模式：没确认、缺失都拒绝', role: 'rose' },
+          { label: 'remarkCodePin', note: '同一个插件，生成正本模式：没确认、缺失都拒绝', role: 'rose' },
           { label: 'remarkLLMs', note: '读登记表出 Markdown（关掉标题 id）', role: 'emerald' },
           { label: '加 frontmatter、写文件', note: 'outputs 里点名的字段（SKILL.md 要 name、description）', role: 'amber' },
         ]}
@@ -67,10 +67,10 @@ function CliPath(): JSX.Element {
         <Pill dot tone="good">docfirst check 逐字节比</Pill>
       </Products>
       <Terminal
-        title="docsite-kit"
+        title="god-docsite"
         lines={[
           { text: 'pnpm docfirst render', kind: 'cmd' },
-          '写出 AGENTS.md、CLAUDE.md、plugins/docsite/skills/docsite/SKILL.md',
+          '写出 README.md、CLAUDE.md、plugins/docfirst/skills/docs-site/SKILL.md 等',
           { text: 'pnpm docfirst check', kind: 'cmd' },
           { text: '一致，绿', kind: 'ok' },
         ]}
@@ -93,7 +93,7 @@ export function OutputsPaths(): JSX.Element {
         {
           id: 'cli',
           label: '命令行：生成正本',
-          text: 'AGENTS.md、SKILL.md 这些生成物走另一条路：docfirst render 在命令行里读同一个 mdx、跑同一个 remarkDocfirst，只是打开生成正本模式——钉码没确认、钉码缺失都拒绝生成。不放进 build：站点不运行它们也得在，也不能让 build 去改仓里受版本管理的文件。',
+          text: 'AGENTS.md、SKILL.md 这些生成物走另一条路：docfirst render 在命令行里读同一个 mdx、跑同一个 remarkCodePin，只是打开生成正本模式——钉码没确认、钉码缺失都拒绝生成。不放进 build：站点不运行它们也得在，也不能让 build 去改仓里受版本管理的文件。',
         },
       ]}
     >

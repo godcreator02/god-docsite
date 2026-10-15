@@ -152,7 +152,7 @@ const STAGES: readonly Stage[] = [
     srcHl: null,
     srcTone: 'info',
     srcRef: at('mdx/src/loaders/mdx/index.ts', 71, 77),
-    tree: ['app/lib/source.ts 执行一遍，取出 docs.mdxOptions：', '  applyMdxPreset({', '    remarkPlugins: [remarkDocfirst()]   ← 钉码从这来', '  })'],
+    tree: ['app/lib/source.ts 执行一遍，取出 docs.mdxOptions：', '  applyMdxPreset({', '    remarkPlugins: [remarkCodePin()]   ← 钉码从这来', '  })'],
     treeTitle: '设置从哪来',
     treeAdded: [1, 2, 3, 4],
     text: '先弄清按谁的设置编译：凭网址后面的 macro_id 找到 lib/source.ts 里的 docs 集合，把那个文件执行一遍，取出 mdxOptions 和 schema——我们的钉码插件就是这样被带进来的。lib/source.ts 也被登记成依赖：改了它，所有页面都重新编译。',
@@ -242,7 +242,7 @@ const STAGES: readonly Stage[] = [
     treeTitle: 'Markdown 语法树（mdast）',
     treeAdded: [9],
     treeChanged: [6, 7],
-    text: '站点用 applyMdxPreset({ remarkPlugins: [remarkDocfirst()] }) 挂的插件，排在默认工序之后、structure 之前。它做三件事：① 找到 <Pin file lines hash blob />，读 src/setup.ts 第 3-9 行，和标签上的 hash、blob 比对算出绿黄红，把 <Pin> 换成 PinBlock（状态点、标题、黄灯时的增删行）包着一个普通的 code 节点——后面照常交给 Shiki 高亮；② <PinTree> 换成 PinTreeBlock 包 fumadocs 的文件树；③ 读过的文件都登记依赖，并用 replaceSource 登记它写成 Markdown 是什么样（给搜索与生成正本用）。源码窗口是站点自己写的 lib/source.ts。',
+    text: '站点用 applyMdxPreset({ remarkPlugins: [remarkCodePin()] }) 挂的插件，排在默认工序之后、structure 之前。它做三件事：① 找到 <Pin file lines hash blob />，读 src/setup.ts 第 3-9 行，和标签上的 hash、blob 比对算出绿黄红，把 <Pin> 换成 PinBlock（状态点、标题、黄灯时的增删行）包着一个普通的 code 节点——后面照常交给 Shiki 高亮；② <PinTree> 换成 PinTreeBlock 包 fumadocs 的文件树；③ 读过的文件都登记依赖，并用 replaceSource 登记它写成 Markdown 是什么样（给搜索与生成正本用）。源码窗口是站点自己写的 lib/source.ts。',
   }),
   stage({
     title: 'remarkStructure',
@@ -264,7 +264,7 @@ const STAGES: readonly Stage[] = [
     tree: [...MDAST, 'import arch.png', 'export structuredData', 'export _markdown（开了才有）', 'export frontmatter'],
     treeTitle: 'Markdown 语法树（mdast）',
     treeAdded: [11, 12],
-    text: 'fumadocs-mdx 收尾：frontmatter 没 title 就拿一级标题补上；mdx-export 里的值在这里写成 export。集合开了 includeProcessedMarkdown 时，remarkLLMs 也在这步读登记表，从原文切出整页 Markdown（<Pin> 换成那块代码、import/export 去掉），导出成 _markdown——llms.txt、每页 .md、页面上的「复制 Markdown」按钮都靠它。没开就没有这一行；docfirst 的站目前不开。',
+    text: 'fumadocs-mdx 收尾：frontmatter 没 title 就拿一级标题补上；mdx-export 里的值在这里写成 export。集合开了 includeProcessedMarkdown 时，remarkLLMs 也在这步读登记表，从原文切出整页 Markdown（<Pin> 换成那块代码、import/export 去掉），导出成 _markdown——llms.txt、每页 .md、页面上的「复制 Markdown」按钮都靠它。没开就没有这一行。',
   }),
   stage({
     title: '转成 HTML 语法树',

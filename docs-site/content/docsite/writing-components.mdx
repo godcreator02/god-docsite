@@ -15,7 +15,7 @@ icon: Blocks
 </Callout>
 
 <Callout type="warn" title="要小心">
-  `type="warn"` 用在会踩坑的地方，比如改了开发服务插件要先构建基础包。
+  `type="warn"` 用在会踩坑的地方，比如改了平台包的 vite 插件要先构建平台包。
 </Callout>
 
 <Callout type="error" title="不能这样做">
@@ -31,9 +31,9 @@ icon: Blocks
 一组去处用卡片排开，`href` 写站内地址：
 
 <Cards>
-  <Card title="项目骨架" description="站点目录里放的那套文件，各自做什么" href="/docsite/skeleton" />
-  <Card title="三种页面" description="MDX、TSX、HTML 都能当页面" href="/docsite/page-types" />
-  <Card title="开发服务插件" description="docsite() 做的两件事" href="/docsite/dev-plugin" />
+  <Card title="总览" description="站点由哪些包组成、依赖方向、三个 gwb 插件" href="/docs" />
+  <Card title="TSX 页面示例" description="正文要运行组件的页面写成 .page.tsx" href="/docs/example" />
+  <Card title="fumadocs 图解总览" description="三个部件、打开一页时谁调用谁" href="/docs/fumadocs/overview" />
   <Card title="写一页说明" description="标题、正文、代码与图片怎么写" href="/docsite/writing" />
 </Cards>
 
@@ -44,12 +44,12 @@ icon: Blocks
 <Tabs items={['pnpm', 'npm']}>
   <Tab value="pnpm">
     ```bash
-    pnpm add @godcreator/docsite-kit
+    pnpm add @godcreator/god-docsite
     ```
   </Tab>
   <Tab value="npm">
     ```bash
-    npm install @godcreator/docsite-kit
+    npm install @godcreator/god-docsite
     ```
   </Tab>
 </Tabs>
@@ -60,7 +60,7 @@ icon: Blocks
   <Step>
     ### 摆好骨架
 
-    照[项目骨架](/docsite/skeleton)把文件放进站点目录。
+    用平台包的站点模板建站（gwb 里是 `docsite.site.init`）。
   </Step>
   <Step>
     ### 写页面
@@ -112,9 +112,9 @@ icon: Blocks
 
 <TypeTable
   type={{
-    relativePath: { type: 'string', description: '/api/content/ 后面那一段，如 design/topology.html', required: true },
-    contentDir: { type: 'string', description: '内容目录的绝对路径', default: "path.resolve(process.cwd(), 'content')" },
+    file: { type: 'string', description: 'import.meta.glob 给的路径，如 /content/guide/waveform.html', required: true },
+    contentDir: { type: 'string', description: 'glob 里内容目录的写法', default: "'/content'" },
   }}
 />
 
-上面是 `contentFileResponse(relativePath, contentDir)` 的两个参数。
+上面是平台包 `contentFileUrlOf(file, contentDir)` 的两个参数。
