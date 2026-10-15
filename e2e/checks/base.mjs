@@ -82,6 +82,21 @@ export async function runBaseChecks({ browser, baseUrl, mode, siteDir, feedToken
       return { pass: terms === 1 && katex >= 1, detail: `.docsite-term ${terms} 个（同一词只标第一次），.katex ${katex} 个` }
     })
 
+    await check('术语有可见的标注（平台 styles.css：词下点线、问号光标），悬停弹出释义', async () => {
+      await page.goto(`${baseUrl}/glossary-demo`, { waitUntil: 'load' })
+      const word = page.locator('.docsite-term-word').first()
+      const style = await word.evaluate((element) => {
+        const computed = getComputedStyle(element)
+        return { border: `${computed.borderBottomWidth} ${computed.borderBottomStyle}`, cursor: computed.cursor }
+      })
+      const pop = page.locator('.docsite-term-pop').first()
+      const hiddenBefore = await pop.evaluate((element) => getComputedStyle(element).display)
+      await word.hover()
+      const shownAfter = await pop.evaluate((element) => getComputedStyle(element).display)
+      const pass = style.border === '1px dotted' && style.cursor === 'help' && hiddenBefore === 'none' && shownAfter === 'block'
+      return { pass, detail: `词的下边框 ${style.border}、光标 ${style.cursor}；释义悬停前 display=${hiddenBefore}，悬停后 ${shownAfter}` }
+    })
+
     await check('侧栏目录切换按钮（root: true 文件夹，DocsLayout 不传 tabs）', async () => {
       await page.goto(`${baseUrl}/guide`, { waitUntil: 'load' })
       const dropdown = await page.locator('#nd-sidebar button', { hasText: '指南' }).count()
