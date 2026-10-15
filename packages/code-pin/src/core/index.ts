@@ -29,7 +29,7 @@ export { formalOf, markerErrors, parseFormal, targetKey } from "./marker.ts";
 export type { MarkerShell } from "./marker.ts";
 export { braceComment, findMarkers, lineOf, mdxFormat, mdxMarker, parseMdx } from "./mdx.ts";
 export type { MarkerPlace } from "./mdx.ts";
-export { blockComment, codeFormat, codeMarker, COMPONENTS_DIR } from "./code-format.ts";
+export { blockComment, codeFormat, codeMarker } from "./code-format.ts";
 export { createDocPinning, formatOf } from "./doc-pins.ts";
 export type { DocCheck, DocConfirm, DocPin, DocPinning, PinFormat } from "./doc-pins.ts";
 export { PIN_FORMATS } from "./formats.ts";

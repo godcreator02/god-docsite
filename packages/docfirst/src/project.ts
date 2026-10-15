@@ -2,11 +2,11 @@
  * 一个项目 = 项目根 + 校验过的配置。装配时定下现状区有哪些文件，备好钉码与生成物两个功能包要的对象。
  *
  * 分区按约定：内容根下 `trajectory/` 与 `future/` 两个名字固定、不进核对；内容根下别的 .mdx 都是现状区，
- * 再加上项目根下 `src/components/` 里组件格式认领的代码文件（讲解组件的源码）。
+ * 再加上组件格式认领的代码文件（讲解组件的源码）：现状区里的（页面同名文件夹、组里 `_` 开头的共用文件夹）与站点 `app/components/` 下的。
  */
 import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
 import { isAbsolute, join, relative, sep } from "node:path";
-import { codeFormat, COMPONENTS_DIR } from "@godcreator/code-pin";
+import { codeFormat } from "@godcreator/code-pin";
 import { createPinWorkspace } from "@godcreator/code-pin/node";
 import type { PinWorkspace } from "@godcreator/code-pin/node";
 import { assertOutputTurf } from "@godcreator/doc-export/node";
@@ -45,11 +45,12 @@ function filesUnderFollowingLinks(dir: string): string[] {
   });
 }
 
-function statusPages(root: string, contentAbs: string): string[] {
+/** 现状区里的全部文件（文档身份）：内容根下除 trajectory/、future/ 之外的 */
+function statusAreaFiles(root: string, contentAbs: string): string[] {
   return readdirSync(contentAbs).flatMap((name) => {
     const path = join(contentAbs, name);
-    if (statSync(path).isDirectory()) return NOT_STATUS_AREAS.has(name) ? [] : filesUnderFollowingLinks(path).filter(isPage).map((file) => docIdOf(root, file));
-    return isPage(name) ? [docIdOf(root, path)] : [];
+    if (statSync(path).isDirectory()) return NOT_STATUS_AREAS.has(name) ? [] : filesUnderFollowingLinks(path).map((file) => docIdOf(root, file));
+    return [docIdOf(root, path)];
   });
 }
 
@@ -61,10 +62,25 @@ function filesUnder(dir: string): string[] {
   });
 }
 
-function componentSources(root: string): string[] {
-  const dir = join(root, COMPONENTS_DIR);
+/** 站点里几组页面共用的组件 */
+const SHARED_COMPONENTS_DIR = "app/components";
+/** 讲解组件以前放的位置：还有文件就报错，不然里面的钉码没人核对 */
+const RETIRED_COMPONENTS_DIR = "src/components";
+
+function sharedComponentSources(root: string): string[] {
+  const dir = join(root, SHARED_COMPONENTS_DIR);
   if (!existsSync(dir)) return [];
   return filesUnder(dir).map((path) => docIdOf(root, path)).filter(codeFormat.claims);
+}
+
+function assertNoRetiredComponents(root: string): void {
+  const dir = join(root, RETIRED_COMPONENTS_DIR);
+  if (!existsSync(dir)) return;
+  const files = filesUnder(dir).map((path) => docIdOf(root, path));
+  if (files.length === 0) return;
+  throw new Error(
+    `${RETIRED_COMPONENTS_DIR}/ 下还有文件：${files.join("、")}——讲解组件只给一页用的放进那一页的同名文件夹，几组页面共用的放进 ${SHARED_COMPONENTS_DIR}/，docfirst 只核对这两处的钉码`,
+  );
 }
 
 /** outputs 里的正本得是现状区里的 mdx 页面：写错路径的映射不会被核对，也不会被生成 */
@@ -80,7 +96,9 @@ export function assembleProject(root: string, config: DocfirstConfig): Project {
     throw new Error(`内容根 ${config.contentDir} 不是项目根下的目录——配置的 content 写错了，或者还没建`);
   }
   assertOutputTurf(root, [config.contentDir], config.outputs);
-  const docs = [...statusPages(root, contentAbs), ...componentSources(root)].sort();
+  assertNoRetiredComponents(root);
+  const statusFiles = statusAreaFiles(root, contentAbs);
+  const docs = [...statusFiles.filter(isPage), ...statusFiles.filter(codeFormat.claims), ...sharedComponentSources(root)].sort();
   assertOutputSourcesAreStatusPages(config.outputs, docs);
   const pins = createPinWorkspace(root);
   return {

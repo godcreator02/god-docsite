@@ -106,7 +106,7 @@ test("这个站自己的文档全是绿的：写下的钉码跟源码没脱节",
 });
 
 test("讲解组件的源码也进现状区，里面写的钉码全是绿的", () => {
-  assert.ok(COMPONENT_FILES.every((file) => file.startsWith("src/components/")), `现状区里有 src/components/ 之外的代码文件：${COMPONENT_FILES.join("、")}`);
+  assert.ok(COMPONENT_FILES.every((file) => file.startsWith("content/") || file.startsWith("app/components/")), `现状区里有 content/ 与 app/components/ 之外的代码文件：${COMPONENT_FILES.join("、")}`);
   for (const file of COMPONENT_FILES) {
     const { checks } = project.pins.check(file);
     assert.deepEqual(checks.map((check) => check.status), checks.map(() => "fresh"), `${file} 有钉码不是新鲜的——运行 pnpm doc 看看`);

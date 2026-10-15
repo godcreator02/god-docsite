@@ -22,8 +22,8 @@ docfirst.create  {"dir":"<仓>/docs-site"}    接好 docfirst 的站：现状、
 - `port`：不给就在站目录的祖父目录里找没被别的站脚本占用的，从 4310 起选
 - 只认这三个参数，多给一个就拒绝；要装着 gwb-docsite，没装就拒绝
 
-它先经 gwb-docsite 建基础站（复制平台模板、装依赖、起服务检查），再把 `@godcreator/docfirst` 的起始物（`docfirst.config.mjs`、`content/docs/outputs/` 下
-README / AGENTS / CLAUDE 的正本、未来区起始页、第一张轨迹卡）叠到站点根（已有的文件不覆盖），往 `package.json` 写脚本 `doc`、`doc:confirm`、`doc:render`，
+它先经 gwb-docsite 建基础站（复制平台模板、装依赖、启动服务检查），再把 `@godcreator/docfirst` 的起始物（`docfirst.config.mjs`、`content/docs/outputs/` 下
+README / AGENTS / CLAUDE 的正本、未来区起始页、第一张轨迹卡）复制到站点根（已有的文件不覆盖），往 `package.json` 写脚本 `doc`、`doc:confirm`、`doc:render`，
 最后逐个加功能包 code-pin、trajectory、explainer。中途失败时前面做完的不回退，报错写明卡在哪一步。
 
 仓根已经有 `README.md` / `AGENTS.md` / `CLAUDE.md` 时，第一次 `pnpm doc:render` 会**覆盖**它们：先把原有内容移进 `content/docs/outputs/` 下对应的 mdx 正本，再 render。
@@ -36,17 +36,20 @@ docsite.feature.add  {"dir":…,"package":"@godcreator/trajectory","version":"^0
 ```
 
 `docsite.feature.add` 在站点目录里 `pnpm add` 这个包，把它 `template/` 里站点还没有的文件补进 `app/features/<功能>/`（已有的不覆盖），重写 `app/features/` 下的汇总文件，
-再起服务检查。可以对同一站点重复运行，只补缺的；站点在运行时拒绝，先 `docsite.site.stop`。`version` 不给就用 gwb-docsite 旁边装着的那一版，没装就拒绝。
+再启动服务检查。可以对同一站点重复运行，只补缺的；站点在运行时拒绝，先 `docsite.site.stop`。`version` 不给就用 gwb-docsite 旁边装着的那一版，没装就拒绝。
 
 ## 改站的结构
 
 - **加一个分区**（`content/notes/` → `/notes`）：建目录，`meta.json` 写 `title`、`"root": true` 与 `pages`，再把目录名加进 `content/meta.json` 的 `pages`。`content/` 下除 `future/` 外的目录自动算现状区，不用登记
 - **侧栏顺序**写在各目录的 `meta.json`：`{ "pages": ["index", "...", "glossary"] }`，`"..."` 是其余按文件名排
 - **`app/` 由建站器写出**：`app/features/` 下文件名带 `generated` 的汇总文件每次加功能都重写，不手改
-- **用组件**：站内组件写在 `src/components/`，在用到它的页面开头按相对路径 `import`；fumadocs 自带的组件（`Callout`、`Cards`、`Tabs`、`Steps`、`Files` 等）与平台的 `Term` 不用 import。
+- **页面用到的文件放哪**：只给一页用的组件、数据、样式、图片放进和页面同名的文件夹（`push.mdx` 配 `push/`），页面开头按相对路径 `import`（`./push/auto-merge`）；
+  同一组里几页共用的放进组里 `_` 开头的文件夹；跨组共用的放站点 `app/components/`，**放之前先问人**。这些文件夹里不放页面与 `meta.json`，组文件夹里只放页面、`meta.json` 与这几种文件夹。
+  写法与例子看 gwb-docsite 的说明书 `docsite`「写页面」
+- **用组件**：fumadocs 自带的组件（`Callout`、`Cards`、`Tabs`、`Steps`、`Files` 等）与平台的 `Term` 不用 import。
   生成正本里用到的组件才要在 `docfirst.config.mjs` 的 `components` 给一条机读规则，名册外的组件 `pnpm doc` 报红、render 拒绝渲染
 - **术语表**是站点根的 `glossary.json`（每条 `term` / `aliases` / `def` / `href`），不标术语的页写在 `app/lib/mdx-plugins.ts`
-- **图片**放在页面旁边，Markdown 图片 `![说明](./x.png)` 不用登记；**公式**模板已经接好（remark-math + rehype-katex），直接写
+- **图片**放进页面的同名文件夹，Markdown 图片 `![说明](./push/x.png)` 不用登记；**公式**模板已经接好（remark-math + rehype-katex），直接写
 - 站用到的包都写进站自己的 `package.json`：pnpm 不让代码 import 没声明的依赖
 
 ## 托管与查看
@@ -81,7 +84,7 @@ pnpm exec docfirst trajectory                   列出轨迹卡在星轨盘上�
 
 **读 `--json` 报告**：`docs[].items[]` 里 `status` 是 `changed`（内容变了）或 `missing`（目标不在了）的就是待处理，带 `blocking: true` 的黄灯算红；
 `line` 是记号在文档里第几行，`lines` 是被引的那段今天在源文件里的位置，`diff` 是变了的那几行；`unconfirmed` 不算对不上。
-`doc` 也可能是站 `src/components/` 下讲解组件的源码。生成正本还有 `outputs[]`，轨迹卡的问题在顶层 `trajectory[]`。
+`doc` 也可能是讲解组件的源码：现状区里与站点 `app/components/` 下的 `.ts`、`.tsx`、`.mjs`（项目根下还有 `src/components/` 时 docfirst 直接报错，组件要挪走）。生成正本还有 `outputs[]`，轨迹卡的问题在顶层 `trajectory[]`。
 
 ### 改了被钉的代码：同一个提交里处理黄灯
 

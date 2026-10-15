@@ -43,13 +43,13 @@ description: 写或改文档站页面内容之前读（普通站与 docfirst 站
 
 - **自包含**：画面和讲解文字都写在组件里，mdx 里只写 `<名字 />`；讲解文字是一份不依赖 React 的数据（`*.data.mjs`），画面读它
 - **机读规则只给放进生成正本的组件写**：一份 `*.ai.mjs` 读同一份 `*.data.mjs`，交回它在生成物里的样子，登记进 `docfirst.config.mjs` 的 `components`；规则只写结论，不逐步展开
-- **页面用到站内组件就在开头 `import`**，路径相对页面，如 `import { AutoMergeRun } from '../../src/components/auto-merge/auto-merge'`；`Term`、文件树 `Files` / `Folder` / `File` 与 fumadocs 自带的组件不用 import
+- **组件放进页面的同名文件夹，页面开头 `import`**，路径相对页面，如 `push.mdx` 里 `import { AutoMergeRun } from './push/auto-merge'`（几页共用时放哪看 `docs-site`）；`Term`、文件树 `Files` / `Folder` / `File` 与 fumadocs 自带的组件不用 import
 - **组件自己 `import` 自己的样式** `./xx.css`；讲解组件包的样式由站点的 explainer 功能接进全站，不用再引
 - 浏览器 API 放进 `useEffect`；组件最外层加 `not-prose`，宽窄屏用容器查询
 - 颜色用 fumadocs 的主题色（`bg-fd-card`、`border-fd-border`、`text-fd-muted-foreground`）；自己的彩色定义成 CSS 变量、`.dark` 下另给一套
 - 组件里的文字不进站内搜索：读者会搜的词写进页面标题、描述或正文
 
-现成的例子：本仓 `docs-site/src/components/auto-merge/`（数据、画面、机读规则各一个文件，数据里照抄源码的地方钉了码）。
+现成的例子：本仓 `docs-site/content/gitea/push/`，是 `push.mdx` 的同名文件夹（auto-merge 的数据、画面、机读规则各一个文件，数据里照抄源码的地方钉了码）。
 
 ## docfirst 站额外的规矩
 

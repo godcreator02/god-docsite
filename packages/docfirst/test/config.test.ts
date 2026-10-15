@@ -102,6 +102,13 @@ test("default 导出不是对象：报错", async () => {
   await assert.rejects(loadConfig(root), /要 export default 一个对象/);
 });
 
+test("项目根下还有 src/components/：装配时报错，讲解组件要挪到页面的同名文件夹或 app/components/", () => {
+  const root = tempRoot();
+  mkdirSync(join(root, "src", "components", "x"), { recursive: true });
+  writeFileSync(join(root, "src", "components", "x", "x.data.mjs"), "export const code = 1;\n");
+  assert.throws(() => assembleProject(root, { contentDir: "content", trajectoryDir: "trajectory", roster: {}, outputs: {} }), /src\/components\//);
+});
+
 test("内容根不在：装配时报错", async () => {
   const root = tempRoot();
   writeFileSync(join(root, "docfirst.config.mjs"), `export default { content: "nope" };\n`);

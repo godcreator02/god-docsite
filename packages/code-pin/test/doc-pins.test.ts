@@ -80,14 +80,14 @@ test("confirmDoc：黄灯不带 accept 原样不动，带 accept 按今天的内
 
 const CT: Target = { kind: "span", file: "../src/greet.ts", a: 2, b: 3 };
 const RECORD: MemoRecord = { kind: "content", hash: "3fa9c2e1b07d", blob: "2689fa073ac6" };
-const COMPONENT = "src/components/greet/greet.data.mjs";
+const COMPONENT = "content/docs/greet/greet.data.mjs";
 const code = formatOf(COMPONENT, PIN_FORMATS);
 
-test("认领：mdx 认 .mdx；组件格式认站的 src/components/ 下的 .ts / .tsx / .mjs，别的都不认", () => {
+test("认领：mdx 认 .mdx；组件格式认 .ts / .tsx / .mjs，在哪个目录都一样；别的扩展名都不认", () => {
   assert.equal(code.name, "组件格式");
-  for (const file of [COMPONENT, "src/components/a/a.tsx", "src/components/registry.ts"]) assert.equal(formatOf(file, PIN_FORMATS).name, "组件格式", file);
+  for (const file of [COMPONENT, "content/docs/greet/greet.tsx", "app/components/registry.ts"]) assert.equal(formatOf(file, PIN_FORMATS).name, "组件格式", file);
   assert.equal(formatOf("content/docs/a.mdx", PIN_FORMATS).name, "mdx 格式");
-  for (const file of ["src/components/a/a.css", "src/lib/source.ts", "scripts/x.mjs"]) {
+  for (const file of ["content/docs/greet/greet.css", "content/docs/greet/fpga.data.d.mts", "content/docs/notes.md"]) {
     assert.throws(() => formatOf(file, PIN_FORMATS), /没有格式认领这个文件/, file);
   }
 });
@@ -146,5 +146,5 @@ test("按文件挑格式：组件文件走组件格式写回；没有格式认�
   const done = pinning.confirmDoc(COMPONENT, text, plain);
   assert.deepEqual(done.steps.map((s) => s.action), ["recorded"]);
   assert.match(done.text.split("\n")[1]!, /^\/\* ref file="\.\.\/src\/greet\.ts" lines="2-3" hash="[0-9a-f]{12}" blob="[0-9a-f]{12}" \*\/$/);
-  assert.throws(() => pinning.checkDoc("src/lib/source.ts", ""), /没有格式认领/);
+  assert.throws(() => pinning.checkDoc("content/docs/greet/greet.css", ""), /没有格式认领/);
 });

@@ -224,20 +224,24 @@ test("目录树与整文件一篇文档：两种标记各自认得回来；多�
   }
 });
 
-test("讲解组件的源码也是现状区：src/components/ 下的块注释标记一样核对与确认", async () => {
+test("讲解组件的源码也是现状区：页面同名文件夹里与站点 app/components/ 下的块注释标记一样核对与确认", async () => {
   const p = setupProject();
   try {
-    const dir = join(p.root, "src", "components", "x");
-    mkdirSync(dir, { recursive: true });
-    writeFileSync(join(dir, "x.data.mjs"), '/* ref file="src/greet.ts" lines="2-3" */\nexport const code = "greet";\n');
-    writeFileSync(join(dir, "x.css"), '/* ref file="src/greet.ts" lines="2-3" */\n.x { color: red; }\n');
+    const pageDir = join(p.root, "docs", "x");
+    const sharedDir = join(p.root, "app", "components", "y");
+    mkdirSync(pageDir, { recursive: true });
+    mkdirSync(sharedDir, { recursive: true });
+    writeFileSync(join(pageDir, "x.data.mjs"), '/* ref file="src/greet.ts" lines="2-3" */\nexport const code = "greet";\n');
+    writeFileSync(join(pageDir, "x.css"), '/* ref file="src/greet.ts" lines="2-3" */\n.x { color: red; }\n');
+    writeFileSync(join(sharedDir, "y.tsx"), '/* ref file="src/greet.ts" lines="2-3" */\nexport const Y = () => null;\n');
     const first = await p.cli("check");
-    assert.match(first.out, /⚪ src\/components\/x\/x\.data\.mjs {2}src\/greet\.ts:2-3 {2}未确认/);
+    assert.match(first.out, /⚪ docs\/x\/x\.data\.mjs {2}src\/greet\.ts:2-3 {2}未确认/);
+    assert.match(first.out, /⚪ app\/components\/y\/y\.tsx {2}src\/greet\.ts:2-3 {2}未确认/);
     const report = JSON.parse((await p.cli("check", "--json")).out) as { docs: Array<{ doc: string }> };
-    assert.equal(report.docs.some((d) => d.doc === "src/components/x/x.data.mjs"), true);
-    assert.equal(report.docs.some((d) => d.doc === "src/components/x/x.css"), false,"没有哪种代码格式认领 .css：不进现状区");
-    await p.cli("confirm", "src/components/x/x.data.mjs");
-    assert.match(p.read("src/components/x/x.data.mjs"), /^\/\* ref file="src\/greet\.ts" lines="2-3" hash="[0-9a-f]{12}" blob="[0-9a-f]{12}" \*\/$/m);
+    assert.equal(report.docs.some((d) => d.doc === "docs/x/x.data.mjs"), true);
+    assert.equal(report.docs.some((d) => d.doc === "docs/x/x.css"), false, "没有哪种代码格式认领 .css：不进现状区");
+    await p.cli("confirm", "docs/x/x.data.mjs");
+    assert.match(p.read("docs/x/x.data.mjs"), /^\/\* ref file="src\/greet\.ts" lines="2-3" hash="[0-9a-f]{12}" blob="[0-9a-f]{12}" \*\/$/m);
   } finally {
     p.teardown();
   }

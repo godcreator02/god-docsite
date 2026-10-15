@@ -1,0 +1,26 @@
+---
+born-at: 2026-10-16T07:10
+type: choice
+parent: [2026-09-03-god-live-doc]
+label: 讲解组件的源码跟着页面放：docfirst 核对内容目录里与 app/components/ 下的代码文件，项目根下还有 src/components/ 就报错
+domain: 钉码
+---
+
+## 背景
+
+用户定了页面用到的文件怎么放：只给一页用的放进和页面同名的文件夹，组里几页共用的放进组里 `_` 开头的文件夹，跨组共用的放站点 `app/components/`（放之前先问用户，基本不会有）。
+讲解组件原来按约定放在项目根 `src/components/`，code-pin 的组件格式只认那个目录下的 `.ts`、`.tsx`、`.mjs`，docfirst 也只从那里收组件源码。
+组件挪进页面的同名文件夹以后，数据文件里照抄源码处的钉码就没人核对了，而且不报错。
+
+## 结论与边界
+
+- code-pin 的组件格式按扩展名认领（`.ts`、`.tsx`、`.mjs`），不再限定目录；哪些代码文件算文档由 docfirst 决定。
+- docfirst 收现状区里的全部代码文件（内容根下除 `trajectory/`、`future/` 以外），再加站点 `app/components/` 下的。
+- 项目根下还有 `src/components/` 且里面有文件，装配时直接报错，列出文件、说明挪到哪：从旧写法迁过来的站不会悄悄少核对一批钉码。
+- 本站 `src/components/auto-merge/` 只有「实时推送与执行器」一页在用，挪进 `content/gitea/push/`。
+- 站点的类型检查收 `content/`，组件以前在 `src/components/` 时没被检查过，挪进来后报了十几条类型错误；数据文件旁边补一份 `auto-merge.data.d.mts`。数据文件仍是 `.mjs`，因为机读规则 `auto-merge.ai.mjs` 要在 Node 里直接读它。
+
+## 否掉的候选
+
+- 组件格式改成认一组目录（内容根 + `app/components/`）：code-pin 的核心不知道站点的内容根在哪，要么把配置传进格式，要么写死 `content/`；docfirst 本来就负责列出文档，交给它最少改动。
+- 旧位置照旧收、新位置也收：两处都能放，规矩就白定了；下游站迁移时也看不出有没有挪完。
