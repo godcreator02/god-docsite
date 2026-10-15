@@ -1,4 +1,4 @@
 {
   "title": "god-docsite",
-  "pages": ["docs", "docsite", "gitea", "maintain"]
+  "pages": ["docs", "packages", "docsite", "gitea", "maintain"]
 }
