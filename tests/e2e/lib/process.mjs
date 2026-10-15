@@ -2,7 +2,7 @@ import { spawn, spawnSync } from 'node:child_process'
 import { createWriteStream, writeFileSync } from 'node:fs'
 import { createServer } from 'node:net'
 
-/** 这几个端口上跑着 gwb-docsite 托管的站（docs-site 4340、collab-test 4450 等），e2e 不碰 */
+/** 这几个端口上跑着 gwb-docsite 托管的站（docs-site 4340、full-test 4450 等），e2e 不碰 */
 const reservedPorts = new Set([4340, 4430, 4450, 4451])
 
 /** 向系统要一个空闲端口（绑 0 再放掉），避开托管站的端口 */

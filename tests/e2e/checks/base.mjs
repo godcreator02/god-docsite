@@ -90,7 +90,7 @@ export async function runBaseChecks({ browser, baseUrl, mode, siteDir, feedToken
       const missingSections = [taskSection, '快到期的模块', '最近的日志', '成员'].filter((title) => !sections.includes(title))
       const recordLinks = await page.locator('main section a[href^="/tasks/"]').count()
       return {
-        pass: response?.status() === 200 && heading === '协作站测试' && sidebars === 0 && missingNav.length === 0 && missingSections.length === 0 && recordLinks > 0,
+        pass: response?.status() === 200 && heading === '全功能测试站' && sidebars === 0 && missingNav.length === 0 && missingSections.length === 0 && recordLinks > 0,
         detail: `GET / → ${response?.status()}，h1=${heading}，侧栏 ${sidebars} 个；顶栏缺 ${missingNav.join('、') || '无'}；缺的栏 ${missingSections.join('、') || '无'}；指向任务或模块的链接 ${recordLinks} 个`,
       }
     })
@@ -340,10 +340,10 @@ export async function runBaseChecks({ browser, baseUrl, mode, siteDir, feedToken
     await check('每一页侧栏都有目录切换按钮：组外的页面收在以站名命名的那一组里，功能页面也有', async () => {
       const outcomes = []
       for (const { url, group } of [
-        { url: '/about', group: '协作站测试' },
-        { url: '/writing/collapse-test', group: '协作站测试' },
+        { url: '/about', group: '全功能测试站' },
+        { url: '/writing/collapse-test', group: '全功能测试站' },
         { url: '/guide', group: '指南' },
-        { url: '/tasks', group: '协作站测试' },
+        { url: '/tasks', group: '全功能测试站' },
       ]) {
         await page.goto(`${baseUrl}${url}`, { waitUntil: 'load' })
         await waitForHydrated(page, `${sidebarRow} a[href="/comments"]`)

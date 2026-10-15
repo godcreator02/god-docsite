@@ -1,0 +1,17 @@
+---
+born-at: 2026-10-16T01:50
+type: choice
+parent: [2026-09-03-god-live-doc]
+label: 测试站 collab-test/ 改名 full-test/（全功能测试站）
+domain: 维护
+---
+
+## 背景
+
+测试站最早只测协作站，叫 `collab-test/`。现在它装着全部功能（collab、code-pin、trajectory、explainer、word-report），e2e 的五组检查都在它上面跑；仓里又加了演示站 `demo/`，它也是协作仓形态。再叫「协作测试」，读的人会以为它只管协作功能，也容易和演示站分不清。
+
+## 结论与边界
+
+- 目录 `collab-test/` 改名 `full-test/`，站点包名 `collab-test-site` 改名 `full-test-site`，站名「协作站测试」改为「全功能测试站」。
+- e2e、打包检查、scaffold 比对、仓根工作区、AGENTS.md 与维护者手册里的名字跟着改；e2e 里的标识符 `collabTest*` 改成 `fullTest*`。只换名字，检查逻辑不变。
+- 轨迹卡只增不改，里面的旧名保持原样；`probes/` 里引用的旧名也不改。

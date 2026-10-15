@@ -27,8 +27,8 @@ const siteOwnedInEverySite = [
 
 const sites = [
   {
-    name: 'collab-test',
-    dir: path.join(repoDir, 'collab-test', 'site'),
+    name: 'full-test',
+    dir: path.join(repoDir, 'full-test', 'site'),
     features: ['@godcreator/collab', '@godcreator/code-pin', '@godcreator/trajectory', '@godcreator/explainer', '@godcreator/word-report'],
     siteOwned: [],
     // 协作站的首页由 collab.site.init 照协作功能的模板写出，测试站的要和它一样

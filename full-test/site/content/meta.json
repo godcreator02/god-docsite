@@ -1,5 +1,5 @@
 {
-  "title": "协作站测试",
+  "title": "全功能测试站",
   "root": true,
   "pages": ["about", "plan", "usage", "regression", "..."]
 }

@@ -44,20 +44,20 @@ export function createRecorder() {
   return { report, record }
 }
 
-/** collab-test 下的 git 状态（含未跟踪的每个文件）：跑之前记一份，跑完再比 */
-export function collabTestGitStatus() {
-  const result = spawnSync('git', ['status', '--porcelain', '--untracked-files=all', '--', 'collab-test'], { cwd: repoDir, encoding: 'utf8' })
+/** full-test 下的 git 状态（含未跟踪的每个文件）：跑之前记一份，跑完再比 */
+export function fullTestGitStatus() {
+  const result = spawnSync('git', ['status', '--porcelain', '--untracked-files=all', '--', 'full-test'], { cwd: repoDir, encoding: 'utf8' })
   if (result.status !== 0) throw new Error(`git status 失败（exit ${result.status}）：${result.stderr}`)
   return result.stdout.split('\n').filter(Boolean)
 }
 
 export function unchangedGitStatusResult(before) {
-  const after = collabTestGitStatus()
+  const after = fullTestGitStatus()
   const appeared = after.filter((line) => !before.includes(line))
   const disappeared = before.filter((line) => !after.includes(line))
   const pass = appeared.length === 0 && disappeared.length === 0
   return {
-    name: '跑完 git status collab-test 和跑之前一样（测试没改脏仓里的文件）',
+    name: '跑完 git status full-test 和跑之前一样（测试没改脏仓里的文件）',
     pass,
     detail: pass ? `跑之前 ${before.length} 行，跑之后一样` : [...appeared.map((line) => `多出 ${line}`), ...disappeared.map((line) => `少了 ${line}`)].join('；'),
   }

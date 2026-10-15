@@ -12,9 +12,9 @@
 import { cpSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import path from 'node:path'
 import { runLogged, runLoggedAsync } from './lib/process.mjs'
-import { collabTestGitStatus, createRecorder, finishRun, parseOptions, startRun, unchangedGitStatusResult } from './lib/report.mjs'
+import { fullTestGitStatus, createRecorder, finishRun, parseOptions, startRun, unchangedGitStatusResult } from './lib/report.mjs'
 import { runRounds } from './lib/rounds.mjs'
-import { buildSitePackages, collabTestDir, collabTestSiteDir, repoDir, typecheckSite } from './lib/site.mjs'
+import { buildSitePackages, fullTestDir, fullTestSiteDir, repoDir, typecheckSite } from './lib/site.mjs'
 
 const toPosix = (file) => file.replaceAll('\\', '/')
 const readJson = (file) => JSON.parse(readFileSync(file, 'utf8'))
@@ -37,7 +37,7 @@ function workspacePackagesOfSite() {
       visit(readJson(path.join(found.get(name), 'package.json')))
     }
   }
-  visit(readJson(path.join(collabTestSiteDir, 'package.json')))
+  visit(readJson(path.join(fullTestSiteDir, 'package.json')))
   return found
 }
 
@@ -94,9 +94,9 @@ async function preparePackedSite(runDir) {
   const tarballDir = path.join(runDir, 'tarballs')
   mkdirSync(tarballDir, { recursive: true })
   const tarballs = new Map([...workspacePackagesOfSite()].map(([name, dir]) => [name, packPackage(name, dir, tarballDir, runDir)]))
-  const copiedCollabTest = path.join(runDir, 'collab-test')
-  cpSync(collabTestDir, copiedCollabTest, { recursive: true, filter: (source) => !notCopied.has(path.basename(source)) })
-  const siteDir = path.join(copiedCollabTest, 'site')
+  const copiedFullTest = path.join(runDir, 'full-test')
+  cpSync(fullTestDir, copiedFullTest, { recursive: true, filter: (source) => !notCopied.has(path.basename(source)) })
+  const siteDir = path.join(copiedFullTest, 'site')
   rewriteSiteManifest(siteDir, tarballs)
   writeSiteWorkspaceYaml(siteDir, tarballs)
   await runLoggedAsync('pnpm', ['install', '--prefer-offline'], { cwd: siteDir, logFile: path.join(runDir, 'install.txt'), timeoutMs: 900_000 })
@@ -108,7 +108,7 @@ async function main() {
   const options = parseOptions(process.argv.slice(2))
   const { runTag, runDir, startedAt } = startRun('pack')
   console.log(`运行编号 ${runTag}，日志与临时站点在 ${runDir}`)
-  const statusBefore = collabTestGitStatus()
+  const statusBefore = fullTestGitStatus()
   const { report, record } = createRecorder()
   if (!options.skipBuild) buildSitePackages(runDir)
   let prepared

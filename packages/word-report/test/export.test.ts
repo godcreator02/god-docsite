@@ -42,7 +42,7 @@ async function successfulJob(ownerSite = site) {
 
 beforeEach(async () => {
   temporary = await mkdtemp(path.join(os.tmpdir(), 'docsite-export-test-'));
-  site = path.join(temporary, 'workspace/collab-test/site'); engine = path.join(temporary, 'engine'); packageDir = path.join(temporary, 'package');
+  site = path.join(temporary, 'workspace/full-test/site'); engine = path.join(temporary, 'engine'); packageDir = path.join(temporary, 'package');
   vi.stubEnv('DOCREPORT_ENGINE_ROOT', undefined);
   renderer.spawn.mockReset();
   renderer.logFailure = false;
