@@ -1,0 +1,29 @@
+/*
+ * SubmitStops 自己的画面：bob 的改动、八步清单、仓里留下什么三张卡片加一行提示栏。
+ * 卡片、胶囊、代码行与新旧行对照的颜色变量（--dx-*）由 @godcreator/explainer 提供，颜色只取那套变量。
+ */
+.ss-case { display: grid; gap: 12px; }
+
+.ss-file { display: grid; gap: 6px; }
+.ss-file + .ss-file { margin-top: 10px; }
+.ss-file-title { font-size: 12.5px; font-weight: 600; color: var(--dx-fg); word-break: break-all; }
+.ss-group { display: grid; gap: 4px; }
+.ss-group-title { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--dx-dim); }
+.ss-changes-note { margin: 10px 0 0; font-size: 12.5px; color: var(--dx-dim); }
+
+.ss-steps { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.ss-steps li { display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: baseline; column-gap: 8px; font-size: 13px; }
+.ss-steps li[data-state='skip'] { color: var(--dx-dim); opacity: .55; }
+.ss-steps li[data-state='bad'] .ss-step-name { font-weight: 700; }
+.ss-steps li[data-state='bad'] .ss-step-note { color: var(--dx-fg); }
+.ss-step-name { white-space: nowrap; }
+.ss-step-note { grid-column: 2; font-size: 12px; color: var(--dx-dim); }
+
+.ss-end { display: flex; margin-bottom: 8px; }
+.ss-repo-note { margin: 0 0 8px; font-size: 12.5px; color: var(--dx-dim); }
+.ss-repo-note:last-child { margin-bottom: 0; }
+
+.ss-notice { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.ss-notice-title { font-size: 12.5px; font-weight: 600; color: var(--dx-fg); }
+.ss-notice-empty { font-size: 12.5px; color: var(--dx-dim); }
+.ss-notice-note { flex-basis: 100%; margin: 0; font-size: 12.5px; color: var(--dx-dim); }

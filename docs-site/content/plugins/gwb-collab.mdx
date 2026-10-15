@@ -1,0 +1,201 @@
+---
+title: gwb-collab：协作站插件
+description: 协作站在每个成员电脑上的那一半：协作仓与别的仓两套操作，本机自动同步与提交审核（提交前查格式与站点、推送前查只有负责人能改的内容、等执行器的结论），通知每次从此刻的状态现算、推给站点并交给协作窗格与 QQ，站点交给 gwb-docsite 建与托管
+icon: Plug
+---
+
+import { SubmitStops } from './gwb-collab/submit-stops'
+
+gwb-collab 是 gwb 工作台的插件，跑在每个成员自己的电脑上：管 git 与 Gitea（克隆、取回、同步、提交审核、读合并请求与 issue、核对仓的配置），把要人处理的事算成通知，再交给站点、协作窗格与 QQ。站点不跑 git、也不向插件发请求，只收插件推来的数据。
+
+和别处的分工：记录格式、写入规则、合并检查判什么、`SiteFeed` 的形状在 [collab 包](/packages/collab)；ntfy 推送、执行器、权限在 [Gitea 与 NAS](/gitea) 分区；每条命令怎么用、每条通知怎么处理在说明书 [collab](/docs/outputs/skills/collab)。这一页只讲插件这一层。
+
+这一页从头到尾用同一个例子：Gitea 组织 `hybrid-mmc` 的项目里，`bob` 是协作仓 `collab` 的成员、本机身份，`admin` 是管理员、项目负责人，`carol` 是另一个成员。推送以后 Gitea 开出的合并请求都是 #7。
+
+## 插件里有什么
+
+{/* tree dir="../plugins/collab/src" depth="1" hash="e3dcfdd56c39" */}
+
+| 目录或文件 | 做什么 |
+| --- | --- |
+| `collab-repo/` | 协作仓那一套：监视本机状态（`sync/watch.ts`、`sync/local-state.ts`）、取回与自动同步（`sync/`）、提交审核（`submit/`）、读项目负责人（`leads.ts`）、核对协作仓的配置（`rules.ts`）、任务与模块的命令和「找我的」（`records/`）、完整刷新与收到消息时做哪几步（`events.ts`） |
+| `other-repos/` | 别的仓那一套：监视各仓 HEAD 与服务器同名分支的差（`fetch/watch.ts`、`fetch/head.ts`）、取回与补克隆组织里新加的仓（`fetch/`）、`collab.repos.update` 只做快进（`fetch/update.ts`）、读合并请求与 issue（`review.ts`）、核对配置（`rules.ts`）、`events.ts` |
+| `organization/` | 组织级：`events/` 订阅 ntfy、认消息、合成一批再调度、完整刷新、各步出错的记录、组织 webhook、`leads changed`（细节见 [实时推送与执行器](/gitea/push)）；`setup/` 克隆组织、加入、项目列表、建仓、配仓的命令（配仓见 [权限怎么配](/gitea/permissions)） |
+| `notifications/` | 从各处此刻的状态算通知（`notifications-of.ts`）、交给站点与通知渠道（`project-notifications.ts`）、QQ 私聊（`qq-private-chat.ts`） |
+| `site-process/` | 站点交给 gwb-docsite 托管与推数据（`collab-sites.ts`）、`collab.site.init`、在 `site/` 里装依赖与跑类型检查（`dependencies.ts`） |
+| `pane/` | 协作窗格：`collab.projects` 与浏览器侧的 `ProjectsPane` |
+| `ai-prompt/` | 把一个项目此刻的全部通知写成交给 AI 的提示词，`collab.ai.prompt` |
+| `project/` | 打开项目、按本 home 的身份码认人（`project.ts`）、核对令牌账号就是这个人（`account.ts`）、设置 `projects`（`list.ts`）、QQ 任务组（`qq-task-groups.ts`）、仓的状态变化转给通知（`repo-change-relay.ts`） |
+| `gitea-api/` | 调 Gitea 接口；两种仓共用的配置核对与写入（`repo-rules.ts`，见 [权限怎么配](/gitea/permissions)） |
+| `git/` | 运行 git、解析 `git status`、判断能不能快进 |
+| `index.ts` | 装配：建各目录的对象、把它们接起来、登记命令、窗格与说明书 |
+| `commands.ts` | 登记命令的共用写法：参数只收声明的键、拒绝回 `{ ok: false, error }`、打开项目 |
+
+## 装配：依赖、设置与打包进来的 collab 包
+
+顶层注入的服务是 `gwbCommands`、`gwbSettings`、`gwbData`、`gwbDocsite`、`timer`：站点与身份码都归 gwb-docsite，所以它是必需的。`gwbGitea`、`gwbQqBot`、`gwbSkills`、`gwbShell` 局部注入：没装 gwb-gitea 时插件照常加载，用到 Gitea 的命令再报；没装外壳只是没有窗格。设置只有两项：`qq-notifications`（布尔，默认关）与 `projects`（项目仓根，一行一个绝对路径）。仓里文件接连变化时，停下 300 毫秒没有新变化才重算，两套的监视都用这个数：
+
+{/* ref file="../plugins/collab/src/index.ts" lines="44-69" hash="56067a9b51dc" blob="3ff0ea6b6bfe" */}
+
+同仓的 `@godcreator/collab`、`comments`、`identity` 打包进插件产物，不是 peer。打包时还把 collab 包的版本、自动合并工作流模板、项目首页模板作为常量带进来：`collab.site.init` 写进 `site/package.json` 的功能包范围与工作流里的 `MERGE_CHECK_RANGE` 都是 `^<这一版>`，推送前在本机查「只有负责人能改的内容」用的也是这一版的 `leadOnlyProblems`。所以改了 collab 包要先构建它，再构建插件：
+
+{/* ref file="../plugins/collab/build.ts" lines="28-54" hash="9389a7cce4a7" blob="6098b7734a98" */}
+
+## 两套操作：协作仓与别的仓
+
+项目文件夹（以组织命名）里有一个协作仓（带 `collab/` 与 `site/people.json` 的那个）和若干别的仓。两种仓进 main 的路不同，插件里各走一套，各自记着「此刻怎样」，通知只读这些记录：
+
+| | 协作仓那一套 | 别的仓那一套 |
+| --- | --- | --- |
+| 本机状态 | 一直监视整个协作仓：还没提交审核的 `collab/`、`site/` 文件，冲突，当前分支 | 一直监视各仓的引用：HEAD 比服务器上同名分支多几个、少几个提交 |
+| 取回以后 | 能快进就自动快进（下一节） | 只取回，不动分支与工作区；人要更新时由 AI 调 `collab.repos.update`，也只做快进 |
+| 进 main | 只经 `collab.submit` 提交审核，由执行器合并 | 普通 git 仓：负责人直接推，别人推分支开合并请求，负责人同意后合并 |
+| 读 Gitea | 协作仓的协作者，作为项目负责人交给站点 | 每个仓的协作者、开着的合并请求与审阅、issue 与评论 |
+| 核对配置 | 协作仓的规矩：main 谁都不能直接推，合并只许团队 `bots` | 别的仓的规矩：main 的推送与合并只许负责人 |
+
+完整刷新（插件连上推送、加进项目列表、`collab.check`）时，协作仓这边按顺序做四步：取回、读负责人、核对配置、自动同步；取回失败也照样试一次自动同步，本机已有的 `origin/main` 可能还没快进进来：
+
+{/* ref file="../plugins/collab/src/collab-repo/events.ts" lines="24-31" hash="8a862822b72b" blob="2f7d37c4b1e8" */}
+
+别的仓那边先补克隆组织里新加的仓，再对项目文件夹里每个仓并行做取回、读合并请求与 issue、核对配置。每一步出错不往外抛：按项目、按步名记下原话，那一步下次做成了就清掉；同一个项目同时只做一件，正在做时 `collab.check` 回 `busy`。这些原话合成一条「gwb 检查项目出错」的通知。收到 ntfy 消息时按消息说的仓只做那一处，见 [实时推送与执行器](/gitea/push) 的「收到消息以后」，这里不重复。
+
+## 自动同步：只快进
+
+协作仓不用 `git pull`：取回之后，在 main 上、能快进才快进。不能快进的原因按顺序判：不在 main、没有 `origin/main`、提交审核合 main 的冲突还没改好、本地 main 有还没进 main 的提交（提交审核正在等执行器，或者上次中途断了）。都不是时才 `git merge --ff-only`；它失败只剩一种可能——工作区没提交的改动和新改动碰到同一个文件，这时 git 什么都没动：
+
+{/* ref file="../plugins/collab/src/collab-repo/sync/sync.ts" lines="10-60" hash="915a839cd4fa" blob="64df3cef406d" */}
+
+不能快进不是错误：什么都不动，原因记下来，成为「没能自动同步 main 上的新改动」的通知（冲突没改好、不在 main 时不列这条，见下文「通知」）。
+
+快进进来的改动动了 `site/package.json` 或 `site/pnpm-lock.yaml`：站点在运行就先停，在 `site/` 里 `pnpm install`，装完再启动；装失败站点保持停着，报错里写明怎么启动。只动了 `site/` 别的文件：确保站点登记在 gwb-docsite、停着就启动、已在运行就不动。
+
+自动同步之后协作仓没有东西可提交（`collab/`、`site/` 没有改动、没有冲突、本地 main 不领先），上次提交审核失败的那条通知就清掉。
+
+本机状态的监视：协作仓里任何文件变了都重算，`.git/` 里只看 `index`、`HEAD`、`packed-refs`、`refs/`；`git status` 只跑一次，按路径分出 `collab/` 与 `site/`。监视事件的行为假设在 `tests/verified/watch.test.ts`，动了监视要跑 `pnpm test:verified`。
+
+## 提交审核
+
+`collab.submit` 只在 main 上做，不建分支。它把检查分成两半：**记录格式与站点只在本机查**（执行器不查）；**冲突与只有负责人能改的内容执行器查**，后者本机推送前也用同一个函数先查一遍，成员在本机就知道会不会被打回。
+
+查格式的参照点有两个，都只算「这次带来的新问题」（`newFormatProblems`，规则见 [collab 包](/packages/collab) 的「读出状态与校验」）：提交前比的是本地 main 与 `origin/main` 的分叉点，那时就有的问题不算我的；把 main 合进来以后再比一次合进来的那个 `origin/main`，两个人各自没问题、凑在一起才出的问题只有这一步能发现。
+
+站点检查此刻只查 `site/journal/` 的文件名（站点布局按它读，文件名不是真实日期整站打不开）；`site/package.json` 写了 `typecheck` 脚本就在 `site/` 里跑一次，没写就跳过。别的站点问题由 gwb-docsite 启动站点时查。
+
+提交只带 `collab/` 与 `site/`，暂存区里别的文件不带上；上次合 main 出的冲突已经改好时，这次提交就完成那次合并。推送用 AGit：`HEAD:refs/for/main`，主题固定是自己的身份，同一个人推的都进同一个合并请求；之后每 2 秒查一次合并请求，最多等 3 分钟。执行器那边怎么查、怎么合并见 [实时推送与执行器](/gitea/push)。
+
+{/* ref file="../plugins/collab/src/collab-repo/submit/submit.ts" lines="112-170" hash="bf3f1f94abe6" blob="3df0aa7106c6" */}
+
+本机查的两样与两个参照点都在这份短文件里：
+
+{/* ref file="../plugins/collab/src/collab-repo/submit/submit-checks.ts" hash="b8d470e3bb80" blob="b3d52bfd5201" */}
+
+拒绝时命令回 `{ ok: false, error }`，原话同时记成这个项目的「上次提交审核没成功」，经下文的通知推到网站提示栏；提交审核成功一次就清掉：
+
+{/* ref file="../plugins/collab/src/collab-repo/submit/commands.ts" lines="17-28" hash="e04db6cc3273" blob="a187f085c6f3" */}
+
+选一种情况看看提交审核停在哪、仓里留下什么、网站提示栏里出现什么：
+
+<SubmitStops />
+
+停下后仓的样子只有四种，记住哪一种对应哪几步就够了：前三步不过——没提交；合 main 有冲突——提交了、合并停在半路，下次提交审核完成这次合并；合进来以后的检查、负责人检查、推送失败、被打回、等不到结论——`git reset --mixed` 回推送时的 `origin/main`，这次的提交撤掉、改动变回没提交，改好再提交审核。等不到结论时插件自己关掉合并请求再退回：执行器恢复以后看到合并请求已关就不处理，不会出现「本机退回了、服务器上又合并了」。
+
+## 通知：每次从此刻的状态现算
+
+通知不存。一个项目要算通知时，从各处读「此刻怎样」交给 `notificationsOf`，按 kind 造出通知，`id` 由 collab 包按事实算（同一件事在状态更新前后算出同一个 `id`），再按组排好。事情解决了，下一次算就不再出现。
+
+三组的来源（kind 名与读取项、接线一一对应）：
+
+| 组 | kind | 从哪来 |
+| --- | --- | --- |
+| 协作仓 | `unsubmitted`、`conflicts`、`off-main` | 协作仓的本机状态（监视着重算的那一份） |
+| 协作仓 | `submit-failure` | 上次 `collab.submit` 拒绝的原话 |
+| 协作仓 | `sync-problem` | 最近一次自动同步没能快进的原因 |
+| 协作仓 | `check-error` | 刷新各步此刻的出错，一步一行 |
+| 协作仓 | `record-problem` | 工作区 `collab/` 读不出的文件、重复的 id、所属模块不存在 |
+| 协作仓 | `webhook-setup` | 组织管理员的插件核对组织 webhook |
+| 别的仓 | `unpushed`、`unpulled`、`diverged` | 别的仓的 HEAD 与服务器同名分支比 |
+| 别的仓 | `pull-to-review`、`issue-to-answer`、`my-pull-update`、`my-issue-answered` | 读各仓的合并请求、审阅与 issue |
+| 别的仓 | `repo-setup` | 核对配置；协作仓自己没配好也在这一组，写协作仓的名字 |
+| 找我的 | `task`、`mention`、`reply` | 现读工作区的 `collab/` 与 `site/comments/` |
+
+协作仓组有两条让某些通知不列的规矩：冲突没改好时，提交失败与同步不了说的都是这件事，只列冲突；不在 main 时自动同步一定停着，不再列同步不了：
+
+{/* ref file="../plugins/collab/src/notifications/notifications-of.ts" lines="29-81" hash="fd26b91bd6d5" blob="7e945c82036a" */}
+
+「找我的」由 collab 包的 `inboxOf` 算：负责人是我、还没做完的任务；没解决的评论串里别人写的、正文 @ 了我的；我发起或回复过之后别人写的回复。评论串标为已解决，它带来的 @ 与回复就不再列；重新打开又列出来。记录与人员列表读的是工作区（网站显示的也是工作区），所以本机刚保存、还没提交审核的改动也会立刻反映在「找我的」里：
+
+{/* ref file="../packages/collab/src/core/inbox.ts" lines="55-63" hash="c1d61c9f6fa9" blob="31d0e9ce0ef0" */}
+
+## 交给站点、协作窗格与 QQ
+
+各目录的状态一变都调同一个入口：装配时先建一个中转 `RepoChangeRelay` 交给各目录，通知建好后再接上，接上之前就有变化直接报错（装配顺序错了）。它转给 `ProjectNotifications.changed`，也让 QQ 任务组按现状重新登记一次。
+
+- **站点**：`changed` 先让 `CollabSites.feedChanged` 推一次。站点在运行就现算整份 `SiteFeed`（通知、提示词、项目负责人），经 gwb-docsite 的服务 `push` 推到频道 `collab`；没在运行就不推，站点转成运行时 gwb-docsite 的 `onStatus` 回调里补推。推送按项目排队，接连变化时后推的一定是新的；推不上记一行警告，同样的原因不重复记
+- **协作窗格**：`collab.projects` 现算同一份通知，只回各组几条；「复制给 AI」调 `collab.ai.prompt`，和站点提示栏里复制的是同一份提示词
+- **QQ 私聊**（设置 `qq-notifications` 打开、同 home 装了 gwb-qq-bot 才发）：插件加载后要先做完一次完整刷新才交给 QQ——之前读 Gitea 的结果不齐，还没读到的会被当成消失了。之后每次交来此刻的全部，只发新出现、连续存在满 1 分钟的；`unsubmitted`（自己保存出来的改动）不发；同时到点的合成一条，一条最长 600 字。发过的 `id` 记在 gwb-data 的文档 `qq-sent-notifications` 里，消失了就去掉、再出现算新的一件事；但这一批里有 `check-error` 时一个都不去掉——读 Gitea 失败时读不到的合并请求看起来像消失了，恢复后不能当成新的重发。等待中的只在内存里，重启后从头等
+
+`SiteFeed` 由谁拼、每次变化先给站点、做完一次完整刷新才给 QQ：
+
+{/* ref file="../plugins/collab/src/notifications/project-notifications.ts" lines="73-87" hash="33956e5b48f3" blob="456019e4bd7c" */}
+
+推送频道 `collab`、没运行不推、按项目排队：
+
+{/* ref file="../plugins/collab/src/site-process/collab-sites.ts" lines="121-139" hash="ddd0ca64baaa" blob="04e52fcfb1e0" */}
+
+已发的 `id` 什么时候去掉（含 `check-error` 时一个都不去）：
+
+{/* ref file="../plugins/collab/src/notifications/qq-private-chat.ts" lines="56-64" hash="90f0d60de2fa" blob="fcc474a74e72" */}
+
+只发新出现、满时长才发、期间消失过从头算、同时到点合成一条：
+
+{/* ref file="../plugins/collab/src/notifications/qq-private-chat.ts" lines="122-159" hash="5cf0354114a5" blob="fcc474a74e72" */}
+
+QQ 私聊长什么样，一个例子（别的仓 `firmware` 有 carol 开的合并请求 #7「修复」等我审阅，连续存在满 1 分钟时私聊这么一条；之后同样的再交来、重新加载以后都不重发）：
+
+```
+协作站 混合型 MMC
+firmware #7「修复」等你审阅（卡萝 开的）
+```
+
+QQ 任务组是另一件事：给项目起了 QQ 命令（`collab.project.qq-command`）的，经 gwb-qq-bot 登记成一个任务组，工作区是项目文件夹，由 gwb-qq-bot 交给 claude-agent 做（见说明书附件 [organization](/docs/outputs/skills/collab/organization)）。
+
+## 站点交给 gwb-docsite
+
+插件自己不启动站点进程。常驻的站只登记在 gwb-docsite 的设置 `sites` 里，启停、状态、起不来的原因、工作台启动时启动都由 gwb-docsite 做。插件只做三件事：项目加进列表、插件加载、自动同步改了 `site/` 之后登记站点（`add`：已登记、已在运行就不动）；项目移出列表时撤销登记（`remove`，在运行就停掉）；把数据推过去（上一节）。登记不了、起不来记成这个项目 `site:host` 一步的出错，经「gwb 检查项目出错」显示。`site/package.json` 还不存在时不登记，报错让负责人先 `collab.site.init`。
+
+`collab.site.init {repo, title}` 只对新站点（`site/` 不存在或是空目录），按顺序：
+
+1. 交给 gwb-docsite 的 `init` 建基础站（平台模板、装依赖、启动一次检查首页）
+2. 建好仓根的 `collab/` 与站点的 `journal/`：站点运行时会写入它们，协作功能的样式表在 Tailwind 扫描里排除这两个目录，目录要在开发服务启动前就存在才生效，否则一写入就整页刷新、推送连接断掉
+3. 仓里还没有 `.gitea/workflows/collab-auto-merge.yaml` 就照打包进来的模板写出，`MERGE_CHECK_RANGE` 写成 `^<打包时的 collab 版本>`；已有的是负责人管的，不覆盖
+4. 站点此刻在运行（站点目录早已登记在 gwb-docsite、`init` 检查完首页后它保持运行）就先停掉：加功能要站点停着
+5. 交给 gwb-docsite 的 `addFeature` 加 `@godcreator/collab`，范围是 `^<打包时的 collab 版本>`
+6. 把平台模板的首页 `site/app/routes/home.tsx` 换成打包进来的项目首页（它 import 协作功能的接线文件，所以要等加完功能再写）
+7. 项目在列表里就交给 gwb-docsite 常驻（这时才再启动）；不在就等 `collab.project.add` 时登记
+
+{/* ref file="../plugins/collab/src/site-process/collab-sites.ts" lines="84-102" hash="6562be365981" blob="04e52fcfb1e0" */}
+
+它只写文件、不提交：新站点里 `.gitea/`、`site/package.json`、站点根的配置文件都是只有负责人能改的内容，由负责人提交。用到的 gwb-docsite 服务方法就是 `add`、`remove`、`start`、`stop`、`status`、`onStatus`、`push`、`init`、`addFeature`，另有身份码 `identityCode` 与加入项目时的 `join`。
+
+## 命令
+
+命令一共 22 条，按登记它的文件列一张表；参数、回执、什么时候用以 `search {"prefix":"collab."}` 的 usage 与说明书为准，这里不展开：
+
+| 文件 | 命令（effect） |
+| --- | --- |
+| `collab-repo/submit/commands.ts` | `collab.submit`（external） |
+| `collab-repo/records/commands.ts` | `collab.inbox`（read）；`collab.task.create`、`collab.task.update`、`collab.task.delete`、`collab.module.create`、`collab.module.update`、`collab.module.delete`（write） |
+| `other-repos/fetch/commands.ts` | `collab.repos.update`（write） |
+| `organization/events/commands.ts` | `collab.check`、`collab.org.setup`（external） |
+| `organization/setup/commands.ts` | `collab.project.open`、`collab.repo.create`、`collab.repo.setup`（external）；`collab.project.clone`、`collab.project.join`、`collab.project.add`、`collab.project.remove`、`collab.project.qq-command`（write） |
+| `site-process/commands.ts` | `collab.site.init`（write） |
+| `pane/commands.ts` | `collab.projects`（read） |
+| `ai-prompt/commands.ts` | `collab.ai.prompt`（read） |
+
+拒绝执行（`CollabRejected`）回 `{ ok: false, error }`，原话直接给人和 AI；别的异常交给命令总线。参数只收这条命令声明的键，认不出的键直接拒绝。
+
+跟上 main 没有单独的命令：只靠完整刷新与收到推送时的自动同步，`collab.check` 触发一次完整刷新。
+
+## 测试
+
+快的一级是各目录的单元测试；调真实 git、建临时仓的放在 `*.slow.test.ts`，提交审核的四个慢测试共用 `tests/collab-repo/submit/submit-fixture.ts`（本机裸仓当 origin、钩子回一行合并请求地址、假的执行器给结论），上面组件的例子都出自它们。`tests/verified/` 是对 git 与文件监视本身的行为假设（整组织克隆、补克隆、ahead/behind 的含义、监视事件），只在仓根 AGENTS 写的四种信号下跑 `pnpm test:verified`。改了这一页讲的某一段代码，先看它被哪处钉码钉着，同一个提交里复核那一段正文。
