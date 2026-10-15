@@ -33,11 +33,16 @@ function bundledCollabVersion(): string {
   return version
 }
 
+/** 打包进来的那一版功能包的自动合并工作流模板：功能包本身打包进产物，templates/ 不随插件发出去，原文只能在这里带进来 */
+function bundledMergeWorkflowTemplate(): string {
+  return fs.readFileSync(path.join(here, 'node_modules/@godcreator/collab/templates/collab-auto-merge.yaml'), 'utf8')
+}
+
 await build({
   entryPoints: ['src/index.ts'],
   outfile: 'dist/index.js',
   external: nodeSideExternals(),
-  define: { __COLLAB_VERSION__: JSON.stringify(bundledCollabVersion()) },
+  define: { __COLLAB_VERSION__: JSON.stringify(bundledCollabVersion()), __COLLAB_MERGE_WORKFLOW_TEMPLATE__: JSON.stringify(bundledMergeWorkflowTemplate()) },
   // 打包进来的 CommonJS 依赖会 require node 内置模块；ESM 产物里没有 require，
   // esbuild 的 __require 执行到就抛「Dynamic require ... is not supported」。在产物开头用 createRequire 造一个
   banner: { js: 'import { createRequire as __createRequire } from "node:module";\nconst require = __createRequire(import.meta.url);' },

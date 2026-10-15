@@ -1,6 +1,6 @@
-import { mkdirSync } from 'node:fs'
+import { existsSync, mkdirSync, writeFileSync } from 'node:fs'
 import path from 'node:path'
-import { collabPathInRepo, journalDirName, siteFeedChannel, sitePathInRepo, type SiteFeed } from '@godcreator/collab'
+import { collabPathInRepo, journalDirName, mergeWorkflowPathInRepo, siteFeedChannel, sitePathInRepo, type SiteFeed } from '@godcreator/collab'
 import type { GwbDocsiteApi, SiteFeatureAdded, SiteInitResult, SiteStarted } from '@godcreator/gwb-docsite'
 import { messageOf } from '../errors.js'
 import { repoKeyOf, type Project } from '../project/project.js'
@@ -9,8 +9,8 @@ import { featurePackage } from './site-files.js'
 /** 用到的 gwb-docsite 服务方法：站点进程的启动与停止、状态、推数据、从零建站、加功能 */
 export type DocsiteHosting = Pick<GwbDocsiteApi, 'start' | 'stop' | 'status' | 'push' | 'init' | 'addFeature'>
 
-/** collab.site.init 的结果：gwb-docsite 建的基础站与加上的协作功能 */
-export type CollabSiteInitResult = SiteInitResult & { feature: SiteFeatureAdded }
+/** collab.site.init 的结果：gwb-docsite 建的基础站、加上的协作功能、自动合并工作流（written 为 false 是仓里已经有、没动） */
+export type CollabSiteInitResult = SiteInitResult & { feature: SiteFeatureAdded; mergeWorkflow: { path: string; written: boolean } }
 
 /** 窗格要的：url 在运行时是实际地址，没运行时是 gwb-docsite 按 site/package.json 的 dev 脚本预期的地址；起不来时的原因 */
 export type SiteState = { url: string | null; running: boolean; error: string | null }
@@ -31,6 +31,15 @@ const siteDirOf = (repo: string) => path.join(repo, sitePathInRepo)
 function createDirsWrittenWhileRunning(repo: string): void {
   mkdirSync(path.join(repo, collabPathInRepo), { recursive: true })
   mkdirSync(path.join(siteDirOf(repo), journalDirName), { recursive: true })
+}
+
+/** 协作仓里还没有自动合并工作流就写进去，回写没写；已有的是负责人管的（升检查工具的版本就是改它），不覆盖 */
+function writeMergeWorkflowIfMissing(repo: string, mergeWorkflow: string): boolean {
+  const file = path.join(repo, mergeWorkflowPathInRepo)
+  if (existsSync(file)) return false
+  mkdirSync(path.dirname(file), { recursive: true })
+  writeFileSync(file, mergeWorkflow)
+  return true
 }
 
 /**
@@ -71,17 +80,18 @@ export class CollabSites {
   }
 
   /**
-   * collab.site.init：交给 gwb-docsite 从零建基础站，建好站点运行时会写入的目录，再加协作功能（功能包写成给的范围；
+   * collab.site.init：交给 gwb-docsite 从零建基础站，建好站点运行时会写入的目录，仓里没有自动合并工作流就写进去，再加协作功能（功能包写成给的范围；
    * 加功能时 gwb-docsite 会起服务检查首页），port 与 title 是新站的开发端口与站名；项目在列表里就启动并推一次数据
    */
-  async init(repo: string, options: { featureRange: string; port: number; title: string; listed: boolean }): Promise<CollabSiteInitResult> {
-    const { featureRange, listed, ...newSite } = options
+  async init(repo: string, options: { featureRange: string; mergeWorkflow: string; port: number; title: string; listed: boolean }): Promise<CollabSiteInitResult> {
+    const { featureRange, mergeWorkflow, listed, ...newSite } = options
     const siteDir = siteDirOf(repo)
     const created = await this.options.docsite.init(siteDir, newSite)
     createDirsWrittenWhileRunning(repo)
+    const mergeWorkflowWritten = writeMergeWorkflowIfMissing(repo, mergeWorkflow)
     const feature = await this.options.docsite.addFeature(siteDir, { packageName: featurePackage, specifier: featureRange })
     if (listed) await this.keep(repo)
-    return { ...created, feature }
+    return { ...created, feature, mergeWorkflow: { path: mergeWorkflowPathInRepo, written: mergeWorkflowWritten } }
   }
 
   /** 自动同步快进进来改了 site/ 的提交之后：确保站点在运行（已在运行就不动、不重启），把最新的数据推过去 */

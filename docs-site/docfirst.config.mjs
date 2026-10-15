@@ -28,6 +28,10 @@ export default {
     "content/docs/outputs/skills/docs-site.mdx": [skill("docs-site")],
     "content/docs/outputs/skills/docs-writing.mdx": [skill("docs-writing")],
     "content/docs/outputs/skills/trajectory.mdx": [skill("trajectory")],
+    // gwb-docsite 随包发布的说明书
+    "content/docs/outputs/skills/docsite.mdx": [
+      { to: "../plugins/docsite/skills/docsite/SKILL.md", frontmatter: ["name", "description"] },
+    ],
     // gwb-collab 随包发布的说明书：主文件与三份附件
     "content/docs/outputs/skills/collab/index.mdx": [
       { to: "../plugins/collab/skills/collab/SKILL.md", frontmatter: ["name", "description"] },
