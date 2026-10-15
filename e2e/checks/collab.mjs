@@ -64,6 +64,13 @@ async function waitForBoard(page, expected) {
   )
 }
 
+/** 看板标题旁的筛选说明，和看板上方选中的那个筛选（名字连着计数） */
+async function boardFilterShown(page) {
+  const note = ((await boardSection(page).locator('[data-board-filter-note]').textContent({ timeout: stepTimeoutMs })) ?? '').trim()
+  const chip = ((await boardSection(page).locator('[aria-label="看板显示哪些任务"] button[aria-pressed="true"]').textContent({ timeout: stepTimeoutMs })) ?? '').replace(/\s+/g, '')
+  return { note, chip }
+}
+
 /** dev 下 Tailwind 扫到被写的文件会在写入之后才整页刷新：写完等一会儿再看标记 */
 async function noReloadAfterWrite(page) {
   await page.waitForTimeout(1_500)
@@ -106,10 +113,17 @@ export async function runCollabChecks({ browser, baseUrl, mode, siteDir, feedTok
       await waitForBoard(page, ofPerson)
       await page.locator('button[title="只看这个模块的任务"]', { hasText: moduleTitle }).click()
       await waitForBoard(page, ofBoth)
+      const bothShown = await boardFilterShown(page)
       await page.click('button[title="看全部人的任务"]')
       await waitForBoard(page, ofModule)
+      const moduleShown = await boardFilterShown(page)
       const distinct = new Set([ofPerson, ofBoth, ofModule].map((titles) => titles.join())).size === 3
-      return { pass: distinct, detail: `${tracked.carol.name}：${ofPerson.join('、')}；再加模块：${ofBoth.join('、')}；去掉人员：${ofModule.join('、')}（三步结果各不相同=${distinct}）` }
+      const bothNoteOk = bothShown.note.startsWith(`只看 ${tracked.carol.name} 在模块「${moduleTitle}」里的任务`) && bothShown.chip === `${moduleTitle}${ofBoth.length}`
+      const moduleNoteOk = moduleShown.note.startsWith(`只看模块「${moduleTitle}」里的任务`) && moduleShown.chip === `${moduleTitle}${ofModule.length}`
+      return {
+        pass: distinct && bothNoteOk && moduleNoteOk,
+        detail: `${tracked.carol.name}：${ofPerson.join('、')}；再加模块：${ofBoth.join('、')}（说明「${bothShown.note}」，选中的筛选「${bothShown.chip}」）；去掉人员：${ofModule.join('、')}（说明「${moduleShown.note}」，选中的筛选「${moduleShown.chip}」）；三步结果各不相同=${distinct}`,
+      }
     })
 
     let createdId = ''

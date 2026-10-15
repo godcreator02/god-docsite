@@ -104,13 +104,26 @@ function BoardColumn({ status, tasks, context, showModule }: { status: TaskStatu
   )
 }
 
-/** 看板：三列等宽、允许比内容窄，长标题、长页面名在卡片里折行或省略，不把列撑宽；上面一行是「全部」「未归入模块」两个筛选 */
+/** 看板筛选的名字：「全部」、模块的标题、「未归入模块」 */
+export function boardFilterLabel(filter: BoardFilter, modules: readonly ModuleState[]) {
+  if (filter.kind === 'all') return '全部'
+  if (filter.kind === 'unassigned') return '未归入模块'
+  const module = modules.find((entry) => entry.id === filter.id)
+  if (module === undefined) throw new Error(`看板按模块 ${filter.id} 筛选，模块列表里没有它`)
+  return module.title
+}
+
+/**
+ * 看板：三列等宽、允许比内容窄，长标题、长页面名在卡片里折行或省略，不把列撑宽。
+ * 上面一行是「全部」「未归入模块」两个筛选，在甘特图上点了模块时多一个那个模块的筛选；计数都按传进来的 tasks（已按人员筛过）算，选中那个的计数就是看板上的张数
+ */
 export function Board({ tasks, context, filter, setFilter }: { tasks: TaskState[]; context: CardContext; filter: BoardFilter; setFilter: (filter: BoardFilter) => void }) {
   const shown = tasksShownBy(filter, tasks)
   return (
     <div className="grid gap-3">
       <div className="flex flex-wrap gap-1.5" role="group" aria-label="看板显示哪些任务">
         <FilterChip label="全部" count={tasks.length} active={filter.kind === 'all'} onClick={() => setFilter({ kind: 'all' })} />
+        {filter.kind === 'module' && <FilterChip label={boardFilterLabel(filter, context.modules)} count={shown.length} active onClick={() => setFilter({ kind: 'all' })} />}
         <FilterChip label="未归入模块" count={tasksShownBy({ kind: 'unassigned' }, tasks).length} active={filter.kind === 'unassigned'} onClick={() => setFilter({ kind: 'unassigned' })} />
       </div>
       <div className="grid gap-2 md:grid-cols-[repeat(3,minmax(0,1fr))]">
