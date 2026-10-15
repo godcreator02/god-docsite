@@ -10,4 +10,6 @@ export default defineConfig({
   resolve: {
     tsconfigPaths: true,
   },
+  // 构建时预渲染经 vite preview 发请求：写死 IPv4，免得 localhost 双栈连接在构建进程忙时超时、预渲染报空错误
+  preview: { host: '127.0.0.1' },
 })

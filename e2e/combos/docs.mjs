@@ -41,8 +41,8 @@ export async function addDocsFeaturesWithChecks({ siteDir, addFeature }) {
     const collectionsIndex = readFileSync(path.join(featuresDir, 'collections.generated.ts'), 'utf8')
     const stylesIndex = readFileSync(path.join(featuresDir, 'styles.generated.css'), 'utf8')
     const pass =
-      dirs.join() === 'code-pin,explainer,trajectory' &&
-      added.at(-1).features.join() === 'code-pin,explainer,trajectory' &&
+      dirs.join() === 'code-pin,comments,explainer,trajectory' &&
+      added.at(-1).features.join() === 'code-pin,comments,explainer,trajectory' &&
       routesIndex.includes('./trajectory/routes.ts') &&
       collectionsIndex.includes('export const trajectory =') &&
       stylesIndex.includes("@import './explainer/styles.css';")

@@ -23,7 +23,7 @@
     "build": "tsdown",
     "typecheck": "tsc -p tsconfig.json",
     "test": "vitest run",
-    "check": "tsc -p tsconfig.json && vitest run",
+    "check": "pnpm typecheck && pnpm test",
     "prepublishOnly": "pnpm run build"
   },
   "dependencies": {

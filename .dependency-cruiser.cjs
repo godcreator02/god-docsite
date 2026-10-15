@@ -1,10 +1,8 @@
 /**
- * 依赖规则：`pnpm depcheck` 跑 dependency-cruiser，扫 packages/*\/src 与 plugins/*\/src。
- * 规则分两类：现有代码现在就要守的（没有环、包不依赖 gwb 插件），以及目标结构的规则——
- * 功能包的 src/core|node|site|cli 分层与功能包之间允许的边。目标结构的目录还没建出来时这些规则没有匹配，
- * 下一阶段的包一建出来就生效。目标结构见 refactor-plan.html 的「功能包」「依赖方向」两节。
- * 建规则时已有的环记在 .dependency-cruiser-known-violations.json（depcheck 带 --ignore-known），
- * 新出现的环照样报错；表里的环修掉后用 depcruise-baseline 重新生成这份表。
+ * 依赖规则：`pnpm depcheck` 跑 dependency-cruiser，扫 packages/*\/src 与 plugins/*\/src，是包之间方向的唯一守卫。
+ * 规则有三类：没有环、包不依赖 gwb 插件、gwb 插件不碰包的站点层；功能包之间允许的边（allowedFeatureDependencies）；
+ * 包内 src/core|node|site|cli 的分层。方向与分层的来历见 refactor-plan.html 的「功能包」「依赖方向」两节。
+ * 本仓包之间按包名 import 时解析到对方的 dist/，所以要先 pnpm build 再跑。
  */
 
 /** 功能包（按 packages/ 下的目录名）各自允许依赖的其他功能包；不在表里的边都报错 */
@@ -28,6 +26,8 @@ const fumadocsPackages = '(fumadocs-[^/]+|@fumadocs/[^/]+)'
 const externalPackagePath = (namePattern) => `(^|/)node_modules/${namePattern}/`
 const reactPaths = externalPackagePath(reactPackages)
 const fumadocsPaths = externalPackagePath(fumadocsPackages)
+/** 本仓包的站点层出口：源码在 src/site|mdx|vite/，构建产物在 dist/site…、dist/mdx…、dist/vite…（trajectory 是 dist/site.mjs、dist/site-server.mjs 这种平铺名） */
+const siteLayerPaths = ['^packages/[^/]+/src/(site|mdx|vite)/', '^packages/[^/]+/dist/(site|mdx|vite)([/.-])']
 
 /** 功能包之间不允许的边：from 包的源码 import 了不在白名单里的功能包 */
 function featureEdgeRules() {
@@ -73,7 +73,21 @@ module.exports = {
       from: { path: '^packages/[^/]+/src/', pathNot: '^packages/god-docsite/' },
       to: { path: '^packages/god-docsite/' },
     },
+    {
+      name: 'gwb-plugin-no-site-layer',
+      comment: 'gwb 插件跑在工作台的 Node 里，只用包的 . 与 ./node（平台包的 ./scaffold 也在 node 层），不碰站点层',
+      severity: 'error',
+      from: { path: '^plugins/[^/]+/src/' },
+      to: { path: siteLayerPaths },
+    },
     ...featureEdgeRules(),
+    {
+      name: 'non-site-layer-not-to-other-site-layer',
+      comment: 'src/core|node|cli/ 不 import 别的包的站点层出口：那会把 react、fumadocs 带进纯 Node 的使用方',
+      severity: 'error',
+      from: { path: '^packages/[^/]+/src/(core|node|cli)/' },
+      to: { path: '^packages/[^/]+/dist/(site|mdx|vite)([/.-])' },
+    },
     {
       name: 'core-no-ui',
       comment: 'src/core/ 是纯逻辑：不 import react 系、fumadocs 系',
@@ -94,6 +108,20 @@ module.exports = {
       severity: 'error',
       from: { path: '^packages/([^/]+)/src/core/' },
       to: { path: '^packages/$1/src/(node|site)/' },
+    },
+    {
+      name: 'node-not-to-own-site',
+      comment: 'src/node/ 只往 core/ 走，不 import 本包的 site/',
+      severity: 'error',
+      from: { path: '^packages/([^/]+)/src/node/' },
+      to: { path: '^packages/$1/src/site/' },
+    },
+    {
+      name: 'cli-not-to-own-site',
+      comment: 'src/cli/ 只用 core/ 与 node/，不 import 本包的 site/',
+      severity: 'error',
+      from: { path: '^packages/([^/]+)/src/cli/' },
+      to: { path: '^packages/$1/src/site/' },
     },
     {
       name: 'node-no-ui',

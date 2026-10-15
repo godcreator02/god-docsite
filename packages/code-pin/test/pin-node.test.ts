@@ -38,6 +38,11 @@ test("核对结果里混进了不是这棵树上认出的钉：报错，不悄�
   assert.throws(() => replacePinMarkers(tree, () => [{ pin: { target: T, record: null, line: 9 }, status: "fresh", lines: [1, 1], current: [] }]), /第 9 行/);
 });
 
+test("核对结果漏了树上的标记：报到行，不把标记原样留在树上", () => {
+  const tree = parseMdx(`${mdxMarker(T, null)}\n\n${mdxMarker({ kind: "file", file: "a.json" }, null)}\n`);
+  assert.throws(() => replacePinMarkers(tree, (pins) => fakeCheck()(pins).slice(0, 1)), /第 3 行/);
+});
+
 test("没有标记的树：不问核对", () => {
   const tree = parseMdx("# 只有标题\n");
   assert.deepEqual(replacePinMarkers(tree, () => assert.fail("不该核对")), []);

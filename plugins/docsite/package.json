@@ -28,7 +28,7 @@
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "lint": "oxlint . --deny-warnings",
     "test": "vitest run",
-    "check": "pnpm run typecheck && pnpm run lint && pnpm run test"
+    "check": "pnpm typecheck && pnpm test && pnpm lint"
   },
   "peerDependencies": {
     "@godcreator/gwb-commands": "^0.6.1",

@@ -2,12 +2,12 @@
  * 评论交互台（浮标 + 唤起式侧栏 + 批注模式）：
  * - 右下角浮标：评论按钮（角标是本页评论串数）唤出右侧评论栏，再点收起；开关记在 localStorage。
  *   侧栏 fixed 盖在目录那一列上（宽度同 --docsite-side-column-width），开着时由站点样式
- *   （docsite-ui 的 data-comments-sidebar-open 那组）让目录列让位
+ *   （平台包 god-docsite 的 styles.css 里 data-comments-sidebar-open 那组）让目录列让位
  * - 批注模式（可写时）：正文鼠标变十字（站点样式 data-comment-picking），点候选元素批它
  *   （anchor 存元素的稳定 id，见 ./browser/annotate 的协议），选中一段字批这段字
  *   （anchor 存 JSON：quote/start/end/snapshot，见模型 parseCommentAnchor）
  * - 已被批的元素描边（data-commented-element）、划的字高亮（CSS Custom Highlight API，
- *   注册名 docsite-comment，样式在 docsite-ui 的 styles.css）；点标记在侧栏里亮对应评论，
+ *   注册名 docsite-comment，样式在本包 template/styles.css，建站后在站点的 app/features/comments/）；点标记在侧栏里亮对应评论，
  *   侧栏点 ⚲ 滚到正文里对应的位置；划的字原文改了按快照差异重新找，找不到如实标注
  *
  * 写入提交到 action 参数给的地址（字段与 CommentsSidebar 同一约定）；列表与回复复用 CommentsSidebar。
@@ -33,13 +33,13 @@ import { CommentsSidebar, errorOf, type CommentAvatar, type CommentsAccess, type
 const sidebarOpenStorageKey = 'docsite-comments-sidebar-open'
 /** 页面正文的容器带这个属性，评论在它里面找被批的原文：<DocsBody {...commentScopeProps}> */
 export const commentScopeProps = { [commentScopeAttribute]: '' } as const
-/** 划字高亮的注册名：样式在 @godcreator/docsite-ui 的 styles.css（::highlight(docsite-comment)） */
+/** 划字高亮的注册名：样式在本包 template/styles.css（::highlight(docsite-comment)） */
 const quoteHighlightName = 'docsite-comment'
 const activeQuoteHighlightName = 'docsite-comment-active'
-/** 被批元素描边（样式在 docsite-ui）与它对应评论串的属性 */
+/** 被批元素描边（样式在本包 template/styles.css）与它对应评论串的属性 */
 const commentedElementAttribute = 'data-commented-element'
 const commentedThreadAttribute = 'data-comment-thread'
-/** 批注模式打开时挂在 <html> 上的属性（正文变十字光标，样式在 docsite-ui） */
+/** 批注模式打开时挂在 <html> 上的属性（正文变十字光标，样式在本包 template/styles.css） */
 const pickingAttribute = 'data-comment-picking'
 const sidebarOpenAttribute = 'data-comments-sidebar-open'
 /** 引文标签最多显示的字数 */
@@ -160,7 +160,7 @@ export function CommentsDock({ pagePath, action, threads, access, BodyComponent,
     }
   }, [])
 
-  // 侧栏开着时挂到 <html> 上：站点样式据此让目录列让位（样式在 docsite-ui）。
+  // 侧栏开着时挂到 <html> 上：站点样式据此让目录列让位（样式在平台包 god-docsite 的 styles.css）。
   // 用 layout effect 赶在绘制前挂上：挂在普通 effect 里时，属性变化偶发不触发目录列的重算（要等下一次交互）
   useLayoutEffect(() => {
     if (sidebarOpen) document.documentElement.setAttribute(sidebarOpenAttribute, '')

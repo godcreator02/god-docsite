@@ -1,7 +1,7 @@
 import { cpSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
-import { runLogged } from './process.mjs'
+import { runLogged, runLoggedAsync } from './process.mjs'
 import { docsFeaturePackages, prepareDocsSite } from '../combos/docs.mjs'
 
 export const repoDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..')
@@ -83,15 +83,15 @@ export async function generateSite({ siteDir, installMode, combo, tarballs, scri
 }
 
 export function installSite(siteDir, logDir) {
-  runLogged('pnpm', ['install', '--prefer-offline'], { cwd: siteDir, logFile: path.join(logDir, 'install.txt'), timeoutMs: 900_000 })
+  return runLoggedAsync('pnpm', ['install', '--prefer-offline'], { cwd: siteDir, logFile: path.join(logDir, 'install.txt'), timeoutMs: 900_000 })
 }
 
 export function typecheckSite(siteDir, logDir) {
-  runLogged('pnpm', ['typecheck'], { cwd: siteDir, logFile: path.join(logDir, 'typecheck.txt'), timeoutMs: 300_000 })
+  return runLoggedAsync('pnpm', ['typecheck'], { cwd: siteDir, logFile: path.join(logDir, 'typecheck.txt'), timeoutMs: 300_000 })
 }
 
 export function buildSite(siteDir, logDir) {
-  runLogged('pnpm', ['build'], { cwd: siteDir, logFile: path.join(logDir, 'build.txt'), timeoutMs: 900_000 })
+  return runLoggedAsync('pnpm', ['build'], { cwd: siteDir, logFile: path.join(logDir, 'build.txt'), timeoutMs: 900_000 })
 }
 
 export const reactRouterBin = (siteDir) => path.join(siteDir, 'node_modules', '@react-router', 'dev', 'bin.cjs')

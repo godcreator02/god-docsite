@@ -1,3 +1,5 @@
+import { existsSync, mkdtempSync, rmSync } from 'node:fs'
+import { tmpdir } from 'node:os'
 import path from 'node:path'
 import type { SiteFeed } from '@godcreator/collab'
 import { describe, expect, it, vi } from 'vitest'
@@ -114,16 +116,41 @@ describe('项目站点交给 gwb-docsite', () => {
   })
 
   it('collab.site.init：交给 gwb-docsite 建基础站、再加协作功能（写成给的范围）；项目在列表里就启动并推数据，不在就不启动', async () => {
-    const { docsite, calls } = fakeDocsite()
-    const { sites } = sitesWith(docsite)
-    expect(await sites.init(repo, { featureRange: '^0.31.0', port: 4400, title: '新项目', listed: false })).toEqual({
-      dir: siteDir,
-      platformDependencies: { '@godcreator/god-docsite': '^0.1.0' },
-      feature: { feature: 'collab', specifier: '^0.31.0', addedFiles: ['routes.ts'], keptFiles: [], features: ['collab'] },
-    })
-    expect(calls).toEqual([`init ${siteDir} {"port":4400,"title":"新项目"}`, `addFeature ${siteDir} @godcreator/collab@^0.31.0`])
-    await sites.init(repo, { featureRange: '^0.31.0', port: 4400, title: '新项目', listed: true })
-    expect(calls.slice(2, 5)).toEqual([`init ${siteDir} {"port":4400,"title":"新项目"}`, `addFeature ${siteDir} @godcreator/collab@^0.31.0`, `start ${siteDir}`])
+    const newRepo = mkdtempSync(path.join(tmpdir(), 'collab-site-init-'))
+    const newSiteDir = path.join(newRepo, 'site')
+    try {
+      const { docsite, calls } = fakeDocsite()
+      const { sites } = sitesWith(docsite)
+      expect(await sites.init(newRepo, { featureRange: '^0.31.0', port: 4400, title: '新项目', listed: false })).toEqual({
+        dir: newSiteDir,
+        platformDependencies: { '@godcreator/god-docsite': '^0.1.0' },
+        feature: { feature: 'collab', specifier: '^0.31.0', addedFiles: ['routes.ts'], keptFiles: [], features: ['collab'] },
+      })
+      expect(calls).toEqual([`init ${newSiteDir} {"port":4400,"title":"新项目"}`, `addFeature ${newSiteDir} @godcreator/collab@^0.31.0`])
+      await sites.init(newRepo, { featureRange: '^0.31.0', port: 4400, title: '新项目', listed: true })
+      expect(calls.slice(2, 5)).toEqual([`init ${newSiteDir} {"port":4400,"title":"新项目"}`, `addFeature ${newSiteDir} @godcreator/collab@^0.31.0`, `start ${newSiteDir}`])
+    } finally {
+      rmSync(newRepo, { recursive: true, force: true })
+    }
+  })
+
+  it('collab.site.init：加协作功能（gwb-docsite 会起服务）之前，仓根的 collab/ 与站点的 journal/ 已经建好', async () => {
+    const newRepo = mkdtempSync(path.join(tmpdir(), 'collab-site-init-'))
+    try {
+      const { docsite } = fakeDocsite()
+      const existedWhenAdding: boolean[] = []
+      const checking: DocsiteHosting = {
+        ...docsite,
+        addFeature: async (dir, options) => {
+          existedWhenAdding.push(existsSync(path.join(newRepo, 'collab')), existsSync(path.join(dir, 'journal')))
+          return docsite.addFeature(dir, options)
+        },
+      }
+      await sitesWith(checking).sites.init(newRepo, { featureRange: '^0.31.0', port: 4400, title: '新项目', listed: false })
+      expect(existedWhenAdding).toEqual([true, true])
+    } finally {
+      rmSync(newRepo, { recursive: true, force: true })
+    }
   })
 
   it('项目移出列表：停掉在运行的站点，排着的推送不再发；插件卸载：启动过的都停掉', async () => {

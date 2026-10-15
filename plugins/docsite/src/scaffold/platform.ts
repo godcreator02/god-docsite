@@ -5,7 +5,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url'
 import type * as Scaffold from '@godcreator/god-docsite/scaffold'
 import { DocsiteRejected } from '../errors.js'
 
-export type PlatformScaffold = Pick<typeof Scaffold, 'createSite' | 'addFeature'>
+export type PlatformScaffold = Pick<typeof Scaffold, 'createSite' | 'addBaseFeatures' | 'addFeature'>
 export type { PackageSource } from '@godcreator/god-docsite/scaffold'
 
 export const platformPackageName = '@godcreator/god-docsite'

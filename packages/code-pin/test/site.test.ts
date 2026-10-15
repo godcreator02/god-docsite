@@ -135,6 +135,15 @@ test("目录树：换成 fumadocs 的 Files，根是展开的文件夹、名字�
   assert.equal(attrsOf(goneRoot.children[0] as MdxJsxFlowElement).name, "（目录不在了）");
 });
 
+test("目录树有变动：外框是黄的，摆今天的名字表；带 glob 的根写成「目录/ glob」", () => {
+  const tree: Target = { kind: "tree", dir: "src", depth: 1, glob: "*.ts" };
+  const [frame] = framesOf(`${mdxMarker(tree, { kind: "tree", hash: "3fa9c2e1b07d" })}\n`, () => ({ status: "changed", reason: "changed", lines: [1, 2], current: ["add.ts", "new.ts"] }));
+  assert.equal(statusOf(frame!), "changed");
+  const root = (frame!.children[0] as MdxJsxFlowElement).children[0] as MdxJsxFlowElement;
+  assert.deepEqual(attrsOf(root), { name: "src/ *.ts", defaultOpen: true });
+  assert.deepEqual((root.children as MdxJsxFlowElement[]).map((n) => attrsOf(n).name), ["add.ts", "new.ts"]);
+});
+
 test("标记写坏了：报错带上是哪一页、第几行；普通注释原样留着", () => {
   const tree: Root = parseMdx('{/* 普通注释 */}\n\n{/* probe dir="src" */}\n');
   assert.throws(() => remarkCodePin({ pinner: pinnerOf(() => FRESH) })(tree, { path: "docs/a.mdx" }), /^Error: docs\/a\.mdx 第 3 行：标记的动作词只有 ref \/ tree/);

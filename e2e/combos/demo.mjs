@@ -19,7 +19,7 @@ export async function addDemoFeatureWithChecks({ siteDir, addFeature }) {
   await check('addFeature：补进功能目录、重写汇总文件', async () => {
     const added = addFeature({ siteDir, packageName: demoFeature })
     firstIndexText = readFileSync(indexFile, 'utf8')
-    const pass = added.feature === demoFeature && added.keptFiles.length === 0 && added.addedFiles.includes('routes.ts') && added.features.join() === demoFeature && firstIndexText.includes(`./${demoFeature}/routes.ts`)
+    const pass = added.feature === demoFeature && added.keptFiles.length === 0 && added.addedFiles.includes('routes.ts') && added.features.join() === `comments,${demoFeature}` && firstIndexText.includes(`./${demoFeature}/routes.ts`)
     return { pass, detail: `补进 ${added.addedFiles.join('、')}；功能 ${added.features.join('、')}` }
   })
 

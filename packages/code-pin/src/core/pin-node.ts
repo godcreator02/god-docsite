@@ -38,9 +38,13 @@ export type CheckPins = (pins: DocPin[]) => PinCheck<DocPin>[];
 export function replacePinMarkers(tree: Root, checkPins: CheckPins): CodePin[] {
   const places = new Map<DocPin, MarkerPlace>(findMarkers(tree).map((place) => [place.pin, place]));
   if (places.size === 0) return [];
-  return checkPins([...places.keys()]).map((check) => {
-    const place = places.get(check.pin);
-    if (place === undefined) throw new Error(`核对结果里的钉不是从这棵树上认出来的（第 ${check.pin.line} 行）`);
+  const checks = checkPins([...places.keys()]);
+  const foreign = checks.find((check) => !places.has(check.pin));
+  if (foreign !== undefined) throw new Error(`核对结果里的钉不是从这棵树上认出来的（第 ${foreign.pin.line} 行）`);
+  const uncheckedLines = [...places.keys()].filter((pin) => !checks.some((check) => check.pin === pin)).map((pin) => pin.line);
+  if (uncheckedLines.length > 0) throw new Error(`核对结果里少了这几处标记（第 ${uncheckedLines.join("、")} 行）：每处标记都要有核对结果`);
+  return checks.map((check) => {
+    const place = places.get(check.pin)!;
     const node: CodePin = { type: "codePin", check, children: [], ...(place.node.position !== undefined ? { position: place.node.position } : {}) };
     place.parent.children[place.index] = node;
     return node;
