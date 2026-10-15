@@ -25,7 +25,7 @@ pivots-from:: [全仓检查并入 tests/](2026-10-15-repo-checks-into-tests-dir.
 从此报出来的每一条都算违规，出了环或越界的 import 就拆掉，不再登记成已知违规。检查范围不变，仍是 `packages/*/src` 与 `plugins/*/src`，
 规则里的路径相对仓根，从仓根运行。
 
-边界：旧轨迹卡与 `probes/` 里写的 `pnpm depcheck`、`.dependency-cruiser.cjs` 是当时的名字，不改。
+边界：规则表 `allowedFeatureDependencies` 本身没动，这次只改了位置、命令名和豁免清单。
 
 ## 依据
 
