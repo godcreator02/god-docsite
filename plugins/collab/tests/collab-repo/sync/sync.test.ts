@@ -122,7 +122,7 @@ describe('定时检查里的自动同步', () => {
   })
 
   it('快进进来的改动动了依赖、接着装依赖失败：报错写明已经快进了，附 pnpm 原话', async () => {
-    writeFileSync(path.join(admin, 'site', 'package.json'), '{ "name": "site", "dependencies": { "@godcreator/collab-site": "^0.12.1" } }\n')
+    writeFileSync(path.join(admin, 'site', 'package.json'), '{ "name": "site", "dependencies": { "@godcreator/collab": "^0.1.0" } }\n')
     commitAll(admin, '升框架包')
     git(admin, 'push', '-q', 'origin', 'main')
     fetchBob()
@@ -194,7 +194,7 @@ describe('定时检查里的自动同步', () => {
   })
 
   it('合进来的改动动了 site/ 的依赖：接着装依赖，站点照常驻的规矩重启', async () => {
-    writeFileSync(path.join(admin, 'site', 'package.json'), '{ "name": "site", "dependencies": { "@godcreator/collab-site": "^0.12.1" } }\n')
+    writeFileSync(path.join(admin, 'site', 'package.json'), '{ "name": "site", "dependencies": { "@godcreator/collab": "^0.1.0" } }\n')
     commitAll(admin, '升框架包')
     git(admin, 'push', '-q', 'origin', 'main')
     fetchBob()

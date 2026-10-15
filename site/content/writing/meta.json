@@ -1,7 +1,0 @@
-{
-  "title": "写作示例",
-  "description": "页面能写成什么样：排版与 fumadocs 组件",
-  "icon": "PenLine",
-  "root": true,
-  "pages": ["index", "components", "collapse-test"]
-}

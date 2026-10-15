@@ -1,13 +1,12 @@
 {
-  "name": "docsite-kit-workspace",
+  "name": "god-docsite-workspace",
   "private": true,
   "type": "module",
-  "description": "文档站地基与 docfirst 文档工作流的 pnpm workspace：packages/ 是地基能力包、组合包 docsite-kit 与 docfirst 的包（钉码 code-pin、星轨盘 trajectory-disk、命令行 docfirst-workflow、功能包 docsite-docfirst、讲解组件薄壳 docfirst-explainer）；plugins/ 是两个 gwb 插件（docsite 基础插件与 docfirst 工作流插件）；site/ 是基础包自述站（骨架的正本），docs-site/ 是 docfirst 文档站（docfirst 站的正本）",
+  "description": "god-docsite 的 pnpm workspace：packages/ 是平台包 god-docsite 与各功能包（identity、comments、explainer、code-pin、doc-export、trajectory、docfirst、collab）；plugins/ 是三个 gwb 插件（gwb-docsite、gwb-docfirst-workflow、gwb-collab）；docs-site/ 是全仓文档站，collab-test/ 是协作站测试仓，e2e/ 是建站组合的端到端检查",
   "scripts": {
-    "dev": "pnpm --filter docsite-kit-site dev",
     "build": "pnpm -r build",
-    "test": "vitest run",
-    "check": "tsc -p tsconfig.tests.json && pnpm -r --no-bail check",
+    "test": "pnpm -r test",
+    "check": "pnpm -r check",
     "e2e": "node e2e/run.mjs",
     "depcheck": "depcruise \"packages/*/src\" \"plugins/*/src\" --config .dependency-cruiser.cjs --ignore-known"
   },
@@ -15,9 +14,6 @@
     "node": ">=24"
   },
   "devDependencies": {
-    "@godcreator/code-pin": "workspace:^",
-    "@godcreator/docfirst-workflow": "workspace:^",
-    "@godcreator/trajectory-disk": "workspace:^",
     "@types/mdast": "catalog:",
     "@types/node": "catalog:",
     "@types/react": "catalog:",
