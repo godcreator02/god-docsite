@@ -23,7 +23,7 @@ docfirst.create  {"dir":"<仓>/docs-site"}    接好 docfirst 的站：现状、
 
 它先建基础站（同 `docsite.site.init`：复制平台模板、装依赖、启动服务检查），再把 `@godcreator/docfirst` 的起始物（`docfirst.config.mjs`、`content/docs/outputs/` 下
 README / AGENTS / CLAUDE 的正本、未来区起始页、第一张轨迹卡）复制到站点根（已有的文件不覆盖），往 `package.json` 写脚本 `doc`、`doc:confirm`、`doc:render`，
-最后逐个加功能包 code-pin、trajectory、explainer。中途失败时前面做完的不回退，报错写明卡在哪一步。
+最后逐个加功能包 code-pin、trajectory、explainer。中途失败时前面做完的不回退，报错写明是哪一步失败。
 
 仓根已经有 `README.md` / `AGENTS.md` / `CLAUDE.md` 时，第一次 `pnpm doc:render` 会**覆盖**它们：先把原有内容移进 `content/docs/outputs/` 下对应的 mdx 正本，再 render。
 
@@ -57,7 +57,7 @@ docsite.feature.add  {"dir":…,"package":"@godcreator/trajectory","version":"^0
 
 ```
 docsite.site.add     {"dir":…}    登记进设置 sites 并启动（工作台每次启动时也会启动登记着的站）
-docsite.site.start   {"dir":…}    启动；人为停了、起不来修好之后也用它
+docsite.site.start   {"dir":…}    启动；人为停了、启动失败修好之后也用它
 docsite.site.stop    {"dir":…}    停掉
 docsite.site.list    {}           各站的 state（running / stopped / failed）、url（只在运行时有）、error
 docsite.site.remove  {"dir":…}    停掉并不再托管
@@ -67,6 +67,42 @@ docsite.site.remove  {"dir":…}    停掉并不再托管
 - **改了构建页面时 remark 插件会调用到的包**（code-pin、trajectory、god-docsite 的术语标注）：在改过的包里 `pnpm build`，再 `docsite.site.stop`、`docsite.site.start`
 - 给人看就在 VS Code 的内置浏览器里打开 `docsite.site.list` 回的地址（读说明书 `vscode`）；只是自己验证，没托管的站 `docsite.site.start`，验完 `docsite.site.stop`
 - `pnpm build` 是 `react-router build`，只作提交前的检查；agent 读 `content/` 下的 mdx 正本，不解析 HTML
+
+### 验收一页
+
+- 每个按钮点一下、每种情况都试一遍，深浅主题各看一次，把窗口拉窄看一次。预览把窗口缩放过时按坐标点会点偏，改用元素引用
+- docfirst 站再运行 `pnpm doc`；页面是生成正本的，看一眼生成物里组件变成的文字读得懂
+
+**讲解组件截图验收**：预览面板被隐藏时截图是空白的（页面宽度是 0、逐帧回调不运行），改用 Playwright 驱动本机 Edge 截图。
+Playwright 从 academic-deck 仓里取，不另装；脚本放临时目录，用 `node <脚本> <页面地址> <截图目录>` 运行，再逐张看图：
+
+```js
+import { createRequire } from 'node:module';
+const { chromium } = createRequire('D:/unitfolders/e0k6i-academic-deck/package.json')('playwright');
+
+const [url, out] = process.argv.slice(2);
+const views = {
+  light: { viewport: { width: 1280, height: 900 }, colorScheme: 'light' },
+  dark: { viewport: { width: 1280, height: 900 }, colorScheme: 'dark' },
+  narrow: { viewport: { width: 375, height: 812 }, colorScheme: 'light' },
+};
+const browser = await chromium.launch({ channel: 'msedge' });
+for (const [view, options] of Object.entries(views)) {
+  const page = await browser.newPage(options);
+  await page.goto(url, { waitUntil: 'networkidle' });
+  const components = page.locator('.dx:not(.dx .dx)');   // 只取最外层的讲解组件
+  for (let i = 0; i < (await components.count()); i++) {
+    await components.nth(i).screenshot({ path: `${out}/dx-${i}-${view}.png` });
+  }
+  await page.close();
+}
+await browser.close();
+```
+
+- 每个组件截浅色、深色、375 宽各一张
+- 动画在宽屏和 375 宽下都把时间拖到设计说明里写的关键时刻再截：起始帧画面上还没东西，看不出会不会重叠。
+  动画外壳的时间条是 `aria-label="时间"` 的滑块、值以秒计，`components.nth(i).locator('input[aria-label="时间"]').fill('<秒数>')` 拖到那一刻，截图文件名带上秒数
+- 对照设计说明的验收标准逐条看图。发现问题逐条写清：哪个组件、哪张图、哪里出了问题、要改成什么，发回给实现方，改完重截
 
 ## docfirst 站：核对、确认、生成
 
