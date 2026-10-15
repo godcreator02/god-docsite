@@ -1,4 +1,0 @@
-@import 'e2e-demo/styles.css';
-
-/* 演示页的 action 往站点 data/ 写计数：不让 Tailwind 扫它，扫到的文件一变 dev 下就整页刷新 */
-@source not '../../../data';

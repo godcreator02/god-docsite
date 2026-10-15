@@ -2,13 +2,10 @@ import { spawn, spawnSync } from 'node:child_process'
 import { createWriteStream, writeFileSync } from 'node:fs'
 import { createServer } from 'node:net'
 
-/** 这几个端口上跑着别人托管的站，e2e 不碰 */
+/** 这几个端口上跑着 gwb-docsite 托管的站（docs-site 4340、collab-test 4450 等），e2e 不碰 */
 const reservedPorts = new Set([4340, 4430, 4450, 4451])
 
-/** 本次运行已经发出去的端口：并发建站时，一个站拿到端口到服务真正占上之间，别的站不会再拿到同一个 */
-const handedOutPorts = new Set()
-
-/** 向系统要一个空闲端口（绑 0 再放掉），避开托管站的端口与本次运行发过的端口 */
+/** 向系统要一个空闲端口（绑 0 再放掉），避开托管站的端口 */
 export async function freePort() {
   for (;;) {
     const port = await new Promise((resolve, reject) => {
@@ -19,9 +16,7 @@ export async function freePort() {
         probe.close(() => resolve(assigned))
       })
     })
-    if (reservedPorts.has(port) || handedOutPorts.has(port)) continue
-    handedOutPorts.add(port)
-    return port
+    if (!reservedPorts.has(port)) return port
   }
 }
 
@@ -31,7 +26,7 @@ function writeCommandLog(logFile, { command, args, cwd, stdout, stderr, exit }) 
   writeFileSync(logFile, `$ ${command} ${args.join(' ')}\n(cwd ${cwd})\n\n${stdout}\n--- stderr ---\n${stderr}\n--- ${exit}\n`)
 }
 
-/** 命令的输出整份写进日志文件；退出码不为 0 时报错并指出日志。会挡住事件循环，只在没有别的站点在跑时用 */
+/** 命令的输出整份写进日志文件；退出码不为 0 时报错并指出日志。会挡住事件循环，只在没有服务在跑时用 */
 export function runLogged(command, args, { cwd, env = {}, logFile, timeoutMs }) {
   const result = spawnSync(command, args, {
     cwd,
@@ -45,7 +40,7 @@ export function runLogged(command, args, { cwd, env = {}, logFile, timeoutMs }) 
   if (result.status !== 0) throw new Error(`${command} ${args.join(' ')} 失败（exit ${result.status}${result.error ? `，${result.error.message}` : ''}），日志 ${logFile}`)
 }
 
-/** 同 runLogged，但不挡事件循环：并发时别的站点的服务与浏览器检查照常跑。超时停掉整棵进程树并报错 */
+/** 同 runLogged，但不挡事件循环：Ctrl+C 能停掉它，超时停掉整棵进程树并报错 */
 export function runLoggedAsync(command, args, { cwd, env = {}, logFile, timeoutMs }) {
   return new Promise((resolve, reject) => {
     const child = spawn(command, args, { cwd, env: { ...process.env, ...env }, shell: shellOf(command), stdio: ['ignore', 'pipe', 'pipe'] })

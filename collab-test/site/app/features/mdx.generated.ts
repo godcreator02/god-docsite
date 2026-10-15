@@ -1,6 +1,8 @@
 // 建站器生成，勿手改：addFeature / regenerateFeatureIndex 每次都重写。功能清单是 app/features/ 下含 routes.ts、feature.tsx、mdx.ts 或 styles.css 的子目录
 import type { DefaultMDXOptions } from 'fumadocs-mdx/config'
+import * as codePinMdx from './code-pin/mdx.ts'
 import * as collabMdx from './collab/mdx.ts'
+import * as trajectoryMdx from './trajectory/mdx.ts'
 
 export type MdxPluginList = Extract<NonNullable<DefaultMDXOptions['remarkPlugins']>, unknown[]>
 
@@ -17,7 +19,7 @@ interface FeatureMdxModule {
   collections?: Readonly<Record<string, (sitePlugins: SiteMdxPlugins) => unknown>>
 }
 
-const featureMdxModules: FeatureMdxModule[] = [collabMdx]
+const featureMdxModules: FeatureMdxModule[] = [codePinMdx, collabMdx, trajectoryMdx]
 
 export const featureRemarkPlugins: MdxPluginList = featureMdxModules.flatMap((mdx) => mdx.remarkPlugins ?? [])
 export const featureRehypePlugins: MdxPluginList = featureMdxModules.flatMap((mdx) => mdx.rehypePlugins ?? [])
