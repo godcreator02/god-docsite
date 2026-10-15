@@ -337,7 +337,7 @@ export function CommentsDock({ pagePath, action, threads, access, BodyComponent,
     }
   }, [threads, openThreadId, mapRange, draftRange])
 
-  // 草稿批的元素换一种底色，草稿收起就去掉
+  // 草稿批的元素做个标记（它旁边的蓝条由 CommentMarginBars 画），草稿收起就去掉
   useEffect(() => {
     if (draft?.kind !== 'element') return
     draft.element.setAttribute(draftElementAttribute, '')
@@ -595,9 +595,10 @@ export function CommentsDock({ pagePath, action, threads, access, BodyComponent,
           评论
         </button>
       ) : null}
-      {scope && commented.length > 0 ? (
+      {scope && (commented.length > 0 || draft?.kind === 'element') ? (
         <CommentMarginBars
           commented={commented}
+          draftElement={draft?.kind === 'element' ? draft.element : null}
           scope={scope}
           layoutVersion={layoutVersion}
           openThreadId={openThreadId}
