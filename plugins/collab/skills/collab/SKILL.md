@@ -6,7 +6,7 @@ description: 协作站（gwb-collab）的项目里替人做事时读：照通知
 # 协作站
 
 一个项目是 Gitea 上的一个私有组织，本机项目文件夹里有一个协作仓（`site/` 是站点，`collab/` 是任务与模块）和若干别的仓。你替人调 gwb-collab 的 `collab.*` 命令，参数与回执看 `search {"prefix":"collab."}` 的 usage。
-站点用文档站基础包搭，页面怎么写、评论怎么读写看说明书 `docsite`（gwb-docsite 带的），站点目录就是协作仓的 `site/`。
+站点建在平台包 `@godcreator/god-docsite` 上、装着协作功能包 `@godcreator/collab`，页面怎么写、评论怎么读写看说明书 `docsite`（gwb-docsite 带的），站点目录就是协作仓的 `site/`。
 
 ## 始终照做
 
