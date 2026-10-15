@@ -1,4 +1,4 @@
 {
-  "title": "docsite-kit",
-  "pages": ["docs", "docsite", "docfirst", "collab", "gitea", "maintain", "future"]
+  "title": "god-docsite",
+  "pages": ["docs", "docsite", "gitea", "maintain"]
 }

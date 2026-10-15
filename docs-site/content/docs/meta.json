@@ -1,5 +1,5 @@
 {
   "title": "总览与原理",
   "root": true,
-  "pages": ["index", "principles", "site-lifecycle", "fumadocs", "glossary", "human-write-spec-dont-change", "outputs", "example"]
+  "pages": ["index", "fumadocs", "human-write-spec-dont-change", "outputs", "example"]
 }

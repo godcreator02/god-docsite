@@ -1,7 +1,9 @@
 ---
 title: 实时推送与执行器
-description: Gitea 上一有事件，怎样经同一台 NAS 上的 ntfy 推到每个成员的工作台（组织级 webhook 的期望配置、ntfy 怎么开、插件收到消息怎么分）；执行器只管协作仓：按 main 上的工作流跑合并检查包、以 collab-bot 合并或打回
+description: Gitea 上一有事件，怎样经同一台 NAS 上的 ntfy 推到每个成员的工作台（组织级 webhook 的期望配置、ntfy 怎么开、插件收到消息怎么分）；执行器只管协作仓：按 main 上的工作流跑 collab 包的合并检查、以 collab-bot 合并或打回
 ---
+
+import { AutoMergeRun } from '../../src/components/auto-merge/auto-merge'
 
 别人在 Gitea 上做的事，靠实时推送让每个成员的插件知道：
 
@@ -9,7 +11,7 @@ description: Gitea 上一有事件，怎样经同一台 NAS 上的 ntfy 推到�
 2. 每个成员的插件对列表里全部项目的 topic 开着一条长连接（`organization/events/ntfy-subscription.ts`），断了隔一会儿重连，每次连上都对全部项目做一次完整刷新，补上没连着时的事
 3. 插件的 `organization/events/` 认出消息说的是哪个仓、什么事，按仓分给协作仓那一套或别的仓那一套，只去 Gitea 取那一处
 
-`collab.repo.setup`、`collab.repo.create` 配好负责人后，由调命令的人的插件往同一个 topic 直接发一条 `leads changed`，不经 webhook。插件那一侧各步做什么，见 [检查与实时推送](/gwb-collab/checks)。
+`collab.repo.setup`、`collab.repo.create` 配好负责人后，由调命令的人的插件往同一个 topic 直接发一条 `leads changed`，不经 webhook。
 
 ## 消息只带位置
 
@@ -85,23 +87,23 @@ Gitea 换协作者不发 webhook，所以 `collab.repo.setup`、`collab.repo.cre
 {/* ref file="../plugins/collab/src/organization/events/project-topics-subscription.ts" lines="25-29" hash="0cd20eceb7a9" blob="b7acd81b9b42" */}
 
 新建一个协作组织时，webhook 是 [建项目与人员变动](/gitea/setup) 里的一步。这一步不做，Gitea 上的事件推不出来，成员的插件只在连上推送、加项目或调 `collab.check` 时才做完整刷新；webhook 配得不对，插件认不出推来的消息，每条都只能做一次完整刷新。
---- | ---
 
-import { AutoMergeRun } from '../../src/components/auto-merge/auto-merge'
+## 执行器：每一步由谁负责
 
- | --- |
+| 步 | 负责的一方 | 改了会让哪一边出问题 |
+| --- | --- | --- |
 | 1 推成合并请求 | gwb-collab 的 `collab.submit` | 主题是身份：同一个人推的都进同一个合并请求，改了主题会开出好几个 |
 | 2 派任务 | Gitea；工作流里的 `runs-on: nas` 与执行器登记的标签 | 标签对不上，任务一直排队、没有执行器领取 |
-| 3 读工作流 | 每个协作仓 main 上的工作流文件，照合并检查包的模板放 | 各仓的文件不一样，合并规则就不一样；只有 main 上那份算数 |
+| 3 读工作流 | 每个协作仓 main 上的工作流文件，照 collab 包的模板放 | 各仓的文件不一样，合并规则就不一样；只有 main 上那份算数 |
 | 4 取代码 | 工作流；令牌要能读协作仓 | 令牌看不到仓，「核对令牌」一步就报出来，不往下做 |
-| 5 装检查工具 | 协作仓 main 上工作流文件里的 `MERGE_CHECK_RANGE` | 执行器每次按这个范围安装合并检查包（连同它依赖的数据模型包，不装功能包），和站点用的功能包版本无关，升版本就是负责人改这一行；模板用机器人令牌读协作仓的协作者，把提交人与这些负责人作为 `--author`、`--leads` 传给检查，两个都必填，装到的命令行不认 `--leads` 时检查以退出码 2 失败、不合并也不留言；协作仓没有协作者时这一步报错，同样不合并 |
-| 6 合并检查 | 合并检查包的命令行 `collab-merge-check` | 规则改在合并检查包里，负责人改了工作流里的版本范围，检查就按新规则；gwb-collab 推送前用的是它打包的那一版 |
+| 5 装检查工具 | 协作仓 main 上工作流文件里的 `MERGE_CHECK_RANGE` | 执行器每次按这个范围安装 collab 包（npm 连带装上它依赖的本仓包，站点页面要的 react 等可选 peer 不装），和站点 `site/package.json` 里写的版本无关，升版本就是负责人改这一行；模板用机器人令牌读协作仓的协作者，把提交人与这些负责人作为 `--author`、`--leads` 传给检查，两个都必填，装到的命令行不认 `--leads` 时检查以退出码 2 失败、不合并也不留言；协作仓没有协作者时这一步报错，同样不合并 |
+| 6 合并检查 | collab 包的命令行 `collab-merge-check` | 规则改在 collab 包里，负责人改了工作流里的版本范围，检查就按新规则；gwb-collab 推送前用的是它打包的那一版 |
 | 7 合并或打回 | 工作流；`collab-bot` 在组织的团队 `bots` 里，协作仓 main 的合并许可里只有团队 `bots`，负责人也不在里面（`collab.repo.setup` 配协作仓时写上，见 [权限怎么配](/gitea/permissions)） | 权限不够时 Gitea 拒绝合并，执行器把 Gitea 的原话留在合并请求上、打回 |
 | 8 等结论 | gwb-collab 的 `collab.submit` | 等不到结论（执行器没在运行）时插件 3 分钟后关掉合并请求、退回改动；执行器恢复后看到合并请求已关就不处理 |
 
-{/* ref file="../packages/collab-merge-check/templates/collab-auto-merge.yaml" lines="53-53" hash="1717250ea183" blob="38412d8b2e58" */}
-{/* ref file="../packages/collab-merge-check/templates/collab-auto-merge.yaml" lines="74-91" hash="d935d8a9bfaa" blob="38412d8b2e58" */}
-{/* ref file="../packages/collab-merge-check/templates/collab-auto-merge.yaml" lines="107-130" hash="e79881df51d9" blob="38412d8b2e58" */}
+{/* ref file="../packages/collab/templates/collab-auto-merge.yaml" lines="53-53" hash="1717250ea183" blob="2f8884f0ba6c" */}
+{/* ref file="../packages/collab/templates/collab-auto-merge.yaml" lines="74-91" hash="d935d8a9bfaa" blob="2f8884f0ba6c" */}
+{/* ref file="../packages/collab/templates/collab-auto-merge.yaml" lines="107-130" hash="e79881df51d9" blob="2f8884f0ba6c" */}
 {/* ref file="../plugins/collab/src/collab-repo/submit/submit.ts" lines="101-110" hash="c7ad49a13e36" blob="92a88843de16" */}
 {/* ref file="../plugins/collab/src/collab-repo/rules.ts" lines="5-6" hash="0388cffaba4b" blob="635892e2fc80" */}
 
@@ -110,8 +112,6 @@ import { AutoMergeRun } from '../../src/components/auto-merge/auto-merge'
 例子：bob 在 MMC 协作仓建了一条任务，提交审核开出合并请求 #7。选一步看那一刻在哪台机器上、实际经手的是什么：
 
 <AutoMergeRun />
-
-执行器在 MMC 协作仓上实测的五种合并请求各自的留言与用时，见案例 [执行器实测的五种合并请求](/cases/merge-runs)。
 
 ## 为什么要一个机器人账号
 
@@ -128,7 +128,7 @@ Gitea 每次运行会自动发一个令牌 `GITEA_TOKEN`，但 AGit 开的合并
 
 ## 成员电脑上看到的
 
-成员的 gwb-collab 不合并：提交前在本机先查记录格式与站点（执行器不查这两样），推送前用和执行器同一个函数查只有负责人能改的内容，推送后等执行器的结论，被打回就把改动退回工作区；执行器合并之后，组织 webhook 经 ntfy 告诉每个成员的插件协作仓有新提交，插件等 2 秒合成一批，再取回协作仓、能快进就把本地 main 快进过去（见 [实时推送的部署](/gitea/push)）。每一步见 [提交审核与同步](/gwb-collab/submit)。
+成员的 gwb-collab 不合并：提交前在本机先查记录格式与站点（执行器不查这两样），推送前用和执行器同一个函数查只有负责人能改的内容，推送后等执行器的结论，被打回就把改动退回工作区；执行器合并之后，组织 webhook 经 ntfy 告诉每个成员的插件协作仓有新提交，插件等 2 秒合成一批，再取回协作仓、能快进就把本地 main 快进过去（见上面「收到消息以后」）。每一步见说明书 collab 的附件 [collab-repo](/docs/outputs/skills/collab/collab-repo)。
 
 ## 不做的事
 

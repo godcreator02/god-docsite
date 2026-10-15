@@ -4,7 +4,7 @@ docfirst: none
 description: 官方扩展包怎么组织、怎么接进站点：入口类型、openapi 样板、元素名约定、peer 与打包
 ---
 
-我们的基础包、docfirst 站点库要照搬的就是这一套。看了 fumadocs-openapi、fumadocs-typescript、fumadocs-twoslash、fumadocs-docgen、fumadocs-obsidian，以及 shared-api、@fumadocs/language、@fumadocs/ai-chat。
+我们的平台包与功能包要照搬的就是这一套。看了 fumadocs-openapi、fumadocs-typescript、fumadocs-twoslash、fumadocs-docgen、fumadocs-obsidian，以及 shared-api、@fumadocs/language、@fumadocs/ai-chat。
 
 ## 通用模式
 
@@ -23,7 +23,7 @@ description: 官方扩展包怎么组织、怎么接进站点：入口类型、o
 | 可复制界面 | `registry/index.ts`，不发布到 npm | `npx @fumadocs/cli add xxx/组件` |
 | 生成脚本 / 命令行 | `generateFiles()`（浏览器构建换成会报错的空实现）；`bin` | `scripts/*.ts`、`package.json` 的 scripts |
 
-> **「输出元素名」是一个关键约定。**remark / rehype 插件把内容转换成 `<TypeTable>`、`<Popup>` 这样的 MDX 元素，不在 MDX 里写 import；站点在 `mdx-components` 里提供同名组件。构建时的插件和运行时的组件就靠名字对上，彼此不导入。
+> **「输出元素名」是一个关键约定**。remark / rehype 插件把内容转换成 `<TypeTable>`、`<Popup>` 这样的 MDX 元素，不在 MDX 里写 import；站点在 `mdx-components` 里提供同名组件。构建时的插件和运行时的组件就靠名字对上，彼此不导入。
 
 ## fumadocs-openapi：最完整的样板
 
@@ -95,4 +95,4 @@ loader({ docs: docs.toFumadocsSource(), openapi: await openapi.staticSource({ ba
 5. 命名：主包 `fumadocs-xxx` 或 `@fumadocs/xxx`；工厂 `createXxx`；插件 `remarkXxx` / `xxxPlugin`；界面工厂 `createXxxPage`；翻译 `xxxTranslations`；CSS 固定 `css/preset.css`；loader 插件的 `name` 用 `fumadocs:xxx`。
 6. `"type": "module"`、只出 ESM、`files: ["dist", "css"]`、CSS 包的 `sideEffects` 只写 CSS。
 
-> **对我们的影响：**官方包靠名字前缀 `fumadocs-` / `@fumadocs/` 被 fumadocs-mdx 自动加进 `ssr.noExternal`。我们的包叫 `@godcreator/…`，站点的 `vite.config.ts` 要自己写这一项（站点自己的配置，符合「站点归站点」）。
+> **对我们的影响**：官方包靠名字前缀 `fumadocs-` / `@fumadocs/` 被 fumadocs-mdx 自动加进 `ssr.noExternal`。我们的包叫 `@godcreator/…`，要另外处理：本仓由平台包的 vite 插件 `godDocsite()` 按 peerDependencies 里有没有 fumadocs 认出这些包。

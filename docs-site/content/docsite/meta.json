@@ -1,5 +1,5 @@
 {
-  "title": "地基 docsite",
+  "title": "写页面",
   "root": true,
-  "pages": ["index", "skeleton", "page-types", "writing", "writing-components", "commenting", "features", "dev-plugin", "gwb-plugin"]
+  "pages": ["writing", "writing-components"]
 }

@@ -1,5 +1,0 @@
-{
-  "title": "三种页面",
-  "icon": "Files",
-  "pages": ["index", "tsx-page", "html-page"]
-}

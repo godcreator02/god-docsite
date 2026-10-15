@@ -1,8 +1,8 @@
 /**
- * AutoMergeRun（「执行器与自动合并」那一页）与 AutoMergeCases（案例「执行器实测的五种合并请求」）的全部数据：画面（auto-merge.tsx）与机读版规则（auto-merge.ai.mjs）都只读这一份。
+ * AutoMergeRun（「实时推送与执行器」那一页）与 AutoMergeCases（执行器实测的五种合并请求）的全部数据：画面（auto-merge.tsx）与机读版规则（auto-merge.ai.mjs）都只读这一份。
  * runSteps：一个合并请求从 bob 推送到进 main，八步，例子是 bob 在 MMC 协作仓提交一条任务、开出合并请求 #7；命令与输出照现在的源码写。
  * cases：2026-09-30 在 MMC 协作仓上实测的五种情况，那时检查只有三条（measuredCheckNames）；合并请求编号、用时、留言都是那次的原样，不跟着源码改。
- * 每一步标出它经过这一页接缝图（seam-map/inner/auto-merge.data.mjs）的哪几条接缝。
+ * 每一步标出它对应那一页「执行器：每一步由谁负责」表里的哪几步（seams）。
  */
 
 /**
@@ -12,6 +12,9 @@
  *   | { kind: 'merge', request: string[], result: string }} Artifact
  * @typedef {{ title: string, text: string, place: string, seams: number[], artifact: Artifact }} RunStep
  */
+
+/** 那一页「执行器：每一步由谁负责」表里的八步，runSteps 的 seams 写的是这里的步号（从 1 起） */
+export const stepNames = ['推成合并请求', '派任务', '读工作流', '取代码', '装检查工具', '合并检查', '合并或打回', '等结论'];
 
 export const example = { person: 'bob', lead: 'godcreator', pull: 7, repo: 'hybrid-mmc/collab', range: '^0.1.0' };
 
@@ -28,11 +31,11 @@ export const places = [
   { id: 'actions', column: 'gitea', name: 'Actions', detail: '按 main 上的工作流派任务' },
   { id: 'main', column: 'gitea', name: 'main', detail: '合并提交' },
   { id: 'job', column: 'nas', name: 'gitea-runner', detail: '标签 nas · 主机方式' },
-  { id: 'check', column: 'nas', name: 'collab-merge-check', detail: '合并检查包' },
+  { id: 'check', column: 'nas', name: 'collab-merge-check', detail: 'collab 包的命令行' },
 ];
 
 /** 现在检查的两条：有冲突时第二条不再查。记录格式与站点由成员提交前在本机查，执行器不查 */
-/* ref file="../packages/collab-merge-check/src/check.ts" lines="177-190" hash="d187b8e75c98" blob="c0f8c11da687" */
+/* ref file="../packages/collab/src/node/merge-check.ts" lines="180-193" hash="d187b8e75c98" blob="5aee6b777440" */
 export const checkNames = ['和 main 没有冲突', '没改只有负责人能改的内容'];
 
 /** 2026-09-30 实测时检查的三条，只给 cases 用：那时前一条不过，后面的不再查 */
@@ -40,7 +43,7 @@ export const measuredCheckNames = ['和 main 没有冲突', '合并后只改了 
 
 /* ref file="../plugins/collab/src/collab-repo/submit/submit.ts" lines="35-39" hash="2e408d45cad7" blob="92a88843de16" */
 /* ref file="../plugins/collab/src/collab-repo/submit/submit.ts" lines="50-52" hash="169b02d46d48" blob="92a88843de16" */
-/* ref file="../plugins/collab/src/collab-repo/submit/submit.ts" lines="153-153" hash="770f3420697e" blob="d6f41b5784e7" */
+/* ref file="../plugins/collab/src/collab-repo/submit/submit.ts" lines="151-151" hash="770f3420697e" blob="3df0aa7106c6" */
 const submitLines = [
   { text: 'git add --all -- collab site', kind: 'cmd' },
   { text: `git commit -m "${example.person} 的协作记录" -- collab site`, kind: 'cmd' },
@@ -48,7 +51,7 @@ const submitLines = [
   { text: `Gitea：新建合并请求 #${example.pull}`, kind: 'ok' },
 ];
 
-/* ref file="../packages/collab-merge-check/templates/collab-auto-merge.yaml" lines="10-25" hash="13f9d2d0d1cb" blob="38412d8b2e58" */
+/* ref file="../packages/collab/templates/collab-auto-merge.yaml" lines="10-25" hash="5e4587e3e470" blob="2f8884f0ba6c" */
 const workflowLines = [
   'on:',
   '  pull_request_target:',
@@ -63,38 +66,38 @@ const workflowLines = [
   '    runs-on: nas',
 ];
 
-/* ref file="../packages/collab-merge-check/templates/collab-auto-merge.yaml" lines="24-24" hash="0d6665dd505c" blob="38412d8b2e58" */
-/* ref file="../packages/collab-merge-check/templates/collab-auto-merge.yaml" lines="42-42" hash="ff3ef7a918c7" blob="38412d8b2e58" */
+/* ref file="../packages/collab/templates/collab-auto-merge.yaml" lines="24-24" hash="0d6665dd505c" blob="2f8884f0ba6c" */
+/* ref file="../packages/collab/templates/collab-auto-merge.yaml" lines="42-42" hash="ff3ef7a918c7" blob="2f8884f0ba6c" */
 const tokenLines = [
   { text: 'command -v node >/dev/null || apk add --no-cache nodejs npm', kind: 'cmd' },
   { text: `令牌是 collab-bot 的，看得到 ${example.repo}`, kind: 'ok' },
 ];
 
-/* ref file="../packages/collab-merge-check/templates/collab-auto-merge.yaml" lines="58-61" hash="61d08cec3df8" blob="38412d8b2e58" */
+/* ref file="../packages/collab/templates/collab-auto-merge.yaml" lines="58-61" hash="61d08cec3df8" blob="2f8884f0ba6c" */
 const fetchLines = [
   { text: 'git init -q -b collab-check repo', kind: 'cmd' },
   { text: `git fetch <Gitea>/${example.repo}.git main refs/pull/${example.pull}/head`, kind: 'cmd' },
   { text: 'refs/collab/pull 就是 Gitea 报的那个提交', kind: 'ok' },
 ];
 
-/* ref file="../packages/collab-merge-check/templates/collab-auto-merge.yaml" lines="70-91" hash="64585ea46400" blob="38412d8b2e58" */
+/* ref file="../packages/collab/templates/collab-auto-merge.yaml" lines="70-91" hash="bff46e6bef46" blob="2f8884f0ba6c" */
 const installLines = [
   { text: `MERGE_CHECK_RANGE=${example.range}`, kind: 'out' },
-  { text: `npm install @godcreator/collab-merge-check@${example.range}`, kind: 'cmd' },
+  { text: `npm install @godcreator/collab@${example.range}`, kind: 'cmd' },
   { text: '装在 ~/.cache/collab-merge-check/ 下，下次直接用', kind: 'ok' },
 ];
 
-/* ref file="../packages/collab-merge-check/src/cli.ts" lines="44-44" hash="50b299e5673d" blob="6a579864ce25" */
+/* ref file="../packages/collab/src/cli/merge-check.ts" lines="44-44" hash="25ca53edf681" blob="8627d7878e62" */
 const mergeableOutput = '可以合并：没有冲突，没改只有负责人能改的内容';
 
 /** 实测那次能合并时命令行的原话 */
 const measuredMergeableOutput = '可以合并：没有冲突，只改了 collab/，没有新的格式问题';
 
 /** 执行器运行检查的那一行：提交合并请求的人作为 --author、协作仓的协作者（项目负责人）作为 --leads 传进去 */
-/* ref file="../packages/collab-merge-check/templates/collab-auto-merge.yaml" lines="91-91" hash="e7cca7b57816" blob="38412d8b2e58" */
+/* ref file="../packages/collab/templates/collab-auto-merge.yaml" lines="91-91" hash="e7cca7b57816" blob="2f8884f0ba6c" */
 export const checkCommand = `collab-merge-check --base main --head refs/collab/pull --author ${example.person} --leads ${example.lead}`;
 
-/* ref file="../packages/collab-merge-check/templates/collab-auto-merge.yaml" lines="121-121" hash="bbab227fb135" blob="38412d8b2e58" */
+/* ref file="../packages/collab/templates/collab-auto-merge.yaml" lines="121-121" hash="bbab227fb135" blob="2f8884f0ba6c" */
 const mergeRequest = [`POST /api/v1/repos/${example.repo}/pulls/${example.pull}/merge`, '{', '  "Do": "merge",', '  "head_commit_id": "<检查过的那个提交>"', '}'];
 
 /** @type {RunStep[]} */
@@ -143,7 +146,7 @@ export const runSteps = [
     title: '装检查工具',
     place: 'check',
     seams: [5],
-    text: '检查用哪一版合并检查包，写在工作流文件的 MERGE_CHECK_RANGE 里：这个文件只有负责人能改，升版本就是改这一行，和成员网站用的功能包版本无关。只装合并检查包，连同它依赖的数据模型包，不装功能包；按版本范围装进缓存目录，第一次约半分钟，之后几乎不花时间。',
+    text: '检查用哪一版 collab 包，写在工作流文件的 MERGE_CHECK_RANGE 里：这个文件只有负责人能改，升版本就是改这一行，和成员网站 site/package.json 里写的版本无关。只装 collab 包，npm 连带装上它依赖的本仓包，站点页面要的 react 等可选 peer 不装；按版本范围装进缓存目录，第一次约半分钟，之后几乎不花时间。',
     artifact: { kind: 'term', title: 'gitea-runner · 缓存', lines: installLines },
   },
   {
@@ -162,8 +165,8 @@ export const runSteps = [
   },
 ];
 
-/* ref file="../packages/collab-merge-check/templates/collab-auto-merge.yaml" lines="114-118" hash="ae6fdd3a338f" blob="38412d8b2e58" */
-/* ref file="../packages/collab-merge-check/templates/collab-auto-merge.yaml" lines="129-129" hash="a183cc957424" blob="38412d8b2e58" */
+/* ref file="../packages/collab/templates/collab-auto-merge.yaml" lines="114-118" hash="ae6fdd3a338f" blob="2f8884f0ba6c" */
+/* ref file="../packages/collab/templates/collab-auto-merge.yaml" lines="129-129" hash="a183cc957424" blob="2f8884f0ba6c" */
 /** 执行器打回时留言的开头与结尾，中间是检查的原话；留完言就关掉合并请求 */
 export const commentFrame = {
   head: '没有合并（检查的是提交 <提交号>）：',

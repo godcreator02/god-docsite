@@ -1,7 +1,7 @@
 /**
  * TSX 页面的示例：正文是要运行的组件时用这种页面（MDX 页面里的组件是静态排版组件，不适合承载交互）。
- * 文件名以 .page.tsx 结尾、导出 meta 与 default 组件；meta 的说明见 @godcreator/docsite-page-sources 的 TsxPageMeta。
- * 这一页同时让「三种页面来源」的类型在任何 docfirst 站上都成立（只有 MDX 页面的站，类型会塌掉一个分支）。
+ * 文件名以 .page.tsx 结尾、导出 meta 与 default 组件；meta 的说明见 @godcreator/god-docsite/server 的 TsxPageMeta。
+ * 这一页同时让「三种页面来源」的类型在这个站上都成立（只有 MDX 页面的站，类型会塌掉一个分支）。
  */
 export const meta = {
   title: 'TSX 页面示例',

@@ -13,7 +13,7 @@
 
 <p class="crumbs">fumadocs 原理 · 第二部分</p>
 <h1>三大件各借了底座的哪个机制</h1>
-<p class="lead">上一页讲了底座：<a href="/design/fumadocs/base-vite-rr">Vite 和 React Router</a>。这一页看 fumadocs 的三个包各插在底座的哪里。每张图都点「下一步」或「自动播放」看。</p>
+<p class="lead">上一页讲了底座：<a href="/docs/fumadocs/base-vite-rr">Vite 和 React Router</a>。这一页看 fumadocs 的三个包各插在底座的哪里。每张图都点「下一步」或「自动播放」看。</p>
 
 <h2 id="overview">一、总图：三个包各插在底座的哪里</h2>
 <div id="sc-all"></div>
@@ -42,7 +42,7 @@
 </table></div>
 <div class="why"><b>由此推出我们的库该怎么做：</b>要改写文档内容的，做成挂在 fumadocs-mdx 编译里的插件；要建表、读文件的（比如评论），做成普通函数，由站点在 loader 里调用；界面做成 React 组件，由站点放进路由组件。三样都由站点自己接上，不需要发明新机制。</div>
 
-<div class="pager"><a href="/design/fumadocs/base-vite-rr">← 第一部分：底座</a><a href="/design/fumadocs/full-flow">回到全流程大图 →</a></div>
+<div class="pager"><a href="/docs/fumadocs/base-vite-rr">← 第一部分：底座</a><a href="/docs/fumadocs/full-flow">回到全流程大图 →</a></div>
 </main>
 
 <script>

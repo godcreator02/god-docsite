@@ -1,16 +1,15 @@
 'use client';
 /**
- * 两个讲解组件：AutoMergeRun 在「执行器与自动合并」那一页，AutoMergeCases 在案例「执行器实测的五种合并请求」。
+ * 两个讲解组件：AutoMergeRun 在「实时推送与执行器」那一页，AutoMergeCases 讲执行器实测的五种合并请求（现在没有页面用它）。
  * AutoMergeRun：一个合并请求从 bob 推送到进 main，上面是 bob 的电脑、Gitea、NAS 执行器三列地点，当前这一步亮起、走过的留着，
  * 下面是这一步实际经手的东西（命令、工作流、检查、合并请求）。
  * AutoMergeCases：MMC 协作仓上 2026-09-30 实测的五种情况，那时的三条检查各是过、不过还是没查到，执行器合并了还是留了言。
- * 讲解文字与数据都在 auto-merge.data.mjs，接缝的名字取自这一页的接缝图；机读版由 auto-merge.ai.mjs 读同一份数据生成。
+ * 讲解文字与数据都在 auto-merge.data.mjs，步名取自那一页的「执行器：每一步由谁负责」表；机读版由 auto-merge.ai.mjs 读同一份数据生成。
  */
 import type { JSX } from 'react';
 import { CasePicker, CodeLines, Dot, Pane, Pill, Stepper, Terminal } from '@godcreator/explainer/site';
 import type { TerminalLine, Tone } from '@godcreator/explainer/site';
-import { cases, checkNames, columns, commentFrame, measuredCheckNames, places, runSteps } from './auto-merge.data.mjs';
-import { autoMergeGraph } from '../seam-map-flow/inner/auto-merge.data.mjs';
+import { cases, checkNames, columns, commentFrame, measuredCheckNames, places, runSteps, stepNames } from './auto-merge.data.mjs';
 
 type RunStep = (typeof runSteps)[number];
 type Artifact = RunStep['artifact'];
@@ -95,7 +94,7 @@ export function AutoMergeRun(): JSX.Element {
           <div className="am-tags">
             {step.seams.map((n) => (
               <Pill key={n} role="slate">
-                接缝 {autoMergeGraph.seams.find((seam) => seam.n === n)!.label}
+                第 {n} 步 {stepNames[n - 1]}
               </Pill>
             ))}
           </div>

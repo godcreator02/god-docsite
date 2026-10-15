@@ -31,15 +31,15 @@ interface DynamicSource { files: () => VirtualFile[] | Promise<…>; cache: 'mem
 
 入口 [source/loader.ts:304-509](https://github.com/fuma-nama/fumadocs/blob/fumadocs%4016.17.1/packages/core/src/source/loader.ts#L304-L509)。
 
-1. **整理配置。**算出 `url(slugs, locale)` 函数；拼插件列表：`icon` 选项生成的图标插件 → 站点的 `plugins` → 最后的 slugs 插件，再按 `enforce: 'pre' | 'post'` 排序；依次调用每个插件的 `config()`。
+1. **整理配置**。算出 `url(slugs, locale)` 函数；拼插件列表：`icon` 选项生成的图标插件 → 站点的 `plugins` → 最后的 slugs 插件，再按 `enforce: 'pre' | 'post'` 排序；依次调用每个插件的 `config()`。
    （[loader.ts:511-588](https://github.com/fuma-nama/fumadocs/blob/fumadocs%4016.17.1/packages/core/src/source/loader.ts#L511-L588)）
-2. **写进内存文件系统。**每个虚拟文件加上 `baseDir`、规范化路径，按语言分组，每种语言一个 `FileSystem`（就两个 Map：路径 → 文件、目录 → 子项）；写完对这个存储调用所有插件的 `transformStorage`。
+2. **写进内存文件系统**。每个虚拟文件加上 `baseDir`、规范化路径，按语言分组，每种语言一个 `FileSystem`（就两个 Map：路径 → 文件、目录 → 子项）；写完对这个存储调用所有插件的 `transformStorage`。
    （[storage/content.ts:50-175](https://github.com/fuma-nama/fumadocs/blob/fumadocs%4016.17.1/packages/core/src/source/storage/content.ts#L50-L175)、[storage/file-system.ts:6-89](https://github.com/fuma-nama/fumadocs/blob/fumadocs%4016.17.1/packages/core/src/source/storage/file-system.ts#L6-L89)）
-3. **算 slug。**slugs 插件在 `transformStorage` 里给没有 `slugs` 的页面算：目录段做 URI 编码，`(分组)` 段跳过，文件名 `index` 省略，**只去掉最后一个扩展名**（所以 `x.page.tsx` 得到 `x.page`）。自动算出的 slug 重复就报 `Duplicated slugs`；来源自己给的 slug 不检查。
+3. **算 slug**。slugs 插件在 `transformStorage` 里给没有 `slugs` 的页面算：目录段做 URI 编码，`(分组)` 段跳过，文件名 `index` 省略，**只去掉最后一个扩展名**（所以 `x.page.tsx` 得到 `x.page`）。自动算出的 slug 重复就报 `Duplicated slugs`；来源自己给的 slug 不检查。
    （[plugins/slugs.ts:43-125](https://github.com/fuma-nama/fumadocs/blob/fumadocs%4016.17.1/packages/core/src/source/plugins/slugs.ts#L43-L125)）
-4. **建索引。**四张 Map：slug、页面路径、meta 路径、url；`page.url` 在这一步算出。
+4. **建索引**。四张 Map：slug、页面路径、meta 路径、url；`page.url` 在这一步算出。
    （[loader.ts:195-261](https://github.com/fuma-nama/fumadocs/blob/fumadocs%4016.17.1/packages/core/src/source/loader.ts#L195-L261)）
-5. **页面树延迟构建。**`pageTree` 是 getter，第一次读时构建并缓存，也能整棵替换。构建时依次跑：`pageTree.transformers` → 各插件的 `transformPageTree` → 构建器自己的 fallback 处理。最后回调各来源的 `configureStatic`。
+5. **页面树延迟构建**。`pageTree` 是 getter，第一次读时构建并缓存，也能整棵替换。构建时依次跑：`pageTree.transformers` → 各插件的 `transformPageTree` → 构建器自己的 fallback 处理。最后回调各来源的 `configureStatic`。
    （[loader.ts:333-372](https://github.com/fuma-nama/fumadocs/blob/fumadocs%4016.17.1/packages/core/src/source/loader.ts#L333-L372)）
 
 常用查询：`getPage(slugs, lang)` 按 slug 查（编码与否都能命中）；`getPageByHref` / `resolveHref` 处理 `./x.mdx#a` 这类相对文件链接；`getNodePage(node)` 靠树节点上的内部引用反查页面；`serializePageTree` 把节点里的 React 名称和图标转成 HTML 字符串，好从服务端传给浏览器。
@@ -134,4 +134,4 @@ fumadocs-mdx、local-md、obsidian 都复用这一套，汇总在 `fumadocs-core
 5. `FrameworkProvider`；headless 的目录、面包屑、链接。
 6. MDX 插件的选项；`replaceSource`；`createRehypeCode`；vfile 的 `toc`、`structuredData`。
 
-**不该依赖的：**树节点上的 `$ref`（用 `getNodePage`）、`_Internal` 类型、索引键格式、`searchPath`、下划线开头的钩子、已废弃的 `multiple`。
+**不该依赖的**：树节点上的 `$ref`（用 `getNodePage`）、`_Internal` 类型、索引键格式、`searchPath`、下划线开头的钩子、已废弃的 `multiple`。

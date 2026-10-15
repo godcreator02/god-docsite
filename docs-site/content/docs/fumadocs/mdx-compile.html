@@ -33,7 +33,7 @@
 <body>
 <main>
 
-<p class="crumbs">fumadocs 原理　·　<a href="/design/fumadocs/full-flow">全流程大图</a>里「编译 .mdx」那一格放大</p>
+<p class="crumbs">fumadocs 原理　·　<a href="/docs/fumadocs/full-flow">全流程大图</a>里「编译 .mdx」那一格放大</p>
 <h1>编译一个 .mdx：从一段文本到一个 JS 模块</h1>
 <p class="lead">全流程图里，Vite 把 <code>install.mdx</code> 交给 fumadocs-mdx，出来就是 JS 模块，中间只画了一格。这一页把那一格拆开：左边是原文和设置，中间是按顺序排的工序，右边是语法树怎么一步步被改、最后导出了什么。我们的钉码就挂在这条工序里（橙色）。</p>
 <p class="meta">按 fumadocs 16.17.1 源码（默认编译器 <code>@mdx-js/mdx</code>）。右栏的源码行都能点开看原文件。</p>
@@ -51,7 +51,7 @@
 <p>上图第 9 道工序后面，钉码插件用 <code>replaceSource</code> 登记了 <code>&lt;Pin&gt;</code> 的 Markdown 形式。这张图看同一个正本走两条路：站点里编译（搜索、fumadocs 的 LLM 输出），以及命令行里生成 AGENTS.md 这类生成物。橙色是我们的包，虚线是可选、现在不开的。</p>
 <div id="sc-outputs"></div>
 
-<div class="pager"><a href="/design/fumadocs/full-flow">← 全流程大图</a></div>
+<div class="pager"><a href="/docs/fumadocs/full-flow">← 全流程大图</a></div>
 </main>
 
 <script>
@@ -113,7 +113,7 @@ function draw(s, { box, group }) {
   label(gCfg, 20, 394, '↓ 执行一遍 lib/source.ts，取出', { size: 10.5, color: 'var(--muted)' });
   label(gCfg, 20, 416, 'docs.mdxOptions =', { size: 10.5 });
   box('cfgPreset', { w: 226, h: 18, plain: true, t: '　applyMdxPreset({', fs: 10.5, align: 'start', weight: 500 });
-  box('cfgPin', { w: 226, h: 18, color: C.ours, t: '　　remarkPlugins: [remarkDocfirst()]', fs: 10.5, align: 'start', weight: 500 });
+  box('cfgPin', { w: 226, h: 18, color: C.ours, t: '　　remarkPlugins: [remarkCodePin()]', fs: 10.5, align: 'start', weight: 500 });
   label(gCfg, 20, 472, '　})', { size: 10.5 });
   box('cfgResult', { w: 226, h: 22, color: C.mdx, t: '= 默认工序 + 钉码插件', fs: 10.5, weight: 700 });
 
@@ -188,7 +188,7 @@ const STEPS = [
       '  const item = resolved.collection',
       "  if (item.type === 'docs') docCollection = item.docs",
       '}'], 1),
-    cap: '先弄清按谁的设置编译：凭网址后面的 <code>macro_id</code> 找到 <code>app/lib/source.ts</code> 里的 <code>docs</code> 集合，把那个文件执行一遍，取出 <code>mdxOptions</code> 和 schema。我们的钉码插件就是这样被带进来的。（设置也可以写在全局的 <code>source.config.ts</code> 里，现在的 docfirst 站就是这样，要点一会讲两种写法的差别。）lib/source.ts 也被登记成依赖：改了它，所有页面都重新编译。' },
+    cap: '先弄清按谁的设置编译：凭网址后面的 <code>macro_id</code> 找到 <code>app/lib/source.ts</code> 里的 <code>docs</code> 集合，把那个文件执行一遍，取出 <code>mdxOptions</code> 和 schema。我们的钉码插件就是这样被带进来的。（设置也可以写在全局的 <code>source.config.ts</code> 里，要点一会讲两种写法的差别。）lib/source.ts 也被登记成依赖：改了它，所有页面都重新编译。' },
   { who: ['mdx', 'core'], at: at(2, { src0: { o: 0.3 }, src1: { o: 0.3 }, src2: { o: 0.3 }, fmData: { o: 1, hl: true } }),
     code: code('mdx/src/loaders/mdx/index.ts', 91, 100, [
       'if (docCollection) {',
@@ -271,12 +271,12 @@ const STEPS = [
   { phase: '我们的工序', who: ['ours', 'site'], at: at(9, { n5: { t: '<PinBlock 状态=绿> > code（setup.ts 3-9 行）', hl: true }, n6: { t: '<PinTreeBlock> > <Files> > <Folder>…', hl: true }, src7: { hl: true }, src8: { hl: true }, cfgPin: { hl: true }, dPinned: { o: 1, hl: true }, depList: { t2: 'env.mdx、setup.ts、src/', hl: true } }),
     code: { file: 'app/lib/source.ts（站点写的；包名、导出名、组件名都暂定）', lines: [
       "import { applyMdxPreset } from 'fumadocs-mdx/config'",
-      "import { remarkDocfirst } from '@godcreator/docfirst-site/mdx'",
+      "import { remarkCodePin } from '@godcreator/code-pin/site'",
       'export const docs = defineDocs({',
       "  dir: 'content/docs',",
-      '  docs: { mdxOptions: applyMdxPreset({ remarkPlugins: [remarkDocfirst()] }) },',
+      '  docs: { mdxOptions: applyMdxPreset({ remarkPlugins: [remarkCodePin()] }) },',
       '})'], hl: 4 },
-    cap: '站点用 <code>applyMdxPreset({ remarkPlugins: [remarkDocfirst()] })</code> 挂的插件，排在默认工序之后、structure 之前。它做三件事：<br>① 找到 <code>&lt;Pin file lines hash blob /&gt;</code>，读 src/setup.ts 第 3–9 行，和标签上的 hash、blob 比对，算出绿 / 黄 / 红；把 <code>&lt;Pin&gt;</code> 换成<b>钉码代码块</b>：外层是我们的 <code>&lt;PinBlock&gt;</code>（状态点、标题、黄灯时的增删行），里面是一个<b>普通的 code 节点</b>，后面照常交给 Shiki 高亮、用 fumadocs 的代码块显示。<br>② 找到 <code>&lt;PinTree dir depth glob hash /&gt;</code>，列出目录、比对，换成 <code>&lt;PinTreeBlock&gt;</code>，里面是 fumadocs-ui 的 <code>&lt;Files&gt;/&lt;Folder&gt;/&lt;File&gt;</code>。<br>③ 读过的文件和目录都登记依赖。<br>现在的 docfirst 接在 structure <b>之后</b>、也没登记依赖，新设计把这两点改掉。另外还要登记「这个 &lt;Pin&gt; 写成 Markdown 是什么样」，见下一步。' },
+    cap: '站点用 <code>applyMdxPreset({ remarkPlugins: [remarkCodePin()] })</code> 挂的插件，排在默认工序之后、structure 之前。它做三件事：<br>① 找到 <code>&lt;Pin file lines hash blob /&gt;</code>，读 src/setup.ts 第 3–9 行，和标签上的 hash、blob 比对，算出绿 / 黄 / 红；把 <code>&lt;Pin&gt;</code> 换成<b>钉码代码块</b>：外层是我们的 <code>&lt;PinBlock&gt;</code>（状态点、标题、黄灯时的增删行），里面是一个<b>普通的 code 节点</b>，后面照常交给 Shiki 高亮、用 fumadocs 的代码块显示。<br>② 找到 <code>&lt;PinTree dir depth glob hash /&gt;</code>，列出目录、比对，换成 <code>&lt;PinTreeBlock&gt;</code>，里面是 fumadocs-ui 的 <code>&lt;Files&gt;/&lt;Folder&gt;/&lt;File&gt;</code>。<br>③ 读过的文件和目录都登记依赖。<br>插件要排在 structure <b>之前</b>、要登记依赖，见后面两个要点。另外还要登记「这个 &lt;Pin&gt; 写成 Markdown 是什么样」，见下一步。' },
   { who: ['ours', 'core'], at: at(9, { n5: { hl: true }, reg: { o: 1, hl: true, t2: '<Pin> → ```ts title="src/setup.ts:3-9"' } }),
     code: { file: '钉码插件里处理一个 <Pin>（示意，名字暂定）', lines: [
       "import { replaceSource } from 'fumadocs-core/mdx-plugins/stringifier'",
@@ -287,7 +287,7 @@ const STEPS = [
       "  '```ts title=\"src/setup.ts:3-9\"\\n' + code + '\\n```')",
       '// 再把节点换成 PinBlock 给网页显示',
       'parent.children[index] = pinBlock(pinNode, code)'], hl: 4 },
-    cap: '钉码插件还要说明一件事：<b>这个 <code>&lt;Pin&gt;</code> 写成 Markdown 是什么样</b>。做法是调用 fumadocs-core 公开的 <code>replaceSource</code>，按这个节点在原文里的位置登记一段替换文字（左下的登记表）。fumadocs 自己的 include、npm、图片、文件树插件都这样登记。<br>后面需要「整页的 Markdown」的地方都读这张表：fumadocs 的 LLM 输出（第 11 道工序里的 <code>_markdown</code>），以及我们的生成正本（页面最下面那张图）。这样一个组件的 Markdown 形式只写一处，跟组件放在同一个包里。现在的 docfirst 是另写一张名册加一套 <code>renderAi</code>，新设计把它们换成这一步。' },
+    cap: '钉码插件还要说明一件事：<b>这个 <code>&lt;Pin&gt;</code> 写成 Markdown 是什么样</b>。做法是调用 fumadocs-core 公开的 <code>replaceSource</code>，按这个节点在原文里的位置登记一段替换文字（左下的登记表）。fumadocs 自己的 include、npm、图片、文件树插件都这样登记。<br>后面需要「整页的 Markdown」的地方都读这张表：fumadocs 的 LLM 输出（第 11 道工序里的 <code>_markdown</code>），以及我们的生成正本（页面最下面那张图）。这样一个组件的 Markdown 形式只写一处，跟组件放在同一个包里。生成物那一侧（doc-export）现在另有一张名册与一套写出规则，换成这一步的做法见页面最下面那张图。' },
   { phase: 'remark 收尾', who: ['core'], at: at(10, { n9: { o: 1, hl: true }, reg: { hl: true } }),
     code: code('core/src/mdx-plugins/remark-structure.ts', 158, 171, [
       'if (node.data?.structuredData) {',
@@ -304,7 +304,7 @@ const STEPS = [
       "// nodes without a source, generated by plugins, and nodes in a record aren't records",
       'const range = s.range(node)',
       'if (!range || (covered && s.within(range, covered))) return'], 0),
-    cap: '把标题和正文切成搜索记录，作为 <code>export structuredData</code> 挂到树上，后面的搜索接口用它。注意三点：它<b>只收标题、段落、引用、表格，以及没有子节点的组件标签，代码块默认不收</b>；文字是<b>从作者写的原文里切的</b>，也会读左下那张登记表（只给搜索用的替换可以单独登记在 <code>search</code> 名下）；PinBlock 里包着一个 code 子节点，默认不算一条记录，所以钉进来的代码默认搜不到。<b>口子是节点上的 <code>data.structuredData</code></b>：钉码插件在 PinBlock、PinTreeBlock 节点上挂上它（比如文件路径、函数名），这些内容就替代节点进入搜索记录（右栏第一行）。现在的 docfirst 排在 structure 之后，挂了也没用。' },
+    cap: '把标题和正文切成搜索记录，作为 <code>export structuredData</code> 挂到树上，后面的搜索接口用它。注意三点：它<b>只收标题、段落、引用、表格，以及没有子节点的组件标签，代码块默认不收</b>；文字是<b>从作者写的原文里切的</b>，也会读左下那张登记表（只给搜索用的替换可以单独登记在 <code>search</code> 名下）；PinBlock 里包着一个 code 子节点，默认不算一条记录，所以钉进来的代码默认搜不到。<b>口子是节点上的 <code>data.structuredData</code></b>：钉码插件在 PinBlock、PinTreeBlock 节点上挂上它（比如文件路径、函数名），这些内容就替代节点进入搜索记录（右栏第一行）。插件排在 structure 之后的话，挂了也没用。' },
   { who: ['mdx'], at: at(11, { n11: { o: 1, hl: true }, fmData: { hl: true } }),
     code: code('mdx/src/loaders/mdx/remark-postprocess.ts', 52, 66, [
       'const frontmatter = (file.data.frontmatter ??= {})',
@@ -325,7 +325,7 @@ const STEPS = [
       '  )',
       '  llms(tree, file, () => undefined)',
       '}'], 1),
-    cap: '<b>fumadocs 的 LLM 功能在编译这一侧就是这一步。</b>集合设置里开了 <code>postprocess: { includeProcessedMarkdown: true }</code>，postprocess 就在这里调用 fumadocs-core 的 <code>remarkLLMs</code>：从作者写的原文切出整页 Markdown，登记过的节点换成登记的文字（<code>&lt;Pin&gt;</code> 换成那块代码），import / export 去掉，结果导出为 <code>_markdown</code>。<br>它只产出一个导出，不写文件。站点运行时用 <code>page.data.getText(\'processed\')</code> 读它，<code>llms.txt</code>、每页 <code>.md</code>、页面上的「复制 Markdown」按钮都靠它（请求时的那一半见全流程大图）。没开就没有这一行；docfirst 的站目前不开。' },
+    cap: '<b>fumadocs 的 LLM 功能在编译这一侧就是这一步。</b>集合设置里开了 <code>postprocess: { includeProcessedMarkdown: true }</code>，postprocess 就在这里调用 fumadocs-core 的 <code>remarkLLMs</code>：从作者写的原文切出整页 Markdown，登记过的节点换成登记的文字（<code>&lt;Pin&gt;</code> 换成那块代码），import / export 去掉，结果导出为 <code>_markdown</code>。<br>它只产出一个导出，不写文件。站点运行时用 <code>page.data.getText(\'processed\')</code> 读它，<code>llms.txt</code>、每页 <code>.md</code>、页面上的「复制 Markdown」按钮都靠它（请求时的那一半见全流程大图）。没开就没有这一行。' },
   { phase: 'rehype', who: ['mdxjs'], at: at(12, { treeTitle: { t: 'HTML 语法树（hast）' }, n1: { t: 'h2 id="用-pnpm-安装"' }, n2: { t: 'p' }, n3: { t: 'pre > code（ts）' }, n4: { t: 'p（env.mdx 的内容）' }, n5: { t: 'PinBlock（组件标签保留）> pre > code' }, n6: { t: 'PinTreeBlock > Files > Folder…（都保留）' }, n7: { t: 'img src={arch.png}' } }),
     code: NO_CODE('这一步在 @mdx-js/mdx 内部（remark-rehype），fumadocs 没有代码。'),
     cap: 'MDX 编译器把 Markdown 语法树转成 HTML 语法树：heading 变 h2，paragraph 变 p，code 变 pre。<code>&lt;PinBlock&gt;</code>、<code>&lt;Files&gt;</code> 这类组件标签原样保留，等到渲染时再换成真正的组件；PinBlock 里面那个 code 节点也变成了 pre。' },
@@ -383,7 +383,7 @@ const STEPS = [
       '}'], hl: 6 },
     cap: '树变成 JS 交回 Vite。每个标签都写成 <code>_components.xxx</code>，渲染时先查站点传进来的组件映射表：fumadocs-ui 的组件、我们的 <code>PinBlock</code>、<code>PinTreeBlock</code> 就是这样接上的。<b>组件映射表里少了哪个，渲染时直接报错</b>；站点没装钉码插件、<code>&lt;Pin&gt;</code> 原样留到这里，也会报「Pin 没有定义」，不会静默显示空白。' },
   { phase: '要点一：applyMdxPreset', who: ['mdx', 'site'],
-    at: Object.assign({ cursor: { o: 0 }, cfgPreset: { o: 0.2 }, cfgPin: { t: '{ remarkPlugins: [remarkDocfirst()] }', hl: true }, cfgResult: { t: '= 只剩 include、钉码插件、postprocess', hl: true } },
+    at: Object.assign({ cursor: { o: 0 }, cfgPreset: { o: 0.2 }, cfgPin: { t: '{ remarkPlugins: [remarkCodePin()] }', hl: true }, cfgResult: { t: '= 只剩 include、钉码插件、postprocess', hl: true } },
       Object.fromEntries(DEFAULT_STATIONS.map(i => ['st' + i, { o: 0.15 }]))),
     code: code('mdx/src/loaders/mdx/build-default.ts', 119, 128, [
       'if (collection?.mdxOptions) {',
@@ -395,9 +395,9 @@ const STEPS = [
       '    return applyMdxPreset(options)(environment)',
       '  })()',
       '}'], 2),
-    cap: '如果站点在集合上只写 <code>mdxOptions: { remarkPlugins: [remarkDocfirst()] }</code>、没用 applyMdxPreset 包一层：集合有自己的 mdxOptions 时，fumadocs-mdx 直接拿来用，不再套默认工序。于是灰掉的这几道全部消失：标题没了 id、没有搜索记录、没有本页目录、代码不高亮。<br>写在全局 <code>source.config.ts</code> 的设置会自动套 applyMdxPreset（右栏 else 那一支）。另一个细节是插件写成数组还是函数：<code>remarkPlugins: [x]</code> 插在默认工序中间、structure 之前；<code>remarkPlugins: (defaults) =&gt; [...defaults, x]</code> 接在所有默认工序之后、structure 之后。<b>现在的 docfirst 站用的就是函数写法，所以排在 structure 后面。</b>' },
+    cap: '如果站点在集合上只写 <code>mdxOptions: { remarkPlugins: [remarkCodePin()] }</code>、没用 applyMdxPreset 包一层：集合有自己的 mdxOptions 时，fumadocs-mdx 直接拿来用，不再套默认工序。于是灰掉的这几道全部消失：标题没了 id、没有搜索记录、没有本页目录、代码不高亮。<br>写在全局 <code>source.config.ts</code> 的设置会自动套 applyMdxPreset（右栏 else 那一支）。另一个细节是插件写成数组还是函数：<code>remarkPlugins: [x]</code> 插在默认工序中间、structure 之前；<code>remarkPlugins: (defaults) =&gt; [...defaults, x]</code> 接在所有默认工序之后、structure 之后。<b>写成函数时插件排在 structure 后面。</b>' },
   { phase: '要点二：登记依赖', who: ['ours', 'vite'],
-    at: Object.assign({ cursor: { y: ST_Y(0) + 8, o: 1 }, st0: { hl: true }, cfgPreset: { o: 1 }, cfgPin: { t: '　　remarkPlugins: [remarkDocfirst()]' }, cfgResult: { t: '= 默认工序 + 钉码插件' },
+    at: Object.assign({ cursor: { y: ST_Y(0) + 8, o: 1 }, st0: { hl: true }, cfgPreset: { o: 1 }, cfgPin: { t: '　　remarkPlugins: [remarkCodePin()]' }, cfgResult: { t: '= 默认工序 + 钉码插件' },
       dPinned: { t: 'src/setup.ts（改了）', hl: true }, depList: { hl: true } },
       Object.fromEntries(DEFAULT_STATIONS.map(i => ['st' + i, { o: 1 }]))),
     code: code('mdx/src/loaders/adapter.ts', 114, 118, [
@@ -406,7 +406,7 @@ const STEPS = [
       '    this.addWatchFile(file)',
       '  },',
       '},'], 2),
-    cap: 'dev 下改了 src/setup.ts：钉码插件编译时登记过依赖，fumadocs-mdx 把它转成 Vite 的 <code>addWatchFile</code>，Vite 就让 install.mdx 失效，从第 1 步重新编译，钉住的代码和状态点跟着更新。<b>现在的 docfirst 没有登记依赖</b>：dev 下改了被钉的代码，页面不会变，要再存一下 .mdx 或重启。<code>&lt;PinTree&gt;</code> 钉的是目录，目录里增删文件也要能触发，这一点登记单个文件做不到，要另想办法（比如登记目录、或在 dev 下监听）。注意 <code>_compiler</code> 带下划线，是 fumadocs-mdx 内部的东西，不算公开接口，升级时要留意。' },
+    cap: 'dev 下改了 src/setup.ts：钉码插件编译时登记过依赖，fumadocs-mdx 把它转成 Vite 的 <code>addWatchFile</code>，Vite 就让 install.mdx 失效，从第 1 步重新编译，钉住的代码和状态点跟着更新。<b>现在的钉码插件（code-pin）没有登记依赖</b>：dev 下改了被钉的代码，页面不会变，要再存一下 .mdx 或重启。<code>&lt;PinTree&gt;</code> 钉的是目录，目录里增删文件也要能触发，这一点登记单个文件做不到，要另想办法（比如登记目录、或在 dev 下监听）。注意 <code>_compiler</code> 带下划线，是 fumadocs-mdx 内部的东西，不算公开接口，升级时要留意。' },
 ];
 
 function showCode(entry) {
@@ -471,18 +471,18 @@ function drawOutputs(s, { box, arrowHead }) {
   box('doc', { w: 200, h: 56, color: C.mdxjs, t: 'outputs/agents.mdx', t2: '正本，里面有 <Pin>', fs: 12 });
   const B = (key, color, t, t2, extra = {}) => box(key, Object.assign({ w: COL_W, h: 44, color, t, t2, fs: 11.5 }, extra));
   B('pPreset', C.core, 'fumadocs 默认工序', 'gfm、标题 id、图片…');
-  B('pOurs', C.ours, 'remarkDocfirst', '换成 PinBlock、登记');
+  B('pOurs', C.ours, 'remarkCodePin', '换成 PinBlock、登记');
   B('pStruct', C.core, 'remarkStructure', '切搜索记录');
   B('pLLMs', C.core, 'remarkLLMs', '开了才运行', { dashed: true });
   B('reg1', C.core, '登记表', '<Pin> → 一块代码');
   B('oSearch', C.core, '搜索', '钉码靠 structuredData');
   B('oRoute', C.core, 'llms.txt、每页 .md', '请求时由路由读出', { dashed: true });
   B('cParse', C.mdxjs, '解析', 'remark-parse + mdx');
-  B('cOurs', C.ours, 'remarkDocfirst', '同一个插件，更严');
+  B('cOurs', C.ours, 'remarkCodePin', '同一个插件，更严');
   B('cLLMs', C.core, 'remarkLLMs', '读登记表出 Markdown');
   B('cFm', C.ours, '加 frontmatter', 'outputs 点名的字段');
   B('reg2', C.core, '登记表', '同样的登记');
-  B('old', C.warn, '现在：renderAi', '加一张名册，另一套规则');
+  B('old', C.warn, '现在：doc-export', '名册加自己的写出规则');
   B('oCheck', C.ours, 'docfirst check', '再出一遍，逐字节比');
   B('oFiles', C.prod, 'AGENTS.md 等落点', '写成文件，随正本提交');
   box('pk', { w: 54, h: 22, color: C.ours, t: '<Pin>', fs: 11 });
@@ -507,11 +507,11 @@ const outputsFlow = Fig.scene(document.getElementById('sc-outputs'), {
     { at: { pStruct: { o: 1, hl: true }, oSearch: { o: 1, hl: true }, reg1: { hl: true }, pk: pkAt('pStruct') },
       cap: 'remarkStructure 切搜索记录时也读这张登记表。但 PinBlock 里包着子节点，默认不算一条记录，钉码要进搜索，得在节点上挂 <code>data.structuredData</code>。' },
     { at: { pLLMs: { o: 1, hl: true }, oRoute: { o: 1, hl: true }, reg1: { hl: true }, pk: pkAt('pLLMs') },
-      cap: '<b>fumadocs 的 LLM 功能</b>：集合开了 <code>includeProcessedMarkdown</code>，remarkLLMs 读登记表出整页 Markdown，导出成 <code>_markdown</code>；站点运行时，<code>llms.txt</code>、每页 <code>.md</code> 的路由在请求时把它读出来。它不写文件。docfirst 的站现在不开（虚线）；规则统一以后，开不开只是站点自己的选择，出来的文字和生成物一样。' },
+      cap: '<b>fumadocs 的 LLM 功能</b>：集合开了 <code>includeProcessedMarkdown</code>，remarkLLMs 读登记表出整页 Markdown，导出成 <code>_markdown</code>；站点运行时，<code>llms.txt</code>、每页 <code>.md</code> 的路由在请求时把它读出来。它不写文件，开不开由站点决定（虚线）；规则统一以后，开不开只是站点自己的选择，出来的文字和生成物一样。' },
     { at: { cParse: { o: 1, hl: true }, old: { o: 1, hl: true }, pk: pkAt('cParse') },
-      cap: '生成正本走另一条路：<code>docfirst render</code>（<code>confirm</code> 写回钉码记录以后也会顺带生成）在命令行里读同一个 mdx，不启动 Vite。不放进 build 的原因：AGENTS.md、SKILL.md 是给客户端、插件包、Gitea 直接读的文件，站点不运行也得在；让 build 去改仓里受版本管理的文件，不 build 就不更新。<br>现在这一段是 <code>renderAi</code> 加一张名册（左下）：自己写了一套按原文位置改写的规则，跟 fumadocs 的 stringifier 做的是同一件事。' },
-    { at: { cOurs: { o: 1, hl: true }, reg2: { o: 1, hl: true }, old: { o: 0.3, t: '删掉：renderAi', t2: '名册也删掉' }, pk: pkAt('cOurs') },
-      cap: '<b>推荐做法</b>：命令行跑一条普通的 unified 流水线，挂的是和站点<b>同一个</b> remarkDocfirst，只是打开生成正本模式：钉码没确认、钉码缺失，都拒绝生成。它照样用 <code>replaceSource</code> 登记 Markdown 形式。renderAi 和名册删掉。' },
+      cap: '生成正本走另一条路：<code>docfirst render</code>（<code>confirm</code> 写回钉码记录以后也会顺带生成）在命令行里读同一个 mdx，不启动 Vite。不放进 build 的原因：AGENTS.md、SKILL.md 是给客户端、插件包、Gitea 直接读的文件，站点不运行也得在；让 build 去改仓里受版本管理的文件，不 build 就不更新。<br>现在这一段是 doc-export：一张名册（左下）加一套交给 remark-stringify 的写出规则，跟 fumadocs 的 stringifier 做的是同一件事。' },
+    { at: { cOurs: { o: 1, hl: true }, reg2: { o: 1, hl: true }, old: { o: 0.3, t: '删掉：自己的写出规则', t2: '名册也删掉' }, pk: pkAt('cOurs') },
+      cap: '<b>推荐做法</b>：命令行跑一条普通的 unified 流水线，挂的是和站点<b>同一个</b> remarkCodePin，只是打开生成正本模式：钉码没确认、钉码缺失，都拒绝生成。它照样用 <code>replaceSource</code> 登记 Markdown 形式。doc-export 自己的写出规则和名册删掉。' },
     { at: { cLLMs: { o: 1, hl: true }, reg2: { hl: true }, pk: pkAt('cLLMs') },
       cap: '再用 fumadocs-core 公开导出的 <code>remarkLLMs</code> 出 Markdown（关掉标题 id：<code>headingIds: false</code>）。正本里如果有没登记 Markdown 形式的组件，remarkLLMs 会把原样的 JSX 写出来，所以命令行要先查出这种组件并报错。' },
     { at: { cFm: { o: 1, hl: true }, oFiles: { o: 1, hl: true }, pk: Object.assign(pkAt('oFiles'), { o: 0 }) },
@@ -519,7 +519,7 @@ const outputsFlow = Fig.scene(document.getElementById('sc-outputs'), {
     { at: { oCheck: { o: 1, hl: true }, oFiles: { hl: true } },
       cap: '<code>docfirst check</code> 在提交前再出一遍，和落点逐字节比：一致是绿，不一致报红，要先 render。它和站点 build 无关，站点不运行也能查。' },
     { at: Object.assign({ pOurs: { hl: true }, cOurs: { hl: true } }, Object.fromEntries(['pPreset', 'pStruct', 'pLLMs', 'reg1', 'oSearch', 'oRoute', 'cParse', 'cLLMs', 'cFm', 'reg2', 'oCheck', 'oFiles'].map(k => [k, { o: 1 }]))),
-      cap: '<b>小结</b>：一个组件的 Markdown 形式只在插件里写一次（<code>replaceSource</code>），有两个读的：remarkStructure 切搜索记录，remarkLLMs 出 Markdown。remarkLLMs 的结果又有两个去处：站点上的 <code>_markdown</code>（可选），命令行写出的生成物。要先做小实验确认：和现在 renderAi 的输出逐字节比对，看差在哪。' },
+      cap: '<b>小结</b>：一个组件的 Markdown 形式只在插件里写一次（<code>replaceSource</code>），有两个读的：remarkStructure 切搜索记录，remarkLLMs 出 Markdown。remarkLLMs 的结果又有两个去处：站点上的 <code>_markdown</code>（可选），命令行写出的生成物。要先做小实验确认：和现在 doc-export 的输出逐字节比对，看差在哪。' },
   ],
 });
 </script>

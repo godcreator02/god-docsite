@@ -2,47 +2,21 @@
  * 这个项目的 docfirst 配置：命令行 docfirst（check / confirm / render / trajectory）读它，项目根是这个站目录。
  *
  * 引用的代码在工作区的 packages/ 与 plugins/ 下，所以引用里写 `../packages/…` 或 `../plugins/…`。
- * content：内容根。下面的 future/ 是未来区，其余目录都是现状区、都进 check；
- * 本站的现状区按能力分：content/docs（总览与原理）、content/docsite（地基）、content/docfirst（docfirst 的包与插件）、
- * content/collab（协作站的包与插件）、content/gitea（在 Gitea 与 NAS 上配的部分）、content/maintain（维护这个仓），外加 src/components/ 下讲解组件的源码。
+ * content：内容根。下面除 future/ 外的目录都是现状区、都进 check，外加 src/components/ 下讲解组件的源码。
  * outputs：仓根 README.md / CLAUDE.md 与插件里的几份 SKILL.md 是生成物，正本是下面映射左边的 mdx
  * （都在 content/docs/outputs/）；AGENTS.md 是手写的正本，不在 outputs 里——
  * 改 mdx 正本要运行 `pnpm doc:render`（`doc:confirm` 也会顺带做），两份放进同一个提交，`pnpm doc` 检查生成物跟正本是否一致。
  * CLAUDE.md 第一行固定是 `@AGENTS.md`，只给 Claude 的指令写在它后面。
- * fumadocsRoster 与 components：组件名册。fumadocsRoster 放进 fumadocs 自带的 Note、Files、Folder、File 的机读规则，
- * components 再加站里自己定义的组件和它们转成机读文本的规则。站内组件的 React 实现在 src/components/ 下，页面里 import；
- * 讲解组件的机读文字规则来自 @godcreator/explainer（各组件的 .ai.mjs 调它）。Term 与 Files / Folder / File 由平台登记，页面里不用 import。
- * 星轨盘不在名册里：它是 trajectory 功能的整页路由 /trajectory，不在 mdx 里用。
+ * fumadocsRoster 与 components：组件名册，只管生成正本里用到的组件。fumadocsRoster 放进 fumadocs 自带的 Note、Files、Folder、File 的机读规则，
+ * components 再加站里的；生成正本里要用站内组件，就在这里给它加一条机读规则。
  * trajectory：轨迹卡放在站点根下的 trajectory/，站点的卡集合（app/features/trajectory/mdx.ts）读同一个目录。
  * 术语表不在这里：它是站点根的 glossary.json，不标术语的页写在站点的 app/lib/mdx-plugins.ts。
  */
-import * as tabs from "./src/components/tabs/tabs.ai.mjs";
-import * as pin from "./src/components/pin/pin.ai.mjs";
-import * as pinGlance from "./src/components/pin-glance/glance.ai.mjs";
-import * as seamMap from "./src/components/seam-map/seam-map.ai.mjs";
-import * as renderFlow from "./src/components/render-flow/render-flow.ai.mjs";
-import * as refKinds from "./src/components/ref-kinds/ref-kinds.ai.mjs";
-import * as spanFollow from "./src/components/span-follow/span-follow.ai.mjs";
-import * as commitGate from "./src/components/commit-gate/commit-gate.ai.mjs";
-import * as trajectoryFlow from "./src/components/trajectory-flow/trajectory-flow.ai.mjs";
-import * as boundaryRules from "./src/components/boundary-rules/boundary-rules.ai.mjs";
-// 协作站迁入的讲解组件：FlowSeamMap 是数据流画法的接缝图（协作站的全局图），SeamMap 仍是模块框画法
-import * as seamMapFlow from "./src/components/seam-map-flow/seam-map.ai.mjs";
-import * as submitScenarios from "./src/components/submit-scenarios/submit-scenarios.ai.mjs";
-import * as recordMerge from "./src/components/record-merge/record-merge.ai.mjs";
-import * as writeRule from "./src/components/write-rule/write-rule.ai.mjs";
-import * as autoMerge from "./src/components/auto-merge/auto-merge.ai.mjs";
-import * as pushFlow from "./src/components/push-flow/push-flow.ai.mjs";
-import * as repoModes from "./src/components/repo-modes/repo-modes.ai.mjs";
 
 /**
  * 一份 skill 的生成位置：正本是 `content/docs/outputs/skills/<名>.mdx`，生成到**插件**里那份 SKILL.md。
  * 对象写法指定 name / description 两个 frontmatter 字段保留到生成物里——宿主靠这两个字段决定什么时候读
  * 这份 skill，去掉 frontmatter 生成出去，就是一份永远不会被触发的普通文档。
- *
- * 正本存放在这个站、生成物存放在插件里：三份讲的都是**包与插件**的行为（对站执行哪些命令、页面与钉码怎么写、轨迹卡怎么记），
- * 跟代码在同一个仓才改得动、才检查得了，所以正本都在这儿。生成物却不能放进包：包装在 node_modules 里，没有任何说明指向它，
- * agent 不会去读；agent 能读到这些 skill，全靠插件 `register` 了自己包里的 `skills/` 目录。
  */
 const skill = (name) => ({ to: `../plugins/docfirst/skills/${name}/SKILL.md`, frontmatter: ["name", "description"] });
 
@@ -54,7 +28,7 @@ export default {
     "content/docs/outputs/skills/docs-site.mdx": [skill("docs-site")],
     "content/docs/outputs/skills/docs-writing.mdx": [skill("docs-writing")],
     "content/docs/outputs/skills/trajectory.mdx": [skill("trajectory")],
-    // gwb-collab 随包发布的说明书：主文件与三份附件，正本自协作站文档站迁入
+    // gwb-collab 随包发布的说明书：主文件与三份附件
     "content/docs/outputs/skills/collab/index.mdx": [
       { to: "../plugins/collab/skills/collab/SKILL.md", frontmatter: ["name", "description"] },
     ],
@@ -64,31 +38,10 @@ export default {
   },
   fumadocsRoster: true,
   components: {
-    Tabs: tabs.Tabs,
-    Tab: tabs.Tab,
-    // 术语标注：自动标出的术语是构建时生成的，不写进源文件，命令行看不到。这条规则管作者
-    // 手写的术语标注——机读版里只保留术语原词，不保留样式
+    // 手写的术语标注：机读版里只保留术语原词，不保留样式
     Term: "children",
     // 只有装饰作用的分隔线，md 里整个去掉
     Divider: "drop",
-    // 自包含的讲解组件：规则读组件自己的讲解数据，把每一步、每一条写成段落
-    PinGlance: pinGlance.PinGlance,
-    PinStory: pin.PinStory,
-    PinJudge: pin.PinJudge,
-    SeamMap: seamMap.SeamMap,
-    FlowSeamMap: seamMapFlow.SeamMap,
-    SubmitScenarios: submitScenarios.SubmitScenarios,
-    RecordMerge: recordMerge.RecordMerge,
-    WriteRule: writeRule.WriteRule,
-    AutoMergeRun: autoMerge.AutoMergeRun,
-    PushFlow: pushFlow.PushFlow,
-    RepoModes: repoModes.RepoModes,
-    RenderFlow: renderFlow.RenderFlow,
-    RefKinds: refKinds.RefKinds,
-    SpanFollow: spanFollow.SpanFollow,
-    CommitGate: commitGate.CommitGate,
-    TrajectoryFlow: trajectoryFlow.TrajectoryFlow,
-    BoundaryRules: boundaryRules.BoundaryRules,
   },
   trajectory: "trajectory",
 };

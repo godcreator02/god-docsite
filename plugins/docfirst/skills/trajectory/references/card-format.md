@@ -186,13 +186,13 @@ supersedes:: [2025-11-30-bdd-as-main-axis](2025-11-30-bdd-as-main-axis.md)
 
 ## 六、校验由工具负责，建卡时不另写一套
 
-这份字段表由 docfirst 的卡格式（`@godcreator/docfirst-workflow` 的 `src/cards/`）读，它把卡换成星轨盘（`@godcreator/trajectory-disk`）要的中性输入。盘用到的是：`type: root`（盘心的根卡）、`born-at`（盘上的时间轴，根卡以外 `born-at` 合格的卡都画到盘上）、`label`（节点显示名，读不到时用身份去掉日期前缀那一截）、`domain`（分组与配色）、`type` 的形态值（节点形状）、正文关系 `supersedes::` / `pivots-from::`（连线与被取代的样子）、根卡「## 里程碑」区块（里程碑环）。
+这份字段表由轨迹卡包 `@godcreator/trajectory` 的卡格式（`src/core/`）读，它把卡换成星轨盘要的中性输入。盘用到的是：`type: root`（盘心的根卡）、`born-at`（盘上的时间轴，根卡以外 `born-at` 合格的卡都画到盘上）、`label`（节点显示名，读不到时用身份去掉日期前缀那一截）、`domain`（分组与配色）、`type` 的形态值（节点形状）、正文关系 `supersedes::` / `pivots-from::`（连线与被取代的样子）、根卡「## 里程碑」区块（里程碑环）。
 
 **校验在 `docfirst check` 里运行**：
 
-- 单张卡（卡格式的 `card.ts`）：字段的形状（`born-at`、`type`、`label`、`domain` 写成单个值，`parent` 写成列表）、存在性（缺 `born-at` 或 `label`、非根卡缺 `parent`）、`born-at` 的格式、关系行格式不对、根卡的里程碑行格式不对
-- 整个卡目录（卡格式的 `scan.ts`）：根卡多于一张，每张各报一条；根卡写了 `parent`；其余卡的 `parent` 写了根卡以外的身份，目录里没有根卡时写了 `parent` 就报；关系指向根卡或不在盘上的卡；同一身份 `.md` 与 `.mdx` 两个文件都在（只认 `.mdx`）
-- 卡正文里出现 docfirst 引用记号（卡格式的 `card-refs.ts`）
+- 单张卡（`src/core/card.ts`）：字段的形状（`born-at`、`type`、`label`、`domain` 写成单个值，`parent` 写成列表）、存在性（缺 `born-at` 或 `label`、非根卡缺 `parent`）、`born-at` 的格式、关系行格式不对、根卡的里程碑行格式不对
+- 整个卡目录（`src/core/card-set.ts`，读目录在 `src/node/scan.ts`）：根卡多于一张，每张各报一条；根卡写了 `parent`；其余卡的 `parent` 写了根卡以外的身份，目录里没有根卡时写了 `parent` 就报；关系指向根卡或不在盘上的卡；同一身份 `.md` 与 `.mdx` 两个文件都在（只认 `.mdx`）
+- 卡正文里出现 docfirst 引用记号（`src/core/pin-marks.ts`）
 
 有问题的卡由它报出来，算红，退出码是 1。
 
