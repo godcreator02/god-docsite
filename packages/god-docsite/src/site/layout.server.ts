@@ -21,16 +21,20 @@ function treeLinkTitlesOf(nodes: readonly PageTree.Node[]): Array<[string, strin
   })
 }
 
+/** 站内地址到标题：页面树里的链接项与全部页面；正文链接按它显示成带标题的卡片（交给 SiteLinksProvider） */
+export function sitePageTitles({ source }: Pick<DocsiteContext, 'source'>): Record<string, string> {
+  return Object.fromEntries([
+    ...treeLinkTitlesOf(source.getPageTree().children),
+    ...source.getPages().map((page): [string, string] => [page.url, page.data.title ?? page.url]),
+  ])
+}
+
 /** 布局路由 loader 的平台部分：页面树（根 $id 是内容摘要）、站名（内容目录 meta.json 的 title）、站内地址到标题 */
 export async function siteLayoutData({ source }: Pick<DocsiteContext, 'source'>): Promise<SiteLayoutData> {
   const tree = source.getPageTree()
-  const pageTitles = Object.fromEntries([
-    ...treeLinkTitlesOf(tree.children),
-    ...source.getPages().map((page): [string, string] => [page.url, page.data.title ?? page.url]),
-  ])
   return {
     pageTree: withContentDigestId(await source.serializePageTree(tree)),
     siteName: typeof tree.name === 'string' ? tree.name : '',
-    pageTitles,
+    pageTitles: sitePageTitles({ source }),
   }
 }

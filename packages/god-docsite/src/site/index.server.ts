@@ -1,5 +1,5 @@
 export { htmlPageSource, htmlPageSuffix, tsxPageSource, tsxPageSuffix, type FilePageData, type FilePageSource, type TsxPageMeta } from './page-sources.js'
-export { siteLayoutData, withContentDigestId } from './layout.server.js'
+export { siteLayoutData, sitePageTitles, withContentDigestId } from './layout.server.js'
 export { markdownLoader, markdownOfPage, sitePageData, sitePageRefs } from './page.server.js'
 export { searchLoader, searchServerOf } from './search.server.js'
 export { llmsFullLoader, llmsIndexLoader } from './llms.server.js'
