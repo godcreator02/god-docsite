@@ -30,7 +30,8 @@ description: 改这个仓时怎么跑、按什么节奏检查、提交怎么写�
 | 改了包之间或包内 `core/`、`node/`、`site/`、`cli/` 之间的 import | 先 `pnpm build`，再仓根 `pnpm test:deps`：按 `tests/dependency-rules.cjs` 查依赖方向、分层与环，没有豁免清单，报出来的都要改掉 |
 | 改了本站的页面或被钉的代码 | 在 `docs-site/` 里 `pnpm doc`（就是 `docfirst check`），按说明书 [docs-site](/docs/outputs/skills/docs-site) 处理黄灯 |
 | 改了站点骨架或功能包的模板 | `pnpm test:scaffold`：比对测试站、本站和建站器生成的是否一致，几秒钟 |
-| 合并分支前 | 仓根 `pnpm verify`：`pnpm build` → `pnpm check` → `pnpm test:deps` → `pnpm test:scaffold` → `pnpm test:e2e` |
+| 合并分支 | 不跑全量，各分支改到的包已经查过 |
+| 最终交付之前（推送、交给人验收） | 仓根 `pnpm verify`：`pnpm build` → `pnpm check` → `pnpm test:deps` → `pnpm test:scaffold` → `pnpm test:e2e`，五六分钟，整批改动只跑这一次 |
 | 发版前 | `pnpm verify` 之后再跑 `pnpm test:pack`：把包打成 tarball 装进测试站的副本，查漏打包的文件、写错的出口 |
 
 本站自己的检查在 `docs-site/` 里跑：`pnpm doc`、`pnpm typecheck`、`pnpm test`、`pnpm build`。

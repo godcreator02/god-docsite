@@ -39,8 +39,9 @@
   （`--workspace-concurrency=1`：几个包的测试大量调 git，并行时超时；docs-site 没有 check，它的检查见下），
   `pnpm test` 是 `pnpm -r test`，`pnpm test:deps` 按 `tests/dependency-rules.cjs` 跑 dependency-cruiser（要先 `pnpm build`，包之间按包名 import 时解析到对方的 `dist/`；
   没有豁免清单，报出来的每一条都要改掉）
-* 测试按节奏跑，不是每次全量：改代码过程中只跑改到的包（`pnpm --filter <包> check`），e2e 可以只跑一轮（`pnpm test:e2e --server=dev`）；
-  **合并分支前跑 `pnpm verify`**：`pnpm build` → `pnpm check` → `pnpm test:deps` → `pnpm test:scaffold` → `pnpm test:e2e`（`--skip-build`，不再重复构建）。
+* 测试按节奏跑：改代码、交回、合并分支的过程中只跑改到的包（`pnpm --filter <包> check`），改了模板再跑 `pnpm test:scaffold`，不跑全量；
+  **全量 `pnpm verify` 只在最终交付之前跑一次**（发版前、推送前、交给人验收前）：`pnpm build` → `pnpm check` → `pnpm test:deps` → `pnpm test:scaffold` → `pnpm test:e2e`（`--skip-build`，不再重复构建），
+  要五六分钟，大头是各包的 check（gwb-docsite 有一条真建站的测试、gwb-collab 大量调 git）与构建。
   `pnpm test:e2e` 不建站、不装依赖，直接测 collab-test，一分钟左右；它在站里新建的评论、任务、临时内容页都带本次运行编号，每轮跑完删掉，
   最后一项检查 `git status collab-test` 和跑之前一样（多出、少了的路径会列出来）。日志与 `report.json` 在 `%TEMP%/god-docsite-e2e/repo-<运行时刻>/`。
   `docs-site/` 里 `pnpm docfirst check`、`pnpm typecheck`、`pnpm build`；
