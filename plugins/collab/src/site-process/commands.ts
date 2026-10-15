@@ -3,7 +3,7 @@ import { sameRepo } from '../project/project.js'
 import { argsOf, openProjectAt, registerCommand, repoOf, repoUsage, type PluginServices, repoOfArgs } from '../commands.js'
 import { featurePackage } from './site-files.js'
 
-/** 新建站点、照新模板更新骨架交给 gwb-docsite；项目站点平时由它常驻，start、stop 给人为停止、连续失败停下、检查不过修好之后用 */
+/** 新建站点交给 gwb-docsite；项目站点平时由它常驻，start、stop 给人为停止、连续失败停下、检查不过修好之后用 */
 export function registerSiteCommands(services: PluginServices): void {
   const { commands, sites, events } = services
   registerCommand(
@@ -14,7 +14,7 @@ export function registerSiteCommands(services: PluginServices): void {
       description: '从空目录建出项目站点：交给 gwb-docsite 建基础站（平台模板、装依赖、起服务检查首页），再加协作功能',
       usage:
         `{ repo, port, title }：repo 是协作仓的仓根绝对路径，不要求在项目列表里；port 是开发端口、title 是站名（写进 content/meta.json），两样都必给。` +
-        `只对新站点：site/ 要不存在或是空目录，已有站点直接拒绝（要重建删掉 site/ 再来，content/、comments/、people.json、journal/ 想留先拷走）。` +
+        `只对新站点：site/ 要不存在或是空目录，已有站点直接拒绝；升级已有站点没有命令，由 agent 对照平台包与功能包的 template/ 判断要改哪些文件（说明书 collab 的 references/organization.md「升级站点」）。` +
         `先经 gwbDocsite.init 建基础站（平台包的范围由 gwb-docsite 写），再建好仓根的 collab/ 与 site/journal/（站点运行时写入它们，服务启动前就在，写入时才不整页刷新），` +
         `再经 gwbDocsite.addFeature 加功能包 ${featurePackage}，范围写成 ^${__COLLAB_VERSION__}（本插件打包时带的那一版），补进 site/app/features/collab/ 并起服务检查首页。` +
         '项目在列表里就启动站点并把通知推过去。只写文件、不提交：用 collab.submit 提交审核。合并检查里只有负责人能改的：site/package.json 里 @godcreator/ 下的包（加、删、改版本都算）、' +

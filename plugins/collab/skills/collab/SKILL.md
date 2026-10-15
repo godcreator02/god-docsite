@@ -1,6 +1,6 @@
 ---
 name: collab
-description: 协作站（gwb-collab）的项目里替人做事时读：照通知或评论改协作仓的页面与任务、写项目日志、提交审核；处理别的仓的合并请求、issue、未推送未拉取；加入项目、配仓、配组织 webhook、设项目的 QQ 命令、升功能包。
+description: 协作站（gwb-collab）的项目里替人做事时读：照通知或评论改协作仓的页面与任务、写项目日志、提交审核；处理别的仓的合并请求、issue、未推送未拉取；加入项目、配仓、配组织 webhook、设项目的 QQ 命令、升级站点。
 ---
 
 # 协作站
@@ -28,6 +28,6 @@ description: 协作站（gwb-collab）的项目里替人做事时读：照通知
 | --- | --- |
 | 协作仓：写页面、任务与评论、写项目日志、提交审核、自动同步、站点；「协作仓」「找我的」两组通知 | `references/collab-repo.md` |
 | 别的仓：提合并请求、更新、审阅与合并、issue；「别的仓」组通知；配仓 | `references/other-repos.md` |
-| 加入项目、令牌与身份、设置、项目的 QQ 命令、组织 webhook、加人、换负责人、升功能包 | `references/organization.md` |
+| 加入项目、令牌与身份、设置、项目的 QQ 命令、组织 webhook、加人、换负责人、升级站点 | `references/organization.md` |
 
 交给 AI 的提示词里，每条通知写着读哪个附件的哪一节。
