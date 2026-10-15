@@ -18,8 +18,8 @@ export const platformPackages = {
 /** 只给 e2e 用的演示功能包：不在 pnpm workspace 里，不用构建 */
 export const demoFeaturePackage = { name: 'e2e-demo', dir: path.join(fixturesDir, 'e2e-demo') }
 
-/** 组合：base 是基础站（平台 + identity + comments），demo 是基础站加上演示功能 */
-export const combos = ['base', 'demo']
+/** 组合：base 是基础站（平台 + identity + comments），demo 是基础站加上演示功能，collab 是基础站加上协作功能（e2e/combos/collab.mjs） */
+export const combos = ['base', 'demo', 'collab']
 
 /** 夹具里 people.json 那个人的身份码：服务带着它启动，站点认出「测试员」，可以写评论 */
 export const testerIdentityCode = 'e2etestcode01'
@@ -34,7 +34,7 @@ export async function loadScaffold() {
   return import(pathToFileURL(path.join(repoDir, 'packages', 'god-docsite', 'dist', 'node', 'scaffold.mjs')).href)
 }
 
-function packPackage(name, packageDir, tarballDir, logDir) {
+export function packPackage(name, packageDir, tarballDir, logDir) {
   const before = new Set(readdirSync(tarballDir))
   runLogged('pnpm', ['pack', '--pack-destination', tarballDir], { cwd: packageDir, logFile: path.join(logDir, `pack-${name.replace('@', '').replace('/', '-')}.txt`), timeoutMs: 120_000 })
   const created = readdirSync(tarballDir).filter((file) => !before.has(file) && file.endsWith('.tgz'))
