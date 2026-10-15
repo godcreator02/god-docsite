@@ -57,7 +57,7 @@ export interface BaseSiteContext<Person extends SitePerson = SitePerson, Viewer 
   commentEntries: readonly CommentEntry[]
   /** people.json 的人员列表 */
   people(): readonly Person[]
-  /** 本机身份：启动方经环境变量 DOCSITE_IDENTITY_CODE 给的码在 people.json 里认出的人 */
+  /** 本机身份：dev 下是启动方经环境变量 DOCSITE_IDENTITY_CODE 给的码在 people.json 里认出的人；start（发布版）一律只读 */
   identity(): Viewer
   /** 写入请求的 Origin 头要等于它：DOCSITE_ORIGIN，否则 dev 取 --host/--port、start 取 HOST/PORT */
   trustedOrigin(): string

@@ -41,12 +41,20 @@ describe('站点目录里的人员列表', () => {
     expect(sitePeople(siteDir)).toEqual(people)
   })
 
-  it('本机身份按环境变量里的身份码找：没有码只读，有码是那个人（不带 codes）', async () => {
+  it('dev 下本机身份按环境变量里的身份码找：没有码只读，有码是那个人（不带 codes）', async () => {
     await writeFile(path.join(siteDir, 'people.json'), JSON.stringify(people))
-    expect(siteIdentity(siteDir).reason).toContain('没有本机的身份码')
+    expect(siteIdentity(siteDir, 'dev').reason).toContain('没有本机的身份码')
     process.env[identityCodeEnvName] = 'zhoucode0001'
-    expect(siteIdentity(siteDir)).toEqual({ person: { id: 'zhou', name: '小周', gitea: 'zhou' } })
+    expect(siteIdentity(siteDir, 'dev')).toEqual({ person: { id: 'zhou', name: '小周', gitea: 'zhou' } })
     process.env[identityCodeEnvName] = 'othercode001'
-    expect(siteIdentity(siteDir).reason).not.toContain('othercode001')
+    expect(siteIdentity(siteDir, 'dev').reason).not.toContain('othercode001')
+  })
+
+  it('start（发布版）一律只读：环境变量里的身份码在人员列表里也不认', async () => {
+    await writeFile(path.join(siteDir, 'people.json'), JSON.stringify(people))
+    process.env[identityCodeEnvName] = 'zhoucode0001'
+    const identity = siteIdentity(siteDir, 'start')
+    expect(identity.person).toBeNull()
+    expect(identity.reason).toContain('发布版')
   })
 })

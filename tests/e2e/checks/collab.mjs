@@ -1,7 +1,7 @@
 import { existsSync, readdirSync, readFileSync, writeFileSync } from 'node:fs'
 import path from 'node:path'
 import { pathToFileURL } from 'node:url'
-import { checkRunner, filesUnder, headingOf, markNoReload, problemResults, serverCodeInClientBuild, stepTimeoutMs, stillNoReload, waitForHydrated, watchPage } from '../lib/checks.mjs'
+import { checkRunner, filesUnder, headingOf, markNoReload, postFormToAction, problemResults, serverCodeInClientBuild, stepTimeoutMs, stillNoReload, waitForHydrated, watchPage } from '../lib/checks.mjs'
 import { recordsDirOf } from '../lib/run-scratch.mjs'
 import { repoDir, testerIdentityCode } from '../lib/site.mjs'
 
@@ -77,7 +77,30 @@ async function noReloadAfterWrite(page) {
   return stillNoReload(page)
 }
 
-/** 协作功能的检查。mode 是 dev 或 start */
+/** start 是只读的发布版：页面上没有写入口，绕过页面直接提交也被拒，记录与评论目录都不变 */
+async function readonlyStartCheck({ page, baseUrl, siteDir, runTag }) {
+  const commentsDir = path.join(siteDir, 'comments')
+  const recordsBefore = recordFiles(siteDir).length
+  const commentsBefore = filesUnder(commentsDir).length
+  await page.goto(`${baseUrl}/tasks`, { waitUntil: 'load' })
+  await waitForHydrated(page, '[data-comment-dock-open]')
+  const createButtons = await page.getByRole('button', { name: '新建任务', exact: true }).count()
+  await page.click('[data-comment-dock-open]')
+  const reason = page.locator('[data-readonly-reason]')
+  await reason.waitFor({ timeout: stepTimeoutMs })
+  const reasonText = ((await reason.textContent()) ?? '').trim()
+  const taskPost = await postFormToAction(baseUrl, '/tasks.data', { intent: 'create-record', type: 'task', title: `e2e start 任务 ${runTag}` })
+  const commentPost = await postFormToAction(baseUrl, '/tasks.data', { intent: 'create-thread', page: '/tasks', body: `e2e start 任务页评论 ${runTag}` })
+  const recordsAfter = recordFiles(siteDir).length
+  const commentsAfter = filesUnder(commentsDir).length
+  const rejected = [taskPost, commentPost].every(({ status, text }) => status === 403 && text.includes('发布版'))
+  return {
+    pass: reasonText.includes('发布版') && createButtons === 0 && rejected && recordsAfter === recordsBefore && commentsAfter === commentsBefore,
+    detail: `新建任务按钮 ${createButtons} 个，评论面板写着「${reasonText}」；直接提交任务 → ${taskPost.status}、评论 → ${commentPost.status}；记录文件 ${recordsBefore} → ${recordsAfter}，评论目录文件 ${commentsBefore} → ${commentsAfter}`,
+  }
+}
+
+/** 协作功能的检查。mode 是 dev 或 start：写任务、写评论、收通知只在 dev 下做，start 是只读的发布版，核对写不进去 */
 export async function runCollabChecks({ browser, baseUrl, mode, siteDir, feedToken, runTag }) {
   const results = []
   const problems = []
@@ -126,60 +149,64 @@ export async function runCollabChecks({ browser, baseUrl, mode, siteDir, feedTok
       }
     })
 
-    let createdId = ''
-    await check('新建任务（useFetcher 提交到 /tasks 的 action，建好跳到它那一页，没有整页刷新）', async () => {
-      await page.goto(`${baseUrl}/tasks`, { waitUntil: 'load' })
-      await waitForHydrated(page, 'button[title^="只看 "]')
-      await markNoReload(page)
-      const before = recordFiles(siteDir)
-      await page.getByRole('button', { name: '新建任务', exact: true }).click()
-      await page.fill('[role="dialog"] input[aria-label="标题"]', `e2e 新任务 ${runTag}`)
-      await page.click('[role="dialog"] button[type="submit"]')
-      await page.waitForURL(/\/tasks\/\d{14}-[a-z0-9]{7}$/, { timeout: stepTimeoutMs })
-      createdId = new URL(page.url()).pathname.split('/').at(-1)
-      await page.locator('h1', { hasText: `e2e 新任务 ${runTag}` }).waitFor({ timeout: stepTimeoutMs })
-      const after = recordFiles(siteDir)
-      const stored = readRecord(siteDir, createdId)
-      const kept = await noReloadAfterWrite(page)
-      const pass = after.length === before.length + 1 && stored.author === 'tester' && stored.status === 'todo' && kept
-      return { pass, detail: `新记录 ${createdId}（作者 ${stored.author}），记录文件 ${before.length} → ${after.length}，没有整页刷新=${kept}` }
-    })
+    if (mode === 'dev') {
+      let createdId = ''
+      await check('新建任务（useFetcher 提交到 /tasks 的 action，建好跳到它那一页，没有整页刷新）', async () => {
+        await page.goto(`${baseUrl}/tasks`, { waitUntil: 'load' })
+        await waitForHydrated(page, 'button[title^="只看 "]')
+        await markNoReload(page)
+        const before = recordFiles(siteDir)
+        await page.getByRole('button', { name: '新建任务', exact: true }).click()
+        await page.fill('[role="dialog"] input[aria-label="标题"]', `e2e 新任务 ${runTag}`)
+        await page.click('[role="dialog"] button[type="submit"]')
+        await page.waitForURL(/\/tasks\/\d{14}-[a-z0-9]{7}$/, { timeout: stepTimeoutMs })
+        createdId = new URL(page.url()).pathname.split('/').at(-1)
+        await page.locator('h1', { hasText: `e2e 新任务 ${runTag}` }).waitFor({ timeout: stepTimeoutMs })
+        const after = recordFiles(siteDir)
+        const stored = readRecord(siteDir, createdId)
+        const kept = await noReloadAfterWrite(page)
+        const pass = after.length === before.length + 1 && stored.author === 'tester' && stored.status === 'todo' && kept
+        return { pass, detail: `新记录 ${createdId}（作者 ${stored.author}），记录文件 ${before.length} → ${after.length}，没有整页刷新=${kept}` }
+      })
 
-    await check('改字段（状态改成进行中：useFetcher 写进记录文件，页面跟着变，没有整页刷新）', async () => {
-      await waitForHydrated(page, 'select[aria-label="状态"]')
-      await markNoReload(page)
-      await page.selectOption('select[aria-label="状态"]', 'doing')
-      await page.waitForFunction(() => document.querySelector('select[aria-label="状态"]')?.value === 'doing', null, { timeout: stepTimeoutMs })
-      const deadline = Date.now() + stepTimeoutMs
-      while (readRecord(siteDir, createdId).status !== 'doing' && Date.now() < deadline) await page.waitForTimeout(200)
-      const stored = readRecord(siteDir, createdId).status
-      const kept = await noReloadAfterWrite(page)
-      return { pass: stored === 'doing' && kept, detail: `文件里 status=${stored}，没有整页刷新=${kept}` }
-    })
+      await check('改字段（状态改成进行中：useFetcher 写进记录文件，页面跟着变，没有整页刷新）', async () => {
+        await waitForHydrated(page, 'select[aria-label="状态"]')
+        await markNoReload(page)
+        await page.selectOption('select[aria-label="状态"]', 'doing')
+        await page.waitForFunction(() => document.querySelector('select[aria-label="状态"]')?.value === 'doing', null, { timeout: stepTimeoutMs })
+        const deadline = Date.now() + stepTimeoutMs
+        while (readRecord(siteDir, createdId).status !== 'doing' && Date.now() < deadline) await page.waitForTimeout(200)
+        const stored = readRecord(siteDir, createdId).status
+        const kept = await noReloadAfterWrite(page)
+        return { pass: stored === 'doing' && kept, detail: `文件里 status=${stored}，没有整页刷新=${kept}` }
+      })
 
-    await check('删掉刚建的任务（确认后提交，删完跳回任务页）', async () => {
-      await page.getByRole('button', { name: '删除', exact: true }).click()
-      await page.getByRole('button', { name: '确认删除', exact: true }).click()
-      await page.waitForURL(`${baseUrl}/tasks`, { timeout: stepTimeoutMs })
-      const gone = !existsSync(path.join(recordsDirOf(siteDir), `${createdId}.json`))
-      const kept = await noReloadAfterWrite(page)
-      return { pass: gone && kept, detail: `记录文件删掉=${gone}，回到 /tasks，没有整页刷新=${kept}` }
-    })
+      await check('删掉刚建的任务（确认后提交，删完跳回任务页）', async () => {
+        await page.getByRole('button', { name: '删除', exact: true }).click()
+        await page.getByRole('button', { name: '确认删除', exact: true }).click()
+        await page.waitForURL(`${baseUrl}/tasks`, { timeout: stepTimeoutMs })
+        const gone = !existsSync(path.join(recordsDirOf(siteDir), `${createdId}.json`))
+        const kept = await noReloadAfterWrite(page)
+        return { pass: gone && kept, detail: `记录文件删掉=${gone}，回到 /tasks，没有整页刷新=${kept}` }
+      })
 
-    await check('写入规则拒绝时显示原话（删还有任务的模块）', async () => {
-      const moduleId = runRecords.module.id
-      await page.goto(`${baseUrl}/tasks/${moduleId}`, { waitUntil: 'load' })
-      await waitForHydrated(page, 'button[title="点一下改标题"]')
-      await page.getByRole('button', { name: '删除', exact: true }).click()
-      const [response] = await Promise.all([
-        page.waitForResponse((each) => each.request().method() === 'POST' && each.url().includes(`/tasks/${moduleId}`), { timeout: stepTimeoutMs }),
-        page.getByRole('button', { name: '确认删除', exact: true }).click(),
-      ])
-      const message = page.locator('p.text-danger', { hasText: '先把这些任务删掉或改到别的模块，再删模块' })
-      await message.waitFor({ timeout: stepTimeoutMs })
-      const stillThere = existsSync(path.join(recordsDirOf(siteDir), `${moduleId}.json`))
-      return { pass: response.status() === 422 && stillThere, detail: `POST → ${response.status()}，页面上：${(await message.textContent())?.trim()}；模块还在=${stillThere}` }
-    })
+      await check('写入规则拒绝时显示原话（删还有任务的模块）', async () => {
+        const moduleId = runRecords.module.id
+        await page.goto(`${baseUrl}/tasks/${moduleId}`, { waitUntil: 'load' })
+        await waitForHydrated(page, 'button[title="点一下改标题"]')
+        await page.getByRole('button', { name: '删除', exact: true }).click()
+        const [response] = await Promise.all([
+          page.waitForResponse((each) => each.request().method() === 'POST' && each.url().includes(`/tasks/${moduleId}`), { timeout: stepTimeoutMs }),
+          page.getByRole('button', { name: '确认删除', exact: true }).click(),
+        ])
+        const message = page.locator('p.text-danger', { hasText: '先把这些任务删掉或改到别的模块，再删模块' })
+        await message.waitFor({ timeout: stepTimeoutMs })
+        const stillThere = existsSync(path.join(recordsDirOf(siteDir), `${moduleId}.json`))
+        return { pass: response.status() === 422 && stillThere, detail: `POST → ${response.status()}，页面上：${(await message.textContent())?.trim()}；模块还在=${stillThere}` }
+      })
+    } else {
+      await check('start 只读：任务页没有新建按钮、评论面板写明原因，直接提交任务与评论都被拒且不写文件（服务有身份码也不认）', () => readonlyStartCheck({ page, baseUrl, siteDir, runTag }))
+    }
 
     await check('记录 404：id 合法但没有这条、id 不合法', async () => {
       const missing = await fetch(`${baseUrl}/tasks/20991231000000-nothing`)
@@ -232,53 +259,51 @@ export async function runCollabChecks({ browser, baseUrl, mode, siteDir, feedTok
       return { pass: await stillNoReload(page), detail: '侧栏点「日历」再点「任务」' }
     })
 
-    const commentText = `e2e 任务页评论 ${runTag}`
-    await check(`任务页评论（${mode === 'dev' ? '写进去并显示' : 'start：写进评论目录，正文是构建时的快照'}）`, async () => {
-      await page.goto(`${baseUrl}/tasks`, { waitUntil: 'load' })
-      await waitForHydrated(page, '[data-comment-dock-open]')
-      const commentsDir = path.join(siteDir, 'comments')
-      const before = filesUnder(commentsDir).length
-      await page.click('[data-comment-dock-open]')
-      await page.click('[data-new-thread-toggle]')
-      await page.fill('[data-new-thread-form] textarea[name="body"]', commentText)
-      const [response] = await Promise.all([
-        page.waitForResponse((each) => each.request().method() === 'POST' && new URL(each.url()).pathname.startsWith('/tasks'), { timeout: stepTimeoutMs }),
-        page.click('[data-new-thread-form] button[type="submit"]'),
-      ])
-      const after = filesUnder(commentsDir).length
-      const written = filesUnder(commentsDir).some((file) => readFileSync(file, 'utf8').includes(commentText))
-      let shown = 'start 下不看正文'
-      if (mode === 'dev') {
+    if (mode === 'dev') {
+      const commentText = `e2e 任务页评论 ${runTag}`
+      await check('任务页评论（写进去并显示）', async () => {
+        await page.goto(`${baseUrl}/tasks`, { waitUntil: 'load' })
+        await waitForHydrated(page, '[data-comment-dock-open]')
+        const commentsDir = path.join(siteDir, 'comments')
+        const before = filesUnder(commentsDir).length
+        await page.click('[data-comment-dock-open]')
+        await page.click('[data-new-thread-toggle]')
+        await page.fill('[data-new-thread-form] textarea[name="body"]', commentText)
+        const [response] = await Promise.all([
+          page.waitForResponse((each) => each.request().method() === 'POST' && new URL(each.url()).pathname.startsWith('/tasks'), { timeout: stepTimeoutMs }),
+          page.click('[data-new-thread-form] button[type="submit"]'),
+        ])
+        const after = filesUnder(commentsDir).length
+        const written = filesUnder(commentsDir).some((file) => readFileSync(file, 'utf8').includes(commentText))
         await page.locator('[data-comment-card]', { hasText: commentText }).waitFor({ timeout: stepTimeoutMs })
-        shown = '评论卡片显示出来'
-      }
-      return { pass: response.status() === 200 && after === before + 1 && written, detail: `POST ${new URL(response.url()).pathname} → ${response.status()}，评论目录文件 ${before} → ${after}，${shown}` }
-    })
-
-    await check('通知经推送通道到达通知栏（已打开的页面不刷新就出现，新打开的页面首屏就有）', async () => {
-      await page.goto(`${baseUrl}/tasks`, { waitUntil: 'load' })
-      await waitForHydrated(page, 'button[title^="只看 "]')
-      await markNoReload(page)
-      const barBefore = await page.locator('button', { hasText: '条找我的' }).count()
-      const { notificationOf } = await loadCollabCore()
-      const notification = notificationOf({ kind: 'task', recordId: runRecords.task.id, title: runRecords.task.title, due: null, detail: null })
-      const pushed = await fetch(`${baseUrl}/__docsite/feed/collab`, {
-        method: 'POST',
-        headers: { 'content-type': 'application/json', 'x-docsite-token': feedToken },
-        body: JSON.stringify({ notifications: [notification], projectLeads: ['tester'] }),
+        return { pass: response.status() === 200 && after === before + 1 && written, detail: `POST ${new URL(response.url()).pathname} → ${response.status()}，评论目录文件 ${before} → ${after}，评论卡片显示出来` }
       })
-      const bar = page.locator('button', { hasText: '1 条找我的' })
-      await bar.waitFor({ timeout: stepTimeoutMs })
-      await bar.click()
-      await page.locator('section[aria-label="要处理的事"]', { hasText: `指派给我的任务：${runRecords.task.title}` }).waitFor({ timeout: stepTimeoutMs })
-      const kept = await stillNoReload(page)
-      const fresh = await context.newPage()
-      watchPage(fresh, 'collab-fresh', problems)
-      await fresh.goto(`${baseUrl}/calendar`, { waitUntil: 'load' })
-      const firstPaint = await fresh.locator('button', { hasText: '1 条找我的' }).count()
-      await fresh.close()
-      return { pass: pushed.status === 204 && barBefore === 0 && kept && firstPaint === 1, detail: `推送 ${pushed.status}；推之前通知栏 ${barBefore} 个，推之后出现、展开看得到那条，没有整页刷新=${kept}；新打开日历页首屏通知栏 ${firstPaint} 个` }
-    })
+
+      await check('通知经推送通道到达通知栏（已打开的页面不刷新就出现，新打开的页面首屏就有）', async () => {
+        await page.goto(`${baseUrl}/tasks`, { waitUntil: 'load' })
+        await waitForHydrated(page, 'button[title^="只看 "]')
+        await markNoReload(page)
+        const barBefore = await page.locator('button', { hasText: '条找我的' }).count()
+        const { notificationOf } = await loadCollabCore()
+        const notification = notificationOf({ kind: 'task', recordId: runRecords.task.id, title: runRecords.task.title, due: null, detail: null })
+        const pushed = await fetch(`${baseUrl}/__docsite/feed/collab`, {
+          method: 'POST',
+          headers: { 'content-type': 'application/json', 'x-docsite-token': feedToken },
+          body: JSON.stringify({ notifications: [notification], projectLeads: ['tester'] }),
+        })
+        const bar = page.locator('button', { hasText: '1 条找我的' })
+        await bar.waitFor({ timeout: stepTimeoutMs })
+        await bar.click()
+        await page.locator('section[aria-label="要处理的事"]', { hasText: `指派给我的任务：${runRecords.task.title}` }).waitFor({ timeout: stepTimeoutMs })
+        const kept = await stillNoReload(page)
+        const fresh = await context.newPage()
+        watchPage(fresh, 'collab-fresh', problems)
+        await fresh.goto(`${baseUrl}/calendar`, { waitUntil: 'load' })
+        const firstPaint = await fresh.locator('button', { hasText: '1 条找我的' }).count()
+        await fresh.close()
+        return { pass: pushed.status === 204 && barBefore === 0 && kept && firstPaint === 1, detail: `推送 ${pushed.status}；推之前通知栏 ${barBefore} 个，推之后出现、展开看得到那条，没有整页刷新=${kept}；新打开日历页首屏通知栏 ${firstPaint} 个` }
+      })
+    }
 
     await check('浏览器拿到的页面与 loader 数据里没有身份码', async () => {
       const urls = ['/', '/tasks', `/tasks/${tracked.adaptTask}`, '/calendar', `/calendar/${tracked.journalDate}`]

@@ -21,7 +21,8 @@ export const site = {
   commentEntries: comments,
   /** 带身份码，只在服务端用；给浏览器的经 publicPeopleOf */
   people: () => sitePeople(dir),
-  identity: () => siteIdentity(dir),
+  /** start（build 之后的发布版）一律只读 */
+  identity: () => siteIdentity(dir, mode),
   trustedOrigin: () => siteOrigin(mode),
   feedValue: (channel: string) => siteFeedValue(channel),
 } satisfies BaseSiteContext

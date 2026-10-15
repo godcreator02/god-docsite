@@ -73,6 +73,15 @@ export function filesUnder(dir) {
   })
 }
 
+/**
+ * 不经浏览器直接向路由 action 提交一份表单，带上站点自己的 Origin 头（和浏览器从站内提交时一样，过得了来源检查）。
+ * routePath 写 React Router 的数据地址（如 /comments.data）；回状态码与响应正文。不经页面发，故意被拒的 4xx 不会记成页面上的问题
+ */
+export async function postFormToAction(baseUrl, routePath, fields) {
+  const response = await fetch(`${baseUrl}${routePath}`, { method: 'POST', headers: { origin: new URL(baseUrl).origin }, body: new URLSearchParams(fields) })
+  return { status: response.status, text: await response.text() }
+}
+
 /** 浏览器产物（build/client 下的 js）里搜服务端才有的字样：搜到就说明服务端代码进了浏览器包 */
 export function serverCodeInClientBuild(siteDir, serverOnlyMarkers) {
   const clientFiles = filesUnder(path.join(siteDir, 'build', 'client')).filter((file) => file.endsWith('.js'))

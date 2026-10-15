@@ -31,7 +31,9 @@
 * 依赖不打补丁：dev 下新增内容文件的即时出现由平台包的 vite 插件负责（不再靠 vite 补丁），功能包路由经站点 `app/features/` 的接线文件登记
   （不再靠 React Router 补丁），为什么能删见轨迹卡 `docs-site/trajectory/2026-10-15-drop-dependency-patches.mdx`
 * 站点的开发服务都交给 gwb-docsite 托管（`docsite.site.add`），不在会话里自己 `pnpm dev`；docs-site 在 4340、collab-test 在 4450。
-  要写评论，开发服务的环境变量 `DOCSITE_IDENTITY_CODE` 要是站里 `people.json` 某人的码（经 gwb-docsite 启动时它自己给）
+  要写评论，开发服务的环境变量 `DOCSITE_IDENTITY_CODE` 要是站里 `people.json` 某人的码（经 gwb-docsite 启动时它自己给）。
+  只有 dev 能写：build + start 跑的是发布版，全面只读（身份包的 `siteIdentity(dir, 'start')` 不看身份码）。协作是各人在本机的 dev 里改、经 git 同步，
+  不做多人共用一个网站写入，选型见轨迹卡 `docs-site/trajectory/2026-10-15-published-site-readonly.mdx`
 * **站点骨架只改 `packages/god-docsite/template/`**，功能包的接线文件只改各包的 `template/`；docs-site、collab-test/site 的 `app/` 由建站器写出，
   改了模板用建站器重新生成它们。`pnpm test:scaffold`（几秒钟）比对两个站和建站器生成的是否一致，站点自己维护的文件名单写在 `tests/scaffold-check.mjs` 里
 * 插件打包时带进各包的构建产物：改了包要先构建；在隔离 home 里验插件用 `devkit.dev`（说明书 gwb-devkit）
@@ -49,7 +51,7 @@
   | 全仓·慢 | `pnpm test:e2e`、`pnpm test:pack` | 显式命令，见下 |
   | 行为假设 | `plugins/collab` 的 `tests/verified/` | `pnpm test:verified`，只在下面写的四种信号下跑 |
 
-  慢的标准：真建站、装依赖、构建、起服务的；或者单独运行这个文件（`pnpm exec vitest run <文件>`）时，vitest 报告里这个文件的耗时（不含启动与 import）超过 2 秒——
+  慢的标准：真建站、装依赖、构建、启动服务的；或者单独运行这个文件（`pnpm exec vitest run <文件>`）时，vitest 报告里这个文件的耗时（不含启动与 import）超过 2 秒——
   多是每条测试都建临时 git 仓、调几十次 git 或起子进程的。慢的文件名写成 `*.slow.test.ts`：包里的 `vitest.config.ts` 在 `exclude` 里排除它们，
   `vitest.slow.config.ts` 只收它们，`test:slow` 就是 `vitest run --config vitest.slow.config.ts`。一个文件里快慢混着、把慢的几条挪出去就能让剩下的进快的一级时，
   把那几条挪进单独的 `.slow.test.ts`（只挪，不改断言）。现在有慢测试的包是 code-pin、collab、docfirst、gwb-docsite、gwb-collab；
@@ -58,7 +60,8 @@
   `pnpm --filter <包> test:slow`；改了模板再跑 `pnpm test:scaffold`，不跑全量。
   **全量 `pnpm verify` 只在最终交付之前跑一次**（发版前、推送前、交给人验收前）：`pnpm build` → `pnpm check` → `pnpm test:slow` → `pnpm test:deps` → `pnpm test:scaffold` → `pnpm test:e2e`（`--skip-build`，不再重复构建），
   要五六分钟，最耗时的是 `pnpm test:slow`（gwb-collab 一分多钟、gwb-docsite 那条真建站的四十秒）与构建。
-  `pnpm test:e2e` 不建站、不装依赖，直接测 collab-test，一分钟左右；它在站里新建的评论、任务、临时内容页都带本次运行编号，每轮跑完删掉，
+  `pnpm test:e2e` 不建站、不装依赖，直接测 collab-test，一分钟左右；dev 一轮写评论、任务、临时内容页，start 一轮核对只读（页面上没有写入口、直接提交被拒、文件不变）；
+  站里新建的东西都带本次运行编号，每轮跑完删掉，
   最后一项检查 `git status collab-test` 和跑之前一样（多出、少了的路径会列出来）。日志与 `report.json` 在 `%TEMP%/god-docsite-e2e/repo-<运行时刻>/`。
   `docs-site/` 里 `pnpm docfirst check`、`pnpm typecheck`、`pnpm build`；
   改了被钉的代码，本仓未提交改动引起的黄灯算红，照 `docs-site` 说明书处理后放进同一个提交

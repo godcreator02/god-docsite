@@ -1,6 +1,6 @@
 import { readFileSync, writeFileSync } from 'node:fs'
 import path from 'node:path'
-import { checkRunner, filesUnder, hasViteErrorOverlay, headingOf, markNoReload, problemResults, serverCodeInClientBuild, stepTimeoutMs, stillNoReload, waitForHydrated, watchPage } from '../lib/checks.mjs'
+import { checkRunner, filesUnder, hasViteErrorOverlay, headingOf, markNoReload, postFormToAction, problemResults, serverCodeInClientBuild, stepTimeoutMs, stillNoReload, waitForHydrated, watchPage } from '../lib/checks.mjs'
 import { addedPageOf, titlePageOf } from '../lib/run-scratch.mjs'
 
 /** 写一条评论并回复：评论面板打开、整页评论、展开回复写回复；返回串 id */
@@ -22,7 +22,8 @@ async function writeThreadAndReply(page, { threadText, replyText }) {
 
 /**
  * 基础站（god-docsite + identity + comments）的检查。mode 是 dev 或 start；
- * dev 下多做内容文件增改的几项（改的是本次运行新建的临时页），start 下多搜构建产物。评论只写在「收起内容试验」这一页，正文带 runTag，跑完删掉
+ * dev 下写评论，并多做内容文件增改的几项（改的是本次运行新建的临时页）；start 是只读的发布版，核对写不进去，并多搜构建产物。
+ * 评论只写在「收起内容试验」这一页，正文带 runTag，跑完删掉
  */
 export async function runBaseChecks({ browser, baseUrl, mode, siteDir, feedToken, runTag }) {
   const results = []
@@ -129,25 +130,23 @@ export async function runBaseChecks({ browser, baseUrl, mode, siteDir, feedToken
         return { pass: pending === 0, detail: `串 ${threadId} 与回复都显示出来，等编译入口的占位 ${pending} 个` }
       })
     } else {
-      await check('写评论（start：写进文件，页面是构建时的快照）', async () => {
+      await check('start 只读：评论面板没有写入口、写明原因，直接提交被拒且不写文件（服务有身份码也不认）', async () => {
         const before = filesUnder(commentsDir).length
         await page.goto(`${baseUrl}/writing/collapse-test`, { waitUntil: 'load' })
         await waitForHydrated(page, '[data-comment-dock-open]')
         await page.click('[data-comment-dock-open]')
-        await page.click('[data-new-thread-toggle]')
-        await page.fill('[data-new-thread-form] textarea[name="body"]', `e2e start 评论 ${runTag}`)
-        const [response] = await Promise.all([
-          page.waitForResponse((each) => each.url().includes('/comments') && each.request().method() === 'POST', { timeout: stepTimeoutMs }),
-          page.click('[data-new-thread-form] button[type="submit"]'),
-        ])
-        await page.locator('[data-new-thread-toggle]').waitFor({ timeout: stepTimeoutMs })
+        const reason = page.locator('[data-readonly-reason]')
+        await reason.waitFor({ timeout: stepTimeoutMs })
+        const reasonText = ((await reason.textContent()) ?? '').trim()
+        const toggles = await page.locator('[data-new-thread-toggle]').count()
+        const rejected = await postFormToAction(baseUrl, '/comments.data', { intent: 'create-thread', page: 'writing/collapse-test.mdx', body: `e2e start 评论 ${runTag}` })
         const after = filesUnder(commentsDir).length
-        const errors = await page.locator('[data-action-error]').count()
-        return { pass: response.status() === 200 && after === before + 1 && errors === 0, detail: `写入 ${response.status()}，评论目录文件 ${before} → ${after}` }
+        const pass = reasonText.includes('发布版') && toggles === 0 && rejected.status === 403 && rejected.text.includes('发布版') && after === before
+        return { pass, detail: `面板写着「${reasonText}」，写评论按钮 ${toggles} 个；直接提交 → ${rejected.status}，评论目录文件 ${before} → ${after}` }
       })
     }
 
-    // start 的评论正文是构建时编译的：只看预置的那串；dev 再看刚写的那串
+    // start 只读、评论正文是构建时编译的：只看预置的那串；dev 再看刚写的那串
     const threadsToSee = [{ threadText: 'e2e 预置评论', replyText: 'e2e 预置回复' }]
     if (mode === 'dev') threadsToSee.push({ threadText: `e2e 评论 ${runTag}`, replyText: `e2e 回复 ${runTag}` })
     await check('全站评论页看得到评论与回复', async () => {

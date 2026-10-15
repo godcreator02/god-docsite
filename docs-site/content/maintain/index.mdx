@@ -55,7 +55,7 @@ description: 改这个仓时怎么跑、按什么节奏检查、提交怎么写�
 
 {/* ref file="package.json" lines="7-17" hash="5f75778a7b17" blob="e0920196005b" */}
 
-端到端检查 `pnpm test:e2e` 直接在测试站 `collab-test/site` 上启动 dev 与 build + start 各跑一轮浏览器检查，一分钟左右。它只写本次运行新建的评论、任务和页面，跑完删掉，最后核对测试站的 `git status` 和跑之前一样。
+端到端检查 `pnpm test:e2e` 直接在测试站 `collab-test/site` 上启动 dev 与 build + start 各跑一轮浏览器检查，一分钟左右。dev 一轮写评论、任务和页面，只写本次运行新建的，跑完删掉；start 跑的是只读的发布版，那一轮核对写不进去。最后核对测试站的 `git status` 和跑之前一样。
 
 ## 提交
 

@@ -24,12 +24,12 @@ docsite.feature.add  {"dir":…,"package":"@godcreator/trajectory","version":"^0
 ```
 
 - `docsite.site.init`：`dir` 要不存在或是空目录，`port`（写进 `scripts.dev` 的 `--port`）与 `title`（写进 `content/meta.json`）必给。
-  复制平台包的 `template/`，平台包、身份、评论三个包写成插件旁边装着的那一版的 `^<版本>`，`pnpm install`，补上评论功能的接线文件，再起服务检查首页。
+  复制平台包的 `template/`，平台包、身份、评论三个包写成插件旁边装着的那一版的 `^<版本>`，`pnpm install`，补上评论功能的接线文件，再启动服务检查首页。
   `people.json` 里只有 agent `claude`，人用 `docsite.people.join` 把自己加进来
 - `docsite.feature.add`：在站点里 `pnpm add <package>@<version>`，把功能包 `template/` 里站点还没有的文件补进 `app/features/<功能名>/`（已有的不覆盖），
-  重写 `app/features/` 下文件名带 `generated` 的汇总文件，再起服务检查首页。`version` 不给就用 gwb-docsite 旁边装着的那一版，没装就拒绝。
+  重写 `app/features/` 下文件名带 `generated` 的汇总文件，再启动服务检查首页。`version` 不给就用 gwb-docsite 旁边装着的那一版，没装就拒绝。
   可以重复运行，只补缺的；站点在运行时拒绝，先 `docsite.site.stop`
-- 起服务检查看首页回不回 200：通过后登记在设置 `sites` 里的站保持运行，没登记的停掉；没通过就报错，站点留着运行，报错在浏览器里看，看完 `docsite.site.stop`
+- 启动服务检查时看首页回不回 200：通过后登记在设置 `sites` 里的站保持运行，没登记的停掉；没通过就报错，站点留着运行，报错在浏览器里看，看完 `docsite.site.stop`
 - 协作站由 `collab.site.init` 建（说明书 `collab`），docfirst 站由 `docfirst.create` 建（说明书 `docs-site`），它们经下面的服务调这两步，不直接调这两条命令
 
 ## 升级已有站点
@@ -59,6 +59,8 @@ docsite.site.remove  {"dir":…}   从设置 sites 里去掉，在运行就停�
 ## 我是谁
 
 每个 home 有一串身份码（`docsite.identity` 查，设置 `identity-code`，第一次加载时生成），站点按 `people.json` 里各人的 `codes` 认人。
+只有本机由工作台托管的开发服务（`pnpm dev`）能写评论、改任务；`pnpm build` 之后用 `pnpm start` 跑的是发布版，全面只读，环境变量里有身份码也不认。
+协作就是各人在自己电脑上改、经 git 同步，不做多人共用一个网站写入。
 侧栏底部写「只读」、悬停提示码不在 `people.json` 里时：
 
 ```text
