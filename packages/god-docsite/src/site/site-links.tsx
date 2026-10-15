@@ -2,7 +2,7 @@ import { createContext, use, type AnchorHTMLAttributes, type ComponentType, type
 import Link from 'fumadocs-core/link'
 import { usePathname } from 'fumadocs-core/framework'
 import { ArrowUpRight, FileText, Paperclip, TriangleAlert } from 'lucide-react'
-import { siteLinkTargetOf } from '../core/site-link-targets.js'
+import { siteAddressOf, siteLinkTargetOf } from '../core/site-link-targets.js'
 import { contentFileUrlPrefix } from '../core/content-file-url.js'
 
 /** 站内链接显示成的小卡片；功能包自己的链接种类也用它，和站里其余的链接一个样子 */
@@ -92,6 +92,25 @@ function SiteTargetChip({ href, path, hash, children }: { href: string; path: st
       {children}
     </PageChip>
   )
+}
+
+/**
+ * 功能路由下的一类地址（如轨迹卡页 `/trajectory/<卡身份>`）：这些地址不在页面树里，布局给的页面标题查不到它们，
+ * 改由功能自己认——titleOf 收 prefix 后面那段（不带开头的 /），认得就给名字，显示成和站里页面一样的卡片（没写链接文字时显示这个名字），
+ * 认不得给 undefined，标红。功能的 feature.tsx 放进 linkKinds 导出；它不读 SiteLinksProvider，独立页面上也能用
+ */
+export function routeLinkKind({ prefix, titleOf }: { prefix: string; titleOf: (subpath: string) => string | undefined }): SiteLinkKind {
+  return {
+    matches: (href) => href.startsWith(`${prefix}/`),
+    Chip: function RouteLinkChip({ href, children }) {
+      const { path, hash } = siteAddressOf(href, prefix)
+      return (
+        <PageChip href={href} path={path} hash={hash} pageTitle={titleOf(path.slice(prefix.length + 1))}>
+          {children}
+        </PageChip>
+      )
+    },
+  }
 }
 
 /**

@@ -6,7 +6,7 @@ import { renderToStaticMarkup } from 'react-dom/server'
 import { MemoryRouter } from 'react-router'
 import { ReactRouterProvider } from 'fumadocs-core/framework/react-router'
 import { describe, expect, it } from 'vitest'
-import { siteLinkComponent, SiteLinksProvider } from '../src/site/site-links.js'
+import { routeLinkKind, siteLinkComponent, SiteLinksProvider } from '../src/site/site-links.js'
 
 const SiteLink = siteLinkComponent([])
 
@@ -43,6 +43,23 @@ describe('siteLinkComponent', () => {
     expect(html).toContain('target="_blank"')
     expect(html).toContain('figure.svg</a>')
     expect(html).not.toContain('text-red-600')
+  })
+
+  it('功能路由下的地址（routeLinkKind）：titleOf 认得的显示成卡片，认不得标红；不读 SiteLinksProvider', () => {
+    const CardLink = siteLinkComponent([routeLinkKind({ prefix: '/cards', titleOf: (subpath) => (subpath === 'first' ? '第一张' : undefined) })])
+    const renderBare = (link: ReactNode) =>
+      renderToStaticMarkup(
+        <MemoryRouter>
+          <ReactRouterProvider>{link}</ReactRouterProvider>
+        </MemoryRouter>,
+      )
+    const found = renderBare(<CardLink href="/cards/first#背景" />)
+    expect(found).toContain('第一张 › 背景')
+    expect(found).not.toContain('text-red-600')
+    expect(renderBare(<CardLink href="/cards/first">回到第一张</CardLink>)).toContain('回到第一张</a>')
+    const missing = renderBare(<CardLink href="/cards/none" />)
+    expect(missing).toContain('text-red-600')
+    expect(missing).toContain('title="站里没有 /cards/none 这一页"')
   })
 
   it('没包 SiteLinksProvider 时站内链接直接报错', () => {

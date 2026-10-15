@@ -2,6 +2,7 @@ import type { ComponentType } from 'react'
 import type { LoaderPlugin } from 'fumadocs-core/source'
 import type { LoaderFunctionArgs } from 'react-router'
 import type { BaseSiteContext } from './site-context.js'
+import type { SiteLinkKind } from './site-links.js'
 
 /** MDX 正文里不用 import 就能写的组件：键是 MDX 里写的标签名；props 由各组件自己定，与 mdx/types 的 MDXComponents 一样收 any */
 export type FeatureMdxComponents = Readonly<Record<string, ComponentType<any>>>
@@ -14,6 +15,8 @@ export interface FeatureRuntimeModule {
   mdxComponents?: FeatureMdxComponents
   /** 接进站点 source.ts 的 loader({ plugins })，排在平台自己的插件后面 */
   pageTreePlugins?: readonly LoaderPlugin[]
+  /** 正文链接里本功能路由的地址怎么显示（如 routeLinkKind），站点 mdx-components 的 siteLinkComponent 收下，排在平台认地址的办法前面 */
+  linkKinds?: readonly SiteLinkKind[]
   /** 布局 loader 调用；返回值以功能名为键并进布局数据。写成方法：功能可以把 base 声明成更具体的站点类型 */
   layoutData?(args: LoaderFunctionArgs, base: BaseSiteContext): unknown
   /** 布局顶部插槽：渲染在整站布局上方，自己用 useRouteLoaderData('routes/layout') 取自己那份数据 */
@@ -34,6 +37,7 @@ export interface FeatureLayoutTop {
 export interface SiteFeatureRuntime {
   mdxComponents: FeatureMdxComponents
   pageTreePlugins: LoaderPlugin[]
+  linkKinds: SiteLinkKind[]
   layoutData: FeatureLayoutDataLoader[]
   layoutTops: FeatureLayoutTop[]
 }
@@ -45,7 +49,7 @@ export interface SiteFeatureRuntime {
 export function siteFeatureRuntime(features: Readonly<Record<string, FeatureRuntimeModule>>): SiteFeatureRuntime {
   const mdxComponents: Record<string, FeatureMdxComponents[string]> = {}
   const ownerOfComponent = new Map<string, string>()
-  const runtime: SiteFeatureRuntime = { mdxComponents, pageTreePlugins: [], layoutData: [], layoutTops: [] }
+  const runtime: SiteFeatureRuntime = { mdxComponents, pageTreePlugins: [], linkKinds: [], layoutData: [], layoutTops: [] }
   for (const [feature, featureModule] of Object.entries(features)) {
     for (const [tag, component] of Object.entries(featureModule.mdxComponents ?? {})) {
       const owner = ownerOfComponent.get(tag)
@@ -54,6 +58,7 @@ export function siteFeatureRuntime(features: Readonly<Record<string, FeatureRunt
       mdxComponents[tag] = component
     }
     runtime.pageTreePlugins.push(...(featureModule.pageTreePlugins ?? []))
+    runtime.linkKinds.push(...(featureModule.linkKinds ?? []))
     const { layoutData, LayoutTop } = featureModule
     if (layoutData !== undefined) runtime.layoutData.push({ feature, load: (args, base) => layoutData.call(featureModule, args, base) })
     if (LayoutTop !== undefined) runtime.layoutTops.push({ feature, Component: LayoutTop })
