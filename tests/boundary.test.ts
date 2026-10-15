@@ -590,7 +590,8 @@ test("fumadocs 子入口的 `./fumadocs/roster`：命令行读 docfirst.config.m
  */
 test("包只发 dist 与样式：skills 与建站模板跟着插件走了，包里连目录都不该再有", () => {
   const FILES: Record<string, string[]> = {
-    "code-pin": ["dist"],
+    // 这里的 template/ 不是建站模板：是建站器复制进站点 app/features/code-pin/ 的接线文件（remark 插件与样式）
+    "code-pin": ["dist", "template"],
     "trajectory-disk": ["dist", "styles"],
     "docfirst-workflow": ["dist", "styles"],
     "docfirst-explainer": ["dist", "styles"],
