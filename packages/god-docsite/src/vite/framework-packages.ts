@@ -37,8 +37,9 @@ export function frameworkPackages(): Plugin {
       return {
         optimizeDeps: { include: [...crawled.optimizeDeps.include, ...browserPeersOfPlatform], exclude: crawled.optimizeDeps.exclude },
         ssr: crawled.ssr,
-        // 不变式：React、React Router 与 fumadocs 的上下文在一个站里只能有一份；包按 link: 装进来时它们会从包自己的目录解析出另一份
-        resolve: { dedupe: ['react', 'react-dom', 'react-router', 'fumadocs-core', '@fumadocs/base-ui'] },
+        // 不变式：React、React Router、fumadocs 与 lucide-react 的上下文在一个站里只能有一份；包按 link: 装进来时它们会从包自己的目录解析出另一份，
+        // 另一份 lucide-react 会带着包目录那份 React，服务端渲染图标时报 Invalid hook call
+        resolve: { dedupe: ['react', 'react-dom', 'react-router', 'fumadocs-core', '@fumadocs/base-ui', 'lucide-react'] },
       }
     },
   }
