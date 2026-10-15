@@ -1,0 +1,46 @@
+---
+born-at: 2026-10-15T14:30
+type: choice
+parent: [2026-09-03-god-live-doc]
+label: docs-site 从模板重建
+domain: 骨架
+---
+
+## 背景
+
+[建站器进平台包](2026-10-15-scaffold-feature-index.md) 之后，docs-site 要从手写的旧骨架（docsite-kit 组合包、docsite-docfirst 功能包、
+命令行 docfirst-workflow）换到 god-docsite 模板加 code-pin、trajectory、explainer 三个功能，命令行换成 @godcreator/docfirst。
+
+pivots-from:: [功能包的站点模板](2026-10-15-feature-package-templates.md)
+
+## 结论与边界
+
+- 骨架用建站器生成：`createSite`（link 装法）加三次 `addFeature`，生成的 `app/` 与根目录配置整份换进 docs-site，本仓包改写成 `workspace:^`；
+  `content/`、`trajectory/`、`comments/`、`people.json`、`src/components/` 原样保留，讲解组件只改 import 的包名
+- 和模板不一样的地方只有三处，都在站点自己的文件里：`tsconfig.json` 的 include 照旧不收 `src/components/`（那里的 .mjs 数据文件没有类型，
+  一直不在类型检查里）；`app/lib/mdx-plugins.ts` 给术语标注写了不标的页；`vite.config.ts` 给 `preview` 写死 `host: '127.0.0.1'`
+- 术语表从 `src/glossary.mjs` 转成站点根的 `glossary.json`（字段相同），docfirst 配置去掉 glossary，名册用 `fumadocsRoster: true`
+- 卡页的父卡链接与「回到星轨盘」改成 React Router 的 `Link`，站内导航不再整页刷新
+- 平台 vite 插件的 `resolve.dedupe` 加上 `lucide-react`：功能包按 link: 装时，lucide-react 从包所在仓的目录解析，带着那边的另一份 React
+
+边界：模板只认含 `routes.ts`、`feature.tsx` 或 `mdx.ts` 的功能目录，explainer 的模板只有 `styles.css`，`addFeature` 复制了它但汇总样式里没有它；
+docs-site 的讲解组件自己 import 讲解组件的样式，不受影响。
+
+## 依据
+
+`pnpm build` 在仓根两次失败：docs-site 预渲染 `/llms.txt` 时报 `Prerender: Request failed for /llms.txt: `（消息为空），单独在站点里 build 时一次成功一次失败，
+`react-router-serve` 下同一地址 200。React Router 预渲染时起 `vite preview`（`port: 0`、主机默认 localhost），再用 `node:http` 按 localhost 请求；
+构建进程忙时 localhost 的双栈连接（先试 ::1 再试 127.0.0.1）可能都失败，报的是没有消息的 AggregateError。`preview.host` 写成 127.0.0.1 后，仓根 `pnpm build` 连跑两次都通过。
+
+e2e 的「文档维护」组合（基础站 + code-pin、trajectory、explainer）在 link 装法的 dev 下卡页 500：卡正文里站内链接的图标由 lucide-react 渲染，
+它从本仓 `node_modules` 解析、调用本仓那份 React 的 `useContext`，而渲染器是站点自己那份 react-dom，报 `Invalid hook call`。
+file 装法和 link 装法的 build + start 不出现。dedupe 加上 `lucide-react` 后 link dev 的 10 项检查全过。
+
+## 否掉的候选
+
+在旧骨架上逐个文件改：旧骨架与模板差得太多（路由挂载、功能包约定、页面 loader 都不同），重建后再核对差异更可靠。
+`tsconfig.json` 照模板收全部文件：讲解组件的 .tsx 引用无类型的 .mjs 数据文件，会多出一百七十多条类型报错，本轮不改组件。
+
+## 代价与遗留
+
+模板该不该把 `preview.host` 写进去、模板要不要认只有样式的功能目录，交给平台那一路定；定了之后 docs-site 跟着对齐。

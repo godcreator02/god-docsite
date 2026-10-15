@@ -2,6 +2,7 @@ import { cpSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 'nod
 import path from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 import { runLogged } from './process.mjs'
+import { docsFeaturePackages, prepareDocsSite } from '../combos/docs.mjs'
 
 export const repoDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..')
 const fixturesDir = path.join(repoDir, 'e2e', 'fixtures')
@@ -18,14 +19,14 @@ export const platformPackages = {
 /** 只给 e2e 用的演示功能包：不在 pnpm workspace 里，不用构建 */
 export const demoFeaturePackage = { name: 'e2e-demo', dir: path.join(fixturesDir, 'e2e-demo') }
 
-/** 组合：base 是基础站（平台 + identity + comments），demo 是基础站加上演示功能 */
-export const combos = ['base', 'demo']
+/** 组合：base 是基础站（平台 + identity + comments），demo 是基础站加上演示功能，docs 是文档维护（基础站 + code-pin、trajectory、explainer） */
+export const combos = ['base', 'demo', 'docs']
 
 /** 夹具里 people.json 那个人的身份码：服务带着它启动，站点认出「测试员」，可以写评论 */
 export const testerIdentityCode = 'e2etestcode01'
 
 export function buildPlatformPackages(logDir) {
-  const filters = Object.keys(platformPackages).flatMap((name) => ['--filter', name])
+  const filters = [...Object.keys(platformPackages), ...Object.keys(docsFeaturePackages)].flatMap((name) => ['--filter', name])
   runLogged('pnpm', [...filters, 'build'], { cwd: repoDir, logFile: path.join(logDir, 'build-packages.txt'), timeoutMs: 600_000 })
 }
 
@@ -42,11 +43,11 @@ function packPackage(name, packageDir, tarballDir, logDir) {
   return path.join(tarballDir, created[0])
 }
 
-/** pnpm pack 出平台包与演示功能包的 tarball：装进站点后包的真实路径在 node_modules/.pnpm 下，和从 registry 装一样 */
+/** pnpm pack 出平台包、演示功能包与文档维护三个功能包的 tarball：装进站点后包的真实路径在 node_modules/.pnpm 下，和从 registry 装一样 */
 export function packPackages(tarballDir, logDir) {
   mkdirSync(tarballDir, { recursive: true })
-  const platform = Object.fromEntries(Object.entries(platformPackages).map(([name, dir]) => [name, packPackage(name, path.join(repoDir, dir), tarballDir, logDir)]))
-  return { platform, demo: packPackage(demoFeaturePackage.name, demoFeaturePackage.dir, tarballDir, logDir) }
+  const packAll = (packages) => Object.fromEntries(Object.entries(packages).map(([name, dir]) => [name, packPackage(name, path.join(repoDir, dir), tarballDir, logDir)]))
+  return { platform: packAll(platformPackages), demo: packPackage(demoFeaturePackage.name, demoFeaturePackage.dir, tarballDir, logDir), docs: packAll(docsFeaturePackages) }
 }
 
 function toPosix(file) {
@@ -65,6 +66,13 @@ export async function generateSite({ siteDir, installMode, combo, tarballs, scri
   createSite({ dir: siteDir, siteName: 'e2e 站', port: scriptPort, people, packageSource })
   if (combo === 'base') {
     cpSync(baseSiteFixturesDir, siteDir, { recursive: true, filter: (source) => path.basename(source) !== 'people.json' })
+    return
+  }
+  if (combo === 'docs') {
+    const specifiers = Object.fromEntries(
+      Object.entries(docsFeaturePackages).map(([name, dir]) => [name, installMode === 'link' ? `link:${toPosix(path.join(repoDir, dir))}` : `file:${toPosix(tarballs.docs[name])}`]),
+    )
+    prepareDocsSite({ siteDir, repoDir, specifiers })
     return
   }
   cpSync(demoSiteFixturesDir, siteDir, { recursive: true })
