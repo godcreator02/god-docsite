@@ -8,7 +8,7 @@
 import { useState } from "react";
 import type { ComponentType, CSSProperties, JSX, KeyboardEvent, ReactNode, SVGProps } from "react";
 import { Pill } from "./parts.tsx";
-import type { Seam, SeamGraph, SeamModule } from "./seam-graph.ts";
+import type { Seam, SeamGraph, SeamModule } from "../core/seam-graph.ts";
 
 export interface Box {
   x: number;

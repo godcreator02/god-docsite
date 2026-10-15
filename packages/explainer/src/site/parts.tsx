@@ -3,7 +3,7 @@
  * 颜色一律写成 data-tone / data-role 属性，样式表按属性给出 --dx-c，零件自己不写颜色值。
  */
 import type { JSX, ReactNode } from "react";
-import type { Role, Tone } from "./colors.ts";
+import type { Role, Tone } from "../core/colors.ts";
 import { Icon } from "./icons.tsx";
 import type { PaneIcon } from "./icons.tsx";
 

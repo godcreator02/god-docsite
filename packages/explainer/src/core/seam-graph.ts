@@ -1,7 +1,7 @@
 /**
  * 接缝图的内容：模块是框，能力是框里的方块，接缝是跨框的带编号连线，入口是从图外进来的箭头。
  * 画面（seam-diagram.tsx）与机读文字（seamGraphText）只读 defineSeamGraph 交回的对象。
- * 站在 Node 里生成机读版时加载这个入口，数据文件又被画面 import，所以这里只许 import 类型。
+ * 站在 Node 里生成机读版时加载它，数据文件又被画面 import，所以这里只许 import 类型。
  */
 import type { Role } from "./colors.ts";
 

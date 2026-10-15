@@ -1,6 +1,8 @@
-"use client";
+/**
+ * `@godcreator/explainer/site`：讲解组件，正文里直接 import。只 import react 与本包 core/。
+ */
 
-export type { Role, Tone } from "./colors.ts";
+export type { Role, Tone } from "../core/colors.ts";
 export { Stepper } from "./stepper.tsx";
 export type { StepItem, StepperProps } from "./stepper.tsx";
 export { Timeline } from "./timeline.tsx";

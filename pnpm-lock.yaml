@@ -1173,6 +1173,9 @@ importers:
       react-dom:
         specifier: 'catalog:'
         version: 19.3.0(react@19.3.0)
+      tsdown:
+        specifier: 'catalog:'
+        version: 0.22.14(typescript@6.0.3)
       typescript:
         specifier: 'catalog:'
         version: 6.0.3

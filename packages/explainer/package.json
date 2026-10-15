@@ -1,26 +1,24 @@
 {
   "name": "@godcreator/explainer",
   "version": "0.0.0",
-  "description": "文档站讲解组件（能力小包）：把一段讲解拆成若干帧、每帧配一句说明，用固定的控制条播放和切换。分步、动画、选情况三种外壳，面板、终端、胶囊、代码行等画帧用的零件，还有画系统接缝图的 SeamDiagram，共用一套样式。`.` 是客户端组件，`./text` 把各帧的说明转成机读版的文字，`./seam-graph` 定义接缝图并把它写成机读文字。",
+  "description": "讲解组件：把一段讲解拆成若干帧、每帧配一句说明，用固定的控制条播放和切换。`.` 是机读文字规则（各帧说明、接缝图写成给 AI 读的文字，供站点的组件名册用，不 import react）与接缝图的定义；`./site` 是组件：分步、动画、选情况三种外壳，面板、终端、胶囊、代码行等画帧用的零件，画系统接缝图的 SeamDiagram，共用一套样式 `./styles.css`。",
   "type": "module",
+  "sideEffects": [
+    "*.css"
+  ],
   "exports": {
     ".": {
-      "types": "./dist/index.d.ts",
-      "default": "./dist/index.js"
+      "types": "./dist/core/index.d.mts",
+      "default": "./dist/core/index.mjs"
     },
-    "./text": {
-      "types": "./dist/text.d.ts",
-      "default": "./dist/text.js"
-    },
-    "./seam-graph": {
-      "types": "./dist/seam-graph.d.ts",
-      "default": "./dist/seam-graph.js"
+    "./site": {
+      "types": "./dist/site/index.d.mts",
+      "default": "./dist/site/index.mjs"
     },
     "./styles.css": "./styles/explain.css"
   },
   "files": [
     "dist",
-    "src",
     "styles"
   ],
   "repository": {
@@ -31,14 +29,19 @@
     "registry": "https://git.tianshen02.online:28377/api/packages/godcreator/npm/"
   },
   "scripts": {
-    "build": "node -e \"require('node:fs').rmSync('dist',{recursive:true,force:true})\" && tsc -p tsconfig.build.json",
-    "typecheck": "tsc --noEmit",
+    "build": "tsdown",
+    "typecheck": "tsc -p tsconfig.json",
     "test": "vitest run",
-    "check": "tsc --noEmit && vitest run && pnpm lint",
+    "check": "tsc -p tsconfig.json && vitest run && pnpm lint",
     "lint": "oxlint . --deny-warnings"
   },
   "peerDependencies": {
     "react": "^19.3.0"
+  },
+  "peerDependenciesMeta": {
+    "react": {
+      "optional": true
+    }
   },
   "devDependencies": {
     "@types/node": "catalog:",
@@ -46,6 +49,7 @@
     "@types/react-dom": "catalog:",
     "react": "catalog:",
     "react-dom": "catalog:",
+    "tsdown": "catalog:",
     "typescript": "catalog:",
     "vitest": "catalog:"
   }

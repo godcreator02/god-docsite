@@ -7,11 +7,11 @@ import assert from "node:assert/strict";
 import { createElement } from "react";
 import type { SVGProps } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
-import { CasePicker, CodeLines, Diff, Pane, Pill, SeamDiagram, Stepper, Terminal, Timeline, cap } from "../src/index.js";
-import type { SeamLayout } from "../src/index.js";
-import { defineSeamGraph, seamGraphText } from "../src/seam-graph.js";
-import type { SeamGraphInput } from "../src/seam-graph.js";
-import { casesText, chaptersText, stepsText } from "../src/text.js";
+import { CasePicker, CodeLines, Diff, Pane, Pill, SeamDiagram, Stepper, Terminal, Timeline, cap } from "../src/site/index.ts";
+import type { SeamLayout } from "../src/site/index.ts";
+import { defineSeamGraph, seamGraphText } from "../src/core/seam-graph.ts";
+import type { SeamGraphInput } from "../src/core/seam-graph.ts";
+import { casesText, chaptersText, stepsText } from "../src/core/text.ts";
 
 const STEPS = [
   { title: "写下引用", text: "文档里记下源码的行段。" },
