@@ -172,7 +172,7 @@ export async function runBaseChecks({ browser, baseUrl, mode, siteDir, feedToken
       return { pass: await stillNoReload(page), detail: '点横排里的「评论」站内导航到 /comments' }
     })
 
-    await check('侧栏站名下是一横排：最左是只有图标的搜索按钮，后面的入口都带图标；一行最多四格、字没被截掉；侧栏里没有整行的搜索框', async () => {
+    await check('侧栏站名下是一横排：最左是只有图标的搜索按钮，后面的入口都带图标；一行最多四格、各行格数平均、字没被截掉；侧栏里没有整行的搜索框', async () => {
       await page.goto(`${baseUrl}/about`, { waitUntil: 'load' })
       await waitForHydrated(page, `${sidebarRow} a[href="/comments"]`)
       const cells = await page.locator(`${sidebarRow} [data-docsite-sidebar-cell]`).evaluateAll((spans) =>
@@ -192,7 +192,8 @@ export async function runBaseChecks({ browser, baseUrl, mode, siteDir, feedToken
       const searchOk = search?.tag === 'button' && search.text === '' && search.icon
       const linksOk = links.length > 0 && links.every((cell) => cell.tag === 'a' && cell.icon && cell.text !== '')
       const clipped = cells.filter((cell) => cell.clipped).map((cell) => cell.href ?? '搜索')
-      const linesOk = cellsPerLine.every((count) => count <= 4) && cellsPerLine.reduce((sum, count) => sum + count, 0) === cells.length
+      const linesOk =
+        cellsPerLine.every((count) => count <= 4) && Math.max(...cellsPerLine) - Math.min(...cellsPerLine) <= 1 && cellsPerLine.reduce((sum, count) => sum + count, 0) === cells.length
       const fullSearchBars = await page.locator('#nd-sidebar button', { has: page.locator('kbd') }).count()
       // dev 下搜索框的代码按需加载：没加载完就点，fumadocs 记成已打开却画不出来，之后 Ctrl K 也打不开（main 上整行搜索框一样）
       await page.waitForLoadState('networkidle')

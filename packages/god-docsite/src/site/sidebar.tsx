@@ -5,6 +5,7 @@ import { TreeContextProvider, useTreeContext } from '@fumadocs/base-ui/contexts/
 import { Sidebar, SidebarProvider, SidebarTrigger, useSidebar, type SidebarProps } from '@fumadocs/base-ui/layouts/docs/slots/sidebar'
 import { SearchTrigger } from '@fumadocs/base-ui/layouts/shared/slots/search-trigger'
 import type { SidebarLink } from './sidebar-links.js'
+import { sidebarLinesOf } from './sidebar-lines.js'
 import { sidebarTreeOf, type SidebarGroupId } from './sidebar-tree.js'
 
 /** 塞进分组里的那条页面项的名字带这个属性，styles.css 据此把它藏起来 */
@@ -34,23 +35,14 @@ export const groupKeepingSidebar = { provider: SidebarProvider, root: GroupKeepi
 /** DocsLayout 的 slots.searchTrigger：侧栏里不放整行的搜索框（搜索按钮在 SidebarLinksRow 里），窄屏顶栏的搜索按钮照旧 */
 export const rowSearchTrigger = { sm: SearchTrigger, full: () => null }
 
-/** 侧栏宽 268px，一格放图标加两个字，一行最多放下四格；多出来的换到下一行 */
-const cellsPerLine = 4
-
 /** 一格：同一行各格等宽，格与格之间是这一行 divide-x 画的竖线 */
 const rowCellClassName = 'flex min-w-0 flex-1 px-0.5'
 const rowLinkClassName =
   'flex w-full items-center justify-center gap-1 rounded-md px-0.5 py-1.5 text-nowrap text-fd-muted-foreground transition-colors hover:bg-fd-accent/50 hover:text-fd-accent-foreground/80 data-[active=true]:bg-fd-primary/10 data-[active=true]:text-fd-primary [&_svg]:size-4 [&_svg]:shrink-0'
 
-function linesOf<T>(cells: readonly T[]): T[][] {
-  const lines: T[][] = []
-  for (let start = 0; start < cells.length; start += cellsPerLine) lines.push(cells.slice(start, start + cellsPerLine))
-  return lines
-}
-
 /**
  * 侧栏站名下的一横排：最左是只有图标的搜索按钮（Ctrl K 照样能打开搜索），后面是功能的侧栏入口，
- * 当前地址就是入口地址或在它下面时高亮。超过四格时折成几行，各行按四格分宽，下一行的格子与上一行对齐。
+ * 当前地址就是入口地址或在它下面时高亮。超过四格时平均折成几行（sidebarLinesOf），各行按同样的格数分宽，下一行的格子与上一行对齐。
  * 放在 DocsLayout 的 sidebar.banner，slots.searchTrigger 用 rowSearchTrigger
  */
 export function SidebarLinksRow({ links }: { links: readonly SidebarLink[] }) {
@@ -68,15 +60,14 @@ export function SidebarLinksRow({ links }: { links: readonly SidebarLink[] }) {
       </span>
     )),
   ]
-  const lines = linesOf(cells)
-  const wraps = lines.length > 1
+  const { lines, cellsPerLine } = sidebarLinesOf(cells)
   return (
     <nav data-docsite-sidebar-row="" className="flex flex-col divide-y divide-fd-border rounded-lg border bg-fd-secondary/50 text-sm">
       {lines.map((line, index) => (
         <div key={index} data-docsite-sidebar-line="" className="flex divide-x divide-fd-border py-0.5">
           {line}
-          {/* 折行时末行补上空格子，格子宽度与上一行一致 */}
-          {wraps && Array.from({ length: cellsPerLine - line.length }, (_, filler) => <span key={`filler-${filler}`} className={`${rowCellClassName} border-transparent!`} />)}
+          {/* 末行格子少时补上空格子，格子宽度与上一行一致 */}
+          {Array.from({ length: cellsPerLine - line.length }, (_, filler) => <span key={`filler-${filler}`} className={`${rowCellClassName} border-transparent!`} />)}
         </div>
       ))}
     </nav>
