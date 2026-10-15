@@ -1,67 +1,7 @@
-import { readdirSync, readFileSync, statSync, writeFileSync } from 'node:fs'
+import { readFileSync, writeFileSync } from 'node:fs'
 import path from 'node:path'
 import { chromium } from 'playwright'
-
-const stepTimeoutMs = 30_000
-
-/** 一项检查：body 返回 { pass, detail }；抛错记为失败，不中断后面的项 */
-function checkRunner(results) {
-  return async function check(name, body) {
-    const startedAt = Date.now()
-    try {
-      const { pass, detail } = await body()
-      results.push({ name, pass: Boolean(pass), detail, ms: Date.now() - startedAt })
-    } catch (error) {
-      results.push({ name, pass: false, detail: `抛错：${String(error?.message ?? error).split('\n').slice(0, 3).join(' ')}`, ms: Date.now() - startedAt })
-    }
-  }
-}
-
-function watchPage(page, label, problems) {
-  page.on('console', (message) => {
-    if (message.type() === 'error' || message.type() === 'warning') problems.push(`[${label} console.${message.type()}] ${message.text()}`)
-  })
-  page.on('pageerror', (error) => problems.push(`[${label} pageerror] ${error.message}`))
-  page.on('response', (response) => {
-    if (response.status() >= 400) problems.push(`[${label} http ${response.status()}] ${response.url()}`)
-  })
-}
-
-async function waitForHydrated(page, selector) {
-  await page.waitForFunction(
-    (sel) => {
-      const element = document.querySelector(sel)
-      return element !== null && Object.keys(element).some((key) => key.startsWith('__reactProps'))
-    },
-    selector,
-    { timeout: stepTimeoutMs },
-  )
-}
-
-async function headingOf(page) {
-  return (await page.locator('h1').first().textContent({ timeout: stepTimeoutMs }))?.trim()
-}
-
-async function markNoReload(page) {
-  await page.evaluate(() => {
-    window.__e2eNoReload = 'kept'
-  })
-}
-
-async function stillNoReload(page) {
-  return (await page.evaluate(() => window.__e2eNoReload)) === 'kept'
-}
-
-async function hasViteErrorOverlay(page) {
-  return page.evaluate(() => document.querySelector('vite-error-overlay') !== null)
-}
-
-function filesUnder(dir) {
-  return readdirSync(dir).flatMap((name) => {
-    const full = path.join(dir, name)
-    return statSync(full).isDirectory() ? filesUnder(full) : [full]
-  })
-}
+import { checkRunner, filesUnder, hasViteErrorOverlay, headingOf, markNoReload, problemResults, stepTimeoutMs, stillNoReload, waitForHydrated, watchPage } from '../lib/checks.mjs'
 
 /** 写一条评论并回复：评论面板打开、整页评论、展开回复写回复；返回串 id */
 async function writeThreadAndReply(page, { threadText, replyText }) {
@@ -316,12 +256,6 @@ export async function runBaseChecks({ baseUrl, mode, siteDir, feedToken, runTag 
     await browser.close()
   }
 
-  const frameworkProviderErrors = problems.filter((line) => line.includes('FrameworkProvider'))
-  results.push({ name: '只有一份 fumadocs（无 FrameworkProvider 报错）', pass: frameworkProviderErrors.length === 0, detail: `${frameworkProviderErrors.length} 条` })
-  results.push({
-    name: '控制台无报错、无 4xx/5xx',
-    pass: problems.length === 0,
-    detail: problems.length === 0 ? '无' : problems.slice(0, 12).join('\n'),
-  })
+  results.push(...problemResults(problems))
   return results
 }

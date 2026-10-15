@@ -1,0 +1,64 @@
+---
+born-at: 2026-10-15T10:30
+type: choice
+parent: [2026-09-03-god-live-doc]
+label: 建站器进平台包，功能经汇总文件接进模板
+domain: 骨架
+---
+
+## 背景
+
+[功能包原生接入](2026-10-14-functional-packages-native-wiring.md) 定下功能包经 fumadocs 与 React Router 原生的扩展点接进站点，
+站点 = god-docsite 模板 + 功能包。还缺两件事：建站逻辑放在哪、模板怎样接上「装了哪些功能」。旧建站器在 gwb-docsite 插件里，
+维护一张精确版本表，把 `@react-router/dev` 补丁全文写进每个新站，生成的 `app/site/` 按 `package.json` 的 `docsite.features` 引用功能包的出口。
+新约定由三方共用：功能包的 `template/` 原样复制到站点 `app/features/<功能名>/`，目录里可以有 `routes.ts`、`feature.tsx`、`site.server.ts`、`mdx.ts`、`styles.css`。
+
+## 结论与边界
+
+建站逻辑进平台包的纯 Node 子路径 `@godcreator/god-docsite/scaffold`：`createSite` 复制模板并把 `{{version}}` 换成依赖说明
+（registry 装法取各包自己 `package.json` 的 version，不维护版本表；另有 `link:` 与 `file:`），不再写任何补丁；
+`addFeature` 从站点 `node_modules` 里的功能包补文件、不覆盖已有的；`regenerateFeatureIndex` 只重写汇总文件。
+
+模板固定 import `app/features/` 下五个每次重写的汇总文件，相对路径都带扩展名：
+`routes.generated.ts`（各功能 `routes.ts` 的默认导出嵌在布局路由里、`standaloneRoutes` 在布局之外，都在 `*` 之前）、
+`runtime.generated.ts`（各功能 `feature.tsx` 以 `import * as` 交给平台的 `siteFeatureRuntime` 合并，mdx-components、`source.ts`、布局路由各取一样）、
+`mdx.generated.ts`（各功能的 remark / rehype 插件）、`collections.generated.ts`（按功能包 `package.json` 的 `godDocsite.collections` 名单，
+调 `mdx.ts` 里 `collections` 的工厂、传入站点的全站插件，`source.config.ts` 用 `export *` 再导出）、`styles.generated.css`（`app.css` 引入）。
+站点的全站插件放在模板 `app/lib/mdx-plugins.ts`，页面集合与功能的集合工厂共用。布局路由 id 固定为 `routes/layout`，功能的 `layoutData` 结果以功能名为键并进布局数据。
+没有功能时汇总文件是空的，基础站行为不变。
+
+边界：`feature.tsx` 会进浏览器，`layoutData` 不能静态 import `.server` 模块，要的服务端数据只能经基础站点上下文的字段取
+（身份、人员、页面、推送通道现值）。只在 Windows、Node 24、fumadocs-mdx 15.4.7、react-router 8.4.0 下验过。
+
+pivots-from:: [功能包原生接入](2026-10-14-functional-packages-native-wiring.md)
+
+## 依据
+
+`pnpm e2e` 新增「基础站 + 演示功能」组合（`e2e/fixtures/e2e-demo` 演示功能包把约定的每一项都用上），link 与 file 两种装法 × dev、build + start
+全部通过，基础站原有的 68 项照旧全过；检查写在 `e2e/combos/demo.mjs`。
+
+集合再导出：fumadocs-mdx 用 esbuild 打包 `source.config.ts`（本地文件打进包、npm 包外置）后逐个读导出，再导出的集合与直接写的一样被认出，
+`.source/server.ts` 里生成了功能的集合。它对不是集合的导出报 `Unknown export`（`dist/core-*.js` 的 `buildConfig`），所以集合单独一个汇总文件。
+
+`feature.tsx` 引用 `.server` 模块：在 e2e 生成的 demo 站里让 `feature.tsx` import `e2e-demo/site/server`，`react-router build` 报
+`Server-only module referenced by client`（`'e2e-demo/site/server' imported by 'app/features/e2e-demo/feature.tsx'`）。
+
+功能 `styles.css` 里的 `@source not` 生效：同一个 demo 站、计数文件在开发服务启动前已存在，去掉演示功能 `styles.css` 里那行后，
+`useFetcher` 写入时开发服务日志连着出现 `[vite] (ssr) program reload`、页面整页刷新，写入检查失败；留着那行则通过、没有刷新。
+数据目录在服务启动后才建出来时，去不去那行都不刷新，所以 e2e 让计数文件在建站时就存在。复现：`pnpm e2e --install=file --combo=demo --keep`
+后删掉站点 `app/features/e2e-demo/styles.css` 的 `@source not` 一行再起 dev、点演示页的「加一」。
+
+## 否掉的候选
+
+汇总文件 `export *` 各功能的 `mdx.ts`：两个功能都导出 `remarkPlugins` 时名字冲突，fumadocs-mdx 又不收非集合导出。
+功能在 `mdx.ts` 直接导出 `defineCollections(...)`、建站器词法扫描导出名：集合写了自己的 `mdxOptions` 后全局插件不生效，
+功能拿不到站点的全站插件；改成工厂收全站插件，名单写进 `package.json`，建站器不必解析源码。
+`feature.tsx` 逐个点名 import：要先知道它导出了哪几样，`import * as` 交给平台合并更简单，类型由平台的 `FeatureRuntimeModule` 检查。
+`LayoutTop` 放进 `DocsLayout` 的子元素：布局是 CSS 网格，多出的子元素会被自动排进网格；放在 `DocsLayout` 上方。
+由建站器把各功能的数据目录排除写进 `app.css`：功能自己的 `styles.css` 里写已经生效，建站器不必知道功能写哪些目录。
+
+## 代价与遗留
+
+要读盘的功能数据在 `feature.tsx` 的 `layoutData` 里做不到，只能经基础站点上下文已有的字段；约定若加一个只在服务端的文件导出 `layoutData`，
+运行时汇总要拆成服务端一份、浏览器一份。dev 运行中加功能没验过（e2e 都是加完功能再起服务）；fumadocs-mdx 的 vite 插件只把
+`source.config.ts` 本身加进监视，新加的集合多半要重启开发服务才认。
