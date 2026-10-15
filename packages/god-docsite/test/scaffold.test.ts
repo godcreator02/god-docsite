@@ -181,12 +181,26 @@ describe('addFeature', () => {
     expect(() => addFeature({ siteDir, packageName: '@godcreator/bad-list' })).toThrow(/godDocsite 要写成/)
   })
 
-  it('regenerateFeatureIndex 只认含 routes.ts、feature.tsx 或 mdx.ts 的子目录，按名字排序', () => {
+  it('regenerateFeatureIndex 只认含 routes.ts、feature.tsx、mdx.ts 或 styles.css 的子目录，按名字排序', () => {
     const siteDir = newSite()
     const featuresDir = path.join(siteDir, 'app', 'features')
     writeFile(path.join(featuresDir, 'zeta', 'feature.tsx'), 'export {}\n')
     writeFile(path.join(featuresDir, 'alpha', 'routes.ts'), 'export default []\n')
+    writeFile(path.join(featuresDir, 'beta', 'styles.css'), '.beta {}\n')
     writeFile(path.join(featuresDir, 'notes', 'readme.md'), '不是功能\n')
-    expect(regenerateFeatureIndex(siteDir).features).toEqual(['alpha', 'zeta'])
+    expect(regenerateFeatureIndex(siteDir).features).toEqual(['alpha', 'beta', 'zeta'])
+  })
+
+  it('模板只有 styles.css 的功能包：算作功能，只进样式汇总', () => {
+    const siteDir = newSite()
+    installFakeFeature(siteDir, '@godcreator/style-only', { 'styles.css': "@import '@godcreator/style-only/styles.css';\n" })
+    const added = addFeature({ siteDir, packageName: '@godcreator/style-only' })
+    expect(added.features).toEqual(['style-only'])
+    const indexText = (file: string) => readFileSync(path.join(siteDir, 'app', 'features', file), 'utf8')
+    expect(indexText('styles.generated.css')).toContain("@import './style-only/styles.css';")
+    expect(indexText('routes.generated.ts')).not.toContain('style-only')
+    expect(indexText('runtime.generated.ts')).toContain('siteFeatureRuntime({})')
+    expect(indexText('mdx.generated.ts')).not.toContain('style-only')
+    expect(indexText('collections.generated.ts')).toContain('export {}')
   })
 })

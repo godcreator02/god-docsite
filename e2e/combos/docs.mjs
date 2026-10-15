@@ -39,7 +39,13 @@ export async function addDocsFeaturesWithChecks({ siteDir, addFeature }) {
     const dirs = readdirSync(featuresDir, { withFileTypes: true }).filter((entry) => entry.isDirectory()).map((entry) => entry.name).sort()
     const routesIndex = readFileSync(path.join(featuresDir, 'routes.generated.ts'), 'utf8')
     const collectionsIndex = readFileSync(path.join(featuresDir, 'collections.generated.ts'), 'utf8')
-    const pass = dirs.join() === 'code-pin,explainer,trajectory' && routesIndex.includes('./trajectory/routes.ts') && collectionsIndex.includes('export const trajectory =')
+    const stylesIndex = readFileSync(path.join(featuresDir, 'styles.generated.css'), 'utf8')
+    const pass =
+      dirs.join() === 'code-pin,explainer,trajectory' &&
+      added.at(-1).features.join() === 'code-pin,explainer,trajectory' &&
+      routesIndex.includes('./trajectory/routes.ts') &&
+      collectionsIndex.includes('export const trajectory =') &&
+      stylesIndex.includes("@import './explainer/styles.css';")
     return { pass, detail: `功能目录 ${dirs.join('、')}；汇总认出的功能 ${added.at(-1).features.join('、')}` }
   })
   return results
@@ -74,6 +80,14 @@ export async function runDocsChecks({ baseUrl, mode, siteDir }) {
         missing?.status === 'missing' &&
         missing.dot === '#ef4444'
       return { pass, detail: `GET /pinned → ${response?.status()}；外框 ${frames.map((frame) => `${frame.status}(${frame.dot})`).join('、')}` }
+    })
+
+    await check('讲解组件的样式经功能样式汇总生效（正文没有 import 样式）', async () => {
+      const button = await page.locator('.dx-stepper .dx-btn-next').evaluate((element) => {
+        const style = getComputedStyle(element)
+        return { height: style.height, radius: style.borderTopLeftRadius }
+      })
+      return { pass: button.height === '28px' && button.radius === '8px', detail: `「下一步」按钮高 ${button.height}、圆角 ${button.radius}（explainer 的 .dx-btn 是 28px、8px）` }
     })
 
     await check('讲解组件水合（正文 import 的 Stepper）', async () => {
