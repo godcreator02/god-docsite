@@ -2,7 +2,6 @@ import { existsSync } from 'node:fs'
 import { readCommentThreads, type CommentThreadOnDisk } from '@godcreator/comments/node'
 import { commentsAccessOf } from '@godcreator/comments/site'
 import { handleCommentWrite, pageThreadsOf, type CommentCollectionEntry } from '@godcreator/comments/site/server'
-import { sitePeople } from '@godcreator/identity/node'
 import type { CollabSite } from '../collab-site.js'
 import type { PageComments } from '../page-data.js'
 
@@ -27,12 +26,12 @@ function entriesOf(threads: readonly CommentThreadOnDisk[]): CommentCollectionEn
 export async function pageCommentsOf(site: CollabSite, page: string): Promise<PageComments> {
   const threads = existsSync(site.commentsDir) ? await readCommentThreads(site.commentsDir) : []
   return {
-    threads: pageThreadsOf({ entries: entriesOf(threads), people: sitePeople(site.siteDir), page }),
+    threads: pageThreadsOf({ entries: entriesOf(threads), people: site.people(), page }),
     access: commentsAccessOf(site.identity()),
   }
 }
 
 /** 写评论：评论包唯一的写入 action，评论目录、人员、身份、可信 origin 都取站点给的 */
 export function writeComment(request: Request, site: CollabSite) {
-  return handleCommentWrite({ request, commentsDir: site.commentsDir, people: sitePeople(site.siteDir), identity: site.identity(), trustedOrigin: site.trustedOrigin })
+  return handleCommentWrite({ request, commentsDir: site.commentsDir, people: site.people(), identity: site.identity(), trustedOrigin: site.trustedOrigin })
 }

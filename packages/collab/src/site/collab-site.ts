@@ -1,4 +1,4 @@
-import type { SiteIdentity } from '@godcreator/identity'
+import type { Person, SiteIdentity } from '@godcreator/identity'
 import type { Params } from 'react-router'
 import type { SiteFeed } from '../core/notifications/site-feed.js'
 import type { SitePageRef } from './page-data.js'
@@ -10,7 +10,7 @@ import type { SitePageRef } from './page-data.js'
 export type CollabSite = {
   /** 站名：页面标题写成「任务 · 站名」 */
   siteName: string
-  /** 站点目录：人员列表 people.json、日志页 journal/ 在这里 */
+  /** 站点目录：日志页 journal/ 在这里 */
   siteDir: string
   /** 协作仓的仓根：任务与模块在 <repoDir>/collab/records/ */
   repoDir: string
@@ -18,6 +18,8 @@ export type CollabSite = {
   commentsDir: string
   /** 写入请求的 Origin 头要和它完全一样 */
   trustedOrigin: string
+  /** 人员列表（站点的 people.json）：带身份码，只在服务端用，交给浏览器的一律经 publicPeopleOf */
+  people: () => readonly Person[]
   /** 本机身份：没有人时站点只读 */
   identity: () => SiteIdentity
   /** 站里的页面：任务链接页面时从这里选 */

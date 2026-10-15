@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { notificationOf, sortedNotifications } from '../src/core/notifications/notifications.js'
-import { InvalidSiteFeed, siteFeedOf } from '../src/core/notifications/site-feed.js'
+import { InvalidSiteFeed, pushedSiteFeedOf, siteFeedOf } from '../src/core/notifications/site-feed.js'
 
 const notifications = sortedNotifications([
   notificationOf({ kind: 'task', recordId: '20260926120000-abc1234', title: '画机柜', due: '2026-10-20', detail: '先画草图' }),
@@ -34,5 +34,11 @@ describe('gwb-collab 交来的站点状态', () => {
   ])('%s：拒收并写明哪一项', (_label, body, message) => {
     expect(() => siteFeedOf(body)).toThrow(InvalidSiteFeed)
     expect(() => siteFeedOf(body)).toThrow(message)
+  })
+
+  it('推送通道的当前值：还没推过（undefined）为 null，推过的照 siteFeedOf 查，推来 null 也拒收', () => {
+    expect(pushedSiteFeedOf(undefined)).toBeNull()
+    expect(pushedSiteFeedOf(JSON.parse(JSON.stringify(valid)))).toEqual(valid)
+    expect(() => pushedSiteFeedOf(null)).toThrow(InvalidSiteFeed)
   })
 })

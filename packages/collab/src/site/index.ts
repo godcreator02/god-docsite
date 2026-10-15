@@ -13,6 +13,7 @@ export type {
   WriteResult,
 } from './page-data.js'
 export { recordIntents, type RecordIntent } from './record-intents.js'
+export { collabLayoutData, type CollabLayoutSite } from './layout-data.js'
 export { TasksPage, TasksView } from './tasks/tasks-page.js'
 export { RecordPage, RecordView } from './record/record-page.js'
 export { CalendarPage, CalendarView } from './calendar/calendar-page.js'

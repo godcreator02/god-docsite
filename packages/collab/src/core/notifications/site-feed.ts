@@ -29,3 +29,8 @@ export function siteFeedOf(body: unknown): SiteFeed {
     projectLeads: feed['projectLeads'] === null ? null : textsOf(feed['projectLeads'], 'projectLeads'),
   }
 }
+
+/** 推送通道里这个频道现在的值（还没推过是 undefined）按 siteFeedOf 查过；还没推过为 null */
+export function pushedSiteFeedOf(pushed: unknown): SiteFeed | null {
+  return pushed === undefined ? null : siteFeedOf(pushed)
+}

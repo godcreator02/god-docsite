@@ -7,9 +7,9 @@ import { collabState, type ModuleState, type TaskState } from '../../core/state.
 import { journalDatesOf, journalSourcesOf } from '../../node/journal-files.js'
 import { readCollabSnapshot } from '../../node/snapshot.js'
 import type { CollabRouteArgs, CollabSite } from '../collab-site.js'
-import type { CalendarPageData, CollabLayoutData, JournalPageData, RecordPageData, ShownRecord, TasksPageData } from '../page-data.js'
+import type { CalendarPageData, JournalPageData, RecordPageData, ShownRecord, TasksPageData } from '../page-data.js'
 import { pageCommentsOf } from './comments.server.js'
-import { publicSitePeopleOf, viewerIdOf, viewerOf } from './viewer.server.js'
+import { viewerOf } from './viewer.server.js'
 
 /*
  * 页面的 loader。路由参数的名字是站点路由表与这里的约定：记录那一页是 tasks/:recordId，日志页是 calendar/:date
@@ -17,11 +17,6 @@ import { publicSitePeopleOf, viewerIdOf, viewerOf } from './viewer.server.js'
 
 async function collabStateOf(site: CollabSite) {
   return collabState(await readCollabSnapshot(site.repoDir))
-}
-
-/** 整站布局的 loader 调用：只给公开人员、本机身份与推送来的通知，不读 collab/；任务全集只在任务页、日历页读 */
-export function collabLayoutData(_args: CollabRouteArgs, site: CollabSite): CollabLayoutData {
-  return { people: publicSitePeopleOf(site), person: viewerIdOf(site), notifications: site.feed()?.notifications ?? null }
 }
 
 /** /tasks：全部任务与模块、人员、站里的页面、这一页的评论 */

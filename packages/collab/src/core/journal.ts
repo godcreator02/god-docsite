@@ -4,6 +4,9 @@ export const journalDirName = 'journal'
 /** 日志页的文件：journal/<日期>.mdx */
 export const journalFilePattern = /^(\d{4}-\d{2}-\d{2})\.mdx$/
 
+/** 同一条规则写成 glob（相对 journal/）：站点的日志集合只收这些文件 */
+export const journalFileGlob = '[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9].mdx'
+
 /** YYYY-MM-DD 是不是真实存在的日期 */
 export function isRealDate(date: string): boolean {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return false
