@@ -8,8 +8,8 @@ docfirst: none
 
 ## 是什么
 
-文档站平台、按功能切的功能包，以及三个 gwb 工作台插件。任何站点都是「fumadocs 官方 React Router 模板 + 挑选的功能包」：
-平台包 `@godcreator/god-docsite` 带唯一的站点模板与建站器，功能包各自经 fumadocs 与 React Router 原生的扩展点接进站点。
+文档站平台、按功能划分的功能包，以及三个 gwb 工作台插件。任何站点都是「fumadocs 官方 React Router 模板 + 挑选的功能包」：
+平台包 `@godcreator/god-docsite` 带唯一的站点模板与建站器，功能包各自经 fumadocs 与 React Router 原生的扩展点接入站点。
 仓正在重构，设计未定，以代码和 `AGENTS.md` 为准。
 
 | 包（`packages/`） | 做什么 |
@@ -64,7 +64,8 @@ pnpm install
 pnpm build          # 按依赖序构建全部包、三个插件与两个站
 pnpm check          # 逐个包跑 check（typecheck、test，有 lint 的再 lint）
 pnpm depcheck       # 包之间的依赖方向（要先 pnpm build）
-pnpm verify         # 合并分支前、发版前：build → check → depcheck → e2e
+pnpm verify         # 合并分支前、发版前：build → check → depcheck → test:scaffold → test:e2e
+pnpm test:pack      # 发版前再跑：把包打成 tarball 装进测试站的副本，跑同样的端到端检查
 
 cd docs-site
 pnpm doc
