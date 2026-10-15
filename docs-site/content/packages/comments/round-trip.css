@@ -1,0 +1,53 @@
+/*
+ * CommentRoundTrip 自己的画面：三条横道、横道之间的箭头、字格、核对清单、第 6 步的正文与收件箱一行。
+ * 卡片与颜色变量（--dx-*）由 @godcreator/explainer 提供，颜色只取那套变量；
+ * 划字的高亮照站点 ::highlight(docsite-comment) 的黄，深色下底色加深一档。
+ */
+.rt-stage { display: grid; gap: 0; }
+.rt-lane { transition: opacity 0.2s; }
+.rt-lane[data-dim] { opacity: 0.5; }
+
+/* 横道之间的间隙：没有箭头时只留一道细缝，有箭头时居中画方向与传的东西 */
+.rt-flow { min-height: 8px; display: flex; align-items: center; justify-content: center; gap: 6px; padding: 1px 0; }
+.rt-flow[data-active] { min-height: 22px; }
+.rt-flow-arrow { font-size: 15px; line-height: 1; color: var(--dx-fg); }
+.rt-flow-label { font-size: 12.5px; color: var(--dx-dim); }
+
+/* 字格：一排字，能换行（换行的单位是格子加它的位置标记）；整个算一个字的格子里面加注，标了位置的格子下方另起一行小字对准左边缘（字从 0 数） */
+.rt-cells { display: flex; flex-wrap: wrap; gap: 3px; }
+.rt-cell-unit { display: grid; gap: 1px; }
+.rt-cell { position: relative; min-width: 24px; padding: 3px 4px 15px; border: 1px solid var(--dx-line); border-radius: 4px; font-family: var(--dx-mono); font-size: 12.5px; line-height: 1.4; text-align: center; }
+.rt-cell[data-hl] { font-weight: 600; }
+.rt-cell[data-tone='info'][data-hl] { border-color: var(--dx-info); background: color-mix(in oklab, var(--dx-info) 12%, transparent); }
+.rt-cell-tag { position: absolute; left: 0; right: 0; bottom: 2px; font-size: 9px; font-style: normal; line-height: 1; color: var(--dx-dim); }
+.rt-cell-no { display: block; font-size: 9px; font-style: normal; line-height: 1; color: var(--dx-fg); font-family: var(--dx-mono); }
+
+/* 第 1 步：字格在上，锚点 JSON 在下 */
+.rt-anchor { display: grid; gap: 10px; }
+
+/* 第 3 步：核对清单 */
+.rt-checks ol { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.rt-checks li { display: flex; align-items: baseline; gap: 8px; font-size: 13px; }
+.rt-dim-note { margin: 8px 0 0; font-size: 12.5px; color: var(--dx-dim); }
+
+/* 第 4 步：左文件树、右整份文件 */
+.rt-write { display: grid; gap: 10px; }
+@container (min-width: 680px) { .rt-write { grid-template-columns: auto minmax(0, 1fr); align-items: start; } }
+.rt-tree { margin: 0; padding: 8px 12px; border: 1px solid var(--dx-line); border-radius: 6px; font-family: var(--dx-mono); font-size: 12.5px; line-height: 1.7; color: var(--dx-fg); overflow-x: auto; }
+
+/* 第 5 步：一句说明加 loader 交给浏览器的那一串 */
+.rt-read { display: grid; gap: 8px; justify-items: start; }
+.rt-read .rt-dim-note { margin: 0; }
+
+/* 第 6 步：正文四块加收件箱一行 */
+.rt-body-view { display: grid; gap: 12px; --rt-hl-bg: color-mix(in oklab, #f5b301 16%, transparent); --rt-hl-line: color-mix(in oklab, #f5b301 75%, transparent); }
+.dark .rt-body-view { --rt-hl-bg: color-mix(in oklab, #f5b301 30%, transparent); --rt-hl-line: color-mix(in oklab, #f5b301 85%, transparent); }
+.rt-doc { display: grid; gap: 7px; }
+.rt-doc-heading { font-size: 14px; font-weight: 600; }
+.rt-doc-para { font-size: 13px; }
+.rt-doc [data-hl] { background-color: var(--rt-hl-bg); text-decoration: underline 2px var(--rt-hl-line); text-underline-offset: 3px; border-radius: 2px; }
+.rt-doc-img { display: inline-block; width: 30px; height: 18px; margin-right: 6px; vertical-align: middle; border: 1px solid var(--dx-line); border-radius: 3px; background: color-mix(in oklab, var(--dx-slate) 20%, transparent); }
+.rt-inbox-row { display: flex; align-items: center; gap: 8px; justify-self: end; padding: 6px 10px; border: 1px solid var(--dx-line); border-radius: 8px; background: var(--dx-surface); font-size: 12.5px; }
+.rt-avatar { display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; border-radius: 999px; background: var(--dx-violet); color: #fff; font-size: 11px; }
+.rt-inbox-time { color: var(--dx-dim); font-size: 11.5px; }
+.rt-inbox-note { color: var(--dx-dim); }

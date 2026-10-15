@@ -1,0 +1,42 @@
+/*
+ * WhereItLands 自己的画面：快照与今天的正文两张卡片、找落点三步、结论一行。
+ * 卡片与颜色变量（--dx-*）由 @godcreator/explainer 提供，颜色只取那套变量。
+ */
+.wl-case { container-type: inline-size; display: grid; gap: 12px; }
+
+.wl-cards { display: grid; gap: 12px; }
+@container (min-width: 680px) { .wl-cards { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); align-items: start; } }
+
+/* 字格：一排字，能换行（换行的单位是格子加它的位置标记）；高亮按语气着色，收起来的画虚线框并调淡，标了位置的格子下方另起一行小字对准左边缘 */
+.wl-cells { display: flex; flex-wrap: wrap; gap: 3px; }
+.wl-cell-unit { display: grid; gap: 1px; }
+.wl-cell { position: relative; min-width: 24px; padding: 3px 4px 15px; border: 1px solid var(--dx-line); border-radius: 4px; font-family: var(--dx-mono); font-size: 12.5px; line-height: 1.4; text-align: center; }
+.wl-cell[data-hl] { font-weight: 600; }
+.wl-cell[data-tone='info'][data-hl] { border-color: var(--dx-info); background: color-mix(in oklab, var(--dx-info) 12%, transparent); }
+.wl-cell[data-tone='good'][data-hl] { border-color: var(--dx-good); background: color-mix(in oklab, var(--dx-good) 14%, transparent); }
+.wl-cell[data-tone='warn'][data-hl] { border-color: var(--dx-warn); background: color-mix(in oklab, var(--dx-warn) 16%, transparent); }
+.wl-cell[data-folded] { border-style: dashed; opacity: 0.55; }
+.wl-cell-tag { position: absolute; left: 0; right: 0; bottom: 2px; font-size: 9px; font-style: normal; line-height: 1; color: var(--dx-dim); }
+.wl-cell-no { display: block; font-size: 9px; font-style: normal; line-height: 1; color: var(--dx-fg); font-family: var(--dx-mono); }
+
+/* 元素锚点：快照卡片里只写 anchor 那一行 */
+.wl-anchor-line { display: block; padding: 8px 10px; border: 1px solid var(--dx-line); border-radius: 6px; font-family: var(--dx-mono); font-size: 12.5px; color: var(--dx-fg); overflow-x: auto; }
+
+/* element-gone 的今天的正文：四块，标题那块是虚线空位 */
+.wl-doc { display: grid; gap: 7px; }
+.wl-doc-heading, .wl-doc-para { font-size: 13px; }
+.wl-doc-gone { padding: 2px 6px; border: 1px dashed var(--dx-line); border-radius: 4px; color: var(--dx-dim); }
+.wl-doc-img { display: inline-block; width: 30px; height: 18px; margin-right: 6px; vertical-align: middle; border: 1px solid var(--dx-line); border-radius: 3px; background: color-mix(in oklab, var(--dx-slate) 20%, transparent); }
+
+/* 找落点三步：下结论的一行加粗，没走到的调淡写「没走到」 */
+.wl-trail { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.wl-trail li { display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: baseline; gap: 8px; font-size: 13px; }
+.wl-trail li[data-state='skip'] { color: var(--dx-dim); opacity: 0.55; }
+.wl-trail li[data-state='yes'] .wl-step-name { font-weight: 600; }
+.wl-step-name { white-space: normal; }
+.wl-step-note { grid-column: 2; font-size: 12px; color: var(--dx-dim); }
+.wl-trail li[data-state='yes'] .wl-step-note { color: var(--dx-fg); }
+
+/* 结论一行 */
+.wl-verdict { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.wl-note { font-size: 12.5px; color: var(--dx-dim); }
