@@ -1,0 +1,51 @@
+---
+born-at: 2026-10-15T12:30
+type: choice
+parent: [2026-09-03-god-live-doc]
+label: gwb 插件按路径用平台建站器
+domain: gwb 插件
+---
+
+## 背景
+
+[建站器进平台包](2026-10-15-scaffold-feature-index.md) 之后，三个 gwb 插件要改用平台包 `@godcreator/god-docsite/scaffold` 的 `createSite` 与 `addFeature`：
+gwb-docsite 建站、加功能、托管，gwb-docfirst 建 docfirst 站，gwb-collab 建协作站。卡在三处：
+建站器按自己模块的位置找平台包的 `template/`，而 gwb 插件的产物照规矩把依赖全部打包进一个文件；
+新模板的评论写入是 `/comments` 路由的 action，浏览器经 `useFetcher` 提交，命令行这边要拿到 action 的返回值；
+docfirst 站除了三个功能包，还要命令行 `@godcreator/docfirst` 与它叠在站点根上的起始物。
+
+pivots-from:: [建站器进平台包](2026-10-15-scaffold-feature-index.md)
+
+## 结论与边界
+
+- 平台包 god-docsite 与 identity、comments 写进 gwb-docsite 的 `dependencies`，装在插件旁边：`createSite` 的 registry 装法从插件包根往上的
+  `node_modules` 读它们的版本写 `^版本`，不再有版本表。建站器按算出的文件地址 `import(变量)` 加载、不打包进插件，
+  它才找得到自己的 `template/`；发版检查只认产物里写成字符串字面量的包名 import，这样写不违反「产物只 import peer」
+- 加功能（`docsite.feature.add`、`gwbDocsite.addFeature`）是 `pnpm add <包>@<依赖说明>` → `addFeature` → 起服务检查首页；
+  依赖说明不给就取 gwb-docsite 旁边装着的那一版。站点在运行时拒绝，不替人停
+- 评论写入 POST 到 `/comments.data`（React Router 单次请求取 action 的返回值），带 Origin 头；回的 turbo-stream 只解扁平的字符串与布尔
+- 托管只认装着 god-docsite 的站，旧地基 docsite-kit 的站拒绝；推送与身份的环境变量、推送地址与旧协议同名，照旧
+- gwb-docfirst 把 docfirst 与三个功能包写进 `dependencies`，只按路径读版本与 `template/`、不 import；先叠起始物、写脚本与命令行依赖，
+  再加功能，让 `pnpm add` 顺带装上命令行。gwb-collab 的功能包版本照旧取打包时带的那一版
+
+边界：只在 Windows、Node 24、pnpm 12.4、本仓 link 装法下真的建站跑通过；registry 装法要等平台包与功能包发版，隔离 home 里没跑通（见代价与遗留）。
+
+## 依据
+
+`plugins/docsite/tests/real-site.test.ts`（b332063f）在长路径临时目录里按 link 建站、`pnpm install`、起开发服务、`docsite.people.join` 的同一函数加入身份、
+写评论与 agent 回复、推送后 GET 读回、加轨迹卡功能、`pnpm build`，约 55 秒通过。实验时 POST 到 `/comments` 回 200 的整页 HTML，
+POST 到 `/comments.data` 回 `text/x-script`：`[{"_1":2},"data",{"_3":4,"_5":6,"_7":8},"ok",true,"intent","create-thread","threadId",…]`；不带 Origin 头回 403。
+同一实验站加 code-pin、trajectory、explainer 并叠 docfirst 模板后 `pnpm build` 通过，装上命令行后 `pnpm doc` 只报生成物还没 render。
+
+## 否掉的候选
+
+把建站器打包进插件、模板随插件发：就是删掉的派生模板那条路，模板有两份。平台包写进 peer：peer 只许 cordis、内核包与插件，发版检查拒。
+评论写入 POST 整页再按评论目录前后的差别认出新串：并发写时认错。把 react-router 的 `UNSAFE_decodeViaTurboStream` 打包进插件：
+它从包根出口导出，会把 React 一起打包进来。
+
+## 代价与遗留
+
+插件装进 home 时要能从源上装到 god-docsite、identity、comments（gwb-docfirst 另要 docfirst、code-pin、trajectory、explainer）：
+2026-10-15 在隔离 home 里 `devkit.dev` gwb-docsite，`pnpm add` 报 `@godcreator/comments` 404，验证停在装插件这一步。
+god-docsite 的 react、fumadocs、vite 等 peer 没标 optional，home 装插件时可能把它们一起装进来。
+评论写入的结果里将来有数组或别的类型时，解码要跟着扩。
