@@ -1,5 +1,5 @@
 {
   "title": "包",
   "root": true,
-  "pages": ["identity", "code-pin"]
+  "pages": ["identity", "explainer", "code-pin"]
 }

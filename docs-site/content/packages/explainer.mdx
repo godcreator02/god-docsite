@@ -1,0 +1,119 @@
+---
+title: explainer：讲解组件
+description: 讲解组件包：分步、动画、选情况三种外壳共用一套控制条与说明行，页面只画自己的画面；接缝图把内容和坐标分开；包的 `.` 出口不 import React，给生成物写机读文字
+icon: Presentation
+---
+
+import { StepperDemo, TimelineDemo, CasePickerDemo } from './explainer/shell-demos'
+import { ExplainerSeams } from './explainer/seams'
+
+explainer 把一段讲解变成能看、能动的东西：分步 `Stepper`、动画 `Timeline`、选情况 `CasePicker` 三种外壳，加上一张接缝图 `SeamDiagram`。外壳管控制条与说明行，页面交给它一个「当前这一项 → 画面」的函数，只画这一页独有的部分。
+
+贯穿这页的例子是 [code-pin 页](/packages/code-pin)那个「一处行段钉在六种改动下怎么判」的组件 `JudgeCases`：它的说明文字与例子数据在 `judge-cases.data.mjs`，画面在 `judge-cases.tsx`，用 `CasePicker` 外壳和 `Pane`、`CodeLines`、`Pill`、`Dot` 零件拼出来。
+
+## 一个组件拆成三份文件
+
+一个讲解组件由三份文件组成：一份不依赖 React 的数据（`*.data.mjs`）、一个画面（`*.tsx`），放进生成正本时再加一条机读规则（`*.ai.mjs`）。谁 import 谁、docfirst 又怎么读它，画成一张接缝图：
+
+<ExplainerSeams />
+
+按接缝编号逐条看，代码只在契约那一行出现：
+
+1. **页面引入组件**：页面开头 `import`，正文只写组件标签——code-pin 页写的是 `import { JudgeCases } from './code-pin/judge-cases'`。画面读同一文件夹里的数据（接缝 2）。
+2. **画面读数据**：说明文字和例子都在数据文件里，画面只读，两边读的是同一份。
+3. **画面用外壳与零件**：画面把「当前这一项 → 画面」的函数交给外壳，用零件拼画面；颜色只写 `tone` / `role` 的名字，不写颜色值。
+4. **机读规则读数据**：机读规则读画面读的同一份数据，用 `stepsText` 等转成段落。
+5. **名册登记机读规则**：规则登记进 `docfirst.config.mjs` 的 `components`；只有生成正本里用到的组件要登记，名册怎么合并、哪些页查名册，看 [doc-export 页](/packages/doc-export)的「组件名册」。
+6. **组件出口用核心的类型**：`site/` 只 import React 与本包 `core/`，`core/` 什么都不 import——docfirst 要在 Node 里加载机读规则，这是前提。包的两个出口正好对着上面的拆法：`.` 给数据和机读规则用（不 import React），`./site` 给画面用（要 React）：
+
+{/* ref file="../packages/explainer/package.json" lines="10-20" hash="3866917f6d21" blob="b10650324dec" */}
+
+{/* ref file="../packages/explainer/src/core/index.ts" hash="ac07ae118ec6" blob="6b98c5b29c15" */}
+
+7. **站点接进包的样式**：建站器把包里的 `template/styles.css` 复制成站点 `app/features/explainer/styles.css`，里面一行 `@import` 把包的样式接进全站；页面组件只 import 自己的 `./xx.css`。
+8. **核对数据里的钉**：数据里照抄源码的地方，在那段数据正上方钉一处码，docfirst 读文件核对它；标记怎么写看 [code-pin 页](/packages/code-pin)的「两种文档格式」。
+
+## 三种外壳：控制条一样，画面归页面
+
+三者共同的部分：控制条在画面上方（播放、上一步、中间一格、下一步、计数），画面在中间，说明在画面下方。←/→ 是上一步、下一步，空格是播放、暂停；焦点在按钮上时空格交给按钮，焦点在横条上时方向键交给横条；带 Alt/Ctrl/Meta 的组合键一律不接。传进来的数组是空的，直接报错。
+
+下面三个组件是同一种布局的最小例子：左块是画面函数拿到的参数，右块是同一份数据经机读文字函数转出的段落，当前这一项亮起。
+
+### 分步 `Stepper`
+
+用于有先后的过程。`steps` 每项至少有 `title`、`text`；画面函数拿到 `(step, index)`。播放按 `interval` 毫秒自动下一步（默认 3500），到最后一步停；在最后一步按播放，从第 1 步重来。
+
+<StepperDemo />
+
+{/* ref file="../packages/explainer/src/site/stepper.tsx" lines="9-52" hash="2a5e062955f5" blob="dafaf7713972" */}
+
+### 动画 `Timeline`
+
+用于时间连续的过程。每章有 `duration`（秒），总长是各章之和；画面函数拿到 `{ time, chapter, index, progress }`。画面是时间的纯函数——横条可以往回拖，拖到哪一刻都画得出那一刻的画面。上一步、下一步跳到章节开头；`duration` 不是正数直接报错。
+
+<TimelineDemo />
+
+{/* ref file="../packages/explainer/src/site/timeline.tsx" lines="10-24" hash="88a7ba5715fa" blob="40324b1df520" */}
+
+{/* ref file="../packages/explainer/src/site/timeline.tsx" lines="37-60" hash="0cf645e2d0bb" blob="40324b1df520" */}
+
+### 选情况 `CasePicker`
+
+用于同一套规则下几种情况的差别。每项有 `id`、`label`、`text`；默认选第一个；给了 `value` 就是受控，选中哪个由外部管；`value` 指向不存在的 `id` 直接报错。没有播放键。
+
+<CasePickerDemo />
+
+`JudgeCases` 就是这么写的：它只写了「这一种情况 → 画面」。
+
+{/* ref file="../packages/explainer/src/site/case-picker.tsx" lines="9-34" hash="cbc0fdef16e6" blob="f6d9bff872e4" */}
+
+## 零件与颜色
+
+拼画面用的零件就六个：
+
+| 零件 | 画什么 |
+| --- | --- |
+| `Pane` | 带标题栏的卡片 |
+| `Terminal` | 终端窗口 |
+| `Pill` | 胶囊标签 |
+| `Dot` | 状态点 |
+| `CodeLines` | 带行号与高亮的代码行 |
+| `Diff` | 新旧行对照 |
+
+颜色只有两组名字。语气 `Tone` 五种：good 绿、warn 琥珀、bad 玫红、pending 琥珀空心、info 蓝，说「这一项是什么状态」。角色色 `Role` 七种：blue、violet、emerald、amber、rose、cyan、slate，说「这个东西是哪个角色」，同一个角色在整页里固定一种颜色。零件只写 `data-tone` / `data-role` 属性，样式表按属性给颜色，深色主题另有一套。
+
+## 接缝图：内容和坐标分开
+
+内容是一张图：模块（虚线框）、能力（框里的方块，能力名加最关键的标识符）、入口（图外进来的箭头）、接缝（跨框的带编号连线，`via: 'code'` 画实线、`via: 'disk'` 画虚线）。`defineSeamGraph` 定义时就查：能力 id 重复、模块 id 重复、接缝一端或入口指向不存在的能力、接缝编号重复，都当场报错。
+
+{/* ref file="../packages/explainer/src/core/seam-graph.ts" lines="8-46" hash="6a1390c3279f" blob="a639d865d6dd" */}
+
+{/* ref file="../packages/explainer/src/core/seam-graph.ts" lines="78-106" hash="88434c2a65b3" blob="a639d865d6dd" */}
+
+坐标与图标另写一张 `SeamLayout`：键都是图里的 id，画到缺的那一项直接报错；能力方块高度固定，`cap(x, y, w)` 只给左上角和宽度。
+
+{/* ref file="../packages/explainer/src/site/seam-diagram.tsx" lines="23-41" hash="46f3ecdd7adf" blob="744931efbbf4" */}
+
+交互是两件互相独立的事：鼠标停在编号或模块框上浮出说明；点击固定高亮——点编号高亮这条接缝和两端的能力，点模块框高亮跟它有关的全部接缝，再点一次取消。本页开头那张图就是这样定义的：内容在 `explainer/seams.data.mjs`，坐标在 `explainer/seams.tsx`。
+
+## 机读文字：放进生成正本的组件
+
+生成物（README、AGENTS.md、SKILL.md）里没有画面，组件要换成文字。`.` 出口给三种外壳各一个转换函数，格式固定：分步是「第 n 步 · 标题：说明」、动画是「第 n 段 · 标题：说明」、选情况是「情况「label」：说明」；接缝图用 `seamGraphText`：图的说明与入口一段、每个模块一段、每条接缝一段。
+
+{/* ref file="../packages/explainer/src/core/text.ts" hash="e733d5f9a1c7" blob="6032fb562d4d" */}
+
+{/* ref file="../packages/explainer/src/core/seam-graph.ts" lines="108-124" hash="09514dbadae9" blob="a639d865d6dd" */}
+
+机读规则（`*.ai.mjs`）读画面读的同一份数据，交回段落，只写结论、不逐步展开。站里唯一一份是 [实时推送与执行器](/gitea/push) 页的 `content/gitea/push/auto-merge.ai.mjs`：拿 `AutoMergeRun` 的规则看，`stepsText(runSteps)` 把每步转成一段，后面跟这一步经手的东西。什么组件要写机读规则、名册怎么查，看 [doc-export 页](/packages/doc-export)。
+
+## 样式怎么接进站点
+
+建站器把包里的 `template/styles.css` 复制成站点的 `app/features/explainer/styles.css`，里面只有一行 `@import`。模板里没有页面、不登记组件，讲解组件由正文直接 import。外壳都带 `not-prose`、按容器宽度排版，窄于 480 时上一步、下一步只留箭头；接缝图画布最小 820 宽，容器更窄时在图自己的框里横向滚动，页面本身不横向滚动。
+
+{/* ref file="../packages/explainer/template/styles.css" hash="0b573e6bfd45" blob="c938c5365cc7" */}
+
+## 谁在用它
+
+- **gwb-docsite**：`docfirst.create` 建 docfirst 站时，把 explainer 和 code-pin、trajectory 一起装上
+- **本站的页面组件**：code-pin 页的 `JudgeCases`、[实时推送与执行器](/gitea/push) 页的 `AutoMergeRun`、[背景分区的 mdx 编译一页](/background/mdx-compile-explainer)的两个组件
+- **docfirst**：生成正本里用到的组件，经 `docfirst.config.mjs` 的 `components` 加载机读规则，规则 import `.` 出口

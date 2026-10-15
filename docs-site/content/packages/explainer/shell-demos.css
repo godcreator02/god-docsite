@@ -1,0 +1,22 @@
+/*
+ * 三种外壳最小例子的画面：左块参数、右块机读文字，容器够宽时并排、窄于 480 时上下排。
+ * 卡片与颜色变量（--dx-*）由 @godcreator/explainer 提供，颜色只取那套变量。
+ */
+.sd-stage { display: grid; gap: 12px; }
+@container (min-width: 480px) { .sd-stage { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); align-items: start; } }
+
+.sd-kv { margin: 0; display: grid; gap: 6px; font-family: var(--dx-mono); font-size: 12.5px; }
+.sd-kv div { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 10px; }
+.sd-kv dt { color: var(--dx-dim); }
+.sd-kv dd { margin: 0; overflow-wrap: anywhere; }
+
+.sd-progress { height: 4px; border-radius: 999px; overflow: hidden; background: color-mix(in srgb, var(--dx-violet) 18%, transparent); }
+.sd-progress-fill { height: 100%; background: var(--dx-violet); }
+
+.sd-lines { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; font-size: 12.5px; color: var(--dx-dim); }
+.sd-lines li { padding: 2px 8px; border-radius: 6px; border-left: 2px solid transparent; }
+.sd-lines li[data-current='true'] {
+  color: var(--dx-fg);
+  border-left-color: var(--dx-amber);
+  background: color-mix(in srgb, var(--dx-amber) 10%, transparent);
+}
