@@ -3,30 +3,20 @@
   "version": "0.0.0",
   "private": true,
   "type": "module",
-  "description": "协作站的测试协作仓（docsite-kit 仓里的开发台）：用 docsite-kit 地基搭、挂 @godcreator/collab-site 功能包，测试数据在上一级 collab/records/；它是协作站功能包的正本测试场，依赖用 workspace 直连本仓的包",
-  "docsite": {
-    "features": [
-      "@godcreator/collab-site"
-    ]
-  },
+  "description": "协作站的测试协作仓（本仓里的开发台）：god-docsite 建站器建的基础站加 @godcreator/collab 功能，测试数据在上一级 collab/records/；本仓的包用 workspace 直连",
   "scripts": {
-    "dev": "react-router dev --port 4450 --host 127.0.0.1 --strictPort",
+    "dev": "react-router dev --host 127.0.0.1 --strictPort --port 4450",
     "build": "react-router build",
     "start": "react-router-serve ./build/server/index.js",
     "typecheck": "react-router typegen && tsc --noEmit",
-    "check": "react-router typegen && tsc --noEmit && pnpm lint",
-    "lint": "oxlint . --deny-warnings"
+    "check": "react-router typegen && tsc --noEmit"
   },
   "dependencies": {
     "@fumadocs/base-ui": "catalog:",
-    "@godcreator/collab-model": "workspace:^",
-    "@godcreator/collab-site": "workspace:^",
-    "@godcreator/docsite-comments": "workspace:^",
-    "@godcreator/docsite-identity": "workspace:^",
-    "@godcreator/docsite-kit": "workspace:^",
-    "@godcreator/docsite-page-sources": "workspace:^",
-    "@godcreator/docsite-ui": "workspace:^",
-    "@godcreator/docsite-writing": "workspace:^",
+    "@godcreator/collab": "workspace:^",
+    "@godcreator/comments": "workspace:^",
+    "@godcreator/god-docsite": "workspace:^",
+    "@godcreator/identity": "workspace:^",
     "@react-router/node": "catalog:",
     "@react-router/serve": "catalog:",
     "fumadocs-core": "catalog:",
@@ -47,7 +37,6 @@
     "@types/node": "catalog:",
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:",
-    "oxlint": "catalog:",
     "tailwindcss": "catalog:",
     "typescript": "catalog:",
     "vite": "catalog:"

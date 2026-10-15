@@ -1,5 +1,5 @@
-import { searchServer } from '../lib/source.server'
+import type { Route } from './+types/search'
+import { searchLoader } from '@godcreator/god-docsite/server'
+import { site } from '@/lib/site.server'
 
-export async function loader({ request }: { request: Request }) {
-  return searchServer.GET(request)
-}
+export const loader = (args: Route.LoaderArgs) => searchLoader(args, site)

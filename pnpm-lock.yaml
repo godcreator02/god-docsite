@@ -295,30 +295,18 @@ importers:
       '@fumadocs/base-ui':
         specifier: 'catalog:'
         version: 16.17.1(@types/mdx@2.0.14)(@types/react@19.3.0)(fumadocs-core@16.17.1(@mdx-js/mdx@3.1.1(supports-color@7.2.0))(@types/estree-jsx@1.0.5)(@types/hast@3.0.5)(@types/mdast@4.0.4)(@types/react@19.3.0)(lucide-react@1.54.0(@types/react@19.3.0)(react@19.3.0))(react-dom@19.3.0(react@19.3.0))(react-router@8.4.0(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(react@19.3.0)(supports-color@7.2.0)(zod@4.6.5))(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(supports-color@7.2.0)(tailwindcss@4.3.3)
-      '@godcreator/collab-model':
+      '@godcreator/collab':
         specifier: workspace:^
-        version: link:../../packages/collab-model
-      '@godcreator/collab-site':
+        version: link:../../packages/collab
+      '@godcreator/comments':
         specifier: workspace:^
-        version: link:../../packages/collab-site
-      '@godcreator/docsite-comments':
+        version: link:../../packages/comments
+      '@godcreator/god-docsite':
         specifier: workspace:^
-        version: link:../../packages/docsite-comments
-      '@godcreator/docsite-identity':
+        version: link:../../packages/god-docsite
+      '@godcreator/identity':
         specifier: workspace:^
-        version: link:../../packages/docsite-identity
-      '@godcreator/docsite-kit':
-        specifier: workspace:^
-        version: link:../../packages/docsite-kit
-      '@godcreator/docsite-page-sources':
-        specifier: workspace:^
-        version: link:../../packages/docsite-page-sources
-      '@godcreator/docsite-ui':
-        specifier: workspace:^
-        version: link:../../packages/docsite-ui
-      '@godcreator/docsite-writing':
-        specifier: workspace:^
-        version: link:../../packages/docsite-writing
+        version: link:../../packages/identity
       '@react-router/node':
         specifier: 'catalog:'
         version: 8.4.0(react-router@8.4.0(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(typescript@6.0.3)
@@ -374,9 +362,6 @@ importers:
       '@types/react-dom':
         specifier: 'catalog:'
         version: 19.3.0(@types/react@19.3.0)
-      oxlint:
-        specifier: 'catalog:'
-        version: 1.76.0(oxlint-tsgolint@7.0.2001)
       tailwindcss:
         specifier: 'catalog:'
         version: 4.3.3

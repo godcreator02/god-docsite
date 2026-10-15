@@ -26,6 +26,11 @@
     },
     "./styles.css": "./styles.css"
   },
+  "godDocsite": {
+    "collections": [
+      "journal"
+    ]
+  },
   "bin": {
     "collab-merge-check": "./dist/cli/bin.mjs"
   },

@@ -7,7 +7,7 @@
  *   pnpm e2e --keep                                       跑完保留生成的站点目录
  *
  * 装法：link 把包写成 link:<仓里的包目录>；file 先 pnpm pack，再按 file:<tarball> 装，包的真实路径在 node_modules/.pnpm 下，
- * 和从 registry 装一样。组合：base 是基础站，demo 是基础站加 e2e/fixtures/e2e-demo 演示功能包。
+ * 和从 registry 装一样。组合：base 是基础站，demo 是基础站加 e2e/fixtures/e2e-demo 演示功能包，collab 是基础站加协作功能（站点建在协作仓布局的 site/ 下）。
  * 每次运行的日志与结果在 %TEMP%/god-docsite-e2e/<运行时刻>/
  */
 import { mkdirSync, realpathSync, rmSync, writeFileSync } from 'node:fs'
@@ -16,6 +16,7 @@ import path from 'node:path'
 import { randomUUID } from 'node:crypto'
 import { runBaseChecks } from './combos/base.mjs'
 import { addDemoFeatureWithChecks, runDemoChecks } from './combos/demo.mjs'
+import { addCollabFeatureWithChecks, buildCollabPackage, collabSiteDirOf, generateCollabSite, packCollabPackage, runCollabChecks } from './combos/collab.mjs'
 import { freePort, startServer, waitForHttp } from './lib/process.mjs'
 import { buildPlatformPackages, buildSite, combos, generateSite, installSite, loadScaffold, packPackages, reactRouterBin, reactRouterServeBin, testerIdentityCode, typecheckSite } from './lib/site.mjs'
 
@@ -54,21 +55,27 @@ async function withServer({ name, siteDir, args, env, logFile, url }, body) {
 const checksOfCombo = {
   base: ({ baseUrl, mode, siteDir, feedToken, runTag }) => runBaseChecks({ baseUrl, mode, siteDir, feedToken, runTag }),
   demo: ({ baseUrl, mode, siteDir, feedToken }) => runDemoChecks({ baseUrl, mode, siteDir, feedToken }),
+  collab: ({ baseUrl, mode, siteDir, feedToken, runTag }) => runCollabChecks({ baseUrl, mode, siteDir, feedToken, runTag }),
 }
 
 /** 一种装法 × 一种组合：建站、安装（demo 再加功能）、dev 与 build + start 各跑一轮检查 */
 async function runSite({ options, runDir, runTag, installMode, combo, tarballs, record }) {
-  const siteDir = path.join(runDir, `site-${combo}-${installMode}`)
+  const siteDir = combo === 'collab' ? collabSiteDirOf(runDir, installMode) : path.join(runDir, `site-${combo}-${installMode}`)
   const logDir = path.join(runDir, `logs-${combo}-${installMode}`)
   mkdirSync(logDir, { recursive: true })
   const feedToken = randomUUID()
   const serverEnv = { DOCSITE_IDENTITY_CODE: testerIdentityCode, DOCSITE_FEED_TOKEN: feedToken }
   try {
-    await generateSite({ siteDir, installMode, combo, tarballs, scriptPort: await freePort() })
+    if (combo === 'collab') await generateCollabSite({ siteDir, installMode, tarballs, collabTarball: tarballs?.collab, scriptPort: await freePort() })
+    else await generateSite({ siteDir, installMode, combo, tarballs, scriptPort: await freePort() })
     installSite(siteDir, logDir)
     if (combo === 'demo') {
       const { addFeature } = await loadScaffold()
       record('setup', await addDemoFeatureWithChecks({ siteDir, addFeature }))
+    }
+    if (combo === 'collab') {
+      const { addFeature } = await loadScaffold()
+      record('setup', await addCollabFeatureWithChecks({ siteDir, addFeature }))
     }
     // link 装法下包的 .d.mts 从仓里解析 @types/react、vite，与站点自己装的是两份，类型必然对不上；类型只在 file 装法查
     if (installMode === 'file') typecheckSite(siteDir, logDir)
@@ -123,7 +130,9 @@ async function main() {
   mkdirSync(runDir, { recursive: true })
   console.log(`运行目录 ${runDir}`)
   buildPlatformPackages(runDir)
+  if (options.combo.includes('collab')) buildCollabPackage(runDir)
   const tarballs = options.install.includes('file') ? packPackages(path.join(runDir, 'tarballs'), runDir) : undefined
+  if (tarballs !== undefined && options.combo.includes('collab')) tarballs.collab = packCollabPackage(path.join(runDir, 'tarballs'), runDir)
 
   const report = []
   for (const installMode of options.install) {

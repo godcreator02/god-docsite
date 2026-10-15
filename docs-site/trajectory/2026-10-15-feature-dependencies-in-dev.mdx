@@ -1,0 +1,41 @@
+---
+born-at: 2026-10-15T11:20
+type: choice
+parent: [2026-09-03-god-live-doc]
+label: 功能包自己的依赖在 dev 下
+domain: 骨架
+---
+
+## 背景
+
+[站点包的 Vite 处理](2026-10-14-site-packages-vite-handling.md) 之后，基础站与演示功能的 e2e 全过。演示功能的依赖只有 CommonJS 的 `ms`，
+identity、comments、trajectory 的依赖都不 import React。协作功能是第一个依赖里有 React 组件库（lucide-react）和浏览器端 ESM 包
+（react-markdown、remark-gfm、unified 等）的功能包，`pnpm e2e --combo=collab` 在 link 装法的 dev 下先后撞到两件事。
+
+pivots-from:: [站点包的 Vite 处理](2026-10-14-site-packages-vite-handling.md)
+
+## 结论与边界
+
+`godDocsite()` 的 `frameworkPackages` 改两处：
+
+- `resolve.dedupe` 加上 lucide-react：link 装法下功能包的 lucide-react 从仓里解析，带着仓里那份 React，图标组件的 `useContext`
+  在服务端渲染时报 `Invalid hook call`，任务页 500。按站点根目录解析后只有一份
+- 导出 `./site` 的功能包，自己 `dependencies` 里不是站点包、也不在去重名单里的，都写成「功能包 > 依赖」进 `optimizeDeps.include`。
+  vitefu 只替其中的 CommonJS 包写；ESM 的要等浏览器打开页面才被发现，重新预构建后整页刷新，刷新前已加载的模块引用旧产物，
+  报 `does not provide an export named 't'`
+
+边界：这样写的前提是功能包的 `dependencies` 都能在浏览器里预构建；功能包若有只在 Node 用的依赖（不是 Node 内置模块），预构建会失败，
+到那时要改成按功能包声明的名单写。只在 Windows、link 与 file 两种装法下验过。
+
+## 依据
+
+`pnpm e2e --combo=collab --install=link --server=dev`：改之前任务页 500（dev 服务日志 `TypeError: Cannot read properties of null (reading 'useContext')`，
+栈在仓里 `node_modules/.pnpm/lucide-react@1.54.0…` 与 `react@19.3.0`）；只加去重后日志里有
+`dependencies optimized: react-markdown, remark-gfm`、`remark-mdx, remark-parse, unified` 与 `optimized dependencies changed. reloading`，
+「两层筛选」与「控制台无报错」失败；两处都改后 17/17，连跑两次都过。检查写在 `e2e/combos/collab.mjs`。
+
+## 否掉的候选
+
+把 lucide-react、react-markdown 改成协作包的 peer：link 装法下包从自己目录解析依赖，peer 不改变解析到哪一份，开发依赖里装的仍是仓里那份。
+在协作包里不用 lucide-react：任务页、通知栏的图标都用它，换掉代价大，而且下一个功能包还会撞上。
+把功能包也放进预构建：功能包自带的评论、身份组件会被打进预构建产物，和站点用的那份是两份，上下文对不上。

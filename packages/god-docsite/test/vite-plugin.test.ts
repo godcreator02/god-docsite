@@ -2,7 +2,7 @@ import type { EnvironmentModuleNode } from 'vite'
 import { describe, expect, it } from 'vitest'
 import { collectionDirsOf } from '../src/vite/collections.js'
 import { collectorModulesToAdd } from '../src/vite/content-collectors.js'
-import { isSitePackage } from '../src/vite/framework-packages.js'
+import { featureDependencyIncludes, isSitePackage } from '../src/vite/framework-packages.js'
 
 function moduleNode(id: string | null): EnvironmentModuleNode {
   return { id } as EnvironmentModuleNode
@@ -44,5 +44,16 @@ describe('isSitePackage', () => {
     expect(isSitePackage({ exports: { '.': './dist/index.mjs', './site': './dist/site.mjs' } })).toBe(true)
     expect(isSitePackage({ exports: { '.': './dist/index.mjs' } })).toBe(false)
     expect(isSitePackage({ exports: './dist/index.mjs' })).toBe(false)
+  })
+})
+
+describe('featureDependencyIncludes', () => {
+  it('导出 ./site 的功能包的 dependencies 都写成「包 > 依赖」，站点包与去重的包除外；不导出 ./site 的站点包（平台、fumadocs-mdx）不写', () => {
+    const collab = {
+      name: '@godcreator/collab',
+      packageJson: { exports: { '.': './a.mjs', './site': './b.mjs' }, dependencies: { '@godcreator/identity': '^0', 'lucide-react': '1', 'react-markdown': '10', unified: '11' } },
+    }
+    const mdx = { name: 'fumadocs-mdx', packageJson: { peerDependencies: { 'fumadocs-core': '16' }, dependencies: { esbuild: '0.28' } } }
+    expect(featureDependencyIncludes([collab, mdx], new Set(['@godcreator/collab', '@godcreator/identity', 'fumadocs-mdx']))).toEqual(['@godcreator/collab > react-markdown', '@godcreator/collab > unified'])
   })
 })
