@@ -1,6 +1,5 @@
 import { existsSync, readdirSync, readFileSync } from 'node:fs'
 import path from 'node:path'
-import type * as PageTree from 'fumadocs-core/page-tree'
 import { describe, expect, it, vi } from 'vitest'
 import { calendarUrl, journalDirName, journalFileGlob, journalUrlOf, projectFileApiUrl, recordLinksApiUrl, recordPageUrlOf, repoLinksApiUrl, tasksPageUrl } from '../src/core/index.js'
 import { notificationOf } from '../src/core/notifications/notifications.js'
@@ -8,8 +7,8 @@ import { InvalidSiteFeed } from '../src/core/notifications/site-feed.js'
 import { remarkCollabLinks } from '../src/mdx/index.js'
 import { importsOf, importsOfFile, reachableFrom } from './source-imports.js'
 
-// 平台的浏览器出口连带加载 @fumadocs/base-ui 的样式文件，Node 里 import 不了；这里只测不渲染的导出，用不到它
-vi.mock('@godcreator/god-docsite/react', () => ({ useSiteFeed: () => undefined }))
+// 平台的浏览器出口连带加载 @fumadocs/base-ui 的样式文件，Node 里 import 不了；这里只测不渲染的导出，页面树插件换成记下入口的替身
+vi.mock('@godcreator/god-docsite/react', () => ({ useSiteFeed: () => undefined, pageTreeLinksPlugin: (links: unknown) => ({ name: 'page-tree-links', links }) }))
 
 /*
  * 功能包模板：建站器把 template/ 原样复制到站点的 app/features/collab/。
@@ -81,7 +80,14 @@ describe('mdx.ts（构建期，只经 source.config.ts 加载）', () => {
   it('给站点集合的 remark 插件是记录链接；日志集合照本包的日志规则：journal/ 顶层的 <日期>.mdx，正文按需加载', async () => {
     const mdx = await import('../template/mdx.ts')
     expect(mdx.remarkPlugins).toEqual([remarkCollabLinks])
-    expect(mdx.journal).toMatchObject({ type: 'doc', dir: journalDirName, files: [journalFileGlob], async: true })
+    const journal = mdx.collections.journal({ remarkPlugins: [], rehypePlugins: [] })
+    expect(journal).toMatchObject({ type: 'doc', dir: journalDirName, files: [journalFileGlob], async: true })
+  })
+
+  it('集合工厂的名单与 package.json 的 godDocsite.collections 一致：建站器按名单生成集合汇总', async () => {
+    const mdx = await import('../template/mdx.ts')
+    const manifest = JSON.parse(readFileSync(path.resolve(import.meta.dirname, '../package.json'), 'utf8')) as { godDocsite: { collections: string[] } }
+    expect(Object.keys(mdx.collections)).toEqual(manifest.godDocsite.collections)
   })
 })
 
@@ -91,14 +97,16 @@ describe('feature.tsx（运行时，浏览器侧也加载）', () => {
     expect(serverOnly).toEqual([])
   })
 
-  it('页面树插件在侧栏根部末尾加「任务」「日历」两个站内入口', async () => {
+  it('页面树插件用平台的 pageTreeLinksPlugin 在侧栏加「任务」「日历」两个站内入口', async () => {
     const { pageTreePlugins } = await import('../template/feature.tsx')
-    const root: PageTree.Root = { type: 'root', name: '站', children: [{ type: 'page', name: '首页', url: '/' }] }
-    const transformed = pageTreePlugins.reduce((tree, plugin) => plugin.transformPageTree!.root!.call({} as never, tree), root)
-    expect(transformed.children.map((node) => [node.name, node.type === 'page' ? node.url : null])).toEqual([
-      ['首页', '/'],
-      ['任务', tasksPageUrl],
-      ['日历', calendarUrl],
+    expect(pageTreePlugins).toEqual([
+      {
+        name: 'page-tree-links',
+        links: [
+          { name: '任务', url: tasksPageUrl },
+          { name: '日历', url: calendarUrl },
+        ],
+      },
     ])
   })
 
@@ -106,11 +114,12 @@ describe('feature.tsx（运行时，浏览器侧也加载）', () => {
     const { layoutData } = await import('../template/feature.tsx')
     const notification = notificationOf({ kind: 'task', recordId: '20261001090000-aaaaaaa', title: '画采样板', due: null, detail: null })
     let pushed: unknown
+    // layoutData 只用基础站点上下文的这三项
     const base = {
       people: () => [{ id: 'bob', name: '鲍勃', codes: ['bobcode2345'] }],
       identity: () => ({ person: { id: 'bob', name: '鲍勃' } }),
       feedValue: (channel: string) => (channel === 'collab' ? pushed : undefined),
-    }
+    } as unknown as Parameters<typeof layoutData>[1]
     const args = { request: new Request('http://collab.test/'), params: {}, context: {} } as Parameters<typeof layoutData>[0]
     expect(layoutData(args, base)).toEqual({ people: [{ id: 'bob', name: '鲍勃' }], person: 'bob', notifications: null })
     pushed = JSON.parse(JSON.stringify({ notifications: [notification], projectLeads: null }))
