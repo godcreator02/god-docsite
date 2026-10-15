@@ -1,0 +1,31 @@
+---
+born-at: 2026-10-15T15:30
+type: choice
+parent: [2026-09-03-god-live-doc]
+label: 全仓检查并入 tests/
+domain: 检查
+---
+
+## 背景
+
+[e2e 改测仓里的测试站](2026-10-15-e2e-on-repo-test-site.md) 之后，全仓级的检查分在两处：端到端检查在仓根 `e2e/`，
+建站器比对在 `scripts/scaffold-check.mjs`，和一次性的数据迁移工具 `scripts/migrate-comments-to-threads.mjs` 放在一起。
+三条命令的名字也各成一套：`pnpm e2e`、`pnpm e2e:pack`、`pnpm scaffold:check`。
+
+pivots-from:: [e2e 改测仓里的测试站](2026-10-15-e2e-on-repo-test-site.md)
+
+## 结论与边界
+
+仓根 `tests/` 只放全仓级的检查，各包自己的测试留在各包里：`e2e/` 移到 `tests/e2e/`，`scripts/scaffold-check.mjs` 移到
+`tests/scaffold-check.mjs`；`scripts/` 只剩数据迁移工具。仓根脚本统一成 `test:` 开头：`test:e2e`（`node tests/e2e/run.mjs`）、
+`test:pack`（`node tests/e2e/pack.mjs`）、`test:scaffold`（`node tests/scaffold-check.mjs`），`pnpm verify` 跟着改。
+检查本身的行为不变，只改了位置、命令名，以及 `tests/e2e/lib/site.mjs` 找仓根时多上一层目录。
+
+边界：仓根的 `pnpm test` 仍是 `pnpm -r test`，只跑各包的测试，不包括这三条 `test:` 命令；合并前照旧跑 `pnpm verify`。
+旧轨迹卡里写的 `pnpm e2e`、`e2e/…` 路径是当时的名字，不改。
+
+## 依据
+
+分支 `wave10/tests-dir`，移动与改名在提交 f3b8f90c：移动后 `pnpm test:scaffold` 两个站一致（54、39 个文件）；
+`pnpm build` 之后 `pnpm test:e2e --server=start --skip-build` 53 项全过、22 秒，最后一项 `git status collab-test` 与跑之前一样。
+运行日志在系统临时目录、不进仓。
