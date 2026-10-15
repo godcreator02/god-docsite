@@ -1,6 +1,0 @@
-{
-  "title": "指南",
-  "description": "meta.json 写了 root: true 的文件夹：侧栏出现目录切换按钮",
-  "root": true,
-  "pages": ["index"]
-}
