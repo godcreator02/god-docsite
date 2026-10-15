@@ -34,7 +34,8 @@
 * **站点骨架只改 `packages/god-docsite/template/`**，功能包的接线文件只改各包的 `template/`；docs-site、collab-test/site 的 `app/` 由建站器写出，
   改了模板用建站器重新生成它们
 * 插件打包时带进各包的构建产物：改了包要先构建；在隔离 home 里验插件用 `devkit.dev`（说明书 gwb-devkit）
-* 每个包都有 `build`、`typecheck`、`test`、`check`（`check` 先 typecheck 再 test，有 `lint` 的再 lint）；仓根 `pnpm check` 是 `pnpm -r check`，
+* 每个包都有 `build`、`typecheck`、`test`、`check`（`check` 先 typecheck 再 test，有 `lint` 的再 lint）；仓根 `pnpm check` 逐个包跑 check
+  （`--workspace-concurrency=1`：几个包的测试大量调 git，并行时超时；docs-site 没有 check，它的检查见下），
   `pnpm test` 是 `pnpm -r test`，`pnpm depcheck` 跑 dependency-cruiser（要先 `pnpm build`，包之间按包名 import 时解析到对方的 `dist/`）
 * 测试按节奏跑，不是每次全量：改代码过程中只跑改到的包（`pnpm --filter <包> check`），e2e 只跑改到的组合
   （如 `pnpm e2e --combo=collab --install=link --server=dev`）；**合并分支前和发版前跑 `pnpm verify`**：`pnpm build` → `pnpm check` →
