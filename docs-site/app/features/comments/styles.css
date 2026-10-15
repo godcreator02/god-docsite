@@ -5,27 +5,52 @@
 @source not '../../../comments';
 
 /*
- * 评论在正文上的标记（CommentsDock 注册高亮、给被批的元素加属性）：划的字走 CSS Custom Highlight API，注册名 docsite-comment；
- * 批的元素描边；批注模式打开时正文鼠标换成十字
+ * 评论在正文上的标记（CommentsDock 注册高亮、给被批的元素加属性）：划的字走 CSS Custom Highlight API，注册名 docsite-comment，
+ * 打开着的那一串加深，写草稿时批的字是蓝色；被批的元素左边一道黄线（两层阴影：一层底色隔开，一层黄色），悬停与打开时整块铺黄底；
+ * 草稿批的元素铺蓝底；批注模式打开时正文鼠标换成十字
  */
 ::highlight(docsite-comment) {
-  background-color: color-mix(in oklab, #f5b301 25%, transparent);
-  text-decoration: underline 2px color-mix(in oklab, #f5b301 80%, transparent);
+  background-color: color-mix(in oklab, #f5b301 16%, transparent);
+  text-decoration: underline 2px color-mix(in oklab, #f5b301 75%, transparent);
   text-underline-offset: 3px;
 }
 
 ::highlight(docsite-comment-active) {
-  background-color: color-mix(in oklab, #f5b301 55%, transparent);
+  background-color: color-mix(in oklab, #f5b301 42%, transparent);
+}
+
+::highlight(docsite-comment-draft) {
+  background-color: color-mix(in oklab, #2383e2 18%, transparent);
+  text-decoration: underline 2px #2383e2;
+  text-underline-offset: 3px;
 }
 
 [data-commented-element] {
-  outline: 2px solid color-mix(in oklab, #f5b301 55%, transparent);
-  outline-offset: 4px;
+  cursor: pointer;
   border-radius: 4px;
+  box-shadow:
+    -10px 0 0 -3px var(--color-fd-background, #fff),
+    -13px 0 0 -3px color-mix(in oklab, #f5b301 75%, transparent);
+  transition:
+    background-color 0.15s,
+    box-shadow 0.15s;
 }
 
-[data-commented-element='active'] {
-  outline-color: #f5b301;
+[data-commented-element]:hover {
+  background-color: color-mix(in oklab, #f5b301 12%, transparent);
+  box-shadow: 0 0 0 6px color-mix(in oklab, #f5b301 12%, transparent);
+}
+
+[data-commented-element='active'],
+[data-commented-element='active']:hover {
+  background-color: color-mix(in oklab, #f5b301 22%, transparent);
+  box-shadow: 0 0 0 6px color-mix(in oklab, #f5b301 22%, transparent);
+}
+
+[data-comment-draft-target] {
+  border-radius: 4px;
+  background-color: color-mix(in oklab, #2383e2 12%, transparent);
+  box-shadow: 0 0 0 6px color-mix(in oklab, #2383e2 12%, transparent);
 }
 
 html[data-comment-picking] [data-comment-scope] {

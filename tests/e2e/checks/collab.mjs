@@ -1,7 +1,7 @@
 import { existsSync, readdirSync, readFileSync, writeFileSync } from 'node:fs'
 import path from 'node:path'
 import { pathToFileURL } from 'node:url'
-import { checkRunner, filesUnder, headingOf, markNoReload, postFormToAction, problemResults, serverCodeInClientBuild, stepTimeoutMs, stillNoReload, waitForHydrated, watchPage } from '../lib/checks.mjs'
+import { checkRunner, filesUnder, headingOf, markNoReload, openCommentsInbox, postFormToAction, problemResults, serverCodeInClientBuild, stepTimeoutMs, stillNoReload, waitForHydrated, watchPage } from '../lib/checks.mjs'
 import { recordsDirOf } from '../lib/run-scratch.mjs'
 import { repoDir, testerIdentityCode } from '../lib/site.mjs'
 
@@ -83,9 +83,9 @@ async function readonlyStartCheck({ page, baseUrl, siteDir, runTag }) {
   const recordsBefore = recordFiles(siteDir).length
   const commentsBefore = filesUnder(commentsDir).length
   await page.goto(`${baseUrl}/tasks`, { waitUntil: 'load' })
-  await waitForHydrated(page, '[data-comment-dock-open]')
+  await waitForHydrated(page, '[data-comment-inbox-toggle]')
   const createButtons = await page.getByRole('button', { name: '新建任务', exact: true }).count()
-  await page.click('[data-comment-dock-open]')
+  await openCommentsInbox(page)
   const reason = page.locator('[data-readonly-reason]')
   await reason.waitFor({ timeout: stepTimeoutMs })
   const reasonText = ((await reason.textContent()) ?? '').trim()
@@ -96,7 +96,7 @@ async function readonlyStartCheck({ page, baseUrl, siteDir, runTag }) {
   const rejected = [taskPost, commentPost].every(({ status, text }) => status === 403 && text.includes('发布版'))
   return {
     pass: reasonText.includes('发布版') && createButtons === 0 && rejected && recordsAfter === recordsBefore && commentsAfter === commentsBefore,
-    detail: `新建任务按钮 ${createButtons} 个，评论面板写着「${reasonText}」；直接提交任务 → ${taskPost.status}、评论 → ${commentPost.status}；记录文件 ${recordsBefore} → ${recordsAfter}，评论目录文件 ${commentsBefore} → ${commentsAfter}`,
+    detail: `新建任务按钮 ${createButtons} 个，评论收件箱写着「${reasonText}」；直接提交任务 → ${taskPost.status}、评论 → ${commentPost.status}；记录文件 ${recordsBefore} → ${recordsAfter}，评论目录文件 ${commentsBefore} → ${commentsAfter}`,
   }
 }
 
@@ -263,11 +263,9 @@ export async function runCollabChecks({ browser, baseUrl, mode, siteDir, feedTok
       const commentText = `e2e 任务页评论 ${runTag}`
       await check('任务页评论（写进去并显示）', async () => {
         await page.goto(`${baseUrl}/tasks`, { waitUntil: 'load' })
-        await waitForHydrated(page, '[data-comment-dock-open]')
         const commentsDir = path.join(siteDir, 'comments')
         const before = filesUnder(commentsDir).length
-        await page.click('[data-comment-dock-open]')
-        await page.click('[data-new-thread-toggle]')
+        await openCommentsInbox(page)
         await page.fill('[data-new-thread-form] textarea[name="body"]', commentText)
         const [response] = await Promise.all([
           page.waitForResponse((each) => each.request().method() === 'POST' && new URL(each.url()).pathname.startsWith('/tasks'), { timeout: stepTimeoutMs }),

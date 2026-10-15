@@ -1,20 +1,20 @@
 /**
- * 评论交互台（浮标 + 唤起式侧栏 + 批注模式）：
- * - 右下角浮标：评论按钮（角标是本页评论串数）唤出右侧评论栏，再点收起；开关记在 localStorage。
- *   侧栏 fixed 盖在目录那一列上（宽度同 --docsite-side-column-width），开着时由站点样式
- *   （平台包 god-docsite 的 styles.css 里 data-comments-sidebar-open 那组）让目录列让位
- * - 批注模式（可写时）：正文鼠标变十字（站点样式 data-comment-picking），点候选元素批它
- *   （anchor 存元素的稳定 id，见 ./browser/annotate 的协议），选中一段字批这段字
- *   （anchor 存 JSON：quote/start/end/snapshot，见模型 parseCommentAnchor）
- * - 已被批的元素描边（data-commented-element）、划的字高亮（CSS Custom Highlight API，
- *   注册名 docsite-comment，样式在本包 template/styles.css，建站后在站点的 app/features/comments/）；点标记在侧栏里亮对应评论，
- *   侧栏点 ⚲ 滚到正文里对应的位置；划的字原文改了按快照差异重新找，找不到如实标注
+ * 评论交互台（右下角工具条 + 本页评论收件箱 + 正文下方的评论浮窗 + 批注模式）：
+ * - 工具条：「批注」开关（可写时）与「评论」按钮。「评论」弹出收件箱（./comments-inbox），只有再点它或收件箱右上角的 × 才收起，
+ *   点正文、Esc 都不收；开关记在 localStorage
+ * - 点正文里的标记（被批的元素、划的字），或在收件箱里点一行：被批的那一块正下方浮出一个框，只放这一串（./comment-thread），
+ *   盖在后面的正文上、不挤动正文；再点同一处、点正文别处或 Esc 收起。批整页、找不到原文的串浮在正文顶上
+ * - 批注模式（可写时）：正文鼠标变十字（站点样式 data-comment-picking），点候选元素批它（anchor 存元素的稳定 id，见 ./browser/annotate 的协议）；
+ *   可写时划一段字随时浮出「评论」按钮批这段字（anchor 存 JSON：quote/start/end/snapshot，见模型 parseCommentAnchor）。草稿同样浮在那一块下面
+ * - 被批的元素带 data-commented-element，划的字高亮（CSS Custom Highlight API，注册名 docsite-comment，样式在本包 template/styles.css，
+ *   建站后在站点的 app/features/comments/）；划的字原文改了按快照差异重新找，找不到如实标注
  *
- * 写入提交到 action 参数给的地址（字段与 CommentsSidebar 同一约定）；列表与回复复用 CommentsSidebar。
+ * 浮窗与草稿经 portal 挂在 body 上、按文档坐标定位（带 data-comments-layer），不受正文容器的定位影响。
+ * 写入提交到 action 参数给的地址（字段约定见 ./comment-model）
  */
-import { useEffect, useLayoutEffect, useMemo, useRef, useState, type ComponentType } from 'react'
-import { useFetcher } from 'react-router'
-import { parseCommentAnchor, serializeTextAnchor, type TextAnchorFields } from '../core/anchor.js'
+import { useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from 'react'
+import { createPortal } from 'react-dom'
+import { parseCommentAnchor, serializeTextAnchor, type CommentAnchor, type TextAnchorFields } from '../core/anchor.js'
 import {
   annotateCommentTargets,
   commentScopeAttribute,
@@ -27,53 +27,76 @@ import {
   targetOfThread,
   type ThreadTarget,
 } from './browser/index.js'
-import { CommentsSidebar, errorOf, type CommentAvatar, type CommentsAccess, type PageThreadSummary } from './comments-sidebar.js'
+import type { CommentAvatar, CommentBodyComponent, CommentsAccess, PageThreadSummary } from './comment-model.js'
+import { CommentIcon, Composer, ThreadQuote, type ThreadPlace } from './comment-parts.js'
+import { CommentThread } from './comment-thread.js'
+import { CommentsInbox, type InboxItem } from './comments-inbox.js'
 
-/** 侧栏开关存在 localStorage 的键 */
-const sidebarOpenStorageKey = 'docsite-comments-sidebar-open'
+/** 收件箱开关存在 localStorage 的键 */
+const inboxOpenStorageKey = 'docsite-comments-inbox-open'
 /** 页面正文的容器带这个属性，评论在它里面找被批的原文：<DocsBody {...commentScopeProps}> */
 export const commentScopeProps = { [commentScopeAttribute]: '' } as const
-/** 划字高亮的注册名：样式在本包 template/styles.css（::highlight(docsite-comment)） */
+/** 划字高亮的注册名：样式在本包 template/styles.css（::highlight(docsite-comment) 这几条） */
 const quoteHighlightName = 'docsite-comment'
 const activeQuoteHighlightName = 'docsite-comment-active'
-/** 被批元素描边（样式在本包 template/styles.css）与它对应评论串的属性 */
+const draftQuoteHighlightName = 'docsite-comment-draft'
+/** 被批元素、草稿批的元素与它们对应评论串的属性（样式在本包 template/styles.css） */
 const commentedElementAttribute = 'data-commented-element'
 const commentedThreadAttribute = 'data-comment-thread'
+const draftElementAttribute = 'data-comment-draft-target'
 /** 批注模式打开时挂在 <html> 上的属性（正文变十字光标，样式在本包 template/styles.css） */
 const pickingAttribute = 'data-comment-picking'
-const sidebarOpenAttribute = 'data-comments-sidebar-open'
+/** 交互台自己的界面：工具条、收件箱所在的根，与挂在 body 上的浮窗 */
+const dockAttribute = 'data-comments-dock'
+const layerAttribute = 'data-comments-layer'
 /** 引文标签最多显示的字数 */
 const noteQuoteLength = 40
+/** 浮窗最窄的宽度：批的是列表项、图片这类窄元素时也放得下回复框 */
+const floatingMinWidth = 420
+/** 浮窗与被批那一块之间的空隙 */
+const floatingGap = 10
 
 type Box = { top: number; left: number; width: number; height: number }
 
 /** 拾取中的草稿：批元素（存的 anchor 就是元素 id）或批一段字（存的 anchor 是 TextAnchorFields 的 JSON） */
-type Draft =
-  | { kind: 'element'; anchorValue: string; label: string; top: number; left: number }
-  | { kind: 'text'; anchorValue: string; label: string; top: number; left: number }
+type Draft = { kind: 'element'; anchorValue: string; element: Element } | { kind: 'text'; anchorValue: string; label: string; range: Range }
+
+/** 打开着的那一串；reveal 是浮窗出现后怎么滚进视野（从收件箱打开时滚到中间） */
+type OpenThread = { id: string; reveal: 'nearest' | 'center' }
+
+/** 浮窗挂在哪：一块正下方（小三角对准 pointAt 的第一行，不给就对准这一块的左边），或正文顶上（批整页、找不到原文） */
+type FloatAnchor = { block: Element; edge: 'below' | 'top'; pointAt?: Range }
+
+type FloatPosition = { top: number; left: number; width: number; arrowX: number | null }
 
 function boxOf(element: Element): Box {
   const rect = element.getBoundingClientRect()
   return { top: rect.top, left: rect.left, width: rect.width, height: rect.height }
 }
 
-function clampToViewport(left: number, width: number) {
-  return Math.max(8, Math.min(left, window.innerWidth - width - 8))
-}
-
 function containsPoint(rect: DOMRect, x: number, y: number) {
   return x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom
+}
+
+function clamp(value: number, min: number, max: number) {
+  return Math.max(min, Math.min(value, max))
+}
+
+function firstLineOf(range: Range): DOMRect {
+  return [...range.getClientRects()].find((rect) => rect.width > 0 && rect.height > 0) ?? range.getBoundingClientRect()
 }
 
 function highlightsAvailable() {
   return typeof CSS !== 'undefined' && CSS.highlights != null && typeof Highlight === 'function'
 }
 
-function paintHighlights(ranges: ReadonlyArray<Range>, activeRange: Range | undefined) {
+function paintHighlights(ranges: ReadonlyArray<Range>, activeRange: Range | undefined, draftRange: Range | undefined) {
   if (!highlightsAvailable()) return
   CSS.highlights.set(quoteHighlightName, new Highlight(...ranges))
   if (activeRange) CSS.highlights.set(activeQuoteHighlightName, new Highlight(activeRange))
   else CSS.highlights.delete(activeQuoteHighlightName)
+  if (draftRange) CSS.highlights.set(draftQuoteHighlightName, new Highlight(draftRange))
+  else CSS.highlights.delete(draftQuoteHighlightName)
 }
 
 function setAttributeIfDifferent(element: Element, name: string, value: string) {
@@ -81,7 +104,13 @@ function setAttributeIfDifferent(element: Element, name: string, value: string) 
 }
 
 /** 标注走查与描边标记写进正文的属性；观察者对它们的变更不算正文变化，否则自己触发自己 */
-const ownAttributeNames = new Set(['id', 'data-comment-target', commentedElementAttribute, commentedThreadAttribute])
+const ownAttributeNames = new Set(['id', 'data-comment-target', commentedElementAttribute, commentedThreadAttribute, draftElementAttribute])
+
+/** 这个节点属于交互台自己的界面（工具条、收件箱、浮窗）吗 */
+function isOwnInterface(node: Node | EventTarget | null) {
+  const element = node instanceof Element ? node : node instanceof Node ? node.parentElement : null
+  return element?.closest(`[${dockAttribute}], [${layerAttribute}]`) != null
+}
 
 /** 两轮落点相同吗（相同就不更新 state，下游 effect 不重跑） */
 function sameTargets(a: Map<string, ThreadTarget>, b: Map<string, ThreadTarget>) {
@@ -114,6 +143,87 @@ function quoteNote(quote: string, prefix: string) {
   return `${prefix}「${shown}」`
 }
 
+/** 一串批在哪：还没量过落点时（服务端渲染、首帧）按锚点的种类先算 */
+function placeOf(anchor: CommentAnchor, target: ThreadTarget | undefined): ThreadPlace {
+  if (anchor.kind === 'page') return 'page'
+  if (anchor.kind === 'broken') return 'missing'
+  if (target === undefined) return 'body'
+  return target.kind === 'element' || target.kind === 'text' ? 'body' : 'missing'
+}
+
+/** 批的位置写给人看：被批的元素、引的原文、原文改过或找不到了 */
+function noteOf(anchor: CommentAnchor, target: ThreadTarget | undefined): string | undefined {
+  if (anchor.kind === 'broken') return '锚点数据认不出'
+  const quote = anchor.kind === 'text' ? anchor.quote : ''
+  if (target?.kind === 'missing') {
+    if (target.reason === 'element-id-gone') return '批的元素不在这一页上了'
+    // 页签没打开、组件收起把内容从页面拿掉时，被批的字也不在页面文字里：换到那一页或展开就找得回
+    return quoteNote(quote, '原文找不到了（可能已删去，或在没打开的页签、收起的内容里）：')
+  }
+  if (target?.kind === 'hidden') return quoteNote(quote, '批的内容现在看不见（可能在收起的内容里）：')
+  if (target?.kind === 'text') return quoteNote(target.quote, target.changed ? '原文改过：' : '')
+  if (target?.kind === 'element') return commentTargetLabelOf(target.element)
+  return undefined
+}
+
+/** 浮窗挂在哪：元素正下方；划的字所在那一块正下方、小三角对准那几个字；其余浮在正文顶上 */
+function floatAnchorOf(target: ThreadTarget | undefined, scope: Element): FloatAnchor {
+  if (target?.kind === 'element') return { block: target.element, edge: 'below' }
+  if (target?.kind === 'text') return { block: commentTargetNear(target.range.startContainer, scope) ?? scope, edge: 'below', pointAt: target.range }
+  return { block: scope, edge: 'top' }
+}
+
+/** 浮窗的文档坐标：和那一块左对齐、同宽（至少 floatingMinWidth），不超出正文与窗口 */
+function floatPositionOf(anchor: FloatAnchor, scope: Element): FloatPosition {
+  const blockRect = anchor.block.getBoundingClientRect()
+  const scopeRect = scope.getBoundingClientRect()
+  const width = Math.min(Math.max(blockRect.width, floatingMinWidth), Math.max(scopeRect.width, blockRect.width), window.innerWidth - 16)
+  const rightLimit = Math.min(Math.max(scopeRect.right, blockRect.right), window.innerWidth - 8)
+  const left = Math.max(8, Math.min(blockRect.left, rightLimit - width))
+  const top = anchor.edge === 'top' ? scopeRect.top : blockRect.bottom + floatingGap
+  const pointLeft = anchor.pointAt ? firstLineOf(anchor.pointAt).left : anchor.edge === 'below' ? blockRect.left : null
+  return {
+    top: top + window.scrollY,
+    left: left + window.scrollX,
+    width,
+    arrowX: pointLeft === null ? null : clamp(pointLeft - left + 10, 14, width - 30),
+  }
+}
+
+/** 浮在某一块下面的框：挂在 body 上，跟着窗口与正文的尺寸变化重新定位；出现后滚进视野 */
+function FloatingLayer({ anchor, scope, reveal, tone, children }: { anchor: FloatAnchor; scope: Element; reveal: OpenThread['reveal']; tone: 'thread' | 'draft'; children: ReactNode }) {
+  const layerRef = useRef<HTMLDivElement>(null)
+  const [position, setPosition] = useState<FloatPosition | null>(null)
+  useLayoutEffect(() => {
+    const place = () => setPosition(floatPositionOf(anchor, scope))
+    place()
+    const observer = new ResizeObserver(place)
+    observer.observe(scope)
+    window.addEventListener('resize', place)
+    return () => {
+      observer.disconnect()
+      window.removeEventListener('resize', place)
+    }
+  }, [anchor, scope])
+  const placed = position !== null
+  useEffect(() => {
+    if (!placed) return
+    layerRef.current?.scrollIntoView({ block: reveal, behavior: 'smooth' })
+    // 定位之前框是隐藏的，输入框挂载时的自动聚焦落空了，这里补上
+    layerRef.current?.querySelector<HTMLElement>('[data-autofocus]')?.focus({ preventScroll: true })
+  }, [placed])
+  const style: CSSProperties = position
+    ? ({ top: position.top, left: position.left, width: position.width, '--docsite-arrow-x': `${position.arrowX ?? 0}px` } as CSSProperties)
+    : { visibility: 'hidden' }
+  const classNames = ['docsite-floating', tone === 'draft' ? 'docsite-floating-draft' : '', position?.arrowX == null ? '' : 'docsite-floating-arrow'].filter(Boolean).join(' ')
+  return createPortal(
+    <div ref={layerRef} {...{ [layerAttribute]: '' }} className={classNames} style={style}>
+      {children}
+    </div>,
+    document.body,
+  )
+}
+
 export interface CommentsDockProps {
   pagePath: string
   /** 评论表单提交到的地址：这个地址的路由 action 调 handleCommentWrite */
@@ -121,31 +231,32 @@ export interface CommentsDockProps {
   threads: PageThreadSummary[]
   access: CommentsAccess
   /** 宿主的评论正文组件：按集合内路径渲染（fumadocs 的 client loader），正文按需加载 */
-  BodyComponent: ComponentType<{ path: string }>
-  /** 宿主的头像组件（身份包的 Avatar 包一层），传给侧栏的评论卡 */
+  BodyComponent: CommentBodyComponent
+  /** 宿主的头像组件（身份包的 Avatar 包一层）；不给就用名字的头一个字 */
   AvatarComponent?: CommentAvatar
 }
 
 export function CommentsDock({ pagePath, action, threads, access, BodyComponent, AvatarComponent }: CommentsDockProps) {
-  const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [inboxOpen, setInboxOpen] = useState(false)
   const [picking, setPicking] = useState(false)
-  const [activeThreadId, setActiveThreadId] = useState<string | null>(null)
+  const [openThread, setOpenThread] = useState<OpenThread | null>(null)
   const [draft, setDraft] = useState<Draft | null>(null)
-  const [selectionAction, setSelectionAction] = useState<{ top: number; left: number; anchor: TextAnchorFields } | null>(null)
+  const [selectionAction, setSelectionAction] = useState<{ top: number; left: number; anchor: TextAnchorFields; range: Range } | null>(null)
   const [hovered, setHovered] = useState<{ box: Box; label: string } | null>(null)
   const [targets, setTargets] = useState<Map<string, ThreadTarget>>(() => new Map())
+  const [scope, setScope] = useState<Element | null>(null)
   const [mapRange] = useState(createRangeMapper)
-  const dockRootRef = useRef<HTMLDivElement>(null)
-  /** 落点与拾取悬停的实时引用：document 级点击监听里用，不跟着 React 状态走 */
+  /** 落点的实时引用：document 级点击监听里用，不跟着 React 状态走 */
   const targetsRef = useRef(targets)
   targetsRef.current = targets
   const hoveredElementRef = useRef<Element | null>(null)
   const writable = access.kind === 'writable'
+  const openThreadId = openThread?.id ?? null
 
-  const changeSidebarOpen = (open: boolean) => {
-    setSidebarOpen(open)
+  const changeInboxOpen = (open: boolean) => {
+    setInboxOpen(open)
     try {
-      localStorage.setItem(sidebarOpenStorageKey, open ? '1' : '0')
+      localStorage.setItem(inboxOpenStorageKey, open ? '1' : '0')
     } catch {
       // localStorage 被浏览器策略禁用时只丢记忆，不影响开关本身
     }
@@ -154,39 +265,35 @@ export function CommentsDock({ pagePath, action, threads, access, BodyComponent,
   // 挂载后读上次的开关（不在首渲染读：SSR 与客户端要渲染一致）
   useEffect(() => {
     try {
-      if (localStorage.getItem(sidebarOpenStorageKey) === '1') setSidebarOpen(true)
+      if (localStorage.getItem(inboxOpenStorageKey) === '1') setInboxOpen(true)
     } catch {
       // 同上
     }
   }, [])
 
-  // 侧栏开着时挂到 <html> 上：站点样式据此让目录列让位（样式在平台包 god-docsite 的 styles.css）。
-  // 用 layout effect 赶在绘制前挂上：挂在普通 effect 里时，属性变化偶发不触发目录列的重算（要等下一次交互）
-  useLayoutEffect(() => {
-    if (sidebarOpen) document.documentElement.setAttribute(sidebarOpenAttribute, '')
-    else document.documentElement.removeAttribute(sidebarOpenAttribute)
-  }, [sidebarOpen])
-
-  // 正文变化 → 标注走查 + 逐串推算落点 + 画高亮与描边。自己的属性写入不算正文变化
+  // 正文变化 → 标注走查 + 逐串推算落点 + 画高亮与描边。自己的属性写入与自己的界面不算正文变化
+  const draftRange = draft?.kind === 'text' ? draft.range : undefined
   useEffect(() => {
     let frame = 0
     const markedElements: Element[] = []
     const measure = () => {
-      const scope = document.querySelector<HTMLElement>(`[${commentScopeAttribute}]`)
-      if (!scope) {
+      const found = document.querySelector<HTMLElement>(`[${commentScopeAttribute}]`)
+      setScope(found)
+      if (!found) {
         setTargets((current) => (current.size === 0 ? current : new Map<string, ThreadTarget>()))
-        paintHighlights([], undefined)
+        paintHighlights([], undefined, draftRange)
         return
       }
-      annotateCommentTargets(scope)
-      const pageText = pageTextOf(scope)
+      annotateCommentTargets(found)
+      const pageText = pageTextOf(found)
       const next = new Map<string, ThreadTarget>()
-      for (const thread of threads) next.set(thread.id, targetOfThread(scope, pageText, parseCommentAnchor(thread.anchor), mapRange))
+      for (const thread of threads) next.set(thread.id, targetOfThread(found, pageText, parseCommentAnchor(thread.anchor), mapRange))
       setTargets((current) => (sameTargets(current, next) ? current : next))
-      const activeTarget = activeThreadId === null ? undefined : next.get(activeThreadId)
+      const activeTarget = openThreadId === null ? undefined : next.get(openThreadId)
       paintHighlights(
         [...next.values()].filter((target): target is Extract<ThreadTarget, { kind: 'text' }> => target.kind === 'text').map((target) => target.range),
         activeTarget?.kind === 'text' ? activeTarget.range : undefined,
+        draftRange,
       )
       for (const element of markedElements.splice(0)) {
         element.removeAttribute(commentedElementAttribute)
@@ -194,7 +301,7 @@ export function CommentsDock({ pagePath, action, threads, access, BodyComponent,
       }
       for (const [id, target] of next) {
         if (target.kind !== 'element') continue
-        setAttributeIfDifferent(target.element, commentedElementAttribute, id === activeThreadId ? 'active' : '')
+        setAttributeIfDifferent(target.element, commentedElementAttribute, id === openThreadId ? 'active' : '')
         setAttributeIfDifferent(target.element, commentedThreadAttribute, id)
         markedElements.push(target.element)
       }
@@ -205,8 +312,7 @@ export function CommentsDock({ pagePath, action, threads, access, BodyComponent,
     }
     const isIgnored = (record: MutationRecord) => {
       if (record.type === 'attributes' && record.attributeName !== null && ownAttributeNames.has(record.attributeName)) return true
-      const node = record.target instanceof Element ? record.target : record.target.parentElement
-      return node !== null && dockRootRef.current !== null && dockRootRef.current.contains(node)
+      return isOwnInterface(record.target)
     }
     const observer = new MutationObserver((records) => {
       if (records.some((record) => !isIgnored(record))) scheduleMeasure()
@@ -221,24 +327,25 @@ export function CommentsDock({ pagePath, action, threads, access, BodyComponent,
         element.removeAttribute(commentedElementAttribute)
         element.removeAttribute(commentedThreadAttribute)
       }
-      paintHighlights([], undefined)
+      paintHighlights([], undefined, undefined)
     }
-  }, [threads, activeThreadId, mapRange])
+  }, [threads, openThreadId, mapRange, draftRange])
 
-  // 批注模式：悬停画虚线框、点元素拾取、划字松手弹按钮、Esc 退出
+  // 草稿批的元素换一种底色，草稿收起就去掉
+  useEffect(() => {
+    if (draft?.kind !== 'element') return
+    draft.element.setAttribute(draftElementAttribute, '')
+    return () => draft.element.removeAttribute(draftElementAttribute)
+  }, [draft])
+
+  // 批注模式：悬停画框、点元素拾取
   useEffect(() => {
     if (!picking) return
     document.documentElement.setAttribute(pickingAttribute, '')
     const scopeOf = () => document.querySelector<HTMLElement>(`[${commentScopeAttribute}]`)
-    const inDock = (target: EventTarget | null) => target instanceof Element && dockRootRef.current?.contains(target) === true
     const onMove = (event: MouseEvent) => {
-      if (inDock(event.target)) {
-        hoveredElementRef.current = null
-        setHovered(null)
-        return
-      }
-      const scope = scopeOf()
-      const element = scope && event.target instanceof Element && scope.contains(event.target) ? commentTargetNear(event.target, scope) : null
+      const found = scopeOf()
+      const element = !isOwnInterface(event.target) && found && event.target instanceof Element && found.contains(event.target) ? commentTargetNear(event.target, found) : null
       hoveredElementRef.current = element
       setHovered(element ? { box: boxOf(element), label: commentTargetLabelOf(element) } : null)
     }
@@ -247,53 +354,18 @@ export function CommentsDock({ pagePath, action, threads, access, BodyComponent,
       setHovered(null)
     }
     const onPick = (event: MouseEvent) => {
-      if (inDock(event.target)) return
-      const scope = scopeOf()
-      if (!scope || !(event.target instanceof Element) || !scope.contains(event.target)) return
+      if (isOwnInterface(event.target)) return
+      const found = scopeOf()
+      if (!found || !(event.target instanceof Element) || !found.contains(event.target)) return
       // 拖选了文字就是批那段字，交给选中那一路（mouseup 后弹按钮）
       const selection = document.getSelection()
       if (selection && !selection.isCollapsed) return
-      const element = commentTargetNear(event.target, scope)
+      const element = commentTargetNear(event.target, found)
       if (!element || element.id === '') return
       event.preventDefault()
       event.stopPropagation()
-      const box = boxOf(element)
-      setDraft({
-        kind: 'element',
-        anchorValue: element.id,
-        label: commentTargetLabelOf(element),
-        top: box.top + box.height + 8,
-        left: clampToViewport(box.left, 360),
-      })
-    }
-    const onSelectionEnd = () => {
-      const selection = document.getSelection()
-      const scope = scopeOf()
-      if (!selection || selection.isCollapsed || selection.rangeCount === 0 || !scope) {
-        setSelectionAction(null)
-        return
-      }
-      const range = selection.getRangeAt(0)
-      if (!scope.contains(range.startContainer) || !scope.contains(range.endContainer)) {
-        setSelectionAction(null)
-        return
-      }
-      const pageText = pageTextOf(scope)
-      const offsets = offsetsOfRange(pageText, range)
-      if (offsets === undefined) {
-        setSelectionAction(null)
-        return
-      }
-      const anchor: TextAnchorFields = { quote: pageText.text.slice(...offsets), start: offsets[0], end: offsets[1], snapshot: pageText.text }
-      const first = [...range.getClientRects()].find((rect) => rect.width > 0 && rect.height > 0) ?? range.getBoundingClientRect()
-      setSelectionAction({ top: Math.max(8, first.top - 38), left: clampToViewport(first.left, 360), anchor })
-    }
-    const onKey = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
-        setPicking(false)
-        setDraft(null)
-        setSelectionAction(null)
-      }
+      setOpenThread(null)
+      setDraft({ kind: 'element', anchorValue: element.id, element })
     }
     const onScroll = () => {
       const element = hoveredElementRef.current
@@ -302,164 +374,185 @@ export function CommentsDock({ pagePath, action, threads, access, BodyComponent,
     document.addEventListener('mousemove', onMove)
     document.addEventListener('mouseleave', onLeave)
     document.addEventListener('click', onPick, true)
-    document.addEventListener('mouseup', onSelectionEnd)
-    document.addEventListener('keydown', onKey)
     window.addEventListener('scroll', onScroll, true)
     return () => {
       document.documentElement.removeAttribute(pickingAttribute)
       document.removeEventListener('mousemove', onMove)
       document.removeEventListener('mouseleave', onLeave)
       document.removeEventListener('click', onPick, true)
-      document.removeEventListener('mouseup', onSelectionEnd)
-      document.removeEventListener('keydown', onKey)
       window.removeEventListener('scroll', onScroll, true)
       hoveredElementRef.current = null
       setHovered(null)
-      setSelectionAction(null)
     }
   }, [picking])
 
-  // 点正文里的标记（被批元素、高亮的字）→ 打开侧栏、亮对应评论并滚到那张卡
+  // 划字：可写时在正文里选中几个字，松手浮出「评论」按钮
   useEffect(() => {
-    const onClick = (event: MouseEvent) => {
-      if (!(event.target instanceof Element)) return
-      if (dockRootRef.current?.contains(event.target)) return
-      if (event.target.closest('a, button, input, textarea, select, summary, label')) return
-      const marked = event.target.closest(`[${commentedElementAttribute}]`)
-      if (marked) {
-        const threadId = marked.getAttribute(commentedThreadAttribute)
-        if (threadId) activateThreadFromPage(threadId)
+    if (!writable) return
+    const onSelectionEnd = (event: MouseEvent) => {
+      if (isOwnInterface(event.target)) return
+      const selection = document.getSelection()
+      const found = document.querySelector<HTMLElement>(`[${commentScopeAttribute}]`)
+      if (!selection || selection.isCollapsed || selection.rangeCount === 0 || !found) {
+        setSelectionAction(null)
         return
       }
+      const range = selection.getRangeAt(0)
+      if (!found.contains(range.startContainer) || !found.contains(range.endContainer) || range.toString().trim() === '') {
+        setSelectionAction(null)
+        return
+      }
+      const pageText = pageTextOf(found)
+      const offsets = offsetsOfRange(pageText, range)
+      if (offsets === undefined) {
+        setSelectionAction(null)
+        return
+      }
+      const anchor: TextAnchorFields = { quote: pageText.text.slice(...offsets), start: offsets[0], end: offsets[1], snapshot: pageText.text }
+      const first = firstLineOf(range)
+      setSelectionAction({ top: Math.max(8, first.top - 42), left: clamp(first.left, 8, window.innerWidth - 100), anchor, range: range.cloneRange() })
+    }
+    const onScroll = () => setSelectionAction(null)
+    document.addEventListener('mouseup', onSelectionEnd)
+    window.addEventListener('scroll', onScroll, true)
+    return () => {
+      document.removeEventListener('mouseup', onSelectionEnd)
+      window.removeEventListener('scroll', onScroll, true)
+      setSelectionAction(null)
+    }
+  }, [writable])
+
+  // Esc：退出批注、收起草稿与浮窗（收件箱不跟着收）
+  useEffect(() => {
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key !== 'Escape') return
+      setPicking(false)
+      setDraft(null)
+      setSelectionAction(null)
+      setOpenThread(null)
+    }
+    document.addEventListener('keydown', onKey)
+    return () => document.removeEventListener('keydown', onKey)
+  }, [])
+
+  // 点正文里的标记（被批元素、高亮的字）→ 打开那一串，再点同一处收起；点正文别处收起浮窗
+  useEffect(() => {
+    const toggleThread = (threadId: string) => setOpenThread((current) => (current?.id === threadId ? null : { id: threadId, reveal: 'nearest' }))
+    const onClick = (event: MouseEvent) => {
+      if (!(event.target instanceof Element) || isOwnInterface(event.target)) return
+      if (event.target.closest('a, button, input, textarea, select, summary, label')) return
+      const selection = document.getSelection()
+      if (selection && !selection.isCollapsed) return
+      const marked = event.target.closest(`[${commentedElementAttribute}]`)
+      const markedThreadId = marked?.getAttribute(commentedThreadAttribute)
+      if (markedThreadId) return toggleThread(markedThreadId)
       for (const [threadId, target] of targetsRef.current) {
         if (target.kind !== 'text') continue
-        if ([...target.range.getClientRects()].some((rect) => containsPoint(rect, event.clientX, event.clientY))) {
-          activateThreadFromPage(threadId)
-          return
-        }
+        if ([...target.range.getClientRects()].some((rect) => containsPoint(rect, event.clientX, event.clientY))) return toggleThread(threadId)
       }
-      setActiveThreadId((current) => (current === null ? current : null))
+      setOpenThread(null)
     }
     document.addEventListener('click', onClick)
     return () => document.removeEventListener('click', onClick)
   }, [])
 
-  function activateThreadFromPage(threadId: string) {
-    setActiveThreadId(threadId)
-    // 已开着时 setSidebarOpen(true) 不触发重渲染，只是再写一次记忆
-    changeSidebarOpen(true)
+  const items = useMemo<InboxItem[]>(
+    () =>
+      threads.map((thread) => {
+        const anchor = parseCommentAnchor(thread.anchor)
+        const target = targets.get(thread.id)
+        const note = noteOf(anchor, target)
+        return { thread, place: placeOf(anchor, target), ...(note === undefined ? {} : { note }) }
+      }),
+    [threads, targets],
+  )
+  const openItem = openThreadId === null ? undefined : items.find((item) => item.thread.id === openThreadId)
+  const openTarget = openThreadId === null ? undefined : targets.get(openThreadId)
+  const openAnchor = useMemo(() => (scope && openItem ? floatAnchorOf(openTarget, scope) : null), [scope, openItem === undefined, openTarget])
+  const draftAnchor = useMemo<FloatAnchor | null>(() => {
+    if (!draft || !scope) return null
+    if (draft.kind === 'element') return { block: draft.element, edge: 'below' }
+    return { block: commentTargetNear(draft.range.startContainer, scope) ?? scope, edge: 'below', pointAt: draft.range }
+  }, [draft, scope])
+
+  const openFromInbox = (threadId: string) => {
+    setDraft(null)
+    setOpenThread({ id: threadId, reveal: 'center' })
   }
-
-  // 侧栏里点一行：亮这串并滚到正文里被批的元素或那段字
-  function goToThread(threadId: string) {
-    setActiveThreadId(threadId)
-    const target = targetsRef.current.get(threadId)
-    if (target?.kind === 'element') {
-      target.element.scrollIntoView({ behavior: 'smooth', block: 'center' })
-      return
-    }
-    if (target?.kind === 'text') {
-      const start = target.range.startContainer
-      const element = start instanceof Element ? start : start.parentElement
-      element?.scrollIntoView({ behavior: 'smooth', block: 'center' })
-    }
-  }
-
-  // 激活的评论在侧栏里滚到可见
-  useEffect(() => {
-    if (activeThreadId === null || !sidebarOpen) return
-    const card = dockRootRef.current?.querySelector(`[data-comment-card="${activeThreadId}"]`)
-    card?.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
-  }, [activeThreadId, sidebarOpen, threads])
-
-  // 落点算出来后给每串补一条锚点说明（原文找不到了、在收起的内容里、批的是什么）
-  const threadsWithNotes = useMemo(() => {
-    const noteOf = (thread: PageThreadSummary): string | undefined => {
-      const anchor = parseCommentAnchor(thread.anchor)
-      const target = targets.get(thread.id)
-      if (anchor.kind === 'broken') return '锚点数据认不出'
-      if (target?.kind === 'missing') {
-        if (target.reason === 'element-id-gone') return '锚定的元素不在这一页上'
-        // 页签没打开、组件收起把内容从页面拿掉时，被批的字也不在页面文字里：换到那一页或展开就找得回
-        return quoteNote(anchor.kind === 'text' ? anchor.quote : '', '原文找不到了（可能已删去，或在没打开的页签、收起的内容里）：')
-      }
-      if (target?.kind === 'hidden') return quoteNote(anchor.kind === 'text' ? anchor.quote : '', '批的内容现在看不见（可能在收起的内容里）：')
-      if (target?.kind === 'text') return quoteNote(target.quote, target.changed ? '原文改过：' : '')
-      if (target?.kind === 'element') return `批的元素：${commentTargetLabelOf(target.element)}`
-      return undefined
-    }
-    return threads.map((thread) => {
-      const note = noteOf(thread)
-      return note === undefined ? thread : { ...thread, anchorNote: note }
-    })
-  }, [threads, targets])
-
-  const draftSubmitted = (threadId: unknown) => {
+  const draftSubmitted = (threadId: string | undefined) => {
     setDraft(null)
     setSelectionAction(null)
     setPicking(false)
     document.getSelection()?.removeAllRanges()
-    if (typeof threadId === 'string') activateThreadFromPage(threadId)
+    if (threadId !== undefined) setOpenThread({ id: threadId, reveal: 'nearest' })
   }
 
   return (
-    <div ref={dockRootRef} data-comments-dock="">
-      {!sidebarOpen && (
-        <div className="docsite-comments-dock">
-          {writable && (
+    <div {...{ [dockAttribute]: '' }}>
+      <div className="docsite-comments-dock">
+        {writable ? (
+          <>
             <button
               type="button"
               data-comment-picking-toggle=""
               aria-pressed={picking}
-              title="批注模式：点正文里的一个元素批它，或选中几个字批这段字；Esc 退出"
+              title="批注：点正文里的一块批它，或划一段字（Esc 退出）"
               className={picking ? 'docsite-dock-button docsite-dock-button-active' : 'docsite-dock-button'}
-              onClick={() => setPicking(!picking)}
+              onClick={() => {
+                setPicking(!picking)
+                if (picking) setDraft(null)
+              }}
             >
-              {picking ? '批注中 · Esc 退出' : '批注'}
+              <CommentIcon name="pen" />
+              批注
             </button>
-          )}
-          <button type="button" data-comment-dock-open="" className="docsite-dock-button" onClick={() => changeSidebarOpen(true)}>
-            评论{threads.length > 0 ? ` ${threads.length}` : ''}
+            <span className="docsite-dock-separator" />
+          </>
+        ) : null}
+        <button
+          type="button"
+          data-comment-inbox-toggle=""
+          aria-expanded={inboxOpen}
+          title={inboxOpen ? '收起本页评论' : '本页评论'}
+          className={inboxOpen ? 'docsite-dock-button docsite-dock-button-open' : 'docsite-dock-button'}
+          onClick={() => changeInboxOpen(!inboxOpen)}
+        >
+          <CommentIcon name="message" />
+          评论
+          <span className="docsite-dock-count">{threads.length}</span>
+          <CommentIcon name={inboxOpen ? 'chevronDown' : 'chevronUp'} />
+        </button>
+      </div>
+      {inboxOpen ? (
+        <CommentsInbox
+          items={items}
+          pagePath={pagePath}
+          action={action}
+          access={access}
+          BodyComponent={BodyComponent}
+          AvatarComponent={AvatarComponent}
+          openThreadId={openThreadId}
+          onOpenThread={openFromInbox}
+          onClose={() => changeInboxOpen(false)}
+          onThreadCreated={(threadId) => setOpenThread({ id: threadId, reveal: 'center' })}
+        />
+      ) : null}
+      {picking ? (
+        <div className="docsite-picking-bar">
+          <CommentIcon name="pen" />
+          <span>批注：点正文里的一块，或划一段字</span>
+          <kbd>Esc</kbd>
+          <button type="button" onClick={() => setPicking(false)}>
+            退出
           </button>
         </div>
-      )}
-      {sidebarOpen && (
-        <aside data-comments-panel="" aria-label="本页评论" className="docsite-comments-panel">
-          <div className="docsite-comments-panel-bar">
-            {writable ? (
-              <button
-                type="button"
-                data-comment-picking-toggle=""
-                aria-pressed={picking}
-                title="批注模式：点正文里的一个元素批它，或选中几个字批这段字；Esc 退出"
-                className={picking ? 'docsite-panel-button docsite-panel-button-active' : 'docsite-panel-button'}
-                onClick={() => setPicking(!picking)}
-              >
-                {picking ? '批注中 · Esc 退出' : '批注'}
-              </button>
-            ) : null}
-            <button type="button" data-comment-panel-close="" aria-label="收起评论栏" className="docsite-panel-button" onClick={() => changeSidebarOpen(false)}>
-              ✕
-            </button>
-          </div>
-          <CommentsSidebar
-            pagePath={pagePath}
-            action={action}
-            threads={threadsWithNotes}
-            access={access}
-            BodyComponent={BodyComponent}
-            AvatarComponent={AvatarComponent}
-            activeThreadId={activeThreadId}
-            onThreadActivate={goToThread}
-          />
-        </aside>
-      )}
-      {picking && hovered && !draft && (
-        <div data-comment-hover="" className="docsite-picking-hover" style={{ position: 'fixed', ...hovered.box }}>
-          <span className="docsite-picking-hover-label">{hovered.label}</span>
+      ) : null}
+      {picking && hovered && !draft ? (
+        <div data-comment-hover="" className="docsite-picking-hover" style={{ position: 'fixed', top: hovered.box.top - 4, left: hovered.box.left - 6, width: hovered.box.width + 12, height: hovered.box.height + 8 }}>
+          <span className="docsite-picking-hover-label">{hovered.label} · 点击评论</span>
         </div>
-      )}
-      {picking && selectionAction && !draft && (
+      ) : null}
+      {selectionAction && !draft ? (
         <button
           type="button"
           data-comment-quote-button=""
@@ -467,69 +560,54 @@ export function CommentsDock({ pagePath, action, threads, access, BodyComponent,
           style={{ position: 'fixed', top: selectionAction.top, left: selectionAction.left }}
           onMouseDown={(event) => event.preventDefault()}
           onClick={() => {
-            const anchor = selectionAction.anchor
-            setDraft({
-              kind: 'text',
-              anchorValue: serializeTextAnchor(anchor),
-              label: quoteNote(anchor.quote, ''),
-              top: selectionAction.top + 38,
-              left: clampToViewport(selectionAction.left, 360),
-            })
+            setOpenThread(null)
+            setDraft({ kind: 'text', anchorValue: serializeTextAnchor(selectionAction.anchor), label: quoteNote(selectionAction.anchor.quote, ''), range: selectionAction.range })
             setSelectionAction(null)
+            // 选区换成草稿的高亮，免得两层颜色叠在一起
+            document.getSelection()?.removeAllRanges()
           }}
         >
-          批这段字
+          <CommentIcon name="message" />
+          评论
         </button>
-      )}
-      {draft && writable && <DraftForm draft={draft} pagePath={pagePath} action={action} onDone={draftSubmitted} onCancel={() => setDraft(null)} />}
+      ) : null}
+      {openItem && openAnchor && scope ? (
+        <FloatingLayer key={openItem.thread.id} anchor={openAnchor} scope={scope} reveal={openThread?.reveal ?? 'nearest'} tone="thread">
+          <CommentThread
+            thread={openItem.thread}
+            action={action}
+            writer={access.kind === 'writable' ? access.writer : undefined}
+            BodyComponent={BodyComponent}
+            AvatarComponent={AvatarComponent}
+            place={openItem.place}
+            // 批的是元素时浮窗就贴在它下面，不再重复写它是什么
+            note={openTarget?.kind === 'element' ? undefined : openItem.note}
+            foldReplies
+            onClose={() => setOpenThread(null)}
+          />
+        </FloatingLayer>
+      ) : null}
+      {draft && draftAnchor && scope && access.kind === 'writable' ? (
+        <FloatingLayer key={draft.anchorValue} anchor={draftAnchor} scope={scope} reveal="nearest" tone="draft">
+          <div data-comment-draft="" className="docsite-thread docsite-draft">
+            <button type="button" className="docsite-icon-button docsite-thread-close" title="取消（Esc）" aria-label="取消这条评论" onClick={() => setDraft(null)}>
+              <CommentIcon name="close" />
+            </button>
+            {draft.kind === 'text' ? <ThreadQuote place="body" note={draft.label} /> : null}
+            <Composer
+              action={action}
+              fields={{ intent: 'create-thread', page: pagePath, anchor: draft.anchorValue }}
+              placeholder="写评论…"
+              writer={access.writer}
+              AvatarComponent={AvatarComponent}
+              autoFocus
+              formAttributes={{ 'data-comment-draft-form': '' }}
+              onSent={(result) => draftSubmitted(result.threadId)}
+            />
+            <p className="docsite-draft-hint">Enter 发送 · Shift+Enter 换行 · Esc 取消</p>
+          </div>
+        </FloatingLayer>
+      ) : null}
     </div>
-  )
-}
-
-function DraftForm({
-  draft,
-  pagePath,
-  action,
-  onDone,
-  onCancel,
-}: {
-  draft: Draft
-  pagePath: string
-  action: string
-  onDone: (threadId: unknown) => void
-  onCancel: () => void
-}) {
-  const fetcher = useFetcher()
-  const error = errorOf(fetcher.data)
-  useEffect(() => {
-    const data = fetcher.data as { ok?: boolean; threadId?: unknown } | undefined
-    if (fetcher.state === 'idle' && data?.ok === true) onDone(data.threadId)
-  }, [fetcher.state, fetcher.data, onDone])
-  return (
-    <fetcher.Form
-      method="post"
-      action={action}
-      data-comment-draft=""
-      className="docsite-comment-draft"
-      style={{ position: 'fixed', top: draft.top, left: draft.left }}
-    >
-      <p className="docsite-draft-quote">{draft.label}</p>
-      <input type="hidden" name="intent" value="create-thread" />
-      <input type="hidden" name="page" value={pagePath} />
-      <input type="hidden" name="anchor" value={draft.anchorValue} />
-      <textarea name="body" required rows={3} autoFocus placeholder="写评论（支持 MDX）" />
-      <div className="docsite-form-row">
-        <span />
-        <span className="docsite-draft-actions">
-          <button type="button" className="docsite-draft-cancel" onClick={onCancel}>
-            取消
-          </button>
-          <button type="submit" className="docsite-draft-submit" disabled={fetcher.state !== 'idle'}>
-            {fetcher.state !== 'idle' ? '写入中…' : '发评论'}
-          </button>
-        </span>
-      </div>
-      {error ? <p data-action-error>{error}</p> : null}
-    </fetcher.Form>
   )
 }

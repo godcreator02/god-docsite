@@ -47,6 +47,17 @@ export async function waitForHydrated(page, selector) {
   )
 }
 
+/**
+ * 打开右下角的本页评论收件箱（comments 包的 CommentsDock）：上次开着的会在挂载后从 localStorage 恢复（键 docsite-comments-inbox-open），
+ * 记着开着就等它自己出来，不点按钮，免得和恢复撞上把它点收起
+ */
+export async function openCommentsInbox(page) {
+  await waitForHydrated(page, '[data-comment-inbox-toggle]')
+  const remembered = await page.evaluate(() => localStorage.getItem('docsite-comments-inbox-open') === '1')
+  if (!remembered) await page.click('[data-comment-inbox-toggle]')
+  await page.locator('[data-comments-inbox]').waitFor({ timeout: stepTimeoutMs })
+}
+
 export async function headingOf(page) {
   return (await page.locator('h1').first().textContent({ timeout: stepTimeoutMs }))?.trim()
 }

@@ -1,11 +1,12 @@
 export { CommentsDock, commentScopeProps, type CommentsDockProps } from './comments-dock.js'
+export { CommentThread, type CommentThreadProps } from './comment-thread.js'
+export { CommentsTable, type CommentsTableRow, type CommentsTableProps } from './comments-table.js'
 export {
-  CommentsSidebar,
   type CommentAvatar,
+  type CommentBodyComponent,
   type CommentsAccess,
-  type CommentsSidebarProps,
   type CommentWriter,
   type PageThreadReplySummary,
   type PageThreadSummary,
-} from './comments-sidebar.js'
+} from './comment-model.js'
 export { commentsAccessOf } from './access.js'

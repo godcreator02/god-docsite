@@ -6,7 +6,7 @@ import { createReply, createThread, deleteReply, deleteThread } from '../node/st
 export const commentIntents = ['create-thread', 'reply', 'delete-reply', 'delete-thread'] as const
 export type CommentIntent = (typeof commentIntents)[number]
 
-/** 写入结果：评论面板按 ok 判断成败，失败时显示 error（外部契约，见 comments-sidebar.tsx 的字段约定） */
+/** 写入结果：评论界面按 ok 判断成败，失败时显示 error（外部契约，见 comment-model.ts 的字段约定） */
 export type CommentWriteResult =
   | { ok: true; intent: CommentIntent; threadId?: string; replyId?: string }
   | { ok: false; error: string }

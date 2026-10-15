@@ -78,8 +78,6 @@ a:has([data-docsite-sidebar-hidden-page]) {
 /*
  * 宽屏布局：fumadocs 的 docs 布局在窗口比 97rem 宽时整体居中，左侧栏左边、目录右边各空出一截。
  * 这里让布局铺满窗口：左侧栏贴左边，本页目录那一列贴右边、宽度固定，正文在中间那一列里居中。
- * 评论栏（@godcreator/comments 的 CommentsDock）fixed 盖在目录那一列上（同宽同位），打开时在 <html> 上挂
- * data-comments-sidebar-open；打开、关上都不改布局，正文不动，让位的规则在下面那组
  */
 :root {
   --docsite-side-column-width: 340px;
@@ -99,13 +97,8 @@ a:has([data-docsite-sidebar-hidden-page]) {
     margin-inline: auto;
   }
 
-  /* 评论栏打开时，目录那一列被它盖住，不再响应鼠标 */
-  html[data-comments-sidebar-open] #nd-toc {
-    visibility: hidden;
-  }
-
-  /* 全宽时目录那一列让给正文；评论栏打开时照样空出那一列给它，不盖住正文 */
-  html[data-docsite-wide]:not([data-comments-sidebar-open]) #nd-docs-layout {
+  /* 全宽时目录那一列让给正文 */
+  html[data-docsite-wide] #nd-docs-layout {
     --fd-toc-width: 0px !important;
   }
 
@@ -114,10 +107,9 @@ a:has([data-docsite-sidebar-hidden-page]) {
   }
 
   /*
-   * 评论栏打开时、全宽时，目录改成正文上方的下拉条（fumadocs 窄屏时用的那个）。它在网格里单独占一行，负的下边距把这一行抵成 0 高：
+   * 全宽时目录改成正文上方的下拉条（fumadocs 窄屏时用的那个）。它在网格里单独占一行，负的下边距把这一行抵成 0 高：
    * 下拉条浮在标题上方那段空白里，正文不往下挪；往下滚时吸在顶上
    */
-  html[data-comments-sidebar-open] [data-toc-popover],
   html[data-docsite-wide] [data-toc-popover] {
     display: block;
     width: 100%;

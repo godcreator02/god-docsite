@@ -1,406 +1,683 @@
-/* 评论界面（组件在 ./site）：唤起式评论栏（CommentsDock）的浮标、侧栏面板、批注模式与草稿表单，全站评论页的评论卡。
-   侧栏盖在目录列上的布局规则在平台包 god-docsite 的 styles.css；正文高亮（::highlight）与描边在本包 template/styles.css，建站后在站点的 app/features/comments/ */
+/* 评论界面（组件在 ./site，照 Notion 的评论样子）：右下角工具条与本页评论收件箱、正文下方的评论浮窗、批注模式、全站评论表格。
+   正文里的标记（划字高亮、被批元素的黄线）在本包 template/styles.css，建站后在站点的 app/features/comments/ */
 
-.docsite-comments-sidebar {
-  font-size: 14px;
-  width: 100%;
-  display: flex;
-  flex-direction: column;
+:root {
+  --docsite-comment-accent: #2383e2;
+  --docsite-comment-accent-soft: color-mix(in srgb, #2383e2 12%, transparent);
+  --docsite-comment-mark: color-mix(in srgb, #f5b301 85%, transparent);
+  --docsite-comment-danger: #d44c47;
+  --docsite-comment-hover: color-mix(in srgb, var(--color-fd-foreground, #111) 5%, transparent);
+  --docsite-comment-hover-strong: color-mix(in srgb, var(--color-fd-foreground, #111) 9%, transparent);
+  --docsite-comment-shadow: 0 0 0 1px rgb(15 15 15 / 0.05), 0 3px 6px rgb(15 15 15 / 0.1), 0 9px 24px rgb(15 15 15 / 0.2);
+  --docsite-comment-shadow-small: 0 0 0 1px rgb(15 15 15 / 0.08), 0 2px 4px rgb(15 15 15 / 0.1);
 }
-.docsite-comments-header {
-  display: flex;
-  align-items: center;
-  gap: 8px;
+.dark {
+  --docsite-comment-accent: #3b8eea;
+  --docsite-comment-accent-soft: color-mix(in srgb, #3b8eea 16%, transparent);
+  --docsite-comment-danger: #f27474;
+  --docsite-comment-shadow: 0 0 0 1px rgb(255 255 255 / 0.07), 0 6px 16px rgb(0 0 0 / 0.35), 0 16px 40px rgb(0 0 0 / 0.35);
+  --docsite-comment-shadow-small: 0 0 0 1px rgb(255 255 255 / 0.08), 0 2px 6px rgb(0 0 0 / 0.4);
 }
-.docsite-comments-title {
-  font-size: 1rem;
-  font-weight: 600;
-  margin: 0;
+
+.docsite-comment-icon {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
 }
-.docsite-comments-count {
+
+.docsite-icon-button {
+  display: inline-grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
   color: var(--color-fd-muted-foreground, #666);
-}
-
-/* 评论行：面板里平铺的只读预览，行间一条分隔线；点行跳到正文里被批的位置 */
-.docsite-comment-row {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  padding: 10px 12px;
-  border-bottom: 1px solid var(--color-fd-border, #e5e5e5);
   cursor: pointer;
 }
-.docsite-comment-row:hover {
-  background: var(--color-fd-accent, #f5f5f5);
+.docsite-icon-button:hover {
+  background: var(--docsite-comment-hover-strong);
+  color: var(--color-fd-foreground, #111);
 }
-.docsite-comment-row-active {
-  background: color-mix(in oklab, #f5b301 12%, transparent);
-}
-.docsite-comment-row-active::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 0;
-  bottom: 0;
-  width: 3px;
-  background: #f5b301;
+.docsite-icon-button:disabled {
+  opacity: 0.5;
+  cursor: default;
 }
 
-/* 收着时串头只露开头几行，展开回复时放开全文 */
-.docsite-row-body {
-  overflow-wrap: anywhere;
+/* ---------- 一条评论：头像、名字、时间，正文和名字对齐；可写时悬停露出删除 ---------- */
+.docsite-comment {
+  position: relative;
+  padding: 5px 0;
 }
-.docsite-row-body-clamped {
-  max-height: 3.6em;
-  overflow: hidden;
-}
-
-/* 行内作者信息：头像、名字、相对时间；删除等操作平时收着，挂到行上才露出 */
 .docsite-comment-heading {
   display: flex;
   align-items: center;
-  gap: 6px;
-  font-size: 12px;
-  color: var(--color-fd-muted-foreground, #666);
-}
-.docsite-comment-heading .dc-avatar {
-  flex-shrink: 0;
+  gap: 8px;
+  min-height: 24px;
+  font-size: 14px;
 }
 .docsite-comment-authorname {
   font-weight: 600;
-  color: var(--color-fd-foreground, #111);
 }
 .docsite-comment-time {
+  font-size: 12px;
+  color: var(--color-fd-muted-foreground, #666);
   white-space: nowrap;
 }
+.docsite-comment-initial {
+  display: inline-grid;
+  place-items: center;
+  flex-shrink: 0;
+  border-radius: 9999px;
+  background: var(--color-fd-primary, #333);
+  color: var(--color-fd-primary-foreground, #fff);
+  font-weight: 600;
+  line-height: 1;
+}
+.docsite-comment-body {
+  padding-left: 32px;
+  font-size: 14px;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
 .docsite-comment-actions {
-  margin-left: auto;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  opacity: 0;
-  transition: opacity 0.15s ease;
-}
-.docsite-comment-row:hover .docsite-comment-actions,
-.docsite-reply:hover .docsite-comment-actions {
-  opacity: 1;
-}
-.docsite-comment-actions form {
-  display: inline;
-}
-.docsite-comment-actions button {
-  border: 0;
-  background: none;
-  color: inherit;
-  text-decoration: underline;
-  cursor: pointer;
-  font-size: 12px;
-  padding: 0;
-}
-.docsite-replies-toggle {
-  align-self: flex-start;
-  border: 0;
-  background: none;
-  color: var(--color-fd-primary, #1f6feb);
-  font-size: 12px;
-  cursor: pointer;
-  padding: 0;
-}
-.docsite-replies-toggle:hover {
-  text-decoration: underline;
-}
-
-/* 展开的回复区：回复平铺，底部一个回复框 */
-.docsite-row-replies {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  margin-top: 4px;
-  padding-left: 10px;
-  border-left: 2px solid var(--color-fd-border, #e5e5e5);
-}
-.docsite-reply {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-/* 新建整页评论：平时收成一行按钮 */
-.docsite-new-thread-toggle {
-  border: 1px dashed var(--color-fd-border, #ddd);
-  border-radius: 8px;
-  background: transparent;
-  padding: 8px;
-  text-align: left;
-  font-size: 13px;
-  color: var(--color-fd-muted-foreground, #666);
-  cursor: pointer;
-}
-.docsite-new-thread-toggle:hover {
-  background: var(--color-fd-accent, #f0f0f0);
-}
-.docsite-new-thread,
-.docsite-reply-form {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-.docsite-new-thread textarea,
-.docsite-reply-form textarea {
-  width: 100%;
-  border: 1px solid var(--color-fd-border, #ddd);
+  position: absolute;
+  top: 2px;
+  right: 0;
+  display: none;
+  padding: 2px;
   border-radius: 6px;
-  padding: 8px;
-  font: inherit;
-  resize: vertical;
+  background: var(--color-fd-popover, #fff);
+  box-shadow: var(--docsite-comment-shadow-small);
 }
-.docsite-form-row {
+.docsite-comment:hover .docsite-comment-actions,
+.docsite-comment-actions:focus-within {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
 }
-.docsite-form-row button {
-  border: 1px solid var(--color-fd-border, #ddd);
-  border-radius: 6px;
-  padding: 4px 12px;
-  cursor: pointer;
+.docsite-comment-actions .docsite-icon-button {
+  width: 26px;
+  height: 26px;
 }
 .docsite-comment-pending {
   font-size: 12px;
   color: var(--color-fd-muted-foreground, #666);
 }
 [data-action-error] {
-  color: #b91c1c;
+  margin: 4px 0 0;
+  color: var(--docsite-comment-danger);
   font-size: 12px;
-  margin: 0;
-}
-.docsite-readonly-reason {
-  border: 1px dashed var(--color-fd-border, #ddd);
-  border-radius: 6px;
-  padding: 8px;
-  color: var(--color-fd-muted-foreground, #666);
 }
 
-/* 全站评论页（/comments）的评论卡：只读、按页分组的宽列表 */
-.docsite-comment-card {
-  border: 1px solid var(--color-fd-border, #ddd);
-  border-radius: 8px;
-  padding: 8px 12px;
+/* 批的位置那一行：正文里的左边一道黄线，整页与找不到原文带图标 */
+.docsite-thread-quote {
+  display: flex;
+  gap: 8px;
+  margin: 0 0 6px;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--color-fd-muted-foreground, #666);
 }
-.docsite-comment-meta {
+.docsite-thread-quote::before {
+  content: '';
+  flex: 0 0 3px;
+  border-radius: 2px;
+  background: var(--docsite-comment-mark);
+}
+.docsite-thread-quote > span {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  min-width: 0;
+}
+.docsite-thread-quote-page::before,
+.docsite-thread-quote-missing::before {
+  display: none;
+}
+.docsite-thread-quote .docsite-comment-icon {
+  width: 14px;
+  height: 14px;
+  margin-top: 2px;
+}
+.docsite-thread-quote-missing {
+  color: var(--docsite-comment-danger);
+}
+
+.docsite-more-replies {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  font-size: 12px;
+  gap: 6px;
+  margin: 2px 0 2px 28px;
+  padding: 2px 6px 2px 4px;
+  border: 0;
+  border-radius: 5px;
+  background: transparent;
+  font-size: 13px;
   color: var(--color-fd-muted-foreground, #666);
+  cursor: pointer;
+}
+.docsite-more-replies:hover {
+  background: var(--docsite-comment-hover-strong);
+  color: var(--color-fd-foreground, #111);
 }
 
-/* 右下角浮标（批注模式开关 + 唤出评论栏） */
+/* ---------- 写评论的输入框：头像、随内容长高的文本框、圆形发送按钮 ---------- */
+.docsite-composer {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.docsite-composer-avatar {
+  display: flex;
+  margin-top: 3px;
+}
+.docsite-composer-box {
+  flex: 1;
+  display: flex;
+  align-items: flex-end;
+  gap: 6px;
+  min-width: 0;
+}
+.docsite-composer textarea {
+  flex: 1;
+  min-width: 0;
+  height: 30px;
+  max-height: 200px;
+  padding: 4px 0;
+  border: 0;
+  outline: none;
+  background: transparent;
+  resize: none;
+  font: inherit;
+  font-size: 14px;
+  line-height: 1.5;
+  color: inherit;
+}
+.docsite-composer textarea::placeholder {
+  color: var(--color-fd-muted-foreground, #999);
+}
+.docsite-composer-send {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  margin-bottom: 3px;
+  border: 0;
+  border-radius: 9999px;
+  background: var(--docsite-comment-hover-strong);
+  color: var(--color-fd-muted-foreground, #999);
+}
+.docsite-composer-send .docsite-comment-icon {
+  width: 14px;
+  height: 14px;
+}
+.docsite-composer-ready .docsite-composer-send {
+  background: var(--docsite-comment-accent);
+  color: #fff;
+  cursor: pointer;
+}
+.docsite-composer [data-action-error] {
+  flex-basis: 100%;
+  padding-left: 32px;
+}
+/* ---------- 一串评论（浮窗里、全站评论表格展开的那一行） ---------- */
+.docsite-thread {
+  position: relative;
+}
+.docsite-thread-close {
+  position: absolute;
+  top: -4px;
+  right: -6px;
+  z-index: 1;
+}
+/* 右上角的收起按钮占着那一角：第一行（批的位置、第一条评论、草稿的输入框）给它让出位置 */
+.docsite-thread > .docsite-thread-quote,
+.docsite-thread-comments > .docsite-comment:first-child .docsite-comment-heading,
+.docsite-draft > .docsite-composer {
+  padding-right: 32px;
+}
+.docsite-floating .docsite-thread-comments > .docsite-comment:first-child .docsite-comment-actions {
+  right: 32px;
+}
+.docsite-thread-reply {
+  margin-top: 6px;
+  padding-top: 8px;
+  border-top: 1px solid var(--color-fd-border, #e5e5e5);
+}
+.docsite-draft-hint {
+  margin: 4px 0 0 32px;
+  font-size: 11.5px;
+  color: var(--color-fd-muted-foreground, #999);
+}
+
+/* 正文下方的浮窗：挂在 body 上、按文档坐标定位（CommentsDock 的 FloatingLayer），盖在后面的正文上；小三角对准被批的那几个字 */
+.docsite-floating {
+  position: absolute;
+  z-index: 45;
+  padding: 12px 14px 10px;
+  border: 1px solid var(--color-fd-border, #ddd);
+  border-radius: 10px;
+  background: var(--color-fd-popover, #fff);
+  color: var(--color-fd-popover-foreground, #111);
+  box-shadow: var(--docsite-comment-shadow);
+  animation: docsite-floating-in 0.14s ease-out;
+}
+.docsite-floating-arrow::before {
+  content: '';
+  position: absolute;
+  top: -7px;
+  left: var(--docsite-arrow-x, 22px);
+  width: 12px;
+  height: 12px;
+  border-left: 1px solid var(--color-fd-border, #ddd);
+  border-top: 1px solid var(--color-fd-border, #ddd);
+  background: inherit;
+  transform: rotate(45deg);
+}
+.docsite-floating-draft,
+.docsite-floating-draft::before {
+  border-color: var(--docsite-comment-accent);
+}
+@keyframes docsite-floating-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+}
+
+/* ---------- 右下角工具条与收件箱 ---------- */
 .docsite-comments-dock {
   position: fixed;
-  right: 16px;
-  bottom: 16px;
+  right: 20px;
+  bottom: 20px;
   z-index: 40;
   display: flex;
-  gap: 8px;
+  align-items: center;
+  gap: 2px;
+  padding: 4px;
+  border-radius: 12px;
+  background: var(--color-fd-popover, #fff);
+  color: var(--color-fd-popover-foreground, #111);
+  box-shadow: var(--docsite-comment-shadow);
 }
 .docsite-dock-button {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  border: 1px solid var(--color-fd-border, #ddd);
-  border-radius: 9999px;
-  padding: 6px 14px;
-  font-size: 14px;
-  background: var(--color-fd-card, #fff);
-  color: var(--color-fd-card-foreground, #111);
-  box-shadow: 0 4px 12px rgb(0 0 0 / 0.12);
+  height: 32px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  font-size: 13px;
   cursor: pointer;
 }
 .docsite-dock-button:hover {
-  background: var(--color-fd-accent, #f0f0f0);
+  background: var(--docsite-comment-hover-strong);
 }
-.docsite-dock-button-active {
-  border-color: #f5b301;
-  background: #f5b301;
-  color: #fff;
+.docsite-dock-button-active,
+.docsite-dock-button-open {
+  background: var(--docsite-comment-accent-soft);
+  color: var(--docsite-comment-accent);
 }
-.docsite-dock-button-active:hover {
-  background: #d99e00;
+.docsite-dock-count {
+  display: inline-grid;
+  place-items: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: 9px;
+  background: color-mix(in srgb, #f5b301 30%, transparent);
+  color: var(--color-fd-foreground, #111);
+  font-size: 11.5px;
+}
+.docsite-dock-separator {
+  width: 1px;
+  height: 18px;
+  margin: 0 2px;
+  background: var(--color-fd-border, #ddd);
 }
 
-/* 唤起式评论栏：盖在目录那一列上（同宽同位，让位的样式在平台包 god-docsite 的 styles.css）。
-   面板自己滚但滚动条藏起来：右边正文的滚动条已经占着 gutter，面板再出一条就叠在一起 */
-.docsite-comments-panel {
+.docsite-inbox {
   position: fixed;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  z-index: 40;
-  width: var(--docsite-side-column-width, 340px);
-  max-width: 100vw;
+  right: 20px;
+  bottom: 68px;
+  z-index: 41;
   display: flex;
   flex-direction: column;
-  background: var(--color-fd-card, #fff);
-  color: var(--color-fd-card-foreground, #111);
-  box-shadow: -8px 0 24px rgb(0 0 0 / 0.08);
-  overflow-y: auto;
-  overscroll-behavior: contain;
-  scrollbar-width: none;
+  width: min(400px, calc(100vw - 32px));
+  max-height: min(640px, calc(100vh - 100px));
+  overflow: hidden;
+  border-radius: 12px;
+  background: var(--color-fd-popover, #fff);
+  color: var(--color-fd-popover-foreground, #111);
+  box-shadow: var(--docsite-comment-shadow);
+  font-size: 14px;
 }
-.docsite-comments-panel::-webkit-scrollbar {
-  display: none;
-}
-.docsite-comments-panel-bar {
-  position: sticky;
-  top: 0;
-  z-index: 1;
+.docsite-inbox-head {
   display: flex;
   align-items: center;
-  justify-content: flex-end;
+  justify-content: space-between;
+  padding: 10px 10px 0 14px;
+  font-weight: 600;
+}
+.docsite-readonly-reason {
+  display: flex;
   gap: 8px;
-  padding: 8px 12px;
-  background: inherit;
-  border-bottom: 1px solid var(--color-fd-border, #ddd);
-}
-.docsite-comments-panel > .docsite-comments-sidebar {
-  padding: 0;
-}
-.docsite-comments-panel .docsite-comments-header,
-.docsite-comments-panel .docsite-new-thread-toggle,
-.docsite-comments-panel .docsite-new-thread,
-.docsite-comments-panel .docsite-readonly-reason {
-  margin: 12px;
-  width: auto;
-}
-.docsite-panel-button {
-  border: 1px solid var(--color-fd-border, #ddd);
-  border-radius: 6px;
-  background: transparent;
-  padding: 4px 10px;
-  font-size: 13px;
+  margin: 10px 12px 0;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: var(--docsite-comment-hover);
   color: var(--color-fd-muted-foreground, #666);
+  font-size: 12.5px;
+  line-height: 1.55;
+}
+.docsite-readonly-reason .docsite-comment-icon {
+  width: 14px;
+  height: 14px;
+  margin-top: 2px;
+}
+.docsite-inbox-tabs {
+  display: flex;
+  gap: 2px;
+  padding: 8px 10px 0;
+  border-bottom: 1px solid var(--color-fd-border, #e5e5e5);
+}
+.docsite-inbox-tabs button {
+  padding: 6px 8px;
+  border: 0;
+  border-radius: 6px 6px 0 0;
+  background: transparent;
+  color: var(--color-fd-muted-foreground, #666);
+  font-size: 13px;
   cursor: pointer;
 }
-.docsite-panel-button:hover {
-  background: var(--color-fd-accent, #f0f0f0);
-  color: var(--color-fd-card-foreground, #111);
+.docsite-inbox-tabs button:hover {
+  color: var(--color-fd-foreground, #111);
 }
-.docsite-panel-button-active {
-  border-color: #f5b301;
-  background: #f5b301;
-  color: #fff;
+.docsite-inbox-tabs button[aria-selected='true'] {
+  color: var(--color-fd-foreground, #111);
+  box-shadow: inset 0 -2px 0 currentColor;
 }
-
-/* 批注模式：悬停的候选元素画虚线框加类别标签 */
-.docsite-picking-hover {
-  z-index: 30;
-  pointer-events: none;
-  border: 2px dashed #f5b301;
-  border-radius: 4px;
+.docsite-inbox-tabs button span {
+  margin-left: 3px;
+  opacity: 0.6;
 }
-.docsite-picking-hover-label {
-  position: absolute;
-  top: -2px;
-  left: 0;
-  transform: translateY(-100%);
-  background: #f5b301;
-  color: #fff;
-  font-size: 12px;
-  line-height: 20px;
-  padding: 0 6px;
-  border-radius: 4px 4px 0 0;
-  white-space: nowrap;
-  max-width: 60vw;
-  overflow: hidden;
-  text-overflow: ellipsis;
+.docsite-inbox-list {
+  flex: 1;
+  overflow: auto;
+  padding: 4px 0;
+  overscroll-behavior: contain;
 }
-
-/* 划字松手后浮出的「批这段字」按钮 */
-.docsite-selection-button {
-  z-index: 30;
+.docsite-inbox-empty {
+  padding: 24px 16px;
+  text-align: center;
+  color: var(--color-fd-muted-foreground, #999);
+  font-size: 13px;
+}
+.docsite-inbox-row {
+  display: flex;
+  gap: 10px;
+  padding: 10px 14px;
+  cursor: pointer;
+  outline: none;
+}
+.docsite-inbox-row:hover,
+.docsite-inbox-row:focus-visible {
+  background: var(--docsite-comment-hover);
+}
+.docsite-inbox-row-open {
+  background: var(--docsite-comment-hover-strong);
+}
+.docsite-inbox-row-main {
+  flex: 1;
+  min-width: 0;
+}
+.docsite-inbox-row-top {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  font-size: 13px;
+}
+.docsite-inbox-row-replies {
   display: inline-flex;
   align-items: center;
-  border: 1px solid var(--color-fd-border, #ddd);
-  border-radius: 8px;
-  padding: 5px 10px;
-  font-size: 13px;
-  background: var(--color-fd-card, #fff);
-  color: var(--color-fd-card-foreground, #111);
-  box-shadow: 0 4px 12px rgb(0 0 0 / 0.15);
-  cursor: pointer;
-}
-.docsite-selection-button:hover {
-  background: #f5b301;
-  border-color: #f5b301;
-  color: #fff;
-}
-
-/* 拾取后的草稿表单（固定浮在被批的元素或那段字旁边） */
-.docsite-comment-draft {
-  z-index: 30;
-  width: min(360px, calc(100vw - 16px));
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  border: 1px solid var(--color-fd-border, #ddd);
-  border-radius: 12px;
-  padding: 12px;
-  background: var(--color-fd-card, #fff);
-  color: var(--color-fd-card-foreground, #111);
-  box-shadow: 0 8px 24px rgb(0 0 0 / 0.18);
-}
-.docsite-draft-quote {
-  margin: 0;
-  border-left: 3px solid #f5b301;
-  padding-left: 8px;
+  gap: 3px;
+  margin-left: auto;
+  color: var(--color-fd-muted-foreground, #999);
   font-size: 12px;
-  color: var(--color-fd-muted-foreground, #666);
+}
+.docsite-inbox-row-replies .docsite-comment-icon {
+  width: 13px;
+  height: 13px;
+}
+.docsite-inbox-row .docsite-thread-quote {
+  margin: 3px 0 2px;
+  font-size: 12.5px;
+}
+.docsite-inbox-row .docsite-thread-quote > span {
+  -webkit-line-clamp: 1;
+}
+.docsite-inbox-row-body {
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
+  font-size: 13.5px;
+  line-height: 1.55;
 }
-.docsite-comment-draft textarea {
-  width: 100%;
-  border: 1px solid var(--color-fd-border, #ddd);
-  border-radius: 6px;
-  padding: 8px;
-  font: inherit;
-  resize: vertical;
-  box-sizing: border-box;
+.docsite-inbox-row-body p {
+  display: inline;
+  margin: 0;
 }
-.docsite-draft-actions {
-  display: inline-flex;
-  gap: 8px;
-}
-.docsite-draft-cancel {
-  border: 1px solid var(--color-fd-border, #ddd);
-  border-radius: 6px;
-  padding: 4px 12px;
-  background: transparent;
-  cursor: pointer;
-}
-.docsite-draft-submit {
-  border: 1px solid var(--color-fd-primary, #1f6feb);
-  border-radius: 6px;
-  padding: 4px 12px;
-  background: var(--color-fd-primary, #1f6feb);
-  color: var(--color-fd-primary-foreground, #fff);
-  cursor: pointer;
-}
-.docsite-draft-submit:disabled {
-  opacity: 0.6;
-  cursor: default;
+.docsite-inbox-foot {
+  padding: 8px 14px;
+  border-top: 1px solid var(--color-fd-border, #e5e5e5);
 }
 
-/* 评论卡上的锚点状态说明（原文找不到了、批的是什么） */
-.docsite-thread-note {
-  margin: 0;
-  font-size: 12px;
+/* ---------- 批注模式：顶上的提示条、悬停的候选元素画框加类别标签、划字后浮出的「评论」按钮 ---------- */
+.docsite-picking-bar {
+  position: fixed;
+  top: 14px;
+  left: 50%;
+  z-index: 60;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 5px 6px 5px 14px;
+  border-radius: 9999px;
+  background: var(--color-fd-popover, #fff);
+  color: var(--color-fd-popover-foreground, #111);
+  box-shadow: var(--docsite-comment-shadow);
+  font-size: 13px;
+  transform: translateX(-50%);
+}
+.docsite-picking-bar > .docsite-comment-icon {
+  color: var(--docsite-comment-accent);
+}
+.docsite-picking-bar kbd {
+  padding: 1px 5px;
+  border: 1px solid var(--color-fd-border, #ddd);
+  border-radius: 4px;
+  font: 11px ui-monospace, Consolas, monospace;
   color: var(--color-fd-muted-foreground, #666);
-  overflow-wrap: anywhere;
+}
+.docsite-picking-bar button {
+  padding: 3px 12px;
+  border: 0;
+  border-radius: 9999px;
+  background: var(--docsite-comment-hover-strong);
+  font-size: 12.5px;
+  cursor: pointer;
+}
+.docsite-picking-bar button:hover {
+  background: var(--docsite-comment-accent);
+  color: #fff;
+}
+.docsite-picking-hover {
+  z-index: 30;
+  pointer-events: none;
+  border-radius: 6px;
+  background: var(--docsite-comment-accent-soft);
+  box-shadow: 0 0 0 2px var(--docsite-comment-accent);
+}
+.docsite-picking-hover-label {
+  position: absolute;
+  top: -26px;
+  left: -2px;
+  max-width: 60vw;
+  padding: 0 8px;
+  overflow: hidden;
+  border-radius: 6px;
+  background: var(--docsite-comment-accent);
+  color: #fff;
+  font-size: 12px;
+  line-height: 22px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.docsite-selection-button {
+  z-index: 50;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 32px;
+  padding: 0 12px 0 10px;
+  border: 0;
+  border-radius: 8px;
+  background: var(--color-fd-popover, #fff);
+  color: var(--color-fd-popover-foreground, #111);
+  box-shadow: var(--docsite-comment-shadow);
+  font-size: 13px;
+  cursor: pointer;
+}
+.docsite-selection-button:hover {
+  background: var(--docsite-comment-accent);
+  color: #fff;
+}
+
+/* ---------- 全站评论表格（/comments，只读）：一行一串，点行展开整串 ---------- */
+.docsite-comments-table {
+  font-size: 14px;
+}
+.docsite-comments-table-meta {
+  margin: 0 0 8px;
+  color: var(--color-fd-muted-foreground, #666);
+  font-size: 12.5px;
+  text-align: right;
+}
+.docsite-comments-table table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+.docsite-comments-table th {
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--color-fd-border, #e5e5e5);
+  color: var(--color-fd-muted-foreground, #666);
+  font-size: 13px;
+  font-weight: 400;
+  text-align: left;
+  white-space: nowrap;
+}
+.docsite-comments-table td {
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--color-fd-border, #e5e5e5);
+  vertical-align: top;
+}
+.docsite-comments-table th + th,
+.docsite-comments-table td + td {
+  border-left: 1px solid var(--color-fd-border, #e5e5e5);
+}
+.docsite-comments-table th.docsite-comments-table-comment {
+  width: 36%;
+}
+.docsite-comments-table-number {
+  width: 56px;
+  text-align: right;
+}
+.docsite-comments-table tr[data-comment-row] {
+  cursor: pointer;
+  outline: none;
+}
+.docsite-comments-table tr[data-comment-row]:hover td,
+.docsite-comments-table tr[data-comment-row]:focus-visible td {
+  background: var(--docsite-comment-hover);
+}
+.docsite-comments-table-preview {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+}
+.docsite-comments-table-preview > .docsite-comment-icon {
+  width: 14px;
+  height: 14px;
+  margin-top: 4px;
+  color: var(--color-fd-muted-foreground, #999);
+}
+.docsite-comments-table-clip {
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.docsite-comments-table-clip p {
+  display: inline;
+  margin: 0;
+}
+.docsite-comments-table-page {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border-bottom: 1px solid var(--color-fd-border, #ddd);
+  line-height: 1.4;
+  text-decoration: none;
+}
+.docsite-comments-table-page:hover {
+  border-bottom-color: currentColor;
+}
+.docsite-comments-table-page .docsite-comment-icon {
+  width: 14px;
+  height: 14px;
+  color: var(--color-fd-muted-foreground, #999);
+}
+.docsite-comments-table-author {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.docsite-comments-table-quote {
+  display: block;
+  margin-top: 2px;
+  overflow: hidden;
+  color: var(--color-fd-muted-foreground, #666);
+  font-size: 12.5px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.docsite-place-chip {
+  display: inline-block;
+  padding: 0 6px;
+  border-radius: 4px;
+  font-size: 12px;
+  line-height: 20px;
+}
+.docsite-place-chip-body {
+  background: color-mix(in srgb, #f5b301 20%, transparent);
+}
+.docsite-place-chip-page {
+  background: var(--docsite-comment-hover-strong);
+}
+.docsite-place-chip-missing {
+  background: color-mix(in srgb, #d44c47 18%, transparent);
+}
+.docsite-comments-table-detail td {
+  padding: 12px 18px 12px 34px;
+  background: var(--docsite-comment-hover);
+}
+.docsite-comments-table-detail .docsite-thread {
+  max-width: 640px;
 }

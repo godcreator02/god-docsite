@@ -1,22 +1,23 @@
 import { readFileSync, writeFileSync } from 'node:fs'
 import path from 'node:path'
-import { checkRunner, filesUnder, hasViteErrorOverlay, headingOf, markNoReload, postFormToAction, problemResults, serverCodeInClientBuild, stepTimeoutMs, stillNoReload, waitForHydrated, watchPage } from '../lib/checks.mjs'
+import { checkRunner, filesUnder, hasViteErrorOverlay, headingOf, markNoReload, openCommentsInbox, postFormToAction, problemResults, serverCodeInClientBuild, stepTimeoutMs, stillNoReload, waitForHydrated, watchPage } from '../lib/checks.mjs'
 import { addedPageOf, titlePageOf } from '../lib/run-scratch.mjs'
 
 /** 侧栏站名下的一横排：搜索按钮与功能入口（god-docsite 的 SidebarLinksRow） */
 const sidebarRow = '#nd-sidebar [data-docsite-sidebar-row]'
 
-/** 写一条评论并回复：评论面板打开、整页评论、展开回复写回复；返回串 id */
+/**
+ * 写一条评论并回复：打开收件箱，在底部批整页；发出去以后这一串浮在正文顶上（data-comment-card），在它的回复框里回复；
+ * 收件箱里多出这一行。返回串 id
+ */
 async function writeThreadAndReply(page, { threadText, replyText }) {
-  await waitForHydrated(page, '[data-comment-dock-open]')
-  await page.click('[data-comment-dock-open]')
-  await page.click('[data-new-thread-toggle]')
+  await openCommentsInbox(page)
   await page.fill('[data-new-thread-form] textarea[name="body"]', threadText)
   await page.click('[data-new-thread-form] button[type="submit"]')
   const card = page.locator('[data-comment-card]', { hasText: threadText })
   await card.waitFor({ timeout: stepTimeoutMs })
   const threadId = await card.getAttribute('data-comment-card')
-  await page.click(`[data-open-replies="${threadId}"]`)
+  await page.locator(`[data-comment-row="${threadId}"]`).waitFor({ timeout: stepTimeoutMs })
   await page.fill(`[data-reply-form="${threadId}"] textarea[name="body"]`, replyText)
   await page.click(`[data-reply-form="${threadId}"] button[type="submit"]`)
   await card.locator('[data-reply]', { hasText: replyText }).waitFor({ timeout: stepTimeoutMs })
@@ -77,7 +78,7 @@ export async function runBaseChecks({ browser, baseUrl, mode, siteDir, feedToken
 
     await check('内容页直接打开', async () => {
       const response = await page.goto(`${baseUrl}/writing/collapse-test`, { waitUntil: 'load' })
-      await waitForHydrated(page, '[data-comment-dock-open]')
+      await waitForHydrated(page, '[data-comment-inbox-toggle]')
       const heading = await headingOf(page)
       const tabs = await page.locator('[role="tab"]').count()
       return { pass: response?.status() === 200 && heading === '收起内容试验' && tabs >= 4, detail: `h1=${heading}，标签页 ${tabs} 个` }
@@ -154,35 +155,70 @@ export async function runBaseChecks({ browser, baseUrl, mode, siteDir, feedToken
         const pending = await page.locator('[data-comment-pending]').count()
         return { pass: pending === 0, detail: `串 ${threadId} 与回复都显示出来，等编译入口的占位 ${pending} 个` }
       })
+
+      await check('批注一块（dev）：草稿与这一串浮在那一块正下方、不挤动正文；再点那一块收起浮窗，收件箱不跟着收', async () => {
+        const commentText = `e2e 批一块 ${runTag}`
+        await page.goto(`${baseUrl}/writing/collapse-test`, { waitUntil: 'load' })
+        await page.waitForLoadState('networkidle')
+        await openCommentsInbox(page)
+        const paragraphs = page.locator('[data-comment-scope] p')
+        const block = paragraphs.first()
+        const documentTopOf = (locator) => locator.evaluate((element) => element.getBoundingClientRect().top + window.scrollY)
+        const nextTopBefore = await documentTopOf(paragraphs.nth(1))
+        await page.click('[data-comment-picking-toggle]')
+        await block.click()
+        await page.fill('[data-comment-draft-form] textarea[name="body"]', commentText)
+        await page.click('[data-comment-draft-form] button[type="submit"]')
+        const card = page.locator('[data-comments-layer] [data-comment-card]', { hasText: commentText })
+        await card.waitFor({ timeout: stepTimeoutMs })
+        const blockBottom = await block.evaluate((element) => element.getBoundingClientRect().bottom + window.scrollY)
+        const layerTop = await page.locator('[data-comments-layer]').evaluate((element) => element.getBoundingClientRect().top + window.scrollY)
+        const nextTopAfter = await documentTopOf(paragraphs.nth(1))
+        const marked = await block.getAttribute('data-commented-element')
+        await block.click()
+        await card.waitFor({ state: 'detached', timeout: stepTimeoutMs })
+        const inboxes = await page.locator('[data-comments-inbox]').count()
+        const below = layerTop > blockBottom && layerTop - blockBottom < 24
+        return {
+          pass: below && nextTopAfter === nextTopBefore && marked === 'active' && inboxes === 1,
+          detail: `浮窗顶边比那一块底边低 ${Math.round(layerTop - blockBottom)}px；下一段的位置 ${nextTopBefore} → ${nextTopAfter}；那一块标成 ${marked}；再点一下浮窗收起，收件箱 ${inboxes} 个`,
+        }
+      })
     } else {
-      await check('start 只读：评论面板没有写入口、写明原因，直接提交被拒且不写文件（服务有身份码也不认）', async () => {
+      await check('start 只读：收件箱没有写入口、写明原因，直接提交被拒且不写文件（服务有身份码也不认）', async () => {
         const before = filesUnder(commentsDir).length
         await page.goto(`${baseUrl}/writing/collapse-test`, { waitUntil: 'load' })
-        await waitForHydrated(page, '[data-comment-dock-open]')
-        await page.click('[data-comment-dock-open]')
+        await openCommentsInbox(page)
         const reason = page.locator('[data-readonly-reason]')
         await reason.waitFor({ timeout: stepTimeoutMs })
         const reasonText = ((await reason.textContent()) ?? '').trim()
-        const toggles = await page.locator('[data-new-thread-toggle]').count()
+        const writeForms = await page.locator('[data-new-thread-form], [data-comment-picking-toggle]').count()
         const rejected = await postFormToAction(baseUrl, '/comments.data', { intent: 'create-thread', page: 'writing/collapse-test.mdx', body: `e2e start 评论 ${runTag}` })
         const after = filesUnder(commentsDir).length
-        const pass = reasonText.includes('发布版') && toggles === 0 && rejected.status === 403 && rejected.text.includes('发布版') && after === before
-        return { pass, detail: `面板写着「${reasonText}」，写评论按钮 ${toggles} 个；直接提交 → ${rejected.status}，评论目录文件 ${before} → ${after}` }
+        const pass = reasonText.includes('发布版') && writeForms === 0 && rejected.status === 403 && rejected.text.includes('发布版') && after === before
+        return { pass, detail: `收件箱写着「${reasonText}」，批整页的输入框与批注按钮 ${writeForms} 个；直接提交 → ${rejected.status}，评论目录文件 ${before} → ${after}` }
       })
     }
 
     // start 只读、评论正文是构建时编译的：只看预置的那串；dev 再看刚写的那串
     const threadsToSee = [{ threadText: 'e2e 预置评论', replyText: 'e2e 预置回复' }]
     if (mode === 'dev') threadsToSee.push({ threadText: `e2e 评论 ${runTag}`, replyText: `e2e 回复 ${runTag}` })
-    await check('全站评论页看得到评论与回复', async () => {
+    await check('全站评论表格：一行一串，点行展开看得到评论与回复', async () => {
       await page.goto(`${baseUrl}/comments`, { waitUntil: 'load' })
+      await waitForHydrated(page, '[data-comment-row]')
+      // dev 下首次打开会因依赖预构建整页刷新一次：等它安定再点，不然点开的行随刷新收回去
+      await page.waitForLoadState('networkidle')
       const seen = []
       for (const { threadText, replyText } of threadsToSee) {
-        const thread = page.locator('[data-comment-card]', { hasText: threadText })
+        const row = page.locator('[data-comment-row]', { hasText: threadText })
+        await row.waitFor({ timeout: stepTimeoutMs })
+        const threadId = await row.getAttribute('data-comment-row')
+        await row.click()
+        const thread = page.locator(`[data-comment-card="${threadId}"]`)
         await thread.waitFor({ timeout: stepTimeoutMs })
         seen.push(await thread.locator('[data-reply]', { hasText: replyText }).count())
       }
-      return { pass: seen.every((count) => count === 1), detail: threadsToSee.map(({ threadText }, index) => `「${threadText}」回复 ${seen[index]} 条`).join('，') }
+      return { pass: seen.every((count) => count === 1), detail: threadsToSee.map(({ threadText }, index) => `「${threadText}」展开后回复 ${seen[index]} 条`).join('，') }
     })
 
     await check('侧栏横排的「评论」入口（comments 的 sidebarLinks）', async () => {

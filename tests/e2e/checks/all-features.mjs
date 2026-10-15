@@ -30,7 +30,7 @@ const routeMarkers = [
   { url: '/tasks/20261012091000-adapt01', marker: '协作站三包依赖换到 0.3 地基', owner: 'collab 记录页' },
   { url: '/calendar', marker: 'aria-label="上一个月"', owner: 'collab 日历页' },
   { url: '/calendar/2026-10-12', marker: '顺手估了一下测试板的功耗', owner: 'collab 日志页' },
-  { url: '/comments', marker: 'data-comment-card', owner: 'comments 全站评论页' },
+  { url: '/comments', marker: 'data-comment-row', owner: 'comments 全站评论页' },
   { url: '/trajectory', marker: 'star-disk', owner: 'trajectory 星轨盘页（独立页面）' },
   { url: '/trajectory/2026-01-02-second', marker: '第二张卡', owner: 'trajectory 卡页' },
   { url: '/pinned', marker: 'data-pin-status', owner: '内容页（code-pin 外框）' },
@@ -41,7 +41,7 @@ const controlUrl = '/about'
 /** 各功能 styles.css 里只有它才有的规则：进了页面的样式表，就说明功能样式汇总把它带进来了 */
 const featureStyleSelectors = [
   { feature: 'code-pin', selector: '.code-pin' },
-  { feature: 'comments（包样式）', selector: '.docsite-comment-row' },
+  { feature: 'comments（包样式）', selector: '.docsite-floating' },
   { feature: 'comments（接线文件里的正文高亮）', selector: '::highlight(docsite-comment)' },
   { feature: 'explainer', selector: '.dx-btn' },
   { feature: 'trajectory', selector: '.star-disk' },

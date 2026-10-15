@@ -1,6 +1,6 @@
 import { personOf, type Person } from '@godcreator/identity'
 import { threadsByPage, threadsForPage, type CommentEntryLike, type ThreadSummary } from '../core/threads.js'
-import type { CommentWriter, PageThreadSummary } from './comments-sidebar.js'
+import type { CommentWriter, PageThreadSummary } from './comment-model.js'
 
 /** 站点评论集合里的一条（fumadocs-mdx 集合条目）：info.path 相对评论目录，frontmatter 字段直接在条目上 */
 export type CommentCollectionEntry = { info: { path: string } }
@@ -31,7 +31,7 @@ function commentEntryOf(entry: CommentCollectionEntry): CommentEntryLike {
   }
 }
 
-/** 评论面板要的一串：作者 id 换成人员列表里的 {id, name}（只取这两项，身份码不会带出去） */
+/** 评论界面要的一串：作者 id 换成人员列表里的 {id, name}（只取这两项，身份码不会带出去） */
 function pageThreadOf(thread: ThreadSummary, people: readonly Person[]): PageThreadSummary {
   const writerOf = (authorId: string): CommentWriter => {
     const person = personOf(people, authorId)
