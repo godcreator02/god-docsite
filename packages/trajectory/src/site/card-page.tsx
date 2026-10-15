@@ -5,7 +5,7 @@
 
 import { use } from "react";
 import type { MDXComponents } from "mdx/types";
-import { useLoaderData } from "react-router";
+import { Link, useLoaderData } from "react-router";
 import { DocsBody, DocsPage, DocsTitle } from "@fumadocs/base-ui/layouts/docs/page";
 import type { CardPageData, CardPageFields } from "./page-data.ts";
 import { cardHrefOf } from "./collection-entries.ts";
@@ -29,7 +29,7 @@ function CardLine({ card, hrefBase }: { card: CardPageFields; hrefBase: string }
           {card.parents.map((id, index) => (
             <span key={id}>
               {index > 0 ? "、" : ""}
-              <a href={cardHrefOf(hrefBase, id)}>{id}</a>
+              <Link to={cardHrefOf(hrefBase, id)}>{id}</Link>
             </span>
           ))}
         </>
@@ -48,9 +48,9 @@ export function CardPage({ bodies, components }: CardPageProps) {
       <title>{`${card.title} · ${siteName}`}</title>
       <DocsTitle>{card.title}</DocsTitle>
       <CardLine card={card} hrefBase={hrefBase} />
-      <a className="trajectory-card-back" href={hrefBase}>
+      <Link className="trajectory-card-back" to={hrefBase}>
         ← 回到星轨盘
-      </a>
+      </Link>
       <DocsBody>
         <Body components={components} />
       </DocsBody>
