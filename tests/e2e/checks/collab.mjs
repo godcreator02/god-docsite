@@ -247,7 +247,7 @@ export async function runCollabChecks({ browser, baseUrl, mode, siteDir, feedTok
     })
 
     await check('侧栏的「任务」「日历」入口站内导航', async () => {
-      await page.goto(`${baseUrl}/`, { waitUntil: 'load' })
+      await page.goto(`${baseUrl}/about`, { waitUntil: 'load' })
       await waitForHydrated(page, '#nd-sidebar a[href="/tasks"]')
       // React Router dev 按需发现路由：侧栏链接一渲染就去取路由清单，取到之前点下去会退回整页跳转
       await page.waitForLoadState('networkidle')

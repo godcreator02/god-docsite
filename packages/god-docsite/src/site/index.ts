@@ -1,5 +1,7 @@
 export type { SidebarLink } from './sidebar-links.js'
 export { SiteLayout, type SiteLayoutProps } from './site-layout.js'
+export { SiteHomeLayout, type SiteHomeLayoutProps } from './home-layout.js'
+export type { SiteHomeData } from './home.server.js'
 export { createSitePage, type CompiledMdxPage, type DocsBrowserCollection, type SitePageOptions } from './site-page.js'
 export { siteMdxComponents } from './mdx-components.js'
 export { linkChipClassName, linkChipIconClassName, routeLinkKind, siteLinkComponent, SiteLinksProvider, type SiteLinkKind } from './site-links.js'

@@ -20,11 +20,11 @@ afterEach(() => {
   rmSync(root, { recursive: true, force: true })
 })
 
-/** 基础站建好后的样子：只要 package.json 与模板自己的 content/ 首页 */
+/** 基础站建好后的样子：只要 package.json 与模板自己的 content/ 起始页 */
 function writeBaseSite(): void {
   mkdirSync(path.join(siteDir, 'content'), { recursive: true })
   writeFileSync(path.join(siteDir, 'package.json'), JSON.stringify({ name: 'docsite', scripts: { dev: 'react-router dev --port 4310' }, dependencies: {}, devDependencies: { vite: '^8.3.4' } }))
-  writeFileSync(path.join(siteDir, 'content', 'index.mdx'), '# 首页\n')
+  writeFileSync(path.join(siteDir, 'content', 'start.mdx'), '# 开始\n')
 }
 
 describe('插件旁边装着的包', () => {
@@ -44,7 +44,7 @@ describe('叠 docfirst 起始物', () => {
     expect(added).toContain('content/docs/outputs/agents.mdx')
     expect(added).toContain('trajectory/2026-01-01-site-born.md')
     expect(readFileSync(path.join(siteDir, 'docfirst.config.mjs'), 'utf8')).toBe('// 站点自己的\n')
-    expect(readFileSync(path.join(siteDir, 'content', 'index.mdx'), 'utf8')).toBe('# 首页\n')
+    expect(readFileSync(path.join(siteDir, 'content', 'start.mdx'), 'utf8')).toBe('# 开始\n')
   })
 
   it('写 doc 系列脚本与 devDependencies 里的命令行；已有同名脚本就报错', () => {

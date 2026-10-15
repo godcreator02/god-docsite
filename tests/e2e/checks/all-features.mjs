@@ -101,7 +101,7 @@ export async function runAllFeaturesChecks({ browser, baseUrl }) {
     watchPage(page, 'all-features', problems)
 
     await check('侧栏横排里各功能入口都在、先后固定（刷新后不变），入口不进页面树', async () => {
-      await page.goto(`${baseUrl}/`, { waitUntil: 'load' })
+      await page.goto(`${baseUrl}/about`, { waitUntil: 'load' })
       const first = await sidebarRowLinks(page)
       await page.reload({ waitUntil: 'load' })
       const second = await sidebarRowLinks(page)

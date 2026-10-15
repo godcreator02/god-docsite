@@ -1,7 +1,7 @@
 /**
  * docfirst 的模板 template/：文档维护要的起始物，叠在站点根上（不进 app/features/）——配置、三份生成物的正本、
- * 现状区与未来区的起始页、第一张轨迹卡。路径与站点模板（content/index.mdx、content/meta.json）不重叠。
- * 叠到一个只有首页的站点根上：配置按新字段表校验通过，render 之后 check 全绿，trajectory 认出起始根卡。
+ * 现状区与未来区的起始页、第一张轨迹卡。路径与站点模板（content/start.mdx、content/meta.json）不重叠。
+ * 叠到一个只有起始页的站点根上：配置按新字段表校验通过，render 之后 check 全绿，trajectory 认出起始根卡。
  */
 import { test } from "vitest";
 import assert from "node:assert/strict";
@@ -51,7 +51,7 @@ test("叠在站点根上就能用：render 生成仓根三份生成物，之后 
   console.log = (...args: unknown[]) => void said.push(args.join(" "));
   try {
     mkdirSync(join(site, "content"), { recursive: true });
-    writeFileSync(join(site, "content", "index.mdx"), "---\ntitle: 首页\n---\n\n站点模板的首页。\n");
+    writeFileSync(join(site, "content", "start.mdx"), "---\ntitle: 开始\n---\n\n站点模板的起始页。\n");
     cpSync(TEMPLATE, site, { recursive: true });
     run(repo, ["init", "-q", "-b", "main"]);
     run(repo, [...SETTINGS, "add", "-A"]);

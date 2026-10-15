@@ -83,7 +83,7 @@ icon: Blocks
     `defineDocs` 与 `import.meta.glob` 的参数要能在构建时直接读出来，只能写在项目里。
   </Accordion>
   <Accordion title="为什么首页另写一条路由">
-    React Router 里 `*` 不匹配根地址 `/`，首页用一条 `index` 路由交给同一个页面文件。
+    首页不是一篇文档：它用 fumadocs 的 `HomeLayout`，没有侧栏，所以是整站布局外面的一条 `index` 路由，文件是 `app/routes/home.tsx`。
   </Accordion>
 </Accordions>
 

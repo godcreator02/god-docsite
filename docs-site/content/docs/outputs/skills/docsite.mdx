@@ -87,7 +87,8 @@ docsite.people.join {"dir":…,"id":"<字母数字_->","name":"<显示名>","git
 
 - 页面放在 `content/`：`名字.mdx`（frontmatter 写 `title`、可选 `description`、`icon`）、`名字.page.tsx`（导出 `meta = { title }` 与默认组件）、`名字.html`（`<title>` 是标题）
 - 一页要用几个组件：页面放外面，组件放进同名文件夹，`content/notes/waveform.mdx` 从 `./waveform/` 引用；图片放在页面旁边，用相对路径
-- 文件夹的 `meta.json` 写 `title`、`pages`（顺序，写文件名去掉扩展名，TSX 页面也去掉 `.page`）、`icon`（lucide 图标名）；写了 `"root": true` 的是侧栏顶上切换下拉框的一项
+- 文件夹的 `meta.json` 写 `title`、`pages`（顺序，写文件名去掉扩展名，TSX 页面也去掉 `.page`）、`icon`（lucide 图标名）；写了 `"root": true` 的是侧栏顶上切换下拉框的一项，不在任何一项里的页面收成以站名命名的一项
+- 首页 `/` 是站点的 `app/routes/home.tsx`（fumadocs 的 `HomeLayout`，没有侧栏），不在 `content/` 里：`content/` 根上不放 `index` 页，放了打开首页报错
 - 地址就是 `content/` 下的路径；`/api`、`/comments`、`/llms.txt` 与功能包的页面（如协作站的 `/tasks`、`/calendar`）留给站点自己。改了页面，开发服务自己刷新
 
 ## 服务 gwbDocsite

@@ -37,15 +37,29 @@ export async function runBaseChecks({ browser, baseUrl, mode, siteDir, feedToken
     const page = await context.newPage()
     watchPage(page, 'base', problems)
 
-    await check('主页打开：正文里有功能页面与各组目录的卡片', async () => {
+    await check('首页打开：HomeLayout，没有侧栏；顶栏有「文档」与功能入口，正文有功能页面的卡片', async () => {
       const response = await page.goto(`${baseUrl}/`, { waitUntil: 'load' })
       const heading = await headingOf(page)
-      const cardTargets = await page.locator('#nd-page a[href]').evaluateAll((links) => links.map((link) => link.getAttribute('href')))
-      const missing = ['/tasks', '/calendar', '/comments', '/trajectory', '/about', '/guide'].filter((href) => !cardTargets.includes(href))
+      const sidebars = await page.locator('#nd-sidebar').count()
+      const navLinks = await page.locator('header a[href]').evaluateAll((links) => links.map((link) => `${link.getAttribute('href')} ${link.textContent?.trim()}`))
+      const bodyLinks = await page.locator('main a[href]').evaluateAll((links) => links.map((link) => link.getAttribute('href')))
+      const missingNav = ['/about 文档', '/tasks 任务', '/calendar 日历', '/comments 评论', '/trajectory 轨迹'].filter((entry) => !navLinks.includes(entry))
+      const missingCards = ['/tasks', '/calendar', '/comments', '/trajectory'].filter((href) => !bodyLinks.includes(href))
       return {
-        pass: response?.status() === 200 && heading === '协作站测试' && missing.length === 0,
-        detail: `GET / → ${response?.status()}，h1=${heading}；缺的卡片 ${missing.join('、') || '无'}`,
+        pass: response?.status() === 200 && heading === '协作站测试' && sidebars === 0 && missingNav.length === 0 && missingCards.length === 0,
+        detail: `GET / → ${response?.status()}，h1=${heading}，侧栏 ${sidebars} 个；顶栏缺 ${missingNav.join('、') || '无'}；正文缺的卡片 ${missingCards.join('、') || '无'}`,
       }
+    })
+
+    await check('首页顶栏的「文档」站内导航到第一组的第一页（带侧栏）', async () => {
+      await waitForHydrated(page, 'header a[href="/about"]')
+      await page.waitForLoadState('networkidle')
+      await markNoReload(page)
+      await page.click('header a[href="/about"]')
+      await page.locator('h1', { hasText: '这个测试站是什么' }).waitFor({ timeout: stepTimeoutMs })
+      const sidebars = await page.locator('#nd-sidebar').count()
+      const kept = await stillNoReload(page)
+      return { pass: kept && sidebars === 1, detail: `到 /about，没有整页刷新=${kept}，侧栏 ${sidebars} 个` }
     })
 
     await check('侧栏站内导航', async () => {
@@ -169,7 +183,7 @@ export async function runBaseChecks({ browser, baseUrl, mode, siteDir, feedToken
     })
 
     await check('侧栏横排的「评论」入口（comments 的 sidebarLinks）', async () => {
-      await page.goto(`${baseUrl}/`, { waitUntil: 'load' })
+      await page.goto(`${baseUrl}/about`, { waitUntil: 'load' })
       await waitForHydrated(page, `${sidebarRow} a[href="/comments"]`)
       await markNoReload(page)
       await page.click(`${sidebarRow} a[href="/comments"]`)
@@ -211,10 +225,9 @@ export async function runBaseChecks({ browser, baseUrl, mode, siteDir, feedToken
       }
     })
 
-    await check('每一页侧栏都有目录切换按钮：组外的页面收在以站名命名的那一组里，主页与功能页面也有', async () => {
+    await check('每一页侧栏都有目录切换按钮：组外的页面收在以站名命名的那一组里，功能页面也有', async () => {
       const outcomes = []
       for (const { url, group } of [
-        { url: '/', group: '协作站测试' },
         { url: '/about', group: '协作站测试' },
         { url: '/writing/collapse-test', group: '协作站测试' },
         { url: '/guide', group: '指南' },
@@ -225,11 +238,11 @@ export async function runBaseChecks({ browser, baseUrl, mode, siteDir, feedToken
         const toggles = await page.locator('#nd-sidebar button', { hasText: group }).count()
         outcomes.push({ url, group, toggles })
       }
-      // 主页不进页面树：侧栏里指向 / 的只有站名那一个链接
+      // 首页不在页面树里：侧栏里指向 / 的只有站名那一个链接
       const homeLinks = await page.locator('#nd-sidebar a[href="/"]').count()
       return {
         pass: outcomes.every(({ toggles }) => toggles >= 1) && homeLinks === 1,
-        detail: `${outcomes.map(({ url, group, toggles }) => `${url}「${group}」${toggles} 个`).join('；')}；侧栏里指向主页的链接 ${homeLinks} 个（应只有站名）`,
+        detail: `${outcomes.map(({ url, group, toggles }) => `${url}「${group}」${toggles} 个`).join('；')}；侧栏里指向首页的链接 ${homeLinks} 个（应只有站名）`,
       }
     })
 

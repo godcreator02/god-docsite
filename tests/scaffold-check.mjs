@@ -17,6 +17,7 @@ const scaffoldModule = path.join(repoDir, 'packages', 'god-docsite', 'dist', 'no
 /** 两个站都由站点自己维护、建站器只在建站时写一次的文件：内容、人员、依赖清单、站名、术语、评论 */
 const siteOwnedInEverySite = [
   { path: 'content/', reason: '站点的内容页（模板只给一张起始页与 meta.json）' },
+  { path: 'app/routes/home.tsx', reason: '站点的首页（模板只给一份最简单的）' },
   { path: 'comments/', reason: '站点的评论' },
   { path: 'people.json', reason: '站点的人员' },
   { path: 'glossary.json', reason: '站点的术语表' },

@@ -52,12 +52,12 @@ describe('真的在临时目录建站', () => {
     expect(new URL(url).port).toBe(String(port))
 
     expect(await joinPeople(siteDir, identityCode, { id: 'tester', name: '测试员' })).toEqual({ changed: true })
-    const created = await writeComment(url, { op: 'create', page: 'index.mdx', body: '真站上的评论' })
+    const created = await writeComment(url, { op: 'create', page: 'start.mdx', body: '真站上的评论' })
     expect(existsSync(path.join(siteDir, 'comments', created.thread, 'index.mdx'))).toBe(true)
     const replied = await writeComment(url, { op: 'reply', thread: created.thread, body: 'agent 的回复', as: 'claude' })
     expect(existsSync(path.join(siteDir, 'comments', created.thread, `${replied.reply}.mdx`))).toBe(true)
     await expect(writeComment(url, { op: 'reply', thread: created.thread, body: 'x', as: 'nobody' })).rejects.toThrow('people.json 里没有 nobody')
-    const [thread] = await listComments(siteDir, { page: 'index.mdx' })
+    const [thread] = await listComments(siteDir, { page: 'start.mdx' })
     expect(thread).toMatchObject({ id: created.thread, author: 'tester', body: '真站上的评论', replies: [{ author: 'claude', body: 'agent 的回复' }] })
 
     await host.push(siteDir, 'probe', { note: '推送一' })

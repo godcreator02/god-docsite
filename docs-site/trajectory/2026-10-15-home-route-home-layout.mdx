@@ -1,0 +1,32 @@
+---
+born-at: 2026-10-15T21:40
+type: choice
+parent: [2026-09-03-god-live-doc]
+label: 首页照 fumadocs 官方做成单独的路由，用 HomeLayout、没有侧栏
+domain: 页面
+---
+
+## 背景
+
+上一张卡把测试站的主页做成了一篇内容页（`content/index.page.tsx`，不进页面树），它照样在 `DocsLayout` 里，带着侧栏。
+用户指出这不是 fumadocs 的首页。fumadocs 官方 React Router 模板的首页是单独一条 `index('routes/home.tsx')`，
+用 `@fumadocs/base-ui/layouts/home` 的 `HomeLayout`：顶上一条导航栏，下面整页由站点自己写，没有侧栏和本页目录；文档页才用 `DocsLayout`。
+
+supersedes:: [组外的页面收成以站名命名的一组，测试站做专门的主页](2026-10-15-loose-pages-group-and-home.md)
+
+那张卡里组外页面收成一组的部分不变，只取代它「主页做成内容页」的那一半。
+
+## 结论与边界
+
+- 平台模板的路由表加 `index('routes/home.tsx')`，放在整站布局路由外面；整站布局里不再有 `index` 路由，只有功能的页面路由和 `*`。
+- 首页由站点自己写：模板给一份最简单的 `app/routes/home.tsx`（站名、一句话、「看文档」按钮），建站器只在建站时写一次，
+  `tests/scaffold-check.mjs` 把它列为站点自己维护的文件。测试站与本站各写了自己的首页：站名、介绍、按钮，下面一组卡片。
+- 平台包加 `SiteHomeLayout`（`HomeLayout` 加顶栏链接：「文档」与各功能的 `sidebarLinks`）和 `siteHomeData`（站名与「文档」链接的地址：目录切换按钮第一组里的第一页）。
+- `/` 归首页：内容目录根上写了 `index` 页（地址也是 `/`）时，`siteHomeData` 报错，不让两页抢同一个地址。
+  模板的起始页从 `content/index.mdx` 改名为 `content/start.mdx`；本站删掉了 `content/index.mdx`，它列的入口挪进了首页的卡片。
+- e2e base 组：首页没有侧栏、顶栏有「文档」与四个功能入口、正文有四张卡片；点「文档」站内导航到 `/about`，那一页带侧栏。原来从 `/` 开始找侧栏的检查改从 `/about` 开始。
+
+## 否掉的候选
+
+- 首页内容从 `content/home.page.tsx` 读，再由平台套上 `HomeLayout`：多一层平台约定，不是 fumadocs 的原生写法。
+- 由协作功能包统一给协作站提供首页：各协作站差别大，统一的首页不一定合用。
