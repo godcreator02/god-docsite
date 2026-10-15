@@ -212,7 +212,7 @@ test("包的方向：源码里也不许 import 禁止的兄弟包", () => {
 });
 
 /** 按功能切的新包：边界由 .dependency-cruiser.cjs（pnpm depcheck）检查，不进这个文件的几张表 */
-const FUNCTIONAL_PACKAGES = new Set(["trajectory", "docfirst", "god-docsite"]);
+const FUNCTIONAL_PACKAGES = new Set(["trajectory", "docfirst", "god-docsite", "explainer"]);
 
 test("packages/ 下的包一个不多一个不少——加了新包得先想清楚它能认识谁", () => {
   const dirs = readdirSync(PACKAGES, { withFileTypes: true })
@@ -590,7 +590,8 @@ test("fumadocs 子入口的 `./fumadocs/roster`：命令行读 docfirst.config.m
  */
 test("包只发 dist 与样式：skills 与建站模板跟着插件走了，包里连目录都不该再有", () => {
   const FILES: Record<string, string[]> = {
-    "code-pin": ["dist"],
+    // 这里的 template/ 不是建站模板：是建站器复制进站点 app/features/code-pin/ 的接线文件（remark 插件与样式）
+    "code-pin": ["dist", "template"],
     "trajectory-disk": ["dist", "styles"],
     "docfirst-workflow": ["dist", "styles"],
     "docfirst-explainer": ["dist", "styles"],

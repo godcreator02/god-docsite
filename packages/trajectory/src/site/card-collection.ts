@@ -1,11 +1,11 @@
 /**
  * 站点声明卡集合时用的两样东西：schema `cardSchema` 与 mdx 选项 `cardMdxOptions`。只在构建期由 fumadocs-mdx 在 Node 里调用。
- * 集合本身由站点声明（fumadocs-mdx 要求集合宏的 dir 是字符串字面量）：
+ * 集合本身由站点声明（本包模板的 mdx.ts，经站点 source.config.ts 导出）：
  *
- *   export const trajectoryCards = defineCollections({
- *     type: 'doc', dir: 'trajectory', async: true,
+ *   export const trajectory = defineCollections({
+ *     type: 'doc', dir: 'trajectory', files: ['*.{md,mdx}'], async: true,
  *     schema: cardSchema,
- *     mdxOptions: cardMdxOptions({ hrefBase: '/trajectory' }),
+ *     mdxOptions: cardMdxOptions({ hrefBase: '/trajectory', remarkPlugins: [remarkMath], rehypePlugins: [rehypeKatex] }),
  *   })
  */
 
@@ -50,13 +50,25 @@ export function cardSchema(ctx: CardSchemaContext): StandardSchemaV1<unknown, Ca
   };
 }
 
+type MdxProcessorOptions = Awaited<ReturnType<ReturnType<typeof applyMdxPreset>>>;
+/** remark / rehype 插件表，跟 fumadocs-mdx 的 mdx 选项同一个类型 */
+export type MdxPluginList = NonNullable<MdxProcessorOptions["remarkPlugins"]>;
+
 export interface CardMdxOptions {
   /** 卡页地址前缀，正文里指向别的卡的链接改写成 `${hrefBase}/<卡身份>` */
   hrefBase: string;
+  /** 站点的全站 remark 插件（公式、术语标注这类）：接在默认预设之后、卡链接改写之前 */
+  remarkPlugins?: MdxPluginList;
+  /** 站点的全站 rehype 插件（公式渲染这类）：排在默认预设前面，跟站点 docs 集合同一个位置 */
+  rehypePlugins?: MdxPluginList;
 }
 
-/** 卡集合的 mdx 选项：fumadocs 的默认预设（GFM、标题锚点、代码高亮）之后接上卡链接改写。
- * 集合级 mdxOptions 写成普通对象时 fumadocs-mdx 不套默认预设，所以一定经 applyMdxPreset */
-export function cardMdxOptions({ hrefBase }: CardMdxOptions): ReturnType<typeof applyMdxPreset> {
-  return applyMdxPreset({ remarkPlugins: (defaults) => [...defaults, [remarkTrajectoryLinks, { hrefBase }]] });
+/** 卡集合的 mdx 选项：fumadocs 的默认预设（GFM、标题锚点、代码高亮）加上站点的全站插件，最后接上卡链接改写。
+ * 集合级 mdxOptions 写成普通对象时 fumadocs-mdx 不套默认预设，所以一定经 applyMdxPreset；
+ * 集合写了 mdxOptions，站点 source.config.ts 全局的 mdxOptions 对它整个不生效，全站插件只能经 remarkPlugins / rehypePlugins 再传一次 */
+export function cardMdxOptions({ hrefBase, remarkPlugins = [], rehypePlugins = [] }: CardMdxOptions): ReturnType<typeof applyMdxPreset> {
+  return applyMdxPreset({
+    remarkPlugins: (defaults) => [...defaults, ...remarkPlugins, [remarkTrajectoryLinks, { hrefBase }]],
+    rehypePlugins: (defaults) => [...rehypePlugins, ...defaults],
+  });
 }

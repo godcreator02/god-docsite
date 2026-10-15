@@ -5,7 +5,7 @@
     "name": "godcreator"
   },
   "type": "module",
-  "description": "把文字钉在代码上：只认目标（行段、整个文件、目录树）与记录，核对出代码变没变、确认出新记录；不读文件，读取器与旧内容来源由调用方传入。",
+  "description": "把文字钉在代码上：只认目标（行段、整个文件、目录树）与记录，核对出代码变没变、确认出新记录；不读文件，读取器与旧内容来源由调用方传入。template/ 是建站器复制进站点 app/features/code-pin/ 的接线文件（remark 插件与样式）。",
   "exports": {
     ".": {
       "types": "./dist/index.d.mts",
@@ -22,7 +22,8 @@
     "./site/pin.css": "./dist/pin.css"
   },
   "files": [
-    "dist"
+    "dist",
+    "template"
   ],
   "scripts": {
     "build": "tsdown",

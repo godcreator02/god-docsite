@@ -5,7 +5,7 @@
     "name": "godcreator"
   },
   "type": "module",
-  "description": "docfirst 命令行：读项目根的 docfirst.config.mjs，把 check / confirm / render / trajectory 分派给钉码（code-pin）、生成物（doc-export）、轨迹卡（trajectory）三个功能包，汇总结果、给出退出码。",
+  "description": "docfirst 命令行：读项目根的 docfirst.config.mjs，把 check / confirm / render / trajectory 分派给钉码（code-pin）、生成物（doc-export）、轨迹卡（trajectory）三个功能包，汇总结果、给出退出码。template/ 是文档维护的起始物（配置、生成物正本、起始页、第一张轨迹卡），建站后叠在站点根上。",
   "bin": {
     "docfirst": "./dist/bin.mjs"
   },
@@ -16,7 +16,8 @@
     }
   },
   "files": [
-    "dist"
+    "dist",
+    "template"
   ],
   "scripts": {
     "build": "tsdown",

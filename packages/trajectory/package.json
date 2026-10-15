@@ -5,7 +5,7 @@
     "name": "godcreator"
   },
   "type": "module",
-  "description": "轨迹卡：卡格式与校验、卡之间的关系、星轨盘的数据模型（.）；读卡目录（./node）；卡页、星轨盘页与星轨盘画布（./site），两页的 loader（./site/server），站点声明卡集合用的 schema 与 mdx 选项（./site/collection）。",
+  "description": "轨迹卡：卡格式与校验、卡之间的关系、星轨盘的数据模型（.）；读卡目录（./node）；卡页、星轨盘页与星轨盘画布（./site），两页的 loader（./site/server），站点声明卡集合用的 schema 与 mdx 选项（./site/collection）；template/ 是建站器复制进站点 app/features/trajectory/ 的接线文件（两条路由、卡集合、侧栏入口、样式）。",
   "exports": {
     ".": {
       "types": "./dist/core.d.mts",
@@ -30,9 +30,15 @@
     "./styles.css": "./styles/trajectory.css",
     "./star.css": "./styles/star.css"
   },
+  "godDocsite": {
+    "collections": [
+      "trajectory"
+    ]
+  },
   "files": [
     "dist",
-    "styles"
+    "styles",
+    "template"
   ],
   "scripts": {
     "build": "tsdown",
@@ -67,6 +73,7 @@
   },
   "devDependencies": {
     "@fumadocs/base-ui": "catalog:",
+    "@react-router/dev": "catalog:",
     "@standard-schema/spec": "catalog:",
     "@types/mdast": "catalog:",
     "@types/mdx": "catalog:",

@@ -126,3 +126,18 @@ test("cardMdxOptions：经 fumadocs 默认预设（带 GFM 与代码高亮），
   const rehypeNames = (options.rehypePlugins ?? []).map((plugin) => (Array.isArray(plugin) ? plugin[0] : plugin)).map((plugin) => (plugin as { name?: string }).name);
   assert.ok(rehypeNames.includes("rehypeCode"), `默认预设里该有代码高亮 rehypeCode，实际：${rehypeNames.join("、")}`);
 });
+
+test("cardMdxOptions：站点的全站插件并进来——remark 接在默认预设之后、卡链接改写之前，rehype 排在默认预设前面", async () => {
+  const remarkSite = function remarkSite() {};
+  const rehypeSite = function rehypeSite() {};
+  const options = await cardMdxOptions({ hrefBase: "/cards", remarkPlugins: [remarkSite], rehypePlugins: [rehypeSite] })("bundler");
+  const remarkPlugins = options.remarkPlugins ?? [];
+  const plain = await cardMdxOptions({ hrefBase: "/cards" })("bundler");
+  const defaults = plain.remarkPlugins ?? [];
+  assert.equal(remarkPlugins.length, defaults.length + 1, "只多出站点那一个 remark 插件");
+  assert.equal(remarkPlugins.at(-2), remarkSite);
+  assert.deepEqual(remarkPlugins.at(-1), [remarkTrajectoryLinks, { hrefBase: "/cards" }]);
+  const rehypePlugins = options.rehypePlugins ?? [];
+  assert.equal(rehypePlugins[0], rehypeSite);
+  assert.equal(rehypePlugins.length, (plain.rehypePlugins ?? []).length + 1, "只多出站点那一个 rehype 插件");
+});
