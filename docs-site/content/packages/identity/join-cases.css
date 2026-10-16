@@ -1,0 +1,19 @@
+/*
+ * JoinCases 自己的画面：上面带来的参数、下面名单的改动，两张卡并排，窄屏竖排。
+ * 卡片、胶囊与新旧行对照由 @godcreator/explainer 提供，颜色只取那套变量。
+ * docsite.people.join 一侧固定 cyan（对应接缝图里的 gwb-docsite），people.json 一侧固定 emerald。
+ */
+.jc-case { display: grid; gap: 12px; }
+
+.jc-panes { display: grid; grid-template-columns: 1fr 1.2fr; gap: 12px; }
+@container (max-width: 639px) {
+  .jc-panes { grid-template-columns: 1fr; }
+}
+
+/* 这次带来的参数：等宽字一行一项；码一栏注明它来自本 home 的设置，不是命令参数 */
+.jc-joining { display: grid; gap: 4px; font-family: var(--dx-mono); font-variant-ligatures: none; font-size: 12px; white-space: pre-wrap; overflow-wrap: anywhere; }
+
+/* 结论行或报错原话 */
+.jc-note { margin-top: 8px; font-size: 12.5px; color: var(--dx-dim); }
+.jc-reason { margin-top: 8px; font-family: var(--dx-mono); font-variant-ligatures: none; font-size: 12px; white-space: pre-wrap; overflow-wrap: anywhere; }
+.jc-dim { color: var(--dx-dim); }

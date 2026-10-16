@@ -1,12 +1,20 @@
 ---
 title: identity：身份
-description: 站点的人员名单 people.json 与身份码：dev 按本机的身份码在名单里认人，发布版一律只读；写入前核对请求来源与身份，交给浏览器的人员只有公开字段
+description: 站点的人员名单 people.json 与身份码：身份码由 gwb-docsite 生成、经环境变量交给站点，dev 按它在名单里认人，发布版一律只读；加进名单六种情况怎么改文件，写入前核对请求来源与身份，交给浏览器的人员只有公开字段
 icon: IdCard
 ---
 
+import { IdentitySeams } from './identity/seams'
+import { JoinCases } from './identity/join-cases'
+import { RecognizeCases } from './identity/recognize-cases'
 import { WhoWrites } from './identity/who-writes'
+import { PublicShape } from './identity/public-shape'
 
 站点要知道「这台机器上是谁在看」，才能决定能不能写评论、署谁的名。identity 不做登录：名单是站点目录里进 git 的 `people.json`，每个 gwb home 有一个身份码，开发服务启动时由 gwb-docsite 交给站点；站点拿码在名单里找人。小周的电脑上码是 `zhoucode0001`，名单里 `zhou` 那一项带着这个码，所以他打开的站侧栏底部显示「小周」，能写评论。这一页从头到尾都用这份名单：小周（`zhou`）、小李（`li`，没有码）、Claude（`claude`，agent）。
+
+先看一张图，把身份码从哪来、名单在哪、站点怎么认人、谁在写入前核对摆清楚；后面每一节开头都会写它在图上的位置。
+
+<IdentitySeams />
 
 ## people.json：名单与身份码
 
@@ -30,23 +38,27 @@ import { WhoWrites } from './identity/who-writes'
 
 ## 身份码从哪来、怎么进名单
 
-身份码由 gwb 插件 gwb-docsite 在本 home 第一次加载时生成、存在它的设置里，生成规则归 gwb-docsite 的页。把自己加进名单走它的命令 `docsite.people.join`，它调本包 node 层的 `joinSitePeople`。规则：名单里已有这个 id，就把码加进它的 `codes`——同一个人换一台电脑、一个新 home，就多一个码；没有就新加一项；码已经在别人名下、id 是 agent、`gitea` 和已写的不一样都报错；码已经在那个人名下时不动文件。
+图上第 1、2 号。身份码由 gwb 插件 gwb-docsite 在本 home 第一次加载时生成、存在它的设置 `identity-code` 里，生成规则归 gwb-docsite 的页。把自己加进名单走它的命令 `docsite.people.join`：它带上 id、名字（可选 `gitea`）与本机的码，调本包 node 层的 `joinSitePeople` 写回名单。加进名单时文件怎么变、什么时候被拒：
 
-{/* ref file="../packages/identity/src/core/people.ts" lines="59-76" hash="cede7911eb3c" blob="5d0cf38c6fe0" */}
+<JoinCases />
+
+写回一项一行：加一个人或一个码，git 里的改动只有那一行；码已在名下时不动文件。这一节的名单比贯穿例子少小李一项——他还没把自己加进去，正好用他做「新的人」。
 
 ## 认人：dev 看身份码，发布版一律只读
 
-认人的结果 `SiteIdentity` 只有两种：有人（公开形状的那个人），或没人加一句只读原因；原因里不写码本身。按码在名单里找：没有码，只读，原因是这个开发服务不是经 gwb-docsite 启动的；码不在名单里，只读，原因里写明调 `docsite.people.join`。
+图上第 3、4 号。认人的结果 `SiteIdentity` 只有两种：有人（公开形状的那个人），或没人加一句只读原因；原因里不写码本身。同一份名单，站点怎么跑、环境变量里有没有码、码在不在名单里，认出来的结果不同：
 
 {/* ref file="../packages/identity/src/core/identity.ts" hash="ee7573cfb482" blob="7b82e260a0c2" */}
 
-站点怎么跑决定看不看码：`dev`（本机由 gwb-docsite 启动的开发服务）按环境变量 `DOCSITE_IDENTITY_CODE` 找人；`start`（build 之后的发布版）一律只读，环境变量里有码也不看。所以写评论、改任务只在各人本机的 dev 里做，改完经 git 同步；为什么这样定，见轨迹卡 [只有本机 dev 能写，build + start 的发布版全面只读](/trajectory/2026-10-15-published-site-readonly)。
+<RecognizeCases />
+
+`dev`（本机由 gwb-docsite 启动的开发服务）按环境变量 `DOCSITE_IDENTITY_CODE` 找人；`start`（build 之后的发布版）一律只读，环境变量里有码也不看。所以写评论、改任务只在各人本机的 dev 里做，改完经 git 同步；为什么这样定，见轨迹卡 [只有本机 dev 能写，build + start 的发布版全面只读](/trajectory/2026-10-15-published-site-readonly)。
 
 {/* ref file="../packages/identity/src/node/identity.ts" hash="299e3558d9da" blob="a212be6dd6f7" */}
 
 ## 一次写入以谁的身份
 
-认人只回答「这台机器是谁」；每次写入还要过 `authorizeWrite`：先核对请求的 `Origin` 头和站点的可信 origin 完全一样——可信 origin 由宿主配置，不从请求推导——再看有没有本机身份，最后看 `as`。被拒抛 `WriteAccessError`，带着要回给浏览器的状态码。选一种情况看看：
+图上第 6 号。认人只回答「这台机器是谁」；每次写入还要过 `authorizeWrite`：先核对请求的 `Origin` 头和站点的可信 origin 完全一样——可信 origin 由宿主配置，不从请求推导——再看有没有本机身份，最后看 `as`。被拒抛 `WriteAccessError`，带着要回给浏览器的状态码。选一种情况看看：
 
 <WhoWrites />
 
@@ -56,11 +68,13 @@ import { WhoWrites } from './identity/who-writes'
 
 ## 交给浏览器的只有公开形状
 
-`PublicPerson` 的 `codes` 写成 `never`，`StoredPerson` 在类型上不能直接当它用；要给浏览器只能经 `publicPersonOf` / `publicPeopleOf`，它们按白名单重造对象（只抄 `id`、`name`、`gitea`、`agent`），凡是进 loader 数据的人员列表都只能是 `publicPeopleOf` 的结果。
+图上第 5 号。存在文件里的人带 `codes`（`StoredPerson`），交给浏览器前按白名单重造：`publicPersonOf` / `publicPeopleOf` 只抄 `id`、`name`、`gitea`、`agent` 四项，`PublicPerson` 的 `codes` 写成 `never`，`StoredPerson` 在类型上就不能直接当它用；凡是进 loader 数据的人员列表都只能是 `publicPeopleOf` 的结果：
 
 {/* ref file="../packages/identity/src/core/public-people.ts" hash="7f2a0fd0e311" blob="ec5d2ba8b743" */}
 
-类型挡不住 `as` 断言，所以 `IdentityProvider` 渲染时再查一次：人员列表里有谁带着 `codes` 就直接报错。页面里的组件用 `useSiteIdentity()` 取本机身份、`useSitePeople()` 取名单。侧栏底部的 `IdentityBadge` 有人显示头像与名字，只读显示「只读」、鼠标停上去看原因；头像 `Avatar` 是名字第一个字加一个由 id 算出的底色（改名不变色），不联网取图。
+<PublicShape />
+
+类型挡不住 `as` 断言，所以 `IdentityProvider` 渲染时再查一次，人员列表里有谁带着 `codes` 就直接报错。页面里的组件用 `useSiteIdentity()` 取本机身份、`useSitePeople()` 取名单。侧栏底部的 `IdentityBadge` 有人显示头像与名字，只读显示「只读」、鼠标停上去看原因；头像 `Avatar` 是名字第一个字加一个由 id 算出的底色（改名不变色），不联网取图。
 
 ## 在正文里 @ 人
 
@@ -78,10 +92,6 @@ import { WhoWrites } from './identity/who-writes'
 | `node/` | `@godcreator/identity/node` | 读写站点的 `people.json`、按运行方式与环境变量认本机身份 |
 | `site/` | `@godcreator/identity/site` | `IdentityProvider` 与两个 hook、`Avatar`、`IdentityBadge`；样式在包的 `styles.css` |
 
-谁在用它（只写调哪个导出）：
+层之间的方向与不许有环由 `tests/dependency-rules.cjs` 检查；identity 不依赖任何别的功能包。
 
-- 平台模板（god-docsite 的 `template/app/lib/site.server.ts`）：`siteIdentity(dir, mode)`、`sitePeople(dir)`
-- 平台模板的 `template/app/routes/layout.tsx`：`publicPeopleOf`、`IdentityProvider`、`IdentityBadge`；`template/app/lib/content.tsx`：`Avatar`
-- comments：`authorizeWrite`、`personOf`、类型 `SiteIdentity`
-- collab：`authorizeWrite`、`publicPeopleOf`、`mentionsOf`、`Avatar`
-- gwb-docsite：`joinSitePeople`、`sitePeople`、`identityCodeEnvName`、`identityCodePattern`、`mentionsOf`
+用它的三方就是图上的 gwb-docsite 与右列两方，图上画过的调用不再逐条列，另列几个图上没画的：gwb-docsite 另用 `identityCodeEnvName`、`identityCodePattern`、`mentionsOf`（评论命令里认 @）；comments 另用 `personOf` 与类型 `SiteIdentity`；collab 另用 `publicPeopleOf`、`mentionsOf`、`Avatar`，平台模板的正文页也用 `Avatar`。

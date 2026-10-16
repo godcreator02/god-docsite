@@ -1,0 +1,22 @@
+/*
+ * PublicShape 自己的画面：三张卡横排，窄屏竖排；下面两行摆带着 codes 的对象直接交给 IdentityProvider 的流向与报错原话。
+ * 外层的 dx 类接进 @godcreator/explainer 的零件样式与 --dx-* 变量，深色主题跟着变。
+ */
+.ps-board { container-type: inline-size; display: grid; gap: 12px; }
+
+.ps-panes { display: grid; gap: 12px; }
+@container (min-width: 720px) {
+  .ps-panes { grid-template-columns: repeat(3, minmax(0, 1fr)); align-items: start; }
+}
+
+.ps-note { margin-top: 8px; font-size: 12px; color: var(--dx-dim); }
+
+/* 第一行：对象 → IdentityProvider → 报错，放不下就折行；第二行：报错原话 */
+.ps-leak { display: grid; gap: 6px; }
+.ps-leak-flow { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.ps-leak-obj,
+.ps-leak-target,
+.ps-leak-reason { font-family: var(--dx-mono); font-variant-ligatures: none; font-size: 12px; white-space: pre-wrap; overflow-wrap: anywhere; }
+.ps-leak-obj { color: var(--dx-dim); text-decoration: line-through; }
+.ps-arrow { color: var(--dx-dim); }
+.ps-leak-reason { color: var(--dx-dim); }

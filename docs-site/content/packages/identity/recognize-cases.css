@@ -1,0 +1,44 @@
+/*
+ * RecognizeCases 自己的画面：三格从左到右——运行方式与环境变量、名单里找、侧栏底部显示。
+ * 卡片、胶囊、代码行与颜色变量（--dx-*）由 @godcreator/explainer 提供，颜色只取那套变量。
+ * 名单格固定 emerald；发布版的情况整格灰掉，标题栏右端摆「发布版不看码」。
+ */
+.rc-case { container-type: inline-size; display: grid; gap: 12px; }
+
+@container (min-width: 720px) {
+  .rc-case { grid-template-columns: 1fr 1.3fr 1fr; align-items: start; }
+}
+
+/* 运行方式与环境变量：等宽字一行一项；环境变量名连着码很长，放不下就断行 */
+.rc-machine { display: grid; gap: 4px; font-family: var(--dx-mono); font-variant-ligatures: none; font-size: 12px; white-space: pre-wrap; overflow-wrap: anywhere; }
+.rc-dim { color: var(--dx-dim); }
+
+/* 发布版的情况：名单整格灰掉 */
+.rc-list[data-dim='true'] { opacity: .45; }
+
+/* 侧栏底部（仿 IdentityBadge）：认出人时头像加名字；头像的底色由 id 算出，这里写死按 hueOfId('zhou') 算出的颜色 */
+.rc-badge { display: flex; align-items: center; gap: 8px; padding: 4px 0; }
+.rc-avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 999px;
+  font-size: 10px;
+  color: #fff;
+}
+.rc-avatar[data-person='zhou'] { background: hsl(124 45% 45%); }
+.rc-badge-name { font-size: 13px; }
+
+/* 只读：「只读」标识加原因原文（真组件里原因是鼠标停上去才看的 title，这里直接摆出来） */
+.rc-readonly { display: grid; gap: 6px; padding: 4px 0; }
+.rc-readonly-mark {
+  justify-self: start;
+  padding: 1px 8px;
+  border-radius: 999px;
+  font-size: 12px;
+  color: var(--dx-dim);
+  border: 1px solid var(--dx-border);
+}
+.rc-reason { font-size: 12px; color: var(--dx-dim); overflow-wrap: anywhere; }
