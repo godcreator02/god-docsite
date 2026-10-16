@@ -143,7 +143,7 @@ docfirst: none
 
 ## 生成物的正本怎么写
 
-README、AGENTS.md、CLAUDE.md、SKILL.md 的正本是现状区的 mdx（一般在 `content/docs/outputs/`）。渲染时记号换成代码块、组件换成它的机读文字，别的一个字节不改。
+README、AGENTS.md、CLAUDE.md、SKILL.md 的正本是现状区的 mdx（一般在 `content/docs/outputs/`）。渲染时记号换成代码块（今天那几行）、组件换成名册里写的机读文字、frontmatter 只抄点名的字段，别的文字经 remark 重新写出：读出来跟正本一样，个别转义的写法会变（`\}` 写出成 `}`）。正本里的 mdx 表达式（包括 `{/* 说明 */}` 这种普通注释）与 import / export 让整篇拒绝生成，拒绝的全部情况见文档站 doc-export 包页。
 
 - **AGENTS 与 skill 要精简**：前者每个会话都读，后者触发就读，只留硬约束与「怎么做」，为什么写在站里；生成出的 AGENTS.md 控制在 60 行内
 - CLAUDE 正本第一行固定是 `@AGENTS.md`，只给 Claude 的指令写在后面
