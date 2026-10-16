@@ -1,0 +1,21 @@
+/*
+ * ConflictCases 自己的画面：两边改动、结论一行。
+ * 卡片、终端、胶囊、状态点与新旧行对照由 @godcreator/explainer 提供，颜色只取那套变量。
+ * bob 固定 blue、carol 固定 violet，与结论行（Terminal）之间留出间隔。
+ */
+.cc-case { display: grid; gap: 12px; }
+
+/* 两边改动并排，窄屏竖排 */
+.cc-sides { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+@container (max-width: 639px) {
+  .cc-sides { grid-template-columns: 1fr; }
+}
+
+.cc-file { display: grid; gap: 3px; }
+.cc-path { font-family: var(--dx-mono); font-size: 12px; color: var(--dx-dim); overflow-wrap: anywhere; }
+.cc-note { font-size: 11px; opacity: .8; }
+
+/* 结论：胶囊、终端、解码那句竖着排 */
+.cc-verdict { display: grid; gap: 8px; justify-items: start; }
+.cc-verdict > .dx-term { width: 100%; }
+.cc-decode { display: flex; align-items: baseline; gap: 8px; font-size: 12.5px; color: var(--dx-dim); overflow-wrap: anywhere; }

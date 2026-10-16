@@ -1,12 +1,21 @@
 ---
 title: collab：项目协作
-description: 协作仓里的任务与模块：一条记录一个 JSON 文件，写入规则只拦这次写入带来的新问题；合并检查只查有没有冲突、有没有改只有负责人能改的内容；站点上的页面、loader 与 action，以及 gwb-collab 推给站点的 SiteFeed
+description: 协作仓里的任务与模块：一条记录一个 JSON 文件、规范写法让两人的改动大多能自动合上；写入规则只拦这次写入带来的新问题；合并检查只查有没有冲突、有没有改只有负责人能改的内容；站点上的读、写、通知三条路
 icon: Users
 ---
 
 import { MergeCases } from './collab/merge-cases'
+import { CollabSeams } from './collab/seams'
+import { ConflictCases } from './collab/conflict-cases'
+import { NewProblems } from './collab/new-problems'
+import { WriteSteps } from './collab/write-steps'
+import { SiteRoutes } from './collab/site-routes'
 
 协作站没有服务器端数据库：任务与模块就是协作仓里 `collab/records/` 下的 JSON 文件，跟页面一起经 git 同步。collab 包规定这些文件长什么样、网站能怎么改它们、合并请求进 main 之前查什么，也提供站点上的任务页、日历、日志页。git、Gitea、通知从哪来都归 gwb-collab 插件，这个包自己不跑 git——合并检查除外，它只调 git 读。
+
+先看一张图，把数据从哪来、经过这个包的哪一块、到哪去摆清楚；后面每一节开头都会写它在图上的位置。
+
+<CollabSeams />
 
 ## 协作仓里放什么
 
@@ -40,10 +49,6 @@ import { MergeCases } from './collab/merge-cases'
 
 记录 id 是作者电脑上的本地时间 14 位加 `-` 加 7 位小写字母数字，文件名就是 `records/<id>.json`。新建一条就是新加一个文件，两个人各建各的不会碰到同一个文件。
 
-编码是规范写法：字段按固定键序、两格缩进、一个字段一行、中文不转义、换行结尾，同一条记录每次编码出的字节相同。所以只有两人改了同一条记录的同一个字段，git 才会冲突。解码时先找 git 冲突标记，找到就报出是第几行，让人（或 AI）按两边的意思改好，不猜；认不出的字段、认不出的类型都报错。
-
-{/* ref file="../packages/collab/src/core/records.ts" lines="144-163" hash="22c11b85693b" blob="5a06ddde0a55" */}
-
 这一页的例子取自测试夹具 `packages/collab/test/fixtures.ts` 第 4–17 行：人员列表里有 `godcreator`（负责人）、`bob-test`（小王）、`carol-test`（小李）和 agent `claude`；`godcreator` 建了任务 `20260925160530-t5v9w3d`「补 ADC 通道对比」，owner 是 `carol-test`、截止 `2026-10-10`；还有模块 `20260920090000-m1a2b3c`「采样板」。这条任务写成文件就是：
 
 ```json
@@ -58,9 +63,17 @@ import { MergeCases } from './collab/merge-cases'
 }
 ```
 
+编码是规范写法：字段按固定键序、两格缩进、一个字段一行、中文不转义、换行结尾，同一条记录每次编码出的字节相同。一个字段一行，两人的改动能不能自动合上就由 git 按行判：改不同的记录、各建各的新文件能合上；同一条记录里两人改的行中间隔着没人动的行也能合上，改到同一行或相邻两行就合不上。这几种情况是在仓外临时目录用 git 2.53（默认 ort 策略）实跑出来的：
+
+<ConflictCases />
+
+合不上时文件里留着 git 的冲突标记。解码时先找标记，找到就报出是第几行，让人（或 AI）按两边的意思改好，不猜；认不出的字段、认不出的类型都报错。
+
+{/* ref file="../packages/collab/src/core/records.ts" lines="144-163" hash="22c11b85693b" blob="5a06ddde0a55" */}
+
 ## 读出状态与校验
 
-核心层不碰磁盘：它只收一份 `CollabSnapshot`——`people` 是 `site/people.json` 的原文，`files` 是 `collab/` 下每个文件的原文。node 层从磁盘读出这一份，gwb-collab 提交前从 git 的两个版本各取一份。
+图上第 1、4 号。核心层不碰磁盘：它只收一份 `CollabSnapshot`——`people` 是 `site/people.json` 的原文，`files` 是 `collab/` 下每个文件的原文。站点的 loader 与写入规则每次从磁盘现读这一份（第 1 号），gwb-collab 提交前从 git 的两个版本各取一份（第 4 号）。
 
 `collabState` 读出任务与模块，读不出的文件、重复的 id、所属模块不存在都列成问题；`validateCollab` 只查格式：换行是 LF、能解码且是规范写法、文件名等于 id、作者与负责人在人员列表里、id 不重复、所属模块存在，不查谁改了谁的记录。
 
@@ -68,9 +81,11 @@ import { MergeCases } from './collab/merge-cases'
 
 {/* ref file="../packages/collab/src/core/state.ts" lines="151-166" hash="e7f261c5e980" blob="e02f987b51c2" */}
 
+<NewProblems />
+
 ## 写入规则
 
-网站的写入分三个动作，规则都在核心层，交回一份「要写哪些文件、删哪些文件」的计划；node 层照计划改磁盘，新建不覆盖已有文件：
+图上第 2、3 号。网站的写入分三个动作，规则都在核心层，交回一份「要写哪些文件、删哪些文件」的计划；node 层照计划改磁盘，新建不覆盖已有文件：
 
 | 动作 | 谁能做 | 被拒的例子（原话出自 `test/write.test.ts`） |
 | --- | --- | --- |
@@ -84,11 +99,15 @@ import { MergeCases } from './collab/merge-cases'
 
 {/* ref file="../packages/collab/src/core/write-rules.ts" lines="117-130" hash="ca367ee1f35a" blob="65347254ae19" */}
 
-每次写入的最后一步都是上一节的 `newFormatProblems`。项目负责人是 Gitea 上协作仓的协作者，包里不存：站点从 `SiteFeed.projectLeads` 取（还没推来就当没有负责人），gwb-collab 自己调用时从 Gitea 读来交进来。被拒抛 `WriteRejected`，消息直接给人看；站点 action 把它回成 422。
+一次写入从表单到磁盘走五步、在哪一步被拒，用同一个例子摆出来——`carol-test`（不是作者）改 `godcreator` 那条任务，改 `status` 走通、改 `detail` 在第 2 步停下：
+
+<WriteSteps />
+
+写盘前的最后一道检查是上一节的 `newFormatProblems`。项目负责人是 Gitea 上协作仓的协作者，包里不存：站点从 `SiteFeed.projectLeads` 取（还没推来就当没有负责人），gwb-collab 自己调用时从 Gitea 读来交进来。被拒抛 `WriteRejected`，消息直接给人看；站点 action 把它回成 422。
 
 ## 合并检查
 
-协作仓的合并请求由 NAS 上的执行器照协作仓 main 上的工作流跑包里的命令行 `collab-merge-check`；执行器怎么跑、谁合并归 Gitea 区的 [实时推送与执行器](/gitea/push)，这一节只讲检查本身判什么。
+图上第 5 号。协作仓的合并请求由 NAS 上的执行器照协作仓 main 上的工作流跑包里的命令行 `collab-merge-check`；执行器怎么跑、谁合并归 Gitea 区的 [实时推送与执行器](/gitea/push)，这一节只讲检查本身判什么。
 
 检查在内存里算出「把 head 合进 main」的树（`git merge-tree --write-tree`），不动工作区和分支；有冲突就停在第一条。没冲突时，改了哪些文件按 main 与**合并后的树**算，不按 head 算：head 落后于 main 时，main 后来加的文件不会算成 head 删的。
 
@@ -116,9 +135,9 @@ import { MergeCases } from './collab/merge-cases'
 
 gwb-collab 推送前也调同一个 `leadOnlyProblems`，成员在本机就能知道会不会被打回。工作流模板里 `MERGE_CHECK_RANGE` 的占位由 `renderMergeWorkflow` 换成 `^<collab 版本>`，gwb-collab 建站时调它；模板每一步归 Gitea 区那页。
 
-## 站点上：页面、loader 与 action
+## 站点上：读、写、通知
 
-站点交给协作功能的是一个 `CollabSite`：站名、站点目录、协作仓仓根、评论目录、可信 origin，加四个每次请求现调的函数（人员、本机身份、站里的页面、推送来的 `SiteFeed`）。人员、页面、推送来的数据改了不用重启服务。
+图上第 1、2、6 号。站点交给协作功能的是一个 `CollabSite`：站名、站点目录、协作仓仓根、评论目录、可信 origin，加四个每次请求现调的函数（人员、本机身份、站里的页面、推送来的 `SiteFeed`）。人员、页面、推送来的数据改了不用重启服务。
 
 {/* ref file="../packages/collab/src/site/collab-site.ts" lines="6-29" hash="67955db1e71d" blob="c06f0efc84b8" */}
 
@@ -126,11 +145,17 @@ gwb-collab 推送前也调同一个 `leadOnlyProblems`，成员在本机就能�
 
 {/* ref file="../packages/collab/template/routes.ts" hash="925f975189f0" blob="1727a062721d" */}
 
-其余接线文件各一句：`site.server.ts` 每次请求现组装 `CollabSite`（不在模块顶层算，构建时算不出可信 origin）；`feature.tsx` 浏览器侧也会加载，给侧栏横排的「任务」「日历」入口、布局顶部的通知栏、MDX 组件表，布局数据不读 `collab/`；`mdx.ts` 给每个集合加 remark 插件，并定义日志集合 `journal`。页面每次请求从磁盘现读 `collab/`。
+其余接线文件各一句：`site.server.ts` 每次请求现组装 `CollabSite`（不在模块顶层算，构建时算不出可信 origin）；`feature.tsx` 浏览器侧也会加载，给侧栏横排的「任务」「日历」入口、布局顶部的通知栏、MDX 组件表，布局数据不读 `collab/`；`mdx.ts` 给每个集合加 remark 插件，并定义日志集合 `journal`。
 
-写任务与模块的表单约定是三种 `intent`（`create-record`、`update-record`、`delete-record`）；任务页与记录页的 action 同时收评论包的 intent，转给评论包。返回码：表单不对 400，只读或来源不对 403，被写入规则拒绝 422；只改 `collab/records/` 里的文件，不跑 git。
+站点上的数据只走三条路——读、写、通知，每条链里写各环节手里的真实东西：
 
-项目首页 `templates/home.tsx` 不经建站器：gwb-collab 的 `collab.site.init` 建站后把它写成站点的 `app/routes/home.tsx`，之后归站点自己改。
+<SiteRoutes />
+
+写任务与模块的表单约定是三种 `intent`（`create-record`、`update-record`、`delete-record`）；任务页与记录页的 action 同时收评论包的 intent，转给评论包。项目首页 `templates/home.tsx` 不经建站器：gwb-collab 的 `collab.site.init` 建站后把它写成站点的 `app/routes/home.tsx`，之后归站点自己改。
+
+通知那条链里推过来的整份数据是 `SiteFeed`：通知、把通知交给 AI 的提示词、项目负责人。站点由 gwb-docsite 托管，gwb-collab 经推送通道的频道 `collab`（`siteFeedChannel`）整份推过来；站点只收不发，网站自己不跑 git。推来的是外部输入：`siteFeedOf` 按形状逐项查，多了、少了、不对都抛 `InvalidSiteFeed`。包和插件同仓发版，形状对不对得上由发版顺序保证（collab 先发、插件后发）。
+
+{/* ref file="../packages/collab/src/core/notifications/site-feed.ts" lines="12-33" hash="36be22eafd4e" blob="4e6fee0582e9" */}
 
 ## 正文里的三种链接
 
@@ -142,13 +167,7 @@ gwb-collab 推送前也调同一个 `leadOnlyProblems`，成员在本机就能�
 
 记录那一页的「日志里的进展」是反向链接：在每篇日志里找 `<RecordLink id="…" />`，列出引用了这条记录的那几段文字，新的日子在前。
 
-## SiteFeed：gwb-collab 推给站点的数据
-
-`SiteFeed` 是 gwb-collab 交给站点的全部数据：通知、把通知交给 AI 的提示词、项目负责人。站点由 gwb-docsite 托管，gwb-collab 经推送通道的频道 `collab`（`siteFeedChannel`）整份推过来；站点只收不发，网站自己不跑 git。推来的是外部输入：`siteFeedOf` 按形状逐项查，多了、少了、不对都抛 `InvalidSiteFeed`。包和插件同仓发版，形状对不对得上由发版顺序保证（collab 先发、插件后发）。
-
-{/* ref file="../packages/collab/src/core/notifications/site-feed.ts" lines="12-33" hash="36be22eafd4e" blob="4e6fee0582e9" */}
-
-## 分层
+## 分层与谁在用它
 
 | 层 | 导出 | 做什么 |
 | --- | --- | --- |
@@ -160,8 +179,4 @@ gwb-collab 推送前也调同一个 `leadOnlyProblems`，成员在本机就能�
 
 层之间的方向与不许有环由 `tests/dependency-rules.cjs` 检查；collab 只依赖 identity 与 comments。
 
-## 谁在用它
-
-- 站点：`template/` 下的接线文件，以及 gwb-collab 写出的项目首页
-- gwb-collab：路径常量；`readCollabSnapshot` 与 `createRecord` / `updateRecord` / `deleteRecords`（命令改记录）；`newFormatProblems`（提交前检查）；`changedFilesBetween`、`leadOnlyProblems`（推送前检查）；`siteFeedChannel` 与通知相关的导出；`renderMergeWorkflow`（写工作流）
-- NAS 上的执行器：按工作流里的 `MERGE_CHECK_RANGE` 装本包，运行 `collab-merge-check`
+用它的三方就是总图右列：站点用 `template/` 下的接线文件，以及 gwb-collab 写出的项目首页；gwb-collab 用路径常量、`readCollabSnapshot` 与 `createRecord` / `updateRecord` / `deleteRecords`（命令改记录）、`newFormatProblems`（提交前检查）、`changedFilesBetween` 与 `leadOnlyProblems`（推送前检查）、`siteFeedChannel` 与通知相关的导出、`renderMergeWorkflow`（写工作流）；NAS 上的执行器按工作流里的 `MERGE_CHECK_RANGE` 装本包，运行 `collab-merge-check`。

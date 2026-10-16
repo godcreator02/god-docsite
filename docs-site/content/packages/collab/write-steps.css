@@ -1,0 +1,20 @@
+/*
+ * WriteSteps 自己的画面：左边卡片 + 右边一句说明，窄屏竖排。
+ * 卡片与状态点由 @godcreator/explainer 提供；中性行前摆一个与状态点等宽的空位，行首对齐。
+ */
+.ws-stage { display: grid; grid-template-columns: 1.7fr 1fr; gap: 10px; align-items: start; }
+@container (max-width: 639px) {
+  .ws-stage { grid-template-columns: 1fr; }
+}
+
+.ws-lines { display: grid; gap: 6px; }
+.ws-row { display: flex; align-items: baseline; gap: 8px; font-size: 12.5px; }
+/* 保留数据里写的前导空格（WritePlan 那几行的缩进），长行仍能换行 */
+.ws-row > span { white-space: pre-wrap; }
+.ws-row[data-tone='good'] { color: var(--dx-fg); }
+.ws-row[data-tone='bad'] { color: var(--dx-fg); }
+.ws-row[data-tone='bad'] > span { overflow-wrap: anywhere; }
+.ws-row[data-tone='none'] { color: var(--dx-dim); font-family: var(--dx-mono); font-size: 12px; }
+.ws-dot-none { width: 8px; flex: none; }
+
+.ws-note { margin: 0; font-size: 13px; color: var(--dx-dim); }
