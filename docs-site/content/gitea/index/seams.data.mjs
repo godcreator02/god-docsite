@@ -1,0 +1,128 @@
+/**
+ * NasSeams（「Gitea 与 NAS」那一页开头的接缝图）的内容：NAS 上三样和每个成员电脑上的 gwb-collab 之间谁调谁，
+ * 以及组织管理员、负责人在网页上配的东西在哪。坐标与图标在 seams.tsx 的 SeamLayout 里，这里只有内容。
+ * 本页后面的两张表按接缝编号引用这张图（「谁调它」一列就是图上的线）。
+ */
+import { defineSeamGraph } from '@godcreator/explainer';
+
+export const nasSeams = defineSeamGraph({
+  id: 'nas-seams',
+  title: 'NAS 一侧的接缝图',
+  intro: '左列是组织管理员、负责人在网页上配的东西，中列是 NAS 上的三样，右列是每个成员电脑上的 gwb-collab；线上编号是接缝，鼠标停在编号或模块框上看说明。',
+  frameLabel: '模块',
+  modules: [
+    {
+      id: 'config',
+      name: '人在网页上配的',
+      pkg: 'Gitea 网页',
+      role: 'slate',
+      outside: false,
+      blurb: '组织、团队、组织密钥、工作流文件不由插件配：组织管理员在 Gitea 网页上建组织、管团队、存组织密钥，工作流文件只有负责人能改。各仓的负责人、main 的保护、合并方式与组织的 webhook 才由命令写进去。',
+      caps: [
+        { id: 'org', name: '组织', ident: 'hybrid-mmc' },
+        { id: 'teams', name: '团队', ident: 'Owners · members · bots' },
+        { id: 'secret', name: '组织密钥', ident: 'COLLAB_BOT_TOKEN' },
+        { id: 'workflow', name: '工作流文件', ident: 'collab-auto-merge.yaml' },
+      ],
+    },
+    {
+      id: 'nas',
+      name: 'NAS',
+      pkg: 'teamhub 容器组',
+      role: 'amber',
+      outside: false,
+      blurb: '协作站没有站点服务器，NAS 上就是这三样：Gitea 是唯一的远端，执行器只管协作仓的合并请求，ntfy 把 Gitea 的事件转成实时推送。各容器怎么部署写在 NAS 配置仓的 teamhub 篇。',
+      caps: [
+        { id: 'gitea', name: 'Gitea', ident: '仓 · 合并请求 · 团队与保护' },
+        { id: 'runner', name: '执行器 gitea-runner', ident: 'collab-merge-check · collab-bot' },
+        { id: 'ntfy', name: 'ntfy', ident: 'topic collab-<组织>' },
+      ],
+    },
+    {
+      id: 'member',
+      name: '成员的电脑',
+      pkg: 'gwb-collab',
+      role: 'blue',
+      outside: false,
+      blurb: '每个成员电脑上的 gwb-collab：调 Gitea 用 gwb-gitea 里那个人的令牌，令牌勾了哪几项，插件就能替他做哪些事；实时推送是它对 NAS 上 ntfy 的长连接。',
+      caps: [
+        { id: 'submit', name: '提交审核', ident: 'collab.submit' },
+        { id: 'setup', name: '建仓、配仓、配组织', ident: 'collab.repo.setup · collab.org.setup' },
+        { id: 'subscribe', name: '实时推送', ident: 'organization/events/' },
+      ],
+    },
+  ],
+  entries: [],
+  seams: [
+    {
+      n: 1,
+      name: '调 Gitea',
+      a: ['submit', 'setup'],
+      b: ['gitea'],
+      iface: '经 gwb-gitea 的令牌：git clone / fetch / push · Gitea API',
+      convention: false,
+      via: 'code',
+      text: '成员的插件全部经 gwb-gitea 里那个人的令牌调 Gitea：collab.submit 取回、推送、读合并请求，collab.repo.setup 与 collab.org.setup 读协作者、建仓、写 main 的保护、配组织的 webhook。',
+    },
+    {
+      n: 2,
+      name: 'Actions 派任务',
+      a: ['gitea'],
+      b: ['runner'],
+      iface: 'pull_request_target 触发 · runs-on: nas',
+      convention: false,
+      via: 'code',
+      text: '合并请求一开出来，Gitea 照协作仓 main 上的工作流派任务，只派给登记了 nas 标签的这一台执行器。',
+    },
+    {
+      n: 3,
+      name: '合并或打回',
+      a: ['runner'],
+      b: ['gitea'],
+      iface: 'POST /repos/<组织>/<仓>/pulls/<n>/merge',
+      convention: false,
+      via: 'code',
+      text: '检查两条都过，执行器以 collab-bot 的令牌调合并接口，main 上多一个合并人是 collab-bot 的合并提交；不过就留言写明原因、关掉合并请求。',
+    },
+    {
+      n: 4,
+      name: '组织 webhook',
+      a: ['gitea'],
+      b: ['ntfy'],
+      iface: 'POST http://ntfy/collab-<组织>?template=yes',
+      convention: false,
+      via: 'code',
+      text: 'Gitea 把组织里的事件按地址里的模板写成只带位置的消息发给 ntfy；webhook 本身由 collab.org.setup 写进组织，组织管理员的插件完整刷新时核对。',
+    },
+    {
+      n: 5,
+      name: '发 leads changed',
+      a: ['subscribe'],
+      b: ['ntfy'],
+      iface: 'POST <push-url>/collab-<组织>，正文 leads changed',
+      convention: false,
+      via: 'code',
+      text: 'Gitea 换协作者不发 webhook：collab.repo.setup、collab.repo.create 配好负责人后，调命令的人的插件往同一个 topic 直接发一条 leads changed。',
+    },
+    {
+      n: 6,
+      name: '推来消息',
+      a: ['ntfy'],
+      b: ['subscribe'],
+      iface: '长连接 · JSON 消息',
+      convention: false,
+      via: 'code',
+      text: '每个成员的插件对列表里全部项目的 topic 开着一条长连接，断了隔一会儿重连，连上就对全部项目做一次完整刷新；认出消息说的是哪个仓的什么事后，按仓分给协作仓那一套或别的仓那一套，只去 Gitea 取那一处。',
+    },
+    {
+      n: 7,
+      name: '组织密钥交给执行器',
+      a: ['secret'],
+      b: ['runner'],
+      iface: 'COLLAB_BOT_TOKEN',
+      convention: false,
+      via: 'code',
+      text: '组织密钥随任务交给执行器，里面是 collab-bot 的令牌：Gitea 自动发的令牌合并不了 AGit 开的合并请求，所以要一个真实账号的令牌。',
+    },
+  ],
+});

@@ -1,0 +1,12 @@
+/*
+ * EventRoutes 自己的画面：一条竖排的链，卡与卡之间向下箭头，末尾一行灰字（照 collab 页 SiteRoutes）。
+ * 卡片由 @godcreator/explainer 提供；卡片里的行用等宽字摆真实的东西（字段、标题、正文、步骤）。
+ */
+.er-chain { display: grid; gap: 0; }
+.er-step { display: grid; gap: 6px; }
+.er-arrow { text-align: center; font-size: 15px; line-height: 1.2; color: var(--dx-dim); user-select: none; }
+
+.er-lines { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
+.er-lines li { font-family: var(--dx-mono); font-size: 12px; color: var(--dx-fg); overflow-wrap: anywhere; white-space: pre-wrap; }
+
+.er-footer { margin: 10px 0 0; font-size: 12px; color: var(--dx-dim); }

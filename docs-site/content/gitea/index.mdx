@@ -1,9 +1,15 @@
 ---
 title: Gitea 与 NAS
-description: 协作站里不属于哪个包的那一侧：NAS 上的 Gitea、执行器与 ntfy 各做什么、和哪个包打交道，一个项目在 Gitea 上是什么样子。这个分区写的是在 Gitea 与 NAS 上要配的东西、由哪条命令配；调 Gitea 接口的代码在 gwb-collab 插件与 collab 包的工作流模板里
+description: 协作站里 NAS 上的部分：Gitea、执行器与 ntfy 各做什么、和每个成员电脑上的 gwb-collab 之间谁调谁，一个项目在 Gitea 上是什么样子。这个分区写的是在 Gitea 与 NAS 上要配的东西、由哪条命令配；调 Gitea 接口的代码在 gwb-collab 插件与 collab 包的工作流模板里
 ---
 
-协作站没有站点服务器，Gitea 是唯一的远端。NAS 上和协作站有关的就是下面三样。组织、团队、组织密钥、工作流文件由人在 Gitea 网页上配；各仓的负责人、main 的保护、合并方式与组织的 webhook 由 gwb-collab 的命令照插件里写好的规矩写进去，人不在网页上手改：
+import { NasSeams } from './index/seams'
+
+协作站没有站点服务器，Gitea 是唯一的远端。NAS 上和协作站有关的就是三样，它们和每个成员电脑上的 gwb-collab 之间谁调谁、人在网页上配的是哪几样，画成一张图：
+
+<NasSeams />
+
+组织、团队、组织密钥、工作流文件由人在 Gitea 网页上配（图左）；各仓的负责人、main 的保护、合并方式与组织的 webhook 由 gwb-collab 的命令照插件里写好的规矩写进去（图上第 1、4 号），人不在网页上手改。下面表里「谁调它」一列，说的就是图上的线：
 
 | NAS 上的 | 做什么 | 谁调它 | 要配的写在 |
 | --- | --- | --- | --- |

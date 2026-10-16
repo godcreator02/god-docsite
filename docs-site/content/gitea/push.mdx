@@ -4,12 +4,9 @@ description: Gitea 上一有事件，怎样经同一台 NAS 上的 ntfy 推到�
 ---
 
 import { AutoMergeRun } from './push/auto-merge'
+import { EventRoutes } from './push/event-routes'
 
-别人在 Gitea 上做的事，靠实时推送让每个成员的插件知道：
-
-1. Gitea 组织级的 webhook 把事件发到 NAS 上 ntfy 的 topic `collab-<组织>`
-2. 每个成员的插件对列表里全部项目的 topic 开着一条长连接（`organization/events/ntfy-subscription.ts`），断了隔一会儿重连，每次连上都对全部项目做一次完整刷新，补上没连着时的事
-3. 插件的 `organization/events/` 认出消息说的是哪个仓、什么事，按仓分给协作仓那一套或别的仓那一套，只去 Gitea 取那一处
+别人在 Gitea 上做的事，靠实时推送让每个成员的插件知道：Gitea 组织级的 webhook 把事件发到 NAS 上 ntfy 的 topic `collab-<组织>`；每个成员的插件对列表里全部项目的 topic 开着一条长连接（`organization/events/ntfy-subscription.ts`），断了隔一会儿重连，每次连上都对全部项目做一次完整刷新，补上没连着时的事。一件事怎样变成一条消息、插件认出后按仓分给哪一套、去 Gitea 取哪一处，见下面「收到消息以后」的 EventRoutes。
 
 `collab.repo.setup`、`collab.repo.create` 配好负责人后，由调命令的人的插件往同一个 topic 直接发一条 `leads changed`，不经 webhook。
 
@@ -53,18 +50,12 @@ Gitea 换协作者不发 webhook，所以 `collab.repo.setup`、`collab.repo.cre
 
 ## 收到消息以后
 
-全部项目共用一条订阅；一个组织的消息交给订了这个 topic 的项目。认不出的消息记一行警告，对那个组织的项目做一次完整刷新；认得出的先等 2 秒合成一批，再按仓分给两边：
+全部项目共用一条订阅；一个组织的消息交给订了这个 topic 的项目。认不出的消息记一行警告，对那个组织的项目做一次完整刷新；认得出的先等 2 秒合成一批，再按仓分给两边。每种情况从 Gitea 上的事到插件去取哪一处：
 
 {/* ref file="../plugins/collab/src/organization/events/project-topics-subscription.ts" lines="94-98" hash="9b6e1f8a20e2" blob="b7acd81b9b42" */}
 {/* ref file="../plugins/collab/src/organization/events/scheduler.ts" lines="3-6" hash="796fde5bfaf3" blob="bb0e2607c8ec" */}
 
-| 消息 | 说的是协作仓 | 说的是别的仓 |
-| --- | --- | --- |
-| `push` | 取回协作仓，能快进就自动同步 | 只取回那个仓 |
-| `pr`（含审阅）、`issue`、`comment` | 不处理：协作仓的合并请求由执行器定论，提交审核自己等结论 | 重读那个仓的合并请求与 issue |
-| `leads changed` | 重读项目负责人，再核对协作仓的规矩 | 重读那个仓，再核对它的规矩 |
-| `repo created` | 组织里新建了仓：克隆进项目文件夹，读一遍、核对一遍 | 同左 |
-| `repo` 的其他动作（删仓等） | 只记一行，本机的目录不动 | 同左 |
+<EventRoutes />
 
 别的仓的消息说的仓不在项目文件夹里，只记一行：
 

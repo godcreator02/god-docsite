@@ -1,0 +1,36 @@
+/*
+ * WhoCanCases 自己的画面：四条横带各写一层在这种情况说了什么，拦下的那一层加粗强调，不相关的灰掉。
+ * 状态点与结果胶囊由 @godcreator/explainer 提供，颜色只取那套变量。
+ */
+.wc-board { display: grid; gap: 6px; }
+
+.wc-row {
+  display: grid;
+  grid-template-columns: 148px 14px 1fr;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 12px;
+  border: 1px solid var(--dx-line);
+  border-radius: 8px;
+  background: var(--dx-surface);
+}
+
+/* 拦下的那一层：加粗，边框与底色点出玫红 */
+.wc-row[data-state='block'] {
+  font-weight: 600;
+  border-color: color-mix(in srgb, var(--dx-bad) 45%, var(--dx-line));
+  background: color-mix(in srgb, var(--dx-bad) 6%, var(--dx-surface));
+}
+
+.wc-row[data-state='dim'] { opacity: .55; }
+
+.wc-layer { font-size: 12px; color: var(--dx-dim); }
+.wc-what { font-size: 13px; color: var(--dx-fg); overflow-wrap: anywhere; }
+
+.wc-outcome { display: flex; align-items: center; gap: 10px; margin-top: 6px; }
+.wc-outcome-label { font-size: 12px; color: var(--dx-dim); }
+
+@container (max-width: 479px) {
+  .wc-row { grid-template-columns: 14px 1fr; }
+  .wc-layer { grid-column: 1 / -1; }
+}
