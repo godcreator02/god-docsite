@@ -69,7 +69,7 @@ description: 改这个仓时怎么跑、按什么节奏检查、提交怎么写�
 3. 第 2 层：`collab`、`docfirst`
 4. 两个插件：`gwb-docsite`、`gwb-collab`
 
-发版前还要在 `plugins/collab` 里跑一遍 `pnpm test:verified`。
+发版前还要在 `plugins/collab` 里跑一遍 `pnpm test:verified`。发了协作相关的包或插件之后，照 [协作站双人回归](/maintain/collab-regression) 走一遍。
 
 包发到 npmjs，本机不直接发：仓在 GitHub 上（`godcreator02/god-docsite`，公开），`devkit.release` 在本机构建、检查、打好包文件，在已经推上去的 HEAD 上建一个 GitHub release 挂上包文件，
 仓里的工作流 `.github/workflows/publish.yml` 由 release 公开触发，用 trusted publishing 按序号逐个发到 npmjs，不存 token。各包的 `publishConfig` 指向 npmjs、`repository` 指向这个仓，`files` 收进 MIT 的 `LICENSE`。
