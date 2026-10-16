@@ -1,0 +1,14 @@
+/*
+ * ConfirmScope 自己的画面：上面终端，下面三张小卡片。
+ * 终端、卡片与状态点由 @godcreator/explainer 提供，颜色只取那套变量；
+ * 这次被改写的卡片标题栏换成绿色（写回），没动的灰（不动）。
+ */
+.cs-case { display: grid; gap: 10px; }
+
+.cs-cards { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+@container (max-width: 719px) {
+  .cs-cards { grid-template-columns: 1fr; }
+}
+
+.cs-note { font-size: 12.5px; color: var(--dx-dim); overflow-wrap: anywhere; }
+.cs-verdict { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 500; }

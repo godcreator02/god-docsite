@@ -5,6 +5,8 @@ icon: Terminal
 ---
 
 import { DocfirstSeams } from './docfirst/seams'
+import { TurfMap } from './docfirst/turf-map'
+import { ConfirmScope } from './docfirst/confirm-scope'
 
 `docfirst` 是在站目录运行的命令行：站点 `package.json` 里的 `doc`、`doc:confirm`、`doc:render` 三条脚本就是 `docfirst check`、`docfirst confirm`、`docfirst render`（这三条脚本是 gwb-docsite 建站时写进站点 `package.json` 的）。项目根是当前目录，那里要有 `docfirst.config.mjs`。
 
@@ -40,12 +42,12 @@ check 不认识开关 --dry-run（check 只认 --json），什么都没动。用
 
 <DocfirstSeams />
 
-按接缝编号逐条讲：
+图上每条线画了谁调用谁、谁读写哪些文件，逐条只剩图上看不出的那一点：
 
-- **1、2 配置读进来**：由 Node 原生 import 配置模块、按五个键校验；落点表与名册的形状交给 doc-export 归一（`placementsOf`、`fumadocsRoster`）。
-- **3、4、5 装配项目**：按目录约定定下现状区，建一个钉码工作区，生成物项目共用这个工作区的 `pinner`——生成时把记号换成代码块要用同一套钉码核心。
-- **6、9 钉的核对与确认**：交给 code-pin。code-pin 自己读被钉的代码、从 git 取旧内容、确认时改写标记那一行。
-- **7、10 生成物**：核对、生成与名册检查交给 doc-export，落点由 doc-export 自己写。
+- **1、2 配置读进来**：落点表与名册的形状交给 doc-export 归一（`placementsOf`、`fumadocsRoster`）。
+- **3、4、5 装配项目**：生成物项目共用钉码工作区的 `pinner`——生成时把记号换成代码块，用的就是同一套钉码核心。
+- **6、9 钉的核对与确认**：code-pin 自己读被钉的代码、从 git 取旧内容、确认时改写标记那一行。
+- **7、10 生成物**：核对、生成与名册检查交给 doc-export，落点由它自己写。
 - **8、11 轨迹卡**：交给 trajectory，它自己读卡目录。
 
 docfirst 只依赖这三个功能包，这条方向由 dependency-cruiser 的规则检查：
@@ -68,9 +70,11 @@ docfirst 只依赖这三个功能包，这条方向由 dependency-cruiser 的规
 
 {/* ref file="../packages/docfirst/src/project.ts" lines="37-55" hash="a0b18670a436" blob="f6eb46f4a4d7" */}
 
-内容根下除 `trajectory/`、`future/` 外的目录里的文件都算：其中 `.mdx` 是页面，`.ts`、`.tsx`、`.mjs` 这类由 code-pin 的组件格式认领——讲解组件的源码也算文档（怎么认看 [code-pin 页](/packages/code-pin)的「两种文档格式」），站点 `app/components/` 下被认领的也算。
+同一个站目录里，每个文件各归谁核对。树取例子站（刚由 `docfirst.create` 建好），再加上为讲解补的一组页面 `content/packages/x.*` 与几组页面共用的 `app/components/`；组件格式怎么认领源码，看 [code-pin 页](/packages/code-pin)的「两种文档格式」。
 
-站点根下还有 `src/components/` 且里面有文件时，装配直接报错——讲解组件以前放在那里，留着的话里面的钉码没人核对。`outputs` 里写的正本必须是现状区里的 `.mdx` 页面，写错路径的映射直接报错：不然它既不会被核对，也不会被生成。落点不许落进内容根、一个落点只许一篇正本写，由 doc-export 的 `assertOutputTurf` 检查。
+<TurfMap />
+
+`outputs` 里写的正本必须是现状区里的 `.mdx` 页面，写错路径的映射直接报错：不然它既不会被核对，也不会被生成。落点不许落进内容根、一个落点只许一篇正本写，由 doc-export 的 `assertOutputTurf` 检查。
 
 装配时只建一个钉码工作区：核对、确认用它，生成物项目也拿它的 `pinner`：
 
@@ -124,7 +128,9 @@ docfirst 只依赖这三个功能包，这条方向由 dependency-cruiser 的规
 
 {/* ref file="../packages/docfirst/src/commands/confirm.ts" lines="35-54" hash="968e1b367ff3" blob="21b2dc364719" */}
 
-不带页名是全部现状区文件，带页名只动点名的那几篇——同一个仓里别人的黄灯还等着他复核，一并确认就是替别人做了复核。页名三种写法都收（相对项目根、绝对路径、带 `./`），有一个对不上现状区就报错、什么都不动。`--accept` 确认的就是黄灯，必须点名页，不点名就报错。
+不带页名是全部现状区文件；带页名只动点名的那几篇，页名相对项目根、绝对路径、带 `./` 三种写法都收。同一个仓里别人的黄灯还等着他复核，一并确认就是替别人做了复核。五种写法各自的后果，用同一个仓里的三篇页对照：
+
+<ConfirmScope />
 
 每处钉的结果打印一行（写上记录、挪了位置写回新行号、按今天内容重新记、等复核、钉不住），原地没动的不打印；每处写回什么看 [code-pin 页](/packages/code-pin)的「确认」一节。最后把全部生成正本重新生成一遍，不按页限定——生成物要不要跟着更新按内容判断，内容变了才写。钉不住的处数加上没生成成功的落点数大于 0，就以非零退出。
 
