@@ -37,7 +37,7 @@ afterAll(async () => {
  */
 describe('真的在临时目录建站', () => {
   it('建站（端口随机挑）→ 加入身份 → 写评论与回复 → 推送 → 重启沿用上次的端口 → 加轨迹卡功能 → pnpm build', { timeout: 900_000 }, async () => {
-    const keepRunning: HomePageCheckDeps = { isRegistered: () => true, start: (dir) => host.start(dir), stop: (dir) => host.stop(dir), pageStatus }
+    const keepRunning: HomePageCheckDeps = { isRegistered: async () => true, start: (dir) => host.start(dir), stop: (dir) => host.stop(dir), pageStatus }
     await createDocsite(siteDir, { title: '真站' }, { ...keepRunning, scaffold, packageSource: { kind: 'link', repoDir }, pnpm: runPnpm })
     const status = host.statusOf(siteDir)
     expect(status.state).toBe('running')
@@ -67,7 +67,7 @@ describe('真的在临时目录建站', () => {
     await host.stop(siteDir)
     expect((await host.start(siteDir)).url).toBe(url)
     await host.stop(siteDir)
-    const stopAfterCheck: HomePageCheckDeps = { ...keepRunning, isRegistered: () => false }
+    const stopAfterCheck: HomePageCheckDeps = { ...keepRunning, isRegistered: async () => false }
     const added = await addSiteFeature(
       siteDir,
       { packageName: '@godcreator/trajectory', specifier: `link:${path.join(repoDir, 'packages', 'trajectory').replaceAll('\\', '/')}` },

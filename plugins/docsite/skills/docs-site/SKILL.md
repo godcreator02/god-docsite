@@ -56,12 +56,14 @@ docsite.feature.add  {"dir":…,"package":"@godcreator/trajectory","version":"^0
 开发服务由 gwb-docsite 托管，不在会话里自己 `pnpm dev`；改了页面，开发服务自己刷新。下面每条只收 `dir`（站点目录的绝对路径），`list` 不收参数：
 
 ```
-docsite.site.add     {"dir":…}    登记进设置 sites 并启动（插件每次加载时也会启动登记着的站：工作台启动、插件升级都算）
+docsite.site.add     {"dir":…}    登记为常驻并启动（插件每次加载时也会启动登记着的站：工作台启动、插件升级都算）
 docsite.site.start   {"dir":…}    启动；人为停了、启动失败修好之后也用它
 docsite.site.stop    {"dir":…}    停掉
-docsite.site.list    {}           各站的 state（running / stopped / failed）、url（只在运行时有）、error
+docsite.site.list    {}           各站的站名、state（running / stopped / failed）、url（只在运行时有）、error、是否常驻与谁登记的
 docsite.site.remove  {"dir":…}    停掉并不再托管
 ```
+
+人在工作台的「站点」窗格里看同一张表，能打开、启停。
 
 - 端口不写在站里（`scripts.dev` 写了 `--port` 就拒绝启动）：先试这个站上次用的，被占了由平台的 vite 插件在 10000–49151 里随机挑；地址以 `docsite.site.list` 的 `url` 为准。启动前核对站点的 `node_modules` 里装着 `@godcreator/god-docsite`
 - **页面打开是「Error」、白屏，或开发服务退出了**：开发服务的输出进 gwb 日志，日志名 `gwb-docsite-dev`，每条开头是站点目录。stderr（Vite 与服务端渲染的报错）记 warn，`logger.query {"name":"gwb-docsite-dev","minLevel":"warn","limit":50}` 就能看到；stdout 记 debug，默认不写进 gwb.log，要看完整输出就在环境变量 `GWB_DEBUG` 里加上 `gwb-docsite-dev` 再启动工作台

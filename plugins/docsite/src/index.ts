@@ -3,11 +3,12 @@ import type { GwbContext } from '@godcreator/gwb-kernel-desktop'
 import type {} from '@godcreator/gwb-commands'
 import type {} from '@godcreator/gwb-data'
 import type {} from '@godcreator/gwb-settings'
+import type { GwbShellApi } from '@godcreator/gwb-shell'
 import type {} from '@godcreator/gwb-skills'
 import { registerCommands } from './commands.js'
 import { registerDocfirstCommands } from './docfirst/commands.js'
 import { devServerLauncher } from './dev-server.js'
-import { HostedSites } from './hosted-sites.js'
+import { addedByCommand, HostedSites } from './hosted-sites.js'
 import { isIdentityCode, joinPeople, newIdentityCode } from './people-file.js'
 import { runPnpm } from './pnpm.js'
 import { addSiteFeature } from './scaffold/add-feature.js'
@@ -16,6 +17,7 @@ import type { HomePageCheckDeps } from './scaffold/home-page-check.js'
 import { loadPlatformScaffold, pluginDir } from './scaffold/platform.js'
 import { DocsiteService, type GwbDocsiteApi } from './service.js'
 import { SiteHost } from './site-host.js'
+import { siteListingsOf, siteTitleOf } from './site-list.js'
 import { SitePorts } from './site-ports.js'
 
 /** 写在包入口：devkit.release 只读类型入口 dist/index.d.ts 认服务由谁提供 */
@@ -38,6 +40,10 @@ export const inject = ['gwbCommands', 'gwbSettings', 'gwbData']
 /** 产物在 dist/index.js，说明书目录是它上一级的 skills/ */
 const skillsDir = new URL('../skills/', import.meta.url)
 
+/** 站点窗格的浏览器侧与样式表，注册窗格时报给外壳；构建产物里它们与本模块同在 dist/ 下 */
+const clientUrl = new URL('./client.js', import.meta.url).href
+const styleUrl = new URL('./style.css', import.meta.url).href
+
 const settingDefinitions = [
   {
     key: 'identity-code',
@@ -47,15 +53,9 @@ const settingDefinitions = [
       '本 home 的身份码：站点的 people.json 里按它认出「我是谁」。插件第一次加载时生成 12 个小写字母与数字；换电脑时把旧电脑的码填到这里（8 到 64 个小写字母或数字），改了以后新启动的开发服务才用新的码',
     default: '',
   },
-  { key: 'sites', type: 'string-list', title: '托管的站点', description: '常驻的站点目录，一行一个绝对路径；插件每次加载时启动它们。docsite.site.add 登记的，和别的插件经服务登记的（如 gwb-collab 的项目站点，加进项目列表时登记、移出时去掉）都在这里', default: [] },
 ] as const
 
-function stringList(value: unknown): string[] {
-  if (!Array.isArray(value) || !value.every((item) => typeof item === 'string')) throw new Error(`设置 sites 要是字符串列表，读到 ${JSON.stringify(value)}`)
-  return value
-}
-
-/** 装配：身份码、托管站点（每个站上次的端口记在 gwb-data 里）、服务 gwbDocsite、命令（含建 docfirst 站的 docfirst.create）与说明书 */
+/** 装配：身份码、托管站点（常驻登记与每个站上次的端口都记在 gwb-data 里）、服务 gwbDocsite、命令（含建 docfirst 站的 docfirst.create）、站点窗格与说明书 */
 export function apply(ctx: GwbContext): void {
   const log = ctx.logger(name)
   const commands = ctx.gwbCommands
@@ -74,7 +74,8 @@ export function apply(ctx: GwbContext): void {
     return code
   }
 
-  const ports = new SitePorts({ readDoc: (doc) => ctx.gwbData.readDoc(doc), writeDoc: (doc, value) => ctx.gwbData.writeDoc(doc, value) }, async (port) => (await loadPlatformScaffold()).isPortFree(port))
+  const dataStore = { readDoc: (doc: string) => ctx.gwbData.readDoc(doc), writeDoc: (doc: string, value: unknown) => ctx.gwbData.writeDoc(doc, value) }
+  const ports = new SitePorts(dataStore, async (port) => (await loadPlatformScaffold()).isPortFree(port))
   const host = new SiteHost({ log, launchDevServer: devServerLauncher(ctx.logger('gwb-docsite-dev')), identityCode, ports })
   // 内核不等卸载回调里的异步操作，工作台退出时异步的停止来不及跑完：卸载时同步停；没经卸载就退出的，在退出事件里同步停
   const stopSitesNow = () => host.stopAllNow()
@@ -86,7 +87,7 @@ export function apply(ctx: GwbContext): void {
     }
   })
 
-  const hosted = new HostedSites({ get: () => stringList(settings.get('sites')), set: (dirs: string[]) => settings.set('sites', dirs) }, host)
+  const hosted = new HostedSites(dataStore, host)
 
   const homePageCheck: HomePageCheckDeps = {
     isRegistered: (siteDir) => hosted.isRegistered(siteDir),
@@ -98,7 +99,7 @@ export function apply(ctx: GwbContext): void {
 
   const api: GwbDocsiteApi = {
     identityCode,
-    add: (dir) => hosted.add(dir),
+    add: (dir, options) => hosted.add(dir, options?.by ?? addedByCommand),
     remove: (dir) => hosted.remove(dir),
     start: (dir) => host.start(dir),
     stop: (dir) => host.stop(dir),
@@ -114,10 +115,24 @@ export function apply(ctx: GwbContext): void {
 
   hosted.startAll((message) => log.warn(message))
 
-  registerCommands({ commands, docsite: api, isRegistered: (dir) => hosted.isRegistered(dir), list: () => host.list() })
+  const list = async () => siteListingsOf(await hosted.list(), host.list(), (dir) => host.statusOf(dir), siteTitleOf)
+  registerCommands({ commands, docsite: api, isRegistered: (dir) => hosted.isRegistered(dir), list })
   registerDocfirstCommands({ commands, docsite: api, packagesFrom: pluginDir, log })
 
   ctx.inject(['gwbSkills'], (scoped) => {
     scoped.effect(() => scoped.gwbSkills.register(skillsDir))
+  })
+
+  // 没装外壳只是没有窗格
+  ctx.inject(['gwbShell'], (scoped) => {
+    scoped.effect(() => {
+      const shellApi = scoped.gwbShell as GwbShellApi
+      const unregisterPane = shellApi.registerPane({ id: 'sites', title: '站点', icon: 'globe', client: clientUrl, style: styleUrl })
+      const undescribeSelf = shellApi.describeSelf({ title: '站点', icon: 'globe' })
+      return () => {
+        undescribeSelf()
+        unregisterPane()
+      }
+    })
   })
 }

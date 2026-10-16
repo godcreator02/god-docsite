@@ -11,5 +11,6 @@
     "skipLibCheck": true,
     "noEmit": true
   },
-  "include": ["src", "build.ts", "tests/**/*.ts"]
+  "include": ["src", "build.ts", "tests/**/*.ts"],
+  "exclude": ["src/pane/browser"]
 }

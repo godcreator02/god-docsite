@@ -48,7 +48,7 @@ function writeMergeWorkflowIfMissing(repo: string, mergeWorkflow: string): boole
 }
 
 /**
- * 项目站点交给 gwb-docsite 托管：常驻的站只记在它的设置 sites 里，进程的启停、状态、起不来的原因、工作台启动时拉起都是它做的。
+ * 项目站点交给 gwb-docsite 托管：常驻的站只记在它的 gwb-data 的 hosted-sites 里（登记的一方记成 gwb-collab），进程的启停、状态、起不来的原因、工作台启动时拉起都是它做的。
  * 这里只做三件事：项目加进列表（以及插件加载、自动同步改了 site/ 之后）登记站点，移出列表撤销登记；
  * 站点一转成运行就把整份数据推到频道 collab（gwb-docsite 的 onStatus），通知、提示词或项目负责人一变也推
  */
@@ -64,12 +64,12 @@ export class CollabSites {
   }
 
   /**
-   * 交给 gwb-docsite 常驻（登记进设置 sites 再启动；已登记、已在运行就不动），再推一次数据（站点可能在本插件接上 onStatus 之前就起来了）。
+   * 交给 gwb-docsite 常驻（登记再启动；已登记、已在运行就不动），再推一次数据（站点可能在本插件接上 onStatus 之前就起来了）。
    * site/ 还没建就报错、不登记：等项目负责人 collab.site.init
    */
   async host(repo: string): Promise<void> {
     if (!existsSync(path.join(siteDirOf(repo), 'package.json'))) throw new CollabRejected(`${repo} 里还没有站点 ${sitePathInRepo}/：项目负责人用 collab.site.init 建站`)
-    await this.options.docsite.add(siteDirOf(repo))
+    await this.options.docsite.add(siteDirOf(repo), { by: 'gwb-collab' })
     this.feedChanged(repo)
   }
 
@@ -92,7 +92,7 @@ export class CollabSites {
     const created = await this.options.docsite.init(siteDir, newSite)
     createDirsWrittenWhileRunning(repo)
     const mergeWorkflowWritten = writeMergeWorkflowIfMissing(repo, mergeWorkflow)
-    // 站点目录已登记在 gwb-docsite 的设置 sites 里时（项目在列表里、重建站点），建站检查完首页它保持运行；加功能要站点停着
+    // 站点目录已登记为 gwb-docsite 的常驻站时（项目在列表里、重建站点），建站检查完首页它保持运行；加功能要站点停着
     if (this.options.docsite.status(siteDir).state === 'running') await this.options.docsite.stop(siteDir)
     const feature = await this.options.docsite.addFeature(siteDir, { packageName: featurePackage, specifier: featureRange })
     // 项目首页 import 协作功能的接线文件（app/features/collab/），要等加完功能再写

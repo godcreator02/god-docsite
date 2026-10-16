@@ -19,7 +19,7 @@ export function readJson(file: string): Record<string, unknown> {
 /** 假的起服务检查：记下调用顺序，首页回 status */
 export function fakeHomePageCheck(events: string[], options: { registered?: boolean; status?: number } = {}): HomePageCheckDeps {
   return {
-    isRegistered: () => options.registered ?? false,
+    isRegistered: async () => options.registered ?? false,
     start: async () => {
       events.push('start')
       return { url: 'http://127.0.0.1:4560', pid: 1, alreadyRunning: false }

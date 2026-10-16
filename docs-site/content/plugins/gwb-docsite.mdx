@@ -1,6 +1,6 @@
 ---
 title: gwb-docsite：文档站插件
-description: gwb 工作台插件这一层：一张接缝图看它夹在工作台、平台包、站点开发服务、gwb-collab 之间各经什么接；docfirst.create 从空目录建站的七步（前四步就是普通的 init）；一个站的 running / stopped / failed 由哪些事件转换；一次 start 怎么定端口；给别的插件的服务 gwbDocsite；打包与随包说明书
+description: gwb 工作台插件这一层：一张接缝图看它夹在工作台、平台包、站点开发服务、gwb-collab 之间各经什么接；docfirst.create 从空目录建站的七步（前四步就是普通的 init）；常驻的站记在哪、站点窗格列什么；一个站的 running / stopped / failed 由哪些事件转换；一次 start 怎么定端口；给别的插件的服务 gwbDocsite；打包与随包说明书
 icon: Plug
 ---
 
@@ -15,15 +15,15 @@ gwb-docsite 是 gwb 工作台和[平台包](/packages/god-docsite) `@godcreator/
 
 <DocsiteSeams />
 
-第 1 号（注册命令）：插件 inject 工作台的命令服务，注册 `docsite.*` 十四条与 `docfirst.create`；`gwbSkills` 是可选的注入，有它时才把随包的 `skills/` 目录注册给工作台。第 2、3 号见「服务 gwbDocsite」，第 4 号见「建站与加功能」，第 5、6 号见「托管开发服务」，第 7、8 号见「推送与评论」。
+第 1 号（注册命令）：插件 inject 工作台的命令服务，注册 `docsite.*` 十四条与 `docfirst.create`；`gwbSkills` 是可选的注入，有它时才把随包的 `skills/` 目录注册给工作台；`gwbShell` 也是可选的注入，有它时才注册站点窗格。第 2、3 号见「服务 gwbDocsite」，第 4 号见「建站与加功能」，第 5、6 号见「托管开发服务」，第 7、8 号见「推送与评论」，第 9 号见「站点窗格」。
 
-插件自己的状态只有两样：本 home 的身份码在 `identity-code`，常驻的站记在 `sites`：
+插件自己的状态有三样：设置里只有本 home 的身份码 `identity-code`；gwb-data 里有常驻站点的登记表 `hosted-sites` 与每个站上次用的端口 `site-ports`。身份码是人会去看、换电脑时要手填的，放设置；另外两样都是插件运行时自己维护的，放 gwb-data：
 
-{/* ref file="../plugins/docsite/src/index.ts" lines="41-51" hash="cc0bf1462472" blob="4de40222eb79" */}
+{/* ref file="../plugins/docsite/src/index.ts" lines="47-56" hash="ceabc6e44d53" blob="53d11d0d8ce5" */}
 
-图上全部接线都在 `apply` 里：定义设置、第一次加载时生成身份码，造出端口记录 `SitePorts`、进程表 `SiteHost`、常驻表 `HostedSites`，组装成一份 `GwbDocsiteApi` 给服务与命令共用，最后把登记着的站逐个启动（不等）。
+图上全部接线都在 `apply` 里：定义设置、第一次加载时生成身份码，造出端口记录 `SitePorts`、进程表 `SiteHost`、常驻表 `HostedSites`，组装成一份 `GwbDocsiteApi` 给服务与命令共用，把登记着的站逐个启动（不等），最后注册命令、说明书与站点窗格。
 
-{/* ref file="../plugins/docsite/src/index.ts" lines="58-123" hash="8d480805de19" blob="7bc0a3ae86cc" */}
+{/* ref file="../plugins/docsite/src/index.ts" lines="58-138" hash="70b4f28c162c" blob="53d11d0d8ce5" */}
 
 身份码第一次加载时生成 12 个小写字母与数字（去掉容易看错的 l、o、0、1）；之后每次读都校验，设置里写错了就报错、不替人改。每次启动开发服务时现读，所以改了设置只影响之后启动的开发服务。
 
@@ -45,13 +45,27 @@ gwb-docsite 是 gwb 工作台和[平台包](/packages/god-docsite) `@godcreator/
 
 ## 托管开发服务
 
-### 常驻的站只记在设置 sites
+### 常驻的站只记在 gwb-data 的 hosted-sites
 
-图上第 5 号。常驻的站只有一张表：设置 `sites`。`docsite.site.add` 与别的插件经服务 `add` 登记的都在这里；插件每次加载时逐个启动它们，不等，没能启动的报一行警告。
+图上第 5 号。常驻的站只有一张表：gwb-data 的文档 `hosted-sites`，每项是站点目录与谁登记的 `{ dir, by }`。`docsite.site.add` 登记的记成 `by: "docsite.site.add"`；别的插件经服务 `add(dir, { by })` 登记时报自己的名字，gwb-collab 的项目站点记成 `gwb-collab`。插件每次加载时读一次表、逐个启动登记着的站，不等，没能启动的报一行警告；表的形状不对就一个也不启动、报一行，之后的登记与列表照样报这个错。没有这份文档就是一个站也没登记。
 
-{/* ref file="../plugins/docsite/src/hosted-sites.ts" lines="13-48" hash="ff1aca0f11f6" blob="6b0bd7e4fb72" */}
+{/* ref file="../plugins/docsite/src/hosted-sites.ts" lines="33-110" hash="91a7ef3789b8" blob="b5b3e584fdbd" */}
 
-`add` 先登记再启动，启动不了照样报错、登记留着，下次加载再试；`remove` 去掉登记，在运行就停掉。服务的 `remove` 对没登记过的站回 `{ registered: false }`，命令 `docsite.site.remove` 对它直接拒绝。站点目录的比较键是解析成绝对路径再转小写：大小写、斜杠不同的写法算同一个站。进程的启停不在这张表里，归下面的 `SiteHost`；`docsite.site.list` 列的是 `SiteHost` 这次运行里见过的站，不是设置 `sites`。
+表读进内存以后，改动排队写回，几处同时登记时后写的不覆盖先写的。`add` 先登记再启动，启动不了照样报错、登记留着，下次加载再试；已登记的站换了登记的一方就改过来，不重复登记。`remove` 去掉登记，在运行就停掉。服务的 `remove` 对没登记过的站回 `{ registered: false }`，命令 `docsite.site.remove` 对它直接拒绝。站点目录的比较键是解析成绝对路径再转小写：大小写、斜杠不同的写法算同一个站。进程的启停不在这张表里，归下面的 `SiteHost`。
+
+`docsite.site.list` 把两边合成一张：常驻的站按登记先后在前，后面是 `SiteHost` 这次运行里启动过、却没登记的站（建站时的首页检查、自己验页面时启动的）。每行在进程状态之外带三样：`title` 是站点 `content/meta.json` 的 `title`（文件不在或没写为 `null`，不是合法 JSON 就报错），`hosted` 是登记了没有，`by` 是谁登记的（没登记为 `null`）。
+
+{/* ref file="../plugins/docsite/src/site-list.ts" lines="6-32" hash="9c8932871c2c" blob="744a7469f622" */}
+
+### 站点窗格
+
+图上第 9 号。插件注册一个窗格 `sites`（标题「站点」），列的就是 `docsite.site.list`：每个站一行，写站名（没有就用目录名，协作站的 `site` 带上上一级）、来源、状态与端口、站点目录，站点出错或这一行的操作失败时原因写在下面。窗格看得见时每 5 秒重读一次。
+
+每行右边三个操作，都是调命令：「打开」先 `docsite.site.start`（已在运行就回现状）再把地址交给系统浏览器；「启动」「停止」调 `docsite.site.start` / `docsite.site.stop`。来源是「手动」的站（`docsite.site.add` 登记的）还有「不再托管」，点了要再点一次确认，调 `docsite.site.remove`；别的插件登记的站不给这个按钮，协作站要在协作窗格移出项目列表，不然 gwb-collab 下次加载又登记回来。建站、加功能这些事窗格不做，由人让自己的 AI 调命令。
+
+{/* ref file="../plugins/docsite/src/pane/browser/sites.ts" lines="24-42" hash="f38bd645f7d8" blob="4f06caa00a21" */}
+
+浏览器侧照 gwb-collab 的窗格搭：React 与 lucide 从外壳的共享模块取，按钮是 shadcn 的那份，Tailwind 类名都带前缀 `docsite:`，只匹配本插件画出来的元素；外壳的主题令牌里没有表示「运行中」的绿色，在 `tokens.css` 里补了一个。
 
 ### 一个站的三种状态
 
@@ -93,17 +107,17 @@ gwb-docsite 是 gwb 工作台和[平台包](/packages/god-docsite) `@godcreator/
 
 图上第 2、3 号。别的插件 `inject: ['gwbDocsite']` 后调用。接口分四组：建站（`init`、`addFeature`）、托管（`add`、`remove`、`start`、`stop`、`status`、`onStatus`）、推送（`push`）、身份（`join`、`identityCode`）。命令 `docsite.*` 是同一份实现外面包一层参数校验，所以命令与服务的行为不会分叉；每个方法的参数与回执表在说明书 `docsite` 的「服务 gwbDocsite」一节。
 
-{/* ref file="../plugins/docsite/src/service.ts" lines="7-40" hash="04223be9f212" blob="247aab9e7e61" */}
+{/* ref file="../plugins/docsite/src/service.ts" lines="7-43" hash="12d2f1897797" blob="1c90afd3d644" */}
 
 服务对象只存闭包：cordis 读服务属性时会把属性里存的服务重新绑到调用方的上下文。`declare module 'cordis'` 写在包入口 `index.ts`：发版工具只读类型入口 `dist/index.d.ts` 认这个服务由谁提供。改方法签名就是改给别的插件 inject 的服务，要先问人、照 gwb-release 定版本号。
 
-用它的就是图上第 3 号两端：gwb-collab（`plugins/collab/src/site-process/collab-sites.ts`）用 `init` 与 `addFeature` 建协作站，项目加进列表时 `add` 登记、移出时 `remove` 撤销，`onStatus` 接到站点转成 running 就重推整份数据，`join`、`identityCode` 把本 home 加进项目的人员列表，细节归它自己的页；本插件自己的 `docfirst.create` 只用 `init` 与 `addFeature`。
+用它的就是图上第 3 号两端：gwb-collab（`plugins/collab/src/site-process/collab-sites.ts`）用 `init` 与 `addFeature` 建协作站，项目加进列表（以及每次插件加载）时 `add(dir, { by: 'gwb-collab' })` 登记、移出时 `remove` 撤销，`onStatus` 接到站点转成 running 就重推整份数据，`join`、`identityCode` 把本 home 加进项目的人员列表，细节归它自己的页；本插件自己的 `docfirst.create` 只用 `init` 与 `addFeature`。
 
 ## 打包与随包说明书
 
-打包：`build.ts` 用 esbuild 把 `src/index.ts` 打成一个 `dist/index.js`，外置名单只有 cordis 与 peer 里的工作台包，其余按值 import 的都打包进来——平台包核心（推送通道的常量）、identity（身份码的环境变量名、`people.json` 读写、@ 提取）、comments 的 node 层（读评论文件）。它们按包的 `exports` 解析到各包的 `dist/`，所以改了这几个包要先构建，再构建插件。类型入口由紧接着的 `tsc` 输出。
+打包：`build.ts` 用 esbuild 把 `src/index.ts` 打成一个 `dist/index.js`，外置名单只有 cordis 与 peer 里的工作台包，其余按值 import 的都打包进来——平台包核心（推送通道的常量）、identity（身份码的环境变量名、`people.json` 读写、@ 提取）、comments 的 node 层（读评论文件）。它们按包的 `exports` 解析到各包的 `dist/`，所以改了这几个包要先构建，再构建插件。站点窗格的浏览器侧另打成 `dist/client.js`，外置名单是外壳共享的模块；类型入口与窗格样式表 `dist/style.css` 由紧接着的 `tsc`、`tailwindcss` 输出。
 
-{/* ref file="../plugins/docsite/build.ts" lines="6-20" hash="a2cb76349fcd" blob="5a2e20c1c9bc" */}
+{/* ref file="../plugins/docsite/build.ts" lines="7-21" hash="76b6f2167374" blob="0641a65e0b89" */}
 
 不打包的：平台建站器（运行时加载，见上文）；docfirst、code-pin、trajectory、explainer（只读文件）。七个包都写在 `dependencies` 里，随插件装在旁边，版本号「插件旁边装着的那一版」说的就是它们。
 
@@ -115,6 +129,7 @@ gwb-docsite 是 gwb 工作台和[平台包](/packages/god-docsite) `@godcreator/
 
 | 级别 | 文件 | 测什么 |
 | --- | --- | --- |
-| 快 | `tests/site-host.test.ts`、`hosted-sites.test.ts`、`site-ports.test.ts` | 状态机、常驻表、端口记录（含等上次的端口空出来）；开发服务、设置、gwb-data 都是假的 |
+| 快 | `tests/site-host.test.ts`、`hosted-sites.test.ts`、`site-ports.test.ts` | 状态机、常驻表、端口记录（含等上次的端口空出来）；开发服务、gwb-data 都是假的 |
+| 快 | `tests/site-list.test.ts` | `docsite.site.list` 怎么合成一张表、站名怎么取，窗格一行的来源、站名与能不能「不再托管」 |
 | 快 | `tests/scaffold-create.test.ts`、`scaffold-add-feature.test.ts`、`docfirst/*.test.ts` | 真的平台建站器、假的 pnpm 与首页检查（`tests/site-fixtures.ts`） |
 | 慢 | `tests/real-site.slow.test.ts` | 在临时目录真建站、装依赖、启动、写评论、推送、重启沿用端口、加功能、`pnpm build`；要先在仓根 `pnpm build` |

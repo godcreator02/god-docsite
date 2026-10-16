@@ -1,10 +1,11 @@
+import { browserImports } from '@godcreator/gwb-shell/browser-imports'
 import fs from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { build } from 'esbuild'
 
 /**
- * node 侧用 esbuild 打成一个文件，外置名单之外的依赖全部打包进去；类型入口由紧接着的 tsc 输出。
+ * node 侧与站点窗格的浏览器侧各用 esbuild 打成一个文件，外置名单之外的依赖全部打包进去；类型入口与样式表由 build 脚本里紧接着的 tsc、tailwindcss 输出。
  * 平台建站器 @godcreator/god-docsite/scaffold 不打包：源码按算出的地址 import(变量) 加载，esbuild 不跟进
  */
 const here = path.dirname(fileURLToPath(import.meta.url))
@@ -44,4 +45,22 @@ await build({
   absWorkingDir: here,
 })
 
-console.log('[docsite] dist/index.js ← src/index.ts')
+await build({
+  entryPoints: ['src/pane/browser/index.tsx'],
+  outfile: 'dist/client.js',
+  external: Object.keys(browserImports()),
+  // shadcn 添加的组件写的是 @/… 别名，和 components.json、src/pane/browser/tsconfig.json 的 paths 是同一条约定
+  alias: { '@': path.join(here, 'src', 'pane', 'browser') },
+  absWorkingDir: here,
+  format: 'esm',
+  platform: 'browser',
+  target: 'es2022',
+  bundle: true,
+  minify: false,
+  legalComments: 'none',
+  jsx: 'automatic',
+  define: { 'process.env.NODE_ENV': '"production"' },
+  logLevel: 'warning',
+})
+
+console.log('[docsite] dist/index.js ← src/index.ts，dist/client.js ← src/pane/browser/index.tsx')

@@ -3,7 +3,7 @@ import type { GwbContext } from '@godcreator/gwb-kernel-desktop'
 import { listComments, writeComment, type CommentFilter, type CommentWrite } from './comments.js'
 import { DocsiteRejected, messageOf } from './errors.js'
 import type { GwbDocsiteApi } from './service.js'
-import type { SiteStatus } from './site-host.js'
+import type { SiteListing } from './site-list.js'
 
 type Args = Record<string, unknown>
 
@@ -42,9 +42,9 @@ type GwbCommandsApi = NonNullable<GwbContext['gwbCommands']>
 export type CommandServices = {
   commands: GwbCommandsApi
   docsite: GwbDocsiteApi
-  /** 站点目录在不在设置 sites 里 */
-  isRegistered(dir: string): boolean
-  list(): SiteStatus[]
+  /** 站点目录有没有登记为常驻 */
+  isRegistered(dir: string): Promise<boolean>
+  list(): Promise<SiteListing[]>
 }
 
 function register(commands: GwbCommandsApi, definition: { name: string; description: string; usage: string; effect: 'read' | 'write' | 'external' }, handler: Handler) {
@@ -60,6 +60,10 @@ function register(commands: GwbCommandsApi, definition: { name: string; descript
 
 const siteShape =
   '每个站是 { dir, state, url, error }：state 是 running（进程在，url 是实际地址）、stopped（没有进程）、failed（进程退出了或没能启动，error 记退出码与最后几行输出）；url 只在 running 时有。端口不写在站点里：启动时先试这个站上次用的端口，被占了就随机挑一个五位数的空闲端口'
+
+const listingShape =
+  `${siteShape}。列表的每一行另有 title、hosted、by：title 是站点 content/meta.json 的 title（没有为 null）；hosted 是登记为常驻（工作台每次启动都启动它），` +
+  'by 是谁登记的（docsite.site.add，或登记它的插件名，如 gwb-collab）；没登记、只是这次被启动过的站 hosted 为 false、by 为 null。常驻的站按登记先后排在前面'
 
 const commentWriteUsage =
   '要站点在运行（POST 到站点的评论写入路由 /comments，和网页评论面板同一套规则与字段）；署名是本 home 的身份码在 people.json 里对应的人，agent 写时给 as（people.json 里 agent 为 true 的 id）'
@@ -82,10 +86,10 @@ export function registerCommands({ commands, docsite, isRegistered, list }: Comm
 
   register(
     commands,
-    { name: 'docsite.site.list', description: '列出托管着的站点与各自的状态', usage: `无参数。回 { sites }。${siteShape}`, effect: 'read' },
+    { name: 'docsite.site.list', description: '列出常驻的站点与这次被启动过的站点，各自的站名、状态、谁登记的；站点窗格显示的就是它', usage: `无参数。回 { sites }。${listingShape}`, effect: 'read' },
     async (args) => {
       argsOf(args, [])
-      return { sites: list() }
+      return { sites: await list() }
     },
   )
 
@@ -93,8 +97,8 @@ export function registerCommands({ commands, docsite, isRegistered, list }: Comm
     commands,
     {
       name: 'docsite.site.add',
-      description: '托管一个站点：登记进设置 sites 并启动（工作台每次启动时也会启动登记着的站）',
-      usage: `{ dir }：站点目录的绝对路径，要有 package.json（scripts.dev 不写 --port）、装好依赖、建在平台包 @godcreator/god-docsite 上。已经登记过的只确保它在运行。协作站由 gwb-collab 在项目加进列表时登记，不用另外加。回这个站。${siteShape}`,
+      description: '托管一个站点：登记为常驻并启动（工作台每次启动时也会启动登记着的站）',
+      usage: `{ dir }：站点目录的绝对路径，要有 package.json（scripts.dev 不写 --port）、装好依赖、建在平台包 @godcreator/god-docsite 上。登记记在 gwb-data 的 hosted-sites 里，登记的一方记成 docsite.site.add；已经登记过的只确保它在运行。协作站由 gwb-collab 在项目加进列表时登记，不用另外加。回这个站。${siteShape}`,
       effect: 'write',
     },
     async (args) => docsite.add(dirOf(argsOf(args, ['dir']))),
@@ -104,13 +108,13 @@ export function registerCommands({ commands, docsite, isRegistered, list }: Comm
     commands,
     {
       name: 'docsite.site.remove',
-      description: '不再托管一个站点：从设置 sites 里去掉，在运行就停掉',
-      usage: '{ dir }：设置 sites 里登记着的站点目录，没登记过就拒绝。协作站要移出项目列表（collab.project.remove），不然 gwb-collab 下次加载又登记回来。回 { dir, removed: true }',
+      description: '不再托管一个站点：去掉常驻登记，在运行就停掉',
+      usage: '{ dir }：登记为常驻的站点目录，没登记过就拒绝。协作站要移出项目列表（collab.project.remove），不然 gwb-collab 下次加载又登记回来。回 { dir, removed: true }',
       effect: 'write',
     },
     async (args) => {
       const dir = dirOf(argsOf(args, ['dir']))
-      if (!isRegistered(dir)) throw new DocsiteRejected(`${dir} 不在设置 sites 里`)
+      if (!(await isRegistered(dir))) throw new DocsiteRejected(`${dir} 没有登记为常驻`)
       await docsite.remove(dir)
       return { dir, removed: true }
     },
@@ -150,7 +154,7 @@ export function registerCommands({ commands, docsite, isRegistered, list }: Comm
       description: '一条命令从空目录建站：平台包 god-docsite 的建站器复制站点模板、装依赖、起服务检查，骨架写完归站点',
       usage:
         '{ dir, title }：dir 是站点目录的绝对路径，要不存在或是空目录；title（站名，写进 content/meta.json）必给。端口不写进站点，启动时挑（见 docsite.site.start）。' +
-        '站点模板是平台包 @godcreator/god-docsite 的 template/，平台包（god-docsite、identity、comments）的依赖写成插件旁边装着的那一版的 ^<版本>；写完 pnpm install，起服务检查首页，通过后登记进设置 sites 的站保持运行、没登记的停掉。' +
+        '站点模板是平台包 @godcreator/god-docsite 的 template/，平台包（god-docsite、identity、comments）的依赖写成插件旁边装着的那一版的 ^<版本>；写完 pnpm install，起服务检查首页，通过后登记为常驻的站保持运行、没登记的停掉。' +
         'people.json 里只有 agent claude，人用 docsite.people.join 把自己加进来。要功能（轨迹卡、钉码、协作等）建完再 docsite.feature.add。回 { dir, platformDependencies }',
       effect: 'write',
     },
