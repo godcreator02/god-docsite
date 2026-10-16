@@ -3,6 +3,8 @@ title: 维护
 description: 改这个仓时怎么跑、按什么节奏检查、提交怎么写、发版按什么顺序
 ---
 
+import { ReleaseFlow } from './index/release-flow'
+
 ## 怎么跑
 
 仓根是 pnpm 包工作区：`packages/` 是平台包与功能包，`plugins/` 是两个 gwb 插件，`docs-site/` 是本站，`full-test/` 是全功能测试仓，`demo/` 是本地验收用的演示协作仓（内容是一个真实项目的快照，看实际用起来的样子；不进仓，只在维护者本机上有），`tests/` 是全仓级的检查（端到端检查在 `tests/e2e/`，建站器比对是 `tests/scaffold-check.mjs`，依赖方向与分层的规则是 `tests/dependency-rules.cjs`；各包自己的测试在各包里）。
@@ -62,12 +64,7 @@ description: 改这个仓时怎么跑、按什么节奏检查、提交怎么写�
 
 ## 发版
 
-只用工作台命令 `devkit.release`。升哪一位、发版的每一步，每次都先读说明书 gwb-release。包按依赖序发：
-
-1. 第 0 层：`god-docsite`、`identity`、`explainer`、`code-pin`、`trajectory`、`word-report`
-2. 第 1 层：`comments`、`doc-export`
-3. 第 2 层：`collab`、`docfirst`
-4. 两个插件：`gwb-docsite`、`gwb-collab`
+只用工作台命令 `devkit.release`。升哪一位、发版的每一步，每次都先读说明书 gwb-release，包按依赖序发。
 
 发版前的检查按这次要发的改动分两档：
 
@@ -80,8 +77,9 @@ description: 改这个仓时怎么跑、按什么节奏检查、提交怎么写�
 
 发 gwb-collab 时另在 `plugins/collab` 里跑一遍 `pnpm test:verified`，不分档。发了协作相关的包或插件之后，照 [协作站双人回归](/maintain/collab-regression) 走一遍。
 
-包发到 npmjs，本机不直接发：仓在 GitHub 上（`godcreator02/god-docsite`，公开），`devkit.release` 在本机构建、检查、打好包文件，在已经推上去的 HEAD 上建一个 GitHub release 挂上包文件，
-仓里的工作流 `.github/workflows/publish.yml` 由 release 公开触发，用 trusted publishing 按序号逐个发到 npmjs，不存 token。各包的 `publishConfig` 指向 npmjs、`repository` 指向这个仓，`files` 收进 MIT 的 `LICENSE`。
+包发到 npmjs，本机不直接发——从本机到 npmjs 走六步，每处做什么、传什么、卡在哪一步会怎样：
+
+<ReleaseFlow />
 
 - **过渡期同时发 Gitea**：各 home 还从 Gitea 装 `@godcreator` 的包，`devkit.release` 加 `alsoPublishTo` Gitea 的源
 - **新加一个包**：npmjs 上要先有这个包才能登记谁能发它，命令要在有终端的地方运行（npm 在那里才给出网页批准链接并等着）：
