@@ -1,0 +1,9 @@
+/*
+ * StatusCases 自己的画面：串头卡里的新旧行对照、灰字的正文、被拒那行。
+ * 卡片与颜色变量（--dx-*）由 @godcreator/explainer 提供，颜色只取那套变量。
+ */
+.sc-reject { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+.sc-reject-message { font-family: var(--dx-mono); font-size: 12px; color: var(--dx-bad); }
+
+/* 正文那句在 Diff 下面灰字原样摆着，表示没动 */
+.sc-body { margin: 10px 0 0; font-size: 13px; color: var(--dx-dim); }

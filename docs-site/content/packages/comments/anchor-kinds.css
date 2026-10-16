@@ -1,0 +1,27 @@
+/*
+ * AnchorKinds 自己的画面：左串头行、右仿正文的小页面。
+ * 卡片与颜色变量（--dx-*）由 @godcreator/explainer 提供，颜色只取那套变量；
+ * 划字的高亮与元素的竖黄条照站点批注的黄（同 round-trip.css 的 --rt-hl 两变量），深色下底色加深一档。
+ */
+.ak-case { display: grid; gap: 12px; }
+@container (min-width: 640px) { .ak-case { grid-template-columns: minmax(0, 5fr) minmax(0, 6fr); align-items: start; } }
+
+/* 仿正文的小页面：整页批中的情况给整块描边 */
+.ak-page { position: relative; display: grid; gap: 7px; padding: 12px 14px; border: 1px solid var(--dx-line); border-radius: 6px; background: var(--dx-surface); }
+.ak-page[data-mark] { border-color: var(--dx-warn); box-shadow: 0 0 0 1px var(--dx-warn); }
+.ak-heading { font-size: 14px; font-weight: 600; }
+.ak-para { margin: 0; font-size: 13px; }
+
+/* 元素批中的情况：标题旁一道竖黄条（与站点正文栏左外侧的竖黄条同色） */
+.ak-heading[data-mark] { border-left: 3px solid var(--dx-warn); padding-left: 8px; }
+
+/* 划字批中的情况：那五个字铺划字的高亮 */
+.ak-page { --ak-hl-bg: color-mix(in oklab, #f5b301 16%, transparent); --ak-hl-line: color-mix(in oklab, #f5b301 75%, transparent); }
+.dark .ak-page { --ak-hl-bg: color-mix(in oklab, #f5b301 30%, transparent); --ak-hl-line: color-mix(in oklab, #f5b301 85%, transparent); }
+.ak-page [data-hl] { background-color: var(--ak-hl-bg); text-decoration: underline 2px var(--ak-hl-line); text-underline-offset: 3px; border-radius: 2px; }
+
+/* 图片占位 */
+.ak-img { display: inline-block; width: 30px; height: 18px; margin-right: 6px; vertical-align: middle; border: 1px solid var(--dx-line); border-radius: 3px; background: color-mix(in oklab, var(--dx-slate) 20%, transparent); }
+
+/* 认不出的情况：页面角上挂胶囊 */
+.ak-broken { position: absolute; top: 8px; right: 8px; }

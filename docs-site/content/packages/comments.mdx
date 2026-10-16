@@ -1,13 +1,22 @@
 ---
 title: comments：评论
-description: 文档站的评论：一串一个文件夹写进站点的 comments/，唯一一份写入 action 先核对身份再写文件；锚点记下批的是整页、一个元素还是一段字，正文改了以后按快照的逐字差异找回位置，找不到如实标注
+description: 文档站的评论：一串一个文件夹写进站点的 comments/，唯一一份写入 action 先核对身份再写文件；锚点按字面认成整页、一个元素或一段字，位置按页面文字数，正文改了以后按快照的逐字差异找回位置
 icon: MessageSquare
 ---
 
+import { CommentsSeams } from './comments/seams'
 import { CommentRoundTrip } from './comments/round-trip'
+import { AnchorKinds } from './comments/anchor-kinds'
+import { StatusCases } from './comments/status-cases'
+import { PageText } from './comments/page-text'
+import { StableIds } from './comments/stable-ids'
 import { WhereItLands } from './comments/where-it-lands'
 
-评论不进数据库，是站点目录 `comments/` 下的文件，跟着 git 同步，和正文一起审阅。每串评论一个文件夹；写入只有一份 action；正文里批的位置靠锚点找回。先看一条划字评论从写到回到正文的整条路：
+评论不进数据库，是站点目录 `comments/` 下的文件，跟着 git 同步，和正文一起审阅。先看一张图，把评论文件在哪、经哪一份 action 写、怎么读回、浏览器里怎么找回位置摆清楚；后面每一节开头都会写它在图上的位置。
+
+<CommentsSeams />
+
+一条评论走这条路的先后，用小周在 `index.mdx` 上划「第二段话。」写的一条评论从头看一遍：
 
 <CommentRoundTrip />
 
@@ -37,25 +46,21 @@ anchor: "{\"quote\":\"第二段话。\",\"start\":15,\"end\":20,\"snapshot\":\"�
 
 ## 批在哪：锚点的三种写法
 
-串头的 `anchor` 字段决定批的是哪里，按字面认，不另加类型字段：
+串头的 `anchor` 字段决定批的是哪里，按字面认，不另加类型字段——同一个字段认成整页、元素、划字、认不出四种结果：
 
-- 不写或空串：批整页
-- 不以 `{` 开头的字符串：一个页面元素的 id（标题自己的 id，或下面「批一块」讲的稳定 id）
-- JSON：划字，`quote`（选中的原文）、`start`、`end`（不含 end）、`snapshot`（发起那一刻的整页文字）
-
-以 `{` 开头却解析不出这四项的，算「锚点数据认不出」，界面上标出来，不让整页挂掉。
-
-{/* ref file="../packages/comments/src/core/anchor.ts" hash="6ae748fd241a" blob="35261a2b0ccd" */}
+<AnchorKinds />
 
 ## 已解决只记在串头
 
-串头 frontmatter 的 `status` 是 `open` 或 `resolved`（不写等于 `open`）；`resolved` 时 `resolvedBy`（人员 id）与 `resolvedAt`（ISO 时刻）都要有，`open` 时两项都不能有；回复不能带这三项。标为已解决、重新打开只改串头的这三项，别的字段与正文原样写回；已经是这个状态再标一次拒绝（409），写明是谁在什么时候标的。
+串头 frontmatter 的 `status` 是 `open` 或 `resolved`（不写等于 `open`）；`resolved` 时 `resolvedBy`（人员 id）与 `resolvedAt`（ISO 时刻）都要有，`open` 时两项都不能有；回复不能带这三项。标为已解决、重新打开只改串头的这三项，别的字段与正文原样写回；已经是这个状态再标一次拒绝（409），写明是谁在什么时候标的：
 
 {/* ref file="../packages/comments/src/core/comment-file.ts" lines="64-82" hash="baea6782a133" blob="77cca07d6e1d" */}
 
+<StatusCases />
+
 ## 写入：唯一一份 action
 
-全站的评论写入都提交到 `/comments`：这个路由既是全站评论页，它的 action 调 `handleCommentWrite`。路由文件由建站器写进站点的 `app/features/comments/`（只改本包 `template/`）：
+图上第 1、2 号。全站的评论写入都提交到 `/comments`：这个路由既是全站评论页，它的 action 调 `handleCommentWrite`。路由文件由建站器写进站点的 `app/features/comments/`（只改本包 `template/`）：
 
 {/* ref file="../packages/comments/template/comments.tsx" lines="17-20" hash="8ea0ded43bb4" blob="f265c85cb735" */}
 
@@ -71,7 +76,7 @@ anchor: "{\"quote\":\"第二段话。\",\"start\":15,\"end\":20,\"snapshot\":\"�
 
 ## 读回：从集合条目到评论串
 
-平台模板在 `source.config.ts` 里把站点的 `comments/` 定义成集合 `comments`（怎么定义归 god-docsite 页）。页面 loader 用 `pageThreadsOf` 取本页的串，全站评论页用 `threadsByPageOf` 按页分组。
+图上第 3 号。平台模板在 `source.config.ts` 里把站点的 `comments/` 定义成集合 `comments`（怎么定义归 god-docsite 页）。页面 loader 用 `pageThreadsOf` 取本页的串，全站评论页用 `threadsByPageOf` 按页分组。
 
 按文件夹分串：串按创建时间排，回复按文件名排（文件名就是带时刻的 id）。数据不完整就直接报错并点名文件：回复没有串头、串头缺 `page`、一个文件夹两个串头、回复带了已解决状态。
 
@@ -85,13 +90,11 @@ anchor: "{\"quote\":\"第二段话。\",\"start\":15,\"end\":20,\"snapshot\":\"�
 
 ## 正文里的位置：页面文字
 
-划字的位置不按 DOM 存，按「页面文字」数：正文容器（带 `data-comment-scope` 属性，平台模板经 `commentScopeProps` 加在正文上）里的文字节点按顺序拼成一个字符串；图片、SVG、画布、视频、iframe、KaTeX 公式整个算一个字（`￼`，U+FFFC）；只给读屏软件看的字（`sr-only`）不算。所以换了界面语言、标题旁多一个隐藏的链接文字，位置都不受影响。
+图上第 4 号。划字的位置不按 DOM 存，按「页面文字」数：正文容器（带 `data-comment-scope` 属性，平台模板经 `commentScopeProps` 加在正文上）里的文字节点按顺序拼成的一个字符串：
 
-{/* ref file="../packages/comments/src/site/browser/page-text.ts" lines="8-30" hash="0044555ef006" blob="306242d374fb" */}
+<PageText />
 
-{/* ref file="../packages/comments/src/site/browser/page-text.ts" lines="53-75" hash="30784884637a" blob="306242d374fb" */}
-
-划完字松手时，把选区换成页面文字里的位置，连同那一刻的整页文字一起存进锚点。
+划完字松手时，把选区换成页面文字里的位置，连同那一刻的整页文字一起存进锚点。所以换了界面语言、标题旁多一个隐藏的链接文字，位置都不受影响。
 
 ## 批一块：可批元素与稳定 id
 
@@ -99,15 +102,15 @@ anchor: "{\"quote\":\"第二段话。\",\"start\":15,\"end\":20,\"snapshot\":\"�
 
 {/* ref file="../packages/comments/src/site/browser/annotate.ts" lines="19-23" hash="6d526f395470" blob="54bd19da4787" */}
 
-浏览器里走一遍正文，给没有 id 的候选按内容算稳定 id（`dc-` 加内容指纹），标题保留自己的 id；同页内容相同的按出现次序加 `-2`、`-3`。内容不变 id 就不变；在它前面插一份相同内容会让后缀错位，这是已知的边界。走查只加属性，不产生文字，页面文字不受影响。
+浏览器里走一遍正文，给没有 id 的候选按内容算稳定 id（`dc-` 加内容指纹），标题保留自己的 id；同页内容相同的按出现次序加 `-2`、`-3`：
 
-{/* ref file="../packages/comments/src/site/browser/annotate.ts" lines="56-72" hash="b79518cf93ae" blob="54bd19da4787" */}
+<StableIds />
 
 不在候选块里的单放链接、按钮、画布这类也能批，id 用单独的前缀 `dc-s-` 与序号，不改变候选已经分到的 id。
 
 ## 正文改了以后：推算落点
 
-正文每次变化（`CommentsDock` 观察整个文档的 DOM 变化，自己写的属性与自己的界面不算），都重新走一遍可批元素、重算页面文字，逐串推算落点。元素锚点按 id 找；划字锚点拿快照和现在的页面文字算逐字差异，再推算首尾。选一种改动看看：
+图上第 4 号。正文每次变化（`CommentsDock` 观察整个文档的 DOM 变化，自己写的属性与自己的界面不算），都重新走一遍可批元素、重算页面文字，逐串推算落点。元素锚点按 id 找；划字锚点拿快照和现在的页面文字算逐字差异，再推算首尾。选一种改动看看：
 
 <WhereItLands />
 
@@ -121,18 +124,17 @@ anchor: "{\"quote\":\"第二段话。\",\"start\":15,\"end\":20,\"snapshot\":\"�
 
 - 右下角工具条：可写时有「批注」开关；「评论」按钮弹出本页评论收件箱，按「正文里」「整页」「找不到原文」筛，可写时底部能批整页
 - 点黄条、点高亮的字、或在收件箱点一行：被批的那一块正下方浮出这一串，不挤动正文；Esc 或点别处收起
+- 地址带 `?comment=<评论串 id>` 时（gwb-collab 通知里评论的链接就是这样拼的），打开页面就浮出这一串，和在收件箱点那一行一样；这一页上没有那一串就不管
 - 被批的元素不铺底色，正文栏左边外侧画一道和它上下对齐的竖黄条；划的字用浏览器的 CSS Custom Highlight API 高亮（注册名 `docsite-comment`）
 - 全站评论页 `/comments` 是只读表格，一行一串，按最近有人说话排；那里不量落点，位置只按锚点的种类写
 
-## 接进站点
+## 分层与谁在用它
 
 建站、装完依赖后，建站器（平台包的 `addBaseFeatures`）把本包 `template/` 补进站点 `app/features/comments/`：全站评论页兼写入路由、侧栏入口、样式与正文高亮。评论目录不进 Tailwind 的源码扫描：扫到的文件一变，dev 下整页刷新，推送连接与页面状态都断掉。
 
 {/* ref file="../packages/comments/template/styles.css" lines="3-5" hash="45c5688bc0d3" blob="2df3d9654916" */}
 
-平台模板的页面路由用 `pageThreadsOf`、`commentsAccessOf`、`CommentsDock`，正文组件加 `commentScopeProps`，头像用 identity 的 `Avatar` 包一层传给 `AvatarComponent`（怎么接归 god-docsite 页）。
-
-{/* tree dir="../packages/comments/src" depth="2" hash="964039ca0c71" */}
+{/* tree dir="../packages/comments/src" depth="2" hash="a7f513982ddb" */}
 
 | 层 | 导出 | 做什么 |
 | --- | --- | --- |
@@ -141,9 +143,6 @@ anchor: "{\"quote\":\"第二段话。\",\"start\":15,\"end\":20,\"snapshot\":\"�
 | `site/` | `@godcreator/comments/site` | `CommentsDock`、`CommentThread`、`CommentsTable`、`commentsAccessOf`、`commentScopeProps`；浏览器里的页面文字、稳定 id、落点推算在 `site/browser/`，不单独导出 |
 | `site/` 服务端 | `@godcreator/comments/site/server` | `handleCommentWrite`、`pageThreadsOf`、`threadsByPageOf`、`commentIntents` |
 
-## 谁在用它
+层之间的方向与不许有环由 `tests/dependency-rules.cjs` 检查；comments 只依赖 identity。
 
-- 平台模板（god-docsite 的 `template/`）：页面路由 `pageThreadsOf`、`commentsAccessOf`、`CommentsDock`；`app/lib/content.tsx` 的 `commentScopeProps` 与类型 `CommentAvatar`
-- collab：`CommentsDock`、`commentScopeProps`、`handleCommentWrite`、`pageThreadsOf`、`commentsAccessOf`、`commentIntents`、`readCommentThreads`、`pageAddressOf`（通知里评论的链接）
-- gwb-docsite 的评论命令：`readCommentThreads`、类型 `CommentFileOnDisk`
-- gwb-collab 的收件箱：`readCommentThreads`
+用它的四方就是总图右列。平台模板（god-docsite 的 `template/`）页面路由用 `pageThreadsOf`、`commentsAccessOf`、`CommentsDock`，正文组件加 `commentScopeProps`，头像用 identity 的 `Avatar` 包一层传给 `AvatarComponent`（怎么接归 god-docsite 页）；collab 的任务页与记录页把评论的 intent 转给 `handleCommentWrite`，站点接的也是那几样（`CommentsDock`、`commentScopeProps`、`pageThreadsOf`、`commentsAccessOf`、`commentIntents`），通知里评论的链接用 `pageAddressOf`；gwb-docsite 的评论命令与 gwb-collab 的收件箱都直接 `readCommentThreads` 读整个目录（图上第 5 号），前者还用类型 `CommentFileOnDisk`。
