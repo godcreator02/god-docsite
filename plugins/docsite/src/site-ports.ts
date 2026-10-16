@@ -16,6 +16,15 @@ function portsOf(doc: unknown): Record<string, number> {
   return doc as Record<string, number>
 }
 
+/** 上次的端口被占时，再查几次、每次之间等多久；测试里换成不等的 */
+export type PortReleaseWait = { retries: number; sleep: () => Promise<void> }
+
+/**
+ * 插件重新加载时内核不等旧实例停完开发服务（taskkill 整棵进程树要一两秒）就加载新实例，新实例紧接着来查端口；
+ * 所以被占了先每 0.5 秒再查一次、最多 10 秒，旧进程放开端口就沿用
+ */
+const portReleaseWait: PortReleaseWait = { retries: 20, sleep: () => new Promise((resolve) => setTimeout(resolve, 500)) }
+
 /** 每个站上次用的端口，存在 gwb-data 里；几个站同时启动时排队写，后写的不覆盖先写的 */
 export class SitePorts implements SitePortMemory {
   private writes: Promise<void> = Promise.resolve()
@@ -23,11 +32,22 @@ export class SitePorts implements SitePortMemory {
   constructor(
     private readonly store: SitePortsStore,
     private readonly isPortFree: (port: number) => Promise<boolean>,
+    private readonly releaseWait: PortReleaseWait = portReleaseWait,
   ) {}
 
   async preferredPortOf(dir: string): Promise<number | null> {
     const port = portsOf(await this.store.readDoc(sitePortsDocKey))[siteKeyOf(dir)]
-    return port !== undefined && (await this.isPortFree(port)) ? port : null
+    if (port === undefined) return null
+    return (await this.becomesFree(port)) ? port : null
+  }
+
+  private async becomesFree(port: number): Promise<boolean> {
+    if (await this.isPortFree(port)) return true
+    for (let retry = 0; retry < this.releaseWait.retries; retry += 1) {
+      await this.releaseWait.sleep()
+      if (await this.isPortFree(port)) return true
+    }
+    return false
   }
 
   remember(dir: string, port: number): Promise<void> {

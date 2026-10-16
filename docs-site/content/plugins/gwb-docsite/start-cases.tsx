@@ -1,6 +1,6 @@
 'use client';
 /**
- * StartCases：对一个站调一次 start 的七种情况。上面是 gwb-data 的 site-ports（前后各一行）、
+ * StartCases：对一个站调一次 start 的八种情况。上面是 gwb-data 的 site-ports（前后各一行）、
  * 中间是 SiteHost.start 的五步（哪一步下结论、第 ④ 步启动的命令）、下面是交回与之后的状态。数据都在 start-cases.data.mjs。
  */
 import type { JSX } from 'react';

@@ -68,19 +68,37 @@ export const cases = [
   {
     id: 'port-taken',
     label: '上次的端口被占了',
-    text: '14001 被别的程序占了，这次不带 --port，让站点重新挑，跑起来以后记下新的端口，下次先试它。',
+    text: '14001 被别的程序占了，每 0.5 秒再查一次，10 秒后还被占着，这次就不带 --port，让站点重新挑，跑起来以后记下新的端口，下次先试它。',
     portsBefore: { port: 14001, occupancy: 'taken' },
     portsAfter: { port: 14003, note: '记下 14003' },
     steps: [
       { state: 'pass', note: '不在运行，也没在启动' },
       { state: 'pass', note: '核对通过' },
-      { state: 'pass', note: '14001 被占 → 不给端口' },
+      { state: 'pass', note: '14001 等了 10 秒还被占 → 不给端口' },
       { state: 'pass', note: '站点重新挑，报出 http://127.0.0.1:14003' },
       { state: 'pass', note: '记下 14003' },
     ],
     command: 'pnpm dev',
     result: { error: false, value: '{ url: "http://127.0.0.1:14003", pid: 3, alreadyRunning: false }' },
     after: [{ state: 'running', url: 'http://127.0.0.1:14003', error: null }],
+  },
+  /* ref file="../plugins/docsite/tests/site-ports.test.ts" lines="41-47" hash="07fd55967cd0" blob="03e396ba7210" */
+  {
+    id: 'reload',
+    label: '插件重新加载',
+    text: '升级或重载插件时，内核不等旧实例停完开发服务就加载新实例，新实例马上来查端口，旧进程这时还占着 14001。每 0.5 秒再查一次，旧进程停完、放开 14001 后就带 --port 14001 启动，地址不变。',
+    portsBefore: { port: 14001, occupancy: 'taken' },
+    portsAfter: { port: 14001, note: '还是 14001，不重写' },
+    steps: [
+      { state: 'pass', note: '新实例里还没有这个站' },
+      { state: 'pass', note: '核对通过' },
+      { state: 'pass', note: '14001 还被旧进程占着 → 等它空出来 → --port 14001' },
+      { state: 'pass', note: '报出的端口和给的相同' },
+      { state: 'pass', note: '记下 14001' },
+    ],
+    command: 'pnpm dev --port 14001',
+    result: { error: false, value: '{ url: "http://127.0.0.1:14001", pid: 1, alreadyRunning: false }' },
+    after: [{ state: 'running', url: 'http://127.0.0.1:14001', error: null }],
   },
   /* ref file="../plugins/docsite/tests/site-host.test.ts" lines="88-112" hash="221b354e4e54" blob="811d1530d81d" */
   {

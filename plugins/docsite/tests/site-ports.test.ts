@@ -4,16 +4,23 @@ import { SitePorts, sitePortsDocKey } from '../src/site-ports.js'
 
 const siteDir = path.resolve('/projects/demo/site')
 
+const retries = 3
+
 function portsWith(initial: unknown, free: (port: number) => boolean = () => true) {
   const docs = new Map<string, unknown>(initial === undefined ? [] : [[sitePortsDocKey, initial]])
+  const probes: number[] = []
   const ports = new SitePorts(
     {
       readDoc: async (doc) => docs.get(doc),
       writeDoc: async (doc, value) => void docs.set(doc, value),
     },
-    async (port) => free(port),
+    async (port) => {
+      probes.push(port)
+      return free(port)
+    },
+    { retries, sleep: async () => undefined },
   )
-  return { ports, docs }
+  return { ports, docs, probes }
 }
 
 describe('每个站上次用的端口', () => {
@@ -24,10 +31,25 @@ describe('每个站上次用的端口', () => {
     expect(await ports.preferredPortOf(siteDir.toUpperCase())).toBe(23456)
   })
 
-  it('上次的端口被占了回 null', async () => {
-    const { ports } = portsWith(undefined, () => false)
+  it('上次的端口一直被占着：再查满次数后回 null', async () => {
+    const { ports, probes } = portsWith(undefined, () => false)
     await ports.remember(siteDir, 23456)
     expect(await ports.preferredPortOf(siteDir)).toBeNull()
+    expect(probes).toEqual(Array(retries + 1).fill(23456))
+  })
+
+  it('上次的端口在等的时候空出来了（插件重新加载，旧实例的开发服务还没停完）：沿用它', async () => {
+    let probeCount = 0
+    const { ports } = portsWith(undefined, () => ++probeCount > 2)
+    await ports.remember(siteDir, 23456)
+    expect(await ports.preferredPortOf(siteDir)).toBe(23456)
+    expect(probeCount).toBe(3)
+  })
+
+  it('没记过不查端口', async () => {
+    const { ports, probes } = portsWith(undefined)
+    expect(await ports.preferredPortOf(siteDir)).toBeNull()
+    expect(probes).toEqual([])
   })
 
   it('几个站同时记，一个都不丢', async () => {
