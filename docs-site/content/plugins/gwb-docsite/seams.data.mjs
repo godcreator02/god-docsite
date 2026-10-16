@@ -1,0 +1,169 @@
+/**
+ * DocsiteSeams（「gwb-docsite：文档站插件」那一页开头的接缝图）的内容：插件夹在工作台、平台包、站点开发服务、
+ * gwb-collab 之间，各经什么接。坐标与图标在 seams.tsx 的 SeamLayout 里，这里只有内容；名字以代码里的导出名为准。
+ * 本页后面各节开头按接缝编号引用这张图。
+ */
+import { defineSeamGraph } from '@godcreator/explainer';
+
+export const docsiteSeams = defineSeamGraph({
+  id: 'gwb-docsite-seams',
+  title: 'gwb-docsite 的接缝图',
+  intro:
+    '中间是插件自己的五个能力，左边是它 inject 的工作台服务与同样注入这份服务的 gwb-collab，' +
+    '右边是它加载的包（上）与它管的站点开发服务子进程（下）。',
+  frameLabel: '模块',
+  modules: [
+    {
+      id: 'workbench',
+      name: 'gwb 工作台',
+      pkg: 'gwb-kernel + 工作台插件',
+      role: null,
+      outside: true,
+      blurb: '插件运行在上面的宿主。命令、设置、数据、说明书各是工作台的一个服务，插件在 apply 里 inject 它们完成全部接线。',
+      caps: [
+        { id: 'skills-service', name: '说明书', ident: 'gwbSkills' },
+        { id: 'commands-service', name: '命令服务', ident: 'gwbCommands' },
+        { id: 'settings-service', name: '设置', ident: 'identity-code · sites' },
+        { id: 'data-service', name: '数据', ident: 'site-ports' },
+      ],
+    },
+    {
+      id: 'gwb-collab',
+      name: 'gwb-collab',
+      pkg: 'plugins/collab',
+      role: null,
+      outside: true,
+      blurb: '另一个插件，协作站也经本插件建与托管。它自己的页讲它怎么用这些方法。',
+      caps: [{ id: 'collab-user', name: '协作站的建站与托管', ident: 'inject gwbDocsite' }],
+    },
+    {
+      id: 'gwb-docsite',
+      name: 'gwb-docsite',
+      pkg: 'plugins/docsite',
+      role: 'violet',
+      outside: false,
+      blurb: '把平台包的东西接到工作台上的一层：命令与服务、建站与加功能、托管站点的开发服务、往运行中的站点推送与写评论。',
+      caps: [
+        { id: 'service-cap', name: '服务 gwbDocsite', ident: 'GwbDocsiteApi · DocsiteService' },
+        { id: 'commands-cap', name: '命令 docsite.* 与 docfirst.create', ident: 'registerCommands' },
+        { id: 'host-cap', name: '托管', ident: 'HostedSites · SiteHost · SitePorts' },
+        { id: 'push-cap', name: '推送与评论', ident: 'push · docsite.comment.*' },
+        { id: 'scaffold-cap', name: '建站与加功能', ident: 'createDocsite · addSiteFeature' },
+      ],
+    },
+    {
+      id: 'packages',
+      name: '平台包与功能包',
+      pkg: '@godcreator/god-docsite + 6 个功能包',
+      role: 'blue',
+      outside: false,
+      blurb:
+        '站点怎么建、长什么样都定在包里。插件运行时加载装在自己旁边的建站器；平台核心、identity、comments 按值打包进产物；' +
+        'docfirst、code-pin、trajectory、explainer 一行不 import，只按路径读它们的 package.json 与 template/。',
+      caps: [
+        { id: 'scaffold-pkg', name: '平台建站器', ident: '@godcreator/god-docsite/scaffold' },
+        { id: 'bundled-pkg', name: '打包进插件的', ident: '平台核心 · identity · comments' },
+        { id: 'readonly-pkg', name: '只按路径读文件的', ident: 'docfirst · code-pin · trajectory · explainer' },
+      ],
+    },
+    {
+      id: 'dev-server',
+      name: '站点开发服务',
+      pkg: '各站点的 pnpm dev',
+      role: 'amber',
+      outside: false,
+      blurb:
+        '托管着的每个站是一个子进程。启动前核对不过、进程退出都记成 failed；建站与加功能的首页检查用 GET /，' +
+        '推送走 /__docsite/feed/<频道>，写评论走 /comments.data。',
+      caps: [
+        { id: 'dev-process', name: '子进程 pnpm dev', ident: 'taskkill /T 停整棵树' },
+        { id: 'home-page', name: '首页检查', ident: 'GET /' },
+        { id: 'feed', name: '推送频道', ident: '/__docsite/feed/<频道>' },
+        { id: 'comments-route', name: '评论写入路由', ident: '/comments.data' },
+      ],
+    },
+  ],
+  entries: [],
+  seams: [
+    {
+      n: 1,
+      name: '注册命令',
+      a: ['commands-service'],
+      b: ['commands-cap'],
+      iface: 'inject gwbCommands → commands.register()：docsite.* 十四条 + docfirst.create',
+      convention: false,
+      via: 'code',
+      text: '命令服务是 inject 进来的，插件在它上面注册 docsite.* 十四条命令与 docfirst.create；gwbSkills 是可选的注入，有它时才把随包的 skills/ 目录注册给工作台。',
+    },
+    {
+      n: 2,
+      name: '命令与服务是同一份实现',
+      a: ['commands-cap'],
+      b: ['service-cap'],
+      iface: 'registerCommands({ docsite: api }) 与 new DocsiteService(ctx, api) 用同一份 api',
+      convention: false,
+      via: 'code',
+      text: '命令是同一份 GwbDocsiteApi 外面包一层参数校验，命令与服务的行为不会分叉；每个方法的参数与回执表在说明书 docsite 的「服务 gwbDocsite」一节。',
+    },
+    {
+      n: 3,
+      name: 'gwb-collab 注入服务',
+      a: ['collab-user'],
+      b: ['service-cap'],
+      iface: "inject: ['gwbDocsite'] → GwbDocsiteApi",
+      convention: false,
+      via: 'code',
+      text: 'gwb-collab 经服务调 init、addFeature 建协作站，调 add、remove 随项目列表登记，onStatus 接站点转 running 就重推，join、identityCode 把本 home 加进人员列表；本插件自己的 docfirst.create 也只用其中的 init 与 addFeature。',
+    },
+    {
+      n: 4,
+      name: '运行时加载建站器',
+      a: ['scaffold-cap'],
+      b: ['scaffold-pkg'],
+      iface: 'createRequire(插件 package.json).resolve(地址) → import(变量)：createSite · addBaseFeatures · addFeature · isPortFree',
+      convention: false,
+      via: 'code',
+      text: '建站器不打包进插件：它按自己模块的位置找平台包的 template/，打包进来就找不到。插件从自己的包根解析 @godcreator/god-docsite/scaffold 的地址、经 import(变量) 加载；地址是算出来的，发版检查才不把它当成产物里 import 的包名。',
+    },
+    {
+      n: 5,
+      name: '托管记在设置与数据里',
+      a: ['host-cap'],
+      b: ['settings-service', 'data-service'],
+      iface: '设置 sites（站点目录列表）· gwbData 文档 site-ports（{ 站点目录: 端口 }）',
+      convention: false,
+      via: 'code',
+      text: '常驻的站记在设置 sites 里，一行一个绝对路径；每个站上次用的端口记在 gwb-data 的文档 site-ports 里。进程的启停不落盘，只在这次运行的 SiteHost 里。',
+    },
+    {
+      n: 6,
+      name: '启动开发服务',
+      a: ['host-cap'],
+      b: ['dev-process'],
+      iface: 'spawn pnpm dev [--port <端口>]，环境变量 DOCSITE_IDENTITY_CODE 与 DOCSITE_FEED_TOKEN',
+      convention: false,
+      via: 'code',
+      text: '托管就是插件替站点目录跑 pnpm dev：启动时经环境变量交给开发服务本 home 的身份码与这次现生成的推送令牌，没有身份码站点只读。端口怎么定见「一次 start 怎么走」。',
+    },
+    {
+      n: 7,
+      name: '推送',
+      a: ['push-cap'],
+      b: ['feed'],
+      iface: 'POST /__docsite/feed/<频道>，请求头 x-docsite-token',
+      convention: false,
+      via: 'code',
+      text: 'push 把一份 JSON POST 到运行中站点的推送路由，请求头带这次的令牌；站点每个频道只留最新一份、重启就没了，所以用推送的插件要在站点转成 running 时重推一次——这就是服务里有 onStatus 的原因。',
+    },
+    {
+      n: 8,
+      name: '写评论',
+      a: ['push-cap'],
+      b: ['comments-route'],
+      iface: 'POST /comments.data，请求头 Origin 写站点地址',
+      convention: false,
+      via: 'code',
+      text: '写评论（docsite.comment.*）不自己写文件，把表单 POST 到运行中站点的评论写入路由，与网页评论面板走同一套规则；读评论（docsite.comments）直接读站点目录的评论文件，不要站点在运行。',
+    },
+  ],
+});

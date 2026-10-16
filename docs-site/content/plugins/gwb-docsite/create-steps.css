@@ -1,0 +1,32 @@
+/*
+ * CreateSteps 自己的画面：左边站目录的树 + 右边这一步的命令或写进去的内容，窄屏竖排。
+ * 卡片、胶囊、状态点、终端与颜色变量（--dx-*）由 @godcreator/explainer 提供，颜色只取那套变量。
+ */
+.cs-stage { display: grid; gap: 8px; }
+.cs-pill-row { display: flex; }
+
+.cs-columns { display: grid; grid-template-columns: 1.15fr 1fr; gap: 10px; align-items: start; }
+@container (max-width: 639px) {
+  .cs-columns { grid-template-columns: 1fr; }
+}
+
+.cs-tree { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; }
+.cs-tree li { display: flex; align-items: baseline; gap: 7px; font-size: 12.5px; min-width: 0; }
+.cs-tree li[data-depth='1'] { padding-left: 18px; }
+.cs-tree li[data-depth='2'] { padding-left: 36px; }
+.cs-tree-name { font-family: var(--dx-mono); font-size: 12px; overflow-wrap: anywhere; }
+.cs-tree li[data-dir='true'] > .cs-tree-name { color: var(--dx-fg); font-weight: 600; }
+/* 这一步新出现的行整行用 good 色强调；改写过的用 info 色 */
+.cs-tree li[data-new='true'] > .cs-tree-name,
+.cs-tree li[data-new='true'] > .cs-tree-note { color: var(--dx-good); font-weight: 600; }
+.cs-tree li[data-modified='true'] > .cs-tree-name { color: var(--dx-info); font-weight: 600; }
+.cs-tree-note { font-size: 11.5px; color: var(--dx-dim); overflow-wrap: anywhere; }
+.cs-tree li[data-new='true'] > .dx-pill { flex: none; }
+.cs-tree-blank { width: 8px; flex: none; }
+
+.cs-lines { display: grid; gap: 5px; }
+.cs-line { font-size: 12.5px; white-space: pre-wrap; overflow-wrap: anywhere; }
+.cs-line[data-tone='none'] { color: var(--dx-dim); }
+.cs-line[data-tone='good'] { color: var(--dx-good); }
+.cs-line[data-tone='bad'] { color: var(--dx-bad); }
+.cs-line[data-tone='code'] { font-family: var(--dx-mono); font-size: 12px; color: var(--dx-fg); }

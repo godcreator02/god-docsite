@@ -1,0 +1,36 @@
+/*
+ * SiteStates 自己的画面：上面的状态图与下面的 list 行。
+ * 颜色只用 --dx-* 变量：箭头与框按事件/状态取 info（人为发出的命令）或 bad（进程自己出的事）与三态色。
+ */
+.ss-case { display: grid; gap: 12px; }
+
+.ss-diagram { overflow-x: auto; }
+.ss-svg { display: block; width: 100%; min-width: 560px; height: auto; }
+
+.ss-edge path { fill: none; stroke-width: 1.6; }
+.ss-edge[data-tone='info'] path { stroke: var(--dx-info); }
+.ss-edge[data-tone='bad'] path { stroke: var(--dx-bad); }
+.ss-edge[data-lit='true'] path { stroke-width: 2.6; }
+.ss-edge[data-dim='true'] { opacity: .32; }
+.ss-arrowhead[data-tone='info'] { fill: var(--dx-info); }
+.ss-arrowhead[data-tone='bad'] { fill: var(--dx-bad); }
+
+.ss-edge-label { font-size: 12.5px; fill: var(--dx-fg); }
+.ss-edge[data-lit='true'] .ss-edge-label { font-weight: 600; }
+.ss-edge[data-dim='true'] .ss-edge-label,
+.ss-edge[data-dim='true'] .ss-edge-note { opacity: 1; }
+.ss-edge-note { font-size: 11px; fill: var(--dx-dim); }
+
+.ss-box rect { fill: var(--dx-surface); stroke-width: 1.4; }
+.ss-box[data-state='stopped'] rect { stroke: var(--dx-pending); }
+.ss-box[data-state='running'] rect { stroke: var(--dx-good); }
+.ss-box[data-state='failed'] rect { stroke: var(--dx-bad); }
+.ss-box[data-lit='true'] rect { stroke-width: 2.6; }
+.ss-box-label { font-size: 13px; font-weight: 600; fill: var(--dx-fg); font-family: var(--dx-mono); }
+
+.ss-list { display: grid; gap: 6px; }
+.ss-row { display: flex; align-items: baseline; gap: 10px; font-size: 13px; min-width: 0; }
+.ss-key { color: var(--dx-dim); flex: none; width: 4em; }
+.ss-value { font-family: var(--dx-mono); font-size: 12.5px; overflow-wrap: anywhere; white-space: pre-wrap; }
+.ss-value[data-empty='true'] { color: var(--dx-dim); }
+.ss-thrown { color: var(--dx-bad); }
