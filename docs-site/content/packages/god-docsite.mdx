@@ -1,6 +1,6 @@
 ---
 title: god-docsite：平台包
-description: 站点的公共部分：模板与建站器写出站点，按功能目录现算五份汇总文件；运行时把 MDX、TSX、HTML 三种页面合进一棵页面树，提供布局与侧栏、搜索、llms、推送通道与术语标注；vite 插件管端口、可信来源与内容目录。功能包经站点 app/features/ 里的文件接入，平台包不依赖任何功能包
+description: 站点的公共部分：模板与建站器写出站点，每次按功能目录重新生成五份汇总文件；运行时把 MDX、TSX、HTML 三种页面合进一棵页面树，提供布局与侧栏、搜索、llms、推送通道与术语标注；vite 插件管端口、可信来源与内容目录。功能包经站点 app/features/ 里的文件接入，平台包不依赖任何功能包
 icon: LayoutTemplate
 ---
 
@@ -44,7 +44,7 @@ import { OriginCases } from './god-docsite/origin-cases'
 | `./vite` | `src/vite/` vite 插件 | 站点 `vite.config.ts` |
 | `./mdx` | `src/mdx/` 术语标注的 remark 插件 | 站点 `app/lib/mdx-plugins.ts` |
 | `./server` | `src/site/*.server.ts` 等服务端部分 | 站点路由文件、功能包模板 |
-| `./react` | `src/site/` 浏览器端组件 | 站点路由文件、功能包模板 |
+| `./react` | `src/site/` 浏览器端组件 | 站点路由文件、功能包模板；TSX 页面取点了能放大的 `ImageZoom` |
 | `./tex` | TSX 页面里写公式的 `Tex` | 站点的 TSX 页面 |
 | `./styles.css` | 平台样式 | 站点 `app/app.css` |
 | `docsite-serve`（bin） | `src/cli/serve.ts` 发布版启动命令 | 站点 `package.json` 的 `scripts.start` |
@@ -65,7 +65,7 @@ import { OriginCases } from './god-docsite/origin-cases'
 
 {/* ref file="../packages/god-docsite/template/app/routes.ts" lines="4-18" hash="ce6e863ba835" blob="68a61b6a0cdc" */}
 
-## 建站器：从功能目录现算汇总文件
+## 建站器：按功能目录生成汇总文件
 
 `createSite` 往空目录里复制模板，把模板 `package.json` 里的 `{{version}}` 换成依赖写法——registry（发版后从 registry 装，写 `^<版本>`）、link（直接用仓里的包）、file（`pnpm pack` 的 tarball）三种——再写站名、`people.json`、`pnpm-workspace.yaml`，最后写出空的汇总文件。它不装依赖、不起服务。
 
@@ -79,7 +79,7 @@ import { OriginCases } from './god-docsite/origin-cases'
 
 {/* ref file="../packages/god-docsite/src/node/scaffold/feature-index.ts" lines="7-20" hash="a9cdf57d595c" blob="778f5b87a5f7" */}
 
-`regenerateFeatureIndex` 是核心：扫 `app/features/` 下的子目录，含四种文件之一的才算功能，按名字排序；有 `mdx.ts` 的去站点依赖里找功能名对得上的那个包，读它 `package.json` 的 `godDocsite.collections`；集合名要全站唯一，与 `source.config.ts` 自己的集合也不能重名；然后重写五份汇总文件。汇总文件每次都按目录现算，所以加一个功能不用改模板，平台包也不用知道有哪些功能包。下面把本站建出来的六步依次看一遍：
+`regenerateFeatureIndex` 是核心：扫 `app/features/` 下的子目录，含四种文件之一的才算功能，按名字排序；有 `mdx.ts` 的去站点依赖里找功能名对得上的那个包，读它 `package.json` 的 `godDocsite.collections`；集合名要全站唯一，与 `source.config.ts` 自己的集合也不能重名；然后重写五份汇总文件。汇总文件每次都按目录重新生成，所以加一个功能不用改模板，平台包也不用知道有哪些功能包。下面把本站建出来的六步依次看一遍：
 
 <FeatureIndexSteps />
 
@@ -99,7 +99,7 @@ import { OriginCases } from './god-docsite/origin-cases'
 - `format` 是布局代号，现在是 `1`。布局再变时加一，读到不认识的号直接报错、写明照模板手动升级，不自动搬
 - 写坏了就报错，写明哪一项不对：不是 JSON、`kind` 不在三个值里、`format` 不对、多了认不出的键
 
-`createSite` 不写它：建站的一方建完站接着调 `writeSiteIdentity` 写一次，之后归站点。gwb-docsite 的 `docsite.site.init`、`docfirst.create`、gwb-collab 的 `collab.site.init` 分别写 `base`、`docs`、`collab`。gwb-docsite 托管前、gwb-collab 认协作仓都只看它，没有这个文件的站（旧地基 docsite-kit 的站、有身份文件之前建的站）不认。
+`createSite` 不写它：建站的一方建完站接着调 `writeSiteIdentity` 写一次，之后归站点。gwb-docsite 的 `docsite.site.init`、`docfirst.create`、gwb-collab 的 `collab.site.init` 分别写 `base`、`docs`、`collab`。gwb-docsite 托管前、gwb-collab 认协作仓都只看它，没有这个文件的站（旧平台 docsite-kit 建的站、有身份文件之前建的站）不认。
 
 {/* ref file="../packages/god-docsite/src/node/site-identity.ts" lines="4-13" hash="8b4d76c28339" blob="a260faf0383b" */}
 
@@ -136,13 +136,13 @@ import { OriginCases } from './god-docsite/origin-cases'
 
 ## 站点上下文
 
-站点的 `app/lib/site.server.ts` 造一个 `site`，平台与功能包的 loader、action 都经参数拿到它，自己不 import 站点代码。字段：站点目录、`mode`（`dev` / `start`）、loader 结果 `source`（平台只用到它的四个方法：`getPage`、`getPages`、`getPageTree`、`serializePageTree`，页面是三种来源之一）、内容目录、评论目录与评论条目，以及每次调用都现读的四个函数——人员列表、本机身份（start 一律只读）、可信来源、推送通道某频道现在的值。功能包模板里的 `site.server.ts` 从它组装本功能要的上下文。
+站点的 `app/lib/site.server.ts` 造一个 `site`，平台与功能包的 loader、action 都经参数拿到它，自己不 import 站点代码。字段：站点目录、`mode`（`dev` / `start`）、loader 结果 `source`（平台只用到它的四个方法：`getPage`、`getPages`、`getPageTree`、`serializePageTree`，页面是三种来源之一）、内容目录、评论目录与评论条目，以及每次调用都重新读取的四个函数——人员列表、本机身份（start 一律只读）、可信来源、推送通道某频道现在的值。功能包模板里的 `site.server.ts` 从它组装本功能要的上下文。
 
 {/* ref file="../packages/god-docsite/src/site/site-context.ts" lines="6-66" hash="7172c6ce4439" blob="d46a41fec05d" */}
 
 ## 推送通道
 
-这是和 gwb-docsite 之间的外部契约：启动方经环境变量 `DOCSITE_FEED_TOKEN` 给站点进程一个令牌，推的一方 POST JSON 到频道的地址、请求头带同一个令牌，浏览器订阅事件流跟着变。从启动到页面变化分五步（频道例子用 `collab`——协作站的通知整份推到这个频道）：
+这是和 gwb-docsite 之间的外部契约：启动方经环境变量 `DOCSITE_FEED_TOKEN` 给站点进程一个令牌，推送的一方 POST JSON 到频道的地址、请求头带同一个令牌，浏览器订阅事件流跟着变。从启动到页面变化分五步（频道例子用 `collab`——协作站的通知整份推到这个频道）：
 
 <FeedSteps />
 
@@ -163,16 +163,16 @@ import { OriginCases } from './god-docsite/origin-cases'
 
 {/* ref file="../packages/god-docsite/src/vite/index.ts" lines="19-27" hash="36bdf15f538a" blob="e519c0e5039c" */}
 
-可信来源 `siteOrigin`：写入请求的 Origin 头要和它完全一样，差一点就被 403 拒绝（`写入只接受来自 <origin> 的请求`，核对在 identity 包的 `authorizeWrite`，评论、任务这些写入 action 都先过它）。它按环境变量算，五种情况各看一遍：
+可信来源 `siteOrigin`：写入请求的 Origin 头要和它完全一样，有一点不同就被 403 拒绝（`写入只接受来自 <origin> 的请求`，核对在 identity 包的 `authorizeWrite`，评论、任务这些写入 action 都先经它核对）。它按环境变量算，五种情况各看一遍：
 
 <OriginCases />
 
 ## 其余能力
 
-- **布局与侧栏**：整站布局是 fumadocs 的 `DocsLayout`；目录切换按钮按 `meta.json` 写了 `"root": true` 的文件夹生成，组外的页面收成以站名命名的一组；在任务、全站评论这类不在页面树里的功能页面上，侧栏停在最近看过的那一组。站名下一横排是搜索按钮与各功能的侧栏入口。
-- **首页**：`app/routes/home.tsx` 在整站布局之外、占着 `/`，内容目录根上不能再写 index 页；「文档」链接指向第一组的第一页。
+- **布局与侧栏**：整站布局是 fumadocs 的 `DocsLayout`；目录切换按钮按 `meta.json` 写了 `"root": true` 的文件夹生成，不在任何一组里的页面归进以站名命名的一组；在任务、全站评论这类不在页面树里的功能页面上，侧栏显示最近看过的那一组。站名下一横排是搜索按钮与各功能的侧栏入口。
+- **首页**：`app/routes/home.tsx` 在整站布局之外、地址是 `/`，内容目录根上不能再写 index 页；「文档」链接指向第一组的第一页。
 - **TSX 与 HTML 页面**：TSX 页的标题、描述、搜索文字来自它导出的 `meta`；HTML 页的标题取 `<title>`，只有写了 `id` 的标题才进目录与搜索锚点。
-- **内容目录的放法**：组文件夹只放页面、`meta.json`、页面的同名文件夹、下划线开头的文件夹与子组，同名文件夹里不放页面；vite 插件在 build 与 dev 启动时检查，放错了停下。
+- **内容目录的放法**：组文件夹只放页面、`meta.json`、页面的同名文件夹、下划线开头的文件夹与子组，同名文件夹里不放页面；vite 插件在 build 与 dev 启动时检查，放错了就报错、不启动。
 - **搜索**：中文站点把 fumadocs 搜索的容错与命中阈值都设成 0，每个词都要原样出现。
 - **Markdown 与 llms**：每一页都有 Markdown 形式（MDX 走 `getText('processed')`，TSX、HTML 页在来源数据里），`/api/markdown`、`llms.txt`、`llms-full.txt` 用它；构建时只预渲染两份 llms 文本。
 - **术语标注**：站点根的 `glossary.json` 列术语；构建时长词优先、西文要词边界、一篇只标第一次，代码、公式、标题、链接里不标，所以排在 `remark-math` 之后。

@@ -5,8 +5,8 @@ description: MDX 里能直接用的 fumadocs 组件：提示框、卡片、标�
 icon: Blocks
 ---
 
-这一页的组件都不用 import：`Callout`、`Card`、`Cards`，`Tabs`/`Tab`、`Steps`/`Step`、`Accordions`/`Accordion`、`Files`/`Folder`/`File`、`TypeTable`，还有 `Banner`、`InlineTOC`。
-图片自动换成点了能放大的 `ImageZoom`。
+这一页的组件都不用 import：`Callout`、`Card`、`Cards`，`Tabs`/`Tab`、`Steps`/`Step`、`Accordions`/`Accordion`、`Files`/`Folder`/`File`、`TypeTable`，还有 `Banner`、`InlineTOC`、`ImageZoom`。
+Markdown 写法的图片自动换成点了能放大的 `ImageZoom`；直接写 `<img>` 标签的图片不会，要放大就写 `<ImageZoom>`，放大时换高清版加 `zoomSrc`（见[](/docsite/writing#图片)）。
 
 ## 提示框
 
@@ -28,7 +28,7 @@ icon: Blocks
 
 ## 卡片
 
-一组去处用卡片排开，`href` 写站内地址：
+几个要链接过去的页面用一组卡片列出来，`href` 写站内地址：
 
 <Cards>
   <Card title="总览" description="站点由哪些包组成、依赖方向、两个 gwb 插件" href="/docs" />
@@ -76,7 +76,7 @@ icon: Blocks
 
 ## 折叠
 
-不常看的内容收进折叠，点开才显示：
+不常看的内容放进折叠框，点开才显示：
 
 <Accordions>
   <Accordion title="为什么站点模板的文件复制进项目，不留在包里">

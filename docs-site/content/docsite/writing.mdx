@@ -61,7 +61,7 @@ icon: FileText
 </Files>
 
 - **只给一页用的**放进和页面同名的文件夹：`push.mdx` 的组件在 `push/`，开头写 `import { AutoMergeRun } from './push/auto-merge'`；
-  这一页的图在 `writing/`。TSX 页面 `名字.page.tsx`、HTML 页面 `名字.html` 一样配 `名字/`。被页面 import 的正文写成 `_` 开头的 `.mdx`，也放在这里
+  这一页的图在 `writing/`。TSX 页面 `名字.page.tsx`、HTML 页面 `名字.html` 的文件也放在同名文件夹 `名字/` 里。被页面 import 的正文写成 `_` 开头的 `.mdx`，也放在这里
 - **同一组里几页共用的**放进组里 `_` 开头的文件夹：fumadocs 图解的几个 HTML 页共用 `_shared/` 里的脚本和样式
 - **几组都要用的**放站点的 `app/components/`。这种情况很少，放之前先问人
 - **有子页面的页**写成文件夹加 `index.mdx`：`gitea/index.mdx` 是 `/gitea`，它要用组件就放 `gitea/index/`
@@ -83,7 +83,7 @@ icon: FileText
 ```
 
 - `title`：页面标题，也是侧栏与搜索结果里的名字
-- `description`：标题下面的一句话，搜索也收
+- `description`：标题下面的一句话，也能被搜索到
 - `icon`：侧栏里的图标，写 [lucide](https://lucide.dev/icons) 的图标名
 
 ## 标题分几级
@@ -135,7 +135,7 @@ icon: FileText
 
 表格适合列对照，比如三种页面各自的标题从哪来：
 
-| 类型 | 标题从哪来 | 搜索收什么 |
+| 类型 | 标题从哪来 | 搜索范围 |
 | :-- | :-- | :-- |
 | MDX | frontmatter 的 `title` | 全文 |
 | TSX | 导出的 `meta.title` | 标题和描述 |
@@ -185,7 +185,8 @@ $$
 
 ![三种页面进同一棵页面树](./writing/figure.svg)
 
-点图片可以放大看。
+点图片可以放大看。TSX 页面和 MDX 里直接写的 `<img>` 标签不会自动放大，换成平台的 `ImageZoom`：MDX 里不用 import，TSX 页面从 `@godcreator/god-docsite/react` 引入。
+页面上放压缩过的图、放大时才加载高清版的，加 `zoomSrc`：`<ImageZoom src={small} zoomSrc={large} alt="…" />`。
 
 ## 链接
 

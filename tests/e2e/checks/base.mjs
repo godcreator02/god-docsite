@@ -134,6 +134,27 @@ export async function runBaseChecks({ browser, baseUrl, mode, siteDir, feedToken
       return { pass: katex >= 1 && heading?.startsWith('TSX 演示页'), detail: `h1=${heading}，.katex ${katex} 个，点一下计数为 1` }
     })
 
+    await check('TSX 页的 ImageZoom：点图在页内放大，放大的是 zoomSrc 给的高清图', async () => {
+      await page.goto(`${baseUrl}/tsx-demo`, { waitUntil: 'load' })
+      await waitForHydrated(page, '[data-tsx-counter]')
+      const pageImage = page.locator('[data-tsx-zoom-image]')
+      const pageSrc = await pageImage.getAttribute('src')
+      await pageImage.click()
+      // 弹层先放页面上那张，高清图加载完才换上；小 SVG 会被 Vite 内联成 data 地址、看不出文件名，所以等它变得和页面上那张不同
+      const zoomedSrc = await page
+        .waitForFunction(
+          (smallSrc) => {
+            const src = document.querySelector('dialog[open] img[data-rmiz-modal-img]')?.getAttribute('src')
+            return src && src !== smallSrc ? src : null
+          },
+          pageSrc,
+          { timeout: stepTimeoutMs },
+        )
+        .then((handle) => handle.jsonValue())
+      await page.keyboard.press('Escape')
+      return { pass: Boolean(pageSrc), detail: `放大后换成了另一张图（${zoomedSrc.length} 个字符的地址）` }
+    })
+
     if (mode === 'dev') {
       await check('批注模式下点单放的按钮（dev）：批的是这个按钮，按钮不被按下；退出批注后照常能按', async () => {
         await page.goto(`${baseUrl}/tsx-demo`, { waitUntil: 'load' })
