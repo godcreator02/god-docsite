@@ -50,38 +50,42 @@
   | 慢 | 各包里的 `*.slow.test.ts` | 只有显式 `pnpm test:slow`：包里跑本包的，仓根逐个包跑（`--workspace-concurrency=1`），近三分钟 |
   | 全仓·快 | `pnpm test:deps`、`pnpm test:scaffold` | 显式命令，各几秒钟 |
   | 全仓·慢 | `pnpm test:e2e`、`pnpm test:pack` | 显式命令，见下 |
-  | 行为假设 | `plugins/collab` 的 `tests/verified/` | `pnpm test:verified`，只在下面写的四种信号下跑 |
+  | 行为假设 | `plugins/collab` 的 `tests/verified/` | `pnpm test:verified`，只在下面写的几种时候跑 |
 
   慢的标准：真建站、装依赖、构建、启动服务的；或者单独运行这个文件（`pnpm exec vitest run <文件>`）时，vitest 报告里这个文件的耗时（不含启动与 import）超过 2 秒——
   多是每条测试都建临时 git 仓、调几十次 git 或启动子进程的。慢的文件名写成 `*.slow.test.ts`：包里的 `vitest.config.ts` 在 `exclude` 里排除它们，
   `vitest.slow.config.ts` 只收它们，`test:slow` 就是 `vitest run --config vitest.slow.config.ts`。一个文件里快慢混着、把慢的几条挪出去就能让剩下的进快的一级时，
   把那几条挪进单独的 `.slow.test.ts`（只挪，不改断言）。现在有慢测试的包是 code-pin、collab、docfirst、gwb-docsite、gwb-collab；
   给别的包加第一个慢测试时，同时加 `vitest.slow.config.ts` 与 `test:slow`（仓根 `pnpm test:slow` 跳过没有这条脚本的包）。新写的测试照这个标准量一次再定放哪一级
-* 测试按节奏跑：改代码、交回、合并分支的过程中只跑改到的包（`pnpm --filter <包> check`）；改动碰到了某个慢测试测的代码，交回前再跑那个包的
-  `pnpm --filter <包> test:slow`；改了模板再跑 `pnpm test:scaffold`，不跑全量。
-  **全量 `pnpm verify` 只在一整批改动交付之前跑一次**（发版前、推送前、交给人验收前；小改动单独发版不跑，见下面「发版前的检查分两档」）：`pnpm build` → `pnpm check` → `pnpm test:slow` → `pnpm test:deps` → `pnpm test:scaffold` → `pnpm test:e2e`（`--skip-build`，不再重复构建），
+* **跑什么检查只看改到了什么**，不看改了多少、升哪一位版本号；改代码、交回、推送、发版都照这张表，没改到的东西不查：
+
+  | 改到了什么 | 跑什么 |
+  | --- | --- |
+  | 某个包的代码 | 那个包的 `pnpm --filter <包> check`；改了导出或类型，下游包也跑 `check`；碰到慢测试测的代码，再跑那个包的 `test:slow` |
+  | 包里会显示在站点上的行为（组件、路由、样式） | 再 `pnpm build` 后 `pnpm test:e2e --skip-build`，一分半 |
+  | 包的 `package.json` 的 `exports`、`files`、依赖 | 再跑 `pnpm test:pack` |
+  | 平台模板或功能包的 `template/` | 再跑 `pnpm test:scaffold`，几秒 |
+  | 包之间或包内分层的 import | 再 `pnpm build` 后 `pnpm test:deps`，几秒 |
+  | 插件 | 插件的 `check`，碰到慢测试再跑 `test:slow`；再用 `devkit.dev` 装进隔离 home 看一眼。测试站不加载插件、`test:pack` 不打包插件，e2e 与 `test:pack` 对插件查不出东西 |
+  | 升 git，或改了 gwb-collab 的 `src/organization/setup/`、`src/other-repos/fetch/` | 再跑 `plugins/collab` 的 `pnpm test:verified` |
+  | 升大家共用的依赖（fumadocs、react-router、vite、catalog 里的版本） | 全量 `pnpm verify`，再 `pnpm test:pack`：这时哪个包都可能坏 |
+
+  从干净的工作树发版只是因为别的会话有没提交的文件、`devkit.release` 要求工作区干净：检出后只 `pnpm install --frozen-lockfile`，不跑检查，构建与产物核对 `devkit.release` 自己做。
+  全量 `pnpm verify` 是 `pnpm build` → `pnpm check` → `pnpm test:slow` → `pnpm test:deps` → `pnpm test:scaffold` → `pnpm test:e2e`（`--skip-build`，不再重复构建），
   要五六分钟，最耗时的是 `pnpm test:slow`（gwb-collab 一分多钟、gwb-docsite 那条真建站的四十秒）与构建。
   `pnpm test:e2e` 不建站、不装依赖，直接测 full-test，一分钟左右；dev 一轮写评论、任务、临时内容页，start 一轮核对只读（页面上没有写入口、直接提交被拒、文件不变）；
   站里新建的东西都带本次运行编号，每轮跑完删掉，
   最后一项检查 `git status full-test` 和跑之前一样（多出、少了的路径会列出来）。日志与 `report.json` 在 `%TEMP%/god-docsite-e2e/repo-<运行时刻>/`。
   `docs-site/` 里 `pnpm docfirst check`、`pnpm typecheck`、`pnpm build`；
   改了被钉的代码，本仓未提交改动引起的黄灯算红，照 `docs-site` 说明书处理后放进同一个提交
-* **发版前的检查分两档**，按这次要发的改动定：
-
-  | 档 | 什么改动 | 跑什么 |
-  | --- | --- | --- |
-  | 小改动 | 下面几条都满足：只改了一两个包的源码、样式或说明书；没动 `package.json` 的 `exports`、`files`、依赖；没改平台模板与功能包的 `template/`；只升 y | 改到的包 `pnpm --filter <包> check`；改动碰到了慢测试测的代码，再跑那个包的 `test:slow`；改了页面上的交互，再 `pnpm build` 后 `pnpm test:e2e --skip-build`（一分半）。不跑 `pnpm verify` 与 `pnpm test:pack`。从干净的工作树发时只 `pnpm install --frozen-lockfile`，`devkit.release` 自己会构建、核对产物 |
-  | 全量 | 其余所有情况：一整批改动、动了 `exports` / `files` / 依赖、改了模板、改了包之间的接口、升 x | `pnpm verify`，再 `pnpm test:pack` |
-
-  拿不准算哪档就按全量。发 gwb-collab 时另跑 `plugins/collab` 的 `pnpm test:verified`，不分档
-* **全量那档再跑 `pnpm test:pack`**：查只有装成 tarball 才会露出来的问题（包的 `files` 漏了文件、`exports` 指错、依赖没写进 `dependencies`、类型对不上）。
+* `pnpm test:pack` 查只有装成 tarball 才会露出来的问题（包的 `files` 漏了文件、`exports` 指错、依赖没写进 `dependencies`、类型对不上）。
   它把测试站依赖的包 `pnpm pack`、full-test 复制到 `%TEMP%/god-docsite-e2e/pack-<运行时刻>/`、依赖换成 `file:<tarball>` 装好、typegen + tsc，
   再跑和 `pnpm test:e2e` 完全相同的检查；装依赖要一两分钟，日常不跑
 * `plugins/collab` 的 `tests/verified/` 是**已验证的行为假设**（整组织克隆、ahead/behind 语义、文件监视事件）：断言直接针对 git 与
-  watcher 本身，日常不跑。四种信号下跑 `pnpm test:verified`：升 git 或关键依赖、动了 `src/organization/setup/` 或
-  `src/other-repos/fetch/`、发 gwb-collab 前、用户或 agent 明确要求
+  watcher 本身，日常不跑。只在这几种时候跑 `pnpm test:verified`：升 git 或关键依赖、动了 `src/organization/setup/` 或
+  `src/other-repos/fetch/`、用户或 agent 明确要求
 * 发版只用 `devkit.release`，包按依赖序排：第 0 层（god-docsite、identity、explainer、code-pin、trajectory、word-report）→ 第 1 层（comments、doc-export）→
-  第 2 层（collab、docfirst）→ 插件；发前按上面的两档检查。升版本号前先读 skill「gwb-release」
+  第 2 层（collab、docfirst）→ 插件；发前的检查照上面「跑什么检查只看改到了什么」那张表。升版本号前先读 skill「gwb-release」
 * 包发到 npmjs，由 GitHub 仓 `godcreator02/god-docsite` 的 `.github/workflows/publish.yml` 经 trusted publishing 发：`devkit.release` 要求 HEAD 已经推到 GitHub，
   在 HEAD 上建 release、挂上本机打好的包文件，工作流按序号逐个发。各包 `publishConfig` 指向 npmjs、`repository` 指向这个仓、`files` 收进 MIT 的 `LICENSE`。
   各 home 还从 Gitea 装 `@godcreator` 的包，过渡期发版加 `alsoPublishTo` Gitea 的源（`https://git.tianshen02.online:28377/api/packages/godcreator/npm/`）；

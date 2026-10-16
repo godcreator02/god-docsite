@@ -2,7 +2,7 @@
  * ReleaseFlow（「维护」页「发版」一节）的全部数据，画面（release-flow.tsx）只读这一份。
  * 一次发版从本机到 npmjs 走六步：地图上三个方块是本机、GitHub、npmjs，本机下方挂过渡期的 Gitea，
  * 当前这一步所在的方块高亮，亮着的箭头是这一步传出去的东西；下面一张卡片摆这一步的命令或经手的东西。
- * 两档的判别条件与跑什么照仓根 AGENTS.md「发版前的检查分两档」那张表；发版顺序照它同一段的分层；
+ * 检查跑什么照仓根 AGENTS.md「跑什么检查只看改到了什么」那张表；发版顺序照它同一段的分层；
  * publish.yml 的原话照抄并钉码；第六步「协作相关的包」的名单照「协作站双人回归」页（collab-regression.mdx）开头一段。
  */
 
@@ -44,7 +44,7 @@ export const loopMiddleNote = '读出包名与版本；已经在 npmjs 上的跳
 
 export const steps = [
   {
-    title: '发版前的检查（两档）',
+    title: '发版前的检查（看改到了什么）',
     where: ['local'],
     lit: [],
     role: 'blue',
@@ -54,25 +54,32 @@ export const steps = [
       icon: 'terminal',
       tiers: [
         {
-          tier: '小改动',
+          tier: '改了包',
           tone: 'info',
-          when: '只改一两个包的源码、样式或说明书；没动 exports、files、依赖；没改模板；只升 y',
+          when: '只查改到的包和受它影响的',
           runs: [
-            '改到的包 pnpm --filter <包> check',
-            '碰到了慢测试测的代码：再加跑那个包的 test:slow',
-            '改了页面上的交互：pnpm build 后 pnpm test:e2e --skip-build',
+            '改到的包 pnpm --filter <包> check；改了导出或类型，下游包也跑',
+            '碰到了慢测试测的代码：再跑那个包的 test:slow',
+            '站点上看得到的行为：pnpm build 后 pnpm test:e2e --skip-build',
+            '动了 exports、files、依赖：pnpm test:pack；动了模板：pnpm test:scaffold',
           ],
         },
         {
-          tier: '全量',
+          tier: '改了插件',
+          tone: 'info',
+          when: '测试站不加载插件，e2e 与 test:pack 查不到它',
+          runs: ['插件的 check，碰到慢测试再跑 test:slow', 'devkit.dev 装进隔离 home 看一眼'],
+        },
+        {
+          tier: '升共用依赖',
           tone: 'warn',
-          when: '其余所有情况；拿不准算哪档就按全量',
+          when: 'fumadocs、react-router、vite、catalog 里的版本：哪个包都可能坏',
           runs: ['pnpm verify', 'pnpm test:pack'],
         },
       ],
-      note: '发 gwb-collab 时另在 plugins/collab 里跑一遍 pnpm test:verified，不分档。',
+      note: '版本号升哪一位不影响跑什么。升 git 或改了 gwb-collab 的 setup/、fetch/ 另跑 plugins/collab 的 pnpm test:verified。从干净的工作树发时检出后只装依赖，构建与产物核对由 devkit.release 自己做。',
     },
-    text: '发版前的检查按这次要发的改动分两档：小改动只查改到的包，其余情况跑全量 pnpm verify 再 pnpm test:pack；发 gwb-collab 时另跑 plugins/collab 的 pnpm test:verified，不分档。',
+    text: '发版前跑什么检查只看改到了什么：改了包只查那个包和受它影响的，改了插件查插件并装进隔离 home 看一眼，只有升共用依赖时才跑全量 pnpm verify 再 pnpm test:pack。',
   },
   {
     title: '推 HEAD 到 GitHub',

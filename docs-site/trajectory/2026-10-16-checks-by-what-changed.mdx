@@ -1,0 +1,26 @@
+---
+born-at: 2026-10-16T13:50
+type: choice
+parent: [2026-09-03-god-live-doc]
+label: 跑什么检查只看改到了什么：全量 verify 只在升共用依赖时跑，插件靠隔离 home 验
+domain: 检查
+---
+
+pivots-from:: [发版前的检查分两档：小改动只查改到的包，不跑 verify 与 test:pack](2026-10-16-release-check-two-tiers.mdx)
+
+## 背景
+
+当天早上把发版前的检查分成两档：小改动只查改到的包，其余（升 x、动了依赖、一整批改动）跑全量 `pnpm verify` 再 `pnpm test:pack`，发 gwb-collab 另跑 `test:verified`。发 gwb-docsite 0.5.0（常驻站点挪进 gwb-data、加站点窗格）时，它升 x、改了依赖，按这个规矩归全量，要十几分钟。用户叫停，要求从头分析必要性。
+
+逐项看全量对这次两个插件的改动查得出什么：仓根 `pnpm build` 与 `devkit.release` 自己的构建重复；仓根 `check` 与 `test:slow` 里只有两个插件的结果可能变，它们已经跑过；`test:scaffold` 查模板，没动；`test:e2e` 与 `test:pack` 只测测试站和包，测试站不加载插件、`test:pack` 不打包插件；`test:verified` 查 git 与文件监视的行为，gwb-collab 只改了一个参数。全部查不出新东西。插件真正需要的验证是 `devkit.dev` 装进隔离 home 看一眼，这一步已经做过。
+
+## 结论与边界
+
+- 跑什么检查只看改到了什么，不看改了多少、升哪一位版本号：改了包查那个包（改了导出或类型再查下游；站点上看得到的行为加 e2e；动了 `exports`、`files`、依赖加 `test:pack`；动了模板加 `test:scaffold`）；改了插件查插件并装进隔离 home
+- 全量 `pnpm verify` 加 `pnpm test:pack` 只在升大家共用的依赖（fumadocs、react-router、vite、catalog 里的版本）时跑，那时哪个包都可能坏
+- `test:verified` 只在升 git、改 gwb-collab 的 `setup/`、`fetch/` 时跑，不再跟着每次发 gwb-collab
+- 干净的工作树只为满足 `devkit.release` 要求工作区干净，检出后只装依赖
+
+## 否掉的候选
+
+- 早上的两档：按改动大小和版本号分，升 x 或动了依赖就全量。版本号说的是给调用方的契约变没变，跟哪些检查查得出问题没有关系；插件升 x 时全量里没有一项测得到插件

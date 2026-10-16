@@ -27,7 +27,7 @@ import { ReleaseFlow } from './index/release-flow'
 | 慢 | 各包里的 `*.slow.test.ts` | 只有显式 `pnpm test:slow`：包里跑本包的，仓根逐个包跑，近三分钟 |
 | 全仓·快 | `pnpm test:deps`、`pnpm test:scaffold` | 显式命令，各几秒钟 |
 | 全仓·慢 | `pnpm test:e2e`、`pnpm test:pack` | 显式命令 |
-| 行为假设 | `plugins/collab` 的 `tests/verified/` | `pnpm test:verified`：升 git 或关键依赖、动了被测的模块、发 gwb-collab 前、有人明确要求时才跑 |
+| 行为假设 | `plugins/collab` 的 `tests/verified/` | `pnpm test:verified`：升 git 或关键依赖、动了被测的模块、有人明确要求时才跑 |
 
 慢的标准：真建站、装依赖、构建、启动服务的；或者单独运行这个文件时，vitest 报告里它的耗时（不含启动与 import）超过 2 秒，多是每条测试都建临时 git 仓、调几十次 git 的。
 慢的文件名写成 `*.slow.test.ts`：包里的 `vitest.config.ts` 排除它们，`vitest.slow.config.ts` 只收它们，`test:slow` 用的就是后者。
@@ -35,19 +35,21 @@ import { ReleaseFlow } from './index/release-flow'
 
 ## 检查节奏
 
-不是每次都全量跑，改了哪些就查哪些：
+跑什么检查只看改到了什么，不看改了多少、升哪一位版本号；改代码、交回、合并、推送、发版都照这张表，没改到的东西不查：
 
-| 什么时候 | 跑什么 |
+| 改到了什么 | 跑什么 |
 | --- | --- |
-| 改代码的过程中 | 只跑改到的包：`pnpm --filter <包> check`（先 typecheck 再 test，有 lint 的再 lint） |
-| 改动碰到了慢测试测的代码 | 交回前再跑那个包的 `pnpm --filter <包> test:slow` |
-| 改了上游包的类型或导出 | 先构建上游，再跑受影响的下游包 |
-| 改了包之间或包内 `core/`、`node/`、`site/`、`cli/` 之间的 import | 先 `pnpm build`，再仓根 `pnpm test:deps`：按 `tests/dependency-rules.cjs` 查依赖方向、分层与环，没有豁免清单，报出来的都要改掉 |
-| 改了本站的页面或被钉的代码 | 在 `docs-site/` 里 `pnpm doc`（就是 `docfirst check`），按说明书 [docs-site](/docs/outputs/skills/docs-site) 处理黄灯 |
-| 改了平台模板或功能包的模板 | `pnpm test:scaffold`：比对测试站、本站和建站器生成的是否一致，几秒钟 |
-| 合并分支 | 不跑全量，各分支改到的包已经查过 |
-| 一整批改动交付之前（推送、交给人验收） | 仓根 `pnpm verify`：`pnpm build` → `pnpm check` → `pnpm test:slow` → `pnpm test:deps` → `pnpm test:scaffold` → `pnpm test:e2e`，五六分钟，整批改动只跑这一次 |
-| 发版前 | 按改动分两档，见下面「发版」一节 |
+| 某个包的代码 | 那个包的 `pnpm --filter <包> check`（先 typecheck 再 test，有 lint 的再 lint） |
+| 碰到了慢测试测的代码 | 再跑那个包的 `pnpm --filter <包> test:slow` |
+| 上游包的类型或导出 | 先构建上游，再跑受影响的下游包 |
+| 包里会显示在站点上的行为（组件、路由、样式） | 先 `pnpm build`，再 `pnpm test:e2e --skip-build`，一分半 |
+| 包的 `package.json` 的 `exports`、`files`、依赖 | `pnpm test:pack`：把包打成 tarball 装进测试站的副本，查漏打包的文件、写错的出口，近三分钟 |
+| 包之间或包内 `core/`、`node/`、`site/`、`cli/` 之间的 import | 先 `pnpm build`，再仓根 `pnpm test:deps`：按 `tests/dependency-rules.cjs` 查依赖方向、分层与环，没有豁免清单，报出来的都要改掉 |
+| 平台模板或功能包的模板 | `pnpm test:scaffold`：比对测试站、本站和建站器生成的是否一致，几秒钟 |
+| 插件 | 插件的 `check`，碰到慢测试再跑 `test:slow`；再用 `devkit.dev` 装进隔离 home 看一眼。测试站不加载插件，`test:pack` 也不打包插件，这两项对插件查不出东西 |
+| 升 git，或 gwb-collab 的 `src/organization/setup/`、`src/other-repos/fetch/` | `plugins/collab` 里 `pnpm test:verified` |
+| 本站的页面或被钉的代码 | 在 `docs-site/` 里 `pnpm doc`（就是 `docfirst check`），按说明书 [docs-site](/docs/outputs/skills/docs-site) 处理黄灯 |
+| 升大家共用的依赖（fumadocs、react-router、vite、catalog 里的版本） | 仓根 `pnpm verify`：`pnpm build` → `pnpm check` → `pnpm test:slow` → `pnpm test:deps` → `pnpm test:scaffold` → `pnpm test:e2e`，五六分钟；再 `pnpm test:pack`。只有这时哪个包都可能坏 |
 
 本站自己的检查在 `docs-site/` 里跑：`pnpm doc`、`pnpm typecheck`、`pnpm test`、`pnpm build`。
 
@@ -66,16 +68,7 @@ import { ReleaseFlow } from './index/release-flow'
 
 只用工作台命令 `devkit.release`。升哪一位、发版的每一步，每次都先读说明书 gwb-release，包按依赖序发。
 
-发版前的检查按这次要发的改动分两档：
-
-| 档 | 什么改动 | 跑什么 |
-| --- | --- | --- |
-| 小改动 | 下面几条都满足：只改了一两个包的源码、样式或说明书；没动 `package.json` 的 `exports`、`files`、依赖；没改平台模板与功能包的 `template/`；只升 y | 改到的包 `pnpm --filter <包> check`；改动碰到了慢测试测的代码，再跑那个包的 `test:slow`；改了页面上的交互，再 `pnpm build` 后 `pnpm test:e2e --skip-build`，一分半。不跑 `pnpm verify` 与 `pnpm test:pack` |
-| 全量 | 其余所有情况：一整批改动、动了 `exports` / `files` / 依赖、改了模板、改了包之间的接口、升 x | `pnpm verify`，再 `pnpm test:pack`：把包打成 tarball 装进测试站的副本，查漏打包的文件、写错的出口，近三分钟 |
-
-拿不准算哪档就按全量。小改动不跑 `test:pack`，是因为 `devkit.release` 发之前自己会构建，并照 `files` 核对产物、查产物里相对 import 指向的文件都在；`test:pack` 多查的是 `exports` 与依赖写错，小改动没碰它们。
-
-发 gwb-collab 时另在 `plugins/collab` 里跑一遍 `pnpm test:verified`，不分档。发了协作相关的包或插件之后，照 [协作站双人回归](/maintain/collab-regression) 走一遍。
+发版前的检查照上面「检查节奏」那张表，看这次要发的改动改到了什么。`devkit.release` 发之前自己会构建，并照 `files` 核对产物、查产物里相对 import 指向的文件都在、插件的 peer 与样式合不合规矩，所以从干净的工作树发时检出后只装依赖，不另跑检查。发了协作相关的包或插件之后，照 [协作站双人回归](/maintain/collab-regression) 走一遍。
 
 包发到 npmjs，本机不直接发——从本机到 npmjs 走六步，每处做什么、传什么、卡在哪一步会怎样：
 
