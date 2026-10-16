@@ -123,9 +123,15 @@ export function assembleDocument(entry: string, files: Record<string, string | R
     const rawUrl = node.type === 'link' ? node.href : node.url;
     if (rawUrl !== undefined) { try { const url = new URL(rawUrl); if (!['http:', 'https:'].includes(url.protocol) || !url.hostname) fail(node, 'Invalid URL'); } catch { fail(node, 'Invalid URL'); } }
   }
-  const counts = { decimal: 0, appendix: 0, figure: 0, table: 0 };
+  const counts = { decimal: 0, appendix: 0 };
   let appendixSeen = false;
-  const eqCounts = new Map<string, number>();
+  const chapterCounts = { figure: new Map<string, number>(), table: new Map<string, number>(), equation: new Map<string, number>() };
+  /** 图、编号表格、编号公式各自按所在的顶层章从 1 编，写成「章号-n」；导出 Word 的题注同样取章号，不在编号章里就没有章号可取 */
+  function chapterNumber(node: Record<string, any>, kind: keyof typeof chapterCounts, chapter: string | undefined): string {
+    if (!chapter) fail(node, `Numbered ${kind} outside a numbered chapter`);
+    const n = (chapterCounts[kind].get(chapter!) ?? 0) + 1; chapterCounts[kind].set(chapter!, n);
+    return `${chapter}-${n}`;
+  }
   function blockNumbers(blocks: any[], depth = 0, chapter?: string, parentNumber?: string, parentMode?: string, tables = 0) {
     let decimal = 0;
     for (const node of blocks) {
@@ -143,12 +149,9 @@ export function assembleDocument(entry: string, files: Record<string, string | R
         blockNumbers(node.children, depth + 1, depth === 0 && number ? number : chapter, number, node.numbering, tables);
         continue;
       }
-      if (node.type === 'figure') { number = String(++counts.figure); label = `图 ${number}`; }
-      if (node.type === 'table' && node.numbered) { number = String(++counts.table); label = `表 ${number}`; }
-      if (node.type === 'equation' && node.numbered) {
-        if (!chapter) fail(node, 'Numbered equation outside a numbered chapter');
-        const n = (eqCounts.get(chapter!) ?? 0) + 1; eqCounts.set(chapter!, n); number = `${chapter}-${n}`; label = `式（${number}）`;
-      }
+      if (node.type === 'figure') { number = chapterNumber(node, 'figure', chapter); label = `图 ${number}`; }
+      if (node.type === 'table' && node.numbered) { number = chapterNumber(node, 'table', chapter); label = `表 ${number}`; }
+      if (node.type === 'equation' && node.numbered) { number = chapterNumber(node, 'equation', chapter); label = `式（${number}）`; }
       if (node.id) index[node.id] = { type: node.type, number, label, title };
       if (node.type === 'figure' && node.panels) for (const panel of node.panels) {
         const panelNumber = `${number}(${panel.label})`;

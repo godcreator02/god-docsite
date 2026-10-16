@@ -94,7 +94,7 @@ describe('Word 导出 Node 命令（禁止启动实际 Word）', () => {
     for (const name of ['a.png', 'b.png']) await put(path.join(site, 'reports/example/assets', name), png);
     await put(path.join(site, entry), JSON.stringify({
       format: 'docreport', schemaVersion: 1, id: 'doc_fixture', metadata: { title: '导出命令测试', language: 'zh-CN' },
-      blocks: [{ type: 'figure', id: 'fig_grid', rows: 1, columns: 2, caption: [{ type: 'text', text: '两张图' }], panels: [{ id: 'pa', row: 1, column: 1, label: 'a', src: 'assets/a.png', alt: 'a' }, { id: 'pb', row: 1, column: 2, label: 'b', src: 'assets/b.png', alt: 'b' }] }],
+      blocks: [{ type: 'section', id: 'sec_grid', title: '结果', numbering: 'decimal', children: [{ type: 'figure', id: 'fig_grid', rows: 1, columns: 2, caption: [{ type: 'text', text: '两张图' }], panels: [{ id: 'pa', row: 1, column: 1, label: 'a', src: 'assets/a.png', alt: 'a' }, { id: 'pb', row: 1, column: 2, label: 'b', src: 'assets/b.png', alt: 'b' }] }] }],
     }));
     expect(await reportExport(options())).toMatchObject({ state: 'failed', message: expect.stringContaining('导出 Word 还不支持多图') });
     expect(renderer.spawn).not.toHaveBeenCalled();

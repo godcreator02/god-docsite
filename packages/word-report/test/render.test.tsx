@@ -103,10 +103,10 @@ describe('JSON 报告真实 React 渲染', () => {
     expect(html).toContain('(b) 满载');
     expect(html).toContain('>(f)</div>');
     expect(html.match(/<figcaption/g)).toHaveLength(1);
-    expect(html).toContain('<span>图 1 </span>六个工况的波形');
-    expect(html).toContain('href="#panel_b" class="report-ref">图 1(b)</a>');
+    expect(html).toContain('<span>图 1-1 </span>六个工况的波形');
+    expect(html).toContain('href="#panel_b" class="report-ref">图 1-1(b)</a>');
     const meta = reportMeta(assembleDocument('panels.json', { 'panels.json': document }));
-    expect(meta.markdown).toContain('图 1(b) 满载');
+    expect(meta.markdown).toContain('图 1-1(b) 满载');
   });
 
   it('摘要、富文本、列表、行内公式和代码均展示，文本保持转义', () => {

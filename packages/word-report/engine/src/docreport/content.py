@@ -166,7 +166,10 @@ def validate_content(content, directory):
                 blocks(item["children"], depth + 1, scope, mode, tables)
             elif kind == "equation" and item["numbered"]:
                 require(chapter is not None, f"{item['id']}: numbered equation outside a chapter")
+            elif kind == "figure":
+                require(chapter is not None, f"{item['id']}: numbered figure outside a chapter")
             elif kind == "table":
+                require(chapter is not None or not item["numbered"], f"{item['id']}: numbered table outside a chapter")
                 require(tables < 6, f"{item['id']}: Word renderer supports at most six table levels")
                 for row in item["rows"]:
                     for cell in row["cells"]:

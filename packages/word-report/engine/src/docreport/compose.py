@@ -61,9 +61,18 @@ class Composer:
         if kind not in ('Table', 'Figure'):
             raise ValueError(f'Unknown caption kind: {kind}')
         name = {'Table': '表', 'Figure': '图'}[kind]
-        number = self.field_token('SEQ ' + kind + r' \* ARABIC', bookmark)
+        number = self.chapter_number(r'STYLEREF 1 \s', 'SEQ ' + kind + r' \* ARABIC \s 1', bookmark)
         return self.paragraph(f'{name} {number}  {text}',
                               'Table Caption' if kind == 'Table' else -35)
+
+    def chapter_number(self, chapter_code, sequence_code, bookmark):
+        """Return「章号-序号」 placeholders; ``bookmark`` spans both fields so REF shows the whole number."""
+        chapter = self.field_token(chapter_code)
+        number = self.field_token(sequence_code)
+        index = len(self._pending_numbers)
+        begin, end = f'@NUMSTART{index}@', f'@NUMEND{index}@'
+        self._pending_numbers.append((begin, end, bookmark))
+        return f'{begin}{chapter}-{number}{end}'
 
     def list(self, items, ordered=False):
         doc = self.doc
@@ -100,12 +109,8 @@ class Composer:
                                       boldSymbol=bold_symbol))
         if inline:
             return self.paragraph(before + token + after)
-        chapter = self.field_token(r'STYLEREF 1 \s')
-        number = self.field_token(r'SEQ Equation \* ARABIC \s 1')
-        index = len(self._pending_numbers)
-        begin, end = f'@NUMSTART{index}@', f'@NUMEND{index}@'
-        self._pending_numbers.append((begin, end, bookmark))
-        return self.paragraph(f'\t{token}\t({begin}{chapter}-{number}{end})', 'Equation')
+        number = self.chapter_number(r'STYLEREF 1 \s', r'SEQ Equation \* ARABIC \s 1', bookmark)
+        return self.paragraph(f'\t{token}\t({number})', 'Equation')
 
     def footnote(self, token, text):
         rng = self.doc.Content.Duplicate
@@ -313,12 +318,26 @@ class ContentComposer(Composer):
                     setattr(run.Font, {'strong': 'Bold', 'em': 'Italic', 'sup': 'Superscript', 'sub': 'Subscript'}[mark], True)
         return rng
 
+    def chapter_sequence(self, kind, bookmark):
+        """「章号-序号」 for an equation, figure or table in the current top-level chapter."""
+        if self.chapter_is_appendix:
+            # The SEQ "\s 1" restart only fires on built-in Heading 1
+            # paragraphs; the template's Appendix Heading is Normal-based,
+            # so appendix sequences never restart there. Giving each
+            # appendix its own SEQ identifier keeps a natural 1, 2, 3 …
+            # count that renumbers on insert or delete like main chapters,
+            # without touching heading styles or their linked lists.
+            letter = chr(ord('A') + self.appendix_count - 1)
+            return self.chapter_number(r'STYLEREF "Appendix Heading" \s',
+                                       'SEQ ' + kind + 'Appendix' + letter + r' \* ARABIC', bookmark)
+        return self.chapter_number(r'STYLEREF 1 \s', 'SEQ ' + kind + r' \* ARABIC \s 1', bookmark)
+
     def numbered_caption(self, node, kind):
         from .content import bookmark
         numbered = node.get('numbered', True)
         prefix = ''
         if numbered:
-            prefix = {'Figure': '图 ', 'Table': '表 '}[kind] + self.field_token('SEQ ' + kind + r' \* ARABIC', bookmark(node['id'], '_n')) + '  '
+            prefix = {'Figure': '图 ', 'Table': '表 '}[kind] + self.chapter_sequence(kind, bookmark(node['id'], '_n')) + '  '
         rng = self.rich_paragraph(node['caption'], 'Table Caption' if kind == 'Table' else -35, prefix=prefix)
         title = self.part(rng, utf16_length(prefix), rng.End - rng.Start - utf16_length(prefix) - 1)
         self.mark(node['id'], title, '_t')
@@ -416,24 +435,9 @@ class ContentComposer(Composer):
         token = self.math_token(node, False)
         suffix = ''
         if node['numbered']:
-            chapter = self.field_token(r'STYLEREF 1 \s' if self.chapter_style == 'Heading 1' else r'STYLEREF "Appendix Heading" \s')
-            if self.chapter_is_appendix:
-                # The SEQ "\s 1" restart only fires on built-in Heading 1
-                # paragraphs; the template's Appendix Heading is Normal-based,
-                # so appendix sequences never restart there. Giving each
-                # appendix its own SEQ identifier keeps a natural 1, 2, 3 …
-                # count that renumbers on insert or delete like main chapters,
-                # without touching heading styles or their linked lists.
-                letter = chr(ord('A') + self.appendix_count - 1)
-                number = self.field_token(r'SEQ EquationAppendix' + letter + r' \* ARABIC')
-            else:
-                number = self.field_token(r'SEQ Equation \* ARABIC \s 1')
-            self.chapter_first_equation = False
-            i = len(self._pending_numbers)
-            begin, end = f'@NUMSTART{i}@', f'@NUMEND{i}@'
             from .content import bookmark
-            self._pending_numbers.append((begin, end, bookmark(node['id'], '_n')))
-            suffix = f'\t({begin}{chapter}-{number}{end})'
+            self.chapter_first_equation = False
+            suffix = '\t(' + self.chapter_sequence('Equation', bookmark(node['id'], '_n')) + ')'
         rng = self.paragraph('\t' + token + suffix, 'Equation')
         rng.ParagraphFormat.TabStops.ClearAll()
         rng.ParagraphFormat.TabStops.Add(self.width / 2, 1, 0)

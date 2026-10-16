@@ -31,8 +31,10 @@ docsite.feature.add  {"dir":"<站点目录>","package":"@godcreator/word-report"
 ### 文档格式
 
 每个 `content.json` 的 `format` 是 `docreport`。正文由块组成：节、段落、列表、图、公式、表格、代码、摘要、参考文献；段落里有文字、行内公式、交叉引用、链接、脚注和文献引用。
-每个块有一个随机的 id，交叉引用写目标的 id，图、表、公式和节的编号按它们在整份报告里的先后自动算。字段的完整说明在包里的 `engine/schemas/report-content.schema.json`，
-例子是同目录的 `report-content.example.json`。
+每个块有一个随机的 id，交叉引用写目标的 id，编号都自动算。节按整份报告里的先后编；图、编号的表格和编号的公式按所在的顶层章各自从 1 编，写成「章号-序号」：
+第 2 章的第 4 张表是「表 2-4」，附录 A 的第一张图是「图 A-1」、第一个公式是「式（A-1）」，网页和导出的 Word 一样。
+所以图、编号的表格和编号的公式都要写在编号的章里（顶层的节，`numbering` 是 `decimal` 或 `appendix`），写在章外或不编号的章里直接报错。
+字段的完整说明在包里的 `engine/schemas/report-content.schema.json`，例子是同目录的 `report-content.example.json`。
 
 ### 多图
 
@@ -61,7 +63,7 @@ docsite.feature.add  {"dir":"<站点目录>","package":"@godcreator/word-report"
 }
 ```
 
-交叉引用写整个图的 `id` 显示「图 3」，写某一张的 `id` 显示「图 3(b)」，括号里是那张图的 `label`。导出 Word 还不支持多图：报告里有多图时导出直接报错，网页上照常显示。
+交叉引用写整个图的 `id` 显示「图 2-3」，写某一张的 `id` 显示「图 2-3(b)」，括号里是那张图的 `label`。导出 Word 还不支持多图：报告里有多图时导出直接报错，网页上照常显示。
 
 ## 网页上怎么看
 

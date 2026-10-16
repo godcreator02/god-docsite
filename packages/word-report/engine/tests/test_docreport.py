@@ -12,6 +12,7 @@ from unittest.mock import MagicMock, patch
 from zipfile import ZipFile
 
 from docreport.__main__ import load_report, reserve_output
+from docreport.compose import Composer, ContentComposer
 from docreport.mathtype import mathtype_tex, readback_tex_matches, validate_pending
 from docreport.verify import package_state
 from docreport.word import utf16_length, word_application
@@ -164,9 +165,48 @@ class ContentProtocolTests(unittest.TestCase):
             (root/'assets').mkdir()
             Image.new('RGB',(2,2)).save(root/'assets/wrong.png', format='JPEG')
             data=copy.deepcopy(self.content)
-            data['blocks'].append(dict(type='figure',id='fig',src='assets/wrong.png',alt='图',caption=[dict(type='text',text='图')]))
+            figure = dict(type='figure',id='fig',src='assets/wrong.png',alt='图',caption=[dict(type='text',text='图')])
+            data['blocks'].append(dict(type='section',id='chapter',title='结果',numbering='decimal',children=[figure]))
             with self.assertRaisesRegex(ValueError, 'encoding'):
                 validate_content(data, root)
+
+    def test_figures_and_numbered_tables_require_a_numbered_chapter(self):
+        figure = dict(type='figure', id='fig', src='assets/missing.png', alt='图', caption=[dict(type='text', text='图')])
+        table = dict(type='table', id='tbl', numbered=True, caption=[dict(type='text', text='表')], columns=[dict(id='c')],
+                     headerRows=0, rows=[dict(id='r', cells=[dict(id='x', blocks=[])])])
+        for block, message in ((figure, 'numbered figure outside a chapter'), (table, 'numbered table outside a chapter')):
+            front = dict(type='section', id='front', title='前言', numbering='none', children=[copy.deepcopy(block)])
+            for blocks in ([copy.deepcopy(block)], [front]):
+                data = copy.deepcopy(self.content); data['blocks'] = blocks
+                with self.subTest(blocks=blocks), self.assertRaisesRegex(ValueError, message):
+                    validate_content(data, self.root)
+        data = copy.deepcopy(self.content)
+        data['blocks'].append(dict(table, numbered=False))
+        validate_content(data, self.root)
+
+
+class ChapterNumberFieldTests(unittest.TestCase):
+    def composer(self, appendix_count=0):
+        composer = ContentComposer.__new__(ContentComposer)
+        Composer.__init__(composer, MagicMock())
+        composer.chapter_is_appendix, composer.appendix_count = appendix_count > 0, appendix_count
+        return composer
+
+    def test_figure_and_table_numbers_use_chapter_and_restarting_sequence_like_equations(self):
+        for kind in ('Figure', 'Table', 'Equation'):
+            composer = self.composer()
+            with self.subTest(kind=kind):
+                self.assertEqual(composer.chapter_sequence(kind, 'bm'), '@NUMSTART0@@FIELD0@-@FIELD1@@NUMEND0@')
+                self.assertEqual([code for _, code, _ in composer._pending_fields],
+                                 [r'STYLEREF 1 \s \* CHARFORMAT', 'SEQ ' + kind + r' \* ARABIC \s 1 \* CHARFORMAT'])
+                self.assertEqual([mark for *_, mark in composer._pending_fields], [None, None])
+                self.assertEqual(composer._pending_numbers, [('@NUMSTART0@', '@NUMEND0@', 'bm')])
+
+    def test_appendix_numbers_use_appendix_heading_and_a_sequence_per_appendix(self):
+        composer = self.composer(appendix_count=2)
+        composer.chapter_sequence('Table', 'bm')
+        self.assertEqual([code for _, code, _ in composer._pending_fields],
+                         [r'STYLEREF "Appendix Heading" \s \* CHARFORMAT', r'SEQ TableAppendixB \* ARABIC \* CHARFORMAT'])
 
 
 class ReportBoundaryTests(unittest.TestCase):

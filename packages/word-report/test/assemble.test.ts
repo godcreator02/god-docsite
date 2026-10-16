@@ -62,14 +62,14 @@ describe('isomorphic report assembly', () => {
     const ref = (id: string, target: string, display: 'label' | 'number' | 'title') => ({ type: 'ref' as const, id, target, display });
     const input = doc('d', [section('s', [single, multi, { type: 'paragraph', id: 'p', content: [ref('r1', 'pb', 'label'), ref('r2', 'pc', 'number'), ref('r3', 'pa', 'title'), ref('r4', 'grid', 'label')] }])]);
     const result = assembleDocument('x.json', { 'x.json': input });
-    expect(result.index.grid!.label).toBe('图 2');
-    expect(result.index.pb).toEqual({ type: 'figure-panel', number: '2(b)', label: '图 2(b)', title: 'pb 小标题' });
-    expect(result.index.pc!.number).toBe('2(c)');
+    expect(result.index.grid!.label).toBe('图 1-2');
+    expect(result.index.pb).toEqual({ type: 'figure-panel', number: '1-2(b)', label: '图 1-2(b)', title: 'pb 小标题' });
+    expect(result.index.pc!.number).toBe('1-2(c)');
     expect(Object.keys(result.assets).sort()).toEqual(['assets/d/a.png', 'assets/d/b.png', 'assets/d/c.png', 'assets/d/one.png']);
   });
   it('leaves cells that no panel names empty', () => {
     const figure = { type: 'figure' as const, id: 'grid', rows: 2, columns: 3, caption: [{ type: 'text' as const, text: '图题' }], panels: [{ id: 'pa', row: 1, column: 1, label: 'a', src: 'assets/a.png', alt: 'a' }, { id: 'pb', row: 2, column: 3, label: 'b', src: 'assets/b.png', alt: 'b' }] };
-    expect(assembleDocument('x.json', { 'x.json': doc('d', [section('s', [figure])]) }).index.pb!.label).toBe('图 1(b)');
+    expect(assembleDocument('x.json', { 'x.json': doc('d', [section('s', [figure])]) }).index.pb!.label).toBe('图 1-1(b)');
   });
   it.each([
     ['panels together with src', (f: any) => { f.src = 'assets/x.png'; }, 'Disallowed'],
@@ -168,6 +168,33 @@ describe('isomorphic report assembly', () => {
     expect(() => assembleDocument('x.json', { 'x.json': doc('x', [include('x.json')]) })).toThrow('Circular');
     expect(() => assembleDocument('x.json', { 'x.json': doc('x', [include('a.json'), include('a.json')]), 'a.json': doc('a') })).toThrow('Repeated');
     expect(() => assembleDocument('x.json', { 'x.json': doc('x', [include('gone.json')]) })).toThrow('Missing');
+  });
+  it('numbers figures, numbered tables and equations per top-level chapter, appendices by letter', () => {
+    const figure = (id: string) => ({ type: 'figure' as const, id, src: `assets/${id}.png`, alt: id, caption: [{ type: 'text' as const, text: id }] });
+    const table = (id: string, numbered: boolean) => ({ type: 'table' as const, id, numbered, caption: [{ type: 'text' as const, text: id }], columns: [{ id: `${id}_c` }], headerRows: 0, rows: [{ id: `${id}_r`, cells: [{ id: `${id}_x`, blocks: [] }] }] });
+    const appendix = section('app', [figure('fA1'), table('tA1', true)]); appendix.numbering = 'appendix' as any;
+    const input = doc('d', [
+      section('one', [figure('f11'), table('t11', true), section('one_sub', [figure('f12'), table('plain', false), table('t12', true)])]),
+      section('two', [figure('f21'), { type: 'equation', id: 'e21', latex: 'x', numbered: true }, table('t21', true)]),
+      appendix,
+    ]);
+    const { index } = assembleDocument('x.json', { 'x.json': input });
+    expect(['f11', 'f12', 'f21', 'fA1'].map(id => index[id]!.label)).toEqual(['图 1-1', '图 1-2', '图 2-1', '图 A-1']);
+    expect(['t11', 't12', 't21', 'tA1'].map(id => index[id]!.label)).toEqual(['表 1-1', '表 1-2', '表 2-1', '表 A-1']);
+    expect(index.plain!.number).toBeUndefined();
+    expect(index.e21!.label).toBe('式（2-1）');
+  });
+  it.each([
+    ['a figure', { type: 'figure', id: 'f', src: 'assets/f.png', alt: 'f', caption: [{ type: 'text', text: 'f' }] }, 'Numbered figure outside a numbered chapter'],
+    ['a numbered table', { type: 'table', id: 't', numbered: true, caption: [{ type: 'text', text: 't' }], columns: [{ id: 'c' }], headerRows: 0, rows: [{ id: 'r', cells: [{ id: 'x', blocks: [] }] }] }, 'Numbered table outside a numbered chapter'],
+  ])('rejects %s outside a numbered chapter', (_name, block, error) => {
+    const unnumbered = { ...section('front', [block as any]), numbering: 'none' as const };
+    expect(() => assembleDocument('x.json', { 'x.json': doc('d', [unnumbered, section('one')]) })).toThrow(error);
+    expect(() => assembleDocument('x.json', { 'x.json': doc('d', [block as any]) })).toThrow(error);
+  });
+  it('keeps an unnumbered table outside a numbered chapter valid', () => {
+    const table = { type: 'table' as const, id: 't', numbered: false, columns: [{ id: 'c' }], headerRows: 0, rows: [{ id: 'r', cells: [{ id: 'x', blocks: [] }] }] };
+    expect(assembleDocument('x.json', { 'x.json': doc('d', [table]) }).index.t!.number).toBeUndefined();
   });
 });
 describe('strict JSON parsing', () => {

@@ -42,7 +42,7 @@ export const aloneResult = {
       rows: [
         { key: 'sb', value: '第 1 节', chapter: 'b' },
         { key: 'eq_b', value: '式（1-1）', chapter: 'b', strong: true },
-        { key: 'fb', value: '图 1', chapter: 'b' },
+        { key: 'fb', value: '图 1-1', chapter: 'b' },
         { key: 'assets', value: '只有 assets/b/image.png ← b/assets/image.png' },
         { key: '段落 p', value: '换成文字「建模章中的公式」' },
       ],
@@ -96,7 +96,7 @@ export const steps = [
   },
   {
     title: '编号',
-    text: '顶层的节依次编 1、2，图全报告连着编，编号公式按所在的顶层章各自从 1 编，写成「章号-n」。a 章的公式是式（1-1），b 章的是式（2-1）。',
+    text: '顶层的节依次编 1、2；图、编号表格、编号公式按所在的顶层章各自从 1 编，写成「章号-n」。a 章的公式是式（1-1）、图是图 1-1，b 章的是式（2-1）、图 2-1。',
     highlights: { root: null, a: [2, 4], b: [2, 7] },
     dim: [],
     extra: {},
@@ -107,8 +107,8 @@ export const steps = [
           { key: 'sb', value: '第 2 节', chapter: 'b' },
           { key: 'target', value: '式（1-1）', chapter: 'a' },
           { key: 'eq_b', value: '式（2-1）', chapter: 'b', strong: true },
-          { key: 'fa', value: '图 1', chapter: 'a' },
-          { key: 'fb', value: '图 2', chapter: 'b' },
+          { key: 'fa', value: '图 1-1', chapter: 'a' },
+          { key: 'fb', value: '图 2-1', chapter: 'b' },
         ],
       },
     ],
@@ -131,7 +131,7 @@ export const steps = [
   },
   {
     title: '单独组装 b',
-    text: '检查会把每一章单独组装一次。只有 b 时，b 的节是第 1 节、公式变成式（1-1）：编号变了，id 没变。引用的目标不在，写了 externalLabel 就换成「建模章中的公式」并记一条提示；没写就报错。',
+    text: '检查会把每一章单独组装一次。只有 b 时，b 的节是第 1 节、公式变成式（1-1）、图变成图 1-1：编号变了，id 没变。引用的目标不在，写了 externalLabel 就换成「建模章中的公式」并记一条提示；没写就报错。',
     highlights: { root: null, a: null, b: [5, 6] },
     dim: ['root', 'a'],
     extra: { root: '单独组装 b，不读', a: '单独组装 b，不读' },
