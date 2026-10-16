@@ -1,18 +1,26 @@
 ---
 title: doc-export：生成物
-description: 从 mdx 正本生成 README、AGENTS.md、SKILL.md：钉码标记写成代码块，名册里的组件写成机读文字，点名的 frontmatter 字段原样带上；渲染不了的一次列全、整篇拒绝；核对生成物与正本是否一致
+description: 从 mdx 正本生成 README、AGENTS.md、SKILL.md：一篇正本配几个落点，钉码标记写成代码块、名册里的组件写成机读文字、点名的 frontmatter 字段原样带上；渲染不了的一次列全、整篇拒绝；核对生成物与正本是否一致
 icon: FileOutput
 ---
 
+import { DocExportSeams } from './doc-export/seams'
+import { PlacementCases } from './doc-export/placement-cases'
 import { RenderPipeline } from './doc-export/render-pipeline'
+import { RosterRules } from './doc-export/roster-rules'
+import { VerifyCases } from './doc-export/verify-cases'
 
 仓根的 README.md、AGENTS.md、CLAUDE.md，插件里的 SKILL.md，是现状区 mdx 正本的机读版：改正本、在站目录运行 `pnpm doc:render` 重新生成，两份放进同一个提交，`pnpm doc` 核对两边是否一致。doc-export 负责「正本 → 生成物」这一步与「生成物跟正本一致吗」的核对；读配置、选哪些正本、打印结果归 docfirst。
 
 这一页从头到尾用同一个例子：正本 `docs/a.mdx`（frontmatter 写了 `name`、`description`、`secret`，正文一个 `# 摆放`、一处钉在 `src/greet.ts` 第 2–3 行的钉、一个三行写法的 `<Note>`），三个落点：`skills/x/SKILL.md` 点名 `name` 与 `description`、`PLAIN.md` 是字符串写法、`BAD.md` 点名的 `nope` 正本里没有。
 
+先看一张图，把正本、落点表、名册、钉码核对、生成物摆清楚，也分清 doc-export 管哪一段、docfirst 管哪一段；后面每一节开头写它在图上的位置。
+
+<DocExportSeams />
+
 ## 一篇正本、几个落点
 
-`docfirst.config.mjs` 的 `outputs` 是「正本 → 落点数组」的表。落点两种写法：字符串（相对项目根的路径，等于 `frontmatter: []`）、对象 `{ to, frontmatter }`；形状不对当场报错：
+图上第 1、3 号。`docfirst.config.mjs` 的 `outputs` 是「正本 → 落点数组」的表。落点两种写法：字符串（相对项目根的路径，等于 `frontmatter: []`）、对象 `{ to, frontmatter }`；形状不对当场报错：
 
 {/* ref file="../packages/doc-export/src/core/outputs.ts" lines="9-22" hash="0d322a1efb59" blob="dc1854c6456a" */}
 
@@ -36,7 +44,17 @@ outputs: {
 }
 ```
 
+同一篇正本按这三种写法各写出什么，选一种看：
+
+<PlacementCases />
+
+点名的字段按 YAML 读正本头部，把作者写下的那几行**原样**抄出来——多行的值、块式列表的连续行一并带上，生成物头部长什么样作者一眼对得上。正文只渲染一次；渲染被拒绝时每个落点都报 `unrenderable`，原因是同一句；别的错误照原样抛出：
+
+{/* ref file="../packages/doc-export/src/core/outputs.ts" lines="44-67" hash="54d921ca734f" blob="dc1854c6456a" */}
+
 ## 渲染：一条管线
+
+图上第 5 号。
 
 <RenderPipeline />
 
@@ -67,31 +85,31 @@ outputs: {
 
 ## 组件名册：组件在生成物里写成什么
 
-名册是「组件名 → 规则」的表，规则三种：`"children"`（去掉外壳只留子内容）、`"drop"`（整个不进生成物）、函数 `(node, helpers) => 节点`：
+图上第 1、6 号。名册是「组件名 → 规则」的表，规则三种：`"children"`（去掉外壳只留子内容）、`"drop"`（整个不进生成物）、函数 `(node, helpers) => 节点`：
 
 {/* ref file="../packages/doc-export/src/core/roster.ts" lines="20-34" hash="1736fdbd2c61" blob="3e7d67c94a00" */}
 
 函数规则的契约：只经 `helpers` 读节点（`attr`、`textOf`）、造节点（`text`、`heading`、`paragraph`、`quote`、`children`），不碰节点的字段；`helpers.inline` 说明组件是不是写在句子里。规则交回的内容里再嵌着组件，写出时各自再换。
 
-doc-export 自带一份 fumadocs 名册：`Note` 块级变引用块、行内变一段文字，前缀 `[note]`；`Files` 只留子内容，`Folder` 写成「名字/」再跟子项，`File` 写成名字。例子里三行写法的 `<Note>` 是块级组件，写出成 `> \[note] 提示`（方括号被转义，读出来还是 `[note]`）。
+三种规则把组件写成什么、名册外的组件是什么下场，选一种看：
 
-讲解组件的机读规则（`*.ai.mjs`）就是函数规则，写法见 explainer 页「机读文字」一节。
+<RosterRules />
+
+doc-export 自带一份 fumadocs 名册（`Note`、`Files`、`Folder`、`File` 这四个），讲解组件的机读规则（`*.ai.mjs`）就是函数规则，写法见 explainer 页「机读文字」一节。
 
 名册由使用方给：docfirst 在配置的 `fumadocsRoster: true` 时先放 fumadocs 名册，再用 `components` 里同名的规则盖过它；docfirst 只对生成正本查名册，别的页里用什么组件都不管。
 
-## frontmatter：点名的字段原样抄
-
-按 YAML 读正本头部，点名的字段**按点名的顺序**、把作者写的那几行原样抄出来（多行的值、块式列表连续行一起带上）；没点名的不带（例子里的 `secret`）。源里缺点名的字段，这个落点报 `no-frontmatter`、写明缺哪几个，**不写**：一份缺 `name` 的 SKILL.md 比没有更糟。正文只渲染一次；渲染被拒绝时每个落点都报 `unrenderable`，原因是同一句；别的错误照原样抛出：
-
-{/* ref file="../packages/doc-export/src/core/outputs.ts" lines="44-67" hash="54d921ca734f" blob="dc1854c6456a" */}
-
 ## 写出与核对
 
-写出（`renderOutputs`）：每篇正本算一次，内容有变的落点才写，父目录自己建；状态 `placed`、`unchanged`、`no-frontmatter`、`unrenderable`。核对（`verifyOutputs`）：只读，状态 `fresh`、`missing`（落点还没有文件）、`stale`（跟正本不一致，比如有人手改了生成物）、`no-frontmatter`、`unrenderable`；只有 `fresh` 算一致。比较前把 CRLF 换成 LF，工作区换行方式不影响结果。点名映射里没有的正本直接报错：
+图上第 2、3、4 号。写出（`renderOutputs`）：每篇正本算一次，内容有变的落点才写，父目录自己建；状态 `placed`、`unchanged`、`no-frontmatter`、`unrenderable`。核对（`verifyOutputs`）只读，怎么判一份生成物选一种看——只有 `fresh` 算一致：
+
+<VerifyCases />
+
+点名映射里没有的正本直接报错：
 
 {/* ref file="../packages/doc-export/src/node/outputs.ts" lines="21-38" hash="94c2eebe8e1e" blob="37cec59bcc93" */}
 
-## 分层：核心不碰磁盘
+## 分层与谁在用它
 
 {/* tree dir="../packages/doc-export/src" depth="1" hash="40538faa6072" */}
 
@@ -102,11 +120,4 @@ doc-export 自带一份 fumadocs 名册：`Note` 块级变引用块、行内变�
 
 依赖方向：doc-export 只依赖 code-pin。
 
-## 谁在用它
-
-只有 docfirst（`pnpm doc` / `doc:render` / `doc:confirm`）：
-
-- 读配置时用 `placementsOf` 归一落点表、按 `fumadocsRoster` 合名册
-- 装配项目时用 `assertOutputTurf` 查落点的地盘
-- `render` 与 `confirm` 的最后一步用 `renderOutputs` 写生成物
-- `check` 对生成正本用 `unknownComponents` 查名册、用 `verifyOutputs` 核对生成物
+用它的只有 docfirst，就是总图上那一排：读配置时用 `placementsOf` 归一落点表、按 `fumadocsRoster` 合名册（第 1 号）；装配项目时用 `assertOutputTurf` 查落点的地盘；`render` 与 `confirm` 的最后一步用 `renderOutputs` 写生成物、`check` 对生成正本用 `unknownComponents` 查名册、用 `verifyOutputs` 核对生成物（第 2 号）。

@@ -1,0 +1,11 @@
+/*
+ * VerifyCases 自己的画面：两块并排（容器窄于 560 上下排），下面一行核对结论。
+ * 卡片、胶囊、代码行与颜色变量（--dx-*）由 @godcreator/explainer 提供，颜色只取那套变量；
+ * 等宽代码里写着 ---（frontmatter 分隔线），关掉连字。
+ */
+.vc-case { display: grid; gap: 10px; font-variant-ligatures: none; }
+.vc-panes { display: grid; gap: 12px; align-items: start; }
+@container (min-width: 560px) { .vc-panes { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } }
+
+.vc-missing { margin: 0; padding: 6px 4px; font-size: 12.5px; color: var(--dx-dim); }
+.vc-verdict { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--dx-fg); }

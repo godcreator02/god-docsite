@@ -1,0 +1,16 @@
+/*
+ * PlacementCases 自己的画面：左右两块（容器窄于 560 上下排），右块的拒绝状态一行胶囊加一句原话。
+ * 卡片、胶囊、代码行与颜色变量（--dx-*）由 @godcreator/explainer 提供，颜色只取那套变量。
+ * 等宽代码里写着 ---（frontmatter 分隔线），关掉连字，不然显示成一条长横线。
+ * explainer 的代码块按内容撑宽（.dx-code-lines 的 width: max-content）且行不折（.dx-ln 的 pre），长行会在框里横向滚动、
+ * 看着像截断；落点写法一行放不下要折行，下面两条只在本组件里覆盖成占满卡宽、允许折行，不改 explainer 包。
+ */
+.pc-case { display: grid; gap: 12px; align-items: start; font-variant-ligatures: none; }
+@container (min-width: 560px) { .pc-case { grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr); } }
+
+.pc-case .dx-code-lines { width: 100%; }
+.pc-case .dx-ln { white-space: pre-wrap; }
+.pc-case .dx-ln-text { white-space: pre-wrap; overflow-wrap: anywhere; }
+
+.pc-refusal { display: grid; gap: 8px; justify-items: start; padding: 6px 0; }
+.pc-why { font-size: 12.5px; color: var(--dx-dim); }
