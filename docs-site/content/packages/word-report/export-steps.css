@@ -1,0 +1,22 @@
+/*
+ * ExportSteps 自己的画面：左边这一步手里的东西 + 右边锁与任务状态两张小卡片，窄屏竖排。
+ * 卡片与状态点由 @godcreator/explainer 提供；中性行前摆一个与状态点等宽的空位，行首对齐；
+ * 保留数据里写的前导空格（目录树、命令行的缩进），长行仍能换行。
+ */
+.es-stage { display: grid; grid-template-columns: 1.7fr 1fr; gap: 10px; align-items: start; }
+@container (max-width: 639px) {
+  .es-stage { grid-template-columns: 1fr; }
+}
+
+.es-lines { display: grid; gap: 6px; }
+.es-row { display: flex; align-items: baseline; gap: 8px; font-size: 12.5px; }
+.es-row > span { white-space: pre-wrap; }
+.es-row[data-tone='none'] { color: var(--dx-dim); font-family: var(--dx-mono); font-size: 12px; }
+.es-row[data-tone='bad'] > span { overflow-wrap: anywhere; }
+.es-dot-none { width: 8px; flex: none; }
+
+.es-side { display: grid; gap: 10px; }
+.es-lock-phase { font-size: 13px; }
+.es-lock-lines { display: grid; gap: 4px; }
+.es-lock-lines code { font-family: var(--dx-mono); font-size: 11.5px; color: var(--dx-dim); overflow-wrap: anywhere; }
+.es-job { font-family: var(--dx-mono); font-size: 12.5px; }

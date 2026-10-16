@@ -1,0 +1,21 @@
+/*
+ * ModeCases 自己的画面：左边引用、右边结果两卡片，底部一行模式胶囊。
+ * 卡片、代码行、胶囊、状态点由 @godcreator/explainer 提供，颜色只取那套变量。
+ * 章里的引用固定 violet、组装结果固定 emerald，与分章组装那一节的同组文件一致。
+ */
+.mc-case { display: grid; gap: 10px; }
+
+.mc-panes { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+@container (max-width: 639px) {
+  .mc-panes { grid-template-columns: 1fr; }
+}
+
+.mc-note { font-size: 11px; opacity: .8; font-family: var(--dx-mono); }
+
+.mc-lines { display: grid; gap: 6px; }
+.mc-line { display: flex; align-items: baseline; gap: 8px; font-size: 12.5px; }
+.mc-line[data-mono='true'] { font-family: var(--dx-mono); font-size: 12px; color: var(--dx-dim); }
+.mc-line > span:last-child { overflow-wrap: anywhere; }
+.mc-dot-none { width: 8px; flex: none; }
+
+.mc-mode { display: flex; justify-content: center; }
