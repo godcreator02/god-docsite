@@ -127,7 +127,8 @@ async function main() {
   const workDir = path.join(realpathSync.native(tmpdir()), 'god-docsite-scaffold-check', String(process.pid))
   rmSync(workDir, { recursive: true, force: true })
   let failed = 0
-  const presentSites = sites.filter((site) => site.localOnly !== true || existsSync(site.dir))
+  // 克隆下来的仓里 pnpm install 照锁文件也会建出 demo/site/node_modules，所以看 package.json，不看目录
+  const presentSites = sites.filter((site) => site.localOnly !== true || existsSync(path.join(site.dir, 'package.json')))
   for (const site of sites.filter((site) => !presentSites.includes(site))) console.log(`跳过 ${site.name}：本地验收站，这份仓里没有 ${path.relative(repoDir, site.dir)}`)
   try {
     for (const site of presentSites) {
