@@ -83,8 +83,8 @@
 * `plugins/collab` 的 `tests/verified/` 是**已验证的行为假设**（整组织克隆、ahead/behind 语义、文件监视事件）：断言直接针对 git 与
   watcher 本身，日常不跑。只在这几种时候跑 `pnpm test:verified`：升 git 或关键依赖、动了 `src/organization/setup/` 或
   `src/other-repos/fetch/`、用户或 agent 明确要求
-* 发版只用 `devkit.release`，包按依赖序排：第 0 层（god-docsite、identity、explainer、code-pin、trajectory、word-report）→ 第 1 层（comments、doc-export）→
-  第 2 层（collab、docfirst）→ 插件；发前的检查照上面「跑什么检查只看改到了什么」那张表。升版本号前先读 skill「gwb-release」
+* 发版只用 `devkit.release`，包按依赖序排：第 0 层（god-docsite、identity、explainer、code-pin、trajectory）→ 第 1 层（comments、doc-export）→
+  第 2 层（collab、docfirst、word-report）→ 插件；发前的检查照上面「跑什么检查只看改到了什么」那张表。升版本号前先读 skill「gwb-release」
 * 包发到 npmjs，由 GitHub 仓 `godcreator02/god-docsite` 的 `.github/workflows/publish.yml` 经 trusted publishing 发：`devkit.release` 要求 HEAD 已经推到 GitHub，
   在 HEAD 上建 release、附上本机打好的包文件，工作流按序号逐个发。各包 `publishConfig` 指向 npmjs、`repository` 指向这个仓、`files` 收进 MIT 的 `LICENSE`。
   各 home 还从 Gitea 装 `@godcreator` 的包：`~/.npmrc` 里 `@godcreator` 的范围行指向 Gitea 的源（`https://git.tianshen02.online:28377/api/packages/godcreator/npm/`），`devkit.release` 照这一行先把同样的包发一份到 Gitea、再走 npmjs 那一段，不用另加参数；

@@ -7,12 +7,15 @@ import { Readable } from 'node:stream'
 import { assembleDocument } from '../core/assemble.ts'
 import type { AssemblyResult, ReportDocument } from '../core/types.ts'
 import { readReportFiles, REPORT_ID_PATTERN, reportEntryOf, reportIdsOf } from '../node/report-files.ts'
-import type { ReportListData, ReportPageData, ReportSummary, ReportTocItem } from './page-data.ts'
+import { reportHrefOf, type ReportListData, type ReportPageComments, type ReportPageData, type ReportSummary, type ReportTocItem } from './page-data.ts'
 
-export type { ReportListData, ReportPageData, ReportSummary, ReportTocItem } from './page-data.ts'
+export type { ReportListData, ReportPageComments, ReportPageData, ReportSummary, ReportTocItem } from './page-data.ts'
 
-/** 报告功能的站点信息：站点目录（报告在它的 reports/ 下）、站名、报告页的地址前缀 */
-export type WordReportSite = { siteDir: string; siteName: string; hrefBase: string }
+/**
+ * 报告功能的站点信息：站点目录（报告在它的 reports/ 下）、站名、报告页的地址前缀，
+ * 以及按评论归属键取一页评论的函数（报告页的归属键是它的地址，如 /reports/sample）
+ */
+export type WordReportSite = { siteDir: string; siteName: string; hrefBase: string; pageComments: (page: string) => ReportPageComments }
 
 /** loader 用到的路由参数：报告页是 :report，图片再加 * */
 export type ReportRouteArgs = { params: Partial<Record<string, string>> }
@@ -81,7 +84,7 @@ function tocOf(result: AssemblyResult): ReportTocItem[] {
 export async function reportPageLoader({ params }: ReportRouteArgs, site: WordReportSite): Promise<ReportPageData> {
   const reportId = await reportIdOf(params, site.siteDir)
   const result = plainOf(await assembledReport(site.siteDir, reportId))
-  return { siteName: site.siteName, hrefBase: site.hrefBase, reportId, report: result, toc: tocOf(result) }
+  return { siteName: site.siteName, hrefBase: site.hrefBase, reportId, report: result, toc: tocOf(result), comments: site.pageComments(reportHrefOf(site.hrefBase, reportId)) }
 }
 
 const imageContentTypes: Record<string, string> = { '.png': 'image/png', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg' }

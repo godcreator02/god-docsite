@@ -15,6 +15,8 @@ const chapter = (id: string, title: string, extra: ReportBlock[] = []): ReportDo
 
 let siteDir: string
 let site: WordReportSite
+/** 站点被问过哪几页的评论 */
+let commentPagesAsked: string[]
 async function save(file: string, value: unknown) {
   const absolute = path.join(siteDir, file)
   await mkdir(path.dirname(absolute), { recursive: true })
@@ -23,7 +25,16 @@ async function save(file: string, value: unknown) {
 
 beforeEach(async () => {
   siteDir = await mkdtemp(path.join(tmpdir(), 'word-report-site-'))
-  site = { siteDir, siteName: '测试站', hrefBase: '/reports' }
+  commentPagesAsked = []
+  site = {
+    siteDir,
+    siteName: '测试站',
+    hrefBase: '/reports',
+    pageComments: (page) => {
+      commentPagesAsked.push(page)
+      return { threads: [], access: { kind: 'readonly', reasonCode: 'no-identity', reasonText: '测试站只读' } }
+    },
+  }
   await save('reports/sample/content.json', {
     format: 'docreport', schemaVersion: 1, id: 'doc_sample',
     metadata: { title: '样例报告', language: 'zh-CN', revision: 'A', date: '2026-10-15', authors: ['甲', '乙'] },
@@ -72,6 +83,12 @@ describe('报告页的 loader', () => {
       { title: '2.1 第二章的小节', url: '#two_sub', depth: 3 },
     ])
     expect(Object.getPrototypeOf(data.report.index)).toBe(Object.prototype)
+  })
+
+  it('评论按报告页的地址取：归属键是 /reports/<报告 id>', async () => {
+    const data = await reportPageLoader({ params: { report: 'sample' } }, site)
+    expect(commentPagesAsked).toEqual(['/reports/sample'])
+    expect(data.comments).toEqual({ threads: [], access: { kind: 'readonly', reasonCode: 'no-identity', reasonText: '测试站只读' } })
   })
 
   it('没有这份报告、id 形状不对：404', async () => {

@@ -2,6 +2,7 @@ import { personOf, type Person } from '@godcreator/identity'
 import { threadResolutionOf } from '../core/comment-file.js'
 import { threadsByPage, threadsForPage, type CommentEntryLike, type ThreadSummary } from '../core/threads.js'
 import type { CommentWriter, PageThreadSummary } from './comment-model.js'
+import type { CommentsTableRow } from './comments-table.js'
 
 /** 站点评论集合里的一条（fumadocs-mdx 集合条目）：info.path 相对评论目录，frontmatter 字段直接在条目上 */
 export type CommentCollectionEntry = { info: { path: string } }
@@ -69,4 +70,19 @@ export function threadsByPageOf({ entries, people }: PageThreadsOptions): Map<st
   return new Map(
     [...threadsByPage(entries.map(commentEntryOf))].map(([page, threads]) => [page, threads.map((thread) => pageThreadOf(thread, people))]),
   )
+}
+
+/** 站点的一个内容页：评论归属键（docs 集合里的路径）、标题、地址 */
+export type CommentsTablePage = { key: string; title: string; url: string }
+
+/**
+ * 全站评论表的行：内容页的串写那一页的标题与地址；功能包页面（报告页、协作页）的串归属键就是地址，标题也写地址。
+ * 归属的内容页已经不在站里的串不列
+ */
+export function commentsTableRowsOf(byPage: ReadonlyMap<string, PageThreadSummary[]>, contentPages: readonly CommentsTablePage[]): CommentsTableRow[] {
+  const contentRows = contentPages.flatMap((page) => (byPage.get(page.key) ?? []).map((thread) => ({ thread, pageTitle: page.title, pageUrl: page.url })))
+  const featurePageRows = [...byPage]
+    .filter(([page]) => page.startsWith('/'))
+    .flatMap(([page, threads]) => threads.map((thread) => ({ thread, pageTitle: page, pageUrl: page })))
+  return [...contentRows, ...featurePageRows]
 }

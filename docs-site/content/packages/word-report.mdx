@@ -98,7 +98,11 @@ import { ExportSteps } from './word-report/export-steps'
 
 {/* ref file="../packages/word-report/template/routes.ts" hash="0860a9d22604" blob="2d895248505a" */}
 
-图片只交这份报告组装结果里有的：地址是组装后的路径 `assets/<文档 id>/<文件名>`，不是任意文件。每个块的 id 原样写到页面元素上，留给评论按元素 id 定位。
+图片只交这份报告组装结果里有的：地址是组装后的路径 `assets/<文档 id>/<文件名>`，不是任意文件。
+
+报告页能评论，和内容页一样批一段字、一个元素或整页。评论的归属键是报告页的地址 `/reports/<报告 id>`；正文容器带 `commentScopeProps`，右下角是 comments 包的 `CommentsDock`，写入提交到站点的 `/comments`。每个块的 id 原样写到页面元素上，评论按元素 id 定位，所以改了文字、挪了位置，批在块上的评论还跟着那个块。本页评论由站点的接线文件 `site.server.ts` 经 `pageComments` 交给 loader：
+
+{/* ref file="../packages/word-report/template/site.server.ts" hash="fde6495015a3" blob="5a0424ae2a42" */}
 
 ## 分层与谁在用它
 
@@ -111,4 +115,4 @@ import { ExportSteps } from './word-report/export-steps'
 
 层之间的方向与不许有环由 `tests/dependency-rules.cjs` 检查；word-report 只依赖 comments。
 
-用它的就是总图上的右列：站点经 `template/` 下的接线文件调三个 loader 与页面组件，由 gwb-docsite 的 `docsite.feature.add` 装进站点（协作站建站时不默认带）；测试站 `full-test/site` 装着它，e2e 的 report 组在它上面查列表、整份一页、目录、公式、图片与 404。两个 gwb 插件都不 import 这个包，导出只走命令行。
+用它的就是总图上的右列：站点经 `template/` 下的接线文件调三个 loader 与页面组件，由 gwb-docsite 的 `docsite.feature.add` 装进站点（协作站建站时不默认带）；测试站 `full-test/site` 装着它，e2e 的 report 组在它上面查列表、整份一页、目录、公式、图片、404，以及报告页的评论（dev 写一串，start 只读）。两个 gwb 插件都不 import 这个包，导出只走命令行。

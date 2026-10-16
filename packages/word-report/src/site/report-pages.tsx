@@ -3,6 +3,7 @@
  */
 import { Link, useLoaderData } from 'react-router';
 import { DocsBody, DocsPage, DocsTitle } from '@fumadocs/base-ui/layouts/docs/page';
+import { CommentsDock, commentScopeProps, type CommentAvatar, type CommentBodyComponent } from '@godcreator/comments/site';
 import type { ReportListData, ReportPageData, ReportSummary } from './page-data.ts';
 import { reportAssetHrefOf, reportHrefOf } from './page-data.ts';
 import { ReportView } from './report-view.tsx';
@@ -56,21 +57,40 @@ export function ReportListPage() {
   );
 }
 
-export function ReportDocumentPage() {
-  const { report, toc, reportId, siteName, hrefBase } = useLoaderData<ReportPageData>();
+export interface ReportDocumentPageProps {
+  /** 评论表单提交到的地址：站点的评论写入路由（comments 功能的 /comments） */
+  commentAction: string;
+  /** 站点的评论正文组件与头像组件（站点 app/lib/content 里的 CommentBody、commentAvatar） */
+  CommentBody: CommentBodyComponent;
+  AvatarComponent?: CommentAvatar;
+}
+
+/** 报告页：正文是评论范围，右下角是本页评论；评论归属键是报告页的地址 */
+export function ReportDocumentPage({ commentAction, CommentBody, AvatarComponent }: ReportDocumentPageProps) {
+  const { report, toc, reportId, siteName, hrefBase, comments } = useLoaderData<ReportPageData>();
   const { metadata } = report.document;
   const metaLine = [metadata.revision, metadata.date, metadata.authors?.join('、')].filter((part) => part !== undefined && part !== '');
   return (
-    <DocsPage toc={toc}>
-      <title>{`${metadata.title} · ${siteName}`}</title>
-      <DocsTitle>{metadata.title}</DocsTitle>
-      {metaLine.length > 0 ? <p className="report-meta-line">{metaLine.join(' · ')}</p> : null}
-      <Link className="report-back" to={hrefBase}>
-        ← 全部报告
-      </Link>
-      <DocsBody>
-        <ReportView report={report} assetUrl={(_source, compiledPath) => reportAssetHrefOf(hrefBase, reportId, compiledPath)} />
-      </DocsBody>
-    </DocsPage>
+    <>
+      <DocsPage toc={toc}>
+        <title>{`${metadata.title} · ${siteName}`}</title>
+        <DocsTitle>{metadata.title}</DocsTitle>
+        {metaLine.length > 0 ? <p className="report-meta-line">{metaLine.join(' · ')}</p> : null}
+        <Link className="report-back" to={hrefBase}>
+          ← 全部报告
+        </Link>
+        <DocsBody {...commentScopeProps}>
+          <ReportView report={report} assetUrl={(_source, compiledPath) => reportAssetHrefOf(hrefBase, reportId, compiledPath)} />
+        </DocsBody>
+      </DocsPage>
+      <CommentsDock
+        pagePath={reportHrefOf(hrefBase, reportId)}
+        action={commentAction}
+        threads={comments.threads}
+        access={comments.access}
+        BodyComponent={CommentBody}
+        {...(AvatarComponent !== undefined ? { AvatarComponent } : {})}
+      />
+    </>
   );
 }

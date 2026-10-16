@@ -144,9 +144,9 @@ export const steps = [
         { kind: 'code', text: publishLine },
       ],
       tiers: [
-        { label: '第 0 层', packs: ['god-docsite', 'identity', 'explainer', 'code-pin', 'trajectory', 'word-report'] },
+        { label: '第 0 层', packs: ['god-docsite', 'identity', 'explainer', 'code-pin', 'trajectory'] },
         { label: '第 1 层', packs: ['comments', 'doc-export'] },
-        { label: '第 2 层', packs: ['collab', 'docfirst'] },
+        { label: '第 2 层', packs: ['collab', 'docfirst', 'word-report'] },
         { label: '插件', packs: ['gwb-docsite', 'gwb-collab'] },
       ],
     },

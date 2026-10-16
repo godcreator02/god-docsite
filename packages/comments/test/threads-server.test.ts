@@ -2,7 +2,7 @@
 import { identityOf, type StoredPerson } from '@godcreator/identity'
 import { describe, expect, it } from 'vitest'
 import { commentsAccessOf } from '../src/site/index.js'
-import { pageThreadsOf, threadsByPageOf, type CommentCollectionEntry } from '../src/site/index.server.js'
+import { commentsTableRowsOf, pageThreadsOf, threadsByPageOf, type CommentCollectionEntry } from '../src/site/index.server.js'
 
 const people: StoredPerson[] = [
   { id: 'owner', name: '站长', codes: ['ownercode001'] },
@@ -39,6 +39,21 @@ describe('页面 loader 读本页评论', () => {
     const byPage = threadsByPageOf({ entries, people })
     expect([...byPage.keys()]).toEqual(['index.mdx', 'guide.mdx'])
     expect(byPage.get('index.mdx')![0]!.replies).toHaveLength(1)
+  })
+
+  it('全站评论表：内容页的串带页面标题，功能包页面的串标题写地址，内容页已不在的串不列', () => {
+    const byPage = threadsByPageOf({
+      entries: [
+        ...entries,
+        entryOf('20261012t100000-report/index.mdx', { page: '/reports/sample', author: 'owner', createdAt: '2026-10-12T10:00:00.000Z', anchor: 'sec_one' }),
+      ],
+      people,
+    })
+    const rows = commentsTableRowsOf(byPage, [{ key: 'index.mdx', title: '首页', url: '/' }])
+    expect(rows.map(({ thread, pageTitle, pageUrl }) => [thread.id, pageTitle, pageUrl])).toEqual([
+      ['20261012t080000-seed1', '首页', '/'],
+      ['20261012t100000-report', '/reports/sample', '/reports/sample'],
+    ])
   })
 
   it('frontmatter 缺作者、字段不是字符串、作者不在人员列表：报错并点名', () => {

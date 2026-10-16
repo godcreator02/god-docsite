@@ -894,6 +894,9 @@ importers:
 
   packages/word-report:
     dependencies:
+      '@godcreator/comments':
+        specifier: workspace:^
+        version: link:../comments
       sharp:
         specifier: 'catalog:'
         version: 0.35.5(@types/node@26.6.4)

@@ -62,7 +62,7 @@ anchor: "{\"quote\":\"第二段话。\",\"start\":15,\"end\":20,\"snapshot\":\"�
 
 图上第 1、2 号。全站的评论写入都提交到 `/comments`：这个路由既是全站评论页，它的 action 调 `handleCommentWrite`。路由文件由建站器写进站点的 `app/features/comments/`（只改本包 `template/`）：
 
-{/* ref file="../packages/comments/template/comments.tsx" lines="17-20" hash="8ea0ded43bb4" blob="f265c85cb735" */}
+{/* ref file="../packages/comments/template/comments.tsx" lines="14-17" hash="8ea0ded43bb4" blob="391d3c0bb103" */}
 
 表单字段是界面与 action 之间的外部契约：六种 `intent`（建串、回复、删回复、删串、标为已解决、重新打开），每种只收自己那几个字段，多写一个字段就拒绝；`as` 只给 agent 经命令用，网页界面里不出现。返回 `{ ok: true, intent, threadId?, replyId? }` 或 `{ ok: false, error }`。
 
@@ -76,7 +76,9 @@ anchor: "{\"quote\":\"第二段话。\",\"start\":15,\"end\":20,\"snapshot\":\"�
 
 ## 读回：从集合条目到评论串
 
-图上第 3 号。平台模板在 `source.config.ts` 里把站点的 `comments/` 定义成集合 `comments`（怎么定义归 god-docsite 页）。页面 loader 用 `pageThreadsOf` 取本页的串，全站评论页用 `threadsByPageOf` 按页分组。
+图上第 3 号。平台模板在 `source.config.ts` 里把站点的 `comments/` 定义成集合 `comments`（怎么定义归 god-docsite 页）。页面 loader 用 `pageThreadsOf` 取本页的串，全站评论页用 `threadsByPageOf` 按页分组，再用 `commentsTableRowsOf` 排成表格的行：内容页的串写那一页的标题，功能包页面（报告页、协作页）的串标题写地址，归属的内容页已经不在站里的串不列。
+
+{/* ref file="../packages/comments/src/site/threads.server.ts" lines="82-88" hash="9f4b7ea77281" blob="6e6db6348ac9" */}
 
 按文件夹分串：串按创建时间排，回复按文件名排（文件名就是带时刻的 id）。数据不完整就直接报错并点名文件：回复没有串头、串头缺 `page`、一个文件夹两个串头、回复带了已解决状态。
 
@@ -126,7 +128,7 @@ anchor: "{\"quote\":\"第二段话。\",\"start\":15,\"end\":20,\"snapshot\":\"�
 - 点黄条、点高亮的字、或在收件箱点一行：被批的那一块正下方浮出这一串，不挤动正文；Esc 或点别处收起
 - 地址带 `?comment=<评论串 id>` 时（gwb-collab 通知里评论的链接就是这样拼的），打开页面就浮出这一串，和在收件箱点那一行一样；这一页上没有那一串就不管
 - 被批的元素不铺底色，正文栏左边外侧画一道和它上下对齐的竖黄条；划的字用浏览器的 CSS Custom Highlight API 高亮（注册名 `docsite-comment`）
-- 全站评论页 `/comments` 是只读表格，一行一串，按最近有人说话排；那里不量落点，位置只按锚点的种类写
+- 全站评论页 `/comments` 是只读表格，一行一串，按最近有人说话排，内容页与功能包页面的评论都列；那里不量落点，位置只按锚点的种类写
 
 ## 分层与谁在用它
 
@@ -141,8 +143,8 @@ anchor: "{\"quote\":\"第二段话。\",\"start\":15,\"end\":20,\"snapshot\":\"�
 | `core/` | `@godcreator/comments` | 评论文件的格式（读、写、状态）、锚点的三种写法、按文件夹分串、`page` 换成站内地址（`pageAddressOf`）；不碰磁盘 |
 | `node/` | `@godcreator/comments/node` | 评论目录的读写：建串、回复、删除、改状态，直接读整个目录（`readCommentThreads`，站点不在运行也能读） |
 | `site/` | `@godcreator/comments/site` | `CommentsDock`、`CommentThread`、`CommentsTable`、`commentsAccessOf`、`commentScopeProps`；浏览器里的页面文字、稳定 id、落点推算在 `site/browser/`，不单独导出 |
-| `site/` 服务端 | `@godcreator/comments/site/server` | `handleCommentWrite`、`pageThreadsOf`、`threadsByPageOf`、`commentIntents` |
+| `site/` 服务端 | `@godcreator/comments/site/server` | `handleCommentWrite`、`pageThreadsOf`、`threadsByPageOf`、`commentsTableRowsOf`、`commentIntents` |
 
 层之间的方向与不许有环由 `tests/dependency-rules.cjs` 检查；comments 只依赖 identity。
 
-用它的四方就是总图右列。平台模板（god-docsite 的 `template/`）页面路由用 `pageThreadsOf`、`commentsAccessOf`、`CommentsDock`，正文组件加 `commentScopeProps`，头像用 identity 的 `Avatar` 包一层传给 `AvatarComponent`（怎么接归 god-docsite 页）；collab 的任务页与记录页把评论的 intent 转给 `handleCommentWrite`，站点接的也是那几样（`CommentsDock`、`commentScopeProps`、`pageThreadsOf`、`commentsAccessOf`、`commentIntents`），通知里评论的链接用 `pageAddressOf`；gwb-docsite 的评论命令与 gwb-collab 的收件箱都直接 `readCommentThreads` 读整个目录（图上第 5 号），前者还用类型 `CommentFileOnDisk`。
+用它的四方就是总图右列。平台模板（god-docsite 的 `template/`）页面路由用 `pageThreadsOf`、`commentsAccessOf`、`CommentsDock`，正文组件加 `commentScopeProps`，头像用 identity 的 `Avatar` 包一层传给 `AvatarComponent`（怎么接归 god-docsite 页）；collab 的任务页与记录页把评论的 intent 转给 `handleCommentWrite`，站点接的也是那几样（`CommentsDock`、`commentScopeProps`、`pageThreadsOf`、`commentsAccessOf`、`commentIntents`），通知里评论的链接用 `pageAddressOf`；word-report 的报告页接 `CommentsDock`、`commentScopeProps`，站点的接线文件用 `pageThreadsOf`、`commentsAccessOf` 取本页评论，写入提交到 `/comments`；gwb-docsite 的评论命令与 gwb-collab 的收件箱都直接 `readCommentThreads` 读整个目录（图上第 5 号），前者还用类型 `CommentFileOnDisk`。

@@ -91,8 +91,8 @@ export const cases = [
       },
     ],
   },
-  /* ref file="../packages/collab/test/merge-check-lead-only.slow.test.ts" lines="28-32" hash="331fb82e41ee" blob="c50a5a5d42e0" */
-  /* ref file="../packages/collab/test/merge-check-lead-only.slow.test.ts" lines="52-56" hash="6195322269eb" blob="c50a5a5d42e0" */
+  /* ref file="../packages/collab/test/merge-check-lead-only.slow.test.ts" lines="29-33" hash="331fb82e41ee" blob="9a341177f5dd" */
+  /* ref file="../packages/collab/test/merge-check-lead-only.slow.test.ts" lines="53-57" hash="6195322269eb" blob="9a341177f5dd" */
   {
     id: 'own-codes',
     label: '给自己加身份码',
@@ -130,7 +130,7 @@ export const cases = [
       { verdict: 'needs-review', exitCode: 1, problems: ['改了只有负责人能改的内容：site/people.json；这类改动交给负责人（协作仓的协作者）提交'] },
     ],
   },
-  /* ref file="../packages/collab/test/merge-check-lead-only.slow.test.ts" lines="73-94" hash="88a5199f0c5c" blob="c50a5a5d42e0" */
+  /* ref file="../packages/collab/test/merge-check-lead-only.slow.test.ts" lines="74-95" hash="88a5199f0c5c" blob="9a341177f5dd" */
   {
     id: 'other-libs',
     label: '升级 react、加 three',
@@ -173,7 +173,7 @@ export const cases = [
       },
     ],
   },
-  /* ref file="../packages/collab/test/merge-check-lead-only.slow.test.ts" lines="96-101" hash="736f11cdce34" blob="c50a5a5d42e0" */
+  /* ref file="../packages/collab/test/merge-check-lead-only.slow.test.ts" lines="97-102" hash="736f11cdce34" blob="9a341177f5dd" */
   {
     id: 'lead-scripts',
     label: '负责人改 scripts',

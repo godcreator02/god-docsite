@@ -1,3 +1,4 @@
+import type { CommentsAccess, PageThreadSummary } from '@godcreator/comments/site'
 import type { AssemblyResult } from '../core/types.ts'
 
 /** 报告列表里的一行：报告读不对时 problem 是原话，标题退回报告 id */
@@ -19,7 +20,10 @@ export type ReportListData = { siteName: string; hrefBase: string; reports: Repo
 /** 报告页右侧目录的一项：url 是 #<节的 id> */
 export type ReportTocItem = { title: string; url: string; depth: number }
 
-export type ReportPageData = { siteName: string; hrefBase: string; reportId: string; report: AssemblyResult; toc: ReportTocItem[] }
+/** 报告页上的评论：归属这一页的评论串，以及本机身份能不能写 */
+export type ReportPageComments = { threads: PageThreadSummary[]; access: CommentsAccess }
+
+export type ReportPageData = { siteName: string; hrefBase: string; reportId: string; report: AssemblyResult; toc: ReportTocItem[]; comments: ReportPageComments }
 
 /** 报告页地址 */
 export const reportHrefOf = (hrefBase: string, reportId: string) => `${hrefBase}/${reportId}`

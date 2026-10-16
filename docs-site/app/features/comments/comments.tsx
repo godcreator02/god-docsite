@@ -3,15 +3,12 @@ import { useLoaderData } from 'react-router'
 import { DocsPage } from '@fumadocs/base-ui/layouts/docs/page'
 import { sitePageRefs } from '@godcreator/god-docsite/server'
 import { CommentsTable } from '@godcreator/comments/site'
-import { handleCommentWrite, threadsByPageOf } from '@godcreator/comments/site/server'
+import { commentsTableRowsOf, handleCommentWrite, threadsByPageOf } from '@godcreator/comments/site/server'
 import { site } from '@/lib/site.server'
 import { commentAvatar, CommentBody } from '@/lib/content'
 
 export async function loader() {
-  const byPage = threadsByPageOf({ entries: site.commentEntries, people: site.people() })
-  return {
-    rows: sitePageRefs(site).flatMap((page) => (byPage.get(page.key) ?? []).map((thread) => ({ thread, pageTitle: page.title, pageUrl: page.url }))),
-  }
+  return { rows: commentsTableRowsOf(threadsByPageOf({ entries: site.commentEntries, people: site.people() }), sitePageRefs(site)) }
 }
 
 /** 评论写入：各页的评论都提交到 /comments */

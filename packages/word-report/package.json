@@ -1,6 +1,6 @@
 {
   "name": "@godcreator/word-report",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "author": {
     "name": "godcreator"
   },
@@ -49,6 +49,7 @@
     "prepublishOnly": "pnpm run build"
   },
   "dependencies": {
+    "@godcreator/comments": "workspace:^",
     "sharp": "catalog:"
   },
   "peerDependencies": {
