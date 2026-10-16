@@ -35,15 +35,6 @@ const sites = [
     homePageFrom: path.join(repoDir, 'packages', 'collab', 'templates', 'home.tsx'),
   },
   {
-    name: 'demo',
-    dir: path.join(repoDir, 'demo', 'site'),
-    features: ['@godcreator/collab', '@godcreator/code-pin', '@godcreator/trajectory', '@godcreator/explainer', '@godcreator/word-report'],
-    siteOwned: [],
-    homePageFrom: path.join(repoDir, 'packages', 'collab', 'templates', 'home.tsx'),
-    // 本地验收站：内容是真实项目的快照，.gitignore 忽略、不进公开仓，克隆下来的仓里没有它
-    localOnly: true,
-  },
-  {
     name: 'docs-site',
     dir: path.join(repoDir, 'docs-site'),
     features: ['@godcreator/code-pin', '@godcreator/trajectory', '@godcreator/explainer'],
@@ -127,11 +118,8 @@ async function main() {
   const workDir = path.join(realpathSync.native(tmpdir()), 'god-docsite-scaffold-check', String(process.pid))
   rmSync(workDir, { recursive: true, force: true })
   let failed = 0
-  // 克隆下来的仓里 pnpm install 照锁文件也会建出 demo/site/node_modules，所以看 package.json，不看目录
-  const presentSites = sites.filter((site) => site.localOnly !== true || existsSync(path.join(site.dir, 'package.json')))
-  for (const site of sites.filter((site) => !presentSites.includes(site))) console.log(`跳过 ${site.name}：本地验收站，这份仓里没有 ${path.relative(repoDir, site.dir)}`)
   try {
-    for (const site of presentSites) {
+    for (const site of sites) {
       const generatedDir = path.join(workDir, site.name)
       generateExpectedSite({ scaffold, generatedDir, features: site.features })
       const siteOwned = [...siteOwnedInEverySite, ...site.siteOwned]
@@ -151,7 +139,7 @@ async function main() {
     // 递归删除遇到目录联接只删联接本身（lstat 认作符号链接），不进到工作区的包目录里
     rmSync(workDir, { recursive: true, force: true })
   }
-  console.log(`${presentSites.length - failed}/${presentSites.length} 个站一致，用时 ${((Date.now() - startedAt) / 1000).toFixed(1)} 秒`)
+  console.log(`${sites.length - failed}/${sites.length} 个站一致，用时 ${((Date.now() - startedAt) / 1000).toFixed(1)} 秒`)
   process.exitCode = failed === 0 ? 0 : 1
 }
 

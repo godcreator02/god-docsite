@@ -2,6 +2,5 @@ node_modules/
 dist/
 *.tgz
 
-# 真实项目的内容不进公开仓：演示站 demo/ 是本地验收站，probe 里的两页 SST 页面同理
-/demo/
+# 真实项目的内容不进公开仓：probe 里的两页 SST 页面
 /probes/2609251500_vite-react-pages/site/pages/sst/

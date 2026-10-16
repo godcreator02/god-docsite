@@ -1,0 +1,23 @@
+---
+born-at: 2026-10-16T17:30
+type: choice
+parent: [2026-09-03-god-live-doc]
+label: 删掉本地验收站 demo/：它快照的 chb-dab-sst 协作仓已经迁到新平台，看真实内容直接看那个仓的站
+domain: 平台
+---
+
+pivots-from:: [演示站 demo/ 改成本地验收站：不进仓，从全部历史里删掉，probe 里的两页真实项目页同样处理](2026-10-16-demo-local-only.mdx)
+
+## 背景
+
+`demo/` 是 `chb-dab-sst` 协作仓 2026-10-15 的内容快照，装上全部功能，用来在新平台还没接上真实项目时看真实内容用起来的样子。同一天这个协作仓本身迁到了新平台（站点由 gwb-collab 登记、gwb-docsite 托管，改动已经合进它的 main）。用户要求同一个项目的站不要同时出现在好几个地方。
+
+## 结论与边界
+
+- 删掉本机的 `demo/`，从 pnpm 工作区、锁文件、`.gitignore`、`tests/scaffold-check.mjs`（连同只为它写的 `localOnly` 跳过）、仓根 `package.json` 的说明、AGENTS 与维护页里去掉它
+- 看真实内容就开 `chb-dab-sst` 协作仓的站；`pnpm test:scaffold` 只比对测试站与本站，真实站点的骨架跟不跟得上模板，由升级站点时对照模板来管
+- probe 里两页真实项目页照旧由 `.gitignore` 忽略
+
+## 否掉的候选
+
+- 留着 `demo/` 当另一份验收站：内容是快照，会和真实仓越走越远，同一个项目两个站反而让人分不清该看哪个
