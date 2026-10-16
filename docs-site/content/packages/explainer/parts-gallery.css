@@ -1,0 +1,35 @@
+/*
+ * PartsGallery 自己的画面：上半六个零件两列（容器够宽三列），每格是零件名、真实渲染、格底一行最小写法；
+ * 下半两排色块（语气五种、角色色七种），色块下写名字。
+ * 零件与颜色变量（--dx-*）由 @godcreator/explainer 提供，颜色只取那套变量，深色主题跟着换。
+ */
+.pg-board { gap: 16px; }
+
+/* 上半：六个零件 */
+.pg-parts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+@container (min-width: 640px) { .pg-parts { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+
+.pg-part { margin: 0; display: grid; gap: 8px; align-content: start; min-width: 0; padding: 10px; border: 1px solid var(--dx-line); border-radius: 10px; background: var(--dx-surface); }
+.pg-part-head { display: flex; align-items: baseline; gap: 8px; min-width: 0; }
+.pg-part-name { font-family: var(--dx-mono); font-size: 13px; font-weight: 600; }
+.pg-part-what { color: var(--dx-dim); font-size: 12px; }
+/* 舞台垂直居中；零件放不下时在自己的滚动区里滚（零件自带横向滚动） */
+.pg-part-stage { display: flex; align-items: center; justify-content: center; min-height: 56px; min-width: 0; }
+.pg-part-stage > * { max-width: 100%; }
+/* 格底的最小写法：放不下就折行，不截断；连字关掉，?? 与 => 不被等宽字体画成别的符号 */
+.pg-part-usage { display: block; font-family: var(--dx-mono); font-size: 11px; line-height: 1.55; color: var(--dx-dim); white-space: pre-wrap; overflow-wrap: anywhere; font-variant-ligatures: none; }
+
+/* Pane 格里的四步 */
+.pg-pane-steps { margin: 0; padding: 0; list-style: none; display: grid; gap: 2px; font-size: 12px; }
+
+/* 下半：两排色块 */
+.pg-tones, .pg-roles { display: grid; gap: 8px; }
+.pg-row-label { font-size: 12.5px; font-weight: 600; }
+.pg-label-mono { font-family: var(--dx-mono); font-weight: 500; }
+.pg-swatch-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: start; }
+.pg-swatch { margin: 0; display: grid; gap: 6px; justify-items: center; min-width: 0; flex: 1 1 96px; max-width: 180px; }
+.pg-swatch-name { font-family: var(--dx-mono); font-size: 11.5px; color: var(--dx-dim); }
+.pg-tone-pair { display: inline-flex; align-items: center; gap: 10px; }
+/* 角色色的格子更宽（标题栏文字长，折行显示）；只展示标题栏，空身子收掉 */
+.pg-roles .pg-swatch { flex-basis: 128px; }
+.pg-roles .dx-pane-body:empty { display: none; }

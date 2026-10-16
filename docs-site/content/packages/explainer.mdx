@@ -1,11 +1,12 @@
 ---
 title: explainer：讲解组件
-description: 讲解组件包：分步、动画、选情况三种外壳共用一套控制条与说明行，页面只画自己的画面；接缝图把内容和坐标分开；包的 `.` 出口不 import React，给生成物写机读文字
+description: 讲解组件包：分步、动画、选情况三种外壳共用一套控制条与说明行，六个零件、两组颜色名拼画面；接缝图把内容和坐标分开；包的 `.` 出口不 import React，给生成物写机读文字
 icon: Presentation
 ---
 
 import { StepperDemo, TimelineDemo, CasePickerDemo } from './explainer/shell-demos'
 import { ExplainerSeams } from './explainer/seams'
+import { PartsGallery } from './explainer/parts-gallery'
 
 explainer 把一段讲解变成能看、能动的东西：分步 `Stepper`、动画 `Timeline`、选情况 `CasePicker` 三种外壳，加上一张接缝图 `SeamDiagram`。外壳管控制条与说明行，页面交给它一个「当前这一项 → 画面」的函数，只画这一页独有的部分。
 
@@ -17,21 +18,21 @@ explainer 把一段讲解变成能看、能动的东西：分步 `Stepper`、动
 
 <ExplainerSeams />
 
-按接缝编号逐条看，代码只在契约那一行出现：
+图上画了谁 import 谁、中间传什么，下面每条只补图上看不出的那一点，代码只在契约那一行出现：
 
-1. **页面引入组件**：页面开头 `import`，正文只写组件标签——code-pin 页写的是 `import { JudgeCases } from './code-pin/judge-cases'`。画面读同一文件夹里的数据（接缝 2）。
-2. **画面读数据**：说明文字和例子都在数据文件里，画面只读，两边读的是同一份。
-3. **画面用外壳与零件**：画面把「当前这一项 → 画面」的函数交给外壳，用零件拼画面；颜色只写 `tone` / `role` 的名字，不写颜色值。
-4. **机读规则读数据**：机读规则读画面读的同一份数据，用 `stepsText` 等转成段落。
-5. **名册登记机读规则**：规则登记进 `docfirst.config.mjs` 的 `components`；只有生成正本里用到的组件要登记，名册怎么合并、哪些页查名册，看 [doc-export 页](/packages/doc-export)的「组件名册」。
-6. **组件出口用核心的类型**：`site/` 只 import React 与本包 `core/`，`core/` 什么都不 import——docfirst 要在 Node 里加载机读规则，这是前提。包的两个出口正好对着上面的拆法：`.` 给数据和机读规则用（不 import React），`./site` 给画面用（要 React）：
+1. **页面引入组件**：`import` 写在页面开头，正文里只剩组件标签。
+2. **画面读数据**：说明文字和例子都在数据文件里，画面只读。
+3. **画面用外壳与零件**：颜色只写 `tone` / `role` 的名字，不写颜色值。
+4. **机读规则读数据**：用 `stepsText` 等转成段落，只写结论、不逐步展开。
+5. **名册登记机读规则**：名册怎么合并、哪些页查名册，看 [doc-export 页](/packages/doc-export)的「组件名册」。
+6. **组件出口用核心的类型**：`core/` 什么都不 import，docfirst 才能在 Node 里加载机读规则；两个出口正对着上面的拆法——`.` 给数据与机读规则，`./site` 给画面：
 
 {/* ref file="../packages/explainer/package.json" lines="10-20" hash="3866917f6d21" blob="b10650324dec" */}
 
 {/* ref file="../packages/explainer/src/core/index.ts" hash="ac07ae118ec6" blob="6b98c5b29c15" */}
 
-7. **站点接进包的样式**：建站器把包里的 `template/styles.css` 复制成站点 `app/features/explainer/styles.css`，里面一行 `@import` 把包的样式接进全站；页面组件只 import 自己的 `./xx.css`。
-8. **核对数据里的钉**：数据里照抄源码的地方，在那段数据正上方钉一处码，docfirst 读文件核对它；标记怎么写看 [code-pin 页](/packages/code-pin)的「两种文档格式」。
+7. **站点接进包的样式**：页面组件只 import 自己的 `./xx.css`。
+8. **核对数据里的钉**：标记怎么写看 [code-pin 页](/packages/code-pin)的「两种文档格式」。
 
 ## 三种外壳：控制条一样，画面归页面
 
@@ -69,18 +70,11 @@ explainer 把一段讲解变成能看、能动的东西：分步 `Stepper`、动
 
 ## 零件与颜色
 
-拼画面用的零件就六个：
+拼画面用的零件就六个，颜色只有两组名字；每格零件下面那行等宽字，是本站页面里真实用过的最小写法：
 
-| 零件 | 画什么 |
-| --- | --- |
-| `Pane` | 带标题栏的卡片 |
-| `Terminal` | 终端窗口 |
-| `Pill` | 胶囊标签 |
-| `Dot` | 状态点 |
-| `CodeLines` | 带行号与高亮的代码行 |
-| `Diff` | 新旧行对照 |
+<PartsGallery />
 
-颜色只有两组名字。语气 `Tone` 五种：good 绿、warn 琥珀、bad 玫红、pending 琥珀空心、info 蓝，说「这一项是什么状态」。角色色 `Role` 七种：blue、violet、emerald、amber、rose、cyan、slate，说「这个东西是哪个角色」，同一个角色在整页里固定一种颜色。零件只写 `data-tone` / `data-role` 属性，样式表按属性给颜色，深色主题另有一套。
+语气 `Tone` 说「这一项是什么状态」，角色色 `Role` 说「这个东西是哪个角色」，同一个角色在整页里固定一种颜色；零件只写 `data-tone` / `data-role` 属性，样式表按属性给颜色，深色主题另有一套。
 
 ## 接缝图：内容和坐标分开
 
@@ -115,5 +109,5 @@ explainer 把一段讲解变成能看、能动的东西：分步 `Stepper`、动
 ## 谁在用它
 
 - **gwb-docsite**：`docfirst.create` 建 docfirst 站时，把 explainer 和 code-pin、trajectory 一起装上
-- **本站的页面组件**：code-pin 页的 `JudgeCases`、[实时推送与执行器](/gitea/push) 页的 `AutoMergeRun`、[背景分区的 mdx 编译一页](/background/mdx-compile-explainer)的两个组件
+- **本站各包、各插件页的讲解组件**：如 code-pin 页的 `JudgeCases`、[实时推送与执行器](/gitea/push) 页的 `AutoMergeRun`
 - **docfirst**：生成正本里用到的组件，经 `docfirst.config.mjs` 的 `components` 加载机读规则，规则 import `.` 出口
