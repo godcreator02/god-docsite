@@ -1,3 +1,4 @@
+import { pageAddressOf } from '@godcreator/comments'
 import { mentionsOf } from '@godcreator/identity'
 import type { CollabState, TaskState } from './state.js'
 import type { Person } from './people.js'
@@ -16,7 +17,8 @@ export function commentRefOf(thread: string, file: string): string {
 
 /** 点到一串评论时去哪：挂在页面上的去那一页并打开它，不挂在页面上的去全部评论页并展开它 */
 export function commentDestinationOf(thread: Pick<CommentThreadOnFile, 'id'> & { head: { page?: string | undefined } }): string {
-  return `${thread.head.page ?? '/comments'}?${new URLSearchParams({ comment: thread.id })}`
+  const page = thread.head.page === undefined ? '/comments' : pageAddressOf(thread.head.page)
+  return `${page}?${new URLSearchParams({ comment: thread.id })}`
 }
 
 /** @ 了我的一条：在发起的那条（comment）还是回复（reply）里 */

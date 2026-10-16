@@ -57,5 +57,7 @@ describe('找我的', () => {
   it('点一串评论去哪：挂在页面上的去那一页，不挂的去全部评论页，都带上评论串', () => {
     expect(commentDestinationOf({ id: '2026-10-10-abc', head: { page: '/a/b' } })).toBe('/a/b?comment=2026-10-10-abc')
     expect(commentDestinationOf({ id: '2026-10-10-abc', head: {} })).toBe('/comments?comment=2026-10-10-abc')
+    expect(commentDestinationOf({ id: '2026-10-16-i4jj', head: { page: 'about.mdx' } })).toBe('/about?comment=2026-10-16-i4jj')
+    expect(commentDestinationOf({ id: '2026-10-16-i4jj', head: { page: 'plan/index.mdx' } })).toBe('/plan?comment=2026-10-16-i4jj')
   })
 })

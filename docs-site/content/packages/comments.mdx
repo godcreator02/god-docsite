@@ -77,6 +77,10 @@ anchor: "{\"quote\":\"第二段话。\",\"start\":15,\"end\":20,\"snapshot\":\"�
 
 {/* ref file="../packages/comments/src/core/threads.ts" lines="44-79" hash="277e303a7a37" blob="036a6a68be13" */}
 
+串头的 `page` 有两种写法：内容页写页面在 docs 集合里的路径（`plan/index.mdx`），功能包页面写地址（`/tasks`）。站点之外要拿它拼链接的（gwb-collab 的通知），用 `pageAddressOf` 换成站内地址：`/` 开头的原样返回，路径照 fumadocs 的 `getSlugs` 去掉扩展名、`index` 落到所在目录、括号分组目录不进地址，再逐段 `encodeURI`。
+
+{/* ref file="../packages/comments/src/core/page-address.ts" hash="a7323e9f5118" blob="f2d1af612a7c" */}
+
 交给界面前作者 id 换成名单里的 `{ id, name }`，只取这两项，身份码不会带出去；作者不在名单里直接报错。界面不认识身份码，只收「可写、署名是谁」或「只读、原因」（`commentsAccessOf`）。
 
 ## 正文里的位置：页面文字
@@ -128,11 +132,11 @@ anchor: "{\"quote\":\"第二段话。\",\"start\":15,\"end\":20,\"snapshot\":\"�
 
 平台模板的页面路由用 `pageThreadsOf`、`commentsAccessOf`、`CommentsDock`，正文组件加 `commentScopeProps`，头像用 identity 的 `Avatar` 包一层传给 `AvatarComponent`（怎么接归 god-docsite 页）。
 
-{/* tree dir="../packages/comments/src" depth="2" hash="7120b49b7489" */}
+{/* tree dir="../packages/comments/src" depth="2" hash="964039ca0c71" */}
 
 | 层 | 导出 | 做什么 |
 | --- | --- | --- |
-| `core/` | `@godcreator/comments` | 评论文件的格式（读、写、状态）、锚点的三种写法、按文件夹分串；不碰磁盘 |
+| `core/` | `@godcreator/comments` | 评论文件的格式（读、写、状态）、锚点的三种写法、按文件夹分串、`page` 换成站内地址（`pageAddressOf`）；不碰磁盘 |
 | `node/` | `@godcreator/comments/node` | 评论目录的读写：建串、回复、删除、改状态，直接读整个目录（`readCommentThreads`，站点不在运行也能读） |
 | `site/` | `@godcreator/comments/site` | `CommentsDock`、`CommentThread`、`CommentsTable`、`commentsAccessOf`、`commentScopeProps`；浏览器里的页面文字、稳定 id、落点推算在 `site/browser/`，不单独导出 |
 | `site/` 服务端 | `@godcreator/comments/site/server` | `handleCommentWrite`、`pageThreadsOf`、`threadsByPageOf`、`commentIntents` |
@@ -140,6 +144,6 @@ anchor: "{\"quote\":\"第二段话。\",\"start\":15,\"end\":20,\"snapshot\":\"�
 ## 谁在用它
 
 - 平台模板（god-docsite 的 `template/`）：页面路由 `pageThreadsOf`、`commentsAccessOf`、`CommentsDock`；`app/lib/content.tsx` 的 `commentScopeProps` 与类型 `CommentAvatar`
-- collab：`CommentsDock`、`commentScopeProps`、`handleCommentWrite`、`pageThreadsOf`、`commentsAccessOf`、`commentIntents`、`readCommentThreads`
+- collab：`CommentsDock`、`commentScopeProps`、`handleCommentWrite`、`pageThreadsOf`、`commentsAccessOf`、`commentIntents`、`readCommentThreads`、`pageAddressOf`（通知里评论的链接）
 - gwb-docsite 的评论命令：`readCommentThreads`、类型 `CommentFileOnDisk`
 - gwb-collab 的收件箱：`readCommentThreads`
