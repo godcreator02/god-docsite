@@ -1,16 +1,23 @@
 ---
 title: gwb-collab：协作站插件
-description: 协作站在每个成员电脑上的那一半：协作仓与别的仓两套操作，本机自动同步与提交审核（提交前查格式与站点、推送前查只有负责人能改的内容、等执行器的结论），通知每次从此刻的状态现算、推给站点并交给协作窗格与 QQ，站点交给 gwb-docsite 建与托管
+description: 协作站在每个成员电脑上的那一半：夹在 git / Gitea / ntfy 与站点、协作窗格、QQ 之间——协作仓与别的仓两套操作，自动同步只快进，提交审核查格式与只有负责人能改的内容，通知每次从此刻的状态现算、推给站点并交给协作窗格与 QQ
 icon: Plug
 ---
 
 import { SubmitStops } from './gwb-collab/submit-stops'
+import { CollabPluginSeams } from './gwb-collab/seams'
+import { SyncCases } from './gwb-collab/sync-cases'
+import { QqTiming } from './gwb-collab/qq-timing'
 
 gwb-collab 是 gwb 工作台的插件，跑在每个成员自己的电脑上：管 git 与 Gitea（克隆、取回、同步、提交审核、读合并请求与 issue、核对仓的配置），把要人处理的事算成通知，再交给站点、协作窗格与 QQ。站点不跑 git、也不向插件发请求，只收插件推来的数据。
 
 和别处的分工：记录格式、写入规则、合并检查判什么、`SiteFeed` 的形状在 [collab 包](/packages/collab)；ntfy 推送、执行器、权限在 [Gitea 与 NAS](/gitea) 分区；每条命令怎么用、每条通知怎么处理在说明书 [collab](/docs/outputs/skills/collab)。这一页只讲插件这一层。
 
 这一页从头到尾用同一个例子：Gitea 组织 `hybrid-mmc` 的项目里，`bob` 是协作仓 `collab` 的成员、本机身份，`admin` 是管理员、项目负责人，`carol` 是另一个成员。推送以后 Gitea 开出的合并请求都是 #7。
+
+先看一张图，把插件夹在哪些东西之间、状态从哪进来、通知往哪出去摆清楚；后面每一节开头都会写它在图上的位置。
+
+<CollabPluginSeams />
 
 ## 插件里有什么
 
@@ -43,7 +50,7 @@ gwb-collab 是 gwb 工作台的插件，跑在每个成员自己的电脑上：�
 
 ## 两套操作：协作仓与别的仓
 
-项目文件夹（以组织命名）里有一个协作仓（带 `collab/` 与 `site/people.json` 的那个）和若干别的仓。两种仓进 main 的路不同，插件里各走一套，各自记着「此刻怎样」，通知只读这些记录：
+图上第 2、3、4 号。项目文件夹（以组织命名）里有一个协作仓（带 `collab/` 与 `site/people.json` 的那个）和若干别的仓。两种仓进 main 的路不同，插件里各走一套，各自记着「此刻怎样」，通知只读这些记录：
 
 | | 协作仓那一套 | 别的仓那一套 |
 | --- | --- | --- |
@@ -61,13 +68,11 @@ gwb-collab 是 gwb 工作台的插件，跑在每个成员自己的电脑上：�
 
 ## 自动同步：只快进
 
-协作仓不用 `git pull`：取回之后，在 main 上、能快进才快进。不能快进的原因按顺序判：不在 main、没有 `origin/main`、提交审核合 main 的冲突还没改好、本地 main 有还没进 main 的提交（提交审核正在等执行器，或者上次中途断了）。都不是时才 `git merge --ff-only`；它失败只剩一种可能——工作区没提交的改动和新改动碰到同一个文件，这时 git 什么都没动：
+图上第 2 号的完整刷新做完取回就接自动同步，git 都在本机的仓上跑（第 3 号）。协作仓不用 `git pull`：取回之后，在 main 上、能快进才快进——不能快进的原因按顺序判，停下的那格之后不再判；判定都过了才 `git merge --ff-only`。每种情况停在哪一格、仓里是什么样、网站提示栏里出现什么：
 
-{/* ref file="../plugins/collab/src/collab-repo/sync/sync.ts" lines="10-60" hash="915a839cd4fa" blob="64df3cef406d" */}
+<SyncCases />
 
-不能快进不是错误：什么都不动，原因记下来，成为「没能自动同步 main 上的新改动」的通知（冲突没改好、不在 main 时不列这条，见下文「通知」）。
-
-快进进来的改动动了 `site/package.json` 或 `site/pnpm-lock.yaml`：站点在运行就先停，在 `site/` 里 `pnpm install`，装完再启动；装失败站点保持停着，报错里写明怎么启动。只动了 `site/` 别的文件：确保站点登记在 gwb-docsite、停着就启动、已在运行就不动。
+不能快进不是错误：什么都不动，原因记下来，成为「没能自动同步 main 上的新改动」的通知（图里不在 main、冲突没改好两种情况不列这条）；下一次完整刷新取回成功后再试。
 
 自动同步之后协作仓没有东西可提交（`collab/`、`site/` 没有改动、没有冲突、本地 main 不领先），上次提交审核失败的那条通知就清掉。
 
@@ -75,7 +80,7 @@ gwb-collab 是 gwb 工作台的插件，跑在每个成员自己的电脑上：�
 
 ## 提交审核
 
-`collab.submit` 只在 main 上做，不建分支。它把检查分成两半：**记录格式与站点只在本机查**（执行器不查）；**冲突与只有负责人能改的内容执行器查**，后者本机推送前也用同一个函数先查一遍，成员在本机就知道会不会被打回。
+图上第 5 号。`collab.submit` 只在 main 上做，不建分支。它把检查分成两半：**记录格式与站点只在本机查**（执行器不查）；**冲突与只有负责人能改的内容执行器查**，后者本机推送前也用同一个函数先查一遍，成员在本机就知道会不会被打回。
 
 查格式的参照点有两个，都只算「这次带来的新问题」（`newFormatProblems`，规则见 [collab 包](/packages/collab) 的「读出状态与校验」）：提交前比的是本地 main 与 `origin/main` 的分叉点，那时就有的问题不算我的；把 main 合进来以后再比一次合进来的那个 `origin/main`，两个人各自没问题、凑在一起才出的问题只有这一步能发现。
 
@@ -101,7 +106,7 @@ gwb-collab 是 gwb 工作台的插件，跑在每个成员自己的电脑上：�
 
 ## 通知：每次从此刻的状态现算
 
-通知不存。一个项目要算通知时，从各处读「此刻怎样」交给 `notificationsOf`，按 kind 造出通知，`id` 由 collab 包按事实算（同一件事在状态更新前后算出同一个 `id`），再按组排好。事情解决了，下一次算就不再出现。
+图上第 6 号。通知不存。一个项目要算通知时，从各处读「此刻怎样」交给 `notificationsOf`，按 kind 造出通知，`id` 由 collab 包按事实算（同一件事在状态更新前后算出同一个 `id`），再按组排好。事情解决了，下一次算就不再出现。
 
 三组的来源（kind 名与读取项、接线一一对应）：
 
@@ -124,44 +129,27 @@ gwb-collab 是 gwb 工作台的插件，跑在每个成员自己的电脑上：�
 
 「找我的」由 collab 包的 `inboxOf` 算：负责人是我、还没做完的任务；没解决的评论串里别人写的、正文 @ 了我的；我发起或回复过之后别人写的回复。评论串标为已解决，它带来的 @ 与回复就不再列；重新打开又列出来。记录与人员列表读的是工作区（网站显示的也是工作区），所以本机刚保存、还没提交审核的改动也会立刻反映在「找我的」里：
 
-{/* ref file="../packages/collab/src/core/inbox.ts" lines="55-63" hash="c1d61c9f6fa9" blob="31d0e9ce0ef0" */}
+{/* ref file="../packages/collab/src/core/inbox.ts" lines="57-65" hash="c1d61c9f6fa9" blob="7f9fc2f1fbef" */}
 
 ## 交给站点、协作窗格与 QQ
 
-各目录的状态一变都调同一个入口：装配时先建一个中转 `RepoChangeRelay` 交给各目录，通知建好后再接上，接上之前就有变化直接报错（装配顺序错了）。它转给 `ProjectNotifications.changed`，也让 QQ 任务组按现状重新登记一次。
+图上第 6、7 号。各目录的状态一变都调同一个入口：装配时先建一个中转 `RepoChangeRelay` 交给各目录，通知建好后再接上，接上之前就有变化直接报错（装配顺序错了）。它转给 `ProjectNotifications.changed`，也让 QQ 任务组按现状重新登记一次。
 
-- **站点**：`changed` 先让 `CollabSites.feedChanged` 推一次。站点在运行就现算整份 `SiteFeed`（通知、提示词、项目负责人），经 gwb-docsite 的服务 `push` 推到频道 `collab`；没在运行就不推，站点转成运行时 gwb-docsite 的 `onStatus` 回调里补推。推送按项目排队，接连变化时后推的一定是新的；推不上记一行警告，同样的原因不重复记
+- **站点**：`changed` 先让 `CollabSites.feedChanged` 推一次。站点在运行就现算整份 `SiteFeed`（通知、提示词、项目负责人），经 gwb-docsite 的服务 `push` 推到频道 `collab`；没在运行就不推，站点转成运行时经 gwb-docsite 的 `onStatus` 回调再推一次。推送按项目排队，接连变化时后推的一定是新的；推不上记一行警告，同样的原因不重复记
 - **协作窗格**：`collab.projects` 现算同一份通知，只回各组几条；「复制给 AI」调 `collab.ai.prompt`，和站点提示栏里复制的是同一份提示词
-- **QQ 私聊**（设置 `qq-notifications` 打开、同 home 装了 gwb-qq-bot 才发）：插件加载后要先做完一次完整刷新才交给 QQ——之前读 Gitea 的结果不齐，还没读到的会被当成消失了。之后每次交来此刻的全部，只发新出现、连续存在满 1 分钟的；`unsubmitted`（自己保存出来的改动）不发；同时到点的合成一条，一条最长 600 字。发过的 `id` 记在 gwb-data 的文档 `qq-sent-notifications` 里，消失了就去掉、再出现算新的一件事；但这一批里有 `check-error` 时一个都不去掉——读 Gitea 失败时读不到的合并请求看起来像消失了，恢复后不能当成新的重发。等待中的只在内存里，重启后从头等
+- **QQ 私聊**（设置 `qq-notifications` 打开、同 home 装了 gwb-qq-bot 才发）：提示栏里出现新的通知、连续存在满 1 分钟，就经 QQ 私聊主人，一条通知只发一次。什么时候发、什么时候不重发，这 160 秒的时间轴讲全（自己的 `unsubmitted` 不发；等待中的只在内存里，重启后从头等）：
 
-`SiteFeed` 由谁拼、每次变化先给站点、做完一次完整刷新才给 QQ：
-
-{/* ref file="../plugins/collab/src/notifications/project-notifications.ts" lines="73-87" hash="33956e5b48f3" blob="456019e4bd7c" */}
+<QqTiming />
 
 推送频道 `collab`、没运行不推、按项目排队：
 
 {/* ref file="../plugins/collab/src/site-process/collab-sites.ts" lines="121-139" hash="ddd0ca64baaa" blob="04e52fcfb1e0" */}
 
-已发的 `id` 什么时候去掉（含 `check-error` 时一个都不去）：
-
-{/* ref file="../plugins/collab/src/notifications/qq-private-chat.ts" lines="56-64" hash="90f0d60de2fa" blob="fcc474a74e72" */}
-
-只发新出现、满时长才发、期间消失过从头算、同时到点合成一条：
-
-{/* ref file="../plugins/collab/src/notifications/qq-private-chat.ts" lines="122-159" hash="5cf0354114a5" blob="fcc474a74e72" */}
-
-QQ 私聊长什么样，一个例子（别的仓 `firmware` 有 carol 开的合并请求 #7「修复」等我审阅，连续存在满 1 分钟时私聊这么一条；之后同样的再交来、重新加载以后都不重发）：
-
-```
-协作站 混合型 MMC
-firmware #7「修复」等你审阅（卡萝 开的）
-```
-
 QQ 任务组是另一件事：给项目起了 QQ 命令（`collab.project.qq-command`）的，经 gwb-qq-bot 登记成一个任务组，工作区是项目文件夹，由 gwb-qq-bot 交给 claude-agent 做（见说明书附件 [organization](/docs/outputs/skills/collab/organization)）。
 
 ## 站点交给 gwb-docsite
 
-插件自己不启动站点进程。常驻的站只登记在 gwb-docsite 的设置 `sites` 里，启停、状态、起不来的原因、工作台启动时启动都由 gwb-docsite 做。插件只做三件事：项目加进列表、插件加载、自动同步改了 `site/` 之后登记站点（`add`：已登记、已在运行就不动）；项目移出列表时撤销登记（`remove`，在运行就停掉）；把数据推过去（上一节）。登记不了、起不来记成这个项目 `site:host` 一步的出错，经「gwb 检查项目出错」显示。`site/package.json` 还不存在时不登记，报错让负责人先 `collab.site.init`。
+这一节讲图上第 7 号里站点那一路经过的 site-process。插件自己不启动站点进程。常驻的站只登记在 gwb-docsite 的 gwb-data 文档 `hosted-sites` 里（登记的一方记成 gwb-collab），启停、状态、起不来的原因、工作台启动时启动都由 gwb-docsite 做。插件只做三件事：项目加进列表、插件加载、自动同步改了 `site/` 之后登记站点（`add`，带上 `{ by: 'gwb-collab' }`：已登记、已在运行就不动）；项目移出列表时撤销登记（`remove`，在运行就停掉）；把数据推过去（上一节）。登记不了、起不来记成这个项目 `site:host` 一步的出错，经「gwb 检查项目出错」显示。`site/package.json` 还不存在时不登记，报错让负责人先 `collab.site.init`。
 
 `collab.site.init {repo, title}` 只对新站点（`site/` 不存在或是空目录），按顺序：
 
@@ -173,7 +161,7 @@ QQ 任务组是另一件事：给项目起了 QQ 命令（`collab.project.qq-com
 6. 把平台模板的首页 `site/app/routes/home.tsx` 换成打包进来的项目首页（它 import 协作功能的接线文件，所以要等加完功能再写）
 7. 项目在列表里就交给 gwb-docsite 常驻（这时才再启动）；不在就等 `collab.project.add` 时登记
 
-{/* ref file="../plugins/collab/src/site-process/collab-sites.ts" lines="84-102" hash="6562be365981" blob="04e52fcfb1e0" */}
+{/* ref file="../plugins/collab/src/site-process/collab-sites.ts" lines="84-102" hash="6b259e3c9fae" blob="4cafbb566612" */}
 
 它只写文件、不提交：新站点里 `.gitea/`、`site/package.json`、站点根的配置文件都是只有负责人能改的内容，由负责人提交。用到的 gwb-docsite 服务方法就是 `add`、`remove`、`start`、`stop`、`status`、`onStatus`、`push`、`init`、`addFeature`，另有身份码 `identityCode` 与加入项目时的 `join`。
 

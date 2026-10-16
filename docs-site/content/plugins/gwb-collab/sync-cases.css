@@ -1,0 +1,130 @@
+/*
+ * SyncCases 自己的画面：左边判定格一列，右边仓的样子与提示栏。
+ * 卡片、胶囊、状态点与代码行由 @godcreator/explainer 提供，颜色只取那套 --dx-* 变量，深色主题跟着变。
+ */
+.sc-case {
+  display: grid;
+  grid-template-columns: minmax(230px, 2fr) 3fr;
+  gap: 14px;
+}
+@container (max-width: 719px) {
+  .sc-case {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* 判定格：问题一行、答案一行；停下的格子用 bad 色，之后的灰掉 */
+.sc-gates {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+.sc-gate {
+  border: 1px solid var(--dx-line);
+  border-radius: 8px;
+  padding: 8px 12px;
+  display: grid;
+  gap: 2px;
+  background: var(--dx-surface);
+}
+.sc-gate + .sc-gate {
+  margin-top: 14px;
+  position: relative;
+}
+/* 格子之间的竖线，连成「从上往下问」的一列 */
+.sc-gate + .sc-gate::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: -14px;
+  height: 14px;
+  border-left: 1px solid var(--dx-line);
+}
+.sc-gate[data-state='stop'] {
+  border-color: var(--dx-bad);
+  background: color-mix(in srgb, var(--dx-bad) 8%, transparent);
+}
+.sc-gate[data-state='stop'] .sc-gate-answer {
+  color: var(--dx-bad);
+}
+.sc-gate[data-state='pass'] .sc-gate-question {
+  color: var(--dx-dim);
+}
+.sc-gate[data-state='dim'] {
+  opacity: 0.45;
+}
+.sc-gate-question {
+  font-size: 12.5px;
+  color: var(--dx-fg);
+}
+.sc-merge .sc-gate-question {
+  font-family: var(--dx-mono);
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+.sc-gate-answer {
+  font-size: 12px;
+  color: var(--dx-good);
+}
+.sc-gate[data-state='stop'] .sc-gate-answer,
+.sc-merge[data-state='stop'] .sc-gate-answer {
+  color: var(--dx-bad);
+}
+
+/* 仓的样子：每行一个状态点加标签 */
+.sc-result {
+  display: grid;
+  gap: 10px;
+  align-content: start;
+}
+.sc-repo {
+  display: grid;
+  gap: 8px;
+}
+.sc-repo-row {
+  display: grid;
+  grid-template-columns: auto auto 1fr;
+  gap: 8px;
+  align-items: baseline;
+}
+.sc-repo-label {
+  font-size: 12px;
+  color: var(--dx-dim);
+  white-space: nowrap;
+}
+.sc-repo-value {
+  font-size: 12.5px;
+  color: var(--dx-fg);
+  overflow-wrap: anywhere;
+}
+.sc-dep {
+  margin: 8px 0 0;
+  font-size: 12px;
+  color: var(--dx-dim);
+  overflow-wrap: anywhere;
+}
+
+/* 提示栏一行：标题、胶囊、不列的说明、原文 */
+.sc-notice {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+.sc-notice-title {
+  font-size: 12px;
+  color: var(--dx-dim);
+}
+.sc-notice-empty {
+  font-size: 12px;
+  color: var(--dx-dim);
+}
+.sc-notice-note {
+  flex-basis: 100%;
+  margin: 0;
+  font-size: 12px;
+  color: var(--dx-dim);
+}
+.sc-notice .dx-code {
+  flex-basis: 100%;
+}
