@@ -1,0 +1,28 @@
+/*
+ * LoaderSteps 自己的画面：左边卡片 + 右边说明与源码链接，窄屏竖排。
+ * 卡片由 @godcreator/explainer 提供；数据行用等宽字保留前导空格（两个 Map、树形缩进），长行折行不截断。
+ */
+.ls-stage { display: grid; grid-template-columns: 1.55fr 1fr; gap: 10px; align-items: start; }
+@container (max-width: 639px) {
+  .ls-stage { grid-template-columns: 1fr; }
+}
+
+.ls-lines {
+  margin: 0;
+  font-family: var(--dx-mono);
+  font-size: 12px;
+  line-height: 1.75;
+  color: var(--dx-fg);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.ls-side { display: grid; gap: 6px; padding-top: 2px; }
+.ls-note { margin: 0; font-size: 13px; color: var(--dx-dim); }
+.ls-src {
+  font-family: var(--dx-mono);
+  font-size: 11px;
+  color: var(--dx-dim);
+  overflow-wrap: anywhere;
+}
+.ls-src:hover { color: var(--dx-blue); }

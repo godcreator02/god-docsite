@@ -1,0 +1,60 @@
+/*
+ * MetaPages 自己的画面：左边 meta.json 卡片 + 右边仿侧栏的竖列，窄屏竖排。
+ * 卡片由 @godcreator/explainer 提供；侧栏里页面项、文件夹项（展开子项）、分隔线、链接项各一种样式，
+ * 颜色只用 --dx-* 变量，深色主题跟着变。
+ */
+.mp-case { display: grid; grid-template-columns: 1fr 1.15fr; gap: 10px; align-items: start; }
+@container (max-width: 639px) {
+  .mp-case { grid-template-columns: 1fr; }
+}
+
+.mp-note { font-size: 10.5px; color: var(--dx-dim); white-space: nowrap; }
+
+.mp-right { display: grid; gap: 8px; }
+
+.mp-side { display: grid; gap: 3px; }
+
+/* 页面项：普通一行 */
+.mp-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 6px;
+  border-radius: 6px;
+  font-size: 12.5px;
+  color: var(--dx-fg);
+}
+/* 文件夹的子项往里缩一层 */
+.mp-child { margin-left: 18px; color: var(--dx-dim); }
+.mp-folder > .mp-item { font-weight: 600; }
+.mp-chev { font-size: 10px; color: var(--dx-dim); }
+
+/* 分隔线：小字居中，上下留空 */
+.mp-sep {
+  margin: 6px 0 2px;
+  padding: 0 6px;
+  border-top: 1px solid var(--dx-line);
+  padding-top: 5px;
+  font-size: 10.5px;
+  letter-spacing: 0.08em;
+  color: var(--dx-dim);
+}
+
+/* 链接项：末尾一个外链符号 */
+.mp-link { color: var(--dx-blue); }
+.mp-ext { font-size: 10px; }
+
+/* fallback 子树：虚线框、整体调暗，标签用等宽字 */
+.mp-fallback {
+  border: 1px dashed color-mix(in srgb, var(--dx-slate) 45%, transparent);
+  border-radius: 10px;
+  padding: 8px;
+  display: grid;
+  gap: 4px;
+}
+.mp-fallback .mp-item, .mp-fallback .mp-child { color: var(--dx-dim); }
+.mp-fallback-label {
+  font-family: var(--dx-mono);
+  font-size: 11px;
+  color: var(--dx-dim);
+}

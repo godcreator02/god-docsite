@@ -4,7 +4,9 @@ docfirst: none
 description: 界面层的布局、可替换部件、样式机制、搜索与 CLI：深度定制时官方让你怎么做
 ---
 
-@fumadocs/base-ui 16.17.1（Base UI 版）与 fumadocs-ui（Radix 版，API 相同、几乎逐行一样）、core 的搜索、@fumadocs/cli。重点是：界面留了哪些口子，深度定制时官方让你怎么做。
+import { LayoutColumns } from './ui/layout-columns'
+
+@fumadocs/base-ui 16.17.1（Base UI 版）与 fumadocs-ui（Radix 版，API 相同、几乎逐行一样）、core 的搜索、@fumadocs/cli。重点是：界面留了哪些扩展点，深度定制时官方让你怎么做。
 
 包名对应：`packages/base-ui` 发布为 `@fumadocs/base-ui`，`packages/radix-ui` 发布为 `fumadocs-ui`。官方文档和扩展包一律写 `fumadocs-ui/...`，用 Base UI 的站点在 `package.json` 里写 `"fumadocs-ui": "npm:@fumadocs/base-ui"` 别名。
 
@@ -82,6 +84,8 @@ description: 界面层的布局、可替换部件、样式机制、搜索与 CLI
 ```
 
 > **关键机制**：容器上的宽度变量默认都是 0；每个部件渲染时带一个 `layout:[--fd-x:…]` 类，CSS 借 `:has()` 把变量写到容器上（[css/lib/base.css:168-177](https://github.com/fuma-nama/fumadocs/blob/fumadocs%4016.17.1/packages/base-ui/css/lib/base.css#L168-L177)）。侧栏写 `md:layout:[--fd-sidebar-width:268px]`，目录写 `xl:layout:[--fd-toc-width:268px]`。部件不渲染，变量回到 0，那一列就消失。
+
+<LayoutColumns />
 
 ```css
 @variant layout {

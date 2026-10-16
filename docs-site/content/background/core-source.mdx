@@ -4,6 +4,9 @@ docfirst: none
 description: fumadocs-core 16.17.1：页面来源的约定、loader 内部五步、页面树怎么建、loader 插件与 framework 适配层
 ---
 
+import { LoaderSteps } from './core-source/loader-steps'
+import { MetaPages } from './core-source/meta-pages'
+
 fumadocs-core 16.17.1 里除搜索以外的部分。核心是一个和内容格式无关的「内存文件系统 + 索引 + 页面树构建器」：谁能给出虚拟文件，谁就能成为页面来源。源码在 `packages/core/src`。
 
 ## 页面来源的约定
@@ -29,18 +32,9 @@ interface DynamicSource { files: () => VirtualFile[] | Promise<…>; cache: 'mem
 
 ## loader() 内部五步
 
-入口 [source/loader.ts:304-509](https://github.com/fuma-nama/fumadocs/blob/fumadocs%4016.17.1/packages/core/src/source/loader.ts#L304-L509)。
+入口 [source/loader.ts:304-509](https://github.com/fuma-nama/fumadocs/blob/fumadocs%4016.17.1/packages/core/src/source/loader.ts#L304-L509)：一组虚拟文件进去，一路变成查询用的索引和一棵页面树；每一步手里是什么、源码在哪一段，跟着图走一遍。
 
-1. **整理配置**。算出 `url(slugs, locale)` 函数；拼插件列表：`icon` 选项生成的图标插件 → 站点的 `plugins` → 最后的 slugs 插件，再按 `enforce: 'pre' | 'post'` 排序；依次调用每个插件的 `config()`。
-   （[loader.ts:511-588](https://github.com/fuma-nama/fumadocs/blob/fumadocs%4016.17.1/packages/core/src/source/loader.ts#L511-L588)）
-2. **写进内存文件系统**。每个虚拟文件加上 `baseDir`、规范化路径，按语言分组，每种语言一个 `FileSystem`（就两个 Map：路径 → 文件、目录 → 子项）；写完对这个存储调用所有插件的 `transformStorage`。
-   （[storage/content.ts:50-175](https://github.com/fuma-nama/fumadocs/blob/fumadocs%4016.17.1/packages/core/src/source/storage/content.ts#L50-L175)、[storage/file-system.ts:6-89](https://github.com/fuma-nama/fumadocs/blob/fumadocs%4016.17.1/packages/core/src/source/storage/file-system.ts#L6-L89)）
-3. **算 slug**。slugs 插件在 `transformStorage` 里给没有 `slugs` 的页面算：目录段做 URI 编码，`(分组)` 段跳过，文件名 `index` 省略，**只去掉最后一个扩展名**（所以 `x.page.tsx` 得到 `x.page`）。自动算出的 slug 重复就报 `Duplicated slugs`；来源自己给的 slug 不检查。
-   （[plugins/slugs.ts:43-125](https://github.com/fuma-nama/fumadocs/blob/fumadocs%4016.17.1/packages/core/src/source/plugins/slugs.ts#L43-L125)）
-4. **建索引**。四张 Map：slug、页面路径、meta 路径、url；`page.url` 在这一步算出。
-   （[loader.ts:195-261](https://github.com/fuma-nama/fumadocs/blob/fumadocs%4016.17.1/packages/core/src/source/loader.ts#L195-L261)）
-5. **页面树延迟构建**。`pageTree` 是 getter，第一次读时构建并缓存，也能整棵替换。构建时依次跑：`pageTree.transformers` → 各插件的 `transformPageTree` → 构建器自己的 fallback 处理。最后回调各来源的 `configureStatic`。
-   （[loader.ts:333-372](https://github.com/fuma-nama/fumadocs/blob/fumadocs%4016.17.1/packages/core/src/source/loader.ts#L333-L372)）
+<LoaderSteps />
 
 常用查询：`getPage(slugs, lang)` 按 slug 查（编码与否都能命中）；`getPageByHref` / `resolveHref` 处理 `./x.mdx#a` 这类相对文件链接；`getNodePage(node)` 靠树节点上的内部引用反查页面；`serializePageTree` 把节点里的 React 名称和图标转成 HTML 字符串，好从服务端传给浏览器。
 
@@ -63,12 +57,16 @@ interface DynamicSource { files: () => VirtualFile[] | Promise<…>; cache: 'mem
 
 | `pages` 里的写法 | 效果 |
 | --- | --- |
-| `"..."` / `"z..."` | 其余没列出的项按正序 / 倒序放在这里 |
+| `"..."` / `"z...a"` | 其余没列出的项按正序 / 倒序放在这里 |
 | `"---标题---"`、`"---[图标]标题---"` | 分隔线节点 |
 | `"[名称](url)"`、`"external:[名称](url)"` | 链接节点 |
 | `"!名字"` | 从 `...` 里排除 |
 | `"...子文件夹"` | 把子文件夹的内容摊平到当前层 |
 | `"名字"` | 先当文件夹找，找不到当页面 |
+
+同一个文件夹换六种 `pages` 写法，侧栏各排成什么样：
+
+<MetaPages />
 
 - **同一个节点被几个文件夹引用**时按优先级归属：`pagesIndex` 指定 3，显式列出 2，自动展开 0；优先级高的把节点从原文件夹挪走（[builder.ts:158-184](https://github.com/fuma-nama/fumadocs/blob/fumadocs%4016.17.1/packages/core/src/source/page-tree/builder.ts#L158-L184)）。
 - **文件夹的 index 页**：非 root 文件夹自动把 `index.*` 当作文件夹自己的页面；root 文件夹的 index 只当普通子项排在最前（[builder.ts:387-395](https://github.com/fuma-nama/fumadocs/blob/fumadocs%4016.17.1/packages/core/src/source/page-tree/builder.ts#L387-L395)）。

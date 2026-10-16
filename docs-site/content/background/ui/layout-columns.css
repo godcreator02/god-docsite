@@ -1,0 +1,59 @@
+/*
+ * LayoutColumns 自己的画面：变量一行、缩小的页面框（grid 模板画出几个区）、底下一行谁带的类。
+ * 区与圆点只用 data-role（explainer 的角色色），深色主题跟着变；断点写 Tailwind 的名字，不写像素值。
+ */
+.lc-case { display: grid; gap: 8px; }
+
+.lc-vars {
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 10px;
+  align-items: baseline;
+  font-size: 12px;
+  color: var(--dx-dim);
+}
+.lc-vars code {
+  font-family: var(--dx-mono);
+  font-size: 11.5px;
+  color: var(--dx-fg);
+  overflow-wrap: anywhere;
+}
+
+/* 缩小的页面框：外框是视口，里面是 grid 区 */
+.lc-frame {
+  display: grid;
+  gap: 4px;
+  min-height: 175px;
+  padding: 5px;
+  border: 1px solid var(--dx-line);
+  border-radius: 10px;
+}
+/* 名字与小注放不下就折行（小注整块换到名字下面），不截断 */
+.lc-cell {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 1px 6px;
+  min-width: 0;
+  padding: 3px 4px;
+  border-radius: 6px;
+  border: 1px solid color-mix(in srgb, var(--dx-c) 40%, transparent);
+  background: color-mix(in srgb, var(--dx-c) 8%, transparent);
+  color: var(--dx-c);
+}
+.lc-cell-name { font-family: var(--dx-mono); font-size: 10.5px; overflow-wrap: anywhere; }
+.lc-cell-sub { font-size: 10px; color: var(--dx-dim); }
+
+/* 底下一行：哪个部件带的哪个类 */
+.lc-who-row { display: flex; flex-wrap: wrap; gap: 4px 14px; }
+.lc-who { display: inline-flex; align-items: center; gap: 6px; min-width: 0; }
+.lc-who code {
+  font-family: var(--dx-mono);
+  font-size: 11px;
+  color: var(--dx-fg);
+  overflow-wrap: anywhere;
+}
+.lc-who-dot { width: 8px; height: 8px; flex: none; border-radius: 999px; background: var(--dx-c); }
+.lc-who-dot[data-hollow] { background: transparent; border: 1.5px solid var(--dx-dim); }
