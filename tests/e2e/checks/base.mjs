@@ -106,7 +106,7 @@ export async function runBaseChecks({ browser, baseUrl, mode, siteDir, feedToken
       return { pass: kept && sidebars === 1, detail: `到 /about，没有整页刷新=${kept}，侧栏 ${sidebars} 个` }
     })
 
-    await check('侧栏站内导航', async () => {
+    await check('侧栏站内导航（这一页的同名文件夹里有 json 附件，不被当成目录说明，这一页仍在侧栏里）', async () => {
       await waitForHydrated(page, '#nd-sidebar a[href="/writing/collapse-test"]')
       await markNoReload(page)
       await page.click('#nd-sidebar a[href="/writing/collapse-test"]')

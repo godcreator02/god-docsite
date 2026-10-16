@@ -67,7 +67,7 @@ icon: FileText
 - **有子页面的页**写成文件夹加 `index.mdx`：`gitea/index.mdx` 是 `/gitea`，它要用组件就放 `gitea/index/`
 
 `meta.json` 的 `pages` 只写页面名，不写这些文件夹。同名文件夹与 `_` 开头的文件夹里不放页面（不以 `_` 开头的 `.mdx`、`.page.tsx`、`.html`）和 `meta.json`：
-fumadocs 解析 `pages` 里的名字时先找文件夹，同名文件夹一旦有页面就被认成一组，同名的那一页从侧栏消失。组文件夹里也不散放组件和图片，只放页面、`meta.json` 与上面这几种文件夹。
+fumadocs 解析 `pages` 里的名字时先找文件夹，同名文件夹一旦有页面就被认成一组，同名的那一页从侧栏消失。目录说明只认 `meta.json`，别的 `.json`（数据、导出清单）可以当附件放在这些文件夹里。组文件夹里也不散放组件和图片，只放页面、`meta.json` 与上面这几种文件夹。
 放错了，`pnpm dev` 与 `pnpm build` 启动时直接报错；开发服务运行中增删文件放错了，终端和浏览器里都会报出来，列出每个文件。
 
 ### frontmatter

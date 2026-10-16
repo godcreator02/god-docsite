@@ -25,6 +25,8 @@ export const docs = defineDocs({
       rehypePlugins: (list) => [...sitePlugins.rehypePlugins, ...list],
     }),
   },
+  // fumadocs-mdx 默认把所有 .json 当目录说明：页面同名文件夹里的 .json 附件会让那个文件夹变成一组，同名的那一页从侧栏消失
+  meta: { files: ['**/meta.json'] },
 })
 
 // 评论：一串一个文件夹（index.mdx 是串头，回复各一个 mdx），frontmatter 由评论包校验
