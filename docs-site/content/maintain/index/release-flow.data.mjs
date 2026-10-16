@@ -1,6 +1,6 @@
 /**
  * ReleaseFlow（「维护」页「发版」一节）的全部数据，画面（release-flow.tsx）只读这一份。
- * 一次发版从本机到 npmjs 走六步：地图上三个方块是本机、GitHub、npmjs，本机下方挂过渡期的 Gitea，
+ * 一次发版从本机到 npmjs 走六步：地图上三个方块是本机、GitHub、npmjs，本机下方是过渡期的 Gitea，
  * 当前这一步所在的方块高亮，亮着的箭头是这一步传出去的东西；下面一张卡片摆这一步的命令或经手的东西。
  * 检查跑什么照仓根 AGENTS.md「跑什么检查只看改到了什么」那张表；发版顺序照它同一段的分层；
  * publish.yml 的原话照抄并钉码；第六步「协作相关的包」的名单照「协作站双人回归」页（collab-regression.mdx）开头一段。
@@ -108,12 +108,12 @@ export const steps = [
       title: 'devkit.release',
       icon: 'terminal',
       lines: [
-        '构建、检查，把要发的包打好包文件（*.tgz）',
-        '在已经推上去的 HEAD 上建 GitHub release，挂上包文件',
-        '过渡期加 alsoPublishTo：同样的包再发一份到 Gitea 的源',
+        '构建、检查要发的包',
+        '过渡期：~/.npmrc 里 @godcreator 的范围行指向 Gitea，先把同样的包发一份到 Gitea 的源',
+        '把要发的包打好包文件（*.tgz），在已经推上去的 HEAD 上建 GitHub release，附上包文件',
       ],
     },
-    text: 'devkit.release 在本机构建、检查、打好包文件，在 HEAD 上建 GitHub release 挂上包文件；过渡期加 alsoPublishTo，同样的包再发一份到 Gitea 的源。本机构建失败就停在这里，什么都没发出去。',
+    text: 'devkit.release 在本机构建、检查；过渡期照 ~/.npmrc 里 @godcreator 的范围行先把同样的包发一份到 Gitea 的源，不用另加参数；再打好包文件，在 HEAD 上建 GitHub release 附上包文件。本机构建或检查失败就停在这里，什么都没发出去。',
   },
   {
     title: '工作流被触发',

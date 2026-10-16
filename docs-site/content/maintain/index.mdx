@@ -74,7 +74,7 @@ import { ReleaseFlow } from './index/release-flow'
 
 <ReleaseFlow />
 
-- **过渡期同时发 Gitea**：各 home 还从 Gitea 装 `@godcreator` 的包，`devkit.release` 加 `alsoPublishTo` Gitea 的源
+- **过渡期同时发 Gitea**：各 home 还从 Gitea 装 `@godcreator` 的包。本机 `~/.npmrc` 里 `@godcreator` 的范围行指向 Gitea，`devkit.release` 照这一行先把同样的包发一份到 Gitea（同号已在那里就跳过），再走 npmjs 那一段，不用另加参数
 - **新加一个包**：npmjs 上要先有这个包才能登记谁能发它，命令要在有终端的地方运行（npm 在那里才给出网页批准链接并等着）：
   - 发一个 `0.0.1-stage` 占位版（npmjs 不收 `0.0.0-stage`）：`npm publish <目录> --auth-type=web --access public --tag stage --registry https://registry.npmjs.org/ --@godcreator:registry=https://registry.npmjs.org/`，在浏览器里批准。
     `~/.npmrc` 里 `@godcreator` 的范围行指向 Gitea，它比 `--registry` 优先，不带最后那个参数就发到 Gitea 去了
