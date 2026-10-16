@@ -28,7 +28,7 @@ type HostedSite = {
 
 /** 每个站上次用的端口：下次启动先试它，被占了才让站点重新随机挑；书签与开着的页面在重启后还能用 */
 export type SitePortMemory = {
-  /** 上次的端口此刻还空着就回它，没记过或被占了回 null */
+  /** 上次的端口空着就回它（被占了先等一会儿再判断），没记过或一直被占着回 null */
   preferredPortOf(dir: string): Promise<number | null>
   remember(dir: string, port: number): Promise<void>
 }

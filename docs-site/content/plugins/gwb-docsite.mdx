@@ -38,19 +38,19 @@ gwb-docsite 是 gwb 工作台和[平台包](/packages/god-docsite) `@godcreator/
 
 {/* ref file="../plugins/docsite/src/scaffold/platform.ts" lines="23-35" hash="242c7fc83e9c" blob="3fd3d79ed663" */}
 
-建站（`init`）四步：建站器复制模板、写站名与只有 agent `claude` 的 `people.json` → `pnpm install` → 补上评论这个基础功能的文件（评论的模板在装好的 comments 包里，所以要在装依赖之后）→ 起服务检查首页。平台包三个依赖（god-docsite、identity、comments）写成插件旁边装着的那一版的 `^<版本>`（托管时 `packageSource` 是 `registry`，从插件包根往上找；测试里换成 `link` 指向本仓）。
+建站（`init`）四步：建站器复制模板、写站名与只有 agent `claude` 的 `people.json` → `pnpm install` → 补上评论这个基础功能的文件（评论的模板在装好的 comments 包里，所以要在装依赖之后）→ 启动开发服务、检查首页。平台包三个依赖（god-docsite、identity、comments）写成插件旁边装着的那一版的 `^<版本>`（托管时 `packageSource` 是 `registry`，从插件包根往上找；测试里换成 `link` 指向本仓）。
 
 {/* ref file="../plugins/docsite/src/scaffold/create.ts" lines="27-47" hash="017c2c0a4c4c" blob="1f85e5fdeecb" */}
 
-加功能（`addFeature`）：站点在运行就拒绝（Windows 上运行中的开发服务占着依赖里的文件）；依赖说明不给就取插件旁边装着的那一版写 `^<版本>`，插件没装这个包就拒绝；`pnpm add` → 建站器补 `app/features/<功能名>/` 里缺的文件、重写汇总文件 → 起服务检查首页。依赖说明只认版本范围或 `link:` / `file:` 加绝对路径，因为它经 shell 交给 pnpm。
+加功能（`addFeature`）：站点在运行就拒绝（Windows 上运行中的开发服务占着依赖里的文件）；依赖说明不给就取插件旁边装着的那一版写 `^<版本>`，插件没装这个包就拒绝；`pnpm add` → 建站器补 `app/features/<功能名>/` 里缺的文件、重写汇总文件 → 启动开发服务、检查首页。依赖说明只认版本范围或 `link:` / `file:` 加绝对路径，因为它经 shell 交给 pnpm。
 
 {/* ref file="../plugins/docsite/src/scaffold/add-feature.ts" lines="56-74" hash="382c636a8e71" blob="32c6853a5d5e" */}
 
-起服务检查：启动、`GET /` 看是不是 200。进程活着不等于站能用：缺依赖、功能模板有错时开发服务起得来、页面 500。通过后登记在 `sites` 里的站保持运行，没登记的停掉；没通过就报错，站点留着运行让人在浏览器里看报错。
+首页检查：启动开发服务、`GET /` 看是不是 200。进程活着不等于站能用：缺依赖、功能模板有错时开发服务起得来、页面 500。通过后登记在 `sites` 里的站保持运行，没登记的停掉；没通过就报错，站点留着运行让人在浏览器里看报错。
 
 {/* ref file="../plugins/docsite/src/scaffold/home-page-check.ts" lines="13-24" hash="1e3d1a486f24" blob="ecfceefa4c17" */}
 
-例子（测试里的 pnpm 与起服务检查都是假的，建站器是真的）：建一个没登记的站，依次是 `pnpm install`、`start`、`page-status`、`stop`；登记着的站少了最后的 `stop`；加功能 trajectory 是 `pnpm add @godcreator/trajectory@link:…`、`start`、`page-status`、`stop`。
+例子（测试里的 pnpm 与首页检查都是假的，建站器是真的）：建一个没登记的站，依次是 `pnpm install`、`start`、`page-status`、`stop`；登记着的站少了最后的 `stop`；加功能 trajectory 是 `pnpm add @godcreator/trajectory@link:…`、`start`、`page-status`、`stop`。
 
 ## docfirst.create：在基础站上多做的几步
 
@@ -76,15 +76,15 @@ gwb-docsite 是 gwb 工作台和[平台包](/packages/god-docsite) `@godcreator/
 
 {/* ref file="../plugins/docsite/src/site-host.ts" lines="7-13" hash="df7ebb7f1f35" blob="455a3efb4dce" */}
 
-状态只有三种：`running` 进程在，`url` 是开发服务报出的实际地址；`stopped` 没有进程；`failed` 进程退出了或没能启动，`error` 记原因。人为 `stop` 不算失败。`start` 与 `stop` 幂等：已在运行就回现状；正在启动时再来的 `start` 复用同一次，不重复启动；`stop` 先等正在启动的那一次落定再判断，没在运行就报错。进程退出只标 `failed`，不自动重启；修好后再 `start`。插件卸载时全部停掉（Windows 上 pnpm 经 cmd 启动、底下还有 node，停的时候连同子进程一起停）。
+状态只有三种：`running` 进程在，`url` 是开发服务报出的实际地址；`stopped` 没有进程；`failed` 进程退出了或没能启动，`error` 记原因。人为 `stop` 不算失败。`start` 与 `stop` 幂等：已在运行就回现状；正在启动时再来的 `start` 复用同一次，不重复启动；`stop` 先等正在启动的那一次落定再判断，没在运行就报错。进程退出只标 `failed`，不自动重启；修好后再 `start`。插件卸载时全部停掉（Windows 上 pnpm 经 cmd 启动、底下还有 node，停的时候连同子进程一起停）；内核不等这一步做完就加载新实例，所以新实例沿用端口时要等旧进程放开它，见下一节。
 
 ### 一次 start 怎么走
 
 启动前先核对：站点目录里有 `package.json`、`node_modules` 里装着平台包（建在旧包 `@godcreator/docsite-kit` 上的站拒绝）、`scripts.dev` 没写死 `--port`。写死了会和启动时带的 `--port` 同时出现，站点认错自己的地址。
 
-端口：gwb-data 的文档 `site-ports` 记着每个站上次用的端口。上次的端口此刻在 127.0.0.1 与 ::1 上都空着，就带 `--port <端口>` 启动（平台的 vite 插件加 strictPort，被占就起不来）；没记过或被占了就不带，由平台的 vite 插件在 10000–49151 里随机挑。报出的端口和给的不同就停掉并拒绝。好处是书签与开着的页面重启后还能用：真站测试里停了再启动，地址不变。
+端口：gwb-data 的文档 `site-ports` 记着每个站上次用的端口。上次的端口在 127.0.0.1 与 ::1 上都空着，就带 `--port <端口>` 启动（平台的 vite 插件加 strictPort，被占就起不来）；没记过就不带，由平台的 vite 插件在 10000–49151 里随机挑。上次的端口被占着时先每 0.5 秒再查一次、最多 10 秒：插件重新加载（升级、重载）时，内核不等旧实例停完开发服务就加载新实例，新实例马上来查端口，旧进程这时多半还占着它，停完整棵进程树要一两秒。10 秒后还被占着才不带 `--port`、让站点随机挑。报出的端口和给的不同就停掉并拒绝。好处是书签与开着的页面重启后还能用：真站测试里停了再启动、插件升级以后，地址都不变。
 
-{/* ref file="../plugins/docsite/src/site-ports.ts" lines="19-42" hash="ddcce823fbc9" blob="9e3102b38b0b" */}
+{/* ref file="../plugins/docsite/src/site-ports.ts" lines="19-62" hash="0ba7a9be47b8" blob="0cb5b5c21893" */}
 
 启动时经环境变量交给开发服务两样：本 home 的身份码 `DOCSITE_IDENTITY_CODE`（站点按它在 `people.json` 里认人，没有它站点只读），这次启动现生成的推送令牌 `DOCSITE_FEED_TOKEN`；然后等输出里出现 `Local:` 那一行的地址，60 秒内没等到就停掉、报错。
 
@@ -133,6 +133,6 @@ gwb-docsite 是 gwb 工作台和[平台包](/packages/god-docsite) `@godcreator/
 
 | 级别 | 文件 | 测什么 |
 | --- | --- | --- |
-| 快 | `tests/site-host.test.ts`、`hosted-sites.test.ts`、`site-ports.test.ts` | 状态机、常驻表、端口记录；开发服务、设置、gwb-data 都是假的 |
-| 快 | `tests/scaffold-create.test.ts`、`scaffold-add-feature.test.ts`、`docfirst/*.test.ts` | 真的平台建站器、假的 pnpm 与起服务检查（`tests/site-fixtures.ts`） |
+| 快 | `tests/site-host.test.ts`、`hosted-sites.test.ts`、`site-ports.test.ts` | 状态机、常驻表、端口记录（含等上次的端口空出来）；开发服务、设置、gwb-data 都是假的 |
+| 快 | `tests/scaffold-create.test.ts`、`scaffold-add-feature.test.ts`、`docfirst/*.test.ts` | 真的平台建站器、假的 pnpm 与首页检查（`tests/site-fixtures.ts`） |
 | 慢 | `tests/real-site.slow.test.ts` | 在临时目录真建站、装依赖、启动、写评论、推送、重启沿用端口、加功能、`pnpm build`；要先在仓根 `pnpm build` |
