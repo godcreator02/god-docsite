@@ -1,0 +1,25 @@
+/*
+ * Normalize 自己的画面：三张卡横排，窄于 720px 竖排。
+ * 卡片、代码行与胶囊由 @godcreator/explainer 提供，颜色只取那套变量。
+ */
+.nz-row { container-type: inline-size; display: grid; gap: 12px; }
+
+.nz-mark { font-size: 12px; color: var(--dx-dim); }
+
+.nz-hash {
+  font-family: var(--dx-mono);
+  font-size: 16px;
+  letter-spacing: .5px;
+  padding: 8px 10px;
+  border-radius: 6px;
+  background: var(--dx-surface);
+  border: 1px solid var(--dx-line);
+}
+
+.nz-rows { list-style: none; margin: 10px 0 0; padding: 0; display: grid; gap: 6px; }
+.nz-rows li { display: flex; align-items: center; gap: 8px; font-size: 13px; }
+.nz-row-left { color: var(--dx-dim); }
+
+@container (min-width: 720px) {
+  .nz-row { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr); align-items: start; }
+}

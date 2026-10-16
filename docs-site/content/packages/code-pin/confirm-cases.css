@@ -1,0 +1,14 @@
+/*
+ * ConfirmCases 自己的画面：结论一行、标记那一行一张卡、底部一行灰字。
+ * 卡片、胶囊、状态点与新旧行对照由 @godcreator/explainer 提供，颜色只取那套变量。
+ */
+.cf-case { display: grid; gap: 12px; }
+
+.cf-verdict { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.cf-status { font-weight: 600; }
+.cf-status-note { font-size: 13px; color: var(--dx-dim); }
+.cf-flow { font-size: 12px; color: var(--dx-dim); }
+
+.cf-kept { padding: 6px 10px; font-size: 12.5px; font-family: var(--dx-mono); border-radius: 6px; background: var(--dx-surface); border: 1px dashed var(--dx-line); color: var(--dx-dim); overflow-wrap: anywhere; }
+
+.cf-note { margin: 0; font-size: 12.5px; color: var(--dx-dim); }
