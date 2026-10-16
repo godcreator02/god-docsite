@@ -2,7 +2,7 @@ import { existsSync } from 'node:fs'
 import path from 'node:path'
 import type { DevServer, LaunchDevServer } from './dev-server.js'
 import { DocsiteRejected, messageOf } from './errors.js'
-import { checkDevScript, checkPlatformInstalled } from './site-contract.js'
+import { checkDevScript, checkPlatformInstalled, checkSiteIdentity } from './site-contract.js'
 
 /** 站点的三种状态：running 进程在；stopped 没有进程；failed 进程退出了或没能启动（error 记原因） */
 export type SiteState = 'running' | 'stopped' | 'failed'
@@ -41,9 +41,10 @@ export type SiteHostOptions = {
   ports: SitePortMemory
 }
 
-/** 启动前的核对：是站点目录、建在平台包上、dev 脚本没写死端口；不过就抛出原因 */
+/** 启动前的核对：是站点目录、有身份文件、装着平台包、dev 脚本没写死端口；不过就抛出原因 */
 function checkSiteBeforeLaunch(dir: string): void {
   if (!existsSync(path.join(dir, 'package.json'))) throw new DocsiteRejected(`${dir} 下没有 package.json，不是站点目录`)
+  checkSiteIdentity(dir)
   checkPlatformInstalled(dir)
   checkDevScript(dir)
 }

@@ -44,13 +44,13 @@ gwb-collab 是 gwb 工作台的插件，跑在每个成员自己的电脑上：�
 
 {/* ref file="../plugins/collab/src/index.ts" lines="44-69" hash="56067a9b51dc" blob="3ff0ea6b6bfe" */}
 
-同仓的 `@godcreator/collab`、`comments`、`identity` 打包进插件产物，不是 peer。打包时还把 collab 包的版本、自动合并工作流模板、项目首页模板作为常量带进来：`collab.site.init` 写进 `site/package.json` 的功能包范围与工作流里的 `MERGE_CHECK_RANGE` 都是 `^<这一版>`，推送前在本机查「只有负责人能改的内容」用的也是这一版的 `leadOnlyProblems`。所以改了 collab 包要先构建它，再构建插件：
+同仓的 `@godcreator/collab`、`comments`、`identity` 打包进插件产物，不是 peer；平台包只打包身份文件那一个出口 `@godcreator/god-docsite/identity`（认协作仓用）。打包时还把 collab 包的版本、自动合并工作流模板、项目首页模板作为常量带进来：`collab.site.init` 写进 `site/package.json` 的功能包范围与工作流里的 `MERGE_CHECK_RANGE` 都是 `^<这一版>`，推送前在本机查「只有负责人能改的内容」用的也是这一版的 `leadOnlyProblems`。所以改了 collab 包要先构建它，再构建插件：
 
 {/* ref file="../plugins/collab/build.ts" lines="28-54" hash="9389a7cce4a7" blob="6098b7734a98" */}
 
 ## 两套操作：协作仓与别的仓
 
-图上第 2、3、4 号。项目文件夹（以组织命名）里有一个协作仓（带 `collab/` 与 `site/people.json` 的那个）和若干别的仓。两种仓进 main 的路不同，插件里各走一套，各自记着「此刻怎样」，通知只读这些记录：
+图上第 2、3、4 号。项目文件夹（以组织命名）里有一个协作仓（站点身份文件 `site/docsite.json` 写着 `"kind": "collab"` 的那个，格式见 [god-docsite](/packages/god-docsite) 页的「站点身份文件」；`collab/` 在没有任务记录时是空目录、git 不跟踪，不拿它认）和若干别的仓。两种仓进 main 的路不同，插件里各走一套，各自记着「此刻怎样」，通知只读这些记录：
 
 | | 协作仓那一套 | 别的仓那一套 |
 | --- | --- | --- |
@@ -153,7 +153,7 @@ QQ 任务组是另一件事：给项目起了 QQ 命令（`collab.project.qq-com
 
 `collab.site.init {repo, title}` 只对新站点（`site/` 不存在或是空目录），按顺序：
 
-1. 交给 gwb-docsite 的 `init` 建基础站（平台模板、装依赖、启动一次检查首页）
+1. 交给 gwb-docsite 的 `init` 建站（平台模板、身份文件 `site/docsite.json` 写 `"kind": "collab"`、装依赖、启动一次检查首页）
 2. 建好仓根的 `collab/` 与站点的 `journal/`：站点运行时会写入它们，协作功能的样式表在 Tailwind 扫描里排除这两个目录，目录要在开发服务启动前就存在才生效，否则一写入就整页刷新、推送连接断掉
 3. 仓里还没有 `.gitea/workflows/collab-auto-merge.yaml` 就照打包进来的模板写出，`MERGE_CHECK_RANGE` 写成 `^<打包时的 collab 版本>`；已有的是负责人管的，不覆盖
 4. 站点此刻在运行（站点目录早已登记在 gwb-docsite、`init` 检查完首页后它保持运行）就先停掉：加功能要站点停着
@@ -161,9 +161,9 @@ QQ 任务组是另一件事：给项目起了 QQ 命令（`collab.project.qq-com
 6. 把平台模板的首页 `site/app/routes/home.tsx` 换成打包进来的项目首页（它 import 协作功能的接线文件，所以要等加完功能再写）
 7. 项目在列表里就交给 gwb-docsite 常驻（这时才再启动）；不在就等 `collab.project.add` 时登记
 
-{/* ref file="../plugins/collab/src/site-process/collab-sites.ts" lines="84-102" hash="6b259e3c9fae" blob="4cafbb566612" */}
+{/* ref file="../plugins/collab/src/site-process/collab-sites.ts" lines="84-102" hash="caa907e3c89e" blob="7d68452147a2" */}
 
-它只写文件、不提交：新站点里 `.gitea/`、`site/package.json`、站点根的配置文件都是只有负责人能改的内容，由负责人提交。用到的 gwb-docsite 服务方法就是 `add`、`remove`、`start`、`stop`、`status`、`onStatus`、`push`、`init`、`addFeature`，另有身份码 `identityCode` 与加入项目时的 `join`。
+它只写文件、不提交：新站点里 `.gitea/`、`site/package.json`、`site/docsite.json`、站点根的配置文件都是只有负责人能改的内容，由负责人提交。用到的 gwb-docsite 服务方法就是 `add`、`remove`、`start`、`stop`、`status`、`onStatus`、`push`、`init`、`addFeature`，另有身份码 `identityCode` 与加入项目时的 `join`。
 
 ## 命令
 

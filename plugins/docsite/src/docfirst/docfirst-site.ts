@@ -95,7 +95,7 @@ export interface DocfirstSiteDeps {
  * 脚本与依赖写在加功能之前：addFeature 的 pnpm add 顺带把 docfirst 命令行装上，不用再装一次。版本都是插件旁边装着的那一版写 ^<版本>
  */
 export async function createDocfirstSite(siteDir: string, { title }: { title: string }, deps: DocfirstSiteDeps): Promise<{ features: string[] }> {
-  await deps.docsite.init(siteDir, { title });
+  await deps.docsite.init(siteDir, { title, kind: 'docs' });
   const docfirst = packageNearby(deps.packagesFrom, DOCFIRST_PACKAGE);
   overlayDocfirstTemplate(siteDir, docfirst.dir);
   addDocfirstScripts(siteDir, `^${docfirst.version}`);

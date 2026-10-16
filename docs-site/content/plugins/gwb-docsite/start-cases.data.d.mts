@@ -32,7 +32,7 @@ export interface StartCase {
   steps: StartStep[];
   /** 第 ④ 步走到时启动的命令；没走到是 null */
   command: string | null;
-  /** refused 情况：第 ② 步下面列出的四条原话 */
+  /** refused 情况：第 ② 步下面列出的五条原话 */
   refusals?: string[];
   result: { error: boolean; value: string };
   after: AfterLine[];

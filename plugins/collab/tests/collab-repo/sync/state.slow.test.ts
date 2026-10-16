@@ -114,6 +114,7 @@ describe('协作仓那一边的自动同步', () => {
     admin = cloneAs(root, origin, 'admin')
     write(path.join(admin, seedRecord), '{}\n')
     write(path.join(admin, 'site', 'people.json'), people)
+    write(path.join(admin, 'site', 'docsite.json'), '{"kind":"collab","format":1}\n')
     git(admin, 'add', '.')
     git(admin, 'commit', '-q', '-m', '起点')
     git(admin, 'push', '-q', 'origin', 'main')

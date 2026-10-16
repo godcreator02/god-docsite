@@ -1,7 +1,7 @@
 {
   "name": "@godcreator/god-docsite",
-  "version": "0.1.1",
-  "description": "文档站平台：fumadocs（React Router + Vite）站点的公共部分——三种页面来源、布局与侧栏、搜索、llms、推送、术语标注、vite 插件（开发服务没给端口就随机挑），发布版启动命令 docsite-serve，以及唯一的站点模板与建站器（建站、加功能、重写功能汇总文件）",
+  "version": "0.1.2",
+  "description": "文档站平台：fumadocs（React Router + Vite）站点的公共部分——三种页面来源、布局与侧栏、搜索、llms、推送、术语标注、vite 插件（开发服务没给端口就随机挑），发布版启动命令 docsite-serve，以及唯一的站点模板与建站器（建站、加功能、重写功能汇总文件）、站点身份文件 docsite.json 的读写（站点类别与布局代号）",
   "license": "MIT",
   "type": "module",
   "bin": {
@@ -34,6 +34,10 @@
     "./scaffold": {
       "types": "./dist/node/scaffold.d.mts",
       "default": "./dist/node/scaffold.mjs"
+    },
+    "./identity": {
+      "types": "./dist/node/identity.d.mts",
+      "default": "./dist/node/identity.mjs"
     },
     "./tex": {
       "types": "./dist/site/tex.d.mts",

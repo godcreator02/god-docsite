@@ -6,7 +6,7 @@ description: 平台包 @godcreator/god-docsite 建的站（协作站、docfirst 
 # 平台建的站（gwb-docsite）
 
 站点建在平台包 `@godcreator/god-docsite` 上（fumadocs + React Router + Vite）：`content/` 放页面，`comments/` 放评论，`people.json` 列出人员，
-`app/features/<功能名>/` 是各功能包的接线文件。基础站自带身份（`@godcreator/identity`）与评论（`@godcreator/comments`）。
+`docsite.json` 是身份文件（站点类别与布局代号），`app/features/<功能名>/` 是各功能包的接线文件。基础站自带身份（`@godcreator/identity`）与评论（`@godcreator/comments`）。
 每条命令的参数与回执以 usage 为准（`search {"prefix":"docsite."}`）；`dir` 一律是站点目录的绝对路径。
 
 ## 始终照做
@@ -24,7 +24,7 @@ docsite.feature.add  {"dir":…,"package":"@godcreator/trajectory","version":"^0
 ```
 
 - `docsite.site.init`：`dir` 要不存在或是空目录，`title`（写进 `content/meta.json`）必给；端口不写进站点，启动时挑。
-  复制平台包的 `template/`，平台包、身份、评论三个包写成插件旁边装着的那一版的 `^<版本>`，`pnpm install`，补上评论功能的接线文件，再启动服务检查首页。
+  复制平台包的 `template/`，平台包、身份、评论三个包写成插件旁边装着的那一版的 `^<版本>`，身份文件写 `"kind": "base"`，`pnpm install`，补上评论功能的接线文件，再启动服务检查首页。
   `people.json` 里只有 agent `claude`，人用 `docsite.people.join` 把自己加进来
 - `docsite.feature.add`：在站点里 `pnpm add <package>@<version>`，把功能包 `template/` 里站点还没有的文件补进 `app/features/<功能名>/`（已有的不覆盖），
   重写 `app/features/` 下文件名带 `generated` 的汇总文件，再启动服务检查首页。`version` 不给就用 gwb-docsite 旁边装着的那一版，没装就拒绝。
@@ -47,17 +47,19 @@ docsite.feature.add  {"dir":…,"package":"@godcreator/trajectory","version":"^0
 docsite.site.add     {"dir":…}   登记为常驻并启动；插件每次加载时（工作台启动、插件升级）也启动登记着的站
 docsite.site.start   {"dir":…}   启动；已在运行或正在启动就回现状
 docsite.site.stop    {"dir":…}   停掉；没在运行就拒绝
-docsite.site.list    {}          每个站 { dir, state, url, error, title, hosted, by }：state 是 running / stopped / failed，url 只在运行时有，
-                                 title 是站名，hosted 是登记为常驻，by 是谁登记的（docsite.site.add 或插件名）
+docsite.site.list    {}          每个站 { dir, state, url, error, title, kind, hosted, by }：state 是 running / stopped / failed，url 只在运行时有，
+                                 title 是站名，kind 是类别（base / docs / collab，没有身份文件为 null），hosted 是登记为常驻，by 是谁登记的（docsite.site.add 或插件名）
 docsite.site.remove  {"dir":…}   去掉常驻登记，在运行就停掉；没登记过就拒绝
 ```
 
-- 启动前核对站点的 `node_modules` 里装着 `@godcreator/god-docsite`（建在旧包 `@godcreator/docsite-kit` 上的站拒绝），`scripts.dev` 没写 `--port`（写了就拒绝，照报错去掉）
+- 启动前核对：站点根有身份文件 `docsite.json` 且写对了，`node_modules` 里装着 `@godcreator/god-docsite`，`scripts.dev` 没写 `--port`（写了就拒绝，照报错去掉）
+- 身份文件写明站点的类别与布局代号，平台建站时写，只有两项：`{ "kind": "base" | "docs" | "collab", "format": 1 }`。
+  没有它的站拒绝托管（旧包 `@godcreator/docsite-kit` 上的站、有身份文件之前建的站）：平台建的站照报错手动补一份，别的站先迁到平台；`format` 不是 `1` 也拒绝，照平台包的 `template/` 升级站点后再改
 - 启动时经环境变量交给站点本 home 的身份码 `DOCSITE_IDENTITY_CODE` 与这次的推送令牌 `DOCSITE_FEED_TOKEN`
 - `failed` 时 `error` 写着退出码与最后几行输出；进程退出了不自动重启，修好后 `docsite.site.start`
 - 常驻的站只记在 gwb-data 的文档 `hosted-sites` 里，不在设置里。协作站也在里面：gwb-collab 在项目加进列表时登记、移出列表时去掉，启停照样用 `docsite.site.start` / `docsite.site.stop`；
   不想要某个协作站就移出项目列表（`collab.project.remove`），单 `docsite.site.remove` 的话 gwb-collab 下次加载又登记回来
-- 人在工作台的「站点」窗格里看每个站：站名、来源（手动、gwb-collab、临时）、状态与端口，能打开、启停，手动登记的还能不再托管
+- 人在工作台的「站点」窗格里看每个站：站名、类别（协作站、文档站、基础站）、来源（手动、gwb-collab、临时）、状态与端口，能打开、启停，手动登记的还能不再托管
 
 ## 我是谁
 
@@ -138,7 +140,7 @@ docsite.people.join {"dir":…,"id":"<字母数字_->","name":"<显示名>","git
 
 | 方法 | 做什么 |
 | --- | --- |
-| `init(dir, { title })` | 同 `docsite.site.init`，回 `{ dir, platformDependencies }` |
+| `init(dir, { title, kind })` | 同 `docsite.site.init`，身份文件写给的 `kind`（`base` / `docs` / `collab`）；回 `{ dir, platformDependencies }` |
 | `addFeature(dir, { packageName, specifier? })` | 同 `docsite.feature.add`；`specifier` 还可以写 `link:` / `file:` 加绝对路径 |
 | `add(dir, { by? })` / `remove(dir)` | 同 `docsite.site.add` / `docsite.site.remove`：登记为常驻再启动（回这个站此刻的状态，起不来报错、登记照留），`by` 写登记的插件名，显示在站点窗格里，不给记成 `docsite.site.add`；去掉登记、在运行就停掉（回 `{ registered }`，`false` 是本来就没登记） |
 | `start(dir)` / `stop(dir)` / `status(dir)` | 启停与此刻的状态，形状同 `docsite.site.*`；不改常驻登记 |

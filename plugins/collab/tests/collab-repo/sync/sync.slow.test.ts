@@ -52,6 +52,7 @@ beforeEach(async () => {
   mkdirSync(path.join(admin, 'collab'))
   mkdirSync(path.join(admin, 'site'))
   writeFileSync(path.join(admin, 'site', 'people.json'), people)
+  writeFileSync(path.join(admin, 'site', 'docsite.json'), '{"kind":"collab","format":1}\n')
   writeFileSync(path.join(admin, 'site', 'package.json'), '{ "name": "site" }\n')
   writeRecord(admin, shared)
   commitAll(admin, '起点')

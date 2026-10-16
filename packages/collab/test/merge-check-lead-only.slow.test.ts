@@ -13,13 +13,14 @@ describe('合并检查：只有负责人能改的内容', () => {
     write('site/people.json', people.replace('乙', '乙改名'))
     write('site/.npmrc', 'registry=https://example.org/\n')
     write('site/pnpm-workspace.yaml', 'onlyBuiltDependencies: [evil]\n')
+    write('site/docsite.json', '{"kind":"base","format":1}\n')
     write('site/vite.config.ts', 'export default {}\n')
     write('site/postcss.config.mjs', 'export default {}\n')
     commit('乙改了一堆只有负责人能改的东西')
     const result = await check('topic')
     expect(result.verdict).toBe('needs-review')
     expect(result.problems[0]).toBe(
-      '改了只有负责人能改的内容：.gitea/workflows/collab-auto-merge.yaml、.github/workflows/steal.yaml、site/.npmrc、' +
+      '改了只有负责人能改的内容：.gitea/workflows/collab-auto-merge.yaml、.github/workflows/steal.yaml、site/.npmrc、site/docsite.json、' +
         'site/package.json 的 scripts、site/package.json 里 @godcreator/collab 的版本、site/package.json 里 evil 写成了 "https://example.org/evil.tgz"（只能写版本号范围）、' +
         'site/people.json、site/pnpm-workspace.yaml、site/postcss.config.mjs、site/vite.config.ts；这类改动交给负责人（协作仓的协作者）提交',
     )

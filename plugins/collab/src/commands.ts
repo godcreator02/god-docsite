@@ -25,7 +25,7 @@ export type PluginServices = {
   qqTaskGroups: QqTaskGroups
 }
 
-export const repoUsage = '{ repo }：repo 是项目仓根的绝对路径（仓根下有 collab/ 与 site/people.json）'
+export const repoUsage = '{ repo }：repo 是项目仓根的绝对路径（site/docsite.json 写着 "kind": "collab"，人员列表在 site/people.json）'
 
 export const remoteAuthUsage =
   '要联网：git 用 gwb-gitea 设置里的令牌认证、不经 Windows 凭据管理器，origin 要在 gwb-gitea 配的 Gitea 上，令牌的 Gitea 账号要和本 home 的身份（身份码在 site/people.json 里认出的那个人）一致，不然拒绝'

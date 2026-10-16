@@ -1,5 +1,5 @@
 export { isPlainObject } from './plain-object.js'
-export { calendarUrl, collabPathInRepo, journalUrlOf, peoplePathInRepo, recordLinksApiUrl, recordPageUrlOf, sitePathInRepo, tasksPageUrl } from './layout.js'
+export { calendarUrl, collabPathInRepo, journalUrlOf, peoplePathInRepo, recordLinksApiUrl, recordPageUrlOf, siteIdentityPathInRepo, sitePathInRepo, tasksPageUrl } from './layout.js'
 export { byDue, dueStateOf, moduleColorSlotsOf, modulePaletteSize, type DueState } from './modules.js'
 export { CollabFormatError, decodeRecordFile, encodeRecordFile, fieldsAnyoneMayChange, isRecordId, newRecordId, recordTime, taskStatuses } from './records.js'
 export type { CollabRecord, ModuleRecord, RecordType, TaskRecord, TaskStatus } from './records.js'

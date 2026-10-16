@@ -82,14 +82,14 @@ export class CollabSites {
   }
 
   /**
-   * collab.site.init：交给 gwb-docsite 从零建基础站，建好站点运行时会写入的目录，仓里没有自动合并工作流就写进去，再加协作功能（功能包写成给的范围；
+   * collab.site.init：交给 gwb-docsite 从零建站（身份文件 site/docsite.json 写 kind collab，插件靠它认出协作仓），建好站点运行时会写入的目录，仓里没有自动合并工作流就写进去，再加协作功能（功能包写成给的范围；
    * 加功能时 gwb-docsite 会起服务检查首页），最后把平台模板的首页换成协作功能的项目首页（homePage 是它的原文）；
    * title 是新站的站名；项目在列表里就交给 gwb-docsite 常驻
    */
   async init(repo: string, options: { featureRange: string; mergeWorkflow: string; homePage: string; title: string; listed: boolean }): Promise<CollabSiteInitResult> {
     const { featureRange, mergeWorkflow, homePage, listed, ...newSite } = options
     const siteDir = siteDirOf(repo)
-    const created = await this.options.docsite.init(siteDir, newSite)
+    const created = await this.options.docsite.init(siteDir, { ...newSite, kind: 'collab' })
     createDirsWrittenWhileRunning(repo)
     const mergeWorkflowWritten = writeMergeWorkflowIfMissing(repo, mergeWorkflow)
     // 站点目录已登记为 gwb-docsite 的常驻站时（项目在列表里、重建站点），建站检查完首页它保持运行；加功能要站点停着

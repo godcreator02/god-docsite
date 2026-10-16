@@ -15,7 +15,7 @@ beforeEach(async () => {
   root = longTempDir('gwb-docsite-feature-')
   siteDir = path.join(root, 'site')
   const events: string[] = []
-  await createDocsite(siteDir, { title: '新站' }, { ...fakeHomePageCheck(events), scaffold: () => loadPlatformScaffold(), packageSource: { kind: 'link', repoDir }, pnpm: fakePnpm(events) })
+  await createDocsite(siteDir, { title: '新站', kind: 'base' }, { ...fakeHomePageCheck(events), scaffold: () => loadPlatformScaffold(), packageSource: { kind: 'link', repoDir }, pnpm: fakePnpm(events) })
 })
 
 afterEach(() => {

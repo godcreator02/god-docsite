@@ -31,7 +31,7 @@ export const collabPluginSeams = defineSeamGraph({
       pkg: '项目文件夹',
       role: null,
       outside: true,
-      blurb: '项目文件夹（以组织命名）里的仓：一个是协作仓（带 collab/ 与 site/ 的那个），其余是普通 git 仓。',
+      blurb: '项目文件夹（以组织命名）里的仓：一个是协作仓（site/docsite.json 写着 kind collab 的那个），其余是普通 git 仓。',
       caps: [
         { id: 'repo-collab', name: '协作仓', ident: 'collab/ · site/' },
         { id: 'repo-others', name: '别的仓', ident: '项目文件夹/' },

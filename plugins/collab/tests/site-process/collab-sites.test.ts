@@ -195,9 +195,9 @@ describe('项目站点交给 gwb-docsite', () => {
         mergeWorkflow: { path: '.gitea/workflows/collab-auto-merge.yaml', written: true },
         homePage: 'site/app/routes/home.tsx',
       })
-      expect(calls).toEqual([`init ${newSiteDir} {"title":"新项目"}`, `addFeature ${newSiteDir} @godcreator/collab@^0.31.0`])
+      expect(calls).toEqual([`init ${newSiteDir} {"title":"新项目","kind":"collab"}`, `addFeature ${newSiteDir} @godcreator/collab@^0.31.0`])
       await sites.init(newRepo, { featureRange: '^0.31.0', mergeWorkflow, title: '新项目', homePage, listed: true })
-      expect(calls.slice(2, 5)).toEqual([`init ${newSiteDir} {"title":"新项目"}`, `addFeature ${newSiteDir} @godcreator/collab@^0.31.0`, `add ${newSiteDir}`])
+      expect(calls.slice(2, 5)).toEqual([`init ${newSiteDir} {"title":"新项目","kind":"collab"}`, `addFeature ${newSiteDir} @godcreator/collab@^0.31.0`, `add ${newSiteDir}`])
     } finally {
       rmSync(newRepo, { recursive: true, force: true })
     }
@@ -222,7 +222,7 @@ describe('项目站点交给 gwb-docsite', () => {
       }
       await sitesWith(registeredSite, [newRepo]).sites.init(newRepo, { featureRange: '^0.31.0', mergeWorkflow, title: '新项目', homePage, listed: true })
       expect(calls.slice(0, 5)).toEqual([
-        `init ${newSiteDir} {"title":"新项目"}`,
+        `init ${newSiteDir} {"title":"新项目","kind":"collab"}`,
         `start ${newSiteDir}`,
         `stop ${newSiteDir}`,
         `addFeature ${newSiteDir} @godcreator/collab@^0.31.0`,

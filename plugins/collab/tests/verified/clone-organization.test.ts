@@ -32,7 +32,7 @@ function bareRepoWith(name: string, files: Record<string, string>): void {
 }
 
 const seedModule = `${JSON.stringify({ id: '20260901090000-seedmod', type: 'module', author: 'admin', title: '起点模块', due: '2026-12-31' }, null, 2)}\n`
-const collabRepoFiles = { 'collab/records/20260901090000-seedmod.json': seedModule, 'site/people.json': people, 'site/package.json': '{"name":"site","private":true}\n' }
+const collabRepoFiles = { 'collab/records/20260901090000-seedmod.json': seedModule, 'site/people.json': people, 'site/docsite.json': '{"kind":"collab","format":1}\n', 'site/package.json': '{"name":"site","private":true}\n' }
 
 function sourceOf(names: string[], organization = 'hybrid-mmc'): OrganizationSource {
   return { organization, repoNames: async () => [...names], cloneUrlOf: (name) => path.join(organizationDir, `${name}.git`) }
@@ -111,7 +111,7 @@ describe('克隆整个组织', () => {
   })
 
   it('组织里没有协作仓：照实报错，写明克隆了哪些仓', async () => {
-    await expect(cloneOrganization(parent, sourceOf(['datasheets']), 'bob', { env: {} })).rejects.toThrow(/没有一个带 collab\/ 与 site\/people\.json 的协作仓.*datasheets/s)
+    await expect(cloneOrganization(parent, sourceOf(['datasheets']), 'bob', { env: {} })).rejects.toThrow(/没有协作仓（site\/docsite\.json 写着 "kind": "collab"）.*datasheets/s)
   })
 
   it('协作仓不止一个：照实报错，写明是哪些仓', async () => {

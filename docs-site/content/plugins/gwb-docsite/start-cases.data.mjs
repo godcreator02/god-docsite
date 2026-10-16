@@ -6,7 +6,7 @@
  */
 
 /** 共用数据：站点目录、本 home 的身份码、假开发服务报出的地址与 pid */
-/* ref file="../plugins/docsite/tests/site-host.test.ts" lines="33-79" hash="8195745a15bd" blob="6a55f4ff8484" */
+/* ref file="../plugins/docsite/tests/site-host.test.ts" lines="34-80" hash="8195745a15bd" blob="21f339f3ceed" */
 export const siteDir = '/projects/demo/site'
 export const identityCode = 'mycode000001'
 
@@ -16,11 +16,12 @@ export const stepNames = ['已在运行或正在启动', '启动前核对', '定
 /** 启动时经环境变量交给开发服务的两样：本 home 的身份码、这次启动现生成的推送令牌 */
 export const envLine = 'DOCSITE_IDENTITY_CODE=mycode000001 DOCSITE_FEED_TOKEN=<这次生成的随机串>'
 
-/** 启动前核对不过的四条原话（站点目录换成例子里同一个可读的路径；Windows 上路径分隔符统一写 /） */
+/** 启动前核对不过的五条原话（站点目录换成例子里同一个可读的路径；Windows 上路径分隔符统一写 /） */
 export const refusalMessages = [
   '/projects/demo/site 下没有 package.json，不是站点目录',
-  '/projects/demo/site 的 node_modules 里没有 @godcreator/god-docsite：不是平台建的站，或者还没在站点目录里运行 pnpm install',
-  '/projects/demo/site 建在旧地基 @godcreator/docsite-kit 上：本插件只托管建在 @godcreator/god-docsite 上的站，先把站点迁到新平台',
+  '/projects/demo/site 下没有身份文件 docsite.json：不是 @godcreator/god-docsite 建的站，或是有身份文件之前建的站。平台建的站补一份 { "kind": "<base | docs | collab>", "format": 1 }；别的站先迁到 @godcreator/god-docsite',
+  '/projects/demo/site/docsite.json 的 kind 要是 base / docs / collab 之一，收到 "wiki"',
+  '/projects/demo/site 的 node_modules 里没有 @godcreator/god-docsite：还没在站点目录里运行 pnpm install',
   '/projects/demo/site/package.json 的 scripts.dev 写死了 --port：端口由 gwb-docsite 启动时挑，把 --port 和端口号从 scripts.dev 里去掉',
 ]
 
@@ -29,7 +30,7 @@ export const refusalMessages = [
  * 五步各走成什么样（state：pass 过了往下走，stop 在这一步结束，skip 没走到；stopTone 区分回现状与拒绝或失败）、
  * 第 ④ 步走到时启动的命令（command）、交回（result 的 error 为 true 是抛错）、之后 docsite.site.list 里这个站的样子（after）。
  */
-/* ref file="../plugins/docsite/tests/site-host.test.ts" lines="189-203" hash="ea0825f3caab" blob="6a55f4ff8484" */
+/* ref file="../plugins/docsite/tests/site-host.test.ts" lines="192-206" hash="ea0825f3caab" blob="21f339f3ceed" */
 export const cases = [
   {
     id: 'first',
@@ -39,7 +40,7 @@ export const cases = [
     portsAfter: { port: 14001, note: '记下 14001' },
     steps: [
       { state: 'pass', note: '不在运行，也没在启动' },
-      { state: 'pass', note: '有 package.json、装着平台包、dev 脚本没写 --port' },
+      { state: 'pass', note: '有 package.json 与身份文件、装着平台包、dev 脚本没写 --port' },
       { state: 'pass', note: '没记过 → 不给端口' },
       { state: 'pass', note: '站点自己挑，报出 http://127.0.0.1:14001' },
       { state: 'pass', note: '记下 14001' },
@@ -100,7 +101,7 @@ export const cases = [
     result: { error: false, value: '{ url: "http://127.0.0.1:14001", pid: 1, alreadyRunning: false }' },
     after: [{ state: 'running', url: 'http://127.0.0.1:14001', error: null }],
   },
-  /* ref file="../plugins/docsite/tests/site-host.test.ts" lines="91-115" hash="221b354e4e54" blob="6a55f4ff8484" */
+  /* ref file="../plugins/docsite/tests/site-host.test.ts" lines="92-116" hash="221b354e4e54" blob="21f339f3ceed" */
   {
     id: 'already',
     label: '已在运行',
@@ -118,28 +119,28 @@ export const cases = [
     result: { error: false, value: '{ url: "http://127.0.0.1:14001", pid: 1, alreadyRunning: true }' },
     after: [{ state: 'running', url: 'http://127.0.0.1:14001', error: null, note: '只启动过一次' }],
   },
-  /* ref file="../plugins/docsite/tests/site-host.test.ts" lines="152-165" hash="31cb59cb7d19" blob="6a55f4ff8484" */
-  /* ref file="../plugins/docsite/tests/site-host.test.ts" lines="205-214" hash="0bed967545fc" blob="6a55f4ff8484" */
-  /* ref file="../plugins/docsite/src/site-contract.ts" hash="02d02ff9f5cd" blob="f728727e9c4f" */
+  /* ref file="../plugins/docsite/tests/site-host.test.ts" lines="153-168" hash="c28cb65304a1" blob="21f339f3ceed" */
+  /* ref file="../plugins/docsite/tests/site-host.test.ts" lines="208-217" hash="0bed967545fc" blob="21f339f3ceed" */
+  /* ref file="../plugins/docsite/src/site-contract.ts" hash="7d5fc52852d0" blob="5ea4e0f2625d" */
   {
     id: 'refused',
     label: '启动前核对不过',
-    text: '不是站点目录、没装平台包、建在旧包 docsite-kit 上、dev 脚本写死了 --port，都在启动之前拒绝，不启动进程。状态转成 failed，error 记下拒绝的原话，docsite.site.list 里看得到为什么没起来。',
+    text: '不是站点目录、没有身份文件 docsite.json（旧包 docsite-kit 上的站也是这一条）、身份文件写坏了、没装平台包、dev 脚本写死了 --port，都在启动之前拒绝，不启动进程。状态转成 failed，error 记下拒绝的原话，docsite.site.list 里看得到为什么没起来。',
     portsBefore: { port: null, occupancy: 'none' },
     portsAfter: { port: null, note: '没记过' },
     steps: [
       { state: 'pass', note: '不在运行，也没在启动' },
-      { state: 'stop', stopTone: 'refusal', note: '四种拒绝，原话在下面' },
+      { state: 'stop', stopTone: 'refusal', note: '五种拒绝，原话在下面' },
       { state: 'skip', note: '' },
       { state: 'skip', note: '' },
       { state: 'skip', note: '' },
     ],
     command: null,
     refusals: refusalMessages,
-    result: { error: true, value: '四种拒绝各抛一条原话' },
+    result: { error: true, value: '五种拒绝各抛一条原话' },
     after: [{ state: 'failed', url: null, error: '拒绝的那条原话' }],
   },
-  /* ref file="../plugins/docsite/tests/site-host.test.ts" lines="143-150" hash="2ffe71740b6f" blob="6a55f4ff8484" */
+  /* ref file="../plugins/docsite/tests/site-host.test.ts" lines="144-151" hash="2ffe71740b6f" blob="21f339f3ceed" */
   {
     id: 'launch-fails',
     label: '开发服务没起来',
@@ -157,7 +158,7 @@ export const cases = [
     result: { error: true, value: '开发服务 60 秒内没有报出地址，已停掉' },
     after: [{ state: 'failed', url: null, error: '开发服务 60 秒内没有报出地址，已停掉' }],
   },
-  /* ref file="../plugins/docsite/tests/site-host.test.ts" lines="129-141" hash="1945645e1b52" blob="6a55f4ff8484" */
+  /* ref file="../plugins/docsite/tests/site-host.test.ts" lines="130-142" hash="1945645e1b52" blob="21f339f3ceed" */
   {
     id: 'exited',
     label: '跑着跑着退出了',

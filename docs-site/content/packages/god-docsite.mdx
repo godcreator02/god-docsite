@@ -15,6 +15,8 @@ import { OriginCases } from './god-docsite/origin-cases'
 - **模板与建站器**：`template/` 是唯一的站点模板，`./scaffold` 是建站器（`createSite` 建站、`addFeature` 加功能、`regenerateFeatureIndex` 重写汇总文件），负责把站点写出来
 - **运行时出口**：`./server`、`./react`、`./vite`、`./mdx` 等，由模板写出的站点文件调用，管页面树、布局与侧栏、搜索、推送与术语标注
 
+另有 `./identity`：站点根的身份文件 `docsite.json`（站点类别与布局代号）的读写，插件靠它认出平台建的站、分出类别，见下面「站点身份文件」一节。
+
 本站的 `app/features/` 就是建站器建出来的样子：`code-pin`、`comments`、`explainer`、`trajectory` 四个功能目录，和「`createSite` → `addBaseFeatures` → 依次 `addFeature` code-pin、trajectory、explainer」得到的一字不差——`pnpm test:scaffold` 就是这么比对的。这一页的例子从头到尾都是本站自己。
 
 ## 接缝图
@@ -38,6 +40,7 @@ import { OriginCases } from './god-docsite/origin-cases'
 | --- | --- | --- |
 | `.` | `src/core/` 纯逻辑：术语匹配、HTML 提取、站内链接解析、推送协议的常量 | gwb-docsite（推送协议常量）、本包其余各层 |
 | `./scaffold` | `src/node/scaffold/` 建站器，纯 Node | gwb-docsite |
+| `./identity` | `src/node/site-identity.ts` 站点身份文件的读写，纯 Node、不按自己模块的位置找文件，插件可以打包进去 | gwb-docsite、gwb-collab |
 | `./vite` | `src/vite/` vite 插件 | 站点 `vite.config.ts` |
 | `./mdx` | `src/mdx/` 术语标注的 remark 插件 | 站点 `app/lib/mdx-plugins.ts` |
 | `./server` | `src/site/*.server.ts` 等服务端部分 | 站点路由文件、功能包模板 |
@@ -46,7 +49,7 @@ import { OriginCases } from './god-docsite/origin-cases'
 | `./styles.css` | 平台样式 | 站点 `app/app.css` |
 | `docsite-serve`（bin） | `src/cli/serve.ts` 发布版启动命令 | 站点 `package.json` 的 `scripts.start` |
 
-{/* ref file="../packages/god-docsite/package.json" lines="7-43" hash="c92d340e240e" blob="4da5c09c43b4" */}
+{/* ref file="../packages/god-docsite/package.json" lines="7-47" hash="58f53f4629d7" blob="bc333cdf88ea" */}
 
 ## 站点里的三类文件
 
@@ -83,6 +86,22 @@ import { OriginCases } from './god-docsite/origin-cases'
 {/* ref file="../packages/god-docsite/src/node/scaffold/feature-index.ts" lines="53-121" hash="79d409a1487e" blob="778f5b87a5f7" */}
 
 {/* ref file="../packages/god-docsite/src/node/scaffold/feature-index.ts" lines="197-215" hash="7aeec0bff430" blob="778f5b87a5f7" */}
+
+## 站点身份文件
+
+站点根的 `docsite.json` 写明这个站拿来干什么、按哪一代布局建的，只有两项：
+
+```json
+{ "kind": "collab", "format": 1 }
+```
+
+- `kind` 是 `base`（基础站）、`docs`（文档站）、`collab`（协作站）之一，说的是用途，不是装了哪些功能：测试站装了全部功能，`kind` 仍是 `collab`。装了哪些功能看 `package.json` 的依赖
+- `format` 是布局代号，现在是 `1`。布局再变时加一，读到不认识的号直接报错、写明照模板手动升级，不自动搬
+- 写坏了就报错，写明哪一项不对：不是 JSON、`kind` 不在三个值里、`format` 不对、多了认不出的键
+
+`createSite` 不写它：建站的一方建完站接着调 `writeSiteIdentity` 写一次，之后归站点。gwb-docsite 的 `docsite.site.init`、`docfirst.create`、gwb-collab 的 `collab.site.init` 分别写 `base`、`docs`、`collab`。gwb-docsite 托管前、gwb-collab 认协作仓都只看它，没有这个文件的站（旧地基 docsite-kit 的站、有身份文件之前建的站）不认。
+
+{/* ref file="../packages/god-docsite/src/node/site-identity.ts" lines="4-13" hash="8b4d76c28339" blob="a260faf0383b" */}
 
 ## 功能目录里的四种文件
 
@@ -160,6 +179,7 @@ import { OriginCases } from './god-docsite/origin-cases'
 
 ## 谁在用它
 
-- **gwb-docsite**：`./scaffold` 的 `createSite`、`addBaseFeatures`、`addFeature`、`isPortFree`（`docsite.site.init`、`docsite.feature.add`）；`.` 的 `feedTokenEnvName`、`feedTokenHeader`、`feedUrlOf`（托管开发服务、往推送通道推数据）
+- **gwb-docsite**：`./scaffold` 的 `createSite`、`addBaseFeatures`、`addFeature`、`isPortFree`（`docsite.site.init`、`docsite.feature.add`）；`./identity` 的 `writeSiteIdentity`、`siteIdentityOf`（建站时写身份文件、托管前核对、站点列表的类别）；`.` 的 `feedTokenEnvName`、`feedTokenHeader`、`feedUrlOf`（托管开发服务、往推送通道推数据）
+- **gwb-collab**：`./identity` 的 `siteIdentityOf`（`site/docsite.json` 写着 `collab` 的仓才是协作仓）
 - **功能包的 `template/`**（写进站点后才 import 平台包，包本身不依赖它）：comments 的全站评论页调 `sitePageRefs`；trajectory 调 `routeLinkKind`、`SiteLinksProvider`、`sitePageTitles`；collab 调 `useSiteFeed`、`sitePageRefs`，它的首页模板 `templates/home.tsx` 调 `siteHomeData`、`SiteHomeLayout`
 - **站点**：上面各节的模板文件

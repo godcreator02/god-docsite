@@ -26,6 +26,7 @@ export const seedModule = `${JSON.stringify({ id: seedModuleId, type: 'module', 
 export const collabRepoFiles = {
   [`collab/records/${seedModuleId}.json`]: seedModule,
   'site/people.json': people,
+  'site/docsite.json': '{"kind":"collab","format":1}\n',
   'site/package.json': '{"name":"site","private":true}\n',
 }
 

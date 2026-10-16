@@ -8,15 +8,15 @@
 /* ref file="../plugins/docsite/src/site-host.ts" lines="7-13" hash="df7ebb7f1f35" blob="c6df7cdcd9ac" */
 
 /** stop 对没在运行的站报错，原话逐字照抄（模板里的 dir 换成例子的站点目录） */
-/* ref file="../plugins/docsite/src/site-host.ts" lines="143-155" hash="cbdce1c29734" blob="c6df7cdcd9ac" */
+/* ref file="../plugins/docsite/src/site-host.ts" lines="144-156" hash="cbdce1c29734" blob="95cf31bba1e4" */
 export const stopNotRunningMessage = '/projects/demo/site 的站点没在运行'
 
-/** 启动前核对不过的报错原话（四条里的第一条，模板里的 dir 换成例子的站点目录） */
-/* ref file="../plugins/docsite/src/site-host.ts" lines="44-49" hash="d22e16af9b99" blob="c6df7cdcd9ac" */
+/** 启动前核对不过的报错原话（五条里的第一条，模板里的 dir 换成例子的站点目录） */
+/* ref file="../plugins/docsite/src/site-host.ts" lines="44-50" hash="110ea7049332" blob="95cf31bba1e4" */
 export const refusedMessage = '/projects/demo/site 下没有 package.json，不是站点目录'
 
 /** 进程退出记下的原因，逐字照抄测试断言（fake 服务退出的 reason 与 dev-server 生成的格式相同） */
-/* ref file="../plugins/docsite/tests/site-host.test.ts" lines="129-141" hash="1945645e1b52" blob="62f2145859ee" */
+/* ref file="../plugins/docsite/tests/site-host.test.ts" lines="130-142" hash="1945645e1b52" blob="21f339f3ceed" */
 export const exitMessage = '开发服务退出了（退出码 1），最后的输出：\nError: boom'
 
 /** 状态图的画布：三个圆角框与带事件的箭头；tone 决定箭头颜色（info 是人为发出的命令，bad 是进程自己出的事） */
@@ -111,6 +111,6 @@ export const cases = [
     states: { to: 'failed' },
     list: { state: 'failed', url: null, error: refusedMessage },
     thrown: null,
-    text: '不是站点目录、node_modules 里没有平台包、建在旧包 docsite-kit 上、dev 脚本写死了 --port：都在启动之前拒绝，不 spawn 进程，状态转成 failed，error 记拒绝的原话。',
+    text: '不是站点目录、没有身份文件 docsite.json（旧包 docsite-kit 上的站也是这一条）或写坏了、node_modules 里没有平台包、dev 脚本写死了 --port：都在启动之前拒绝，不 spawn 进程，状态转成 failed，error 记拒绝的原话。',
   },
 ]

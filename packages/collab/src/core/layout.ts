@@ -1,7 +1,11 @@
-/** 项目仓的布局是固定的：任务与模块的记录在仓根的 collab/，站点在仓根的 site/，人员列表是站点的 site/people.json；都是相对仓根、用 / 分隔的路径 */
+/**
+ * 项目仓的布局是固定的：任务与模块的记录在仓根的 collab/，站点在仓根的 site/，人员列表是站点的 site/people.json，
+ * 站点的身份文件 site/docsite.json 写着 "kind": "collab"（认协作仓就看它，格式归平台包 god-docsite）；都是相对仓根、用 / 分隔的路径
+ */
 export const collabPathInRepo = 'collab'
 export const sitePathInRepo = 'site'
 export const peoplePathInRepo = 'site/people.json'
+export const siteIdentityPathInRepo = 'site/docsite.json'
 
 /** 网站自带的任务页的地址：任务与模块自己那一页是 /tasks/<记录 id> */
 export const tasksPageUrl = '/tasks'

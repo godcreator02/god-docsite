@@ -1,9 +1,10 @@
 import { existsSync, readFileSync, realpathSync } from 'node:fs'
 import path from 'node:path'
-import { CollabFormatError, collabPathInRepo, parsePeople, peoplePathInRepo, personOfCode, sitePathInRepo, type Person } from '@godcreator/collab'
+import { CollabFormatError, collabPathInRepo, parsePeople, peoplePathInRepo, personOfCode, siteIdentityPathInRepo, sitePathInRepo, type Person } from '@godcreator/collab'
 import { projectDirOfCollabRepo } from '@godcreator/collab/node'
+import { siteIdentityOf } from '@godcreator/god-docsite/identity'
 import type { JoiningPerson } from '@godcreator/identity'
-import { CollabRejected } from '../errors.js'
+import { CollabRejected, messageOf } from '../errors.js'
 import { isGiteaName, ownerAndRepoOf, type GiteaLocation } from '../gitea-api/gitea.js'
 import { git } from '../git/git.js'
 import { gitReposIn } from '../git/status.js'
@@ -47,13 +48,21 @@ export async function giteaLocationOfRepoIn(collabRepo: string, name: string): P
   return ownerAndRepoOf(await git(path.join(projectDirOfCollabRepo(collabRepo), name), ['remote', 'get-url', 'origin']))
 }
 
-/** 带 collab/ 与 site/people.json 的仓是协作仓 */
+/** 认协作仓的标记，写进报错 */
+export const collabRepoMark = `${siteIdentityPathInRepo} 写着 "kind": "collab"`
+
+/** 站点身份文件 site/docsite.json 写着 kind collab 的仓是协作仓；身份文件写坏了拒绝，写明哪里不对 */
 export function isCollabRepo(repo: string): boolean {
-  return existsSync(path.join(repo, collabPathInRepo)) && existsSync(path.join(repo, ...peoplePathInRepo.split('/')))
+  try {
+    return siteIdentityOf(path.join(repo, sitePathInRepo))?.kind === 'collab'
+  } catch (error) {
+    throw new CollabRejected(messageOf(error))
+  }
 }
 
-/** 协作仓工作区里的人员列表；读不对时拒绝，写明是 site/people.json 的问题 */
+/** 协作仓工作区里的人员列表；没有或读不对时拒绝，写明是 site/people.json 的问题 */
 export function peopleOfRepo(repo: string): Person[] {
+  if (!existsSync(path.join(repo, ...peoplePathInRepo.split('/')))) throw new CollabRejected(`协作仓 ${repo} 下没有人员列表 ${peoplePathInRepo}`)
   try {
     return parsePeople(readFileSync(path.join(repo, ...peoplePathInRepo.split('/')), 'utf8'))
   } catch (error) {
@@ -103,7 +112,7 @@ export async function openProject(repo: string, identityCode: string): Promise<P
   if (!existsSync(repo)) throw new CollabRejected(`${repo} 不存在`)
   const top = (await git(repo, ['rev-parse', '--show-toplevel'])).trim()
   if (!sameDirectory(top, repo)) throw new CollabRejected(`${repo} 不是仓根，这个仓的仓根是 ${top}`)
-  if (!isCollabRepo(repo)) throw new CollabRejected(`${repo} 下没有 ${collabPathInRepo}/ 与 ${peoplePathInRepo}，不是协作仓：要选项目里带这两样的那个仓`)
+  if (!isCollabRepo(repo)) throw new CollabRejected(`${repo} 不是协作仓（协作仓的 ${collabRepoMark}）：要选项目里带这个标记的那个仓`)
   const person = personOfCode(peopleOfRepo(repo), identityCode)
   if (person === null) {
     throw new CollabRejected(`本 home 的身份码不在 ${peoplePathInRepo} 里：运行 collab.project.join 把它加进自己那一项（按 gwb-gitea 令牌的账号认人），再 collab.submit 提交审核`)
@@ -116,7 +125,7 @@ export async function openProject(repo: string, identityCode: string): Promise<P
  * 不在列表里就拒绝，加人只有负责人能做。join 是 gwb-docsite 的 gwbDocsite.join
  */
 export async function joinProject(repo: string, login: string, join: (siteDir: string, person: JoiningPerson) => Promise<{ changed: boolean }>): Promise<{ person: string; changed: boolean }> {
-  if (!isCollabRepo(repo)) throw new CollabRejected(`${repo} 下没有 ${collabPathInRepo}/ 与 ${peoplePathInRepo}，不是协作仓`)
+  if (!isCollabRepo(repo)) throw new CollabRejected(`${repo} 不是协作仓（协作仓的 ${collabRepoMark}）`)
   const entry = peopleOfRepo(repo).find((person) => person.id === login)
   if (entry === undefined) {
     throw new CollabRejected(

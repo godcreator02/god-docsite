@@ -117,11 +117,11 @@ import { SiteRoutes } from './collab/site-routes'
 
 第二条「只有负责人能改的内容」逐个文件判：
 
-- 整个文件算的：`.gitea/`、`.github/` 下的一切（工作流改了能绕过检查、拿到组织密钥）；`site/.npmrc`、`site/pnpm-workspace.yaml`（从哪个源装包、哪些包能跑安装脚本）；`site/` 根目录下 Node 会执行的 `*.config.*` 与 `.postcssrc*`
+- 整个文件算的：`.gitea/`、`.github/` 下的一切（工作流改了能绕过检查、拿到组织密钥）；`site/.npmrc`、`site/pnpm-workspace.yaml`（从哪个源装包、哪些包能跑安装脚本）；站点身份文件 `site/docsite.json`（gwb-collab 靠它认出协作仓）；`site/` 根目录下 Node 会执行的 `*.config.*` 与 `.postcssrc*`
 - `site/package.json` 逐处算：依赖两段以外的键（如 `scripts`）、`@godcreator/` 下的包（加、删、改版本都算）、写成网址或本地路径的依赖；别的库加、升级、删都放开；文件新建、删掉或读不懂时整个文件算
 - `site/people.json` 只放行一种改动：提交人只给 `gitea` 是自己的那一项加减 `codes`，项数、先后、别的字段、别人的项都不变
 
-{/* ref file="../packages/collab/src/node/merge-check.ts" lines="55-66" hash="0d98744370cf" blob="5aee6b777440" */}
+{/* ref file="../packages/collab/src/node/merge-check.ts" lines="55-66" hash="7c716e318a02" blob="e13e1945ef9c" */}
 
 {/* ref file="../packages/collab/src/node/merge-check.ts" lines="87-111" hash="ca76b212458b" blob="5aee6b777440" */}
 

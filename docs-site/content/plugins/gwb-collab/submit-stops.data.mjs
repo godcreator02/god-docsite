@@ -12,7 +12,7 @@ const conflictTaskPath = 'collab/records/20260925130000-ddddddd.json'
 const pullNumber = 7
 
 /** main 的起点（admin 的种子提交写的）与假的执行器的默认：协作者是 ['admin']；它打回时留下的留言是 rejected 情况「原因」后面的那两行 */
-/* ref file="../plugins/collab/tests/collab-repo/submit/submit-fixture.ts" lines="81-146" hash="babe30bc09b1" blob="907a7defb577" */
+/* ref file="../plugins/collab/tests/collab-repo/submit/submit-fixture.ts" lines="81-146" hash="18361611bbf4" blob="667f68c5610d" */
 const startingSitePackageJson = '{ "dependencies": {} }'
 const executorRejectComment = [
   '没有合并（检查的是提交 abc）：',

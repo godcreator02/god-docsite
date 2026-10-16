@@ -2,8 +2,8 @@ import { mkdirSync, rmSync, writeFileSync } from 'node:fs'
 import path from 'node:path'
 import { afterEach, describe, expect, it } from 'vitest'
 import { addedByCommand } from '../src/hosted-sites.js'
-import { canUnhost, siteNameOf, sourceOf, type SiteRow } from '../src/pane/browser/sites.js'
-import { siteListingsOf, siteTitleOf } from '../src/site-list.js'
+import { canUnhost, kindOf, siteNameOf, sourceOf, type SiteRow } from '../src/pane/browser/sites.js'
+import { siteDescriptionOf, siteListingsOf, siteTitleOf } from '../src/site-list.js'
 import type { SiteStatus } from '../src/site-host.js'
 import { longTempDir } from './site-fixtures.js'
 
@@ -23,13 +23,27 @@ describe('docsite.site.list 的每一行', () => {
       ],
       [stopped(collabDir.toUpperCase()), running],
       stopped,
-      (dir) => (dir === docsDir ? '文档站' : null),
+      (dir) => (dir === docsDir ? { title: '文档站', kind: 'docs' } : { title: null, kind: dir === trialDir ? null : 'collab' }),
     )
     expect(rows).toEqual([
-      { ...stopped(docsDir), title: '文档站', hosted: true, by: addedByCommand },
-      { ...stopped(collabDir), title: null, hosted: true, by: 'gwb-collab' },
-      { ...running, title: null, hosted: false, by: null },
+      { ...stopped(docsDir), title: '文档站', kind: 'docs', hosted: true, by: addedByCommand },
+      { ...stopped(collabDir), title: null, kind: 'collab', hosted: true, by: 'gwb-collab' },
+      { ...running, title: null, kind: null, hosted: false, by: null },
     ])
+  })
+})
+
+describe('站名与类别', () => {
+  let siteDir = ''
+  afterEach(() => rmSync(siteDir, { recursive: true, force: true }))
+
+  it('类别取自站点根 docsite.json 的 kind：没有这个文件为 null，写坏了报错', () => {
+    siteDir = longTempDir('site-kind-')
+    expect(siteDescriptionOf(siteDir)).toEqual({ title: null, kind: null })
+    writeFileSync(path.join(siteDir, 'docsite.json'), '{"kind":"collab","format":1}')
+    expect(siteDescriptionOf(siteDir)).toEqual({ title: null, kind: 'collab' })
+    writeFileSync(path.join(siteDir, 'docsite.json'), '{"kind":"collab","format":2}')
+    expect(() => siteDescriptionOf(siteDir)).toThrow('只认第 1 代布局')
   })
 })
 
@@ -51,7 +65,14 @@ describe('站名取自 content/meta.json 的 title', () => {
 })
 
 describe('站点窗格的一行', () => {
-  const row = (fields: Partial<SiteRow>): SiteRow => ({ dir: collabDir, state: 'stopped', url: null, error: null, title: null, hosted: true, by: addedByCommand, ...fields })
+  const row = (fields: Partial<SiteRow>): SiteRow => ({ dir: collabDir, state: 'stopped', url: null, error: null, title: null, kind: 'collab', hosted: true, by: addedByCommand, ...fields })
+
+  it('类别：协作站、文档站、基础站；没有身份文件写「未标注」', () => {
+    expect(kindOf(row({})).label).toBe('协作站')
+    expect(kindOf(row({ kind: 'docs' })).label).toBe('文档站')
+    expect(kindOf(row({ kind: 'base' })).label).toBe('基础站')
+    expect(kindOf(row({ kind: null })).label).toBe('未标注')
+  })
 
   it('只有手动登记的站能在窗格里不再托管；插件登记的与临时的不能', () => {
     expect(canUnhost(row({}))).toBe(true)

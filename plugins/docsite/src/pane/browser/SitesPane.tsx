@@ -2,7 +2,7 @@ import type { HostBridge, ShellBridge } from '@godcreator/gwb-shell/pane'
 import { ExternalLink, Play, Square, X } from 'lucide-react'
 import { useCallback, useEffect, useRef, useState, type ReactElement } from 'react'
 import { Button } from '@/components/ui/button'
-import { canUnhost, receiptOf, siteNameOf, siteStateOf, sourceOf, type Receipt, type SiteRow, type Tone } from './sites'
+import { canUnhost, kindOf, receiptOf, siteNameOf, siteStateOf, sourceOf, type Receipt, type SiteRow, type Tone } from './sites'
 
 /** 窗格看得见时多久重读一次列表：只读本机内存与各站的 meta.json，很快 */
 const refreshMilliseconds = 5_000
@@ -91,9 +91,10 @@ function Notice({ text }: { text: string }): ReactElement {
   )
 }
 
-/** 一个站一行：站名、来源、状态与端口，右边打开、启停、不再托管；站点出错或这一行的操作失败时原因写在下面 */
+/** 一个站一行：站名、类别、来源、状态与端口，右边打开、启停、不再托管；站点出错或这一行的操作失败时原因写在下面 */
 function SiteLine({ site, run }: { site: SiteRow; run: RunSiteCommand }): ReactElement {
   const state = siteStateOf(site)
+  const kind = kindOf(site)
   const source = sourceOf(site)
   const [busy, setBusy] = useState(false)
   const [actionError, setActionError] = useState<string | null>(null)
@@ -119,6 +120,9 @@ function SiteLine({ site, run }: { site: SiteRow; run: RunSiteCommand }): ReactE
     <li className="docsite:flex docsite:flex-col docsite:gap-1.5 docsite:rounded-lg docsite:border docsite:border-border docsite:bg-card docsite:px-3 docsite:py-2">
       <div className="docsite:flex docsite:flex-wrap docsite:items-center docsite:gap-x-2 docsite:gap-y-1">
         <span className="docsite:min-w-0 docsite:truncate docsite:text-sm docsite:font-medium docsite:text-foreground">{siteNameOf(site)}</span>
+        <span className="docsite:rounded-full docsite:border docsite:border-border docsite:px-2 docsite:py-0.5 docsite:text-xs docsite:text-foreground" title={kind.title}>
+          {kind.label}
+        </span>
         <span className="docsite:rounded-full docsite:bg-muted docsite:px-2 docsite:py-0.5 docsite:text-xs docsite:text-muted-foreground" title={source.title}>
           {source.label}
         </span>

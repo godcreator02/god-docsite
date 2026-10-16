@@ -1,6 +1,7 @@
 import { defineConfig } from "tsdown";
 
-// 入口与 package.json 的出口一一对应：site/index 进浏览器，只从 core 取东西；node/ 只经 index.server、构建期入口（vite、mdx）与建站器入口（node/scaffold，纯 Node）出去。
+// 入口与 package.json 的出口一一对应：site/index 进浏览器，只从 core 取东西；node/ 只经 index.server、构建期入口（vite、mdx）、建站器入口（node/scaffold，纯 Node）
+// 与站点身份文件入口（node/identity，纯 Node、不靠自己模块的位置找文件，插件可以打包进去）出去。
 // 服务端入口的产物名以 .server.mjs 结尾，React Router 的 .server 检查才认得出它
 export default defineConfig({
   entry: {
@@ -11,6 +12,7 @@ export default defineConfig({
     "site/index.server": "src/site/index.server.ts",
     "site/tex": "src/site/tex-entry.ts",
     "node/scaffold": "src/node/scaffold/index.ts",
+    "node/identity": "src/node/site-identity.ts",
     "cli/serve": "src/cli/serve.ts",
   },
   format: ["esm"],

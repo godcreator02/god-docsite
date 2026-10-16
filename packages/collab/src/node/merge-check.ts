@@ -1,7 +1,7 @@
 import { execFile } from 'node:child_process'
 import path from 'node:path'
 import { promisify } from 'node:util'
-import { peoplePathInRepo, sitePathInRepo } from '../core/layout.js'
+import { peoplePathInRepo, siteIdentityPathInRepo, sitePathInRepo } from '../core/layout.js'
 
 /** mergeable 能合并；conflict 和 base 有冲突；needs-review 改了只有负责人能改的内容、提交的人又不是负责人 */
 export type MergeVerdict = 'mergeable' | 'conflict' | 'needs-review'
@@ -54,12 +54,12 @@ const isVersionRange = (spec: unknown) => typeof spec === 'string' && spec.trim(
 
 /**
  * 只看改了的文件名就能判定的：执行器工作流（改了能绕过检查、拿到组织密钥）、
- * 站点的装包设置（从哪个源装 @godcreator 的包、哪些包能运行安装脚本）、站点根目录下 Node 会执行的配置文件。
+ * 站点的装包设置（从哪个源装 @godcreator 的包、哪些包能运行安装脚本）、站点的身份文件（插件靠它认出协作仓）、站点根目录下 Node 会执行的配置文件。
  * 人员列表 site/people.json 另由 peopleChangeIsOwnCodesOnly 判断
  */
 function isLeadOnlyFile(file: string): boolean {
   if (file.startsWith('.gitea/') || file.startsWith('.github/')) return true
-  if (file === `${sitePathInRepo}/.npmrc` || file === `${sitePathInRepo}/pnpm-workspace.yaml`) return true
+  if (file === `${sitePathInRepo}/.npmrc` || file === `${sitePathInRepo}/pnpm-workspace.yaml` || file === siteIdentityPathInRepo) return true
   if (path.posix.dirname(file) !== sitePathInRepo) return false
   const name = path.posix.basename(file)
   return /\.config\.[cm]?[jt]s$/.test(name) || name.startsWith('.postcssrc')

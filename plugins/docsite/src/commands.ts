@@ -62,7 +62,7 @@ const siteShape =
   '每个站是 { dir, state, url, error }：state 是 running（进程在，url 是实际地址）、stopped（没有进程）、failed（进程退出了或没能启动，error 记退出码与最后几行输出）；url 只在 running 时有。端口不写在站点里：启动时先试这个站上次用的端口，被占了就随机挑一个五位数的空闲端口'
 
 const listingShape =
-  `${siteShape}。列表的每一行另有 title、hosted、by：title 是站点 content/meta.json 的 title（没有为 null）；hosted 是登记为常驻（工作台每次启动都启动它），` +
+  `${siteShape}。列表的每一行另有 title、kind、hosted、by：title 是站点 content/meta.json 的 title（没有为 null）；kind 是站点根 docsite.json 写的类别 base（基础站）、docs（文档站）或 collab（协作站），没有这个文件为 null；hosted 是登记为常驻（工作台每次启动都启动它），` +
   'by 是谁登记的（docsite.site.add，或登记它的插件名，如 gwb-collab）；没登记、只是这次被启动过的站 hosted 为 false、by 为 null。常驻的站按登记先后排在前面'
 
 const commentWriteUsage =
@@ -98,7 +98,7 @@ export function registerCommands({ commands, docsite, isRegistered, list }: Comm
     {
       name: 'docsite.site.add',
       description: '托管一个站点：登记为常驻并启动（工作台每次启动时也会启动登记着的站）',
-      usage: `{ dir }：站点目录的绝对路径，要有 package.json（scripts.dev 不写 --port）、装好依赖、建在平台包 @godcreator/god-docsite 上。登记记在 gwb-data 的 hosted-sites 里，登记的一方记成 docsite.site.add；已经登记过的只确保它在运行。协作站由 gwb-collab 在项目加进列表时登记，不用另外加。回这个站。${siteShape}`,
+      usage: `{ dir }：站点目录的绝对路径，要有身份文件 docsite.json（平台建站时写出）、package.json（scripts.dev 不写 --port）、装好依赖。登记记在 gwb-data 的 hosted-sites 里，登记的一方记成 docsite.site.add；已经登记过的只确保它在运行。协作站由 gwb-collab 在项目加进列表时登记，不用另外加。回这个站。${siteShape}`,
       effect: 'write',
     },
     async (args) => docsite.add(dirOf(argsOf(args, ['dir']))),
@@ -126,7 +126,7 @@ export function registerCommands({ commands, docsite, isRegistered, list }: Comm
       name: 'docsite.site.start',
       description: '启动一个站点的开发服务（在站点目录里运行 pnpm dev，只绑本机）',
       usage:
-        '{ dir }：站点目录的绝对路径。启动前核对站点装着 @godcreator/god-docsite（旧地基 docsite-kit 的站拒绝）、scripts.dev 没写死 --port，起不来把开发服务的输出报出来。' +
+        '{ dir }：站点目录的绝对路径。启动前核对：站点根有身份文件 docsite.json 且写对了（没有就是平台之外建的站、或有身份文件之前建的站，拒绝并写明怎么补；format 不是这一版平台认的那一代也拒绝）、node_modules 里装着 @godcreator/god-docsite、scripts.dev 没写死 --port；起不来把开发服务的输出报出来。' +
         '端口先试这个站上次用的（记在 gwb-data 里），被占了由平台的 vite 插件在 10000–49151 里随机挑一个空闲的；地址以回执的 url 为准。' +
         '启动时经环境变量交给站点本 home 的身份码（DOCSITE_IDENTITY_CODE）与这次生成的推送令牌（DOCSITE_FEED_TOKEN）。已在运行或正在启动就回现状。回 { url, pid, alreadyRunning }。要看页面把 url 给 VS Code 插件打开',
       effect: 'write',
@@ -154,7 +154,7 @@ export function registerCommands({ commands, docsite, isRegistered, list }: Comm
       description: '一条命令从空目录建站：平台包 god-docsite 的建站器复制站点模板、装依赖、起服务检查，骨架写完归站点',
       usage:
         '{ dir, title }：dir 是站点目录的绝对路径，要不存在或是空目录；title（站名，写进 content/meta.json）必给。端口不写进站点，启动时挑（见 docsite.site.start）。' +
-        '站点模板是平台包 @godcreator/god-docsite 的 template/，平台包（god-docsite、identity、comments）的依赖写成插件旁边装着的那一版的 ^<版本>；写完 pnpm install，起服务检查首页，通过后登记为常驻的站保持运行、没登记的停掉。' +
+        '站点模板是平台包 @godcreator/god-docsite 的 template/，平台包（god-docsite、identity、comments）的依赖写成插件旁边装着的那一版的 ^<版本>；站点根写身份文件 docsite.json，类别是 base（基础站；文档站用 docfirst.create，协作站用 collab.site.init）；写完 pnpm install，起服务检查首页，通过后登记为常驻的站保持运行、没登记的停掉。' +
         'people.json 里只有 agent claude，人用 docsite.people.join 把自己加进来。要功能（轨迹卡、钉码、协作等）建完再 docsite.feature.add。回 { dir, platformDependencies }',
       effect: 'write',
     },
@@ -162,7 +162,7 @@ export function registerCommands({ commands, docsite, isRegistered, list }: Comm
       const parsed = argsOf(args, ['dir', 'title'])
       const title = optionalString(parsed, 'title')
       if (title === undefined) throw new DocsiteRejected('缺少 title（站名），要是非空字符串')
-      return docsite.init(dirOf(parsed), { title })
+      return docsite.init(dirOf(parsed), { title, kind: 'base' })
     },
   )
 

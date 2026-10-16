@@ -86,7 +86,7 @@ beforeEach(async () => {
     git(templateOrigin, 'config', 'receive.advertisePushOptions', 'true')
     writeHook(templateOrigin)
     const seedAdmin = cloneAs(root, templateOrigin, 'admin')
-    writeSite(seedAdmin, { 'people.json': peopleText(peopleEntries), 'package.json': '{ "dependencies": {} }\n' })
+    writeSite(seedAdmin, { 'people.json': peopleText(peopleEntries), 'docsite.json': '{"kind":"collab","format":1}\n', 'package.json': '{ "dependencies": {} }\n' })
     writeRecord(seedAdmin, task(t1, 'admin'))
     git(seedAdmin, 'add', '.')
     git(seedAdmin, 'commit', '-q', '-m', '起点')

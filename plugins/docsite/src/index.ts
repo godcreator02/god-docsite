@@ -17,7 +17,7 @@ import type { HomePageCheckDeps } from './scaffold/home-page-check.js'
 import { loadPlatformScaffold, pluginDir } from './scaffold/platform.js'
 import { DocsiteService, type GwbDocsiteApi } from './service.js'
 import { SiteHost } from './site-host.js'
-import { siteListingsOf, siteTitleOf } from './site-list.js'
+import { siteDescriptionOf, siteListingsOf } from './site-list.js'
 import { SitePorts } from './site-ports.js'
 
 /** 写在包入口：devkit.release 只读类型入口 dist/index.d.ts 认服务由谁提供 */
@@ -115,7 +115,7 @@ export function apply(ctx: GwbContext): void {
 
   hosted.startAll((message) => log.warn(message))
 
-  const list = async () => siteListingsOf(await hosted.list(), host.list(), (dir) => host.statusOf(dir), siteTitleOf)
+  const list = async () => siteListingsOf(await hosted.list(), host.list(), (dir) => host.statusOf(dir), siteDescriptionOf)
   registerCommands({ commands, docsite: api, isRegistered: (dir) => hosted.isRegistered(dir), list })
   registerDocfirstCommands({ commands, docsite: api, packagesFrom: pluginDir, log })
 

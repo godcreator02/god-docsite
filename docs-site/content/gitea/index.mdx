@@ -36,7 +36,7 @@ import { NasSeams } from './index/seams'
 
 一个项目是 Gitea 上的一个私有组织，以 hybrid-mmc 为例：
 
-- **组织里的仓**：带 `collab/` 与 `site/people.json` 的那个是协作仓，成员在网站上写的任务、模块、评论和页面都在它里面，合并请求由执行器合并；其余是别的仓（资料库、代码仓），合并请求由各仓的负责人审、负责人同意后合并。两种仓在插件里各走一套，见说明书 collab 的附件 [other-repos](/docs/outputs/skills/collab/other-repos)
+- **组织里的仓**：站点身份文件 `site/docsite.json` 写着 `"kind": "collab"` 的那个是协作仓，成员在网站上写的任务、模块、评论和页面都在它里面，合并请求由执行器合并；其余是别的仓（资料库、代码仓），合并请求由各仓的负责人审、负责人同意后合并。两种仓在插件里各走一套，见说明书 collab 的附件 [other-repos](/docs/outputs/skills/collab/other-repos)
 - **人**：全部成员在团队 `members` 里；每个仓的负责人就是这个仓的协作者，项目负责人就是协作仓的协作者；机器人账号 `collab-bot` 只在团队 `bots` 里、只对协作仓有写权限
 - **令牌**：每个成员一个，填在自己的 gwb-gitea 里，插件联网都用它；`collab-bot` 的存成组织密钥，只给执行器用
 

@@ -6,7 +6,7 @@ import type { SiteStarted, SiteStatus } from './site-host.js'
 
 /**
  * 别的插件注入的服务 gwbDocsite：建站与加功能、托管站点的开发服务（常驻的站只记在 gwb-data 的 hosted-sites 里，别的插件的站也经 add 登记）、往站点推数据、本 home 的身份码。
- * 站点都建在平台包 @godcreator/god-docsite 上。站点目录都写绝对路径；同一个站点目录大小写、斜杠不同的写法算同一个
+ * 站点都建在平台包 @godcreator/god-docsite 上，站点根有身份文件 docsite.json（类别与布局代号，建站时写）。站点目录都写绝对路径；同一个站点目录大小写、斜杠不同的写法算同一个
  */
 export interface GwbDocsiteApi {
   /** 本 home 的身份码（设置 identity-code），开发服务按它在站点的 people.json 里认人 */
@@ -31,7 +31,7 @@ export interface GwbDocsiteApi {
   /** 某个站的状态变了（启动、停止、出错）时调用；返回撤掉的函数 */
   onStatus(listener: (dir: string) => void): () => void
   /**
-   * 从空目录建站：平台建站器复制模板（平台包的版本取插件旁边装着的那几个）、pnpm install、起服务检查首页。
+   * 从空目录建站：平台建站器复制模板（平台包的版本取插件旁边装着的那几个）、按 options.kind 写身份文件 docsite.json、pnpm install、起服务检查首页。
    * 骨架写完就归站点；要功能再 addFeature
    */
   init(dir: string, options: SiteInitOptions): Promise<SiteInitResult>

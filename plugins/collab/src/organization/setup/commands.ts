@@ -57,7 +57,7 @@ export function registerOrganizationSetupCommands(services: PluginServices, open
       usage:
         '{ url, parent }：url 是组织地址 https://<主机>/<组织>，要在 gwb-gitea 配的那个 Gitea 上，给仓的地址直接拒绝；parent 是把项目文件夹放在哪个目录下的绝对路径，要已经存在（问人放在哪）。' +
         '在 <parent>/<组织>/ 新建项目文件夹（已存在就拒绝），经 gwb-gitea 列出组织的全部仓，逐个用令牌 git clone 进去，文件夹名就是仓名；中途某个仓克隆失败就停下，报出已经克隆了哪些、哪个失败、git 的原话。' +
-        '带 collab/ 与 site/people.json 的仓是协作仓，要正好一个，没有或不止一个就报错并写明是哪些仓。' +
+        '站点身份文件 site/docsite.json 写着 "kind": "collab" 的仓是协作仓，要正好一个，没有或不止一个就报错并写明是哪些仓。' +
         '令牌的 Gitea 账号不在 site/people.json 里时到这里为止，listed 为 false：请负责人加上，在协作仓里 git pull 拿到之后再调 collab.project.join 与 collab.project.add。' +
         '在里面就照 collab.project.join 把本 home 的身份码加进自己那一项，照 collab.project.add 加进列表，再在 site/ 里运行 pnpm install，装完在后台启动站点、常驻；身份码那一行改动要 collab.submit 提交审核。' +
         '加进列表或装依赖失败时，报错写明前面已经做到哪一步，那些都不回退；pnpm 失败附 pnpm 的原话。在 VS Code 里直接打开项目文件夹就是整个项目。' +
@@ -113,7 +113,7 @@ export function registerOrganizationSetupCommands(services: PluginServices, open
       name: 'collab.project.add',
       effect: 'write',
       description: '把一个项目仓加进协作窗格的项目列表，之后实时推送来了就刷新它、站点常驻',
-      usage: `{ repo }：repo 是协作仓（带 collab/ 与 site/people.json 的仓）的仓根的绝对路径，本 home 的身份码要已在 site/people.json 里（不在就先 collab.project.join）；origin 的主人要是 Gitea 上的组织（经 gwb-gitea 查 /orgs/<主人>），仓要放在以组织命名的项目文件夹里（collab.project.clone 就是这样放的），不然拒绝。写进本插件的设置 projects；加进去后开始盯协作仓的文件与别的仓的 HEAD，把站点交给 gwb-docsite 常驻（site/ 没装依赖、检查不过就只记下原因，窗格里显示），约 2 秒后完整刷新一次，刷新完把它的组织加进实时推送的订阅。回 { repo }`,
+      usage: `{ repo }：repo 是协作仓（site/docsite.json 写着 "kind": "collab" 的仓）的仓根的绝对路径，本 home 的身份码要已在 site/people.json 里（不在就先 collab.project.join）；origin 的主人要是 Gitea 上的组织（经 gwb-gitea 查 /orgs/<主人>），仓要放在以组织命名的项目文件夹里（collab.project.clone 就是这样放的），不然拒绝。写进本插件的设置 projects；加进去后开始盯协作仓的文件与别的仓的 HEAD，把站点交给 gwb-docsite 常驻（site/ 没装依赖、检查不过就只记下原因，窗格里显示），约 2 秒后完整刷新一次，刷新完把它的组织加进实时推送的订阅。回 { repo }`,
     },
     async (args) => events.add(repoOfArgs(args)),
   )

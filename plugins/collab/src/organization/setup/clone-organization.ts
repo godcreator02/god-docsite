@@ -3,9 +3,8 @@ import path from 'node:path'
 import { CollabRejected } from '../../errors.js'
 import { gitReposIn } from '../../git/status.js'
 import { isGiteaName } from '../../gitea-api/gitea.js'
-import { collabPathInRepo, peoplePathInRepo } from '@godcreator/collab'
 import { cloneReposInto, type OrganizationSource } from '../../other-repos/fetch/clone-new-repos.js'
-import { isCollabRepo, peopleOfRepo, type GitRemote } from '../../project/project.js'
+import { collabRepoMark, isCollabRepo, peopleOfRepo, type GitRemote } from '../../project/project.js'
 
 /** 克隆好的组织：项目文件夹、协作仓的仓根、令牌的账号、它在不在 site/people.json 里、项目文件夹里的全部仓 */
 export type OrganizationCloned = { projectDir: string; repo: string; person: string; listed: boolean; repos: string[] }
@@ -30,16 +29,14 @@ export function organizationOfUrl(url: string): { organization: string; organiza
   return { organization, organizationUrl: `${parsed.origin}/${organization}` }
 }
 
-const collabRepoMarks = `${collabPathInRepo}/ 与 ${peoplePathInRepo}`
-
-/** 带 collab/ 与 site/people.json 的仓就是协作仓，组织里要正好一个 */
+/** site/docsite.json 写着 kind collab 的仓就是协作仓，组织里要正好一个 */
 function collabRepoNameAmong(projectDir: string, organization: string, repoNames: string[]): string {
   const candidates = repoNames.filter((name) => isCollabRepo(path.join(projectDir, name)))
   if (candidates.length === 1) return candidates[0]!
   if (candidates.length === 0) {
-    throw new CollabRejected(`组织 ${organization} 的仓里没有一个带 ${collabRepoMarks} 的协作仓；克隆了 ${repoNames.join('、')}，都在 ${projectDir}`)
+    throw new CollabRejected(`组织 ${organization} 的仓里没有协作仓（${collabRepoMark}）；克隆了 ${repoNames.join('、')}，都在 ${projectDir}`)
   }
-  throw new CollabRejected(`组织 ${organization} 里带 ${collabRepoMarks} 的协作仓不止一个：${candidates.join('、')}；一个项目只能有一个协作仓，都克隆在 ${projectDir}`)
+  throw new CollabRejected(`组织 ${organization} 里的协作仓（${collabRepoMark}）不止一个：${candidates.join('、')}；一个项目只能有一个协作仓，都克隆在 ${projectDir}`)
 }
 
 /**

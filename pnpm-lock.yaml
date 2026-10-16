@@ -949,6 +949,9 @@ importers:
       '@godcreator/comments':
         specifier: workspace:^
         version: link:../../packages/comments
+      '@godcreator/god-docsite':
+        specifier: workspace:^
+        version: link:../../packages/god-docsite
       '@godcreator/gwb-commands':
         specifier: 'catalog:'
         version: 0.6.1(@godcreator/gwb-kernel-desktop@0.10.1(cordis@4.0.0-rc.10))(cordis@4.0.0-rc.10)

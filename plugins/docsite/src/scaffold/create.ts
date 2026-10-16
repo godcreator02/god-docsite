@@ -1,3 +1,4 @@
+import { type SiteKind, writeSiteIdentity } from '@godcreator/god-docsite/identity'
 import { DocsiteRejected, messageOf } from '../errors.js'
 import type { RunPnpm } from '../pnpm.js'
 import { checkHomePage, type HomePageCheckDeps } from './home-page-check.js'
@@ -6,6 +7,8 @@ import type { PackageSource, PlatformScaffold } from './platform.js'
 export type SiteInitOptions = {
   /** 站名，写进 content/meta.json 的 title */
   title: string
+  /** 站点类别，写进站点根的 docsite.json：docsite.site.init 建 base，docfirst.create 建 docs，gwb-collab 建 collab */
+  kind: SiteKind
 }
 
 export type SiteInitResult = {
@@ -25,14 +28,15 @@ export type CreateDocsiteDeps = HomePageCheckDeps & {
 const initialPeople = [{ id: 'claude', name: 'Claude', agent: true }]
 
 /**
- * 从空目录建站：平台建站器复制模板、写站名 → pnpm install → 补上基础功能（评论的全站评论页与样式）→
+ * 从空目录建站：平台建站器复制模板、写站名，写身份文件 docsite.json → pnpm install → 补上基础功能（评论的全站评论页与样式）→
  * 起服务检查首页（通过后登记着的站保持运行，没登记的停掉）。平台模板写出的文件写完就归站点；要功能再对它 addFeature
  */
-export async function createDocsite(dir: string, { title }: SiteInitOptions, deps: CreateDocsiteDeps): Promise<SiteInitResult> {
+export async function createDocsite(dir: string, { title, kind }: SiteInitOptions, deps: CreateDocsiteDeps): Promise<SiteInitResult> {
   const { createSite, addBaseFeatures } = await deps.scaffold()
   let platformDependencies: Record<string, string>
   try {
     ;({ platformDependencies } = createSite({ dir, siteName: title, people: initialPeople, packageSource: deps.packageSource }))
+    writeSiteIdentity(dir, kind)
   } catch (error) {
     throw new DocsiteRejected(`没建成站点：${messageOf(error)}`)
   }

@@ -1,0 +1,30 @@
+---
+born-at: 2026-10-16T19:00
+type: choice
+parent: [2026-09-03-god-live-doc]
+label: 站点根加身份文件 docsite.json（类别 base / docs / collab 与布局代号）：托管、认协作仓、站点窗格的类别都只看它
+domain: 平台
+---
+
+## 背景
+
+engineering-knowledge 协作仓迁到新平台时，人员列表从 `collab/people.json` 挪到了 `site/people.json`，这个仓又没有任务记录，`collab/` 就成了空目录。git 不跟踪空目录，别人克隆或拉取后没有 `collab/`，gwb-collab 原来按「有 `collab/` 与 `site/people.json`」认协作仓，就认不出它了。gwb-docsite 托管前按 `node_modules` 里有没有平台包认平台建的站，没装依赖的站报的原因也对不上。
+
+用户要一份显式的身份文件，而且要通用：文档站也标上自己是文档站，站点窗格多一列类别。
+
+## 结论与边界
+
+- 每个平台建的站在站点根有 `docsite.json`，只写 `kind`（`base` 基础站、`docs` 文档站、`collab` 协作站）与 `format`（布局代号，现在是 1）。写坏了、多了键、`format` 不认识都直接报错
+- 格式与读写归平台包，新出口 `@godcreator/god-docsite/identity`。它不按自己模块的位置找文件，两个插件按值 import、打包进去；建站器 `./scaffold` 照旧运行时加载
+- `createSite` 不写它，建站的一方接着调 `writeSiteIdentity`：`docsite.site.init` 写 `base`，`docfirst.create` 写 `docs`，gwb-collab 经服务 `init(dir, { title, kind })` 传 `collab`
+- gwb-docsite 托管前先看身份文件，没有就拒绝并写明补一份什么样的，旧地基 docsite-kit 的站也走这一条；`docsite.site.list` 每行多 `kind`，站点窗格显示协作站、文档站、基础站或「未标注」
+- gwb-collab 认协作仓只看 `site/docsite.json` 的 `kind` 是不是 `collab`；合并检查把 `site/docsite.json` 列为只有负责人能改
+- 不写从旧站补身份文件的代码：已有的站（chb-dab-sst、engineering-knowledge、collab-test 的协作仓，本仓的 docs-site 与 full-test）手动补一份，hybrid-mmc 迁的时候带上
+- 版本：平台包、collab 包只加东西，升 y；gwb-docsite（服务 `init` 多了必给的 `kind`、托管要求新文件）与 gwb-collab（磁盘上的协作仓要多一个文件才认）升 x。各仓先推身份文件、等大家同步，再发插件：插件先升级、本地还没拉到身份文件的人，要手动 `git pull` 一次
+
+## 否掉的候选
+
+- 在协作仓根另放 `collab.json`：协作仓与文档站各一种标记文件、各一条位置规则；站点窗格列的是站点目录，读身份正好在站点根
+- 沿用单元目录的出生证 `unit.json`：它的六个必填字段是给 `D:\unitfolders` 下的单元目录的，放进仓里的站点不合适
+- 判断协作仓改成看 `site/people.json` 加 `site/package.json` 里有 `@godcreator/collab`：仍是从别的文件推断，换个功能组合就又对不上
+- `createSite` 加必给的 `kind`：改了建站器导出的用法，平台包要升 x，各站依赖的 `^0.1` 都要跟着改

@@ -5,8 +5,17 @@ export type SiteRow = {
   url: string | null
   error: string | null
   title: string | null
+  kind: 'base' | 'docs' | 'collab' | null
   hosted: boolean
   by: string | null
+}
+
+const kindLabels = { base: '基础站', docs: '文档站', collab: '协作站' } as const
+
+/** 站点类别：站点根 docsite.json 写的 kind；没有这个文件的站托管不了，原因写在这一行下面 */
+export function kindOf(site: SiteRow): { label: string; title: string } {
+  if (site.kind === null) return { label: '未标注', title: '站点根没有身份文件 docsite.json：不是平台建的站，或是有身份文件之前建的站' }
+  return { label: kindLabels[site.kind], title: `站点根 docsite.json 写的类别：${site.kind}` }
 }
 
 /** docsite.site.add 登记的站记的 by；窗格里只有这种站能「不再托管」，别的插件登记的由那个插件管 */

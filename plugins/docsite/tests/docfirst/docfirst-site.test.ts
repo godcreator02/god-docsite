@@ -77,7 +77,7 @@ describe('createDocfirstSite', () => {
     }
     const result = await createDocfirstSite(siteDir, { title: '文档站' }, { docsite, packagesFrom: pluginDir })
     expect(calls).toEqual([
-      'init {"title":"文档站"}',
+      'init {"title":"文档站","kind":"docs"}',
       `addFeature @godcreator/code-pin@^${versionOf('code-pin')}`,
       `addFeature @godcreator/trajectory@^${versionOf('trajectory')}`,
       `addFeature @godcreator/explainer@^${versionOf('explainer')}`,
