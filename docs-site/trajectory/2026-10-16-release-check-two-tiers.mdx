@@ -1,0 +1,29 @@
+---
+born-at: 2026-10-16T11:30
+type: choice
+parent: [2026-09-03-god-live-doc]
+label: 发版前的检查分两档：小改动只查改到的包，不跑 verify 与 test:pack
+domain: 检查
+---
+
+pivots-from:: [测试分级，慢的只有显式命令才跑](2026-10-15-test-tiers.mdx)
+
+## 背景
+
+原来每次发版前都要跑 `pnpm verify` 加 `pnpm test:pack`，不管改了多少。comments 0.1.2 只加了「地址带 `?comment=` 就展开那一串评论」：一个新文件、一个组件里加十行。发版时在干净的工作树里装依赖、跑 verify、跑 test:pack，一共十分钟左右；同一份改动在提交前已经跑过 comments 的 check 和 e2e，这一轮全部通过，没有查出新东西。
+
+## 结论与边界
+
+- 小改动指下面几条都满足：只改了一两个包的源码、样式或说明书；没动 `package.json` 的 `exports`、`files`、依赖；没改模板；只升 y
+- 小改动发版只跑改到的包的 `check`；碰到慢测试测的代码再跑那个包的 `test:slow`；改了页面上的交互再跑 `pnpm test:e2e`
+- 其余情况照旧全量：`pnpm verify` 再 `pnpm test:pack`。拿不准算哪档就按全量
+- `test:verified` 只跟 gwb-collab 的发版走，不再是每次发版都跑
+
+## 为什么小改动可以不跑 test:pack
+
+`devkit.release` 发之前会自己构建，照 `files` 核对产物，并检查产物里相对 import 指向的文件都在。test:pack 在这之外查的是 `exports` 指错、依赖没写进 `dependencies`。小改动的定义里就不能动这几项，所以 test:pack 查不出新问题。
+
+## 否掉的候选
+
+- 按版本号定档（升 y 就不跑全量）：升 y 也可能改了 `files`、`exports` 或依赖，test:pack 要查的正是这些，所以分档看改了什么，不看版本号
+- 去掉 test:pack，只留 verify：一整批改动发版时，打包漏文件还是只有它查得出来

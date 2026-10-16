@@ -25,7 +25,7 @@ description: 改这个仓时怎么跑、按什么节奏检查、提交怎么写�
 | 慢 | 各包里的 `*.slow.test.ts` | 只有显式 `pnpm test:slow`：包里跑本包的，仓根逐个包跑，近三分钟 |
 | 全仓·快 | `pnpm test:deps`、`pnpm test:scaffold` | 显式命令，各几秒钟 |
 | 全仓·慢 | `pnpm test:e2e`、`pnpm test:pack` | 显式命令 |
-| 行为假设 | `plugins/collab` 的 `tests/verified/` | `pnpm test:verified`：升 git 或关键依赖、动了被测的模块、发版前、有人明确要求时才跑 |
+| 行为假设 | `plugins/collab` 的 `tests/verified/` | `pnpm test:verified`：升 git 或关键依赖、动了被测的模块、发 gwb-collab 前、有人明确要求时才跑 |
 
 慢的标准：真建站、装依赖、构建、启动服务的；或者单独运行这个文件时，vitest 报告里它的耗时（不含启动与 import）超过 2 秒，多是每条测试都建临时 git 仓、调几十次 git 的。
 慢的文件名写成 `*.slow.test.ts`：包里的 `vitest.config.ts` 排除它们，`vitest.slow.config.ts` 只收它们，`test:slow` 用的就是后者。
@@ -44,8 +44,8 @@ description: 改这个仓时怎么跑、按什么节奏检查、提交怎么写�
 | 改了本站的页面或被钉的代码 | 在 `docs-site/` 里 `pnpm doc`（就是 `docfirst check`），按说明书 [docs-site](/docs/outputs/skills/docs-site) 处理黄灯 |
 | 改了平台模板或功能包的模板 | `pnpm test:scaffold`：比对测试站、本站和建站器生成的是否一致，几秒钟 |
 | 合并分支 | 不跑全量，各分支改到的包已经查过 |
-| 最终交付之前（推送、交给人验收） | 仓根 `pnpm verify`：`pnpm build` → `pnpm check` → `pnpm test:slow` → `pnpm test:deps` → `pnpm test:scaffold` → `pnpm test:e2e`，五六分钟，整批改动只跑这一次 |
-| 发版前 | `pnpm verify` 之后再跑 `pnpm test:pack`：把包打成 tarball 装进测试站的副本，查漏打包的文件、写错的出口 |
+| 一整批改动交付之前（推送、交给人验收） | 仓根 `pnpm verify`：`pnpm build` → `pnpm check` → `pnpm test:slow` → `pnpm test:deps` → `pnpm test:scaffold` → `pnpm test:e2e`，五六分钟，整批改动只跑这一次 |
+| 发版前 | 按改动分两档，见下面「发版」一节 |
 
 本站自己的检查在 `docs-site/` 里跑：`pnpm doc`、`pnpm typecheck`、`pnpm test`、`pnpm build`。
 
@@ -69,7 +69,16 @@ description: 改这个仓时怎么跑、按什么节奏检查、提交怎么写�
 3. 第 2 层：`collab`、`docfirst`
 4. 两个插件：`gwb-docsite`、`gwb-collab`
 
-发版前还要在 `plugins/collab` 里跑一遍 `pnpm test:verified`。发了协作相关的包或插件之后，照 [协作站双人回归](/maintain/collab-regression) 走一遍。
+发版前的检查按这次要发的改动分两档：
+
+| 档 | 什么改动 | 跑什么 |
+| --- | --- | --- |
+| 小改动 | 下面几条都满足：只改了一两个包的源码、样式或说明书；没动 `package.json` 的 `exports`、`files`、依赖；没改平台模板与功能包的 `template/`；只升 y | 改到的包 `pnpm --filter <包> check`；改动碰到了慢测试测的代码，再跑那个包的 `test:slow`；改了页面上的交互，再 `pnpm build` 后 `pnpm test:e2e --skip-build`，一分半。不跑 `pnpm verify` 与 `pnpm test:pack` |
+| 全量 | 其余所有情况：一整批改动、动了 `exports` / `files` / 依赖、改了模板、改了包之间的接口、升 x | `pnpm verify`，再 `pnpm test:pack`：把包打成 tarball 装进测试站的副本，查漏打包的文件、写错的出口，近三分钟 |
+
+拿不准算哪档就按全量。小改动不跑 `test:pack`，是因为 `devkit.release` 发之前自己会构建，并照 `files` 核对产物、查产物里相对 import 指向的文件都在；`test:pack` 多查的是 `exports` 与依赖写错，小改动没碰它们。
+
+发 gwb-collab 时另在 `plugins/collab` 里跑一遍 `pnpm test:verified`，不分档。发了协作相关的包或插件之后，照 [协作站双人回归](/maintain/collab-regression) 走一遍。
 
 包发到 npmjs，本机不直接发：仓在 GitHub 上（`godcreator02/god-docsite`，公开），`devkit.release` 在本机构建、检查、打好包文件，在已经推上去的 HEAD 上建一个 GitHub release 挂上包文件，
 仓里的工作流 `.github/workflows/publish.yml` 由 release 公开触发，用 trusted publishing 按序号逐个发到 npmjs，不存 token。各包的 `publishConfig` 指向 npmjs、`repository` 指向这个仓，`files` 收进 MIT 的 `LICENSE`。
