@@ -1,0 +1,26 @@
+---
+born-at: 2026-10-16T10:50
+type: choice
+parent: [2026-09-03-god-live-doc]
+label: 托管的开发服务的输出进 gwb 日志：stderr 记 warn、stdout 记 debug，不另开每站一个的日志文件
+domain: 插件
+---
+
+pivots-from:: [新平台上的第一次双人回归](2026-10-16-regression-run-new-platform.mdx)
+
+## 背景
+
+双人回归里点窗格的站点按钮，浏览器打开的页面标题是「Error」。这个标题来自 Vite 开发服务在服务端出错时回的错误页，可当时报了什么已经查不到：gwb-docsite 只在内存里留开发服务输出的最后 4000 字，进程一停就没了。之后照当时的情形试了三次（正常打开、冷启动后马上打开、同一个站点目录同时跑两个开发服务），都没复现。
+
+## 结论与边界
+
+- 输出一块一条写进 gwb 日志，日志名 `gwb-docsite-dev`，每条开头是站点目录：stderr 记 warn，stdout 记 debug
+- Vite 的「Internal server error」、服务端渲染与 MDX 编译的报错都从 stderr 出来，`logger.query {"name":"gwb-docsite-dev","minLevel":"warn"}` 就能查到；在隔离 home 上放一个写坏的页面打开，回 500，日志里记下了第几行、哪个文件、错在哪
+- stdout 记 debug，默认不写进 gwb.log：开发服务平时改一个文件就刷一行「page reload」，写成 info 会把 gwb.log 刷满、日志窗格里全是它；要看完整输出就在 `GWB_DEBUG` 里加上 `gwb-docsite-dev` 再启动工作台
+- 每次启动 pnpm 回显的那行 `$ react-router dev …` 走 stderr，也记成一条 warn，一次启动一条
+- 问题本身没修：复现不出，只保证下次再出现时留下原话
+
+## 否掉的候选
+
+- 每个站一个日志文件、每次启动重写：完整原始输出只有文件里有，但多了一处要知道去哪找的地方，`logger.query` 查不到，大小与轮转也要自己管；gwb.log 已经有 128 MB 上限与轮转
+- stdout 也记 info：见上，会把日志刷满
