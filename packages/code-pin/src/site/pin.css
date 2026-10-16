@@ -1,27 +1,74 @@
 /*
- * 钉码外框的状态点：remark 插件把每处钉包进 .code-pin，状态写在 data-pin-status。
- * 点画在代码块标题栏右侧、复制按钮左边（目录树画在右上角），8px，不写字。
- * 四种：新鲜绿、有变动实心黄、未确认空心黄、缺失红。换色覆盖 --code-pin-dot。
+ * 钉码外框：remark 插件把每处钉包进 <details class="code-pin">，状态写在 data-pin-status。
+ * 收起时只剩 summary 一行胶囊（状态点、位置、状态字、展开箭头），点开在下面摆代码块或文件树。
+ * 状态点四种：新鲜绿、有变动实心黄、未确认空心黄、缺失红。换色覆盖 --code-pin-dot。
  */
 .code-pin {
-  position: relative;
+  margin: 0.75rem 0;
 }
 
-.code-pin::after {
+.code-pin > .code-pin-summary {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  max-width: 100%;
+  margin: 0;
+  padding: 0.2rem 0.7rem;
+  border: 1px solid var(--color-fd-border, #e4e4e7);
+  border-radius: 999px;
+  color: var(--color-fd-muted-foreground, #71717a);
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  list-style: none;
+  cursor: pointer;
+  user-select: none;
+}
+
+.code-pin > .code-pin-summary::-webkit-details-marker {
+  display: none;
+}
+
+.code-pin > .code-pin-summary:hover {
+  background: var(--color-fd-accent, #f4f4f5);
+}
+
+.code-pin > .code-pin-summary code {
+  overflow: hidden;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  font-size: inherit;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.code-pin > .code-pin-summary::before {
   content: '';
-  position: absolute;
-  top: 15px;
-  right: 44px;
+  flex: none;
   width: 8px;
   height: 8px;
   border-radius: 50%;
   background: var(--code-pin-dot, #a1a1aa);
-  pointer-events: none;
 }
 
-.code-pin[data-pin-kind='tree']::after {
-  top: 12px;
-  right: 12px;
+.code-pin > .code-pin-summary::after {
+  content: '▸';
+  flex: none;
+  font-size: 0.75rem;
+  transition: transform 0.15s;
+}
+
+.code-pin[open] > .code-pin-summary::after {
+  transform: rotate(90deg);
+}
+
+.code-pin[open] > .code-pin-summary {
+  margin-bottom: 0.5rem;
+}
+
+.code-pin > :not(summary):first-of-type,
+.code-pin > summary + * {
+  margin-top: 0;
 }
 
 .code-pin[data-pin-status='fresh'] {
@@ -38,7 +85,7 @@
 }
 
 /* 未确认：空心圈——黄，但跟「改过了」是两回事 */
-.code-pin[data-pin-status='unconfirmed']::after {
+.code-pin[data-pin-status='unconfirmed'] > .code-pin-summary::before {
   background: transparent;
   box-shadow: inset 0 0 0 2px var(--code-pin-dot);
 }

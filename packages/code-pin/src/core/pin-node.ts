@@ -11,7 +11,7 @@ import type { PinCheck } from "./types.ts";
 
 export interface CodePinData extends Data {
   hName?: string;
-  hProperties?: Record<string, string | string[]>;
+  hProperties?: Record<string, string | string[] | boolean>;
 }
 
 /** 标记换成的节点：核对结果挂在 `check` 上，位置照抄标记的 */
