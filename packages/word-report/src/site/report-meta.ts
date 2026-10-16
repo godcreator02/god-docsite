@@ -25,7 +25,12 @@ export function reportMeta(input: ReportDocument | AssemblyResult) {
       case 'abstract': return `## ${node.title ?? '摘要'}\n\n${node.paragraphs.map(p => block(p)).join('\n\n')}\n\n关键词：${node.keywords.join('；')}`;
       case 'paragraph': return inline(node.content);
       case 'equation': return `$$\n${node.latex}\n$$${report?.index[node.id]?.number ? `\n(${report.index[node.id]!.number})` : ''}`;
-      case 'figure': return `![${node.alt}](${node.src})\n\n${report?.index[node.id]?.label ?? ''} ${inline(node.caption)}`;
+      case 'figure': {
+        const images = node.panels
+          ? node.panels.map(panel => `![${panel.alt}](${panel.src})\n${report?.index[panel.id]?.label ?? panel.id}${panel.caption ? ' ' + inline(panel.caption) : ''}`).join('\n\n')
+          : `![${node.alt}](${node.src})`;
+        return `${images}\n\n${report?.index[node.id]?.label ?? ''} ${inline(node.caption)}`;
+      }
       case 'table': return `${node.caption ? `${report?.index[node.id]?.label ?? ''} ${inline(node.caption)}\n\n` : ''}${node.rows.map(row => row.cells.map(cell => cell.blocks.map(child => block(child, depth)).join('\n')).join(' | ')).join('\n')}`;
       case 'list': return node.items.map((item, i) => `${node.ordered ? `${(node.start ?? 1) + i}.` : '-'} ${item.blocks.map(child => block(child, depth)).join('\n')}`).join('\n');
       case 'code': return `\`\`\`${node.language}\n${node.text}\n\`\`\``;

@@ -55,6 +55,33 @@ describe('isomorphic report assembly', () => {
     const result = assembleDocument('content.json', { 'content.json': root(), 'a/content.json': doc('a', [section('sa', [figure('fa')])]), 'b/content.json': doc('b', [section('sb', [figure('fb')])]) });
     expect(result.assets).toEqual({ 'assets/a/image.png': 'a/assets/image.png', 'assets/b/image.png': 'b/assets/image.png' });
   });
+  it('numbers multi-image figure panels under one figure number and resolves references to a panel', () => {
+    const panel = (id: string, file: string) => ({ id, src: `assets/${file}`, alt: id, caption: [{ type: 'text' as const, text: `${id} 小标题` }] });
+    const multi = { type: 'figure' as const, id: 'grid', columns: 2, panels: [panel('pa', 'a.png'), panel('pb', 'b.png'), panel('pc', 'c.png')], caption: [{ type: 'text' as const, text: '三张图' }] };
+    const single = { type: 'figure' as const, id: 'one', src: 'assets/one.png', alt: '图', caption: [{ type: 'text' as const, text: '单张' }] };
+    const ref = (id: string, target: string, display: 'label' | 'number' | 'title') => ({ type: 'ref' as const, id, target, display });
+    const input = doc('d', [section('s', [single, multi, { type: 'paragraph', id: 'p', content: [ref('r1', 'pb', 'label'), ref('r2', 'pc', 'number'), ref('r3', 'pa', 'title'), ref('r4', 'grid', 'label')] }])]);
+    const result = assembleDocument('x.json', { 'x.json': input });
+    expect(result.index.grid!.label).toBe('图 2');
+    expect(result.index.pb).toEqual({ type: 'figure-panel', number: '2(b)', label: '图 2(b)', title: 'pb 小标题' });
+    expect(result.index.pc!.number).toBe('2(c)');
+    expect(Object.keys(result.assets).sort()).toEqual(['assets/d/a.png', 'assets/d/b.png', 'assets/d/c.png', 'assets/d/one.png']);
+  });
+  it.each([
+    ['panels together with src', (f: any) => { f.src = 'assets/x.png'; }, 'Disallowed'],
+    ['panels without columns', (f: any) => { delete f.columns; }, 'Missing columns'],
+    ['more than six columns', (f: any) => { f.columns = 7; }, 'Maximum is 6'],
+    ['a single panel', (f: any) => { f.panels = f.panels.slice(0, 1); }, 'At least 2'],
+    ['a duplicate panel id', (f: any) => { f.panels[1].id = 'pa'; }, 'Duplicate ID'],
+  ])('rejects a multi-image figure with %s', (_name, mutate, error) => {
+    const figure = { type: 'figure', id: 'grid', columns: 2, caption: [{ type: 'text', text: '图题' }], panels: [{ id: 'pa', src: 'assets/a.png', alt: 'a' }, { id: 'pb', src: 'assets/b.png', alt: 'b' }] };
+    mutate(figure);
+    expect(() => assembleDocument('x.json', { 'x.json': doc('d', [section('s', [figure as any])]) })).toThrow(error);
+  });
+  it('rejects columns on a single-image figure', () => {
+    const figure = { type: 'figure', id: 'one', src: 'assets/one.png', alt: '图', columns: 2, caption: [{ type: 'text', text: '单张' }] };
+    expect(() => assembleDocument('x.json', { 'x.json': doc('d', [section('s', [figure as any])]) })).toThrow('Disallowed');
+  });
   it('uses only root template metadata and allows common child field names', () => {
     const a = doc('a'), b = doc('b');
     a.metadata.fields = [{ id: 'course', label: '课程', value: 'A' }]; b.metadata.fields = [{ id: 'course', label: '课程', value: 'B' }];

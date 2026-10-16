@@ -6,14 +6,14 @@
  */
 
 /** 第 6 步收尾核对的规则：核对记录的状态、docx 与 pdf 的哈希对得上才 ready */
-/* ref file="../packages/word-report/src/node/export.ts" lines="120-127" hash="bd7f74288e3c" blob="ab2479c83f5b" */
+/* ref file="../packages/word-report/src/node/export.ts" lines="126-133" hash="bd7f74288e3c" blob="a10afb8c5c20" */
 export const verifyWording = {
   status: 'passed_automation_visual_review_pending',
   mismatch: '生成文件与验收记录不一致',
 };
 
 /** 第 3 步锁：Node 写进锁文件的内容，与锁在而进程已退出时的报错原话 */
-/* ref file="../packages/word-report/src/node/export.ts" lines="156-174" hash="5ac53c8f9b56" blob="ab2479c83f5b" */
+/* ref file="../packages/word-report/src/node/export.ts" lines="162-180" hash="5ac53c8f9b56" blob="a10afb8c5c20" */
 export const lockWording = {
   writtenByNode: [
     '{ "id": "web-<任务 id>", "pid": <Node 进程>,',
@@ -30,7 +30,7 @@ export const snapshotWording = {
 };
 
 /** 第 4、5 步：写快照目录、启动 Python 前再核引擎指纹、spawn 的命令行 */
-/* ref file="../packages/word-report/src/node/export.ts" lines="176-212" hash="986edd3d15b9" blob="ab2479c83f5b" */
+/* ref file="../packages/word-report/src/node/export.ts" lines="182-218" hash="986edd3d15b9" blob="a10afb8c5c20" */
 export const executeWording = {
   engineChanged: 'Word 引擎在建立快照期间改变，请重新导出',
   command: [
@@ -51,7 +51,7 @@ export const pythonClaim = {
 };
 
 /** 一次导出的六步：capture（组装取快照、算指纹）→ acquireLock → 建任务 → execute（写目录、启动 Python、收尾） */
-/* ref file="../packages/word-report/src/node/export.ts" lines="215-246" hash="f6d7bb6446be" blob="ab2479c83f5b" */
+/* ref file="../packages/word-report/src/node/export.ts" lines="221-252" hash="f6d7bb6446be" blob="a10afb8c5c20" */
 export const steps = [
   {
     title: '组装并取快照',

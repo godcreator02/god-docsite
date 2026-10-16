@@ -85,6 +85,28 @@ describe('JSON 报告真实 React 渲染', () => {
     expect(meta.markdown).not.toContain('eq_random');
   });
 
+  it('多图每张下面写 (a)(b)……，整个图题只写一次，引用写成图号加字母', () => {
+    const document: ReportDocument = {
+      format: 'docreport', schemaVersion: 1, id: 'doc_panels', metadata: { title: '多图测试', language: 'zh-CN' },
+      blocks: [{ type: 'section', id: 'sec_panels', title: '结果', numbering: 'decimal', children: [
+        { type: 'figure', id: 'fig_grid', columns: 3, caption: [text('六个工况的波形')], panels: ['a', 'b', 'c', 'd', 'e', 'f'].map(k => ({ id: `panel_${k}`, src: `assets/${k}.png`, alt: `工况 ${k}`, ...(k === 'b' ? { caption: [text('满载')] } : {}) })) },
+        { type: 'paragraph', id: 'p_panels', content: [text('见'), { type: 'ref', id: 'ref_panel', target: 'panel_b', display: 'label' }] },
+      ] }],
+    };
+    const html = renderToStaticMarkup(<ReportView report={assembleDocument('panels.json', { 'panels.json': document })} assetUrl={source => `/content-files/${source}`} />);
+    expect(html).toContain('--report-panel-columns:3');
+    expect(html.match(/<img /g)).toHaveLength(6);
+    expect(html).toContain('id="panel_f"');
+    expect(html).toContain('/content-files/assets/f.png');
+    expect(html).toContain('(b) 满载');
+    expect(html).toContain('>(f)</div>');
+    expect(html.match(/<figcaption/g)).toHaveLength(1);
+    expect(html).toContain('<span>图 1 </span>六个工况的波形');
+    expect(html).toContain('href="#panel_b" class="report-ref">图 1(b)</a>');
+    const meta = reportMeta(assembleDocument('panels.json', { 'panels.json': document }));
+    expect(meta.markdown).toContain('图 1(b) 满载');
+  });
+
   it('摘要、富文本、列表、行内公式和代码均展示，文本保持转义', () => {
     const document: ReportDocument = {
       format: 'docreport', schemaVersion: 1, id: 'doc_inline', metadata: { title: '行内测试', language: 'zh' },

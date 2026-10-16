@@ -9,7 +9,12 @@ export type ReportInline =
 export interface Paragraph { type: 'paragraph'; id: string; content: ReportInline[] }
 export interface Section { type: 'section'; id: string; title: string; numbering: 'decimal' | 'appendix' | 'none'; children: ReportBlock[] }
 export interface ReportList { type: 'list'; id: string; ordered: boolean; start?: number; items: { id: string; blocks: (Paragraph | ReportList)[] }[] }
-export interface Figure { type: 'figure'; id: string; src: string; caption: ReportInline[]; alt: string }
+/** 多图里的一张：显示时按先后编为 (a)、(b)……，caption 是写在编号后面的小标题 */
+export interface FigurePanel { id: string; src: string; alt: string; caption?: ReportInline[] }
+export interface SingleImageFigure { type: 'figure'; id: string; src: string; caption: ReportInline[]; alt: string; columns?: never; panels?: never }
+/** 一个图号下的多张图：每行 columns 张，按行排开；caption 是整个图的图题 */
+export interface MultiImageFigure { type: 'figure'; id: string; caption: ReportInline[]; columns: number; panels: FigurePanel[]; src?: never; alt?: never }
+export type Figure = SingleImageFigure | MultiImageFigure;
 export interface Equation { type: 'equation'; id: string; latex: string; numbered: boolean }
 export interface TableCell { id: string; rowSpan?: number; colSpan?: number; blocks: CellBlock[] }
 export interface Table { type: 'table'; id: string; numbered: boolean; caption?: ReportInline[]; columns: { id: string }[]; headerRows: number; rows: { id: string; cells: TableCell[] }[] }

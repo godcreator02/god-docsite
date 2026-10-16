@@ -5,6 +5,7 @@ import { existsSync, readFileSync } from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { readReport, type ReadReportResult } from './read-report.ts'
+import { walk } from '../core/validate.ts'
 
 type Mode = 'complete' | 'standalone'
 type Job = { id: string; site: string; entry: string; mode: Mode; state: 'running' | 'ready' | 'failed'; fingerprint: string; message?: string; checks?: unknown; outputs?: Record<string, string> }
@@ -87,9 +88,14 @@ async function layoutOf(root: string, entry: string): Promise<{ value?: unknown;
   const bytes = await readFile(resolved)
   return { file, bytes, value: JSON.parse(bytes.toString('utf8')) }
 }
+/** Word 引擎还不会排一个图号下的多张图：报告里有多图就在启动 Word 之前拒绝 */
+function rejectMultiImageFigures(document: unknown) {
+  for (const { node } of walk(document)) if (node.type === 'figure' && node.panels) throw new Error(`图 ${node.id} 是多图（panels），导出 Word 还不支持多图；网页上照常显示`)
+}
 async function capture(site: string, engine: string, compiler: string, entry: string, mode: Mode) {
   const root = site
   const report = await readReport(path.join(root, entry), { root, mode })
+  rejectMultiImageFigures(report.document)
   const layout = await layoutOf(root, entry)
   const engineHash = await engineFingerprint(engine, compiler)
   return { report, layout, engineHash, fingerprint: hash(`${report.fingerprint}\n${engineHash}\n${hash(layout.bytes ?? '')}\n${mode}`) }

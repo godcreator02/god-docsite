@@ -2,6 +2,7 @@ import { createHash, randomUUID } from 'node:crypto';
 import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
+import sharp from 'sharp';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 const renderer = vi.hoisted(() => ({ spawn: vi.fn(), logFailure: false }));
@@ -84,6 +85,18 @@ describe('Word 导出 Node 命令（禁止启动实际 Word）', () => {
     const id = await successfulJob();
     await put(path.join(site, entry), '{ broken');
     expect(await reportExport(options())).toMatchObject({ state: 'failed', stale: true, ...outputPaths(id) });
+    expect(renderer.spawn).not.toHaveBeenCalled();
+  });
+
+  it('报告里有多图时返回 failed，写明 Word 还不支持多图，不启动 Word', async () => {
+    await configureEngine();
+    const png = await sharp({ create: { width: 2, height: 2, channels: 3, background: '#888' } }).png().toBuffer();
+    for (const name of ['a.png', 'b.png']) await put(path.join(site, 'reports/example/assets', name), png);
+    await put(path.join(site, entry), JSON.stringify({
+      format: 'docreport', schemaVersion: 1, id: 'doc_fixture', metadata: { title: '导出命令测试', language: 'zh-CN' },
+      blocks: [{ type: 'figure', id: 'fig_grid', columns: 2, caption: [{ type: 'text', text: '两张图' }], panels: [{ id: 'pa', src: 'assets/a.png', alt: 'a' }, { id: 'pb', src: 'assets/b.png', alt: 'b' }] }],
+    }));
+    expect(await reportExport(options())).toMatchObject({ state: 'failed', message: expect.stringContaining('导出 Word 还不支持多图') });
     expect(renderer.spawn).not.toHaveBeenCalled();
   });
 

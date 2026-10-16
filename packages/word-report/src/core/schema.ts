@@ -449,13 +449,71 @@ export const reportSchema = {
         },
         "alt": {
           "$ref": "#/$defs/line"
+        },
+        "columns": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 6
+        },
+        "panels": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/figurePanel"
+          },
+          "minItems": 2,
+          "maxItems": 26
         }
       },
       "required": [
         "type",
         "id",
+        "caption"
+      ],
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": { "required": ["panels"] },
+          "then": { "required": ["columns"] }
+        },
+        {
+          "if": { "required": ["panels"] },
+          "then": { "not": { "required": ["src"] } }
+        },
+        {
+          "if": { "required": ["panels"] },
+          "then": { "not": { "required": ["alt"] } }
+        },
+        {
+          "if": { "not": { "required": ["panels"] } },
+          "then": { "required": ["src", "alt"] }
+        },
+        {
+          "if": { "not": { "required": ["panels"] } },
+          "then": { "not": { "required": ["columns"] } }
+        }
+      ],
+      "description": "A single image (src, alt) or several images under one figure number (columns, panels). Panels fill rows of `columns` images in order and are labelled (a), (b), ... in that order."
+    },
+    "figurePanel": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "src": {
+          "$ref": "#/$defs/assetPath"
+        },
+        "alt": {
+          "$ref": "#/$defs/line"
+        },
+        "caption": {
+          "$ref": "#/$defs/inlines",
+          "minItems": 1
+        }
+      },
+      "required": [
+        "id",
         "src",
-        "caption",
         "alt"
       ],
       "additionalProperties": false

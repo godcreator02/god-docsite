@@ -14,6 +14,18 @@ export function assembleDocument(entry: string, files: Record<string, string | R
   const pending = new Map<string, SourceLocation>();
   const resourceNames = new Map<string, string>();
   let rootBibliography: Record<string, any> | undefined;
+  /** 图片路径改成按文档 id 分开的 assets/<文档 id>/…，同名的章节图片不互相覆盖 */
+  function registerAsset(image: Record<string, any>, file: string, srcPointer: string) {
+    try { safeRelativePath(image.src, true); } catch (e) { throw new ReportContentError((e as Error).message, file, srcPointer); }
+    const original = join(file, image.src), namespace = documents.get(file)!.id;
+    const output = `assets/${namespace}/${image.src.slice(7)}`;
+    for (const resource of [original, output]) {
+      const key = resource.normalize('NFC').toLowerCase(), previous = resourceNames.get(key);
+      if (previous && previous !== resource) throw new ReportContentError('Asset names collide on Windows', file, srcPointer);
+      resourceNames.set(key, resource);
+    }
+    assets[output] = original; image.src = output;
+  }
   function register(value: unknown, file: string, prefix: string) {
     for (const { node, pointer } of walk(value, prefix)) {
       if (node.id !== undefined) {
@@ -21,15 +33,8 @@ export function assembleDocument(entry: string, files: Record<string, string | R
         ids.set(node.id, node); sources[node.id] = { file, pointer };
       }
       if (node.type === 'figure') {
-        try { safeRelativePath(node.src, true); } catch (e) { throw new ReportContentError((e as Error).message, file, pointer + '/src'); }
-        const original = join(file, node.src), namespace = documents.get(file)!.id;
-        const output = `assets/${namespace}/${node.src.slice(7)}`;
-        for (const resource of [original, output]) {
-          const key = resource.normalize('NFC').toLowerCase(), previous = resourceNames.get(key);
-          if (previous && previous !== resource) throw new ReportContentError('Asset names collide on Windows', file, pointer + '/src');
-          resourceNames.set(key, resource);
-        }
-        assets[output] = original; node.src = output;
+        const images: [Record<string, any>, string][] = node.panels ? node.panels.map((panel: Record<string, any>, k: number) => [panel, `${pointer}/panels/${k}/src`]) : [[node, `${pointer}/src`]];
+        for (const [image, srcPointer] of images) registerAsset(image, file, srcPointer);
       }
     }
   }
@@ -144,6 +149,10 @@ export function assembleDocument(entry: string, files: Record<string, string | R
         const n = (eqCounts.get(chapter!) ?? 0) + 1; eqCounts.set(chapter!, n); number = `${chapter}-${n}`; label = `式（${number}）`;
       }
       if (node.id) index[node.id] = { type: node.type, number, label, title };
+      if (node.type === 'figure' && node.panels) node.panels.forEach((panel: Record<string, any>, k: number) => {
+        const panelNumber = `${number}${panelLetter(k)}`;
+        index[panel.id] = { type: 'figure-panel', number: panelNumber, label: `图 ${panelNumber}`, title: plain(panel.caption) };
+      });
       if (node.type === 'table') {
         if (tables >= 6) fail(node, 'At most six table levels');
         for (const row of node.rows) for (const cell of row.cells) blockNumbers(cell.blocks, depth, chapter, parentNumber, parentMode, tables + 1);
@@ -184,6 +193,10 @@ export function assembleDocument(entry: string, files: Record<string, string | R
           }
           fail(node, `Unknown reference target: ${node.target}`);
         }
+        if (index[node.target]?.type === 'figure-panel') {
+          if (node.display === 'title' && (!target!.caption?.length || target!.caption.some((x: any) => !['text', 'break'].includes(x.type)))) fail(node, 'Title reference requires plain caption');
+          delete node.externalLabel; continue;
+        }
         if (!['section', 'figure', 'table', 'equation'].includes(target!.type)) fail(node, 'Invalid reference target type');
         if (target!.type === 'equation' && (!target!.numbered || node.display === 'title')) fail(node, 'Equation has no requested label');
         if (target!.type === 'section' && target!.numbering === 'none' && node.display !== 'title') fail(node, 'Section is not numbered');
@@ -199,4 +212,6 @@ export function assembleDocument(entry: string, files: Record<string, string | R
   validateDocument(document, entry);
   return { document, index, sources, assets, dependencies, warnings };
 }
+/** 多图里第 k 张（从 0 起）的编号：(a)、(b)……，schema 限定至多 26 张 */
+export function panelLetter(k: number): string { return `(${String.fromCharCode(97 + k)})`; }
 function alphabet(n: number): string { let s = ''; while (n > 0) { n--; s = String.fromCharCode(65 + n % 26) + s; n = Math.floor(n / 26); } return s; }

@@ -34,6 +34,27 @@ docsite.feature.add  {"dir":"<站点目录>","package":"@godcreator/word-report"
 每个块有一个随机的 id，交叉引用写目标的 id，图、表、公式和节的编号按它们在整份报告里的先后自动算。字段的完整说明在包里的 `engine/schemas/report-content.schema.json`，
 例子是同目录的 `report-content.example.json`。
 
+### 多图
+
+一个图号下放几张图时，图不写 `src` 与 `alt`，改写 `columns`（每行几张，1 到 6）和 `panels`（2 到 26 张，每张有自己的 `id`、`src`、`alt`，可选的 `caption` 是这张图的小标题）。
+图按 `panels` 的先后一行 `columns` 张排开，不满的末行居中；每张图下面写 (a)、(b)……，`caption` 写在编号后面；整个图的图题照常写在图的 `caption` 里，排在最下面一行。
+田字格是 `columns: 2` 放 4 张，两行三列是 `columns: 3` 放 6 张：
+
+```json
+{
+  "type": "figure", "id": "fig_waveforms", "columns": 2,
+  "caption": [{ "type": "text", "text": "四种工况下的电流波形" }],
+  "panels": [
+    { "id": "fig_waveforms_a", "src": "assets/light-load.png", "alt": "轻载电流", "caption": [{ "type": "text", "text": "轻载" }] },
+    { "id": "fig_waveforms_b", "src": "assets/full-load.png", "alt": "满载电流", "caption": [{ "type": "text", "text": "满载" }] },
+    { "id": "fig_waveforms_c", "src": "assets/startup.png", "alt": "启动电流" },
+    { "id": "fig_waveforms_d", "src": "assets/fault.png", "alt": "故障电流" }
+  ]
+}
+```
+
+交叉引用写整个图的 `id` 显示「图 3」，写某一张的 `id` 显示「图 3(b)」。手机宽度下每行最多两张。导出 Word 还不支持多图：报告里有多图时导出直接报错，网页上照常显示。
+
 ## 网页上怎么看
 
 | 地址 | 显示什么 |

@@ -36,8 +36,10 @@ function shape(value: any, rule: Schema, pointer: string, file: string): void {
     if (rule.format === 'date' && (Number.isNaN(Date.parse(value)) || new Date(value).toISOString().slice(0, 10) !== value)) fail('Invalid calendar date');
   }
   if (typeof value === 'number' && rule.minimum !== undefined && value < rule.minimum) fail(`Minimum is ${rule.minimum}`);
+  if (typeof value === 'number' && rule.maximum !== undefined && value > rule.maximum) fail(`Maximum is ${rule.maximum}`);
   if (Array.isArray(value)) {
-    if (rule.minItems && value.length < rule.minItems) fail('Array must not be empty');
+    if (rule.minItems && value.length < rule.minItems) fail(rule.minItems === 1 ? 'Array must not be empty' : `At least ${rule.minItems} items`);
+    if (rule.maxItems && value.length > rule.maxItems) fail(`At most ${rule.maxItems} items`);
     if (rule.uniqueItems && new Set(value.map(stableValue)).size !== value.length) fail('Duplicate array values');
     if (rule.items) value.forEach((v, i) => shape(v, rule.items, `${pointer}/${i}`, file));
     if (rule.contains && !value.some(v => { try { shape(v, rule.contains, pointer, file); return true; } catch { return false; } })) fail('Missing required array member');
