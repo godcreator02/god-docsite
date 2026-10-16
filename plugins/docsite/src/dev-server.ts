@@ -1,4 +1,4 @@
-import { spawn, type ChildProcess } from 'node:child_process'
+import { spawn, spawnSync, type ChildProcess } from 'node:child_process'
 import { randomUUID } from 'node:crypto'
 import { feedTokenEnvName, feedTokenHeader, feedUrlOf } from '@godcreator/god-docsite'
 import { identityCodeEnvName } from '@godcreator/identity/node'
@@ -30,6 +30,8 @@ export type DevServer = {
   onExit(listener: (reason: string) => void): void
   /** 连同子进程一起停掉 */
   stop(): Promise<void>
+  /** 工作台退出时用：同步停掉整棵进程树，返回时已经停了 */
+  stopNow(): void
   /** 往开发服务的推送通道推一份数据；开发服务回的不是 2xx 就把它的原话报出来 */
   push(channel: string, data: unknown): Promise<void>
 }
@@ -70,6 +72,15 @@ export function stopProcessTree(child: ChildProcess): Promise<void> {
       })
     })
   })
+}
+
+/**
+ * 工作台退出时同步停整棵进程树。工作台一退出，libuv 的作业对象只结束直接起的 cmd，pnpm 与 node 早已脱离作业、会留下来占着端口；
+ * 异步的 stopProcessTree 起的 taskkill 也在作业里、会被一起结束，所以要在 cmd 还在的时候同步跑完。退出时没有地方报错，taskkill 的结果不看
+ */
+export function stopProcessTreeNow(child: ChildProcess): void {
+  if (child.exitCode !== null || child.pid === undefined) return
+  spawnSync('taskkill', ['/PID', String(child.pid), '/T', '/F'], { windowsHide: true })
 }
 
 /** 推送：POST JSON 到站点的推送路由，请求头带这次启动交给站点进程的令牌；站点回的不是 2xx 就把它的原话报出来 */
@@ -138,6 +149,7 @@ export const launchDevServer: LaunchDevServer = (siteDir, identityCode, port) =>
           else child.once('exit', () => listener(exitReasonOf()))
         },
         stop: () => stopProcessTree(child),
+        stopNow: () => stopProcessTreeNow(child),
         push: (channel, data) => postFeed(url, token, channel, data),
       })
     }

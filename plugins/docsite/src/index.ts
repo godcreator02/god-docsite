@@ -76,7 +76,15 @@ export function apply(ctx: GwbContext): void {
 
   const ports = new SitePorts({ readDoc: (doc) => ctx.gwbData.readDoc(doc), writeDoc: (doc, value) => ctx.gwbData.writeDoc(doc, value) }, async (port) => (await loadPlatformScaffold()).isPortFree(port))
   const host = new SiteHost({ log, launchDevServer, identityCode, ports })
-  ctx.effect(() => () => void host.stopAll())
+  // 内核不等卸载回调里的异步操作，工作台退出时异步的停止来不及跑完：卸载时同步停；没经卸载就退出的，在退出事件里同步停
+  const stopSitesNow = () => host.stopAllNow()
+  ctx.effect(() => {
+    process.once('exit', stopSitesNow)
+    return () => {
+      process.off('exit', stopSitesNow)
+      stopSitesNow()
+    }
+  })
 
   const hosted = new HostedSites({ get: () => stringList(settings.get('sites')), set: (dirs: string[]) => settings.set('sites', dirs) }, host)
 

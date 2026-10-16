@@ -161,6 +161,17 @@ export class SiteHost {
     await server.push(channel, data)
   }
 
+  /** 工作台退出：同步停掉全部，返回时整棵进程树都已停掉 */
+  stopAllNow(): void {
+    this.disposed = true
+    for (const site of this.sites.values()) {
+      const server = site.running
+      if (server === null) continue
+      site.running = null
+      server.stopNow()
+    }
+  }
+
   /** 插件卸载：全部停掉 */
   async stopAll(): Promise<void> {
     this.disposed = true

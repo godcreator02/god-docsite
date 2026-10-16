@@ -6,7 +6,7 @@
  */
 
 /** 共用数据：站点目录、本 home 的身份码、假开发服务报出的地址与 pid */
-/* ref file="../plugins/docsite/tests/site-host.test.ts" lines="33-76" hash="4d2393d02753" blob="811d1530d81d" */
+/* ref file="../plugins/docsite/tests/site-host.test.ts" lines="33-79" hash="8195745a15bd" blob="6a55f4ff8484" */
 export const siteDir = '/projects/demo/site'
 export const identityCode = 'mycode000001'
 
@@ -29,7 +29,7 @@ export const refusalMessages = [
  * 五步各走成什么样（state：pass 过了往下走，stop 在这一步结束，skip 没走到；stopTone 区分回现状与拒绝或失败）、
  * 第 ④ 步走到时启动的命令（command）、交回（result 的 error 为 true 是抛错）、之后 docsite.site.list 里这个站的样子（after）。
  */
-/* ref file="../plugins/docsite/tests/site-host.test.ts" lines="186-200" hash="ea0825f3caab" blob="708e0d04e205" */
+/* ref file="../plugins/docsite/tests/site-host.test.ts" lines="189-203" hash="ea0825f3caab" blob="6a55f4ff8484" */
 export const cases = [
   {
     id: 'first',
@@ -86,7 +86,7 @@ export const cases = [
   {
     id: 'reload',
     label: '插件重新加载',
-    text: '升级或重载插件时，内核不等旧实例停完开发服务就加载新实例，新实例马上来查端口，旧进程这时还占着 14001。每 0.5 秒再查一次，旧进程停完、放开 14001 后就带 --port 14001 启动，地址不变。',
+    text: '升级或重载插件时，旧实例卸载时停掉开发服务，新实例马上来查端口，14001 可能还没放开。每 0.5 秒再查一次，放开以后就带 --port 14001 启动，地址不变。',
     portsBefore: { port: 14001, occupancy: 'taken' },
     portsAfter: { port: 14001, note: '还是 14001，不重写' },
     steps: [
@@ -100,7 +100,7 @@ export const cases = [
     result: { error: false, value: '{ url: "http://127.0.0.1:14001", pid: 1, alreadyRunning: false }' },
     after: [{ state: 'running', url: 'http://127.0.0.1:14001', error: null }],
   },
-  /* ref file="../plugins/docsite/tests/site-host.test.ts" lines="88-112" hash="221b354e4e54" blob="811d1530d81d" */
+  /* ref file="../plugins/docsite/tests/site-host.test.ts" lines="91-115" hash="221b354e4e54" blob="6a55f4ff8484" */
   {
     id: 'already',
     label: '已在运行',
@@ -118,8 +118,8 @@ export const cases = [
     result: { error: false, value: '{ url: "http://127.0.0.1:14001", pid: 1, alreadyRunning: true }' },
     after: [{ state: 'running', url: 'http://127.0.0.1:14001', error: null, note: '只启动过一次' }],
   },
-  /* ref file="../plugins/docsite/tests/site-host.test.ts" lines="149-162" hash="31cb59cb7d19" blob="708e0d04e205" */
-  /* ref file="../plugins/docsite/tests/site-host.test.ts" lines="202-211" hash="0bed967545fc" blob="708e0d04e205" */
+  /* ref file="../plugins/docsite/tests/site-host.test.ts" lines="152-165" hash="31cb59cb7d19" blob="6a55f4ff8484" */
+  /* ref file="../plugins/docsite/tests/site-host.test.ts" lines="205-214" hash="0bed967545fc" blob="6a55f4ff8484" */
   /* ref file="../plugins/docsite/src/site-contract.ts" hash="02d02ff9f5cd" blob="f728727e9c4f" */
   {
     id: 'refused',
@@ -139,7 +139,7 @@ export const cases = [
     result: { error: true, value: '四种拒绝各抛一条原话' },
     after: [{ state: 'failed', url: null, error: '拒绝的那条原话' }],
   },
-  /* ref file="../plugins/docsite/tests/site-host.test.ts" lines="140-147" hash="2ffe71740b6f" blob="811d1530d81d" */
+  /* ref file="../plugins/docsite/tests/site-host.test.ts" lines="143-150" hash="2ffe71740b6f" blob="6a55f4ff8484" */
   {
     id: 'launch-fails',
     label: '开发服务没起来',
@@ -157,7 +157,7 @@ export const cases = [
     result: { error: true, value: '开发服务 60 秒内没有报出地址，已停掉' },
     after: [{ state: 'failed', url: null, error: '开发服务 60 秒内没有报出地址，已停掉' }],
   },
-  /* ref file="../plugins/docsite/tests/site-host.test.ts" lines="126-138" hash="1945645e1b52" blob="811d1530d81d" */
+  /* ref file="../plugins/docsite/tests/site-host.test.ts" lines="129-141" hash="1945645e1b52" blob="6a55f4ff8484" */
   {
     id: 'exited',
     label: '跑着跑着退出了',

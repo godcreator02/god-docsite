@@ -26,9 +26,9 @@ gwb-docsite 是 gwb 工作台和[平台包](/packages/god-docsite) `@godcreator/
 
 {/* ref file="../plugins/docsite/src/index.ts" lines="41-51" hash="cc0bf1462472" blob="4de40222eb79" */}
 
-`apply` 是全部接线：先定义设置、第一次加载时生成身份码，再依次造出端口记录 `SitePorts`、进程表 `SiteHost`、常驻表 `HostedSites`，拼成一份 `GwbDocsiteApi`，服务和命令都用这一份；最后把登记着的站逐个启动（不等），有 `gwbSkills` 时注册说明书。
+`apply` 是全部接线：先定义设置、第一次加载时生成身份码，再依次造出端口记录 `SitePorts`、进程表 `SiteHost`（卸载时、工作台退出时同步停掉全部开发服务，见下面「一个站的三种状态」）、常驻表 `HostedSites`，拼成一份 `GwbDocsiteApi`，服务和命令都用这一份；最后把登记着的站逐个启动（不等），有 `gwbSkills` 时注册说明书。
 
-{/* ref file="../plugins/docsite/src/index.ts" lines="58-115" hash="838188dd4183" blob="4de40222eb79" */}
+{/* ref file="../plugins/docsite/src/index.ts" lines="58-123" hash="046c9497a560" blob="e73a0e8cfcfc" */}
 
 身份码第一次加载时生成 12 个小写字母与数字（去掉容易看错的 l、o、0、1）；之后每次读都校验，设置里写错了就报错、不替人改。每次启动开发服务时现读，所以改了设置只影响之后启动的开发服务。
 
@@ -76,19 +76,19 @@ gwb-docsite 是 gwb 工作台和[平台包](/packages/god-docsite) `@godcreator/
 
 {/* ref file="../plugins/docsite/src/site-host.ts" lines="7-13" hash="df7ebb7f1f35" blob="455a3efb4dce" */}
 
-状态只有三种：`running` 进程在，`url` 是开发服务报出的实际地址；`stopped` 没有进程；`failed` 进程退出了或没能启动，`error` 记原因。人为 `stop` 不算失败。`start` 与 `stop` 幂等：已在运行就回现状；正在启动时再来的 `start` 复用同一次，不重复启动；`stop` 先等正在启动的那一次落定再判断，没在运行就报错。进程退出只标 `failed`，不自动重启；修好后再 `start`。插件卸载时全部停掉（Windows 上 pnpm 经 cmd 启动、底下还有 node，停的时候连同子进程一起停）；内核不等这一步做完就加载新实例，所以新实例沿用端口时要等旧进程放开它，见下一节。
+状态只有三种：`running` 进程在，`url` 是开发服务报出的实际地址；`stopped` 没有进程；`failed` 进程退出了或没能启动，`error` 记原因。人为 `stop` 不算失败。`start` 与 `stop` 幂等：已在运行就回现状；正在启动时再来的 `start` 复用同一次，不重复启动；`stop` 先等正在启动的那一次落定再判断，没在运行就报错。进程退出只标 `failed`，不自动重启；修好后再 `start`。插件卸载时同步停掉全部：Windows 上 pnpm 经 cmd 启动、底下还有 node，停的时候用 `taskkill /T` 连同子进程一起停，等它跑完才返回。内核不等卸载回调里的异步操作，工作台退出时异步的停止来不及跑完：工作台一退出，直接起的 cmd 被一起结束，pnpm 与 node 却留下来占着端口。没经卸载就退出的，在进程的退出事件里同步再停一次。整棵进程树停掉以后端口还要片刻才放开，新实例沿用端口时要等它，见下一节。
 
 ### 一次 start 怎么走
 
 启动前先核对：站点目录里有 `package.json`、`node_modules` 里装着平台包（建在旧包 `@godcreator/docsite-kit` 上的站拒绝）、`scripts.dev` 没写死 `--port`。写死了会和启动时带的 `--port` 同时出现，站点认错自己的地址。
 
-端口：gwb-data 的文档 `site-ports` 记着每个站上次用的端口。上次的端口在 127.0.0.1 与 ::1 上都空着，就带 `--port <端口>` 启动（平台的 vite 插件加 strictPort，被占就起不来）；没记过就不带，由平台的 vite 插件在 10000–49151 里随机挑。上次的端口被占着时先每 0.5 秒再查一次、最多 10 秒：插件重新加载（升级、重载）时，内核不等旧实例停完开发服务就加载新实例，新实例马上来查端口，旧进程这时多半还占着它，停完整棵进程树要一两秒。10 秒后还被占着才不带 `--port`、让站点随机挑。报出的端口和给的不同就停掉并拒绝。好处是书签与开着的页面重启后还能用：真站测试里停了再启动、插件升级以后，地址都不变。
+端口：gwb-data 的文档 `site-ports` 记着每个站上次用的端口。上次的端口在 127.0.0.1 与 ::1 上都空着，就带 `--port <端口>` 启动（平台的 vite 插件加 strictPort，被占就起不来）；没记过就不带，由平台的 vite 插件在 10000–49151 里随机挑。上次的端口被占着时先每 0.5 秒再查一次、最多 10 秒：插件重新加载（升级、重载）时，旧实例卸载时停掉开发服务，新实例马上来查端口，端口这时可能还没放开。10 秒后还被占着才不带 `--port`、让站点随机挑。报出的端口和给的不同就停掉并拒绝。好处是书签与开着的页面重启后还能用：真站测试里停了再启动、插件升级以后，地址都不变。
 
 {/* ref file="../plugins/docsite/src/site-ports.ts" lines="19-62" hash="0ba7a9be47b8" blob="0cb5b5c21893" */}
 
 启动时经环境变量交给开发服务两样：本 home 的身份码 `DOCSITE_IDENTITY_CODE`（站点按它在 `people.json` 里认人，没有它站点只读），这次启动现生成的推送令牌 `DOCSITE_FEED_TOKEN`；然后等输出里出现 `Local:` 那一行的地址，60 秒内没等到就停掉、报错。
 
-{/* ref file="../plugins/docsite/src/dev-server.ts" lines="91-103" hash="54de2c8063e4" blob="f61c6d2b5065" */}
+{/* ref file="../plugins/docsite/src/dev-server.ts" lines="102-114" hash="54de2c8063e4" blob="47f7b92e4b38" */}
 
 跑起来以后记下这次的端口；几个站同时记时排队写，后写的不覆盖先写的。记不下来只报一行警告，照样运行，下次重新挑（有意设计的降级）。选一种情况看看：
 

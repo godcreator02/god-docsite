@@ -32,9 +32,9 @@ async function installPackage(name: string, version: string): Promise<void> {
 
 /** 假的开发服务：记下推来的数据，能让它退出 */
 function fakeServers() {
-  const launched: Array<{ code: string; port: number | null; pushed: Array<[string, unknown]>; exit: (reason: string) => void; stopped: boolean }> = []
+  const launched: Array<{ code: string; port: number | null; pushed: Array<[string, unknown]>; exit: (reason: string) => void; stopped: boolean; stoppedNow: boolean }> = []
   const launch = async (_dir: string, code: string, port: number | null): Promise<DevServer> => {
-    const record = { code, port, pushed: [] as Array<[string, unknown]>, exit: (_reason: string) => {}, stopped: false }
+    const record = { code, port, pushed: [] as Array<[string, unknown]>, exit: (_reason: string) => {}, stopped: false, stoppedNow: false }
     launched.push(record)
     return {
       url: `http://127.0.0.1:${port ?? 14000 + launched.length}`,
@@ -42,6 +42,9 @@ function fakeServers() {
       onExit: (listener) => (record.exit = listener),
       stop: async () => {
         record.stopped = true
+      },
+      stopNow: () => {
+        record.stoppedNow = true
       },
       push: async (channel, data) => {
         record.pushed.push([channel, data])
@@ -218,6 +221,17 @@ describe('站点状态机', () => {
     await host.stopAll()
     expect(launched[0]!.stopped).toBe(true)
     expect(host.statusOf(siteDir).state).toBe('stopped')
+  })
+
+  it('stopAllNow 同步停掉全部（工作台退出），之后不再启动', async () => {
+    await siteWithSupportedKit()
+    const { launched, launch } = fakeServers()
+    const { host } = hostWith(launch)
+    await host.start(siteDir)
+    host.stopAllNow()
+    expect(launched[0]!.stoppedNow).toBe(true)
+    expect(host.statusOf(siteDir).state).toBe('stopped')
+    await expect(host.start(siteDir)).rejects.toThrow('插件正在卸载')
   })
 })
 
