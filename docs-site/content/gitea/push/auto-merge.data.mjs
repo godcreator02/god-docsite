@@ -43,7 +43,7 @@ export const measuredCheckNames = ['和 main 没有冲突', '合并后只改了 
 
 /* ref file="../plugins/collab/src/collab-repo/submit/submit.ts" lines="35-39" hash="2e408d45cad7" blob="92a88843de16" */
 /* ref file="../plugins/collab/src/collab-repo/submit/submit.ts" lines="50-52" hash="169b02d46d48" blob="92a88843de16" */
-/* ref file="../plugins/collab/src/collab-repo/submit/submit.ts" lines="151-151" hash="770f3420697e" blob="3df0aa7106c6" */
+/* ref file="../plugins/collab/src/collab-repo/submit/submit.ts" lines="155-155" hash="770f3420697e" blob="969e98c0a648" */
 const submitLines = [
   { text: 'git add --all -- collab site', kind: 'cmd' },
   { text: `git commit -m "${example.person} 的协作记录" -- collab site`, kind: 'cmd' },

@@ -96,6 +96,10 @@ async function returnToWorkingTree(repo: string, base: string): Promise<void> {
   await git(repo, ['reset', '--mixed', base])
 }
 
+/** 成员被拦下后怎样先提交自己别的改动：只有负责人能改的那几处不撤掉，同一批里的身份码、页面、评论都推不出去 */
+const howToSubmitTheRest =
+  '。要先提交别的改动，就把这几处改回 main 上的样子再提交审核：改回站点依赖的版本时 site/pnpm-lock.yaml 一起改回，再在 site/ 里运行 pnpm install'
+
 const sleep = (milliseconds: number) => new Promise((resolve) => setTimeout(resolve, milliseconds))
 
 /** 一直查到合并请求关闭（合并或打回）；超过时限还开着回 timeout */
@@ -146,7 +150,7 @@ export async function submitCollab(project: RemoteProject, gitea: GiteaRepo, typ
   })
   if (leadOnly.length > 0) {
     await returnToWorkingTree(project.repo, base)
-    throw new CollabRejected(`没有推送，改动留在工作区（没提交）：${leadOnly.join('；')}`)
+    throw new CollabRejected(`没有推送，改动留在工作区（没提交）：${leadOnly.join('；')}${howToSubmitTheRest}`)
   }
   const push = await runGit(project.repo, ['push', 'origin', 'HEAD:refs/for/main', '-o', `topic=${project.person}`, '-o', `title=${await pullTitleOf(project, base)}`], project.remote.env)
   if (push.code !== 0) {

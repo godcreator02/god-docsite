@@ -47,7 +47,8 @@ describe('collab.submit 带上 site/ 的改动', () => {
     git(bob.repo, 'checkout', '-q', '--', 'site/people.json')
     writeSite(bob.repo, { 'package.json': '{ "scripts": { "dev": "vite" }, "dependencies": {} }\n' })
     await expect(submitCollab(bob, merges(), fakeTypecheck('passed').typecheck)).rejects.toThrow(
-      '没有推送，改动留在工作区（没提交）：改了只有负责人能改的内容：site/package.json 的 scripts；这类改动交给负责人（协作仓的协作者）提交',
+      '没有推送，改动留在工作区（没提交）：改了只有负责人能改的内容：site/package.json 的 scripts；这类改动交给负责人（协作仓的协作者）提交。' +
+        '要先提交别的改动，就把这几处改回 main 上的样子再提交审核：改回站点依赖的版本时 site/pnpm-lock.yaml 一起改回，再在 site/ 里运行 pnpm install',
     )
     expect(() => git(origin, 'rev-parse', '--verify', '-q', 'refs/for/main')).toThrow()
     expect(git(bob.repo, 'rev-list', '--count', 'origin/main..HEAD')).toBe('0')

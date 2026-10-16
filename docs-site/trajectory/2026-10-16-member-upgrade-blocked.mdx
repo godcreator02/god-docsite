@@ -1,0 +1,35 @@
+---
+born-at: 2026-10-16T15:20
+type: choice
+parent: [2026-09-03-god-live-doc]
+label: 成员升级站点被拦下：不自动拆分，报错与说明书写明怎么改回
+domain: 协作流程
+---
+
+## 背景
+
+godcreator/god-docsite#1：CHB+DAB SST 样机的成员 chenhao 让 Codex「升级全部 GWB」，Codex 在他本机把站点的 `@godcreator/collab` 从 0.1.1 升到 0.1.2、`@godcreator/god-docsite` 从 ^0.1.1 升到 ^0.1.2。这两处只有负责人能改，`collab.submit` 推送前在本机拦下。`collab.submit` 一次提交 `collab/` 与 `site/` 的全部改动，于是同一批里他给自己加的身份码也推不出去，之后的页面、评论改动同样被这批升级挡住。
+
+拦截本身符合规则。缺的是两样：说明书「升级站点」写在「项目负责人的事」下，却没说成员不升级、也没给办法确认自己是不是负责人；被拦下的原话只说「交给负责人提交」，没说成员怎样先把别的改动提交上去。
+
+## 结论与边界
+
+- 说明书 collab 的「升级站点」开头先确认本机身份是负责人：`gitea.http` GET `/repos/<组织>/<协作仓>/collaborators/<本机身份>`，204 是、404 不是。不是就不升级，告诉人请负责人升级、合进 main 后自动同步会装好
+- `collab.submit` 被拦下的原话后面接一句：要先提交别的改动，就把这几处改回 main 上的样子再提交审核，改回站点依赖的版本时 `site/pnpm-lock.yaml` 一起改回、再在 `site/` 里 `pnpm install`。说明书 `collab-repo.md` 的「只有项目负责人能改的」与通知表写明具体做法
+- 只改本机拦下时的原话，执行器打回的留言（`packages/collab` 的 `leadOnlyProblems`）不变：执行器那边的读者是合并请求，不在成员的工作区里
+- 只加说明与原话，gwb-collab 升 y
+
+## 依据
+
+在 SST 的协作仓上用 `gitea.http` 实测：查 chenhao 回 404、查 godcreator 回 204。新原话在 `plugins/collab/tests/collab-repo/submit/submit-site.slow.test.ts` 里测。
+
+## 否掉的候选
+
+- **`collab.submit` 自动拆分，只提交不受限的部分**：受限的是 `site/package.json` 里的某几个键，锁文件和它绑在一起，自动拆要改写成员的 `package.json` 与锁文件、再装依赖，拆错了站点打不开；成员同一批里自己加的库也要分辨。照原话手动改回，几条命令就够，判断留给人和 agent
+- **`docsite.feature.add` 与 `pnpm add` 之前由插件检查负责人**：gwb-docsite 不认识协作仓的负责人，`pnpm add` 也不经过插件，拦不住；写进说明书，agent 升级前自己查
+- **给 `collab.projects` 加「我是不是负责人」的字段**：只有升级这一处要用，`gitea.http` 查一次就够，不为它加接口
+
+## 代价
+
+- 成员的 agent 不读说明书就照样能在本机升级，只能等 `collab.submit` 拦下后照原话改回
+- 改回依赖要在 `site/` 里重新装一次

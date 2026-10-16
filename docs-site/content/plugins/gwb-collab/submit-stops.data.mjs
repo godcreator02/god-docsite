@@ -133,7 +133,7 @@ const timeoutCase = {
 
 /* lead-only、site-check 两种情况照 submit-site 的用例：一个用例连着跑六种场景，这里取成员改 scripts 被拦、
  * 站点检查拦下不存在日期的日志页（同时加的评论作者不在人员列表里，不被拦）两段 */
-/* ref file="../plugins/collab/tests/collab-repo/submit/submit-site.slow.test.ts" lines="43-87" hash="a89a15ee202f" blob="62e059466e05" */
+/* ref file="../plugins/collab/tests/collab-repo/submit/submit-site.slow.test.ts" lines="43-88" hash="352d1dc73c31" blob="67f2f4421753" */
 const leadOnlyCase = {
   id: 'lead-only',
   label: '成员改 scripts',
@@ -143,7 +143,7 @@ const leadOnlyCase = {
   end: 'returned',
   leftInRepo: "本地 main 回到 origin/main（origin/main..HEAD 是 0 个提交）；site/package.json 的改动回到工作区；没推送。同样的改动由负责人提交时第 7 步放行（协作者是 ['admin', 'bob']）",
   error: [
-    '没有推送，改动留在工作区（没提交）：改了只有负责人能改的内容：site/package.json 的 scripts；这类改动交给负责人（协作仓的协作者）提交',
+    '没有推送，改动留在工作区（没提交）：改了只有负责人能改的内容：site/package.json 的 scripts；这类改动交给负责人（协作仓的协作者）提交。要先提交别的改动，就把这几处改回 main 上的样子再提交审核：改回站点依赖的版本时 site/pnpm-lock.yaml 一起改回，再在 site/ 里运行 pnpm install',
   ],
   receipt: null,
   noticeBar: { pills: ['本机有 1 个文件还没提交审核（站点文件 1 个）', '上次提交审核没成功'], note: null },
