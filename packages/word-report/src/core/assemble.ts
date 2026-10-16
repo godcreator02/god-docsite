@@ -111,6 +111,7 @@ export function assembleDocument(entry: string, files: Record<string, string | R
   for (const { node } of objects) {
     if (node.type === 'abstract' && (node.keywords.some((x: string) => x !== x.trim()) || node.paragraphs.some((x: any) => !x.content.length))) fail(node, 'Abstract requires nonempty paragraphs and trimmed keywords');
     if (node.type === 'table') { const source = sources[node.id]!; validateTable(node, source.file, source.pointer); }
+    if (node.type === 'figure' && node.panels) validatePanelGrid(node, fail);
     if (node.type === 'math' || node.type === 'equation') {
       const latex = node.latex.trim();
       if (!latex || /[^\x00-\x7f]/.test(latex) || /^(\$|\\\(|\\\[)/.test(latex) || /\\(?:tag|label|documentclass)\b|\\begin\s*\{document\}/.test(latex)) fail(node, 'MathType requires nonempty ASCII TeX without delimiters or manual numbering');
@@ -149,10 +150,10 @@ export function assembleDocument(entry: string, files: Record<string, string | R
         const n = (eqCounts.get(chapter!) ?? 0) + 1; eqCounts.set(chapter!, n); number = `${chapter}-${n}`; label = `式（${number}）`;
       }
       if (node.id) index[node.id] = { type: node.type, number, label, title };
-      if (node.type === 'figure' && node.panels) node.panels.forEach((panel: Record<string, any>, k: number) => {
-        const panelNumber = `${number}${panelLetter(k)}`;
+      if (node.type === 'figure' && node.panels) for (const panel of node.panels) {
+        const panelNumber = `${number}(${panel.label})`;
         index[panel.id] = { type: 'figure-panel', number: panelNumber, label: `图 ${panelNumber}`, title: plain(panel.caption) };
-      });
+      }
       if (node.type === 'table') {
         if (tables >= 6) fail(node, 'At most six table levels');
         for (const row of node.rows) for (const cell of row.cells) blockNumbers(cell.blocks, depth, chapter, parentNumber, parentMode, tables + 1);
@@ -212,6 +213,15 @@ export function assembleDocument(entry: string, files: Record<string, string | R
   validateDocument(document, entry);
   return { document, index, sources, assets, dependencies, warnings };
 }
-/** 多图里第 k 张（从 0 起）的编号：(a)、(b)……，schema 限定至多 26 张 */
-export function panelLetter(k: number): string { return `(${String.fromCharCode(97 + k)})`; }
+/** 多图的每张都要在 rows × columns 的网格里、一格只放一张、编号不重复 */
+function validatePanelGrid(figure: Record<string, any>, fail: (node: Record<string, any>, message: string) => never) {
+  const occupied = new Map<string, string>(), labels = new Map<string, string>();
+  for (const panel of figure.panels) {
+    if (panel.row > figure.rows || panel.column > figure.columns) fail(panel, `Panel cell row ${panel.row}, column ${panel.column} is outside the ${figure.rows} x ${figure.columns} grid of ${figure.id}`);
+    const cell = `${panel.row},${panel.column}`;
+    if (occupied.has(cell)) fail(panel, `Panel shares row ${panel.row}, column ${panel.column} with ${occupied.get(cell)}`);
+    if (labels.has(panel.label)) fail(panel, `Panel label (${panel.label}) is also used by ${labels.get(panel.label)}`);
+    occupied.set(cell, panel.id); labels.set(panel.label, panel.id);
+  }
+}
 function alphabet(n: number): string { let s = ''; while (n > 0) { n--; s = String.fromCharCode(65 + n % 26) + s; n = Math.floor(n / 26); } return s; }

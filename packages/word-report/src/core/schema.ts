@@ -450,6 +450,11 @@ export const reportSchema = {
         "alt": {
           "$ref": "#/$defs/line"
         },
+        "rows": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 6
+        },
         "columns": {
           "type": "integer",
           "minimum": 1,
@@ -461,7 +466,7 @@ export const reportSchema = {
             "$ref": "#/$defs/figurePanel"
           },
           "minItems": 2,
-          "maxItems": 26
+          "maxItems": 36
         }
       },
       "required": [
@@ -473,7 +478,7 @@ export const reportSchema = {
       "allOf": [
         {
           "if": { "required": ["panels"] },
-          "then": { "required": ["columns"] }
+          "then": { "required": ["rows", "columns"] }
         },
         {
           "if": { "required": ["panels"] },
@@ -489,16 +494,35 @@ export const reportSchema = {
         },
         {
           "if": { "not": { "required": ["panels"] } },
+          "then": { "not": { "required": ["rows"] } }
+        },
+        {
+          "if": { "not": { "required": ["panels"] } },
           "then": { "not": { "required": ["columns"] } }
         }
       ],
-      "description": "A single image (src, alt) or several images under one figure number (columns, panels). Panels fill rows of `columns` images in order and are labelled (a), (b), ... in that order."
+      "description": "A single image (src, alt) or several images under one figure number (rows, columns, panels). Each panel names its own grid cell and label; cells nobody names stay empty. Cells inside the grid, one panel per cell and unique labels are semantic checks."
     },
     "figurePanel": {
       "type": "object",
       "properties": {
         "id": {
           "$ref": "#/$defs/id"
+        },
+        "row": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 6
+        },
+        "column": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 6
+        },
+        "label": {
+          "type": "string",
+          "pattern": "^[^\\s()（）]{1,8}$",
+          "description": "Shown under the image as (label) and in references as figure number + (label); written without parentheses."
         },
         "src": {
           "$ref": "#/$defs/assetPath"
@@ -513,6 +537,9 @@ export const reportSchema = {
       },
       "required": [
         "id",
+        "row",
+        "column",
+        "label",
         "src",
         "alt"
       ],

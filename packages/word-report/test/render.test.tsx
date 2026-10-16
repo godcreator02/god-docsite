@@ -85,16 +85,18 @@ describe('JSON 报告真实 React 渲染', () => {
     expect(meta.markdown).not.toContain('eq_random');
   });
 
-  it('多图每张下面写 (a)(b)……，整个图题只写一次，引用写成图号加字母', () => {
+  it('多图每张放在写定的格子里，下面写手写的编号，整个图题只写一次，引用写成图号加编号', () => {
+    const cells = [['a', 1, 1], ['b', 1, 2], ['c', 1, 3], ['d', 2, 1], ['e', 2, 2], ['f', 2, 3]] as const;
     const document: ReportDocument = {
       format: 'docreport', schemaVersion: 1, id: 'doc_panels', metadata: { title: '多图测试', language: 'zh-CN' },
       blocks: [{ type: 'section', id: 'sec_panels', title: '结果', numbering: 'decimal', children: [
-        { type: 'figure', id: 'fig_grid', columns: 3, caption: [text('六个工况的波形')], panels: ['a', 'b', 'c', 'd', 'e', 'f'].map(k => ({ id: `panel_${k}`, src: `assets/${k}.png`, alt: `工况 ${k}`, ...(k === 'b' ? { caption: [text('满载')] } : {}) })) },
+        { type: 'figure', id: 'fig_grid', rows: 2, columns: 3, caption: [text('六个工况的波形')], panels: cells.map(([k, row, column]) => ({ id: `panel_${k}`, row, column, label: k, src: `assets/${k}.png`, alt: `工况 ${k}`, ...(k === 'b' ? { caption: [text('满载')] } : {}) })) },
         { type: 'paragraph', id: 'p_panels', content: [text('见'), { type: 'ref', id: 'ref_panel', target: 'panel_b', display: 'label' }] },
       ] }],
     };
     const html = renderToStaticMarkup(<ReportView report={assembleDocument('panels.json', { 'panels.json': document })} assetUrl={source => `/content-files/${source}`} />);
-    expect(html).toContain('--report-panel-columns:3');
+    expect(html).toContain('grid-template-columns:repeat(3, minmax(0, 1fr));grid-template-rows:repeat(2, auto)');
+    expect(html).toContain('style="grid-row:2;grid-column:3"><div class="report-panel-image"><img id="panel_f"');
     expect(html.match(/<img /g)).toHaveLength(6);
     expect(html).toContain('id="panel_f"');
     expect(html).toContain('/content-files/assets/f.png');

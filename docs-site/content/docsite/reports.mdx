@@ -36,24 +36,32 @@ docsite.feature.add  {"dir":"<站点目录>","package":"@godcreator/word-report"
 
 ### 多图
 
-一个图号下放几张图时，图不写 `src` 与 `alt`，改写 `columns`（每行几张，1 到 6）和 `panels`（2 到 26 张，每张有自己的 `id`、`src`、`alt`，可选的 `caption` 是这张图的小标题）。
-图按 `panels` 的先后一行 `columns` 张排开，不满的末行居中；每张图下面写 (a)、(b)……，`caption` 写在编号后面；整个图的图题照常写在图的 `caption` 里，排在最下面一行。
-田字格是 `columns: 2` 放 4 张，两行三列是 `columns: 3` 放 6 张：
+一个图号下放几张图时，图不写 `src` 与 `alt`，改写网格的大小 `rows`、`columns`（各 1 到 6）和 `panels`（2 到 36 张）。每张图写明自己的位置和编号：
+
+| 字段 | 写什么 |
+| --- | --- |
+| `row`、`column` | 放在第几行、第几列，从 1 起 |
+| `label` | 图下显示的编号，不带括号：写 `a`，显示「(a)」 |
+| `id`、`src`、`alt` | 和单张图一样 |
+| `caption` | 可选，这张图的小标题，写在编号后面 |
+
+网页照写的位置摆，不自动排列：各列等宽，没有图写到的格子留空，任何宽度下都不重排；编号也不自动编。
+两张图写在同一格、格子超出网格、同一个图里编号重复都直接报错。整个图的图题照常写在图的 `caption` 里，排在最下面一行。田字格是 `rows: 2, columns: 2` 放 4 张：
 
 ```json
 {
-  "type": "figure", "id": "fig_waveforms", "columns": 2,
+  "type": "figure", "id": "fig_waveforms", "rows": 2, "columns": 2,
   "caption": [{ "type": "text", "text": "四种工况下的电流波形" }],
   "panels": [
-    { "id": "fig_waveforms_a", "src": "assets/light-load.png", "alt": "轻载电流", "caption": [{ "type": "text", "text": "轻载" }] },
-    { "id": "fig_waveforms_b", "src": "assets/full-load.png", "alt": "满载电流", "caption": [{ "type": "text", "text": "满载" }] },
-    { "id": "fig_waveforms_c", "src": "assets/startup.png", "alt": "启动电流" },
-    { "id": "fig_waveforms_d", "src": "assets/fault.png", "alt": "故障电流" }
+    { "id": "fig_waveforms_a", "row": 1, "column": 1, "label": "a", "src": "assets/light-load.png", "alt": "轻载电流", "caption": [{ "type": "text", "text": "轻载" }] },
+    { "id": "fig_waveforms_b", "row": 1, "column": 2, "label": "b", "src": "assets/full-load.png", "alt": "满载电流", "caption": [{ "type": "text", "text": "满载" }] },
+    { "id": "fig_waveforms_c", "row": 2, "column": 1, "label": "c", "src": "assets/startup.png", "alt": "启动电流" },
+    { "id": "fig_waveforms_d", "row": 2, "column": 2, "label": "d", "src": "assets/fault.png", "alt": "故障电流" }
   ]
 }
 ```
 
-交叉引用写整个图的 `id` 显示「图 3」，写某一张的 `id` 显示「图 3(b)」。手机宽度下每行最多两张。导出 Word 还不支持多图：报告里有多图时导出直接报错，网页上照常显示。
+交叉引用写整个图的 `id` 显示「图 3」，写某一张的 `id` 显示「图 3(b)」，括号里是那张图的 `label`。导出 Word 还不支持多图：报告里有多图时导出直接报错，网页上照常显示。
 
 ## 网页上怎么看
 

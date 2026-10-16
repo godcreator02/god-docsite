@@ -1,6 +1,6 @@
-import { Fragment, type CSSProperties, type ReactNode } from 'react';
+import { Fragment, type ReactNode } from 'react';
 import katex from 'katex';
-import { assembleDocument, panelLetter } from '../core/assemble.ts';
+import { assembleDocument } from '../core/assemble.ts';
 import type { AssemblyResult, ReportDocument, ReportInline } from '../core/types.ts';
 
 export type AssetUrl = (sourcePath: string, compiledPath: string) => string;
@@ -77,10 +77,10 @@ export function ReportView({ report, assetUrl }: ReportViewProps) {
         const caption = <figcaption id={`${node.id}-caption`}>{label?.number && <span>{label.label} </span>}{inlines(node.caption)}</figcaption>;
         if (!node.panels) return <figure key={node.id} data-report-source={origin?.file} data-report-pointer={origin?.pointer}>{image(node.src, node.id, node.alt)}{caption}</figure>;
         return <figure key={node.id} className="report-multi-figure" data-report-source={origin?.file} data-report-pointer={origin?.pointer}>
-          <div id={node.id} className="report-panels" style={{ '--report-panel-columns': node.columns } as CSSProperties}>
-            {node.panels.map((panel, k) => <div key={panel.id} className="report-panel">
+          <div id={node.id} className="report-panels" style={{ gridTemplateColumns: `repeat(${node.columns}, minmax(0, 1fr))`, gridTemplateRows: `repeat(${node.rows}, auto)` }}>
+            {node.panels.map(panel => <div key={panel.id} className="report-panel" style={{ gridRow: panel.row, gridColumn: panel.column }}>
               <div className="report-panel-image">{image(panel.src, panel.id, panel.alt)}</div>
-              <div id={`${panel.id}-caption`} className="report-panel-caption">{panelLetter(k)}{panel.caption && <> {inlines(panel.caption)}</>}</div>
+              <div id={`${panel.id}-caption`} className="report-panel-caption">({panel.label}){panel.caption && <> {inlines(panel.caption)}</>}</div>
             </div>)}
           </div>
           {caption}
