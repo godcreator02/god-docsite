@@ -233,6 +233,19 @@ export async function runBaseChecks({ browser, baseUrl, mode, siteDir, feedToken
         return { pass, detail: `未解决时按钮写「${openLabel}」，标了以后写「${resolvedLabel}」、串头 status 行 ${resolvedText.match(/^status: .*$/m)?.[0]}；重新打开后 ${reopenedText.match(/^status: .*$/m)?.[0]}，还有 resolvedBy/At：${/^resolved(By|At):/m.test(reopenedText)}` }
       })
 
+      await check('地址点名一串就打开它（dev）：通知里的评论链接 ?comment=<串 id>，打开页面时这一串浮在正文上，不用在收件箱里点', async () => {
+        await page.goto(`${baseUrl}/writing/collapse-test`, { waitUntil: 'load' })
+        await page.waitForLoadState('networkidle')
+        await openCommentsInbox(page)
+        const row = page.locator('[data-comment-row]', { hasText: `e2e 评论 ${runTag}` })
+        await row.waitFor({ timeout: stepTimeoutMs })
+        const threadId = await row.getAttribute('data-comment-row')
+        await page.goto(`${baseUrl}/writing/collapse-test?comment=${threadId}`, { waitUntil: 'load' })
+        const card = page.locator(`[data-comments-layer] [data-comment-card="${threadId}"]`)
+        const shown = await card.waitFor({ timeout: stepTimeoutMs }).then(() => true, () => false)
+        return { pass: shown, detail: `串 ${threadId} ${shown ? '' : '没有'}浮在正文上` }
+      })
+
       await check('批注一块（dev）：草稿与这一串浮在那一块正下方、不挤动正文；写草稿时正文栏外是蓝条，发出以后是一道和那一块上下对齐的黄条，打开时加粗，那一块始终不铺底色；点那一块收起浮窗、不打开评论，点黄条才打开，收件箱不跟着收', async () => {
         const commentText = `e2e 批一块 ${runTag}`
         await page.goto(`${baseUrl}/writing/collapse-test`, { waitUntil: 'load' })

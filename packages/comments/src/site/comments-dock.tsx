@@ -15,6 +15,7 @@
  */
 import { useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from 'react'
 import { createPortal } from 'react-dom'
+import { useLocation } from 'react-router'
 import { parseCommentAnchor, serializeTextAnchor, type CommentAnchor, type TextAnchorFields } from '../core/anchor.js'
 import {
   annotateCommentTargets,
@@ -33,6 +34,7 @@ import type { CommentAvatar, CommentBodyComponent, CommentsAccess, PageThreadSum
 import { CommentIcon, Composer, ThreadQuote, type ThreadPlace } from './comment-parts.js'
 import { CommentThread } from './comment-thread.js'
 import { CommentsInbox, type InboxItem } from './comments-inbox.js'
+import { linkedThreadIdOf } from './comment-link.js'
 
 /** 收件箱开关存在 localStorage 的键 */
 const inboxOpenStorageKey = 'docsite-comments-inbox-open'
@@ -275,6 +277,15 @@ export function CommentsDock({ pagePath, action, threads, access, BodyComponent,
       // 同上
     }
   }, [])
+
+  // 地址点名了这一页上的一串（?comment=<id>，通知里的链接）就打开它，和在收件箱里点那一行一样；只在地址变了时看一次
+  const { search } = useLocation()
+  const threadIds = threads.map((thread) => thread.id)
+  useEffect(() => {
+    const linkedThreadId = linkedThreadIdOf(search, threadIds)
+    if (linkedThreadId !== null) setOpenThread({ id: linkedThreadId, reveal: 'center' })
+    // 只跟着地址走：评论串列表变了（别人写了新评论）不重新打开
+  }, [pagePath, search])
 
   // 正文变化 → 标注走查 + 逐串推算落点 + 画高亮与描边。自己的属性写入与自己的界面不算正文变化
   const draftRange = draft?.kind === 'text' ? draft.range : undefined
