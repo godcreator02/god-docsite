@@ -2,6 +2,7 @@ import type { ReactNode } from 'react'
 import { Link } from 'react-router'
 import { ExternalLink } from 'lucide-react'
 import { recordPageUrlOf } from '../../core/layout.js'
+import type { ModuleGroup } from '../../core/module-groups.js'
 import { taskStatuses, type TaskStatus } from '../../core/records.js'
 import type { ModuleState } from '../../core/state.js'
 import type { SitePageRef } from '../page-data.js'
@@ -141,6 +142,33 @@ export function ModuleProperty({ target, editable, moduleId, modules }: Editable
         <Empty>不归入模块</Empty>
       )}
       {current && <OpenRecordLink recordId={current.id} title={current.title} />}
+    </PropertyRow>
+  )
+}
+
+/** 模块的分组：从分组列表里选；已经分了组的只能换，不能清空。写的分组不在列表里时照原样显示 id */
+export function GroupProperty({ target, editable, groupId, groups }: EditableProperty & { groupId: string | undefined; groups: readonly ModuleGroup[] }) {
+  const { write, shownValue, error } = useFieldWrite(target, 'group')
+  const shown = shownValue(groupId)
+  const current = shown === undefined ? undefined : groups.find((group) => group.id === shown)
+  const shownTitle = shown === undefined ? undefined : (current?.title ?? shown)
+  return (
+    <PropertyRow label="分组" error={error}>
+      {editable ? (
+        <select aria-label="分组" value={shown ?? ''} onChange={(event) => write(event.target.value)} className={`${inlineControlClass} ${shown ? '' : 'text-fd-muted-foreground'}`}>
+          {shown === undefined && <option value="">不分组</option>}
+          {shown !== undefined && current === undefined && <option value={shown}>{shown}</option>}
+          {groups.map((group) => (
+            <option key={group.id} value={group.id}>
+              {group.title}
+            </option>
+          ))}
+        </select>
+      ) : shownTitle ? (
+        <span className="truncate px-1.5">{shownTitle}</span>
+      ) : (
+        <Empty>不分组</Empty>
+      )}
     </PropertyRow>
   )
 }

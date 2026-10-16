@@ -1,5 +1,6 @@
 import { useState, type ReactNode } from 'react'
 import { useFetcher } from 'react-router'
+import type { ModuleGroup } from '../../core/module-groups.js'
 import type { ModuleState } from '../../core/state.js'
 import type { WriteResult } from '../page-data.js'
 import { ErrorLine, PlainButton, PrimaryButton } from '../shared/parts.js'
@@ -54,25 +55,46 @@ export function NewTaskForm({ action, module, onCancel }: NewRecordFormProps & {
   )
 }
 
-/** 新建模块：标题、截止日必填（甘特图要画），其余在模块那一页上填 */
-export function NewModuleForm({ action, onCancel }: NewRecordFormProps) {
+/** 分组下拉框里「不分组」的值，不会和分组 id 重名（分组 id 不以 - 开头）；没选过时是空串 */
+const noGroupChoice = '-'
+
+/** 新建模块：标题、截止日必填（甘特图要画）；有分组时还要选一组或明确选「不分组」，其余在模块那一页上填 */
+export function NewModuleForm({ action, groups, onCancel }: NewRecordFormProps & { groups: ModuleGroup[] }) {
   const fetcher = useFetcher<WriteResult>()
   const [title, setTitle] = useState('')
   const [due, setDue] = useState('')
+  const [groupChoice, setGroupChoice] = useState('')
+  const groupChosen = groups.length === 0 || groupChoice !== ''
   return (
     <fetcher.Form method="post" action={action} className="grid gap-2.5">
       <input type="hidden" name="intent" value="create-record" />
       <input type="hidden" name="type" value="module" />
       <input type="hidden" name="title" value={title.trim()} />
+      {groupChoice !== '' && groupChoice !== noGroupChoice && <input type="hidden" name="group" value={groupChoice} />}
       <Field label="标题">
         <input autoFocus aria-label="标题" value={title} onChange={(event) => setTitle(event.target.value)} className={inputClass} placeholder="一块大的工作，比如「采样板」" />
       </Field>
       <Field label="截止日">
         <input type="date" name="due" required value={due} onChange={(event) => setDue(event.target.value)} className={inputClass} />
       </Field>
+      {groups.length > 0 && (
+        <Field label="分组">
+          <select aria-label="分组" value={groupChoice} onChange={(event) => setGroupChoice(event.target.value)} className={inputClass}>
+            <option value="" disabled>
+              选一组，画在那一组的甘特图上
+            </option>
+            {groups.map((group) => (
+              <option key={group.id} value={group.id}>
+                {group.title}
+              </option>
+            ))}
+            <option value={noGroupChoice}>不分组</option>
+          </select>
+        </Field>
+      )}
       <p className="m-0 text-[12px] text-fd-muted-foreground">建好后打开模块那一页，在那里填负责人和模块内容。</p>
       <ErrorLine message={writeErrorOf(fetcher.data)} />
-      <FormButtons saving={fetcher.state !== 'idle'} canSave={title.trim() !== '' && due !== ''} submitLabel="新建模块" onCancel={onCancel} />
+      <FormButtons saving={fetcher.state !== 'idle'} canSave={title.trim() !== '' && due !== '' && groupChosen} submitLabel="新建模块" onCancel={onCancel} />
     </fetcher.Form>
   )
 }

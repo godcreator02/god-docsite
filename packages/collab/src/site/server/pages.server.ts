@@ -19,10 +19,10 @@ async function collabStateOf(site: CollabSite) {
   return collabState(await readCollabSnapshot(site.repoDir))
 }
 
-/** /tasks：全部任务与模块、人员、站里的页面、这一页的评论 */
+/** /tasks：全部任务、模块与分组、人员、站里的页面、这一页的评论 */
 export async function tasksLoader(_args: CollabRouteArgs, site: CollabSite): Promise<TasksPageData> {
-  const { tasks, modules } = await collabStateOf(site)
-  return { siteName: site.siteName, ...viewerOf(site), tasks, modules, pages: [...site.pages()], comments: await pageCommentsOf(site, tasksPageUrl) }
+  const { tasks, modules, groups } = await collabStateOf(site)
+  return { siteName: site.siteName, ...viewerOf(site), tasks, modules, groups, pages: [...site.pages()], comments: await pageCommentsOf(site, tasksPageUrl) }
 }
 
 function recordNotFound(recordId: string) {
@@ -44,7 +44,7 @@ function shownRecordOf(recordId: string, tasks: TaskState[], modules: ModuleStat
 export async function recordLoader({ params }: CollabRouteArgs, site: CollabSite): Promise<RecordPageData> {
   const recordId = params['recordId'] ?? ''
   if (!isRecordId(recordId)) throw recordNotFound(recordId)
-  const { tasks, modules } = await collabStateOf(site)
+  const { tasks, modules, groups } = await collabStateOf(site)
   const record = shownRecordOf(recordId, tasks, modules)
   if (record === null) throw recordNotFound(recordId)
   const titleById = new Map([...tasks, ...modules].map((entry) => [entry.id, entry.title]))
@@ -53,6 +53,7 @@ export async function recordLoader({ params }: CollabRouteArgs, site: CollabSite
     ...viewerOf(site),
     record,
     modules,
+    groups,
     pages: [...site.pages()],
     mentions: journalMentionsOf(recordId, journalSourcesOf(site.siteDir), (id) => titleById.get(id) ?? '已删除的记录'),
     comments: await pageCommentsOf(site, recordPageUrlOf(recordId)),

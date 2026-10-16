@@ -4,10 +4,10 @@
 
 - **只用 main**：直接在 `main` 的工作区改，改完 `collab.submit`
 - **页面**：照说明书 `docsite` 的「写页面」写在 `site/content/` 里，地址就是 `content/` 下的路径。`/tasks`、`/calendar`、`/comments`、`/api` 是协作站自己的，不拿来当页面路径。一段讲一件事，并列的要点写成列表：评论按段落、列表项、表格、图来批。有评论的页面移动或改名时，`site/comments/` 里评论串 `index.mdx` 的 `page`、`collab/records/` 里任务的 `page` 等于旧地址的，一起改成新地址
-- **任务与模块**：用 `collab.task.*`、`collab.module.*` 写，模块只有截止日、没有开始日；任务的 `page` 写相关页面的地址，如 `/plan/control-plan`。删任务、模块前把标题给人先过目
+- **任务与模块**：用 `collab.task.*`、`collab.module.*` 写，模块只有截止日、没有开始日；任务的 `page` 写相关页面的地址，如 `/plan/control-plan`。协作仓里有分组列表 `collab/groups.json` 时，模块的 `group` 写其中一组的 `id`，任务页一组画一张甘特图。删任务、模块前把标题给人先过目
 - **评论**：`docsite.comments {"dir":"<协作仓>/site"}` 找，属于某一页的看 `page` 与 `quote`，在页面源文件里搜 `quote`；没有 `quote` 的说的是整页，没有 `page` 的不属于任何页面。要回答的写好答复给人先过目，同意了再 `docsite.comment.reply`（要站点在运行）。事情办完了，问人要不要 `docsite.comment.resolve` 把这串标为已解决
 - **项目负责人改文件不受限**：身份是项目负责人（Gitea 上协作仓的协作者）时，`collab/`、`site/` 下的任何文件都可以直接改，别人的记录也一样，改完照常 `collab.submit`；改之前把改哪些记录、怎么改给人先过目
-- **只有项目负责人能改的**：`.gitea/` 与 `.github/` 下的工作流、`site/people.json`（每个人只改自己那一项的 `codes` 不算）、`site/` 根下的 `*.config.*`、`.postcssrc*`、`.npmrc` 与 `pnpm-workspace.yaml`、`site/package.json` 里 `@godcreator/` 下的包（加、删、改版本都算）、`scripts` 这类不是依赖的字段和写成网址或路径的依赖。不是负责人的提交被拦下时，把这几处报给人，交给项目负责人。
+- **只有项目负责人能改的**：`.gitea/` 与 `.github/` 下的工作流、`site/people.json`（每个人只改自己那一项的 `codes` 不算）、分组列表 `collab/groups.json`、`site/` 根下的 `*.config.*`、`.postcssrc*`、`.npmrc` 与 `pnpm-workspace.yaml`、`site/package.json` 里 `@godcreator/` 下的包（加、删、改版本都算）、`scripts` 这类不是依赖的字段和写成网址或路径的依赖。不是负责人的提交被拦下时，把这几处报给人，交给项目负责人。
   `collab.submit` 一次提交 `collab/` 与 `site/` 的全部改动，这几处不撤掉，同一批里自己的身份码、页面、评论也推不出去：人同意后把这几处改回 main 上的样子，别的改动照留，再提交审核。
   改回的是站点依赖的版本（比如成员自己升级了站点）时，`git checkout -- site/package.json site/pnpm-lock.yaml`，再在 `site/` 里 `pnpm install`；`site/package.json` 里同一批还有自己加的库时，只把 `@godcreator/` 下的版本改回去、再 `pnpm install`。
   要升级站点请负责人做（`references/organization.md` 的「升级站点」），合进 main 后自动同步会装好

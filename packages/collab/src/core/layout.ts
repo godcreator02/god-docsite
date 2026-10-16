@@ -6,6 +6,8 @@ export const collabPathInRepo = 'collab'
 export const sitePathInRepo = 'site'
 export const peoplePathInRepo = 'site/people.json'
 export const siteIdentityPathInRepo = 'site/docsite.json'
+/** 模块的分组列表：只有负责人能改 */
+export const moduleGroupsPathInRepo = 'collab/groups.json'
 
 /** 网站自带的任务页的地址：任务与模块自己那一页是 /tasks/<记录 id> */
 export const tasksPageUrl = '/tasks'

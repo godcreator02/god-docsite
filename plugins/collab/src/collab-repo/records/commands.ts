@@ -72,7 +72,7 @@ export function registerRecordCommands(services: PluginServices): void {
       name: 'collab.module.create',
       effect: 'write',
       description: '建一个模块（一块有截止日的大工作，画在任务页的甘特图上，任务用 module 字段归进来），写成工作区里 collab/records/ 下的新文件，和网站走同一套写入规则',
-      usage: `{ repo, title, due, owner?, detail? }：repo 是项目仓根的绝对路径；title、due 必填；due 是截止日，YYYY-MM-DD；模块没有开始日，给 start 就拒绝；owner 是负责人的 Gitea 用户名，要在 site/people.json 里。模块不存状态，作者是本 home 的身份，不能自己给。只写工作区、不提交：写完调 collab.submit 提交审核。回 { id, file }，id 是模块的记录 id（建任务时填进 module），file 是记录文件相对仓根的路径`,
+      usage: `{ repo, title, due, owner?, group?, detail? }：repo 是项目仓根的绝对路径；title、due 必填；due 是截止日，YYYY-MM-DD；模块没有开始日，给 start 就拒绝；owner 是负责人的 Gitea 用户名，要在 site/people.json 里；group 是分组的 id，要列在协作仓的 collab/groups.json 里（任务页一组画一张甘特图），仓里没有这个文件就不能给。模块不存状态，作者是本 home 的身份，不能自己给。只写工作区、不提交：写完调 collab.submit 提交审核。回 { id, file }，id 是模块的记录 id（建任务时填进 module），file 是记录文件相对仓根的路径`,
     },
     async (args) => {
       const { repo, fields } = moduleCreateArgsOf(args)
@@ -86,7 +86,7 @@ export function registerRecordCommands(services: PluginServices): void {
       name: 'collab.module.update',
       effect: 'write',
       description: '改一个模块的字段，直接改写那条记录的文件，和网站走同一套写入规则',
-      usage: `{ repo, id, fields }：repo 是项目仓根的绝对路径；id 是模块的记录 id；fields 是要改的字段与新值，比如 { "due": "2026-11-15" }。自己的模块能改除 id、type、author 以外的任何字段；别人的模块只能改 title、owner、due，改了别的整条拒绝、文件不变。id 对应的不是模块就拒绝。只写工作区、不提交：写完调 collab.submit 提交审核。回 { id, file }，file 是记录文件相对仓根的路径`,
+      usage: `{ repo, id, fields }：repo 是项目仓根的绝对路径；id 是模块的记录 id；fields 是要改的字段与新值，比如 { "due": "2026-11-15" }。自己的模块能改除 id、type、author 以外的任何字段；别人的模块只能改 title、owner、due、group（group 要列在 collab/groups.json 里），改了别的整条拒绝、文件不变。id 对应的不是模块就拒绝。只写工作区、不提交：写完调 collab.submit 提交审核。回 { id, file }，file 是记录文件相对仓根的路径`,
     },
     async (args) => {
       const { repo, id, fields } = moduleUpdateArgsOf(args)

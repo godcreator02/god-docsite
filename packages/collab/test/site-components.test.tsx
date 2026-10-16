@@ -48,7 +48,7 @@ function changeValue(element: HTMLInputElement | HTMLSelectElement, value: strin
 describe('记录那一页改字段走 useFetcher 提交到调用方给的地址', () => {
   it('改状态：提交 update-record 到 /tasks/<id>；被写入规则拒绝时原话显示在那个字段下面', async () => {
     const received: Array<Record<string, FormDataEntryValue>> = []
-    const pageData: RecordPageData = { siteName: '站', ...viewer, record: { kind: 'task', task }, modules: [], pages: [], mentions: [], comments: noComments }
+    const pageData: RecordPageData = { siteName: '站', ...viewer, record: { kind: 'task', task }, modules: [], groups: [], pages: [], mentions: [], comments: noComments }
     const Stub = createRoutesStub([
       {
         path: '/tasks/:recordId',
@@ -74,7 +74,7 @@ describe('记录那一页改字段走 useFetcher 提交到调用方给的地址'
 describe('任务页新建任务', () => {
   it('提交 create-record 到调用方给的地址，action 跳转后到了新记录那一页', async () => {
     const received: Array<Record<string, FormDataEntryValue>> = []
-    const pageData: TasksPageData = { siteName: '站', ...viewer, tasks: [], modules: [], pages: [], comments: noComments }
+    const pageData: TasksPageData = { siteName: '站', ...viewer, tasks: [], modules: [], groups: [], pages: [], comments: noComments }
     const Stub = createRoutesStub([
       {
         path: '/tasks',
@@ -101,6 +101,59 @@ describe('任务页新建任务', () => {
   })
 })
 
+describe('按分组画多张甘特图', () => {
+  const groups = [
+    { id: 'sst', title: 'SST' },
+    { id: 'mmc', title: 'MMC' },
+  ]
+  const modules = [
+    { id: '20261001080000-aaaaaaa', author: 'admin', title: '主控板', due: '2026-12-01', group: 'mmc' },
+    { id: '20261001080001-bbbbbbb', author: 'admin', title: '采样板', due: '2026-11-01', group: 'sst' },
+    { id: '20261001080002-ccccccc', author: 'admin', title: '机架', due: '2026-10-20' },
+  ]
+
+  async function renderTasks(pageData: TasksPageData) {
+    const Stub = createRoutesStub([
+      {
+        path: '/tasks',
+        Component: () => (
+          <CollabViewerProvider viewer={pageData}>
+            <TasksView data={pageData} action="/tasks" />
+          </CollabViewerProvider>
+        ),
+      },
+    ])
+    await act(async () => root.render(<Stub initialEntries={['/tasks']} />))
+  }
+
+  it('一组一张图，照分组列表的先后，没写分组的在最后「未分组」', async () => {
+    await renderTasks({ siteName: '站', ...viewer, tasks: [], modules, groups, pages: [], comments: noComments })
+    const charts = [...container.querySelectorAll('[data-module-group]')].map((chart) => [chart.querySelector('h3')!.textContent, chart.querySelector('button[title="只看这个模块的任务"]')!.textContent])
+    expect(charts).toEqual([
+      ['SST', expect.stringContaining('采样板')],
+      ['MMC', expect.stringContaining('主控板')],
+      ['未分组', expect.stringContaining('机架')],
+    ])
+  })
+
+  it('有分组时新建模块要先选一组或「不分组」才能提交；表单里的 group 是选中那一组的 id，选「不分组」就没有 group', async () => {
+    await renderTasks({ siteName: '站', ...viewer, tasks: [], modules, groups, pages: [], comments: noComments })
+    const form = () => container.querySelector('form')!
+    const submit = () => [...container.querySelectorAll<HTMLButtonElement>('button[type="submit"]')].find((button) => button.textContent === '新建模块')!
+    const groupSelect = () => container.querySelector<HTMLSelectElement>('select[aria-label="分组"]')!
+    await act(async () => [...container.querySelectorAll('button')].find((button) => button.textContent === '新建模块')!.click())
+    await act(async () => changeValue(container.querySelector<HTMLInputElement>('input[aria-label="标题"]')!, '驱动板'))
+    await act(async () => changeValue(form().querySelector<HTMLInputElement>('input[name="due"]')!, '2026-12-20'))
+    expect(submit().disabled).toBe(true)
+    await act(async () => changeValue(groupSelect(), 'mmc'))
+    expect(submit().disabled).toBe(false)
+    expect(Object.fromEntries(new FormData(form()))).toEqual({ intent: 'create-record', type: 'module', title: '驱动板', group: 'mmc', due: '2026-12-20' })
+    await act(async () => changeValue(groupSelect(), '-'))
+    expect(submit().disabled).toBe(false)
+    expect(Object.fromEntries(new FormData(form()))).toEqual({ intent: 'create-record', type: 'module', title: '驱动板', due: '2026-12-20' })
+  })
+})
+
 describe('任务看板的两层筛选', () => {
   const module = { id: '20261001080000-mmmmmmm', author: 'admin', title: '采样', due: '2026-12-01' }
   const tasks = [
@@ -108,7 +161,7 @@ describe('任务看板的两层筛选', () => {
     { id: '20261001090001-bbbbbbb', author: 'admin', status: 'todo' as const, title: '鲍勃没归模块', owner: 'bob' },
     { id: '20261001090002-ccccccc', author: 'admin', status: 'doing' as const, title: '管理员在模块里', owner: 'admin', module: module.id },
   ]
-  const pageData: TasksPageData = { siteName: '站', ...viewer, tasks, modules: [module], pages: [], comments: noComments }
+  const pageData: TasksPageData = { siteName: '站', ...viewer, tasks, modules: [module], groups: [], pages: [], comments: noComments }
 
   const boardTitles = () => [...container.querySelectorAll('section li a')].map((link) => link.textContent).sort()
   const filterNote = () => container.querySelector('[data-board-filter-note]')?.textContent ?? ''

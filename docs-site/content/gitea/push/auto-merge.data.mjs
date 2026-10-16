@@ -35,7 +35,7 @@ export const places = [
 ];
 
 /** 现在检查的两条：有冲突时第二条不再查。记录格式与站点由成员提交前在本机查，执行器不查 */
-/* ref file="../packages/collab/src/node/merge-check.ts" lines="180-193" hash="d187b8e75c98" blob="5aee6b777440" */
+/* ref file="../packages/collab/src/node/merge-check.ts" lines="181-194" hash="d187b8e75c98" blob="9b414afa970e" */
 export const checkNames = ['和 main 没有冲突', '没改只有负责人能改的内容'];
 
 /** 2026-09-30 实测时检查的三条，只给 cases 用：那时前一条不过，后面的不再查 */

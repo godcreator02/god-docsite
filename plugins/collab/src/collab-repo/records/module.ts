@@ -15,7 +15,7 @@ const moduleKind: WritableRecordKind = { type: 'module', noun: '模块' }
 
 /** collab.module.create 的参数：除 repo 以外都是模块的字段；模块不存状态，也没有开始日。字段的格式交给写入规则查 */
 export function moduleCreateArgsOf(args: unknown): { repo: string; fields: Record<string, unknown> } {
-  const { repo, ...fields } = argsOf(args, ['repo', 'title', 'due', 'owner', 'detail'])
+  const { repo, ...fields } = argsOf(args, ['repo', 'title', 'due', 'owner', 'group', 'detail'])
   return { repo: repoOf({ repo }), fields }
 }
 

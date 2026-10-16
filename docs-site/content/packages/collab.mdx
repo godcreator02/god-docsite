@@ -26,6 +26,7 @@ import { SiteRoutes } from './collab/site-routes'
     <Folder name="records" defaultOpen>
       <File name="20260925160530-t5v9w3d.json" />
     </Folder>
+    <File name="groups.json" />
   </Folder>
   <Folder name="site" defaultOpen>
     <File name="people.json" />
@@ -39,13 +40,13 @@ import { SiteRoutes } from './collab/site-routes'
   </Folder>
 </Files>
 
-`site/comments/` 是评论，归 comments 包；`.gitea/workflows/collab-auto-merge.yaml` 是合并检查的工作流，见下文。
+`site/comments/` 是评论，归 comments 包；`.gitea/workflows/collab-auto-merge.yaml` 是合并检查的工作流，见下文；`collab/groups.json` 是模块的分组列表，可以没有，见「模块分组」一节。
 
 ## 一条记录一个文件
 
 记录只有两种：任务 `task` 与模块 `module`。模块只有截止日、不存状态，完没完成由归进它的任务算。
 
-{/* ref file="../packages/collab/src/core/records.ts" lines="8-32" hash="282caa00822d" blob="5a06ddde0a55" */}
+{/* ref file="../packages/collab/src/core/records.ts" lines="8-34" hash="989f4a552850" blob="a137d8a2caff" */}
 
 记录 id 是作者电脑上的本地时间 14 位加 `-` 加 7 位小写字母数字，文件名就是 `records/<id>.json`。新建一条就是新加一个文件，两个人各建各的不会碰到同一个文件。
 
@@ -69,17 +70,38 @@ import { SiteRoutes } from './collab/site-routes'
 
 合不上时文件里留着 git 的冲突标记。解码时先找标记，找到就报出是第几行，让人（或 AI）按两边的意思改好，不猜；认不出的字段、认不出的类型都报错。
 
-{/* ref file="../packages/collab/src/core/records.ts" lines="144-163" hash="22c11b85693b" blob="5a06ddde0a55" */}
+{/* ref file="../packages/collab/src/core/records.ts" lines="156-175" hash="22c11b85693b" blob="a137d8a2caff" */}
+
+## 模块分组
+
+一个项目里有几条线（比如 SST 与 MMC 并在一个协作站里）时，负责人在 `collab/groups.json` 里列出分组，模块的 `group` 字段写其中一组的 `id`，任务页就一组画一张甘特图。没有这个文件就不分组，任务页只画一张，和以前一样。
+
+```json
+[
+  { "id": "sst", "title": "SST" },
+  { "id": "mmc", "title": "MMC" }
+]
+```
+
+- 列表至少一组；`id` 是小写字母、数字，用 `-` 连接；`id` 与 `title` 都不能重复；只有这两个字段。写错了整份读不出，报在 `groups.json` 上
+- 模块写的 `group` 不在列表里（或者仓里没有这个文件），报在那条模块上；新建、修改时写入规则按它拦
+- 先后就是各张图的先后。没有模块的组不画；没写分组的模块放进最后一张「未分组」。几张图共用一条时间轴，左列定宽，月份上下对齐
+- 别人也能改模块的 `group`；分组列表本身只有负责人能改（见「合并检查」）
+- 网页上新建模块时，有分组就要先选一组或「不分组」才能提交；模块那一页能换分组
+
+{/* ref file="../packages/collab/src/core/module-groups.ts" lines="25-39" hash="0d8e4321bd0d" blob="eec8a3308cef" */}
+
+{/* ref file="../packages/collab/src/core/modules.ts" lines="19-34" hash="c33d03e4e041" blob="9b9eb0618d6a" */}
 
 ## 读出状态与校验
 
 图上第 1、4 号。核心层不碰磁盘：它只收一份 `CollabSnapshot`——`people` 是 `site/people.json` 的原文，`files` 是 `collab/` 下每个文件的原文。站点的 loader 与写入规则每次从磁盘现读这一份（第 1 号），gwb-collab 提交前从 git 的两个版本各取一份（第 4 号）。
 
-`collabState` 读出任务与模块，读不出的文件、重复的 id、所属模块不存在都列成问题；`validateCollab` 只查格式：换行是 LF、能解码且是规范写法、文件名等于 id、作者与负责人在人员列表里、id 不重复、所属模块存在，不查谁改了谁的记录。
+`collabState` 读出任务、模块与分组，读不出的文件、重复的 id、所属模块不存在、模块的分组不在列表里都列成问题；`validateCollab` 只查格式：换行是 LF、能解码且是规范写法、文件名等于 id、作者与负责人在人员列表里、id 不重复、所属模块存在、分组列表读得出、模块的分组在列表里，不查谁改了谁的记录。
 
 **只拦新问题**：`newProblems(before, after)` 只交回 after 有、before 没有的问题——同一个文件、同一句说法算同一个问题。`newFormatProblems(base, merged)` 是 gwb-collab 提交前在本机查的那一步，网站写入也按它拦。一个人不会因为别人留下的问题被挡住，原本就有的问题照旧显示在网站顶部的提示栏里。
 
-{/* ref file="../packages/collab/src/core/state.ts" lines="151-166" hash="e7f261c5e980" blob="e02f987b51c2" */}
+{/* ref file="../packages/collab/src/core/state.ts" lines="177-192" hash="e7f261c5e980" blob="2d3138b7c741" */}
 
 <NewProblems />
 
@@ -93,7 +115,7 @@ import { SiteRoutes } from './collab/site-routes'
 | 改字段 | 作者能改自己记录里除 `id`、`type`、`author` 以外的任何字段；别人只能改 `fieldsAnyoneMayChange` 里那几个 | `carol-test` 改 `godcreator` 那条任务的 `detail`：被拒，说明里列出别人的 task 记录只能改 status、owner、due、title、module |
 | 删除 | 作者本人或项目负责人；模块下还有没一起删的任务就拒绝；有一条删不了，整次一个文件都不删 | 负责人只删模块「采样板」、不删归进它的任务「选 ADC」：被拒 |
 
-{/* ref file="../packages/collab/src/core/records.ts" lines="54-58" hash="739339db35a8" blob="5a06ddde0a55" */}
+{/* ref file="../packages/collab/src/core/records.ts" lines="56-60" hash="3cae888877fe" blob="a137d8a2caff" */}
 
 {/* ref file="../packages/collab/src/core/write-rules.ts" lines="44-51" hash="9ee96d52a371" blob="65347254ae19" */}
 
@@ -117,17 +139,17 @@ import { SiteRoutes } from './collab/site-routes'
 
 第二条「只有负责人能改的内容」逐个文件判：
 
-- 整个文件算的：`.gitea/`、`.github/` 下的一切（工作流改了能绕过检查、拿到组织密钥）；`site/.npmrc`、`site/pnpm-workspace.yaml`（从哪个源装包、哪些包能跑安装脚本）；站点身份文件 `site/docsite.json`（gwb-collab 靠它认出协作仓）；`site/` 根目录下 Node 会执行的 `*.config.*` 与 `.postcssrc*`
+- 整个文件算的：`.gitea/`、`.github/` 下的一切（工作流改了能绕过检查、拿到组织密钥）；`site/.npmrc`、`site/pnpm-workspace.yaml`（从哪个源装包、哪些包能跑安装脚本）；站点身份文件 `site/docsite.json`（gwb-collab 靠它认出协作仓）；模块的分组列表 `collab/groups.json`（项目分几条线由负责人定）；`site/` 根目录下 Node 会执行的 `*.config.*` 与 `.postcssrc*`
 - `site/package.json` 逐处算：依赖两段以外的键（如 `scripts`）、`@godcreator/` 下的包（加、删、改版本都算）、写成网址或本地路径的依赖；别的库加、升级、删都放开；文件新建、删掉或读不懂时整个文件算
 - `site/people.json` 只放行一种改动：提交人只给 `gitea` 是自己的那一项加减 `codes`，项数、先后、别的字段、别人的项都不变
 
-{/* ref file="../packages/collab/src/node/merge-check.ts" lines="55-66" hash="7c716e318a02" blob="e13e1945ef9c" */}
+{/* ref file="../packages/collab/src/node/merge-check.ts" lines="55-67" hash="ff5c3ef783f4" blob="9b414afa970e" */}
 
-{/* ref file="../packages/collab/src/node/merge-check.ts" lines="87-111" hash="ca76b212458b" blob="5aee6b777440" */}
+{/* ref file="../packages/collab/src/node/merge-check.ts" lines="88-112" hash="ca76b212458b" blob="9b414afa970e" */}
 
-{/* ref file="../packages/collab/src/node/merge-check.ts" lines="127-140" hash="844140d748f0" blob="5aee6b777440" */}
+{/* ref file="../packages/collab/src/node/merge-check.ts" lines="128-141" hash="844140d748f0" blob="9b414afa970e" */}
 
-{/* ref file="../packages/collab/src/node/merge-check.ts" lines="167-193" hash="d593d67d273a" blob="5aee6b777440" */}
+{/* ref file="../packages/collab/src/node/merge-check.ts" lines="168-194" hash="d593d67d273a" blob="9b414afa970e" */}
 
 提交人是负责人时第二条直接放行。命令行收 `--author` 与 `--leads`，「是不是负责人」就是 `--leads` 里有没有 `--author`。记录格式、站点会不会打不开、谁改了谁的记录、有没有删记录，这里都不查：格式由成员提交前在本机查，谁能改谁的记录由网站的写入规则管。退出码：0 能合并；1 不能合并，输出每条一行；2 是检查自己出错（参数不对、git 失败），和「不能合并」分开。
 

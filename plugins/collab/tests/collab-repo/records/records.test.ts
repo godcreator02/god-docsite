@@ -212,6 +212,15 @@ describe('collab.module.create', () => {
     expect(readRecordFile(id)).toBe(encodeRecordFile({ id, type: 'module', author: 'bob', title: '机柜', due: '2026-10-31', owner: 'carol', detail: '先定尺寸' }))
   })
 
+  it('给 group：要列在 collab/groups.json 里；仓里没有分组列表就拒绝', async () => {
+    const { fields } = moduleCreateArgsOf({ repo: bob.repo, title: '机柜', due: '2026-10-31', group: 'mmc' })
+    await expect(createModule(bob, fields)).rejects.toThrow(/模块的分组 mmc 不在 collab\/groups.json 里/)
+    mkdirSync(bob.collabDir, { recursive: true })
+    writeFileSync(path.join(bob.collabDir, 'groups.json'), `${JSON.stringify([{ id: 'mmc', title: 'MMC' }], null, 2)}\n`)
+    const { id } = await createModule(bob, fields)
+    expect(readRecordFile(id)).toBe(encodeRecordFile({ id, type: 'module', author: 'bob', title: '机柜', due: '2026-10-31', group: 'mmc' }))
+  })
+
   it('缺 due：写入规则拒绝，转成 CollabRejected，不写文件', async () => {
     await expect(createModule(bob, { title: '机柜' })).rejects.toThrow(CollabRejected)
     await expect(createModule(bob, { title: '机柜' })).rejects.toThrow(/due/)

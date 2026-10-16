@@ -1,3 +1,4 @@
+import { moduleGroupsFile, parseModuleGroups, type ModuleGroup } from './module-groups.js'
 import { parsePeople } from './people.js'
 import { CollabFormatError, decodeRecordFile, encodeRecordFile, type CollabRecord, type ModuleRecord, type TaskRecord } from './records.js'
 
@@ -21,13 +22,14 @@ export function recordFileOf(id: string): string {
   return `records/${id}.json`
 }
 
-/** 解码指定的记录文件；不在 records/<id>.json 的文件和读不出的文件列成问题，不猜它本来是什么 */
+/** 解码指定的记录文件；分组列表不是记录、跳过，别的不在 records/<id>.json 的文件和读不出的文件列成问题，不猜它本来是什么 */
 export function readRecords(snapshot: CollabSnapshot, files: string[] = Object.keys(snapshot.files)): { records: LocatedRecord[]; problems: CollabProblem[] } {
   const records: LocatedRecord[] = []
   const problems: CollabProblem[] = []
   for (const file of files) {
+    if (file === moduleGroupsFile) continue
     if (recordIdOfPath(file) === null) {
-      problems.push({ file, message: '认不出的文件：collab/ 下只能有 records/<记录 id>.json' })
+      problems.push({ file, message: `认不出的文件：collab/ 下只能有 records/<记录 id>.json 与 ${moduleGroupsFile}` })
       continue
     }
     const text = snapshot.files[file]!
@@ -43,7 +45,25 @@ export function readRecords(snapshot: CollabSnapshot, files: string[] = Object.k
 
 export type TaskState = Omit<TaskRecord, 'type'>
 export type ModuleState = Omit<ModuleRecord, 'type'>
-export type CollabState = { tasks: TaskState[]; modules: ModuleState[]; problems: CollabProblem[] }
+/** groups 是 collab/groups.json 列的分组，没有这个文件或读不出时为空 */
+export type CollabState = { tasks: TaskState[]; modules: ModuleState[]; groups: ModuleGroup[]; problems: CollabProblem[] }
+
+/**
+ * 读分组列表：没有文件时 declaredIds 是空集（模块写了分组就是指向不存在的分组）；
+ * 文件在却读不出时 declaredIds 为 null，已经报过读不出，模块的分组不再逐个报
+ */
+function readModuleGroups(snapshot: CollabSnapshot, readable: boolean): { groups: ModuleGroup[]; declaredIds: ReadonlySet<string> | null; problems: CollabProblem[] } {
+  const text = snapshot.files[moduleGroupsFile]
+  if (text === undefined) return { groups: [], declaredIds: new Set(), problems: [] }
+  if (!readable) return { groups: [], declaredIds: null, problems: [] }
+  try {
+    const groups = parseModuleGroups(text)
+    return { groups, declaredIds: new Set(groups.map((group) => group.id)), problems: [] }
+  } catch (error) {
+    if (!(error instanceof CollabFormatError)) throw error
+    return { groups: [], declaredIds: null, problems: [{ file: moduleGroupsFile, message: error.message }] }
+  }
+}
 
 function withoutType<T extends { type: string }>({ type: _type, ...rest }: T): Omit<T, 'type'> {
   return rest
@@ -57,10 +77,11 @@ function idsOfUnreadableFiles(problems: CollabProblem[]): Set<string> {
 const byId = (a: LocatedRecord, b: LocatedRecord) => (a.record.id < b.record.id ? -1 : a.record.id > b.record.id ? 1 : 0)
 
 /**
- * 把读出来的记录分成任务与模块，都按 id 排好。重复的 id、任务所属的不是一个模块，都列成问题，不猜。
- * unreadableIds 是文件还在、只是读不出的记录（比如留着冲突标记）：已经报过读不出，指向它们的不再报成不存在
+ * 把读出来的记录分成任务与模块，都按 id 排好。重复的 id、任务所属的不是一个模块、模块的分组没列在分组列表里，都列成问题，不猜。
+ * unreadableIds 是文件还在、只是读不出的记录（比如留着冲突标记）：已经报过读不出，指向它们的不再报成不存在。
+ * declaredGroupIds 为 null 是分组列表读不出，不查模块的分组
  */
-function linkRecords(located: LocatedRecord[], unreadableIds: ReadonlySet<string>): CollabState {
+function linkRecords(located: LocatedRecord[], unreadableIds: ReadonlySet<string>, declaredGroupIds: ReadonlySet<string> | null): Omit<CollabState, 'groups'> {
   const problems: CollabProblem[] = []
   const firstById = new Map<string, LocatedRecord>()
   for (const entry of [...located].sort(byId)) {
@@ -77,6 +98,9 @@ function linkRecords(located: LocatedRecord[], unreadableIds: ReadonlySet<string
   for (const { record, file } of firstById.values()) {
     if (record.type === 'module') {
       modules.push(withoutType(record))
+      if (record.group !== undefined && declaredGroupIds !== null && !declaredGroupIds.has(record.group)) {
+        problems.push({ file, message: `模块的分组 ${record.group} 不在 collab/${moduleGroupsFile} 里` })
+      }
       continue
     }
     tasks.push(withoutType(record))
@@ -88,11 +112,12 @@ function linkRecords(located: LocatedRecord[], unreadableIds: ReadonlySet<string
   return { tasks, modules, problems }
 }
 
-/** 一份 collab/ 的当前状态：读出全部任务与模块；读不出的文件和连不上的记录都在 problems 里 */
+/** 一份 collab/ 的当前状态：读出全部任务、模块与分组；读不出的文件和连不上的记录都在 problems 里 */
 export function collabState(snapshot: CollabSnapshot): CollabState {
   const { records, problems } = readRecords(snapshot)
-  const linked = linkRecords(records, idsOfUnreadableFiles(problems))
-  return { ...linked, problems: [...problems, ...linked.problems] }
+  const groupList = readModuleGroups(snapshot, true)
+  const linked = linkRecords(records, idsOfUnreadableFiles(problems), groupList.declaredIds)
+  return { ...linked, groups: groupList.groups, problems: [...problems, ...groupList.problems, ...linked.problems] }
 }
 
 function checkLineEndings(file: string, content: string): CollabProblem | null {
@@ -107,7 +132,7 @@ function checkPeopleReferences(record: CollabRecord, personIds: Set<string>, at:
 
 /**
  * 校验协作仓的一份内容：路径与换行、每个文件能解码且是规范写法、记录放在 records/<id>.json、
- * 作者与负责人都在 site/people.json 里、id 不重复、任务所属的是存在的模块。
+ * 作者与负责人都在 site/people.json 里、id 不重复、任务所属的是存在的模块、分组列表能读出、模块的分组列在里面。
  * 只查格式，不查谁改了谁的记录：别人的记录能改哪些字段由写入规则管。人员列表的问题记在文件 people.json 上
  */
 export function validateCollab(snapshot: CollabSnapshot): CollabProblem[] {
@@ -133,7 +158,8 @@ export function validateCollab(snapshot: CollabSnapshot): CollabProblem[] {
   }
 
   const { records, problems: unreadable } = readRecords(snapshot, readableFiles)
-  problems.push(...lineEndingProblems, ...unreadable)
+  const groupList = readModuleGroups(snapshot, readableFiles.includes(moduleGroupsFile))
+  problems.push(...lineEndingProblems, ...unreadable, ...groupList.problems)
   for (const { record, file, text } of records) {
     const at = (message: string) => problems.push({ file, message })
     if (encodeRecordFile(record) !== text) at('不是规范写法：键序、缩进、空白、转义或结尾换行和重新编码的结果不同')
@@ -141,7 +167,7 @@ export function validateCollab(snapshot: CollabSnapshot): CollabProblem[] {
     if (record.id !== idInFileName) at(`文件名是 ${idInFileName}.json，记录的 id 却是 ${record.id}；文件名要等于 id`)
     if (personIds) checkPeopleReferences(record, personIds, at)
   }
-  problems.push(...linkRecords(records, idsOfUnreadableFiles([...lineEndingProblems, ...unreadable])).problems)
+  problems.push(...linkRecords(records, idsOfUnreadableFiles([...lineEndingProblems, ...unreadable]), groupList.declaredIds).problems)
   return problems
 }
 

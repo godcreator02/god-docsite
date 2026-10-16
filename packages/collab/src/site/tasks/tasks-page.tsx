@@ -60,7 +60,7 @@ function BoardFilterNote({ personId, filter, modules, onClearPerson, onClearModu
  * 能写时新建任务、模块在弹窗里只填最少的几项，提交到 action（recordAction 所在的地址），建好就跳到它那一页
  */
 export function TasksView({ data, action }: { data: TasksPageData; action: string }) {
-  const { tasks, modules, pages } = data
+  const { tasks, modules, groups, pages } = data
   const canWrite = useCanWrite()
   const [dialog, setDialog] = useState<DialogState>(null)
   const [filter, setFilter] = useState<BoardFilter>({ kind: 'all' })
@@ -91,7 +91,7 @@ export function TasksView({ data, action }: { data: TasksPageData; action: strin
       </section>
       <section className="grid gap-3">
         <h2 className="m-0 text-lg font-semibold">模块</h2>
-        <Gantt modules={modules} tasks={tasks} colors={colors} selectedId={selectedModuleId} onSelect={toggleModule} />
+        <Gantt modules={modules} groups={groups} tasks={tasks} colors={colors} selectedId={selectedModuleId} onSelect={toggleModule} />
       </section>
       <section className="grid gap-3">
         <div className="flex flex-wrap items-center gap-3">
@@ -111,7 +111,7 @@ export function TasksView({ data, action }: { data: TasksPageData; action: strin
       )}
       {dialog?.kind === 'new-module' && (
         <Dialog title="新建模块" onClose={close}>
-          <NewModuleForm action={action} onCancel={close} />
+          <NewModuleForm action={action} groups={groups} onCancel={close} />
         </Dialog>
       )}
     </div>

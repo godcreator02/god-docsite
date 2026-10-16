@@ -12,7 +12,7 @@ import { ContentSection, SectionHeading } from './content-section.js'
 import { DeleteRecord } from './delete-record.js'
 import { useChangeableFields, type FieldTarget } from './field-write.js'
 import { JournalMentions } from './journal-mentions.js'
-import { AuthorRows, DueProperty, ModuleProperty, OwnerProperty, PageProperty, Properties, PropertyRow, StatusProperty } from './properties.js'
+import { AuthorRows, DueProperty, GroupProperty, ModuleProperty, OwnerProperty, PageProperty, Properties, PropertyRow, StatusProperty } from './properties.js'
 import { TitleField } from './title-field.js'
 
 /** 页面最上面那一行：返回任务页、删除 */
@@ -91,6 +91,7 @@ function ModuleView({ module, moduleTasks, context }: { module: ModuleState; mod
       <Properties>
         <OwnerProperty target={target} editable={mayChange('owner')} owner={module.owner} />
         <DueProperty target={target} editable={mayChange('due')} due={module.due} />
+        {(data.groups.length > 0 || module.group !== undefined) && <GroupProperty target={target} editable={mayChange('group')} groupId={module.group} groups={data.groups} />}
         <PropertyRow label="进度">
           <span className="px-1.5 tabular-nums">
             做完 {done} / {total}

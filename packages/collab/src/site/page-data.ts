@@ -1,6 +1,7 @@
 import type { CommentsAccess, PageThreadSummary } from '@godcreator/comments/site'
 import type { PublicPerson } from '@godcreator/identity'
 import type { JournalMention } from '../core/journal-mentions.js'
+import type { ModuleGroup } from '../core/module-groups.js'
 import type { DueState } from '../core/modules.js'
 import type { Notification } from '../core/notifications/notifications.js'
 import type { TaskStatus } from '../core/records.js'
@@ -30,6 +31,8 @@ export type TasksPageData = CollabViewer & {
   siteName: string
   tasks: TaskState[]
   modules: ModuleState[]
+  /** collab/groups.json 列的分组，空的是不分组：甘特图只画一张 */
+  groups: ModuleGroup[]
   pages: SitePageRef[]
   comments: PageComments
 }
@@ -42,6 +45,8 @@ export type RecordPageData = CollabViewer & {
   record: ShownRecord
   /** 全部模块：任务选所属模块用 */
   modules: ModuleState[]
+  /** 分组：模块选所属分组用，空的是不分组 */
+  groups: ModuleGroup[]
   pages: SitePageRef[]
   mentions: JournalMention[]
   comments: PageComments

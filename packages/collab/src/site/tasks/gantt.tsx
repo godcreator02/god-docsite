@@ -2,7 +2,8 @@ import type { CSSProperties } from 'react'
 import { Link } from 'react-router'
 import { ExternalLink } from 'lucide-react'
 import { recordPageUrlOf } from '../../core/layout.js'
-import { byDue, dueStateOf } from '../../core/modules.js'
+import type { ModuleGroup } from '../../core/module-groups.js'
+import { dueStateOf, moduleSectionsOf, type ModuleSection } from '../../core/modules.js'
 import type { ModuleState, TaskState } from '../../core/state.js'
 import { dayOf, moduleProgressOf, timelineAxisOf, todayDay } from '../../core/timeline.js'
 import { DueMark } from '../shared/module-marks.js'
@@ -79,28 +80,51 @@ function GanttRow({ module, tasks, axis, color, selected, onSelect }: GanttRowPr
   )
 }
 
+type GanttProps = { modules: ModuleState[]; groups: ModuleGroup[]; tasks: TaskState[]; colors: Map<string, CSSProperties>; selectedId: string | null; onSelect: (id: string) => void }
+
+/** 分组时左列定宽：几张图的时间轴才在同一处起头，月份上下对齐 */
+const sharedLabelColumn = 'grid-cols-[200px_minmax(280px,1fr)]'
+const ownLabelColumn = 'grid-cols-[fit-content(200px)_minmax(280px,1fr)]'
+
+function GanttChart({ section, axis, labelColumn, tasks, colors, selectedId, onSelect }: Omit<GanttProps, 'modules' | 'groups'> & { section: ModuleSection; axis: TimelineAxis; labelColumn: string }) {
+  return (
+    <div className="overflow-x-auto rounded-lg border border-fd-border">
+      <div className={`grid ${labelColumn} text-[12.5px]`}>
+        <div className="border-b border-fd-border bg-fd-muted px-3 py-1.5 text-fd-muted-foreground">模块</div>
+        <MonthHeader axis={axis} />
+        {section.modules.map((module) => (
+          <GanttRow key={module.id} module={module} tasks={tasks} axis={axis} color={colors.get(module.id)} selected={selectedId === module.id} onSelect={onSelect} />
+        ))}
+      </div>
+    </div>
+  )
+}
+
 /**
  * 甘特图只画模块：每个模块一行，只在截止日画一个记号（DueMark），旁边写截止日；行上写「做完几个 / 共几个」。
+ * 有分组时一组一张图（moduleSectionsOf 分），几张图共用一条时间轴。
  * 点模块名只看这个模块的任务（再点取消），点旁边的打开按钮进模块那一页
  */
-export function Gantt({ modules, tasks, colors, selectedId, onSelect }: { modules: ModuleState[]; tasks: TaskState[]; colors: Map<string, CSSProperties>; selectedId: string | null; onSelect: (id: string) => void }) {
+export function Gantt({ modules, groups, ...chartProps }: GanttProps) {
   if (modules.length === 0) return <p className="m-0 text-[13px] text-fd-muted-foreground">还没有模块。模块是一块大的工作，有截止日，画在这里；具体的小任务在下面的看板里，可以归进某个模块。</p>
-  const sorted = [...modules].sort(byDue)
   const axis = timelineAxisOf(
-    sorted.map((module) => dayOf(module.due)),
+    modules.map((module) => dayOf(module.due)),
     todayDay(),
   )
+  const sections = moduleSectionsOf(modules, groups)
+  const grouped = groups.length > 0
   return (
     <div className="grid gap-2">
-      <div className="overflow-x-auto rounded-lg border border-fd-border">
-        <div className="grid grid-cols-[fit-content(200px)_minmax(280px,1fr)] text-[12.5px]">
-          <div className="border-b border-fd-border bg-fd-muted px-3 py-1.5 text-fd-muted-foreground">模块</div>
-          <MonthHeader axis={axis} />
-          {sorted.map((module) => (
-            <GanttRow key={module.id} module={module} tasks={tasks} axis={axis} color={colors.get(module.id)} selected={selectedId === module.id} onSelect={onSelect} />
-          ))}
-        </div>
-      </div>
+      {sections.map((section) =>
+        grouped ? (
+          <section key={section.group?.id ?? ''} data-module-group={section.group?.id ?? ''} className="grid gap-1.5">
+            <h3 className="m-0 text-[14px] font-semibold">{section.group?.title ?? '未分组'}</h3>
+            <GanttChart section={section} axis={axis} labelColumn={sharedLabelColumn} {...chartProps} />
+          </section>
+        ) : (
+          <GanttChart key="" section={section} axis={axis} labelColumn={ownLabelColumn} {...chartProps} />
+        ),
+      )}
       <p className="m-0 text-[12px] text-fd-muted-foreground">
         每个模块一行，菱形画在截止日，颜色是模块的颜色；全部做完换成勾，过了截止日还没做完加红框。看板上任务卡片左边的色条是它所属模块的颜色。点模块名，下面的看板只显示它的任务。
       </p>

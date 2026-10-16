@@ -26,6 +26,13 @@ describe('合并检查：只有负责人能改的内容', () => {
     )
   })
 
+  it('成员改了模块的分组列表 collab/groups.json：只有负责人能改', async () => {
+    write('collab/groups.json', `${JSON.stringify([{ id: 'sst', title: 'SST' }], null, 2)}\n`)
+    commit('乙加了分组')
+    expect((await check('topic')).problems).toEqual(['改了只有负责人能改的内容：collab/groups.json；这类改动交给负责人（协作仓的协作者）提交'])
+    expect(await check('topic', true)).toEqual({ verdict: 'mergeable', problems: [] })
+  })
+
   it('成员给人员列表里自己那一项加身份码：放行', async () => {
     writePeople((person) => (person.gitea === 'bob' ? { ...person, codes: ['bobcode00001'] } : person))
     commit('乙在本机用协作站，写进身份码')

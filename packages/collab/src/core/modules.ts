@@ -1,3 +1,4 @@
+import type { ModuleGroup } from './module-groups.js'
 import type { ModuleState, TaskState } from './state.js'
 import { dayOf, moduleProgressOf } from './timeline.js'
 
@@ -13,6 +14,23 @@ export const modulePaletteSize = 8
  */
 export function moduleColorSlotsOf(modules: ReadonlyArray<Pick<ModuleState, 'id' | 'due'>>): Map<string, number> {
   return new Map([...modules].sort(byDue).map((module, index) => [module.id, index % modulePaletteSize]))
+}
+
+/** 任务页上的一张甘特图：group 为 null 的是不分组时的那一张，或分组之后剩下的「未分组」 */
+export type ModuleSection = { group: ModuleGroup | null; modules: ModuleState[] }
+
+/**
+ * 模块分到各张甘特图：不分组时只有一张；分组时按分组列表的先后，没有模块的分组不画，
+ * 没写分组、或写的分组不在列表里的（这已经列成问题）放进最后一张「未分组」。每张里按截止日排
+ */
+export function moduleSectionsOf(modules: readonly ModuleState[], groups: readonly ModuleGroup[]): ModuleSection[] {
+  const sorted = [...modules].sort(byDue)
+  if (groups.length === 0) return [{ group: null, modules: sorted }]
+  const declaredIds = new Set(groups.map((group) => group.id))
+  const sections: ModuleSection[] = groups.map((group) => ({ group, modules: sorted.filter((module) => module.group === group.id) })).filter((section) => section.modules.length > 0)
+  const ungrouped = sorted.filter((module) => module.group === undefined || !declaredIds.has(module.group))
+  if (ungrouped.length > 0) sections.push({ group: null, modules: ungrouped })
+  return sections
 }
 
 export type DueState = 'finished' | 'overdue' | 'pending'

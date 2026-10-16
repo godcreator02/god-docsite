@@ -26,12 +26,14 @@ export type ModuleRecord = RecordBase<'module'> & {
   title: string
   due: string
   owner?: string
+  /** 所属分组的 id，要列在 collab/groups.json 里；任务页按分组各画一张甘特图 */
+  group?: string
   detail?: string
 }
 
 export type CollabRecord = TaskRecord | ModuleRecord
 
-export type FieldKind = 'text' | 'recordId' | 'personId' | 'date' | 'taskStatus'
+export type FieldKind = 'text' | 'recordId' | 'personId' | 'date' | 'taskStatus' | 'groupId'
 type FieldSpec = { key: string; kind: FieldKind; required: boolean }
 
 const required = (key: string, kind: FieldKind): FieldSpec => ({ key, kind, required: true })
@@ -48,13 +50,20 @@ export const recordFields: Record<RecordType, FieldSpec[]> = {
     optional('detail', 'text'),
     optional('module', 'recordId'),
   ],
-  module: [required('title', 'text'), required('due', 'date'), optional('owner', 'personId'), optional('detail', 'text')],
+  module: [required('title', 'text'), required('due', 'date'), optional('owner', 'personId'), optional('group', 'groupId'), optional('detail', 'text')],
 }
 
 /** 别人的记录只能改这些字段；作者能改自己记录里除 id、type、author 以外的任何字段 */
 export const fieldsAnyoneMayChange: Record<RecordType, string[]> = {
   task: ['status', 'owner', 'due', 'title', 'module'],
-  module: ['title', 'owner', 'due'],
+  module: ['title', 'owner', 'due', 'group'],
+}
+
+const moduleGroupIdPattern = /^[a-z0-9]+(-[a-z0-9]+)*$/
+
+/** 分组 id：小写字母、数字，用 - 连接 */
+export function isModuleGroupId(value: unknown): value is string {
+  return typeof value === 'string' && moduleGroupIdPattern.test(value)
 }
 
 export const taskStatuses: TaskStatus[] = ['todo', 'doing', 'done']
@@ -109,6 +118,9 @@ function checkField(key: string, kind: FieldKind, value: unknown): unknown {
       return value
     case 'taskStatus':
       if (typeof value !== 'string' || !(taskStatuses as string[]).includes(value)) throw new CollabFormatError(`字段 ${key} 只能是 ${taskStatuses.join('、')}，收到 ${JSON.stringify(value)}`)
+      return value
+    case 'groupId':
+      if (!isModuleGroupId(value)) throw new CollabFormatError(`字段 ${key} 要是分组 id（小写字母、数字，用 - 连接），收到 ${JSON.stringify(value)}`)
       return value
   }
 }
