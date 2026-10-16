@@ -37,6 +37,8 @@
   font-size: 14px;
   line-height: 1.6;
   color: var(--dx-fg);
+  /* 讲解里的代码照字面显示：等宽字体的连字会把 ---、!== 画成别的符号 */
+  font-variant-ligatures: none;
   border-radius: 12px;
 }
 .dark .dx {
