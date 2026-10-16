@@ -3,7 +3,7 @@ import { tmpdir } from 'node:os'
 import path from 'node:path'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { commentFormOf, decodeFlatTurboStream } from '../src/comments.js'
-import { localUrlOf, type DevServer } from '../src/dev-server.js'
+import { devOutputEntryOf, localUrlOf, type DevServer } from '../src/dev-server.js'
 import { isIdentityCode, joinPeople, newIdentityCode } from '../src/people-file.js'
 import { devScriptHasFixedPort } from '../src/site-contract.js'
 import { SiteHost, type SitePortMemory } from '../src/site-host.js'
@@ -257,6 +257,11 @@ describe('开发服务的输出与评论表单', () => {
   it('读出地址与端口', () => {
     expect(localUrlOf('  ➜  \x1b[32mLocal\x1b[39m:   http://127.0.0.1:4430/\n')).toBe('http://127.0.0.1:4430/')
     expect(localUrlOf('starting')).toBeNull()
+  })
+
+  it('输出的一块写成一条日志：开头是站点目录，去掉颜色控制符与末尾空白，只有空白的不记', () => {
+    expect(devOutputEntryOf('D:/site', '\x1b[31m[vite] Internal server error\x1b[39m\n    at a.ts:1\n\n')).toBe('D:/site\n[vite] Internal server error\n    at a.ts:1')
+    expect(devOutputEntryOf('D:/site', '  \r\n')).toBeNull()
   })
 
   it('批整页、批页面元素，表单字段和网页的 action 一样', () => {

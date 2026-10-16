@@ -6,7 +6,7 @@ import type {} from '@godcreator/gwb-settings'
 import type {} from '@godcreator/gwb-skills'
 import { registerCommands } from './commands.js'
 import { registerDocfirstCommands } from './docfirst/commands.js'
-import { launchDevServer } from './dev-server.js'
+import { devServerLauncher } from './dev-server.js'
 import { HostedSites } from './hosted-sites.js'
 import { isIdentityCode, joinPeople, newIdentityCode } from './people-file.js'
 import { runPnpm } from './pnpm.js'
@@ -75,7 +75,7 @@ export function apply(ctx: GwbContext): void {
   }
 
   const ports = new SitePorts({ readDoc: (doc) => ctx.gwbData.readDoc(doc), writeDoc: (doc, value) => ctx.gwbData.writeDoc(doc, value) }, async (port) => (await loadPlatformScaffold()).isPortFree(port))
-  const host = new SiteHost({ log, launchDevServer, identityCode, ports })
+  const host = new SiteHost({ log, launchDevServer: devServerLauncher(ctx.logger('gwb-docsite-dev')), identityCode, ports })
   // 内核不等卸载回调里的异步操作，工作台退出时异步的停止来不及跑完：卸载时同步停；没经卸载就退出的，在退出事件里同步停
   const stopSitesNow = () => host.stopAllNow()
   ctx.effect(() => {

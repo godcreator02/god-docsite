@@ -28,7 +28,7 @@ gwb-docsite 是 gwb 工作台和[平台包](/packages/god-docsite) `@godcreator/
 
 `apply` 是全部接线：先定义设置、第一次加载时生成身份码，再依次造出端口记录 `SitePorts`、进程表 `SiteHost`（卸载时、工作台退出时同步停掉全部开发服务，见下面「一个站的三种状态」）、常驻表 `HostedSites`，拼成一份 `GwbDocsiteApi`，服务和命令都用这一份；最后把登记着的站逐个启动（不等），有 `gwbSkills` 时注册说明书。
 
-{/* ref file="../plugins/docsite/src/index.ts" lines="58-123" hash="046c9497a560" blob="e73a0e8cfcfc" */}
+{/* ref file="../plugins/docsite/src/index.ts" lines="58-123" hash="8d480805de19" blob="7bc0a3ae86cc" */}
 
 身份码第一次加载时生成 12 个小写字母与数字（去掉容易看错的 l、o、0、1）；之后每次读都校验，设置里写错了就报错、不替人改。每次启动开发服务时现读，所以改了设置只影响之后启动的开发服务。
 
@@ -88,7 +88,9 @@ gwb-docsite 是 gwb 工作台和[平台包](/packages/god-docsite) `@godcreator/
 
 启动时经环境变量交给开发服务两样：本 home 的身份码 `DOCSITE_IDENTITY_CODE`（站点按它在 `people.json` 里认人，没有它站点只读），这次启动现生成的推送令牌 `DOCSITE_FEED_TOKEN`；然后等输出里出现 `Local:` 那一行的地址，60 秒内没等到就停掉、报错。
 
-{/* ref file="../plugins/docsite/src/dev-server.ts" lines="102-114" hash="54de2c8063e4" blob="47f7b92e4b38" */}
+开发服务的输出一块一条写进 gwb 日志，日志名 `gwb-docsite-dev`，开头是站点目录：stderr 记 warn，Vite 的「Internal server error」、服务端渲染的报错都从这里出来，页面打开是「Error」时用 `logger.query` 按这个名字查；stdout 记 debug，默认不写进 gwb.log，改一个文件就刷一行的「page reload」不会把日志刷满。插件另在内存里留最后 4000 字，启动失败、退出时的报错原话从那里取。
+
+{/* ref file="../plugins/docsite/src/dev-server.ts" lines="111-124" hash="60e364b8c09a" blob="3b8dc007fd85" */}
 
 跑起来以后记下这次的端口；几个站同时记时排队写，后写的不覆盖先写的。记不下来只报一行警告，照样运行，下次重新挑（有意设计的降级）。选一种情况看看：
 

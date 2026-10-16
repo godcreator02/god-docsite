@@ -2,7 +2,7 @@ import { existsSync, rmSync } from 'node:fs'
 import path from 'node:path'
 import { afterAll, describe, expect, it } from 'vitest'
 import { listComments, writeComment } from '../src/comments.js'
-import { launchDevServer } from '../src/dev-server.js'
+import { devServerLauncher } from '../src/dev-server.js'
 import { joinPeople } from '../src/people-file.js'
 import { runPnpm } from '../src/pnpm.js'
 import { addSiteFeature } from '../src/scaffold/add-feature.js'
@@ -19,6 +19,9 @@ const siteDir = path.join(root, 'site')
 /** 端口记在内存里，空不空用平台包的真检查 */
 const portDocs = new Map<string, unknown>()
 const ports = new SitePorts({ readDoc: async (doc) => portDocs.get(doc), writeDoc: async (doc, value) => void portDocs.set(doc, value) }, async (port) => (await loadPlatformScaffold()).isPortFree(port))
+/** 开发服务的输出：stdout 与 stderr 各记在哪一边 */
+const devOutput = { debug: [] as string[], warn: [] as string[] }
+const launchDevServer = devServerLauncher({ debug: (message) => devOutput.debug.push(message), warn: (message) => devOutput.warn.push(message) })
 const host = new SiteHost({ log: { info: () => {}, warn: () => {} }, launchDevServer, identityCode: () => identityCode, ports })
 const scaffold = () => loadPlatformScaffold()
 const pageStatus = async (url: string) => (await fetch(new URL('/', url))).status
@@ -42,6 +45,7 @@ describe('真的在临时目录建站', () => {
     const port = Number(new URL(url).port)
     expect(port).toBeGreaterThanOrEqual(10_000)
     expect(port).toBeLessThanOrEqual(49_151)
+    expect(devOutput.debug.some((entry) => entry.startsWith(`${siteDir}\n`) && entry.includes(url))).toBe(true)
 
     expect(await joinPeople(siteDir, identityCode, { id: 'tester', name: '测试员' })).toEqual({ changed: true })
     const created = await writeComment(url, { op: 'create', page: 'start.mdx', body: '真站上的评论' })
@@ -74,5 +78,11 @@ describe('真的在临时目录建站', () => {
 
     await runPnpm(siteDir, ['build'], `${siteDir} 里 pnpm build`)
     expect(existsSync(path.join(siteDir, 'build', 'server', 'index.js'))).toBe(true)
+
+    // 工作台退出时的同步停止：返回时整棵进程树已停，端口放开
+    await host.start(siteDir)
+    host.stopAllNow()
+    expect(host.statusOf(siteDir).state).toBe('stopped')
+    expect(await (await loadPlatformScaffold()).isPortFree(port)).toBe(true)
   })
 })

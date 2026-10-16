@@ -66,6 +66,7 @@ docsite.site.remove  {"dir":…}    停掉并不再托管
 ```
 
 - 端口不写在站里（`scripts.dev` 写了 `--port` 就拒绝启动）：先试这个站上次用的，被占了由平台的 vite 插件在 10000–49151 里随机挑；地址以 `docsite.site.list` 的 `url` 为准。启动前核对站点的 `node_modules` 里装着 `@godcreator/god-docsite`
+- **页面打开是「Error」、白屏，或开发服务退出了**：开发服务的输出进 gwb 日志，日志名 `gwb-docsite-dev`，每条开头是站点目录。stderr（Vite 与服务端渲染的报错）记 warn，`logger.query {"name":"gwb-docsite-dev","minLevel":"warn","limit":50}` 就能看到；stdout 记 debug，默认不写进 gwb.log，要看完整输出就在环境变量 `GWB_DEBUG` 里加上 `gwb-docsite-dev` 再启动工作台
 - **改了构建页面时 remark 插件会调用到的包**（code-pin、trajectory、god-docsite 的术语标注）：在改过的包里 `pnpm build`，再 `docsite.site.stop`、`docsite.site.start`
 - 给人看就在 VS Code 的内置浏览器里打开 `docsite.site.list` 回的地址（读说明书 `vscode`）；只是自己验证，没托管的站 `docsite.site.start`，验完 `docsite.site.stop`
 - `pnpm build` 是 `react-router build`，只作提交前的检查；agent 读 `content/` 下的 mdx 正本，不解析 HTML

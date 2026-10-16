@@ -22,6 +22,15 @@ export function lastLinesOf(output: string, lineCount = 10): string {
     .join('\n')
 }
 
+/** 开发服务输出的一块写成一条日志：开头是站点目录，去掉颜色控制符与末尾空白；只有空白的一块回 null */
+export function devOutputEntryOf(siteDir: string, chunk: string): string | null {
+  const text = chunk.replace(ansiEscapePattern, '').trimEnd()
+  return text.trim() === '' ? null : `${siteDir}\n${text}`
+}
+
+/** 开发服务的输出写进哪里：stderr 是报错与警告，stdout 是平时的输出 */
+export type DevOutputLog = { warn(message: string): void; debug(message: string): void }
+
 /** 一个在运行的开发服务 */
 export type DevServer = {
   url: string
@@ -102,9 +111,10 @@ export async function postFeed(siteUrl: string, token: string, channel: string, 
 /**
  * 在站点目录里运行 pnpm dev，环境变量交给它身份码与这次启动生成的推送令牌，等它在输出里报出地址。
  * 给了 port 就带上 --port（平台的 vite 插件加 strictPort，被占就起不来），没给由平台的 vite 插件随机挑；报出的地址端口和给的不同就拒绝。
- * 先退出或超时都抛 DocsiteRejected，写明开发服务的输出
+ * 先退出或超时都抛 DocsiteRejected，写明开发服务的输出。
+ * 输出一块一条写进 outputLog：stderr 记 warn（Vite 与服务端渲染的报错从这里出来），stdout 记 debug
  */
-export const launchDevServer: LaunchDevServer = (siteDir, identityCode, port) => {
+export const devServerLauncher = (outputLog: DevOutputLog): LaunchDevServer => (siteDir, identityCode, port) => {
   const token = randomUUID()
   const child = spawn('pnpm', port === null ? ['dev'] : ['dev', '--port', String(port)], {
     cwd: siteDir,
@@ -154,8 +164,12 @@ export const launchDevServer: LaunchDevServer = (siteDir, identityCode, port) =>
       })
     }
     const onEarlyExit = (code: number | null) => fail(`开发服务启动后就退出了（退出码 ${String(code)}）`)
-    child.stdout.setEncoding('utf8').on('data', collect)
-    child.stderr.setEncoding('utf8').on('data', collect)
+    const logOutput = (write: (message: string) => void) => (chunk: string) => {
+      const entry = devOutputEntryOf(siteDir, chunk)
+      if (entry !== null) write(entry)
+    }
+    child.stdout.setEncoding('utf8').on('data', collect).on('data', logOutput((message) => outputLog.debug(message)))
+    child.stderr.setEncoding('utf8').on('data', collect).on('data', logOutput((message) => outputLog.warn(message)))
     child.on('exit', onEarlyExit)
     child.on('error', (error) => fail(`pnpm 启动不了：${error.message}`))
   })
