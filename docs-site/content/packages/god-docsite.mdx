@@ -6,8 +6,11 @@ icon: LayoutTemplate
 
 import { PlatformSeams } from './god-docsite/platform-seams'
 import { FeatureIndexSteps } from './god-docsite/feature-index-steps'
+import { PageTypes } from './god-docsite/page-types'
+import { FeedSteps } from './god-docsite/feed-steps'
+import { OriginCases } from './god-docsite/origin-cases'
 
-平台包 `@godcreator/god-docsite` 是每个站点的公共部分，别的包都不依赖它。它有两半：
+平台包 `@godcreator/god-docsite` 是每个站点的公共部分，别的包都不依赖它。它分两部分：
 
 - **模板与建站器**：`template/` 是唯一的站点模板，`./scaffold` 是建站器（`createSite` 建站、`addFeature` 加功能、`regenerateFeatureIndex` 重写汇总文件），负责把站点写出来
 - **运行时出口**：`./server`、`./react`、`./vite`、`./mdx` 等，由模板写出的站点文件调用，管页面树、布局与侧栏、搜索、推送与术语标注
@@ -18,14 +21,16 @@ import { FeatureIndexSteps } from './god-docsite/feature-index-steps'
 
 <PlatformSeams />
 
-1. **建站与加功能**：gwb-docsite 的 `docsite.site.init` 依次调 `createSite`、`addBaseFeatures`，`docsite.feature.add` 调 `addFeature`。建站器按自己模块所在的位置找平台包的 `template/`，所以插件从装好的平台包目录加载 `./scaffold`，不把它打包进插件。
-2. **写出站点**：`createSite` 复制模板，写 `package.json`、`people.json`、`pnpm-workspace.yaml`；`addFeature` 把功能包的 `template/` 补进功能目录，已有的文件不覆盖；`regenerateFeatureIndex` 每次重写五份汇总文件。
-3. **读功能包**：功能包要先装进站点的 `node_modules`；`addFeature` 读它的 `template/`，重写汇总文件时去站点依赖里找功能名对得上的那个包，读集合名单 `godDocsite.collections`。
-4. **合并功能**：`runtime.generated.ts` 把各功能的 `feature.tsx` 交给 `siteFeatureRuntime`，合成一份 `featureRuntime`，布局路由、`source.ts`、`mdx-components` 各取所需；两个功能导出同名 MDX 组件时报错。
-5. **路由调 loader**：站点的路由文件只有几行——调平台的 loader，把站点上下文 `site`（满足 `BaseSiteContext`）当参数传进去；平台与功能包都不 import 站点代码。
-6. **构建配置**：`vite.config.ts` 把 `source.config.ts` 的全部导出交给 `godDocsite()`，插件从中认出内容目录；`app/lib/mdx-plugins.ts` 把术语标注排在全站 remark 插件的最后。
-7. **推送**：gwb-docsite 启动开发服务时经环境变量 `DOCSITE_FEED_TOKEN` 给站点进程一个令牌，之后带同一个令牌 POST JSON；协议的常量两边都从平台包的 `.` 出口取。
-8. **端口与可信来源**：开发服务开始监听时 vite 插件把地址写进 `DOCSITE_DEV_ORIGIN`，发布版由 `docsite-serve` 设 `PORT`；`siteOrigin` 按它们算出写入请求要对上的 Origin。
+图上画不出的几点：
+
+1. **建站与加功能**：插件从装好的平台包目录加载 `./scaffold`，不把它打包进插件。
+2. **写出站点**：`addFeature` 补文件时已有的不覆盖，五份汇总文件每次重写。
+3. **读功能包**：功能包要先装进站点的 `node_modules`，集合名单读它 `package.json` 的 `godDocsite.collections`。
+4. **合并功能**：两个功能导出同名 MDX 组件时报错。
+5. **路由调 loader**：站点上下文 `site` 经参数传进去，平台与功能包都不 import 站点代码。
+6. **构建配置**：术语标注排在全站 remark 插件的最后。
+7. **推送**：协议的常量两边都从平台包的 `.` 出口取，见下面「推送通道」一节。
+8. **端口与可信来源**：`DOCSITE_DEV_ORIGIN` 由 vite 插件在开发服务监听后写、`PORT` 由 `docsite-serve` 设，`siteOrigin` 怎么按它们算见下面「vite 插件、端口与可信来源」一节。
 
 平台包对外的出口全在这些地方：
 
@@ -71,7 +76,7 @@ import { FeatureIndexSteps } from './god-docsite/feature-index-steps'
 
 {/* ref file="../packages/god-docsite/src/node/scaffold/feature-index.ts" lines="7-20" hash="a9cdf57d595c" blob="778f5b87a5f7" */}
 
-`regenerateFeatureIndex` 是核心：扫 `app/features/` 下的子目录，含四种文件之一的才算功能，按名字排序；有 `mdx.ts` 的去站点依赖里找功能名对得上的那个包，读它 `package.json` 的 `godDocsite.collections`；集合名要全站唯一，与 `source.config.ts` 自己的集合也不能重名；然后重写五份汇总文件。汇总文件每次都按目录现算，所以加一个功能不用改模板，平台包也不用知道有哪些功能包。下面把本站建出来的六步走一遍：
+`regenerateFeatureIndex` 是核心：扫 `app/features/` 下的子目录，含四种文件之一的才算功能，按名字排序；有 `mdx.ts` 的去站点依赖里找功能名对得上的那个包，读它 `package.json` 的 `godDocsite.collections`；集合名要全站唯一，与 `source.config.ts` 自己的集合也不能重名；然后重写五份汇总文件。汇总文件每次都按目录现算，所以加一个功能不用改模板，平台包也不用知道有哪些功能包。下面把本站建出来的六步依次看一遍：
 
 <FeatureIndexSteps />
 
@@ -106,9 +111,9 @@ import { FeatureIndexSteps } from './god-docsite/feature-index-steps'
 
 {/* ref file="../packages/god-docsite/template/app/lib/source.ts" lines="11-16" hash="35db1285d9d4" blob="eea12044bb68" */}
 
-页面路由的 loader（`sitePageData`）按 `type` 给浏览器不同的东西：MDX 给路径（正文由 fumadocs-mdx 的 client loader 在浏览器加载）、TSX 给文件（按需加载页面模块）、HTML 给 `/api/content/` 下的地址（iframe 原样展示）。页面树不在这里给，只由布局路由给。
+从内容目录里的文件到浏览器显示，每种情况一条链（例子都是本站自己的页）：
 
-{/* ref file="../packages/god-docsite/src/site/page.server.ts" lines="15-32" hash="6c0dabd9f88e" blob="8d10a15cc344" */}
+<PageTypes />
 
 ## 站点上下文
 
@@ -118,9 +123,11 @@ import { FeatureIndexSteps } from './god-docsite/feature-index-steps'
 
 ## 推送通道
 
-这是和 gwb-docsite 之间的外部契约。启动方经环境变量 `DOCSITE_FEED_TOKEN` 给站点进程一个令牌；推的一方 POST JSON 到 `/__docsite/feed/<频道>`，请求头 `x-docsite-token` 带同一个令牌；每个频道只留最新一份。同一地址 GET 可以拿现在的值，或者订阅事件流（连上先收到现在的值）。浏览器端用 `useSiteFeed(频道, 初始值)`，初始值由 loader 经站点上下文的 `feedValue` 读。
+这是和 gwb-docsite 之间的外部契约：启动方经环境变量 `DOCSITE_FEED_TOKEN` 给站点进程一个令牌，推的一方 POST JSON 到频道的地址、请求头带同一个令牌，浏览器订阅事件流跟着变。从启动到页面变化分五步（频道例子用 `collab`——协作站的通知整份推到这个频道）：
 
-{/* ref file="../packages/god-docsite/src/core/feed.ts" lines="1-7" hash="996597c39f34" blob="fcb5c0377071" */}
+<FeedSteps />
+
+同一地址 GET 回这个频道现在的值（还没推过是 null）；协议的常量两边都从平台包的 `.` 出口取。
 
 ## vite 插件、端口与可信来源
 
@@ -137,9 +144,9 @@ import { FeatureIndexSteps } from './god-docsite/feature-index-steps'
 
 {/* ref file="../packages/god-docsite/src/vite/index.ts" lines="19-27" hash="36bdf15f538a" blob="e519c0e5039c" */}
 
-可信来源 `siteOrigin`：写入请求的 Origin 头要和它完全一样。设了 `DOCSITE_ORIGIN` 就只认它；dev 取 vite 插件写的 `DOCSITE_DEV_ORIGIN`（没有就是开发服务没经 `godDocsite()` 启动，报错）；start 取 `HOST`（缺省 localhost）与 `PORT`（没设报错——发布版用 `docsite-serve` 启动，它挑端口、设 `PORT`）。
+可信来源 `siteOrigin`：写入请求的 Origin 头要和它完全一样，差一点就被 403 拒绝（`写入只接受来自 <origin> 的请求`，核对在 identity 包的 `authorizeWrite`，评论、任务这些写入 action 都先过它）。它按环境变量算，五种情况各看一遍：
 
-{/* ref file="../packages/god-docsite/src/site/origin.server.ts" lines="19-36" hash="fa5abe38e24b" blob="47bff7857623" */}
+<OriginCases />
 
 ## 其余能力
 

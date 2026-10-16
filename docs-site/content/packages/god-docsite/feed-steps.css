@@ -1,0 +1,32 @@
+/*
+ * FeedSteps 自己的画面：左边三个方块竖排、方块之间写当前一步传的东西，右边一张卡片；窄屏竖排。
+ * 方块经 data-role 取角色色（--dx-c），不亮时整体调淡；不活跃的通道画一条淡竖线占位。
+ * 卡片与状态点由 @godcreator/explainer 提供；中性行前摆一个与状态点等宽的空位，行首对齐。
+ */
+.fs-stage { display: grid; grid-template-columns: 210px 1fr; gap: 12px; align-items: stretch; }
+@container (max-width: 639px) {
+  .fs-stage { grid-template-columns: 1fr; }
+  .fs-actors { display: flex; align-items: center; gap: 4px; }
+  .fs-flows { min-height: 0; padding: 0 2px; }
+  .fs-idle { display: none; }
+}
+
+.fs-actors { display: grid; gap: 0; }
+.fs-actor { display: flex; flex-direction: column; gap: 1px; border: 1px solid color-mix(in srgb, var(--dx-c) 40%, transparent); border-radius: 8px; padding: 7px 10px; background: color-mix(in srgb, var(--dx-c) 8%, transparent); opacity: 0.4; }
+.fs-actor[data-active] { opacity: 1; }
+.fs-actor-name { font-size: 12.5px; font-weight: 600; color: var(--dx-fg); }
+.fs-actor-sub { font-size: 11px; color: var(--dx-dim); }
+
+.fs-flows { display: grid; gap: 2px; padding: 3px 0 3px 12px; min-height: 36px; align-content: center; }
+.fs-flow { display: flex; align-items: baseline; gap: 6px; font-size: 11.5px; color: var(--dx-fg); }
+.fs-flow-arrow { color: var(--dx-dim); font-size: 13px; line-height: 1; }
+.fs-flow-label { overflow-wrap: anywhere; }
+.fs-idle { display: block; width: 1px; min-height: 28px; margin-left: 7px; background: color-mix(in srgb, var(--dx-dim) 35%, transparent); }
+
+.fs-lines { display: grid; gap: 6px; }
+.fs-row { display: flex; align-items: baseline; gap: 8px; font-size: 12.5px; }
+/* 保留数据里写的前导空格（env 那几行的缩进），长行仍能换行 */
+.fs-row > span { white-space: pre-wrap; }
+.fs-row[data-tone='bad'] > span { overflow-wrap: anywhere; }
+.fs-row[data-tone='none'] { color: var(--dx-dim); font-family: var(--dx-mono); font-size: 12px; }
+.fs-dot-none { width: 8px; flex: none; }

@@ -1,0 +1,12 @@
+/*
+ * PageTypes 自己的画面：一条竖排的链，卡与卡之间向下箭头，末尾一行灰字。
+ * 卡片由 @godcreator/explainer 提供；卡片里的行用等宽字写真实的东西（文件、loader 数据、调用）。
+ */
+.pt-chain { display: grid; gap: 0; }
+.pt-step { display: grid; gap: 6px; }
+.pt-arrow { text-align: center; font-size: 15px; line-height: 1.2; color: var(--dx-dim); user-select: none; }
+
+.pt-lines { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
+.pt-lines li { font-family: var(--dx-mono); font-size: 12px; color: var(--dx-fg); overflow-wrap: anywhere; }
+
+.pt-footer { margin: 10px 0 0; font-size: 12px; color: var(--dx-dim); }
