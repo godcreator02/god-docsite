@@ -1,0 +1,47 @@
+/*
+ * CardSorting 自己的画面：文件标签一行，三栏（盘心、上盘、病卡），最下一行灰字。
+ * 卡片、状态点与颜色变量（--dx-*）由 @godcreator/explainer 提供，颜色只取那套变量。
+ * 去处固定三色：盘心 slate、上盘 blue、病卡 rose，标签与那一栏的卡片标题同色。
+ */
+
+.cs-box { display: grid; gap: 10px; container-type: inline-size; }
+
+/* 十一个文件的标签：圆角色块对到去处，文件名放在悬停提示里 */
+.cs-files { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; }
+.cs-file {
+  min-width: 30px; padding: 3px 9px; border-radius: 999px;
+  font-size: 12.5px; font-weight: 600; text-align: center;
+  border: 1px solid color-mix(in srgb, var(--dx-slate) 55%, transparent);
+  color: color-mix(in srgb, var(--dx-slate) 80%, var(--dx-fg));
+  background: color-mix(in srgb, var(--dx-slate) 14%, transparent);
+}
+.cs-file[data-dest='cards'] {
+  border-color: color-mix(in srgb, var(--dx-blue) 55%, transparent);
+  color: color-mix(in srgb, var(--dx-blue) 75%, var(--dx-fg));
+  background: color-mix(in srgb, var(--dx-blue) 14%, transparent);
+}
+.cs-file[data-dest='sick'] {
+  border-color: color-mix(in srgb, var(--dx-rose) 55%, transparent);
+  color: color-mix(in srgb, var(--dx-rose) 75%, var(--dx-fg));
+  background: color-mix(in srgb, var(--dx-rose) 14%, transparent);
+}
+
+/* 三栏，窄屏竖排 */
+.cs-panes { display: grid; gap: 10px; }
+@container (min-width: 680px) { .cs-panes { grid-template-columns: 1fr 1.6fr 1.2fr; } }
+
+.cs-cards { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; }
+.cs-card { display: flex; align-items: baseline; gap: 8px; font-size: 12.5px; }
+.cs-mark { flex: none; width: 2.2em; font-weight: 600; }
+.cs-label { flex: 1; min-width: 0; }
+.cs-date { flex: none; font-family: var(--dx-mono); font-size: 11.5px; color: var(--dx-dim); }
+.cs-date-bad { color: color-mix(in srgb, var(--dx-rose) 80%, var(--dx-fg)); text-decoration: line-through; }
+
+.cs-reason {
+  display: flex; align-items: baseline; gap: 8px; margin-top: 8px;
+  font-family: var(--dx-mono); font-size: 11.5px; overflow-wrap: anywhere;
+  color: color-mix(in srgb, var(--dx-rose) 80%, var(--dx-fg));
+}
+
+.cs-pane-note { margin: 8px 0 0; font-size: 11.5px; color: var(--dx-dim); }
+.cs-note { margin: 0; font-size: 12.5px; color: var(--dx-dim); }

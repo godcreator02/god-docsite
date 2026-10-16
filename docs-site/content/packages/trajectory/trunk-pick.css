@@ -1,0 +1,56 @@
+/*
+ * TrunkPick 自己的画面：左边的树与孤星（自画 SVG），右边每步一句说明，第 4 步底下加一行领域顺序。
+ * 胶囊与颜色变量（--dx-*）由 @godcreator/explainer 提供，颜色只取那套变量。
+ * 角色固定：存储蓝、界面紫、取代线金黄实线、转向线青虚线、起点与主干金黄、被取代的卡领域色混灰。
+ */
+
+.tp-stage { display: grid; gap: 12px; align-items: center; }
+@container (min-width: 720px) { .tp-stage { grid-template-columns: minmax(0, 1fr) 230px; } }
+
+.tp-svg { min-width: 0; }
+.tp-svg > svg { display: block; width: 100%; }
+
+/* 树的连通框：第 1 步亮着，之后淡成背景 */
+.tp-tree { fill: none; stroke: color-mix(in srgb, var(--dx-slate) 45%, transparent); stroke-width: 1.5; stroke-dasharray: 10 8; vector-effect: non-scaling-stroke; }
+.tp-tree-off { stroke: color-mix(in srgb, var(--dx-slate) 18%, transparent); }
+.tp-divider { stroke: var(--dx-line); stroke-width: 1; stroke-dasharray: 8 8; vector-effect: non-scaling-stroke; }
+.tp-zone { font-size: 13px; fill: var(--dx-dim); }
+
+/* 关系线：取代金黄实线、转向青虚线；候选加粗、主干更粗，支线与被取代的调淡 */
+.tp-edge { stroke-width: 1.8; vector-effect: non-scaling-stroke; }
+.tp-edge-supersede { stroke: var(--dx-amber); }
+.tp-edge-pivot { stroke: var(--dx-cyan); stroke-dasharray: 12 9; }
+.tp-edge-dim { opacity: 0.35; }
+.tp-cand { stroke-width: 3.2; }
+.tp-trunk { stroke-width: 4.2; }
+.tp-dim { opacity: 0.3; }
+.tp-dead { opacity: 0.3; }
+.tp-arrow { stroke: none; }
+.tp-arrow-supersede { fill: var(--dx-amber); }
+.tp-arrow-pivot { fill: var(--dx-cyan); }
+
+/* 节点：带编号的小圆，颜色按领域；起点与主干成员外加描边；被取代的混灰调淡 */
+.tp-node circle { stroke: var(--dx-surface); stroke-width: 1.5; vector-effect: non-scaling-stroke; }
+.tp-node-blue circle { fill: var(--dx-blue); }
+.tp-node-violet circle { fill: var(--dx-violet); }
+.tp-node.tp-dim circle, .tp-node.tp-dead circle { fill: color-mix(in srgb, var(--dx-blue) 40%, var(--dx-slate)); }
+.tp-node.tp-dead.tp-node-violet circle { fill: color-mix(in srgb, var(--dx-violet) 40%, var(--dx-slate)); }
+.tp-ring { fill: none; stroke: var(--dx-amber); stroke-width: 2.5; vector-effect: non-scaling-stroke; }
+.tp-node-start > circle:first-child { stroke: var(--dx-amber); stroke-width: 2.5; }
+.tp-mark { font-size: 16px; font-weight: 700; fill: var(--dx-surface); }
+.tp-node.tp-dim .tp-mark, .tp-node.tp-dead .tp-mark { fill: color-mix(in srgb, var(--dx-surface) 60%, var(--dx-slate)); }
+.tp-date { font-family: var(--dx-mono); font-size: 12.5px; fill: var(--dx-dim); }
+.tp-date-dim { opacity: 0.45; }
+
+/* 标注胶囊：文字白底描边圆角条 */
+.tp-tag rect { fill: var(--dx-surface); stroke: color-mix(in srgb, var(--dx-slate) 45%, transparent); stroke-width: 1; vector-effect: non-scaling-stroke; }
+.tp-tag text { font-size: 12.5px; fill: var(--dx-fg); }
+.tp-tag-amber rect { stroke: color-mix(in srgb, var(--dx-amber) 70%, transparent); }
+.tp-tag-amber text { fill: color-mix(in srgb, var(--dx-amber) 80%, var(--dx-fg)); }
+
+/* 第 4 步底下的领域顺序 */
+.tp-domains { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.tp-domain-item { display: inline-flex; align-items: center; gap: 8px; }
+.tp-domain-arrow { color: var(--dx-dim); }
+
+.tp-note { margin: 0; font-size: 13px; color: var(--dx-dim); }

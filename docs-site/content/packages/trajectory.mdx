@@ -1,10 +1,13 @@
 ---
 title: trajectory：轨迹卡与星轨盘
-description: 轨迹卡的格式与校验、一批卡汇总成星轨盘的输入（命令行与站点走同一个汇总）、关系连成树并挑出主干、按日期定半径按扇区定角度把卡排上盘；站点上的卡页、星轨盘页与卡链接
+description: 卡文件经两条路读进来（命令行与站点构建期）汇进同一个汇总；谁是盘心、谁上盘、谁是病卡；关系连成树挑出主干，按日期定半径按扇区定角度把卡排上盘；站点上的卡页、星轨盘页与卡链接
 icon: Orbit
 ---
 
 import { DiskPlacement } from './trajectory/disk-placement'
+import { TrajectorySeams } from './trajectory/seams'
+import { CardSorting } from './trajectory/card-sorting'
+import { TrunkPick } from './trajectory/trunk-pick'
 
 轨迹卡目录里一个 `.md` / `.mdx` 文件是一张卡。trajectory 这个包读卡、校验卡，把一个站的全部卡画成星轨盘（`/trajectory`），每张卡另有卡页（`/trajectory/<卡身份>`）。卡怎么写、什么时候建卡，看[说明书 `trajectory`](/docs/outputs/skills/trajectory)；这一页讲包怎么处理卡。
 
@@ -26,9 +29,13 @@ import { DiskPlacement } from './trajectory/disk-placement'
 
 盘心是根卡（文件 `2026-03-01-start.md`），其余十张的 frontmatter 都写 `parent: [2026-03-01-start]`。下文各处的数都是把这 11 个文件交给 `scanCards` → `buildModel` → `RingsLayout`（全景态，手感参数全取默认值）跑出来的。
 
+先看一张总图：卡文件经两条路读进来、汇总成同一份结果，再建模、排盘；命令行与站点在哪里汇合，后面每一节开头都会写它在图上的位置。
+
+<TrajectorySeams />
+
 ## 一张卡：frontmatter 加正文里的两种行
 
-卡身份是文件名去掉 `.md` / `.mdx`。frontmatter 里 `type`、`born-at`、`parent`、`label`、`domain` 五个字段一个都没有的文件不是卡（比如卡目录里的导读页），整个不校验。`status` 不算——它是可以随意写的字段，单凭一个 `status` 不足以认定是卡。
+图上第 3、5 号都在用的 `readCardFile`。卡身份是文件名去掉 `.md` / `.mdx`。frontmatter 里 `type`、`born-at`、`parent`、`label`、`domain` 五个字段一个都没有的文件不是卡（比如卡目录里的导读页），整个不校验。`status` 不算——它是可以随意写的字段，单凭一个 `status` 不足以认定是卡。
 
 格式的正本是一个 zod schema：先查形状（该写单个值的写成了列表、`parent` 没写成列表），再查必填——`born-at`、`label` 全卡必填，`born-at` 只认 `YYYY-MM-DD` 与 `YYYY-MM-DDTHH:mm`；非根卡必填 `parent`。别的字段随便写、不查。`type` 只有 `root` 被读出含义，其余取值只决定盘上的形状。
 
@@ -64,11 +71,13 @@ supersedes:: [改用 SQLite](2026-03-06-sqlite.md)
 
 ## 一批卡：谁是盘心、谁上盘、谁是病卡
 
-`assembleCardSet` 收一批已经单独读过的卡文件，交回 `CardScan`：盘心 `center`、画上星轨盘的卡 `cards`、病卡清单 `sick`。卡按身份排序、病卡按路径排序，同一批文件汇总两次，产物逐位相等。
+图上第 4、8 号汇进的 `assembleCardSet` 收一批已经单独读过的卡文件，交回 `CardScan`：盘心 `center`、画上星轨盘的卡 `cards`、病卡清单 `sick`。卡按身份排序、病卡按路径排序，同一批文件汇总两次，产物逐位相等；根卡恰好一张时它是盘心，born-at 合格的非根卡全部上盘，有病但画得出来的照样画上去。
 
 {/* ref file="../packages/trajectory/src/core/card-set.ts" lines="44-71" hash="3e8ecd4dee34" blob="fe5cfe9cbea0" */}
 
-上盘的门槛只有一条：born-at 写得对——算不出半径的卡画不出来。根卡恰好一张时它是盘心；非根卡只要 born-at 合格就上盘，parent 写错、关系指错这些病不挡。例子里 ✗「加一层缓存」的 born-at 写成了「三月十八号」，不进 `cards`、进 `sick`，理由是「born-at 格式须 YYYY-MM-DD 或 YYYY-MM-DDTHH:mm」；其余 9 张全部上盘。
+11 个文件交给汇总以后分到哪三处、为什么：
+
+<CardSorting />
 
 还有些病单个文件看不出来，要看整批：
 
@@ -82,36 +91,31 @@ supersedes:: [改用 SQLite](2026-03-06-sqlite.md)
 
 ## 两条路读卡，同一个汇总
 
-读卡有两条路，最后都交给 `assembleCardSet`：
-
-- **命令行**：`scanCardDir(dir)`（`/node` 出口）列卡目录下一层、读全文交给 `scanCards`。目录不存在交回空结果，不建目录
-- **站点**：卡集合的 schema 在构建期对每个文件调 `readCardFile`，把结果存进这一页的数据（`cardFile`）；星轨盘页的 loader 把全部页的 `cardFile` 交给 `assembleCardSet`，不再读磁盘
-
-所以 `docfirst check` 报的病卡，和星轨盘页上数出来的卡，两边逐位相同。站点读 frontmatter 用的是本包自己那一种读法，不用 fumadocs 解析好的值——fumadocs 会把只写到日的 `born-at` 读成 `Date`，两边就对不上了。
+图上第 1–4 号是命令行这条路，第 5–8 号是站点这条路，两条都汇进同一个 `assembleCardSet`——所以 `docfirst check` 报的病卡，和星轨盘页上数出来的卡，两边逐位相同。站点读 frontmatter 用的是本包自己那一种读法（构建期逐个 `readCardFile`），不用 fumadocs 解析好的值——fumadocs 会把只写到日的 `born-at` 读成 `Date`，两边就对不上了。
 
 ## 建模：关系连成树，挑出主干
 
-盘的输入是中性的 `DiskInput`：盘心加一组卡，每张卡只有身份、时刻、短名、领域、种类、关系。盘不知道卡文件怎么写，校验归上游；输入不合格（身份重复、时刻写坏、关系种类不认识）`buildModel` 直接抛错——走到这里说明上游有 bug。
+图上第 9 号。盘的输入是中性的 `DiskInput`：盘心加一组卡，每张卡只有身份、时刻、短名、领域、种类、关系。盘不知道卡文件怎么写，校验归上游；输入不合格（身份重复、时刻写坏、关系种类不认识）`buildModel` 直接抛错——走到这里说明上游有 bug。
 
 {/* ref file="../packages/trajectory/src/core/model/types.ts" lines="23-53" hash="d21e32de3093" blob="1c5858ea0197" */}
 
-关系边：`from` 是被取代的旧卡或转向的起点，`to` 是写着这条关系的卡；指向盘外的进 `broken`，不画。
-
-**树**：取代与转向两种边一起求连通分量，同一件事的卡在盘上占同一块扇区；一条关系都没有的卡是**孤星**。例子里 ①②③④⑤⑥ 连成一棵树（⑤ 是靠转向连进来的），⑦⑧⑨ 是孤星。
-
-**主干**只在取代边上选（整棵树只有转向边时才退到转向链）：从每个没有取代入边的卡出发，每一步挑「终点更晚」的那条，终点一样晚再比长、再按身份。例子里从 ① 出发有两条候选：①→②→③→④（4 张，终点 03-12）与 ①→②→⑥（3 张，终点 04-20）。⑥ 更晚，主干是 ①②⑥，③④⑤ 是一条支线。比终点不比长度的理由：一条反复微调的支线步数多，按长度选会压过只转折几次的主线。
+关系边：`from` 是被取代的旧卡或转向的起点，`to` 是写着这条关系的卡；指向盘外的进 `broken`，不画。**树**：取代与转向两种边一起求连通分量，同一件事的卡在盘上占同一块扇区；一条关系都没有的卡是**孤星**。
 
 {/* ref file="../packages/trajectory/src/core/model/types.ts" lines="79-112" hash="66969de41545" blob="1c5858ea0197" */}
 
-{/* ref file="../packages/trajectory/src/core/model/build.ts" lines="152-227" hash="e093c6d7a835" blob="fafdd715830c" */}
+例子里 ①–⑥ 怎么连成一棵树、主干为什么是 ①②⑥，五步看完：
 
-有取代出边的卡（被别的卡取代了）盘上淡出，例子里是 ①②③。领域的先后按卡的 born-at 顺序首次出现定（例子里是存储、界面），没写 domain 的归「未分道」、排最后。扇区的先后就靠这个顺序——换成按卡数或字母排，盘画得不一样、还不报错。
+<TrunkPick />
+
+主干只在取代边上选（整棵树只有转向边时才退到转向链）：从起点出发每一步挑「终点更晚」的那条，终点一样晚再比长、再按身份。有取代出边的卡（例子里是 ①②③）盘上淡出；领域的先后按卡的 born-at 顺序首次出现定（例子里是存储、界面），没写 domain 的归「未分道」、排最后。扇区的先后就靠这个顺序——换成按卡数或字母排，盘画得不一样、还不报错。
+
+{/* ref file="../packages/trajectory/src/core/model/build.ts" lines="152-227" hash="e093c6d7a835" blob="fafdd715830c" */}
 
 {/* ref file="../packages/trajectory/src/core/model/build.ts" lines="258-270" hash="341542fab23d" blob="fafdd715830c" */}
 
 ## 上盘：半径由日期定，角度由扇区定
 
-建模交出去的模型进排盘引擎 `RingsLayout`，一组卡怎么排到星轨盘上，五步看完：
+图上第 10 号。建模交出去的模型进排盘引擎 `RingsLayout`，一组卡怎么排到星轨盘上，五步看完：
 
 <DiskPlacement />
 
@@ -141,7 +145,7 @@ $e(d)$ 是有效天数，只讲两层意思：**长空档折叠**——相邻两
 
 ## 站点上：两个页面与卡链接
 
-建站器把 `template/` 写进站点的 `app/features/trajectory/`。卡集合在 `mdx.ts` 里声明：读站点根下 `trajectory/` 的 `*.{md,mdx}`，正文按需加载，schema 是 `cardSchema`；这个目录要和 `docfirst.config.mjs` 的 `trajectory` 一致，两处各读各的目录。
+图上第 5–7 号。建站器把 `template/` 写进站点的 `app/features/trajectory/`。卡集合在 `mdx.ts` 里声明：读站点根下 `trajectory/` 的 `*.{md,mdx}`，正文按需加载，schema 是 `cardSchema`；这个目录要和 `docfirst.config.mjs` 的 `trajectory` 一致，两处各读各的目录。
 
 {/* ref file="../packages/trajectory/template/mdx.ts" hash="6ea94aed95c1" blob="1faf4fd087fc" */}
 
@@ -151,7 +155,7 @@ $e(d)$ 是有效天数，只讲两层意思：**长空档折叠**——相邻两
 
 {/* ref file="../packages/trajectory/src/site/remark-trajectory-links.ts" lines="30-57" hash="1e6c4bfdea47" blob="8feaa96a0caf" */}
 
-## 分层与出口
+## 分层与谁在用它
 
 | 出口 | 有什么 | 谁用 |
 | --- | --- | --- |
@@ -164,8 +168,4 @@ $e(d)$ 是有效天数，只讲两层意思：**长空档折叠**——相邻两
 
 建模在 `core/`（命令行也用），排盘（`RingsLayout`）在 `site/disk/`，只在浏览器里跑；trajectory 不依赖任何别的功能包（dependency-cruiser 的规则检查）。
 
-## 谁在用它
-
-- **docfirst**：`check` 调 `scanCardDir` 取病卡，每条病算一个红；`trajectory` 命令调 `scanCardDir` 再 `buildModel`，打印盘心、卡数、每棵树的主干。看 [docfirst 页](/packages/docfirst)
-- **gwb-docsite**：`docfirst.create` 建站时把 trajectory 当功能包加进站点，写入上面那几份接线文件
-- **站点**：上一节的接线文件
+用它的就是总图右列：docfirst 的 `check` 调 `scanCardDir` 取病卡，每条病算一个红；`trajectory` 命令再 `buildModel`，打印盘心、卡数、每棵树的主干（看 [docfirst 页](/packages/docfirst)）。gwb-docsite 的 `docfirst.create` 建站时把 trajectory 当功能包加进站点，写入上面那几份接线文件。站点上的两个页面与它们的 loader，就是「站点上」那一节的接线文件。
