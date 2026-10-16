@@ -11,17 +11,47 @@ function harness(results: ReportExportResult[] = []) {
     return result
   })
   const checkReports = vi.fn(async () => ({ checked: 0, runs: [], problems: [], warnings: [] }))
-  return { reportExport, checkReports, sleep: vi.fn(async () => {}), stdout: vi.fn(), stderr: vi.fn() }
+  const reportEntryIn = vi.fn(async () => entry)
+  return { reportExport, checkReports, reportEntryIn, sleep: vi.fn(async () => {}), stdout: vi.fn(), stderr: vi.fn() }
 }
 
 describe('命令行 report-docx（不启动实际 Word）', () => {
-  it('export、status 收报告 id，入口是站点 reports/<报告 id>/content.json；默认站点是当前目录', () => {
-    expect(parseCliArgs(['export', 'example'])).toEqual({ command: 'export', options: { siteDir: process.cwd(), entry, mode: 'complete', action: 'start' } })
-    expect(parseCliArgs(['status', 'example'], path.resolve('fixture-site'))).toEqual({ command: 'status', options: { siteDir: path.resolve('fixture-site'), entry, mode: 'complete', action: 'status' } })
+  it('export、status 收报告 id，入口留给 main 看磁盘；默认站点是当前目录', () => {
+    expect(parseCliArgs(['export', 'example'])).toEqual({ command: 'export', reportId: 'example', options: { siteDir: process.cwd(), mode: 'complete', action: 'start' } })
+    expect(parseCliArgs(['status', 'example'], path.resolve('fixture-site'))).toEqual({ command: 'status', reportId: 'example', options: { siteDir: path.resolve('fixture-site'), mode: 'complete', action: 'status' } })
     expect(parseCliArgs(['export', 'example', '--site', 'site', '--engine', 'engine'], path.resolve('fixture'))).toEqual({
       command: 'export',
-      options: { siteDir: path.resolve('fixture/site'), entry, mode: 'complete', action: 'start', engineDir: path.resolve('fixture/engine') },
+      reportId: 'example',
+      options: { siteDir: path.resolve('fixture/site'), mode: 'complete', action: 'start', engineDir: path.resolve('fixture/engine') },
     })
+  })
+
+  it('export 用 main 在磁盘上找到的入口：MDX 报告的入口是 index.mdx', async () => {
+    const deps = harness([{ state: 'ready', jobId: 'job' }])
+    deps.reportEntryIn.mockResolvedValue('reports/example/index.mdx')
+    expect(await main(['export', 'example'], deps)).toBe(0)
+    expect(deps.reportEntryIn).toHaveBeenCalledWith(process.cwd(), 'example')
+    expect(deps.reportExport).toHaveBeenCalledWith({ siteDir: process.cwd(), entry: 'reports/example/index.mdx', mode: 'complete', action: 'start' })
+  })
+
+  it('convert 收两个报告 id 与 --site，转好了退出码 0，没转成非零并列出原因', async () => {
+    expect(parseCliArgs(['convert', 'old', 'new', '--site', 'site'], path.resolve('fixture'))).toEqual({ command: 'convert', siteDir: path.resolve('fixture/site'), sourceId: 'old', targetId: 'new' })
+    const converted = vi.fn(async () => ({ converted: true as const, targetDir: 'reports/new', files: ['index.mdx'] }))
+    const stdout = vi.fn()
+    expect(await main(['convert', 'old', 'new'], { convertReportToMdx: converted, stdout })).toBe(0)
+    expect(converted).toHaveBeenCalledWith(process.cwd(), 'old', 'new')
+    expect(stdout.mock.calls[0]![0]).toContain('转好了')
+    const refused = vi.fn(async () => ({ converted: false as const, reason: '对不上', problems: ['/blocks/0：差异'] }))
+    const refusedOut = vi.fn()
+    expect(await main(['convert', 'old', 'new'], { convertReportToMdx: refused, stdout: refusedOut })).toBe(1)
+    expect(refusedOut.mock.calls[0]![0]).toContain('/blocks/0：差异')
+  })
+
+  it.each([['convert'], ['convert', 'old'], ['convert', 'old', 'Bad'], ['convert', 'old', 'new', '--engine', 'e']])('convert 参数不对直接报错：%j', async (...args: string[]) => {
+    const convertReportToMdx = vi.fn()
+    const stderr = vi.fn()
+    expect(await main(args, { convertReportToMdx, stderr })).toBe(1)
+    expect(convertReportToMdx).not.toHaveBeenCalled()
   })
 
   it('check 收 --site 与 --json', () => {

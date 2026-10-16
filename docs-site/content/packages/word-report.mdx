@@ -1,6 +1,6 @@
 ---
 title: word-report：报告
-description: JSON 报告文档（docreport 格式）：网页、检查、导出三处读文件的方式不同，组装都是同一个 assembleDocument，整份组装与单独组装一章只差在跨章引用；导出经指纹、锁与快照目录把组装好的数据交给本机 Word 引擎，TS 与 Python 两边各验一遍格式
+description: 报告文档（docreport 格式），正文写成 JSON 或先编译成它的 MDX：网页、检查、导出三处读文件的方式不同，组装都是同一个 assembleDocument，整份组装与单独组装一章只差在跨章引用；导出经指纹、锁与快照目录把组装好的数据交给本机 Word 引擎，TS 与 Python 两边各验一遍格式
 icon: FileText
 ---
 
@@ -9,7 +9,7 @@ import { ReportSeams } from './word-report/seams'
 import { ModeCases } from './word-report/mode-cases'
 import { ExportSteps } from './word-report/export-steps'
 
-站点里一份报告是 `reports/<报告 id>/` 下的一组 JSON 文件，网页上整份一页，也能用本机的 Word 导出成 docx 和 pdf，两边读同一份数据。怎么放文件、怎么运行命令在用法页 [写报告](/docsite/reports)；这一页讲包里怎么把几章接成一份、导出时交给 Word 的是什么。三个旧包怎么并成这一个、为什么导出不进 gwb，见轨迹卡[「报告改写成功能包 word-report」](/trajectory/2026-10-15-word-report-package)。
+站点里一份报告是 `reports/<报告 id>/` 下的一组文件，正文写成 JSON（`content.json` 入口）或 MDX（`index.mdx` 入口），网页上整份一页，也能用本机的 Word 导出成 docx 和 pdf，两边读同一份数据。怎么放文件、怎么写、怎么运行命令在用法页 [写报告](/docsite/reports)；这一页讲包里怎么把 MDX 编译成报告文档、怎么把几章接成一份、导出时交给 Word 的是什么。三个旧包怎么并成这一个、为什么导出不进 gwb，见轨迹卡[「报告改写成功能包 word-report」](/trajectory/2026-10-15-word-report-package)；为什么加 MDX 写法、为什么中间仍是 docreport，见轨迹卡[「报告正文加 MDX 写法，编译成 docreport」](/trajectory/2026-10-17-report-mdx-source)。
 
 先看一张图，报告文件被三处读——网页、检查、导出——都经同一个 `assembleDocument`，导出再把组装好的数据固定成快照交给本机 Word 引擎；后面每一节开头都会写它在图上的位置。
 
@@ -22,6 +22,22 @@ import { ExportSteps } from './word-report/export-steps'
 {/* ref file="../packages/word-report/src/core/types.ts" lines="1-37" hash="fdc94a4af4d6" blob="ac61de1cb12f" */}
 
 读 JSON 用包里自己写的解析器，为的是抓重复的键——`JSON.parse` 会悄悄留下后一个。
+
+## MDX 报告：先编译成一份报告文档
+
+MDX 报告不另有一套组装、显示和导出：`core/mdx/` 的编译器把入口 `index.mdx`、文件头 `chapters` 列的各章、可选的 `references.mdx` 编译成**一份**不含 `include` 的报告文档，再交给下面同一个 `assembleDocument`。编译器只用 remark（`remark-parse`、`remark-frontmatter`、`remark-mdx`、`remark-gfm`、`remark-math`）把 MDX 解析成语法树，逐个节点对照到报告文档的块与行内节点，不执行 MDX；对照不上的节点（`import`、表达式、没列出的组件与属性、Markdown 图片、引用块等）直接报错。各写法对应哪种节点见用法页的「MDX 写法」。
+
+{/* ref file="../packages/word-report/src/core/mdx/compile.ts" lines="80-107" hash="27b97daef28e" blob="33f858e48d38" */}
+
+**id**：手写的 id 只出现在要被引用、或要在 `layout.json` 里调版式的地方；其余要 id 的节点由编译器在整份转完后一次分配，写成 `auto-<种类>-<指纹>`：指纹是种类加去掉所有 id 的节点内容的 FNV-1a 散列，节只取标题。同样的内容每次编译得到同样的 id，重复的内容按先后加 `-2`、`-3`；手写的 id 不许以 `auto-` 开头，两边不会撞。所以 MDX 报告里段落改了字，它的 id 就变，按元素 id 定位的评论随之对不上原段，和站里其他 MDX 页面的评论一样。
+
+{/* ref file="../packages/word-report/src/core/mdx/ids.ts" lines="38-60" hash="a579ad7c04c8" blob="7b54fac7e217" */}
+
+**出错位置**：编译器给每个生成的节点记下 MDX 的文件与「行:列」。编译时的错直接带上它；组装时报的错指着编译结果里的 JSON 指针，`assembleMdxReport` 接住后按最长前缀找到最近的有记录的节点，换成 MDX 的文件与行列再抛。组装结果的 `sources` 也换成 MDX 的位置。
+
+{/* ref file="../packages/word-report/src/core/mdx/compile.ts" lines="109-131" hash="76aa864eb688" blob="33f858e48d38" */}
+
+`report-docx convert` 走反方向：`mdxReportPlanOf` 把组装好的 JSON 报告写成 MDX 文件，只写出被引用的、`layout.json` 里出现的、文献与脚注的 id，写不出的内容记进清单；`convertReportToMdx` 写完立刻编译回来，按「只留写出的 id、图片只看文件名、相邻同样式的文字合并」的口径逐项比对，对不上就删掉新目录。
 
 ## 分章组装
 
@@ -59,13 +75,13 @@ import { ExportSteps } from './word-report/export-steps'
 
 | 调用方 | 读文件 | 模式 | 结果怎么用 |
 | --- | --- | --- | --- |
-| 网页（`/reports` 与 `/reports/<报告 id>`） | 只读 JSON，不读图片 | `complete` | 列表里读不对的报告照样列出、带原话；报告页读不对直接报错 |
-| `report-docx check` | 还解码图片、核对快照 | 每个 `content.json` 都 `standalone` 组装一次；有 `include` 的再 `complete` 组装一次 | 例子里检查 3 份文档、组装 4 次：入口两次，a、b 各一次；b 单独组装记一条提示 |
+| 网页（`/reports` 与 `/reports/<报告 id>`） | 只读 JSON 或 MDX 原文，不读图片；MDX 报告的每个原文都和上次一样时用上次的编译结果 | `complete` | 列表里读不对的报告照样列出、带原话；报告页读不对直接报错 |
+| `report-docx check` | 还解码图片、核对快照 | 每个 `content.json` 都 `standalone` 组装一次；有 `include` 的再 `complete` 组装一次；每份 MDX 报告只 `complete` 一次 | 例子里检查 3 份文档、组装 4 次：入口两次，a、b 各一次；b 单独组装记一条提示 |
 | `report-docx export` | 同 check | `complete` | 组装结果写进快照，交给 Word 引擎 |
 
-`check` 把站点 `reports/` 下每一个 `content.json`（报告与各章）都当一份文档查，所以每一章自己也要能单独组装：这就是「单独组装一章时，指向别章的引用要写 `externalLabel`」的来历。
+`check` 把站点 `reports/` 下每一个 `content.json`（报告与各章）都当一份文档查，所以 JSON 报告的每一章自己也要能单独组装：这就是「单独组装一章时，指向别章的引用要写 `externalLabel`」的来历。MDX 的章文件不是独立的文档，只认报告目录根上的 `index.mdx`，整份查一次。哪种入口由报告目录里有 `content.json` 还是 `index.mdx` 定（`reportEntryIn`），两个都有直接报错。
 
-{/* ref file="../packages/word-report/src/node/check.ts" lines="45-59" hash="ae0b44bcbcf7" blob="4f89b57d9c32" */}
+{/* ref file="../packages/word-report/src/node/check.ts" lines="50-73" hash="fc8735df2fb4" blob="22977f2b8380" */}
 
 同一处跨章引用在整份组装与单独组装一章时的三种结果，用分章组装那一节的同一个例子列出来——章 b 的段落里那处指向 a 章编号公式的引用：
 
@@ -79,7 +95,7 @@ import { ExportSteps } from './word-report/export-steps'
 
 图上第 6、7、8 号，命令行在第 10 号。包里的 `reportExport` 不要网站、不要 gwb 也能用：`action: "start"` 开始一次导出，`action: "status"` 只看状态不启动 Word；命令行 `report-docx export` 开始后反复查询状态，等同一个任务做完才退出。
 
-{/* ref file="../packages/word-report/src/node/export.ts" lines="12-34" hash="0e9f40c27dd0" blob="a10afb8c5c20" */}
+{/* ref file="../packages/word-report/src/node/export.ts" lines="12-34" hash="e8accfc5cc82" blob="30c2c8561395" */}
 
 一次导出六步，右边两张小卡片跟着锁与任务状态变：
 
@@ -101,7 +117,7 @@ import { ExportSteps } from './word-report/export-steps'
 
 图片只交这份报告组装结果里有的：地址是组装后的路径 `assets/<文档 id>/<文件名>`，不是任意文件。
 
-报告页能评论，和内容页一样批一段字、一个元素或整页。评论的归属键是报告页的地址 `/reports/<报告 id>`；正文容器带 `commentScopeProps`，右下角是 comments 包的 `CommentsDock`，写入提交到站点的 `/comments`。每个块的 id 原样写到页面元素上，评论按元素 id 定位，所以改了文字、挪了位置，批在块上的评论还跟着那个块。本页评论由站点的接线文件 `site.server.ts` 经 `pageComments` 交给 loader：
+报告页能评论，和内容页一样批一段字、一个元素或整页。评论的归属键是报告页的地址 `/reports/<报告 id>`；正文容器带 `commentScopeProps`，右下角是 comments 包的 `CommentsDock`，写入提交到站点的 `/comments`。每个块的 id 原样写到页面元素上，评论按元素 id 定位：JSON 报告的 id 是写死的，改了文字、挪了位置，批在块上的评论还跟着那个块；MDX 报告里没手写 id 的块，id 随内容生成，改了字评论就对不上原块。本页评论由站点的接线文件 `site.server.ts` 经 `pageComments` 交给 loader：
 
 {/* ref file="../packages/word-report/template/site.server.ts" hash="fde6495015a3" blob="5a0424ae2a42" */}
 
@@ -109,8 +125,8 @@ import { ExportSteps } from './word-report/export-steps'
 
 | 层 | 导出 | 做什么 |
 | --- | --- | --- |
-| `core/` | `@godcreator/word-report` | 报告文档的类型、Schema 与校验、严格 JSON 解析、分章组装；不碰磁盘、不 import React |
-| `node/` | `@godcreator/word-report/node`，命令行 `report-docx` | 读报告目录、取快照、检查、导出（指纹、锁、启动引擎）、命令行 |
+| `core/` | `@godcreator/word-report` | 报告文档的类型、Schema 与校验、严格 JSON 解析、分章组装；`core/mdx/` 是 MDX 编译器与反方向的写出；不碰磁盘、不 import React |
+| `node/` | `@godcreator/word-report/node`，命令行 `report-docx` | 认报告入口、读报告目录、取快照、检查、导出（指纹、锁、启动引擎）、JSON 报告转 MDX、命令行 |
 | `site/` | `@godcreator/word-report/site`、`@godcreator/word-report/site/server` | 报告列表页与报告页、报告的显示组件；服务端的三个 loader |
 | `engine/` | 随包发出的文件（不是 JS 出口） | 驱动本机 Word 与 MathType 的 Python 引擎、`.dotx` 模板、引擎那份 Schema |
 

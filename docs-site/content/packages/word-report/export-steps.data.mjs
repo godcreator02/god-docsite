@@ -24,7 +24,7 @@ export const lockWording = {
 };
 
 /** 第 1 步取快照：读所有 JSON 与图片、每张图真解码、记 sha256、整个再读一遍防中途改动 */
-/* ref file="../packages/word-report/src/node/read-report.ts" lines="57-84" hash="da40c0e9ef2f" blob="1283dd859c85" */
+/* ref file="../packages/word-report/src/node/read-report.ts" lines="71-98" hash="da40c0e9ef2f" blob="aac8a186c779" */
 export const snapshotWording = {
   changed: 'Input changed while taking snapshot; retry export',
 };

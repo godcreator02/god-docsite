@@ -5,8 +5,9 @@ import { createReadStream } from 'node:fs'
 import path from 'node:path'
 import { Readable } from 'node:stream'
 import { assembleDocument } from '../core/assemble.ts'
+import { assembleMdxReport, mdxReportInputsOf } from '../core/mdx/index.ts'
 import type { AssemblyResult, ReportDocument } from '../core/types.ts'
-import { readReportFiles, REPORT_ID_PATTERN, reportEntryOf, reportIdsOf } from '../node/report-files.ts'
+import { isMdxEntry, readMdxReportFiles, readReportFiles, REPORT_ID_PATTERN, reportEntryIn, reportIdsOf } from '../node/report-files.ts'
 import { reportHrefOf, type ReportListData, type ReportPageComments, type ReportPageData, type ReportSummary, type ReportTocItem } from './page-data.ts'
 
 export type { ReportListData, ReportPageComments, ReportPageData, ReportSummary, ReportTocItem } from './page-data.ts'
@@ -23,9 +24,35 @@ export type ReportRouteArgs = { params: Partial<Record<string, string>> }
 /** 组装结果里有 Object.create(null) 的对象：换成普通对象再交给 React Router 序列化 */
 const plainOf = (result: AssemblyResult): AssemblyResult => JSON.parse(JSON.stringify(result)) as AssemblyResult
 
+type ReadAndAssembled = { files: Record<string, string>; result: AssemblyResult; chapterCount: number }
+
+/** MDX 报告编译一遍要几百毫秒，一页几十张图各请求一次：同一入口的每个原文都没变就用上次的结果 */
+const lastMdxAssembly = new Map<string, { files: Record<string, string>; result: AssemblyResult }>()
+const sameFiles = (a: Record<string, string>, b: Record<string, string>) => Object.keys(a).length === Object.keys(b).length && Object.entries(a).every(([file, text]) => b[file] === text)
+
+function assembledMdx(siteDir: string, entry: string, files: Record<string, string>): AssemblyResult {
+  const key = `${siteDir}\0${entry}`
+  const previous = lastMdxAssembly.get(key)
+  if (previous && sameFiles(previous.files, files)) return previous.result
+  const result = assembleMdxReport({ reportId: path.posix.basename(path.posix.dirname(entry)), entry, files }, { mode: 'complete' })
+  lastMdxAssembly.set(key, { files, result })
+  return result
+}
+
+/** 读一份报告并组装：JSON 报告的章数是入口里 include 的个数，MDX 报告是入口文件头 chapters 的个数 */
+async function readAndAssemble(siteDir: string, reportId: string): Promise<ReadAndAssembled> {
+  const entry = await reportEntryIn(siteDir, reportId)
+  if (isMdxEntry(entry)) {
+    const files = await readMdxReportFiles(siteDir, entry)
+    return { files, result: assembledMdx(siteDir, entry, files), chapterCount: mdxReportInputsOf(files[entry]!, entry).chapters.length }
+  }
+  const files = await readReportFiles(siteDir, entry)
+  const entryDocument = JSON.parse(files[entry]!) as ReportDocument
+  return { files, result: assembleDocument(entry, files, { mode: 'complete' }), chapterCount: entryDocument.blocks.filter((block) => block.type === 'include').length }
+}
+
 async function assembledReport(siteDir: string, reportId: string): Promise<AssemblyResult> {
-  const entry = reportEntryOf(reportId)
-  return assembleDocument(entry, await readReportFiles(siteDir, entry), { mode: 'complete' })
+  return (await readAndAssemble(siteDir, reportId)).result
 }
 
 /** 地址里的报告 id：形状不对或站点里没有这份报告都是 404 */
@@ -35,17 +62,16 @@ async function reportIdOf(params: ReportRouteArgs['params'], siteDir: string): P
   return reportId
 }
 
-function summaryOf(reportId: string, files: Record<string, string> | null, result: AssemblyResult | null, problem: string | null): ReportSummary {
-  const metadata: Partial<ReportDocument['metadata']> = result?.document.metadata ?? {}
-  const entryDocument = files === null ? null : (JSON.parse(files[reportEntryOf(reportId)]!) as ReportDocument)
+function summaryOf(reportId: string, read: ReadAndAssembled | null, problem: string | null): ReportSummary {
+  const metadata: Partial<ReportDocument['metadata']> = read?.result.document.metadata ?? {}
   return {
     id: reportId,
     title: metadata.title ?? reportId,
     revision: metadata.revision ?? null,
     date: metadata.date ?? null,
     authors: metadata.authors ?? [],
-    chapterCount: entryDocument?.blocks.filter((block) => block.type === 'include').length ?? 0,
-    warningCount: result?.warnings.length ?? 0,
+    chapterCount: read?.chapterCount ?? 0,
+    warningCount: read?.result.warnings.length ?? 0,
     problem,
   }
 }
@@ -54,12 +80,10 @@ function summaryOf(reportId: string, files: Record<string, string> | null, resul
 export async function reportListLoader(_args: ReportRouteArgs, site: WordReportSite): Promise<ReportListData> {
   const reports: ReportSummary[] = []
   for (const reportId of await reportIdsOf(site.siteDir)) {
-    let files: Record<string, string> | null = null
     try {
-      files = await readReportFiles(site.siteDir, reportEntryOf(reportId))
-      reports.push(summaryOf(reportId, files, assembleDocument(reportEntryOf(reportId), files, { mode: 'complete' }), null))
+      reports.push(summaryOf(reportId, await readAndAssemble(site.siteDir, reportId), null))
     } catch (error) {
-      reports.push(summaryOf(reportId, null, null, error instanceof Error ? error.message : String(error)))
+      reports.push(summaryOf(reportId, null, error instanceof Error ? error.message : String(error)))
     }
   }
   return { siteName: site.siteName, hrefBase: site.hrefBase, reports }

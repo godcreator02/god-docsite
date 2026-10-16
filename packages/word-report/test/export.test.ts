@@ -62,9 +62,10 @@ afterEach(async () => {
 });
 
 describe('Word 导出 Node 命令（禁止启动实际 Word）', () => {
-  it('报告入口拒绝目录逃逸、机器路径及非content.json文件', () => {
+  it('报告入口拒绝目录逃逸、机器路径及 content.json、index.mdx 以外的文件', () => {
     expect(reportEntry(entry)).toBe(entry);
-    for (const value of ['../content.json', '/reports/content.json', 'C:\\content.json', 'reports//content.json', 'reports/./content.json', 'reports/other.json', null, 1]) expect(() => reportEntry(value)).toThrow('报告入口要是站点目录里的相对 content.json 路径');
+    expect(reportEntry('reports/example/index.mdx')).toBe('reports/example/index.mdx');
+    for (const value of ['../content.json', '/reports/content.json', 'C:\\content.json', 'reports//content.json', 'reports/./content.json', 'reports/other.json', 'reports/example/c1.mdx', '../index.mdx', null, 1]) expect(() => reportEntry(value)).toThrow('报告入口要是站点目录里的相对路径');
   });
 
   it('入口、模式、操作及路径参数错误抛错，不启动 renderer', async () => {

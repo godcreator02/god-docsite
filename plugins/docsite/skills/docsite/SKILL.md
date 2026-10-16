@@ -127,10 +127,12 @@ docsite.people.join {"dir":…,"id":"<字母数字_->","name":"<显示名>","git
 
 装了功能包 `@godcreator/word-report` 的站才有报告（`docsite.feature.add` 加上）。
 
-- 报告放在站点根下 `reports/<报告 id>/`，不放进 `content/`：`content.json` 是入口（标题、版本、作者，正文按顺序 `include` 各章），每章在 `chapters/<章>/content.json`，图片在那一章的 `assets/`，只给 Word 用的版式在 `layout.json`。
-  报告 id 只用小写字母、数字和 `-`
-- 格式是 `docreport`：字段说明在包里的 `engine/schemas/report-content.schema.json`，例子是同目录的 `report-content.example.json`；每个块的 id 用随机码，交叉引用写目标的 id，编号自动算
-- 网页上 `/reports` 列出全部报告，`/reports/<报告 id>` 整份报告一页；改了 JSON 刷新就能看到
+- 报告放在站点根下 `reports/<报告 id>/`，不放进 `content/`；报告 id 只用小写字母、数字和 `-`。正文有两种写法，一个报告目录里只能有一种，新写的报告用 MDX：
+  - **MDX**：`index.mdx` 是入口（文件头写 `title`、`language`、`revision`、`date`、`chapters`），各章一个 `.mdx` 放在报告目录根上，文献列表在 `references.mdx`，图片在 `assets/`。
+    图、表、编号公式、引用用固定的组件与写法（`<Figure>`、`<Table>`、` ```math <id> `、`<Ref to>`、`<Cite to>`），完整写法见文档站的「写报告」页；只有要被引用的对象才写 id，其余编译器生成
+  - **JSON**（`docreport` 格式）：`content.json` 是入口（正文按顺序 `include` 各章），每章在 `chapters/<章>/content.json`，图片在那一章的 `assets/`；字段说明在包里的 `engine/schemas/report-content.schema.json`
+  - 只给 Word 用的版式两种都写在 `layout.json`。JSON 报告要转成 MDX 用 `pnpm exec report-docx convert <JSON 报告 id> <新报告 id>`，它转完自己比对，对不上不留文件
+- 网页上 `/reports` 列出全部报告，`/reports/<报告 id>` 整份报告一页；改了文件刷新就能看到
 - 改完在站点目录运行 `pnpm exec report-docx check`，有问题照原话改
 - 导出 Word 用 `pnpm exec report-docx export <报告 id>`：要本机装着 Word 与 MathType，引擎目录里要有 `.venv`（没有时命令会说怎么建）；人让导出时才导出
 

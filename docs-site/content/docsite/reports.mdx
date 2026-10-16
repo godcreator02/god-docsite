@@ -1,11 +1,13 @@
 ---
 title: 写报告
 docfirst: none
-description: 站点里的报告：JSON 文件放在 reports/ 里，网页上一份报告一页，用命令行检查、导出 Word
+description: 站点里的报告：reports/ 下一份报告一个目录，正文写成 MDX 或 JSON，网页上一份报告一页，用命令行检查、导出 Word
 icon: FileSpreadsheet
 ---
 
-报告是功能包 `@godcreator/word-report` 提供的。一份报告是一组 JSON 文件，网页上整份显示成一页，也能用本机的 Word 导出成 docx 和 pdf，两边读的是同一份数据。
+报告是功能包 `@godcreator/word-report` 提供的。一份报告是 `reports/<报告 id>/` 下的一组文件，网页上整份显示成一页，也能用本机的 Word 导出成 docx 和 pdf，两边读的是同一份数据。
+
+正文有两种写法：**MDX**（新写的报告用它）和 **JSON**（`docreport` 格式）。MDX 报告读进来先编译成和 JSON 报告一样的一份文档，之后的检查、网页、导出完全一样。一个报告目录里只能有其中一种。
 
 ## 装上报告功能
 
@@ -17,62 +19,132 @@ docsite.feature.add  {"dir":"<站点目录>","package":"@godcreator/word-report"
 
 ## 文件放在哪
 
-报告放在站点根下的 `reports/<报告 id>/`，不放进 `content/`，所以报告不出现在文档目录里。报告 id 是网址的一段，只用小写字母、数字和 `-`。
+报告放在站点根下的 `reports/<报告 id>/`，不放进 `content/`，所以报告不出现在文档目录里。报告 id 是网址的一段，只用小写字母、数字和 `-`；MDX 报告的目录名还要以字母开头。
+
+### MDX 报告
 
 | 文件 | 装什么 |
 | --- | --- |
-| `content.json` | 报告的入口：标题、版本、日期、作者、封面上的字段；正文按顺序用 `include` 引入各章 |
+| `index.mdx` | 入口：文件头写标题、语言、版本、日期、作者、封面字段与章节列表 `chapters`；正文放摘要 |
+| `c1.mdx`、`a1.mdx` …… | 各章，文件名随意，按 `chapters` 的顺序接在入口正文后面；都放在报告目录根上，不放子目录 |
+| `references.mdx` | 可选：文献列表 |
+| `assets/` | 图片，只能是 png 或 jpg；正文里写 `assets/<文件名>` |
+| `layout.json` | 可选，只给 Word 用的版式，和 JSON 报告一样 |
+
+### JSON 报告
+
+| 文件 | 装什么 |
+| --- | --- |
+| `content.json` | 入口：标题、版本、日期、作者、封面上的字段；正文按顺序用 `include` 引入各章 |
 | `chapters/<章>/content.json` | 一章，它本身也是一份完整的报告文档 |
 | `chapters/<章>/assets/` | 这一章的图片，只能是 png 或 jpg；正文里写 `assets/<文件名>` |
 | `layout.json` | 只给 Word 用的版式：按块的 id 写宽度、最小行高、分页、横版，网页不读它 |
 
-不分章的报告就只有一个 `content.json`，正文直接写在里面。
+不分章的 JSON 报告就只有一个 `content.json`，正文直接写在里面。
 
-### 文档格式
+## MDX 写法
 
-每个 `content.json` 的 `format` 是 `docreport`。正文由块组成：节、段落、列表、图、公式、表格、代码、摘要、参考文献；段落里有文字、行内公式、交叉引用、链接、脚注和文献引用。
-每个块有一个随机的 id，交叉引用写目标的 id，编号都自动算。节按整份报告里的先后编；图、编号的表格和编号的公式按所在的顶层章各自从 1 编，写成「章号-序号」：
-第 2 章的第 4 张表是「表 2-4」，附录 A 的第一张图是「图 A-1」、第一个公式是「式（A-1）」，网页和导出的 Word 一样。
-所以图、编号的表格和编号的公式都要写在编号的章里（顶层的节，`numbering` 是 `decimal` 或 `appendix`），写在章外或不编号的章里直接报错。
-字段的完整说明在包里的 `engine/schemas/report-content.schema.json`，例子是同目录的 `report-content.example.json`。
+普通内容照 Markdown 写；图、表、公式、引用这类要编号的东西用几个固定的组件。编译器只解析、不执行 MDX，下面没列的写法一律报错，报在哪个文件的第几行第几列。
 
-### 多图
+一份最小的报告：
 
-一个图号下放几张图时，图不写 `src` 与 `alt`，改写网格的大小 `rows`、`columns`（各 1 到 6）和 `panels`（2 到 36 张）。每张图写明自己的位置和编号：
+````mdx title="index.mdx"
+---
+title: 10 kV 固态变压器初步设计报告
+language: zh-CN
+revision: V0.1
+date: 2026-10-17
+chapters: [c1.mdx]
+---
 
-| 字段 | 写什么 |
-| --- | --- |
-| `row`、`column` | 放在第几行、第几列，从 1 起 |
-| `label` | 图下显示的编号，不带括号：写 `a`，显示「(a)」 |
-| `id`、`src`、`alt` | 和单张图一样 |
-| `caption` | 可选，这张图的小标题，写在编号后面 |
+<Abstract keywords="固态变压器；双有源桥">
 
-网页照写的位置摆，不自动排列：各列等宽，没有图写到的格子留空，任何宽度下都不重排；编号也不自动编。
-两张图写在同一格、格子超出网格、同一个图里编号重复都直接报错。整个图的图题照常写在图的 `caption` 里，排在最下面一行。田字格是 `rows: 2, columns: 2` 放 4 张：
+摘要正文。
 
-```json
-{
-  "type": "figure", "id": "fig_waveforms", "rows": 2, "columns": 2,
-  "caption": [{ "type": "text", "text": "四种工况下的电流波形" }],
-  "panels": [
-    { "id": "fig_waveforms_a", "row": 1, "column": 1, "label": "a", "src": "assets/light-load.png", "alt": "轻载电流", "caption": [{ "type": "text", "text": "轻载" }] },
-    { "id": "fig_waveforms_b", "row": 1, "column": 2, "label": "b", "src": "assets/full-load.png", "alt": "满载电流", "caption": [{ "type": "text", "text": "满载" }] },
-    { "id": "fig_waveforms_c", "row": 2, "column": 1, "label": "c", "src": "assets/startup.png", "alt": "启动电流" },
-    { "id": "fig_waveforms_d", "row": 2, "column": 2, "label": "d", "src": "assets/fault.png", "alt": "故障电流" }
-  ]
-}
+</Abstract>
+````
+
+````mdx title="c1.mdx"
+# 主电路设计 [#c1]
+
+单元额定功率见<Ref to="tab-unit" />，由<Ref to="eq-pcell" />算出<Cite to="ref-iec" />。
+
+```math eq-pcell
+P_{cell} = \frac{P_N}{3N_{on}}
 ```
 
-交叉引用写整个图的 `id` 显示「图 2-3」，写某一张的 `id` 显示「图 2-3(b)」，括号里是那张图的 `label`。导出 Word 还不支持多图：报告里有多图时导出直接报错，网页上照常显示。
+<Table id="tab-unit">
+  <Caption>功率单元额定参数</Caption>
+
+| 参数 | 数值 |
+| --- | --- |
+| $P_{cell}$ | 69.4 kW |
+
+</Table>
+
+<Figure id="fig-main" src="assets/main-circuit.png">主电路</Figure>
+````
+
+````mdx title="references.mdx"
+<Reference id="ref-iec" url="https://example.com/iec">IEC 61800-5-1:2022[S]. Geneva: IEC, 2022.</Reference>
+````
+
+### 块
+
+| 写法 | 是什么 |
+| --- | --- |
+| `#`、`##`、`###` | 节，`#` 是章；标题末尾可写 `[#id]` 给节一个固定的 id。标题里只写文字，不跳级 |
+| 段落、`-` 列表、`1.` 列表 | 段落与列表 |
+| ` ```math ` 或 ` ```math <id> ` | 编号的公式 |
+| `$$ … $$` | 不编号的公式，不能被引用 |
+| ` ```<语言> ` | 代码块 |
+| `<Figure id? src alt?>图题</Figure>` | 一张图；不写 `alt` 时取图题的纯文字 |
+| `<Figures id? rows columns>`，里面一个 `<Caption>` 和若干 `<Panel id? row column label src alt?>小标题</Panel>` | 一个图号下的多张图，每张写明第几行第几列和编号 |
+| `<Table id?>`，里面先写可省的 `<Caption>表题</Caption>`，再写一张 GFM 表格 | 编号的表格 |
+| `<Table>` 里写小写的 `<table>`、`<tr>`、`<th>`、`<td rowSpan colSpan>` | 有合并单元格的编号表格；开头全是 `<th>` 的行是表头 |
+| 不在 `<Table>` 里的 GFM 表格 | 不编号、没有表题的表格 |
+| `<Abstract keywords="甲；乙">段落</Abstract>` | 摘要，只写在 `index.mdx` 正文最前面；关键词用全角分号隔开 |
+| `<Bibliography />` | 可选，参考文献的位置，不写时放在文末 |
+| `[^id]` 与 `[^id]: …` | 脚注；定义要和引用写在同一个文件里 |
+
+章文件的文件头只能写 `numbering: appendix`（附录）或 `numbering: none`（不编号），管这个文件的一级标题，下级跟着上级。
+组件的属性都写成字符串（`rows="2"`），不写成 `{…}`；正文里要写花括号或小于号就写成 `\{`、`\<`；注释写成 `{/* … */}`。
+
+### 行内
+
+| 写法 | 是什么 |
+| --- | --- |
+| `**加粗**`、`*斜体*`、`` `代码` ``、`<sub>`、`<sup>` | 文字的样式，可以嵌套；加粗或斜体的内容以标点开头或结尾时（如 `**（1）方案**`），`**` 在中文旁边读不出来，改写 `<strong>…</strong>`、`<em>…</em>` |
+| `$…$` | 行内公式 |
+| `<Ref to="id" />` | 交叉引用，显示「图 3-2」「表 1-1」「式（2-3）」「第 2.1 节」；加 `show="number"` 只显示编号，`show="title"` 显示标题 |
+| `<Cite to="ref-a ref-b" />` | 文献引用，几个 id 用空格隔开 |
+| `[文字](https://…)` | 链接 |
+| `<br />` | 换行 |
+
+段落里的换行两边都是中文时直接连上，否则换成一个空格。
+
+### id
+
+- **要引用、或要在 `layout.json` 里调版式的才写 id**，起一个看得懂的名字（`fig-main`、`tab-unit`），以后一直用它。id 以字母开头，只用字母、数字、`_` 与 `-`，不以 `auto-` 开头
+- 其余的 id 由编译器按内容生成（`auto-p-1x2y3z` 这种），不写回文件：同样的内容每次得到同样的 id，段落改了字 id 就变，挂在这一段上的评论随之对不上
+
+### 把 JSON 报告转成 MDX
+
+```bash
+pnpm exec report-docx convert <JSON 报告 id> <新报告 id>
+```
+
+它把 JSON 报告写成一份新的 MDX 报告 `reports/<新报告 id>/`，不动原报告：被引用的、`layout.json` 里出现的 id 写出来，其余交给编译器生成；图片复制进新目录的 `assets/`。
+写完立刻编译回来，和原报告逐项比对，对不上就删掉新目录、列出差在哪。原报告里有 MDX 写不出的内容（比如没有内容的段落）时一个文件都不写，列出位置。
 
 ## 网页上怎么看
 
 | 地址 | 显示什么 |
 | --- | --- |
 | `/reports` | 报告列表：每份一行，写标题、版本、日期、作者、章数，以及检查的结果 |
-| `/reports/<报告 id>` | 整份报告一页：各章按 `include` 的顺序接在一起，编号连着排；右侧目录列出前两层的节 |
+| `/reports/<报告 id>` | 整份报告一页：各章按顺序接在一起，编号连着排；右侧目录列出前两层的节 |
 
-- 每次打开都从文件现读：改了 JSON，刷新页面就能看到
+- 每次打开都从文件现读：改了文件，刷新页面就能看到
 - 读不对的报告在列表里照样列出来，「检查」一栏写出错的原话；打开它的页面直接报错
 - 报告页能评论：和内容页一样，右下角「批注」「评论」，批一段字、一个元素或整页；全站评论页里也列出来
 - 网页上没有导出按钮，导出只走下面的命令行
@@ -85,8 +157,10 @@ docsite.feature.add  {"dir":"<站点目录>","package":"@godcreator/word-report"
 pnpm exec report-docx check
 ```
 
-它把每份报告整份组装一次，每一章再单独组装一次，核对格式、引用、编号和图片；有问题时把原话列出来，退出码不是 0。加 `--json` 按 JSON 打出结果。
-单独组装一章时，指向别的章的引用要写 `externalLabel`，否则报错。
+它核对每份报告的格式、引用、编号和图片，有问题时把原话列出来，退出码不是 0。加 `--json` 按 JSON 打出结果。
+
+- MDX 报告整份检查一次，问题报在 MDX 文件的第几行第几列
+- JSON 报告整份组装一次，每一章再单独组装一次；单独组装一章时，指向别的章的引用要写 `externalLabel`，否则报错
 
 ## 导出 Word
 
@@ -96,6 +170,9 @@ pnpm exec report-docx check
 
 ```bash
 python -m venv .venv
+```
+
+```bash
 .venv\Scripts\pip install -r requirements.txt
 ```
 
@@ -105,8 +182,11 @@ python -m venv .venv
 
 ```bash
 pnpm exec report-docx export <报告 id>
+```
+
+```bash
 pnpm exec report-docx status <报告 id>
 ```
 
 `export` 等这次导出做完，把结果按 JSON 打出来，里面有 docx 和 pdf 的路径；`status` 只看状态，不启动 Word。导出结果放在引擎目录的 `out/` 下，附带自动核对的记录（页数等）；
-版式还要人看一遍。报告在导出前固定成一份快照，导出过程中改了文件不会混进这一次的结果。同一时间只能导出一份。
+版式还要人看一遍。报告在导出前固定成一份快照（MDX 报告是入口、各章、文献列表与图片），导出过程中改了文件不会混进这一次的结果。同一时间只能导出一份。

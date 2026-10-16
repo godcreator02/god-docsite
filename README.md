@@ -13,7 +13,7 @@
 | `@godcreator/code-pin`、`@godcreator/doc-export`、`@godcreator/trajectory` | 钉码、生成物、轨迹卡与星轨盘 |
 | `@godcreator/docfirst` | 命令行 `docfirst`：核对、确认、生成 |
 | `@godcreator/collab` | 项目协作：任务与模块、日志与日历、通知、合并检查 |
-| `@godcreator/word-report` | 报告：JSON 报告文档、报告列表与报告页、命令行 `report-docx`（检查、导出 Word） |
+| `@godcreator/word-report` | 报告：正文写成 MDX 或 JSON 的报告文档、报告列表与报告页、命令行 `report-docx`（检查、导出 Word、JSON 转 MDX） |
 
 | 插件（`plugins/`） | 做什么 |
 | --- | --- |

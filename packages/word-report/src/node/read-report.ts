@@ -1,9 +1,10 @@
 import { createHash } from 'node:crypto';
-import { readFile, realpath } from 'node:fs/promises';
+import { readFile, realpath, stat } from 'node:fs/promises';
 import path from 'node:path';
 import sharp from 'sharp';
 import { assembleDocument } from '../core/assemble.ts';
 import { parseReportJson } from '../core/json.ts';
+import { assembleMdxReport, MDX_ENTRY_NAME, mdxReportInputsOf } from '../core/mdx/index.ts';
 import { safeRelativePath, validateDocument } from '../core/validate.ts';
 import { ReportContentError, type AssemblyOptions, type AssemblyResult } from '../core/types.ts';
 export interface SnapshotEntry { path: string; sha256: string; size: number }
@@ -36,14 +37,16 @@ export async function readReport(entryAbsolute: string, options: AssemblyOptions
       return { bytes, key };
     } catch { throw new ReportContentError('Unreadable report file', key); }
   }
+  async function readText(absolute: string, format: string): Promise<string> {
+    const { bytes, key } = await readWithin(absolute);
+    try { return new TextDecoder('utf-8', { fatal: true }).decode(bytes); } catch { throw new ReportContentError(`Document must be UTF-8 ${format}`, key); }
+  }
   async function load(absolute: string): Promise<void> {
     const key = relative(absolute);
     if (visiting.has(key)) throw new ReportContentError('Circular document include', key);
     if (Object.hasOwn(files, key)) return; // Pure assembler reports repeated includes with source context.
     visiting.add(key);
-    const { bytes } = await readWithin(absolute);
-    let text: string;
-    try { text = new TextDecoder('utf-8', { fatal: true }).decode(bytes); } catch { throw new ReportContentError('Document must be UTF-8 JSON', key); }
+    const text = await readText(absolute, 'JSON');
     files[key] = text;
     const document = parseReportJson(text, key); validateDocument(document, key);
     for (const [i, block] of document.blocks.entries()) if (block.type === 'include') {
@@ -52,8 +55,19 @@ export async function readReport(entryAbsolute: string, options: AssemblyOptions
     }
     visiting.delete(key);
   }
-  await load(entry);
-  const result = assembleDocument(relative(entry), files, options);
+  /** MDX 报告：入口、各章与文献列表都进快照，编译成一份文档再组装 */
+  async function loadMdx(): Promise<AssemblyResult> {
+    const entryKey = relative(entry);
+    files[entryKey] = await readText(entry, 'MDX');
+    const { chapters, references } = mdxReportInputsOf(files[entryKey]!, entryKey);
+    for (const chapter of chapters) files[chapter] = await readText(path.resolve(root, chapter), 'MDX');
+    const referencesExist = await stat(path.resolve(root, references)).then(info => info.isFile(), (error: NodeJS.ErrnoException) => { if (error.code === 'ENOENT') return false; throw error; });
+    if (referencesExist) files[references] = await readText(path.resolve(root, references), 'MDX');
+    return assembleMdxReport({ reportId: path.basename(path.dirname(entry)), entry: entryKey, files }, options);
+  }
+  let result: AssemblyResult;
+  if (path.basename(entry) === MDX_ENTRY_NAME) result = await loadMdx();
+  else { await load(entry); result = assembleDocument(relative(entry), files, options); }
   const assetBytes: Record<string, Uint8Array> = Object.create(null), normalized = new Map<string, string>();
   for (const [src, source] of Object.entries(result.assets)) {
     const folded = source.normalize('NFC').toLowerCase(), previous = normalized.get(folded);

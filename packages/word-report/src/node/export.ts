@@ -11,7 +11,7 @@ type Mode = 'complete' | 'standalone'
 type Job = { id: string; site: string; entry: string; mode: Mode; state: 'running' | 'ready' | 'failed'; fingerprint: string; message?: string; checks?: unknown; outputs?: Record<string, string> }
 export interface ReportExportOptions {
   siteDir: string
-  /** 相对站点目录的 content.json 路径，如 reports/<报告 id>/content.json（reportEntryOf） */
+  /** 相对站点目录的入口路径：reports/<报告 id>/content.json 或 reports/<报告 id>/index.mdx（reportEntryIn） */
   entry: string
   mode?: Mode
   action?: 'start' | 'status'
@@ -56,7 +56,7 @@ const packagedEngineDir = (packageDir: string) => path.join(packageDir, 'engine'
 
 /** 入口相对站点目录，不收本机的任意路径 */
 export function reportEntry(entry: unknown): string {
-  if (typeof entry !== 'string' || !entry.endsWith('/content.json') || /[\\:\x00-\x1f]/.test(entry) || entry.startsWith('/') || entry.split('/').some((part) => !part || part === '.' || part === '..')) throw new Error('报告入口要是站点目录里的相对 content.json 路径，如 reports/<报告 id>/content.json')
+  if (typeof entry !== 'string' || !(entry.endsWith('/content.json') || entry.endsWith('/index.mdx')) || /[\\:\x00-\x1f]/.test(entry) || entry.startsWith('/') || entry.split('/').some((part) => !part || part === '.' || part === '..')) throw new Error('报告入口要是站点目录里的相对路径，如 reports/<报告 id>/content.json 或 reports/<报告 id>/index.mdx')
   return entry
 }
 function reportMode(value: unknown): Mode {
