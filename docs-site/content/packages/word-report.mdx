@@ -96,7 +96,7 @@ import { ChapterAssembly } from './word-report/chapter-assembly'
 
 建站器把 `template/` 下的接线文件写进站点的 `app/features/word-report/`：三条路由 `/reports`（列表）、`/reports/:report`（整份一页）、`/reports/:report/assets/*`（图片）；另有每次请求现组装站点信息的 `site.server.ts` 与侧栏横排的「报告」入口。
 
-{/* ref file="../packages/word-report/template/routes.ts" hash="5f1543b1a98b" blob="65e784d32088" */}
+{/* ref file="../packages/word-report/template/routes.ts" hash="0860a9d22604" blob="2d895248505a" */}
 
 图片只交这份报告组装结果里有的：地址是组装后的路径 `assets/<文档 id>/<文件名>`，不是任意文件。每个块的 id 原样写到页面元素上，留给评论按元素 id 定位。
 

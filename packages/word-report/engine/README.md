@@ -13,16 +13,16 @@
 .\.venv\Scripts\python.exe -m unittest discover -s tests -v
 ```
 
-## 报告包的数据入口
+## word-report 交给引擎的数据
 
-网站只用于阅读和评论。`@godcreator/docsite-reports` 的 `report-docx` CLI 与 `./export` API 先把分章内容编译成完整 `format: docreport` / `schemaVersion: 1` 文档与 `assets/`，交给以下入口。它们不依赖 gwb。`--data-only` 必须传递；这个模式不导入快照目录中的 `report.py`。未展开的文档引用不会通过正式 Schema。
+网站只用于阅读和评论。`@godcreator/word-report` 的命令行 `report-docx` 与 `./node` 出口的 `reportExport` 先把分章内容编译成完整 `format: docreport` / `schemaVersion: 1` 文档与 `assets/`，交给以下入口。它们不依赖 gwb。`--data-only` 必须传递；这个模式不导入快照目录中的 `report.py`。未展开的文档引用不会通过正式 Schema。
 
 ```powershell
 .\.venv\Scripts\python.exe -m docreport validate <快照目录> --data-only
 .\.venv\Scripts\python.exe -m docreport build <快照目录> --data-only --out out\<新的运行目录>
 ```
 
-需要版式数据时，可加 `--layout <layout.json>`，内容为已有 `validate_layout` 支持的节点 ID 字典：段落样式、图片宽度、表格列宽与行高、顶层章节起页与方向。默认采用 `templates/project-report.dotx`。报告包的 CLI/API 不接受任意 Python 布局程序。
+需要版式数据时，可加 `--layout <layout.json>`，内容为已有 `validate_layout` 支持的节点 ID 字典：段落样式、图片宽度、表格列宽与行高、顶层章节起页与方向。默认采用 `templates/project-report.dotx`。word-report 的命令行与 `reportExport` 不接受任意 Python 布局程序。
 
 已有 demo 保留其受信任的 `report.py` 与原入口，用于原有版式和专属验收回归：
 
