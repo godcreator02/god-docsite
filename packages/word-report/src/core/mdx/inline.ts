@@ -99,8 +99,14 @@ function collectElement(context: CompileContext, element: MdastNode, marks: read
       return;
     default:
       if (name !== null && BLOCK_COMPONENTS.has(name)) failAt(context, element, `<${name}> 要单独成段，前后空一行，不写在一段文字中间`);
-      failAt(context, element, `认不出组件 <${name ?? ''}>：行内只能用 WordRef、WordCite、WordPlainMath、sub、sup、strong、em、br`);
+      failAt(context, element, unknownComponentMessage(name ?? '', '行内只能用 WordRef、WordCite、WordPlainMath 与 HTML 标签 sub、sup、strong、em、br'));
   }
+}
+
+/** 认不出的元素：大写开头、不以 Word 开头的单独说明——报告的组件名都以 Word 开头，小写的只认几个 HTML 标签 */
+export function unknownComponentMessage(name: string, allowed: string): string {
+  if (/^[A-Z]/.test(name) && !name.startsWith('Word')) return `报告里的组件都以 Word 开头，<${name}> 不认：${allowed}`;
+  return `认不出组件 <${name}>：${allowed}`;
 }
 
 const PLAIN_MATH_MARKS: readonly Mark[] = ['em', 'sub', 'sup'];

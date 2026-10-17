@@ -1,7 +1,7 @@
 import type { CellBlock, Equation, Figure, FigurePanel, Paragraph, ReportBlock, ReportInline, ReportList, Section, Table, TableCell } from '../types.ts';
 import { failAt, isCommentOnlyExpression, located, type CompileContext, type MdastNode } from './context.ts';
 import { explicitIdOf } from './ids.ts';
-import { BLOCK_COMPONENTS, inlinesOf, plainTextOf } from './inline.ts';
+import { BLOCK_COMPONENTS, inlinesOf, plainTextOf, unknownComponentMessage } from './inline.ts';
 import { attributesOf, elementChildrenOf, phrasingChildrenOf, positiveIntegerOf } from './jsx.ts';
 import { positionOf } from './parse.ts';
 
@@ -157,7 +157,7 @@ function componentOf(context: CompileContext, element: MdastNode, place: BlockPl
     case 'tr':
     case 'th':
     case 'td': return failAt(context, element, `<${element.name}> 只能写在 <WordTable> 里：不编号的简单表格直接写 GFM 表格`);
-    default: return failAt(context, element, `认不出组件 <${element.name ?? ''}>：块级只能用 Figure、Figures、Table、Abstract、Bibliography`);
+    default: return failAt(context, element, unknownComponentMessage(element.name ?? '', '块级只能用 WordFigure、WordFigures、WordTable、WordAbstract、WordBibliography'));
   }
 }
 
