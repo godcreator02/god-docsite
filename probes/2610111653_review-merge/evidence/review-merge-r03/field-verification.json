@@ -1,0 +1,74 @@
+{
+  "status": "passed",
+  "numbers": {
+    "eq-edit": "1-1",
+    "eq-stable": "2-1",
+    "fig-stable": "1",
+    "tbl-values": "1"
+  },
+  "references": [
+    {
+      "bookmark": "DR_f9cd45bd8852ca66d7e672693774_n",
+      "value": "1-1"
+    },
+    {
+      "bookmark": "DR_9c79c3fef63d8f010d6e210f5772_n",
+      "value": "1"
+    },
+    {
+      "bookmark": "DR_f9cd45bd8852ca66d7e672693774_n",
+      "value": "1-1"
+    },
+    {
+      "bookmark": "DR_9c79c3fef63d8f010d6e210f5772_n",
+      "value": "1"
+    },
+    {
+      "bookmark": "DR_f9cd45bd8852ca66d7e672693774_n",
+      "value": "1-1"
+    },
+    {
+      "bookmark": "DR_9c79c3fef63d8f010d6e210f5772_n",
+      "value": "1"
+    },
+    {
+      "bookmark": "DR_f9cd45bd8852ca66d7e672693774_n",
+      "value": "1-1"
+    },
+    {
+      "bookmark": "DR_9c79c3fef63d8f010d6e210f5772_n",
+      "value": "1"
+    },
+    {
+      "bookmark": "DR_f9cd45bd8852ca66d7e672693774_n",
+      "value": "1-1"
+    },
+    {
+      "bookmark": "DR_9c79c3fef63d8f010d6e210f5772_n",
+      "value": "1"
+    },
+    {
+      "bookmark": "DR_f9cd45bd8852ca66d7e672693774_n",
+      "value": "1-1"
+    },
+    {
+      "bookmark": "DR_9c79c3fef63d8f010d6e210f5772_n",
+      "value": "1"
+    },
+    {
+      "bookmark": "DR_f9cd45bd8852ca66d7e672693774_n",
+      "value": "1-1"
+    },
+    {
+      "bookmark": "DR_9c79c3fef63d8f010d6e210f5772_n",
+      "value": "1"
+    }
+  ],
+  "referenceCount": 14,
+  "tocCount": 1,
+  "wordVersion": "16.0",
+  "wordBuild": "16.0.14334",
+  "python": "3.12.14 (main, Aug 25 2026, 14:01:42) [MSC v.1944 64 bit (AMD64)]",
+  "docxSha256": "a9a28d0cced5ed07d95fc85b3d181b471ede49049e21b470e082609519530d74",
+  "retainedFromActualReturn": true
+}

@@ -1,0 +1,15 @@
+{
+  "mode": "patch",
+  "changes": [
+    {
+      "id": "eq-edit",
+      "kind": "equation",
+      "node": {
+        "type": "equation",
+        "id": "eq-edit",
+        "latex": "P=VI\\eta",
+        "numbered": true
+      }
+    }
+  ]
+}

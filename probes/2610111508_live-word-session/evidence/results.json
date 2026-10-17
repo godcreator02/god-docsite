@@ -1,0 +1,58 @@
+{
+  "character": {
+    "run": "live-word-r02",
+    "rounds": 4,
+    "medians": {
+      "editSeconds": 0.3628542499936884,
+      "saveSeconds": 0.27815205001388676,
+      "refreshSeconds": 3.2036629499780247,
+      "saveAfterRefreshSeconds": 0.2392383999977028,
+      "pdfSeconds": 1.6021898000180954,
+      "editToPdfSeconds": 5.577174850011943,
+      "staticCheckSeconds": 0.1436218999879202,
+      "editAndSaveSeconds": 0.6255015500064474
+    }
+  },
+  "table": {
+    "run": "live-word-r02",
+    "rounds": 4,
+    "medians": {
+      "editSeconds": 5.226250899999286,
+      "saveSeconds": 0.24341014999663457,
+      "refreshSeconds": 2.842282149998937,
+      "saveAfterRefreshSeconds": 0.2330017000058433,
+      "pdfSeconds": 1.6832221999939065,
+      "editToPdfSeconds": 10.321885500001372,
+      "staticCheckSeconds": 0.12809240000206046,
+      "editAndSaveSeconds": 5.464624200001708
+    }
+  },
+  "formula": {
+    "run": "live-word-r02",
+    "rounds": 4,
+    "medians": {
+      "editSeconds": 1.3031684500165284,
+      "saveSeconds": 0.22715744999004528,
+      "refreshSeconds": 3.4834834500215948,
+      "saveAfterRefreshSeconds": 0.24764309999591205,
+      "pdfSeconds": 1.4379583499830915,
+      "editToPdfSeconds": 6.70111330000509,
+      "staticCheckSeconds": 0.12926690001040697,
+      "editAndSaveSeconds": 1.548629950004397
+    }
+  },
+  "cell": {
+    "run": "live-word-cell-r01",
+    "rounds": 4,
+    "medians": {
+      "editSeconds": 0.3296868499892298,
+      "saveSeconds": 0.2536500499845715,
+      "refreshSeconds": 3.3569245000107912,
+      "saveAfterRefreshSeconds": 0.24015540000982583,
+      "pdfSeconds": 1.3925167999987025,
+      "editToPdfSeconds": 5.652858849993208,
+      "staticCheckSeconds": 0.1283489500056021,
+      "editAndSaveSeconds": 0.5824633999873186
+    }
+  }
+}

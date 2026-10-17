@@ -1,0 +1,38 @@
+         15064 function calls (15014 primitive calls) in 19.179 seconds
+
+   Ordered by: cumulative time
+   List reduced from 187 to 30 due to restriction <30>
+
+   ncalls  tottime  percall  cumtime  percall filename:lineno(function)
+        1    0.775    0.775   19.179   19.179 compose.py:661(build)
+        1    0.322    0.322   14.822   14.822 compose.py:626(blocks)
+      525    7.302    0.014    7.302    0.014 {method 'InvokeTypes' of 'PyIDispatch' objects}
+       17    0.539    0.032    7.239    0.426 compose.py:311(rich_paragraph)
+        1    0.024    0.024    6.534    6.534 compose.py:538(table_node)
+        1    0.825    0.825    6.509    6.509 compose.py:477(_bulk_table)
+      242    0.003    0.000    6.335    0.026 __init__.py:586(__getattr__)
+      242    0.007    0.000    6.332    0.026 __init__.py:579(_ApplyTypes_)
+      352    6.024    0.017    6.024    0.017 {method 'QueryInterface' of 'PyIUnknown' objects}
+      348    0.002    0.000    6.004    0.017 __init__.py:108(Dispatch)
+      348    0.009    0.000    6.000    0.017 __init__.py:21(__WrapDispatch)
+      348    0.007    0.000    5.987    0.017 __init__.py:524(__init__)
+       93    0.917    0.010    3.645    0.039 compose.py:253(mark)
+       17    0.001    0.000    3.566    0.210 compose.py:236(paragraph)
+      252    0.001    0.000    3.048    0.012 __init__.py:616(_get_good_object_)
+      252    0.000    0.000    3.047    0.012 __init__.py:610(_get_good_single_object_)
+       95    0.002    0.000    2.829    0.030 00020905-0000-0000-C000-000000000046x0x8x7.py:4977(Add)
+      242    0.001    0.000    2.770    0.011 __init__.py:605(_get_good_object_)
+       18    0.268    0.015    2.182    0.121 compose.py:229(point)
+       78    0.001    0.000    1.856    0.024 00020905-0000-0000-C000-000000000046x0x8x7.py:27375(Range)
+       35    0.000    0.000    1.844    0.053 compose.py:247(part)
+       75    0.001    0.000    1.580    0.021 __init__.py:592(__setattr__)
+       75    1.580    0.021    1.580    0.021 {method 'Invoke' of 'PyIDispatch' objects}
+      109    0.000    0.000    1.122    0.010 __init__.py:636(__getattr__)
+      115    0.000    0.000    1.122    0.010 {built-in method builtins.getattr}
+        1    0.196    0.196    1.080    1.080 compose.py:172(finish)
+       71    0.001    0.000    1.007    0.014 00020905-0000-0000-C000-000000000046x0x8x7.py:18683(SetRange)
+       13    0.000    0.000    0.561    0.043 util.py:102(__next__)
+       37    0.000    0.000    0.528    0.014 __init__.py:628(__init__)
+       37    0.000    0.000    0.501    0.014 __init__.py:642(__setattr__)
+
+

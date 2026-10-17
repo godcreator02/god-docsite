@@ -1,0 +1,98 @@
+{
+  "python": "D:\\unitfolders\\nb9zj-word-conversion-lab\\word-conversion-lab\\.venv\\Scripts\\python.exe",
+  "dll": "C:\\Program Files (x86)\\MathType\\MathPage\\64\\MathPage.wll",
+  "input": {
+    "id": "eq-fraction",
+    "display": true,
+    "numbered": true,
+    "latex": "H(s)=\\frac{1}{LCs^2+RCs+1}"
+  },
+  "fixtureSha256": "8dc4d0430939c3cd4a3e423cab3e21b063f171afd2567d633e80b978a1037f1c",
+  "status": "error",
+  "events": [
+    {
+      "event": "init",
+      "returnCode": 1
+    },
+    {
+      "event": "functionality",
+      "full": 1,
+      "mode": 2,
+      "modeName": "full"
+    },
+    {
+      "event": "word-started",
+      "version": "16.0"
+    },
+    {
+      "event": "inserted",
+      "progId": "Equation.DSMT4"
+    },
+    {
+      "event": "write-tex",
+      "stage": "initial",
+      "returnCode": 0,
+      "text": "H(s)=\\frac{1}{LCs^2+RCs+1}"
+    },
+    {
+      "event": "read-length",
+      "stage": "initial",
+      "returnCode": 0,
+      "length": 29
+    },
+    {
+      "event": "read-tex",
+      "stage": "initial",
+      "returnCode": 0,
+      "text": "$H(s)=\\frac{1}{LCs^2+RCs+1}$",
+      "matchesExpected": true
+    },
+    {
+      "event": "close-ole",
+      "stage": "initial",
+      "returnCode": 0
+    },
+    {
+      "event": "reopened",
+      "objectCount": 1,
+      "progId": "Equation.DSMT4"
+    },
+    {
+      "event": "read-length",
+      "stage": "reopened-original",
+      "returnCode": 0,
+      "length": 29
+    },
+    {
+      "event": "read-tex",
+      "stage": "reopened-original",
+      "returnCode": 0,
+      "text": "$H(s)=\\frac{1}{LCs^2+RCs+1}$",
+      "matchesExpected": true
+    },
+    {
+      "event": "close-ole",
+      "stage": "reopened-original",
+      "returnCode": 0
+    },
+    {
+      "event": "replace-ole",
+      "mode": "recreate-at-original-range",
+      "objectCount": 2
+    },
+    {
+      "event": "exception",
+      "detail": "Traceback (most recent call last):\n  File \"D:\\unitfolders\\nb9zj-word-conversion-lab\\word-conversion-lab\\routes\\word-com\\mathtype-probe.py\", line 159, in main\n    raise AssertionError('Replacing the equation left extra OLE objects')\nAssertionError: Replacing the equation left extra OLE objects\n"
+    },
+    {
+      "event": "terminate-api",
+      "returnCode": 0
+    },
+    {
+      "event": "finished",
+      "status": "error"
+    }
+  ],
+  "visualReview": "not_performed",
+  "systemAnsiCodePage": "1252"
+}

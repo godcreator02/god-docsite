@@ -1,0 +1,14 @@
+{
+  "generationSeconds": 1.4054693999933079,
+  "tableConstraintsSeconds": 0.0433041000214871,
+  "command": [
+    "C:\\Users\\GODAME~1\\AppData\\Local\\Temp\\word-lab-tools\\pandoc-3.12.1\\pandoc.exe",
+    "D:\\unitfolders\\nb9zj-word-conversion-lab\\word-conversion-lab\\runs\\sgcc-samples-20261010-141515\\pandoc-input.md",
+    "--from=markdown+raw_attribute",
+    "--to=docx",
+    "--reference-doc=D:\\unitfolders\\nb9zj-word-conversion-lab\\word-conversion-lab\\templates\\sgcc-style-reference.docx",
+    "-o",
+    "D:\\unitfolders\\nb9zj-word-conversion-lab\\word-conversion-lab\\runs\\sgcc-samples-20261010-141515\\pandoc.raw.docx"
+  ],
+  "version": "pandoc 3.12.1"
+}

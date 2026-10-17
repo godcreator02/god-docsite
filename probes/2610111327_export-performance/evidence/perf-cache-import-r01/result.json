@@ -1,0 +1,11 @@
+[
+  {
+    "mode": "minimal",
+    "error": "(-2147352567, 'Exception occurred.', (0, 'Microsoft Word', '不能在指定的位置插入 XML 标记。', 'wdmain11.chm', 25625, -2146822143), None)"
+  },
+  {
+    "mode": "original",
+    "count": 1,
+    "progid": "Equation.DSMT4"
+  }
+]

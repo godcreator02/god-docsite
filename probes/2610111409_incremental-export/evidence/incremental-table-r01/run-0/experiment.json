@@ -1,0 +1,19 @@
+{
+  "mode": "patch",
+  "seconds": 29.323,
+  "changed": [
+    {
+      "id": "tbl-values",
+      "kind": "table"
+    }
+  ],
+  "createdEquations": 0,
+  "unchangedEquationPayloads": 2,
+  "unchangedPayloadsEqual": true,
+  "pdf": {
+    "pages": 10,
+    "sha256": "b3ddfdc01cc5bfe1a8f2a24c7d2d2462f71376e66f8250a8b409ab625b6308cb",
+    "textWorkers": 1
+  },
+  "status": "passed_automation_visual_review_pending"
+}

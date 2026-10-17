@@ -1,0 +1,23 @@
+{
+  "pages": 10,
+  "revisions": 0,
+  "comments": 0,
+  "tables": 1,
+  "inlineShapes": 3,
+  "omml": 0,
+  "plainParagraphsVerified": 62,
+  "teamParagraphsWritten": [
+    "p-edit"
+  ],
+  "status": "passed_automation_visual_review_pending",
+  "allOlePayloadsPreserved": true,
+  "imageBytesPreserved": true,
+  "sourceDocxHash": "15c6c84ad72dabe7cd0adb7e51b2ff956f6a12988809d0a4255ef4f26e096758",
+  "docxHash": "a9a28d0cced5ed07d95fc85b3d181b471ede49049e21b470e082609519530d74",
+  "pdfHash": "15188118e9c0c709619cd7bde9ab5cea2cea6fe5e8a2c55424e39cb83452ffd5",
+  "pdfTextChecks": "passed",
+  "visualReview": "pending-user-review",
+  "elapsedSeconds": 49.383289499994135,
+  "simulation": true,
+  "mergeTestCount": 7
+}

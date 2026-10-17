@@ -1,0 +1,23 @@
+{
+  "status": "failed",
+  "startedAt": "2026-10-11T02:31:06.562940+00:00",
+  "report": "D:\\unitfolders\\nb9zj-word-conversion-lab\\word-conversion-lab\\out\\perf-full-input-r01",
+  "visualReview": "pending",
+  "events": [
+    {
+      "event": "start",
+      "template": "D:\\unitfolders\\nb9zj-word-conversion-lab\\word-conversion-lab\\out\\perf-full-input-r01\\project-report-noimgcompress.dotx",
+      "templateSha256": "223c75d27f9d38f1b03ea233b6611c8bec6dbdc249290cf01879e01f6e8778fc",
+      "elapsedSeconds": 0.712
+    },
+    {
+      "event": "compose-start",
+      "elapsedSeconds": 5.761
+    },
+    {
+      "event": "exception",
+      "detail": "Traceback (most recent call last):\n  File \"D:\\unitfolders\\nb9zj-word-conversion-lab\\word-conversion-lab\\src\\docreport\\__main__.py\", line 135, in build\n    pending = module.build(doc, content, output)\n              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"D:\\unitfolders\\nb9zj-word-conversion-lab\\word-conversion-lab\\src\\docreport\\__main__.py\", line 48, in <lambda>\n    module.build = lambda doc, data, output: ContentComposer(doc, data, directory, layout).build()\n                                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"D:\\unitfolders\\nb9zj-word-conversion-lab\\word-conversion-lab\\src\\docreport\\compose.py\", line 674, in build\n    self.blocks(self.content['blocks'])\n  File \"D:\\unitfolders\\nb9zj-word-conversion-lab\\word-conversion-lab\\src\\docreport\\compose.py\", line 632, in blocks\n    self.section(node, depth)\n  File \"D:\\unitfolders\\nb9zj-word-conversion-lab\\word-conversion-lab\\src\\docreport\\compose.py\", line 423, in section\n    self.blocks(node['children'], depth + 1)\n  File \"D:\\unitfolders\\nb9zj-word-conversion-lab\\word-conversion-lab\\src\\docreport\\compose.py\", line 641, in blocks\n    self.table_node(node, depth)\n  File \"D:\\unitfolders\\nb9zj-word-conversion-lab\\word-conversion-lab\\src\\docreport\\compose.py\", line 542, in table_node\n    return self._bulk_table(node)\n           ^^^^^^^^^^^^^^^^^^^^^^\n  File \"D:\\unitfolders\\nb9zj-word-conversion-lab\\word-conversion-lab\\src\\docreport\\compose.py\", line 534, in _bulk_table\n    raise RuntimeError('Bulk table character offsets differ from Word.')\nRuntimeError: Bulk table character offsets differ from Word.\n",
+      "elapsedSeconds": 15.854
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "python": "3.12.14 (main, Aug 25 2026, 14:01:42) [MSC v.1944 64 bit (AMD64)]",
+  "executable": "D:\\unitfolders\\nb9zj-word-conversion-lab\\word-conversion-lab\\.venv\\Scripts\\python.exe",
+  "platform": "Windows-11-10.0.26200-SP0",
+  "packages": {
+    "pywin32": "312",
+    "comtypes": "1.4.17",
+    "pypdf": "6.10.0",
+    "Pillow": "12.3.0",
+    "jsonschema": "4.25.1"
+  },
+  "baseCommit": "d6e01303a6a20f64e2e21314fe8fbc75b476bb50",
+  "sourceState": "uncommitted working files identified by hashes",
+  "publicTemplateSha256": "2d645df23ecd1ee6f40d7da29854435139ff9d77a490f29c5051b6960bf909c4"
+}

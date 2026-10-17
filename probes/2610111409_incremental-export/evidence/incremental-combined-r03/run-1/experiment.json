@@ -1,0 +1,27 @@
+{
+  "mode": "patch",
+  "seconds": 39.14,
+  "changed": [
+    {
+      "id": "p-edit",
+      "kind": "paragraph"
+    },
+    {
+      "id": "tbl-values",
+      "kind": "table"
+    },
+    {
+      "id": "eq-edit",
+      "kind": "equation"
+    }
+  ],
+  "createdEquations": 1,
+  "unchangedEquationPayloads": 1,
+  "unchangedPayloadsEqual": true,
+  "pdf": {
+    "pages": 10,
+    "sha256": "e5f41cd7ebc54a463ebb10b5b4c1064a92df7c1abb7bf2aa75f9e0d11d0e3892",
+    "textWorkers": 1
+  },
+  "status": "passed_automation_visual_review_pending"
+}

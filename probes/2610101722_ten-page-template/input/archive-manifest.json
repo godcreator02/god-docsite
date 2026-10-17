@@ -1,0 +1,846 @@
+{
+  "archivedAt": "2026-10-10T20:19:55.425231+08:00",
+  "sourceRepo": "D:\\unitfolders\\nb9zj-word-conversion-lab\\word-conversion-lab",
+  "sourceCommit": "e8e308e51ea99863800dcce518fcff3767856b12",
+  "mode": "template",
+  "question": "自建原生 dotx 能否覆盖十页正文的公式、长表、横向节、目录和编辑回归？",
+  "conclusion": "r03 共 12 页，其中正文 10 页；6 条 OMML、5 张表、2 幅图，通过全公式编辑、编号插入、表格增行及修订检查，并逐页验收。",
+  "limitations": "r01/r02 中间源码未单独留存；r03 对应 Git 提交冻结。归档保留全部已存在失败/中间检查记录，新运行不自动宣告视觉通过。",
+  "originalRuns": [
+    "project-report-r01",
+    "project-report-r02",
+    "project-report-r03"
+  ],
+  "historicalSourceRevisions": [
+    {
+      "commit": "e8e308e51ea99863800dcce518fcff3767856b12",
+      "files": 14,
+      "snapshot": "input/history-source/e8e308e51ea99863800dcce518fcff3767856b12"
+    }
+  ],
+  "inputFiles": [
+    {
+      "path": "input/history-source/e8e308e51ea99863800dcce518fcff3767856b12/fixtures/canonical.json",
+      "sha256": "c5a0fa88beccde3c90715cbdaaa742e6d17a6a903e0730ed591d7aa6f16c96e5",
+      "bytes": 47206
+    },
+    {
+      "path": "input/history-source/e8e308e51ea99863800dcce518fcff3767856b12/requirements.txt",
+      "sha256": "2cba12dfb77c691d83f77be6b32c2f6708ec0aaa1df8376373ee160444c78260",
+      "bytes": 177
+    },
+    {
+      "path": "input/history-source/e8e308e51ea99863800dcce518fcff3767856b12/routes/direct-docx/build.py",
+      "sha256": "f9960884cf9dccbb1a0cef2306714072722ac2be22e91f458efafffc21ef93bd",
+      "bytes": 3513
+    },
+    {
+      "path": "input/history-source/e8e308e51ea99863800dcce518fcff3767856b12/routes/pandoc/build.py",
+      "sha256": "808e6be2f107e38ce581638ff9d322fd0ce6d09333b9c5c1cf325e479ca7105e",
+      "bytes": 3609
+    },
+    {
+      "path": "input/history-source/e8e308e51ea99863800dcce518fcff3767856b12/routes/word-com/build.py",
+      "sha256": "6d48d870419b6082bd1061b104976ec368829d6e85b19929644c890f64fceb6b",
+      "bytes": 12655
+    },
+    {
+      "path": "input/history-source/e8e308e51ea99863800dcce518fcff3767856b12/routes/word-com/restyle.py",
+      "sha256": "f4aa600c068721d42f6d591b8e95f266b3cf6ddd01f3fce734b9b480d39c821d",
+      "bytes": 16932
+    },
+    {
+      "path": "input/history-source/e8e308e51ea99863800dcce518fcff3767856b12/routes/word-com/template.py",
+      "sha256": "27139122c775fb6c3c2161d8c5c21a908b7b5dbed4ece1f5210f47c3e648a9bc",
+      "bytes": 6745
+    },
+    {
+      "path": "input/history-source/e8e308e51ea99863800dcce518fcff3767856b12/scripts/audit-and-render.py",
+      "sha256": "3f5eb4a7b294c9fa152e6f91e9929703cd2680657873647ff43e89dbce514c15",
+      "bytes": 2648
+    },
+    {
+      "path": "input/history-source/e8e308e51ea99863800dcce518fcff3767856b12/scripts/capture-environment.py",
+      "sha256": "7d9173c8765d34ce04d9b11767d94b1364710f84e48c42d1d37fe7ad30f52d48",
+      "bytes": 4374
+    },
+    {
+      "path": "input/history-source/e8e308e51ea99863800dcce518fcff3767856b12/scripts/document_common.py",
+      "sha256": "710d83c3fb802ddc588bbdd96a366e0d53502a9d0f1717918894575699db48f1",
+      "bytes": 5790
+    },
+    {
+      "path": "input/history-source/e8e308e51ea99863800dcce518fcff3767856b12/scripts/record-evidence.py",
+      "sha256": "43ffd47346f26ade525436cf546f97656c47221c407dbf74a4e67c92ada6e951",
+      "bytes": 5337
+    },
+    {
+      "path": "input/history-source/e8e308e51ea99863800dcce518fcff3767856b12/scripts/word-verify.py",
+      "sha256": "ec2f79882cf37b832758c22da1f0c99f0a1e7bc91556f0f09899cca50fa0bb67",
+      "bytes": 14214
+    },
+    {
+      "path": "input/history-source/e8e308e51ea99863800dcce518fcff3767856b12/scripts/word_com.py",
+      "sha256": "c7acaf6bbbdaf3799a15f13044baddd42de1a65bb6945b6ed5b3839956df80b2",
+      "bytes": 2121
+    },
+    {
+      "path": "input/history-source/e8e308e51ea99863800dcce518fcff3767856b12/templates/source.json",
+      "sha256": "a6aa3e0fb052caa35654b37b71dde8fae60de3d67d3e594c02cc77cd66b92d48",
+      "bytes": 1472
+    },
+    {
+      "path": "input/repo/fixtures/canonical.json",
+      "sha256": "c5a0fa88beccde3c90715cbdaaa742e6d17a6a903e0730ed591d7aa6f16c96e5",
+      "bytes": 47206
+    },
+    {
+      "path": "input/repo/requirements.txt",
+      "sha256": "2cba12dfb77c691d83f77be6b32c2f6708ec0aaa1df8376373ee160444c78260",
+      "bytes": 177
+    },
+    {
+      "path": "input/repo/routes/direct-docx/build.py",
+      "sha256": "f9960884cf9dccbb1a0cef2306714072722ac2be22e91f458efafffc21ef93bd",
+      "bytes": 3513
+    },
+    {
+      "path": "input/repo/routes/pandoc/build.py",
+      "sha256": "808e6be2f107e38ce581638ff9d322fd0ce6d09333b9c5c1cf325e479ca7105e",
+      "bytes": 3609
+    },
+    {
+      "path": "input/repo/routes/word-com/build.py",
+      "sha256": "6d48d870419b6082bd1061b104976ec368829d6e85b19929644c890f64fceb6b",
+      "bytes": 12655
+    },
+    {
+      "path": "input/repo/routes/word-com/restyle.py",
+      "sha256": "f4aa600c068721d42f6d591b8e95f266b3cf6ddd01f3fce734b9b480d39c821d",
+      "bytes": 16932
+    },
+    {
+      "path": "input/repo/routes/word-com/template.py",
+      "sha256": "27139122c775fb6c3c2161d8c5c21a908b7b5dbed4ece1f5210f47c3e648a9bc",
+      "bytes": 6745
+    },
+    {
+      "path": "input/repo/scripts/audit-and-render.py",
+      "sha256": "3f5eb4a7b294c9fa152e6f91e9929703cd2680657873647ff43e89dbce514c15",
+      "bytes": 2648
+    },
+    {
+      "path": "input/repo/scripts/capture-environment.py",
+      "sha256": "7d9173c8765d34ce04d9b11767d94b1364710f84e48c42d1d37fe7ad30f52d48",
+      "bytes": 4374
+    },
+    {
+      "path": "input/repo/scripts/document_common.py",
+      "sha256": "710d83c3fb802ddc588bbdd96a366e0d53502a9d0f1717918894575699db48f1",
+      "bytes": 5790
+    },
+    {
+      "path": "input/repo/scripts/record-evidence.py",
+      "sha256": "43ffd47346f26ade525436cf546f97656c47221c407dbf74a4e67c92ada6e951",
+      "bytes": 5337
+    },
+    {
+      "path": "input/repo/scripts/word-verify.py",
+      "sha256": "ec2f79882cf37b832758c22da1f0c99f0a1e7bc91556f0f09899cca50fa0bb67",
+      "bytes": 14214
+    },
+    {
+      "path": "input/repo/scripts/word_com.py",
+      "sha256": "c7acaf6bbbdaf3799a15f13044baddd42de1a65bb6945b6ed5b3839956df80b2",
+      "bytes": 2121
+    },
+    {
+      "path": "input/repo/templates/project-report.dotx",
+      "sha256": "2d645df23ecd1ee6f40d7da29854435139ff9d77a490f29c5051b6960bf909c4",
+      "bytes": 31815
+    },
+    {
+      "path": "input/repo/templates/sgcc-feasibility-2018-original.docx",
+      "sha256": "141131ad823f273eb50cebfae6c5f5fb4b65e878c2c63e52472d2612f55b60fd",
+      "bytes": 37630
+    },
+    {
+      "path": "input/repo/templates/sgcc-style-reference.docx",
+      "sha256": "a95f2a070c77007246353e4849d399f709667916bfafd98380a336066efade57",
+      "bytes": 38257
+    },
+    {
+      "path": "input/repo/templates/source.json",
+      "sha256": "a6aa3e0fb052caa35654b37b71dde8fae60de3d67d3e594c02cc77cd66b92d48",
+      "bytes": 1472
+    }
+  ],
+  "originalFiles": [
+    {
+      "source": "out/project-report-r01/FigArchitecture.png",
+      "bytes": 49880,
+      "sha256": "d449256d773e841a3c826638d65a1790fa023dd4d9b825fd05502500e7f9d1a0",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/project-report-r01/FigResponse.png",
+      "bytes": 25324,
+      "sha256": "7ad4450870ae6f02c1da2d43d403421dc3145e846dabc075ee8e8bd71f478836",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/project-report-r01/structure-audit.json",
+      "bytes": 21045,
+      "sha256": "2dbbebfb382314d82455589240bd3338cec3ca9171046eabcbcbcbbfd3fadf98",
+      "archive": "evidence/project-report-r01/structure-audit.json"
+    },
+    {
+      "source": "out/project-report-r01/word-com-contact.png",
+      "bytes": 844386,
+      "sha256": "eac86f4809ac1776a4da8b89734a3cf1d758299f5db2e7e5a95e7a7cdaa07dee",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/project-report-r01/word-com-generation.json",
+      "bytes": 740,
+      "sha256": "064a333abcffdd42f829f13c7fd3a1766fc209e4153425881a39f3d50a9043c4",
+      "archive": "evidence/project-report-r01/word-com-generation.json"
+    },
+    {
+      "source": "out/project-report-r01/word-com-pages/page-01.png",
+      "bytes": 34545,
+      "sha256": "7f14e1dc765592179e3dff7f6ea133597d7e71d863ae41b79eeb7ebc3ae3169c",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/project-report-r01/word-com-pages/page-02.png",
+      "bytes": 58698,
+      "sha256": "029010c4edbfcebcab5996dc05f2659a708f2ea3d91b7624209b89a2ba5f2282",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/project-report-r01/word-com-pages/page-03.png",
+      "bytes": 269838,
+      "sha256": "7f23e79ec2b951b622a4c549a00eab937178b9d84f6108c0b235d31e94dfcb9e",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/project-report-r01/word-com-pages/page-04.png",
+      "bytes": 251499,
+      "sha256": "f1c158e197a28154b2d2324b95e4733e7df321bd7885f2e260971d93c907939a",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/project-report-r01/word-com-pages/page-05.png",
+      "bytes": 134951,
+      "sha256": "7da3183962ed121058a2d1bd4c32eea69e1fa3774934d514fbb1ea249f14f245",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/project-report-r01/word-com-pages/page-06.png",
+      "bytes": 213805,
+      "sha256": "1af4c0d7d5e2cbdeb054ba3098fc4ecb8937fac23e46b86c39ce10e34e108570",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/project-report-r01/word-com-pages/page-07.png",
+      "bytes": 167632,
+      "sha256": "c7b5cb814e002af05daa3a26f26a6458f1579b36837b53f15acc36bb7eac6351",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/project-report-r01/word-com-pages/page-08.png",
+      "bytes": 183703,
+      "sha256": "0622ec9bf6bbb9fe2e07ea6a87c0f747bbfd5f9f550a4987de8d5259a00f276b",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/project-report-r01/word-com-pages/page-09.png",
+      "bytes": 181958,
+      "sha256": "e14d8c9738a29f99d7c7f829202a85b39f1a47fa2398247efa83d33aee12d989",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/project-report-r01/word-com-pages/page-10.png",
+      "bytes": 175453,
+      "sha256": "27cfcc8a8a78ea8d5a534282f8255bd4f66d75f6fce31727a9296b6de84ace4f",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/project-report-r01/word-com-pages/page-11.png",
+      "bytes": 84922,
+      "sha256": "bbc5d9d4c29b5a9c4adb2fce8d9de7928ba44068ba10043c2945db1c1dd89e23",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/project-report-r01/word-com-pages/page-12.png",
+      "bytes": 205629,
+      "sha256": "7bf2d479cfd5371a5d80f41f0745301fadc527c0cbd2924b6369b7f0690321c0",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/project-report-r01/word-com-pages/page-13.png",
+      "bytes": 198490,
+      "sha256": "1987d27eecd2ff9f79f9f0e37c1ce73682b9697c3c9e8efe97bfa601ad026917",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/project-report-r01/word-com.docx",
+      "bytes": 126653,
+      "sha256": "3a13e549c721cab6f827a75f94cb865fb1029d56e469ad454fa9ce5215c91be1",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/project-report-r01/word-com.edit-check.docx",
+      "bytes": 126603,
+      "sha256": "5d6b0da4539fa3b309c98320fd5180f928382c379741fa8502a5d094bdac78dc",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/project-report-r01/word-com.pdf",
+      "bytes": 463849,
+      "sha256": "2bc1ea690c1ca22120c7fc54568840346ec1f8904bc234a56b99d69b0d91fdf6",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/project-report-r01/word-com.raw.docx",
+      "bytes": 130941,
+      "sha256": "377139e303ad801adc33b7845a990c29e87bb24750066069a7745aee8839b060",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/project-report-r01/word-verification.json",
+      "bytes": 962,
+      "sha256": "298f34b657bd4893c8080e3b0ba06f085e62e6d7f64048064c685902b67f062a",
+      "archive": "evidence/project-report-r01/word-verification.json"
+    },
+    {
+      "source": "out/project-report-r02/FigArchitecture.png",
+      "bytes": 49880,
+      "sha256": "d449256d773e841a3c826638d65a1790fa023dd4d9b825fd05502500e7f9d1a0",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/project-report-r02/FigResponse.png",
+      "bytes": 25324,
+      "sha256": "7ad4450870ae6f02c1da2d43d403421dc3145e846dabc075ee8e8bd71f478836",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/project-report-r02/list-debug.docx",
+      "bytes": 126915,
+      "sha256": "89231f3c6ee1ccb8fd526aeb5abae9fcece992ab57b3fe8e549fafb4482f7106",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/project-report-r02/project-verification.json",
+      "bytes": 2215,
+      "sha256": "d773fbb2634db623afe3959a4397bd11467eb8286a7807eae2b82f7e1684a6ad",
+      "archive": "evidence/project-report-r02/project-verification.json"
+    },
+    {
+      "source": "out/project-report-r02/structure-audit.json",
+      "bytes": 20993,
+      "sha256": "4eb2fa8e91a8fe923ea46eb4312b9a1642027a623efab0ccd6908293fb657ddc",
+      "archive": "evidence/project-report-r02/structure-audit.json"
+    },
+    {
+      "source": "out/project-report-r02/word-com-contact.png",
+      "bytes": 830487,
+      "sha256": "a1d577369fe885474c0286d9a882062c4cb4d153754a21c4c02e298cc6cca08b",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/project-report-r02/word-com-generation.json",
+      "bytes": 740,
+      "sha256": "ebf84734549b0c083f1eb7491cfab5abce663cf228c8fb54576fd35a6e173176",
+      "archive": "evidence/project-report-r02/word-com-generation.json"
+    },
+    {
+      "source": "out/project-report-r02/word-com-pages/page-01.png",
+      "bytes": 34545,
+      "sha256": "7f14e1dc765592179e3dff7f6ea133597d7e71d863ae41b79eeb7ebc3ae3169c",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/project-report-r02/word-com-pages/page-02.png",
+      "bytes": 58790,
+      "sha256": "17852636627bcc0eaff4126a31dbd0d719e2eec6731b823083671e97317db0b1",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/project-report-r02/word-com-pages/page-03.png",
+      "bytes": 269838,
+      "sha256": "7f23e79ec2b951b622a4c549a00eab937178b9d84f6108c0b235d31e94dfcb9e",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/project-report-r02/word-com-pages/page-04.png",
+      "bytes": 251499,
+      "sha256": "f1c158e197a28154b2d2324b95e4733e7df321bd7885f2e260971d93c907939a",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/project-report-r02/word-com-pages/page-05.png",
+      "bytes": 134951,
+      "sha256": "7da3183962ed121058a2d1bd4c32eea69e1fa3774934d514fbb1ea249f14f245",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/project-report-r02/word-com-pages/page-06.png",
+      "bytes": 213805,
+      "sha256": "1af4c0d7d5e2cbdeb054ba3098fc4ecb8937fac23e46b86c39ce10e34e108570",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/project-report-r02/word-com-pages/page-07.png",
+      "bytes": 168077,
+      "sha256": "5b6556aba34d110a9169e2bf40034031d170fe0e29d56efa837dae40526c9bb0",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/project-report-r02/word-com-pages/page-08.png",
+      "bytes": 183703,
+      "sha256": "0622ec9bf6bbb9fe2e07ea6a87c0f747bbfd5f9f550a4987de8d5259a00f276b",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/project-report-r02/word-com-pages/page-09.png",
+      "bytes": 208645,
+      "sha256": "971b214d08479f7c450cb4849efedd4ab189b5a2d97aa2040f47a5fdfd321a40",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/project-report-r02/word-com-pages/page-10.png",
+      "bytes": 222697,
+      "sha256": "0896222c5763d563db4fbbff55ff81b7af640872c1ff04bdfab10022bb2c6ece",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/project-report-r02/word-com-pages/page-11.png",
+      "bytes": 205537,
+      "sha256": "3d755b64af0acbe1c832e5425f641d6a374008aefb9b980b2f7e687f680dafe7",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/project-report-r02/word-com-pages/page-12.png",
+      "bytes": 198643,
+      "sha256": "42f732f2f2901adda0cba23c173a63846f2bc77be39ad9caf0600d668db10b7e",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/project-report-r02/word-com.all-math-edit.docx",
+      "bytes": 126895,
+      "sha256": "ea35aab334c77d3c4850639a9fdcd02f40502ce156f19234568e2793aa0e097b",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/project-report-r02/word-com.all-math-edit.pdf",
+      "bytes": 463499,
+      "sha256": "e456735df92710e62f552690a981ee5bd446a7cdd16ebccd702239a9501b1141",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/project-report-r02/word-com.docx",
+      "bytes": 126962,
+      "sha256": "0adc1ab6086485ca3769b068ae56ed9b1dcf881f25e05e53a37144d44b3522c8",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/project-report-r02/word-com.edit-check.docx",
+      "bytes": 126954,
+      "sha256": "a12d0ae1506934065457ba64aa46596679a16cb0fe361a886a2187879805379b",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/project-report-r02/word-com.numbering-check.docx",
+      "bytes": 126957,
+      "sha256": "d12ecbe5ef38164d2131207455ca85955d9347b4738d57fb34c448ed0a990b3b",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/project-report-r02/word-com.numbering-check.pdf",
+      "bytes": 463924,
+      "sha256": "e5e7ccf1bbc977acbe6d9cbe394d320cd519b58d4f70e21f49cb56024c045e7e",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/project-report-r02/word-com.pagination-check.docx",
+      "bytes": 128479,
+      "sha256": "f96bd3467ed10d1a1dc36c6ec0080e0d4a993583851061c7e8305a9d0abeced9",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/project-report-r02/word-com.pagination-check.pdf",
+      "bytes": 472412,
+      "sha256": "3211f2949a5d3b1a3b15ac75773a9e09086e08fc2c6b9d09d721ae3b1133e154",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/project-report-r02/word-com.pdf",
+      "bytes": 463023,
+      "sha256": "9ccb75ac3bbc00f11b91e387ae5c97048401724bec2e1484fa8e91a3546ee3e6",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/project-report-r02/word-com.raw.docx",
+      "bytes": 131180,
+      "sha256": "3704dc7de7741d5dd114aac1b08878f76e32cfbeb2be8a027e3eaca18abf5939",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/project-report-r02/word-com.review-check.docx",
+      "bytes": 131034,
+      "sha256": "94b7d11e47c185005717677e9d0b78bb7404995c8b5d93e29dbbad422d861b61",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/project-report-r02/word-verification.json",
+      "bytes": 964,
+      "sha256": "c93d5217db6d9efd3bfe00e3e36bef5e67ec4c877ec157d8096f57646a4b9c2d",
+      "archive": "evidence/project-report-r02/word-verification.json"
+    },
+    {
+      "source": "out/project-report-r03/artifact.md",
+      "bytes": 1441,
+      "sha256": "3b96c59ca0d52baac7b7d3bf477a0b89b25b05a8c2e64cfee4814348ea4f283d",
+      "archive": "evidence/project-report-r03/artifact.md"
+    },
+    {
+      "source": "out/project-report-r03/environment.json",
+      "bytes": 3141,
+      "sha256": "02d04539737cec0ea0a16fa83d662687f71f42b61ae9e5fe9d2a63b3ca665762",
+      "archive": "evidence/project-report-r03/environment.json"
+    },
+    {
+      "source": "out/project-report-r03/FigArchitecture.png",
+      "bytes": 49880,
+      "sha256": "d449256d773e841a3c826638d65a1790fa023dd4d9b825fd05502500e7f9d1a0",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/project-report-r03/FigResponse.png",
+      "bytes": 25324,
+      "sha256": "7ad4450870ae6f02c1da2d43d403421dc3145e846dabc075ee8e8bd71f478836",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/project-report-r03/manifest.json",
+      "bytes": 6660,
+      "sha256": "3e261ebc2f3a8e4aa1bf554050bc92a09498700fbf8451b300e180d5b6ced550",
+      "archive": "evidence/project-report-r03/manifest.json"
+    },
+    {
+      "source": "out/project-report-r03/project-verification.json",
+      "bytes": 2375,
+      "sha256": "e00c28e2a6e092b4ec485a82a1fa0c05a2b3fa2f6e8a508a338cf238a46f1472",
+      "archive": "evidence/project-report-r03/project-verification.json"
+    },
+    {
+      "source": "out/project-report-r03/structure-audit.json",
+      "bytes": 20950,
+      "sha256": "dccd38693f8b4a11789af227ead0dc955cf570e22ab1457ba460e94abc0076f4",
+      "archive": "evidence/project-report-r03/structure-audit.json"
+    },
+    {
+      "source": "out/project-report-r03/template-preview-1.png",
+      "bytes": 21613,
+      "sha256": "4105835e1be11c9758077c65e1b85ad40dd5886e63d3ada5a9f74abfd3923814",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/project-report-r03/template-preview-2.png",
+      "bytes": 10913,
+      "sha256": "b493622d785c5f67f18266edb1e75a8246bd36dfddcf71c34061e98af41a3d45",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/project-report-r03/template-preview-3.png",
+      "bytes": 23390,
+      "sha256": "721b04c980115cfafbe67713d9c283739d9d5a081d11865309f83a90f7d49f79",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/project-report-r03/template-preview.pdf",
+      "bytes": 128687,
+      "sha256": "eb8103f89e543b0c49406a2d221a50af487efb60e45f728c4020cffee6d8806f",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/project-report-r03/visual-review.json",
+      "bytes": 1143,
+      "sha256": "f1a405e034d55da762724e5db416d8c20cdf0099dc0cf6a84d4ded3bd6020bb1",
+      "archive": "evidence/project-report-r03/visual-review.json"
+    },
+    {
+      "source": "out/project-report-r03/word-com-contact.png",
+      "bytes": 829765,
+      "sha256": "d61bfefadd9bc14d1e2766a849bceaf76b0fc91fe3deab21fade577605973042",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/project-report-r03/word-com-generation.json",
+      "bytes": 737,
+      "sha256": "5b66a32fd808ea80a920d3167bf6132be8b82596017f0685b41b39141dc84b3b",
+      "archive": "evidence/project-report-r03/word-com-generation.json"
+    },
+    {
+      "source": "out/project-report-r03/word-com-pages/page-01.png",
+      "bytes": 34545,
+      "sha256": "7f14e1dc765592179e3dff7f6ea133597d7e71d863ae41b79eeb7ebc3ae3169c",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/project-report-r03/word-com-pages/page-02.png",
+      "bytes": 58577,
+      "sha256": "e4ae50a9d51ee96966824fc9e0065be85b99f260b85e184ae4e28a4cdbcb99f4",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/project-report-r03/word-com-pages/page-03.png",
+      "bytes": 269895,
+      "sha256": "3a2887813126108f2fb1737de9d171462311be81087e550976876cc8ccabd7eb",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/project-report-r03/word-com-pages/page-04.png",
+      "bytes": 251499,
+      "sha256": "f1c158e197a28154b2d2324b95e4733e7df321bd7885f2e260971d93c907939a",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/project-report-r03/word-com-pages/page-05.png",
+      "bytes": 134951,
+      "sha256": "7da3183962ed121058a2d1bd4c32eea69e1fa3774934d514fbb1ea249f14f245",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/project-report-r03/word-com-pages/page-06.png",
+      "bytes": 213805,
+      "sha256": "1af4c0d7d5e2cbdeb054ba3098fc4ecb8937fac23e46b86c39ce10e34e108570",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/project-report-r03/word-com-pages/page-07.png",
+      "bytes": 168077,
+      "sha256": "5b6556aba34d110a9169e2bf40034031d170fe0e29d56efa837dae40526c9bb0",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/project-report-r03/word-com-pages/page-08.png",
+      "bytes": 183786,
+      "sha256": "dbe6ff438954449a94a74cae67d052abe95bed67f4bb599fa9ba8b3ea525c186",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/project-report-r03/word-com-pages/page-09.png",
+      "bytes": 208645,
+      "sha256": "971b214d08479f7c450cb4849efedd4ab189b5a2d97aa2040f47a5fdfd321a40",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/project-report-r03/word-com-pages/page-10.png",
+      "bytes": 222697,
+      "sha256": "0896222c5763d563db4fbbff55ff81b7af640872c1ff04bdfab10022bb2c6ece",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/project-report-r03/word-com-pages/page-11.png",
+      "bytes": 205652,
+      "sha256": "3c44e1395d037f19669a2f894185fc9d12c8dfdab979c56a07bef6213d453de8",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/project-report-r03/word-com-pages/page-12.png",
+      "bytes": 198569,
+      "sha256": "3139b22d691deb66e3c614d43b335cd0085a38bcba508633263b48ccbfed651d",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/project-report-r03/word-com.all-math-edit-05.png",
+      "bytes": 134951,
+      "sha256": "60d830f649faf21af18372b76d8bceab1c0da1d223cc321a548a32105931cf0e",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/project-report-r03/word-com.all-math-edit.docx",
+      "bytes": 127019,
+      "sha256": "6f5619bfe8509249d75966c2cccca306d68580690ad02a4ee919986d04e04706",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/project-report-r03/word-com.all-math-edit.pdf",
+      "bytes": 463485,
+      "sha256": "e46d59d0a2f80561fbf597f463908b99cce23ad65fd56564513fb4664519db79",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/project-report-r03/word-com.docx",
+      "bytes": 127166,
+      "sha256": "ca5a6b8100f21a2947795428cd28bb2273dc0bc7fd072ffb3aa447455adb9252",
+      "archive": "evidence/project-report-r03/word-com.docx"
+    },
+    {
+      "source": "out/project-report-r03/word-com.edit-check.docx",
+      "bytes": 127121,
+      "sha256": "743a7362e1595309869bc7e80bfc6c5720d3e3009d6a2ffb8f7e2882a541e645",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/project-report-r03/word-com.numbering-check-05.png",
+      "bytes": 136148,
+      "sha256": "5c1dd7bda1cbb029d1aaa77859c262c8aea1dbf09a82f73b1715e5f74273aa73",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/project-report-r03/word-com.numbering-check.docx",
+      "bytes": 127137,
+      "sha256": "7298a94bf78178eb21cd35d0209092b81b075212952453d2e9c66251c906d752",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/project-report-r03/word-com.numbering-check.pdf",
+      "bytes": 463906,
+      "sha256": "453b4e706a91addf734e4fe431744b1cffde4bad87b3eb41c1953696af1a6062",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/project-report-r03/word-com.pagination-check-09.png",
+      "bytes": 208655,
+      "sha256": "f997c7096eae1bd60f8adc489d7673445defcca143e1c3abd05fa6adbd7e3f36",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/project-report-r03/word-com.pagination-check-10.png",
+      "bytes": 217225,
+      "sha256": "b7b960bf68fa9d73d87aaf7494f882bfa35e3c984e52013398482fcc171a039d",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/project-report-r03/word-com.pagination-check-11.png",
+      "bytes": 138367,
+      "sha256": "5fd28229f88d120e567c55658ad84c27c00c203831d22d20a2382f7cd14f4a98",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/project-report-r03/word-com.pagination-check.docx",
+      "bytes": 128626,
+      "sha256": "ec5dcf94461ba620b1cd019ecbad31bb6e7f5a2894852ae593cc6ce055b0c5ac",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/project-report-r03/word-com.pagination-check.pdf",
+      "bytes": 472392,
+      "sha256": "eaf8c9e56b9c621c6519cf08a67aff70b7554c02363ebc64b7a693fa20876cf9",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/project-report-r03/word-com.pdf",
+      "bytes": 463006,
+      "sha256": "1fe6b718141f90594c1aeed58000e47d6c01e91a4495421751c0920b28eab9ad",
+      "archive": "evidence/project-report-r03/word-com.pdf"
+    },
+    {
+      "source": "out/project-report-r03/word-com.raw.docx",
+      "bytes": 131421,
+      "sha256": "6a4bddb59fa74d573ef83110789adb63e5ae2c7246026a5d2dd6db91d3488a60",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/project-report-r03/word-com.review-check.docx",
+      "bytes": 131191,
+      "sha256": "eeb63dcfa61d39d5344391441c6a456dddd76c00bfd331ee08eb257979265d1a",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/project-report-r03/word-verification.json",
+      "bytes": 964,
+      "sha256": "2de262b6c3e599c8376e4b91edb92267dcfb7925495c717d0edc48fe4830d92c",
+      "archive": "evidence/project-report-r03/word-verification.json"
+    }
+  ],
+  "archiveValidation": "all_preserved_file_hashes_verified; all_python_sources_parse; Office rerun not performed",
+  "rerunValidation": "not_run_during_archival",
+  "historicalPaths": "Older evidence may say runs/. These literal historical records are retained; actual files are now under out/.",
+  "lineEndings": "git show snapshots preserve committed bytes, usually LF. Original output source snapshots preserve original bytes, often CRLF. Historical raw hashes can differ by line endings."
+}

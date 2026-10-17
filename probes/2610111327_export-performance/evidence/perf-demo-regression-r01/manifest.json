@@ -1,0 +1,53 @@
+{
+  "report": "D:\\unitfolders\\nb9zj-word-conversion-lab\\word-conversion-lab\\reports\\demo-report",
+  "inputs": {
+    "pyproject.toml": "b58b03fd68cb08c7776b0d3ad4ee26d3660959b5102efe541445f2a3306e4f92",
+    "reports\\demo-report\\assets\\architecture.png": "d449256d773e841a3c826638d65a1790fa023dd4d9b825fd05502500e7f9d1a0",
+    "reports\\demo-report\\assets\\response.png": "7ad4450870ae6f02c1da2d43d403421dc3145e846dabc075ee8e8bd71f478836",
+    "reports\\demo-report\\content.json": "7a06ae87d075ec43d2d67231182c677b0e7b448f050fc01226a89d774481ceb2",
+    "reports\\demo-report\\report.py": "3930a3425ed098b5f02527b3873601d634ba3e398caceb9b89ff0e734d1fa37e",
+    "requirements.txt": "75d98410b556701a59f6caacfa41c88ae75d866d8d7159202741d7fd3a4996d3",
+    "schemas\\report-content.schema.json": "6020452fbe3176fb491a2fcb9712cf9277491f6f9a6d5cf9ab46c51f1e1d3d99",
+    "src\\docreport\\__init__.py": "65c430b8659a96080cf159ebea4ff6b656f6fedb73ebbc56b6c41750dd4a401e",
+    "src\\docreport\\__main__.py": "ab7978ebb348e3ba3c65bf3ef9c692d50bf3c5508cc205ef49d07733ed563aef",
+    "src\\docreport\\compose.py": "98251178c901d3a6b1f12e7cf1626f50b5314eb1fc4d7e6aefbefd7d1784d00e",
+    "src\\docreport\\content.py": "eb5ebe3c15b5d379d269398d30e88077eb80179d6a65dd41367a9e6552b8f7dc",
+    "src\\docreport\\mathtype.py": "3d90f5ffcbc91cc6638376039e80cae9833e72294ab4b89c5ffd749763917e42",
+    "src\\docreport\\verify.py": "af5f0fec47280acd99463baea0ccf9f86e099aec5b422c189a63c5d2a443f83a",
+    "src\\docreport\\word.py": "062bcc29152e4c5c5a4a13eaed1121a4f286639668170b5388ddd9777ece8b8f",
+    "templates\\project-report.dotx": "2d645df23ecd1ee6f40d7da29854435139ff9d77a490f29c5051b6960bf909c4"
+  },
+  "environment": {
+    "python": "3.12.14 (main, Aug 25 2026, 14:01:42) [MSC v.1944 64 bit (AMD64)]",
+    "executable": "D:\\unitfolders\\nb9zj-word-conversion-lab\\word-conversion-lab\\.venv\\Scripts\\python.exe",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "packages": {
+      "pywin32": "312",
+      "comtypes": "1.4.17",
+      "pypdf": "6.10.0",
+      "Pillow": "12.3.0",
+      "setuptools": "80.9.0",
+      "jsonschema": "4.25.1"
+    },
+    "word": {
+      "version": "16.0",
+      "build": "16.0.14334"
+    }
+  },
+  "command": [
+    "D:\\unitfolders\\nb9zj-word-conversion-lab\\word-conversion-lab\\.venv\\Scripts\\python.exe",
+    "-m",
+    "docreport",
+    "build",
+    "D:\\unitfolders\\nb9zj-word-conversion-lab\\word-conversion-lab\\reports\\demo-report",
+    "--out",
+    "D:\\unitfolders\\nb9zj-word-conversion-lab\\word-conversion-lab\\out\\perf-demo-regression-r01",
+    "--mathtype-dll",
+    "C:\\Program Files (x86)\\MathType\\MathPage\\64\\MathPage.wll",
+    "--no-cache"
+  ],
+  "baseGitCommit": "d6e01303a6a20f64e2e21314fe8fbc75b476bb50",
+  "provenance": "Input hashes identify exact working files; baseGitCommit may precede local changes.",
+  "mathTypeCacheEnabled": false,
+  "mathTypeCacheDirectory": null
+}

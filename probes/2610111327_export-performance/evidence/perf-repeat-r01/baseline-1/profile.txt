@@ -1,0 +1,38 @@
+         49968 function calls (49868 primitive calls) in 68.984 seconds
+
+   Ordered by: cumulative time
+   List reduced from 185 to 30 due to restriction <30>
+
+   ncalls  tottime  percall  cumtime  percall filename:lineno(function)
+        1    0.427    0.427   68.984   68.984 baseline_compose.py:573(build)
+     76/1    1.620    0.021   66.338   66.338 baseline_compose.py:538(blocks)
+        1    5.550    5.550   50.679   50.679 baseline_compose.py:452(table_node)
+     1990    0.013    0.000   34.860    0.018 __init__.py:586(__getattr__)
+     1990    0.023    0.000   34.844    0.018 __init__.py:579(_ApplyTypes_)
+     2922   32.051    0.011   32.051    0.011 {method 'InvokeTypes' of 'PyIDispatch' objects}
+       92    1.291    0.014   29.833    0.324 baseline_compose.py:304(rich_paragraph)
+     1557    0.007    0.000   18.510    0.012 __init__.py:108(Dispatch)
+     1557    0.023    0.000   18.497    0.012 __init__.py:21(__WrapDispatch)
+     1561   18.488    0.012   18.488    0.012 {method 'QueryInterface' of 'PyIUnknown' objects}
+     1557    0.014    0.000   18.461    0.012 __init__.py:524(__init__)
+       92    1.763    0.019   17.180    0.187 baseline_compose.py:233(paragraph)
+     2000    0.005    0.000   14.284    0.007 __init__.py:616(_get_good_object_)
+     2000    0.003    0.000   14.275    0.007 __init__.py:610(_get_good_single_object_)
+     1990    0.005    0.000   14.116    0.007 __init__.py:605(_get_good_object_)
+       75    1.178    0.016   11.464    0.153 baseline_compose.py:499(trim_container)
+      146    0.002    0.000    9.793    0.067 baseline_compose.py:241(part)
+       93    0.916    0.010    6.846    0.074 baseline_compose.py:226(point)
+       93    1.574    0.017    5.826    0.063 baseline_compose.py:246(mark)
+      219    0.001    0.000    4.648    0.021 __init__.py:636(__getattr__)
+      225    0.001    0.000    4.647    0.021 {built-in method builtins.getattr}
+      406    0.002    0.000    4.563    0.011 00020905-0000-0000-C000-000000000046x0x8x7.py:18683(SetRange)
+      224    0.002    0.000    3.546    0.016 __init__.py:592(__setattr__)
+      224    3.543    0.016    3.543    0.016 {method 'Invoke' of 'PyIDispatch' objects}
+       95    0.001    0.000    2.403    0.025 00020905-0000-0000-C000-000000000046x0x8x7.py:4977(Add)
+       93    0.001    0.000    2.043    0.022 00020905-0000-0000-C000-000000000046x0x8x7.py:22714(Item)
+       75    0.001    0.000    1.992    0.027 00020905-0000-0000-C000-000000000046x0x8x7.py:23105(Cell)
+       75    0.001    0.000    1.714    0.023 00020905-0000-0000-C000-000000000046x0x8x7.py:6105(Item)
+       76    0.000    0.000    1.338    0.018 00020905-0000-0000-C000-000000000046x0x8x7.py:18395(Delete)
+       92    0.000    0.000    1.061    0.012 00020905-0000-0000-C000-000000000046x0x8x7.py:18508(InsertBefore)
+
+

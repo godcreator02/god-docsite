@@ -1,0 +1,165 @@
+{
+  "python": "D:\\unitfolders\\nb9zj-word-conversion-lab\\word-conversion-lab\\.venv\\Scripts\\python.exe",
+  "dll": "C:\\Program Files (x86)\\MathType\\MathPage\\64\\MathPage.wll",
+  "input": {
+    "id": "eq-fraction",
+    "display": true,
+    "numbered": true,
+    "latex": "H(s)=\\frac{1}{LCs^2+RCs+1}"
+  },
+  "fixtureSha256": "8dc4d0430939c3cd4a3e423cab3e21b063f171afd2567d633e80b978a1037f1c",
+  "status": "passed_automation_visual_review_pending",
+  "events": [
+    {
+      "event": "init",
+      "returnCode": 1
+    },
+    {
+      "event": "functionality",
+      "full": 1,
+      "mode": 2,
+      "modeName": "full"
+    },
+    {
+      "event": "word-started",
+      "version": "16.0"
+    },
+    {
+      "event": "inserted",
+      "progId": "Equation.DSMT4"
+    },
+    {
+      "event": "write-tex",
+      "stage": "initial",
+      "returnCode": 0,
+      "text": "H(s)=\\frac{1}{LCs^2+RCs+1}"
+    },
+    {
+      "event": "read-length",
+      "stage": "initial",
+      "returnCode": 0,
+      "length": 29
+    },
+    {
+      "event": "read-tex",
+      "stage": "initial",
+      "returnCode": 0,
+      "text": "$H(s)=\\frac{1}{LCs^2+RCs+1}$",
+      "matchesExpected": true
+    },
+    {
+      "event": "close-ole",
+      "stage": "initial",
+      "returnCode": 0
+    },
+    {
+      "event": "reopened",
+      "objectCount": 1,
+      "progId": "Equation.DSMT4"
+    },
+    {
+      "event": "read-length",
+      "stage": "reopened-original",
+      "returnCode": 0,
+      "length": 29
+    },
+    {
+      "event": "read-tex",
+      "stage": "reopened-original",
+      "returnCode": 0,
+      "text": "$H(s)=\\frac{1}{LCs^2+RCs+1}$",
+      "matchesExpected": true
+    },
+    {
+      "event": "close-ole",
+      "stage": "reopened-original",
+      "returnCode": 0
+    },
+    {
+      "event": "write-tex",
+      "stage": "edit-existing",
+      "returnCode": 0,
+      "text": "H(s)=\\frac{1}{LCs^2+RCs+2}"
+    },
+    {
+      "event": "read-length",
+      "stage": "edit-existing",
+      "returnCode": 0,
+      "length": 29
+    },
+    {
+      "event": "read-tex",
+      "stage": "edit-existing",
+      "returnCode": 0,
+      "text": "$H(s)=\\frac{1}{LCs^2+RCs+2}$",
+      "matchesExpected": true
+    },
+    {
+      "event": "close-ole",
+      "stage": "edit-existing",
+      "returnCode": 0
+    },
+    {
+      "event": "read-length",
+      "stage": "reopened-edited",
+      "returnCode": 0,
+      "length": 29
+    },
+    {
+      "event": "read-tex",
+      "stage": "reopened-edited",
+      "returnCode": 0,
+      "text": "$H(s)=\\frac{1}{LCs^2+RCs+2}$",
+      "matchesExpected": true
+    },
+    {
+      "event": "close-ole",
+      "stage": "reopened-edited",
+      "returnCode": 0
+    },
+    {
+      "event": "package-audit",
+      "file": "mathtype-original.docx",
+      "objects": [
+        {
+          "Type": "Embed",
+          "ProgID": "Equation.DSMT4",
+          "ShapeID": "_x0000_i1027",
+          "DrawAspect": "Content",
+          "ObjectID": "_1853166461",
+          "{http://schemas.openxmlformats.org/officeDocument/2006/relationships}id": "rId5"
+        }
+      ],
+      "embeddedFiles": {
+        "word/embeddings/oleObject1.bin": "6f8ad5e950887a3a6b80530b8c093d38a07b36df2deb1a1d5e6f809d4ab9f34f"
+      }
+    },
+    {
+      "event": "package-audit",
+      "file": "mathtype-edited.docx",
+      "objects": [
+        {
+          "Type": "Embed",
+          "ProgID": "Equation.DSMT4",
+          "ShapeID": "_x0000_i1027",
+          "DrawAspect": "Content",
+          "ObjectID": "_1853166470",
+          "{http://schemas.openxmlformats.org/officeDocument/2006/relationships}id": "rId7"
+        }
+      ],
+      "embeddedFiles": {
+        "word/embeddings/oleObject1.bin": "106addfa3702d3bf4ef86820b5468dcb163bc17711258e58828f8c68175118a0"
+      }
+    },
+    {
+      "event": "terminate-api",
+      "returnCode": 0
+    },
+    {
+      "event": "finished",
+      "status": "passed_automation_visual_review_pending"
+    }
+  ],
+  "visualReview": "not_performed",
+  "systemAnsiCodePage": "1252"
+}

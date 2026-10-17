@@ -1,0 +1,7 @@
+word-started
+before-add-ole
+ole-added:Equation.DSMT4
+object:<COMObject Object>
+type-info:0
+saved
+done

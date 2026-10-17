@@ -1,0 +1,156 @@
+[
+  {
+    "pdf": "D:\\unitfolders\\nb9zj-word-conversion-lab\\word-conversion-lab\\out\\incremental-ten-base-r03\\report.pdf",
+    "pdfSha256": "6a8ca68c9327cfca0ccc18f9b1f2c21f9eb0e6f89d6c60b39732dd4a24459391",
+    "pages": [
+      "D:\\unitfolders\\nb9zj-word-conversion-lab\\word-conversion-lab\\out\\incremental-visual-r01\\pdf-00\\page-01.png",
+      "D:\\unitfolders\\nb9zj-word-conversion-lab\\word-conversion-lab\\out\\incremental-visual-r01\\pdf-00\\page-02.png",
+      "D:\\unitfolders\\nb9zj-word-conversion-lab\\word-conversion-lab\\out\\incremental-visual-r01\\pdf-00\\page-03.png",
+      "D:\\unitfolders\\nb9zj-word-conversion-lab\\word-conversion-lab\\out\\incremental-visual-r01\\pdf-00\\page-04.png",
+      "D:\\unitfolders\\nb9zj-word-conversion-lab\\word-conversion-lab\\out\\incremental-visual-r01\\pdf-00\\page-05.png",
+      "D:\\unitfolders\\nb9zj-word-conversion-lab\\word-conversion-lab\\out\\incremental-visual-r01\\pdf-00\\page-06.png",
+      "D:\\unitfolders\\nb9zj-word-conversion-lab\\word-conversion-lab\\out\\incremental-visual-r01\\pdf-00\\page-07.png",
+      "D:\\unitfolders\\nb9zj-word-conversion-lab\\word-conversion-lab\\out\\incremental-visual-r01\\pdf-00\\page-08.png",
+      "D:\\unitfolders\\nb9zj-word-conversion-lab\\word-conversion-lab\\out\\incremental-visual-r01\\pdf-00\\page-09.png",
+      "D:\\unitfolders\\nb9zj-word-conversion-lab\\word-conversion-lab\\out\\incremental-visual-r01\\pdf-00\\page-10.png"
+    ]
+  },
+  {
+    "pdf": "D:\\unitfolders\\nb9zj-word-conversion-lab\\word-conversion-lab\\out\\incremental-combined-r03\\run-3\\report.pdf",
+    "pdfSha256": "1467e009f7fe062f2f8fd6e53fb79b3c8f99c67c549db8f361d6814d118831f3",
+    "pages": [
+      "D:\\unitfolders\\nb9zj-word-conversion-lab\\word-conversion-lab\\out\\incremental-visual-r01\\pdf-01\\page-01.png",
+      "D:\\unitfolders\\nb9zj-word-conversion-lab\\word-conversion-lab\\out\\incremental-visual-r01\\pdf-01\\page-02.png",
+      "D:\\unitfolders\\nb9zj-word-conversion-lab\\word-conversion-lab\\out\\incremental-visual-r01\\pdf-01\\page-03.png",
+      "D:\\unitfolders\\nb9zj-word-conversion-lab\\word-conversion-lab\\out\\incremental-visual-r01\\pdf-01\\page-04.png",
+      "D:\\unitfolders\\nb9zj-word-conversion-lab\\word-conversion-lab\\out\\incremental-visual-r01\\pdf-01\\page-05.png",
+      "D:\\unitfolders\\nb9zj-word-conversion-lab\\word-conversion-lab\\out\\incremental-visual-r01\\pdf-01\\page-06.png",
+      "D:\\unitfolders\\nb9zj-word-conversion-lab\\word-conversion-lab\\out\\incremental-visual-r01\\pdf-01\\page-07.png",
+      "D:\\unitfolders\\nb9zj-word-conversion-lab\\word-conversion-lab\\out\\incremental-visual-r01\\pdf-01\\page-08.png",
+      "D:\\unitfolders\\nb9zj-word-conversion-lab\\word-conversion-lab\\out\\incremental-visual-r01\\pdf-01\\page-09.png",
+      "D:\\unitfolders\\nb9zj-word-conversion-lab\\word-conversion-lab\\out\\incremental-visual-r01\\pdf-01\\page-10.png"
+    ],
+    "pixelsDifferentFromBaselinePages": [
+      3,
+      4,
+      5,
+      7,
+      8,
+      9,
+      10
+    ]
+  },
+  {
+    "pdf": "D:\\unitfolders\\nb9zj-word-conversion-lab\\word-conversion-lab\\out\\incremental-combined-r03\\full-oracle\\report.pdf",
+    "pdfSha256": "d6abaa152739fac45c3b6bee949fd55c136c2e05ae965b08b057ac0896db26f0",
+    "pages": [
+      "D:\\unitfolders\\nb9zj-word-conversion-lab\\word-conversion-lab\\out\\incremental-visual-r01\\pdf-02\\page-01.png",
+      "D:\\unitfolders\\nb9zj-word-conversion-lab\\word-conversion-lab\\out\\incremental-visual-r01\\pdf-02\\page-02.png",
+      "D:\\unitfolders\\nb9zj-word-conversion-lab\\word-conversion-lab\\out\\incremental-visual-r01\\pdf-02\\page-03.png",
+      "D:\\unitfolders\\nb9zj-word-conversion-lab\\word-conversion-lab\\out\\incremental-visual-r01\\pdf-02\\page-04.png",
+      "D:\\unitfolders\\nb9zj-word-conversion-lab\\word-conversion-lab\\out\\incremental-visual-r01\\pdf-02\\page-05.png",
+      "D:\\unitfolders\\nb9zj-word-conversion-lab\\word-conversion-lab\\out\\incremental-visual-r01\\pdf-02\\page-06.png",
+      "D:\\unitfolders\\nb9zj-word-conversion-lab\\word-conversion-lab\\out\\incremental-visual-r01\\pdf-02\\page-07.png",
+      "D:\\unitfolders\\nb9zj-word-conversion-lab\\word-conversion-lab\\out\\incremental-visual-r01\\pdf-02\\page-08.png",
+      "D:\\unitfolders\\nb9zj-word-conversion-lab\\word-conversion-lab\\out\\incremental-visual-r01\\pdf-02\\page-09.png",
+      "D:\\unitfolders\\nb9zj-word-conversion-lab\\word-conversion-lab\\out\\incremental-visual-r01\\pdf-02\\page-10.png"
+    ],
+    "pixelsDifferentFromBaselinePages": [
+      3,
+      4,
+      5,
+      8,
+      9,
+      10
+    ]
+  },
+  {
+    "pdf": "D:\\unitfolders\\nb9zj-word-conversion-lab\\word-conversion-lab\\out\\incremental-paragraph-r01\\run-0\\report.pdf",
+    "pdfSha256": "3eb894716bc0c2c9240a4e5775d4c0fcf2fbe95c4c7a9db49c0535248a8d64ca",
+    "pages": [
+      "D:\\unitfolders\\nb9zj-word-conversion-lab\\word-conversion-lab\\out\\incremental-visual-r01\\pdf-03\\page-01.png",
+      "D:\\unitfolders\\nb9zj-word-conversion-lab\\word-conversion-lab\\out\\incremental-visual-r01\\pdf-03\\page-02.png",
+      "D:\\unitfolders\\nb9zj-word-conversion-lab\\word-conversion-lab\\out\\incremental-visual-r01\\pdf-03\\page-03.png",
+      "D:\\unitfolders\\nb9zj-word-conversion-lab\\word-conversion-lab\\out\\incremental-visual-r01\\pdf-03\\page-04.png",
+      "D:\\unitfolders\\nb9zj-word-conversion-lab\\word-conversion-lab\\out\\incremental-visual-r01\\pdf-03\\page-05.png",
+      "D:\\unitfolders\\nb9zj-word-conversion-lab\\word-conversion-lab\\out\\incremental-visual-r01\\pdf-03\\page-06.png",
+      "D:\\unitfolders\\nb9zj-word-conversion-lab\\word-conversion-lab\\out\\incremental-visual-r01\\pdf-03\\page-07.png",
+      "D:\\unitfolders\\nb9zj-word-conversion-lab\\word-conversion-lab\\out\\incremental-visual-r01\\pdf-03\\page-08.png",
+      "D:\\unitfolders\\nb9zj-word-conversion-lab\\word-conversion-lab\\out\\incremental-visual-r01\\pdf-03\\page-09.png",
+      "D:\\unitfolders\\nb9zj-word-conversion-lab\\word-conversion-lab\\out\\incremental-visual-r01\\pdf-03\\page-10.png"
+    ],
+    "pixelsDifferentFromBaselinePages": [
+      3,
+      4,
+      5,
+      7,
+      8,
+      9,
+      10
+    ]
+  },
+  {
+    "pdf": "D:\\unitfolders\\nb9zj-word-conversion-lab\\word-conversion-lab\\out\\incremental-table-r01\\run-0\\report.pdf",
+    "pdfSha256": "b3ddfdc01cc5bfe1a8f2a24c7d2d2462f71376e66f8250a8b409ab625b6308cb",
+    "pages": [
+      "D:\\unitfolders\\nb9zj-word-conversion-lab\\word-conversion-lab\\out\\incremental-visual-r01\\pdf-04\\page-01.png",
+      "D:\\unitfolders\\nb9zj-word-conversion-lab\\word-conversion-lab\\out\\incremental-visual-r01\\pdf-04\\page-02.png",
+      "D:\\unitfolders\\nb9zj-word-conversion-lab\\word-conversion-lab\\out\\incremental-visual-r01\\pdf-04\\page-03.png",
+      "D:\\unitfolders\\nb9zj-word-conversion-lab\\word-conversion-lab\\out\\incremental-visual-r01\\pdf-04\\page-04.png",
+      "D:\\unitfolders\\nb9zj-word-conversion-lab\\word-conversion-lab\\out\\incremental-visual-r01\\pdf-04\\page-05.png",
+      "D:\\unitfolders\\nb9zj-word-conversion-lab\\word-conversion-lab\\out\\incremental-visual-r01\\pdf-04\\page-06.png",
+      "D:\\unitfolders\\nb9zj-word-conversion-lab\\word-conversion-lab\\out\\incremental-visual-r01\\pdf-04\\page-07.png",
+      "D:\\unitfolders\\nb9zj-word-conversion-lab\\word-conversion-lab\\out\\incremental-visual-r01\\pdf-04\\page-08.png",
+      "D:\\unitfolders\\nb9zj-word-conversion-lab\\word-conversion-lab\\out\\incremental-visual-r01\\pdf-04\\page-09.png",
+      "D:\\unitfolders\\nb9zj-word-conversion-lab\\word-conversion-lab\\out\\incremental-visual-r01\\pdf-04\\page-10.png"
+    ],
+    "pixelsDifferentFromBaselinePages": [
+      3,
+      4,
+      5,
+      8,
+      9,
+      10
+    ]
+  },
+  {
+    "pdf": "D:\\unitfolders\\nb9zj-word-conversion-lab\\word-conversion-lab\\out\\incremental-formula-r01\\run-0\\report.pdf",
+    "pdfSha256": "5e18f720120e8d37cedb7995aeede27e85f6c6fae48b698bb5cd92ef77594d30",
+    "pages": [
+      "D:\\unitfolders\\nb9zj-word-conversion-lab\\word-conversion-lab\\out\\incremental-visual-r01\\pdf-05\\page-01.png",
+      "D:\\unitfolders\\nb9zj-word-conversion-lab\\word-conversion-lab\\out\\incremental-visual-r01\\pdf-05\\page-02.png",
+      "D:\\unitfolders\\nb9zj-word-conversion-lab\\word-conversion-lab\\out\\incremental-visual-r01\\pdf-05\\page-03.png",
+      "D:\\unitfolders\\nb9zj-word-conversion-lab\\word-conversion-lab\\out\\incremental-visual-r01\\pdf-05\\page-04.png",
+      "D:\\unitfolders\\nb9zj-word-conversion-lab\\word-conversion-lab\\out\\incremental-visual-r01\\pdf-05\\page-05.png",
+      "D:\\unitfolders\\nb9zj-word-conversion-lab\\word-conversion-lab\\out\\incremental-visual-r01\\pdf-05\\page-06.png",
+      "D:\\unitfolders\\nb9zj-word-conversion-lab\\word-conversion-lab\\out\\incremental-visual-r01\\pdf-05\\page-07.png",
+      "D:\\unitfolders\\nb9zj-word-conversion-lab\\word-conversion-lab\\out\\incremental-visual-r01\\pdf-05\\page-08.png",
+      "D:\\unitfolders\\nb9zj-word-conversion-lab\\word-conversion-lab\\out\\incremental-visual-r01\\pdf-05\\page-09.png",
+      "D:\\unitfolders\\nb9zj-word-conversion-lab\\word-conversion-lab\\out\\incremental-visual-r01\\pdf-05\\page-10.png"
+    ],
+    "pixelsDifferentFromBaselinePages": [
+      3
+    ]
+  },
+  {
+    "pdf": "D:\\unitfolders\\nb9zj-word-conversion-lab\\word-conversion-lab\\out\\incremental-boundaries-r01\\insert-rebuilt\\report.pdf",
+    "pdfSha256": "1fffb51da0b27ad65696beb001c62fd0de9d9d602d65a1e89c82afcc2afbd631",
+    "pages": [
+      "D:\\unitfolders\\nb9zj-word-conversion-lab\\word-conversion-lab\\out\\incremental-visual-r01\\pdf-06\\page-01.png",
+      "D:\\unitfolders\\nb9zj-word-conversion-lab\\word-conversion-lab\\out\\incremental-visual-r01\\pdf-06\\page-02.png",
+      "D:\\unitfolders\\nb9zj-word-conversion-lab\\word-conversion-lab\\out\\incremental-visual-r01\\pdf-06\\page-03.png",
+      "D:\\unitfolders\\nb9zj-word-conversion-lab\\word-conversion-lab\\out\\incremental-visual-r01\\pdf-06\\page-04.png",
+      "D:\\unitfolders\\nb9zj-word-conversion-lab\\word-conversion-lab\\out\\incremental-visual-r01\\pdf-06\\page-05.png",
+      "D:\\unitfolders\\nb9zj-word-conversion-lab\\word-conversion-lab\\out\\incremental-visual-r01\\pdf-06\\page-06.png",
+      "D:\\unitfolders\\nb9zj-word-conversion-lab\\word-conversion-lab\\out\\incremental-visual-r01\\pdf-06\\page-07.png",
+      "D:\\unitfolders\\nb9zj-word-conversion-lab\\word-conversion-lab\\out\\incremental-visual-r01\\pdf-06\\page-08.png",
+      "D:\\unitfolders\\nb9zj-word-conversion-lab\\word-conversion-lab\\out\\incremental-visual-r01\\pdf-06\\page-09.png",
+      "D:\\unitfolders\\nb9zj-word-conversion-lab\\word-conversion-lab\\out\\incremental-visual-r01\\pdf-06\\page-10.png"
+    ],
+    "pixelsDifferentFromBaselinePages": [
+      3,
+      8,
+      10
+    ]
+  }
+]

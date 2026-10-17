@@ -1,0 +1,96 @@
+{
+  "pages": 54,
+  "sectionOrientations": [
+    0,
+    1,
+    0
+  ],
+  "sourceSha256": "ca5e82d84d98f4e58453d7f92d4c4340325110ea97e2ce4ea3ffec06dda71fca",
+  "finalDocxSha256": "4ca6b8fd3e4d00dcbbd896c2c18c4ac8f9aa4b110197eb4a19f774f1dce6895d",
+  "finalPdfSha256": "262d35c4f319acfb0db3a3b867ab73cc8b6fda78179d5d6c93223b49032b70c2",
+  "scriptSha256": "f4aa600c068721d42f6d591b8e95f266b3cf6ddd01f3fce734b9b480d39c821d",
+  "contentMatches": true,
+  "imagesUnchanged": true,
+  "sourceLinksPreserved": 22,
+  "equationEditAndReopen": {
+    "before": "\r3\r",
+    "after": "\r4\r",
+    "mathCount": 26,
+    "passed": true
+  },
+  "files": [
+    "D:\\unitfolders\\nb9zj-word-conversion-lab\\word-conversion-lab\\out\\sst-restyle-20261010-150201\\final\\wf10kV直挂SST系统设计方案_国网报告风格.docx",
+    "D:\\unitfolders\\nb9zj-word-conversion-lab\\word-conversion-lab\\out\\sst-restyle-20261010-150201\\final\\wf10kV直挂SST系统设计方案_国网报告风格.pdf"
+  ],
+  "b1HeaderRepair": {
+    "fromColumns": 9,
+    "toColumns": 7,
+    "dataRowsPreserved": true
+  },
+  "preservedContent": {
+    "bodySha256": "d4291268536f33d90b8be43865c034a40608b7d9405dadce20c1e3875ebfb181",
+    "bodyCharacters": 38030,
+    "sourceLinkTargets": [
+      "https://mp.weixin.qq.com/s/dBGHLWX7oljoT4WSNTDkKQ",
+      "https://mp.weixin.qq.com/s/dBGHLWX7oljoT4WSNTDkKQ",
+      "https://mp.weixin.qq.com/s/dBGHLWX7oljoT4WSNTDkKQ",
+      "https://mp.weixin.qq.com/s/dBGHLWX7oljoT4WSNTDkKQ",
+      "https://www.cls.cn/detail/2422937",
+      "https://www.cnesa.org/information/detail/?column_id=58&id=8297",
+      "https://www.cnesa.org/information/detail/?column_id=58&id=8297",
+      "https://www.cnesa.org/information/detail/?column_id=58&id=8297",
+      "https://www.eaton.com/us/en-us/catalog/medium-voltage-power-distribution-control-systems/medium-voltage-solid-state-transformer.html",
+      "https://www.eet-china.com/mp/a493614.html",
+      "https://www.factmr.com/report/solid-state-power-transformers-market",
+      "https://www.factmr.com/report/solid-state-power-transformers-market",
+      "https://www.factmr.com/report/solid-state-power-transformers-market",
+      "https://www.hjssemi.com/topic/1784011525922",
+      "https://www.hjssemi.com/topic/1784011525922",
+      "https://www.hjssemi.com/topic/1784011525922",
+      "https://www.hjssemi.com/topic/1784011525922",
+      "https://www.hjssemi.com/topic/1784011525922",
+      "https://www.hjssemi.com/topic/1784011525922",
+      "https://www.marketsandmarkets.com/Market-Reports/us-data-centers-solid-state-transformers-market-51807964.html",
+      "https://www.sina.cn/news/detail/5322278864421809.html",
+      "https://www.stcn.com/article/detail/3991663.html"
+    ],
+    "equations": [
+      "3",
+      "2",
+      "2",
+      "2",
+      "2",
+      "𝑓",
+      "2",
+      "((𝐿1+𝐿2)/(𝐿1·𝐿2·𝐶))",
+      "2",
+      "2",
+      "2",
+      "2",
+      "3",
+      "2",
+      "2",
+      "3",
+      "3",
+      "2",
+      "2",
+      "3",
+      "2",
+      "3",
+      "2",
+      "2",
+      "((𝐿1+𝐿2)/(𝐿1·𝐿2·𝐶))",
+      "2"
+    ],
+    "tables": 32,
+    "pictures": 10,
+    "shapes": 0
+  },
+  "mathStructuresPreserved": true,
+  "visualReview": {
+    "pages": 54,
+    "dpi": 110,
+    "renderDirectory": "final-pages-v4",
+    "allPagesReviewed": true
+  }
+}

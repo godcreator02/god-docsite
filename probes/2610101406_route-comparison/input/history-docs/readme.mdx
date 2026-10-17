@@ -1,0 +1,149 @@
+---
+title: README 与实验说明
+description: 自建项目报告模板、Word COM 主方案、数据来源和复现入口
+---
+
+# Word 技术路线实验
+
+本仓长期采用 **Word 原生 `.dotx` 模板 + 仓内 `.venv` Python + pywin32 控制本机 Microsoft Word**。模板管版式，JSON 管正文与数据，Word 原生创建和排版文档。README 与实验说明合并维护于此。
+
+当前使用自建项目报告模板，不套用行业或单位规范。十页正文样稿加一页封面、一页自动目录，共十二页，已生成 OMML 与全 MathType 两个版本。MathType 完整版来自同一 JSON，包含一条行内和五条行间公式，六类均已创建、保存重开读取并逐页检查；整体替换编辑只验证了分式。首轮国网风格的三路线比较保留为历史实验。
+
+MathType 当前样稿已采用行间公式居中、右侧 `(章号-序号)` 自动域编号，同章显示 `(1-1)`、`(1-2)`，换章从 `(2-1)` 开始。生成时自动更新；手工增删或移动整段公式后，按 Ctrl+A、F9 更新。实现与验证见[样稿与检查结果](/docs/samples)。
+
+完整 MathType 报告见 `out/project-report-mathtype-r02/word-com.docx` 和同名 PDF；公式位于正文第 3 页，编号为 `(3-1)` 至 `(3-5)`。复现命令：`.\.venv\Scripts\python.exe routes\word-com\build.py out\project-report-mathtype-new --mathtype`。`aligned` 由生成器转换为本机已验证的 `array{rl}`；JSON 正本保持不变。
+
+## 文档入口
+
+- 本机文档站：http://127.0.0.1:4312/docs
+- [首轮样稿与检查结果](/docs/samples)：样稿位置、观察和已验证范围。
+- 验收规则：`spec/acceptance.md`，正本 `docs-site/content/docs/acceptance.mdx`。
+- 在途计划：`docs-site/content/future/spec/comparison.mdx`。
+- 结果记录格式：`reports/result-template.md`。
+
+## 自建模板与使用规则
+
+正式模板为 `templates/project-report.dotx`，由本机 Word 以无宏模板格式创建。可在 Word 中直接新建报告，也可运行生成器；日常修改模板后，生成器会从该模板新建文档，不会重写模板本身。
+
+| 部位 | 自建模板规则 |
+| --- | --- |
+| 页面 | A4，四边 25 mm；宽表单独使用横向节 |
+| 正文 | 宋体 12 pt、西文 Times New Roman，1.5 倍行距，首行缩进 2 字符 |
+| 标题 | 黑体 16 / 14 / 12 pt，Word 原生三级多级编号 |
+| 封面 | 28 pt 主标题、18 pt 项目名；五个可填写内容控件 |
+| 目录与页码 | 原生 TOC 与 PAGE 域；封面无页码、目录罗马数字、正文从 1 开始 |
+| 图表 | 图下题注、表上题注；SEQ 编号和 REF 交叉引用 |
+| 表格 | 10.5 pt，明确列宽、重复表头、禁止拆行；行高按最小值而非固定值 |
+| 公式 | Cambria Math、原生 OMML；独立公式居中，右侧自动编号 |
+
+`routes/word-com/template.py` 是模板的初始构建代码。模板已纳入 Git，普通生成不需运行它。只有明确要重新生成并覆盖模板时才运行 `template.py --replace`；模板中手工调整的样式应同步记录，避免重建时丢失。
+
+十页正文依次覆盖：项目概述、需求与三级标题/列表/脚注、六类公式、架构图、计算曲线、参数及合并单元格表、两页自然跨页长表、横向宽表、结论与修订记录。章节起页是本样稿的显式排版安排；新增真实内容后允许自然增加页数，不承诺任意报告固定为十页。
+
+## 历史参考模板
+
+采用[天津大学 2020 年项目申报通知](https://kj.tju.edu.cn/info/1029/2553.htm)附带的《国家电网公司总部科技项目可行性研究报告及附录模板（2018版）》作为视觉参考。原件与来源记录保存在 `templates/`。这是有来源的报告风格实验，不认定为现行国网通用规范。
+
+| 部位 | 本轮规则 |
+| --- | --- |
+| 页面 | A4 纵向，上下 25.4 mm、左 23 mm、右 22 mm |
+| 封面 | 仿宋首行 26 pt，标题 36 pt 加粗，说明字段 16 pt |
+| 正文 | 仿宋 12 pt、Times New Roman、1.5 倍行距 |
+| 一级标题 | 仿宋 15 pt 加粗，结构化 Heading 1 |
+| 公式 | Cambria Math，原生 OMML，SEQ 编号与 REF 引用 |
+| 表格 | 总宽 165 mm，重复表头，禁止一行跨页 |
+
+原件要求仿宋_GB2312；本机未独立安装该字体，本轮显式使用仿宋。目录、页眉、公式编号、跨页表格与首行缩进是实验补充规则。原件含横向附录，本轮统一样例不使用这些章节。
+
+## 首轮比较路线（历史）
+
+| 标识 | 实现 | 共同收尾之前的处理 |
+| --- | --- | --- |
+| word-com | Python + pywin32 调用本机 Word | Word 原生创建正文、样式、表格、域与 UnicodeMath 公式 |
+| pandoc | Markdown 加 reference.docx | Pandoc 转换正文与 LaTeX 公式；额外补表格列宽、网格和行规则 |
+| direct-docx | python-docx 加 OOXML | 直接写入正文、样式、表格、域和显式 OMML 树 |
+
+首轮三个生成器读取同一旧样例并交 Word 保存重开、导出 PDF。现在只扩展 Word COM 主方案；另外两条路线仍读取旧字段，不能拿它们的五页历史样稿与本轮十二页报告作同输入比较。
+
+## 生成代码与数据来源
+
+`fixtures/canonical.json#projectReport` 是当前内容正本：封面信息、章节和段落、六条 UnicodeMath 输入、图表数据、列宽与交叉引用目标。数据是为验证文档能力编写的演示内容，不来自真实项目测量。曲线采用已写明条件的一阶离线计算，用例状态均保留“待实测”。旧顶层字段保留供历史路线使用。
+
+| 代码 | 当前职责 |
+| --- | --- |
+| `routes/word-com/template.py` | 用 Word 创建无宏 `.dotx`，定义样式、编号、封面控件和分节骨架 |
+| `routes/word-com/build.py` | 从 `.dotx` 新建文档，读取 `projectReport`；默认生成 OMML，`--mathtype` 生成全 MathType 报告，正文、图表和域均由 Word 排版 |
+| `routes/word-com/mathtype-probe.py` | MathType API 共享函数和分式探针；完整报告的六类公式生成、重开读取、按章编号及交叉引用验证 |
+| `routes/word-com/restyle.py` | 接收现有 SST 报告 DOCX，在 Word 内重排；保留原生公式、图片和表格，并校验正文及来源链接 |
+| `routes/pandoc/build.py` | 从 JSON 生成 Markdown，直接使用其中的 LaTeX；调用 Pandoc，再补表格约束 |
+| `routes/direct-docx/build.py` | 从 JSON 取正文等内容；用 python-docx 生成文档，由 `formula(id)` 构建六条固定 OMML 公式 |
+| `scripts/document_common.py` | Pandoc 与直接 DOCX 的共用样式、封面、域和表格；同时读取 JSON |
+| `scripts/word_com.py` | 创建和关闭本次拥有的 Word COM 实例 |
+| `scripts/word-verify.py` | `--project-report` 验证主方案；更新域、保存重开、导出 PDF，测试六类公式编辑、重编号、增行分页及批注修订 |
+| `scripts/audit-and-render.py`、`scripts/record-evidence.py` | 检查结构、PDF 转页面图、记录哈希与验收证据 |
+
+当前 COM 的公式不再硬编码在 `LINEAR` 中：OMML 模式读取 `projectReport.equations[].unicodeMath`；`--mathtype` 模式读取同一对象的 `latex`，并记录必要的兼容转换。修改后都需要检查数学语义与 Word 排版。字号等样式在 `.dotx` 中；图形绘制及章节起页逻辑在生成器中。旧 Pandoc / 直接 DOCX 路线仍有原有固定项。
+
+现成报告重排走 `restyle.py`，数据源是传入的 DOCX，直接保留文档里的公式对象，不经过六条固定公式映射。当前规则针对含封面、摘要、目录及厂商对比表的 SST 技术报告：国网风格正文与标题、自动目录、重复表头、厂商表横向节、Markdown 来源链接转 Word 超链接。它不是任意文档的通用模板识别器。
+
+## 目录分工
+
+- `fixtures/canonical.json`：统一样例的内容和版式要求；实际读取范围及代码内固定项见上表。
+- `templates/`：当前项目报告 `.dotx`、历史公开原件、来源记录及 Pandoc 参考样式。
+- `routes/word-com/`、`routes/pandoc/`、`routes/direct-docx/`：三个生成器。
+- `scripts/`：环境采集、共同样式定义、Word 验证与页面检查。
+- `out/`：每次运行独立保存原始与最终文件、编辑副本、PDF、页面图和日志；本机保留，Git 忽略，Restic 现有追加规则排除该目录名。
+- `spec/acceptance.md`、`reports/`：docfirst 生成的验收与结果文档。
+- `docs-site/`：文档正本与站点。
+- `.venv/`：仓内独立 Python 环境，不进入 Git；`requirements.txt` 固定全部 Python 依赖版本。
+
+旧产物已整体迁入 `out/`，文件内容保持不变。历史日志中的旧目录路径保留当时执行记录；查找当前文件时将仓根后的旧目录名替换为 `out`。之前 Git 提交和已有备份快照中的副本不会因改目录而消失。
+
+## 复现入口
+
+在仓根创建独立虚拟环境。下面命令在 PowerShell 7 中执行；生成、环境采集和验证本身均为 Python，不需要 `.ps1` 脚本。基础解释器仅用于创建环境，实验一律运行 `.venv` 内的解释器，不继承系统或用户目录的第三方库。
+
+```powershell
+& $basePython -m venv .venv
+& ./.venv/Scripts/python.exe -m pip install -r requirements.txt
+& ./.venv/Scripts/python.exe -m pip check
+```
+
+本机 `$basePython` 使用 Codex workspace dependency loader 提供的 Python 3.12.14；新建环境不加 `--system-site-packages`。无需激活环境，也无需调整全局 PATH。在新机器上可用指定的 Python 3.12 基础解释器重建，`.venv` 本身不搬运。
+
+每次在 `out/` 使用新的目录，不覆盖以前的结果：
+
+```powershell
+$python = './.venv/Scripts/python.exe'
+$runDir = Join-Path (Get-Location) ('out/project-report-' + (Get-Date -Format 'yyyyMMdd-HHmmss'))
+& $python -X utf8 ./scripts/capture-environment.py $runDir
+& $python -X utf8 ./routes/word-com/build.py $runDir
+& $python -X utf8 ./scripts/word-verify.py $runDir --project-report
+& $python -X utf8 ./scripts/audit-and-render.py $runDir $popplerBin
+```
+
+`requirements.txt` 固定 pywin32、python-docx、lxml、pypdf、Pillow 及 typing_extensions，安装均落在 `.venv/Lib/site-packages/`。`environment.json` 记录解释器、环境隔离及包路径；`manifest.json` 记录依赖版本与清单哈希。必须实际查看 `word-com-pages/` 全部十二页后，再运行 `& $python -X utf8 ./scripts/record-evidence.py $runDir --reviewed-pages 1-12` 汇总证据；这个参数声明已经检查，不会自动替人看图。
+
+`$popplerBin` 指定 workspace dependency loader 返回的 Poppler bin，仅用于把 Word PDF 转为检查图片。生成主报告不需要 Pandoc 或 LibreOffice。COM 生成器使用 pywin32 直接控制本机 Word，独立实例由 `scripts/word_com.py` 管理。
+
+UnicodeMath 支持范围和 LaTeX 不相同，本生成器不是通用 LaTeX 解析器。任何新增公式都应在 Word 内检查语义、编辑保存和渲染。运行耗时是单次记录，不是性能基准。
+
+对现成 SST 报告使用独立的新输出目录：
+
+```powershell
+& ./.venv/Scripts/python.exe -X utf8 ./routes/word-com/restyle.py $sourceDocx $outDir
+```
+
+`$sourceDocx` 为输入文件，`$outDir` 位于 `out/` 内。脚本只读打开输入，另存 DOCX、重开并导出 PDF；检查正文（忽略布局空白与目录结果）、已有公式对象的实际文本与数量、图片字节和表格数量。Markdown 链接的显示文字与原网址分别校验。脚本不改写原文件，也不执行报告里提到的命令。
+
+Word 自动化仅关闭本次拥有的文档与实例，禁止全局结束 WINWORD。环境采集到软件注册，不等于实际编辑能力已通过。
+
+## 后续实验
+
+1. 根据真实项目补充图表、章节和验收证据，延续 Word 原生模板方案。
+2. MathType 复测运行 `routes/word-com/mathtype-probe.py`；当前通过证据位于 `out/mathtype-20261010-r10/`，查看 `mathtype-numbered.docx` 和同名 PDF。探针依赖仓内 `.venv` 的 comtypes，通过 Word COM 与 MathType API 创建和整体替换分式，不使用桌面点击。读回内容、自动编号和页面显示分别验收，不能只依据 API 返回码。
+3. 若需要性能结论，再进行冷启动与至少三轮连续运行统计。
+
+## 文档维护
+
+正本由 `docs-site/docfirst.config.mjs` 映射到仓根 README、验收与结果文件。在 `docs-site/` 执行 `pnpm doc:render`、`pnpm doc`、`pnpm verify:roster`；通过 gwb `docfirst.site.restart` 构建并重启现有 4312 端口。正本与生成物一起提交。

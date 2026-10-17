@@ -1,0 +1,289 @@
+[
+  {
+    "event": "mathtype-functionality",
+    "elapsedSeconds": 0.001,
+    "full": 1,
+    "mode": 2,
+    "dll": "C:\\Program Files (x86)\\MathType\\MathPage\\64\\MathPage.wll"
+  },
+  {
+    "event": "equation-cache-hit",
+    "elapsedSeconds": 9.76,
+    "id": "DR_b33648d47ecfe1b1d66b913a34ff"
+  },
+  {
+    "event": "equation-created",
+    "elapsedSeconds": 10.095,
+    "id": "DR_b33648d47ecfe1b1d66b913a34ff",
+    "inline": false,
+    "widthPt": 105.80000305175781,
+    "heightPt": 33.25
+  },
+  {
+    "event": "equation-cache-hit",
+    "elapsedSeconds": 11.14,
+    "id": "DR_e80f8e07fd377e625f1a80f04b55"
+  },
+  {
+    "event": "equation-created",
+    "elapsedSeconds": 11.302,
+    "id": "DR_e80f8e07fd377e625f1a80f04b55",
+    "inline": false,
+    "widthPt": 64.80000305175781,
+    "heightPt": 38.20000076293945
+  },
+  {
+    "event": "equation-cache-hit",
+    "elapsedSeconds": 12.316,
+    "id": "DR_83354ecacf0fe4b52d93ad6b793a"
+  },
+  {
+    "event": "equation-created",
+    "elapsedSeconds": 12.695,
+    "id": "DR_83354ecacf0fe4b52d93ad6b793a",
+    "inline": false,
+    "widthPt": 115.75,
+    "heightPt": 18.850000381469727
+  },
+  {
+    "event": "equation-cache-hit",
+    "elapsedSeconds": 14.214,
+    "id": "DR_3dc5752a031fa25d760414353406"
+  },
+  {
+    "event": "equation-created",
+    "elapsedSeconds": 14.487,
+    "id": "DR_3dc5752a031fa25d760414353406",
+    "inline": false,
+    "widthPt": 52.04999923706055,
+    "heightPt": 33.79999923706055
+  },
+  {
+    "event": "equation-cache-hit",
+    "elapsedSeconds": 15.61,
+    "id": "DR_65a2192e57bab142adea833a0215"
+  },
+  {
+    "event": "equation-created",
+    "elapsedSeconds": 15.96,
+    "id": "DR_65a2192e57bab142adea833a0215",
+    "inline": false,
+    "widthPt": 74.75,
+    "heightPt": 33.79999923706055
+  },
+  {
+    "event": "equation-cache-hit",
+    "elapsedSeconds": 16.902,
+    "id": "DR_5b93603efbf3ee9aeea7951be14f"
+  },
+  {
+    "event": "equation-created",
+    "elapsedSeconds": 17.235,
+    "id": "DR_5b93603efbf3ee9aeea7951be14f",
+    "inline": false,
+    "widthPt": 91.94999694824219,
+    "heightPt": 38.20000076293945
+  },
+  {
+    "event": "equation-cache-hit",
+    "elapsedSeconds": 19.26,
+    "id": "DR_f69a8cdb9846109411c96511d3b9"
+  },
+  {
+    "event": "equation-created",
+    "elapsedSeconds": 19.755,
+    "id": "DR_f69a8cdb9846109411c96511d3b9",
+    "inline": false,
+    "widthPt": 42.099998474121094,
+    "heightPt": 37.099998474121094
+  },
+  {
+    "event": "equation-cache-hit",
+    "elapsedSeconds": 21.676,
+    "id": "DR_16be23d7fb8f8cce443ddff5c7a4"
+  },
+  {
+    "event": "equation-created",
+    "elapsedSeconds": 21.87,
+    "id": "DR_16be23d7fb8f8cce443ddff5c7a4",
+    "inline": false,
+    "widthPt": 136.8000030517578,
+    "heightPt": 38.20000076293945
+  },
+  {
+    "event": "equation-cache-hit",
+    "elapsedSeconds": 22.946,
+    "id": "DR_4b15db2d3579f8920ed62ec9ad6f"
+  },
+  {
+    "event": "equation-created",
+    "elapsedSeconds": 23.174,
+    "id": "DR_4b15db2d3579f8920ed62ec9ad6f",
+    "inline": false,
+    "widthPt": 187.75,
+    "heightPt": 38.20000076293945
+  },
+  {
+    "event": "equation-cache-hit",
+    "elapsedSeconds": 24.035,
+    "id": "DR_d95d639e84db843e84490299d570"
+  },
+  {
+    "event": "equation-created",
+    "elapsedSeconds": 24.217,
+    "id": "DR_d95d639e84db843e84490299d570",
+    "inline": false,
+    "widthPt": 234.3000030517578,
+    "heightPt": 33.79999923706055
+  },
+  {
+    "event": "read-tex",
+    "elapsedSeconds": 29.975,
+    "stage": "reopened-DR_b33648d47ecfe1b1d66b913a34ff",
+    "returnCode": 0,
+    "text": "$V_{\\mathrm{ph}}=\\frac{10000}{\\sqrt{3}}=5774\\,\\mathrm{V}$",
+    "matchesExpected": true
+  },
+  {
+    "event": "close-ole",
+    "elapsedSeconds": 30.146,
+    "stage": "reopened-DR_b33648d47ecfe1b1d66b913a34ff",
+    "returnCode": 0
+  },
+  {
+    "event": "read-tex",
+    "elapsedSeconds": 31.552,
+    "stage": "reopened-DR_e80f8e07fd377e625f1a80f04b55",
+    "returnCode": 0,
+    "text": "$N\\geq\\frac{\\sqrt{2}\\,V_{\\mathrm{ph}}}{m_{\\mathrm{max}}V_{\\mathrm{bus}}}$",
+    "matchesExpected": true
+  },
+  {
+    "event": "close-ole",
+    "elapsedSeconds": 31.637,
+    "stage": "reopened-DR_e80f8e07fd377e625f1a80f04b55",
+    "returnCode": 0
+  },
+  {
+    "event": "read-tex",
+    "elapsedSeconds": 32.711,
+    "stage": "reopened-DR_83354ecacf0fe4b52d93ad6b793a",
+    "returnCode": 0,
+    "text": "$C(N)\\approx N C_{\\mathrm{fixed}}+P_{\\mathrm{ph}}C_{\\mathrm{var}}$",
+    "matchesExpected": true
+  },
+  {
+    "event": "close-ole",
+    "elapsedSeconds": 32.805,
+    "stage": "reopened-DR_83354ecacf0fe4b52d93ad6b793a",
+    "returnCode": 0
+  },
+  {
+    "event": "read-tex",
+    "elapsedSeconds": 33.865,
+    "stage": "reopened-DR_3dc5752a031fa25d760414353406",
+    "returnCode": 0,
+    "text": "$P=\\frac{n V_1 V_2}{8 f_{\\mathrm{s}} L}$",
+    "matchesExpected": true
+  },
+  {
+    "event": "close-ole",
+    "elapsedSeconds": 33.949,
+    "stage": "reopened-DR_3dc5752a031fa25d760414353406",
+    "returnCode": 0
+  },
+  {
+    "event": "read-tex",
+    "elapsedSeconds": 34.941,
+    "stage": "reopened-DR_65a2192e57bab142adea833a0215",
+    "returnCode": 0,
+    "text": "$A_{\\mathrm{e}}N=\\frac{V_1}{4 f_{\\mathrm{s}} B_{\\mathrm{max}}}$",
+    "matchesExpected": true
+  },
+  {
+    "event": "close-ole",
+    "elapsedSeconds": 35.018,
+    "stage": "reopened-DR_65a2192e57bab142adea833a0215",
+    "returnCode": 0
+  },
+  {
+    "event": "read-tex",
+    "elapsedSeconds": 36.331,
+    "stage": "reopened-DR_5b93603efbf3ee9aeea7951be14f",
+    "returnCode": 0,
+    "text": "$f_{\\mathrm{res}}=\\frac{1}{2\\pi}\\sqrt{\\frac{L_1+L_2}{L_1 L_2 C}}$",
+    "matchesExpected": true
+  },
+  {
+    "event": "close-ole",
+    "elapsedSeconds": 36.473,
+    "stage": "reopened-DR_5b93603efbf3ee9aeea7951be14f",
+    "returnCode": 0
+  },
+  {
+    "event": "read-tex",
+    "elapsedSeconds": 37.876,
+    "stage": "reopened-DR_f69a8cdb9846109411c96511d3b9",
+    "returnCode": 0,
+    "text": "$m=\\frac{\\hat{V}_{\\mathrm{ref}}}{V_{\\mathrm{tri}}}$",
+    "matchesExpected": true
+  },
+  {
+    "event": "close-ole",
+    "elapsedSeconds": 37.979,
+    "stage": "reopened-DR_f69a8cdb9846109411c96511d3b9",
+    "returnCode": 0
+  },
+  {
+    "event": "read-tex",
+    "elapsedSeconds": 39.135,
+    "stage": "reopened-DR_16be23d7fb8f8cce443ddff5c7a4",
+    "returnCode": 0,
+    "text": "$V_{\\mathrm{ph}}=\\frac{N m V_{\\mathrm{bus}}}{\\sqrt{2}}\\;\\Rightarrow\\;m=\\frac{\\sqrt{2}\\,V_{\\mathrm{ph}}}{N V_{\\mathrm{bus}}}$",
+    "matchesExpected": true
+  },
+  {
+    "event": "close-ole",
+    "elapsedSeconds": 39.199,
+    "stage": "reopened-DR_16be23d7fb8f8cce443ddff5c7a4",
+    "returnCode": 0
+  },
+  {
+    "event": "read-tex",
+    "elapsedSeconds": 40.151,
+    "stage": "reopened-DR_4b15db2d3579f8920ed62ec9ad6f",
+    "returnCode": 0,
+    "text": "$m_{\\mathrm{SVPWM}}=\\frac{\\sqrt{3}\\,\\hat{V}_{\\mathrm{ph}}}{V_{\\mathrm{dc}}},\\quad m_{\\mathrm{SPWM}}=\\sqrt{3}\\,m_{\\mathrm{SVPWM}}$",
+    "matchesExpected": true
+  },
+  {
+    "event": "close-ole",
+    "elapsedSeconds": 40.205,
+    "stage": "reopened-DR_4b15db2d3579f8920ed62ec9ad6f",
+    "returnCode": 0
+  },
+  {
+    "event": "read-tex",
+    "elapsedSeconds": 41.052,
+    "stage": "reopened-DR_d95d639e84db843e84490299d570",
+    "returnCode": 0,
+    "text": "$P=\\frac{n V_1 V_2 D(1-D)}{2 f_{\\mathrm{s}} L},\\quad D\\in[0,\\,0.5];\\quad P_{\\max}=\\frac{n V_1 V_2}{8 f_{\\mathrm{s}} L}$",
+    "matchesExpected": true
+  },
+  {
+    "event": "close-ole",
+    "elapsedSeconds": 41.107,
+    "stage": "reopened-DR_d95d639e84db843e84490299d570",
+    "returnCode": 0
+  },
+  {
+    "event": "mathtype-reopen",
+    "elapsedSeconds": 41.229,
+    "verified": 10
+  },
+  {
+    "event": "terminate-api",
+    "elapsedSeconds": 41.289,
+    "returnCode": 0
+  }
+]

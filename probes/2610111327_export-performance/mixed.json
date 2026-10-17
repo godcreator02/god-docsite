@@ -1,0 +1,374 @@
+{
+  "format": "docreport",
+  "schemaVersion": 1,
+  "id": "mixed-perf",
+  "metadata": {
+    "title": "批量写入边界验证",
+    "language": "zh-CN"
+  },
+  "blocks": [
+    {
+      "type": "table",
+      "id": "flat",
+      "numbered": true,
+      "caption": [
+        {
+          "type": "text",
+          "text": "flat"
+        }
+      ],
+      "columns": [
+        {
+          "id": "flat-c0"
+        },
+        {
+          "id": "flat-c1"
+        }
+      ],
+      "headerRows": 1,
+      "rows": [
+        {
+          "id": "flat-r0",
+          "cells": [
+            {
+              "id": "f00",
+              "blocks": [
+                {
+                  "type": "paragraph",
+                  "id": "f00p",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "参数"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "f01",
+              "blocks": [
+                {
+                  "type": "paragraph",
+                  "id": "f01p",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "数值"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "flat-r1",
+          "cells": [
+            {
+              "id": "f10",
+              "blocks": [
+                {
+                  "type": "paragraph",
+                  "id": "f10p",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "😀 中文"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "f11",
+              "blocks": [
+                {
+                  "type": "paragraph",
+                  "id": "f11p",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "x",
+                      "marks": [
+                        "em"
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": "2",
+                      "marks": [
+                        "sub"
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " tail & < > 😀"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "flat-r2",
+          "cells": [
+            {
+              "id": "f20",
+              "blocks": [
+                {
+                  "type": "paragraph",
+                  "id": "f20p",
+                  "content": []
+                }
+              ]
+            },
+            {
+              "id": "f21",
+              "blocks": [
+                {
+                  "type": "paragraph",
+                  "id": "f21p",
+                  "content": [
+                    {
+                      "type": "ref",
+                      "id": "self-ref",
+                      "target": "flat",
+                      "display": "label"
+                    },
+                    {
+                      "type": "text",
+                      "text": " "
+                    },
+                    {
+                      "type": "link",
+                      "id": "site-link",
+                      "text": "来源",
+                      "href": "https://example.org"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "table",
+      "id": "outer",
+      "numbered": true,
+      "caption": [
+        {
+          "type": "text",
+          "text": "outer"
+        }
+      ],
+      "columns": [
+        {
+          "id": "outer-c0"
+        }
+      ],
+      "headerRows": 0,
+      "rows": [
+        {
+          "id": "outer-r0",
+          "cells": [
+            {
+              "id": "o00",
+              "blocks": [
+                {
+                  "type": "paragraph",
+                  "id": "o00p",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "嵌套前"
+                    }
+                  ]
+                },
+                {
+                  "type": "table",
+                  "id": "inner",
+                  "numbered": true,
+                  "caption": [
+                    {
+                      "type": "text",
+                      "text": "inner"
+                    }
+                  ],
+                  "columns": [
+                    {
+                      "id": "inner-c0"
+                    },
+                    {
+                      "id": "inner-c1"
+                    }
+                  ],
+                  "headerRows": 1,
+                  "rows": [
+                    {
+                      "id": "inner-r0",
+                      "cells": [
+                        {
+                          "id": "i00",
+                          "blocks": [
+                            {
+                              "type": "paragraph",
+                              "id": "i00p",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "内层"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "id": "i01",
+                          "blocks": [
+                            {
+                              "type": "paragraph",
+                              "id": "i01p",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "表头"
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "id": "inner-r1",
+                      "cells": [
+                        {
+                          "id": "i10",
+                          "blocks": [
+                            {
+                              "type": "paragraph",
+                              "id": "i10p",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "A"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "id": "i11",
+                          "blocks": [
+                            {
+                              "type": "paragraph",
+                              "id": "i11p",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "B"
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "outer-r1",
+          "cells": [
+            {
+              "id": "o10",
+              "blocks": [
+                {
+                  "type": "paragraph",
+                  "id": "o10p",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "嵌套后"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "table",
+      "id": "controls",
+      "numbered": true,
+      "caption": [
+        {
+          "type": "text",
+          "text": "controls"
+        }
+      ],
+      "columns": [
+        {
+          "id": "controls-c0"
+        },
+        {
+          "id": "controls-c1"
+        }
+      ],
+      "headerRows": 0,
+      "rows": [
+        {
+          "id": "controls-r0",
+          "cells": [
+            {
+              "id": "c00",
+              "blocks": [
+                {
+                  "type": "paragraph",
+                  "id": "c00p",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "前后"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "c01",
+              "blocks": [
+                {
+                  "type": "paragraph",
+                  "id": "c01p",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "第一行"
+                    },
+                    {
+                      "type": "break"
+                    },
+                    {
+                      "type": "text",
+                      "text": "第二行"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

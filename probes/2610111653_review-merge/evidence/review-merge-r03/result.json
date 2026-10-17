@@ -1,0 +1,15 @@
+{
+  "status": "passed_automation_visual_review_pending",
+  "proposalChanges": 5,
+  "mergeTests": 7,
+  "artifacts": {
+    "proposal.json": "D:\\unitfolders\\nb9zj-word-conversion-lab\\word-conversion-lab\\out\\review-merge-r03\\proposal.json",
+    "decisions.pending.json": "D:\\unitfolders\\nb9zj-word-conversion-lab\\word-conversion-lab\\out\\review-merge-r03\\decisions.pending.json",
+    "review.md": "D:\\unitfolders\\nb9zj-word-conversion-lab\\word-conversion-lab\\out\\review-merge-r03\\review.md",
+    "merged-report/content.json": "D:\\unitfolders\\nb9zj-word-conversion-lab\\word-conversion-lab\\out\\review-merge-r03\\merged-report\\content.json",
+    "merged-report/layout.json": "D:\\unitfolders\\nb9zj-word-conversion-lab\\word-conversion-lab\\out\\review-merge-r03\\merged-report\\layout.json",
+    "merged-report/merged.docx": "D:\\unitfolders\\nb9zj-word-conversion-lab\\word-conversion-lab\\out\\review-merge-r03\\merged-report\\merged.docx",
+    "merged-report/merged.pdf": "D:\\unitfolders\\nb9zj-word-conversion-lab\\word-conversion-lab\\out\\review-merge-r03\\merged-report\\merged.pdf"
+  },
+  "scope": "Real proposal remains pending. Merge and Word update are isolated simulations. No production files changed."
+}

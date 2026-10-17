@@ -1,0 +1,38 @@
+         22516 function calls (22433 primitive calls) in 10.627 seconds
+
+   Ordered by: cumulative time
+   List reduced from 273 to 30 due to restriction <30>
+
+   ncalls  tottime  percall  cumtime  percall filename:lineno(function)
+        1    0.216    0.216   10.627   10.627 compose.py:661(build)
+     14/1    0.082    0.006    7.495    7.495 compose.py:626(blocks)
+      5/4    0.782    0.156    7.436    1.859 compose.py:538(table_node)
+      454    0.003    0.000    4.561    0.010 __init__.py:586(__getattr__)
+      454    0.005    0.000    4.558    0.010 __init__.py:579(_ApplyTypes_)
+      687    3.897    0.006    3.897    0.006 {method 'InvokeTypes' of 'PyIDispatch' objects}
+      449    0.002    0.000    3.355    0.007 __init__.py:108(Dispatch)
+      449    0.007    0.000    3.351    0.007 __init__.py:21(__WrapDispatch)
+      459    3.299    0.007    3.299    0.007 {method 'QueryInterface' of 'PyIUnknown' objects}
+      449    0.005    0.000    3.256    0.007 __init__.py:524(__init__)
+      473    0.001    0.000    2.402    0.005 __init__.py:616(_get_good_object_)
+      473    0.001    0.000    2.400    0.005 __init__.py:610(_get_good_single_object_)
+      454    0.001    0.000    2.252    0.005 __init__.py:605(_get_good_object_)
+        1    0.345    0.345    1.994    1.994 compose.py:172(finish)
+        1    0.169    0.169    1.376    1.376 compose.py:477(_bulk_table)
+       18    0.000    0.000    1.202    0.067 compose.py:311(rich_paragraph)
+       18    0.001    0.000    1.200    0.067 compose.py:236(paragraph)
+       13    0.108    0.008    1.181    0.091 compose.py:587(trim_container)
+      111    0.001    0.000    1.128    0.010 __init__.py:592(__setattr__)
+      111    1.127    0.010    1.127    0.010 {method 'Invoke' of 'PyIDispatch' objects}
+       23    0.102    0.004    0.868    0.038 compose.py:229(point)
+        7    0.063    0.009    0.662    0.095 word.py:66(find_text)
+       29    0.148    0.005    0.595    0.021 compose.py:253(mark)
+       60    0.000    0.000    0.564    0.009 __init__.py:636(__getattr__)
+  294/254    0.000    0.000    0.564    0.002 {built-in method builtins.getattr}
+        5    0.000    0.000    0.555    0.111 compose.py:326(numbered_caption)
+       35    0.000    0.000    0.523    0.015 Bookmarks.py:33(Add)
+       62    0.000    0.000    0.312    0.005 Range.py:392(SetRange)
+       22    0.000    0.000    0.265    0.012 util.py:102(__next__)
+       14    0.050    0.004    0.251    0.018 word.py:57(story_ranges)
+
+

@@ -1,0 +1,13 @@
+{
+  "mode": "baseline",
+  "python": "D:\\unitfolders\\nb9zj-word-conversion-lab\\word-conversion-lab\\.venv\\Scripts\\python.exe",
+  "fixtureSha256": "b56a22f657205ddfbe370bc633587077d1880cde686fcb3c464c26f385886506",
+  "templateSha256": "2d645df23ecd1ee6f40d7da29854435139ff9d77a490f29c5051b6960bf909c4",
+  "budgetSeconds": 30.0,
+  "word": {
+    "version": "16.0",
+    "build": "16.0.14334"
+  },
+  "rendererSha256": "806b03437b3b403a457c9dcd74ebe0eb3f039513c88ad9cc1f165696e1e6f800",
+  "error": "Traceback (most recent call last):\n  File \"D:\\unitfolders\\nb9zj-word-conversion-lab\\word-conversion-lab\\probes\\2026-10-11-export-performance\\probe.py\", line 57, in main\n    composer = cls(doc, content, HERE)\n               ^^^^^^^^^^^^^^^^^^^^^^^\n  File \"D:\\unitfolders\\nb9zj-word-conversion-lab\\word-conversion-lab\\probes\\2026-10-11-export-performance\\baseline_compose.py\", line 208, in __init__\n    from .content import validate_content\nImportError: attempted relative import with no known parent package\n"
+}

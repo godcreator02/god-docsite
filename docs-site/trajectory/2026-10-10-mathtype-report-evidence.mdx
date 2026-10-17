@@ -1,0 +1,37 @@
+---
+born-at: 2026-10-10T20:18
+type: evidence
+parent: [2026-09-03-god-live-doc]
+label: MathType实测
+domain: 技术验证
+---
+
+## 背景
+
+用户要求通过 COM 添加真实 MathType 公式，将行间公式居中并采用 `(章号-序号)` 自动编号，随后要求从同一 JSON 重写完整报告，行内公式也全部使用 MathType。
+
+## 结论与边界
+
+本机 Word 16.0.14334 与 MathType 7.11.1.462 生成十二页完整报告，其中一条行内和五条行间公式均为 `Equation.DSMT4` OLE，OMML 数为零；六个对象保存重开后可激活并读回，全部十二页显示通过。这个结论覆盖六类样例的创建、读取与显示；整体替换编辑只验证分式，原对象内部覆盖和任意复杂 LaTeX 未通过验收。
+
+## 经过
+
+分式 probe 使用 Python、Word COM 与 MathType 自带的 64 位 MathPage API 写入和读回。修改分母常数采用在原位置创建新 OLE、成功后移除旧对象的整体替换方式。编号通过 Word 原生 STYLEREF 和 SEQ 域完成：同章 `(1-1)`、`(1-2)`，换章 `(2-1)`；插入、删除以及保存重开检查通过。
+
+完整报告保留封面、目录、正文和图表，公式在正文第三页，显示 `(3-1)` 至 `(3-5)`。交叉引用读取完整章号与序号；临时在第一条行间公式前插入编号段后，两处引用都从 `3-1` 更新为 `3-2`。
+
+## 否掉的候选
+
+直接再次向已有 OLE 调用写入接口时，页面出现追加的公式，虽然 API 返回成功且内容读回看似正确。保留这一反例，不能只用返回码和读回判断编辑正确。
+
+MathType 无法直接解析该样例的 `aligned`，会把命令以红字显示，但写入与读回仍返回成功。最终只把该两列形式适配为 `array{rl}`，保留原始 JSON 与转换前后输入。PDF 文本检查与逐页显示均重新执行。
+
+## 依据
+
+分式与编号证据在 `probes/2610101845_mathtype-automation/evidence/`：`mathtype-20261010-r10/result.json` 和 `visual-review.json` 是通过轮次；r04 保留授权受限、r06 保留追加显示、r07 保留双对象残留的失败证据。
+
+完整报告证据在 `probes/2610102000_mathtype-report/evidence/`：`project-report-mathtype-r01/visual-review.json` 记录 aligned 失败；`project-report-mathtype-r02/mathtype-report-verification.json` 和 `visual-review.json` 分别记录自动与逐页通过。最终 PDF SHA-256 为 `d6cef958a023e8a503e1395ee8d34b6ceed667948ffd6a33d2a1d59641691402`。
+
+## 代价与遗留
+
+MathType 旧界面部分中文显示问号时，本机非 Unicode 程序语言为 en-US、ANSI 代码页为 1252，同时进程载入中文资源。这是当时的诊断线索，没有修改系统区域设置进行对照；不能认定所有问号都由这个原因造成。Word 正文与交付 PDF 的中文显示正常。

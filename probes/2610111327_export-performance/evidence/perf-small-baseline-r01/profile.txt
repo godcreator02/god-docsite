@@ -1,0 +1,38 @@
+         58886 function calls (58722 primitive calls) in 35.464 seconds
+
+   Ordered by: cumulative time
+   List reduced from 263 to 30 due to restriction <30>
+
+   ncalls  tottime  percall  cumtime  percall filename:lineno(function)
+        1    0.309    0.309   35.464   35.464 compose.py:573(build)
+     76/1    0.728    0.010   33.679   33.679 compose.py:538(blocks)
+        1    2.778    2.778   28.597   28.597 compose.py:452(table_node)
+     1990    0.012    0.000   18.113    0.009 __init__.py:586(__getattr__)
+     1990    0.021    0.000   18.098    0.009 __init__.py:579(_ApplyTypes_)
+     2922   15.398    0.005   15.398    0.005 {method 'InvokeTypes' of 'PyIDispatch' objects}
+       92    0.362    0.004   13.640    0.148 compose.py:304(rich_paragraph)
+     1557    0.006    0.000   10.967    0.007 __init__.py:108(Dispatch)
+     1557    0.022    0.000   10.955    0.007 __init__.py:21(__WrapDispatch)
+     1561   10.831    0.007   10.831    0.007 {method 'QueryInterface' of 'PyIUnknown' objects}
+     1557    0.015    0.000   10.816    0.007 __init__.py:524(__init__)
+       92    0.835    0.009    8.909    0.097 compose.py:233(paragraph)
+     2000    0.004    0.000    8.491    0.004 __init__.py:616(_get_good_object_)
+     2000    0.003    0.000    8.483    0.004 __init__.py:610(_get_good_single_object_)
+     1990    0.004    0.000    8.371    0.004 __init__.py:605(_get_good_object_)
+       75    0.646    0.009    6.883    0.092 compose.py:499(trim_container)
+      146    0.002    0.000    3.838    0.026 compose.py:241(part)
+       93    0.432    0.005    3.530    0.038 compose.py:226(point)
+       93    0.813    0.009    3.165    0.034 compose.py:246(mark)
+      219    0.001    0.000    2.443    0.011 __init__.py:636(__getattr__)
+  453/405    0.001    0.000    2.443    0.006 {built-in method builtins.getattr}
+      406    0.002    0.000    2.113    0.005 Range.py:392(SetRange)
+      224    0.002    0.000    1.880    0.008 __init__.py:592(__setattr__)
+      224    1.878    0.008    1.878    0.008 {method 'Invoke' of 'PyIDispatch' objects}
+       95    0.001    0.000    1.386    0.015 Bookmarks.py:33(Add)
+       93    0.001    0.000    1.172    0.013 Styles.py:41(Item)
+       75    0.001    0.000    0.984    0.013 Cells.py:54(Item)
+       75    0.001    0.000    0.826    0.011 Table.py:48(Cell)
+       76    0.000    0.000    0.825    0.011 Range.py:104(Delete)
+        1    0.084    0.084    0.560    0.560 compose.py:172(finish)
+
+

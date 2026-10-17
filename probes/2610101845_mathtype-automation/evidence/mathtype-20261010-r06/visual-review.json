@@ -1,0 +1,12 @@
+{
+  "status": "failed",
+  "reason": "Direct write to populated MathType object appended a second visible equation. TeX readback only reflected latest input.",
+  "pagesReviewed": [
+    "original-page.png",
+    "edited-page.png"
+  ],
+  "pdfSha256": {
+    "mathtype-edited.pdf": "405d0f869a5885dab41c1bc2e62c87bce129ece23629325b2b159cda9dc0e3c0",
+    "mathtype-original.pdf": "f71995a8f0b6c49f6fe97159a66b5b5724c120e4054aceed49bf5e7f9c813346"
+  }
+}

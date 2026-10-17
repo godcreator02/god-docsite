@@ -1,0 +1,38 @@
+         47171 function calls (45164 primitive calls) in 2.373 seconds
+
+   Ordered by: cumulative time
+   List reduced from 278 to 30 due to restriction <30>
+
+   ncalls  tottime  percall  cumtime  percall filename:lineno(function)
+        1    0.345    0.345    2.373    2.373 compose.py:609(build)
+       54    1.033    0.019    1.033    0.019 {method 'InvokeTypes' of 'PyIDispatch' objects}
+       40    0.000    0.000    1.029    0.026 __init__.py:586(__getattr__)
+       40    0.000    0.000    1.029    0.026 __init__.py:579(_ApplyTypes_)
+       42    0.619    0.015    0.619    0.015 {method 'QueryInterface' of 'PyIUnknown' objects}
+       39    0.000    0.000    0.589    0.015 __init__.py:108(Dispatch)
+       39    0.001    0.000    0.589    0.015 __init__.py:21(__WrapDispatch)
+       39    0.000    0.000    0.588    0.015 __init__.py:524(__init__)
+       49    0.000    0.000    0.489    0.010 __init__.py:616(_get_good_object_)
+       49    0.000    0.000    0.489    0.010 __init__.py:610(_get_good_single_object_)
+        1    0.015    0.015    0.463    0.463 compose.py:736(finish)
+        1    0.065    0.065    0.448    0.448 compose.py:182(finish)
+       13    0.000    0.000    0.425    0.033 __init__.py:636(__getattr__)
+       23    0.000    0.000    0.425    0.018 {built-in method builtins.getattr}
+       40    0.000    0.000    0.365    0.009 __init__.py:605(_get_good_object_)
+        1    0.000    0.000    0.350    0.350 compose.py:791(blocks)
+        1    0.022    0.022    0.255    0.255 compose.py:795(flush)
+       12    0.000    0.000    0.251    0.021 util.py:102(__next__)
+        1    0.000    0.000    0.232    0.232 compose.py:814(insert_body)
+        1    0.000    0.000    0.173    0.173 00020905-0000-0000-C000-000000000046x0x8x7.py:18571(InsertXML)
+       14    0.127    0.009    0.127    0.009 {built-in method builtins.next}
+        8    0.000    0.000    0.121    0.015 __init__.py:592(__setattr__)
+        8    0.121    0.015    0.121    0.015 {method 'Invoke' of 'PyIDispatch' objects}
+       92    0.002    0.000    0.093    0.001 compose.py:667(paragraph_xml)
+       93    0.000    0.000    0.086    0.001 compose.py:653(style_id)
+        3    0.000    0.000    0.085    0.028 00020905-0000-0000-C000-000000000046x0x8x7.py:27375(Range)
+        1    0.000    0.000    0.051    0.051 compose.py:239(point)
+        1    0.000    0.000    0.050    0.050 00020905-0000-0000-C000-000000000046x0x8x7.py:4989(Item)
+        1    0.000    0.000    0.044    0.044 00020905-0000-0000-C000-000000000046x0x8x7.py:4977(Add)
+        2    0.000    0.000    0.032    0.016 00020905-0000-0000-C000-000000000046x0x8x7.py:11907(Item)
+
+

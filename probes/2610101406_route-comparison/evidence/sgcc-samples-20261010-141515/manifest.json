@@ -1,0 +1,78 @@
+{
+  "runDirectory": "D:\\unitfolders\\nb9zj-word-conversion-lab\\word-conversion-lab\\runs\\sgcc-samples-20261010-141515",
+  "fixtureSha256": "971f1cf52c991115ce4b5d7ca7ce179600e06bcb453fb540b37538f3a429ad67",
+  "sourceTemplateSha256": "141131ad823f273eb50cebfae6c5f5fb4b65e878c2c63e52472d2612f55b60fd",
+  "python": {
+    "executable": "C:\\Users\\godamericatb14\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+    "version": "3.12.14",
+    "packages": {
+      "python-docx": "1.2.0",
+      "lxml": "6.1.1",
+      "pypdf": "6.10.0",
+      "Pillow": "12.3.0"
+    }
+  },
+  "scripts": {
+    "routes\\direct-docx\\build.py": "f9960884cf9dccbb1a0cef2306714072722ac2be22e91f458efafffc21ef93bd",
+    "routes\\pandoc\\build.py": "808e6be2f107e38ce581638ff9d322fd0ce6d09333b9c5c1cf325e479ca7105e",
+    "routes\\word-com\\build.ps1": "2f82f0221a8ae209ccb355626d42c108f6abf62f5fe5a44fb5e8f872c3ba1f8a",
+    "scripts\\audit-and-render.py": "f574adab582e6a69b5e96802de1c8a625777393f7022a1e94c57274d365f49b2",
+    "scripts\\capture-environment.ps1": "ee393815c816754cc6c6ae09b628788a8c50edd61c296563ada0ebacc7172b51",
+    "scripts\\document_common.py": "710d83c3fb802ddc588bbdd96a366e0d53502a9d0f1717918894575699db48f1",
+    "scripts\\record-evidence.py": "b50fd59a39f507b7027821aca753bdbc91fad913e527b61e5508b0f82d05e7b4",
+    "scripts\\word-verify.ps1": "b5032322841640ebe764850db15a48bd5cf0b3517b3fee4f164906c36f5282e9"
+  },
+  "editAssertions": [
+    {
+      "route": "word-com",
+      "original": {
+        "mathCount": 6,
+        "denominator": "LCs2+RCs+1"
+      },
+      "editedAndReopened": {
+        "mathCount": 6,
+        "denominator": "LCs2+RCs+2"
+      },
+      "passed": true
+    },
+    {
+      "route": "pandoc",
+      "original": {
+        "mathCount": 6,
+        "denominator": "LCs2+RCs+1"
+      },
+      "editedAndReopened": {
+        "mathCount": 6,
+        "denominator": "LCs2+RCs+2"
+      },
+      "passed": true
+    },
+    {
+      "route": "direct-docx",
+      "original": {
+        "mathCount": 6,
+        "denominator": "LCs2+RCs+1"
+      },
+      "editedAndReopened": {
+        "mathCount": 6,
+        "denominator": "LCs2+RCs+2"
+      },
+      "passed": true
+    }
+  ],
+  "verifiedScope": [
+    "Word open/save/reopen",
+    "Word denominator edit and reopen",
+    "6 OMML formulas",
+    "40 data rows plus repeating header",
+    "5 pages each inspected at 110 dpi"
+  ],
+  "notTested": [
+    "MathType OLE",
+    "all six equation types edited",
+    "insert-before numbering test",
+    "append-row pagination test",
+    "cold and repeated benchmark",
+    "other Word/WPS versions"
+  ]
+}

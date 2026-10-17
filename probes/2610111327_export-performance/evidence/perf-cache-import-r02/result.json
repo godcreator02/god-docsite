@@ -1,0 +1,36 @@
+[
+  {
+    "mode": "minimal",
+    "before": 7,
+    "target": [
+      7,
+      7,
+      ""
+    ],
+    "positions": [
+      [
+        7,
+        33
+      ]
+    ],
+    "text": "before\t\u0001\r\t(after)\r",
+    "count": 1
+  },
+  {
+    "mode": "original",
+    "before": 7,
+    "target": [
+      7,
+      7,
+      ""
+    ],
+    "positions": [
+      [
+        7,
+        33
+      ]
+    ],
+    "text": "before\t\u0001\r\t(after)\r",
+    "count": 1
+  }
+]

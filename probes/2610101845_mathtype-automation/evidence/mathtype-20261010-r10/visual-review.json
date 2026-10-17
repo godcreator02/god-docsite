@@ -1,0 +1,54 @@
+{
+  "status": "passed",
+  "reviewedAt": "2026-10-10T19:56:39.147528",
+  "method": "Microsoft Word PDF export, Poppler 110 dpi, each page inspected with view_image",
+  "checks": [
+    "Formula centered on text area",
+    "Number at right text boundary",
+    "Black chapter headings",
+    "Chinese and mathematical glyphs legible",
+    "No overlap or clipping",
+    "Denominator constants and displayed numbering correct"
+  ],
+  "pages": [
+    {
+      "file": "mathtype-original.pdf",
+      "page": 1,
+      "image": "original-page.png",
+      "sha256": "a88ef7847ef253fe326d5cdd45c15df28a341325e738d6dd7e5ccd91e72ccc7e",
+      "numbers": [
+        "(1-1)"
+      ]
+    },
+    {
+      "file": "mathtype-edited.pdf",
+      "page": 1,
+      "image": "edited-page.png",
+      "sha256": "3ecf5d1ed6468c9464ac3009adcf1ee0a57fdb69ccfd81e54b564dfbef76450c",
+      "numbers": [
+        "(1-1)"
+      ]
+    },
+    {
+      "file": "mathtype-numbered.pdf",
+      "page": 1,
+      "image": "numbered-page.png",
+      "sha256": "1759d86731a2aabb73ffa987f9b84ab27b84ab21bd52e9e91236156ff1bce34d",
+      "numbers": [
+        "(1-1)",
+        "(1-2)",
+        "(2-1)"
+      ]
+    }
+  ],
+  "rendererWarnings": [
+    "No display font for 'Symbol'",
+    "No display font for 'ArialUnicode'"
+  ],
+  "duplicateFormulaRegression": {
+    "status": "passed",
+    "knownBadSampleRejected": true,
+    "reason": "mathtype-edited.pdf: unexpected page count, duplicate formula or question marks"
+  },
+  "sourceSha256": "0f0583d551ce5fc5ad953f3308b6c677b2257c1bfda68129ce48f6966ff3d980"
+}

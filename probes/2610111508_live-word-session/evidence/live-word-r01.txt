@@ -1,0 +1,24 @@
+Traceback (most recent call last):
+  File "D:\unitfolders\nb9zj-word-conversion-lab\word-conversion-lab\.venv\Lib\site-packages\comtypes\client\lazybind.py", line 105, in __bind
+    return self._tdesc[(name, invkind)]
+           ~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+KeyError: ('Hwnd', 3)
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "D:\unitfolders\nb9zj-word-conversion-lab\word-conversion-lab\probes\2026-10-11-live-word-session\live.py", line 141, in <module>
+    if __name__=='__main__':main()
+                            ^^^^^^
+  File "D:\unitfolders\nb9zj-word-conversion-lab\word-conversion-lab\probes\2026-10-11-live-word-session\live.py", line 46, in main
+    pid=win32process.GetWindowThreadProcessId(int(word.Hwnd))[1]
+                                                  ^^^^^^^^^
+  File "D:\unitfolders\nb9zj-word-conversion-lab\word-conversion-lab\.venv\Lib\site-packages\comtypes\client\lazybind.py", line 139, in __getattr__
+    descr = self.__bind(name, DISPATCH_METHOD | DISPATCH_PROPERTYGET)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\unitfolders\nb9zj-word-conversion-lab\word-conversion-lab\.venv\Lib\site-packages\comtypes\client\lazybind.py", line 108, in __bind
+    descr = self._tcomp.Bind(name, invkind)[1]
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\unitfolders\nb9zj-word-conversion-lab\word-conversion-lab\.venv\Lib\site-packages\comtypes\typeinfo.py", line 462, in Bind
+    raise NameError("Name %s not found" % name)
+NameError: Name Hwnd not found

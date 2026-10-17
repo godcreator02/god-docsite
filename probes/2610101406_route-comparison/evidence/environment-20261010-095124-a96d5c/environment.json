@@ -1,0 +1,48 @@
+{
+  "recordedAt": "2026-10-10T09:51:24.0162464+08:00",
+  "timeZone": "Asia/Shanghai",
+  "powershellVersion": "7.6.5",
+  "osVersion": "Microsoft Windows NT 10.0.26200.0",
+  "installedSoftware": [
+    {
+      "DisplayName": "Microsoft Office LTSC 专业增强版 2021 - zh-cn",
+      "DisplayVersion": "16.0.14334.20918",
+      "InstallLocation": "C:\\Program Files\\Microsoft Office"
+    },
+    {
+      "DisplayName": "MathType 7",
+      "DisplayVersion": "7.11.1",
+      "InstallLocation": null
+    }
+  ],
+  "comRegistrations": [
+    {
+      "progId": "Word.Application",
+      "registered": true,
+      "clsid": "{000209FF-0000-0000-C000-000000000046}",
+      "localServer": "C:\\Program Files\\Microsoft Office\\Root\\Office16\\WINWORD.EXE /Automation",
+      "executablePath": "C:\\Program Files\\Microsoft Office\\Root\\Office16\\WINWORD.EXE",
+      "executableExists": true,
+      "runtimeVerified": false
+    },
+    {
+      "progId": "Equation.DSMT4",
+      "registered": true,
+      "clsid": "{0002CE03-0000-0000-C000-000000000046}",
+      "localServer": "C:\\Program Files (x86)\\MathType\\MathType.exe",
+      "executablePath": "C:\\Program Files (x86)\\MathType\\MathType.exe",
+      "executableExists": true,
+      "runtimeVerified": false
+    }
+  ],
+  "pandoc": {
+    "onPath": false,
+    "path": null,
+    "version": null
+  },
+  "fixtureSha256": "3BE688AA5B7BE08ED583D52CB7190E7EFF638DCAB9329E9D98846D95BFC81377",
+  "notes": [
+    "注册信息、程序存在与运行成功分别记录；本脚本不启动 Office 或 MathType。",
+    "PATH 未发现程序不等于全盘未安装；不采集许可证或其他凭据。"
+  ]
+}

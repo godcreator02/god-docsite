@@ -1,0 +1,23 @@
+---
+born-at: 2026-10-11T02:20
+type: evidence
+parent: [2026-09-03-god-live-doc]
+label: 图片字节保真
+domain: 排版引擎
+---
+
+## 背景
+
+全文转换稿首次嵌入十张大尺寸 PNG。通用检查要求保存后的 DOCX 媒体与输入图片字节一致，但 Word 在每次保存时把超过默认 220ppi 的图片重采样（例如 1500 像素宽的图在 140mm 显示宽度下被压到 1298 像素），十张里八张字节被改写。
+
+## 结论与边界
+
+本次在现有 COM 路径中没有找到可用的图片压缩开关，采用报告专属模板的 settings.xml 设置 `<w:doNotAutoCompressPictures w:val="true"/>`。该元素会随新建文档保存；本机 Word 的完整保存链（含 MathType 填充后的保存重开）已验证十张源图字节不变。本仓不改公共模板，复制公共模板后仅加入该元素，经 report.py 的 TEMPLATE 指定。设置属于生成文档自身，并不要求接收方安装同一模板。手动压缩图片、删除该设置或使用其他编辑器后的保真情况未测试；`w:doNotCompressImages` 不是有效元素名，Word 在本次试验中将其剥离。
+
+## 经过
+
+先误用元素名 `doNotCompressImages`，在 settings.xml 的五个位置逐一插入，Word 保存后全部被剥离。经查证正确元素名为 `doNotAutoCompressPictures`，插在 defaultTabStop 之前，两次保存后元素保留、源 PNG 哈希逐字节一致。最小探针用 140mm 宽插入 1500×750 的 PNG，保存、重开再保存，媒体哈希与源一致；随后全文五十一页生成稿的 content-check 记录十张图全部按源字节嵌入。
+
+## 依据
+
+模板副本在 `out/sst-full-r01/project-report-noimgcompress.dotx`；全文通过运行 `out/sst-full-render-r05/`，最终修订稿在 `out/sst-full-render-r06/`（content-check 的 sourceImages 与源逐张一致）；被压缩的失败运行保留在 `out/sst-full-render-r04/`。元素含义见 [Microsoft Open XML 文档](https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.wordprocessing.donotautocompresspictures)。

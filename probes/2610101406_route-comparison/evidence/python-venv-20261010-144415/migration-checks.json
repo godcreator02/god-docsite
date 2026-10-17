@@ -1,0 +1,81 @@
+{
+  "baseline": "runs\\sgcc-samples-20261010-141515",
+  "pages": [
+    {
+      "route": "word-com",
+      "page": 1,
+      "pixelIdentical": true
+    },
+    {
+      "route": "word-com",
+      "page": 2,
+      "pixelIdentical": true
+    },
+    {
+      "route": "word-com",
+      "page": 3,
+      "pixelIdentical": true
+    },
+    {
+      "route": "word-com",
+      "page": 4,
+      "pixelIdentical": true
+    },
+    {
+      "route": "word-com",
+      "page": 5,
+      "pixelIdentical": true
+    },
+    {
+      "route": "pandoc",
+      "page": 1,
+      "pixelIdentical": true
+    },
+    {
+      "route": "pandoc",
+      "page": 2,
+      "pixelIdentical": true
+    },
+    {
+      "route": "pandoc",
+      "page": 3,
+      "pixelIdentical": true
+    },
+    {
+      "route": "pandoc",
+      "page": 4,
+      "pixelIdentical": true
+    },
+    {
+      "route": "pandoc",
+      "page": 5,
+      "pixelIdentical": true
+    },
+    {
+      "route": "direct-docx",
+      "page": 1,
+      "pixelIdentical": true
+    },
+    {
+      "route": "direct-docx",
+      "page": 2,
+      "pixelIdentical": true
+    },
+    {
+      "route": "direct-docx",
+      "page": 3,
+      "pixelIdentical": true
+    },
+    {
+      "route": "direct-docx",
+      "page": 4,
+      "pixelIdentical": true
+    },
+    {
+      "route": "direct-docx",
+      "page": 5,
+      "pixelIdentical": true
+    }
+  ],
+  "cleanupEvidence": "../python-com-20261010-143843/migration-checks.json"
+}

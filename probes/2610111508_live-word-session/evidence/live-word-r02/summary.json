@@ -1,0 +1,61 @@
+{
+  "status": "passed_automation_visual_review_pending",
+  "pages": 10,
+  "policy": "One document copy and one private Word instance. First edit plus three subsequent edits per case. Word stays open for all twelve edits. No unchanged formula activation. Mutation includes changed-formula write and readback. Save waits for the background queue. Final reopen acceptance is outside interactive timings.",
+  "startup": {
+    "copyOnceSeconds": 0.0008035000064410269,
+    "launchAndOpenOnceSeconds": 5.334989399998449
+  },
+  "environment": {
+    "wordVersion": "16.0",
+    "wordBuild": "16.0.14334",
+    "wordPid": 90572,
+    "backgroundPagination": true,
+    "backgroundSave": true
+  },
+  "medians": {
+    "character": {
+      "editSeconds": 0.3628542499936884,
+      "saveSeconds": 0.27815205001388676,
+      "refreshSeconds": 3.2036629499780247,
+      "saveAfterRefreshSeconds": 0.2392383999977028,
+      "pdfSeconds": 1.6021898000180954,
+      "editToPdfSeconds": 5.577174850011943,
+      "staticCheckSeconds": 0.1436218999879202
+    },
+    "table": {
+      "editSeconds": 5.226250899999286,
+      "saveSeconds": 0.24341014999663457,
+      "refreshSeconds": 2.842282149998937,
+      "saveAfterRefreshSeconds": 0.2330017000058433,
+      "pdfSeconds": 1.6832221999939065,
+      "editToPdfSeconds": 10.321885500001372,
+      "staticCheckSeconds": 0.12809240000206046
+    },
+    "formula": {
+      "editSeconds": 1.3031684500165284,
+      "saveSeconds": 0.22715744999004528,
+      "refreshSeconds": 3.4834834500215948,
+      "saveAfterRefreshSeconds": 0.24764309999591205,
+      "pdfSeconds": 1.4379583499830915,
+      "editToPdfSeconds": 6.70111330000509,
+      "staticCheckSeconds": 0.12926690001040697
+    }
+  },
+  "finalAcceptanceSeconds": 5.17305509999278,
+  "finalDocument": {
+    "pages": 10,
+    "mathTypeObjects": 2,
+    "ommlCount": 0,
+    "tables": 1,
+    "figures": 1,
+    "footnotes": 0,
+    "toc": 1,
+    "contentControls": 5
+  },
+  "finalHashes": {
+    "report.docx": "fb51218d28a8c11dcc45c2099f9b800870ca2e05325abbcac8317f7072af9a0f",
+    "report.pdf": "5691706693cb2e629094e1c14543d741282cfdccf476654d0769fe3b35693284"
+  },
+  "baselineUnchanged": true
+}

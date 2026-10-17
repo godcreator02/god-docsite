@@ -1,0 +1,122 @@
+{
+  "status": "passed",
+  "reviewedAt": "2026-10-10T20:30:48.274190+08:00",
+  "method": "Word PDF export; Poppler 110 dpi; all 12 new page PNGs inspected with view_image; per-page pixel comparison with accepted MathType sample",
+  "pdfSha256": "cf9987f482051b560cfdaa950a17bfdb7fd8cd4a8bb0a8d27177791ede7b5526",
+  "docxSha256": "4813098a30ef2da6d351b6386aca33bb1ef9a57079089a156800c045481a48d2",
+  "bodyPages": 10,
+  "pages": [
+    {
+      "page": 1,
+      "image": "pages/page-01.png",
+      "notes": "Cover title and metadata fit."
+    },
+    {
+      "page": 2,
+      "image": "pages/page-02.png",
+      "notes": "TOC hierarchy and Roman page number correct."
+    },
+    {
+      "page": 3,
+      "image": "pages/page-03.png",
+      "notes": "Overview, table caption and table fit."
+    },
+    {
+      "page": 4,
+      "image": "pages/page-04.png",
+      "notes": "Three heading levels, separate lists and footnote correct."
+    },
+    {
+      "page": 5,
+      "image": "pages/page-05.png",
+      "notes": "One inline and five display MathType formulas legible; baseline, centered formulas, right numbers and two-line array checked."
+    },
+    {
+      "page": 6,
+      "image": "pages/page-06.png",
+      "notes": "Architecture figure and caption legible."
+    },
+    {
+      "page": 7,
+      "image": "pages/page-07.png",
+      "notes": "Response curve and labels legible."
+    },
+    {
+      "page": 8,
+      "image": "pages/page-08.png",
+      "notes": "Merged table heading and all parameter rows fit."
+    },
+    {
+      "page": 9,
+      "image": "pages/page-09.png",
+      "notes": "Long table first page, complete rows T01-T22."
+    },
+    {
+      "page": 10,
+      "image": "pages/page-10.png",
+      "notes": "Repeated header, complete rows T23-T40 and following paragraphs fit."
+    },
+    {
+      "page": 11,
+      "image": "pages/page-11.png",
+      "notes": "Landscape table fits, body page 9 preserved."
+    },
+    {
+      "page": 12,
+      "image": "pages/page-12.png",
+      "notes": "Conclusion, revision table, hyperlink and formula reference 3-1 correct."
+    }
+  ],
+  "pixelComparison": [
+    {
+      "page": "page-01.png",
+      "pixelIdentical": true
+    },
+    {
+      "page": "page-02.png",
+      "pixelIdentical": true
+    },
+    {
+      "page": "page-03.png",
+      "pixelIdentical": true
+    },
+    {
+      "page": "page-04.png",
+      "pixelIdentical": true
+    },
+    {
+      "page": "page-05.png",
+      "pixelIdentical": true
+    },
+    {
+      "page": "page-06.png",
+      "pixelIdentical": true
+    },
+    {
+      "page": "page-07.png",
+      "pixelIdentical": true
+    },
+    {
+      "page": "page-08.png",
+      "pixelIdentical": true
+    },
+    {
+      "page": "page-09.png",
+      "pixelIdentical": true
+    },
+    {
+      "page": "page-10.png",
+      "pixelIdentical": true
+    },
+    {
+      "page": "page-11.png",
+      "pixelIdentical": true
+    },
+    {
+      "page": "page-12.png",
+      "pixelIdentical": true
+    }
+  ],
+  "failures": [],
+  "limits": "Six example formulas; additional report content and new TeX require their own review."
+}

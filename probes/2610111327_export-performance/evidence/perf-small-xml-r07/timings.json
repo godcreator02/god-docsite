@@ -1,0 +1,26 @@
+{
+  "mode": "xml",
+  "python": "D:\\unitfolders\\nb9zj-word-conversion-lab\\word-conversion-lab\\.venv\\Scripts\\python.exe",
+  "fixtureSha256": "8e2656a97cbdd504ba43ab1383e58d357dabd8fb66c8ce41d5344ba85d1f883c",
+  "templateSha256": "2d645df23ecd1ee6f40d7da29854435139ff9d77a490f29c5051b6960bf909c4",
+  "budgetSeconds": 25.0,
+  "word": {
+    "version": "16.0",
+    "build": "16.0.14334"
+  },
+  "rendererSha256": "380a9b58825e19cdb8a2bc5c8b0eb459baadc41d63257c5ae79f45d6d03307cf",
+  "composeSeconds": 7.454,
+  "pdfExported": true,
+  "contentChecks": {
+    "sourceTextRuns": 145,
+    "tablesIncludingNested": 1,
+    "maximumTableDepth": 1,
+    "sourceImages": {},
+    "fields": 3
+  },
+  "formatChecks": {
+    "nativeTextRuns": 144,
+    "nativeScriptRuns": 15
+  },
+  "passed": true
+}

@@ -1,0 +1,27 @@
+[
+  {
+    "route": "word-com",
+    "controller": "Python + pywin32",
+    "wordVersion": "16.0",
+    "wordBuild": "16.0.14334",
+    "openSeconds": 0.7586116000020411,
+    "updateSaveSeconds": 1.0819577999936882,
+    "reopenExportSeconds": 7.721353000000818,
+    "pages": 12,
+    "equations": 6,
+    "tables": 5,
+    "rows": 5,
+    "toc": 1,
+    "fields": 50,
+    "formulaText": [
+      "\r𝑖\r𝐿\r\r𝑡\r=\r𝐼\r0\r+𝛥𝑖\rsin\r\r𝜔𝑡\r\r",
+      "𝐻\r𝑠\r=\r1\r𝐿𝐶\r𝑠\r2\r+𝑅𝐶𝑠+1\r",
+      "𝐸=\r0\r𝑇\r𝑣\r𝑡\r𝑖\r𝑡\rⅆ𝑡\r",
+      "𝐀=\r\r0\r1\r−\r𝜔\r0\r2\r\r−2𝜁\r𝜔\r0\r\r\r",
+      "𝑢\r𝑡\r=\r\r\r𝑈\rdc\r,\r𝑡≥0\r0,\r𝑡<0\r\r",
+      "\r\r𝑣\r𝐿\r&=𝐿\rⅆ\r𝑖\r𝐿\r\rⅆ𝑡\r\r\r𝑖\r𝐶\r&=𝐶\rⅆ\r𝑣\r𝐶\r\rⅆ𝑡\r\r"
+    ],
+    "editedFraction": "𝐻\r𝑠\r=\r1\r𝐿𝐶\r𝑠\r2\r+𝑅𝐶𝑠+2\r",
+    "editCheck": true
+  }
+]

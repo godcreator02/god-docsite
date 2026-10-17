@@ -1,0 +1,78 @@
+{
+  "report": "D:\\unitfolders\\nb9zj-word-conversion-lab\\word-conversion-lab\\out\\sst-full-r01",
+  "inputs": {
+    "out\\sst-full-r01\\assets\\image1.png": "de14f9cc003768c27949c4e96d2ebc5f638ff49e1fdefaa3f9eca77e035640ef",
+    "out\\sst-full-r01\\assets\\image10.png": "db3164e0e17b75acbab35f97e006988817767caf74d13437586eee68eda8abaf",
+    "out\\sst-full-r01\\assets\\image2.png": "d800fa029d77a9c508eea9fa7468bf46da3f5c34229bf29fcfb2ef0ffa26f853",
+    "out\\sst-full-r01\\assets\\image3.png": "c74ad0097011ec4381c5fecc88baa6064c0670c288b577d2be1a9e31811039c3",
+    "out\\sst-full-r01\\assets\\image4.png": "877b501acea87a30a174e18159e84d3c46337ee852aaa9f068ba0b8528119c79",
+    "out\\sst-full-r01\\assets\\image5.png": "4f57a03073fbfe5941f7258d3ed89471b4417ecc634f2af2a52cb2a3516acfef",
+    "out\\sst-full-r01\\assets\\image6.png": "a242c35e9574bd1064730e974f91a8b76a6273a81b6a515533455d6a99ff9a6b",
+    "out\\sst-full-r01\\assets\\image7.png": "5f20c89496b64ff9ceca56f28f43c3bff96f4fd728b2457c29e0fef6c5adaf17",
+    "out\\sst-full-r01\\assets\\image8.png": "c42a33e707e383b31a9889024ab4b922abce6fe65dba408a384ec5091839e0e0",
+    "out\\sst-full-r01\\assets\\image9.png": "57b4ea840bd205da3bec19f052621272b8e3e1d1b76ff476c4954fa36d3c3693",
+    "out\\sst-full-r01\\assets\\media": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "out\\sst-full-r01\\content.json": "cfe86069c14fe945314d396b8887bbfc46e73378d3b4262be30942ca83526547",
+    "out\\sst-full-r01\\conversion-audit.json": "26843d8c0a36bcfc7b4166897f428149b9ed289ca787ae1d2810c5e58cacb36a",
+    "out\\sst-full-r01\\convert_full.py": "4602be6696aeecead3b024faa00ac1b318574c87381f8d865d481c7aec5fea98",
+    "out\\sst-full-r01\\extract_full.py": "63d4161a9d227e65f7bee5830b81640cfc2cf4df988249492057101656c90e46",
+    "out\\sst-full-r01\\extract_pages.py": "5f7344d8f0087cdc6fb2320bbdb3e6f2b09872e1fbcffe836e0eadca0f2c5ea7",
+    "out\\sst-full-r01\\extraction-full.json": "1b3ad38fe8dd0e156c9377af4f42b09123cb4363c27c112865c144cfcbaf5ecf",
+    "out\\sst-full-r01\\fix_pages.py": "500b8decfd5c330f32322143a11cb8902135e93e7bce161aaa8e2847288dda9b",
+    "out\\sst-full-r01\\full-read.md": "b6ad1944e1fe29c16eb0824aac78bd9a60da0a00d1d347ce01fe90fa181a7848",
+    "out\\sst-full-r01\\make_readview.py": "eeef788954d49c19230e0cdbbd0a52d9eb6eebed7aacb6b85eea0ca2541853b9",
+    "out\\sst-full-r01\\omml-inventory.json": "5dffd758815c5984c055da6a45aecc01ba16c95957475db76d77ac3393edc15b",
+    "out\\sst-full-r01\\page-map.json": "8f47ca6f320b7aa4bff273f8fd94de217894a3e4d72b1359ff94987056dba541",
+    "out\\sst-full-r01\\pandoc-source.json": "0993add615f2a02806bec1f18c2fd947e530401a34c2d9fbfa9857ad654b3bbd",
+    "out\\sst-full-r01\\project-report-noimgcompress.dotx": "223c75d27f9d38f1b03ea233b6611c8bec6dbdc249290cf01879e01f6e8778fc",
+    "out\\sst-full-r01\\report.py": "a33391e0be04af6b5b17688831aca6c23b38b04eb4926f5b0d4c0c6f1f2fe36c",
+    "out\\sst-full-r01\\review.md": "7f8eb611261ecc2759511bcbded0d4a816d8949218f6016d5c75a9146403c74f",
+    "out\\sst-full-r01\\source-body-text.json": "429443d1cb4f0baa6ae0df5af8220872428a9dc58f957f2c9f7250e53811eb69",
+    "out\\sst-full-r01\\source-full.pdf": "02edbd3b3009d32ad7edd80e68f75e289bc0bf28dc4a9a258323f31c4d7727ee",
+    "pyproject.toml": "b58b03fd68cb08c7776b0d3ad4ee26d3660959b5102efe541445f2a3306e4f92",
+    "requirements.txt": "75d98410b556701a59f6caacfa41c88ae75d866d8d7159202741d7fd3a4996d3",
+    "schemas\\report-content.schema.json": "6020452fbe3176fb491a2fcb9712cf9277491f6f9a6d5cf9ab46c51f1e1d3d99",
+    "src\\docreport\\__init__.py": "65c430b8659a96080cf159ebea4ff6b656f6fedb73ebbc56b6c41750dd4a401e",
+    "src\\docreport\\__main__.py": "51a407de127964e45155127dc430f1a105e4f57b67c0426bed250899e8df35f9",
+    "src\\docreport\\compose.py": "806b03437b3b403a457c9dcd74ebe0eb3f039513c88ad9cc1f165696e1e6f800",
+    "src\\docreport\\content.py": "eb5ebe3c15b5d379d269398d30e88077eb80179d6a65dd41367a9e6552b8f7dc",
+    "src\\docreport\\mathtype.py": "a3418ea42f374955940a356cfc52c5099e9fd9474d92b9ec6da4bc6144c62586",
+    "src\\docreport\\verify.py": "a2e63aa39bbfd223e6cc5c8cb2824e9ba56b4a6ed2cb54b5e653cc40c81e8cd1",
+    "src\\docreport\\word.py": "6b90c00e46fe7da9330e27365e31183fb51a8f8dabf0703c88781bbe6567aecb"
+  },
+  "environment": {
+    "python": "3.12.14 (main, Aug 25 2026, 14:01:42) [MSC v.1944 64 bit (AMD64)]",
+    "executable": "D:\\unitfolders\\nb9zj-word-conversion-lab\\word-conversion-lab\\.venv\\Scripts\\python.exe",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "packages": {
+      "pywin32": "312",
+      "comtypes": "1.4.17",
+      "pypdf": "6.10.0",
+      "Pillow": "12.3.0",
+      "setuptools": "80.9.0",
+      "jsonschema": "4.25.1"
+    },
+    "word": {
+      "version": "16.0",
+      "build": "16.0.14334"
+    }
+  },
+  "command": [
+    "D:\\unitfolders\\nb9zj-word-conversion-lab\\word-conversion-lab\\.venv\\Scripts\\python.exe",
+    "-m",
+    "docreport",
+    "build",
+    "D:\\unitfolders\\nb9zj-word-conversion-lab\\word-conversion-lab\\out\\sst-full-r01",
+    "--out",
+    "D:\\unitfolders\\nb9zj-word-conversion-lab\\word-conversion-lab\\out\\sst-full-render-r06",
+    "--mathtype-dll",
+    "C:\\Program Files (x86)\\MathType\\MathPage\\64\\MathPage.wll"
+  ],
+  "baseGitCommit": "81a85c99a0800a9eb696038734b5f8deeb4b5fce",
+  "provenance": "Input hashes identify exact working files; baseGitCommit may precede local changes.",
+  "outputs": {
+    "report.docx": "6fea0074ead715643218095b3e6d8494a329f38644647ff62257e298b846d1dd",
+    "report.pdf": "1c6cfb7bdaa573f0ce61ee769cdb4feca2aa5238bd44bf780a49b54255c4fdd5"
+  },
+  "templateUnchanged": true
+}

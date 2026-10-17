@@ -1,0 +1,33 @@
+{
+  "file": "sgcc-feasibility-2018-original.docx",
+  "title": "国家电网公司总部科技项目可行性研究报告及附录模板（2018版）",
+  "publisherPage": "https://kj.tju.edu.cn/info/1029/2553.htm",
+  "noticeDate": "2020-11-12",
+  "retrievedDate": "2026-10-10",
+  "downloadUrl": "https://kj.tju.edu.cn/system/_content/download.jsp?urltype=news.DownloadAttachUrl&owner=1458539866&wbfileid=CAA48EF49D37A1326EC3D741E6627D59",
+  "scope": "天津大学公开项目申报通知附件。只作为报告风格参考，不认定为现行通用国网规范。",
+  "observed": {
+    "coverHeadingPt": 26,
+    "coverTitlePt": 36,
+    "coverMetadataPt": 16,
+    "bodyFont": "仿宋_GB2312",
+    "bodySizePt": 12,
+    "heading1Pt": 15,
+    "heading1Bold": true,
+    "lineSpacing": 1.5,
+    "firstSectionMarginsMm": [
+      25.4,
+      25.4,
+      23.001,
+      21.996
+    ]
+  },
+  "adaptations": [
+    "将前三页的技术样例结构替换原可研申报内容，保留封面层次和正文视觉规则。",
+    "使用本机已安装的仿宋替代仿宋_GB2312；西文为Times New Roman，数学为Cambria Math。",
+    "全篇A4纵向；原件附录的横向分节不在本轮样例范围。",
+    "使用结构化Heading样式、自动目录、PAGE/SEQ/REF域与重复表头，作为实验扩展。",
+    "封面明确标为风格样稿，标题和元数据为实验内容。"
+  ],
+  "sha256": "141131AD823F273EB50CEBFAE6C5F5FB4B65E878C2C63E52472D2612F55B60FD"
+}

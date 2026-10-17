@@ -1,0 +1,86 @@
+[
+  {
+    "event": "write-tex",
+    "stage": "edit-eq-edit",
+    "returnCode": 0,
+    "text": "$P=VI\\eta$"
+  },
+  {
+    "event": "read-tex",
+    "stage": "edit-eq-edit",
+    "returnCode": 0,
+    "text": "$P=VI\\eta$",
+    "matchesExpected": true
+  },
+  {
+    "event": "close-ole",
+    "stage": "edit-eq-edit",
+    "returnCode": 0
+  },
+  {
+    "event": "write-tex",
+    "stage": "edit-eq-edit",
+    "returnCode": 0,
+    "text": "$P=2VI$"
+  },
+  {
+    "event": "read-tex",
+    "stage": "edit-eq-edit",
+    "returnCode": 0,
+    "text": "$P=2VI$",
+    "matchesExpected": true
+  },
+  {
+    "event": "close-ole",
+    "stage": "edit-eq-edit",
+    "returnCode": 0
+  },
+  {
+    "event": "write-tex",
+    "stage": "edit-eq-edit",
+    "returnCode": 0,
+    "text": "$P=VI/2$"
+  },
+  {
+    "event": "read-tex",
+    "stage": "edit-eq-edit",
+    "returnCode": 0,
+    "text": "$P=VI/2$",
+    "matchesExpected": true
+  },
+  {
+    "event": "close-ole",
+    "stage": "edit-eq-edit",
+    "returnCode": 0
+  },
+  {
+    "event": "write-tex",
+    "stage": "edit-eq-edit",
+    "returnCode": 0,
+    "text": "$P=VI\\eta$"
+  },
+  {
+    "event": "read-tex",
+    "stage": "edit-eq-edit",
+    "returnCode": 0,
+    "text": "$P=VI\\eta$",
+    "matchesExpected": true
+  },
+  {
+    "event": "close-ole",
+    "stage": "edit-eq-edit",
+    "returnCode": 0
+  },
+  {
+    "event": "read-tex",
+    "stage": "final-reopened-eq-edit",
+    "returnCode": 0,
+    "text": "$P=VI\\eta$",
+    "matchesExpected": true
+  },
+  {
+    "event": "close-ole",
+    "stage": "final-reopened-eq-edit",
+    "returnCode": 0
+  }
+]

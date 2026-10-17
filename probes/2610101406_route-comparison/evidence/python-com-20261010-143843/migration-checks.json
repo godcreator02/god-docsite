@@ -1,0 +1,112 @@
+{
+  "baseline": "runs\\sgcc-samples-20261010-141515",
+  "pages": [
+    {
+      "route": "word-com",
+      "page": 1,
+      "pixelIdentical": true,
+      "differenceBounds": null
+    },
+    {
+      "route": "word-com",
+      "page": 2,
+      "pixelIdentical": true,
+      "differenceBounds": null
+    },
+    {
+      "route": "word-com",
+      "page": 3,
+      "pixelIdentical": true,
+      "differenceBounds": null
+    },
+    {
+      "route": "word-com",
+      "page": 4,
+      "pixelIdentical": true,
+      "differenceBounds": null
+    },
+    {
+      "route": "word-com",
+      "page": 5,
+      "pixelIdentical": true,
+      "differenceBounds": null
+    },
+    {
+      "route": "pandoc",
+      "page": 1,
+      "pixelIdentical": true,
+      "differenceBounds": null
+    },
+    {
+      "route": "pandoc",
+      "page": 2,
+      "pixelIdentical": true,
+      "differenceBounds": null
+    },
+    {
+      "route": "pandoc",
+      "page": 3,
+      "pixelIdentical": true,
+      "differenceBounds": null
+    },
+    {
+      "route": "pandoc",
+      "page": 4,
+      "pixelIdentical": true,
+      "differenceBounds": null
+    },
+    {
+      "route": "pandoc",
+      "page": 5,
+      "pixelIdentical": true,
+      "differenceBounds": null
+    },
+    {
+      "route": "direct-docx",
+      "page": 1,
+      "pixelIdentical": true,
+      "differenceBounds": null
+    },
+    {
+      "route": "direct-docx",
+      "page": 2,
+      "pixelIdentical": true,
+      "differenceBounds": null
+    },
+    {
+      "route": "direct-docx",
+      "page": 3,
+      "pixelIdentical": true,
+      "differenceBounds": null
+    },
+    {
+      "route": "direct-docx",
+      "page": 4,
+      "pixelIdentical": true,
+      "differenceBounds": null
+    },
+    {
+      "route": "direct-docx",
+      "page": 5,
+      "pixelIdentical": true,
+      "differenceBounds": null
+    }
+  ],
+  "environment": {
+    "python": "D:\\unitfolders\\nb9zj-word-conversion-lab\\word-conversion-lab\\.venv\\Scripts\\python.exe",
+    "userSiteEnabled": false,
+    "modulePaths": {
+      "docx": "D:\\unitfolders\\nb9zj-word-conversion-lab\\word-conversion-lab\\.venv\\Lib\\site-packages\\docx\\__init__.py",
+      "lxml": "D:\\unitfolders\\nb9zj-word-conversion-lab\\word-conversion-lab\\.venv\\Lib\\site-packages\\lxml\\__init__.py",
+      "pypdf": "D:\\unitfolders\\nb9zj-word-conversion-lab\\word-conversion-lab\\.venv\\Lib\\site-packages\\pypdf\\__init__.py",
+      "PIL": "D:\\unitfolders\\nb9zj-word-conversion-lab\\word-conversion-lab\\.venv\\Lib\\site-packages\\PIL\\__init__.py",
+      "win32com": "D:\\unitfolders\\nb9zj-word-conversion-lab\\word-conversion-lab\\.venv\\Lib\\site-packages\\win32com\\__init__.py",
+      "pythoncom": "D:\\unitfolders\\nb9zj-word-conversion-lab\\word-conversion-lab\\.venv\\Lib\\site-packages\\pywin32_system32\\pythoncom312.dll",
+      "typing_extensions": "D:\\unitfolders\\nb9zj-word-conversion-lab\\word-conversion-lab\\.venv\\Lib\\site-packages\\typing_extensions.py"
+    }
+  },
+  "exceptionCleanup": {
+    "ownedProcessExited": true,
+    "separateInstancePreserved": true
+  }
+}

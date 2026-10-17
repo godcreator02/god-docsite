@@ -1,0 +1,45 @@
+{
+  "report": "D:\\unitfolders\\nb9zj-word-conversion-lab\\word-conversion-lab\\reports\\demo-report",
+  "inputs": {
+    "pyproject.toml": "b58b03fd68cb08c7776b0d3ad4ee26d3660959b5102efe541445f2a3306e4f92",
+    "reports\\demo-report\\content.json": "531bad0b29b6d7ca3656ddfe372198c58fbc0453bd8e582eaa4f6ec49d9a4616",
+    "reports\\demo-report\\report.py": "0234736e33c18ce17ffdad6c4833b3d86e53b3d12b02f11265a54276abf4c17b",
+    "requirements.txt": "438c0e6dc14ce57a8158faebefc04632d4498f4fae78916d0c39389584eda33f",
+    "src\\docreport\\__init__.py": "65c430b8659a96080cf159ebea4ff6b656f6fedb73ebbc56b6c41750dd4a401e",
+    "src\\docreport\\__main__.py": "1080a7ff0dacbb528970b1e4fdf4a1a821b97a63f8ff77a3ce7775f5cadda819",
+    "src\\docreport\\compose.py": "7349f0a84adbbdce84db5f5752ab3cd9dfafd09695218395234f475a9a0646fe",
+    "src\\docreport\\mathtype.py": "f6d3edeab00a944fea6eec5b76363916e4327f53f150d9b3af7b1423b8b2bacb",
+    "src\\docreport\\verify.py": "1af3d64ea193b8ef6539a7d3d101b821b6d8da3d448fb7c5763d1a11a71ae5d9",
+    "src\\docreport\\word.py": "e04dd0efd07f277eec884bc64f50b4114e0546b4b13c909367e355e2755f1139",
+    "templates\\project-report.dotx": "2d645df23ecd1ee6f40d7da29854435139ff9d77a490f29c5051b6960bf909c4"
+  },
+  "environment": {
+    "python": "3.12.14 (main, Aug 25 2026, 14:01:42) [MSC v.1944 64 bit (AMD64)]",
+    "executable": "D:\\unitfolders\\nb9zj-word-conversion-lab\\word-conversion-lab\\.venv\\Scripts\\python.exe",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "packages": {
+      "pywin32": "312",
+      "comtypes": "1.4.17",
+      "pypdf": "6.10.0",
+      "Pillow": "12.3.0",
+      "setuptools": "80.9.0"
+    },
+    "word": {
+      "version": "16.0",
+      "build": "16.0.14334"
+    }
+  },
+  "command": [
+    "D:\\unitfolders\\nb9zj-word-conversion-lab\\word-conversion-lab\\.venv\\Scripts\\python.exe",
+    "-m",
+    "docreport",
+    "build",
+    "D:\\unitfolders\\nb9zj-word-conversion-lab\\word-conversion-lab\\reports\\demo-report",
+    "--out",
+    "D:\\unitfolders\\nb9zj-word-conversion-lab\\word-conversion-lab\\out\\formal-r01",
+    "--mathtype-dll",
+    "C:\\Program Files (x86)\\MathType\\MathPage\\64\\MathPage.wll"
+  ],
+  "baseGitCommit": "6c6de0a4f6dc025be5ca7446b9483d779d01a35b",
+  "provenance": "Input hashes identify exact working files; baseGitCommit may precede local changes."
+}

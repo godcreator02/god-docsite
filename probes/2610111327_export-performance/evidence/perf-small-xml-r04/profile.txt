@@ -1,0 +1,38 @@
+         52091 function calls (50815 primitive calls) in 54.324 seconds
+
+   Ordered by: cumulative time
+   List reduced from 317 to 30 due to restriction <30>
+
+   ncalls  tottime  percall  cumtime  percall filename:lineno(function)
+        1    0.717    0.717   54.325   54.325 baseline_compose.py:573(build)
+        1    0.334    0.334   44.403   44.403 baseline_compose.py:538(blocks)
+      586    0.015    0.000   40.404    0.069 dynamic.py:544(__getattr__)
+       17    1.424    0.084   37.944    2.232 baseline_compose.py:304(rich_paragraph)
+      363    0.002    0.000   30.051    0.083 dynamic.py:474(__LazyMap__)
+      363    0.011    0.000   30.049    0.083 dynamic.py:485(_LazyAddAttr_)
+     1452   15.166    0.010   15.180    0.010 {method 'Bind' of 'PyITypeComp' objects}
+      510    0.036    0.000   14.857    0.029 build.py:192(_AddFunc_)
+       17    0.720    0.042   14.240    0.838 baseline_compose.py:233(paragraph)
+       71    0.001    0.000   11.773    0.166 baseline_compose.py:241(part)
+      269    0.001    0.000   11.202    0.042 __init__.py:108(Dispatch)
+      269    0.007    0.000   11.200    0.042 __init__.py:21(__WrapDispatch)
+ 1201/941    1.458    0.001    9.384    0.010 build.py:545(_ResolveType)
+      421    0.001    0.000    9.289    0.022 dynamic.py:383(_get_good_object_)
+      421    0.001    0.000    9.287    0.022 dynamic.py:370(_get_good_single_object_)
+      213    0.000    0.000    9.286    0.044 __init__.py:156(_wrap_dispatch_)
+      858    9.257    0.011    9.257    0.011 {method 'GetTypeAttr' of 'PyITypeInfo' objects}
+       19    0.177    0.009    6.604    0.348 baseline_compose.py:226(point)
+      269    0.004    0.000    6.409    0.024 dynamic.py:120(Dispatch)
+      472    5.746    0.012    5.746    0.012 {method 'Invoke' of 'PyIDispatch' objects}
+      510    5.435    0.011    5.435    0.011 {method 'GetNames' of 'PyITypeInfo' objects}
+       61    0.001    0.000    4.737    0.078 dynamic.py:633(__setattr__)
+       18    0.730    0.041    4.316    0.240 baseline_compose.py:246(mark)
+        1    0.272    0.272    4.123    4.123 baseline_compose.py:172(finish)
+        1    0.078    0.078    3.259    3.259 xmlbulk.py:57(table_node)
+      269    2.947    0.011    2.947    0.011 {method 'GetTypeComp' of 'PyITypeInfo' objects}
+      269    2.932    0.011    2.932    0.011 {method 'GetTypeInfo' of 'PyIDispatch' objects}
+      269    0.003    0.000    2.923    0.011 dynamic.py:147(MakeOleRepr)
+       36    0.000    0.000    2.631    0.073 {built-in method builtins.setattr}
+      179    2.489    0.014    2.489    0.014 {method 'InvokeTypes' of 'PyIDispatch' objects}
+
+

@@ -1,0 +1,1 @@
+{"mode": "patch", "seconds": 30.512, "changed": [{"id": "eq-edit", "kind": "equation"}], "createdEquations": 1, "unchangedEquationPayloads": 1, "unchangedPayloadsEqual": true, "pdf": {"pages": 10, "sha256": "5e18f720120e8d37cedb7995aeede27e85f6c6fae48b698bb5cd92ef77594d30", "textWorkers": 1}, "status": "passed_automation_visual_review_pending"}

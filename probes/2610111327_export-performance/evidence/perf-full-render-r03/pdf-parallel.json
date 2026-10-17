@@ -1,0 +1,14 @@
+[
+  {
+    "pages": 51,
+    "sha256": "609c823d2c23e62affdcbc284eef07309afc20bc374ba40d3670db52e36d6d56",
+    "textWorkers": 1,
+    "seconds": 1.799
+  },
+  {
+    "pages": 51,
+    "sha256": "609c823d2c23e62affdcbc284eef07309afc20bc374ba40d3670db52e36d6d56",
+    "textWorkers": 4,
+    "seconds": 1.049
+  }
+]

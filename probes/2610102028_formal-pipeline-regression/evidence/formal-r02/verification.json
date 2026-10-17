@@ -1,0 +1,370 @@
+{
+  "status": "passed_automation_visual_review_pending",
+  "startedAt": "2026-10-10T12:26:35.438054+00:00",
+  "report": "D:\\unitfolders\\nb9zj-word-conversion-lab\\word-conversion-lab\\reports\\demo-report",
+  "visualReview": "pending",
+  "events": [
+    {
+      "event": "start",
+      "template": "D:\\unitfolders\\nb9zj-word-conversion-lab\\word-conversion-lab\\templates\\project-report.dotx",
+      "templateSha256": "2d645df23ecd1ee6f40d7da29854435139ff9d77a490f29c5051b6960bf909c4"
+    },
+    {
+      "event": "draft-saved",
+      "equations": 6
+    },
+    {
+      "event": "mathtype-functionality",
+      "full": 1,
+      "mode": 2,
+      "dll": "C:\\Program Files (x86)\\MathType\\MathPage\\64\\MathPage.wll"
+    },
+    {
+      "event": "write-tex",
+      "stage": "eq-inline",
+      "returnCode": 0,
+      "text": "i_L(t) = I_0 + \\Delta i\\sin(\\omega t)"
+    },
+    {
+      "event": "read-tex",
+      "stage": "eq-inline",
+      "returnCode": 0,
+      "text": "$i_L(t) = I_0 + \\Delta i\\sin(\\omega t)$",
+      "matchesExpected": true
+    },
+    {
+      "event": "close-ole",
+      "stage": "eq-inline",
+      "returnCode": 0
+    },
+    {
+      "event": "equation-created",
+      "id": "eq-inline",
+      "inline": true,
+      "widthPt": 103.0,
+      "heightPt": 18.299999237060547
+    },
+    {
+      "event": "write-tex",
+      "stage": "eq-fraction",
+      "returnCode": 0,
+      "text": "H(s)=\\frac{1}{LCs^2+RCs+1}"
+    },
+    {
+      "event": "read-tex",
+      "stage": "eq-fraction",
+      "returnCode": 0,
+      "text": "$H(s)=\\frac{1}{LCs^2+RCs+1}$",
+      "matchesExpected": true
+    },
+    {
+      "event": "close-ole",
+      "stage": "eq-fraction",
+      "returnCode": 0
+    },
+    {
+      "event": "equation-created",
+      "id": "eq-fraction",
+      "inline": false,
+      "widthPt": 113.0,
+      "heightPt": 31.0
+    },
+    {
+      "event": "write-tex",
+      "stage": "eq-integral",
+      "returnCode": 0,
+      "text": "E=\\int_0^T v(t)i(t)\\,\\mathrm{d}t"
+    },
+    {
+      "event": "read-tex",
+      "stage": "eq-integral",
+      "returnCode": 0,
+      "text": "$E=\\int_0^T v(t)i(t)\\,\\mathrm{d}t$",
+      "matchesExpected": true
+    },
+    {
+      "event": "close-ole",
+      "stage": "eq-integral",
+      "returnCode": 0
+    },
+    {
+      "event": "equation-created",
+      "id": "eq-integral",
+      "inline": false,
+      "widthPt": 79.75,
+      "heightPt": 26.049999237060547
+    },
+    {
+      "event": "write-tex",
+      "stage": "eq-matrix",
+      "returnCode": 0,
+      "text": "\\mathbf{A}=\\begin{bmatrix}0&1\\\\-\\omega_0^2&-2\\zeta\\omega_0\\end{bmatrix}"
+    },
+    {
+      "event": "read-tex",
+      "stage": "eq-matrix",
+      "returnCode": 0,
+      "text": "$\\mathbf{A}=\\begin{bmatrix}0&1\\\\-\\omega_0^2&-2\\zeta\\omega_0\\end{bmatrix}$",
+      "matchesExpected": true
+    },
+    {
+      "event": "close-ole",
+      "stage": "eq-matrix",
+      "returnCode": 0
+    },
+    {
+      "event": "equation-created",
+      "id": "eq-matrix",
+      "inline": false,
+      "widthPt": 99.1500015258789,
+      "heightPt": 38.20000076293945
+    },
+    {
+      "event": "write-tex",
+      "stage": "eq-cases",
+      "returnCode": 0,
+      "text": "u(t)=\\begin{cases}U_{\\mathrm{dc}},&t\\geq 0\\\\0,&t<0\\end{cases}"
+    },
+    {
+      "event": "read-tex",
+      "stage": "eq-cases",
+      "returnCode": 0,
+      "text": "$u(t)=\\begin{cases}U_{\\mathrm{dc}},&t\\geq 0\\\\0,&t<0\\end{cases}$",
+      "matchesExpected": true
+    },
+    {
+      "event": "close-ole",
+      "stage": "eq-cases",
+      "returnCode": 0
+    },
+    {
+      "event": "equation-created",
+      "id": "eq-cases",
+      "inline": false,
+      "widthPt": 91.94999694824219,
+      "heightPt": 36.0
+    },
+    {
+      "event": "tex-adaptation",
+      "id": "eq-aligned",
+      "sourceTex": "\\begin{aligned}v_L&=L\\frac{\\mathrm{d}i_L}{\\mathrm{d}t}\\\\i_C&=C\\frac{\\mathrm{d}v_C}{\\mathrm{d}t}\\end{aligned}",
+      "mathTypeTex": "\\begin{array}{rl}v_L&=L\\frac{\\mathrm{d}i_L}{\\mathrm{d}t}\\\\i_C&=C\\frac{\\mathrm{d}v_C}{\\mathrm{d}t}\\end{array}"
+    },
+    {
+      "event": "write-tex",
+      "stage": "eq-aligned",
+      "returnCode": 0,
+      "text": "\\begin{array}{rl}v_L&=L\\frac{\\mathrm{d}i_L}{\\mathrm{d}t}\\\\i_C&=C\\frac{\\mathrm{d}v_C}{\\mathrm{d}t}\\end{array}"
+    },
+    {
+      "event": "read-tex",
+      "stage": "eq-aligned",
+      "returnCode": 0,
+      "text": "$\\begin{array}{rl}v_L&=L\\frac{\\mathrm{d}i_L}{\\mathrm{d}t}\\\\i_C&=C\\frac{\\mathrm{d}v_C}{\\mathrm{d}t}\\end{array}$",
+      "matchesExpected": true
+    },
+    {
+      "event": "close-ole",
+      "stage": "eq-aligned",
+      "returnCode": 0
+    },
+    {
+      "event": "equation-created",
+      "id": "eq-aligned",
+      "inline": false,
+      "widthPt": 64.25,
+      "heightPt": 64.25
+    },
+    {
+      "event": "read-tex",
+      "stage": "reopened-eq-inline",
+      "returnCode": 0,
+      "text": "$i_L(t) = I_0 + \\Delta i\\sin(\\omega t)$",
+      "matchesExpected": true
+    },
+    {
+      "event": "close-ole",
+      "stage": "reopened-eq-inline",
+      "returnCode": 0
+    },
+    {
+      "event": "read-tex",
+      "stage": "reopened-eq-fraction",
+      "returnCode": 0,
+      "text": "$H(s)=\\frac{1}{LCs^2+RCs+1}$",
+      "matchesExpected": true
+    },
+    {
+      "event": "close-ole",
+      "stage": "reopened-eq-fraction",
+      "returnCode": 0
+    },
+    {
+      "event": "read-tex",
+      "stage": "reopened-eq-integral",
+      "returnCode": 0,
+      "text": "$E=\\int_0^T v(t)i(t)\\,\\mathrm{d}t$",
+      "matchesExpected": true
+    },
+    {
+      "event": "close-ole",
+      "stage": "reopened-eq-integral",
+      "returnCode": 0
+    },
+    {
+      "event": "read-tex",
+      "stage": "reopened-eq-matrix",
+      "returnCode": 0,
+      "text": "$\\mathbf{A}=\\begin{bmatrix}0&1\\\\-\\omega_0^2&-2\\zeta\\omega_0\\end{bmatrix}$",
+      "matchesExpected": true
+    },
+    {
+      "event": "close-ole",
+      "stage": "reopened-eq-matrix",
+      "returnCode": 0
+    },
+    {
+      "event": "read-tex",
+      "stage": "reopened-eq-cases",
+      "returnCode": 0,
+      "text": "$u(t)=\\begin{cases}U_{\\mathrm{dc}},&t\\geq 0\\\\0,&t<0\\end{cases}$",
+      "matchesExpected": true
+    },
+    {
+      "event": "close-ole",
+      "stage": "reopened-eq-cases",
+      "returnCode": 0
+    },
+    {
+      "event": "read-tex",
+      "stage": "reopened-eq-aligned",
+      "returnCode": 0,
+      "text": "$\\begin{array}{rl}v_L&=L\\frac{\\mathrm{d}i_L}{\\mathrm{d}t}\\\\i_C&=C\\frac{\\mathrm{d}v_C}{\\mathrm{d}t}\\end{array}$",
+      "matchesExpected": true
+    },
+    {
+      "event": "close-ole",
+      "stage": "reopened-eq-aligned",
+      "returnCode": 0
+    },
+    {
+      "event": "mathtype-reopen",
+      "verified": 6
+    },
+    {
+      "event": "terminate-api",
+      "returnCode": 0
+    },
+    {
+      "event": "document-check",
+      "pages": 12,
+      "mathTypeObjects": 6,
+      "ommlCount": 0,
+      "tables": 5,
+      "figures": 2,
+      "footnotes": 1,
+      "toc": 1,
+      "contentControls": 5
+    },
+    {
+      "event": "report-check",
+      "result": {
+        "pages": 12,
+        "bodyStart": 3,
+        "ommlCount": 0,
+        "tables": 5,
+        "figures": 2,
+        "mathTypeCount": 6,
+        "embeddedObjectCount": 6,
+        "footnotes": 1,
+        "toc": 1,
+        "contentControls": 5,
+        "orientations": [
+          0,
+          0,
+          0,
+          1,
+          0
+        ],
+        "bodyPages": 10,
+        "numbers": [
+          "3-1",
+          "3-2",
+          "3-3",
+          "3-4",
+          "3-5"
+        ],
+        "fractionReferences": [
+          "3-1",
+          "3-1"
+        ],
+        "status": "passed"
+      }
+    },
+    {
+      "event": "editing-check-unsaved",
+      "result": {
+        "status": "passed",
+        "saved": false,
+        "afterInsertion": {
+          "numbers": [
+            "3-2",
+            "3-3",
+            "3-4",
+            "3-5",
+            "3-6"
+          ],
+          "fractionReferences": [
+            "3-2",
+            "3-2"
+          ]
+        },
+        "afterDeletion": {
+          "numbers": [
+            "3-1",
+            "3-2",
+            "3-3",
+            "3-4",
+            "3-5"
+          ],
+          "fractionReferences": [
+            "3-1",
+            "3-1"
+          ]
+        }
+      }
+    },
+    {
+      "event": "package-check",
+      "mathTypeObjects": 6,
+      "ommlCount": 0,
+      "sha256": "4813098a30ef2da6d351b6386aca33bb1ef9a57079089a156800c045481a48d2"
+    },
+    {
+      "event": "pdf-check",
+      "pages": 12,
+      "sha256": "cf9987f482051b560cfdaa950a17bfdb7fd8cd4a8bb0a8d27177791ede7b5526"
+    },
+    {
+      "event": "report-pdf-check",
+      "result": {
+        "status": "passed",
+        "pages": 12,
+        "numbers": [
+          "(3-1)",
+          "(3-2)",
+          "(3-3)",
+          "(3-4)",
+          "(3-5)"
+        ],
+        "unparsedTex": false,
+        "visualReview": "required"
+      }
+    },
+    {
+      "event": "finished",
+      "status": "passed_automation_visual_review_pending",
+      "seconds": 81.778
+    }
+  ]
+}

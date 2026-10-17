@@ -1,0 +1,585 @@
+{
+  "python": "D:\\unitfolders\\nb9zj-word-conversion-lab\\word-conversion-lab\\.venv\\Scripts\\python.exe",
+  "dll": "C:\\Program Files (x86)\\MathType\\MathPage\\64\\MathPage.wll",
+  "input": {
+    "id": "eq-fraction",
+    "display": true,
+    "numbered": true,
+    "latex": "H(s)=\\frac{1}{LCs^2+RCs+1}"
+  },
+  "fixtureSha256": "8dc4d0430939c3cd4a3e423cab3e21b063f171afd2567d633e80b978a1037f1c",
+  "status": "passed_automation_visual_review_pending",
+  "events": [
+    {
+      "event": "init",
+      "returnCode": 1
+    },
+    {
+      "event": "functionality",
+      "full": 1,
+      "mode": 2,
+      "modeName": "full"
+    },
+    {
+      "event": "word-started",
+      "version": "16.0"
+    },
+    {
+      "event": "inserted",
+      "progId": "Equation.DSMT4"
+    },
+    {
+      "event": "write-tex",
+      "stage": "initial",
+      "returnCode": 0,
+      "text": "H(s)=\\frac{1}{LCs^2+RCs+1}"
+    },
+    {
+      "event": "read-length",
+      "stage": "initial",
+      "returnCode": 0,
+      "length": 29
+    },
+    {
+      "event": "read-tex",
+      "stage": "initial",
+      "returnCode": 0,
+      "text": "$H(s)=\\frac{1}{LCs^2+RCs+1}$",
+      "matchesExpected": true
+    },
+    {
+      "event": "close-ole",
+      "stage": "initial",
+      "returnCode": 0
+    },
+    {
+      "event": "numbering-audit",
+      "stage": "initial",
+      "rows": [
+        {
+          "number": "(1-1)",
+          "fields": [
+            {
+              "code": "STYLEREF 1 \\s",
+              "value": "1"
+            },
+            {
+              "code": "SEQ Equation \\* ARABIC \\s 1",
+              "value": "1"
+            }
+          ]
+        }
+      ],
+      "expected": [
+        "(1-1)"
+      ]
+    },
+    {
+      "event": "reopened",
+      "objectCount": 1,
+      "progId": "Equation.DSMT4"
+    },
+    {
+      "event": "read-length",
+      "stage": "reopened-original",
+      "returnCode": 0,
+      "length": 29
+    },
+    {
+      "event": "read-tex",
+      "stage": "reopened-original",
+      "returnCode": 0,
+      "text": "$H(s)=\\frac{1}{LCs^2+RCs+1}$",
+      "matchesExpected": true
+    },
+    {
+      "event": "close-ole",
+      "stage": "reopened-original",
+      "returnCode": 0
+    },
+    {
+      "event": "write-tex",
+      "stage": "replace-existing",
+      "returnCode": 0,
+      "text": "H(s)=\\frac{1}{LCs^2+RCs+2}"
+    },
+    {
+      "event": "read-length",
+      "stage": "replace-existing",
+      "returnCode": 0,
+      "length": 29
+    },
+    {
+      "event": "read-tex",
+      "stage": "replace-existing",
+      "returnCode": 0,
+      "text": "$H(s)=\\frac{1}{LCs^2+RCs+2}$",
+      "matchesExpected": true
+    },
+    {
+      "event": "close-ole",
+      "stage": "replace-existing",
+      "returnCode": 0
+    },
+    {
+      "event": "replace-ole",
+      "mode": "recreate-at-original-range",
+      "objectCount": 1
+    },
+    {
+      "event": "numbering-audit",
+      "stage": "after-object-replacement",
+      "rows": [
+        {
+          "number": "(1-1)",
+          "fields": [
+            {
+              "code": "STYLEREF 1 \\s",
+              "value": "1"
+            },
+            {
+              "code": "SEQ Equation \\* ARABIC \\s 1",
+              "value": "1"
+            }
+          ]
+        }
+      ],
+      "expected": [
+        "(1-1)"
+      ]
+    },
+    {
+      "event": "read-length",
+      "stage": "reopened-edited",
+      "returnCode": 0,
+      "length": 29
+    },
+    {
+      "event": "read-tex",
+      "stage": "reopened-edited",
+      "returnCode": 0,
+      "text": "$H(s)=\\frac{1}{LCs^2+RCs+2}$",
+      "matchesExpected": true
+    },
+    {
+      "event": "close-ole",
+      "stage": "reopened-edited",
+      "returnCode": 0
+    },
+    {
+      "event": "numbering-audit",
+      "stage": "reopened-edited",
+      "rows": [
+        {
+          "number": "(1-1)",
+          "fields": [
+            {
+              "code": "STYLEREF 1 \\s",
+              "value": "1"
+            },
+            {
+              "code": "SEQ Equation \\* ARABIC \\s 1",
+              "value": "1"
+            }
+          ]
+        }
+      ],
+      "expected": [
+        "(1-1)"
+      ]
+    },
+    {
+      "event": "inserted",
+      "progId": "Equation.DSMT4"
+    },
+    {
+      "event": "write-tex",
+      "stage": "insert-before-existing",
+      "returnCode": 0,
+      "text": "H(s)=\\frac{1}{LCs^2+RCs+1}"
+    },
+    {
+      "event": "read-length",
+      "stage": "insert-before-existing",
+      "returnCode": 0,
+      "length": 29
+    },
+    {
+      "event": "read-tex",
+      "stage": "insert-before-existing",
+      "returnCode": 0,
+      "text": "$H(s)=\\frac{1}{LCs^2+RCs+1}$",
+      "matchesExpected": true
+    },
+    {
+      "event": "close-ole",
+      "stage": "insert-before-existing",
+      "returnCode": 0
+    },
+    {
+      "event": "numbering-audit",
+      "stage": "after-insertion",
+      "rows": [
+        {
+          "number": "(1-1)",
+          "fields": [
+            {
+              "code": "STYLEREF 1 \\s",
+              "value": "1"
+            },
+            {
+              "code": "SEQ Equation \\* ARABIC \\s 1",
+              "value": "1"
+            }
+          ]
+        },
+        {
+          "number": "(1-2)",
+          "fields": [
+            {
+              "code": "STYLEREF 1 \\s",
+              "value": "1"
+            },
+            {
+              "code": "SEQ Equation \\* ARABIC \\s 1",
+              "value": "2"
+            }
+          ]
+        }
+      ],
+      "expected": [
+        "(1-1)",
+        "(1-2)"
+      ]
+    },
+    {
+      "event": "inserted",
+      "progId": "Equation.DSMT4"
+    },
+    {
+      "event": "write-tex",
+      "stage": "new-chapter",
+      "returnCode": 0,
+      "text": "H(s)=\\frac{1}{LCs^2+RCs+1}"
+    },
+    {
+      "event": "read-length",
+      "stage": "new-chapter",
+      "returnCode": 0,
+      "length": 29
+    },
+    {
+      "event": "read-tex",
+      "stage": "new-chapter",
+      "returnCode": 0,
+      "text": "$H(s)=\\frac{1}{LCs^2+RCs+1}$",
+      "matchesExpected": true
+    },
+    {
+      "event": "close-ole",
+      "stage": "new-chapter",
+      "returnCode": 0
+    },
+    {
+      "event": "numbering-audit",
+      "stage": "new-chapter",
+      "rows": [
+        {
+          "number": "(1-1)",
+          "fields": [
+            {
+              "code": "STYLEREF 1 \\s",
+              "value": "1"
+            },
+            {
+              "code": "SEQ Equation \\* ARABIC \\s 1",
+              "value": "1"
+            }
+          ]
+        },
+        {
+          "number": "(1-2)",
+          "fields": [
+            {
+              "code": "STYLEREF 1 \\s",
+              "value": "1"
+            },
+            {
+              "code": "SEQ Equation \\* ARABIC \\s 1",
+              "value": "2"
+            }
+          ]
+        },
+        {
+          "number": "(2-1)",
+          "fields": [
+            {
+              "code": "STYLEREF 1 \\s",
+              "value": "2"
+            },
+            {
+              "code": "SEQ Equation \\* ARABIC \\s 1",
+              "value": "1"
+            }
+          ]
+        }
+      ],
+      "expected": [
+        "(1-1)",
+        "(1-2)",
+        "(2-1)"
+      ]
+    },
+    {
+      "event": "numbering-audit",
+      "stage": "reopened-numbered",
+      "rows": [
+        {
+          "number": "(1-1)",
+          "fields": [
+            {
+              "code": "STYLEREF 1 \\s",
+              "value": "1"
+            },
+            {
+              "code": "SEQ Equation \\* ARABIC \\s 1",
+              "value": "1"
+            }
+          ]
+        },
+        {
+          "number": "(1-2)",
+          "fields": [
+            {
+              "code": "STYLEREF 1 \\s",
+              "value": "1"
+            },
+            {
+              "code": "SEQ Equation \\* ARABIC \\s 1",
+              "value": "2"
+            }
+          ]
+        },
+        {
+          "number": "(2-1)",
+          "fields": [
+            {
+              "code": "STYLEREF 1 \\s",
+              "value": "2"
+            },
+            {
+              "code": "SEQ Equation \\* ARABIC \\s 1",
+              "value": "1"
+            }
+          ]
+        }
+      ],
+      "expected": [
+        "(1-1)",
+        "(1-2)",
+        "(2-1)"
+      ]
+    },
+    {
+      "event": "read-length",
+      "stage": "reopened-numbered-1",
+      "returnCode": 0,
+      "length": 29
+    },
+    {
+      "event": "read-tex",
+      "stage": "reopened-numbered-1",
+      "returnCode": 0,
+      "text": "$H(s)=\\frac{1}{LCs^2+RCs+1}$",
+      "matchesExpected": true
+    },
+    {
+      "event": "close-ole",
+      "stage": "reopened-numbered-1",
+      "returnCode": 0
+    },
+    {
+      "event": "read-length",
+      "stage": "reopened-numbered-2",
+      "returnCode": 0,
+      "length": 29
+    },
+    {
+      "event": "read-tex",
+      "stage": "reopened-numbered-2",
+      "returnCode": 0,
+      "text": "$H(s)=\\frac{1}{LCs^2+RCs+2}$",
+      "matchesExpected": true
+    },
+    {
+      "event": "close-ole",
+      "stage": "reopened-numbered-2",
+      "returnCode": 0
+    },
+    {
+      "event": "read-length",
+      "stage": "reopened-numbered-3",
+      "returnCode": 0,
+      "length": 29
+    },
+    {
+      "event": "read-tex",
+      "stage": "reopened-numbered-3",
+      "returnCode": 0,
+      "text": "$H(s)=\\frac{1}{LCs^2+RCs+1}$",
+      "matchesExpected": true
+    },
+    {
+      "event": "close-ole",
+      "stage": "reopened-numbered-3",
+      "returnCode": 0
+    },
+    {
+      "event": "numbering-audit",
+      "stage": "after-deletion-unsaved",
+      "rows": [
+        {
+          "number": "(1-1)",
+          "fields": [
+            {
+              "code": "STYLEREF 1 \\s",
+              "value": "1"
+            },
+            {
+              "code": "SEQ Equation \\* ARABIC \\s 1",
+              "value": "1"
+            }
+          ]
+        },
+        {
+          "number": "(2-1)",
+          "fields": [
+            {
+              "code": "STYLEREF 1 \\s",
+              "value": "2"
+            },
+            {
+              "code": "SEQ Equation \\* ARABIC \\s 1",
+              "value": "1"
+            }
+          ]
+        }
+      ],
+      "expected": [
+        "(1-1)",
+        "(2-1)"
+      ]
+    },
+    {
+      "event": "package-audit",
+      "file": "mathtype-original.docx",
+      "objects": [
+        {
+          "Type": "Embed",
+          "ProgID": "Equation.DSMT4",
+          "ShapeID": "_x0000_i1027",
+          "DrawAspect": "Content",
+          "ObjectID": "_1853167172",
+          "{http://schemas.openxmlformats.org/officeDocument/2006/relationships}id": "rId6"
+        }
+      ],
+      "embeddedFiles": {
+        "word/embeddings/oleObject1.bin": "f55af590837cc09591b3afbf811effb437388d81375bf172bfa81cc4078e47b3"
+      }
+    },
+    {
+      "event": "pdf-audit",
+      "file": "mathtype-original.pdf",
+      "pages": 1,
+      "formulaMarkerCount": 1,
+      "numbers": [
+        "(1-1)"
+      ],
+      "text": "MathType 公式自动化验证 \n数据来源：canonical.json / eq-fraction。 \n公式居中，编号右对齐；编号随章号及公式次序更新。 \n手工增删或移动公式后，按 Ctrl+A、F9 更新编号。 \n1 同章顺序编号 \n \n2\n1() 1Hs LCs RCs= ++  (1-1) \n "
+    },
+    {
+      "event": "package-audit",
+      "file": "mathtype-edited.docx",
+      "objects": [
+        {
+          "Type": "Embed",
+          "ProgID": "Equation.DSMT4",
+          "ShapeID": "_x0000_i1028",
+          "DrawAspect": "Content",
+          "ObjectID": "_1853167184",
+          "{http://schemas.openxmlformats.org/officeDocument/2006/relationships}id": "rId8"
+        }
+      ],
+      "embeddedFiles": {
+        "word/embeddings/oleObject1.bin": "65fa2e3818ad12247b6049c02ab1888828dae358f93242b457fe04106477aca3"
+      }
+    },
+    {
+      "event": "pdf-audit",
+      "file": "mathtype-edited.pdf",
+      "pages": 1,
+      "formulaMarkerCount": 1,
+      "numbers": [
+        "(1-1)"
+      ],
+      "text": "MathType 公式自动化验证 \n数据来源：canonical.json / eq-fraction。 \n公式居中，编号右对齐；编号随章号及公式次序更新。 \n手工增删或移动公式后，按 Ctrl+A、F9 更新编号。 \n1 同章顺序编号 \n \n2\n1() 2Hs LCs RCs= ++  (1-1) \n "
+    },
+    {
+      "event": "package-audit",
+      "file": "mathtype-numbered.docx",
+      "objects": [
+        {
+          "Type": "Embed",
+          "ProgID": "Equation.DSMT4",
+          "ShapeID": "_x0000_i1028",
+          "DrawAspect": "Content",
+          "ObjectID": "_1853167209",
+          "{http://schemas.openxmlformats.org/officeDocument/2006/relationships}id": "rId8"
+        },
+        {
+          "Type": "Embed",
+          "ProgID": "Equation.DSMT4",
+          "ShapeID": "_x0000_i1025",
+          "DrawAspect": "Content",
+          "ObjectID": "_1853167210",
+          "{http://schemas.openxmlformats.org/officeDocument/2006/relationships}id": "rId10"
+        },
+        {
+          "Type": "Embed",
+          "ProgID": "Equation.DSMT4",
+          "ShapeID": "_x0000_i1032",
+          "DrawAspect": "Content",
+          "ObjectID": "_1853167211",
+          "{http://schemas.openxmlformats.org/officeDocument/2006/relationships}id": "rId12"
+        }
+      ],
+      "embeddedFiles": {
+        "word/embeddings/oleObject1.bin": "4d92d8c7d975d910c75bd363494ec627c039944f15a2a676cf76ad180229fcf7",
+        "word/embeddings/oleObject2.bin": "65fa2e3818ad12247b6049c02ab1888828dae358f93242b457fe04106477aca3",
+        "word/embeddings/oleObject3.bin": "126b2b0459c2d426eec98f8c907478a9496b519409589c2dba358fcc6ebcaf35"
+      }
+    },
+    {
+      "event": "pdf-audit",
+      "file": "mathtype-numbered.pdf",
+      "pages": 1,
+      "formulaMarkerCount": 3,
+      "numbers": [
+        "(1-1)",
+        "(1-2)",
+        "(2-1)"
+      ],
+      "text": "MathType 公式自动化验证 \n数据来源：canonical.json / eq-fraction。 \n公式居中，编号右对齐；编号随章号及公式次序更新。 \n手工增删或移动公式后，按 Ctrl+A、F9 更新编号。 \n1 同章顺序编号 \n \n2\n1() 1Hs LCs RCs= ++  (1-1) \n \n2\n1() 2Hs LCs RCs= ++  (1-2) \n2 换章重新计数 \n \n2\n1() 1Hs LCs RCs= ++  (2-1) \n "
+    },
+    {
+      "event": "terminate-api",
+      "returnCode": 0
+    },
+    {
+      "event": "finished",
+      "status": "passed_automation_visual_review_pending"
+    }
+  ],
+  "visualReview": "not_performed",
+  "systemAnsiCodePage": "1252"
+}

@@ -1,0 +1,11 @@
+{
+  "proposalHash": "5a43cb3cbf73c9f73d5f9ab09f5d13d951791aa5a755c4353cdc11cdb73821aa",
+  "choices": {
+    "change-bca46a47416f65b6": "accept",
+    "change-71a96c73d357b302": "accept",
+    "change-64530f1398c0a631": "accept",
+    "change-eade63c04d4bcaec": "accept",
+    "change-4aa6eb0a99e38516": "accept"
+  },
+  "scope": "SIMULATION ONLY; not a human approval or production merge"
+}

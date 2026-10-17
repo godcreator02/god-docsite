@@ -1,0 +1,80 @@
+{
+  "python": "D:\\unitfolders\\nb9zj-word-conversion-lab\\word-conversion-lab\\.venv\\Scripts\\python.exe",
+  "dll": "C:\\Program Files (x86)\\MathType\\MathPage\\64\\MathPage.wll",
+  "input": {
+    "id": "eq-fraction",
+    "display": true,
+    "numbered": true,
+    "latex": "H(s)=\\frac{1}{LCs^2+RCs+1}"
+  },
+  "fixtureSha256": "8dc4d0430939c3cd4a3e423cab3e21b063f171afd2567d633e80b978a1037f1c",
+  "status": "write_read_completed_further_edit_verification_required",
+  "events": [
+    {
+      "event": "init",
+      "returnCode": 1
+    },
+    {
+      "event": "functionality",
+      "full": 1,
+      "mode": 2,
+      "modeName": "full"
+    },
+    {
+      "event": "word-started",
+      "version": "16.0"
+    },
+    {
+      "event": "inserted",
+      "progId": "Equation.DSMT4"
+    },
+    {
+      "event": "write-tex",
+      "returnCode": 0
+    },
+    {
+      "event": "read-length",
+      "returnCode": 0,
+      "length": 29
+    },
+    {
+      "event": "read-tex",
+      "returnCode": 0,
+      "text": "$H(s)=\\frac{1}{LCs^2+RCs+1}$"
+    },
+    {
+      "event": "close-ole",
+      "returnCode": 0
+    },
+    {
+      "event": "reopened",
+      "objectCount": 1,
+      "progId": "Equation.DSMT4"
+    },
+    {
+      "event": "package-audit",
+      "objects": [
+        {
+          "Type": "Embed",
+          "ProgID": "Equation.DSMT4",
+          "ShapeID": "_x0000_i1027",
+          "DrawAspect": "Content",
+          "ObjectID": "_1853166363",
+          "{http://schemas.openxmlformats.org/officeDocument/2006/relationships}id": "rId5"
+        }
+      ],
+      "embeddedFiles": [
+        "word/embeddings/oleObject1.bin"
+      ]
+    },
+    {
+      "event": "terminate-api",
+      "returnCode": 0
+    },
+    {
+      "event": "finished",
+      "status": "write_read_completed_further_edit_verification_required"
+    }
+  ],
+  "visualReview": "not_performed"
+}

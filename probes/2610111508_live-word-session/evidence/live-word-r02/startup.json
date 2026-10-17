@@ -1,0 +1,11 @@
+{
+  "copyOnceSeconds": 0.0008035000064410269,
+  "launchAndOpenOnceSeconds": 5.334989399998449,
+  "environment": {
+    "wordVersion": "16.0",
+    "wordBuild": "16.0.14334",
+    "wordPid": 90572,
+    "backgroundPagination": true,
+    "backgroundSave": true
+  }
+}

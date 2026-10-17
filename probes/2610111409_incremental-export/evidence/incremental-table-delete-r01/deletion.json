@@ -1,0 +1,14 @@
+[
+  {
+    "mode": "range-delete",
+    "before": 1,
+    "afterDelete": 1,
+    "afterAdd": 1
+  },
+  {
+    "mode": "table-delete",
+    "before": 1,
+    "afterDelete": 0,
+    "afterAdd": 1
+  }
+]

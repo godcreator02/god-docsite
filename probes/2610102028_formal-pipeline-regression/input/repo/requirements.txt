@@ -1,0 +1,6 @@
+# Python 3.12; install into this repository's .venv.
+setuptools==80.9.0
+pywin32==312; sys_platform == "win32"
+comtypes==1.4.17; sys_platform == "win32"
+pypdf==6.10.0
+Pillow==12.3.0

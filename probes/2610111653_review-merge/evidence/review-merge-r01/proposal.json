@@ -1,0 +1,461 @@
+{
+  "format": "review-merge-probe",
+  "baseContentHash": "a07315f14dfba90059f709e3458ccea1569389b646f73da90f94415fda77d02d",
+  "baseLayoutHash": "a9c9290a5ff80ed25ff70dfe9fbb0f0d408e7519d77fc48dce00d0341b8a8670",
+  "baselineDocxHash": "cbf3a05e3c2402115ab1831aedb953bfb072e5c95fbda970168522544c544305",
+  "returnedDocxHash": "15c6c84ad72dabe7cd0adb7e51b2ff956f6a12988809d0a4255ef4f26e096758",
+  "changes": [
+    {
+      "id": "change-bca46a47416f65b6",
+      "kind": "insert",
+      "targetId": "chapter-one",
+      "field": "children",
+      "afterId": "p-stable",
+      "nextId": "tbl-values",
+      "items": [
+        {
+          "type": "paragraph",
+          "id": "review-89fa878aac1915cff764",
+          "content": [
+            {
+              "type": "text",
+              "text": "阿斯顿发啥的"
+            }
+          ]
+        }
+      ],
+      "description": "原段落后新增段落"
+    },
+    {
+      "id": "change-71a96c73d357b302",
+      "kind": "insert",
+      "targetId": "tbl-values",
+      "field": "rows",
+      "afterId": "row-2",
+      "nextId": null,
+      "items": [
+        {
+          "id": "review-57879ca621a6cc418a5d",
+          "cells": [
+            {
+              "id": "review-57879ca621a6cc418a5d-c1",
+              "blocks": [
+                {
+                  "type": "paragraph",
+                  "id": "review-57879ca621a6cc418a5d-p1",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "123123"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "review-57879ca621a6cc418a5d-c2",
+              "blocks": [
+                {
+                  "type": "paragraph",
+                  "id": "review-57879ca621a6cc418a5d-p2",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "213123"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "review-eba851b5ed941b3ccc24",
+          "cells": [
+            {
+              "id": "review-eba851b5ed941b3ccc24-c1",
+              "blocks": [
+                {
+                  "type": "paragraph",
+                  "id": "review-eba851b5ed941b3ccc24-p1",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "123"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "review-eba851b5ed941b3ccc24-c2",
+              "blocks": [
+                {
+                  "type": "paragraph",
+                  "id": "review-eba851b5ed941b3ccc24-p2",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "123"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "review-d62cf0c4039f2a87bd12",
+          "cells": [
+            {
+              "id": "review-d62cf0c4039f2a87bd12-c1",
+              "blocks": [
+                {
+                  "type": "paragraph",
+                  "id": "review-d62cf0c4039f2a87bd12-p1",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "123"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "review-d62cf0c4039f2a87bd12-c2",
+              "blocks": [
+                {
+                  "type": "paragraph",
+                  "id": "review-d62cf0c4039f2a87bd12-p2",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "123123"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "description": "表格尾部新增行"
+    },
+    {
+      "id": "change-64530f1398c0a631",
+      "kind": "layout",
+      "targetId": "fig-stable",
+      "before": {
+        "widthMm": 90
+      },
+      "after": {
+        "widthMm": 106.52125430636936,
+        "heightMm": 56.74430770874023,
+        "lockAspectRatio": true
+      },
+      "description": "图片显示尺寸修改"
+    },
+    {
+      "id": "change-eade63c04d4bcaec",
+      "kind": "replace",
+      "targetId": "body-2-3",
+      "field": "content",
+      "before": [
+        {
+          "type": "text",
+          "text": "模板提供默认字体、段落间距和页眉页脚。模板或布局规则变化时，过去生成的文档不能直接当作新规则的结果，必须重新执行全量生成。普通内容修改与版式变化分别记录，避免把不同工作量的耗时放在一起比较。"
+        }
+      ],
+      "after": [
+        {
+          "type": "text",
+          "text": "模板提供默认字体、段落间距和页眉页脚。模板或布局规则变化时，过去生成的文档不能直接当作新规则的结果，必须重新执行全量生成。普通内容修改与版式变化分别记录，避免把不同工作量的耗时放在一起比较。888方法发给 "
+        }
+      ],
+      "description": "正文文字修改"
+    },
+    {
+      "id": "change-4aa6eb0a99e38516",
+      "kind": "replace",
+      "targetId": "eq-edit",
+      "field": "latex",
+      "before": "P=VI",
+      "after": "P=VI123123",
+      "description": "MathType 内部公式修改"
+    }
+  ],
+  "comments": [],
+  "revisionsObserved": 3,
+  "mathReadback": [
+    {
+      "id": "eq-edit",
+      "before": "P=VI",
+      "after": "P=VI123123"
+    }
+  ],
+  "coverage": [
+    {
+      "id": "p-edit",
+      "status": "plain-text-compared"
+    },
+    {
+      "id": "p-stable",
+      "status": "plain-text-compared"
+    },
+    {
+      "id": "tbl-values",
+      "status": "all-simple-cells-compared"
+    },
+    {
+      "id": "fig-stable",
+      "status": "caption-linked-inline-image-measured",
+      "baseline": {
+        "widthMm": 89.99361326429579,
+        "heightMm": 30.938610034518767,
+        "lockAspectRatio": true
+      },
+      "returned": {
+        "widthMm": 106.52125430636936,
+        "heightMm": 56.74430770874023,
+        "lockAspectRatio": true
+      }
+    },
+    {
+      "id": "p-refs",
+      "status": "unchanged-rich-text"
+    },
+    {
+      "id": "p-tail",
+      "status": "plain-text-compared"
+    },
+    {
+      "id": "body-2-0",
+      "status": "plain-text-compared"
+    },
+    {
+      "id": "body-2-1",
+      "status": "plain-text-compared"
+    },
+    {
+      "id": "body-2-2",
+      "status": "plain-text-compared"
+    },
+    {
+      "id": "body-2-3",
+      "status": "plain-text-compared"
+    },
+    {
+      "id": "p-fixed-3",
+      "status": "plain-text-compared"
+    },
+    {
+      "id": "p-ref-3",
+      "status": "unchanged-rich-text"
+    },
+    {
+      "id": "body-3-0",
+      "status": "plain-text-compared"
+    },
+    {
+      "id": "body-3-1",
+      "status": "plain-text-compared"
+    },
+    {
+      "id": "body-3-2",
+      "status": "plain-text-compared"
+    },
+    {
+      "id": "body-3-3",
+      "status": "plain-text-compared"
+    },
+    {
+      "id": "body-3-4",
+      "status": "plain-text-compared"
+    },
+    {
+      "id": "body-3-5",
+      "status": "plain-text-compared"
+    },
+    {
+      "id": "p-fixed-4",
+      "status": "plain-text-compared"
+    },
+    {
+      "id": "p-ref-4",
+      "status": "unchanged-rich-text"
+    },
+    {
+      "id": "body-4-0",
+      "status": "plain-text-compared"
+    },
+    {
+      "id": "body-4-1",
+      "status": "plain-text-compared"
+    },
+    {
+      "id": "body-4-2",
+      "status": "plain-text-compared"
+    },
+    {
+      "id": "body-4-3",
+      "status": "plain-text-compared"
+    },
+    {
+      "id": "body-4-4",
+      "status": "plain-text-compared"
+    },
+    {
+      "id": "body-4-5",
+      "status": "plain-text-compared"
+    },
+    {
+      "id": "p-fixed-5",
+      "status": "plain-text-compared"
+    },
+    {
+      "id": "p-ref-5",
+      "status": "unchanged-rich-text"
+    },
+    {
+      "id": "body-5-0",
+      "status": "plain-text-compared"
+    },
+    {
+      "id": "body-5-1",
+      "status": "plain-text-compared"
+    },
+    {
+      "id": "body-5-2",
+      "status": "plain-text-compared"
+    },
+    {
+      "id": "body-5-3",
+      "status": "plain-text-compared"
+    },
+    {
+      "id": "body-5-4",
+      "status": "plain-text-compared"
+    },
+    {
+      "id": "body-5-5",
+      "status": "plain-text-compared"
+    },
+    {
+      "id": "p-fixed-6",
+      "status": "plain-text-compared"
+    },
+    {
+      "id": "p-ref-6",
+      "status": "unchanged-rich-text"
+    },
+    {
+      "id": "body-6-0",
+      "status": "plain-text-compared"
+    },
+    {
+      "id": "body-6-1",
+      "status": "plain-text-compared"
+    },
+    {
+      "id": "body-6-2",
+      "status": "plain-text-compared"
+    },
+    {
+      "id": "body-6-3",
+      "status": "plain-text-compared"
+    },
+    {
+      "id": "body-6-4",
+      "status": "plain-text-compared"
+    },
+    {
+      "id": "body-6-5",
+      "status": "plain-text-compared"
+    },
+    {
+      "id": "p-fixed-7",
+      "status": "plain-text-compared"
+    },
+    {
+      "id": "p-ref-7",
+      "status": "unchanged-rich-text"
+    },
+    {
+      "id": "body-7-0",
+      "status": "plain-text-compared"
+    },
+    {
+      "id": "body-7-1",
+      "status": "plain-text-compared"
+    },
+    {
+      "id": "body-7-2",
+      "status": "plain-text-compared"
+    },
+    {
+      "id": "body-7-3",
+      "status": "plain-text-compared"
+    },
+    {
+      "id": "body-7-4",
+      "status": "plain-text-compared"
+    },
+    {
+      "id": "body-7-5",
+      "status": "plain-text-compared"
+    },
+    {
+      "id": "p-fixed-8",
+      "status": "plain-text-compared"
+    },
+    {
+      "id": "p-ref-8",
+      "status": "unchanged-rich-text"
+    },
+    {
+      "id": "body-8-0",
+      "status": "plain-text-compared"
+    },
+    {
+      "id": "body-8-1",
+      "status": "plain-text-compared"
+    },
+    {
+      "id": "body-8-2",
+      "status": "plain-text-compared"
+    },
+    {
+      "id": "body-8-3",
+      "status": "plain-text-compared"
+    },
+    {
+      "id": "body-8-4",
+      "status": "plain-text-compared"
+    },
+    {
+      "id": "body-8-5",
+      "status": "plain-text-compared"
+    },
+    {
+      "id": "eq-stable",
+      "status": "unchanged-OLE-payload"
+    }
+  ],
+  "bindings": {
+    "paragraphs": {
+      "p-stable": [
+        "review-89fa878aac1915cff764"
+      ]
+    },
+    "rows": {
+      "tbl-values": [
+        "review-57879ca621a6cc418a5d",
+        "review-eba851b5ed941b3ccc24",
+        "review-d62cf0c4039f2a87bd12"
+      ]
+    }
+  },
+  "status": "pending-human-review",
+  "scope": "Saved fixed ten-page review only. No pending edits in the live window. No general-purpose DOCX import."
+}

@@ -1,0 +1,3143 @@
+{
+  "version": 1,
+  "content": {
+    "format": "docreport",
+    "schemaVersion": 1,
+    "id": "incremental-probe",
+    "metadata": {
+      "title": "增量写入边界实验",
+      "shortTitle": "增量写入实验",
+      "language": "zh-CN",
+      "authors": [
+        "项目实验"
+      ],
+      "revision": "R0",
+      "date": "2026-10-11"
+    },
+    "blocks": [
+      {
+        "type": "section",
+        "id": "chapter-one",
+        "title": "局部修改",
+        "numbering": "decimal",
+        "children": [
+          {
+            "type": "paragraph",
+            "id": "p-edit",
+            "content": [
+              {
+                "type": "text",
+                "text": "这一段是修改目标。原始版本保留全角标点与中文，后续只替换这一段。"
+              }
+            ]
+          },
+          {
+            "type": "paragraph",
+            "id": "p-stable",
+            "content": [
+              {
+                "type": "text",
+                "text": "这一段不修改，用于检查相邻内容、格式和定位是否保留。"
+              }
+            ]
+          },
+          {
+            "type": "table",
+            "id": "tbl-values",
+            "numbered": true,
+            "caption": [
+              {
+                "type": "text",
+                "text": "验证参数"
+              }
+            ],
+            "columns": [
+              {
+                "id": "col-a"
+              },
+              {
+                "id": "col-b"
+              }
+            ],
+            "headerRows": 1,
+            "rows": [
+              {
+                "id": "row-0",
+                "cells": [
+                  {
+                    "id": "cell-0-0",
+                    "blocks": [
+                      {
+                        "type": "paragraph",
+                        "id": "cell-p-0-0",
+                        "content": [
+                          {
+                            "type": "text",
+                            "text": "项目"
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "id": "cell-0-1",
+                    "blocks": [
+                      {
+                        "type": "paragraph",
+                        "id": "cell-p-0-1",
+                        "content": [
+                          {
+                            "type": "text",
+                            "text": "数值"
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "row-1",
+                "cells": [
+                  {
+                    "id": "cell-1-0",
+                    "blocks": [
+                      {
+                        "type": "paragraph",
+                        "id": "cell-p-1-0",
+                        "content": [
+                          {
+                            "type": "text",
+                            "text": "额定功率"
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "id": "cell-1-1",
+                    "blocks": [
+                      {
+                        "type": "paragraph",
+                        "id": "cell-p-1-1",
+                        "content": [
+                          {
+                            "type": "text",
+                            "text": "100 kW"
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "row-2",
+                "cells": [
+                  {
+                    "id": "cell-2-0",
+                    "blocks": [
+                      {
+                        "type": "paragraph",
+                        "id": "cell-p-2-0",
+                        "content": [
+                          {
+                            "type": "text",
+                            "text": "母线电压"
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "id": "cell-2-1",
+                    "blocks": [
+                      {
+                        "type": "paragraph",
+                        "id": "cell-p-2-1",
+                        "content": [
+                          {
+                            "type": "text",
+                            "text": "800 V"
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "equation",
+            "id": "eq-edit",
+            "latex": "P=VI",
+            "numbered": true
+          },
+          {
+            "type": "figure",
+            "id": "fig-stable",
+            "src": "assets/architecture.png",
+            "alt": "原图保持不变",
+            "caption": [
+              {
+                "type": "text",
+                "text": "保留的图片"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "type": "section",
+        "id": "chapter-two",
+        "title": "引用与保留对象",
+        "numbering": "decimal",
+        "children": [
+          {
+            "type": "paragraph",
+            "id": "p-refs",
+            "content": [
+              {
+                "type": "text",
+                "text": "第一章公式编号为"
+              },
+              {
+                "type": "ref",
+                "target": "eq-edit",
+                "display": "number",
+                "id": "reference-1"
+              },
+              {
+                "type": "text",
+                "text": "，表格编号为"
+              },
+              {
+                "type": "ref",
+                "target": "tbl-values",
+                "display": "number",
+                "id": "reference-2"
+              },
+              {
+                "type": "text",
+                "text": "。"
+              }
+            ]
+          },
+          {
+            "type": "equation",
+            "id": "eq-stable",
+            "latex": "E=mc^2",
+            "numbered": true
+          },
+          {
+            "type": "paragraph",
+            "id": "p-tail",
+            "content": [
+              {
+                "type": "text",
+                "text": "结束标记：未修改的第二章仍然完整。"
+              }
+            ]
+          },
+          {
+            "type": "paragraph",
+            "id": "body-2-0",
+            "content": [
+              {
+                "type": "text",
+                "text": "本实验以报告中的稳定标识定位内容。段落、表格与公式各自拥有独立标识，修改文字时保留标识，新增对象才分配新标识。页码属于排版结果，不能用来判断逻辑对象是否发生变化。"
+              }
+            ]
+          },
+          {
+            "type": "paragraph",
+            "id": "body-2-1",
+            "content": [
+              {
+                "type": "text",
+                "text": "未发生变化的内容保留在上一版文档副本中，包括图片、公式和相邻段落。保存新版本以后检查原始资源的字节、公式读回结果以及引用关系，以判断这次更新有没有改变本来不应改变的对象。"
+              }
+            ]
+          },
+          {
+            "type": "paragraph",
+            "id": "body-2-2",
+            "content": [
+              {
+                "type": "text",
+                "text": "正文内容依照数据源给定的顺序排列。对于增加、删除或移动章节的操作，需要考虑后续章节编号、题注序列与交叉引用。当前实验先记录这些操作的回退行为，不把局部段落替换成功推广到任意文档结构修改。"
+              }
+            ]
+          },
+          {
+            "type": "paragraph",
+            "id": "body-2-3",
+            "content": [
+              {
+                "type": "text",
+                "text": "模板提供默认字体、段落间距和页眉页脚。模板或布局规则变化时，过去生成的文档不能直接当作新规则的结果，必须重新执行全量生成。普通内容修改与版式变化分别记录，避免把不同工作量的耗时放在一起比较。"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "type": "section",
+        "id": "chapter-3",
+        "title": "保留章节 3",
+        "numbering": "decimal",
+        "children": [
+          {
+            "type": "paragraph",
+            "id": "p-fixed-3",
+            "content": [
+              {
+                "type": "text",
+                "text": "第 3 章用于观察前文变更是否影响后续分页、页眉和编号。本段在局部更新实验中保持不变。"
+              }
+            ]
+          },
+          {
+            "type": "paragraph",
+            "id": "p-ref-3",
+            "content": [
+              {
+                "type": "text",
+                "text": "跨章节引用："
+              },
+              {
+                "type": "ref",
+                "target": "eq-edit",
+                "display": "label",
+                "id": "reference-3"
+              },
+              {
+                "type": "text",
+                "text": "，以及"
+              },
+              {
+                "type": "ref",
+                "target": "tbl-values",
+                "display": "label",
+                "id": "reference-4"
+              },
+              {
+                "type": "text",
+                "text": "。"
+              }
+            ]
+          },
+          {
+            "type": "paragraph",
+            "id": "body-3-0",
+            "content": [
+              {
+                "type": "text",
+                "text": "本实验以报告中的稳定标识定位内容。段落、表格与公式各自拥有独立标识，修改文字时保留标识，新增对象才分配新标识。页码属于排版结果，不能用来判断逻辑对象是否发生变化。"
+              }
+            ]
+          },
+          {
+            "type": "paragraph",
+            "id": "body-3-1",
+            "content": [
+              {
+                "type": "text",
+                "text": "未发生变化的内容保留在上一版文档副本中，包括图片、公式和相邻段落。保存新版本以后检查原始资源的字节、公式读回结果以及引用关系，以判断这次更新有没有改变本来不应改变的对象。"
+              }
+            ]
+          },
+          {
+            "type": "paragraph",
+            "id": "body-3-2",
+            "content": [
+              {
+                "type": "text",
+                "text": "正文内容依照数据源给定的顺序排列。对于增加、删除或移动章节的操作，需要考虑后续章节编号、题注序列与交叉引用。当前实验先记录这些操作的回退行为，不把局部段落替换成功推广到任意文档结构修改。"
+              }
+            ]
+          },
+          {
+            "type": "paragraph",
+            "id": "body-3-3",
+            "content": [
+              {
+                "type": "text",
+                "text": "模板提供默认字体、段落间距和页眉页脚。模板或布局规则变化时，过去生成的文档不能直接当作新规则的结果，必须重新执行全量生成。普通内容修改与版式变化分别记录，避免把不同工作量的耗时放在一起比较。"
+              }
+            ]
+          },
+          {
+            "type": "paragraph",
+            "id": "body-3-4",
+            "content": [
+              {
+                "type": "text",
+                "text": "每次试验都写入新的输出目录，上一版文档与输入文件保持不变。生成过程记录每一阶段的耗时，并在保存重开后核对内容、公式编号、表格数据和图片，最后检查完整 PDF 的显示。"
+              }
+            ]
+          },
+          {
+            "type": "paragraph",
+            "id": "body-3-5",
+            "content": [
+              {
+                "type": "text",
+                "text": "性能数据只代表当前测试稿与本机环境。首次运行和后续连续运行分别保存，比较时说明是否包含启动 Word、更新目录和导出 PDF。页面检查与机器检查独立记录，不能用一次 API 成功代表文档显示正确。"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "type": "section",
+        "id": "chapter-4",
+        "title": "保留章节 4",
+        "numbering": "decimal",
+        "children": [
+          {
+            "type": "paragraph",
+            "id": "p-fixed-4",
+            "content": [
+              {
+                "type": "text",
+                "text": "第 4 章用于观察前文变更是否影响后续分页、页眉和编号。本段在局部更新实验中保持不变。"
+              }
+            ]
+          },
+          {
+            "type": "paragraph",
+            "id": "p-ref-4",
+            "content": [
+              {
+                "type": "text",
+                "text": "跨章节引用："
+              },
+              {
+                "type": "ref",
+                "target": "eq-edit",
+                "display": "label",
+                "id": "reference-5"
+              },
+              {
+                "type": "text",
+                "text": "，以及"
+              },
+              {
+                "type": "ref",
+                "target": "tbl-values",
+                "display": "label",
+                "id": "reference-6"
+              },
+              {
+                "type": "text",
+                "text": "。"
+              }
+            ]
+          },
+          {
+            "type": "paragraph",
+            "id": "body-4-0",
+            "content": [
+              {
+                "type": "text",
+                "text": "本实验以报告中的稳定标识定位内容。段落、表格与公式各自拥有独立标识，修改文字时保留标识，新增对象才分配新标识。页码属于排版结果，不能用来判断逻辑对象是否发生变化。"
+              }
+            ]
+          },
+          {
+            "type": "paragraph",
+            "id": "body-4-1",
+            "content": [
+              {
+                "type": "text",
+                "text": "未发生变化的内容保留在上一版文档副本中，包括图片、公式和相邻段落。保存新版本以后检查原始资源的字节、公式读回结果以及引用关系，以判断这次更新有没有改变本来不应改变的对象。"
+              }
+            ]
+          },
+          {
+            "type": "paragraph",
+            "id": "body-4-2",
+            "content": [
+              {
+                "type": "text",
+                "text": "正文内容依照数据源给定的顺序排列。对于增加、删除或移动章节的操作，需要考虑后续章节编号、题注序列与交叉引用。当前实验先记录这些操作的回退行为，不把局部段落替换成功推广到任意文档结构修改。"
+              }
+            ]
+          },
+          {
+            "type": "paragraph",
+            "id": "body-4-3",
+            "content": [
+              {
+                "type": "text",
+                "text": "模板提供默认字体、段落间距和页眉页脚。模板或布局规则变化时，过去生成的文档不能直接当作新规则的结果，必须重新执行全量生成。普通内容修改与版式变化分别记录，避免把不同工作量的耗时放在一起比较。"
+              }
+            ]
+          },
+          {
+            "type": "paragraph",
+            "id": "body-4-4",
+            "content": [
+              {
+                "type": "text",
+                "text": "每次试验都写入新的输出目录，上一版文档与输入文件保持不变。生成过程记录每一阶段的耗时，并在保存重开后核对内容、公式编号、表格数据和图片，最后检查完整 PDF 的显示。"
+              }
+            ]
+          },
+          {
+            "type": "paragraph",
+            "id": "body-4-5",
+            "content": [
+              {
+                "type": "text",
+                "text": "性能数据只代表当前测试稿与本机环境。首次运行和后续连续运行分别保存，比较时说明是否包含启动 Word、更新目录和导出 PDF。页面检查与机器检查独立记录，不能用一次 API 成功代表文档显示正确。"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "type": "section",
+        "id": "chapter-5",
+        "title": "保留章节 5",
+        "numbering": "decimal",
+        "children": [
+          {
+            "type": "paragraph",
+            "id": "p-fixed-5",
+            "content": [
+              {
+                "type": "text",
+                "text": "第 5 章用于观察前文变更是否影响后续分页、页眉和编号。本段在局部更新实验中保持不变。"
+              }
+            ]
+          },
+          {
+            "type": "paragraph",
+            "id": "p-ref-5",
+            "content": [
+              {
+                "type": "text",
+                "text": "跨章节引用："
+              },
+              {
+                "type": "ref",
+                "target": "eq-edit",
+                "display": "label",
+                "id": "reference-7"
+              },
+              {
+                "type": "text",
+                "text": "，以及"
+              },
+              {
+                "type": "ref",
+                "target": "tbl-values",
+                "display": "label",
+                "id": "reference-8"
+              },
+              {
+                "type": "text",
+                "text": "。"
+              }
+            ]
+          },
+          {
+            "type": "paragraph",
+            "id": "body-5-0",
+            "content": [
+              {
+                "type": "text",
+                "text": "本实验以报告中的稳定标识定位内容。段落、表格与公式各自拥有独立标识，修改文字时保留标识，新增对象才分配新标识。页码属于排版结果，不能用来判断逻辑对象是否发生变化。"
+              }
+            ]
+          },
+          {
+            "type": "paragraph",
+            "id": "body-5-1",
+            "content": [
+              {
+                "type": "text",
+                "text": "未发生变化的内容保留在上一版文档副本中，包括图片、公式和相邻段落。保存新版本以后检查原始资源的字节、公式读回结果以及引用关系，以判断这次更新有没有改变本来不应改变的对象。"
+              }
+            ]
+          },
+          {
+            "type": "paragraph",
+            "id": "body-5-2",
+            "content": [
+              {
+                "type": "text",
+                "text": "正文内容依照数据源给定的顺序排列。对于增加、删除或移动章节的操作，需要考虑后续章节编号、题注序列与交叉引用。当前实验先记录这些操作的回退行为，不把局部段落替换成功推广到任意文档结构修改。"
+              }
+            ]
+          },
+          {
+            "type": "paragraph",
+            "id": "body-5-3",
+            "content": [
+              {
+                "type": "text",
+                "text": "模板提供默认字体、段落间距和页眉页脚。模板或布局规则变化时，过去生成的文档不能直接当作新规则的结果，必须重新执行全量生成。普通内容修改与版式变化分别记录，避免把不同工作量的耗时放在一起比较。"
+              }
+            ]
+          },
+          {
+            "type": "paragraph",
+            "id": "body-5-4",
+            "content": [
+              {
+                "type": "text",
+                "text": "每次试验都写入新的输出目录，上一版文档与输入文件保持不变。生成过程记录每一阶段的耗时，并在保存重开后核对内容、公式编号、表格数据和图片，最后检查完整 PDF 的显示。"
+              }
+            ]
+          },
+          {
+            "type": "paragraph",
+            "id": "body-5-5",
+            "content": [
+              {
+                "type": "text",
+                "text": "性能数据只代表当前测试稿与本机环境。首次运行和后续连续运行分别保存，比较时说明是否包含启动 Word、更新目录和导出 PDF。页面检查与机器检查独立记录，不能用一次 API 成功代表文档显示正确。"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "type": "section",
+        "id": "chapter-6",
+        "title": "保留章节 6",
+        "numbering": "decimal",
+        "children": [
+          {
+            "type": "paragraph",
+            "id": "p-fixed-6",
+            "content": [
+              {
+                "type": "text",
+                "text": "第 6 章用于观察前文变更是否影响后续分页、页眉和编号。本段在局部更新实验中保持不变。"
+              }
+            ]
+          },
+          {
+            "type": "paragraph",
+            "id": "p-ref-6",
+            "content": [
+              {
+                "type": "text",
+                "text": "跨章节引用："
+              },
+              {
+                "type": "ref",
+                "target": "eq-edit",
+                "display": "label",
+                "id": "reference-9"
+              },
+              {
+                "type": "text",
+                "text": "，以及"
+              },
+              {
+                "type": "ref",
+                "target": "tbl-values",
+                "display": "label",
+                "id": "reference-10"
+              },
+              {
+                "type": "text",
+                "text": "。"
+              }
+            ]
+          },
+          {
+            "type": "paragraph",
+            "id": "body-6-0",
+            "content": [
+              {
+                "type": "text",
+                "text": "本实验以报告中的稳定标识定位内容。段落、表格与公式各自拥有独立标识，修改文字时保留标识，新增对象才分配新标识。页码属于排版结果，不能用来判断逻辑对象是否发生变化。"
+              }
+            ]
+          },
+          {
+            "type": "paragraph",
+            "id": "body-6-1",
+            "content": [
+              {
+                "type": "text",
+                "text": "未发生变化的内容保留在上一版文档副本中，包括图片、公式和相邻段落。保存新版本以后检查原始资源的字节、公式读回结果以及引用关系，以判断这次更新有没有改变本来不应改变的对象。"
+              }
+            ]
+          },
+          {
+            "type": "paragraph",
+            "id": "body-6-2",
+            "content": [
+              {
+                "type": "text",
+                "text": "正文内容依照数据源给定的顺序排列。对于增加、删除或移动章节的操作，需要考虑后续章节编号、题注序列与交叉引用。当前实验先记录这些操作的回退行为，不把局部段落替换成功推广到任意文档结构修改。"
+              }
+            ]
+          },
+          {
+            "type": "paragraph",
+            "id": "body-6-3",
+            "content": [
+              {
+                "type": "text",
+                "text": "模板提供默认字体、段落间距和页眉页脚。模板或布局规则变化时，过去生成的文档不能直接当作新规则的结果，必须重新执行全量生成。普通内容修改与版式变化分别记录，避免把不同工作量的耗时放在一起比较。"
+              }
+            ]
+          },
+          {
+            "type": "paragraph",
+            "id": "body-6-4",
+            "content": [
+              {
+                "type": "text",
+                "text": "每次试验都写入新的输出目录，上一版文档与输入文件保持不变。生成过程记录每一阶段的耗时，并在保存重开后核对内容、公式编号、表格数据和图片，最后检查完整 PDF 的显示。"
+              }
+            ]
+          },
+          {
+            "type": "paragraph",
+            "id": "body-6-5",
+            "content": [
+              {
+                "type": "text",
+                "text": "性能数据只代表当前测试稿与本机环境。首次运行和后续连续运行分别保存，比较时说明是否包含启动 Word、更新目录和导出 PDF。页面检查与机器检查独立记录，不能用一次 API 成功代表文档显示正确。"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "type": "section",
+        "id": "chapter-7",
+        "title": "保留章节 7",
+        "numbering": "decimal",
+        "children": [
+          {
+            "type": "paragraph",
+            "id": "p-fixed-7",
+            "content": [
+              {
+                "type": "text",
+                "text": "第 7 章用于观察前文变更是否影响后续分页、页眉和编号。本段在局部更新实验中保持不变。"
+              }
+            ]
+          },
+          {
+            "type": "paragraph",
+            "id": "p-ref-7",
+            "content": [
+              {
+                "type": "text",
+                "text": "跨章节引用："
+              },
+              {
+                "type": "ref",
+                "target": "eq-edit",
+                "display": "label",
+                "id": "reference-11"
+              },
+              {
+                "type": "text",
+                "text": "，以及"
+              },
+              {
+                "type": "ref",
+                "target": "tbl-values",
+                "display": "label",
+                "id": "reference-12"
+              },
+              {
+                "type": "text",
+                "text": "。"
+              }
+            ]
+          },
+          {
+            "type": "paragraph",
+            "id": "body-7-0",
+            "content": [
+              {
+                "type": "text",
+                "text": "本实验以报告中的稳定标识定位内容。段落、表格与公式各自拥有独立标识，修改文字时保留标识，新增对象才分配新标识。页码属于排版结果，不能用来判断逻辑对象是否发生变化。"
+              }
+            ]
+          },
+          {
+            "type": "paragraph",
+            "id": "body-7-1",
+            "content": [
+              {
+                "type": "text",
+                "text": "未发生变化的内容保留在上一版文档副本中，包括图片、公式和相邻段落。保存新版本以后检查原始资源的字节、公式读回结果以及引用关系，以判断这次更新有没有改变本来不应改变的对象。"
+              }
+            ]
+          },
+          {
+            "type": "paragraph",
+            "id": "body-7-2",
+            "content": [
+              {
+                "type": "text",
+                "text": "正文内容依照数据源给定的顺序排列。对于增加、删除或移动章节的操作，需要考虑后续章节编号、题注序列与交叉引用。当前实验先记录这些操作的回退行为，不把局部段落替换成功推广到任意文档结构修改。"
+              }
+            ]
+          },
+          {
+            "type": "paragraph",
+            "id": "body-7-3",
+            "content": [
+              {
+                "type": "text",
+                "text": "模板提供默认字体、段落间距和页眉页脚。模板或布局规则变化时，过去生成的文档不能直接当作新规则的结果，必须重新执行全量生成。普通内容修改与版式变化分别记录，避免把不同工作量的耗时放在一起比较。"
+              }
+            ]
+          },
+          {
+            "type": "paragraph",
+            "id": "body-7-4",
+            "content": [
+              {
+                "type": "text",
+                "text": "每次试验都写入新的输出目录，上一版文档与输入文件保持不变。生成过程记录每一阶段的耗时，并在保存重开后核对内容、公式编号、表格数据和图片，最后检查完整 PDF 的显示。"
+              }
+            ]
+          },
+          {
+            "type": "paragraph",
+            "id": "body-7-5",
+            "content": [
+              {
+                "type": "text",
+                "text": "性能数据只代表当前测试稿与本机环境。首次运行和后续连续运行分别保存，比较时说明是否包含启动 Word、更新目录和导出 PDF。页面检查与机器检查独立记录，不能用一次 API 成功代表文档显示正确。"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "type": "section",
+        "id": "chapter-8",
+        "title": "保留章节 8",
+        "numbering": "decimal",
+        "children": [
+          {
+            "type": "paragraph",
+            "id": "p-fixed-8",
+            "content": [
+              {
+                "type": "text",
+                "text": "第 8 章用于观察前文变更是否影响后续分页、页眉和编号。本段在局部更新实验中保持不变。"
+              }
+            ]
+          },
+          {
+            "type": "paragraph",
+            "id": "p-ref-8",
+            "content": [
+              {
+                "type": "text",
+                "text": "跨章节引用："
+              },
+              {
+                "type": "ref",
+                "target": "eq-edit",
+                "display": "label",
+                "id": "reference-13"
+              },
+              {
+                "type": "text",
+                "text": "，以及"
+              },
+              {
+                "type": "ref",
+                "target": "tbl-values",
+                "display": "label",
+                "id": "reference-14"
+              },
+              {
+                "type": "text",
+                "text": "。"
+              }
+            ]
+          },
+          {
+            "type": "paragraph",
+            "id": "body-8-0",
+            "content": [
+              {
+                "type": "text",
+                "text": "本实验以报告中的稳定标识定位内容。段落、表格与公式各自拥有独立标识，修改文字时保留标识，新增对象才分配新标识。页码属于排版结果，不能用来判断逻辑对象是否发生变化。"
+              }
+            ]
+          },
+          {
+            "type": "paragraph",
+            "id": "body-8-1",
+            "content": [
+              {
+                "type": "text",
+                "text": "未发生变化的内容保留在上一版文档副本中，包括图片、公式和相邻段落。保存新版本以后检查原始资源的字节、公式读回结果以及引用关系，以判断这次更新有没有改变本来不应改变的对象。"
+              }
+            ]
+          },
+          {
+            "type": "paragraph",
+            "id": "body-8-2",
+            "content": [
+              {
+                "type": "text",
+                "text": "正文内容依照数据源给定的顺序排列。对于增加、删除或移动章节的操作，需要考虑后续章节编号、题注序列与交叉引用。当前实验先记录这些操作的回退行为，不把局部段落替换成功推广到任意文档结构修改。"
+              }
+            ]
+          },
+          {
+            "type": "paragraph",
+            "id": "body-8-3",
+            "content": [
+              {
+                "type": "text",
+                "text": "模板提供默认字体、段落间距和页眉页脚。模板或布局规则变化时，过去生成的文档不能直接当作新规则的结果，必须重新执行全量生成。普通内容修改与版式变化分别记录，避免把不同工作量的耗时放在一起比较。"
+              }
+            ]
+          },
+          {
+            "type": "paragraph",
+            "id": "body-8-4",
+            "content": [
+              {
+                "type": "text",
+                "text": "每次试验都写入新的输出目录，上一版文档与输入文件保持不变。生成过程记录每一阶段的耗时，并在保存重开后核对内容、公式编号、表格数据和图片，最后检查完整 PDF 的显示。"
+              }
+            ]
+          },
+          {
+            "type": "paragraph",
+            "id": "body-8-5",
+            "content": [
+              {
+                "type": "text",
+                "text": "性能数据只代表当前测试稿与本机环境。首次运行和后续连续运行分别保存，比较时说明是否包含启动 Word、更新目录和导出 PDF。页面检查与机器检查独立记录，不能用一次 API 成功代表文档显示正确。"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "notes": [],
+    "references": []
+  },
+  "dependencies": {
+    "engine\\docreport\\compose.py": "ccd5fe89bac8fe59dedc89c0aea34cbb56836c49ddd51a71d8d8857bb95d5017",
+    "engine\\docreport\\content.py": "e601f7932748747862ed048ebf7bd662786ac85e4132612ff85caaa3f1a2f6d9",
+    "engine\\docreport\\mathtype.py": "5c2304b0107f3f8dfcd5f88159b9a232a04fdaad0defd7d88cdb2bfc19637454",
+    "engine\\docreport\\verify.py": "74a86241de272f651403c51bfb9c8b15821119067ccbc19d2c30f157e302afac",
+    "engine\\docreport\\word.py": "1d60c6450308ca6e4b02e2ed827ba87b96a67f9b9ab45d3e90f921c8438d002a",
+    "engine\\docreport\\__init__.py": "d949bdf38adb1eec44467d6e59150603980b529f28164ceec99b97f31882dee9",
+    "engine\\docreport\\__main__.py": "48c6dc23c509e63931deadcf34d6691a39063fbe228cf46e2382bb4f2d383ac7",
+    "template": "223c75d27f9d38f1b03ea233b6611c8bec6dbdc249290cf01879e01f6e8778fc",
+    "schema": "6020452fbe3176fb491a2fcb9712cf9277491f6f9a6d5cf9ab46c51f1e1d3d99",
+    "requirements": "75d98410b556701a59f6caacfa41c88ae75d866d8d7159202741d7fd3a4996d3",
+    "report.py": "e8c4f0b0d2efd8231a192ab63164d90b72a432b8c4d8353aa7f5b575ba227e08",
+    "assets": {
+      "assets\\architecture.png": "d449256d773e841a3c826638d65a1790fa023dd4d9b825fd05502500e7f9d1a0"
+    },
+    "dll": "ecf3c5515e76336a0728fefa2d62b10ac9ad77e02a0bfa33db940498386e199e",
+    "servers": {
+      "Word.Application": [
+        "C:\\Program Files\\Microsoft Office\\Root\\Office16\\WINWORD.EXE",
+        1639736,
+        1790273054826283300
+      ],
+      "Equation.DSMT4": [
+        "C:\\Program Files (x86)\\MathType\\MathType.exe",
+        7388160,
+        1769085224000000000
+      ]
+    },
+    "mathTypePreferencesHash": "215e7d73b223433c6e1509d577b72f9e4f27a554b5499412ad81e16d9af22748",
+    "fonts": [
+      [
+        "C:\\Windows\\Fonts\\8514fix.fon",
+        10976,
+        1711956168466230900
+      ],
+      [
+        "C:\\Windows\\Fonts\\8514fixe.fon",
+        10976,
+        1711956168591233900
+      ],
+      [
+        "C:\\Windows\\Fonts\\8514fixg.fon",
+        11520,
+        1711956168856865600
+      ],
+      [
+        "C:\\Windows\\Fonts\\8514fixr.fon",
+        10976,
+        1711956169169366100
+      ],
+      [
+        "C:\\Windows\\Fonts\\8514fixt.fon",
+        11488,
+        1711956169278737300
+      ],
+      [
+        "C:\\Windows\\Fonts\\8514oem.fon",
+        12288,
+        1711956169419359100
+      ],
+      [
+        "C:\\Windows\\Fonts\\8514oeme.fon",
+        13248,
+        1711956169794411800
+      ],
+      [
+        "C:\\Windows\\Fonts\\8514oemg.fon",
+        12800,
+        1711956169934994900
+      ],
+      [
+        "C:\\Windows\\Fonts\\8514oemr.fon",
+        13200,
+        1711956170028737800
+      ],
+      [
+        "C:\\Windows\\Fonts\\8514oemt.fon",
+        12720,
+        1711956170106868200
+      ],
+      [
+        "C:\\Windows\\Fonts\\8514sys.fon",
+        9280,
+        1711956168466230900
+      ],
+      [
+        "C:\\Windows\\Fonts\\8514syse.fon",
+        9504,
+        1711956168591233900
+      ],
+      [
+        "C:\\Windows\\Fonts\\8514sysg.fon",
+        9856,
+        1711956168856865600
+      ],
+      [
+        "C:\\Windows\\Fonts\\8514sysr.fon",
+        10064,
+        1711956169153762300
+      ],
+      [
+        "C:\\Windows\\Fonts\\8514syst.fon",
+        9792,
+        1711956169278737300
+      ],
+      [
+        "C:\\Windows\\Fonts\\85775.fon",
+        12304,
+        1711956169169366100
+      ],
+      [
+        "C:\\Windows\\Fonts\\85855.fon",
+        12256,
+        1711956169278737300
+      ],
+      [
+        "C:\\Windows\\Fonts\\85f1255.fon",
+        12336,
+        1711956169419359100
+      ],
+      [
+        "C:\\Windows\\Fonts\\85f1256.fon",
+        12384,
+        1711956169747495100
+      ],
+      [
+        "C:\\Windows\\Fonts\\85f1257.fon",
+        10976,
+        1711956169934994900
+      ],
+      [
+        "C:\\Windows\\Fonts\\85f874.fon",
+        12288,
+        1711956168278739200
+      ],
+      [
+        "C:\\Windows\\Fonts\\85s1255.fon",
+        10224,
+        1711956169419359100
+      ],
+      [
+        "C:\\Windows\\Fonts\\85s1256.fon",
+        10608,
+        1711956169685011600
+      ],
+      [
+        "C:\\Windows\\Fonts\\85s1257.fon",
+        9472,
+        1711956169934994900
+      ],
+      [
+        "C:\\Windows\\Fonts\\85s874.fon",
+        10240,
+        1711956168278739200
+      ],
+      [
+        "C:\\Windows\\Fonts\\ANTQUAB.TTF",
+        151000,
+        1775146935231906400
+      ],
+      [
+        "C:\\Windows\\Fonts\\ANTQUABI.TTF",
+        150416,
+        1775146935231906400
+      ],
+      [
+        "C:\\Windows\\Fonts\\ANTQUAI.TTF",
+        149092,
+        1775146935236697900
+      ],
+      [
+        "C:\\Windows\\Fonts\\app775.fon",
+        35808,
+        1711956162216216400
+      ],
+      [
+        "C:\\Windows\\Fonts\\app850.fon",
+        36672,
+        1711956163481844600
+      ],
+      [
+        "C:\\Windows\\Fonts\\app852.fon",
+        36656,
+        1711956164591209600
+      ],
+      [
+        "C:\\Windows\\Fonts\\app855.fon",
+        37296,
+        1711956165497460500
+      ],
+      [
+        "C:\\Windows\\Fonts\\app857.fon",
+        36672,
+        1711956165872472100
+      ],
+      [
+        "C:\\Windows\\Fonts\\app866.fon",
+        37472,
+        1711956166200587800
+      ],
+      [
+        "C:\\Windows\\Fonts\\app932.fon",
+        80896,
+        1711956166513101100
+      ],
+      [
+        "C:\\Windows\\Fonts\\app936.fon",
+        70000,
+        1711956166841224800
+      ],
+      [
+        "C:\\Windows\\Fonts\\app949.fon",
+        80896,
+        1711956167044358200
+      ],
+      [
+        "C:\\Windows\\Fonts\\app950.fon",
+        70000,
+        1711956167278728200
+      ],
+      [
+        "C:\\Windows\\Fonts\\arial.ttf",
+        1045720,
+        1781722908217579200
+      ],
+      [
+        "C:\\Windows\\Fonts\\arialbd.ttf",
+        989780,
+        1781722908225581300
+      ],
+      [
+        "C:\\Windows\\Fonts\\arialbi.ttf",
+        724872,
+        1781722908221579300
+      ],
+      [
+        "C:\\Windows\\Fonts\\ariali.ttf",
+        721584,
+        1781722908225581300
+      ],
+      [
+        "C:\\Windows\\Fonts\\ARIALN.TTF",
+        175956,
+        1775146973656103600
+      ],
+      [
+        "C:\\Windows\\Fonts\\ARIALNB.TTF",
+        180740,
+        1775146973656919400
+      ],
+      [
+        "C:\\Windows\\Fonts\\ARIALNBI.TTF",
+        180084,
+        1775146973657527500
+      ],
+      [
+        "C:\\Windows\\Fonts\\ARIALNI.TTF",
+        181124,
+        1775146973658608500
+      ],
+      [
+        "C:\\Windows\\Fonts\\ariblk.ttf",
+        167592,
+        1711956127356584300
+      ],
+      [
+        "C:\\Windows\\Fonts\\bahnschrift.ttf",
+        361564,
+        1711956127372208900
+      ],
+      [
+        "C:\\Windows\\Fonts\\BKANT.TTF",
+        155528,
+        1775146935237809700
+      ],
+      [
+        "C:\\Windows\\Fonts\\BOOKOS.TTF",
+        160940,
+        1775146974670565700
+      ],
+      [
+        "C:\\Windows\\Fonts\\BOOKOSB.TTF",
+        154576,
+        1775146974672271400
+      ],
+      [
+        "C:\\Windows\\Fonts\\BOOKOSBI.TTF",
+        162460,
+        1775146974672779900
+      ],
+      [
+        "C:\\Windows\\Fonts\\BOOKOSI.TTF",
+        161020,
+        1775146974673844100
+      ],
+      [
+        "C:\\Windows\\Fonts\\BSSYM7.TTF",
+        54412,
+        1775146934240207600
+      ],
+      [
+        "C:\\Windows\\Fonts\\c8514fix.fon",
+        10992,
+        1711956153247392200
+      ],
+      [
+        "C:\\Windows\\Fonts\\c8514oem.fon",
+        13552,
+        1711956129356620100
+      ],
+      [
+        "C:\\Windows\\Fonts\\c8514sys.fon",
+        17760,
+        1711956153263016700
+      ],
+      [
+        "C:\\Windows\\Fonts\\calibri.ttf",
+        1650632,
+        1778303687644951700
+      ],
+      [
+        "C:\\Windows\\Fonts\\calibrib.ttf",
+        1615616,
+        1778303687641523600
+      ],
+      [
+        "C:\\Windows\\Fonts\\calibrii.ttf",
+        1202512,
+        1778303687637883900
+      ],
+      [
+        "C:\\Windows\\Fonts\\calibril.ttf",
+        1441448,
+        1778303687641523600
+      ],
+      [
+        "C:\\Windows\\Fonts\\calibrili.ttf",
+        1065868,
+        1778303687631884500
+      ],
+      [
+        "C:\\Windows\\Fonts\\calibriz.ttf",
+        1163904,
+        1778303687629883400
+      ],
+      [
+        "C:\\Windows\\Fonts\\cambria.ttc",
+        1792664,
+        1711956127372208900
+      ],
+      [
+        "C:\\Windows\\Fonts\\cambriab.ttf",
+        841440,
+        1711956153216151800
+      ],
+      [
+        "C:\\Windows\\Fonts\\cambriai.ttf",
+        892620,
+        1711956129153476100
+      ],
+      [
+        "C:\\Windows\\Fonts\\cambriaz.ttf",
+        856672,
+        1711956159481808400
+      ],
+      [
+        "C:\\Windows\\Fonts\\Candara.ttf",
+        242012,
+        1711956129153476100
+      ],
+      [
+        "C:\\Windows\\Fonts\\Candarab.ttf",
+        250772,
+        1711956159497434500
+      ],
+      [
+        "C:\\Windows\\Fonts\\Candarai.ttf",
+        251156,
+        1711956153216151800
+      ],
+      [
+        "C:\\Windows\\Fonts\\Candaral.ttf",
+        252124,
+        1711956163497467700
+      ],
+      [
+        "C:\\Windows\\Fonts\\Candarali.ttf",
+        189388,
+        1711956164591209600
+      ],
+      [
+        "C:\\Windows\\Fonts\\Candaraz.ttf",
+        254676,
+        1711956162216216400
+      ],
+      [
+        "C:\\Windows\\Fonts\\CENTURY.TTF",
+        165248,
+        1775146935247682400
+      ],
+      [
+        "C:\\Windows\\Fonts\\cga40737.fon",
+        7216,
+        1711956167669349100
+      ],
+      [
+        "C:\\Windows\\Fonts\\cga40850.fon",
+        6352,
+        1711956167856849500
+      ],
+      [
+        "C:\\Windows\\Fonts\\cga40852.fon",
+        6672,
+        1711956168028737700
+      ],
+      [
+        "C:\\Windows\\Fonts\\cga40857.fon",
+        6672,
+        1711956168341236800
+      ],
+      [
+        "C:\\Windows\\Fonts\\cga40866.fon",
+        7232,
+        1711956168481862200
+      ],
+      [
+        "C:\\Windows\\Fonts\\cga40869.fon",
+        7216,
+        1711956168606856600
+      ],
+      [
+        "C:\\Windows\\Fonts\\cga40woa.fon",
+        6336,
+        1711956167497482100
+      ],
+      [
+        "C:\\Windows\\Fonts\\cga80737.fon",
+        5168,
+        1711956169185035400
+      ],
+      [
+        "C:\\Windows\\Fonts\\cga80850.fon",
+        4320,
+        1711956169294364600
+      ],
+      [
+        "C:\\Windows\\Fonts\\cga80852.fon",
+        5200,
+        1711956169434999400
+      ],
+      [
+        "C:\\Windows\\Fonts\\cga80857.fon",
+        4640,
+        1711956169856896500
+      ],
+      [
+        "C:\\Windows\\Fonts\\cga80866.fon",
+        5168,
+        1711956169950610900
+      ],
+      [
+        "C:\\Windows\\Fonts\\cga80869.fon",
+        5168,
+        1711956170028737800
+      ],
+      [
+        "C:\\Windows\\Fonts\\cga80woa.fon",
+        4304,
+        1711956168872476200
+      ],
+      [
+        "C:\\Windows\\Fonts\\comic.ttf",
+        272612,
+        1711956127387832300
+      ],
+      [
+        "C:\\Windows\\Fonts\\comicbd.ttf",
+        255972,
+        1711956152794293200
+      ],
+      [
+        "C:\\Windows\\Fonts\\comici.ttf",
+        255796,
+        1711956159419315100
+      ],
+      [
+        "C:\\Windows\\Fonts\\comicz.ttf",
+        253232,
+        1711956162169336000
+      ],
+      [
+        "C:\\Windows\\Fonts\\consola.ttf",
+        453088,
+        1778303687640513400
+      ],
+      [
+        "C:\\Windows\\Fonts\\consolab.ttf",
+        391756,
+        1778303687640513400
+      ],
+      [
+        "C:\\Windows\\Fonts\\consolai.ttf",
+        461496,
+        1778303687641523600
+      ],
+      [
+        "C:\\Windows\\Fonts\\consolaz.ttf",
+        401732,
+        1778303687641523600
+      ],
+      [
+        "C:\\Windows\\Fonts\\constan.ttf",
+        448376,
+        1711956129153476100
+      ],
+      [
+        "C:\\Windows\\Fonts\\constanb.ttf",
+        451824,
+        1711956159481808400
+      ],
+      [
+        "C:\\Windows\\Fonts\\constani.ttf",
+        448748,
+        1711956153216151800
+      ],
+      [
+        "C:\\Windows\\Fonts\\constanz.ttf",
+        455564,
+        1711956162200599100
+      ],
+      [
+        "C:\\Windows\\Fonts\\corbel.ttf",
+        277168,
+        1711956129169205900
+      ],
+      [
+        "C:\\Windows\\Fonts\\corbelb.ttf",
+        290908,
+        1711956159481808400
+      ],
+      [
+        "C:\\Windows\\Fonts\\corbeli.ttf",
+        284690,
+        1711956153216151800
+      ],
+      [
+        "C:\\Windows\\Fonts\\corbell.ttf",
+        172256,
+        1711956163481844600
+      ],
+      [
+        "C:\\Windows\\Fonts\\corbelli.ttf",
+        169228,
+        1711956164591209600
+      ],
+      [
+        "C:\\Windows\\Fonts\\corbelz.ttf",
+        294692,
+        1711956162200599100
+      ],
+      [
+        "C:\\Windows\\Fonts\\coue1255.fon",
+        26432,
+        1711956164591209600
+      ],
+      [
+        "C:\\Windows\\Fonts\\coue1256.fon",
+        26544,
+        1711956165497460500
+      ],
+      [
+        "C:\\Windows\\Fonts\\coue1257.fon",
+        23440,
+        1711956165872472100
+      ],
+      [
+        "C:\\Windows\\Fonts\\couf1255.fon",
+        35888,
+        1711956167513105300
+      ],
+      [
+        "C:\\Windows\\Fonts\\couf1256.fon",
+        36032,
+        1711956167684978600
+      ],
+      [
+        "C:\\Windows\\Fonts\\couf1257.fon",
+        31760,
+        1711956167872477500
+      ],
+      [
+        "C:\\Windows\\Fonts\\cour.ttf",
+        817164,
+        1781722908225581300
+      ],
+      [
+        "C:\\Windows\\Fonts\\courbd.ttf",
+        818292,
+        1781722908230580100
+      ],
+      [
+        "C:\\Windows\\Fonts\\courbi.ttf",
+        593192,
+        1781722908233207700
+      ],
+      [
+        "C:\\Windows\\Fonts\\coure.fon",
+        23408,
+        1711956129325367700
+      ],
+      [
+        "C:\\Windows\\Fonts\\couree.fon",
+        23440,
+        1711956153247392200
+      ],
+      [
+        "C:\\Windows\\Fonts\\coureg.fon",
+        25024,
+        1711956159481808400
+      ],
+      [
+        "C:\\Windows\\Fonts\\courer.fon",
+        23440,
+        1711956162216216400
+      ],
+      [
+        "C:\\Windows\\Fonts\\couret.fon",
+        25024,
+        1711956163481844600
+      ],
+      [
+        "C:\\Windows\\Fonts\\courf.fon",
+        31712,
+        1711956166200587800
+      ],
+      [
+        "C:\\Windows\\Fonts\\courfe.fon",
+        31776,
+        1711956166497466000
+      ],
+      [
+        "C:\\Windows\\Fonts\\courfg.fon",
+        33344,
+        1711956166825587500
+      ],
+      [
+        "C:\\Windows\\Fonts\\courfr.fon",
+        31808,
+        1711956167044358200
+      ],
+      [
+        "C:\\Windows\\Fonts\\courft.fon",
+        33360,
+        1711956167294346100
+      ],
+      [
+        "C:\\Windows\\Fonts\\couri.ttf",
+        682968,
+        1781722908237210500
+      ],
+      [
+        "C:\\Windows\\Fonts\\cvgafix.fon",
+        5600,
+        1711956129325367700
+      ],
+      [
+        "C:\\Windows\\Fonts\\cvgasys.fon",
+        12896,
+        1711956129340971400
+      ],
+      [
+        "C:\\Windows\\Fonts\\Deng.ttf",
+        16324168,
+        1775146434680893200
+      ],
+      [
+        "C:\\Windows\\Fonts\\Dengb.ttf",
+        16450596,
+        1775146434680893200
+      ],
+      [
+        "C:\\Windows\\Fonts\\Dengl.ttf",
+        15437648,
+        1775146434678882200
+      ],
+      [
+        "C:\\Windows\\Fonts\\desktop.ini",
+        65,
+        1711956244261852900
+      ],
+      [
+        "C:\\Windows\\Fonts\\dos737.fon",
+        36336,
+        1711956153263016700
+      ],
+      [
+        "C:\\Windows\\Fonts\\dos869.fon",
+        36816,
+        1711956159481808400
+      ],
+      [
+        "C:\\Windows\\Fonts\\dosapp.fon",
+        36656,
+        1711956129340971400
+      ],
+      [
+        "C:\\Windows\\Fonts\\DUBAI-BOLD.TTF",
+        179268,
+        1775146935247682400
+      ],
+      [
+        "C:\\Windows\\Fonts\\DUBAI-LIGHT.TTF",
+        179648,
+        1775146935247682400
+      ],
+      [
+        "C:\\Windows\\Fonts\\DUBAI-MEDIUM.TTF",
+        179432,
+        1775146935253318100
+      ],
+      [
+        "C:\\Windows\\Fonts\\DUBAI-REGULAR.TTF",
+        181484,
+        1775146935253318100
+      ],
+      [
+        "C:\\Windows\\Fonts\\ebrima.ttf",
+        949408,
+        1711956127403460900
+      ],
+      [
+        "C:\\Windows\\Fonts\\ebrimabd.ttf",
+        1026388,
+        1711956127434708600
+      ],
+      [
+        "C:\\Windows\\Fonts\\ega40737.fon",
+        9248,
+        1711956170184991500
+      ],
+      [
+        "C:\\Windows\\Fonts\\ega40850.fon",
+        8384,
+        1711956170263111500
+      ],
+      [
+        "C:\\Windows\\Fonts\\ega40852.fon",
+        8368,
+        1711956170325612100
+      ],
+      [
+        "C:\\Windows\\Fonts\\ega40857.fon",
+        8704,
+        1711956170388109700
+      ],
+      [
+        "C:\\Windows\\Fonts\\ega40866.fon",
+        9232,
+        1711956170622486000
+      ],
+      [
+        "C:\\Windows\\Fonts\\ega40869.fon",
+        9248,
+        1711956170685011300
+      ],
+      [
+        "C:\\Windows\\Fonts\\ega40woa.fon",
+        8368,
+        1711956170106868200
+      ],
+      [
+        "C:\\Windows\\Fonts\\ega80737.fon",
+        6192,
+        1711956170778760900
+      ],
+      [
+        "C:\\Windows\\Fonts\\ega80850.fon",
+        5328,
+        1711956170841240100
+      ],
+      [
+        "C:\\Windows\\Fonts\\ega80852.fon",
+        5344,
+        1711956170888124400
+      ],
+      [
+        "C:\\Windows\\Fonts\\ega80857.fon",
+        5648,
+        1711956171028742700
+      ],
+      [
+        "C:\\Windows\\Fonts\\ega80866.fon",
+        5280,
+        1711956171138112000
+      ],
+      [
+        "C:\\Windows\\Fonts\\ega80869.fon",
+        6192,
+        1711956171200623000
+      ],
+      [
+        "C:\\Windows\\Fonts\\ega80woa.fon",
+        5312,
+        1711956170731869700
+      ],
+      [
+        "C:\\Windows\\Fonts\\euclid.ttf",
+        60758,
+        1769084288000000000
+      ],
+      [
+        "C:\\Windows\\Fonts\\euclidb.ttf",
+        58238,
+        1769084288000000000
+      ],
+      [
+        "C:\\Windows\\Fonts\\euclidbi.ttf",
+        70682,
+        1769084288000000000
+      ],
+      [
+        "C:\\Windows\\Fonts\\euclidi.ttf",
+        68584,
+        1769084288000000000
+      ],
+      [
+        "C:\\Windows\\Fonts\\eucsym.ttf",
+        42306,
+        1769084288000000000
+      ],
+      [
+        "C:\\Windows\\Fonts\\eucsymb.ttf",
+        40686,
+        1769084288000000000
+      ],
+      [
+        "C:\\Windows\\Fonts\\eucsymbi.ttf",
+        41276,
+        1769084288000000000
+      ],
+      [
+        "C:\\Windows\\Fonts\\eucsymi.ttf",
+        43452,
+        1769084288000000000
+      ],
+      [
+        "C:\\Windows\\Fonts\\euextra.ttf",
+        29008,
+        1769084288000000000
+      ],
+      [
+        "C:\\Windows\\Fonts\\euextrab.ttf",
+        28696,
+        1769084288000000000
+      ],
+      [
+        "C:\\Windows\\Fonts\\eufrak.ttf",
+        29992,
+        1769084288000000000
+      ],
+      [
+        "C:\\Windows\\Fonts\\eufrakb.ttf",
+        29190,
+        1769084288000000000
+      ],
+      [
+        "C:\\Windows\\Fonts\\eumat1.ttf",
+        36244,
+        1769084288000000000
+      ],
+      [
+        "C:\\Windows\\Fonts\\eumat1b.ttf",
+        36432,
+        1769084288000000000
+      ],
+      [
+        "C:\\Windows\\Fonts\\eumat2.ttf",
+        42516,
+        1769084288000000000
+      ],
+      [
+        "C:\\Windows\\Fonts\\eumat2b.ttf",
+        42036,
+        1769084288000000000
+      ],
+      [
+        "C:\\Windows\\Fonts\\fences.ttf",
+        14308,
+        1769084288000000000
+      ],
+      [
+        "C:\\Windows\\Fonts\\fms_metadata.xml",
+        84241,
+        1711956244277480900
+      ],
+      [
+        "C:\\Windows\\Fonts\\framd.ttf",
+        133632,
+        1711956129169205900
+      ],
+      [
+        "C:\\Windows\\Fonts\\framdit.ttf",
+        148728,
+        1711956153216151800
+      ],
+      [
+        "C:\\Windows\\Fonts\\FZSTK.TTF",
+        7574196,
+        1775146839512650900
+      ],
+      [
+        "C:\\Windows\\Fonts\\FZYTK.TTF",
+        3241748,
+        1775146841373603500
+      ],
+      [
+        "C:\\Windows\\Fonts\\Gabriola.ttf",
+        1806004,
+        1711956129169205900
+      ],
+      [
+        "C:\\Windows\\Fonts\\gadugi.ttf",
+        242684,
+        1711956127419097400
+      ],
+      [
+        "C:\\Windows\\Fonts\\gadugib.ttf",
+        249236,
+        1711956129184726100
+      ],
+      [
+        "C:\\Windows\\Fonts\\GARA.TTF",
+        198072,
+        1775146973659117200
+      ],
+      [
+        "C:\\Windows\\Fonts\\GARABD.TTF",
+        199772,
+        1775146973660081400
+      ],
+      [
+        "C:\\Windows\\Fonts\\GARAIT.TTF",
+        189464,
+        1775146973660591000
+      ],
+      [
+        "C:\\Windows\\Fonts\\georgia.ttf",
+        219712,
+        1711956127419097400
+      ],
+      [
+        "C:\\Windows\\Fonts\\georgiab.ttf",
+        207476,
+        1711956159419315100
+      ],
+      [
+        "C:\\Windows\\Fonts\\georgiai.ttf",
+        208444,
+        1711956152809891700
+      ],
+      [
+        "C:\\Windows\\Fonts\\georgiaz.ttf",
+        211780,
+        1711956162153715600
+      ],
+      [
+        "C:\\Windows\\Fonts\\GlobalMonospace.CompositeFont",
+        26040,
+        1765876220003330800
+      ],
+      [
+        "C:\\Windows\\Fonts\\GlobalSansSerif.CompositeFont",
+        26489,
+        1765876220003330800
+      ],
+      [
+        "C:\\Windows\\Fonts\\GlobalSerif.CompositeFont",
+        29779,
+        1765876220017293300
+      ],
+      [
+        "C:\\Windows\\Fonts\\GlobalUserInterface.CompositeFont",
+        43318,
+        1765876220018290800
+      ],
+      [
+        "C:\\Windows\\Fonts\\GOTHIC.TTF",
+        137568,
+        1775146936251925800
+      ],
+      [
+        "C:\\Windows\\Fonts\\GOTHICB.TTF",
+        129676,
+        1775146936251925800
+      ],
+      [
+        "C:\\Windows\\Fonts\\GOTHICBI.TTF",
+        139084,
+        1775146936254851700
+      ],
+      [
+        "C:\\Windows\\Fonts\\GOTHICI.TTF",
+        148520,
+        1775146936256502500
+      ],
+      [
+        "C:\\Windows\\Fonts\\h8514fix.fon",
+        11056,
+        1711956162200599100
+      ],
+      [
+        "C:\\Windows\\Fonts\\h8514oem.fon",
+        12400,
+        1711956153263016700
+      ],
+      [
+        "C:\\Windows\\Fonts\\h8514sys.fon",
+        10032,
+        1711956162200599100
+      ],
+      [
+        "C:\\Windows\\Fonts\\himalaya.ttf",
+        572776,
+        1711956127450333000
+      ],
+      [
+        "C:\\Windows\\Fonts\\hvgafix.fon",
+        5680,
+        1711956159481808400
+      ],
+      [
+        "C:\\Windows\\Fonts\\hvgasys.fon",
+        6512,
+        1711956159481808400
+      ],
+      [
+        "C:\\Windows\\Fonts\\HYZhongHeiTi-197.ttf",
+        1418764,
+        1785327742000000000
+      ],
+      [
+        "C:\\Windows\\Fonts\\impact.ttf",
+        206784,
+        1711956129590970500
+      ],
+      [
+        "C:\\Windows\\Fonts\\Inkfree.ttf",
+        198972,
+        1711956127434708600
+      ],
+      [
+        "C:\\Windows\\Fonts\\j8514fix.fon",
+        12896,
+        1711956164575588600
+      ],
+      [
+        "C:\\Windows\\Fonts\\j8514oem.fon",
+        14432,
+        1711956159481808400
+      ],
+      [
+        "C:\\Windows\\Fonts\\j8514sys.fon",
+        10656,
+        1711956164575588600
+      ],
+      [
+        "C:\\Windows\\Fonts\\javatext.ttf",
+        305448,
+        1711956127450333000
+      ],
+      [
+        "C:\\Windows\\Fonts\\jsmalle.fon",
+        41584,
+        1711956129325367700
+      ],
+      [
+        "C:\\Windows\\Fonts\\jsmallf.fon",
+        38480,
+        1711956153247392200
+      ],
+      [
+        "C:\\Windows\\Fonts\\jvgafix.fon",
+        6528,
+        1711956163481844600
+      ],
+      [
+        "C:\\Windows\\Fonts\\jvgasys.fon",
+        7728,
+        1711956163481844600
+      ],
+      [
+        "C:\\Windows\\Fonts\\l_10646.ttf",
+        309516,
+        1711956129278477100
+      ],
+      [
+        "C:\\Windows\\Fonts\\LeelaUIb.ttf",
+        324708,
+        1781722908237210500
+      ],
+      [
+        "C:\\Windows\\Fonts\\LEELAWAD.TTF",
+        94064,
+        1775146936256502500
+      ],
+      [
+        "C:\\Windows\\Fonts\\LEELAWDB.TTF",
+        93836,
+        1775146936258507600
+      ],
+      [
+        "C:\\Windows\\Fonts\\LeelawUI.ttf",
+        390004,
+        1781722908241206900
+      ],
+      [
+        "C:\\Windows\\Fonts\\LeelUIsl.ttf",
+        382988,
+        1781722908239204400
+      ],
+      [
+        "C:\\Windows\\Fonts\\lucon.ttf",
+        111108,
+        1711956134684768200
+      ],
+      [
+        "C:\\Windows\\Fonts\\malgun.ttf",
+        13459196,
+        1711956127575339600
+      ],
+      [
+        "C:\\Windows\\Fonts\\malgunbd.ttf",
+        12600392,
+        1711956136091023900
+      ],
+      [
+        "C:\\Windows\\Fonts\\malgunsl.ttf",
+        5085196,
+        1711956136091023900
+      ],
+      [
+        "C:\\Windows\\Fonts\\marlett.ttf",
+        27724,
+        1711956129294093100
+      ],
+      [
+        "C:\\Windows\\Fonts\\micross.ttf",
+        857472,
+        1778303687650951100
+      ],
+      [
+        "C:\\Windows\\Fonts\\mingliub.ttc",
+        37112128,
+        1711956129559742000
+      ],
+      [
+        "C:\\Windows\\Fonts\\mmrtext.ttf",
+        336912,
+        1786482451827712100
+      ],
+      [
+        "C:\\Windows\\Fonts\\mmrtextb.ttf",
+        318804,
+        1786482451829713700
+      ],
+      [
+        "C:\\Windows\\Fonts\\modern.fon",
+        8704,
+        1711956159481808400
+      ],
+      [
+        "C:\\Windows\\Fonts\\monbaiti.ttf",
+        579752,
+        1786482451823019300
+      ],
+      [
+        "C:\\Windows\\Fonts\\msgothic.ttc",
+        8990160,
+        1711956129340971400
+      ],
+      [
+        "C:\\Windows\\Fonts\\msjh.ttc",
+        21404172,
+        1711956127481579400
+      ],
+      [
+        "C:\\Windows\\Fonts\\msjhbd.ttc",
+        14441188,
+        1711956136012964100
+      ],
+      [
+        "C:\\Windows\\Fonts\\msjhl.ttc",
+        12877764,
+        1711956136012964100
+      ],
+      [
+        "C:\\Windows\\Fonts\\MSUIGHUB.TTF",
+        247348,
+        1775146936259958000
+      ],
+      [
+        "C:\\Windows\\Fonts\\MSUIGHUR.TTF",
+        222632,
+        1775146936259958000
+      ],
+      [
+        "C:\\Windows\\Fonts\\msyh.ttc",
+        19704352,
+        1757964936669715100
+      ],
+      [
+        "C:\\Windows\\Fonts\\msyhbd.ttc",
+        16883552,
+        1757964936638465200
+      ],
+      [
+        "C:\\Windows\\Fonts\\msyhl.ttc",
+        12189612,
+        1757964936607220400
+      ],
+      [
+        "C:\\Windows\\Fonts\\msyi.ttf",
+        301180,
+        1711956127934709000
+      ],
+      [
+        "C:\\Windows\\Fonts\\Mt Extra Tiger.ttf",
+        34788,
+        1769084288000000000
+      ],
+      [
+        "C:\\Windows\\Fonts\\MTCORSVA.TTF",
+        157360,
+        1775146973661325100
+      ],
+      [
+        "C:\\Windows\\Fonts\\MTEXTRA.TTF",
+        9024,
+        1775146936259958000
+      ],
+      [
+        "C:\\Windows\\Fonts\\mtextra_01.ttf",
+        27092,
+        1769084288000000000
+      ],
+      [
+        "C:\\Windows\\Fonts\\mvboli.ttf",
+        79320,
+        1711956127497224600
+      ],
+      [
+        "C:\\Windows\\Fonts\\Nirmala.ttc",
+        5304988,
+        1711956127715956500
+      ],
+      [
+        "C:\\Windows\\Fonts\\NotoSansSC-VF.ttf",
+        17773244,
+        1775146434838473700
+      ],
+      [
+        "C:\\Windows\\Fonts\\NotoSerifSC-VF.ttf",
+        25129160,
+        1775146434909254400
+      ],
+      [
+        "C:\\Windows\\Fonts\\ntailu.ttf",
+        74464,
+        1711956127512844100
+      ],
+      [
+        "C:\\Windows\\Fonts\\ntailub.ttf",
+        67168,
+        1711956129294093100
+      ],
+      [
+        "C:\\Windows\\Fonts\\pala.ttf",
+        472284,
+        1711956129309715900
+      ],
+      [
+        "C:\\Windows\\Fonts\\palab.ttf",
+        419932,
+        1711956159481808400
+      ],
+      [
+        "C:\\Windows\\Fonts\\palabi.ttf",
+        335292,
+        1711956162200599100
+      ],
+      [
+        "C:\\Windows\\Fonts\\palai.ttf",
+        413708,
+        1711956153247392200
+      ],
+      [
+        "C:\\Windows\\Fonts\\phagspa.ttf",
+        93720,
+        1711956127794096500
+      ],
+      [
+        "C:\\Windows\\Fonts\\phagspab.ttf",
+        97476,
+        1711956129309715900
+      ],
+      [
+        "C:\\Windows\\Fonts\\REFSAN.TTF",
+        220172,
+        1775146934240207600
+      ],
+      [
+        "C:\\Windows\\Fonts\\REFSPCL.TTF",
+        53288,
+        1775146935231906400
+      ],
+      [
+        "C:\\Windows\\Fonts\\roman.fon",
+        13312,
+        1711956129356620100
+      ],
+      [
+        "C:\\Windows\\Fonts\\s8514fix.fon",
+        11056,
+        1711956165856848900
+      ],
+      [
+        "C:\\Windows\\Fonts\\s8514oem.fon",
+        12384,
+        1711956162200599100
+      ],
+      [
+        "C:\\Windows\\Fonts\\s8514sys.fon",
+        17760,
+        1711956165856848900
+      ],
+      [
+        "C:\\Windows\\Fonts\\SansSerifCollection.ttf",
+        3775516,
+        1711956127653466100
+      ],
+      [
+        "C:\\Windows\\Fonts\\script.fon",
+        12288,
+        1711956153263016700
+      ],
+      [
+        "C:\\Windows\\Fonts\\segmdl2.ttf",
+        283820,
+        1711956166981857700
+      ],
+      [
+        "C:\\Windows\\Fonts\\SegoeIcons.ttf",
+        471716,
+        1789555954914614800
+      ],
+      [
+        "C:\\Windows\\Fonts\\segoepr.ttf",
+        168404,
+        1711956127809717000
+      ],
+      [
+        "C:\\Windows\\Fonts\\segoeprb.ttf",
+        167800,
+        1711956129294093100
+      ],
+      [
+        "C:\\Windows\\Fonts\\segoesc.ttf",
+        597476,
+        1711956129309715900
+      ],
+      [
+        "C:\\Windows\\Fonts\\segoescb.ttf",
+        593028,
+        1711956153247392200
+      ],
+      [
+        "C:\\Windows\\Fonts\\segoeui.ttf",
+        959752,
+        1778303687699988700
+      ],
+      [
+        "C:\\Windows\\Fonts\\segoeuib.ttf",
+        947092,
+        1778303687669330500
+      ],
+      [
+        "C:\\Windows\\Fonts\\segoeuii.ttf",
+        530616,
+        1778303687665326000
+      ],
+      [
+        "C:\\Windows\\Fonts\\segoeuil.ttf",
+        910144,
+        1778303687680326600
+      ],
+      [
+        "C:\\Windows\\Fonts\\segoeuisl.ttf",
+        848220,
+        1778303687682326200
+      ],
+      [
+        "C:\\Windows\\Fonts\\segoeuiz.ttf",
+        542140,
+        1778303687681326000
+      ],
+      [
+        "C:\\Windows\\Fonts\\seguibl.ttf",
+        318708,
+        1778303687678326400
+      ],
+      [
+        "C:\\Windows\\Fonts\\seguibli.ttf",
+        350484,
+        1778303687680326600
+      ],
+      [
+        "C:\\Windows\\Fonts\\seguiemj.ttf",
+        12934920,
+        1789555955256565900
+      ],
+      [
+        "C:\\Windows\\Fonts\\seguihis.ttf",
+        1622060,
+        1711956166653724600
+      ],
+      [
+        "C:\\Windows\\Fonts\\seguili.ttf",
+        458412,
+        1778303687691986700
+      ],
+      [
+        "C:\\Windows\\Fonts\\seguisb.ttf",
+        974500,
+        1778303687687989600
+      ],
+      [
+        "C:\\Windows\\Fonts\\seguisbi.ttf",
+        456140,
+        1778303687692987000
+      ],
+      [
+        "C:\\Windows\\Fonts\\seguisli.ttf",
+        465660,
+        1778303687694988000
+      ],
+      [
+        "C:\\Windows\\Fonts\\seguisym.ttf",
+        2514056,
+        1711956165888095000
+      ],
+      [
+        "C:\\Windows\\Fonts\\SegUIVar.ttf",
+        1851000,
+        1711956127684722800
+      ],
+      [
+        "C:\\Windows\\Fonts\\sere1255.fon",
+        62944,
+        1711956164575588600
+      ],
+      [
+        "C:\\Windows\\Fonts\\sere1256.fon",
+        65392,
+        1711956165481848900
+      ],
+      [
+        "C:\\Windows\\Fonts\\sere1257.fon",
+        59024,
+        1711956165872472100
+      ],
+      [
+        "C:\\Windows\\Fonts\\serf1255.fon",
+        89456,
+        1711956167497482100
+      ],
+      [
+        "C:\\Windows\\Fonts\\serf1256.fon",
+        95488,
+        1711956167669349100
+      ],
+      [
+        "C:\\Windows\\Fonts\\serf1257.fon",
+        84080,
+        1711956167856849500
+      ],
+      [
+        "C:\\Windows\\Fonts\\serife.fon",
+        57936,
+        1711956129325367700
+      ],
+      [
+        "C:\\Windows\\Fonts\\serifee.fon",
+        59952,
+        1711956153247392200
+      ],
+      [
+        "C:\\Windows\\Fonts\\serifeg.fon",
+        60752,
+        1711956159481808400
+      ],
+      [
+        "C:\\Windows\\Fonts\\serifer.fon",
+        63296,
+        1711956162200599100
+      ],
+      [
+        "C:\\Windows\\Fonts\\serifet.fon",
+        61024,
+        1711956163481844600
+      ],
+      [
+        "C:\\Windows\\Fonts\\seriff.fon",
+        81728,
+        1711956166200587800
+      ],
+      [
+        "C:\\Windows\\Fonts\\seriffe.fon",
+        85360,
+        1711956166497466000
+      ],
+      [
+        "C:\\Windows\\Fonts\\seriffg.fon",
+        86256,
+        1711956166825587500
+      ],
+      [
+        "C:\\Windows\\Fonts\\seriffr.fon",
+        90736,
+        1711956167044358200
+      ],
+      [
+        "C:\\Windows\\Fonts\\serifft.fon",
+        84848,
+        1711956167278728200
+      ],
+      [
+        "C:\\Windows\\Fonts\\simfang.ttf",
+        10570564,
+        1778303687769978400
+      ],
+      [
+        "C:\\Windows\\Fonts\\simhei.ttf",
+        9745792,
+        1778303687760511100
+      ],
+      [
+        "C:\\Windows\\Fonts\\simkai.ttf",
+        11779732,
+        1778303687781977800
+      ],
+      [
+        "C:\\Windows\\Fonts\\SIMLI.TTF",
+        9223160,
+        1775146845392515800
+      ],
+      [
+        "C:\\Windows\\Fonts\\simsun.ttc",
+        18316748,
+        1778303688026423600
+      ],
+      [
+        "C:\\Windows\\Fonts\\simsunb.ttf",
+        21894056,
+        1778303687870975200
+      ],
+      [
+        "C:\\Windows\\Fonts\\SimsunExtG.ttf",
+        3549508,
+        1778303687750001500
+      ],
+      [
+        "C:\\Windows\\Fonts\\SIMYOU.TTF",
+        6700204,
+        1775146845425512900
+      ],
+      [
+        "C:\\Windows\\Fonts\\SitkaVF-Italic.ttf",
+        558188,
+        1711956153247392200
+      ],
+      [
+        "C:\\Windows\\Fonts\\SitkaVF.ttf",
+        516124,
+        1711956129325367700
+      ],
+      [
+        "C:\\Windows\\Fonts\\smae1255.fon",
+        25216,
+        1711956165872472100
+      ],
+      [
+        "C:\\Windows\\Fonts\\smae1256.fon",
+        32512,
+        1711956166200587800
+      ],
+      [
+        "C:\\Windows\\Fonts\\smae1257.fon",
+        24672,
+        1711956166497466000
+      ],
+      [
+        "C:\\Windows\\Fonts\\smaf1255.fon",
+        20448,
+        1711956167841231900
+      ],
+      [
+        "C:\\Windows\\Fonts\\smaf1256.fon",
+        37952,
+        1711956168013095400
+      ],
+      [
+        "C:\\Windows\\Fonts\\smaf1257.fon",
+        19904,
+        1711956168325647800
+      ],
+      [
+        "C:\\Windows\\Fonts\\smalle.fon",
+        26112,
+        1711956159481808400
+      ],
+      [
+        "C:\\Windows\\Fonts\\smallee.fon",
+        24784,
+        1711956162200599100
+      ],
+      [
+        "C:\\Windows\\Fonts\\smalleg.fon",
+        28912,
+        1711956163481844600
+      ],
+      [
+        "C:\\Windows\\Fonts\\smaller.fon",
+        24832,
+        1711956164591209600
+      ],
+      [
+        "C:\\Windows\\Fonts\\smallet.fon",
+        29200,
+        1711956165497460500
+      ],
+      [
+        "C:\\Windows\\Fonts\\smallf.fon",
+        21504,
+        1711956166825587500
+      ],
+      [
+        "C:\\Windows\\Fonts\\smallfe.fon",
+        19600,
+        1711956167028741300
+      ],
+      [
+        "C:\\Windows\\Fonts\\smallfg.fon",
+        23120,
+        1711956167263107600
+      ],
+      [
+        "C:\\Windows\\Fonts\\smallfr.fon",
+        19760,
+        1711956167481843300
+      ],
+      [
+        "C:\\Windows\\Fonts\\smallft.fon",
+        23008,
+        1711956167653732400
+      ],
+      [
+        "C:\\Windows\\Fonts\\ssee1255.fon",
+        69232,
+        1711956164591209600
+      ],
+      [
+        "C:\\Windows\\Fonts\\ssee1256.fon",
+        73216,
+        1711956165497460500
+      ],
+      [
+        "C:\\Windows\\Fonts\\ssee1257.fon",
+        65456,
+        1711956165872472100
+      ],
+      [
+        "C:\\Windows\\Fonts\\ssee874.fon",
+        72192,
+        1711956168044356900
+      ],
+      [
+        "C:\\Windows\\Fonts\\ssef1255.fon",
+        95840,
+        1711956167497482100
+      ],
+      [
+        "C:\\Windows\\Fonts\\ssef1256.fon",
+        67328,
+        1711956167669349100
+      ],
+      [
+        "C:\\Windows\\Fonts\\ssef1257.fon",
+        90336,
+        1711956167856849500
+      ],
+      [
+        "C:\\Windows\\Fonts\\ssef874.fon",
+        102400,
+        1711956168341236800
+      ],
+      [
+        "C:\\Windows\\Fonts\\sserife.fon",
+        64656,
+        1711956129325367700
+      ],
+      [
+        "C:\\Windows\\Fonts\\sserifee.fon",
+        66464,
+        1711956153263016700
+      ],
+      [
+        "C:\\Windows\\Fonts\\sserifeg.fon",
+        65328,
+        1711956159481808400
+      ],
+      [
+        "C:\\Windows\\Fonts\\sserifer.fon",
+        68848,
+        1711956162200599100
+      ],
+      [
+        "C:\\Windows\\Fonts\\sserifet.fon",
+        64400,
+        1711956163481844600
+      ],
+      [
+        "C:\\Windows\\Fonts\\sseriff.fon",
+        89856,
+        1711956166200587800
+      ],
+      [
+        "C:\\Windows\\Fonts\\sseriffe.fon",
+        92032,
+        1711956166513101100
+      ],
+      [
+        "C:\\Windows\\Fonts\\sseriffg.fon",
+        90288,
+        1711956166841224800
+      ],
+      [
+        "C:\\Windows\\Fonts\\sseriffr.fon",
+        98256,
+        1711956167044358200
+      ],
+      [
+        "C:\\Windows\\Fonts\\sserifft.fon",
+        89456,
+        1711956167294346100
+      ],
+      [
+        "C:\\Windows\\Fonts\\StaticCache.dat",
+        20119552,
+        1789555955109321200
+      ],
+      [
+        "C:\\Windows\\Fonts\\STCAIYUN.TTF",
+        5673836,
+        1775146846425581200
+      ],
+      [
+        "C:\\Windows\\Fonts\\STFANGSO.TTF",
+        11362788,
+        1775146852477523600
+      ],
+      [
+        "C:\\Windows\\Fonts\\STHUPO.TTF",
+        3714568,
+        1775146852495099700
+      ],
+      [
+        "C:\\Windows\\Fonts\\STKAITI.TTF",
+        12736196,
+        1775146856533143000
+      ],
+      [
+        "C:\\Windows\\Fonts\\STLITI.TTF",
+        4111960,
+        1775146856551235200
+      ],
+      [
+        "C:\\Windows\\Fonts\\STSONG.TTF",
+        11697600,
+        1775146861636291700
+      ],
+      [
+        "C:\\Windows\\Fonts\\STXIHEI.TTF",
+        9768704,
+        1775146868683420100
+      ],
+      [
+        "C:\\Windows\\Fonts\\STXINGKA.TTF",
+        4016288,
+        1775146868704360600
+      ],
+      [
+        "C:\\Windows\\Fonts\\STXINWEI.TTF",
+        4051204,
+        1775146879725383300
+      ],
+      [
+        "C:\\Windows\\Fonts\\STZHONGS.TTF",
+        12135284,
+        1775146880770201100
+      ],
+      [
+        "C:\\Windows\\Fonts\\svgafix.fon",
+        5680,
+        1711956165481848900
+      ],
+      [
+        "C:\\Windows\\Fonts\\svgasys.fon",
+        12896,
+        1711956165481848900
+      ],
+      [
+        "C:\\Windows\\Fonts\\sylfaen.ttf",
+        260108,
+        1711956129325367700
+      ],
+      [
+        "C:\\Windows\\Fonts\\Symbol Tiger Expert.ttf",
+        56724,
+        1769084288000000000
+      ],
+      [
+        "C:\\Windows\\Fonts\\Symbol Tiger.ttf",
+        57688,
+        1769084288000000000
+      ],
+      [
+        "C:\\Windows\\Fonts\\symbol.ttf",
+        69036,
+        1711956129325367700
+      ],
+      [
+        "C:\\Windows\\Fonts\\tahoma.ttf",
+        919260,
+        1778303687765970800
+      ],
+      [
+        "C:\\Windows\\Fonts\\tahomabd.ttf",
+        849284,
+        1778303687778979000
+      ],
+      [
+        "C:\\Windows\\Fonts\\taile.ttf",
+        67568,
+        1711956127919193200
+      ],
+      [
+        "C:\\Windows\\Fonts\\taileb.ttf",
+        58532,
+        1711956129559742000
+      ],
+      [
+        "C:\\Windows\\Fonts\\Tiger Expert.ttf",
+        178620,
+        1769084288000000000
+      ],
+      [
+        "C:\\Windows\\Fonts\\Tiger.ttf",
+        193636,
+        1769084288000000000
+      ],
+      [
+        "C:\\Windows\\Fonts\\times.ttf",
+        1190736,
+        1781722908255209300
+      ],
+      [
+        "C:\\Windows\\Fonts\\timesbd.ttf",
+        1170096,
+        1781722908255209300
+      ],
+      [
+        "C:\\Windows\\Fonts\\timesbi.ttf",
+        904204,
+        1781722908253205200
+      ],
+      [
+        "C:\\Windows\\Fonts\\timesi.ttf",
+        962864,
+        1781722908256207300
+      ],
+      [
+        "C:\\Windows\\Fonts\\trebuc.ttf",
+        254396,
+        1711956127919193200
+      ],
+      [
+        "C:\\Windows\\Fonts\\trebucbd.ttf",
+        244124,
+        1711956159450564500
+      ],
+      [
+        "C:\\Windows\\Fonts\\trebucbi.ttf",
+        225868,
+        1711956162184951000
+      ],
+      [
+        "C:\\Windows\\Fonts\\trebucit.ttf",
+        252224,
+        1711956152981779100
+      ],
+      [
+        "C:\\Windows\\Fonts\\verdana.ttf",
+        243304,
+        1711956127919193200
+      ],
+      [
+        "C:\\Windows\\Fonts\\verdanab.ttf",
+        211260,
+        1711956159434938100
+      ],
+      [
+        "C:\\Windows\\Fonts\\verdanai.ttf",
+        223268,
+        1711956152981779100
+      ],
+      [
+        "C:\\Windows\\Fonts\\verdanaz.ttf",
+        229800,
+        1711956162169336000
+      ],
+      [
+        "C:\\Windows\\Fonts\\vga737.fon",
+        5168,
+        1711956163481844600
+      ],
+      [
+        "C:\\Windows\\Fonts\\vga775.fon",
+        5168,
+        1711956164591209600
+      ],
+      [
+        "C:\\Windows\\Fonts\\vga850.fon",
+        5232,
+        1711956165497460500
+      ],
+      [
+        "C:\\Windows\\Fonts\\vga852.fon",
+        6160,
+        1711956165872472100
+      ],
+      [
+        "C:\\Windows\\Fonts\\vga855.fon",
+        5120,
+        1711956166216213900
+      ],
+      [
+        "C:\\Windows\\Fonts\\vga857.fon",
+        5552,
+        1711956166513101100
+      ],
+      [
+        "C:\\Windows\\Fonts\\vga860.fon",
+        5184,
+        1711956166841224800
+      ],
+      [
+        "C:\\Windows\\Fonts\\vga861.fon",
+        5184,
+        1711956167059978300
+      ],
+      [
+        "C:\\Windows\\Fonts\\vga863.fon",
+        5200,
+        1711956167294346100
+      ],
+      [
+        "C:\\Windows\\Fonts\\vga865.fon",
+        5184,
+        1711956167497482100
+      ],
+      [
+        "C:\\Windows\\Fonts\\vga866.fon",
+        6128,
+        1711956167669349100
+      ],
+      [
+        "C:\\Windows\\Fonts\\vga869.fon",
+        5184,
+        1711956167856849500
+      ],
+      [
+        "C:\\Windows\\Fonts\\vga932.fon",
+        7232,
+        1711956168028737700
+      ],
+      [
+        "C:\\Windows\\Fonts\\vga936.fon",
+        6272,
+        1711956168325647800
+      ],
+      [
+        "C:\\Windows\\Fonts\\vga949.fon",
+        6304,
+        1711956168481862200
+      ],
+      [
+        "C:\\Windows\\Fonts\\vga950.fon",
+        6272,
+        1711956168606856600
+      ],
+      [
+        "C:\\Windows\\Fonts\\vgaf1255.fon",
+        5952,
+        1711956167669349100
+      ],
+      [
+        "C:\\Windows\\Fonts\\vgaf1256.fon",
+        6528,
+        1711956167841231900
+      ],
+      [
+        "C:\\Windows\\Fonts\\vgaf1257.fon",
+        5376,
+        1711956168013095400
+      ],
+      [
+        "C:\\Windows\\Fonts\\vgaf874.fon",
+        7168,
+        1711956166200587800
+      ],
+      [
+        "C:\\Windows\\Fonts\\vgafix.fon",
+        5360,
+        1711956166497466000
+      ],
+      [
+        "C:\\Windows\\Fonts\\vgafixe.fon",
+        5376,
+        1711956166809964400
+      ],
+      [
+        "C:\\Windows\\Fonts\\vgafixg.fon",
+        6112,
+        1711956167028741300
+      ],
+      [
+        "C:\\Windows\\Fonts\\vgafixr.fon",
+        5600,
+        1711956167278728200
+      ],
+      [
+        "C:\\Windows\\Fonts\\vgafixt.fon",
+        6112,
+        1711956167481843300
+      ],
+      [
+        "C:\\Windows\\Fonts\\vgaoem.fon",
+        5168,
+        1711956168872476200
+      ],
+      [
+        "C:\\Windows\\Fonts\\vgas1255.fon",
+        7104,
+        1711956167653732400
+      ],
+      [
+        "C:\\Windows\\Fonts\\vgas1256.fon",
+        7648,
+        1711956167841231900
+      ],
+      [
+        "C:\\Windows\\Fonts\\vgas1257.fon",
+        6656,
+        1711956168013095400
+      ],
+      [
+        "C:\\Windows\\Fonts\\vgas874.fon",
+        8704,
+        1711956166200587800
+      ],
+      [
+        "C:\\Windows\\Fonts\\vgasys.fon",
+        7280,
+        1711956166497466000
+      ],
+      [
+        "C:\\Windows\\Fonts\\vgasyse.fon",
+        6608,
+        1711956166809964400
+      ],
+      [
+        "C:\\Windows\\Fonts\\vgasysg.fon",
+        7008,
+        1711956167028741300
+      ],
+      [
+        "C:\\Windows\\Fonts\\vgasysr.fon",
+        6912,
+        1711956167263107600
+      ],
+      [
+        "C:\\Windows\\Fonts\\vgasyst.fon",
+        6912,
+        1711956167481843300
+      ],
+      [
+        "C:\\Windows\\Fonts\\webdings.ttf",
+        120560,
+        1711956127934709000
+      ],
+      [
+        "C:\\Windows\\Fonts\\wingding.ttf",
+        82180,
+        1711956127919193200
+      ],
+      [
+        "C:\\Windows\\Fonts\\WINGDNG2.TTF",
+        65788,
+        1775146938281459200
+      ],
+      [
+        "C:\\Windows\\Fonts\\WINGDNG3.TTF",
+        35328,
+        1775146939296956500
+      ],
+      [
+        "C:\\Windows\\Fonts\\YuGothB.ttc",
+        14729372,
+        1778303687929650100
+      ],
+      [
+        "C:\\Windows\\Fonts\\YuGothL.ttc",
+        13969876,
+        1778303687938656300
+      ],
+      [
+        "C:\\Windows\\Fonts\\YuGothM.ttc",
+        13908392,
+        1778303687924613800
+      ],
+      [
+        "C:\\Windows\\Fonts\\YuGothR.ttc",
+        13835976,
+        1778303687936649200
+      ],
+      [
+        "C:\\Users\\godamericatb14\\AppData\\Local\\Microsoft\\Windows\\Fonts\\MapleMono-CN-Bold.ttf",
+        18549392,
+        1775234243507615200
+      ],
+      [
+        "C:\\Users\\godamericatb14\\AppData\\Local\\Microsoft\\Windows\\Fonts\\MapleMono-CN-BoldItalic.ttf",
+        19281100,
+        1775234240581165600
+      ],
+      [
+        "C:\\Users\\godamericatb14\\AppData\\Local\\Microsoft\\Windows\\Fonts\\MapleMono-CN-Italic.ttf",
+        19322512,
+        1775234243342934500
+      ],
+      [
+        "C:\\Users\\godamericatb14\\AppData\\Local\\Microsoft\\Windows\\Fonts\\MapleMono-CN-Medium.ttf",
+        18584900,
+        1775234242446323200
+      ],
+      [
+        "C:\\Users\\godamericatb14\\AppData\\Local\\Microsoft\\Windows\\Fonts\\MapleMono-CN-Regular.ttf",
+        18594640,
+        1775234240346577500
+      ],
+      [
+        "C:\\Users\\godamericatb14\\AppData\\Local\\Microsoft\\Windows\\Fonts\\MapleMonoNormal-Regular.ttf",
+        264256,
+        1775197983616355300
+      ],
+      [
+        "C:\\Users\\godamericatb14\\AppData\\Local\\Microsoft\\Windows\\Fonts\\SarasaMonoSC-Bold.ttf",
+        25357408,
+        1774752005533236300
+      ],
+      [
+        "C:\\Users\\godamericatb14\\AppData\\Local\\Microsoft\\Windows\\Fonts\\SarasaMonoSC-BoldItalic.ttf",
+        26232924,
+        1774752011524821200
+      ],
+      [
+        "C:\\Users\\godamericatb14\\AppData\\Local\\Microsoft\\Windows\\Fonts\\SarasaMonoSC-Italic.ttf",
+        26413232,
+        1774752013609255600
+      ],
+      [
+        "C:\\Users\\godamericatb14\\AppData\\Local\\Microsoft\\Windows\\Fonts\\SarasaMonoSC-Light.ttf",
+        25640216,
+        1774752001016863400
+      ],
+      [
+        "C:\\Users\\godamericatb14\\AppData\\Local\\Microsoft\\Windows\\Fonts\\SarasaMonoSC-Regular.ttf",
+        25545512,
+        1774752000632034200
+      ]
+    ]
+  },
+  "outputs": {
+    "report.docx": "1eec5726100eb88dedc51f3acbc4f998b920fcbc09eb40d742323cd18aa4430f",
+    "report.pdf": "6a8ca68c9327cfca0ccc18f9b1f2c21f9eb0e6f89d6c60b39732dd4a24459391"
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "status": "merged",
+  "conflicts": [],
+  "pending": [],
+  "operations": [
+    {
+      "id": "change-bca46a47416f65b6",
+      "status": "applied"
+    },
+    {
+      "id": "change-71a96c73d357b302",
+      "status": "applied"
+    },
+    {
+      "id": "change-64530f1398c0a631",
+      "status": "applied"
+    },
+    {
+      "id": "change-eade63c04d4bcaec",
+      "status": "applied"
+    },
+    {
+      "id": "change-4aa6eb0a99e38516",
+      "status": "applied"
+    }
+  ]
+}

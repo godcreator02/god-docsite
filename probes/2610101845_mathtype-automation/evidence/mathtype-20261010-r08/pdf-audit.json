@@ -1,0 +1,14 @@
+{
+  "mathtype-edited.pdf": {
+    "pages": 1,
+    "formulaMarkerCount": 1,
+    "text": "MathType 公式自动化验证 \n数据来源：canonical.json / eq-fraction。 \n验证内容：写入、读回、保存重开；将分母常数 1 改为 2 后再次保存重开。 \n \n2\n1() 2Hs LCs RCs= ++\n ",
+    "sha256": "8f1d9a74bc92793c4f8fc47670f4b31e12803352875b03748a2a55334fbb557d"
+  },
+  "mathtype-original.pdf": {
+    "pages": 1,
+    "formulaMarkerCount": 1,
+    "text": "MathType 公式自动化验证 \n数据来源：canonical.json / eq-fraction。 \n验证内容：写入、读回、保存重开；将分母常数 1 改为 2 后再次保存重开。 \n \n2\n1() 1Hs LCs RCs= ++\n ",
+    "sha256": "11da28470af3e1ce1926b207b50855e5876bf7f16565c35a3de64f38aadd3e9c"
+  }
+}

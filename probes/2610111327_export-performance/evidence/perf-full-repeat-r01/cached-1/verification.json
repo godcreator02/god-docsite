@@ -1,0 +1,427 @@
+{
+  "status": "passed_automation_visual_review_pending",
+  "startedAt": "2026-10-11T04:32:27.030373+00:00",
+  "report": "D:\\unitfolders\\nb9zj-word-conversion-lab\\word-conversion-lab\\out\\perf-full-input-r05",
+  "visualReview": "pending",
+  "events": [
+    {
+      "event": "start",
+      "template": "D:\\unitfolders\\nb9zj-word-conversion-lab\\word-conversion-lab\\out\\perf-full-input-r05\\project-report-noimgcompress.dotx",
+      "templateSha256": "223c75d27f9d38f1b03ea233b6611c8bec6dbdc249290cf01879e01f6e8778fc",
+      "elapsedSeconds": 0.215
+    },
+    {
+      "event": "compose-start",
+      "elapsedSeconds": 3.861
+    },
+    {
+      "event": "draft-saved",
+      "equations": 10,
+      "elapsedSeconds": 73.103
+    },
+    {
+      "event": "mathtype-functionality",
+      "full": 1,
+      "mode": 2,
+      "dll": "C:\\Program Files (x86)\\MathType\\MathPage\\64\\MathPage.wll",
+      "elapsedSeconds": 73.927
+    },
+    {
+      "event": "equation-cache-hit",
+      "id": "DR_b33648d47ecfe1b1d66b913a34ff",
+      "elapsedSeconds": 80.721
+    },
+    {
+      "event": "equation-created",
+      "id": "DR_b33648d47ecfe1b1d66b913a34ff",
+      "inline": false,
+      "widthPt": 105.80000305175781,
+      "heightPt": 33.25,
+      "elapsedSeconds": 81.053
+    },
+    {
+      "event": "equation-cache-hit",
+      "id": "DR_e80f8e07fd377e625f1a80f04b55",
+      "elapsedSeconds": 82.023
+    },
+    {
+      "event": "equation-created",
+      "id": "DR_e80f8e07fd377e625f1a80f04b55",
+      "inline": false,
+      "widthPt": 64.80000305175781,
+      "heightPt": 38.20000076293945,
+      "elapsedSeconds": 82.254
+    },
+    {
+      "event": "equation-cache-hit",
+      "id": "DR_83354ecacf0fe4b52d93ad6b793a",
+      "elapsedSeconds": 83.129
+    },
+    {
+      "event": "equation-created",
+      "id": "DR_83354ecacf0fe4b52d93ad6b793a",
+      "inline": false,
+      "widthPt": 115.75,
+      "heightPt": 18.850000381469727,
+      "elapsedSeconds": 83.281
+    },
+    {
+      "event": "equation-cache-hit",
+      "id": "DR_3dc5752a031fa25d760414353406",
+      "elapsedSeconds": 84.09
+    },
+    {
+      "event": "equation-created",
+      "id": "DR_3dc5752a031fa25d760414353406",
+      "inline": false,
+      "widthPt": 52.04999923706055,
+      "heightPt": 33.79999923706055,
+      "elapsedSeconds": 84.232
+    },
+    {
+      "event": "equation-cache-hit",
+      "id": "DR_65a2192e57bab142adea833a0215",
+      "elapsedSeconds": 85.109
+    },
+    {
+      "event": "equation-created",
+      "id": "DR_65a2192e57bab142adea833a0215",
+      "inline": false,
+      "widthPt": 74.75,
+      "heightPt": 33.79999923706055,
+      "elapsedSeconds": 85.254
+    },
+    {
+      "event": "equation-cache-hit",
+      "id": "DR_5b93603efbf3ee9aeea7951be14f",
+      "elapsedSeconds": 86.464
+    },
+    {
+      "event": "equation-created",
+      "id": "DR_5b93603efbf3ee9aeea7951be14f",
+      "inline": false,
+      "widthPt": 91.94999694824219,
+      "heightPt": 38.20000076293945,
+      "elapsedSeconds": 86.567
+    },
+    {
+      "event": "equation-cache-hit",
+      "id": "DR_f69a8cdb9846109411c96511d3b9",
+      "elapsedSeconds": 87.275
+    },
+    {
+      "event": "equation-created",
+      "id": "DR_f69a8cdb9846109411c96511d3b9",
+      "inline": false,
+      "widthPt": 42.099998474121094,
+      "heightPt": 37.099998474121094,
+      "elapsedSeconds": 87.368
+    },
+    {
+      "event": "equation-cache-hit",
+      "id": "DR_16be23d7fb8f8cce443ddff5c7a4",
+      "elapsedSeconds": 88.233
+    },
+    {
+      "event": "equation-created",
+      "id": "DR_16be23d7fb8f8cce443ddff5c7a4",
+      "inline": false,
+      "widthPt": 136.8000030517578,
+      "heightPt": 38.20000076293945,
+      "elapsedSeconds": 88.34
+    },
+    {
+      "event": "equation-cache-hit",
+      "id": "DR_4b15db2d3579f8920ed62ec9ad6f",
+      "elapsedSeconds": 89.17
+    },
+    {
+      "event": "equation-created",
+      "id": "DR_4b15db2d3579f8920ed62ec9ad6f",
+      "inline": false,
+      "widthPt": 187.75,
+      "heightPt": 38.20000076293945,
+      "elapsedSeconds": 89.291
+    },
+    {
+      "event": "equation-cache-hit",
+      "id": "DR_d95d639e84db843e84490299d570",
+      "elapsedSeconds": 90.031
+    },
+    {
+      "event": "equation-created",
+      "id": "DR_d95d639e84db843e84490299d570",
+      "inline": false,
+      "widthPt": 234.3000030517578,
+      "heightPt": 33.79999923706055,
+      "elapsedSeconds": 90.124
+    },
+    {
+      "event": "read-tex",
+      "stage": "reopened-DR_b33648d47ecfe1b1d66b913a34ff",
+      "returnCode": 0,
+      "text": "$V_{\\mathrm{ph}}=\\frac{10000}{\\sqrt{3}}=5774\\,\\mathrm{V}$",
+      "matchesExpected": true,
+      "elapsedSeconds": 94.394
+    },
+    {
+      "event": "close-ole",
+      "stage": "reopened-DR_b33648d47ecfe1b1d66b913a34ff",
+      "returnCode": 0,
+      "elapsedSeconds": 94.603
+    },
+    {
+      "event": "read-tex",
+      "stage": "reopened-DR_e80f8e07fd377e625f1a80f04b55",
+      "returnCode": 0,
+      "text": "$N\\geq\\frac{\\sqrt{2}\\,V_{\\mathrm{ph}}}{m_{\\mathrm{max}}V_{\\mathrm{bus}}}$",
+      "matchesExpected": true,
+      "elapsedSeconds": 96.327
+    },
+    {
+      "event": "close-ole",
+      "stage": "reopened-DR_e80f8e07fd377e625f1a80f04b55",
+      "returnCode": 0,
+      "elapsedSeconds": 96.456
+    },
+    {
+      "event": "read-tex",
+      "stage": "reopened-DR_83354ecacf0fe4b52d93ad6b793a",
+      "returnCode": 0,
+      "text": "$C(N)\\approx N C_{\\mathrm{fixed}}+P_{\\mathrm{ph}}C_{\\mathrm{var}}$",
+      "matchesExpected": true,
+      "elapsedSeconds": 97.758
+    },
+    {
+      "event": "close-ole",
+      "stage": "reopened-DR_83354ecacf0fe4b52d93ad6b793a",
+      "returnCode": 0,
+      "elapsedSeconds": 97.831
+    },
+    {
+      "event": "read-tex",
+      "stage": "reopened-DR_3dc5752a031fa25d760414353406",
+      "returnCode": 0,
+      "text": "$P=\\frac{n V_1 V_2}{8 f_{\\mathrm{s}} L}$",
+      "matchesExpected": true,
+      "elapsedSeconds": 98.897
+    },
+    {
+      "event": "close-ole",
+      "stage": "reopened-DR_3dc5752a031fa25d760414353406",
+      "returnCode": 0,
+      "elapsedSeconds": 98.955
+    },
+    {
+      "event": "read-tex",
+      "stage": "reopened-DR_65a2192e57bab142adea833a0215",
+      "returnCode": 0,
+      "text": "$A_{\\mathrm{e}}N=\\frac{V_1}{4 f_{\\mathrm{s}} B_{\\mathrm{max}}}$",
+      "matchesExpected": true,
+      "elapsedSeconds": 100.388
+    },
+    {
+      "event": "close-ole",
+      "stage": "reopened-DR_65a2192e57bab142adea833a0215",
+      "returnCode": 0,
+      "elapsedSeconds": 100.491
+    },
+    {
+      "event": "read-tex",
+      "stage": "reopened-DR_5b93603efbf3ee9aeea7951be14f",
+      "returnCode": 0,
+      "text": "$f_{\\mathrm{res}}=\\frac{1}{2\\pi}\\sqrt{\\frac{L_1+L_2}{L_1 L_2 C}}$",
+      "matchesExpected": true,
+      "elapsedSeconds": 102.021
+    },
+    {
+      "event": "close-ole",
+      "stage": "reopened-DR_5b93603efbf3ee9aeea7951be14f",
+      "returnCode": 0,
+      "elapsedSeconds": 102.084
+    },
+    {
+      "event": "read-tex",
+      "stage": "reopened-DR_f69a8cdb9846109411c96511d3b9",
+      "returnCode": 0,
+      "text": "$m=\\frac{\\hat{V}_{\\mathrm{ref}}}{V_{\\mathrm{tri}}}$",
+      "matchesExpected": true,
+      "elapsedSeconds": 103.187
+    },
+    {
+      "event": "close-ole",
+      "stage": "reopened-DR_f69a8cdb9846109411c96511d3b9",
+      "returnCode": 0,
+      "elapsedSeconds": 103.244
+    },
+    {
+      "event": "read-tex",
+      "stage": "reopened-DR_16be23d7fb8f8cce443ddff5c7a4",
+      "returnCode": 0,
+      "text": "$V_{\\mathrm{ph}}=\\frac{N m V_{\\mathrm{bus}}}{\\sqrt{2}}\\;\\Rightarrow\\;m=\\frac{\\sqrt{2}\\,V_{\\mathrm{ph}}}{N V_{\\mathrm{bus}}}$",
+      "matchesExpected": true,
+      "elapsedSeconds": 104.273
+    },
+    {
+      "event": "close-ole",
+      "stage": "reopened-DR_16be23d7fb8f8cce443ddff5c7a4",
+      "returnCode": 0,
+      "elapsedSeconds": 104.382
+    },
+    {
+      "event": "read-tex",
+      "stage": "reopened-DR_4b15db2d3579f8920ed62ec9ad6f",
+      "returnCode": 0,
+      "text": "$m_{\\mathrm{SVPWM}}=\\frac{\\sqrt{3}\\,\\hat{V}_{\\mathrm{ph}}}{V_{\\mathrm{dc}}},\\quad m_{\\mathrm{SPWM}}=\\sqrt{3}\\,m_{\\mathrm{SVPWM}}$",
+      "matchesExpected": true,
+      "elapsedSeconds": 105.956
+    },
+    {
+      "event": "close-ole",
+      "stage": "reopened-DR_4b15db2d3579f8920ed62ec9ad6f",
+      "returnCode": 0,
+      "elapsedSeconds": 106.039
+    },
+    {
+      "event": "read-tex",
+      "stage": "reopened-DR_d95d639e84db843e84490299d570",
+      "returnCode": 0,
+      "text": "$P=\\frac{n V_1 V_2 D(1-D)}{2 f_{\\mathrm{s}} L},\\quad D\\in[0,\\,0.5];\\quad P_{\\max}=\\frac{n V_1 V_2}{8 f_{\\mathrm{s}} L}$",
+      "matchesExpected": true,
+      "elapsedSeconds": 107.86
+    },
+    {
+      "event": "close-ole",
+      "stage": "reopened-DR_d95d639e84db843e84490299d570",
+      "returnCode": 0,
+      "elapsedSeconds": 108.0
+    },
+    {
+      "event": "mathtype-reopen",
+      "verified": 10,
+      "elapsedSeconds": 108.169
+    },
+    {
+      "event": "terminate-api",
+      "returnCode": 0,
+      "elapsedSeconds": 108.274
+    },
+    {
+      "event": "document-check",
+      "pages": 52,
+      "mathTypeObjects": 10,
+      "ommlCount": 0,
+      "tables": 32,
+      "figures": 10,
+      "footnotes": 0,
+      "toc": 1,
+      "contentControls": 5,
+      "elapsedSeconds": 126.671
+    },
+    {
+      "event": "abstract-check",
+      "abstracts": [
+        {
+          "id": "abstract-sst",
+          "paragraphs": 3,
+          "tables": 0,
+          "headingCentered": true,
+          "headingNumbered": false,
+          "keywordsFirstLineIndentPt": 0.0,
+          "keywordsLeadingWhitespace": false
+        }
+      ],
+      "elapsedSeconds": 127.318
+    },
+    {
+      "event": "report-check-start",
+      "elapsedSeconds": 127.319
+    },
+    {
+      "event": "report-check",
+      "result": {
+        "status": "passed",
+        "tables": 32,
+        "figures": 10,
+        "numberedTables": 31,
+        "equations": 10,
+        "equationNumbers": [
+          "1-1",
+          "1-2",
+          "1-3",
+          "2-1",
+          "2-2",
+          "4-1",
+          "A-1",
+          "A-2",
+          "A-3",
+          "B-1"
+        ],
+        "nativeTextRuns": 1994,
+        "nativeScriptRuns": 227,
+        "chaptersVerified": 15,
+        "inlineMathTypeObjects": 0,
+        "nativeWordEquations": 0
+      },
+      "elapsedSeconds": 138.547
+    },
+    {
+      "event": "pdf-export-start",
+      "elapsedSeconds": 138.549
+    },
+    {
+      "event": "pdf-export-finished",
+      "elapsedSeconds": 168.305
+    },
+    {
+      "event": "package-check",
+      "mathTypeObjects": 10,
+      "ommlCount": 0,
+      "sha256": "d9a68bfc1486d1ce4ec706ef11c5be112461ce1867d8b0ba79ee5bf5d0c4752b",
+      "elapsedSeconds": 168.558
+    },
+    {
+      "event": "content-check",
+      "sourceTextRuns": 2366,
+      "tablesIncludingNested": 32,
+      "maximumTableDepth": 1,
+      "sourceImages": {
+        "assets/image1.png": "de14f9cc003768c27949c4e96d2ebc5f638ff49e1fdefaa3f9eca77e035640ef",
+        "assets/image2.png": "d800fa029d77a9c508eea9fa7468bf46da3f5c34229bf29fcfb2ef0ffa26f853",
+        "assets/image3.png": "c74ad0097011ec4381c5fecc88baa6064c0670c288b577d2be1a9e31811039c3",
+        "assets/image4.png": "877b501acea87a30a174e18159e84d3c46337ee852aaa9f068ba0b8528119c79",
+        "assets/image5.png": "4f57a03073fbfe5941f7258d3ed89471b4417ecc634f2af2a52cb2a3516acfef",
+        "assets/image6.png": "a242c35e9574bd1064730e974f91a8b76a6273a81b6a515533455d6a99ff9a6b",
+        "assets/image7.png": "5f20c89496b64ff9ceca56f28f43c3bff96f4fd728b2457c29e0fef6c5adaf17",
+        "assets/image8.png": "c42a33e707e383b31a9889024ab4b922abce6fe65dba408a384ec5091839e0e0",
+        "assets/image9.png": "57b4ea840bd205da3bec19f052621272b8e3e1d1b76ff476c4954fa36d3c3693",
+        "assets/image10.png": "db3164e0e17b75acbab35f97e006988817767caf74d13437586eee68eda8abaf"
+      },
+      "fields": 158,
+      "elapsedSeconds": 168.652
+    },
+    {
+      "event": "pdf-check",
+      "pages": 52,
+      "sha256": "21b61420e19fd7e6fa47c27babd78181f2d253103bbf321dd51e0b464754d354",
+      "textWorkers": 4,
+      "elapsedSeconds": 169.825
+    },
+    {
+      "event": "report-pdf-check",
+      "result": {
+        "status": "passed",
+        "pages": 52,
+        "requiredSnippets": 21,
+        "staleNumbering": 0
+      },
+      "elapsedSeconds": 169.827
+    },
+    {
+      "event": "finished",
+      "status": "passed_automation_visual_review_pending",
+      "seconds": 169.838,
+      "elapsedSeconds": 169.838
+    }
+  ]
+}

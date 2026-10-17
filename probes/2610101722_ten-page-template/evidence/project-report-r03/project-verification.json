@@ -1,0 +1,109 @@
+{
+  "baseline": {
+    "pages": 12,
+    "bodyStartsOnPage": 3,
+    "bodyPages": 10,
+    "math": 6,
+    "tables": 5,
+    "figures": 2,
+    "footnotes": 1,
+    "contentControls": 5,
+    "toc": 1,
+    "hyperlinks": 15,
+    "orientations": [
+      0,
+      0,
+      0,
+      1,
+      0
+    ],
+    "headingLevels": [
+      1,
+      2,
+      3
+    ],
+    "headingNumbers": [
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6",
+      "7",
+      "8",
+      "9"
+    ],
+    "independentLists": [
+      [
+        "1.",
+        "2.",
+        "3."
+      ],
+      [
+        "1.",
+        "2.",
+        "3."
+      ]
+    ],
+    "longTableRows": 41,
+    "tablePages": [
+      9,
+      10
+    ]
+  },
+  "allMathEdit": {
+    "passed": true,
+    "before": [
+      "\r𝑖\r𝐿\r\r𝑡\r=\r𝐼\r0\r+𝛥𝑖\rsin\r\r𝜔𝑡\r\r",
+      "𝐻\r𝑠\r=\r1\r𝐿𝐶\r𝑠\r2\r+𝑅𝐶𝑠+1\r",
+      "𝐸=\r0\r𝑇\r𝑣\r𝑡\r𝑖\r𝑡\rⅆ𝑡\r",
+      "𝐀=\r\r0\r1\r−\r𝜔\r0\r2\r\r−2𝜁\r𝜔\r0\r\r\r",
+      "𝑢\r𝑡\r=\r\r\r𝑈\rdc\r,\r𝑡≥0\r0,\r𝑡<0\r\r",
+      "\r\r𝑣\r𝐿\r&=𝐿\rⅆ\r𝑖\r𝐿\r\rⅆ𝑡\r\r\r𝑖\r𝐶\r&=𝐶\rⅆ\r𝑣\r𝐶\r\rⅆ𝑡\r\r"
+    ],
+    "afterReopen": [
+      "\r𝑖\r𝐿\r\r𝑡\r=\r𝐼\r1\r+𝛥𝑖\rsin\r\r𝜔𝑡\r\r",
+      "𝐻\r𝑠\r=\r1\r𝐿𝐶\r𝑠\r2\r+𝑅𝐶𝑠+2\r",
+      "𝐸=\r0\r𝑆\r𝑣\r𝑡\r𝑖\r𝑡\rⅆ𝑡\r",
+      "𝐀=\r\r0\r2\r−\r𝜔\r0\r2\r\r−2𝜁\r𝜔\r0\r\r\r",
+      "𝑢\r𝑡\r=\r\r\r𝑈\rdc\r,\r𝑡≥1\r0,\r𝑡<0\r\r",
+      "\r\r𝑤\r𝐿\r&=𝐿\rⅆ\r𝑖\r𝐿\r\rⅆ𝑡\r\r\r𝑖\r𝐶\r&=𝐶\rⅆ\r𝑣\r𝐶\r\rⅆ𝑡\r\r"
+    ],
+    "structurePreserved": true
+  },
+  "insertFormula": {
+    "passed": true,
+    "equationSequence": [
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6"
+    ],
+    "fractionReferences": [
+      "2",
+      "2"
+    ],
+    "mathCount": 7
+  },
+  "appendRows": {
+    "passed": true,
+    "addedRows": 15,
+    "rows": 56,
+    "pages": 13,
+    "tablePages": [
+      9,
+      10,
+      11
+    ],
+    "repeatHeader": true,
+    "allRowsUnsplit": true
+  },
+  "review": {
+    "passed": true,
+    "revisions": 2,
+    "comments": 1,
+    "revisionControl": "版本  R1（复核副本）"
+  }
+}

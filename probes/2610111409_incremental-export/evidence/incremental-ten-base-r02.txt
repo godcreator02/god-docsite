@@ -1,0 +1,26 @@
+{"event": "start", "template": "D:\\unitfolders\\nb9zj-word-conversion-lab\\word-conversion-lab\\probes\\2026-10-11-incremental-export\\fixture\\template.dotx", "templateSha256": "2d645df23ecd1ee6f40d7da29854435139ff9d77a490f29c5051b6960bf909c4", "elapsedSeconds": 0.343}
+{"event": "compose-start", "elapsedSeconds": 4.263}
+{"event": "draft-saved", "equations": 2, "elapsedSeconds": 23.532}
+{"event": "mathtype-functionality", "full": 1, "mode": 2, "dll": "C:\\Program Files (x86)\\MathType\\MathPage\\64\\MathPage.wll", "elapsedSeconds": 23.905}
+{"event": "write-tex", "stage": "DR_f9cd45bd8852ca66d7e672693774", "returnCode": 0, "text": "$P=VI$", "elapsedSeconds": 31.039}
+{"event": "read-tex", "stage": "DR_f9cd45bd8852ca66d7e672693774", "returnCode": 0, "text": "$P=VI$", "matchesExpected": true, "elapsedSeconds": 31.054}
+{"event": "close-ole", "stage": "DR_f9cd45bd8852ca66d7e672693774", "returnCode": 0, "elapsedSeconds": 31.287}
+{"event": "equation-created", "id": "DR_f9cd45bd8852ca66d7e672693774", "inline": false, "widthPt": 34.900001525878906, "heightPt": 13.850000381469727, "elapsedSeconds": 31.636}
+{"event": "write-tex", "stage": "DR_2b155d95e9fbb5255560dd867f0c", "returnCode": 0, "text": "$E=mc^2$", "elapsedSeconds": 32.737}
+{"event": "read-tex", "stage": "DR_2b155d95e9fbb5255560dd867f0c", "returnCode": 0, "text": "$E=mc^2$", "matchesExpected": true, "elapsedSeconds": 32.742}
+{"event": "close-ole", "stage": "DR_2b155d95e9fbb5255560dd867f0c", "returnCode": 0, "elapsedSeconds": 32.905}
+{"event": "equation-created", "id": "DR_2b155d95e9fbb5255560dd867f0c", "inline": false, "widthPt": 42.099998474121094, "heightPt": 16.049999237060547, "elapsedSeconds": 33.239}
+{"event": "read-tex", "stage": "reopened-DR_f9cd45bd8852ca66d7e672693774", "returnCode": 0, "text": "$P=VI$", "matchesExpected": true, "elapsedSeconds": 39.468}
+{"event": "close-ole", "stage": "reopened-DR_f9cd45bd8852ca66d7e672693774", "returnCode": 0, "elapsedSeconds": 39.658}
+{"event": "read-tex", "stage": "reopened-DR_2b155d95e9fbb5255560dd867f0c", "returnCode": 0, "text": "$E=mc^2$", "matchesExpected": true, "elapsedSeconds": 41.994}
+{"event": "close-ole", "stage": "reopened-DR_2b155d95e9fbb5255560dd867f0c", "returnCode": 0, "elapsedSeconds": 42.155}
+{"event": "mathtype-reopen", "verified": 2, "elapsedSeconds": 42.318}
+{"event": "terminate-api", "returnCode": 0, "elapsedSeconds": 42.497}
+{"event": "document-check", "pages": 10, "mathTypeObjects": 2, "ommlCount": 0, "tables": 1, "figures": 1, "footnotes": 0, "toc": 1, "contentControls": 5, "elapsedSeconds": 55.285}
+{"event": "report-check-start", "elapsedSeconds": 55.287}
+{"event": "report-check", "result": {"status": "passed", "pages": 10}, "elapsedSeconds": 55.304}
+{"event": "pdf-export-start", "elapsedSeconds": 55.305}
+{"event": "pdf-export-finished", "elapsedSeconds": 58.852}
+{"event": "package-check", "mathTypeObjects": 2, "ommlCount": 0, "sha256": "d91d5d7101560640794b2fcd0f4ba3e6f1d23ce73922cd128cf4f9d38dec93ac", "elapsedSeconds": 59.065}
+{"event": "exception", "detail": "Traceback (most recent call last):\n  File \"D:\\unitfolders\\nb9zj-word-conversion-lab\\word-conversion-lab\\probes\\2026-10-11-incremental-export\\engine\\docreport\\__main__.py\", line 172, in build\n    record('content-check', **content_state(destination, content, directory))\n                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"D:\\unitfolders\\nb9zj-word-conversion-lab\\word-conversion-lab\\probes\\2026-10-11-incremental-export\\engine\\docreport\\verify.py\", line 146, in content_state\n    raise RuntimeError('Source image bytes are missing or transformed in DOCX.')\nRuntimeError: Source image bytes are missing or transformed in DOCX.\n", "elapsedSeconds": 59.077}
+docreport: Source image bytes are missing or transformed in DOCX.

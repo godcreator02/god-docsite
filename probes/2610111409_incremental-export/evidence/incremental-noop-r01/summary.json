@@ -1,0 +1,34 @@
+{
+  "runs": [
+    {
+      "mode": "reuse",
+      "seconds": 0.31751530000474304,
+      "wordLaunched": false,
+      "evidenceInheritedFrom": "D:\\unitfolders\\nb9zj-word-conversion-lab\\word-conversion-lab\\out\\incremental-ten-base-r03",
+      "outputHashesEqual": true
+    },
+    {
+      "mode": "reuse",
+      "seconds": 0.2634136000124272,
+      "wordLaunched": false,
+      "evidenceInheritedFrom": "D:\\unitfolders\\nb9zj-word-conversion-lab\\word-conversion-lab\\out\\incremental-ten-base-r03",
+      "outputHashesEqual": true
+    },
+    {
+      "mode": "reuse",
+      "seconds": 0.28012130002025515,
+      "wordLaunched": false,
+      "evidenceInheritedFrom": "D:\\unitfolders\\nb9zj-word-conversion-lab\\word-conversion-lab\\out\\incremental-ten-base-r03",
+      "outputHashesEqual": true
+    },
+    {
+      "mode": "reuse",
+      "seconds": 0.24943460000213236,
+      "wordLaunched": false,
+      "evidenceInheritedFrom": "D:\\unitfolders\\nb9zj-word-conversion-lab\\word-conversion-lab\\out\\incremental-ten-base-r03",
+      "outputHashesEqual": true
+    }
+  ],
+  "medianSeconds": 0.27176745001634117,
+  "passed": true
+}

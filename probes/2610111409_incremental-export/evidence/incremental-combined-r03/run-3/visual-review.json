@@ -1,0 +1,31 @@
+{
+  "status": "passed",
+  "pdfSha256": "1467e009f7fe062f2f8fd6e53fb79b3c8f99c67c549db8f361d6814d118831f3",
+  "pagesReviewed": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10
+  ],
+  "method": "All ten pages viewed in two numbered contact sheets at 110 dpi. Combined-update page 3 additionally viewed at full resolution.",
+  "blockingFindings": [],
+  "scope": "This exact PDF only; no claim of pixel identity to the baseline.",
+  "pixelDifferencesFromBaseline": [
+    3,
+    4,
+    5,
+    7,
+    8,
+    9,
+    10
+  ],
+  "fullResolutionPages": [
+    3
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "wordVersion": "16.0",
+  "wordBuild": "16.0.14334",
+  "startupSeconds": 1.7381586000265088,
+  "generationSeconds": 12.224001199996565,
+  "mathCount": 6,
+  "mathInput": "Word native UnicodeMath BuildUp",
+  "controller": "Python + pywin32",
+  "pywin32Version": "312",
+  "pythonExecutable": "D:\\unitfolders\\nb9zj-word-conversion-lab\\word-conversion-lab\\.venv\\Scripts\\python.exe"
+}

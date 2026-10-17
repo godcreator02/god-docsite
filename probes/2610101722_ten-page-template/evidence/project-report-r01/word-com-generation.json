@@ -1,0 +1,17 @@
+{
+  "profile": "project-report-v1",
+  "source": "fixtures/canonical.json#projectReport",
+  "sourceSha256": "b4545140d99c39c691185c8a8db039553332165350adf14f83a6304878910749",
+  "template": "templates/project-report.dotx",
+  "templateSha256": "b342e84a922bb22af45c8467d32903657568e4b413163fc094ce08c2bcc0ac61",
+  "templateUnchanged": true,
+  "wordVersion": "16.0",
+  "wordBuild": "16.0.14334",
+  "startupSeconds": 2.4442097999854013,
+  "generationSeconds": 35.021231899998384,
+  "mathCount": 6,
+  "mathInput": "Word native UnicodeMath BuildUp",
+  "controller": "Python + pywin32",
+  "pywin32Version": "312",
+  "pythonExecutable": "D:\\unitfolders\\nb9zj-word-conversion-lab\\word-conversion-lab\\.venv\\Scripts\\python.exe"
+}

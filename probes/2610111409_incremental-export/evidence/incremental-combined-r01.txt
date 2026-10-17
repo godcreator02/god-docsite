@@ -1,0 +1,12 @@
+Traceback (most recent call last):
+  File "D:\unitfolders\nb9zj-word-conversion-lab\word-conversion-lab\probes\2026-10-11-incremental-export\patch.py", line 64, in <module>
+    if __name__=='__main__':main()
+                            ^^^^^^
+  File "D:\unitfolders\nb9zj-word-conversion-lab\word-conversion-lab\probes\2026-10-11-incremental-export\patch.py", line 46, in main
+    result=update(directory,args.baseline.resolve(),output/f'run-{i}')
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\unitfolders\nb9zj-word-conversion-lab\word-conversion-lab\probes\2026-10-11-incremental-export\common.py", line 309, in update
+    content_state(output/'report.docx',content,directory)
+  File "D:\unitfolders\nb9zj-word-conversion-lab\word-conversion-lab\probes\2026-10-11-incremental-export\engine\docreport\verify.py", line 142, in content_state
+    raise RuntimeError(f'Expected {expected} tables including nested tables, found {tables}.')
+RuntimeError: Expected 1 tables including nested tables, found 2.

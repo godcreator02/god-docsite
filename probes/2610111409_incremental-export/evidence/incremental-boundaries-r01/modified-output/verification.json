@@ -1,0 +1,189 @@
+{
+  "status": "passed_automation_visual_review_pending",
+  "startedAt": "2026-10-11T05:56:43.817012+00:00",
+  "report": "D:\\unitfolders\\nb9zj-word-conversion-lab\\word-conversion-lab\\probes\\2026-10-11-incremental-export\\fixture",
+  "visualReview": "pending",
+  "events": [
+    {
+      "event": "start",
+      "template": "D:\\unitfolders\\nb9zj-word-conversion-lab\\word-conversion-lab\\probes\\2026-10-11-incremental-export\\fixture\\template.dotx",
+      "templateSha256": "223c75d27f9d38f1b03ea233b6611c8bec6dbdc249290cf01879e01f6e8778fc",
+      "elapsedSeconds": 0.31
+    },
+    {
+      "event": "compose-start",
+      "elapsedSeconds": 6.325
+    },
+    {
+      "event": "draft-saved",
+      "equations": 2,
+      "elapsedSeconds": 29.436
+    },
+    {
+      "event": "mathtype-functionality",
+      "full": 1,
+      "mode": 2,
+      "dll": "C:\\Program Files (x86)\\MathType\\MathPage\\64\\MathPage.wll",
+      "elapsedSeconds": 29.903
+    },
+    {
+      "event": "write-tex",
+      "stage": "DR_f9cd45bd8852ca66d7e672693774",
+      "returnCode": 0,
+      "text": "$P=VI$",
+      "elapsedSeconds": 37.432
+    },
+    {
+      "event": "read-tex",
+      "stage": "DR_f9cd45bd8852ca66d7e672693774",
+      "returnCode": 0,
+      "text": "$P=VI$",
+      "matchesExpected": true,
+      "elapsedSeconds": 37.44
+    },
+    {
+      "event": "close-ole",
+      "stage": "DR_f9cd45bd8852ca66d7e672693774",
+      "returnCode": 0,
+      "elapsedSeconds": 37.633
+    },
+    {
+      "event": "equation-created",
+      "id": "DR_f9cd45bd8852ca66d7e672693774",
+      "inline": false,
+      "widthPt": 34.900001525878906,
+      "heightPt": 13.850000381469727,
+      "elapsedSeconds": 37.839
+    },
+    {
+      "event": "write-tex",
+      "stage": "DR_2b155d95e9fbb5255560dd867f0c",
+      "returnCode": 0,
+      "text": "$E=mc^2$",
+      "elapsedSeconds": 39.028
+    },
+    {
+      "event": "read-tex",
+      "stage": "DR_2b155d95e9fbb5255560dd867f0c",
+      "returnCode": 0,
+      "text": "$E=mc^2$",
+      "matchesExpected": true,
+      "elapsedSeconds": 39.034
+    },
+    {
+      "event": "close-ole",
+      "stage": "DR_2b155d95e9fbb5255560dd867f0c",
+      "returnCode": 0,
+      "elapsedSeconds": 39.11
+    },
+    {
+      "event": "equation-created",
+      "id": "DR_2b155d95e9fbb5255560dd867f0c",
+      "inline": false,
+      "widthPt": 42.099998474121094,
+      "heightPt": 16.049999237060547,
+      "elapsedSeconds": 39.331
+    },
+    {
+      "event": "read-tex",
+      "stage": "reopened-DR_f9cd45bd8852ca66d7e672693774",
+      "returnCode": 0,
+      "text": "$P=VI$",
+      "matchesExpected": true,
+      "elapsedSeconds": 44.644
+    },
+    {
+      "event": "close-ole",
+      "stage": "reopened-DR_f9cd45bd8852ca66d7e672693774",
+      "returnCode": 0,
+      "elapsedSeconds": 44.771
+    },
+    {
+      "event": "read-tex",
+      "stage": "reopened-DR_2b155d95e9fbb5255560dd867f0c",
+      "returnCode": 0,
+      "text": "$E=mc^2$",
+      "matchesExpected": true,
+      "elapsedSeconds": 46.462
+    },
+    {
+      "event": "close-ole",
+      "stage": "reopened-DR_2b155d95e9fbb5255560dd867f0c",
+      "returnCode": 0,
+      "elapsedSeconds": 46.636
+    },
+    {
+      "event": "mathtype-reopen",
+      "verified": 2,
+      "elapsedSeconds": 46.806
+    },
+    {
+      "event": "terminate-api",
+      "returnCode": 0,
+      "elapsedSeconds": 46.964
+    },
+    {
+      "event": "document-check",
+      "pages": 10,
+      "mathTypeObjects": 2,
+      "ommlCount": 0,
+      "tables": 1,
+      "figures": 1,
+      "footnotes": 0,
+      "toc": 1,
+      "contentControls": 5,
+      "elapsedSeconds": 59.044
+    },
+    {
+      "event": "report-check-start",
+      "elapsedSeconds": 59.046
+    },
+    {
+      "event": "report-check",
+      "result": {
+        "status": "passed",
+        "pages": 10
+      },
+      "elapsedSeconds": 59.063
+    },
+    {
+      "event": "pdf-export-start",
+      "elapsedSeconds": 59.064
+    },
+    {
+      "event": "pdf-export-finished",
+      "elapsedSeconds": 62.073
+    },
+    {
+      "event": "package-check",
+      "mathTypeObjects": 2,
+      "ommlCount": 0,
+      "sha256": "1eec5726100eb88dedc51f3acbc4f998b920fcbc09eb40d742323cd18aa4430f",
+      "elapsedSeconds": 62.325
+    },
+    {
+      "event": "content-check",
+      "sourceTextRuns": 78,
+      "tablesIncludingNested": 1,
+      "maximumTableDepth": 1,
+      "sourceImages": {
+        "assets/architecture.png": "d449256d773e841a3c826638d65a1790fa023dd4d9b825fd05502500e7f9d1a0"
+      },
+      "fields": 63,
+      "elapsedSeconds": 62.35
+    },
+    {
+      "event": "pdf-check",
+      "pages": 10,
+      "sha256": "6a8ca68c9327cfca0ccc18f9b1f2c21f9eb0e6f89d6c60b39732dd4a24459391",
+      "textWorkers": 1,
+      "elapsedSeconds": 62.479
+    },
+    {
+      "event": "finished",
+      "status": "passed_automation_visual_review_pending",
+      "seconds": 62.491,
+      "elapsedSeconds": 62.491
+    }
+  ]
+}

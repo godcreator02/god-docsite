@@ -4,3 +4,12 @@ dist/
 
 # 真实项目的内容不进公开仓：probe 里的两页 SST 页面
 /probes/2609251500_vite-react-pages/site/pages/sst/
+# 同理：OMML 实验的 SST 报告节选只留在本机，导出控件 ReportExport.tsx 不是报告内容
+/probes/2610101631_collab-word-omml/site/pages/report/sst-sample/*
+!/probes/2610101631_collab-word-omml/site/pages/report/sst-sample/ReportExport.tsx
+# word-conversion-lab 两个实验用的 SST 报告原稿、全文输入与抽出的正文
+/probes/2610101502_existing-docx-restyle/input/source.docx
+/probes/2610101502_existing-docx-restyle/evidence/sst-restyle-20261010-150201/pass-1/page-text.json
+/probes/2610101502_existing-docx-restyle/evidence/sst-restyle-20261010-150201/pass-2/content-mismatch.json
+/probes/2610111327_export-performance/full-input/content.json
+/probes/2610111327_export-performance/full-input/assets/

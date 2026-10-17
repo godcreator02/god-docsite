@@ -1,0 +1,26 @@
+{
+  "chapter-two": {
+    "pageBreakBefore": true
+  },
+  "fig-stable": {
+    "widthMm": 90
+  },
+  "chapter-3": {
+    "pageBreakBefore": true
+  },
+  "chapter-4": {
+    "pageBreakBefore": true
+  },
+  "chapter-5": {
+    "pageBreakBefore": true
+  },
+  "chapter-6": {
+    "pageBreakBefore": true
+  },
+  "chapter-7": {
+    "pageBreakBefore": true
+  },
+  "chapter-8": {
+    "pageBreakBefore": true
+  }
+}

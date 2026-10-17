@@ -1,0 +1,190 @@
+{
+  "baselineSha256": "cbf3a05e3c2402115ab1831aedb953bfb072e5c95fbda970168522544c544305",
+  "returnedSha256": "15c6c84ad72dabe7cd0adb7e51b2ff956f6a12988809d0a4255ef4f26e096758",
+  "drawingComparisons": [
+    {
+      "drawingId": "1",
+      "operation": "change",
+      "imageBytesChanged": false,
+      "layoutChanged": true,
+      "sizeChanged": true,
+      "aspectRatioChanged": true,
+      "before": {
+        "sourceIds": [],
+        "part": "word/media/image2.png",
+        "sha256": "d449256d773e841a3c826638d65a1790fa023dd4d9b825fd05502500e7f9d1a0",
+        "drawingId": "1",
+        "name": "图片 1",
+        "layout": {
+          "kind": "inline",
+          "extentEmu": {
+            "cx": 3240000,
+            "cy": 1113929
+          },
+          "frameAttributes": {
+            "distT": "0",
+            "distB": "0",
+            "distL": "0",
+            "distR": "0"
+          },
+          "placement": [
+            {
+              "tag": "{http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing}effectExtent",
+              "attributes": {
+                "b": "0",
+                "l": "0",
+                "r": "0",
+                "t": "0"
+              },
+              "text": "",
+              "children": []
+            }
+          ],
+          "transforms": [
+            {
+              "tag": "{http://schemas.openxmlformats.org/drawingml/2006/main}xfrm",
+              "attributes": {},
+              "text": "",
+              "children": [
+                {
+                  "tag": "{http://schemas.openxmlformats.org/drawingml/2006/main}off",
+                  "attributes": {
+                    "x": "0",
+                    "y": "0"
+                  },
+                  "text": "",
+                  "children": []
+                },
+                {
+                  "tag": "{http://schemas.openxmlformats.org/drawingml/2006/main}ext",
+                  "attributes": {
+                    "cx": "3240000",
+                    "cy": "1113929"
+                  },
+                  "text": "",
+                  "children": []
+                }
+              ]
+            }
+          ],
+          "crops": []
+        },
+        "insideRevision": false
+      },
+      "after": {
+        "sourceIds": [],
+        "part": "word/media/image2.png",
+        "sha256": "d449256d773e841a3c826638d65a1790fa023dd4d9b825fd05502500e7f9d1a0",
+        "drawingId": "1",
+        "name": "图片 1",
+        "layout": {
+          "kind": "inline",
+          "extentEmu": {
+            "cx": 3835291,
+            "cy": 2042931
+          },
+          "frameAttributes": {
+            "distT": "0",
+            "distB": "0",
+            "distL": "0",
+            "distR": "0"
+          },
+          "placement": [
+            {
+              "tag": "{http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing}effectExtent",
+              "attributes": {
+                "b": "0",
+                "l": "0",
+                "r": "0",
+                "t": "0"
+              },
+              "text": "",
+              "children": []
+            }
+          ],
+          "transforms": [
+            {
+              "tag": "{http://schemas.openxmlformats.org/drawingml/2006/main}xfrm",
+              "attributes": {},
+              "text": "",
+              "children": [
+                {
+                  "tag": "{http://schemas.openxmlformats.org/drawingml/2006/main}off",
+                  "attributes": {
+                    "x": "0",
+                    "y": "0"
+                  },
+                  "text": "",
+                  "children": []
+                },
+                {
+                  "tag": "{http://schemas.openxmlformats.org/drawingml/2006/main}ext",
+                  "attributes": {
+                    "cx": "3844177",
+                    "cy": "2047664"
+                  },
+                  "text": "",
+                  "children": []
+                }
+              ]
+            }
+          ],
+          "crops": []
+        },
+        "insideRevision": false
+      }
+    }
+  ],
+  "wordMeasurements": {
+    "baseline": {
+      "pictures": [
+        {
+          "widthPt": 255.10000610351562,
+          "heightPt": 87.69999694824219,
+          "widthCm": 8.999361326429579,
+          "heightCm": 3.093861003451877,
+          "paragraphAlignment": 1,
+          "cropPt": {
+            "CropLeft": 0.0,
+            "CropRight": 0.0,
+            "CropTop": 0.0,
+            "CropBottom": 0.0
+          }
+        }
+      ],
+      "revisions": 0,
+      "comments": 0,
+      "trackRevisions": true,
+      "protectionType": 0
+    },
+    "returned": {
+      "pictures": [
+        {
+          "widthPt": 301.95001220703125,
+          "heightPt": 160.85000610351562,
+          "widthCm": 10.652125430636936,
+          "heightCm": 5.674430770874023,
+          "paragraphAlignment": 1,
+          "cropPt": {
+            "CropLeft": 0.0,
+            "CropRight": 0.0,
+            "CropTop": 0.0,
+            "CropBottom": 0.0
+          }
+        }
+      ],
+      "revisions": 3,
+      "comments": 0,
+      "trackRevisions": true,
+      "protectionType": 0
+    }
+  },
+  "priorFormulaEvidence": "probes/2026-10-11-locked-review/evidence/locked-details-r01/details.json",
+  "boundary": "This verifies the single embedded inline DrawingML picture in this saved report, not arbitrary VML, grouped, linked, floating or chart objects. No source JSON mapping is inferred from a media hash.",
+  "policy": "Private read-only snapshot copies, no save, no unprotect, no MathType activation, no JSON mutation.",
+  "status": "geometry-confirmed-not-merged",
+  "regression": {
+    "beforeFix": "FAIL: reader records image bytes but omits display geometry",
+    "afterFix": "PASS: same image bytes + resized display detected; unchanged image has no change"
+  }
+}

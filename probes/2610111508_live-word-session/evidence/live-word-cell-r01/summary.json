@@ -1,0 +1,43 @@
+{
+  "status": "passed_automation_visual_review_pending",
+  "pages": 10,
+  "policy": "One document copy and one private Word instance. First edit plus three subsequent edits per case. Word stays open for all edits. No unchanged formula activation. Mutation includes changed-formula write and readback when applicable. Save waits for the background queue. Final reopen acceptance is outside interactive timings.",
+  "startup": {
+    "copyOnceSeconds": 0.0009951999818440527,
+    "launchAndOpenOnceSeconds": 4.795497399987653
+  },
+  "environment": {
+    "wordVersion": "16.0",
+    "wordBuild": "16.0.14334",
+    "wordPid": 96760,
+    "backgroundPagination": true,
+    "backgroundSave": true
+  },
+  "medians": {
+    "cell": {
+      "editSeconds": 0.3296868499892298,
+      "saveSeconds": 0.2536500499845715,
+      "refreshSeconds": 3.3569245000107912,
+      "saveAfterRefreshSeconds": 0.24015540000982583,
+      "pdfSeconds": 1.3925167999987025,
+      "editToPdfSeconds": 5.652858849993208,
+      "staticCheckSeconds": 0.1283489500056021
+    }
+  },
+  "finalAcceptanceSeconds": 2.8643956999876536,
+  "finalDocument": {
+    "pages": 10,
+    "mathTypeObjects": 2,
+    "ommlCount": 0,
+    "tables": 1,
+    "figures": 1,
+    "footnotes": 0,
+    "toc": 1,
+    "contentControls": 5
+  },
+  "finalHashes": {
+    "report.docx": "185fc33c878abb05ab1327c6aaddae9c414fc59f8d2452dc380c30a71829d3d7",
+    "report.pdf": "602c97cd28371bc2636489c9dbd0e680845f6f52546ee1d4a8b6556c33bec80f"
+  },
+  "baselineUnchanged": true
+}

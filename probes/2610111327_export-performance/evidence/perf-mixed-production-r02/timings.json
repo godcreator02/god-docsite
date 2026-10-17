@@ -1,0 +1,13 @@
+{
+  "mode": "production",
+  "python": "D:\\unitfolders\\nb9zj-word-conversion-lab\\word-conversion-lab\\.venv\\Scripts\\python.exe",
+  "fixtureSha256": "aab9a34beab1ae0fdb30729f6bd44e8532fa73a4968c44e1f6e5cf9df6f758dd",
+  "templateSha256": "2d645df23ecd1ee6f40d7da29854435139ff9d77a490f29c5051b6960bf909c4",
+  "budgetSeconds": 30.0,
+  "word": {
+    "version": "16.0",
+    "build": "16.0.14334"
+  },
+  "rendererSha256": "5298134d3c2413f0ac062b62b8552c19a687f64af3315966713058c50f11e92f",
+  "error": "Traceback (most recent call last):\n  File \"D:\\unitfolders\\nb9zj-word-conversion-lab\\word-conversion-lab\\probes\\2026-10-11-export-performance\\probe.py\", line 57, in main\n    composer = cls(doc, content, HERE)\n               ^^^^^^^^^^^^^^^^^^^^^^^\n  File \"D:\\unitfolders\\nb9zj-word-conversion-lab\\word-conversion-lab\\src\\docreport\\compose.py\", line 211, in __init__\n    self.context = validate_content(content, directory)\n                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"D:\\unitfolders\\nb9zj-word-conversion-lab\\word-conversion-lab\\src\\docreport\\content.py\", line 83, in validate_content\n    raise ValueError(f\"content.json/{path}: {error.message}\")\nValueError: content.json/blocks/3: {'type': 'table', 'id': 'controls', 'numbered': True, 'caption': [{'type': 'text', 'text': 'controls'}], 'columns': [{'id': 'controls-c0'}, {'id': 'controls-c1'}], 'headerRows': 0, 'rows': [{'id': 'controls-r0', 'cells': [{'id': 'c00', 'blocks': [{'type': 'paragraph', 'id': 'c00p', 'content': [{'type': 'text', 'text': '前\\t后'}]}]}, {'id': 'c01', 'blocks': [{'type': 'paragraph', 'id': 'c01p', 'content': [{'type': 'text', 'text': '第一行'}, {'type': 'break'}, {'type': 'text', 'text': '第二行'}]}]}]}]} is not valid under any of the given schemas\n"
+}

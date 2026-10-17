@@ -1,0 +1,35 @@
+---
+born-at: 2026-10-10T20:32
+type: evidence
+parent: [2026-09-03-god-live-doc]
+label: 正式入口回归
+domain: 技术验证
+---
+
+## 背景
+
+用户批准将 Word 与 MathType 的实验实现提取为正式引擎，每份报告独立维护内容与布局。重构后的代码需要重新生成、保存重开并逐页验收，不能直接继承旧探针的通过结论。
+
+## 结论与边界
+
+正式入口独立生成了十二页示例报告，自动检查、保存重开和全部十二页显示通过；六个 MathType OLE、零个 OMML、五张表、两幅图与十页正文符合报告专属检查。按相同 110 dpi 渲染后，十二页均与已验收的 MathType 样稿逐像素一致。该结论证明本次引擎拆分保留了这份示例的行为与显示，不代表任意报告、公式写法或平台通过。
+
+pivots-from:: [正式流程](2026-10-10-formal-report-workflow.md)
+
+pivots-from:: [MathType实测](2026-10-10-mathtype-report-evidence.md)
+
+## 经过
+
+运行使用仓内虚拟环境与正式命令 `python -m docreport build`，正式引擎不导入 probe。内容和专属检查来自 `reports/demo-report/`；通用引擎持有 Word、填入 MathType、更新域、保存重开与导出 PDF。七项单元检查通过，完整 Word 运行另行留下证据。
+
+在不保存的独立检查副本中，在第一条行间公式前插入编号段后，原编号变为 `3-2` 至 `3-6`，两处引用均更新为 `3-2`；删除插入段后，编号恢复 `3-1` 至 `3-5`，引用恢复 `3-1`。交付稿没有保留检查插入的内容。
+
+首轮新增的删除校验未通过：折叠 Range 定位到错误段落。改为定位插入行的唯一文本后重新完整运行，第二轮通过。首轮失败记录与第二轮通过记录均保留，没有覆盖失败结果。
+
+## 依据
+
+复现材料固定在 `probes/2610102028_formal-pipeline-regression/`。正式工作树源码按 `input/archive-manifest.json` 的 SHA-256 冻结，记录中的基础 Git 提交不冒充本次正式实现的提交。
+
+`evidence/formal-r02/verification.json` 记录自动检查和编辑副本行为，`visual-review.json` 记录逐页验收，`pixel-comparison.json` 记录十二页像素一致，`manifest.json` 记录输入、环境和产物哈希。首轮失败与修复核对分别在 `evidence/formal-r01/verification.json` 和 `numbering-repair-check.json`。
+
+通过稿 PDF SHA-256 为 `cf9987f482051b560cfdaa950a17bfdb7fd8cd4a8bb0a8d27177791ede7b5526`。自动记录仍保留 `passed_automation_visual_review_pending`，页面通过由独立的 `visual-review.json` 证明，两份证据职责分开。

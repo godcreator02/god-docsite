@@ -1,0 +1,53 @@
+         12054864 function calls (10842888 primitive calls) in 164.077 seconds
+
+   Ordered by: cumulative time
+   List reduced from 2009 to 45 due to restriction <45>
+
+   ncalls  tottime  percall  cumtime  percall filename:lineno(function)
+        1    0.147    0.147  164.083  164.083 __main__.py:100(build)
+        1    0.069    0.069   82.537   82.537 __main__.py:48(<lambda>)
+        1    0.749    0.749   78.315   78.315 compose.py:609(build)
+     3363   69.693    0.021   69.693    0.021 {method 'InvokeTypes' of 'PyIDispatch' objects}
+     70/1    0.018    0.000   63.221   63.221 compose.py:775(blocks)
+    95/16    1.937    0.020   63.221    3.951 compose.py:574(blocks)
+    69/15    1.443    0.021   60.610    4.041 compose.py:379(section)
+        1    0.017    0.017   40.110   40.110 mathtype.py:236(fill_and_reopen)
+     2170    0.016    0.000   35.816    0.017 __init__.py:586(__getattr__)
+     2170    0.026    0.000   35.796    0.016 __init__.py:579(_ApplyTypes_)
+      447   22.832    0.051   27.165    0.061 automation.py:831(_invoke)
+      124    0.527    0.004   23.399    0.189 compose.py:798(insert_body)
+      116    0.002    0.000   19.710    0.170 lazybind.py:159(caller)
+     1667    0.235    0.000   18.314    0.011 __init__.py:108(Dispatch)
+     1709   18.075    0.011   18.075    0.011 {method 'QueryInterface' of 'PyIUnknown' objects}
+     1667    0.027    0.000   18.072    0.011 __init__.py:21(__WrapDispatch)
+     1667    0.016    0.000   17.757    0.011 __init__.py:524(__init__)
+194791/109513    1.321    0.000   17.255    0.000 {built-in method builtins.next}
+       12    1.203    0.100   16.028    1.336 compose.py:545(list_node)
+      124    0.001    0.000   14.681    0.118 00020905-0000-0000-C000-000000000046x0x8x7.py:18571(InsertXML)
+     2311    0.006    0.000   14.659    0.006 __init__.py:616(_get_good_object_)
+     2296    0.004    0.000   14.649    0.006 __init__.py:610(_get_good_single_object_)
+       10    1.063    0.106   13.547    1.355 mathtype.py:205(operate_equation)
+     2170    0.004    0.000   12.862    0.006 __init__.py:605(_get_good_object_)
+      165    0.529    0.003   12.144    0.074 compose.py:779(flush)
+       55    0.007    0.000   11.861    0.216 compose.py:810(rich_paragraph)
+  140/139    0.000    0.000   11.723    0.084 contextlib.py:132(__enter__)
+      236    0.003    0.000   10.432    0.044 compose.py:239(point)
+  1577936    0.217    0.000   10.271    0.000 {built-in method builtins.getattr}
+      424    0.007    0.000   10.173    0.024 lazybind.py:134(__getattr__)
+      579    0.002    0.000   10.058    0.017 __init__.py:636(__getattr__)
+      110    0.004    0.000    9.922    0.090 compose.py:246(paragraph)
+        1    0.007    0.007    8.025    8.025 compose.py:734(finish)
+        1    2.599    2.599    8.018    8.018 compose.py:182(finish)
+        1    1.008    1.008    7.547    7.547 report.py:85(validate)
+        4    0.021    0.005    7.510    1.878 word.py:64(opened_document)
+       32    0.250    0.008    7.501    0.234 word.py:93(find_text)
+        1    0.319    0.319    7.501    7.501 word.py:102(refresh)
+      541    0.005    0.000    7.258    0.013 __init__.py:592(__setattr__)
+      541    7.253    0.013    7.253    0.013 {method 'Invoke' of 'PyIDispatch' objects}
+        2    0.000    0.000    6.816    3.408 00020905-0000-0000-C000-000000000046x0x8x7.py:9394(Open)
+        2    0.018    0.009    6.417    3.209 content.py:77(validate_content)
+       10    0.320    0.032    6.212    0.621 compose.py:462(figure_node)
+  96800/2    0.094    0.000    6.153    3.077 validators.py:350(iter_errors)
+  98644/2    0.117    0.000    6.153    3.077 _keywords.py:290(properties)
+
+

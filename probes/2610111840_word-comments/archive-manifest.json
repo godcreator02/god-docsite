@@ -1,0 +1,28 @@
+{
+  "status": "passed-local-comments-and-reply-readback",
+  "files": {
+    "evidence\\comment-readback-r01\\artifact-hashes.json": "28eef3dd6ae4b16968e49154f7ad37e4fa2ce6359be1a6950fa27a8889cb4bc5",
+    "evidence\\comment-readback-r01\\readback.json": "3e9e1974a3272513a4d3ae581f14453ec374ae6c7955abe2188e3854b2666fdc",
+    "evidence\\comment-readback-r01\\readback.snapshot.py": "f59f8446454ed09792c2fa4caf836e0fb4c0ac47bf6ce50a3fe3dfc43b7f9480",
+    "evidence\\comment-readback-r01\\reply-enumeration-issue.json": "08e59168db99d01aac259220484cac0aaa9e49dba68f46f9a7174778c4a10602",
+    "evidence\\comment-readback-r02\\artifact-hashes.json": "b09de1c35f8077b0ac02c89a8450dc2d74a38d2ee5ae7cb02d01211c7e9dfb29",
+    "evidence\\comment-readback-r02\\readback.json": "261a11eefa4291ff9c922941ae1d2d2dc5790bea4325acd28b9397438aa21b0a",
+    "evidence\\comment-readback-r02\\readback.snapshot.py": "4ed7f232d978a87647a002631811bdb493133729c08ced5e28c2cb71706cf387",
+    "evidence\\comment-readback-r03\\artifact-hashes.json": "4ef6a609e12394445641abbb64142ba7cb7bcf3a530e80788846a1e911ce8454",
+    "evidence\\comment-readback-r03\\interpretation.json": "9ac3462ffa64907bcb4d7df018036bfbfd89c8a0e7226b1cf27a070d0cc68d2d",
+    "evidence\\comment-readback-r03\\readback.json": "261a11eefa4291ff9c922941ae1d2d2dc5790bea4325acd28b9397438aa21b0a",
+    "evidence\\comment-readback-r03\\readback.snapshot.py": "998fb4633fefc34b02a57732b189735f7aae24228588172f5f5888128d3c5ad9",
+    "evidence\\comment-readback-r03\\report.md": "ca26f75cae5ff7dbbd7529f88ed0fc9c035ca9b1d6995a00bed1d2e9a7b3fdd8",
+    "evidence\\comment-ui-r01\\actions.json": "68322e1cb9b278b814124796ede82b2dd1fbb34ac9c3c7acf46c826b56c22ea1",
+    "evidence\\comment-ui-r01\\ui-input-issue.json": "87cbf26c66bef58604b81bf6ce9a41bba7aad582b1e72d9f356a4c68a3b79cf8",
+    "fixture\\baseline.docx": "15c6c84ad72dabe7cd0adb7e51b2ff956f6a12988809d0a4255ef4f26e096758",
+    "fixture\\commented.docx": "f96c74029e6fe67ad187d0c609d29e7c1165f931fd8c514a289c33451000a589",
+    "fixture\\content.json": "e1283549cedcc52f15b9c0128ce42bc01ce7aea4f95dba4934a744a09ec31be5",
+    "fixture\\session.json": "fef60f10d9e118d24adbfccc3dc733587fa909beb2e68cb079ef3d25474089c1",
+    "readback.py": "998fb4633fefc34b02a57732b189735f7aae24228588172f5f5888128d3c5ad9",
+    "README.md": "aa2ac38ee54588e28592edea056404f320e16f690389dccf24be4f0b5845d741",
+    "requirements.txt": "75d98410b556701a59f6caacfa41c88ae75d866d8d7159202741d7fd3a4996d3",
+    "word_session.py": "062bcc29152e4c5c5a4a13eaed1121a4f286639668170b5388ddd9777ece8b8f"
+  },
+  "policy": "Fixed DOCX inputs included; no unrelated clipboard text or unlock password archived; source JSON unchanged."
+}

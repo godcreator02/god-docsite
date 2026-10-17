@@ -1,0 +1,793 @@
+{
+  "archivedAt": "2026-10-10T20:19:55.425231+08:00",
+  "sourceRepo": "D:\\unitfolders\\nb9zj-word-conversion-lab\\word-conversion-lab",
+  "sourceCommit": "8e0f09da7836ffebe294fab94adaba7ca1bc7d52",
+  "mode": "mathtype",
+  "question": "能否通过 Word COM 和 MathType API 写入、整体替换公式，并自动按章编号？",
+  "conclusion": "r10 的分式整体替换和保存重开通过，自动编号 (1-1)/(1-2)/(2-1) 的插入、删除、换章测试通过。r06 保留“读回成功但画面追加”的反例。",
+  "limitations": "授权限制、追加写入、两个 OLE 残留等失败记录均保留。不是已有 OLE 内部覆盖接口已通过；整体替换仅实测分式。没有源码快照的 r03-r07 无法逐字复现。",
+  "originalRuns": [
+    "mathtype-20261010-r01",
+    "mathtype-20261010-r02",
+    "mathtype-20261010-r03",
+    "mathtype-20261010-r04",
+    "mathtype-20261010-r05",
+    "mathtype-20261010-r06",
+    "mathtype-20261010-r07",
+    "mathtype-20261010-r08",
+    "mathtype-20261010-r09",
+    "mathtype-20261010-r10"
+  ],
+  "historicalSourceRevisions": [
+    {
+      "commit": "cd8af689312faf416006c6e31d1a3f26dc770442",
+      "files": 15,
+      "snapshot": "input/history-source/cd8af689312faf416006c6e31d1a3f26dc770442"
+    },
+    {
+      "commit": "280fbecda993cc863cf3eb4089095b1e286b17c7",
+      "files": 15,
+      "snapshot": "input/history-source/280fbecda993cc863cf3eb4089095b1e286b17c7"
+    },
+    {
+      "commit": "8e0f09da7836ffebe294fab94adaba7ca1bc7d52",
+      "files": 15,
+      "snapshot": "input/history-source/8e0f09da7836ffebe294fab94adaba7ca1bc7d52"
+    }
+  ],
+  "inputFiles": [
+    {
+      "path": "input/history-source/280fbecda993cc863cf3eb4089095b1e286b17c7/fixtures/canonical.json",
+      "sha256": "c5a0fa88beccde3c90715cbdaaa742e6d17a6a903e0730ed591d7aa6f16c96e5",
+      "bytes": 47206
+    },
+    {
+      "path": "input/history-source/280fbecda993cc863cf3eb4089095b1e286b17c7/requirements.txt",
+      "sha256": "3069384b47d2c896dbafbb8c031d7cc7c1dcefddc3755cf7b18857f39b69dfc2",
+      "bytes": 219
+    },
+    {
+      "path": "input/history-source/280fbecda993cc863cf3eb4089095b1e286b17c7/routes/direct-docx/build.py",
+      "sha256": "f9960884cf9dccbb1a0cef2306714072722ac2be22e91f458efafffc21ef93bd",
+      "bytes": 3513
+    },
+    {
+      "path": "input/history-source/280fbecda993cc863cf3eb4089095b1e286b17c7/routes/pandoc/build.py",
+      "sha256": "808e6be2f107e38ce581638ff9d322fd0ce6d09333b9c5c1cf325e479ca7105e",
+      "bytes": 3609
+    },
+    {
+      "path": "input/history-source/280fbecda993cc863cf3eb4089095b1e286b17c7/routes/word-com/build.py",
+      "sha256": "6d48d870419b6082bd1061b104976ec368829d6e85b19929644c890f64fceb6b",
+      "bytes": 12655
+    },
+    {
+      "path": "input/history-source/280fbecda993cc863cf3eb4089095b1e286b17c7/routes/word-com/mathtype-probe.py",
+      "sha256": "85713a9f7e8600a0815ec2ccc372f8bae5c1ee68f954f165cb1ac5eb770de88c",
+      "bytes": 11317
+    },
+    {
+      "path": "input/history-source/280fbecda993cc863cf3eb4089095b1e286b17c7/routes/word-com/restyle.py",
+      "sha256": "f4aa600c068721d42f6d591b8e95f266b3cf6ddd01f3fce734b9b480d39c821d",
+      "bytes": 16932
+    },
+    {
+      "path": "input/history-source/280fbecda993cc863cf3eb4089095b1e286b17c7/routes/word-com/template.py",
+      "sha256": "27139122c775fb6c3c2161d8c5c21a908b7b5dbed4ece1f5210f47c3e648a9bc",
+      "bytes": 6745
+    },
+    {
+      "path": "input/history-source/280fbecda993cc863cf3eb4089095b1e286b17c7/scripts/audit-and-render.py",
+      "sha256": "3f5eb4a7b294c9fa152e6f91e9929703cd2680657873647ff43e89dbce514c15",
+      "bytes": 2648
+    },
+    {
+      "path": "input/history-source/280fbecda993cc863cf3eb4089095b1e286b17c7/scripts/capture-environment.py",
+      "sha256": "7d9173c8765d34ce04d9b11767d94b1364710f84e48c42d1d37fe7ad30f52d48",
+      "bytes": 4374
+    },
+    {
+      "path": "input/history-source/280fbecda993cc863cf3eb4089095b1e286b17c7/scripts/document_common.py",
+      "sha256": "710d83c3fb802ddc588bbdd96a366e0d53502a9d0f1717918894575699db48f1",
+      "bytes": 5790
+    },
+    {
+      "path": "input/history-source/280fbecda993cc863cf3eb4089095b1e286b17c7/scripts/record-evidence.py",
+      "sha256": "43ffd47346f26ade525436cf546f97656c47221c407dbf74a4e67c92ada6e951",
+      "bytes": 5337
+    },
+    {
+      "path": "input/history-source/280fbecda993cc863cf3eb4089095b1e286b17c7/scripts/word-verify.py",
+      "sha256": "ec2f79882cf37b832758c22da1f0c99f0a1e7bc91556f0f09899cca50fa0bb67",
+      "bytes": 14214
+    },
+    {
+      "path": "input/history-source/280fbecda993cc863cf3eb4089095b1e286b17c7/scripts/word_com.py",
+      "sha256": "c7acaf6bbbdaf3799a15f13044baddd42de1a65bb6945b6ed5b3839956df80b2",
+      "bytes": 2121
+    },
+    {
+      "path": "input/history-source/280fbecda993cc863cf3eb4089095b1e286b17c7/templates/source.json",
+      "sha256": "a6aa3e0fb052caa35654b37b71dde8fae60de3d67d3e594c02cc77cd66b92d48",
+      "bytes": 1472
+    },
+    {
+      "path": "input/history-source/8e0f09da7836ffebe294fab94adaba7ca1bc7d52/fixtures/canonical.json",
+      "sha256": "c5a0fa88beccde3c90715cbdaaa742e6d17a6a903e0730ed591d7aa6f16c96e5",
+      "bytes": 47206
+    },
+    {
+      "path": "input/history-source/8e0f09da7836ffebe294fab94adaba7ca1bc7d52/requirements.txt",
+      "sha256": "3069384b47d2c896dbafbb8c031d7cc7c1dcefddc3755cf7b18857f39b69dfc2",
+      "bytes": 219
+    },
+    {
+      "path": "input/history-source/8e0f09da7836ffebe294fab94adaba7ca1bc7d52/routes/direct-docx/build.py",
+      "sha256": "f9960884cf9dccbb1a0cef2306714072722ac2be22e91f458efafffc21ef93bd",
+      "bytes": 3513
+    },
+    {
+      "path": "input/history-source/8e0f09da7836ffebe294fab94adaba7ca1bc7d52/routes/pandoc/build.py",
+      "sha256": "808e6be2f107e38ce581638ff9d322fd0ce6d09333b9c5c1cf325e479ca7105e",
+      "bytes": 3609
+    },
+    {
+      "path": "input/history-source/8e0f09da7836ffebe294fab94adaba7ca1bc7d52/routes/word-com/build.py",
+      "sha256": "6d48d870419b6082bd1061b104976ec368829d6e85b19929644c890f64fceb6b",
+      "bytes": 12655
+    },
+    {
+      "path": "input/history-source/8e0f09da7836ffebe294fab94adaba7ca1bc7d52/routes/word-com/mathtype-probe.py",
+      "sha256": "0f0583d551ce5fc5ad953f3308b6c677b2257c1bfda68129ce48f6966ff3d980",
+      "bytes": 17988
+    },
+    {
+      "path": "input/history-source/8e0f09da7836ffebe294fab94adaba7ca1bc7d52/routes/word-com/restyle.py",
+      "sha256": "f4aa600c068721d42f6d591b8e95f266b3cf6ddd01f3fce734b9b480d39c821d",
+      "bytes": 16932
+    },
+    {
+      "path": "input/history-source/8e0f09da7836ffebe294fab94adaba7ca1bc7d52/routes/word-com/template.py",
+      "sha256": "27139122c775fb6c3c2161d8c5c21a908b7b5dbed4ece1f5210f47c3e648a9bc",
+      "bytes": 6745
+    },
+    {
+      "path": "input/history-source/8e0f09da7836ffebe294fab94adaba7ca1bc7d52/scripts/audit-and-render.py",
+      "sha256": "3f5eb4a7b294c9fa152e6f91e9929703cd2680657873647ff43e89dbce514c15",
+      "bytes": 2648
+    },
+    {
+      "path": "input/history-source/8e0f09da7836ffebe294fab94adaba7ca1bc7d52/scripts/capture-environment.py",
+      "sha256": "7d9173c8765d34ce04d9b11767d94b1364710f84e48c42d1d37fe7ad30f52d48",
+      "bytes": 4374
+    },
+    {
+      "path": "input/history-source/8e0f09da7836ffebe294fab94adaba7ca1bc7d52/scripts/document_common.py",
+      "sha256": "710d83c3fb802ddc588bbdd96a366e0d53502a9d0f1717918894575699db48f1",
+      "bytes": 5790
+    },
+    {
+      "path": "input/history-source/8e0f09da7836ffebe294fab94adaba7ca1bc7d52/scripts/record-evidence.py",
+      "sha256": "43ffd47346f26ade525436cf546f97656c47221c407dbf74a4e67c92ada6e951",
+      "bytes": 5337
+    },
+    {
+      "path": "input/history-source/8e0f09da7836ffebe294fab94adaba7ca1bc7d52/scripts/word-verify.py",
+      "sha256": "ec2f79882cf37b832758c22da1f0c99f0a1e7bc91556f0f09899cca50fa0bb67",
+      "bytes": 14214
+    },
+    {
+      "path": "input/history-source/8e0f09da7836ffebe294fab94adaba7ca1bc7d52/scripts/word_com.py",
+      "sha256": "c7acaf6bbbdaf3799a15f13044baddd42de1a65bb6945b6ed5b3839956df80b2",
+      "bytes": 2121
+    },
+    {
+      "path": "input/history-source/8e0f09da7836ffebe294fab94adaba7ca1bc7d52/templates/source.json",
+      "sha256": "a6aa3e0fb052caa35654b37b71dde8fae60de3d67d3e594c02cc77cd66b92d48",
+      "bytes": 1472
+    },
+    {
+      "path": "input/history-source/cd8af689312faf416006c6e31d1a3f26dc770442/fixtures/canonical.json",
+      "sha256": "c5a0fa88beccde3c90715cbdaaa742e6d17a6a903e0730ed591d7aa6f16c96e5",
+      "bytes": 47206
+    },
+    {
+      "path": "input/history-source/cd8af689312faf416006c6e31d1a3f26dc770442/requirements.txt",
+      "sha256": "3069384b47d2c896dbafbb8c031d7cc7c1dcefddc3755cf7b18857f39b69dfc2",
+      "bytes": 219
+    },
+    {
+      "path": "input/history-source/cd8af689312faf416006c6e31d1a3f26dc770442/routes/direct-docx/build.py",
+      "sha256": "f9960884cf9dccbb1a0cef2306714072722ac2be22e91f458efafffc21ef93bd",
+      "bytes": 3513
+    },
+    {
+      "path": "input/history-source/cd8af689312faf416006c6e31d1a3f26dc770442/routes/pandoc/build.py",
+      "sha256": "808e6be2f107e38ce581638ff9d322fd0ce6d09333b9c5c1cf325e479ca7105e",
+      "bytes": 3609
+    },
+    {
+      "path": "input/history-source/cd8af689312faf416006c6e31d1a3f26dc770442/routes/word-com/build.py",
+      "sha256": "6d48d870419b6082bd1061b104976ec368829d6e85b19929644c890f64fceb6b",
+      "bytes": 12655
+    },
+    {
+      "path": "input/history-source/cd8af689312faf416006c6e31d1a3f26dc770442/routes/word-com/mathtype-probe.py",
+      "sha256": "3f15ee02c86c63fe5c978de2821ce5506e4eed764794a51b6da7d46d51455e29",
+      "bytes": 6608
+    },
+    {
+      "path": "input/history-source/cd8af689312faf416006c6e31d1a3f26dc770442/routes/word-com/restyle.py",
+      "sha256": "f4aa600c068721d42f6d591b8e95f266b3cf6ddd01f3fce734b9b480d39c821d",
+      "bytes": 16932
+    },
+    {
+      "path": "input/history-source/cd8af689312faf416006c6e31d1a3f26dc770442/routes/word-com/template.py",
+      "sha256": "27139122c775fb6c3c2161d8c5c21a908b7b5dbed4ece1f5210f47c3e648a9bc",
+      "bytes": 6745
+    },
+    {
+      "path": "input/history-source/cd8af689312faf416006c6e31d1a3f26dc770442/scripts/audit-and-render.py",
+      "sha256": "3f5eb4a7b294c9fa152e6f91e9929703cd2680657873647ff43e89dbce514c15",
+      "bytes": 2648
+    },
+    {
+      "path": "input/history-source/cd8af689312faf416006c6e31d1a3f26dc770442/scripts/capture-environment.py",
+      "sha256": "7d9173c8765d34ce04d9b11767d94b1364710f84e48c42d1d37fe7ad30f52d48",
+      "bytes": 4374
+    },
+    {
+      "path": "input/history-source/cd8af689312faf416006c6e31d1a3f26dc770442/scripts/document_common.py",
+      "sha256": "710d83c3fb802ddc588bbdd96a366e0d53502a9d0f1717918894575699db48f1",
+      "bytes": 5790
+    },
+    {
+      "path": "input/history-source/cd8af689312faf416006c6e31d1a3f26dc770442/scripts/record-evidence.py",
+      "sha256": "43ffd47346f26ade525436cf546f97656c47221c407dbf74a4e67c92ada6e951",
+      "bytes": 5337
+    },
+    {
+      "path": "input/history-source/cd8af689312faf416006c6e31d1a3f26dc770442/scripts/word-verify.py",
+      "sha256": "ec2f79882cf37b832758c22da1f0c99f0a1e7bc91556f0f09899cca50fa0bb67",
+      "bytes": 14214
+    },
+    {
+      "path": "input/history-source/cd8af689312faf416006c6e31d1a3f26dc770442/scripts/word_com.py",
+      "sha256": "c7acaf6bbbdaf3799a15f13044baddd42de1a65bb6945b6ed5b3839956df80b2",
+      "bytes": 2121
+    },
+    {
+      "path": "input/history-source/cd8af689312faf416006c6e31d1a3f26dc770442/templates/source.json",
+      "sha256": "a6aa3e0fb052caa35654b37b71dde8fae60de3d67d3e594c02cc77cd66b92d48",
+      "bytes": 1472
+    },
+    {
+      "path": "input/repo/fixtures/canonical.json",
+      "sha256": "c5a0fa88beccde3c90715cbdaaa742e6d17a6a903e0730ed591d7aa6f16c96e5",
+      "bytes": 47206
+    },
+    {
+      "path": "input/repo/requirements.txt",
+      "sha256": "3069384b47d2c896dbafbb8c031d7cc7c1dcefddc3755cf7b18857f39b69dfc2",
+      "bytes": 219
+    },
+    {
+      "path": "input/repo/routes/direct-docx/build.py",
+      "sha256": "f9960884cf9dccbb1a0cef2306714072722ac2be22e91f458efafffc21ef93bd",
+      "bytes": 3513
+    },
+    {
+      "path": "input/repo/routes/pandoc/build.py",
+      "sha256": "808e6be2f107e38ce581638ff9d322fd0ce6d09333b9c5c1cf325e479ca7105e",
+      "bytes": 3609
+    },
+    {
+      "path": "input/repo/routes/word-com/build.py",
+      "sha256": "6d48d870419b6082bd1061b104976ec368829d6e85b19929644c890f64fceb6b",
+      "bytes": 12655
+    },
+    {
+      "path": "input/repo/routes/word-com/mathtype-probe.py",
+      "sha256": "0f0583d551ce5fc5ad953f3308b6c677b2257c1bfda68129ce48f6966ff3d980",
+      "bytes": 17988
+    },
+    {
+      "path": "input/repo/routes/word-com/restyle.py",
+      "sha256": "f4aa600c068721d42f6d591b8e95f266b3cf6ddd01f3fce734b9b480d39c821d",
+      "bytes": 16932
+    },
+    {
+      "path": "input/repo/routes/word-com/template.py",
+      "sha256": "27139122c775fb6c3c2161d8c5c21a908b7b5dbed4ece1f5210f47c3e648a9bc",
+      "bytes": 6745
+    },
+    {
+      "path": "input/repo/scripts/audit-and-render.py",
+      "sha256": "3f5eb4a7b294c9fa152e6f91e9929703cd2680657873647ff43e89dbce514c15",
+      "bytes": 2648
+    },
+    {
+      "path": "input/repo/scripts/capture-environment.py",
+      "sha256": "7d9173c8765d34ce04d9b11767d94b1364710f84e48c42d1d37fe7ad30f52d48",
+      "bytes": 4374
+    },
+    {
+      "path": "input/repo/scripts/document_common.py",
+      "sha256": "710d83c3fb802ddc588bbdd96a366e0d53502a9d0f1717918894575699db48f1",
+      "bytes": 5790
+    },
+    {
+      "path": "input/repo/scripts/record-evidence.py",
+      "sha256": "43ffd47346f26ade525436cf546f97656c47221c407dbf74a4e67c92ada6e951",
+      "bytes": 5337
+    },
+    {
+      "path": "input/repo/scripts/word-verify.py",
+      "sha256": "ec2f79882cf37b832758c22da1f0c99f0a1e7bc91556f0f09899cca50fa0bb67",
+      "bytes": 14214
+    },
+    {
+      "path": "input/repo/scripts/word_com.py",
+      "sha256": "c7acaf6bbbdaf3799a15f13044baddd42de1a65bb6945b6ed5b3839956df80b2",
+      "bytes": 2121
+    },
+    {
+      "path": "input/repo/templates/project-report.dotx",
+      "sha256": "2d645df23ecd1ee6f40d7da29854435139ff9d77a490f29c5051b6960bf909c4",
+      "bytes": 31815
+    },
+    {
+      "path": "input/repo/templates/sgcc-feasibility-2018-original.docx",
+      "sha256": "141131ad823f273eb50cebfae6c5f5fb4b65e878c2c63e52472d2612f55b60fd",
+      "bytes": 37630
+    },
+    {
+      "path": "input/repo/templates/sgcc-style-reference.docx",
+      "sha256": "a95f2a070c77007246353e4849d399f709667916bfafd98380a336066efade57",
+      "bytes": 38257
+    },
+    {
+      "path": "input/repo/templates/source.json",
+      "sha256": "a6aa3e0fb052caa35654b37b71dde8fae60de3d67d3e594c02cc77cd66b92d48",
+      "bytes": 1472
+    }
+  ],
+  "originalFiles": [
+    {
+      "source": "out/mathtype-20261010-r01/api-formula.docx",
+      "bytes": 15665,
+      "sha256": "da4116a5730302c5d05acfa037dc04b51414ccb53153d1c958cd3e105fb74b73",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/mathtype-20261010-r01/api-formula.pdf",
+      "bytes": 77914,
+      "sha256": "51712ef36322f905c04e309c1006f89a0ce123ef4167e16a5ca641e731a80922",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/mathtype-20261010-r01/api-probe.json",
+      "bytes": 545,
+      "sha256": "39a345794fe4bd669148117fec67815554c0367a70cceeb34e79feeca5bb3623",
+      "archive": "evidence/mathtype-20261010-r01/api-probe.json"
+    },
+    {
+      "source": "out/mathtype-20261010-r01/api-probe.py",
+      "bytes": 2385,
+      "sha256": "b088924109b2c962aa5aa161d22cd8f4e7abc25542e7d1f5fa546eda3485eb9b",
+      "archive": "evidence/mathtype-20261010-r01/api-probe.py"
+    },
+    {
+      "source": "out/mathtype-20261010-r01/blank-ole.docx",
+      "bytes": 13764,
+      "sha256": "c45c39a6e0fc7930ecb9087ca2e0cdf66a0e32d725d7abf05bb0fb96bbf19c80",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/mathtype-20261010-r01/CallbackGuard.cls",
+      "bytes": 2651,
+      "sha256": "bdcf32655f53b8570f3e683342113999d51dd164e6bb36c4e63bd2f0af2db8a7",
+      "archive": "evidence/mathtype-20261010-r01/CallbackGuard.cls"
+    },
+    {
+      "source": "out/mathtype-20261010-r01/CommandGuard.cls",
+      "bytes": 3103,
+      "sha256": "fe15a498c02bc850f6c25d945ff5a9d428dc671ad629a11040943eb31a22896e",
+      "archive": "evidence/mathtype-20261010-r01/CommandGuard.cls"
+    },
+    {
+      "source": "out/mathtype-20261010-r01/Declarations.bas",
+      "bytes": 30660,
+      "sha256": "e3b3996aa63fdc5bb6e51077dfa0ed7a3abfa75a28ae8a8f7dc127619542b5a0",
+      "archive": "evidence/mathtype-20261010-r01/Declarations.bas"
+    },
+    {
+      "source": "out/mathtype-20261010-r01/Declarations64.bas",
+      "bytes": 21117,
+      "sha256": "195ad457aeefcdc025f473818576c0d307234f728643b5affe2054de64762b8b",
+      "archive": "evidence/mathtype-20261010-r01/Declarations64.bas"
+    },
+    {
+      "source": "out/mathtype-20261010-r01/MTLib.bas",
+      "bytes": 141497,
+      "sha256": "811c734158498d1e9d5eadccd11a0d127577352fa5de7632348da81e9561e75e",
+      "archive": "evidence/mathtype-20261010-r01/MTLib.bas"
+    },
+    {
+      "source": "out/mathtype-20261010-r01/MTSetData.bas",
+      "bytes": 3298,
+      "sha256": "fdcc5a0ba26924d8773d70094c107bb40af2b731a905dbee27737caded5395f9",
+      "archive": "evidence/mathtype-20261010-r01/MTSetData.bas"
+    },
+    {
+      "source": "out/mathtype-20261010-r01/MTTeXToggle.bas",
+      "bytes": 46394,
+      "sha256": "45cff5eeed6f8b20adc01f8ce19e933e1fe8dbf579d3c9aa10a675694be9c4a1",
+      "archive": "evidence/mathtype-20261010-r01/MTTeXToggle.bas"
+    },
+    {
+      "source": "out/mathtype-20261010-r01/probe.log",
+      "bytes": 109,
+      "sha256": "cbf426dd2604802223c3aba1fe1d6a8f5dc9e02d2369edd750f681d1ba569605",
+      "archive": "evidence/mathtype-20261010-r01/probe.txt"
+    },
+    {
+      "source": "out/mathtype-20261010-r01/UILib.bas",
+      "bytes": 23863,
+      "sha256": "876286fe37ecdf580ec0a85ab95bb2edbcee75c6490a8cbe0c7120bea0311334",
+      "archive": "evidence/mathtype-20261010-r01/UILib.bas"
+    },
+    {
+      "source": "out/mathtype-20261010-r02/api-formula.docx",
+      "bytes": 15667,
+      "sha256": "81ae9b7d767a1b3d94188418e3b0079bb4b9ae74fc5f394fd852a7f9b5e4730e",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/mathtype-20261010-r02/api-formula.pdf",
+      "bytes": 77914,
+      "sha256": "cf9493a4ef3250da311e600d3a0e5eb040c17fa84423bfe43ce88a6a29fac5b2",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/mathtype-20261010-r02/api-probe.json",
+      "bytes": 545,
+      "sha256": "39a345794fe4bd669148117fec67815554c0367a70cceeb34e79feeca5bb3623",
+      "archive": "evidence/mathtype-20261010-r02/api-probe.json"
+    },
+    {
+      "source": "out/mathtype-20261010-r02/api-probe.py",
+      "bytes": 2385,
+      "sha256": "49379d8fa97db127538c626822ded54e1a592c3939dc8313a9d2ed8dabcb5e39",
+      "archive": "evidence/mathtype-20261010-r02/api-probe.py"
+    },
+    {
+      "source": "out/mathtype-20261010-r02/blank-ole.docx",
+      "bytes": 13764,
+      "sha256": "c45c39a6e0fc7930ecb9087ca2e0cdf66a0e32d725d7abf05bb0fb96bbf19c80",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/mathtype-20261010-r03/result.json",
+      "bytes": 2310,
+      "sha256": "3e03aced7488a47d0e2d4834323c83d3a0845df8c57c89bf96a56e00796d3efb",
+      "archive": "evidence/mathtype-20261010-r03/result.json"
+    },
+    {
+      "source": "out/mathtype-20261010-r04/ole-probe.docx",
+      "bytes": 13778,
+      "sha256": "c42688d0de2e1c37325111ab207bd4927941ae63f15c180c729477821cd034e8",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/mathtype-20261010-r04/result.json",
+      "bytes": 1786,
+      "sha256": "debe896abea5338fb39029f3e5faa6727fa2b6f5f760305fd4ace034d30fb534",
+      "archive": "evidence/mathtype-20261010-r04/result.json"
+    },
+    {
+      "source": "out/mathtype-20261010-r05/ole-probe.docx",
+      "bytes": 14306,
+      "sha256": "5053d35c14ed82296303338d748bc21824e5bf81c300268ce8718c45f2f86dba",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/mathtype-20261010-r05/result.json",
+      "bytes": 1936,
+      "sha256": "262b4ecf4f549a50d7d0f7b209686d742868405af3c291ff2e92d3f5d5507609",
+      "archive": "evidence/mathtype-20261010-r05/result.json"
+    },
+    {
+      "source": "out/mathtype-20261010-r06/edited-page.png",
+      "bytes": 36990,
+      "sha256": "f0b8b72791f07312ebb584f6860c27233d0c6077190fa0ec571bc369d98eb369",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/mathtype-20261010-r06/mathtype-edited.docx",
+      "bytes": 16898,
+      "sha256": "445fb94e8e7409e141e529cfeaf9784f0fd96dcc451c53a6de976c945bcee70f",
+      "archive": "evidence/mathtype-20261010-r06/mathtype-edited.docx"
+    },
+    {
+      "source": "out/mathtype-20261010-r06/mathtype-edited.pdf",
+      "bytes": 48671,
+      "sha256": "405d0f869a5885dab41c1bc2e62c87bce129ece23629325b2b159cda9dc0e3c0",
+      "archive": "evidence/mathtype-20261010-r06/mathtype-edited.pdf"
+    },
+    {
+      "source": "out/mathtype-20261010-r06/mathtype-original.docx",
+      "bytes": 14707,
+      "sha256": "16895993a3d57cb663d268d510ed1bbf9b6f223858121a36cdcbe10f1df098ea",
+      "archive": "evidence/mathtype-20261010-r06/mathtype-original.docx"
+    },
+    {
+      "source": "out/mathtype-20261010-r06/mathtype-original.pdf",
+      "bytes": 48621,
+      "sha256": "f71995a8f0b6c49f6fe97159a66b5b5724c120e4054aceed49bf5e7f9c813346",
+      "archive": "evidence/mathtype-20261010-r06/mathtype-original.pdf"
+    },
+    {
+      "source": "out/mathtype-20261010-r06/original-page.png",
+      "bytes": 34203,
+      "sha256": "232b2675e30f6c08dba0fb4f43f97a9fb81adf05b7dc8ef989d8c024c0544dd6",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/mathtype-20261010-r06/result.json",
+      "bytes": 4158,
+      "sha256": "c3887f24b4b61306b892610a8fdf8c29232531e4e68281ed4723b5821650ad79",
+      "archive": "evidence/mathtype-20261010-r06/result.json"
+    },
+    {
+      "source": "out/mathtype-20261010-r06/visual-review.json",
+      "bytes": 456,
+      "sha256": "480d76b188f2177b4324006f76b1292cf699decd888c40ee851275a0e4a1732c",
+      "archive": "evidence/mathtype-20261010-r06/visual-review.json"
+    },
+    {
+      "source": "out/mathtype-20261010-r07/mathtype-original.docx",
+      "bytes": 14718,
+      "sha256": "3d48b1f78fbfe2af4b97f25c65a5979ad4ce00a8d30c7b9fc6131b3ce893f318",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/mathtype-20261010-r07/mathtype-original.pdf",
+      "bytes": 48621,
+      "sha256": "982e9707955710c80686d5f3b3dc972afee008ef8d2f2779ef88de700a299b65",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/mathtype-20261010-r07/result.json",
+      "bytes": 2505,
+      "sha256": "607be2b2a12101aa861ded1c2b6215131bde23002e31d06f3e81aade1769cb69",
+      "archive": "evidence/mathtype-20261010-r07/result.json"
+    },
+    {
+      "source": "out/mathtype-20261010-r08/edited-page.png",
+      "bytes": 34522,
+      "sha256": "88dac2ae6b189b97321dc0489bff30b7637447fe68f8025bdb5f63067dce841f",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/mathtype-20261010-r08/mathtype-edited.docx",
+      "bytes": 16855,
+      "sha256": "e07d46f1972264f29e39ef6cb6ce5c71b0e99d8e9a23b2be83e18ae12d84fb2a",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/mathtype-20261010-r08/mathtype-edited.pdf",
+      "bytes": 48620,
+      "sha256": "8f1d9a74bc92793c4f8fc47670f4b31e12803352875b03748a2a55334fbb557d",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/mathtype-20261010-r08/mathtype-original.docx",
+      "bytes": 14709,
+      "sha256": "60981d4c92ca8eff3f4023408259d9e63628bd2f2d0f62dc8e3571eb28908e67",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/mathtype-20261010-r08/mathtype-original.pdf",
+      "bytes": 48621,
+      "sha256": "11da28470af3e1ce1926b207b50855e5876bf7f16565c35a3de64f38aadd3e9c",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/mathtype-20261010-r08/mathtype-probe.py",
+      "bytes": 11317,
+      "sha256": "85713a9f7e8600a0815ec2ccc372f8bae5c1ee68f954f165cb1ac5eb770de88c",
+      "archive": "evidence/mathtype-20261010-r08/mathtype-probe.py"
+    },
+    {
+      "source": "out/mathtype-20261010-r08/original-page.png",
+      "bytes": 34203,
+      "sha256": "232b2675e30f6c08dba0fb4f43f97a9fb81adf05b7dc8ef989d8c024c0544dd6",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/mathtype-20261010-r08/pdf-audit.json",
+      "bytes": 789,
+      "sha256": "960b3f216247f1ff4eab95965c6104cd1f895c731b76a15757b10f84f75c91e6",
+      "archive": "evidence/mathtype-20261010-r08/pdf-audit.json"
+    },
+    {
+      "source": "out/mathtype-20261010-r08/result.json",
+      "bytes": 4285,
+      "sha256": "436ed395c61e6601b60a87defbb3a6503310a6a3ce8691e6532468b9d99c9575",
+      "archive": "evidence/mathtype-20261010-r08/result.json"
+    },
+    {
+      "source": "out/mathtype-20261010-r08/visual-review.json",
+      "bytes": 783,
+      "sha256": "1c3894aa0dc96f2b625ede90470d60c862ad6912001184f6719b386831a4b0d0",
+      "archive": "evidence/mathtype-20261010-r08/visual-review.json"
+    },
+    {
+      "source": "out/mathtype-20261010-r09/edited-page.png",
+      "bytes": 42456,
+      "sha256": "4c674403df6343adebea2e07edd87b5299d63c2ee5b4d535552f8a6f4dc2dd58",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/mathtype-20261010-r09/mathtype-edited.docx",
+      "bytes": 18489,
+      "sha256": "b4df3505d95a8fe09df19bab720a10ab5c1b7d35f98e02875e4c6b9e62cdb59b",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/mathtype-20261010-r09/mathtype-edited.pdf",
+      "bytes": 83383,
+      "sha256": "c5b73f93e52479963d32a47615546c9d0ed79303b30059c55f9d9d57047f9478",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/mathtype-20261010-r09/mathtype-numbered.docx",
+      "bytes": 21983,
+      "sha256": "449d473de1ab558af97e62e9a98e379e9a90b12fb659764c43db0a2b758c0bb2",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/mathtype-20261010-r09/mathtype-numbered.pdf",
+      "bytes": 87233,
+      "sha256": "47851eb14d8c197fd50b978305b4f7934210ba0ccdcb1207f0806f8b74d65ed8",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/mathtype-20261010-r09/mathtype-original.docx",
+      "bytes": 16369,
+      "sha256": "7df94e00f3a58f60a969d7d2577fa485952d8e8b00c69682fb97e80861092922",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/mathtype-20261010-r09/mathtype-original.pdf",
+      "bytes": 83380,
+      "sha256": "d315452fda9b3be074ec28cf6c81ab0d850b49b06e1ab37ca57f09428fd9e574",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/mathtype-20261010-r09/numbered-page.png",
+      "bytes": 54175,
+      "sha256": "3cf3f98bdbbf84521bb0e9f9b61fed089ea59e65cb51eb89eba10c2428c666c6",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/mathtype-20261010-r09/original-page.png",
+      "bytes": 42388,
+      "sha256": "8b87c085af01c08f6f54a8d31999fa991d6b251b82d5982ae7f26e4bec08185e",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/mathtype-20261010-r09/result.json",
+      "bytes": 14930,
+      "sha256": "b1e1f33da423ff9f441c1029a5a74325644abe17a2290952f9d00a7d61427f2e",
+      "archive": "evidence/mathtype-20261010-r09/result.json"
+    },
+    {
+      "source": "out/mathtype-20261010-r10/edited-page.png",
+      "bytes": 42389,
+      "sha256": "2f1a0e54252157874249598c27f97a2005c5f963ac7686f6e7b5bbff8655abd4",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/mathtype-20261010-r10/mathtype-edited.docx",
+      "bytes": 18446,
+      "sha256": "77486f7cb6567e611f2ad9a5496ff3c3f4e8c1f28355676685e9b28287e667a1",
+      "archive": "evidence/mathtype-20261010-r10/mathtype-edited.docx"
+    },
+    {
+      "source": "out/mathtype-20261010-r10/mathtype-edited.pdf",
+      "bytes": 71464,
+      "sha256": "3ecf5d1ed6468c9464ac3009adcf1ee0a57fdb69ccfd81e54b564dfbef76450c",
+      "archive": "evidence/mathtype-20261010-r10/mathtype-edited.pdf"
+    },
+    {
+      "source": "out/mathtype-20261010-r10/mathtype-numbered.docx",
+      "bytes": 21942,
+      "sha256": "4384c2dc90bb7616918335be8e519f4396a47a3c9ac53b5867c5b2b11f4cb5b1",
+      "archive": "evidence/mathtype-20261010-r10/mathtype-numbered.docx"
+    },
+    {
+      "source": "out/mathtype-20261010-r10/mathtype-numbered.pdf",
+      "bytes": 74066,
+      "sha256": "1759d86731a2aabb73ffa987f9b84ab27b84ab21bd52e9e91236156ff1bce34d",
+      "archive": "evidence/mathtype-20261010-r10/mathtype-numbered.pdf"
+    },
+    {
+      "source": "out/mathtype-20261010-r10/mathtype-original.docx",
+      "bytes": 16334,
+      "sha256": "942efea6de9c95fb66771d1df0bf4d5f02a6e988e05736bcba96e8500e909435",
+      "archive": "evidence/mathtype-20261010-r10/mathtype-original.docx"
+    },
+    {
+      "source": "out/mathtype-20261010-r10/mathtype-original.pdf",
+      "bytes": 71470,
+      "sha256": "a88ef7847ef253fe326d5cdd45c15df28a341325e738d6dd7e5ccd91e72ccc7e",
+      "archive": "evidence/mathtype-20261010-r10/mathtype-original.pdf"
+    },
+    {
+      "source": "out/mathtype-20261010-r10/mathtype-probe.py",
+      "bytes": 17988,
+      "sha256": "0f0583d551ce5fc5ad953f3308b6c677b2257c1bfda68129ce48f6966ff3d980",
+      "archive": "evidence/mathtype-20261010-r10/mathtype-probe.py"
+    },
+    {
+      "source": "out/mathtype-20261010-r10/numbered-page.png",
+      "bytes": 54050,
+      "sha256": "d93aae72225fa0bf1a42577ba455029046be6aeb243decc1aa55795f2d63eb5d",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/mathtype-20261010-r10/original-page.png",
+      "bytes": 42344,
+      "sha256": "cd6be5ff166fa0cb0e0ef9b6b5f00b01df0b8dc7af732e277ad74b953e3eba51",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/mathtype-20261010-r10/result.json",
+      "bytes": 14930,
+      "sha256": "5fd324d8c7d6bc5ed134cc3ed40b49c570387c9ad5c694761bd7158f3aa52cde",
+      "archive": "evidence/mathtype-20261010-r10/result.json"
+    },
+    {
+      "source": "out/mathtype-20261010-r10/visual-review.json",
+      "bytes": 1608,
+      "sha256": "9a6dd2db7e26c0e05182d1e93d4a23d0594437453679b2d27c9a0a3125625e3c",
+      "archive": "evidence/mathtype-20261010-r10/visual-review.json"
+    }
+  ],
+  "archiveValidation": "all_preserved_file_hashes_verified; all_python_sources_parse; Office rerun not performed",
+  "rerunValidation": "not_run_during_archival",
+  "historicalPaths": "Older evidence may say runs/. These literal historical records are retained; actual files are now under out/.",
+  "lineEndings": "git show snapshots preserve committed bytes, usually LF. Original output source snapshots preserve original bytes, often CRLF. Historical raw hashes can differ by line endings."
+}

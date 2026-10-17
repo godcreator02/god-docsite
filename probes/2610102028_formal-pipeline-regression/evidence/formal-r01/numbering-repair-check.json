@@ -1,0 +1,30 @@
+{
+  "status": "passed",
+  "saved": false,
+  "afterInsertion": {
+    "numbers": [
+      "3-2",
+      "3-3",
+      "3-4",
+      "3-5",
+      "3-6"
+    ],
+    "fractionReferences": [
+      "3-2",
+      "3-2"
+    ]
+  },
+  "afterDeletion": {
+    "numbers": [
+      "3-1",
+      "3-2",
+      "3-3",
+      "3-4",
+      "3-5"
+    ],
+    "fractionReferences": [
+      "3-1",
+      "3-1"
+    ]
+  }
+}

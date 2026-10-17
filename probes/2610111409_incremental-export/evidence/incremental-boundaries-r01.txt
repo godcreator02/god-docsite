@@ -1,0 +1,28 @@
+{"event": "start", "template": "D:\\unitfolders\\nb9zj-word-conversion-lab\\word-conversion-lab\\out\\incremental-boundaries-r01\\insert-input\\template.dotx", "templateSha256": "223c75d27f9d38f1b03ea233b6611c8bec6dbdc249290cf01879e01f6e8778fc", "elapsedSeconds": 0.209}
+{"event": "compose-start", "elapsedSeconds": 3.894}
+{"event": "draft-saved", "equations": 2, "elapsedSeconds": 22.283}
+{"event": "mathtype-functionality", "full": 1, "mode": 2, "dll": "C:\\Program Files (x86)\\MathType\\MathPage\\64\\MathPage.wll", "elapsedSeconds": 22.637}
+{"event": "write-tex", "stage": "DR_f9cd45bd8852ca66d7e672693774", "returnCode": 0, "text": "$P=VI$", "elapsedSeconds": 28.464}
+{"event": "read-tex", "stage": "DR_f9cd45bd8852ca66d7e672693774", "returnCode": 0, "text": "$P=VI$", "matchesExpected": true, "elapsedSeconds": 28.486}
+{"event": "close-ole", "stage": "DR_f9cd45bd8852ca66d7e672693774", "returnCode": 0, "elapsedSeconds": 28.64}
+{"event": "equation-created", "id": "DR_f9cd45bd8852ca66d7e672693774", "inline": false, "widthPt": 34.900001525878906, "heightPt": 13.850000381469727, "elapsedSeconds": 29.141}
+{"event": "write-tex", "stage": "DR_2b155d95e9fbb5255560dd867f0c", "returnCode": 0, "text": "$E=mc^2$", "elapsedSeconds": 30.447}
+{"event": "read-tex", "stage": "DR_2b155d95e9fbb5255560dd867f0c", "returnCode": 0, "text": "$E=mc^2$", "matchesExpected": true, "elapsedSeconds": 30.453}
+{"event": "close-ole", "stage": "DR_2b155d95e9fbb5255560dd867f0c", "returnCode": 0, "elapsedSeconds": 30.506}
+{"event": "equation-created", "id": "DR_2b155d95e9fbb5255560dd867f0c", "inline": false, "widthPt": 42.099998474121094, "heightPt": 16.049999237060547, "elapsedSeconds": 30.714}
+{"event": "read-tex", "stage": "reopened-DR_f9cd45bd8852ca66d7e672693774", "returnCode": 0, "text": "$P=VI$", "matchesExpected": true, "elapsedSeconds": 34.641}
+{"event": "close-ole", "stage": "reopened-DR_f9cd45bd8852ca66d7e672693774", "returnCode": 0, "elapsedSeconds": 34.751}
+{"event": "read-tex", "stage": "reopened-DR_2b155d95e9fbb5255560dd867f0c", "returnCode": 0, "text": "$E=mc^2$", "matchesExpected": true, "elapsedSeconds": 36.101}
+{"event": "close-ole", "stage": "reopened-DR_2b155d95e9fbb5255560dd867f0c", "returnCode": 0, "elapsedSeconds": 36.174}
+{"event": "mathtype-reopen", "verified": 2, "elapsedSeconds": 36.287}
+{"event": "terminate-api", "returnCode": 0, "elapsedSeconds": 36.401}
+{"event": "document-check", "pages": 10, "mathTypeObjects": 2, "ommlCount": 0, "tables": 1, "figures": 1, "footnotes": 0, "toc": 1, "contentControls": 5, "elapsedSeconds": 49.315}
+{"event": "report-check-start", "elapsedSeconds": 49.316}
+{"event": "report-check", "result": {"status": "passed", "pages": 10}, "elapsedSeconds": 49.326}
+{"event": "pdf-export-start", "elapsedSeconds": 49.327}
+{"event": "pdf-export-finished", "elapsedSeconds": 52.665}
+{"event": "package-check", "mathTypeObjects": 2, "ommlCount": 0, "sha256": "703fcbc6fa55b828e0fa04459bd0dc2b06fcd1bd6f1a42a9759659e0a8da501d", "elapsedSeconds": 52.88}
+{"event": "content-check", "sourceTextRuns": 79, "tablesIncludingNested": 1, "maximumTableDepth": 1, "sourceImages": {"assets/architecture.png": "d449256d773e841a3c826638d65a1790fa023dd4d9b825fd05502500e7f9d1a0"}, "fields": 63, "elapsedSeconds": 52.893}
+{"event": "pdf-check", "pages": 10, "sha256": "1fffb51da0b27ad65696beb001c62fd0de9d9d602d65a1e89c82afcc2afbd631", "textWorkers": 1, "elapsedSeconds": 52.976}
+{"event": "finished", "status": "passed_automation_visual_review_pending", "seconds": 52.989, "elapsedSeconds": 52.989}
+{"cases": 11, "passed": true}

@@ -1,0 +1,58 @@
+{
+  "id": "word-route-comparison",
+  "purpose": "所有路线共享的内容和版式要求；公式的 LaTeX 字段描述数学内容，不要求某条路线经过 LaTeX 排版引擎。",
+  "language": "zh-CN",
+  "title": "Word 文档技术路线统一样例",
+  "layout": {
+    "pageSize": "A4",
+    "orientation": "portrait",
+    "marginsMm": { "top": 25.4, "bottom": 25.4, "left": 25.4, "right": 25.4 },
+    "body": { "eastAsianFont": "宋体", "latinFont": "Times New Roman", "sizePt": 12, "lineSpacingMultiple": 1.5 },
+    "headingFont": "黑体",
+    "nativeMathFont": "Cambria Math",
+    "headerText": "Word 技术路线实验",
+    "footer": "动态 PAGE 页码域",
+    "toc": "根据 Heading 1 和 Heading 2 样式生成可更新目录"
+  },
+  "paragraphs": [
+    { "id": "text-cn-en", "text": "本段检查中文、English、数字 123.456 与标点的混合排版。测试符号包括 α、β、Δ、±、≤、≥、Ω 和 μ。内容仅作为排版测试，不构成工程设计结论。" },
+    { "id": "text-inline", "textBeforeEquation": "当电流满足 ", "inlineEquationId": "eq-inline", "textAfterEquation": " 时，检查公式与正文的基线、字号和行距是否协调。" },
+    { "id": "text-crossref", "text": "此处引用参数表和独立公式的自动编号。插入新的表格或公式后更新域，引用值应随编号变化。" }
+  ],
+  "headings": [
+    { "level": 1, "text": "正文与行内公式" },
+    { "level": 1, "text": "独立公式与编号" },
+    { "level": 2, "text": "矩阵与分段函数" },
+    { "level": 1, "text": "表格与跨页" }
+  ],
+  "equations": [
+    { "id": "eq-inline", "display": false, "latex": "i_L(t) = I_0 + \\Delta i\\sin(\\omega t)" },
+    { "id": "eq-fraction", "display": true, "numbered": true, "latex": "H(s)=\\frac{1}{LCs^2+RCs+1}" },
+    { "id": "eq-integral", "display": true, "numbered": true, "latex": "E=\\int_0^T v(t)i(t)\\,\\mathrm{d}t" },
+    { "id": "eq-matrix", "display": true, "numbered": true, "latex": "\\mathbf{A}=\\begin{bmatrix}0&1\\\\-\\omega_0^2&-2\\zeta\\omega_0\\end{bmatrix}" },
+    { "id": "eq-cases", "display": true, "numbered": true, "latex": "u(t)=\\begin{cases}U_{\\mathrm{dc}},&t\\geq 0\\\\0,&t<0\\end{cases}" },
+    { "id": "eq-aligned", "display": true, "numbered": true, "latex": "\\begin{aligned}v_L&=L\\frac{\\mathrm{d}i_L}{\\mathrm{d}t}\\\\i_C&=C\\frac{\\mathrm{d}v_C}{\\mathrm{d}t}\\end{aligned}" }
+  ],
+  "table": {
+    "id": "table-parameters",
+    "caption": "排版测试参数",
+    "headers": ["参数", "符号", "数值", "单位"],
+    "rows": [
+      ["电感", "L", "100", "μH"],
+      ["电容", "C", "47", "μF"],
+      ["电阻", "R", "0.2", "Ω"],
+      ["频率", "f", "20", "kHz"]
+    ],
+    "columnWidthsMm": [45, 30, 44, 40.2],
+    "repeatHeaderOnEachPage": true,
+    "allowRowSplitAcrossPages": false,
+    "stressRepeatCount": 10,
+    "stressRule": "顺序重复四行十次，第一列追加从 1 到 40 的连续序号；跨页表只使用一次题注。"
+  },
+  "roundTripEdits": [
+    "修改 text-cn-en 中的一个数值，保存关闭并重新打开。",
+    "将 eq-fraction 分母常数项从 1 改成 2，确认公式仍可编辑。",
+    "在首个带编号公式之前插入一个公式，更新编号与交叉引用。",
+    "增加一行表格，检查跨页表头与行完整性。"
+  ]
+}

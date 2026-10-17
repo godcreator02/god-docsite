@@ -1,0 +1,7 @@
+{
+  "stage": "UI-text-entry",
+  "result": "unexpected clipboard content pasted; replaced immediately; empty duplicate removed",
+  "unexpectedLength": 5282,
+  "unexpectedContentArchived": false,
+  "finalMethod": "UI creates comments; COM writes intended comment text and reads saved results"
+}

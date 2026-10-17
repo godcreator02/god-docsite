@@ -1,0 +1,72 @@
+[
+  {
+    "event": "preflight",
+    "seconds": 0.201,
+    "mode": "patch"
+  },
+  {
+    "event": "local-write-saved",
+    "seconds": 9.314,
+    "changedObjects": 1
+  },
+  {
+    "event": "read-tex",
+    "seconds": 14.15,
+    "stage": "verify-eq-edit",
+    "returnCode": 0,
+    "text": "$P=VI$",
+    "matchesExpected": true
+  },
+  {
+    "event": "close-ole",
+    "seconds": 14.223,
+    "stage": "verify-eq-edit",
+    "returnCode": 0
+  },
+  {
+    "event": "read-tex",
+    "seconds": 15.199,
+    "stage": "verify-eq-stable",
+    "returnCode": 0,
+    "text": "$E=mc^2$",
+    "matchesExpected": true
+  },
+  {
+    "event": "close-ole",
+    "seconds": 15.257,
+    "stage": "verify-eq-stable",
+    "returnCode": 0
+  },
+  {
+    "event": "math-verified",
+    "seconds": 15.593,
+    "created": 0,
+    "read": 2
+  },
+  {
+    "event": "fields-refreshed",
+    "seconds": 22.425
+  },
+  {
+    "event": "document-checked",
+    "seconds": 25.458,
+    "result": {
+      "pages": 10,
+      "mathTypeObjects": 2,
+      "ommlCount": 0,
+      "tables": 1,
+      "figures": 1,
+      "footnotes": 0,
+      "toc": 1,
+      "contentControls": 5
+    },
+    "report": {
+      "status": "passed",
+      "pages": 10
+    }
+  },
+  {
+    "event": "pdf-exported",
+    "seconds": 28.847
+  }
+]

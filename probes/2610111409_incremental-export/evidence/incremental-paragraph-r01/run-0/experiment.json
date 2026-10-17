@@ -1,0 +1,19 @@
+{
+  "mode": "patch",
+  "seconds": 28.976,
+  "changed": [
+    {
+      "id": "p-edit",
+      "kind": "paragraph"
+    }
+  ],
+  "createdEquations": 0,
+  "unchangedEquationPayloads": 2,
+  "unchangedPayloadsEqual": true,
+  "pdf": {
+    "pages": 10,
+    "sha256": "3eb894716bc0c2c9240a4e5775d4c0fcf2fbe95c4c7a9db49c0535248a8d64ca",
+    "textWorkers": 1
+  },
+  "status": "passed_automation_visual_review_pending"
+}

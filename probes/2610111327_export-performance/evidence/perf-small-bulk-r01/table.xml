@@ -1,0 +1,2819 @@
+<w:tbl xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" xmlns:wpc="http://schemas.microsoft.com/office/word/2010/wordprocessingCanvas" xmlns:cx="http://schemas.microsoft.com/office/drawing/2014/chartex" xmlns:cx1="http://schemas.microsoft.com/office/drawing/2015/9/8/chartex" xmlns:cx2="http://schemas.microsoft.com/office/drawing/2015/10/21/chartex" xmlns:cx3="http://schemas.microsoft.com/office/drawing/2016/5/9/chartex" xmlns:cx4="http://schemas.microsoft.com/office/drawing/2016/5/10/chartex" xmlns:cx5="http://schemas.microsoft.com/office/drawing/2016/5/11/chartex" xmlns:cx6="http://schemas.microsoft.com/office/drawing/2016/5/12/chartex" xmlns:cx7="http://schemas.microsoft.com/office/drawing/2016/5/13/chartex" xmlns:cx8="http://schemas.microsoft.com/office/drawing/2016/5/14/chartex" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:aink="http://schemas.microsoft.com/office/drawing/2016/ink" xmlns:am3d="http://schemas.microsoft.com/office/drawing/2017/model3d" xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" xmlns:m="http://schemas.openxmlformats.org/officeDocument/2006/math" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:wp14="http://schemas.microsoft.com/office/word/2010/wordprocessingDrawing" xmlns:wp="http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing" xmlns:w10="urn:schemas-microsoft-com:office:word" xmlns:w14="http://schemas.microsoft.com/office/word/2010/wordml" xmlns:w15="http://schemas.microsoft.com/office/word/2012/wordml" xmlns:w16cex="http://schemas.microsoft.com/office/word/2018/wordml/cex" xmlns:w16cid="http://schemas.microsoft.com/office/word/2016/wordml/cid" xmlns:w16="http://schemas.microsoft.com/office/word/2018/wordml" xmlns:w16sdtdh="http://schemas.microsoft.com/office/word/2020/wordml/sdtdatahash" xmlns:w16se="http://schemas.microsoft.com/office/word/2015/wordml/symex" xmlns:wpg="http://schemas.microsoft.com/office/word/2010/wordprocessingGroup" xmlns:wpi="http://schemas.microsoft.com/office/word/2010/wordprocessingInk" xmlns:wne="http://schemas.microsoft.com/office/word/2006/wordml" xmlns:wps="http://schemas.microsoft.com/office/word/2010/wordprocessingShape">
+  <w:tblPr>
+    <w:tblStyle w:val="ad"/>
+    <w:tblW w:w="0" w:type="auto"/>
+    <w:tblLayout w:type="fixed"/>
+    <w:tblCellMar>
+      <w:top w:w="60" w:type="dxa"/>
+      <w:left w:w="80" w:type="dxa"/>
+      <w:bottom w:w="60" w:type="dxa"/>
+      <w:right w:w="80" w:type="dxa"/>
+    </w:tblCellMar>
+    <w:tblLook w:val="00AF" w:firstRow="1" w:lastRow="0" w:firstColumn="1" w:lastColumn="0" w:noHBand="0" w:noVBand="0"/>
+  </w:tblPr>
+  <w:tblGrid>
+    <w:gridCol w:w="3020"/>
+    <w:gridCol w:w="3021"/>
+    <w:gridCol w:w="3021"/>
+  </w:tblGrid>
+  <w:tr w:rsidR="00BA770A" w:rsidRPr="00BA770A" w14:paraId="5239DA27" w14:textId="77777777" w:rsidTr="00BA770A">
+    <w:trPr>
+      <w:cantSplit/>
+      <w:tblHeader/>
+    </w:trPr>
+    <w:tc>
+      <w:tcPr>
+        <w:tcW w:w="3020" w:type="dxa"/>
+        <w:shd w:val="clear" w:color="auto" w:fill="EFEFEF"/>
+      </w:tcPr>
+      <w:p w14:paraId="7EF68779" w14:textId="77777777" w:rsidR="00BA770A" w:rsidRPr="00BA770A" w:rsidRDefault="00BA770A" w:rsidP="00BA770A">
+        <w:pPr>
+          <w:pStyle w:val="TableHeader"/>
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+        </w:pPr>
+        <w:bookmarkStart w:id="19" w:name="DR_282d88b93b20827cc1146be4a40c_b"/>
+        <w:bookmarkStart w:id="20" w:name="DR_513e6fb17dc332ca294815b1a122_b"/>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t>&#24207;&#21495;</w:t>
+        </w:r>
+        <w:bookmarkEnd w:id="19"/>
+      </w:p>
+    </w:tc>
+    <w:tc>
+      <w:tcPr>
+        <w:tcW w:w="3021" w:type="dxa"/>
+        <w:shd w:val="clear" w:color="auto" w:fill="EFEFEF"/>
+      </w:tcPr>
+      <w:p w14:paraId="52B82837" w14:textId="77777777" w:rsidR="00BA770A" w:rsidRPr="00BA770A" w:rsidRDefault="00BA770A" w:rsidP="00BA770A">
+        <w:pPr>
+          <w:pStyle w:val="TableHeader"/>
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+        </w:pPr>
+        <w:bookmarkStart w:id="21" w:name="DR_377582c37d8b0da6b4aa7dc7b8e9_b"/>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t>&#39033;&#30446;</w:t>
+        </w:r>
+        <w:bookmarkEnd w:id="21"/>
+      </w:p>
+    </w:tc>
+    <w:tc>
+      <w:tcPr>
+        <w:tcW w:w="3021" w:type="dxa"/>
+        <w:shd w:val="clear" w:color="auto" w:fill="EFEFEF"/>
+      </w:tcPr>
+      <w:p w14:paraId="7DEB982C" w14:textId="77777777" w:rsidR="00BA770A" w:rsidRPr="00BA770A" w:rsidRDefault="00BA770A" w:rsidP="00BA770A">
+        <w:pPr>
+          <w:pStyle w:val="TableHeader"/>
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+        </w:pPr>
+        <w:bookmarkStart w:id="22" w:name="DR_5d1ba1adeb7cbdde3cc5ab2a0e38_b"/>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t>&#25216;&#26415;&#35201;&#27714;</w:t>
+        </w:r>
+        <w:bookmarkEnd w:id="22"/>
+      </w:p>
+    </w:tc>
+  </w:tr>
+  <w:tr w:rsidR="00BA770A" w:rsidRPr="00BA770A" w14:paraId="13DA79F7" w14:textId="77777777" w:rsidTr="00BA770A">
+    <w:trPr>
+      <w:cantSplit/>
+    </w:trPr>
+    <w:tc>
+      <w:tcPr>
+        <w:tcW w:w="3020" w:type="dxa"/>
+        <w:shd w:val="clear" w:color="auto" w:fill="auto"/>
+      </w:tcPr>
+      <w:p w14:paraId="1072E1EA" w14:textId="77777777" w:rsidR="00BA770A" w:rsidRPr="00BA770A" w:rsidRDefault="00BA770A" w:rsidP="00BA770A">
+        <w:pPr>
+          <w:pStyle w:val="TableText"/>
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+        </w:pPr>
+        <w:bookmarkStart w:id="23" w:name="DR_841aa26487f2ade1abc34d9c12a0_b"/>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t>1</w:t>
+        </w:r>
+        <w:bookmarkEnd w:id="23"/>
+      </w:p>
+    </w:tc>
+    <w:tc>
+      <w:tcPr>
+        <w:tcW w:w="3021" w:type="dxa"/>
+        <w:shd w:val="clear" w:color="auto" w:fill="auto"/>
+      </w:tcPr>
+      <w:p w14:paraId="22517606" w14:textId="77777777" w:rsidR="00BA770A" w:rsidRPr="00BA770A" w:rsidRDefault="00BA770A" w:rsidP="00BA770A">
+        <w:pPr>
+          <w:pStyle w:val="TableText"/>
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+        </w:pPr>
+        <w:bookmarkStart w:id="24" w:name="DR_201d4d7d4abb9ec8c4efe06b2b59_b"/>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t>&#21151;&#29575;</w:t>
+        </w:r>
+        <w:bookmarkEnd w:id="24"/>
+      </w:p>
+    </w:tc>
+    <w:tc>
+      <w:tcPr>
+        <w:tcW w:w="3021" w:type="dxa"/>
+        <w:shd w:val="clear" w:color="auto" w:fill="auto"/>
+      </w:tcPr>
+      <w:p w14:paraId="2A297782" w14:textId="77777777" w:rsidR="00BA770A" w:rsidRPr="00BA770A" w:rsidRDefault="00BA770A" w:rsidP="00BA770A">
+        <w:pPr>
+          <w:pStyle w:val="TableText"/>
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+        </w:pPr>
+        <w:bookmarkStart w:id="25" w:name="DR_ebd67c3b9f162c2ec8bb1aa3328e_b"/>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t xml:space="preserve">100kVA </w:t>
+        </w:r>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t>&#36830;&#32493;&#65307;</w:t>
+        </w:r>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t xml:space="preserve">110kVA / 2h </w:t>
+        </w:r>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t>&#36807;&#36733;&#65288;&#23545;&#24212;</w:t>
+        </w:r>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t xml:space="preserve"> 100kW </w:t>
+        </w:r>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t>&#21333;&#20803;</w:t>
+        </w:r>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t xml:space="preserve"> + </w:t>
+        </w:r>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t>&#31995;&#32479;</w:t>
+        </w:r>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t xml:space="preserve"> 110% </w:t>
+        </w:r>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t>&#36807;&#36733;&#65289;</w:t>
+        </w:r>
+        <w:bookmarkEnd w:id="25"/>
+      </w:p>
+    </w:tc>
+  </w:tr>
+  <w:tr w:rsidR="00BA770A" w:rsidRPr="00BA770A" w14:paraId="450295B9" w14:textId="77777777" w:rsidTr="00BA770A">
+    <w:trPr>
+      <w:cantSplit/>
+    </w:trPr>
+    <w:tc>
+      <w:tcPr>
+        <w:tcW w:w="3020" w:type="dxa"/>
+        <w:shd w:val="clear" w:color="auto" w:fill="auto"/>
+      </w:tcPr>
+      <w:p w14:paraId="3F85B400" w14:textId="77777777" w:rsidR="00BA770A" w:rsidRPr="00BA770A" w:rsidRDefault="00BA770A" w:rsidP="00BA770A">
+        <w:pPr>
+          <w:pStyle w:val="TableText"/>
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+        </w:pPr>
+        <w:bookmarkStart w:id="26" w:name="DR_72ab6b7cb38f6f7b3cd8307fa171_b"/>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t>2</w:t>
+        </w:r>
+        <w:bookmarkEnd w:id="26"/>
+      </w:p>
+    </w:tc>
+    <w:tc>
+      <w:tcPr>
+        <w:tcW w:w="3021" w:type="dxa"/>
+        <w:shd w:val="clear" w:color="auto" w:fill="auto"/>
+      </w:tcPr>
+      <w:p w14:paraId="0757317B" w14:textId="77777777" w:rsidR="00BA770A" w:rsidRPr="00BA770A" w:rsidRDefault="00BA770A" w:rsidP="00BA770A">
+        <w:pPr>
+          <w:pStyle w:val="TableText"/>
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+        </w:pPr>
+        <w:bookmarkStart w:id="27" w:name="DR_f8738ea3f66e898e47ce6c62f6eb_b"/>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t>&#21407;&#36793;&#30005;&#21387;</w:t>
+        </w:r>
+        <w:bookmarkEnd w:id="27"/>
+      </w:p>
+    </w:tc>
+    <w:tc>
+      <w:tcPr>
+        <w:tcW w:w="3021" w:type="dxa"/>
+        <w:shd w:val="clear" w:color="auto" w:fill="auto"/>
+      </w:tcPr>
+      <w:p w14:paraId="3711E81E" w14:textId="77777777" w:rsidR="00BA770A" w:rsidRPr="00BA770A" w:rsidRDefault="00BA770A" w:rsidP="00BA770A">
+        <w:pPr>
+          <w:pStyle w:val="TableText"/>
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+        </w:pPr>
+        <w:bookmarkStart w:id="28" w:name="DR_cdb0c728ad5204329247de32ef94_b"/>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t>1800V</w:t>
+        </w:r>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t>&#65288;</w:t>
+        </w:r>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t xml:space="preserve">20kHz </w:t>
+        </w:r>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t>&#21452;&#26497;&#24615;&#26041;&#27874;</w:t>
+        </w:r>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t xml:space="preserve"> </w:t>
+        </w:r>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t>&#177;</w:t>
+        </w:r>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t>1800V</w:t>
+        </w:r>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t>&#65292;&#21344;&#31354;&#27604;</w:t>
+        </w:r>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t xml:space="preserve"> 50%</w:t>
+        </w:r>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t>&#65289;</w:t>
+        </w:r>
+        <w:bookmarkEnd w:id="28"/>
+      </w:p>
+    </w:tc>
+  </w:tr>
+  <w:tr w:rsidR="00BA770A" w:rsidRPr="00BA770A" w14:paraId="65E9E8C1" w14:textId="77777777" w:rsidTr="00BA770A">
+    <w:trPr>
+      <w:cantSplit/>
+    </w:trPr>
+    <w:tc>
+      <w:tcPr>
+        <w:tcW w:w="3020" w:type="dxa"/>
+        <w:shd w:val="clear" w:color="auto" w:fill="auto"/>
+      </w:tcPr>
+      <w:p w14:paraId="0F36B759" w14:textId="77777777" w:rsidR="00BA770A" w:rsidRPr="00BA770A" w:rsidRDefault="00BA770A" w:rsidP="00BA770A">
+        <w:pPr>
+          <w:pStyle w:val="TableText"/>
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+        </w:pPr>
+        <w:bookmarkStart w:id="29" w:name="DR_2b51c95847f74f79980736e1584f_b"/>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t>3</w:t>
+        </w:r>
+        <w:bookmarkEnd w:id="29"/>
+      </w:p>
+    </w:tc>
+    <w:tc>
+      <w:tcPr>
+        <w:tcW w:w="3021" w:type="dxa"/>
+        <w:shd w:val="clear" w:color="auto" w:fill="auto"/>
+      </w:tcPr>
+      <w:p w14:paraId="41247C57" w14:textId="77777777" w:rsidR="00BA770A" w:rsidRPr="00BA770A" w:rsidRDefault="00BA770A" w:rsidP="00BA770A">
+        <w:pPr>
+          <w:pStyle w:val="TableText"/>
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+        </w:pPr>
+        <w:bookmarkStart w:id="30" w:name="DR_8a17aa2d4bd41cb4ad62d4c6f7af_b"/>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t>&#21407;&#36793;&#30005;&#27969;</w:t>
+        </w:r>
+        <w:bookmarkEnd w:id="30"/>
+      </w:p>
+    </w:tc>
+    <w:tc>
+      <w:tcPr>
+        <w:tcW w:w="3021" w:type="dxa"/>
+        <w:shd w:val="clear" w:color="auto" w:fill="auto"/>
+      </w:tcPr>
+      <w:p w14:paraId="2FC2F97C" w14:textId="77777777" w:rsidR="00BA770A" w:rsidRPr="00BA770A" w:rsidRDefault="00BA770A" w:rsidP="00BA770A">
+        <w:pPr>
+          <w:pStyle w:val="TableText"/>
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+        </w:pPr>
+        <w:bookmarkStart w:id="31" w:name="DR_188431ac9820c101236551c74915_b"/>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t>&#39069;&#23450;</w:t>
+        </w:r>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t xml:space="preserve"> 91A rms</w:t>
+        </w:r>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t>&#65307;&#26368;&#22823;</w:t>
+        </w:r>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t xml:space="preserve"> 100A rms / 122A </w:t>
+        </w:r>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t>&#23792;&#20540;&#65288;</w:t>
+        </w:r>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t xml:space="preserve">110% </w:t>
+        </w:r>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t>&#36807;&#36733;&#28857;&#65289;</w:t>
+        </w:r>
+        <w:bookmarkEnd w:id="31"/>
+      </w:p>
+    </w:tc>
+  </w:tr>
+  <w:tr w:rsidR="00BA770A" w:rsidRPr="00BA770A" w14:paraId="53AE5F15" w14:textId="77777777" w:rsidTr="00BA770A">
+    <w:trPr>
+      <w:cantSplit/>
+    </w:trPr>
+    <w:tc>
+      <w:tcPr>
+        <w:tcW w:w="3020" w:type="dxa"/>
+        <w:shd w:val="clear" w:color="auto" w:fill="auto"/>
+      </w:tcPr>
+      <w:p w14:paraId="599324BB" w14:textId="77777777" w:rsidR="00BA770A" w:rsidRPr="00BA770A" w:rsidRDefault="00BA770A" w:rsidP="00BA770A">
+        <w:pPr>
+          <w:pStyle w:val="TableText"/>
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+        </w:pPr>
+        <w:bookmarkStart w:id="32" w:name="DR_6a1b5d6573a585a1adf473fa8c23_b"/>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t>4</w:t>
+        </w:r>
+        <w:bookmarkEnd w:id="32"/>
+      </w:p>
+    </w:tc>
+    <w:tc>
+      <w:tcPr>
+        <w:tcW w:w="3021" w:type="dxa"/>
+        <w:shd w:val="clear" w:color="auto" w:fill="auto"/>
+      </w:tcPr>
+      <w:p w14:paraId="7CF4F3FE" w14:textId="77777777" w:rsidR="00BA770A" w:rsidRPr="00BA770A" w:rsidRDefault="00BA770A" w:rsidP="00BA770A">
+        <w:pPr>
+          <w:pStyle w:val="TableText"/>
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+        </w:pPr>
+        <w:bookmarkStart w:id="33" w:name="DR_8a7c5809b222592e5108ef1b0598_b"/>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t>&#21103;&#36793;&#30005;&#21387;</w:t>
+        </w:r>
+        <w:bookmarkEnd w:id="33"/>
+      </w:p>
+    </w:tc>
+    <w:tc>
+      <w:tcPr>
+        <w:tcW w:w="3021" w:type="dxa"/>
+        <w:shd w:val="clear" w:color="auto" w:fill="auto"/>
+      </w:tcPr>
+      <w:p w14:paraId="5C416436" w14:textId="77777777" w:rsidR="00BA770A" w:rsidRPr="00BA770A" w:rsidRDefault="00BA770A" w:rsidP="00BA770A">
+        <w:pPr>
+          <w:pStyle w:val="TableText"/>
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+        </w:pPr>
+        <w:bookmarkStart w:id="34" w:name="DR_7dcedb4da48dd5aacf8790ddeb44_b"/>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t>800V</w:t>
+        </w:r>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t>&#65288;</w:t>
+        </w:r>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t xml:space="preserve">20kHz </w:t>
+        </w:r>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t>&#21452;&#26497;&#24615;&#26041;&#27874;</w:t>
+        </w:r>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t xml:space="preserve"> </w:t>
+        </w:r>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t>&#177;</w:t>
+        </w:r>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t>800V</w:t>
+        </w:r>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t>&#65289;</w:t>
+        </w:r>
+        <w:bookmarkEnd w:id="34"/>
+      </w:p>
+    </w:tc>
+  </w:tr>
+  <w:tr w:rsidR="00BA770A" w:rsidRPr="00BA770A" w14:paraId="4B8CCE6A" w14:textId="77777777" w:rsidTr="00BA770A">
+    <w:trPr>
+      <w:cantSplit/>
+    </w:trPr>
+    <w:tc>
+      <w:tcPr>
+        <w:tcW w:w="3020" w:type="dxa"/>
+        <w:shd w:val="clear" w:color="auto" w:fill="auto"/>
+      </w:tcPr>
+      <w:p w14:paraId="63827EF2" w14:textId="77777777" w:rsidR="00BA770A" w:rsidRPr="00BA770A" w:rsidRDefault="00BA770A" w:rsidP="00BA770A">
+        <w:pPr>
+          <w:pStyle w:val="TableText"/>
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+        </w:pPr>
+        <w:bookmarkStart w:id="35" w:name="DR_96b3519891ab6edd9860baea2757_b"/>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t>5</w:t>
+        </w:r>
+        <w:bookmarkEnd w:id="35"/>
+      </w:p>
+    </w:tc>
+    <w:tc>
+      <w:tcPr>
+        <w:tcW w:w="3021" w:type="dxa"/>
+        <w:shd w:val="clear" w:color="auto" w:fill="auto"/>
+      </w:tcPr>
+      <w:p w14:paraId="204CED59" w14:textId="77777777" w:rsidR="00BA770A" w:rsidRPr="00BA770A" w:rsidRDefault="00BA770A" w:rsidP="00BA770A">
+        <w:pPr>
+          <w:pStyle w:val="TableText"/>
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+        </w:pPr>
+        <w:bookmarkStart w:id="36" w:name="DR_91e02d3a7ca105a717a905c092b5_b"/>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t>&#21103;&#36793;&#30005;&#27969;</w:t>
+        </w:r>
+        <w:bookmarkEnd w:id="36"/>
+      </w:p>
+    </w:tc>
+    <w:tc>
+      <w:tcPr>
+        <w:tcW w:w="3021" w:type="dxa"/>
+        <w:shd w:val="clear" w:color="auto" w:fill="auto"/>
+      </w:tcPr>
+      <w:p w14:paraId="423A243B" w14:textId="77777777" w:rsidR="00BA770A" w:rsidRPr="00BA770A" w:rsidRDefault="00BA770A" w:rsidP="00BA770A">
+        <w:pPr>
+          <w:pStyle w:val="TableText"/>
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+        </w:pPr>
+        <w:bookmarkStart w:id="37" w:name="DR_2c53cea119c2d287cd3100110c13_b"/>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t>&#39069;&#23450;</w:t>
+        </w:r>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t xml:space="preserve"> 204A rms / 250A </w:t>
+        </w:r>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t>&#23792;&#20540;&#65307;&#26368;&#22823;</w:t>
+        </w:r>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t xml:space="preserve"> 224A rms / 275A </w:t>
+        </w:r>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t>&#23792;&#20540;</w:t>
+        </w:r>
+        <w:bookmarkEnd w:id="37"/>
+      </w:p>
+    </w:tc>
+  </w:tr>
+  <w:tr w:rsidR="00BA770A" w:rsidRPr="00BA770A" w14:paraId="760A09BB" w14:textId="77777777" w:rsidTr="00BA770A">
+    <w:trPr>
+      <w:cantSplit/>
+    </w:trPr>
+    <w:tc>
+      <w:tcPr>
+        <w:tcW w:w="3020" w:type="dxa"/>
+        <w:shd w:val="clear" w:color="auto" w:fill="auto"/>
+      </w:tcPr>
+      <w:p w14:paraId="73D79052" w14:textId="77777777" w:rsidR="00BA770A" w:rsidRPr="00BA770A" w:rsidRDefault="00BA770A" w:rsidP="00BA770A">
+        <w:pPr>
+          <w:pStyle w:val="TableText"/>
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+        </w:pPr>
+        <w:bookmarkStart w:id="38" w:name="DR_1c3798538eba33f09561e71ea102_b"/>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t>6</w:t>
+        </w:r>
+        <w:bookmarkEnd w:id="38"/>
+      </w:p>
+    </w:tc>
+    <w:tc>
+      <w:tcPr>
+        <w:tcW w:w="3021" w:type="dxa"/>
+        <w:shd w:val="clear" w:color="auto" w:fill="auto"/>
+      </w:tcPr>
+      <w:p w14:paraId="2FC8957F" w14:textId="77777777" w:rsidR="00BA770A" w:rsidRPr="00BA770A" w:rsidRDefault="00BA770A" w:rsidP="00BA770A">
+        <w:pPr>
+          <w:pStyle w:val="TableText"/>
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+        </w:pPr>
+        <w:bookmarkStart w:id="39" w:name="DR_e547eae3e1a19bf2238f9b353816_b"/>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t>&#21464;&#27604;</w:t>
+        </w:r>
+        <w:bookmarkEnd w:id="39"/>
+      </w:p>
+    </w:tc>
+    <w:tc>
+      <w:tcPr>
+        <w:tcW w:w="3021" w:type="dxa"/>
+        <w:shd w:val="clear" w:color="auto" w:fill="auto"/>
+      </w:tcPr>
+      <w:p w14:paraId="3D1BFEC8" w14:textId="77777777" w:rsidR="00BA770A" w:rsidRPr="00BA770A" w:rsidRDefault="00BA770A" w:rsidP="00BA770A">
+        <w:pPr>
+          <w:pStyle w:val="TableText"/>
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+        </w:pPr>
+        <w:bookmarkStart w:id="40" w:name="DR_8f75de21cea20db295857048c605_b"/>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t>Np:Ns = 12:5</w:t>
+        </w:r>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t>&#65288;&#32469;&#32452;&#21277;&#25968;&#65307;&#21151;&#29575;&#24046;&#39069;&#30001;</w:t>
+        </w:r>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t xml:space="preserve"> DAB </w:t>
+        </w:r>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t>&#31227;&#30456;&#35282;&#34917;&#20607;&#65289;</w:t>
+        </w:r>
+        <w:bookmarkEnd w:id="40"/>
+      </w:p>
+    </w:tc>
+  </w:tr>
+  <w:tr w:rsidR="00BA770A" w:rsidRPr="00BA770A" w14:paraId="1A50F574" w14:textId="77777777" w:rsidTr="00BA770A">
+    <w:trPr>
+      <w:cantSplit/>
+    </w:trPr>
+    <w:tc>
+      <w:tcPr>
+        <w:tcW w:w="3020" w:type="dxa"/>
+        <w:shd w:val="clear" w:color="auto" w:fill="auto"/>
+      </w:tcPr>
+      <w:p w14:paraId="7A244B48" w14:textId="77777777" w:rsidR="00BA770A" w:rsidRPr="00BA770A" w:rsidRDefault="00BA770A" w:rsidP="00BA770A">
+        <w:pPr>
+          <w:pStyle w:val="TableText"/>
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+        </w:pPr>
+        <w:bookmarkStart w:id="41" w:name="DR_a538bc65e30cad0dd3da8cd76ca8_b"/>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t>7</w:t>
+        </w:r>
+        <w:bookmarkEnd w:id="41"/>
+      </w:p>
+    </w:tc>
+    <w:tc>
+      <w:tcPr>
+        <w:tcW w:w="3021" w:type="dxa"/>
+        <w:shd w:val="clear" w:color="auto" w:fill="auto"/>
+      </w:tcPr>
+      <w:p w14:paraId="5D690F34" w14:textId="77777777" w:rsidR="00BA770A" w:rsidRPr="00BA770A" w:rsidRDefault="00BA770A" w:rsidP="00BA770A">
+        <w:pPr>
+          <w:pStyle w:val="TableText"/>
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+        </w:pPr>
+        <w:bookmarkStart w:id="42" w:name="DR_3698eb021c61d8936f66c83d60df_b"/>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t>&#39057;&#29575;</w:t>
+        </w:r>
+        <w:bookmarkEnd w:id="42"/>
+      </w:p>
+    </w:tc>
+    <w:tc>
+      <w:tcPr>
+        <w:tcW w:w="3021" w:type="dxa"/>
+        <w:shd w:val="clear" w:color="auto" w:fill="auto"/>
+      </w:tcPr>
+      <w:p w14:paraId="22791615" w14:textId="77777777" w:rsidR="00BA770A" w:rsidRPr="00BA770A" w:rsidRDefault="00BA770A" w:rsidP="00BA770A">
+        <w:pPr>
+          <w:pStyle w:val="TableText"/>
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+        </w:pPr>
+        <w:bookmarkStart w:id="43" w:name="DR_3c46608acd6125ec6ecfc4f43ade_b"/>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t>&#35774;&#35745;&#28857;</w:t>
+        </w:r>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t xml:space="preserve"> 20kHz</w:t>
+        </w:r>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t>&#65307;&#20801;&#35768;</w:t>
+        </w:r>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t xml:space="preserve"> 15~25kHz </w:t>
+        </w:r>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t>&#33539;&#22260;&#36816;&#34892;&#65288;&#38477;&#39057;&#22686;&#23481;&#25353;&#25442;&#27969;&#30005;&#27969;</w:t>
+        </w:r>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t xml:space="preserve"> </w:t>
+        </w:r>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t>&#8733;</w:t>
+        </w:r>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t xml:space="preserve">1/f </w:t>
+        </w:r>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t>&#26657;&#26680;&#65289;</w:t>
+        </w:r>
+        <w:bookmarkEnd w:id="43"/>
+      </w:p>
+    </w:tc>
+  </w:tr>
+  <w:tr w:rsidR="00BA770A" w:rsidRPr="00BA770A" w14:paraId="18348130" w14:textId="77777777" w:rsidTr="00BA770A">
+    <w:trPr>
+      <w:cantSplit/>
+    </w:trPr>
+    <w:tc>
+      <w:tcPr>
+        <w:tcW w:w="3020" w:type="dxa"/>
+        <w:shd w:val="clear" w:color="auto" w:fill="auto"/>
+      </w:tcPr>
+      <w:p w14:paraId="2EE5241B" w14:textId="77777777" w:rsidR="00BA770A" w:rsidRPr="00BA770A" w:rsidRDefault="00BA770A" w:rsidP="00BA770A">
+        <w:pPr>
+          <w:pStyle w:val="TableText"/>
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+        </w:pPr>
+        <w:bookmarkStart w:id="44" w:name="DR_4a09868d9efe3e922a203435148b_b"/>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:lastRenderedPageBreak/>
+          <w:t>8</w:t>
+        </w:r>
+        <w:bookmarkEnd w:id="44"/>
+      </w:p>
+    </w:tc>
+    <w:tc>
+      <w:tcPr>
+        <w:tcW w:w="3021" w:type="dxa"/>
+        <w:shd w:val="clear" w:color="auto" w:fill="auto"/>
+      </w:tcPr>
+      <w:p w14:paraId="27A6E5CB" w14:textId="77777777" w:rsidR="00BA770A" w:rsidRPr="00BA770A" w:rsidRDefault="00BA770A" w:rsidP="00BA770A">
+        <w:pPr>
+          <w:pStyle w:val="TableText"/>
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+        </w:pPr>
+        <w:bookmarkStart w:id="45" w:name="DR_081016b0b56bd3b5697ff11dffc8_b"/>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t>&#21021;&#32423;&#21169;&#30913;&#30005;&#24863;</w:t>
+        </w:r>
+        <w:bookmarkEnd w:id="45"/>
+      </w:p>
+    </w:tc>
+    <w:tc>
+      <w:tcPr>
+        <w:tcW w:w="3021" w:type="dxa"/>
+        <w:shd w:val="clear" w:color="auto" w:fill="auto"/>
+      </w:tcPr>
+      <w:p w14:paraId="48CA693F" w14:textId="77777777" w:rsidR="00BA770A" w:rsidRPr="00BA770A" w:rsidRDefault="00BA770A" w:rsidP="00BA770A">
+        <w:pPr>
+          <w:pStyle w:val="TableText"/>
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+        </w:pPr>
+        <w:bookmarkStart w:id="46" w:name="DR_247c94e9950d3045679e89d4a32b_b"/>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t>&#8805;</w:t>
+        </w:r>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t>2.0mH @20kHz/1V</w:t>
+        </w:r>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t>&#65288;&#23545;&#24212;</w:t>
+        </w:r>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t xml:space="preserve"> 1800V </w:t>
+        </w:r>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t>&#19979;&#21169;&#30913;&#30005;&#27969;&#23792;&#20540;</w:t>
+        </w:r>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t xml:space="preserve"> </w:t>
+        </w:r>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t>&#8804;</w:t>
+        </w:r>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t>11A</w:t>
+        </w:r>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t>&#65292;&#20379;&#20239;&#31186;&#19981;&#24179;&#34913;&#20445;&#25252;&#26816;&#27979;&#65289;</w:t>
+        </w:r>
+        <w:bookmarkEnd w:id="46"/>
+      </w:p>
+    </w:tc>
+  </w:tr>
+  <w:tr w:rsidR="00BA770A" w:rsidRPr="00BA770A" w14:paraId="48BB6086" w14:textId="77777777" w:rsidTr="00BA770A">
+    <w:trPr>
+      <w:cantSplit/>
+    </w:trPr>
+    <w:tc>
+      <w:tcPr>
+        <w:tcW w:w="3020" w:type="dxa"/>
+        <w:shd w:val="clear" w:color="auto" w:fill="auto"/>
+      </w:tcPr>
+      <w:p w14:paraId="314CC61C" w14:textId="77777777" w:rsidR="00BA770A" w:rsidRPr="00BA770A" w:rsidRDefault="00BA770A" w:rsidP="00BA770A">
+        <w:pPr>
+          <w:pStyle w:val="TableText"/>
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+        </w:pPr>
+        <w:bookmarkStart w:id="47" w:name="DR_191aed68bb8804dfe58b6b51f579_b"/>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t>9</w:t>
+        </w:r>
+        <w:bookmarkEnd w:id="47"/>
+      </w:p>
+    </w:tc>
+    <w:tc>
+      <w:tcPr>
+        <w:tcW w:w="3021" w:type="dxa"/>
+        <w:shd w:val="clear" w:color="auto" w:fill="auto"/>
+      </w:tcPr>
+      <w:p w14:paraId="6958F86F" w14:textId="77777777" w:rsidR="00BA770A" w:rsidRPr="00BA770A" w:rsidRDefault="00BA770A" w:rsidP="00BA770A">
+        <w:pPr>
+          <w:pStyle w:val="TableText"/>
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+        </w:pPr>
+        <w:bookmarkStart w:id="48" w:name="DR_d4eedaaf3d25d90f31ffa7ec6b45_b"/>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t>&#21021;&#32423;&#28431;&#24863;</w:t>
+        </w:r>
+        <w:bookmarkEnd w:id="48"/>
+      </w:p>
+    </w:tc>
+    <w:tc>
+      <w:tcPr>
+        <w:tcW w:w="3021" w:type="dxa"/>
+        <w:shd w:val="clear" w:color="auto" w:fill="auto"/>
+      </w:tcPr>
+      <w:p w14:paraId="153FB97B" w14:textId="77777777" w:rsidR="00BA770A" w:rsidRPr="00BA770A" w:rsidRDefault="00BA770A" w:rsidP="00BA770A">
+        <w:pPr>
+          <w:pStyle w:val="TableText"/>
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+        </w:pPr>
+        <w:bookmarkStart w:id="49" w:name="DR_ce8dc551f3b601558877e2cba49f_b"/>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t>25&#181;H</w:t>
+        </w:r>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t>&#177;</w:t>
+        </w:r>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t>5% @20kHz/1V</w:t>
+        </w:r>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t>&#65288;&#20316;&#20026;</w:t>
+        </w:r>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t xml:space="preserve"> DAB </w:t>
+        </w:r>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t>&#31227;&#30456;&#30005;&#24863;&#32452;&#25104;&#37096;&#20998;&#65307;&#25209;&#38388;&#20844;&#24046;&#30452;&#25509;&#24433;&#21709;&#22810;&#21333;&#20803;&#24182;&#32852;&#22343;&#27969;&#65292;&#20026;&#20851;&#38190;&#25511;&#21046;&#39033;&#65289;</w:t>
+        </w:r>
+        <w:bookmarkEnd w:id="49"/>
+      </w:p>
+    </w:tc>
+  </w:tr>
+  <w:tr w:rsidR="00BA770A" w:rsidRPr="00BA770A" w14:paraId="6F811F5E" w14:textId="77777777" w:rsidTr="00BA770A">
+    <w:trPr>
+      <w:cantSplit/>
+    </w:trPr>
+    <w:tc>
+      <w:tcPr>
+        <w:tcW w:w="3020" w:type="dxa"/>
+        <w:shd w:val="clear" w:color="auto" w:fill="auto"/>
+      </w:tcPr>
+      <w:p w14:paraId="5772E166" w14:textId="77777777" w:rsidR="00BA770A" w:rsidRPr="00BA770A" w:rsidRDefault="00BA770A" w:rsidP="00BA770A">
+        <w:pPr>
+          <w:pStyle w:val="TableText"/>
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+        </w:pPr>
+        <w:bookmarkStart w:id="50" w:name="DR_bb2dd61f02d50cf56cc6e7e5fa60_b"/>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t>10</w:t>
+        </w:r>
+        <w:bookmarkEnd w:id="50"/>
+      </w:p>
+    </w:tc>
+    <w:tc>
+      <w:tcPr>
+        <w:tcW w:w="3021" w:type="dxa"/>
+        <w:shd w:val="clear" w:color="auto" w:fill="auto"/>
+      </w:tcPr>
+      <w:p w14:paraId="6D3DF565" w14:textId="77777777" w:rsidR="00BA770A" w:rsidRPr="00BA770A" w:rsidRDefault="00BA770A" w:rsidP="00BA770A">
+        <w:pPr>
+          <w:pStyle w:val="TableText"/>
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+        </w:pPr>
+        <w:bookmarkStart w:id="51" w:name="DR_d311397db7c47d8b1480c2f7b784_b"/>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t>&#20919;&#21364;&#26041;&#24335;</w:t>
+        </w:r>
+        <w:bookmarkEnd w:id="51"/>
+      </w:p>
+    </w:tc>
+    <w:tc>
+      <w:tcPr>
+        <w:tcW w:w="3021" w:type="dxa"/>
+        <w:shd w:val="clear" w:color="auto" w:fill="auto"/>
+      </w:tcPr>
+      <w:p w14:paraId="7CFC20BE" w14:textId="77777777" w:rsidR="00BA770A" w:rsidRPr="00BA770A" w:rsidRDefault="00BA770A" w:rsidP="00BA770A">
+        <w:pPr>
+          <w:pStyle w:val="TableText"/>
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+        </w:pPr>
+        <w:bookmarkStart w:id="52" w:name="DR_7300e772f7a9f2d3e80c17e4d6a4_b"/>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t>AN</w:t>
+        </w:r>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t>&#65288;&#26588;&#20869;&#39118;&#36947;&#39118;&#36895;</w:t>
+        </w:r>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t xml:space="preserve"> &gt;3m/s</w:t>
+        </w:r>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t>&#65289;</w:t>
+        </w:r>
+        <w:bookmarkEnd w:id="52"/>
+      </w:p>
+    </w:tc>
+  </w:tr>
+  <w:tr w:rsidR="00BA770A" w:rsidRPr="00BA770A" w14:paraId="5F37F366" w14:textId="77777777" w:rsidTr="00BA770A">
+    <w:trPr>
+      <w:cantSplit/>
+    </w:trPr>
+    <w:tc>
+      <w:tcPr>
+        <w:tcW w:w="3020" w:type="dxa"/>
+        <w:shd w:val="clear" w:color="auto" w:fill="auto"/>
+      </w:tcPr>
+      <w:p w14:paraId="479D4D36" w14:textId="77777777" w:rsidR="00BA770A" w:rsidRPr="00BA770A" w:rsidRDefault="00BA770A" w:rsidP="00BA770A">
+        <w:pPr>
+          <w:pStyle w:val="TableText"/>
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+        </w:pPr>
+        <w:bookmarkStart w:id="53" w:name="DR_fa2b522e55c4bb668390f28942a7_b"/>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t>11</w:t>
+        </w:r>
+        <w:bookmarkEnd w:id="53"/>
+      </w:p>
+    </w:tc>
+    <w:tc>
+      <w:tcPr>
+        <w:tcW w:w="3021" w:type="dxa"/>
+        <w:shd w:val="clear" w:color="auto" w:fill="auto"/>
+      </w:tcPr>
+      <w:p w14:paraId="78A7F864" w14:textId="77777777" w:rsidR="00BA770A" w:rsidRPr="00BA770A" w:rsidRDefault="00BA770A" w:rsidP="00BA770A">
+        <w:pPr>
+          <w:pStyle w:val="TableText"/>
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+        </w:pPr>
+        <w:bookmarkStart w:id="54" w:name="DR_dda1c0f2c16ace6c091def91f36f_b"/>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t>&#32477;&#32536;&#31561;&#32423;</w:t>
+        </w:r>
+        <w:bookmarkEnd w:id="54"/>
+      </w:p>
+    </w:tc>
+    <w:tc>
+      <w:tcPr>
+        <w:tcW w:w="3021" w:type="dxa"/>
+        <w:shd w:val="clear" w:color="auto" w:fill="auto"/>
+      </w:tcPr>
+      <w:p w14:paraId="5EF1041F" w14:textId="77777777" w:rsidR="00BA770A" w:rsidRPr="00BA770A" w:rsidRDefault="00BA770A" w:rsidP="00BA770A">
+        <w:pPr>
+          <w:pStyle w:val="TableText"/>
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+        </w:pPr>
+        <w:bookmarkStart w:id="55" w:name="DR_0b0f847fa5188250b7a16958c71f_b"/>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t xml:space="preserve">F </w:t>
+        </w:r>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t>&#32423;&#65288;</w:t>
+        </w:r>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t>155</w:t>
+        </w:r>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t>&#8451;&#65289;</w:t>
+        </w:r>
+        <w:bookmarkEnd w:id="55"/>
+      </w:p>
+    </w:tc>
+  </w:tr>
+  <w:tr w:rsidR="00BA770A" w:rsidRPr="00BA770A" w14:paraId="5A94A5E6" w14:textId="77777777" w:rsidTr="00BA770A">
+    <w:trPr>
+      <w:cantSplit/>
+    </w:trPr>
+    <w:tc>
+      <w:tcPr>
+        <w:tcW w:w="3020" w:type="dxa"/>
+        <w:shd w:val="clear" w:color="auto" w:fill="auto"/>
+      </w:tcPr>
+      <w:p w14:paraId="00817D9B" w14:textId="77777777" w:rsidR="00BA770A" w:rsidRPr="00BA770A" w:rsidRDefault="00BA770A" w:rsidP="00BA770A">
+        <w:pPr>
+          <w:pStyle w:val="TableText"/>
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+        </w:pPr>
+        <w:bookmarkStart w:id="56" w:name="DR_706a2f340ac92d524856b20115db_b"/>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t>12</w:t>
+        </w:r>
+        <w:bookmarkEnd w:id="56"/>
+      </w:p>
+    </w:tc>
+    <w:tc>
+      <w:tcPr>
+        <w:tcW w:w="3021" w:type="dxa"/>
+        <w:shd w:val="clear" w:color="auto" w:fill="auto"/>
+      </w:tcPr>
+      <w:p w14:paraId="02BC45DB" w14:textId="77777777" w:rsidR="00BA770A" w:rsidRPr="00BA770A" w:rsidRDefault="00BA770A" w:rsidP="00BA770A">
+        <w:pPr>
+          <w:pStyle w:val="TableText"/>
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+        </w:pPr>
+        <w:bookmarkStart w:id="57" w:name="DR_3fdbe9e9329a6a4ebe2f3d362c73_b"/>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t>&#23616;&#37096;&#25918;&#30005;</w:t>
+        </w:r>
+        <w:bookmarkEnd w:id="57"/>
+      </w:p>
+    </w:tc>
+    <w:tc>
+      <w:tcPr>
+        <w:tcW w:w="3021" w:type="dxa"/>
+        <w:shd w:val="clear" w:color="auto" w:fill="auto"/>
+      </w:tcPr>
+      <w:p w14:paraId="0BD08BEC" w14:textId="77777777" w:rsidR="00BA770A" w:rsidRPr="00BA770A" w:rsidRDefault="00BA770A" w:rsidP="00BA770A">
+        <w:pPr>
+          <w:pStyle w:val="TableText"/>
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+        </w:pPr>
+        <w:bookmarkStart w:id="58" w:name="DR_e9d52b24244951167c7f8d190ee1_b"/>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t>&#23545;&#22320;</w:t>
+        </w:r>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t xml:space="preserve"> </w:t>
+        </w:r>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t>&#8804;</w:t>
+        </w:r>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t>10pC @13kV</w:t>
+        </w:r>
+        <w:bookmarkEnd w:id="58"/>
+      </w:p>
+    </w:tc>
+  </w:tr>
+  <w:tr w:rsidR="00BA770A" w:rsidRPr="00BA770A" w14:paraId="5863E0CC" w14:textId="77777777" w:rsidTr="00BA770A">
+    <w:trPr>
+      <w:cantSplit/>
+    </w:trPr>
+    <w:tc>
+      <w:tcPr>
+        <w:tcW w:w="3020" w:type="dxa"/>
+        <w:shd w:val="clear" w:color="auto" w:fill="auto"/>
+      </w:tcPr>
+      <w:p w14:paraId="13AD4CDC" w14:textId="77777777" w:rsidR="00BA770A" w:rsidRPr="00BA770A" w:rsidRDefault="00BA770A" w:rsidP="00BA770A">
+        <w:pPr>
+          <w:pStyle w:val="TableText"/>
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+        </w:pPr>
+        <w:bookmarkStart w:id="59" w:name="DR_1a0f434584c9c983c4eab634bd37_b"/>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t>13</w:t>
+        </w:r>
+        <w:bookmarkEnd w:id="59"/>
+      </w:p>
+    </w:tc>
+    <w:tc>
+      <w:tcPr>
+        <w:tcW w:w="3021" w:type="dxa"/>
+        <w:shd w:val="clear" w:color="auto" w:fill="auto"/>
+      </w:tcPr>
+      <w:p w14:paraId="7A6A484B" w14:textId="77777777" w:rsidR="00BA770A" w:rsidRPr="00BA770A" w:rsidRDefault="00BA770A" w:rsidP="00BA770A">
+        <w:pPr>
+          <w:pStyle w:val="TableText"/>
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+        </w:pPr>
+        <w:bookmarkStart w:id="60" w:name="DR_0337e49d10e7e5b8251630ebd92a_b"/>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t>&#24037;&#39057;&#32784;&#21387;</w:t>
+        </w:r>
+        <w:bookmarkEnd w:id="60"/>
+      </w:p>
+    </w:tc>
+    <w:tc>
+      <w:tcPr>
+        <w:tcW w:w="3021" w:type="dxa"/>
+        <w:shd w:val="clear" w:color="auto" w:fill="auto"/>
+      </w:tcPr>
+      <w:p w14:paraId="5A64642C" w14:textId="77777777" w:rsidR="00BA770A" w:rsidRPr="00BA770A" w:rsidRDefault="00BA770A" w:rsidP="00BA770A">
+        <w:pPr>
+          <w:pStyle w:val="TableText"/>
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+        </w:pPr>
+        <w:bookmarkStart w:id="61" w:name="DR_045eeac71bc94f4a0ce8ad963dfb_b"/>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t>Pri-Sec/E</w:t>
+        </w:r>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t>&#65306;</w:t>
+        </w:r>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t>AC 42kV/50Hz/1min</w:t>
+        </w:r>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t>&#65292;&#27844;&#28431;&#30005;&#27969;</w:t>
+        </w:r>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t xml:space="preserve"> </w:t>
+        </w:r>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t>&#8804;</w:t>
+        </w:r>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t>30mA</w:t>
+        </w:r>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t>&#65307;</w:t>
+        </w:r>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t>Sec-E</w:t>
+        </w:r>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t>&#65306;</w:t>
+        </w:r>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t>AC 3kV/50Hz/1min</w:t>
+        </w:r>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t>&#65292;&#8804;</w:t>
+        </w:r>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t>5mA</w:t>
+        </w:r>
+        <w:bookmarkEnd w:id="61"/>
+      </w:p>
+    </w:tc>
+  </w:tr>
+  <w:tr w:rsidR="00BA770A" w:rsidRPr="00BA770A" w14:paraId="2C6F91CD" w14:textId="77777777" w:rsidTr="00BA770A">
+    <w:trPr>
+      <w:cantSplit/>
+    </w:trPr>
+    <w:tc>
+      <w:tcPr>
+        <w:tcW w:w="3020" w:type="dxa"/>
+        <w:shd w:val="clear" w:color="auto" w:fill="auto"/>
+      </w:tcPr>
+      <w:p w14:paraId="0AB3D2C5" w14:textId="77777777" w:rsidR="00BA770A" w:rsidRPr="00BA770A" w:rsidRDefault="00BA770A" w:rsidP="00BA770A">
+        <w:pPr>
+          <w:pStyle w:val="TableText"/>
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+        </w:pPr>
+        <w:bookmarkStart w:id="62" w:name="DR_fab2fbd72b7700f05f6bd5280803_b"/>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t>14</w:t>
+        </w:r>
+        <w:bookmarkEnd w:id="62"/>
+      </w:p>
+    </w:tc>
+    <w:tc>
+      <w:tcPr>
+        <w:tcW w:w="3021" w:type="dxa"/>
+        <w:shd w:val="clear" w:color="auto" w:fill="auto"/>
+      </w:tcPr>
+      <w:p w14:paraId="2FA98F2F" w14:textId="77777777" w:rsidR="00BA770A" w:rsidRPr="00BA770A" w:rsidRDefault="00BA770A" w:rsidP="00BA770A">
+        <w:pPr>
+          <w:pStyle w:val="TableText"/>
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+        </w:pPr>
+        <w:bookmarkStart w:id="63" w:name="DR_353258cea05411a3f48e7b384497_b"/>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t>&#32477;&#32536;&#30005;&#38459;</w:t>
+        </w:r>
+        <w:bookmarkEnd w:id="63"/>
+      </w:p>
+    </w:tc>
+    <w:tc>
+      <w:tcPr>
+        <w:tcW w:w="3021" w:type="dxa"/>
+        <w:shd w:val="clear" w:color="auto" w:fill="auto"/>
+      </w:tcPr>
+      <w:p w14:paraId="16E6B9B8" w14:textId="77777777" w:rsidR="00BA770A" w:rsidRPr="00BA770A" w:rsidRDefault="00BA770A" w:rsidP="00BA770A">
+        <w:pPr>
+          <w:pStyle w:val="TableText"/>
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+        </w:pPr>
+        <w:bookmarkStart w:id="64" w:name="DR_6b1809e0f3044c9ba3997b1f2e78_b"/>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t>Pri-Sec/E</w:t>
+        </w:r>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t>&#12289;</w:t>
+        </w:r>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t>Sec-E</w:t>
+        </w:r>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t>&#65306;</w:t>
+        </w:r>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t>&gt;100M</w:t>
+        </w:r>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t>&#937;</w:t>
+        </w:r>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t>/DC1kV</w:t>
+        </w:r>
+        <w:bookmarkEnd w:id="64"/>
+      </w:p>
+    </w:tc>
+  </w:tr>
+  <w:tr w:rsidR="00BA770A" w:rsidRPr="00BA770A" w14:paraId="49B25D57" w14:textId="77777777" w:rsidTr="00BA770A">
+    <w:trPr>
+      <w:cantSplit/>
+    </w:trPr>
+    <w:tc>
+      <w:tcPr>
+        <w:tcW w:w="3020" w:type="dxa"/>
+        <w:shd w:val="clear" w:color="auto" w:fill="auto"/>
+      </w:tcPr>
+      <w:p w14:paraId="4F3923AA" w14:textId="77777777" w:rsidR="00BA770A" w:rsidRPr="00BA770A" w:rsidRDefault="00BA770A" w:rsidP="00BA770A">
+        <w:pPr>
+          <w:pStyle w:val="TableText"/>
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+        </w:pPr>
+        <w:bookmarkStart w:id="65" w:name="DR_2777d7409dbfb301cecff0b727a0_b"/>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t>15</w:t>
+        </w:r>
+        <w:bookmarkEnd w:id="65"/>
+      </w:p>
+    </w:tc>
+    <w:tc>
+      <w:tcPr>
+        <w:tcW w:w="3021" w:type="dxa"/>
+        <w:shd w:val="clear" w:color="auto" w:fill="auto"/>
+      </w:tcPr>
+      <w:p w14:paraId="5E1A0174" w14:textId="77777777" w:rsidR="00BA770A" w:rsidRPr="00BA770A" w:rsidRDefault="00BA770A" w:rsidP="00BA770A">
+        <w:pPr>
+          <w:pStyle w:val="TableText"/>
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+        </w:pPr>
+        <w:bookmarkStart w:id="66" w:name="DR_828de34db3624f407d78f3885e85_b"/>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t>&#38647;&#30005;&#20914;&#20987;</w:t>
+        </w:r>
+        <w:bookmarkEnd w:id="66"/>
+      </w:p>
+    </w:tc>
+    <w:tc>
+      <w:tcPr>
+        <w:tcW w:w="3021" w:type="dxa"/>
+        <w:shd w:val="clear" w:color="auto" w:fill="auto"/>
+      </w:tcPr>
+      <w:p w14:paraId="26B6B109" w14:textId="77777777" w:rsidR="00BA770A" w:rsidRPr="00BA770A" w:rsidRDefault="00BA770A" w:rsidP="00BA770A">
+        <w:pPr>
+          <w:pStyle w:val="TableText"/>
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+        </w:pPr>
+        <w:bookmarkStart w:id="67" w:name="DR_cc1f2ae980ed7a426af9d25e79e4_b"/>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t>95kV</w:t>
+        </w:r>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t>&#65288;</w:t>
+        </w:r>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t xml:space="preserve">1.2/50&#181;s </w:t>
+        </w:r>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t>&#26631;&#20934;&#27874;&#65292;&#32437;&#32477;&#32536;&#25353;&#20914;&#20987;&#30005;&#21387;&#20998;&#24067;&#35774;&#35745;&#65289;</w:t>
+        </w:r>
+        <w:bookmarkEnd w:id="67"/>
+      </w:p>
+    </w:tc>
+  </w:tr>
+  <w:tr w:rsidR="00BA770A" w:rsidRPr="00BA770A" w14:paraId="4A93CE58" w14:textId="77777777" w:rsidTr="00BA770A">
+    <w:trPr>
+      <w:cantSplit/>
+    </w:trPr>
+    <w:tc>
+      <w:tcPr>
+        <w:tcW w:w="3020" w:type="dxa"/>
+        <w:shd w:val="clear" w:color="auto" w:fill="auto"/>
+      </w:tcPr>
+      <w:p w14:paraId="5AB3BFDA" w14:textId="77777777" w:rsidR="00BA770A" w:rsidRPr="00BA770A" w:rsidRDefault="00BA770A" w:rsidP="00BA770A">
+        <w:pPr>
+          <w:pStyle w:val="TableText"/>
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+        </w:pPr>
+        <w:bookmarkStart w:id="68" w:name="DR_922f69c26c791d3df9469b034f2b_b"/>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t>16</w:t>
+        </w:r>
+        <w:bookmarkEnd w:id="68"/>
+      </w:p>
+    </w:tc>
+    <w:tc>
+      <w:tcPr>
+        <w:tcW w:w="3021" w:type="dxa"/>
+        <w:shd w:val="clear" w:color="auto" w:fill="auto"/>
+      </w:tcPr>
+      <w:p w14:paraId="3CD3E197" w14:textId="77777777" w:rsidR="00BA770A" w:rsidRPr="00BA770A" w:rsidRDefault="00BA770A" w:rsidP="00BA770A">
+        <w:pPr>
+          <w:pStyle w:val="TableText"/>
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+        </w:pPr>
+        <w:bookmarkStart w:id="69" w:name="DR_6b566b4895e5cd5f33b2acd604ae_b"/>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t>&#39640;&#39057;&#24863;&#24212;&#32784;&#21387;</w:t>
+        </w:r>
+        <w:bookmarkEnd w:id="69"/>
+      </w:p>
+    </w:tc>
+    <w:tc>
+      <w:tcPr>
+        <w:tcW w:w="3021" w:type="dxa"/>
+        <w:shd w:val="clear" w:color="auto" w:fill="auto"/>
+      </w:tcPr>
+      <w:p w14:paraId="27823E11" w14:textId="77777777" w:rsidR="00BA770A" w:rsidRPr="00BA770A" w:rsidRDefault="00BA770A" w:rsidP="00BA770A">
+        <w:pPr>
+          <w:pStyle w:val="TableText"/>
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+        </w:pPr>
+        <w:bookmarkStart w:id="70" w:name="DR_4707b95305da00a9d63e2e570983_b"/>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t xml:space="preserve">20kHz </w:t>
+        </w:r>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t>&#26041;&#27874;&#39069;&#23450;&#24133;&#20540;</w:t>
+        </w:r>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t xml:space="preserve"> 1h </w:t>
+        </w:r>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t>&#26080;&#20987;&#31359;&#12289;</w:t>
+        </w:r>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t xml:space="preserve">PD </w:t>
+        </w:r>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t>&#26080;&#26174;&#33879;&#22686;&#38271;&#65288;&#39640;&#39057;&#24212;&#21147;&#19987;&#39033;&#35797;&#39564;&#65292;</w:t>
+        </w:r>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t xml:space="preserve">50Hz </w:t>
+        </w:r>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t>&#35797;&#39564;&#19981;&#21487;&#26367;&#20195;&#65292;&#35265;</w:t>
+        </w:r>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t xml:space="preserve"> 2.9 </w:t>
+        </w:r>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t>&#33410;&#65289;</w:t>
+        </w:r>
+        <w:bookmarkEnd w:id="70"/>
+      </w:p>
+    </w:tc>
+  </w:tr>
+  <w:tr w:rsidR="00BA770A" w:rsidRPr="00BA770A" w14:paraId="28C073D8" w14:textId="77777777" w:rsidTr="00BA770A">
+    <w:trPr>
+      <w:cantSplit/>
+    </w:trPr>
+    <w:tc>
+      <w:tcPr>
+        <w:tcW w:w="3020" w:type="dxa"/>
+        <w:shd w:val="clear" w:color="auto" w:fill="auto"/>
+      </w:tcPr>
+      <w:p w14:paraId="235FDA57" w14:textId="77777777" w:rsidR="00BA770A" w:rsidRPr="00BA770A" w:rsidRDefault="00BA770A" w:rsidP="00BA770A">
+        <w:pPr>
+          <w:pStyle w:val="TableText"/>
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+        </w:pPr>
+        <w:bookmarkStart w:id="71" w:name="DR_438b43b51aa8949d2ad8065b78fd_b"/>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t>17</w:t>
+        </w:r>
+        <w:bookmarkEnd w:id="71"/>
+      </w:p>
+    </w:tc>
+    <w:tc>
+      <w:tcPr>
+        <w:tcW w:w="3021" w:type="dxa"/>
+        <w:shd w:val="clear" w:color="auto" w:fill="auto"/>
+      </w:tcPr>
+      <w:p w14:paraId="2F480350" w14:textId="77777777" w:rsidR="00BA770A" w:rsidRPr="00BA770A" w:rsidRDefault="00BA770A" w:rsidP="00BA770A">
+        <w:pPr>
+          <w:pStyle w:val="TableText"/>
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+        </w:pPr>
+        <w:bookmarkStart w:id="72" w:name="DR_207b20010d91047306e9c3aef6c4_b"/>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t>&#28201;&#21319;</w:t>
+        </w:r>
+        <w:bookmarkEnd w:id="72"/>
+      </w:p>
+    </w:tc>
+    <w:tc>
+      <w:tcPr>
+        <w:tcW w:w="3021" w:type="dxa"/>
+        <w:shd w:val="clear" w:color="auto" w:fill="auto"/>
+      </w:tcPr>
+      <w:p w14:paraId="78B3E761" w14:textId="77777777" w:rsidR="00BA770A" w:rsidRPr="00BA770A" w:rsidRDefault="00BA770A" w:rsidP="00BA770A">
+        <w:pPr>
+          <w:pStyle w:val="TableText"/>
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+        </w:pPr>
+        <w:bookmarkStart w:id="73" w:name="DR_0ea8f98c591cb4b6940405a2fe70_b"/>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t>&#39118;&#36895;</w:t>
+        </w:r>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t xml:space="preserve"> &gt;3m/s </w:t>
+        </w:r>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t>&#19979;&#32469;&#32452;&#28201;&#21319;</w:t>
+        </w:r>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t xml:space="preserve"> &lt;125K</w:t>
+        </w:r>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t>&#65288;&#21472;&#21152;</w:t>
+        </w:r>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t xml:space="preserve"> 45</w:t>
+        </w:r>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t>&#8451;</w:t>
+        </w:r>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t xml:space="preserve"> </w:t>
+        </w:r>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t>&#29615;&#22659;&#65292;&#28909;&#28857;</w:t>
+        </w:r>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t xml:space="preserve"> </w:t>
+        </w:r>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t>&#8804;</w:t>
+        </w:r>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t>155K</w:t>
+        </w:r>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t>&#65292;</w:t>
+        </w:r>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t xml:space="preserve">F </w:t>
+        </w:r>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t>&#32423;&#38480;&#20540;&#65289;</w:t>
+        </w:r>
+        <w:bookmarkEnd w:id="73"/>
+      </w:p>
+    </w:tc>
+  </w:tr>
+  <w:tr w:rsidR="00BA770A" w:rsidRPr="00BA770A" w14:paraId="01382AF3" w14:textId="77777777" w:rsidTr="00BA770A">
+    <w:trPr>
+      <w:cantSplit/>
+    </w:trPr>
+    <w:tc>
+      <w:tcPr>
+        <w:tcW w:w="3020" w:type="dxa"/>
+        <w:shd w:val="clear" w:color="auto" w:fill="auto"/>
+      </w:tcPr>
+      <w:p w14:paraId="7A28E5D4" w14:textId="77777777" w:rsidR="00BA770A" w:rsidRPr="00BA770A" w:rsidRDefault="00BA770A" w:rsidP="00BA770A">
+        <w:pPr>
+          <w:pStyle w:val="TableText"/>
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+        </w:pPr>
+        <w:bookmarkStart w:id="74" w:name="DR_c0f2521e187378c79f3a6125efef_b"/>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t>18</w:t>
+        </w:r>
+        <w:bookmarkEnd w:id="74"/>
+      </w:p>
+    </w:tc>
+    <w:tc>
+      <w:tcPr>
+        <w:tcW w:w="3021" w:type="dxa"/>
+        <w:shd w:val="clear" w:color="auto" w:fill="auto"/>
+      </w:tcPr>
+      <w:p w14:paraId="0E05F758" w14:textId="77777777" w:rsidR="00BA770A" w:rsidRPr="00BA770A" w:rsidRDefault="00BA770A" w:rsidP="00BA770A">
+        <w:pPr>
+          <w:pStyle w:val="TableText"/>
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+        </w:pPr>
+        <w:bookmarkStart w:id="75" w:name="DR_4638ff6f830a710ed7510420c720_b"/>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t>&#37325;&#37327;</w:t>
+        </w:r>
+        <w:bookmarkEnd w:id="75"/>
+      </w:p>
+    </w:tc>
+    <w:tc>
+      <w:tcPr>
+        <w:tcW w:w="3021" w:type="dxa"/>
+        <w:shd w:val="clear" w:color="auto" w:fill="auto"/>
+      </w:tcPr>
+      <w:p w14:paraId="15EEB23A" w14:textId="77777777" w:rsidR="00BA770A" w:rsidRPr="00BA770A" w:rsidRDefault="00BA770A" w:rsidP="00BA770A">
+        <w:pPr>
+          <w:pStyle w:val="TableText"/>
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+        </w:pPr>
+        <w:bookmarkStart w:id="76" w:name="DR_ba9e906e7f3ce89431539a7c7647_b"/>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t>&#8804;</w:t>
+        </w:r>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t>30kg</w:t>
+        </w:r>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t>&#65288;&#21547;&#30913;&#33455;&#12289;&#32469;&#32452;&#12289;&#27975;&#27880;&#19982;&#25903;&#26550;&#65289;</w:t>
+        </w:r>
+        <w:bookmarkEnd w:id="76"/>
+      </w:p>
+    </w:tc>
+  </w:tr>
+  <w:tr w:rsidR="00BA770A" w:rsidRPr="00BA770A" w14:paraId="3649280F" w14:textId="77777777" w:rsidTr="00BA770A">
+    <w:trPr>
+      <w:cantSplit/>
+    </w:trPr>
+    <w:tc>
+      <w:tcPr>
+        <w:tcW w:w="3020" w:type="dxa"/>
+        <w:shd w:val="clear" w:color="auto" w:fill="auto"/>
+      </w:tcPr>
+      <w:p w14:paraId="62D45184" w14:textId="77777777" w:rsidR="00BA770A" w:rsidRPr="00BA770A" w:rsidRDefault="00BA770A" w:rsidP="00BA770A">
+        <w:pPr>
+          <w:pStyle w:val="TableText"/>
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+        </w:pPr>
+        <w:bookmarkStart w:id="77" w:name="DR_e739ff66311f1184810b283f5860_b"/>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t>19</w:t>
+        </w:r>
+        <w:bookmarkEnd w:id="77"/>
+      </w:p>
+    </w:tc>
+    <w:tc>
+      <w:tcPr>
+        <w:tcW w:w="3021" w:type="dxa"/>
+        <w:shd w:val="clear" w:color="auto" w:fill="auto"/>
+      </w:tcPr>
+      <w:p w14:paraId="0648195D" w14:textId="77777777" w:rsidR="00BA770A" w:rsidRPr="00BA770A" w:rsidRDefault="00BA770A" w:rsidP="00BA770A">
+        <w:pPr>
+          <w:pStyle w:val="TableText"/>
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+        </w:pPr>
+        <w:bookmarkStart w:id="78" w:name="DR_9f9d15456bf9ddca924bd0d11aa5_b"/>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t>&#32467;&#26500;</w:t>
+        </w:r>
+        <w:bookmarkEnd w:id="78"/>
+      </w:p>
+    </w:tc>
+    <w:tc>
+      <w:tcPr>
+        <w:tcW w:w="3021" w:type="dxa"/>
+        <w:shd w:val="clear" w:color="auto" w:fill="auto"/>
+      </w:tcPr>
+      <w:p w14:paraId="1701ACA6" w14:textId="77777777" w:rsidR="00BA770A" w:rsidRPr="00BA770A" w:rsidRDefault="00BA770A" w:rsidP="00BA770A">
+        <w:pPr>
+          <w:pStyle w:val="TableText"/>
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+        </w:pPr>
+        <w:bookmarkStart w:id="79" w:name="DR_3b6d98d562371d9b1939884259e3_b"/>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t>&#38081;&#22522;&#32435;&#31859;&#26230;&#29615;&#24418;&#30913;&#33455;&#23545;&#35013;&#65288;</w:t>
+        </w:r>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t xml:space="preserve">LY 8-95 </w:t>
+        </w:r>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t>&#24102;&#26448;&#31867;&#65292;&#21452;&#29615;&#24182;&#32622;&#65289;&#65292;&#21407;&#21103;&#36793;&#21033;&#20857;&#32447;&#20132;&#21449;&#25442;&#20301;&#32469;&#21046;&#65292;&#29615;&#27687;&#27975;&#27880;</w:t>
+        </w:r>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t>/</w:t>
+        </w:r>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t>&#30495;&#31354;&#28024;&#28173;&#28040;&#38500;&#27668;&#38553;&#65292;&#21407;&#36793;&#38745;&#30005;&#23631;&#34109;&#23618;&#25509;&#22320;</w:t>
+        </w:r>
+        <w:bookmarkEnd w:id="79"/>
+      </w:p>
+    </w:tc>
+  </w:tr>
+  <w:tr w:rsidR="00BA770A" w:rsidRPr="00BA770A" w14:paraId="57E43C88" w14:textId="77777777" w:rsidTr="00BA770A">
+    <w:trPr>
+      <w:cantSplit/>
+    </w:trPr>
+    <w:tc>
+      <w:tcPr>
+        <w:tcW w:w="3020" w:type="dxa"/>
+        <w:shd w:val="clear" w:color="auto" w:fill="auto"/>
+      </w:tcPr>
+      <w:p w14:paraId="2F92936E" w14:textId="77777777" w:rsidR="00BA770A" w:rsidRPr="00BA770A" w:rsidRDefault="00BA770A" w:rsidP="00BA770A">
+        <w:pPr>
+          <w:pStyle w:val="TableText"/>
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+        </w:pPr>
+        <w:bookmarkStart w:id="80" w:name="DR_c6df61253b22e3ffe56aa9d9443f_b"/>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t>20</w:t>
+        </w:r>
+        <w:bookmarkEnd w:id="80"/>
+      </w:p>
+    </w:tc>
+    <w:tc>
+      <w:tcPr>
+        <w:tcW w:w="3021" w:type="dxa"/>
+        <w:shd w:val="clear" w:color="auto" w:fill="auto"/>
+      </w:tcPr>
+      <w:p w14:paraId="252E9D7B" w14:textId="77777777" w:rsidR="00BA770A" w:rsidRPr="00BA770A" w:rsidRDefault="00BA770A" w:rsidP="00BA770A">
+        <w:pPr>
+          <w:pStyle w:val="TableText"/>
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+        </w:pPr>
+        <w:bookmarkStart w:id="81" w:name="DR_4e41403a23c79c0c6bc2e46dcb0e_b"/>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t>&#32469;&#32452;&#23548;&#32447;</w:t>
+        </w:r>
+        <w:bookmarkEnd w:id="81"/>
+      </w:p>
+    </w:tc>
+    <w:tc>
+      <w:tcPr>
+        <w:tcW w:w="3021" w:type="dxa"/>
+        <w:shd w:val="clear" w:color="auto" w:fill="auto"/>
+      </w:tcPr>
+      <w:p w14:paraId="085C4C35" w14:textId="77777777" w:rsidR="00BA770A" w:rsidRPr="00BA770A" w:rsidRDefault="00BA770A" w:rsidP="00BA770A">
+        <w:pPr>
+          <w:pStyle w:val="TableText"/>
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+        </w:pPr>
+        <w:bookmarkStart w:id="82" w:name="DR_b1a4b115e2a9d9872db7dec7d610_b"/>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t>&#21033;&#20857;&#32447;</w:t>
+        </w:r>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t xml:space="preserve"> </w:t>
+        </w:r>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t>&#934;</w:t>
+        </w:r>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t xml:space="preserve">0.1~0.2mm </w:t>
+        </w:r>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t>&#22810;&#32929;&#24182;&#32469;&#65292;&#30005;&#27969;&#23494;&#24230;</w:t>
+        </w:r>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t xml:space="preserve"> </w:t>
+        </w:r>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t>&#8804;</w:t>
+        </w:r>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t>4A/mm</w:t>
+        </w:r>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t>&#178;&#65307;&#36235;&#32932;&#28145;&#24230;</w:t>
+        </w:r>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t xml:space="preserve"> 20kHz </w:t>
+        </w:r>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t>&#26102;</w:t>
+        </w:r>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t xml:space="preserve"> 0.47mm</w:t>
+        </w:r>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t>&#65292;&#21333;&#19997;&#30452;&#24452;&#19981;&#24471;&#36229;&#36807;</w:t>
+        </w:r>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t xml:space="preserve"> 0.47mm</w:t>
+        </w:r>
+        <w:bookmarkEnd w:id="82"/>
+      </w:p>
+    </w:tc>
+  </w:tr>
+  <w:tr w:rsidR="00BA770A" w:rsidRPr="00BA770A" w14:paraId="416947B4" w14:textId="77777777" w:rsidTr="00BA770A">
+    <w:trPr>
+      <w:cantSplit/>
+    </w:trPr>
+    <w:tc>
+      <w:tcPr>
+        <w:tcW w:w="3020" w:type="dxa"/>
+        <w:shd w:val="clear" w:color="auto" w:fill="auto"/>
+      </w:tcPr>
+      <w:p w14:paraId="69F31ED8" w14:textId="77777777" w:rsidR="00BA770A" w:rsidRPr="00BA770A" w:rsidRDefault="00BA770A" w:rsidP="00BA770A">
+        <w:pPr>
+          <w:pStyle w:val="TableText"/>
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+        </w:pPr>
+        <w:bookmarkStart w:id="83" w:name="DR_b8f8bd18798b17e078b48e56d81a_b"/>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t>21</w:t>
+        </w:r>
+        <w:bookmarkEnd w:id="83"/>
+      </w:p>
+    </w:tc>
+    <w:tc>
+      <w:tcPr>
+        <w:tcW w:w="3021" w:type="dxa"/>
+        <w:shd w:val="clear" w:color="auto" w:fill="auto"/>
+      </w:tcPr>
+      <w:p w14:paraId="2EF344D3" w14:textId="77777777" w:rsidR="00BA770A" w:rsidRPr="00BA770A" w:rsidRDefault="00BA770A" w:rsidP="00BA770A">
+        <w:pPr>
+          <w:pStyle w:val="TableText"/>
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+        </w:pPr>
+        <w:bookmarkStart w:id="84" w:name="DR_f412df2b9f1e8c8976040a6ea708_b"/>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t>&#30913;&#23494;</w:t>
+        </w:r>
+        <w:bookmarkEnd w:id="84"/>
+      </w:p>
+    </w:tc>
+    <w:tc>
+      <w:tcPr>
+        <w:tcW w:w="3021" w:type="dxa"/>
+        <w:shd w:val="clear" w:color="auto" w:fill="auto"/>
+      </w:tcPr>
+      <w:p w14:paraId="45A40BE6" w14:textId="77777777" w:rsidR="00BA770A" w:rsidRPr="00BA770A" w:rsidRDefault="00BA770A" w:rsidP="00BA770A">
+        <w:pPr>
+          <w:pStyle w:val="TableText"/>
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+        </w:pPr>
+        <w:bookmarkStart w:id="85" w:name="DR_9414400c977c96ad07ce55f1d1a9_b"/>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t>&#24037;&#20316;&#30913;&#23494;</w:t>
+        </w:r>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t xml:space="preserve"> </w:t>
+        </w:r>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t>&#8804;</w:t>
+        </w:r>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t>0.12T @20kHz</w:t>
+        </w:r>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t>&#65288;&#25928;&#29575;&#20248;&#20808;&#21462;&#20540;&#65307;&#33509;&#21378;&#21830;&#25353;</w:t>
+        </w:r>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t xml:space="preserve"> 0.2~0.25T </w:t>
+        </w:r>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t>&#39640;&#23494;&#24230;&#26041;&#26696;&#25253;&#20215;&#65292;&#39035;&#38543;&#38468;&#25439;&#32791;&#23454;&#27979;&#25968;&#25454;&#20379;&#37325;&#26032;&#26680;&#31639;&#65289;</w:t>
+        </w:r>
+        <w:bookmarkEnd w:id="85"/>
+      </w:p>
+    </w:tc>
+  </w:tr>
+  <w:tr w:rsidR="00BA770A" w:rsidRPr="00BA770A" w14:paraId="1CE8DD4D" w14:textId="77777777" w:rsidTr="00BA770A">
+    <w:trPr>
+      <w:cantSplit/>
+    </w:trPr>
+    <w:tc>
+      <w:tcPr>
+        <w:tcW w:w="3020" w:type="dxa"/>
+        <w:shd w:val="clear" w:color="auto" w:fill="auto"/>
+      </w:tcPr>
+      <w:p w14:paraId="7EF0935D" w14:textId="77777777" w:rsidR="00BA770A" w:rsidRPr="00BA770A" w:rsidRDefault="00BA770A" w:rsidP="00BA770A">
+        <w:pPr>
+          <w:pStyle w:val="TableText"/>
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+        </w:pPr>
+        <w:bookmarkStart w:id="86" w:name="DR_f17c16e3f05840b259a28546ce7a_b"/>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:lastRenderedPageBreak/>
+          <w:t>22</w:t>
+        </w:r>
+        <w:bookmarkEnd w:id="86"/>
+      </w:p>
+    </w:tc>
+    <w:tc>
+      <w:tcPr>
+        <w:tcW w:w="3021" w:type="dxa"/>
+        <w:shd w:val="clear" w:color="auto" w:fill="auto"/>
+      </w:tcPr>
+      <w:p w14:paraId="6E5241DB" w14:textId="77777777" w:rsidR="00BA770A" w:rsidRPr="00BA770A" w:rsidRDefault="00BA770A" w:rsidP="00BA770A">
+        <w:pPr>
+          <w:pStyle w:val="TableText"/>
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+        </w:pPr>
+        <w:bookmarkStart w:id="87" w:name="DR_853312869700cefc910d1afcc98d_b"/>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t>&#25439;&#32791;&#39044;&#31639;</w:t>
+        </w:r>
+        <w:bookmarkEnd w:id="87"/>
+      </w:p>
+    </w:tc>
+    <w:tc>
+      <w:tcPr>
+        <w:tcW w:w="3021" w:type="dxa"/>
+        <w:shd w:val="clear" w:color="auto" w:fill="auto"/>
+      </w:tcPr>
+      <w:p w14:paraId="64B55E20" w14:textId="77777777" w:rsidR="00BA770A" w:rsidRPr="00BA770A" w:rsidRDefault="00BA770A" w:rsidP="00BA770A">
+        <w:pPr>
+          <w:pStyle w:val="TableText"/>
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+        </w:pPr>
+        <w:bookmarkStart w:id="88" w:name="DR_af29b09a86749b200d0e48ab9e2e_b"/>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t>&#24635;&#25439;&#32791;</w:t>
+        </w:r>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t xml:space="preserve"> </w:t>
+        </w:r>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t>&#8804;</w:t>
+        </w:r>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t>420W</w:t>
+        </w:r>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t>&#65288;&#30913;&#33455;</w:t>
+        </w:r>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t xml:space="preserve"> </w:t>
+        </w:r>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t>&#8804;</w:t>
+        </w:r>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t xml:space="preserve">330W + </w:t>
+        </w:r>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t>&#32469;&#32452;</w:t>
+        </w:r>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t xml:space="preserve"> </w:t>
+        </w:r>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t>&#8804;</w:t>
+        </w:r>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t>90W @20kHz/</w:t>
+        </w:r>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t>&#28385;&#36733;</w:t>
+        </w:r>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t>/45</w:t>
+        </w:r>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t>&#8451;&#65289;&#65292;&#20379;&#25253;&#20215;&#27178;&#21521;&#23545;&#27604;</w:t>
+        </w:r>
+        <w:bookmarkEnd w:id="88"/>
+      </w:p>
+    </w:tc>
+  </w:tr>
+  <w:tr w:rsidR="00BA770A" w:rsidRPr="00BA770A" w14:paraId="602785AB" w14:textId="77777777" w:rsidTr="00BA770A">
+    <w:trPr>
+      <w:cantSplit/>
+    </w:trPr>
+    <w:tc>
+      <w:tcPr>
+        <w:tcW w:w="3020" w:type="dxa"/>
+        <w:shd w:val="clear" w:color="auto" w:fill="auto"/>
+      </w:tcPr>
+      <w:p w14:paraId="2C7E8720" w14:textId="77777777" w:rsidR="00BA770A" w:rsidRPr="00BA770A" w:rsidRDefault="00BA770A" w:rsidP="00BA770A">
+        <w:pPr>
+          <w:pStyle w:val="TableText"/>
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+        </w:pPr>
+        <w:bookmarkStart w:id="89" w:name="DR_2be73b0e3767cc39a04375e69957_b"/>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t>23</w:t>
+        </w:r>
+        <w:bookmarkEnd w:id="89"/>
+      </w:p>
+    </w:tc>
+    <w:tc>
+      <w:tcPr>
+        <w:tcW w:w="3021" w:type="dxa"/>
+        <w:shd w:val="clear" w:color="auto" w:fill="auto"/>
+      </w:tcPr>
+      <w:p w14:paraId="0D129A4A" w14:textId="77777777" w:rsidR="00BA770A" w:rsidRPr="00BA770A" w:rsidRDefault="00BA770A" w:rsidP="00BA770A">
+        <w:pPr>
+          <w:pStyle w:val="TableText"/>
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+        </w:pPr>
+        <w:bookmarkStart w:id="90" w:name="DR_dd0ad9de95971737d52d54cb0302_b"/>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t>&#27979;&#28201;&#37197;&#32622;&#65288;&#26679;&#21697;&#38454;&#27573;&#65289;</w:t>
+        </w:r>
+        <w:bookmarkEnd w:id="90"/>
+      </w:p>
+    </w:tc>
+    <w:tc>
+      <w:tcPr>
+        <w:tcW w:w="3021" w:type="dxa"/>
+        <w:shd w:val="clear" w:color="auto" w:fill="auto"/>
+      </w:tcPr>
+      <w:p w14:paraId="1DB5BD2F" w14:textId="77777777" w:rsidR="00BA770A" w:rsidRPr="00BA770A" w:rsidRDefault="00BA770A" w:rsidP="00BA770A">
+        <w:pPr>
+          <w:pStyle w:val="TableText"/>
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+        </w:pPr>
+        <w:bookmarkStart w:id="91" w:name="DR_6523a92619bc1c1737cfbad670c7_b"/>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t>&#27599;&#20010;&#39640;&#21387;&#32447;&#21253;</w:t>
+        </w:r>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t xml:space="preserve"> </w:t>
+        </w:r>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t>&#8805;</w:t>
+        </w:r>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t xml:space="preserve">4 </w:t>
+        </w:r>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t>&#20010;</w:t>
+        </w:r>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t xml:space="preserve"> K </w:t>
+        </w:r>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t>&#22411;&#28909;&#30005;&#20598;&#65292;&#20302;&#21387;&#32447;&#21253;&#20869;</w:t>
+        </w:r>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t xml:space="preserve"> </w:t>
+        </w:r>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t>&#8805;</w:t>
+        </w:r>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t xml:space="preserve">1 </w:t>
+        </w:r>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t>&#20010;&#65292;&#27599;&#21103;&#30913;&#33455;</w:t>
+        </w:r>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t xml:space="preserve"> </w:t>
+        </w:r>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t>&#8805;</w:t>
+        </w:r>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t xml:space="preserve">1 </w:t>
+        </w:r>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t>&#20010;&#65292;&#32447;&#38271;</w:t>
+        </w:r>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t xml:space="preserve"> 3m</w:t>
+        </w:r>
+        <w:bookmarkEnd w:id="91"/>
+      </w:p>
+    </w:tc>
+  </w:tr>
+  <w:tr w:rsidR="00BA770A" w:rsidRPr="00BA770A" w14:paraId="53DBC625" w14:textId="77777777" w:rsidTr="00BA770A">
+    <w:trPr>
+      <w:cantSplit/>
+    </w:trPr>
+    <w:tc>
+      <w:tcPr>
+        <w:tcW w:w="3020" w:type="dxa"/>
+        <w:shd w:val="clear" w:color="auto" w:fill="auto"/>
+      </w:tcPr>
+      <w:p w14:paraId="673FE9E7" w14:textId="77777777" w:rsidR="00BA770A" w:rsidRPr="00BA770A" w:rsidRDefault="00BA770A" w:rsidP="00BA770A">
+        <w:pPr>
+          <w:pStyle w:val="TableText"/>
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+        </w:pPr>
+        <w:bookmarkStart w:id="92" w:name="DR_503dc6ffb264568534ef3a24dcfe_b"/>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t>24</w:t>
+        </w:r>
+        <w:bookmarkEnd w:id="92"/>
+      </w:p>
+    </w:tc>
+    <w:tc>
+      <w:tcPr>
+        <w:tcW w:w="3021" w:type="dxa"/>
+        <w:shd w:val="clear" w:color="auto" w:fill="auto"/>
+      </w:tcPr>
+      <w:p w14:paraId="19FD3BA1" w14:textId="77777777" w:rsidR="00BA770A" w:rsidRPr="00BA770A" w:rsidRDefault="00BA770A" w:rsidP="00BA770A">
+        <w:pPr>
+          <w:pStyle w:val="TableText"/>
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+        </w:pPr>
+        <w:bookmarkStart w:id="93" w:name="DR_cb259eb63c8bf262f9b3d5bcc23a_b"/>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t>&#20132;&#20184;&#25991;&#20214;</w:t>
+        </w:r>
+        <w:bookmarkEnd w:id="93"/>
+      </w:p>
+    </w:tc>
+    <w:tc>
+      <w:tcPr>
+        <w:tcW w:w="3021" w:type="dxa"/>
+        <w:shd w:val="clear" w:color="auto" w:fill="auto"/>
+      </w:tcPr>
+      <w:p w14:paraId="22E55ADE" w14:textId="77777777" w:rsidR="00BA770A" w:rsidRPr="00BA770A" w:rsidRDefault="00BA770A" w:rsidP="00BA770A">
+        <w:pPr>
+          <w:pStyle w:val="TableText"/>
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+        </w:pPr>
+        <w:bookmarkStart w:id="94" w:name="DR_227f32f956a9f76af4106799b0a0_b"/>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t>&#20363;&#34892;&#35797;&#39564;&#25253;&#21578;&#65306;&#24037;&#39057;&#32784;&#21387;&#12289;&#39640;&#39057;&#24863;&#24212;&#32784;&#21387;&#12289;&#23616;&#25918;&#65288;</w:t>
+        </w:r>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t>13kV</w:t>
+        </w:r>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t>&#65289;&#12289;&#21464;&#27604;&#12289;&#21169;&#30913;</w:t>
+        </w:r>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t>/</w:t>
+        </w:r>
+        <w:r w:rsidRPr="00BA770A">
+          <w:rPr>
+            <w:rFonts w:hint="eastAsia"/>
+          </w:rPr>
+          <w:t>&#28431;&#24863;&#23454;&#27979;&#20540;&#12289;&#37325;&#37327;&#12289;&#32477;&#32536;&#30005;&#38459;</w:t>
+        </w:r>
+        <w:bookmarkEnd w:id="94"/>
+      </w:p>
+    </w:tc>
+  </w:tr>
+  <w:bookmarkEnd w:id="20"/>
+</w:tbl>

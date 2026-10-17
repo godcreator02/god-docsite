@@ -1,0 +1,43 @@
+{
+  "pdfSha256": "1fe6b718141f90594c1aeed58000e47d6c01e91a4495421751c0920b28eab9ad",
+  "reviewedPages": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12
+  ],
+  "method": "Word PDF rendered with Poppler at 110 dpi; every declared page inspected at full resolution",
+  "result": "No missing glyphs, clipping, overlap or broken table pagination observed",
+  "additionalReviewed": {
+    "template-preview.pdf": [
+      1,
+      2,
+      3
+    ],
+    "word-com.all-math-edit.pdf": [
+      5
+    ],
+    "word-com.numbering-check.pdf": [
+      5
+    ],
+    "word-com.pagination-check.pdf": [
+      9,
+      10,
+      11
+    ]
+  },
+  "additionalPdfSha256": {
+    "template-preview.pdf": "eb8103f89e543b0c49406a2d221a50af487efb60e45f728c4020cffee6d8806f",
+    "word-com.all-math-edit.pdf": "e46d59d0a2f80561fbf597f463908b99cce23ad65fd56564513fb4664519db79",
+    "word-com.numbering-check.pdf": "453b4e706a91addf734e4fe431744b1cffde4bad87b3eb41c1953696af1a6062",
+    "word-com.pagination-check.pdf": "eaf8c9e56b9c621c6519cf08a67aff70b7554c02363ebc64b7a693fa20876cf9"
+  }
+}

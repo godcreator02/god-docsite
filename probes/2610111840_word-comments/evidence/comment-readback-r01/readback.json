@@ -1,0 +1,207 @@
+{
+  "status": "passed",
+  "state": {
+    "comments": 4,
+    "revisions": 3,
+    "trackRevisions": true,
+    "protectionType": 0,
+    "pages": 10,
+    "wordVersion": "16.0",
+    "wordBuild": "16.0.14334"
+  },
+  "checks": {
+    "expectedTexts": true,
+    "bodyParagraphsUnchanged": true,
+    "imageDimensionsUnchanged": true,
+    "imageAndOlePayloadsUnchanged": true,
+    "sourceFileUnchanged": true,
+    "xmlTextsMatch": true,
+    "replyRelationshipPersisted": true,
+    "revisionModePreserved": true
+  },
+  "comments": [
+    {
+      "index": 1,
+      "author": "godamericatb14",
+      "date": "2026-10-11 18:26:00+00:00",
+      "text": "【批注测试-正文】请补充这一段的验收依据；这是审阅意见，不直接修改正文。",
+      "scopeText": "这一段是修改目标。原始版本保留全角标点与中文，后续只替换这一段。",
+      "start": 683,
+      "end": 715,
+      "storyType": 1,
+      "sourceCandidates": [
+        {
+          "name": "DR_18955081f034ea299dd8d0a7186f_b",
+          "sourceId": "p-edit",
+          "start": 683,
+          "end": 718,
+          "story": 1
+        }
+      ],
+      "scopeShapes": [],
+      "precedingContext": "h 7\r8 保留章节 8\t8\r\r\f局部修改\r",
+      "followingContext": "\u0005\u0005\r这一段不修改，用于检查相邻内容、格式和定位是否保留。\r阿斯顿发啥的\r表 1  验证参数\r项目\r\u0007数值\r\u0007\r\u0007额定功率\r\u0007100 kW\r\u0007\r\u0007母线电压\r\u0007",
+      "ancestorIndex": null,
+      "replies": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "done": false
+    },
+    {
+      "index": 2,
+      "author": "godamericatb14",
+      "date": "2026-10-11 18:33:00+00:00",
+      "text": "【批注测试-回复】收到，后续补充验收条目；这条回复暂不代表正文已经修改。",
+      "scopeText": "这一段是修改目标。原始版本保留全角标点与中文，后续只替换这一段。\u0005",
+      "start": 683,
+      "end": 716,
+      "storyType": 1,
+      "sourceCandidates": [
+        {
+          "name": "DR_18955081f034ea299dd8d0a7186f_b",
+          "sourceId": "p-edit",
+          "start": 683,
+          "end": 718,
+          "story": 1
+        }
+      ],
+      "scopeShapes": [],
+      "precedingContext": "h 7\r8 保留章节 8\t8\r\r\f局部修改\r",
+      "followingContext": "\u0005\r这一段不修改，用于检查相邻内容、格式和定位是否保留。\r阿斯顿发啥的\r表 1  验证参数\r项目\r\u0007数值\r\u0007\r\u0007额定功率\r\u0007100 kW\r\u0007\r\u0007母线电压\r\u00078",
+      "ancestorIndex": 1,
+      "replies": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "done": false
+    },
+    {
+      "index": 3,
+      "author": "godamericatb14",
+      "date": "2026-10-11 18:29:00+00:00",
+      "text": "【批注测试-公式】请核对式（1-1）末尾的 123123 是否为测试残留，并说明变量含义。",
+      "scopeText": "\u0001",
+      "start": 869,
+      "end": 895,
+      "storyType": 1,
+      "sourceCandidates": [
+        {
+          "name": "MT_DR_f9cd45bd8852ca66d7e672693774",
+          "sourceId": "eq-edit",
+          "start": 869,
+          "end": 895,
+          "story": 1
+        }
+      ],
+      "scopeShapes": [
+        {
+          "type": 1,
+          "start": 869,
+          "end": 895,
+          "alt": "MathType DR_f9cd45bd8852ca66d7e672693774",
+          "widthPt": 69.80000305175781,
+          "heightPt": 13.850000381469727,
+          "progId": "Equation.DSMT4"
+        }
+      ],
+      "precedingContext": "CHARFORMAT 1  验证参数\r项目\r\u0007数值\r\u0007\r\u0007额定功率\r\u0007100 kW\r\u0007\r\u0007母线电压\r\u0007800 V\r\u0007\r\u0007123123\r\u0007213123\r\u0007\r\u0007123\r\u0007123\r\u0007\r\u0007123\r\u0007123123\r\u0007\r\u0007\t",
+      "followingContext": "\u0005\t(1-1)\r/\u0005\r图 ",
+      "ancestorIndex": null,
+      "replies": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "done": false
+    },
+    {
+      "index": 4,
+      "author": "godamericatb14",
+      "date": "2026-10-11 18:30:00+00:00",
+      "text": "【批注测试-图片】图 1 已调整为约 10.65×5.67 cm，请确认宽高比例是否应保留。",
+      "scopeText": "/",
+      "start": 981,
+      "end": 982,
+      "storyType": 1,
+      "sourceCandidates": [],
+      "scopeShapes": [
+        {
+          "type": 3,
+          "start": 981,
+          "end": 982,
+          "alt": "原图保持不变",
+          "widthPt": 301.95001220703125,
+          "heightPt": 160.85000610351562
+        }
+      ],
+      "precedingContext": " \u0001\u0005\t(1-1)\r",
+      "followingContext": "\u0005\r图 1  保留的图片\r\f\r引用与保留对象\r第一章公式编号为",
+      "ancestorIndex": null,
+      "replies": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "done": false
+    }
+  ],
+  "xmlComments": [
+    {
+      "id": "4",
+      "author": "godamericatb14",
+      "date": "2026-10-11T18:26:00Z",
+      "text": "【批注测试-正文】请补充这一段的验收依据；这是审阅意见，不直接修改正文。"
+    },
+    {
+      "id": "5",
+      "author": "godamericatb14",
+      "date": "2026-10-11T18:33:00Z",
+      "text": "【批注测试-回复】收到，后续补充验收条目；这条回复暂不代表正文已经修改。"
+    },
+    {
+      "id": "34",
+      "author": "godamericatb14",
+      "date": "2026-10-11T18:29:00Z",
+      "text": "【批注测试-公式】请核对式（1-1）末尾的 123123 是否为测试残留，并说明变量含义。"
+    },
+    {
+      "id": "36",
+      "author": "godamericatb14",
+      "date": "2026-10-11T18:30:00Z",
+      "text": "【批注测试-图片】图 1 已调整为约 10.65×5.67 cm，请确认宽高比例是否应保留。"
+    }
+  ],
+  "xmlThreads": [
+    {
+      "paraId": "20FAED91",
+      "parentParaId": null,
+      "done": "0"
+    },
+    {
+      "paraId": "14C23298",
+      "parentParaId": "20FAED91",
+      "done": "0"
+    },
+    {
+      "paraId": "2B8290BD",
+      "parentParaId": null,
+      "done": "0"
+    },
+    {
+      "paraId": "65315A00",
+      "parentParaId": null,
+      "done": "0"
+    }
+  ],
+  "docxSha256": "f96c74029e6fe67ad187d0c609d29e7c1165f931fd8c514a289c33451000a589",
+  "baselineSha256": "15c6c84ad72dabe7cd0adb7e51b2ff956f6a12988809d0a4255ef4f26e096758",
+  "creation": "Word UI creates 3 root comments and 1 reply; COM fills exact text after a clipboard input failure.",
+  "boundary": "Agent interprets comments and source candidates. No JSON merge or body changes. Same-author local test; resolved threads and multiple reviewers not tested."
+}

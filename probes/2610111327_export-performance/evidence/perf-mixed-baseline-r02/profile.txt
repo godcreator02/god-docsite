@@ -1,0 +1,38 @@
+         27696 function calls (27595 primitive calls) in 15.099 seconds
+
+   Ordered by: cumulative time
+   List reduced from 270 to 30 due to restriction <30>
+
+   ncalls  tottime  percall  cumtime  percall filename:lineno(function)
+        1    0.236    0.236   15.099   15.099 baseline_compose.py:573(build)
+     19/1    0.198    0.010   11.647   11.647 baseline_compose.py:538(blocks)
+      5/4    1.274    0.255   11.546    2.886 baseline_compose.py:452(table_node)
+      669    0.004    0.000    7.065    0.011 __init__.py:586(__getattr__)
+      669    0.008    0.000    7.059    0.011 __init__.py:579(_ApplyTypes_)
+      978    5.729    0.006    5.729    0.006 {method 'InvokeTypes' of 'PyIDispatch' objects}
+      604    0.003    0.000    4.765    0.008 __init__.py:108(Dispatch)
+      604    0.009    0.000    4.760    0.008 __init__.py:21(__WrapDispatch)
+      614    4.698    0.008    4.698    0.008 {method 'QueryInterface' of 'PyIUnknown' objects}
+      604    0.006    0.000    4.652    0.008 __init__.py:524(__init__)
+      688    0.002    0.000    3.618    0.005 __init__.py:616(_get_good_object_)
+      688    0.001    0.000    3.614    0.005 __init__.py:610(_get_good_single_object_)
+      669    0.001    0.000    3.461    0.005 __init__.py:605(_get_good_object_)
+       23    0.033    0.001    3.459    0.150 baseline_compose.py:304(rich_paragraph)
+       23    0.229    0.010    2.584    0.112 baseline_compose.py:233(paragraph)
+        1    0.378    0.378    2.158    2.158 baseline_compose.py:172(finish)
+       18    0.168    0.009    1.649    0.092 baseline_compose.py:499(trim_container)
+      120    0.001    0.000    1.256    0.010 __init__.py:592(__setattr__)
+      120    1.255    0.010    1.255    0.010 {method 'Invoke' of 'PyIDispatch' objects}
+      105    0.000    0.000    1.217    0.012 __init__.py:636(__getattr__)
+  355/299    0.000    0.000    1.217    0.004 {built-in method builtins.getattr}
+        5    0.029    0.006    1.196    0.239 baseline_compose.py:316(numbered_caption)
+       28    0.152    0.005    1.183    0.042 baseline_compose.py:226(point)
+       28    0.275    0.010    1.041    0.037 baseline_compose.py:246(mark)
+       33    0.000    0.000    0.943    0.029 baseline_compose.py:241(part)
+        7    0.086    0.012    0.761    0.109 word.py:66(find_text)
+      102    0.001    0.000    0.574    0.006 Range.py:392(SetRange)
+       34    0.000    0.000    0.525    0.015 Bookmarks.py:33(Add)
+       28    0.000    0.000    0.437    0.016 Styles.py:41(Item)
+       22    0.000    0.000    0.312    0.014 Cells.py:54(Item)
+
+

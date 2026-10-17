@@ -1,0 +1,97 @@
+{
+  "status": "passed_with_noted_layout_differences",
+  "pdfSha256": "531b769b010fa165a3bb468bc4208014f5b8d0e14f34eac7b10503e1caaa0087",
+  "docxSha256": "8f9239cd1f19af1e783a7c37a8904a166aeeb922eb0ec8dbf4e0cd3be97858e6",
+  "pagesReviewed": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19,
+    20,
+    21,
+    22,
+    23,
+    24,
+    25,
+    26,
+    27,
+    28,
+    29,
+    30,
+    31,
+    32,
+    33,
+    34,
+    35,
+    36,
+    37,
+    38,
+    39,
+    40,
+    41,
+    42,
+    43,
+    44,
+    45,
+    46,
+    47,
+    48,
+    49,
+    50,
+    51
+  ],
+  "fullResolutionPages": [
+    39,
+    47,
+    48
+  ],
+  "method": "All 51 numbered pages visually inspected in nine contact sheets; pages 39, 47 and 48 additionally inspected at full 110 dpi resolution. No observed clipping or overlapping text in the final candidate.",
+  "blockingFindings": [],
+  "findings": [
+    {
+      "pages": [
+        39
+      ],
+      "status": "fixed",
+      "issue": "Pure Latin formula cells no longer receive the East Asia font hint; lower line and minus sign visible."
+    },
+    {
+      "pages": [
+        21,
+        22
+      ],
+      "status": "existing_limitation",
+      "issue": "Text-drawn architecture box has an uneven right edge."
+    },
+    {
+      "pages": [
+        47,
+        48
+      ],
+      "status": "nonblocking",
+      "issue": "Dense table cells wrap formula fragments and units; no observed clipping."
+    },
+    {
+      "status": "not_pixel_identical",
+      "issue": "Spacing, symbol font metrics and line wrapping differ from baseline. Strict comparison.json passed=false remains unchanged."
+    }
+  ],
+  "deliveryAllowed": true,
+  "scope": "Formatting/performance regression; not engineering content fact-checking.",
+  "reviewedAt": "2026-10-11T13:28:12.814206+08:00"
+}

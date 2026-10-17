@@ -1,0 +1,64 @@
+{
+  "report": "D:\\unitfolders\\nb9zj-word-conversion-lab\\word-conversion-lab\\out\\perf-full-input-r02",
+  "inputs": {
+    "out\\perf-full-input-r02\\assets\\image1.png": "de14f9cc003768c27949c4e96d2ebc5f638ff49e1fdefaa3f9eca77e035640ef",
+    "out\\perf-full-input-r02\\assets\\image10.png": "db3164e0e17b75acbab35f97e006988817767caf74d13437586eee68eda8abaf",
+    "out\\perf-full-input-r02\\assets\\image2.png": "d800fa029d77a9c508eea9fa7468bf46da3f5c34229bf29fcfb2ef0ffa26f853",
+    "out\\perf-full-input-r02\\assets\\image3.png": "c74ad0097011ec4381c5fecc88baa6064c0670c288b577d2be1a9e31811039c3",
+    "out\\perf-full-input-r02\\assets\\image4.png": "877b501acea87a30a174e18159e84d3c46337ee852aaa9f068ba0b8528119c79",
+    "out\\perf-full-input-r02\\assets\\image5.png": "4f57a03073fbfe5941f7258d3ed89471b4417ecc634f2af2a52cb2a3516acfef",
+    "out\\perf-full-input-r02\\assets\\image6.png": "a242c35e9574bd1064730e974f91a8b76a6273a81b6a515533455d6a99ff9a6b",
+    "out\\perf-full-input-r02\\assets\\image7.png": "5f20c89496b64ff9ceca56f28f43c3bff96f4fd728b2457c29e0fef6c5adaf17",
+    "out\\perf-full-input-r02\\assets\\image8.png": "c42a33e707e383b31a9889024ab4b922abce6fe65dba408a384ec5091839e0e0",
+    "out\\perf-full-input-r02\\assets\\image9.png": "57b4ea840bd205da3bec19f052621272b8e3e1d1b76ff476c4954fa36d3c3693",
+    "out\\perf-full-input-r02\\assets\\media": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "out\\perf-full-input-r02\\content.json": "cfe86069c14fe945314d396b8887bbfc46e73378d3b4262be30942ca83526547",
+    "out\\perf-full-input-r02\\project-report-noimgcompress.dotx": "223c75d27f9d38f1b03ea233b6611c8bec6dbdc249290cf01879e01f6e8778fc",
+    "out\\perf-full-input-r02\\report.py": "f9530cb7018445e916d7f83b68ef61b57b5917861ca9a1fe990f92213450ea74",
+    "pyproject.toml": "b58b03fd68cb08c7776b0d3ad4ee26d3660959b5102efe541445f2a3306e4f92",
+    "requirements.txt": "75d98410b556701a59f6caacfa41c88ae75d866d8d7159202741d7fd3a4996d3",
+    "schemas\\report-content.schema.json": "6020452fbe3176fb491a2fcb9712cf9277491f6f9a6d5cf9ab46c51f1e1d3d99",
+    "src\\docreport\\__init__.py": "65c430b8659a96080cf159ebea4ff6b656f6fedb73ebbc56b6c41750dd4a401e",
+    "src\\docreport\\__main__.py": "41cd54a2d6906f261ab04370e6aac3978dda2bee72a5e75ef7699f8d0cca33dd",
+    "src\\docreport\\compose.py": "5298134d3c2413f0ac062b62b8552c19a687f64af3315966713058c50f11e92f",
+    "src\\docreport\\content.py": "eb5ebe3c15b5d379d269398d30e88077eb80179d6a65dd41367a9e6552b8f7dc",
+    "src\\docreport\\mathtype.py": "a3418ea42f374955940a356cfc52c5099e9fd9474d92b9ec6da4bc6144c62586",
+    "src\\docreport\\verify.py": "0379b4c0e2a5825d9e4d5592ba694a05a5547162492a369e80e610a502a5d957",
+    "src\\docreport\\word.py": "6b90c00e46fe7da9330e27365e31183fb51a8f8dabf0703c88781bbe6567aecb"
+  },
+  "environment": {
+    "python": "3.12.14 (main, Aug 25 2026, 14:01:42) [MSC v.1944 64 bit (AMD64)]",
+    "executable": "D:\\unitfolders\\nb9zj-word-conversion-lab\\word-conversion-lab\\.venv\\Scripts\\python.exe",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "packages": {
+      "pywin32": "312",
+      "comtypes": "1.4.17",
+      "pypdf": "6.10.0",
+      "Pillow": "12.3.0",
+      "setuptools": "80.9.0",
+      "jsonschema": "4.25.1"
+    },
+    "word": {
+      "version": "16.0",
+      "build": "16.0.14334"
+    }
+  },
+  "command": [
+    "D:\\unitfolders\\nb9zj-word-conversion-lab\\word-conversion-lab\\.venv\\Scripts\\python.exe",
+    "-m",
+    "docreport",
+    "build",
+    "D:\\unitfolders\\nb9zj-word-conversion-lab\\word-conversion-lab\\out\\perf-full-input-r02",
+    "--out",
+    "D:\\unitfolders\\nb9zj-word-conversion-lab\\word-conversion-lab\\out\\perf-full-render-r02",
+    "--mathtype-dll",
+    "C:\\Program Files (x86)\\MathType\\MathPage\\64\\MathPage.wll"
+  ],
+  "baseGitCommit": "d6e01303a6a20f64e2e21314fe8fbc75b476bb50",
+  "provenance": "Input hashes identify exact working files; baseGitCommit may precede local changes.",
+  "outputs": {
+    "report.docx": "b1772c80d7b192b05115b3df90485db8e27ff07c724f115fd4e32ec9101c5a2b",
+    "report.pdf": "ecf83ac6818263db79195a5838b8bc5cf0ac23392eb116d86e76e958973dd87f"
+  },
+  "templateUnchanged": true
+}

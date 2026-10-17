@@ -1,0 +1,199 @@
+{
+  "profile": "project-report-v1",
+  "runDirectory": "D:\\unitfolders\\nb9zj-word-conversion-lab\\word-conversion-lab\\out\\project-report-r03",
+  "fixtureSha256": "8dc4d0430939c3cd4a3e423cab3e21b063f171afd2567d633e80b978a1037f1c",
+  "templateSha256": "2d645df23ecd1ee6f40d7da29854435139ff9d77a490f29c5051b6960bf909c4",
+  "nativeMacroFreeTemplate": true,
+  "templateUnchangedByGeneration": true,
+  "requirementsSha256": "2cba12dfb77c691d83f77be6b32c2f6708ec0aaa1df8376373ee160444c78260",
+  "python": {
+    "executable": "D:\\unitfolders\\nb9zj-word-conversion-lab\\word-conversion-lab\\.venv\\Scripts\\python.exe",
+    "version": "3.12.14",
+    "packages": {
+      "pywin32": "312",
+      "Pillow": "12.3.0",
+      "lxml": "6.1.1",
+      "pypdf": "6.10.0"
+    }
+  },
+  "scripts": {
+    "routes/word-com/template.py": "27139122c775fb6c3c2161d8c5c21a908b7b5dbed4ece1f5210f47c3e648a9bc",
+    "routes/word-com/build.py": "cda95c75d2abdff539683b8fb2696048c8b40f9939d87665f847dcfc83a18845",
+    "scripts/word_com.py": "c7acaf6bbbdaf3799a15f13044baddd42de1a65bb6945b6ed5b3839956df80b2",
+    "scripts/word-verify.py": "ec2f79882cf37b832758c22da1f0c99f0a1e7bc91556f0f09899cca50fa0bb67",
+    "scripts/audit-and-render.py": "3f5eb4a7b294c9fa152e6f91e9929703cd2680657873647ff43e89dbce514c15",
+    "scripts/record-evidence.py": "43ffd47346f26ade525436cf546f97656c47221c407dbf74a4e67c92ada6e951",
+    "scripts/capture-environment.py": "7d9173c8765d34ce04d9b11767d94b1364710f84e48c42d1d37fe7ad30f52d48"
+  },
+  "artifacts": {
+    "word-com.all-math-edit.docx": "6f5619bfe8509249d75966c2cccca306d68580690ad02a4ee919986d04e04706",
+    "word-com.all-math-edit.pdf": "e46d59d0a2f80561fbf597f463908b99cce23ad65fd56564513fb4664519db79",
+    "word-com.docx": "ca5a6b8100f21a2947795428cd28bb2273dc0bc7fd072ffb3aa447455adb9252",
+    "word-com.edit-check.docx": "743a7362e1595309869bc7e80bfc6c5720d3e3009d6a2ffb8f7e2882a541e645",
+    "word-com.numbering-check.docx": "7298a94bf78178eb21cd35d0209092b81b075212952453d2e9c66251c906d752",
+    "word-com.numbering-check.pdf": "453b4e706a91addf734e4fe431744b1cffde4bad87b3eb41c1953696af1a6062",
+    "word-com.pagination-check.docx": "ec5dcf94461ba620b1cd019ecbad31bb6e7f5a2894852ae593cc6ce055b0c5ac",
+    "word-com.pagination-check.pdf": "eaf8c9e56b9c621c6519cf08a67aff70b7554c02363ebc64b7a693fa20876cf9",
+    "word-com.pdf": "1fe6b718141f90594c1aeed58000e47d6c01e91a4495421751c0920b28eab9ad",
+    "word-com.raw.docx": "6a4bddb59fa74d573ef83110789adb63e5ae2c7246026a5d2dd6db91d3488a60",
+    "word-com.review-check.docx": "eeb63dcfa61d39d5344391441c6a456dddd76c00bfd331ee08eb257979265d1a"
+  },
+  "verification": {
+    "baseline": {
+      "pages": 12,
+      "bodyStartsOnPage": 3,
+      "bodyPages": 10,
+      "math": 6,
+      "tables": 5,
+      "figures": 2,
+      "footnotes": 1,
+      "contentControls": 5,
+      "toc": 1,
+      "hyperlinks": 15,
+      "orientations": [
+        0,
+        0,
+        0,
+        1,
+        0
+      ],
+      "headingLevels": [
+        1,
+        2,
+        3
+      ],
+      "headingNumbers": [
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6",
+        "7",
+        "8",
+        "9"
+      ],
+      "independentLists": [
+        [
+          "1.",
+          "2.",
+          "3."
+        ],
+        [
+          "1.",
+          "2.",
+          "3."
+        ]
+      ],
+      "longTableRows": 41,
+      "tablePages": [
+        9,
+        10
+      ]
+    },
+    "allMathEdit": {
+      "passed": true,
+      "before": [
+        "\r𝑖\r𝐿\r\r𝑡\r=\r𝐼\r0\r+𝛥𝑖\rsin\r\r𝜔𝑡\r\r",
+        "𝐻\r𝑠\r=\r1\r𝐿𝐶\r𝑠\r2\r+𝑅𝐶𝑠+1\r",
+        "𝐸=\r0\r𝑇\r𝑣\r𝑡\r𝑖\r𝑡\rⅆ𝑡\r",
+        "𝐀=\r\r0\r1\r−\r𝜔\r0\r2\r\r−2𝜁\r𝜔\r0\r\r\r",
+        "𝑢\r𝑡\r=\r\r\r𝑈\rdc\r,\r𝑡≥0\r0,\r𝑡<0\r\r",
+        "\r\r𝑣\r𝐿\r&=𝐿\rⅆ\r𝑖\r𝐿\r\rⅆ𝑡\r\r\r𝑖\r𝐶\r&=𝐶\rⅆ\r𝑣\r𝐶\r\rⅆ𝑡\r\r"
+      ],
+      "afterReopen": [
+        "\r𝑖\r𝐿\r\r𝑡\r=\r𝐼\r1\r+𝛥𝑖\rsin\r\r𝜔𝑡\r\r",
+        "𝐻\r𝑠\r=\r1\r𝐿𝐶\r𝑠\r2\r+𝑅𝐶𝑠+2\r",
+        "𝐸=\r0\r𝑆\r𝑣\r𝑡\r𝑖\r𝑡\rⅆ𝑡\r",
+        "𝐀=\r\r0\r2\r−\r𝜔\r0\r2\r\r−2𝜁\r𝜔\r0\r\r\r",
+        "𝑢\r𝑡\r=\r\r\r𝑈\rdc\r,\r𝑡≥1\r0,\r𝑡<0\r\r",
+        "\r\r𝑤\r𝐿\r&=𝐿\rⅆ\r𝑖\r𝐿\r\rⅆ𝑡\r\r\r𝑖\r𝐶\r&=𝐶\rⅆ\r𝑣\r𝐶\r\rⅆ𝑡\r\r"
+      ],
+      "structurePreserved": true
+    },
+    "insertFormula": {
+      "passed": true,
+      "equationSequence": [
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6"
+      ],
+      "fractionReferences": [
+        "2",
+        "2"
+      ],
+      "mathCount": 7
+    },
+    "appendRows": {
+      "passed": true,
+      "addedRows": 15,
+      "rows": 56,
+      "pages": 13,
+      "tablePages": [
+        9,
+        10,
+        11
+      ],
+      "repeatHeader": true,
+      "allRowsUnsplit": true
+    },
+    "review": {
+      "passed": true,
+      "revisions": 2,
+      "comments": 1,
+      "revisionControl": "版本  R1（复核副本）"
+    }
+  },
+  "visualReview": {
+    "pdfSha256": "1fe6b718141f90594c1aeed58000e47d6c01e91a4495421751c0920b28eab9ad",
+    "reviewedPages": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12
+    ],
+    "method": "Word PDF rendered with Poppler at 110 dpi; every declared page inspected at full resolution",
+    "result": "No missing glyphs, clipping, overlap or broken table pagination observed",
+    "additionalReviewed": {
+      "template-preview.pdf": [
+        1,
+        2,
+        3
+      ],
+      "word-com.all-math-edit.pdf": [
+        5
+      ],
+      "word-com.numbering-check.pdf": [
+        5
+      ],
+      "word-com.pagination-check.pdf": [
+        9,
+        10,
+        11
+      ]
+    },
+    "additionalPdfSha256": {
+      "template-preview.pdf": "eb8103f89e543b0c49406a2d221a50af487efb60e45f728c4020cffee6d8806f",
+      "word-com.all-math-edit.pdf": "e46d59d0a2f80561fbf597f463908b99cce23ad65fd56564513fb4664519db79",
+      "word-com.numbering-check.pdf": "453b4e706a91addf734e4fe431744b1cffde4bad87b3eb41c1953696af1a6062",
+      "word-com.pagination-check.pdf": "eaf8c9e56b9c621c6519cf08a67aff70b7554c02363ebc64b7a693fa20876cf9"
+    }
+  },
+  "notTested": [
+    "MathType OLE",
+    "WPS / Word Online / macOS Word",
+    "arbitrary LaTeX conversion",
+    "performance benchmark"
+  ]
+}

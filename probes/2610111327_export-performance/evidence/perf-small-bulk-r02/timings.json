@@ -1,0 +1,13 @@
+{
+  "mode": "bulk",
+  "python": "D:\\unitfolders\\nb9zj-word-conversion-lab\\word-conversion-lab\\.venv\\Scripts\\python.exe",
+  "fixtureSha256": "8e2656a97cbdd504ba43ab1383e58d357dabd8fb66c8ce41d5344ba85d1f883c",
+  "templateSha256": "2d645df23ecd1ee6f40d7da29854435139ff9d77a490f29c5051b6960bf909c4",
+  "budgetSeconds": 15,
+  "word": {
+    "version": "16.0",
+    "build": "16.0.14334"
+  },
+  "composeSeconds": 7.749,
+  "passed": true
+}

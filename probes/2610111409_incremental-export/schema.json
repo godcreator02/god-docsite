@@ -1,0 +1,840 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:docreport:content:1",
+  "title": "Report content protocol v1",
+  "description": "Portable content for one-way Word COM and MathType generation, with file-based figures and recursive tables.",
+  "$comment": "Schema validates shape only. IDs, references, section numbering, table spans, paths, resources and renderer capabilities also require the semantic checks specified in docs-site/content/docs/report-content.mdx.",
+  "type": "object",
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "format": {
+      "const": "docreport"
+    },
+    "schemaVersion": {
+      "const": 1
+    },
+    "id": {
+      "$ref": "#/$defs/id"
+    },
+    "metadata": {
+      "$ref": "#/$defs/metadata"
+    },
+    "blocks": {
+      "type": "array",
+      "items": {
+        "oneOf": [
+          {
+            "$ref": "#/$defs/abstract"
+          },
+          {
+            "$ref": "#/$defs/block"
+          }
+        ]
+      },
+      "minItems": 1
+    },
+    "notes": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/note"
+      }
+    },
+    "references": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/bibliographicEntry"
+      }
+    }
+  },
+  "required": [
+    "format",
+    "schemaVersion",
+    "id",
+    "metadata",
+    "blocks"
+  ],
+  "additionalProperties": false,
+  "$defs": {
+    "id": {
+      "type": "string",
+      "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$",
+      "description": "Stable case-sensitive identity, unique across all id-bearing objects in one document."
+    },
+    "line": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^[^\\r\\n\\t]*$"
+    },
+    "assetPath": {
+      "type": "string",
+      "pattern": "^assets/[^\\\\:?%#\\u0000-\\u001f]+\\.(png|jpg|jpeg)$",
+      "description": "Relative to content.json. Canonical path containment, filename rules, existence and decoded image type require semantic/resource validation."
+    },
+    "webUrl": {
+      "type": "string",
+      "pattern": "^https?://[^\\s]+$",
+      "description": "Absolute HTTP(S) URL; must also pass URL parsing. No automatic network fetch during validation."
+    },
+    "text": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "text"
+        },
+        "text": {
+          "$ref": "#/$defs/line"
+        },
+        "marks": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "strong",
+              "em",
+              "sub",
+              "sup",
+              "code"
+            ]
+          },
+          "uniqueItems": true
+        }
+      },
+      "required": [
+        "type",
+        "text"
+      ],
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "not": {
+            "required": [
+              "marks"
+            ],
+            "properties": {
+              "marks": {
+                "allOf": [
+                  {
+                    "contains": {
+                      "const": "sub"
+                    }
+                  },
+                  {
+                    "contains": {
+                      "const": "sup"
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        }
+      ]
+    },
+    "math": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "math"
+        },
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "latex": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "type",
+        "id",
+        "latex"
+      ],
+      "additionalProperties": false
+    },
+    "reference": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "ref"
+        },
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "target": {
+          "$ref": "#/$defs/id"
+        },
+        "display": {
+          "enum": [
+            "label",
+            "number",
+            "title"
+          ]
+        }
+      },
+      "required": [
+        "type",
+        "id",
+        "target",
+        "display"
+      ],
+      "additionalProperties": false
+    },
+    "link": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "link"
+        },
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "text": {
+          "$ref": "#/$defs/line"
+        },
+        "href": {
+          "$ref": "#/$defs/webUrl"
+        }
+      },
+      "required": [
+        "type",
+        "id",
+        "text",
+        "href"
+      ],
+      "additionalProperties": false
+    },
+    "noteRef": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "note_ref"
+        },
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "target": {
+          "$ref": "#/$defs/id"
+        }
+      },
+      "required": [
+        "type",
+        "id",
+        "target"
+      ],
+      "additionalProperties": false
+    },
+    "citation": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "cite"
+        },
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "targets": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/id"
+          },
+          "minItems": 1,
+          "uniqueItems": true
+        }
+      },
+      "required": [
+        "type",
+        "id",
+        "targets"
+      ],
+      "additionalProperties": false
+    },
+    "break": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "break"
+        }
+      },
+      "required": [
+        "type"
+      ],
+      "additionalProperties": false
+    },
+    "inline": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/text"
+        },
+        {
+          "$ref": "#/$defs/math"
+        },
+        {
+          "$ref": "#/$defs/reference"
+        },
+        {
+          "$ref": "#/$defs/link"
+        },
+        {
+          "$ref": "#/$defs/noteRef"
+        },
+        {
+          "$ref": "#/$defs/citation"
+        },
+        {
+          "$ref": "#/$defs/break"
+        }
+      ]
+    },
+    "inlines": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/inline"
+      }
+    },
+    "paragraph": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "paragraph"
+        },
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "content": {
+          "$ref": "#/$defs/inlines"
+        }
+      },
+      "required": [
+        "type",
+        "id",
+        "content"
+      ],
+      "additionalProperties": false
+    },
+    "section": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "section"
+        },
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "title": {
+          "$ref": "#/$defs/line"
+        },
+        "numbering": {
+          "enum": [
+            "decimal",
+            "appendix",
+            "none"
+          ]
+        },
+        "children": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/block"
+          },
+          "minItems": 1
+        }
+      },
+      "required": [
+        "type",
+        "id",
+        "title",
+        "numbering",
+        "children"
+      ],
+      "additionalProperties": false
+    },
+    "list": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "list"
+        },
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "ordered": {
+          "type": "boolean"
+        },
+        "start": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/listItem"
+          },
+          "minItems": 1
+        }
+      },
+      "required": [
+        "type",
+        "id",
+        "ordered",
+        "items"
+      ],
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "ordered": {
+                "const": false
+              }
+            }
+          },
+          "then": {
+            "not": {
+              "required": [
+                "start"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "listItem": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "blocks": {
+          "type": "array",
+          "items": {
+            "oneOf": [
+              {
+                "$ref": "#/$defs/paragraph"
+              },
+              {
+                "$ref": "#/$defs/list"
+              }
+            ]
+          },
+          "minItems": 1
+        }
+      },
+      "required": [
+        "id",
+        "blocks"
+      ],
+      "additionalProperties": false
+    },
+    "figure": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "figure"
+        },
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "src": {
+          "$ref": "#/$defs/assetPath"
+        },
+        "caption": {
+          "$ref": "#/$defs/inlines",
+          "minItems": 1
+        },
+        "alt": {
+          "$ref": "#/$defs/line"
+        }
+      },
+      "required": [
+        "type",
+        "id",
+        "src",
+        "caption",
+        "alt"
+      ],
+      "additionalProperties": false
+    },
+    "equation": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "equation"
+        },
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "latex": {
+          "type": "string",
+          "minLength": 1
+        },
+        "numbered": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "type",
+        "id",
+        "latex",
+        "numbered"
+      ],
+      "additionalProperties": false
+    },
+    "column": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "additionalProperties": false
+    },
+    "cell": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "rowSpan": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "colSpan": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "blocks": {
+          "type": "array",
+          "items": {
+            "oneOf": [
+              {
+                "$ref": "#/$defs/paragraph"
+              },
+              {
+                "$ref": "#/$defs/list"
+              },
+              {
+                "$ref": "#/$defs/figure"
+              },
+              {
+                "$ref": "#/$defs/table"
+              },
+              {
+                "$ref": "#/$defs/equation"
+              },
+              {
+                "$ref": "#/$defs/code"
+              }
+            ]
+          }
+        }
+      },
+      "required": [
+        "id",
+        "blocks"
+      ],
+      "additionalProperties": false,
+      "description": "A cell contains zero or more block elements, including nested tables. Each table owns an independent grid."
+    },
+    "row": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "cells": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/cell"
+          }
+        }
+      },
+      "required": [
+        "id",
+        "cells"
+      ],
+      "additionalProperties": false
+    },
+    "table": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "table"
+        },
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "caption": {
+          "$ref": "#/$defs/inlines",
+          "minItems": 1
+        },
+        "columns": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/column"
+          },
+          "minItems": 1
+        },
+        "headerRows": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "rows": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/row"
+          },
+          "minItems": 1
+        },
+        "numbered": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "type",
+        "id",
+        "numbered",
+        "columns",
+        "headerRows",
+        "rows"
+      ],
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "numbered": {
+                "const": true
+              }
+            },
+            "required": [
+              "numbered"
+            ]
+          },
+          "then": {
+            "required": [
+              "caption"
+            ]
+          }
+        }
+      ],
+      "description": "Numbered tables require a caption. Unnumbered tables may omit caption, including nested tables. All numbered tables share one document-wide sequence."
+    },
+    "code": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "code"
+        },
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "language": {
+          "$ref": "#/$defs/line"
+        },
+        "text": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "type",
+        "id",
+        "language",
+        "text"
+      ],
+      "additionalProperties": false
+    },
+    "bibliography": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "bibliography"
+        },
+        "id": {
+          "$ref": "#/$defs/id"
+        }
+      },
+      "required": [
+        "type",
+        "id"
+      ],
+      "additionalProperties": false
+    },
+    "block": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/section"
+        },
+        {
+          "$ref": "#/$defs/paragraph"
+        },
+        {
+          "$ref": "#/$defs/list"
+        },
+        {
+          "$ref": "#/$defs/figure"
+        },
+        {
+          "$ref": "#/$defs/table"
+        },
+        {
+          "$ref": "#/$defs/equation"
+        },
+        {
+          "$ref": "#/$defs/code"
+        },
+        {
+          "$ref": "#/$defs/bibliography"
+        }
+      ]
+    },
+    "note": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "blocks": {
+          "type": "array",
+          "items": {
+            "oneOf": [
+              {
+                "$ref": "#/$defs/paragraph"
+              },
+              {
+                "$ref": "#/$defs/list"
+              },
+              {
+                "$ref": "#/$defs/code"
+              }
+            ]
+          },
+          "minItems": 1
+        }
+      },
+      "required": [
+        "id",
+        "blocks"
+      ],
+      "additionalProperties": false
+    },
+    "bibliographicEntry": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "text": {
+          "$ref": "#/$defs/line"
+        },
+        "url": {
+          "$ref": "#/$defs/webUrl"
+        }
+      },
+      "required": [
+        "id",
+        "text"
+      ],
+      "additionalProperties": false
+    },
+    "field": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "label": {
+          "$ref": "#/$defs/line"
+        },
+        "value": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "label",
+        "value"
+      ],
+      "additionalProperties": false
+    },
+    "metadata": {
+      "type": "object",
+      "properties": {
+        "title": {
+          "$ref": "#/$defs/line"
+        },
+        "shortTitle": {
+          "$ref": "#/$defs/line"
+        },
+        "language": {
+          "type": "string",
+          "pattern": "^[a-z]{2,3}(-[A-Za-z0-9]{2,8})*$"
+        },
+        "authors": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/line"
+          }
+        },
+        "date": {
+          "type": "string",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+          "format": "date"
+        },
+        "revision": {
+          "$ref": "#/$defs/line"
+        },
+        "fields": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/field"
+          }
+        }
+      },
+      "required": [
+        "title",
+        "language"
+      ],
+      "additionalProperties": false
+    },
+    "abstract": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "abstract"
+        },
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "title": {
+          "$ref": "#/$defs/line"
+        },
+        "paragraphs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/paragraph"
+          },
+          "minItems": 1
+        },
+        "keywords": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/line"
+          },
+          "minItems": 1,
+          "uniqueItems": true
+        }
+      },
+      "required": [
+        "type",
+        "id",
+        "paragraphs",
+        "keywords"
+      ],
+      "additionalProperties": false,
+      "description": "One optional first top-level block. Centered unnumbered title, prose paragraphs, flush-left keywords. No tables, figures, lists or nested sections."
+    }
+  }
+}

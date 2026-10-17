@@ -1,0 +1,74 @@
+[
+  {
+    "route": "word-com",
+    "wordVersion": "16.0",
+    "wordBuild": "16.0.14334",
+    "openSeconds": 0.6108775,
+    "updateSaveSeconds": 0.8977075999999999,
+    "reopenExportSeconds": 3.4954885,
+    "pages": 5,
+    "equations": 6,
+    "tables": 1,
+    "rows": 41,
+    "toc": 1,
+    "fields": 17,
+    "formulaText": [
+      "\r𝑖\r𝐿\r\r𝑡\r=\r𝐼\r0\r+𝛥𝑖\rsin\r\r𝜔𝑡\r\r",
+      "𝐻\r𝑠\r=\r1\r𝐿𝐶\r𝑠\r2\r+𝑅𝐶𝑠+1\r",
+      "𝐸=\r0\r𝑇\r𝑣\r𝑡\r𝑖\r𝑡\rⅆ𝑡\r",
+      "𝐀=\r\r0\r1\r−\r𝜔\r0\r2\r\r−2𝜁\r𝜔\r0\r\r\r",
+      "𝑢\r𝑡\r=\r\r\r𝑈\rdc\r,\r𝑡≥0\r0,\r𝑡<0\r\r",
+      "\r\r𝑣\r𝐿\r&=𝐿\rⅆ\r𝑖\r𝐿\r\rⅆ𝑡\r\r\r𝑖\r𝐶\r&=𝐶\rⅆ\r𝑣\r𝐶\r\rⅆ𝑡\r\r"
+    ],
+    "editCheck": true,
+    "editedFraction": "𝐻\r𝑠\r=\r1\r𝐿𝐶\r𝑠\r2\r+𝑅𝐶𝑠+2\r"
+  },
+  {
+    "route": "pandoc",
+    "wordVersion": "16.0",
+    "wordBuild": "16.0.14334",
+    "openSeconds": 0.5156303,
+    "updateSaveSeconds": 0.7028896,
+    "reopenExportSeconds": 2.3096686,
+    "pages": 5,
+    "equations": 6,
+    "tables": 1,
+    "rows": 41,
+    "toc": 1,
+    "fields": 17,
+    "formulaText": [
+      "\r𝑖\r𝐿\r(𝑡)=\r𝐼\r0\r+Δ𝑖sin(𝜔𝑡)",
+      "𝐻(𝑠)=\r1\r𝐿𝐶\r𝑠\r2\r+𝑅𝐶𝑠+1\r",
+      "𝐸=\r0\r𝑇\r𝑣\r(𝑡)𝑖(𝑡) d𝑡",
+      "𝑨=\r\r0\r1\r−\r𝜔\r0\r2\r\r−2𝜁\r𝜔\r0\r\r\r",
+      "𝑢(𝑡)=\r\r\r𝑈\rdc\r,\r𝑡≥0\r0,\r𝑡<0\r\r",
+      "\r\r𝑣\r𝐿\r&=𝐿\rd\r𝑖\r𝐿\r\rd𝑡\r\r\r𝑖\r𝐶\r&=𝐶\rd\r𝑣\r𝐶\r\rd𝑡\r\r"
+    ],
+    "editCheck": true,
+    "editedFraction": "𝐻(𝑠)=\r1\r𝐿𝐶\r𝑠\r2\r+𝑅𝐶𝑠+2\r"
+  },
+  {
+    "route": "direct-docx",
+    "wordVersion": "16.0",
+    "wordBuild": "16.0.14334",
+    "openSeconds": 0.4904394,
+    "updateSaveSeconds": 0.6694779,
+    "reopenExportSeconds": 3.1184358999999997,
+    "pages": 5,
+    "equations": 6,
+    "tables": 1,
+    "rows": 41,
+    "toc": 1,
+    "fields": 17,
+    "formulaText": [
+      "\r𝑖\r𝐿\r(𝑡)=\r𝐼\r0\r+𝛥𝑖\rsin\r(𝜔𝑡)\r",
+      "𝐻(𝑠)=\r1\r𝐿𝐶\r𝑠\r2\r+𝑅𝐶𝑠+1\r",
+      "𝐸=\r0\r𝑇\r𝑣(𝑡)𝑖(𝑡)d𝑡\r",
+      "𝐀=\r\r0\r1\r−\r𝜔\r0\r2\r\r−2𝜁\r𝜔\r0\r\r\r",
+      "𝑢(𝑡)=\r\r\r𝑈\rdc\r,\r𝑡≥0\r0,\r𝑡<0\r\r",
+      "\r\r𝑣\r𝐿\r=𝐿\rd\r𝑖\r𝐿\r\rd𝑡\r\r\r𝑖\r𝐶\r=𝐶\rd\r𝑣\r𝐶\r\rd𝑡\r\r"
+    ],
+    "editCheck": true,
+    "editedFraction": "𝐻(𝑠)=\r1\r𝐿𝐶\r𝑠\r2\r+𝑅𝐶𝑠+2\r"
+  }
+]

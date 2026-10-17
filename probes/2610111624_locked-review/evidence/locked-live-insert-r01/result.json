@@ -1,0 +1,33 @@
+{
+  "status": "observed",
+  "document": "D:\\unitfolders\\nb9zj-word-conversion-lab\\word-conversion-lab\\out\\locked-review-r01\\导师审阅试验.docx",
+  "observedAt": "2026-10-11T08:31:59.009934+00:00",
+  "insertedText": "【COM 修订测试 01】这句话由自动化直接添加，用于验证 Word 是否记录为插入修订。",
+  "before": {
+    "saved": false,
+    "revisions": 4,
+    "diskSha256": "15c6c84ad72dabe7cd0adb7e51b2ff956f6a12988809d0a4255ef4f26e096758",
+    "trackRevisions": true,
+    "protectionType": 0
+  },
+  "after": {
+    "saved": false,
+    "revisions": 5,
+    "diskSha256": "15c6c84ad72dabe7cd0adb7e51b2ff956f6a12988809d0a4255ef4f26e096758",
+    "trackRevisions": true,
+    "protectionType": 0
+  },
+  "matchingRevisions": [
+    {
+      "type": 1,
+      "text": "\r【COM 修订测试 01】这句话由自动化直接添加，用于验证 Word 是否记录为插入修订。",
+      "author": "godamericatb14",
+      "date": "2026-10-11 16:31:00+00:00",
+      "start": 6082,
+      "end": 6128
+    }
+  ],
+  "insertionTracked": true,
+  "diskUnchanged": true,
+  "policy": "Attached to the user-requested open document. InsertAfter only; no save, close, accept/reject, unlock, or tracking toggle. Author is the current Word user, not a distinct automation identity."
+}

@@ -1,0 +1,346 @@
+{
+  "status": "failed",
+  "startedAt": "2026-10-11T04:21:04.958928+00:00",
+  "report": "D:\\unitfolders\\nb9zj-word-conversion-lab\\word-conversion-lab\\out\\perf-full-input-r05",
+  "visualReview": "pending",
+  "events": [
+    {
+      "event": "start",
+      "template": "D:\\unitfolders\\nb9zj-word-conversion-lab\\word-conversion-lab\\out\\perf-full-input-r05\\project-report-noimgcompress.dotx",
+      "templateSha256": "223c75d27f9d38f1b03ea233b6611c8bec6dbdc249290cf01879e01f6e8778fc",
+      "elapsedSeconds": 0.311
+    },
+    {
+      "event": "compose-start",
+      "elapsedSeconds": 4.628
+    },
+    {
+      "event": "draft-saved",
+      "equations": 10,
+      "elapsedSeconds": 87.557
+    },
+    {
+      "event": "mathtype-functionality",
+      "full": 1,
+      "mode": 2,
+      "dll": "C:\\Program Files (x86)\\MathType\\MathPage\\64\\MathPage.wll",
+      "elapsedSeconds": 88.238
+    },
+    {
+      "event": "equation-cache-hit",
+      "id": "DR_b33648d47ecfe1b1d66b913a34ff",
+      "elapsedSeconds": 94.807
+    },
+    {
+      "event": "equation-created",
+      "id": "DR_b33648d47ecfe1b1d66b913a34ff",
+      "inline": false,
+      "widthPt": 105.80000305175781,
+      "heightPt": 33.25,
+      "elapsedSeconds": 95.025
+    },
+    {
+      "event": "equation-cache-hit",
+      "id": "DR_e80f8e07fd377e625f1a80f04b55",
+      "elapsedSeconds": 95.875
+    },
+    {
+      "event": "equation-created",
+      "id": "DR_e80f8e07fd377e625f1a80f04b55",
+      "inline": false,
+      "widthPt": 64.80000305175781,
+      "heightPt": 38.20000076293945,
+      "elapsedSeconds": 96.002
+    },
+    {
+      "event": "equation-cache-hit",
+      "id": "DR_83354ecacf0fe4b52d93ad6b793a",
+      "elapsedSeconds": 96.61
+    },
+    {
+      "event": "equation-created",
+      "id": "DR_83354ecacf0fe4b52d93ad6b793a",
+      "inline": false,
+      "widthPt": 115.75,
+      "heightPt": 18.850000381469727,
+      "elapsedSeconds": 96.769
+    },
+    {
+      "event": "equation-cache-hit",
+      "id": "DR_3dc5752a031fa25d760414353406",
+      "elapsedSeconds": 97.625
+    },
+    {
+      "event": "equation-created",
+      "id": "DR_3dc5752a031fa25d760414353406",
+      "inline": false,
+      "widthPt": 52.04999923706055,
+      "heightPt": 33.79999923706055,
+      "elapsedSeconds": 97.744
+    },
+    {
+      "event": "equation-cache-hit",
+      "id": "DR_65a2192e57bab142adea833a0215",
+      "elapsedSeconds": 98.5
+    },
+    {
+      "event": "equation-created",
+      "id": "DR_65a2192e57bab142adea833a0215",
+      "inline": false,
+      "widthPt": 74.75,
+      "heightPt": 33.79999923706055,
+      "elapsedSeconds": 98.679
+    },
+    {
+      "event": "equation-cache-hit",
+      "id": "DR_5b93603efbf3ee9aeea7951be14f",
+      "elapsedSeconds": 99.855
+    },
+    {
+      "event": "equation-created",
+      "id": "DR_5b93603efbf3ee9aeea7951be14f",
+      "inline": false,
+      "widthPt": 91.94999694824219,
+      "heightPt": 38.20000076293945,
+      "elapsedSeconds": 100.128
+    },
+    {
+      "event": "equation-cache-hit",
+      "id": "DR_f69a8cdb9846109411c96511d3b9",
+      "elapsedSeconds": 101.304
+    },
+    {
+      "event": "equation-created",
+      "id": "DR_f69a8cdb9846109411c96511d3b9",
+      "inline": false,
+      "widthPt": 42.099998474121094,
+      "heightPt": 37.099998474121094,
+      "elapsedSeconds": 101.586
+    },
+    {
+      "event": "equation-cache-hit",
+      "id": "DR_16be23d7fb8f8cce443ddff5c7a4",
+      "elapsedSeconds": 102.61
+    },
+    {
+      "event": "equation-created",
+      "id": "DR_16be23d7fb8f8cce443ddff5c7a4",
+      "inline": false,
+      "widthPt": 136.8000030517578,
+      "heightPt": 38.20000076293945,
+      "elapsedSeconds": 102.883
+    },
+    {
+      "event": "equation-cache-hit",
+      "id": "DR_4b15db2d3579f8920ed62ec9ad6f",
+      "elapsedSeconds": 104.111
+    },
+    {
+      "event": "equation-created",
+      "id": "DR_4b15db2d3579f8920ed62ec9ad6f",
+      "inline": false,
+      "widthPt": 187.75,
+      "heightPt": 38.20000076293945,
+      "elapsedSeconds": 104.417
+    },
+    {
+      "event": "equation-cache-hit",
+      "id": "DR_d95d639e84db843e84490299d570",
+      "elapsedSeconds": 106.265
+    },
+    {
+      "event": "equation-created",
+      "id": "DR_d95d639e84db843e84490299d570",
+      "inline": false,
+      "widthPt": 234.3000030517578,
+      "heightPt": 33.79999923706055,
+      "elapsedSeconds": 106.606
+    },
+    {
+      "event": "read-tex",
+      "stage": "reopened-DR_b33648d47ecfe1b1d66b913a34ff",
+      "returnCode": 0,
+      "text": "$V_{\\mathrm{ph}}=\\frac{10000}{\\sqrt{3}}=5774\\,\\mathrm{V}$",
+      "matchesExpected": true,
+      "elapsedSeconds": 114.48
+    },
+    {
+      "event": "close-ole",
+      "stage": "reopened-DR_b33648d47ecfe1b1d66b913a34ff",
+      "returnCode": 0,
+      "elapsedSeconds": 114.713
+    },
+    {
+      "event": "read-tex",
+      "stage": "reopened-DR_e80f8e07fd377e625f1a80f04b55",
+      "returnCode": 0,
+      "text": "$N\\geq\\frac{\\sqrt{2}\\,V_{\\mathrm{ph}}}{m_{\\mathrm{max}}V_{\\mathrm{bus}}}$",
+      "matchesExpected": true,
+      "elapsedSeconds": 116.297
+    },
+    {
+      "event": "close-ole",
+      "stage": "reopened-DR_e80f8e07fd377e625f1a80f04b55",
+      "returnCode": 0,
+      "elapsedSeconds": 116.37
+    },
+    {
+      "event": "read-tex",
+      "stage": "reopened-DR_83354ecacf0fe4b52d93ad6b793a",
+      "returnCode": 0,
+      "text": "$C(N)\\approx N C_{\\mathrm{fixed}}+P_{\\mathrm{ph}}C_{\\mathrm{var}}$",
+      "matchesExpected": true,
+      "elapsedSeconds": 118.66
+    },
+    {
+      "event": "close-ole",
+      "stage": "reopened-DR_83354ecacf0fe4b52d93ad6b793a",
+      "returnCode": 0,
+      "elapsedSeconds": 118.812
+    },
+    {
+      "event": "read-tex",
+      "stage": "reopened-DR_3dc5752a031fa25d760414353406",
+      "returnCode": 0,
+      "text": "$P=\\frac{n V_1 V_2}{8 f_{\\mathrm{s}} L}$",
+      "matchesExpected": true,
+      "elapsedSeconds": 120.852
+    },
+    {
+      "event": "close-ole",
+      "stage": "reopened-DR_3dc5752a031fa25d760414353406",
+      "returnCode": 0,
+      "elapsedSeconds": 120.936
+    },
+    {
+      "event": "read-tex",
+      "stage": "reopened-DR_65a2192e57bab142adea833a0215",
+      "returnCode": 0,
+      "text": "$A_{\\mathrm{e}}N=\\frac{V_1}{4 f_{\\mathrm{s}} B_{\\mathrm{max}}}$",
+      "matchesExpected": true,
+      "elapsedSeconds": 122.564
+    },
+    {
+      "event": "close-ole",
+      "stage": "reopened-DR_65a2192e57bab142adea833a0215",
+      "returnCode": 0,
+      "elapsedSeconds": 122.634
+    },
+    {
+      "event": "read-tex",
+      "stage": "reopened-DR_5b93603efbf3ee9aeea7951be14f",
+      "returnCode": 0,
+      "text": "$f_{\\mathrm{res}}=\\frac{1}{2\\pi}\\sqrt{\\frac{L_1+L_2}{L_1 L_2 C}}$",
+      "matchesExpected": true,
+      "elapsedSeconds": 123.592
+    },
+    {
+      "event": "close-ole",
+      "stage": "reopened-DR_5b93603efbf3ee9aeea7951be14f",
+      "returnCode": 0,
+      "elapsedSeconds": 123.653
+    },
+    {
+      "event": "read-tex",
+      "stage": "reopened-DR_f69a8cdb9846109411c96511d3b9",
+      "returnCode": 0,
+      "text": "$m=\\frac{\\hat{V}_{\\mathrm{ref}}}{V_{\\mathrm{tri}}}$",
+      "matchesExpected": true,
+      "elapsedSeconds": 124.69
+    },
+    {
+      "event": "close-ole",
+      "stage": "reopened-DR_f69a8cdb9846109411c96511d3b9",
+      "returnCode": 0,
+      "elapsedSeconds": 124.835
+    },
+    {
+      "event": "read-tex",
+      "stage": "reopened-DR_16be23d7fb8f8cce443ddff5c7a4",
+      "returnCode": 0,
+      "text": "$V_{\\mathrm{ph}}=\\frac{N m V_{\\mathrm{bus}}}{\\sqrt{2}}\\;\\Rightarrow\\;m=\\frac{\\sqrt{2}\\,V_{\\mathrm{ph}}}{N V_{\\mathrm{bus}}}$",
+      "matchesExpected": true,
+      "elapsedSeconds": 125.872
+    },
+    {
+      "event": "close-ole",
+      "stage": "reopened-DR_16be23d7fb8f8cce443ddff5c7a4",
+      "returnCode": 0,
+      "elapsedSeconds": 125.936
+    },
+    {
+      "event": "read-tex",
+      "stage": "reopened-DR_4b15db2d3579f8920ed62ec9ad6f",
+      "returnCode": 0,
+      "text": "$m_{\\mathrm{SVPWM}}=\\frac{\\sqrt{3}\\,\\hat{V}_{\\mathrm{ph}}}{V_{\\mathrm{dc}}},\\quad m_{\\mathrm{SPWM}}=\\sqrt{3}\\,m_{\\mathrm{SVPWM}}$",
+      "matchesExpected": true,
+      "elapsedSeconds": 126.927
+    },
+    {
+      "event": "close-ole",
+      "stage": "reopened-DR_4b15db2d3579f8920ed62ec9ad6f",
+      "returnCode": 0,
+      "elapsedSeconds": 126.993
+    },
+    {
+      "event": "read-tex",
+      "stage": "reopened-DR_d95d639e84db843e84490299d570",
+      "returnCode": 0,
+      "text": "$P=\\frac{n V_1 V_2 D(1-D)}{2 f_{\\mathrm{s}} L},\\quad D\\in[0,\\,0.5];\\quad P_{\\max}=\\frac{n V_1 V_2}{8 f_{\\mathrm{s}} L}$",
+      "matchesExpected": true,
+      "elapsedSeconds": 127.945
+    },
+    {
+      "event": "close-ole",
+      "stage": "reopened-DR_d95d639e84db843e84490299d570",
+      "returnCode": 0,
+      "elapsedSeconds": 128.008
+    },
+    {
+      "event": "mathtype-reopen",
+      "verified": 10,
+      "elapsedSeconds": 128.124
+    },
+    {
+      "event": "terminate-api",
+      "returnCode": 0,
+      "elapsedSeconds": 128.219
+    },
+    {
+      "event": "document-check",
+      "pages": 52,
+      "mathTypeObjects": 10,
+      "ommlCount": 0,
+      "tables": 32,
+      "figures": 10,
+      "footnotes": 0,
+      "toc": 1,
+      "contentControls": 5,
+      "elapsedSeconds": 151.728
+    },
+    {
+      "event": "abstract-check",
+      "abstracts": [
+        {
+          "id": "abstract-sst",
+          "paragraphs": 3,
+          "tables": 0,
+          "headingCentered": true,
+          "headingNumbered": false,
+          "keywordsFirstLineIndentPt": 0.0,
+          "keywordsLeadingWhitespace": false
+        }
+      ],
+      "elapsedSeconds": 153.44
+    },
+    {
+      "event": "report-check-start",
+      "elapsedSeconds": 153.457
+    },
+    {
+      "event": "exception",
+      "detail": "Traceback (most recent call last):\n  File \"D:\\unitfolders\\nb9zj-word-conversion-lab\\word-conversion-lab\\src\\docreport\\__main__.py\", line 164, in build\n    record(\"report-check\", result=module.validate(doc, content))\n                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"D:\\unitfolders\\nb9zj-word-conversion-lab\\word-conversion-lab\\out\\perf-full-input-r05\\report.py\", line 137, in validate\n    raise RuntimeError(f\"Equation alignment failed: {eq['id']}\")\nRuntimeError: Equation alignment failed: eq-phase-voltage\n",
+      "elapsedSeconds": 161.151
+    }
+  ]
+}

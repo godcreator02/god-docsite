@@ -1,0 +1,53 @@
+         10707143 function calls (9690023 primitive calls) in 18.587 seconds
+
+   Ordered by: cumulative time
+   List reduced from 1108 to 45 due to restriction <45>
+
+   ncalls  tottime  percall  cumtime  percall filename:lineno(function)
+        1    0.008    0.008   18.587   18.587 __main__.py:100(build)
+        1    0.000    0.000    9.747    9.747 __main__.py:48(<lambda>)
+        2    0.016    0.008    6.229    3.115 content.py:77(validate_content)
+193249/107967    0.089    0.000    6.160    0.000 {built-in method builtins.next}
+  96800/2    0.091    0.000    5.986    2.993 validators.py:350(iter_errors)
+  98644/2    0.115    0.000    5.985    2.993 _keywords.py:290(properties)
+266808/12    0.612    0.000    5.985    0.499 validators.py:397(descend)
+   6434/6    0.028    0.000    5.983    0.997 _keywords.py:59(items)
+118836/190    0.081    0.000    5.983    0.031 _keywords.py:274(ref)
+  7410/32    0.091    0.000    5.982    0.187 _keywords.py:351(oneOf)
+        1    0.268    0.268    5.911    5.911 compose.py:661(build)
+      2/1    0.090    0.045    4.904    4.904 compose.py:626(blocks)
+      225    4.312    0.019    4.312    0.019 {method 'InvokeTypes' of 'PyIDispatch' objects}
+        1    0.053    0.053    3.836    3.836 compose.py:206(__init__)
+48778/46806    0.196    0.000    3.406    0.000 validators.py:486(is_valid)
+        2    0.019    0.010    3.307    1.654 word.py:8(word_application)
+    49/46    0.000    0.000    2.967    0.065 contextlib.py:132(__enter__)
+        1    0.000    0.000    2.884    2.884 __init__.py:120(DispatchEx)
+        1    0.000    0.000    2.728    2.728 __main__.py:29(load_report)
+        1    2.597    2.597    2.597    2.597 {built-in method pythoncom.CoCreateInstanceEx}
+        1    0.008    0.008    2.473    2.473 compose.py:369(section)
+        1    0.190    0.190    2.341    2.341 compose.py:336(abstract_node)
+      128    0.001    0.000    2.206    0.017 __init__.py:586(__getattr__)
+      128    0.002    0.000    2.205    0.017 __init__.py:579(_ApplyTypes_)
+      143    0.019    0.000    2.128    0.015 __init__.py:108(Dispatch)
+      143    0.003    0.000    2.109    0.015 __init__.py:21(__WrapDispatch)
+        1    0.000    0.000    2.041    2.041 compose.py:538(table_node)
+        1    0.419    0.419    2.041    2.041 compose.py:477(_bulk_table)
+    72176    0.057    0.000    1.958    0.000 validators.py:460(_validate_reference)
+        1    0.000    0.000    1.925    1.925 Documents.py:33(Add)
+    72176    0.153    0.000    1.901    0.000 _core.py:653(lookup)
+      146    1.798    0.012    1.798    0.012 {method 'QueryInterface' of 'PyIUnknown' objects}
+      143    0.002    0.000    1.794    0.013 __init__.py:524(__init__)
+    72176    0.391    0.000    1.192    0.000 _core.py:254(pointer)
+      133    0.000    0.000    1.047    0.008 __init__.py:616(_get_good_object_)
+      133    0.000    0.000    1.046    0.008 __init__.py:610(_get_good_single_object_)
+   218196    0.487    0.000    1.035    0.000 validators.py:340(evolve)
+      128    0.000    0.000    0.969    0.008 __init__.py:605(_get_good_object_)
+        6    0.000    0.000    0.938    0.156 compose.py:236(paragraph)
+       60    0.001    0.000    0.916    0.015 __init__.py:592(__setattr__)
+       60    0.916    0.015    0.916    0.015 {method 'Invoke' of 'PyIDispatch' objects}
+        4    0.000    0.000    0.900    0.225 compose.py:311(rich_paragraph)
+        9    0.143    0.016    0.807    0.090 compose.py:229(point)
+1576811/1576779    0.212    0.000    0.791    0.000 {built-in method builtins.getattr}
+       21    0.295    0.014    0.780    0.037 compose.py:253(mark)
+
+

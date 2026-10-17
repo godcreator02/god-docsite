@@ -1,0 +1,56 @@
+{
+  "checked": 110,
+  "passed": false,
+  "errors": [
+    {
+      "name": "DR_33e91da0900d36850d7b06300177_t",
+      "expected": "效率对比：单元效率–负载特性与系统额定效率",
+      "actual": "1  效率对比：单元效率–负载特性与系统额定效率"
+    },
+    {
+      "name": "DR_c9421b23b2da61ffd57df4cb4581_t",
+      "expected": "SPWM调制原理",
+      "actual": "2  SPWM调制原理"
+    },
+    {
+      "name": "DR_906cfac702d0703acb52abd7bf6c_t",
+      "expected": "调制度的影响",
+      "actual": "3  调制度的影响"
+    },
+    {
+      "name": "DR_e65daa453a6aab4e95ea5a664731_t",
+      "expected": "CHB级联输出",
+      "actual": "4  CHB级联输出"
+    },
+    {
+      "name": "DR_f09bcb04835ab834ec84e6223fab_t",
+      "expected": "调制度计算图解",
+      "actual": "5  调制度计算图解"
+    },
+    {
+      "name": "DR_e680d14f6f6fbff28393f82562d8_t",
+      "expected": "SVPWM与SPWM对比",
+      "actual": "6  SVPWM与SPWM对比"
+    },
+    {
+      "name": "DR_03bbc4a6313bdd12a7e8434e844b_t",
+      "expected": "SPS工作原理",
+      "actual": "7  SPS工作原理"
+    },
+    {
+      "name": "DR_7e677a8bcd524a32ab34745a7ad7_t",
+      "expected": "ZVS机制",
+      "actual": "8  ZVS机制"
+    },
+    {
+      "name": "DR_8a3304905ecc29cd41200761ab4f_t",
+      "expected": "功率特性与ZVS区间",
+      "actual": "9  功率特性与ZVS区间"
+    },
+    {
+      "name": "DR_11111223048b7ccfa88ff6efc465_t",
+      "expected": "轻载三调制对比",
+      "actual": "10  轻载三调制对比"
+    }
+  ]
+}

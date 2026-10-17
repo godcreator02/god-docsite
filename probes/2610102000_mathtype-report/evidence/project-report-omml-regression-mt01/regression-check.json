@@ -1,0 +1,60 @@
+{
+  "status": "passed",
+  "check": "Existing OMML mode still creates six equations with the same math structure as the accepted native report",
+  "mathStructure": [
+    {
+      "f": 0,
+      "nary": 0,
+      "m": 0,
+      "eqArr": 0,
+      "sSub": 2,
+      "sSup": 0,
+      "d": 2
+    },
+    {
+      "f": 1,
+      "nary": 0,
+      "m": 0,
+      "eqArr": 0,
+      "sSub": 0,
+      "sSup": 1,
+      "d": 1
+    },
+    {
+      "f": 0,
+      "nary": 1,
+      "m": 0,
+      "eqArr": 0,
+      "sSub": 0,
+      "sSup": 0,
+      "d": 2
+    },
+    {
+      "f": 0,
+      "nary": 0,
+      "m": 1,
+      "eqArr": 0,
+      "sSub": 1,
+      "sSup": 0,
+      "d": 1
+    },
+    {
+      "f": 0,
+      "nary": 0,
+      "m": 1,
+      "eqArr": 0,
+      "sSub": 1,
+      "sSup": 0,
+      "d": 2
+    },
+    {
+      "f": 2,
+      "nary": 0,
+      "m": 0,
+      "eqArr": 1,
+      "sSub": 4,
+      "sSup": 0,
+      "d": 0
+    }
+  ]
+}

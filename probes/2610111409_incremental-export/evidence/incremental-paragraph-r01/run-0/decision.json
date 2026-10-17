@@ -1,0 +1,37 @@
+{
+  "mode": "patch",
+  "changes": [
+    {
+      "id": "p-edit",
+      "kind": "paragraph",
+      "node": {
+        "type": "paragraph",
+        "id": "p-edit",
+        "content": [
+          {
+            "type": "text",
+            "text": "这一段已更新：中文与😀 "
+          },
+          {
+            "type": "text",
+            "text": "x",
+            "marks": [
+              "em"
+            ]
+          },
+          {
+            "type": "text",
+            "text": "2",
+            "marks": [
+              "sup"
+            ]
+          },
+          {
+            "type": "text",
+            "text": " 的格式应正确，后面的普通文字保持正体。"
+          }
+        ]
+      }
+    }
+  ]
+}

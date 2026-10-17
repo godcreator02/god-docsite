@@ -1,0 +1,73 @@
+{
+  "status": "passed",
+  "reviewedAt": "2026-10-10T20:07:23.862992",
+  "method": "Word PDF export, Poppler 110 dpi, all 12 PNG pages inspected with view_image",
+  "pdfSha256": "d6cef958a023e8a503e1395ee8d34b6ceed667948ffd6a33d2a1d59641691402",
+  "docxSha256": "2d661eccb4e068d48a4b2906e5d821f3fc84a903d4922de200bd6bd4ee788164",
+  "bodyPages": 10,
+  "pages": [
+    {
+      "page": 1,
+      "image": "word-com-pages/page-01.png",
+      "notes": "Cover title and metadata fit."
+    },
+    {
+      "page": 2,
+      "image": "word-com-pages/page-02.png",
+      "notes": "TOC hierarchy and Roman page number correct."
+    },
+    {
+      "page": 3,
+      "image": "word-com-pages/page-03.png",
+      "notes": "Overview, table caption and table fit."
+    },
+    {
+      "page": 4,
+      "image": "word-com-pages/page-04.png",
+      "notes": "Three heading levels, separate lists and footnote correct."
+    },
+    {
+      "page": 5,
+      "image": "word-com-pages/page-05.png",
+      "notes": "One inline and five display MathType formulas legible; baseline, centered formulas, right numbers and two-line array checked."
+    },
+    {
+      "page": 6,
+      "image": "word-com-pages/page-06.png",
+      "notes": "Architecture figure and caption legible."
+    },
+    {
+      "page": 7,
+      "image": "word-com-pages/page-07.png",
+      "notes": "Response curve and labels legible."
+    },
+    {
+      "page": 8,
+      "image": "word-com-pages/page-08.png",
+      "notes": "Merged table heading and all parameter rows fit."
+    },
+    {
+      "page": 9,
+      "image": "word-com-pages/page-09.png",
+      "notes": "Long table first page, complete rows T01-T22."
+    },
+    {
+      "page": 10,
+      "image": "word-com-pages/page-10.png",
+      "notes": "Repeated header, complete rows T23-T40 and following paragraphs fit."
+    },
+    {
+      "page": 11,
+      "image": "word-com-pages/page-11.png",
+      "notes": "Landscape table fits, body page 9 preserved."
+    },
+    {
+      "page": 12,
+      "image": "word-com-pages/page-12.png",
+      "notes": "Conclusion, revision table, hyperlink and formula reference 3-1 correct."
+    }
+  ],
+  "failures": [],
+  "knownBadRun": "../project-report-mathtype-r01/visual-review.json",
+  "limits": "Six fixture formulas checked; not arbitrary LaTeX compatibility or in-place MathType editing."
+}

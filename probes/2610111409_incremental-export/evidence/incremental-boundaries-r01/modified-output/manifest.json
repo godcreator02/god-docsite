@@ -1,0 +1,54 @@
+{
+  "report": "D:\\unitfolders\\nb9zj-word-conversion-lab\\word-conversion-lab\\probes\\2026-10-11-incremental-export\\fixture",
+  "inputs": {
+    "probes\\2026-10-11-incremental-export\\engine\\docreport\\__init__.py": "d949bdf38adb1eec44467d6e59150603980b529f28164ceec99b97f31882dee9",
+    "probes\\2026-10-11-incremental-export\\engine\\docreport\\__main__.py": "48c6dc23c509e63931deadcf34d6691a39063fbe228cf46e2382bb4f2d383ac7",
+    "probes\\2026-10-11-incremental-export\\engine\\docreport\\compose.py": "ccd5fe89bac8fe59dedc89c0aea34cbb56836c49ddd51a71d8d8857bb95d5017",
+    "probes\\2026-10-11-incremental-export\\engine\\docreport\\content.py": "e601f7932748747862ed048ebf7bd662786ac85e4132612ff85caaa3f1a2f6d9",
+    "probes\\2026-10-11-incremental-export\\engine\\docreport\\mathtype.py": "5c2304b0107f3f8dfcd5f88159b9a232a04fdaad0defd7d88cdb2bfc19637454",
+    "probes\\2026-10-11-incremental-export\\engine\\docreport\\verify.py": "74a86241de272f651403c51bfb9c8b15821119067ccbc19d2c30f157e302afac",
+    "probes\\2026-10-11-incremental-export\\engine\\docreport\\word.py": "1d60c6450308ca6e4b02e2ed827ba87b96a67f9b9ab45d3e90f921c8438d002a",
+    "probes\\2026-10-11-incremental-export\\fixture\\assets\\architecture.png": "d449256d773e841a3c826638d65a1790fa023dd4d9b825fd05502500e7f9d1a0",
+    "probes\\2026-10-11-incremental-export\\fixture\\content.json": "e1283549cedcc52f15b9c0128ce42bc01ce7aea4f95dba4934a744a09ec31be5",
+    "probes\\2026-10-11-incremental-export\\fixture\\report.py": "e8c4f0b0d2efd8231a192ab63164d90b72a432b8c4d8353aa7f5b575ba227e08",
+    "probes\\2026-10-11-incremental-export\\fixture\\template.dotx": "223c75d27f9d38f1b03ea233b6611c8bec6dbdc249290cf01879e01f6e8778fc",
+    "probes\\2026-10-11-incremental-export\\pyproject.toml": "b58b03fd68cb08c7776b0d3ad4ee26d3660959b5102efe541445f2a3306e4f92",
+    "probes\\2026-10-11-incremental-export\\requirements.txt": "75d98410b556701a59f6caacfa41c88ae75d866d8d7159202741d7fd3a4996d3",
+    "probes\\2026-10-11-incremental-export\\schema.json": "6020452fbe3176fb491a2fcb9712cf9277491f6f9a6d5cf9ab46c51f1e1d3d99"
+  },
+  "environment": {
+    "python": "3.12.14 (main, Aug 25 2026, 14:01:42) [MSC v.1944 64 bit (AMD64)]",
+    "executable": "D:\\unitfolders\\nb9zj-word-conversion-lab\\word-conversion-lab\\.venv\\Scripts\\python.exe",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "packages": {
+      "pywin32": "312",
+      "comtypes": "1.4.17",
+      "pypdf": "6.10.0",
+      "Pillow": "12.3.0",
+      "setuptools": "80.9.0",
+      "jsonschema": "4.25.1"
+    },
+    "word": {
+      "version": "16.0",
+      "build": "16.0.14334"
+    }
+  },
+  "command": [
+    "D:\\unitfolders\\nb9zj-word-conversion-lab\\word-conversion-lab\\.venv\\Scripts\\python.exe",
+    "-m",
+    "docreport",
+    "build",
+    "D:\\unitfolders\\nb9zj-word-conversion-lab\\word-conversion-lab\\probes\\2026-10-11-incremental-export\\fixture",
+    "--out",
+    "D:\\unitfolders\\nb9zj-word-conversion-lab\\word-conversion-lab\\out\\incremental-ten-base-r03",
+    "--mathtype-dll",
+    "C:\\Program Files (x86)\\MathType\\MathPage\\64\\MathPage.wll"
+  ],
+  "baseGitCommit": "d6e01303a6a20f64e2e21314fe8fbc75b476bb50",
+  "provenance": "Input hashes identify exact working files; baseGitCommit may precede local changes.",
+  "outputs": {
+    "report.docx": "1eec5726100eb88dedc51f3acbc4f998b920fcbc09eb40d742323cd18aa4430f",
+    "report.pdf": "6a8ca68c9327cfca0ccc18f9b1f2c21f9eb0e6f89d6c60b39732dd4a24459391"
+  },
+  "templateUnchanged": true
+}

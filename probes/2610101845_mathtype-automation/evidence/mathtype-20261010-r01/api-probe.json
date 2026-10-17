@@ -1,0 +1,40 @@
+[
+  {
+    "event": "api-init",
+    "rc": 1
+  },
+  {
+    "event": "word-start"
+  },
+  {
+    "event": "doc-open"
+  },
+  {
+    "event": "prog-id",
+    "value": "Equation.DSMT4"
+  },
+  {
+    "event": "activated"
+  },
+  {
+    "event": "set-equation",
+    "rc": -9999,
+    "latex": "H(s)=\\frac{1}{LCs^2+RCs+1}"
+  },
+  {
+    "event": "get-length",
+    "rc": -9999,
+    "size": 0
+  },
+  {
+    "event": "close-equation",
+    "rc": 0
+  },
+  {
+    "event": "saved"
+  },
+  {
+    "event": "api-term",
+    "rc": 0
+  }
+]

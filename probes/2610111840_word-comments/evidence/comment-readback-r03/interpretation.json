@@ -1,0 +1,36 @@
+{
+  "docxSha256": "f96c74029e6fe67ad187d0c609d29e7c1165f931fd8c514a289c33451000a589",
+  "interpretedBy": "agent",
+  "status": "review-comments-only-no-content-change",
+  "items": [
+    {
+      "commentIndex": 1,
+      "sourceId": "p-edit",
+      "meaning": "要求补充验收依据",
+      "evidence": "选中的完整正文与 p-edit 书签范围一致",
+      "action": "保留为待处理意见"
+    },
+    {
+      "commentIndex": 2,
+      "sourceId": "p-edit",
+      "parentCommentIndex": 1,
+      "meaning": "确认收到并计划补充，不代表正文已经改完",
+      "evidence": "COM Ancestor/Replies 与 XML 父子关系一致",
+      "action": "保留在线程中"
+    },
+    {
+      "commentIndex": 3,
+      "sourceId": "eq-edit",
+      "meaning": "核对公式测试残留并说明变量",
+      "evidence": "锚定 Equation.DSMT4 对象，对象书签对应 eq-edit，旁边编号为 1-1",
+      "action": "核实后另行决定正文/公式修改"
+    },
+    {
+      "commentIndex": 4,
+      "sourceId": "fig-stable",
+      "meaning": "确认图 1 的非等比显示尺寸是否应保留",
+      "evidence": "锚定行内图片，后文紧接图 1 保留的图片；对象替代文字和宽高相符",
+      "action": "保留为排版确认意见"
+    }
+  ]
+}

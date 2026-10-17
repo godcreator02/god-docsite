@@ -1,0 +1,5 @@
+{
+  "status": "superseded-by-reply-fix",
+  "finding": "Direct iteration over Comment.Replies returned all four document comments for every root on this host. The initial passed status covered persisted XML relationships but did not catch the wrong COM reply list.",
+  "fix": "Use Replies.Count and Replies.Item(i); verify root reply indexes and Ancestor together."
+}

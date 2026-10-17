@@ -1,0 +1,14 @@
+{
+  "unitTests": {
+    "count": 23,
+    "status": "passed",
+    "seconds": 1.124
+  },
+  "productionXmlBatchRemoved": true,
+  "productionFormulaCacheRemoved": true,
+  "publicTemplateUnchanged": true,
+  "baselineUnchanged": true,
+  "tenPageVisualReviews": 7,
+  "firstThreeCombinedRunsVisualReview": "not-performed",
+  "sourceProtocolUnchanged": true
+}

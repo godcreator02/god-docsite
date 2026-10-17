@@ -1,0 +1,97 @@
+{
+  "cases": [
+    {
+      "case": "insert",
+      "decision": {
+        "mode": "full",
+        "reason": "structure-insert-delete-or-move"
+      },
+      "execution": "planner-only"
+    },
+    {
+      "case": "delete",
+      "decision": {
+        "mode": "full",
+        "reason": "structure-insert-delete-or-move"
+      },
+      "execution": "planner-only"
+    },
+    {
+      "case": "move",
+      "decision": {
+        "mode": "full",
+        "reason": "structure-insert-delete-or-move"
+      },
+      "execution": "planner-only"
+    },
+    {
+      "case": "cross-parent-move",
+      "decision": {
+        "mode": "full",
+        "reason": "structure-insert-delete-or-move"
+      },
+      "execution": "planner-only"
+    },
+    {
+      "case": "metadata",
+      "decision": {
+        "mode": "full",
+        "reason": "metadata-notes-or-references-changed"
+      },
+      "execution": "planner-only"
+    },
+    {
+      "case": "formula-placement",
+      "decision": {
+        "mode": "full",
+        "reason": "unsupported-node-change",
+        "id": "eq-edit"
+      },
+      "execution": "planner-only"
+    },
+    {
+      "case": "complex-table",
+      "decision": {
+        "mode": "full",
+        "reason": "complex-table",
+        "id": "tbl-values"
+      },
+      "execution": "planner-only"
+    },
+    {
+      "case": "template-change",
+      "decision": {
+        "mode": "full",
+        "reason": "template-assets-engine-or-environment-changed"
+      },
+      "execution": "preflight-only"
+    },
+    {
+      "case": "manual-docx-change",
+      "decision": {
+        "mode": "full",
+        "reason": "previous-output-modified"
+      },
+      "execution": "preflight-only"
+    },
+    {
+      "case": "missing-anchor",
+      "decision": {
+        "mode": "full-required",
+        "reason": "missing-anchor:p-edit"
+      },
+      "execution": "native-unsaved-copy"
+    },
+    {
+      "case": "insert-actual-rebuild",
+      "decision": {
+        "mode": "full",
+        "reason": "structure-insert-delete-or-move"
+      },
+      "execution": "passed-full-build",
+      "seconds": 53.54894670000067
+    }
+  ],
+  "passed": true,
+  "scope": "Planner refusals are distinct from actual rebuild; only the insert case is rebuilt when requested."
+}

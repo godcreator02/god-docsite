@@ -1,0 +1,478 @@
+{
+  "archivedAt": "2026-10-10T20:19:55.425231+08:00",
+  "sourceRepo": "D:\\unitfolders\\nb9zj-word-conversion-lab\\word-conversion-lab",
+  "sourceCommit": "6c6de0a4f6dc025be5ca7446b9483d779d01a35b",
+  "mode": "report",
+  "question": "能否从同一 JSON 生成包含行内与行间 MathType 的完整十页正文？",
+  "conclusion": "r02 共 12 页：6 个 Equation.DSMT4、0 OMML，行间式 (3-1) 至 (3-5)，交叉引用插入后变化正确，六条公式保存重开读回通过，12 页逐页验收。",
+  "limitations": "r01 的 aligned 被 MathType 渲染为未识别红字；r02 对本次两列公式适配 array{rl}。r01 源码未冻结，array 单测脚本未保存，不能逐字复现失败轮。本项覆盖创建和重开读取，不代表六类公式内部覆盖编辑或任意 LaTeX 已通过。",
+  "originalRuns": [
+    "project-report-mathtype-r01",
+    "mathtype-array-check",
+    "project-report-mathtype-r02",
+    "project-report-omml-regression-mt01"
+  ],
+  "historicalSourceRevisions": [
+    {
+      "commit": "6c6de0a4f6dc025be5ca7446b9483d779d01a35b",
+      "files": 15,
+      "snapshot": "input/history-source/6c6de0a4f6dc025be5ca7446b9483d779d01a35b"
+    }
+  ],
+  "inputFiles": [
+    {
+      "path": "input/history-source/6c6de0a4f6dc025be5ca7446b9483d779d01a35b/fixtures/canonical.json",
+      "sha256": "c5a0fa88beccde3c90715cbdaaa742e6d17a6a903e0730ed591d7aa6f16c96e5",
+      "bytes": 47206
+    },
+    {
+      "path": "input/history-source/6c6de0a4f6dc025be5ca7446b9483d779d01a35b/requirements.txt",
+      "sha256": "3069384b47d2c896dbafbb8c031d7cc7c1dcefddc3755cf7b18857f39b69dfc2",
+      "bytes": 219
+    },
+    {
+      "path": "input/history-source/6c6de0a4f6dc025be5ca7446b9483d779d01a35b/routes/direct-docx/build.py",
+      "sha256": "f9960884cf9dccbb1a0cef2306714072722ac2be22e91f458efafffc21ef93bd",
+      "bytes": 3513
+    },
+    {
+      "path": "input/history-source/6c6de0a4f6dc025be5ca7446b9483d779d01a35b/routes/pandoc/build.py",
+      "sha256": "808e6be2f107e38ce581638ff9d322fd0ce6d09333b9c5c1cf325e479ca7105e",
+      "bytes": 3609
+    },
+    {
+      "path": "input/history-source/6c6de0a4f6dc025be5ca7446b9483d779d01a35b/routes/word-com/build.py",
+      "sha256": "e5b115c38d3a22ecbc6ed391b83a4d0391eccddd4cba6fdfb0b1605e4a1f09e8",
+      "bytes": 14786
+    },
+    {
+      "path": "input/history-source/6c6de0a4f6dc025be5ca7446b9483d779d01a35b/routes/word-com/mathtype-probe.py",
+      "sha256": "fdac3a08fc8200005ae0b988707fca2e6bd0e2ed272fe042f8d5ffed668ab24f",
+      "bytes": 27459
+    },
+    {
+      "path": "input/history-source/6c6de0a4f6dc025be5ca7446b9483d779d01a35b/routes/word-com/restyle.py",
+      "sha256": "f4aa600c068721d42f6d591b8e95f266b3cf6ddd01f3fce734b9b480d39c821d",
+      "bytes": 16932
+    },
+    {
+      "path": "input/history-source/6c6de0a4f6dc025be5ca7446b9483d779d01a35b/routes/word-com/template.py",
+      "sha256": "27139122c775fb6c3c2161d8c5c21a908b7b5dbed4ece1f5210f47c3e648a9bc",
+      "bytes": 6745
+    },
+    {
+      "path": "input/history-source/6c6de0a4f6dc025be5ca7446b9483d779d01a35b/scripts/audit-and-render.py",
+      "sha256": "3f5eb4a7b294c9fa152e6f91e9929703cd2680657873647ff43e89dbce514c15",
+      "bytes": 2648
+    },
+    {
+      "path": "input/history-source/6c6de0a4f6dc025be5ca7446b9483d779d01a35b/scripts/capture-environment.py",
+      "sha256": "7d9173c8765d34ce04d9b11767d94b1364710f84e48c42d1d37fe7ad30f52d48",
+      "bytes": 4374
+    },
+    {
+      "path": "input/history-source/6c6de0a4f6dc025be5ca7446b9483d779d01a35b/scripts/document_common.py",
+      "sha256": "710d83c3fb802ddc588bbdd96a366e0d53502a9d0f1717918894575699db48f1",
+      "bytes": 5790
+    },
+    {
+      "path": "input/history-source/6c6de0a4f6dc025be5ca7446b9483d779d01a35b/scripts/record-evidence.py",
+      "sha256": "43ffd47346f26ade525436cf546f97656c47221c407dbf74a4e67c92ada6e951",
+      "bytes": 5337
+    },
+    {
+      "path": "input/history-source/6c6de0a4f6dc025be5ca7446b9483d779d01a35b/scripts/word-verify.py",
+      "sha256": "ec2f79882cf37b832758c22da1f0c99f0a1e7bc91556f0f09899cca50fa0bb67",
+      "bytes": 14214
+    },
+    {
+      "path": "input/history-source/6c6de0a4f6dc025be5ca7446b9483d779d01a35b/scripts/word_com.py",
+      "sha256": "c7acaf6bbbdaf3799a15f13044baddd42de1a65bb6945b6ed5b3839956df80b2",
+      "bytes": 2121
+    },
+    {
+      "path": "input/history-source/6c6de0a4f6dc025be5ca7446b9483d779d01a35b/templates/source.json",
+      "sha256": "a6aa3e0fb052caa35654b37b71dde8fae60de3d67d3e594c02cc77cd66b92d48",
+      "bytes": 1472
+    },
+    {
+      "path": "input/repo/fixtures/canonical.json",
+      "sha256": "8dc4d0430939c3cd4a3e423cab3e21b063f171afd2567d633e80b978a1037f1c",
+      "bytes": 48704
+    },
+    {
+      "path": "input/repo/requirements.txt",
+      "sha256": "3069384b47d2c896dbafbb8c031d7cc7c1dcefddc3755cf7b18857f39b69dfc2",
+      "bytes": 219
+    },
+    {
+      "path": "input/repo/routes/direct-docx/build.py",
+      "sha256": "f9960884cf9dccbb1a0cef2306714072722ac2be22e91f458efafffc21ef93bd",
+      "bytes": 3513
+    },
+    {
+      "path": "input/repo/routes/pandoc/build.py",
+      "sha256": "808e6be2f107e38ce581638ff9d322fd0ce6d09333b9c5c1cf325e479ca7105e",
+      "bytes": 3609
+    },
+    {
+      "path": "input/repo/routes/word-com/build.py",
+      "sha256": "e5b115c38d3a22ecbc6ed391b83a4d0391eccddd4cba6fdfb0b1605e4a1f09e8",
+      "bytes": 14786
+    },
+    {
+      "path": "input/repo/routes/word-com/mathtype-probe.py",
+      "sha256": "9bc8844f27d3e620f9ad8cc1b62aff90834af2e8970565ba1ea4472e6eec2256",
+      "bytes": 27790
+    },
+    {
+      "path": "input/repo/routes/word-com/restyle.py",
+      "sha256": "f4aa600c068721d42f6d591b8e95f266b3cf6ddd01f3fce734b9b480d39c821d",
+      "bytes": 16932
+    },
+    {
+      "path": "input/repo/routes/word-com/template.py",
+      "sha256": "27139122c775fb6c3c2161d8c5c21a908b7b5dbed4ece1f5210f47c3e648a9bc",
+      "bytes": 6745
+    },
+    {
+      "path": "input/repo/scripts/audit-and-render.py",
+      "sha256": "3f5eb4a7b294c9fa152e6f91e9929703cd2680657873647ff43e89dbce514c15",
+      "bytes": 2648
+    },
+    {
+      "path": "input/repo/scripts/capture-environment.py",
+      "sha256": "7d9173c8765d34ce04d9b11767d94b1364710f84e48c42d1d37fe7ad30f52d48",
+      "bytes": 4374
+    },
+    {
+      "path": "input/repo/scripts/document_common.py",
+      "sha256": "710d83c3fb802ddc588bbdd96a366e0d53502a9d0f1717918894575699db48f1",
+      "bytes": 5790
+    },
+    {
+      "path": "input/repo/scripts/record-evidence.py",
+      "sha256": "43ffd47346f26ade525436cf546f97656c47221c407dbf74a4e67c92ada6e951",
+      "bytes": 5337
+    },
+    {
+      "path": "input/repo/scripts/word-verify.py",
+      "sha256": "ec2f79882cf37b832758c22da1f0c99f0a1e7bc91556f0f09899cca50fa0bb67",
+      "bytes": 14214
+    },
+    {
+      "path": "input/repo/scripts/word_com.py",
+      "sha256": "c7acaf6bbbdaf3799a15f13044baddd42de1a65bb6945b6ed5b3839956df80b2",
+      "bytes": 2121
+    },
+    {
+      "path": "input/repo/templates/project-report.dotx",
+      "sha256": "2d645df23ecd1ee6f40d7da29854435139ff9d77a490f29c5051b6960bf909c4",
+      "bytes": 31815
+    },
+    {
+      "path": "input/repo/templates/sgcc-feasibility-2018-original.docx",
+      "sha256": "141131ad823f273eb50cebfae6c5f5fb4b65e878c2c63e52472d2612f55b60fd",
+      "bytes": 37630
+    },
+    {
+      "path": "input/repo/templates/sgcc-style-reference.docx",
+      "sha256": "a95f2a070c77007246353e4849d399f709667916bfafd98380a336066efade57",
+      "bytes": 38257
+    },
+    {
+      "path": "input/repo/templates/source.json",
+      "sha256": "a6aa3e0fb052caa35654b37b71dde8fae60de3d67d3e594c02cc77cd66b92d48",
+      "bytes": 1472
+    }
+  ],
+  "originalFiles": [
+    {
+      "source": "out/project-report-mathtype-r01/FigArchitecture.png",
+      "bytes": 49880,
+      "sha256": "d449256d773e841a3c826638d65a1790fa023dd4d9b825fd05502500e7f9d1a0",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/project-report-mathtype-r01/FigResponse.png",
+      "bytes": 25324,
+      "sha256": "7ad4450870ae6f02c1da2d43d403421dc3145e846dabc075ee8e8bd71f478836",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/project-report-mathtype-r01/math-page.png",
+      "bytes": 180315,
+      "sha256": "dcb28d85d860255a60493718fc61f81f0510bfa84e14f21073c4b3fe94f8fad3",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/project-report-mathtype-r01/mathtype-draft.docx",
+      "bytes": 130059,
+      "sha256": "792ab5be565b1c98e6af20e15a84f9c6dfa65db70830c0aa0652051787841ecb",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/project-report-mathtype-r01/mathtype-report-verification.json",
+      "bytes": 27365,
+      "sha256": "0ef5a999be75f6dedf5b26484a821c65147d00b49fe23393a0f18073492ca63d",
+      "archive": "evidence/project-report-mathtype-r01/mathtype-report-verification.json"
+    },
+    {
+      "source": "out/project-report-mathtype-r01/visual-review.json",
+      "bytes": 277,
+      "sha256": "9fb99d9e38b8f8270d852c269b58db0f8ae168d8c451f3ddd8c8b0684d40fca8",
+      "archive": "evidence/project-report-mathtype-r01/visual-review.json"
+    },
+    {
+      "source": "out/project-report-mathtype-r01/word-com-generation.json",
+      "bytes": 739,
+      "sha256": "ad75c2e9b8c3cb9b1710b0c28f533b85f272ee4160d76f1a1a382e1b0b557094",
+      "archive": "evidence/project-report-mathtype-r01/word-com-generation.json"
+    },
+    {
+      "source": "out/project-report-mathtype-r01/word-com.docx",
+      "bytes": 138354,
+      "sha256": "d2b206753c338a059f79b20f809405ad94fc5db24395e1817ecaf3ec9446026e",
+      "archive": "evidence/project-report-mathtype-r01/word-com.docx"
+    },
+    {
+      "source": "out/project-report-mathtype-r01/word-com.pdf",
+      "bytes": 440250,
+      "sha256": "552f171c00fd543fdd6dff8de71c50fda512fac3f7c630e37e09f0e213604694",
+      "archive": "evidence/project-report-mathtype-r01/word-com.pdf"
+    },
+    {
+      "source": "out/mathtype-array-check/array-page.png",
+      "bytes": 11061,
+      "sha256": "12ce0e1e4058692ee4f8b7e27ee51925113f794c94fbc6c16fd3088ecd61be3d",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/mathtype-array-check/array.docx",
+      "bytes": 14390,
+      "sha256": "4bb559ed4d289f85cfe5dcf846f4d6cc369e130362848d607e6efef584a063fd",
+      "archive": "evidence/mathtype-array-check/array.docx"
+    },
+    {
+      "source": "out/mathtype-array-check/array.pdf",
+      "bytes": 78564,
+      "sha256": "67bef00da7daa04889fda2e4e80e85de0c0aa3f66453785bb5b8493807dbbee9",
+      "archive": "evidence/mathtype-array-check/array.pdf"
+    },
+    {
+      "source": "out/project-report-mathtype-r02/build.py",
+      "bytes": 14786,
+      "sha256": "e5b115c38d3a22ecbc6ed391b83a4d0391eccddd4cba6fdfb0b1605e4a1f09e8",
+      "archive": "evidence/project-report-mathtype-r02/build.py"
+    },
+    {
+      "source": "out/project-report-mathtype-r02/FigArchitecture.png",
+      "bytes": 49880,
+      "sha256": "d449256d773e841a3c826638d65a1790fa023dd4d9b825fd05502500e7f9d1a0",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/project-report-mathtype-r02/FigResponse.png",
+      "bytes": 25324,
+      "sha256": "7ad4450870ae6f02c1da2d43d403421dc3145e846dabc075ee8e8bd71f478836",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/project-report-mathtype-r02/manifest.json",
+      "bytes": 587,
+      "sha256": "32228305afd01c3228b74c74445d32dafe8a6895eb872da0879785da63cf7bc8",
+      "archive": "evidence/project-report-mathtype-r02/manifest.json"
+    },
+    {
+      "source": "out/project-report-mathtype-r02/mathtype-draft.docx",
+      "bytes": 130443,
+      "sha256": "9b7d2b27a7026ccd3e8c72c8b74af9d09c6d5363426355db6557ed67f7e12f90",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/project-report-mathtype-r02/mathtype-probe.py",
+      "bytes": 27790,
+      "sha256": "9bc8844f27d3e620f9ad8cc1b62aff90834af2e8970565ba1ea4472e6eec2256",
+      "archive": "evidence/project-report-mathtype-r02/mathtype-probe.py"
+    },
+    {
+      "source": "out/project-report-mathtype-r02/mathtype-report-verification.json",
+      "bytes": 27784,
+      "sha256": "4047f789a8cdccbb086ab888dc18a6ee72f4bd8597fd3f5a29b7d488a4adec54",
+      "archive": "evidence/project-report-mathtype-r02/mathtype-report-verification.json"
+    },
+    {
+      "source": "out/project-report-mathtype-r02/structure-audit.json",
+      "bytes": 21074,
+      "sha256": "caa0ef41822d3501114dbca741e0743ba67a696f4aa7a36b07a53eb1ac5ebf60",
+      "archive": "evidence/project-report-mathtype-r02/structure-audit.json"
+    },
+    {
+      "source": "out/project-report-mathtype-r02/visual-review.json",
+      "bytes": 2398,
+      "sha256": "b51da87eef8b0e653040ac3ecfc9867fed0664d4bf3eac7d1470c874d198c3d0",
+      "archive": "evidence/project-report-mathtype-r02/visual-review.json"
+    },
+    {
+      "source": "out/project-report-mathtype-r02/word-com-contact.png",
+      "bytes": 830115,
+      "sha256": "3c708c9dd8d13079901a96fb520d79490ef51bd74876cc71e73634c0181428ad",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/project-report-mathtype-r02/word-com-generation.json",
+      "bytes": 739,
+      "sha256": "ab9949f394c487a92b87aef31f3996acaf9ccd6e307f516ccf7e3387419634d0",
+      "archive": "evidence/project-report-mathtype-r02/word-com-generation.json"
+    },
+    {
+      "source": "out/project-report-mathtype-r02/word-com-pages/page-01.png",
+      "bytes": 34545,
+      "sha256": "7f14e1dc765592179e3dff7f6ea133597d7e71d863ae41b79eeb7ebc3ae3169c",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/project-report-mathtype-r02/word-com-pages/page-02.png",
+      "bytes": 58577,
+      "sha256": "e4ae50a9d51ee96966824fc9e0065be85b99f260b85e184ae4e28a4cdbcb99f4",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/project-report-mathtype-r02/word-com-pages/page-03.png",
+      "bytes": 269895,
+      "sha256": "3a2887813126108f2fb1737de9d171462311be81087e550976876cc8ccabd7eb",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/project-report-mathtype-r02/word-com-pages/page-04.png",
+      "bytes": 251627,
+      "sha256": "0712f8dad7c7e2fa1e5c19ca4477e1ada04617821338fdd30dd0a169aeff5f92",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/project-report-mathtype-r02/word-com-pages/page-05.png",
+      "bytes": 137457,
+      "sha256": "6a5a2a9c95c06d752671cd9722934d45db5e41075fa44e81d7eff601a6d72dc3",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/project-report-mathtype-r02/word-com-pages/page-06.png",
+      "bytes": 213792,
+      "sha256": "ae2e10ea7f02cd4fb054298b044fda8e33b296ce768bdc1ca8b6db6f448f99e5",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/project-report-mathtype-r02/word-com-pages/page-07.png",
+      "bytes": 168164,
+      "sha256": "9ed2b1e77d5d6acbcef9dcd393b0e0cc25fa45292dd6db6a10d767af9379b04d",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/project-report-mathtype-r02/word-com-pages/page-08.png",
+      "bytes": 183786,
+      "sha256": "dbe6ff438954449a94a74cae67d052abe95bed67f4bb599fa9ba8b3ea525c186",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/project-report-mathtype-r02/word-com-pages/page-09.png",
+      "bytes": 208645,
+      "sha256": "971b214d08479f7c450cb4849efedd4ab189b5a2d97aa2040f47a5fdfd321a40",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/project-report-mathtype-r02/word-com-pages/page-10.png",
+      "bytes": 222697,
+      "sha256": "0896222c5763d563db4fbbff55ff81b7af640872c1ff04bdfab10022bb2c6ece",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/project-report-mathtype-r02/word-com-pages/page-11.png",
+      "bytes": 205652,
+      "sha256": "3c44e1395d037f19669a2f894185fc9d12c8dfdab979c56a07bef6213d453de8",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/project-report-mathtype-r02/word-com-pages/page-12.png",
+      "bytes": 199086,
+      "sha256": "f4112c6b2bed42c2baafccf79fefad606d563bf20ed8c9fd57ee013bb7bf01e8",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/project-report-mathtype-r02/word-com.docx",
+      "bytes": 138368,
+      "sha256": "2d661eccb4e068d48a4b2906e5d821f3fc84a903d4922de200bd6bd4ee788164",
+      "archive": "evidence/project-report-mathtype-r02/word-com.docx"
+    },
+    {
+      "source": "out/project-report-mathtype-r02/word-com.pdf",
+      "bytes": 436451,
+      "sha256": "d6cef958a023e8a503e1395ee8d34b6ceed667948ffd6a33d2a1d59641691402",
+      "archive": "evidence/project-report-mathtype-r02/word-com.pdf"
+    },
+    {
+      "source": "out/project-report-mathtype-r02/~$rd-com.docx",
+      "bytes": 162,
+      "sha256": "429b6f6694207adf1183f0ca163f1a04cf8fe72a05644d7ef3f4687e981a955d",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/project-report-omml-regression-mt01/FigArchitecture.png",
+      "bytes": 49880,
+      "sha256": "d449256d773e841a3c826638d65a1790fa023dd4d9b825fd05502500e7f9d1a0",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/project-report-omml-regression-mt01/FigResponse.png",
+      "bytes": 25324,
+      "sha256": "7ad4450870ae6f02c1da2d43d403421dc3145e846dabc075ee8e8bd71f478836",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/project-report-omml-regression-mt01/regression-check.json",
+      "bytes": 966,
+      "sha256": "45490326f70444a47400e97ec1702145fc9218bcccc0004e4519fce3d34dfa93",
+      "archive": "evidence/project-report-omml-regression-mt01/regression-check.json"
+    },
+    {
+      "source": "out/project-report-omml-regression-mt01/word-com-generation.json",
+      "bytes": 739,
+      "sha256": "83fc104951eda1c2f11fb0624bd78ad5532266065bcae78518fba4c188435b41",
+      "archive": "evidence/project-report-omml-regression-mt01/word-com-generation.json"
+    },
+    {
+      "source": "out/project-report-omml-regression-mt01/word-com.raw.docx",
+      "bytes": 131432,
+      "sha256": "7d4291cdb8fb332092954d6a0144c113eea4d03640c8e4497011442aaed4f787",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    }
+  ],
+  "archiveValidation": "all_preserved_file_hashes_verified; all_python_sources_parse; Office rerun not performed",
+  "rerunValidation": "not_run_during_archival",
+  "historicalPaths": "Older evidence may say runs/. These literal historical records are retained; actual files are now under out/.",
+  "lineEndings": "git show snapshots preserve committed bytes, usually LF. Original output source snapshots preserve original bytes, often CRLF. Historical raw hashes can differ by line endings."
+}

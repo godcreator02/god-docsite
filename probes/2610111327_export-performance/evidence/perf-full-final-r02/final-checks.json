@@ -1,0 +1,12 @@
+{
+  "tests": 27,
+  "unitStatus": "passed",
+  "docRender": "passed",
+  "docCheck": "passed",
+  "roster": "passed",
+  "siteBuild": "passed",
+  "sitePort": 4312,
+  "frozenSmoke": "passed",
+  "frozenSmokeSeconds": 4.689,
+  "frozenFullInput": "valid"
+}

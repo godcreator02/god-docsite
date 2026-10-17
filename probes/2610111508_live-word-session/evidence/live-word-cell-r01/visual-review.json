@@ -1,0 +1,19 @@
+{
+  "status": "passed",
+  "pagesReviewed": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10
+  ],
+  "pdfSha256": "602c97cd28371bc2636489c9dbd0e680845f6f52546ee1d4a8b6556c33bec80f",
+  "method": "All ten pages viewed in numbered contact sheets rendered at 110 dpi.",
+  "blockingFindings": [],
+  "scope": "Final PDF only. Intermediate trial PDFs were automatically checked, not individually visually reviewed."
+}

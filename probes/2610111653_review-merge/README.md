@@ -1,0 +1,42 @@
+# 审阅回收、三方合并与 Word 复用实验
+
+本实验针对固定十页人工返回稿，产物放 fresh `out/`。正式生成入口、正式报告 JSON 和用户打开的 Word 均不修改；禁止用本实验宣称任意 DOCX 双向转换。Python 使用仓内 `.venv`，依赖固定在 `requirements.txt`。
+
+## 输入与输出
+
+`fixture/` 固定发稿 DOCX、返回 DOCX、发稿 JSON、布局、图片、协议与原回读证据；哈希见 `fixture-hashes.json`。返回稿是最后保存版本，SHA-256 为 `15c6c84ad72dabe7cd0adb7e51b2ff956f6a12988809d0a4255ef4f26e096758`。用户窗口中后来未保存的 COM 测试文字不纳入。
+
+```powershell
+.\.venv\Scripts\python.exe -X utf8 probes\2610111653_review-merge\run.py --out out\review-merge-new --key-file out\locked-review-r01\unlock-key.json
+.\.venv\Scripts\python.exe -X utf8 probes\2610111653_review-merge\verify_fields.py --run out\review-merge-new
+```
+
+解锁密码仅从原 out 路径读取，用于解锁独立分析副本，绝不复制到 fixture 或 evidence。Word 写入通过 COM；`object_reader.py` 为此前对象读取代码的固定副本，只读 XML 与对象信息，不写 XML，不调用 Computer Use。
+
+`proposal.json` 列出五项真实候选，`review.md` 是可读清单，`decisions.pending.json` 全部待确认。`decisions.simulated.json` 只在独立实验中模拟采用全部候选，不代表用户批准正式合并。
+
+`merged-report/content.json` 为模拟合并内容，`layout.json` 保留图片独立宽高和比例锁定状态，实际图片在 `assets/`。该布局 JSON 是 probe 约定，不是正式生成器的新参数；正式生成器尚不能完整重现此独立宽高。`merged.docx` 是基于返回稿副本更新的结果，`merged.pdf` 为 Word 导出结果。
+
+## 工作机制
+
+1. 严格核对固定输入哈希与审阅批次。复制返回稿，在独立分析副本中接受修订，得到候选内容视图，不修改原稿。
+2. 比较源段落、普通表格单元格、图片尺寸及 OLE 对象。普通段落的新增部分分成独立节点，表格新增行分配确定 ID。图片通过题注书签和前一行内图片定位；改变的公式通过 MathType API 读回。
+3. 真实清单保持待确认。另模拟团队在 `p-edit` 增添一句文字，再将导师候选与发稿、团队当前 JSON 做三方核对。
+4. 明确采用后复用返回稿副本，补新节点书签并修复被扩大书签的边界。已在返回稿里的新增段落、三行表格、公式与图片尺寸直接保留，只额外写入团队修改的那一段。
+5. 更新域和目录，保存重开，逐项核对 62 个普通段落／单元格的内容，检查对象数据、图片宽高和 PDF 文本。另用独立 COM 检查编号和 14 个引用目标。
+
+当前 Word 更新只验收“模拟采用全部候选＋团队另一处普通文字修改”。拒绝、待决定、冲突与重复合并在纯数据层验证；没有承诺任意混合决定的 Word 物化、富文本自动合并、删除移动或复杂表格。
+
+## 结果与失败记录
+
+成功记录为 `evidence/review-merge-r03/`：五项候选、七项合并检查、十页 Word／PDF，自动检查通过，页面显示待用户查看。完整收集、数次独立 Word 打开、公式读取、合并、保存重开和导出合计约 49.4 s；它不是单次局部修改的延迟。
+
+七项数据检查覆盖重复合并不重复插入、同段冲突阻止输出、待决定阻止输出、全拒绝保持原数据、插入锚点缺失、团队改单元格同时导师加行，以及过期决定集拒绝。模拟团队另一段修改与五项导师候选成功合并，是主流程的另外一项实际验证。
+
+第一轮在新单元格定位时失败：Word 的末尾单元格标记占一个 Range 单位，却在 Text 表现为 CR 加 BEL。沿用已有生成器的单元格段落书签规则，只绑定单元格文本后通过。第二轮 Word 检查通过，PDF 文本检查因提取结果为 `888 方法发给` 而误报；文本检索去除排版空白后通过，实际原文保留在 `pdf-text.json`，未改写 DOCX 文字。
+
+失败输入、脚本与错误均归档。没有逐页检查，不写视觉通过；真实批注为零，批注与回复的往返仍未验证。正式生产协议与代码没有推广本实验。
+
+## 挪入本仓
+
+本目录原是本机仓 word-conversion-lab 的 `probes/2026-10-11-review-merge/`，2026-10-17 随那个仓的轨迹卡挪进本仓；那个仓已退役，最后一个提交是 `3146c64`，bundle 是 `D:\unitfolders\nb9zj-word-conversion-lab\word-conversion-lab.bundle`。上面的命令与相对路径都以 word-conversion-lab 的仓根为准：要重跑，先从 bundle 克隆那个仓、照它的 README 建 `.venv`，在它的仓根下运行。

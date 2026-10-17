@@ -1,0 +1,5 @@
+{
+  "status": "failed",
+  "error": "Missing PDF text: 888方法发给",
+  "traceback": "Traceback (most recent call last):\n  File \"D:\\unitfolders\\nb9zj-word-conversion-lab\\word-conversion-lab\\probes\\2026-10-11-review-merge\\run.py\", line 85, in main\n    if needed not in all_text:raise AssertionError('Missing PDF text: '+needed)\n                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: Missing PDF text: 888方法发给\n"
+}

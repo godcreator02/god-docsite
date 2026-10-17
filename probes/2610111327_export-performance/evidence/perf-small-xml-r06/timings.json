@@ -1,0 +1,22 @@
+{
+  "mode": "xml",
+  "python": "D:\\unitfolders\\nb9zj-word-conversion-lab\\word-conversion-lab\\.venv\\Scripts\\python.exe",
+  "fixtureSha256": "8e2656a97cbdd504ba43ab1383e58d357dabd8fb66c8ce41d5344ba85d1f883c",
+  "templateSha256": "2d645df23ecd1ee6f40d7da29854435139ff9d77a490f29c5051b6960bf909c4",
+  "budgetSeconds": 25.0,
+  "word": {
+    "version": "16.0",
+    "build": "16.0.14334"
+  },
+  "rendererSha256": "3cef9999dfefe24fc295f74944199cdcde2e466674cb99e2868ceba974f9f25e",
+  "composeSeconds": 8.013,
+  "pdfExported": true,
+  "contentChecks": {
+    "sourceTextRuns": 145,
+    "tablesIncludingNested": 1,
+    "maximumTableDepth": 1,
+    "sourceImages": {},
+    "fields": 3
+  },
+  "error": "Traceback (most recent call last):\n  File \"D:\\unitfolders\\nb9zj-word-conversion-lab\\word-conversion-lab\\probes\\2026-10-11-export-performance\\probe.py\", line 78, in main\n    record['formatChecks'] = native_text_state(output / 'report.docx', content)\n                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"D:\\unitfolders\\nb9zj-word-conversion-lab\\word-conversion-lab\\probes\\2026-10-11-export-performance\\frozen_verify.py\", line 218, in native_text_state\n    raise RuntimeError(f\"Native text differs: {node['id']} {value!r}\")\nRuntimeError: Native text differs: p-105 '磁芯损耗估算（纳米晶，20kHz/0.12T）：约 330W（20kHz）、400W（30kHz）；绕组损耗约 71W（原边利兹线 ~21W + 副边 ~50W）'\n"
+}

@@ -1,0 +1,269 @@
+{
+  "archivedAt": "2026-10-10T20:32:37.096821+08:00",
+  "baseGitCommit": "6c6de0a4f6dc025be5ca7446b9483d779d01a35b",
+  "provenance": "The formal implementation was an uncommitted working tree at formal-r02. baseGitCommit is only the prior repository commit; input file SHA-256 identifies this exact implementation.",
+  "mode": "formal-pipeline-regression",
+  "question": "Does the extracted production engine preserve the accepted MathType report while separating reusable engine and report-specific rules?",
+  "historicalResult": "formal-r01 failed during temporary numbering-row deletion; formal-r02 passed automation and all 12 page reviews. Its 12 rendered pages were pixel-identical to project-report-mathtype-r02.",
+  "limitations": [
+    "formal-r01 source was not frozen; its input hashes and failed verification remain. This archive does not reconstruct or claim exact rerun of that failed source.",
+    "The historical pixel comparison and review are copied evidence. Reruns must perform their own comparison and human visual review.",
+    "Large intermediate DOCX/PDF and page PNG outputs are only hash-indexed and remain in excluded out/."
+  ],
+  "baseline": {
+    "source": "out/project-report-mathtype-r02/word-com.pdf",
+    "archive": "input/baseline/report.pdf",
+    "sha256": "d6cef958a023e8a503e1395ee8d34b6ceed667948ffd6a33d2a1d59641691402"
+  },
+  "inputFiles": [
+    {
+      "path": "input/baseline/report.pdf",
+      "bytes": 436451,
+      "sha256": "d6cef958a023e8a503e1395ee8d34b6ceed667948ffd6a33d2a1d59641691402"
+    },
+    {
+      "path": "input/repo/pyproject.toml",
+      "bytes": 370,
+      "sha256": "b58b03fd68cb08c7776b0d3ad4ee26d3660959b5102efe541445f2a3306e4f92"
+    },
+    {
+      "path": "input/repo/reports/demo-report/content.json",
+      "bytes": 41652,
+      "sha256": "531bad0b29b6d7ca3656ddfe372198c58fbc0453bd8e582eaa4f6ec49d9a4616"
+    },
+    {
+      "path": "input/repo/reports/demo-report/report.py",
+      "bytes": 15791,
+      "sha256": "d6370c16aab949f57fd051d1db7126938a24986df59e75995f67459c6eec3b79"
+    },
+    {
+      "path": "input/repo/requirements.txt",
+      "bytes": 181,
+      "sha256": "438c0e6dc14ce57a8158faebefc04632d4498f4fae78916d0c39389584eda33f"
+    },
+    {
+      "path": "input/repo/src/docreport/__init__.py",
+      "bytes": 74,
+      "sha256": "65c430b8659a96080cf159ebea4ff6b656f6fedb73ebbc56b6c41750dd4a401e"
+    },
+    {
+      "path": "input/repo/src/docreport/__main__.py",
+      "bytes": 8739,
+      "sha256": "1080a7ff0dacbb528970b1e4fdf4a1a821b97a63f8ff77a3ce7775f5cadda819"
+    },
+    {
+      "path": "input/repo/src/docreport/compose.py",
+      "bytes": 9394,
+      "sha256": "7349f0a84adbbdce84db5f5752ab3cd9dfafd09695218395234f475a9a0646fe"
+    },
+    {
+      "path": "input/repo/src/docreport/mathtype.py",
+      "bytes": 7977,
+      "sha256": "f6d3edeab00a944fea6eec5b76363916e4327f53f150d9b3af7b1423b8b2bacb"
+    },
+    {
+      "path": "input/repo/src/docreport/verify.py",
+      "bytes": 2770,
+      "sha256": "1af3d64ea193b8ef6539a7d3d101b821b6d8da3d448fb7c5763d1a11a71ae5d9"
+    },
+    {
+      "path": "input/repo/src/docreport/word.py",
+      "bytes": 1997,
+      "sha256": "e04dd0efd07f277eec884bc64f50b4114e0546b4b13c909367e355e2755f1139"
+    },
+    {
+      "path": "input/repo/templates/project-report.dotx",
+      "bytes": 31815,
+      "sha256": "2d645df23ecd1ee6f40d7da29854435139ff9d77a490f29c5051b6960bf909c4"
+    },
+    {
+      "path": "input/repo/tests/test_docreport.py",
+      "bytes": 5753,
+      "sha256": "0e939920d330cb6f4b17aafe18c29bbdf008bde8cfcc9588817734610c87b2e0"
+    },
+    {
+      "path": "input/compare-pages.py",
+      "bytes": 1685,
+      "sha256": "0e2cce495a83b9e0e605c4d725b92d727e947a52b68060e93663f760e0fe7e5e"
+    }
+  ],
+  "originalFiles": [
+    {
+      "source": "out/formal-r01/draft.docx",
+      "bytes": 130337,
+      "sha256": "32ad4702f40683b44e93fddf5f4a4a6b14889e2588c548c9daa70eb2f9734a9f",
+      "archive": null
+    },
+    {
+      "source": "out/formal-r01/FigArchitecture.png",
+      "bytes": 49880,
+      "sha256": "d449256d773e841a3c826638d65a1790fa023dd4d9b825fd05502500e7f9d1a0",
+      "archive": null
+    },
+    {
+      "source": "out/formal-r01/FigResponse.png",
+      "bytes": 25324,
+      "sha256": "7ad4450870ae6f02c1da2d43d403421dc3145e846dabc075ee8e8bd71f478836",
+      "archive": null
+    },
+    {
+      "source": "out/formal-r01/manifest.json",
+      "bytes": 2387,
+      "sha256": "c8d3d9d33c1f3351e862c1cf5df680882bf81cb4c4bcf9a5651bcb9bf0ac336c",
+      "archive": "evidence/formal-r01/manifest.json"
+    },
+    {
+      "source": "out/formal-r01/numbering-repair-check.json",
+      "bytes": 418,
+      "sha256": "0569b90e10d85535d93d988964b1c8055ecce7886c5c0fe77610a0a374735e8e",
+      "archive": "evidence/formal-r01/numbering-repair-check.json"
+    },
+    {
+      "source": "out/formal-r01/report.docx",
+      "bytes": 138269,
+      "sha256": "924b2fab3996dd03e8e105404150a18341ac63b5222f07c320680801cb50eab4",
+      "archive": null
+    },
+    {
+      "source": "out/formal-r01/report.pdf",
+      "bytes": 436451,
+      "sha256": "a902404928c7126d85bc983a7637fafe1b246822bbc550874a6c416b4aa66844",
+      "archive": null
+    },
+    {
+      "source": "out/formal-r01/verification.json",
+      "bytes": 8956,
+      "sha256": "cead0c10a8dec2dad342e6d4113d573b3c6b0c055a875bd3b0e2221a4cdf3fdc",
+      "archive": "evidence/formal-r01/verification.json"
+    },
+    {
+      "source": "out/formal-r02/draft.docx",
+      "bytes": 130866,
+      "sha256": "e25c22c8c0beb86d7d823038d05958053cd4938595231036b8cf8b317fb071c9",
+      "archive": null
+    },
+    {
+      "source": "out/formal-r02/FigArchitecture.png",
+      "bytes": 49880,
+      "sha256": "d449256d773e841a3c826638d65a1790fa023dd4d9b825fd05502500e7f9d1a0",
+      "archive": null
+    },
+    {
+      "source": "out/formal-r02/FigResponse.png",
+      "bytes": 25324,
+      "sha256": "7ad4450870ae6f02c1da2d43d403421dc3145e846dabc075ee8e8bd71f478836",
+      "archive": null
+    },
+    {
+      "source": "out/formal-r02/manifest.json",
+      "bytes": 2613,
+      "sha256": "43f2e402e8b2782118cac144978425112c2d881e2e3a94e90a6a4004cac13246",
+      "archive": "evidence/formal-r02/manifest.json"
+    },
+    {
+      "source": "out/formal-r02/pages/page-01.png",
+      "bytes": 34545,
+      "sha256": "7f14e1dc765592179e3dff7f6ea133597d7e71d863ae41b79eeb7ebc3ae3169c",
+      "archive": null
+    },
+    {
+      "source": "out/formal-r02/pages/page-02.png",
+      "bytes": 58577,
+      "sha256": "e4ae50a9d51ee96966824fc9e0065be85b99f260b85e184ae4e28a4cdbcb99f4",
+      "archive": null
+    },
+    {
+      "source": "out/formal-r02/pages/page-03.png",
+      "bytes": 269895,
+      "sha256": "3a2887813126108f2fb1737de9d171462311be81087e550976876cc8ccabd7eb",
+      "archive": null
+    },
+    {
+      "source": "out/formal-r02/pages/page-04.png",
+      "bytes": 251627,
+      "sha256": "0712f8dad7c7e2fa1e5c19ca4477e1ada04617821338fdd30dd0a169aeff5f92",
+      "archive": null
+    },
+    {
+      "source": "out/formal-r02/pages/page-05.png",
+      "bytes": 137457,
+      "sha256": "6a5a2a9c95c06d752671cd9722934d45db5e41075fa44e81d7eff601a6d72dc3",
+      "archive": null
+    },
+    {
+      "source": "out/formal-r02/pages/page-06.png",
+      "bytes": 213792,
+      "sha256": "ae2e10ea7f02cd4fb054298b044fda8e33b296ce768bdc1ca8b6db6f448f99e5",
+      "archive": null
+    },
+    {
+      "source": "out/formal-r02/pages/page-07.png",
+      "bytes": 168164,
+      "sha256": "9ed2b1e77d5d6acbcef9dcd393b0e0cc25fa45292dd6db6a10d767af9379b04d",
+      "archive": null
+    },
+    {
+      "source": "out/formal-r02/pages/page-08.png",
+      "bytes": 183786,
+      "sha256": "dbe6ff438954449a94a74cae67d052abe95bed67f4bb599fa9ba8b3ea525c186",
+      "archive": null
+    },
+    {
+      "source": "out/formal-r02/pages/page-09.png",
+      "bytes": 208645,
+      "sha256": "971b214d08479f7c450cb4849efedd4ab189b5a2d97aa2040f47a5fdfd321a40",
+      "archive": null
+    },
+    {
+      "source": "out/formal-r02/pages/page-10.png",
+      "bytes": 222697,
+      "sha256": "0896222c5763d563db4fbbff55ff81b7af640872c1ff04bdfab10022bb2c6ece",
+      "archive": null
+    },
+    {
+      "source": "out/formal-r02/pages/page-11.png",
+      "bytes": 205652,
+      "sha256": "3c44e1395d037f19669a2f894185fc9d12c8dfdab979c56a07bef6213d453de8",
+      "archive": null
+    },
+    {
+      "source": "out/formal-r02/pages/page-12.png",
+      "bytes": 199086,
+      "sha256": "f4112c6b2bed42c2baafccf79fefad606d563bf20ed8c9fd57ee013bb7bf01e8",
+      "archive": null
+    },
+    {
+      "source": "out/formal-r02/pixel-comparison.json",
+      "bytes": 807,
+      "sha256": "3dbd14850a8a1fe6ab569a1560a238befae544f113f5b20ce1f6d2262cb13954",
+      "archive": "evidence/formal-r02/pixel-comparison.json"
+    },
+    {
+      "source": "out/formal-r02/report.docx",
+      "bytes": 137961,
+      "sha256": "4813098a30ef2da6d351b6386aca33bb1ef9a57079089a156800c045481a48d2",
+      "archive": "evidence/formal-r02/report.docx"
+    },
+    {
+      "source": "out/formal-r02/report.pdf",
+      "bytes": 436451,
+      "sha256": "cf9987f482051b560cfdaa950a17bfdb7fd8cd4a8bb0a8d27177791ede7b5526",
+      "archive": "evidence/formal-r02/report.pdf"
+    },
+    {
+      "source": "out/formal-r02/verification.json",
+      "bytes": 9451,
+      "sha256": "d68d0e5497f220b9c1020bfadba6ea159ea613c47d03b0e8eda1947a00ea4f53",
+      "archive": "evidence/formal-r02/verification.json"
+    },
+    {
+      "source": "out/formal-r02/visual-review.json",
+      "bytes": 3209,
+      "sha256": "2777b2247f32bc6fc41dfcc14867bc789f502a8f65591d748d11653b4be870cc",
+      "archive": "evidence/formal-r02/visual-review.json"
+    }
+  ],
+  "formalRunInputHashesMatched": true,
+  "rerunValidation": "not_run_during_archival",
+  "archiveValidation": "All retained SHA-256 hashes verified; CLI help works; Python sources parse; 11 formal-r02 input hashes match. Word/MathType rerun not performed."
+}

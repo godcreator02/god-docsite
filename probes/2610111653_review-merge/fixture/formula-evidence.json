@@ -1,0 +1,181 @@
+{
+  "status": "readback-complete-not-merged",
+  "baseline": {
+    "objects": [
+      {
+        "sourceIds": [
+          "eq-edit"
+        ],
+        "bookmarks": [
+          "MT_DR_f9cd45bd8852ca66d7e672693774"
+        ],
+        "part": "word/embeddings/oleObject1.bin",
+        "progId": "Equation.DSMT4",
+        "sha256": "b10bee136ba449a3216b0ef8102c2314d295a5ffcb7b17d0cdc8e494fc37a89d",
+        "insideRevision": false
+      },
+      {
+        "sourceIds": [
+          "eq-stable"
+        ],
+        "bookmarks": [
+          "MT_DR_2b155d95e9fbb5255560dd867f0c"
+        ],
+        "part": "word/embeddings/oleObject2.bin",
+        "progId": "Equation.DSMT4",
+        "sha256": "163c765395b64bb4e1cf578efa0c07b457ea8f25ffbf7e82f550dcb73883c56a",
+        "insideRevision": false
+      }
+    ],
+    "tables": [
+      {
+        "sourceIds": [],
+        "rows": [
+          {
+            "inserted": false,
+            "deleted": false,
+            "cells": [
+              "项目",
+              "数值"
+            ]
+          },
+          {
+            "inserted": false,
+            "deleted": false,
+            "cells": [
+              "额定功率",
+              "100 kW"
+            ]
+          },
+          {
+            "inserted": false,
+            "deleted": false,
+            "cells": [
+              "母线电压",
+              "800 V"
+            ]
+          }
+        ]
+      }
+    ],
+    "drawings": [
+      {
+        "sourceIds": [],
+        "part": "word/media/image2.png",
+        "sha256": "d449256d773e841a3c826638d65a1790fa023dd4d9b825fd05502500e7f9d1a0"
+      }
+    ]
+  },
+  "returned": {
+    "objects": [
+      {
+        "sourceIds": [
+          "eq-edit"
+        ],
+        "bookmarks": [
+          "MT_DR_f9cd45bd8852ca66d7e672693774"
+        ],
+        "part": "word/embeddings/oleObject1.bin",
+        "progId": "Equation.DSMT4",
+        "sha256": "73e79096aa4bd8a8cf748ce3d76859d942fc37c32f8edb5197e232e5f5a4bd6d",
+        "insideRevision": false
+      },
+      {
+        "sourceIds": [
+          "eq-stable"
+        ],
+        "bookmarks": [
+          "MT_DR_2b155d95e9fbb5255560dd867f0c"
+        ],
+        "part": "word/embeddings/oleObject2.bin",
+        "progId": "Equation.DSMT4",
+        "sha256": "163c765395b64bb4e1cf578efa0c07b457ea8f25ffbf7e82f550dcb73883c56a",
+        "insideRevision": false
+      }
+    ],
+    "tables": [
+      {
+        "sourceIds": [],
+        "rows": [
+          {
+            "inserted": false,
+            "deleted": false,
+            "cells": [
+              "项目",
+              "数值"
+            ]
+          },
+          {
+            "inserted": false,
+            "deleted": false,
+            "cells": [
+              "额定功率",
+              "100 kW"
+            ]
+          },
+          {
+            "inserted": false,
+            "deleted": false,
+            "cells": [
+              "母线电压",
+              "800 V"
+            ]
+          },
+          {
+            "inserted": true,
+            "deleted": false,
+            "cells": [
+              "123123",
+              "213123"
+            ]
+          },
+          {
+            "inserted": true,
+            "deleted": false,
+            "cells": [
+              "123",
+              "123"
+            ]
+          },
+          {
+            "inserted": true,
+            "deleted": false,
+            "cells": [
+              "123",
+              "123123"
+            ]
+          }
+        ]
+      }
+    ],
+    "drawings": [
+      {
+        "sourceIds": [],
+        "part": "word/media/image2.png",
+        "sha256": "d449256d773e841a3c826638d65a1790fa023dd4d9b825fd05502500e7f9d1a0"
+      }
+    ]
+  },
+  "formulaComparisons": [
+    {
+      "snapshot": "baseline",
+      "sourceIds": [
+        "eq-edit"
+      ],
+      "bookmark": "MT_DR_f9cd45bd8852ca66d7e672693774",
+      "tex": "$P=VI$"
+    },
+    {
+      "snapshot": "returned",
+      "sourceIds": [
+        "eq-edit"
+      ],
+      "bookmark": "MT_DR_f9cd45bd8852ca66d7e672693774",
+      "tex": "$P=VI123123$"
+    }
+  ],
+  "policy": "Private copies only; unprotect in memory for MathType activation, no save, no revisions accepted/rejected, no JSON merge.",
+  "terminateApiReturnCode": 0,
+  "baselineSha256": "cbf3a05e3c2402115ab1831aedb953bfb072e5c95fbda970168522544c544305",
+  "returnedSha256": "15c6c84ad72dabe7cd0adb7e51b2ff956f6a12988809d0a4255ef4f26e096758"
+}

@@ -1,0 +1,12 @@
+{
+  "status": "completed",
+  "rootCommentsCreatedViaUI": 3,
+  "repliesCreatedViaUI": 1,
+  "commentTextWrittenViaCOM": true,
+  "blankDuplicateRemovedViaCOM": 1,
+  "unexpectedClipboardContentCorrected": true,
+  "computerUseWasExplicitlyAuthorizedForThisTest": true,
+  "userSourceUnchanged": true,
+  "replyUI": "正文批注的答复按钮",
+  "resolvedThreadsTested": false
+}

@@ -1,0 +1,14 @@
+[
+  {
+    "event": "mathtype-functionality",
+    "elapsedSeconds": 0.001,
+    "full": 1,
+    "mode": 2,
+    "dll": "C:\\Program Files (x86)\\MathType\\MathPage\\64\\MathPage.wll"
+  },
+  {
+    "event": "terminate-api",
+    "elapsedSeconds": 5.873,
+    "returnCode": 0
+  }
+]

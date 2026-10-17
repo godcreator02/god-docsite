@@ -1,0 +1,7 @@
+{
+  "status": "failed",
+  "page": 5,
+  "image": "math-page.png",
+  "reason": "MathType 7 displays the aligned environment as red unparsed TeX, despite successful API write and readback.",
+  "pdfSha256": "552f171c00fd543fdd6dff8de71c50fda512fac3f7c630e37e09f0e213604694"
+}

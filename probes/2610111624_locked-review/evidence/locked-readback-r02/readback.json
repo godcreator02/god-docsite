@@ -1,0 +1,267 @@
+{
+  "status": "readback-complete-not-merged",
+  "baselineSha256": "cbf3a05e3c2402115ab1831aedb953bfb072e5c95fbda970168522544c544305",
+  "returnedSha256": "15c6c84ad72dabe7cd0adb7e51b2ff956f6a12988809d0a4255ef4f26e096758",
+  "changed": true,
+  "state": {
+    "trackRevisions": true,
+    "protectionType": 0,
+    "batchId": "e654ca60-0ba0-41ed-a202-8840e9e16020"
+  },
+  "revisionCount": 3,
+  "commentCount": 0,
+  "revisions": [
+    {
+      "type": 1,
+      "author": "godamericatb14",
+      "date": "2026-10-11 16:04:00+00:00",
+      "text": "\r阿斯顿发啥的",
+      "storyIndex": 0,
+      "start": 742,
+      "end": 749,
+      "storyType": 1,
+      "sourceId": "p-stable",
+      "mapping": "containing-bookmark",
+      "paragraphContext": "这一段不修改，用于检查相邻内容、格式和定位是否保留。\r"
+    },
+    {
+      "type": 1,
+      "author": "godamericatb14",
+      "date": "2026-10-11 16:04:00+00:00",
+      "text": "123123\r\u0007213123\r\u0007\r\u0007123\r\u0007123\r\u0007\r\u0007123\r\u0007123123\r\u0007\r\u0007",
+      "storyIndex": 0,
+      "start": 830,
+      "end": 866,
+      "storyType": 1,
+      "sourceId": "tbl-values",
+      "mapping": "containing-bookmark",
+      "paragraphContext": "123123\r\u0007"
+    },
+    {
+      "type": 1,
+      "author": "godamericatb14",
+      "date": "2026-10-11 15:31:00+00:00",
+      "text": "888方法发给 ",
+      "storyIndex": 0,
+      "start": 1667,
+      "end": 1675,
+      "storyType": 1,
+      "sourceId": "body-2-3",
+      "mapping": "containing-bookmark",
+      "paragraphContext": "模板提供默认字体、段落间距和页眉页脚。模板或布局规则变化时，过去生成的文档不能直接当作新规则的结果，必须重新执行全量生成。普通内容修改与版式变化分别记录，避免把不同工作量的耗时放在一起比较。888方法发给 \r"
+    }
+  ],
+  "comments": [],
+  "xmlRevisions": [
+    {
+      "part": "word/document.xml",
+      "type": "ins",
+      "id": "4",
+      "author": "godamericatb14",
+      "date": "2026-10-11T16:04:00Z",
+      "text": ""
+    },
+    {
+      "part": "word/document.xml",
+      "type": "ins",
+      "id": "6",
+      "author": "godamericatb14",
+      "date": "2026-10-11T16:04:00Z",
+      "text": "阿斯顿发啥的"
+    },
+    {
+      "part": "word/document.xml",
+      "type": "ins",
+      "id": "16",
+      "author": "godamericatb14",
+      "date": "2026-10-11T16:04:00Z",
+      "text": ""
+    },
+    {
+      "part": "word/document.xml",
+      "type": "ins",
+      "id": "17",
+      "author": "godamericatb14",
+      "date": "2026-10-11T16:04:00Z",
+      "text": ""
+    },
+    {
+      "part": "word/document.xml",
+      "type": "ins",
+      "id": "18",
+      "author": "godamericatb14",
+      "date": "2026-10-11T16:04:00Z",
+      "text": "123123"
+    },
+    {
+      "part": "word/document.xml",
+      "type": "ins",
+      "id": "19",
+      "author": "godamericatb14",
+      "date": "2026-10-11T16:04:00Z",
+      "text": ""
+    },
+    {
+      "part": "word/document.xml",
+      "type": "ins",
+      "id": "20",
+      "author": "godamericatb14",
+      "date": "2026-10-11T16:04:00Z",
+      "text": "213123"
+    },
+    {
+      "part": "word/document.xml",
+      "type": "ins",
+      "id": "21",
+      "author": "godamericatb14",
+      "date": "2026-10-11T16:04:00Z",
+      "text": ""
+    },
+    {
+      "part": "word/document.xml",
+      "type": "ins",
+      "id": "22",
+      "author": "godamericatb14",
+      "date": "2026-10-11T16:04:00Z",
+      "text": ""
+    },
+    {
+      "part": "word/document.xml",
+      "type": "ins",
+      "id": "23",
+      "author": "godamericatb14",
+      "date": "2026-10-11T16:04:00Z",
+      "text": "123"
+    },
+    {
+      "part": "word/document.xml",
+      "type": "ins",
+      "id": "24",
+      "author": "godamericatb14",
+      "date": "2026-10-11T16:04:00Z",
+      "text": ""
+    },
+    {
+      "part": "word/document.xml",
+      "type": "ins",
+      "id": "25",
+      "author": "godamericatb14",
+      "date": "2026-10-11T16:04:00Z",
+      "text": "123"
+    },
+    {
+      "part": "word/document.xml",
+      "type": "ins",
+      "id": "26",
+      "author": "godamericatb14",
+      "date": "2026-10-11T16:04:00Z",
+      "text": ""
+    },
+    {
+      "part": "word/document.xml",
+      "type": "ins",
+      "id": "27",
+      "author": "godamericatb14",
+      "date": "2026-10-11T16:04:00Z",
+      "text": ""
+    },
+    {
+      "part": "word/document.xml",
+      "type": "ins",
+      "id": "28",
+      "author": "godamericatb14",
+      "date": "2026-10-11T16:04:00Z",
+      "text": "123"
+    },
+    {
+      "part": "word/document.xml",
+      "type": "ins",
+      "id": "29",
+      "author": "godamericatb14",
+      "date": "2026-10-11T16:04:00Z",
+      "text": ""
+    },
+    {
+      "part": "word/document.xml",
+      "type": "ins",
+      "id": "30",
+      "author": "godamericatb14",
+      "date": "2026-10-11T16:04:00Z",
+      "text": "123123"
+    },
+    {
+      "part": "word/document.xml",
+      "type": "ins",
+      "id": "45",
+      "author": "godamericatb14",
+      "date": "2026-10-11T15:31:00Z",
+      "text": "888"
+    },
+    {
+      "part": "word/document.xml",
+      "type": "ins",
+      "id": "46",
+      "author": "godamericatb14",
+      "date": "2026-10-11T16:04:00Z",
+      "text": "方法发给 "
+    }
+  ],
+  "acceptedTextDifferences": [
+    {
+      "operation": "insert",
+      "baselineParagraphIndex": [
+        20,
+        20
+      ],
+      "returnedParagraphIndex": [
+        20,
+        21
+      ],
+      "before": [],
+      "after": [
+        "阿斯顿发啥的"
+      ]
+    },
+    {
+      "operation": "insert",
+      "baselineParagraphIndex": [
+        27,
+        27
+      ],
+      "returnedParagraphIndex": [
+        28,
+        34
+      ],
+      "before": [],
+      "after": [
+        "123123",
+        "213123",
+        "123",
+        "123",
+        "123",
+        "123123"
+      ]
+    },
+    {
+      "operation": "replace",
+      "baselineParagraphIndex": [
+        38,
+        39
+      ],
+      "returnedParagraphIndex": [
+        45,
+        46
+      ],
+      "before": [
+        "模板提供默认字体、段落间距和页眉页脚。模板或布局规则变化时，过去生成的文档不能直接当作新规则的结果，必须重新执行全量生成。普通内容修改与版式变化分别记录，避免把不同工作量的耗时放在一起比较。"
+      ],
+      "after": [
+        "模板提供默认字体、段落间距和页眉页脚。模板或布局规则变化时，过去生成的文档不能直接当作新规则的结果，必须重新执行全量生成。普通内容修改与版式变化分别记录，避免把不同工作量的耗时放在一起比较。888方法发给 "
+      ]
+    }
+  ],
+  "rejectedParagraphTextsEqualBaseline": false,
+  "embeddedPayloadsEqual": false,
+  "mediaPayloadsEqual": false,
+  "boundary": "Text projections do not fully resolve paragraph-mark/table-structure revisions. OLE differences require formula readback. Source JSON is unchanged; nothing is automatically accepted."
+}

@@ -1,0 +1,38 @@
+         14585 function calls (14259 primitive calls) in 9.170 seconds
+
+   Ordered by: cumulative time
+   List reduced from 306 to 30 due to restriction <30>
+
+   ncalls  tottime  percall  cumtime  percall filename:lineno(function)
+        1    0.341    0.341    9.170    9.170 compose.py:661(build)
+      9/1    0.046    0.005    6.161    6.161 xmlbulk.py:102(blocks)
+     10/2    0.019    0.002    5.906    2.953 compose.py:626(blocks)
+      3/2    0.063    0.021    5.892    2.946 xmlbulk.py:140(table_node)
+      3/2    0.796    0.265    5.859    2.930 compose.py:538(table_node)
+      258    0.002    0.000    3.895    0.015 __init__.py:586(__getattr__)
+      258    0.003    0.000    3.893    0.015 __init__.py:579(_ApplyTypes_)
+      381    3.616    0.009    3.616    0.009 {method 'InvokeTypes' of 'PyIDispatch' objects}
+      247    2.440    0.010    2.440    0.010 {method 'QueryInterface' of 'PyIUnknown' objects}
+      242    0.001    0.000    2.411    0.010 __init__.py:108(Dispatch)
+      242    0.004    0.000    2.409    0.010 __init__.py:21(__WrapDispatch)
+      242    0.002    0.000    2.404    0.010 __init__.py:524(__init__)
+      271    0.001    0.000    1.815    0.007 __init__.py:616(_get_good_object_)
+      271    0.000    0.000    1.814    0.007 __init__.py:610(_get_good_single_object_)
+      258    0.001    0.000    1.643    0.006 __init__.py:605(_get_good_object_)
+        1    0.033    0.033    1.289    1.289 xmlbulk.py:97(finish)
+        1    0.263    0.263    1.256    1.256 compose.py:172(finish)
+       11    0.000    0.000    1.093    0.099 xmlbulk.py:131(rich_paragraph)
+       60    0.001    0.000    0.993    0.017 __init__.py:592(__setattr__)
+       60    0.993    0.017    0.993    0.017 {method 'Invoke' of 'PyIDispatch' objects}
+        8    0.086    0.011    0.910    0.114 compose.py:587(trim_container)
+        9    0.000    0.000    0.770    0.086 compose.py:311(rich_paragraph)
+        9    0.000    0.000    0.770    0.086 compose.py:236(paragraph)
+       15    0.094    0.006    0.746    0.050 compose.py:229(point)
+        3    0.000    0.000    0.660    0.220 compose.py:326(numbered_caption)
+       32    0.000    0.000    0.529    0.017 __init__.py:636(__getattr__)
+       50    0.000    0.000    0.529    0.011 {built-in method builtins.getattr}
+        3    0.000    0.000    0.505    0.168 xmlbulk.py:122(insert_body)
+       16    0.000    0.000    0.356    0.022 util.py:102(__next__)
+       14    0.101    0.007    0.356    0.025 compose.py:253(mark)
+
+

@@ -1,0 +1,38 @@
+         34536 function calls (33072 primitive calls) in 8.005 seconds
+
+   Ordered by: cumulative time
+   List reduced from 281 to 30 due to restriction <30>
+
+   ncalls  tottime  percall  cumtime  percall filename:lineno(function)
+        1    0.315    0.315    8.005    8.005 compose.py:661(build)
+        1    0.113    0.113    6.068    6.068 compose.py:626(blocks)
+       18    0.138    0.008    5.081    0.282 xmlbulk.py:70(insert_body)
+       17    0.137    0.008    5.002    0.294 xmlbulk.py:80(rich_paragraph)
+      308    4.698    0.015    4.698    0.015 {method 'InvokeTypes' of 'PyIDispatch' objects}
+      199    0.001    0.000    2.990    0.015 __init__.py:586(__getattr__)
+      199    0.003    0.000    2.988    0.015 __init__.py:579(_ApplyTypes_)
+       36    0.276    0.008    2.338    0.065 compose.py:229(point)
+       18    0.000    0.000    1.971    0.109 00020905-0000-0000-C000-000000000046x0x8x7.py:18571(InsertXML)
+      168    1.762    0.010    1.762    0.010 {method 'QueryInterface' of 'PyIUnknown' objects}
+      164    0.001    0.000    1.739    0.011 __init__.py:108(Dispatch)
+      164    0.003    0.000    1.737    0.011 __init__.py:21(__WrapDispatch)
+      164    0.002    0.000    1.733    0.011 __init__.py:524(__init__)
+      209    0.001    0.000    1.253    0.006 __init__.py:616(_get_good_object_)
+      209    0.000    0.000    1.252    0.006 __init__.py:610(_get_good_single_object_)
+      199    0.001    0.000    1.139    0.006 __init__.py:605(_get_good_object_)
+       69    0.000    0.000    0.982    0.014 __init__.py:636(__getattr__)
+      112    0.000    0.000    0.982    0.009 {built-in method builtins.getattr}
+        1    0.030    0.030    0.650    0.650 xmlbulk.py:88(table_node)
+        1    0.078    0.078    0.586    0.586 compose.py:172(finish)
+       18    0.150    0.008    0.548    0.030 compose.py:253(mark)
+       20    0.000    0.000    0.438    0.022 00020905-0000-0000-C000-000000000046x0x8x7.py:4977(Add)
+       21    0.000    0.000    0.353    0.017 00020905-0000-0000-C000-000000000046x0x8x7.py:27375(Range)
+       37    0.000    0.000    0.304    0.008 00020905-0000-0000-C000-000000000046x0x8x7.py:18683(SetRange)
+        1    0.000    0.000    0.258    0.258 compose.py:326(numbered_caption)
+       13    0.000    0.000    0.234    0.018 util.py:102(__next__)
+        1    0.010    0.010    0.206    0.206 word.py:93(find_text)
+       10    0.000    0.000    0.126    0.013 __init__.py:592(__setattr__)
+       10    0.126    0.013    0.126    0.013 {method 'Invoke' of 'PyIDispatch' objects}
+       49    0.119    0.002    0.119    0.002 {built-in method builtins.next}
+
+

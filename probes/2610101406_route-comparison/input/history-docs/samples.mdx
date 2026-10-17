@@ -1,0 +1,160 @@
+---
+title: 样稿与检查结果
+description: 自建项目报告模板与十页正文验收，以及历史三路线样稿
+---
+
+## 先看结果
+
+### 自建项目报告模板：当前主方案
+
+长期方案确定为 **原生 `.dotx` + `.venv` Python / pywin32 + 本机 Word**。本轮仅扩展这条路线，模板为 `templates/project-report.dotx`，最终样稿和证据位于 `out/project-report-r03/`。
+
+`word-com.docx` 共 **12 页：封面 1 页、目录 1 页、正文 10 页**。正文包含三级自动标题、独立编号与项目符号列表、六类原生公式、两张图、五张表、合并单元格、连续跨页长表、横向宽表、脚注、超链接与修订记录。封面有五个可填写内容控件；目录罗马数字页码与正文阿拉伯数字页码分节管理。
+
+数据来自 `fixtures/canonical.json#projectReport`。演示曲线为离线计算，40 条项目用例全部标为“待实测”；文档技术验收通过不表示示例工程已经完成验证。
+
+| 文档行为 | 本轮实际验证 |
+| --- | --- |
+| 模板 | Word 以无宏模板格式创建；从模板新建文档，生成前后模板哈希不变 |
+| 保存与显示 | 本机 Word 16.0.14334 保存重开，导出 PDF；全部 12 页逐页检查 |
+| 六类原生公式 | 行内、分式、积分、矩阵、分段、多行公式均在独立副本中修改，重开后文字与数学结构核对 |
+| 编号与交叉引用 | 在第一条独立公式前插入新公式；序号变为 1–6，原分式的两处引用由 1 变为 2 |
+| 长表增行 | 从 40 条数据增加到 55 条；报告增至 13 页，长表跨三页，重复表头、每行完整 |
+| 列表与标题 | 三级标题为原生编号；两组独立列表各自从 1 开始 |
+| 评审副本 | 修改封面版本控件、保留 2 条修订记录和 1 条批注，保存重开后仍存在 |
+
+主要文件为 `word-com.docx`、`word-com.pdf`；编辑证据为 `word-com.all-math-edit.docx`、`word-com.numbering-check.docx`、`word-com.pagination-check.docx`、`word-com.review-check.docx`。这些副本用于验证编辑行为，不作为报告正文结论。
+
+`project-verification.json` 保存行为断言，`structure-audit.json` 保存结构和 PDF 文本，`visual-review.json` 记录实际检查的页码与 PDF 哈希，`manifest.json` 汇总模板、数据、代码及产物哈希。首轮试排 `r01` 发现长表后说明多占一页；`r02` 达到十页正文后，逐页检查发现独立列表仍续号；最终 `r03` 修复列表定义并补上目录层级缩进及表后间距。
+
+MathType OLE、其他 Word/WPS 平台、任意 LaTeX 解析与性能基准不在本轮通过范围。正文页数针对这个样例，真实内容增加后允许自然分页。
+
+### 完整 MathType 报告：行内与行间公式均已生成
+
+以未修改的 `fixtures/canonical.json#projectReport` 为输入，从 `templates/project-report.dotx` 重新生成完整报告，交付在 `out/project-report-mathtype-r02/word-com.docx` 和同名 PDF。共 **12 页：封面、目录各 1 页，正文 10 页**，全部页面已经逐页查看。
+
+JSON 中的六条公式全部是 `Equation.DSMT4` MathType OLE：一条行内公式保留在正文句子中，另外五条为居中的分式、积分、矩阵、分段和多行公式，右侧显示 `(3-1)` 至 `(3-5)`。保存重开后六个对象分别通过 MathType API 激活和内容读回；DOCX 中有六份 OLE，原生 OMML 数为零。五张表、两幅图、脚注、封面内容控件、自动目录和横向宽表均保留。公式集中在 PDF 第 5 页，即正文第 3 页。
+
+正文中的两处公式引用由 REF 域读取完整的“章号-序号”。在不保存的验证副本中，给第一条独立公式前插入编号段后，两处引用均从 `3-1` 更新为 `3-2`。手工增删或移动时应带上整段公式和编号，再按 Ctrl+A、F9 更新。
+
+本机 MathType 7 无法直接解析样例的 `aligned` 环境，会把未识别命令以红字显示，虽然写入与读回都返回成功。生成器因此仅对本次两列多行形式转换为等价的 `array{rl}`，保留原公式正文、JSON 数据与原始 LaTeX，并把转换前后文本记入日志。`project-report-mathtype-r01/visual-review.json` 保留这一失败反例；PDF 检查新增未解析 TeX 检测，最终版另经逐页视觉验收。这个适配不代表支持任意 LaTeX 环境或宏包。
+
+在仓根运行完整 MathType 版：
+
+```powershell
+.\.venv\Scripts\python.exe routes\word-com\build.py out\project-report-mathtype-new --mathtype
+```
+
+`build.py` 先用 Word 从模板排好正文、图表和字段，再由 `mathtype-probe.py` 的共享 API 函数把占位符逐一填成 MathType OLE，最后更新目录和引用、保存重开并导出 PDF。证据包括 `word-com-generation.json`、`mathtype-report-verification.json`、`structure-audit.json`、`visual-review.json` 和页面图。本轮验证六类公式的创建与重开读取；公式内部覆盖编辑仍未通过，已有的整体替换验证只针对分式。
+
+### MathType 分式探针：整体替换与按章编号
+
+本机 MathType 7.11.1.462 的接口现返回完整功能：`MTIsFullFunctionality(0) = 1`、`MTGetAppFunctionality() = 2`。使用 `.venv` Python + comtypes 调用 Word COM，并经 ctypes 调用 MathType 自带的 64 位 `MathPage.wll`，没有键盘、鼠标或剪贴板自动化，也没有修改宏安全或许可证设置。
+
+测试公式来自 `fixtures/canonical.json` 的 `eq-fraction`。TeX 写入、读回、保存重开全部成功；分母常数由 1 改为 2 后再次保存重开，MathType API 读回内容与预期一致。原稿和修改稿分别导出一页 PDF，两页均已逐页查看：每页只有一个公式，分母常数分别为 1、2，中文正常，无重叠和裁切。DOCX 中保留 `Equation.DSMT4` 和真实 OLE 二进制对象，公式不是仅供显示的图片。
+
+行间公式采用独立的居中制表位，编号用版心右侧的右对齐制表位；公式本体在版心居中，编号宽度不影响公式中心。章号来自一级标题的原生自动编号，公式序号在每章重新计数，使用半角括号和连字符：
+
+```text
+({ STYLEREF 1 \s }-{ SEQ Equation \* ARABIC \s 1 })
+```
+
+这里的大括号代表 Word 原生域，由 COM `Fields.Add` 创建。样稿显示 `(1-1)`、`(1-2)`、`(2-1)`：已实际验证在原公式前插入一条公式后原编号从 `(1-1)` 变为 `(1-2)`，进入第二章从 `(2-1)` 开始；保存重开后编号和三条 MathType 公式仍正确。在不保存的验证副本中删除第一条公式，余下编号恢复为 `(1-1)`、`(2-1)`。编号样稿的一页 PDF 已检查居中、右对齐和分式显示。
+
+生成脚本在保存及导出前调用 `Fields.Update()`。手工增删或移动时应带上整段公式和编号，然后在正文按 **Ctrl+A、F9** 更新；无需手改序号，也不需要宏。这不是每次键入后立即刷新的事件机制。一级标题必须使用原生自动编号，不能把章号直接敲进标题文字。[Microsoft 的 SEQ 说明](https://support.microsoft.com/en-us/word/field-codes-seq-sequence-field)给出了顺序重排和按标题层级重置的规则。
+
+**修改采用整体替换：在原位置创建并写入新的 MathType OLE，成功后删除旧对象。** 本机直接向已有对象再次调用 `MTSetEqnFromLangStr` 会追加公式；TeX 读回却只反映最后输入，不能独立作为正确性证据。探针因此同时核对 DOCX 对象数、PDF 公式标记数，并要求人工页面检查。这个结论覆盖当前分式的创建和整体替换，不代表原对象内部覆盖或所有复杂 LaTeX 已通过。
+
+复测入口为 `routes/word-com/mathtype-probe.py`，仅接受仓内 `out/` 的新目录；在仓根运行：
+
+```powershell
+.\.venv\Scripts\python.exe routes\word-com\mathtype-probe.py
+```
+
+当前交付在 `out/mathtype-20261010-r10/`：优先查看 `mathtype-numbered.docx` 和同名 PDF；`mathtype-original.docx`、`mathtype-edited.docx` 及同名 PDF 保留整体替换对照。`result.json` 是 COM/API、字段和 PDF 文本检查记录，`visual-review.json` 是逐页显示验收。`r08` 是未加居中和编号的上一轮样稿，`r09` 通过编号验证后在 `r10` 将标题统一为黑色。`r04` 保留授权受限时的失败证据，`r06/visual-review.json` 保留“读回成功但页面追加”的反例，`r07` 保留首次范围替换仍残留两个 OLE 对象的失败断言。
+
+接口签名依据本机 MathType 自带 `MathType Commands 2016.dotm` 中的 `Declarations64.bas`、`Declarations.bas` 和 `MTTeXToggle.bas`。探针直接传递 comtypes 的 IDispatch 指针，不读取 pywin32 对象的内存偏移。
+
+#### 中文界面的问号
+
+本机 Windows 非 Unicode 程序语言为 `en-US`，系统 ANSI 代码页为 `1252`；MathType 进程实际载入 `MT7CHS.DLL` 中文资源。这个组合是部分旧式界面中文显示为问号的主要嫌疑，[Microsoft 说明](https://learn.microsoft.com/en-us/windows/win32/intl/nls-terminology)确认系统区域设置决定非 Unicode 程序的代码页。尚未通过更换语言或系统区域设置做对照验证，不能认定所有问号只有这个原因。此次 Word/PDF 正文及公式均显示正确。
+
+可优先尝试在 MathType 的“预置 / 工作区预置”切换英文界面并重启 MathType；[官方说明](https://docs.wiris.com/en_US/dialogs)指出语言选项只在安装了多种语言时出现。保留中文的系统方案是将非 Unicode 程序语言改为简体中文，但会影响其他旧程序并需要重启 Windows。本次没有修改这些设置。
+
+### 真实 SST 报告重排
+
+2026-10-10 增加现成 DOCX 实验：用户提供的《wf10kV直挂SST系统设计方案》直接作为输入，由 `routes/word-com/restyle.py` 经 Python + 本机 Word COM 重排并导出 PDF，未使用固定样例的公式生成器。原稿在本机 Word 中为 58 页，输出为 54 页；文件保存在 `out/sst-restyle-20261010-150201/final/`。
+
+保留了 32 张表、10 张原始图片和 26 个原生公式。正文、公式文本与数学结构、图片字节以及保存重开后的内容均完成比对；独立副本中的一个根式也完成了修改、保存与重开验证。源文件保持不变。本轮没有进行工程结论校核。
+
+沿用前述国网报告风格，统一封面、正文、标题、页眉页码与目录；厂商表使用横向节，对应 PDF 第 37–38 页。PDF 有 65 个标题书签，22 条网页来源引用保留原网址并改为 Word 超链接；原文指向未提供的本地文件的引用仍保留原文。
+
+表 B-1 原有绝对值符号被拆成额外表列，已在严格匹配表头、确认多余数据单元格为空后恢复为 7 列，三行原始数值逐格核对一致。实验记录在运行目录 `out/sst-restyle-20261010-150201/` 的 `final-verification.json` 和页面检查文件中，内容保真校验明确包含这项表头规范化。
+
+### 首轮三路线比较（历史）
+
+三条路线均已生成 5 页 DOCX，在本机 Word 中保存重开、更新目录与编号、导出 PDF；每条路线的分式均已在 Word 内把分母常数从 1 改为 2，再保存重开确认。三份样稿的 15 页均已查看，没有发现缺字、公式裁切、重叠或跨页拆行。
+
+**本机 Word COM 可以完成本轮全部生成工作，继续作为主路线。** Pandoc 和直接 DOCX 已跑通，用于比较输入方式和维护成本。首轮不能证明对所有公式或所有 Word 版本均兼容。
+
+## 三份文件
+
+首轮历史交付目录是 `out/python-venv-20261010-144415/`；最初的 PowerShell 对照样稿仍保留在 `out/sgcc-samples-20261010-141515/`。
+
+| 文件 | 生成方式 | 本轮结果 |
+| --- | --- | --- |
+| `word-com.docx` | Python + pywin32 控制本机 Word COM | 5 页，6 个 OMML 公式，40 行数据 |
+| `pandoc.docx` | Pandoc 3.12.1 加参考样式及表格补充处理 | 5 页，6 个 OMML 公式，40 行数据 |
+| `direct-docx.docx` | python-docx 加显式 OMML | 5 页，6 个 OMML 公式，40 行数据 |
+
+同目录的 `*.raw.docx` 是生成器原始输出，`pandoc.prepared.docx` 是表格补充处理后的输入，`*.edit-check.docx` 是修改分母后的验证副本。`*.pdf` 与 `*-pages/` 是从 Word 实际导出的检查证据。
+
+页序一致：封面、自动目录、正文与六种公式、跨页参数表的前后两页。主样稿保留原始公式，修改只发生在编辑副本中。
+
+## Python 与独立环境复验
+
+生成、Word 验证、环境采集均已改成 Python，当前入口没有 `.ps1`。所有实验命令使用仓内 `.venv/Scripts/python.exe`；`include-system-site-packages = false`，用户包目录关闭，七个实际导入模块的路径均位于 `.venv/`。固定版本见仓根 `requirements.txt`，`pip check` 通过。本次曾临时装入用户目录的 pywin32 已卸载。
+
+三条路线在独立环境中重新生成、更新域、保存重开、导出 PDF，并再次完成分母从 1 改为 2 的保存重开验证。按同样的 110 dpi 渲染后，各路线的 5 页与迁移前各自的样稿逐像素一致，共 15 页；这不表示三条路线互相完全一致。
+
+迁移过程中修正了两个实际问题：本机 Office 的单位换算接口经 pywin32 调用返回 E_FAIL，改用精确单位关系转换为 pt；COM 初始化属于 Python 主线程生命周期，不能随单个 Word 实例释放。异常测试已确认出错实例退出，同时另一个实验 Word 实例及其文档保持可用，测试后各自关闭。
+
+环境与包路径见 `environment.json`，最终页面对比见 `migration-checks.json`，异常清理测试证据保留于 `out/python-com-20261010-143843/migration-checks.json`。迁移首轮试跑位于 `out/python-com-20261010-143639/`，最终复现命令见 [README](/docs/outputs/readme)。
+
+## 国网风格从哪里来
+
+参考[天津大学公开的国网项目申报通知](https://kj.tju.edu.cn/info/1029/2553.htm)所附 2018 版可研报告模板。公开通知日期为 2020-11-12；本仓保留下载原件及 SHA-256，没有修改原件，也不把它称为现行通用标准。
+
+采用 A4、上下 25.4 mm、左 23 mm、右 22 mm。封面首行 26 pt、标题 36 pt 加粗、元数据 16 pt；正文 12 pt 仿宋、1.5 倍行距，一级标题 15 pt 加粗仿宋。原件使用仿宋_GB2312，本机采用已安装的仿宋替代。西文、数学字体和自动目录等实验扩展见 [README](/docs/outputs/readme)。
+
+## 实际观察
+
+| 检查项 | COM | Pandoc | 直接 DOCX |
+| --- | --- | --- | --- |
+| Word 保存、重开、PDF 导出 | 通过 | 通过 | 通过 |
+| 目录与页码 | 更新后正确 | 更新后正确 | 更新后正确 |
+| 六种公式显示 | 通过逐页检查 | 通过逐页检查 | 通过逐页检查 |
+| 分母常数编辑并保存重开 | 通过 | 通过 | 通过 |
+| 跨页表头及完整行 | 通过 | 补约束后通过 | 通过 |
+| MathType OLE | 未测试 | 未测试 | 未测试 |
+
+封面和正文规则已经接近，但没有宣称像素级相同：Word 默认目录缩进、符号间距、表格相对正文的水平位置仍有小差别；Pandoc 的表头字重也与另外两份不同。这些均保留在样稿中供查看，未通过后置 Word 排版把差别抹平。
+
+共同收尾仅用 Word 更新域、保存重开和导出 PDF。Pandoc 的列宽、网格样式、重复表头及禁止拆行补充步骤单独记录。COM 从创建到保存不依赖 Pandoc 或 python-docx。
+
+## 本轮修复与证据
+
+- Word 原生 UnicodeMath 的行内下标需要明确结束位置，避免把后面的括号纳入下标。
+- python-docx 默认模板带有主题字体及 Title 蓝线，必须移除主题覆盖与边框，才能落实仿宋版式。
+- Pandoc 原始 Markdown 表格需要追加列宽、网格与行约束；原始输出保留用于对比。
+- COM 数学字母会变成 Unicode 补充字符。把 Range 截成半个代理对会报错，脚本已改用 Find 定位完整字符。
+
+第一次试跑及发现的问题保存在 `out/sgcc-first-20261010-140600/`，交付样稿在后续独立目录。`word-verification.json` 记录实际 Word 版本、重开、公式内容和耗时；`structure-audit.json` 记录 OMML、表格结构与 PDF 文本；`manifest.json` 记录输入和脚本哈希、Python 依赖与编辑断言；`artifact.md` 记录样式约定。
+
+内置文档渲染器依赖 LibreOffice，本机没有该程序，其失败日志已保留。本轮使用实际目标 Microsoft Word 16.0.14334 的 PDF 导出，再用 Poppler 转为 PNG 检查，显示证据来自 Word。
+
+## 首轮边界与当前状态
+
+首轮只编辑过分式。本页开头的原生项目报告实验已补齐 COM 六类 OMML 公式编辑、重新编号和增行分页；没有将这些结果套用到 Pandoc 或直接 DOCX 路线。MathType 完整报告已验证六类公式的创建、保存重开读取与页面显示，整体替换编辑目前只验证了分式。MathType 原对象内部覆盖、未覆盖的 LaTeX 写法与冷启动加三轮性能统计仍未测试。报告生成器默认读取 JSON 的 UnicodeMath；传入 `--mathtype` 时读取 LaTeX 并执行已验证的兼容适配，不是通用 LaTeX 转换器。
+
+长期方案按用户选择集中维护 Word COM；历史三份样稿用于追溯最初比较条件。当前验收范围见[路线计划](/future/spec/comparison)。

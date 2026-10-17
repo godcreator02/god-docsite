@@ -1,0 +1,5 @@
+{
+  "status": "rejected",
+  "reason": "comtypes early binding stalled before saving; interrupted after more than 120 seconds; owned Word PID 77260 cleaned up, user Word 61552 preserved",
+  "coldStart": "2026-10-11T12:11:40+08:00"
+}

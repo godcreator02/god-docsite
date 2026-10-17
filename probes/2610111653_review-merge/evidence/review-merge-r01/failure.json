@@ -1,0 +1,5 @@
+{
+  "status": "failed",
+  "error": "Cell binding text mismatch",
+  "traceback": "Traceback (most recent call last):\n  File \"D:\\unitfolders\\nb9zj-word-conversion-lab\\word-conversion-lab\\probes\\2026-10-11-review-merge\\run.py\", line 81, in main\n    validation=patch_and_verify(accepted,report_dir,proposal,reviewer['content'],result['content'],result['layout'])\n               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"D:\\unitfolders\\nb9zj-word-conversion-lab\\word-conversion-lab\\probes\\2026-10-11-review-merge\\word_io.py\", line 196, in patch_and_verify\n    bind_insertions(doc,proposal,review_content)\n  File \"D:\\unitfolders\\nb9zj-word-conversion-lab\\word-conversion-lab\\probes\\2026-10-11-review-merge\\word_io.py\", line 187, in bind_insertions\n    if rng.Text!=text(p)+'\\r':raise ValueError('Cell binding text mismatch')\n                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nValueError: Cell binding text mismatch\n"
+}

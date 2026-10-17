@@ -1,0 +1,23 @@
+---
+born-at: 2026-10-11T01:40
+type: choice
+parent: [2026-09-03-god-live-doc]
+label: 附录公式编号
+domain: 排版引擎
+---
+
+## 背景
+
+全文转换稿首次在附录里放置行间公式。附录根标题使用模板的 Appendix Heading 样式，公式编号右侧的 `SEQ Equation \s 1` 域没有在附录边界重置：附录 A 的首条公式沿用第 11 章重置后的序号碰巧显示 A-1，附录 B 显示 B-4，序号在附录间全局延续。需要每个附录从 1 重新计数，且不能手写编号。
+
+## 结论与边界
+
+每个附录使用独立的 SEQ 序列名（附录 A 用 `SEQ EquationAppendixA`，以此类推），章号仍由 STYLEREF 提供。独立序列天然从 1 计数，在首式前插入或删除公式后随域更新自动顺延，引用域同步跟随，不依赖任何标题样式的重置行为。该方案不改变正文章节沿用 `SEQ Equation \s 1` 的路径；未验证同一文档超过 26 个附录的字母编号。
+
+## 经过
+
+先试验把附录根标题改用内置 Heading 1 并施加字母列表：SEQ 重置生效，但对 Heading 1 段落应用列表模板会剥离该样式的编号定义并劫持其列表实例，主章标题编号全部丢失，此路不通。又试验给 Appendix Heading 样式设置大纲级别 1：Word 的 `\s 1` 重置只认内置标题样式段落，样式大纲级别不触发，序号仍全局延续。小样报告以四个附录、八条公式验证了独立序列方案：基础编号 A-1/A-2/A-3、B-1/B-2、C-1、D-1 正确；在附录 A 首式前构造一条同结构编号行后全部顺延为 A-2/A-3/A-4 且其余附录不变，指向 A-1 的引用同步显示 A-2；删除该行后编号与引用恢复。
+
+## 依据
+
+小样输入与验收在 `out/appendix-equation-probe-r01/`，通过运行为 `out/appendix-equation-probe-render-r06/`（report-check 与 editing-check 记录构造编号行、删除前后的编号与引用断言）；Heading 1 方案的失败保存在 `out/appendix-equation-probe-render-r01/`，样式大纲级别方案的失败保存在 `out/appendix-equation-probe-render-r02/`。全文失败现场在 `out/sst-full-render-r01/`（B-4）。

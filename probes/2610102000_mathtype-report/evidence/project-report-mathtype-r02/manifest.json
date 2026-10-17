@@ -1,0 +1,8 @@
+{
+  "routes/word-com/build.py": "e5b115c38d3a22ecbc6ed391b83a4d0391eccddd4cba6fdfb0b1605e4a1f09e8",
+  "routes/word-com/mathtype-probe.py": "9bc8844f27d3e620f9ad8cc1b62aff90834af2e8970565ba1ea4472e6eec2256",
+  "fixtures/canonical.json": "8dc4d0430939c3cd4a3e423cab3e21b063f171afd2567d633e80b978a1037f1c",
+  "templates/project-report.dotx": "2d645df23ecd1ee6f40d7da29854435139ff9d77a490f29c5051b6960bf909c4",
+  "word-com.docx": "2d661eccb4e068d48a4b2906e5d821f3fc84a903d4922de200bd6bd4ee788164",
+  "word-com.pdf": "d6cef958a023e8a503e1395ee8d34b6ceed667948ffd6a33d2a1d59641691402"
+}

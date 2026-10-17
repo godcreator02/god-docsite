@@ -1,0 +1,21 @@
+{
+  "status": "passed",
+  "reviewedPages": [
+    "original-page.png",
+    "edited-page.png"
+  ],
+  "checks": [
+    "One visible formula per page",
+    "Original denominator ends +1; edited denominator ends +2",
+    "Chinese heading and text render correctly",
+    "No overlap, cropping or question marks"
+  ],
+  "pdfSha256": {
+    "mathtype-edited.pdf": "8f1d9a74bc92793c4f8fc47670f4b31e12803352875b03748a2a55334fbb557d",
+    "mathtype-original.pdf": "11da28470af3e1ce1926b207b50855e5876bf7f16565c35a3de64f38aadd3e9c"
+  },
+  "replacementMethod": "New editable MathType OLE object replaces old object; not in-place overwrite",
+  "rendererWarnings": [
+    "Poppler reported missing display fonts Symbol and ArialUnicode; both rendered pages visually checked."
+  ]
+}

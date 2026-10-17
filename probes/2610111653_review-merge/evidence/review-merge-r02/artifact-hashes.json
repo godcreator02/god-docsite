@@ -1,0 +1,20 @@
+{
+  "accepted-view.docx": "0e8337469418ad06c20c70891aa5e68a07f9fab38f4600e3625cc8fbda2c814c",
+  "current-team.simulated.json": "c73ecd98f52bd14a97b6c90161f9197c9b0eb7e1c9749ec8f9a2954958871ff9",
+  "decisions.pending.json": "77661b69064d7c7cb44098c3cd83212e4f2a745d28cb42873c81d305dd624fe8",
+  "decisions.simulated.json": "0ddbfc8683d6d43218fcd2567ebbe3dd5bc63f07509d57b1737591ae79dbd22e",
+  "failure.json": "94cbe237f64e9a4a021b46cf528bca92aa467c559912749090fce2cf10daaf30",
+  "merge-result.json": "56ea43cc88d35430d9538b7d3bd0f94b404423fd681d352177541082f4f715bf",
+  "merge-tests.json": "8ff83899adfddf1827b78e3fd38ad45108122c76b3696d794a7dd5aca3554402",
+  "proposal.json": "b6dcd6b7f2dcc7b5440d78f991dda093c6b63bbcb1f245698c2f9e0be335a951",
+  "code\\merge.py": "37fe93e04cb0114c864919cc1eb49f461c6e49f87b93ead6a9c63feab9d36eb3",
+  "code\\object_reader.py": "fb695177de532636884c041840cfa2746037da7f47a028f3d436c188286438db",
+  "code\\run.py": "dbcab3a122a6de535a91110175b0a6d8bff91f6ff49e95f1c0133b88592e5ef7",
+  "code\\word_io.py": "add662673373dab5ec3c75500772cdf5863ecbed65d568a4d2a67510b10c0c9f",
+  "code\\word_session.py": "062bcc29152e4c5c5a4a13eaed1121a4f286639668170b5388ddd9777ece8b8f",
+  "merged-report\\content.json": "ed67248cb3499e3d114f8665621f51ebdcb15d40e273016352c1fbbbe2a31215",
+  "merged-report\\layout.json": "c75c594f6e032c4473d62ae3a56b41cd0097249614cf171ea3ebba73585ace74",
+  "merged-report\\merged.docx": "cfd9a69d05d5eed58c7d703cdcc6145a8ce371ec01d807f073a24b0eb20363e1",
+  "merged-report\\merged.pdf": "1758db6a05afb1a63244881430d6ac43ac6516dc212c2543e7f72fdb857343fd",
+  "merged-report\\assets\\architecture.png": "d449256d773e841a3c826638d65a1790fa023dd4d9b825fd05502500e7f9d1a0"
+}

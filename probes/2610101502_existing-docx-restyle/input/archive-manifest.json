@@ -1,0 +1,2855 @@
+{
+  "archivedAt": "2026-10-10T20:19:55.425231+08:00",
+  "sourceRepo": "D:\\unitfolders\\nb9zj-word-conversion-lab\\word-conversion-lab",
+  "sourceCommit": "94fa9098a53b5f283ecca3d1bc3ac71830253a04",
+  "mode": "restyle",
+  "question": "能否针对已有 SST DOCX 制定专属重排规则，同时保留正文、公式和图片？",
+  "conclusion": "本机 Word 从原稿 58 页重排为 54 页，26 个原生公式、32 张表、10 幅图片及 22 条来源链接保留。表头还原和内容守恒有独立记录。",
+  "limitations": "只适用于冻结的输入报告。pass-2 的 content-mismatch.json 保留失败。最终版还经过历史人工/临时脚本处理，原脚本未全部保存；probe.py 重跑冻结 restyle.py，不承诺逐字重现 final.docx。大型 54 页输出仅存哈希。",
+  "originalRuns": [
+    "sst-restyle-20261010-150201"
+  ],
+  "historicalSourceRevisions": [
+    {
+      "commit": "94fa9098a53b5f283ecca3d1bc3ac71830253a04",
+      "files": 13,
+      "snapshot": "input/history-source/94fa9098a53b5f283ecca3d1bc3ac71830253a04"
+    }
+  ],
+  "inputFiles": [
+    {
+      "path": "input/history-source/94fa9098a53b5f283ecca3d1bc3ac71830253a04/fixtures/canonical.json",
+      "sha256": "971f1cf52c991115ce4b5d7ca7ce179600e06bcb453fb540b37538f3a429ad67",
+      "bytes": 3635
+    },
+    {
+      "path": "input/history-source/94fa9098a53b5f283ecca3d1bc3ac71830253a04/requirements.txt",
+      "sha256": "2cba12dfb77c691d83f77be6b32c2f6708ec0aaa1df8376373ee160444c78260",
+      "bytes": 177
+    },
+    {
+      "path": "input/history-source/94fa9098a53b5f283ecca3d1bc3ac71830253a04/routes/direct-docx/build.py",
+      "sha256": "f9960884cf9dccbb1a0cef2306714072722ac2be22e91f458efafffc21ef93bd",
+      "bytes": 3513
+    },
+    {
+      "path": "input/history-source/94fa9098a53b5f283ecca3d1bc3ac71830253a04/routes/pandoc/build.py",
+      "sha256": "808e6be2f107e38ce581638ff9d322fd0ce6d09333b9c5c1cf325e479ca7105e",
+      "bytes": 3609
+    },
+    {
+      "path": "input/history-source/94fa9098a53b5f283ecca3d1bc3ac71830253a04/routes/word-com/build.py",
+      "sha256": "0a49c4f03af851f5ae7150685f47a2a682f98539c7d6be556a07fb2007a8e67e",
+      "bytes": 8269
+    },
+    {
+      "path": "input/history-source/94fa9098a53b5f283ecca3d1bc3ac71830253a04/routes/word-com/restyle.py",
+      "sha256": "f4aa600c068721d42f6d591b8e95f266b3cf6ddd01f3fce734b9b480d39c821d",
+      "bytes": 16932
+    },
+    {
+      "path": "input/history-source/94fa9098a53b5f283ecca3d1bc3ac71830253a04/scripts/audit-and-render.py",
+      "sha256": "f574adab582e6a69b5e96802de1c8a625777393f7022a1e94c57274d365f49b2",
+      "bytes": 2561
+    },
+    {
+      "path": "input/history-source/94fa9098a53b5f283ecca3d1bc3ac71830253a04/scripts/capture-environment.py",
+      "sha256": "7d9173c8765d34ce04d9b11767d94b1364710f84e48c42d1d37fe7ad30f52d48",
+      "bytes": 4374
+    },
+    {
+      "path": "input/history-source/94fa9098a53b5f283ecca3d1bc3ac71830253a04/scripts/document_common.py",
+      "sha256": "710d83c3fb802ddc588bbdd96a366e0d53502a9d0f1717918894575699db48f1",
+      "bytes": 5790
+    },
+    {
+      "path": "input/history-source/94fa9098a53b5f283ecca3d1bc3ac71830253a04/scripts/record-evidence.py",
+      "sha256": "947349996dc70325c8c7b20edd604a31de3152cc495fafe29d58751db8addacc",
+      "bytes": 2197
+    },
+    {
+      "path": "input/history-source/94fa9098a53b5f283ecca3d1bc3ac71830253a04/scripts/word-verify.py",
+      "sha256": "06fbec9db5711983c27286589fbc541a1434b6f3aaf2d316613676876683c22e",
+      "bytes": 4732
+    },
+    {
+      "path": "input/history-source/94fa9098a53b5f283ecca3d1bc3ac71830253a04/scripts/word_com.py",
+      "sha256": "c7acaf6bbbdaf3799a15f13044baddd42de1a65bb6945b6ed5b3839956df80b2",
+      "bytes": 2121
+    },
+    {
+      "path": "input/history-source/94fa9098a53b5f283ecca3d1bc3ac71830253a04/templates/source.json",
+      "sha256": "a6aa3e0fb052caa35654b37b71dde8fae60de3d67d3e594c02cc77cd66b92d48",
+      "bytes": 1472
+    },
+    {
+      "path": "input/repo/fixtures/canonical.json",
+      "sha256": "971f1cf52c991115ce4b5d7ca7ce179600e06bcb453fb540b37538f3a429ad67",
+      "bytes": 3635
+    },
+    {
+      "path": "input/repo/requirements.txt",
+      "sha256": "2cba12dfb77c691d83f77be6b32c2f6708ec0aaa1df8376373ee160444c78260",
+      "bytes": 177
+    },
+    {
+      "path": "input/repo/routes/direct-docx/build.py",
+      "sha256": "f9960884cf9dccbb1a0cef2306714072722ac2be22e91f458efafffc21ef93bd",
+      "bytes": 3513
+    },
+    {
+      "path": "input/repo/routes/pandoc/build.py",
+      "sha256": "808e6be2f107e38ce581638ff9d322fd0ce6d09333b9c5c1cf325e479ca7105e",
+      "bytes": 3609
+    },
+    {
+      "path": "input/repo/routes/word-com/build.py",
+      "sha256": "0a49c4f03af851f5ae7150685f47a2a682f98539c7d6be556a07fb2007a8e67e",
+      "bytes": 8269
+    },
+    {
+      "path": "input/repo/routes/word-com/restyle.py",
+      "sha256": "f4aa600c068721d42f6d591b8e95f266b3cf6ddd01f3fce734b9b480d39c821d",
+      "bytes": 16932
+    },
+    {
+      "path": "input/repo/scripts/audit-and-render.py",
+      "sha256": "f574adab582e6a69b5e96802de1c8a625777393f7022a1e94c57274d365f49b2",
+      "bytes": 2561
+    },
+    {
+      "path": "input/repo/scripts/capture-environment.py",
+      "sha256": "7d9173c8765d34ce04d9b11767d94b1364710f84e48c42d1d37fe7ad30f52d48",
+      "bytes": 4374
+    },
+    {
+      "path": "input/repo/scripts/document_common.py",
+      "sha256": "710d83c3fb802ddc588bbdd96a366e0d53502a9d0f1717918894575699db48f1",
+      "bytes": 5790
+    },
+    {
+      "path": "input/repo/scripts/record-evidence.py",
+      "sha256": "947349996dc70325c8c7b20edd604a31de3152cc495fafe29d58751db8addacc",
+      "bytes": 2197
+    },
+    {
+      "path": "input/repo/scripts/word-verify.py",
+      "sha256": "06fbec9db5711983c27286589fbc541a1434b6f3aaf2d316613676876683c22e",
+      "bytes": 4732
+    },
+    {
+      "path": "input/repo/scripts/word_com.py",
+      "sha256": "c7acaf6bbbdaf3799a15f13044baddd42de1a65bb6945b6ed5b3839956df80b2",
+      "bytes": 2121
+    },
+    {
+      "path": "input/repo/templates/sgcc-feasibility-2018-original.docx",
+      "sha256": "141131ad823f273eb50cebfae6c5f5fb4b65e878c2c63e52472d2612f55b60fd",
+      "bytes": 37630
+    },
+    {
+      "path": "input/repo/templates/sgcc-style-reference.docx",
+      "sha256": "a95f2a070c77007246353e4849d399f709667916bfafd98380a336066efade57",
+      "bytes": 38257
+    },
+    {
+      "path": "input/repo/templates/source.json",
+      "sha256": "a6aa3e0fb052caa35654b37b71dde8fae60de3d67d3e594c02cc77cd66b92d48",
+      "bytes": 1472
+    },
+    {
+      "path": "input/source.docx",
+      "sha256": "ca5e82d84d98f4e58453d7f92d4c4340325110ea97e2ce4ea3ffec06dda71fca",
+      "bytes": 1419245
+    }
+  ],
+  "originalFiles": [
+    {
+      "source": "out/sst-restyle-20261010-150201/artifact.md",
+      "bytes": 2460,
+      "sha256": "465788d7da19de3abd9512ac8915a10de8cd041d0dee4add56638a9865e20a46",
+      "archive": "evidence/sst-restyle-20261010-150201/artifact.md"
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/cell-border-check-06.png",
+      "bytes": 202611,
+      "sha256": "7116cf75814d1150aed924f4bdd83d451912f57b4379766f5588bcba5d4f3785",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final/wf10kV直挂SST系统设计方案_国网报告风格.docx",
+      "bytes": 1432944,
+      "sha256": "4ca6b8fd3e4d00dcbbd896c2c18c4ac8f9aa4b110197eb4a19f774f1dce6895d",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final/wf10kV直挂SST系统设计方案_国网报告风格.pdf",
+      "bytes": 1824164,
+      "sha256": "262d35c4f319acfb0db3a3b867ab73cc8b6fda78179d5d6c93223b49032b70c2",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-contact-1.png",
+      "bytes": 417760,
+      "sha256": "4e30f717bd1aa94eb2200a38443bd63274c36bed390d10df25fea95c85f2088f",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-contact-2.png",
+      "bytes": 485946,
+      "sha256": "51c3c3efcedaa3b02f6f2a381480b1e032c6828e951e179643b74c000276a9b3",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-contact-3.png",
+      "bytes": 482473,
+      "sha256": "5bfad10c271e19fec6308137f03b108e70293b53335761a23944fc278f27d48c",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-contact-4.png",
+      "bytes": 324187,
+      "sha256": "a72db770c544124a1299960fcb715b8c43d13b483f09bf47d70613058ba6bf81",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-contact-5.png",
+      "bytes": 211718,
+      "sha256": "a5f91a868f4eee113b251d604d2ec3d77bed8a81ed8811c85c483c1a98bb3afe",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages/page-01.png",
+      "bytes": 51343,
+      "sha256": "b428fd643b28573cfccdf39995816f0a63a95fa62c99e99cadeb8bebd45a5ce9",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages/page-02.png",
+      "bytes": 217583,
+      "sha256": "02e52044af724bf5a003c10c0624fe1de7e21a2abea0fc6e371b959bb89bdbf2",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages/page-03.png",
+      "bytes": 132909,
+      "sha256": "fff9362646462b4f37e7571bf7a3bf2f7d9c0d2b2b5edfb075cfc65f819f00bf",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages/page-04.png",
+      "bytes": 160444,
+      "sha256": "1a66909130ca652995ff1abb2d6edcb56e8d30003d961d3d0273bd03f30a18bf",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages/page-05.png",
+      "bytes": 111262,
+      "sha256": "5a35d81af53791ca37b69143bfbb4bd740ad324a581725dbb517585967c45fd5",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages/page-06.png",
+      "bytes": 198797,
+      "sha256": "54ffd728304dfbe8dcceaf9bba564a1bb9d0765284d4fa61e5f50b594e1d911c",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages/page-07.png",
+      "bytes": 282005,
+      "sha256": "f28e98138b05d0133a235d942d9cb169fb73da528f2a6aee1876eb34f0f44f10",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages/page-08.png",
+      "bytes": 312808,
+      "sha256": "5cb00a9677ee353c1f4113b73316b0884f1991526272188e2c4370ae67c9f217",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages/page-09.png",
+      "bytes": 337021,
+      "sha256": "f23877d6f4931c2335009d25b0e18d714576ecc3c118cb6ecfa0f0394455aca5",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages/page-10.png",
+      "bytes": 168786,
+      "sha256": "8aef684d9c12338cdf1da954285c0813b0fe7c32326773e9238b6f1560be1b29",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages/page-11.png",
+      "bytes": 345463,
+      "sha256": "31a2d1b41b683417b399996e04a8227457522736963ece10533a7b7ea6efee7d",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages/page-12.png",
+      "bytes": 252486,
+      "sha256": "5786dabc6746f6d573c486efe6f3d1a5c20ea4d956123b5d63913c685c39f0f8",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages/page-13.png",
+      "bytes": 270967,
+      "sha256": "7e5cb5600436c7d09461f99c8ce40ca913ae95a38e6707265a1fd5b0df0559f7",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages/page-14.png",
+      "bytes": 352026,
+      "sha256": "1a5a64120fc6c5d0e3fa16862ccb33d50f685c6ed18b60a611202640de0d5482",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages/page-15.png",
+      "bytes": 291346,
+      "sha256": "65e88349d2b591bfa343eddb9809e445a8b319cf578f180dd4aedca5c6148569",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages/page-16.png",
+      "bytes": 296667,
+      "sha256": "b9ecda68481f08d88d545f181977a2f5851713fe38b2f305af5935aaf4c9262a",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages/page-17.png",
+      "bytes": 233808,
+      "sha256": "a7c24e6d7a1eff9a9f8dff44e943e2d23c7f9d3e00fc79dd9b9e88463ed55703",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages/page-18.png",
+      "bytes": 178063,
+      "sha256": "3be9a25a2a69dbcb76371fa3d7f3021e8c3b8986b4866b8207d5273aba44d099",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages/page-19.png",
+      "bytes": 220704,
+      "sha256": "e07033781ff9ce71f0f2d289c730558ac65ae695d8ac70ae02b134af0691180c",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages/page-20.png",
+      "bytes": 260137,
+      "sha256": "08f4033a40303a2a030fa8c9f7b032cbdba82ec67c4c4a444ee8c3775c59f38d",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages/page-21.png",
+      "bytes": 237459,
+      "sha256": "afd6853c6071b1516e756365c0ff9c0b61a0162c2fd6e56ab8dfe694d36b3fdf",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages/page-22.png",
+      "bytes": 267645,
+      "sha256": "fbb9d367a030abdca7bf6c9818683efe1d312f1da0d5d5b269c2a8767efba215",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages/page-23.png",
+      "bytes": 266959,
+      "sha256": "5144830aca4acf7296f09b0b2cc5ec43c4ea2a6504918a3e3465cda22343390b",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages/page-24.png",
+      "bytes": 222669,
+      "sha256": "47481b3d1845bbf485e20f7bfd4b2980cdcbc17013f0e92ac0a2cb67f8fe405e",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages/page-25.png",
+      "bytes": 215534,
+      "sha256": "8d11585d40933ebed427e1b95d3c8d740e7c529fa1724b462c81620d9cb1fb89",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages/page-26.png",
+      "bytes": 219279,
+      "sha256": "96822f184b93e59c8af9cd132e7a721bf600f51c0b402e827c9cb6c3b5684af4",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages/page-27.png",
+      "bytes": 345223,
+      "sha256": "04a2c17d977559b42df89982d7f59e5315d8464b243012e8cc33021fc2e32c1c",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages/page-28.png",
+      "bytes": 308267,
+      "sha256": "4ad4f14be2605a97671cd2f0ee49adec6fac96bc39c2cb8309706b7bc6bb5d23",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages/page-29.png",
+      "bytes": 295549,
+      "sha256": "362ed54bd61ae301aaa4a3bdb0a910edb47fb8fd71a6f01451da1c067bc7b015",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages/page-30.png",
+      "bytes": 265015,
+      "sha256": "0f3e1a65de21b89f5a568a60e52fed321d0552637fcd9bc1a40628e8b198ac16",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages/page-31.png",
+      "bytes": 340888,
+      "sha256": "ab1672e1a71c0ae7914fc8bc6df08d21881d0d01a645fbfe8438b14f9713e12c",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages/page-32.png",
+      "bytes": 230614,
+      "sha256": "8875ea019c97aecb0cfc28163360ea610af446ee692f67f3140113c546169935",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages/page-33.png",
+      "bytes": 243308,
+      "sha256": "a76c69c002315fa6fc2a4334bab2fdbf8a76e52034d34f6d84a047c9dabf4c91",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages/page-34.png",
+      "bytes": 252040,
+      "sha256": "cad7f56313bbbdc4422d8b1a75354aeb280fe3b92125050ede4eaa66e68eca71",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages/page-35.png",
+      "bytes": 316207,
+      "sha256": "c62ea231c8018db2ad4691e5a340c53c0f38debe72f1ebd9140d125c3f56403c",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages/page-36.png",
+      "bytes": 116939,
+      "sha256": "267a5836037fa113705e206d05d9f1ee49b45a4ed52b2154845deabf08a4344d",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages/page-37.png",
+      "bytes": 236866,
+      "sha256": "27219e7d1268929c7387d935640fba5a83b6f02449da636d461a63fb53794ec3",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages/page-38.png",
+      "bytes": 97659,
+      "sha256": "88381ef1e56ab011a6daf5b05de20c7f580ae30e6cd5a99bb9d465068627bd02",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages/page-39.png",
+      "bytes": 255324,
+      "sha256": "8235360c318b96ddeaaba13f0c10d443aa74b1b3c118a821d3708cb58de75907",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages/page-40.png",
+      "bytes": 204710,
+      "sha256": "f4dae8e87f4200a7a90376166e19cb8b74146e8230d820696f966506167edd5a",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages/page-41.png",
+      "bytes": 128874,
+      "sha256": "f25edce3fe891f46c8708b57cea11058581a1f828d55a87d525f5f41da289568",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages/page-42.png",
+      "bytes": 255335,
+      "sha256": "62e7f4cfb9de75aef8ccd7ee7d7c2c0841d30700d9dd58c245d00cdc7238146f",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages/page-43.png",
+      "bytes": 203032,
+      "sha256": "f84e4152bb3f05d7d37b17917e528a805cd41ff0021d15a988893d294e06ac09",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages/page-44.png",
+      "bytes": 66096,
+      "sha256": "55b23c7fc76c80bc54c84fad44d27701f82232d04025794465ab42f3cf2591ec",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages/page-45.png",
+      "bytes": 154034,
+      "sha256": "47d7784f67f9bd9c0c3ad69183945654bfa336c502b689f2686fa7ddf36f27ce",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages/page-46.png",
+      "bytes": 203967,
+      "sha256": "182e145d76e4edee7947abc4fa2c491deaa1e9bc39650a219702f46f6c747bee",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages/page-47.png",
+      "bytes": 206112,
+      "sha256": "1f8cf5c50d89c90911feb53bdf6d0ee97a47f4db04a4178e66cbe3bdecdc4de9",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages/page-48.png",
+      "bytes": 72347,
+      "sha256": "138c3bf0e3676232be8e8f2aa4dfbd22a06be1d2e1a907f7c55ead66da537a3a",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages/page-49.png",
+      "bytes": 160113,
+      "sha256": "627e2809e5c36dc8f2f99af245caab56d8c677117d84fa4e8e17e5a51d105377",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages/page-50.png",
+      "bytes": 206825,
+      "sha256": "77090bb271c837731f4f76a998cafbf9f47d16f91fb813abaa2f1bbc84af91cb",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages/page-51.png",
+      "bytes": 174953,
+      "sha256": "4a54691e19a9bdab02f68327c865a8d7753f4b551c0425e5fe2f21ebe2422d4e",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages/page-52.png",
+      "bytes": 99781,
+      "sha256": "20277214571223859e76dc4dc7478e99d8ee4e366e20e4f86a6266bd0416967c",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages/page-53.png",
+      "bytes": 246298,
+      "sha256": "ba1e561e776ec616856abf31a0aaac70376894e8bd24b65b7f6ad7bfa596d381",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages/page-54.png",
+      "bytes": 254448,
+      "sha256": "1eb1e73cedd2137f6c11787b233ea49a2f9fa31a82240433fb13c8fa30b03543",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages-v2/page-01.png",
+      "bytes": 51343,
+      "sha256": "b428fd643b28573cfccdf39995816f0a63a95fa62c99e99cadeb8bebd45a5ce9",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages-v2/page-02.png",
+      "bytes": 217583,
+      "sha256": "02e52044af724bf5a003c10c0624fe1de7e21a2abea0fc6e371b959bb89bdbf2",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages-v2/page-03.png",
+      "bytes": 132909,
+      "sha256": "fff9362646462b4f37e7571bf7a3bf2f7d9c0d2b2b5edfb075cfc65f819f00bf",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages-v2/page-04.png",
+      "bytes": 160444,
+      "sha256": "1a66909130ca652995ff1abb2d6edcb56e8d30003d961d3d0273bd03f30a18bf",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages-v2/page-05.png",
+      "bytes": 111262,
+      "sha256": "5a35d81af53791ca37b69143bfbb4bd740ad324a581725dbb517585967c45fd5",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages-v2/page-06.png",
+      "bytes": 202608,
+      "sha256": "a8aa139d7e2508ba91e1f9457e2b858844977ab030444748381b7d3625d72fb7",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages-v2/page-07.png",
+      "bytes": 276083,
+      "sha256": "498c437570ea729002fd0365782d036ef24335cbd3aa10f1a1b1069d7218d5b3",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages-v2/page-08.png",
+      "bytes": 312808,
+      "sha256": "5cb00a9677ee353c1f4113b73316b0884f1991526272188e2c4370ae67c9f217",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages-v2/page-09.png",
+      "bytes": 337021,
+      "sha256": "f23877d6f4931c2335009d25b0e18d714576ecc3c118cb6ecfa0f0394455aca5",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages-v2/page-10.png",
+      "bytes": 168786,
+      "sha256": "8aef684d9c12338cdf1da954285c0813b0fe7c32326773e9238b6f1560be1b29",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages-v2/page-11.png",
+      "bytes": 345463,
+      "sha256": "31a2d1b41b683417b399996e04a8227457522736963ece10533a7b7ea6efee7d",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages-v2/page-12.png",
+      "bytes": 252486,
+      "sha256": "5786dabc6746f6d573c486efe6f3d1a5c20ea4d956123b5d63913c685c39f0f8",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages-v2/page-13.png",
+      "bytes": 270967,
+      "sha256": "7e5cb5600436c7d09461f99c8ce40ca913ae95a38e6707265a1fd5b0df0559f7",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages-v2/page-14.png",
+      "bytes": 352132,
+      "sha256": "63f9a6f63f7b207c47853ef0f5a4dbce75a16abb91001cc51b0e2759a8266e00",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages-v2/page-15.png",
+      "bytes": 291523,
+      "sha256": "4f98f47c33ae244a307a3e7b08c6f656a53a5d423668ca55a6f959b90a5f4b84",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages-v2/page-16.png",
+      "bytes": 296448,
+      "sha256": "c7fd0675de9243f33edf0e53c38fd6f49ae9e1a52d6e5e76f4f272483bda40c2",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages-v2/page-17.png",
+      "bytes": 233299,
+      "sha256": "a309fa1042649b861000a204b9deaa49f5beaeea3ddbdc6cef0206ed2d32cb33",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages-v2/page-18.png",
+      "bytes": 178063,
+      "sha256": "3be9a25a2a69dbcb76371fa3d7f3021e8c3b8986b4866b8207d5273aba44d099",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages-v2/page-19.png",
+      "bytes": 220704,
+      "sha256": "e07033781ff9ce71f0f2d289c730558ac65ae695d8ac70ae02b134af0691180c",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages-v2/page-20.png",
+      "bytes": 260137,
+      "sha256": "08f4033a40303a2a030fa8c9f7b032cbdba82ec67c4c4a444ee8c3775c59f38d",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages-v2/page-21.png",
+      "bytes": 237459,
+      "sha256": "afd6853c6071b1516e756365c0ff9c0b61a0162c2fd6e56ab8dfe694d36b3fdf",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages-v2/page-22.png",
+      "bytes": 267645,
+      "sha256": "fbb9d367a030abdca7bf6c9818683efe1d312f1da0d5d5b269c2a8767efba215",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages-v2/page-23.png",
+      "bytes": 267339,
+      "sha256": "bde34af3ea79fec8c9ce6f6b6591286e308d2618ed10b19e723a5f64078e0ec4",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages-v2/page-24.png",
+      "bytes": 222641,
+      "sha256": "eaaeba0e60defaf6b56dbfba319568f25efb85675104f93c06607c48b9999e2f",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages-v2/page-25.png",
+      "bytes": 215534,
+      "sha256": "8d11585d40933ebed427e1b95d3c8d740e7c529fa1724b462c81620d9cb1fb89",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages-v2/page-26.png",
+      "bytes": 219279,
+      "sha256": "96822f184b93e59c8af9cd132e7a721bf600f51c0b402e827c9cb6c3b5684af4",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages-v2/page-27.png",
+      "bytes": 344758,
+      "sha256": "6d71a51cb5114acae1f784fd47f6ad80b2777e2cd73b17b293d582bb7bc42799",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages-v2/page-28.png",
+      "bytes": 307975,
+      "sha256": "f31b6106d6d503c818db4c252b9388d5b0c7ab900b59bb45d91afc69737b1ff0",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages-v2/page-29.png",
+      "bytes": 295549,
+      "sha256": "362ed54bd61ae301aaa4a3bdb0a910edb47fb8fd71a6f01451da1c067bc7b015",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages-v2/page-30.png",
+      "bytes": 265015,
+      "sha256": "0f3e1a65de21b89f5a568a60e52fed321d0552637fcd9bc1a40628e8b198ac16",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages-v2/page-31.png",
+      "bytes": 340832,
+      "sha256": "6abdb062dc6e08a863d63ed2cd33b4264174fd8a8fb991669ae3c6c1b98ec91e",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages-v2/page-32.png",
+      "bytes": 230614,
+      "sha256": "8875ea019c97aecb0cfc28163360ea610af446ee692f67f3140113c546169935",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages-v2/page-33.png",
+      "bytes": 243308,
+      "sha256": "a76c69c002315fa6fc2a4334bab2fdbf8a76e52034d34f6d84a047c9dabf4c91",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages-v2/page-34.png",
+      "bytes": 252044,
+      "sha256": "6c4f6d867762d8a5e74cf84c40163512c4ec14ead24fb9fbf43cd771cbde5af1",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages-v2/page-35.png",
+      "bytes": 316202,
+      "sha256": "f25e50e97dae8d6cb90ff12c198a030de78fbc8ee75f1cc070e3401ca0c10381",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages-v2/page-36.png",
+      "bytes": 116933,
+      "sha256": "bc90d67ec58233226934c55a8f47d8e92d8117c50556587f2b9fdfda93f91e6e",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages-v2/page-37.png",
+      "bytes": 236866,
+      "sha256": "27219e7d1268929c7387d935640fba5a83b6f02449da636d461a63fb53794ec3",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages-v2/page-38.png",
+      "bytes": 97659,
+      "sha256": "88381ef1e56ab011a6daf5b05de20c7f580ae30e6cd5a99bb9d465068627bd02",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages-v2/page-39.png",
+      "bytes": 255324,
+      "sha256": "8235360c318b96ddeaaba13f0c10d443aa74b1b3c118a821d3708cb58de75907",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages-v2/page-40.png",
+      "bytes": 204634,
+      "sha256": "dfaf2ff3e72e14f333aa79235595811a1cbeba2d9ea58f1479d8f2c58e48bbf8",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages-v2/page-41.png",
+      "bytes": 128874,
+      "sha256": "f25edce3fe891f46c8708b57cea11058581a1f828d55a87d525f5f41da289568",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages-v2/page-42.png",
+      "bytes": 255335,
+      "sha256": "62e7f4cfb9de75aef8ccd7ee7d7c2c0841d30700d9dd58c245d00cdc7238146f",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages-v2/page-43.png",
+      "bytes": 203032,
+      "sha256": "f84e4152bb3f05d7d37b17917e528a805cd41ff0021d15a988893d294e06ac09",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages-v2/page-44.png",
+      "bytes": 66096,
+      "sha256": "55b23c7fc76c80bc54c84fad44d27701f82232d04025794465ab42f3cf2591ec",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages-v2/page-45.png",
+      "bytes": 154034,
+      "sha256": "47d7784f67f9bd9c0c3ad69183945654bfa336c502b689f2686fa7ddf36f27ce",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages-v2/page-46.png",
+      "bytes": 203967,
+      "sha256": "182e145d76e4edee7947abc4fa2c491deaa1e9bc39650a219702f46f6c747bee",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages-v2/page-47.png",
+      "bytes": 206112,
+      "sha256": "1f8cf5c50d89c90911feb53bdf6d0ee97a47f4db04a4178e66cbe3bdecdc4de9",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages-v2/page-48.png",
+      "bytes": 72347,
+      "sha256": "138c3bf0e3676232be8e8f2aa4dfbd22a06be1d2e1a907f7c55ead66da537a3a",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages-v2/page-49.png",
+      "bytes": 160113,
+      "sha256": "627e2809e5c36dc8f2f99af245caab56d8c677117d84fa4e8e17e5a51d105377",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages-v2/page-50.png",
+      "bytes": 206825,
+      "sha256": "77090bb271c837731f4f76a998cafbf9f47d16f91fb813abaa2f1bbc84af91cb",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages-v2/page-51.png",
+      "bytes": 174953,
+      "sha256": "4a54691e19a9bdab02f68327c865a8d7753f4b551c0425e5fe2f21ebe2422d4e",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages-v2/page-52.png",
+      "bytes": 99781,
+      "sha256": "20277214571223859e76dc4dc7478e99d8ee4e366e20e4f86a6266bd0416967c",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages-v2/page-53.png",
+      "bytes": 246298,
+      "sha256": "ba1e561e776ec616856abf31a0aaac70376894e8bd24b65b7f6ad7bfa596d381",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages-v2/page-54.png",
+      "bytes": 254448,
+      "sha256": "1eb1e73cedd2137f6c11787b233ea49a2f9fa31a82240433fb13c8fa30b03543",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages-v3/page-01.png",
+      "bytes": 51343,
+      "sha256": "b428fd643b28573cfccdf39995816f0a63a95fa62c99e99cadeb8bebd45a5ce9",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages-v3/page-02.png",
+      "bytes": 217583,
+      "sha256": "02e52044af724bf5a003c10c0624fe1de7e21a2abea0fc6e371b959bb89bdbf2",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages-v3/page-03.png",
+      "bytes": 132909,
+      "sha256": "fff9362646462b4f37e7571bf7a3bf2f7d9c0d2b2b5edfb075cfc65f819f00bf",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages-v3/page-04.png",
+      "bytes": 160444,
+      "sha256": "1a66909130ca652995ff1abb2d6edcb56e8d30003d961d3d0273bd03f30a18bf",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages-v3/page-05.png",
+      "bytes": 111262,
+      "sha256": "5a35d81af53791ca37b69143bfbb4bd740ad324a581725dbb517585967c45fd5",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages-v3/page-06.png",
+      "bytes": 202611,
+      "sha256": "7116cf75814d1150aed924f4bdd83d451912f57b4379766f5588bcba5d4f3785",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages-v3/page-07.png",
+      "bytes": 276072,
+      "sha256": "655fb241837299d9ab53d73dd51e875b0856a302588e53eb90ae2eb1082c1741",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages-v3/page-08.png",
+      "bytes": 312712,
+      "sha256": "740a03ff895d0415b5aa471a39924aa0e1aeac5889fdea29d1144a1e8e302f52",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages-v3/page-09.png",
+      "bytes": 336708,
+      "sha256": "47b68a6aa6d199f538554c1b8bf6e1296c2548a5eb10aec31d044d06c0b12bc2",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages-v3/page-10.png",
+      "bytes": 168786,
+      "sha256": "8aef684d9c12338cdf1da954285c0813b0fe7c32326773e9238b6f1560be1b29",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages-v3/page-11.png",
+      "bytes": 345931,
+      "sha256": "d11a409108cd76d1c5b08fa0ac781410b64fdae4305830f0e972c4228cb646c7",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages-v3/page-12.png",
+      "bytes": 252508,
+      "sha256": "9c483f2f391f1739c0209be6360a61ad6daf99010c749fe0852a5a3d22b90750",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages-v3/page-13.png",
+      "bytes": 271010,
+      "sha256": "c487f53fb3b9d6ccfbaa124793ee807991b7ba2d0ec7af9b23692b4d5ad51eba",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages-v3/page-14.png",
+      "bytes": 352026,
+      "sha256": "1a5a64120fc6c5d0e3fa16862ccb33d50f685c6ed18b60a611202640de0d5482",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages-v3/page-15.png",
+      "bytes": 291349,
+      "sha256": "143f240f75e52c6493477cf868ad992031367d8c76a469242f4f0e261e167a46",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages-v3/page-16.png",
+      "bytes": 296607,
+      "sha256": "7d065e9306dc381f764c3609e36c72274f1f95730bbb0b5bbd55671ecf2ee373",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages-v3/page-17.png",
+      "bytes": 233299,
+      "sha256": "a309fa1042649b861000a204b9deaa49f5beaeea3ddbdc6cef0206ed2d32cb33",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages-v3/page-18.png",
+      "bytes": 178063,
+      "sha256": "3be9a25a2a69dbcb76371fa3d7f3021e8c3b8986b4866b8207d5273aba44d099",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages-v3/page-19.png",
+      "bytes": 220704,
+      "sha256": "e07033781ff9ce71f0f2d289c730558ac65ae695d8ac70ae02b134af0691180c",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages-v3/page-20.png",
+      "bytes": 260137,
+      "sha256": "08f4033a40303a2a030fa8c9f7b032cbdba82ec67c4c4a444ee8c3775c59f38d",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages-v3/page-21.png",
+      "bytes": 237486,
+      "sha256": "42eff5d5225d919facd1fd54e7a61be36c1b545237d79c84984d381518bf8ea2",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages-v3/page-22.png",
+      "bytes": 267640,
+      "sha256": "20c92768affe32091c9641037df98a0a3e795f2e1b157c1ec3044c77ecc7afe0",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages-v3/page-23.png",
+      "bytes": 266988,
+      "sha256": "3178477bbcfae0fe60799d9d75a5d781895a8606c001093a46cc00a416bcdeb7",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages-v3/page-24.png",
+      "bytes": 222649,
+      "sha256": "0b90cb0f8671e2822af408ec7184e243b1f0400c1fdb6446179aaf465c8416b4",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages-v3/page-25.png",
+      "bytes": 215534,
+      "sha256": "8d11585d40933ebed427e1b95d3c8d740e7c529fa1724b462c81620d9cb1fb89",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages-v3/page-26.png",
+      "bytes": 219292,
+      "sha256": "5d51a47a091db3f8293ab4f1d2e5c036e048ed79a71b4a9ae64736197ac2603e",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages-v3/page-27.png",
+      "bytes": 345172,
+      "sha256": "3b358fd694e07750c605d215dd96aa56d48999e86383361b7d64d638bf92dc05",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages-v3/page-28.png",
+      "bytes": 308319,
+      "sha256": "d507218ed0db8bf3c4dde9f2f278bd090d6b8380856d38b6b2e92e877a831175",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages-v3/page-29.png",
+      "bytes": 295565,
+      "sha256": "0d3302f11eb57fb89f4f869a62f7eb5a57cd8c11821bfce0474713cf32f4c302",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages-v3/page-30.png",
+      "bytes": 265015,
+      "sha256": "0f3e1a65de21b89f5a568a60e52fed321d0552637fcd9bc1a40628e8b198ac16",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages-v3/page-31.png",
+      "bytes": 340828,
+      "sha256": "6a439b3883339e96be31e9f810a61df4719e2dde67c685769a4161860d1dea68",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages-v3/page-32.png",
+      "bytes": 230614,
+      "sha256": "8875ea019c97aecb0cfc28163360ea610af446ee692f67f3140113c546169935",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages-v3/page-33.png",
+      "bytes": 243299,
+      "sha256": "cd2c0b3d27ecefe7b6517134c4ed08bcf5261237ac90ebdc2406a9a4ca9aaa15",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages-v3/page-34.png",
+      "bytes": 252044,
+      "sha256": "6c4f6d867762d8a5e74cf84c40163512c4ec14ead24fb9fbf43cd771cbde5af1",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages-v3/page-35.png",
+      "bytes": 316334,
+      "sha256": "b19c9079b45d3d8f9ef7f5a99806c709a8b090d387363d1962acc5134be56afb",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages-v3/page-36.png",
+      "bytes": 116939,
+      "sha256": "267a5836037fa113705e206d05d9f1ee49b45a4ed52b2154845deabf08a4344d",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages-v3/page-37.png",
+      "bytes": 236866,
+      "sha256": "27219e7d1268929c7387d935640fba5a83b6f02449da636d461a63fb53794ec3",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages-v3/page-38.png",
+      "bytes": 97659,
+      "sha256": "88381ef1e56ab011a6daf5b05de20c7f580ae30e6cd5a99bb9d465068627bd02",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages-v3/page-39.png",
+      "bytes": 255324,
+      "sha256": "8235360c318b96ddeaaba13f0c10d443aa74b1b3c118a821d3708cb58de75907",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages-v3/page-40.png",
+      "bytes": 204634,
+      "sha256": "dfaf2ff3e72e14f333aa79235595811a1cbeba2d9ea58f1479d8f2c58e48bbf8",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages-v3/page-41.png",
+      "bytes": 128874,
+      "sha256": "f25edce3fe891f46c8708b57cea11058581a1f828d55a87d525f5f41da289568",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages-v3/page-42.png",
+      "bytes": 255335,
+      "sha256": "62e7f4cfb9de75aef8ccd7ee7d7c2c0841d30700d9dd58c245d00cdc7238146f",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages-v3/page-43.png",
+      "bytes": 203032,
+      "sha256": "f84e4152bb3f05d7d37b17917e528a805cd41ff0021d15a988893d294e06ac09",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages-v3/page-44.png",
+      "bytes": 66096,
+      "sha256": "55b23c7fc76c80bc54c84fad44d27701f82232d04025794465ab42f3cf2591ec",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages-v3/page-45.png",
+      "bytes": 154463,
+      "sha256": "bee97016b8f2e76700f5437326602b431490cd16fd191a073ce6bcfabe98b2c7",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages-v3/page-46.png",
+      "bytes": 203973,
+      "sha256": "16ff5ff62dcf8b09da13fe357c598c4eed9a54ab5b887bac6e2f587f64d19b8f",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages-v3/page-47.png",
+      "bytes": 206113,
+      "sha256": "ddae6cc963e3017a7bf0c2217a2b4d44c8155f402fda2e5b51ea42a8734a3a92",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages-v3/page-48.png",
+      "bytes": 72347,
+      "sha256": "138c3bf0e3676232be8e8f2aa4dfbd22a06be1d2e1a907f7c55ead66da537a3a",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages-v3/page-49.png",
+      "bytes": 160113,
+      "sha256": "627e2809e5c36dc8f2f99af245caab56d8c677117d84fa4e8e17e5a51d105377",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages-v3/page-50.png",
+      "bytes": 206402,
+      "sha256": "0a004ace4af11ff197485da35d40bc72a8f4326f9f9c71cd6dc81c69d8f6812e",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages-v3/page-51.png",
+      "bytes": 174953,
+      "sha256": "4a54691e19a9bdab02f68327c865a8d7753f4b551c0425e5fe2f21ebe2422d4e",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages-v3/page-52.png",
+      "bytes": 99781,
+      "sha256": "20277214571223859e76dc4dc7478e99d8ee4e366e20e4f86a6266bd0416967c",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages-v3/page-53.png",
+      "bytes": 246298,
+      "sha256": "ba1e561e776ec616856abf31a0aaac70376894e8bd24b65b7f6ad7bfa596d381",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages-v3/page-54.png",
+      "bytes": 254448,
+      "sha256": "1eb1e73cedd2137f6c11787b233ea49a2f9fa31a82240433fb13c8fa30b03543",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages-v4/page-01.png",
+      "bytes": 51343,
+      "sha256": "b428fd643b28573cfccdf39995816f0a63a95fa62c99e99cadeb8bebd45a5ce9",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages-v4/page-02.png",
+      "bytes": 217583,
+      "sha256": "02e52044af724bf5a003c10c0624fe1de7e21a2abea0fc6e371b959bb89bdbf2",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages-v4/page-03.png",
+      "bytes": 132909,
+      "sha256": "fff9362646462b4f37e7571bf7a3bf2f7d9c0d2b2b5edfb075cfc65f819f00bf",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages-v4/page-04.png",
+      "bytes": 160444,
+      "sha256": "1a66909130ca652995ff1abb2d6edcb56e8d30003d961d3d0273bd03f30a18bf",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages-v4/page-05.png",
+      "bytes": 111262,
+      "sha256": "5a35d81af53791ca37b69143bfbb4bd740ad324a581725dbb517585967c45fd5",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages-v4/page-06.png",
+      "bytes": 202611,
+      "sha256": "7116cf75814d1150aed924f4bdd83d451912f57b4379766f5588bcba5d4f3785",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages-v4/page-07.png",
+      "bytes": 276072,
+      "sha256": "655fb241837299d9ab53d73dd51e875b0856a302588e53eb90ae2eb1082c1741",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages-v4/page-08.png",
+      "bytes": 312712,
+      "sha256": "740a03ff895d0415b5aa471a39924aa0e1aeac5889fdea29d1144a1e8e302f52",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages-v4/page-09.png",
+      "bytes": 336708,
+      "sha256": "47b68a6aa6d199f538554c1b8bf6e1296c2548a5eb10aec31d044d06c0b12bc2",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages-v4/page-10.png",
+      "bytes": 168786,
+      "sha256": "8aef684d9c12338cdf1da954285c0813b0fe7c32326773e9238b6f1560be1b29",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages-v4/page-11.png",
+      "bytes": 345931,
+      "sha256": "d11a409108cd76d1c5b08fa0ac781410b64fdae4305830f0e972c4228cb646c7",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages-v4/page-12.png",
+      "bytes": 252508,
+      "sha256": "9c483f2f391f1739c0209be6360a61ad6daf99010c749fe0852a5a3d22b90750",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages-v4/page-13.png",
+      "bytes": 271010,
+      "sha256": "c487f53fb3b9d6ccfbaa124793ee807991b7ba2d0ec7af9b23692b4d5ad51eba",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages-v4/page-14.png",
+      "bytes": 352026,
+      "sha256": "1a5a64120fc6c5d0e3fa16862ccb33d50f685c6ed18b60a611202640de0d5482",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages-v4/page-15.png",
+      "bytes": 291349,
+      "sha256": "143f240f75e52c6493477cf868ad992031367d8c76a469242f4f0e261e167a46",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages-v4/page-16.png",
+      "bytes": 296607,
+      "sha256": "7d065e9306dc381f764c3609e36c72274f1f95730bbb0b5bbd55671ecf2ee373",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages-v4/page-17.png",
+      "bytes": 233299,
+      "sha256": "a309fa1042649b861000a204b9deaa49f5beaeea3ddbdc6cef0206ed2d32cb33",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages-v4/page-18.png",
+      "bytes": 178063,
+      "sha256": "3be9a25a2a69dbcb76371fa3d7f3021e8c3b8986b4866b8207d5273aba44d099",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages-v4/page-19.png",
+      "bytes": 220704,
+      "sha256": "e07033781ff9ce71f0f2d289c730558ac65ae695d8ac70ae02b134af0691180c",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages-v4/page-20.png",
+      "bytes": 260137,
+      "sha256": "08f4033a40303a2a030fa8c9f7b032cbdba82ec67c4c4a444ee8c3775c59f38d",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages-v4/page-21.png",
+      "bytes": 237486,
+      "sha256": "42eff5d5225d919facd1fd54e7a61be36c1b545237d79c84984d381518bf8ea2",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages-v4/page-22.png",
+      "bytes": 267640,
+      "sha256": "20c92768affe32091c9641037df98a0a3e795f2e1b157c1ec3044c77ecc7afe0",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages-v4/page-23.png",
+      "bytes": 266988,
+      "sha256": "3178477bbcfae0fe60799d9d75a5d781895a8606c001093a46cc00a416bcdeb7",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages-v4/page-24.png",
+      "bytes": 222649,
+      "sha256": "0b90cb0f8671e2822af408ec7184e243b1f0400c1fdb6446179aaf465c8416b4",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages-v4/page-25.png",
+      "bytes": 215534,
+      "sha256": "8d11585d40933ebed427e1b95d3c8d740e7c529fa1724b462c81620d9cb1fb89",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages-v4/page-26.png",
+      "bytes": 219292,
+      "sha256": "5d51a47a091db3f8293ab4f1d2e5c036e048ed79a71b4a9ae64736197ac2603e",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages-v4/page-27.png",
+      "bytes": 345172,
+      "sha256": "3b358fd694e07750c605d215dd96aa56d48999e86383361b7d64d638bf92dc05",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages-v4/page-28.png",
+      "bytes": 308319,
+      "sha256": "d507218ed0db8bf3c4dde9f2f278bd090d6b8380856d38b6b2e92e877a831175",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages-v4/page-29.png",
+      "bytes": 295565,
+      "sha256": "0d3302f11eb57fb89f4f869a62f7eb5a57cd8c11821bfce0474713cf32f4c302",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages-v4/page-30.png",
+      "bytes": 265015,
+      "sha256": "0f3e1a65de21b89f5a568a60e52fed321d0552637fcd9bc1a40628e8b198ac16",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages-v4/page-31.png",
+      "bytes": 340828,
+      "sha256": "6a439b3883339e96be31e9f810a61df4719e2dde67c685769a4161860d1dea68",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages-v4/page-32.png",
+      "bytes": 230614,
+      "sha256": "8875ea019c97aecb0cfc28163360ea610af446ee692f67f3140113c546169935",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages-v4/page-33.png",
+      "bytes": 243299,
+      "sha256": "cd2c0b3d27ecefe7b6517134c4ed08bcf5261237ac90ebdc2406a9a4ca9aaa15",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages-v4/page-34.png",
+      "bytes": 252044,
+      "sha256": "6c4f6d867762d8a5e74cf84c40163512c4ec14ead24fb9fbf43cd771cbde5af1",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages-v4/page-35.png",
+      "bytes": 316334,
+      "sha256": "b19c9079b45d3d8f9ef7f5a99806c709a8b090d387363d1962acc5134be56afb",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages-v4/page-36.png",
+      "bytes": 116939,
+      "sha256": "267a5836037fa113705e206d05d9f1ee49b45a4ed52b2154845deabf08a4344d",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages-v4/page-37.png",
+      "bytes": 236866,
+      "sha256": "27219e7d1268929c7387d935640fba5a83b6f02449da636d461a63fb53794ec3",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages-v4/page-38.png",
+      "bytes": 97659,
+      "sha256": "88381ef1e56ab011a6daf5b05de20c7f580ae30e6cd5a99bb9d465068627bd02",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages-v4/page-39.png",
+      "bytes": 255324,
+      "sha256": "8235360c318b96ddeaaba13f0c10d443aa74b1b3c118a821d3708cb58de75907",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages-v4/page-40.png",
+      "bytes": 204634,
+      "sha256": "dfaf2ff3e72e14f333aa79235595811a1cbeba2d9ea58f1479d8f2c58e48bbf8",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages-v4/page-41.png",
+      "bytes": 128874,
+      "sha256": "f25edce3fe891f46c8708b57cea11058581a1f828d55a87d525f5f41da289568",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages-v4/page-42.png",
+      "bytes": 255335,
+      "sha256": "62e7f4cfb9de75aef8ccd7ee7d7c2c0841d30700d9dd58c245d00cdc7238146f",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages-v4/page-43.png",
+      "bytes": 203032,
+      "sha256": "f84e4152bb3f05d7d37b17917e528a805cd41ff0021d15a988893d294e06ac09",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages-v4/page-44.png",
+      "bytes": 66096,
+      "sha256": "55b23c7fc76c80bc54c84fad44d27701f82232d04025794465ab42f3cf2591ec",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages-v4/page-45.png",
+      "bytes": 154463,
+      "sha256": "bee97016b8f2e76700f5437326602b431490cd16fd191a073ce6bcfabe98b2c7",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages-v4/page-46.png",
+      "bytes": 203973,
+      "sha256": "16ff5ff62dcf8b09da13fe357c598c4eed9a54ab5b887bac6e2f587f64d19b8f",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages-v4/page-47.png",
+      "bytes": 204921,
+      "sha256": "d296097461bcb5cada396a011284f9c0a9556c484423fd2a8229990b38e64a2b",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages-v4/page-48.png",
+      "bytes": 72347,
+      "sha256": "138c3bf0e3676232be8e8f2aa4dfbd22a06be1d2e1a907f7c55ead66da537a3a",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages-v4/page-49.png",
+      "bytes": 160113,
+      "sha256": "627e2809e5c36dc8f2f99af245caab56d8c677117d84fa4e8e17e5a51d105377",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages-v4/page-50.png",
+      "bytes": 206402,
+      "sha256": "0a004ace4af11ff197485da35d40bc72a8f4326f9f9c71cd6dc81c69d8f6812e",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages-v4/page-51.png",
+      "bytes": 174953,
+      "sha256": "4a54691e19a9bdab02f68327c865a8d7753f4b551c0425e5fe2f21ebe2422d4e",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages-v4/page-52.png",
+      "bytes": 99781,
+      "sha256": "20277214571223859e76dc4dc7478e99d8ee4e366e20e4f86a6266bd0416967c",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages-v4/page-53.png",
+      "bytes": 246298,
+      "sha256": "ba1e561e776ec616856abf31a0aaac70376894e8bd24b65b7f6ad7bfa596d381",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-pages-v4/page-54.png",
+      "bytes": 254448,
+      "sha256": "1eb1e73cedd2137f6c11787b233ea49a2f9fa31a82240433fb13c8fa30b03543",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-render-checks.json",
+      "bytes": 729,
+      "sha256": "f6ec38c9c70c5521334d3fb2a2c4a1ee25e9de2db28e5ba3ee2081bccd7dd909",
+      "archive": "evidence/sst-restyle-20261010-150201/final-render-checks.json"
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/final-verification.json",
+      "bytes": 3428,
+      "sha256": "07cf5b87ebbadc933b453d7cde0c189c1c5f9a987d47b5b421984155afe30449",
+      "archive": "evidence/sst-restyle-20261010-150201/final-verification.json"
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/grid-final-diff.json",
+      "bytes": 549,
+      "sha256": "0975b8bc6d659e884ffb5bc6b9843878f8ed4e255f466f09db5406e5c219d549",
+      "archive": "evidence/sst-restyle-20261010-150201/grid-final-diff.json"
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/pass-1/contact-1.png",
+      "bytes": 380910,
+      "sha256": "8818b7ae5a54dce35dd43346ab8840f8d7a5557dd725977e455362a05e10c873",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/pass-1/contact-2.png",
+      "bytes": 474069,
+      "sha256": "5a86c56f4ab638b7b92c5be0b0bd775c99bac23312bebea7dd8ffce018b1777d",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/pass-1/contact-3.png",
+      "bytes": 441945,
+      "sha256": "918e14f9ae94c2ed17b324ca984d3635bc6cec1d1e24d35b83ec3734ec43d122",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/pass-1/contact-4.png",
+      "bytes": 362748,
+      "sha256": "19e258406de5c9e89c17cc7a2f9360be640c8d94ce230e0cefe7d7821edf019a",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/pass-1/contact-5.png",
+      "bytes": 327586,
+      "sha256": "7906c5b5a3f9d133cb0c9addc136db98331a9d12bdda5be60ddbd63e23df57ae",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/pass-1/page-text.json",
+      "bytes": 31084,
+      "sha256": "f08abfe43bc1bfe78b1e07b2ac42d0c1e7aa09440ffcf4f7d8bfdedcfd92a359",
+      "archive": "evidence/sst-restyle-20261010-150201/pass-1/page-text.json"
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/pass-1/pages/page-01.png",
+      "bytes": 51397,
+      "sha256": "3f26b99fcecaafe7985d084aac1a7a14b6cd05074d9d282fd1971edd55281f9c",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/pass-1/pages/page-02.png",
+      "bytes": 217583,
+      "sha256": "02e52044af724bf5a003c10c0624fe1de7e21a2abea0fc6e371b959bb89bdbf2",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/pass-1/pages/page-03.png",
+      "bytes": 132426,
+      "sha256": "d844f4fd49e689ff7d086b63be0b10bc89c58dd5105c63e71a77f3b77c906511",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/pass-1/pages/page-04.png",
+      "bytes": 160814,
+      "sha256": "5114df506cb456bf0d95a5334c163269c4e7a6204434af55644a0f5da88d1568",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/pass-1/pages/page-05.png",
+      "bytes": 111331,
+      "sha256": "36b43cd9a463205ad84e573dd05be7a4a65e11e86bc5e487ea96b49e752f5b3b",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/pass-1/pages/page-06.png",
+      "bytes": 51597,
+      "sha256": "d85b053dade0a287872ef6a3f1056aa6ea559c58b318150692af6dfd90b93008",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/pass-1/pages/page-07.png",
+      "bytes": 202028,
+      "sha256": "266dbb15b3357e34522f2b202a6e060ad36f6c09c8e999a876ebda72d6450b93",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/pass-1/pages/page-08.png",
+      "bytes": 310632,
+      "sha256": "cb6614fa488c43feb4ab2eb19736377e5521fdcf30edb6a0cb82284cbe48fc56",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/pass-1/pages/page-09.png",
+      "bytes": 346592,
+      "sha256": "9b6323b2fa27ed2fbb6ad8978a505bdba74dd67a93e197faf20ade6f5f35a12f",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/pass-1/pages/page-10.png",
+      "bytes": 224735,
+      "sha256": "a1a011f2a0002720d4d6374713c0e333f2d7d858dbd3e2607c4574ac3b4e3580",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/pass-1/pages/page-11.png",
+      "bytes": 144602,
+      "sha256": "4f06e9832ab1bda4e54b96e08c5ad326d28fd9e817cbdd74ac7179ebcff4f689",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/pass-1/pages/page-12.png",
+      "bytes": 355520,
+      "sha256": "c3ed42c43a7b32af2bf0d8dc14dd22258cabf0f96f1de7b990148c4d17ce4c41",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/pass-1/pages/page-13.png",
+      "bytes": 282449,
+      "sha256": "5ed7689a87c93451aeee325c0cf7de127e0ca117ed820478abb13ab009176334",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/pass-1/pages/page-14.png",
+      "bytes": 288173,
+      "sha256": "ed05bdad6e19c20761bb12a664698cf9f6c7e366dd9d6dec26454200285b0d7f",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/pass-1/pages/page-15.png",
+      "bytes": 368777,
+      "sha256": "b93b8e63b6a8089a6cfbb6c369a9c26b1f9ec2a9a7ea231b7f510b2a0975d0aa",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/pass-1/pages/page-16.png",
+      "bytes": 271638,
+      "sha256": "7b1b56698b84f4728b41d006c3351dbf78002a6c08ea648ec0e5a8f78ec2975d",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/pass-1/pages/page-17.png",
+      "bytes": 275454,
+      "sha256": "1cf1d2384c388588bbb82bdb701c7cb065cea165087349e90ba792384b6d2c23",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/pass-1/pages/page-18.png",
+      "bytes": 233921,
+      "sha256": "73a72eb46ff6b89b04ce53651f9408d63ee08a0b870ff851d0136c2034a72ad0",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/pass-1/pages/page-19.png",
+      "bytes": 178055,
+      "sha256": "b9ada70042d30a0a32d2e2a0535cb2a037b8ce0c8fb66a4667be785f5783cf0f",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/pass-1/pages/page-20.png",
+      "bytes": 220818,
+      "sha256": "3b2a90eeecde2dc0693b81dfba53da2b49e858d45eb999558515113617f609b4",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/pass-1/pages/page-21.png",
+      "bytes": 178069,
+      "sha256": "e2a51720d7c65b370e8f6fbf6e9111286a86d03482c0cc51cc4760a6e9993dba",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/pass-1/pages/page-22.png",
+      "bytes": 216926,
+      "sha256": "3fd71ce1d16ef0fe43ee42c01f6f2c7c986a6ca7d53171f1cb511d6d97329b13",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/pass-1/pages/page-23.png",
+      "bytes": 255511,
+      "sha256": "34980656a3f115a2656133d05565a0f6377cdc37ffaac71941a61157acf18543",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/pass-1/pages/page-24.png",
+      "bytes": 262496,
+      "sha256": "17002f83287ce2ed4bf5144f4bd6d113e30ae62ca4d12a15d527f0174ae27ba4",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/pass-1/pages/page-25.png",
+      "bytes": 279083,
+      "sha256": "b8efe6639bbb10be68ac6842861627de1b6ce185451bc70f967fdb5631b2d4f5",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/pass-1/pages/page-26.png",
+      "bytes": 196844,
+      "sha256": "619e38a713fc67d1df11687d4d24e994483854b7cc1c086f3093bd758987db76",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/pass-1/pages/page-27.png",
+      "bytes": 82818,
+      "sha256": "96e650e798d111c4e9c7c4f959e24554fcb9e355e1e898c08536238c6ba9eb9d",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/pass-1/pages/page-28.png",
+      "bytes": 220571,
+      "sha256": "a74577e233a4334e1fd5f70514a19ab06ac8e1102a838a545fae0776f574b23e",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/pass-1/pages/page-29.png",
+      "bytes": 325872,
+      "sha256": "57fde72cb0a877b14674430ea5f39827da2eb1119e2457a722ac5e8ffa91345d",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/pass-1/pages/page-30.png",
+      "bytes": 297660,
+      "sha256": "47b8fd82a972138f2ce2e2aa686a8d70e71ede0561eb6328ade6e18f7dbc3e77",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/pass-1/pages/page-31.png",
+      "bytes": 109423,
+      "sha256": "a29e221ddaf337b84f89565719a8a7931bffebeeb1443497cd2e1bd3353d6390",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/pass-1/pages/page-32.png",
+      "bytes": 298750,
+      "sha256": "1ede4685db493c5a9141de3400f894ce0329b6199ed4f4184436efa9a4dbc68c",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/pass-1/pages/page-33.png",
+      "bytes": 285922,
+      "sha256": "66588dab39c4e8a57f58d1d3899a4a0e65085dc96242425d54789608863c416d",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/pass-1/pages/page-34.png",
+      "bytes": 349493,
+      "sha256": "662cba4b912ef8f0c851ab7de562ba795ad803545f238ccd4f0a57726527fa2f",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/pass-1/pages/page-35.png",
+      "bytes": 179944,
+      "sha256": "d804005a41b76e86a0a6871314f5ee56c14025bcd08c240baf5bdb67d45d12b3",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/pass-1/pages/page-36.png",
+      "bytes": 231129,
+      "sha256": "6b93c916837826db0a5729559bb68108d174d4ae5394dc24120d60c4fa2994ee",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/pass-1/pages/page-37.png",
+      "bytes": 195974,
+      "sha256": "4b4be2f457657a95f30b2435b1766b9364b0b2d8ed4ecf05de7fe75e497065e3",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/pass-1/pages/page-38.png",
+      "bytes": 155466,
+      "sha256": "e0dbaebc5d33899cfa903d1d8b73153ebc1fd16a6c020c497682568275f65a3b",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/pass-1/pages/page-39.png",
+      "bytes": 324912,
+      "sha256": "7f1ee842a98485d22d4e33088faa1480b6e43ccab3f86f44f652ccdf3cb52643",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/pass-1/pages/page-40.png",
+      "bytes": 120663,
+      "sha256": "c2680a642a5fd617c87a6d139f6168c0f90ea4be55e3cdb7284a86e072b368f7",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/pass-1/pages/page-41.png",
+      "bytes": 91576,
+      "sha256": "7adeb091e699f245772fff2b5f5d5ff076d5c4f107a4a4f04a77a3f437b87a11",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/pass-1/pages/page-42.png",
+      "bytes": 149519,
+      "sha256": "6c4efea7bc780997097b0bd058c8eae105eca137a62a5eda7524a408f5c7f3b6",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/pass-1/pages/page-43.png",
+      "bytes": 190131,
+      "sha256": "fa52cba1cca632c715247adb06805d4f9d3736bf96f0be2c4d0059237bc0a1be",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/pass-1/pages/page-44.png",
+      "bytes": 235004,
+      "sha256": "fff7fcba950bc8bdb68a87abfc6e334bc74f3db1f7411a5049501f539a2ca5a5",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/pass-1/pages/page-45.png",
+      "bytes": 204652,
+      "sha256": "4572a31090935b15ff2ba3acad78260feefe54a6af418263a919c23d21d792d8",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/pass-1/pages/page-46.png",
+      "bytes": 129064,
+      "sha256": "76006b4e59e1fb2772d15ee68013114fa9047b886bcfa0f000269ba4b6574bff",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/pass-1/pages/page-47.png",
+      "bytes": 255275,
+      "sha256": "000ed0bb0fbec090898d08ca318da7446924b585abcbcf2261833fd8366931a4",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/pass-1/pages/page-48.png",
+      "bytes": 203246,
+      "sha256": "d9867492e39e58554278d7f6226b2ee84e65e007691d18a6238833fd597519e5",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/pass-1/pages/page-49.png",
+      "bytes": 66335,
+      "sha256": "700504f691f420f33a4c9143e4738f226aa36f0cbd12613bf172e9b6a1256a49",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/pass-1/pages/page-50.png",
+      "bytes": 154578,
+      "sha256": "e5aba2d2468d4bd29d88839f0986306cdc9008edf7af66d9f7b34518b1f88d6c",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/pass-1/pages/page-51.png",
+      "bytes": 203886,
+      "sha256": "5c43fcda76c4da93fa9dd4eb0f91ad703820d124372f7ee718f832de538ae5b1",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/pass-1/pages/page-52.png",
+      "bytes": 206204,
+      "sha256": "ae5ce3bd572700104e23d0fbc1fab77ad005f7331a33585a6bc789fcaf68df89",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/pass-1/pages/page-53.png",
+      "bytes": 72352,
+      "sha256": "b24d1c69d46f152775d46449f029b0dbc5df52ba2eb3dcafe6e80d86b3525866",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/pass-1/pages/page-54.png",
+      "bytes": 160054,
+      "sha256": "d88d8c06178f4765cd00a367d41f04d13f3e101c1df749638b91108c1a78df06",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/pass-1/pages/page-55.png",
+      "bytes": 206162,
+      "sha256": "7a58a9bfde38b21b9009d63c2d50fb749ac94f7a0f93ce1a863be7f9c16a312e",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/pass-1/pages/page-56.png",
+      "bytes": 175114,
+      "sha256": "7e201ca5788b8e6ccb7fc09a37197c870becd3f7e5bbfa5086f547b6f8258caf",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/pass-1/pages/page-57.png",
+      "bytes": 99729,
+      "sha256": "fa28c32e9c6a478c525eddb19ed0c57959166d26adb828ada091e381e4bbfc29",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/pass-1/pages/page-58.png",
+      "bytes": 246346,
+      "sha256": "575d84c5d41a7c1add61113f3f2543d7c3875be931fab6a3c4204bc873ef0546",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/pass-1/pages/page-59.png",
+      "bytes": 254572,
+      "sha256": "a99f3c68cc2f5283b1c90554aeba1ddd08ebbf872237133ecc5e32f28be284ec",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/pass-1/restyle-verification.json",
+      "bytes": 1280,
+      "sha256": "7d83279bf65f866cb69cea1ceeafe6f515edf50b468e4329ea5a9922a02324c9",
+      "archive": "evidence/sst-restyle-20261010-150201/pass-1/restyle-verification.json"
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/pass-1/wf10kV直挂SST系统设计方案_国网报告风格.docx",
+      "bytes": 1434340,
+      "sha256": "df3944771d11e78deaca4e27eec2a204759cfe8caa2fb5579d051aef266c37c7",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/pass-1/wf10kV直挂SST系统设计方案_国网报告风格.pdf",
+      "bytes": 1812432,
+      "sha256": "5714ca5fe7b42beb4e53c013893695a0d80422fcc84eb006c016945e31e7adf5",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/pass-2/content-mismatch.json",
+      "bytes": 5001,
+      "sha256": "bf1ea0023f49aa16834379b6ec52e8d76195457e2640916b3fdd3218eb491888",
+      "archive": "evidence/sst-restyle-20261010-150201/pass-2/content-mismatch.json"
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/pass-3/native-equation-edit-check.docx",
+      "bytes": 1431277,
+      "sha256": "9be6fb7a107ecda7f8d3f0695367ccabc06cf097e15388b35c920660dcdb1890",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/pass-3/restyle-verification.json",
+      "bytes": 2815,
+      "sha256": "86eede97cf6b2ff0845fa1829ab814700e7020e58d8e1996ff69bb9390d200da",
+      "archive": "evidence/sst-restyle-20261010-150201/pass-3/restyle-verification.json"
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/pass-3/wf10kV直挂SST系统设计方案_国网报告风格.docx",
+      "bytes": 1435143,
+      "sha256": "df2ccb076af15ef5a66349302ee63d9686c11825e71d96d6eb236b902180f582",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/pass-3/wf10kV直挂SST系统设计方案_国网报告风格.pdf",
+      "bytes": 1813820,
+      "sha256": "81937dbf8d3116b0069f61c0e321096b4375a0eb37b944046450cded90bbbce6",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/render-manifest-v2.json",
+      "bytes": 6518,
+      "sha256": "7db9acaa29655a7030370d8d6d7589ffb26c40a36fbf89856e1d323464181915",
+      "archive": "evidence/sst-restyle-20261010-150201/render-manifest-v2.json"
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/render-manifest.json",
+      "bytes": 6104,
+      "sha256": "c571d2627b1e7ca33cd5f8983ced75e75238f113d9e713d62547ad9255a2f260",
+      "archive": "evidence/sst-restyle-20261010-150201/render-manifest.json"
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/review-pages/pages-01-02.png",
+      "bytes": 277164,
+      "sha256": "26e7d45fdcaaf9f593522e8b1e2fd046fcbe2f853cc390b6e76e0f1a47d9aca2",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/review-pages/pages-03-04.png",
+      "bytes": 293392,
+      "sha256": "cbaa481025dead773843b10797f85fdeee9c40dca0c2cafdaca00f5e00c3e796",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/review-pages/pages-05-06.png",
+      "bytes": 309917,
+      "sha256": "877c5ca4948cb7ec638a2afaf0499ca6b25f551232b8f515f71604bf06061f93",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/review-pages/pages-07-08.png",
+      "bytes": 601091,
+      "sha256": "d74536ac6c669abddcace5c7ff60b60b183e9d9031251cbed315788a00583062",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/review-pages/pages-09-10.png",
+      "bytes": 509813,
+      "sha256": "b2fc534b7e7e6a74bfd711b463a24ec30e2d9e398b146e991880e8cf59583f6c",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/review-pages/pages-11-12.png",
+      "bytes": 598081,
+      "sha256": "e66ddac2e204af201dec4ea49ee9f9c1e07916ed532196f48be2ddce6b2a1925",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/review-pages/pages-13-14.png",
+      "bytes": 627358,
+      "sha256": "79963b206cf6c743fefb2d19ea5502981a9050ea5a07f7f5160f31e93f3aa1d9",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/review-pages/pages-15-16.png",
+      "bytes": 593801,
+      "sha256": "981f14b48db5e3fa76ed1923ecdb50e649d92a786425485c6b34b263d5b0a65e",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/review-pages/pages-17-18.png",
+      "bytes": 415686,
+      "sha256": "b914ff6ec82c93cfcf975563b0c7f9000f11f69db984a83aa859938a4974938b",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/review-pages/pages-19-20.png",
+      "bytes": 483336,
+      "sha256": "82b4622eb63d10f028845613664345ff65d2fee68276a033703fac8a22855523",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/review-pages/pages-21-22.png",
+      "bytes": 508811,
+      "sha256": "05c781422c58fcbd43595cce7b89c74830888a18446dc508ef8c9c6d652976a6",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/review-pages/pages-23-24.png",
+      "bytes": 493020,
+      "sha256": "4637fc712c852721ef12ac92fbae74563d205420aef458feef2c75d42e00bb3e",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/review-pages/pages-25-26.png",
+      "bytes": 441701,
+      "sha256": "1ebe78ce6818889142a26dc82400dd8bf0e23e600bdc4651aa7a566e38df856b",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/review-pages/pages-27-28.png",
+      "bytes": 659772,
+      "sha256": "4cd5315c7764e4fd22dc25419f04b71e9b0b0659eb5d51e677711c7e64aef5c3",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/review-pages/pages-29-30.png",
+      "bytes": 566847,
+      "sha256": "63f69b8819d6cf037ee04750028bdd1b3de693e936abb919bdc90989c51f2ede",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/review-pages/pages-31-32.png",
+      "bytes": 573787,
+      "sha256": "aa09708428b1f9898a98a6c4ecca92ad6da1aa876aa6d87417a0b17794c64d5c",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/review-pages/pages-33-34.png",
+      "bytes": 501561,
+      "sha256": "6bd2646495b4c06103e25c96b03015b90abf631478fcf9a2aaaef6ee0ce8ed0c",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/review-pages/pages-35-36.png",
+      "bytes": 442691,
+      "sha256": "e00f897cbee5f1f1f9cba5df6b1813a90ab3e2130b299100e4a6a6efa141128b",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/review-pages/pages-37.png",
+      "bytes": 237586,
+      "sha256": "1743de6e6d2c8416e960b348dcd18f634b43e39bf5cbef312f17bb5e8eca2155",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/review-pages/pages-38.png",
+      "bytes": 100052,
+      "sha256": "93bcb0aeabad6682641dec4f6de0b46621d3bf39edf55920fcacde07a15ef3f9",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/review-pages/pages-39-40.png",
+      "bytes": 474826,
+      "sha256": "3ada68543ad47c632eb0b8b80ea21590782c374fa7ad96d0f2ca94256fcf7818",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/review-pages/pages-41-42.png",
+      "bytes": 398346,
+      "sha256": "c48750c56ecae656fc6a5d438c895dbb97f5f665f73cdef6448159d3cf02f357",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/review-pages/pages-43-44.png",
+      "bytes": 275618,
+      "sha256": "d4d4c8819b8f2519f82c4c6e0c526d984b0255a72ec2933113e0c206cf8751b1",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/review-pages/pages-45-46.png",
+      "bytes": 361510,
+      "sha256": "465fb6829f445c3fff9f6bb436a015da514d7aaa1af57d03073382eebec1f5ef",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/review-pages/pages-47-48.png",
+      "bytes": 283218,
+      "sha256": "7b1bffe71f6baec57feee32090d47b42113059178e1fd23ecc88e7034f9b5700",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/review-pages/pages-49-50.png",
+      "bytes": 376347,
+      "sha256": "7e1f7e68db6f8012c1bf9c1d60cd6a3545d66c3463e041c5cdd0084b2e118ab1",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/review-pages/pages-51-52.png",
+      "bytes": 281333,
+      "sha256": "8575de182d41a4a74d097e0aa676bb813087fb94556733c1ac0155f0f9fa654b",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/review-pages/pages-53-54.png",
+      "bytes": 510217,
+      "sha256": "e71d72e420d642ef54caf847ae9533a8097ca6f827dff80b9a1856e199cdffed",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/review-pages-v2/pages-01-02.png",
+      "bytes": 277164,
+      "sha256": "26e7d45fdcaaf9f593522e8b1e2fd046fcbe2f853cc390b6e76e0f1a47d9aca2",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/review-pages-v2/pages-03-04.png",
+      "bytes": 293392,
+      "sha256": "cbaa481025dead773843b10797f85fdeee9c40dca0c2cafdaca00f5e00c3e796",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/review-pages-v2/pages-05-06.png",
+      "bytes": 315473,
+      "sha256": "d46ebe9e0d8bd414fe1bfc2a5fc06c328568af589cb44b791d2260ddbc1d447c",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/review-pages-v2/pages-07-08.png",
+      "bytes": 594143,
+      "sha256": "c16c23eab0b8606805ee160dbdd3181f2c5487d9c4054741cee7060f2a938a21",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/review-pages-v2/pages-09-10.png",
+      "bytes": 509813,
+      "sha256": "b2fc534b7e7e6a74bfd711b463a24ec30e2d9e398b146e991880e8cf59583f6c",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/review-pages-v2/pages-11-12.png",
+      "bytes": 598081,
+      "sha256": "e66ddac2e204af201dec4ea49ee9f9c1e07916ed532196f48be2ddce6b2a1925",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/review-pages-v2/pages-13-14.png",
+      "bytes": 627620,
+      "sha256": "40932c74ca7635fc206ae21e0ea249780750f5afb8fc703b21b783d386326240",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/review-pages-v2/pages-15-16.png",
+      "bytes": 593988,
+      "sha256": "b24d994e9a6ccf6367ee997760e01d9fe3675f3c8471a35ff07d36e7981e37a7",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/review-pages-v2/pages-17-18.png",
+      "bytes": 415141,
+      "sha256": "e038f2171f4ef19bae450ea11db60d2cc0348b343316e2c6355d24e5c3361feb",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/review-pages-v2/pages-19-20.png",
+      "bytes": 483336,
+      "sha256": "82b4622eb63d10f028845613664345ff65d2fee68276a033703fac8a22855523",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/review-pages-v2/pages-21-22.png",
+      "bytes": 508811,
+      "sha256": "05c781422c58fcbd43595cce7b89c74830888a18446dc508ef8c9c6d652976a6",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/review-pages-v2/pages-23-24.png",
+      "bytes": 493442,
+      "sha256": "9291a1270315c222975519ac3e9bfe9d5bfb44470d062a5465d4661ffd85c0b8",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/review-pages-v2/pages-25-26.png",
+      "bytes": 441701,
+      "sha256": "1ebe78ce6818889142a26dc82400dd8bf0e23e600bdc4651aa7a566e38df856b",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/review-pages-v2/pages-27-28.png",
+      "bytes": 659055,
+      "sha256": "23993eaf624886ea708122ec4d3f4b79c28793f3cb9787d62711d697f033e38c",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/review-pages-v2/pages-29-30.png",
+      "bytes": 566847,
+      "sha256": "63f69b8819d6cf037ee04750028bdd1b3de693e936abb919bdc90989c51f2ede",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/review-pages-v2/pages-31-32.png",
+      "bytes": 573788,
+      "sha256": "ba7709c43cdfbeaf494ff97a43007530a060e4f7b72340faecccae4ee72911cb",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/review-pages-v2/pages-33-34.png",
+      "bytes": 501525,
+      "sha256": "ab17678875692f5309423690b3f903789276f6981dc505319398be5f3c964b73",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/review-pages-v2/pages-35-36.png",
+      "bytes": 442577,
+      "sha256": "8365916cceb13e6ac54f543bcd73942f664e2e14675a9fba2bd6412de4b8984c",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/review-pages-v2/pages-37.png",
+      "bytes": 237586,
+      "sha256": "1743de6e6d2c8416e960b348dcd18f634b43e39bf5cbef312f17bb5e8eca2155",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/review-pages-v2/pages-38.png",
+      "bytes": 100052,
+      "sha256": "93bcb0aeabad6682641dec4f6de0b46621d3bf39edf55920fcacde07a15ef3f9",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/review-pages-v2/pages-39-40.png",
+      "bytes": 474819,
+      "sha256": "94132ebe254d01cedc1e7c4acae968d1d135e116669903d020aa91229149e9a8",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/review-pages-v2/pages-41-42.png",
+      "bytes": 398346,
+      "sha256": "c48750c56ecae656fc6a5d438c895dbb97f5f665f73cdef6448159d3cf02f357",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/review-pages-v2/pages-43-44.png",
+      "bytes": 275618,
+      "sha256": "d4d4c8819b8f2519f82c4c6e0c526d984b0255a72ec2933113e0c206cf8751b1",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/review-pages-v2/pages-45-46.png",
+      "bytes": 361510,
+      "sha256": "465fb6829f445c3fff9f6bb436a015da514d7aaa1af57d03073382eebec1f5ef",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/review-pages-v2/pages-47-48.png",
+      "bytes": 283218,
+      "sha256": "7b1bffe71f6baec57feee32090d47b42113059178e1fd23ecc88e7034f9b5700",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/review-pages-v2/pages-49-50.png",
+      "bytes": 376347,
+      "sha256": "7e1f7e68db6f8012c1bf9c1d60cd6a3545d66c3463e041c5cdd0084b2e118ab1",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/review-pages-v2/pages-51-52.png",
+      "bytes": 281333,
+      "sha256": "8575de182d41a4a74d097e0aa676bb813087fb94556733c1ac0155f0f9fa654b",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/review-pages-v2/pages-53-54.png",
+      "bytes": 510217,
+      "sha256": "e71d72e420d642ef54caf847ae9533a8097ca6f827dff80b9a1856e199cdffed",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/review-pages-v4/pages-05-06.png",
+      "bytes": 315466,
+      "sha256": "53fc0244b70fd64c53ff7baa139bba471f4394b06c8471697554fb478afe2946",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/review-pages-v4/pages-07-08.png",
+      "bytes": 593818,
+      "sha256": "540874c7e0312ace9ae8ce0df81b394e9758eb3e896ea0b11a34201a67d084cb",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/review-pages-v4/pages-09-10.png",
+      "bytes": 509303,
+      "sha256": "2c55a38810a2b6db1c4f028d0842d2e81c870e373b0de58770e80ff8d036f2b3",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/review-pages-v4/pages-11-12.png",
+      "bytes": 598319,
+      "sha256": "56ff9ab8e0cc5f9cc3f6ffd3ba10ffb3af4bc2076bbc6462c9b7d2187a9a6af2",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/review-pages-v4/pages-13-14.png",
+      "bytes": 627379,
+      "sha256": "fa596e17ff2ba1fb1e799ffbd9cb528e6bd1d99667710addd034b1bb2e55ccaf",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/review-pages-v4/pages-15-16.png",
+      "bytes": 593857,
+      "sha256": "3eb5c13640ad71a8a7d409ba3a6d11d37c7e78d3698cc05815be5b77c6a3dca6",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/review-pages-v4/pages-21-22.png",
+      "bytes": 508799,
+      "sha256": "9d9b36d42d6f0935881d0ba2d8d7f04c6a50dc0e74ce94768489a463fe470a70",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/review-pages-v4/pages-23-24.png",
+      "bytes": 492759,
+      "sha256": "def0936824780d3e7fa226e8bb4771df0bf98d818cefdeae582d8c3e2da4506f",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/review-pages-v4/pages-25-26.png",
+      "bytes": 441704,
+      "sha256": "57b7200f3dd979fe13e7520c9e4eb5e4e2b2b9b9d611ef75e633199546adb0a5",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/review-pages-v4/pages-27-28.png",
+      "bytes": 659685,
+      "sha256": "cde1f965b020a9e4d2dc44c8878287df570721bb491b9124926ce7612250b77a",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/review-pages-v4/pages-29-30.png",
+      "bytes": 566846,
+      "sha256": "7500c6a75d5802fd3848cd70b2b0cdab4c1e253a4d5513b093b63ab5d7239d3d",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/review-pages-v4/pages-31-32.png",
+      "bytes": 573630,
+      "sha256": "dc92569cd29ba617e718ebf7d2698714c17203450bb66d9e89a0d34e5c843740",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/review-pages-v4/pages-33-34.png",
+      "bytes": 501519,
+      "sha256": "c00b367f25432cb2a8ccdd2a9429458a7623429c8b3be9e90cf76a070a57f34f",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/review-pages-v4/pages-35-36.png",
+      "bytes": 442803,
+      "sha256": "36570c6faf050d027a806cdff6245abbbaba3859ad18032c8dbbe295474db8c7",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/review-pages-v4/pages-45-46.png",
+      "bytes": 361996,
+      "sha256": "7c82e07189529e1fd87193642cec875fdea5ce7faf89d17869ee1c29043007db",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/review-pages-v4/pages-47-48.png",
+      "bytes": 281488,
+      "sha256": "49bde2e1fb70688a5676cd5f0c2c7eb3eb8009e8ba368e7f81ca12f8f53576fb",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/review-pages-v4/pages-49-50.png",
+      "bytes": 376117,
+      "sha256": "4a882e6b3bd86ada355fd9756eceebf97b906cd9a8a298009058fb84ed9250d4",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/source-audit.json",
+      "bytes": 361,
+      "sha256": "cb15588a3132f53ffece76fb55f0b3ecdcc45b749e6cf078eff0e51926958e8e",
+      "archive": "evidence/sst-restyle-20261010-150201/source-audit.json"
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/source-preview/page-01.png",
+      "bytes": 36307,
+      "sha256": "b23a782e229bed46b057ed146aa133aadf6fd4b52b693644595f2af90cf785a9",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/source-preview/page-02.png",
+      "bytes": 178360,
+      "sha256": "c1c230b3e85c2983f80f33c585b9ae3a8efb7fe12f12fd520e3da4b85a950fd3",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/source-preview/page-03.png",
+      "bytes": 19082,
+      "sha256": "05cd9782597b7af79498af99e924513990974ade62e6f626f82c58185897d749",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/source-preview/page-04.png",
+      "bytes": 42373,
+      "sha256": "1cd6af07d93031cd2737fe026e22c4ee50d10ffd405a4c3b3fc27ac75ac73f57",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/source-word.pdf",
+      "bytes": 1860067,
+      "sha256": "b55ab4f63d37b34b2f0d04e1c7ca12c2ea6a8b132b482f327cf1106aab96f031",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/source.docx",
+      "bytes": 1419245,
+      "sha256": "ca5e82d84d98f4e58453d7f92d4c4340325110ea97e2ce4ea3ffec06dda71fca",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-restyle-20261010-150201/thin-line-check-06.png",
+      "bytes": 202608,
+      "sha256": "a8aa139d7e2508ba91e1f9457e2b858844977ab030444748381b7d3625d72fb7",
+      "archive": null,
+      "reason": "Reproducible page/figure image, intermediate document or large output: hash indexed; original remains in excluded out/."
+    },
+    {
+      "source": "out/sst-current.txt",
+      "bytes": 92,
+      "sha256": "18a5c3c7e56a6787759f6a86b15380840d3d2974b00b977b605b37b3274944eb",
+      "archive": "evidence/sst-current.txt"
+    }
+  ],
+  "archiveValidation": "all_preserved_file_hashes_verified; all_python_sources_parse; Office rerun not performed",
+  "rerunValidation": "not_run_during_archival",
+  "historicalPaths": "Older evidence may say runs/. These literal historical records are retained; actual files are now under out/.",
+  "lineEndings": "git show snapshots preserve committed bytes, usually LF. Original output source snapshots preserve original bytes, often CRLF. Historical raw hashes can differ by line endings."
+}

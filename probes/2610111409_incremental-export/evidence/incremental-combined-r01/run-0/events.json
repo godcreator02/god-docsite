@@ -1,0 +1,98 @@
+[
+  {
+    "event": "preflight",
+    "seconds": 0.161,
+    "mode": "patch"
+  },
+  {
+    "event": "local-write-saved",
+    "seconds": 10.314,
+    "changedObjects": 3
+  },
+  {
+    "event": "write-tex",
+    "seconds": 16.547,
+    "stage": "eq-edit",
+    "returnCode": 0,
+    "text": "$P=VI\\eta$"
+  },
+  {
+    "event": "read-tex",
+    "seconds": 16.552,
+    "stage": "eq-edit",
+    "returnCode": 0,
+    "text": "$P=VI\\eta$",
+    "matchesExpected": true
+  },
+  {
+    "event": "close-ole",
+    "seconds": 16.626,
+    "stage": "eq-edit",
+    "returnCode": 0
+  },
+  {
+    "event": "read-tex",
+    "seconds": 19.53,
+    "stage": "verify-eq-edit",
+    "returnCode": 0,
+    "text": "$P=VI\\eta$",
+    "matchesExpected": true
+  },
+  {
+    "event": "close-ole",
+    "seconds": 19.603,
+    "stage": "verify-eq-edit",
+    "returnCode": 0
+  },
+  {
+    "event": "read-tex",
+    "seconds": 20.727,
+    "stage": "verify-eq-stable",
+    "returnCode": 0,
+    "text": "$E=mc^2$",
+    "matchesExpected": true
+  },
+  {
+    "event": "close-ole",
+    "seconds": 20.784,
+    "stage": "verify-eq-stable",
+    "returnCode": 0
+  },
+  {
+    "event": "math-verified",
+    "seconds": 21.057,
+    "created": 1,
+    "read": 2
+  },
+  {
+    "event": "fields-refreshed",
+    "seconds": 28.459
+  },
+  {
+    "event": "document-checked",
+    "seconds": 30.245,
+    "result": {
+      "pages": 10,
+      "mathTypeObjects": 2,
+      "ommlCount": 0,
+      "tables": 1,
+      "figures": 1,
+      "footnotes": 0,
+      "toc": 1,
+      "contentControls": 5
+    },
+    "report": {
+      "status": "passed",
+      "pages": 10
+    }
+  },
+  {
+    "event": "pdf-exported",
+    "seconds": 33.451
+  },
+  {
+    "event": "failed",
+    "seconds": 33.473,
+    "traceback": "Traceback (most recent call last):\n  File \"D:\\unitfolders\\nb9zj-word-conversion-lab\\word-conversion-lab\\probes\\2026-10-11-incremental-export\\common.py\", line 309, in update\n    content_state(output/'report.docx',content,directory)\n  File \"D:\\unitfolders\\nb9zj-word-conversion-lab\\word-conversion-lab\\probes\\2026-10-11-incremental-export\\engine\\docreport\\verify.py\", line 142, in content_state\n    raise RuntimeError(f'Expected {expected} tables including nested tables, found {tables}.')\nRuntimeError: Expected 1 tables including nested tables, found 2.\n"
+  }
+]

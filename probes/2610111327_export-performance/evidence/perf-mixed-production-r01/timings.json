@@ -1,0 +1,13 @@
+{
+  "mode": "production",
+  "python": "D:\\unitfolders\\nb9zj-word-conversion-lab\\word-conversion-lab\\.venv\\Scripts\\python.exe",
+  "fixtureSha256": "c647af86208ccba3bc034443e72e8d484a000b0e8b99741c6d7d157e8c102f9c",
+  "templateSha256": "2d645df23ecd1ee6f40d7da29854435139ff9d77a490f29c5051b6960bf909c4",
+  "budgetSeconds": 30.0,
+  "word": {
+    "version": "16.0",
+    "build": "16.0.14334"
+  },
+  "rendererSha256": "5298134d3c2413f0ac062b62b8552c19a687f64af3315966713058c50f11e92f",
+  "error": "Traceback (most recent call last):\n  File \"D:\\unitfolders\\nb9zj-word-conversion-lab\\word-conversion-lab\\probes\\2026-10-11-export-performance\\probe.py\", line 57, in main\n    composer = cls(doc, content, HERE)\n               ^^^^^^^^^^^^^^^^^^^^^^^\n  File \"D:\\unitfolders\\nb9zj-word-conversion-lab\\word-conversion-lab\\src\\docreport\\compose.py\", line 211, in __init__\n    self.context = validate_content(content, directory)\n                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"D:\\unitfolders\\nb9zj-word-conversion-lab\\word-conversion-lab\\src\\docreport\\content.py\", line 83, in validate_content\n    raise ValueError(f\"content.json/{path}: {error.message}\")\nValueError: content.json/blocks/0: {'type': 'table', 'id': 'flat', 'numbered': True, 'caption': [{'type': 'text', 'text': 'flat'}], 'columns': [{'id': 'flat-c0'}, {'id': 'flat-c1'}], 'headerRows': 1, 'rows': [{'id': 'flat-r0', 'cells': [{'id': 'f00', 'blocks': [{'type': 'paragraph', 'id': 'f00p', 'content': [{'type': 'text', 'text': '参数'}]}]}, {'id': 'f01', 'blocks': [{'type': 'paragraph', 'id': 'f01p', 'content': [{'type': 'text', 'text': '数值'}]}]}]}, {'id': 'flat-r1', 'cells': [{'id': 'f10', 'blocks': [{'type': 'paragraph', 'id': 'f10p', 'content': [{'type': 'text', 'text': '😀 中文'}]}]}, {'id': 'f11', 'blocks': [{'type': 'paragraph', 'id': 'f11p', 'content': [{'type': 'text', 'text': 'x', 'marks': ['em']}, {'type': 'text', 'text': '2', 'marks': ['sub']}, {'type': 'text', 'text': ' tail & < > 😀'}]}]}]}, {'id': 'flat-r2', 'cells': [{'id': 'f20', 'blocks': [{'type': 'paragraph', 'id': 'f20p', 'content': [{'type': 'text', 'text': ''}]}]}, {'id': 'f21', 'blocks': [{'type': 'paragraph', 'id': 'f21p', 'content': [{'type': 'ref', 'id': 'self-ref', 'target': 'flat', 'display': 'label'}, {'type': 'text', 'text': ' '}, {'type': 'link', 'id': 'site-link', 'text': '来源', 'href': 'https://example.org'}]}]}]}]} is not valid under any of the given schemas\n"
+}

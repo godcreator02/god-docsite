@@ -1,0 +1,19 @@
+{
+  "baseline": [
+    48.444,
+    56.708,
+    41.101,
+    52.287
+  ],
+  "production": [
+    2.522,
+    3.301,
+    2.029,
+    2.383
+  ],
+  "baselineMedian": 50.3655,
+  "productionMedian": 2.4524999999999997,
+  "fasterFactor": 20.53639143730887,
+  "policy": "Fresh private Word process for every run. First pair plus three consecutive pairs. PDF excluded from this composition measurement; saved content and formatting verified each time.",
+  "passed": true
+}

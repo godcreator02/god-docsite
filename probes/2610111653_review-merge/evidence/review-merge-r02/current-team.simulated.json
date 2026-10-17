@@ -1,0 +1,934 @@
+{
+  "format": "docreport",
+  "schemaVersion": 1,
+  "id": "incremental-probe",
+  "metadata": {
+    "title": "增量写入边界实验",
+    "shortTitle": "增量写入实验",
+    "language": "zh-CN",
+    "authors": [
+      "项目实验"
+    ],
+    "revision": "R0",
+    "date": "2026-10-11"
+  },
+  "blocks": [
+    {
+      "type": "section",
+      "id": "chapter-one",
+      "title": "局部修改",
+      "numbering": "decimal",
+      "children": [
+        {
+          "type": "paragraph",
+          "id": "p-edit",
+          "content": [
+            {
+              "type": "text",
+              "text": "这一段是修改目标。原始版本保留全角标点与中文，后续只替换这一段。【团队修改样例：补充验收条件。】"
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "id": "p-stable",
+          "content": [
+            {
+              "type": "text",
+              "text": "这一段不修改，用于检查相邻内容、格式和定位是否保留。"
+            }
+          ]
+        },
+        {
+          "type": "table",
+          "id": "tbl-values",
+          "numbered": true,
+          "caption": [
+            {
+              "type": "text",
+              "text": "验证参数"
+            }
+          ],
+          "columns": [
+            {
+              "id": "col-a"
+            },
+            {
+              "id": "col-b"
+            }
+          ],
+          "headerRows": 1,
+          "rows": [
+            {
+              "id": "row-0",
+              "cells": [
+                {
+                  "id": "cell-0-0",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "cell-p-0-0",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "项目"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-0-1",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "cell-p-0-1",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "数值"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "row-1",
+              "cells": [
+                {
+                  "id": "cell-1-0",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "cell-p-1-0",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "额定功率"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-1-1",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "cell-p-1-1",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "100 kW"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "row-2",
+              "cells": [
+                {
+                  "id": "cell-2-0",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "cell-p-2-0",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "母线电压"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "cell-2-1",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "cell-p-2-1",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "800 V"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "equation",
+          "id": "eq-edit",
+          "latex": "P=VI",
+          "numbered": true
+        },
+        {
+          "type": "figure",
+          "id": "fig-stable",
+          "src": "assets/architecture.png",
+          "alt": "原图保持不变",
+          "caption": [
+            {
+              "type": "text",
+              "text": "保留的图片"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "chapter-two",
+      "title": "引用与保留对象",
+      "numbering": "decimal",
+      "children": [
+        {
+          "type": "paragraph",
+          "id": "p-refs",
+          "content": [
+            {
+              "type": "text",
+              "text": "第一章公式编号为"
+            },
+            {
+              "type": "ref",
+              "target": "eq-edit",
+              "display": "number",
+              "id": "reference-1"
+            },
+            {
+              "type": "text",
+              "text": "，表格编号为"
+            },
+            {
+              "type": "ref",
+              "target": "tbl-values",
+              "display": "number",
+              "id": "reference-2"
+            },
+            {
+              "type": "text",
+              "text": "。"
+            }
+          ]
+        },
+        {
+          "type": "equation",
+          "id": "eq-stable",
+          "latex": "E=mc^2",
+          "numbered": true
+        },
+        {
+          "type": "paragraph",
+          "id": "p-tail",
+          "content": [
+            {
+              "type": "text",
+              "text": "结束标记：未修改的第二章仍然完整。"
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "id": "body-2-0",
+          "content": [
+            {
+              "type": "text",
+              "text": "本实验以报告中的稳定标识定位内容。段落、表格与公式各自拥有独立标识，修改文字时保留标识，新增对象才分配新标识。页码属于排版结果，不能用来判断逻辑对象是否发生变化。"
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "id": "body-2-1",
+          "content": [
+            {
+              "type": "text",
+              "text": "未发生变化的内容保留在上一版文档副本中，包括图片、公式和相邻段落。保存新版本以后检查原始资源的字节、公式读回结果以及引用关系，以判断这次更新有没有改变本来不应改变的对象。"
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "id": "body-2-2",
+          "content": [
+            {
+              "type": "text",
+              "text": "正文内容依照数据源给定的顺序排列。对于增加、删除或移动章节的操作，需要考虑后续章节编号、题注序列与交叉引用。当前实验先记录这些操作的回退行为，不把局部段落替换成功推广到任意文档结构修改。"
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "id": "body-2-3",
+          "content": [
+            {
+              "type": "text",
+              "text": "模板提供默认字体、段落间距和页眉页脚。模板或布局规则变化时，过去生成的文档不能直接当作新规则的结果，必须重新执行全量生成。普通内容修改与版式变化分别记录，避免把不同工作量的耗时放在一起比较。"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "chapter-3",
+      "title": "保留章节 3",
+      "numbering": "decimal",
+      "children": [
+        {
+          "type": "paragraph",
+          "id": "p-fixed-3",
+          "content": [
+            {
+              "type": "text",
+              "text": "第 3 章用于观察前文变更是否影响后续分页、页眉和编号。本段在局部更新实验中保持不变。"
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "id": "p-ref-3",
+          "content": [
+            {
+              "type": "text",
+              "text": "跨章节引用："
+            },
+            {
+              "type": "ref",
+              "target": "eq-edit",
+              "display": "label",
+              "id": "reference-3"
+            },
+            {
+              "type": "text",
+              "text": "，以及"
+            },
+            {
+              "type": "ref",
+              "target": "tbl-values",
+              "display": "label",
+              "id": "reference-4"
+            },
+            {
+              "type": "text",
+              "text": "。"
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "id": "body-3-0",
+          "content": [
+            {
+              "type": "text",
+              "text": "本实验以报告中的稳定标识定位内容。段落、表格与公式各自拥有独立标识，修改文字时保留标识，新增对象才分配新标识。页码属于排版结果，不能用来判断逻辑对象是否发生变化。"
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "id": "body-3-1",
+          "content": [
+            {
+              "type": "text",
+              "text": "未发生变化的内容保留在上一版文档副本中，包括图片、公式和相邻段落。保存新版本以后检查原始资源的字节、公式读回结果以及引用关系，以判断这次更新有没有改变本来不应改变的对象。"
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "id": "body-3-2",
+          "content": [
+            {
+              "type": "text",
+              "text": "正文内容依照数据源给定的顺序排列。对于增加、删除或移动章节的操作，需要考虑后续章节编号、题注序列与交叉引用。当前实验先记录这些操作的回退行为，不把局部段落替换成功推广到任意文档结构修改。"
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "id": "body-3-3",
+          "content": [
+            {
+              "type": "text",
+              "text": "模板提供默认字体、段落间距和页眉页脚。模板或布局规则变化时，过去生成的文档不能直接当作新规则的结果，必须重新执行全量生成。普通内容修改与版式变化分别记录，避免把不同工作量的耗时放在一起比较。"
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "id": "body-3-4",
+          "content": [
+            {
+              "type": "text",
+              "text": "每次试验都写入新的输出目录，上一版文档与输入文件保持不变。生成过程记录每一阶段的耗时，并在保存重开后核对内容、公式编号、表格数据和图片，最后检查完整 PDF 的显示。"
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "id": "body-3-5",
+          "content": [
+            {
+              "type": "text",
+              "text": "性能数据只代表当前测试稿与本机环境。首次运行和后续连续运行分别保存，比较时说明是否包含启动 Word、更新目录和导出 PDF。页面检查与机器检查独立记录，不能用一次 API 成功代表文档显示正确。"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "chapter-4",
+      "title": "保留章节 4",
+      "numbering": "decimal",
+      "children": [
+        {
+          "type": "paragraph",
+          "id": "p-fixed-4",
+          "content": [
+            {
+              "type": "text",
+              "text": "第 4 章用于观察前文变更是否影响后续分页、页眉和编号。本段在局部更新实验中保持不变。"
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "id": "p-ref-4",
+          "content": [
+            {
+              "type": "text",
+              "text": "跨章节引用："
+            },
+            {
+              "type": "ref",
+              "target": "eq-edit",
+              "display": "label",
+              "id": "reference-5"
+            },
+            {
+              "type": "text",
+              "text": "，以及"
+            },
+            {
+              "type": "ref",
+              "target": "tbl-values",
+              "display": "label",
+              "id": "reference-6"
+            },
+            {
+              "type": "text",
+              "text": "。"
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "id": "body-4-0",
+          "content": [
+            {
+              "type": "text",
+              "text": "本实验以报告中的稳定标识定位内容。段落、表格与公式各自拥有独立标识，修改文字时保留标识，新增对象才分配新标识。页码属于排版结果，不能用来判断逻辑对象是否发生变化。"
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "id": "body-4-1",
+          "content": [
+            {
+              "type": "text",
+              "text": "未发生变化的内容保留在上一版文档副本中，包括图片、公式和相邻段落。保存新版本以后检查原始资源的字节、公式读回结果以及引用关系，以判断这次更新有没有改变本来不应改变的对象。"
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "id": "body-4-2",
+          "content": [
+            {
+              "type": "text",
+              "text": "正文内容依照数据源给定的顺序排列。对于增加、删除或移动章节的操作，需要考虑后续章节编号、题注序列与交叉引用。当前实验先记录这些操作的回退行为，不把局部段落替换成功推广到任意文档结构修改。"
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "id": "body-4-3",
+          "content": [
+            {
+              "type": "text",
+              "text": "模板提供默认字体、段落间距和页眉页脚。模板或布局规则变化时，过去生成的文档不能直接当作新规则的结果，必须重新执行全量生成。普通内容修改与版式变化分别记录，避免把不同工作量的耗时放在一起比较。"
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "id": "body-4-4",
+          "content": [
+            {
+              "type": "text",
+              "text": "每次试验都写入新的输出目录，上一版文档与输入文件保持不变。生成过程记录每一阶段的耗时，并在保存重开后核对内容、公式编号、表格数据和图片，最后检查完整 PDF 的显示。"
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "id": "body-4-5",
+          "content": [
+            {
+              "type": "text",
+              "text": "性能数据只代表当前测试稿与本机环境。首次运行和后续连续运行分别保存，比较时说明是否包含启动 Word、更新目录和导出 PDF。页面检查与机器检查独立记录，不能用一次 API 成功代表文档显示正确。"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "chapter-5",
+      "title": "保留章节 5",
+      "numbering": "decimal",
+      "children": [
+        {
+          "type": "paragraph",
+          "id": "p-fixed-5",
+          "content": [
+            {
+              "type": "text",
+              "text": "第 5 章用于观察前文变更是否影响后续分页、页眉和编号。本段在局部更新实验中保持不变。"
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "id": "p-ref-5",
+          "content": [
+            {
+              "type": "text",
+              "text": "跨章节引用："
+            },
+            {
+              "type": "ref",
+              "target": "eq-edit",
+              "display": "label",
+              "id": "reference-7"
+            },
+            {
+              "type": "text",
+              "text": "，以及"
+            },
+            {
+              "type": "ref",
+              "target": "tbl-values",
+              "display": "label",
+              "id": "reference-8"
+            },
+            {
+              "type": "text",
+              "text": "。"
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "id": "body-5-0",
+          "content": [
+            {
+              "type": "text",
+              "text": "本实验以报告中的稳定标识定位内容。段落、表格与公式各自拥有独立标识，修改文字时保留标识，新增对象才分配新标识。页码属于排版结果，不能用来判断逻辑对象是否发生变化。"
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "id": "body-5-1",
+          "content": [
+            {
+              "type": "text",
+              "text": "未发生变化的内容保留在上一版文档副本中，包括图片、公式和相邻段落。保存新版本以后检查原始资源的字节、公式读回结果以及引用关系，以判断这次更新有没有改变本来不应改变的对象。"
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "id": "body-5-2",
+          "content": [
+            {
+              "type": "text",
+              "text": "正文内容依照数据源给定的顺序排列。对于增加、删除或移动章节的操作，需要考虑后续章节编号、题注序列与交叉引用。当前实验先记录这些操作的回退行为，不把局部段落替换成功推广到任意文档结构修改。"
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "id": "body-5-3",
+          "content": [
+            {
+              "type": "text",
+              "text": "模板提供默认字体、段落间距和页眉页脚。模板或布局规则变化时，过去生成的文档不能直接当作新规则的结果，必须重新执行全量生成。普通内容修改与版式变化分别记录，避免把不同工作量的耗时放在一起比较。"
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "id": "body-5-4",
+          "content": [
+            {
+              "type": "text",
+              "text": "每次试验都写入新的输出目录，上一版文档与输入文件保持不变。生成过程记录每一阶段的耗时，并在保存重开后核对内容、公式编号、表格数据和图片，最后检查完整 PDF 的显示。"
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "id": "body-5-5",
+          "content": [
+            {
+              "type": "text",
+              "text": "性能数据只代表当前测试稿与本机环境。首次运行和后续连续运行分别保存，比较时说明是否包含启动 Word、更新目录和导出 PDF。页面检查与机器检查独立记录，不能用一次 API 成功代表文档显示正确。"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "chapter-6",
+      "title": "保留章节 6",
+      "numbering": "decimal",
+      "children": [
+        {
+          "type": "paragraph",
+          "id": "p-fixed-6",
+          "content": [
+            {
+              "type": "text",
+              "text": "第 6 章用于观察前文变更是否影响后续分页、页眉和编号。本段在局部更新实验中保持不变。"
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "id": "p-ref-6",
+          "content": [
+            {
+              "type": "text",
+              "text": "跨章节引用："
+            },
+            {
+              "type": "ref",
+              "target": "eq-edit",
+              "display": "label",
+              "id": "reference-9"
+            },
+            {
+              "type": "text",
+              "text": "，以及"
+            },
+            {
+              "type": "ref",
+              "target": "tbl-values",
+              "display": "label",
+              "id": "reference-10"
+            },
+            {
+              "type": "text",
+              "text": "。"
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "id": "body-6-0",
+          "content": [
+            {
+              "type": "text",
+              "text": "本实验以报告中的稳定标识定位内容。段落、表格与公式各自拥有独立标识，修改文字时保留标识，新增对象才分配新标识。页码属于排版结果，不能用来判断逻辑对象是否发生变化。"
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "id": "body-6-1",
+          "content": [
+            {
+              "type": "text",
+              "text": "未发生变化的内容保留在上一版文档副本中，包括图片、公式和相邻段落。保存新版本以后检查原始资源的字节、公式读回结果以及引用关系，以判断这次更新有没有改变本来不应改变的对象。"
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "id": "body-6-2",
+          "content": [
+            {
+              "type": "text",
+              "text": "正文内容依照数据源给定的顺序排列。对于增加、删除或移动章节的操作，需要考虑后续章节编号、题注序列与交叉引用。当前实验先记录这些操作的回退行为，不把局部段落替换成功推广到任意文档结构修改。"
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "id": "body-6-3",
+          "content": [
+            {
+              "type": "text",
+              "text": "模板提供默认字体、段落间距和页眉页脚。模板或布局规则变化时，过去生成的文档不能直接当作新规则的结果，必须重新执行全量生成。普通内容修改与版式变化分别记录，避免把不同工作量的耗时放在一起比较。"
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "id": "body-6-4",
+          "content": [
+            {
+              "type": "text",
+              "text": "每次试验都写入新的输出目录，上一版文档与输入文件保持不变。生成过程记录每一阶段的耗时，并在保存重开后核对内容、公式编号、表格数据和图片，最后检查完整 PDF 的显示。"
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "id": "body-6-5",
+          "content": [
+            {
+              "type": "text",
+              "text": "性能数据只代表当前测试稿与本机环境。首次运行和后续连续运行分别保存，比较时说明是否包含启动 Word、更新目录和导出 PDF。页面检查与机器检查独立记录，不能用一次 API 成功代表文档显示正确。"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "chapter-7",
+      "title": "保留章节 7",
+      "numbering": "decimal",
+      "children": [
+        {
+          "type": "paragraph",
+          "id": "p-fixed-7",
+          "content": [
+            {
+              "type": "text",
+              "text": "第 7 章用于观察前文变更是否影响后续分页、页眉和编号。本段在局部更新实验中保持不变。"
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "id": "p-ref-7",
+          "content": [
+            {
+              "type": "text",
+              "text": "跨章节引用："
+            },
+            {
+              "type": "ref",
+              "target": "eq-edit",
+              "display": "label",
+              "id": "reference-11"
+            },
+            {
+              "type": "text",
+              "text": "，以及"
+            },
+            {
+              "type": "ref",
+              "target": "tbl-values",
+              "display": "label",
+              "id": "reference-12"
+            },
+            {
+              "type": "text",
+              "text": "。"
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "id": "body-7-0",
+          "content": [
+            {
+              "type": "text",
+              "text": "本实验以报告中的稳定标识定位内容。段落、表格与公式各自拥有独立标识，修改文字时保留标识，新增对象才分配新标识。页码属于排版结果，不能用来判断逻辑对象是否发生变化。"
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "id": "body-7-1",
+          "content": [
+            {
+              "type": "text",
+              "text": "未发生变化的内容保留在上一版文档副本中，包括图片、公式和相邻段落。保存新版本以后检查原始资源的字节、公式读回结果以及引用关系，以判断这次更新有没有改变本来不应改变的对象。"
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "id": "body-7-2",
+          "content": [
+            {
+              "type": "text",
+              "text": "正文内容依照数据源给定的顺序排列。对于增加、删除或移动章节的操作，需要考虑后续章节编号、题注序列与交叉引用。当前实验先记录这些操作的回退行为，不把局部段落替换成功推广到任意文档结构修改。"
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "id": "body-7-3",
+          "content": [
+            {
+              "type": "text",
+              "text": "模板提供默认字体、段落间距和页眉页脚。模板或布局规则变化时，过去生成的文档不能直接当作新规则的结果，必须重新执行全量生成。普通内容修改与版式变化分别记录，避免把不同工作量的耗时放在一起比较。"
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "id": "body-7-4",
+          "content": [
+            {
+              "type": "text",
+              "text": "每次试验都写入新的输出目录，上一版文档与输入文件保持不变。生成过程记录每一阶段的耗时，并在保存重开后核对内容、公式编号、表格数据和图片，最后检查完整 PDF 的显示。"
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "id": "body-7-5",
+          "content": [
+            {
+              "type": "text",
+              "text": "性能数据只代表当前测试稿与本机环境。首次运行和后续连续运行分别保存，比较时说明是否包含启动 Word、更新目录和导出 PDF。页面检查与机器检查独立记录，不能用一次 API 成功代表文档显示正确。"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "chapter-8",
+      "title": "保留章节 8",
+      "numbering": "decimal",
+      "children": [
+        {
+          "type": "paragraph",
+          "id": "p-fixed-8",
+          "content": [
+            {
+              "type": "text",
+              "text": "第 8 章用于观察前文变更是否影响后续分页、页眉和编号。本段在局部更新实验中保持不变。"
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "id": "p-ref-8",
+          "content": [
+            {
+              "type": "text",
+              "text": "跨章节引用："
+            },
+            {
+              "type": "ref",
+              "target": "eq-edit",
+              "display": "label",
+              "id": "reference-13"
+            },
+            {
+              "type": "text",
+              "text": "，以及"
+            },
+            {
+              "type": "ref",
+              "target": "tbl-values",
+              "display": "label",
+              "id": "reference-14"
+            },
+            {
+              "type": "text",
+              "text": "。"
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "id": "body-8-0",
+          "content": [
+            {
+              "type": "text",
+              "text": "本实验以报告中的稳定标识定位内容。段落、表格与公式各自拥有独立标识，修改文字时保留标识，新增对象才分配新标识。页码属于排版结果，不能用来判断逻辑对象是否发生变化。"
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "id": "body-8-1",
+          "content": [
+            {
+              "type": "text",
+              "text": "未发生变化的内容保留在上一版文档副本中，包括图片、公式和相邻段落。保存新版本以后检查原始资源的字节、公式读回结果以及引用关系，以判断这次更新有没有改变本来不应改变的对象。"
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "id": "body-8-2",
+          "content": [
+            {
+              "type": "text",
+              "text": "正文内容依照数据源给定的顺序排列。对于增加、删除或移动章节的操作，需要考虑后续章节编号、题注序列与交叉引用。当前实验先记录这些操作的回退行为，不把局部段落替换成功推广到任意文档结构修改。"
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "id": "body-8-3",
+          "content": [
+            {
+              "type": "text",
+              "text": "模板提供默认字体、段落间距和页眉页脚。模板或布局规则变化时，过去生成的文档不能直接当作新规则的结果，必须重新执行全量生成。普通内容修改与版式变化分别记录，避免把不同工作量的耗时放在一起比较。"
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "id": "body-8-4",
+          "content": [
+            {
+              "type": "text",
+              "text": "每次试验都写入新的输出目录，上一版文档与输入文件保持不变。生成过程记录每一阶段的耗时，并在保存重开后核对内容、公式编号、表格数据和图片，最后检查完整 PDF 的显示。"
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "id": "body-8-5",
+          "content": [
+            {
+              "type": "text",
+              "text": "性能数据只代表当前测试稿与本机环境。首次运行和后续连续运行分别保存，比较时说明是否包含启动 Word、更新目录和导出 PDF。页面检查与机器检查独立记录，不能用一次 API 成功代表文档显示正确。"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "notes": [],
+  "references": []
+}

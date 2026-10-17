@@ -1,0 +1,30 @@
+[
+  {
+    "case": "repeat-is-idempotent",
+    "status": "passed"
+  },
+  {
+    "case": "same-paragraph-conflict-blocks-output",
+    "status": "passed"
+  },
+  {
+    "case": "pending-decisions-block-output",
+    "status": "passed"
+  },
+  {
+    "case": "reject-all-keeps-source",
+    "status": "passed"
+  },
+  {
+    "case": "missing-insertion-anchor-blocks-output",
+    "status": "passed"
+  },
+  {
+    "case": "team-cell-edit-survives-new-review-rows",
+    "status": "passed"
+  },
+  {
+    "case": "stale-decisions-rejected",
+    "status": "passed"
+  }
+]

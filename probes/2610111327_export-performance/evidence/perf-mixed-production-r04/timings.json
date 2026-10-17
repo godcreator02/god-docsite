@@ -1,0 +1,14 @@
+{
+  "mode": "production",
+  "python": "D:\\unitfolders\\nb9zj-word-conversion-lab\\word-conversion-lab\\.venv\\Scripts\\python.exe",
+  "fixtureSha256": "9bccf1466b2b1bd4267796b799c2e9fff85d17798b9f91e301285f292b28203f",
+  "templateSha256": "2d645df23ecd1ee6f40d7da29854435139ff9d77a490f29c5051b6960bf909c4",
+  "budgetSeconds": 30.0,
+  "word": {
+    "version": "16.0",
+    "build": "16.0.14334"
+  },
+  "rendererSha256": "5298134d3c2413f0ac062b62b8552c19a687f64af3315966713058c50f11e92f",
+  "composeSeconds": 10.64,
+  "error": "Traceback (most recent call last):\n  File \"D:\\unitfolders\\nb9zj-word-conversion-lab\\word-conversion-lab\\probes\\2026-10-11-export-performance\\probe.py\", line 72, in main\n    record['contentChecks'] = content_state(output / 'report.docx', content, HERE)\n                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"D:\\unitfolders\\nb9zj-word-conversion-lab\\word-conversion-lab\\src\\docreport\\verify.py\", line 104, in content_state\n    raise RuntimeError(f\"Source text missing after save: {node['text'][:100]}\")\nRuntimeError: Source text missing after save: 单格\n"
+}

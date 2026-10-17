@@ -1,0 +1,22 @@
+[
+  {
+    "mode": "cold",
+    "seconds": 46.731,
+    "check": {
+      "mathTypeObjects": 10,
+      "ommlCount": 0,
+      "sha256": "64cb6d6b3d39c6647423cc8e7b4c5b3bb8efca8f216565568847c2a6d0a15d47"
+    },
+    "cacheHits": 0
+  },
+  {
+    "mode": "warm",
+    "seconds": 41.767,
+    "check": {
+      "mathTypeObjects": 10,
+      "ommlCount": 0,
+      "sha256": "c910c1b04eec3e3c69475f1783aff1368aa7b07cffd063ec5cd56518062ae97f"
+    },
+    "cacheHits": 10
+  }
+]

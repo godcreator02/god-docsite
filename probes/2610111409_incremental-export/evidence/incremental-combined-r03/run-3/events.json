@@ -1,0 +1,93 @@
+[
+  {
+    "event": "preflight",
+    "seconds": 0.098,
+    "mode": "patch"
+  },
+  {
+    "event": "local-write-saved",
+    "seconds": 10.81,
+    "changedObjects": 3
+  },
+  {
+    "event": "write-tex",
+    "seconds": 16.19,
+    "stage": "eq-edit",
+    "returnCode": 0,
+    "text": "$P=VI\\eta$"
+  },
+  {
+    "event": "read-tex",
+    "seconds": 16.201,
+    "stage": "eq-edit",
+    "returnCode": 0,
+    "text": "$P=VI\\eta$",
+    "matchesExpected": true
+  },
+  {
+    "event": "close-ole",
+    "seconds": 16.304,
+    "stage": "eq-edit",
+    "returnCode": 0
+  },
+  {
+    "event": "read-tex",
+    "seconds": 20.812,
+    "stage": "verify-eq-edit",
+    "returnCode": 0,
+    "text": "$P=VI\\eta$",
+    "matchesExpected": true
+  },
+  {
+    "event": "close-ole",
+    "seconds": 20.958,
+    "stage": "verify-eq-edit",
+    "returnCode": 0
+  },
+  {
+    "event": "read-tex",
+    "seconds": 22.995,
+    "stage": "verify-eq-stable",
+    "returnCode": 0,
+    "text": "$E=mc^2$",
+    "matchesExpected": true
+  },
+  {
+    "event": "close-ole",
+    "seconds": 23.11,
+    "stage": "verify-eq-stable",
+    "returnCode": 0
+  },
+  {
+    "event": "math-verified",
+    "seconds": 23.538,
+    "created": 1,
+    "read": 2
+  },
+  {
+    "event": "fields-refreshed",
+    "seconds": 36.824
+  },
+  {
+    "event": "document-checked",
+    "seconds": 40.349,
+    "result": {
+      "pages": 10,
+      "mathTypeObjects": 2,
+      "ommlCount": 0,
+      "tables": 1,
+      "figures": 1,
+      "footnotes": 0,
+      "toc": 1,
+      "contentControls": 5
+    },
+    "report": {
+      "status": "passed",
+      "pages": 10
+    }
+  },
+  {
+    "event": "pdf-exported",
+    "seconds": 44.163
+  }
+]

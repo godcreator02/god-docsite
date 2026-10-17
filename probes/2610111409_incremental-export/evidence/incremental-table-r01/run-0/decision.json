@@ -1,0 +1,136 @@
+{
+  "mode": "patch",
+  "changes": [
+    {
+      "id": "tbl-values",
+      "kind": "table",
+      "node": {
+        "type": "table",
+        "id": "tbl-values",
+        "numbered": true,
+        "caption": [
+          {
+            "type": "text",
+            "text": "验证参数"
+          }
+        ],
+        "columns": [
+          {
+            "id": "col-a"
+          },
+          {
+            "id": "col-b"
+          }
+        ],
+        "headerRows": 1,
+        "rows": [
+          {
+            "id": "row-0",
+            "cells": [
+              {
+                "id": "cell-0-0",
+                "blocks": [
+                  {
+                    "type": "paragraph",
+                    "id": "cell-p-0-0",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "项目"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "cell-0-1",
+                "blocks": [
+                  {
+                    "type": "paragraph",
+                    "id": "cell-p-0-1",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "数值"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "row-1",
+            "cells": [
+              {
+                "id": "cell-1-0",
+                "blocks": [
+                  {
+                    "type": "paragraph",
+                    "id": "cell-p-1-0",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "额定功率"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "cell-1-1",
+                "blocks": [
+                  {
+                    "type": "paragraph",
+                    "id": "cell-p-1-1",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "125 kW"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "row-2",
+            "cells": [
+              {
+                "id": "cell-2-0",
+                "blocks": [
+                  {
+                    "type": "paragraph",
+                    "id": "cell-p-2-0",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "母线电压"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "cell-2-1",
+                "blocks": [
+                  {
+                    "type": "paragraph",
+                    "id": "cell-p-2-1",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "800 V"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}
