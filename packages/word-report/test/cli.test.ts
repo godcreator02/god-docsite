@@ -34,26 +34,6 @@ describe('命令行 report-docx（不启动实际 Word）', () => {
     expect(deps.reportExport).toHaveBeenCalledWith({ siteDir: process.cwd(), entry: 'reports/example/index.mdx', mode: 'complete', action: 'start' })
   })
 
-  it('convert 收两个报告 id 与 --site，转好了退出码 0，没转成非零并列出原因', async () => {
-    expect(parseCliArgs(['convert', 'old', 'new', '--site', 'site'], path.resolve('fixture'))).toEqual({ command: 'convert', siteDir: path.resolve('fixture/site'), sourceId: 'old', targetId: 'new' })
-    const converted = vi.fn(async () => ({ converted: true as const, targetDir: 'reports/new', files: ['index.mdx'] }))
-    const stdout = vi.fn()
-    expect(await main(['convert', 'old', 'new'], { convertReportToMdx: converted, stdout })).toBe(0)
-    expect(converted).toHaveBeenCalledWith(process.cwd(), 'old', 'new')
-    expect(stdout.mock.calls[0]![0]).toContain('转好了')
-    const refused = vi.fn(async () => ({ converted: false as const, reason: '对不上', problems: ['/blocks/0：差异'] }))
-    const refusedOut = vi.fn()
-    expect(await main(['convert', 'old', 'new'], { convertReportToMdx: refused, stdout: refusedOut })).toBe(1)
-    expect(refusedOut.mock.calls[0]![0]).toContain('/blocks/0：差异')
-  })
-
-  it.each([['convert'], ['convert', 'old'], ['convert', 'old', 'Bad'], ['convert', 'old', 'new', '--engine', 'e']])('convert 参数不对直接报错：%j', async (...args: string[]) => {
-    const convertReportToMdx = vi.fn()
-    const stderr = vi.fn()
-    expect(await main(args, { convertReportToMdx, stderr })).toBe(1)
-    expect(convertReportToMdx).not.toHaveBeenCalled()
-  })
-
   it('check 收 --site 与 --json', () => {
     expect(parseCliArgs(['check'])).toEqual({ command: 'check', siteDir: process.cwd(), json: false })
     expect(parseCliArgs(['check', '--site', 'site', '--json'], path.resolve('fixture'))).toEqual({ command: 'check', siteDir: path.resolve('fixture/site'), json: true })
@@ -63,7 +43,7 @@ describe('命令行 report-docx（不启动实际 Word）', () => {
     [], ['unknown', 'example'], ['export'], ['export', '../x'], ['export', 'Upper'], ['export', 'example', '--mode', 'standalone'],
     ['export', 'example', '--site'], ['export', 'example', '--engine', ''], ['export', 'example', '--site', '--engine', 'e'],
     ['export', 'example', '--other', 'value'], ['export', 'example', 'extra'], ['export', 'example', '--site', 'a', '--site', 'b'],
-    ['export', 'example', '--json'], ['check', '--engine', 'e'], ['check', '--json', '--json'],
+    ['export', 'example', '--json'], ['check', '--engine', 'e'], ['check', '--json', '--json'], ['convert', 'old', 'new'],
   ])('参数错误不调用导出与检查，返回非零：%j', async (...args: string[]) => {
     const deps = harness()
     expect(await main(args, deps)).toBe(1)

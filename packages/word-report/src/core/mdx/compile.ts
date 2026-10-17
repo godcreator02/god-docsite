@@ -47,10 +47,10 @@ function referencesOf(context: CompileContext, root: MdastNode): NonNullable<Rep
   for (const node of root.children as MdastNode[]) {
     if (isCommentOnlyExpression(node)) continue;
     const element = node.type === 'paragraph' && node.children.length === 1 ? node.children[0] : node;
-    if ((element.type !== 'mdxJsxFlowElement' && element.type !== 'mdxJsxTextElement') || element.name !== 'Reference') failAt(context, node, 'references.mdx 里只能写 <Reference id="…" url="…">著录文字</Reference>，一条一段');
+    if ((element.type !== 'mdxJsxFlowElement' && element.type !== 'mdxJsxTextElement') || element.name !== 'WordReference') failAt(context, node, 'references.mdx 里只能写 <WordReference id="…" url="…">著录文字</WordReference>，一条一段');
     const attributes = attributesOf(context, element, { id: 'required', url: 'optional' });
     const text = inlinesOf(context, phrasingChildrenOf(context, element));
-    if (text.length !== 1 || text[0]!.type !== 'text' || text[0]!.marks) failAt(context, element, '<Reference> 的著录文字只能是一行纯文字');
+    if (text.length !== 1 || text[0]!.type !== 'text' || text[0]!.marks) failAt(context, element, '<WordReference> 的著录文字只能是一行纯文字');
     const entry: NonNullable<ReportDocument['references']>[number] = { id: explicitIdOf(attributes['id']!, context.file, positionOf(element)), text: text[0]!.text };
     if (attributes['url'] !== undefined) entry.url = attributes['url'];
     entries.push(located(context, entry, element));

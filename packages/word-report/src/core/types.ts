@@ -1,11 +1,13 @@
 export type ReportInline =
   | { type: 'text'; text: string; marks?: ('strong' | 'em' | 'sub' | 'sup' | 'code')[] }
-  | { type: 'math'; id: string; latex: string }
+  | { type: 'math'; id: string; latex: string; plainText?: PlainMathRun[] }
   | { type: 'ref'; id: string; target: string; display: 'label' | 'number' | 'title'; externalLabel?: string }
   | { type: 'link'; id: string; text: string; href: string }
   | { type: 'note_ref'; id: string; target: string }
   | { type: 'cite'; id: string; targets: string[] }
   | { type: 'break' };
+/** 行内公式在 Word 里写成文字时的一段：网页仍按 latex 显示，Word 照这些文字与标记写，不插 MathType */
+export interface PlainMathRun { text: string; marks?: ('em' | 'sub' | 'sup')[] }
 export interface Paragraph { type: 'paragraph'; id: string; content: ReportInline[] }
 export interface Section { type: 'section'; id: string; title: string; numbering: 'decimal' | 'appendix' | 'none'; children: ReportBlock[] }
 export interface ReportList { type: 'list'; id: string; ordered: boolean; start?: number; items: { id: string; blocks: (Paragraph | ReportList)[] }[] }

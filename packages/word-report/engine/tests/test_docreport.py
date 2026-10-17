@@ -62,6 +62,17 @@ class ContentProtocolTests(unittest.TestCase):
                 validate_layout(layout, self.content)
         validate_layout({'p':{'style':'Normal'}}, self.content)
 
+    def test_inline_math_plain_text_accepts_only_em_sub_sup_runs(self):
+        def with_runs(runs):
+            data = copy.deepcopy(self.content)
+            data['blocks'][0]['content'].append(dict(type='math', id='m', latex='C_1', plainText=runs))
+            return data
+        validate_content(with_runs([{'text': 'C', 'marks': ['em']}, {'text': '1', 'marks': ['sub']}]), self.root)
+        for runs in ([], [{'text': 'C', 'marks': ['strong']}], [{'text': 'x', 'marks': ['sub', 'sup']}],
+                     [{'text': 'a\nb'}], [{'text': 'C', 'italic': True}]):
+            with self.subTest(runs=runs), self.assertRaises(ValueError):
+                validate_content(with_runs(runs), self.root)
+
     def test_abstract_is_first_class_and_plain_reports_remain_valid(self):
         data = copy.deepcopy(self.content)
         paragraph = data['blocks'].pop()

@@ -1,4 +1,4 @@
-import type { ReportInline } from '../types.ts';
+import type { PlainMathRun, ReportInline } from '../types.ts';
 import { failAt, isCommentOnlyExpression, located, type CompileContext, type MdastNode } from './context.ts';
 import { explicitIdOf } from './ids.ts';
 import { attributesOf } from './jsx.ts';
@@ -10,7 +10,7 @@ const MARK_ORDER: readonly Mark[] = ['strong', 'em', 'sub', 'sup', 'code'];
 const MARK_ELEMENTS: Record<string, Mark> = { strong: 'strong', em: 'em', sub: 'sub', sup: 'sup' };
 
 /** 只能单独成段的组件：写进一段文字中间时报错 */
-export const BLOCK_COMPONENTS = new Set(['Figure', 'Figures', 'Table', 'Abstract', 'Bibliography', 'Reference', 'Caption', 'Panel', 'table', 'tr', 'th', 'td']);
+export const BLOCK_COMPONENTS = new Set(['WordFigure', 'WordFigures', 'WordTable', 'WordAbstract', 'WordBibliography', 'WordReference', 'WordCaption', 'WordPanel', 'table', 'tr', 'th', 'td']);
 
 /** 一段行内 MDX → docreport 行内节点：相邻、标记相同的文字合并，软换行按两侧字符连上或换成空格 */
 export function inlinesOf(context: CompileContext, nodes: MdastNode[]): ReportInline[] {
@@ -52,7 +52,7 @@ function collectInlines(context: CompileContext, nodes: MdastNode[], marks: read
         if (!isCommentOnlyExpression(node)) failAt(context, node, '正文里不能写 {…} 表达式；只想写花括号就写成 \\{ \\}，注释写成 {/* … */}');
         break;
       case 'image':
-      case 'imageReference': failAt(context, node, 'Markdown 图片 ![…](…) 不收：图写成 <Figure src="assets/…">图题</Figure>');
+      case 'imageReference': failAt(context, node, 'Markdown 图片 ![…](…) 不收：图写成 <WordFigure src="assets/…">图题</WordFigure>');
       case 'linkReference': failAt(context, node, '不支持引用式链接 [文字][名字]：链接写成 [文字](https://…)');
       case 'delete': failAt(context, node, '不支持删除线 ~~…~~');
       case 'html': failAt(context, node, '不支持原始 HTML');
@@ -69,21 +69,27 @@ function collectElement(context: CompileContext, element: MdastNode, marks: read
     return;
   }
   switch (name) {
-    case 'Ref': {
+    case 'WordRef': {
       const attributes = attributesOf(context, element, { to: 'required', show: 'optional' });
       rejectChildren(context, element);
-      if (/\s/.test(attributes['to']!.trim())) failAt(context, element, '<Ref> 的 to 只能写一个 id');
+      if (/\s/.test(attributes['to']!.trim())) failAt(context, element, '<WordRef> 的 to 只能写一个 id');
       const [target] = idTargetsOf(context, element, attributes['to']!);
       const show = attributes['show'];
-      if (show !== undefined && show !== 'number' && show !== 'title') failAt(context, element, `<Ref> 的 show 只能是 number 或 title（不写就显示「图 3-2」这种全称），这里写的是「${show}」`);
+      if (show !== undefined && show !== 'number' && show !== 'title') failAt(context, element, `<WordRef> 的 show 只能是 number 或 title（不写就显示「图 3-2」这种全称），这里写的是「${show}」`);
       const display = (show ?? 'label') as 'label' | 'number' | 'title';
       out.push(located(context, context.ids.request({ type: 'ref' as const, id: '', target: target!, display }, 'ref'), element));
       return;
     }
-    case 'Cite': {
+    case 'WordCite': {
       const attributes = attributesOf(context, element, { to: 'required' });
       rejectChildren(context, element);
       out.push(located(context, context.ids.request({ type: 'cite' as const, id: '', targets: idTargetsOf(context, element, attributes['to']!) }, 'cite'), element));
+      return;
+    }
+    case 'WordPlainMath': {
+      const attributes = attributesOf(context, element, { tex: 'required' });
+      const plainText = plainMathRunsOf(context, element);
+      out.push(located(context, context.ids.request({ type: 'math' as const, id: '', latex: attributes['tex']!, plainText }, 'm'), element));
       return;
     }
     case 'br':
@@ -93,8 +99,25 @@ function collectElement(context: CompileContext, element: MdastNode, marks: read
       return;
     default:
       if (name !== null && BLOCK_COMPONENTS.has(name)) failAt(context, element, `<${name}> 要单独成段，前后空一行，不写在一段文字中间`);
-      failAt(context, element, `认不出组件 <${name ?? ''}>：行内只能用 Ref、Cite、sub、sup、strong、em、br`);
+      failAt(context, element, `认不出组件 <${name ?? ''}>：行内只能用 WordRef、WordCite、WordPlainMath、sub、sup、strong、em、br`);
   }
+}
+
+const PLAIN_MATH_MARKS: readonly Mark[] = ['em', 'sub', 'sup'];
+
+/** <WordPlainMath> 里写给 Word 的文字：只收文字、斜体、下标、上标 */
+function plainMathRunsOf(context: CompileContext, element: MdastNode): PlainMathRun[] {
+  const usage = '<WordPlainMath tex="…"> 里写 Word 用的文字，只能用文字、*斜体*、<sub>、<sup>';
+  const inlines = inlinesOf(context, element.children);
+  if (!inlines.length) failAt(context, element, `${usage}，这里是空的`);
+  return inlines.map((inline) => {
+    if (inline.type !== 'text') failAt(context, element, `${usage}，这里出现了 ${inline.type}`);
+    const marks = inline.marks ?? [];
+    const unsupported = marks.find((mark) => !PLAIN_MATH_MARKS.includes(mark));
+    if (unsupported !== undefined) failAt(context, element, `${usage}，这里出现了 ${unsupported}`);
+    if (marks.includes('sub') && marks.includes('sup')) failAt(context, element, '<WordPlainMath> 里同一段文字不能既是下标又是上标');
+    return marks.length ? { text: inline.text, marks: marks as NonNullable<PlainMathRun['marks']> } : { text: inline.text };
+  });
 }
 
 function linkTextOf(context: CompileContext, link: MdastNode): string {
@@ -138,7 +161,7 @@ export function plainTextOf(inlines: ReportInline[]): string {
   return inlines.map((inline) => {
     switch (inline.type) {
       case 'text': return inline.text;
-      case 'math': return `$${inline.latex}$`;
+      case 'math': return inline.plainText ? inline.plainText.map((run) => run.text).join('') : `$${inline.latex}$`;
       case 'link': return inline.text;
       case 'break': return ' ';
       default: return '';

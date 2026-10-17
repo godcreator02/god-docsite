@@ -146,6 +146,48 @@ export const reportSchema = {
         "latex": {
           "type": "string",
           "minLength": 1
+        },
+        "plainText": {
+          "type": "array",
+          "minItems": 1,
+          "description": "Word writes these runs as text instead of a MathType object; the web view still renders latex.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "text": {
+                "$ref": "#/$defs/line"
+              },
+              "marks": {
+                "type": "array",
+                "items": {
+                  "enum": [
+                    "em",
+                    "sub",
+                    "sup"
+                  ]
+                },
+                "uniqueItems": true,
+                "not": {
+                  "allOf": [
+                    {
+                      "contains": {
+                        "const": "sub"
+                      }
+                    },
+                    {
+                      "contains": {
+                        "const": "sup"
+                      }
+                    }
+                  ]
+                }
+              }
+            },
+            "required": [
+              "text"
+            ],
+            "additionalProperties": false
+          }
         }
       },
       "required": [
