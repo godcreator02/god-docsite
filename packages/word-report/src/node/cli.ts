@@ -3,19 +3,16 @@ import { realpathSync } from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { checkReports, type ReportCheckResult } from './check.ts'
-import { convertReportToMdx, type ConvertReportResult } from './convert.ts'
 import { reportExport, type ReportExportOptions, type ReportExportResult } from './export.ts'
 import { reportEntryIn, reportEntryOf } from './report-files.ts'
 
 const help = `用法：report-docx <export|status> <报告 id> [选项]
       report-docx check [选项]
-      report-docx convert <JSON 报告 id> <新报告 id> [--site <目录>]
 
 报告在站点目录的 reports/<报告 id>/：入口是 content.json（JSON 报告）或 index.mdx（MDX 报告）。
 export   导出这份报告的 Word 与 PDF，等这次导出做完，把结果按 JSON 打出来
 status   只看这份报告的导出状态，不启动 Word
 check    检查站点里全部报告（JSON 报告的每份与每一章、MDX 报告整份）的格式、引用与图片，有问题时退出码非零
-convert  把一份 JSON 报告转成一份新的 MDX 报告，转完编译回来和原报告逐项比对，对不上就删掉新目录、退出码非零；不动原报告
 
 选项：
   --site <目录>     站点目录（默认当前目录）
@@ -28,7 +25,6 @@ convert  把一份 JSON 报告转成一份新的 MDX 报告，转完编译回来
 export type CliCommand =
   | { command: 'export' | 'status'; reportId: string; options: Omit<ReportExportOptions, 'entry'> }
   | { command: 'check'; siteDir: string; json: boolean }
-  | { command: 'convert'; siteDir: string; sourceId: string; targetId: string }
 
 function flagValuesOf(flags: string[], allowed: readonly string[]): { values: Map<string, string>; switches: Set<string> } {
   const values = new Map<string, string>()
@@ -52,22 +48,14 @@ function flagValuesOf(flags: string[], allowed: readonly string[]): { values: Ma
 
 /** 解析命令行；要显示说明时回 undefined。参数不对直接报错 */
 export function parseCliArgs(args: string[], cwd = process.cwd()): CliCommand | undefined {
-  if (args.length === 0) throw new Error('缺少命令：export、status、check 或 convert；用 --help 查看用法')
+  if (args.length === 0) throw new Error('缺少命令：export、status 或 check；用 --help 查看用法')
   if (args.includes('--help') || args.includes('-h')) return undefined
   const [command, ...rest] = args
   if (command === 'check') {
     const { values, switches } = flagValuesOf(rest, ['--site', '--json'])
     return { command, siteDir: path.resolve(cwd, values.get('--site') ?? '.'), json: switches.has('--json') }
   }
-  if (command === 'convert') {
-    const [sourceId, targetId, ...flags] = rest
-    if (sourceId === undefined || targetId === undefined || sourceId.startsWith('-') || targetId.startsWith('-')) throw new Error('convert 要给两个报告 id：要转的 JSON 报告、新的 MDX 报告')
-    reportEntryOf(sourceId)
-    reportEntryOf(targetId)
-    const { values } = flagValuesOf(flags, ['--site'])
-    return { command, siteDir: path.resolve(cwd, values.get('--site') ?? '.'), sourceId, targetId }
-  }
-  if (command !== 'export' && command !== 'status') throw new Error(`认不出的命令 ${JSON.stringify(command)}：只有 export、status、check、convert；用 --help 查看用法`)
+  if (command !== 'export' && command !== 'status') throw new Error(`认不出的命令 ${JSON.stringify(command)}：只有 export、status、check；用 --help 查看用法`)
   const [reportId, ...flags] = rest
   if (reportId === undefined || reportId.startsWith('-')) throw new Error(`${command} 要给报告 id（站点 reports/ 下的目录名）`)
   reportEntryOf(reportId)
@@ -89,7 +77,6 @@ export interface CliDependencies {
   reportExport?: (options: ReportExportOptions) => Promise<ReportExportResult>
   checkReports?: (siteDir: string) => Promise<ReportCheckResult>
   reportEntryIn?: (siteDir: string, reportId: string) => Promise<string>
-  convertReportToMdx?: (siteDir: string, sourceId: string, targetId: string) => Promise<ConvertReportResult>
   sleep?: (milliseconds: number) => Promise<void>
   stdout?: (text: string) => void
   stderr?: (text: string) => void
@@ -101,13 +88,6 @@ function checkReportText(result: ReportCheckResult): string {
   for (const warning of result.warnings) lines.push(`提示 ${warning.file}${warning.pointer}：${warning.message}`)
   for (const problem of result.problems) lines.push(`问题 ${problem.entry}（${problem.mode === 'complete' ? '整份' : '单独'}）：${problem.message}`)
   if (result.problems.length === 0) lines.push('没有问题。')
-  return `${lines.join('\n')}\n`
-}
-
-function convertReportText(result: ConvertReportResult): string {
-  if (result.converted) return `转好了：${result.targetDir}\n${result.files.map((file) => `  ${file}`).join('\n')}\n`
-  const lines = [`没有转换：${result.reason}`]
-  for (const problem of result.problems) lines.push(`  ${problem}`)
   return `${lines.join('\n')}\n`
 }
 
@@ -139,11 +119,6 @@ export async function main(args: string[], dependencies: CliDependencies = {}): 
       const result = await (dependencies.checkReports ?? checkReports)(parsed.siteDir)
       write(parsed.json ? `${JSON.stringify(result)}\n` : checkReportText(result))
       return result.problems.length > 0 ? 1 : 0
-    }
-    if (parsed.command === 'convert') {
-      const result = await (dependencies.convertReportToMdx ?? convertReportToMdx)(parsed.siteDir, parsed.sourceId, parsed.targetId)
-      write(convertReportText(result))
-      return result.converted ? 0 : 1
     }
     const entry = await (dependencies.reportEntryIn ?? reportEntryIn)(parsed.options.siteDir, parsed.reportId)
     const result = await runExport({ ...parsed.options, entry }, { reportExport: dependencies.reportExport ?? reportExport, sleep })

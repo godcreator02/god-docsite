@@ -1,7 +1,7 @@
 import type { CellBlock, Equation, Figure, FigurePanel, Paragraph, ReportBlock, ReportInline, ReportList, Section, Table, TableCell } from '../types.ts';
 import { failAt, isCommentOnlyExpression, located, type CompileContext, type MdastNode } from './context.ts';
 import { explicitIdOf } from './ids.ts';
-import { BLOCK_COMPONENTS, inlinesOf, plainTextOf } from './inline.ts';
+import { BLOCK_COMPONENTS, inlinesOf, plainTextOf, unknownComponentMessage } from './inline.ts';
 import { attributesOf, elementChildrenOf, phrasingChildrenOf, positiveIntegerOf } from './jsx.ts';
 import { positionOf } from './parse.ts';
 
@@ -18,9 +18,9 @@ const ALLOWED_BLOCKS: Record<BlockPlace, ReadonlySet<string>> = {
 };
 
 const BLOCK_NAMES: Record<string, string> = {
-  paragraph: '段落', list: '列表', figure: '图', table: '表', equation: '公式', code: '代码块', bibliography: '<Bibliography />', abstract: '<Abstract>',
+  paragraph: '段落', list: '列表', figure: '图', table: '表', equation: '公式', code: '代码块', bibliography: '<WordBibliography />', abstract: '<WordAbstract>',
 };
-const PLACE_NAMES: Record<BlockPlace, string> = { top: '正文', listItem: '列表项', cell: '表格单元格', note: '脚注', abstract: '<Abstract>' };
+const PLACE_NAMES: Record<BlockPlace, string> = { top: '正文', listItem: '列表项', cell: '表格单元格', note: '脚注', abstract: '<WordAbstract>' };
 
 const explicitOrRequested = <T extends { id: string }>(context: CompileContext, node: T, rawId: string | undefined, source: MdastNode, kind: Parameters<CompileContext['ids']['request']>[1]): T => {
   if (rawId !== undefined) node.id = explicitIdOf(rawId, context.file, positionOf(source));
@@ -142,22 +142,22 @@ function codeOf(context: CompileContext, node: MdastNode): AnyBlock {
 
 function componentOf(context: CompileContext, element: MdastNode, place: BlockPlace): AnyBlock {
   switch (element.name) {
-    case 'Figure': return figureOf(context, element);
-    case 'Figures': return multiFigureOf(context, element);
-    case 'Table': return numberedTableOf(context, element);
-    case 'Abstract': return abstractOf(context, element, place);
-    case 'Bibliography':
+    case 'WordFigure': return figureOf(context, element);
+    case 'WordFigures': return multiFigureOf(context, element);
+    case 'WordTable': return numberedTableOf(context, element);
+    case 'WordAbstract': return abstractOf(context, element, place);
+    case 'WordBibliography':
       attributesOf(context, element, {});
-      if ((element.children as MdastNode[]).some((child) => !isCommentOnlyExpression(child))) failAt(context, element, '<Bibliography /> 不收子内容');
+      if ((element.children as MdastNode[]).some((child) => !isCommentOnlyExpression(child))) failAt(context, element, '<WordBibliography /> 不收子内容');
       return located(context, context.ids.request({ type: 'bibliography' as const, id: '' }, 'bib'), element);
-    case 'Reference': return failAt(context, element, '<Reference> 只能写在报告目录的 references.mdx 里');
-    case 'Caption': return failAt(context, element, '<Caption> 只能写在 <Table> 或 <Figures> 里');
-    case 'Panel': return failAt(context, element, '<Panel> 只能写在 <Figures> 里');
+    case 'WordReference': return failAt(context, element, '<WordReference> 只能写在报告目录的 references.mdx 里');
+    case 'WordCaption': return failAt(context, element, '<WordCaption> 只能写在 <WordTable> 或 <WordFigures> 里');
+    case 'WordPanel': return failAt(context, element, '<WordPanel> 只能写在 <WordFigures> 里');
     case 'table':
     case 'tr':
     case 'th':
-    case 'td': return failAt(context, element, `<${element.name}> 只能写在 <Table> 里：不编号的简单表格直接写 GFM 表格`);
-    default: return failAt(context, element, `认不出组件 <${element.name ?? ''}>：块级只能用 Figure、Figures、Table、Abstract、Bibliography`);
+    case 'td': return failAt(context, element, `<${element.name}> 只能写在 <WordTable> 里：不编号的简单表格直接写 GFM 表格`);
+    default: return failAt(context, element, unknownComponentMessage(element.name ?? '', '块级只能用 WordFigure、WordFigures、WordTable、WordAbstract、WordBibliography'));
   }
 }
 
@@ -169,19 +169,19 @@ function captionOf(context: CompileContext, element: MdastNode, what: string): R
 
 function figureOf(context: CompileContext, element: MdastNode): Figure {
   const attributes = attributesOf(context, element, { id: 'optional', src: 'required', alt: 'optional' });
-  const caption = captionOf(context, element, '<Figure> 的图题');
+  const caption = captionOf(context, element, '<WordFigure> 的图题');
   return explicitOrRequested<Figure>(context, { type: 'figure', id: '', src: attributes['src']!, caption, alt: attributes['alt'] ?? plainTextOf(caption) }, attributes['id'], element, 'fig');
 }
 
 function multiFigureOf(context: CompileContext, element: MdastNode): Figure {
   const attributes = attributesOf(context, element, { id: 'optional', rows: 'required', columns: 'required' });
   const children = elementChildrenOf(context, element);
-  const captions = children.filter((child) => child.name === 'Caption');
-  if (captions.length !== 1) failAt(context, element, '<Figures> 里要有且只有一个 <Caption> 写整个图的图题');
-  for (const child of children) if (child.name !== 'Caption' && child.name !== 'Panel') failAt(context, child, `<Figures> 里只能放 <Caption> 与 <Panel>，不能放 <${child.name}>`);
+  const captions = children.filter((child) => child.name === 'WordCaption');
+  if (captions.length !== 1) failAt(context, element, '<WordFigures> 里要有且只有一个 <WordCaption> 写整个图的图题');
+  for (const child of children) if (child.name !== 'WordCaption' && child.name !== 'WordPanel') failAt(context, child, `<WordFigures> 里只能放 <WordCaption> 与 <WordPanel>，不能放 <${child.name}>`);
   attributesOf(context, captions[0]!, {});
-  const caption = captionOf(context, captions[0]!, '<Figures> 的图题');
-  const panels = children.filter((child) => child.name === 'Panel').map((panel) => panelOf(context, panel));
+  const caption = captionOf(context, captions[0]!, '<WordFigures> 的图题');
+  const panels = children.filter((child) => child.name === 'WordPanel').map((panel) => panelOf(context, panel));
   const figure = { type: 'figure', id: '', caption, rows: positiveIntegerOf(context, element, 'rows', attributes['rows']!), columns: positiveIntegerOf(context, element, 'columns', attributes['columns']!), panels } as Figure;
   return explicitOrRequested(context, figure, attributes['id'], element, 'fig');
 }
@@ -190,7 +190,7 @@ function panelOf(context: CompileContext, element: MdastNode): FigurePanel {
   const attributes = attributesOf(context, element, { id: 'optional', row: 'required', column: 'required', label: 'required', src: 'required', alt: 'optional' });
   const caption = inlinesOf(context, phrasingChildrenOf(context, element));
   const alt = attributes['alt'] ?? plainTextOf(caption);
-  if (!alt) failAt(context, element, '<Panel> 没有小标题时要写 alt');
+  if (!alt) failAt(context, element, '<WordPanel> 没有小标题时要写 alt');
   const panel: FigurePanel = {
     id: '', row: positiveIntegerOf(context, element, 'row', attributes['row']!), column: positiveIntegerOf(context, element, 'column', attributes['column']!),
     label: attributes['label']!, src: attributes['src']!, alt,
@@ -204,12 +204,12 @@ function numberedTableOf(context: CompileContext, element: MdastNode): Table {
   const parts = (element.children as MdastNode[]).filter((child) => !isCommentOnlyExpression(child) && !isWhitespaceText(child))
     .flatMap((child) => (child.type === 'paragraph' ? (child.children as MdastNode[]).filter((inner) => !isWhitespaceText(inner)) : [child]));
   let caption: ReportInline[] | undefined;
-  if (parts[0]?.name === 'Caption') {
+  if (parts[0]?.name === 'WordCaption') {
     attributesOf(context, parts[0], {});
-    caption = captionOf(context, parts.shift()!, '<Caption> 的表题');
+    caption = captionOf(context, parts.shift()!, '<WordCaption> 的表题');
   }
   const body = parts[0];
-  if (parts.length !== 1 || !body || !(body.type === 'table' || body.name === 'table')) failAt(context, element, '<Table> 里先写可省的 <Caption>，再写一张表（GFM 表格或 <table>），别的不放');
+  if (parts.length !== 1 || !body || !(body.type === 'table' || body.name === 'table')) failAt(context, element, '<WordTable> 里先写可省的 <WordCaption>，再写一张表（GFM 表格或 <table>），别的不放');
   return body.type === 'table' ? tableFromGfm(context, body, true, caption, attributes['id'] ?? null, element) : tableFromJsx(context, body, caption, attributes['id'] ?? null, element);
 }
 
@@ -277,10 +277,10 @@ function tableFromJsx(context: CompileContext, element: MdastNode, caption: Repo
 }
 
 function abstractOf(context: CompileContext, element: MdastNode, place: BlockPlace): AnyBlock {
-  if (context.role !== 'index' || place !== 'top') failAt(context, element, '<Abstract> 只能写在 index.mdx 的正文最前面');
+  if (context.role !== 'index' || place !== 'top') failAt(context, element, '<WordAbstract> 只能写在 index.mdx 的正文最前面');
   const attributes = attributesOf(context, element, { keywords: 'required', title: 'optional' });
   const keywords = attributes['keywords']!.split('；').map((keyword) => keyword.trim());
-  if (keywords.some((keyword) => !keyword)) failAt(context, element, '<Abstract> 的 keywords 用全角分号「；」隔开，每个关键词都不能空');
+  if (keywords.some((keyword) => !keyword)) failAt(context, element, '<WordAbstract> 的 keywords 用全角分号「；」隔开，每个关键词都不能空');
   const paragraphs = blocksOf(context, (element.children as MdastNode[]).filter((child) => !isWhitespaceText(child)), 'abstract');
   const abstract: Record<string, unknown> & { type: 'abstract'; id: string } = { type: 'abstract', id: '', paragraphs, keywords };
   if (attributes['title'] !== undefined) abstract['title'] = attributes['title'];

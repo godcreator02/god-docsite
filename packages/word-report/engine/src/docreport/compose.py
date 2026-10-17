@@ -7,7 +7,7 @@ Word objects and deferred MathType/field placeholders.
 from pathlib import Path
 import re
 
-from docreport.plain_math import INLINE_MATH_STYLE, plain_runs
+from docreport.plain_math import INLINE_MATH_STYLE
 from docreport.word import utf16_length, find_text, MarkerFinder
 
 
@@ -286,14 +286,12 @@ class ContentComposer(Composer):
             if kind == 'text':
                 value = node['text']
             elif kind == 'math':
-                runs = plain_runs(node['latex'])
-                if runs is None:
+                if 'plainText' not in node:
                     value = self.math_token(node, True)
                 else:
-                    for run in runs:
-                        marks = ['math'] + (['em'] if run.italic else []) + ([run.script] if run.script else [])
-                        spans.append((utf16_length(text), utf16_length(run.text), marks + node.get('marks', [])))
-                        text += run.text
+                    for run in node['plainText']:
+                        spans.append((utf16_length(text), utf16_length(run['text']), ['math'] + run.get('marks', [])))
+                        text += run['text']
                     continue
             elif kind == 'ref':
                 value = self.ref_token(node)

@@ -2,4 +2,3 @@ export { checkReports, type ReportCheckDiagnostic, type ReportCheckResult } from
 export { reportEntry, reportExport, type ReportExportOptions, type ReportExportResult } from './export.ts'
 export { readReport, type ReadReportResult, type SnapshotEntry } from './read-report.ts'
 export { isMdxEntry, JSON_ENTRY_NAME, readMdxReportFiles, readReportFiles, REPORT_ID_PATTERN, reportEntryIn, reportEntryOf, reportIdsOf, reportsDirName } from './report-files.ts'
-export { convertReportToMdx, type ConvertReportResult } from './convert.ts'

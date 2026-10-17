@@ -137,6 +137,11 @@ def content_state(path, content, directory):
                 if compact(node['text']) not in available:
                     raise RuntimeError(f"Source text missing after save: {node['text'][:100]}")
                 checked += 1
+            elif node.get('type') == 'math' and 'plainText' in node:
+                written = ''.join(run['text'] for run in node['plainText'])
+                if compact(written) not in available:
+                    raise RuntimeError(f"Inline formula text missing after save: {written[:100]}")
+                checked += 1
             elif node.get('type') == 'abstract':
                 keywords = '关键词：' + '；'.join(node['keywords'])
                 if compact(node.get('title', '摘要')) not in available or compact(keywords) not in available:

@@ -19,13 +19,13 @@ import { ExportSteps } from './word-report/export-steps'
 
 一份文档是 `format: "docreport"`、`schemaVersion: 1` 的 JSON：`metadata`（标题、语言、作者、日期、版本、封面字段），`blocks`（节、段落、列表、图、公式、表格、代码、参考文献标记、摘要、`include`），以及文档级的 `notes`（脚注）与 `references`（参考文献）。凡是带 `id` 的东西 id 在整份报告里唯一；引用、脚注、文献引用都写目标的 id，不写编号；`include` 只能出现在文档的顶层 `blocks` 里。
 
-{/* ref file="../packages/word-report/src/core/types.ts" lines="1-37" hash="fdc94a4af4d6" blob="ac61de1cb12f" */}
+{/* ref file="../packages/word-report/src/core/types.ts" lines="1-39" hash="917789f6f8b3" blob="33654157691e" */}
 
 读 JSON 用包里自己写的解析器，为的是抓重复的键——`JSON.parse` 会悄悄留下后一个。
 
 ## MDX 报告：先编译成一份报告文档
 
-MDX 报告不另有一套组装、显示和导出：`core/mdx/` 的编译器把入口 `index.mdx`、文件头 `chapters` 列的各章、可选的 `references.mdx` 编译成**一份**不含 `include` 的报告文档，再交给下面同一个 `assembleDocument`。编译器只用 remark（`remark-parse`、`remark-frontmatter`、`remark-mdx`、`remark-gfm`、`remark-math`）把 MDX 解析成语法树，逐个节点对照到报告文档的块与行内节点，不执行 MDX；对照不上的节点（`import`、表达式、没列出的组件与属性、Markdown 图片、引用块等）直接报错。各写法对应哪种节点见用法页的「MDX 写法」。
+MDX 报告不另有一套组装、显示和导出：`core/mdx/` 的编译器把入口 `index.mdx`、文件头 `chapters` 列的各章、可选的 `references.mdx` 编译成**一份**不含 `include` 的报告文档，再交给下面同一个 `assembleDocument`。编译器只用 remark（`remark-parse`、`remark-frontmatter`、`remark-mdx`、`remark-gfm`、`remark-math`）把 MDX 解析成语法树，逐个节点对照到报告文档的块与行内节点，不执行 MDX；对照不上的节点（`import`、表达式、没列出的组件与属性、Markdown 图片、引用块等）直接报错。报告用的组件名都以 `Word` 开头（`WordFigure`、`WordTable`、`WordRef`、`WordPlainMath` 等），和站点里别的 MDX 组件分开。各写法对应哪种节点见用法页的「MDX 写法」。
 
 {/* ref file="../packages/word-report/src/core/mdx/compile.ts" lines="80-107" hash="27b97daef28e" blob="33f858e48d38" */}
 
@@ -36,8 +36,6 @@ MDX 报告不另有一套组装、显示和导出：`core/mdx/` 的编译器把�
 **出错位置**：编译器给每个生成的节点记下 MDX 的文件与「行:列」。编译时的错直接带上它；组装时报的错指着编译结果里的 JSON 指针，`assembleMdxReport` 接住后按最长前缀找到最近的有记录的节点，换成 MDX 的文件与行列再抛。组装结果的 `sources` 也换成 MDX 的位置。
 
 {/* ref file="../packages/word-report/src/core/mdx/compile.ts" lines="109-131" hash="76aa864eb688" blob="33f858e48d38" */}
-
-`report-docx convert` 方向相反：`mdxReportPlanOf` 把组装好的 JSON 报告写成 MDX 文件，只写出被引用的、`layout.json` 里出现的、文献与脚注的 id，写不出的内容记进清单；`convertReportToMdx` 写完立刻编译回来，按「只留写出的 id、图片只看文件名、相邻同样式的文字合并」的口径逐项比对，对不上就删掉新目录。
 
 ## 分章组装
 
@@ -109,13 +107,13 @@ MDX 报告不另有一套组装、显示和导出：`core/mdx/` 的编译器把�
 
 {/* ref file="../packages/word-report/engine/src/docreport/content.py" lines="77-83" hash="6c98768ded6d" blob="a4478c548365" */}
 {/* ref file="../packages/word-report/src/core/schema.ts" lines="27-37" hash="4b3eed8b1d03" blob="dbd05f87d4bc" */}
-{/* ref file="../packages/word-report/src/core/schema.ts" lines="177-179" hash="7363160e81bd" blob="dbd05f87d4bc" */}
+{/* ref file="../packages/word-report/src/core/schema.ts" lines="219-221" hash="7363160e81bd" blob="7af58fb59c71" */}
 
 结果放在引擎目录的 `out/` 下，不放进站点。
 
 引擎里一次导出启动三次 Word。第一次按模板写出排版稿：域、编号、要交给 MathType 的公式先写成 `@FIELD3@`、`@MATH3@` 这类占位符，写完再逐个换成域与书签；只有一段文字的单元格整格一次写入。第二次把公式占位符逐个换成 MathType 对象、写入 TeX 并读回比对，存盘后重新打开再逐个读回核对。第三次更新域与目录并存盘，再以只读方式重新打开，按存盘的样子做检查、导出 PDF（不再更新一次域，免得存盘里过期的域结果被盖住），最后核对正文文字、表格数、图片字节与页数；存盘的 docx 里任何一个域的结果是「错误!未找到引用源」这类 Word 报错文字，导出就失败。占位符按写入的先后排在正文里，找下一个时从上一个的位置往后找，找不到才搜整篇与脚注、页眉页脚。
 
-行内公式只用到字母、数字、希腊字母、一层上标或下标、`\mathrm` 与 `\text`、函数名和简单运算符的，不交给 MathType：`plain_math.py` 把它解析成几段文字，字母与小写希腊字母斜体、其余正体，上下标用 Word 的上标下标，应用字符样式「DR Inline Math」（Times New Roman）。Word 把 φ、≈ 这类字符插进中文段落时会给它们加上东亚字体提示、显示成宋体，而 COM 改不了这个提示，所以排版稿存盘、Word 关掉之后，引擎直接改 docx 里这个字符样式的那些段，去掉提示。带根号、分式、求和、偏导、帽子、自动大小括号，或者同一个字母同时带上下标的行内公式，以及全部行间公式，照旧是 MathType 对象。模板设置里关掉了 Word 存盘时压缩图片，docx 里的图片和源图逐字节相同，最后核对图片字节靠这一条。
+行内公式节点带 `plainText`（MDX 里的 `<WordPlainMath>`）时不交给 MathType：引擎照 `plainText` 的几段文字写，`em`、`sub`、`sup` 用 Word 的斜体、下标、上标，整段应用字符样式「DR Inline Math」（Times New Roman），最后核对时这些文字也要在存盘的 docx 里找得到。哪些公式写成文字由源文件定，引擎不解析 TeX、不自己判断。Word 把 φ、≈ 这类字符插进中文段落时会给它们加上东亚字体提示、显示成宋体，而 COM 改不了这个提示，所以排版稿存盘、Word 关掉之后，引擎（`plain_math.py`）直接改 docx 里这个字符样式的那些段，去掉提示。不带 `plainText` 的行内公式和全部行间公式是 MathType 对象。网页不读 `plainText`，两种都由 KaTeX 按 `latex` 显示。模板设置里关掉了 Word 存盘时压缩图片，docx 里的图片和源图逐字节相同，最后核对图片字节靠这一条。
 
 时间主要花在 Word 的 COM 调用与 MathType 对象上。协作站初步设计报告（155 页、74 张表、806 个行内公式与 52 个行间公式）一次导出约 6.5 分钟：排版稿约 4.6 分钟，98 个 MathType 公式约 40 秒，更新域与目录约 20 秒。为什么这样改、试过哪些没用，见轨迹卡[「Word 导出提速：行内公式写成文字」](/trajectory/2026-10-17-word-export-speed)。
 

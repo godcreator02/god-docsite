@@ -1,0 +1,256 @@
+tex	WordPlainMath 里的文字
+m	*m*
+m\le1	*m* ≤ 1
+m>1	*m* \> 1
+m\sin\omega t	*m*sin *ωt*
+-m\sin\omega t	−*m*sin *ωt*
+V_{C1}	*V*<sub>*C*</sub><sub>1</sub>
+v_{ab}	*v*<sub>*ab*</sub>
++V_{C1}	+*V*<sub>*C*</sub><sub>1</sub>
+-V_{C1}	−*V*<sub>*C*</sub><sub>1</sub>
+mV_{C1}	*mV*<sub>*C*</sub><sub>1</sub>
+f_c	*f*<sub>*c*</sub>
+2f_c	2*f*<sub>*c*</sub>
+1.086V_{C1}	1.086*V*<sub>*C*</sub><sub>1</sub>
+1.218V_{C1}	1.218*V*<sub>*C*</sub><sub>1</sub>
+4V_{C1}/\pi\approx1.27V_{C1}	4*V*<sub>*C*</sub><sub>1</sub>/*π* ≈ 1.27*V*<sub>*C*</sub><sub>1</sub>
+N	*N*
+NmV_{C1}	*NmV*<sub>*C*</sub><sub>1</sub>
+V_{ph}	*V*<sub>*ph*</sub>
+V_{ph}/N	*V*<sub>*ph*</sub>/*N*
+C_1	*C*<sub>1</sub>
+0<m\le1	0 \< *m* ≤ 1
+L	*L*
+n	*n*
+V_2	*V*<sub>2</sub>
+f_s	*f*<sub>*s*</sub>
+nv_s	*nv*<sub>*s*</sub>
+v_p	*v*<sub>*p*</sub>
+\varphi	*φ*
+i_L	*i*<sub>*L*</sub>
+(V_1+nV_2)/L	(*V*<sub>1</sub> + *nV*<sub>2</sub>)/*L*
+(V_1-nV_2)/L	(*V*<sub>1</sub> − *nV*<sub>2</sub>)/*L*
+V_1=nV_2	*V*<sub>1</sub> = *nV*<sub>2</sub>
+p_p=v_pi_L	*p*<sub>*p*</sub> = *v*<sub>*p*</sub>*i*<sub>*L*</sub>
+D=\varphi/\pi	*D* = *φ*/*π*
+D	*D*
+P_{max}=nV_1V_2/(8f_sL)	*P*<sub>*max*</sub> = *nV*<sub>1</sub>*V*<sub>2</sub>/(8*f*<sub>*s*</sub>*L*)
+V_1	*V*<sub>1</sub>
+P_{max}	*P*<sub>*max*</sub>
+t_d	*t*<sub>*d*</sub>
+C_{oss}	*C*<sub>*oss*</sub>
+V	*V*
+P=nV_1V_2D(1-D)/(2f_sL)	*P* = *nV*<sub>1</sub>*V*<sub>2</sub>*D*(1 − *D*)/(2*f*<sub>*s*</sub>*L*)
+i_L<0	*i*<sub>*L*</sub> \< 0
+i_L>0	*i*<sub>*L*</sub> \> 0
+|i_{sw}|\ge2C_{oss}V/t_d	\|*i*<sub>*sw*</sub>\| ≥ 2*C*<sub>*oss*</sub>*V*/*t*<sub>*d*</sub>
+P/V_1	*P*/*V*<sub>1</sub>
+U_m = 12\,\mathrm{kV}	*U*<sub>*m*</sub> = 12 kV
+P_{cell}	*P*<sub>*cell*</sub>
+V_{C1,N}	*V*<sub>*C*</sub><sub>1,</sub><sub>*N*</sub>
+m_r	*m*<sub>*r*</sub>
+\varphi_N	*φ*<sub>*N*</sub>
+V_1 = 1.6\,\mathrm{kV}	*V*<sub>1</sub> = 1.6 kV
+C_2	*C*<sub>2</sub>
+M	*M*
+2M+1	2*M* + 1
+2M	2*M*
+\Delta E	Δ*E*
+\Delta V	Δ*V*
+\Delta E = C V \Delta V	Δ*E* = *CV*Δ*V*
+P_{cell}/\omega	*P*<sub>*cell*</sub>/*ω*
+V_{LL,\max}	*V*<sub>*LL*</sub><sub>,max</sub>
+v_s	*v*<sub>*s*</sub>
+-\pi/2	−*π*/2
+\pi/2	*π*/2
+\varphi=\pm\pi/2	*φ* = ±*π*/2
+nV_2\approx V_1	*nV*<sub>2</sub> ≈ *V*<sub>1</sub>
+L_{r1}	*L*<sub>*r*</sub><sub>1</sub>
+L_{r2}	*L*<sub>*r*</sub><sub>2</sub>
+C_{r1}	*C*<sub>*r*</sub><sub>1</sub>
+C_{r2}	*C*<sub>*r*</sub><sub>2</sub>
+L_m	*L*<sub>*m*</sub>
+L_m/L_r=5	*L*<sub>*m*</sub>/*L*<sub>*r*</sub> = 5
+Q	*Q*
+N-1	*N* − 1
+m_N=0.85	*m*<sub>*N*</sub> = 0.85
+V_{LL}	*V*<sub>*LL*</sub>
+2N+1	2*N* + 1
+2N	2*N*
+P	*P*
+V_{\mathrm{LL}}	*V*<sub>LL</sub>
+\eta	*η*
+\mathrm{PF}	PF
+n=N_H/N_L	*n* = *N*<sub>*H*</sub>/*N*<sub>*L*</sub>
+V_H=nV_L	*V*<sub>*H*</sub> = *nV*<sub>*L*</sub>
+0\le D\le 0.5	0 ≤ *D* ≤ 0.5
+L_H	*L*<sub>*H*</sub>
+\varphi=45^\circ	*φ* = 45°
+P=69.4	*P* = 69.4
+L_H\approx 173	*L*<sub>*H*</sub> ≈ 173
+P=52.1	*P* = 52.1
+L_H\approx 130	*L*<sub>*H*</sub> ≈ 130
+\varphi=60^\circ	*φ* = 60°
+P_{pk}=138.9	*P*<sub>*pk*</sub> = 138.9
+L_H\approx 102	*L*<sub>*H*</sub> ≈ 102
+P_{pk}=104.2	*P*<sub>*pk*</sub> = 104.2
+L_H\approx 77	*L*<sub>*H*</sub> ≈ 77
+p_{cell}(t)=P_{cell}[1-\cos(2\omega t)]	*p*<sub>*cell*</sub>(*t*) = *P*<sub>*cell*</sub>\[1 − cos(2*ωt*)\]
+C=P_{cell}/(2\omega V_{dc}\Delta V_{pk})	*C* = *P*<sub>*cell*</sub>/(2*ωV*<sub>*dc*</sub>Δ*V*<sub>*pk*</sub>)
+\omega	*ω*
+V_{dc}	*V*<sub>*dc*</sub>
+\Delta V_{pk}	Δ*V*<sub>*pk*</sub>
+\Delta V_{pk}=5\%\,V_{dc}	Δ*V*<sub>*pk*</sub> = 5% *V*<sub>*dc*</sub>
+V_{GS}=15	*V*<sub>*GS*</sub> = 15
+I_{DC}=333	*I*<sub>*DC*</sub> = 333
+T_C=90	*T*<sub>*C*</sub> = 90
+T_j\le 175	*T*<sub>*j*</sub> ≤ 175
+V_{GS}=18	*V*<sub>*GS*</sub> = 18
+I_{DDC}=375	*I*<sub>*DDC*</sub> = 375
+T_C=25	*T*<sub>*C*</sub> = 25
+T_j=175	*T*<sub>*j*</sub> = 175
+I_{DC}=150	*I*<sub>*DC*</sub> = 150
+T_H=75	*T*<sub>*H*</sub> = 75
+T_{j,\max}=150	*T*<sub>*j*</sub><sub>,max</sub> = 150
+E_{on}	*E*<sub>*on*</sub>
+E_{off}	*E*<sub>*off*</sub>
+V_{GS}=-4/+15	*V*<sub>*GS*</sub> = −4/ + 15
+R_{G,on}/R_{G,off}=6.8/0	*R*<sub>*G*</sub><sub>,</sub><sub>*on*</sub>/*R*<sub>*G*</sub><sub>,</sub><sub>*off*</sub> = 6.8/0
+V_{GS}=-3/+18	*V*<sub>*GS*</sub> = −3/ + 18
+R_{G,on}/R_{G,off}=8.2/2.2	*R*<sub>*G*</sub><sub>,</sub><sub>*on*</sub>/*R*<sub>*G*</sub><sub>,</sub><sub>*off*</sub> = 8.2/2.2
+L_\sigma=25	*L*<sub>*σ*</sub> = 25
+R_{G,on}/R_{G,off}=0/0	*R*<sub>*G*</sub><sub>,</sub><sub>*on*</sub>/*R*<sub>*G*</sub><sub>,</sub><sub>*off*</sub> = 0/0
+L_\sigma=18	*L*<sub>*σ*</sub> = 18
+R_{DS(on)}	*R*<sub>*DS*</sub><sub>(</sub><sub>*on*</sub><sub>)</sub>
+I_{DC}=317	*I*<sub>*DC*</sub> = 317
+I_{DC}=200	*I*<sub>*DC*</sub> = 200
+T_H=50	*T*<sub>*H*</sub> = 50
+T_j\le 150	*T*<sub>*j*</sub> ≤ 150
+R_{G,on}/R_{G,off}=5/0	*R*<sub>*G*</sub><sub>,</sub><sub>*on*</sub>/*R*<sub>*G*</sub><sub>,</sub><sub>*off*</sub> = 5/0
+E_{on}/E_{off}	*E*<sub>*on*</sub>/*E*<sub>*off*</sub>
+R_{G,on}/R_{G,off}=1.5/0	*R*<sub>*G*</sub><sub>,</sub><sub>*on*</sub>/*R*<sub>*G*</sub><sub>,</sub><sub>*off*</sub> = 1.5/0
+Q_g	*Q*<sub>*g*</sub>
+V_{G,\mathrm{on}}	*V*<sub>*G*</sub><sub>,on</sub>
+V_{G,\mathrm{off}}	*V*<sub>*G*</sub><sub>,off</sub>
+Q_g\approx 1245	*Q*<sub>*g*</sub> ≈ 1245
+Q_g\approx 1.56	*Q*<sub>*g*</sub> ≈ 1.56
+T_c/(2M)	*T*<sub>*c*</sub>/(2*M*)
+T_c	*T*<sub>*c*</sub>
+2Mf_c	2*Mf*<sub>*c*</sub>
+2P_{cell}	2*P*<sub>*cell*</sub>
+P_N	*P*<sub>*N*</sub>
+N_{on}	*N*<sub>*on*</sub>
+1/N_{on}	1/*N*<sub>*on*</sub>
+P_{cell}/V_{C1,N}	*P*<sub>*cell*</sub>/*V*<sub>*C*</sub><sub>1,</sub><sub>*N*</sub>
+P_{cell}/V_2	*P*<sub>*cell*</sub>/*V*<sub>2</sub>
+P_{cell}/V_{C1}	*P*<sub>*cell*</sub>/*V*<sub>*C*</sub><sub>1</sub>
+m_r = 0.95	*m*<sub>*r*</sub> = 0.95
+V_{C1,N} = 1.6\,\mathrm{kV}	*V*<sub>*C*</sub><sub>1,</sub><sub>*N*</sub> = 1.6 kV
+I_{L,rms}	*I*<sub>*L*</sub><sub>,</sub><sub>*rms*</sub>
+V_2 = 800\,\mathrm{V}	*V*<sub>2</sub> = 800 V
+t_0	*t*<sub>0</sub>
+t_1	*t*<sub>1</sub>
+t_2	*t*<sub>2</sub>
+t_3	*t*<sub>3</sub>
+V_1 > nV_2	*V*<sub>1</sub> \> *nV*<sub>2</sub>
+d = 1	*d* = 1
+d	*d*
+V_1 = 1.7\,\mathrm{kV}	*V*<sub>1</sub> = 1.7 kV
+n = 2.125	*n* = 2.125
+\varphi > 0	*φ* \> 0
+\varphi < 0	*φ* \< 0
+|\varphi| = \pi/2	\|*φ*\| = *π*/2
+1/L	1/*L*
+\varphi_N = 20^\circ	*φ*<sub>*N*</sub> = 20°
+\varphi_N = 30^\circ	*φ*<sub>*N*</sub> = 30°
+\varphi_N = 45^\circ	*φ*<sub>*N*</sub> = 45°
+V_1 = 1.8\,\mathrm{kV}	*V*<sub>1</sub> = 1.8 kV
+L \approx 128\,\mu\mathrm{H}	*L* ≈ 128 *μ*H
+i_L(t_2) = -i_L(t_0)	*i*<sub>*L*</sub>(*t*<sub>2</sub>) = −*i*<sub>*L*</sub>(*t*<sub>0</sub>)
+D = \varphi/\pi	*D* = *φ*/*π*
+i_L(t_0) < 0	*i*<sub>*L*</sub>(*t*<sub>0</sub>) \< 0
+i_L(t_1) > 0	*i*<sub>*L*</sub>(*t*<sub>1</sub>) \> 0
+D > 0	*D* \> 0
+d > 1	*d* \> 1
+D = (1-1/d)/2	*D* = (1 − 1/*d*)/2
+d < 1	*d* \< 1
+D = (1-d)/2	*D* = (1 − *d*)/2
+Q_{oss}(V_1)	*Q*<sub>*oss*</sub>(*V*<sub>1</sub>)
+i_L(t_1)	*i*<sub>*L*</sub>(*t*<sub>1</sub>)
+Q_{oss}(V_2)	*Q*<sub>*oss*</sub>(*V*<sub>2</sub>)
+|i_L(t_0)| = 52.1\,\mathrm{A}	\|*i*<sub>*L*</sub>(*t*<sub>0</sub>)\| = 52.1 A
+|i_L(t_0)|	\|*i*<sub>*L*</sub>(*t*<sub>0</sub>)\|
+Q_{oss}	*Q*<sub>*oss*</sub>
+n = 2	*n* = 2
+L = 128\,\mu\mathrm{H}	*L* = 128 *μ*H
+i_L(t_0)	*i*<sub>*L*</sub>(*t*<sub>0</sub>)
+-i_L(t_0)	−*i*<sub>*L*</sub>(*t*<sub>0</sub>)
+i_0 = i_L(t_0)	*i*<sub>0</sub> = *i*<sub>*L*</sub>(*t*<sub>0</sub>)
+i_1 = i_L(t_1)	*i*<sub>1</sub> = *i*<sub>*L*</sub>(*t*<sub>1</sub>)
+I_{L,pk}	*I*<sub>*L*</sub><sub>,</sub><sub>*pk*</sub>
+A_e N_1 = V_{C1}/(4 f_s B_m)	*A*<sub>*e*</sub>*N*<sub>1</sub> = *V*<sub>*C*</sub><sub>1</sub>/(4*f*<sub>*s*</sub>*B*<sub>*m*</sub>)
+A_e	*A*<sub>*e*</sub>
+N_1	*N*<sub>1</sub>
+B_m	*B*<sub>*m*</sub>
+I_m = V_{C1}/(4 f_s L_m)	*I*<sub>*m*</sub> = *V*<sub>*C*</sub><sub>1</sub>/(4*f*<sub>*s*</sub>*L*<sub>*m*</sub>)
+U_m	*U*<sub>*m*</sub>
+C_{bus}	*C*<sub>*bus*</sub>
+L_g	*L*<sub>*g*</sub>
+e_x	*e*<sub>*x*</sub>
+i_x	*i*<sub>*x*</sub>
+v_x	*v*<sub>*x*</sub>
+x	*x*
+m_x	*m*<sub>*x*</sub>
+V_{C1,xk}	*V*<sub>*C*</sub><sub>1,</sub><sub>*xk*</sub>
+k	*k*
+M=6	*M* = 6
+v_{nN}	*v*<sub>*nN*</sub>
+p_{in,xk}	*p*<sub>*in*</sub><sub>,</sub><sub>*xk*</sub>
+p_{dab,xk}	*p*<sub>*dab*</sub><sub>,</sub><sub>*xk*</sub>
+V_{bus}	*V*<sub>*bus*</sub>
+\varphi_{xk}	*φ*<sub>*xk*</sub>
+P_{load}	*P*<sub>*load*</sub>
+P_g	*P*<sub>*g*</sub>
+i_d	*i*<sub>*d*</sub>
+i_q	*i*<sub>*q*</sub>
+\theta	*θ*
+e_d	*e*<sub>*d*</sub>
+i_{load}	*i*<sub>*load*</sub>
+G_v(s)	*G*<sub>*v*</sub>(*s*)
+e_q	*e*<sub>*q*</sub>
+v_d	*v*<sub>*d*</sub>
+v_q	*v*<sub>*q*</sub>
+\omega L_gi_q	*ωL*<sub>*g*</sub>*i*<sub>*q*</sub>
+\omega L_gi_d	*ωL*<sub>*g*</sub>*i*<sub>*d*</sub>
+e_\alpha	*e*<sub>*α*</sub>
+e_\beta	*e*<sub>*β*</sub>
+e'	*e*′
+qe'	*qe*′
+\omega'	*ω*′
+G_i(s)	*G*<sub>*i*</sub>(*s*)
+L_g\,\mathrm{d}i/\mathrm{d}t=G_i(s)(i^*-i)	*L*<sub>*g*</sub> d*i*/d*t* = *G*<sub>*i*</sub>(*s*)(*i*<sup>\*</sup> − *i*)
+-m_x	−*m*<sub>*x*</sub>
+(k-1)T_c/(2M)	(*k* − 1)*T*<sub>*c*</sub>/(2*M*)
+\delta	*δ*
+\theta_x	*θ*<sub>*x*</sub>
+2\pi/3	2*π*/3
+4\pi/3	4*π*/3
+3\theta_x	3*θ*<sub>*x*</sub>
+2\pi	2*π*
+4\pi	4*π*
+-\omega	−*ω*
+i_{dab}	*i*<sub>*dab*</sub>
+K_i	*K*<sub>*i*</sub>
+i_{in}	*i*<sub>*in*</sub>
+G_c(s)	*G*<sub>*c*</sub>(*s*)
+N(s)	*N*(*s*)
+\omega_r	*ω*<sub>*r*</sub>
+P(\varphi)	*P*(*φ*)
+P_{cell}(1-\cos2\omega t)	*P*<sub>*cell*</sub>(1 − cos 2*ωt*)
+T_s	*T*<sub>*s*</sub>
+t_\varphi	*t*<sub>*φ*</sub>
+V_{bus0}	*V*<sub>*bus*</sub><sub>0</sub>
+H_c(s)	*H*<sub>*c*</sub>(*s*)
+I^2t	*I*<sup>2</sup>*t*
+s	*s*
+[-1, +1]	\[−1, +1\]

@@ -1,0 +1,40 @@
+---
+born-at: 2026-10-17T14:30
+type: choice
+parent: [2026-09-03-god-live-doc]
+label: 行内公式写成文字改由源文件标注
+domain: 页面
+---
+
+## 背景
+
+supersedes:: [Word 导出提速](2026-10-17-word-export-speed.md)
+
+上一张卡定下行内公式能写成文字的由引擎自己判断：`plain_math.py` 解析 TeX，只有字母、数字、一层上下标、单位、简单运算符的写成 Word 文字，其余插 MathType，源文件不用区分。报告转成 MDX 之后，用户看着源文件提出反过来：
+
+> 然后行内的公式我倾向于手动写清楚是mathtype还是纯文字，也搞个行内组件，纯文字写好对应内容这样
+
+> 感觉反了吧，应该mathtype的不要标注，转纯文字的需要个单独组件
+
+> 引擎那套识别直接删了得了
+
+同一次还定了报告的 MDX 组件都加 `Word` 前缀，组件属于 word-report 自己，不和站点里通用的组件混用。
+
+## 结论与边界
+
+- `$…$` 默认插 MathType，不用标注；要在 Word 里写成文字的行内公式写成 `<WordPlainMath tex="C_1">*C*<sub>1</sub></WordPlainMath>`：`tex` 给网页，KaTeX 照旧按 TeX 显示；组件里是 Word 用的文字，只能写文字、`*斜体*`、`<sub>`、`<sup>`，写了别的直接报错
+- 报告文档（docreport）的行内公式节点加可选的 `plainText`（几段文字，标记只能是 `em`、`sub`、`sup`）；引擎照它写，不再解析 TeX，`plain_runs` 与整个解析器删掉。字符样式「DR Inline Math」和存盘后去掉东亚字体提示两项不变
+- 两份内容由人写，编译器不比对：`tex` 改了、组件里的文字没跟着改，只能从 Word 里看出来。这是让写报告的人决定每个公式在 Word 里长什么样的代价
+- 组件改名：`Figure`、`Figures`、`Panel`、`Table`、`Caption`、`Ref`、`Cite`、`Abstract`、`Reference`、`Bibliography` 都加 `Word` 前缀，旧名直接报「认不出组件」，不留别名。MDX 写法变了，word-report 升到 0.5.0
+- `report-docx convert`（JSON 报告转 MDX）在 0.5.0 删掉：唯一一份真在用的 JSON 报告已经转完，留着它就要跟着每次 MDX 写法的改动一起改。JSON 报告的写法照旧能读、能检查、能导出
+- SST 初步设计报告里原先被引擎写成文字的 760 个行内公式，用删掉之前的解析器最后跑一次，一次性改写成 `<WordPlainMath>`，Word 导出的样子不变
+
+## 否掉的候选
+
+- **保留引擎自动判断，只加一个强制插 MathType 的标注**：用户要的是在源文件里看得出每个公式在 Word 里是什么，自动判断让同一种写法在 Word 里有两种结果
+- **组件里只写 TeX、由编译器转成 Word 文字**：等于把解析器从 Python 搬到 TS，判断仍不在写报告的人手里
+- **网页也显示组件里的文字**：网页上公式的样子会和 `$…$` 的不一致，改用 KaTeX 显示 `tex`
+
+## 依据
+
+无实验。改动在 god-docsite 的分支 `feat/word-plain-math`；迁移脚本与 760 个公式的对照在 `probes/2610171430_word-plain-math-migration/`。

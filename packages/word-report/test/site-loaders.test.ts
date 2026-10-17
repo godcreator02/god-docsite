@@ -155,14 +155,14 @@ describe('组装结果沿用', () => {
 
   it('MDX 报告同样沿用：几张图同时请求只编译组装一次；加了 references.mdx 或另一种入口就重新组装', async () => {
     await save('reports/mdx/index.mdx', '---\ntitle: MDX\nlanguage: zh-CN\nchapters: [c1.mdx]\n---\n')
-    await save('reports/mdx/c1.mdx', '# 章\n\n<Figure src="assets/plot.png">图</Figure>\n')
+    await save('reports/mdx/c1.mdx', '# 章\n\n<WordFigure src="assets/plot.png">图</WordFigure>\n')
     await save('reports/mdx/assets/plot.png', png)
     vi.mocked(assembleDocument).mockClear()
     const responses = await Promise.all(Array.from({ length: 4 }, () => reportAssetLoader({ params: { report: 'mdx', '*': 'mdx/plot.png' } }, site)))
     expect(responses.map((response) => response.status)).toEqual([200, 200, 200, 200])
     await reportPageLoader({ params: { report: 'mdx' } }, site)
     expect(assembleDocument).toHaveBeenCalledTimes(1)
-    await save('reports/mdx/references.mdx', '<Reference id="ref-a">文献</Reference>\n')
+    await save('reports/mdx/references.mdx', '<WordReference id="ref-a">文献</WordReference>\n')
     expect((await reportPageLoader({ params: { report: 'mdx' } }, site)).report.document.references).toEqual([{ id: 'ref-a', text: '文献' }])
     await save('reports/mdx/content.json', '{}')
     await expect(reportPageLoader({ params: { report: 'mdx' } }, site)).rejects.toThrow('只能留一个')

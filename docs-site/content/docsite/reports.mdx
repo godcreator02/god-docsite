@@ -44,7 +44,8 @@ docsite.feature.add  {"dir":"<站点目录>","package":"@godcreator/word-report"
 
 ## MDX 写法
 
-普通内容照 Markdown 写；图、表、公式、引用这类要编号的东西用几个固定的组件。编译器只解析、不执行 MDX，下面没列的写法一律报错，报在哪个文件的第几行第几列。
+普通内容照 Markdown 写；图、表、引用这类要编号的东西，以及在 Word 里写成文字的行内公式，用几个固定的组件，名字都以 `Word` 开头，只在报告里用。编译器只解析、不执行 MDX，下面没列的写法一律报错，报在哪个文件的第几行第几列：
+大写开头、不以 `Word` 开头的组件（如 `<Figure>`）报「报告里的组件都以 Word 开头」；小写的只认下面列出的几个 HTML 标签（表格的 `<table>`、`<tr>`、`<th>`、`<td>`，文字样式的 `<sub>`、`<sup>`、`<strong>`、`<em>`、`<br />`）。
 
 一份最小的报告：
 
@@ -57,36 +58,37 @@ date: 2026-10-17
 chapters: [c1.mdx]
 ---
 
-<Abstract keywords="固态变压器；双有源桥">
+<WordAbstract keywords="固态变压器；双有源桥">
 
 摘要正文。
 
-</Abstract>
+</WordAbstract>
 ````
 
 ````mdx title="c1.mdx"
 # 主电路设计 [#c1]
 
-单元额定功率见<Ref to="tab-unit" />，由<Ref to="eq-pcell" />算出<Cite to="ref-iec" />。
+单元额定功率见<WordRef to="tab-unit" />，由<WordRef to="eq-pcell" />算出<WordCite to="ref-iec" />；
+单元直流电容 <WordPlainMath tex="C_1">*C*<sub>1</sub></WordPlainMath> 的电压纹波取 $\Delta V/\sqrt{2}$。
 
 ```math eq-pcell
 P_{cell} = \frac{P_N}{3N_{on}}
 ```
 
-<Table id="tab-unit">
-  <Caption>功率单元额定参数</Caption>
+<WordTable id="tab-unit">
+  <WordCaption>功率单元额定参数</WordCaption>
 
 | 参数 | 数值 |
 | --- | --- |
 | $P_{cell}$ | 69.4 kW |
 
-</Table>
+</WordTable>
 
-<Figure id="fig-main" src="assets/main-circuit.png">主电路</Figure>
+<WordFigure id="fig-main" src="assets/main-circuit.png">主电路</WordFigure>
 ````
 
 ````mdx title="references.mdx"
-<Reference id="ref-iec" url="https://example.com/iec">IEC 61800-5-1:2022[S]. Geneva: IEC, 2022.</Reference>
+<WordReference id="ref-iec" url="https://example.com/iec">IEC 61800-5-1:2022[S]. Geneva: IEC, 2022.</WordReference>
 ````
 
 ### 块
@@ -98,13 +100,13 @@ P_{cell} = \frac{P_N}{3N_{on}}
 | ` ```math ` 或 ` ```math <id> ` | 编号的公式 |
 | `$$ … $$` | 不编号的公式，不能被引用 |
 | ` ```<语言> ` | 代码块 |
-| `<Figure id? src alt?>图题</Figure>` | 一张图；不写 `alt` 时取图题的纯文字 |
-| `<Figures id? rows columns>`，里面一个 `<Caption>` 和若干 `<Panel id? row column label src alt?>小标题</Panel>` | 一个图号下的多张图，每张写明第几行第几列和编号 |
-| `<Table id?>`，里面先写可省的 `<Caption>表题</Caption>`，再写一张 GFM 表格 | 编号的表格 |
-| `<Table>` 里写小写的 `<table>`、`<tr>`、`<th>`、`<td rowSpan colSpan>` | 有合并单元格的编号表格；开头全是 `<th>` 的行是表头 |
-| 不在 `<Table>` 里的 GFM 表格 | 不编号、没有表题的表格 |
-| `<Abstract keywords="甲；乙">段落</Abstract>` | 摘要，只写在 `index.mdx` 正文最前面；关键词用全角分号隔开 |
-| `<Bibliography />` | 可选，参考文献的位置，不写时放在文末 |
+| `<WordFigure id? src alt?>图题</WordFigure>` | 一张图；不写 `alt` 时取图题的纯文字 |
+| `<WordFigures id? rows columns>`，里面一个 `<WordCaption>` 和若干 `<WordPanel id? row column label src alt?>小标题</WordPanel>` | 一个图号下的多张图，每张写明第几行第几列和编号 |
+| `<WordTable id?>`，里面先写可省的 `<WordCaption>表题</WordCaption>`，再写一张 GFM 表格 | 编号的表格 |
+| `<WordTable>` 里写小写的 `<table>`、`<tr>`、`<th>`、`<td rowSpan colSpan>` | 有合并单元格的编号表格；开头全是 `<th>` 的行是表头 |
+| 不在 `<WordTable>` 里的 GFM 表格 | 不编号、没有表题的表格 |
+| `<WordAbstract keywords="甲；乙">段落</WordAbstract>` | 摘要，只写在 `index.mdx` 正文最前面；关键词用全角分号隔开 |
+| `<WordBibliography />` | 可选，参考文献的位置，不写时放在文末 |
 | `[^id]` 与 `[^id]: …` | 脚注；定义要和引用写在同一个文件里 |
 
 章文件的文件头只能写 `numbering: appendix`（附录）或 `numbering: none`（不编号），作用于这个文件的一级标题，下级随上级。
@@ -115,9 +117,10 @@ P_{cell} = \frac{P_N}{3N_{on}}
 | 写法 | 是什么 |
 | --- | --- |
 | `**加粗**`、`*斜体*`、`` `代码` ``、`<sub>`、`<sup>` | 文字的样式，可以嵌套；加粗或斜体的内容以标点开头或结尾时（如 `**（1）方案**`），`**` 在中文旁边读不出来，改写 `<strong>…</strong>`、`<em>…</em>` |
-| `$…$` | 行内公式 |
-| `<Ref to="id" />` | 交叉引用，显示「图 3-2」「表 1-1」「式（2-3）」「第 2.1 节」；加 `show="number"` 只显示编号，`show="title"` 显示标题 |
-| `<Cite to="ref-a ref-b" />` | 文献引用，几个 id 用空格隔开 |
+| `$…$` | 行内公式，Word 里插成 MathType 对象 |
+| `<WordPlainMath tex="C_1">*C*<sub>1</sub></WordPlainMath>` | 在 Word 里写成文字的行内公式：网页按 `tex` 显示，Word 照组件里的文字写；组件里只能写文字、`*斜体*`、`<sub>`、`<sup>` |
+| `<WordRef to="id" />` | 交叉引用，显示「图 3-2」「表 1-1」「式（2-3）」「第 2.1 节」；加 `show="number"` 只显示编号，`show="title"` 显示标题 |
+| `<WordCite to="ref-a ref-b" />` | 文献引用，几个 id 用空格隔开 |
 | `[文字](https://…)` | 链接 |
 | `<br />` | 换行 |
 
@@ -128,14 +131,6 @@ P_{cell} = \frac{P_N}{3N_{on}}
 - **要引用、或要在 `layout.json` 里调版式的才写 id**，起一个看得懂的名字（`fig-main`、`tab-unit`），以后一直用它。id 以字母开头，只用字母、数字、`_` 与 `-`，不以 `auto-` 开头
 - 其余的 id 由编译器按内容生成（`auto-p-1x2y3z` 这种），不写回文件：同样的内容每次得到同样的 id，段落改了字 id 就变，针对这一段的评论随之对不上
 
-### 把 JSON 报告转成 MDX
-
-```bash
-pnpm exec report-docx convert <JSON 报告 id> <新报告 id>
-```
-
-它把 JSON 报告写成一份新的 MDX 报告 `reports/<新报告 id>/`，不动原报告：被引用的、`layout.json` 里出现的 id 写出来，其余交给编译器生成；图片复制进新目录的 `assets/`。
-写完立刻编译回来，和原报告逐项比对，对不上就删掉新目录、列出哪里不同。原报告里有 MDX 写不出的内容（比如没有内容的段落）时一个文件都不写，列出位置。
 
 ## 网页上怎么看
 
@@ -197,4 +192,9 @@ pnpm exec report-docx status <报告 id>
 `export` 等这次导出做完，把结果按 JSON 输出，里面有 docx 和 pdf 的路径；`status` 只看状态，不启动 Word。导出结果放在引擎目录的 `out/` 下，附带自动核对的记录（页数等）；
 版式还要人看一遍。报告在导出前固定成一份快照（MDX 报告是入口、各章、文献列表与图片），导出过程中改了文件不会混进这一次的结果。同一时间只能导出一份。
 
-公式在 Word 里分两种：行内公式只用到字母、数字、希腊字母、一层上标或下标、单位、函数名和简单运算符的，写成文字（字母与小写希腊字母斜体，其余正体，字体 Times New Roman，应用字符样式「DR Inline Math」）；带根号、分式、求和、偏导、帽子、自动大小括号，或者同一个字母同时有上标和下标的，以及全部行间公式，插成 MathType 对象。源文件不用区分，网页上照旧由 KaTeX 显示。
+公式在 Word 里分两种，由源文件决定，引擎不自己判断：
+
+- `<WordPlainMath>` 写成文字，照组件里写的斜体、上标、下标，字体 Times New Roman，应用字符样式「DR Inline Math」。只有字母、数字、一层上标或下标、单位和简单运算符的行内公式适合这样写，插 MathType 对象是导出里最慢的一步
+- `$…$` 和全部行间公式插成 MathType 对象
+
+网页上两种都由 KaTeX 按 TeX 显示。`<WordPlainMath>` 的 `tex` 与组件里的文字是两份，改公式时两边一起改，编译器不比对它们。
