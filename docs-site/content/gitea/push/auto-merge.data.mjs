@@ -41,12 +41,12 @@ export const checkNames = ['和 main 没有冲突', '没改只有负责人能改
 /** 2026-09-30 实测时检查的三条，只给 cases 用：那时前一条不过，后面的不再查 */
 export const measuredCheckNames = ['和 main 没有冲突', '合并后只改了 collab/', '合并后没有新的格式问题'];
 
-/* ref file="../plugins/collab/src/collab-repo/submit/submit.ts" lines="35-39" hash="2e408d45cad7" blob="92a88843de16" */
-/* ref file="../plugins/collab/src/collab-repo/submit/submit.ts" lines="50-52" hash="169b02d46d48" blob="92a88843de16" */
-/* ref file="../plugins/collab/src/collab-repo/submit/submit.ts" lines="155-155" hash="770f3420697e" blob="969e98c0a648" */
+/* ref file="../plugins/collab/src/collab-repo/submit/submit.ts" lines="33-37" hash="2e408d45cad7" blob="72b363403a5f" */
+/* ref file="../plugins/collab/src/collab-repo/submit/submit.ts" lines="47-56" hash="31df7943f46f" blob="72b363403a5f" */
+/* ref file="../plugins/collab/src/collab-repo/submit/submit.ts" lines="159-159" hash="770f3420697e" blob="72b363403a5f" */
 const submitLines = [
-  { text: 'git add --all -- collab site', kind: 'cmd' },
-  { text: `git commit -m "${example.person} 的协作记录" -- collab site`, kind: 'cmd' },
+  { text: 'git add --all -- collab', kind: 'cmd' },
+  { text: `git commit -m "${example.person} 的协作记录" -- collab`, kind: 'cmd' },
   { text: `git push origin HEAD:refs/for/main -o topic=${example.person} -o "title=${example.person} 的协作记录"`, kind: 'cmd' },
   { text: `Gitea：新建合并请求 #${example.pull}`, kind: 'ok' },
 ];

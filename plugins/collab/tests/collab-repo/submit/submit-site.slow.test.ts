@@ -1,9 +1,9 @@
-import { rmSync } from 'node:fs'
+import { mkdirSync, rmSync } from 'node:fs'
 import path from 'node:path'
 import { describe, expect, it } from 'vitest'
 import { CollabRejected } from '../../../src/errors.js'
 import { submitCollab } from '../../../src/collab-repo/submit/submit.js'
-import { bob, bobCode, executor, forMain, git, merges, origin, peopleEntries, peopleText, t2, task, threadFile, writeRecord, writeSite } from './submit-fixture.js'
+import { bob, bobCode, executor, forMain, git, merges, origin, peopleEntries, peopleText, t1, t2, task, threadFile, writeRecord, writeSite } from './submit-fixture.js'
 
 /*
  * 只有负责人能改的内容，规则本体（哪些字段算、怎么核对）在合并检查包 lead-only 的测试里；
@@ -85,5 +85,23 @@ describe('collab.submit 带上 site/ 的改动', () => {
       /pnpm run typecheck 失败/,
     )
     expect(git(bob.repo, 'rev-list', '--count', 'HEAD')).toBe('1')
+  })
+
+  it('collab/ 是空目录（git 不跟踪）时只改了页面：照常提交，提交里只有 site/ 的文件', async () => {
+    git(bob.repo, 'rm', '-r', '-q', 'collab')
+    git(bob.repo, 'commit', '-q', '-m', '清空协作记录')
+    mkdirSync(path.join(bob.repo, 'collab'))
+    writeSite(bob.repo, page)
+    const result = await submitCollab(bob, merges(), fakeTypecheck('passed').typecheck)
+    expect(result).toMatchObject({ siteFiles: 2, siteTypecheck: 'passed' })
+    expect(git(bob.repo, 'log', '-1', '--format=%s', result.commit!)).toBe('bob 的页面改动')
+    expect(git(bob.repo, 'show', '--name-only', '--format=', result.commit!).split('\n')).toEqual(['site/content/meta.json', 'site/content/notes.mdx'])
+  })
+
+  it('collab/ 下的记录删光、目录也没了：删除照样提交', async () => {
+    rmSync(path.join(bob.repo, 'collab'), { recursive: true, force: true })
+    const result = await submitCollab(bob, merges(), fakeTypecheck('passed').typecheck)
+    expect(result).toMatchObject({ siteFiles: 0, siteTypecheck: null })
+    expect(git(bob.repo, 'show', '--name-status', '--format=', result.commit!)).toBe(`D\tcollab/records/${t1}.json`)
   })
 })

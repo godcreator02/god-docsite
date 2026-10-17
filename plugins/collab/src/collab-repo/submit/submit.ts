@@ -1,5 +1,3 @@
-import { existsSync } from 'node:fs'
-import path from 'node:path'
 import { collabPathInRepo, sitePathInRepo } from '@godcreator/collab'
 import { changedFilesBetween, leadOnlyProblems } from '@godcreator/collab/node'
 import { pnpmTypecheck, type SiteTypecheck, type TypecheckSite } from '../../site-process/dependencies.js'
@@ -45,9 +43,15 @@ function commitMessageOf(person: string, hasRecords: boolean, hasSite: boolean):
 async function commitRecordsAndSite(project: Project, collabChanges: number, siteChanges: number): Promise<string | null> {
   const merging = await isMerging(project.repo)
   if (!merging && collabChanges + siteChanges === 0) return null
-  // 没有 site/ 的仓也能提交：git add 遇到一个都对不上的路径会直接失败
-  const paths = [collabPathInRepo, sitePathInRepo].filter((dir) => existsSync(path.join(project.repo, dir)))
-  await git(project.repo, ['add', '--all', '--', ...paths])
+  // 只写有改动的目录：空目录 git 不跟踪，写进 git commit 会报 pathspec 对不上；目录删光了也照样要提交删除
+  const paths = [
+    { dir: collabPathInRepo, changes: collabChanges },
+    { dir: sitePathInRepo, changes: siteChanges },
+  ]
+    .filter(({ changes }) => changes > 0)
+    .map(({ dir }) => dir)
+  // 不带路径的 git add --all 会把整个仓都暂存
+  if (paths.length > 0) await git(project.repo, ['add', '--all', '--', ...paths])
   if (merging) await git(project.repo, ['commit', '--no-edit'])
   else await git(project.repo, ['commit', '-m', commitMessageOf(project.person, collabChanges > 0, siteChanges > 0), '--', ...paths])
   return (await git(project.repo, ['rev-parse', 'HEAD'])).trim()

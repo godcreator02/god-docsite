@@ -20,7 +20,7 @@ const executorRejectComment = [
 ]
 
 /** 等结论：每 2 秒查一次合并请求，最多 180 秒 */
-/* ref file="../plugins/collab/src/collab-repo/submit/submit.ts" lines="30-33" hash="1553118eddb9" blob="3df0aa7106c6" */
+/* ref file="../plugins/collab/src/collab-repo/submit/submit.ts" lines="28-31" hash="1553118eddb9" blob="72b363403a5f" */
 export const verdictWait = { pollSeconds: 2, timeoutSeconds: 180 }
 
 /** bob 新建的任务文件（规范写法，两格缩进、以换行结尾） */
@@ -195,7 +195,7 @@ const conflictCase = {
     '本地 main 多出 bob 的提交，合并没完成；那个文件里留着冲突标记（以 <<<<<<< 开头的行）；没推送；自动同步跳过，原因「提交审核时把 main 合进来出了冲突，还没改好：让 AI 改好冲突、再提交审核」。改好后再 collab.submit，那次提交完成这次合并（合并提交有两个父提交）',
   error: [
     /* 把 origin/main 合进来停在半路时的拒绝原话 */
-    /* ref file="../plugins/collab/src/collab-repo/submit/submit.ts" lines="63-76" hash="96288abf3896" blob="3df0aa7106c6" */
+    /* ref file="../plugins/collab/src/collab-repo/submit/submit.ts" lines="67-80" hash="96288abf3896" blob="72b363403a5f" */
     '把 origin/main 合进来有冲突，没有推送；冲突标记留在这些文件里（网站顶部的提示栏也会列出来）：',
     'collab/records/20260925130000-ddddddd.json',
     '让 AI 按两边的意思改好，再运行 collab.submit',
