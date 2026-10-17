@@ -14,37 +14,46 @@ vi.mock('node:fs/promises', async (importOriginal) => {
     return original.writeFile(...args);
   } };
 });
-import { reportEntry, reportExport, type ReportExportOptions } from '../src/node/export.ts';
+import { gwbDataDir, reportEntry, reportExport, type ReportExportOptions } from '../src/node/export.ts';
 
 const sha = (value: string | Uint8Array) => createHash('sha256').update(value).digest('hex');
 const entry = 'reports/example/content.json';
-let temporary: string, site: string, engine: string, packageDir: string;
-const options = () => ({ siteDir: site, engineDir: engine, packageDir, entry });
+const uvName = process.platform === 'win32' ? 'uv.exe' : 'uv';
+let temporary: string, site: string, engine: string, packageDir: string, dataDir: string, uvDir: string;
+const exportRoot = () => path.join(site, 'out', 'word-report');
+const lockFile = () => path.join(dataDir, 'export.lock');
+const options = () => ({ siteDir: site, engineDir: engine, packageDir, dataDir, entry });
 const status = () => reportExport({ ...options(), action: 'status' });
-const outputPaths = (id: string) => ({ docx: path.join(engine, 'out', id, 'result/report.docx'), pdf: path.join(engine, 'out', id, 'result/report.pdf') });
+const outputPaths = (id: string) => ({ docx: path.join(exportRoot(), id, 'result/report.docx'), pdf: path.join(exportRoot(), id, 'result/report.pdf') });
 
 async function put(file: string, value: string | Uint8Array) {
   await mkdir(path.dirname(file), { recursive: true });
   await writeFile(file, value);
 }
+/** 假的引擎与本包，PATH 里放一个假的 uv（spawn 被换掉，从不运行它） */
 async function configureEngine() {
-  for (const file of ['.venv/Scripts/python.exe', 'templates/project-report.dotx', 'schemas/report-content.schema.json', 'requirements.txt', 'pyproject.toml', 'src/docreport/__main__.py']) await put(path.join(engine, file), 'fixture only; never execute');
-  for (const file of ['package.json', 'src/schema.ts', 'dist/assemble.js', 'dist/schema.js']) await put(path.join(packageDir, file), 'compiler fixture');
+  for (const file of ['templates/project-report.dotx', 'schemas/report-content.schema.json', 'pyproject.toml', 'uv.lock', '.python-version', 'src/docreport/__main__.py']) await put(path.join(engine, file), 'fixture only; never execute');
+  await put(path.join(packageDir, 'package.json'), JSON.stringify({ name: '@godcreator/word-report', version: '9.9.9-test' }));
+  for (const file of ['src/schema.ts', 'dist/assemble.js', 'dist/schema.js']) await put(path.join(packageDir, file), 'compiler fixture');
+  await put(path.join(uvDir, uvName), 'fixture only; never execute');
+  vi.stubEnv('PATH', uvDir);
 }
 async function successfulJob(ownerSite = site) {
   const id = `web-${randomUUID()}`, output = Buffer.from('verified output fixture');
-  await put(path.join(engine, 'out', id, 'result/report.docx'), output);
-  await put(path.join(engine, 'out', id, 'result/report.pdf'), output);
-  await put(path.join(engine, 'out', id, 'job.json'), JSON.stringify({ id, site: ownerSite, entry, mode: 'complete', state: 'ready', fingerprint: 'previous', outputs: { 'report.docx': sha(output), 'report.pdf': sha(output) } }));
+  await put(path.join(exportRoot(), id, 'result/report.docx'), output);
+  await put(path.join(exportRoot(), id, 'result/report.pdf'), output);
+  await put(path.join(exportRoot(), id, 'job.json'), JSON.stringify({ id, site: ownerSite, entry, mode: 'complete', state: 'ready', fingerprint: 'previous', outputs: { 'report.docx': sha(output), 'report.pdf': sha(output) } }));
   const key = sha(JSON.stringify([site, entry, 'complete']));
-  await put(path.join(engine, 'out/web-index', `${key}.json`), JSON.stringify({ id }));
+  await put(path.join(exportRoot(), 'web-index', `${key}.json`), JSON.stringify({ id }));
   return id;
 }
 
 beforeEach(async () => {
   temporary = await mkdtemp(path.join(os.tmpdir(), 'docsite-export-test-'));
   site = path.join(temporary, 'workspace/full-test/site'); engine = path.join(temporary, 'engine'); packageDir = path.join(temporary, 'package');
+  dataDir = path.join(temporary, 'home/data/word-report'); uvDir = path.join(temporary, 'bin');
   vi.stubEnv('DOCREPORT_ENGINE_ROOT', undefined);
+  vi.stubEnv('PATH', path.join(temporary, 'empty-path'));
   renderer.spawn.mockReset();
   renderer.logFailure = false;
   renderer.spawn.mockImplementation(() => { throw new Error('Fixture renderer intentionally unavailable'); });
@@ -69,15 +78,15 @@ describe('Word 导出 Node 命令（禁止启动实际 Word）', () => {
   });
 
   it('入口、模式、操作及路径参数错误抛错，不启动 renderer', async () => {
-    for (const invalid of [{ entry: '../content.json' }, { mode: 'invalid' }, { action: 'download' }, { action: '' }, { siteDir: '' }, { engineDir: 1 }, { packageDir: 1 }, { expectedFingerprint: 1 }]) {
+    for (const invalid of [{ entry: '../content.json' }, { mode: 'invalid' }, { action: 'download' }, { action: '' }, { siteDir: '' }, { engineDir: 1 }, { packageDir: 1 }, { dataDir: '' }, { expectedFingerprint: 1 }]) {
       await expect(reportExport({ ...options(), ...invalid } as ReportExportOptions)).rejects.toThrow();
     }
     expect(renderer.spawn).not.toHaveBeenCalled();
   });
 
-  it('无Python环境保留以前成功导出的绝对路径', async () => {
+  it('本机找不到 uv 时 unavailable，说明要装 uv，保留以前成功导出的绝对路径', async () => {
     const id = await successfulJob();
-    expect(await status()).toMatchObject({ state: 'unavailable', ...outputPaths(id) });
+    expect(await status()).toMatchObject({ state: 'unavailable', message: expect.stringContaining('本机找不到 uv'), ...outputPaths(id) });
     expect(renderer.spawn).not.toHaveBeenCalled();
   });
 
@@ -109,7 +118,7 @@ describe('Word 导出 Node 命令（禁止启动实际 Word）', () => {
 
   it('活进程持锁时拒绝第二任务', async () => {
     await configureEngine();
-    await put(path.join(engine, 'out/.web-export.lock'), JSON.stringify({ id: `web-${randomUUID()}`, pid: process.pid }));
+    await put(lockFile(), JSON.stringify({ id: `web-${randomUUID()}`, pid: process.pid }));
     await expect(reportExport(options())).rejects.toMatchObject({ state: 'locked', message: expect.stringContaining('Word 正在生成') });
     expect(renderer.spawn).not.toHaveBeenCalled();
   });
@@ -122,7 +131,7 @@ describe('Word 导出 Node 命令（禁止启动实际 Word）', () => {
     expect(results.filter((result) => result.status === 'rejected')).toHaveLength(1);
     await vi.waitFor(async () => {
       expect((await status()).state).toBe('failed');
-      await expect(readFile(path.join(engine, 'out/.web-export.lock'))).rejects.toMatchObject({ code: 'ENOENT' });
+      await expect(readFile(lockFile())).rejects.toMatchObject({ code: 'ENOENT' });
     });
     expect(renderer.spawn).toHaveBeenCalledOnce();
   });
@@ -135,14 +144,39 @@ describe('Word 导出 Node 命令（禁止启动实际 Word）', () => {
     const { jobId } = result;
     await vi.waitFor(async () => {
       expect(await status()).toMatchObject({ state: 'failed', jobId, ...outputPaths(previousId) });
-      await expect(readFile(path.join(engine, 'out/.web-export.lock'))).rejects.toMatchObject({ code: 'ENOENT' });
+      await expect(readFile(lockFile())).rejects.toMatchObject({ code: 'ENOENT' });
     });
-    const job = JSON.parse(await readFile(path.join(engine, 'out', jobId!, 'job.json'), 'utf8'));
+    const job = JSON.parse(await readFile(path.join(exportRoot(), jobId!, 'job.json'), 'utf8'));
     expect(job).toMatchObject({ mode: 'complete', message: expect.stringContaining('Fixture renderer intentionally unavailable') });
     expect(renderer.spawn).toHaveBeenCalledOnce();
     expect(renderer.spawn.mock.calls[0]![1]).toContain('--data-only');
-    const snapshot = JSON.parse(await readFile(path.join(engine, 'out', jobId!, 'input/content.json'), 'utf8'));
+    const snapshot = JSON.parse(await readFile(path.join(exportRoot(), jobId!, 'input/content.json'), 'utf8'));
     expect(snapshot.blocks[0].content[0].text).toBe('固定输入正文');
+  });
+
+  it('用 PATH 里的 uv 在引擎 src/ 下运行，环境放 dataDir/env-<版本>，不写字节码；站点 out/word-report/ 不进 git', async () => {
+    await configureEngine();
+    const { jobId } = await reportExport(options());
+    await vi.waitFor(async () => expect((await status()).state).toBe('failed'));
+    const [command, args, spawnOptions] = renderer.spawn.mock.calls[0]!;
+    expect(command).toBe(path.join(uvDir, uvName));
+    expect(args.slice(0, 7)).toEqual(['run', '--project', engine, '--frozen', 'python', '-m', 'docreport.web_runner']);
+    expect(args).toEqual(expect.arrayContaining(['--lock', lockFile(), '--job', jobId, '--out', path.join(exportRoot(), jobId!, 'result')]));
+    expect(spawnOptions).toMatchObject({ cwd: path.join(engine, 'src'), env: { UV_PROJECT_ENVIRONMENT: path.join(dataDir, 'env-9.9.9-test'), PYTHONDONTWRITEBYTECODE: '1' } });
+    expect(await readFile(path.join(exportRoot(), '.gitignore'), 'utf8')).toBe('*\n');
+  });
+
+  it('不给 dataDir 时用 gwb home 的 data/word-report：GWB_HOME 是名字拼在 APPDATA 下，带路径分隔符就是目录本身，没设是 default', () => {
+    vi.stubEnv('APPDATA', path.join(temporary, 'appdata'));
+    vi.stubEnv('GWB_HOME', undefined);
+    expect(gwbDataDir()).toBe(path.join(temporary, 'appdata/gwb-kernel/homes/default/data/word-report'));
+    vi.stubEnv('GWB_HOME', 'dev-home');
+    expect(gwbDataDir()).toBe(path.join(temporary, 'appdata/gwb-kernel/homes/dev-home/data/word-report'));
+    vi.stubEnv('GWB_HOME', path.join(temporary, 'own-home'));
+    expect(gwbDataDir()).toBe(path.join(temporary, 'own-home/data/word-report'));
+    vi.stubEnv('GWB_HOME', 'dev-home');
+    vi.stubEnv('APPDATA', undefined);
+    expect(() => gwbDataDir()).toThrow('APPDATA 没有设');
   });
 
   it('状态产物属于当前站点，并在返回绝对路径前重新验证两个文件hash', async () => {
@@ -150,9 +184,9 @@ describe('Word 导出 Node 命令（禁止启动实际 Word）', () => {
     const id = await successfulJob();
     expect(await status()).toMatchObject({ state: 'ready', ...outputPaths(id) });
     for (const extension of ['docx', 'pdf']) {
-      await put(path.join(engine, 'out', id, `result/report.${extension}`), 'tampered');
+      await put(path.join(exportRoot(), id, `result/report.${extension}`), 'tampered');
       await expect(status()).rejects.toThrow('生成文件与验收记录不一致');
-      await put(path.join(engine, 'out', id, `result/report.${extension}`), 'verified output fixture');
+      await put(path.join(exportRoot(), id, `result/report.${extension}`), 'verified output fixture');
     }
     await successfulJob(path.join(temporary, 'other-site'));
     expect(await status()).toMatchObject({ state: 'idle' });
@@ -161,28 +195,25 @@ describe('Word 导出 Node 命令（禁止启动实际 Word）', () => {
 
   it('空锁给出明确异常而不抢占', async () => {
     await configureEngine();
-    const lock = path.join(engine, 'out/.web-export.lock');
-    await put(lock, '');
+    await put(lockFile(), '');
     await expect(reportExport(options())).rejects.toMatchObject({ state: 'lock-invalid' });
-    expect(await readFile(lock, 'utf8')).toBe('');
+    expect(await readFile(lockFile(), 'utf8')).toBe('');
     expect(renderer.spawn).not.toHaveBeenCalled();
   });
 
   it('父Node退出但Python renderer仍存活时保持互斥', async () => {
     await configureEngine();
-    const lock = path.join(engine, 'out/.web-export.lock');
-    await put(lock, JSON.stringify({ id: `web-${randomUUID()}`, pid: process.pid, ownerPid: 99999999, rendererPid: process.pid, phase: 'rendering' }));
+    await put(lockFile(), JSON.stringify({ id: `web-${randomUUID()}`, pid: process.pid, ownerPid: 99999999, rendererPid: process.pid, phase: 'rendering' }));
     await expect(reportExport(options())).rejects.toMatchObject({ state: 'locked' });
     expect(renderer.spawn).not.toHaveBeenCalled();
   });
 
   it('已退出进程的锁保持原样并给出清理提示', async () => {
     await configureEngine();
-    const lock = path.join(engine, 'out/.web-export.lock');
     const bytes = JSON.stringify({ id: `web-${randomUUID()}`, pid: 99999999 });
-    await put(lock, bytes);
+    await put(lockFile(), bytes);
     await expect(reportExport(options())).rejects.toMatchObject({ state: 'lock-orphaned', message: expect.stringContaining('锁仍保留') });
-    expect(await readFile(lock, 'utf8')).toBe(bytes);
+    expect(await readFile(lockFile(), 'utf8')).toBe(bytes);
     expect(renderer.spawn).not.toHaveBeenCalled();
   });
 
@@ -192,8 +223,8 @@ describe('Word 导出 Node 命令（禁止启动实际 Word）', () => {
     const { jobId, state } = await reportExport(options());
     expect(state).toBe('running');
     await vi.waitFor(async () => {
-      await expect(readFile(path.join(engine, 'out/.web-export.lock'))).rejects.toMatchObject({ code: 'ENOENT' });
-      const result = JSON.parse(await readFile(path.join(engine, 'out', jobId!, 'job.json'), 'utf8'));
+      await expect(readFile(lockFile())).rejects.toMatchObject({ code: 'ENOENT' });
+      const result = JSON.parse(await readFile(path.join(exportRoot(), jobId!, 'job.json'), 'utf8'));
       expect(result).toMatchObject({ state: 'failed', message: expect.stringContaining('Fixture export log write failed') });
     });
   });
@@ -201,15 +232,8 @@ describe('Word 导出 Node 命令（禁止启动实际 Word）', () => {
   it('不给引擎目录时用环境变量 DOCREPORT_ENGINE_ROOT', async () => {
     await configureEngine();
     vi.stubEnv('DOCREPORT_ENGINE_ROOT', engine);
-    expect(await reportExport({ siteDir: site, packageDir, entry, action: 'status' })).toMatchObject({ state: 'idle' });
+    expect(await reportExport({ siteDir: site, packageDir, dataDir, entry, action: 'status' })).toMatchObject({ state: 'idle' });
     expect(renderer.spawn).not.toHaveBeenCalled();
-  });
-
-  it('默认用本包自带的 engine/；那里还没有 Python 环境时说明怎么配', async () => {
-    expect(await reportExport({ siteDir: site, packageDir, entry, action: 'status' })).toMatchObject({
-      state: 'unavailable',
-      message: expect.stringContaining(`Word 引擎 ${path.join(packageDir, 'engine')} 里还没有 Python 环境`),
-    });
   });
 
   it('compiler构建代码或协议变化使报告fingerprint变化', async () => {
@@ -226,10 +250,10 @@ describe('Word 导出 Node 命令（禁止启动实际 Word）', () => {
   it('重启后从磁盘恢复已完成但Node未登记的成功结果', async () => {
     await configureEngine();
     const { jobId } = await reportExport(options());
-    const directory = path.join(engine, 'out', jobId!);
+    const directory = path.join(exportRoot(), jobId!);
     await vi.waitFor(async () => {
       expect(JSON.parse(await readFile(path.join(directory, 'job.json'), 'utf8')).state).toBe('failed');
-      await expect(readFile(path.join(engine, 'out/.web-export.lock'))).rejects.toMatchObject({ code: 'ENOENT' });
+      await expect(readFile(lockFile())).rejects.toMatchObject({ code: 'ENOENT' });
     });
     const bytes = Buffer.from('recovered output'), outputs = { 'report.docx': sha(bytes), 'report.pdf': sha(bytes) };
     for (const name of Object.keys(outputs)) await put(path.join(directory, 'result', name), bytes);

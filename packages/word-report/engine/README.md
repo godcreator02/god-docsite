@@ -4,13 +4,12 @@
 
 ## 环境
 
-使用本目录独立 `.venv`，不使用系统包、不复制源仓环境。Windows 64 位 Python 3.12、Microsoft Word 与 MathType 为实际导出的本机要求。
+依赖写在 `pyproject.toml`、锁在 `uv.lock`，Python 版本写在 `.python-version`（3.12）；Windows 64 位、Microsoft Word 与 MathType 为实际导出的本机要求。`[tool.uv] package = false`：uv 只装依赖、不构建本项目，引擎从 `src/` 以 `python -m docreport` 运行。
+
+`report-docx export` 自己用 uv 运行引擎，环境放在 gwb home 的 `data/word-report/env-<版本>/`，不用手动准备。在本目录开发、跑测试时：
 
 ```powershell
-.\.venv\Scripts\python.exe -m pip install -r requirements.txt
-.\.venv\Scripts\python.exe -m pip install --no-build-isolation --no-deps -e .
-.\.venv\Scripts\python.exe -m pip check
-.\.venv\Scripts\python.exe -m unittest discover -s tests -v
+$env:PYTHONPATH = 'src'; uv run --frozen python -m unittest discover -s tests -v
 ```
 
 ## word-report 交给引擎的数据
@@ -18,8 +17,8 @@
 网站只用于阅读和评论。`@godcreator/word-report` 的命令行 `report-docx` 与 `./node` 出口的 `reportExport` 先把分章内容编译成完整 `format: docreport` / `schemaVersion: 1` 文档与 `assets/`，交给以下入口。它们不依赖 gwb。`--data-only` 必须传递；这个模式不导入快照目录中的 `report.py`。未展开的文档引用不会通过正式 Schema。
 
 ```powershell
-.\.venv\Scripts\python.exe -m docreport validate <快照目录> --data-only
-.\.venv\Scripts\python.exe -m docreport build <快照目录> --data-only --out out\<新的运行目录>
+cd src; uv run --project .. --frozen python -m docreport validate <快照目录> --data-only
+cd src; uv run --project .. --frozen python -m docreport build <快照目录> --data-only --out <还不存在的输出目录>
 ```
 
 需要版式数据时，可加 `--layout <layout.json>`，内容为已有 `validate_layout` 支持的节点 ID 字典：段落样式、图片宽度、表格列宽与行高、顶层章节起页与方向。默认采用 `templates/project-report.dotx`。word-report 的命令行与 `reportExport` 不接受任意 Python 布局程序。
@@ -27,10 +26,10 @@
 已有 demo 保留其受信任的 `report.py` 与原入口，用于原有版式和专属验收回归：
 
 ```powershell
-.\.venv\Scripts\python.exe -m docreport build reports\demo-report --out out\<新的运行目录>
+cd src; uv run --project .. --frozen python -m docreport build ..\reports\demo-report --out ..\out\<新的运行目录>
 ```
 
-一次运行只占用本包 `out/` 的新子目录；失败记录保留，不覆盖以前结果。COM 使用独立 `DispatchEx` 实例，只关闭本次实例内的文档。模板为只读输入，输入与输出哈希、保存重开检查、公式检查、DOCX/PDF 均写入本次输出。自动通过状态保持 `passed_automation_visual_review_pending`，逐页显示由用户检查，不能沿用旧输出的验收。
+一次运行只占用一个还不存在的输出目录；失败记录保留，不覆盖以前结果。COM 使用独立 `DispatchEx` 实例，只关闭本次实例内的文档。模板为只读输入，输入与输出哈希、保存重开检查、公式检查、DOCX/PDF 均写入本次输出。自动通过状态保持 `passed_automation_visual_review_pending`，逐页显示由用户检查，不能沿用旧输出的验收。
 
 ## 迁入回归
 

@@ -75,11 +75,8 @@ def load_report(directory, *, data_only=False, layout_path=None):
     return directory, content, module, template
 
 
-def reserve_output(output, root=ROOT):
+def reserve_output(output):
     output = output.resolve()
-    allowed = (root / "out").resolve()
-    if output == allowed or not output.is_relative_to(allowed):
-        raise ValueError("Use a new subdirectory of the repository out/.")
     # Refuse even an empty existing directory: one invocation owns one run.
     output.mkdir(parents=True, exist_ok=False)
     return output
@@ -88,13 +85,13 @@ def reserve_output(output, root=ROOT):
 def require_environment():
     if sys.platform != "win32" or struct.calcsize("P") != 8:
         raise RuntimeError("Build requires Windows and 64-bit Python.")
-    if sys.prefix == sys.base_prefix or Path(sys.prefix).resolve() != (ROOT / ".venv").resolve():
-        raise RuntimeError("Run this project with its .venv\\Scripts\\python.exe.")
+    if sys.prefix == sys.base_prefix:
+        raise RuntimeError("Run the engine inside its uv environment: uv run --project <engine> --frozen python -m docreport ...")
 
 
 def inputs_manifest(directory, template):
     paths = set((ROOT / "src/docreport").glob("*.py"))
-    paths.update((ROOT / name) for name in ("pyproject.toml", "requirements.txt"))
+    paths.update((ROOT / name) for name in ("pyproject.toml", "uv.lock", ".python-version"))
     paths.add(template)
     paths.add(ROOT / 'schemas/report-content.schema.json')
     paths.update(p for p in directory.rglob("*") if p.is_file()
@@ -134,7 +131,7 @@ def build(directory, output, dll=DEFAULT_DLL, *, data_only=False, layout_path=No
                     environment=dict(python=sys.version, executable=sys.executable,
                                      platform=platform.platform(),
                                      packages={name: importlib.metadata.version(name) for name in
-                                               ("pywin32", "comtypes", "pypdf", "Pillow", "setuptools", "jsonschema")}),
+                                               ("pywin32", "comtypes", "pypdf", "Pillow", "jsonschema")}),
                     command=[sys.executable, "-m", "docreport", "build", str(directory),
                              "--out", str(output), "--mathtype-dll", str(dll)])
     git = subprocess.run(["git", "rev-parse", "HEAD"], cwd=ROOT, capture_output=True, text=True)
@@ -224,7 +221,7 @@ def main():
     commands = parser.add_subparsers(dest="command", required=True)
     generate = commands.add_parser("build", help="Generate DOCX, PDF and automated verification from a report directory")
     generate.add_argument("report_directory", type=Path)
-    generate.add_argument("--out", type=Path, required=True, help="Fresh directory under repository out/")
+    generate.add_argument("--out", type=Path, required=True, help="Directory that does not exist yet")
     generate.add_argument("--mathtype-dll", type=Path, default=DEFAULT_DLL)
     generate.add_argument('--data-only', action='store_true', help='Export compiled protocol data without importing report.py')
     generate.add_argument('--layout', type=Path, help='Optional pure JSON layout for data-only exports')

@@ -12,8 +12,8 @@ from docreport.web_runner import claim_lock, release_lock, run
 
 class WebRunnerTests(unittest.TestCase):
     def fixture(self, root):
-        lock = root / 'out/.web-export.lock'
-        lock.parent.mkdir()
+        lock = root / 'data/word-report/export.lock'
+        lock.parent.mkdir(parents=True)
         job = 'web-' + str(uuid.uuid4())
         lock.write_text(json.dumps(dict(id=job, pid=1234, ownerPid=1234, phase='starting')), encoding='utf-8')
         return lock, job
@@ -22,7 +22,7 @@ class WebRunnerTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)
             lock, job = self.fixture(root)
-            claim_lock(lock, job, root=root)
+            claim_lock(lock, job)
             owner = json.loads(lock.read_text(encoding='utf-8'))
             self.assertEqual(owner['rendererPid'], os.getpid())
             self.assertEqual(owner['pid'], os.getpid())
@@ -31,14 +31,12 @@ class WebRunnerTests(unittest.TestCase):
             release_lock(lock, job)
             self.assertFalse(lock.exists())
 
-    def test_claim_cannot_steal_other_job_or_path(self):
+    def test_claim_cannot_steal_other_job(self):
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)
             lock, job = self.fixture(root)
             with self.assertRaises(ValueError):
-                claim_lock(lock, 'web-' + str(uuid.uuid4()), root=root)
-            with self.assertRaises(ValueError):
-                claim_lock(root / 'another-lock', job, root=root)
+                claim_lock(lock, 'web-' + str(uuid.uuid4()))
             self.assertEqual(json.loads(lock.read_text(encoding='utf-8'))['phase'], 'starting')
 
     def test_release_cannot_delete_another_renderer_lock(self):

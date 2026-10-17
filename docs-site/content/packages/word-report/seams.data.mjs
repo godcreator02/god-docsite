@@ -151,10 +151,10 @@ export const reportSeams = defineSeamGraph({
       name: '导出写快照目录并启动引擎',
       a: ['export'],
       b: ['runner'],
-      iface: 'out/<任务 id>/input/ · out/.web-export.lock · python -m docreport.web_runner --data-only',
+      iface: 'out/word-report/<任务 id>/input/ · <data>/export.lock · uv run … python -m docreport.web_runner --data-only',
       convention: false,
       via: 'code',
-      text: 'reportExport 把组装好的数据写进引擎目录 out/<任务 id>/，拿 out/.web-export.lock 锁——一个引擎同一时间只导出一份——再启动 .venv 里的 Python 跑 web_runner。',
+      text: 'reportExport 把组装好的数据写进站点的 out/word-report/<任务 id>/，拿 gwb home 的 data/word-report/export.lock 锁（一个 home 同一时间只导出一份），再由 uv 在 data/word-report/env-<版本>/ 的环境里跑 web_runner。',
     },
     {
       n: 8,
@@ -164,7 +164,7 @@ export const reportSeams = defineSeamGraph({
       iface: 'report.docx · report.pdf · verification.json',
       convention: false,
       via: 'code',
-      text: 'web_runner 只认组装好的数据，驱动本机 Word 与 MathType 按 .dotx 模板排版，写出 docx、pdf 与逐项核对记录，都在 out/<任务 id>/result/ 下。',
+      text: 'web_runner 只认组装好的数据，驱动本机 Word 与 MathType 按 .dotx 模板排版，写出 docx、pdf 与逐项核对记录，都在站点的 out/word-report/<任务 id>/result/ 下。',
     },
     {
       n: 9,

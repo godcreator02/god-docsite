@@ -1,0 +1,36 @@
+---
+born-at: 2026-10-17T21:30
+type: choice
+parent: [2026-09-03-god-live-doc]
+label: Word 引擎改由 uv 运行：环境放 gwb home 的 data/word-report，结果放站点 out/word-report
+domain: 页面
+---
+
+## 背景
+
+pivots-from:: [报告改写成功能包 word-report](2026-10-15-word-report-package.md)
+
+导出 Word 原来要人先准备引擎：把站点 `node_modules` 里的 `engine/` 复制到路径短的目录（快照和结果写在引擎目录的 `out/` 下，路径太长时 Word 插图片报「这不是有效文件名」），在那里用三条命令建 `.venv`，再设 `DOCREPORT_ENGINE_ROOT`；每次升级 word-report 都要重来，0.6.2 发出后没有一份复制出去的引擎是新的。用户先问是不是该把导出放进 gwb、或者加一条 pnpm 快捷命令，讨论后定了：导出照旧只走 `report-docx`，让它自己用 uv 准备引擎；uv 的环境放在 gwb home 的 `data/word-report`，不放别处；输出放在站点的 `out` 里。
+
+## 结论与边界
+
+- 要人准备，追到根上是两处绑定：引擎只认自己目录里的 `.venv`（`require_environment`），快照、结果和锁只能写在引擎目录的 `out/` 下（`reserve_output`、`claim_lock`、`export.ts` 的路径）。两处都解开，引擎留在 `node_modules` 里只读
+- 依赖从 `requirements.txt` 搬进 `pyproject.toml`，加 `uv.lock` 与 `.python-version`（3.12）；`[tool.uv] package = false`，uv 只装依赖、不构建引擎这个包
+- `report-docx` 在 PATH 里找 uv，以 `uv run --project <engine> --frozen python -m docreport.web_runner …` 启动引擎，工作目录 `engine/src/`，`UV_PROJECT_ENVIRONMENT` 指向 `<home>/data/word-report/env-<版本>/`，`PYTHONDONTWRITEBYTECODE=1`；导出锁改在 `<home>/data/word-report/export.lock`，任务、快照与结果在 `<站点>/out/word-report/`，那里写一个内容为 `*` 的 `.gitignore`
+- home 照 gwb 内核的规则找（`GWB_HOME` 是名字就在 `%APPDATA%/gwb-kernel/homes/<名字>`，带路径分隔符就是目录本身，没设是 `default`），所以 gwb 启动的进程和在 shell 里运行的命令找到的是同一个 home；word-report 仍不依赖 gwb 的任何包
+- 实测：在引擎副本上 uv 第一次建环境 8 秒、之后每次 1.3 秒，前后比对副本里每个文件的哈希完全相同；测试站 `full-test/site` 的 sample 报告用新流程真实导出一次 59 秒，12 页，全部检查通过，`git status full-test` 没有变化，锁已释放
+- 本机找不到 uv 时 `status` 与 `export` 回 `unavailable`，写明怎么装；不改用别的办法建环境
+
+## 否掉的候选
+
+- **把导出做成 gwb 命令、由插件准备引擎**：要另外处理插件与站点之间的版本一致，没装 gwb 的机器用不了；问题出在引擎的两处绑定，不在命令放在哪
+- **在站点 package.json 里加一条 pnpm 快捷命令**：和 `pnpm exec report-docx export` 完全一样，不碰引擎环境
+- **把项目本身装进环境（去掉 `package = false`）**：setuptools 构建时往 `node_modules` 里的引擎目录写 `egg-info`；装成包以后 `ROOT` 指到 `site-packages`，找不到模板
+- **uv 的 `--no-install-project`**：uv 0.12 的 `run` 没有这个参数
+- **环境放 `%LOCALAPPDATA%\word-report`**：用户定了放 gwb home 的 data 里
+
+## 没做的
+
+- 0.6.2 起关后台工作时记下的 Word 选项原值仍在 `%LOCALAPPDATA%\word-report\word-options.json`：Word 选项属于 Windows 用户，几个 home 同时导出也要看到同一份记录
+- uv 自己的下载缓存与它下载的 Python 解释器仍在 uv 的默认位置；这台机器上 3.12 已经装着，没有下载
+- 旧版本导出在引擎目录 `out/` 下的结果不搬到站点

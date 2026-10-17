@@ -8,14 +8,12 @@ import re
 import sys
 import uuid
 
-from .__main__ import ROOT, build, require_environment
+from .__main__ import build, require_environment
 from .content import read_json
 
 
-def claim_lock(lock, job, *, root=ROOT):
+def claim_lock(lock, job):
     lock = Path(lock).resolve()
-    if lock != (Path(root) / 'out/.web-export.lock').resolve():
-        raise ValueError('Renderer lock must be the engine out/.web-export.lock.')
     if not re.fullmatch(r'web-[a-f0-9-]{36}', job):
         raise ValueError('Invalid website job identifier.')
     owner = read_json(lock)

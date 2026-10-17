@@ -10,13 +10,16 @@ const help = `用法：report-docx <export|status> <报告 id> [选项]
       report-docx check [选项]
 
 报告在站点目录的 reports/<报告 id>/：入口是 content.json（JSON 报告）或 index.mdx（MDX 报告）。
-export   导出这份报告的 Word 与 PDF，等这次导出做完，把结果按 JSON 打出来
+export   导出这份报告的 Word 与 PDF，等这次导出做完，把结果按 JSON 打出来；结果在站点的 out/word-report/ 下
 status   只看这份报告的导出状态，不启动 Word
 check    检查站点里全部报告（JSON 报告的每份与每一章、MDX 报告整份）的格式、引用与图片，有问题时退出码非零
 
+导出要本机装着 Word、MathType 与 uv：uv 照引擎的 uv.lock 在 gwb home 的 data/word-report/ 下准备 Python 环境
+（home 照环境变量 GWB_HOME 找，没设是 default），第一次导出要多等几十秒。
+
 选项：
   --site <目录>     站点目录（默认当前目录）
-  --engine <目录>   Word 引擎目录（只给 export、status；默认环境变量 DOCREPORT_ENGINE_ROOT，再默认本包自带的 engine/）
+  --engine <目录>   Word 引擎的源码目录（只给 export、status；默认环境变量 DOCREPORT_ENGINE_ROOT，再默认本包自带的 engine/）
   --json            check 的结果按 JSON 打出来
   --help, -h        显示这段说明
 `

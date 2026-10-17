@@ -1,6 +1,6 @@
 {
   "name": "@godcreator/word-report",
-  "version": "0.6.2",
+  "version": "0.6.3",
   "author": {
     "name": "godcreator"
   },
@@ -34,7 +34,8 @@
     "styles",
     "template",
     "engine/pyproject.toml",
-    "engine/requirements.txt",
+    "engine/uv.lock",
+    "engine/.python-version",
     "engine/README.md",
     "engine/src/docreport",
     "engine/schemas",

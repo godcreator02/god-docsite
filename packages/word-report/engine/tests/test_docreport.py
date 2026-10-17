@@ -267,17 +267,13 @@ class BodyMarkerTests(unittest.TestCase):
 
 
 class ReportBoundaryTests(unittest.TestCase):
-    def test_output_is_fresh_and_cannot_escape_out(self):
+    def test_output_is_fresh(self):
         with tempfile.TemporaryDirectory() as temporary:
-            root = Path(temporary)
-            for target in (root / 'out', root / 'report', root / 'out/../report'):
-                with self.assertRaises(ValueError):
-                    reserve_output(target, root)
-            path = reserve_output(root / 'out/first', root)
+            path = reserve_output(Path(temporary) / 'out/word-report/first')
             marker = path / 'keep.txt'
             marker.write_text('original', encoding='utf-8')
             with self.assertRaises(FileExistsError):
-                reserve_output(path, root)
+                reserve_output(path)
             self.assertEqual(marker.read_text(encoding='utf-8'), 'original')
 
     def test_report_contract_accepts_independent_content_and_checks_template(self):

@@ -15,8 +15,10 @@ export interface ReportExportOptions {
   entry: string
   mode?: Mode
   action?: 'start' | 'status'
-  /** Word 引擎目录（里面有 .venv、templates/、src/docreport/）；不给就看环境变量 DOCREPORT_ENGINE_ROOT，再不给用本包自带的 engine/ */
+  /** Word 引擎的源码目录（里面有 pyproject.toml、uv.lock、templates/、src/docreport/）；不给就看环境变量 DOCREPORT_ENGINE_ROOT，再不给用本包自带的 engine/ */
   engineDir?: string
+  /** 放引擎的 Python 环境与导出锁的目录；不给用 gwb home 的 data/word-report */
+  dataDir?: string
   /** 本包目录：它的 package.json 与构建产物算进版本指纹；不给用装着的这一份 */
   packageDir?: string
   expectedFingerprint?: string
@@ -54,6 +56,33 @@ function installedPackageDir(): string {
 /** 本包自带的 Word 引擎：包目录下的 engine/ */
 const packagedEngineDir = (packageDir: string) => path.join(packageDir, 'engine')
 
+/** gwb home 的 data/word-report；home 照 gwb 内核的规则找：GWB_HOME 是名字就在 %APPDATA%/gwb-kernel/homes/<名字>，带路径分隔符就是目录本身，没设是 default */
+export function gwbDataDir(): string {
+  const setting = process.env.GWB_HOME ?? 'default'
+  if (/[\\/]/.test(setting)) return path.join(path.resolve(setting), 'data', 'word-report')
+  const appData = process.env.APPDATA
+  if (!appData) throw new Error(`找不到 gwb home：环境变量 GWB_HOME 是名字 ${JSON.stringify(setting)}，要靠 APPDATA 拼出 home 目录，但 APPDATA 没有设`)
+  return path.join(appData, 'gwb-kernel', 'homes', setting, 'data', 'word-report')
+}
+
+/** PATH 里的 uv：导出用它照引擎的 uv.lock 准备 Python 环境再运行引擎 */
+function uvOnPath(): string | undefined {
+  const name = process.platform === 'win32' ? 'uv.exe' : 'uv'
+  for (const directory of (process.env.PATH ?? '').split(path.delimiter)) {
+    if (directory && existsSync(path.join(directory, name))) return path.join(directory, name)
+  }
+  return undefined
+}
+
+/** 导出任务、快照与结果都在站点的 out/word-report/ 下；那里的 .gitignore 让整个目录不进 git */
+const exportRootOf = (site: string) => path.join(site, 'out', 'word-report')
+const lockFileOf = (dataDir: string) => path.join(dataDir, 'export.lock')
+async function versionOf(compiler: string): Promise<string> {
+  const version = (JSON.parse(await readFile(path.join(compiler, 'package.json'), 'utf8')) as { version?: unknown }).version
+  if (typeof version !== 'string' || !version) throw new Error(`${path.join(compiler, 'package.json')} 里没有 version`)
+  return version
+}
+
 /** 入口相对站点目录，不收本机的任意路径 */
 export function reportEntry(entry: unknown): string {
   if (typeof entry !== 'string' || !(entry.endsWith('/content.json') || entry.endsWith('/index.mdx')) || /[\\:\x00-\x1f]/.test(entry) || entry.startsWith('/') || entry.split('/').some((part) => !part || part === '.' || part === '..')) throw new Error('报告入口要是站点目录里的相对路径，如 reports/<报告 id>/content.json 或 reports/<报告 id>/index.mdx')
@@ -65,7 +94,7 @@ function reportMode(value: unknown): Mode {
 }
 /** 引擎文件与本包（组装报告的代码）一起算指纹：任何一边变了，旧的导出结果就算过期 */
 async function engineFingerprint(engine: string, compiler: string): Promise<string> {
-  const files = ['templates/project-report.dotx', 'schemas/report-content.schema.json', 'requirements.txt', 'pyproject.toml']
+  const files = ['templates/project-report.dotx', 'schemas/report-content.schema.json', 'pyproject.toml', 'uv.lock', '.python-version']
   for (const name of await readdir(path.join(engine, 'src/docreport'))) if (name.endsWith('.py')) files.push(`src/docreport/${name}`)
   const inputs = await Promise.all(files.sort().map(async (file): Promise<[string, string]> => [`word/${file}`, hash(await readFile(path.join(engine, file)))]))
   async function compilerFiles(relative: string): Promise<void> {
@@ -101,11 +130,11 @@ async function capture(site: string, engine: string, compiler: string, entry: st
   return { report, layout, engineHash, fingerprint: hash(`${report.fingerprint}\n${engineHash}\n${hash(layout.bytes ?? '')}\n${mode}`) }
 }
 const keyFor = (site: string, entry: string, mode: Mode) => hash(JSON.stringify([site, entry, mode]))
-const jobPath = (engine: string, id: string) => path.join(engine, 'out', id)
-async function previousJob(engine: string, key: string, site: string, entry: string, mode: Mode): Promise<Job | undefined> {
-  const latest = await saved<{ id: string }>(path.join(engine, 'out/web-index', `${key}.json`))
+const jobPath = (exportRoot: string, id: string) => path.join(exportRoot, id)
+async function previousJob(exportRoot: string, key: string, site: string, entry: string, mode: Mode): Promise<Job | undefined> {
+  const latest = await saved<{ id: string }>(path.join(exportRoot, 'web-index', `${key}.json`))
   if (!latest || !/^web-[a-f0-9-]{36}$/.test(latest.id)) return undefined
-  const job = await saved<Job>(path.join(jobPath(engine, latest.id), 'job.json'))
+  const job = await saved<Job>(path.join(jobPath(exportRoot, latest.id), 'job.json'))
   return job?.id === latest.id && job.site === site && job.entry === entry && job.mode === mode && job.state === 'ready' ? job : undefined
 }
 type RendererLock = { id: string; pid: number; ownerPid?: number; rendererPid?: number; phase?: 'starting' | 'rendering'; createdAt?: string }
@@ -119,12 +148,12 @@ class ExportLockError extends Error {
 function alive(pid: number): boolean {
   try { process.kill(pid, 0); return true } catch (error) { return (error as NodeJS.ErrnoException).code !== 'ESRCH' }
 }
-async function rendererLock(engine: string): Promise<RendererLock | undefined> {
-  const value = await saved<RendererLock>(path.join(engine, 'out/.web-export.lock'))
+async function rendererLock(lockFile: string): Promise<RendererLock | undefined> {
+  const value = await saved<RendererLock>(lockFile)
   return value && /^web-[a-f0-9-]{36}$/.test(value.id) && Number.isSafeInteger(value.pid) && value.pid > 0 ? value : undefined
 }
-async function verifyResult(engine: string, job: Job) {
-  const output = path.join(jobPath(engine, job.id), 'result')
+async function verifyResult(exportRoot: string, job: Job) {
+  const output = path.join(jobPath(exportRoot, job.id), 'result')
   const verification = await saved<{ status: string; events: { event: string; pages?: number }[] }>(path.join(output, 'verification.json'))
   const manifest = await saved<{ outputs: Record<string, string> }>(path.join(output, 'manifest.json'))
   if (verification?.status !== 'passed_automation_visual_review_pending' || !manifest?.outputs) throw new Error('Word 未给出完整自动验收记录')
@@ -132,36 +161,35 @@ async function verifyResult(engine: string, job: Job) {
   return { outputs: manifest.outputs, checks: { pages: verification.events.find((event) => event.event === 'document-check')?.pages, visualReview: 'pending' } }
 }
 /** Latest attempt is persisted independently of the previous successful output pointer. */
-async function latestAttempt(engine: string, compiler: string, key: string, site: string): Promise<Job | undefined> {
-  const pointer = await saved<{ id: string }>(path.join(engine, 'out/web-active', `${key}.json`))
+async function latestAttempt(exportRoot: string, lockFile: string, engine: string, compiler: string, key: string, site: string): Promise<Job | undefined> {
+  const pointer = await saved<{ id: string }>(path.join(exportRoot, 'web-active', `${key}.json`))
   if (!pointer || !/^web-[a-f0-9-]{36}$/.test(pointer.id)) return undefined
-  const job = await saved<Job>(path.join(jobPath(engine, pointer.id), 'job.json'))
+  const job = await saved<Job>(path.join(jobPath(exportRoot, pointer.id), 'job.json'))
   if (!job || job.site !== site || job.state !== 'running') return job?.site === site ? job : undefined
-  const lock = await rendererLock(engine)
+  const lock = await rendererLock(lockFile)
   if (lock?.id === job.id && alive(lock.rendererPid ?? lock.pid)) return job
   try {
-    const source = await saved<{ engineHash: string }>(path.join(jobPath(engine, job.id), 'source-manifest.json'))
+    const source = await saved<{ engineHash: string }>(path.join(jobPath(exportRoot, job.id), 'source-manifest.json'))
     if (!source || await engineFingerprint(engine, compiler) !== source.engineHash) throw new Error('导出服务已重启且引擎版本发生变化，请重新导出')
-    const result = await verifyResult(engine, job)
+    const result = await verifyResult(exportRoot, job)
     Object.assign(job, result, { state: 'ready' })
-    await atomicJson(path.join(jobPath(engine, job.id), 'job.json'), job)
-    await atomicJson(path.join(engine, 'out/web-index', `${key}.json`), { id: job.id })
+    await atomicJson(path.join(jobPath(exportRoot, job.id), 'job.json'), job)
+    await atomicJson(path.join(exportRoot, 'web-index', `${key}.json`), { id: job.id })
   } catch (error) {
     job.state = 'failed'; job.message = `导出进程已结束：${(error as Error).message}`
-    await atomicJson(path.join(jobPath(engine, job.id), 'job.json'), job)
+    await atomicJson(path.join(jobPath(exportRoot, job.id), 'job.json'), job)
   }
   return job
 }
-async function outputPaths(engine: string, job?: Job): Promise<Pick<ReportExportResult, 'docx' | 'pdf'>> {
+async function outputPaths(exportRoot: string, job?: Job): Promise<Pick<ReportExportResult, 'docx' | 'pdf'>> {
   if (!job || !job.outputs) return {}
-  const directory = path.join(jobPath(engine, job.id), 'result')
+  const directory = path.join(jobPath(exportRoot, job.id), 'result')
   for (const name of ['report.docx', 'report.pdf']) if (hash(await readFile(path.join(directory, name))) !== job.outputs[name]) throw new Error('生成文件与验收记录不一致')
   return { docx: path.join(directory, 'report.docx'), pdf: path.join(directory, 'report.pdf') }
 }
 
-/** One lock per renderer, shared across sites and dev-server instances. */
-async function acquireLock(engine: string, id: string): Promise<() => Promise<void>> {
-  const file = path.join(engine, 'out/.web-export.lock')
+/** One lock per gwb home's word-report data directory, shared across sites and dev-server instances. */
+async function acquireLock(file: string, id: string): Promise<() => Promise<void>> {
   await mkdir(path.dirname(file), { recursive: true })
   try {
       const handle = await open(file, 'wx')
@@ -171,7 +199,7 @@ async function acquireLock(engine: string, id: string): Promise<() => Promise<vo
       return async () => { const owner = await saved<{ id: string }>(file); if (owner?.id === id) await unlink(file).catch((error: NodeJS.ErrnoException) => { if (error.code !== 'ENOENT') throw error }) }
     } catch (error) {
       if ((error as NodeJS.ErrnoException).code !== 'EEXIST') throw error
-      const owner = await rendererLock(engine)
+      const owner = await rendererLock(file)
       if (!owner) throw new ExportLockError(`导出锁损坏或尚未写完，不能确认 Word 是否停止。请核对渲染进程后清理锁：${file}`, 'lock-invalid')
       if (alive(owner.rendererPid ?? owner.pid)) throw new ExportLockError('Word 正在生成另一份报告，请等待完成', 'locked')
       // Never race a delayed child handoff or delete a newly acquired lock from another server.
@@ -179,8 +207,12 @@ async function acquireLock(engine: string, id: string): Promise<() => Promise<vo
     }
 }
 
-async function execute(job: Job, engine: string, compiler: string, report: ReadReportResult, layout: Awaited<ReturnType<typeof layoutOf>>, engineHash: string, release: () => Promise<void>) {
-  const directory = jobPath(engine, job.id), input = path.join(directory, 'input'), output = path.join(directory, 'result')
+/** 引擎在哪、导出写到哪、Python 环境与锁在哪 */
+type ExportPlaces = { engine: string; compiler: string; exportRoot: string; dataDir: string; lockFile: string; uv: string }
+
+async function execute(job: Job, places: ExportPlaces, report: ReadReportResult, layout: Awaited<ReturnType<typeof layoutOf>>, engineHash: string, release: () => Promise<void>) {
+  const { engine, compiler, exportRoot, dataDir, lockFile, uv } = places
+  const directory = jobPath(exportRoot, job.id), input = path.join(directory, 'input'), output = path.join(directory, 'result')
   let log = ''
   try {
     await mkdir(input, { recursive: true })
@@ -197,18 +229,20 @@ async function execute(job: Job, engine: string, compiler: string, report: ReadR
     if (layout.bytes) await writeFile(path.join(directory, 'layout.json'), layout.bytes)
     // Recheck before starting COM; no authored code or live content paths enter Python.
     if (await engineFingerprint(engine, compiler) !== engineHash) throw new Error('Word 引擎在建立快照期间改变，请重新导出')
-    const args = ['-m', 'docreport.web_runner', '--lock', path.join(engine, 'out/.web-export.lock'), '--job', job.id, input, '--data-only', '--out', output]
+    // uv 照 uv.lock 把环境同步进 dataDir/env-<版本>（第一次几十秒），引擎从 src/ 以 python -m 运行；不写字节码，安装在 node_modules 里的引擎目录一个文件都不改
+    const args = ['run', '--project', engine, '--frozen', 'python', '-m', 'docreport.web_runner', '--lock', lockFile, '--job', job.id, input, '--data-only', '--out', output]
     if (layout.bytes) args.push('--layout', path.join(directory, 'layout.json'))
+    const environment = { ...process.env, UV_PROJECT_ENVIRONMENT: path.join(dataDir, `env-${await versionOf(compiler)}`), PYTHONDONTWRITEBYTECODE: '1' }
     await new Promise<void>((resolve, reject) => {
-      const child = spawn(path.join(engine, '.venv/Scripts/python.exe'), args, { cwd: engine, windowsHide: true, stdio: ['ignore', 'pipe', 'pipe'] })
+      const child = spawn(uv, args, { cwd: path.join(engine, 'src'), env: environment, windowsHide: true, stdio: ['ignore', 'pipe', 'pipe'] })
       for (const stream of [child.stdout, child.stderr]) stream.on('data', (chunk: Buffer) => { log += chunk.toString('utf8'); if (log.length > 2_000_000) log = log.slice(-2_000_000) })
       child.on('error', reject)
       child.on('close', (code) => code === 0 ? resolve() : reject(new Error(`Word 导出失败（退出码 ${code}），请查看本次运行记录`)))
     })
     if (await engineFingerprint(engine, compiler) !== engineHash) throw new Error('Word 引擎在生成期间改变，本次结果不能标为成功')
-    Object.assign(job, await verifyResult(engine, job), { state: 'ready' })
+    Object.assign(job, await verifyResult(exportRoot, job), { state: 'ready' })
     await atomicJson(path.join(directory, 'job.json'), job)
-    await atomicJson(path.join(engine, 'out/web-index', `${keyFor(job.site, job.entry, job.mode)}.json`), { id: job.id })
+    await atomicJson(path.join(exportRoot, 'web-index', `${keyFor(job.site, job.entry, job.mode)}.json`), { id: job.id })
   } catch (error) {
     job.state = 'failed'; job.message = (error as Error).message
     await atomicJson(path.join(directory, 'job.json'), job)
@@ -226,12 +260,15 @@ export async function reportExport(options: ReportExportOptions): Promise<Report
   if (action !== 'start' && action !== 'status') throw new Error('导出操作必须是 start 或 status')
   if (options.engineDir !== undefined && (typeof options.engineDir !== 'string' || !options.engineDir.trim())) throw new Error('engineDir 必须是 Word 引擎目录')
   if (options.packageDir !== undefined && (typeof options.packageDir !== 'string' || !options.packageDir.trim())) throw new Error('packageDir 必须是本包目录')
+  if (options.dataDir !== undefined && (typeof options.dataDir !== 'string' || !options.dataDir.trim())) throw new Error('dataDir 必须是放 Python 环境与导出锁的目录')
   if (options.expectedFingerprint !== undefined && typeof options.expectedFingerprint !== 'string') throw new Error('expectedFingerprint 必须是字符串')
   const compiler = path.resolve(options.packageDir ?? installedPackageDir())
   const engine = path.resolve(options.engineDir ?? process.env.DOCREPORT_ENGINE_ROOT ?? packagedEngineDir(compiler))
-  const key = keyFor(site, entry, mode), active = await latestAttempt(engine, compiler, key, site), previous = await previousJob(engine, key, site, entry, mode)
-  const outputs = await outputPaths(engine, previous)
-  if (!(await exists(path.join(engine, '.venv/Scripts/python.exe')))) return { state: 'unavailable', message: `Word 引擎 ${engine} 里还没有 Python 环境：在那里运行 python -m venv .venv、.venv\\Scripts\\pip install -r requirements.txt 与 .venv\\Scripts\\pip install --no-build-isolation --no-deps -e .（要本机装着 Word 与 MathType）；node_modules 里的路径太长时 Word 打不开图片，把 engine/ 复制到路径短的目录、用 --engine 或环境变量 DOCREPORT_ENGINE_ROOT 指过去`, ...outputs }
+  const dataDir = path.resolve(options.dataDir ?? gwbDataDir()), lockFile = lockFileOf(dataDir), exportRoot = exportRootOf(site)
+  const key = keyFor(site, entry, mode), active = await latestAttempt(exportRoot, lockFile, engine, compiler, key, site), previous = await previousJob(exportRoot, key, site, entry, mode)
+  const outputs = await outputPaths(exportRoot, previous)
+  const uv = uvOnPath()
+  if (!uv) return { state: 'unavailable', message: `本机找不到 uv：导出用 uv 照 Word 引擎的 uv.lock 在 ${dataDir} 下准备 Python 环境再运行引擎；装好 uv（winget install astral-sh.uv）后重试。导出还要本机装着 Word 与 MathType`, ...outputs }
   let current: Awaited<ReturnType<typeof capture>>
   try { current = await capture(site, engine, compiler, entry, mode) } catch (error) { return { state: 'failed', stale: Boolean(previous), message: (error as Error).message, ...outputs } }
   const latest = active ?? previous
@@ -239,14 +276,17 @@ export async function reportExport(options: ReportExportOptions): Promise<Report
   if (options.expectedFingerprint !== undefined && options.expectedFingerprint !== current.fingerprint) throw new Error('报告内容已变化，请重新获取状态后导出')
   if (active?.state === 'running') throw new ExportLockError('Word 正在生成这份报告，请等待完成', 'locked')
   const job: Job = { id: `web-${randomUUID()}`, site, entry, mode, state: 'running', fingerprint: current.fingerprint }
-  const release = await acquireLock(engine, job.id)
+  const release = await acquireLock(lockFile, job.id)
   try {
-    await mkdir(jobPath(engine, job.id)); await atomicJson(path.join(jobPath(engine, job.id), 'job.json'), job)
-    await atomicJson(path.join(engine, 'out/web-active', `${key}.json`), { id: job.id })
+    await mkdir(exportRoot, { recursive: true })
+    await writeFile(path.join(exportRoot, '.gitignore'), '*\n')
+    await mkdir(jobPath(exportRoot, job.id))
+    await atomicJson(path.join(jobPath(exportRoot, job.id), 'job.json'), job)
+    await atomicJson(path.join(exportRoot, 'web-active', `${key}.json`), { id: job.id })
   } catch (error) { await release(); throw error }
-  void execute(job, engine, compiler, current.report, current.layout, current.engineHash, release).catch(async (error: unknown) => {
+  void execute(job, { engine, compiler, exportRoot, dataDir, lockFile, uv }, current.report, current.layout, current.engineHash, release).catch(async (error: unknown) => {
     job.state = 'failed'; job.message = String(error)
-    await atomicJson(path.join(jobPath(engine, job.id), 'job.json'), job).catch(() => undefined)
+    await atomicJson(path.join(jobPath(exportRoot, job.id), 'job.json'), job).catch(() => undefined)
   })
   return { state: 'running', jobId: job.id, fingerprint: job.fingerprint, ...outputs }
 }

@@ -97,7 +97,7 @@ MDX 报告不另有一套组装、显示和导出：`core/mdx/` 的编译器把�
 
 图上第 6、7、8 号，命令行在第 10 号。包里的 `reportExport` 不要网站、不要 gwb 也能用：`action: "start"` 开始一次导出，`action: "status"` 只看状态不启动 Word；命令行 `report-docx export` 开始后反复查询状态，等同一个任务做完才退出。
 
-{/* ref file="../packages/word-report/src/node/export.ts" lines="12-34" hash="e8accfc5cc82" blob="30c2c8561395" */}
+{/* ref file="../packages/word-report/src/node/export.ts" lines="12-36" hash="25272d772263" blob="c9444cf25531" */}
 
 一次导出六步，右边两张小卡片跟着锁与任务状态变：
 
@@ -109,7 +109,15 @@ MDX 报告不另有一套组装、显示和导出：`core/mdx/` 的编译器把�
 {/* ref file="../packages/word-report/src/core/schema.ts" lines="27-37" hash="4b3eed8b1d03" blob="dbd05f87d4bc" */}
 {/* ref file="../packages/word-report/src/core/schema.ts" lines="219-221" hash="7363160e81bd" blob="7af58fb59c71" */}
 
-结果放在引擎目录的 `out/` 下，不放进站点。
+导出要用的东西分三处放：
+
+| 放什么 | 在哪 | 为什么在那 |
+| --- | --- | --- |
+| 引擎源码（`src/docreport/`、模板、Schema、`pyproject.toml`、`uv.lock`） | 包里的 `engine/`，在站点的 `node_modules` 里 | 站点装哪个版本的 word-report 就用哪个版本的引擎，编译器与引擎不会对不上；这个目录只读，导出不往里写任何文件 |
+| Python 环境与导出锁 | gwb home 的 `data/word-report/`：`env-<版本>/` 与 `export.lock` | 一个 home 里所有站点共用；home 照 `GWB_HOME` 找，规则和工作台内核一样（名字就在 `%APPDATA%/gwb-kernel/homes/<名字>`，带路径分隔符就是目录本身，没设是 `default`），`reportExport` 的 `dataDir` 能换掉它 |
+| 每次导出的快照、记录与结果 | 站点的 `out/word-report/<任务>/`，任务指针在同目录的 `web-index/`、`web-active/` | 结果跟着站点走；这里的 `.gitignore`（内容是 `*`）由导出写入，整个目录不进 git |
+
+引擎由 uv 启动：`uv run --project <engine> --frozen python -m docreport.web_runner …`，环境变量 `UV_PROJECT_ENVIRONMENT` 指向 `env-<版本>/`，工作目录是 `engine/src/`。`pyproject.toml` 里写着 `[tool.uv] package = false`：uv 只照 `uv.lock` 装依赖、不构建引擎这个包（构建会往 `node_modules` 里的引擎目录写 `egg-info`），引擎以 `python -m` 从源码运行；再加上 `PYTHONDONTWRITEBYTECODE=1`，引擎目录连 `__pycache__` 都不写。uv 第一次同步环境十几秒，之后每次一秒多。本机找不到 uv 时 `status` 与 `export` 回 `unavailable`、写明怎么装。
 
 引擎里一次导出启动三次 Word。第一次按模板写出排版稿：域、编号、要交给 MathType 的公式先写成 `@FIELD3@`、`@MATH3@` 这类占位符，写完再逐个换成域与书签；只有一段文字的单元格整格一次写入。第二次把公式占位符逐个换成 MathType 对象、写入 TeX 并读回比对，存盘后重新打开再逐个读回核对。第三次更新域与目录并存盘，再以只读方式重新打开，按存盘的样子做检查、导出 PDF（不再更新一次域，免得存盘里过期的域结果被盖住），最后核对正文文字、表格数、图片字节与页数；存盘的 docx 里任何一个域的结果是「错误!未找到引用源」这类 Word 报错文字，导出就失败。
 

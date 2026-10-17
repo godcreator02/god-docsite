@@ -7,10 +7,23 @@ name = "docreport"
 version = "0.0.1"
 description = "Local Word and MathType report production"
 requires-python = ">=3.12"
-dynamic = ["dependencies"]
+dependencies = [
+  "pywin32==312; sys_platform == 'win32'",
+  "comtypes==1.4.17; sys_platform == 'win32'",
+  "pypdf==6.10.0",
+  "Pillow==12.3.0",
+  "jsonschema==4.25.1",
+  "attrs==26.1.0",
+  "jsonschema-specifications==2025.9.1",
+  "referencing==0.37.0",
+  "rpds-py==2026.9.1",
+  "typing-extensions==4.16.0",
+]
 
 [tool.setuptools.packages.find]
 where = ["src"]
 
-[tool.setuptools.dynamic]
-dependencies = {file = ["requirements.txt"]}
+# uv installs only the dependencies and runs the engine from src/ with python -m docreport:
+# building the project would write egg-info into the installed package directory.
+[tool.uv]
+package = false

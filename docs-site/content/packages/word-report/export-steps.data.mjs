@@ -1,26 +1,26 @@
 /**
  * ExportSteps（「word-report：报告」那一页「导出」一节）的全部数据，画面（export-steps.tsx）只读这一份。
  * 一次导出的六步照 src/node/export.ts 的 reportExport 与 execute、engine/src/docreport/web_runner.py 的锁交接写出；
- * 报错与状态原话逐字照抄源码。每步还带两张小卡片的数据：锁（out/.web-export.lock 的 phase 无 → starting → rendering
+ * 报错与状态原话逐字照抄源码。每步还带两张小卡片的数据：锁（gwb home 的 data/word-report/export.lock 的 phase 无 → starting → rendering
  * → 释放）与任务状态（无 → running → ready），字段名与状态名照代码。
  */
 
 /** 第 6 步收尾核对的规则：核对记录的状态、docx 与 pdf 的哈希对得上才 ready */
-/* ref file="../packages/word-report/src/node/export.ts" lines="126-133" hash="bd7f74288e3c" blob="a10afb8c5c20" */
+/* ref file="../packages/word-report/src/node/export.ts" lines="155-162" hash="f1ed6e56eac4" blob="c9444cf25531" */
 export const verifyWording = {
   status: 'passed_automation_visual_review_pending',
   mismatch: '生成文件与验收记录不一致',
 };
 
 /** 第 3 步锁：Node 写进锁文件的内容，与锁在而进程已退出时的报错原话 */
-/* ref file="../packages/word-report/src/node/export.ts" lines="162-180" hash="5ac53c8f9b56" blob="a10afb8c5c20" */
+/* ref file="../packages/word-report/src/node/export.ts" lines="191-208" hash="28d65241d24b" blob="c9444cf25531" */
 export const lockWording = {
   writtenByNode: [
     '{ "id": "web-<任务 id>", "pid": <Node 进程>,',
     '  "ownerPid": <Node 进程>, "phase": "starting",',
     '  "createdAt": <时刻> }',
   ],
-  orphaned: '上次导出进程已退出，锁仍保留。请确认本次 Word 实例已结束后清理锁：<engine>/out/.web-export.lock',
+  orphaned: '上次导出进程已退出，锁仍保留。请确认本次 Word 实例已结束后清理锁：<gwb home>/data/word-report/export.lock',
 };
 
 /** 第 1 步取快照：读所有 JSON 与图片、每张图真解码、记 sha256、整个再读一遍防中途改动 */
@@ -30,18 +30,18 @@ export const snapshotWording = {
 };
 
 /** 第 4、5 步：写快照目录、启动 Python 前再核引擎指纹、spawn 的命令行 */
-/* ref file="../packages/word-report/src/node/export.ts" lines="182-218" hash="986edd3d15b9" blob="a10afb8c5c20" */
+/* ref file="../packages/word-report/src/node/export.ts" lines="210-252" hash="741b9b3f75a3" blob="c9444cf25531" */
 export const executeWording = {
   engineChanged: 'Word 引擎在建立快照期间改变，请重新导出',
   command: [
-    '.venv/Scripts/python.exe -m docreport.web_runner',
-    '  --lock out/.web-export.lock --job web-<任务 id>',
-    '  <out/web-<任务 id>/input> --data-only --out <out/web-<任务 id>/result>',
+    'uv run --project <engine> --frozen python -m docreport.web_runner',
+    '  --lock <data>/export.lock --job web-<任务 id> <任务目录>/input',
+    '  --data-only --out <任务目录>/result（环境在 <data>/env-<版本>/）',
   ],
 };
 
 /** 第 5 步：Python 把锁从 starting 接过来改成 rendering 并记下自己的进程号，跑完自己释放 */
-/* ref file="../packages/word-report/engine/src/docreport/web_runner.py" lines="15-41" hash="08389797c252" blob="6a2778d6822b" */
+/* ref file="../packages/word-report/engine/src/docreport/web_runner.py" lines="15-39" hash="192e8d9aaa61" blob="10f978eb41a8" */
 export const pythonClaim = {
   lockLines: [
     '{ "id": "web-<任务 id>", "pid": <渲染进程>,',
@@ -51,7 +51,7 @@ export const pythonClaim = {
 };
 
 /** 一次导出的六步：capture（组装取快照、算指纹）→ acquireLock → 建任务 → execute（写目录、启动 Python、收尾） */
-/* ref file="../packages/word-report/src/node/export.ts" lines="221-252" hash="f3cf69182e78" blob="706cd2001bab" */
+/* ref file="../packages/word-report/src/node/export.ts" lines="254-292" hash="b7af4a8a12c8" blob="c9444cf25531" */
 export const steps = [
   {
     title: '组装并取快照',
@@ -72,7 +72,7 @@ export const steps = [
     cardTitle: '指纹的四项',
     lines: [
       { tone: 'none', text: '① 快照 fingerprint（每个文件的 sha256 合成）' },
-      { tone: 'none', text: '② 引擎文件的哈希（src/docreport/*.py、.dotx 模板、Schema、requirements、pyproject）' },
+      { tone: 'none', text: '② 引擎文件的哈希（src/docreport/*.py、.dotx 模板、Schema、pyproject、uv.lock、.python-version）' },
       { tone: 'none', text: '③ 本包构建产物的哈希（dist/、src/、package.json）——②③合成引擎指纹' },
       { tone: 'none', text: '④ layout.json 的哈希与模式' },
       { tone: 'good', text: '四项合成这一次的 fingerprint' },
@@ -84,9 +84,9 @@ export const steps = [
   },
   {
     title: '拿锁',
-    cardTitle: 'out/.web-export.lock',
+    cardTitle: '<data>/export.lock',
     lines: [
-      { tone: 'none', text: '锁文件建在引擎目录 out/ 下：一个引擎同一时间只导出一份' },
+      { tone: 'none', text: '锁文件在 gwb home 的 data/word-report/ 下：一个 home 同一时间只导出一份' },
       { tone: 'none', text: '几个站点、几个开发服务共用同一份锁文件' },
       { tone: 'bad', text: '锁在而进程已退出时不自动清，报错：' },
       { tone: 'bad', text: lockWording.orphaned },
@@ -97,9 +97,9 @@ export const steps = [
   },
   {
     title: '写快照目录',
-    cardTitle: 'out/<任务 id>/',
+    cardTitle: '<站点>/out/word-report/<任务 id>/',
     lines: [
-      { tone: 'none', text: 'out/web-<uuid>/' },
+      { tone: 'none', text: 'out/word-report/web-<uuid>/' },
       { tone: 'none', text: '├─ input/content.json        组装好的文档' },
       { tone: 'none', text: '├─ input/assets/…            改过名的图片' },
       { tone: 'none', text: '├─ sources/…                 原始 JSON' },
@@ -131,7 +131,7 @@ export const steps = [
     lines: [
       { tone: 'good', text: `核对记录 status: ${verifyWording.status}` },
       { tone: 'good', text: 'report.docx、report.pdf 的 sha256 与 manifest 对得上，才把任务标成 ready' },
-      { tone: 'none', text: '结果在 out/<任务 id>/result/ 下，不放进站点' },
+      { tone: 'none', text: '结果在站点的 out/word-report/<任务 id>/result/ 下，不进 git' },
       { tone: 'warn', text: 'visualReview: pending——逐页显示还要人看' },
     ],
     lock: { phase: '已释放', dot: 'good', lines: [] },
