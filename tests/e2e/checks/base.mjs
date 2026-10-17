@@ -702,21 +702,28 @@ export async function runBaseChecks({ browser, baseUrl, mode, siteDir, feedToken
         return { pass: true, detail: `侧栏 ${sidebarMs} ms 后是新标题，正文标题也换了，没有整页刷新=${kept}` }
       })
 
-      await check('dev 内容目录放错文件：底部出现问题按钮、点开列着那个文件，不弹报错层；删掉后按钮消失，没有整页刷新', async () => {
+      await check('dev 内容目录放错文件：顶上正中那一行最前面出现问题按钮、点开的列表在按钮下方，列着那个文件，不弹报错层；删掉后按钮消失，没有整页刷新', async () => {
         await page.goto(`${baseUrl}/glossary-demo`, { waitUntil: 'load' })
         await waitForHydrated(page, '#nd-sidebar a[href="/glossary-demo"]')
         await markNoReload(page)
         const stray = strayContentFileOf(siteDir, runTag)
         writeFileSync(stray.file, stray.text)
-        const issuesButton = page.locator('[data-dev-issues] > button', { hasText: '个问题' })
+        const issuesButton = page.locator('[data-top-notices] > [data-dev-issues]:first-child > button', { hasText: '个问题' })
         await issuesButton.waitFor({ timeout: stepTimeoutMs })
         await issuesButton.click()
-        await page.locator('[data-dev-issue-group="content-layout"] summary', { hasText: stray.name }).waitFor({ timeout: stepTimeoutMs })
+        const issueRow = page.locator('[data-dev-issue-group="content-layout"] summary', { hasText: stray.name })
+        await issueRow.waitFor({ timeout: stepTimeoutMs })
+        const buttonBox = await issuesButton.boundingBox()
+        const panelBox = await page.locator('section[aria-label="开发服务报出的问题"]').boundingBox()
+        const atTop = buttonBox !== null && buttonBox.y < 40 && panelBox !== null && panelBox.y >= buttonBox.y + buttonBox.height
         const overlay = await hasViteErrorOverlay(page)
         rmSync(stray.file)
         await page.locator('[data-dev-issues]').waitFor({ state: 'detached', timeout: stepTimeoutMs })
         const kept = await stillNoReload(page)
-        return { pass: !overlay && kept, detail: `问题按钮点开列着 ${stray.name}，报错层=${overlay}；删掉后按钮消失，没有整页刷新=${kept}` }
+        return {
+          pass: atTop && !overlay && kept,
+          detail: `问题按钮在顶上（y=${buttonBox?.y}），列表在它下方（y=${panelBox?.y}），列着 ${stray.name}，报错层=${overlay}；删掉后按钮消失，没有整页刷新=${kept}`,
+        }
       })
     } else {
       await check('浏览器产物里没有服务端代码', async () =>

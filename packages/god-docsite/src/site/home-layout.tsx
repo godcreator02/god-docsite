@@ -2,9 +2,10 @@ import { useMemo, type ReactNode } from 'react'
 import { BookOpen } from 'lucide-react'
 import { HomeLayout } from '@fumadocs/base-ui/layouts/home'
 import type { LinkItemType } from '@fumadocs/base-ui/layouts/shared'
-import { DevSiteUpdates } from './dev-updates.js'
+import { DevIssuesButton, DevSiteUpdates } from './dev-updates.js'
 import type { SiteHomeData } from './home.server.js'
 import type { SidebarLink } from './sidebar-links.js'
+import { TopNotices } from './top-notices.js'
 
 export interface SiteHomeLayoutProps {
   /** 首页路由 loader 里 siteHomeData 的结果 */
@@ -30,6 +31,9 @@ export function SiteHomeLayout({ data, sidebarLinks, children }: SiteHomeLayoutP
   return (
     <HomeLayout nav={nav} links={links}>
       <DevSiteUpdates />
+      <TopNotices>
+        <DevIssuesButton />
+      </TopNotices>
       {children}
     </HomeLayout>
   )

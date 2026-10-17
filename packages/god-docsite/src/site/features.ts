@@ -22,7 +22,10 @@ export interface FeatureRuntimeModule {
   sidebarLinks?: readonly SidebarLink[]
   /** 布局 loader 调用；返回值以功能名为键并进布局数据。写成方法：功能可以把 base 声明成更具体的站点类型 */
   layoutData?(args: LoaderFunctionArgs, base: BaseSiteContext): unknown
-  /** 布局顶部插槽：渲染在整站布局上方，自己用 useRouteLoaderData('routes/layout') 取自己那份数据 */
+  /**
+   * 布局顶部插槽：渲染在顶上正中那一行（TopNotices）里、排在问题按钮后面，自己用 useRouteLoaderData('routes/layout') 取自己那份数据。
+   * 那一行不接鼠标：按钮写 pointer-events-auto；点开的列表写 absolute inset-x-0 top-full mx-auto，挂在那一行正下方
+   */
   LayoutTop?: ComponentType
 }
 

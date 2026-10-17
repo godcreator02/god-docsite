@@ -123,7 +123,7 @@ import { OriginCases } from './god-docsite/origin-cases'
 - 两个功能导出同名 MDX 组件时报错；侧栏入口按 `order` 排，同样大的按功能名。
 - 集合工厂收一份全站插件 `sitePlugins` 并进自己的选项；`source.config.ts` 用 `export *` 再导出 `collections.generated.ts`，因为 fumadocs-mdx 要求那份文件只导出集合。
 
-{/* ref file="../packages/god-docsite/src/site/features.ts" lines="11-74" hash="7b8a790bf59f" blob="a9887c39aed8" */}
+{/* ref file="../packages/god-docsite/src/site/features.ts" lines="11-77" hash="164f2b6c87fa" blob="055ba60eb5de" */}
 
 ## 三种页面进一棵页面树
 
@@ -182,7 +182,7 @@ import { OriginCases } from './god-docsite/origin-cases'
 
 {/* ref file="../packages/god-docsite/src/vite/data-dirs.ts" lines="54-76" hash="f49071bba5a6" blob="cf8abbffb21c" */}
 
-**问题按钮**。dev 下的问题不再弹 Vite 的全屏报错层，而是在页面底部正中显示一个带数字的小按钮，点开分三组列出，每条再点开看完整原话：
+**问题按钮**。dev 下的问题不再弹 Vite 的全屏报错层，而是在页面顶上正中显示一个带数字的小按钮，点开分三组列出，每条再点开看完整原话。顶上正中那一行是平台的 `TopNotices`：问题按钮排在最前，各功能的 `LayoutTop`（协作站的提示栏）跟在后面，放不下就折行；两边点开的列表都挂在这一行正下方、按视口居中，不挤动旁边的按钮。这一行撑满视口宽、本身不接鼠标，所以 `LayoutTop` 的按钮自己写 `pointer-events-auto`，点开的列表写 `absolute inset-x-0 top-full mx-auto`：
 
 | 组 | 从哪来 | 什么时候消失 |
 | --- | --- | --- |

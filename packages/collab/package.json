@@ -1,6 +1,6 @@
 {
   "name": "@godcreator/collab",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "description": "项目协作：协作仓里的任务与模块（格式、状态、写入规则）、日志与日历、通知、我的待办、合并检查（命令行 collab-merge-check）、记录链接与 repo: 链接，以及接到 fumadocs 站上的页面与 loader / action",
   "license": "MIT",
   "type": "module",

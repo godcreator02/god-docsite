@@ -3,12 +3,13 @@ import { useFumadocsLoader } from 'fumadocs-core/source/client'
 import { DocsLayout } from '@fumadocs/base-ui/layouts/docs'
 import { getLayoutTabs } from '@fumadocs/base-ui/layouts/shared'
 import { ThemeSwitch, type ThemeSwitchProps } from '@fumadocs/base-ui/layouts/shared/slots/theme-switch'
-import { DevSiteUpdates } from './dev-updates.js'
+import { DevIssuesButton, DevSiteUpdates } from './dev-updates.js'
 import type { SiteLayoutData } from './site-context.js'
 import type { SidebarLink } from './sidebar-links.js'
 import { groupKeepingSidebar, rowSearchTrigger, SidebarLinksRow } from './sidebar.js'
 import { withGroupLandingPages, withLoosePagesGrouped } from './sidebar-tree.js'
 import { SiteLinksProvider } from './site-links.js'
+import { TopNotices } from './top-notices.js'
 import { WidePageToggle } from './wide-page.js'
 
 const SidebarFooterStartContext = createContext<ReactNode>(null)
@@ -35,7 +36,7 @@ export interface SiteLayoutProps {
   sidebarLinks: readonly SidebarLink[]
   /** 侧栏底部左边放的东西，如 identity 包的 IdentityBadge */
   sidebarFooterStart?: ReactNode
-  /** 整站布局上方的一栏，如各功能的 LayoutTop；随页面滚走，不占 DocsLayout 的网格 */
+  /** 顶上正中那一行（TopNotices）里排在问题按钮后面的东西，如各功能的 LayoutTop；不占 DocsLayout 的网格 */
   top?: ReactNode
   children: ReactNode
 }
@@ -54,7 +55,10 @@ export function SiteLayout({ data, sidebarLinks, sidebarFooterStart, top, childr
   return (
     <SiteLinksProvider pageTitles={data.pageTitles}>
       <DevSiteUpdates />
-      {top}
+      <TopNotices>
+        <DevIssuesButton />
+        {top}
+      </TopNotices>
       <SidebarFooterStartContext value={sidebarFooterStart}>
         <DocsLayout tree={tree} tabs={tabs} nav={nav} sidebar={sidebar} slots={siteSlots}>
           {children}

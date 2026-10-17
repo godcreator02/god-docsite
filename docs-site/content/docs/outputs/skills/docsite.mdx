@@ -111,7 +111,7 @@ docsite.people.join {"dir":…,"id":"<字母数字_->","name":"<显示名>","git
   - 同名文件夹与 `_` 开头的文件夹里不放页面（不以 `_` 开头的 `.mdx`、`.page.tsx`、`.html`）与 `meta.json`：
     fumadocs 解析 `meta.json` 里的名字时先找文件夹，同名文件夹一旦被认成组，那一页就从侧栏消失。目录说明只认 `meta.json`，别的 `.json` 可以当附件放
   - 组文件夹（有 `meta.json`、里面是页面）只放页面、`meta.json`、同名文件夹、`_` 开头的文件夹与子组，不散放别的文件
-  - 放错了 `pnpm build` 直接报错；开发服务不拦，终端与浏览器底部的问题按钮里列出每个文件，照着挪；协作站的 `collab.submit` 也拦下放错的文件
+  - 放错了 `pnpm build` 直接报错；开发服务不拦，终端与浏览器顶上正中的问题按钮里列出每个文件，照着挪；协作站的 `collab.submit` 也拦下放错的文件
 - 有子页面的页写成组：`guide/index.mdx` 是 `/guide`，它的组件放 `guide/index/`
 - 例子：
 

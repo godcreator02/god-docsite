@@ -1,6 +1,7 @@
 import { useEffect, useState, type ReactNode } from 'react'
 import { isRouteErrorResponse, Link, useLocation, useRouteError } from 'react-router'
-import { DevSiteUpdates, useDevIssues } from './dev-updates.js'
+import { DevIssuesButton, DevSiteUpdates, useDevIssues } from './dev-updates.js'
+import { TopNotices } from './top-notices.js'
 
 const buttonClassName = 'inline-flex items-center rounded-lg border px-4 py-2 text-sm font-medium transition-colors'
 
@@ -31,6 +32,9 @@ function ErrorPage({ code, title, children }: { code: string; title: string; chi
       {children}
       <ErrorPageActions />
       <DevSiteUpdates />
+      <TopNotices>
+        <DevIssuesButton />
+      </TopNotices>
     </main>
   )
 }

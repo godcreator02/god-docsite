@@ -119,7 +119,7 @@ export function useDevIssues(): DevIssues {
 }
 
 /**
- * dev 下的问题按钮：页面底部正中一个带数字的小按钮，点开列出三类问题，每条再点开看完整原话。
+ * dev 下的问题按钮：放在顶上正中那一行（TopNotices）的最前面，带数字，点开列出三类问题，每条再点开看完整原话。
  * 放法问题随检查结果变；热更新失败在下一次热更新成功时清掉；浏览器报错由人点「清空」。Vite 自带的报错层由平台的 vite 插件关掉，改由这里显示
  */
 export function DevIssuesButton() {
@@ -135,9 +135,21 @@ export function DevIssuesButton() {
   if (count === 0) return null
   const hasErrors = hotUpdateIssues.length + runtimeIssues.length > 0
   return (
-    <div data-dev-issues className="not-prose fixed bottom-5 left-1/2 z-50 flex -translate-x-1/2 flex-col items-center gap-2 text-left text-xs">
+    <div data-dev-issues>
+      <button
+        type="button"
+        aria-expanded={open}
+        onClick={() => setOpen(!open)}
+        className="pointer-events-auto inline-flex items-center gap-2 rounded-lg bg-fd-popover px-2.5 py-1.5 text-[13px] font-medium whitespace-nowrap text-fd-popover-foreground shadow-lg ring-1 ring-fd-border hover:bg-fd-accent"
+      >
+        <span aria-hidden className={`size-2 rounded-full ${hasErrors ? 'bg-red-500' : 'bg-amber-500'}`} />
+        {count} 个问题
+      </button>
       {open ? (
-        <section aria-label="开发服务报出的问题" className="flex max-h-[min(60vh,32rem)] w-[min(40rem,calc(100vw-2rem))] flex-col overflow-hidden rounded-xl border bg-fd-popover text-fd-popover-foreground shadow-xl">
+        <section
+          aria-label="开发服务报出的问题"
+          className="pointer-events-auto absolute inset-x-0 top-full mx-auto mt-1.5 flex max-h-[min(60vh,32rem)] w-[min(40rem,calc(100vw-2rem))] flex-col overflow-hidden rounded-xl border bg-fd-popover text-xs text-fd-popover-foreground shadow-xl"
+        >
           <header className="flex items-center gap-2 border-b px-3 py-2">
             <h2 className="flex-1 text-sm font-semibold">开发时的问题（{count}）</h2>
             {runtimeIssues.length > 0 ? (
@@ -170,15 +182,6 @@ export function DevIssuesButton() {
           </div>
         </section>
       ) : null}
-      <button
-        type="button"
-        aria-expanded={open}
-        onClick={() => setOpen(!open)}
-        className="inline-flex items-center gap-2 rounded-full border bg-fd-popover px-3 py-1.5 font-medium text-fd-popover-foreground shadow-lg hover:bg-fd-accent"
-      >
-        <span aria-hidden className={`size-2 rounded-full ${hasErrors ? 'bg-red-500' : 'bg-amber-500'}`} />
-        {count} 个问题
-      </button>
     </div>
   )
 }
@@ -209,12 +212,11 @@ export function DevServerLostScreen() {
   )
 }
 
-/** 平台两个布局（文档页与首页）里放的 dev 更新：数据目录变了重新取数据、问题按钮、开发服务断开的全屏提示；发布版里什么也不做 */
+/** 平台两个布局（文档页与首页）与错误页里放的 dev 更新：数据目录变了重新取数据、开发服务断开的全屏提示；问题按钮另放在 TopNotices 里。发布版里什么也不做 */
 export function DevSiteUpdates() {
   return (
     <>
       <RevalidateOnDataDirChange />
-      <DevIssuesButton />
       <DevServerLostScreen />
     </>
   )

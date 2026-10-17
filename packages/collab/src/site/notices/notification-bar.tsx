@@ -273,7 +273,7 @@ function SubmitButton({ submit, notifications }: { submit: SubmitState; notifica
 }
 
 /**
- * 顶部正中的提示栏，放在站点布局的插槽里。notifications 是调用方交来的通知（推送通道的最新一份，还没交来为 null），
+ * 顶部正中的提示栏，放在站点布局的顶部插槽里：平台把它排进顶上正中那一行（TopNotices），列表挂在那一行正下方。notifications 是调用方交来的通知（推送通道的最新一份，还没交来为 null），
  * aiPrompt 是同一份通知写成的提示词（gwb-collab 写），people 是公开人员列表（人名从 id 换成显示名）；
  * submit 是一键提交此刻的状态（站点没接一键提交时不给，就没有那个按钮）。没有通知、也没在提交时不显示
  */
@@ -296,10 +296,8 @@ export function NotificationBar({
   if (shownNotifications.length === 0) {
     if (progress === null) return null
     return (
-      <div className="pointer-events-none fixed inset-x-0 top-2.5 z-40 flex justify-center px-4">
-        <div role="status" className={`pointer-events-auto flex max-w-full min-w-0 items-center gap-2 rounded-lg px-2.5 py-1.5 text-[13px] whitespace-nowrap shadow-lg ring-1 ${progress.state === 'merged' ? 'bg-done-soft ring-done/40' : 'bg-info-soft ring-info/40'}`}>
-          <SubmitProgress submit={progress} />
-        </div>
+      <div role="status" className={`pointer-events-auto flex max-w-full min-w-0 items-center gap-2 rounded-lg px-2.5 py-1.5 text-[13px] whitespace-nowrap shadow-lg ring-1 ${progress.state === 'merged' ? 'bg-done-soft ring-done/40' : 'bg-info-soft ring-info/40'}`}>
+        <SubmitProgress submit={progress} />
       </div>
     )
   }
@@ -307,53 +305,54 @@ export function NotificationBar({
   const shownGroups = notificationGroups.filter((group) => counts[group] > 0)
   const navigation = { onNavigate: () => setExpanded(false), nameOf }
   return (
-    <div className="pointer-events-none fixed inset-x-0 top-2.5 z-40 flex justify-center px-4">
-      <div className="flex w-[560px] max-w-full flex-col items-center">
-        <button
-          type="button"
-          aria-expanded={expanded}
-          onClick={() => setExpanded(!expanded)}
-          title={expanded ? '收起' : '点开看是哪些事'}
-          className={`pointer-events-auto flex max-w-full min-w-0 items-center gap-2 rounded-lg py-1.5 pr-2 pl-2.5 text-[13px] whitespace-nowrap text-fd-foreground shadow-lg ring-1 ${groupTone[shownGroups[0]!]}`}
-        >
-          {progress !== null && (
-            <>
-              <SubmitProgress submit={progress} />
-              <span className="text-fd-muted-foreground">{' · '}</span>
-            </>
-          )}
-          {shownGroups.map((group, index) => (
-            <Fragment key={group}>
-              {index > 0 && <span className="text-fd-muted-foreground">{' · '}</span>}
-              <SummaryPart icon={groupSummaryIcon[group]} className={groupText[group]}>
-                {groupSummaryOf[group](counts[group])}
-              </SummaryPart>
-            </Fragment>
-          ))}
-          <ChevronDown size={15} className={`shrink-0 text-fd-muted-foreground transition-transform ${expanded ? 'rotate-180' : ''}`} />
-        </button>
-        {expanded && (
-          <section aria-label="要处理的事" className="pointer-events-auto mt-1.5 flex max-h-[min(70vh,640px)] w-full flex-col overflow-hidden rounded-xl border border-fd-border bg-fd-card shadow-lg">
-            <header className="flex flex-wrap items-baseline gap-2 border-b border-fd-border px-3 py-2">
-              <h2 className="m-0 text-[13px] font-semibold">要处理的事</h2>
-              <span className="ml-auto inline-flex flex-wrap items-baseline justify-end gap-2">
-                {submit !== undefined && <SubmitButton submit={submit} notifications={shownNotifications} />}
-                {aiPrompt !== null && <CopyForAiButton prompt={aiPrompt} items={shownNotifications.length} />}
-              </span>
-            </header>
-            <div className="min-h-0 overflow-y-auto">
-              {shownGroups.map((group) => (
-                <section key={group} aria-label={groupTitle[group]} className="border-t border-fd-border first:border-t-0">
-                  <h3 className={`m-0 px-3 pt-2 text-[12px] font-semibold ${groupText[group]}`}>{groupTitle[group]}</h3>
-                  <ul className="m-0 list-none p-0">
-                    <GroupRows group={group} notifications={shownNotifications.filter((notification) => notificationGroupOf(notification) === group)} {...navigation} />
-                  </ul>
-                </section>
-              ))}
-            </div>
-          </section>
+    <div className="max-w-full min-w-0">
+      <button
+        type="button"
+        aria-expanded={expanded}
+        onClick={() => setExpanded(!expanded)}
+        title={expanded ? '收起' : '点开看是哪些事'}
+        className={`pointer-events-auto flex max-w-full min-w-0 items-center gap-2 rounded-lg py-1.5 pr-2 pl-2.5 text-[13px] whitespace-nowrap text-fd-foreground shadow-lg ring-1 ${groupTone[shownGroups[0]!]}`}
+      >
+        {progress !== null && (
+          <>
+            <SubmitProgress submit={progress} />
+            <span className="text-fd-muted-foreground">{' · '}</span>
+          </>
         )}
-      </div>
+        {shownGroups.map((group, index) => (
+          <Fragment key={group}>
+            {index > 0 && <span className="text-fd-muted-foreground">{' · '}</span>}
+            <SummaryPart icon={groupSummaryIcon[group]} className={groupText[group]}>
+              {groupSummaryOf[group](counts[group])}
+            </SummaryPart>
+          </Fragment>
+        ))}
+        <ChevronDown size={15} className={`shrink-0 text-fd-muted-foreground transition-transform ${expanded ? 'rotate-180' : ''}`} />
+      </button>
+      {expanded && (
+        <section
+          aria-label="要处理的事"
+          className="pointer-events-auto absolute inset-x-0 top-full mx-auto mt-1.5 flex max-h-[min(70vh,640px)] w-[min(560px,calc(100vw-2rem))] flex-col overflow-hidden rounded-xl border border-fd-border bg-fd-card shadow-lg"
+        >
+          <header className="flex flex-wrap items-baseline gap-2 border-b border-fd-border px-3 py-2">
+            <h2 className="m-0 text-[13px] font-semibold">要处理的事</h2>
+            <span className="ml-auto inline-flex flex-wrap items-baseline justify-end gap-2">
+              {submit !== undefined && <SubmitButton submit={submit} notifications={shownNotifications} />}
+              {aiPrompt !== null && <CopyForAiButton prompt={aiPrompt} items={shownNotifications.length} />}
+            </span>
+          </header>
+          <div className="min-h-0 overflow-y-auto">
+            {shownGroups.map((group) => (
+              <section key={group} aria-label={groupTitle[group]} className="border-t border-fd-border first:border-t-0">
+                <h3 className={`m-0 px-3 pt-2 text-[12px] font-semibold ${groupText[group]}`}>{groupTitle[group]}</h3>
+                <ul className="m-0 list-none p-0">
+                  <GroupRows group={group} notifications={shownNotifications.filter((notification) => notificationGroupOf(notification) === group)} {...navigation} />
+                </ul>
+              </section>
+            ))}
+          </div>
+        </section>
+      )}
     </div>
   )
 }
