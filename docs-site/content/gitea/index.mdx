@@ -13,7 +13,7 @@ import { NasSeams } from './index/seams'
 
 | NAS 上的 | 做什么 | 谁调它 | 要配的写在 |
 | --- | --- | --- | --- |
-| Gitea | 存项目的全部仓；收下成员的推送、开合并请求；按团队、协作者与 main 的保护决定谁能改 main；各 home 现在还从它装 `@godcreator` 的包（包主要发到 npmjs，过渡期同时发一份到这里） | gwb-collab 经 gwb-gitea 的令牌克隆、取回、推送、读协作者、读合并请求与它的审阅、读 issue 与评论、建仓、配仓、配组织的 webhook；执行器以 `collab-bot` 读协作仓的协作者、合并或打回 | [权限怎么配](/gitea/permissions) |
+| Gitea | 存项目的全部仓；收下成员的推送、开合并请求；按团队、协作者与 main 的保护决定谁能改 main；`@godcreator` 的包只发到它的 npm 源，各 home 从这里装 | gwb-collab 经 gwb-gitea 的令牌克隆、取回、推送、读协作者、读合并请求与它的审阅、读 issue 与评论、建仓、配仓、配组织的 webhook；执行器以 `collab-bot` 读协作仓的协作者、合并或打回 | [权限怎么配](/gitea/permissions) |
 | 执行器 `gitea-runner` | 只管协作仓：按协作仓 main 上的工作流检查每个合并请求，以 `collab-bot` 合并或打回 | Gitea Actions 派任务；它运行 collab 包的命令行 `collab-merge-check` | [执行器与自动合并](/gitea/push) |
 | ntfy | 把组织的 webhook 转成实时推送，告诉每个成员的插件哪个仓出了什么事，插件再去 Gitea 取那一处 | Gitea 的组织 webhook 发进来（由组织管理员用 `collab.org.setup` 配）；`collab.repo.setup`、`collab.repo.create` 配好负责人后也往里发 `leads changed`；gwb-collab 订阅 | [实时推送的部署](/gitea/push) |
 

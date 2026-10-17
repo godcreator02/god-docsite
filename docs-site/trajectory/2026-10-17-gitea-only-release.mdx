@@ -1,0 +1,26 @@
+---
+born-at: 2026-10-17T21:30
+type: choice
+parent: [2026-09-03-god-live-doc]
+label: 包只发 Gitea，不再发 npmjs
+domain: 发版
+---
+
+## 背景
+
+supersedes:: [仓推到 GitHub 公开、包改发 npmjs](2026-10-16-publish-to-npmjs.md)
+
+发 npmjs 要等 Gitea 推送镜像把提交同步到 GitHub，再由 GitHub 的工作流发。10-17 下午镜像一直没同步，几次发版（含 gwb-docsite 0.6.5）都只发到了 Gitea，npmjs 那一段停着；gwb-collab 0.33.6 发版前检查又因为「peer gwb-docsite ^0.6.5 在 npmjs 上没有」被拦。用户说：
+
+> npmjs 没发出去这个不要再管了啊，改掉对应的地方，也不要检查，你就发到gitea其他都不管就行了
+
+## 结论与边界
+
+- 12 个包的 `publishConfig.registry` 都改成 Gitea 的源，`devkit.release` 照它只发 Gitea，不再建 GitHub release、不等镜像，也不做「peer 要在 npmjs 上」的检查
+- 各 home 本来就从 Gitea 装 `@godcreator` 的包，装包与升级不受影响
+- npmjs 上停在各包 10-17 上午的版本，不再更新；`.github/workflows/publish.yml` 留在仓里不用
+- AGENTS 的发版一节与维护页的发版一节照这个改写，讲 npmjs 六步的组件删掉
+
+## 依据
+
+无实验。

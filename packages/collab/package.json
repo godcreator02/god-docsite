@@ -52,7 +52,7 @@
     "directory": "packages/collab"
   },
   "publishConfig": {
-    "registry": "https://registry.npmjs.org/",
+    "registry": "https://git.tianshen02.online:28377/api/packages/godcreator/npm/",
     "access": "public"
   },
   "scripts": {

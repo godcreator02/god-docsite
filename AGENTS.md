@@ -85,12 +85,8 @@
   `src/other-repos/fetch/`、用户或 agent 明确要求
 * 发版只用 `devkit.release`，包按依赖序排：第 0 层（god-docsite、identity、explainer、code-pin、trajectory）→ 第 1 层（comments、doc-export）→
   第 2 层（collab、docfirst、word-report）→ 插件；发前的检查照上面「跑什么检查只看改到了什么」那张表。升版本号前先读 skill「gwb-release」
-* 包发到 npmjs，由 GitHub 仓 `godcreator02/god-docsite` 的 `.github/workflows/publish.yml` 经 trusted publishing 发：`devkit.release` 要求 HEAD 已经推到 GitHub，
-  在 HEAD 上建 release、附上本机打好的包文件，工作流按序号逐个发。各包 `publishConfig` 指向 npmjs、`repository` 指向这个仓、`files` 收进 MIT 的 `LICENSE`。
-  各 home 还从 Gitea 装 `@godcreator` 的包：`~/.npmrc` 里 `@godcreator` 的范围行指向 Gitea 的源（`https://git.tianshen02.online:28377/api/packages/godcreator/npm/`），`devkit.release` 照这一行先把同样的包发一份到 Gitea、再走 npmjs 那一段，不用另加参数；
-  新加一个包，先在有终端的地方发一个 `0.0.1-stage` 占位版（npmjs 不收 `0.0.0-stage`）：`npm publish <目录> --auth-type=web --access public --tag stage --registry https://registry.npmjs.org/ --@godcreator:registry=https://registry.npmjs.org/`，
-  在浏览器里批准（范围行优先于 `--registry`，不带后一个参数会发到 Gitea）；再 `npx npm@12 trust github <包名> --repository=godcreator02/god-docsite --file=publish.yml --allow-publish --yes --registry=https://registry.npmjs.org/` 登记
-  （npm 11 的登记请求 npmjs 回 400），登记后两天内要正式发一次
+* 包只发到 Gitea 的源（`https://git.tianshen02.online:28377/api/packages/godcreator/npm/`）：各包 `publishConfig.registry` 写的就是它，`devkit.release` 照它发，
+  各 home 的 `~/.npmrc` 里 `@godcreator` 的范围行也指向它。npmjs 与 GitHub 不再发、不查、不管；新加的包 `publishConfig` 照抄别的包
 
 ## 规矩
 
