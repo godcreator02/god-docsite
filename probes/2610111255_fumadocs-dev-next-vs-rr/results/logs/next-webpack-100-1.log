@@ -1,0 +1,54 @@
+▲ Next.js 16.4.0 (webpack)
+- Local:         http://127.0.0.1:4104
+- Network:       http://127.0.0.1:4104
+✓ Ready in 449ms
+✓ Running next.config.mjs took 86ms
+[MDX] started dev server
+- Experiments (use with caution):
+  ✓ webpackMemoryOptimizations
+
+<w> [webpack.cache.PackFileCacheStrategy/webpack.FileSystemInfo] Parsing of D:\unitfolders\aoi5p-fumadocs-dev-bench\site-next-tuned\node_modules\.pnpm\fumadocs-mdx@15.4.7_@types+_8c50806cb96aa35af943fc96bb07f512\node_modules\fumadocs-mdx\dist\load-from-file-DOcUY7bU.js for build dependencies failed at 'import(url.href)'.
+<w> Build dependencies behind this expression are ignored and might cause incorrect cache invalidation.
+○ Compiling /docs/[[...slug]]/page ...
+⚠ metadataBase property in metadata export is not set for resolving social open graph or twitter images, using "http://localhost:4104". See https://nextjs.org/docs/app/api-reference/functions/generate-metadata#metadatabase
+ GET /docs 200 in 22.6s (next.js: 19.9s, proxy.ts: 197ms, generate-params: 1383ms, application-code: 1072ms)
+<w> [webpack.cache.PackFileCacheStrategy/webpack.FileSystemInfo] Parsing of D:\unitfolders\aoi5p-fumadocs-dev-bench\site-next-tuned\node_modules\.pnpm\fumadocs-mdx@15.4.7_@types+_8c50806cb96aa35af943fc96bb07f512\node_modules\fumadocs-mdx\dist\load-from-file-DOcUY7bU.js for build dependencies failed at 'import(url.href)'.
+<w> Build dependencies behind this expression are ignored and might cause incorrect cache invalidation.
+<w> [webpack.cache.PackFileCacheStrategy/webpack.FileSystemInfo] Parsing of D:\unitfolders\aoi5p-fumadocs-dev-bench\site-next-tuned\node_modules\.pnpm\fumadocs-mdx@15.4.7_@types+_8c50806cb96aa35af943fc96bb07f512\node_modules\fumadocs-mdx\dist\eval-DxGmVc3G.js for build dependencies failed at 'import(pathToFileURL(outfile).href)'.
+<w> Build dependencies behind this expression are ignored and might cause incorrect cache invalidation.
+⚠ metadataBase property in metadata export is not set for resolving social open graph or twitter images, using "http://localhost:4104". See https://nextjs.org/docs/app/api-reference/functions/generate-metadata#metadatabase
+ GET /docs/test 200 in 1716ms (next.js: 228ms, proxy.ts: 95ms, generate-params: 14ms, application-code: 1379ms)
+ GET /docs/bench/group-01/page-001 200 in 1160ms (next.js: 9ms, proxy.ts: 7ms, generate-params: 14ms, application-code: 1130ms)
+ GET /docs/bench/group-01/page-002 200 in 1139ms (next.js: 12ms, proxy.ts: 9ms, generate-params: 0.0ms, application-code: 1118ms)
+ GET /docs/bench/group-01/page-003 200 in 1190ms (next.js: 11ms, proxy.ts: 9ms, generate-params: 11ms, application-code: 1158ms)
+ GET /docs/bench/group-01/page-004 200 in 982ms (next.js: 12ms, proxy.ts: 9ms, generate-params: 0.0ms, application-code: 961ms)
+ GET /docs/bench/group-01/page-005 200 in 895ms (next.js: 9ms, proxy.ts: 6ms, generate-params: 13ms, application-code: 867ms)
+ GET /docs/bench/group-01/page-006 200 in 877ms (next.js: 7ms, proxy.ts: 6ms, generate-params: 0.0ms, application-code: 863ms)
+ GET /docs/bench/group-01/page-007 200 in 951ms (next.js: 9ms, proxy.ts: 7ms, generate-params: 12ms, application-code: 923ms)
+ GET /docs/bench/group-01/page-008 200 in 884ms (next.js: 9ms, proxy.ts: 8ms, generate-params: 0.0ms, application-code: 867ms)
+ GET /docs/bench/group-01/page-009 200 in 911ms (next.js: 11ms, proxy.ts: 6ms, generate-params: 12ms, application-code: 883ms)
+ GET /docs/bench/group-01/page-010 200 in 841ms (next.js: 8ms, proxy.ts: 7ms, generate-params: 0.0ms, application-code: 825ms)
+ GET /docs/bench/group-01/page-011 200 in 968ms (next.js: 7ms, proxy.ts: 4ms, generate-params: 12ms, application-code: 945ms)
+ GET /docs/bench/group-01/page-012 200 in 917ms (next.js: 8ms, proxy.ts: 6ms, generate-params: 0.0ms, application-code: 902ms)
+ GET /docs/bench/group-01/page-013 200 in 939ms (next.js: 9ms, proxy.ts: 7ms, generate-params: 14ms, application-code: 908ms)
+ GET /docs/bench/group-01/page-014 200 in 842ms (next.js: 9ms, proxy.ts: 6ms, generate-params: 0.0ms, application-code: 827ms)
+ GET /docs/bench/group-01/page-015 200 in 887ms (next.js: 8ms, proxy.ts: 4ms, generate-params: 10ms, application-code: 864ms)
+ GET /docs/bench/group-01/page-016 200 in 818ms (next.js: 7ms, proxy.ts: 5ms, generate-params: 0.0ms, application-code: 805ms)
+ GET /docs/bench/group-01/page-017 200 in 863ms (next.js: 7ms, proxy.ts: 4ms, generate-params: 15ms, application-code: 836ms)
+ GET /docs/bench/group-01/page-018 200 in 844ms (next.js: 6ms, proxy.ts: 4ms, generate-params: 0.0ms, application-code: 834ms)
+ GET /docs/bench/group-01/page-019 200 in 884ms (next.js: 6ms, proxy.ts: 4ms, generate-params: 11ms, application-code: 863ms)
+ GET /docs/bench/group-01/page-020 200 in 836ms (next.js: 8ms, proxy.ts: 6ms, generate-params: 0.0ms, application-code: 822ms)
+ GET /docs/bench/group-01/page-021 200 in 900ms (next.js: 9ms, proxy.ts: 6ms, generate-params: 14ms, application-code: 871ms)
+ GET /docs/bench/group-01/page-022 200 in 799ms (next.js: 7ms, proxy.ts: 5ms, generate-params: 0.0ms, application-code: 786ms)
+ GET /docs/bench/group-01/page-023 200 in 861ms (next.js: 6ms, proxy.ts: 4ms, generate-params: 9ms, application-code: 842ms)
+ GET /docs/bench/group-01/page-024 200 in 816ms (next.js: 6ms, proxy.ts: 5ms, generate-params: 0.0ms, application-code: 805ms)
+ GET /docs/bench/group-01/page-025 200 in 958ms (next.js: 6ms, proxy.ts: 5ms, generate-params: 10ms, application-code: 937ms)
+ GET /docs/bench/group-01/page-026 200 in 971ms (next.js: 13ms, proxy.ts: 8ms, generate-params: 0.0ms, application-code: 950ms)
+ GET /docs/bench/group-01/page-027 200 in 896ms (next.js: 9ms, proxy.ts: 5ms, generate-params: 12ms, application-code: 871ms)
+ GET /docs/bench/group-01/page-028 200 in 824ms (next.js: 9ms, proxy.ts: 5ms, generate-params: 0.0ms, application-code: 809ms)
+ GET /docs/bench/group-01/page-029 200 in 918ms (next.js: 8ms, proxy.ts: 4ms, generate-params: 12ms, application-code: 894ms)
+ GET /docs/bench/group-01/page-030 200 in 915ms (next.js: 7ms, proxy.ts: 6ms, generate-params: 0.0ms, application-code: 902ms)
+ GET /docs/bench/group-01/page-031 200 in 1160ms (next.js: 7ms, proxy.ts: 6ms, generate-params: 12ms, application-code: 1135ms)
+ GET /docs/bench/group-01/page-032 200 in 1279ms (next.js: 14ms, proxy.ts: 10ms, generate-params: 0.0ms, application-code: 1255ms)
+ GET /docs/bench/group-01/page-033 200 in 1326ms (next.js: 8ms, proxy.ts: 6ms, generate-params: 10ms, application-code: 1301ms)
+ GET /docs/bench/group-01/page-034 200 in 1256ms (next.js: 7ms, proxy.ts: 8ms, generate-params: 0.0ms, application-code: 1241ms)

@@ -1,0 +1,64 @@
+{
+  "site": "rr",
+  "pageCount": 10,
+  "run": 0,
+  "startedAt": "2026-10-11T05:00:20.455Z",
+  "versions": {
+    "vite": "8.3.4",
+    "react-router": "8.4.0",
+    "@react-router/dev": "8.4.0",
+    "fumadocs-core": "16.17.1",
+    "fumadocs-mdx": "15.4.7",
+    "react": "19.3.0"
+  },
+  "node": "v24.14.1",
+  "phases": {
+    "startupMs": 10097.0911,
+    "firstPageMs": 3788.237500000001,
+    "secondPageMs": 54.849199999998746,
+    "crawl": {
+      "pages": 10,
+      "totalMs": 828.7394999999997,
+      "firstMs": 311.22239999999874,
+      "medianMs": 61.77880000000005,
+      "p95Ms": 311.22239999999874,
+      "maxMs": 311.22239999999874
+    },
+    "hmrMs": 103.45230000000083
+  },
+  "memory": {
+    "afterStartup": {
+      "workingSet": 286715904,
+      "privateBytes": 412868608,
+      "processCount": 3
+    },
+    "afterFirstPage": {
+      "workingSet": 599998464,
+      "privateBytes": 1300193280,
+      "processCount": 3
+    },
+    "afterCrawl": {
+      "workingSet": 601387008,
+      "privateBytes": 1325387776,
+      "processCount": 3
+    },
+    "afterHmr": {
+      "workingSet": 610099200,
+      "privateBytes": 1350897664,
+      "processCount": 3
+    },
+    "idleEnd": {
+      "workingSet": 610099200,
+      "privateBytes": 1350897664,
+      "processCount": 3
+    },
+    "peak": {
+      "workingSet": 610099200,
+      "privateBytes": 1350897664,
+      "phase": "hmr"
+    }
+  },
+  "overLimit": null,
+  "error": null,
+  "totalMs": 22799.321
+}

@@ -1,0 +1,16 @@
+▲ Next.js 16.4.0 (Turbopack)
+- Local:         http://127.0.0.1:4103
+- Network:       http://127.0.0.1:4103
+✓ Ready in 517ms
+✓ Running next.config.mjs took 88ms
+[MDX] started dev server
+
+○ Compiling /docs/[[...slug]] ...
+⚠ metadataBase property in metadata export is not set for resolving social open graph or twitter images, using "http://localhost:4103". See https://nextjs.org/docs/app/api-reference/functions/generate-metadata#metadatabase
+ GET /docs 200 in 12.8s (next.js: 11.7s, proxy.ts: 160ms, generate-params: 520ms, application-code: 442ms)
+ GET /docs/test 200 in 181ms (next.js: 64ms, proxy.ts: 5ms, generate-params: 13ms, application-code: 99ms)
+ GET /docs/test 200 in 116ms (next.js: 11ms, proxy.ts: 4ms, generate-params: 14ms, application-code: 87ms)
+✓ Compiled in 212ms
+ GET /docs/test 200 in 224ms (next.js: 108ms, proxy.ts: 6ms, generate-params: 0.0ms, application-code: 110ms)
+✓ Compiled in 330ms
+ GET /docs/test 200 in 506ms (next.js: 346ms, proxy.ts: 23ms, generate-params: 0.0ms, application-code: 136ms)

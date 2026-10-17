@@ -1,0 +1,7 @@
+[restart] Relaunching with --conditions=development
+  ➜  Local:   http://127.0.0.1:4102/
+1:15:17 PM [vite] (ssr) connected.
+1:15:22 PM [vite] (ssr) page reload content/docs/test.mdx
+1:15:22 PM [vite] (ssr) program reload
+1:15:22 PM [vite] (ssr) page reload content/docs/test.mdx
+1:15:22 PM [vite] (ssr) program reload

@@ -1,0 +1,33 @@
+---
+born-at: 2026-10-17T10:50
+type: evidence
+parent: [2026-09-03-god-live-doc]
+label: fumadocs dev 模式实测：100 页时 Next 内存峰值约 4 GB，Vite + React Router 744 MB
+domain: 骨架
+---
+
+## 背景
+
+站点要选建在 fumadocs 的哪个框架模板上。日常看站、写评论都在 dev 里，几个站同时开着，dev 的内存和首屏速度直接决定一台电脑能同时开几个站。
+当时在单元 `aoi5p-fumadocs-dev-bench` 里拿两个官方模板放同一批生成页面实测了一次，材料不在任何仓里，2026-10-17 挪进 `probes/` 补这张卡。
+
+## 结论与边界
+
+同样 100 页，Vite + React Router 的 dev 内存峰值是 Next 的约五分之一、首屏快五倍；500 页时 Next 跑不完。只在 2026-10-11 这台 Windows 机器、Node v24.14.1、
+next 16.4.0 与 fumadocs 16.17.1 的官方模板、确定性生成的纯文字 mdx 页上测过；页面里有大量组件、图片或公式时没有测，生产构建（`build`）的耗时与内存也不在本次范围内。
+
+## 经过
+
+四个站：Next 模板原样（全部页面一次导入）、Next 改成按页懒加载、带优化开关的 Next（内存回收、工作线程、webpack 省内存）、Vite + React Router 模板原样。
+每次冷启动先删编译缓存，启动 dev 后依次打开 `/docs`、`/docs/test`、全部生成页，改一页 mdx 量热更新，空闲 60 秒，全程按进程树采样内存；
+页数 0 / 100 / 500 三档，每档每站 3 次取中位数，站之间交替跑。另跑了一批热启动（保留缓存）与 Next 优化变体。
+
+100 页冷启动：内存峰值（工作集）Next 三种 3925 / 4484 / 4267 MB，Vite + React Router 744 MB；第一次打开 `/docs` 23.39 / 17.94 / 19.23 秒对 3.76 秒；
+依次打开 100 页的单页中位数 166 / 196 / 126 ms 对 38 ms；首页后进程数 33 / 37 / 31 对 3。热启动只把 Next 首屏降到 8.56 / 7.22 秒，峰值仍有 3532 / 3699 MB。
+500 页冷启动：Next 两种写法 3 次都在依次打开全部页时超限，峰值约 6.2 GB；Vite + React Router 3 次完成，峰值 1324 MB，单页中位数 37 ms。
+
+## 依据
+
+数字全部出自 `probes/2610111255_fumadocs-dev-next-vs-rr/results/summary.md`（由同目录 `results/raw.jsonl` 经 `bench/summarize.mjs` 取中位数得出），
+内存曲线在 `results/report.html`。Next 的内存大头不在主进程：100 页首页后主进程工作集 811–1256 MB，其余是 turbopack 拉起的三十多个转换进程，
+所以按页懒加载、内存回收这类只动页面导入或主进程的开关压不下峰值。

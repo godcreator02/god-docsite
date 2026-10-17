@@ -1,0 +1,25 @@
+▲ Next.js 16.4.0 (Turbopack)
+- Local:         http://127.0.0.1:4103
+- Network:       http://127.0.0.1:4103
+✓ Ready in 520ms
+✓ Running next.config.mjs took 90ms
+[MDX] started dev server
+
+○ Compiling /docs/[[...slug]] ...
+⚠ metadataBase property in metadata export is not set for resolving social open graph or twitter images, using "http://localhost:4103". See https://nextjs.org/docs/app/api-reference/functions/generate-metadata#metadatabase
+ GET /docs 200 in 13.8s (next.js: 12.5s, proxy.ts: 166ms, generate-params: 662ms, application-code: 389ms)
+ GET /docs/test 200 in 148ms (next.js: 56ms, proxy.ts: 4ms, generate-params: 14ms, application-code: 74ms)
+ GET /docs/bench/group-01/page-001 200 in 194ms (next.js: 15ms, proxy.ts: 5ms, generate-params: 0.0ms, application-code: 174ms)
+ GET /docs/bench/group-01/page-002 200 in 144ms (next.js: 10ms, proxy.ts: 5ms, generate-params: 0.0ms, application-code: 129ms)
+ GET /docs/bench/group-01/page-003 200 in 140ms (next.js: 11ms, proxy.ts: 4ms, generate-params: 0.0ms, application-code: 124ms)
+ GET /docs/bench/group-01/page-004 200 in 134ms (next.js: 10ms, proxy.ts: 4ms, generate-params: 0.0ms, application-code: 119ms)
+ GET /docs/bench/group-01/page-005 200 in 184ms (next.js: 12ms, proxy.ts: 4ms, generate-params: 10ms, application-code: 157ms)
+ GET /docs/bench/group-01/page-006 200 in 159ms (next.js: 12ms, proxy.ts: 7ms, generate-params: 0.0ms, application-code: 141ms)
+ GET /docs/bench/group-01/page-007 200 in 188ms (next.js: 14ms, proxy.ts: 7ms, generate-params: 0.0ms, application-code: 168ms)
+ GET /docs/bench/group-01/page-008 200 in 147ms (next.js: 10ms, proxy.ts: 4ms, generate-params: 0.0ms, application-code: 133ms)
+ GET /docs/bench/group-01/page-009 200 in 170ms (next.js: 11ms, proxy.ts: 4ms, generate-params: 0.0ms, application-code: 156ms)
+ GET /docs/bench/group-01/page-010 200 in 216ms (next.js: 17ms, proxy.ts: 8ms, generate-params: 15ms, application-code: 177ms)
+✓ Compiled in 64ms
+ GET /docs/test 200 in 128ms (next.js: 10ms, proxy.ts: 3ms, generate-params: 15ms, application-code: 99ms)
+ GET /docs/test 200 in 222ms (next.js: 90ms, proxy.ts: 6ms, generate-params: 0.0ms, application-code: 126ms)
+ GET /docs/test 200 in 144ms (next.js: 40ms, proxy.ts: 5ms, generate-params: 0.0ms, application-code: 99ms)

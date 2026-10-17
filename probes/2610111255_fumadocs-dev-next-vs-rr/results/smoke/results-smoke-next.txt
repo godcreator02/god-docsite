@@ -1,0 +1,36 @@
+{
+  "site": "next",
+  "pageCount": 10,
+  "run": 0,
+  "startedAt": "2026-10-11T05:00:02.790Z",
+  "versions": {
+    "next": "16.4.0",
+    "fumadocs-core": "16.17.1",
+    "fumadocs-mdx": "15.4.7",
+    "react": "19.3.0"
+  },
+  "node": "v24.14.1",
+  "phases": {
+    "startupMs": 839.0022
+  },
+  "memory": {
+    "afterStartup": {
+      "workingSet": 211943424,
+      "privateBytes": 220131328,
+      "processCount": 3
+    },
+    "peak": {
+      "workingSet": 2581159936,
+      "privateBytes": 2984087552,
+      "phase": "firstPage"
+    }
+  },
+  "overLimit": {
+    "phase": "firstPage",
+    "workingSet": 2324471808,
+    "privateBytes": 2728439808,
+    "atMs": 15350.91
+  },
+  "error": "进程树工作集 2217 MB 超过 2 GB 上限（阶段 firstPage）",
+  "totalMs": 17544.178499999998
+}
