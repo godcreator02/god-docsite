@@ -102,7 +102,7 @@ export const recheckRows = [
 export const steps = [
   {
     title: '读正本',
-    text: 'remark 按 gfm、frontmatter、数学公式、mdx 解析，换行先统一成 LF。头部成了一个 yaml 节点，第 9 行的钉码标记和第 11–13 行的组件各是一个节点。',
+    text: 'remark 按 gfm、frontmatter、数学公式、mdx 解析，换行先统一成 LF，正文里裸写的网址换回原文那一段（这一篇没有）。头部成了一个 yaml 节点，第 9 行的钉码标记和第 11–13 行的组件各是一个节点。',
     marks: [
       { lines: [1, 5], tone: 'pending', note: 'yaml 节点' },
       { lines: [9, 9], tone: 'info', note: '钉码标记' },

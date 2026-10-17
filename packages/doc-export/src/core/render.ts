@@ -1,5 +1,5 @@
 /**
- * 正本渲染成 Markdown，只有一条管线：remark 解析 → 钉码标记换成 codePin 节点（code-pin 的 core）→
+ * 正本渲染成 Markdown，只有一条管线：remark 解析 → 裸写的网址换回原文 → 钉码标记换成 codePin 节点（code-pin 的 core）→
  * 查出渲染不了的地方 → remark-stringify 加 `machineTextHandlers` 写出 Markdown。
  *
  * handlers 不改树：codePin 写成一块代码，名册里的组件写成它的机读节点，frontmatter 不写。
@@ -42,6 +42,22 @@ function pinProblem(pin: CodePin): string | null {
   if (check.status !== "missing") return null;
   if (check.reason === undefined || check.reason === "changed") throw new Error(`第 ${line} 行：缺失的钉没带缺失理由（${check.reason}）`);
   return `第 ${line} 行的钉缺失（${REASON_TEXT[check.reason]}），先修好`;
+}
+
+/**
+ * 正文里裸写的网址（GFM 自动链接：没有方括号也没有尖括号）换回原文那一段，照原样写出。
+ * 解析出的 link 节点不记得自己是裸写的，写回会变成 `[网址](网址)`；GFM 认网址结尾只看空白与 ASCII 标点，
+ * 后面紧跟的全角标点与汉字也算进网址，写成链接就把后文一起包进去。换成 html 节点是因为写出时它的 value 原样输出、不转义
+ */
+function keepBareUrlsAsWritten(tree: Root, source: string): void {
+  visit(tree, "link", (node, index, parent) => {
+    const start = node.position?.start.offset;
+    const end = node.position?.end.offset;
+    if (start === undefined || end === undefined || parent === undefined || index === undefined) return undefined;
+    if (source[start] === "[" || source[start] === "<") return SKIP;
+    parent.children[index] = { type: "html", value: source.slice(start, end) };
+    return SKIP;
+  });
 }
 
 const placeOf = (node: RootContent): string => (node.position === undefined ? "规则交回的节点里" : `第 ${lineOf(node)} 行`);
@@ -116,7 +132,7 @@ export function machineTextHandlers(roster: Roster): Record<"codePin" | "mdxJsxF
 
 /**
  * 正本渲染成生成物的正文：去掉 frontmatter，钉码标记写成带语言与 `title="路径:起-止"` 的代码块，
- * 组件写成名册里它的机读文字，开头的空行去掉。换行先统一成 LF。渲染不了的一次列全、抛 RenderRefusal
+ * 组件写成名册里它的机读文字，裸写的网址照原文，开头的空行去掉。换行先统一成 LF。渲染不了的一次列全、抛 RenderRefusal
  */
 export function renderMachineMarkdown(source: string, { roster, checkPins }: MachineTextOptions): string {
   const processor = unified()
@@ -127,7 +143,9 @@ export function renderMachineMarkdown(source: string, { roster, checkPins }: Mac
     .use(remarkMath)
     .use(remarkMdx)
     .use(remarkStringify, { ...STRINGIFY_OPTIONS, handlers: machineTextHandlers(roster) });
-  const tree = processor.parse(source.replace(/\r\n/g, "\n"));
+  const normalized = source.replace(/\r\n/g, "\n");
+  const tree = processor.parse(normalized);
+  keepBareUrlsAsWritten(tree, normalized);
   replacePinMarkers(tree, checkPins);
   const refusals = refusalsOf(tree, roster);
   if (refusals.length > 0) throw new RenderRefusal(refusals.join("；"));

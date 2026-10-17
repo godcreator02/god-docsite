@@ -13,8 +13,8 @@ export const treeOutput = ['src/', '', 'add.ts', '', 'package.json'];
 
 /** drop 情况：正本是照 render.test.ts 的 Hidden 例子拼的；断言是生成物里没有「不要」。右块是一份连续编号的生成物，
  *  被 drop 掉的那段用一行不带行号的灰字标出（灰字是画面标注，不是写出内容） */
-/* ref file="../packages/doc-export/test/render.test.ts" lines="81-81" hash="a50e6121a02c" blob="3a91a40cc80f" */
-/* ref file="../packages/doc-export/test/render.test.ts" lines="85-85" hash="ff562f481d71" blob="3a91a40cc80f" */
+/* ref file="../packages/doc-export/test/render.test.ts" lines="93-93" hash="a50e6121a02c" blob="7ca2efbbb19e" */
+/* ref file="../packages/doc-export/test/render.test.ts" lines="97-97" hash="ff562f481d71" blob="7ca2efbbb19e" */
 export const dropSource = ['# x', '', '<Hidden>不要</Hidden>', '', '后一段'];
 export const dropOutput = [{ lines: ['# x', ''] }, { note: '（Hidden 整段没有进来）' }, { lines: ['后一段'], start: 3 }];
 
@@ -26,7 +26,7 @@ export const noteInline = { source: ['一句话中有 <Note>提示</Note> 接着
 
 /** unknown 情况：空名册下 Note 也在名册外；正本是 outputs.test.ts 那篇的第 7–11 行，整篇拒绝的原话照断言 */
 /* ref file="../packages/doc-export/test/outputs.test.ts" lines="52-58" hash="521867dba54a" blob="cbb7c3b5b48e" */
-/* ref file="../packages/doc-export/src/core/render.ts" lines="92-92" hash="8b870dd5ec55" blob="eb8bab74efe6" */
+/* ref file="../packages/doc-export/src/core/render.ts" lines="108-108" hash="8b870dd5ec55" blob="d8c08731c041" */
 export const unknownSource = { start: 7, lines: ['一段**加粗**的正文，&#x2A; 原样', '', '<Note>提示</Note>'] };
 export const unknownRefusal = {
   pill: '整篇拒绝',

@@ -1,0 +1,32 @@
+---
+born-at: 2026-10-17T10:40
+type: choice
+parent: [2026-09-03-god-live-doc]
+label: 生成物里裸写的网址照原文写出，不改成链接写法
+domain: 生成物
+---
+
+## 背景
+
+gwb-vscode 文档站迁到平台时，AGENTS.md 里的 `http://127.0.0.1:4313），不用` 被生成成 `[http://127.0.0.1:4313），不用](http://127.0.0.1:4313），不用)`。
+写了复现测试后看到范围更大：正文里每个裸写的网址（`http://…`、`www.…`、邮箱）都被写成 `[网址](网址)`，全角标点那一例只是连后文一起包进了链接。
+
+pivots-from:: [Next docfirst 站迁到平台](2026-10-17-next-docfirst-site-migration.md)
+
+## 结论与边界
+
+- 原因有两层：remark-gfm 在解析时把裸网址变成 link 节点，节点上不留「原来是裸写的」，remark-stringify 写回只能写成 `[文字](网址)`；
+  GFM 认网址结尾只看空白与 ASCII 标点，全角标点和后面的汉字都算进网址
+- `renderMachineMarkdown` 解析完先把原文里不以 `[`、`<` 开头的 link 节点换成原文那一段（html 节点，写出时原样输出、不转义），生成物里的网址和正本一字不差
+- 只管生成物；站点页面上的自动链接仍由 fumadocs 的 remark-gfm 决定，全角标点后的文字在页面上照样会被并进链接
+- 测试 `正文里直接写的网址照原文写出` 在改之前失败，改之后包的 32 条测试全过；本站生成物渲染后没有变化
+
+## 否掉的候选
+
+- 不装 GFM 的自动链接扩展、只装表格、删除线、任务列表、脚注：要多引四对 micromark 与 mdast 扩展包，还要自己保证和 remark-gfm 的其余行为一致；换回原文只动一处
+- 换成 text 节点：GFM 的写出规则会转义，`http://example.com/a` 写出成 `http\://example.com/a`、`www.example.com` 写出成 `www\.example.com`，读出来不一样
+- 在全角标点处截断网址：改了网址的认法，生成物与站点页面对同一句的理解就不一致了；照原文写出不替作者判断网址在哪结束
+
+## 代价与遗留
+
+这一步写在 `renderMachineMarkdown` 里，不在 `machineTextHandlers` 里：只拿 handlers 去配自己序列化的使用方不经这一步，裸网址仍会写成 `[网址](网址)`。现在没有这样的使用方。

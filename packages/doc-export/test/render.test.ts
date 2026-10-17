@@ -44,6 +44,18 @@ test("行内代码后面紧跟以行内代码开头的加粗段，原样不变�
   assert.equal(render(`# x\n\n${line}\n`), `# x\n\n${line}\n`);
 });
 
+test("正文里直接写的网址照原文写出：不加尖括号、不改成 [文字](网址)，后面紧跟全角标点时也不把标点和后文并进链接", () => {
+  for (const line of [
+    "地址 http://example.com/a 打开。",
+    "也可以写 www.example.com 或 someone@example.com。",
+    "看页面（http://127.0.0.1:4313），不用 `pnpm dev`。",
+  ]) {
+    assert.equal(render(`${line}\n`), `${line}\n`);
+  }
+  assert.equal(render("- 列表里：https://example.com，再说\n"), "- 列表里：https://example.com，再说\n");
+  assert.equal(render("[写了文字的链接](https://example.com)，照旧\n"), "[写了文字的链接](https://example.com)，照旧\n");
+});
+
 test("行段标题写今天的位置；整文件标题是 路径:1-行数；目录树给名字表", () => {
   const whole: Target = { kind: "file", file: "config.json" };
   const tree: Target = { kind: "tree", dir: "src", depth: 1 };

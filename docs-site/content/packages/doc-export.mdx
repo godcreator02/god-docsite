@@ -14,7 +14,7 @@ import { VerifyCases } from './doc-export/verify-cases'
 
 这一页从头到尾用同一个例子：正本 `docs/a.mdx`（frontmatter 写了 `name`、`description`、`secret`，正文一个 `# 摆放`、一处钉在 `src/greet.ts` 第 2–3 行的钉、一个三行写法的 `<Note>`），三个落点：`skills/x/SKILL.md` 点名 `name` 与 `description`、`PLAIN.md` 是字符串写法、`BAD.md` 点名的 `nope` 正本里没有。
 
-先看一张图，把正本、落点表、名册、钉码核对、生成物摆清楚，也分清 doc-export 管哪一段、docfirst 管哪一段；后面每一节开头写它在图上的位置。
+先看一张图，把正本、落点表、名册、钉码核对、生成物之间的关系画清楚，也分清 doc-export 管哪一段、docfirst 管哪一段；后面每一节开头写它在图上的位置。
 
 <DocExportSeams />
 
@@ -24,7 +24,7 @@ import { VerifyCases } from './doc-export/verify-cases'
 
 {/* ref file="../packages/doc-export/src/core/outputs.ts" lines="9-22" hash="0d322a1efb59" blob="dc1854c6456a" */}
 
-本站的写法是一个 `skill(name)` 帮手，把说明书正本对到 `../plugins/docsite/skills/<名>/SKILL.md`，点名 `name`、`description`——宿主靠这两个字段决定什么时候读这份说明书：
+本站的写法是一个函数 `skill(name)`，把说明书正本对到 `../plugins/docsite/skills/<名>/SKILL.md`，点名 `name`、`description`——宿主靠这两个字段决定什么时候读这份说明书：
 
 {/* ref file="docfirst.config.mjs" lines="21-21" hash="e6b80bdb8ff2" blob="ce0b89f792c2" */}
 
@@ -58,9 +58,15 @@ outputs: {
 
 <RenderPipeline />
 
-组件里的六步就是 `renderMachineMarkdown` 的全部：remark 解析（gfm、frontmatter、数学公式、mdx），换行先统一成 LF；钉码标记换成 `codePin` 节点（调用 code-pin 的 `replacePinMarkers`，核对由调用方传进来的 `checkPins` 做）；查出渲染不了的地方；remark-stringify 加 `machineTextHandlers` 写出 Markdown，开头的空行去掉。handlers 不改树：`codePin` 写成 code-pin 的 `exportCodeOf` 交回的代码块（标题 `路径:起-止` 是今天的位置），组件写成名册交回的节点，frontmatter 不写。别的文字经 remark 重新写出：读出来的文字跟正本一样，个别转义的写法会变（测试里 `\}` 写出成 `}`）。
+组件里的六步就是 `renderMachineMarkdown` 的全部：remark 解析（gfm、frontmatter、数学公式、mdx），换行先统一成 LF，正文里裸写的网址换回原文那一段；钉码标记换成 `codePin` 节点（调用 code-pin 的 `replacePinMarkers`，核对由调用方传进来的 `checkPins` 做）；查出渲染不了的地方；remark-stringify 加 `machineTextHandlers` 写出 Markdown，开头的空行去掉。handlers 不改树：`codePin` 写成 code-pin 的 `exportCodeOf` 交回的代码块（标题 `路径:起-止` 是今天的位置），组件写成名册交回的节点，frontmatter 不写。别的文字经 remark 重新写出：读出来的文字跟正本一样，个别转义的写法会变（测试里 `\}` 写出成 `}`）。
 
-{/* ref file="../packages/doc-export/src/core/render.ts" lines="117-135" hash="8ae81174c5c9" blob="eb8bab74efe6" */}
+{/* ref file="../packages/doc-export/src/core/render.ts" lines="133-153" hash="655c1b455ed2" blob="d8c08731c041" */}
+
+裸写的网址要单独处理：GFM 把没有方括号也没有尖括号的网址解析成 link 节点，节点不记得自己是裸写的，写回会变成 `[网址](网址)`；
+GFM 认网址的结尾只看空白与 ASCII 标点，紧跟的全角标点和后面的汉字也算进网址，`http://127.0.0.1:4313），不用` 会整段写成一个链接。
+所以解析完先把这类 link 节点换成原文那一段，原样写出：
+
+{/* ref file="../packages/doc-export/src/core/render.ts" lines="47-61" hash="94fb1e0e9dea" blob="d8c08731c041" */}
 
 ## 什么时候拒绝生成
 
@@ -81,7 +87,7 @@ outputs: {
 
 黄灯的钉不拦生成：生成物写的是今天的代码，黄灯只说明正文那句话待复核；拦它的是 docfirst 的规则——本仓未提交改动引起的黄灯算红（见 code-pin 页）。
 
-{/* ref file="../packages/doc-export/src/core/render.ts" lines="72-104" hash="48db87ee3bfa" blob="eb8bab74efe6" */}
+{/* ref file="../packages/doc-export/src/core/render.ts" lines="88-120" hash="48db87ee3bfa" blob="d8c08731c041" */}
 
 ## 组件名册：组件在生成物里写成什么
 
@@ -91,7 +97,7 @@ outputs: {
 
 函数规则的契约：只经 `helpers` 读节点（`attr`、`textOf`）、造节点（`text`、`heading`、`paragraph`、`quote`、`children`），不碰节点的字段；`helpers.inline` 说明组件是不是写在句子里。规则交回的内容里再嵌着组件，写出时各自再换。
 
-三种规则把组件写成什么、名册外的组件是什么下场，选一种看：
+三种规则把组件写成什么、名册外的组件怎么处理，选一种看：
 
 <RosterRules />
 
@@ -116,8 +122,8 @@ doc-export 自带一份 fumadocs 名册（`Note`、`Files`、`Folder`、`File` �
 | 层 | 导出 | 做什么 |
 | --- | --- | --- |
 | `core/` | `@godcreator/doc-export` | 渲染管线、名册机制与 fumadocs 名册、frontmatter、落点表与 `planOutputs`。钉的核对从传入的 `checkPins` 来，不读文件；fumadocs 名册是纯数据加纯函数，不 import fumadocs 与 React，只有命令行的环境也加载得动 |
-| `node/` | `@godcreator/doc-export/node` | 读正本、读写落点、落点的地盘规则；钉经传入的 code-pin `Pinner` 核对 |
+| `node/` | `@godcreator/doc-export/node` | 读正本、读写落点、落点能放在哪的规则；钉经传入的 code-pin `Pinner` 核对 |
 
 依赖方向：doc-export 只依赖 code-pin。
 
-用它的只有 docfirst，就是总图上那一排：读配置时用 `placementsOf` 归一落点表、按 `fumadocsRoster` 合名册（第 1 号）；装配项目时用 `assertOutputTurf` 查落点的地盘；`render` 与 `confirm` 的最后一步用 `renderOutputs` 写生成物、`check` 对生成正本用 `unknownComponents` 查名册、用 `verifyOutputs` 核对生成物（第 2 号）。
+用它的只有 docfirst，就是总图上 docfirst 连过来的那几条线：读配置时用 `placementsOf` 归一落点表、按 `fumadocsRoster` 合名册（第 1 号）；装配项目时用 `assertOutputTurf` 查落点放的位置合不合规则；`render` 与 `confirm` 的最后一步用 `renderOutputs` 写生成物、`check` 对生成正本用 `unknownComponents` 查名册、用 `verifyOutputs` 核对生成物（第 2 号）。
