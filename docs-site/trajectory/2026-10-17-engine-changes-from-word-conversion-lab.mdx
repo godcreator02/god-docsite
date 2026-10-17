@@ -1,0 +1,33 @@
+---
+born-at: 2026-10-17T11:45
+type: choice
+parent: [2026-09-03-god-live-doc]
+label: word-conversion-lab 没提交的引擎改动：合进存盘域结果检查、去掉只读重开后的再次更新域与分段计时，早绑定等几处不合
+domain: 报告
+---
+
+## 背景
+
+pivots-from:: [Word 导出提速](2026-10-17-word-export-speed.md)
+
+Word 引擎 2026-10-13 从本机仓 word-conversion-lab 的已提交基线迁进来，那边 2026-10-11 还留着一批没提交的引擎改动（导出提速与核验，见 [回到串行写入](2026-10-11-serial-rendering.md) 里「保留」的那几项）。
+word-conversion-lab 退役前要把它们和今天的 `packages/word-report/engine/`（word-report 0.4.2，同一天已做过一轮 Word 导出提速）比对后决定哪些合进来。
+
+## 结论与边界
+
+合进三处：存盘的 docx 里每个域的显示结果是「错误!未找到引用源」「错误!不能识别的开关参数」这类 Word 报错文字就让导出失败（`verify.py` 的 `reject_field_error_results`，在 `package_state` 里对每个 XML 部件检查）；
+更新域并存盘之后，只读重开的那一次不再更新域，检查与导出 PDF 都按存盘的样子做；核对记录里每个事件带上从开始算起的秒数 `elapsedSeconds`，另加排版稿开始、报告检查开始、PDF 导出开始与结束四个事件。
+其余不合。合进的部分用 c2 样本（初步设计报告第 2 章两节、18 页、218 个域）在本机 Word 上跑了一次，全部检查通过；demo 报告也跑了一次，到报告自己的检查为止都通过，
+停在 `report.py` 里写死的「6 个 MathType 对象」：0.4.2 起它那一个行内公式写成了文字，只剩 5 个，这条期望在合并之前就已经对不上，本卡没有改它。整份 155 页的报告没有重跑，去掉再次更新域省了多少时间没有量。
+
+## 否掉的候选
+
+- **pywin32 早绑定与放在虚拟环境里的类型包装缓存**（`configure_com_cache`、`gencache.EnsureDispatch`）：同一天的提速实验在样本上测得早绑定在噪声内、整份报告第一次试跑了 17 分钟没完，已经否掉
+- **保存稿正文格式核对 `native_text_state`**：只给报告模块自己的 `validate` 调，导出走 `--data-only`、不加载报告模块，合进来没有调用方
+- **长 PDF 分四个进程提取文字**、**排版稿里缓存样式与书签对象、文字段没有格式就不取区域**：没有在今天的引擎上单独量过收益；后一项的「不取区域」0.4.2 已经做了，样式与书签缓存在样本上省下的时间小于 ±2～4 秒的噪声
+
+## 依据
+
+原改动在 word-conversion-lab 的提交 `3146c64`（退役前快照，bundle 在单元目录 `D:\unitfolders\nb9zj-word-conversion-lab\`），`src/docreport/` 与 `tests/test_docreport.py` 相对 `d6e0130` 的差异。
+验证两次运行的输出在引擎被忽略的 `out/` 下（`bench-merge-wcl-104850`、`demo-merge-wcl-01`），没有存进仓：c2 样本用 `probes/2610170945_word-export-speed/bench.py` 跑，共 40.7 秒、状态 `passed_automation_visual_review_pending`；demo 报告停在 `Demo report mathTypeCount: expected 6, got 5`。
+引擎的 Python 单元测试 40 条通过，新加的两条测试存盘域结果的报错文字被拒、正文里写着同样文字不被拒。

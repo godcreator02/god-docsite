@@ -59,6 +59,39 @@ def abstract_state(doc, content):
     return results
 
 
+WORD_NS = '{http://schemas.openxmlformats.org/wordprocessingml/2006/main}'
+# Word writes these into a field's result when a REF/SEQ target or switch is broken; readers then see them as body text.
+FIELD_ERROR_PREFIXES = ('错误!不能识别的开关参数', '错误!未找到引用源', '错误!找不到引用源', '错误!未定义书签',
+                        'error!unknownswitchargument', 'error!referencesourcenotfound', 'error!bookmarknotdefined')
+
+
+def field_results(root):
+    """Yield (field code, displayed result) for every simple and complex field in one XML part."""
+    open_fields = []  # [code, result, past separator] per nested complex field
+    for node in root.iter():
+        if node.tag == WORD_NS + 'fldSimple':
+            yield node.get(WORD_NS + 'instr', ''), ''.join(t.text or '' for t in node.iter(WORD_NS + 't'))
+        elif node.tag == WORD_NS + 'fldChar':
+            kind = node.get(WORD_NS + 'fldCharType')
+            if kind == 'begin':
+                open_fields.append(['', '', False])
+            elif kind == 'separate' and open_fields:
+                open_fields[-1][2] = True
+            elif kind == 'end' and open_fields:
+                code, result, _ = open_fields.pop()
+                yield code, result
+        elif open_fields and node.tag == WORD_NS + 'instrText' and not open_fields[-1][2]:
+            open_fields[-1][0] += node.text or ''
+        elif open_fields and node.tag == WORD_NS + 't' and open_fields[-1][2]:
+            open_fields[-1][1] += node.text or ''
+
+
+def reject_field_error_results(root):
+    for code, result in field_results(root):
+        if re.sub(r'\s+', '', result).lower().replace('！', '!').startswith(FIELD_ERROR_PREFIXES):
+            raise RuntimeError(f'Word field result error: {code.strip()}: {result}')
+
+
 def package_state(path, expected_equations):
     with ZipFile(path) as archive:
         objects, omml = [], []
@@ -66,6 +99,7 @@ def package_state(path, expected_equations):
             if not part.startswith('word/') or not part.endswith('.xml'):
                 continue
             root = ET.fromstring(archive.read(part))
+            reject_field_error_results(root)
             found = [o for o in root.findall(".//{urn:schemas-microsoft-com:office:office}OLEObject")
                      if o.get("ProgID") == "Equation.DSMT4"]
             objects.extend(found)

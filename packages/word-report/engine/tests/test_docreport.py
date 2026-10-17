@@ -14,9 +14,29 @@ from zipfile import ZipFile
 from docreport.__main__ import load_report, reserve_output
 from docreport.compose import Composer, ContentComposer
 from docreport.mathtype import mathtype_tex, readback_tex_matches, validate_pending
-from docreport.verify import package_state
+from docreport.verify import package_state, reject_field_error_results
 from docreport.word import utf16_length, word_application
 from docreport.content import read_json, validate_content, validate_layout, table_grid, bookmark, walk
+from xml.etree import ElementTree as ET
+
+
+class SavedFieldResultTests(unittest.TestCase):
+    def test_saved_field_errors_are_rejected_but_literal_prose_is_allowed(self):
+        source = '''<w:p xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
+          <w:r><w:fldChar w:fldCharType="begin"/></w:r><w:r><w:instrText> REF target \\h </w:instrText></w:r>
+          <w:r><w:fldChar w:fldCharType="separate"/></w:r><w:r><w:t>错误!</w:t></w:r>
+          <w:r><w:t>不能识别的开关参数。</w:t></w:r><w:r><w:fldChar w:fldCharType="end"/></w:r></w:p>'''
+        with self.assertRaisesRegex(RuntimeError, 'Word field result error'):
+            reject_field_error_results(ET.fromstring(source))
+        reject_field_error_results(ET.fromstring(source.replace('错误!', '结果：').replace('不能识别的开关参数。', '3-1')))
+        literal = '<w:p xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:r><w:t>错误!不能识别的开关参数。</w:t></w:r></w:p>'
+        reject_field_error_results(ET.fromstring(literal))
+
+    def test_simple_field_with_missing_reference_is_rejected(self):
+        source = '''<w:p xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
+          <w:fldSimple w:instr=" REF fig-1 \\h "><w:r><w:t>Error! Reference source not found.</w:t></w:r></w:fldSimple></w:p>'''
+        with self.assertRaisesRegex(RuntimeError, 'REF fig-1'):
+            reject_field_error_results(ET.fromstring(source))
 
 
 class ContentProtocolTests(unittest.TestCase):

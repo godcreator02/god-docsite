@@ -123,6 +123,7 @@ def build(directory, output, dll=DEFAULT_DLL, *, data_only=False, layout_path=No
         last_written[0] = time.perf_counter()
 
     def record(event, **values):
+        values.setdefault('elapsedSeconds', round(time.perf_counter() - started, 3))
         evidence["events"].append(dict(event=event, **values))
         if time.perf_counter() - last_written[0] >= 2:
             persist()
@@ -151,6 +152,7 @@ def build(directory, output, dll=DEFAULT_DLL, *, data_only=False, layout_path=No
             manifest["environment"]["word"] = dict(version=word.Version, build=word.Build)
             doc = word.Documents.Add(Template=str(template), NewTemplate=False)
             doc.UpdateStylesOnOpen = False
+            record("compose-start")
             pending = module.build(doc, content, output)
             validate_pending(pending)
             doc.SaveAs2(str(draft), 16, AddToRecentFiles=False)
@@ -166,16 +168,19 @@ def build(directory, output, dll=DEFAULT_DLL, *, data_only=False, layout_path=No
             with opened_document(word, destination) as doc:
                 refresh(doc)
                 doc.Save()
+            # Checks and the PDF read the field results as saved; refreshing again here would hide a stale save.
             with opened_document(word, destination, True) as doc:
-                refresh(doc)
                 generic = document_state(doc, len(pending))
                 record("document-check", **generic)
                 if content.get('format') == 'docreport':
                     abstracts = abstract_state(doc, content)
                     if abstracts:
                         record('abstract-check', abstracts=abstracts)
+                record("report-check-start")
                 record("report-check", result=module.validate(doc, content))
+                record("pdf-export-start")
                 doc.ExportAsFixedFormat(str(destination.with_suffix(".pdf")), 17)
+                record("pdf-export-finished")
             saved_hash = sha(destination)
             if callable(getattr(module, "validate_editing", None)):
                 with opened_document(word, destination, True) as doc:
