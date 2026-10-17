@@ -26,7 +26,7 @@ docsite.feature.add  {"dir":…,"package":"@godcreator/trajectory","version":"^0
 ```
 
 - `docsite.site.init`：`dir` 要不存在或是空目录，`title`（写进 `content/meta.json`）必给；端口不写进站点，启动时挑。
-  复制平台包的 `template/`，平台包、身份、评论三个包写成插件旁边装着的那一版的 `^<版本>`，身份文件写 `"kind": "base"`，`pnpm install`，补上评论功能的接线文件，再启动服务检查首页。
+  复制平台包的 `template/`，平台包、身份、评论三个包写成插件旁边装着的那一版的 `^<版本>`，身份文件写 `"kind": "base"`，`pnpm install`，补上评论与身份（头像写入路由）两个功能的接线文件，再启动服务检查首页。
   `people.json` 里只有 agent `claude`，人用 `docsite.people.join` 把自己加进来
 - `docsite.feature.add`：在站点里 `pnpm add <package>@<version>`，把功能包 `template/` 里站点还没有的文件补进 `app/features/<功能名>/`（已有的不覆盖），
   重写 `app/features/` 下文件名带 `generated` 的汇总文件，再启动服务检查首页。`version` 不给就用 gwb-docsite 旁边装着的那一版，没装就拒绝。
