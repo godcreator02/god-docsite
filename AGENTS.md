@@ -4,7 +4,7 @@
 
 仓根是 pnpm 包工作区。任何站点都是「fumadocs 官方 React Router 模板 + 挑选的功能包」：平台包 `god-docsite` 带唯一的站点模板与建站器，
 功能包按功能划分、名字不带站点类型，各自经 fumadocs 与 React Router 原生的扩展点接入站点（站点 `app/features/<包>/` 里的接线文件由建站器写入）。
-重构方案见仓外的 `D:\unitfolders\oz47p-docsite-kit\refactor-plan.html`；`docs-site/` 是全仓唯一的文档站。
+重构方案见 `docs-site/content/background/refactor-plan.html`；`docs-site/` 是全仓唯一的文档站。
 
 ## 仓里有什么
 

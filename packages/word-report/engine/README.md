@@ -1,6 +1,6 @@
 # Word report engine
 
-正式 Word COM / MathType 引擎迁入本仓。来源、提交与每份原始文件的 SHA-256 见 `migration-provenance.json`。仅迁入源仓已提交基线，未迁入源仓未提交代码、probe、旧运行输出或虚拟环境。Python 包版本仍为 0.0.1，依赖版本保持来源固定值。
+正式 Word COM / MathType 引擎迁入本仓。来源、提交与每份原始文件的 SHA-256 见仓根 `probes/2610131513_word-report-migration-baseline/migration-provenance.json`。仅迁入源仓已提交基线，未迁入源仓未提交代码、probe、旧运行输出或虚拟环境。Python 包版本仍为 0.0.1，依赖版本保持来源固定值。
 
 ## 环境
 
@@ -34,8 +34,8 @@
 
 ## 迁入回归
 
-2026-10-13 的证据摘要见 `migration-verification.json`：23 个 Python 单测与依赖检查通过；原 demo 经迁入代码重新生成 12 页 DOCX/PDF，6 个 MathType 保存重开、5 张表、2 张源图片、正文、域引用和临时编号增删检查通过，模板哈希未变。页面显示仍待用户检查。
+2026-10-13 的证据在仓根 `probes/2610131513_word-report-migration-baseline/`，摘要是其中的 `migration-verification.json`：23 个 Python 单测与依赖检查通过；原 demo 经迁入代码重新生成 12 页 DOCX/PDF，6 个 MathType 保存重开、5 张表、2 张源图片、正文、域引用和临时编号增删检查通过，模板哈希未变。页面显示仍待用户检查。
 
-首次运行在 `out/migration-baseline-20261013-01` 留下失败记录：已提交基线的链接锚点保留 `@LINK0@`。迁入包显式替换锚点文字后，在全新目录 `out/migration-baseline-20261013-02` 重新生成并通过自动验收；没有使用源仓未提交的修补代码。
+首次运行（同一目录的 `runs/migration-baseline-20261013-01`）留下失败记录：已提交基线的链接占位文字 `@LINK0@` 没被替换。迁入包显式替换占位文字后，在全新目录（`runs/migration-baseline-20261013-02`）重新生成并通过自动验收；没有使用源仓未提交的修补代码。
 
 独立 CLI 回归时，MathType 将读回文本的外层 `$...$` 换成了 `\[...\]`，旧校验错误地判定公式变化。当前只规范化一对外层数学分隔符，内部 TeX 仍逐字比较；不会改写公式、改 MathType 全局设置或忽略内容差异。对应回归同时检查错误公式与不匹配分隔符仍被拒绝。

@@ -1,0 +1,24 @@
+{
+  "sourceRepository": "D:\\unitfolders\\nb9zj-word-conversion-lab\\word-conversion-lab",
+  "sourceCommit": "d6e01303a6a20f64e2e21314fe8fbc75b476bb50",
+  "method": "git show committed baseline; dirty working files excluded",
+  "files": {
+    "pyproject.toml": "b58b03fd68cb08c7776b0d3ad4ee26d3660959b5102efe541445f2a3306e4f92",
+    "reports/demo-report/assets/architecture.png": "d449256d773e841a3c826638d65a1790fa023dd4d9b825fd05502500e7f9d1a0",
+    "reports/demo-report/assets/response.png": "7ad4450870ae6f02c1da2d43d403421dc3145e846dabc075ee8e8bd71f478836",
+    "reports/demo-report/content.json": "27237d0c78bb982914d2ffb464eb9f2e55d822c952315e00cee0a40f8e374e03",
+    "reports/demo-report/report.py": "b2f7f4be193daa0676acccd824fbba54e8796ca512f1753291e7a53161188f13",
+    "requirements.txt": "75d98410b556701a59f6caacfa41c88ae75d866d8d7159202741d7fd3a4996d3",
+    "schemas/report-content.example.json": "72302f639aefc41a46616092ebe7053768b173bb3faf975b60c99edb892789ab",
+    "schemas/report-content.schema.json": "f88c0b739b446e8d563f7d8be2a7996d99069cc723cb73eaa1b8da58ed645a31",
+    "src/docreport/__init__.py": "65c430b8659a96080cf159ebea4ff6b656f6fedb73ebbc56b6c41750dd4a401e",
+    "src/docreport/__main__.py": "51a407de127964e45155127dc430f1a105e4f57b67c0426bed250899e8df35f9",
+    "src/docreport/compose.py": "806b03437b3b403a457c9dcd74ebe0eb3f039513c88ad9cc1f165696e1e6f800",
+    "src/docreport/content.py": "eb5ebe3c15b5d379d269398d30e88077eb80179d6a65dd41367a9e6552b8f7dc",
+    "src/docreport/mathtype.py": "a3418ea42f374955940a356cfc52c5099e9fd9474d92b9ec6da4bc6144c62586",
+    "src/docreport/verify.py": "a2e63aa39bbfd223e6cc5c8cb2824e9ba56b4a6ed2cb54b5e653cc40c81e8cd1",
+    "src/docreport/word.py": "6b90c00e46fe7da9330e27365e31183fb51a8f8dabf0703c88781bbe6567aecb",
+    "templates/project-report.dotx": "2d645df23ecd1ee6f40d7da29854435139ff9d77a490f29c5051b6960bf909c4",
+    "tests/test_docreport.py": "89144ce2f391b2c2efb8664cce5e4f0230d29fc53f3b1a65a04624a4767ffe8c"
+  }
+}

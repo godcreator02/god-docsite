@@ -1,0 +1,1068 @@
+<!doctype html>
+<!-- 原型（用完即弃）：评论界面三套 Notion 风格的方案加两个组合（D：文档页用 A、全站评论用 B；E：段下浮窗 + 收件箱、全站评论用 B），左下角工具条切换方案、页面、可写/只读、明暗；?variant=A|B|C|D|E 可直接打开某一套。数据只在内存里，刷新就复原 -->
+<html lang="zh-CN" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>评论界面原型</title>
+<style>
+:root[data-theme="dark"] {
+  --bg: #121212; --bg-side: #121212; --panel: #181818; --pop: #232323; --pop-hover: #2b2b2b;
+  --fg: rgba(255,255,255,.88); --muted: rgba(255,255,255,.56); --faint: rgba(255,255,255,.36);
+  --border: rgba(255,255,255,.08); --border2: rgba(255,255,255,.18);
+  --hover: rgba(255,255,255,.055); --hover2: rgba(255,255,255,.09);
+  --shadow: 0 0 0 1px rgba(255,255,255,.07), 0 6px 16px rgba(0,0,0,.35), 0 16px 40px rgba(0,0,0,.35);
+  --shadow-sm: 0 0 0 1px rgba(255,255,255,.08), 0 2px 6px rgba(0,0,0,.4);
+  --hl: rgba(255,212,0,.12); --hl-hover: rgba(255,212,0,.2); --hl-active: rgba(255,212,0,.3); --hl-line: rgba(255,212,0,.6);
+  --accent: #3b8eea; --accent-soft: rgba(59,142,234,.16);
+  --danger: #f27474; --code-bg: rgba(255,255,255,.08); --code-fg: #f0a29a;
+}
+:root[data-theme="light"] {
+  --bg: #ffffff; --bg-side: #fbfbfa; --panel: #ffffff; --pop: #ffffff; --pop-hover: #f7f7f5;
+  --fg: #37352f; --muted: rgba(55,53,47,.65); --faint: rgba(55,53,47,.42);
+  --border: rgba(55,53,47,.09); --border2: rgba(55,53,47,.22);
+  --hover: rgba(55,53,47,.05); --hover2: rgba(55,53,47,.08);
+  --shadow: 0 0 0 1px rgba(15,15,15,.05), 0 3px 6px rgba(15,15,15,.1), 0 9px 24px rgba(15,15,15,.2);
+  --shadow-sm: 0 0 0 1px rgba(15,15,15,.08), 0 2px 4px rgba(15,15,15,.1);
+  --hl: rgba(255,212,0,.14); --hl-hover: rgba(255,212,0,.3); --hl-active: rgba(255,212,0,.5); --hl-line: rgba(240,190,0,.85);
+  --accent: #2383e2; --accent-soft: rgba(35,131,226,.12);
+  --danger: #d44c47; --code-bg: rgba(135,131,120,.15); --code-fg: #eb5757;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body {
+  background: var(--bg); color: var(--fg);
+  font: 15px/1.7 ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Text", "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+button { font: inherit; color: inherit; }
+a { color: inherit; }
+code { font-family: ui-monospace, SFMono-Regular, Consolas, monospace; font-size: .86em; background: var(--code-bg); color: var(--code-fg); padding: .12em .38em; border-radius: 4px; }
+kbd { font: 11px ui-monospace, Consolas, monospace; padding: 1px 5px; border-radius: 4px; border: 1px solid var(--border2); color: var(--muted); }
+.i { width: 16px; height: 16px; flex-shrink: 0; }
+
+/* ---------- 站点骨架（模仿 fumadocs） ---------- */
+.shell { display: grid; grid-template-columns: 260px minmax(0, 1fr) 340px; min-height: 100vh; }
+.shell.noToc { grid-template-columns: 260px minmax(0, 1fr); }
+.sidenav { position: sticky; top: 0; height: 100vh; overflow: auto; border-right: 1px solid var(--border); padding: 18px 12px; font-size: 14px; background: var(--bg-side); }
+.sn-title { font-weight: 600; padding: 2px 10px 14px; display: flex; align-items: center; gap: 8px; }
+.logo { width: 22px; height: 22px; border-radius: 6px; background: var(--fg); color: var(--bg); display: grid; place-items: center; font-size: 12px; }
+.sn-search { margin: 0 4px 10px; padding: 5px 10px; border: 1px solid var(--border); border-radius: 8px; color: var(--faint); font-size: 13px; display: flex; align-items: center; gap: 8px; }
+.sn-search span { flex: 1; }
+.sn-group { margin: 16px 0 2px; padding: 0 10px; font-size: 12px; color: var(--faint); font-weight: 500; }
+.sn-item { display: flex; align-items: center; gap: 8px; padding: 5px 10px; border-radius: 6px; color: var(--muted); cursor: pointer; text-decoration: none; }
+.sn-item:hover { background: var(--hover); color: var(--fg); }
+.sn-item.on { background: var(--hover2); color: var(--fg); font-weight: 500; }
+.sn-n { margin-left: auto; font-size: 12px; color: var(--faint); }
+.main { padding: 52px 48px 220px; min-width: 0; }
+.doc { max-width: 720px; margin: 0 auto; position: relative; }
+.crumbs { font-size: 13px; color: var(--faint); margin-bottom: 10px; }
+.crumbs span { margin: 0 4px; }
+.doc h1 { font-size: 34px; line-height: 1.25; margin: 0 0 12px; font-weight: 700; }
+.doc .lead { font-size: 17px; color: var(--muted); margin: 0 0 28px; }
+.doc h2 { font-size: 22px; line-height: 1.4; margin: 36px 0 10px; font-weight: 600; }
+.doc p { margin: 0 0 14px; }
+.doc table { width: 100%; border-collapse: collapse; font-size: 14px; }
+.doc [data-block="b-table"] { margin: 8px 0 20px; }
+.doc th, .doc td { border: 1px solid var(--border2); padding: 8px 12px; text-align: left; vertical-align: top; }
+.doc th { font-weight: 500; color: var(--muted); background: var(--hover); }
+.doc ul { padding-left: 22px; margin: 0 0 14px; }
+.doc [data-block] { position: relative; transition: background .15s, box-shadow .15s; }
+.toc { position: sticky; top: 0; height: 100vh; padding: 56px 24px; font-size: 13px; color: var(--muted); }
+.toc-title { font-weight: 500; color: var(--fg); margin-bottom: 10px; display: flex; gap: 6px; align-items: center; }
+.toc a { display: block; padding: 4px 0 4px 12px; border-left: 1px solid var(--border2); text-decoration: none; }
+.empty { padding: 32px 16px; text-align: center; color: var(--faint); font-size: 13px; }
+
+/* ---------- 正文里的标记（三套共用 Notion 的黄色） ---------- */
+.cmark { background: var(--hl); border-bottom: 2px solid var(--hl-line); cursor: pointer; transition: background .15s; }
+.cmark:hover, .cmark.hov { background: var(--hl-hover); }
+.cmark.on { background: var(--hl-active); }
+.cmark.pending { background: var(--accent-soft); border-bottom-color: var(--accent); }
+.doc [data-block].pending { background: var(--accent-soft); box-shadow: 0 0 0 6px var(--accent-soft); border-radius: 4px; }
+
+/* ---------- 共用：头像、评论、引文行、输入框、只读说明 ---------- */
+.av { display: inline-grid; place-items: center; border-radius: 50%; color: #fff; font-weight: 600; flex-shrink: 0; line-height: 1; }
+.avs { display: inline-flex; }
+.avs .av + .av { margin-left: -5px; }
+.avs .av { box-shadow: 0 0 0 2px var(--bg); }
+.cm { position: relative; padding: 5px 0; }
+.cm-head { display: flex; align-items: center; gap: 8px; font-size: 14px; min-height: 24px; }
+.cm-name { font-weight: 600; }
+.cm-time { font-size: 12px; color: var(--faint); }
+.cm-body { padding-left: 32px; font-size: 14px; line-height: 1.6; overflow-wrap: anywhere; }
+.cm-acts { position: absolute; top: 2px; right: 0; display: none; background: var(--pop); border-radius: 6px; box-shadow: var(--shadow-sm); padding: 2px; }
+.cm:hover .cm-acts { display: flex; }
+.ib { width: 28px; height: 28px; display: grid; place-items: center; border: 0; background: transparent; border-radius: 6px; color: var(--muted); cursor: pointer; }
+.ib:hover { background: var(--hover2); color: var(--fg); }
+.ib.on { background: var(--accent-soft); color: var(--accent); }
+.cm-acts .ib { width: 26px; height: 26px; }
+.qt { display: flex; gap: 8px; font-size: 13px; color: var(--muted); margin: 0 0 6px; line-height: 1.5; }
+.qt::before { content: ''; flex: 0 0 3px; border-radius: 2px; background: var(--hl-line); }
+.qt > span { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; min-width: 0; }
+.qt em { font-style: normal; color: var(--faint); margin-right: 4px; }
+.qt.page::before, .qt.missing::before { display: none; }
+.qt.page .i, .qt.missing .i { width: 14px; height: 14px; margin-top: 2px; }
+.qt.missing { color: var(--danger); }
+.qt.missing s { color: var(--muted); }
+.more-replies { display: flex; align-items: center; gap: 6px; margin: 2px 0 2px 32px; padding: 2px 6px 2px 4px; border: 0; background: transparent; border-radius: 5px; font-size: 13px; color: var(--muted); cursor: pointer; }
+.more-replies:hover { background: var(--hover2); color: var(--fg); }
+.composer { display: flex; align-items: flex-start; gap: 8px; }
+.composer > .av { margin-top: 3px; }
+.composer .box { flex: 1; display: flex; align-items: flex-end; gap: 6px; min-width: 0; }
+.composer textarea { flex: 1; min-width: 0; border: 0; background: transparent; resize: none; outline: none; font: inherit; font-size: 14px; line-height: 1.5; color: var(--fg); padding: 4px 0; height: 30px; max-height: 200px; }
+.composer textarea::placeholder { color: var(--faint); }
+.send { width: 24px; height: 24px; border-radius: 50%; border: 0; display: grid; place-items: center; background: var(--hover2); color: var(--faint); flex-shrink: 0; margin-bottom: 3px; cursor: default; }
+.send .i { width: 14px; height: 14px; }
+.composer.ready .send { background: var(--accent); color: #fff; cursor: pointer; }
+.ro { display: flex; gap: 8px; font-size: 12.5px; color: var(--muted); line-height: 1.55; padding: 8px 10px; background: var(--hover); border-radius: 8px; }
+.ro .i { width: 14px; height: 14px; margin-top: 2px; }
+
+/* 浮层（A/C 的草稿、C 的评论串） */
+.pop { position: absolute; z-index: 45; width: 380px; background: var(--pop); border-radius: 10px; box-shadow: var(--shadow); padding: 12px 12px 8px; }
+.pop-foot { display: flex; justify-content: space-between; align-items: center; margin-top: 4px; padding-left: 32px; font-size: 11.5px; color: var(--faint); }
+.pop-foot button { border: 0; background: none; color: var(--muted); font-size: 12px; cursor: pointer; padding: 2px 8px; border-radius: 5px; }
+.pop-foot button:hover { background: var(--hover2); color: var(--fg); }
+
+/* 批注模式 */
+body.picking .doc { cursor: crosshair; }
+#hoverbox { position: fixed; pointer-events: none; z-index: 30; display: none; border-radius: 6px; background: var(--accent-soft); box-shadow: 0 0 0 2px var(--accent); }
+#hoverbox span { position: absolute; top: -26px; left: -2px; font-size: 12px; line-height: 22px; padding: 0 8px; border-radius: 6px; background: var(--accent); color: #fff; white-space: nowrap; }
+.pickbar { position: fixed; top: 14px; left: 50%; transform: translateX(-50%); z-index: 60; display: flex; align-items: center; gap: 10px; padding: 5px 6px 5px 14px; border-radius: 999px; background: var(--pop); box-shadow: var(--shadow); font-size: 13px; color: var(--fg); }
+.pickbar .i { color: var(--accent); }
+.pickbar button { border: 0; background: var(--hover2); border-radius: 999px; padding: 3px 12px; font-size: 12.5px; cursor: pointer; }
+.pickbar button:hover { background: var(--accent); color: #fff; }
+#selBtn { position: fixed; display: none; z-index: 50; align-items: center; gap: 6px; height: 32px; padding: 0 12px 0 10px; border-radius: 8px; border: 0; background: var(--pop); box-shadow: var(--shadow); font-size: 13px; color: var(--fg); cursor: pointer; }
+#selBtn:hover { background: var(--pop-hover); }
+#gutterBtn { position: fixed; display: none; z-index: 30; width: 28px; height: 28px; border-radius: 6px; border: 0; background: transparent; color: var(--faint); cursor: pointer; place-items: center; }
+#gutterBtn:hover { background: var(--hover2); color: var(--fg); }
+#toast { position: fixed; left: 50%; bottom: 28px; transform: translateX(-50%); z-index: 90; background: var(--fg); color: var(--bg); padding: 7px 14px; border-radius: 8px; font-size: 13px; opacity: 0; pointer-events: none; transition: opacity .2s; }
+#toast.show { opacity: 1; }
+
+/* ================= A：Notion 侧栏 ================= */
+.vA .doc [data-threads]::before, .vB .doc [data-threads]::before, .vE .doc [data-threads]::before { content: ''; position: absolute; left: -18px; top: 4px; bottom: 4px; width: 3px; border-radius: 2px; background: var(--hl-line); }
+.vA .doc [data-threads], .vB .doc [data-threads], .vE .doc [data-threads] { cursor: pointer; border-radius: 4px; }
+.vA .doc [data-threads]:hover, .vB .doc [data-threads]:hover, .vE .doc [data-threads]:hover, .doc [data-threads].hov { background: var(--hl); box-shadow: 0 0 0 6px var(--hl); border-radius: 4px; }
+.vA .doc [data-threads].on, .vB .doc [data-threads].on, .vC .doc [data-threads].on, .vE .doc [data-threads].on { background: var(--hl-hover); box-shadow: 0 0 0 6px var(--hl-hover); }
+.pA { position: fixed; top: 0; right: 0; bottom: 0; width: 340px; background: var(--panel); border-left: 1px solid var(--border); display: flex; flex-direction: column; z-index: 40; }
+.pA-head { display: flex; align-items: center; justify-content: space-between; padding: 12px 12px 8px 18px; }
+.pA-title { font-size: 14px; font-weight: 600; display: flex; gap: 8px; align-items: center; }
+.pA-count { font-size: 12px; color: var(--faint); font-weight: 400; }
+.pA-tools { display: flex; gap: 2px; }
+.pA-scroll { flex: 1; overflow: auto; padding: 0 8px 40px; scrollbar-width: thin; }
+.pA-new { margin: 0 2px 10px; padding: 6px 10px; border-radius: 10px; background: var(--hover); }
+.pA-scroll > .ro { margin: 0 2px 10px; }
+.tA { padding: 12px 10px 10px; cursor: pointer; border-top: 1px solid var(--border); border-radius: 0; transition: background .12s; }
+.tA:hover { background: var(--hover); border-radius: 10px; border-top-color: transparent; }
+.tA:hover + .tA, .tA.on + .tA { border-top-color: transparent; }
+.tA.on { background: var(--pop); box-shadow: var(--shadow); border-radius: 10px; border-top-color: transparent; cursor: default; margin: 4px 0; }
+.tA-reply { margin-top: 6px; padding-top: 8px; border-top: 1px solid var(--border); }
+.dockA { position: fixed; right: 20px; bottom: 20px; display: flex; gap: 8px; z-index: 40; }
+.dockA button { display: flex; align-items: center; gap: 6px; height: 36px; padding: 0 14px; border-radius: 18px; border: 0; background: var(--pop); box-shadow: var(--shadow); font-size: 13.5px; cursor: pointer; }
+.dockA button:hover { background: var(--pop-hover); }
+.dockA button.on { background: var(--accent); color: #fff; }
+.allA { max-width: 760px; margin: 0 auto; }
+.allA h1, .allB h1, .allC h1 { font-size: 32px; margin: 0 0 6px; }
+.sub { color: var(--muted); margin: 0 0 24px; font-size: 14px; }
+.grpA { margin-top: 18px; }
+.grpA-head { display: flex; align-items: center; gap: 8px; font-weight: 600; font-size: 15px; padding: 6px 10px; border-radius: 6px; cursor: pointer; text-decoration: none; }
+.grpA-head:hover { background: var(--hover); }
+.grpA-head .go { margin-left: auto; color: var(--faint); opacity: 0; }
+.grpA-head:hover .go { opacity: 1; }
+.grpA-n { font-size: 12px; color: var(--faint); font-weight: 400; }
+.tA.static { cursor: default; }
+.tA.static:hover { background: transparent; border-radius: 0; border-top-color: var(--border); }
+
+/* ================= B：页边批注 ================= */
+.bWrap { display: grid; grid-template-columns: minmax(0, 680px) 300px; gap: 56px; max-width: 1040px; margin: 0 auto; }
+.bWrap .doc { margin: 0; }
+.bMargin { position: relative; }
+.cardB { position: absolute; left: 0; right: 0; padding: 10px 12px; border-radius: 10px; cursor: pointer; transition: background .12s; }
+.cardB:hover { background: var(--hover); }
+.cardB.on { background: var(--pop); box-shadow: var(--shadow); cursor: default; left: -14px; right: 14px; z-index: 2; }
+.mini-head { display: flex; align-items: center; gap: 8px; font-size: 13px; }
+.mini-body { padding-left: 28px; font-size: 13.5px; line-height: 1.55; margin-top: 2px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; color: var(--muted); }
+.cardB:hover .mini-body { color: var(--fg); }
+.mini-foot { padding-left: 28px; margin-top: 6px; font-size: 12px; color: var(--faint); display: flex; align-items: center; gap: 6px; }
+.cardB .composer { margin-top: 6px; padding-top: 8px; border-top: 1px solid var(--border); }
+.bPage { margin: -8px 0 28px; padding: 0 0 14px; border-bottom: 1px solid var(--border); }
+.bPage-title { font-size: 13px; color: var(--faint); font-weight: 500; margin: 0 0 4px; display: flex; gap: 6px; align-items: center; }
+.bPage-t { padding: 4px 8px; margin: 0 -8px; border-radius: 8px; cursor: pointer; }
+.bPage-t:hover { background: var(--hover); }
+.bPage-t.on { background: var(--hover); cursor: default; }
+.bPage-t .composer { margin: 2px 0 4px; }
+.bPage > .composer { margin-top: 4px; }
+.bPage > .ro { margin-top: 6px; }
+.vB.writable .doc { cursor: text; }
+.allB { max-width: 1100px; margin: 0 auto; }
+.dbbar { display: flex; align-items: center; gap: 4px; border-bottom: 1px solid var(--border); padding-bottom: 6px; margin-bottom: 2px; font-size: 13.5px; }
+.dbtab { display: flex; align-items: center; gap: 6px; padding: 4px 8px; border-radius: 6px; color: var(--muted); cursor: pointer; }
+.dbtab.on { color: var(--fg); font-weight: 500; box-shadow: inset 0 -2px 0 var(--fg); border-radius: 0; }
+.dbtab .i { width: 14px; height: 14px; }
+.dbsp { flex: 1; }
+.dbmeta { color: var(--faint); font-size: 12.5px; }
+.tblB { width: 100%; border-collapse: collapse; font-size: 14px; table-layout: fixed; }
+.tblB th { font-weight: 400; color: var(--muted); text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--border); font-size: 13px; white-space: nowrap; }
+.tblB th .i { width: 14px; height: 14px; vertical-align: -2px; margin-right: 6px; color: var(--faint); }
+.tblB td { padding: 8px 10px; border-bottom: 1px solid var(--border); vertical-align: top; }
+.tblB th + th, .tblB td + td { border-left: 1px solid var(--border); }
+.tblB tr[data-act]:hover td { background: var(--hover); cursor: pointer; }
+.tblB .num { text-align: right; }
+.tdB-c { display: flex; gap: 6px; align-items: flex-start; }
+.tdB-c .caret { color: var(--faint); margin-top: 4px; width: 14px; height: 14px; }
+.clip1 { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+.pgB { display: inline-flex; align-items: center; gap: 6px; text-decoration: none; border-bottom: 1px solid var(--border2); line-height: 1.4; }
+.pgB:hover { border-bottom-color: var(--fg); }
+.pgB .i { width: 14px; height: 14px; color: var(--faint); }
+.who { display: inline-flex; align-items: center; gap: 6px; }
+.chip { display: inline-block; padding: 0 6px; border-radius: 4px; font-size: 12px; line-height: 20px; margin-right: 6px; }
+.chip-element { background: rgba(255,212,0,.18); }
+.chip-text { background: rgba(59,142,234,.18); }
+.chip-page { background: var(--hover2); }
+.chip-missing { background: rgba(242,116,116,.2); }
+.chip-q { font-size: 12.5px; color: var(--muted); }
+.tdmuted { color: var(--muted); font-size: 13px; }
+.tblB tr.detail td { background: var(--hover); padding: 12px 18px 12px 34px; }
+.detailB { max-width: 640px; }
+
+/* ================= C：气泡 + 收件箱 ================= */
+.badgeC { position: absolute; right: -60px; top: 0; display: inline-flex; align-items: center; gap: 4px; font-size: 12px; line-height: 1; color: var(--muted); padding: 5px 7px; border-radius: 6px; border: 0; background: transparent; cursor: pointer; font-weight: 400; }
+.badgeC .i { width: 14px; height: 14px; }
+.badgeC:hover, .badgeC.on { background: var(--hover2); color: var(--fg); }
+.doc h1 .badgeC { top: 10px; }
+.doc h2 .badgeC { top: 4px; }
+.vC .doc [data-threads] { cursor: pointer; border-radius: 4px; }
+.vC .doc [data-threads]:hover { background: var(--hl); box-shadow: 0 0 0 6px var(--hl); }
+.popC { width: 400px; padding: 0; }
+.popC-head { display: flex; align-items: flex-start; gap: 6px; padding: 10px 8px 4px 14px; }
+.popC-head .qt { flex: 1; margin: 5px 0 0; }
+.popC-body { padding: 0 14px 4px; max-height: 360px; overflow: auto; }
+.popC-foot { padding: 8px 14px; border-top: 1px solid var(--border); }
+.dockC { position: fixed; right: 20px; bottom: 20px; display: flex; align-items: center; z-index: 40; background: var(--pop); border-radius: 12px; box-shadow: var(--shadow); padding: 4px; gap: 2px; }
+.dockC button { display: flex; align-items: center; gap: 6px; height: 32px; padding: 0 10px; border-radius: 8px; border: 0; background: transparent; font-size: 13px; cursor: pointer; }
+.dockC button:hover { background: var(--hover2); }
+.dockC button.on { background: var(--accent-soft); color: var(--accent); }
+.dockC .num { min-width: 18px; height: 18px; border-radius: 9px; background: var(--hl-active); color: var(--fg); font-size: 11.5px; display: inline-grid; place-items: center; padding: 0 5px; }
+.dockC-sep { width: 1px; height: 18px; background: var(--border2); margin: 0 2px; }
+.inboxC { position: fixed; right: 20px; bottom: 68px; width: 400px; max-height: min(640px, calc(100vh - 100px)); display: flex; flex-direction: column; background: var(--pop); border-radius: 12px; box-shadow: var(--shadow); z-index: 41; overflow: hidden; }
+.inboxC-head { padding: 12px 14px 0; display: flex; align-items: center; justify-content: space-between; font-weight: 600; font-size: 14px; }
+.tabsC { display: flex; gap: 2px; padding: 8px 10px 0; border-bottom: 1px solid var(--border); }
+.tabsC button { border: 0; background: transparent; padding: 6px 8px; font-size: 13px; color: var(--muted); cursor: pointer; border-radius: 6px 6px 0 0; }
+.tabsC button:hover { color: var(--fg); }
+.tabsC button.on { color: var(--fg); box-shadow: inset 0 -2px 0 var(--fg); }
+.tabsC b { font-weight: 400; color: var(--faint); margin-left: 3px; }
+.inboxC-list { flex: 1; overflow: auto; padding: 4px 0; }
+.inboxC > .ro { margin: 10px 12px 0; }
+.rowC { display: flex; gap: 10px; padding: 10px 14px; cursor: pointer; }
+.rowC:hover { background: var(--hover); }
+.rowC.on { background: var(--hover2); }
+.rowC-main { flex: 1; min-width: 0; }
+.rowC-top { display: flex; gap: 8px; font-size: 13px; align-items: baseline; }
+.rowC-top time { font-size: 12px; color: var(--faint); }
+.rowC-n { margin-left: auto; display: inline-flex; gap: 3px; align-items: center; font-size: 12px; color: var(--faint); }
+.rowC-n .i { width: 13px; height: 13px; }
+.rowC .qt { margin: 3px 0 2px; font-size: 12.5px; }
+.rowC .qt > span { -webkit-line-clamp: 1; }
+.rowC-b { font-size: 13.5px; line-height: 1.55; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.inboxC-foot { border-top: 1px solid var(--border); padding: 8px 14px; }
+.allC { max-width: 720px; margin: 0 auto; }
+.chipsC { display: flex; gap: 6px; margin: 0 0 18px; }
+.chipsC button { border: 1px solid var(--border2); background: transparent; border-radius: 999px; padding: 3px 12px; font-size: 13px; color: var(--muted); cursor: pointer; }
+.chipsC button.on { background: var(--fg); color: var(--bg); border-color: var(--fg); }
+.dayC { font-size: 12px; color: var(--faint); font-weight: 500; margin: 18px 0 4px 12px; }
+.feedC { display: flex; gap: 12px; padding: 12px; border-radius: 10px; cursor: pointer; }
+.feedC:hover { background: var(--hover); }
+.feedC-main { flex: 1; min-width: 0; }
+.feedC-line { font-size: 14px; color: var(--muted); display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.feedC-line b { color: var(--fg); font-weight: 600; }
+.feedC-line time { font-size: 12px; color: var(--faint); margin-left: auto; }
+.pgC { display: inline-flex; align-items: center; gap: 4px; color: var(--fg); font-weight: 500; }
+.pgC .i { width: 14px; height: 14px; color: var(--faint); }
+.feedC .qt { margin: 6px 0 4px; }
+.feedC-body { font-size: 14.5px; line-height: 1.6; }
+.feedC-replies { margin-top: 8px; display: flex; align-items: center; gap: 8px; font-size: 12.5px; color: var(--muted); }
+
+/* ================= E：段下浮窗 + 收件箱 ================= */
+.inlineE { --arrow-x: 22px; position: absolute; z-index: 45; border: 1px solid var(--border2); border-radius: 10px; background: var(--pop); box-shadow: var(--shadow); animation: inlineE-in .14s ease-out; }
+.inlineE::before { content: ''; position: absolute; top: -7px; left: var(--arrow-x); width: 12px; height: 12px; background: var(--pop); border-left: 1px solid var(--border2); border-top: 1px solid var(--border2); transform: rotate(45deg); }
+.inlineE.draft { border-color: var(--accent); }
+.inlineE.draft::before { border-color: var(--accent); }
+.inlineE > .ib { position: absolute; top: 6px; right: 6px; }
+.inlineE-quote { padding: 10px 44px 0 14px; }
+.inlineE-quote .qt { margin: 0; }
+.inlineE-body { padding: 6px 44px 6px 14px; }
+.inlineE-foot { padding: 8px 14px; border-top: 1px solid var(--border); }
+.inlineE.draft .inlineE-foot { border-top: 0; padding-top: 10px; }
+@keyframes inlineE-in { from { opacity: 0; transform: translateY(-4px); } }
+
+/* ---------- 原型工具条（不属于设计） ---------- */
+#bar { position: fixed; left: 16px; bottom: 16px; z-index: 100; }
+.pbar { background: #fff8db; color: #1a1a1a; border: 1px dashed #c99a00; border-radius: 12px; padding: 6px 8px 8px; box-shadow: 0 6px 20px rgba(0,0,0,.28); font-size: 13px; width: min(660px, calc(100vw - 32px)); }
+.pbar-row { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.pbtn { width: 28px; height: 28px; border: 0; border-radius: 6px; background: transparent; display: grid; place-items: center; cursor: pointer; color: #1a1a1a; }
+.pbtn:hover { background: rgba(0,0,0,.08); }
+.pbar-label { min-width: 150px; font-weight: 500; display: flex; align-items: center; }
+.pbar-label b { display: inline-grid; place-items: center; width: 20px; height: 20px; border-radius: 5px; background: #1a1a1a; color: #fff8db; margin-right: 6px; font-size: 12px; }
+.psep { width: 1px; height: 18px; background: rgba(0,0,0,.15); margin: 0 4px; }
+.seg { display: inline-flex; background: rgba(0,0,0,.07); border-radius: 7px; padding: 2px; }
+.seg button { border: 0; background: transparent; padding: 2px 9px; border-radius: 5px; font-size: 12.5px; cursor: pointer; color: #555; }
+.seg button.on { background: #fff; color: #111; box-shadow: 0 1px 2px rgba(0,0,0,.18); }
+.pbar-note { font-size: 12px; color: #5a4a00; line-height: 1.55; margin: 4px 6px 0; }
+</style>
+</head>
+<body>
+<div id="app"></div>
+<div id="hoverbox"><span></span></div>
+<button id="gutterBtn" type="button" title="评论这一块"></button>
+<button id="selBtn" type="button"></button>
+<div id="toast"></div>
+<div id="bar"></div>
+<script>
+const $ = (s, r = document) => r.querySelector(s)
+const $$ = (s, r = document) => [...r.querySelectorAll(s)]
+const ICON = {
+  message: '<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>',
+  msgPlus: '<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><path d="M12 7v6M9 10h6"/>',
+  pen: '<path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4z"/>',
+  x: '<path d="M18 6 6 18M6 6l12 12"/>',
+  arrowUp: '<path d="M12 19V5M5 12l7-7 7 7"/>',
+  arrowRight: '<path d="M5 12h14M12 5l7 7-7 7"/>',
+  trash: '<path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="m19 6-1 14H6L5 6"/>',
+  reply: '<path d="M9 14 4 9l5-5"/><path d="M4 9h11a5 5 0 0 1 5 5v6"/>',
+  lock: '<rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/>',
+  alert: '<path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4M12 17h.01"/>',
+  file: '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/>',
+  inbox: '<path d="M22 12h-6l-2 3h-4l-2-3H2"/><path d="M5.5 5.1 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.5-6.9A2 2 0 0 0 16.8 4H7.2a2 2 0 0 0-1.7 1.1z"/>',
+  chevronDown: '<path d="m6 9 6 6 6-6"/>', chevronUp: '<path d="m18 15-6-6-6 6"/>',
+  chevronRight: '<path d="m9 18 6-6-6-6"/>', chevronLeft: '<path d="m15 18-6-6 6-6"/>',
+  expand: '<path d="m7 15 5 5 5-5"/><path d="m7 9 5-5 5 5"/>',
+  search: '<circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/>',
+  table: '<rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18M9 3v18"/>',
+  target: '<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3"/>',
+  user: '<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>',
+  clock: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+  list: '<path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/>',
+}
+const icon = (name, cls = '') => `<svg class="i ${cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${ICON[name]}</svg>`
+const esc = (s) => String(s).replace(/[&<>"]/g, (ch) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[ch])
+const fmt = (s) => esc(s).replace(/`([^`]+)`/g, '<code>$1</code>').replace(/\n/g, '<br>')
+const clip = (s, n) => (s.length > n ? s.slice(0, n) + '…' : s)
+const av = (p, size) => `<span class="av" style="width:${size}px;height:${size}px;font-size:${Math.round(size * 0.48)}px;background:${p.color}" title="${esc(p.name)}">${esc(p.name[0].toUpperCase())}</span>`
+
+const MINUTE = 60_000, HOUR = 60 * MINUTE
+function rel(at) {
+  const elapsed = Date.now() - at
+  if (elapsed < MINUTE) return '刚刚'
+  if (elapsed < HOUR) return `${Math.floor(elapsed / MINUTE)} 分钟前`
+  if (elapsed < 24 * HOUR) return `${Math.floor(elapsed / HOUR)} 小时前`
+  if (elapsed < 7 * 24 * HOUR) return `${Math.floor(elapsed / (24 * HOUR))} 天前`
+  return new Date(at).toLocaleDateString('zh-CN')
+}
+const fullTime = (at) => new Date(at).toLocaleString('zh-CN')
+
+/* ---------- 假数据 ---------- */
+const ME = { name: 'godtb14', color: '#7c5cff' }, ZHANG = { name: '张三', color: '#e8590c' }, LI = { name: '李四', color: '#0f9f6e' }
+const NOW = Date.now()
+let seq = 0
+const comment = (author, agoHours, body) => ({ id: 'c' + ++seq, author, at: NOW - agoHours * HOUR, body })
+const PAGES = { 'gitea-nas': 'Gitea 与 NAS', 'collab-repo': '协作仓怎么建', home: '首页' }
+let threads = [
+  { id: 't1', page: 'gitea-nas', anchor: { kind: 'element', block: 'b-intro', label: '段落', snippet: '协作站没有站点服务器，Gitea 是唯一的远端。NAS 上和协作站有关的就是下面三样。' }, comments: [comment(ME, 1, '测试下')] },
+  { id: 't2', page: 'gitea-nas', anchor: { kind: 'text', quote: '负责人能改 main 的保护' }, comments: [
+    comment(ZHANG, 5, '「负责人」是指团队里的 Owner 还是仓库的协作者？两种在 Gitea 里权限不一样，最好写明。'),
+    comment(ME, 4, '指 `collab.repo.owner` 命令设的那个人，Gitea 里对应仓库管理员。'),
+    comment(LI, 3, '那可以在这句后面直接链到命令的说明页。'),
+    comment(ZHANG, 2, '好，等改完我再看一遍。'),
+  ] },
+  { id: 't3', page: 'gitea-nas', anchor: { kind: 'page' }, comments: [comment(LI, 26, '整页可以加一张示意图：Gitea、执行器、ntfy 三者谁调谁。'), comment(ME, 20, '可以，用讲解组件画一张。')] },
+  { id: 't4', page: 'gitea-nas', anchor: { kind: 'text', quote: '旧的 webhook 地址写在 .env 里' }, comments: [comment(ZHANG, 72, '这句话现在还对吗？')] },
+  { id: 't7', page: 'gitea-nas', anchor: { kind: 'text', quote: '执行器只认组织密钥里的令牌' }, comments: [comment(LI, 0.5, '那在本机跑合并检查时用的是谁的令牌？')] },
+  { id: 't5', page: 'collab-repo', anchor: { kind: 'text', quote: 'collab/records' }, comments: [comment(LI, 30, '`collab/records` 底下的目录结构能不能列一下？')] },
+  { id: 't6', page: 'home', anchor: { kind: 'page' }, comments: [comment(ME, 50, '首页的项目列表按最近活动排会更好用。'), comment(ZHANG, 48, '同意。')] },
+]
+
+const VARIANTS = [
+  { k: 'A', name: 'Notion 侧栏',
+    note: '评论栏还在目录那一列，改成 Notion 的讨论列表：评论平铺、悬停才出操作、长串折成「另外 N 条回复」；被批的块左边一道黄线，划的字是黄底下划线。批注模式里点块或划字，草稿浮在旁边。',
+    allNote: '全站评论：按页分组，每串的样子和侧栏里一样。' },
+  { k: 'B', name: '页边批注',
+    note: '不开侧栏：每串评论排在正文右边、和被批的位置对齐，点开就地展开回复；整页评论放在标题下面的「页面讨论」。没有批注模式：悬停一块时右边出评论按钮，划字直接出「评论」。',
+    allNote: '全站评论：数据库表格，一行一串，点行展开整串，点页面名跳过去。' },
+  { k: 'C', name: '气泡 + 收件箱',
+    note: '正文优先：点黄色标记或块右边的计数，在原处弹出这一串；右下角收成一个小工具条，「评论」弹出本页评论列表（可按正文 / 整页 / 找不到原文筛）。批注模式点块，划字直接出「评论」。',
+    allNote: '全站评论：动态流，按最近活动倒序、按天分组，可筛「有回复」「找不到原文」。' },
+]
+for (const v of VARIANTS) Object.assign(v, { page: v.k, all: v.k })
+VARIANTS.push({ k: 'D', name: 'A 页面 + B 全站', page: 'A', all: 'B', note: VARIANTS[0].note, allNote: VARIANTS[1].allNote })
+VARIANTS.push({ k: 'E', name: '段下浮窗 + 收件箱', page: 'E', all: 'B',
+  note: '点被批的段落或黄色标记，在那一段正下方浮出一个和它同宽的框，只放这一串评论，盖在后面的正文上、不挤动正文；再点同一处、空白处或 Esc 收起。右边回到目录，评论列表收进右下角「评论」弹出的收件箱。批注的草稿也浮在那一段下面。',
+  allNote: VARIANTS[1].allNote })
+const currentVariant = () => VARIANTS.find((v) => v.k === S.variant)
+/** 文档页用哪一套的样子与交互（组合方案 D 用 A） */
+const pageVariant = () => currentVariant().page
+
+const query = new URLSearchParams(location.search)
+const S = {
+  variant: VARIANTS.some((v) => v.k === query.get('variant')) ? query.get('variant') : 'E',
+  view: query.get('view') === 'all' ? 'all' : 'doc',
+  access: query.get('access') === 'readonly' ? 'readonly' : 'writable',
+  theme: query.get('theme') === 'light' ? 'light' : 'dark',
+  panelOpen: true, picking: false, active: null, expanded: new Set(), draft: null,
+  pop: null, inbox: false, inboxFilter: 'all', openRows: new Set(), feedFilter: 'all', focusReply: null,
+}
+const writable = () => S.access === 'writable'
+function resetTransient() {
+  Object.assign(S, { picking: false, active: null, draft: null, pop: null, inbox: false, focusReply: null })
+  S.expanded.clear()
+}
+
+/* ---------- 正文 ---------- */
+function docHTML(slot = '') {
+  return `
+  <div class="crumbs">协作<span>/</span>原理</div>
+  <h1 data-block="b-title" data-label="标题">Gitea 与 NAS</h1>
+  <p class="lead" data-block="b-lead" data-label="段落">协作站里不属于哪个包的那一侧：NAS 上的 Gitea、执行器与 ntfy 各做什么、和哪个包打交道，一个项目在 Gitea 上是什么样子。这个分区写的是在 Gitea 与 NAS 上要配的东西、由哪条命令配。</p>
+  ${slot}
+  <p data-block="b-intro" data-label="段落">协作站没有站点服务器，Gitea 是唯一的远端。NAS 上和协作站有关的就是下面三样。组织、团队、组织密钥、工作流文件由人在 Gitea 网页上配；各仓的负责人、main 的保护、合并方式与组织的 webhook 由 gwb-collab 的命令照插件里写好的规矩写进去，人不在网页上手改：</p>
+  <div data-block="b-table" data-label="表格"><table>
+    <thead><tr><th style="width:18%">NAS 上的</th><th>做什么</th><th>谁调它</th></tr></thead>
+    <tbody>
+      <tr><td>Gitea</td><td>存项目的全部仓；收下成员的推送、开合并请求；按团队、协作者与 main 的保护决定谁能改 main</td><td>gwb-collab 经 gwb-gitea 的令牌克隆、取回、推送、建仓、配仓</td></tr>
+      <tr><td>执行器</td><td>跑协作仓里的工作流：合并检查、自动合并</td><td>Gitea Actions 按 <code>.gitea/workflows</code> 调起</td></tr>
+      <tr><td>ntfy</td><td>把合并结果与评论推到手机</td><td>组织的 webhook、站点的通知模块</td></tr>
+    </tbody></table></div>
+  <h2 data-block="b-h1" data-label="标题">一个项目在 Gitea 上的样子</h2>
+  <p data-block="b-org" data-label="段落">每个项目是 Gitea 上的一个组织，组织里有一个协作仓 <code>collab</code> 和若干代码仓。成员按团队分权限：负责人能改 main 的保护，其他人只能开合并请求，合并由执行器跑完检查后自动完成。</p>
+  <ul data-block="b-list" data-label="列表">
+    <li>组织密钥里放 <code>COLLAB_BOT_TOKEN</code>，执行器用它回写合并结果</li>
+    <li>组织的 webhook 指向 ntfy，合并、评论都会推一条通知</li>
+    <li>代码仓的 main 只接受经合并请求进来的提交</li>
+  </ul>
+  <h2 data-block="b-h2" data-label="标题">插件里和这一侧打交道的几处</h2>
+  <p data-block="b-plugin" data-label="段落">建仓、配仓都走 <code>collab.repo.*</code> 命令；读协作者、合并请求与评论走 gwb-gitea 的令牌。执行器只认组织密钥里的令牌，不读任何人本机的凭据。</p>
+  <p data-block="b-plugin2" data-label="段落">NAS 重启后执行器会自己重新注册；Gitea 的地址变了，就在设置里改 <code>gitea.baseUrl</code>，再运行一次 <code>collab.org.sync</code> 把 webhook 重写一遍。</p>`
+}
+const TEMPLATE = document.createElement('template')
+TEMPLATE.innerHTML = docHTML()
+const DOC_TEXT = TEMPLATE.content.textContent
+const TEMPLATE_BLOCKS = $$('[data-block]', TEMPLATE.content)
+const blockOfQuote = (quote) => TEMPLATE_BLOCKS.find((b) => b.textContent.includes(quote))?.dataset.block
+function docOrder(t) {
+  if (t.anchor.kind === 'page') return -1
+  const block = t.anchor.kind === 'element' ? t.anchor.block : blockOfQuote(t.anchor.quote)
+  return block ? TEMPLATE_BLOCKS.findIndex((b) => b.dataset.block === block) : 999
+}
+const pageThreads = () => threads.filter((t) => t.page === 'gitea-nas').sort((a, b) => docOrder(a) - docOrder(b))
+const lastAt = (t) => t.comments.at(-1).at
+const uniqAuthors = (cs) => [...new Map(cs.map((c) => [c.author.name, c.author])).values()]
+
+function anchorOf(t) {
+  const a = t.anchor
+  if (a.kind === 'page') return { kind: 'page' }
+  if (a.kind === 'element') return { kind: 'element', label: a.label, text: a.snippet }
+  if (t.page !== 'gitea-nas' || DOC_TEXT.includes(a.quote)) return { kind: 'text', text: a.quote }
+  return { kind: 'missing', text: a.quote }
+}
+const KIND_LABEL = { element: '元素', text: '划字', page: '整页', missing: '找不到原文' }
+
+/* ---------- 共用片段 ---------- */
+function quoteRow(t) {
+  const a = anchorOf(t)
+  if (a.kind === 'page') return `<div class="qt page">${icon('file')}<span>评论整页</span></div>`
+  if (a.kind === 'missing') return `<div class="qt missing" title="可能已删去，或在没打开的页签、收起的内容里">${icon('alert')}<span>原文找不到了 · <s>${esc(clip(a.text, 40))}</s></span></div>`
+  if (a.kind === 'element') return `<div class="qt"><span><em>${a.label}</em>${esc(clip(a.text, 60))}</span></div>`
+  return `<div class="qt"><span>${esc(clip(a.text, 80))}</span></div>`
+}
+function commentHTML(t, c, isHead) {
+  const canEdit = S.view === 'doc' && writable()
+  const actions = canEdit
+    ? `<div class="cm-acts">${isHead ? `<button class="ib" data-act="reply" data-id="${t.id}" title="回复">${icon('reply')}</button>` : ''}<button class="ib" data-act="${isHead ? 'delete-thread' : 'delete-reply'}" data-id="${t.id}" data-rid="${c.id}" title="${isHead ? '删除整串（含回复）' : '删除这条回复'}">${icon('trash')}</button></div>`
+    : ''
+  return `<div class="cm">${actions}<div class="cm-head">${av(c.author, 24)}<span class="cm-name">${esc(c.author.name)}</span><time class="cm-time" title="${fullTime(c.at)}">${rel(c.at)}</time></div><div class="cm-body">${fmt(c.body)}</div></div>`
+}
+function commentsHTML(t, { collapse = true } = {}) {
+  const cs = t.comments
+  if (collapse && cs.length > 3 && !S.expanded.has(t.id)) {
+    return commentHTML(t, cs[0], true) + `<button class="more-replies" data-act="expand" data-id="${t.id}">${icon('expand')}另外 ${cs.length - 2} 条回复</button>` + commentHTML(t, cs.at(-1), false)
+  }
+  return cs.map((c, i) => commentHTML(t, c, i === 0)).join('')
+}
+const composer = (kind, id, placeholder, autofocus = false) =>
+  `<form class="composer" data-kind="${kind}" ${id ? `data-id="${id}"` : ''}>${av(ME, 24)}<div class="box"><textarea rows="1" placeholder="${placeholder}" ${autofocus ? 'data-autofocus' : ''}></textarea><button class="send" type="submit" title="发送（Enter）">${icon('arrowUp')}</button></div></form>`
+const readonlyNote = () => `<div class="ro">${icon('lock')}<span>只读：这是 build 之后的发布版，评论与任务只能在本机由 gwb 插件 gwb-docsite 启动的站点里写</span></div>`
+const pickbar = () => (S.picking ? `<div class="pickbar">${icon('pen')}<span>批注：点正文里的一块，或划一段字</span><kbd>Esc</kbd><button data-act="toggle-picking">退出</button></div>` : '')
+const draftQuote = (d) => `<div class="qt"><span>${d.kind === 'element' ? `<em>${d.label}</em>` : ''}${esc(clip(d.text, 60))}</span></div>`
+const draftPop = () => `<div class="pop" style="top:${S.draft.top}px;left:${S.draft.left}px">${draftQuote(S.draft)}${composer('draft', '', '写评论…', true)}<div class="pop-foot"><span>Enter 发送 · Shift+Enter 换行</span><button data-act="cancel-draft">取消</button></div></div>`
+
+function sideNav() {
+  return `<nav class="sidenav">
+    <div class="sn-title"><span class="logo">协</span>协作站文档</div>
+    <div class="sn-search">${icon('search')}<span>搜索</span><kbd>Ctrl K</kbd></div>
+    <a class="sn-item ${S.view === 'all' ? 'on' : ''}" data-act="view" data-v="all">${icon('inbox')}全站评论<span class="sn-n">${threads.length}</span></a>
+    <div class="sn-group">开始</div>
+    <a class="sn-item" data-act="nop">首页</a>
+    <a class="sn-item" data-act="nop">协作仓怎么建</a>
+    <div class="sn-group">原理</div>
+    <a class="sn-item ${S.view === 'doc' ? 'on' : ''}" data-act="view" data-v="doc">Gitea 与 NAS</a>
+    <a class="sn-item" data-act="nop">合并检查</a>
+    <a class="sn-item" data-act="nop">通知</a>
+  </nav>`
+}
+const toc = () => `<aside class="toc"><div class="toc-title">${icon('list')}本页目录</div><a>一个项目在 Gitea 上的样子</a><a>插件里和这一侧打交道的几处</a></aside>`
+
+/* ================= A ================= */
+function threadA(t, { isStatic = false } = {}) {
+  const on = !isStatic && S.active === t.id
+  return `<section class="tA ${on ? 'on' : ''} ${isStatic ? 'static' : ''}" ${isStatic || on ? '' : `data-act="activate" data-id="${t.id}"`} data-hover-anchor="${t.id}">${quoteRow(t)}${commentsHTML(t, { collapse: !isStatic })}${on && writable() ? `<div class="tA-reply">${composer('reply', t.id, '回复…')}</div>` : ''}</section>`
+}
+function panelA() {
+  const ts = pageThreads()
+  return `<aside class="pA">
+    <header class="pA-head">
+      <div class="pA-title">评论<span class="pA-count">${ts.length}</span></div>
+      <div class="pA-tools">${writable() ? `<button class="ib ${S.picking ? 'on' : ''}" data-act="toggle-picking" title="批注：点正文里的一块，或划一段字（Esc 退出）">${icon('pen')}</button>` : ''}<button class="ib" data-act="close-panel" title="收起评论栏">${icon('x')}</button></div>
+    </header>
+    <div class="pA-scroll" data-keep-scroll="pA">
+      ${writable() ? `<div class="pA-new">${composer('page', '', '评论整页…')}</div>` : readonlyNote()}
+      ${ts.length ? ts.map((t) => threadA(t)).join('') : '<div class="empty">这一页还没有评论</div>'}
+    </div>
+  </aside>`
+}
+const dockA = () => `<div class="dockA">${writable() ? `<button class="${S.picking ? 'on' : ''}" data-act="toggle-picking" title="批注：点正文里的一块，或划一段字">${icon('pen')}${S.picking ? '批注中' : '批注'}</button>` : ''}<button data-act="open-panel" title="打开评论栏">${icon('message')}${pageThreads().length || ''}</button></div>`
+function allA() {
+  const groups = Object.entries(PAGES).map(([key, title]) => ({ key, title, ts: threads.filter((t) => t.page === key) })).filter((g) => g.ts.length)
+  return `<div class="allA"><h1>全站评论</h1><p class="sub">${threads.length} 串评论，分在 ${groups.length} 页 · 这里只读，写评论去对应页面</p>
+    ${groups.map((g) => `<section class="grpA"><a class="grpA-head" data-act="go-page" data-page="${g.key}">${icon('file')}<span>${g.title}</span><span class="grpA-n">${g.ts.length}</span>${icon('arrowRight', 'go')}</a>${g.ts.map((t) => threadA(t, { isStatic: true })).join('')}</section>`).join('')}
+  </div>`
+}
+
+/* ================= B ================= */
+function pageDiscussionB() {
+  const ts = pageThreads().filter((t) => ['page', 'missing'].includes(anchorOf(t).kind))
+  return `<section class="bPage">
+    <div class="bPage-title">${icon('message')}页面讨论 · ${ts.length}</div>
+    ${ts.map((t) => {
+      const on = S.active === t.id
+      return `<div class="bPage-t ${on ? 'on' : ''}" ${on ? '' : `data-act="activate" data-id="${t.id}"`}>${anchorOf(t).kind === 'missing' ? quoteRow(t) : ''}${commentsHTML(t)}${on && writable() ? composer('reply', t.id, '回复…') : ''}</div>`
+    }).join('')}
+    ${writable() ? composer('page', '', '评论整页…') : readonlyNote()}
+  </section>`
+}
+function cardB(t) {
+  const cs = t.comments
+  if (S.active !== t.id) {
+    const head = cs[0]
+    return `<div class="cardB" data-act="activate" data-id="${t.id}" data-card="${t.id}" data-hover-anchor="${t.id}">
+      <div class="mini-head">${av(head.author, 20)}<span class="cm-name">${esc(head.author.name)}</span><time class="cm-time">${rel(head.at)}</time></div>
+      <div class="mini-body">${fmt(head.body)}</div>
+      ${cs.length > 1 ? `<div class="mini-foot"><span class="avs">${uniqAuthors(cs.slice(1)).map((p) => av(p, 16)).join('')}</span>${cs.length - 1} 条回复</div>` : ''}
+    </div>`
+  }
+  return `<div class="cardB on" data-card="${t.id}">${commentsHTML(t)}${writable() ? composer('reply', t.id, '回复…') : ''}</div>`
+}
+function docB() {
+  const anchored = pageThreads().filter((t) => ['element', 'text'].includes(anchorOf(t).kind))
+  const draft = S.draft ? `<div class="cardB on" data-card="draft">${draftQuote(S.draft)}${composer('draft', '', '写评论…', true)}<div class="pop-foot"><span>Enter 发送</span><button data-act="cancel-draft">取消</button></div></div>` : ''
+  return `<div class="bWrap"><article class="doc">${docHTML(pageDiscussionB())}</article><div class="bMargin">${anchored.map(cardB).join('')}${draft}</div></div>`
+}
+function allB() {
+  const rows = threads.slice().sort((a, b) => lastAt(b) - lastAt(a))
+  return `<div class="allB"><h1>全站评论</h1><p class="sub">这里只读，写评论去对应页面</p>
+    <div class="dbbar"><span class="dbtab on">${icon('table')}表格</span><span class="dbtab">按页面</span><span class="dbsp"></span><span class="dbmeta">按最近活动排序 · ${rows.length} 串</span></div>
+    <table class="tblB"><thead><tr>
+      <th style="width:34%">${icon('message')}评论</th><th style="width:15%">${icon('file')}页面</th><th style="width:22%">${icon('target')}位置</th><th style="width:11%">${icon('user')}作者</th><th class="num" style="width:7%">回复</th><th style="width:11%">${icon('clock')}最近</th>
+    </tr></thead><tbody>${rows.map(rowB).join('')}</tbody></table></div>`
+}
+function rowB(t) {
+  const open = S.openRows.has(t.id), head = t.comments[0], a = anchorOf(t)
+  return `<tr data-act="row-toggle" data-id="${t.id}">
+      <td><div class="tdB-c">${icon(open ? 'chevronDown' : 'chevronRight', 'caret')}<span class="clip1">${fmt(head.body)}</span></div></td>
+      <td><a class="pgB" data-act="go-page" data-page="${t.page}" data-id="${t.id}">${icon('file')}${PAGES[t.page]}</a></td>
+      <td><div class="clip1"><span class="chip chip-${a.kind}">${a.kind === 'element' ? a.label : KIND_LABEL[a.kind]}</span>${a.text ? `<span class="chip-q">${esc(a.text)}</span>` : ''}</div></td>
+      <td><span class="who">${av(head.author, 20)}${esc(head.author.name)}</span></td>
+      <td class="num tdmuted">${t.comments.length - 1 || ''}</td>
+      <td class="tdmuted">${rel(lastAt(t))}</td>
+    </tr>${open ? `<tr class="detail"><td colspan="6"><div class="detailB">${quoteRow(t)}${commentsHTML(t, { collapse: false })}</div></td></tr>` : ''}`
+}
+
+/* ================= C ================= */
+function popC(t) {
+  return `<div class="pop popC" data-pop="${t.id}">
+    <div class="popC-head">${quoteRow(t)}<button class="ib" data-act="close-pop" title="关闭（Esc）">${icon('x')}</button></div>
+    <div class="popC-body">${commentsHTML(t)}</div>
+    ${writable() ? `<div class="popC-foot">${composer('reply', t.id, '回复…', S.focusReply === t.id)}</div>` : ''}
+  </div>`
+}
+const INBOX_FILTERS = [['all', '全部'], ['body', '正文里'], ['page', '整页'], ['missing', '找不到原文']]
+function inboxFilterOf(key) {
+  const kinds = { all: null, body: ['element', 'text'], page: ['page'], missing: ['missing'] }[key]
+  return (t) => !kinds || kinds.includes(anchorOf(t).kind)
+}
+function inboxC() {
+  const all = pageThreads()
+  const tabs = INBOX_FILTERS.map(([key, label]) => [key, label, all.filter(inboxFilterOf(key)).length]).filter(([key, , n]) => key === 'all' || n > 0)
+  const shown = all.filter(inboxFilterOf(S.inboxFilter))
+  return `<div class="inboxC">
+    <div class="inboxC-head"><span>本页评论</span><button class="ib" data-act="inbox-toggle" title="收起">${icon('x')}</button></div>
+    ${writable() ? '' : readonlyNote()}
+    <div class="tabsC">${tabs.map(([key, label, n]) => `<button class="${S.inboxFilter === key ? 'on' : ''}" data-act="inbox-filter" data-v="${key}">${label}<b>${n}</b></button>`).join('')}</div>
+    <div class="inboxC-list" data-keep-scroll="inbox">${shown.length ? shown.map(rowC).join('') : '<div class="empty">没有评论</div>'}</div>
+    ${writable() ? `<div class="inboxC-foot">${composer('page', '', '评论整页…')}</div>` : ''}
+  </div>`
+}
+function rowC(t) {
+  const head = t.comments[0]
+  return `<div class="rowC ${S.pop === t.id ? 'on' : ''}" data-act="activate" data-id="${t.id}" data-hover-anchor="${t.id}">${av(head.author, 28)}<div class="rowC-main">
+    <div class="rowC-top"><b>${esc(head.author.name)}</b><time>${rel(head.at)}</time>${t.comments.length > 1 ? `<span class="rowC-n">${icon('message')}${t.comments.length - 1}</span>` : ''}</div>
+    ${quoteRow(t)}<div class="rowC-b">${fmt(head.body)}</div></div></div>`
+}
+const dockC = () => `<div class="dockC">${writable() ? `<button class="${S.picking ? 'on' : ''}" data-act="toggle-picking" title="批注：点正文里的一块，或划一段字">${icon('pen')}批注</button><span class="dockC-sep"></span>` : ''}<button class="${S.inbox ? 'on' : ''}" data-act="inbox-toggle">${icon('inbox')}评论<span class="num">${pageThreads().length}</span>${icon(S.inbox ? 'chevronDown' : 'chevronUp')}</button></div>${S.inbox ? inboxC() : ''}`
+function dayLabel(at) {
+  const day = (x) => new Date(x).toDateString()
+  if (day(at) === day(Date.now())) return '今天'
+  if (day(at) === day(Date.now() - 24 * HOUR)) return '昨天'
+  return '更早'
+}
+function allC() {
+  const filters = { all: () => true, replied: (t) => t.comments.length > 1, missing: (t) => anchorOf(t).kind === 'missing' }
+  const items = threads.slice().filter(filters[S.feedFilter]).sort((a, b) => lastAt(b) - lastAt(a))
+  const groups = []
+  for (const t of items) {
+    const label = dayLabel(lastAt(t))
+    if (groups.at(-1)?.label !== label) groups.push({ label, items: [] })
+    groups.at(-1).items.push(t)
+  }
+  const chip = (key, label) => `<button class="${S.feedFilter === key ? 'on' : ''}" data-act="feed-filter" data-v="${key}">${label} ${threads.filter(filters[key]).length}</button>`
+  return `<div class="allC"><h1>全站评论</h1><p class="sub">按最近活动排 · 这里只读，点一条去对应页面</p>
+    <div class="chipsC">${chip('all', '全部')}${chip('replied', '有回复')}${chip('missing', '找不到原文')}</div>
+    ${groups.map((g) => `<div class="dayC">${g.label}</div>${g.items.map(feedItemC).join('')}`).join('') || '<div class="empty">没有评论</div>'}
+  </div>`
+}
+function feedItemC(t) {
+  const head = t.comments[0], last = t.comments.at(-1)
+  return `<div class="feedC" data-act="go-page" data-page="${t.page}" data-id="${t.id}">${av(head.author, 32)}<div class="feedC-main">
+    <div class="feedC-line"><b>${esc(head.author.name)}</b>评论了<span class="pgC">${icon('file')}${PAGES[t.page]}</span><time title="${fullTime(head.at)}">${rel(head.at)}</time></div>
+    ${quoteRow(t)}<div class="feedC-body">${fmt(head.body)}</div>
+    ${t.comments.length > 1 ? `<div class="feedC-replies"><span class="avs">${uniqAuthors(t.comments.slice(1)).map((p) => av(p, 18)).join('')}</span>${t.comments.length - 1} 条回复 · 最近 ${esc(last.author.name)} ${rel(last.at)}</div>` : ''}
+  </div></div>`
+}
+
+/* ---------- 渲染 ---------- */
+function docView() {
+  if (pageVariant() === 'B') return docB()
+  return `<article class="doc">${docHTML()}</article>`
+}
+const allView = () => ({ A: allA, B: allB, C: allC })[currentVariant().all]()
+function overlays() {
+  if (S.view !== 'doc') return ''
+  if (pageVariant() === 'A') return (S.panelOpen ? panelA() : dockA()) + (S.draft ? draftPop() : '') + pickbar()
+  if (pageVariant() === 'C') {
+    const popThread = threads.find((t) => t.id === S.pop)
+    return dockC() + (popThread ? popC(popThread) : '') + (S.draft ? draftPop() : '') + pickbar()
+  }
+  if (pageVariant() === 'E') return dockC() + pickbar()
+  return ''
+}
+function barHTML() {
+  const v = VARIANTS.find((x) => x.k === S.variant)
+  const seg = (key, options) => `<span class="seg">${options.map(([value, label]) => `<button class="${S[key] === value ? 'on' : ''}" data-act="set" data-k="${key}" data-v="${value}">${label}</button>`).join('')}</span>`
+  return `<div class="pbar"><div class="pbar-row">
+    <button class="pbtn" data-act="cycle" data-v="-1" title="上一套（←）">${icon('chevronLeft')}</button>
+    <span class="pbar-label"><b>${v.k}</b>${v.name}</span>
+    <button class="pbtn" data-act="cycle" data-v="1" title="下一套（→）">${icon('chevronRight')}</button>
+    <span class="psep"></span>${seg('view', [['doc', '文档页'], ['all', '全站评论']])}${seg('access', [['writable', '可写'], ['readonly', '只读']])}${seg('theme', [['dark', '暗'], ['light', '亮']])}
+  </div><div class="pbar-note">${S.view === 'doc' ? v.note : v.allNote}</div></div>`
+}
+function render() {
+  const keptScroll = Object.fromEntries($$('[data-keep-scroll]').map((el) => [el.dataset.keepScroll, el.scrollTop]))
+  hideFloating()
+  hoveredAnchorId = null
+  document.documentElement.dataset.theme = S.theme
+  document.body.className = `v${pageVariant()} ${S.picking ? 'picking' : ''} ${writable() ? 'writable' : 'readonly'}`
+  const showToc = S.view === 'doc' && pageVariant() !== 'B'
+  $('#app').innerHTML = `<div class="shell ${showToc ? '' : 'noToc'}">${sideNav()}<main class="main">${S.view === 'doc' ? docView() : allView()}</main>${showToc ? toc() : ''}</div>${overlays()}`
+  $('#bar').innerHTML = barHTML()
+  for (const el of $$('[data-keep-scroll]')) if (keptScroll[el.dataset.keepScroll] != null) el.scrollTop = keptScroll[el.dataset.keepScroll]
+  if (S.view === 'doc') {
+    const doc = $('.doc')
+    applyMarks(doc)
+    if (pageVariant() === 'B') layoutMarginB()
+    if (pageVariant() === 'C') { placeBadgesC(doc); placePopC() }
+    if (pageVariant() === 'E') placeInlineE(doc)
+  }
+  const focusTarget = S.focusReply ? $(`form[data-kind="reply"][data-id="${S.focusReply}"] textarea`) : $('[data-autofocus]')
+  focusTarget?.focus({ preventScroll: true })
+  S.focusReply = null
+  try {
+    history.replaceState(null, '', '?' + new URLSearchParams({ variant: S.variant, view: S.view, access: S.access, theme: S.theme }))
+  } catch {
+    // file:// 下有的浏览器不让改地址，只是少了「刷新后停在原方案」
+  }
+}
+
+function wrapQuote(root, quote) {
+  const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT)
+  for (let node = walker.nextNode(); node; node = walker.nextNode()) {
+    if (node.parentElement.closest('.cmark, .bPage, .badgeC')) continue
+    const at = node.data.indexOf(quote)
+    if (at < 0) continue
+    const range = document.createRange()
+    range.setStart(node, at)
+    range.setEnd(node, at + quote.length)
+    const span = document.createElement('span')
+    span.className = 'cmark'
+    range.surroundContents(span)
+    return span
+  }
+  return null
+}
+function applyMarks(doc) {
+  for (const t of pageThreads()) {
+    const a = t.anchor
+    if (a.kind === 'element') {
+      const block = doc.querySelector(`[data-block="${a.block}"]`)
+      if (!block) continue
+      block.dataset.threads = ((block.dataset.threads || '') + ' ' + t.id).trim()
+      if (S.active === t.id) block.classList.add('on')
+    } else if (a.kind === 'text') {
+      const mark = wrapQuote(doc, a.quote)
+      if (!mark) continue
+      mark.dataset.thread = t.id
+      if (S.active === t.id) mark.classList.add('on')
+    }
+  }
+  if (S.draft?.kind === 'element') doc.querySelector(`[data-block="${S.draft.block}"]`)?.classList.add('pending')
+  if (S.draft?.kind === 'text') wrapQuote(doc, S.draft.text)?.classList.add('pending')
+}
+const anchorEl = (id) => $(`.doc [data-threads~="${id}"]`) || $(`.doc .cmark[data-thread="${id}"]`)
+
+function layoutMarginB() {
+  const wrap = $('.bWrap')
+  const top0 = wrap.getBoundingClientRect().top
+  const items = $$('.cardB', wrap).map((card) => {
+    const id = card.dataset.card
+    const anchor = id === 'draft' ? null : anchorEl(id)
+    const top = id === 'draft' ? S.draft.wrapTop : anchor ? anchor.getBoundingClientRect().top - top0 : 0
+    return { card, top, height: card.offsetHeight, on: card.classList.contains('on') }
+  }).sort((a, b) => a.top - b.top)
+  const gap = 8
+  const pinned = items.findIndex((it) => it.on)
+  if (pinned < 0) {
+    let y = -Infinity
+    for (const it of items) { it.y = Math.max(it.top, y); y = it.y + it.height + gap }
+  } else {
+    items[pinned].y = items[pinned].top
+    let y = items[pinned].y + items[pinned].height + gap
+    for (let i = pinned + 1; i < items.length; i++) { items[i].y = Math.max(items[i].top, y); y = items[i].y + items[i].height + gap }
+    y = items[pinned].y
+    for (let i = pinned - 1; i >= 0; i--) { items[i].y = Math.min(items[i].top, y - gap - items[i].height); y = items[i].y }
+  }
+  for (const it of items) it.card.style.top = it.y + 'px'
+}
+function placeBadgesC(doc) {
+  const byBlock = new Map()
+  for (const el of $$('[data-threads], .cmark[data-thread]', doc)) {
+    const block = el.matches('[data-block]') ? el : el.closest('[data-block]')
+    if (!block) continue
+    const ids = el.dataset.threads ? el.dataset.threads.split(' ') : [el.dataset.thread]
+    byBlock.set(block, [...(byBlock.get(block) || []), ...ids])
+  }
+  for (const [block, ids] of byBlock) {
+    const badge = document.createElement('button')
+    badge.className = 'badgeC' + (ids.includes(S.pop) ? ' on' : '')
+    badge.dataset.act = 'badge'
+    badge.dataset.id = ids[0]
+    badge.title = `这一块有 ${ids.length} 串评论`
+    badge.innerHTML = icon('message') + ids.length
+    block.appendChild(badge)
+  }
+}
+function placePopC() {
+  const pop = $('.popC')
+  if (!pop) return
+  const anchor = anchorEl(pop.dataset.pop) || $('.doc h1')
+  const rect = anchor.getBoundingClientRect()
+  pop.style.top = rect.bottom + scrollY + 8 + 'px'
+  pop.style.left = Math.max(12, Math.min(rect.left, innerWidth - pop.offsetWidth - 16)) + scrollX + 'px'
+}
+
+function inlineE(t) {
+  const showQuote = anchorOf(t).kind !== 'element'
+  return `<div class="inlineE" data-inline="${t.id}"><button class="ib" data-act="close-pop" title="收起（Esc）">${icon('x')}</button>
+    ${showQuote ? `<div class="inlineE-quote">${quoteRow(t)}</div>` : ''}
+    <div class="inlineE-body">${commentsHTML(t)}</div>
+    ${writable() ? `<div class="inlineE-foot">${composer('reply', t.id, '回复…', S.focusReply === t.id)}</div>` : ''}
+  </div>`
+}
+const inlineDraftE = () => `<div class="inlineE draft"><button class="ib" data-act="cancel-draft" title="取消（Esc）">${icon('x')}</button>
+  ${S.draft.kind === 'text' ? `<div class="inlineE-quote">${draftQuote(S.draft)}</div>` : ''}
+  <div class="inlineE-foot">${composer('draft', '', '写评论…', true)}<div class="pop-foot"><span>Enter 发送 · Shift+Enter 换行</span></div></div></div>`
+/** 浮窗盖在被批那一块的正下方、与它同宽，不挤动正文；小三角对准被批的元素或那几个字的开头 */
+function floatBelow(block, html, pointAt) {
+  $('#app').insertAdjacentHTML('beforeend', html)
+  const box = $('#app').lastElementChild
+  const blockRect = block.getBoundingClientRect()
+  Object.assign(box.style, { top: blockRect.bottom + scrollY + 10 + 'px', left: blockRect.left + scrollX + 'px', width: blockRect.width + 'px' })
+  const firstLine = pointAt.getClientRects()[0] ?? pointAt.getBoundingClientRect()
+  const arrowX = firstLine.left - box.getBoundingClientRect().left + 10
+  box.style.setProperty('--arrow-x', Math.max(14, Math.min(arrowX, box.offsetWidth - 30)) + 'px')
+}
+function placeInlineE(doc) {
+  for (const box of $$('.inlineE')) box.remove()
+  const thread = threads.find((t) => t.id === S.pop)
+  if (thread) {
+    const anchor = anchorEl(thread.id)
+    const block = anchor ? anchor.closest('[data-block]') : doc.querySelector('[data-block="b-lead"]')
+    floatBelow(block, inlineE(thread), anchor && !anchor.matches('[data-block]') ? anchor : block)
+  }
+  if (S.draft) {
+    const pending = doc.querySelector('.pending')
+    if (pending) floatBelow(pending.closest('[data-block]'), inlineDraftE(), pending)
+  }
+}
+
+/* ---------- 交互 ---------- */
+let toastTimer = 0
+function toast(message) {
+  const el = $('#toast')
+  el.textContent = message
+  el.classList.add('show')
+  clearTimeout(toastTimer)
+  toastTimer = setTimeout(() => el.classList.remove('show'), 1800)
+}
+function hideFloating() {
+  $('#hoverbox').style.display = 'none'
+  $('#gutterBtn').style.display = 'none'
+  $('#selBtn').style.display = 'none'
+}
+const usesPopThread = () => ['C', 'E'].includes(pageVariant())
+function activate(id, source) {
+  if (pageVariant() === 'E' && source === 'mark' && S.pop === id) {
+    Object.assign(S, { pop: null, active: null })
+    return render()
+  }
+  S.active = id
+  if (pageVariant() === 'A') S.panelOpen = true
+  if (usesPopThread()) S.pop = id
+  render()
+  if (pageVariant() === 'E') $('.inlineE')?.scrollIntoView({ behavior: 'smooth', block: source === 'list' ? 'center' : 'nearest' })
+  else if (source === 'list' && pageVariant() !== 'B') anchorEl(id)?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+  if (source === 'mark' && pageVariant() === 'A') $(`.tA.on`)?.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
+}
+function startDraft(draft, rect) {
+  const panelWidth = pageVariant() === 'A' && S.panelOpen ? 340 : 0
+  draft.top = rect.bottom + scrollY + 8
+  draft.left = Math.max(12, Math.min(rect.left, innerWidth - panelWidth - 380 - 16)) + scrollX
+  const wrap = $('.bWrap')
+  if (wrap) draft.wrapTop = rect.top - wrap.getBoundingClientRect().top
+  Object.assign(S, { draft, active: null, pop: null })
+  getSelection().removeAllRanges()
+  render()
+}
+const draftFromBlock = (block) => startDraft({ kind: 'element', block: block.dataset.block, label: block.dataset.label, text: block.textContent.trim().replace(/\s+/g, ' ') }, block.getBoundingClientRect())
+
+function submit(kind, id, body) {
+  const c = { id: 'c' + ++seq, author: ME, at: Date.now(), body }
+  if (kind === 'reply') {
+    threads.find((t) => t.id === id).comments.push(c)
+    S.expanded.add(id)
+    S.focusReply = id
+  } else {
+    const d = S.draft
+    const anchor = kind === 'page' ? { kind: 'page' } : d.kind === 'element' ? { kind: 'element', block: d.block, label: d.label, snippet: d.text } : { kind: 'text', quote: d.text }
+    const t = { id: 't' + ++seq, page: 'gitea-nas', anchor, comments: [c] }
+    threads.push(t)
+    Object.assign(S, { draft: null, picking: false, active: t.id })
+    if (pageVariant() === 'E' || (pageVariant() === 'C' && kind !== 'page')) S.pop = t.id
+  }
+  render()
+}
+
+document.addEventListener('submit', (e) => {
+  e.preventDefault()
+  const form = e.target
+  const body = form.querySelector('textarea').value.trim()
+  if (body) submit(form.dataset.kind, form.dataset.id, body)
+})
+document.addEventListener('input', (e) => {
+  if (!e.target.matches('.composer textarea')) return
+  const ta = e.target
+  ta.style.height = 'auto'
+  ta.style.height = Math.min(ta.scrollHeight, 200) + 'px'
+  ta.closest('.composer').classList.toggle('ready', ta.value.trim() !== '')
+})
+document.addEventListener('keydown', (e) => {
+  if (e.target.matches?.('.composer textarea') && e.key === 'Enter' && !e.shiftKey && !e.isComposing) {
+    e.preventDefault()
+    e.target.form.requestSubmit()
+    return
+  }
+  if (e.key === 'Escape') {
+    Object.assign(S, { picking: false, draft: null, pop: null, active: null })
+    render()
+    return
+  }
+  const typing = e.target.closest?.('input, textarea, [contenteditable]')
+  if (!typing && (e.key === 'ArrowLeft' || e.key === 'ArrowRight')) cycle(e.key === 'ArrowLeft' ? -1 : 1)
+})
+function cycle(step) {
+  const i = VARIANTS.findIndex((v) => v.k === S.variant)
+  S.variant = VARIANTS[(i + step + VARIANTS.length) % VARIANTS.length].k
+  resetTransient()
+  S.panelOpen = true
+  render()
+}
+
+function handleAct(act, d) {
+  const thread = threads.find((t) => t.id === d.id)
+  switch (act) {
+    case 'cycle': return cycle(Number(d.v))
+    case 'set':
+      S[d.k] = d.v
+      if (d.k === 'access' || d.k === 'view') resetTransient()
+      render()
+      if (d.k === 'view') scrollTo(0, 0)
+      return
+    case 'view': S.view = d.v; resetTransient(); render(); scrollTo(0, 0); return
+    case 'nop': return toast('原型里只做了「Gitea 与 NAS」这一页')
+    case 'open-panel': S.panelOpen = true; return render()
+    case 'close-panel': Object.assign(S, { panelOpen: false, active: null }); return render()
+    case 'toggle-picking': S.picking = !S.picking; if (!S.picking) S.draft = null; return render()
+    case 'activate': return activate(d.id, 'list')
+    case 'badge': return activate(d.id, 'mark')
+    case 'expand': S.expanded.add(d.id); return render()
+    case 'reply':
+      Object.assign(S, { active: d.id, focusReply: d.id })
+      if (usesPopThread()) S.pop = d.id
+      return render()
+    case 'delete-thread':
+      threads = threads.filter((t) => t !== thread)
+      if (S.active === d.id) S.active = null
+      if (S.pop === d.id) S.pop = null
+      render()
+      return toast('已删除整串')
+    case 'delete-reply':
+      thread.comments = thread.comments.filter((c) => c.id !== d.rid)
+      render()
+      return toast('已删除回复')
+    case 'cancel-draft': S.draft = null; return render()
+    case 'inbox-toggle': S.inbox = !S.inbox; return render()
+    case 'inbox-filter': S.inboxFilter = d.v; return render()
+    case 'close-pop': Object.assign(S, { pop: null, active: null }); return render()
+    case 'row-toggle':
+      if (S.openRows.has(d.id)) S.openRows.delete(d.id)
+      else S.openRows.add(d.id)
+      return render()
+    case 'feed-filter': S.feedFilter = d.v; return render()
+    case 'go-page':
+      if (d.page !== 'gitea-nas') return toast('原型里只做了「Gitea 与 NAS」这一页')
+      S.view = 'doc'
+      resetTransient()
+      scrollTo(0, 0)
+      if (d.id) return activate(d.id, 'list')
+      return render()
+  }
+}
+
+// 批注模式（A、C）：捕获阶段拦下正文里的点击，点哪块就批哪块
+document.addEventListener('click', (e) => {
+  if (!S.picking || S.view !== 'doc' || pageVariant() === 'B') return
+  if (!e.target.closest('.doc') || e.target.closest('.badgeC')) return
+  if (!getSelection().isCollapsed) return
+  const block = e.target.closest('[data-block]')
+  if (!block) return
+  e.preventDefault()
+  e.stopPropagation()
+  draftFromBlock(block)
+}, true)
+
+document.addEventListener('click', (e) => {
+  const target = e.target
+  if (target.closest('.composer')) return
+  if (!getSelection().isCollapsed && target.closest('.doc')) return
+  const actEl = target.closest('[data-act]')
+  if (actEl) return handleAct(actEl.dataset.act, actEl.dataset)
+  if (S.view !== 'doc') return
+  const mark = target.closest('.doc .cmark[data-thread]')
+  if (mark) return activate(mark.dataset.thread, 'mark')
+  const block = target.closest('.doc [data-threads]')
+  if (block) return activate(block.dataset.threads.split(' ')[0], 'mark')
+  if (target.closest('.pop, .inlineE, .pA, .dockA, .dockC, .inboxC, .cardB, .bPage, #bar, #selBtn, #gutterBtn, .pickbar')) return
+  // 收件箱不跟着点空白处收起，只认它自己的开关按钮
+  if (S.active || S.pop) {
+    Object.assign(S, { active: null, pop: null })
+    render()
+  }
+})
+
+let gutterBlock = null
+document.addEventListener('mousemove', (e) => {
+  if (S.view !== 'doc') return
+  const doc = $('.doc')
+  if (S.picking && pageVariant() !== 'B' && !S.draft) {
+    const block = e.target.closest?.('.doc [data-block]')
+    const box = $('#hoverbox')
+    if (block) {
+      const r = block.getBoundingClientRect()
+      Object.assign(box.style, { display: 'block', top: r.top - 4 + 'px', left: r.left - 6 + 'px', width: r.width + 12 + 'px', height: r.height + 8 + 'px' })
+      box.firstElementChild.textContent = `${block.dataset.label} · 点击评论`
+    } else box.style.display = 'none'
+  }
+  if (pageVariant() === 'B' && writable() && !S.draft) {
+    const btn = $('#gutterBtn')
+    if (e.target.closest('#gutterBtn')) return
+    const docRect = doc.getBoundingClientRect()
+    const inRow = e.clientX >= docRect.left - 20 && e.clientX <= docRect.right + 44 && !e.target.closest('.bPage, .cardB')
+    gutterBlock = inRow ? $$('[data-block]', doc).find((b) => { const r = b.getBoundingClientRect(); return e.clientY >= r.top - 4 && e.clientY <= r.bottom + 4 }) : null
+    if (gutterBlock) {
+      const r = gutterBlock.getBoundingClientRect()
+      Object.assign(btn.style, { display: 'grid', top: r.top + 'px', left: docRect.right + 10 + 'px' })
+    } else btn.style.display = 'none'
+  }
+})
+$('#gutterBtn').innerHTML = icon('msgPlus')
+$('#gutterBtn').addEventListener('click', () => gutterBlock && draftFromBlock(gutterBlock))
+addEventListener('scroll', () => { $('#hoverbox').style.display = 'none'; $('#gutterBtn').style.display = 'none' }, true)
+
+// 划字：A 只在批注模式里出按钮（同现在），B、C 随时出（Notion 的做法）
+let selectionRange = null
+$('#selBtn').innerHTML = icon('message') + '评论'
+$('#selBtn').addEventListener('mousedown', (e) => e.preventDefault())
+$('#selBtn').addEventListener('click', () => {
+  if (!selectionRange) return
+  startDraft({ kind: 'text', text: selectionRange.toString().trim() }, selectionRange.getBoundingClientRect())
+})
+document.addEventListener('mouseup', (e) => {
+  if (e.target.closest('#selBtn')) return
+  setTimeout(() => {
+    const btn = $('#selBtn')
+    const selection = getSelection()
+    const allowed = writable() && S.view === 'doc' && (pageVariant() !== 'A' || S.picking)
+    if (!allowed || selection.isCollapsed || selection.rangeCount === 0) { btn.style.display = 'none'; return }
+    const range = selection.getRangeAt(0)
+    const doc = $('.doc')
+    const startEl = range.startContainer.parentElement
+    if (!doc.contains(range.commonAncestorContainer) || startEl.closest('.bPage, .inlineE') || !range.toString().trim()) { btn.style.display = 'none'; return }
+    selectionRange = range
+    const first = [...range.getClientRects()].find((r) => r.width > 0) || range.getBoundingClientRect()
+    Object.assign(btn.style, { display: 'flex', top: Math.max(8, first.top - 42) + 'px', left: first.left + 'px' })
+  })
+})
+
+let hoveredAnchorId = null
+document.addEventListener('mouseover', (e) => {
+  const id = e.target.closest?.('[data-hover-anchor]')?.dataset.hoverAnchor ?? null
+  if (id === hoveredAnchorId) return
+  $$('.doc .hov').forEach((el) => el.classList.remove('hov'))
+  hoveredAnchorId = id
+  if (id) anchorEl(id)?.classList.add('hov')
+})
+addEventListener('resize', () => {
+  if (S.view === 'doc' && pageVariant() === 'B') layoutMarginB()
+  if (S.view === 'doc' && pageVariant() === 'C') placePopC()
+  if (S.view === 'doc' && pageVariant() === 'E') placeInlineE($('.doc'))
+})
+
+render()
+</script>
+</body>
+</html>

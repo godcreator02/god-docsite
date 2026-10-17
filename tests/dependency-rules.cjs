@@ -1,7 +1,7 @@
 /**
  * 依赖规则：仓根 `pnpm test:deps` 用它跑 dependency-cruiser，扫 packages/*\/src 与 plugins/*\/src，包之间的方向只由它检查。
  * 规则有三类：没有环、包不依赖 gwb 插件、gwb 插件不 import 包的站点层；功能包之间允许的边（allowedFeatureDependencies）；
- * 包内 src/core|node|site|cli 的分层。方向与分层的来历见 refactor-plan.html 的「功能包」「依赖方向」两节。
+ * 包内 src/core|node|site|cli 的分层。方向与分层的来历见 docs-site/content/background/refactor-plan.html 的「功能包」「依赖方向」两节。
  * 没有豁免清单，报出来的每一条都算违规。规则里的路径都相对仓根，从仓根运行。
  * 本仓包之间按包名 import 时解析到对方的 dist/，所以要先 pnpm build 再跑。
  */

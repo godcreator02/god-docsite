@@ -1,5 +1,5 @@
 {
   "title": "背景：fumadocs 原理",
   "root": true,
-  "pages": ["overview", "three-pieces", "base-vite-rr", "full-flow", "mdx-compile", "mdx-compile-explainer", "core-source", "mdx", "sources", "ui", "integrations"]
+  "pages": ["overview", "three-pieces", "base-vite-rr", "full-flow", "mdx-compile", "mdx-compile-explainer", "core-source", "mdx", "sources", "ui", "integrations", "refactor-plan"]
 }

@@ -1,0 +1,381 @@
+{
+  "status": "passed_automation_visual_review_pending",
+  "startedAt": "2026-10-13T07:17:50.429669+00:00",
+  "report": "D:\\unitfolders\\oz47p-docsite-kit\\docsite-kit\\packages\\word-report\\reports\\demo-report",
+  "visualReview": "pending",
+  "events": [
+    {
+      "event": "start",
+      "template": "D:\\unitfolders\\oz47p-docsite-kit\\docsite-kit\\packages\\word-report\\templates\\project-report.dotx",
+      "templateSha256": "2d645df23ecd1ee6f40d7da29854435139ff9d77a490f29c5051b6960bf909c4"
+    },
+    {
+      "event": "draft-saved",
+      "equations": 6
+    },
+    {
+      "event": "mathtype-functionality",
+      "full": 1,
+      "mode": 2,
+      "dll": "C:\\Program Files (x86)\\MathType\\MathPage\\64\\MathPage.wll"
+    },
+    {
+      "event": "write-tex",
+      "stage": "DR_25e42c968954ee541d4a62d70c40",
+      "returnCode": 0,
+      "text": "$i_L(t) = I_0 + \\Delta i\\sin(\\omega t)$"
+    },
+    {
+      "event": "read-tex",
+      "stage": "DR_25e42c968954ee541d4a62d70c40",
+      "returnCode": 0,
+      "text": "$i_L(t) = I_0 + \\Delta i\\sin(\\omega t)$",
+      "matchesExpected": true
+    },
+    {
+      "event": "close-ole",
+      "stage": "DR_25e42c968954ee541d4a62d70c40",
+      "returnCode": 0
+    },
+    {
+      "event": "equation-created",
+      "id": "DR_25e42c968954ee541d4a62d70c40",
+      "inline": true,
+      "widthPt": 103.0,
+      "heightPt": 18.299999237060547
+    },
+    {
+      "event": "write-tex",
+      "stage": "DR_a80a0a77c3c2e8d27e0f84ca640f",
+      "returnCode": 0,
+      "text": "$H(s)=\\frac{1}{LCs^2+RCs+1}$"
+    },
+    {
+      "event": "read-tex",
+      "stage": "DR_a80a0a77c3c2e8d27e0f84ca640f",
+      "returnCode": 0,
+      "text": "$H(s)=\\frac{1}{LCs^2+RCs+1}$",
+      "matchesExpected": true
+    },
+    {
+      "event": "close-ole",
+      "stage": "DR_a80a0a77c3c2e8d27e0f84ca640f",
+      "returnCode": 0
+    },
+    {
+      "event": "equation-created",
+      "id": "DR_a80a0a77c3c2e8d27e0f84ca640f",
+      "inline": false,
+      "widthPt": 113.0,
+      "heightPt": 31.0
+    },
+    {
+      "event": "write-tex",
+      "stage": "DR_c81418ac3daddecc1998473b715b",
+      "returnCode": 0,
+      "text": "$E=\\int_0^T v(t)i(t)\\,\\mathrm{d}t$"
+    },
+    {
+      "event": "read-tex",
+      "stage": "DR_c81418ac3daddecc1998473b715b",
+      "returnCode": 0,
+      "text": "$E=\\int_0^T v(t)i(t)\\,\\mathrm{d}t$",
+      "matchesExpected": true
+    },
+    {
+      "event": "close-ole",
+      "stage": "DR_c81418ac3daddecc1998473b715b",
+      "returnCode": 0
+    },
+    {
+      "event": "equation-created",
+      "id": "DR_c81418ac3daddecc1998473b715b",
+      "inline": false,
+      "widthPt": 79.75,
+      "heightPt": 26.049999237060547
+    },
+    {
+      "event": "write-tex",
+      "stage": "DR_dc00b50349960efe49afa0168786",
+      "returnCode": 0,
+      "text": "$\\mathbf{A}=\\begin{bmatrix}0&1\\\\-\\omega_0^2&-2\\zeta\\omega_0\\end{bmatrix}$"
+    },
+    {
+      "event": "read-tex",
+      "stage": "DR_dc00b50349960efe49afa0168786",
+      "returnCode": 0,
+      "text": "$\\mathbf{A}=\\begin{bmatrix}0&1\\\\-\\omega_0^2&-2\\zeta\\omega_0\\end{bmatrix}$",
+      "matchesExpected": true
+    },
+    {
+      "event": "close-ole",
+      "stage": "DR_dc00b50349960efe49afa0168786",
+      "returnCode": 0
+    },
+    {
+      "event": "equation-created",
+      "id": "DR_dc00b50349960efe49afa0168786",
+      "inline": false,
+      "widthPt": 99.1500015258789,
+      "heightPt": 38.20000076293945
+    },
+    {
+      "event": "write-tex",
+      "stage": "DR_3f8fad011ec0eade51d504ffe80a",
+      "returnCode": 0,
+      "text": "$u(t)=\\begin{cases}U_{\\mathrm{dc}},&t\\geq 0\\\\0,&t<0\\end{cases}$"
+    },
+    {
+      "event": "read-tex",
+      "stage": "DR_3f8fad011ec0eade51d504ffe80a",
+      "returnCode": 0,
+      "text": "$u(t)=\\begin{cases}U_{\\mathrm{dc}},&t\\geq 0\\\\0,&t<0\\end{cases}$",
+      "matchesExpected": true
+    },
+    {
+      "event": "close-ole",
+      "stage": "DR_3f8fad011ec0eade51d504ffe80a",
+      "returnCode": 0
+    },
+    {
+      "event": "equation-created",
+      "id": "DR_3f8fad011ec0eade51d504ffe80a",
+      "inline": false,
+      "widthPt": 91.94999694824219,
+      "heightPt": 36.0
+    },
+    {
+      "event": "tex-adaptation",
+      "id": "DR_270e410de338dc3951c145e102f0",
+      "sourceTex": "\\begin{aligned}v_L&=L\\frac{\\mathrm{d}i_L}{\\mathrm{d}t}\\\\i_C&=C\\frac{\\mathrm{d}v_C}{\\mathrm{d}t}\\end{aligned}",
+      "mathTypeTex": "\\begin{array}{rl}v_L&=L\\frac{\\mathrm{d}i_L}{\\mathrm{d}t}\\\\i_C&=C\\frac{\\mathrm{d}v_C}{\\mathrm{d}t}\\end{array}"
+    },
+    {
+      "event": "write-tex",
+      "stage": "DR_270e410de338dc3951c145e102f0",
+      "returnCode": 0,
+      "text": "$\\begin{array}{rl}v_L&=L\\frac{\\mathrm{d}i_L}{\\mathrm{d}t}\\\\i_C&=C\\frac{\\mathrm{d}v_C}{\\mathrm{d}t}\\end{array}$"
+    },
+    {
+      "event": "read-tex",
+      "stage": "DR_270e410de338dc3951c145e102f0",
+      "returnCode": 0,
+      "text": "$\\begin{array}{rl}v_L&=L\\frac{\\mathrm{d}i_L}{\\mathrm{d}t}\\\\i_C&=C\\frac{\\mathrm{d}v_C}{\\mathrm{d}t}\\end{array}$",
+      "matchesExpected": true
+    },
+    {
+      "event": "close-ole",
+      "stage": "DR_270e410de338dc3951c145e102f0",
+      "returnCode": 0
+    },
+    {
+      "event": "equation-created",
+      "id": "DR_270e410de338dc3951c145e102f0",
+      "inline": false,
+      "widthPt": 64.25,
+      "heightPt": 64.25
+    },
+    {
+      "event": "read-tex",
+      "stage": "reopened-DR_25e42c968954ee541d4a62d70c40",
+      "returnCode": 0,
+      "text": "$i_L(t) = I_0 + \\Delta i\\sin(\\omega t)$",
+      "matchesExpected": true
+    },
+    {
+      "event": "close-ole",
+      "stage": "reopened-DR_25e42c968954ee541d4a62d70c40",
+      "returnCode": 0
+    },
+    {
+      "event": "read-tex",
+      "stage": "reopened-DR_a80a0a77c3c2e8d27e0f84ca640f",
+      "returnCode": 0,
+      "text": "$H(s)=\\frac{1}{LCs^2+RCs+1}$",
+      "matchesExpected": true
+    },
+    {
+      "event": "close-ole",
+      "stage": "reopened-DR_a80a0a77c3c2e8d27e0f84ca640f",
+      "returnCode": 0
+    },
+    {
+      "event": "read-tex",
+      "stage": "reopened-DR_c81418ac3daddecc1998473b715b",
+      "returnCode": 0,
+      "text": "$E=\\int_0^T v(t)i(t)\\,\\mathrm{d}t$",
+      "matchesExpected": true
+    },
+    {
+      "event": "close-ole",
+      "stage": "reopened-DR_c81418ac3daddecc1998473b715b",
+      "returnCode": 0
+    },
+    {
+      "event": "read-tex",
+      "stage": "reopened-DR_dc00b50349960efe49afa0168786",
+      "returnCode": 0,
+      "text": "$\\mathbf{A}=\\begin{bmatrix}0&1\\\\-\\omega_0^2&-2\\zeta\\omega_0\\end{bmatrix}$",
+      "matchesExpected": true
+    },
+    {
+      "event": "close-ole",
+      "stage": "reopened-DR_dc00b50349960efe49afa0168786",
+      "returnCode": 0
+    },
+    {
+      "event": "read-tex",
+      "stage": "reopened-DR_3f8fad011ec0eade51d504ffe80a",
+      "returnCode": 0,
+      "text": "$u(t)=\\begin{cases}U_{\\mathrm{dc}},&t\\geq 0\\\\0,&t<0\\end{cases}$",
+      "matchesExpected": true
+    },
+    {
+      "event": "close-ole",
+      "stage": "reopened-DR_3f8fad011ec0eade51d504ffe80a",
+      "returnCode": 0
+    },
+    {
+      "event": "read-tex",
+      "stage": "reopened-DR_270e410de338dc3951c145e102f0",
+      "returnCode": 0,
+      "text": "$\\begin{array}{rl}v_L&=L\\frac{\\mathrm{d}i_L}{\\mathrm{d}t}\\\\i_C&=C\\frac{\\mathrm{d}v_C}{\\mathrm{d}t}\\end{array}$",
+      "matchesExpected": true
+    },
+    {
+      "event": "close-ole",
+      "stage": "reopened-DR_270e410de338dc3951c145e102f0",
+      "returnCode": 0
+    },
+    {
+      "event": "mathtype-reopen",
+      "verified": 6
+    },
+    {
+      "event": "terminate-api",
+      "returnCode": 0
+    },
+    {
+      "event": "document-check",
+      "pages": 12,
+      "mathTypeObjects": 6,
+      "ommlCount": 0,
+      "tables": 5,
+      "figures": 2,
+      "footnotes": 1,
+      "toc": 1,
+      "contentControls": 5
+    },
+    {
+      "event": "report-check",
+      "result": {
+        "pages": 12,
+        "bodyStart": 3,
+        "ommlCount": 0,
+        "tables": 5,
+        "figures": 2,
+        "mathTypeCount": 6,
+        "embeddedObjectCount": 6,
+        "footnotes": 1,
+        "toc": 1,
+        "contentControls": 5,
+        "orientations": [
+          0,
+          0,
+          0,
+          1,
+          0
+        ],
+        "bodyPages": 10,
+        "numbers": [
+          "3-1",
+          "3-2",
+          "3-3",
+          "3-4",
+          "3-5"
+        ],
+        "fractionReferences": [
+          "3-1",
+          "3-1"
+        ],
+        "status": "passed"
+      }
+    },
+    {
+      "event": "editing-check-unsaved",
+      "result": {
+        "status": "passed",
+        "saved": false,
+        "afterInsertion": {
+          "numbers": [
+            "3-2",
+            "3-3",
+            "3-4",
+            "3-5",
+            "3-6"
+          ],
+          "fractionReferences": [
+            "3-2",
+            "3-2"
+          ]
+        },
+        "afterDeletion": {
+          "numbers": [
+            "3-1",
+            "3-2",
+            "3-3",
+            "3-4",
+            "3-5"
+          ],
+          "fractionReferences": [
+            "3-1",
+            "3-1"
+          ]
+        }
+      }
+    },
+    {
+      "event": "package-check",
+      "mathTypeObjects": 6,
+      "ommlCount": 0,
+      "sha256": "0b089caaccf5e035d3e905f6b1faaee2fc61d612564474fcee01fb17b1198e15"
+    },
+    {
+      "event": "content-check",
+      "sourceTextRuns": 373,
+      "tablesIncludingNested": 5,
+      "maximumTableDepth": 1,
+      "sourceImages": {
+        "assets/architecture.png": "d449256d773e841a3c826638d65a1790fa023dd4d9b825fd05502500e7f9d1a0",
+        "assets/response.png": "7ad4450870ae6f02c1da2d43d403421dc3145e846dabc075ee8e8bd71f478836"
+      },
+      "fields": 76
+    },
+    {
+      "event": "pdf-check",
+      "pages": 12,
+      "sha256": "7b2f10a8c9168063f176b64b9b8228d3956ca3a3f99df6a69caf0602fb7b2e25"
+    },
+    {
+      "event": "report-pdf-check",
+      "result": {
+        "status": "passed",
+        "pages": 12,
+        "numbers": [
+          "(3-1)",
+          "(3-2)",
+          "(3-3)",
+          "(3-4)",
+          "(3-5)"
+        ],
+        "unparsedTex": false,
+        "visualReview": "required"
+      }
+    },
+    {
+      "event": "finished",
+      "status": "passed_automation_visual_review_pending",
+      "seconds": 148.029
+    }
+  ]
+}

@@ -1,0 +1,57 @@
+{
+  "report": "D:\\unitfolders\\oz47p-docsite-kit\\docsite-kit\\packages\\word-report\\reports\\demo-report",
+  "inputs": {
+    "pyproject.toml": "b58b03fd68cb08c7776b0d3ad4ee26d3660959b5102efe541445f2a3306e4f92",
+    "reports\\demo-report\\assets\\architecture.png": "d449256d773e841a3c826638d65a1790fa023dd4d9b825fd05502500e7f9d1a0",
+    "reports\\demo-report\\assets\\response.png": "7ad4450870ae6f02c1da2d43d403421dc3145e846dabc075ee8e8bd71f478836",
+    "reports\\demo-report\\content.json": "27237d0c78bb982914d2ffb464eb9f2e55d822c952315e00cee0a40f8e374e03",
+    "reports\\demo-report\\layout.json": "a1b7ed6c31431a7e5d98cd2c22f1da50899784376500c007306948794af041ab",
+    "reports\\demo-report\\report.py": "b2f7f4be193daa0676acccd824fbba54e8796ca512f1753291e7a53161188f13",
+    "requirements.txt": "75d98410b556701a59f6caacfa41c88ae75d866d8d7159202741d7fd3a4996d3",
+    "schemas\\report-content.schema.json": "f88c0b739b446e8d563f7d8be2a7996d99069cc723cb73eaa1b8da58ed645a31",
+    "src\\docreport\\__init__.py": "65c430b8659a96080cf159ebea4ff6b656f6fedb73ebbc56b6c41750dd4a401e",
+    "src\\docreport\\__main__.py": "94edcc44234ebafdf10e274c638d3ac0735dffcac53b7a7e66622c0a43c178bf",
+    "src\\docreport\\compose.py": "a852dd2ce35e80cd0a01ba216c20b55b03d886b2151b349da9e002f246f406af",
+    "src\\docreport\\content.py": "eb5ebe3c15b5d379d269398d30e88077eb80179d6a65dd41367a9e6552b8f7dc",
+    "src\\docreport\\mathtype.py": "a3418ea42f374955940a356cfc52c5099e9fd9474d92b9ec6da4bc6144c62586",
+    "src\\docreport\\verify.py": "a2e63aa39bbfd223e6cc5c8cb2824e9ba56b4a6ed2cb54b5e653cc40c81e8cd1",
+    "src\\docreport\\word.py": "6b90c00e46fe7da9330e27365e31183fb51a8f8dabf0703c88781bbe6567aecb",
+    "templates\\project-report.dotx": "2d645df23ecd1ee6f40d7da29854435139ff9d77a490f29c5051b6960bf909c4"
+  },
+  "environment": {
+    "python": "3.12.10 (tags/v3.12.10:0cc8128, Apr  8 2025, 12:21:36) [MSC v.1943 64 bit (AMD64)]",
+    "executable": "D:\\unitfolders\\oz47p-docsite-kit\\docsite-kit\\packages\\word-report\\.venv\\Scripts\\python.exe",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "packages": {
+      "pywin32": "312",
+      "comtypes": "1.4.17",
+      "pypdf": "6.10.0",
+      "Pillow": "12.3.0",
+      "setuptools": "80.9.0",
+      "jsonschema": "4.25.1"
+    },
+    "word": {
+      "version": "16.0",
+      "build": "16.0.14334"
+    }
+  },
+  "command": [
+    "D:\\unitfolders\\oz47p-docsite-kit\\docsite-kit\\packages\\word-report\\.venv\\Scripts\\python.exe",
+    "-m",
+    "docreport",
+    "build",
+    "D:\\unitfolders\\oz47p-docsite-kit\\docsite-kit\\packages\\word-report\\reports\\demo-report",
+    "--out",
+    "D:\\unitfolders\\oz47p-docsite-kit\\docsite-kit\\packages\\word-report\\out\\migration-baseline-20261013-02",
+    "--mathtype-dll",
+    "C:\\Program Files (x86)\\MathType\\MathPage\\64\\MathPage.wll"
+  ],
+  "baseGitCommit": "ffe905e50cf4159c0031a6793f2057813a0363c1",
+  "provenance": "Input hashes identify exact working files; baseGitCommit may precede local changes.",
+  "dataOnly": false,
+  "outputs": {
+    "report.docx": "0b089caaccf5e035d3e905f6b1faaee2fc61d612564474fcee01fb17b1198e15",
+    "report.pdf": "7b2f10a8c9168063f176b64b9b8228d3956ca3a3f99df6a69caf0602fb7b2e25"
+  },
+  "templateUnchanged": true
+}

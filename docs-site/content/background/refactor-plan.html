@@ -1,0 +1,614 @@
+<title>docsite 重构方案</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* 版式：单栏文档，正文约 46em 宽；颜色按「平台 / 功能包 / gwb 插件 / 待定」编码，全页一致 */
+:root {
+  --bg: #f4f6f4;
+  --surface: #ffffff;
+  --surface-2: #eaeeeb;
+  --fg: #18211d;
+  --muted: #56645d;
+  --line: #d3dbd6;
+  --accent: #1d6b58;
+  --kit: #1d6b58;      --kit-bg: #dcefe8;
+  --plugin: #2b5ea8;   --plugin-bg: #dfe8f6;
+  --domain: #9a620e;   --domain-bg: #f5e9d4;
+  --gwb: #7a4a8c;      --gwb-bg: #eee3f2;
+  --bad: #b23a2e;      --bad-bg: #f7e1de;
+  --ok: #2d7a3e;       --ok-bg: #dff0e2;
+  --font-display: "Noto Serif SC", "Songti SC", "SimSun", serif;
+  --font-body: "PingFang SC", "Microsoft YaHei", "Noto Sans SC", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", "Cascadia Code", Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #121815; --surface: #1a221e; --surface-2: #222c27;
+    --fg: #e3ebe6; --muted: #9aa9a1; --line: #33413a; --accent: #5cc4a6;
+    --kit: #5cc4a6;    --kit-bg: #1d3830;
+    --plugin: #8db2ec; --plugin-bg: #1f2c42;
+    --domain: #e0aa58; --domain-bg: #3a2c16;
+    --gwb: #c99be0;    --gwb-bg: #33233c;
+    --bad: #f08a7c;    --bad-bg: #3d211d;
+    --ok: #7fd08f;     --ok-bg: #1d3524;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #121815; --surface: #1a221e; --surface-2: #222c27;
+  --fg: #e3ebe6; --muted: #9aa9a1; --line: #33413a; --accent: #5cc4a6;
+  --kit: #5cc4a6;    --kit-bg: #1d3830;
+  --plugin: #8db2ec; --plugin-bg: #1f2c42;
+  --domain: #e0aa58; --domain-bg: #3a2c16;
+  --gwb: #c99be0;    --gwb-bg: #33233c;
+  --bad: #f08a7c;    --bad-bg: #3d211d;
+  --ok: #7fd08f;     --ok-bg: #1d3524;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+body {
+  background: var(--bg); color: var(--fg);
+  font-family: var(--font-body); font-size: 15.5px; line-height: 1.75;
+  padding-inline: 20px; padding-block: 40px 80px;
+}
+main { max-width: 52rem; margin: 0 auto; display: grid; gap: 56px; }
+section { display: grid; gap: 16px; min-width: 0; }
+h1, h2, h3 { font-family: var(--font-display); text-wrap: balance; line-height: 1.3; margin: 0; }
+h1 { font-size: 2.1rem; }
+h2 { font-size: 1.45rem; padding-bottom: 8px; border-bottom: 1px solid var(--line); }
+h3 { font-size: 1.08rem; margin-top: 8px; }
+p { margin: 0; max-width: 46em; }
+ul, ol { margin: 0; padding-left: 1.4em; display: grid; gap: 6px; max-width: 46em; }
+code { font-family: var(--font-mono); font-size: 0.86em; background: var(--surface-2); padding: 1px 5px; border-radius: 4px; }
+a { color: var(--accent); }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.muted { color: var(--muted); }
+.label { font-size: 12px; letter-spacing: 0.08em; color: var(--muted); }
+
+header { display: grid; gap: 12px; }
+.meta { display: flex; flex-wrap: wrap; gap: 8px 16px; font-size: 13px; color: var(--muted); }
+.status { color: var(--ok); font-weight: 600; }
+
+.summary { background: var(--surface); border: 1px solid var(--line); border-left: 4px solid var(--accent); padding: 18px 20px; display: grid; gap: 10px; border-radius: 6px; }
+.summary p { max-width: none; }
+
+nav.toc { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 13.5px; }
+nav.toc a { text-decoration: none; color: var(--muted); }
+nav.toc a:hover { color: var(--accent); }
+
+.scroll { overflow-x: auto; min-width: 0; }
+table { border-collapse: collapse; width: 100%; font-size: 14px; background: var(--surface); }
+th, td { text-align: left; vertical-align: top; padding: 9px 12px; border-bottom: 1px solid var(--line); }
+th { font-weight: 600; background: var(--surface-2); white-space: nowrap; }
+td code { white-space: nowrap; }
+
+pre { margin: 0; font-family: var(--font-mono); font-size: 13px; line-height: 1.6; background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 14px 16px; overflow-x: auto; }
+pre .c { color: var(--muted); }
+
+.tag { display: inline-block; font-size: 12px; padding: 1px 8px; border-radius: 999px; font-weight: 600; white-space: nowrap; }
+.t-kit { color: var(--kit); background: var(--kit-bg); }
+.t-plugin { color: var(--plugin); background: var(--plugin-bg); }
+.t-domain { color: var(--domain); background: var(--domain-bg); }
+.t-gwb { color: var(--gwb); background: var(--gwb-bg); }
+.t-tbd { color: var(--muted); background: transparent; border: 1px dashed var(--line); }
+.t-bad { color: var(--bad); background: var(--bad-bg); }
+.t-ok { color: var(--ok); background: var(--ok-bg); }
+
+.legend { display: flex; flex-wrap: wrap; gap: 8px; font-size: 13px; align-items: center; }
+
+.combos { display: grid; gap: 10px; }
+.combo { display: grid; grid-template-columns: 8em 1fr; gap: 12px; align-items: center; background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 10px 14px; }
+.combo-name { font-weight: 600; font-size: 14px; }
+.bricks { display: flex; flex-wrap: wrap; gap: 6px; min-width: 0; }
+.brick { font-family: var(--font-mono); font-size: 12.5px; padding: 4px 10px; border-radius: 4px; border: 1px solid transparent; }
+.b-base { background: var(--surface-2); color: var(--fg); border-color: var(--line); }
+.b-kit { background: var(--kit-bg); color: var(--kit); }
+.b-plugin { background: var(--plugin-bg); color: var(--plugin); }
+.b-cli { background: var(--domain-bg); color: var(--domain); }
+.b-plus { color: var(--muted); align-self: center; font-size: 13px; }
+
+.layers { display: grid; gap: 10px; }
+.layer { display: grid; grid-template-columns: 8em 1fr; gap: 12px; align-items: start; }
+.layer-name { font-size: 13px; color: var(--muted); padding-top: 8px; }
+.boxes { display: flex; flex-wrap: wrap; gap: 8px; min-width: 0; }
+.box { background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 7px 11px; font-size: 13px; display: grid; gap: 2px; min-width: 0; }
+.box b { font-family: var(--font-mono); font-weight: 500; font-size: 13px; }
+.box span { color: var(--muted); font-size: 12px; }
+.box.kit { border-color: var(--kit); }
+.box.plugin { border-color: var(--plugin); }
+.box.gwb { border-color: var(--gwb); }
+.box.tbd { border-style: dashed; }
+
+.cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr)); gap: 12px; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 14px 16px; display: grid; gap: 6px; align-content: start; min-width: 0; }
+.card h3 { margin: 0; font-size: 1rem; }
+.card p, .card li { font-size: 14px; }
+
+.phases { list-style: none; padding: 0; display: grid; gap: 12px; max-width: none; }
+.phase { display: grid; grid-template-columns: 2.4em 1fr; gap: 12px; background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 14px 16px; }
+.phase-no { font-family: var(--font-display); font-size: 1.3rem; color: var(--accent); line-height: 1.2; }
+.phase-body { display: grid; gap: 6px; min-width: 0; }
+.phase-body h3 { margin: 0; }
+.phase-body ul { font-size: 14px; }
+
+@media (max-width: 560px) {
+  body { padding-inline: 16px; font-size: 15px; }
+  h1 { font-size: 1.7rem; }
+  .combo, .layer { grid-template-columns: 1fr; gap: 6px; }
+  .layer-name { padding-top: 0; }
+}
+</style>
+
+<main>
+
+<header>
+  <span class="label">oz47p-docsite-kit · god-docsite 仓（原 docsite-kit）</span>
+  <h1>docsite 重构方案</h1>
+  <div class="meta">
+    <span>2026-10-14</span>
+    <span class="status">已定稿，开始执行</span>
+    <span>依据：5 份只读评审，关键结论已对照源码核实</span>
+  </div>
+  <nav class="toc" aria-label="目录">
+    <a href="#summary">结论</a>
+    <a href="#causes">现状与根因</a>
+    <a href="#idea">核心思路</a>
+    <a href="#points">扩展点</a>
+    <a href="#rules">组合规则</a>
+    <a href="#packages">功能包</a>
+    <a href="#deps">依赖方向</a>
+    <a href="#tree">文件树</a>
+    <a href="#example">功能包示例</a>
+    <a href="#keep">删掉与保留</a>
+    <a href="#phases">执行阶段</a>
+    <a href="#risks">风险</a>
+    <a href="#decisions">已定的决定</a>
+  </nav>
+</header>
+
+<section id="summary">
+  <div class="summary">
+    <p><b>任何站点都是「fumadocs 官方 React Router 模板 + 挑选的功能包」组合出来的。</b>包按功能切，名字不带站点类型：没有「docfirst 站专用包」「协作站专用包」，只有钉码、轨迹卡、协作、评论这样的功能。</p>
+    <p>不造自己的插件系统。每个功能包只通过 fumadocs 和 React Router 原生的扩展点接进站点，组合方式就是站点文件里显式的几行，由建站器写入。包从 17 个减到 10 个，仓改名为 <code>god-docsite</code>。</p>
+  </div>
+</section>
+
+<section id="causes">
+  <h2>现状与根因</h2>
+  <p>几十条问题归下来，是五个根上的决定出了错。</p>
+  <div class="scroll"><table>
+    <thead><tr><th>根因</th><th>派生出的问题</th></tr></thead>
+    <tbody>
+      <tr><td><b>功能包自带路由</b>，路由模块放在 node_modules 里</td><td>React Router 只认站点 <code>app/</code> 里、按精确路径登记的路由。为此给 <code>@react-router/dev</code> 打补丁，建站器把补丁写进每个新站；<code>.server</code> 检查失效，出现两种互相矛盾的绕法；功能包用 <code>@site</code> 别名反过来 import 站点代码</td></tr>
+      <tr><td><b>骨架和库的界线没划清</b></td><td>615 行骨架装着评论写入、页面 loader 等逻辑，在三个站各抄一份，建站器里再一份，已经走样；评论写入 action 有四份</td></tr>
+      <tr><td><b>沿站点类型切包，又靠手工协调版本</b></td><td>同一功能的模型和站点部分分在两个包，总是一起装、一起改；版本表滞后过一次，新站首页 500；仓根构建写错包名，<code>docsite-docfirst</code> 一直没被构建</td></tr>
+      <tr><td><b>同一件事做了好几遍</b></td><td><code>Term</code> 3 份、术语插件 2 份、生成物渲染管线 2 条（站上那条只做一半）、frontmatter 3 种读法、报告 schema 与样例各 2 份</td></tr>
+      <tr><td><b>功能只在开发服务里能用</b></td><td>推送借用 Vite 热更新连接、数据存在进程内存，构建出的站没有通知，协作站只能一直跑 dev</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>已发现的 bug（重构中一并消掉）</h3>
+  <div class="scroll"><table>
+    <thead><tr><th>问题</th><th>位置</th><th>状态</th></tr></thead>
+    <tbody>
+      <tr><td>每个人的身份码随布局 loader 发进浏览器</td><td><code>collab-site/src/server/index.server.ts:36</code></td><td><span class="tag t-bad">已核实</span></td></tr>
+      <tr><td>协作站写请求的可信地址写死 4450 端口</td><td><code>collab-site/src/server/index.server.ts:66</code></td><td><span class="tag t-bad">已核实</span></td></tr>
+      <tr><td>轨迹卡集合给 <code>mdxOptions</code> 传普通对象，丢掉 GFM、标题锚点、代码高亮</td><td><code>docs-site/app/lib/trajectory.ts:13</code></td><td><span class="tag t-bad">已核实</span></td></tr>
+      <tr><td>仓根 <code>pnpm build</code> 漏掉 <code>docsite-docfirst</code></td><td><code>package.json:8</code></td><td><span class="tag t-bad">已核实</span></td></tr>
+      <tr><td>协作页评论写到包目录，不是站点目录</td><td><code>collab-site/src/server/comments.server.ts:15</code></td><td><span class="tag t-tbd">推断</span></td></tr>
+      <tr><td>评论锚点带引号或换行时，读回来会坏</td><td><code>docsite-comments/src/model.ts:176</code>、<code>server.ts:123</code></td><td><span class="tag t-tbd">推断</span></td></tr>
+      <tr><td><code>docsite.comment.create</code> 在协作站上发到没有 action 的首页</td><td><code>plugins/docsite/src/comments.ts:74</code></td><td><span class="tag t-tbd">推断</span></td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section id="idea">
+  <h2>核心思路：站点 = 官方模板 + 功能包</h2>
+  <p>fumadocs 本来就是一组让使用者自己组合的库，不是带插件运行时的框架。所有站从同一份模板出发，按需装功能包。基础站只是最常用的默认组合。</p>
+  <div class="legend">
+    <span class="tag t-kit">平台</span>
+    <span class="tag t-plugin">功能包（装到站上）</span>
+    <span class="tag t-domain">命令行（装在仓里）</span>
+    <span class="tag t-gwb">gwb 插件</span>
+  </div>
+  <div class="combos">
+    <div class="combo"><span class="combo-name">基础站</span><div class="bricks">
+      <span class="brick b-base">fumadocs 官方模板</span><span class="b-plus">+</span>
+      <span class="brick b-kit">god-docsite</span><span class="b-plus">+</span>
+      <span class="brick b-plugin">identity</span><span class="brick b-plugin">comments</span>
+    </div></div>
+    <div class="combo"><span class="combo-name">文档维护</span><div class="bricks">
+      <span class="brick b-base">基础站</span><span class="b-plus">+</span>
+      <span class="brick b-plugin">code-pin</span><span class="brick b-plugin">trajectory</span><span class="brick b-plugin">explainer</span><span class="b-plus">+ 仓里装</span><span class="brick b-cli">docfirst</span>
+    </div></div>
+    <div class="combo"><span class="combo-name">项目协作</span><div class="bricks">
+      <span class="brick b-base">基础站</span><span class="b-plus">+</span>
+      <span class="brick b-plugin">collab</span>
+    </div></div>
+    <div class="combo"><span class="combo-name">任意组合</span><div class="bricks">
+      <span class="brick b-base">基础站</span><span class="b-plus">+</span>
+      <span class="brick b-plugin">collab</span><span class="brick b-plugin">trajectory</span><span class="b-plus">…挑着装</span>
+    </div></div>
+  </div>
+  <p class="muted">术语标注（glossary）是 god-docsite 的一部分，每个站都有。</p>
+</section>
+
+<section id="points">
+  <h2>功能包接进站点的扩展点</h2>
+  <p>fumadocs 加 React Router 没有统一的「插件对象」。一个功能包的 <code>./site</code> 往下面几处各接一部分。</p>
+  <div class="scroll"><table>
+    <thead><tr><th>扩展点</th><th>站点里接在哪</th><th>原生支持</th><th>例子</th></tr></thead>
+    <tbody>
+      <tr><td>remark / rehype 插件</td><td>集合的 <code>mdxOptions</code>（统一用 <code>applyMdxPreset</code>）</td><td>支持</td><td>钉码标记、术语、公式、记录链接</td></tr>
+      <tr><td>MDX 组件</td><td><code>app/lib/mdx-components.tsx</code></td><td>支持</td><td>Term、钉码外框、RecordLink</td></tr>
+      <tr><td>集合</td><td><code>app/lib/source.ts</code></td><td>半支持：集合必须由站点声明，功能包只给 schema</td><td>轨迹卡、日志</td></tr>
+      <tr><td>页面树（侧栏）</td><td><code>loader({ plugins })</code></td><td>支持，具体 API 待实验确认</td><td>侧栏的「任务」「星轨盘」入口</td></tr>
+      <tr><td>样式</td><td><code>app/app.css</code> 里 <code>@import</code></td><td>支持</td><td>各功能包的样式</td></tr>
+      <tr><td>根组件、布局插槽</td><td><code>app/root.tsx</code>、布局路由</td><td>支持</td><td>身份、通知栏、评论面板</td></tr>
+      <tr><td><b>带数据的页面</b></td><td><code>app/routes.ts</code> + <code>app/features/</code> 下的转发文件</td><td><b>不支持</b>：React Router 只认站点 <code>app/</code> 里的路由</td><td>任务页、日历、星轨盘页、卡页</td></tr>
+    </tbody>
+  </table></div>
+  <p>最后一行是上一版栽跟头的地方。新做法：功能包只导出 loader、action 和页面组件；站点 <code>app/features/</code> 里放一两行的转发文件，由建站器写入。这和 fumadocs 自己的 CLI 把组件复制进项目是同一个思路，不需要任何补丁。</p>
+</section>
+
+<section id="rules">
+  <h2>组合规则</h2>
+  <div class="cards">
+    <div class="card"><h3>不造插件系统</h3><p>没有注册表、自动发现、生命周期钩子。组合就是站点文件里显式的几行，打开文件就能看出这个站接了什么。建站器写入这几行，并且能对已有站点重复运行，只补缺的。</p></div>
+    <div class="card"><h3>共享的东西归站点</h3><p>首页、<code>*</code> 页面路由、全站布局归站点。功能包只占自己声明的路径，通过页面树插件加侧栏入口，往指定的布局插槽放组件。</p></div>
+    <div class="card"><h3>功能包互不认识站点</h3><p>功能包的 <code>site/</code> 不依赖 god-docsite，要用的站点信息（目录、身份、可信地址、集合）由站点经参数传入，所以装到任何 fumadocs 站都能用。</p></div>
+    <div class="card"><h3>build 下必须能用</h3><p>所有功能在 <code>build + start</code> 下都要工作。推送改成 SSE 资源路由，不再依赖开发服务。托管时跑 dev 还是 start，另作运维选择。</p></div>
+  </div>
+</section>
+
+<section id="packages">
+  <h2>功能包：10 个</h2>
+  <p><b>按功能切包，名字不带站点类型。</b>同一功能的模型、读写、站上显示放在同一个包里，因为它们总是一起装、一起改；纯 Node 的使用方（gwb 插件、命令行、CI）不碰 React，由包内分层和可选 peer 依赖保证，不靠拆包。全部在 <code>@godcreator/</code> 下。</p>
+  <div class="scroll"><table>
+    <thead><tr><th>包</th><th>功能</th><th>来自</th></tr></thead>
+    <tbody>
+      <tr><td><code>god-docsite</code></td><td><span class="tag t-kit">平台</span> 站点模板（唯一正本）、mdx/tsx/html 三种页面来源、布局与侧栏、搜索、llms、推送、vite 帮手；<code>./glossary</code> 术语标注</td><td>docsite-kit、docsite-page-sources、docsite-ui、docsite-feed、docsite-writing</td></tr>
+      <tr><td><code>identity</code></td><td>身份：people.json、身份码、给浏览器的公开投影</td><td>docsite-identity</td></tr>
+      <tr><td><code>comments</code></td><td>评论：存储、锚点、写入 action（只此一份）、评论面板</td><td>docsite-comments；删 overlay、修转义</td></tr>
+      <tr><td><code>explainer</code></td><td>讲解组件，以及它们给生成物用的机读文字</td><td>docsite-explainer</td></tr>
+      <tr><td><code>code-pin</code></td><td>钉码：mdx 里的标记语法、漂移判定、确认写回、读 git、站上的钉码外框</td><td>code-pin，吸收 docfirst-workflow 的标记、git、钉码外框</td></tr>
+      <tr><td><code>doc-export</code></td><td>生成物：mdx 正本生成 AGENTS.md / README / SKILL.md，只留一条渲染管线，核对一致</td><td>docfirst-workflow 的 mdx、project/placement</td></tr>
+      <tr><td><code>trajectory</code></td><td>轨迹卡：卡格式与校验、卡之间的关系、卡集合、卡页、星轨盘</td><td>trajectory-disk、docfirst-workflow 的 cards、docsite-docfirst 的卡页</td></tr>
+      <tr><td><code>docfirst</code></td><td><span class="tag t-domain">命令行</span> 读 docfirst.config，把 check / render / confirm 分派给上面几个功能，自己不实现功能</td><td>docfirst-workflow 的 cli、project</td></tr>
+      <tr><td><code>collab</code></td><td>协作：任务与模块、日志与日历、通知、合并检查（命令 <code>collab-merge-check</code>）、记录链接</td><td>collab-model、collab-merge-check、collab-site</td></tr>
+      <tr><td><code>report</code></td><td>报告文档：格式与组装、网页阅读、导出 Word 的命令（放最后做）</td><td>report-content、docsite-reports；Python 引擎移到 <code>tools/word-report</code></td></tr>
+    </tbody>
+  </table></div>
+  <p>gwb 插件不改名：<code>gwb-docsite</code>、<code>gwb-docfirst</code>（原 gwb-docfirst-workflow）、<code>gwb-collab</code>。</p>
+
+  <h3>每个功能包的统一分层</h3>
+<pre>&lt;包&gt;/
+├─ package.json     exports: .  ./node  ./site  （有命令行的再加 bin）
+├─ src/
+│  ├─ core/         纯逻辑：不 import node:*、react、fumadocs
+│  ├─ node/         读写文件、git
+│  ├─ site/         接站点的部分；react、react-router、fumadocs 都是可选 peer，不依赖 god-docsite
+│  └─ cli/          有命令行的才有
+├─ template/        带页面的才有：建站器写进站点 app/features/&lt;包&gt;/ 的转发文件
+└─ test/</pre>
+
+  <h3>不再发布的包名</h3>
+  <p><code>docsite-kit</code>、<code>docsite-identity</code>、<code>docsite-comments</code>、<code>docsite-page-sources</code>、<code>docsite-ui</code>、<code>docsite-feed</code>、<code>docsite-writing</code>、<code>docsite-explainer</code>、<code>docsite-docfirst</code>、<code>docfirst-workflow</code>、<code>docfirst-explainer</code>、<code>trajectory-disk</code>、<code>collab-model</code>、<code>collab-merge-check</code>、<code>collab-site</code>、<code>report-content</code>、<code>docsite-reports</code>、<code>gwb-docfirst-workflow</code>。发版时在 registry 上标作废，写明新包名。</p>
+
+  <h3>为什么包名不以 fumadocs 开头</h3>
+  <p>fumadocs-mdx 的 vite 插件会自动处理名字以 <code>fumadocs-</code> 或 <code>@fumadocs/</code> 开头的包。但 <code>@fumadocs/</code> 是官方组织，我们不能用；不带作用域的 <code>fumadocs-x</code> 会去公共 npm 解析，有被抢注的风险；这个前缀判断也只是 fumadocs-mdx 的内部实现。所以改由 <code>godDocsite()</code> 用同样的遍历方式、按「peerDependencies 里有 fumadocs」识别要一起处理的包。</p>
+</section>
+
+<section id="deps">
+  <h2>依赖方向</h2>
+  <div class="layers">
+    <div class="layer"><span class="layer-name">第 2 层</span><div class="boxes">
+      <div class="box plugin"><b>collab</b><span>→ identity、comments</span></div>
+      <div class="box plugin tbd"><b>report</b><span>→ comments（待定）</span></div>
+      <div class="box plugin"><b>docfirst</b><span>→ code-pin、doc-export、trajectory</span></div>
+    </div></div>
+    <div class="layer"><span class="layer-name">第 1 层</span><div class="boxes">
+      <div class="box plugin"><b>comments</b><span>→ identity</span></div>
+      <div class="box plugin"><b>doc-export</b><span>→ code-pin</span></div>
+    </div></div>
+    <div class="layer"><span class="layer-name">第 0 层</span><div class="boxes">
+      <div class="box kit"><b>god-docsite</b><span>不依赖任何功能包</span></div>
+      <div class="box plugin"><b>identity</b><span>无</span></div>
+      <div class="box plugin"><b>explainer</b><span>无</span></div>
+      <div class="box plugin"><b>code-pin</b><span>无</span></div>
+      <div class="box plugin"><b>trajectory</b><span>无</span></div>
+    </div></div>
+  </div>
+
+  <h3>谁用哪些包</h3>
+<pre>docs-site          god-docsite、identity、comments、explainer、code-pin、trajectory；命令行另装 docfirst
+collab-test/site   god-docsite、identity、comments、collab
+gwb-docsite        identity/node、comments/node；建站器从 god-docsite 与各功能包的 template/ 复制文件
+gwb-docfirst       不 import 任何包；调 gwb-docsite 建站，再复制 docfirst/template
+gwb-collab         collab、comments/node、identity/node
+Gitea 执行器        只装 collab（命令 collab-merge-check），连带装 identity、comments</pre>
+
+  <h3>依赖规则（.dependency-cruiser.cjs）</h3>
+  <div class="cards">
+    <div class="card"><h3>包之间</h3><ul>
+      <li>god-docsite 不依赖任何功能包；「我是谁」、评论面板在模板里接</li>
+      <li>功能包之间只允许上图的边，出现新边或环就报红</li>
+      <li>功能包的 <code>site/</code> 不依赖 god-docsite</li>
+      <li>没有包依赖 gwb 插件；gwb 插件只用 <code>.</code> 和 <code>./node</code></li>
+    </ul></div>
+    <div class="card"><h3>包内部</h3><ul>
+      <li><code>core/</code> 不 import node:*、react、fumadocs，也不 import 本包 node/、site/</li>
+      <li><code>node/</code> → core/，不 import react、fumadocs</li>
+      <li><code>cli/</code> → core/、node/</li>
+      <li><code>site/*.server.ts</code> → core/、node/</li>
+      <li><code>site/</code> 其余文件 → core/，不碰 node:* 和 node/（以前「水合静默死」的根因）</li>
+    </ul></div>
+  </div>
+</section>
+
+<section id="tree">
+  <h2>文件树</h2>
+  <h3>仓</h3>
+<pre>god-docsite/                       <span class="c">原 docsite-kit</span>
+├─ package.json                    <span class="c">build = pnpm -r build；check / test / e2e</span>
+├─ pnpm-workspace.yaml             <span class="c">catalog 统一外部依赖版本；补丁只剩 vite</span>
+├─ patches/vite@8.3.4.patch        <span class="c">Windows 上 Vite 的 glob 缺陷，与架构无关</span>
+├─ .dependency-cruiser.cjs
+├─ tsconfig.base.json  .oxlintrc.json
+├─ AGENTS.md  CLAUDE.md  README.md
+├─ packages/                       <span class="c">10 个功能包</span>
+├─ plugins/  docsite/  docfirst/  collab/
+├─ tools/word-report/              <span class="c">Python 的 Word 引擎，不发 npm</span>
+├─ docs-site/
+├─ collab-test/
+├─ e2e/
+└─ probes/</pre>
+
+  <h3>packages/</h3>
+<pre>packages/
+├─ god-docsite/
+│  ├─ src/
+│  │  ├─ vite/      plugin.ts                 <span class="c">godDocsite()</span>
+│  │  ├─ source/    page-sources.ts  tsx-pages.ts  html-pages.ts  search.server.ts  llms.server.ts
+│  │  ├─ layout/    layout.server.ts  docs-layout.tsx  sidebar.tsx  site-links.tsx
+│  │  │             theme-switch.tsx  wide-page.tsx  translations.ts
+│  │  ├─ page/      page.server.ts  page.tsx  tex.tsx
+│  │  ├─ feed/      feed.server.ts  use-feed.ts   <span class="c">SSE，build 下也能用</span>
+│  │  ├─ glossary/  glossary.ts  remark-glossary.ts  term.tsx  term.css
+│  │  └─ site-context.ts
+│  ├─ template/                            <span class="c">唯一的站点骨架正本</span>
+│  └─ test/
+├─ identity/
+│  └─ src/  core/   people.ts  public-people.ts  write-access.ts
+│           node/   people-file.ts  identity.ts
+│           site/   identity-provider.tsx
+├─ comments/
+│  └─ src/  core/   comment-file.ts  threads.ts
+│           node/   store.ts
+│           site/   action.server.ts  threads.server.ts  comments-dock.tsx  comments-sidebar.tsx
+│                   browser/  range-mapping.ts  annotate.ts  page-text.ts  thread-target.ts
+├─ explainer/
+│  └─ src/  core/   machine-text.ts
+│           site/   现有讲解组件
+├─ code-pin/
+│  └─ src/  core/   marker.ts  compare.ts  diff.ts  span.ts  confirm.ts
+│           node/   git.ts  files.ts  uncommitted.ts  pins.ts
+│           site/   remark-code-pin.ts  pin-frame.tsx  pin.css
+├─ doc-export/
+│  └─ src/  core/   render.ts  roster.ts  outputs.ts
+│           node/   write.ts  verify.ts
+├─ trajectory/
+│  ├─ src/  core/   card.ts  refs.ts  chains.ts  validate.ts
+│  │        node/   scan.ts
+│  │        site/   card-collection.ts  card.server.ts  card-page.tsx  disk.server.ts  disk-page.tsx
+│  │                disk/  disk.tsx  layout.ts  model/  canvas/   <span class="c">零依赖</span>
+│  └─ template/     card.tsx  disk.tsx  routes.ts
+├─ docfirst/                               <span class="c">bin: docfirst</span>
+│  ├─ src/  config.ts  cli.ts  commands/  check.ts  render.ts  confirm.ts  trajectory.ts
+│  └─ template/     docfirst.config.mjs  outputs 正本  trajectory/
+├─ collab/                                 <span class="c">bin: collab-merge-check</span>
+│  ├─ src/  core/   layout.ts  records.ts  write-rules.ts  state.ts  journal.ts
+│  │                notifications.ts  inbox.ts  leads.ts
+│  │        node/   snapshot.ts  write.ts  merge-check.ts
+│  │        site/   server/    tasks.server.ts  record.server.ts  record-action.server.ts
+│  │                           calendar.server.ts  journal.server.ts  repo-links.server.ts
+│  │                tasks/  record/  calendar/  journal/  notices/
+│  │                mdx/       remark-record-links.ts  record-link.tsx  repo-link.tsx
+│  │                styles.css
+│  │        cli/    merge-check.ts
+│  └─ template/     tasks.tsx  record.tsx  calendar.tsx  journal.tsx  routes.ts
+└─ report/                                 <span class="c">bin: report-docx；放最后做</span>
+   ├─ src/  core/   report.schema.json  validate.ts  assemble.ts  numbering.ts
+   │        node/   read.ts  export.ts
+   │        site/   report.server.ts  report-page.tsx
+   │        cli/    report-docx.ts
+   └─ template/     report.tsx  routes.ts</pre>
+
+  <h3>站点骨架（god-docsite/template/）</h3>
+<pre>template/
+├─ package.json
+├─ vite.config.ts           <span class="c">fumadocsMdx() + tailwindcss() + reactRouter() + godDocsite()</span>
+├─ react-router.config.ts  tsconfig.json
+├─ people.json
+├─ content/  index.mdx  meta.json
+├─ comments/
+└─ app/
+   ├─ root.tsx
+   ├─ app.css               <span class="c">@import 各功能包的样式</span>
+   ├─ routes.ts             <span class="c">route() 显式列出全部路由</span>
+   ├─ routes/               <span class="c">layout.tsx  page.tsx  search.ts  llms.ts  feed.ts  comments.ts</span>
+   ├─ features/             <span class="c">建站器按所装功能包写入</span>
+   └─ lib/
+      ├─ source.ts          <span class="c">集合与 loader；remark 插件、页面树插件在这里接</span>
+      ├─ mdx-components.tsx
+      └─ site.server.ts     <span class="c">站点上下文：目录、身份、可信地址、集合</span></pre>
+
+  <h3>两个实际站点、gwb 插件与测试</h3>
+<pre>docs-site/                  <span class="c">app/ 与模板一致</span>
+├─ docfirst.config.mjs  content/  trajectory/  comments/  people.json
+└─ app/features/trajectory/  card.tsx  disk.tsx  routes.ts
+
+collab-test/
+├─ collab/records/
+└─ site/  content/  journal/  comments/  people.json
+          app/features/collab/  tasks.tsx  record.tsx  calendar.tsx  journal.tsx  routes.ts
+
+plugins/
+├─ docsite/   src/  scaffold/  create.ts  add-feature.ts（可重复运行，只补缺的）
+│                   hosting/  identity/  comments/  commands.ts  index.ts
+├─ docfirst/  src/  create.ts  index.ts      skills/（由 docs-site 的 outputs 生成）
+└─ collab/    src/  collab-repo/  organization/  other-repos/  notifications/  ai-handoff/
+                    pane/  project/  site-process/  git/  gitea-api/
+
+e2e/
+├─ playwright.config.ts
+├─ combos/  base.spec.ts  docs.spec.ts  collab.spec.ts  all.spec.ts
+└─ fixtures/collapse-test.mdx      <span class="c">评论定位的回归页（原自述站那页）</span></pre>
+  <p class="muted">加一个测试比对各站的 <code>app/</code> 和模板，有出入就报红。自述站 <code>site/</code> 取消。</p>
+</section>
+
+<section id="example">
+  <h2>功能包示例：collab</h2>
+  <p>站点里的转发文件只有几行：</p>
+<pre><span class="c">// app/features/collab/tasks.tsx（建站器写入）</span>
+import { site } from '~/lib/site.server'
+import { tasksLoader } from '@godcreator/collab/site/server'
+export const loader = (args) =&gt; tasksLoader(args, site)
+export { TasksPage as default } from '@godcreator/collab/site'
+
+<span class="c">// app/routes.ts</span>
+export default [
+  ...siteRoutes,        <span class="c">// 布局、页面、搜索、评论</span>
+  ...trajectoryRoutes,  <span class="c">// app/features/trajectory/routes.ts</span>
+  ...collabRoutes,      <span class="c">// app/features/collab/routes.ts</span>
+]</pre>
+  <p class="muted">写入一律走 <code>useFetcher</code> 加路由 action，删掉自造的 <code>/api/collab</code> 和手写的保存状态。转发文件的确切写法以第 1 阶段实验结论为准。</p>
+</section>
+
+<section id="keep">
+  <h2>删掉与保留</h2>
+  <div class="cards">
+    <div class="card">
+      <h3>做完可以删</h3>
+      <ul>
+        <li><code>@react-router/dev</code> 补丁，以及建站器里写补丁的代码</li>
+        <li><code>@site</code> 别名和手写的站点模块类型</li>
+        <li><code>package-dirs.ts</code>、vite 插件里写死的包名单</li>
+        <li>建站器的版本表 <code>versions.ts</code></li>
+        <li>为绕开 <code>.server</code> 检查写的动态 import</li>
+        <li>往页面树塞的隐藏假页面</li>
+        <li>Next 时代的出口、评论 overlay、docfirst-explainer</li>
+        <li>618 行的正则边界测试</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>值得保留的零件</h3>
+      <ul>
+        <li>code-pin 的漂移判定顺序，读盘与历史由调用方传入</li>
+        <li>collab 的「先算改动、再写盘」两步写入</li>
+        <li>通知只存事实、由纯函数算出</li>
+        <li>评论存成集合 mdx、用 <code>useFetcher</code> 读写；<code>range-mapping</code></li>
+        <li>三种页面进同一个 fumadocs <code>loader</code></li>
+        <li>搜索配置、<code>DocsLayout</code> 的 slots、中文界面文字</li>
+        <li>星轨盘整体（并进 trajectory 后仍零依赖）</li>
+        <li>gwb-collab 按领域分的目录、真实 git 组织的测试夹具</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section id="phases">
+  <h2>执行阶段</h2>
+  <ol class="phases">
+    <li class="phase"><span class="phase-no">0</span><div class="phase-body">
+      <h3>收拾现场</h3>
+      <ul>
+        <li>报告那批未提交改动原样提交到 <code>wip/reports</code> 分支</li>
+        <li><code>docsite-modules</code> 的重组提交到 <code>ref/packages-by-capability</code> 分支，删掉 worktree</li>
+        <li>仓目录改名为 <code>god-docsite</code>，从 <code>main</code> 开 <code>refactor/functional-packages</code></li>
+      </ul>
+    </div></li>
+    <li class="phase"><span class="phase-no">1</span><div class="phase-body">
+      <h3>两件事并行：实验 + 工具链</h3>
+      <ul>
+        <li>实验：官方模板 + 两个最小功能包，扩展点表每一行在 dev 和 build 下跑通，不打 React Router 补丁；定集合写法、页面树插件、vitefu 识别</li>
+        <li>工具链：catalog、统一构建工具与测试版本、<code>pnpm -r build</code>、依赖规则文件</li>
+      </ul>
+    </div></li>
+    <li class="phase"><span class="phase-no">2</span><div class="phase-body">
+      <h3>功能包的纯逻辑部分（并行）</h3>
+      <ul>
+        <li>identity 与 comments、code-pin 与 doc-export 与 docfirst、trajectory、collab 各一个子代理，各在自己的工作副本里做 <code>core/</code>、<code>node/</code>、<code>cli/</code></li>
+        <li>不依赖实验结论，所以和第 1 阶段的实验可以错开并行</li>
+      </ul>
+    </div></li>
+    <li class="phase"><span class="phase-no">3</span><div class="phase-body">
+      <h3>平台与站点接法</h3>
+      <ul>
+        <li>按实验结论做 god-docsite、模板、各功能包的 <code>site/</code> 与 <code>template/</code></li>
+        <li>gwb-docsite 建站器改成复制模板、能补已有站点</li>
+        <li>docs-site、collab-test 从模板重建；四种组合的 e2e 全绿</li>
+      </ul>
+    </div></li>
+    <li class="phase"><span class="phase-no">4</span><div class="phase-body">
+      <h3>报告</h3>
+      <ul>
+        <li>schema 只留一份，用现成的校验库；导出砍成同步命令行；一条路由代替 11 个页面文件</li>
+      </ul>
+    </div></li>
+    <li class="phase"><span class="phase-no">5</span><div class="phase-body">
+      <h3>文档</h3>
+      <ul>
+        <li>docs-site 现状页按新结构改写，描述旧结构的讲解动画删掉，接缝图合一、数据生成，补轨迹卡</li>
+        <li>重构分支上 docs-site 的 <code>docfirst check</code> 在这一阶段之前允许是红的；<code>main</code> 一直保持绿</li>
+      </ul>
+    </div></li>
+    <li class="phase"><span class="phase-no">6</span><div class="phase-body">
+      <h3>发版</h3>
+      <ul>
+        <li>先读 gwb-release，按依赖序发版；旧包名标作废；三个 gwb 插件跟上</li>
+        <li>真实项目的迁移另起一批，不在本轮</li>
+      </ul>
+    </div></li>
+  </ol>
+  <p class="muted">每次提交前改到的范围要绿；改名、搬文件和逻辑改动分开提交；子代理回报的测试结果由主会话再跑一次核实。</p>
+</section>
+
+<section id="risks">
+  <h2>风险</h2>
+  <div class="scroll"><table>
+    <thead><tr><th>风险</th><th>应对</th></tr></thead>
+    <tbody>
+      <tr><td>改了很多才发现官方路线有坑</td><td>第 1 阶段先在仓外的官方模板上跑通全部扩展点，站点接法等实验结论</td></tr>
+      <tr><td>并行子代理改到同一批根配置</td><td>根配置（catalog、构建脚本、依赖规则）由工具链那一路先做完；功能包各在自己的工作副本，由主会话合并</td></tr>
+      <tr><td>路由只能靠转发文件，加新页面时已建好的站要补文件</td><td>建站器能对已有站点重复运行，只补缺的</td></tr>
+      <tr><td>页面树插件的 API 没亲手验证过</td><td>放进实验；不行就退回 meta.json 里写链接项</td></tr>
+      <tr><td>docs-site 大面积变红</td><td>第 5 阶段集中改写；结构图改为生成</td></tr>
+      <tr><td>以前的 bug 都是浏览器里真点才暴露</td><td>e2e 覆盖站内导航和写入按钮，四种组合各跑一遍</td></tr>
+      <tr><td>gwb MCP 现在连不上</td><td>发版、托管站点、开隔离 home 要等工作台启动</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section id="decisions">
+  <h2>已定的决定</h2>
+  <div class="scroll"><table>
+    <thead><tr><th>事项</th><th>决定</th></tr></thead>
+    <tbody>
+      <tr><td>组合思路</td><td>站点 = 官方模板 + 功能包；不造插件系统；共享的东西归站点；功能包不依赖平台</td></tr>
+      <tr><td>分包</td><td>按功能切，10 个包，名字不带站点类型；身份独立；术语并进平台</td></tr>
+      <tr><td>命名</td><td>平台叫 <code>god-docsite</code>；仓改名 <code>god-docsite</code>；gwb 插件不改名</td></tr>
+      <tr><td>起点</td><td>两批未提交改动各存一个分支；从 <code>main</code> 开重构分支</td></tr>
+      <tr><td>兼容</td><td>不留兼容转发包，一次性破坏性升级</td></tr>
+      <tr><td>报告</td><td>留在本仓，放最后做并瘦身</td></tr>
+      <tr><td>docs-site 讲解动画</td><td>描述旧结构的删掉（git 留历史），接缝图合一、数据生成</td></tr>
+      <tr><td>已知 bug</td><td>并进重构</td></tr>
+      <tr><td>自述站</td><td>取消，骨架正本进 <code>god-docsite/template/</code></td></tr>
+      <tr><td>对外操作</td><td>Gitea 归档 gwb-docfirst、registry 标作废等，到发版阶段再逐项确认</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+</main>
