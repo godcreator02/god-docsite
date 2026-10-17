@@ -87,7 +87,7 @@ MDX 报告不另有一套组装、显示和导出：`core/mdx/` 的编译器把�
 
 ## 读文件：网页现读，检查与导出取快照
 
-图上第 1、5 号。网页每次请求都从磁盘现读 JSON 或 MDX 原文，不读图片，只拒绝超出站点目录的路径。报告列表、报告页与图片共用每份报告最近一次的组装：先拿上次读过的每个原文和磁盘上的比，再看当时不存在、一出现就会改变结果的文件（另一种入口、MDX 报告的 `references.mdx`）是否仍不存在，都没变就沿用上次的结果，同时到的请求共用同一次组装。一页几十张图各自发请求，组装（MDX 还要先编译）一次几百毫秒到几秒，又都在一个线程上排队，不共用的话最后一张图要等半分钟以上；比原文不比修改时间，是因为修改时间在读完文件到取时间之间被改，会把旧内容当成新的留下来。
+图上第 1、5 号。网页每次请求都从磁盘读 JSON 或 MDX 原文，不读图片，只拒绝超出站点目录的路径。报告列表、报告页与图片共用每份报告最近一次的组装：先拿上次读过的每个原文和磁盘上的比，再看当时不存在、一出现就会改变结果的文件（另一种入口、MDX 报告的 `references.mdx`）是否仍不存在，都没变就沿用上次的结果，同时到的请求共用同一次组装。一页几十张图各自发请求，组装（MDX 还要先编译）一次几百毫秒到几秒，又都在一个线程上排队，不共用的话最后一张图要等半分钟以上；比原文不比修改时间，是因为修改时间在读完文件到取时间之间被改，会把旧内容当成新的留下来。
 
 {/* ref file="../packages/word-report/src/site/loaders.server.ts" lines="57-93" hash="83ee6fad957c" blob="1ae6716b1b24" */}
 
@@ -115,13 +115,15 @@ MDX 报告不另有一套组装、显示和导出：`core/mdx/` 的编译器把�
 
 排版稿的时间几乎都花在跨进程的 COM 调用上，所以写法尽量少调：段落插入后直接用插入返回的区域，起点记在引擎里，文字格式按偏移取区域；样式对象与书签集合各取一次；没有合并单元格的表按行列直接取格。正文里的域、编号、脚注与链接占位符在写进去时记下位置，不再查找：脚注与链接按正文顺序替换，每换一个就把后面记下的位置按正文长度的变化平移；域与编号从后往前替换，换后面的不挪动前面的位置。「章号-序号」外面那个书签的结尾按正文长度的变化算，因为紧挨在域后面的 Word 区域不会跟着刚插进的域移动。脚注里的占位符不记位置，照旧在整篇与脚注里查找。
 
+写排版稿期间，引擎（`background.py`）还关掉 Word 的几项后台工作：屏幕刷新、后台分页、边写边查拼写与语法，窗口换成草稿视图；写完恢复，再存盘。只关窗口那两项或只关分页与拼写语法都不见变快，要一起关。分页与拼写语法是当前用户的 Word 选项，其中拼写一改就写进用户设置、另开的 Word 马上读到，所以改之前把用户原来的值和本次导出的进程号记进 `%LOCALAPPDATA%\word-report\word-options.json`，写完排版稿恢复原值并删掉这个文件；几个导出同时改过时，各自记下进程号，最后一个结束的才删。导出被强行结束、没来得及恢复的，下一次导出开始时发现文件里记的进程都不在了，先把记下的原值写回去，并记一条 `word-options-restored` 事件。
+
 行内公式节点带 `plainText`（MDX 里的 `<WordPlainMath>`）时不交给 MathType：引擎照 `plainText` 的几段文字写，`em`、`sub`、`sup` 用 Word 的斜体、下标、上标，整段应用字符样式「DR Inline Math」（Times New Roman），最后核对时这些文字也要在存盘的 docx 里找得到。哪些公式写成文字由源文件定，引擎不解析 TeX、不自己判断。Word 把 φ、≈ 这类字符插进中文段落时会给它们加上东亚字体提示、显示成宋体，而 COM 改不了这个提示，所以排版稿存盘、Word 关掉之后，引擎（`plain_math.py`）直接改 docx 里这个字符样式的那些段，去掉提示。不带 `plainText` 的行内公式和全部行间公式是 MathType 对象。网页不读 `plainText`，两种都由 KaTeX 按 `latex` 显示。模板设置里关掉了 Word 存盘时压缩图片，docx 里的图片和源图逐字节相同，最后核对图片字节靠这一条。
 
-时间主要花在 Word 的 COM 调用与 MathType 对象上。协作站初步设计报告（155 页、74 张表、806 个行内公式与 52 个行间公式）在 0.6.0 时一次导出约 6.5 分钟，排版稿约 4.6 分钟、98 个 MathType 公式约 40 秒、更新域与目录约 20 秒；上面那些少调 COM 的写法让同一章的排版稿从 103 秒降到 60 秒。为什么这样改、试过哪些没用，见轨迹卡[「Word 导出提速：行内公式写成文字」](/trajectory/2026-10-17-word-export-speed)与[「排版稿少调 COM」](/trajectory/2026-10-17-word-compose-fewer-calls)。
+时间主要花在 Word 的 COM 调用与 MathType 对象上。协作站初步设计报告（155 页、74 张表、806 个行内公式与 52 个行间公式）在 0.6.0 时一次导出约 6.5 分钟，排版稿约 4.6 分钟、98 个 MathType 公式约 40 秒、更新域与目录约 20 秒；上面那些少调 COM 的写法让同一章的排版稿从 103 秒降到 60 秒，关掉后台工作再快约四分之一；整份导出现在约 4.5 分钟，机器负载重时能到 5 分半以上。为什么这样改、试过哪些没用，见轨迹卡[「Word 导出提速：行内公式写成文字」](/trajectory/2026-10-17-word-export-speed)、[「排版稿少调 COM」](/trajectory/2026-10-17-word-compose-fewer-calls)与[「排版稿期间关掉 Word 后台工作」](/trajectory/2026-10-17-word-compose-background-paused)。
 
 ## 站点上
 
-图上第 9 号。建站器把 `template/` 下的接线文件写进站点的 `app/features/word-report/`：三条路由 `/reports`（列表）、`/reports/:report`（整份一页）、`/reports/:report/assets/*`（图片）；另有每次请求现组装站点信息的 `site.server.ts` 与侧栏横排的「报告」入口。
+图上第 9 号。建站器把 `template/` 下的接线文件写进站点的 `app/features/word-report/`：三条路由 `/reports`（列表）、`/reports/:report`（整份一页）、`/reports/:report/assets/*`（图片）；另有每次请求都重新组装站点信息的 `site.server.ts` 与侧栏横排的「报告」入口。
 
 {/* ref file="../packages/word-report/template/routes.ts" hash="0860a9d22604" blob="2d895248505a" */}
 
@@ -135,8 +137,8 @@ MDX 报告不另有一套组装、显示和导出：`core/mdx/` 的编译器把�
 
 | 层 | 导出 | 做什么 |
 | --- | --- | --- |
-| `core/` | `@godcreator/word-report` | 报告文档的类型、Schema 与校验、严格 JSON 解析、分章组装；`core/mdx/` 是 MDX 编译器与反方向的写出；不碰磁盘、不 import React |
-| `node/` | `@godcreator/word-report/node`，命令行 `report-docx` | 认报告入口、读报告目录、取快照、检查、导出（指纹、锁、启动引擎）、JSON 报告转 MDX、命令行 |
+| `core/` | `@godcreator/word-report` | 报告文档的类型、Schema 与校验、严格 JSON 解析、分章组装；`core/mdx/` 是 MDX 编译器；不碰磁盘、不 import React |
+| `node/` | `@godcreator/word-report/node`，命令行 `report-docx` | 认报告入口、读报告目录、取快照、检查、导出（指纹、锁、启动引擎）、命令行 |
 | `site/` | `@godcreator/word-report/site`、`@godcreator/word-report/site/server` | 报告列表页与报告页、报告的显示组件；服务端的三个 loader |
 | `engine/` | 随包发出的文件（不是 JS 出口） | 驱动本机 Word 与 MathType 的 Python 引擎、`.dotx` 模板、引擎那份 Schema |
 

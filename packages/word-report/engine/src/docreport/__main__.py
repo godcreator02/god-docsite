@@ -13,6 +13,7 @@ import time
 import traceback
 from types import SimpleNamespace
 
+from .background import background_paused
 from .content import read_json, validate_content, validate_layout
 from .compose import ContentComposer
 from .mathtype import DEFAULT_DLL, fill_and_reopen, validate_pending
@@ -153,7 +154,8 @@ def build(directory, output, dll=DEFAULT_DLL, *, data_only=False, layout_path=No
             doc = word.Documents.Add(Template=str(template), NewTemplate=False)
             doc.UpdateStylesOnOpen = False
             record("compose-start")
-            pending = module.build(doc, content, output)
+            with background_paused(word, doc, record):
+                pending = module.build(doc, content, output)
             validate_pending(pending)
             doc.SaveAs2(str(draft), 16, AddToRecentFiles=False)
             record("draft-saved", equations=len(pending))
