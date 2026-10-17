@@ -59,7 +59,7 @@ docfirst.create {"dir":"D:\\gwb-docfirst-migrate\\<仓名>\\docs-site","title":"
 - **`.ledger.json`**：记录还写在这个文件里时用的记录簿。旧站在 docfirst-workflow 0.5.x 上 `pnpm doc` 全绿、页面里的 `ref` 记号都带着 `hash` 与 `blob`，就说明记录早已写进记号，这个文件没人读了，`git rm`（plecs-studio 是这样）。
   记号还没带记录的站不能照这页迁：新 docfirst 不认没有记录的正式记号，也没有把记录簿写进记号的命令，停下来问人
 - **站目录自己的 `.npmrc`**（plecs-studio 的写着旧的本机源与 `auto-install-peers`）：删掉。pnpm 不读项目级 `.npmrc` 里的安装设置，骨架的 `pnpm-workspace.yaml` 已经写好
-- **`public/`**：照留。平台站在开发服务和构建产物里都把它挂在站点根上，页面里写的绝对地址（anpc-lcl 的 `/figures/…`、plecs-studio 轨迹卡里的 `/trajectory/<目录>/x.png`）不用改，
+- **`public/`**：照留。平台站的开发服务把它放在站点根上（实测过），构建时 Vite 默认把它复制进产物，页面里写的绝对地址（anpc-lcl 的 `/figures/…`、plecs-studio 轨迹卡里的 `/trajectory/<目录>/x.png`）不用改，
   `/trajectory/` 底下的文件也不会被卡页路由拦住。新加的图仍放进页面的同名文件夹
 - **`content/` 下的空目录**（plecs-studio 的 `spec/`、`feedback/`，git 不跟踪）：删掉，不然侧栏会多出空的一项
 
