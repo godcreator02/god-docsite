@@ -5,9 +5,12 @@ description: 用 Next 与 @godcreator/docfirst-workflow 建的旧文档站，怎
 
 没有升级命令：旧站与平台站的路由、页面 loader、功能包接线全都不同，逐个文件把 Next 改成 React Router 不划算。
 做法是在空目录用 `docfirst.create` 生成一套新站，把建站器负责的文件整份换进旧站，`content/` 的正文留着，再逐类处理差异。
-第一个这样迁过来的是 gwb-vscode 的 `docs-site`（Next 16 + docfirst-workflow 0.5.2，14 个 mdx、一个讲解组件），下面的报错与输出都出自那一次。
+第一个这样迁过来的是 gwb-vscode 的 `docs-site`（Next 16 + docfirst-workflow 0.5.2，14 个 mdx、一个讲解组件）；
+第二个是 gwb-windows-backup 的 `docs-site`（docfirst-workflow 0.5.2 + docfirst-explainer 0.1.1，29 个 mdx、六个用讲解组件包画的组件），讲解组件包怎么换出自这一次。
 
 开始前站点要停着，`git status` 里没有别人在 `docs-site/` 下未提交的改动。
+站是仓根 pnpm 工作区的成员时（仓根 `pnpm-workspace.yaml` 的 `packages` 里列着 `docs-site`），先从那里去掉：平台站自带 `pnpm-workspace.yaml`，留在里面就是工作区里嵌套工作区。
+去掉后在仓根 `pnpm install`，锁文件里站的那一份依赖跟着删掉，一起提交。
 
 ## 1. 生成骨架
 
@@ -37,8 +40,8 @@ docfirst.create {"dir":"D:\\gwb-docfirst-migrate\\<仓名>\\docs-site","title":"
 `scripts/verify-roster.mjs`、create-fumadocs 留在站目录里的 `README.md`。`registry.ts` 与 `verify-roster.mjs` 是核对组件名册两边一致用的，
 新站的组件由页面自己 import，名册只剩 `docfirst.config.mjs` 一处。已跟踪的文件用 `git mv` / `git rm`，挪动的历史留得住。
 
-构建产物与旧依赖也删掉：`.next/`、`.source/`、`node_modules/`、`next-env.d.ts`、`tsconfig.tsbuildinfo`，然后 `pnpm install`。
-新的 `.gitignore` 不再忽略 `.next/`，不删它就出现在 `git status` 里。
+构建产物与旧依赖也删掉：`.next/`、`.source/`、`out/`（旧命令行写出的各页机读文本 `*.mdx.ai.md`）、`node_modules/`、`next-env.d.ts`、`tsconfig.tsbuildinfo`，然后 `pnpm install`。
+新的 `.gitignore` 不再忽略 `.next/`，不删它就出现在 `git status` 里；仓根 `.gitignore` 里专给旧站产物写的规则（`docs-site/.next/` 这类）一起删掉。
 
 ## 3. 每类差异怎么改
 
@@ -49,7 +52,7 @@ docfirst.create {"dir":"D:\\gwb-docfirst-migrate\\<仓名>\\docs-site","title":"
 - `content/meta.json` 写站名与 `pages`，如 `{ "title": "gwb-vscode", "pages": ["docs", "future"] }`
 - 每个区的 `meta.json` 加 `title` 与 `"root": true`
 - 地址不变：`content/docs/x.mdx` 还是 `/docs/x`，站内链接不用改
-- `content/` 根上不放 `index` 页。首页是 `app/routes/home.tsx`；旧站多是把 `/` 跳到 `/docs`，新站首页写站名、一句介绍和去文档的链接
+- `content/` 根上不放 `index` 页。首页是 `app/routes/home.tsx`；旧站多是把 `/` 跳到 `/docs`，新站首页写站名、一句介绍和去文档的链接：骨架首页里那句「这是站点的首页，写在 app/routes/home.tsx 里。」换成这个站的介绍
 
 ### 轨迹卡
 
@@ -62,13 +65,49 @@ docfirst.create {"dir":"D:\\gwb-docfirst-migrate\\<仓名>\\docs-site","title":"
 
 {/* ref file="../packages/docfirst/src/project.ts" lines="76-84" hash="cc64e38b44df" blob="f6eb46f4a4d7" */}
 
-- 只给一页用的组件挪进那一页的同名文件夹：gwb-vscode 首页 `content/docs/index.mdx` 用的接缝图挪进 `content/docs/index/`，在侧栏里不会多出一组
-- 页面开头加 import，路径相对页面：`import { VscodeSeams } from './index/vscode-seams'`。旧站靠全局组件表，页面里不用 import
-- 几组页面共用的放站点 `app/components/`，放之前先问人
-- 去掉文件头的 `'use client'`
-- 用到讲解组件包的，`@godcreator/docfirst-explainer` 换成 `@godcreator/explainer`：组件从 `@godcreator/explainer/site` 取，机读文字规则从 `@godcreator/explainer` 取。gwb-vscode 的组件没用到这个包，这一条没在试点里实际换过
+先按每个组件被哪几页用到分好去处，再挪：
+
+- 只给一页用的组件挪进那一页的同名文件夹：gwb-vscode 首页 `content/docs/index.mdx` 用的接缝图挪进 `content/docs/index/`，在侧栏里不会多出一组；
+  gwb-windows-backup 的 `windows-backup/health.mdx` 用的选情况组件挪进 `windows-backup/health/`
+- 同一组里几页共用的放进组里 `_` 开头的文件夹：gwb-windows-backup 的接缝图 `SeamMap` 由 `docs/index.mdx` 与 `docs/windows-backup/index.mdx` 共用，
+  和两张图共用的图标、几个组件共用的样式一起放进 `content/docs/_shared/`。跨组共用的才放站点 `app/components/`，放之前先问人
+- 页面开头加 import，路径相对页面：`import { VscodeSeams } from './index/vscode-seams'`、`import { SeamMap } from '../_shared/seam-map/seam-map'`。旧站靠全局组件表，页面里不用 import
+- 去掉文件头的 `'use client'`：React Router 站没有服务端组件
+- 站自己的组件样式：旧站在 `src/app/global.css` 里统一引（gwb-windows-backup 是 `@import '../components/backup.css'`），新站的 `app/app.css` 是骨架的，不再引它们；
+  改成每个组件开头 `import` 自己用到的样式文件，几个组件共用的那份放进上面的 `_` 文件夹、各自 import
 - 数据文件保持 `.mjs`（`docfirst.config.mjs` 在 Node 里直接 import 它），旁边补一份同名的 `.d.mts` 写出导出的类型。
-  旧站的 `tsconfig.json` 开着 `allowJs`，类型是推断出来的；新站不开，不补就报 `TS7016: Could not find a declaration file for module './vscode-seams.data.mjs'`
+  旧站的 `tsconfig.json` 开着 `allowJs`，类型是推断出来的；新站不开，不补就报 `TS7016: Could not find a declaration file for module './vscode-seams.data.mjs'`。
+  数据文件里写了 JSDoc 的，让 tsc 生成草稿再整理：
+
+  ```text
+  pnpm exec tsc --ignoreConfig --allowJs --declaration --emitDeclarationOnly --skipLibCheck --module esnext --moduleResolution bundler --target esnext --types node --rootDir content --outDir <临时目录> <数据文件…>
+  ```
+
+  命令行上直接给文件时 TypeScript 6 要 `--ignoreConfig`，不加就报 `TS5112: tsconfig.json is present but will not be loaded if files are specified on commandline`
+
+#### 换讲解组件包
+
+用到 `@godcreator/docfirst-explainer` 的组件换成平台的 `@godcreator/explainer`，只换 import：
+
+| 旧站里写的 | 换成 | 取的是什么 |
+| --- | --- | --- |
+| `'@godcreator/docfirst-explainer'` | `'@godcreator/explainer/site'` | 三种外壳 `Stepper`、`Timeline`、`CasePicker`，零件 `Pane`、`Pill`、`Dot`、`Terminal`、`CodeLines`、`Diff`，接缝图 `SeamDiagram`、`cap` 与类型 `SeamLayout` |
+| `'@godcreator/docfirst-explainer/text'` | `'@godcreator/explainer'` | 机读文字规则 `stepsText`、`casesText`、`chaptersText` |
+| `'@godcreator/docfirst-explainer/seam-graph'` | `'@godcreator/explainer'` | `defineSeamGraph`、`seamGraphText`，`.d.mts` 里用的类型 `SeamGraph` |
+| `global.css` 里的 `@import '@godcreator/docfirst-explainer/styles.css'` | 删掉 | 站点的 explainer 功能已经把包的样式接进全站 |
+
+新包的两个入口与接样式的文件：
+
+{/* ref file="../packages/explainer/package.json" lines="10-20" hash="3866917f6d21" blob="7e97f84e3cfa" */}
+
+{/* ref file="../packages/explainer/template/styles.css" hash="0b573e6bfd45" blob="c938c5365cc7" */}
+
+- 两个包 0.1.1 的构建产物逐行比过：外壳、零件、接缝图与机读规则的代码没有变，差别只有入口拆成 `.` 与 `./site`、去掉了 `'use client'`、
+  样式多一条 `font-variant-ligatures: none`（讲解里的 `---`、`!==` 不再被等宽字体连成别的符号）。组件的属性、动画外壳的时间条、选情况的受控写法都照旧，组件正文不用改
+- 替换是机械的，三条正则对 `content/` 下的 `.ts`、`.tsx`、`.mjs` 跑一遍就够：`'@godcreator/docfirst-explainer/(text|seam-graph)'` → `'@godcreator/explainer'`，
+  `'@godcreator/docfirst-explainer'` → `'@godcreator/explainer/site'`，开头的 `'use client'` 删掉
+- 组件旁的 `.ai.mjs` 机读规则照留、只换 import。新名册只管生成正本里用到的组件，旧站给不进生成物的组件也写了规则的，迁移时不顺手删
+- `package.json` 里不再有 `@godcreator/docfirst-explainer`：骨架的依赖里已经有 `@godcreator/explainer`，照骨架换依赖时就换掉了
 
 ### docfirst.config.mjs
 
@@ -87,11 +126,20 @@ docfirst.create {"dir":"D:\\gwb-docfirst-migrate\\<仓名>\\docs-site","title":"
 旧站的 `src/components/mdx.tsx` 自己定义了 `Note`；新站的组件表里没有它，`fumadocsRoster` 只给它在生成物里的机读规则。
 页面里用到 `<Note>` 的，现状页改成 fumadocs 的 `<Callout>`；生成正本里的改成引用块，名册里没有 `Callout` 的机读规则，用了 `pnpm doc` 报红。
 
+### 术语表
+
+旧站把术语表写成数据文件的（gwb-windows-backup 是 `src/glossary.data.mjs`，由 `src/lib/source.ts` 交给术语标注），转成站点根的 `glossary.json`，每条照抄 `term`、`def`、`href`，`aliases` 没有就不写。
+数据文件头注释里的收词判据没地方放了，挪进术语页正文。用这份数据画术语页的组件跟着改：
+
+- 画面 `import glossary from '../../../glossary.json'`（路径相对组件），站内链接的 `next/link` 换成 `fumadocs-core/link`
+- 机读规则在 Node 里读同一份，写成 `import glossary from '../../../glossary.json' with { type: 'json' }`
+
 ### 生成物
 
 迁完第一次 `pnpm doc` 对生成物报红：新渲染器写出的 Markdown 跟旧的不一样。`pnpm doc:render` 后在仓根 `git diff` 逐处看：
 
-- 列表记号 `*` 变成 `-`、表格空格子 `| |` 变成 `|  |`：读出来一样，照收。随包的 SKILL.md 只变了这些时不用为它发插件新版
+- 列表记号 `*` 变成 `-`、表格空格子 `| |` 变成 `|  |`：读出来一样，直接接受。随包的 SKILL.md 只变了这些时不用为它发插件新版。
+  正本本来就写 `-`、表格没有空格子的（gwb-windows-backup），render 后没有这类差异
 - 裸写的网址：doc-export 0.1.0 会把它写成 `[网址](网址)`，后面紧跟全角标点时连标点带后文一起写进链接（`http://127.0.0.1:4313），不用` 写出成
   `[http://127.0.0.1:4313），不用](http://127.0.0.1:4313），不用)`）。之后的版本照原文写出；站里装的还是 0.1.0 时，把网址放进反引号，或改写那一句
 - 旧站 AGENTS / README 正本里「先 `pnpm build` 再 `pnpm start`（端口 43xx）」「`pnpm dev`，端口 43xx」这类说法都过时了，
@@ -107,7 +155,9 @@ pnpm typecheck
 pnpm build
 ```
 
-再 `docsite.site.start {"dir":"<站目录>"}`，请求首页、各区首页、一张卡页、`/llms.txt`，都回 200、页面上的讲解组件画出来了，然后 `docsite.site.stop`。要常驻的站改用 `docsite.site.add`。
+再 `docsite.site.start {"dir":"<站目录>"}`，请求首页、各区首页、一张卡页、`/llms.txt`，都回 200。没有 index 页的区（未来区常常只有 `roadmap.mdx`）请求区的地址是 404，
+下拉框点进去去的是它的第一页，验收时请求第一页。有讲解组件的页，照 `docs-site` 说明书的「讲解组件截图验收」每个组件截浅色、深色、375 宽各一张逐张看，
+动画拖到中段与后段再截；然后 `docsite.site.stop`。要常驻的站改用 `docsite.site.add`。
 
 开发服务的日志里 `Failed to resolve dependency: @godcreator/code-pin > @types/mdast, present in client 'optimizeDeps.include'` 每个平台站都有，骨架站也有，不影响页面。
 
@@ -120,3 +170,7 @@ pnpm build
 
 - 本机的删除守卫拦下了 shell 里带变量路径的 `Copy-Item -Recurse`、`git rm -f`：复制骨架与删构建产物写成 Node 脚本，路径作参数传入
 - 旧 `node_modules/` 里有超过 260 字符的路径，`git status --ignored` 报 `Filename too long`；删掉旧依赖重新安装后就没有了
+- 轨迹卡 `git mv` 到站点根以后紧接着 `git rm trajectory/meta.json`，git 报 `the following file has changes staged in the index`：刚挪的文件还在暂存区里，要加 `-f`
+- 旧页面 frontmatter 里的 `full: true` 不再生效：平台的页面组件不把它交给 fumadocs 的 `DocsPage`，正文旁边照样有目录栏。
+  gwb-windows-backup 两张 1200 宽的接缝图因此在 593 宽的正文里横向滚动，图本身画全了；这是平台包的事，迁移时不改页面
+- 旧站 `global.css` 里给 `@theme` 设的字体（如更纱黑体）不在骨架的 `app/app.css` 里，迁过来用的是平台默认字体

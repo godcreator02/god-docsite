@@ -1,0 +1,34 @@
+---
+born-at: 2026-10-17T16:50
+type: evidence
+parent: [2026-09-03-god-live-doc]
+label: 旧讲解组件包换成 @godcreator/explainer：只换 import
+domain: 骨架
+---
+
+## 背景
+
+本机还在 Next 上的 docfirst 站里，大约一半用了 `@godcreator/docfirst-explainer`。维护页「Next docfirst 站迁到平台」写了换成 `@godcreator/explainer` 的方向，
+但 gwb-vscode 试点的组件没用到这个包，这一条没实际做过。gwb-windows-backup 的 docs-site（docfirst-explainer 0.1.1，六个组件：两张接缝图、两个选情况、一个分步、一个动画）是第一个用到它的站。
+
+pivots-from:: [Next docfirst 站迁到平台](2026-10-17-next-docfirst-site-migration.md)
+
+## 结论与边界
+
+- 把两个包 0.1.1 的构建产物逐行对比（`git diff --no-index` 对 `dist/index.mjs` 与 `dist/site/index.mjs`、`dist/text.mjs` + `dist/seam-graph.mjs` 与 `dist/core/index.mjs`、两份 `styles/explain.css`）：
+  外壳、零件、接缝图与机读规则的代码没有变。差别只有三处：入口从 `.`（组件）、`./text`、`./seam-graph` 改成 `./site`（组件）与 `.`（机读规则和接缝图定义）；组件入口去掉了 `'use client'`；样式多一条 `font-variant-ligatures: none`
+- 所以换包只换 import，组件正文、属性、动画外壳的时间条、选情况的受控写法都不用动；三条正则对 `content/` 跑一遍就换完
+- 包的样式不用站自己引：站点的 explainer 功能把它接进全站；站自己的组件样式改由组件 import
+- gwb-windows-backup 迁完 `pnpm doc`、`pnpm typecheck`、`pnpm build` 退出码 0，六个组件浅色、深色、375 宽截图都画得出来（gwb-windows-backup 提交 dce60a7）
+
+边界：只比了 0.1.1 对 0.1.1。旧站装的是更早版本的 docfirst-explainer、或 anpc-lcl 那种更老的 explainer-player，入口与属性可能不同，要先照这个办法比一次产物再换。
+
+## 否掉的候选
+
+- 在新包里给旧入口留别名（`./text`、`./seam-graph`）：只为迁移期少改几行 import，却让新包永远背着两套入口；import 是机械替换，换一次就完
+- 组件不进生成物的就顺手删掉机读规则：新名册只管生成正本，这些规则现在用不上，但删不删是各站内容上的事，迁移只换写法
+
+## 代价与遗留
+
+- 迁移中另外撞到三处，写进了维护页：站是仓根 pnpm 工作区成员时要先移出、旧页面的 `full: true` 平台不认、没有 index 的区请求区地址是 404
+- `full: true` 不生效是平台的页面组件没把这个 frontmatter 交给 `DocsPage`，宽图只能在正文宽度里横向滚动；要不要支持留给平台包定
