@@ -87,7 +87,7 @@ Gitea 换协作者不发 webhook，所以 `collab.repo.setup`、`collab.repo.cre
 | 2 派任务 | Gitea；工作流里的 `runs-on: nas` 与执行器登记的标签 | 标签对不上，任务一直排队、没有执行器领取 |
 | 3 读工作流 | 每个协作仓 main 上的工作流文件，照 collab 包的模板放 | 各仓的文件不一样，合并规则就不一样；只有 main 上那份算数 |
 | 4 取代码 | 工作流；令牌要能读协作仓 | 令牌看不到仓，「核对令牌」一步就报出来，不往下做 |
-| 5 装检查工具 | 协作仓 main 上工作流文件里的 `MERGE_CHECK_RANGE` | 执行器每次按这个范围安装 collab 包（npm 连带装上它依赖的本仓包，站点页面要的 react 等可选 peer 不装），和站点 `site/package.json` 里写的版本无关，升版本就是负责人改这一行；模板用机器人令牌读协作仓的协作者，把提交人与这些负责人作为 `--author`、`--leads` 传给检查，两个都必填，装到的命令行不认 `--leads` 时检查以退出码 2 失败、不合并也不留言；协作仓没有协作者时这一步报错，同样不合并 |
+| 5 装检查工具 | 协作仓 main 上工作流文件里的 `MERGE_CHECK_RANGE` | 执行器每次按这个范围安装 collab 包（npm 连带装上它依赖的本仓包，站点页面要的 react 等可选 peer 不装），和站点 `site/package.json` 里写的版本无关，升版本就是负责人改好这一行、用 `collab.submit` 提交审核（main 谁都不能直接推）；模板用机器人令牌读协作仓的协作者，把提交人与这些负责人作为 `--author`、`--leads` 传给检查，两个都必填，装到的命令行不认 `--leads` 时检查以退出码 2 失败、不合并也不留言；协作仓没有协作者时这一步报错，同样不合并 |
 | 6 合并检查 | collab 包的命令行 `collab-merge-check` | 规则改在 collab 包里，负责人改了工作流里的版本范围，检查就按新规则；gwb-collab 推送前用的是它打包的那一版 |
 | 7 合并或打回 | 工作流；`collab-bot` 在组织的团队 `bots` 里，协作仓 main 的合并许可里只有团队 `bots`，负责人也不在里面（`collab.repo.setup` 配协作仓时写上，见 [权限怎么配](/gitea/permissions)） | 权限不够时 Gitea 拒绝合并，执行器把 Gitea 的原话留在合并请求上、打回 |
 | 8 等结论 | gwb-collab 的 `collab.submit` | 等不到结论（执行器没在运行）时插件 3 分钟后关掉合并请求、退回改动；执行器恢复后看到合并请求已关就不处理 |
@@ -95,7 +95,7 @@ Gitea 换协作者不发 webhook，所以 `collab.repo.setup`、`collab.repo.cre
 {/* ref file="../packages/collab/templates/collab-auto-merge.yaml" lines="53-53" hash="1717250ea183" blob="2f8884f0ba6c" */}
 {/* ref file="../packages/collab/templates/collab-auto-merge.yaml" lines="74-91" hash="d935d8a9bfaa" blob="2f8884f0ba6c" */}
 {/* ref file="../packages/collab/templates/collab-auto-merge.yaml" lines="107-130" hash="e79881df51d9" blob="2f8884f0ba6c" */}
-{/* ref file="../plugins/collab/src/collab-repo/submit/submit.ts" lines="109-118" hash="c7ad49a13e36" blob="72b363403a5f" */}
+{/* ref file="../plugins/collab/src/collab-repo/submit/submit.ts" lines="125-134" hash="c7ad49a13e36" blob="4c35701efab6" */}
 {/* ref file="../plugins/collab/src/collab-repo/rules.ts" lines="5-6" hash="0388cffaba4b" blob="635892e2fc80" */}
 
 ## 一个合并请求怎样被合并

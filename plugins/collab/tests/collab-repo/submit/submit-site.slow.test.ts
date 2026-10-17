@@ -1,4 +1,4 @@
-import { mkdirSync, rmSync } from 'node:fs'
+import { mkdirSync, rmSync, writeFileSync } from 'node:fs'
 import path from 'node:path'
 import { describe, expect, it } from 'vitest'
 import { CollabRejected } from '../../../src/errors.js'
@@ -67,6 +67,25 @@ describe('collab.submit 带上 site/ 的改动', () => {
     const { typecheck, ran } = fakeTypecheck('passed')
     expect(await submitCollab(bob, merges(), typecheck)).toMatchObject({ siteFiles: 0, siteTypecheck: null })
     expect(ran).toEqual([])
+  })
+
+  it('.gitea/ 下的工作流也带上：成员改了拦下、改动留在工作区；负责人改了照常提交，提交说明写明工作流', async () => {
+    const workflow = path.join(bob.repo, '.gitea', 'workflows', 'collab-auto-merge.yaml')
+    mkdirSync(path.dirname(workflow), { recursive: true })
+    writeFileSync(workflow, "env:\n  MERGE_CHECK_RANGE: '^0.2.1'\n")
+    await expect(submitCollab(bob, merges(), fakeTypecheck('passed').typecheck)).rejects.toThrow(
+      /^没有推送，改动留在工作区（没提交）：改了只有负责人能改的内容：\.gitea\/workflows\/collab-auto-merge\.yaml；/,
+    )
+    expect(git(bob.repo, 'status', '--porcelain', '--untracked-files=all')).toBe('?? .gitea/workflows/collab-auto-merge.yaml')
+
+    writeRecord(bob.repo, task(t2, 'bob'))
+    const { typecheck, ran } = fakeTypecheck('passed')
+    const result = await submitCollab(bob, executor('merge', ['admin', 'bob']).repo, typecheck)
+    expect(result).toMatchObject({ siteFiles: 0, workflowFiles: 1, siteTypecheck: null })
+    expect(ran).toEqual([])
+    expect(git(bob.repo, 'log', '-1', '--format=%s', result.commit!)).toBe('bob 的协作记录与工作流改动')
+    expect(git(bob.repo, 'show', '--name-only', '--format=', result.commit!).split('\n')).toEqual(['.gitea/workflows/collab-auto-merge.yaml', `collab/records/${t2}.json`])
+    expect(git(bob.repo, 'status', '--porcelain', '--untracked-files=all')).toBe('')
   })
 
   it('站点检查与类型检查不过：不提交、不推送，逐条写明', async () => {

@@ -14,11 +14,16 @@ export function requireMainBranch(current: string, action: string): void {
   throw new CollabRejected(`${whereYouAre(current)}；协作仓只用 main 一条分支，${action}只在 main 上做`)
 }
 
+/** 执行器工作流所在的目录：只有负责人能改，负责人改它也走提交审核 */
+const workflowsPathInRepo = '.gitea'
+
 export type SubmitResult = {
-  /** 这次新建的提交；collab/ 与 site/ 都没有改动、只推送已有提交时为 null */
+  /** 这次新建的提交；collab/、site/、.gitea/ 都没有改动、只推送已有提交时为 null */
   commit: string | null
   /** 这次提交里 site/ 下改了几个文件 */
   siteFiles: number
+  /** 这次提交里 .gitea/ 下改了几个文件 */
+  workflowFiles: number
   /** site/ 有改动时提交前的类型检查：passed 跑过且通过，no-script 是站点没写 typecheck 脚本；site/ 没有改动时为 null */
   siteTypecheck: SiteTypecheck | null
   /** 执行器合并了的合并请求 */
@@ -30,30 +35,41 @@ export type VerdictWait = { timeoutMilliseconds: number; pollMilliseconds: numbe
 
 const defaultVerdictWait: VerdictWait = { timeoutMilliseconds: 180_000, pollMilliseconds: 2_000 }
 
-/** 提交说明：按这次带了记录、页面还是两样都有 */
-function commitMessageOf(person: string, hasRecords: boolean, hasSite: boolean): string {
-  if (hasRecords && hasSite) return `${person} 的协作记录与页面改动`
-  return hasSite ? `${person} 的页面改动` : `${person} 的协作记录`
+/** 这次提交改到了哪几样：记录（collab/）、页面（site/）、工作流（.gitea/） */
+type SubmittedKinds = { records: boolean; site: boolean; workflows: boolean }
+
+/** 提交说明：「<身份> 的」加上这次带了的几样，带了页面或工作流时以「改动」结尾 */
+function commitMessageOf(person: string, kinds: SubmittedKinds): string {
+  const labels = [kinds.records && '协作记录', kinds.site && '页面', kinds.workflows && '工作流'].filter((label) => label !== false)
+  const listed = labels.length > 1 ? `${labels.slice(0, -1).join('、')}与${labels.at(-1)}` : labels.join('')
+  return `${person} 的${listed}${kinds.site || kinds.workflows ? '改动' : ''}`
 }
 
+/** 提交审核带上的目录与各自有几个文件改了 */
+type SubmittedChanges = { collab: number; site: number; workflows: number }
+
 /**
- * 提交 collab/ 与 site/：暂存区里别的文件不带上。上次提交审核把 main 合进来时出了冲突、人已经改好的，就完成那次合并，
+ * 提交 collab/、site/ 与 .gitea/：暂存区里别的文件不带上。上次提交审核把 main 合进来时出了冲突、人已经改好的，就完成那次合并，
  * 合并提交本来就包含合并进来的全部改动
  */
-async function commitRecordsAndSite(project: Project, collabChanges: number, siteChanges: number): Promise<string | null> {
+async function commitSubmittedChanges(project: Project, changes: SubmittedChanges): Promise<string | null> {
   const merging = await isMerging(project.repo)
-  if (!merging && collabChanges + siteChanges === 0) return null
+  if (!merging && changes.collab + changes.site + changes.workflows === 0) return null
   // 只写有改动的目录：空目录 git 不跟踪，写进 git commit 会报 pathspec 对不上；目录删光了也照样要提交删除
   const paths = [
-    { dir: collabPathInRepo, changes: collabChanges },
-    { dir: sitePathInRepo, changes: siteChanges },
+    { dir: collabPathInRepo, changed: changes.collab },
+    { dir: sitePathInRepo, changed: changes.site },
+    { dir: workflowsPathInRepo, changed: changes.workflows },
   ]
-    .filter(({ changes }) => changes > 0)
+    .filter(({ changed }) => changed > 0)
     .map(({ dir }) => dir)
   // 不带路径的 git add --all 会把整个仓都暂存
   if (paths.length > 0) await git(project.repo, ['add', '--all', '--', ...paths])
   if (merging) await git(project.repo, ['commit', '--no-edit'])
-  else await git(project.repo, ['commit', '-m', commitMessageOf(project.person, collabChanges > 0, siteChanges > 0), '--', ...paths])
+  else {
+    const message = commitMessageOf(project.person, { records: changes.collab > 0, site: changes.site > 0, workflows: changes.workflows > 0 })
+    await git(project.repo, ['commit', '-m', message, '--', ...paths])
+  }
   return (await git(project.repo, ['rev-parse', 'HEAD'])).trim()
 }
 
@@ -80,13 +96,13 @@ async function mergeMainIn(project: Project): Promise<void> {
 }
 
 /**
- * 合并请求的标题：按推上去的改动比 main 多了记录、页面还是两样都有，和提交说明同一套写法。
+ * 合并请求的标题：按推上去的改动比 main 多了记录、页面、工作流里的哪几样，和提交说明同一套写法。
  * 不给的话 Gitea 取最后一个提交的说明，先合了 main 时就成了「Merge remote-tracking branch」
  */
 async function pullTitleOf(project: Project, base: string): Promise<string> {
   const changed = (await git(project.repo, ['diff', '--name-only', base, 'HEAD'])).split('\n')
   const touches = (dir: string) => changed.some((file) => file.startsWith(`${dir}/`))
-  return commitMessageOf(project.person, touches(collabPathInRepo), touches(sitePathInRepo))
+  return commitMessageOf(project.person, { records: touches(collabPathInRepo), site: touches(sitePathInRepo), workflows: touches(workflowsPathInRepo) })
 }
 
 /** Gitea 在 AGit 推送的输出里写合并请求的网页地址 */
@@ -118,7 +134,7 @@ async function verdictOf(gitea: GiteaRepo, number: number, wait: VerdictWait): P
 }
 
 /**
- * 提交审核：在 main 上一起提交 collab/ 与 site/ 的改动，把 origin/main 合进来，推送到 refs/for/main（主题固定是自己的身份，不建分支），
+ * 提交审核：在 main 上一起提交 collab/、site/ 与 .gitea/ 的改动，把 origin/main 合进来，推送到 refs/for/main（主题固定是自己的身份，不建分支），
  * 再等执行器的结论。合并了就回执；被打回、或执行器到时限还没给结论（这时插件关掉合并请求），本地 main 退回推送时的 origin/main，
  * 改动回到工作区，报出原因。校验不过就不提交、不推送；改了只有负责人能改的内容、自己又不是负责人（Gitea 上协作仓的协作者）时，
  * 不推送、改动退回工作区（和执行器同一项检查）
@@ -131,10 +147,14 @@ export async function submitCollab(project: RemoteProject, gitea: GiteaRepo, typ
     throw new CollabRejected(`collab/ 校验不过，没有提交：\n${problems.map((problem) => `${problem.file}  ${problem.message}`).join('\n')}`)
   }
   const entries = await statusEntriesOf(project.repo)
-  const [collabChanges, siteChanges] = [filesUnder(entries, collabPathInRepo), filesUnder(entries, sitePathInRepo)]
-  const siteTypecheck = siteChanges.length > 0 ? await checkSiteBeforeSubmit(project, typecheck) : null
-  const commit = await commitRecordsAndSite(project, collabChanges.length, siteChanges.length)
-  if ((await aheadBehind(project.repo)).ahead === 0) throw new CollabRejected('没有要提交的：collab/ 与 site/ 都没有改动，本地 main 上也没有 origin/main 里还没有的提交')
+  const changes: SubmittedChanges = {
+    collab: filesUnder(entries, collabPathInRepo).length,
+    site: filesUnder(entries, sitePathInRepo).length,
+    workflows: filesUnder(entries, workflowsPathInRepo).length,
+  }
+  const siteTypecheck = changes.site > 0 ? await checkSiteBeforeSubmit(project, typecheck) : null
+  const commit = await commitSubmittedChanges(project, changes)
+  if ((await aheadBehind(project.repo)).ahead === 0) throw new CollabRejected('没有要提交的：collab/、site/、.gitea/ 都没有改动，本地 main 上也没有 origin/main 里还没有的提交')
   await mergeMainIn(project)
 
   const base = (await git(project.repo, ['rev-parse', upstream])).trim()
@@ -165,7 +185,7 @@ export async function submitCollab(project: RemoteProject, gitea: GiteaRepo, typ
   if (pull === null) throw new CollabRejected(`推送成功了，但 Gitea 的输出里找不到合并请求的地址，没法等执行器的结论：\n${gitMessageOf(push)}`)
 
   const verdict = await verdictOf(gitea, pull.number, wait)
-  if (verdict === 'merged') return { commit, siteFiles: siteChanges.length, siteTypecheck, pull }
+  if (verdict === 'merged') return { commit, siteFiles: changes.site, workflowFiles: changes.workflows, siteTypecheck, pull }
   if (verdict === 'timeout') await gitea.close(pull.number)
   await returnToWorkingTree(project.repo, base)
   if (verdict === 'timeout') {

@@ -86,9 +86,9 @@ gwb-collab 是 gwb 工作台的插件，跑在每个成员自己的电脑上：�
 
 站点检查查两样：`site/journal/` 的文件名（站点布局按它读，文件名不是真实日期整站打不开）；`site/content/` 的文件放对了没有（规则在平台包的 `./content-layout` 出口，放错的页面会从侧栏消失、build 会失败；开发服务对它只报不拦，所以在进 main 之前拦）。`site/package.json` 写了 `typecheck` 脚本就在 `site/` 里跑一次，没写就跳过。别的站点问题由 gwb-docsite 启动站点时查。
 
-提交只带 `collab/` 与 `site/` 里有改动的那几个目录，暂存区里别的文件不带上（空的 `collab/` 不被 git 跟踪，不会写进提交命令；目录里的文件删光了，删除照样提交）；上次合 main 出的冲突已经改好时，这次提交就完成那次合并。推送用 AGit：`HEAD:refs/for/main`，主题固定是自己的身份，同一个人推的都进同一个合并请求；之后每 2 秒查一次合并请求，最多等 3 分钟。执行器那边怎么查、怎么合并见 [实时推送与执行器](/gitea/push)。
+提交只带 `collab/`、`site/`、`.gitea/` 里有改动的那几个目录，暂存区里别的文件不带上（空的 `collab/` 不被 git 跟踪，不会写进提交命令；目录里的文件删光了，删除照样提交）；上次合 main 出的冲突已经改好时，这次提交就完成那次合并。`.gitea/` 下是执行器的工作流，只有负责人能改：协作仓的 main 谁都不能直接推，负责人升检查工具的版本（工作流里的 `MERGE_CHECK_RANGE`）也是改好这一行再提交审核，成员改了它在推送前那一步被拦下。提交说明与合并请求标题按带了哪几样写：「`<身份>` 的协作记录」「的页面改动」「的工作流改动」，几样都有时连起来，如「的协作记录与工作流改动」，回执里的 `siteFiles`、`workflowFiles` 是 `site/`、`.gitea/` 下各改了几个文件。推送用 AGit：`HEAD:refs/for/main`，主题固定是自己的身份，同一个人推的都进同一个合并请求；之后每 2 秒查一次合并请求，最多等 3 分钟。执行器那边怎么查、怎么合并见 [实时推送与执行器](/gitea/push)。
 
-{/* ref file="../plugins/collab/src/collab-repo/submit/submit.ts" lines="120-178" hash="704533c3c62b" blob="72b363403a5f" */}
+{/* ref file="../plugins/collab/src/collab-repo/submit/submit.ts" lines="136-198" hash="1679e1df34e6" blob="4c35701efab6" */}
 
 本机查的两样与两个参照点都在这份短文件里：
 

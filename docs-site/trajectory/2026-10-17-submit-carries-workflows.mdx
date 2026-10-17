@@ -1,0 +1,23 @@
+---
+born-at: 2026-10-17T15:10
+type: choice
+parent: [2026-09-03-god-live-doc]
+label: 提交审核带上 .gitea/
+domain: gwb-collab
+---
+
+## 背景
+
+协作仓的 main 配了保护，谁都不能直接推，改动只能经 `collab.submit` 提交、由执行器合并。执行器早就放行负责人改 `.gitea/` 下的工作流，但 `collab.submit` 只提交 `collab/` 与 `site/`，负责人改了工作流也提交不出去。站点升到 collab 0.2.x 时，engineering-knowledge 与 collab-test 两个仓工作流里的 `MERGE_CHECK_RANGE` 还是 `^0.1.1`、`^0.1.0`，执行器装的合并检查一直停在 0.1.x，没有途径改。
+
+## 结论与边界
+
+- `collab.submit` 一起提交 `collab/`、`site/`、`.gitea/` 三个目录里的改动；负责人改工作流就是改好再提交审核，和别的改动走同一条路
+- 不按身份决定带不带 `.gitea/`：成员改了它照样带进提交，推送前的负责人检查把它拦下、改动退回工作区，原话写明是哪个文件。不悄悄漏掉，人知道这处没提交出去
+- 提交说明与合并请求标题多一种「工作流改动」，回执多 `workflowFiles`
+- `.github/` 不带：协作仓在 Gitea 上，工作流只放 `.gitea/`
+
+## 否掉的候选
+
+- **加一条重写工作流的命令**（照打包时的模板重写整份、再提交）：工作流和模板只差 `MERGE_CHECK_RANGE` 一行，负责人改这一行就够；多一条命令还要单独处理提交与等结论，和 `collab.submit` 重复
+- **只在提交人是负责人时带上 `.gitea/`**：成员的工作流改动就会被静默留在工作区，看不出为什么没提交
