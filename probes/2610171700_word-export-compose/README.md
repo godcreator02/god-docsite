@@ -19,6 +19,7 @@ word-report 0.6.0 导出整份初步设计报告，最慢的是写排版稿（�
 4. `compose_ab.py`：几版在同一个 Word 里轮流写排版稿，墙钟与 CPU（Python 加 Word）都记；第一轮各版更新域后存盘，用 `compare_docx.py` 比对正文与脚注
    （去掉 Word 每次随机生成的修订号、段落与图片编号、书签编号、占位块 GUID、目录书签名）。`v060` 是 `compose_0_6_0.py`（0.6.0 原样），`engine` 是副本里装的引擎。
    `fast_composer.py`、`fast_composer2.py` 写的时候建在 0.6.0 的引擎上，并入引擎之后再跑就和 `engine` 一样，只留作记录；`fast_composer3.py` 建在并入后的引擎上。
+   `quiet`、`window`、`proofing` 是 `engine` 加上 `quiet_word.py` 里的设置：排版稿期间关掉屏幕刷新并换草稿视图（window）、关掉后台分页与边写边查拼写语法（proofing），quiet 两组都关。
 5. 整份完整导出用上一轮的 `probes/2610170945_word-export-speed/bench.py`。
 
 ## 结论

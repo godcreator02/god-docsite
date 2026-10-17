@@ -23,20 +23,33 @@ import os
 EXPERIMENTS = {
     'proofing': {'CheckSpellingAsYouType': False, 'CheckGrammarAsYouType': False},
     'pagination': {'Pagination': False},
+    'window': {},  # 不在 Options 里：见下面的 quiet_window
 }
 chosen = {k: v for name in filter(None, os.environ.get('BENCH_OPTIONS', '').split(',')) for k, v in EXPERIMENTS[name].items()}
 original_build = ContentComposer.build
 
 
+quiet_window = 'window' in os.environ.get('BENCH_OPTIONS', '').split(',')
+DRAFT_VIEW = 1
+
+
 def build_with_options(self):
-    options = self.doc.Application.Options
+    word = self.doc.Application
+    options = word.Options
     saved = {name: getattr(options, name) for name in chosen}
-    print('Word 选项原值', saved, '改为', chosen, flush=True)
+    view = self.doc.Windows.Item(1).View
+    saved_view, saved_updating = view.Type, word.ScreenUpdating
+    print('Word 选项原值', saved, '改为', chosen, '屏幕刷新关、草稿视图' if quiet_window else '', flush=True)
     for name, value in chosen.items():
         setattr(options, name, value)
+    if quiet_window:
+        word.ScreenUpdating = False
+        view.Type = DRAFT_VIEW
     try:
         return original_build(self)
     finally:
+        view.Type = saved_view
+        word.ScreenUpdating = saved_updating
         for name, value in saved.items():
             setattr(options, name, value)
 

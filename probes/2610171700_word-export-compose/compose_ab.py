@@ -5,6 +5,7 @@ python compose_ab.py <样本目录> <每章留几个子节，0 是全留> <轮�
 机器负载会变，轮流跑让各版受到同样的影响；看每版的中位数。
 """
 import copy
+from contextlib import nullcontext
 import psutil
 import statistics
 import subprocess
@@ -23,7 +24,11 @@ from fast_composer3 import FastComposer3
 from compose_bench_sample import trimmed_content
 from compose_0_6_0 import ContentComposer as ContentComposer060
 
-AVAILABLE = {'v060': ContentComposer060, 'engine': ContentComposer, 'fast': FastComposer, 'fast2': FastComposer2, 'fast3': FastComposer3}
+from quiet_word import quiet_proofing, quiet_window, quiet_word, word_settings
+
+AVAILABLE = {'v060': ContentComposer060, 'engine': ContentComposer, 'fast': FastComposer, 'fast2': FastComposer2, 'fast3': FastComposer3,
+             'quiet': ContentComposer, 'window': ContentComposer, 'proofing': ContentComposer}
+SETTINGS = {'quiet': quiet_word, 'window': quiet_window, 'proofing': lambda word, doc: quiet_proofing(word)}
 sample, keep, rounds, out = Path(sys.argv[1]).resolve(), int(sys.argv[2]), int(sys.argv[3]), Path(sys.argv[4]).resolve()
 names = sys.argv[5:]
 if not names or any(name not in AVAILABLE for name in names):
@@ -38,13 +43,15 @@ script_started = time.time()
 with word_application() as word:
     # 本脚本起的 Word：脚本开始之后创建的 WINWORD 进程里最新的那个
     word_process = max((p for p in psutil.process_iter(['name', 'create_time']) if p.info['name'] and p.info['name'].lower() == 'winword.exe' and p.info['create_time'] >= script_started - 1), key=lambda p: p.info['create_time'])
+    print(f'Word 设置（开始时）：{word_settings(word)}', flush=True)
     for round_index in range(rounds):
         order = names[round_index % len(names):] + names[:round_index % len(names)]
         for name in order:
             doc = word.Documents.Add(Template=str(template), NewTemplate=False)
             doc.UpdateStylesOnOpen = False
             started, python_cpu, word_cpu = time.perf_counter(), time.process_time(), sum(word_process.cpu_times()[:2])
-            AVAILABLE[name](doc, copy.deepcopy(content), sample, {}).build()
+            with SETTINGS[name](word, doc) if name in SETTINGS else nullcontext():
+                AVAILABLE[name](doc, copy.deepcopy(content), sample, {}).build()
             seconds[name].append(time.perf_counter() - started)
             cpu[name].append(time.process_time() - python_cpu + sum(word_process.cpu_times()[:2]) - word_cpu)
             if round_index == 0:
@@ -52,6 +59,7 @@ with word_application() as word:
                 doc.SaveAs2(str(out / f'{name}.docx'), 16, AddToRecentFiles=False)
             doc.Close(SaveChanges=0)
             print(f'第 {round_index + 1} 轮 {name}：墙钟 {seconds[name][-1]:.1f} 秒，CPU（Python 加 Word）{cpu[name][-1]:.1f} 秒', flush=True)
+    print(f'Word 设置（结束时）：{word_settings(word)}', flush=True)
 
 for name, values in seconds.items():
     print(f'{name}：墙钟中位数 {statistics.median(values):.1f} 秒，CPU 中位数 {statistics.median(cpu[name]):.1f} 秒；各轮 CPU {", ".join(f"{v:.1f}" for v in cpu[name])}')
