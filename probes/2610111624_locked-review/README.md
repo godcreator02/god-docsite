@@ -49,4 +49,4 @@
 
 ## 挪入本仓
 
-本目录原是本机仓 word-conversion-lab 的 `probes/2026-10-11-locked-review/`，2026-10-17 随那个仓的轨迹卡挪进本仓；那个仓已退役，最后一个提交是 `3146c64`，bundle 是 `D:\unitfolders\nb9zj-word-conversion-lab\word-conversion-lab.bundle`。上面的命令与相对路径都以 word-conversion-lab 的仓根为准：要重跑，先从 bundle 克隆那个仓、照它的 README 建 `.venv`，在它的仓根下运行。
+本目录原是本机仓 word-conversion-lab 的 `probes/2026-10-11-locked-review/`，2026-10-17 随那个仓的轨迹卡挪进本仓；那个仓已退役，2026-10-17 连同备份一起删除（最后一个提交是 `3146c64`），本机和远端都不再有它的代码。上面的命令与相对路径都以那个仓的仓根为准，现在不能再重跑，本目录只作为当时的实验记录。
