@@ -1,0 +1,11 @@
+node time-loader.mjs <site-server.mjs 的 file:/// 地址> D:\unitfolders\b2o8l-sst-mmc-2026\chb-dab-sst\collab\site sst-preliminary-design
+
+--- 新代码（本次提交的 packages/word-report/dist/site-server.mjs）
+报告页 loader 第一次：685 ms
+报告页 loader 第二次：24 ms
+34 张图同时请求：200 ms，状态 200
+
+--- 0.3.0（chb-dab-sst 协作站 node_modules 里装的）
+报告页 loader 第一次：811 ms
+报告页 loader 第二次：779 ms
+34 张图同时请求：33417 ms，状态 200

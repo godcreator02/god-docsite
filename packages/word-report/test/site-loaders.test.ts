@@ -1,9 +1,15 @@
 import { mkdir, mkdtemp, rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import path from 'node:path'
-import { afterEach, beforeEach, describe, expect, it } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { assembleDocument } from '../src/core/assemble.ts'
 import type { ReportBlock, ReportDocument } from '../src/core/index.ts'
 import { reportAssetLoader, reportListLoader, reportPageLoader, type WordReportSite } from '../src/site/loaders.server.ts'
+
+vi.mock('../src/core/assemble.ts', async (importOriginal) => {
+  const original = await importOriginal<typeof import('../src/core/assemble.ts')>()
+  return { ...original, assembleDocument: vi.fn(original.assembleDocument) }
+})
 
 /** 1×1 的 PNG */
 const png = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==', 'base64')
@@ -113,5 +119,58 @@ describe('报告里图片的 loader', () => {
     expect(response.headers.get('content-type')).toBe('image/png')
     expect(Buffer.from(await response.arrayBuffer())).toEqual(png)
     expect((await reportAssetLoader({ params: { report: 'sample', '*': 'two/other.png' } }, site)).status).toBe(404)
+  })
+
+  it('图没变：带着上次的 ETag 来问回 304、不传图；图改了 ETag 跟着变', async () => {
+    const params = { report: 'sample', '*': 'two/plot.png' }
+    const first = await reportAssetLoader({ params }, site)
+    const etag = first.headers.get('etag')!
+    expect(first.headers.get('cache-control')).toBe('no-cache')
+    const request = (tag: string) => new Request('http://site/reports/sample/assets/two/plot.png', { headers: { 'if-none-match': tag } })
+    const notModified = await reportAssetLoader({ params, request: request(etag) }, site)
+    expect(notModified.status).toBe(304)
+    expect(await notModified.text()).toBe('')
+    await save('reports/sample/chapters/two/assets/plot.png', Buffer.concat([png, Buffer.from([0])]))
+    const changed = await reportAssetLoader({ params, request: request(etag) }, site)
+    expect(changed.status).toBe(200)
+    expect(changed.headers.get('etag')).not.toBe(etag)
+  })
+})
+
+describe('组装结果沿用', () => {
+  it('一页的几张图同时请求只组装一次；JSON 没变时再打开报告页也不重新组装', async () => {
+    vi.mocked(assembleDocument).mockClear()
+    const responses = await Promise.all(Array.from({ length: 5 }, () => reportAssetLoader({ params: { report: 'sample', '*': 'two/plot.png' } }, site)))
+    expect(responses.map((response) => response.status)).toEqual([200, 200, 200, 200, 200])
+    await reportPageLoader({ params: { report: 'sample' } }, site)
+    expect(assembleDocument).toHaveBeenCalledTimes(1)
+  })
+
+  it('改了一章的 JSON：下一次请求重新组装，看到改后的内容', async () => {
+    await reportPageLoader({ params: { report: 'sample' } }, site)
+    await save('reports/sample/chapters/one/content.json', chapter('one', '改过的第一章'))
+    const { toc } = await reportPageLoader({ params: { report: 'sample' } }, site)
+    expect(toc[0]).toEqual({ title: '1 改过的第一章', url: '#one_sec', depth: 2 })
+  })
+
+  it('MDX 报告同样沿用：几张图同时请求只编译组装一次；加了 references.mdx 或另一种入口就重新组装', async () => {
+    await save('reports/mdx/index.mdx', '---\ntitle: MDX\nlanguage: zh-CN\nchapters: [c1.mdx]\n---\n')
+    await save('reports/mdx/c1.mdx', '# 章\n\n<Figure src="assets/plot.png">图</Figure>\n')
+    await save('reports/mdx/assets/plot.png', png)
+    vi.mocked(assembleDocument).mockClear()
+    const responses = await Promise.all(Array.from({ length: 4 }, () => reportAssetLoader({ params: { report: 'mdx', '*': 'mdx/plot.png' } }, site)))
+    expect(responses.map((response) => response.status)).toEqual([200, 200, 200, 200])
+    await reportPageLoader({ params: { report: 'mdx' } }, site)
+    expect(assembleDocument).toHaveBeenCalledTimes(1)
+    await save('reports/mdx/references.mdx', '<Reference id="ref-a">文献</Reference>\n')
+    expect((await reportPageLoader({ params: { report: 'mdx' } }, site)).report.document.references).toEqual([{ id: 'ref-a', text: '文献' }])
+    await save('reports/mdx/content.json', '{}')
+    await expect(reportPageLoader({ params: { report: 'mdx' } }, site)).rejects.toThrow('只能留一个')
+  })
+
+  it('上次组装读过的一章被删了：重新组装，照常报错点名文件', async () => {
+    await reportPageLoader({ params: { report: 'sample' } }, site)
+    await rm(path.join(siteDir, 'reports/sample/chapters/one/content.json'))
+    await expect(reportPageLoader({ params: { report: 'sample' } }, site)).rejects.toThrow('chapters/one/content.json')
   })
 })

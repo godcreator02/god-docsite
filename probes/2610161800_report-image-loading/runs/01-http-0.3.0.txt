@@ -1,0 +1,12 @@
+node time-images.mjs http://127.0.0.1:41976/ sst-preliminary-design
+（chb-dab-sst 协作站的开发服务，装的是 word-report 0.3.0）
+
+页面 HTML 3186515 字节，4155 ms
+图片地址 54 个
+单张（单独请求）/reports/sst-preliminary-design/assets/sst-preliminary-design/background-energy-applications-academic.png：200，1465941 字节，3434 ms，cache-control=null
+全部并发：99003 ms
+  129 ms 200 62631 /reports/sst-preliminary-design/assets/a2-sps-principle.png
+  98507 ms 200 47084 /reports/sst-preliminary-design/assets/sst-preliminary-design/c5-bus-loop.png
+  99003 ms 200 1465941 /reports/sst-preliminary-design/assets/sst-preliminary-design/background-energy-applications-academic.png
+
+（54 个地址里有 20 个是从页面数据里正则多抓到的未组装路径，报告实际用到 34 张图）
