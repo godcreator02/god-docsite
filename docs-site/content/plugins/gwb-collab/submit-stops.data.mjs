@@ -152,7 +152,7 @@ const leadOnlyCase = {
 const siteCheckCase = {
   id: 'site-check',
   label: '日志页日期不存在',
-  text: 'site/ 有改动才做站点检查，它只查 journal/ 的文件名——2 月 30 日不是真实日期，站点布局按文件名读日志，留着整站打不开。同时加的那串评论作者不在人员列表里，站点检查不拦它。不提交，类型检查也没跑。',
+  text: 'site/ 有改动才做站点检查，它查 journal/ 的文件名与 content/ 的放法——2 月 30 日不是真实日期，站点布局按文件名读日志，留着整站打不开。同时加的那串评论作者不在人员列表里，站点检查不拦它。不提交，类型检查也没跑。',
   changes: {
     files: [
       { path: 'site/journal/2026-02-30.mdx', groups: [{ title: null, old: [], now: ['# 不存在的一天'] }] },
@@ -165,7 +165,7 @@ const siteCheckCase = {
   },
   steps: [passed, passed, { state: 'bad', note: '类型检查没跑' }, notReached, notReached, notReached, notReached, notReached],
   end: 'untouched',
-  leftInRepo: '没有新提交；dave 的评论没被拦（站点检查只查日志文件名）',
+  leftInRepo: '没有新提交；dave 的评论没被拦（站点检查不查评论）',
   error: ['site/ 的站点检查不过，没有提交：', 'site/  journal/2026-02-30.mdx：2026-02-30 不是真实存在的日期'],
   receipt: null,
   noticeBar: { pills: ['本机有 2 个文件还没提交审核（站点文件 2 个）', '上次提交审核没成功'], note: null },

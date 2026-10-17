@@ -1,7 +1,7 @@
-import { readFileSync, writeFileSync } from 'node:fs'
+import { readFileSync, rmSync, writeFileSync } from 'node:fs'
 import path from 'node:path'
 import { checkRunner, filesUnder, hasViteErrorOverlay, headingOf, markNoReload, openCommentsInbox, postFormToAction, problemResults, serverCodeInClientBuild, stepTimeoutMs, stillNoReload, waitForHydrated, watchPage } from '../lib/checks.mjs'
-import { addedPageOf, titlePageOf } from '../lib/run-scratch.mjs'
+import { addedPageOf, strayContentFileOf, titlePageOf } from '../lib/run-scratch.mjs'
 
 /** 侧栏站名下的一横排：搜索按钮与功能入口（god-docsite 的 SidebarLinksRow） */
 const sidebarRow = '#nd-sidebar [data-docsite-sidebar-row]'
@@ -122,6 +122,23 @@ export async function runBaseChecks({ browser, baseUrl, mode, siteDir, feedToken
       const heading = await headingOf(page)
       const tabs = await page.locator('[role="tab"]').count()
       return { pass: response?.status() === 200 && heading === '收起内容试验' && tabs >= 4, detail: `h1=${heading}，标签页 ${tabs} 个` }
+    })
+
+    await check('没有的地址：404 页写明地址，点「回首页」回到首页', async () => {
+      // 故意打开 404：用不记控制台的单独页面，免得「控制台无 4xx」那一项把它算成问题
+      const missingPage = await context.newPage()
+      try {
+        const missingPath = `/e2e-missing-${runTag}`
+        const response = await missingPage.goto(`${baseUrl}${missingPath}`, { waitUntil: 'load' })
+        const heading = await headingOf(missingPage)
+        const showsPath = ((await missingPage.locator('main').textContent()) ?? '').includes(missingPath)
+        await missingPage.getByRole('link', { name: '回首页', exact: true }).click()
+        const siteName = JSON.parse(readFileSync(path.join(siteDir, 'content', 'meta.json'), 'utf8')).title
+        await missingPage.locator('h1', { hasText: siteName }).waitFor({ timeout: stepTimeoutMs })
+        return { pass: response?.status() === 404 && heading === '没有这一页' && showsPath, detail: `→ ${response?.status()}，h1=${heading}，写着地址=${showsPath}；点「回首页」后回到首页（h1=${siteName}）` }
+      } finally {
+        await missingPage.close()
+      }
     })
 
     await check('TSX 页（Tex 公式、组件交互）', async () => {
@@ -537,6 +554,23 @@ export async function runBaseChecks({ browser, baseUrl, mode, siteDir, feedToken
         await page.locator('h1', { hasText: newTitle }).waitFor({ timeout: stepTimeoutMs })
         const kept = await stillNoReload(page)
         return { pass: true, detail: `侧栏 ${sidebarMs} ms 后是新标题，正文标题也换了，没有整页刷新=${kept}` }
+      })
+
+      await check('dev 内容目录放错文件：底部出现问题按钮、点开列着那个文件，不弹报错层；删掉后按钮消失，没有整页刷新', async () => {
+        await page.goto(`${baseUrl}/glossary-demo`, { waitUntil: 'load' })
+        await waitForHydrated(page, '#nd-sidebar a[href="/glossary-demo"]')
+        await markNoReload(page)
+        const stray = strayContentFileOf(siteDir, runTag)
+        writeFileSync(stray.file, stray.text)
+        const issuesButton = page.locator('[data-dev-issues] > button', { hasText: '个问题' })
+        await issuesButton.waitFor({ timeout: stepTimeoutMs })
+        await issuesButton.click()
+        await page.locator('[data-dev-issue-group="content-layout"] summary', { hasText: stray.name }).waitFor({ timeout: stepTimeoutMs })
+        const overlay = await hasViteErrorOverlay(page)
+        rmSync(stray.file)
+        await page.locator('[data-dev-issues]').waitFor({ state: 'detached', timeout: stepTimeoutMs })
+        const kept = await stillNoReload(page)
+        return { pass: !overlay && kept, detail: `问题按钮点开列着 ${stray.name}，报错层=${overlay}；删掉后按钮消失，没有整页刷新=${kept}` }
       })
     } else {
       await check('浏览器产物里没有服务端代码', async () =>

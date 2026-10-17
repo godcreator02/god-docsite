@@ -3,6 +3,7 @@ import { useFumadocsLoader } from 'fumadocs-core/source/client'
 import { DocsLayout } from '@fumadocs/base-ui/layouts/docs'
 import { getLayoutTabs } from '@fumadocs/base-ui/layouts/shared'
 import { ThemeSwitch, type ThemeSwitchProps } from '@fumadocs/base-ui/layouts/shared/slots/theme-switch'
+import { DevSiteUpdates } from './dev-updates.js'
 import type { SiteLayoutData } from './site-context.js'
 import type { SidebarLink } from './sidebar-links.js'
 import { groupKeepingSidebar, rowSearchTrigger, SidebarLinksRow } from './sidebar.js'
@@ -52,6 +53,7 @@ export function SiteLayout({ data, sidebarLinks, sidebarFooterStart, top, childr
   const sidebar = useMemo(() => ({ banner: <SidebarLinksRow links={sidebarLinks} /> }), [sidebarLinks])
   return (
     <SiteLinksProvider pageTitles={data.pageTitles}>
+      <DevSiteUpdates />
       {top}
       <SidebarFooterStartContext value={sidebarFooterStart}>
         <DocsLayout tree={tree} tabs={tabs} nav={nav} sidebar={sidebar} slots={siteSlots}>

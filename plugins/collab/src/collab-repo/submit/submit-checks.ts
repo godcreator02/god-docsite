@@ -1,5 +1,8 @@
+import { existsSync } from 'node:fs'
+import path from 'node:path'
 import { collabPathInRepo, newFormatProblems, sitePathInRepo, type CollabProblem } from '@godcreator/collab'
 import { journalProblemsOf, readCollabSnapshot } from '@godcreator/collab/node'
+import { misplacedContentFilesOf } from '@godcreator/god-docsite/content-layout'
 import { git } from '../../git/git.js'
 import { upstream } from '../../git/status.js'
 import type { Project } from '../../project/project.js'
@@ -15,17 +18,24 @@ export async function collabProblems(project: Project): Promise<CollabProblem[]>
   return newFormatProblems(atForkPoint, await readCollabSnapshot(project.repo))
 }
 
+/** 站点模板的页面内容目录（source.config.ts 里 docs 集合的 dir），相对 site/ */
+const siteContentDirName = 'content'
+
 /** 本地 main 和 origin/main 的分叉点（我还没合进去的提交之前那个）：提交前的校验拿它当参照，那时就有的问题不算我的 */
 async function forkPointOf(repo: string): Promise<string> {
   return (await git(repo, ['merge-base', 'HEAD', upstream])).trim()
 }
 
 /**
- * 提交前的站点检查：查工作区里 site/journal/ 的文件名（站点布局的 loader 也按它读，不合规矩整站打不开），一条一句话，前面带上 site/。
+ * 提交前的站点检查，一条一句话，前面带上 site/：site/journal/ 的文件名（站点布局的 loader 也按它读，不合规矩整站打不开）；
+ * site/content/ 的文件放对了没有（规则在平台包，放错的页面会从侧栏消失、build 会失败；dev 只报不拦，所以在进 main 之前拦）。
  * 其余的站点问题（依赖装没装、基础包版本、页面起不起得来）由 gwb-docsite 启动时查；类型由 site/ 的 typecheck 脚本查
  */
 export async function siteProblemsOf(project: Project): Promise<string[]> {
-  return journalProblemsOf(project.siteDir).map((problem) => `${sitePathInRepo}/  ${problem}`)
+  const journal = journalProblemsOf(project.siteDir).map((problem) => `${sitePathInRepo}/  ${problem}`)
+  const contentDir = path.join(project.siteDir, siteContentDirName)
+  const content = existsSync(contentDir) ? misplacedContentFilesOf(contentDir).map((problem) => `${sitePathInRepo}/${siteContentDirName}/${problem}`) : []
+  return [...journal, ...content]
 }
 
 /**

@@ -6,7 +6,7 @@ import { commentFormOf, decodeFlatTurboStream } from '../src/comments.js'
 import { devOutputEntryOf, localUrlOf, type DevServer } from '../src/dev-server.js'
 import { isIdentityCode, joinPeople, newIdentityCode } from '../src/people-file.js'
 import { devScriptHasFixedPort } from '../src/site-contract.js'
-import { SiteHost, type SitePortMemory } from '../src/site-host.js'
+import { SiteHost, type CrashRestartPolicy, type SitePortMemory } from '../src/site-host.js'
 
 let siteDir: string
 
@@ -68,16 +68,22 @@ function fakePorts(free = true): SitePortMemory & { remembered: Map<string, numb
   }
 }
 
-function hostWith(launch: (dir: string, code: string, port: number | null) => Promise<DevServer>, ports: SitePortMemory = fakePorts()) {
+/** 测试用的崩溃重启规矩：间隔短到几十毫秒，两次用完 */
+const quickRestart: CrashRestartPolicy = { delaysMs: [20, 40], stableAfterMs: 60_000 }
+
+function hostWith(launch: (dir: string, code: string, port: number | null) => Promise<DevServer>, ports: SitePortMemory = fakePorts(), crashRestart: CrashRestartPolicy = quickRestart) {
   const logs: string[] = []
   const host = new SiteHost({
     log: { info: (message) => logs.push(message), warn: (message) => logs.push(message) },
     launchDevServer: launch,
     identityCode: () => 'mycode000001',
     ports,
+    crashRestart,
   })
   return { host, logs }
 }
+
+const waitMs = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
 
 describe('站点状态机', () => {
   it('start 启动并交给开发服务身份码，状态转 running', async () => {
@@ -127,18 +133,87 @@ describe('站点状态机', () => {
     await expect(host.stop(siteDir)).rejects.toThrow('的站点没在运行')
   })
 
-  it('进程退出只标 failed、记下原因，不自动重启；再 start 清掉错误', async () => {
+  it('进程自己退出：标 failed、写明几秒后第几次重启，到时自动重启；连续崩溃次数用完就不再重启，再手动 start 清掉错误', async () => {
     await siteWithSupportedKit()
     const { launched, launch } = fakeServers()
     const { host, logs } = hostWith(launch)
     await host.start(siteDir)
     launched[0]!.exit('开发服务退出了（退出码 1），最后的输出：\nError: boom')
-    await new Promise((resolve) => setTimeout(resolve, 10))
-    expect(host.statusOf(siteDir)).toMatchObject({ state: 'failed', url: null, error: '开发服务退出了（退出码 1），最后的输出：\nError: boom' })
+    expect(host.statusOf(siteDir)).toMatchObject({ state: 'failed', url: null })
+    expect(host.statusOf(siteDir).error).toBe('开发服务退出了（退出码 1），最后的输出：\nError: boom\n（0 秒后自动重启，第 1 次）')
     expect(logs.join('\n')).toContain('退出了')
-    expect(launched).toHaveLength(1)
+    await waitMs(60)
+    expect(launched).toHaveLength(2)
+    expect(host.statusOf(siteDir)).toMatchObject({ state: 'running', error: null })
+
+    launched[1]!.exit('又退出了')
+    expect(host.statusOf(siteDir).error).toContain('第 2 次')
+    await waitMs(80)
+    expect(launched).toHaveLength(3)
+
+    launched[2]!.exit('第三次退出')
+    expect(host.statusOf(siteDir)).toMatchObject({ state: 'failed' })
+    expect(host.statusOf(siteDir).error).toContain('连续崩溃 3 次，不再自动重启')
+    await waitMs(80)
+    expect(launched).toHaveLength(3)
+
     await host.start(siteDir)
     expect(host.statusOf(siteDir)).toMatchObject({ state: 'running', error: null })
+    launched[3]!.exit('手动启动以后重新计数')
+    expect(host.statusOf(siteDir).error).toContain('第 1 次')
+    await host.stop(siteDir)
+  })
+
+  it('等着重启时手动 stop：取消重启、回上次的地址，状态是 stopped；手动 start：取消等着的重启、马上启动', async () => {
+    await siteWithSupportedKit()
+    const { launched, launch } = fakeServers()
+    const { host } = hostWith(launch, fakePorts(), { delaysMs: [1_000], stableAfterMs: 60_000 })
+    await host.start(siteDir)
+    launched[0]!.exit('boom')
+    expect(await host.stop(siteDir)).toEqual({ url: 'http://127.0.0.1:14001' })
+    expect(host.statusOf(siteDir).state).toBe('stopped')
+    await expect(host.stop(siteDir)).rejects.toThrow('的站点没在运行')
+
+    await host.start(siteDir)
+    launched[1]!.exit('boom')
+    await host.start(siteDir)
+    expect(launched).toHaveLength(3)
+    expect(host.statusOf(siteDir).state).toBe('running')
+    await host.stop(siteDir)
+  })
+
+  it('运行够久才退出的不算连续崩溃：每次都按第 1 次重启', async () => {
+    await siteWithSupportedKit()
+    const { launched, launch } = fakeServers()
+    const { host } = hostWith(launch, fakePorts(), { delaysMs: [20], stableAfterMs: 0 })
+    await host.start(siteDir)
+    for (let index = 0; index < 3; index += 1) {
+      launched[index]!.exit('boom')
+      expect(host.statusOf(siteDir).error).toContain('第 1 次')
+      await waitMs(50)
+    }
+    expect(launched).toHaveLength(4)
+    await host.stop(siteDir)
+  })
+
+  it('自动重启那一次没起来也算一次崩溃，接着按下一次的间隔重启', async () => {
+    await siteWithSupportedKit()
+    const { launched, launch } = fakeServers()
+    let launches = 0
+    const flaky = async (dir: string, code: string, port: number | null) => {
+      launches += 1
+      if (launches === 2) throw new Error('开发服务启动后就退出了（退出码 1）')
+      return launch(dir, code, port)
+    }
+    const { host } = hostWith(flaky)
+    await host.start(siteDir)
+    launched[0]!.exit('boom')
+    await waitMs(30)
+    expect(host.statusOf(siteDir).error).toBe('开发服务启动后就退出了（退出码 1）\n（0 秒后自动重启，第 2 次）')
+    await waitMs(60)
+    expect(launches).toBe(3)
+    expect(host.statusOf(siteDir).state).toBe('running')
+    await host.stop(siteDir)
   })
 
   it('启动失败也标 failed、记下原因', async () => {

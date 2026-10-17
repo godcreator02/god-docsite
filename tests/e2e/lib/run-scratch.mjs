@@ -41,8 +41,14 @@ export function writeTitlePage(siteDir, runTag) {
   writeFileSync(file, text)
 }
 
+/** dev 下「内容目录放错文件」那一项在内容目录根上放的组件文件：组文件夹里只放页面，它是放错的 */
+export function strayContentFileOf(siteDir, runTag) {
+  const name = `E2eStray${runTag.replace(/[^a-zA-Z0-9]/g, '')}.tsx`
+  return { name, file: path.join(siteDir, 'content', name), text: 'export const stray = 1\n' }
+}
+
 function removeTempPages(siteDir, runTag) {
-  return [addedPageOf(siteDir, runTag).file, titlePageOf(siteDir, runTag).file].filter((file) => {
+  return [addedPageOf(siteDir, runTag).file, titlePageOf(siteDir, runTag).file, strayContentFileOf(siteDir, runTag).file].filter((file) => {
     if (!existsSync(file)) return false
     rmSync(file)
     return true

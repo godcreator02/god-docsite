@@ -87,6 +87,14 @@ describe('collab.submit 带上 site/ 的改动', () => {
     expect(git(bob.repo, 'rev-list', '--count', 'HEAD')).toBe('1')
   })
 
+  it('内容目录里放错了文件：不提交、不跑类型检查，写明是哪个文件、该怎么放', async () => {
+    writeSite(bob.repo, { ...page, 'content/Stray.tsx': 'export const stray = 1\n' })
+    const { typecheck, ran } = fakeTypecheck('passed')
+    await expect(submitCollab(bob, merges(), typecheck)).rejects.toThrow(/site\/ 的站点检查不过，没有提交：\nsite\/content\/Stray\.tsx：组文件夹里只放页面、meta\.json 与文件夹/)
+    expect(ran).toEqual([])
+    expect(git(bob.repo, 'rev-list', '--count', 'HEAD')).toBe('1')
+  })
+
   it('collab/ 是空目录（git 不跟踪）时只改了页面：照常提交，提交里只有 site/ 的文件', async () => {
     git(bob.repo, 'rm', '-r', '-q', 'collab')
     git(bob.repo, 'commit', '-q', '-m', '清空协作记录')

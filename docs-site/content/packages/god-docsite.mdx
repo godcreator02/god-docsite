@@ -41,6 +41,7 @@ import { OriginCases } from './god-docsite/origin-cases'
 | `.` | `src/core/` 纯逻辑：术语匹配、HTML 提取、站内链接解析、推送协议的常量 | gwb-docsite（推送协议常量）、本包其余各层 |
 | `./scaffold` | `src/node/scaffold/` 建站器，纯 Node | gwb-docsite |
 | `./identity` | `src/node/site-identity.ts` 站点身份文件的读写，纯 Node、不按自己模块的位置找文件，插件可以打包进去 | gwb-docsite、gwb-collab |
+| `./content-layout` | `src/node/content-layout.ts` 内容目录放法的规则，纯 Node，插件可以打包进去 | gwb-collab（提交审核前的站点检查）、本包的 vite 插件 |
 | `./vite` | `src/vite/` vite 插件 | 站点 `vite.config.ts` |
 | `./mdx` | `src/mdx/` 术语标注的 remark 插件 | 站点 `app/lib/mdx-plugins.ts` |
 | `./server` | `src/site/*.server.ts` 等服务端部分 | 站点路由文件、功能包模板 |
@@ -49,7 +50,7 @@ import { OriginCases } from './god-docsite/origin-cases'
 | `./styles.css` | 平台样式 | 站点 `app/app.css` |
 | `docsite-serve`（bin） | `src/cli/serve.ts` 发布版启动命令 | 站点 `package.json` 的 `scripts.start` |
 
-{/* ref file="../packages/god-docsite/package.json" lines="7-47" hash="58f53f4629d7" blob="bc333cdf88ea" */}
+{/* ref file="../packages/god-docsite/package.json" lines="7-51" hash="e6b99d877bd4" blob="663b7f19a0b7" */}
 
 ## 站点里的三类文件
 
@@ -83,9 +84,9 @@ import { OriginCases } from './god-docsite/origin-cases'
 
 <FeatureIndexSteps />
 
-{/* ref file="../packages/god-docsite/src/node/scaffold/feature-index.ts" lines="53-121" hash="79d409a1487e" blob="778f5b87a5f7" */}
+{/* ref file="../packages/god-docsite/src/node/scaffold/feature-index.ts" lines="53-124" hash="0de9ddc50523" blob="1f2d2a08a622" */}
 
-{/* ref file="../packages/god-docsite/src/node/scaffold/feature-index.ts" lines="197-215" hash="7aeec0bff430" blob="778f5b87a5f7" */}
+{/* ref file="../packages/god-docsite/src/node/scaffold/feature-index.ts" lines="200-218" hash="7aeec0bff430" blob="1f2d2a08a622" */}
 
 ## 站点身份文件
 
@@ -114,7 +115,7 @@ import { OriginCases } from './god-docsite/origin-cases'
 | `mdx.ts` | `remarkPlugins`、`rehypePlugins`、`collections`（集合工厂，名单写在包的 `package.json` 的 `godDocsite.collections`） | `mdx.generated.ts`；有集合的再进 `collections.generated.ts` | `source.config.ts`、`app/lib/mdx-plugins.ts` |
 | `styles.css` | 样式 | `styles.generated.css` | `app/app.css` |
 
-{/* ref file="../packages/god-docsite/src/node/scaffold/feature-index.ts" lines="123-182" hash="0005b519c4d9" blob="778f5b87a5f7" */}
+{/* ref file="../packages/god-docsite/src/node/scaffold/feature-index.ts" lines="126-185" hash="0005b519c4d9" blob="1f2d2a08a622" */}
 
 合并规则三条：
 
@@ -150,7 +151,7 @@ import { OriginCases } from './god-docsite/origin-cases'
 
 ## vite 插件、端口与可信来源
 
-站点 `vite.config.ts` 里 `godDocsite({ collections })` 排在 `fumadocsMdx()`、`tailwindcss()` 之后、`reactRouter()` 之前；参数是 `source.config.ts` 的全部导出，插件从中认出内容目录。它由六个插件组成：
+站点 `vite.config.ts` 里 `godDocsite({ collections })` 排在 `fumadocsMdx()`、`tailwindcss()` 之后、`reactRouter()` 之前；参数是 `source.config.ts` 的全部导出，插件从中认出内容目录。它由八个插件组成：
 
 | 插件 | 做什么 | 何时生效 |
 | --- | --- | --- |
@@ -158,21 +159,47 @@ import { OriginCases } from './god-docsite/origin-cases'
 | `frameworkPackages` | 认出平台与功能包（peer 里有 fumadocs 或导出 `./site` 的包）让它们经 Vite 处理 | dev 与 build |
 | `devDotServerGuard` | 补查 dev 下带查询的 `.server` 模块被浏览器端 import | dev |
 | `invalidateContentCollectors` | 内容目录增删文件时让收集内容的模块重新转换 | dev |
-| `checkContentLayout` | 检查内容目录的文件放对了没有 | build 与 dev 启动 |
+| `refreshPagesOnDataDirChange` | 功能包登记的数据目录有文件增删改，让浏览器重新取当前页的数据 | dev |
+| `devIssuesInsteadOfViteOverlay` | 关掉 Vite 自带的全屏报错层，问题改由平台布局的问题按钮显示 | dev |
+| `checkContentLayout` | 检查内容目录的文件放对了没有：build 放错就停下，dev 只报不拦 | build 与 dev |
 | `copyContentAssets` | 把内容目录里的文件复制进客户端产物 | build |
 
-{/* ref file="../packages/god-docsite/src/vite/index.ts" lines="19-27" hash="36bdf15f538a" blob="e519c0e5039c" */}
+{/* ref file="../packages/god-docsite/src/vite/index.ts" lines="21-39" hash="fef8e6c0104d" blob="693958ae2ecf" */}
 
 可信来源 `siteOrigin`：写入请求的 Origin 头要和它完全一样，有一点不同就被 403 拒绝（`写入只接受来自 <origin> 的请求`，核对在 identity 包的 `authorizeWrite`，评论、任务这些写入 action 都先经它核对）。它按环境变量算，五种情况各看一遍：
 
 <OriginCases />
+
+## dev 下页面怎么跟着变、问题怎么报
+
+开发服务和浏览器之间本来就有一条 Vite 的热更新连接（WebSocket）。平台不另开连接，三件事都走它，浏览器这一边放在平台的两个布局（文档页的 `SiteLayout`、首页的 `SiteHomeLayout`）和根路由的错误页里，所以站点模板不用改，发布版里这些代码什么也不做。事件名与载荷类型在 `core/dev-events.ts`，两边共用。
+
+**站外改了数据，页面就地更新**。任务记录、日志这类数据由功能的 loader 直接读文件，不在 Vite 的模块图里：agent 调命令改了、git 同步进来了，已经打开的页面原本不会变。功能包在自己 `package.json` 的 `godDocsite.dataDirs` 里登记这些目录（相对站点根，协作包登记 `../collab` 与 `journal`），vite 插件启动时读站点直接依赖的每个包，把这些目录加进文件监视；有改动就攒 0.3 秒，再发一次 `god-docsite:data-dirs-changed`。浏览器收到后调 React Router 的 `revalidate()` 重新跑当前页的 loader，数据就地换掉，不整页刷新，表单与展开的评论都还在。
+
+{/* ref file="../packages/god-docsite/src/vite/data-dirs.ts" lines="54-76" hash="f49071bba5a6" blob="cf8abbffb21c" */}
+
+**问题按钮**。dev 下的问题不再弹 Vite 的全屏报错层，而是在页面底部正中显示一个带数字的小按钮，点开分三组列出，每条再点开看完整原话：
+
+| 组 | 从哪来 | 什么时候消失 |
+| --- | --- | --- |
+| 内容放法 | 下面「内容目录的放法」的检查结果 | 放好后自动消失 |
+| 改代码后编译失败 | Vite 推来的 `vite:error`（文件、行列、代码片段、调用栈） | 下一次热更新成功时 |
+| 浏览器里的报错 | `window` 上没接住的 `error` 与 `unhandledrejection`，同样的原话只留一条、最多 20 条 | 人点「清空浏览器报错」 |
+
+问题清单存在模块里、不放在组件状态里：页面渲染不出来时布局卸载、换成错误页，清单不丢，错误页会把开发服务报的原因（哪个文件第几行写错了）放在最上面——浏览器这一边这时只拿到一句「动态导入失败」。改好以后页面自己恢复。
+
+**只在打不开时整屏提示**。开发服务断开（崩溃或正在重启）时整页盖上「开发服务断开了」，连回来后 Vite 自己刷新页面；页面在服务端就渲染不出来时，开发服务回的是 Vite 自己的 500 报错页，本来就是整页，不受关掉报错层的影响。
+
+## 错误页
+
+根路由的错误页 `SiteErrorBoundary`：404 写明是哪个地址或 loader 给的原因（没有路由匹配时 React Router 自己造的 404 只带英文原话，这时写成「这个地址没有页面」），其余错误显示原话与调用栈；底下一个「回首页」，浏览器里有上一页时再给一个「返回上一页」。
 
 ## 其余能力
 
 - **布局与侧栏**：整站布局是 fumadocs 的 `DocsLayout`；目录切换按钮按 `meta.json` 写了 `"root": true` 的文件夹生成，不在任何一组里的页面归进以站名命名的一组；在任务、全站评论这类不在页面树里的功能页面上，侧栏显示最近看过的那一组。站名下一横排是搜索按钮与各功能的侧栏入口。
 - **首页**：`app/routes/home.tsx` 在整站布局之外、地址是 `/`，内容目录根上不能再写 index 页；「文档」链接指向第一组的第一页。
 - **TSX 与 HTML 页面**：TSX 页的标题、描述、搜索文字来自它导出的 `meta`；HTML 页的标题取 `<title>`，只有写了 `id` 的标题才进目录与搜索锚点。
-- **内容目录的放法**：组文件夹只放页面、`meta.json`、页面的同名文件夹、下划线开头的文件夹与子组，同名文件夹里不放页面；vite 插件在 build 与 dev 启动时检查，放错了就报错、不启动；dev 运行中每增删一个文件或文件夹就重查一遍，放错了在终端与浏览器的错误层里报出来。重查途中子文件夹被删掉（git 改名、挪目录时一次删几百个文件）按已经不存在算，开发服务不退出；内容目录本身不在照旧报错。
+- **内容目录的放法**：组文件夹只放页面、`meta.json`、页面的同名文件夹、下划线开头的文件夹与子组，同名文件夹里不放页面。build 放错了就报错停下；dev 只报不拦（别人提交了一个放错的文件，不能让每个人的站都起不来）：启动时查一次，运行中增删文件或文件夹后攒 0.3 秒再查，结果变了才在终端打印、列进问题按钮，刚打开的页面向开发服务要一次当前结果。重查途中子文件夹被删掉（git 改名、挪目录时一次删几百个文件）按已经不存在算；读目录出了别的错（文件被占用、权限）报成「这次没查成」并写明原因，下次增删文件再查，开发服务不退出。gwb-collab 的提交审核用 `./content-layout` 出口的同一份规则，在进 main 之前拦下放错的文件。
 - **搜索**：中文站点把 fumadocs 搜索的容错与命中阈值都设成 0，每个词都要原样出现。
 - **Markdown 与 llms**：每一页都有 Markdown 形式（MDX 走 `getText('processed')`，TSX、HTML 页在来源数据里），`/api/markdown`、`llms.txt`、`llms-full.txt` 用它；构建时只预渲染两份 llms 文本。
 - **术语标注**：站点根的 `glossary.json` 列术语；构建时长词优先、西文要词边界、一篇只标第一次，代码、公式、标题、链接里不标，所以排在 `remark-math` 之后。
@@ -180,6 +207,6 @@ import { OriginCases } from './god-docsite/origin-cases'
 ## 谁在用它
 
 - **gwb-docsite**：`./scaffold` 的 `createSite`、`addBaseFeatures`、`addFeature`、`isPortFree`（`docsite.site.init`、`docsite.feature.add`）；`./identity` 的 `writeSiteIdentity`、`siteIdentityOf`（建站时写身份文件、托管前核对、站点列表的类别）；`.` 的 `feedTokenEnvName`、`feedTokenHeader`、`feedUrlOf`（托管开发服务、往推送通道推数据）
-- **gwb-collab**：`./identity` 的 `siteIdentityOf`（`site/docsite.json` 写着 `collab` 的仓才是协作仓）
+- **gwb-collab**：`./identity` 的 `siteIdentityOf`（`site/docsite.json` 写着 `collab` 的仓才是协作仓）；`./content-layout` 的 `misplacedContentFilesOf`（提交审核前的站点检查）
 - **功能包的 `template/`**（写进站点后才 import 平台包，包本身不依赖它）：comments 的全站评论页调 `sitePageRefs`；trajectory 调 `routeLinkKind`、`SiteLinksProvider`、`sitePageTitles`；collab 调 `useSiteFeed`、`sitePageRefs`，它的首页模板 `templates/home.tsx` 调 `siteHomeData`、`SiteHomeLayout`
 - **站点**：上面各节的模板文件

@@ -2,6 +2,7 @@ import { useMemo, type ReactNode } from 'react'
 import { BookOpen } from 'lucide-react'
 import { HomeLayout } from '@fumadocs/base-ui/layouts/home'
 import type { LinkItemType } from '@fumadocs/base-ui/layouts/shared'
+import { DevSiteUpdates } from './dev-updates.js'
 import type { SiteHomeData } from './home.server.js'
 import type { SidebarLink } from './sidebar-links.js'
 
@@ -28,6 +29,7 @@ export function SiteHomeLayout({ data, sidebarLinks, children }: SiteHomeLayoutP
   )
   return (
     <HomeLayout nav={nav} links={links}>
+      <DevSiteUpdates />
       {children}
     </HomeLayout>
   )

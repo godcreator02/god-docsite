@@ -50,15 +50,18 @@ function identifierOf(name: string): string {
   return name.replace(/-([a-z0-9])/g, (_, letter: string) => letter.toUpperCase())
 }
 
-/** 功能包 package.json 里的 "godDocsite": { "collections": [...] }；没写就是没有集合 */
+/** 功能包 package.json 里的 "godDocsite": { "collections": [...] }；没写就是没有集合。同一对象里的 dataDirs 由 vite 插件读 */
 function declaredCollectionsOf(manifestFile: string): string[] {
   const manifest = readJsonFile(manifestFile)
   if (!isRecord(manifest) || manifest['godDocsite'] === undefined) return []
   const declared = manifest['godDocsite']
-  if (!isRecord(declared) || !Array.isArray(declared['collections']) || !declared['collections'].every((name) => typeof name === 'string' && collectionNamePattern.test(name))) {
+  if (!isRecord(declared)) throw new Error(`${manifestFile} 的 godDocsite 要是对象`)
+  const collections = declared['collections']
+  if (collections === undefined) return []
+  if (!Array.isArray(collections) || !collections.every((name) => typeof name === 'string' && collectionNamePattern.test(name))) {
     throw new Error(`${manifestFile} 的 godDocsite 要写成 { "collections": ["集合名", …] }，集合名是 JS 标识符`)
   }
-  return declared['collections'] as string[]
+  return collections as string[]
 }
 
 /** 站点 package.json 的依赖里功能名是 feature 的那个包：功能目录由 addFeature 从它的 template/ 补出来 */

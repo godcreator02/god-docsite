@@ -84,7 +84,7 @@ gwb-collab 是 gwb 工作台的插件，跑在每个成员自己的电脑上：�
 
 查格式的参照点有两个，都只算「这次带来的新问题」（`newFormatProblems`，规则见 [collab 包](/packages/collab) 的「读出状态与校验」）：提交前比的是本地 main 与 `origin/main` 的分叉点，那时就有的问题不算我的；把 main 合进来以后再比一次合进来的那个 `origin/main`，两个人各自没问题、凑在一起才出的问题只有这一步能发现。
 
-站点检查此刻只查 `site/journal/` 的文件名（站点布局按它读，文件名不是真实日期整站打不开）；`site/package.json` 写了 `typecheck` 脚本就在 `site/` 里跑一次，没写就跳过。别的站点问题由 gwb-docsite 启动站点时查。
+站点检查查两样：`site/journal/` 的文件名（站点布局按它读，文件名不是真实日期整站打不开）；`site/content/` 的文件放对了没有（规则在平台包的 `./content-layout` 出口，放错的页面会从侧栏消失、build 会失败；开发服务对它只报不拦，所以在进 main 之前拦）。`site/package.json` 写了 `typecheck` 脚本就在 `site/` 里跑一次，没写就跳过。别的站点问题由 gwb-docsite 启动站点时查。
 
 提交只带 `collab/` 与 `site/` 里有改动的那几个目录，暂存区里别的文件不带上（空的 `collab/` 不被 git 跟踪，不会写进提交命令；目录里的文件删光了，删除照样提交）；上次合 main 出的冲突已经改好时，这次提交就完成那次合并。推送用 AGit：`HEAD:refs/for/main`，主题固定是自己的身份，同一个人推的都进同一个合并请求；之后每 2 秒查一次合并请求，最多等 3 分钟。执行器那边怎么查、怎么合并见 [实时推送与执行器](/gitea/push)。
 
@@ -92,7 +92,7 @@ gwb-collab 是 gwb 工作台的插件，跑在每个成员自己的电脑上：�
 
 本机查的两样与两个参照点都在这份短文件里：
 
-{/* ref file="../plugins/collab/src/collab-repo/submit/submit-checks.ts" hash="b8d470e3bb80" blob="b3d52bfd5201" */}
+{/* ref file="../plugins/collab/src/collab-repo/submit/submit-checks.ts" hash="71168057df02" blob="31d511b1c156" */}
 
 拒绝时命令回 `{ ok: false, error }`，原话同时记成这个项目的「上次提交审核没成功」，经下文的通知推到网站提示栏；提交审核成功一次就清掉：
 

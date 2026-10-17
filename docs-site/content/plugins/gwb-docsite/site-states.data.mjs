@@ -7,17 +7,21 @@
 /** 三种状态的定义：running 进程在；stopped 没有进程；failed 退出了或没能启动（error 记原因） */
 /* ref file="../plugins/docsite/src/site-host.ts" lines="7-13" hash="df7ebb7f1f35" blob="c6df7cdcd9ac" */
 
-/** stop 对没在运行的站报错，原话逐字照抄（模板里的 dir 换成例子的站点目录） */
-/* ref file="../plugins/docsite/src/site-host.ts" lines="144-156" hash="cbdce1c29734" blob="95cf31bba1e4" */
+/** stop 对没在运行、也没有等着重启的站报错，原话逐字照抄（模板里的 dir 换成例子的站点目录） */
+/* ref file="../plugins/docsite/src/site-host.ts" lines="204-224" hash="1f716b537790" blob="f5da6e52445e" */
 export const stopNotRunningMessage = '/projects/demo/site 的站点没在运行'
 
 /** 启动前核对不过的报错原话（五条里的第一条，模板里的 dir 换成例子的站点目录） */
-/* ref file="../plugins/docsite/src/site-host.ts" lines="44-50" hash="110ea7049332" blob="95cf31bba1e4" */
+/* ref file="../plugins/docsite/src/site-host.ts" lines="59-65" hash="110ea7049332" blob="f5da6e52445e" */
 export const refusedMessage = '/projects/demo/site 下没有 package.json，不是站点目录'
 
-/** 进程退出记下的原因，逐字照抄测试断言（fake 服务退出的 reason 与 dev-server 生成的格式相同） */
-/* ref file="../plugins/docsite/tests/site-host.test.ts" lines="130-142" hash="1945645e1b52" blob="21f339f3ceed" */
+/** 进程退出记下的原因（fake 服务退出的 reason 与 dev-server 生成的格式相同） */
 export const exitMessage = '开发服务退出了（退出码 1），最后的输出：\nError: boom'
+
+/** 崩溃后 error 末尾补的那一行：照默认的重启规矩（2、10、60 秒，三次用完不再重启）逐字照抄 */
+/* ref file="../plugins/docsite/src/site-host.ts" lines="99-114" hash="d68d67d2e099" blob="f5da6e52445e" */
+export const restartPendingMessage = `${exitMessage}\n（2 秒后自动重启，第 1 次）`
+export const gaveUpMessage = `${exitMessage}\n（连续崩溃 4 次，不再自动重启：查明原因后用 docsite.site.start 启动）`
 
 /** 状态图的画布：三个圆角框与带事件的箭头；tone 决定箭头颜色（info 是人为发出的命令，bad 是进程自己出的事） */
 export const diagram = {
@@ -40,6 +44,7 @@ export const diagram = {
     { id: 'reuse', tone: 'info', d: 'M330,100 C330,62 370,62 368,96', label: '再 start：返回现状', labelAt: [352, 46] },
     { id: 'stop', tone: 'info', d: 'M330,148 C300,190 160,190 127,152', label: 'stop（人为停，不算失败）', labelAt: [227, 166] },
     { id: 'exit', tone: 'bad', d: 'M395,124 H466', label: '进程退出', labelAt: [430, 112] },
+    { id: 'restart', tone: 'info', d: 'M535,100 C520,58 430,58 398,104', label: '过几秒自动重启', labelAt: [500, 46] },
     { id: 'refuse', tone: 'bad', d: 'M145,148 C230,252 450,252 530,152', label: '核对不过 / 没能启动', labelAt: [335, 240] },
   ],
 }
@@ -100,9 +105,27 @@ export const cases = [
     label: '进程自己退出',
     lit: ['exit'],
     states: { to: 'failed' },
-    list: { state: 'failed', url: null, error: exitMessage },
+    list: { state: 'failed', url: null, error: restartPendingMessage },
     thrown: null,
-    text: '开发服务启动后又退出了：状态转成 failed，error 记退出码与最后几行输出。不自动重启；修好后再 start，状态回 running、error 清空。',
+    text: '开发服务启动后又退出了（不是 stop 停的）：状态转成 failed，error 记退出码与最后几行输出，末尾写着几秒后第几次自动重启。这时 stop 取消这次重启、回到 stopped；start 取消等待、马上启动。',
+  },
+  {
+    id: 'restart',
+    label: '自动重启',
+    lit: ['restart'],
+    states: { to: 'running' },
+    list: { state: 'running', url: 'http://127.0.0.1:14001', error: null },
+    thrown: null,
+    text: '到时间自动重启：先试上次的端口，起来了状态回 running、error 清空。连续崩溃时间隔依次是 2 秒、10 秒、60 秒；一次运行超过 5 分钟才退出的不算连续，重新从 2 秒算。自动重启那一次没起来也算一次崩溃。',
+  },
+  {
+    id: 'gave-up',
+    label: '连续崩溃，不再重启',
+    lit: ['exit'],
+    states: { to: 'failed' },
+    list: { state: 'failed', url: null, error: gaveUpMessage },
+    thrown: null,
+    text: '三次自动重启都没撑过 5 分钟，第四次退出后就停在 failed，不再重启，error 写明「不再自动重启」。查明原因修好后手动 start，连续崩溃的次数重新计数。',
   },
   {
     id: 'refused',

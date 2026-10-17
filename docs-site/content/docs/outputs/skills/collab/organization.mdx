@@ -58,5 +58,5 @@ description: 说明书 collab 的附件 references/organization.md 的正本：�
   - 站点还没有身份文件 `site/docsite.json` 时补一份 `{ "kind": "collab", "format": 1 }`：没有它插件认不出协作仓、gwb-docsite 也不托管这个站。它只有负责人能改，和别的升级改动一起提交审核
 
   再 `docsite.site.start {"dir":"<协作仓>/site"}`，改动给人过目后提交审核
-- **站点检查不过**：`collab.submit` 报「site/ 的站点检查不过，没有提交」时，照每条原话改 `site/journal/` 下日志页的文件名（站点检查只查这一样），再提交审核
+- **站点检查不过**：`collab.submit` 报「site/ 的站点检查不过，没有提交」时，照每条原话改：`site/journal/` 下日志页的文件名，或把 `site/content/` 里放错的文件挪到原话写的位置（站点检查只查这两样），再提交审核
 - **执行器没给结论**：NAS 上的执行器多半没在运行，告诉人去看执行器

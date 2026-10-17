@@ -58,7 +58,7 @@ docsite.site.remove  {"dir":…}   去掉常驻登记，在运行就停掉；没
 - 身份文件写明站点的类别与布局代号，平台建站时写，只有两项：`{ "kind": "base" | "docs" | "collab", "format": 1 }`。
   没有它的站拒绝托管（旧包 `@godcreator/docsite-kit` 上的站、有身份文件之前建的站）：平台建的站照报错手动补一份，别的站先迁到平台；`format` 不是 `1` 也拒绝，照平台包的 `template/` 升级站点后再改
 - 启动时经环境变量交给站点本 home 的身份码 `DOCSITE_IDENTITY_CODE` 与这次的推送令牌 `DOCSITE_FEED_TOKEN`
-- `failed` 时 `error` 写着退出码与最后几行输出；进程退出了不自动重启，修好后 `docsite.site.start`
+- `failed` 时 `error` 写着退出码与最后几行输出。进程自己退出了会自动重启：连续崩溃时依次等 2 秒、10 秒、60 秒，`error` 末尾写着几秒后第几次；连续三次重启都没撑过 5 分钟就不再重启，`error` 写着「不再自动重启」，查明原因修好后 `docsite.site.start`。等着重启时 `docsite.site.stop` 取消这次重启
 - 常驻的站只记在 gwb-data 的文档 `hosted-sites` 里，不在设置里。协作站也在里面：gwb-collab 在项目加进列表时登记、移出列表时去掉，启停照样用 `docsite.site.start` / `docsite.site.stop`；
   不想要某个协作站就移出项目列表（`collab.project.remove`），单 `docsite.site.remove` 的话 gwb-collab 下次加载又登记回来
 - 人在工作台的「站点」窗格里看每个站：站名、类别（协作站、文档站、基础站）、来源（手动、gwb-collab、临时）、状态与端口，能打开、启停，手动登记的还能不再托管
@@ -101,7 +101,7 @@ docsite.people.join {"dir":…,"id":"<字母数字_->","name":"<显示名>","git
   - 同名文件夹与 `_` 开头的文件夹里不放页面（不以 `_` 开头的 `.mdx`、`.page.tsx`、`.html`）与 `meta.json`：
     fumadocs 解析 `meta.json` 里的名字时先找文件夹，同名文件夹一旦被认成组，那一页就从侧栏消失。目录说明只认 `meta.json`，别的 `.json` 可以当附件放
   - 组文件夹（有 `meta.json`、里面是页面）只放页面、`meta.json`、同名文件夹、`_` 开头的文件夹与子组，不散放别的文件
-  - 放错了 `pnpm dev` 与 `pnpm build` 启动时直接报错，开发服务运行中增删文件时在终端与浏览器里报出来；报错列出每个文件，照着挪
+  - 放错了 `pnpm build` 直接报错；开发服务不拦，终端与浏览器底部的问题按钮里列出每个文件，照着挪；协作站的 `collab.submit` 也拦下放错的文件
 - 有子页面的页写成组：`guide/index.mdx` 是 `/guide`，它的组件放 `guide/index/`
 - 例子：
 

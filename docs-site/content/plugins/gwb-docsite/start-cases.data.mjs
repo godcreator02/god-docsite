@@ -6,7 +6,7 @@
  */
 
 /** 共用数据：站点目录、本 home 的身份码、假开发服务报出的地址与 pid */
-/* ref file="../plugins/docsite/tests/site-host.test.ts" lines="34-80" hash="8195745a15bd" blob="21f339f3ceed" */
+/* ref file="../plugins/docsite/tests/site-host.test.ts" lines="34-84" hash="027aca924795" blob="9e7c00eafe24" */
 export const siteDir = '/projects/demo/site'
 export const identityCode = 'mycode000001'
 
@@ -30,7 +30,7 @@ export const refusalMessages = [
  * 五步各走成什么样（state：pass 过了往下走，stop 在这一步结束，skip 没走到；stopTone 区分回现状与拒绝或失败）、
  * 第 ④ 步走到时启动的命令（command）、交回（result 的 error 为 true 是抛错）、之后 docsite.site.list 里这个站的样子（after）。
  */
-/* ref file="../plugins/docsite/tests/site-host.test.ts" lines="192-206" hash="ea0825f3caab" blob="21f339f3ceed" */
+/* ref file="../plugins/docsite/tests/site-host.test.ts" lines="267-281" hash="ea0825f3caab" blob="9e7c00eafe24" */
 export const cases = [
   {
     id: 'first',
@@ -101,7 +101,7 @@ export const cases = [
     result: { error: false, value: '{ url: "http://127.0.0.1:14001", pid: 1, alreadyRunning: false }' },
     after: [{ state: 'running', url: 'http://127.0.0.1:14001', error: null }],
   },
-  /* ref file="../plugins/docsite/tests/site-host.test.ts" lines="92-116" hash="221b354e4e54" blob="21f339f3ceed" */
+  /* ref file="../plugins/docsite/tests/site-host.test.ts" lines="98-122" hash="221b354e4e54" blob="9e7c00eafe24" */
   {
     id: 'already',
     label: '已在运行',
@@ -119,8 +119,8 @@ export const cases = [
     result: { error: false, value: '{ url: "http://127.0.0.1:14001", pid: 1, alreadyRunning: true }' },
     after: [{ state: 'running', url: 'http://127.0.0.1:14001', error: null, note: '只启动过一次' }],
   },
-  /* ref file="../plugins/docsite/tests/site-host.test.ts" lines="153-168" hash="c28cb65304a1" blob="21f339f3ceed" */
-  /* ref file="../plugins/docsite/tests/site-host.test.ts" lines="208-217" hash="0bed967545fc" blob="21f339f3ceed" */
+  /* ref file="../plugins/docsite/tests/site-host.test.ts" lines="228-243" hash="c28cb65304a1" blob="9e7c00eafe24" */
+  /* ref file="../plugins/docsite/tests/site-host.test.ts" lines="283-292" hash="0bed967545fc" blob="9e7c00eafe24" */
   /* ref file="../plugins/docsite/src/site-contract.ts" hash="7d5fc52852d0" blob="5ea4e0f2625d" */
   {
     id: 'refused',
@@ -140,7 +140,7 @@ export const cases = [
     result: { error: true, value: '五种拒绝各抛一条原话' },
     after: [{ state: 'failed', url: null, error: '拒绝的那条原话' }],
   },
-  /* ref file="../plugins/docsite/tests/site-host.test.ts" lines="144-151" hash="2ffe71740b6f" blob="21f339f3ceed" */
+  /* ref file="../plugins/docsite/tests/site-host.test.ts" lines="219-226" hash="2ffe71740b6f" blob="9e7c00eafe24" */
   {
     id: 'launch-fails',
     label: '开发服务没起来',
@@ -158,11 +158,11 @@ export const cases = [
     result: { error: true, value: '开发服务 60 秒内没有报出地址，已停掉' },
     after: [{ state: 'failed', url: null, error: '开发服务 60 秒内没有报出地址，已停掉' }],
   },
-  /* ref file="../plugins/docsite/tests/site-host.test.ts" lines="130-142" hash="1945645e1b52" blob="21f339f3ceed" */
+  /* ref file="../plugins/docsite/src/site-host.ts" lines="99-114" hash="d68d67d2e099" blob="f5da6e52445e" */
   {
     id: 'exited',
     label: '跑着跑着退出了',
-    text: '开发服务启动后又退出了，状态转成 failed，error 记下退出码与最后几行输出。插件不自动重启，修好后再 start，状态回到 running、error 清空。',
+    text: '开发服务启动后又退出了，状态转成 failed，error 记下退出码与最后几行输出，末尾写着几秒后自动重启。到时间自动重启，先试上次记下的端口，状态回到 running、error 清空。',
     portsBefore: { port: null, occupancy: 'none' },
     portsAfter: { port: 14001, note: '记下 14001' },
     steps: [
@@ -175,8 +175,8 @@ export const cases = [
     command: 'pnpm dev',
     result: { error: false, value: '{ url: "http://127.0.0.1:14001", pid: 1, alreadyRunning: false }' },
     after: [
-      { state: 'failed', url: null, error: '开发服务退出了（退出码 1），最后的输出：\nError: boom', label: '进程退出后', note: '没有自动重启' },
-      { state: 'running', url: null, error: null, label: '再 start 后' },
+      { state: 'failed', url: null, error: '开发服务退出了（退出码 1），最后的输出：\nError: boom\n（2 秒后自动重启，第 1 次）', label: '进程退出后', note: '2 秒后自动重启' },
+      { state: 'running', url: 'http://127.0.0.1:14001', error: null, label: '自动重启后' },
     ],
   },
 ]

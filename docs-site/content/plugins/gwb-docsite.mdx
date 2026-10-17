@@ -95,9 +95,13 @@ gwb-docsite 是 gwb 工作台和[平台包](/packages/god-docsite) `@godcreator/
 
 <StartCases />
 
-启动前核对不过时不启动进程、直接抛错，状态转成 `failed`，`error` 记下拒绝的原话；开发服务没能启动、启动后退出也是 `failed`。`start` 的复用、核对、定端口、启动、记端口、退出转 failed，完整算法在一段里：
+启动前核对不过时不启动进程、直接抛错，状态转成 `failed`，`error` 记下拒绝的原话；开发服务没能启动、启动后退出也是 `failed`。
 
-{/* ref file="../plugins/docsite/src/site-host.ts" lines="93-141" hash="e0ac8f2d3340" blob="95cf31bba1e4" */}
+进程自己退出了（不是 `stop` 停的）就过一会儿自动重启：协作站常驻在后台，崩了往往要等人打开时才发现，所以不等人。连续崩溃时依次等 2 秒、10 秒、60 秒，`error` 末尾写着几秒后第几次；一次运行超过 5 分钟才退出的不算连续，重新从 2 秒算；三次用完就停在 `failed`、写明不再自动重启，免得一个起不来的站反复占资源。自动重启那一次没起来也算一次崩溃。人手动 `start` 取消等待、马上启动，`stop` 取消等着的重启；两者都把连续崩溃的次数清零。人手动 `start` 时起不来不自动重试：那多半是站点本身的问题，要人看。
+
+`start` 的复用、核对、定端口、启动、记端口、崩溃后排重启，完整算法在一段里：
+
+{/* ref file="../plugins/docsite/src/site-host.ts" lines="99-202" hash="c44d8f3ec630" blob="f5da6e52445e" */}
 
 ## 推送与评论：经运行中的站点
 

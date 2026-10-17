@@ -190,6 +190,21 @@ export async function runCollabChecks({ browser, baseUrl, mode, siteDir, feedTok
         return { pass: gone && kept, detail: `记录文件删掉=${gone}，回到 /tasks，没有整页刷新=${kept}` }
       })
 
+      await check('站外改了任务记录（agent 调命令、git 同步进来）：已打开的那一页就地换上新标题，没有整页刷新', async () => {
+        const { encodeRecordFile } = await loadCollabCore()
+        const task = runRecords.task
+        await page.goto(`${baseUrl}/tasks/${task.id}`, { waitUntil: 'load' })
+        await waitForHydrated(page, 'button[title="点一下改标题"]')
+        await markNoReload(page)
+        const renamed = `${task.title} 站外改过`
+        const writtenAt = Date.now()
+        writeFileSync(path.join(recordsDirOf(siteDir), `${task.id}.json`), encodeRecordFile({ ...task, title: renamed }))
+        await page.locator('h1', { hasText: renamed }).waitFor({ timeout: stepTimeoutMs })
+        const shownAfterMs = Date.now() - writtenAt
+        const kept = await stillNoReload(page)
+        return { pass: kept, detail: `写记录文件后 ${shownAfterMs} ms 标题换成新的，没有整页刷新=${kept}` }
+      })
+
       await check('写入规则拒绝时显示原话（删还有任务的模块）', async () => {
         const moduleId = runRecords.module.id
         await page.goto(`${baseUrl}/tasks/${moduleId}`, { waitUntil: 'load' })
